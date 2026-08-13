@@ -125,7 +125,8 @@
                 :value="baseTheme"
                 setting-key="baseTheme"
                 :select-names="baseThemeNames"
-                :select-values="BASE_THEME_VALUES"
+                :select-values="baseThemeValues"
+                :disabled="customThemeEditorOpen"
                 :icon="['fas', 'palette']"
                 @change="updateSetting('BaseTheme', $event)"
               />
@@ -136,7 +137,7 @@
                 setting-key="mainColor"
                 :select-names="colorNames"
                 :select-values="COLOR_VALUES"
-                :disabled="baseTheme === 'hotPink'"
+                :disabled="customThemeEditorOpen || baseTheme === 'hotPink' || usesCustomThemePalette"
                 :icon="['fas', 'palette']"
                 icon-color="var(--primary-color)"
                 @change="updateSetting('MainColor', $event)"
@@ -309,6 +310,7 @@ import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../
 import { showToast } from '../../helpers/utils'
 import { getFirstCharacter } from '../../helpers/strings'
 import { MAIN_PROFILE_ID } from '../../../constants'
+import { customThemeValue, isCustomThemeValue } from '../../../customTheme'
 
 const { locale, t } = useI18n()
 const id = useId()
@@ -333,7 +335,7 @@ const profileInitials = computed(() => profileList.value.reduce((initials, profi
   return initials
 }, {}))
 
-const BASE_THEME_VALUES = [
+const BUILTIN_BASE_THEME_VALUES = [
   'system', 'light', 'dark', 'black', 'nordic', 'hotPink', 'pastelPink',
   'catppuccinFrappe', 'catppuccinLatte', 'catppuccinMocha', 'dracula',
   'everforestDarkHard', 'everforestDarkMedium', 'everforestDarkLow',
@@ -341,7 +343,7 @@ const BASE_THEME_VALUES = [
   'gruvboxDark', 'gruvboxLight', 'solarizedDark', 'solarizedLight'
 ]
 
-const baseThemeNames = computed(() => [
+const builtInBaseThemeNames = computed(() => [
   t('Settings.Theme Settings.Base Theme.System Default'),
   t('Settings.Theme Settings.Base Theme.Light'),
   t('Settings.Theme Settings.Base Theme.Dark'),
@@ -364,6 +366,15 @@ const baseThemeNames = computed(() => [
   t('Settings.Theme Settings.Base Theme.Solarized Dark'),
   t('Settings.Theme Settings.Base Theme.Solarized Light')
 ])
+const customThemes = computed(() => store.getters.getCustomThemes)
+const baseThemeValues = computed(() => [
+  ...BUILTIN_BASE_THEME_VALUES,
+  ...customThemes.value.map(({ id }) => customThemeValue(id))
+])
+const baseThemeNames = computed(() => [
+  ...builtInBaseThemeNames.value,
+  ...customThemes.value.map(({ name }) => name)
+])
 
 const COLOR_VALUES = colors.map(color => color.name)
 const colorNames = useColorTranslations()
@@ -379,6 +390,13 @@ const localeNames = computed(() => [
 ])
 
 const baseTheme = computed(() => store.getters.getBaseTheme)
+const usesCustomThemePalette = computed(() => isCustomThemeValue(baseTheme.value) || (
+  baseTheme.value === 'system' && (
+    isCustomThemeValue(store.getters.getSystemLightTheme) ||
+    isCustomThemeValue(store.getters.getSystemDarkTheme)
+  )
+))
+const customThemeEditorOpen = computed(() => store.getters.getCustomThemeEditorOpen)
 const mainColor = computed(() => store.getters.getMainColor)
 const uiScale = computed(() => store.getters.getUiScale)
 const thumbnailSize = computed(() => store.getters.getThumbnailSize)

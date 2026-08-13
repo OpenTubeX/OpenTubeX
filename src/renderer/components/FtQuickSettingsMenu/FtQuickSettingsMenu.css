@@ -102,7 +102,7 @@
 
 .profilePanelHeader {
   align-items: center;
-  border-block-end: 1px solid var(--scrollbar-color);
+  border-block-end: 1px solid var(--divider-color);
   display: grid;
   grid-template-columns: 40px 1fr 40px;
   padding-block: 6px;
@@ -189,7 +189,7 @@
 }
 
 .menuSection {
-  border-block-start: 1px solid var(--scrollbar-color);
+  border-block-start: 1px solid var(--divider-color);
   padding-block: 10px 12px;
   padding-inline: 18px;
 }
@@ -269,7 +269,7 @@
 }
 
 .menuLinks {
-  border-block-start: 1px solid var(--scrollbar-color);
+  border-block-start: 1px solid var(--divider-color);
   padding-block: 4px;
 }
 

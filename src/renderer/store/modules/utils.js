@@ -52,6 +52,8 @@ const state = {
   settingsWindowOpen: false,
   settingsWindowView: null,
   settingsWindowSection: null,
+  customThemeEditorOpen: false,
+  customThemes: [],
   showSearchFilters: false,
   searchFilterValueChangedByTabId: {},
   progressBarPercentage: 0,
@@ -145,6 +147,14 @@ const getters = {
 
   getSettingsWindowSection(state) {
     return state.settingsWindowSection
+  },
+
+  getCustomThemeEditorOpen(state) {
+    return state.customThemeEditorOpen
+  },
+
+  getCustomThemes(state) {
+    return state.customThemes
   },
 
   getShowAddToPlaylistPrompt(state) {
@@ -823,6 +833,14 @@ const mutations = {
 
   setSettingsWindowSection (state, payload) {
     state.settingsWindowSection = payload
+  },
+
+  setCustomThemeEditorOpen (state, payload) {
+    state.customThemeEditorOpen = payload
+  },
+
+  setCustomThemes (state, payload) {
+    state.customThemes = payload
   },
 
   setShowSearchFilters (state, payload) {

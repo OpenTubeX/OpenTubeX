@@ -70,7 +70,9 @@
       </RouterView>
     </FtFlexBox>
     <Transition name="settings-window">
-      <SettingsWindow v-if="settingsWindowOpen" />
+      <KeepAlive>
+        <SettingsWindow v-if="settingsWindowOpen" />
+      </KeepAlive>
     </Transition>
     <FtTutorialOverlay
       v-if="showTutorial"
@@ -321,6 +323,11 @@ import FtTutorialOverlay from './components/FtTutorialOverlay/FtTutorialOverlay.
 import { vSaferHtml } from './directives/vSaferHtml.js'
 
 import store from './store/index'
+import {
+  applyThemeToDocument,
+  handleCustomThemeUpdated,
+  loadCustomThemes,
+} from './helpers/customTheme'
 
 import packageDetails from '../../package.json'
 import { MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants'
@@ -777,6 +784,20 @@ onMounted(async () => {
 
   const hasExistingSettings = await store.dispatch('grabUserSettings')
 
+  try {
+    customThemes.value = await loadCustomThemes()
+    store.commit('setCustomThemes', customThemes.value)
+    if (baseTheme.value === 'custom' && customThemes.value.length > 0) {
+      await store.dispatch('updateBaseTheme', `custom:${customThemes.value[0].id}`)
+    }
+  } catch (error) {
+    console.error('Failed to load custom theme:', error)
+  }
+  removeCustomThemeListener = handleCustomThemeUpdated((themes) => {
+    customThemes.value = themes
+    store.commit('setCustomThemes', themes)
+    updateTheme()
+  })
   updateTheme()
 
   await store.dispatch('fetchInvidiousInstancesFromFile')
@@ -892,6 +913,8 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  removeCustomThemeListener()
+  systemColorScheme.removeEventListener('change', handleSystemColorSchemeChange)
   if (isElectron) {
     window.ftElectron.tabs.setPreviewCapturePaused(false)
     window.ftElectron.tabs.setShortcutsBlocked(false).catch(() => {})
@@ -1700,8 +1723,15 @@ function clearSubscriptionTabAutoRefreshTimer(tab) {
 
 /** @type {import('vue').ComputedRef<string>} */
 const baseTheme = computed(() => store.getters.getBaseTheme)
+const customThemes = ref([])
+let removeCustomThemeListener = () => {}
+const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
+const systemUsesDarkTheme = ref(systemColorScheme.matches)
+systemColorScheme.addEventListener('change', handleSystemColorSchemeChange)
 
 watch(baseTheme, updateTheme)
+watch(() => store.getters.getSystemLightTheme, updateTheme)
+watch(() => store.getters.getSystemDarkTheme, updateTheme)
 
 /** @type {import('vue').ComputedRef<string>} */
 const mainColor = computed(() => store.getters.getMainColor)
@@ -1729,8 +1759,17 @@ const thumbnailSize = computed(() => store.getters.getThumbnailSize)
 watch(thumbnailSize, updateThumbnailListSize)
 
 function updateTheme() {
-  document.body.className = `${baseTheme.value || 'system'} main${mainColor.value || 'Red'} sec${secColor.value || 'Blue'}`
-  document.body.dataset.systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  const effectiveTheme = baseTheme.value === 'system'
+    ? (systemUsesDarkTheme.value ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
+    : baseTheme.value
+  const customTheme = customThemes.value.find(theme => `custom:${theme.id}` === effectiveTheme) ??
+    (effectiveTheme === 'custom' ? customThemes.value[0] : null) ?? null
+  applyThemeToDocument(effectiveTheme, mainColor.value, secColor.value, customTheme)
+}
+
+function handleSystemColorSchemeChange(event) {
+  systemUsesDarkTheme.value = event.matches
+  if (baseTheme.value === 'system') updateTheme()
 }
 
 function updateUiRoundness() {

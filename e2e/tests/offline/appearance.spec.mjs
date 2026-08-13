@@ -1,7 +1,15 @@
-import { readFile } from 'node:fs/promises'
+import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
+
+async function readSavedThemes (userDataDir) {
+  const themeDirectory = path.join(userDataDir, 'themes')
+  const files = (await readdir(themeDirectory)).filter(file => file.endsWith('.json'))
+  const themes = await Promise.all(files.map(async file =>
+    JSON.parse(await readFile(path.join(themeDirectory, file), 'utf8'))))
+  return themes.sort((left, right) => left.name.localeCompare(right.name))
+}
 
 async function setWindowWidth (app, width) {
   await app.electronApp.evaluate(({ BrowserWindow }, targetWidth) => {
@@ -18,6 +26,19 @@ async function enableVerticalTabBar (page, width) {
     store.commit('setVerticalTabBarWidth', tabBarWidth)
   }, width)
   await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
+}
+
+async function expectAdjacent (left, right) {
+  const [leftBox, rightBox] = await Promise.all([
+    left.boundingBox(),
+    right.boundingBox()
+  ])
+
+  expect(leftBox).not.toBeNull()
+  expect(rightBox).not.toBeNull()
+  expect(Math.abs(leftBox.y - rightBox.y)).toBeLessThan(1)
+  expect(rightBox.x - leftBox.x - leftBox.width).toBeGreaterThanOrEqual(0)
+  expect(rightBox.x - leftBox.x - leftBox.width).toBeLessThanOrEqual(12)
 }
 
 test.describe('distraction and appearance settings', () => {
@@ -55,8 +76,281 @@ test.describe('default appearance', () => {
     // depending on the collapsed state — either way it must exist.
     await expect(page.locator(sel.sideNavLink('trending'))).not.toHaveCount(0)
     await expect(page.locator('.topNav .profileTrigger')).toBeVisible()
-    await expect(page.locator('body')).toHaveClass(/system/)
+    await expect(page.locator('body')).toHaveClass(/(?:light|dark)/)
     await attachScreenshot('default appearance')
+  })
+
+  test('maps system light and dark modes to chosen themes', async ({ app, page }) => {
+    await page.emulateMedia({ colorScheme: 'light' })
+    await goToSettingsSection(page, 'theme')
+
+    const lightTheme = page.getByRole('combobox', { name: 'Light theme' })
+    const darkTheme = page.getByRole('combobox', { name: 'Dark theme' })
+    const mainColorTheme = page.getByRole('combobox', { name: /Main colou?r theme/i })
+    const secondaryColorTheme = page.getByRole('combobox', { name: /Secondary colou?r theme/i })
+    await expect(lightTheme).toHaveText('Light')
+    await expect(darkTheme).toHaveText('Dark')
+    await expectAdjacent(lightTheme, darkTheme)
+    await expectAdjacent(mainColorTheme, secondaryColorTheme)
+    await expect(page.locator('.select').filter({ has: lightTheme }).locator('.select-icon')).toBeVisible()
+    await expect(page.locator('.select').filter({ has: darkTheme }).locator('.select-icon')).toBeVisible()
+
+    await lightTheme.click()
+    await page.locator(`#${await lightTheme.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: 'Catppuccin Frappe', exact: true }).click()
+    await expect(page.locator('body')).toHaveClass(/catppuccinFrappe/)
+
+    await darkTheme.click()
+    await page.locator(`#${await darkTheme.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: 'Catppuccin Mocha', exact: true }).click()
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await expect(page.locator('body')).toHaveClass(/catppuccinMocha/)
+
+    ;({ page } = await app.relaunch())
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await expect(page.locator('body')).toHaveClass(/catppuccinMocha/)
+  })
+})
+
+test.describe('custom theme editor', () => {
+  test.use({ seed: { settings: { baseTheme: 'dark' } } })
+
+  test('copies built-in themes, previews efficiently, persists, and survives closing settings', async ({ app, page }) => {
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+
+    const creatorBreadcrumb = page.locator('.settingsBreadcrumbLabel')
+      .filter({ hasText: 'Custom theme creator' })
+    await expect(creatorBreadcrumb.locator('.settingsBreadcrumbSubpageIcon'))
+      .toHaveAttribute('data-icon', 'palette')
+    await expect(page.getByRole('searchbox', { name: 'Search settings' })).toHaveCount(0)
+
+    const editor = page.locator('.customThemeEditor')
+    await expect(editor.getByRole('button', { name: 'Reset colors' }).locator('svg, .ft-icon')).toBeVisible()
+    await editor.getByRole('textbox', { name: 'Theme name' }).fill('Midnight')
+    const optionsRow = editor.locator('.themeSources')
+    const [editorBox, colorGridBox] = await Promise.all([
+      editor.boundingBox(),
+      editor.locator('.colorGrid').boundingBox()
+    ])
+    expect(colorGridBox.y - editorBox.y).toBeLessThan(200)
+    await expect(optionsRow.getByRole('checkbox', { name: 'Dark theme' })).toBeVisible()
+    await expect(optionsRow.getByRole('combobox', { name: 'Based on' })).toBeVisible()
+    const sourceMainColor = optionsRow.getByRole('combobox', { name: /Main colou?r theme/i })
+    const sourceSecondaryColor = optionsRow.getByRole('combobox', { name: /Secondary colou?r theme/i })
+    await expect(sourceMainColor).toHaveText('Red')
+    await expect(sourceSecondaryColor).toHaveText('Blue')
+    await expect(editor.locator('.changedSettingIndicatorPlaceholder')).toHaveCount(0)
+    const optionControlCenters = await optionsRow.evaluate((options) => {
+      const select = options.querySelector('.select-text').getBoundingClientRect()
+      const toggle = options.querySelector('.switch-label').getBoundingClientRect()
+      return {
+        select: select.y + select.height / 2,
+        toggle: toggle.y + toggle.height / 2
+      }
+    })
+    expect(optionControlCenters.toggle).toBeCloseTo(optionControlCenters.select, 0)
+
+    await sourceMainColor.click()
+    await page.locator(`#${await sourceMainColor.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: 'Green', exact: true }).click()
+    await expect(page.locator('body')).toHaveCSS('--primary-color', '#4caf50')
+    await sourceSecondaryColor.click()
+    await page.locator(`#${await sourceSecondaryColor.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: 'Purple', exact: true }).click()
+    await expect(page.locator('body')).toHaveCSS('--accent-color', '#9c27b0')
+
+    const basedOn = page.getByRole('combobox', { name: 'Based on' })
+
+    const setEditorColor = async (label, value) => {
+      const field = editor.locator('.colorField').filter({ has: page.getByText(label, { exact: true }) })
+      await field.locator('input[type="color"]').evaluate((input, color) => {
+        input.value = color
+        input.dispatchEvent(new Event('input', { bubbles: true }))
+        input.dispatchEvent(new Event('change', { bubbles: true }))
+      }, value)
+    }
+
+    await setEditorColor('Logo icon', '#123456')
+    await setEditorColor('Logo text', '#654321')
+    await setEditorColor('Background', '#101112')
+    await sourceMainColor.click()
+    await page.locator(`#${await sourceMainColor.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: 'Orange', exact: true }).click()
+    await expect(page.locator('body')).toHaveCSS('--primary-color', '#ff9800')
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#101112')
+    await expect(editor.locator('.colorField').filter({ hasText: 'Logo icon' }).locator('input'))
+      .toHaveValue('#123456')
+    await sourceSecondaryColor.click()
+    await page.locator(`#${await sourceSecondaryColor.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: 'Teal', exact: true }).click()
+    await expect(page.locator('body')).toHaveCSS('--accent-color', '#009688')
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#101112')
+    await expect(editor.locator('.colorField').filter({ hasText: 'Logo text' }).locator('input'))
+      .toHaveValue('#654321')
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setBarColor', true)
+    })
+    await expect(page.locator('.topNav')).toHaveClass(/topNavBarColor/)
+    await page.mouse.move(0, 0)
+    await expect(page.locator('.topNav .logoIcon')).toHaveCSS('background-image', 'none')
+    await expect(page.locator('.topNav .logoText')).toHaveCSS('background-image', 'none')
+    await expect(page.locator('.topNav .logoIcon')).toHaveCSS('background-color', 'rgb(18, 52, 86)')
+    await expect(page.locator('.topNav .logoText')).toHaveCSS('background-color', 'rgb(101, 67, 33)')
+    await setEditorColor('Logo hover', '#abcdef')
+    await page.locator('.topNav .logo').hover()
+    await expect(page.locator('.topNav .logoIcon')).toHaveCSS('background-color', 'rgb(171, 205, 239)')
+    await expect(page.locator('.topNav .logoText')).toHaveCSS('background-color', 'rgb(171, 205, 239)')
+
+    await setEditorColor('Scrollbar hover', '#345678')
+    await expect(page.locator('.os-scrollbar').first()).toHaveCSS('--os-handle-bg-hover', '#345678')
+
+    await setEditorColor('Dropdown hover text', '#fedcba')
+    await basedOn.click()
+    await expect(page.getByRole('option', { name: 'System Default' })).toHaveCount(0)
+    await page.getByRole('option', { name: 'Dark', exact: true }).hover()
+    await expect(page.getByRole('option', { name: 'Dark', exact: true })).toHaveCSS('color', 'rgb(254, 220, 186)')
+    await page.getByRole('option', { name: 'Light', exact: true }).click()
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#f1f1f1')
+    await basedOn.click()
+    await page.locator(`#${await basedOn.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: 'Dark', exact: true }).click()
+
+    const backgroundField = page.locator('.colorField')
+      .filter({ has: page.getByText('Background', { exact: true }) })
+    const backgroundInput = backgroundField.locator('input[type="color"]')
+    await expect(backgroundInput).toHaveValue('#212121')
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#212121')
+
+    const dragState = await backgroundInput.evaluate((input) => {
+      const code = input.parentElement.querySelector('code')
+      const before = {
+        preview: document.body.style.getPropertyValue('--bg-color'),
+        label: code.textContent
+      }
+      input.value = '#334455'
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+      input.value = '#445566'
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+      return {
+        before,
+        immediatePreview: document.body.style.getPropertyValue('--bg-color'),
+        immediateLabel: code.textContent
+      }
+    })
+    // Native drag events only queue the latest preview. They must not trigger a
+    // Vue render or a whole-app style update for every pointer movement.
+    expect(dragState.immediatePreview).toBe(dragState.before.preview)
+    expect(dragState.immediateLabel).toBe(dragState.before.label)
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#445566')
+
+    await backgroundInput.evaluate(input => input.dispatchEvent(new Event('change', { bubbles: true })))
+    await expect(backgroundField.locator('code')).toHaveText('#445566')
+
+    const darkTheme = page.getByRole('checkbox', { name: 'Dark theme' })
+    await expect(darkTheme).toBeChecked()
+    await page.locator('label.switch-label').filter({ hasText: 'Dark theme' }).click()
+    await expect(page.locator('body')).toHaveAttribute('data-custom-theme', 'light')
+
+    await page.getByRole('button', { name: 'Save and apply' }).click()
+    await expect.poll(async () => {
+      const themes = await readSavedThemes(app.userDataDir)
+      const theme = themes.find(({ name }) => name === 'Midnight')
+      return {
+        count: themes.length,
+        background: theme?.colors.background,
+        basedOn: theme?.basedOn,
+        mainColor: theme?.mainColor,
+        secondaryColor: theme?.secondaryColor,
+        isDark: theme?.isDark
+      }
+    }).toEqual({
+      count: 1,
+      background: '#445566',
+      basedOn: 'dark',
+      mainColor: 'Orange',
+      secondaryColor: 'Teal',
+      isDark: false
+    })
+    await expect(editor).toHaveCount(0)
+    await page.getByRole('button', { name: 'Edit custom theme' }).click()
+
+    await page.locator('.settingsCloseButton').click()
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+    await page.locator('.topNav .profileTrigger').click()
+    const quickAppearance = page.locator('.quickSettingsMenu .menuSection').filter({ hasText: 'Appearance' })
+    await expect(quickAppearance.getByRole('combobox', { name: 'Base Theme' })).toBeDisabled()
+    await expect(quickAppearance.getByRole('combobox', { name: /Main colou?r theme/i })).toBeDisabled()
+    await expect(quickAppearance.getByRole('button', { name: 'Reset this setting to its default' })).toBeDisabled()
+    await page.locator('.topNav .profileTrigger').click()
+    await goTo(page, 'settings')
+    await expect(page.getByText('Custom theme creator', { exact: true })).toBeVisible()
+    await expect(backgroundInput).toHaveValue('#445566')
+
+    await setEditorColor('Background', '#112233')
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#112233')
+    await page.getByRole('button', { name: 'Show Keyboard Shortcuts' }).click()
+    await expect(page.getByText('Custom theme creator', { exact: true })).toHaveCount(0)
+    await expect(page.locator('.settingsKeyboardShortcutPage')).toBeVisible()
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#445566')
+
+    await page.locator('.settingsBackButton').click()
+    await expect(page.getByRole('combobox', { name: /Main colou?r theme/i })).toBeDisabled()
+    await expect(page.getByRole('combobox', { name: /Secondary colou?r theme/i })).toBeDisabled()
+
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await expect(backgroundInput).toHaveValue('#445566')
+    await expect(page.getByRole('combobox', { name: 'Based on' })).toHaveText('Dark')
+    await expect(editor.getByRole('combobox', { name: /Main colou?r theme/i })).toHaveText('Orange')
+    await expect(editor.getByRole('combobox', { name: /Secondary colou?r theme/i })).toHaveText('Teal')
+    await editor.getByRole('textbox', { name: 'Theme name' }).fill('Paper')
+    await page.getByRole('combobox', { name: 'Based on' }).click()
+    await page.getByRole('option', { name: 'Light', exact: true }).click()
+    await page.getByRole('button', { name: 'Save and apply' }).click()
+    await expect.poll(async () => {
+      const themes = await readSavedThemes(app.userDataDir)
+      return themes.map(({ name, basedOn }) => ({ name, basedOn }))
+    }).toEqual([
+      { name: 'Midnight', basedOn: 'dark' },
+      { name: 'Paper', basedOn: 'light' }
+    ])
+    await expect(editor).toHaveCount(0)
+
+    const baseThemeSelect = page.getByRole('combobox', { name: 'Base Theme' })
+    await baseThemeSelect.click()
+    await page.getByRole('option', { name: 'Midnight', exact: true }).click()
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#445566')
+    await page.getByRole('button', { name: 'Edit custom theme' }).click()
+    await expect(page.getByRole('combobox', { name: 'Based on' })).toHaveText('Dark')
+    await expect(backgroundInput).toHaveValue('#445566')
+
+    ;({ page } = await app.relaunch())
+    await expect(page.locator('body')).toHaveClass(/custom/)
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#445566')
+    await expect(page.locator('body')).toHaveAttribute('data-custom-theme', 'light')
+
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Edit custom theme' }).click()
+    await page.getByRole('button', { name: 'Delete theme' }).click()
+    const deletePrompt = page.getByRole('dialog', { name: /Delete “Midnight”/ })
+    await expect(deletePrompt).toContainText('Delete “Midnight”?')
+    await deletePrompt.getByRole('button', { name: 'Delete theme' }).click()
+    await expect(page.getByText('Custom theme creator', { exact: true })).toHaveCount(0)
+    await expect.poll(async () => (await readSavedThemes(app.userDataDir)).map(({ name }) => name))
+      .toEqual(['Paper'])
+    await expect(page.locator('body')).toHaveClass(/dark/)
+  })
+})
+
+test.describe('black theme surfaces', () => {
+  test.use({ seed: { settings: { baseTheme: 'black' } } })
+
+  test('keeps cards distinguishable from the page background', async ({ page }) => {
+    await goToSettingsSection(page, 'theme')
+    await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(0, 0, 0)')
+    await expect(page.locator('.sectionBody').first()).toHaveCSS('background-color', 'rgb(5, 5, 5)')
   })
 })
 

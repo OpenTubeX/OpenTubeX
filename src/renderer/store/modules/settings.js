@@ -196,6 +196,8 @@ const state = {
   confirmLoadMultipleTabs: true,
   confirmUnloadMultipleTabs: true,
   baseTheme: 'system',
+  systemLightTheme: 'light',
+  systemDarkTheme: 'dark',
   mainColor: 'Red',
   secColor: 'Blue',
   defaultAutoplayInterruptionIntervalHours: 3,

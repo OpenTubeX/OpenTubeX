@@ -530,6 +530,7 @@ Settings:
     Base Theme:
       Base Theme: Base Theme
       Black: Black
+      Custom: Custom
       Dark: Dark
       System Default: System Default
       Light: Light
@@ -550,6 +551,73 @@ Settings:
       Everforest Light Hard: Everforest Light Hard
       Everforest Light Medium: Everforest Light Medium
       Everforest Light Low: Everforest Light Low
+    Light Theme: Light theme
+    Dark Theme: Dark theme
+    Custom Theme:
+      Create Custom Theme: Create custom theme
+      Edit Custom Theme: Edit custom theme
+      Custom Theme Creator: Custom theme creator
+      Theme Name: Theme name
+      Is Dark Theme: Dark theme
+      Based On: Based on
+      Import Theme: Import theme
+      Export Theme: Export theme
+      Delete Theme: Delete theme
+      Delete Theme Confirmation: Delete “{name}”? This cannot be undone.
+      Save and Apply: Save and apply
+      Reset Colors: Reset colors
+      Theme File: OpenTubeX theme file
+      Theme Saved: Custom theme saved and applied
+      Theme Imported: Theme imported into the editor
+      Theme Exported: Theme exported
+      Theme Deleted: Custom theme deleted
+      Unable to Load: Unable to load the custom theme
+      Unable to Save: Unable to save the custom theme
+      Unable to Export: Unable to export the custom theme
+      Unable to Delete: Unable to delete the custom theme
+      Invalid Theme File: Invalid custom theme file
+      Colors:
+        Primary text: Primary text
+        Secondary text: Secondary text
+        Tertiary text: Tertiary text
+        Titles: Titles
+        Logo icon: Logo icon
+        Logo text: Logo text
+        Logo hover: Logo hover
+        Background: Background
+        Cards: Cards
+        Secondary cards: Secondary cards
+        Favorite icon: Favorite icon
+        Errors: Errors
+        Scrollbar: Scrollbar
+        Scrollbar hover: Scrollbar hover
+        Dropdown hover text: Dropdown hover text
+        Side navigation: Side navigation
+        Side navigation hover: Side navigation hover
+        Side navigation hover text: Side navigation hover text
+        Side navigation active: Side navigation active
+        Side navigation active text: Side navigation active text
+        Search bar: Search bar
+        Settings search bar: Settings search bar
+        Instance menu: Instance menu
+        Input background: Input background
+        Shadows: Shadows
+        Primary color: Primary color
+        Primary hover: Primary hover
+        Primary active: Primary active
+        Text on primary: Text on primary
+        Accent color: Accent color
+        Accent hover: Accent hover
+        Accent active: Accent active
+        Light accent: Light accent
+        Visited accent: Visited accent
+        Text on accent: Text on accent
+        Links: Links
+        Visited links: Visited links
+        Destructive action: Destructive action
+        Destructive hover: Destructive hover
+        Destructive active: Destructive active
+        Text on destructive action: Text on destructive action
     Main Color Theme:
       Main Color Theme: Main Color Theme
       Red: Red

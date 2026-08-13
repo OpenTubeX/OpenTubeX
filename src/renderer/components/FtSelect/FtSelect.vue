@@ -74,6 +74,7 @@
           v-if="tooltip === ''"
           :setting-key="settingKey"
           :is-changed="isChanged"
+          :disabled="disabled"
           @reset="emit('reset')"
         />
       </span>
@@ -89,6 +90,7 @@
       <FtSyncedSettingIndicator
         :setting-key="settingKey"
         :is-changed="isChanged"
+        :disabled="disabled"
         @reset="emit('reset')"
       />
     </span>

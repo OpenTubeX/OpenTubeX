@@ -21,6 +21,13 @@ import {
   LIGHT_BASE_THEMES,
   DARK_BASE_THEMES,
 } from '../constants'
+import {
+  CUSTOM_THEMES_DIRECTORY,
+  customThemeIdFromValue,
+  customThemeValue,
+  isCustomThemeValue,
+  normalizeCustomTheme,
+} from '../customTheme'
 import * as baseHandlers from '../datastores/handlers/base'
 import { liveReminders } from '../datastores'
 import { extractExpiryTimestamp, ImageCache } from './ImageCache'
@@ -104,6 +111,55 @@ function runApp() {
   ])
 
   const ROOT_APP_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:9080' : 'app://bundle/index.html'
+  const CUSTOM_THEMES_PATH = path.join(app.getPath('userData'), CUSTOM_THEMES_DIRECTORY)
+
+  function getCustomThemePath(id) {
+    if (!/^[\w-]{1,80}$/.test(id)) throw new TypeError('Invalid custom theme ID')
+    return path.join(CUSTOM_THEMES_PATH, `${id}.json`)
+  }
+
+  async function writeCustomThemeFile(theme) {
+    const themePath = getCustomThemePath(theme.id)
+    const temporaryPath = `${themePath}.tmp`
+    await asyncFs.writeFile(temporaryPath, `${JSON.stringify(theme, null, 2)}\n`, 'utf8')
+    await asyncFs.rename(temporaryPath, themePath)
+  }
+
+  async function loadCustomThemes() {
+    await asyncFs.mkdir(CUSTOM_THEMES_PATH, { recursive: true })
+    const entries = await asyncFs.readdir(CUSTOM_THEMES_PATH, { withFileTypes: true })
+    const themes = []
+    for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
+      if (!entry.isFile() || path.extname(entry.name) !== '.json') continue
+      try {
+        themes.push(normalizeCustomTheme(
+          JSON.parse(await asyncFs.readFile(path.join(CUSTOM_THEMES_PATH, entry.name), 'utf8'))
+        ))
+      } catch (error) {
+        console.error(`Failed to load custom theme ${entry.name}:`, error)
+      }
+    }
+    return themes.sort((left, right) =>
+      left.name.localeCompare(right.name) || left.id.localeCompare(right.id))
+  }
+
+  async function saveCustomTheme(theme) {
+    const normalizedTheme = normalizeCustomTheme(theme)
+    await asyncFs.mkdir(CUSTOM_THEMES_PATH, { recursive: true })
+    await writeCustomThemeFile(normalizedTheme)
+    return await loadCustomThemes()
+  }
+
+  async function deleteCustomTheme(id) {
+    await asyncFs.unlink(getCustomThemePath(id))
+    return await loadCustomThemes()
+  }
+
+  async function getSelectedCustomTheme(value) {
+    const id = customThemeIdFromValue(value)
+    const themes = await loadCustomThemes()
+    return id === null ? themes[0] ?? null : themes.find(theme => theme.id === id) ?? null
+  }
 
   let backendPreference = 'local'
   let backendFallback = true
@@ -1857,7 +1913,11 @@ function runApp() {
       const baseTheme = await baseHandlers.settings._findOne('baseTheme')
 
       if (baseTheme?.value) {
-        updateThemeSource(baseTheme.value)
+        if (isCustomThemeValue(baseTheme.value)) {
+          nativeTheme.themeSource = (await getSelectedCustomTheme(baseTheme.value))?.isDark ? 'dark' : 'light'
+        } else {
+          updateThemeSource(baseTheme.value)
+        }
       }
     } catch {}
 
@@ -2102,13 +2162,16 @@ function runApp() {
       restoreTabLoadStateOnRestore = false
     } = { }) {
     // Syncing new window background to theme choice.
-    const windowBackground = await baseHandlers.settings._findOne('baseTheme').then((setting) => {
+    const windowBackground = await baseHandlers.settings._findOne('baseTheme').then(async (setting) => {
       if (!setting) {
         return nativeTheme.shouldUseDarkColors ? '#212121' : '#f1f1f1'
       }
 
       // Determine window color to be shown (shown most prominently during initial app load)
       // Uses the --bg-color for each corresponding theme
+      if (isCustomThemeValue(setting.value)) {
+        return (await getSelectedCustomTheme(setting.value))?.colors.background ?? '#212121'
+      }
       switch (setting.value) {
         case 'dark':
           return '#212121'
@@ -3683,6 +3746,44 @@ function runApp() {
           : 'system')
   }
 
+  ipcMain.handle(IpcChannels.CUSTOM_THEME_LOAD, async (event) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+    return await loadCustomThemes()
+  })
+
+  ipcMain.handle(IpcChannels.CUSTOM_THEME_SAVE, async (event, theme) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+
+    const themes = await saveCustomTheme(theme)
+    const selectedTheme = (await baseHandlers.settings._findOne('baseTheme'))?.value
+    const selectedCustomTheme = isCustomThemeValue(selectedTheme)
+      ? themes.find(({ id }) => id === customThemeIdFromValue(selectedTheme)) ?? themes[0]
+      : null
+    if (selectedCustomTheme) {
+      nativeTheme.themeSource = selectedCustomTheme.isDark ? 'dark' : 'light'
+    }
+    BrowserWindow.getAllWindows().forEach((window) => {
+      if (isOpenTubeXUrl(window.webContents.getURL())) {
+        window.webContents.send(IpcChannels.CUSTOM_THEME_UPDATED, themes)
+      }
+    })
+    return themes
+  })
+
+  ipcMain.handle(IpcChannels.CUSTOM_THEME_DELETE, async (event, themeId) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+
+    const themes = await deleteCustomTheme(themeId)
+    const selectedTheme = (await baseHandlers.settings._findOne('baseTheme'))?.value
+    if (selectedTheme === customThemeValue(themeId)) nativeTheme.themeSource = 'system'
+    BrowserWindow.getAllWindows().forEach((window) => {
+      if (isOpenTubeXUrl(window.webContents.getURL())) {
+        window.webContents.send(IpcChannels.CUSTOM_THEME_UPDATED, themes)
+      }
+    })
+    return themes
+  })
+
   // ************************************************* //
   // DB related IPC calls
   // *********** //
@@ -3737,7 +3838,11 @@ function runApp() {
               }
               break
             case 'baseTheme':
-              updateThemeSource(data.value)
+              if (isCustomThemeValue(data.value)) {
+                nativeTheme.themeSource = (await getSelectedCustomTheme(data.value))?.isDark ? 'dark' : 'light'
+              } else {
+                updateThemeSource(data.value)
+              }
               break
 
             default:
