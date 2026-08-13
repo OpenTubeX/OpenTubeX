@@ -26,6 +26,7 @@ import {
   getSubscriptionVideoSortTimestamp,
   getUpcomingPremiereTimestamp,
   mergeSubscriptionShortThumbnails,
+  mergeUpcomingSubscriptionFeedPublished,
   reconcileFetchedSubscriptionEntries,
   updateUpcomingPremiereState
 } from './subscription-entries'
@@ -544,6 +545,51 @@ export async function parseYouTubeRSSFeed(rssString, channelId) {
 }
 
 /**
+ * Parses only the exact publication metadata needed to position scraped
+ * upcoming entries. Unlike the full RSS parser, this performs no watch-page
+ * enrichment.
+ * @param {string} rssString
+ */
+function parseYouTubeRSSPublicationDates(rssString) {
+  try {
+    const xmlDom = new DOMParser().parseFromString(rssString, 'application/xml')
+
+    return Array.from(xmlDom.querySelectorAll('entry'), entry => ({
+      videoId: entry.getElementsByTagName('yt:videoId')[0]?.textContent,
+      published: Date.parse(entry.querySelector('published')?.textContent)
+    }))
+  } catch {
+    return []
+  }
+}
+
+/**
+ * @param {string} channelId
+ * @param {object[]} videos
+ */
+async function enrichScrapedUpcomingPublicationDates(channelId, videos) {
+  if (!videos.some(video => video.isUpcoming === true || video.premiere === true)) {
+    return videos
+  }
+
+  try {
+    const response = await fetchWithTimeout(
+      RSS_ENRICHMENT_TIMEOUT_MS,
+      `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`
+    )
+
+    if (!response.ok) {
+      return videos
+    }
+
+    const rssVideos = parseYouTubeRSSPublicationDates(await response.text())
+    return mergeUpcomingSubscriptionFeedPublished(videos, rssVideos)
+  } catch {
+    return videos
+  }
+}
+
+/**
  * @param {{
  *  t: (key: string, named?: Record<string, unknown>) => string,
  *  showStartToast?: boolean,
@@ -1000,7 +1046,12 @@ async function getChannelVideosLocalScraper(channel, t, errorChannels, failedAtt
       return { videos: null }
     }
 
-    return result
+    return {
+      ...result,
+      videos: store.getters.getShowScheduledLiveStreamsFirst
+        ? result.videos
+        : await enrichScrapedUpcomingPublicationDates(channel.id, result.videos)
+    }
   } catch (err) {
     showSubscriptionFetchError(channel, err, t('Local API Error (Click to copy)'))
 
