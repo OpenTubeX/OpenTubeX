@@ -392,7 +392,10 @@ export function listMergedPullRequests(repository, target) {
     `repo=${repo}`,
     '-F',
     `base=${target}`,
-  ], { encoding: 'utf8' })
+  ], {
+    encoding: 'utf8',
+    maxBuffer: 10 * 1024 * 1024,
+  })
 
   return normalizePullRequestPages(JSON.parse(output))
 }
