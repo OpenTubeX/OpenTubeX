@@ -29,19 +29,22 @@ export class CaptionSelection extends shaka.ui.TextSelection {
    * @param {(setting: string, value: string | number) => void} updateSetting
    * @param {() => void} resetSettings
    * @param {() => {id: string, url: string, label: string, translationName: string, language: string, mimeType: string}[]} getTranslations
+   * @param {(caption: {id: string, url: string, label: string, language: string, mimeType: string}) => boolean} isTranslationSelected
    * @param {(caption: {url: string, label: string, language: string, mimeType: string}) => Promise<boolean>} selectTranslation
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
    */
-  constructor(events, getSettings, updateSetting, resetSettings, getTranslations, selectTranslation, parent, controls) {
+  constructor(events, getSettings, updateSetting, resetSettings, getTranslations, isTranslationSelected, selectTranslation, parent, controls) {
     super(parent, controls)
 
     this.getSettings_ = getSettings
     this.updateSetting_ = updateSetting
     this.resetSettings_ = resetSettings
     this.getTranslations_ = getTranslations
+    this.isTranslationSelected_ = isTranslationSelected
     this.selectTranslation_ = selectTranslation
     this.openColorControl_ = null
+    this.translationOverlayFrame_ = 0
 
     this.optionsButton_ = document.createElement('button')
     this.optionsButton_.type = 'button'
@@ -76,6 +79,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     this.translationOptions_ = document.createElement('div')
     this.translationOptions_.classList.add('ft-caption-translation-options')
     this.translationMenu_.appendChild(this.translationOptions_)
+    this.translationButtons_ = []
     this.translationSignature_ = ''
 
     this.appearanceMenu_ = document.createElement('div')
@@ -131,7 +135,9 @@ export class CaptionSelection extends shaka.ui.TextSelection {
       this.setMenuDisplay_(this.menu, false)
       this.setMenuDisplay_(this.translationMenu_, true)
       this.translationBackButton_.focus({ preventScroll: true })
-      requestAnimationFrame(() => {
+      cancelAnimationFrame(this.translationOverlayFrame_)
+      this.translationOverlayFrame_ = requestAnimationFrame(() => {
+        this.translationOverlayFrame_ = 0
         addOverlayScrollbars(this.translationOptions_)
         restoreOverlayScrollTop(this.translationOptions_, 0)
       })
@@ -178,6 +184,8 @@ export class CaptionSelection extends shaka.ui.TextSelection {
   }
 
   release() {
+    cancelAnimationFrame(this.translationOverlayFrame_)
+    this.translationOverlayFrame_ = 0
     removeOverlayScrollbars(this.translationOptions_)
     this.translationMenu_.remove()
     this.appearanceMenu_.remove()
@@ -520,9 +528,10 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     }
 
     this.translationSignature_ = signature
-    for (const button of this.translationOptions_.querySelectorAll(':scope > button')) {
+    for (const button of this.translationButtons_) {
       button.remove()
     }
+    this.translationButtons_ = []
 
     for (const translation of translations) {
       const button = document.createElement('button')
@@ -531,6 +540,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
       label.textContent = translation.translationName
       button.appendChild(label)
       this.translationOptions_.appendChild(button)
+      this.translationButtons_.push(button)
 
       this.eventManager.listen(button, 'click', async () => {
         button.disabled = true
@@ -538,12 +548,37 @@ export class CaptionSelection extends shaka.ui.TextSelection {
         button.disabled = false
 
         if (selected) {
+          this.updateTranslationSelection_()
           this.setMenuDisplay_(this.translationMenu_, false)
           this.setMenuDisplay_(this.menu, true)
           this.menu.querySelector('.shaka-back-to-overflow-button')?.focus({ preventScroll: true })
           this.resetMenuScroll_(this.menu.parentElement)
         }
       })
+    }
+
+    this.updateTranslationSelection_()
+  }
+
+  /** @private */
+  updateTranslationSelection_() {
+    const translations = this.getTranslations_()
+    for (const [index, translation] of translations.entries()) {
+      const button = this.translationButtons_[index]
+      const label = button.querySelector(':scope > span')
+      const isSelected = this.isTranslationSelected_(translation)
+      label.classList.toggle('shaka-chosen-item', isSelected)
+      button.ariaSelected = isSelected ? 'true' : 'false'
+      button.querySelector(':scope > .shaka-ui-icon.shaka-chosen-item')?.remove()
+      if (isSelected) {
+        const checkmark = new shaka.ui.Icon(
+          null,
+          shaka.ui.Enums.MaterialDesignSVGIcons.CHECKMARK
+        ).getSvgElement()
+        checkmark.classList.add('shaka-chosen-item')
+        checkmark.ariaHidden = 'true'
+        button.prepend(checkmark)
+      }
     }
   }
 

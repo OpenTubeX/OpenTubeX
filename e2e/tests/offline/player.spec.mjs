@@ -285,6 +285,9 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   await overflowMenu.getByRole('button', { name: 'Captions' }).click()
   await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
   await expect(translations).not.toHaveClass(/ft-menu-grid/)
+  const selectedTranslation = translations.getByRole('button', { name: 'German' })
+  await expect(selectedTranslation).toHaveAttribute('aria-selected', 'true')
+  await expect(selectedTranslation.locator('.shaka-chosen-item')).toHaveCount(2)
 
   const [listBounds, languageBounds] = await Promise.all([
     translations.boundingBox(),

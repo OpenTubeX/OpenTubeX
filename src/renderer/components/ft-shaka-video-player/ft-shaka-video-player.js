@@ -5887,6 +5887,7 @@ export default defineComponent({
             updateCaptionAppearance,
             resetCaptionAppearance,
             () => props.captionTranslations,
+            caption => Boolean(findMatchingTextTrack(player.getTextTracks(), caption)?.active),
             selectCaptionTranslation,
             rootElement,
             controls

@@ -1081,11 +1081,13 @@
   The checkmark would make the selected tile taller than the others, so the
   selection is shown as a highlighted tile instead.
 */
-:deep(.shaka-sub-menu.ft-menu-grid .shaka-ui-icon.shaka-chosen-item) {
+:deep(.shaka-sub-menu.ft-menu-grid .shaka-ui-icon.shaka-chosen-item),
+:deep(.ft-caption-translation-options.ft-menu-grid .shaka-ui-icon.shaka-chosen-item) {
   display: none;
 }
 
-:deep(.shaka-sub-menu.ft-menu-grid > button:has(.shaka-chosen-item)) {
+:deep(.shaka-sub-menu.ft-menu-grid > button:has(.shaka-chosen-item)),
+:deep(.ft-caption-translation-options.ft-menu-grid > button:has(.shaka-chosen-item)) {
   background: color-mix(in srgb, var(--primary-color) 32%, transparent);
 }
 
