@@ -87,6 +87,34 @@ test('collapsed description paints the More control above its text', async ({ pa
   })).toBe(true)
 })
 
+test('full-window player shows the title overlay', async ({ page }) => {
+  const playerStyles = await readFile(
+    path.join(
+      repoRoot,
+      'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.css'
+    ),
+    'utf8'
+  )
+  await page.addStyleTag({
+    content: playerStyles.replaceAll(/:deep\(((?:[^()]|\([^()]*\))*)\)/g, '$1')
+  })
+  await page.evaluate(() => {
+    const player = document.createElement('div')
+    const title = document.createElement('h1')
+    player.className = 'ftVideoPlayer'
+    title.className = 'playerFullscreenTitleOverlay'
+    title.textContent = 'Test video title'
+    player.append(title)
+    document.body.append(player)
+  })
+
+  const player = page.locator('.ftVideoPlayer')
+  const title = player.locator('.playerFullscreenTitleOverlay')
+  await expect(title).toHaveCSS('display', 'none')
+  await player.evaluate(element => element.classList.add('fullWindow'))
+  await expect(title).toHaveCSS('display', 'block')
+})
+
 test('Shorts top controls stay visible over white video content', async ({ page }) => {
   await goTo(page, 'history')
   const playerStyles = await readFile(

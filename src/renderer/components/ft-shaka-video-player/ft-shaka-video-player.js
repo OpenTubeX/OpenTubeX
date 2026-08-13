@@ -4109,7 +4109,7 @@ export default defineComponent({
         }
       }
 
-      // title overlay when the video is fullscreened
+      // title overlay when the video fills the screen or window
       // placing this inside the controls container so that we can fade it in and out at the same time as the controls
       fullscreenTitleOverlay = document.createElement('h1')
       fullscreenTitleOverlay.textContent = props.title
