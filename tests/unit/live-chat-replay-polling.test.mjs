@@ -5,7 +5,7 @@ import test from 'node:test'
 import 'youtubei.js'
 
 // Imported by path because youtubei.js doesn't export its internals, and because
-// these cover behaviour that only exists thanks to patches/youtubei.js@17.2.0.patch.
+// these cover behaviour that only exists thanks to patches/youtubei.js@18.0.0.patch.
 import LiveChat from '../../node_modules/youtubei.js/dist/src/parser/youtube/LiveChat.js'
 import { LiveChatContinuation } from '../../node_modules/youtubei.js/dist/src/parser/continuations.js'
 

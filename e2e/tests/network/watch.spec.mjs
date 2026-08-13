@@ -704,13 +704,15 @@ test.describe('watch page', () => {
 
     // Exercise reply loading and its continuation path, not only the initial
     // top-level comment batch (8bcf0b58d).
-    const replyToggle = page.locator('.commentMoreReplies').first()
+    const replyToggle = page.locator('.commentReplyRootToggle .commentReplyContinuationButton').first()
     await expect(replyToggle).toBeVisible()
     await replyToggle.click()
     const replies = page.locator('.commentReplyBranch')
     await expect(replies.first()).toBeVisible({ timeout: 30_000 })
 
-    const showMoreReplies = page.locator('.showMoreReplies').first()
+    const showMoreReplies = page.locator(
+      '.commentReplies > .commentReplyContinuation > .commentReplyContinuationButton:not([aria-expanded])'
+    ).first()
     await expect(showMoreReplies).toBeVisible()
     const [continuationResponse] = await Promise.all([
       page.waitForResponse((response) => (

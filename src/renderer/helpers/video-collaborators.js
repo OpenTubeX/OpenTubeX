@@ -11,38 +11,25 @@
  * @returns {LocalVideoCollaborator[]}
  */
 export function parseLocalVideoCollaborators(videoInfo) {
-  const listItems = videoInfo.secondary_info?.owner?.author?.endpoint?.payload
-    ?.panelLoadingStrategy?.inlineContent?.dialogViewModel?.customContent
-    ?.listViewModel?.listItems
+  const author = videoInfo.secondary_info?.owner?.author
+  const collaborators = author?.collaborators?.length > 0
+    ? author.collaborators
+    : author?.endpoint?.command?.inline_content?.custom_content?.items
 
-  if (!Array.isArray(listItems)) {
-    return []
-  }
+  return collaborators?.flatMap((collaborator) => {
+    const channelId = collaborator.title?.endpoint?.payload?.browseId ??
+      collaborator.renderer_context?.command_context?.on_tap?.payload?.browseId
+    const name = collaborator.title?.text
 
-  const collaborators = []
-  const seenChannelIds = new Set()
-
-  for (const item of listItems) {
-    const viewModel = item.listItemViewModel
-    const avatar = viewModel?.leadingAccessory?.avatarViewModel
-    const channelId = viewModel?.title?.commandRuns?.[0]?.onTap?.innertubeCommand?.browseEndpoint?.browseId ??
-      avatar?.endpoint?.innertubeCommand?.browseEndpoint?.browseId
-    const name = viewModel?.title?.content
-
-    if (!channelId || !name || seenChannelIds.has(channelId)) {
-      continue
-    }
-
-    seenChannelIds.add(channelId)
-    collaborators.push({
-      id: channelId,
-      name,
-      thumbnail: avatar?.image?.sources?.at(-1)?.url ?? '',
-      subtitle: viewModel?.subtitle?.content?.replaceAll(/[\u200e\u2068\u2069]/g, '') ?? ''
-    })
-  }
-
-  return collaborators
+    return channelId && name
+      ? [{
+          id: channelId,
+          name,
+          thumbnail: collaborator.leading_accessory?.image?.[0]?.url ?? '',
+          subtitle: collaborator.subtitle?.text?.replaceAll(/[\u200e\u2068\u2069]/g, '') ?? ''
+        }]
+      : []
+  }) ?? []
 }
 
 /**

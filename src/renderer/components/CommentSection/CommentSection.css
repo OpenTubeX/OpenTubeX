@@ -258,17 +258,19 @@
   --highlighted-comment-offset: 13px;
 }
 
-.commentThreadExpanded::before {
+.commentThreadExpanded::before,
+.commentThreadCollapsed::before {
   content: '';
   position: absolute;
   z-index: 0;
-  inset-block: 75px 44px;
+  inset-block: 75px 71px;
   inset-inline-start: 45px;
   border-inline-start: 1px solid var(--comment-thread-line-color);
   pointer-events: none;
 }
 
-.commentThreadExpanded.highlightedComment::before {
+.commentThreadExpanded.highlightedComment::before,
+.commentThreadCollapsed.highlightedComment::before {
   inset-block-start: calc(75px + var(--highlighted-comment-offset));
 }
 
@@ -429,54 +431,69 @@
   z-index: 2;
 }
 
-.commentMoreReplies {
-  font-size: 11px;
-  margin-inline-start: 5px;
-  text-decoration: underline;
-  cursor: pointer;
-  color: var(--title-color);
-}
-
-.commentMoreRepliesSpinner {
-  margin-inline-start: 5px;
-  vertical-align: middle;
-}
-
 .commentReplies {
   clear: both;
   margin-inline-start: 30px;
 }
 
-.hideReplies::before {
+.commentReplyContinuation {
+  position: relative;
+  padding-block: 8px;
+  padding-inline-start: 30px;
+}
+
+.commentReplyContinuation::before {
   content: '';
   position: absolute;
-  z-index: 0;
-  inset-block-start: 3px;
+  inset-block-start: 0;
   inset-inline-start: 0;
   inline-size: 15px;
-  block-size: 15px;
+  block-size: 26px;
   border-block-end: 1px solid var(--comment-thread-line-color);
   border-inline-start: 1px solid var(--comment-thread-line-color);
   border-end-start-radius: calc(12px * var(--ui-roundness));
   pointer-events: none;
 }
 
-.showMoreReplies {
-  margin-inline-start: 30px;
-  font-size: 15px;
-  cursor: pointer;
-  text-decoration: underline;
+.commentReplyRootToggle {
+  clear: both;
+  padding-inline-start: 60px;
 }
 
-.hideReplies {
-  position: relative;
+.commentReplyRootToggle::before {
+  inset-inline-start: 30px;
+}
+
+.commentReplyContinuationButton {
+  display: inline-flex;
+  min-block-size: 40px;
+  align-items: center;
+  gap: 12px;
   padding-block: 8px;
-  padding-inline-start: 30px;
-  font-size: 13px;
-  line-height: 16px;
+  padding-inline: 16px;
   color: var(--title-color);
+  background-color: transparent;
+  border: 0;
+  border-radius: calc(20px * var(--ui-roundness));
   cursor: pointer;
-  text-decoration: underline;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.commentReplyContinuationButton:hover,
+.commentReplyContinuationButton:focus-visible {
+  color: var(--side-nav-hover-text-color);
+  background-color: var(--side-nav-hover-color);
+}
+
+.commentReplyContinuationButton:disabled {
+  cursor: default;
+}
+
+.commentReplyContinuationButton:disabled:hover {
+  color: var(--title-color);
+  background-color: transparent;
 }
 
 .getMoreComments {
