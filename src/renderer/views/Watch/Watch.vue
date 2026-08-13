@@ -6,7 +6,9 @@
       ambientModeActive,
       isLoading,
       shortsPlayerActive: customShortsPlayerActive,
-      useTheatreMode: (useTheatreMode && !isLoading) || (isLoading && defaultViewingMode === 'theatre'),
+      useTheatreMode: isLoading
+        ? (loadingTheatreMode ?? (defaultViewingMode === 'theatre'))
+        : useTheatreMode,
       noSidebar: !theatrePossible && !sidebarPanelLeaving
     }"
   >

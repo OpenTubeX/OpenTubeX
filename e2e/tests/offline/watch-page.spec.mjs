@@ -18,6 +18,87 @@ const WATCH_PAGE_SEED = {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+for (const { defaultViewingMode, currentTheatreMode } of [
+  { defaultViewingMode: 'theatre', currentTheatreMode: false },
+  { defaultViewingMode: 'default', currentTheatreMode: true }
+]) {
+  test.describe(`recommended video morph with ${defaultViewingMode} as the default`, () => {
+    test.use({
+      seed: {
+        settings: {
+          ...WATCH_PAGE_SEED,
+          defaultViewingMode
+        }
+      }
+    })
+
+    test(`uses the current ${currentTheatreMode ? 'theatre' : 'default'} layout`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+
+      let releaseRecommendedPlayer
+      await page.route(/\/youtubei\/v1\/player/, async (route, request) => {
+        const videoId = JSON.parse(request.postData() ?? '{}').videoId
+        if (videoId === 'recommended-video') {
+          await new Promise(resolve => { releaseRecommendedPlayer = resolve })
+        }
+        return route.fallback()
+      })
+
+      await openMockedVideo(page)
+      const watchView = await watchViewHandle(page)
+      await watchView.evaluate(async (view, theatreMode) => {
+        view.useTheatreMode = theatreMode
+        view.recommendedVideos = [{
+          videoId: 'recommended-video',
+          title: 'Recommended video',
+          author: 'Recommended channel',
+          authorId: 'UC-recommended-channel',
+          lengthSeconds: 60,
+          published: Date.now(),
+          type: 'video'
+        }]
+        await view.$nextTick()
+      }, currentTheatreMode)
+      const lazyRecommendation = page.locator('.watchVideoRecommendations > div').nth(1)
+      await lazyRecommendation.evaluate(element => { element.style.minHeight = '1px' })
+      await lazyRecommendation.scrollIntoViewIfNeeded()
+      const recommendation = page.locator('.watchVideoRecommendations .title', {
+        hasText: 'Recommended video'
+      })
+      await expect(recommendation).toBeVisible()
+
+      await page.evaluate((activeTabSelector) => {
+        const startViewTransition = document.startViewTransition.bind(document)
+        document.startViewTransition = (update) => {
+          window.__recommendedMorph = {
+            sourceName: document.querySelector('.watchVideoRecommendations .thumbnailImage')
+              ?.style.viewTransitionName
+          }
+          return startViewTransition(async () => {
+            await update()
+            const player = document.querySelector(`${activeTabSelector} .videoPlayer`)
+            const layout = document.querySelector(`${activeTabSelector} .videoLayout`)
+            window.__recommendedMorph.destinationName = getComputedStyle(player).viewTransitionName
+            window.__recommendedMorph.usesTheatreLayout = layout.classList.contains('useTheatreMode')
+          })
+        }
+      }, activeTab)
+
+      await recommendation.click()
+      await expect(page).toHaveURL(/#\/watch\/recommended-video/)
+      await expect.poll(() => page.evaluate(() => window.__recommendedMorph)).toEqual({
+        sourceName: 'video-morph',
+        destinationName: 'video-morph',
+        usesTheatreLayout: currentTheatreMode
+      })
+      expect(await watchView.evaluate(view => view.loadingTheatreMode)).toBe(currentTheatreMode)
+
+      await expect.poll(() => typeof releaseRecommendedPlayer).toBe('function')
+      releaseRecommendedPlayer()
+    })
+  })
+}
+
 const FULLSCREEN_PLAYLIST_ID = 'fullscreen-preview'
 const FULLSCREEN_PLAYLIST = {
   _id: FULLSCREEN_PLAYLIST_ID,
