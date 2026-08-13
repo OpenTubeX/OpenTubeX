@@ -245,6 +245,16 @@
   transition: none;
 }
 
+.ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) :deep(.shaka-seek-bar-container) {
+  inset-inline: auto;
+  inset-inline-start: 50%;
+  inline-size: min(
+    calc(100dvh * var(--shorts-aspect-ratio)),
+    100%
+  );
+  transform: translateX(-50%);
+}
+
 .ftVideoPlayer.shortsPlayer :deep(.shaka-seek-bar-container .shaka-range-element::-webkit-slider-thumb) {
   opacity: 0;
   transform: scale(0);

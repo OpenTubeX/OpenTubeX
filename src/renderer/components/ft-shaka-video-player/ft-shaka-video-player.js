@@ -4901,6 +4901,7 @@ export default defineComponent({
       const video_ = video.value
       const muted = video_.muted || video_.volume === 0
       shortsMuted.value = muted
+      scrollMiniVolume.value = muted ? 0 : video_.volume
 
       syncMuteControlIcons(muted)
 
@@ -4972,6 +4973,7 @@ export default defineComponent({
         const currentTime = video.value.currentTime
         sponsorBlockCurrentTime.value = currentTime
         annotationCurrentTime.value = currentTime
+        updateHiddenShortsSeekBar(currentTime)
 
         emit('timeupdate', currentTime)
         emitTerminalSponsorBlockOutroStarted(currentTime)
@@ -4996,6 +4998,58 @@ export default defineComponent({
 
         updateScrollMiniDragHandleContrast()
       }
+    }
+
+    /**
+     * Shaka stops refreshing its seek bar while its controls are hidden, but
+     * Shorts keep the seek bar visible. Keep that visible progress in sync
+     * without interfering while Shaka is showing or operating the controls.
+     * @param {number} currentTime
+     */
+    function updateHiddenShortsSeekBar(currentTime) {
+      const controls = ui?.getControls()
+      if (!props.shortsPlayer || !hasLoaded.value || !player || !controls ||
+          controls.getControlsContainer().hasAttribute('shown') || controls.isSeeking()) {
+        return
+      }
+
+      const seekBarContainer = container.value?.querySelector('.shaka-seek-bar-container')
+      const seekBar = seekBarContainer?.querySelector('.shaka-seek-bar')
+      if (!(seekBarContainer instanceof HTMLElement) || !(seekBar instanceof HTMLInputElement)) {
+        return
+      }
+
+      const seekRange = player.seekRange()
+      const seekRangeSize = seekRange.end - seekRange.start
+      if (seekRangeSize <= 0) {
+        return
+      }
+
+      const clampedCurrentTime = Math.min(Math.max(currentTime, seekRange.start), seekRange.end)
+      const buffered = video.value.buffered
+      const bufferedEnd = buffered.length > 0
+        ? Math.min(buffered.end(buffered.length - 1), seekRange.end)
+        : clampedCurrentTime
+      const playedPercent = (clampedCurrentTime - seekRange.start) / seekRangeSize * 100
+      const bufferedPercent = Math.max(
+        playedPercent,
+        (bufferedEnd - seekRange.start) / seekRangeSize * 100
+      )
+      const colors = ui.getConfiguration().seekBarColors
+      const gradient = [
+        'to right',
+        `${colors.played} 0%`,
+        `${colors.played} ${playedPercent}%`,
+        `${colors.buffered} ${playedPercent}%`,
+        `${colors.buffered} ${bufferedPercent}%`,
+        `${colors.base} ${bufferedPercent}%`,
+        `${colors.base} 100%`,
+      ]
+
+      seekBar.min = seekRange.start.toString()
+      seekBar.max = seekRange.end.toString()
+      seekBar.value = clampedCurrentTime.toString()
+      seekBarContainer.style.background = `linear-gradient(${gradient.join(', ')})`
     }
 
     /**
@@ -6047,6 +6101,7 @@ export default defineComponent({
       const bounds = videoSpace.getBoundingClientRect()
       if (event.clientX < bounds.left || event.clientX > bounds.right ||
           event.clientY < bounds.top || event.clientY > bounds.bottom) {
+        container.value.classList.remove('no-cursor')
         event.stopPropagation()
         ui?.getControls().getControlsContainer().removeAttribute('shown')
       }

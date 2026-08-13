@@ -1443,6 +1443,26 @@ test.describe('custom Shorts player', () => {
     await expect(topControls).toHaveCSS('opacity', '0')
     await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s')
 
+    const hiddenSeekBarState = await player.evaluate(element => {
+      const videoElement = element.querySelector('video')
+      const seekInput = element.querySelector('.shaka-seek-bar')
+      const seekRange = element.ui.getControls().getPlayer().seekRange()
+      const currentTime = seekRange.start + (seekRange.end - seekRange.start) / 2
+      seekInput.value = seekRange.start
+      videoElement.currentTime = currentTime
+      window.dispatchEvent(new Event('blur'))
+      videoElement.dispatchEvent(new Event('timeupdate'))
+      return { currentTime, seekValue: Number(seekInput.value) }
+    })
+    expect(hiddenSeekBarState.seekValue).toBeCloseTo(hiddenSeekBarState.currentTime, 3)
+
+    const volumeSlider = player.locator('.shortsVolumeSlider')
+    await video.evaluate(element => {
+      element.muted = false
+      element.volume = 0.37
+    })
+    await expect(volumeSlider).toHaveValue('37')
+
     await expect(seekBar).toHaveCSS('opacity', '1')
     await expect(seekBar).toHaveCSS('height', '3px')
     await expect(seekBar).toHaveCSS('bottom', '-2px')
@@ -1503,6 +1523,7 @@ test.describe('custom Shorts player', () => {
     const topControls = player.locator('.shortsTopControls')
     const actionDock = player.locator('.fullscreenActions')
     const videoSpace = player.locator('.shortsFullscreenVideoSpace')
+    const seekBar = player.locator('.shaka-seek-bar-container')
     const [playerBounds, videoBounds] = await Promise.all([
       player.boundingBox(),
       videoSpace.boundingBox(),
@@ -1517,12 +1538,17 @@ test.describe('custom Shorts player', () => {
     await expect(controls).toHaveAttribute('shown', 'true')
     await expect(topControls).toHaveCSS('opacity', '1')
 
+    await player.evaluate(element => element.classList.add('no-cursor'))
     await page.mouse.move(playerBounds.x + 8, playerBounds.y + playerBounds.height / 2)
+    await expect(player).not.toHaveClass(/no-cursor/)
     await expect(controls).not.toHaveAttribute('shown', 'true')
     await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s, 0.25s, 0.25s')
     await expect(topControls).toHaveCSS('opacity', '0')
     await expect(actionDock).toHaveCSS('opacity', '1')
     await expect(actionDock).toHaveCSS('pointer-events', 'auto')
+    const seekBarBounds = await seekBar.boundingBox()
+    expect(Math.abs(seekBarBounds.x - videoBounds.x)).toBeLessThan(2)
+    expect(Math.abs(seekBarBounds.width - videoBounds.width)).toBeLessThan(2)
 
     await page.mouse.move(
       videoBounds.x + videoBounds.width / 2,
