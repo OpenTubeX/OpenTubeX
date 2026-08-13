@@ -1039,6 +1039,59 @@ test.describe('watch page', () => {
     }])
   })
 
+  test('skips SponsorBlock segments at their boundary without timeupdate events', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route('**/api/skipSegments/**', route => route.fulfill({
+      body: JSON.stringify([{
+        videoID: 'jNQXAC9IVRw',
+        segments: [{
+          UUID: 'precise-skip-segment',
+          actionType: 'skip',
+          category: 'sponsor',
+          description: '',
+          locked: 0,
+          segment: [15, 20],
+          videoDuration: 30,
+          votes: 1
+        }]
+      }]),
+      contentType: 'application/json'
+    }))
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseSponsorBlock', true)
+    })
+
+    await openMockedVideo(page)
+    await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
+
+    const video = page.locator('.ftVideoPlayer video')
+    await video.evaluate(element => {
+      element.pause()
+      element.currentTime = 14.57
+      element.dispatchEvent(new Event('timeupdate'))
+
+      const currentTime = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime')
+      Object.defineProperty(element, 'currentTime', {
+        configurable: true,
+        get: currentTime.get,
+        set(value) {
+          if (value === 20) {
+            window.__sponsorBlockSkipStartedAt = currentTime.get.call(this)
+          }
+          currentTime.set.call(this, value)
+        }
+      })
+      element.addEventListener('timeupdate', event => event.stopImmediatePropagation(), { capture: true })
+      return element.play()
+    })
+
+    await expect.poll(() => page.evaluate(() => window.__sponsorBlockSkipStartedAt ?? null)).not.toBeNull()
+    const skipStartedAt = await page.evaluate(() => window.__sponsorBlockSkipStartedAt)
+    expect(skipStartedAt).toBeGreaterThanOrEqual(15)
+    expect(skipStartedAt).toBeLessThan(15.05)
+  })
+
   test('displays and submits full-video SponsorBlock labels', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     const fullVideoSegment = {
