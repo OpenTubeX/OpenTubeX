@@ -18,6 +18,53 @@ const WATCH_PAGE_SEED = {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+test('a background watch tab stays loading until its cached avatar is ready', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setVideoAvatar', {
+      videoId: 'jNQXAC9IVRw',
+      avatar: 'data:image/png;base64,iVBORw0KGgo='
+    })
+
+    window.__backgroundWatchIconStates = []
+    const record = () => {
+      for (const tab of document.querySelectorAll('.tab')) {
+        window.__backgroundWatchIconStates.push({
+          id: tab.dataset.tabId,
+          loading: tab.querySelector('.loadingDot') != null,
+          avatar: tab.querySelector('.tabAvatar') != null,
+          pageIcon: tab.querySelector('.tabPageIcon') != null
+        })
+      }
+    }
+    new MutationObserver(record).observe(
+      document.querySelector('.tabsContainer'),
+      { childList: true, subtree: true }
+    )
+  })
+
+  const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
+    route: '/watch/jNQXAC9IVRw',
+    title: 'Cached video',
+    makeActive: false,
+    preloadInBackground: true
+  }))
+  const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
+
+  await expect(tab.locator('.loadingDot')).toBeVisible()
+  await expect(tab.locator('.loadingDot')).toHaveCount(0)
+  await expect(tab.locator('.tabAvatar')).toBeVisible()
+
+  const states = await page.evaluate(
+    tabId => window.__backgroundWatchIconStates.filter(state => state.id === tabId),
+    watchTab.id
+  )
+  expect(states.some(state => state.loading)).toBe(true)
+  expect(states.some(state => state.pageIcon)).toBe(false)
+})
+
 for (const { defaultViewingMode, currentTheatreMode } of [
   { defaultViewingMode: 'theatre', currentTheatreMode: false },
   { defaultViewingMode: 'default', currentTheatreMode: true }

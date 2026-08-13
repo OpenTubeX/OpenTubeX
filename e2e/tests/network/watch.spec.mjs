@@ -196,7 +196,7 @@ test.describe('background watch tab', () => {
     await expect(page.locator('.commentsTitle')).toBeVisible()
   })
 
-  test('does not show a stale loading indicator after leaving a loaded video tab', async ({ page }) => {
+  test('keeps reporting genuine loading after leaving a video tab', async ({ page }) => {
     await openVideo(page)
 
     const videoTab = page.locator(sel.tabs).first()
@@ -229,8 +229,8 @@ test.describe('background watch tab', () => {
 
     expect(await page.evaluate(
       () => window.__videoTabShowedLoadingAfterDeactivation
-    )).toBe(false)
-    await expect(videoTab).not.toHaveClass(/loading/)
+    )).toBe(true)
+    await expect(videoTab).toHaveClass(/loading/)
 
     await videoTab.click()
     await expect(videoTab).toHaveClass(/loading/)
@@ -239,7 +239,7 @@ test.describe('background watch tab', () => {
     ).toHaveCount(1)
   })
 
-  test('restores loading updates when tab activation is rejected', async ({ page }) => {
+  test('keeps loading updates when tab activation is rejected', async ({ page }) => {
     await openVideo(page)
 
     const videoTab = page.locator(sel.tabs).first()
