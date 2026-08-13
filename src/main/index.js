@@ -291,7 +291,7 @@ function runApp() {
    * Persist a setting changed by a native main-process prompt and update every
    * open renderer so its Settings UI remains accurate.
    * @param {string} settingKey
-   * @param {boolean} value
+   * @param {unknown} value
    */
   async function updateSettingFromMain(settingKey, value) {
     await baseHandlers.settings.upsert(settingKey, value)
@@ -3774,9 +3774,28 @@ function runApp() {
   ipcMain.handle(IpcChannels.CUSTOM_THEME_DELETE, async (event, themeId) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) return
 
+    const deletedTheme = (await loadCustomThemes()).find(({ id }) => id === themeId)
     const themes = await deleteCustomTheme(themeId)
-    const selectedTheme = (await baseHandlers.settings._findOne('baseTheme'))?.value
-    if (selectedTheme === customThemeValue(themeId)) nativeTheme.themeSource = 'system'
+    if (deletedTheme) {
+      const deletedThemeValue = customThemeValue(themeId)
+      const [baseTheme, systemLightTheme, systemDarkTheme] = await Promise.all([
+        baseHandlers.settings._findOne('baseTheme'),
+        baseHandlers.settings._findOne('systemLightTheme'),
+        baseHandlers.settings._findOne('systemDarkTheme')
+      ])
+      if (systemLightTheme?.value === deletedThemeValue) {
+        await updateSettingFromMain('systemLightTheme', deletedTheme.basedOn)
+      }
+      if (systemDarkTheme?.value === deletedThemeValue) {
+        await updateSettingFromMain('systemDarkTheme', deletedTheme.basedOn)
+      }
+      if (baseTheme?.value === deletedThemeValue) {
+        await updateSettingFromMain('mainColor', deletedTheme.mainColor)
+        await updateSettingFromMain('secColor', deletedTheme.secondaryColor)
+        await updateSettingFromMain('baseTheme', deletedTheme.basedOn)
+        updateThemeSource(deletedTheme.basedOn)
+      }
+    }
     BrowserWindow.getAllWindows().forEach((window) => {
       if (isOpenTubeXUrl(window.webContents.getURL())) {
         window.webContents.send(IpcChannels.CUSTOM_THEME_UPDATED, themes)

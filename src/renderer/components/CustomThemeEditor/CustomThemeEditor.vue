@@ -162,6 +162,7 @@ const draft = shallowReactive(cloneDefaultCustomTheme())
 const showDeletePrompt = ref(false)
 let previewing = false
 let editorLoadId = 0
+let keepSystemThemeOnSave = false
 const basedOnTheme = ref('dark')
 const pendingColorPreviews = new Map()
 let colorPreviewTimer = null
@@ -198,6 +199,8 @@ watch(() => props.open, async (open) => {
   const loadId = ++editorLoadId
   store.commit('setCustomThemeEditorOpen', open)
   if (!open) return
+  keepSystemThemeOnSave = store.getters.getBaseTheme === 'system' &&
+    customThemeIdFromValue(resolveSelectedTheme('system')) === props.themeId
   try {
     const themes = await loadCustomThemes()
     if (!props.open || loadId !== editorLoadId) return
@@ -400,13 +403,11 @@ function readColor(probe, property, background) {
 async function saveAndApply() {
   try {
     flushColorPreviews()
-    const keepSystemTheme = store.getters.getBaseTheme === 'system' &&
-      customThemeIdFromValue(resolveSelectedTheme('system')) === draft.id
     const themes = await saveCustomTheme(draft)
     store.commit('setCustomThemes', themes)
     const savedTheme = themes.find(({ id }) => id === draft.id)
     setDraft(savedTheme)
-    if (!keepSystemTheme) {
+    if (!keepSystemThemeOnSave) {
       await store.dispatch('updateBaseTheme', customThemeValue(savedTheme.id))
     }
     showToast({
@@ -424,20 +425,8 @@ async function handleDeletePrompt(value) {
   if (value !== 'delete') return
 
   try {
-    const deletedThemeValue = customThemeValue(draft.id)
     const themes = await deleteCustomTheme(draft.id)
     store.commit('setCustomThemes', themes)
-    if (store.getters.getSystemLightTheme === deletedThemeValue) {
-      await store.dispatch('updateSystemLightTheme', draft.basedOn)
-    }
-    if (store.getters.getSystemDarkTheme === deletedThemeValue) {
-      await store.dispatch('updateSystemDarkTheme', draft.basedOn)
-    }
-    if (store.getters.getBaseTheme === deletedThemeValue) {
-      await store.dispatch('updateMainColor', draft.mainColor)
-      await store.dispatch('updateSecColor', draft.secondaryColor)
-      await store.dispatch('updateBaseTheme', draft.basedOn)
-    }
     showToast({
       message: t('Settings.Theme Settings.Custom Theme.Theme Deleted'),
       icon: ['fas', 'trash']

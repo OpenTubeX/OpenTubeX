@@ -337,9 +337,18 @@ test.describe('custom theme editor', () => {
 
     await page.locator('.settingsCloseButton').click()
     await page.locator('.topNav .profileTrigger').click()
-    await expect(page.locator('.quickSettingsMenu .menuSection').filter({ hasText: 'Appearance' })
-      .getByRole('combobox', { name: /Main colou?r theme/i })).toBeEnabled()
-    await page.locator('.topNav .profileTrigger').click()
+    const quickSettingsMainColor = page.locator('.quickSettingsMenu .menuSection')
+      .filter({ hasText: 'Appearance' }).getByRole('combobox', { name: /Main colou?r theme/i })
+    await expect(quickSettingsMainColor).toBeEnabled()
+    await quickSettingsMainColor.click()
+    const quickSettingsMainColorList = page.locator(`#${await quickSettingsMainColor.getAttribute('aria-controls')}`)
+    await expect(quickSettingsMainColorList).toBeVisible()
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await expect(quickSettingsMainColor).toBeDisabled()
+    await expect(quickSettingsMainColorList).toHaveCount(0)
+    await page.emulateMedia({ colorScheme: 'light' })
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.quickSettingsMenu')).toBeHidden()
     await goTo(page, 'settings')
     await expect(page.locator('.settingsContent > [data-section="theme"]')).toBeVisible()
 
@@ -356,9 +365,12 @@ test.describe('custom theme editor', () => {
     await expect(page.locator('body')).toHaveClass(/custom/)
     await page.getByRole('button', { name: 'Edit custom theme' }).click()
     await setEditorColor('Background', '#abcdef')
+    await page.emulateMedia({ colorScheme: 'dark' })
     await page.getByRole('button', { name: 'Save and apply' }).click()
     await expect(page.locator('.settingsWindow:visible')
       .getByRole('combobox', { name: 'Base Theme' })).toHaveText('System default')
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#445566')
+    await page.emulateMedia({ colorScheme: 'light' })
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#abcdef')
 
     const activeBaseThemeSelect = page.locator('.settingsWindow:visible')
@@ -386,6 +398,10 @@ test.describe('custom theme editor', () => {
     await expect.poll(async () => (await readSavedThemes(app.userDataDir)).map(({ name }) => name))
       .toEqual(['Paper'])
     await expect(page.locator('body')).toHaveClass(/dark/)
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getBaseTheme
+    })).toBe('dark')
   })
 })
 
