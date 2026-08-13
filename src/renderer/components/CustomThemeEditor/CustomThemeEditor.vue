@@ -266,11 +266,12 @@ function closeEditor() {
   showDeletePrompt.value = false
   store.commit('setCustomThemeEditorOpen', false)
   cancelPendingColorPreviews()
+  const selectedTheme = resolveSelectedTheme(store.getters.getBaseTheme)
   applyThemeToDocument(
-    store.getters.getBaseTheme,
+    selectedTheme,
     store.getters.getMainColor,
     store.getters.getSecColor,
-    store.getters.getCustomThemes.find(({ id }) => id === customThemeIdFromValue(store.getters.getBaseTheme)) ?? null
+    store.getters.getCustomThemes.find(({ id }) => id === customThemeIdFromValue(selectedTheme)) ?? null
   )
   emit('close')
 }

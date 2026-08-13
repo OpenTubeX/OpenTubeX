@@ -348,6 +348,12 @@ test.describe('custom theme editor', () => {
     await page.locator(`#${await lightSystemTheme.getAttribute('aria-controls')}`)
       .getByRole('option', { name: 'Paper', exact: true }).click()
     await expect(page.getByRole('button', { name: 'Edit custom theme' })).toBeVisible()
+    await page.getByRole('button', { name: 'Edit custom theme' }).click()
+    await setEditorColor('Background', '#abcdef')
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#abcdef')
+    await page.locator('.settingsBackButton').click()
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#f1f1f1')
+    await expect(page.locator('body')).toHaveClass(/custom/)
 
     const activeBaseThemeSelect = page.locator('.settingsWindow:visible')
       .getByRole('combobox', { name: 'Base Theme' })
