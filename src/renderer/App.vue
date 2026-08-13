@@ -348,6 +348,7 @@ import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getTabAccentColor } from './constants/tabColors'
 import { getThumbnailListStyles } from './constants/thumbnailSize'
 import { getLastUsedVersion, setLastUsedVersion } from './helpers/lastUsedVersion'
+import { invalidateAllYtDlpPlaybackSources } from './helpers/player/ytDlpPlayback'
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
@@ -562,6 +563,7 @@ let removeTabsStateListener = null
 let removeReloadRequestListener = null
 let removeConfirmMultipleTabsActionListener = null
 let removeOpenUrlListener = null
+let removeYtDlpBinaryUpdatedListener = null
 const pendingSubscriptionAutoRefreshes = []
 const pendingSubscriptionAutoRefreshKeys = new Set()
 const cancelledSubscriptionAutoRefreshKeys = new Set()
@@ -771,6 +773,9 @@ onMounted(async () => {
   preloadUtilityRoutes()
 
   if (isElectron) {
+    removeYtDlpBinaryUpdatedListener = window.ftElectron.addYtDlpBinaryUpdatedListener(
+      invalidateAllYtDlpPlaybackSources
+    )
     removeTabsStateListener = await store.dispatch('initializeTabs')
     window.ftElectron.tabs.rendererReady()
   }
@@ -922,6 +927,7 @@ onBeforeUnmount(() => {
   removeReloadRequestListener?.()
   removeConfirmMultipleTabsActionListener?.()
   removeOpenUrlListener?.()
+  removeYtDlpBinaryUpdatedListener?.()
 })
 
 watch([activeTabId, selectionRevision], ([tabId, revision]) => {

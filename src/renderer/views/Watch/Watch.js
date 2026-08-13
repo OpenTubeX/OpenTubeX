@@ -72,7 +72,7 @@ import {
   MANIFEST_TYPE_DASH,
   MANIFEST_TYPE_HLS
 } from '../../helpers/player/utils'
-import { getYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
+import { getYtDlpPlaybackSource, invalidateYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
 import {
   buildSubscriptionShortsFeed,
@@ -518,6 +518,26 @@ export default defineComponent({
     },
     proxyVideos: function () {
       return this.$store.getters.getProxyVideos
+    },
+    ytDlpPlaybackCacheKey: function () {
+      const getters = this.$store.getters
+      const proxyConfiguration = getters.getUseProxy
+        ? [
+            getters.getProxyProtocol,
+            getters.getProxyHostname,
+            getters.getProxyPort,
+            getters.getProxyUsername,
+            getters.getProxyPassword
+          ]
+        : []
+
+      return JSON.stringify([
+        getters.getYtDlpSource,
+        getters.getYtDlpChannel,
+        getters.getYtDlpPath,
+        getters.getUseProxy,
+        ...proxyConfiguration
+      ])
     },
     defaultAutoplayInterruptionIntervalHours: function () {
       return this.$store.getters.getDefaultAutoplayInterruptionIntervalHours
@@ -3804,6 +3824,7 @@ export default defineComponent({
       // URL or extraction. Refresh those streams once before changing format or
       // restoring the cached built-in source (which may use SABR).
       if (this.activePlaybackEngine === 'yt-dlp') {
+        invalidateYtDlpPlaybackSource(this.videoId)
         const status = error.code === Code.BAD_HTTP_STATUS ? error.data[1] : error.code
         if (await this.reloadAfterStreamErrorOnce(`[PLAYER_ERROR: ${status}]`)) {
           return
@@ -4163,7 +4184,7 @@ export default defineComponent({
     extractYtDlpPlaybackSource: async function (loadGeneration, videoId) {
       let source
       try {
-        source = await getYtDlpPlaybackSource(videoId)
+        source = await getYtDlpPlaybackSource(videoId, this.ytDlpPlaybackCacheKey)
       } catch (error) {
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return false }
 

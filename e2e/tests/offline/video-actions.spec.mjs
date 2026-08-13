@@ -122,7 +122,7 @@ test.describe('video downloads', () => {
 
     const passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
     const extractorArgsIndex = passedArguments.indexOf('--extractor-args')
-    expect(passedArguments[extractorArgsIndex + 1]).toBe('youtube:player_client=android_vr,web_embedded,default')
+    expect(passedArguments[extractorArgsIndex + 1]).toBe('youtube:player_client=web_embedded,default,-android_vr')
     expect(info.formats[0].availableAt).toBe(123)
   })
 

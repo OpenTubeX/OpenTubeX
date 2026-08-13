@@ -132,7 +132,8 @@ const IpcChannels = {
   YT_DLP_GET_INFO: 'yt-dlp-get-info',
   YT_DLP_GET_PLAYBACK_INFO: 'yt-dlp-get-playback-info',
   YT_DLP_DOWNLOAD_BINARY: 'yt-dlp-download-binary',
-  YT_DLP_BINARY_DOWNLOAD_PROGRESS: 'yt-dlp-binary-download-progress'
+  YT_DLP_BINARY_DOWNLOAD_PROGRESS: 'yt-dlp-binary-download-progress',
+  YT_DLP_BINARY_UPDATED: 'yt-dlp-binary-updated'
 }
 
 const DBActions = {
