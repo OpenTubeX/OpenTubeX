@@ -982,6 +982,63 @@ test.describe('watch page', () => {
     await expect(prompt).toHaveCount(0)
   })
 
+  test('previews and submits edited SponsorBlock timestamps', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    let submittedBody = null
+
+    await page.route('**/api/skipSegments/**', route => route.fulfill({
+      body: JSON.stringify([]),
+      contentType: 'application/json'
+    }))
+    await page.route('**/api/skipSegments', async route => {
+      submittedBody = route.request().postDataJSON()
+      await route.fulfill({
+        body: JSON.stringify([{
+          UUID: 'submitted-edited-segment',
+          category: 'sponsor',
+          segment: [11.722, 12]
+        }]),
+        contentType: 'application/json'
+      })
+    })
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseSponsorBlock', true)
+      await store.dispatch('updateSponsorBlockEnableSubmission', true)
+    })
+
+    await openMockedVideo(page)
+
+    const video = page.locator('.ftVideoPlayer video')
+    await video.evaluate(element => {
+      element.pause()
+      element.currentTime = 11
+    })
+    await page.locator('.sponsorblock-start-button').click({ force: true })
+    await video.evaluate(element => { element.currentTime = 12 })
+    await page.locator('.sponsorblock-end-button').click({ force: true })
+
+    const submissionMenu = page.locator('.sponsorBlockSubmissionMenu')
+    await submissionMenu.locator('.sponsorBlockDraftTimeInput').first().fill('0:11.722')
+    await submissionMenu.getByRole('button', { name: 'Inspect' }).click()
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(11.722, 3)
+
+    await submissionMenu.getByRole('button', { name: 'Preview' }).click()
+    await video.evaluate(element => {
+      element.currentTime = 11.8
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+    await submissionMenu.locator('.sponsorBlockSubmissionButton').click()
+
+    await expect.poll(() => submittedBody).not.toBeNull()
+    expect(submittedBody.segments).toEqual([{
+      actionType: 'skip',
+      category: 'sponsor',
+      description: '',
+      segment: [11.722, 12]
+    }])
+  })
+
   test('displays and submits full-video SponsorBlock labels', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     const fullVideoSegment = {
