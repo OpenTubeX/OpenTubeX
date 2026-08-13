@@ -22,12 +22,14 @@ export const SYNC_ACTION_REASONS = new Map([
   ['removeVideos', 'playlists'],
   ['updateHistory', 'history'],
   ['updateChannelPlaybackSpeeds', 'playbackSpeeds'],
+  ['updateCustomThemes', 'settings'],
   ['updatePlaylist', 'playlists'],
   ['updateProfile', 'profilesOrSubscriptions'],
   ['updateWatchProgress', 'history'],
 ])
 
 export const SYNC_MUTATION_REASONS = new Map([
+  ['setCustomThemes', 'settings'],
   ['addProfileToList', 'profiles'],
   ['addChannelToProfiles', 'profilesOrSubscriptions'],
   ['removeChannelFromProfiles', 'profilesOrSubscriptions'],

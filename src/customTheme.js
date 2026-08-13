@@ -1,4 +1,5 @@
 export const CUSTOM_THEMES_DIRECTORY = 'themes'
+export const CUSTOM_THEMES_SYNC_KEY = 'customThemes'
 export const CUSTOM_THEME_VALUE_PREFIX = 'custom:'
 
 export const CUSTOM_THEME_COLORS = Object.freeze([

@@ -15,6 +15,7 @@ const IpcChannels = {
   CUSTOM_THEME_LOAD: 'custom-theme-load',
   CUSTOM_THEME_SAVE: 'custom-theme-save',
   CUSTOM_THEME_DELETE: 'custom-theme-delete',
+  CUSTOM_THEME_REPLACE: 'custom-theme-replace',
   CUSTOM_THEME_UPDATED: 'custom-theme-updated',
 
   SEARCH_INPUT_HANDLING_READY: 'search-input-handling-ready',

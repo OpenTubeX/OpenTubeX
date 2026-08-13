@@ -1,4 +1,5 @@
 import { MAIN_PROFILE_ID } from '../../constants'
+import { CUSTOM_THEMES_SYNC_KEY, normalizeCustomThemes } from '../../customTheme'
 import {
   SyncServerDataLossError,
   SyncServerCancelledError,
@@ -9,6 +10,7 @@ import {
 } from './sync-server-errors'
 import { getSyncableSettingKeys } from '../store/modules/settings'
 import { deepCopy } from './utils'
+import { replaceCustomThemes } from './customTheme'
 import { generateRandomUniqueId } from './playlists'
 import {
   getMergedProfileBackground,
@@ -1018,9 +1020,12 @@ export async function syncSettings(client, store, previous = {}) {
   const remote = Object.fromEntries(remoteEntries.map(entry => [entry.key, entry]))
   const merged = {}
   const now = Date.now()
+  const local = Object.fromEntries(getSyncableSettingKeys(store.state.settings).map(key => (
+    [key, deepCopy(store.state.settings[key])]
+  )))
+  local[CUSTOM_THEMES_SYNC_KEY] = normalizeCustomThemes(store.state.utils.customThemes)
 
-  for (const key of getSyncableSettingKeys(store.state.settings)) {
-    const value = deepCopy(store.state.settings[key])
+  for (const [key, value] of Object.entries(local)) {
     const old = previous[key]
     const remoteEntry = remote[key]
     const localChanged = old !== undefined && !metadataEquals(value, old.value)
@@ -1038,8 +1043,17 @@ export async function syncSettings(client, store, previous = {}) {
 
     merged[key] = entry
     if (!metadataEquals(value, entry.value)) {
-      await store.dispatch(settingUpdater(key), deepCopy(entry.value))
+      if (key === CUSTOM_THEMES_SYNC_KEY) {
+        const themes = await replaceCustomThemes(entry.value)
+        store.commit('setCustomThemes', themes)
+      } else {
+        await store.dispatch(settingUpdater(key), deepCopy(entry.value))
+      }
     }
+  }
+
+  for (const [key, entry] of Object.entries(remote)) {
+    if (!Object.prototype.hasOwnProperty.call(local, key)) merged[key] = entry
   }
 
   await client.putSettings(Object.values(merged))

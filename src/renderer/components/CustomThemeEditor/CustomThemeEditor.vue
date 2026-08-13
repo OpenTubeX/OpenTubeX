@@ -404,7 +404,7 @@ async function saveAndApply() {
   try {
     flushColorPreviews()
     const themes = await saveCustomTheme(draft)
-    store.commit('setCustomThemes', themes)
+    await store.dispatch('updateCustomThemes', themes)
     const savedTheme = themes.find(({ id }) => id === draft.id)
     setDraft(savedTheme)
     if (!keepSystemThemeOnSave) {
@@ -426,7 +426,7 @@ async function handleDeletePrompt(value) {
 
   try {
     const themes = await deleteCustomTheme(draft.id)
-    store.commit('setCustomThemes', themes)
+    await store.dispatch('updateCustomThemes', themes)
     showToast({
       message: t('Settings.Theme Settings.Custom Theme.Theme Deleted'),
       icon: ['fas', 'trash']

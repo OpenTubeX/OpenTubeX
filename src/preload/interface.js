@@ -73,6 +73,10 @@ export default {
     return ipcRenderer.invoke(IpcChannels.CUSTOM_THEME_DELETE, themeId)
   },
 
+  replaceCustomThemes: (themes) => {
+    return ipcRenderer.invoke(IpcChannels.CUSTOM_THEME_REPLACE, themes)
+  },
+
   handleCustomThemeUpdated: (handler) => {
     const listener = (_, theme) => handler(theme)
     ipcRenderer.on(IpcChannels.CUSTOM_THEME_UPDATED, listener)

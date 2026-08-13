@@ -111,7 +111,7 @@ async function runSync(context, { allowDataLoss = false } = {}) {
   const previous = parseSnapshot(settings.syncServerSnapshot)
   const next = { ...previous }
   const result = {}
-  const store = { state: rootState, dispatch }
+  const store = { state: rootState, commit, dispatch }
   const stages = [
     ...(settings.syncServerPrivacyMode === 'enhanced' ? ['download'] : []),
     ...(settings.syncServerSyncSubscriptions ? ['subscriptions'] : []),

@@ -28,6 +28,7 @@ import {
   customThemeValue,
   isCustomThemeValue,
   normalizeCustomTheme,
+  normalizeCustomThemes,
 } from '../customTheme'
 import * as baseHandlers from '../datastores/handlers/base'
 import { liveReminders } from '../datastores'
@@ -156,6 +157,42 @@ function runApp() {
   async function deleteCustomTheme(id) {
     await asyncFs.unlink(getCustomThemePath(id))
     return await loadCustomThemes()
+  }
+
+  async function replaceCustomThemes(themes) {
+    const normalizedThemes = normalizeCustomThemes(themes)
+    const themeIds = new Set()
+    for (const theme of normalizedThemes) {
+      if (themeIds.has(theme.id)) throw new TypeError(`Duplicate custom theme ID: ${theme.id}`)
+      themeIds.add(theme.id)
+    }
+
+    await asyncFs.mkdir(CUSTOM_THEMES_PATH, { recursive: true })
+    await Promise.all(normalizedThemes.map(writeCustomThemeFile))
+
+    const entries = await asyncFs.readdir(CUSTOM_THEMES_PATH, { withFileTypes: true })
+    await Promise.all(entries.map(async entry => {
+      if (!entry.isFile() || path.extname(entry.name) !== '.json') return
+      const id = path.basename(entry.name, '.json')
+      if (!themeIds.has(id)) await asyncFs.unlink(path.join(CUSTOM_THEMES_PATH, entry.name))
+    }))
+
+    return await loadCustomThemes()
+  }
+
+  async function publishCustomThemes(themes) {
+    const selectedTheme = (await baseHandlers.settings._findOne('baseTheme'))?.value
+    const selectedCustomTheme = isCustomThemeValue(selectedTheme)
+      ? themes.find(({ id }) => id === customThemeIdFromValue(selectedTheme)) ?? themes[0]
+      : null
+    if (selectedCustomTheme) {
+      nativeTheme.themeSource = selectedCustomTheme.isDark ? 'dark' : 'light'
+    }
+    BrowserWindow.getAllWindows().forEach((window) => {
+      if (isOpenTubeXUrl(window.webContents.getURL())) {
+        window.webContents.send(IpcChannels.CUSTOM_THEME_UPDATED, themes)
+      }
+    })
   }
 
   async function getSelectedCustomTheme(value) {
@@ -3762,19 +3799,16 @@ function runApp() {
     if (!isOpenTubeXUrl(event.senderFrame.url)) return
 
     const themes = await saveCustomTheme(theme)
-    const selectedTheme = (await baseHandlers.settings._findOne('baseTheme'))?.value
-    const selectedCustomTheme = isCustomThemeValue(selectedTheme)
-      ? themes.find(({ id }) => id === customThemeIdFromValue(selectedTheme)) ?? themes[0]
-      : null
-    if (selectedCustomTheme) {
-      nativeTheme.themeSource = selectedCustomTheme.isDark ? 'dark' : 'light'
-    }
-    BrowserWindow.getAllWindows().forEach((window) => {
-      if (isOpenTubeXUrl(window.webContents.getURL())) {
-        window.webContents.send(IpcChannels.CUSTOM_THEME_UPDATED, themes)
-      }
-    })
+    await publishCustomThemes(themes)
     return themes
+  })
+
+  ipcMain.handle(IpcChannels.CUSTOM_THEME_REPLACE, async (event, themes) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+
+    const normalizedThemes = await replaceCustomThemes(themes)
+    await publishCustomThemes(normalizedThemes)
+    return normalizedThemes
   })
 
   ipcMain.handle(IpcChannels.CUSTOM_THEME_DELETE, async (event, themeId) => {
@@ -3802,11 +3836,7 @@ function runApp() {
         updateThemeSource(deletedTheme.basedOn)
       }
     }
-    BrowserWindow.getAllWindows().forEach((window) => {
-      if (isOpenTubeXUrl(window.webContents.getURL())) {
-        window.webContents.send(IpcChannels.CUSTOM_THEME_UPDATED, themes)
-      }
-    })
+    await publishCustomThemes(themes)
     return themes
   })
 
