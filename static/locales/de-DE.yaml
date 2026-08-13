@@ -1194,11 +1194,13 @@ Change Format:
   Dash formats are not available for this video: DASH-Formate sind für dieses Video nicht verfügbar
   Legacy formats are not available for this video: Veraltete Formate sind für dieses Video nicht verfügbar
   Stream Source: Streamquelle
+  Stream Extraction Method: Stream-Extraktionsmethode
   Playback Engine: Wiedergabe-Engine
   Streaming Protocol: Streamingprotokoll
   Not Available For This Video: Für dieses Video nicht verfügbar
   Engines:
     Built-in: Integriert
+    yt-dlp: yt-dlp
   Protocols:
     Progressive: Progressiv
   Descriptions:

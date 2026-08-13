@@ -181,6 +181,38 @@ async function mockTranslatedEndscreen(app, page) {
 }
 
 test.describe('watch page', () => {
+  test('shows the selected extraction method while yt-dlp streams are pending', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate(async (view) => {
+      view.playbackEngineFallbackTarget = 'yt-dlp'
+      view.ytDlpStreamsPending = true
+      await view.$nextTick()
+    })
+
+    await page.getByRole('button', { name: 'Change Media Formats' }).click()
+    const prompt = page.getByRole('dialog', { name: 'Change Media Formats' })
+    const ytDlp = prompt.getByRole('button', { name: 'yt-dlp' })
+    const builtIn = prompt.getByRole('button', { name: 'Built-in' })
+
+    await expect(ytDlp).toHaveAttribute('aria-pressed', 'true')
+    await expect(builtIn).toHaveAttribute('aria-pressed', 'false')
+    await expect(prompt.locator('.engineBadge')).toHaveText('yt-dlp')
+    await expect(prompt.getByTitle('Streaming protocol')).toHaveCount(0)
+
+    await builtIn.click()
+    await expect(prompt).toHaveCount(0)
+    expect(await watchView.evaluate((view) => ({
+      pending: view.ytDlpStreamsPending,
+      target: view.playbackEngineFallbackTarget
+    }))).toEqual({
+      pending: false,
+      target: 'built-in'
+    })
+  })
+
   test('an IP-blocked HTML watch page makes the built-in engine try yt-dlp', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.route(/^https:\/\/www\.youtube\.com\/watch\?/, (route) => route.fulfill({

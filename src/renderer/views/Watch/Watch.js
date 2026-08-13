@@ -707,6 +707,13 @@ export default defineComponent({
     videoPlaybackEngine: function () {
       return process.env.IS_ELECTRON ? this.$store.getters.getVideoPlaybackEngine : 'built-in'
     },
+    playbackEngineSelection: function () {
+      if (this.ytDlpStreamsPending) {
+        return this.playbackEngineFallbackTarget ?? this.videoPlaybackEngine
+      }
+
+      return this.activePlaybackEngine
+    },
     /** @returns {'sabr' | 'dash' | 'hls' | 'none'} */
     playbackStreamType: function () {
       if (this.manifestSrc === null || this.activeFormat === 'legacy') {
@@ -3513,6 +3520,80 @@ export default defineComponent({
       }
     },
 
+    /**
+     * Changes the stream extraction method for the current video without
+     * changing the default selected in the settings.
+     * @param {'built-in' | 'yt-dlp'} playbackEngine
+     */
+    handlePlaybackEngineChange: async function (playbackEngine) {
+      if (
+        !process.env.IS_ELECTRON ||
+        this.isPostLiveDvr ||
+        playbackEngine === this.playbackEngineSelection
+      ) {
+        return
+      }
+
+      const loadGeneration = this.videoLoadGeneration
+      const videoId = this.videoId
+      const playbackPosition = this.getTimestamp()
+      if (playbackPosition > 0) {
+        this.oneTimeTimestamp = playbackPosition
+      }
+
+      this.playbackEngineFallbackAttemptedForCurrentVideo = false
+      this.playbackEngineFallbackTarget = playbackEngine
+
+      if (playbackEngine === this.activePlaybackEngine) {
+        this.ytDlpStreamsPending = false
+        return
+      }
+
+      this.ytDlpStreamsPending = true
+      await this.$nextTick()
+
+      if (
+        !this.isCurrentVideoLoad(loadGeneration, videoId) ||
+        this.playbackEngineFallbackTarget !== playbackEngine
+      ) {
+        return
+      }
+
+      if (playbackEngine === 'yt-dlp') {
+        try {
+          await this.extractYtDlpPlaybackSource(loadGeneration, videoId)
+        } finally {
+          if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
+            this.ytDlpStreamsPending = false
+          }
+        }
+        return
+      }
+
+      const source = this.builtInPlaybackSource
+      if (
+        source === null ||
+        (source.manifestSrc === null && source.legacyFormats.length === 0) ||
+        (
+          source.streamingDataExpiryDate !== null &&
+          new Date() > source.streamingDataExpiryDate
+        )
+      ) {
+        await this.reloadView({ preserveTitle: true })
+        return
+      }
+
+      this.manifestSrc = source.manifestSrc
+      this.manifestMimeType = source.manifestMimeType
+      this.sabrData = source.sabrData
+      this.legacyFormats = source.legacyFormats
+      this.streamingDataExpiryDate = source.streamingDataExpiryDate
+      this.activePlaybackEngine = 'built-in'
+      this.activePlaybackEngineVersion = null
+      this.alignActiveFormatWithAvailableSources()
+      this.ytDlpStreamsPending = false
+    },
+
     enableDashFormat: function () {
       if (this.activeFormat === 'dash') {
         return
@@ -4177,6 +4258,8 @@ export default defineComponent({
       }
 
       if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return false }
+
+      if (this.playbackEngineFallbackTarget === 'built-in') { return false }
 
       this.builtInPlaybackSource = {
         manifestSrc: this.manifestSrc,
