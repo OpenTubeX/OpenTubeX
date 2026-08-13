@@ -191,7 +191,7 @@
       />
     </div>
     <br>
-    <FtFlexBox>
+    <FtFlexBox class="themeSelectPair">
       <FtSelect
         :placeholder="$t('Settings.Theme Settings.Toast Position.Toast Position')"
         :value="toastPosition"
@@ -206,10 +206,35 @@
         :value="baseTheme"
         setting-key="baseTheme"
         :select-names="baseThemeNames"
-        :select-values="BASE_THEME_VALUES"
+        :select-values="baseThemeValues"
         :icon="['fas', 'palette']"
         @change="updateBaseTheme"
       />
+    </FtFlexBox>
+    <FtFlexBox
+      v-if="baseTheme === 'system'"
+      class="themeSelectPair"
+    >
+      <FtSelect
+        :placeholder="t('Settings.Theme Settings.Light Theme')"
+        :value="systemLightTheme"
+        setting-key="systemLightTheme"
+        :select-names="systemVariantThemeNames"
+        :select-values="systemVariantThemeValues"
+        :icon="['fas', 'sun']"
+        @change="store.dispatch('updateSystemLightTheme', $event)"
+      />
+      <FtSelect
+        :placeholder="t('Settings.Theme Settings.Dark Theme')"
+        :value="systemDarkTheme"
+        setting-key="systemDarkTheme"
+        :select-names="systemVariantThemeNames"
+        :select-values="systemVariantThemeValues"
+        :icon="['fas', 'moon']"
+        @change="store.dispatch('updateSystemDarkTheme', $event)"
+      />
+    </FtFlexBox>
+    <FtFlexBox class="themeSelectPair">
       <FtSelect
         :placeholder="$t('Settings.Theme Settings.Main Color Theme.Main Color Theme')"
         :value="mainColor"
@@ -233,6 +258,24 @@
         @change="updateSecColor"
       />
     </FtFlexBox>
+    <FtFlexBox class="customThemeActions">
+      <FtButton
+        :label="t('Settings.Theme Settings.Custom Theme.Create Custom Theme')"
+        :icon="['fas', 'palette']"
+        @click="openCustomThemeEditor(null)"
+      />
+      <FtButton
+        v-if="selectedCustomThemeId"
+        :label="t('Settings.Theme Settings.Custom Theme.Edit Custom Theme')"
+        :icon="['fas', 'pen']"
+        @click="openCustomThemeEditor(selectedCustomThemeId)"
+      />
+    </FtFlexBox>
+    <CustomThemeEditor
+      :open="showCustomThemeEditor"
+      :theme-id="editingCustomThemeId"
+      @close="showCustomThemeEditor = false"
+    />
     <br>
     <FtPrompt
       v-if="showRestartPrompt"
@@ -256,8 +299,10 @@ import FtSlider from './FtSlider/FtSlider.vue'
 import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
 import FtButton from './FtButton/FtButton.vue'
 import FtPrompt from './FtPrompt/FtPrompt.vue'
+import CustomThemeEditor from './CustomThemeEditor/CustomThemeEditor.vue'
 
 import store from '../store/index'
+import { customThemeIdFromValue, customThemeValue, isCustomThemeValue } from '../../customTheme'
 
 import { colors } from '../helpers/colors'
 import { useColorTranslations } from '../composables/colors'
@@ -289,7 +334,7 @@ const { t } = useI18n()
 // The second group are themes that don't have specific primary and secondary colors.
 // The third group are themes that do have specific primary and secondary colors available.
 
-const BASE_THEME_VALUES = [
+const BUILTIN_BASE_THEME_VALUES = [
   // First group
   'system',
   'light',
@@ -316,7 +361,7 @@ const BASE_THEME_VALUES = [
   'solarizedLight'
 ]
 
-const baseThemeNames = computed(() => [
+const builtInBaseThemeNames = computed(() => [
   // First group
   t('Settings.Theme Settings.Base Theme.System Default'),
   t('Settings.Theme Settings.Base Theme.Light'),
@@ -342,9 +387,22 @@ const baseThemeNames = computed(() => [
   t('Settings.Theme Settings.Base Theme.Solarized Dark'),
   t('Settings.Theme Settings.Base Theme.Solarized Light')
 ])
+const customThemes = computed(() => store.getters.getCustomThemes)
+const baseThemeValues = computed(() => [
+  ...BUILTIN_BASE_THEME_VALUES,
+  ...customThemes.value.map(({ id }) => customThemeValue(id))
+])
+const baseThemeNames = computed(() => [
+  ...builtInBaseThemeNames.value,
+  ...customThemes.value.map(({ name }) => name)
+])
+const systemVariantThemeValues = computed(() => baseThemeValues.value.filter(value => value !== 'system'))
+const systemVariantThemeNames = computed(() => baseThemeNames.value.slice(1))
 
 const COLOR_VALUES = colors.map(color => color.name)
 const colorNames = useColorTranslations()
+const showCustomThemeEditor = ref(false)
+const editingCustomThemeId = ref(null)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const barColor = computed(() => {
@@ -362,6 +420,14 @@ function updateBarColor(value) {
 const baseTheme = computed(() => {
   return store.getters.getBaseTheme
 })
+const systemLightTheme = computed(() => store.getters.getSystemLightTheme)
+const systemDarkTheme = computed(() => store.getters.getSystemDarkTheme)
+const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
+const systemUsesDarkTheme = ref(systemColorScheme.matches)
+
+function updateSystemColorScheme(event) {
+  systemUsesDarkTheme.value = event.matches
+}
 
 /**
  * @param {string} value
@@ -370,7 +436,19 @@ function updateBaseTheme(value) {
   store.dispatch('updateBaseTheme', value)
 }
 
-const areColorThemesEnabled = computed(() => baseTheme.value !== 'hotPink')
+const areColorThemesEnabled = computed(() => baseTheme.value !== 'hotPink' && !(
+  isCustomThemeValue(baseTheme.value) ||
+  (baseTheme.value === 'system' &&
+    (isCustomThemeValue(systemLightTheme.value) || isCustomThemeValue(systemDarkTheme.value)))
+))
+const selectedCustomThemeId = computed(() => customThemeIdFromValue(baseTheme.value === 'system'
+  ? (systemUsesDarkTheme.value ? systemDarkTheme.value : systemLightTheme.value)
+  : baseTheme.value))
+
+function openCustomThemeEditor(themeId) {
+  editingCustomThemeId.value = themeId
+  showCustomThemeEditor.value = true
+}
 
 /** @type {import('vue').ComputedRef<string>} */
 const mainColor = computed(() => {
@@ -606,8 +684,14 @@ function updateSystemReducedMotion(event) {
   systemReducedMotionEnabled.value = event.matches
 }
 
-onMounted(() => systemReducedMotion.addEventListener('change', updateSystemReducedMotion))
-onUnmounted(() => systemReducedMotion.removeEventListener('change', updateSystemReducedMotion))
+onMounted(() => {
+  systemReducedMotion.addEventListener('change', updateSystemReducedMotion)
+  systemColorScheme.addEventListener('change', updateSystemColorScheme)
+})
+onUnmounted(() => {
+  systemReducedMotion.removeEventListener('change', updateSystemReducedMotion)
+  systemColorScheme.removeEventListener('change', updateSystemColorScheme)
+})
 
 /**
  * @param {number} value
@@ -719,6 +803,22 @@ function handleSmoothScrolling(value) {
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--slider-gap);
+}
+
+.customThemeActions {
+  margin-block-start: 24px;
+}
+
+.themeSelectPair {
+  flex-flow: row nowrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.themeSelectPair :deep(.select) {
+  flex: 1 1 200px;
+  min-inline-size: 0;
+  max-inline-size: 200px;
 }
 
 .sliderGrid :deep(.pure-material-slider) {

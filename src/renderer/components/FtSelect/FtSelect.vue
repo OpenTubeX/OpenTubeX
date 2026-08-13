@@ -74,6 +74,7 @@
           v-if="tooltip === ''"
           :setting-key="settingKey"
           :is-changed="isChanged"
+          :disabled="disabled"
           @reset="emit('reset')"
         />
       </span>
@@ -89,6 +90,7 @@
       <FtSyncedSettingIndicator
         :setting-key="settingKey"
         :is-changed="isChanged"
+        :disabled="disabled"
         @reset="emit('reset')"
       />
     </span>
@@ -231,6 +233,10 @@ watch(dropdownShown, (shown) => {
   }
 })
 
+watch(() => props.disabled, (disabled) => {
+  if (disabled) closeDropdown()
+})
+
 onBeforeUnmount(() => {
   removeDropdownListeners()
   if (typeaheadTimer !== null) {
@@ -247,6 +253,8 @@ function toggleDropdown() {
 }
 
 function openDropdown() {
+  if (props.disabled) return
+
   activeIndex.value = Math.max(0, selectedIndex.value)
   dropdownTarget.value = selectRoot.value?.closest('.prompt') ?? document.fullscreenElement ?? document.body
   dropdownShown.value = true
@@ -459,6 +467,11 @@ function selectOffset(offset) {
 }
 
 function selectOption(index) {
+  if (props.disabled) {
+    closeDropdown()
+    return
+  }
+
   const selectedValue = props.selectValues[index]
   if (selectedValue !== props.value) {
     emit('change', selectedValue)

@@ -100,11 +100,19 @@
             class="settingsBreadcrumbSeparator"
             :icon="['fas', 'angle-right']"
           />
-          <span class="settingsBreadcrumbLabel">{{ subpageTitle }}</span>
+          <span class="settingsBreadcrumbLabel">
+            <FontAwesomeIcon
+              v-if="subpageIcon"
+              class="settingsBreadcrumbCategoryIcon settingsBreadcrumbSubpageIcon"
+              :icon="subpageIcon"
+              aria-hidden="true"
+            />
+            <span class="settingsBreadcrumbText">{{ subpageTitle }}</span>
+          </span>
         </template>
       </div>
       <label
-        v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen && !isAboutOpen"
+        v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen && !isAboutOpen && !subpageTitle"
         class="settingsSearch"
       >
         <FontAwesomeIcon :icon="['fas', 'magnifying-glass']" />
@@ -389,7 +397,9 @@ const settingsCloseButtonRef = useTemplateRef('settingsCloseButtonRef')
 const menuRef = useTemplateRef('menuRef')
 const subpageTargetId = `settings-subpage-${useId().replaceAll(':', '')}`
 const subpageTitle = ref('')
+const subpageIcon = ref(null)
 let closeSubpage = null
+let subpagePersistsOnDeactivate = false
 let settingsResizeObserver = null
 let settingsSectionResizeObserver = null
 let profileManagerResizeObserver = null
@@ -646,14 +656,18 @@ const unlocked = ref(store.getters.getSettingsPassword === '')
 
 provide(settingsSubpageKey, {
   targetId: subpageTargetId,
-  open(title, close) {
+  open(title, close, persistOnDeactivate = false, icon = null) {
     subpageTitle.value = title
+    subpageIcon.value = icon
     closeSubpage = close
+    subpagePersistsOnDeactivate = persistOnDeactivate
   },
   close(close) {
     if (closeSubpage === close) {
       subpageTitle.value = ''
+      subpageIcon.value = null
       closeSubpage = null
+      subpagePersistsOnDeactivate = false
     }
   }
 })
@@ -661,6 +675,9 @@ provide(settingsSubpageKey, {
 onMounted(handleMounted)
 onActivated(handleMounted)
 onDeactivated(() => {
+  if (!subpagePersistsOnDeactivate) {
+    closeSubpage?.()
+  }
   stopObserving()
   stopDragging()
   stopResizing()
@@ -831,6 +848,7 @@ function navigateToSection(sectionType) {
   const previousSection = activeSection.value
   closeSubpage?.()
   subpageTitle.value = ''
+  subpageIcon.value = null
   closeSubpage = null
   activeSection.value = sectionType
   if (isInDesktopView.value && previousSection !== null && previousSection !== sectionType) {
@@ -935,6 +953,7 @@ function getSearchTargetText(element) {
 function handleSettingsSearch() {
   closeSubpage?.()
   subpageTitle.value = ''
+  subpageIcon.value = null
   closeSubpage = null
   activeSection.value = settingsSearchQuery.value === '' && isInDesktopView.value
     ? getRememberedSection()
@@ -991,6 +1010,7 @@ function returnToSettingsMenu() {
   }
   closeSubpage?.()
   subpageTitle.value = ''
+  subpageIcon.value = null
   closeSubpage = null
   if (!isInDesktopView.value) {
     const previousSection = activeSection.value

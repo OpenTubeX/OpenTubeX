@@ -61,6 +61,24 @@ export default {
     return ipcRenderer.invoke(IpcChannels.GET_SYSTEM_LOCALE)
   },
 
+  loadCustomTheme: () => {
+    return ipcRenderer.invoke(IpcChannels.CUSTOM_THEME_LOAD)
+  },
+
+  saveCustomTheme: (theme) => {
+    return ipcRenderer.invoke(IpcChannels.CUSTOM_THEME_SAVE, theme)
+  },
+
+  deleteCustomTheme: (themeId) => {
+    return ipcRenderer.invoke(IpcChannels.CUSTOM_THEME_DELETE, themeId)
+  },
+
+  handleCustomThemeUpdated: (handler) => {
+    const listener = (_, theme) => handler(theme)
+    ipcRenderer.on(IpcChannels.CUSTOM_THEME_UPDATED, listener)
+    return () => ipcRenderer.removeListener(IpcChannels.CUSTOM_THEME_UPDATED, listener)
+  },
+
   /**
    * @returns {Promise<boolean>}
    */

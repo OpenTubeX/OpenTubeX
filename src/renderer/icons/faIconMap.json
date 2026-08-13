@@ -566,6 +566,13 @@
     "ri": "money-dollar-circle-line",
     "material": "payments-outline"
   },
+  "moon": {
+    "lucide": "moon",
+    "tabler": "moon",
+    "ph": "moon",
+    "ri": "moon-line",
+    "material": "dark-mode-outline"
+  },
   "network-wired": {
     "lucide": "network",
     "tabler": "topology-star",
@@ -796,6 +803,13 @@
     "ph": "skip-forward",
     "ri": "skip-forward-mini-line",
     "material": "skip-next-rounded"
+  },
+  "sun": {
+    "lucide": "sun",
+    "tabler": "sun",
+    "ph": "sun",
+    "ri": "sun-line",
+    "material": "light-mode-outline"
   },
   "sync": {
     "lucide": "refresh-cw",

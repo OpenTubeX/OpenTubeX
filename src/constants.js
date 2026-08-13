@@ -12,6 +12,10 @@ const IpcChannels = {
   APP_READY: 'app-ready',
   RELAUNCH_REQUEST: 'relaunch-request',
   SET_WINDOW_TITLE: 'set-window-title',
+  CUSTOM_THEME_LOAD: 'custom-theme-load',
+  CUSTOM_THEME_SAVE: 'custom-theme-save',
+  CUSTOM_THEME_DELETE: 'custom-theme-delete',
+  CUSTOM_THEME_UPDATED: 'custom-theme-updated',
 
   SEARCH_INPUT_HANDLING_READY: 'search-input-handling-ready',
   UPDATE_SEARCH_INPUT_TEXT: 'update-search-input-text',

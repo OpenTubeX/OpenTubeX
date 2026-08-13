@@ -6,6 +6,7 @@ body {
 
   --ui-roundness: 1;
   --scrollbar-thumb-width: 6px;
+  --divider-color: color-mix(in srgb, var(--tertiary-text-color) 45%, transparent);
 
   /*
     This works because CSS variables are just a find and replace and
@@ -95,6 +96,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
 /* Dark theme Youtube and Invidious logo styling (in FtShareButton) */
 .system[data-system-theme*='dark'],
 .dark,
+.black,
+.custom[data-custom-theme='dark'],
 .dracula,
 .catppuccinMocha,
 .hotPink,
@@ -206,8 +209,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --title-color: #eee;
   --bg-color: #000;
   --favorite-icon-color: #6eaa73;
-  --card-bg-color: #000;
-  --secondary-card-bg-color: rgb(0 0 0 / 75%);
+  --card-bg-color: #050505;
+  --secondary-card-bg-color: #1c1c1c;
   --scrollbar-color: #515151;
   --scrollbar-color-hover: #424242;
   --side-nav-color: #000;
@@ -216,6 +219,45 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --search-bar-color: #262626;
   --logo-icon: url('../../_icons/iconWhiteSmall.svg');
   --logo-text: url('../../_icons/textWhiteSmall.svg');
+}
+
+.custom[data-custom-theme='dark'] {
+  --logo-icon: url('../../_icons/iconWhiteSmall.svg');
+  --logo-text: url('../../_icons/textWhiteSmall.svg');
+}
+
+.custom[data-custom-theme='light'] {
+  --logo-icon: url('../../_icons/iconBlackSmall.svg');
+  --logo-text: url('../../_icons/textBlackSmall.svg');
+}
+
+/* Custom themes tint the header logo instead of displaying the fixed-color
+   theme assets. Keeping the assets as masks preserves their sharp edges. */
+.custom .topNav .logoIcon,
+.custom .topNav .logoText {
+  /* The component's fixed SVG has intentionally high scoped specificity. */
+  /* stylelint-disable-next-line declaration-no-important */
+  background-image: none !important;
+  background-repeat: no-repeat;
+  background-position: center;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+.custom .topNav .logoIcon {
+  background-color: var(--logo-primary-color);
+  mask-image: var(--logo-icon);
+  mask-size: 25px;
+}
+
+.custom .topNav .logoText {
+  background-color: var(--logo-secondary-color);
+  mask-image: var(--logo-text);
+  mask-size: 100px;
+}
+
+.custom .logo:hover :is(.logoIcon, .logoText) {
+  background-color: var(--logo-tertiary-color);
 }
 
 .nordic {
@@ -2183,8 +2225,8 @@ body .os-scrollbar {
   --os-handle-interactive-area-offset: 4px;
   --os-handle-border-radius: calc(var(--scrollbar-thumb-width) * var(--ui-roundness));
   --os-handle-bg: var(--scrollbar-color);
-  --os-handle-bg-hover: color-mix(in srgb, var(--scrollbar-color) 90%, #fff);
-  --os-handle-bg-active: color-mix(in srgb, var(--scrollbar-color) 80%, #fff);
+  --os-handle-bg-hover: var(--scrollbar-color-hover);
+  --os-handle-bg-active: color-mix(in srgb, var(--scrollbar-color-hover) 80%, #fff);
 }
 
 /* shared shimmer for skeleton loading placeholders */

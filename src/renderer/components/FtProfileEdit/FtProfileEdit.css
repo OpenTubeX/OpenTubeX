@@ -60,7 +60,7 @@ h3 {
 
 .customEmojiInput {
   background: var(--search-bar-color);
-  border: 1px solid var(--scrollbar-color);
+  border: 1px solid var(--divider-color);
   border-radius: calc(4px * var(--ui-roundness));
   color: var(--primary-text-color);
   font-size: 24px;
