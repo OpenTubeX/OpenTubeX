@@ -1023,7 +1023,20 @@ test.describe('watch page', () => {
     await submissionMenu.getByRole('button', { name: 'Inspect' }).click()
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(11.722, 3)
 
+    await video.evaluate(element => {
+      const currentTime = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime')
+      Object.defineProperty(element, 'currentTime', {
+        configurable: true,
+        get: currentTime.get,
+        set(value) {
+          window.__sponsorBlockPreviewSeekTime ??= value
+          currentTime.set.call(this, value)
+        }
+      })
+    })
     await submissionMenu.getByRole('button', { name: 'Preview' }).click()
+    await expect.poll(() => page.evaluate(() => window.__sponsorBlockPreviewSeekTime ?? null))
+      .toBeCloseTo(9.722, 3)
     await video.evaluate(element => {
       element.currentTime = 11.8
       element.dispatchEvent(new Event('timeupdate'))
