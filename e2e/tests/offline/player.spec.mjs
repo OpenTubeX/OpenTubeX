@@ -296,6 +296,21 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   expect(Math.abs(languageBounds.x - listBounds.x)).toBeLessThanOrEqual(1)
   expect(Math.abs(languageBounds.width - listBounds.width)).toBeLessThanOrEqual(1)
 
+  await header.click()
+  const captionsMenu = player.locator('.shaka-text-languages')
+  await captionsMenu.getByRole('button', { name: 'Off' }).click()
+  await overflowMenu.getByRole('button', { name: 'Captions' }).click()
+  await captionsMenu.getByRole('button', { name: 'Auto-translate' }).click()
+  await expect(selectedTranslation).toHaveAttribute('aria-selected', 'false')
+  await expect(selectedTranslation.locator('.shaka-chosen-item')).toHaveCount(0)
+
+  await header.click()
+  await captionsMenu.getByRole('button', { name: 'English (auto-generated)', exact: true }).click()
+  await overflowMenu.getByRole('button', { name: 'Captions' }).click()
+  await captionsMenu.getByRole('button', { name: 'Auto-translate' }).click()
+  await expect(selectedTranslation).toHaveAttribute('aria-selected', 'false')
+  await expect(selectedTranslation.locator('.shaka-chosen-item')).toHaveCount(0)
+
   const nextVideoId = 'aqz-KE-bpKQ'
   await openMockedVideo(page, nextVideoId)
   await player.hover()
