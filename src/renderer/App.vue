@@ -348,6 +348,7 @@ import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getTabAccentColor } from './constants/tabColors'
 import { getThumbnailListStyles } from './constants/thumbnailSize'
 import { getLastUsedVersion, setLastUsedVersion } from './helpers/lastUsedVersion'
+import { invalidateAllYtDlpPlaybackSources } from './helpers/player/ytDlpPlayback'
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
@@ -695,6 +696,10 @@ async function initializeManagedExternalSoftware() {
     const updatedBinaries = results
       .filter(({ result }) => result !== null && 'version' in result && result.updated)
       .map(({ binary }) => binary)
+
+    if (updatedBinaries.includes('yt-dlp')) {
+      invalidateAllYtDlpPlaybackSources()
+    }
 
     if (failures.length === 0 && updatedBinaries.length > 0) {
       toolProgressPercentage = 100
