@@ -1359,6 +1359,7 @@ test.describe('fullscreen playlist dock', () => {
     seed: {
       settings: {
         ...WATCH_PAGE_SEED,
+        enableSubtitlesByDefault: true,
         uiRoundness: 200,
       },
       playlists: [FULLSCREEN_PLAYLIST],
@@ -1403,6 +1404,44 @@ test.describe('fullscreen playlist dock', () => {
     await item.locator('.videoThumbnail').hover()
     await expect(item.locator('.trashIcon')).toHaveCount(1)
     await expect(item.locator('.quickBookmarkVideoIcon')).toHaveCount(0)
+  })
+
+  test('keeps positioned captions centered across playlist videos', async ({ app, page }) => {
+    test.setTimeout(120_000)
+    await mockPlayableWatchPage(app, page, { captionCueSettings: 'position:63% align:start' })
+    await openMockedVideo(page)
+    await openFullscreenPlaylistVideo(page)
+
+    const player = page.locator('.ftVideoPlayer')
+    const caption = player.locator('.shaka-text-container [translate="no"]')
+    const expectCaptionCentered = async () => {
+      await expect(caption).toBeVisible()
+      await expect.poll(async () => {
+        const [playerBounds, captionBounds] = await Promise.all([
+          player.boundingBox(),
+          caption.boundingBox(),
+        ])
+        if (!playerBounds || !captionBounds) return Number.POSITIVE_INFINITY
+
+        return Math.abs(
+          (playerBounds.x + playerBounds.width / 2) -
+          (captionBounds.x + captionBounds.width / 2)
+        )
+      }).toBeLessThanOrEqual(1)
+    }
+
+    // The source cue must not override the configured anchor in the inline player either.
+    await expectCaptionCentered()
+    await setPlayerFullscreen(page, true)
+    await expectCaptionCentered()
+
+    for (let index = 1; index <= 9; index++) {
+      await player.locator('.skip-next-button').click({ force: true })
+      await expect(page).toHaveURL(new RegExp(
+        `#\\/watch\\/playlist${String(index).padStart(3, '0')}\\?.*playlistId=${FULLSCREEN_PLAYLIST_ID}`
+      ))
+      await expectCaptionCentered()
+    }
   })
 
   test('clamps the watch playlist after removing most entries', async ({ app, page }) => {
