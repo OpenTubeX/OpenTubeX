@@ -300,6 +300,7 @@ export default defineComponent({
       ytDlpStreamsPending: false,
       legacyFormats: [],
       captions: [],
+      captionTranslations: [],
       currentTime: 0,
       showTranscript: false,
       showSidebarChapters: false,
@@ -1623,6 +1624,7 @@ export default defineComponent({
       this.ytDlpStreamsPending = false
       this.legacyFormats = []
       this.captions = []
+      this.captionTranslations = []
       this.currentTime = 0
       if (!preserveShortsPanels) {
         this.showTranscript = false
@@ -2424,6 +2426,10 @@ export default defineComponent({
                   mimeType: 'text/vtt'
                 }
               }) ?? []
+
+              this.captionTranslations = (result.captions.translation_languages ?? []).map(language =>
+                this.getTranslatedCaption(result.captions, language)
+              ).filter(Boolean)
 
               if (captionTracks.length > 0) {
                 const languagesSet = new Set([this.preferredCaptionLocale, this.preferredCaptionLocale.split('-')[0]])
@@ -4310,19 +4316,32 @@ export default defineComponent({
      */
     getTranslatedLocaleCaption: function (captions, userLanguages) {
       // check if we can translate to the users language
-      const translationLanguage = captions.translation_languages.find(language => userLanguages.has(language.language_code))
+      let translationLanguage = captions.translation_languages.find(language => userLanguages.has(language.language_code))
 
-      let translationName, translationCode
       // Otherwise use the preferred caption locale and hope that YouTube can handle it.
       if (!translationLanguage) {
-        translationCode = userLanguages.values().next().value
-        translationName = this.$store.getters.getPreferredCaptionLocale
-          ? new Intl.DisplayNames([this.currentLocale, 'en'], { type: 'language' }).of(translationCode) ?? translationCode
-          : this.t('Locale Name')
-      } else {
-        translationName = translationLanguage.language_name.text
-        translationCode = translationLanguage.language_code
+        const languageCode = userLanguages.values().next().value
+        translationLanguage = {
+          language_code: languageCode,
+          language_name: {
+            text: this.$store.getters.getPreferredCaptionLocale
+              ? new Intl.DisplayNames([this.currentLocale, 'en'], { type: 'language' }).of(languageCode) ?? languageCode
+              : this.t('Locale Name')
+          }
+        }
       }
+
+      return this.getTranslatedCaption(captions, translationLanguage)
+    },
+
+    /**
+     * @param {import('youtubei.js').YTNodes.PlayerCaptionsTracklist} captions
+     * @param {{ language_code: string, language_name: { text: string } }} translationLanguage
+     * @returns {null|{ url: string, label: string, language: string, mimeType: string, isAutotranslated: boolean }}
+     */
+    getTranslatedCaption: function (captions, translationLanguage) {
+      const translationName = translationLanguage.language_name.text
+      const translationCode = translationLanguage.language_code
 
       let trackToTranslate
 
@@ -4336,6 +4355,10 @@ export default defineComponent({
       } else {
         // if there is no auto-generated track choose the first translatable track
         trackToTranslate = captions.caption_tracks.find(track => track.is_translatable) ?? captions.caption_tracks[0]
+      }
+
+      if (!trackToTranslate) {
+        return null
       }
 
       const url = new URL(trackToTranslate.base_url)
@@ -4352,6 +4375,7 @@ export default defineComponent({
         id: `${trackToTranslate.vss_id}.${translationCode}`,
         url: url.toString(),
         label,
+        translationName,
         language: translationCode,
         mimeType: 'text/srt',
         isAutotranslated: true

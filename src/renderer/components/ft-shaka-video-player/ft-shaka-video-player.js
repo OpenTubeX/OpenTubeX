@@ -234,6 +234,10 @@ export default defineComponent({
       type: Array,
       default: () => ([])
     },
+    captionTranslations: {
+      type: Array,
+      default: () => ([])
+    },
     chapters: {
       type: Array,
       default: () => ([])
@@ -4188,7 +4192,10 @@ export default defineComponent({
       // keeps its own layout.
       const submenus = menu.querySelectorAll(':scope > .shaka-sub-menu:not(.ft-caption-appearance-menu)')
       for (const submenu of submenus) {
-        submenu.classList.toggle('ft-menu-grid', usePlayerMenuGrid.value)
+        const isTranslationMenu = submenu.classList.contains('ft-caption-translation-menu')
+        submenu.classList.toggle('ft-menu-grid', usePlayerMenuGrid.value && !isTranslationMenu)
+        submenu.querySelector('.ft-caption-translation-options')
+          ?.classList.toggle('ft-menu-grid', usePlayerMenuGrid.value)
       }
 
       addOverlayScrollbars(menu)
@@ -5879,6 +5886,8 @@ export default defineComponent({
             () => captionSettings.value,
             updateCaptionAppearance,
             resetCaptionAppearance,
+            () => props.captionTranslations,
+            selectCaptionTranslation,
             rootElement,
             controls
           )
@@ -5887,6 +5896,33 @@ export default defineComponent({
 
       registerOwnElement(shakaControls, 'captions', new CaptionSelectionFactory())
       registerOwnElement(shakaOverflowMenu, 'captions', new CaptionSelectionFactory())
+    }
+
+    /**
+     * @param {{ url: string, label: string, language: string, mimeType: string }} caption
+     * @returns {Promise<boolean>}
+     */
+    async function selectCaptionTranslation(caption) {
+      let track = findMatchingTextTrack(player.getTextTracks(), caption)
+
+      if (!track) {
+        try {
+          track = await player.addTextTrackAsync(
+            caption.url,
+            caption.language,
+            'captions',
+            caption.mimeType,
+            undefined,
+            caption.label
+          )
+        } catch (error) {
+          handleError(error, 'addTextTrackAsync', caption)
+          return false
+        }
+      }
+
+      player.selectTextTrack(track)
+      return true
     }
 
     function toggleCaptions() {

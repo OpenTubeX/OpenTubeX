@@ -95,6 +95,7 @@
           :legacy-formats="legacyFormats"
           :start-time="startTimeSeconds"
           :captions="captions"
+          :caption-translations="captionTranslations"
           :storyboard-src="videoStoryboardSrc"
           :annotations="videoAnnotations"
           :hide-annotations="hideEndScreenAnnotations"

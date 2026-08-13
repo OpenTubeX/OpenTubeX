@@ -4,6 +4,7 @@
 - Always run Electron/Playwright E2E tests under a private X server using `xvfb-run -a -s "-screen 0 1920x1080x24"`.
 - Before running modified Electron/Playwright E2E tests, run `pnpm run test:e2e:pack` so `dist-e2e` includes the current CSS and rendering or measurement tests do not run against an unstyled app.
 - Custom Shaka overflow-menu controls must hide while any submenu is open; follow the existing `submenuopen` / `submenuclose` visibility pattern using `isSubMenuOpened` and `shaka-hidden`.
+- Headers in scrollable menus and panels must stay outside the content's scroll viewport so neither content nor its scrollbar can pass behind the header; prefer a fixed header plus a separate inner scroller over covering content with a sticky header. When switching between menu views, explicitly restore the actual scroll viewport to the intended position; use `restoreOverlayScrollTop` for OverlayScrollbars-managed elements instead of relying on focus or DOM replacement to reset it.
 - If the request somehow involves other repos (e.g. Website, APT, RPM, Flatpak, AUR, ...) you can find them in the parent folder.
 - Before considering work done here, you need to reproduce it with the test suite (for bugfixes), and verify that your fix/feature works (unless otherwise told to do so or when it makes no sense to do a test for the change).
 - After creating a PR babysit it. Wait for reviews of CodeRabbit/Greptile. When they come in resolve the reviews.

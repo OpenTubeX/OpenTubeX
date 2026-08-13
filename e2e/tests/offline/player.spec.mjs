@@ -228,6 +228,66 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   await watchComponent.dispose()
 })
 
+test('auto-translates captions into an arbitrary language', async ({ app, page, attachScreenshot }) => {
+  await mockPlayableWatchPage(app, page, { captionTranslations: true })
+  await openMockedVideo(page)
+
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await player.hover()
+  const moreOptions = player.getByRole('button', { name: 'More settings' })
+  await moreOptions.click()
+
+  const overflowMenu = player.locator('.shaka-overflow-menu')
+  await overflowMenu.getByRole('button', { name: 'Captions' }).click()
+  await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
+
+  const translationMenu = player.locator('.ft-caption-translation-menu')
+  const header = translationMenu.locator(':scope > .shaka-back-to-overflow-button')
+  const translations = translationMenu.locator('.ft-caption-translation-options')
+  await expect(translationMenu).toBeVisible()
+  await expect(translations).toHaveClass(/ft-menu-grid/)
+  await expect(translations.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
+  await expect(overflowMenu.locator(':scope > .os-scrollbar-vertical')).toHaveCSS('display', 'none')
+  expect(await translations.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
+
+  const [headerBounds, translationsBounds, scrollbarBounds] = await Promise.all([
+    header.boundingBox(),
+    translations.boundingBox(),
+    translations.locator(':scope > .os-scrollbar-vertical').boundingBox(),
+  ])
+  expect(translationsBounds.y).toBeGreaterThanOrEqual(headerBounds.y + headerBounds.height - 1)
+  expect(scrollbarBounds.y).toBeGreaterThanOrEqual(translationsBounds.y - 1)
+
+  await translations.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => translations.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await attachScreenshot('auto-translate language grid')
+
+  await translations.getByRole('button', { name: 'German' }).click()
+  await expect(player.locator('.shaka-text-languages')).toBeVisible()
+  expect(await overflowMenu.evaluate(element => element.scrollTop)).toBe(0)
+  await expect(player.locator('.shaka-text-languages')).toContainText('German')
+
+  const watchComponent = await page.evaluateHandle(findWatchComponent)
+  await watchComponent.evaluate(async (component) => {
+    await component.proxy.$store.dispatch('updateUsePlayerMenuGrid', false)
+    await component.proxy.$nextTick()
+  })
+  await page.keyboard.press('Escape')
+  await player.hover()
+  await moreOptions.click()
+  await overflowMenu.getByRole('button', { name: 'Captions' }).click()
+  await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
+  await expect(translations).not.toHaveClass(/ft-menu-grid/)
+
+  const [listBounds, languageBounds] = await Promise.all([
+    translations.boundingBox(),
+    translations.getByRole('button', { name: 'Afrikaans' }).boundingBox(),
+  ])
+  expect(Math.abs(languageBounds.x - listBounds.x)).toBeLessThanOrEqual(1)
+  expect(Math.abs(languageBounds.width - listBounds.width)).toBeLessThanOrEqual(1)
+  await watchComponent.dispose()
+})
+
 test('video zoom can be disabled', async ({ app, page }) => {
   const video = await openDemoVideo({ app, page })
 

@@ -1513,6 +1513,7 @@ Video:
       Options: Options
       Title: Caption Appearance
       Sample: Captions look like this
+    Auto-translate: Auto-translate
     Sleep Timer:
       Sleep Timer: Sleep timer
       Off: 'Off'
