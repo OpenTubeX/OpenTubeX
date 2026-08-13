@@ -115,6 +115,20 @@ test.describe('default appearance', () => {
 test.describe('custom theme editor', () => {
   test.use({ seed: { settings: { baseTheme: 'dark' } } })
 
+  test('applies a new theme created from System Default', async ({ page }) => {
+    await goToSettingsSection(page, 'theme')
+    const baseTheme = page.getByRole('combobox', { name: 'Base Theme' })
+    await baseTheme.click()
+    await page.locator(`#${await baseTheme.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: /System default/i }).click()
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await page.getByRole('button', { name: 'Save and apply' }).click()
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getBaseTheme
+    })).toMatch(/^custom:/)
+  })
+
   test('copies built-in themes, previews efficiently, persists, and survives closing settings', async ({ app, page }) => {
     await goToSettingsSection(page, 'theme')
     await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()

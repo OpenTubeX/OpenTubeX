@@ -199,7 +199,7 @@ watch(() => props.open, async (open) => {
   const loadId = ++editorLoadId
   store.commit('setCustomThemeEditorOpen', open)
   if (!open) return
-  keepSystemThemeOnSave = store.getters.getBaseTheme === 'system' &&
+  keepSystemThemeOnSave = props.themeId !== null && store.getters.getBaseTheme === 'system' &&
     customThemeIdFromValue(resolveSelectedTheme('system')) === props.themeId
   try {
     const themes = await loadCustomThemes()
