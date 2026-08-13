@@ -982,6 +982,129 @@ test.describe('watch page', () => {
     await expect(prompt).toHaveCount(0)
   })
 
+  test('previews and submits edited SponsorBlock timestamps', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    let submittedBody = null
+
+    await page.route('**/api/skipSegments/**', route => route.fulfill({
+      body: JSON.stringify([]),
+      contentType: 'application/json'
+    }))
+    await page.route('**/api/skipSegments', async route => {
+      submittedBody = route.request().postDataJSON()
+      await route.fulfill({
+        body: JSON.stringify([{
+          UUID: 'submitted-edited-segment',
+          category: 'sponsor',
+          segment: [11.722, 12]
+        }]),
+        contentType: 'application/json'
+      })
+    })
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseSponsorBlock', true)
+      await store.dispatch('updateSponsorBlockEnableSubmission', true)
+    })
+
+    await openMockedVideo(page)
+
+    const video = page.locator('.ftVideoPlayer video')
+    await video.evaluate(element => {
+      element.pause()
+      element.currentTime = 11
+    })
+    await page.locator('.sponsorblock-start-button').click({ force: true })
+    await video.evaluate(element => { element.currentTime = 12 })
+    await page.locator('.sponsorblock-end-button').click({ force: true })
+
+    const submissionMenu = page.locator('.sponsorBlockSubmissionMenu')
+    await submissionMenu.locator('.sponsorBlockDraftTimeInput').first().fill('0:11.722')
+    await submissionMenu.getByRole('button', { name: 'Inspect' }).click()
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(11.722, 3)
+
+    await video.evaluate(element => {
+      const currentTime = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime')
+      Object.defineProperty(element, 'currentTime', {
+        configurable: true,
+        get: currentTime.get,
+        set(value) {
+          window.__sponsorBlockPreviewSeekTime ??= value
+          currentTime.set.call(this, value)
+        }
+      })
+    })
+    await submissionMenu.getByRole('button', { name: 'Preview' }).click()
+    await expect.poll(() => page.evaluate(() => window.__sponsorBlockPreviewSeekTime ?? null))
+      .toBeCloseTo(9.722, 3)
+    await video.evaluate(element => {
+      element.currentTime = 11.8
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+    await submissionMenu.locator('.sponsorBlockSubmissionButton').click()
+
+    await expect.poll(() => submittedBody).not.toBeNull()
+    expect(submittedBody.segments).toEqual([{
+      actionType: 'skip',
+      category: 'sponsor',
+      description: '',
+      segment: [11.722, 12]
+    }])
+  })
+
+  test('skips SponsorBlock segments at their boundary without timeupdate events', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route('**/api/skipSegments/**', route => route.fulfill({
+      body: JSON.stringify([{
+        videoID: 'jNQXAC9IVRw',
+        segments: [{
+          UUID: 'precise-skip-segment',
+          actionType: 'skip',
+          category: 'sponsor',
+          description: '',
+          locked: 0,
+          segment: [15, 20],
+          videoDuration: 30,
+          votes: 1
+        }]
+      }]),
+      contentType: 'application/json'
+    }))
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseSponsorBlock', true)
+    })
+
+    await openMockedVideo(page)
+    await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
+
+    const video = page.locator('.ftVideoPlayer video')
+    await video.evaluate(element => {
+      element.pause()
+      element.currentTime = 14.57
+      element.dispatchEvent(new Event('timeupdate'))
+
+      const currentTime = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime')
+      Object.defineProperty(element, 'currentTime', {
+        configurable: true,
+        get: currentTime.get,
+        set(value) {
+          if (value === 20) {
+            window.__sponsorBlockSkipStartedAt = currentTime.get.call(this)
+          }
+          currentTime.set.call(this, value)
+        }
+      })
+      element.addEventListener('timeupdate', event => event.stopImmediatePropagation(), { capture: true })
+      return element.play()
+    })
+
+    await expect.poll(() => page.evaluate(() => window.__sponsorBlockSkipStartedAt ?? null)).not.toBeNull()
+    const skipStartedAt = await page.evaluate(() => window.__sponsorBlockSkipStartedAt)
+    expect(skipStartedAt).toBeGreaterThanOrEqual(15)
+    expect(skipStartedAt).toBeLessThan(15.05)
+  })
+
   test('displays and submits full-video SponsorBlock labels', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     const fullVideoSegment = {
