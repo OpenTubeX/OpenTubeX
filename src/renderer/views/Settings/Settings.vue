@@ -101,7 +101,7 @@
             :icon="['fas', 'angle-right']"
           />
           <span class="settingsBreadcrumbLabel">
-            <FontAwesomeIcon
+            <FtIcon
               v-if="subpageIcon"
               class="settingsBreadcrumbCategoryIcon settingsBreadcrumbSubpageIcon"
               :icon="subpageIcon"
