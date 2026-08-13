@@ -375,7 +375,9 @@ const actions = {
   },
 
   toggleSettingsWindow ({ state, commit }) {
-    const open = !state.settingsWindowOpen
+    const open = !state.settingsWindowOpen ||
+      state.settingsWindowView !== null ||
+      state.isKeyboardShortcutPromptShown
     commit('setIsKeyboardShortcutPromptShown', false)
     commit('setSettingsWindowView', null)
     commit('setSettingsWindowOpen', open)
