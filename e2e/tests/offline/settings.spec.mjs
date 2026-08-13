@@ -2535,6 +2535,42 @@ test.describe('synced setting indicators', () => {
     expect(neighbourAfter.x).toBeCloseTo(neighbourBefore.x, 0)
   })
 
+  test('aligns non-resettable controls while changed settings are highlighted', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
+
+    const playerSection = await goToSettingsSection(page, 'player')
+    const proxyToggle = playerSection.locator('.switch-ctn')
+      .filter({ hasText: 'Proxy Videos Through Invidious' })
+    const subtitlesToggle = playerSection.locator('.switch-ctn')
+      .filter({ hasText: 'Enable Subtitles by Default' })
+    await expect(proxyToggle).toHaveCSS('border-left-width', '3px')
+
+    const [proxyBox, subtitlesBox] = await Promise.all([
+      proxyToggle.boundingBox(),
+      subtitlesToggle.boundingBox()
+    ])
+    expect(proxyBox).not.toBeNull()
+    expect(subtitlesBox).not.toBeNull()
+    expect(proxyBox.x).toBeCloseTo(subtitlesBox.x, 0)
+
+    const themeSection = await goToSettingsSection(page, 'theme')
+    const smoothScrollingToggle = themeSection.locator('.switch-ctn')
+      .filter({ hasText: 'Disable Smooth Scrolling' })
+    await expect(smoothScrollingToggle).toHaveCSS('border-left-width', '3px')
+
+    const playerSectionAgain = await goToSettingsSection(page, 'player')
+    const viewingModeSelect = playerSectionAgain.locator('.select')
+      .filter({ hasText: 'Default Viewing Mode' })
+    const [selectBox, selectLabelBox] = await Promise.all([
+      viewingModeSelect.locator('.select-text').boundingBox(),
+      viewingModeSelect.locator('.select-label').boundingBox()
+    ])
+    expect(selectBox).not.toBeNull()
+    expect(selectLabelBox).not.toBeNull()
+    expect(selectLabelBox.x).toBeCloseTo(selectBox.x, 0)
+  })
+
   test('keeps a wrapped slider label beside its icons and above its track', async ({ page }) => {
     await goTo(page, 'settings')
     await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()

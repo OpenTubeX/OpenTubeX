@@ -23,7 +23,6 @@
           :label="$t('Settings.Theme Settings.Disable Smooth Scrolling')"
           compact
           :default-value="disableSmoothScrollingToggleValue"
-          reserve-changed-indicator-space
           @change="handleRestartPrompt"
         />
         <FtToggleSwitch

@@ -109,6 +109,19 @@ test.describe('quick settings menu', () => {
     await expect(settingsWindow).toBeVisible()
     await expect(settingsWindow.locator('.settingsMenu')).toBeVisible()
   })
+
+  test('keeps About visible while its close animation plays', async ({ page }) => {
+    await page.locator('.profileTrigger').click()
+    await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'About' }).click()
+
+    const aboutWindow = page.getByRole('dialog', { name: 'About' })
+    await aboutWindow.locator('.settingsCloseButton').click()
+
+    await expect(aboutWindow).toHaveClass(/settings-window-leave-active/)
+    await expect(aboutWindow.locator('.settingsBreadcrumb')).toContainText('About')
+    await expect(aboutWindow.locator('.settingsMenu')).toHaveCount(0)
+    await expect(aboutWindow).toBeHidden()
+  })
 })
 
 test.describe('quick distraction settings', () => {

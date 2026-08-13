@@ -245,7 +245,10 @@
             ref="settingsContentRef"
             v-overlay-scrollbars
             class="settingsContent"
-            :class="settingsContentTransitionClass"
+            :class="[
+              settingsContentTransitionClass,
+              { highlightChangedSettings }
+            ]"
             tabindex="-1"
             @scroll.passive="clampSettingsContentScroll"
           >

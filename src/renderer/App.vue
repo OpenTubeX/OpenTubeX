@@ -69,7 +69,10 @@
         </Transition>
       </RouterView>
     </FtFlexBox>
-    <Transition name="settings-window">
+    <Transition
+      name="settings-window"
+      @after-leave="resetClosedSettingsWindowView"
+    >
       <KeepAlive>
         <SettingsWindow v-if="settingsWindowOpen" />
       </KeepAlive>
@@ -463,6 +466,12 @@ const showSearchFilters = computed(() => store.getters.getShowSearchFilters)
 /** @type {import('vue').ComputedRef<boolean>} */
 const isKeyboardShortcutPromptShown = computed(() => store.getters.getIsKeyboardShortcutPromptShown)
 const settingsWindowOpen = computed(() => store.getters.getSettingsWindowOpen)
+
+function resetClosedSettingsWindowView() {
+  if (!settingsWindowOpen.value) {
+    store.dispatch('showSettingsWindowRoot')
+  }
+}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showAddToPlaylistPrompt = computed(() => store.getters.getShowAddToPlaylistPrompt)
