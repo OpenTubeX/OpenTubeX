@@ -181,6 +181,52 @@ async function mockTranslatedEndscreen(app, page) {
 }
 
 test.describe('watch page', () => {
+  test('an IP-blocked HTML watch page makes the built-in engine try yt-dlp', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route(/^https:\/\/www\.youtube\.com\/watch\?/, (route) => route.fulfill({
+      status: 429,
+      contentType: 'text/html',
+      body: '<title>Sorry...</title>'
+    }))
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.__ytDlpIpBlockFallbackCalls = 0
+      ipcMain.removeHandler('yt-dlp-get-playback-info')
+      ipcMain.handle('yt-dlp-get-playback-info', () => {
+        globalThis.__ytDlpIpBlockFallbackCalls++
+        return { error: 'ENOENT' }
+      })
+    })
+
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.__ytDlpIpBlockFallbackCalls)).toBe(1)
+    const watchView = await watchViewHandle(page)
+    expect(await watchView.evaluate((view) => ({
+      ipBlockDetected: view.ipBlockDetectedInCurrentChain,
+      fallbackAttempted: view.playbackEngineFallbackAttemptedForCurrentVideo,
+      fallbackTarget: view.playbackEngineFallbackTarget
+    }))).toEqual({
+      ipBlockDetected: true,
+      fallbackAttempted: true,
+      fallbackTarget: null
+    })
+
+    expect(await watchView.evaluate(async (view) => {
+      let recoveryCalls = 0
+      view.ipBlockDetectedInCurrentChain = true
+      view.playbackEngineFallbackTarget = 'yt-dlp'
+      view.extractYtDlpPlaybackSource = async () => false
+      view.runIpBlockRecoveryScriptAndReload = async () => {
+        recoveryCalls++
+        return true
+      }
+      await view.applyYtDlpPlaybackSource(view.videoLoadGeneration, view.videoId)
+      return recoveryCalls
+    })).toBe(1)
+  })
+
   test('falls back to yt-dlp when the built-in live source has no manifest', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')

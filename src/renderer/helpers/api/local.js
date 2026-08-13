@@ -406,7 +406,7 @@ export async function getLocalSearchContinuation(continuationData) {
  */
 async function getWatchHTMLWatchPage(videoId, fetchFunc) {
   // This returns session/tracking cookies but they get removed in onHeadersReceived in the main process before they are saved by Electron
-  const htmlResponse = await fetch(`https://www.youtube.com/watch?v=${videoId}&bpctr=9999999999&has_verified=1`,
+  const htmlResponse = await fetchFunc(`https://www.youtube.com/watch?v=${videoId}&bpctr=9999999999&has_verified=1`,
     {
       headers: {
         // We need to be able to parse the localised strings in the /next response data (e.g. view counts and published dates)
@@ -415,12 +415,22 @@ async function getWatchHTMLWatchPage(videoId, fetchFunc) {
     }
   )
 
+  const isIpBlockResponse = htmlResponse.status === 429 || htmlResponse.url.startsWith('https://www.google.com/sorry/')
+
+  if (!htmlResponse.ok) {
+    const error = new Error(`YouTube returned HTTP ${htmlResponse.status} for the HTML watch page`)
+    error.isIpBlock = isIpBlockResponse
+    throw error
+  }
+
   const htmlPage = await htmlResponse.text()
 
   const ytConfigStr = htmlPage.match(/ytcfg\.set\(({.+?})\);/s)?.[1]
   if (!ytConfigStr) {
     // required for botguard
-    throw new Error('Could not find ytcfg in the HTML page')
+    const error = new Error('Could not find ytcfg in the HTML page')
+    error.isIpBlock = isIpBlockResponse
+    throw error
   }
 
   const ytConfig = JSON.parse(ytConfigStr)
@@ -542,13 +552,15 @@ function buildSessionFromYtConfig(ytConfig, fetchFunc) {
  *   },
  *   adEndTimeUnixMs: number,
  *   paidPromotionDurationMs: number | null,
- *   isPremiere: boolean | undefined
+ *   isPremiere: boolean | undefined,
+ *   watchPageIpBlocked: boolean
  * }>}
  */
 export async function getLocalVideoInfo(id) {
   let responseTime
   let paidPromotionDurationMs = null
   let isPremiere
+  let watchPageIpBlocked = false
 
   const fetchFunc = async (input, init) => {
     if (!(input.url?.startsWith('https://www.youtube.com/youtubei/v1/player'))) {
@@ -573,15 +585,40 @@ export async function getLocalVideoInfo(id) {
     })
   }
 
-  const htmlExtracts = await getWatchHTMLWatchPage(id, fetchFunc)
-  responseTime = Date.now()
+  let htmlExtracts
+  let player
+
+  try {
+    htmlExtracts = await getWatchHTMLWatchPage(id, fetchFunc)
+    responseTime = Date.now()
+  } catch (error) {
+    if (!error.isIpBlock) {
+      throw error
+    }
+
+    watchPageIpBlocked = true
+
+    try {
+      const innertube = await createInnertube({
+        withPlayer: true,
+        generateSessionLocally: false,
+        fetchFunc,
+      })
+
+      htmlExtracts = { session: innertube.session }
+      player = innertube.session.player
+    } catch (fallbackError) {
+      fallbackError.isIpBlock = true
+      throw fallbackError
+    }
+  }
 
   if (htmlExtracts.playerResponse) {
     paidPromotionDurationMs ??= getPaidPromotionDurationMs(htmlExtracts.playerResponse)
     isPremiere ??= getLocalPremiereState(htmlExtracts.playerResponse.videoDetails)
   }
 
-  const player = await Player.create(
+  player ??= await Player.create(
     process.env.IS_ELECTRON ? new PlayerCache() : new UniversalCache(false),
     (input, init) => fetch(input, init),
     undefined,
@@ -592,7 +629,7 @@ export async function getLocalVideoInfo(id) {
   // based on the videoId
   let contentPoToken
 
-  if (process.env.IS_ELECTRON) {
+  if (process.env.IS_ELECTRON && !watchPageIpBlocked) {
     try {
       contentPoToken = await window.ftElectron.generatePoToken(
         id,
@@ -710,7 +747,7 @@ export async function getLocalVideoInfo(id) {
 
   if ((info.playability_status.status === 'UNPLAYABLE' && (!hasTrailer || trailerIsAgeRestricted)) ||
     info.playability_status.status === 'LOGIN_REQUIRED') {
-    return { info, poToken: undefined, clientInfo, paidPromotionDurationMs, isPremiere }
+    return { info, poToken: undefined, clientInfo, paidPromotionDurationMs, isPremiere, watchPageIpBlocked }
   }
 
   if (hasTrailer && info.playability_status.status !== 'OK') {
@@ -777,6 +814,7 @@ export async function getLocalVideoInfo(id) {
     adEndTimeUnixMs,
     paidPromotionDurationMs,
     isPremiere,
+    watchPageIpBlocked,
   }
 }
 
