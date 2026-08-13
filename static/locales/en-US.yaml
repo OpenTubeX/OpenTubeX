@@ -709,11 +709,10 @@ Settings:
     Show Fast-Forward Through Silence Toggle: Show Fast-Forward Through Silence Toggle
     Enable Video Zoom: Enable Video Zoom
     Voice-over Translation:
+      Title: Voice-over translation
       Enable: Enable voice-over translation
       Prepare in Background: Start preparing voice-over translations in the background
       Background Preparation Tooltip: Sends the current video's ID, duration, and selected language to the translation service as soon as a supported video loads.
-      Cache: Cache voice-over translations for one day
-      Cache Tooltip: Reuses prepared voice-over translations for 24 hours, including after restarting the app.
       Language: Voice-over translation language
       Supported Source Languages: "Supported source languages: Russian, English, Chinese, Korean, Lithuanian, Latvian, Arabic, French, Italian, Spanish, German, and Japanese."
       Voice Volume: Translated voice volume

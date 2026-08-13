@@ -1,7 +1,15 @@
+.autoPictureInPictureSettings {
+  margin-block: 1rem;
+}
+
+.voiceOverTranslationSettings {
+  margin-block-start: 1rem;
+}
+
 .voiceOverTranslationControls {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
-  align-items: end;
+  align-items: start;
   gap: 1rem 2rem;
   inline-size: 100%;
   margin-block-end: 1rem;
@@ -17,11 +25,20 @@
   margin-inline: 0;
 }
 
+.voiceOverTranslationControls :deep(.pure-material-slider) {
+  margin-block: 5px 0;
+}
+
 .voiceOverTranslationLanguageHint {
   grid-column: 1 / -1;
   margin: 0;
   color: var(--secondary-text-color);
   font-size: 0.9em;
+  text-align: center;
+}
+
+.voiceOverTranslationLanguageHint.disabled {
+  opacity: 0.38;
 }
 
 .screenshotFolderContainer {

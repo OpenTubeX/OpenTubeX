@@ -728,7 +728,7 @@ function handleMounted() {
         if (settingsContentRef.value) {
           clampOverlayScrollTop(
             settingsContentRef.value,
-            settingsContentRef.value.querySelector('.section')
+            getActiveSettingsSectionEnd(settingsContentRef.value)
           )
         }
       }
@@ -780,25 +780,32 @@ function observeActiveSettingsSection() {
   settingsSectionResizeObserver?.disconnect()
   settingsSectionResizeObserver = null
   const content = settingsContentRef.value
-  const section = content?.querySelector('.section')
+  const section = getActiveSettingsSectionEnd(content)
   if (!content || !section) return
   settingsContentPaddingBottom = Number.parseFloat(getComputedStyle(content).paddingBottom)
 
   settingsSectionResizeObserver = new ResizeObserver(() => {
     clampOverlayScrollTop(content, section)
   })
-  settingsSectionResizeObserver.observe(section)
+  content.querySelectorAll(':scope > .section').forEach(element => {
+    settingsSectionResizeObserver.observe(element)
+  })
   clampOverlayScrollTop(content, section)
 }
 
 function clampSettingsContentScroll(event) {
   const content = event.currentTarget
-  const section = content.querySelector('.section')
+  const section = getActiveSettingsSectionEnd(content)
   if (!section) return
   const contentEnd = section.offsetTop + section.offsetHeight + settingsContentPaddingBottom
   if (content.scrollTop > Math.max(0, contentEnd - content.clientHeight)) {
     clampOverlayScrollTop(content, section)
   }
+}
+
+function getActiveSettingsSectionEnd(content) {
+  const sections = content?.querySelectorAll(':scope > .section')
+  return sections?.[sections.length - 1] ?? null
 }
 
 function handleUnlock() {

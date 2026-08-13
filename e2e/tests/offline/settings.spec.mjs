@@ -649,7 +649,15 @@ test.describe('settings', () => {
   test('keeps quick playback speed actions sticky and reflects the default state', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="player"]').click()
-    await page.getByRole('button', { name: 'Customize Quick Playback Speed Bar' }).click()
+    const customizeButton = page.getByRole('button', {
+      name: 'Customize Quick Playback Speed Bar'
+    })
+    await expect(customizeButton).toBeDisabled()
+    await page.locator('label.switch-label')
+      .filter({ hasText: 'Use Quick Playback Speed Bar' })
+      .click()
+    await expect(customizeButton).toBeEnabled()
+    await customizeButton.click()
 
     const scroller = page.locator('.settingsSubpageScroll')
     const toolbar = page.locator('.quickPlaybackSpeedToolbar')
@@ -978,24 +986,36 @@ test.describe('settings', () => {
     await expect(toggle).not.toBeChecked()
   })
 
-  test('offers background voice-over preparation when translation is enabled', async ({ page }) => {
+  test('shows voice-over settings disabled until translation is enabled', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="player"]').click()
 
+    const settingsContent = page.locator('.settingsContent')
+    const voiceOverSection = page.locator('.voiceOverTranslationSettings')
+    await settingsContent.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect(voiceOverSection).toBeInViewport()
+
     const enableToggle = page.getByRole('checkbox', { name: 'Enable voice-over translation' })
+    const backgroundToggle = page.getByRole('checkbox', {
+      name: 'Start preparing voice-over translations in the background'
+    })
+    const languageSelect = page.getByRole('combobox', {
+      name: 'Voice-over translation language'
+    })
+
     await expect(enableToggle).not.toBeChecked()
+    await expect(backgroundToggle).toBeDisabled()
+    await expect(languageSelect).toBeDisabled()
     await page.locator('label.switch-label')
       .filter({ hasText: 'Enable voice-over translation' })
       .click()
 
-    const backgroundToggle = page.getByRole('checkbox', {
-      name: 'Start preparing voice-over translations in the background'
-    })
-    await expect(backgroundToggle).toBeVisible()
+    await expect(backgroundToggle).toBeEnabled()
     await expect(backgroundToggle).not.toBeChecked()
+    await expect(languageSelect).toBeEnabled()
     await expect(page.getByRole('checkbox', {
       name: 'Cache voice-over translations for one day'
-    })).toBeChecked()
+    })).toHaveCount(0)
     await expect(page.getByText('Supported source languages: Russian, English, Chinese, Korean,'))
       .toBeVisible()
   })
