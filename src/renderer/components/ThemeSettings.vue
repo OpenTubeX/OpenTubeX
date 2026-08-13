@@ -236,6 +236,15 @@
     </FtFlexBox>
     <FtFlexBox class="themeSelectPair">
       <FtSelect
+        :placeholder="$t('Settings.Theme Settings.Icon Pack.Icon Pack')"
+        :value="iconPack"
+        setting-key="iconPack"
+        :select-names="iconPackNames"
+        :select-values="ICON_PACKS"
+        :icon="['fas', 'icons']"
+        @change="updateIconPack"
+      />
+      <FtSelect
         :placeholder="$t('Settings.Theme Settings.Main Color Theme.Main Color Theme')"
         :value="mainColor"
         setting-key="mainColor"
@@ -326,6 +335,7 @@ import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../constants/toas
 import { setAnimationSpeed } from '../helpers/animationSpeed'
 import { getMissingTabAvatarTabs, loadMissingTabAvatars } from '../helpers/loadTabAvatars'
 import { showToast } from '../helpers/utils'
+import { ICON_PACKS } from '../icons/iconPackState'
 
 const { t } = useI18n()
 
@@ -399,6 +409,11 @@ const baseThemeNames = computed(() => [
 const systemVariantThemeValues = computed(() => baseThemeValues.value.filter(value => value !== 'system'))
 const systemVariantThemeNames = computed(() => baseThemeNames.value.slice(1))
 
+const iconPackNames = computed(() => [
+  t('Settings.Theme Settings.Icon Pack.Material Symbols'),
+  t('Settings.Theme Settings.Icon Pack.Remix Icon')
+])
+
 const COLOR_VALUES = colors.map(color => color.name)
 const colorNames = useColorTranslations()
 const showCustomThemeEditor = ref(false)
@@ -434,6 +449,15 @@ function updateSystemColorScheme(event) {
  */
 function updateBaseTheme(value) {
   store.dispatch('updateBaseTheme', value)
+}
+
+const iconPack = computed(() => store.getters.getIconPack)
+
+/**
+ * @param {import('../icons/iconPackState').IconPackId} value
+ */
+function updateIconPack(value) {
+  store.dispatch('updateIconPack', value)
 }
 
 const areColorThemesEnabled = computed(() => baseTheme.value !== 'hotPink' && !(

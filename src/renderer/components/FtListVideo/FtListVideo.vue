@@ -15,7 +15,7 @@
         grabBarDisabled: !grabBarEnabled,
       }"
     >
-      <FontAwesomeIcon
+      <FtIcon
         :icon="['fas', 'bars']"
       />
     </div>
@@ -64,7 +64,7 @@
           segmentCategory: sponsorBlockFullVideoLabel
         })"
       >
-        <FontAwesomeIcon :icon="sponsorBlockFullVideoIcon" />
+        <FtIcon :icon="sponsorBlockFullVideoIcon" />
         <span>{{ sponsorBlockFullVideoLabel }}</span>
       </div>
       <FtIconButton
@@ -317,7 +317,7 @@
           :class="{ alwaysVisible: deArrowTogglePinned }"
           @click="toggleDeArrow"
         >
-          <FontAwesomeIcon
+          <FtIcon
             class="deArrowToggleIcon"
             :icon="['far', 'dot-circle']"
           />
@@ -347,7 +347,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'

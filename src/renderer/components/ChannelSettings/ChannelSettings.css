@@ -88,7 +88,7 @@
   display: grid;
 
   /* Icons default to a 1.25em wide box, which would sit off-centre in the circle */
-  --fa-width: 1em;
+  --icon-width: 1em;
 
   place-items: center;
   background-color: var(--side-nav-hover-color);

@@ -264,7 +264,7 @@ const ERROR_TOAST_ICON = ['fas', 'circle-exclamation']
  * @property {Function} [action]
  * @property {AbortSignal} [abortSignal]
  * @property {string} [image] optional image URL (e.g. a video thumbnail) shown alongside the message
- * @property {[string, string]} [icon] optional Font Awesome icon (e.g. `['fas', 'trash']`) shown
+ * @property {[string, string]} [icon] optional semantic icon (e.g. `['fas', 'trash']`) shown
  *   alongside the message, ignored when an image is given
  */
 
@@ -307,7 +307,7 @@ export function showToast(message, time = null, action = null, abortSignal = nul
  * Shows a non-interactive toast in every tab.
  * @param {string} message
  * @param {number} time
- * @param {[string, string] | null} icon optional Font Awesome icon shown alongside the message
+ * @param {[string, string] | null} icon optional semantic icon shown alongside the message
  */
 export function showToastOnAllTabs(message, time = null, icon = null) {
   if (process.env.IS_ELECTRON) {

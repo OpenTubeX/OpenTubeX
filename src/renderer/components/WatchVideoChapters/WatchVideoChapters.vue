@@ -47,7 +47,7 @@
         :title="$t('Chapters.Copy Timestamp Link', { timestamp: chapter.timestamp })"
         @click="copyTimestamp(index)"
       >
-        <FontAwesomeIcon :icon="['fas', 'share-alt']" />
+        <FtIcon :icon="['fas', 'share-alt']" />
       </button>
     </div>
   </div>
@@ -55,7 +55,7 @@
 
 <script setup>
 import { computed, ref, useTemplateRef, watch } from 'vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 
 import { getCenteredChapterScrollTop } from './chapterScroll'
 

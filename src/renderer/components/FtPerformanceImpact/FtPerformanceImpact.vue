@@ -9,7 +9,7 @@
     :title="title"
     :aria-label="fullText"
   >
-    <FontAwesomeIcon :icon="['fas', impact.level === 'high' ? 'gauge-high' : 'gauge']" />
+    <FtIcon :icon="['fas', impact.level === 'high' ? 'gauge-high' : 'gauge']" />
     <span
       v-if="!compact"
       class="performanceImpactLabel"
@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 

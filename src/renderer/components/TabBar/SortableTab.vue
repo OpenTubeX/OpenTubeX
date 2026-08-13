@@ -20,7 +20,7 @@
     @mousedown.middle.prevent
     @auxclick.prevent="handleAuxClick"
   >
-    <FontAwesomeIcon
+    <FtIcon
       v-if="tab.isPinned"
       :icon="['fas', 'thumbtack']"
       class="pinBadge"
@@ -32,7 +32,7 @@
         class="loadingDot"
         aria-hidden="true"
       />
-      <FontAwesomeIcon
+      <FtIcon
         v-else-if="tab.isPlaying"
         :icon="['fas', 'play']"
         class="playingIcon"
@@ -45,7 +45,7 @@
         alt=""
         draggable="false"
       >
-      <FontAwesomeIcon
+      <FtIcon
         v-else-if="showIcon && tabPageIcon"
         :icon="tabPageIcon"
         class="tabPageIcon"
@@ -60,7 +60,7 @@
       @click.stop="$emit('close', tab.id)"
       @pointerdown.stop
     >
-      <FontAwesomeIcon
+      <FtIcon
         :icon="['fas', 'times']"
         class="closeIcon"
       />
@@ -103,7 +103,7 @@
             class="tabTooltipPreviewFallback"
             aria-hidden="true"
           >
-            <FontAwesomeIcon
+            <FtIcon
               :icon="['fas', 'display']"
               class="tabTooltipFallbackIcon"
             />
@@ -115,7 +115,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import packageDetails from '@root/package.json'
 import { getTabAccentColor } from '../../constants/tabColors'

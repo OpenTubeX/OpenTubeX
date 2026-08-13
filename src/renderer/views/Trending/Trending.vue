@@ -9,7 +9,7 @@
       <div class="pageHeader">
         <div class="titleRow">
           <h2 class="pageTitle">
-            <FontAwesomeIcon
+            <FtIcon
               :icon="['fas', 'fire']"
               class="trendingIcon"
             />
@@ -43,7 +43,7 @@
             @keydown.left="focusTab('podcasts', $event)"
             @keydown.right="focusTab('sports', $event)"
           >
-            <FontAwesomeIcon
+            <FtIcon
               :icon="['fas', 'gamepad']"
               class="trendingIcon"
             />
@@ -63,7 +63,7 @@
             @keydown.left="focusTab('gaming', $event)"
             @keydown.right="focusTab('podcasts', $event)"
           >
-            <FontAwesomeIcon
+            <FtIcon
               :icon="['fas', 'trophy']"
               class="trendingIcon"
             />
@@ -83,7 +83,7 @@
             @keydown.left="focusTab('sports', $event)"
             @keydown.right="focusTab('gaming', $event)"
           >
-            <FontAwesomeIcon
+            <FtIcon
               :icon="['fas', 'podcast']"
               class="trendingIcon"
             />
@@ -110,7 +110,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 

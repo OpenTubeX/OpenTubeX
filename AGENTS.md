@@ -8,6 +8,6 @@
 - If the request somehow involves other repos (e.g. Website, APT, RPM, Flatpak, AUR, ...) you can find them in the parent folder.
 - Before considering work done here, you need to reproduce it with the test suite (for bugfixes), and verify that your fix/feature works (unless otherwise told to do so or when it makes no sense to do a test for the change).
 - After creating a PR babysit it. Wait for reviews of CodeRabbit/Greptile. When they come in resolve the reviews.
-- New icons must be registered in the icon registry. Custom icons must also provide mappings for every currently supported icon pack: Material, Tabler, Phosphor, Lucide, Remix, and Font Awesome legacy.
-- For icon-pack / Font Awesome replacement work (#388): get human confirmation that remapped glyphs fit visually in every pack (Material, Tabler, Phosphor, Lucide, Remix, and Font Awesome legacy) before considering the mapping done.
+- New icons must be registered in the icon registry. Custom icons must also provide mappings for every currently supported icon pack: Material and Remix.
+- For icon-pack mapping work (#388): get human confirmation that remapped glyphs fit visually in Material and Remix before considering the mapping done.
 - Never use the "FreeTube" name for promotion of the project (see discussion #391 for details when in doubt).

@@ -13,7 +13,7 @@
           class="headerRow"
         >
           <h2 class="pageTitle">
-            <FontAwesomeIcon
+            <FtIcon
               :icon="['fas', 'rss']"
               class="subscriptionIcon"
             />
@@ -51,7 +51,7 @@
                 @keydown.space.enter.prevent="changeTab('videos')"
                 @keydown.left.right="focusTab($event, 'videos')"
               >
-                <FontAwesomeIcon
+                <FtIcon
                   :icon="['fa', 'video']"
                   class="subscriptionIcon"
                 />
@@ -76,7 +76,7 @@
                 @keydown.space.enter.prevent="changeTab('shorts')"
                 @keydown.left.right="focusTab($event, 'shorts')"
               >
-                <FontAwesomeIcon
+                <FtIcon
                   :icon="['fa', 'clapperboard']"
                   class="subscriptionIcon"
                 />
@@ -101,7 +101,7 @@
                 @keydown.space.enter.prevent="changeTab('live')"
                 @keydown.left.right="focusTab($event, 'live')"
               >
-                <FontAwesomeIcon
+                <FtIcon
                   :icon="['fa', 'tower-broadcast']"
                   class="subscriptionIcon"
                 />
@@ -126,7 +126,7 @@
                 @keydown.space.enter.prevent="changeTab('community')"
                 @keydown.left.right="focusTab($event, 'community')"
               >
-                <FontAwesomeIcon
+                <FtIcon
                   :icon="['fa', 'message']"
                   class="subscriptionIcon"
                 />
@@ -151,7 +151,7 @@
                 @keydown.space.enter.prevent="changeTab('new')"
                 @keydown.left.right="focusTab($event, 'new')"
               >
-                <FontAwesomeIcon
+                <FtIcon
                   :icon="['fa', 'fire']"
                   class="subscriptionIcon"
                 />
@@ -165,7 +165,7 @@
               :disabled="markingSeenTab !== null || currentTabRefreshing"
               @click="markAllAsSeen(currentTab)"
             >
-              <FontAwesomeIcon :icon="['fas', 'check']" />
+              <FtIcon :icon="['fas', 'check']" />
               {{ $t('Subscriptions.Mark All as Seen') }}
             </button>
           </div>
@@ -247,7 +247,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 

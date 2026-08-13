@@ -152,8 +152,7 @@
 }
 
 .iconSelect.ft-icon,
-:deep(.iconSelect.ft-icon),
-:deep(.iconSelect.svg-inline--fa) {
+:deep(.iconSelect.ft-icon) {
   vertical-align: 0;
 }
 

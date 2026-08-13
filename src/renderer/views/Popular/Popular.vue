@@ -9,7 +9,7 @@
       <div class="pageHeader">
         <div class="titleRow">
           <h2 class="pageTitle">
-            <FontAwesomeIcon
+            <FtIcon
               :icon="['fas', 'users']"
               class="headingIcon"
             />
@@ -37,7 +37,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 
 import FtLoader from '../../components/FtLoader/FtLoader.vue'

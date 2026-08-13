@@ -52,7 +52,7 @@
                   referrerpolicy="no-referrer"
                   @error="handleImageIconError(item.icon)"
                 >
-                <FontAwesomeIcon
+                <FtIcon
                   v-else
                   :icon="getItemIcon(item)"
                 />
@@ -106,11 +106,11 @@
                         referrerpolicy="no-referrer"
                         @error="handleImageIconError(child.icon)"
                       >
-                      <FontAwesomeIcon
+                      <FtIcon
                         v-else
                         :icon="getItemIcon(child, item.label)"
                       />
-                      <FontAwesomeIcon
+                      <FtIcon
                         v-if="child.checked"
                         class="checkedMark"
                         :icon="['fas', 'check']"
@@ -146,11 +146,11 @@
                 referrerpolicy="no-referrer"
                 @error="handleImageIconError(item.icon)"
               >
-              <FontAwesomeIcon
+              <FtIcon
                 v-else
                 :icon="getItemIcon(item)"
               />
-              <FontAwesomeIcon
+              <FtIcon
                 v-if="item.checked"
                 class="checkedMark"
                 :icon="['fas', 'check']"
@@ -165,7 +165,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 

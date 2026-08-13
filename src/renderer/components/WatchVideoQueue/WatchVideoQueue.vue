@@ -45,7 +45,7 @@
           @keydown.up.prevent="move(item.queueItemId, -1)"
           @keydown.down.prevent="move(item.queueItemId, 1)"
         >
-          <FontAwesomeIcon :icon="['fas', 'bars']" />
+          <FtIcon :icon="['fas', 'bars']" />
         </span>
         <RouterLink
           class="queueVideo"
@@ -75,7 +75,7 @@
             :title="t('Video.Remove from Queue', { title: item.title })"
             @click="remove(item.queueItemId)"
           >
-            <FontAwesomeIcon :icon="['fas', 'trash']" />
+            <FtIcon :icon="['fas', 'trash']" />
           </button>
         </div>
       </li>
@@ -84,7 +84,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 

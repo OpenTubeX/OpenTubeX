@@ -10,7 +10,7 @@
     :title="label"
     @click.prevent.stop="toggleSync"
   >
-    <FontAwesomeIcon :icon="isSynced ? ['fas', 'link'] : ['fas', 'link-slash']" />
+    <FtIcon :icon="isSynced ? ['fas', 'link'] : ['fas', 'link-slash']" />
   </button>
   <button
     v-if="showReset"
@@ -22,7 +22,7 @@
     :title="resetLabel"
     @click.prevent.stop="resetToDefault"
   >
-    <FontAwesomeIcon :icon="['fas', 'undo']" />
+    <FtIcon :icon="['fas', 'undo']" />
   </button>
   <!-- Kept as reserved space rather than left out: a control that grows by an
        icon the moment its value leaves the default reflows, which can re-wrap
@@ -32,12 +32,12 @@
     class="changedSettingIndicatorPlaceholder"
     aria-hidden="true"
   >
-    <FontAwesomeIcon :icon="['fas', 'undo']" />
+    <FtIcon :icon="['fas', 'undo']" />
   </span>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 

@@ -80,7 +80,7 @@
           :aria-label="$t('Comments.Copy YouTube Link')"
           @click="emit('copy-youtube-link', reply.id)"
         >
-          <FontAwesomeIcon :icon="['fas', 'link']" />
+          <FtIcon :icon="['fas', 'link']" />
         </button>
       </p>
       <FtTimestampCatcher
@@ -90,7 +90,7 @@
       />
       <p class="commentLikeCount">
         <template v-if="!hideCommentLikes">
-          <FontAwesomeIcon :icon="['fas', 'thumbs-up']" />
+          <FtIcon :icon="['fas', 'thumbs-up']" />
           {{ reply.likes }}
         </template>
         <span
@@ -104,11 +104,11 @@
             class="commentHeartBadgeImg"
             alt=""
           >
-          <FontAwesomeIcon
+          <FtIcon
             :icon="['fas', 'heart']"
             class="commentHeartBadgeWhite"
           />
-          <FontAwesomeIcon
+          <FtIcon
             :icon="['fas', 'heart']"
             class="commentHeartBadgeRed"
           />
@@ -154,7 +154,7 @@
           />
           <template v-else>
             <span>{{ $t("Comments.Show More Replies") }}</span>
-            <FontAwesomeIcon
+            <FtIcon
               :icon="['fas', 'angle-down']"
               aria-hidden="true"
             />
@@ -166,7 +166,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 import FtRetryImage from '../FtRetryImage.vue'

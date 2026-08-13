@@ -29,7 +29,7 @@
           <span class="playlistName">{{ playlist.playlistName }}</span>
           <span class="videoCount">{{ t('Global.Counts.Video Count', { count: playlist.videos.length }, playlist.videos.length) }}</span>
         </span>
-        <FontAwesomeIcon
+        <FtIcon
           class="stateIcon"
           :icon="containedIds.has(playlist._id) ? ['fas', 'bookmark'] : ['far', 'bookmark']"
           fixed-width
@@ -41,7 +41,7 @@
       class="playlistRow createRow"
       @click="openCreatePlaylistPrompt"
     >
-      <FontAwesomeIcon
+      <FtIcon
         :icon="['fas', 'plus']"
         fixed-width
       />
@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 

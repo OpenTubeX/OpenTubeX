@@ -254,7 +254,7 @@
             class="premiereDate"
             :class="{trailer: isUpcoming && playabilityStatus === 'OK'}"
           >
-            <font-awesome-icon
+            <ft-icon
               :icon="['fas', 'satellite-dish']"
               class="premiereIcon"
             />
@@ -289,7 +289,7 @@
               :aria-pressed="liveReminderActive"
               @click="toggleLiveReminder"
             >
-              <font-awesome-icon :icon="['fas', 'calendar-days']" />
+              <ft-icon :icon="['fas', 'calendar-days']" />
               {{ liveReminderActive ? $t('Video.Notification on') : $t('Video.Notify me') }}
             </button>
           </div>
@@ -300,7 +300,7 @@
             <div
               class="errorWrapper"
             >
-              <font-awesome-icon
+              <ft-icon
                 :icon="customErrorIcon || ['fas', 'exclamation-circle']"
                 aria-hidden="true"
                 class="errorIcon"
@@ -375,7 +375,7 @@
             @click="openShortsLinkedVideo"
             @auxclick="openShortsLinkedVideo"
           >
-            <font-awesome-icon :icon="['fas', 'play']" />
+            <ft-icon :icon="['fas', 'play']" />
             <span dir="auto">{{ shortsLinkedVideo.title }}</span>
           </RouterLink>
         </div>
@@ -396,7 +396,7 @@
               :title="$t('Video.Previous')"
               @click="navigateSubscriptionShort(-1)"
             >
-              <font-awesome-icon :icon="['fas', 'arrow-up']" />
+              <ft-icon :icon="['fas', 'arrow-up']" />
             </button>
             <button
               type="button"
@@ -406,7 +406,7 @@
               :title="$t('Video.Next')"
               @click="navigateSubscriptionShort(1)"
             >
-              <font-awesome-icon :icon="['fas', 'arrow-down']" />
+              <ft-icon :icon="['fas', 'arrow-down']" />
             </button>
           </div>
           <template v-if="isLoading">
@@ -544,7 +544,7 @@
           class="shortsAuxPanelHeader"
         >
           <h2>
-            <font-awesome-icon :icon="['fas', 'circle-info']" />
+            <ft-icon :icon="['fas', 'circle-info']" />
             {{ $t('Video.Metadata') }}
           </h2>
           <button
@@ -554,7 +554,7 @@
             :title="$t('Video.Close Metadata')"
             @click="toggleShortsMetadata"
           >
-            <font-awesome-icon :icon="['fas', 'xmark']" />
+            <ft-icon :icon="['fas', 'xmark']" />
           </button>
         </div>
         <div
@@ -828,7 +828,7 @@
               :title="$t('Chapters.Close Chapters')"
               @click="closeSidebarChapters"
             >
-              <font-awesome-icon :icon="['fas', 'xmark']" />
+              <ft-icon :icon="['fas', 'xmark']" />
             </button>
           </div>
           <watch-video-chapters

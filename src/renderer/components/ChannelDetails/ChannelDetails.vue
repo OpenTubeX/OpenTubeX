@@ -24,7 +24,7 @@
             :src="thumbnailUrl"
             alt=""
           >
-          <FontAwesomeIcon
+          <FtIcon
             v-else
             class="thumbnail"
             :icon="['fas', 'circle-user']"
@@ -256,7 +256,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
 
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import FtCard from '../ft-card/ft-card.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'

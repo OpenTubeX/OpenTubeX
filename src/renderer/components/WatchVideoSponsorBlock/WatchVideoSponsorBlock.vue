@@ -6,7 +6,7 @@
           class="sponsorBlockShield"
           aria-hidden="true"
         >
-          <font-awesome-icon :icon="['fas', 'shield-halved']" />
+          <ft-icon :icon="['fas', 'shield-halved']" />
         </span>
         <h3>{{ $t('Video.Player.SponsorBlock.InfoPanelTitle') }}</h3>
       </div>
@@ -18,7 +18,7 @@
           :title="$t('Video.Player.SponsorBlock.RefreshSegments')"
           @click="$emit('refresh')"
         >
-          <font-awesome-icon
+          <ft-icon
             :icon="['fas', 'sync']"
             :spin="loading"
           />
@@ -29,7 +29,7 @@
           :title="$t('Close')"
           @click="$emit('close')"
         >
-          <font-awesome-icon :icon="['fas', 'xmark']" />
+          <ft-icon :icon="['fas', 'xmark']" />
         </button>
       </div>
     </header>
@@ -51,7 +51,7 @@
         class="sponsorBlockLoading"
         role="status"
       >
-        <font-awesome-icon
+        <ft-icon
           :icon="['fas', 'sync']"
           spin
         />
@@ -81,7 +81,7 @@
             />
             <span class="sponsorBlockCategory">
               {{ segment.description || segment.translatedCategory }}
-              <font-awesome-icon
+              <ft-icon
                 v-if="segment.locked"
                 class="sponsorBlockLocked"
                 :icon="['fas', 'lock']"
@@ -111,7 +111,7 @@
               :title="$t('Video.Player.SponsorBlock.UpvoteSegment')"
               @click="$emit('vote', segment.uuid, 1)"
             >
-              <font-awesome-icon :icon="['fas', 'thumbs-up']" />
+              <ft-icon :icon="['fas', 'thumbs-up']" />
             </button>
             <button
               v-if="submissionEnabled"
@@ -123,7 +123,7 @@
               :title="$t('Video.Player.SponsorBlock.DownvoteSegment')"
               @click="$emit('vote', segment.uuid, 0)"
             >
-              <font-awesome-icon :icon="['fas', 'thumbs-down']" />
+              <ft-icon :icon="['fas', 'thumbs-down']" />
             </button>
             <button
               v-if="!isSponsorBlockFullVideoSegment(segment)"
@@ -137,7 +137,7 @@
                 : $t('Video.Player.SponsorBlock.SkipSegment')"
               @click="$emit('skip', segment.uuid)"
             >
-              <font-awesome-icon :icon="['fas', segment.actionType === 'mute' ? 'volume-xmark' : 'forward-fast']" />
+              <ft-icon :icon="['fas', segment.actionType === 'mute' ? 'volume-xmark' : 'forward-fast']" />
             </button>
           </div>
         </div>
@@ -163,7 +163,7 @@
                 aria-hidden="true"
               >
                 <span class="sponsorBlockToggleThumb">
-                  <font-awesome-icon :icon="['fas', autoSkipDisabled ? 'pause' : 'forward-fast']" />
+                  <ft-icon :icon="['fas', autoSkipDisabled ? 'pause' : 'forward-fast']" />
                 </span>
               </span>
             </label>
@@ -199,7 +199,7 @@
                 class="sponsorBlockWhitelistBadge"
                 aria-hidden="true"
               >
-                <font-awesome-icon :icon="['fas', channelWhitelisted ? 'check' : 'plus']" />
+                <ft-icon :icon="['fas', channelWhitelisted ? 'check' : 'plus']" />
               </span>
               <span class="sponsorBlockWhitelistLabel">
                 {{ channelWhitelisted

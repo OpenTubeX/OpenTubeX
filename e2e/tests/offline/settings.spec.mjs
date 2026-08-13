@@ -1142,29 +1142,27 @@ test.describe('settings', () => {
     expect(syncRequests).toEqual([])
   })
 
-  test('loads each experimental icon pack when selected', async ({ page, attachScreenshot }) => {
+  test('switches icon packs from Theme settings and persists the choice', async ({ page, attachScreenshot }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="experimental"]').click()
+    await page.locator('.settingsMenu [data-section="theme"]').click()
 
-    const preview = page.locator('.iconPackPreview')
-    const select = preview.locator('select')
-    for (const pack of ['material', 'tabler', 'phosphor', 'lucide', 'remix']) {
-      await select.selectOption(pack)
-      await expect(preview.locator('.previewIcon.ft-icon').first()).toBeVisible()
-      await expect(preview.locator('.ft-icon__glyph').first()).toBeVisible()
-      await attachScreenshot(`${pack} icon pack`)
-    }
+    const iconPackSetting = page.locator('.select').filter({ hasText: 'Icon Pack' })
+    const select = iconPackSetting.locator('select')
+    await expect(select).toHaveValue('material')
+    await select.selectOption('remix')
+    await expect(page.locator('[data-icon-pack="remix"]').first()).toBeVisible()
+    await attachScreenshot('remix icon pack')
 
     await page.reload()
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="experimental"]').click()
-    await expect(preview.locator('select')).toHaveValue('remix')
-    await expect(preview.locator('.ft-icon__glyph').first()).toBeVisible()
+    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await expect(iconPackSetting.locator('select')).toHaveValue('remix')
+    await expect(page.locator('[data-icon-pack="remix"]').first()).toBeVisible()
   })
 
   test('keeps the current icon pack when another pack fails to load', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="experimental"]').click()
+    await page.locator('.settingsMenu [data-section="theme"]').click()
 
     const errors = []
     page.on('pageerror', error => errors.push(error.message))
@@ -1179,37 +1177,19 @@ test.describe('settings', () => {
       }
     })
 
-    const select = page.locator('.iconPackPreview select')
+    const select = page.locator('.select').filter({ hasText: 'Icon Pack' }).locator('select')
     const loadFailure = page.waitForEvent('console', message => (
-      message.type() === 'error' && message.text().includes('[icon-pack] failed to load material')
+      message.type() === 'error' && message.text().includes('[icon-pack] failed to load remix')
     ))
-    await select.selectOption('material')
+    await select.selectOption('remix')
     await loadFailure
     expect(errors).toEqual([])
+    await expect(select).toHaveValue('material')
 
     await page.reload()
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="experimental"]').click()
-    await expect(select).toHaveValue('fontawesome')
-  })
-
-  test('renders custom icons with the default Font Awesome pack', async ({ page }) => {
-    await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="experimental"]').click()
-
-    const preview = page.locator('.iconPackPreview')
-    await expect(preview.locator('select')).toHaveValue('fontawesome')
-
-    for (const icon of [
-      'vertical-tabs',
-      'horizontal-tabs',
-      'playlist-add',
-      'playlist-check'
-    ]) {
-      await expect(
-        preview.locator(`[title="fac ${icon}"] svg[data-prefix="fac"][data-icon="${icon}"]`)
-      ).toBeVisible()
-    }
+    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await expect(select).toHaveValue('material')
   })
 
   test('a toggled setting persists across restarts', async ({ app }) => {

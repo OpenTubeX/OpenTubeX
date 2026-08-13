@@ -8,7 +8,7 @@
       class="fullscreenCommentHeader"
     >
       <h3>
-        <FontAwesomeIcon :icon="['fas', 'comment']" />
+        <FtIcon :icon="['fas', 'comment']" />
         {{ commentsTitle }}
       </h3>
       <div
@@ -26,7 +26,7 @@
           :aria-expanded="String(sortMenuOpen)"
           @click="sortMenuOpen = !sortMenuOpen"
         >
-          <FontAwesomeIcon :icon="['fas', 'arrow-down-short-wide']" />
+          <FtIcon :icon="['fas', 'arrow-down-short-wide']" />
         </button>
         <button
           v-if="!commentsDisabled"
@@ -36,7 +36,7 @@
           :title="$t('Comments.Reload Comments')"
           @click="reloadCommentData"
         >
-          <FontAwesomeIcon :icon="['fas', 'sync']" />
+          <FtIcon :icon="['fas', 'sync']" />
         </button>
         <button
           type="button"
@@ -45,7 +45,7 @@
           :title="$t('Comments.Hide Comments')"
           @click="emit('close-comments')"
         >
-          <FontAwesomeIcon :icon="['fas', 'xmark']" />
+          <FtIcon :icon="['fas', 'xmark']" />
         </button>
         <div
           v-if="sortMenuOpen"
@@ -59,7 +59,7 @@
             @click="handleSortChange(sortValues[index])"
           >
             <span>{{ name }}</span>
-            <FontAwesomeIcon
+            <FtIcon
               v-if="currentSortValue === sortValues[index]"
               :icon="['fas', 'check']"
             />
@@ -182,7 +182,7 @@
             v-if="comment.isPinned"
             class="commentPinned"
           >
-            <FontAwesomeIcon
+            <FtIcon
               :icon="['fas', 'thumbtack']"
             />
             {{ $t("Comments.Pinned by") }} <bdi>{{ channelName }}</bdi>
@@ -229,7 +229,7 @@
               :aria-label="$t('Comments.Copy YouTube Link')"
               @click="copyCommentYoutubeLink(comment.id)"
             >
-              <FontAwesomeIcon
+              <FtIcon
                 :icon="['fas', 'link']"
               />
             </button>
@@ -243,7 +243,7 @@
             <template
               v-if="!hideCommentLikes"
             >
-              <FontAwesomeIcon
+              <FtIcon
                 :icon="['fas', 'thumbs-up']"
               />
               {{ comment.likes }}
@@ -259,11 +259,11 @@
                 class="commentHeartBadgeImg"
                 alt=""
               >
-              <FontAwesomeIcon
+              <FtIcon
                 :icon="['fas', 'heart']"
                 class="commentHeartBadgeWhite"
               />
-              <FontAwesomeIcon
+              <FtIcon
                 :icon="['fas', 'heart']"
                 class="commentHeartBadgeRed"
               />
@@ -289,7 +289,7 @@
               />
               <template v-else>
                 <span>{{ toggleCommentRepliesLinkText(comment) }}</span>
-                <FontAwesomeIcon
+                <FtIcon
                   :icon="['fas', 'angle-down']"
                   aria-hidden="true"
                 />
@@ -336,7 +336,7 @@
                 />
                 <template v-else>
                   <span>{{ $t("Comments.Show More Replies") }}</span>
-                  <FontAwesomeIcon
+                  <FtIcon
                     :icon="['fas', 'angle-down']"
                     aria-hidden="true"
                   />
@@ -354,7 +354,7 @@
                 @click="toggleCommentReplies(index)"
               >
                 <span>{{ toggleCommentRepliesLinkText(comment) }}</span>
-                <FontAwesomeIcon
+                <FtIcon
                   :icon="['fas', 'angle-up']"
                   aria-hidden="true"
                 />
@@ -443,7 +443,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
