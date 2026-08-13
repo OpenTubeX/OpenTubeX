@@ -865,6 +865,7 @@ export async function getLocalShortLinkedVideo(id) {
 }
 
 const LOCAL_VIDEO_COLLABORATORS_CACHE_SIZE = 100
+const LOCAL_VIDEO_COLLABORATORS_TIMEOUT_MS = 15_000
 const localVideoCollaboratorsCache = new Map()
 
 /**
@@ -881,19 +882,30 @@ export function getLocalVideoCollaborators(id) {
   }
 
   const request = (async () => {
-    const innertube = await createInnertube()
-    const response = await innertube.actions.execute('/next', {
-      videoId: id,
-      racyCheckOk: true,
-      contentCheckOk: true,
-      parse: true,
-    })
-    const secondaryInfo = response.contents_memo
-      ?.getType(YTNodes.VideoSecondaryInfo)[0]
+    const abortController = new AbortController()
+    const timeout = setTimeout(() => abortController.abort(), LOCAL_VIDEO_COLLABORATORS_TIMEOUT_MS)
 
-    return parseLocalVideoCollaborators({ secondary_info: secondaryInfo })
+    try {
+      const innertube = await createInnertube({
+        fetchFunc: (input, init) => fetch(input, { ...init, signal: abortController.signal })
+      })
+      const response = await innertube.actions.execute('/next', {
+        videoId: id,
+        racyCheckOk: true,
+        contentCheckOk: true,
+        parse: true,
+      })
+      const secondaryInfo = response.contents_memo
+        ?.getType(YTNodes.VideoSecondaryInfo)[0]
+
+      return parseLocalVideoCollaborators({ secondary_info: secondaryInfo })
+    } finally {
+      clearTimeout(timeout)
+    }
   })().catch((error) => {
-    localVideoCollaboratorsCache.delete(id)
+    if (localVideoCollaboratorsCache.get(id) === request) {
+      localVideoCollaboratorsCache.delete(id)
+    }
     throw error
   })
 

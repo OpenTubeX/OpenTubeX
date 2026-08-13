@@ -1552,9 +1552,9 @@ async function openCollaboratorsPrompt() {
 
   isFetchingCollaborators.value = true
   setCollaboratorsLoading(true)
+  const videoId = id.value
 
   try {
-    const videoId = id.value
     const collaborators = await getLocalVideoCollaborators(videoId)
 
     if (id.value !== videoId) {
@@ -1567,8 +1567,10 @@ async function openCollaboratorsPrompt() {
       showCollaboratorsPrompt.value = true
     }
   } catch (error) {
-    console.error(`Failed to fetch collaborators for ${id.value}`, error)
-    showToast({ message: t('Video.Failed to load collaborators'), icon: ['fas', 'circle-exclamation'] })
+    if (id.value === videoId) {
+      console.error(`Failed to fetch collaborators for ${videoId}`, error)
+      showToast({ message: t('Video.Failed to load collaborators'), icon: ['fas', 'circle-exclamation'] })
+    }
   } finally {
     isFetchingCollaborators.value = false
     setCollaboratorsLoading(false)
