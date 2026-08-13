@@ -441,7 +441,7 @@ export default defineComponent({
       default: ''
     },
     quickBookmarkIcon: {
-      type: Array,
+      type: [Array, Object],
       default: () => ['fas', 'bookmark']
     },
     paidPromotion: {

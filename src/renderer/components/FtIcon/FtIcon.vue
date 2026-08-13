@@ -1,6 +1,26 @@
 <template>
   <span
-    v-if="iconifyId"
+    v-if="customEmoji"
+    v-bind="forwardedAttrs"
+    class="ft-custom-icon"
+    :class="iconClass"
+    :style="customIconStyle"
+    dir="auto"
+  >
+    <span class="ft-custom-icon__emoji">{{ customEmoji }}</span>
+  </span>
+  <img
+    v-else-if="customImageSource"
+    v-bind="forwardedAttrs"
+    class="ft-custom-icon ft-custom-icon--image"
+    :class="iconClass"
+    :style="customIconStyle"
+    :src="customImageSource"
+    alt=""
+    draggable="false"
+  >
+  <span
+    v-else-if="iconifyId"
     v-bind="forwardedAttrs"
     :data-prefix="semanticIcon?.[0]"
     :data-icon="semanticIcon?.[1]"
@@ -27,6 +47,7 @@ import { Icon } from '@iconify/vue/offline'
 import faAliasToCanon from '../../icons/faAliasToCanon.json'
 import { currentIconPack } from '../../icons/iconPackState'
 import { normalizeFaIcon, resolveIconifyId } from '../../icons/resolveIconifyId'
+import { getCustomIconImageSource } from '../../helpers/customIcons'
 
 defineOptions({
   inheritAttrs: false
@@ -81,6 +102,13 @@ const ICON_SIZE_TO_EM = {
 
 const attrs = useAttrs()
 
+const customEmoji = computed(() => {
+  return props.icon?.type === 'emoji' && typeof props.icon.value === 'string'
+    ? props.icon.value
+    : ''
+})
+
+const customImageSource = computed(() => getCustomIconImageSource(props.icon))
 const iconifyId = computed(() => resolveIconifyId(props.icon))
 
 // Preserve the stable semantic metadata used by existing styling and consumers,
@@ -158,6 +186,8 @@ const iconifyWrapperStyle = computed(() => {
   }
   return style
 })
+
+const customIconStyle = computed(() => iconifyWrapperStyle.value)
 
 /**
  * Interpret the existing transform syntax on a 16-unit grid.
@@ -245,6 +275,33 @@ const iconifyGlyphStyle = computed(() => cssFromIconTransform(props.transform))
 </script>
 
 <style>
+.ft-custom-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  inline-size: 1em;
+  block-size: 1em;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  object-fit: cover;
+  overflow: hidden;
+  position: relative;
+  vertical-align: -0.125em;
+}
+
+.ft-custom-icon--image {
+  border-radius: calc(2px * var(--ui-roundness));
+}
+
+.ft-custom-icon__emoji {
+  align-items: center;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  line-height: 1;
+  position: absolute;
+}
+
 .ft-icon {
   display: inline-block;
   flex-shrink: 0;

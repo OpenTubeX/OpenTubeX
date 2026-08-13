@@ -1,5 +1,6 @@
 <template>
   <FtPrompt
+    autosize
     :label="title"
     @click="hideCreatePlaylistPrompt"
   >
@@ -26,7 +27,6 @@
         {{ $t('User Playlists.CreatePlaylistPrompt.Toast["There is already a playlist with this name. Please pick a different name."]') }}
       </p>
     </FtFlexBox>
-    <FtQuickBookmarkIconPicker v-model="quickBookmarkIcon" />
     <FtFlexBox>
       <FtButton
         :label="$t('User Playlists.CreatePlaylistPrompt.Create')"
@@ -51,7 +51,6 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
-import FtQuickBookmarkIconPicker from '../FtQuickBookmarkIconPicker/FtQuickBookmarkIconPicker.vue'
 
 import store from '../../store/index'
 
@@ -66,7 +65,6 @@ const allPlaylists = computed(() => store.getters.getAllPlaylists)
 
 /** @type {import('vue').Ref<string>} */
 const playlistName = ref(store.getters.getNewPlaylistVideoObject.title)
-const quickBookmarkIcon = ref('bookmark')
 
 const playlistNameBlank = computed(() => {
   return playlistName.value !== '' && playlistName.value.trim() === ''
@@ -116,7 +114,6 @@ async function createNewPlaylist() {
     playlistName: playlistName.value,
     protected: false,
     description: '',
-    quickBookmarkIcon: quickBookmarkIcon.value,
     videos: initialVideos,
   }
 

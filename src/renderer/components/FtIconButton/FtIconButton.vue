@@ -168,7 +168,7 @@ const props = defineProps({
     default: ''
   },
   icon: {
-    type: Array,
+    type: [Array, Object],
     default: () => ['fas', 'ellipsis-v']
   },
   overlayIcon: {

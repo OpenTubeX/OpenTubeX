@@ -2085,6 +2085,10 @@
   color: var(--favorite-icon-color);
 }
 
+.fullscreenAction.fullscreenQuickBookmarkAction.open :deep(.ft-custom-icon) {
+  filter: var(--favorite-icon-filter);
+}
+
 .fullscreenActions:has(:focus-visible) {
   opacity: 1;
   pointer-events: auto;

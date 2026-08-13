@@ -22,6 +22,8 @@
 <script setup>
 import { computed } from 'vue'
 
+import { getCustomIconImageSource } from '../../helpers/customIcons'
+
 const props = defineProps({
   profile: {
     type: Object,
@@ -33,12 +35,7 @@ const props = defineProps({
   }
 })
 
-const imageSource = computed(() => {
-  const icon = props.profile.icon
-  if (icon?.type !== 'image' || typeof icon.value !== 'string') return ''
-
-  return /^data:image\/(?:gif|jpeg|png|webp);base64,/i.test(icon.value) ? icon.value : ''
-})
+const imageSource = computed(() => getCustomIconImageSource(props.profile.icon))
 
 const iconText = computed(() => {
   const icon = props.profile.icon

@@ -1,3 +1,5 @@
+import { getCustomIconImageSource } from './customIcons.js'
+
 export const QUICK_BOOKMARK_ICONS = [
   'bookmark',
   'clock',
@@ -7,8 +9,21 @@ export const QUICK_BOOKMARK_ICONS = [
   'film',
 ]
 
-export function getQuickBookmarkIconName(playlist) {
-  return QUICK_BOOKMARK_ICONS.includes(playlist?.quickBookmarkIcon)
-    ? playlist.quickBookmarkIcon
-    : 'bookmark'
+export function getQuickBookmarkIconValue(playlist) {
+  const icon = playlist?.quickBookmarkIcon
+
+  if (QUICK_BOOKMARK_ICONS.includes(icon)) return icon
+
+  if (
+    icon?.type === 'emoji' &&
+    typeof icon.value === 'string' &&
+    icon.value !== ''
+  ) {
+    return { type: 'emoji', value: icon.value }
+  }
+
+  const imageSource = getCustomIconImageSource(icon)
+  if (imageSource) return { type: 'image', value: imageSource }
+
+  return 'bookmark'
 }

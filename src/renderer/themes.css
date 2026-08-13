@@ -39,6 +39,7 @@ body {
   --destructive-text-color: #000;
   --destructive-hover-color: #e53935;
   --destructive-active-color: #c62828;
+  --favorite-icon-filter: grayscale(1) sepia(1) saturate(2.2) hue-rotate(68deg) brightness(0.9);
 
   /* For the 'About' page, show the logo with the primary text color by default */
   --logo-primary-color: var(--primary-text-color);
