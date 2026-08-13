@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises'
+import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 
 import { test, expect, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
@@ -314,7 +315,7 @@ test.describe('OpenTubeX sync server', () => {
     const enhancedPrivacy = (await getSyncCapabilities()).encrypted_sync === 1
     test.skip(!enhancedPrivacy, 'Enhanced privacy server required')
 
-    const username = `opentubex-themes-${Date.now()}-${Math.random().toString(16).slice(2)}`
+    const username = `opentubex-themes-${randomUUID()}`
     const theme = {
       ...structuredClone(DEFAULT_CUSTOM_THEME),
       id: 'synced-theme',
