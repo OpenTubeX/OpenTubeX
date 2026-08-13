@@ -912,6 +912,7 @@ test.describe('watch page', () => {
     await expect(title).toContainText(CAPTIONED_VIDEO.title)
     await page.keyboard.press('s')
     await expect(page.locator('.ftVideoPlayer')).not.toHaveClass(/fullWindow/)
+    await expect(title).toBeHidden()
 
     await setPlayerFullscreen(page, true)
     const titleBounds = await title.boundingBox()
