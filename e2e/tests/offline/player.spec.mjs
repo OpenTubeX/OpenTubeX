@@ -262,9 +262,16 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   await expect.poll(() => translations.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
   await attachScreenshot('auto-translate language grid')
 
+  const frenchResponse = page.waitForResponse(response => {
+    const url = new URL(response.url())
+    return url.pathname === '/api/timedtext' && url.searchParams.get('tlang') === 'fr'
+  })
+  await translations.getByRole('button', { name: 'French' }).click()
   await translations.getByRole('button', { name: 'German' }).click()
   await expect(player.locator('.shaka-text-languages')).toBeVisible()
   expect(await overflowMenu.evaluate(element => element.scrollTop)).toBe(0)
+  await expect(player.locator('.shaka-text-languages')).toContainText('German')
+  await frenchResponse
   await expect(player.locator('.shaka-text-languages')).toContainText('German')
 
   const watchComponent = await page.evaluateHandle(findWatchComponent)
@@ -285,6 +292,21 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   ])
   expect(Math.abs(languageBounds.x - listBounds.x)).toBeLessThanOrEqual(1)
   expect(Math.abs(languageBounds.width - listBounds.width)).toBeLessThanOrEqual(1)
+
+  const nextVideoId = 'aqz-KE-bpKQ'
+  await openMockedVideo(page, nextVideoId)
+  await player.hover()
+  await moreOptions.click()
+  await overflowMenu.getByRole('button', { name: 'Captions' }).click()
+  await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
+  const nextVideoTranslationRequest = page.waitForRequest(request => {
+    const url = new URL(request.url())
+    return url.pathname === '/api/timedtext' &&
+      url.searchParams.get('v') === nextVideoId &&
+      url.searchParams.get('tlang') === 'de'
+  })
+  await translations.getByRole('button', { name: 'German' }).click()
+  await nextVideoTranslationRequest
   await watchComponent.dispose()
 })
 

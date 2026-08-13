@@ -77,15 +77,19 @@ export async function mockWatchPage(app, page, { playable = false, captionTransl
 
   if (captionTranslations) {
     await page.route('https://www.youtube.com/api/timedtext**', (route) => {
-      const format = new URL(route.request().url()).searchParams.get('fmt')
+      const searchParams = new URL(route.request().url()).searchParams
+      const format = searchParams.get('fmt')
       const body = format === 'srt'
         ? '1\n00:00:00,000 --> 00:00:05,000\nTranslated caption\n'
         : 'WEBVTT\n\n00:00:00.000 --> 00:00:05.000\nOriginal caption\n'
-      return route.fulfill({
+      const fulfill = () => route.fulfill({
         status: 200,
         contentType: format === 'srt' ? 'application/x-subrip' : 'text/vtt',
         body
       })
+      return format === 'srt' && searchParams.get('tlang') === 'fr'
+        ? new Promise(resolve => setTimeout(resolve, 250)).then(fulfill)
+        : fulfill()
     })
   }
 

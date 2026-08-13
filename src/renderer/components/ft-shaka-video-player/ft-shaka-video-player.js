@@ -5898,11 +5898,14 @@ export default defineComponent({
       registerOwnElement(shakaOverflowMenu, 'captions', new CaptionSelectionFactory())
     }
 
+    let captionTranslationSelectionGeneration = 0
+
     /**
      * @param {{ url: string, label: string, language: string, mimeType: string }} caption
      * @returns {Promise<boolean>}
      */
     async function selectCaptionTranslation(caption) {
+      const selectionGeneration = ++captionTranslationSelectionGeneration
       let track = findMatchingTextTrack(player.getTextTracks(), caption)
 
       if (!track) {
@@ -5919,6 +5922,10 @@ export default defineComponent({
           handleError(error, 'addTextTrackAsync', caption)
           return false
         }
+      }
+
+      if (selectionGeneration !== captionTranslationSelectionGeneration) {
+        return false
       }
 
       player.selectTextTrack(track)

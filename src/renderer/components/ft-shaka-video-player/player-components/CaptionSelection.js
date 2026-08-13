@@ -514,7 +514,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
   /** @private */
   updateTranslationOptions_() {
     const translations = this.getTranslations_()
-    const signature = translations.map(translation => translation.id).join('\n')
+    const signature = translations.map(translation => `${translation.id}\0${translation.url}`).join('\n')
     if (signature === this.translationSignature_) {
       return
     }
