@@ -574,6 +574,7 @@ Settings:
       Delete Theme: Delete theme
       Delete Theme Confirmation: Delete “{name}”? This cannot be undone.
       Save and Apply: Save and apply
+      Discard Changes: Discard changes
       Reset Colors: Reset colors
       Theme File: OpenTubeX theme file
       Theme Saved: Custom theme saved and applied

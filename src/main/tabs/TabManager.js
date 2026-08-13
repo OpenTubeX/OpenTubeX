@@ -563,10 +563,10 @@ export class TabManager {
    * @param {import('electron').BrowserWindow} browserWindow
    * @param {string} rootAppUrl
    * @param {string} _preloadPath
-   * @param {string} [_backgroundColor='#212121']
+   * @param {string} [_backgroundColor='#0f0f0f']
    * @param {string} [sessionId]
    */
-  constructor(browserWindow, rootAppUrl, _preloadPath, _backgroundColor = '#212121', sessionId) {
+  constructor(browserWindow, rootAppUrl, _preloadPath, _backgroundColor = '#0f0f0f', sessionId) {
     this.browserWindow = browserWindow
     this.rootAppUrl = rootAppUrl
     this.sessionId = sessionId || randomUUID()
