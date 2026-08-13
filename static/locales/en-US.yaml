@@ -973,6 +973,7 @@ Settings:
     Fetch Feed on Startup: Fetch Feed on Startup
     Show New Content Feed: Show New Content Feed
     Show New Content Indicators: Show New Content Indicators
+    Show Scheduled Live Streams / Premieres First: Show Scheduled Live Streams / Premieres First
     Auto Refresh Interval: Auto Refresh Interval
     Videos Auto Refresh Interval: Videos Auto Refresh Interval
     Shorts Auto Refresh Interval: Shorts Auto Refresh Interval
@@ -2016,6 +2017,7 @@ Tooltips:
       your subscription feed on startup and when a new window is opened.
     Show New Content Feed: Shows a New tab containing subscription feed items that were not present during the previous fetch.
     Show New Content Indicators: Shows a small dot beside subscription feed items that were not present during the previous fetch.
+    Show Scheduled Live Streams / Premieres First: Keeps upcoming live streams and premieres at the top of the subscription feed. When disabled, they remain at their announcement position until they start.
     Auto Refresh Interval: How often OpenTubeX automatically refreshes your subscription feed while the app is open.
   Theme Settings:
     Show Progress as Notification: Shows a persistent notification with live progress for background operations, such as subscription refreshes and managed tool downloads, instead of using the global progress bar.

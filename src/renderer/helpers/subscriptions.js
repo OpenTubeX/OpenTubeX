@@ -23,6 +23,7 @@ import { getValidSubscriptionChannels } from './subscription-channels'
 import {
   applyRssPremiereVerdict,
   collectResolvedNonPremiereVideoIds,
+  getSubscriptionVideoSortTimestamp,
   getUpcomingPremiereTimestamp,
   mergeSubscriptionShortThumbnails,
   reconcileFetchedSubscriptionEntries,
@@ -500,8 +501,11 @@ export function updateVideoListAfterProcessing(videos, now = Date.now()) {
     videoList = videoList.filter(item => !isUpcomingPremiere(item, now))
   }
 
+  const showScheduledLiveStreamsFirst = store.getters.getShowScheduledLiveStreamsFirst
+
   videoList.sort((a, b) => {
-    return b.published - a.published
+    return getSubscriptionVideoSortTimestamp(b, showScheduledLiveStreamsFirst, now) -
+      getSubscriptionVideoSortTimestamp(a, showScheduledLiveStreamsFirst, now)
   })
 
   return videoList

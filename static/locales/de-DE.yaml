@@ -558,6 +558,7 @@ Settings:
     Fetch Feed on Startup: Feed beim Start abrufen
     Show New Content Feed: Feed mit neuen Inhalten anzeigen
     Show New Content Indicators: Markierungen für neue Inhalte anzeigen
+    Show Scheduled Live Streams / Premieres First: Geplante Livestreams / Premieren zuerst anzeigen
     Confirm Before Unsubscribing: Unbeabsichtigtes Deabonnieren verhindern
 
     'Limit the number of videos displayed for each channel': Anzahl der für jeden Kanal angezeigten Videos begrenzen
@@ -1343,6 +1344,7 @@ Tooltips:
     Fetch Feed on Startup: Wenn aktiviert, ruft OpenTubeX deine Abos automatisch beim Start und beim Öffnen eines neuen Fensters ab.
     Show New Content Feed: Zeigt eine Registerkarte „Neu“ mit Abo-Feed-Einträgen an, die beim vorherigen Abruf noch nicht vorhanden waren.
     Show New Content Indicators: Zeigt einen kleinen Punkt neben Abo-Feed-Einträgen an, die beim vorherigen Abruf noch nicht vorhanden waren.
+    Show Scheduled Live Streams / Premieres First: Zeigt bevorstehende Livestreams und Premieren oben im Abo-Feed an. Wenn deaktiviert, bleiben sie bis zum Start an der Position ihrer Ankündigung.
     Auto Refresh Interval: Wie oft OpenTubeX automatisch deine Abos aktualisiert während die Anwendung geöffnet ist.
   Player Settings:
     Enable Caption Translations: Wenn aktiviert, bevorzugen die Untertitel-Schaltfläche und das Tastenkürzel C eine automatisch übersetzte Spur in der bevorzugten Untertitelsprache, wenn das Video keine passende Originalspur bereitstellt.

@@ -20,7 +20,10 @@ import store from '../store/index'
 
 import { useRelativeTimeClock } from '../composables/useRelativeTimeClock'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
-import { getUpcomingPremiereTimestamp } from '../helpers/subscription-entries'
+import {
+  ensureUpcomingSubscriptionFeedPublished,
+  getUpcomingPremiereTimestamp
+} from '../helpers/subscription-entries'
 import { getCachedRelativeTimeFormat, getCachedShortDateTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
 import {
   refreshSubscriptionVideosFromRemote,
@@ -49,6 +52,8 @@ const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCache
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSubscriptionsAutomatically)
+
+const showScheduledLiveStreamsFirst = computed(() => store.getters.getShowScheduledLiveStreamsFirst)
 
 const activeSubscriptionList = computed(() => store.getters.getActiveProfile.subscriptions)
 
@@ -88,6 +93,12 @@ const nextUpcomingPremiereTimestamp = computed(() => {
 })
 
 watch(nextUpcomingPremiereTimestamp, scheduleNextPremiereUpdate, { immediate: true })
+
+watch(showScheduledLiveStreamsFirst, () => {
+  if (subscriptionCacheReady.value) {
+    loadVideosFromCacheForAllActiveProfileChannels()
+  }
+})
 
 function scheduleNextPremiereUpdate(timestamp) {
   if (premiereUpdateTimer !== null) {
@@ -266,7 +277,15 @@ function loadVideosFromCacheSometimes() {
 
 function loadVideosFromCacheForAllActiveProfileChannels() {
   const videoList_ = cacheEntriesForAllActiveProfileChannels.value.flatMap((cacheEntry) => {
-    return cacheEntry.videos ?? []
+    const cacheTimestamp = new Date(cacheEntry.timestamp).getTime()
+
+    return (cacheEntry.videos ?? []).map(video => {
+      return ensureUpcomingSubscriptionFeedPublished(
+        video,
+        cacheTimestamp,
+        premiereUpdateNow.value
+      )
+    })
   })
 
   videoList.value = updateVideoListAfterProcessing(videoList_, premiereUpdateNow.value)

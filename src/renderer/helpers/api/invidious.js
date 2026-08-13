@@ -1010,6 +1010,9 @@ function setPublishedTimestamp(video) {
   if (video.liveNow) {
     video.published = Date.now()
   } else if (video.isUpcoming) {
+    if (typeof video.published === 'number') {
+      video.subscriptionFeedPublished = video.published * 1000
+    }
     video.published = video.premiereTimestamp * 1000
   } else if (typeof video.published === 'number') {
     video.published *= 1000

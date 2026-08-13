@@ -52,6 +52,74 @@ export function updateUpcomingPremiereState(video, now) {
 }
 
 /**
+ * @param {object} video
+ * @param {boolean} showScheduledLiveStreamsFirst
+ * @param {number} now
+ */
+export function getSubscriptionVideoSortTimestamp(video, showScheduledLiveStreamsFirst, now) {
+  const scheduledTimestamp = getUpcomingPremiereTimestamp(video)
+  const isUpcoming = scheduledTimestamp != null
+    ? scheduledTimestamp > now
+    : video.isUpcoming === true || video.premiere === true
+
+  if (
+    !showScheduledLiveStreamsFirst &&
+    isUpcoming &&
+    video.subscriptionFeedPublished != null &&
+    Number.isFinite(Number(video.subscriptionFeedPublished))
+  ) {
+    return Number(video.subscriptionFeedPublished)
+  }
+
+  return video.published
+}
+
+/**
+ * Gives pre-setting cache entries a stable announcement position before they
+ * are fetched and reconciled again.
+ * @param {object} video
+ * @param {number} fallbackTimestamp
+ * @param {number} now
+ */
+export function ensureUpcomingSubscriptionFeedPublished(video, fallbackTimestamp, now) {
+  const existingTimestamp = Number(video.subscriptionFeedPublished)
+  if (video.subscriptionFeedPublished != null && Number.isFinite(existingTimestamp)) {
+    return video
+  }
+
+  const scheduledTimestamp = getUpcomingPremiereTimestamp(video)
+  const isUpcoming = scheduledTimestamp != null
+    ? scheduledTimestamp > now
+    : video.isUpcoming === true || video.premiere === true
+  const timestamp = Number(fallbackTimestamp)
+
+  if (!isUpcoming || !Number.isFinite(timestamp)) {
+    return video
+  }
+
+  return {
+    ...video,
+    subscriptionFeedPublished: timestamp
+  }
+}
+
+/**
+ * Returns the announcement position used for an upcoming subscription entry.
+ * Exact publication dates are preferred; scraper entries fall back to the time
+ * they first entered OpenTubeX's subscription cache.
+ * @param {object} video
+ * @param {number} fallbackTimestamp
+ */
+function getSubscriptionFeedPublishedTimestamp(video, fallbackTimestamp) {
+  if (video.subscriptionFeedPublished == null) {
+    return fallbackTimestamp
+  }
+
+  const timestamp = Number(video.subscriptionFeedPublished)
+  return Number.isFinite(timestamp) ? timestamp : fallbackTimestamp
+}
+
+/**
  * Adds YouTube's selected portrait thumbnails to dated Shorts entries without
  * replacing the exact publication and view metadata supplied by RSS.
  * @param {object[]} entries
@@ -154,6 +222,18 @@ export function reconcileFetchedSubscriptionEntries(
       isNewInSubscriptionFeed: !isWatched && (wasPreviouslyNew || isNewlyFetched)
     }
 
+    if (entry.isUpcoming === true || entry.premiere === true) {
+      const scheduledTimestamp = getUpcomingPremiereTimestamp(entry)
+      const previousFeedTimestamp = getSubscriptionFeedPublishedTimestamp(previousEntry ?? {}, null)
+      const fetchedFeedTimestamp = getSubscriptionFeedPublishedTimestamp(entry, null)
+
+      // Some backends expose the scheduled start as both publication fields.
+      // That is not an announcement date, so use first-seen time instead.
+      reconciledEntry.subscriptionFeedPublished = [previousFeedTimestamp, fetchedFeedTimestamp]
+        .find(timestamp => timestamp != null && timestamp !== scheduledTimestamp) ??
+          (Number.isFinite(previousFetchTime) ? previousFetchTime : Date.now())
+    }
+
     if (previousEntry != null && keepPreviousPublicationDate(entry, previousEntry, publicationDateKey)) {
       reconciledEntry[publicationDateKey] = previousEntry[publicationDateKey]
     }
@@ -254,7 +334,8 @@ export function applyRssPremiereVerdict(video, upcomingInfo) {
 
   const enrichedVideo = {
     ...video,
-    isUpcoming: true
+    isUpcoming: true,
+    subscriptionFeedPublished: getSubscriptionFeedPublishedTimestamp(video, video.published)
   }
 
   if (upcomingInfo.premiereDate) {

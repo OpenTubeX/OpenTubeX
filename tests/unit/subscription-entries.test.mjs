@@ -4,7 +4,9 @@ import test from 'node:test'
 import {
   applyRssPremiereVerdict,
   collectResolvedNonPremiereVideoIds,
+  ensureUpcomingSubscriptionFeedPublished,
   ensureSubscriptionFeedEntryState,
+  getSubscriptionVideoSortTimestamp,
   getUpcomingPremiereTimestamp,
   mergeSubscriptionShortThumbnails,
   reconcileFetchedSubscriptionEntries,
@@ -61,6 +63,51 @@ test('marks an upcoming premiere as live when its scheduled time arrives', () =>
     liveNow: false
   }
   assert.equal(updateUpcomingPremiereState(completed, scheduledTime), completed)
+})
+
+test('sorts scheduled entries by announcement time until they start', () => {
+  const scheduledTime = now + HOUR
+  const announcementTime = now - HOUR
+  const upcoming = video('premiere', scheduledTime, {
+    isUpcoming: true,
+    premiereDate: new Date(scheduledTime),
+    subscriptionFeedPublished: announcementTime
+  })
+
+  assert.equal(getSubscriptionVideoSortTimestamp(upcoming, true, now), scheduledTime)
+  assert.equal(getSubscriptionVideoSortTimestamp(upcoming, false, now), announcementTime)
+  assert.equal(getSubscriptionVideoSortTimestamp(upcoming, false, scheduledTime), scheduledTime)
+})
+
+test('backfills and keeps the first-seen feed position for scraper and legacy entries', () => {
+  const scheduledTime = now + HOUR
+  const firstSeenTime = now - HOUR
+  const entry = video('premiere', scheduledTime, {
+    isUpcoming: true,
+    premiereDate: new Date(scheduledTime)
+  })
+
+  const backfilled = ensureUpcomingSubscriptionFeedPublished(entry, firstSeenTime, now)
+  assert.equal(backfilled.subscriptionFeedPublished, firstSeenTime)
+  assert.equal(getSubscriptionVideoSortTimestamp(backfilled, false, now), firstSeenTime)
+
+  const reconciled = reconcileFetchedSubscriptionEntries(
+    [{ ...entry, subscriptionFeedPublished: scheduledTime }],
+    [backfilled],
+    'videoId',
+    now - HOUR
+  )
+
+  assert.equal(reconciled[0].subscriptionFeedPublished, firstSeenTime)
+
+  const refreshedLegacyEntry = reconcileFetchedSubscriptionEntries(
+    [{ ...entry, subscriptionFeedPublished: scheduledTime }],
+    [entry],
+    'videoId',
+    firstSeenTime
+  )
+
+  assert.equal(refreshedLegacyEntry[0].subscriptionFeedPublished, firstSeenTime)
 })
 
 test('adds selected Shorts thumbnails without replacing RSS metadata', () => {
@@ -314,10 +361,14 @@ test('a settled lookup records the verdict both ways', () => {
   assert.deepEqual([...collectResolvedNonPremiereVideoIds([{ ch: { videos: [notPremiere] } }])], ['a'])
 
   const premiereDate = new Date('2026-01-02T03:04:05Z')
-  const premiere = applyRssPremiereVerdict({ videoId: 'b' }, { isUpcoming: true, premiereDate })
+  const premiere = applyRssPremiereVerdict(
+    { videoId: 'b', published: 1234 },
+    { isUpcoming: true, premiereDate }
+  )
   assert.equal(premiere.isUpcoming, true)
   assert.equal(premiere.premiereDate, premiereDate)
   assert.equal(premiere.published, premiereDate.getTime())
+  assert.equal(premiere.subscriptionFeedPublished, 1234)
   // An upcoming premiere goes live eventually, so it is never a durable negative.
   assert.equal(collectResolvedNonPremiereVideoIds([{ ch: { videos: [premiere] } }]).size, 0)
 })
