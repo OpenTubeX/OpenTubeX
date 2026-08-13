@@ -145,6 +145,7 @@ function runApp() {
   }
 
   async function saveCustomTheme(theme) {
+    getCustomThemePath(theme?.id)
     const normalizedTheme = normalizeCustomTheme(theme)
     await asyncFs.mkdir(CUSTOM_THEMES_PATH, { recursive: true })
     await writeCustomThemeFile(normalizedTheme)

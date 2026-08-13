@@ -290,11 +290,15 @@ test.describe('custom theme editor', () => {
     })
     await page.evaluate(async () => {
       const [theme] = await window.ftElectron.loadCustomTheme()
+      await window.ftElectron.saveCustomTheme({ ...theme, id: '../custom-theme' })
+        .then(() => { throw new Error('Invalid custom theme ID was accepted') }, () => {})
       await Promise.all([
         window.ftElectron.saveCustomTheme(theme),
         window.ftElectron.saveCustomTheme(theme)
       ])
     })
+    await expect.poll(async () => (await readSavedThemes(app.userDataDir)).map(({ name }) => name))
+      .toEqual(['Midnight'])
     await expect(editor).toHaveCount(0)
     await page.getByRole('button', { name: 'Edit custom theme' }).click()
 
