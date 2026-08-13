@@ -1267,12 +1267,27 @@ test.describe('manual comment loading', () => {
 
     const comments = page.locator('.comment')
     const commentIndex = await comments.evaluateAll(elements => (
-      elements.findIndex(element => element.querySelector('.commentMoreReplies'))
+      elements.findIndex(element => element.querySelector('.commentReplyRootToggle'))
     ))
     expect(commentIndex).toBeGreaterThanOrEqual(0)
     const comment = comments.nth(commentIndex)
-    const replyToggle = comment.locator('.commentMoreReplies')
+    const replyToggleRow = comment.locator('.commentReplyRootToggle')
+    const replyToggle = replyToggleRow.locator('.commentReplyContinuationButton')
     await expect(replyToggle).toBeVisible()
+    await expect(replyToggle).not.toContainText('View')
+    await expect(replyToggle.locator('svg')).toBeVisible()
+    expect(await replyToggleRow.evaluate(element => (
+      getComputedStyle(element, '::before').borderInlineStartWidth
+    ))).toBe('1px')
+    expect(await comment.evaluate((element) => {
+      const toggle = element.querySelector('.commentReplyRootToggle')
+      const stemStyle = getComputedStyle(element, '::before')
+      const connectorStyle = getComputedStyle(toggle, '::before')
+      const stemBottom = element.getBoundingClientRect().bottom - Number.parseFloat(stemStyle.insetBlockEnd)
+      const connectorTop = toggle.getBoundingClientRect().top +
+        Number.parseFloat(connectorStyle.insetBlockStart)
+      return Math.abs(stemBottom - connectorTop)
+    })).toBeLessThanOrEqual(0.5)
 
     await page.route(/\/youtubei\/v1\/next/, route => route.fulfill({
       status: 200,
@@ -1288,8 +1303,8 @@ test.describe('manual comment loading', () => {
 
     await replyToggle.click()
 
-    await expect(comment.locator('.commentMoreRepliesSpinner')).toHaveCount(0)
-    await expect(comment.locator('.commentMoreReplies')).toHaveCount(0)
+    await expect(comment.locator('.commentReplyRootToggle')).toHaveCount(0)
+    await expect(comment).not.toHaveClass(/commentThreadCollapsed/)
     await expect(comment.locator('.commentReplyBranch')).toHaveCount(0)
   })
 

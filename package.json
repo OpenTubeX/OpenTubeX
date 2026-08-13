@@ -84,7 +84,7 @@
     "vue-router": "^5.2.0",
     "vue-sonner": "^2.0.9",
     "vuex": "^4.1.0",
-    "youtubei.js": "^17.2.0"
+    "youtubei.js": "^18.0.0"
   },
   "devDependencies": {
     "@babel/core": "^8.0.1",

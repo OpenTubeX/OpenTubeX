@@ -4,6 +4,7 @@ import test from 'node:test'
 import {
   getReplyContinuationToken,
   getReplyLoadState,
+  isEmptyReplyContinuation,
   isMissingReplyResponseError,
   shouldLoadInitialReplies
 } from '../../src/renderer/helpers/comment-replies.js'
@@ -54,6 +55,12 @@ test('retries an unusable initial batch when it has no continuation', () => {
 
 test('advances after an unusable initial batch when it has a continuation', () => {
   assert.equal(shouldLoadInitialReplies(true, false, true), false)
+})
+
+test('recognizes an advertised continuation that returns no replies', () => {
+  assert.equal(isEmptyReplyContinuation(0, false), true)
+  assert.equal(isEmptyReplyContinuation(1, false), false)
+  assert.equal(isEmptyReplyContinuation(0, true), false)
 })
 
 test('recognizes a missing reply continuation response', () => {

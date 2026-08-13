@@ -24,9 +24,16 @@ export function shouldLoadInitialReplies(hasLoadedBatch, hasUsableReplies, hasCo
 }
 
 /**
- * Matches the error thrown by our patched youtubei.js 17.2.0
- * CommentThread.getReplies() when the reply endpoint structure is missing.
- * Keep this in sync with patches/youtubei.js@17.2.0.patch.
+ * @param {number} loadedBatchCount
+ * @param {boolean} hasNextContinuation
+ */
+export function isEmptyReplyContinuation(loadedBatchCount, hasNextContinuation) {
+  return loadedBatchCount === 0 && !hasNextContinuation
+}
+
+/**
+ * Matches the error thrown by youtubei.js CommentThread.getReplies() when the
+ * reply endpoint structure is missing.
  * @param {unknown} error
  */
 export function isMissingReplyResponseError(error) {
