@@ -138,7 +138,18 @@
 }
 
 .selectOption.selected {
-  box-shadow: inset 3px 0 var(--accent-color);
+  position: relative;
+}
+
+.selectOption.selected::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 3px;
+  pointer-events: none;
+  background-color: var(--accent-color);
 }
 
 .iconSelect {
