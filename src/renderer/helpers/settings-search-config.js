@@ -47,6 +47,27 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'Default Quality': ['Default Quality'],
     'Screenshot.Modes': []
   },
+  data: {
+    '': [
+      'Data Settings',
+      'Import Subscriptions',
+      'Export Subscriptions',
+      'Import History',
+      'Export History',
+      'Import Playlists',
+      'Export Playlists',
+      'Search history',
+      'Import search history',
+      'Export search history',
+      'Import Settings',
+      'Export Settings',
+      'Import subscriptions formats',
+      'Import history formats',
+      'Import playlists formats',
+      'Import search history formats',
+      'Manage Subscriptions'
+    ]
+  },
   'caption-appearance': {
     Anchor: ['Anchor'],
     'Edge Style': ['Edge Style']

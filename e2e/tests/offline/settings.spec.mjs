@@ -191,7 +191,16 @@ test.describe('settings', () => {
 
     await search.fill('Check for Updates')
     await page.getByRole('button', { name: /Check for updates/i, exact: true }).click()
-    await expect(page.locator('.switch-ctn.settingsSearchTarget')).toContainText(/Check for updates/i)
+    const switchHighlight = page.locator('.switch-ctn.settingsSearchTarget')
+    await expect(switchHighlight).toContainText(/Check for updates/i)
+    const { borderRadius, uiRoundness } = await switchHighlight.evaluate(element => {
+      const style = getComputedStyle(element)
+      return {
+        borderRadius: Number.parseFloat(style.borderRadius),
+        uiRoundness: Number.parseFloat(style.getPropertyValue('--ui-roundness'))
+      }
+    })
+    expect(borderRadius).toBeCloseTo(4 * uiRoundness)
     await expect(page.locator('.section.settingsSearchTarget')).toHaveCount(0)
 
     await search.fill('UI Scale')
@@ -237,6 +246,9 @@ test.describe('settings', () => {
     await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
 
     await search.fill('How do I import my subscriptions?')
+    await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
+
+    await search.fill('successfully imported')
     await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
 
     await search.fill('checking')

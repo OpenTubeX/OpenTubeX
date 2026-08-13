@@ -335,6 +335,7 @@
 .settingsContent :deep(.settingsSearchTarget) {
   outline: 2px solid transparent;
   outline-offset: 4px;
+  border-radius: calc(4px * var(--ui-roundness));
   animation: settings-search-highlight 2.2s ease-in-out;
 }
 
