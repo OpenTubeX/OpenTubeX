@@ -86,6 +86,19 @@ test('every semantic icon the renderer asks for has a mapping', async () => {
   )
 })
 
+test('renderer icons use the icon-pack-aware component', async () => {
+  const legacyUsages = []
+
+  for (const file of await readRendererSources()) {
+    const source = await readFile(file, 'utf8')
+    if (/<(?:font-awesome-icon|FontAwesomeIcon)\b/.test(source)) {
+      legacyUsages.push(path.relative(repoRoot, file))
+    }
+  }
+
+  assert.deepEqual(legacyUsages, [])
+})
+
 async function readRendererSources() {
   const files = []
   const walk = async (directory) => {

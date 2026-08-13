@@ -246,6 +246,8 @@ test.describe('watch page', () => {
 
     await expect(ytDlp).toHaveAttribute('aria-pressed', 'true')
     await expect(builtIn).toHaveAttribute('aria-pressed', 'false')
+    await expect(ytDlp.locator('.engineOptionCheck')).toBeVisible()
+    await expect(builtIn.locator('.engineOptionCheck')).toHaveCount(0)
     await expect(prompt.locator('.engineBadge')).toHaveText('yt-dlp')
     await expect(prompt.getByTitle('Streaming protocol')).toHaveCount(0)
 
