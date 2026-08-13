@@ -66,7 +66,7 @@ index 371f753a780be9c927a767ad844c3b071e9707c8..f9b97e606e787462c85e50510e01d0e9
       * Sends a message.
       * @param text - Text to send.
 diff --git a/dist/src/parser/youtube/LiveChat.js b/dist/src/parser/youtube/LiveChat.js
-index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..80b0f3996e424c794f4eb08d768715dc7603ef43 100644
+index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b0cf4a9ba22fa9e1e482d9084738319e7b6faab5 100644
 --- a/dist/src/parser/youtube/LiveChat.js
 +++ b/dist/src/parser/youtube/LiveChat.js
 @@ -18,8 +18,14 @@ export default class LiveChat extends EventEmitter {
@@ -107,7 +107,7 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..80b0f3996e424c794f4eb08d768715dc
              else {
                  // There are more than 10 actions, emit them asynchronously so we can request the next incremental continuation.
                  this.#emitSmoothedActions(actions);
-@@ -69,17 +68,102 @@ export default class LiveChat extends EventEmitter {
+@@ -69,54 +68,161 @@ export default class LiveChat extends EventEmitter {
          if (!this.running) {
              this.running = true;
              this.#pollLivechat();
@@ -190,78 +190,118 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..80b0f3996e424c794f4eb08d768715dc
      }
      #pollLivechat() {
 -        (async () => {
+-            try {
+-                const response = await this.#actions.execute(this.is_replay ? 'live_chat/get_live_chat_replay' : 'live_chat/get_live_chat', { continuation: this.#continuation, parse: true });
+-                const contents = response.continuation_contents;
+-                if (!contents) {
+-                    this.emit('error', new InnertubeError('Unexpected live chat incremental continuation response', response));
+-                    this.emit('end');
+-                    this.stop();
+-                }
+-                if (!(contents instanceof LiveChatContinuation)) {
+-                    this.stop();
+-                    this.emit('end');
 +        // Concurrent callers await the batch that is already on its way, rather than
 +        // a resolved promise that would claim its actions have been emitted.
 +        if (this.#polling)
 +            return this.#poll_promise ?? Promise.resolve();
 +        this.#polling = true;
 +        const seek_generation = this.#seek_generation;
++        let poll_again = false;
 +        this.#poll_promise = (async () => {
-             try {
--                const response = await this.#actions.execute(this.is_replay ? 'live_chat/get_live_chat_replay' : 'live_chat/get_live_chat', { continuation: this.#continuation, parse: true });
-+                const args = { continuation: this.#continuation, parse: true };
-+                // The player offset only applies to the initial continuation, which is the one
-+                // a seek resets us to. Sending it alongside a later continuation would keep
-+                // pulling us back to the seek position instead of advancing through the chat.
-+                if (this.is_replay && this.#player_offset_ms !== null && this.#continuation === this.#initial_continuation)
-+                    args.currentPlayerState = { playerOffsetMs: this.#player_offset_ms.toString() };
-+                const response = await this.#actions.execute(this.is_replay ? 'live_chat/get_live_chat_replay' : 'live_chat/get_live_chat', args);
-+                if (seek_generation !== this.#seek_generation)
-+                    return;
-+                this.#polling = false;
-+                this.#poll_promise = null;
-                 const contents = response.continuation_contents;
-                 if (!contents) {
-                     this.emit('error', new InnertubeError('Unexpected live chat incremental continuation response', response));
-@@ -91,24 +175,40 @@ export default class LiveChat extends EventEmitter {
-                     this.emit('end');
++            while (seek_generation === this.#seek_generation) {
++                try {
++                    const args = { continuation: this.#continuation, parse: true };
++                    // The player offset only applies to the initial continuation, which is the one
++                    // a seek resets us to. Sending it alongside a later continuation would keep
++                    // pulling us back to the seek position instead of advancing through the chat.
++                    if (this.is_replay && this.#player_offset_ms !== null && this.#continuation === this.#initial_continuation)
++                        args.currentPlayerState = { playerOffsetMs: this.#player_offset_ms.toString() };
++                    const response = await this.#actions.execute(this.is_replay ? 'live_chat/get_live_chat_replay' : 'live_chat/get_live_chat', args);
++                    if (seek_generation !== this.#seek_generation)
++                        return;
++                    const contents = response.continuation_contents;
++                    if (!contents) {
++                        this.emit('error', new InnertubeError('Unexpected live chat incremental continuation response', response));
++                        this.emit('end');
++                        this.stop();
++                    }
++                    if (!(contents instanceof LiveChatContinuation)) {
++                        this.stop();
++                        this.emit('end');
++                        return;
++                    }
++                    // Replays run out of continuations once the end of the chat is reached.
++                    this.#continuation = contents.continuation?.token;
++                    // Header only exists in the first request, and in the first request after a seek
++                    if (contents.header) {
++                        this.initial_info = contents;
++                        this.emit('start', contents);
++                        poll_again = this.running && !this.is_replay;
++                    }
++                    else if (this.is_replay) {
++                        // Replay actions carry their own player offsets, so instead of pacing them
++                        // ourselves we hand them over right away and let the consumer decide when
++                        // to display them.
++                        for (const action of contents.actions) {
++                            this.emit('chat-update', action);
++                        }
++                        // Once the end of the chat is reached there is no continuation left, which
++                        // makes pollNext() a no-op until a seek puts us back into the chat's range.
++                    }
++                    else {
++                        this.smoothed_queue.enqueueActionGroup(contents.actions);
++                    }
++                    this.#retry_count = 0;
                      return;
                  }
 -                this.#continuation = contents.continuation.token;
 -                // Header only exists in the first request
-+                // Replays run out of continuations once the end of the chat is reached.
-+                this.#continuation = contents.continuation?.token;
-+                // Header only exists in the first request, and in the first request after a seek
-                 if (contents.header) {
-                     this.initial_info = contents;
-                     this.emit('start', contents);
+-                if (contents.header) {
+-                    this.initial_info = contents;
+-                    this.emit('start', contents);
 -                    if (this.running)
-+                    if (this.running && !this.is_replay)
-                         this.#pollLivechat();
-                 }
-+                else if (this.is_replay) {
-+                    // Replay actions carry their own player offsets, so instead of pacing them
-+                    // ourselves we hand them over right away and let the consumer decide when
-+                    // to display them.
-+                    for (const action of contents.actions) {
-+                        this.emit('chat-update', action);
+-                        this.#pollLivechat();
+-                }
+-                else {
+-                    this.smoothed_queue.enqueueActionGroup(contents.actions);
++                catch (err) {
++                    if (seek_generation !== this.#seek_generation)
++                        return;
++                    this.emit('error', err);
++                    if (this.#retry_count++ < 10) {
++                        await this.#wait(2000);
 +                    }
-+                    // Once the end of the chat is reached there is no continuation left, which
-+                    // makes pollNext() a no-op until a seek puts us back into the chat's range.
-+                }
-                 else {
-                     this.smoothed_queue.enqueueActionGroup(contents.actions);
++                    else {
++                        this.emit('error', new InnertubeError('Reached retry limit for incremental continuation requests', err));
++                        this.emit('end');
++                        this.stop();
++                        return;
++                    }
                  }
-                 this.#retry_count = 0;
+-                this.#retry_count = 0;
              }
-             catch (err) {
-+                if (seek_generation !== this.#seek_generation)
-+                    return;
-+                this.#polling = false;
-+                this.#poll_promise = null;
-                 this.emit('error', err);
-                 if (this.#retry_count++ < 10) {
-                     await this.#wait(2000);
+-            catch (err) {
+-                this.emit('error', err);
+-                if (this.#retry_count++ < 10) {
+-                    await this.#wait(2000);
 -                    this.#pollLivechat();
-+                    if (seek_generation === this.#seek_generation)
-+                        this.#pollLivechat();
-                 }
-                 else {
-                     this.emit('error', new InnertubeError('Reached retry limit for incremental continuation requests', err));
-@@ -117,6 +217,7 @@ export default class LiveChat extends EventEmitter {
-                 }
-             }
-         })();
+-                }
+-                else {
+-                    this.emit('error', new InnertubeError('Reached retry limit for incremental continuation requests', err));
+-                    this.emit('end');
+-                    this.stop();
+-                }
+-            }
+-        })();
++        })().finally(() => {
++            if (seek_generation !== this.#seek_generation)
++                return;
++            this.#polling = false;
++            this.#poll_promise = null;
++            if (poll_again && this.running)
++                this.#pollLivechat();
++        });
 +        return this.#poll_promise;
      }
      /**

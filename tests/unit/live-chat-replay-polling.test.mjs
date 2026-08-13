@@ -257,6 +257,43 @@ test('concurrent polls are collapsed into one request', async () => {
   assert.equal(requests.length, 2)
 })
 
+test('concurrent polls share a transient failure retry sequence', async () => {
+  const { liveChat, requests, updates } = createReplay((args, callIndex) => {
+    if (callIndex === 1) {
+      throw new Error('temporary failure')
+    }
+
+    return {
+      continuation_contents: fakeContinuation({
+        continuation: `AFTER_${callIndex}`,
+        header: callIndex === 0 ? {} : null,
+        actions: callIndex === 2 ? [fakeReplayAction('5000')] : [],
+      }),
+    }
+  })
+
+  liveChat.start()
+  await flush()
+
+  const first = liveChat.pollNext()
+  await flush()
+  const second = liveChat.pollNext()
+
+  let firstResolved = false
+  first.then(() => { firstResolved = true })
+  await flush()
+
+  assert.equal(requests.length, 2)
+  assert.equal(firstResolved, false)
+
+  await Promise.all([first, second])
+
+  assert.equal(requests.length, 3)
+  assert.equal(requests[1].args.continuation, 'AFTER_0')
+  assert.equal(requests[2].args.continuation, 'AFTER_0')
+  assert.deepEqual(updates, [fakeReplayAction('5000')])
+})
+
 test('switching views moves the chat onto the other continuation', async () => {
   const { liveChat, requests } = createReplay((args, callIndex) => ({
     continuation_contents: fakeContinuation({
