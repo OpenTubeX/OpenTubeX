@@ -210,8 +210,21 @@ test.describe('watch page', () => {
     }))).toEqual({
       ipBlockDetected: true,
       fallbackAttempted: true,
-      fallbackTarget: 'yt-dlp'
+      fallbackTarget: null
     })
+
+    expect(await watchView.evaluate(async (view) => {
+      let recoveryCalls = 0
+      view.ipBlockDetectedInCurrentChain = true
+      view.playbackEngineFallbackTarget = 'yt-dlp'
+      view.extractYtDlpPlaybackSource = async () => false
+      view.runIpBlockRecoveryScriptAndReload = async () => {
+        recoveryCalls++
+        return true
+      }
+      await view.applyYtDlpPlaybackSource(view.videoLoadGeneration, view.videoId)
+      return recoveryCalls
+    })).toBe(1)
   })
 
   test('falls back to yt-dlp when the built-in live source has no manifest', async ({ app, page }) => {

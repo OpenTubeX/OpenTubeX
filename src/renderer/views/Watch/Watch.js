@@ -4117,6 +4117,21 @@ export default defineComponent({
         if (
           !sourceApplied &&
           this.isCurrentVideoLoad(loadGeneration, videoId) &&
+          this.playbackEngineFallbackTarget === 'yt-dlp' &&
+          this.ipBlockDetectedInCurrentChain
+        ) {
+          this.playbackEngineFallbackTarget = null
+          const didReload = await this.runIpBlockRecoveryScriptAndReload()
+          if (!this.isCurrentVideoLoad(loadGeneration, videoId) || didReload) {
+            return
+          }
+          this.errorMessage = this.t('Video.IP block')
+          return
+        }
+
+        if (
+          !sourceApplied &&
+          this.isCurrentVideoLoad(loadGeneration, videoId) &&
           this.manifestSrc === null &&
           this.legacyFormats.length === 0
         ) {
