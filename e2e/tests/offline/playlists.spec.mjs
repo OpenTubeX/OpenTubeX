@@ -8,9 +8,11 @@ test.describe('playlist creation', () => {
     await goTo(page, 'userplaylists')
 
     await page.getByTitle('Create New Playlist').click()
-    await expect(page.getByText('Quick bookmark icon')).toHaveCount(0)
-    await page.locator('.playlistNameInput input').fill('Created via UI')
-    await page.getByRole('button', { name: 'Create', exact: true }).click()
+    const createDialog = page.getByRole('dialog')
+    await expect(createDialog).toBeVisible()
+    await expect(createDialog.getByText('Quick bookmark icon')).toHaveCount(0)
+    await createDialog.locator('.playlistNameInput input').fill('Created via UI')
+    await createDialog.getByRole('button', { name: 'Create', exact: true }).click()
 
     await expect(page.getByRole('link', { name: 'Created via UI' })).toBeVisible()
   })
