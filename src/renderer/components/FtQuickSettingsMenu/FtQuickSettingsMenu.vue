@@ -560,7 +560,7 @@ function handleHideRecommendedVideos(value) {
 
 function openSettings() {
   menuOpen.value = false
-  store.dispatch('toggleSettingsWindow')
+  store.dispatch('showSettingsWindow')
 }
 
 function openKeyboardShortcuts() {
