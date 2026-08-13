@@ -258,7 +258,7 @@ export function reconcileFetchedSubscriptionEntries(
 
       // Some backends expose the scheduled start as both publication fields.
       // That is not an announcement date, so use first-seen time instead.
-      reconciledEntry.subscriptionFeedPublished = [previousFeedTimestamp, fetchedFeedTimestamp]
+      reconciledEntry.subscriptionFeedPublished = [fetchedFeedTimestamp, previousFeedTimestamp]
         .find(timestamp => timestamp != null && timestamp !== scheduledTimestamp) ??
           (Number.isFinite(previousFetchTime) ? previousFetchTime : Date.now())
     }

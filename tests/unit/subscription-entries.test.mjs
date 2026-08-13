@@ -157,6 +157,29 @@ test('adds RSS announcement dates only to scraped upcoming entries', () => {
   assert.equal(getSubscriptionVideoSortTimestamp(merged[0], false, now), announcementTime)
 })
 
+test('replaces a cached first-seen fallback with an exact RSS announcement date', () => {
+  const scheduledTime = now + HOUR
+  const announcementTime = now - 4 * HOUR
+  const firstSeenTime = now - HOUR
+  const upcoming = video('upcoming', scheduledTime, {
+    isUpcoming: true,
+    premiereDate: new Date(scheduledTime)
+  })
+  const [enriched] = mergeUpcomingSubscriptionFeedPublished(
+    [upcoming],
+    [video('upcoming', announcementTime, { isRSS: true })]
+  )
+
+  const [reconciled] = reconcileFetchedSubscriptionEntries(
+    [enriched],
+    [{ ...upcoming, subscriptionFeedPublished: firstSeenTime }],
+    'videoId',
+    firstSeenTime
+  )
+
+  assert.equal(reconciled.subscriptionFeedPublished, announcementTime)
+})
+
 test('keeps the cached publication date of entries that were already fetched', () => {
   const previousEntries = [
     video('a', now - 25 * HOUR),
