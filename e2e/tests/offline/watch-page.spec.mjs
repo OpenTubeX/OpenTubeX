@@ -430,6 +430,28 @@ test.describe('watch page', () => {
     })
   })
 
+  test('shows a live chat skeleton while chat availability loads', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+
+    let releaseMetadata
+    await page.route(/\/youtubei\/v1\/next/, async (route) => {
+      await new Promise(resolve => { releaseMetadata = resolve })
+      await route.fallback()
+    })
+
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    const sidebarSkeletons = page.locator(`${activeTab} .sidebarArea > :is(.liveChatSkeleton, .recommendationsSkeleton)`)
+    await expect(sidebarSkeletons).toHaveCount(2)
+    await expect(sidebarSkeletons.nth(0)).toHaveClass(/liveChatSkeleton/)
+    await expect(sidebarSkeletons.nth(1)).toHaveClass(/recommendationsSkeleton/)
+
+    await expect.poll(() => typeof releaseMetadata).toBe('function')
+    releaseMetadata()
+    await expect(page.locator(`${activeTab} .ftVideoPlayer`)).toBeVisible()
+  })
+
   test('keeps live chat and replay visibility independent and restores a closed chat', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -466,6 +488,7 @@ test.describe('watch page', () => {
 
     const replay = page.locator(`${activeTab} .watchVideoPlaylist`).filter({ hasText: 'Live Chat Replay' })
     await expect(replay).toBeVisible()
+    await expect(replay.locator('.liveChatSkeleton')).toBeVisible()
     await replay.getByRole('button', { name: 'Close Live Chat Replay' }).click()
     await expect(replay).toHaveCount(0)
 
