@@ -79,6 +79,9 @@ test.describe('search history suggestions', () => {
     await expect(page.locator(sel.tabs)).toHaveCount(2)
     await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
     await expect(page).not.toHaveURL(/#\/search\/android%20tutorial/)
+    await expect(page.locator(sel.searchInput)).toBeFocused()
+    await expect(page.locator(sel.searchInput)).toHaveValue('')
+    await expect(suggestions(page)).toHaveCount(2)
 
     await page.locator(sel.tabs).nth(1).click()
     await expect(page).toHaveURL(/#\/search\/android%20tutorial/)

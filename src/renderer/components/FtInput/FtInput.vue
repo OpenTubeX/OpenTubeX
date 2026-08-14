@@ -426,7 +426,11 @@ function handleOptionAuxClick(index, event) {
   }
 
   event.preventDefault()
-  handleOptionClick(index, event)
+  inputRef.value.focus()
+  emit('click', visibleDataList.value[index], {
+    event,
+    dataListIndex: getDataListIndex(index)
+  })
 }
 
 function resetSelectedOption() {
