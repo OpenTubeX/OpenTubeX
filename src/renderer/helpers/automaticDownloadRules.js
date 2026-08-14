@@ -66,7 +66,8 @@ function getDurationSeconds(video) {
   }
 
   if (typeof video.lengthSeconds === 'string' && /^\d+(?::[0-5]?\d){1,2}$/.test(video.lengthSeconds)) {
-    return video.lengthSeconds.split(':').reduce((seconds, part) => seconds * 60 + Number(part), 0)
+    const seconds = video.lengthSeconds.split(':').reduce((total, part) => total * 60 + Number(part), 0)
+    return seconds > 0 ? seconds : null
   }
 
   return null
@@ -100,6 +101,8 @@ export function matchesAutomaticDownloadRule(video, source, rawRule, now = Date.
   }
 
   const duration = getDurationSeconds(video)
+  // RSS feeds do not provide a usable duration. Keep the candidate so yt-dlp
+  // can apply the same min/max constraints after it extracts real metadata.
   if (duration !== null && (
     (rule.minDurationSeconds !== null && duration < rule.minDurationSeconds) ||
     (rule.maxDurationSeconds !== null && duration > rule.maxDurationSeconds)

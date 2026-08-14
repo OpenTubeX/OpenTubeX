@@ -11,7 +11,7 @@ import {
 const DAY = 24 * 60 * 60 * 1000
 const now = Date.parse('2026-08-14T12:00:00Z')
 
-function video(extra = {}) {
+function video (extra = {}) {
   return {
     videoId: 'abcdefghijk',
     title: 'Weekly Open Source Roundup',
@@ -66,6 +66,7 @@ test('applies content-type, duration, age, and title filters', () => {
   assert.equal(matchesAutomaticDownloadRule(video(), 'videos', rule, now), true)
   assert.equal(matchesAutomaticDownloadRule(video({ lengthSeconds: '2:00' }), 'videos', rule, now), false)
   assert.equal(matchesAutomaticDownloadRule(video({ lengthSeconds: 1200 }), 'videos', rule, now), false)
+  assert.equal(matchesAutomaticDownloadRule(video({ lengthSeconds: '0:00' }), 'videos', rule, now), true)
   assert.equal(matchesAutomaticDownloadRule(video({ published: now - 3 * DAY }), 'videos', rule, now), false)
   assert.equal(matchesAutomaticDownloadRule(video({ title: 'A sponsored open source roundup' }), 'videos', rule, now), false)
   assert.equal(matchesAutomaticDownloadRule(video({ title: 'Unrelated update' }), 'videos', rule, now), false)

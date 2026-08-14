@@ -12,6 +12,17 @@ import { showToastOnAllTabs } from './utils'
 const scheduledVideoIds = new Set()
 
 /**
+ * Failed or canceled downloads may be retried by a later feed refresh. The
+ * main-process history remains the source of truth for terminal deduplication.
+ * @param {object} download
+ */
+export function releaseAutomaticDownloadSchedule(download) {
+  if (download?.automatic === true && ['failed', 'cancelled'].includes(download.status)) {
+    scheduledVideoIds.delete(download.videoId)
+  }
+}
+
+/**
  * Adds channels with automatic rules to the set fetched for a subscription
  * feed, even when the current profile filters those channels out.
  * @param {{ id: string }[]} activeSubscriptions
@@ -94,6 +105,9 @@ export async function startAutomaticDownloadsForChannel(channel, videos, source,
 
     scheduledVideoIds.add(video.videoId)
     const title = video.title || video.videoId
+    const automaticMediaType = source === 'shorts'
+      ? 'short'
+      : source === 'live' || video.liveNow === true ? 'livestream' : 'video'
     const result = await window.ftElectron.ytDlpDownload({
       ...templateOptions,
       videoId: video.videoId,
@@ -101,6 +115,8 @@ export async function startAutomaticDownloadsForChannel(channel, videos, source,
       thumbnail: getThumbnail(video),
       template: rule.template,
       automatic: true,
+      channelId: channel.id,
+      automaticMediaType,
       minDurationSeconds: rule.minDurationSeconds,
       maxDurationSeconds: rule.maxDurationSeconds,
       minFileSizeMb: rule.minFileSizeMb,

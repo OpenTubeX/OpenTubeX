@@ -124,13 +124,34 @@ test.describe('download settings', () => {
       videoId: 'ccccccccccc',
       title: 'Automatic video',
       mode: 'video',
+      template: 'video:best',
       automatic: true,
+      channelId: BETA_CHANNEL_ID,
+      automaticMediaType: 'video',
       minDurationSeconds: 60,
       maxDurationSeconds: 180,
       minFileSizeMb: 5,
       maxFileSizeMb: 25,
-      maxAgeDays: 7
+      maxAgeDays: 7,
+      customArgs: '--write-description'
     }
+    expect(await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), payload)).toBeNull()
+    await page.evaluate(async ({ channelId, rule }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpAutomaticDownloadRules', JSON.stringify({ [channelId]: rule }))
+    }, {
+      channelId: BETA_CHANNEL_ID,
+      rule: {
+        template: 'video:best',
+        includeVideos: true,
+        minDurationSeconds: 60,
+        maxDurationSeconds: 180,
+        minFileSizeMb: 5,
+        maxFileSizeMb: 25,
+        maxAgeDays: 7
+      }
+    })
+
     const result = await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), payload)
     expect(result).toEqual({ id: expect.any(Number) })
     await expect.poll(() => page.evaluate(async (id) => {
@@ -140,7 +161,7 @@ test.describe('download settings', () => {
     const args = (await readFile(argumentsFile, 'utf8')).trim().split('\n')
     expect(args).toEqual(expect.arrayContaining([
       '--match-filter',
-      'duration >= 60 & duration <= 180',
+      `channel_id = ${BETA_CHANNEL_ID} & duration >= 60 & duration <= 180`,
       '--min-filesize',
       '5M',
       '--max-filesize',
@@ -149,6 +170,7 @@ test.describe('download settings', () => {
       'now-7days',
       '--no-overwrites'
     ]))
+    expect(args).not.toContain('--write-description')
 
     const duplicate = await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), payload)
     expect(duplicate).toEqual({ skipped: 'already-downloaded' })

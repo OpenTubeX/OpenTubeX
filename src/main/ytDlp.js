@@ -58,6 +58,8 @@ function takeGetInfoAbortSignal(key) {
  * @property {string} [customArgs] additional yt-dlp command line arguments
  * @property {string} [template] the template the options came from, only used for display purposes
  * @property {boolean} [automatic] whether a subscription refresh started the download
+ * @property {string} [channelId] channel whose persisted rule authorized the automatic download
+ * @property {'video' | 'short' | 'livestream'} [automaticMediaType]
  * @property {number} [minDurationSeconds]
  * @property {number} [maxDurationSeconds]
  * @property {number} [minFileSizeMb]
@@ -93,6 +95,48 @@ function takeGetInfoAbortSignal(key) {
  */
 
 const ID_REGEX = /^[\w-]{11}$/
+const CHANNEL_ID_REGEX = /^UC[\w-]{22}$/
+const AUTOMATIC_NUMBER_LIMITS = Object.freeze({
+  minDurationSeconds: 31_536_000,
+  maxDurationSeconds: 31_536_000,
+  minFileSizeMb: 1_000_000,
+  maxFileSizeMb: 1_000_000,
+  maxAgeDays: 36_500
+})
+const AUTOMATIC_TEMPLATE_OPTION_KEYS = new Set([
+  'mode',
+  'quality',
+  'videoFormat',
+  'videoCodec',
+  'audioFormat',
+  'filenameTemplate',
+  'startTime',
+  'endTime',
+  'splitChapters',
+  'removeSponsorblock',
+  'sponsorBlockCategories',
+  'includeSubtitles',
+  'embedSubtitles',
+  'subtitleLanguages',
+  'subtitleFormat',
+  'embedThumbnail',
+  'embedMetadata',
+  'customArgs'
+])
+const BUILT_IN_AUTOMATIC_TEMPLATE_OPTIONS = new Map([
+  ['video:best', { mode: 'video' }],
+  ['video:best:mp4', { mode: 'video', videoFormat: 'mp4' }],
+  ['video:1080', { mode: 'video', quality: '1080' }],
+  ['video:1080:mp4', { mode: 'video', quality: '1080', videoFormat: 'mp4' }],
+  ['video:720', { mode: 'video', quality: '720' }],
+  ['video:720:mp4', { mode: 'video', quality: '720', videoFormat: 'mp4' }],
+  ['video:480', { mode: 'video', quality: '480' }],
+  ['video:480:mp4', { mode: 'video', quality: '480', videoFormat: 'mp4' }],
+  ['audio:best', { mode: 'audio', embedThumbnail: true, embedMetadata: true }],
+  ['audio:mp3', { mode: 'audio', audioFormat: 'mp3', embedThumbnail: true, embedMetadata: true }],
+  ['subtitles:srt', { mode: 'subtitles', subtitleFormat: 'srt' }],
+  ['subtitles:vtt', { mode: 'subtitles', subtitleFormat: 'vtt' }]
+])
 const PLAYLIST_ID_REGEX = /^[\w-]{10,128}$/
 const QUALITY_REGEX = /^\d{3,4}$/
 const VIDEO_FORMATS = ['mp4', 'mkv', 'webm']
@@ -1222,23 +1266,124 @@ function splitArguments(argsString) {
   return args
 }
 
+function automaticNumber(value, maximum) {
+  return Number.isFinite(Number(value)) && Number(value) > 0 && Number(value) <= maximum
+    ? Number(value)
+    : null
+}
+
+async function getAutomaticTemplateOptions(template) {
+  const builtInOptions = BUILT_IN_AUTOMATIC_TEMPLATE_OPTIONS.get(template)
+  if (builtInOptions) {
+    return builtInOptions
+  }
+  if (!template.startsWith('template:')) {
+    return null
+  }
+
+  let templates
+  try {
+    templates = JSON.parse((await settings._findOne('ytDlpDownloadTemplates'))?.value || '[]')
+  } catch {
+    return null
+  }
+  if (!Array.isArray(templates)) {
+    return null
+  }
+
+  const customTemplate = templates.find(candidate => (
+    candidate?.name === template.slice('template:'.length)
+  ))
+  if (customTemplate?.options !== null && typeof customTemplate?.options === 'object' &&
+    !Array.isArray(customTemplate.options)) {
+    return { mode: 'video', ...customTemplate.options }
+  }
+  if (typeof customTemplate?.args === 'string') {
+    return { mode: 'video', customArgs: customTemplate.args }
+  }
+  return null
+}
+
+/**
+ * Rebuilds automatic-only options from settings owned by the main process.
+ * A renderer-provided `automatic` flag alone must never waive the activation
+ * boundary or select arbitrary yt-dlp arguments.
+ * @param {YtDlpDownloadPayload} payload
+ * @returns {Promise<YtDlpDownloadPayload | null>}
+ */
+async function authorizeAutomaticDownload(payload) {
+  if (typeof payload.channelId !== 'string' || !CHANNEL_ID_REGEX.test(payload.channelId)) {
+    return null
+  }
+
+  let rules
+  try {
+    rules = JSON.parse((await settings._findOne('ytDlpAutomaticDownloadRules'))?.value || '{}')
+  } catch {
+    return null
+  }
+  if (rules === null || typeof rules !== 'object' || Array.isArray(rules) ||
+    !Object.hasOwn(rules, payload.channelId)) {
+    return null
+  }
+
+  const rule = rules[payload.channelId]
+  if (rule === null || typeof rule !== 'object' || Array.isArray(rule)) {
+    return null
+  }
+  const template = typeof rule.template === 'string' && rule.template !== '' ? rule.template : 'video:best'
+  if (payload.template !== template) {
+    return null
+  }
+
+  const mediaTypeAllowed = payload.automaticMediaType === 'short'
+    ? rule.includeShorts === true
+    : payload.automaticMediaType === 'livestream'
+      ? rule.includeLivestreams === true
+      : payload.automaticMediaType === 'video' && rule.includeVideos !== false
+  if (!mediaTypeAllowed) {
+    return null
+  }
+
+  const templateOptions = await getAutomaticTemplateOptions(template)
+  if (templateOptions === null) {
+    return null
+  }
+
+  const sanitizedPayload = Object.fromEntries(Object.entries(payload).filter(([key]) => (
+    !AUTOMATIC_TEMPLATE_OPTION_KEYS.has(key) && !Object.hasOwn(AUTOMATIC_NUMBER_LIMITS, key)
+  )))
+  for (const [key, maximum] of Object.entries(AUTOMATIC_NUMBER_LIMITS)) {
+    sanitizedPayload[key] = automaticNumber(rule[key], maximum)
+  }
+
+  return {
+    ...sanitizedPayload,
+    ...structuredClone(templateOptions),
+    template,
+    automatic: true
+  }
+}
+
 /**
  * @param {import('electron').IpcMainInvokeEvent} event
- * @param {YtDlpDownloadPayload} payload
+ * @param {YtDlpDownloadPayload} incomingPayload
  * @returns {Promise<{ id: number } | { error: string } | { skipped: string } | null>}
  */
-async function startYtDlpDownload(event, payload) {
-  if (!isOpenTubeXUrl(event.senderFrame.url) ||
-    (payload?.automatic !== true && !event.sender.isFocused())) {
+async function startYtDlpDownload(event, incomingPayload) {
+  if (!isOpenTubeXUrl(event.senderFrame.url) || typeof incomingPayload !== 'object' || incomingPayload === null) {
+    return null
+  }
+
+  const payload = incomingPayload.automatic === true
+    ? await authorizeAutomaticDownload(incomingPayload)
+    : incomingPayload
+  if (payload === null || (payload.automatic !== true && !event.sender.isFocused())) {
     return null
   }
 
   if ((await settings._findOne('enableDownloads'))?.value === false) {
     return { error: 'downloads-disabled' }
-  }
-
-  if (typeof payload !== 'object' || payload === null) {
-    return null
   }
 
   if (!['video', 'audio', 'subtitles', 'custom'].includes(payload.mode)) {
@@ -1419,16 +1564,14 @@ async function startYtDlpDownload(event, payload) {
   if (!subtitlesOnly && payload.embedMetadata === true) {
     args.push('--embed-metadata', '--embed-chapters')
   }
-  const automaticNumber = (value, maximum) => Number.isFinite(Number(value)) && Number(value) > 0 && Number(value) <= maximum
-    ? Number(value)
-    : null
   if (payload.automatic === true) {
-    const minDurationSeconds = automaticNumber(payload.minDurationSeconds, 31_536_000)
-    const maxDurationSeconds = automaticNumber(payload.maxDurationSeconds, 31_536_000)
-    const minFileSizeMb = automaticNumber(payload.minFileSizeMb, 1_000_000)
-    const maxFileSizeMb = automaticNumber(payload.maxFileSizeMb, 1_000_000)
-    const maxAgeDays = automaticNumber(payload.maxAgeDays, 36_500)
+    const minDurationSeconds = automaticNumber(payload.minDurationSeconds, AUTOMATIC_NUMBER_LIMITS.minDurationSeconds)
+    const maxDurationSeconds = automaticNumber(payload.maxDurationSeconds, AUTOMATIC_NUMBER_LIMITS.maxDurationSeconds)
+    const minFileSizeMb = automaticNumber(payload.minFileSizeMb, AUTOMATIC_NUMBER_LIMITS.minFileSizeMb)
+    const maxFileSizeMb = automaticNumber(payload.maxFileSizeMb, AUTOMATIC_NUMBER_LIMITS.maxFileSizeMb)
+    const maxAgeDays = automaticNumber(payload.maxAgeDays, AUTOMATIC_NUMBER_LIMITS.maxAgeDays)
     const durationFilters = [
+      `channel_id = ${payload.channelId}`,
       minDurationSeconds === null ? null : `duration >= ${minDurationSeconds}`,
       maxDurationSeconds === null ? null : `duration <= ${maxDurationSeconds}`
     ].filter(Boolean)
