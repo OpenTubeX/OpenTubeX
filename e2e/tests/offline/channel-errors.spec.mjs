@@ -45,6 +45,41 @@ test('shows fallback metadata for unavailable channels', async ({ page }) => {
   await expect(fallbackAvatar).toBeVisible()
   await expect(fallbackAvatar).toHaveCSS('font-size', '100px')
 
+  const cachedChannelTab = page.locator(sel.activeTab)
+  await expect(cachedChannelTab.locator('.tabAvatar')).toHaveCount(0)
+  await expect(cachedChannelTab.locator('.tabPageIcon'))
+    .toHaveAttribute('data-icon', 'circle-user')
+
+  await page.evaluate(() => window.ftElectron.tabs.setPreviewCapturePaused(true))
+  try {
+    await cachedChannel.hover()
+    await cachedChannelTab.hover()
+    const tooltipPreview = page.locator('.tabTooltipPreview')
+    await expect(tooltipPreview).toBeVisible()
+    await expect(tooltipPreview.locator('.tabTooltipPreviewAvatar')).toHaveCount(0)
+    await expect(tooltipPreview.locator('.tabTooltipFallbackIcon'))
+      .toHaveAttribute('data-icon', 'circle-user')
+
+    await page.keyboard.down('Control')
+    try {
+      await page.keyboard.press('Tab')
+      const switcherItem = page.locator('.tabSwitcherItem', { hasText: 'Deleted Channel' })
+      await expect(switcherItem).toBeVisible()
+      const switcherTitleAvatar = switcherItem.locator('.tabSwitcherTitleAvatar')
+      const switcherTitleIcon = switcherItem.locator('.tabSwitcherTitleIcon')
+      await expect(switcherTitleAvatar.or(switcherTitleIcon)).toHaveCount(1)
+      if (await switcherTitleAvatar.count() > 0) {
+        await switcherTitleAvatar.dispatchEvent('error')
+      }
+      await expect(switcherItem.locator('.tabSwitcherTitleIcon'))
+        .toHaveAttribute('data-icon', 'circle-user')
+    } finally {
+      await page.keyboard.up('Control')
+    }
+  } finally {
+    await page.evaluate(() => window.ftElectron.tabs.setPreviewCapturePaused(false))
+  }
+
   await openChannelTab(page, UNKNOWN_CHANNEL_ID)
 
   const unknownChannel = page.locator('.channelDetails:visible')

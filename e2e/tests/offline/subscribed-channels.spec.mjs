@@ -57,7 +57,11 @@ test.describe('subscribed channels', () => {
     })
 
     await expect(alpha.locator('img.channelThumbnail')).toHaveCount(0)
-    await expect(alpha.locator('.channelThumbnail:not(img)')).toBeVisible()
+    const fallbackAvatar = alpha.locator('.channelThumbnail:not(img)')
+    await expect(fallbackAvatar).toBeVisible()
+    await expect(fallbackAvatar).toHaveCSS('inline-size', '120px')
+    await expect(fallbackAvatar).toHaveCSS('block-size', '120px')
+    await expect(fallbackAvatar).toHaveCSS('font-size', '120px')
   })
 
   test('profile dropdown uses an overlay scrollbar', async ({ page }) => {

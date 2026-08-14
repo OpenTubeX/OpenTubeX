@@ -44,8 +44,10 @@
 }
 
 .channelThumbnail {
+  inline-size: 120px;
   block-size: 120px;
   border-radius: 50%;
+  font-size: 120px;
 }
 
 .channelName {
@@ -90,6 +92,8 @@
   }
 
   .channelThumbnail {
+    inline-size: 80px;
     block-size: 80px;
+    font-size: 80px;
   }
 }
