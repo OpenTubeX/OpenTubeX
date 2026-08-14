@@ -1785,3 +1785,11 @@ Downloads:
 Update to {version}: Zaktualizuj do wersji {version}
 Maximize: Maksymalizuj
 Restore: Przywróć
+Close Window Confirmation:
+  Title: Zamknąć okno?
+  Close Window: Zamknij okno
+Confirmations:
+  Never Ask Again: Nie pytaj ponownie
+  Settings Hint: Możesz ponownie włączyć to potwierdzenie w Ustawienia → Ogólne → Potwierdź przed…
+Close Multiple Tabs Confirmation:
+  Title: Zamknąć wiele kart?
