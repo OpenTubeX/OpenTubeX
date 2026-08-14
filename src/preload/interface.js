@@ -374,10 +374,11 @@ export default {
 
   /**
    * @param {string} videoId
+   * @param {boolean} [useDefaultClients]
    * @returns {Promise<import('../main/ytDlp').YtDlpPlaybackInfo | { error: string } | null>}
    */
-  ytDlpGetPlaybackInfo: (videoId) => {
-    return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_PLAYBACK_INFO, videoId)
+  ytDlpGetPlaybackInfo: (videoId, useDefaultClients = false) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_PLAYBACK_INFO, videoId, useDefaultClients)
   },
 
   ytDlpPlaybackCacheGet: (videoId, cacheKey) => {

@@ -264,6 +264,10 @@ test.describe('watch page', () => {
 
   test('ignores a superseded yt-dlp extraction after rapid engine switches', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
+    await page.route('https://example.invalid/*.m3u8', route => route.fulfill({
+      contentType: 'application/x-mpegURL',
+      body: '#EXTM3U\n'
+    }))
     await openMockedVideo(page)
 
     await app.electronApp.evaluate(({ ipcMain }) => {
@@ -333,19 +337,34 @@ test.describe('watch page', () => {
     })
   })
 
-  test('an IP-blocked HTML watch page makes the built-in engine try yt-dlp', async ({ app, page }) => {
+  test('an IP-blocked HTML watch page retries yt-dlp with its default clients', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.route(/^https:\/\/www\.youtube\.com\/watch\?/, (route) => route.fulfill({
       status: 429,
       contentType: 'text/html',
       body: '<title>Sorry...</title>'
     }))
+    await page.route('https://example.invalid/rejected.m3u8', route => route.fulfill({
+      contentType: 'text/html',
+      body: '<html>expired</html>'
+    }))
     await app.electronApp.evaluate(({ ipcMain }) => {
       globalThis.__ytDlpIpBlockFallbackCalls = 0
+      globalThis.__ytDlpIpBlockFallbackDefaultClients = []
       ipcMain.removeHandler('yt-dlp-get-playback-info')
-      ipcMain.handle('yt-dlp-get-playback-info', () => {
+      ipcMain.handle('yt-dlp-get-playback-info', (_event, _videoId, useDefaultClients) => {
         globalThis.__ytDlpIpBlockFallbackCalls++
-        return { error: 'ENOENT' }
+        globalThis.__ytDlpIpBlockFallbackDefaultClients.push(useDefaultClients)
+        return globalThis.__ytDlpIpBlockFallbackCalls === 1
+          ? {
+              isLive: true,
+              liveStatus: 'is_live',
+              hlsManifestUrl: 'https://example.invalid/rejected.m3u8',
+              formats: [],
+              duration: null,
+              version: 'test'
+            }
+          : { error: 'ENOENT' }
       })
     })
 
@@ -353,7 +372,8 @@ test.describe('watch page', () => {
     await page.locator(sel.searchInput).press('Enter')
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
 
-    await expect.poll(() => app.electronApp.evaluate(() => globalThis.__ytDlpIpBlockFallbackCalls)).toBe(1)
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.__ytDlpIpBlockFallbackCalls)).toBe(2)
+    expect(await app.electronApp.evaluate(() => globalThis.__ytDlpIpBlockFallbackDefaultClients)).toEqual([false, true])
     const watchView = await watchViewHandle(page)
     expect(await watchView.evaluate((view) => ({
       ipBlockDetected: view.ipBlockDetectedInCurrentChain,
@@ -381,6 +401,11 @@ test.describe('watch page', () => {
 
   test('falls back to yt-dlp when the built-in live source has no manifest', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
+    await page.route('https://example.invalid/live.m3u8', route => route.fulfill({
+      contentType: 'application/x-mpegURL',
+      body: '#EXTM3U\n'
+    }))
+    await page.route('https://example.invalid/rejected.mp4', route => route.fulfill({ status: 403 }))
     await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
     await page.locator(sel.searchInput).press('Enter')
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
@@ -392,7 +417,24 @@ test.describe('watch page', () => {
         isLive: true,
         liveStatus: 'is_live',
         hlsManifestUrl: 'https://example.invalid/live.m3u8',
-        formats: [],
+        formats: [{
+          formatId: '18',
+          url: 'https://example.invalid/rejected.mp4',
+          protocol: 'https',
+          ext: 'mp4',
+          vcodec: 'avc1',
+          acodec: 'mp4a',
+          width: 640,
+          height: 360,
+          fps: 30,
+          bitrate: 500_000,
+          audioSampleRate: 44_100,
+          audioChannels: 2,
+          language: null,
+          formatNote: null,
+          dynamicRange: 'SDR',
+          availableAt: null
+        }],
         duration: null,
         version: 'test'
       }))
@@ -418,6 +460,7 @@ test.describe('watch page', () => {
       activeFormat: view.activeFormat,
       activePlaybackEngine: view.activePlaybackEngine,
       activePlaybackEngineVersion: view.activePlaybackEngineVersion,
+      legacyFormats: view.legacyFormats,
       playerReady: view.playerReady,
       ytDlpStreamsPending: view.ytDlpStreamsPending
     }))).toEqual({
@@ -425,6 +468,7 @@ test.describe('watch page', () => {
       activeFormat: 'dash',
       activePlaybackEngine: 'yt-dlp',
       activePlaybackEngineVersion: 'test',
+      legacyFormats: [],
       playerReady: true,
       ytDlpStreamsPending: false
     })
