@@ -244,10 +244,22 @@ const actions = {
     }
   },
 
-  async removeChannelFromProfiles({ commit }, { channelId, profileIds }) {
+  async removeChannelFromProfiles({ commit, dispatch, rootGetters }, { channelId, profileIds }) {
     try {
       await DBProfileHandlers.removeChannelFromProfiles(channelId, profileIds)
       commit('removeChannelFromProfiles', { channelId, profileIds })
+
+      if (profileIds.includes(MAIN_PROFILE_ID)) {
+        try {
+          const rules = JSON.parse(rootGetters.getYtDlpAutomaticDownloadRules || '{}')
+          if (rules !== null && typeof rules === 'object' && !Array.isArray(rules) && rules[channelId] !== undefined) {
+            delete rules[channelId]
+            await dispatch('updateYtDlpAutomaticDownloadRules', JSON.stringify(rules))
+          }
+        } catch (error) {
+          console.error('Failed to remove automatic download settings for the unsubscribed channel', error)
+        }
+      }
     } catch (errMessage) {
       console.error(errMessage)
     }

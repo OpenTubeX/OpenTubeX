@@ -250,6 +250,7 @@ const state = {
   ytDlpDownloadFolderPath: '',
   ytDlpDownloadTemplates: '[]',
   ytDlpSelectedTemplate: 'video:best',
+  ytDlpAutomaticDownloadRules: '{}',
   expandSideBar: false,
   hideActiveSubscriptions: false,
   hideChannelCommunity: false,

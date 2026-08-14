@@ -27,6 +27,8 @@
         @click="openDownloads"
       />
     </FtFlexBox>
+    <DownloadTemplateSettings v-if="enableDownloads" />
+    <AutomaticDownloadSettings v-if="enableDownloads" />
     <FtFlexBox
       v-if="enableDownloads"
       class="downloadPathInputs settingsFlexStart460px"
@@ -43,16 +45,6 @@
         @click="chooseDownloadFolder"
       />
     </FtFlexBox>
-    <FtFlexBox v-if="enableDownloads">
-      <p class="templatesHint">
-        {{ t('Settings.Download Settings.Templates Hint') }}
-      </p>
-    </FtFlexBox>
-    <FtFlexBox v-if="enableDownloads">
-      <p class="templatesHint">
-        {{ t('Settings.Download Settings.External Software Hint') }}
-      </p>
-    </FtFlexBox>
   </FtSettingsSection>
 </template>
 
@@ -65,6 +57,8 @@ import FtInput from './FtInput/FtInput.vue'
 import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
 import FtToggleSwitch from './FtToggleSwitch/FtToggleSwitch.vue'
 import FtButton from './FtButton/FtButton.vue'
+import AutomaticDownloadSettings from './AutomaticDownloadSettings/AutomaticDownloadSettings.vue'
+import DownloadTemplateSettings from './DownloadTemplateSettings/DownloadTemplateSettings.vue'
 
 import store from '../store/index'
 
@@ -118,7 +112,4 @@ async function chooseDownloadFolder() {
   max-inline-size: 100%;
 }
 
-.templatesHint {
-  margin-block: 0;
-}
 </style>

@@ -895,8 +895,32 @@ Settings:
     Managed Tools Download Error Template: 'Could not download the managed tools: {errors}'
     Download Folder: Download Folder
     Choose Download Folder: Choose Download Folder
-    Templates Hint: Custom download templates can be created and managed in the download prompt, which is located beneath the video player.
     External Software Hint: yt-dlp, FFmpeg, and FFprobe are configured in the External Software settings.
+    Download Templates: Download Templates
+    Manage Download Templates: 'Manage Download Templates ({templateCount})'
+    New Template: New Template
+    Template Source: Template to Edit or Use as a Base
+    Built-in Template: '{name} (Built-in)'
+    Custom Template Name: '{name} (Custom)'
+    Create Template Copy: Create Copy
+    Template Copy Name: '{name} Copy'
+    Automatic Downloads: Automatic Downloads
+    Manage Automatic Downloads: 'Manage Automatic Downloads ({channelCount})'
+    Automatic Downloads Description: Select a download template and filters for each subscribed channel. Matching videos download in the background when subscription feeds refresh.
+    Automatic Downloads New Only: Enabling a channel starts with its next new upload. Existing videos and the channel backlog are not downloaded.
+    Automatic Downloads No Channels: Subscribe to a channel before configuring automatic downloads.
+    Search Automatic Download Channels: Search channels
+    No Matching Automatic Download Channels: No channels match your search.
+    Automatic Downloads Videos: Videos
+    Automatic Downloads Livestreams: Livestreams
+    Minimum Duration Seconds: Minimum duration (seconds)
+    Maximum Duration Seconds: Maximum duration (seconds)
+    Minimum File Size MB: Minimum file size (MB)
+    Maximum File Size MB: Maximum file size (MB)
+    Maximum Age Days: Maximum age (days)
+    Title Includes: Title includes
+    Title Excludes: Title excludes
+    Title Filter Hint: Separate multiple title terms with commas. A video must match at least one included term and no excluded terms.
   External Software Settings:
     External Software Settings: External Software
     yt-dlp Source: yt-dlp Source
@@ -2252,6 +2276,12 @@ Downloads:
   Download Complete: Download complete
   Download Cancelled: Download canceled
   Download Failed: Download failed
+  Automatic Download Started: Automatic download started
+  Automatic Download Started Body: 'Downloading "{title}" from {channel} in the background.'
+  Automatic Download Complete: Automatic download complete
+  Automatic Download Failed: Automatic download failed
+  Automatic Download Could Not Start: 'Could not start the automatic download of "{title}".'
+  Automatic Download Skipped: Skipped by automatic download filters
   Cancel Download: Cancel Download
   yt-dlp Not Found: yt-dlp was not found. Install it or set its path in the Download Settings.
   Download Complete Template: 'Download of "{title}" has finished'

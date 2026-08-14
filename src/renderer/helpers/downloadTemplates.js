@@ -26,6 +26,61 @@ export const DEFAULT_DOWNLOAD_TEMPLATES = [
 ]
 
 /**
+ * Resolves the options stored by a built-in or custom template. Automatic
+ * downloads use the same templates as the download prompt, without needing to
+ * duplicate their interpretation.
+ * @param {string} value
+ * @param {{ name?: string, options?: object, args?: string }[]} customTemplates
+ * @returns {object | null}
+ */
+export function getDownloadTemplateOptions(value, customTemplates = []) {
+  const defaultTemplate = DEFAULT_DOWNLOAD_TEMPLATES.find(template => template.value === value)
+  if (defaultTemplate) {
+    return { mode: 'video', ...defaultTemplate.options }
+  }
+
+  const customTemplate = customTemplates.find(template => `template:${template.name}` === value)
+  if (customTemplate?.options && typeof customTemplate.options === 'object') {
+    return { mode: 'video', ...customTemplate.options }
+  }
+  if (typeof customTemplate?.args === 'string') {
+    return { mode: 'video', customArgs: customTemplate.args }
+  }
+
+  return null
+}
+
+/**
+ * Moves per-channel automatic download rules away from a renamed or deleted
+ * custom template.
+ * @param {string} rulesValue
+ * @param {string} oldTemplate
+ * @param {string} replacementTemplate
+ * @returns {string}
+ */
+export function replaceAutomaticDownloadTemplateReferences(rulesValue, oldTemplate, replacementTemplate) {
+  let rules
+  try {
+    rules = JSON.parse(rulesValue || '{}')
+  } catch {
+    return rulesValue
+  }
+  if (rules === null || typeof rules !== 'object' || Array.isArray(rules)) {
+    return rulesValue
+  }
+
+  let changed = false
+  for (const rule of Object.values(rules)) {
+    if (rule?.template === oldTemplate) {
+      rule.template = replacementTemplate
+      changed = true
+    }
+  }
+
+  return changed ? JSON.stringify(rules) : rulesValue
+}
+
+/**
  * @param {string} value
  * @param {(key: string, values?: object) => string} t
  * @returns {string} empty when the download wasn't started from a template

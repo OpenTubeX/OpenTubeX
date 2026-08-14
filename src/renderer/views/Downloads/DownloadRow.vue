@@ -212,6 +212,8 @@ const statusText = computed(() => {
         : t('Downloads.Download Complete')
     case 'cancelled':
       return t('Downloads.Download Cancelled')
+    case 'skipped':
+      return t('Downloads.Automatic Download Skipped')
     default:
       return t('Downloads.Download Failed')
   }

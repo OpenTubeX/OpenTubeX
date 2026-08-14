@@ -4,7 +4,7 @@ import { chmod, mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from 'no
 import { dirname, join } from 'node:path'
 import { promisify } from 'node:util'
 import { inflateRawSync } from 'node:zlib'
-import { app, BrowserWindow, net, shell } from 'electron'
+import { app, BrowserWindow, net, Notification, shell } from 'electron'
 import { settings } from '../datastores/handlers/base'
 import { buildProxyUrl, isOpenTubeXUrl } from './utils'
 import { IpcChannels } from '../constants'
@@ -57,6 +57,13 @@ function takeGetInfoAbortSignal(key) {
  * @property {boolean} [embedMetadata]
  * @property {string} [customArgs] additional yt-dlp command line arguments
  * @property {string} [template] the template the options came from, only used for display purposes
+ * @property {boolean} [automatic] whether a subscription refresh started the download
+ * @property {number} [minDurationSeconds]
+ * @property {number} [maxDurationSeconds]
+ * @property {number} [minFileSizeMb]
+ * @property {number} [maxFileSizeMb]
+ * @property {number} [maxAgeDays]
+ * @property {{ startedTitle?: string, startedBody?: string, completedTitle?: string, completedBody?: string, failedTitle?: string, failedBody?: string }} [notification]
  */
 
 /**
@@ -69,8 +76,9 @@ function takeGetInfoAbortSignal(key) {
  * @property {string} thumbnail
  * @property {'video' | 'audio' | 'subtitles' | 'custom'} mode
  * @property {string} template
+ * @property {boolean} [automatic]
  * @property {YtDlpDownloadPayload} [retryPayload]
- * @property {'downloading' | 'processing' | 'completed' | 'failed' | 'cancelled'} status
+ * @property {'downloading' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'skipped'} status
  * @property {number} percent
  * @property {string | null} speed
  * @property {string | null} eta
@@ -126,6 +134,7 @@ let downloadRecordsSaveQueue = Promise.resolve()
 let binaryInstallCounter = 0
 let managedBinaryInstallQueue = Promise.resolve()
 const retryingDownloadIds = new Set()
+const activeAutomaticDownloadNotifications = new Set()
 
 /** @type {Map<number, { child: import('node:child_process').ChildProcess, cancelled: boolean }>} */
 const activeDownloads = new Map()
@@ -142,6 +151,33 @@ function broadcastToRenderers(channel, payload) {
   }
 }
 
+function showAutomaticDownloadNotification(payload, phase) {
+  if (payload.automatic !== true || !Notification.isSupported()) {
+    return
+  }
+
+  const title = payload.notification?.[`${phase}Title`]
+  const body = payload.notification?.[`${phase}Body`]
+  if (typeof title !== 'string' || title.length === 0 || title.length > 200 ||
+    typeof body !== 'string' || body.length === 0 || body.length > 500) {
+    return
+  }
+
+  const notification = new Notification({ title, body })
+  activeAutomaticDownloadNotifications.add(notification)
+  notification.once('close', () => activeAutomaticDownloadNotifications.delete(notification))
+  notification.once('click', () => {
+    activeAutomaticDownloadNotifications.delete(notification)
+    const browserWindow = BrowserWindow.getAllWindows().find(window => !window.isDestroyed())
+    if (browserWindow) {
+      if (browserWindow.isMinimized()) browserWindow.restore()
+      browserWindow.show()
+      browserWindow.focus()
+    }
+  })
+  notification.show()
+}
+
 function getDownloadRecordsPath() {
   return join(app.getPath('userData'), 'downloads.json')
 }
@@ -153,7 +189,7 @@ function loadDownloadRecords() {
       if (!Array.isArray(records)) return
       for (const record of records) {
         if (Number.isInteger(record?.id) && typeof record.title === 'string' &&
-          ['completed', 'failed', 'cancelled'].includes(record.status)) {
+          ['completed', 'failed', 'cancelled', 'skipped'].includes(record.status)) {
           if (!downloadRecords.has(record.id)) downloadRecords.set(record.id, record)
           downloadCounter = Math.max(downloadCounter, record.id)
         }
@@ -1189,10 +1225,11 @@ function splitArguments(argsString) {
 /**
  * @param {import('electron').IpcMainInvokeEvent} event
  * @param {YtDlpDownloadPayload} payload
- * @returns {Promise<{ id: number } | { error: string } | null>}
+ * @returns {Promise<{ id: number } | { error: string } | { skipped: string } | null>}
  */
 async function startYtDlpDownload(event, payload) {
-  if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) {
+  if (!isOpenTubeXUrl(event.senderFrame.url) ||
+    (payload?.automatic !== true && !event.sender.isFocused())) {
     return null
   }
 
@@ -1240,6 +1277,12 @@ async function startYtDlpDownload(event, payload) {
   }
 
   await loadDownloadRecords()
+
+  if (payload.automatic === true && isSingleVideo && [...downloadRecords.values()].some(record => (
+    record.videoId === payload.videoId && ['downloading', 'processing', 'completed', 'skipped'].includes(record.status)
+  ))) {
+    return { skipped: 'already-downloaded' }
+  }
 
   const args = [
     '--newline',
@@ -1376,6 +1419,26 @@ async function startYtDlpDownload(event, payload) {
   if (!subtitlesOnly && payload.embedMetadata === true) {
     args.push('--embed-metadata', '--embed-chapters')
   }
+  const automaticNumber = (value, maximum) => Number.isFinite(Number(value)) && Number(value) > 0 && Number(value) <= maximum
+    ? Number(value)
+    : null
+  if (payload.automatic === true) {
+    const minDurationSeconds = automaticNumber(payload.minDurationSeconds, 31_536_000)
+    const maxDurationSeconds = automaticNumber(payload.maxDurationSeconds, 31_536_000)
+    const minFileSizeMb = automaticNumber(payload.minFileSizeMb, 1_000_000)
+    const maxFileSizeMb = automaticNumber(payload.maxFileSizeMb, 1_000_000)
+    const maxAgeDays = automaticNumber(payload.maxAgeDays, 36_500)
+    const durationFilters = [
+      minDurationSeconds === null ? null : `duration >= ${minDurationSeconds}`,
+      maxDurationSeconds === null ? null : `duration <= ${maxDurationSeconds}`
+    ].filter(Boolean)
+
+    if (durationFilters.length > 0) args.push('--match-filter', durationFilters.join(' & '))
+    if (minFileSizeMb !== null) args.push('--min-filesize', `${minFileSizeMb}M`)
+    if (maxFileSizeMb !== null) args.push('--max-filesize', `${maxFileSizeMb}M`)
+    if (maxAgeDays !== null) args.push('--dateafter', `now-${Math.ceil(maxAgeDays)}days`)
+    args.push('--no-overwrites')
+  }
   const startTime = !subtitlesOnly && typeof payload.startTime === 'string' && TIME_REGEX.test(payload.startTime) ? payload.startTime : ''
   const endTime = !subtitlesOnly && typeof payload.endTime === 'string' && TIME_REGEX.test(payload.endTime) ? payload.endTime : ''
   if (startTime !== '' || endTime !== '') {
@@ -1426,6 +1489,7 @@ async function startYtDlpDownload(event, payload) {
     thumbnail: typeof payload.thumbnail === 'string' ? payload.thumbnail.slice(0, 2048) : '',
     mode: payload.mode,
     template: typeof payload.template === 'string' ? payload.template.slice(0, 255) : '',
+    automatic: payload.automatic === true,
     retryPayload: structuredClone(payload),
     status: 'downloading',
     percent: 0,
@@ -1437,6 +1501,7 @@ async function startYtDlpDownload(event, payload) {
     errorMessage: null
   }
   downloadRecords.set(id, status)
+  showAutomaticDownloadNotification(payload, 'started')
 
   let lastSent = 0
   let finished = false
@@ -1565,6 +1630,7 @@ async function startYtDlpDownload(event, payload) {
     removeTemporaryDownloadFolder()
     status.status = 'failed'
     status.errorMessage = error.code === 'ENOENT' ? 'ENOENT' : error.message
+    showAutomaticDownloadNotification(payload, 'failed')
     sendStatus(true)
     saveDownloadRecords().catch(error => console.warn('Could not save download history', error))
   })
@@ -1591,11 +1657,19 @@ async function startYtDlpDownload(event, payload) {
         ))
         status.destination = convertedSubtitleDestinations.get(status.destination) ?? status.destination
       }
-      status.status = 'completed'
-      status.percent = 100
+      status.status = payload.automatic === true && status.destinations.length === 0
+        ? 'skipped'
+        : 'completed'
+      if (status.status === 'completed') status.percent = 100
     } else {
       status.status = 'failed'
       status.errorMessage = stderrLines.join('\n')
+    }
+
+    if (status.status === 'completed') {
+      showAutomaticDownloadNotification(payload, 'completed')
+    } else if (status.status === 'failed') {
+      showAutomaticDownloadNotification(payload, 'failed')
     }
 
     sendStatus(true)
@@ -1609,7 +1683,7 @@ async function startYtDlpDownload(event, payload) {
  * @param {import('electron').IpcMainInvokeEvent} event
  * @param {YtDlpDownloadPayload} payload
  * @param {number} [retryDownloadId]
- * @returns {Promise<{ id: number } | { error: string } | null>}
+ * @returns {Promise<{ id: number } | { error: string } | { skipped: string } | null>}
  */
 export async function handleYtDlpDownload(event, payload, retryDownloadId) {
   if (retryDownloadId === undefined) {
