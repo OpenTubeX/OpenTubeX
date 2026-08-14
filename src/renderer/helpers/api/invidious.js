@@ -439,7 +439,7 @@ export async function invidiousGetVideoInformation(videoId) {
  * @typedef {object} InvidiousComment
  * @property {string} id
  * @property {string} authorLink
- * @property {string} authorThumb
+ * @property {string | null} authorThumb
  * @property {string} author
  * @property {number} likes
  * @property {string} text
