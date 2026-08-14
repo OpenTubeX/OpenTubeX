@@ -122,7 +122,9 @@ test.describe('profile channel thumbnails', () => {
 
     const channel = page.locator('#subscriptionsPanel').getByRole('link', { name: 'Deleted Channel' })
     await expect(channel.locator('img.bubble')).toHaveCount(0)
-    await expect(channel.locator('.bubble:not(img)')).toBeVisible()
+    const fallbackAvatar = channel.locator('.bubble:not(img)')
+    await expect(fallbackAvatar).toBeVisible()
+    await expect(fallbackAvatar).toHaveCSS('font-size', '50px')
   })
 })
 
