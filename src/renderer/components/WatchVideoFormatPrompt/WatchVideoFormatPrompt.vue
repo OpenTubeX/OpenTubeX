@@ -62,9 +62,9 @@
           <button
             type="button"
             class="formatOption"
-            :class="{ active: option.value === activeFormat }"
+            :class="{ active: option.active }"
             :disabled="!option.available"
-            :aria-pressed="option.value === activeFormat"
+            :aria-pressed="option.active"
             @click="selectFormat(option.value)"
           >
             <FtIcon
@@ -79,7 +79,7 @@
               </span>
             </span>
             <FtIcon
-              v-if="option.value === activeFormat"
+              v-if="option.active"
               class="formatOptionCheck"
               :icon="['fas', 'check']"
             />
@@ -141,10 +141,20 @@ const props = defineProps({
   localFilePlayback: {
     type: Boolean,
     default: false
+  },
+  localPlaybackDownloads: {
+    type: Array,
+    default: () => []
   }
 })
 
-const emit = defineEmits(['change-format', 'change-playback-engine', 'close'])
+const emit = defineEmits([
+  'change-format',
+  'change-playback-engine',
+  'use-local-source',
+  'use-online-source',
+  'close'
+])
 
 const { t } = useI18n()
 
@@ -184,37 +194,57 @@ const engines = computed(() => [
 ])
 
 const options = computed(() => {
+  const activeDownloadId = props.localFilePlayback
+    ? props.localPlaybackDownloads.find(download => download.active)?.id
+    : undefined
+  const localOptions = props.localPlaybackDownloads.map(download => ({
+    value: `local:${download.id}`,
+    label: download.mode === 'audio'
+      ? t('Change Format.Local Audio File')
+      : t('Change Format.Local Video File'),
+    description: t('Change Format.Descriptions.Local File'),
+    icon: ['fas', download.mode === 'audio' ? 'volume-high' : 'file-video'],
+    available: true,
+    active: download.id === activeDownloadId
+  }))
+
   if (props.localFilePlayback) {
-    const audioOnly = props.activeFormat === 'audio'
-    return [{
-      value: props.activeFormat,
-      label: audioOnly ? t('Change Format.Local Audio File') : t('Change Format.Local Video File'),
-      description: t('Change Format.Descriptions.Local File'),
-      icon: ['fas', audioOnly ? 'volume-high' : 'file-video'],
-      available: true
-    }]
+    return [
+      ...localOptions,
+      {
+        value: 'online',
+        label: t('Change Format.Online Video'),
+        description: t('Change Format.Descriptions.Online Video'),
+        icon: ['fas', 'circle-play'],
+        available: true,
+        active: false
+      }
+    ]
   }
 
-  return [{
+  return [...localOptions, {
     value: 'dash',
     label: t('Change Format.Use Dash Formats'),
     description: t('Change Format.Descriptions.Dash'),
     icon: ['fas', 'photo-film'],
-    available: props.dashAvailable
+    available: props.dashAvailable,
+    active: props.activeFormat === 'dash'
   },
   {
     value: 'legacy',
     label: t('Change Format.Use Legacy Formats'),
     description: t('Change Format.Descriptions.Legacy'),
     icon: ['fas', 'file-video'],
-    available: props.legacyAvailable
+    available: props.legacyAvailable,
+    active: props.activeFormat === 'legacy'
   },
   {
     value: 'audio',
     label: t('Change Format.Use Audio Formats'),
     description: t('Change Format.Descriptions.Audio'),
     icon: ['fas', 'volume-high'],
-    available: props.audioAvailable
+    available: props.audioAvailable,
+    active: props.activeFormat === 'audio'
   }]
 })
 
@@ -222,6 +252,21 @@ const options = computed(() => {
  * @param {'dash' | 'legacy' | 'audio'} value
  */
 function selectFormat(value) {
+  if (value.startsWith('local:')) {
+    const downloadId = Number(value.slice('local:'.length))
+    if (!props.localPlaybackDownloads.some(download => download.id === downloadId && download.active)) {
+      emit('use-local-source', downloadId)
+    }
+    emit('close')
+    return
+  }
+
+  if (value === 'online') {
+    emit('use-online-source')
+    emit('close')
+    return
+  }
+
   if (value !== props.activeFormat) {
     emit('change-format', value)
   }

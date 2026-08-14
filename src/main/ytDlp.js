@@ -1,6 +1,6 @@
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { chmod, mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises'
+import { chmod, mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { promisify } from 'node:util'
 import { inflateRawSync } from 'node:zlib'
@@ -1403,6 +1403,12 @@ async function startYtDlpDownload(event, payload) {
     }
   }
 
+  // Keep post-processing inputs away from completed files with the same
+  // title and video ID. Audio extraction otherwise reuses and then deletes an
+  // existing video file when both variants have the same source extension.
+  const temporaryDownloadFolder = await mkdtemp(join(app.getPath('temp'), 'opentubex-download-'))
+  args.push('--paths', `temp:${temporaryDownloadFolder}`)
+
   const id = ++downloadCounter
   const child = spawn(executable, args, { windowsHide: true })
   const entry = { child, cancelled: false }
@@ -1527,6 +1533,10 @@ async function startYtDlpDownload(event, payload) {
   }
 
   let stdoutBuffer = ''
+  function removeTemporaryDownloadFolder() {
+    rm(temporaryDownloadFolder, { recursive: true, force: true })
+      .catch(error => console.warn('Could not remove temporary download folder', error))
+  }
   child.stdout.setEncoding('utf-8')
   child.stdout.on('data', (chunk) => {
     stdoutBuffer += chunk
@@ -1552,6 +1562,7 @@ async function startYtDlpDownload(event, payload) {
     finished = true
 
     activeDownloads.delete(id)
+    removeTemporaryDownloadFolder()
     status.status = 'failed'
     status.errorMessage = error.code === 'ENOENT' ? 'ENOENT' : error.message
     sendStatus(true)
@@ -1565,6 +1576,7 @@ async function startYtDlpDownload(event, payload) {
     finished = true
 
     activeDownloads.delete(id)
+    removeTemporaryDownloadFolder()
 
     if (entry.cancelled) {
       status.status = 'cancelled'

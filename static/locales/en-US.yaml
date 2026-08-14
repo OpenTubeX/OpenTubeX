@@ -1752,6 +1752,7 @@ Change Format:
   Use Audio Formats: Use Audio Formats
   Local Video File: Local video file
   Local Audio File: Local audio file
+  Online Video: Online video
   Dash formats are not available for this video: DASH formats are not available for
     this video
   Audio formats are not available for this video: Audio formats are not available
@@ -1770,6 +1771,7 @@ Change Format:
     Progressive: Progressive
   Descriptions:
     Local File: Played directly from the downloaded file on this device
+    Online Video: Load streaming formats from the configured online source
     Dash: Adaptive quality, multiple audio tracks and the highest resolutions
     Legacy: A single file with video and audio combined, limited to lower resolutions
     Audio: Audio only, useful for saving bandwidth or listening in the background
@@ -2189,7 +2191,7 @@ Downloads:
   Open Downloads: Open Downloads
   No Downloads: No downloads yet
   No Downloads Description: Downloads you start will appear here.
-  Clear Finished: Clear Finished
+  Clear Failed Canceled And Missing: Clear failed, canceled, and missing
   Clear From List: Clear From List
   Show in Folder: Show in Folder
   Play Download: Play download

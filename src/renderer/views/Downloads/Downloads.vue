@@ -8,12 +8,12 @@
         {{ t('Downloads.Total Size', { size: formattedTotalSize }) }}
       </p>
       <FtButton
-        v-if="finishedDownloads.length > 0"
-        :label="t('Downloads.Clear Finished')"
+        v-if="clearableDownloads.length > 0"
+        :label="t('Downloads.Clear Failed Canceled And Missing')"
         :icon="['fas', 'trash']"
         :text-color="null"
         :background-color="null"
-        @click="clearFinished"
+        @click="clearFailedAndMissing"
       />
     </div>
 
@@ -87,6 +87,10 @@ const retryingDownloadIds = ref([])
 const downloads = computed(() => Object.values(store.getters.getYtDlpDownloads).sort((a, b) => b.id - a.id))
 const activeDownloads = computed(() => downloads.value.filter(download => ['downloading', 'processing'].includes(download.status)))
 const finishedDownloads = computed(() => downloads.value.filter(download => !['downloading', 'processing'].includes(download.status)))
+const clearableDownloads = computed(() => finishedDownloads.value.filter(download => (
+  ['failed', 'cancelled'].includes(download.status) ||
+  (download.status === 'completed' && download.availability === 'missing')
+)))
 const totalSizeBytes = computed(() => downloads.value.reduce((total, download) => total + (download.sizeBytes ?? 0), 0))
 const formattedTotalSize = computed(() => formatBytes(totalSizeBytes.value))
 
@@ -114,9 +118,10 @@ async function clearDownload(id) {
   await window.ftElectron.ytDlpClearDownloads([id])
   store.commit('removeYtDlpDownload', id)
 }
-async function clearFinished() {
-  await window.ftElectron.ytDlpClearDownloads(finishedDownloads.value.map(download => download.id))
-  store.commit('clearFinishedYtDlpDownloads')
+async function clearFailedAndMissing() {
+  const ids = clearableDownloads.value.map(download => download.id)
+  await window.ftElectron.ytDlpClearDownloads(ids)
+  ids.forEach(id => store.commit('removeYtDlpDownload', id))
 }
 async function openDownload(id) {
   if (!await window.ftElectron.ytDlpOpenDownload(id)) {

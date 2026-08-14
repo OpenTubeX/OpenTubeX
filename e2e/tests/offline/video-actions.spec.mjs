@@ -329,9 +329,11 @@ test.describe('video downloads', () => {
   test('plays a downloaded video locally and reconciles it after external deletion', async ({ app, page }) => {
     const downloadedFile = path.join(app.userDataDir, 'downloaded-demo.webm')
     const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
+    const argumentsFile = path.join(app.userDataDir, 'yt-dlp-arguments.txt')
     await copyFile(DEMO_MEDIA_PATH, downloadedFile)
     await writeFile(executable, [
       '#!/bin/sh',
+      `printf '%s\\n' "$@" >> '${argumentsFile}'`,
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t30\\t640\\t360\\t${downloadedFile}\\n'`
     ].join('\n'))
     await chmod(executable, 0o755)
@@ -375,6 +377,19 @@ test.describe('video downloads', () => {
       const download = (await window.ftElectron.ytDlpListDownloads()).find(record => record.id === id)
       return download.sizeBytes
     }, result.id)).toBe(DEMO_MEDIA_LENGTH)
+    const audioResult = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      title: 'Downloaded audio alternative',
+      mode: 'audio'
+    }))
+    await expect.poll(() => page.evaluate(async (id) => {
+      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+    }, audioResult.id)).toBe('completed')
+    const temporaryPaths = (await readFile(argumentsFile, 'utf8'))
+      .split('\n')
+      .filter(argument => argument.startsWith('temp:'))
+    expect(temporaryPaths).toHaveLength(2)
+    expect(new Set(temporaryPaths).size).toBe(2)
     const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Downloaded demo' })
     await expect(downloadRow.locator('.downloadSummary')).toContainText('140 KiB')
     await expect(page.locator('.settingsBackButton')).toHaveCount(0)
@@ -405,6 +420,20 @@ test.describe('video downloads', () => {
     await page.locator('video.player').evaluate(video => { video.currentTime = 15 })
     await expect.poll(() => page.locator('video.player').evaluate(video => video.currentTime)).toBeGreaterThan(14)
 
+    await page.getByRole('button', { name: 'Change Media Formats' }).click()
+    await formatPrompt.getByRole('button', { name: /Online video/ }).click()
+    await expect(page).not.toHaveURL(/downloadId=/)
+    await page.getByRole('button', { name: 'Change Media Formats' }).click()
+    await expect(formatPrompt.locator('.engineBadge')).not.toHaveText('Local file')
+    await expect(formatPrompt.getByRole('button', { name: /Local video file/ })).toBeVisible()
+    await expect(formatPrompt.getByRole('button', { name: /Local audio file/ })).toBeVisible()
+    await formatPrompt.getByRole('button', { name: /Local audio file/ }).click()
+    await expect(page).toHaveURL(new RegExp(`downloadId=${audioResult.id}`))
+    await page.getByRole('button', { name: 'Change Media Formats' }).click()
+    await expect(formatPrompt.getByRole('button', { name: /Local audio file/ })).toHaveAttribute('aria-pressed', 'true')
+    await formatPrompt.getByRole('button', { name: /Online video/ }).click()
+    await expect(page).not.toHaveURL(/downloadId=/)
+
     await unlink(downloadedFile)
     await page.locator('.topNav .downloadsButton').click()
     await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
@@ -413,6 +442,9 @@ test.describe('video downloads', () => {
     await expect(downloadRow.getByTitle('Play download')).toHaveCount(0)
     await expect(downloadRow.getByTitle('Show in Folder')).toHaveCount(0)
     await expect(downloadRow.getByTitle('Remove File')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Clear failed, canceled, and missing' }).click()
+    await expect(downloadRow).toHaveCount(0)
+    await expect(page.locator('.downloadRow').filter({ hasText: 'Downloaded audio alternative' })).toHaveCount(0)
   })
 
   test('plays an audio download in the normal player', async ({ app, page }) => {
@@ -599,7 +631,7 @@ test.describe('video downloads', () => {
     await hydratedDownload.getByTitle('Cancel Download').click()
     await expect(otherDownload).toContainText('Download canceled')
 
-    await hydratedDownload.getByTitle('Clear From List').click()
+    await lateWindow.getByRole('button', { name: 'Clear failed, canceled, and missing' }).click()
     await expect(otherDownload).toHaveCount(0)
   })
 

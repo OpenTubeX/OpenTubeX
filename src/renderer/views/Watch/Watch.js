@@ -407,6 +407,24 @@ export default defineComponent({
     }
   },
   computed: {
+    localPlaybackDownloads: function () {
+      const downloads = Object.values(this.$store.getters.getYtDlpDownloads)
+        .filter(download => download.status === 'completed' && ['video', 'audio'].includes(download.mode))
+        .filter(download => download.files?.some(file => (
+          file.videoId === this.videoId && file.available !== false
+        )))
+        .toSorted((a, b) => b.id - a.id)
+      const activeDownloadId = Number(this.tabRoute.query.downloadId)
+
+      return ['video', 'audio'].flatMap(mode => {
+        const download = downloads.find(download => (
+          download.id === activeDownloadId && download.mode === mode
+        )) ?? downloads.find(download => download.mode === mode)
+        return download === undefined
+          ? []
+          : [{ id: download.id, mode, active: download.id === activeDownloadId }]
+      })
+    },
     hasScheduledPremiereStarted: function () {
       return this.premiereDate instanceof Date &&
         this.premiereDate.getTime() <= this.liveReminderNow
@@ -3644,6 +3662,26 @@ export default defineComponent({
           this.enableAudioFormat()
           break
       }
+    },
+
+    useOnlinePlaybackSource: async function () {
+      if (!this.localFilePlayback || typeof this.tabRoute.query.downloadId !== 'string') return
+
+      const query = { ...this.tabRoute.query }
+      delete query.downloadId
+      const playbackPosition = this.getTimestamp()
+      if (playbackPosition > 0) query.oneTimeTimestamp = playbackPosition
+      await this.tabRouter.replace({ path: this.tabRoute.path, query })
+    },
+
+    useLocalPlaybackSource: async function (downloadId) {
+      if (!Number.isInteger(downloadId) ||
+        !this.localPlaybackDownloads.some(download => download.id === downloadId)) return
+
+      const query = { ...this.tabRoute.query, downloadId: String(downloadId) }
+      const playbackPosition = this.getTimestamp()
+      if (playbackPosition > 0) query.oneTimeTimestamp = playbackPosition
+      await this.tabRouter.replace({ path: this.tabRoute.path, query })
     },
 
     /**
