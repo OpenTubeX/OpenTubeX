@@ -29,6 +29,7 @@
     "clean": "node _scripts/clean.mjs",
     "debug": "node _scripts/dev-runner.js --remote-debug",
     "dev": "node _scripts/dev-runner.js",
+    "dev:worktree": "node _scripts/dev-runner.js --worktree",
     "dev:web": "node _scripts/dev-runner.js --web",
     "get-instances": "node _scripts/getInstances.js",
     "get-regions": "node _scripts/getRegions.mjs",

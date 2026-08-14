@@ -158,6 +158,7 @@ const config = {
       'process.env.IS_ELECTRON': true,
       'process.env.IS_ELECTRON_MAIN': false,
       'process.env.SUPPORTS_LOCAL_API': true,
+      'process.env.OPENTUBEX_DEV_SERVER_PORT': JSON.stringify(process.env.OPENTUBEX_DEV_SERVER_PORT ?? '9080'),
       'process.env.BUILD_COMMIT': JSON.stringify(process.env.GITHUB_SHA ?? ''),
       __VUE_OPTIONS_API__: 'true',
       __VUE_PROD_DEVTOOLS__: 'false',

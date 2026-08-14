@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { buildProxyUrl, isNonPublicNetworkAddress } from '../../src/main/utils.js'
+import { buildProxyUrl, isNonPublicNetworkAddress, isOpenTubeXUrl } from '../../src/main/utils.js'
 
 test('identifies network addresses which are unsafe for untrusted fetches', () => {
   for (const address of [
@@ -23,7 +23,6 @@ test('identifies network addresses which are unsafe for untrusted fetches', () =
     assert.equal(isNonPublicNetworkAddress(address), false, address)
   }
 })
-
 test('builds a proxy URL from the proxy settings', () => {
   assert.equal(buildProxyUrl({
     protocol: 'socks5',
@@ -94,4 +93,44 @@ test('falls back to the default proxy settings', () => {
   assert.equal(buildProxyUrl({ protocol: 'http', port: '8080' }), 'http://127.0.0.1:8080')
   assert.equal(buildProxyUrl({ protocol: '', hostname: '', port: '' }), 'socks5://127.0.0.1:9050')
   assert.equal(buildProxyUrl({ username: 'user', password: 'pass' }), 'socks5://user:pass@127.0.0.1:9050')
+})
+
+test('recognizes the configured development server origin', () => {
+  const previousNodeEnv = process.env.NODE_ENV
+  const previousPort = process.env.OPENTUBEX_DEV_SERVER_PORT
+
+  try {
+    process.env.NODE_ENV = 'development'
+    process.env.OPENTUBEX_DEV_SERVER_PORT = '12345'
+
+    assert.equal(isOpenTubeXUrl('http://localhost:12345/'), true)
+    assert.equal(isOpenTubeXUrl('http://localhost:12345/index.html'), true)
+    assert.equal(isOpenTubeXUrl('http://localhost:9080/'), false)
+    assert.equal(isOpenTubeXUrl('http://127.0.0.1:12345/'), false)
+  } finally {
+    if (previousNodeEnv === undefined) delete process.env.NODE_ENV
+    else process.env.NODE_ENV = previousNodeEnv
+
+    if (previousPort === undefined) delete process.env.OPENTUBEX_DEV_SERVER_PORT
+    else process.env.OPENTUBEX_DEV_SERVER_PORT = previousPort
+  }
+})
+
+test('uses the default development server origin without an override', () => {
+  const previousNodeEnv = process.env.NODE_ENV
+  const previousPort = process.env.OPENTUBEX_DEV_SERVER_PORT
+
+  try {
+    process.env.NODE_ENV = 'development'
+    delete process.env.OPENTUBEX_DEV_SERVER_PORT
+
+    assert.equal(isOpenTubeXUrl('http://localhost:9080/'), true)
+    assert.equal(isOpenTubeXUrl('http://localhost:12345/'), false)
+  } finally {
+    if (previousNodeEnv === undefined) delete process.env.NODE_ENV
+    else process.env.NODE_ENV = previousNodeEnv
+
+    if (previousPort === undefined) delete process.env.OPENTUBEX_DEV_SERVER_PORT
+    else process.env.OPENTUBEX_DEV_SERVER_PORT = previousPort
+  }
 })

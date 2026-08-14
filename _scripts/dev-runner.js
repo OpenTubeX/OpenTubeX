@@ -6,7 +6,11 @@ const WebpackDevServer = require('webpack-dev-server')
 const kill = require('@magda/tree-kill')
 
 const path = require('path')
+const { createHash } = require('crypto')
 const { spawn } = require('child_process')
+const { mkdirSync, realpathSync } = require('fs')
+const { tmpdir } = require('os')
+const net = require('net')
 
 const ProcessLocalesPlugin = require('./ProcessLocalesPlugin')
 
@@ -20,6 +24,7 @@ const manualRestartResetMs = 2500
 
 const remoteDebugging = process.argv.indexOf('--remote-debug') !== -1
 const web = process.argv.indexOf('--web') !== -1
+const worktree = process.argv.indexOf('--worktree') !== -1
 
 let mainConfig
 let rendererConfig
@@ -27,18 +32,6 @@ let preloadConfig
 let botGuardScriptConfig
 let webConfig
 let SHAKA_LOCALES_TO_BE_BUNDLED
-
-if (!web) {
-  mainConfig = require('./webpack.main.config')
-  rendererConfig = require('./webpack.renderer.config')
-  preloadConfig = require('./webpack.preload.config.js')
-  botGuardScriptConfig = require('./webpack.botGuardScript.config')
-
-  SHAKA_LOCALES_TO_BE_BUNDLED = rendererConfig.SHAKA_LOCALES_TO_BE_BUNDLED
-  delete rendererConfig.SHAKA_LOCALES_TO_BE_BUNDLED
-} else {
-  webConfig = require('./webpack.web.config')
-}
 
 if (remoteDebugging) {
   // disable dvtools open in electron
@@ -49,7 +42,56 @@ if (remoteDebugging) {
 const relaunchExitCode = 69
 process.env.OPENTUBEX_RELAUNCH_EXIT_CODE = relaunchExitCode
 
-const port = 9080
+let port = 9080
+
+function findAvailablePort() {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer()
+    server.unref()
+    server.on('error', reject)
+    server.listen(0, 'localhost', () => {
+      const address = server.address()
+      server.close(error => {
+        if (error) {
+          reject(error)
+        } else if (typeof address === 'object' && address !== null) {
+          resolve(address.port)
+        } else {
+          reject(new Error('Unable to allocate a development server port'))
+        }
+      })
+    })
+  })
+}
+
+async function configureWorktree() {
+  port = await findAvailablePort()
+
+  const projectPath = realpathSync(path.resolve(__dirname, '..'))
+  const profileId = createHash('sha256').update(projectPath).digest('hex').slice(0, 12)
+  const profilePath = path.join(tmpdir(), `opentubex-dev-${profileId}`)
+  mkdirSync(profilePath, { recursive: true, mode: 0o700 })
+
+  process.env.OPENTUBEX_DEV_SERVER_PORT = String(port)
+  process.env.OPENTUBEX_DEV_USER_DATA_DIR = profilePath
+
+  console.log(`Using development server port ${port}`)
+  console.log(`Using worktree profile ${profilePath}`)
+}
+
+function loadWebpackConfigs() {
+  if (!web) {
+    mainConfig = require('./webpack.main.config')
+    rendererConfig = require('./webpack.renderer.config')
+    preloadConfig = require('./webpack.preload.config.js')
+    botGuardScriptConfig = require('./webpack.botGuardScript.config')
+
+    SHAKA_LOCALES_TO_BE_BUNDLED = rendererConfig.SHAKA_LOCALES_TO_BE_BUNDLED
+    delete rendererConfig.SHAKA_LOCALES_TO_BE_BUNDLED
+  } else {
+    webConfig = require('./webpack.web.config')
+  }
+}
 
 async function killElectron(pid) {
   return new Promise((resolve, reject) => {
@@ -281,12 +323,22 @@ function startWeb () {
     console.log(`\nCompiled ${name} script!\n\nWatching file changes for ${name} script...`)
   })
 }
-if (!web) {
-  startRenderer(() => {
-    startBotGuardScript()
-    startPreload()
-    startMain()
-  })
-} else {
-  startWeb()
+async function start() {
+  if (worktree) await configureWorktree()
+  loadWebpackConfigs()
+
+  if (!web) {
+    startRenderer(() => {
+      startBotGuardScript()
+      startPreload()
+      startMain()
+    })
+  } else {
+    startWeb()
+  }
 }
+
+start().catch(error => {
+  console.error(error)
+  process.exitCode = 1
+})
