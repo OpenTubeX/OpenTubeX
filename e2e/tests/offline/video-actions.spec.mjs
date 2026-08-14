@@ -146,7 +146,7 @@ test.describe('video downloads', () => {
     await expect(page.locator('.downloadProgressBarTrack')).toHaveCount(0)
   })
 
-  test('requests compatible streams and alternate audio for yt-dlp playback', async ({ app, page }) => {
+  test('can retry playback extraction with yt-dlp default clients', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'capture-yt-dlp-playback-args.sh')
     const capturedArgs = path.join(app.userDataDir, 'captured-yt-dlp-playback-args.txt')
     await writeFile(executable, [
@@ -161,11 +161,16 @@ test.describe('video downloads', () => {
     }, executable)
 
     await page.bringToFront()
-    const info = await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee'))
+    await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee'))
 
-    const passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
+    let passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
     const extractorArgsIndex = passedArguments.indexOf('--extractor-args')
     expect(passedArguments[extractorArgsIndex + 1]).toBe('youtube:player_client=web_embedded,default,-android_vr')
+
+    const info = await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee', true))
+
+    passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
+    expect(passedArguments).not.toContain('--extractor-args')
     expect(info.formats[0].availableAt).toBe(123)
   })
 

@@ -269,65 +269,75 @@ export async function getYtDlpPlaybackSource(videoId, cacheKey = '') {
     return cachedSource
   }
 
-  const info = await window.ftElectron.ytDlpGetPlaybackInfo(videoId)
+  let extractionError = null
 
-  if (info === null) {
-    throw new Error('yt-dlp is not available')
-  }
+  for (const useDefaultClients of [false, true]) {
+    const info = await window.ftElectron.ytDlpGetPlaybackInfo(videoId, useDefaultClients)
 
-  if ('error' in info) {
-    throw new Error(info.error === 'ENOENT' ? 'yt-dlp could not be found' : info.error)
-  }
+    if (info === null) {
+      throw new Error('yt-dlp is not available')
+    }
 
-  const httpFormats = info.formats.filter(format => format.protocol === 'https' && format.url !== null)
+    if ('error' in info) {
+      if (info.error === 'ENOENT') {
+        throw new Error('yt-dlp could not be found')
+      }
 
-  const legacyFormats = httpFormats
-    .filter(format => isVideoFormat(format) && isAudioFormat(format))
-    .map(mapYtDlpLegacyFormat)
+      extractionError = new Error(info.error)
+      continue
+    }
 
-  // live streams are only available as HLS, which is what makes rewinding within
-  // the DVR window possible
-  if (!info.isLive && info.liveStatus !== 'is_live') {
-    const adaptiveFormats = httpFormats.filter(format => !(isVideoFormat(format) && isAudioFormat(format)))
-    const localFormats = await convertAdaptiveFormats(adaptiveFormats, info.duration)
+    const httpFormats = info.formats.filter(format => format.protocol === 'https' && format.url !== null)
+    const legacyFormats = httpFormats
+      .filter(format => isVideoFormat(format) && isAudioFormat(format))
+      .map(mapYtDlpLegacyFormat)
 
-    if (localFormats.some(format => format.has_video) && localFormats.some(format => format.has_audio)) {
-      const manifest = await FormatUtils.toDash({ adaptive_formats: localFormats })
+    // live streams are only available as HLS, which is what makes rewinding within
+    // the DVR window possible
+    if (!info.isLive && info.liveStatus !== 'is_live') {
+      const adaptiveFormats = httpFormats.filter(format => !(isVideoFormat(format) && isAudioFormat(format)))
+      const localFormats = await convertAdaptiveFormats(adaptiveFormats, info.duration)
 
-      const source = {
-        manifestSrc: `data:${MANIFEST_TYPE_DASH};charset=UTF-8,${encodeURIComponent(manifest)}`,
-        manifestMimeType: MANIFEST_TYPE_DASH,
+      if (localFormats.some(format => format.has_video) && localFormats.some(format => format.has_audio)) {
+        const manifest = await FormatUtils.toDash({ adaptive_formats: localFormats })
+
+        const source = {
+          manifestSrc: `data:${MANIFEST_TYPE_DASH};charset=UTF-8,${encodeURIComponent(manifest)}`,
+          manifestMimeType: MANIFEST_TYPE_DASH,
+          legacyFormats,
+          expiryDate: getEarliestYtDlpFormatExpiry(adaptiveFormats),
+          isLive: false,
+          version: info.version
+        }
+
+        dashPlaybackSourceCache.set(videoId, cacheKey, source)
+        try {
+          await window.ftElectron.ytDlpPlaybackCacheSet(
+            videoId,
+            cacheKey,
+            source.expiryDate?.getTime() ?? NaN,
+            source
+          )
+        } catch (error) {
+          console.warn('Could not save the persistent yt-dlp playback cache', error)
+        }
+        return source
+      }
+    }
+
+    if (info.hlsManifestUrl !== null) {
+      return {
+        manifestSrc: info.hlsManifestUrl,
+        manifestMimeType: MANIFEST_TYPE_HLS,
         legacyFormats,
-        expiryDate: getEarliestYtDlpFormatExpiry(adaptiveFormats),
-        isLive: false,
+        expiryDate: null,
+        isLive: info.isLive,
         version: info.version
       }
-
-      dashPlaybackSourceCache.set(videoId, cacheKey, source)
-      try {
-        await window.ftElectron.ytDlpPlaybackCacheSet(
-          videoId,
-          cacheKey,
-          source.expiryDate?.getTime() ?? NaN,
-          source
-        )
-      } catch (error) {
-        console.warn('Could not save the persistent yt-dlp playback cache', error)
-      }
-      return source
     }
+
+    extractionError = new Error('yt-dlp did not return any playable formats')
   }
 
-  if (info.hlsManifestUrl !== null) {
-    return {
-      manifestSrc: info.hlsManifestUrl,
-      manifestMimeType: MANIFEST_TYPE_HLS,
-      legacyFormats,
-      expiryDate: null,
-      isLive: info.isLive,
-      version: info.version
-    }
-  }
-
-  throw new Error('yt-dlp did not return any playable formats')
+  throw extractionError ?? new Error('yt-dlp did not return any playable formats')
 }

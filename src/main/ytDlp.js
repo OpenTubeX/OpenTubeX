@@ -1077,9 +1077,10 @@ function mapPlaybackFormat(format) {
  * without relying on the SABR streaming protocol.
  * @param {import('electron').IpcMainInvokeEvent} event
  * @param {string} videoId
+ * @param {boolean} useDefaultClients
  * @returns {Promise<YtDlpPlaybackInfo | { error: string } | null>}
  */
-export async function handleYtDlpGetPlaybackInfo(event, videoId) {
+export async function handleYtDlpGetPlaybackInfo(event, videoId, useDefaultClients = false) {
   if (!isOpenTubeXUrl(event.senderFrame.url)) {
     return null
   }
@@ -1104,15 +1105,18 @@ export async function handleYtDlpGetPlaybackInfo(event, videoId) {
     '--no-warnings',
     '--no-progress',
     '--socket-timeout',
-    '15',
-    // The embedded client exposes alternate audio languages without requiring
-    // a PO token. Android VR used to provide the same token-free fallback, but
-    // YouTube now selectively enforces GVS tokens for its non-HLS formats and
-    // returns 403 for the extracted URLs. Keep the remaining default clients as
-    // fallbacks for videos the embedded client cannot access.
-    '--extractor-args',
-    'youtube:player_client=web_embedded,default,-android_vr'
+    '15'
   ]
+
+  if (useDefaultClients !== true) {
+    // Prefer clients whose URLs are not currently subject to selective PO-token
+    // enforcement. The renderer retries with yt-dlp's defaults if none of these
+    // formats are playable for the current video.
+    args.push(
+      '--extractor-args',
+      'youtube:player_client=web_embedded,default,-android_vr'
+    )
+  }
 
   await pushProxyArgument(args)
 

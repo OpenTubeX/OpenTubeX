@@ -333,7 +333,7 @@ test.describe('watch page', () => {
     })
   })
 
-  test('an IP-blocked HTML watch page makes the built-in engine try yt-dlp', async ({ app, page }) => {
+  test('an IP-blocked HTML watch page retries yt-dlp with its default clients', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.route(/^https:\/\/www\.youtube\.com\/watch\?/, (route) => route.fulfill({
       status: 429,
@@ -345,7 +345,9 @@ test.describe('watch page', () => {
       ipcMain.removeHandler('yt-dlp-get-playback-info')
       ipcMain.handle('yt-dlp-get-playback-info', () => {
         globalThis.__ytDlpIpBlockFallbackCalls++
-        return { error: 'ENOENT' }
+        return globalThis.__ytDlpIpBlockFallbackCalls === 1
+          ? { error: 'preferred clients failed' }
+          : { error: 'ENOENT' }
       })
     })
 
@@ -353,7 +355,7 @@ test.describe('watch page', () => {
     await page.locator(sel.searchInput).press('Enter')
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
 
-    await expect.poll(() => app.electronApp.evaluate(() => globalThis.__ytDlpIpBlockFallbackCalls)).toBe(1)
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.__ytDlpIpBlockFallbackCalls)).toBe(2)
     const watchView = await watchViewHandle(page)
     expect(await watchView.evaluate((view) => ({
       ipBlockDetected: view.ipBlockDetectedInCurrentChain,
