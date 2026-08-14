@@ -1590,7 +1590,9 @@ function handleExtraThumbnailAction() {
 }
 
 function parseVideoData() {
+  uploadedTime.value = ''
   uploadedTimeIsRelative.value = false
+  published.value = undefined
   id.value = props.data.videoId
   title.value = props.data.title
 
@@ -1851,7 +1853,7 @@ function onDragStart(event) {
   }
 }
 
-parseVideoData()
+watch(() => props.data, parseVideoData, { immediate: true })
 
 showDeArrowTitle.value = useDeArrowTitles.value
 showDeArrowThumbnail.value = useDeArrowThumbnails.value

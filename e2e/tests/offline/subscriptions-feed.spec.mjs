@@ -56,6 +56,7 @@ const seed = {
         }),
         feedVideo('aaaaaaaaaa2', 'Video A older', CHANNEL_A, now - 3 * HOUR),
         feedVideo('aaaaaaaaaa3', 'Upcoming premiere video', CHANNEL_A, now + 30 * 24 * HOUR, {
+          isUpcoming: true,
           premiereDate: new Date(now + 30 * 24 * HOUR).toISOString()
         })
       ],
@@ -294,6 +295,55 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
     await reminderButton.click()
     await expect(upcomingPremiere.getByRole('button', { name: 'Notification on' }))
       .toHaveAttribute('aria-pressed', 'true')
+  })
+
+  test('updates a reused upcoming card when refreshed premiere state changes', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
+    await expect(upcomingPremiere.locator('.videoDuration')).toHaveText('Upcoming')
+    await expect(upcomingPremiere.getByRole('button', { name: 'Notify me' })).toBeVisible()
+    await upcomingPremiere.evaluate(element => { element.dataset.reuseMarker = 'upcoming-premiere' })
+    const reusedCard = page.locator('[data-reuse-marker="upcoming-premiere"]')
+
+    const updateCachedPremiere = async (updates) => {
+      await page.evaluate(async ({ channelId, updates }) => {
+        const app = document.querySelector('#app').__vue_app__
+        const store = app.config.globalProperties.$store
+        const videos = store.getters.getVideoCache[channelId].videos.map(video => {
+          if (video.videoId !== 'aaaaaaaaaa3') return video
+
+          const updatedVideo = { ...video, ...updates }
+          delete updatedVideo.premiereDate
+          return updatedVideo
+        })
+
+        await store.dispatch('updateSubscriptionVideosCacheByChannel', { channelId, videos })
+        window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-channel', {
+          detail: { tab: 'videos' }
+        }))
+      }, { channelId: CHANNEL_A, updates })
+    }
+
+    await updateCachedPremiere({
+      isUpcoming: false,
+      isPremiere: true,
+      liveNow: true,
+      lengthSeconds: ''
+    })
+
+    await expect(reusedCard).toBeVisible()
+    await expect(upcomingPremiere.locator('.videoDuration')).toHaveText('Premiere')
+    await expect(upcomingPremiere.getByRole('button', { name: /Notify me|Notification on/ })).toHaveCount(0)
+
+    await updateCachedPremiere({
+      isPremiere: false,
+      liveNow: false,
+      lengthSeconds: 702
+    })
+
+    await expect(reusedCard).toBeVisible()
+    await expect(upcomingPremiere.locator('.videoDuration')).toHaveText('11:42')
   })
 
   test('cleans up repeated live-reminder subscriptions independently', async ({ app, page }) => {
