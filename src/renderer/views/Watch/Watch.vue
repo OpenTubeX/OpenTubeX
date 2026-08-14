@@ -797,21 +797,6 @@
         </div>
       </div>
       <div
-        v-if="isLoading && (!hideLiveChat || !hideLiveChatReplay)"
-        class="liveChatSkeleton watchVideoSideBar watchVideoPlaylist"
-        aria-hidden="true"
-      >
-        <div class="skeletonLine skeletonLiveChatTitle ft-shimmer" />
-        <div
-          v-for="index in 8"
-          :key="index"
-          class="skeletonLiveChatMessage"
-        >
-          <div class="skeletonLiveChatAvatar ft-shimmer" />
-          <div class="skeletonLine skeletonLiveChatLine ft-shimmer" />
-        </div>
-      </div>
-      <div
         v-if="isLoading && !hideRecommendedVideos"
         class="recommendationsSkeleton"
         aria-hidden="true"
