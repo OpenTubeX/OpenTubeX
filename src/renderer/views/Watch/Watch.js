@@ -967,6 +967,10 @@ export default defineComponent({
   watch: {
     isLoading(loading) {
       if (!loading) {
+        if (!this.transcriptAvailable && this.showTranscript) {
+          this.closeTranscript()
+        }
+
         this.loadingTheatreMode = null
         this.shortsTransitionPreview = ''
         this.shortsTransitionDirection = 0
@@ -1009,11 +1013,6 @@ export default defineComponent({
     },
     canSkipToPreviousVideo() {
       this.syncMediaSessionSkipHandlers()
-    },
-    transcriptAvailable(available) {
-      if (!available && this.showTranscript) {
-        this.closeTranscript()
-      }
     },
   },
   created: function () {

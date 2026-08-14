@@ -38,6 +38,47 @@ for (const { name, options, expectedCount } of [
   })
 }
 
+test('preserves a Shorts transcript through transient caption resets', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page, { captionCueSettings: 'align:center' })
+  await openMockedVideo(page)
+
+  const watchView = await watchViewHandle(page)
+  const transcriptStates = await watchView.evaluate(async view => {
+    view.showTranscript = true
+    view.resetVideoState({ preserveShortsPanels: true })
+    await view.$nextTick()
+    const duringCaptionReset = view.showTranscript
+
+    view.captions = [{
+      url: 'https://www.youtube.com/api/timedtext?v=next-captioned-short&lang=en',
+      label: 'English',
+      language: 'en',
+      mimeType: 'text/vtt'
+    }]
+    view.isLoading = false
+    await view.$nextTick()
+    const afterCaptionedLoad = view.showTranscript
+
+    view.resetVideoState({ preserveShortsPanels: true })
+    await view.$nextTick()
+    view.isLoading = false
+    await view.$nextTick()
+
+    return {
+      duringCaptionReset,
+      afterCaptionedLoad,
+      afterCaptionlessLoad: view.showTranscript
+    }
+  })
+
+  expect(transcriptStates).toEqual({
+    duringCaptionReset: true,
+    afterCaptionedLoad: true,
+    afterCaptionlessLoad: false
+  })
+  await watchView.dispose()
+})
+
 test('a background watch tab stays loading until its cached avatar is ready', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
 
