@@ -1075,8 +1075,11 @@ function onScroll() {
     }
     showScrollToBottom.value = false
   } else if (!isScrollingToBottom) {
-    stayAtBottom = false
-    showScrollToBottom.value = liveChatComments.scrollHeight > liveChatComments.clientHeight
+    // Scroll events are also emitted while a replay seek replaces the list and
+    // while message/dock animations reflow it. Only explicit user input should
+    // cancel live-edge following; stopScrollingToBottom handles wheel, pointer,
+    // and keyboard input before the resulting scroll event arrives.
+    showScrollToBottom.value = !stayAtBottom && liveChatComments.scrollHeight > liveChatComments.clientHeight
   }
 }
 
