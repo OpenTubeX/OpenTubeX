@@ -4,6 +4,8 @@
 }
 
 .app {
+  --top-nav-sticky-offset: 60px;
+
   display: flex;
   flex-wrap: wrap;
   font-family: Roboto, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
@@ -472,6 +474,10 @@
 
 .app.bottomTabs :deep(.progressBar) {
   inset-block-end: 34px;
+}
+
+.app.topTabs {
+  --top-nav-sticky-offset: 92px;
 }
 
 @media only screen and (width <= 680px) {

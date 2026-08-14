@@ -215,6 +215,19 @@ test.describe('custom playlist order', () => {
     await expect(page.locator('.playlistItemsCard .h3Title').first()).toHaveText('Custom playlist video 3')
   })
 
+  test('keeps the playlist header below the navigation while scrolling the grid', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Large custom playlist').click()
+
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+
+    await expect.poll(async () => {
+      const header = await page.locator('.playlistInfoContainer').boundingBox()
+      const navigation = await page.locator('.topNav').boundingBox()
+      return header != null && navigation != null && header.y >= navigation.y + navigation.height
+    }).toBe(true)
+  })
+
   test('moves a video to the top from its options menu', async ({ page }) => {
     await goTo(page, 'userplaylists')
     await page.getByText('Large custom playlist').click()
