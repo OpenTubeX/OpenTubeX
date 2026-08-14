@@ -113,6 +113,43 @@ test.describe('Shorts transcript navigation', () => {
     await expect(transcriptPanel).toHaveCount(0)
     await expect(transcriptButton).toHaveCount(0)
   })
+
+  test('keeps loading Shorts when another player keeps the shared caption factory alive', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, { captionTranslations: true })
+
+    const backgroundTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/watch/background-captioned-video',
+      title: 'Background captioned video',
+      makeActive: false,
+      preloadInBackground: true
+    }))
+    const backgroundContent = page.locator(`.tabContent[data-tab-id="${backgroundTab.id}"]`)
+    const backgroundPlayer = backgroundContent.locator('.ftVideoPlayer')
+    await expect(backgroundPlayer).toHaveCount(1, { timeout: 30_000 })
+    await expect.poll(() => backgroundPlayer.evaluate(element => {
+      return element.ui?.getControls().getPlayer().getAssetUri() ?? ''
+    })).not.toBe('')
+
+    await page.locator(sel.searchInput)
+      .fill(`https://www.youtube.com/shorts/${CAPTIONED_SHORT_IDS[0]}`)
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[0]}\\?short=true`))
+    await waitForPlayback(page)
+
+    const rendererErrors = []
+    page.on('pageerror', error => rendererErrors.push(error.message))
+    page.on('console', message => {
+      if (message.type() === 'error') rendererErrors.push(message.text())
+    })
+
+    await page.locator('.shortsNavigationButton').last().click()
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[1]}\\?short=true`))
+    await waitForPlayback(page)
+
+    expect(rendererErrors.filter(error => (
+      error.includes('getTextTracks') || error.includes('failed to render')
+    ))).toEqual([])
+  })
 })
 
 test('a background watch tab stays loading until its cached avatar is ready', async ({ app, page }) => {
