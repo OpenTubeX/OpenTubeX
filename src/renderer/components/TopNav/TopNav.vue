@@ -111,6 +111,7 @@
                 :aria-label="t('Search Filters.Search Filters')"
                 :title="t('Search Filters.Search Filters')"
                 @click="showSearchFilters"
+                @contextmenu.stop.prevent="clearSearchFilters"
               >
                 <FtIcon
                   class="navIcon"
@@ -441,6 +442,16 @@ const searchFilterValueChanged = computed(() => {
 
 function showSearchFilters() {
   store.dispatch('showSearchFilters')
+}
+
+function clearSearchFilters() {
+  const tabId = searchFilterTabId.value
+  store.commit('setSearchPrioritize', { tabId, value: 'relevance' })
+  store.commit('setSearchTime', { tabId, value: '' })
+  store.commit('setSearchType', { tabId, value: 'all' })
+  store.commit('setSearchDuration', { tabId, value: '' })
+  store.commit('setSearchFeatures', { tabId, value: [] })
+  store.commit('setSearchFilterValueChanged', { tabId, value: false })
 }
 
 const searchContainer = useTemplateRef('searchContainer')
