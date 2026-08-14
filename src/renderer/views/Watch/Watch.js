@@ -1816,7 +1816,7 @@ export default defineComponent({
       this.localFilePlayback = true
       this.localPlaybackDownloadId = downloadId
       this.playbackSourceKey++
-      return true
+      return file
     },
 
     cacheOnlinePlaybackSource: function () {
@@ -1890,10 +1890,10 @@ export default defineComponent({
     },
 
     finishDownloadedPlaybackWithoutMetadata: function () {
-      if (!this.applyDownloadedPlaybackSource()) return false
+      const file = this.applyDownloadedPlaybackSource()
+      if (!file) return false
 
-      const download = this.$store.getters.getYtDlpDownloads[this.tabRoute.query.downloadId]
-      const file = download.files.find(file => file.videoId === this.videoId && file.available !== false)
+      const download = this.$store.getters.getYtDlpDownloads[this.localPlaybackDownloadId]
       const fileName = file.path.split(/[/\\]/).at(-1)?.replace(/\.[^.]+$/, '') ?? this.videoId
       this.videoTitle = download.videoId === this.videoId ? download.title : fileName
       this.hasResolvedVideoTitle = true

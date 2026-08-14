@@ -1886,7 +1886,11 @@ function runApp() {
 
       let fileSize
       try {
-        fileSize = (await asyncFs.stat(file.path)).size
+        const fileStats = await asyncFs.stat(file.path)
+        if (!fileStats.isFile()) {
+          return new Response(null, { status: 404 })
+        }
+        fileSize = fileStats.size
       } catch {
         return new Response(null, { status: 404 })
       }

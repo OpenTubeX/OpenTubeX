@@ -374,6 +374,26 @@ test.describe('settings', () => {
     }))).toBe(true)
   })
 
+  test('clamps Theme settings after a narrow-to-wide reflow', async ({ page }) => {
+    await page.setViewportSize({ width: 340, height: 600 })
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="theme"]').click()
+
+    const content = page.locator('.settingsContent')
+    await content.evaluate(element => element.scrollTo(0, element.scrollHeight))
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await page.setViewportSize({ width: 1200, height: 800 })
+    await expect.poll(() => content.evaluate(element => {
+      const section = Array.from(element.children).find(child => {
+        return child.classList.contains('section') && getComputedStyle(child).display !== 'none'
+      })
+      const maximum = Math.max(0, section.offsetTop + section.offsetHeight +
+        Number.parseFloat(getComputedStyle(element).paddingBottom) - element.clientHeight)
+      return element.scrollTop <= maximum + 1
+    })).toBe(true)
+  })
+
   test('opens Downloads from the download settings category', async ({ page }) => {
     const routeBeforeOpening = page.url()
     const downloadSection = await goToSettingsSection(page, 'download')

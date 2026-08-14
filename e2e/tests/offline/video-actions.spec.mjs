@@ -1,4 +1,4 @@
-import { chmod, copyFile, readFile, unlink, writeFile } from 'node:fs/promises'
+import { chmod, copyFile, mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, goTo, goToSettingsSection, waitForAppReady } from '../../helpers/app.mjs'
@@ -562,7 +562,7 @@ test.describe('video downloads', () => {
     await writeFile(downloadedFile, '')
     await writeFile(executable, [
       '#!/bin/sh',
-      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\t1\tNA\tNA\t${downloadedFile}\n'`
+      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\tNA\\tNA\\t${downloadedFile}\\n'`
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
@@ -594,6 +594,34 @@ test.describe('video downloads', () => {
       contentType: 'audio/wav',
       bodyLength: 0
     })
+  })
+
+  test('rejects a downloaded media path that is not a file', async ({ app, page }) => {
+    const downloadedDirectory = path.join(app.userDataDir, 'download-directory.webm')
+    const executable = path.join(app.userDataDir, 'fake-directory-yt-dlp.sh')
+    await mkdir(downloadedDirectory)
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\tNA\\tNA\\t${downloadedDirectory}\\n'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      title: 'Directory download',
+      mode: 'video'
+    }))
+    await expect.poll(() => page.evaluate(async (id) => {
+      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+    }, result.id)).toBe('completed')
+
+    expect(await page.evaluate(async (id) => {
+      return (await fetch(`downloadmedia://file/${id}/eeeeeeeeeee`)).status
+    }, result.id)).toBe(404)
   })
 
   test('maps playlist files to video IDs and reports partial availability', async ({ app, page }) => {
@@ -818,7 +846,7 @@ test.describe('video downloads', () => {
     const attemptsFile = path.join(app.userDataDir, 'retry-attempts.txt')
     await writeFile(executable, [
       '#!/bin/sh',
-      `printf 'retry\n' >> ${attemptsFile}`,
+      `printf 'retry\\n' >> '${attemptsFile}'`,
       'sleep 0.5',
       'exit 1'
     ].join('\n'))
@@ -855,7 +883,7 @@ test.describe('video downloads', () => {
     const attemptsFile = path.join(app.userDataDir, 'concurrent-retry-attempts.txt')
     await writeFile(executable, [
       '#!/bin/sh',
-      `printf 'retry\n' >> ${attemptsFile}`,
+      `printf 'retry\\n' >> '${attemptsFile}'`,
       'sleep 0.5',
       'exit 1'
     ].join('\n'))

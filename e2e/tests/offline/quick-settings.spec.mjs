@@ -67,13 +67,18 @@ test.describe('quick settings menu', () => {
   })
 
   test('hides the unavailable main color selector', async ({ page }) => {
+    await page.setViewportSize({ width: 480, height: 420 })
     await page.locator('.profileTrigger').click()
     const menu = page.locator('.quickSettingsMenu')
     const appearance = menu.locator('.menuSection').first()
+    const scrollViewport = menu.locator('.quickSettingsScroll')
+    await scrollViewport.evaluate(element => element.scrollTo(0, element.scrollHeight))
 
     const baseTheme = appearance.getByRole('combobox', { name: 'Base Theme' })
-    await baseTheme.click()
-    await page.getByRole('option', { name: /Hot pink/i, exact: true }).click()
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('updateBaseTheme', 'hotPink')
+    })
 
     await expect(menu).toBeVisible()
     await expect(baseTheme).toBeVisible()
@@ -81,6 +86,26 @@ test.describe('quick settings menu', () => {
     expect(await appearance.locator('.selectPair').evaluate(element => {
       return getComputedStyle(element).gridTemplateColumns.split(' ').length
     })).toBe(1)
+    await expect.poll(() => scrollViewport.evaluate(element => {
+      const content = element.querySelector('.quickSettingsContent')
+      return element.scrollTop <= Math.max(0, content.offsetTop + content.offsetHeight - element.clientHeight) + 1
+    })).toBe(true)
+  })
+
+  test('keeps view headers outside their scrollports and resets switched views', async ({ page }) => {
+    await page.setViewportSize({ width: 480, height: 420 })
+    await page.locator('.profileTrigger').click()
+    const menu = page.locator('.quickSettingsMenu')
+    const mainScroll = menu.locator('.quickSettingsScroll')
+
+    await expect(mainScroll.locator('.profileHeaderRow')).toHaveCount(0)
+    await mainScroll.evaluate(element => element.scrollTo(0, element.scrollHeight))
+    await menu.locator('.profileSummary').click()
+
+    await expect(menu.locator('.quickSettingsScroll').locator('.profilePanelHeader')).toHaveCount(0)
+    await menu.getByRole('button', { name: 'Back' }).click()
+    await expect(menu.locator('.profileHeaderRow')).toBeVisible()
+    await expect(mainScroll).toHaveJSProperty('scrollTop', 0)
   })
 
   test('keeps the menu open when Escape closes a select', async ({ page }) => {
