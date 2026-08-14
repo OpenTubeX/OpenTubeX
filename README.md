@@ -53,12 +53,12 @@ experience. Some of its major areas of focus are:
 <details>
 <summary>Show feature list</summary>
 
-- Remember playback speed on a per-channel basis. You can enable it in settings. When enabled, you can either have speeds saved automatically whenever you change them via the player options or keep automatic saving off and use a dedicated button below the player to manually save the current speed for that channel.
+- Manage and automatically apply playback speed, video quality, subtitles and volume for individual channels. You can enable each option in settings. Playback speeds can be saved automatically whenever you change them through the player options, or you can leave automatic saving off and use the dedicated button below the player to save the current speed for that channel manually.
  <img height="150" alt="image" src="https://github.com/user-attachments/assets/e8fe58f3-80f0-4280-946e-abf997f0eac3" />
- <img height="150" alt="image" src="https://github.com/user-attachments/assets/8fb28196-cf5a-4bb8-baa5-b911cb37262f" />
+ <br />
  <img height="75" alt="image" src="https://github.com/user-attachments/assets/560a55c0-f653-4c21-ae30-5cdeff6ac428" />
-
-- Remember video quality on a per-channel basis. Works the same way as above
+ <br />
+ <img height="250" alt="image" src="https://github.com/user-attachments/assets/a802d400-0f41-4375-a252-9f5a157afb84" />
 
 - Option if you want to multiply seek intervals by playback rate. By default, seek intervals (arrow keys and J/L) are not multiplied by playback rate. You can change this in Player Settings if you prefer the previous behavior.
  <img height="150" alt="image" src="https://github.com/user-attachments/assets/9195f70e-a881-4052-b199-bbdad043e39a" />
@@ -95,7 +95,7 @@ experience. Some of its major areas of focus are:
 
 - Experimental SponsorBlock submission
 
-- Tabs like in a web browser, including horizontal and vertical layouts, pinning, colors, thumbnail previews, duplication, unloading, reordering, moving tabs between windows, bulk closing, copying YouTube links and configurable session restoration
+- Tabs like in a web browser, including horizontal and vertical layouts, pinning, colors, thumbnail previews, duplication, unloading, multi-selection, reordering, moving tabs between windows, bulk actions, copying YouTube links and configurable session restoration
 <img height="250" alt="image" src="https://github.com/user-attachments/assets/2ddbedea-5997-4a3c-af9e-6a36d3a21d04" />
 <br />
 <img width="516" height="129" alt="image" src="https://github.com/user-attachments/assets/486f0119-ca74-40ec-835a-dd6f53cf1f56" />
@@ -134,12 +134,14 @@ experience. Some of its major areas of focus are:
 <img width="261" height="175" alt="image" src="https://github.com/user-attachments/assets/2d7d7549-db79-4d9d-9063-77124d3a9750" />
 <img width="94" height="43" alt="image" src="https://github.com/user-attachments/assets/1f74350c-11cc-4515-8e0e-9abedcebaa71" />
 
-- Additional video metadata, including AI-generated content labels, collaborators, categories, relative publication dates and comment counts
+- Additional video metadata, including AI-generated content and paid-promotion labels, collaborators, categories, games, tags, relative publication dates and comment counts
 <img height="250" alt="image" src="https://github.com/user-attachments/assets/90cfb4b3-1d26-438d-86de-c1be2e8858ce" />
 <br />
 <img width="488" height="142" alt="image" src="https://github.com/user-attachments/assets/ceaa25b3-2157-4904-80ad-619426862c1d" />
 <br />
-<img width="447" height="158" alt="image" src="https://github.com/user-attachments/assets/36674aa1-e6e9-4332-9018-0357667291c5" />
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/0c147b10-c2de-4560-898d-ae80223418c0" />
+<br />
+<img alt="image" src="https://github.com/user-attachments/assets/7741014a-caa1-4bde-9fc2-6e2cdd5755c8" />
 
 - Reorder or remove playlist items during playback and remember the reverse state of each playlist
 
@@ -188,10 +190,11 @@ experience. Some of its major areas of focus are:
 - Caption appearance controls and a preferred caption language setting
 <img height="250" alt="image" src="https://github.com/user-attachments/assets/0098caa1-ccd6-40d5-bcb8-5daed8e0e15a" />
 
-- Reliable video playback and downloads with yt-dlp
-<img width="510" height="273" alt="image" src="https://github.com/user-attachments/assets/cbc33197-d6df-4619-a040-c28fb8a3ba42" />
+- Reliable video playback and advanced video, audio and playlist downloads with yt-dlp, stand-alone SRT, VTT, ASS and LRC subtitle downloads, and a page for managing active and completed downloads
+<img height="256" alt="image" src="https://github.com/user-attachments/assets/1460f265-5b22-40b6-8958-73b4d3a89e83" />
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/d42c04c5-eca4-477f-bcd7-3c8a3bd5a272" />
 
-- Full-screen docks for video info, comments, playlists and chapters
+- Resizable and rearrangeable full-screen docks for video info, comments, playlists, chapters and live chat
 <img height="350" alt="image" src="https://github.com/user-attachments/assets/1cb48073-f523-455d-9926-c96a95fdc959" />
 
 - Customizable keyboard shortcuts
@@ -227,12 +230,12 @@ experience. Some of its major areas of focus are:
 <img width="295" height="98" alt="image" src="https://github.com/user-attachments/assets/186215f1-f8de-4bfa-bcd8-188172448f69" />
 <img height="300" alt="image" src="https://github.com/user-attachments/assets/e4496c03-6fa7-441b-85fd-e93019d429a9" />
 
-- Add-to-playlist inline popover that lets you select which playlists a video should be added to, plus an icon picker for the quick-bookmark playlist.
+- Add-to-playlist inline popover that lets you select which playlists a video should be added to, plus custom icon, emoji and cropped-image options for the quick-bookmark playlist.
 <img height="300" alt="Screencast_20260728_120456" src="https://github.com/user-attachments/assets/c3c6aead-f462-4386-8e82-399dbef2abd1" />
+<br />
 <img width="382" height="129" alt="image" src="https://github.com/user-attachments/assets/bd6dcd6e-346c-4849-9806-dae1a00f6457" />
 <br />
-<img width="328" height="198" alt="image" src="https://github.com/user-attachments/assets/4ef1ba2d-ceb6-49dc-b884-6a19d1468fe9" />
-<img width="372" height="73" alt="image" src="https://github.com/user-attachments/assets/456cc066-1075-42e4-a7dc-91e95716dd33" />
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/7147298f-38a2-4d5b-a99b-a6722e925049" />
 
 - Search selected text using your chosen search engine.
 <img height="300" alt="image" src="https://github.com/user-attachments/assets/862fd213-8646-4f2e-a039-a9cf14c21600" />
@@ -265,6 +268,35 @@ experience. Some of its major areas of focus are:
 
 - Subscription feed refreshes can be canceled and show new videos instantly while loading the rest.
 <img height="300" alt="Screencast_20260728_124530" src="https://github.com/user-attachments/assets/b200bd06-0cde-49a5-8b13-2706a3c6cc8c" />
+
+- Draggable, resizable settings window with integrated subpages and cross-category search
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/be196edf-e84f-4bae-ab59-89a31e507a6c" />
+
+- Improved live streams and premieres with automatic premiere refreshes, comments, chat replay, optional chat timestamps and a choice between top chat and all messages
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/7605cabd-8b2d-428d-a04f-207f9f24cf55" />
+
+- Quick-settings menu for profiles and common preferences, with customizable emoji or cropped-image profile icons
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/80cfe992-c400-4ecf-be56-f0685b1e9ecb" />
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/a8e50f1b-383b-4865-a2d5-83ef18510b64" />
+
+- Synchronized voice-over translation for supported videos via the unofficial Yandex API, with separate translated and original volume controls
+
+https://github.com/user-attachments/assets/0df65773-8f13-4c5e-90d6-2db9106dea98
+
+- Zoom and pan videos from the player menu. Press <kbd>Z</kbd> to zoom in, <kbd>Shift</kbd> + <kbd>Z</kbd> to zoom out, or hold <kbd>Shift</kbd> and drag to pan.
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/d54f6c4d-d7b1-4117-a783-f109c07d94b7" />
+
+- Operating-system notifications when scheduled live streams and premieres start
+<img width="460" height="71" alt="image" src="https://github.com/user-attachments/assets/d8d0e9fc-517c-4136-a3a7-d4f165e99477" />
+
+- Create, import, export and edit custom themes, with independent light and dark themes when following the system setting
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/55b85fc1-04de-44d6-9a0c-1a5081b5d39a" />
+
+- Automatically translate captions into any language offered by YouTube
+<img height="250" alt="image" src="https://github.com/user-attachments/assets/a706d1fa-a6b9-41a2-8ceb-9b42db1ca678" />
+
+- Choose between Material Symbols and Remix Icon throughout the interface
+<img width="470" alt="image" src="https://github.com/user-attachments/assets/2c5f32de-0aa8-4679-9888-b76b85795bab" />
 
 </details>
 
