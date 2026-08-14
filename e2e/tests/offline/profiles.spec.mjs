@@ -100,6 +100,32 @@ test.describe('default profile setting', () => {
   })
 })
 
+test.describe('profile channel thumbnails', () => {
+  test.use({
+    seed: {
+      settings: { hideUnsubscribeButton: true },
+      profiles: [{
+        ...mainProfile,
+        subscriptions: [{
+          id: 'UCaaaaaaaaaaaaaaaaaaaaaa',
+          name: 'Deleted Channel',
+          thumbnail: 'data:image/png;base64,invalid'
+        }]
+      }]
+    }
+  })
+
+  test('uses the default avatar when a channel thumbnail fails to load', async ({ page }) => {
+    await openProfileList(page)
+    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.card .profileList').getByText('All Channels').click()
+
+    const channel = page.locator('#subscriptionsPanel').getByRole('link', { name: 'Deleted Channel' })
+    await expect(channel.locator('img.bubble')).toHaveCount(0)
+    await expect(channel.locator('.bubble:not(img)')).toBeVisible()
+  })
+})
+
 test.describe('profile manager', () => {
   test.describe('scroll position', () => {
     test.use({

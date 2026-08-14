@@ -6,10 +6,11 @@
     :to="`/channel/${channelId}`"
   >
     <img
-      v-if="channelThumbnail != null"
+      v-if="channelThumbnail != null && !thumbnailLoadFailed"
       class="bubble"
       :src="channelThumbnail"
       alt=""
+      @error="handleThumbnailError"
     >
     <FtIcon
       v-else
@@ -35,10 +36,17 @@
     @keydown.space.enter.prevent="handleClick"
   >
     <img
+      v-if="channelThumbnail != null && !thumbnailLoadFailed"
       class="bubble"
       :src="channelThumbnail"
       alt=""
+      @error="handleThumbnailError"
     >
+    <FtIcon
+      v-else
+      :icon="['fas', 'circle-user']"
+      class="bubble"
+    />
     <div
       v-if="selected"
       class="bubble selected"
@@ -60,7 +68,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { useId } from 'vue'
+import { ref, useId, watch } from 'vue'
 
 const props = defineProps({
   channelId: {
@@ -86,11 +94,20 @@ const props = defineProps({
 })
 
 const id = useId()
+const thumbnailLoadFailed = ref(false)
+
+watch(() => props.channelThumbnail, () => {
+  thumbnailLoadFailed.value = false
+})
 
 const emit = defineEmits(['change'])
 
 function handleClick() {
   emit('change', !props.selected)
+}
+
+function handleThumbnailError() {
+  thumbnailLoadFailed.value = true
 }
 </script>
 
