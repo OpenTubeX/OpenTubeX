@@ -494,13 +494,19 @@ const viewCount = ref(0)
 const uploadedTime = ref('')
 const uploadedTimeIsRelative = ref(false)
 const relativeTimeNow = useRelativeTimeClock()
+const relativeTimeDataLoadedAt = ref(Date.now())
 const lengthSeconds = ref(0)
 const duration = ref('')
 const description = ref('')
 const published = ref(undefined)
 const displayedUploadedTime = computed(() => {
   if (uploadedTimeIsRelative.value && published.value) {
-    return getRelativeTimeFromDate(published.value, false, true, relativeTimeNow.value)
+    return getRelativeTimeFromDate(
+      published.value,
+      false,
+      true,
+      Math.max(relativeTimeNow.value, relativeTimeDataLoadedAt.value)
+    )
   }
 
   return uploadedTime.value
@@ -1590,6 +1596,7 @@ function handleExtraThumbnailAction() {
 }
 
 function parseVideoData() {
+  relativeTimeDataLoadedAt.value = Date.now()
   uploadedTime.value = ''
   uploadedTimeIsRelative.value = false
   published.value = undefined
