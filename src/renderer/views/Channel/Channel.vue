@@ -398,12 +398,11 @@ const relatedChannels = shallowRef([])
 const isArtistTopicChannel = ref(false)
 const isFamilyFriendly = ref(false)
 
-// Publish the resolved name only after channel loading finishes. This keeps a
-// late tab-mount or route projection from restoring the route placeholder and
-// also covers error responses that fall back to cached subscription details.
+// Publish the resolved name or its fallback only after channel loading finishes.
+// This keeps a late tab-mount or route projection from restoring the route placeholder.
 watch([channelName, isLoading], ([name, loading]) => {
-  if (!loading && typeof name === 'string' && name.length > 0) {
-    setTabTitle(name)
+  if (!loading) {
+    setTabTitle(name || t('Channel.Channel Name Unavailable'))
   }
 })
 
