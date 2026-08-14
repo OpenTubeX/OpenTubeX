@@ -9,7 +9,7 @@
       </p>
       <FtButton
         v-if="clearableDownloads.length > 0"
-        :label="t('Downloads.Clear Failed Canceled And Missing')"
+        :label="t('Downloads.Clear Failed Canceled Skipped And Missing')"
         :icon="['fas', 'trash']"
         :text-color="null"
         :background-color="null"

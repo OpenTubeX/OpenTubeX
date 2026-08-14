@@ -75,6 +75,14 @@ test.describe('download settings', () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return JSON.parse(store.getters.getYtDlpDownloadTemplates).map(template => template.name)
     })).toEqual(['Podcast', 'Podcast Copy'])
+
+    await name.fill('Podcast')
+    await page.getByRole('button', { name: 'Save Template' }).click()
+    await expect(page.getByText('A download template named "Podcast" already exists.')).toBeVisible()
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return JSON.parse(store.getters.getYtDlpDownloadTemplates).map(template => template.name)
+    })).toEqual(['Podcast', 'Podcast Copy'])
   })
 
   test('searches channels and keeps the template and media switches aligned', async ({ app, page }) => {
@@ -134,6 +142,13 @@ test.describe('automatic download authorization', () => {
   test('starts filtered automatic downloads only for the active subscription refresh', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'fake-automatic-yt-dlp.sh')
     const argumentsFile = path.join(app.userDataDir, 'automatic-yt-dlp-arguments.txt')
+    await writeFile(path.join(app.userDataDir, 'automatic-download-discovery.xml'), [
+      '<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015">',
+      '<entry>',
+      `<yt:videoId>ccccccccccc</yt:videoId><yt:channelId>${BETA_CHANNEL_ID}</yt:channelId>`,
+      '</entry>',
+      '</feed>'
+    ].join(''))
     await writeFile(executable, [
       '#!/bin/sh',
       `printf '%s\\n' "$@" > ${argumentsFile}`,
@@ -168,13 +183,18 @@ test.describe('automatic download authorization', () => {
       return await window.ftElectron.subscriptionAutoRefresh.acquire(tabId, 'videos') ? tabId : null
     })
     expect(refreshOwnerTabId).not.toBeNull()
+    const authorizedPayload = { ...payload, refreshOwnerTabId }
 
     expect(await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), {
-      ...payload,
+      ...authorizedPayload,
       channelId: ALPHA_CHANNEL_ID
     })).toBeNull()
+    expect(await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), {
+      ...authorizedPayload,
+      videoId: 'ddddddddddd'
+    })).toBeNull()
 
-    const result = await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), payload)
+    const result = await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), authorizedPayload)
     expect(result).toEqual({ id: expect.any(Number) })
     await expect.poll(() => page.evaluate(async (id) => {
       return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
@@ -194,7 +214,7 @@ test.describe('automatic download authorization', () => {
     ]))
     expect(args).not.toContain('--write-description')
 
-    const duplicate = await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), payload)
+    const duplicate = await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), authorizedPayload)
     expect(duplicate).toEqual({ skipped: 'already-downloaded' })
     await page.evaluate((tabId) => window.ftElectron.subscriptionAutoRefresh.release(tabId), refreshOwnerTabId)
   })

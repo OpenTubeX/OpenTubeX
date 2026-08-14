@@ -664,7 +664,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
           channelId: channel.id,
           videos
         })
-        await startAutomaticDownloadsForChannel(channel, videos, 'videos', t)
+        await startAutomaticDownloadsForChannel(channel, videos, 'videos', t, electronRefreshOwnerTabId)
         notifySubscriptionChannelRefreshed('videos')
       }
 
@@ -763,7 +763,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
           channelId: channel.id,
           videos
         })
-        await startAutomaticDownloadsForChannel(channel, videos, 'shorts', t)
+        await startAutomaticDownloadsForChannel(channel, videos, 'shorts', t, electronRefreshOwnerTabId)
         notifySubscriptionChannelRefreshed('shorts')
       }
 
@@ -866,7 +866,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
           channelId: channel.id,
           videos
         })
-        await startAutomaticDownloadsForChannel(channel, videos, 'live', t)
+        await startAutomaticDownloadsForChannel(channel, videos, 'live', t, electronRefreshOwnerTabId)
         notifySubscriptionChannelRefreshed('live')
       }
 

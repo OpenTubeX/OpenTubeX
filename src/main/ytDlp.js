@@ -60,6 +60,7 @@ function takeGetInfoAbortSignal(key) {
  * @property {boolean} [automatic] whether a subscription refresh started the download
  * @property {string} [channelId] channel whose persisted rule authorized the automatic download
  * @property {'video' | 'short' | 'livestream'} [automaticMediaType]
+ * @property {string} [refreshOwnerTabId] logical tab that owns the subscription refresh
  * @property {number} [minDurationSeconds]
  * @property {number} [maxDurationSeconds]
  * @property {number} [minFileSizeMb]
@@ -96,6 +97,9 @@ function takeGetInfoAbortSignal(key) {
 
 const ID_REGEX = /^[\w-]{11}$/
 const CHANNEL_ID_REGEX = /^UC[\w-]{22}$/
+const AUTOMATIC_DISCOVERY_CACHE_TTL_MS = 60_000
+const AUTOMATIC_DISCOVERY_TIMEOUT_MS = 15_000
+const AUTOMATIC_DISCOVERY_E2E_FIXTURE = 'automatic-download-discovery.xml'
 const AUTOMATIC_NUMBER_LIMITS = Object.freeze({
   minDurationSeconds: 31_536_000,
   maxDurationSeconds: 31_536_000,
@@ -178,6 +182,7 @@ let downloadRecordsSaveQueue = Promise.resolve()
 let binaryInstallCounter = 0
 let managedBinaryInstallQueue = Promise.resolve()
 const retryingDownloadIds = new Set()
+const automaticDiscoveryCache = new Map()
 const activeAutomaticDownloadNotifications = new Set()
 
 /** @type {Map<number, { child: import('node:child_process').ChildProcess, cancelled: boolean }>} */
@@ -1272,6 +1277,61 @@ function automaticNumber(value, maximum) {
     : null
 }
 
+/**
+ * Loads recent video IDs for a channel from a main-process-owned source. This
+ * prevents a renderer from turning a persisted channel rule into permission to
+ * download an arbitrary video that was not present in the subscription feed.
+ * @param {string} channelId
+ * @returns {Promise<Set<string> | null>}
+ */
+async function getAutomaticDiscoveryVideoIds(channelId) {
+  const cached = automaticDiscoveryCache.get(channelId)
+  if (cached?.expiresAt > Date.now()) {
+    return cached.videoIds
+  }
+
+  let feed
+  if (process.env.OPENTUBEX_E2E_USER_DATA_DIR) {
+    try {
+      feed = await readFile(join(app.getPath('userData'), AUTOMATIC_DISCOVERY_E2E_FIXTURE), 'utf8')
+    } catch {
+      return null
+    }
+  } else {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), AUTOMATIC_DISCOVERY_TIMEOUT_MS)
+    try {
+      const response = await net.fetch(
+        `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`,
+        { signal: controller.signal }
+      )
+      if (!response.ok) {
+        return null
+      }
+      feed = await response.text()
+    } catch {
+      return null
+    } finally {
+      clearTimeout(timeout)
+    }
+  }
+
+  const videoIds = new Set()
+  for (const entry of feed.matchAll(/<entry\b[\s\S]*?<\/entry>/g)) {
+    const entryChannelId = entry[0].match(/<yt:channelId>([^<]+)<\/yt:channelId>/)?.[1]
+    const videoId = entry[0].match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1]
+    if (entryChannelId === channelId && ID_REGEX.test(videoId)) {
+      videoIds.add(videoId)
+    }
+  }
+
+  automaticDiscoveryCache.set(channelId, {
+    expiresAt: Date.now() + AUTOMATIC_DISCOVERY_CACHE_TTL_MS,
+    videoIds
+  })
+  return videoIds
+}
+
 async function getAutomaticTemplateOptions(template) {
   const builtInOptions = BUILT_IN_AUTOMATIC_TEMPLATE_OPTIONS.get(template)
   if (builtInOptions) {
@@ -1309,10 +1369,12 @@ async function getAutomaticTemplateOptions(template) {
  * A renderer-provided `automatic` flag alone must never waive the activation
  * boundary or select arbitrary yt-dlp arguments.
  * @param {YtDlpDownloadPayload} payload
+ * @param {boolean} [discoveryPreviouslyAuthorized]
  * @returns {Promise<YtDlpDownloadPayload | null>}
  */
-async function authorizeAutomaticDownload(payload) {
-  if (typeof payload.channelId !== 'string' || !CHANNEL_ID_REGEX.test(payload.channelId)) {
+async function authorizeAutomaticDownload(payload, discoveryPreviouslyAuthorized = false) {
+  if (typeof payload.channelId !== 'string' || !CHANNEL_ID_REGEX.test(payload.channelId) ||
+    typeof payload.videoId !== 'string' || !ID_REGEX.test(payload.videoId)) {
     return null
   }
 
@@ -1350,6 +1412,13 @@ async function authorizeAutomaticDownload(payload) {
     return null
   }
 
+  if (!discoveryPreviouslyAuthorized) {
+    const discoveredVideoIds = await getAutomaticDiscoveryVideoIds(payload.channelId)
+    if (!discoveredVideoIds?.has(payload.videoId)) {
+      return null
+    }
+  }
+
   const sanitizedPayload = Object.fromEntries(Object.entries(payload).filter(([key]) => (
     !AUTOMATIC_TEMPLATE_OPTION_KEYS.has(key) && !Object.hasOwn(AUTOMATIC_NUMBER_LIMITS, key)
   )))
@@ -1369,15 +1438,21 @@ async function authorizeAutomaticDownload(payload) {
  * @param {import('electron').IpcMainInvokeEvent} event
  * @param {YtDlpDownloadPayload} incomingPayload
  * @param {boolean} automaticDownloadAuthorized
+ * @param {boolean} [automaticDiscoveryPreviouslyAuthorized]
  * @returns {Promise<{ id: number } | { error: string } | { skipped: string } | null>}
  */
-async function startYtDlpDownload(event, incomingPayload, automaticDownloadAuthorized) {
+async function startYtDlpDownload(
+  event,
+  incomingPayload,
+  automaticDownloadAuthorized,
+  automaticDiscoveryPreviouslyAuthorized = false
+) {
   if (!isOpenTubeXUrl(event.senderFrame.url) || typeof incomingPayload !== 'object' || incomingPayload === null) {
     return null
   }
 
   const payload = incomingPayload.automatic === true && automaticDownloadAuthorized
-    ? await authorizeAutomaticDownload(incomingPayload)
+    ? await authorizeAutomaticDownload(incomingPayload, automaticDiscoveryPreviouslyAuthorized)
     : incomingPayload.automatic === true ? null : incomingPayload
   if (payload === null || (payload.automatic !== true && !event.sender.isFocused())) {
     return null
@@ -1852,7 +1927,7 @@ export async function handleYtDlpDownload(event, payload, retryDownloadId, autom
     }
 
     const retryPayload = retryRecord.automatic === true ? retryRecord.retryPayload : payload
-    const result = await startYtDlpDownload(event, retryPayload, true)
+    const result = await startYtDlpDownload(event, retryPayload, true, retryRecord.automatic === true)
     if (result && 'id' in result) {
       downloadRecords.delete(retryDownloadId)
       broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, [retryDownloadId])

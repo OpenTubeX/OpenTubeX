@@ -2216,7 +2216,7 @@ Downloads:
   Open Downloads: Open Downloads
   No Downloads: No downloads yet
   No Downloads Description: Downloads you start will appear here.
-  Clear Failed Canceled And Missing: Clear failed, canceled, and missing
+  Clear Failed Canceled Skipped And Missing: Clear failed, canceled, skipped, and missing
   Clear From List: Clear From List
   Show in Folder: Show in Folder
   Play Download: Play download
@@ -2268,6 +2268,7 @@ Downloads:
   Save Template: Save Template
   Delete Template: Delete Template
   Template Saved: 'Saved download template "{name}"'
+  Template Name Exists: 'A download template named "{name}" already exists.'
   Choose Folder: Change
   Select Folder: Choose Folder
   Folder Required: Choose a download folder to enable downloads.

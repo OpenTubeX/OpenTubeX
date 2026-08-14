@@ -428,6 +428,10 @@ function saveTemplate() {
   if (name === '') return
 
   const previousName = selectedTemplateName.value
+  if (customTemplates.value.some(template => template.name === name && template.name !== previousName)) {
+    showToast({ message: t('Downloads.Template Name Exists', { name }), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
   const templates = customTemplates.value.filter(template => (
     template.name !== previousName && template.name !== name
   ))

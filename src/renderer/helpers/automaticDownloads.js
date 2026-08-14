@@ -73,8 +73,9 @@ function getThumbnail(video) {
  * @param {object[]} videos
  * @param {'videos' | 'shorts' | 'live'} source
  * @param {(key: string, values?: object) => string} t
+ * @param {string | null} refreshOwnerTabId
  */
-export async function startAutomaticDownloadsForChannel(channel, videos, source, t) {
+export async function startAutomaticDownloadsForChannel(channel, videos, source, t, refreshOwnerTabId) {
   if (!process.env.IS_ELECTRON || !store.getters.getEnableDownloads || !Array.isArray(videos)) {
     return
   }
@@ -108,29 +109,35 @@ export async function startAutomaticDownloadsForChannel(channel, videos, source,
     const automaticMediaType = source === 'shorts'
       ? 'short'
       : source === 'live' || video.liveNow === true ? 'livestream' : 'video'
-    const result = await window.ftElectron.ytDlpDownload({
-      ...templateOptions,
-      videoId: video.videoId,
-      title,
-      thumbnail: getThumbnail(video),
-      template: rule.template,
-      automatic: true,
-      channelId: channel.id,
-      automaticMediaType,
-      minDurationSeconds: rule.minDurationSeconds,
-      maxDurationSeconds: rule.maxDurationSeconds,
-      minFileSizeMb: rule.minFileSizeMb,
-      maxFileSizeMb: rule.maxFileSizeMb,
-      maxAgeDays: rule.maxAgeDays,
-      notification: {
-        startedTitle: t('Downloads.Automatic Download Started'),
-        startedBody: t('Downloads.Automatic Download Started Body', { title, channel: channel.name || channel.id }),
-        completedTitle: t('Downloads.Automatic Download Complete'),
-        completedBody: t('Downloads.Download Complete Template', { title }),
-        failedTitle: t('Downloads.Automatic Download Failed'),
-        failedBody: t('Downloads.Download Failed Template', { title })
-      }
-    })
+    let result
+    try {
+      result = await window.ftElectron.ytDlpDownload({
+        ...templateOptions,
+        videoId: video.videoId,
+        title,
+        thumbnail: getThumbnail(video),
+        template: rule.template,
+        automatic: true,
+        channelId: channel.id,
+        automaticMediaType,
+        refreshOwnerTabId,
+        minDurationSeconds: rule.minDurationSeconds,
+        maxDurationSeconds: rule.maxDurationSeconds,
+        minFileSizeMb: rule.minFileSizeMb,
+        maxFileSizeMb: rule.maxFileSizeMb,
+        maxAgeDays: rule.maxAgeDays,
+        notification: {
+          startedTitle: t('Downloads.Automatic Download Started'),
+          startedBody: t('Downloads.Automatic Download Started Body', { title, channel: channel.name || channel.id }),
+          completedTitle: t('Downloads.Automatic Download Complete'),
+          completedBody: t('Downloads.Download Complete Template', { title }),
+          failedTitle: t('Downloads.Automatic Download Failed'),
+          failedBody: t('Downloads.Download Failed Template', { title })
+        }
+      })
+    } catch {
+      result = null
+    }
 
     if (result == null || 'error' in result) {
       scheduledVideoIds.delete(video.videoId)
