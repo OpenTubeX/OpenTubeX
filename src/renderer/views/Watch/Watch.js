@@ -26,6 +26,7 @@ import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
+import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../../constants'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { parseLocalVideoGames } from '../../helpers/video-games'
 import { parseChannelPreferences } from '../../helpers/channel-preferences'
@@ -89,21 +90,6 @@ import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { useTabToast } from '../../composables/useTabToast'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { areCommentsAvailable } from './watchComments'
-
-const DOWNLOADED_MEDIA_MIME_TYPES = {
-  aac: 'audio/aac',
-  flac: 'audio/flac',
-  m4a: 'audio/mp4',
-  mp3: 'audio/mpeg',
-  ogg: 'audio/ogg',
-  opus: 'audio/ogg',
-  wav: 'audio/wav',
-  mp4: 'video/mp4',
-  m4v: 'video/mp4',
-  webm: 'video/webm',
-  mkv: 'video/x-matroska',
-  mov: 'video/quicktime'
-}
 
 /**
  * @typedef {{

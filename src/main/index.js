@@ -21,6 +21,7 @@ import {
   MULTIPLE_TABS_CONFIRM_THRESHOLD,
   LIGHT_BASE_THEMES,
   DARK_BASE_THEMES,
+  DOWNLOADED_MEDIA_MIME_TYPES,
 } from '../constants'
 import {
   CUSTOM_THEMES_DIRECTORY,
@@ -61,20 +62,6 @@ import { LiveReminderManager } from './LiveReminderManager'
 import { requestVoiceOverTranslation } from './voiceOverTranslation'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
-const DOWNLOADED_MEDIA_MIME_TYPES = {
-  '.aac': 'audio/aac',
-  '.flac': 'audio/flac',
-  '.m4a': 'audio/mp4',
-  '.mp3': 'audio/mpeg',
-  '.ogg': 'audio/ogg',
-  '.opus': 'audio/ogg',
-  '.m4v': 'video/mp4',
-  '.mkv': 'video/x-matroska',
-  '.mov': 'video/quicktime',
-  '.mp4': 'video/mp4',
-  '.webm': 'video/webm'
-}
-
 if (process.argv.includes('--version')) {
   console.log(`v${packageDetails.version} Beta`) // eslint-disable-line no-console
   app.exit()
@@ -1908,10 +1895,13 @@ function runApp() {
         ? 'audio/webm'
         : file.mode === 'audio' && extension === '.mp4'
           ? 'audio/mp4'
-          : DOWNLOADED_MEDIA_MIME_TYPES[extension] ?? 'application/octet-stream'
+          : DOWNLOADED_MEDIA_MIME_TYPES[extension.slice(1)] ?? 'application/octet-stream'
       const headers = {
         'Accept-Ranges': 'bytes',
         'Content-Type': mimeType
+      }
+      if (fileSize === 0) {
+        return new Response(null, { status: 200, headers: { ...headers, 'Content-Length': '0' } })
       }
       const rangeMatch = /^bytes=(\d*)-(\d*)$/.exec(request.headers.get('range') ?? '')
       let start = 0

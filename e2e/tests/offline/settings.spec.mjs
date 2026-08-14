@@ -454,6 +454,44 @@ test.describe('settings', () => {
     })).toBe(true)
   })
 
+  test('resets standalone scroll position when switching views', async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
+        x: 40,
+        y: 40,
+        width: 400,
+        height: 650
+      }))
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      for (let index = 0; index < 8; index++) {
+        store.commit('upsertYtDlpDownload', {
+          id: index + 1,
+          title: `View switch download ${index + 1}`,
+          status: 'completed',
+          mode: 'video',
+          availability: 'available',
+          destination: `/tmp/view-switch-download-${index + 1}.webm`
+        })
+      }
+    })
+    await goTo(page, 'downloads')
+    const downloadsScroll = page.locator('.settingsDownloadsPage')
+    await downloadsScroll.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => downloadsScroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('showSettingsWindow', 'about')
+    })
+    await expect(page.getByRole('dialog', { name: 'About', exact: true })).toBeVisible()
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('showSettingsWindow', 'downloads')
+    })
+
+    await expect.poll(() => page.locator('.settingsDownloadsPage').evaluate(element => element.scrollTop)).toBe(0)
+  })
+
   test('clamps the settings scroll position after repeated resizing', async ({ page }) => {
     await goTo(page, 'settings')
     const settingsWindow = page.locator('.settingsWindow')

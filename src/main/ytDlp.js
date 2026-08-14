@@ -125,6 +125,7 @@ let downloadCounter = 0
 let downloadRecordsSaveQueue = Promise.resolve()
 let binaryInstallCounter = 0
 let managedBinaryInstallQueue = Promise.resolve()
+const retryingDownloadIds = new Set()
 
 /** @type {Map<number, { child: import('node:child_process').ChildProcess, cancelled: boolean }>} */
 const activeDownloads = new Map()
@@ -1190,7 +1191,7 @@ function splitArguments(argsString) {
  * @param {YtDlpDownloadPayload} payload
  * @returns {Promise<{ id: number } | { error: string } | null>}
  */
-export async function handleYtDlpDownload(event, payload) {
+async function startYtDlpDownload(event, payload) {
   if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) {
     return null
   }
@@ -1462,9 +1463,11 @@ export async function handleYtDlpDownload(event, payload) {
       const parts = line.slice(FINAL_PATH_PREFIX.length).split('\t')
       const hasMediaMetadata = parts.length >= 5
       const [videoId, rawDuration, rawWidth, rawHeight] = parts
-      const pathParts = parts.slice(hasMediaMetadata ? 4 : 1)
+      const pathParts = parts.slice(hasMediaMetadata ? 4 : parts.length > 1 ? 1 : 0)
       status.destination = pathParts.join('\t')
-      if (!status.destinations.includes(status.destination)) status.destinations.push(status.destination)
+      if (status.destination !== '' && !status.destinations.includes(status.destination)) {
+        status.destinations.push(status.destination)
+      }
       if (ID_REGEX.test(videoId) && status.destination !== '' &&
         !status.files.some(file => file.videoId === videoId && file.path === status.destination)) {
         const duration = hasMediaMetadata ? Number(rawDuration) : NaN
@@ -1588,6 +1591,45 @@ export async function handleYtDlpDownload(event, payload) {
   })
 
   return { id }
+}
+
+/**
+ * @param {import('electron').IpcMainInvokeEvent} event
+ * @param {YtDlpDownloadPayload} payload
+ * @param {number} [retryDownloadId]
+ * @returns {Promise<{ id: number } | { error: string } | null>}
+ */
+export async function handleYtDlpDownload(event, payload, retryDownloadId) {
+  if (retryDownloadId === undefined) {
+    return startYtDlpDownload(event, payload)
+  }
+
+  if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused() ||
+    !Number.isInteger(retryDownloadId)) {
+    return null
+  }
+  if (retryingDownloadIds.has(retryDownloadId)) {
+    return { error: 'download-already-retrying' }
+  }
+
+  retryingDownloadIds.add(retryDownloadId)
+  try {
+    await loadDownloadRecords()
+    const retryRecord = downloadRecords.get(retryDownloadId)
+    if (!['failed', 'cancelled'].includes(retryRecord?.status)) {
+      return { error: 'download-not-retryable' }
+    }
+
+    const result = await startYtDlpDownload(event, payload)
+    if (result && 'id' in result) {
+      downloadRecords.delete(retryDownloadId)
+      await saveDownloadRecords()
+      broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, [retryDownloadId])
+    }
+    return result
+  } finally {
+    retryingDownloadIds.delete(retryDownloadId)
+  }
 }
 
 /**

@@ -393,7 +393,7 @@ import Downloads from '../Downloads/Downloads.vue'
 
 import store from '../../store/index'
 import { settingsSubpageKey } from '../../components/FtSettingsSubpage/settingsSubpage'
-import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getProxyTestUrl } from '../../helpers/proxy-test'
 import {
   SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS,
@@ -435,6 +435,7 @@ let subpagePersistsOnDeactivate = false
 let settingsResizeObserver = null
 let settingsSectionResizeObserver = null
 let profileManagerResizeObserver = null
+let standaloneContentResizeObserver = null
 let settingsContentPaddingBottom = 0
 let observationScheduled = false
 let boundsSaveTimer = null
@@ -750,7 +751,14 @@ watch(isProfileManagerOpen, (open) => {
     nextTick(observeProfileManager)
   }
 })
-watch(isStandaloneViewOpen, () => nextTick(scheduleStandaloneScrollClamp))
+watch(() => store.getters.getSettingsWindowView, async (view) => {
+  stopObservingStandaloneContent()
+  if (!['about', 'downloads'].includes(view)) return
+  await nextTick()
+  const scrollViewport = standaloneScrollRef.value
+  if (scrollViewport) restoreOverlayScrollTop(scrollViewport, 0)
+  observeStandaloneContent()
+})
 watch(activeSection, (section) => {
   if (section !== null) {
     store.commit('setSettingsWindowSection', section)
@@ -763,6 +771,7 @@ function handleMounted() {
   handleResize(settingsWindowRef.value?.clientWidth ?? windowBounds.value.width)
   setInitialSection()
   nextTick(observeProfileManager)
+  nextTick(observeStandaloneContent)
   nextTick(() => (settingsSearchInputRef.value ?? settingsCloseButtonRef.value)?.focus())
   if (settingsResizeObserver !== null || observationScheduled) {
     return
@@ -813,6 +822,7 @@ function stopObserving() {
   settingsSectionResizeObserver?.disconnect()
   settingsSectionResizeObserver = null
   stopObservingProfileManager()
+  stopObservingStandaloneContent()
   settingsContentPaddingBottom = 0
   window.removeEventListener('resize', clampWindowToViewport)
 }
@@ -833,6 +843,22 @@ function observeProfileManager() {
 function stopObservingProfileManager() {
   profileManagerResizeObserver?.disconnect()
   profileManagerResizeObserver = null
+}
+
+function observeStandaloneContent() {
+  stopObservingStandaloneContent()
+  const scrollViewport = standaloneScrollRef.value
+  const content = scrollViewport?.firstElementChild
+  if (!scrollViewport || !(content instanceof HTMLElement)) return
+
+  standaloneContentResizeObserver = new ResizeObserver(scheduleStandaloneScrollClamp)
+  standaloneContentResizeObserver.observe(content)
+  scheduleStandaloneScrollClamp()
+}
+
+function stopObservingStandaloneContent() {
+  standaloneContentResizeObserver?.disconnect()
+  standaloneContentResizeObserver = null
 }
 
 function clampProfileManagerScroll() {

@@ -469,6 +469,46 @@ test.describe('video downloads', () => {
     await expect.poll(() => page.locator('video.player').evaluate(video => video.duration)).toBe(duration)
   })
 
+  test('serves an empty downloaded file without failing the protocol request', async ({ app, page }) => {
+    const downloadedFile = path.join(app.userDataDir, 'empty-audio.wav')
+    const executable = path.join(app.userDataDir, 'fake-empty-audio-yt-dlp.sh')
+    await writeFile(downloadedFile, '')
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\t1\tNA\tNA\t${downloadedFile}\n'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      title: 'Empty audio',
+      mode: 'audio'
+    }))
+    await expect.poll(() => page.evaluate(async (id) => {
+      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+    }, result.id)).toBe('completed')
+
+    const response = await page.evaluate(async (id) => {
+      const result = await fetch(`downloadmedia://file/${id}/eeeeeeeeeee`)
+      return {
+        status: result.status,
+        contentLength: result.headers.get('content-length'),
+        contentType: result.headers.get('content-type'),
+        bodyLength: (await result.arrayBuffer()).byteLength
+      }
+    }, result.id)
+    expect(response).toEqual({
+      status: 200,
+      contentLength: '0',
+      contentType: 'audio/wav',
+      bodyLength: 0
+    })
+  })
+
   test('maps playlist files to video IDs and reports partial availability', async ({ app, page }) => {
     const availableFile = path.join(app.userDataDir, 'available.webm')
     const missingFile = path.join(app.userDataDir, 'missing.webm')
@@ -721,6 +761,44 @@ test.describe('video downloads', () => {
       return matchingDownloads.length === 1 && matchingDownloads[0].id !== originalId
     }, result.id)).toBe(true)
     expect(await readFile(attemptsFile, 'utf8')).toBe('retry\n')
+  })
+
+  test('serializes retry requests in the main process', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'concurrent-retry-yt-dlp.sh')
+    const attemptsFile = path.join(app.userDataDir, 'concurrent-retry-attempts.txt')
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf 'retry\n' >> ${attemptsFile}`,
+      'sleep 0.5',
+      'exit 1'
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const original = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 'ffffffffffg',
+      title: 'Concurrent retry',
+      mode: 'video'
+    }))
+    await expect.poll(() => page.evaluate(async (id) => {
+      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+    }, original.id)).toBe('failed')
+    await writeFile(attemptsFile, '')
+
+    const results = await page.evaluate(async (id) => {
+      const record = (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)
+      return Promise.all([
+        window.ftElectron.ytDlpDownload(record.retryPayload, id),
+        window.ftElectron.ytDlpDownload(record.retryPayload, id)
+      ])
+    }, original.id)
+
+    expect(results.filter(result => result && 'id' in result)).toHaveLength(1)
+    expect(results.filter(result => result?.error === 'download-already-retrying')).toHaveLength(1)
+    await expect.poll(() => readFile(attemptsFile, 'utf8')).toBe('retry\n')
   })
 })
 

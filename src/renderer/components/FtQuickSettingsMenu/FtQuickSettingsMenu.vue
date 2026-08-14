@@ -335,7 +335,7 @@ const menuOpen = ref(false)
 const profilePanelOpen = ref(false)
 let mouseDownOnTrigger = false
 let pointerDownInsideMenu = false
-let settingUpdatePending = false
+let pendingSettingUpdateCount = 0
 const triggerRef = useTemplateRef('triggerRef')
 const menuRef = useTemplateRef('menuRef')
 
@@ -472,8 +472,9 @@ function handleTriggerMouseDown(event) {
   }
 }
 
-function focusMenu() {
-  nextTick(() => menuRef.value?.$el?.focus())
+async function focusMenu() {
+  await nextTick()
+  menuRef.value?.$el?.focus()
 }
 
 function handleWindowFocus() {
@@ -487,7 +488,9 @@ function handleWindowBlur() {
 }
 
 function handleSystemColorSchemeChange(event) {
-  systemUsesDarkTheme.value = event.matches
+  return runSettingUpdate(() => {
+    systemUsesDarkTheme.value = event.matches
+  })
 }
 
 function handleDocumentPointerDown(event) {
@@ -534,7 +537,7 @@ function closeProfilePanel() {
 
 function handleMenuFocusOut(event) {
   if (event.relatedTarget === null) {
-    const controlChangedDuringClick = pointerDownInsideMenu || settingUpdatePending
+    const controlChangedDuringClick = pointerDownInsideMenu || pendingSettingUpdateCount > 0
     setTimeout(() => {
       if (controlChangedDuringClick) {
         focusMenu()
@@ -584,18 +587,21 @@ function openProfileSettings() {
  * @param {string | boolean} value
  */
 async function updateSetting(setting, value) {
-  settingUpdatePending = true
+  return runSettingUpdate(() => store.dispatch(`update${setting}`, value))
+}
+
+async function runSettingUpdate(update) {
+  pendingSettingUpdateCount++
   try {
-    await store.dispatch(`update${setting}`, value)
-    await nextTick()
-    focusMenu()
+    await update()
   } finally {
-    settingUpdatePending = false
+    await focusMenu()
+    pendingSettingUpdateCount--
   }
 }
 
 function updateUiScale(value) {
-  store.dispatch('updateUiScale', value)
+  return runSettingUpdate(() => store.dispatch('updateUiScale', value))
 }
 
 function previewThumbnailSize(value) {
@@ -603,15 +609,16 @@ function previewThumbnailSize(value) {
 }
 
 function updateThumbnailSize(value) {
-  store.dispatch('updateThumbnailSize', value)
+  return runSettingUpdate(() => store.dispatch('updateThumbnailSize', value))
 }
 
 function handleHideRecommendedVideos(value) {
-  if (value) {
-    store.dispatch('updatePlayNextVideo', false)
-  }
-
-  store.dispatch('updateHideRecommendedVideos', value)
+  return runSettingUpdate(async () => {
+    if (value) {
+      await store.dispatch('updatePlayNextVideo', false)
+    }
+    await store.dispatch('updateHideRecommendedVideos', value)
+  })
 }
 
 function openSettings() {

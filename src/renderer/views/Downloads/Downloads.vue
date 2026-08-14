@@ -163,7 +163,7 @@ async function retryDownload(download) {
       }
   let result
   try {
-    result = await window.ftElectron.ytDlpDownload(retryPayload)
+    result = await window.ftElectron.ytDlpDownload(retryPayload, download.id)
   } catch (error) {
     console.error('Could not retry download', error)
   } finally {
