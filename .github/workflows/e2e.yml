@@ -22,9 +22,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  e2e:
+  e2e-shard:
+    name: e2e (${{ matrix.shard }}/4)
     if: ${{ github.event_name != 'pull_request' || github.head_ref != 'weblate-translations' }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [ 1, 2, 3, 4 ]
     env:
       OPENTUBEX_SYNC_SERVER_URL: http://127.0.0.1:8080
 
@@ -91,7 +96,7 @@ jobs:
     # attempt and automatically falls back to recorded fixtures on retry.
     - name: Run E2E tests
       run: |
-        test_args=()
+        test_args=("--shard=${{ matrix.shard }}/4")
         if [ "${{ github.event_name }}" = "pull_request" ]; then
           test_args+=("--only-changed=origin/${GITHUB_BASE_REF}" "--pass-with-no-tests")
         fi
@@ -114,8 +119,19 @@ jobs:
       if: ${{ !cancelled() }}
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
-        name: playwright-report
+        name: playwright-report-${{ matrix.shard }}
         path: |
           e2e/report/
           e2e/results/
         retention-days: 14
+
+  # Keep a stable required-check name while the test suite runs as a matrix.
+  e2e:
+    if: ${{ always() && (github.event_name != 'pull_request' || github.head_ref != 'weblate-translations') }}
+    needs: e2e-shard
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check E2E shards
+      env:
+        SHARD_RESULT: ${{ needs.e2e-shard.result }}
+      run: test "$SHARD_RESULT" = success
