@@ -1,5 +1,5 @@
 import { ipcRenderer, webFrame } from 'electron/renderer'
-import { IpcChannels } from '../constants.js'
+import { DBActions, IpcChannels } from '../constants.js'
 
 /**
  * Linux fix for dynamically updating theme preference, this works on
@@ -470,6 +470,10 @@ export default {
    * @param {any} [data]
    */
   dbSettings: (action, data) => {
+    if (action === DBActions.GENERAL.UPSERT && data?._id === 'ytDlpAutomaticDownloadRules' &&
+      !navigator.userActivation.isActive) {
+      return Promise.resolve(null)
+    }
     return ipcRenderer.invoke(IpcChannels.DB_SETTINGS, data ? { action, data } : { action })
   },
 

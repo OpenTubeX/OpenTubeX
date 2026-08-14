@@ -5,21 +5,31 @@ import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 
 const ALPHA_CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const BETA_CHANNEL_ID = 'UCbbbbbbbbbbbbbbbbbbbbbb'
+const PROFILES = [
+  {
+    _id: 'allChannels',
+    name: 'All Channels',
+    bgColor: '#000000',
+    textColor: '#FFFFFF',
+    subscriptions: [
+      { id: ALPHA_CHANNEL_ID, name: 'Alpha Channel', thumbnail: '' },
+      { id: BETA_CHANNEL_ID, name: 'Beta Channel', thumbnail: '' }
+    ]
+  }
+]
+const AUTOMATIC_RULE = {
+  template: 'video:best',
+  includeVideos: true,
+  minDurationSeconds: 60,
+  maxDurationSeconds: 180,
+  minFileSizeMb: 5,
+  maxFileSizeMb: 25,
+  maxAgeDays: 7
+}
 
 test.use({
   seed: {
-    profiles: [
-      {
-        _id: 'allChannels',
-        name: 'All Channels',
-        bgColor: '#000000',
-        textColor: '#FFFFFF',
-        subscriptions: [
-          { id: ALPHA_CHANNEL_ID, name: 'Alpha Channel', thumbnail: '' },
-          { id: BETA_CHANNEL_ID, name: 'Beta Channel', thumbnail: '' }
-        ]
-      }
-    ]
+    profiles: PROFILES
   }
 })
 
@@ -67,7 +77,7 @@ test.describe('download settings', () => {
     })).toEqual(['Podcast', 'Podcast Copy'])
   })
 
-  test('searches channels and keeps the template and media switches aligned', async ({ page }) => {
+  test('searches channels and keeps the template and media switches aligned', async ({ app, page }) => {
     await goToSettingsSection(page, 'download')
     await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
 
@@ -104,6 +114,21 @@ test.describe('download settings', () => {
       expect(center).toBeCloseTo(geometry.centers[0], 0)
     }
     expect(geometry.widths[0]).toBeGreaterThan(geometry.widths[1])
+
+    const { page: relaunchedPage } = await app.relaunch()
+    await goToSettingsSection(relaunchedPage, 'download')
+    await expect(relaunchedPage.getByRole('button', { name: 'Manage Automatic Downloads (1)' })).toBeVisible()
+  })
+})
+
+test.describe('automatic download authorization', () => {
+  test.use({
+    seed: {
+      settings: {
+        ytDlpAutomaticDownloadRules: JSON.stringify({ [BETA_CHANNEL_ID]: AUTOMATIC_RULE })
+      },
+      profiles: PROFILES
+    }
   })
 
   test('starts filtered automatic downloads without user activation and deduplicates them', async ({ app, page }) => {
@@ -135,22 +160,10 @@ test.describe('download settings', () => {
       maxAgeDays: 7,
       customArgs: '--write-description'
     }
-    expect(await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), payload)).toBeNull()
-    await page.evaluate(async ({ channelId, rule }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      await store.dispatch('updateYtDlpAutomaticDownloadRules', JSON.stringify({ [channelId]: rule }))
-    }, {
-      channelId: BETA_CHANNEL_ID,
-      rule: {
-        template: 'video:best',
-        includeVideos: true,
-        minDurationSeconds: 60,
-        maxDurationSeconds: 180,
-        minFileSizeMb: 5,
-        maxFileSizeMb: 25,
-        maxAgeDays: 7
-      }
-    })
+    expect(await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), {
+      ...payload,
+      channelId: ALPHA_CHANNEL_ID
+    })).toBeNull()
 
     const result = await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), payload)
     expect(result).toEqual({ id: expect.any(Number) })
