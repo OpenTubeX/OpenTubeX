@@ -20,6 +20,7 @@ import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpP
 
 // yt-dlp appends the audio track or a suffix like "-drc" to the itag for some formats
 const ITAG_REGEX = /^\d+/
+const URL_PROBE_TIMEOUT = 10_000
 const dashPlaybackSourceCache = new YtDlpPlaybackSourceCache()
 
 /**
@@ -200,6 +201,38 @@ function mapYtDlpLegacyFormat(format) {
 }
 
 /**
+ * Checks that a stream or manifest URL is accepted before exposing it to the player.
+ * @param {string} url
+ */
+async function probeYtDlpUrl(url) {
+  try {
+    const response = await fetch(url, { signal: AbortSignal.timeout(URL_PROBE_TIMEOUT) })
+    await response.body?.cancel()
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
+/**
+ * @param {YtDlpPlaybackFormat[]} formats
+ */
+async function convertLegacyFormats(formats) {
+  const results = await Promise.all(formats.map(async format => {
+    if (
+      !await waitForYtDlpFormatAvailability(format) ||
+      !await probeYtDlpUrl(format.url)
+    ) {
+      return null
+    }
+
+    return mapYtDlpLegacyFormat(format)
+  }))
+
+  return results.filter(format => format !== null)
+}
+
+/**
  * Reads the byte ranges of every adaptive format in parallel and drops the ones
  * that the byte ranges couldn't be determined for.
  * @param {YtDlpPlaybackFormat[]} formats
@@ -288,9 +321,9 @@ export async function getYtDlpPlaybackSource(videoId, cacheKey = '') {
     }
 
     const httpFormats = info.formats.filter(format => format.protocol === 'https' && format.url !== null)
-    const legacyFormats = httpFormats
-      .filter(format => isVideoFormat(format) && isAudioFormat(format))
-      .map(mapYtDlpLegacyFormat)
+    const legacyFormatsPromise = convertLegacyFormats(
+      httpFormats.filter(format => isVideoFormat(format) && isAudioFormat(format))
+    )
 
     // live streams are only available as HLS, which is what makes rewinding within
     // the DVR window possible
@@ -300,6 +333,7 @@ export async function getYtDlpPlaybackSource(videoId, cacheKey = '') {
 
       if (localFormats.some(format => format.has_video) && localFormats.some(format => format.has_audio)) {
         const manifest = await FormatUtils.toDash({ adaptive_formats: localFormats })
+        const legacyFormats = await legacyFormatsPromise
 
         const source = {
           manifestSrc: `data:${MANIFEST_TYPE_DASH};charset=UTF-8,${encodeURIComponent(manifest)}`,
@@ -325,11 +359,14 @@ export async function getYtDlpPlaybackSource(videoId, cacheKey = '') {
       }
     }
 
-    if (info.hlsManifestUrl !== null) {
+    if (
+      info.hlsManifestUrl !== null &&
+      await probeYtDlpUrl(info.hlsManifestUrl)
+    ) {
       return {
         manifestSrc: info.hlsManifestUrl,
         manifestMimeType: MANIFEST_TYPE_HLS,
-        legacyFormats,
+        legacyFormats: await legacyFormatsPromise,
         expiryDate: null,
         isLive: info.isLive,
         version: info.version
