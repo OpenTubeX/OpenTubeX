@@ -161,17 +161,18 @@ test.describe('OpenTubeX sync server', () => {
       expect(versionedSubscriptionsResponse.status).toBe(409)
       const encryptedResponse = await fetch(`${syncServerUrl}/v1/encrypted_sync`, { headers })
       const encryptedManifest = await encryptedResponse.json()
-      expect(encryptedManifest.collections.map(entry => entry.collection)).toEqual(
+      const encryptedCollectionNames = encryptedManifest.collections.map(entry => entry.collection)
+      expect(encryptedCollectionNames).toEqual(
         expect.arrayContaining([
           'subscriptions',
           'playlists',
           'history',
-          'playbackSpeeds',
           'profiles',
           'sessions',
           'settings'
         ])
       )
+      expect(encryptedCollectionNames).not.toContain('playbackSpeeds')
       for (const { collection, revision } of encryptedManifest.collections) {
         expect(revision).toBeGreaterThan(0)
         const collectionResponse = await fetch(
@@ -215,15 +216,6 @@ test.describe('OpenTubeX sync server', () => {
         })
       ]))
 
-      const playbackSpeedsResponse = await fetch(
-        `${syncServerUrl}${apiPrefix}/channel_playback_speeds/`,
-        { headers }
-      )
-      expect(playbackSpeedsResponse.ok).toBe(true)
-      expect(await playbackSpeedsResponse.json()).toEqual(expect.arrayContaining([
-        { channel_id: channelId, playback_speed: 1.5 }
-      ]))
-
       const profilesResponse = await fetch(
         `${syncServerUrl}${apiPrefix}/subscriptions/groups/`,
         { headers }
@@ -239,16 +231,6 @@ test.describe('OpenTubeX sync server', () => {
           channels: expect.arrayContaining([expect.objectContaining({ id: secondChannelId })])
         })
       ]))
-
-      const putPlaybackSpeedResponse = await fetch(
-        `${syncServerUrl}${apiPrefix}/channel_playback_speeds/`,
-        {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify({ channel_id: remoteChannelId, playback_speed: 2 })
-        }
-      )
-      expect(putPlaybackSpeedResponse.ok).toBe(true)
 
       const addRemoteResponse = await fetch(`${syncServerUrl}${apiPrefix}/subscriptions/`, {
         method: 'PUT',
@@ -281,8 +263,7 @@ test.describe('OpenTubeX sync server', () => {
         const syncedSettings = latestSettings(await readFile(settingsPath, 'utf8'))
         return JSON.parse(syncedSettings.channelPlaybackSpeeds || '{}')
       }).toEqual({
-        [channelId]: 1.5,
-        [remoteChannelId]: 2
+        [channelId]: 1.5
       })
     }
 

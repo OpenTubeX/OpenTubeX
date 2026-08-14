@@ -6,7 +6,6 @@ import {
   isExpiredSessionReauthentication,
   isSessionExpiredError,
   normalizeSyncServerUrl,
-  syncChannelPlaybackSpeeds,
   syncHistory,
   syncPlaylists,
   syncProfiles,
@@ -71,7 +70,6 @@ const state = {
   syncServerError: '',
   syncServerLastResult: null,
   syncServerHistorySupported: null,
-  syncServerPlaybackSpeedsSupported: null,
   syncServerSessionExpired: false,
 }
 
@@ -81,7 +79,6 @@ const getters = {
   getSyncServerError: state => state.syncServerError,
   getSyncServerLastResult: state => state.syncServerLastResult,
   getSyncServerHistorySupported: state => state.syncServerHistorySupported,
-  getSyncServerPlaybackSpeedsSupported: state => state.syncServerPlaybackSpeedsSupported,
 }
 
 function parseSnapshot(value) {
@@ -117,7 +114,6 @@ async function runSync(context, { allowDataLoss = false } = {}) {
     ...(settings.syncServerSyncSubscriptions ? ['subscriptions'] : []),
     ...(settings.syncServerSyncPlaylists ? ['playlists'] : []),
     ...(settings.syncServerSyncHistory ? ['history'] : []),
-    ...(settings.syncServerSyncPlaybackSpeeds ? ['playbackSpeeds'] : []),
     ...(settings.syncServerSyncProfiles ? ['profiles'] : []),
     ...(process.env.IS_ELECTRON &&
       settings.syncServerPrivacyMode === 'enhanced' &&
@@ -189,22 +185,6 @@ async function runSync(context, { allowDataLoss = false } = {}) {
           result.history = history.length
         } else {
           commit('setSyncServerHistorySupported', false)
-        }
-        break
-      }
-      case 'playbackSpeeds': {
-        const speeds = await syncChannelPlaybackSpeeds(
-          targetClient,
-          store,
-          previous.playbackSpeeds,
-          { allowDataLoss }
-        )
-        if (speeds !== null) {
-          commit('setSyncServerPlaybackSpeedsSupported', true)
-          next.playbackSpeeds = speeds
-          result.playbackSpeeds = Object.keys(speeds).length
-        } else {
-          commit('setSyncServerPlaybackSpeedsSupported', false)
         }
         break
       }
@@ -512,7 +492,6 @@ const actions = {
     commit('setSyncServerError', '')
     commit('setSyncServerLastResult', null)
     commit('setSyncServerHistorySupported', null)
-    commit('setSyncServerPlaybackSpeedsSupported', null)
     commit('setSyncServerProgress', null)
     commit('setSyncServerStatus', 'idle')
     commit('setSyncServerSessionExpired', false)
@@ -725,9 +704,6 @@ const mutations = {
   },
   setSyncServerHistorySupported(state, supported) {
     state.syncServerHistorySupported = supported
-  },
-  setSyncServerPlaybackSpeedsSupported(state, supported) {
-    state.syncServerPlaybackSpeedsSupported = supported
   },
   setSyncServerSessionExpired(state, expired) {
     state.syncServerSessionExpired = expired

@@ -860,6 +860,8 @@ Settings:
     Auto Update Volume: Automatically update whenever you change the volume
     Manage Saved Channels: 'Manage Saved Channels ({channelCount})'
     Saved Channels: Saved Channel Settings
+    Enable Saved Channel Settings Sync: Sync saved channel settings
+    Disable Saved Channel Settings Sync: Stop syncing saved channel settings
     Search Channels: Search channels
     No Saved Channels: No channel specific settings have been saved yet
     No Matching Channels: No channels match your search
@@ -1124,7 +1126,6 @@ Settings:
     Account Deleted: Sync account deleted
     Connected as: 'Connected as {username}'
     Automatic Sync: Sync automatically after changes and every five minutes
-    Channel Playback Speeds: Channel playback speeds
     Profiles: Profiles
     Open Tabs: Open tabs and session
     Settings: Settings
@@ -1135,7 +1136,6 @@ Settings:
     Syncing subscriptions: Syncing subscriptions…
     Syncing playlists: Syncing playlists…
     Syncing history: Syncing watch history…
-    Syncing playback speeds: Syncing channel playback speeds…
     Syncing profiles: Syncing profiles…
     Syncing open tabs: Syncing open tabs and session…
     Syncing settings: Syncing settings…
@@ -1144,8 +1144,6 @@ Settings:
     Sync progress percentage: '{percentage}%'
     Last synced: 'Last synced: {date}'
     History not supported: This server version does not support watch history syncing.
-    Playback speeds not supported: This server version does not support channel playback speed syncing.
-    Playback speeds and settings not supported: This server version does not support channel playback speed or settings syncing.
     Settings not supported: This server version does not support settings syncing.
     Sync completed: Sync completed
     Data Loss Confirmation: Confirm destructive sync?

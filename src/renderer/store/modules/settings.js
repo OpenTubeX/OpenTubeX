@@ -24,6 +24,7 @@ import { resolveBaseTheme } from '../../../appearanceSettings.js'
 import { resolveColor } from '../../helpers/colors.js'
 
 const YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING = 'ytDlpPlaybackEngineDefaultMigration'
+const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
 
 /*
  * Due to the complexity of the settings module in FreeTube, a more
@@ -401,7 +402,6 @@ const state = {
   syncServerSyncSubscriptions: true,
   syncServerSyncPlaylists: true,
   syncServerSyncHistory: true,
-  syncServerSyncPlaybackSpeeds: true,
   syncServerSyncProfiles: true,
   syncServerSyncSessions: true,
   syncServerSyncSettings: true,
@@ -658,7 +658,6 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'syncServerSyncSubscriptions',
   'syncServerSyncPlaylists',
   'syncServerSyncHistory',
-  'syncServerSyncPlaybackSpeeds',
   'syncServerSyncProfiles',
   'syncServerSyncSessions',
   'syncServerSyncSettings',
@@ -680,8 +679,6 @@ export const NON_SYNCABLE_SETTINGS = new Set([
   'scrollMiniPlayerSavedRect',
   'uiScale',
   'verticalTabBarWidth',
-  // Synced through its dedicated collection when enabled.
-  'channelPlaybackSpeeds',
 ])
 
 export function isSettingSyncable(settingKey) {
@@ -861,6 +858,29 @@ const customActions = {
       const hasProgressToastSetting = userSettings.some(entry => entry._id === 'showProgressBarToast')
       const legacyHideLiveChatEntry = userSettings.find(entry => entry._id === 'hideLiveChat')
       const hasHideLiveChatReplaySetting = userSettings.some(entry => entry._id === 'hideLiveChatReplay')
+      const legacyPlaybackSpeedSyncEntry = userSettings.find(
+        entry => entry._id === 'syncServerSyncPlaybackSpeeds'
+      )
+      const hasMigratedChannelSettingsSync = userSettings.some(
+        entry => entry._id === CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING
+      )
+
+      if (!hasMigratedChannelSettingsSync) {
+        try {
+          if (legacyPlaybackSpeedSyncEntry?.value === false) {
+            const excluded = Array.isArray(state.syncServerSettingsExcluded)
+              ? state.syncServerSettingsExcluded
+              : []
+            await dispatch('updateSyncServerSettingsExcluded', Array.from(new Set([
+              ...excluded,
+              'channelPlaybackSpeeds',
+            ])))
+          }
+          await DBSettingHandlers.upsert(CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING, true)
+        } catch (error) {
+          console.error('Failed to migrate saved channel settings sync', error)
+        }
+      }
 
       // Switch every existing installation to the new default once, while allowing
       // users to select the built-in engine again afterwards.

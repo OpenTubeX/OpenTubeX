@@ -39,7 +39,7 @@ experience. Some of its major areas of focus are:
 - **A browser-style desktop workflow** with tabs, configurable session restoration, multiple windows, a scroll mini-player and a watch queue.
 - **Deeper SponsorBlock integration** with a segment side panel, richer skip controls, channel whitelisting, submissions and full-video labels.
 - **More ways to manage and understand your library** through watch-time statistics, configurable history retention, enhanced subscription refreshes and advanced search history.
-- **Optional end-to-end encrypted sync** for subscriptions, playlists, history, profiles, tabs, settings and channel playback speeds.
+- **Optional end-to-end encrypted sync** for subscriptions, playlists, history, profiles, tabs and settings, including saved channel settings.
 
 > [!NOTE] 
 > OpenTubeX is currently in Beta. While it should work well for most users, there are still bugs and missing features that need to be addressed.
@@ -220,7 +220,7 @@ experience. Some of its major areas of focus are:
 
 - Open a chatter's channel by clicking their handle in live chat
 
-- Support for end-to-end encrypted synchronization of subscriptions, playlists, history, channel playback speeds, profiles, tabs and settings. LibreTube Sync Servers are also supported.
+- Support for end-to-end encrypted synchronization of subscriptions, playlists, history, profiles, tabs and settings, including saved channel settings. LibreTube Sync Servers are also supported.
 <img height="300" alt="image" src="https://github.com/user-attachments/assets/15144ab2-0111-4e38-b011-c7a57417fcd0" />
 
 - Simple watch queue. Videos can be queued from the three-dots menu and managed in a side panel on the watch page, including drag-and-drop reordering.

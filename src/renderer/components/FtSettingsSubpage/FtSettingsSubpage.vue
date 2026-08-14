@@ -1,6 +1,12 @@
 <template>
   <Teleport
     v-if="open"
+    :to="`#${settingsWindow.breadcrumbTargetId}`"
+  >
+    <slot name="breadcrumb-action" />
+  </Teleport>
+  <Teleport
+    v-if="open"
     :to="`#${settingsWindow.targetId}`"
   >
     <div

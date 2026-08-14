@@ -110,6 +110,10 @@
             <span class="settingsBreadcrumbText">{{ subpageTitle }}</span>
           </span>
         </template>
+        <span
+          :id="subpageBreadcrumbTargetId"
+          class="settingsBreadcrumbAction"
+        />
       </div>
       <label
         v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen && !isAboutOpen && !subpageTitle"
@@ -399,6 +403,7 @@ const settingsSearchInputRef = useTemplateRef('settingsSearchInputRef')
 const settingsCloseButtonRef = useTemplateRef('settingsCloseButtonRef')
 const menuRef = useTemplateRef('menuRef')
 const subpageTargetId = `settings-subpage-${useId().replaceAll(':', '')}`
+const subpageBreadcrumbTargetId = `settings-subpage-breadcrumb-${useId().replaceAll(':', '')}`
 const subpageTitle = ref('')
 const subpageIcon = ref(null)
 let closeSubpage = null
@@ -659,6 +664,7 @@ const unlocked = ref(store.getters.getSettingsPassword === '')
 
 provide(settingsSubpageKey, {
   targetId: subpageTargetId,
+  breadcrumbTargetId: subpageBreadcrumbTargetId,
   open(title, close, persistOnDeactivate = false, icon = null) {
     subpageTitle.value = title
     subpageIcon.value = icon

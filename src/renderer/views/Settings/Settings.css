@@ -135,6 +135,13 @@
   text-overflow: ellipsis;
 }
 
+.settingsBreadcrumbAction {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  font-size: 16px;
+}
+
 .settingsBreadcrumbRoot,
 .settingsBreadcrumbParent {
   appearance: none;

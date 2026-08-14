@@ -30,11 +30,18 @@
       </div>
     </div>
     <FtFlexBox>
-      <FtButton
-        :label="manageButtonLabel"
-        :icon="['fas', 'sliders-h']"
-        @click="showManager = true"
-      />
+      <div class="manageButton">
+        <FtButton
+          :label="manageButtonLabel"
+          :icon="['fas', 'sliders-h']"
+          @click="showManager = true"
+        />
+        <FtSyncedSettingIndicator
+          :setting-keys="channelPreferenceSettingKeys"
+          :enable-label="savedChannelSyncEnableLabel"
+          :disable-label="savedChannelSyncDisableLabel"
+        />
+      </div>
     </FtFlexBox>
     <FtSettingsSubpage
       :open="showManager"
@@ -42,6 +49,13 @@
       :icon="['fas', 'users']"
       @close="showManager = false"
     >
+      <template #breadcrumb-action>
+        <FtSyncedSettingIndicator
+          :setting-keys="channelPreferenceSettingKeys"
+          :enable-label="savedChannelSyncEnableLabel"
+          :disable-label="savedChannelSyncDisableLabel"
+        />
+      </template>
       <FtInput
         v-if="channelEntries.length > SEARCH_THRESHOLD"
         class="channelSearch"
@@ -190,6 +204,7 @@ import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtSlider from '../FtSlider/FtSlider.vue'
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
@@ -204,6 +219,7 @@ import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../
 const { locale, t } = useI18n()
 
 const PREFERENCES = CHANNEL_PREFERENCE_TYPES
+const channelPreferenceSettingKeys = PREFERENCES.map(preference => preference.valuesKey)
 const disableChannelLinks = computed(() => store.getters.getDisableChannelLinks)
 
 /** Only offer the search field once scanning the list by eye gets tedious */
@@ -273,6 +289,12 @@ const preferences = computed(() => PREFERENCES.map(preference => ({
 })))
 
 const settings = computed(() => store.state.settings)
+const savedChannelSyncEnableLabel = computed(() => (
+  t('Settings.Channel Settings.Enable Saved Channel Settings Sync')
+))
+const savedChannelSyncDisableLabel = computed(() => (
+  t('Settings.Channel Settings.Disable Saved Channel Settings Sync')
+))
 
 /** @type {import('vue').ComputedRef<string>} */
 const defaultQuality = computed(() => {
