@@ -1122,9 +1122,42 @@ function stopScrollingToBottom() {
  */
 function handleLiveChatPointerDown(event) {
   const clickedScrollbar = event.target instanceof Element && event.target.closest('.os-scrollbar-vertical') !== null
-  if (event.pointerType === 'touch' || event.button === 1 || clickedScrollbar) {
+  if (event.button === 1 || clickedScrollbar) {
     stopScrollingToBottom()
+    return
   }
+
+  if (event.pointerType !== 'touch') {
+    return
+  }
+
+  const element = event.currentTarget
+  const pointerId = event.pointerId
+  const startX = event.clientX
+  const startY = event.clientY
+
+  const finish = (finishEvent) => {
+    if (finishEvent.pointerId !== pointerId) {
+      return
+    }
+
+    element.removeEventListener('pointermove', handlePointerMove)
+    element.removeEventListener('pointerup', finish)
+    element.removeEventListener('pointercancel', finish)
+  }
+
+  const handlePointerMove = (moveEvent) => {
+    if (moveEvent.pointerId !== pointerId || Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) < 6) {
+      return
+    }
+
+    stopScrollingToBottom()
+    finish(moveEvent)
+  }
+
+  element.addEventListener('pointermove', handlePointerMove, { passive: true })
+  element.addEventListener('pointerup', finish, { passive: true })
+  element.addEventListener('pointercancel', finish, { passive: true })
 }
 
 /**
