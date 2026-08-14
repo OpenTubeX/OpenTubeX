@@ -223,4 +223,20 @@ test.describe('restored watch tab startup priority', () => {
       return state.tabs.find(tab => tab.id === BACKGROUND_WATCH_TAB_ID)?.loadState
     }).not.toBe('unloaded')
   })
+
+  test('releases background watch tabs when a loaded tab becomes active', async ({ page }) => {
+    const backgroundWatchTab = page.locator(`.tab[data-tab-id="${BACKGROUND_WATCH_TAB_ID}"]`)
+    const subscriptionsTab = page.locator(`.tab[data-tab-id="${SUBSCRIPTIONS_TAB_ID}"]`)
+
+    await expect(backgroundWatchTab).toHaveClass(/unloaded/)
+    await expect.poll(async () => {
+      const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+      return state.tabs.find(tab => tab.id === SUBSCRIPTIONS_TAB_ID)?.loadState
+    }).toBe('loaded')
+
+    await subscriptionsTab.click()
+
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', SUBSCRIPTIONS_TAB_ID)
+    await expect(backgroundWatchTab).not.toHaveClass(/unloaded/)
+  })
 })

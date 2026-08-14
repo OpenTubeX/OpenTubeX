@@ -1118,7 +1118,15 @@ export class TabManager {
       this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_MOUNT, true)
     }
 
-    if (this._deferredStartupWatchTabIds.size > 0 && previousActiveId !== tabId) {
+    const shouldResumeDeferredStartupWatchTabs =
+      this._deferredStartupWatchTabIds.size > 0 &&
+      previousActiveId !== tabId &&
+      tab.loadState === 'loaded'
+    if (
+      this._deferredStartupWatchTabIds.size > 0 &&
+      previousActiveId !== tabId &&
+      !shouldResumeDeferredStartupWatchTabs
+    ) {
       this._startupPriorityTabId = tabId
       this._startupPriorityLoadingObserved = false
     }
@@ -1130,6 +1138,9 @@ export class TabManager {
     this.selectionRevision += 1
     this.browserWindow.setTitle(tab.title)
     this.bridge.send(IpcChannels.TABS_ACTIVE_CHANGED, tabId, this.selectionRevision)
+    if (shouldResumeDeferredStartupWatchTabs) {
+      this._resumeDeferredStartupWatchTabs()
+    }
     this._broadcastStateUpdate()
     this._saveSession()
   }
