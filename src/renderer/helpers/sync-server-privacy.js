@@ -219,6 +219,29 @@ export function createEmptySyncDocument() {
   }
 }
 
+export function migrateLegacyPlaybackSpeedsToSettings(document, localValue, updatedAt = Date.now()) {
+  if (document.settings.some(entry => entry.key === 'channelPlaybackSpeeds')) return false
+
+  const legacy = Object.fromEntries(document.playbackSpeeds
+    .filter(entry => entry.channel_id && Number.isFinite(entry.playback_speed) &&
+      entry.playback_speed > 0.07)
+    .map(entry => [entry.channel_id, entry.playback_speed]))
+  if (Object.keys(legacy).length === 0) return false
+
+  let local = {}
+  try {
+    const parsed = JSON.parse(localValue)
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) local = parsed
+  } catch {}
+
+  document.settings.push({
+    key: 'channelPlaybackSpeeds',
+    value: JSON.stringify({ ...legacy, ...local }),
+    updatedAt,
+  })
+  return true
+}
+
 export async function loadLegacySyncDocument(client) {
   const [subscriptions, playlistHeaders, history, playbackSpeeds, subscriptionGroups, playlistBookmarks] =
     await Promise.all([

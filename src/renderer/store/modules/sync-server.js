@@ -20,6 +20,7 @@ import {
   decryptSyncDocument,
   encryptSyncDocument,
   loadLegacySyncDocument,
+  migrateLegacyPlaybackSpeedsToSettings,
   preparePrivacyKey,
 } from '../../helpers/sync-server-privacy'
 import {
@@ -27,6 +28,7 @@ import {
   isRecentSync,
   isSyncReasonEnabled,
 } from '../../helpers/sync-server-scheduling'
+import { isSettingSyncEnabled } from './settings'
 
 const EVENT_SYNC_DEBOUNCE_MS = 1500
 const ENCRYPTED_SYNC_RETRIES = 3
@@ -251,9 +253,15 @@ async function runSync(context, { allowDataLoss = false } = {}) {
         const uploadCollections = manifest.legacy_data || legacyEncrypted?.payload
           ? Array.from(new Set([...enabledCollections, ...LEGACY_ENCRYPTED_COLLECTIONS]))
           : enabledCollections
+        const hasLegacyPlaybackSpeeds = manifest.collections.some(
+          entry => entry.collection === 'playbackSpeeds'
+        )
+        const downloadCollections = hasLegacyPlaybackSpeeds
+          ? Array.from(new Set([...uploadCollections, 'playbackSpeeds']))
+          : uploadCollections
         const document = createEmptySyncDocument()
         const original = {}
-        const entries = await Promise.all(uploadCollections.map(async collection => {
+        const entries = await Promise.all(downloadCollections.map(async collection => {
           const response = await networkClient.getEncryptedSyncCollection(collection)
           const data = response.payload
             ? await decryptSyncDocument(response.payload, settings.syncServerPrivacyKey)
@@ -262,6 +270,13 @@ async function runSync(context, { allowDataLoss = false } = {}) {
           original[collection] = structuredClone(document[collection])
           return [collection, response]
         }))
+        if (settings.syncServerSyncSettings &&
+            isSettingSyncEnabled(settings, 'channelPlaybackSpeeds')) {
+          migrateLegacyPlaybackSpeedsToSettings(
+            document,
+            settings.channelPlaybackSpeeds
+          )
+        }
         return { document, original, remote: Object.fromEntries(entries), uploadCollections }
       })
       client = new EncryptedSyncAdapter(document)

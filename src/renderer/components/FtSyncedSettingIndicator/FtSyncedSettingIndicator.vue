@@ -93,7 +93,7 @@ const canConfigureSync = computed(() => {
 })
 
 const isSynced = computed(() => {
-  return syncableSettingKeys.value.every(settingKey => (
+  return syncableSettingKeys.value.some(settingKey => (
     isSettingSyncEnabled(store.state.settings, settingKey)
   ))
 })

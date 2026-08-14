@@ -9,6 +9,7 @@ test.use({
       channelPlaybackSpeeds: JSON.stringify({
         [CHANNEL_ID]: 1.5
       }),
+      syncServerSettingsExcluded: ['channelPlaybackSpeeds'],
       syncServerAutoSync: false,
       syncServerEnabled: true,
       syncServerPrivacyMode: 'enhanced',
@@ -65,10 +66,12 @@ test.describe('channel settings', () => {
       name: 'Sync saved channel settings'
     })
     await enableSync.click()
-    await expect.poll(() => page.evaluate(() => {
+    await expect.poll(() => page.evaluate(channelSettingKeys => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      return store.state.settings.syncServerSettingsExcluded
-    })).not.toEqual(expect.arrayContaining(channelSettingKeys))
+      return store.state.settings.syncServerSettingsExcluded.filter(
+        settingKey => channelSettingKeys.includes(settingKey)
+      )
+    }, channelSettingKeys)).toEqual([])
   })
 
   test('saved channels in the manager open their channel page', async ({ page }) => {
