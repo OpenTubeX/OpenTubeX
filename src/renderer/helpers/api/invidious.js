@@ -2,6 +2,7 @@ import store from '../../store/index'
 import { calculatePublishedDate, getRelativeTimeFromDate } from '../utils'
 import { isNullOrEmpty } from '../strings'
 import { enrichFallbackInvidiousPublicationDates } from './invidious-channel-videos'
+import { getInvidiousCommentAuthorThumbnail } from './invidious-comments'
 import { filterUnavailableInvidiousPlaylistVideos } from './invidious-playlists'
 import autolinker from 'autolinker'
 import { FormatUtils, Misc, Player } from 'youtubei.js'
@@ -438,7 +439,7 @@ export async function invidiousGetVideoInformation(videoId) {
  * @typedef {object} InvidiousComment
  * @property {string} id
  * @property {string} authorLink
- * @property {string} authorThumb
+ * @property {string | null} authorThumb
  * @property {string} author
  * @property {number} likes
  * @property {string} text
@@ -625,7 +626,7 @@ function parseInvidiousCommentData(response) {
     return {
       id: comment.commentId,
       authorLink: comment.authorId,
-      authorThumb: youtubeImageUrlToInvidious(comment.authorThumbnails.at(-1).url),
+      authorThumb: youtubeImageUrlToInvidious(getInvidiousCommentAuthorThumbnail(comment)),
       author: comment.author,
       likes: comment.likeCount,
       text: autolinker.link(invidiousImageUrlToInvidious(comment.contentHtml, getCurrentInstanceUrl())),
