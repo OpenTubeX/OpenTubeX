@@ -117,7 +117,7 @@ test.describe('loading missing tab icons', () => {
     const themeSection = await goToSettingsSection(page, 'theme')
     const loadButton = themeSection.getByRole('button', { name: 'Load Missing Tab Icons' })
     await loadButton.click()
-    await expect(page.locator('.toast')).toContainText('Missing tab icons loaded: 1')
+    await expect(page.locator('.toast')).toContainText('Missing tab icon loaded: 1')
     await expect(loadButton).toBeDisabled()
 
     await expect.poll(() => page.evaluate(tabId => {
