@@ -89,7 +89,7 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
 }
 
 .clearInputTextButton.visible:active {
-  background-color: var(--tertiary-text-color);
+  background-color: var(--subtle-surface-color);
   color: var(--side-nav-active-text-color);
   transition: background 0.2s ease-in;
 }
@@ -119,6 +119,7 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   color: var(--secondary-text-color);
   border-radius: calc(5px * var(--ui-roundness));
   background-color: var(--search-bar-color);
+  backdrop-filter: var(--search-bar-blur, none);
 }
 
 .ftcomponent ::placeholder {
@@ -129,6 +130,7 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
 .forceTextColor .ft-input {
   color: #eee;
   background-color: var(--primary-input-color);
+  backdrop-filter: var(--primary-input-blur, none);
 }
 
 .forceTextColor .ft-input:focus {
@@ -219,7 +221,7 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
 }
 
 .inputAction.enabled:active {
-  background-color: var(--tertiary-text-color);
+  background-color: var(--subtle-surface-color);
   color: var(--side-nav-active-text-color);
   transition: background 0.2s ease-in;
 }
@@ -239,12 +241,13 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   z-index: 10;
   border-radius: 0 0 calc(5px * var(--ui-roundness)) calc(5px * var(--ui-roundness));
   overflow-wrap: break-word;
-  box-shadow: 0 0 10px var(--scrollbar-color-hover);
+  box-shadow: 0 0 10px var(--dropdown-item-hover-color);
   background-color: var(--search-bar-color);
+  backdrop-filter: var(--search-bar-blur, none);
 
   /* The handle crosses hovered rows because this is an overlay scrollbar.
      Match the row highlight instead of drawing a darker stripe through it. */
-  --scrollbar-color: var(--scrollbar-color-hover);
+  --scrollbar-color: var(--dropdown-item-hover-color);
 }
 
 .search .list {
@@ -303,6 +306,6 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
 }
 
 .hover {
-  background-color: var(--scrollbar-color-hover);
-  color: var(--scrollbar-text-color-hover);
+  background-color: var(--dropdown-item-hover-color);
+  color: var(--dropdown-item-hover-text-color);
 }

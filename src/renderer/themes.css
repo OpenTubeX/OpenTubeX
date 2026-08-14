@@ -6,7 +6,11 @@ body {
 
   --ui-roundness: 1;
   --scrollbar-thumb-width: 6px;
-  --divider-color: color-mix(in srgb, var(--tertiary-text-color) 45%, transparent);
+  --border-color: var(--tertiary-text-color);
+  --divider-color: color-mix(in srgb, var(--border-color) 45%, transparent);
+  --subtle-surface-color: var(--tertiary-text-color);
+  --dropdown-item-hover-color: var(--scrollbar-color-hover);
+  --dropdown-item-hover-text-color: var(--scrollbar-text-color-hover);
 
   /*
     This works because CSS variables are just a find and replace and
@@ -45,6 +49,18 @@ body {
   --logo-primary-color: var(--primary-text-color);
   --logo-secondary-color: var(--primary-text-color);
   --logo-tertiary-color: var(--primary-text-color);
+  --logo-pressed-color: var(--logo-tertiary-color);
+
+  /* Header interaction colors default to the legacy palette mappings so
+     built-in and version 1 custom themes retain their existing appearance. */
+  --header-button-hover-color: var(--side-nav-hover-color);
+  --header-button-hover-text-color: var(--side-nav-hover-text-color);
+  --header-button-pressed-color: var(--subtle-surface-color);
+  --header-button-pressed-text-color: var(--side-nav-active-text-color);
+  --colored-header-button-hover-color: var(--primary-color-hover);
+  --colored-header-button-hover-text-color: var(--text-with-main-color);
+  --colored-header-button-pressed-color: var(--primary-color-active);
+  --colored-header-button-pressed-text-color: var(--text-with-main-color);
 }
 
 /*************** RULE TWEAKS ***************/
@@ -259,6 +275,10 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .custom .logo:hover :is(.logoIcon, .logoText) {
   background-color: var(--logo-tertiary-color);
+}
+
+.custom .logo:active :is(.logoIcon, .logoText) {
+  background-color: var(--logo-pressed-color);
 }
 
 .nordic {
@@ -2243,7 +2263,10 @@ body .os-scrollbar {
   --os-handle-border-radius: calc(var(--scrollbar-thumb-width) * var(--ui-roundness));
   --os-handle-bg: var(--scrollbar-color);
   --os-handle-bg-hover: var(--scrollbar-color-hover);
-  --os-handle-bg-active: color-mix(in srgb, var(--scrollbar-color-hover) 80%, #fff);
+  --os-handle-bg-active: var(
+    --scrollbar-color-active,
+    color-mix(in srgb, var(--scrollbar-color-hover) 80%, #fff)
+  );
 }
 
 /* shared shimmer for skeleton loading placeholders */

@@ -903,20 +903,19 @@ test.describe('settings', () => {
     await edgeStyle.click()
     await page.getByRole('option', { name: 'Drop Shadow' }).click()
 
-    const edgeStyleLabel = edgeStyle.locator('..').locator('.select-label')
+    const edgeStyleControl = edgeStyle.locator('..').locator('..')
     const edgeColorControl = page.locator('.captionColorControl').filter({ hasText: 'Edge Color' })
-    const edgeColorLabel = edgeColorControl.locator(':scope > span')
-    const edgeColorInput = edgeColorControl.locator('input[type="color"]')
-    const [styleLabelBounds, colorLabelBounds, styleInputBounds, colorInputBounds] = await Promise.all([
-      edgeStyleLabel.boundingBox(),
-      edgeColorLabel.boundingBox(),
-      edgeStyle.boundingBox(),
-      edgeColorInput.boundingBox()
+    const edgeColorTrigger = edgeColorControl.getByRole('button', { name: 'Edge Color' })
+    const [styleControlBounds, colorControlBounds, colorTriggerBounds] = await Promise.all([
+      edgeStyleControl.boundingBox(),
+      edgeColorControl.boundingBox(),
+      edgeColorTrigger.boundingBox()
     ])
 
-    expect(colorLabelBounds.y).toBeCloseTo(styleLabelBounds.y, 0)
-    expect(colorInputBounds.y).toBeCloseTo(styleInputBounds.y, 0)
-    expect(colorInputBounds.height).toBeCloseTo(styleInputBounds.height, 0)
+    expect(colorControlBounds.y).toBeCloseTo(styleControlBounds.y, 0)
+    expect(colorControlBounds.height).toBeCloseTo(styleControlBounds.height, 0)
+    expect(colorTriggerBounds.y).toBeCloseTo(colorControlBounds.y + 1, 0)
+    expect(colorTriggerBounds.height).toBeCloseTo(colorControlBounds.height - 2, 0)
   })
 
   test('stacks caption controls at narrow settings widths', async ({ page, attachScreenshot }) => {

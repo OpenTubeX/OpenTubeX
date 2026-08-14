@@ -1,5 +1,6 @@
 .ft-card {
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   border-radius: calc(8px * var(--ui-roundness));
   margin: 8px;
   padding-block: 3px 16px;

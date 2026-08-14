@@ -118,6 +118,7 @@
   padding-block: calc(20px + 0.5rem) 0.5rem;
   padding-inline: 20px;
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
 }
 
 .quickPlaybackSpeedList {
@@ -136,6 +137,7 @@
   border: 1px solid var(--border-color);
   border-radius: calc(4px * var(--ui-roundness));
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   transition: transform 0.18s ease, opacity 0.18s ease;
   will-change: transform;
 }
@@ -190,6 +192,7 @@
   border: 0;
   border-radius: calc(5px * var(--ui-roundness));
   background-color: var(--search-bar-color);
+  backdrop-filter: var(--search-bar-blur, none);
   color: var(--secondary-text-color);
   font-size: 16px;
 }

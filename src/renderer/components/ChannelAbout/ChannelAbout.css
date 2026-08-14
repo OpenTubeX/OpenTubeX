@@ -1,5 +1,6 @@
 .about {
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   margin-block-start: 0;
   padding: 10px;
   position: relative;
@@ -27,6 +28,7 @@
 
 .aboutTagLink {
   background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
   color: var(--primary-text-color);
   border-radius: calc(7px * var(--ui-roundness));
   padding: 7px;

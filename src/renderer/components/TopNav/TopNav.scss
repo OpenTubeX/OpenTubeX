@@ -130,14 +130,14 @@
 .navButton,
 :deep(.ftIconButton:not(.arrowDisabled) .iconButton) {
   &:hover {
-    background-color: var(--side-nav-hover-color);
-    color: var(--side-nav-hover-text-color);
+    background-color: var(--header-button-hover-color);
+    color: var(--header-button-hover-text-color);
     transition: background 0.2s ease-in;
   }
 
   &:active {
-    background-color: var(--tertiary-text-color);
-    color: var(--side-nav-active-text-color);
+    background-color: var(--header-button-pressed-color);
+    color: var(--header-button-pressed-text-color);
     transition: background 0.2s ease-in;
   }
 }
@@ -166,11 +166,13 @@
   color: var(--text-with-main-color);
 
   &:hover {
-    background-color: var(--primary-color-hover);
+    background-color: var(--colored-header-button-hover-color);
+    color: var(--colored-header-button-hover-text-color);
   }
 
   &:active {
-    background-color: var(--primary-color-active);
+    background-color: var(--colored-header-button-pressed-color);
+    color: var(--colored-header-button-pressed-text-color);
   }
 }
 
@@ -233,21 +235,21 @@
     padding-inline: 10px 25px;
 
     &:hover {
-      background-color: var(--side-nav-hover-color);
-      color: var(--side-nav-hover-text-color);
+      background-color: var(--header-button-hover-color);
+      color: var(--header-button-hover-text-color);
       transition: background 0.2s ease-in;
 
       @include top-nav-is-colored {
-        background-color: var(--primary-color-hover);
+        background-color: var(--colored-header-button-hover-color);
       }
     }
 
     &:active {
-      background-color: var(--tertiary-text-color);
+      background-color: var(--header-button-pressed-color);
       transition: background 0.2s ease-in;
 
       @include top-nav-is-colored {
-        background-color: var(--primary-color-active);
+        background-color: var(--colored-header-button-pressed-color);
       }
     }
 

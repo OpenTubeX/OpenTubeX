@@ -562,7 +562,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
 }
 
 .tab.vertical.active {
-  border-color: var(--tab-border-color, var(--tertiary-text-color));
+  border-color: var(--tab-border-color, var(--border-color));
 }
 
 .tab.vertical.colored {
@@ -581,7 +581,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
 
 .tab.active {
   background-color: var(--tab-active-color, var(--card-bg-color));
-  border-color: var(--tab-border-color, var(--tertiary-text-color));
+  border-color: var(--tab-border-color, var(--border-color));
 }
 
 .tab.selected {
@@ -598,7 +598,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
   --tab-surface-color: color-mix(in srgb, var(--tab-accent-color) var(--tab-accent-mix), var(--bg-color));
   --tab-hover-color: color-mix(in srgb, var(--tab-accent-color) 22%, var(--card-bg-color));
   --tab-active-color: color-mix(in srgb, var(--tab-accent-color) 26%, var(--card-bg-color));
-  --tab-border-color: color-mix(in srgb, var(--tab-accent-color) var(--tab-accent-border-mix), var(--tertiary-text-color));
+  --tab-border-color: color-mix(in srgb, var(--tab-accent-color) var(--tab-accent-border-mix), var(--border-color));
 
   box-shadow: inset 0 2px 0 var(--tab-accent-color);
 }
@@ -785,9 +785,10 @@ watch(tabAvatarUrl, (avatarUrl) => {
   inline-size: max-content;
   max-inline-size: min(340px, calc(100vw - 16px));
   padding: 8px;
-  border: 1px solid var(--tertiary-text-color);
+  border: 1px solid var(--border-color);
   border-radius: calc(8px * var(--ui-roundness));
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   box-shadow: 0 8px 26px rgb(0 0 0 / 32%);
   color: var(--primary-text-color);
   font-family: Roboto, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
@@ -821,6 +822,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
   overflow: hidden;
   border-radius: calc(5px * var(--ui-roundness));
   background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
 }
 
 .tabTooltipPreview img {

@@ -5,7 +5,7 @@
 }
 
 .dropdownHeader {
-  border-block-end: 1px solid var(--tertiary-text-color);
+  border-block-end: 1px solid var(--border-color);
   font-size: 13px;
   font-weight: bold;
   margin: 0;
@@ -80,7 +80,7 @@
 .createRow {
   background: none;
   border: 0;
-  border-block-start: 1px solid var(--tertiary-text-color);
+  border-block-start: 1px solid var(--border-color);
   color: inherit;
   font: inherit;
   gap: 8px;

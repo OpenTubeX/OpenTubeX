@@ -44,7 +44,7 @@
   }
 
   &:active {
-    background-color: var(--tertiary-text-color);
+    background-color: var(--subtle-surface-color);
     color: var(--side-nav-active-text-color);
     transition: background 0.2s ease-in;
   }

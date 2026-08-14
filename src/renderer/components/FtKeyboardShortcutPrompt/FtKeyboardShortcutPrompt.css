@@ -138,6 +138,7 @@ h3 {
   border-radius: calc(4px * var(--ui-roundness));
   color: var(--primary-text-color);
   background: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   font: inherit;
   text-transform: capitalize;
   cursor: pointer;

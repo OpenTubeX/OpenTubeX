@@ -137,6 +137,7 @@ $watched-transition-duration: 0.5s;
     .videoDuration {
       place-self: flex-end end;
       background-color: var(--card-bg-color);
+      backdrop-filter: var(--card-bg-blur, none);
       border-radius: calc(5px * var(--ui-roundness));
       color: var(--primary-text-color);
       font-size: 15px;

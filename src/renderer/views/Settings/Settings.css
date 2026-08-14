@@ -14,7 +14,8 @@
   flex-direction: column;
   color: var(--primary-text-color);
   background: var(--card-bg-color);
-  border: 1px solid var(--tertiary-text-color);
+  backdrop-filter: var(--card-bg-blur, none);
+  border: 1px solid var(--border-color);
   border-radius: calc(10px * var(--ui-roundness));
   box-shadow: 0 12px 40px rgb(0 0 0 / 38%);
   container-name: settings-window;
@@ -166,6 +167,7 @@
   border-radius: calc(6px * var(--ui-roundness));
   color: var(--tertiary-text-color);
   background: var(--settings-search-bar-color);
+  backdrop-filter: var(--settings-search-bar-blur, none);
   cursor: text;
 }
 
@@ -295,6 +297,7 @@
   border: 1px solid var(--border-color);
   border-radius: calc(6px * var(--ui-roundness));
   background: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
 }
 
 .settingsSearchResultHeading {

@@ -43,15 +43,13 @@
               @keydown.enter.space.prevent="profileBgColor = 'transparent'"
             />
           </FtFlexBox>
-          <div class="customColorSection">
-            <label for="colorPicker">{{ $t("Profile.Custom Color") }}</label>
-            <input
-              id="colorPicker"
-              type="color"
-              :value="customColorPickerValue"
-              @input="profileBgColor = $event.target.value"
-            >
-          </div>
+          <FtColorPicker
+            class="profileColorPicker"
+            :label="$t('Profile.Custom Color')"
+            :model-value="customColorPickerValue"
+            :allow-alpha="false"
+            @update:model-value="profileBgColor = $event"
+          />
           <FtInput
             class="colorSelection"
             placeholder=""
@@ -239,6 +237,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtButton from '../FtButton/FtButton.vue'
+import FtColorPicker from '../FtColorPicker/FtColorPicker.vue'
 import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
 import FtSlider from '../FtSlider/FtSlider.vue'
 

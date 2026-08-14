@@ -19,6 +19,12 @@
   opacity: 0.3;
 }
 
+.ft-list-item.premiereVideo .info .title,
+.ft-list-item.premiereVideo .info .infoLine,
+.ft-list-item.premiereVideo .info .infoLine .channelName {
+  color: var(--tertiary-text-color);
+}
+
 .draggable:not(.draggable:only-child):focus .grabBar,
 .draggable:not(.draggable:only-child):hover .grabBar {
   display: revert;
@@ -155,6 +161,7 @@
   padding: 3px;
   margin-inline: 2px;
   background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
   font-size: 10px;
   border-radius: calc(2px * var(--ui-roundness));
   display: inline-block;

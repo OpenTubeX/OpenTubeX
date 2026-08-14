@@ -78,6 +78,7 @@
   padding-block: 2px;
   inset-inline-end: 16px;
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   text-decoration: none;
 }
 
@@ -101,6 +102,7 @@
   inset-block-end: 0;
   margin-block-start: 1.5em;
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
 }
 
 .videoDescription:not(.short) .descriptionStatus::before {
@@ -150,6 +152,7 @@
 
 .videoTagLink {
   background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
   color: var(--primary-text-color);
   border-radius: calc(7px * var(--ui-roundness));
   padding: 7px;

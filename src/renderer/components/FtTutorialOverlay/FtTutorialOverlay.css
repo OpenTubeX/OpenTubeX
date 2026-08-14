@@ -52,7 +52,7 @@
   inline-size: 7px;
   block-size: 7px;
   border-radius: 50%;
-  background-color: var(--tertiary-text-color);
+  background-color: var(--subtle-surface-color);
   transition: inline-size 180ms ease-out, background-color 180ms ease-out;
 }
 

@@ -324,6 +324,7 @@ function selectPlaybackEngine(value) {
 .badge {
   align-items: center;
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   border-radius: calc(20px * var(--ui-roundness));
   color: var(--secondary-text-color);
   display: inline-flex;

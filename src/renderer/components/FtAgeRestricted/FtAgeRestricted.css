@@ -12,6 +12,7 @@
 .frown {
   color: var(--primary-text-color);
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   padding-inline: 0;
   text-align: center;
   inline-size: 100%;

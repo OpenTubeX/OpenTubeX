@@ -22,6 +22,7 @@
   overflow: hidden;
   color: #fff;
   background-color: transparent;
+  backdrop-filter: none;
   box-shadow: none;
 }
 
@@ -254,7 +255,7 @@
 .commentThread {
   position: relative;
 
-  --comment-thread-line-color: color-mix(in srgb, var(--tertiary-text-color) 55%, var(--card-bg-color));
+  --comment-thread-line-color: color-mix(in srgb, var(--border-color) 55%, var(--card-bg-color));
   --highlighted-comment-offset: 13px;
 }
 
@@ -313,6 +314,7 @@
 
 .commentOwner {
   background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
   border-radius: calc(10px * var(--ui-roundness));
   padding-inline: 10px;
 }

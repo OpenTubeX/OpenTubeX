@@ -274,32 +274,31 @@ test.describe('custom theme editor', () => {
     const basedOn = page.getByRole('combobox', { name: 'Based on' })
 
     const setEditorColor = async (label, value) => {
-      const field = editor.locator('.colorField').filter({ has: page.getByText(label, { exact: true }) })
-      await field.locator('input[type="color"]').evaluate((input, color) => {
-        input.value = color
-        input.dispatchEvent(new Event('input', { bubbles: true }))
-        input.dispatchEvent(new Event('change', { bubbles: true }))
-      }, value)
+      await editor.getByRole('button', { name: label, exact: true }).click()
+      const picker = page.getByRole('dialog', { name: label })
+      await picker.getByRole('textbox', { name: 'Hex color' }).fill(value)
+      await picker.getByRole('textbox', { name: 'Hex color' }).press('Enter')
+      await picker.getByRole('button', { name: 'Apply' }).click()
     }
 
     await setEditorColor('Logo icon', '#123456')
     await expect(resetColorsButton).toBeEnabled()
     await setEditorColor('Logo text', '#654321')
-    await setEditorColor('Background', '#101112')
+    await setEditorColor('Page background', '#101112')
     await sourceMainColor.click()
     await page.locator(`#${await sourceMainColor.getAttribute('aria-controls')}`)
       .getByRole('option', { name: 'Orange', exact: true }).click()
     await expect(page.locator('body')).toHaveCSS('--primary-color', '#ff9800')
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#101112')
-    await expect(editor.locator('.colorField').filter({ hasText: 'Logo icon' }).locator('input'))
-      .toHaveValue('#123456')
+    await expect(editor.locator('.ftColorPicker').filter({ hasText: 'Logo icon' }).locator('code'))
+      .toHaveText('#123456')
     await sourceSecondaryColor.click()
     await page.locator(`#${await sourceSecondaryColor.getAttribute('aria-controls')}`)
       .getByRole('option', { name: 'Teal', exact: true }).click()
     await expect(page.locator('body')).toHaveCSS('--accent-color', '#009688')
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#101112')
-    await expect(editor.locator('.colorField').filter({ hasText: 'Logo text' }).locator('input'))
-      .toHaveValue('#654321')
+    await expect(editor.locator('.ftColorPicker').filter({ hasText: 'Logo text' }).locator('code'))
+      .toHaveText('#654321')
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setBarColor', true)
@@ -315,10 +314,10 @@ test.describe('custom theme editor', () => {
     await expect(page.locator('.topNav .logoIcon')).toHaveCSS('background-color', 'rgb(171, 205, 239)')
     await expect(page.locator('.topNav .logoText')).toHaveCSS('background-color', 'rgb(171, 205, 239)')
 
-    await setEditorColor('Scrollbar hover', '#345678')
+    await setEditorColor('Scrollbar thumb hover', '#345678')
     await expect(page.locator('.os-scrollbar').first()).toHaveCSS('--os-handle-bg-hover', '#345678')
 
-    await setEditorColor('Dropdown hover text', '#fedcba')
+    await setEditorColor('Dropdown item hover text', '#fedcba')
     await basedOn.click()
     await expect(page.getByRole('option', { name: 'System Default' })).toHaveCount(0)
     await page.getByRole('option', { name: 'Dark', exact: true }).hover()
@@ -329,37 +328,30 @@ test.describe('custom theme editor', () => {
     await page.locator(`#${await basedOn.getAttribute('aria-controls')}`)
       .getByRole('option', { name: 'Dark', exact: true }).click()
 
-    const backgroundField = page.locator('.colorField')
-      .filter({ has: page.getByText('Background', { exact: true }) })
-    const backgroundInput = backgroundField.locator('input[type="color"]')
-    await expect(backgroundInput).toHaveValue('#0f0f0f')
+    const backgroundField = editor.locator('.ftColorPicker')
+      .filter({ has: page.getByText('Page background', { exact: true }) })
+    const backgroundValue = backgroundField.locator('code')
+    await expect(backgroundValue).toHaveText('#0f0f0f')
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#0f0f0f')
     await expect(resetColorsButton).toBeDisabled()
 
-    const dragState = await backgroundInput.evaluate((input) => {
-      const code = input.parentElement.querySelector('code')
-      const before = {
-        preview: document.body.style.getPropertyValue('--bg-color'),
-        label: code.textContent
-      }
-      input.value = '#334455'
-      input.dispatchEvent(new Event('input', { bubbles: true }))
-      input.value = '#445566'
-      input.dispatchEvent(new Event('input', { bubbles: true }))
-      return {
-        before,
-        immediatePreview: document.body.style.getPropertyValue('--bg-color'),
-        immediateLabel: code.textContent
-      }
-    })
-    // Native drag events only queue the latest preview. They must not trigger a
-    // Vue render or a whole-app style update for every pointer movement.
-    expect(dragState.immediatePreview).toBe(dragState.before.preview)
-    expect(dragState.immediateLabel).toBe(dragState.before.label)
-    await expect(page.locator('body')).toHaveCSS('--bg-color', '#445566')
+    await backgroundField.getByRole('button', { name: 'Page background' }).click()
+    let backgroundPicker = page.getByRole('dialog', { name: 'Page background' })
+    await expect(backgroundPicker.getByRole('button', { name: 'Reset' })).toBeDisabled()
+    await backgroundPicker.getByRole('textbox', { name: 'Hex color' }).fill('#33445580')
+    await backgroundPicker.getByRole('textbox', { name: 'Hex color' }).press('Enter')
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#33445580')
+    await expect(backgroundPicker.getByRole('button', { name: 'Reset' })).toBeEnabled()
+    await page.locator('.customThemeEditor .themeNameField input').click()
+    await expect(page.getByRole('dialog', { name: 'Page background' })).toHaveCount(0)
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#0f0f0f')
 
-    await backgroundInput.evaluate(input => input.dispatchEvent(new Event('change', { bubbles: true })))
-    await expect(backgroundField.locator('code')).toHaveText('#445566')
+    await backgroundField.getByRole('button', { name: 'Page background' }).click()
+    backgroundPicker = page.getByRole('dialog', { name: 'Page background' })
+    await backgroundPicker.getByRole('textbox', { name: 'Hex color' }).fill('#445566')
+    await backgroundPicker.getByRole('textbox', { name: 'Hex color' }).press('Enter')
+    await backgroundPicker.getByRole('button', { name: 'Apply' }).click()
+    await expect(backgroundValue).toHaveText('#445566')
     await expect(resetColorsButton).toBeEnabled()
 
     const darkTheme = page.getByRole('checkbox', { name: 'Dark theme' })
@@ -367,14 +359,14 @@ test.describe('custom theme editor', () => {
     await page.locator('label.switch-label').filter({ hasText: 'Dark theme' }).click()
     await expect(page.locator('body')).toHaveAttribute('data-custom-theme', 'light')
 
-    await setEditorColor('Primary hover', '#123456')
-    await setEditorColor('Primary active', '#234567')
-    await setEditorColor('Accent hover', '#345678')
-    await setEditorColor('Accent active', '#456789')
+    await setEditorColor('Primary control hover and focus', '#123456')
+    await setEditorColor('Primary control pressed', '#234567')
+    await setEditorColor('Secondary control hover and focus', '#345678')
+    await setEditorColor('Secondary control pressed', '#456789')
     await setEditorColor('Destructive action', '#123abc')
-    await setEditorColor('Destructive hover', '#456def')
-    await setEditorColor('Destructive active', '#789abc')
-    await setEditorColor('Text on destructive action', '#fedcba')
+    await setEditorColor('Destructive hover and focus', '#456def')
+    await setEditorColor('Destructive pressed', '#789abc')
+    await setEditorColor('Text and icons on destructive actions', '#fedcba')
 
     const saveAndApplyButton = page.getByRole('button', { name: 'Save and apply' })
     await page.keyboard.press('Tab')
@@ -437,23 +429,23 @@ test.describe('custom theme editor', () => {
     await page.locator('.topNav .profileTrigger').click()
     await goTo(page, 'settings')
     await expect(page.getByText('Custom theme creator', { exact: true })).toBeVisible()
-    await expect(backgroundInput).toHaveValue('#445566')
+    await expect(backgroundValue).toHaveText('#445566')
 
     const discardChangesButton = page.getByRole('button', { name: 'Discard changes' })
     await expect(saveAndApplyButton).toBeDisabled()
     await expect(discardChangesButton).toBeDisabled()
 
-    await setEditorColor('Background', '#112233')
+    await setEditorColor('Page background', '#112233')
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#112233')
     await expect(saveAndApplyButton).toBeEnabled()
     await expect(discardChangesButton).toBeEnabled()
     await discardChangesButton.click()
-    await expect(backgroundInput).toHaveValue('#445566')
+    await expect(backgroundValue).toHaveText('#445566')
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#445566')
     await expect(saveAndApplyButton).toBeDisabled()
     await expect(discardChangesButton).toBeDisabled()
 
-    await setEditorColor('Background', '#112233')
+    await setEditorColor('Page background', '#112233')
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#112233')
     await page.getByRole('button', { name: 'Show Keyboard Shortcuts' }).click()
     await expect(page.getByText('Custom theme creator', { exact: true })).toHaveCount(0)
@@ -465,7 +457,7 @@ test.describe('custom theme editor', () => {
     await expect(page.getByRole('combobox', { name: /Secondary colou?r theme/i })).toBeDisabled()
 
     await page.getByRole('button', { name: 'Create custom theme' }).click()
-    await expect(backgroundInput).toHaveValue('#445566')
+    await expect(backgroundValue).toHaveText('#445566')
     await expect(page.getByRole('combobox', { name: 'Based on' })).toHaveText('Dark')
     await expect(editor.getByRole('combobox', { name: /Main colou?r theme/i })).toHaveText('Orange')
     await expect(editor.getByRole('combobox', { name: /Secondary colou?r theme/i })).toHaveText('Teal')
@@ -516,13 +508,13 @@ test.describe('custom theme editor', () => {
       .getByRole('option', { name: 'Paper', exact: true }).click()
     await expect(page.getByRole('button', { name: 'Edit custom theme' })).toBeVisible()
     await page.getByRole('button', { name: 'Edit custom theme' }).click()
-    await setEditorColor('Background', '#abcdef')
+    await setEditorColor('Page background', '#abcdef')
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#abcdef')
     await page.locator('.settingsBackButton').click()
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#f1f1f1')
     await expect(page.locator('body')).toHaveClass(/custom/)
     await page.getByRole('button', { name: 'Edit custom theme' }).click()
-    await setEditorColor('Background', '#abcdef')
+    await setEditorColor('Page background', '#abcdef')
     await page.emulateMedia({ colorScheme: 'dark' })
     await page.getByRole('button', { name: 'Save and apply' }).click()
     await expect(page.locator('.settingsWindow:visible')
@@ -539,7 +531,7 @@ test.describe('custom theme editor', () => {
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#445566')
     await page.getByRole('button', { name: 'Edit custom theme' }).click()
     await expect(page.getByRole('combobox', { name: 'Based on' })).toHaveText('Dark')
-    await expect(backgroundInput).toHaveValue('#445566')
+    await expect(backgroundValue).toHaveText('#445566')
 
     ;({ page } = await app.relaunch())
     await expect(page.locator('body')).toHaveClass(/custom/)

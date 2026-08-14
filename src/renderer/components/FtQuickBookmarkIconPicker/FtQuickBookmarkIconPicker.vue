@@ -395,6 +395,7 @@ function closeCropEditor() {
 .iconOption {
   align-items: center;
   background: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   border: 2px solid transparent;
   border-radius: calc(6px * var(--ui-roundness));
   color: var(--primary-text-color);
@@ -427,6 +428,7 @@ function closeCropEditor() {
 
 .customEmojiInput {
   background: var(--search-bar-color);
+  backdrop-filter: var(--search-bar-blur, none);
   border: 1px solid var(--scrollbar-color);
   border-radius: calc(4px * var(--ui-roundness));
   color: var(--primary-text-color);

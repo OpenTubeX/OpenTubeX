@@ -20,7 +20,7 @@ h2 {
 
 .openedProfile:hover,
 .openedProfile:focus-visible {
-  background-color: var(--tertiary-text-color);
+  background-color: var(--subtle-surface-color);
   transition: background 0.2s ease-in;
 }
 

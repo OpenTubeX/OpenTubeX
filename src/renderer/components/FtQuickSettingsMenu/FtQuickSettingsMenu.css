@@ -38,6 +38,7 @@
 
 .profileHeaderRow {
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   display: grid;
   grid-template-columns: minmax(0, 1fr) 44px;
   padding-inline-end: 8px;
@@ -161,6 +162,7 @@
 
 .quickSettingsMenu {
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   box-shadow: 0 16px 40px rgb(0 0 0 / 55%), 0 3px 10px rgb(0 0 0 / 45%);
   display: flex;
   flex-direction: column;

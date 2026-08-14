@@ -3,70 +3,102 @@ export const CUSTOM_THEMES_SYNC_KEY = 'customThemes'
 export const CUSTOM_THEME_VALUE_PREFIX = 'custom:'
 
 export const CUSTOM_THEME_COLORS = Object.freeze([
-  ['primaryText', '--primary-text-color', 'Primary text'],
+  ['primaryText', '--primary-text-color', 'Main text'],
   ['secondaryText', '--secondary-text-color', 'Secondary text'],
-  ['tertiaryText', '--tertiary-text-color', 'Tertiary text'],
-  ['title', '--title-color', 'Titles'],
+  ['tertiaryText', '--tertiary-text-color', 'Subtle text'],
+  ['border', '--border-color', 'Borders and dividers'],
+  ['subtleSurface', '--subtle-surface-color', 'Subtle surfaces and indicators'],
+  ['title', '--title-color', 'Title text'],
   ['logoPrimary', '--logo-primary-color', 'Logo icon'],
   ['logoSecondary', '--logo-secondary-color', 'Logo text'],
   ['logoTertiary', '--logo-tertiary-color', 'Logo hover'],
-  ['background', '--bg-color', 'Background'],
-  ['cardBackground', '--card-bg-color', 'Cards'],
-  ['secondaryCardBackground', '--secondary-card-bg-color', 'Secondary cards'],
+  ['logoPressed', '--logo-pressed-color', 'Logo pressed'],
+  ['background', '--bg-color', 'Page background'],
+  ['cardBackground', '--card-bg-color', 'Card background'],
+  ['secondaryCardBackground', '--secondary-card-bg-color', 'Secondary card background'],
   ['favoriteIcon', '--favorite-icon-color', 'Favorite icon'],
-  ['error', '--red-500', 'Errors'],
-  ['scrollbar', '--scrollbar-color', 'Scrollbar'],
-  ['scrollbarHover', '--scrollbar-color-hover', 'Scrollbar hover'],
-  ['scrollbarTextHover', '--scrollbar-text-color-hover', 'Dropdown hover text'],
-  ['sideNav', '--side-nav-color', 'Side navigation'],
-  ['sideNavHover', '--side-nav-hover-color', 'Side navigation hover'],
-  ['sideNavHoverText', '--side-nav-hover-text-color', 'Side navigation hover text'],
-  ['sideNavActive', '--side-nav-active-color', 'Side navigation active'],
-  ['sideNavActiveText', '--side-nav-active-text-color', 'Side navigation active text'],
-  ['searchBar', '--search-bar-color', 'Search bar'],
-  ['settingsSearchBar', '--settings-search-bar-color', 'Settings search bar'],
+  ['error', '--red-500', 'Error color'],
+  ['scrollbar', '--scrollbar-color', 'Scrollbar thumb'],
+  ['scrollbarHover', '--scrollbar-color-hover', 'Scrollbar thumb hover'],
+  ['scrollbarActive', '--scrollbar-color-active', 'Scrollbar thumb pressed'],
+  ['scrollbarTextHover', '--scrollbar-text-color-hover', 'Dropdown item hover text'],
+  ['dropdownHover', '--dropdown-item-hover-color', 'Dropdown item hover background'],
+  ['dropdownHoverText', '--dropdown-item-hover-text-color', 'Dropdown item hover text'],
+  ['sideNav', '--side-nav-color', 'Navigation and panel background'],
+  ['sideNavHover', '--side-nav-hover-color', 'Neutral item hover and focus background'],
+  ['sideNavHoverText', '--side-nav-hover-text-color', 'Neutral item hover and focus text and icons'],
+  ['sideNavActive', '--side-nav-active-color', 'Neutral item pressed background'],
+  ['sideNavActiveText', '--side-nav-active-text-color', 'Neutral item pressed text and icons'],
+  ['headerHover', '--header-button-hover-color', 'Header button hover and focus background'],
+  ['headerHoverText', '--header-button-hover-text-color', 'Header button hover and focus text and icons'],
+  ['headerPressed', '--header-button-pressed-color', 'Header button pressed background'],
+  ['headerPressedText', '--header-button-pressed-text-color', 'Header button pressed text and icons'],
+  ['coloredHeaderHover', '--colored-header-button-hover-color', 'Colored header button hover and focus background'],
+  ['coloredHeaderHoverText', '--colored-header-button-hover-text-color', 'Colored header button hover and focus text and icons'],
+  ['coloredHeaderPressed', '--colored-header-button-pressed-color', 'Colored header button pressed background'],
+  ['coloredHeaderPressedText', '--colored-header-button-pressed-text-color', 'Colored header button pressed text and icons'],
+  ['searchBar', '--search-bar-color', 'Search and dropdown background'],
+  ['settingsSearchBar', '--settings-search-bar-color', 'Settings search background'],
   ['instanceMenu', '--instance-menu-color', 'Instance menu'],
   ['primaryInput', '--primary-input-color', 'Input background'],
-  ['primaryShadow', '--primary-shadow-color', 'Shadows'],
-  ['primary', '--primary-color', 'Primary color'],
-  ['primaryHover', '--primary-color-hover', 'Primary hover'],
-  ['primaryActive', '--primary-color-active', 'Primary active'],
-  ['textWithPrimary', '--text-with-main-color', 'Text on primary'],
-  ['accent', '--accent-color', 'Accent color'],
-  ['accentHover', '--accent-color-hover', 'Accent hover'],
-  ['accentActive', '--accent-color-active', 'Accent active'],
-  ['accentLight', '--accent-color-light', 'Light accent'],
+  ['primaryShadow', '--primary-shadow-color', 'Shadow color'],
+  ['primary', '--primary-color', 'Primary controls and highlights'],
+  ['primaryHover', '--primary-color-hover', 'Primary control hover and focus'],
+  ['primaryActive', '--primary-color-active', 'Primary control pressed'],
+  ['textWithPrimary', '--text-with-main-color', 'Text and icons on primary controls'],
+  ['accent', '--accent-color', 'Secondary controls and highlights'],
+  ['accentHover', '--accent-color-hover', 'Secondary control hover and focus'],
+  ['accentActive', '--accent-color-active', 'Secondary control pressed'],
+  ['accentLight', '--accent-color-light', 'Light secondary color'],
   ['accentVisited', '--accent-color-visited', 'Visited accent'],
-  ['textWithAccent', '--text-with-accent-color', 'Text on accent'],
+  ['textWithAccent', '--text-with-accent-color', 'Text and icons on secondary controls'],
   ['link', '--link-color', 'Links'],
   ['linkVisited', '--link-visited-color', 'Visited links'],
   ['destructive', '--destructive-color', 'Destructive action'],
-  ['destructiveHover', '--destructive-hover-color', 'Destructive hover'],
-  ['destructiveActive', '--destructive-active-color', 'Destructive active'],
-  ['destructiveText', '--destructive-text-color', 'Text on destructive action'],
+  ['destructiveHover', '--destructive-hover-color', 'Destructive hover and focus'],
+  ['destructiveActive', '--destructive-active-color', 'Destructive pressed'],
+  ['destructiveText', '--destructive-text-color', 'Text and icons on destructive actions'],
 ])
 
-const LEGACY_UNUSED_CUSTOM_THEME_COLOR_KEYS = new Set(['instanceMenu', 'accentVisited'])
+const LEGACY_UNUSED_CUSTOM_THEME_COLOR_KEYS = new Set([
+  'instanceMenu', 'accentVisited', 'scrollbarTextHover'
+])
 export const CUSTOM_THEME_EDITABLE_COLORS = Object.freeze(
   CUSTOM_THEME_COLORS.filter(([key]) => !LEGACY_UNUSED_CUSTOM_THEME_COLOR_KEYS.has(key))
 )
 
+export const CUSTOM_THEME_BLURS = Object.freeze([
+  ['cardBackground', '--card-bg-blur'],
+  ['secondaryCardBackground', '--secondary-card-bg-blur'],
+  ['searchBar', '--search-bar-blur'],
+  ['settingsSearchBar', '--settings-search-bar-blur'],
+  ['primaryInput', '--primary-input-blur'],
+])
+
+const DEFAULT_CUSTOM_THEME_BLURS = Object.freeze(
+  Object.fromEntries(CUSTOM_THEME_BLURS.map(([key]) => [key, 0]))
+)
+
 export const DEFAULT_CUSTOM_THEME = Object.freeze({
-  version: 1,
+  version: 2,
   id: '',
   name: 'Custom Theme',
   basedOn: 'dark',
   mainColor: 'Red',
   secondaryColor: 'Blue',
   isDark: true,
+  blurs: DEFAULT_CUSTOM_THEME_BLURS,
   colors: Object.freeze({
     primaryText: '#eeeeee',
     secondaryText: '#dddddd',
     tertiaryText: '#999999',
+    border: '#999999',
+    subtleSurface: '#999999',
     title: '#eeeeee',
     logoPrimary: '#eeeeee',
     logoSecondary: '#eeeeee',
     logoTertiary: '#eeeeee',
+    logoPressed: '#eeeeee',
     background: '#121212',
     cardBackground: '#242424',
     secondaryCardBackground: '#181818',
@@ -74,12 +106,23 @@ export const DEFAULT_CUSTOM_THEME = Object.freeze({
     error: '#f44336',
     scrollbar: '#515151',
     scrollbarHover: '#757575',
+    scrollbarActive: '#919191',
     scrollbarTextHover: '#eeeeee',
+    dropdownHover: '#757575',
+    dropdownHoverText: '#eeeeee',
     sideNav: '#181818',
     sideNavHover: '#242424',
     sideNavHoverText: '#eeeeee',
     sideNavActive: '#303030',
     sideNavActiveText: '#eeeeee',
+    headerHover: '#242424',
+    headerHoverText: '#eeeeee',
+    headerPressed: '#999999',
+    headerPressedText: '#eeeeee',
+    coloredHeaderHover: '#e53935',
+    coloredHeaderHoverText: '#ffffff',
+    coloredHeaderPressed: '#c62828',
+    coloredHeaderPressedText: '#ffffff',
     searchBar: '#262626',
     settingsSearchBar: '#242424',
     instanceMenu: '#262626',
@@ -104,7 +147,23 @@ export const DEFAULT_CUSTOM_THEME = Object.freeze({
   })
 })
 
-const HEX_COLOR_PATTERN = /^#[\da-f]{6}$/i
+const HEX_COLOR_PATTERN = /^#[\da-f]{6}(?:[\da-f]{2})?$/i
+
+const LEGACY_CUSTOM_THEME_COLOR_FALLBACKS = Object.freeze({
+  logoPressed: 'logoTertiary',
+  border: 'tertiaryText',
+  subtleSurface: 'tertiaryText',
+  dropdownHover: 'scrollbarHover',
+  dropdownHoverText: 'scrollbarTextHover',
+  headerHover: 'sideNavHover',
+  headerHoverText: 'sideNavHoverText',
+  headerPressed: 'tertiaryText',
+  headerPressedText: 'sideNavActiveText',
+  coloredHeaderHover: 'primaryHover',
+  coloredHeaderHoverText: 'textWithPrimary',
+  coloredHeaderPressed: 'primaryActive',
+  coloredHeaderPressedText: 'textWithPrimary',
+})
 
 export function normalizeCustomTheme(value) {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
@@ -113,15 +172,24 @@ export function normalizeCustomTheme(value) {
 
   const colors = {}
   for (const [key] of CUSTOM_THEME_COLORS) {
-    const color = value.colors?.[key]
+    const color = value.colors?.[key] ??
+      (key === 'scrollbarActive' ? deriveScrollbarActiveColor(value.colors?.scrollbarHover) : undefined) ??
+      value.colors?.[LEGACY_CUSTOM_THEME_COLOR_FALLBACKS[key]]
     if (typeof color !== 'string' || !HEX_COLOR_PATTERN.test(color)) {
       throw new TypeError(`Invalid or missing custom theme color: ${key}`)
     }
     colors[key] = color.toLowerCase()
   }
 
+  const blurs = Object.fromEntries(CUSTOM_THEME_BLURS.map(([key]) => {
+    const blur = value.blurs?.[key]
+    return [key, typeof blur === 'number' && Number.isFinite(blur)
+      ? Math.round(Math.min(40, Math.max(0, blur)))
+      : 0]
+  }))
+
   return {
-    version: 1,
+    version: 2,
     id: typeof value.id === 'string' && /^[\w-]{1,80}$/.test(value.id)
       ? value.id
       : 'custom-theme',
@@ -138,13 +206,42 @@ export function normalizeCustomTheme(value) {
       ? value.secondaryColor
       : DEFAULT_CUSTOM_THEME.secondaryColor,
     isDark: value.isDark !== false,
+    blurs,
     colors
   }
+}
+
+function deriveScrollbarActiveColor(hoverColor) {
+  if (typeof hoverColor !== 'string' || !HEX_COLOR_PATTERN.test(hoverColor)) return undefined
+
+  const components = hoverColor.match(/[\da-f]{2}/gi).map(component => Number.parseInt(component, 16))
+  const hoverAlpha = (components[3] ?? 255) / 255
+  const mixedAlpha = hoverAlpha * 0.8 + 0.2
+  const rgb = components.slice(0, 3).map(component =>
+    Math.round((component * hoverAlpha * 0.8 + 255 * 0.2) / mixedAlpha))
+  const alpha = Math.round(mixedAlpha * 255)
+  return formatHexColor(rgb, alpha)
+}
+
+function formatHexColor(rgb, alpha) {
+  const color = rgb.map(component => component.toString(16).padStart(2, '0')).join('')
+  const transparency = alpha < 255 ? alpha.toString(16).padStart(2, '0') : ''
+  return `#${color}${transparency}`
 }
 
 export function normalizeCustomThemes(value) {
   if (!Array.isArray(value)) throw new TypeError('Custom themes must be a JSON array')
   return value.map(normalizeCustomTheme)
+}
+
+export function hexColorToRgbComponents(color) {
+  const components = color.match(/[\da-f]{2}/gi)
+  return components.slice(0, 3).map(value => Number.parseInt(value, 16)).join(' ')
+}
+
+export function customThemeBackdropBlur(color, strength) {
+  const alpha = color.length === 9 ? Number.parseInt(color.slice(7, 9), 16) : 255
+  return alpha < 255 && strength > 0 ? `blur(${strength}px)` : 'none'
 }
 
 export function customThemeValue(id) {
@@ -164,6 +261,7 @@ export function customThemeIdFromValue(value) {
 export function cloneDefaultCustomTheme() {
   return {
     ...DEFAULT_CUSTOM_THEME,
+    blurs: { ...DEFAULT_CUSTOM_THEME.blurs },
     colors: { ...DEFAULT_CUSTOM_THEME.colors }
   }
 }

@@ -28,9 +28,10 @@
 
 .summaryCard,
 .chartCard {
-  border: 1px solid color-mix(in srgb, var(--tertiary-text-color) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border-color) 18%, transparent);
   border-radius: calc(18px * var(--ui-roundness));
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   box-shadow: 0 8px 30px rgb(0 0 0 / 7%);
 }
 
@@ -151,6 +152,7 @@
   border: 3px solid var(--primary-color);
   border-radius: 50%;
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   cursor: pointer;
   transform: translate(-50%, -50%);
 }
@@ -264,7 +266,7 @@
   align-items: flex-end;
   overflow: hidden;
   border-radius: calc(8px * var(--ui-roundness));
-  background-color: color-mix(in srgb, var(--tertiary-text-color) 8%, transparent);
+  background-color: color-mix(in srgb, var(--subtle-surface-color) 8%, transparent);
 }
 
 .bar {
