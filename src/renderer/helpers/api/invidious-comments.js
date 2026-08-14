@@ -1,7 +1,7 @@
 /**
- * @param {{authorThumbnails?: {url?: string}[]}} comment
+ * @param {{authorThumbnail?: string, authorThumbnails?: {url?: string}[]}} comment
  * @returns {string | null}
  */
 export function getInvidiousCommentAuthorThumbnail(comment) {
-  return comment.authorThumbnails?.at(-1)?.url ?? null
+  return comment.authorThumbnail || comment.authorThumbnails?.at(-1)?.url || null
 }

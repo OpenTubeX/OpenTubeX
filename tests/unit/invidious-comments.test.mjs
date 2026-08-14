@@ -3,6 +3,12 @@ import test from 'node:test'
 
 import { getInvidiousCommentAuthorThumbnail } from '../../src/renderer/helpers/api/invidious-comments.js'
 
+test('returns the Invidious comment author thumbnail', () => {
+  assert.equal(getInvidiousCommentAuthorThumbnail({
+    authorThumbnail: 'author.jpg'
+  }), 'author.jpg')
+})
+
 test('returns the largest Invidious comment author thumbnail', () => {
   assert.equal(getInvidiousCommentAuthorThumbnail({
     authorThumbnails: [
