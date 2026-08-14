@@ -226,6 +226,12 @@
             :theme="transcriptOpen ? 'secondary' : 'base'"
             @click="emit('toggle-transcript')"
           />
+          <FtIconButton
+            v-if="metadataHistory"
+            :title="t('Video.Metadata Cache.History')"
+            :icon="['fas', 'clock-rotate-left']"
+            @click="showMetadataHistory = true"
+          />
         </span>
         <span class="videoOptionsMobileRow">
           <FtIconButton
@@ -284,6 +290,11 @@
       :thumbnail="videoThumbnail"
       @close="showDownloadPrompt = false"
     />
+    <WatchVideoMetadataHistory
+      v-if="metadataHistory && showMetadataHistory"
+      :history="metadataHistory"
+      @close="showMetadataHistory = false"
+    />
   </FtCard>
 </template>
 
@@ -300,6 +311,7 @@ import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import WatchVideoFormatPrompt from '../WatchVideoFormatPrompt/WatchVideoFormatPrompt.vue'
+import WatchVideoMetadataHistory from '../WatchVideoMetadataHistory/WatchVideoMetadataHistory.vue'
 
 import store from '../../store'
 
@@ -416,6 +428,10 @@ const props = defineProps({
   videoThumbnail: {
     type: String,
     required: true
+  },
+  metadataHistory: {
+    type: Object,
+    default: null
   },
   inUserPlaylist: {
     type: Boolean,
@@ -551,6 +567,7 @@ const relativeTimeNow = useRelativeTimeClock()
 const showCollaboratorsPrompt = ref(false)
 const showDownloadPrompt = ref(false)
 const showFormatPrompt = ref(false)
+const showMetadataHistory = ref(false)
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
 const liveChatToggleTitle = computed(() => {
@@ -563,6 +580,10 @@ const liveChatToggleTitle = computed(() => {
 
 watch(enableDownloads, (enabled) => {
   if (!enabled) showDownloadPrompt.value = false
+})
+
+watch(() => props.metadataHistory, history => {
+  if (!history) showMetadataHistory.value = false
 })
 
 // the title is plain text, so it has to be escaped before the hashtags and handles are linked

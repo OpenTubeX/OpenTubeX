@@ -31,6 +31,19 @@
           @change="updateRememberSearchHistory"
         />
       </div>
+      <div
+        v-if="USING_ELECTRON"
+        class="switchColumn"
+      >
+        <FtToggleSwitch
+          :label="$t('Settings.Privacy Settings.Cache Video Metadata')"
+          :tooltip="$t('Settings.Privacy Settings.Cache Video Metadata Tooltip')"
+          compact
+          :default-value="enableVideoMetadataCache"
+          setting-key="enableVideoMetadataCache"
+          @change="updateEnableVideoMetadataCache"
+        />
+      </div>
       <div class="switchColumn">
         <FtToggleSwitch
           :label="$t('Settings.Privacy Settings.Save Watched Videos With Last Viewed Playlist')"
@@ -60,6 +73,21 @@
       />
     </FtFlexBox>
     <br>
+    <div
+      v-if="USING_ELECTRON"
+      class="metadataCacheManagement"
+    >
+      <span>{{ $t('Settings.Privacy Settings.Video Metadata Cache Size', {
+        size: formatBytes(videoMetadataCacheSize)
+      }) }}</span>
+      <FtButton
+        :label="$t('Settings.Privacy Settings.Clear Video Metadata Cache')"
+        theme="destructive"
+        :icon="['fas', 'trash']"
+        @click="showClearMetadataCachePrompt = true"
+      />
+    </div>
+    <br v-if="USING_ELECTRON">
     <FtFlexBox>
       <FtSlider
         :label="$t('Settings.Privacy Settings.Watched Percentage Threshold')"
@@ -136,6 +164,15 @@
       @click="handleSearchCache"
     />
     <FtPrompt
+      v-if="showClearMetadataCachePrompt"
+      autosize
+      :label="$t('Settings.Privacy Settings.Are you sure you want to clear the video metadata cache?')"
+      :option-names="promptNames"
+      :option-values="PROMPT_VALUES"
+      is-first-option-destructive
+      @click="handleClearMetadataCache"
+    />
+    <FtPrompt
       v-if="showRemoveHistoryPrompt"
       autosize
       :label="$t('Settings.Privacy Settings.Are you sure you want to remove your entire watch history?')"
@@ -166,7 +203,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from './FtButton/FtButton.vue'
@@ -183,8 +220,38 @@ import store from '../store/index'
 
 import { MAIN_PROFILE_ID } from '../../constants'
 import { showToast } from '../helpers/utils'
+import { formatBytes } from '../helpers/fileSize'
 
 const { locale, t } = useI18n()
+const USING_ELECTRON = process.env.IS_ELECTRON
+const videoMetadataCacheSize = ref(0)
+let removeVideoMetadataCacheClearedListener = null
+
+async function refreshVideoMetadataCacheSize() {
+  if (!USING_ELECTRON) return
+  try {
+    videoMetadataCacheSize.value = await window.ftElectron.videoMetadataCache.getSize()
+  } catch (error) {
+    console.error('Failed to read the video metadata cache size', error)
+  }
+}
+
+function refreshVideoMetadataCacheSizeWhenVisible() {
+  if (!document.hidden) refreshVideoMetadataCacheSize()
+}
+
+onMounted(() => {
+  refreshVideoMetadataCacheSize()
+  removeVideoMetadataCacheClearedListener = window.ftElectron?.videoMetadataCache?.onCleared?.(
+    refreshVideoMetadataCacheSize
+  ) ?? null
+  document.addEventListener('visibilitychange', refreshVideoMetadataCacheSizeWhenVisible)
+})
+
+onBeforeUnmount(() => {
+  removeVideoMetadataCacheClearedListener?.()
+  document.removeEventListener('visibilitychange', refreshVideoMetadataCacheSizeWhenVisible)
+})
 
 const PROMPT_VALUES = ['delete', 'cancel']
 const promptNames = computed(() => [
@@ -284,6 +351,16 @@ function updateRememberSearchHistory(value) {
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
+const enableVideoMetadataCache = computed(() => store.getters.getEnableVideoMetadataCache)
+
+/**
+ * @param {boolean} value
+ */
+function updateEnableVideoMetadataCache(value) {
+  store.dispatch('updateEnableVideoMetadataCache', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
 const saveVideoHistoryWithLastViewedPlaylist = computed(() => store.getters.getSaveVideoHistoryWithLastViewedPlaylist)
 
 /**
@@ -321,6 +398,23 @@ function updateWatchedPercentageThreshold(value) {
 }
 
 const showSearchCachePrompt = ref(false)
+const showClearMetadataCachePrompt = ref(false)
+
+/**
+ * @param {'delete' | 'cancel' | null} option
+ */
+async function handleClearMetadataCache(option) {
+  showClearMetadataCachePrompt.value = false
+
+  if (option !== 'delete') return
+
+  await window.ftElectron.videoMetadataCache.clear()
+  await refreshVideoMetadataCacheSize()
+  showToast({
+    message: t('Settings.Privacy Settings.Video metadata cache has been cleared'),
+    icon: ['fas', 'trash'],
+  })
+}
 
 /**
  * @param {'delete' | 'cancel' | null} option
@@ -396,3 +490,13 @@ function handleRemovePlaylists(option) {
   showToast({ message: t('Settings.Privacy Settings.All playlists have been removed'), icon: ['fas', 'trash'] })
 }
 </script>
+
+<style scoped>
+.metadataCacheManagement {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+}
+</style>

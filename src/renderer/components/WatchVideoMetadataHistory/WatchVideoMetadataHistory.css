@@ -1,0 +1,74 @@
+.historySections {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  margin-block-end: 24px;
+}
+
+.historySection {
+  min-inline-size: 0;
+}
+
+.historySection h3 {
+  margin-block: 0 12px;
+  text-align: center;
+}
+
+.textHistory,
+.thumbnailHistory {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.textHistory {
+  display: grid;
+  gap: 12px;
+}
+
+.thumbnailHistory {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 280px));
+  justify-content: center;
+}
+
+.historyEntryHeader {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  justify-content: space-between;
+  margin-block-end: 6px;
+}
+
+.historyEntryHeader time {
+  color: var(--tertiary-text-color);
+  font-size: 13px;
+}
+
+.metadataText {
+  background: var(--secondary-card-bg-color);
+  border-radius: calc(6px * var(--ui-roundness));
+  overflow-wrap: anywhere;
+  padding: 10px;
+  white-space: pre-wrap;
+}
+
+.metadataDescription {
+  max-block-size: min(30vh, 280px);
+  overflow: auto;
+}
+
+.thumbnailFrame {
+  aspect-ratio: 16 / 9;
+  background: var(--secondary-card-bg-color);
+  border-radius: calc(6px * var(--ui-roundness));
+  overflow: hidden;
+}
+
+.thumbnailFrame img {
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: contain;
+}

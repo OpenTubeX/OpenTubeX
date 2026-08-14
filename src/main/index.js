@@ -60,6 +60,7 @@ import {
 import { fetchFaviconDataUrl, resolveFaviconUrl } from './favicon'
 import { LiveReminderManager } from './LiveReminderManager'
 import { requestVoiceOverTranslation } from './voiceOverTranslation'
+import { clearVideoMetadataCache, getVideoMetadataCacheSize, updateVideoMetadataCache } from './videoMetadataCache'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
 if (process.argv.includes('--version')) {
@@ -3067,6 +3068,101 @@ function runApp() {
       return false
     }
     return liveReminderManager.cancel(videoId)
+  })
+
+  const MAX_VIDEO_METADATA_THUMBNAIL_BYTES = 5 * 1024 * 1024
+  const VIDEO_METADATA_THUMBNAIL_MIME_TYPES = new Set([
+    'image/avif',
+    'image/gif',
+    'image/jpeg',
+    'image/png',
+    'image/webp'
+  ])
+  let videoMetadataCacheGeneration = 0
+
+  async function fetchVideoMetadataThumbnail(url) {
+    if (typeof url !== 'string' || url.length > 20_000) return null
+
+    let parsedUrl
+    try {
+      parsedUrl = new URL(url)
+    } catch {
+      return null
+    }
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) return null
+
+    const abortController = new AbortController()
+    const timeout = setTimeout(() => abortController.abort(), 15_000)
+
+    try {
+      const response = await net.fetch(parsedUrl.href, { signal: abortController.signal })
+      const mimeType = response.headers.get('content-type')?.split(';', 1)[0].toLowerCase()
+      const contentLength = Number(response.headers.get('content-length'))
+
+      if (
+        !response.ok ||
+        !VIDEO_METADATA_THUMBNAIL_MIME_TYPES.has(mimeType) ||
+        (Number.isFinite(contentLength) && contentLength > MAX_VIDEO_METADATA_THUMBNAIL_BYTES) ||
+        !response.body
+      ) {
+        return null
+      }
+
+      const chunks = []
+      let byteLength = 0
+      const reader = response.body.getReader()
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        byteLength += value.byteLength
+        if (byteLength > MAX_VIDEO_METADATA_THUMBNAIL_BYTES) {
+          await reader.cancel()
+          return null
+        }
+        chunks.push(Buffer.from(value))
+      }
+
+      return `data:${mimeType};base64,${Buffer.concat(chunks).toString('base64')}`
+    } catch (error) {
+      if (error?.name !== 'AbortError') {
+        console.warn('Could not cache the video thumbnail', error)
+      }
+      return null
+    } finally {
+      clearTimeout(timeout)
+    }
+  }
+
+  ipcMain.handle(IpcChannels.VIDEO_METADATA_CACHE_UPDATE, async (event, metadata) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || !isValidVideoId(metadata?.videoId)) {
+      return null
+    }
+
+    const generation = videoMetadataCacheGeneration
+    const thumbnail = await fetchVideoMetadataThumbnail(metadata.thumbnailUrl)
+    if (generation !== videoMetadataCacheGeneration) return null
+
+    return updateVideoMetadataCache({ ...metadata, thumbnail })
+  })
+
+  ipcMain.handle(IpcChannels.VIDEO_METADATA_CACHE_CLEAR, async (event) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) return false
+
+    videoMetadataCacheGeneration += 1
+    await clearVideoMetadataCache()
+    for (const window of BrowserWindow.getAllWindows()) {
+      if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
+        window.webContents.send(IpcChannels.VIDEO_METADATA_CACHE_CLEARED)
+      }
+    }
+    return true
+  })
+
+  ipcMain.handle(IpcChannels.VIDEO_METADATA_CACHE_GET_SIZE, async (event) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) return 0
+    return getVideoMetadataCacheSize()
   })
 
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, async (event, tabId, feedTab) => {

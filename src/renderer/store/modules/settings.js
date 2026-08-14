@@ -226,6 +226,7 @@ const state = {
   disableChannelLinks: false,
   displayVideoPlayButton: false,
   ambientMode: false,
+  enableVideoMetadataCache: false,
   enableWatchStats: true,
   statsWeekStartsOn: '1',
   enableSearchSuggestions: true,

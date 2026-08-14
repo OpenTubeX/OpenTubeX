@@ -1,0 +1,141 @@
+import { once } from 'node:events'
+import { createServer } from 'node:http'
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
+
+import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
+import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
+import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+
+const WATCH_PAGE_SEED = {
+  videoPlaybackEngine: 'built-in',
+  ytDlpPlaybackEngineDefaultMigration: true,
+  enableVideoMetadataCache: true
+}
+const THUMBNAILS = [
+  Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64'),
+  Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64')
+]
+
+test.use({ seed: { settings: WATCH_PAGE_SEED } })
+
+test('stores and presents every previous metadata version', async ({ app, page }) => {
+  const thumbnailServer = createServer((request, response) => {
+    const index = Number(new URL(request.url, 'http://localhost').searchParams.get('revision'))
+    const thumbnail = THUMBNAILS[index % THUMBNAILS.length]
+    response.writeHead(200, {
+      'content-length': thumbnail.length,
+      'content-type': 'image/png'
+    })
+    response.end(thumbnail)
+  })
+  thumbnailServer.listen(0, '127.0.0.1')
+  await once(thumbnailServer, 'listening')
+
+  try {
+    const { port } = thumbnailServer.address()
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate(async (view, thumbnailBaseUrl) => {
+      await window.ftElectron.videoMetadataCache.clear()
+
+      const observedAt = Date.now() - 10_000
+      let history = null
+      for (let index = 0; index < 6; index += 1) {
+        const isCurrent = index === 5
+        const label = isCurrent ? 'Current' : `Previous ${index + 1}`
+        history = await window.ftElectron.videoMetadataCache.update({
+          videoId: view.videoId,
+          title: `${label} title`,
+          description: Array.from(
+            { length: 30 },
+            (_, line) => `${label} description line ${line + 1}`
+          ).join('\n'),
+          thumbnailUrl: `${thumbnailBaseUrl}?revision=${index}`,
+          observedAt: observedAt + index
+        })
+      }
+
+      view.videoTitle = 'Current title'
+      view.videoDescription = 'Current description'
+      view.thumbnail = `${thumbnailBaseUrl}?revision=5`
+      view.videoMetadataHistory = history
+      await view.$nextTick()
+    }, `http://127.0.0.1:${port}/thumbnail.png`)
+    await watchView.dispose()
+
+    const cachePath = path.join(app.userDataDir, 'video-metadata-cache.db')
+    const cacheDocuments = (await readFile(cachePath, 'utf8')).trim().split('\n')
+      .map(line => JSON.parse(line))
+      .filter(document => document._id && !document.$$deleted)
+    expect(cacheDocuments).toHaveLength(6)
+    expect(cacheDocuments.every(document => document.thumbnail?.startsWith('data:image/png;base64,')))
+      .toBe(true)
+
+    const historyButton = page.locator(`${activeTab} .infoArea`)
+      .getByRole('button', { name: 'Metadata history' })
+    await expect(historyButton).toBeVisible()
+    await historyButton.click()
+
+    const dialog = page.getByRole('dialog', { name: 'Metadata history' })
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByRole('heading', { name: 'Title history' })).toBeVisible()
+    await expect(dialog.getByRole('heading', { name: 'Thumbnail history' })).toBeVisible()
+    await expect(dialog.getByRole('heading', { name: 'Description history' })).toBeVisible()
+    await expect(dialog.locator('.historySection')).toHaveCount(3)
+    await expect(dialog.locator('.historySection').first().locator('.historyEntry')).toHaveCount(5)
+    await expect(dialog).not.toContainText('Current title')
+
+    const sectionPositions = await dialog.locator('.historySection').evaluateAll(sections => (
+      sections.map(section => {
+        const { x, y } = section.getBoundingClientRect()
+        return { x, y }
+      })
+    ))
+    expect(new Set(sectionPositions.map(position => Math.round(position.x))).size).toBe(3)
+    expect(Math.max(...sectionPositions.map(position => position.y)) -
+      Math.min(...sectionPositions.map(position => position.y))).toBeLessThanOrEqual(1)
+
+    const thumbnailFrames = dialog.locator('.thumbnailFrame')
+    await expect(thumbnailFrames).toHaveCount(5)
+    expect(Math.max(...await thumbnailFrames.evaluateAll(frames => (
+      frames.map(frame => frame.getBoundingClientRect().width)
+    )))).toBeLessThanOrEqual(280)
+
+    const descriptions = dialog.locator('.metadataDescription')
+    await expect(descriptions).toHaveCount(5)
+    for (const description of await descriptions.all()) {
+      await expect(description).toHaveAttribute('data-overlayscrollbars-viewport')
+      await expect(description.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
+    }
+
+    const scroller = dialog.locator('.promptContentScroller')
+    await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
+    const heading = dialog.getByRole('heading', { name: 'Metadata history' })
+    const closeButton = dialog.getByRole('button', { name: 'Close' })
+    const fixedPositionsBeforeScroll = await Promise.all([heading.boundingBox(), closeButton.boundingBox()])
+    await scroller.evaluate(element => element.scrollTo(0, element.scrollHeight))
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    const fixedPositionsAfterScroll = await Promise.all([heading.boundingBox(), closeButton.boundingBox()])
+    expect(fixedPositionsAfterScroll).toEqual(fixedPositionsBeforeScroll)
+
+    await closeButton.click()
+    await expect(dialog).toHaveCount(0)
+
+    const privacySettings = await goToSettingsSection(page, 'privacy')
+    await expect(privacySettings.getByRole('checkbox', { name: 'Metadata history' })).toBeChecked()
+    await expect(privacySettings.getByText(/^Video metadata cache: (?!0 B)/)).toBeVisible()
+    await privacySettings.getByRole('button', { name: 'Clear Video Metadata Cache' }).click()
+    await page.getByRole('dialog', {
+      name: 'Are you sure you want to clear the cached video titles, thumbnails, and descriptions?'
+    }).getByRole('button', { name: 'Delete' }).click()
+
+    await expect(privacySettings.getByText('Video metadata cache: 0 B')).toBeVisible()
+    await expect(historyButton).toHaveCount(0)
+  } finally {
+    thumbnailServer.close()
+    await once(thumbnailServer, 'close')
+  }
+})

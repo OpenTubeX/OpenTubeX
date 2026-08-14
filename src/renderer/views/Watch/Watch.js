@@ -240,6 +240,7 @@ export default defineComponent({
       liveReminderNow: Date.now(),
       liveReminderStartTimer: null,
       removeLiveReminderUpdatedListener: null,
+      removeVideoMetadataCacheClearedListener: null,
       /** @type {'dash' | 'audio' | 'legacy'} */
       activeFormat: 'legacy',
       localFilePlayback: false,
@@ -249,6 +250,7 @@ export default defineComponent({
       hasResolvedVideoTitle: false,
       videoDescription: '',
       videoDescriptionHtml: '',
+      videoMetadataHistory: null,
       videoCategory: '',
       videoTags: [],
       /** @type {import('../../helpers/video-games').LocalVideoGame[]} */
@@ -529,6 +531,9 @@ export default defineComponent({
     },
     enableWatchStats: function () {
       return this.$store.getters.getEnableWatchStats
+    },
+    enableVideoMetadataCache: function () {
+      return process.env.IS_ELECTRON && this.$store.getters.getEnableVideoMetadataCache
     },
     watchStatsResetVersion: function () {
       return this.$store.getters.getWatchStatsResetVersion
@@ -1006,6 +1011,8 @@ export default defineComponent({
   watch: {
     isLoading(loading) {
       if (!loading) {
+        this.updateVideoMetadataCache()
+
         if (!this.transcriptAvailable && this.showTranscript) {
           this.closeTranscript()
         }
@@ -1052,6 +1059,13 @@ export default defineComponent({
     enableWatchStats(enabled) {
       if (!enabled) {
         this.clearPendingWatchTime()
+      }
+    },
+    enableVideoMetadataCache(enabled) {
+      if (enabled && !this.isLoading) {
+        this.updateVideoMetadataCache()
+      } else if (!enabled) {
+        this.videoMetadataHistory = null
       }
     },
     rememberHistory(enabled) {
@@ -1101,6 +1115,9 @@ export default defineComponent({
         this.liveReminderActive = scheduled
       }
     }) ?? null
+    this.removeVideoMetadataCacheClearedListener = window.ftElectron?.videoMetadataCache?.onCleared?.(() => {
+      this.videoMetadataHistory = null
+    }) ?? null
     this.onMountedDependOnLocalStateLoading()
   },
   beforeUnmount: function () {
@@ -1112,6 +1129,8 @@ export default defineComponent({
     this.clearLiveReminderStartTimer()
     this.removeLiveReminderUpdatedListener?.()
     this.removeLiveReminderUpdatedListener = null
+    this.removeVideoMetadataCacheClearedListener?.()
+    this.removeVideoMetadataCacheClearedListener = null
     if ('mediaSession' in navigator) {
       tabMediaCoordinator.setActionHandlers(this.tabId ?? 'web', 'playlist', {})
     }
@@ -1128,6 +1147,39 @@ export default defineComponent({
     }
   },
   methods: {
+    async updateVideoMetadataCache() {
+      if (
+        !this.enableVideoMetadataCache ||
+        this.isLoading ||
+        !this.hasResolvedVideoTitle ||
+        typeof window.ftElectron?.videoMetadataCache?.update !== 'function'
+      ) {
+        return
+      }
+
+      const loadGeneration = this.videoLoadGeneration
+      const videoId = this.videoId
+
+      try {
+        const history = await window.ftElectron.videoMetadataCache.update({
+          videoId,
+          title: this.videoTitle,
+          description: this.videoDescription ?? '',
+          thumbnailUrl: this.thumbnail ?? '',
+          observedAt: Date.now()
+        })
+
+        if (
+          this.isCurrentVideoLoad(loadGeneration, videoId) &&
+          this.enableVideoMetadataCache
+        ) {
+          this.videoMetadataHistory = history
+        }
+      } catch (error) {
+        console.error('Failed to update the video metadata cache', error)
+      }
+    },
+
     clearLiveReminderStartTimer() {
       if (this.liveReminderStartTimer !== null) {
         clearTimeout(this.liveReminderStartTimer)
@@ -1688,6 +1740,7 @@ export default defineComponent({
       this.videoTitle = preserveTitle ? previousVideoTitle : placeholderTitle
       this.videoDescription = ''
       this.videoDescriptionHtml = ''
+      this.videoMetadataHistory = null
       this.videoCategory = ''
       this.videoTags = []
       this.videoGames = []

@@ -26,6 +26,26 @@
   max-block-size: 95%;
 }
 
+.promptCard.fixedLayout {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.promptCard.fixedLayout > h2 {
+  flex: 0 0 auto;
+}
+
+.promptContentScroller {
+  min-block-size: 0;
+  overflow-y: auto;
+}
+
+.promptFixedFooter {
+  flex: 0 0 auto;
+  padding-block-start: 12px;
+}
+
 @keyframes prompt-backdrop-enter {
   from {
     opacity: 0;

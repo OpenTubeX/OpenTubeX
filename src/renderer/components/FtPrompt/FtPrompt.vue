@@ -11,9 +11,9 @@
     >
       <FtCard
         ref="promptCard"
-        v-overlay-scrollbars
+        v-overlay-scrollbars="!fixedLayout"
         class="promptCard"
-        :class="{ autosize, [theme]: true, [cardClass]: cardClass !== '' }"
+        :class="{ autosize, fixedLayout, [theme]: true, [cardClass]: cardClass !== '' }"
         role="dialog"
         aria-modal="true"
         :aria-labelledby="id"
@@ -30,7 +30,18 @@
           </h2>
         </slot>
 
-        <slot>
+        <template v-if="fixedLayout">
+          <div
+            v-overlay-scrollbars
+            class="promptContentScroller"
+          >
+            <slot />
+          </div>
+          <div class="promptFixedFooter">
+            <slot name="footer" />
+          </div>
+        </template>
+        <slot v-else>
           <p
             v-for="extraLabel in extraLabels"
             :key="extraLabel"
@@ -108,6 +119,10 @@ const props = defineProps({
   lockScroll: {
     type: Boolean,
     default: true
+  },
+  fixedLayout: {
+    type: Boolean,
+    default: false
   }
 })
 
