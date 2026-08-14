@@ -99,6 +99,13 @@ function splitCallArguments(source, openingParenthesisIndex) {
 }
 
 const pluralPaths = collectPluralPaths(locale)
+// These messages only describe bulk actions, so English never needs a singular
+// form. Translated locales can still provide plural forms for categories such
+// as Polish "few" and "many".
+const translatedLocalePluralPaths = [
+  'Close Multiple Tabs Confirmation.Message',
+  'Close Multiple Tabs Confirmation.Close Tabs'
+]
 const sourceFiles = await collectSourceFiles(sourceDirUrl)
 
 test('plural messages declare a singular and a plural form', () => {
@@ -117,7 +124,7 @@ test('plural messages declare a singular and a plural form', () => {
 })
 
 test('plural messages are translated with a plural choice', async () => {
-  const pluralPathSet = new Set(pluralPaths)
+  const pluralPathSet = new Set([...pluralPaths, ...translatedLocalePluralPaths])
   const callPattern = /\$?t\(\s*(['"])(.+?)\1/gs
 
   for (const file of sourceFiles) {
