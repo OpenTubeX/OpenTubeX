@@ -6057,14 +6057,18 @@ export default defineComponent({
       /** @implements {shaka.extern.IUIElement.Factory} */
       class CaptionSelectionFactory {
         create(rootElement, controls) {
+          // Shaka's factory registry is process-global, so this factory can be
+          // invoked briefly while another player instance is being created.
+          // Always use the player belonging to these controls instead of the
+          // component's player, which may already have been destroyed.
           return new CaptionSelection(
             events,
             () => captionSettings.value,
             updateCaptionAppearance,
             resetCaptionAppearance,
             () => props.captionTranslations,
-            caption => Boolean(findMatchingTextTrack(player.getTextTracks(), caption)?.active),
-            selectCaptionTranslation,
+            caption => Boolean(findMatchingTextTrack(controls.getPlayer().getTextTracks(), caption)?.active),
+            caption => selectCaptionTranslation(caption, controls.getPlayer()),
             rootElement,
             controls
           )
@@ -6079,15 +6083,16 @@ export default defineComponent({
 
     /**
      * @param {{ url: string, label: string, language: string, mimeType: string }} caption
+     * @param {shaka.Player} captionPlayer
      * @returns {Promise<boolean>}
      */
-    async function selectCaptionTranslation(caption) {
+    async function selectCaptionTranslation(caption, captionPlayer) {
       const selectionGeneration = ++captionTranslationSelectionGeneration
-      let track = findMatchingTextTrack(player.getTextTracks(), caption)
+      let track = findMatchingTextTrack(captionPlayer.getTextTracks(), caption)
 
       if (!track) {
         try {
-          track = await player.addTextTrackAsync(
+          track = await captionPlayer.addTextTrackAsync(
             caption.url,
             caption.language,
             'captions',
@@ -6101,11 +6106,14 @@ export default defineComponent({
         }
       }
 
-      if (selectionGeneration !== captionTranslationSelectionGeneration) {
+      if (
+        selectionGeneration !== captionTranslationSelectionGeneration ||
+        captionPlayer !== player
+      ) {
         return false
       }
 
-      player.selectTextTrack(track)
+      captionPlayer.selectTextTrack(track)
       return true
     }
 
