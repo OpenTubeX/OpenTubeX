@@ -285,7 +285,7 @@
           class="liveChatComments"
           :style="{ blockSize: chatHeight }"
           tabindex="0"
-          @pointerdown="stopScrollingToBottom"
+          @pointerdown="handleLiveChatPointerDown"
           @scroll.passive="onScroll"
           @scrollend="onScrollEnd"
           @keydown="handleLiveChatScrollKeydown"
@@ -429,7 +429,7 @@ import store from '../../store/index'
 import { formatNumber } from '../../helpers/utils'
 import { getRandomColorClass } from '../../helpers/colors'
 import { getLocalVideoInfo, parseLocalTextRuns } from '../../helpers/api/local'
-import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import {
   createCoalescingPoller,
   isReplaySeek,
@@ -698,7 +698,10 @@ watch(commentsRef, (element, _previous, onCleanup) => {
     return
   }
 
+  const contentElement = element.querySelector('.liveChatCommentList')
   const resizeObserver = new ResizeObserver(() => {
+    clampOverlayScrollTop(element, contentElement)
+
     if (!stayAtBottom) {
       return
     }
@@ -707,6 +710,9 @@ watch(commentsRef, (element, _previous, onCleanup) => {
   })
 
   resizeObserver.observe(element)
+  if (contentElement !== null) {
+    resizeObserver.observe(contentElement)
+  }
   onCleanup(() => {
     resizeObserver.disconnect()
   })
@@ -1065,6 +1071,10 @@ function updateLiveChatFilter(value) {
 
 function onScroll() {
   const liveChatComments = commentsRef.value
+  if (liveChatComments === null) {
+    return
+  }
+
   const isAtBottom = liveChatComments.scrollHeight - liveChatComments.scrollTop - liveChatComments.clientHeight <= 1
 
   if (isAtBottom) {
@@ -1102,6 +1112,19 @@ function stopScrollingToBottom() {
 
   isScrollingToBottom = false
   stayAtBottom = false
+}
+
+/**
+ * Clicking links or selecting text in chat must not disable auto-follow. Pointer
+ * input only expresses scroll intent when it pans the viewport or uses its
+ * scrollbar; wheel and keyboard scrolling have their own handlers.
+ * @param {PointerEvent} event
+ */
+function handleLiveChatPointerDown(event) {
+  const clickedScrollbar = event.target instanceof Element && event.target.closest('.os-scrollbar-vertical') !== null
+  if (event.pointerType === 'touch' || event.button === 1 || clickedScrollbar) {
+    stopScrollingToBottom()
+  }
 }
 
 /**
@@ -1149,11 +1172,13 @@ function scrollToBottom(behavior = scrollingBehaviour.value) {
   }
 
   const top = liveChatComments.scrollHeight
+  const contentElement = liveChatComments.querySelector('.liveChatCommentList')
 
   if (behavior === 'instant' || behavior === 'auto') {
     // Force OverlayScrollbars to accept the new end offset; a plain scrollTo can
     // lose to its restored pre-teleport / pre-trim position.
     restoreOverlayScrollTop(liveChatComments, top)
+    clampOverlayScrollTop(liveChatComments, contentElement)
     scrollToLiveHoldTimer = setTimeout(() => {
       scrollToLiveHoldTimer = null
       if (commentsRef.value !== liveChatComments) {
@@ -1162,6 +1187,7 @@ function scrollToBottom(behavior = scrollingBehaviour.value) {
 
       if (stayAtBottom) {
         restoreOverlayScrollTop(liveChatComments, liveChatComments.scrollHeight)
+        clampOverlayScrollTop(liveChatComments, contentElement)
       }
 
       isScrollingToBottom = false
