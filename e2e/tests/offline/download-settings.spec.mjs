@@ -19,12 +19,15 @@ const PROFILES = [
 ]
 const AUTOMATIC_RULE = {
   template: 'video:best',
+  enabledAt: Date.parse('2026-08-14T00:00:00Z'),
   includeVideos: true,
   minDurationSeconds: 60,
   maxDurationSeconds: 180,
   minFileSizeMb: 5,
   maxFileSizeMb: 25,
-  maxAgeDays: 7
+  maxAgeDays: 7,
+  titleIncludes: 'Automatic',
+  titleExcludes: 'Trailer'
 }
 
 test.use({
@@ -146,6 +149,11 @@ test.describe('automatic download authorization', () => {
       '<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015">',
       '<entry>',
       `<yt:videoId>ccccccccccc</yt:videoId><yt:channelId>${BETA_CHANNEL_ID}</yt:channelId>`,
+      '<published>2026-08-14T01:00:00Z</published>',
+      '</entry>',
+      '<entry>',
+      `<yt:videoId>ddddddddddd</yt:videoId><yt:channelId>${BETA_CHANNEL_ID}</yt:channelId>`,
+      '<published>2026-08-13T23:59:59Z</published>',
       '</entry>',
       '</feed>'
     ].join(''))
@@ -173,9 +181,19 @@ test.describe('automatic download authorization', () => {
       minFileSizeMb: 5,
       maxFileSizeMb: 25,
       maxAgeDays: 7,
+      enabledAt: 1,
+      titleIncludes: 'Injected',
+      titleExcludes: '',
       customArgs: '--write-description'
     }
     expect(await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), payload)).toBeNull()
+
+    if ((await page.evaluate(() => window.ftElectron.subscriptionAutoRefresh.isInProgress())).inProgress) {
+      await page.evaluate(() => window.ftElectron.subscriptionAutoRefresh.cancel())
+      await expect.poll(() => page.evaluate(async () => (
+        await window.ftElectron.subscriptionAutoRefresh.isInProgress()
+      ).inProgress)).toBe(false)
+    }
 
     const refreshOwnerTabId = await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -210,6 +228,8 @@ test.describe('automatic download authorization', () => {
       '25M',
       '--dateafter',
       'now-7days',
+      '--match-title',
+      '(?i)^(?=.*(?:Automatic))(?!.*(?:Trailer)).*$',
       '--no-overwrites'
     ]))
     expect(args).not.toContain('--write-description')

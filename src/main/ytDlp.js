@@ -100,6 +100,8 @@ const CHANNEL_ID_REGEX = /^UC[\w-]{22}$/
 const AUTOMATIC_DISCOVERY_CACHE_TTL_MS = 60_000
 const AUTOMATIC_DISCOVERY_TIMEOUT_MS = 15_000
 const AUTOMATIC_DISCOVERY_E2E_FIXTURE = 'automatic-download-discovery.xml'
+const AUTOMATIC_TITLE_TERM_LIMIT = 20
+const AUTOMATIC_TITLE_TERM_LENGTH_LIMIT = 100
 const AUTOMATIC_NUMBER_LIMITS = Object.freeze({
   minDurationSeconds: 31_536_000,
   maxDurationSeconds: 31_536_000,
@@ -126,6 +128,12 @@ const AUTOMATIC_TEMPLATE_OPTION_KEYS = new Set([
   'embedThumbnail',
   'embedMetadata',
   'customArgs'
+])
+const AUTOMATIC_RULE_OPTION_KEYS = new Set([
+  ...Object.keys(AUTOMATIC_NUMBER_LIMITS),
+  'enabledAt',
+  'titleIncludes',
+  'titleExcludes'
 ])
 const BUILT_IN_AUTOMATIC_TEMPLATE_OPTIONS = new Map([
   ['video:best', { mode: 'video' }],
@@ -1282,12 +1290,12 @@ function automaticNumber(value, maximum) {
  * prevents a renderer from turning a persisted channel rule into permission to
  * download an arbitrary video that was not present in the subscription feed.
  * @param {string} channelId
- * @returns {Promise<Set<string> | null>}
+ * @returns {Promise<Map<string, number> | null>}
  */
 async function getAutomaticDiscoveryVideoIds(channelId) {
   const cached = automaticDiscoveryCache.get(channelId)
   if (cached?.expiresAt > Date.now()) {
-    return cached.videoIds
+    return cached.videos
   }
 
   let feed
@@ -1316,20 +1324,48 @@ async function getAutomaticDiscoveryVideoIds(channelId) {
     }
   }
 
-  const videoIds = new Set()
+  const videos = new Map()
   for (const entry of feed.matchAll(/<entry\b[\s\S]*?<\/entry>/g)) {
     const entryChannelId = entry[0].match(/<yt:channelId>([^<]+)<\/yt:channelId>/)?.[1]
     const videoId = entry[0].match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1]
-    if (entryChannelId === channelId && ID_REGEX.test(videoId)) {
-      videoIds.add(videoId)
+    const published = Date.parse(entry[0].match(/<published>([^<]+)<\/published>/)?.[1])
+    if (entryChannelId === channelId && ID_REGEX.test(videoId) && Number.isFinite(published)) {
+      videos.set(videoId, published)
     }
   }
 
   automaticDiscoveryCache.set(channelId, {
     expiresAt: Date.now() + AUTOMATIC_DISCOVERY_CACHE_TTL_MS,
-    videoIds
+    videos
   })
-  return videoIds
+  return videos
+}
+
+function automaticTitleTerms(value) {
+  return typeof value === 'string'
+    ? value.split(',')
+        .map(term => term.trim().slice(0, AUTOMATIC_TITLE_TERM_LENGTH_LIMIT))
+        .filter(Boolean)
+        .slice(0, AUTOMATIC_TITLE_TERM_LIMIT)
+    : []
+}
+
+function escapeRegularExpression(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function automaticTitleRegex(includedTerms, excludedTerms) {
+  if (includedTerms.length === 0 && excludedTerms.length === 0) {
+    return null
+  }
+
+  const include = includedTerms.length === 0
+    ? ''
+    : `(?=.*(?:${includedTerms.map(escapeRegularExpression).join('|')}))`
+  const exclude = excludedTerms.length === 0
+    ? ''
+    : `(?!.*(?:${excludedTerms.map(escapeRegularExpression).join('|')}))`
+  return `(?i)^${include}${exclude}.*$`
 }
 
 async function getAutomaticTemplateOptions(template) {
@@ -1413,18 +1449,21 @@ async function authorizeAutomaticDownload(payload, discoveryPreviouslyAuthorized
   }
 
   if (!discoveryPreviouslyAuthorized) {
-    const discoveredVideoIds = await getAutomaticDiscoveryVideoIds(payload.channelId)
-    if (!discoveredVideoIds?.has(payload.videoId)) {
+    const discoveredVideos = await getAutomaticDiscoveryVideoIds(payload.channelId)
+    const enabledAt = automaticNumber(rule.enabledAt, Number.MAX_SAFE_INTEGER)
+    if (enabledAt === null || (discoveredVideos?.get(payload.videoId) ?? -Infinity) < enabledAt) {
       return null
     }
   }
 
   const sanitizedPayload = Object.fromEntries(Object.entries(payload).filter(([key]) => (
-    !AUTOMATIC_TEMPLATE_OPTION_KEYS.has(key) && !Object.hasOwn(AUTOMATIC_NUMBER_LIMITS, key)
+    !AUTOMATIC_TEMPLATE_OPTION_KEYS.has(key) && !AUTOMATIC_RULE_OPTION_KEYS.has(key)
   )))
   for (const [key, maximum] of Object.entries(AUTOMATIC_NUMBER_LIMITS)) {
     sanitizedPayload[key] = automaticNumber(rule[key], maximum)
   }
+  sanitizedPayload.titleIncludes = automaticTitleTerms(rule.titleIncludes)
+  sanitizedPayload.titleExcludes = automaticTitleTerms(rule.titleExcludes)
 
   return {
     ...sanitizedPayload,
@@ -1646,6 +1685,10 @@ async function startYtDlpDownload(
     const minFileSizeMb = automaticNumber(payload.minFileSizeMb, AUTOMATIC_NUMBER_LIMITS.minFileSizeMb)
     const maxFileSizeMb = automaticNumber(payload.maxFileSizeMb, AUTOMATIC_NUMBER_LIMITS.maxFileSizeMb)
     const maxAgeDays = automaticNumber(payload.maxAgeDays, AUTOMATIC_NUMBER_LIMITS.maxAgeDays)
+    const titleRegex = automaticTitleRegex(
+      Array.isArray(payload.titleIncludes) ? payload.titleIncludes : [],
+      Array.isArray(payload.titleExcludes) ? payload.titleExcludes : []
+    )
     const durationFilters = [
       `channel_id = ${payload.channelId}`,
       minDurationSeconds === null ? null : `duration >= ${minDurationSeconds}`,
@@ -1656,6 +1699,7 @@ async function startYtDlpDownload(
     if (minFileSizeMb !== null) args.push('--min-filesize', `${minFileSizeMb}M`)
     if (maxFileSizeMb !== null) args.push('--max-filesize', `${maxFileSizeMb}M`)
     if (maxAgeDays !== null) args.push('--dateafter', `now-${Math.ceil(maxAgeDays)}days`)
+    if (titleRegex !== null) args.push('--match-title', titleRegex)
     args.push('--no-overwrites')
   }
   const startTime = !subtitlesOnly && typeof payload.startTime === 'string' && TIME_REGEX.test(payload.startTime) ? payload.startTime : ''
