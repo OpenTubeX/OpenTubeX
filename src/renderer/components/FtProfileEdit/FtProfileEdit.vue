@@ -15,8 +15,8 @@
               :title="$t('Profile.Theme Color')"
               tabindex="0"
               role="button"
-              @click="profileBgColor = THEME_BG_COLOR"
-              @keydown.enter.space.prevent="profileBgColor = THEME_BG_COLOR"
+              @click="selectProfileBgColor(THEME_BG_COLOR)"
+              @keydown.enter.space.prevent="selectProfileBgColor(THEME_BG_COLOR)"
             />
             <div
               v-for="color in COLOR_VALUES"
@@ -28,8 +28,8 @@
               :style="{ background: color }"
               tabindex="0"
               role="button"
-              @click="profileBgColor = color"
-              @keydown.enter.space.prevent="profileBgColor = color"
+              @click="selectProfileBgColor(color)"
+              @keydown.enter.space.prevent="selectProfileBgColor(color)"
             />
             <div
               v-if="profileIcon?.type === 'image'"
@@ -39,8 +39,8 @@
               :title="$t('Profile.Transparent')"
               tabindex="0"
               role="button"
-              @click="profileBgColor = 'transparent'"
-              @keydown.enter.space.prevent="profileBgColor = 'transparent'"
+              @click="selectProfileBgColor('transparent')"
+              @keydown.enter.space.prevent="selectProfileBgColor('transparent')"
             />
           </FtFlexBox>
           <FtColorPicker
@@ -48,7 +48,7 @@
             :label="$t('Profile.Custom Color')"
             :model-value="customColorPickerValue"
             :allow-alpha="false"
-            @update:model-value="profileBgColor = $event"
+            @update:model-value="updateProfileBgColorFromPicker"
           />
           <FtInput
             class="colorSelection"
@@ -293,6 +293,9 @@ const profileName = ref(props.profile.name)
 
 /** @type {import('vue').Ref<string>} */
 const profileBgColor = ref(props.profile.bgColor)
+const semanticProfileBgColor = ref(isSemanticProfileBgColor(profileBgColor.value)
+  ? profileBgColor.value
+  : null)
 const lastOpaqueProfileBgColor = ref(
   props.profile.bgColor === 'transparent' ? THEME_BG_COLOR : props.profile.bgColor
 )
@@ -350,6 +353,34 @@ const customColorPickerValue = computed(() => {
 const profileBgColorLabel = computed(() => {
   return profileBgColor.value === THEME_BG_COLOR ? t('Profile.Theme Color') : profileBgColor.value
 })
+
+function isSemanticProfileBgColor(color) {
+  return color === THEME_BG_COLOR || color === 'transparent'
+}
+
+function selectProfileBgColor(color) {
+  profileBgColor.value = color
+  rememberSemanticProfileBgColor()
+}
+
+function rememberSemanticProfileBgColor() {
+  semanticProfileBgColor.value = isSemanticProfileBgColor(profileBgColor.value)
+    ? profileBgColor.value
+    : null
+}
+
+function updateProfileBgColorFromPicker(color) {
+  if (semanticProfileBgColor.value !== null) {
+    const resolvedSemanticColor = semanticProfileBgColor.value === THEME_BG_COLOR
+      ? themeColor.value
+      : '#000000'
+    if (color.toLowerCase() === resolvedSemanticColor.toLowerCase()) {
+      profileBgColor.value = semanticProfileBgColor.value
+      return
+    }
+  }
+  profileBgColor.value = color
+}
 
 const translatedProfileName = computed(() => {
   return props.isMainProfile ? t('Profile.All Channels') : profileName.value
@@ -576,7 +607,7 @@ function applyCrop() {
     type: 'image',
     value: canvas.toDataURL('image/webp', 0.9)
   }
-  profileBgColor.value = 'transparent'
+  selectProfileBgColor('transparent')
   closeCropEditor()
 }
 
@@ -598,7 +629,7 @@ function clearProfileIcon() {
 
 function restoreOpaqueProfileColor() {
   if (profileBgColor.value === 'transparent') {
-    profileBgColor.value = lastOpaqueProfileBgColor.value
+    selectProfileBgColor(lastOpaqueProfileBgColor.value)
   }
 }
 

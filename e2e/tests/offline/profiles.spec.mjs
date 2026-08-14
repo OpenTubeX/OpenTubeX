@@ -208,6 +208,14 @@ test.describe('profile manager', () => {
       // 'Green' is the seeded main color theme
       const preview = page.locator('.profilePreviewIcon')
       await expect(preview).toHaveCSS('background-color', 'rgb(76, 175, 80)')
+
+      await page.locator('.profileColorPicker .colorFieldTrigger').click()
+      const colorPicker = page.locator('.colorPickerPopover')
+      await colorPicker.locator('input[type="text"]').fill('#123456')
+      await colorPicker.locator('input[type="text"]').press('Enter')
+      await page.getByRole('heading', { name: 'Profile Preview' }).click()
+      await expect(preview).toHaveCSS('background-color', 'rgb(76, 175, 80)')
+
       await page.getByRole('button', { name: 'Update Profile' }).click()
 
       await expect.poll(async () => {
@@ -255,6 +263,14 @@ test.describe('profile manager', () => {
     const preview = page.locator('.profilePreviewIcon')
     await expect(preview.locator('img')).toBeVisible()
     await expect(preview).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+
+    await page.locator('.profileColorPicker .colorFieldTrigger').click()
+    const colorPicker = page.locator('.colorPickerPopover')
+    await colorPicker.locator('input[type="text"]').fill('#123456')
+    await colorPicker.locator('input[type="text"]').press('Enter')
+    await page.getByRole('heading', { name: 'Profile Preview' }).click()
+    await expect(preview).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+
     await page.getByRole('button', { name: 'Update Profile' }).click()
 
     await expect.poll(async () => {

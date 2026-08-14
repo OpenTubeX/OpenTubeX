@@ -269,8 +269,6 @@ watch(open, async value => {
     removeOpenListeners()
     return
   }
-  colorWhenOpened.value = props.modelValue
-  blurWhenOpened.value = props.blurValue ?? 0
   document.addEventListener('pointerdown', closeFromOutside)
   window.addEventListener('resize', positionPopover)
   window.addEventListener('scroll', positionPopover, true)
@@ -294,7 +292,11 @@ function syncFromModel(color, force = false) {
 
 function togglePicker() {
   if (open.value) closePicker()
-  else open.value = true
+  else {
+    colorWhenOpened.value = props.modelValue
+    blurWhenOpened.value = props.blurValue ?? 0
+    open.value = true
+  }
 }
 
 function closePicker(apply = false) {
