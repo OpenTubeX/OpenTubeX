@@ -1342,6 +1342,7 @@ Profile:
 Channel:
   Subscribe: Subscribe
   Unsubscribe: Unsubscribe
+  Channel Name Unavailable: Channel name unavailable
   Channel has been removed from your subscriptions: Channel has been removed from
     your subscriptions
   Removed subscription from {count} other channel(s): Removed subscription from 1 other channel | Removed subscription from {count} other channels

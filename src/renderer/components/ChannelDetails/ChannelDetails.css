@@ -41,6 +41,10 @@
   object-fit: cover;
 }
 
+.ft-icon.thumbnail {
+  font-size: 100px;
+}
+
 .name {
   font-weight: bold;
   inline-size: 100%;

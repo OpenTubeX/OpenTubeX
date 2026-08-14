@@ -19,10 +19,11 @@
           class="thumbnailContainer"
         >
           <img
-            v-if="thumbnailUrl"
+            v-if="thumbnailUrl && !thumbnailLoadFailed"
             class="thumbnail"
             :src="thumbnailUrl"
             alt=""
+            @error="handleThumbnailError"
           >
           <FtIcon
             v-else
@@ -36,7 +37,7 @@
               class="name"
               dir="auto"
             >
-              {{ name }}
+              {{ name || $t('Channel.Channel Name Unavailable') }}
             </h1>
 
             <p
@@ -254,7 +255,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 
 import { FtIcon } from '@opentubex/icons'
 import FtCard from '../ft-card/ft-card.vue'
@@ -319,6 +320,16 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['change-tab', 'search', 'subscribed'])
+
+const thumbnailLoadFailed = ref(false)
+
+watch(() => props.thumbnailUrl, () => {
+  thumbnailLoadFailed.value = false
+})
+
+function handleThumbnailError() {
+  thumbnailLoadFailed.value = true
+}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideChannelSubscriptions = computed(() => {
