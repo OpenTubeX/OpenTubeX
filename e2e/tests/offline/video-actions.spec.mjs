@@ -95,6 +95,45 @@ test('limits persisted yt-dlp playback entries by UTF-8 byte size', async ({ pag
   }, source)).toBe(false)
 })
 
+test('prefers evicting yt-dlp playback entries without open tabs', async ({ page }) => {
+  const result = await page.evaluate(async () => {
+    const openVideoId = 'aaaaaaaaaaa'
+    const unusedVideoId = 'bbbbbbbbbbb'
+    const source = {
+      manifestSrc: 'data:application/dash+xml;charset=UTF-8,manifest',
+      manifestMimeType: 'application/dash+xml',
+      legacyFormats: [],
+      isLive: false,
+      version: '2026.08.13'
+    }
+    const expiryTime = Date.now() + 60 * 60 * 1000
+    const videoIds = [
+      openVideoId,
+      unusedVideoId,
+      ...Array.from({ length: 48 }, (_, index) => `cache${String(index).padStart(6, '0')}`)
+    ]
+
+    await window.ftElectron.ytDlpPlaybackCacheClear()
+    await window.ftElectron.tabs.create({
+      route: `/watch/${openVideoId}`,
+      makeActive: false,
+      lazyLoad: true
+    })
+    for (const videoId of videoIds) {
+      await window.ftElectron.ytDlpPlaybackCacheSet(videoId, 'settings', expiryTime, source)
+    }
+    await window.ftElectron.ytDlpPlaybackCacheSet('zzzzzzzzzzz', 'settings', expiryTime, source)
+
+    return {
+      openEntry: await window.ftElectron.ytDlpPlaybackCacheGet(openVideoId, 'settings'),
+      unusedEntry: await window.ftElectron.ytDlpPlaybackCacheGet(unusedVideoId, 'settings')
+    }
+  })
+
+  expect(result.openEntry).not.toBeNull()
+  expect(result.unusedEntry).toBeNull()
+})
+
 async function readPlaylist(app, id) {
   const contents = await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')
   const records = contents.trim().split('\n').map((line) => JSON.parse(line))
