@@ -3699,7 +3699,10 @@ function runApp() {
 
   ipcMain.on(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, handleOpenInExternalPlayer)
 
-  ipcMain.handle(IpcChannels.YT_DLP_DOWNLOAD, handleYtDlpDownload)
+  ipcMain.handle(IpcChannels.YT_DLP_DOWNLOAD, (event, payload, retryDownloadId) => {
+    const automaticDownloadAuthorized = subscriptionAutoRefreshOwner?.webContents.id === event.sender.id
+    return handleYtDlpDownload(event, payload, retryDownloadId, automaticDownloadAuthorized)
+  })
 
   ipcMain.on(IpcChannels.YT_DLP_CANCEL_DOWNLOAD, handleYtDlpCancelDownload)
   ipcMain.handle(IpcChannels.YT_DLP_LIST_DOWNLOADS, handleYtDlpListDownloads)

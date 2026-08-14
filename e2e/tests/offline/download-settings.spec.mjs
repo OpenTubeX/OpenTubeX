@@ -131,7 +131,7 @@ test.describe('automatic download authorization', () => {
     }
   })
 
-  test('starts filtered automatic downloads without user activation and deduplicates them', async ({ app, page }) => {
+  test('starts filtered automatic downloads only for the active subscription refresh', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'fake-automatic-yt-dlp.sh')
     const argumentsFile = path.join(app.userDataDir, 'automatic-yt-dlp-arguments.txt')
     await writeFile(executable, [
@@ -160,6 +160,15 @@ test.describe('automatic download authorization', () => {
       maxAgeDays: 7,
       customArgs: '--write-description'
     }
+    expect(await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), payload)).toBeNull()
+
+    const refreshOwnerTabId = await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const tabId = store.getters.getActiveTabId
+      return await window.ftElectron.subscriptionAutoRefresh.acquire(tabId, 'videos') ? tabId : null
+    })
+    expect(refreshOwnerTabId).not.toBeNull()
+
     expect(await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), {
       ...payload,
       channelId: ALPHA_CHANNEL_ID
@@ -187,5 +196,6 @@ test.describe('automatic download authorization', () => {
 
     const duplicate = await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), payload)
     expect(duplicate).toEqual({ skipped: 'already-downloaded' })
+    await page.evaluate((tabId) => window.ftElectron.subscriptionAutoRefresh.release(tabId), refreshOwnerTabId)
   })
 })

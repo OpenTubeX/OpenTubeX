@@ -1368,16 +1368,17 @@ async function authorizeAutomaticDownload(payload) {
 /**
  * @param {import('electron').IpcMainInvokeEvent} event
  * @param {YtDlpDownloadPayload} incomingPayload
+ * @param {boolean} automaticDownloadAuthorized
  * @returns {Promise<{ id: number } | { error: string } | { skipped: string } | null>}
  */
-async function startYtDlpDownload(event, incomingPayload) {
+async function startYtDlpDownload(event, incomingPayload, automaticDownloadAuthorized) {
   if (!isOpenTubeXUrl(event.senderFrame.url) || typeof incomingPayload !== 'object' || incomingPayload === null) {
     return null
   }
 
-  const payload = incomingPayload.automatic === true
+  const payload = incomingPayload.automatic === true && automaticDownloadAuthorized
     ? await authorizeAutomaticDownload(incomingPayload)
-    : incomingPayload
+    : incomingPayload.automatic === true ? null : incomingPayload
   if (payload === null || (payload.automatic !== true && !event.sender.isFocused())) {
     return null
   }
@@ -1826,11 +1827,12 @@ async function startYtDlpDownload(event, incomingPayload) {
  * @param {import('electron').IpcMainInvokeEvent} event
  * @param {YtDlpDownloadPayload} payload
  * @param {number} [retryDownloadId]
+ * @param {boolean} [automaticDownloadAuthorized]
  * @returns {Promise<{ id: number } | { error: string } | { skipped: string } | null>}
  */
-export async function handleYtDlpDownload(event, payload, retryDownloadId) {
+export async function handleYtDlpDownload(event, payload, retryDownloadId, automaticDownloadAuthorized = false) {
   if (retryDownloadId === undefined) {
-    return startYtDlpDownload(event, payload)
+    return startYtDlpDownload(event, payload, automaticDownloadAuthorized)
   }
 
   if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused() ||
@@ -1849,7 +1851,8 @@ export async function handleYtDlpDownload(event, payload, retryDownloadId) {
       return { error: 'download-not-retryable' }
     }
 
-    const result = await startYtDlpDownload(event, payload)
+    const retryPayload = retryRecord.automatic === true ? retryRecord.retryPayload : payload
+    const result = await startYtDlpDownload(event, retryPayload, true)
     if (result && 'id' in result) {
       downloadRecords.delete(retryDownloadId)
       broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, [retryDownloadId])
