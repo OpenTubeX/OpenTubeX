@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { buildReorderedTabMap } from '../../src/main/tabs/tabOrder.js'
+import {
+  buildReorderedTabMap,
+  getGroupedTabInsertIndex
+} from '../../src/main/tabs/tabOrder.js'
 
 function createTabs() {
   return new Map([
@@ -40,4 +43,36 @@ test('builds a valid changed order without changing tab objects', () => {
   assert.deepEqual(Array.from(reorderedTabs.keys()), ['pinned', 'second', 'first'])
   assert.equal(reorderedTabs.get('first'), tabs.get('first'))
   assert.equal(reorderedTabs.get('second'), tabs.get('second'))
+})
+
+test('appends new tabs to the contiguous group created from their opener', () => {
+  const tabs = new Map([
+    ['subscriptions', { isPinned: false }],
+    ['first-video', { isPinned: false, placementOpenerTabId: 'subscriptions' }],
+    ['second-video', { isPinned: false, placementOpenerTabId: 'subscriptions' }],
+    ['existing', { isPinned: false }]
+  ])
+
+  assert.equal(getGroupedTabInsertIndex(tabs, 'subscriptions', false), 3)
+})
+
+test('does not follow a grouped tab that was moved elsewhere', () => {
+  const tabs = new Map([
+    ['subscriptions', { isPinned: false }],
+    ['first-video', { isPinned: false, placementOpenerTabId: 'subscriptions' }],
+    ['existing', { isPinned: false }],
+    ['moved-video', { isPinned: false, placementOpenerTabId: 'subscriptions' }]
+  ])
+
+  assert.equal(getGroupedTabInsertIndex(tabs, 'subscriptions', false), 2)
+})
+
+test('starts an unpinned group after all pinned tabs', () => {
+  const tabs = new Map([
+    ['subscriptions', { isPinned: true }],
+    ['other-pinned', { isPinned: true }],
+    ['existing', { isPinned: false }]
+  ])
+
+  assert.equal(getGroupedTabInsertIndex(tabs, 'subscriptions', false), 2)
 })
