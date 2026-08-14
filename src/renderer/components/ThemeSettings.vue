@@ -20,6 +20,14 @@
         />
         <FtToggleSwitch
           v-if="usingElectron"
+          :label="$t('Settings.Theme Settings.Move Downloads to App Header')"
+          compact
+          :default-value="moveDownloadsToAppHeader"
+          setting-key="moveDownloadsToAppHeader"
+          @change="updateMoveDownloadsToAppHeader"
+        />
+        <FtToggleSwitch
+          v-if="usingElectron"
           :label="$t('Settings.Theme Settings.Disable Smooth Scrolling')"
           compact
           :default-value="disableSmoothScrollingToggleValue"
@@ -79,6 +87,14 @@
           :default-value="hideHeaderLogo"
           setting-key="hideHeaderLogo"
           @change="updateHideHeaderLogo"
+        />
+        <FtToggleSwitch
+          v-if="usingElectron"
+          :label="$t('Settings.Theme Settings.Move Settings to App Header')"
+          compact
+          :default-value="moveSettingsToAppHeader"
+          setting-key="moveSettingsToAppHeader"
+          @change="updateMoveSettingsToAppHeader"
         />
         <FtToggleSwitch
           v-if="usingElectron"
@@ -646,6 +662,17 @@ function updateAlwaysShowScrollbars(value) {
 const hideHeaderLogo = computed(() => {
   return store.getters.getHideHeaderLogo
 })
+
+const moveDownloadsToAppHeader = computed(() => store.getters.getMoveDownloadsToAppHeader)
+const moveSettingsToAppHeader = computed(() => store.getters.getMoveSettingsToAppHeader)
+
+function updateMoveDownloadsToAppHeader(value) {
+  store.dispatch('updateMoveDownloadsToAppHeader', value)
+}
+
+function updateMoveSettingsToAppHeader(value) {
+  store.dispatch('updateMoveSettingsToAppHeader', value)
+}
 
 /**
  * @param {boolean} value

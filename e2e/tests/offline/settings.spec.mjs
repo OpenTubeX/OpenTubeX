@@ -404,33 +404,56 @@ test.describe('settings', () => {
     expect(page.url()).toBe(routeBeforeOpening)
   })
 
-  test('moves the Downloads shortcut from the header into Quick Settings', async ({ page }) => {
-    const downloadSection = await goToSettingsSection(page, 'download')
-    const placementToggle = downloadSection.getByRole('checkbox', {
-      name: 'Move Downloads to Quick Settings'
+  test('moves Downloads and Settings from Quick Settings into the app header', async ({ page }) => {
+    const themeSection = await goToSettingsSection(page, 'theme')
+    const downloadsToggle = themeSection.getByRole('checkbox', {
+      name: 'Move Downloads to App Header'
     })
-    await expect(placementToggle).not.toBeChecked()
-    await downloadSection.locator('label.switch-label')
-      .filter({ hasText: 'Move Downloads to Quick Settings' }).click()
+    const settingsToggle = themeSection.getByRole('checkbox', {
+      name: 'Move Settings to App Header'
+    })
 
-    await expect(placementToggle).toBeChecked()
+    await expect(downloadsToggle).not.toBeChecked()
+    await expect(settingsToggle).not.toBeChecked()
     await expect(page.locator('.topNav .downloadsButton')).toHaveCount(0)
-    await page.locator('.profileTrigger').click()
+    await expect(page.locator('.topNav .settingsButton')).toHaveCount(0)
 
+    await page.locator('.profileTrigger').click()
     const menu = page.getByRole('dialog', { name: 'Quick settings' })
     const downloadsShortcut = menu.getByRole('button', { name: 'Downloads' })
     const allSettingsShortcut = menu.getByRole('button', { name: 'All settings' })
     await expect(downloadsShortcut).toBeVisible()
-    const [downloadsBounds, allSettingsBounds] = await Promise.all([
-      downloadsShortcut.boundingBox(),
-      allSettingsShortcut.boundingBox()
-    ])
-    expect(downloadsBounds.x).toBeLessThan(allSettingsBounds.x)
+    await expect(allSettingsShortcut).toBeVisible()
+    await page.locator('.profileTrigger').click()
 
-    await downloadsShortcut.click()
-    await expect(menu).toBeHidden()
-    await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
-    await expect(page.locator('.settingsWindow')).toHaveCount(1)
+    await themeSection.locator('label.switch-label')
+      .filter({ hasText: 'Move Downloads to App Header' }).click()
+    await themeSection.locator('label.switch-label')
+      .filter({ hasText: 'Move Settings to App Header' }).click()
+    await expect(downloadsToggle).toBeChecked()
+    await expect(settingsToggle).toBeChecked()
+    await page.locator('.settingsCloseButton').click()
+
+    const downloadsButton = page.locator('.topNav .downloadsButton')
+    const settingsButton = page.locator('.topNav .settingsButton')
+    await expect(downloadsButton).toBeVisible()
+    await expect(settingsButton).toBeVisible()
+
+    await page.locator('.profileTrigger').click()
+    await expect(downloadsShortcut).toHaveCount(0)
+    await expect(allSettingsShortcut).toHaveCount(0)
+    await page.locator('.profileTrigger').click()
+
+    for (const [button, windowName] of [
+      [downloadsButton, 'Downloads'],
+      [settingsButton, 'Settings']
+    ]) {
+      await button.click()
+      const utilityWindow = page.getByRole('dialog', { name: windowName, exact: true })
+      await expect(utilityWindow).toBeVisible()
+      await expect(utilityWindow.getByRole('button', { name: /Minimi[sz]e/ })).toHaveCount(0)
+      await utilityWindow.getByRole('button', { name: 'Close' }).click()
+    }
   })
 
   test('clamps the Downloads scroll position when a wider layout becomes shorter', async ({ page }) => {

@@ -95,7 +95,10 @@
         <template v-else>
           <div
             class="profileHeaderRow"
-            :class="{ hasDownloadsShortcut: showDownloadsShortcut }"
+            :class="{
+              hasTwoShortcuts: showDownloadsShortcut && showSettingsShortcut,
+              hasNoShortcuts: !showDownloadsShortcut && !showSettingsShortcut
+            }"
           >
             <button
               type="button"
@@ -124,6 +127,7 @@
               <FtIcon :icon="['fas', 'download']" />
             </button>
             <button
+              v-if="showSettingsShortcut"
               type="button"
               class="quickSettingsShortcut allSettingsShortcut"
               :aria-label="t('Settings.Quick Settings.All Settings')"
@@ -453,7 +457,10 @@ const regionValues = computed(() => store.getters.getRegionValues)
 const showDownloadsShortcut = computed(() => (
   USING_ELECTRON &&
   store.getters.getEnableDownloads &&
-  store.getters.getMoveDownloadsToQuickSettings
+  !store.getters.getMoveDownloadsToAppHeader
+))
+const showSettingsShortcut = computed(() => (
+  !USING_ELECTRON || !store.getters.getMoveSettingsToAppHeader
 ))
 
 const RESOLUTION_VALUES = ['2160', '1440', '1080', '720', '480', '360', '240', '144']

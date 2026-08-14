@@ -44,8 +44,13 @@
   padding-inline-end: 8px;
 }
 
-.profileHeaderRow.hasDownloadsShortcut {
+.profileHeaderRow.hasTwoShortcuts {
   grid-template-columns: minmax(0, 1fr) 44px 44px;
+}
+
+.profileHeaderRow.hasNoShortcuts {
+  grid-template-columns: minmax(0, 1fr);
+  padding-inline-end: 0;
 }
 
 .profileSummary {
