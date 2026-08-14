@@ -666,11 +666,13 @@ async function goToSearch(queryText, { event, dataListIndex }) {
   const doCreateNewTab = (ctrlOrCmdPressed || isMiddleClick) && !doCreateNewWindow
   const makeActive = !isMiddleClick
 
-  if (window.innerWidth <= MOBILE_WIDTH_THRESHOLD) {
-    searchContainer.value.blur()
-    showSearchContainer.value = false
-  } else {
-    searchInput.value.blur()
+  if (!isMiddleClick) {
+    if (window.innerWidth <= MOBILE_WIDTH_THRESHOLD) {
+      searchContainer.value.blur()
+      showSearchContainer.value = false
+    } else {
+      searchInput.value.blur()
+    }
   }
 
   clearLocalSearchSuggestionsSession()
