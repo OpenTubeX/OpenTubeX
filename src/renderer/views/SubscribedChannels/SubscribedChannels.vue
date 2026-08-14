@@ -45,11 +45,11 @@
               :to="`/channel/${channel.id}`"
             >
               <img
-                v-if="channel.thumbnail != null"
+                v-if="hasUsableThumbnail(channel.thumbnail)"
                 class="channelThumbnail"
                 :src="thumbnailURL(channel.thumbnail)"
                 alt=""
-                @error.once="updateThumbnail(channel)"
+                @error.once="handleThumbnailError(channel)"
               >
               <ft-icon
                 v-else
@@ -131,6 +131,7 @@ const query = ref('')
 const channelLimit = ref(channelsPerPage)
 const subscribedChannels = ref([])
 const filteredChannels = ref([])
+const failedThumbnailUrls = ref(new Set())
 
 const searchBarChannels = useTemplateRef('searchBarChannels')
 
@@ -229,6 +230,20 @@ function thumbnailURL(originalURL) {
   }
 
   return newURL.replace(re.url, `$1${thumbnailSize}$2`)
+}
+
+function hasUsableThumbnail(originalURL) {
+  const url = thumbnailURL(originalURL)
+  return url !== null && !failedThumbnailUrls.value.has(url)
+}
+
+function handleThumbnailError(channel) {
+  const url = thumbnailURL(channel.thumbnail)
+  if (url !== null) {
+    failedThumbnailUrls.value = new Set(failedThumbnailUrls.value).add(url)
+  }
+
+  updateThumbnail(channel)
 }
 
 function updateThumbnail(channel) {
