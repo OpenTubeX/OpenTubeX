@@ -344,7 +344,10 @@ test.describe('watch page', () => {
       contentType: 'text/html',
       body: '<title>Sorry...</title>'
     }))
-    await page.route('https://example.invalid/rejected.m3u8', route => route.fulfill({ status: 403 }))
+    await page.route('https://example.invalid/rejected.m3u8', route => route.fulfill({
+      contentType: 'text/html',
+      body: '<html>expired</html>'
+    }))
     await app.electronApp.evaluate(({ ipcMain }) => {
       globalThis.__ytDlpIpBlockFallbackCalls = 0
       globalThis.__ytDlpIpBlockFallbackDefaultClients = []

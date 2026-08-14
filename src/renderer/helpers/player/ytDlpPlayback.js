@@ -215,6 +215,18 @@ async function probeYtDlpUrl(url) {
 }
 
 /**
+ * @param {string} url
+ */
+async function probeYtDlpHlsManifest(url) {
+  try {
+    const response = await fetch(url, { signal: AbortSignal.timeout(URL_PROBE_TIMEOUT) })
+    return response.ok && (await response.text()).trimStart().startsWith('#EXTM3U')
+  } catch {
+    return false
+  }
+}
+
+/**
  * @param {YtDlpPlaybackFormat[]} formats
  */
 async function convertLegacyFormats(formats) {
@@ -361,7 +373,7 @@ export async function getYtDlpPlaybackSource(videoId, cacheKey = '') {
 
     if (
       info.hlsManifestUrl !== null &&
-      await probeYtDlpUrl(info.hlsManifestUrl)
+      await probeYtDlpHlsManifest(info.hlsManifestUrl)
     ) {
       return {
         manifestSrc: info.hlsManifestUrl,
