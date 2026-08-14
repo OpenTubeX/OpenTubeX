@@ -634,6 +634,43 @@ export default defineComponent({
     // Reactive mirror of the native fullscreen state, so the template can
     // decide where the chapters render (in-player panel vs the watch sidebar).
     const isFullscreen = ref(false)
+    const playerPaused = ref(true)
+    const pausedInterfaceRevealed = ref(false)
+    /** @type {number|null} */
+    let pausedInterfaceRevealTimeout = null
+
+    const showPlayerControlsWhenPaused = computed(() => store.getters.getShowPlayerControlsWhenPaused)
+    const showVideoTitleWhenPaused = computed(() => store.getters.getShowVideoTitleWhenPaused)
+    const showFullscreenActionsWhenPaused = computed(() => store.getters.getShowFullscreenActionsWhenPaused)
+    const pausedInterfaceHideDelay = computed(() => store.getters.getPausedInterfaceHideDelay)
+
+    function clearPausedInterfaceReveal() {
+      if (pausedInterfaceRevealTimeout !== null) {
+        clearTimeout(pausedInterfaceRevealTimeout)
+        pausedInterfaceRevealTimeout = null
+      }
+
+      pausedInterfaceRevealed.value = false
+    }
+
+    function revealPausedInterface() {
+      if (!playerPaused.value || (!isFullscreen.value && !fullWindowEnabled.value)) {
+        return
+      }
+
+      pausedInterfaceRevealed.value = true
+
+      if (pausedInterfaceRevealTimeout !== null) {
+        clearTimeout(pausedInterfaceRevealTimeout)
+      }
+
+      pausedInterfaceRevealTimeout = window.setTimeout(() => {
+        pausedInterfaceRevealTimeout = null
+        pausedInterfaceRevealed.value = false
+      }, pausedInterfaceHideDelay.value * 1000)
+    }
+
+    onUnmounted(clearPausedInterfaceReveal)
 
     // While switching presentation mode (fullscreen/full window) the side
     // panel transitions would run on top of the container resize and produce
@@ -4861,6 +4898,8 @@ export default defineComponent({
     }
 
     function handlePlay() {
+      playerPaused.value = false
+      clearPausedInterfaceReveal()
       shortsPaused.value = false
       shortsEnded.value = false
       const isCurrentPictureInPictureVideo = document.pictureInPictureElement === video.value
@@ -4907,6 +4946,8 @@ export default defineComponent({
     }
 
     function handlePause() {
+      playerPaused.value = true
+      clearPausedInterfaceReveal()
       shortsPaused.value = true
       syncPlayPauseControlIcons()
 
@@ -6223,6 +6264,8 @@ export default defineComponent({
      */
     function handlePlayerMouseMove(event) {
       const videoElement = video.value
+      revealPausedInterface()
+
       if (!props.shortsPlayer || !isFullscreen.value || videoElement.paused) {
         return
       }
@@ -6239,6 +6282,11 @@ export default defineComponent({
         event.stopPropagation()
         ui?.getControls().getControlsContainer().removeAttribute('shown')
       }
+    }
+
+    function handlePlayerFocusIn(event) {
+      handleScrollMiniPlayerEnter(event)
+      revealPausedInterface()
     }
 
     function toggleShortsFullscreen() {
@@ -9573,6 +9621,7 @@ export default defineComponent({
       positionShortsContextMenu,
       handlePlayerMouseMove,
       handlePlayerMouseLeave,
+      handlePlayerFocusIn,
       toggleShortsFullscreen,
       handlePlayerControlDoubleClick,
       ambientCanvas,
@@ -9591,6 +9640,11 @@ export default defineComponent({
       chapterOverlay,
       showChaptersOverlay,
       isFullscreen,
+      playerPaused,
+      pausedInterfaceRevealed,
+      showPlayerControlsWhenPaused,
+      showVideoTitleWhenPaused,
+      showFullscreenActionsWhenPaused,
       presentationModeChanging,
       chapterThumbnails,
       closeChaptersOverlay,

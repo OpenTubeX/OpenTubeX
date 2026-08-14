@@ -60,7 +60,12 @@
         fullscreenDockReordering,
         presentationModeChanging,
         videoZoomPannable: videoZoomPanReady,
-        videoZoomPanning
+        videoZoomPanning,
+        playerPaused: playerPaused && hasLoaded,
+        pausedInterfaceRevealed,
+        hidePlayerControlsWhenPaused: !showPlayerControlsWhenPaused,
+        hideVideoTitleWhenPaused: !showVideoTitleWhenPaused,
+        hideFullscreenActionsWhenPaused: !showFullscreenActionsWhenPaused
       }"
       :style="[
         captionCssVariables,
@@ -77,7 +82,7 @@
       @pointermove.capture="handleVideoZoomPointerMove"
       @pointerup.capture="handleVideoZoomPointerUp"
       @pointercancel.capture="handleVideoZoomPointerCancel"
-      @focusin="handleScrollMiniPlayerEnter"
+      @focusin="handlePlayerFocusIn"
       @focusout="handleScrollMiniPlayerLeave"
       @contextmenu="positionShortsContextMenu"
       @dblclick.capture="handlePlayerControlDoubleClick"
