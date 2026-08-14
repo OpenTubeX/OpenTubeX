@@ -6335,7 +6335,8 @@ export default defineComponent({
 
     function setFullscreenTranscript(shouldOpen) {
       const open = Boolean(
-        shouldOpen && (isNativeFullscreenActive() || fullWindowEnabled.value)
+        shouldOpen && props.captions.length > 0 &&
+        (isNativeFullscreenActive() || fullWindowEnabled.value)
       )
       showFullscreenTranscript.value = open
       emit('fullscreen-transcript-change', {
@@ -6462,6 +6463,12 @@ export default defineComponent({
 
     watch(() => props.liveChatAvailable, available => {
       if (!available && showFullscreenLiveChat.value) closeFullscreenLiveChat()
+    })
+
+    watch(() => props.captions.length, captionCount => {
+      if (captionCount === 0 && showFullscreenTranscript.value) {
+        dismissFullscreenTranscript()
+      }
     })
 
     watch(() => props.watchingPlaylist, watching => {

@@ -220,7 +220,7 @@
             @click="emit('toggle-live-chat')"
           />
           <FtIconButton
-            v-if="!isLive && !isUpcoming && !hideFullscreenDockActions"
+            v-if="transcriptAvailable && !isLive && !isUpcoming && !hideFullscreenDockActions"
             :title="transcriptOpen ? t('Video.Transcript.Hide') : t('Video.Transcript.Show')"
             :icon="['fas', 'file-lines']"
             :theme="transcriptOpen ? 'secondary' : 'base'"
@@ -478,6 +478,10 @@ const props = defineProps({
     default: false
   },
   transcriptOpen: {
+    type: Boolean,
+    default: false
+  },
+  transcriptAvailable: {
     type: Boolean,
     default: false
   },

@@ -18,6 +18,103 @@ const WATCH_PAGE_SEED = {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+for (const { name, options, expectedCount } of [
+  { name: 'hides transcript actions without captions', options: {}, expectedCount: 0 },
+  {
+    name: 'shows transcript actions with captions',
+    options: { captionCueSettings: 'align:center' },
+    expectedCount: 1
+  }
+]) {
+  test(name, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, options)
+    await openMockedVideo(page)
+
+    await expect(page.locator('.infoArea .watchVideoInfo')
+      .getByRole('button', { name: 'Show transcript' }))
+      .toHaveCount(expectedCount)
+    await expect(page.locator('.fullscreenActions .fullscreenTranscriptToggle'))
+      .toHaveCount(expectedCount)
+  })
+}
+
+test.describe('Shorts transcript navigation', () => {
+  const SHORTS_CHANNEL_ID = 'UC-transcript-shorts'
+  const CAPTIONED_SHORT_IDS = ['captioned-short-1', 'captioned-short-2']
+  const CAPTIONLESS_SHORT_ID = 'captionless-short'
+  const shorts = [...CAPTIONED_SHORT_IDS, CAPTIONLESS_SHORT_ID].map((videoId, index) => ({
+    type: 'video',
+    videoId,
+    title: `Transcript Short ${index + 1}`,
+    author: 'Transcript Shorts',
+    authorId: SHORTS_CHANNEL_ID,
+    published: CAPTIONED_SHORT_IDS.length + 1 - index,
+    isShort: true,
+    lengthSeconds: '',
+    thumbnailUrl: `https://i.ytimg.com/vi/${videoId}/frame0.jpg?selected=1`
+  }))
+
+  test.use({
+    seed: {
+      settings: {
+        ...WATCH_PAGE_SEED,
+        useCustomShortsPlayer: true,
+        fetchSubscriptionsAutomatically: false
+      },
+      profiles: [{
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: [{
+          id: SHORTS_CHANNEL_ID,
+          name: 'Transcript Shorts',
+          thumbnail: ''
+        }]
+      }],
+      subscriptionCache: [{
+        _id: SHORTS_CHANNEL_ID,
+        shorts,
+        shortsTimestamp: new Date().toISOString()
+      }]
+    }
+  })
+
+  test('preserves the panel until navigation reaches a captionless Short', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, {
+      captionCueSettings: 'align:center',
+      captionVideoIds: CAPTIONED_SHORT_IDS
+    })
+    await page.locator(sel.searchInput)
+      .fill(`https://www.youtube.com/shorts/${CAPTIONED_SHORT_IDS[0]}`)
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[0]}\\?short=true`))
+    await waitForPlayback(page)
+
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const transcriptButton = page.locator('.shortsComponentAction')
+      .filter({ hasText: 'Transcript' })
+      .getByRole('button')
+    const transcriptPanel = page.locator('.shortsAuxPanelTarget .watchVideoTranscript')
+    const next = page.locator('.shortsNavigationButton').last()
+
+    await expect(player).toBeVisible()
+    await transcriptButton.click()
+    await expect(transcriptPanel).toBeVisible()
+
+    await next.click()
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[1]}\\?short=true`))
+    await expect(transcriptPanel).toBeVisible()
+    await expect(transcriptButton).toHaveAttribute('aria-pressed', 'true')
+
+    await page.waitForTimeout(350)
+    await next.click()
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONLESS_SHORT_ID}\\?short=true`))
+    await expect(transcriptPanel).toHaveCount(0)
+    await expect(transcriptButton).toHaveCount(0)
+  })
+})
+
 test('a background watch tab stays loading until its cached avatar is ready', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
 
@@ -790,7 +887,7 @@ test.describe('watch page', () => {
   })
 
   test('resets the Shorts auxiliary viewport when switching panels', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
+    await mockPlayableWatchPage(app, page, { captionCueSettings: 'align:center' })
     await openMockedVideo(page)
 
     const watchComponent = await page.evaluateHandle(findWatchComponent)
@@ -824,7 +921,7 @@ test.describe('watch page', () => {
   })
 
   test('shares the Shorts information dock with fullscreen and keeps its settings menu visible', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
+    await mockPlayableWatchPage(app, page, { captionCueSettings: 'align:center' })
     await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/jNQXAC9IVRw')
     await page.locator(sel.searchInput).press('Enter')
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw\?short=true/)

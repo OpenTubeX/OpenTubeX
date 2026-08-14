@@ -360,7 +360,7 @@
           <FtIcon :icon="['fas', 'shield-halved']" />
         </button>
         <button
-          v-if="!isLive && !isUpcoming"
+          v-if="captions.length > 0 && !isLive && !isUpcoming"
           type="button"
           class="fullscreenAction fullscreenTranscriptToggle"
           :class="{ open: showFullscreenTranscript }"

@@ -435,7 +435,7 @@
             <span>{{ shortsCommentsText }}</span>
           </div>
           <div
-            v-if="!isLoading && !isLive && !isUpcoming"
+            v-if="!isLoading && !isLive && !isUpcoming && transcriptAvailable"
             class="shortsAction shortsComponentAction"
             :class="{ active: showTranscript }"
           >
@@ -605,6 +605,7 @@
             :current-volume="currentVolume"
             :sponsor-block-panel-open="showSidebarSponsorBlock"
             :transcript-open="showTranscript"
+            :transcript-available="transcriptAvailable"
             channel-setting-dropdown-portal
             hide-share-button
             hide-playlist-actions
@@ -649,7 +650,7 @@
             @vote="voteOnSponsorBlockInfoSegment"
           />
           <watch-video-transcript
-            v-if="showTranscript && !isLoading && !isLive && !isUpcoming"
+            v-if="showTranscript && transcriptAvailable && !isLoading && !isLive && !isUpcoming"
             :captions="captions"
             :current-time="currentTime"
             :preferred-caption-index="preferredTranscriptCaptionIndex"
@@ -727,6 +728,7 @@
           :current-volume="currentVolume"
           :sponsor-block-panel-open="showSidebarSponsorBlock"
           :transcript-open="showTranscript"
+          :transcript-available="transcriptAvailable"
           :live-chat-available="liveChatAvailable"
           :live-chat-open="showLiveChat"
           :live-chat-replay="liveChatIsReplay"
@@ -888,7 +890,7 @@
           @leave-cancelled="handleSidebarPanelAfterLeave"
         >
           <watch-video-transcript
-            v-if="showTranscript && !isLoading && !isLive && !isUpcoming && (!customShortsPlayerActive || fullscreenTranscriptOpen)"
+            v-if="showTranscript && transcriptAvailable && !isLoading && !isLive && !isUpcoming && (!customShortsPlayerActive || fullscreenTranscriptOpen)"
             :captions="captions"
             :current-time="currentTime"
             :preferred-caption-index="preferredTranscriptCaptionIndex"
