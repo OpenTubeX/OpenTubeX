@@ -105,26 +105,38 @@ test.describe('Shorts transcript navigation', () => {
     expect(playerBounds).not.toBeNull()
     expect(rateBarBounds).not.toBeNull()
 
-    await page.mouse.move(playerBounds.x + playerBounds.width / 2, playerBounds.y + 80)
+    await player.dispatchEvent('mousemove', {
+      clientX: playerBounds.x + playerBounds.width / 2,
+      clientY: playerBounds.y + 80
+    })
     await expect.poll(opacity).toBe(0)
 
-    await page.mouse.move(rateBarBounds.x + rateBarBounds.width / 2, rateBarBounds.y - 24)
+    await player.dispatchEvent('mousemove', {
+      clientX: rateBarBounds.x + rateBarBounds.width / 2,
+      clientY: rateBarBounds.y - 24
+    })
     await expect.poll(opacity).toBeGreaterThan(0.2)
     expect(await opacity()).toBeLessThan(0.5)
 
-    await page.mouse.move(rateBarBounds.x + rateBarBounds.width / 2, rateBarBounds.y - 6)
+    await player.dispatchEvent('mousemove', {
+      clientX: rateBarBounds.x + rateBarBounds.width / 2,
+      clientY: rateBarBounds.y - 6
+    })
     await expect.poll(opacity).toBeGreaterThan(0.75)
 
-    await page.mouse.move(rateBarBounds.x + rateBarBounds.width / 2, rateBarBounds.y + rateBarBounds.height / 2)
+    await playbackRateBar.dispatchEvent('mousemove', {
+      clientX: rateBarBounds.x + rateBarBounds.width / 2,
+      clientY: rateBarBounds.y + rateBarBounds.height / 2
+    })
     await expect.poll(opacity).toBe(1)
     await attachScreenshot('Shorts quick playback speed bar')
 
     const seekBarBounds = await seekBar.boundingBox()
     expect(seekBarBounds).not.toBeNull()
-    await page.mouse.move(
-      seekBarBounds.x + seekBarBounds.width / 2,
-      seekBarBounds.y + seekBarBounds.height / 2
-    )
+    await seekBar.dispatchEvent('mousemove', {
+      clientX: seekBarBounds.x + seekBarBounds.width / 2,
+      clientY: seekBarBounds.y + seekBarBounds.height / 2
+    })
     await expect.poll(opacity).toBe(0)
     expect(await seekBar.evaluate(element => getComputedStyle(element).zIndex)).toBe('3')
     expect(await controlPanel.evaluate(element => getComputedStyle(element).zIndex)).toBe('2')
@@ -209,12 +221,6 @@ test('a background watch tab stays loading until its cached avatar is ready', as
   await mockPlayableWatchPage(app, page)
 
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    store.commit('setVideoAvatar', {
-      videoId: 'jNQXAC9IVRw',
-      avatar: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+Xw4AAAAASUVORK5CYII='
-    })
-
     window.__backgroundWatchIconStates = []
     const record = () => {
       for (const tab of document.querySelectorAll('.tab')) {
@@ -241,6 +247,16 @@ test('a background watch tab stays loading until its cached avatar is ready', as
   const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
 
   await expect(tab.locator('.loadingDot')).toBeVisible()
+  const avatarCached = await page.evaluate(async tabId => {
+    const avatarBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUzZpk7I4HSAAAACklEQVQI12NgAAAAAgAB4iG8MwAAAABJRU5ErkJggg=='
+    const avatarBytes = Uint8Array.from(atob(avatarBase64), character => character.charCodeAt(0))
+    return await window.ftElectron.tabs.updateAvatar(
+      avatarBytes.buffer,
+      tabId,
+      '/watch/jNQXAC9IVRw'
+    )
+  }, watchTab.id)
+  expect(avatarCached).toBe(true)
   await expect(tab.locator('.loadingDot')).toHaveCount(0)
   await expect.poll(() => page.evaluate(tabId => (
     window.__backgroundWatchIconStates.some(state => state.id === tabId && !state.loading && state.avatar)
