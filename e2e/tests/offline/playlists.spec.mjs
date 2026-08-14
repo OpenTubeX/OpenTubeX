@@ -219,13 +219,21 @@ test.describe('custom playlist order', () => {
     await goTo(page, 'userplaylists')
     await page.getByText('Large custom playlist').click()
 
-    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    const expectHeaderBelowNavigation = async () => {
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
 
-    await expect.poll(async () => {
-      const header = await page.locator('.playlistInfoContainer').boundingBox()
-      const navigation = await page.locator('.topNav').boundingBox()
-      return header != null && navigation != null && header.y >= navigation.y + navigation.height
-    }).toBe(true)
+      await expect.poll(async () => {
+        const header = await page.locator('.playlistInfoContainer').boundingBox()
+        const navigation = await page.locator('.topNav').boundingBox()
+        return header != null && navigation != null && header.y >= navigation.y + navigation.height
+      }).toBe(true)
+    }
+
+    await expectHeaderBelowNavigation()
+
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
+    await expectHeaderBelowNavigation()
   })
 
   test('moves a video to the top from its options menu', async ({ page }) => {
