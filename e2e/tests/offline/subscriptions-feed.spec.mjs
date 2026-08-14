@@ -250,6 +250,34 @@ test.describe('relative timestamp updates disabled', () => {
     await goTo(page, 'subscriptions')
     await expect(newestVideo.locator('.uploadedTime')).toHaveText('• 1 hour ago')
   })
+
+  test('uses the current time when a reused card receives new data', async ({ page }) => {
+    await goTo(page, 'trending')
+    await page.clock.install({ time: now })
+    await goTo(page, 'subscriptions')
+
+    const newestVideo = page.locator('.ft-list-video').filter({ hasText: 'Video B newest' })
+    await expect(newestVideo).toBeVisible()
+    await newestVideo.evaluate(element => { element.dataset.reuseMarker = 'relative-time' })
+
+    await page.clock.fastForward(2 * HOUR)
+    await page.evaluate(async ({ channelId, published }) => {
+      const app = document.querySelector('#app').__vue_app__
+      const store = app.config.globalProperties.$store
+      const videos = store.getters.getVideoCache[channelId].videos.map(video => ({
+        ...video,
+        published
+      }))
+
+      await store.dispatch('updateSubscriptionVideosCacheByChannel', { channelId, videos })
+      window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-channel', {
+        detail: { tab: 'videos' }
+      }))
+    }, { channelId: CHANNEL_B, published: now + 1.5 * HOUR })
+
+    await expect(page.locator('[data-reuse-marker="relative-time"]')).toBeVisible()
+    await expect(newestVideo.locator('.uploadedTime')).toHaveText('• 30 minutes ago')
+  })
 })
 
 test.describe('subscriptions feed with upcoming premieres shown', () => {
