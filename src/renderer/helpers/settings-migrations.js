@@ -28,5 +28,12 @@ export function migrateLegacySettings(settings) {
     delete migratedSettings.useVerticalTabBar
   }
 
+  if (Object.hasOwn(migratedSettings, 'moveDownloadsToQuickSettings')) {
+    if (!Object.hasOwn(migratedSettings, 'moveDownloadsToAppHeader')) {
+      migratedSettings.moveDownloadsToAppHeader = migratedSettings.moveDownloadsToQuickSettings !== true
+    }
+    delete migratedSettings.moveDownloadsToQuickSettings
+  }
+
   return migratedSettings
 }
