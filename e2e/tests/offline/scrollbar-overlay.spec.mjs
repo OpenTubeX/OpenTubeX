@@ -32,6 +32,36 @@ test.describe('overlay scrollbars', () => {
     expect(clientWidth).toBe(innerWidth)
   })
 
+  test('the page scrollbar stays on the content side of right vertical tabs', async ({ page }) => {
+    await addPageOverflow(page)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setVerticalTabBarWidth', 220)
+      store.commit('setTabBarPosition', 'right')
+    })
+
+    const [scrollbarBox, tabBarBox] = await Promise.all([
+      page.locator(PAGE_SCROLLBAR).boundingBox(),
+      page.locator('.tabBar.position-right').boundingBox()
+    ])
+
+    expect(Math.abs(scrollbarBox.x + scrollbarBox.width - tabBarBox.x)).toBeLessThanOrEqual(1)
+  })
+
+  test('the page scrollbar stays on the window edge with left vertical tabs', async ({ page }) => {
+    await addPageOverflow(page)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setVerticalTabBarWidth', 220)
+      store.commit('setTabBarPosition', 'left')
+    })
+
+    const scrollbarBox = await page.locator(PAGE_SCROLLBAR).boundingBox()
+    const innerWidth = await page.evaluate(() => window.innerWidth)
+
+    expect(Math.abs(scrollbarBox.x + scrollbarBox.width - innerWidth)).toBeLessThanOrEqual(1)
+  })
+
   test('the scrollbar hides once the pointer rests and follows it back', async ({ page }) => {
     await addPageOverflow(page)
     const scrollbar = page.locator(PAGE_SCROLLBAR)

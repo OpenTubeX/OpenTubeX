@@ -35,6 +35,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'External Link Handling': ['External Link Handling']
   },
   theme: {
+    'Tab Layout': ['Tab Layout'],
     'Toast Position': ['Toast Position'],
     'Base Theme': ['Base Theme'],
     'Main Color Theme': ['Main Color Theme']

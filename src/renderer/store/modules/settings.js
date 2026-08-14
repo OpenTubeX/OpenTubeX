@@ -14,6 +14,7 @@ import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { getSystemLocale, showToast } from '../../helpers/utils'
 import { DEFAULT_THUMBNAIL_SIZE } from '../../constants/thumbnailSize'
 import { DEFAULT_FIXED_TAB_WIDTH } from '../../constants/tabWidth'
+import { normalizeTabBarPosition } from '../../constants/tabBarPosition'
 import { DEFAULT_SCROLLBAR_THUMB_WIDTH } from '../../constants/scrollbar'
 import { setReducedMotionPreference } from '../../helpers/reducedMotion'
 import { setAnimationSpeed } from '../../helpers/animationSpeed'
@@ -308,7 +309,7 @@ const state = {
   showTabIcons: true,
   showTabPreviews: true,
   updateRelativeTimestamps: true,
-  useVerticalTabBar: false,
+  tabBarPosition: 'top',
   verticalTabBarWidth: 220,
   useFixedTabWidth: false,
   fixedTabWidth: DEFAULT_FIXED_TAB_WIDTH,
@@ -738,7 +739,11 @@ const customGetters = {
   }
 }
 
-const customMutations = {}
+const customMutations = {
+  setTabBarPosition: (state, value) => {
+    state.tabBarPosition = normalizeTabBarPosition(value)
+  }
+}
 
 async function updateValidatedSetting(commit, settingId, value) {
   try {
@@ -778,6 +783,12 @@ const customActions = {
     commit,
     'secColor',
     resolveColor(value, 'Blue')
+  ),
+
+  updateTabBarPosition: ({ commit }, value) => updateValidatedSetting(
+    commit,
+    'tabBarPosition',
+    normalizeTabBarPosition(value)
   ),
 
   updateIconPack: async ({ commit }, value) => {
@@ -839,6 +850,12 @@ const customActions = {
         if (mutationIds.includes(defaultMutationId(_id))) {
           commit(defaultMutationId(_id), value)
         }
+      }
+
+      const hasTabBarPosition = userSettings.some(entry => entry._id === 'tabBarPosition')
+      const legacyVerticalTabBar = userSettings.find(entry => entry._id === 'useVerticalTabBar')
+      if (!hasTabBarPosition && legacyVerticalTabBar?.value === true) {
+        await dispatch('updateTabBarPosition', 'left')
       }
 
       if (state.landingPage === 'settings') {

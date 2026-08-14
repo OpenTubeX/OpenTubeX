@@ -518,6 +518,12 @@ Settings:
     Show Tab Previews: Show Tab Previews
     Use Fixed Tab Width: Use Fixed Tab Width in Horizontal Mode
     Tab Width: Tab Width
+    Tab Layout:
+      Tab Layout: Tab Layout
+      Horizontal Top: Horizontal at top
+      Horizontal Bottom: Horizontal at bottom
+      Vertical Left: Vertical on left
+      Vertical Right: Vertical on right
     Show Toast Timeout Indicator: Show toast timeout indicator
     Use Grid Player Menu: Use Grid Player Menu
     Show Progress as Notification: Show progress as notification
@@ -2173,7 +2179,7 @@ KeyboardShortcutPrompt:
   Next Tab: Switch to the next tab
   Previous Tab: Switch to the previous tab
   Switch to Tab: Switch to tab 1–9
-  Toggle Tab Orientation: Switch between horizontal and vertical tabs
+  Toggle Tab Orientation: Switch between tab layouts
   Navigate to Settings: Navigate to the Settings page
   Navigate to History: Navigate to the History page
   Refresh: Refresh feed with latest content

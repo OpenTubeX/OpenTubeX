@@ -3,8 +3,12 @@
   position: relative;
 }
 
-:global(.app:not(.verticalTabs):has(.tabBar)) .quickSettings {
+:global(.app.topTabs) .quickSettings {
   --quick-settings-viewport-offset: 32px;
+}
+
+:global(.app.bottomTabs) .quickSettings {
+  --quick-settings-viewport-offset: 34px;
 }
 
 .profileTrigger {

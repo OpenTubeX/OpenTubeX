@@ -444,20 +444,46 @@
   }
 }
 
-/* Adjust SideNav position when tab bar is present */
-.app:has(.tabBar) :deep(.sideNav) {
+/* The bottom strip includes a 2px compositor-safe inset. */
+.app.topTabs :deep(.sideNav) {
   block-size: calc(100vh - 92px);
   inset-block-start: 92px;
 }
 
-.app:has(.tabBar) .sideNavBackdrop {
+.app.bottomTabs :deep(.sideNav) {
+  block-size: calc(100vh - 94px);
+  inset-block-start: 60px;
+}
+
+.app.topTabs .sideNavBackdrop {
   inset-block-start: 92px;
 }
 
+.app.bottomTabs {
+  box-sizing: border-box;
+  padding-block-end: 34px;
+}
+
+.app.bottomTabs .sideNavBackdrop {
+  inset-block: 60px 34px;
+}
+
+.app.bottomTabs :deep(.progressBar) {
+  inset-block-end: 34px;
+}
+
 @media only screen and (width <= 680px) {
-  .app:has(.tabBar) :deep(.sideNav) {
+  .app:is(.topTabs, .bottomTabs) :deep(.sideNav) {
     block-size: 60px;
     inset-block-start: auto;
+  }
+
+  .app.bottomTabs :deep(.sideNav) {
+    inset-block-end: 34px;
+  }
+
+  .app.bottomTabs :deep(.moreOptionContainer) {
+    inset-block-end: 94px;
   }
 
   .sideNavBackdrop {
@@ -466,20 +492,31 @@
 
   /* The fixed top nav is taller when a tab bar is present, so restore the gap
      between it and the page content (the .flexBox rule above shrinks it). */
-  .app:has(.tabBar) .routerView {
+  .app.topTabs .routerView {
     margin-block-start: 68px;
   }
 }
 
-/* Vertical tab bar layout: the tab bar is a fixed column on the inline-start
-   side, so content shifts over and vertical offsets return to top-nav only. */
-.app.verticalTabs {
-  padding-inline-start: var(--vertical-tab-bar-width, 220px);
+/* These settings name physical window edges, independent of text direction. */
+/* stylelint-disable liberty/use-logical-spec */
+.app.verticalTabsLeft {
+  box-sizing: border-box;
+  padding-left: var(--vertical-tab-bar-width, 220px);
 }
 
-.app.verticalTabs :deep(.progressBar) {
-  inset-inline-start: var(--vertical-tab-bar-width, 220px);
+.app.verticalTabsRight {
+  box-sizing: border-box;
+  padding-right: var(--vertical-tab-bar-width, 220px);
 }
+
+.app.verticalTabsLeft :deep(.progressBar) {
+  left: var(--vertical-tab-bar-width, 220px);
+}
+
+.app.verticalTabsRight :deep(.progressBar) {
+  right: var(--vertical-tab-bar-width, 220px);
+}
+/* stylelint-enable liberty/use-logical-spec */
 
 .app.verticalTabs .sideNavBackdrop {
   inset-block-start: 60px;
@@ -491,15 +528,34 @@
     inset-block-start: 60px;
   }
 
-  .watchSideNavOverlay.verticalTabs :deep(.sideNav) {
-    inset-inline-start: var(--vertical-tab-bar-width, 220px);
+  /* The fixed overlay navigation only shifts when it shares the tab bar's
+     physical edge. */
+  /* stylelint-disable liberty/use-logical-spec */
+  .watchSideNavOverlay.verticalTabsLeft:not(.isLocaleRightToLeft) :deep(.sideNav) {
+    left: var(--vertical-tab-bar-width, 220px);
   }
+
+  .watchSideNavOverlay.verticalTabsRight.isLocaleRightToLeft :deep(.sideNav) {
+    right: var(--vertical-tab-bar-width, 220px);
+  }
+  /* stylelint-enable liberty/use-logical-spec */
 }
 
 /* The mobile bottom nav is fixed, so shift it past the vertical tab column */
 @media only screen and (width <= 680px) {
   .app.verticalTabs :deep(.sideNav) {
-    inset-inline-start: var(--vertical-tab-bar-width, 220px);
     inline-size: calc(100% - var(--vertical-tab-bar-width, 220px));
   }
+
+  /* stylelint-disable liberty/use-logical-spec */
+  .app.verticalTabsLeft :deep(.sideNav) {
+    left: var(--vertical-tab-bar-width, 220px);
+    right: 0;
+  }
+
+  .app.verticalTabsRight :deep(.sideNav) {
+    left: 0;
+    right: var(--vertical-tab-bar-width, 220px);
+  }
+  /* stylelint-enable liberty/use-logical-spec */
 }

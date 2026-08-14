@@ -2,15 +2,19 @@
   <div
     v-if="dataReady"
     class="app"
-    :class="{
+    :class="[{
       hideOutlines: outlinesHidden,
       isLocaleRightToLeft: isLocaleRightToLeft,
       isSideNavOpen: isSideNavOpen,
       hideLabelsSideBar: hideLabelsSideBar && !isSideNavOpen,
       verticalTabs: useVerticalTabBar,
+      verticalTabsLeft: tabBarPosition === 'left',
+      verticalTabsRight: tabBarPosition === 'right',
+      bottomTabs: isElectron && tabBarPosition === 'bottom',
+      topTabs: isElectron && tabBarPosition === 'top',
       watchSideNavOverlay: useWatchSideNavOverlay,
       watchSideNavTransitionDisabled
-    }"
+    }, `tabBar-${tabBarPosition}`]"
     :style="appStyle"
   >
     <TabBar
@@ -361,6 +365,11 @@ import { initializePlatformInfo } from './helpers/platform'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getTabAccentColor } from './constants/tabColors'
 import { getThumbnailListStyles } from './constants/thumbnailSize'
+import {
+  getNextTabBarPosition,
+  isVerticalTabBarPosition,
+  normalizeTabBarPosition
+} from './constants/tabBarPosition'
 import { getLastUsedVersion, setLastUsedVersion } from './helpers/lastUsedVersion'
 import { invalidateAllYtDlpPlaybackSources } from './helpers/player/ytDlpPlayback'
 import { getTabNavigationService } from './tabs/TabNavigationService'
@@ -397,8 +406,10 @@ const isSideNavOpen = computed(() => store.getters.getIsSideNavOpen)
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideLabelsSideBar = computed(() => store.getters.getHideLabelsSideBar)
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const useVerticalTabBar = computed(() => isElectron && store.getters.getUseVerticalTabBar)
+const tabBarPosition = computed(() => isElectron
+  ? normalizeTabBarPosition(store.getters.getTabBarPosition)
+  : 'top')
+const useVerticalTabBar = computed(() => isElectron && isVerticalTabBarPosition(tabBarPosition.value))
 
 const appStyle = computed(() => {
   if (!useVerticalTabBar.value) {
@@ -1959,7 +1970,7 @@ function handleKeyboardShortcuts(event) {
     // F1: Toggle between horizontal and vertical tabs
     if (matchesKeyboardShortcut(event, shortcuts.TOGGLE_TAB_ORIENTATION) && !isTypingTarget(event.target)) {
       event.preventDefault()
-      toggleTabOrientation()
+      cycleTabLayout()
       return
     }
 
@@ -2019,14 +2030,14 @@ function handleKeyboardShortcuts(event) {
 
 /**
  * The setting is only committed to the store once it has been persisted, so
- * consecutive presses are queued to keep every one of them from negating the
- * same stale value.
+ * consecutive presses are queued to keep every one of them from advancing
+ * from the same stale value.
  */
-let pendingTabOrientationUpdate = Promise.resolve()
+let pendingTabLayoutUpdate = Promise.resolve()
 
-function toggleTabOrientation() {
-  pendingTabOrientationUpdate = pendingTabOrientationUpdate.then(() =>
-    store.dispatch('updateUseVerticalTabBar', !useVerticalTabBar.value)
+function cycleTabLayout() {
+  pendingTabLayoutUpdate = pendingTabLayoutUpdate.then(() =>
+    store.dispatch('updateTabBarPosition', getNextTabBarPosition(tabBarPosition.value))
   )
 }
 

@@ -963,7 +963,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   // firing a window resize, so re-dock explicitly (after the DOM updates, so the
   // rail's new bounds are measurable).
   watch(
-    () => [store.getters.getUseVerticalTabBar, store.getters.getVerticalTabBarWidth],
+    () => [store.getters.getTabBarPosition, store.getters.getVerticalTabBarWidth],
     () => { nextTick(resnapScrollMiniPlayerToEdge) }
   )
 

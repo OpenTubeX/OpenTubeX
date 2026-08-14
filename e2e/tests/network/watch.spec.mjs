@@ -632,7 +632,7 @@ test.describe('watch page', () => {
 
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('setUseVerticalTabBar', true)
+      store.commit('setTabBarPosition', 'left')
       store.commit('setVerticalTabBarWidth', 180)
     })
     await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
@@ -676,7 +676,7 @@ test.describe('watch page', () => {
 
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('setUseVerticalTabBar', false)
+      store.commit('setTabBarPosition', 'top')
     })
     await expect(page.locator('.app')).not.toHaveClass(/verticalTabs/)
     await expect.poll(async () => {

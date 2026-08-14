@@ -1146,7 +1146,7 @@ test.describe('list video actions', () => {
     await goTo(page, 'history')
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('setUseVerticalTabBar', true)
+      store.commit('setTabBarPosition', 'left')
     })
 
     const video = page.locator('.ft-list-video').first()

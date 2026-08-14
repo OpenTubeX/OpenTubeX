@@ -40,3 +40,18 @@ test('prefers an explicit live chat replay visibility choice', () => {
     hideLiveChatReplay: false,
   })
 })
+
+test('migrates the legacy vertical tab bar preference to the left layout', () => {
+  assert.deepEqual(migrateLegacySettings({ useVerticalTabBar: true }), {
+    tabBarPosition: 'left',
+  })
+})
+
+test('prefers an explicit tab bar position over the legacy preference', () => {
+  assert.deepEqual(migrateLegacySettings({
+    useVerticalTabBar: true,
+    tabBarPosition: 'right',
+  }), {
+    tabBarPosition: 'right',
+  })
+})

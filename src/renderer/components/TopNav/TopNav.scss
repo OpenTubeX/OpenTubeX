@@ -52,8 +52,8 @@
   }
 }
 
-/* Adjust top position when tab bar is present */
-.app:has(.tabBar) .topNav {
+/* Only the top tab bar sits above the navigation. */
+.app.topTabs .topNav {
   inset-block-start: 32px;
 
   @media only screen and (width <= 680px) {
@@ -66,10 +66,24 @@
   inset-block-start: 0;
 
   @media only screen and (width <= 680px) {
-    inset-inline-start: var(--vertical-tab-bar-width, 220px);
     inline-size: calc(100% - var(--vertical-tab-bar-width, 220px));
   }
 }
+
+/* These settings name physical window edges, independent of text direction. */
+/* stylelint-disable liberty/use-logical-spec */
+@media only screen and (width <= 680px) {
+  .app.verticalTabsLeft .topNav {
+    left: var(--vertical-tab-bar-width, 220px);
+    right: 0;
+  }
+
+  .app.verticalTabsRight .topNav {
+    left: 0;
+    right: var(--vertical-tab-bar-width, 220px);
+  }
+}
+/* stylelint-enable liberty/use-logical-spec */
 
 @media only screen and (width <= 680px) {
   /* Beat .navButton { display: inline-flex } from the icon-pack styles. */
@@ -205,8 +219,7 @@
     }
   }
 
-  .navNewWindowButton,
-  .navTabLayoutButton {
+  .navNewWindowButton {
     @media only screen and (width <= 680px) {
       display: none;
     }
@@ -303,7 +316,7 @@
 
 /* The fixed mobile search bar is positioned against the viewport, so it needs
    the same vertical/horizontal offsets as the top nav when a tab bar is present. */
-.app:has(.tabBar) .middle .searchContainer {
+.app.topTabs .middle .searchContainer {
   @media only screen and (width <= 680px) {
     inset-block-start: 92px;
   }
@@ -312,6 +325,19 @@
 .app.verticalTabs .middle .searchContainer {
   @media only screen and (width <= 680px) {
     inset-block-start: 60px;
-    inset-inline-start: var(--vertical-tab-bar-width, 220px);
   }
 }
+
+/* stylelint-disable liberty/use-logical-spec */
+@media only screen and (width <= 680px) {
+  .app.verticalTabsLeft .middle .searchContainer {
+    left: var(--vertical-tab-bar-width, 220px);
+    right: 0;
+  }
+
+  .app.verticalTabsRight .middle .searchContainer {
+    left: 0;
+    right: var(--vertical-tab-bar-width, 220px);
+  }
+}
+/* stylelint-enable liberty/use-logical-spec */

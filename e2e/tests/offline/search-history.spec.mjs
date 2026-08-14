@@ -209,7 +209,7 @@ test.describe('search suggestion remove button layout', () => {
     // stays open.
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('setUseVerticalTabBar', true)
+      store.commit('setTabBarPosition', 'left')
       store.commit('setVerticalTabBarWidth', 300)
     })
     await expect(page.locator('.app')).toHaveClass(/verticalTabs/)

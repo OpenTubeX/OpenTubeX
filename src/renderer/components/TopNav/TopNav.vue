@@ -66,18 +66,6 @@
             :icon="['fas', 'clone']"
           />
         </button>
-        <button
-          v-if="isElectron"
-          class="navTabLayoutButton navButton"
-          :aria-label="tabLayoutText"
-          :title="tabLayoutText"
-          @click="toggleVerticalTabBar"
-        >
-          <FtIcon
-            class="navIcon"
-            :icon="tabLayoutIcon"
-          />
-        </button>
         <RouterLink
           v-if="!hideHeaderLogo"
           class="logo"
@@ -342,22 +330,6 @@ function toggleDownloadsWindow() {
 
 function restoreSettingsWindow() {
   store.dispatch('restoreSettingsWindow')
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const useVerticalTabBar = computed(() => store.getters.getUseVerticalTabBar)
-
-const tabLayoutText = computed(() => {
-  return useVerticalTabBar.value ? t('Use Horizontal Tabs') : t('Use Vertical Tabs')
-})
-
-// Show the layout the button switches to
-const tabLayoutIcon = computed(() => {
-  return useVerticalTabBar.value ? ['fac', 'horizontal-tabs'] : ['fac', 'vertical-tabs']
-})
-
-function toggleVerticalTabBar() {
-  store.dispatch('updateUseVerticalTabBar', !useVerticalTabBar.value)
 }
 
 function createNewWindow() {

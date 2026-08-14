@@ -22,7 +22,7 @@ async function setWindowWidth (app, width) {
 async function enableVerticalTabBar (page, width) {
   await page.evaluate((tabBarWidth) => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    store.commit('setUseVerticalTabBar', true)
+    store.commit('setTabBarPosition', 'left')
     store.commit('setVerticalTabBarWidth', tabBarWidth)
   }, width)
   await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
@@ -39,6 +39,36 @@ async function expectAdjacent (left, right) {
   expect(Math.abs(leftBox.y - rightBox.y)).toBeLessThan(1)
   expect(rightBox.x - leftBox.x - leftBox.width).toBeGreaterThanOrEqual(0)
   expect(rightBox.x - leftBox.x - leftBox.width).toBeLessThanOrEqual(12)
+}
+
+async function getTabEdgeBorderCoverage (page, tab, edge, inset = 0) {
+  const [screenshot, borderColor] = await Promise.all([
+    tab.screenshot(),
+    tab.evaluate((element, targetEdge) => {
+      const style = getComputedStyle(element)
+      return targetEdge === 'top' ? style.borderTopColor : style.borderBottomColor
+    }, edge)
+  ])
+
+  return page.evaluate(async ({ base64, borderColor, edge, inset }) => {
+    const bytes = Uint8Array.from(atob(base64), character => character.charCodeAt(0))
+    const bitmap = await createImageBitmap(new Blob([bytes], { type: 'image/png' }))
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height)
+    const context = canvas.getContext('2d')
+    context.drawImage(bitmap, 0, 0)
+
+    const target = borderColor.match(/\d+/g).slice(0, 3).map(Number)
+    const row = edge === 'top' ? inset : bitmap.height - 1 - inset
+    const pixels = context.getImageData(0, row, bitmap.width, 1).data
+    let matchingPixels = 0
+    for (let offset = 0; offset < pixels.length; offset += 4) {
+      if (target.every((channel, index) => Math.abs(channel - pixels[offset + index]) <= 8)) {
+        matchingPixels++
+      }
+    }
+
+    return matchingPixels / bitmap.width
+  }, { base64: screenshot.toString('base64'), borderColor, edge, inset })
 }
 
 test.describe('distraction and appearance settings', () => {
@@ -80,6 +110,66 @@ test.describe('default appearance', () => {
     await expect(page.locator('.topNav .profileTrigger')).toBeVisible()
     await expect(page.locator('body')).toHaveClass(/(?:light|dark)/)
     await attachScreenshot('default appearance')
+  })
+
+  test('selects every tab layout from Theme settings instead of the header', async ({ page, attachScreenshot }) => {
+    await expect(page.locator('.navTabLayoutButton')).toHaveCount(0)
+    const themeSection = await goToSettingsSection(page, 'theme')
+    const layout = themeSection.getByRole('combobox', { name: 'Tab Layout' })
+    await expect(layout).toHaveText('Horizontal at top')
+    for (const [label, className] of [
+      ['Horizontal at bottom', 'position-bottom'],
+      ['Vertical on left', 'position-left'],
+      ['Vertical on right', 'position-right'],
+      ['Horizontal at top', 'position-top']
+    ]) {
+      await layout.click()
+      await page.locator(`#${await layout.getAttribute('aria-controls')}`)
+        .getByRole('option', { name: label, exact: true }).click()
+      const tabBar = page.locator(`.tabBar.${className}`)
+      await expect(tabBar).toBeVisible()
+      await expect(layout).toHaveText(label)
+
+      if (className === 'position-bottom' || className === 'position-top') {
+        const activeTab = tabBar.locator('.tab.active')
+        const insets = await tabBar.evaluate((element) => {
+          const barBounds = element.getBoundingClientRect()
+          const tab = element.querySelector('.tab.active')
+          const tabBounds = tab.getBoundingClientRect()
+          return {
+            bottom: barBounds.bottom - tabBounds.bottom,
+            bottomBorder: getComputedStyle(tab).borderBottomWidth,
+            top: tabBounds.top - barBounds.top,
+            topBorder: getComputedStyle(tab).borderTopWidth,
+          }
+        })
+
+        if (className === 'position-bottom') {
+          expect(insets).toEqual({
+            bottom: 4,
+            bottomBorder: '1px',
+            top: 0,
+            topBorder: '0px',
+          })
+          const clipClearance = await activeTab.evaluate((element) => {
+            return element.parentElement.getBoundingClientRect().bottom -
+              element.getBoundingClientRect().bottom
+          })
+          expect(clipClearance).toBeGreaterThanOrEqual(1)
+          expect(await getTabEdgeBorderCoverage(page, activeTab, 'bottom')).toBeGreaterThan(0.7)
+          await attachScreenshot('horizontal tabs at bottom with safe inset')
+        } else {
+          expect(insets).toEqual({
+            bottom: 0,
+            bottomBorder: '0px',
+            top: 2,
+            topBorder: '1px',
+          })
+          expect(await getTabEdgeBorderCoverage(page, activeTab, 'top')).toBeGreaterThan(0.7)
+          await attachScreenshot('horizontal tabs at top')
+        }
+      }
+    }
   })
 
   test('maps system light and dark modes to chosen themes', async ({ app, page }) => {
@@ -667,33 +757,26 @@ test.describe('top nav beside the vertical tab bar', () => {
   })
 })
 
-test.describe('tab orientation shortcut', () => {
-  test('F1 switches between horizontal and vertical tabs', async ({ page, attachScreenshot }) => {
+test.describe('tab layout shortcut', () => {
+  test('F1 cycles through every tab layout', async ({ page, attachScreenshot }) => {
     const app = page.locator('.app')
-    await expect(app).not.toHaveClass(/verticalTabs/)
-
-    await page.keyboard.press('F1')
-    await expect(app).toHaveClass(/verticalTabs/)
-    await expect.poll(async () => {
-      return page.locator('.tab.vertical.active').evaluate((tab) => {
-        const tabEnd = tab.getBoundingClientRect().right
-        const viewportEnd = tab.parentElement.getBoundingClientRect().right
-        return viewportEnd - tabEnd
-      })
-    }).toBeGreaterThanOrEqual(1)
-    await attachScreenshot('vertical tabs')
-
-    await page.keyboard.press('F1')
-    await expect(app).not.toHaveClass(/verticalTabs/)
-    await attachScreenshot('horizontal tabs')
+    for (const className of [
+      'tabBar-left',
+      'tabBar-bottom',
+      'tabBar-right',
+      'tabBar-top'
+    ]) {
+      await page.keyboard.press('F1')
+      await expect(app).toHaveClass(new RegExp(`(?:^|\\s)${className}(?:\\s|$)`))
+    }
+    await attachScreenshot('tab layouts cycled with F1')
   })
 
   test('presses in quick succession are not swallowed by the pending write', async ({ app: appHandle, page }) => {
     const app = page.locator('.app')
 
     // The setting is only committed once persisted, so two presses that beat
-    // the write have to queue up instead of both negating the same value —
-    // otherwise they collapse into a single toggle and the layout flips.
+    // the write have to queue up instead of both advancing from the same value.
     await page.evaluate(() => {
       for (let i = 0; i < 2; i++) {
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'F1', code: 'F1', bubbles: true }))
@@ -705,13 +788,13 @@ test.describe('tab orientation shortcut', () => {
       return Object.fromEntries(contents.trim().split('\n')
         .map(line => JSON.parse(line))
         .map(record => [record._id, record.value]))
-        .useVerticalTabBar
-    }).toBe(false)
-    await expect(app).not.toHaveClass(/verticalTabs/)
+        .tabBarPosition
+    }).toBe('bottom')
+    await expect(app).toHaveClass(/tabBar-bottom/)
   })
 })
 
-test.describe('tab orientation shortcut rebound to a printable key', () => {
+test.describe('tab layout shortcut rebound to a printable key', () => {
   test.use({
     seed: {
       settings: {
@@ -728,12 +811,12 @@ test.describe('tab orientation shortcut rebound to a printable key', () => {
     await searchInput.type('vv')
 
     await expect(searchInput).toHaveValue('vv')
-    await expect(app).not.toHaveClass(/verticalTabs/)
+    await expect(app).toHaveClass(/tabBar-top/)
 
     // Outside a text field the rebound key still works.
     await page.locator('.app').click()
     await page.keyboard.press('v')
-    await expect(app).toHaveClass(/verticalTabs/)
+    await expect(app).toHaveClass(/tabBar-left/)
   })
 })
 

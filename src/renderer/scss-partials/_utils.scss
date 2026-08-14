@@ -20,8 +20,8 @@
    content, so it doesn't add to the top chrome height. */
 @mixin has-tab-bar {
   @at-root {
-    .app:has(.tabBar):not(.verticalTabs) &,
-    .app:has(.tabBar):not(.verticalTabs)#{&} {
+    .app.topTabs &,
+    .app.topTabs#{&} {
       @content;
     }
   }
