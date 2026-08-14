@@ -53,6 +53,18 @@ const props = defineProps({
     type: String,
     default: ''
   },
+  settingKeys: {
+    type: Array,
+    default: () => []
+  },
+  enableLabel: {
+    type: String,
+    default: ''
+  },
+  disableLabel: {
+    type: String,
+    default: ''
+  },
   isChanged: {
     type: Boolean,
     default: null
@@ -67,16 +79,23 @@ const emit = defineEmits(['reset'])
 
 const { t } = useI18n()
 
+const syncableSettingKeys = computed(() => {
+  const keys = props.settingKeys.length > 0 ? props.settingKeys : [props.settingKey]
+  return keys.filter(isSettingSyncable)
+})
+
 const canConfigureSync = computed(() => {
   const settings = store.state.settings
   return settings.syncServerEnabled &&
     settings.syncServerToken !== '' &&
     settings.syncServerSyncSettings &&
-    isSettingSyncable(props.settingKey)
+    syncableSettingKeys.value.length > 0
 })
 
 const isSynced = computed(() => {
-  return isSettingSyncEnabled(store.state.settings, props.settingKey)
+  return syncableSettingKeys.value.some(settingKey => (
+    isSettingSyncEnabled(store.state.settings, settingKey)
+  ))
 })
 
 const canShowReset = computed(() => {
@@ -94,8 +113,8 @@ const showReset = computed(() => {
 })
 
 const label = computed(() => isSynced.value
-  ? t('Settings.Sync Settings.Disable Setting Sync')
-  : t('Settings.Sync Settings.Enable Setting Sync'))
+  ? props.disableLabel || t('Settings.Sync Settings.Disable Setting Sync')
+  : props.enableLabel || t('Settings.Sync Settings.Enable Setting Sync'))
 
 const resetLabel = computed(() => t('Settings.Reset Setting to Default'))
 
@@ -128,11 +147,13 @@ async function toggleSync() {
   const excluded = Array.isArray(store.state.settings.syncServerSettingsExcluded)
     ? store.state.settings.syncServerSettingsExcluded
     : []
-  const next = isSynced.value
-    ? [...excluded, props.settingKey]
-    : excluded.filter(settingKey => settingKey !== props.settingKey)
+  const settingKeys = new Set(syncableSettingKeys.value)
+  const enableSync = !isSynced.value
+  const next = !enableSync
+    ? Array.from(new Set([...excluded, ...settingKeys]))
+    : excluded.filter(settingKey => !settingKeys.has(settingKey))
   await store.dispatch('updateSyncServerSettingsExcluded', next)
-  if (!next.includes(props.settingKey)) {
+  if (enableSync) {
     store.dispatch('scheduleSyncServer', 'settings')
   }
 }

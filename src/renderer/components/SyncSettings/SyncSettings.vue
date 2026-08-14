@@ -165,13 +165,6 @@
             @change="store.dispatch('updateSyncServerSyncHistory', $event)"
           />
           <FtToggleSwitch
-            :label="t('Settings.Sync Settings.Channel Playback Speeds')"
-            :default-value="syncPlaybackSpeedsEnabled"
-            :disabled="busy || playbackSpeedsSupported === false"
-            compact
-            @change="store.dispatch('updateSyncServerSyncPlaybackSpeeds', $event)"
-          />
-          <FtToggleSwitch
             :label="t('Settings.Sync Settings.Profiles')"
             :default-value="syncProfilesEnabled"
             :disabled="busy"
@@ -207,19 +200,7 @@
           {{ t('Settings.Sync Settings.History not supported') }}
         </p>
         <p
-          v-if="playbackSpeedsSupported === false && settingsSupported"
-          class="compatibilityWarning"
-        >
-          {{ t('Settings.Sync Settings.Playback speeds not supported') }}
-        </p>
-        <p
-          v-else-if="playbackSpeedsSupported === false"
-          class="compatibilityWarning"
-        >
-          {{ t('Settings.Sync Settings.Playback speeds and settings not supported') }}
-        </p>
-        <p
-          v-else-if="settingsSupported === false"
+          v-if="settingsSupported === false"
           class="compatibilityWarning"
         >
           {{ t('Settings.Sync Settings.Settings not supported') }}
@@ -405,7 +386,6 @@ const syncProgressLabel = computed(() => {
     subscriptions: t('Settings.Sync Settings.Syncing subscriptions'),
     playlists: t('Settings.Sync Settings.Syncing playlists'),
     history: t('Settings.Sync Settings.Syncing history'),
-    playbackSpeeds: t('Settings.Sync Settings.Syncing playback speeds'),
     profiles: t('Settings.Sync Settings.Syncing profiles'),
     sessions: t('Settings.Sync Settings.Syncing open tabs'),
     settings: t('Settings.Sync Settings.Syncing settings'),
@@ -421,14 +401,10 @@ const autoSync = computed(() => store.getters.getSyncServerAutoSync)
 const syncSubscriptionsEnabled = computed(() => store.getters.getSyncServerSyncSubscriptions)
 const syncPlaylistsEnabled = computed(() => store.getters.getSyncServerSyncPlaylists)
 const syncHistoryEnabled = computed(() => store.getters.getSyncServerSyncHistory)
-const syncPlaybackSpeedsEnabled = computed(() => store.getters.getSyncServerSyncPlaybackSpeeds)
 const syncProfilesEnabled = computed(() => store.getters.getSyncServerSyncProfiles)
 const syncSessionsEnabled = computed(() => store.getters.getSyncServerSyncSessions)
 const syncSettingsEnabled = computed(() => store.getters.getSyncServerSyncSettings)
 const historySupported = computed(() => store.getters.getSyncServerHistorySupported)
-const playbackSpeedsSupported = computed(
-  () => store.getters.getSyncServerPlaybackSpeedsSupported
-)
 const privacyMode = computed(() => store.getters.getSyncServerPrivacyMode)
 const settingsSupported = computed(() => privacyMode.value === 'enhanced')
 const sessionsSupported = computed(() => (

@@ -6,7 +6,7 @@ This document describes the data exposed by OpenTubeX itself. It assumes that yo
 
 ## Data stored by OpenTubeX
 
-By default, subscriptions, playlists, settings, history, profiles, open tabs and channel playback speeds remain on your device. Enabling synchronization sends copies of the selected categories to the configured sync server:
+By default, subscriptions, playlists, settings (including saved channel settings), history, profiles and open tabs remain on your device. Enabling synchronization sends copies of the selected categories to the configured sync server:
 
 - Enhanced-privacy sync encrypts the selected data on your device before upload. The server still receives account and traffic metadata.
 - A legacy sync server does not support this encryption. Synced data is visible to that server's operator.

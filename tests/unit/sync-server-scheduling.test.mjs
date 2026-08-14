@@ -14,7 +14,6 @@ function settings (overrides = {}) {
     syncServerSyncSubscriptions: false,
     syncServerSyncPlaylists: false,
     syncServerSyncHistory: false,
-    syncServerSyncPlaybackSpeeds: false,
     syncServerSyncProfiles: false,
     syncServerSyncSessions: false,
     syncServerSyncSettings: false,
@@ -25,7 +24,7 @@ function settings (overrides = {}) {
 test('maps local actions to their affected sync collection', () => {
   assert.equal(SYNC_ACTION_REASONS.get('updateWatchProgress'), 'history')
   assert.equal(SYNC_ACTION_REASONS.get('addVideo'), 'playlists')
-  assert.equal(SYNC_ACTION_REASONS.get('updateChannelPlaybackSpeeds'), 'playbackSpeeds')
+  assert.equal(SYNC_ACTION_REASONS.has('updateChannelPlaybackSpeeds'), false)
   assert.equal(SYNC_ACTION_REASONS.get('updateCustomThemes'), 'settings')
   assert.equal(SYNC_ACTION_REASONS.get('createProfile'), 'profiles')
   assert.equal(SYNC_ACTION_REASONS.get('addChannelToProfiles'), 'profilesOrSubscriptions')

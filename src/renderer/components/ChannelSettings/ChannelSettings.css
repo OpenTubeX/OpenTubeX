@@ -16,6 +16,17 @@
   margin-inline-start: 1em;
 }
 
+.manageButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.manageButton :deep(.syncedSettingIndicator) {
+  font-size: 0.8em;
+  margin-inline-start: 0;
+}
+
 .channelSearch {
   margin-block-end: 1em;
 }

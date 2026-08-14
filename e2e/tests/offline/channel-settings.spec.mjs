@@ -8,7 +8,13 @@ test.use({
     settings: {
       channelPlaybackSpeeds: JSON.stringify({
         [CHANNEL_ID]: 1.5
-      })
+      }),
+      syncServerSettingsExcluded: ['channelPlaybackSpeeds'],
+      syncServerAutoSync: false,
+      syncServerEnabled: true,
+      syncServerPrivacyMode: 'enhanced',
+      syncServerSyncSettings: true,
+      syncServerToken: 'e2e-sync-token'
     },
     profiles: [
       {
@@ -25,6 +31,49 @@ test.use({
 })
 
 test.describe('channel settings', () => {
+  test('configures saved channel setting sync beside the manager and in its breadcrumb', async ({ page }) => {
+    await goToSettingsSection(page, 'channel')
+
+    const manageButton = page.getByRole('button', { name: 'Manage Saved Channels (1)' })
+    const manageControls = manageButton.locator('..')
+    const disableSync = manageControls.getByRole('button', {
+      name: 'Stop syncing saved channel settings'
+    })
+    await expect(disableSync).toBeVisible()
+    await expect(manageButton.getByRole('button')).toHaveCount(0)
+
+    await manageButton.click()
+
+    const breadcrumb = page.locator('.settingsWindow .settingsBreadcrumb')
+    const breadcrumbSync = breadcrumb.getByRole('button', {
+      name: 'Stop syncing saved channel settings'
+    })
+    await expect(breadcrumbSync).toBeVisible()
+    await breadcrumbSync.click()
+
+    const channelSettingKeys = [
+      'channelPlaybackSpeeds',
+      'channelVideoQualities',
+      'channelSubtitlesStates',
+      'channelVolumes'
+    ]
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.state.settings.syncServerSettingsExcluded
+    })).toEqual(expect.arrayContaining(channelSettingKeys))
+
+    const enableSync = breadcrumb.getByRole('button', {
+      name: 'Sync saved channel settings'
+    })
+    await enableSync.click()
+    await expect.poll(() => page.evaluate(channelSettingKeys => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.state.settings.syncServerSettingsExcluded.filter(
+        settingKey => channelSettingKeys.includes(settingKey)
+      )
+    }, channelSettingKeys)).toEqual([])
+  })
+
   test('saved channels in the manager open their channel page', async ({ page }) => {
     await goToSettingsSection(page, 'channel')
 

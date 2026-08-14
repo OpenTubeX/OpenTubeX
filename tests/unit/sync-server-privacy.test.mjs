@@ -4,6 +4,7 @@ import test from 'node:test'
 import {
   decryptLegacySyncDocument,
   decryptSyncDocument,
+  migrateLegacyPlaybackSpeedsToSettings,
   preparePrivacyKey,
 } from '../../src/renderer/helpers/sync-server-privacy.js'
 
@@ -67,4 +68,40 @@ test('decrypts the original single-document encrypted sync format', async () => 
     () => decryptSyncDocument(payload, privacy.key),
     /corrupted sync data/
   )
+})
+
+test('moves legacy playback speeds into settings while preserving local values', () => {
+  const document = {
+    settings: [],
+    playbackSpeeds: [
+      { channel_id: 'remote', playback_speed: 1.25 },
+      { channel_id: 'shared', playback_speed: 1.5 },
+    ],
+  }
+
+  assert.equal(migrateLegacyPlaybackSpeedsToSettings(
+    document,
+    JSON.stringify({ local: 0.75, shared: 2 }),
+    123
+  ), true)
+  assert.deepEqual(document.settings, [{
+    key: 'channelPlaybackSpeeds',
+    value: JSON.stringify({ remote: 1.25, shared: 2, local: 0.75 }),
+    updatedAt: 123,
+  }])
+})
+
+test('keeps the current settings collection instead of legacy playback speeds', () => {
+  const current = {
+    key: 'channelPlaybackSpeeds',
+    value: JSON.stringify({ current: 1.75 }),
+    updatedAt: 456,
+  }
+  const document = {
+    settings: [current],
+    playbackSpeeds: [{ channel_id: 'legacy', playback_speed: 1.25 }],
+  }
+
+  assert.equal(migrateLegacyPlaybackSpeedsToSettings(document, '{}', 789), false)
+  assert.deepEqual(document.settings, [current])
 })

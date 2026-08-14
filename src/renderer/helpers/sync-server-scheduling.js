@@ -21,7 +21,6 @@ export const SYNC_ACTION_REASONS = new Map([
   ['removeVideo', 'playlists'],
   ['removeVideos', 'playlists'],
   ['updateHistory', 'history'],
-  ['updateChannelPlaybackSpeeds', 'playbackSpeeds'],
   ['updateCustomThemes', 'settings'],
   ['updatePlaylist', 'playlists'],
   ['updateProfile', 'profilesOrSubscriptions'],
@@ -52,7 +51,6 @@ export const SYNC_MUTATION_REASONS = new Map([
   ['removeFromHistoryCacheById', 'history'],
   ['removeMultipleFromHistoryCache', 'history'],
   ['updateRecordWatchProgressInHistoryCache', 'history'],
-  ['setChannelPlaybackSpeeds', 'playbackSpeeds'],
 ])
 
 export function isSyncReasonEnabled(settings, reason) {
@@ -63,8 +61,6 @@ export function isSyncReasonEnabled(settings, reason) {
       return settings.syncServerSyncPlaylists
     case 'history':
       return settings.syncServerSyncHistory
-    case 'playbackSpeeds':
-      return settings.syncServerSyncPlaybackSpeeds
     case 'profiles':
       return settings.syncServerSyncProfiles
     case 'profilesOrSubscriptions':
@@ -80,7 +76,6 @@ export function isSyncReasonEnabled(settings, reason) {
       return settings.syncServerSyncSubscriptions ||
         settings.syncServerSyncPlaylists ||
         settings.syncServerSyncHistory ||
-        settings.syncServerSyncPlaybackSpeeds ||
         settings.syncServerSyncProfiles ||
         (settings.syncServerPrivacyMode === 'enhanced' && (
           settings.syncServerSyncSessions || settings.syncServerSyncSettings

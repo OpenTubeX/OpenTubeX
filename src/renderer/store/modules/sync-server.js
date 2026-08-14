@@ -6,7 +6,6 @@ import {
   isExpiredSessionReauthentication,
   isSessionExpiredError,
   normalizeSyncServerUrl,
-  syncChannelPlaybackSpeeds,
   syncHistory,
   syncPlaylists,
   syncProfiles,
@@ -21,6 +20,7 @@ import {
   decryptSyncDocument,
   encryptSyncDocument,
   loadLegacySyncDocument,
+  migrateLegacyPlaybackSpeedsToSettings,
   preparePrivacyKey,
 } from '../../helpers/sync-server-privacy'
 import {
@@ -28,6 +28,7 @@ import {
   isRecentSync,
   isSyncReasonEnabled,
 } from '../../helpers/sync-server-scheduling'
+import { isSettingSyncEnabled } from './settings'
 
 const EVENT_SYNC_DEBOUNCE_MS = 1500
 const ENCRYPTED_SYNC_RETRIES = 3
@@ -71,7 +72,6 @@ const state = {
   syncServerError: '',
   syncServerLastResult: null,
   syncServerHistorySupported: null,
-  syncServerPlaybackSpeedsSupported: null,
   syncServerSessionExpired: false,
 }
 
@@ -81,7 +81,6 @@ const getters = {
   getSyncServerError: state => state.syncServerError,
   getSyncServerLastResult: state => state.syncServerLastResult,
   getSyncServerHistorySupported: state => state.syncServerHistorySupported,
-  getSyncServerPlaybackSpeedsSupported: state => state.syncServerPlaybackSpeedsSupported,
 }
 
 function parseSnapshot(value) {
@@ -117,7 +116,6 @@ async function runSync(context, { allowDataLoss = false } = {}) {
     ...(settings.syncServerSyncSubscriptions ? ['subscriptions'] : []),
     ...(settings.syncServerSyncPlaylists ? ['playlists'] : []),
     ...(settings.syncServerSyncHistory ? ['history'] : []),
-    ...(settings.syncServerSyncPlaybackSpeeds ? ['playbackSpeeds'] : []),
     ...(settings.syncServerSyncProfiles ? ['profiles'] : []),
     ...(process.env.IS_ELECTRON &&
       settings.syncServerPrivacyMode === 'enhanced' &&
@@ -192,22 +190,6 @@ async function runSync(context, { allowDataLoss = false } = {}) {
         }
         break
       }
-      case 'playbackSpeeds': {
-        const speeds = await syncChannelPlaybackSpeeds(
-          targetClient,
-          store,
-          previous.playbackSpeeds,
-          { allowDataLoss }
-        )
-        if (speeds !== null) {
-          commit('setSyncServerPlaybackSpeedsSupported', true)
-          next.playbackSpeeds = speeds
-          result.playbackSpeeds = Object.keys(speeds).length
-        } else {
-          commit('setSyncServerPlaybackSpeedsSupported', false)
-        }
-        break
-      }
       case 'profiles':
         {
           const profiles = await syncProfiles(
@@ -271,9 +253,15 @@ async function runSync(context, { allowDataLoss = false } = {}) {
         const uploadCollections = manifest.legacy_data || legacyEncrypted?.payload
           ? Array.from(new Set([...enabledCollections, ...LEGACY_ENCRYPTED_COLLECTIONS]))
           : enabledCollections
+        const hasLegacyPlaybackSpeeds = manifest.collections.some(
+          entry => entry.collection === 'playbackSpeeds'
+        )
+        const downloadCollections = hasLegacyPlaybackSpeeds
+          ? Array.from(new Set([...uploadCollections, 'playbackSpeeds']))
+          : uploadCollections
         const document = createEmptySyncDocument()
         const original = {}
-        const entries = await Promise.all(uploadCollections.map(async collection => {
+        const entries = await Promise.all(downloadCollections.map(async collection => {
           const response = await networkClient.getEncryptedSyncCollection(collection)
           const data = response.payload
             ? await decryptSyncDocument(response.payload, settings.syncServerPrivacyKey)
@@ -282,6 +270,13 @@ async function runSync(context, { allowDataLoss = false } = {}) {
           original[collection] = structuredClone(document[collection])
           return [collection, response]
         }))
+        if (settings.syncServerSyncSettings &&
+            isSettingSyncEnabled(settings, 'channelPlaybackSpeeds')) {
+          migrateLegacyPlaybackSpeedsToSettings(
+            document,
+            settings.channelPlaybackSpeeds
+          )
+        }
         return { document, original, remote: Object.fromEntries(entries), uploadCollections }
       })
       client = new EncryptedSyncAdapter(document)
@@ -512,7 +507,6 @@ const actions = {
     commit('setSyncServerError', '')
     commit('setSyncServerLastResult', null)
     commit('setSyncServerHistorySupported', null)
-    commit('setSyncServerPlaybackSpeedsSupported', null)
     commit('setSyncServerProgress', null)
     commit('setSyncServerStatus', 'idle')
     commit('setSyncServerSessionExpired', false)
@@ -725,9 +719,6 @@ const mutations = {
   },
   setSyncServerHistorySupported(state, supported) {
     state.syncServerHistorySupported = supported
-  },
-  setSyncServerPlaybackSpeedsSupported(state, supported) {
-    state.syncServerPlaybackSpeedsSupported = supported
   },
   setSyncServerSessionExpired(state, expired) {
     state.syncServerSessionExpired = expired
