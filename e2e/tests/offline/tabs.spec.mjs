@@ -147,7 +147,7 @@ test.describe('tab bar', () => {
     await expect(page.locator(sel.activeTab).locator('[data-icon="rss"]')).toBeVisible()
     expect(page.url()).toBe(routeBeforeOpening)
 
-    await page.locator('.topNav .downloadsButton').click()
+    await downloadsWindow.locator('.settingsCloseButton').click()
     await expect(downloadsWindow).toBeHidden()
     expect(page.url()).toBe(routeBeforeOpening)
 

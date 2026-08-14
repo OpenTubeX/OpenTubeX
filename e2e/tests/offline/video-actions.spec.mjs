@@ -556,7 +556,7 @@ test.describe('video downloads', () => {
       unlink(downloadedFile),
       unlink(downloadedAudioFile)
     ])
-    await page.locator('.topNav .downloadsButton').click()
+    await goTo(page, 'downloads')
     await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
     await expect(downloadRow).toContainText('Download unavailable')
     await expect(downloadRow).toContainText('The downloaded file is no longer available on the filesystem.')
@@ -734,7 +734,7 @@ test.describe('video downloads', () => {
       page.locator('.topNav .navNewWindowButton').click()
     ])
     await waitForAppReady(otherWindow)
-    await otherWindow.locator('.topNav .downloadsButton').click()
+    await goTo(otherWindow, 'downloads')
 
     await page.bringToFront()
     await goTo(page, 'history')
@@ -752,7 +752,7 @@ test.describe('video downloads', () => {
       otherWindow.locator('.topNav .navNewWindowButton').click()
     ])
     await waitForAppReady(lateWindow)
-    await lateWindow.locator('.topNav .downloadsButton').click()
+    await goTo(lateWindow, 'downloads')
     const hydratedDownload = lateWindow.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
     await expect(hydratedDownload).toContainText('0.0%')
 
