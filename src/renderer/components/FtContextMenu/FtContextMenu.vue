@@ -431,8 +431,15 @@ async function execute(item) {
 function localizedLabel(item) {
   if (!item.labelKey) return item.label
 
+  const parameters = item.labelParameters ?? {}
+
+  if (typeof parameters.count === 'number') {
+    // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
+    return t(item.labelKey, parameters, parameters.count)
+  }
+
   // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
-  return t(item.labelKey, item.labelParameters ?? {})
+  return t(item.labelKey, parameters)
 }
 
 function handleKeydown(event) {

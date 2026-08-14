@@ -166,10 +166,12 @@ function showInvalidEngineToast() {
 }
 
 function showEngineLimitToast() {
+  const count = MAX_CUSTOM_SEARCH_ENGINES
+
   showToast({
     message: t('Settings.Context Menu Search Settings.Engine Limit', {
-      count: MAX_CUSTOM_SEARCH_ENGINES
-    }),
+      count
+    }, count),
     icon: ['fas', 'circle-exclamation']
   })
 }

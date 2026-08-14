@@ -4,7 +4,12 @@ import test from 'node:test'
 
 import { load as loadYaml } from 'js-yaml'
 
-import { createPluralRules } from '../../src/renderer/i18n/plurals.js'
+import {
+  createPluralRules,
+  expandMultipleOnlyPluralMessages,
+  MULTIPLE_ONLY_PLURAL_PATHS,
+  selectPluralForm
+} from '../../src/renderer/i18n/plurals.js'
 
 const localeUrl = new URL('../../static/locales/en-US.yaml', import.meta.url)
 const sourceDirUrl = new URL('../../src/', import.meta.url)
@@ -99,13 +104,6 @@ function splitCallArguments(source, openingParenthesisIndex) {
 }
 
 const pluralPaths = collectPluralPaths(locale)
-// These messages only describe bulk actions, so English never needs a singular
-// form. Translated locales can still provide plural forms for categories such
-// as Polish "few" and "many".
-const translatedLocalePluralPaths = [
-  'Close Multiple Tabs Confirmation.Message',
-  'Close Multiple Tabs Confirmation.Close Tabs'
-]
 const sourceFiles = await collectSourceFiles(sourceDirUrl)
 
 test('plural messages declare a singular and a plural form', () => {
@@ -124,7 +122,7 @@ test('plural messages declare a singular and a plural form', () => {
 })
 
 test('plural messages are translated with a plural choice', async () => {
-  const pluralPathSet = new Set([...pluralPaths, ...translatedLocalePluralPaths])
+  const pluralPathSet = new Set([...pluralPaths, ...MULTIPLE_ONLY_PLURAL_PATHS])
   const callPattern = /\$?t\(\s*(['"])(.+?)\1/gs
 
   for (const file of sourceFiles) {
@@ -143,6 +141,46 @@ test('plural messages are translated with a plural choice', async () => {
       )
     }
   }
+})
+
+test('multiple-only messages can omit unreachable plural categories', () => {
+  const messages = {
+    'Close Multiple Tabs Confirmation': {
+      Message: 'few | many'
+    },
+    Global: {
+      Counts: {
+        'Comment Count': 'one | other'
+      }
+    }
+  }
+
+  expandMultipleOnlyPluralMessages('pl', messages)
+
+  assert.equal(messages['Close Multiple Tabs Confirmation'].Message, 'few | few | many')
+  assert.equal(messages.Global.Counts['Comment Count'], 'one | other')
+  assert.equal(selectPluralForm('pl', messages['Close Multiple Tabs Confirmation'].Message, 2), 'few')
+  assert.equal(selectPluralForm('pl', messages['Close Multiple Tabs Confirmation'].Message, 5), 'many')
+})
+
+test('multiple-only expansion respects categories reachable above one', () => {
+  const englishMessages = {
+    'Close Multiple Tabs Confirmation': {
+      Message: 'multiple'
+    }
+  }
+  const russianMessages = {
+    'Close Multiple Tabs Confirmation': {
+      Message: 'one | few | many'
+    }
+  }
+
+  expandMultipleOnlyPluralMessages('en-US', englishMessages)
+  expandMultipleOnlyPluralMessages('ru', russianMessages)
+
+  assert.equal(englishMessages['Close Multiple Tabs Confirmation'].Message, 'multiple | multiple')
+  assert.equal(russianMessages['Close Multiple Tabs Confirmation'].Message, 'one | few | many')
+  assert.equal(selectPluralForm('ru', russianMessages['Close Multiple Tabs Confirmation'].Message, 21), 'one')
 })
 
 /** vue-i18n's built-in rule, which our rules fall back to. */

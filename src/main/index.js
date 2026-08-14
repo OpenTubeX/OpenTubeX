@@ -43,6 +43,7 @@ import { handleOpenInExternalPlayer } from './externalPlayer'
 import { handleYtDlpCancelDownload, handleYtDlpClearDownloads, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetPlaybackInfo, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpRemoveDownload, shutdownYtDlpDownloads } from './ytDlp'
 import { handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
+import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
 import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isOpenTubeXUrl } from './utils'
 import { TabManager, setupTabsIPC } from './tabs/TabManager'
 import { clearAllTabSessions, loadAllTabSessions } from './tabs/TabSessionStore'
@@ -378,7 +379,7 @@ function runApp() {
   }
 
   /**
-   * @returns {Promise<(key: string) => string>}
+   * @returns {Promise<(key: string, parameters?: Record<string, string | number>, pluralChoice?: number) => string>}
    */
   async function createMainTranslator() {
     const fallbackLocale = 'en-US'
@@ -396,7 +397,7 @@ function runApp() {
       try {
         messagesByLocale.push({
           locale,
-          messages: await loadLocaleMessages(locale)
+          messages: expandMultipleOnlyPluralMessages(locale, await loadLocaleMessages(locale))
         })
       } catch (error) {
         if (locale === fallbackLocale) {
@@ -405,11 +406,20 @@ function runApp() {
       }
     }
 
-    return (key) => {
-      for (const { messages } of messagesByLocale) {
+    return (key, parameters = {}, pluralChoice) => {
+      for (const { locale, messages } of messagesByLocale) {
         const message = getLocaleMessage(key, messages)
         if (message) {
-          return message
+          const selectedMessage = pluralChoice == null
+            ? message
+            : selectPluralForm(locale, message, pluralChoice)
+
+          if (selectedMessage == null) continue
+
+          return Object.entries(parameters).reduce(
+            (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+            selectedMessage
+          )
         }
       }
 
@@ -488,7 +498,7 @@ function runApp() {
       const { response } = await dialog.showMessageBox(browserWindow, {
         type: 'question',
         title: t('Close Window Confirmation.Title'),
-        message: t('Close Window Confirmation.Message').replaceAll('{count}', String(count)),
+        message: t('Close Window Confirmation.Message', { count }, count),
         detail: t('Confirmations.Settings Hint'),
         buttons: [
           t('Close Window Confirmation.Close Window'),

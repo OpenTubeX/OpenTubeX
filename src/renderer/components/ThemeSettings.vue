@@ -610,7 +610,7 @@ async function loadTabIcons() {
     } else if (failed > 0) {
       showToast(t('Settings.Theme Settings.Loaded Tab Icons With Failures', { loaded, failed }))
     } else {
-      showToast(t('Settings.Theme Settings.Loaded Tab Icons', { count: loaded }))
+      showToast(t('Settings.Theme Settings.Loaded Tab Icons', { count: loaded }, loaded))
     }
   } finally {
     loadingTabIcons.value = false
