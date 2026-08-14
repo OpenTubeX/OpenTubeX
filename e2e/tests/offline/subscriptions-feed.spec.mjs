@@ -303,6 +303,8 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
     const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
     await expect(upcomingPremiere.locator('.videoDuration')).toHaveText('Upcoming')
     await expect(upcomingPremiere.getByRole('button', { name: 'Notify me' })).toBeVisible()
+    await upcomingPremiere.evaluate(element => { element.dataset.reuseMarker = 'upcoming-premiere' })
+    const reusedCard = page.locator('[data-reuse-marker="upcoming-premiere"]')
 
     const updateCachedPremiere = async (updates) => {
       await page.evaluate(async ({ channelId, updates }) => {
@@ -330,6 +332,7 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
       lengthSeconds: ''
     })
 
+    await expect(reusedCard).toBeVisible()
     await expect(upcomingPremiere.locator('.videoDuration')).toHaveText('Premiere')
     await expect(upcomingPremiere.getByRole('button', { name: /Notify me|Notification on/ })).toHaveCount(0)
 
@@ -339,6 +342,7 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
       lengthSeconds: 702
     })
 
+    await expect(reusedCard).toBeVisible()
     await expect(upcomingPremiere.locator('.videoDuration')).toHaveText('11:42')
   })
 

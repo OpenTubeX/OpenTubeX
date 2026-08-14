@@ -1582,7 +1582,9 @@ function handleExtraThumbnailAction() {
 }
 
 function parseVideoData() {
+  uploadedTime.value = ''
   uploadedTimeIsRelative.value = false
+  published.value = undefined
   id.value = props.data.videoId
   title.value = props.data.title
 
