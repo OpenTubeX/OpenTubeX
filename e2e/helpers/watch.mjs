@@ -62,14 +62,16 @@ async function fixture(dir, name) {
  * @param {boolean} [options.playable] serve the demo video instead of an error
  * @param {boolean} [options.captionTranslations] include a translatable caption and target languages
  * @param {string} [options.captionCueSettings] append WebVTT settings to the test caption cue
+ * @param {string[]|null} [options.captionVideoIds] limit captions to these video IDs
  */
 export async function mockWatchPage(app, page, {
   playable = false,
   captionTranslations = false,
-  captionCueSettings = ''
+  captionCueSettings = '',
+  captionVideoIds = null
 } = {}) {
   const counters = new Map()
-  const includeCaptions = captionTranslations || captionCueSettings !== ''
+  const includeCaptions = captionTranslations || captionCueSettings !== '' || captionVideoIds !== null
 
   await stubPoToken(app.electronApp)
 
@@ -125,7 +127,7 @@ export async function mockWatchPage(app, page, {
       const videoId = JSON.parse(request.postData() ?? '{}').videoId ?? 'jNQXAC9IVRw'
       const json = demoPlayerResponse(videoId)
 
-      if (includeCaptions) {
+      if (includeCaptions && (captionVideoIds === null || captionVideoIds.includes(videoId))) {
         const displayNames = new Intl.DisplayNames(['en'], { type: 'language' })
         const languageCodes = [
           'af', 'sq', 'am', 'ar', 'hy', 'as', 'ay', 'az', 'eu', 'be',
