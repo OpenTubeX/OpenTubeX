@@ -105,6 +105,10 @@ E2E_USE_FIXTURES=1 pnpm run test:e2e:network
 - **Nightly** → full offline and network suites.
 - **Manual dispatch** → all suites by default, or an individual suite.
 
+The selected tests are split across four CI jobs. Each job still uses one
+Playwright worker and its own X server, avoiding interference between Electron
+windows while substantially reducing the suite's wall-clock time.
+
 Pull requests without changed or affected E2E tests pass without running tests.
 Network tests use the fixture fallback on retry.
 
