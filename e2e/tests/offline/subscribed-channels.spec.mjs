@@ -43,6 +43,23 @@ test.describe('subscribed channels', () => {
     await expect(page.locator('.channel', { hasText: 'Alpha Channel' })).toBeHidden()
   })
 
+  test('uses the default avatar when a channel thumbnail fails to load', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+
+    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.dispatch('updateSubscriptionDetails', {
+        channelId: 'UCaaaaaaaaaaaaaaaaaaaaaa',
+        channelName: 'Alpha Channel',
+        channelThumbnailUrl: 'data:image/png;base64,invalid'
+      })
+    })
+
+    await expect(alpha.locator('img.channelThumbnail')).toHaveCount(0)
+    await expect(alpha.locator('.channelThumbnail:not(img)')).toBeVisible()
+  })
+
   test('profile dropdown uses an overlay scrollbar', async ({ page }) => {
     await goTo(page, 'subscribedchannels')
 
