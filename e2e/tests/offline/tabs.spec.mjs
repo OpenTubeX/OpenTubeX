@@ -176,7 +176,7 @@ test.describe('tab bar', () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setVideoAvatar', {
         videoId,
-        avatar: 'data:image/png;base64,iVBORw0KGgo='
+        avatar: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+Xw4AAAAASUVORK5CYII='
       })
 
       window.__watchTabIconStates = []
@@ -206,7 +206,9 @@ test.describe('tab bar', () => {
     const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
     await expect(tab.locator('.loadingDot')).toBeVisible()
     await expect(tab.locator('.loadingDot')).toHaveCount(0)
-    await expect(tab.locator('.tabAvatar')).toBeVisible()
+    await expect.poll(() => page.evaluate(tabId => (
+      window.__watchTabIconStates.some(state => state.id === tabId && !state.loading && state.avatar)
+    ), watchTab.id)).toBe(true)
 
     const states = await page.evaluate(
       tabId => window.__watchTabIconStates.filter(state => state.id === tabId),
@@ -216,6 +218,7 @@ test.describe('tab bar', () => {
 
     expect(lastLoadingIndex).toBeGreaterThanOrEqual(0)
     expect(states.slice(0, lastLoadingIndex + 1).some(state => state.avatar)).toBe(false)
+    expect(states.slice(lastLoadingIndex + 1).some(state => state.avatar)).toBe(true)
   })
 
   test('Ctrl+T opens and Ctrl+W closes a tab', async ({ page }) => {
