@@ -670,7 +670,33 @@ test.describe('watch page', () => {
 
     const replay = page.locator(`${activeTab} .watchVideoPlaylist`).filter({ hasText: 'Live Chat Replay' })
     await expect(replay).toBeVisible()
-    await expect(replay.locator('.liveChatSkeleton')).toBeVisible()
+    const skeleton = replay.locator('.liveChatSkeleton')
+    await expect(skeleton).toBeVisible()
+    expect(await skeleton.evaluate((element) => {
+      const firstMessage = element.querySelector('.liveChatSkeletonMessage')
+      const avatar = firstMessage.querySelector('.liveChatSkeletonAvatar')
+      const author = firstMessage.querySelector('.liveChatSkeletonAuthor')
+      const text = firstMessage.querySelector('.liveChatSkeletonText')
+      const skeletonRect = element.getBoundingClientRect()
+
+      return {
+        avatarInset: avatar.getBoundingClientRect().top - skeletonRect.top,
+        fillsViewport: element.scrollHeight >= element.clientHeight,
+        linesAligned: Math.abs(author.getBoundingClientRect().top - text.getBoundingClientRect().top) <= 1
+      }
+    })).toEqual({
+      avatarInset: 5,
+      fillsViewport: true,
+      linesAligned: true
+    })
+    const skeletonLines = skeleton.locator('.liveChatSkeletonContent').first().locator('div')
+    await expect(skeletonLines.nth(0)).toHaveCSS('block-size', '10px')
+    await expect(skeletonLines.nth(1)).toHaveCSS('block-size', '10px')
+    await watchView.evaluate((view) => {
+      view.liveChat.dispatchEvent(new ErrorEvent('error', { message: 'Unavailable' }))
+    })
+    await expect(replay.locator('.messageContainer.hasError')).toBeVisible()
+    await expect(replay.locator('.titleContainer')).toHaveCSS('margin-block-start', '0px')
     await replay.getByRole('button', { name: 'Close Live Chat Replay' }).click()
     await expect(replay).toHaveCount(0)
 
