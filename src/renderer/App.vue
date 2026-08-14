@@ -2491,17 +2491,22 @@ const multipleTabsActionPromptTitle = computed(() => {
   return t('Close Multiple Tabs Confirmation.Title')
 })
 const multipleTabsActionPromptMessage = computed(() => {
-  const parameters = { count: multipleTabsActionPromptCount.value }
+  const count = multipleTabsActionPromptCount.value
+  const parameters = { count }
   if (multipleTabsActionPrompt.value === 'load') return t('Load Multiple Tabs Confirmation.Message', parameters)
   if (multipleTabsActionPrompt.value === 'unload') return t('Unload Multiple Tabs Confirmation.Message', parameters)
-  return t('Close Multiple Tabs Confirmation.Message', parameters)
+  return t('Close Multiple Tabs Confirmation.Message', parameters, count)
 })
 const multipleTabsActionPromptNames = computed(() => [
   multipleTabsActionPrompt.value === 'load'
     ? t('Load Multiple Tabs Confirmation.Load Tabs', { count: multipleTabsActionPromptCount.value })
     : multipleTabsActionPrompt.value === 'unload'
       ? t('Unload Multiple Tabs Confirmation.Unload Tabs', { count: multipleTabsActionPromptCount.value })
-      : t('Close Multiple Tabs Confirmation.Close Tabs', { count: multipleTabsActionPromptCount.value }),
+      : t(
+          'Close Multiple Tabs Confirmation.Close Tabs',
+          { count: multipleTabsActionPromptCount.value },
+          multipleTabsActionPromptCount.value
+        ),
   t('Cancel'),
   t('Confirmations.Never Ask Again')
 ])
