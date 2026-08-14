@@ -67,6 +67,11 @@ export class LegacyQualitySelection extends shaka.ui.SettingsMenu {
       this.updateResolutionSelection_()
     })
 
+    this.eventManager.listen(events, 'legacyFormatMetadataChanged', () => {
+      this.updateFormatLabels_()
+      this.updateResolutionSelection_()
+    })
+
     // Re-sync after every (re)load, which covers the format-fallback case where
     // this element is recreated before the active format is known.
     this.eventManager.listen(this.player, 'loaded', () => {
@@ -84,6 +89,15 @@ export class LegacyQualitySelection extends shaka.ui.SettingsMenu {
     }
 
     this.updateResolutionSelection_()
+  }
+
+  /** @private */
+  updateFormatLabels_() {
+    const buttons = this.menu.querySelectorAll('.legacy-resolution')
+    this.legacyFormats_.forEach((format, index) => {
+      const span = buttons[index]?.querySelector('span')
+      if (span) span.textContent = format.qualityLabel
+    })
   }
 
   /** @private */

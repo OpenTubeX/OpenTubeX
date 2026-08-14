@@ -850,6 +850,11 @@ function handleSmoothScrolling(value) {
     align-items: center;
     flex-direction: column;
   }
+
+  .themeSelectRow :deep(.select) {
+    flex: 0 0 auto;
+    inline-size: min(200px, 100%);
+  }
 }
 
 .sliderGrid :deep(.pure-material-slider) {

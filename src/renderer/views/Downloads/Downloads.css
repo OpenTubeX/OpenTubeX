@@ -1,9 +1,7 @@
 .downloadsPage {
   box-sizing: border-box;
   inline-size: 100%;
-  margin-block: 0 60px;
-  margin-inline: auto;
-  max-inline-size: 92vw;
+  container: downloads-page / inline-size;
 }
 
 .downloadsHeader,
@@ -17,6 +15,13 @@
 .downloadsHeader {
   gap: 20px;
   justify-content: space-between;
+  min-block-size: 40px;
+  margin-block-end: 20px;
+}
+
+.downloadsHeader p {
+  color: var(--secondary-text-color);
+  margin: 0;
 }
 
 .downloadRow h3,
@@ -24,11 +29,11 @@
   margin-block: 4px;
 }
 
-.headingIcon {
-  color: var(--primary-color);
+.downloadSection {
+  margin-block-start: 0;
 }
 
-.downloadSection {
+.downloadSection + .downloadSection {
   margin-block-start: 28px;
 }
 
@@ -67,10 +72,25 @@
 }
 
 .downloadStatus,
+.downloadAvailability,
 .downloadSummary,
 .destination {
   color: var(--secondary-text-color);
   font-size: 0.9rem;
+}
+
+.downloadAvailability {
+  color: var(--primary-color);
+}
+
+.downloadAvailability.missing {
+  color: var(--destructive-color);
+}
+
+.downloadError {
+  color: var(--destructive-color);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .destinationList {
@@ -125,12 +145,7 @@
   }
 }
 
-@media only screen and (width <= 680px) {
-  .downloadsPage {
-    inline-size: 100%;
-  }
-
-  .downloadsHeader,
+@container downloads-page (width <= 600px) {
   .downloadRow {
     align-items: stretch;
     flex-direction: column;
@@ -142,5 +157,17 @@
 
   .downloadThumbnail {
     inline-size: 112px;
+  }
+}
+
+@container downloads-page (width <= 420px) {
+  .downloadMain {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .downloadThumbnail {
+    inline-size: min(180px, 100%);
+    margin-inline: auto;
   }
 }

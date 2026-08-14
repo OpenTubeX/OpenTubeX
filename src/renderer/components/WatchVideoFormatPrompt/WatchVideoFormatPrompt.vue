@@ -12,13 +12,13 @@
         <div class="currentSourceBadges">
           <span
             class="badge engineBadge"
-            :title="t('Change Format.Playback Engine')"
+            :title="localFilePlayback ? t('Change Format.Stream Source') : t('Change Format.Playback Engine')"
           >
-            <FtIcon :icon="['fas', 'circle-play']" />
-            {{ engineLabel }}
+            <FtIcon :icon="localFilePlayback ? ['fas', 'file-video'] : ['fas', 'circle-play']" />
+            {{ localFilePlayback ? t('Downloads.Local File') : engineLabel }}
           </span>
           <span
-            v-if="playbackEngineSelection === playbackEngine"
+            v-if="!localFilePlayback && playbackEngineSelection === playbackEngine"
             class="badge"
             :title="t('Change Format.Streaming Protocol')"
           >
@@ -28,7 +28,7 @@
       </div>
 
       <div
-        v-if="canChangePlaybackEngine"
+        v-if="canChangePlaybackEngine && !localFilePlayback"
         class="engineSelector"
       >
         <p class="sectionLabel">
@@ -137,6 +137,10 @@ const props = defineProps({
   canChangePlaybackEngine: {
     type: Boolean,
     default: false
+  },
+  localFilePlayback: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -179,8 +183,19 @@ const engines = computed(() => [
   }
 ])
 
-const options = computed(() => [
-  {
+const options = computed(() => {
+  if (props.localFilePlayback) {
+    const audioOnly = props.activeFormat === 'audio'
+    return [{
+      value: props.activeFormat,
+      label: audioOnly ? t('Change Format.Local Audio File') : t('Change Format.Local Video File'),
+      description: t('Change Format.Descriptions.Local File'),
+      icon: ['fas', audioOnly ? 'volume-high' : 'file-video'],
+      available: true
+    }]
+  }
+
+  return [{
     value: 'dash',
     label: t('Change Format.Use Dash Formats'),
     description: t('Change Format.Descriptions.Dash'),
@@ -200,8 +215,8 @@ const options = computed(() => [
     description: t('Change Format.Descriptions.Audio'),
     icon: ['fas', 'volume-high'],
     available: props.audioAvailable
-  }
-])
+  }]
+})
 
 /**
  * @param {'dash' | 'legacy' | 'audio'} value

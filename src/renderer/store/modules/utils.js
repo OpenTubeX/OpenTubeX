@@ -1,3 +1,5 @@
+import { nextTick } from 'vue'
+
 import i18n from '../../i18n/index'
 
 import { checkYoutubeChannelId } from '../../helpers/channels'
@@ -12,9 +14,35 @@ import {
   loadLegacyChannelThumbnailCache,
   loadLegacyVideoAvatarCache,
 } from '../../helpers/channelThumbnailStorage'
+import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 
 const CHANNEL_THUMBNAIL_CACHE_LIMIT = 200
 const VIDEO_AVATAR_CACHE_LIMIT = 200
+
+async function morphSettingsWindow(commit, update) {
+  commit('setSettingsWindowMorphing', true)
+  await nextTick()
+
+  const root = document.documentElement
+  root.classList.add('utilityWindowMorphActive')
+
+  try {
+    if (typeof document.startViewTransition !== 'function' || isReducedMotionEnabled()) {
+      update()
+      await nextTick()
+      return
+    }
+
+    const transition = document.startViewTransition(async () => {
+      update()
+      await nextTick()
+    })
+    await transition.finished.catch(() => {})
+  } finally {
+    root.classList.remove('utilityWindowMorphActive')
+    commit('setSettingsWindowMorphing', false)
+  }
+}
 
 function getOrCreateSearchSettings(state, tabId) {
   state.searchSettingsByTabId[tabId] ??= {
@@ -50,6 +78,8 @@ const state = {
   showCreatePlaylistPrompt: false,
   isKeyboardShortcutPromptShown: false,
   settingsWindowOpen: false,
+  settingsWindowMinimized: false,
+  settingsWindowMorphing: false,
   settingsWindowView: null,
   settingsWindowSection: null,
   customThemeEditorOpen: false,
@@ -139,6 +169,14 @@ const getters = {
 
   getSettingsWindowOpen(state) {
     return state.settingsWindowOpen
+  },
+
+  getSettingsWindowMinimized(state) {
+    return state.settingsWindowMinimized
+  },
+
+  getSettingsWindowMorphing(state) {
+    return state.settingsWindowMorphing
   },
 
   getSettingsWindowView(state) {
@@ -361,6 +399,7 @@ const actions = {
 
   showKeyboardShortcutPrompt ({ commit }) {
     commit('setIsKeyboardShortcutPromptShown', true)
+    commit('setSettingsWindowMinimized', false)
     commit('setSettingsWindowOpen', true)
   },
 
@@ -371,21 +410,40 @@ const actions = {
   showSettingsWindow ({ commit }, view = null) {
     commit('setIsKeyboardShortcutPromptShown', false)
     commit('setSettingsWindowView', view)
+    commit('setSettingsWindowMinimized', false)
     commit('setSettingsWindowOpen', true)
   },
 
   toggleSettingsWindow ({ state, commit }) {
-    const open = !state.settingsWindowOpen ||
+    const open = state.settingsWindowMinimized || !state.settingsWindowOpen ||
       state.settingsWindowView !== null ||
       state.isKeyboardShortcutPromptShown
     commit('setIsKeyboardShortcutPromptShown', false)
     commit('setSettingsWindowView', null)
+    commit('setSettingsWindowMinimized', false)
     commit('setSettingsWindowOpen', open)
   },
 
   hideSettingsWindow ({ commit }) {
     commit('setIsKeyboardShortcutPromptShown', false)
+    commit('setSettingsWindowMinimized', false)
     commit('setSettingsWindowOpen', false)
+  },
+
+  minimizeSettingsWindow ({ state, commit }) {
+    if (!state.settingsWindowOpen || state.settingsWindowMorphing) return
+    return morphSettingsWindow(commit, () => {
+      commit('setSettingsWindowOpen', false)
+      commit('setSettingsWindowMinimized', true)
+    })
+  },
+
+  restoreSettingsWindow ({ state, commit }) {
+    if (!state.settingsWindowMinimized || state.settingsWindowMorphing) return
+    return morphSettingsWindow(commit, () => {
+      commit('setSettingsWindowMinimized', false)
+      commit('setSettingsWindowOpen', true)
+    })
   },
 
   showSettingsWindowRoot ({ commit }) {
@@ -830,6 +888,14 @@ const mutations = {
 
   setSettingsWindowOpen (state, payload) {
     state.settingsWindowOpen = payload
+  },
+
+  setSettingsWindowMinimized (state, payload) {
+    state.settingsWindowMinimized = payload
+  },
+
+  setSettingsWindowMorphing (state, payload) {
+    state.settingsWindowMorphing = payload
   },
 
   setSettingsWindowView (state, payload) {

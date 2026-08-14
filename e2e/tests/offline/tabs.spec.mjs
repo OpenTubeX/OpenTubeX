@@ -86,29 +86,31 @@ test.describe('tab bar', () => {
     ])
   })
 
-  test('keeps the current app icon when Settings opens over the route', async ({ page }) => {
+  test('uses one utility window for Settings and Downloads', async ({ page }) => {
+    const routeBeforeOpening = page.url()
     await goTo(page, 'settings')
     expect(await page.locator(`${sel.activeTab} .loadingDot`).count()).toBe(0)
     await expect(page.locator(sel.activeTab).locator('[data-icon="rss"]')).toBeVisible()
-
-    await goTo(page, 'history')
-    await expect(page.locator(sel.activeTab).locator('[data-icon="clock-rotate-left"]')).toBeVisible()
+    await expect(page.locator('.settingsWindow')).toHaveCount(1)
 
     await goTo(page, 'downloads')
-    await expect(page.locator(sel.activeTab).locator('[data-icon="download"]')).toBeVisible()
-  })
+    const downloadsWindow = page.getByRole('dialog', { name: 'Downloads', exact: true })
+    await expect(downloadsWindow).toBeVisible()
+    await expect(downloadsWindow.locator('.settingsBreadcrumb')).toContainText('Downloads')
+    await expect(downloadsWindow.locator('.settingsMenu')).toHaveCount(0)
+    await expect(page.locator('.settingsWindow')).toHaveCount(1)
+    await expect(page.locator(sel.activeTab).locator('[data-icon="rss"]')).toBeVisible()
+    expect(page.url()).toBe(routeBeforeOpening)
 
-  test('uses the full page card layout for downloads', async ({ page }) => {
-    await goTo(page, 'history')
-    const historyWidth = await page.locator('.card').first().evaluate(element => element.getBoundingClientRect().width)
-    const historyHeadingTop = await page.locator('.headingRow h2').evaluate(element => element.getBoundingClientRect().top)
+    await page.locator('.topNav .downloadsButton').click()
+    await expect(downloadsWindow).toBeHidden()
+    expect(page.url()).toBe(routeBeforeOpening)
 
     await goTo(page, 'downloads')
-    const downloadsPage = page.locator('.downloadsPage')
-    await expect(downloadsPage.locator('.downloadsHeader [data-icon="download"]')).toBeVisible()
-    await expect(downloadsPage).not.toContainText('Manage active and completed downloads.')
-    await expect.poll(() => downloadsPage.evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(historyWidth, 0)
-    await expect.poll(() => downloadsPage.locator('.downloadsHeader h2').evaluate(element => element.getBoundingClientRect().top)).toBeCloseTo(historyHeadingTop, 0)
+    await goTo(page, 'settings')
+    await expect(page.getByRole('dialog', { name: 'Settings', exact: true })).toBeVisible()
+    await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toHaveCount(0)
+    await expect(page.locator('.settingsWindow')).toHaveCount(1)
   })
 
   test('uses a distinct page icon for watch tabs', async ({ page }) => {

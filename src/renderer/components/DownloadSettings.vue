@@ -11,6 +11,22 @@
         @change="updateEnableDownloads"
       />
     </FtFlexBox>
+    <FtFlexBox v-if="enableDownloads">
+      <FtToggleSwitch
+        :label="t('Settings.Download Settings.Move Downloads to Quick Settings')"
+        :default-value="moveDownloadsToQuickSettings"
+        setting-key="moveDownloadsToQuickSettings"
+        :compact="true"
+        @change="updateMoveDownloadsToQuickSettings"
+      />
+    </FtFlexBox>
+    <FtFlexBox v-if="enableDownloads">
+      <FtButton
+        :label="t('Downloads.Open Downloads')"
+        :icon="['fas', 'download']"
+        @click="openDownloads"
+      />
+    </FtFlexBox>
     <FtFlexBox
       v-if="enableDownloads"
       class="downloadPathInputs settingsFlexStart460px"
@@ -48,6 +64,7 @@ import FtSettingsSection from './FtSettingsSection/FtSettingsSection.vue'
 import FtInput from './FtInput/FtInput.vue'
 import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
 import FtToggleSwitch from './FtToggleSwitch/FtToggleSwitch.vue'
+import FtButton from './FtButton/FtButton.vue'
 
 import store from '../store/index'
 
@@ -55,6 +72,7 @@ const { t } = useI18n()
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
+const moveDownloadsToQuickSettings = computed(() => store.getters.getMoveDownloadsToQuickSettings)
 
 /** @type {import('vue').ComputedRef<string>} */
 const ytDlpDownloadFolderPath = computed(() => store.getters.getYtDlpDownloadFolderPath)
@@ -64,6 +82,14 @@ const ytDlpDownloadFolderPath = computed(() => store.getters.getYtDlpDownloadFol
  */
 function updateEnableDownloads(value) {
   store.dispatch('updateEnableDownloads', value)
+}
+
+function openDownloads() {
+  store.dispatch('showSettingsWindow', 'downloads')
+}
+
+function updateMoveDownloadsToQuickSettings(value) {
+  store.dispatch('updateMoveDownloadsToQuickSettings', value)
 }
 
 /**

@@ -8898,10 +8898,12 @@ export default defineComponent({
               variants = variants.filter(variant => variant.audioRoles.includes('main'))
             }
 
-            const highestBandwidth = Math.max(...variants.map(variant => variant.audioBandwidth))
-            variants = variants.filter(variant => variant.audioBandwidth === highestBandwidth)
+            if (variants.length > 0) {
+              const highestBandwidth = Math.max(...variants.map(variant => variant.audioBandwidth))
+              variants = variants.filter(variant => variant.audioBandwidth === highestBandwidth)
 
-            player.selectVariantTrack(variants[0])
+              player.selectVariantTrack(variants[0])
+            }
           }
         } catch (error) {
           handleError(error, 'loading dash/audio manifest and setting default quality in mounted')
@@ -8921,7 +8923,20 @@ export default defineComponent({
       // Ideally we would set this in the `streaming` event handler, but for HLS this is only set to true after the loaded event fires.
       isLive.value = player.isLive()
       restorePendingPlaybackRate()
-      emit('loaded')
+      const mediaElement = video.value
+      if (props.format === 'legacy' && activeLegacyFormat.value?.localFile &&
+        mediaElement.videoWidth > 0 && mediaElement.videoHeight > 0) {
+        const format = activeLegacyFormat.value
+        format.width = mediaElement.videoWidth
+        format.height = mediaElement.videoHeight
+        format.qualityLabel = `${format.width}×${format.height} • ${format.localFileLabel}`
+        events.dispatchEvent(new CustomEvent('legacyFormatMetadataChanged'))
+      }
+      emit('loaded', {
+        duration: mediaElement.duration,
+        width: mediaElement.videoWidth,
+        height: mediaElement.videoHeight
+      })
 
       nextTick(() => {
         rememberInlinePlayerLayoutHeight()

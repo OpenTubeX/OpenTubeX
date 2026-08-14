@@ -34,13 +34,15 @@ import * as baseHandlers from '../datastores/handlers/base'
 import { liveReminders } from '../datastores'
 import { extractExpiryTimestamp, ImageCache } from './ImageCache'
 import { constants as fsConstants, existsSync } from 'fs'
+import { createReadStream } from 'node:fs'
 import asyncFs from 'fs/promises'
 import { promisify } from 'util'
+import { Readable } from 'node:stream'
 import { brotliDecompress } from 'zlib'
 
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
-import { handleYtDlpCancelDownload, handleYtDlpClearDownloads, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetPlaybackInfo, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpRemoveDownload, shutdownYtDlpDownloads } from './ytDlp'
+import { getYtDlpDownloadFile, handleYtDlpCancelDownload, handleYtDlpClearDownloads, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetPlaybackInfo, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpRemoveDownload, shutdownYtDlpDownloads } from './ytDlp'
 import { handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
 import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
@@ -59,6 +61,19 @@ import { LiveReminderManager } from './LiveReminderManager'
 import { requestVoiceOverTranslation } from './voiceOverTranslation'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
+const DOWNLOADED_MEDIA_MIME_TYPES = {
+  '.aac': 'audio/aac',
+  '.flac': 'audio/flac',
+  '.m4a': 'audio/mp4',
+  '.mp3': 'audio/mpeg',
+  '.ogg': 'audio/ogg',
+  '.opus': 'audio/ogg',
+  '.m4v': 'video/mp4',
+  '.mkv': 'video/x-matroska',
+  '.mov': 'video/quicktime',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm'
+}
 
 if (process.argv.includes('--version')) {
   console.log(`v${packageDetails.version} Beta`) // eslint-disable-line no-console
@@ -100,6 +115,16 @@ function runApp() {
       privileges: {
         secure: true,
         corsEnabled: true
+      }
+    },
+    {
+      scheme: 'downloadmedia',
+      privileges: {
+        standard: true,
+        secure: true,
+        supportFetchAPI: true,
+        corsEnabled: true,
+        stream: true
       }
     },
     ...(process.env.NODE_ENV === 'production'
@@ -1856,6 +1881,62 @@ function runApp() {
 
       // eslint-disable-next-line n/no-callback-literal
       callback({ responseHeaders })
+    })
+
+    protocol.handle('downloadmedia', async (request) => {
+      if (!['GET', 'HEAD'].includes(request.method)) {
+        return new Response(null, { status: 405, headers: { Allow: 'GET, HEAD' } })
+      }
+
+      const url = new URL(request.url)
+      const [, rawId, videoId] = url.pathname.split('/')
+      if (url.host !== 'file' || !/^\d+$/.test(rawId ?? '')) {
+        return new Response(null, { status: 400 })
+      }
+
+      const file = await getYtDlpDownloadFile(Number(rawId), videoId ?? '')
+      if (file === null) return new Response(null, { status: 404 })
+
+      const fileSize = (await asyncFs.stat(file.path)).size
+      const extension = path.extname(file.path).toLowerCase()
+      const mimeType = file.mode === 'audio' && extension === '.webm'
+        ? 'audio/webm'
+        : file.mode === 'audio' && extension === '.mp4'
+          ? 'audio/mp4'
+          : DOWNLOADED_MEDIA_MIME_TYPES[extension] ?? 'application/octet-stream'
+      const headers = {
+        'Accept-Ranges': 'bytes',
+        'Content-Type': mimeType
+      }
+      const rangeMatch = /^bytes=(\d*)-(\d*)$/.exec(request.headers.get('range') ?? '')
+      let start = 0
+      let end = fileSize - 1
+      let status = 200
+
+      if (rangeMatch !== null) {
+        const [, rawStart, rawEnd] = rangeMatch
+        if (rawStart === '') {
+          const suffixLength = Number(rawEnd)
+          start = Math.max(0, fileSize - suffixLength)
+        } else {
+          start = Number(rawStart)
+          if (rawEnd !== '') end = Math.min(Number(rawEnd), end)
+        }
+        if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= fileSize) {
+          return new Response(null, {
+            status: 416,
+            headers: { ...headers, 'Content-Range': `bytes */${fileSize}` }
+          })
+        }
+        status = 206
+        headers['Content-Range'] = `bytes ${start}-${end}/${fileSize}`
+      }
+
+      headers['Content-Length'] = String(end - start + 1)
+      const body = request.method === 'HEAD'
+        ? null
+        : Readable.toWeb(createReadStream(file.path, { start, end }))
+      return new Response(body, { status, headers })
     })
 
     if (replaceHttpCache) {

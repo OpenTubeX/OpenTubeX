@@ -886,6 +886,7 @@ Settings:
   Download Settings:
     Download Settings: Downloads
     Enable Downloads: Enable Downloads
+    Move Downloads to Quick Settings: Move Downloads to Quick Settings
     Managed Tools Download Started Template: 'Required external software was not found: {tools}. Downloading managed copies…'
     Managed Tools Download Finished Template: 'Finished downloading {tools}'
     Managed Tools Update Started Template: 'An update was found for {tools}. Downloading…'
@@ -1497,7 +1498,7 @@ Video:
   Notify me: Notify me
   Notification on: Notification on
   Notification enabled: You will be notified when this video starts
-  Notification cancelled: Start notification cancelled
+  Notification cancelled: Start notification canceled
   Notification unavailable: System notifications are unavailable
   Scheduled video starting: Scheduled video starting
   Live notification body: "{videoTitle} is starting now"
@@ -1749,6 +1750,8 @@ Change Format:
   Use Dash Formats: Use DASH Formats
   Use Legacy Formats: Use Legacy Formats
   Use Audio Formats: Use Audio Formats
+  Local Video File: Local video file
+  Local Audio File: Local audio file
   Dash formats are not available for this video: DASH formats are not available for
     this video
   Audio formats are not available for this video: Audio formats are not available
@@ -1766,6 +1769,7 @@ Change Format:
   Protocols:
     Progressive: Progressive
   Descriptions:
+    Local File: Played directly from the downloaded file on this device
     Dash: Adaptive quality, multiple audio tracks and the highest resolutions
     Legacy: A single file with video and audio combined, limited to lower resolutions
     Audio: Audio only, useful for saving bandwidth or listening in the background
@@ -2182,15 +2186,24 @@ Downloads:
   Download Playlist: Download Playlist
   Downloading: Downloading
   Downloaded: Downloaded
+  Open Downloads: Open Downloads
   No Downloads: No downloads yet
   No Downloads Description: Downloads you start will appear here.
   Clear Finished: Clear Finished
   Clear From List: Clear From List
   Show in Folder: Show in Folder
+  Play Download: Play download
+  Retry Download: Retry download
+  Total Size: 'Total size: {size}'
+  Local File: Local file
+  Available Offline: Available offline
   Remove File: Remove File
   Remove File Confirmation: Remove downloaded file?
   Remove File Warning: 'This will move "{title}" to your device trash.'
   File Not Found: The downloaded file could not be found.
+  Download Missing: Download unavailable
+  Files Missing: The downloaded file is no longer available on the filesystem. | The downloaded files are no longer available on the filesystem.
+  Files Available: '{available} of {total} downloaded files are available.'
   More Files: 1 more file | {count} more files
   Template Used: 'Template: {name}'
   Download Type: Download Type
@@ -2234,7 +2247,7 @@ Downloads:
   System Downloads Folder: System Downloads Folder
   Processing: Processing…
   Download Complete: Download complete
-  Download Cancelled: Download cancelled
+  Download Cancelled: Download canceled
   Download Failed: Download failed
   Cancel Download: Cancel Download
   yt-dlp Not Found: yt-dlp was not found. Install it or set its path in the Download Settings.

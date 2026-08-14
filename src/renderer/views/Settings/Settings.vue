@@ -2,7 +2,10 @@
   <section
     ref="settingsWindowRef"
     class="settingsWindow"
-    :class="{ maximized: isMaximized }"
+    :class="{
+      maximized: isMaximized,
+      utilityWindowMorphTarget: settingsWindowMorphing
+    }"
     :style="windowStyle"
     role="dialog"
     :aria-label="windowTitle"
@@ -29,15 +32,15 @@
         aria-live="polite"
       >
         <span
-          v-if="isAboutOpen"
+          v-if="isStandaloneViewOpen"
           class="settingsBreadcrumbLabel"
         >
           <FtIcon
             class="settingsWindowIcon"
-            :icon="['fas', 'info-circle']"
+            :icon="standaloneViewIcon"
             aria-hidden="true"
           />
-          <span class="settingsBreadcrumbText">{{ t('About.About') }}</span>
+          <span class="settingsBreadcrumbText">{{ windowTitle }}</span>
         </span>
         <button
           v-else-if="showBackButton"
@@ -63,7 +66,7 @@
           />
           <span class="settingsBreadcrumbText">{{ t('Settings.Settings') }}</span>
         </span>
-        <template v-if="!isAboutOpen && currentSectionTitle">
+        <template v-if="!isStandaloneViewOpen && currentSectionTitle">
           <FtIcon
             class="settingsBreadcrumbSeparator"
             :icon="['fas', 'angle-right']"
@@ -95,7 +98,7 @@
             <span class="settingsBreadcrumbText">{{ currentSectionTitle }}</span>
           </span>
         </template>
-        <template v-if="!isAboutOpen && subpageTitle">
+        <template v-if="!isStandaloneViewOpen && subpageTitle">
           <FtIcon
             class="settingsBreadcrumbSeparator"
             :icon="['fas', 'angle-right']"
@@ -116,7 +119,7 @@
         />
       </div>
       <label
-        v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen && !isAboutOpen && !subpageTitle"
+        v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen && !isStandaloneViewOpen && !subpageTitle"
         class="settingsSearch"
       >
         <FtIcon :icon="['fas', 'magnifying-glass']" />
@@ -131,7 +134,7 @@
       </label>
       <div class="settingsHeaderActions">
         <button
-          v-if="USING_ELECTRON && !isAboutOpen"
+          v-if="USING_ELECTRON && !isStandaloneViewOpen"
           type="button"
           class="settingsHeaderButton"
           :aria-label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
@@ -141,7 +144,7 @@
           <FtIcon :icon="['fas', 'keyboard']" />
         </button>
         <button
-          v-if="!isAboutOpen"
+          v-if="!isStandaloneViewOpen"
           type="button"
           class="settingsHeaderButton"
           :class="{ active: settingsSectionSortEnabled }"
@@ -153,7 +156,7 @@
           <FtIcon :icon="['fas', 'sort-alpha-down']" />
         </button>
         <button
-          v-if="!isAboutOpen"
+          v-if="!isStandaloneViewOpen"
           type="button"
           class="settingsHeaderButton"
           :class="{ active: highlightChangedSettings }"
@@ -165,7 +168,7 @@
           <FtIcon :icon="['fas', 'pen']" />
         </button>
         <button
-          v-if="!isAboutOpen"
+          v-if="!isStandaloneViewOpen"
           type="button"
           class="settingsHeaderButton"
           :class="{ active: showPerformanceImpactIndicators }"
@@ -175,6 +178,15 @@
           @click="updateShowPerformanceImpactIndicators(!showPerformanceImpactIndicators)"
         >
           <FtIcon :icon="['fas', 'gauge-high']" />
+        </button>
+        <button
+          type="button"
+          class="settingsHeaderButton"
+          :aria-label="t('Minimize')"
+          :title="t('Minimize')"
+          @click="minimizeSettings"
+        >
+          <FtIcon :icon="['fas', 'angle-down']" />
         </button>
         <button
           type="button"
@@ -205,10 +217,20 @@
     >
       <template v-if="isAboutOpen">
         <div
+          ref="standaloneScrollRef"
           v-overlay-scrollbars
           class="settingsSubpageScroll settingsAboutPage"
         >
           <About />
+        </div>
+      </template>
+      <template v-else-if="isDownloadsOpen">
+        <div
+          ref="standaloneScrollRef"
+          v-overlay-scrollbars
+          class="settingsSubpageScroll settingsDownloadsPage"
+        >
+          <Downloads />
         </div>
       </template>
       <template v-else-if="unlocked">
@@ -367,6 +389,7 @@ import FtSettingsMenu from '../../components/FtSettingsMenu/FtSettingsMenu.vue'
 import FtKeyboardShortcutPrompt from '../../components/FtKeyboardShortcutPrompt/FtKeyboardShortcutPrompt.vue'
 import ProfileSettings from '../ProfileSettings/ProfileSettings.vue'
 import About from '../About/About.vue'
+import Downloads from '../Downloads/Downloads.vue'
 
 import store from '../../store/index'
 import { settingsSubpageKey } from '../../components/FtSettingsSubpage/settingsSubpage'
@@ -398,6 +421,7 @@ const settingsMenuTransitionClass = ref('')
 const settingsWindowRef = useTemplateRef('settingsWindowRef')
 const settingsPageRef = useTemplateRef('settingsPageRef')
 const settingsContentRef = useTemplateRef('settingsContentRef')
+const standaloneScrollRef = useTemplateRef('standaloneScrollRef')
 const profileManagerScrollRef = useTemplateRef('profileManagerScrollRef')
 const settingsSearchInputRef = useTemplateRef('settingsSearchInputRef')
 const settingsCloseButtonRef = useTemplateRef('settingsCloseButtonRef')
@@ -416,6 +440,7 @@ let observationScheduled = false
 let boundsSaveTimer = null
 let boundsAnimation = null
 let searchHighlightTimer = null
+let standaloneClampFrame = null
 let draggingPointerId = null
 let resizeSession = null
 let dragOffsetX = 0
@@ -440,12 +465,22 @@ const windowStyle = computed(() => isMaximized.value
 const maximizeButtonLabel = computed(() => isMaximized.value ? t('Restore') : t('Maximize'))
 
 const settingsSectionSortEnabled = computed(() => store.getters.getSettingsSectionSortEnabled)
+const settingsWindowMorphing = computed(() => store.getters.getSettingsWindowMorphing)
 const highlightChangedSettings = computed(() => store.getters.getHighlightChangedSettings)
 const showPerformanceImpactIndicators = computed(() => store.getters.getShowPerformanceImpactIndicators)
 const isProfileManagerOpen = computed(() => store.getters.getSettingsWindowView === 'profile')
 const isAboutOpen = computed(() => store.getters.getSettingsWindowView === 'about')
+const isDownloadsOpen = computed(() => store.getters.getSettingsWindowView === 'downloads')
+const isStandaloneViewOpen = computed(() => isAboutOpen.value || isDownloadsOpen.value)
 const isKeyboardShortcutPromptOpen = computed(() => store.getters.getIsKeyboardShortcutPromptShown)
-const windowTitle = computed(() => isAboutOpen.value ? t('About.About') : t('Settings.Settings'))
+const windowTitle = computed(() => {
+  if (isAboutOpen.value) return t('About.About')
+  if (isDownloadsOpen.value) return t('Downloads.Downloads')
+  return t('Settings.Settings')
+})
+const standaloneViewIcon = computed(() => isDownloadsOpen.value
+  ? ['fas', 'download']
+  : ['fas', 'info-circle'])
 
 const settingsComponentsData = computed(() => [
   {
@@ -656,6 +691,8 @@ const currentSectionIcon = computed(() => {
   return activeSettingsSection.value?.icon ?? null
 })
 const showBackButton = computed(() => {
+  if (isStandaloneViewOpen.value) return false
+
   return isKeyboardShortcutPromptOpen.value || isProfileManagerOpen.value || subpageTitle.value !== '' ||
     (!isInDesktopView.value && activeSection.value !== null)
 })
@@ -702,6 +739,7 @@ onBeforeUnmount(() => {
   if (searchHighlightTimer !== null) {
     clearTimeout(searchHighlightTimer)
   }
+  cancelStandaloneScrollClamp()
 })
 
 watch(isProfileManagerOpen, (open) => {
@@ -712,6 +750,7 @@ watch(isProfileManagerOpen, (open) => {
     nextTick(observeProfileManager)
   }
 })
+watch(isStandaloneViewOpen, () => nextTick(scheduleStandaloneScrollClamp))
 watch(activeSection, (section) => {
   if (section !== null) {
     store.commit('setSettingsWindowSection', section)
@@ -757,6 +796,7 @@ function handleMounted() {
             getActiveSettingsSectionEnd(settingsContentRef.value)
           )
         }
+        scheduleStandaloneScrollClamp()
       }
     })
     settingsResizeObserver.observe(element)
@@ -769,6 +809,7 @@ function stopObserving() {
   observationScheduled = false
   settingsResizeObserver?.disconnect()
   settingsResizeObserver = null
+  cancelStandaloneScrollClamp()
   settingsSectionResizeObserver?.disconnect()
   settingsSectionResizeObserver = null
   stopObservingProfileManager()
@@ -826,6 +867,24 @@ function clampSettingsContentScroll(event) {
   const contentEnd = section.offsetTop + section.offsetHeight + settingsContentPaddingBottom
   if (content.scrollTop > Math.max(0, contentEnd - content.clientHeight)) {
     clampOverlayScrollTop(content, section)
+  }
+}
+
+function scheduleStandaloneScrollClamp() {
+  cancelStandaloneScrollClamp()
+  standaloneClampFrame = requestAnimationFrame(() => {
+    standaloneClampFrame = null
+    const scrollViewport = standaloneScrollRef.value
+    if (scrollViewport) {
+      clampOverlayScrollTop(scrollViewport, scrollViewport.firstElementChild)
+    }
+  })
+}
+
+function cancelStandaloneScrollClamp() {
+  if (standaloneClampFrame !== null) {
+    cancelAnimationFrame(standaloneClampFrame)
+    standaloneClampFrame = null
   }
 }
 
@@ -1062,6 +1121,10 @@ function handleResize(width) {
 function closeSettings() {
   store.dispatch('hideKeyboardShortcutPrompt')
   store.dispatch('hideSettingsWindow')
+}
+
+function minimizeSettings() {
+  store.dispatch('minimizeSettingsWindow')
 }
 
 async function toggleMaximized() {

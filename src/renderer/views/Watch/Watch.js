@@ -90,6 +90,21 @@ import { useTabToast } from '../../composables/useTabToast'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { areCommentsAvailable } from './watchComments'
 
+const DOWNLOADED_MEDIA_MIME_TYPES = {
+  aac: 'audio/aac',
+  flac: 'audio/flac',
+  m4a: 'audio/mp4',
+  mp3: 'audio/mpeg',
+  ogg: 'audio/ogg',
+  opus: 'audio/ogg',
+  wav: 'audio/wav',
+  mp4: 'video/mp4',
+  m4v: 'video/mp4',
+  webm: 'video/webm',
+  mkv: 'video/x-matroska',
+  mov: 'video/quicktime'
+}
+
 /**
  * @typedef {{
  *   scheme: string,
@@ -241,6 +256,7 @@ export default defineComponent({
       removeLiveReminderUpdatedListener: null,
       /** @type {'dash' | 'audio' | 'legacy'} */
       activeFormat: 'legacy',
+      localFilePlayback: false,
       thumbnail: '',
       videoId: '',
       videoTitle: '',
@@ -1662,6 +1678,7 @@ export default defineComponent({
       this.builtInPlaybackSource = null
       this.ytDlpStreamsPending = false
       this.legacyFormats = []
+      this.localFilePlayback = false
       this.captions = []
       this.captionTranslations = []
       this.currentTime = 0
@@ -1690,6 +1707,79 @@ export default defineComponent({
         this.sabrReloadVideoQuality = null
         this.updateTitle()
       }
+    },
+
+    /**
+     * Keeps the normal online metadata while replacing its streaming formats
+     * with a completed file selected from the Downloads page.
+     */
+    applyDownloadedPlaybackSource: function () {
+      const downloadId = Number(this.tabRoute.query.downloadId)
+      if (!Number.isInteger(downloadId)) return false
+
+      const download = this.$store.getters.getYtDlpDownloads[downloadId]
+      const file = download?.status === 'completed' && ['video', 'audio'].includes(download.mode)
+        ? download.files?.find(file => file.videoId === this.videoId && file.available !== false)
+        : null
+      if (!file) return false
+
+      const extension = file.path.split('.').at(-1)?.toLowerCase() ?? ''
+      const mimeType = download.mode === 'audio' && extension === 'webm'
+        ? 'audio/webm'
+        : download.mode === 'audio' && extension === 'mp4'
+          ? 'audio/mp4'
+          : DOWNLOADED_MEDIA_MIME_TYPES[extension]
+      if (mimeType === undefined) return false
+
+      this.sabrData = null
+      const url = `downloadmedia://file/${downloadId}/${this.videoId}`
+      if (download.mode === 'audio') {
+        this.manifestSrc = url
+        this.manifestMimeType = mimeType
+        this.legacyFormats = []
+        this.activeFormat = 'audio'
+      } else {
+        const hasDimensions = Number.isInteger(file.width) && Number.isInteger(file.height)
+        this.manifestSrc = null
+        this.legacyFormats = [{
+          itag: 0,
+          qualityLabel: hasDimensions
+            ? `${file.width}×${file.height} • ${this.t('Downloads.Local File')}`
+            : this.t('Downloads.Local File'),
+          fps: null,
+          bitrate: 0,
+          mimeType,
+          height: file.height ?? 0,
+          width: file.width ?? 0,
+          localFile: true,
+          localFileLabel: this.t('Downloads.Local File'),
+          url
+        }]
+        this.activeFormat = 'legacy'
+      }
+      if (Number.isFinite(file.duration) && file.duration > 0) {
+        this.videoLengthSeconds = file.duration
+      }
+      this.streamingDataExpiryDate = null
+      this.activePlaybackEngine = 'built-in'
+      this.activePlaybackEngineVersion = null
+      this.localFilePlayback = true
+      return true
+    },
+
+    finishDownloadedPlaybackWithoutMetadata: function () {
+      if (!this.applyDownloadedPlaybackSource()) return false
+
+      const download = this.$store.getters.getYtDlpDownloads[this.tabRoute.query.downloadId]
+      const file = download.files.find(file => file.videoId === this.videoId && file.available !== false)
+      const fileName = file.path.split(/[/\\]/).at(-1)?.replace(/\.[^.]+$/, '') ?? this.videoId
+      this.videoTitle = download.videoId === this.videoId ? download.title : fileName
+      this.hasResolvedVideoTitle = true
+      this.thumbnail = download.thumbnail || this.thumbnail
+      this.errorMessage = null
+      this.isLoading = false
+      this.updateTitle()
+      return true
     },
 
     onMountedDependOnLocalStateLoading() {
@@ -2601,11 +2691,13 @@ export default defineComponent({
         }
 
         if (!this.isUpcoming) {
-          this.alignActiveFormatWithAvailableSources()
+          if (!this.applyDownloadedPlaybackSource()) {
+            this.alignActiveFormatWithAvailableSources()
 
-          // Deliberately not awaited, so that the metadata (title, description,
-          // comments, recommendations, ...) is shown while yt-dlp is still extracting.
-          this.applyYtDlpPlaybackSource(loadGeneration, videoId)
+            // Deliberately not awaited, so that the metadata (title, description,
+            // comments, recommendations, ...) is shown while yt-dlp is still extracting.
+            this.applyYtDlpPlaybackSource(loadGeneration, videoId)
+          }
         }
 
         this.updateShortsPlayerState(
@@ -2645,6 +2737,8 @@ export default defineComponent({
           if (didReload) {
             return
           }
+
+          if (this.finishDownloadedPlaybackWithoutMetadata()) return
 
           this.isLoading = false
 
@@ -2845,11 +2939,13 @@ export default defineComponent({
           }
 
           if (!this.isUpcoming) {
-            this.alignActiveFormatWithAvailableSources()
+            if (!this.applyDownloadedPlaybackSource()) {
+              this.alignActiveFormatWithAvailableSources()
 
-            // Deliberately not awaited, so that the metadata (title, description,
-            // comments, recommendations, ...) is shown while yt-dlp is still extracting.
-            this.applyYtDlpPlaybackSource(loadGeneration, videoId)
+              // Deliberately not awaited, so that the metadata (title, description,
+              // comments, recommendations, ...) is shown while yt-dlp is still extracting.
+              this.applyYtDlpPlaybackSource(loadGeneration, videoId)
+            }
           }
 
           this.updateShortsPlayerState(result.lengthSeconds, result.adaptiveFormats)
@@ -2879,6 +2975,8 @@ export default defineComponent({
             if (didReload) {
               return
             }
+
+            if (this.finishDownloadedPlaybackWithoutMetadata()) return
 
             this.isLoading = false
 
@@ -3462,11 +3560,15 @@ export default defineComponent({
       return isHistoryEntryWatched(this.$store.getters.getHistoryCacheById[videoId])
     },
 
-    handleVideoLoaded: function () {
+    handleVideoLoaded: function (mediaMetadata) {
       // Only used one time = remove after use
       this.oneTimeTimestamp = null
       this.sabrReloadCaptionIndex = null
       this.sabrReloadPlaybackRate = null
+
+      if (this.tabRoute.query.downloadId && Number.isFinite(mediaMetadata?.duration) && mediaMetadata.duration > 0) {
+        this.videoLengthSeconds = mediaMetadata.duration
+      }
 
       // will trigger again if you switch formats or change legacy quality
       // Check isUpcoming to avoid marking upcoming videos as watched if the user has only watched the trailer

@@ -268,6 +268,7 @@
       :dash-available="dashAvailable"
       :legacy-available="legacyAvailable"
       :audio-available="audioAvailable"
+      :local-file-playback="localFilePlayback"
       :can-change-playback-engine="USING_ELECTRON && !isPostLiveDvr"
       @change-format="changeFormat"
       @change-playback-engine="changePlaybackEngine"
@@ -462,6 +463,10 @@ const props = defineProps({
     default: false
   },
   audioAvailable: {
+    type: Boolean,
+    default: false
+  },
+  localFilePlayback: {
     type: Boolean,
     default: false
   },

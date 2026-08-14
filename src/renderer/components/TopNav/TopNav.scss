@@ -128,6 +128,21 @@
   }
 }
 
+.downloadsButton {
+  margin-inline-end: 8px;
+
+  &.active {
+    color: var(--primary-color);
+    background-color: var(--side-nav-hover-color);
+  }
+}
+
+.minimizedUtilityButton {
+  margin-inline-end: 8px;
+  color: var(--primary-color);
+  background-color: var(--side-nav-hover-color);
+}
+
 .navIcon {
   inline-size: 1em;
 }

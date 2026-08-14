@@ -71,6 +71,7 @@
     </FtFlexBox>
     <Transition
       name="settings-window"
+      :css="!settingsWindowMorphing"
       @after-leave="resetClosedSettingsWindowView"
     >
       <KeepAlive>
@@ -468,9 +469,11 @@ const showSearchFilters = computed(() => store.getters.getShowSearchFilters)
 /** @type {import('vue').ComputedRef<boolean>} */
 const isKeyboardShortcutPromptShown = computed(() => store.getters.getIsKeyboardShortcutPromptShown)
 const settingsWindowOpen = computed(() => store.getters.getSettingsWindowOpen)
+const settingsWindowMinimized = computed(() => store.getters.getSettingsWindowMinimized)
+const settingsWindowMorphing = computed(() => store.getters.getSettingsWindowMorphing)
 
 function resetClosedSettingsWindowView() {
-  if (!settingsWindowOpen.value) {
+  if (!settingsWindowOpen.value && !settingsWindowMinimized.value) {
     store.dispatch('showSettingsWindowRoot')
   }
 }

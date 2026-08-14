@@ -407,6 +407,10 @@ const props = defineProps({
     type: String,
     default: null
   },
+  downloadId: {
+    type: String,
+    default: ''
+  },
   playlistIndex: {
     type: Number,
     default: null
@@ -1300,6 +1304,10 @@ const watchPageLinkQuery = computed(() => {
 
   if (playlistItemIdFinal.value) {
     query.playlistItemId = playlistItemIdFinal.value
+  }
+
+  if (props.downloadId) {
+    query.downloadId = props.downloadId
   }
 
   if (props.data.isShort === true) {

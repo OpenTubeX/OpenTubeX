@@ -1,6 +1,6 @@
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { chmod, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
+import { chmod, mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { promisify } from 'node:util'
 import { inflateRawSync } from 'node:zlib'
@@ -69,12 +69,18 @@ function takeGetInfoAbortSignal(key) {
  * @property {string} thumbnail
  * @property {'video' | 'audio' | 'subtitles' | 'custom'} mode
  * @property {string} template
+ * @property {YtDlpDownloadPayload} [retryPayload]
  * @property {'downloading' | 'processing' | 'completed' | 'failed' | 'cancelled'} status
  * @property {number} percent
  * @property {string | null} speed
  * @property {string | null} eta
  * @property {string | null} destination
  * @property {string[]} destinations
+ * @property {{ videoId: string, path: string, duration?: number, width?: number, height?: number, available?: boolean }[]} [files]
+ * @property {'available' | 'partial' | 'missing'} [availability]
+ * @property {number} [availableDestinationCount]
+ * @property {number} [destinationCount]
+ * @property {number} [sizeBytes]
  * @property {string | null} errorMessage
  */
 
@@ -1234,7 +1240,12 @@ export async function handleYtDlpDownload(event, payload) {
 
   await loadDownloadRecords()
 
-  const args = ['--newline', '--progress', '--print', `after_move:${FINAL_PATH_PREFIX}%(filepath)s`]
+  const args = [
+    '--newline',
+    '--progress',
+    '--print',
+    `after_move:${FINAL_PATH_PREFIX}%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(filepath)s`
+  ]
 
   if (!isRemotePlaylist) {
     args.push('--no-playlist')
@@ -1408,12 +1419,14 @@ export async function handleYtDlpDownload(event, payload) {
     thumbnail: typeof payload.thumbnail === 'string' ? payload.thumbnail.slice(0, 2048) : '',
     mode: payload.mode,
     template: typeof payload.template === 'string' ? payload.template.slice(0, 255) : '',
+    retryPayload: structuredClone(payload),
     status: 'downloading',
     percent: 0,
     speed: null,
     eta: null,
     destination: null,
     destinations: [],
+    files: [],
     errorMessage: null
   }
   downloadRecords.set(id, status)
@@ -1446,8 +1459,25 @@ export async function handleYtDlpDownload(event, payload) {
    */
   function handleStdoutLine(line) {
     if (line.startsWith(FINAL_PATH_PREFIX)) {
-      status.destination = line.slice(FINAL_PATH_PREFIX.length)
+      const parts = line.slice(FINAL_PATH_PREFIX.length).split('\t')
+      const hasMediaMetadata = parts.length >= 5
+      const [videoId, rawDuration, rawWidth, rawHeight] = parts
+      const pathParts = parts.slice(hasMediaMetadata ? 4 : 1)
+      status.destination = pathParts.join('\t')
       if (!status.destinations.includes(status.destination)) status.destinations.push(status.destination)
+      if (ID_REGEX.test(videoId) && status.destination !== '' &&
+        !status.files.some(file => file.videoId === videoId && file.path === status.destination)) {
+        const duration = hasMediaMetadata ? Number(rawDuration) : NaN
+        const width = hasMediaMetadata ? Number(rawWidth) : NaN
+        const height = hasMediaMetadata ? Number(rawHeight) : NaN
+        status.files.push({
+          videoId,
+          path: status.destination,
+          ...(Number.isFinite(duration) && duration > 0 ? { duration } : {}),
+          ...(Number.isInteger(width) && width > 0 ? { width } : {}),
+          ...(Number.isInteger(height) && height > 0 ? { height } : {})
+        })
+      }
       sendStatus(true)
       return
     }
@@ -1600,8 +1630,12 @@ export async function handleYtDlpOpenDownload(event, id) {
   }
 
   await loadDownloadRecords()
-  const destination = downloadRecords.get(id)?.destination
-  if (typeof destination !== 'string' || !existsSync(destination)) {
+  const record = downloadRecords.get(id)
+  const destinations = Array.isArray(record?.destinations) && record.destinations.length > 0
+    ? record.destinations
+    : [record?.destination].filter(destination => typeof destination === 'string')
+  const destination = destinations.find(existsSync)
+  if (destination === undefined) {
     return false
   }
 
@@ -1652,7 +1686,71 @@ export async function handleYtDlpRemoveDownload(event, id) {
 export async function handleYtDlpListDownloads(event) {
   if (!isOpenTubeXUrl(event.senderFrame.url)) return []
   await loadDownloadRecords()
-  return [...downloadRecords.values()]
+  return Promise.all([...downloadRecords.values()].map(async record => {
+    if (record.status !== 'completed') return record
+
+    const destinations = Array.isArray(record.destinations) && record.destinations.length > 0
+      ? record.destinations
+      : [record.destination].filter(destination => typeof destination === 'string')
+    const destinationStats = await Promise.all(destinations.map(async destination => {
+      try {
+        return await stat(destination)
+      } catch {
+        return null
+      }
+    }))
+    const availableDestinationCount = destinationStats.filter(Boolean).length
+    const sizeBytes = destinationStats.reduce((total, destinationStat) => (
+      total + (destinationStat?.isFile() ? destinationStat.size : 0)
+    ), 0)
+    const availability = availableDestinationCount === 0
+      ? 'missing'
+      : availableDestinationCount === destinations.length
+        ? 'available'
+        : 'partial'
+
+    return {
+      ...record,
+      availability,
+      availableDestinationCount,
+      destinationCount: destinations.length,
+      sizeBytes,
+      files: getDownloadFiles(record).map(file => ({
+        ...file,
+        available: existsSync(file.path)
+      }))
+    }
+  }))
+}
+
+/**
+ * Returns the playable files recorded for a video download. Older single-video
+ * records can be identified without guessing from their user-customizable path.
+ * @param {YtDlpDownloadStatus} record
+ */
+function getDownloadFiles(record) {
+  if (Array.isArray(record.files) && record.files.length > 0) {
+    return record.files.filter(file => ID_REGEX.test(file?.videoId) && typeof file.path === 'string')
+  }
+  if (['video', 'audio'].includes(record.mode) && ID_REGEX.test(record.videoId) && typeof record.destination === 'string') {
+    return [{ videoId: record.videoId, path: record.destination }]
+  }
+  return []
+}
+
+/**
+ * Resolves a local media request without exposing arbitrary filesystem access
+ * through the custom protocol.
+ * @param {number} id
+ * @param {string} videoId
+ */
+export async function getYtDlpDownloadFile(id, videoId) {
+  if (!Number.isInteger(id) || !ID_REGEX.test(videoId)) return null
+  await loadDownloadRecords()
+  const record = downloadRecords.get(id)
+  if (record?.status !== 'completed' || !['video', 'audio'].includes(record.mode)) return null
+  const file = getDownloadFiles(record).find(file => file.videoId === videoId && existsSync(file.path))
+  return file === undefined ? null : { path: file.path, mode: record.mode }
 }
 
 /**

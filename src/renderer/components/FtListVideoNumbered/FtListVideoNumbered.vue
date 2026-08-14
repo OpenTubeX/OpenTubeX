@@ -38,6 +38,12 @@
             {{ videoIndex + 1 }}
           </span>
         </template>
+        <FtIcon
+          v-if="downloadAvailable"
+          class="downloadAvailableIcon"
+          :icon="['fas', 'download']"
+          :title="t('Downloads.Available Offline')"
+        />
       </p>
       <FtListVideo
         :data="data"
@@ -48,6 +54,7 @@
         :playlist-shuffle="playlistShuffle"
         :playlist-loop="playlistLoop"
         :playlist-item-id="playlistItemId"
+        :download-id="downloadId"
         force-list-type="list"
         :appearance="appearance"
         :always-show-add-to-playlist-button="alwaysShowAddToPlaylistButton"
@@ -69,8 +76,10 @@
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { handleDragAndDrop } from '../../helpers/dragAndDrop'
+import store from '../../store/index'
 
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
 
@@ -106,6 +115,10 @@ const props = defineProps({
   playlistItemId: {
     type: String,
     default: null,
+  },
+  downloadId: {
+    type: String,
+    default: '',
   },
   appearance: {
     type: String,
@@ -169,6 +182,12 @@ const emit = defineEmits([
   'drag-video-end'
 ])
 const visible = ref(props.initialVisibleState)
+const { t } = useI18n()
+const downloadAvailable = computed(() => {
+  if (!props.downloadId) return false
+  const download = store.getters.getYtDlpDownloads[props.downloadId]
+  return download?.files?.some(file => file.videoId === props.data.videoId && file.available !== false) ?? false
+})
 
 const inUserPlaylist = props.playlistType === 'user'
 const canBecomeDraggable = computed(() => inUserPlaylist && props.isSortOrderCustom && (props.canMoveVideoUp || props.canMoveVideoDown))

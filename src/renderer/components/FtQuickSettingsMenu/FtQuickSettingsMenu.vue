@@ -88,7 +88,10 @@
         </template>
 
         <template v-else>
-          <div class="profileHeaderRow">
+          <div
+            class="profileHeaderRow"
+            :class="{ hasDownloadsShortcut: showDownloadsShortcut }"
+          >
             <button
               type="button"
               class="profileSummary"
@@ -106,8 +109,18 @@
               <FtIcon :icon="['fas', 'angle-right']" />
             </button>
             <button
+              v-if="showDownloadsShortcut"
               type="button"
-              class="allSettingsShortcut"
+              class="quickSettingsShortcut downloadsShortcut"
+              :aria-label="t('Downloads.Downloads')"
+              :title="t('Downloads.Downloads')"
+              @click="openDownloads"
+            >
+              <FtIcon :icon="['fas', 'download']" />
+            </button>
+            <button
+              type="button"
+              class="quickSettingsShortcut allSettingsShortcut"
               :aria-label="t('Settings.Quick Settings.All Settings')"
               :title="t('Settings.Quick Settings.All Settings')"
               @click="openSettings"
@@ -131,13 +144,13 @@
                 @change="updateSetting('BaseTheme', $event)"
               />
               <FtSelect
+                v-if="mainColorAvailable"
                 class="quickSelect"
                 :placeholder="t('Settings.Theme Settings.Main Color Theme.Main Color Theme')"
                 :value="mainColor"
                 setting-key="mainColor"
                 :select-names="colorNames"
                 :select-values="COLOR_VALUES"
-                :disabled="customThemeEditorOpen || baseTheme === 'hotPink' || usesCustomThemePalette"
                 :icon="['fas', 'palette']"
                 icon-color="var(--primary-color)"
                 @change="updateSetting('MainColor', $event)"
@@ -322,6 +335,7 @@ const menuOpen = ref(false)
 const profilePanelOpen = ref(false)
 let mouseDownOnTrigger = false
 let pointerDownInsideMenu = false
+let settingUpdatePending = false
 const triggerRef = useTemplateRef('triggerRef')
 const menuRef = useTemplateRef('menuRef')
 
@@ -399,6 +413,11 @@ const usesCustomThemePalette = computed(() => isCustomThemeValue(baseTheme.value
 ))
 const customThemeEditorOpen = computed(() => store.getters.getCustomThemeEditorOpen)
 const mainColor = computed(() => store.getters.getMainColor)
+const mainColorAvailable = computed(() => (
+  !customThemeEditorOpen.value &&
+  baseTheme.value !== 'hotPink' &&
+  !usesCustomThemePalette.value
+))
 const uiScale = computed(() => store.getters.getUiScale)
 const thumbnailSize = computed(() => store.getters.getThumbnailSize)
 const playNextVideo = computed(() => store.getters.getPlayNextVideo)
@@ -410,6 +429,11 @@ const currentLocale = computed(() => store.getters.getCurrentLocale)
 const region = computed(() => store.getters.getRegion)
 const regionNames = computed(() => store.getters.getRegionNames)
 const regionValues = computed(() => store.getters.getRegionValues)
+const showDownloadsShortcut = computed(() => (
+  USING_ELECTRON &&
+  store.getters.getEnableDownloads &&
+  store.getters.getMoveDownloadsToQuickSettings
+))
 
 const RESOLUTION_VALUES = ['2160', '1440', '1080', '720', '480', '360', '240', '144']
 const autoQualityAvailable = computed(() => playbackEngineSupportsAutoQuality(store.getters.getVideoPlaybackEngine))
@@ -510,7 +534,7 @@ function closeProfilePanel() {
 
 function handleMenuFocusOut(event) {
   if (event.relatedTarget === null) {
-    const controlChangedDuringClick = pointerDownInsideMenu
+    const controlChangedDuringClick = pointerDownInsideMenu || settingUpdatePending
     setTimeout(() => {
       if (controlChangedDuringClick) {
         focusMenu()
@@ -559,8 +583,15 @@ function openProfileSettings() {
  * @param {string} setting
  * @param {string | boolean} value
  */
-function updateSetting(setting, value) {
-  store.dispatch(`update${setting}`, value)
+async function updateSetting(setting, value) {
+  settingUpdatePending = true
+  try {
+    await store.dispatch(`update${setting}`, value)
+    await nextTick()
+    focusMenu()
+  } finally {
+    settingUpdatePending = false
+  }
 }
 
 function updateUiScale(value) {
@@ -586,6 +617,11 @@ function handleHideRecommendedVideos(value) {
 function openSettings() {
   menuOpen.value = false
   store.dispatch('toggleSettingsWindow')
+}
+
+function openDownloads() {
+  menuOpen.value = false
+  store.dispatch('showSettingsWindow', 'downloads')
 }
 
 function openKeyboardShortcuts() {
