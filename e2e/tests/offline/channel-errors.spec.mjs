@@ -50,4 +50,16 @@ test('shows fallback metadata for unavailable channels', async ({ page }) => {
   const unknownChannel = page.locator('.channelDetails:visible')
   await expect(unknownChannel.locator('.name')).toHaveText('Channel name unavailable')
   await expect(page.locator(sel.activeTab)).toContainText('Channel name unavailable')
+
+  await page.evaluate(() => {
+    const app = document.querySelector('#app').__vue_app__
+    const i18n = app._context.provides[app.__VUE_I18N_SYMBOL__].global
+    i18n.setLocaleMessage('e2e', {
+      Channel: { 'Channel Name Unavailable': 'Localized unavailable name' }
+    })
+    i18n.locale.value = 'e2e'
+  })
+
+  await expect(unknownChannel.locator('.name')).toHaveText('Localized unavailable name')
+  await expect(page.locator(sel.activeTab)).toContainText('Localized unavailable name')
 })

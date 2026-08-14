@@ -359,7 +359,7 @@ import {
   getLocalChannelSearchResultType,
 } from './channel-search'
 
-const { t } = useI18n()
+const { locale, t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const setTabTitle = useTabTitle()
@@ -400,7 +400,7 @@ const isFamilyFriendly = ref(false)
 
 // Publish the resolved name or its fallback only after channel loading finishes.
 // This keeps a late tab-mount or route projection from restoring the route placeholder.
-watch([channelName, isLoading], ([name, loading]) => {
+watch([channelName, isLoading, locale], ([name, loading]) => {
   if (!loading) {
     setTabTitle(name || t('Channel.Channel Name Unavailable'))
   }
