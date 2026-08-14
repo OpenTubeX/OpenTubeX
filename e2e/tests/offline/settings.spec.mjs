@@ -2188,6 +2188,21 @@ test.describe('live chat replay visibility migration', () => {
   })
 })
 
+test.describe('Downloads placement migration', () => {
+  test.use({ seed: { settings: { moveDownloadsToQuickSettings: false } } })
+
+  test('preserves an existing app header placement choice', async ({ app }) => {
+    await expect.poll(async () => {
+      const settings = latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      )
+      return settings.moveDownloadsToAppHeader
+    }).toBe(true)
+
+    await expect(app.page.locator('.topNav .downloadsButton')).toBeVisible()
+  })
+})
+
 test.describe('playback engine proxy migration', () => {
   test.use({
     seed: {
