@@ -53,3 +53,10 @@
 .videoIndexIcon {
   font-size: 14px;
 }
+
+.downloadAvailableIcon {
+  color: var(--primary-color);
+  display: block;
+  font-size: 11px;
+  margin-block-start: 4px;
+}

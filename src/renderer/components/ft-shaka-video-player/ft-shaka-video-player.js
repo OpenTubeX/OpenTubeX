@@ -238,6 +238,10 @@ export default defineComponent({
       type: Array,
       default: () => ([])
     },
+    playbackSourceKey: {
+      type: Number,
+      default: 0
+    },
     startTime: {
       type: Number,
       default: null
@@ -5520,7 +5524,9 @@ export default defineComponent({
       preRollIntervalId = setInterval(updateRemainingMs, 100)
     }
 
-    if (process.env.SUPPORTS_LOCAL_API && props.sabrData) {
+    function ensureSabrStream() {
+      if (!process.env.SUPPORTS_LOCAL_API || sabrStream || !props.sabrData) return
+
       sabrStream = /** @__NOINLINE__ */ setupSabrScheme(props.sabrData, () => player, () => sabrManifest, playerWidth, playerHeight)
       sabrAbortController = new AbortController()
       sabrStream.onBackoffRequested(({ backoffMs }) => {
@@ -5532,6 +5538,8 @@ export default defineComponent({
         emit('player-reload-requested', getSabrReloadState())
       })
     }
+
+    ensureSabrStream()
 
     // #endregion SABR
 
@@ -8898,10 +8906,12 @@ export default defineComponent({
               variants = variants.filter(variant => variant.audioRoles.includes('main'))
             }
 
-            const highestBandwidth = Math.max(...variants.map(variant => variant.audioBandwidth))
-            variants = variants.filter(variant => variant.audioBandwidth === highestBandwidth)
+            if (variants.length > 0) {
+              const highestBandwidth = Math.max(...variants.map(variant => variant.audioBandwidth))
+              variants = variants.filter(variant => variant.audioBandwidth === highestBandwidth)
 
-            player.selectVariantTrack(variants[0])
+              player.selectVariantTrack(variants[0])
+            }
           }
         } catch (error) {
           handleError(error, 'loading dash/audio manifest and setting default quality in mounted')
@@ -8921,7 +8931,20 @@ export default defineComponent({
       // Ideally we would set this in the `streaming` event handler, but for HLS this is only set to true after the loaded event fires.
       isLive.value = player.isLive()
       restorePendingPlaybackRate()
-      emit('loaded')
+      const mediaElement = video.value
+      if (props.format === 'legacy' && activeLegacyFormat.value?.localFile &&
+        mediaElement.videoWidth > 0 && mediaElement.videoHeight > 0) {
+        const format = activeLegacyFormat.value
+        format.width = mediaElement.videoWidth
+        format.height = mediaElement.videoHeight
+        format.qualityLabel = `${format.width}×${format.height} • ${format.localFileLabel}`
+        events.dispatchEvent(new CustomEvent('legacyFormatMetadataChanged'))
+      }
+      emit('loaded', {
+        duration: mediaElement.duration,
+        width: mediaElement.videoWidth,
+        height: mediaElement.videoHeight
+      })
 
       nextTick(() => {
         rememberInlinePlayerLayoutHeight()
@@ -9049,7 +9072,7 @@ export default defineComponent({
     }
 
     watch(
-      () => props.format,
+      () => [props.format, props.playbackSourceKey],
       /**
        * Handles changing between formats. It tries its best to backup and restore the settings:
        * - playback position
@@ -9061,13 +9084,23 @@ export default defineComponent({
        * @param {'dash'|'audio'|'legacy'} newFormat
        * @param {'dash'|'audio'|'legacy'} oldFormat
        */
-      async (newFormat, oldFormat) => {
+      async ([newFormat], [oldFormat]) => {
         ignoreErrors = true
 
         // format switch happened before the player loaded, probably because of an error
         // as there are no previous player settings to restore, we should treat it like this was the original format
         if (!hasLoaded.value) {
           await unloadForFormatSwitch()
+          ensureSabrStream()
+
+          if (newFormat === 'audio' && props.thumbnail) {
+            // A media element that has already painted video frames may keep
+            // its last frame instead of showing a newly assigned poster. Reset
+            // it after Shaka detaches the video source so audio-only playback
+            // reliably returns to the thumbnail.
+            video.value.poster = props.thumbnail
+            video.value.load()
+          }
 
           ignoreErrors = false
 
@@ -9139,6 +9172,12 @@ export default defineComponent({
           }
 
           await unloadForFormatSwitch()
+          ensureSabrStream()
+
+          if (newFormat === 'audio' && props.thumbnail) {
+            video_.poster = props.thumbnail
+            video_.load()
+          }
 
           ignoreErrors = false
           queuePlaybackRateRestore(playbackRate)

@@ -22,14 +22,6 @@ const mutations = {
 
   removeYtDlpDownload(state, id) {
     delete state.ytDlpDownloads[id]
-  },
-
-  clearFinishedYtDlpDownloads(state) {
-    for (const [id, download] of Object.entries(state.ytDlpDownloads)) {
-      if (download.status !== 'downloading' && download.status !== 'processing') {
-        delete state.ytDlpDownloads[id]
-      }
-    }
   }
 }
 

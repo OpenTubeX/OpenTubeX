@@ -191,6 +191,7 @@
             :playlist-type="playlistType"
             :playlist-index="reversePlaylist ? playlistItems.length - index - 1 : index"
             :playlist-item-id="item.playlistItemId"
+            :download-id="downloadId"
             :playlist-reverse="reversePlaylist"
             :playlist-shuffle="shuffleEnabled"
             :playlist-loop="loopEnabled"
@@ -270,6 +271,10 @@ const props = defineProps({
   playlistItemId: {
     type: String,
     default: null,
+  },
+  downloadId: {
+    type: String,
+    default: '',
   },
   watchViewLoading: {
     type: Boolean,
@@ -835,7 +840,8 @@ function playNextVideo() {
     query: {
       playlistId: props.playlistId,
       playlistType: props.playlistType,
-      playlistItemId: targetPlaylistItem.playlistItemId
+      playlistItemId: targetPlaylistItem.playlistItemId,
+      ...(props.downloadId ? { downloadId: props.downloadId } : {})
     }
   }
 
@@ -899,7 +905,8 @@ function playPreviousVideo() {
       query: {
         playlistId: props.playlistId,
         playlistType: props.playlistType,
-        playlistItemId: targetPlaylistItem.playlistItemId
+        playlistItemId: targetPlaylistItem.playlistItemId,
+        ...(props.downloadId ? { downloadId: props.downloadId } : {})
       }
     }
   )

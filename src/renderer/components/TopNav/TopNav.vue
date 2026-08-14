@@ -134,6 +134,35 @@
         </div>
       </div>
       <div class="side profiles">
+        <button
+          v-if="settingsWindowMinimized"
+          type="button"
+          class="minimizedUtilityButton navButton"
+          :class="{ utilityWindowMorphTarget: settingsWindowMorphing }"
+          :aria-label="restoreSettingsWindowLabel"
+          :title="restoreSettingsWindowLabel"
+          @click="restoreSettingsWindow"
+        >
+          <FtIcon
+            class="navIcon"
+            :icon="minimizedSettingsWindowIcon"
+          />
+        </button>
+        <button
+          v-if="showDownloadsButton"
+          type="button"
+          class="downloadsButton navButton"
+          :class="{ active: downloadsWindowOpen }"
+          :aria-label="t('Downloads.Downloads')"
+          :title="t('Downloads.Downloads')"
+          :aria-pressed="downloadsWindowOpen"
+          @click="toggleDownloadsWindow"
+        >
+          <FtIcon
+            class="navIcon"
+            :icon="['fas', 'download']"
+          />
+        </button>
         <FtQuickSettingsMenu />
       </div>
     </div>
@@ -280,6 +309,40 @@ const newWindowText = computed(() => {
 })
 
 const isElectron = process.env.IS_ELECTRON
+const enableDownloads = computed(() => store.getters.getEnableDownloads)
+const moveDownloadsToQuickSettings = computed(() => store.getters.getMoveDownloadsToQuickSettings)
+const settingsWindowMinimized = computed(() => store.getters.getSettingsWindowMinimized)
+const settingsWindowMorphing = computed(() => store.getters.getSettingsWindowMorphing)
+const settingsWindowView = computed(() => store.getters.getSettingsWindowView)
+const downloadsWindowOpen = computed(() => (
+  store.getters.getSettingsWindowOpen &&
+  store.getters.getSettingsWindowView === 'downloads'
+))
+const showDownloadsButton = computed(() => (
+  isElectron &&
+  enableDownloads.value &&
+  !moveDownloadsToQuickSettings.value &&
+  !(settingsWindowMinimized.value && settingsWindowView.value === 'downloads')
+))
+const minimizedSettingsWindowTitle = computed(() => {
+  if (settingsWindowView.value === 'about') return t('About.About')
+  if (settingsWindowView.value === 'downloads') return t('Downloads.Downloads')
+  return t('Settings.Settings')
+})
+const minimizedSettingsWindowIcon = computed(() => {
+  if (settingsWindowView.value === 'about') return ['fas', 'info-circle']
+  if (settingsWindowView.value === 'downloads') return ['fas', 'download']
+  return ['fas', 'cog']
+})
+const restoreSettingsWindowLabel = computed(() => `${t('Restore')}: ${minimizedSettingsWindowTitle.value}`)
+
+function toggleDownloadsWindow() {
+  store.dispatch(downloadsWindowOpen.value ? 'hideSettingsWindow' : 'showSettingsWindow', 'downloads')
+}
+
+function restoreSettingsWindow() {
+  store.dispatch('restoreSettingsWindow')
+}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const useVerticalTabBar = computed(() => store.getters.getUseVerticalTabBar)

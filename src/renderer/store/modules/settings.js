@@ -246,6 +246,7 @@ const state = {
   ytDlpFfmpegSource: 'system',
   ytDlpFfmpegPath: '',
   enableDownloads: true,
+  moveDownloadsToQuickSettings: false,
   ytDlpDownloadFolderPath: '',
   ytDlpDownloadTemplates: '[]',
   ytDlpSelectedTemplate: 'video:best',

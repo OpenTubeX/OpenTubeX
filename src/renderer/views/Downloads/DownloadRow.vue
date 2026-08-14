@@ -13,6 +13,13 @@
         <p class="downloadStatus">
           {{ statusText }}
         </p>
+        <p
+          v-if="availabilityText"
+          class="downloadAvailability"
+          :class="{ missing: download.availability === 'missing' }"
+        >
+          {{ availabilityText }}
+        </p>
         <div
           v-if="inProgress"
           class="progressTrack"
@@ -29,6 +36,13 @@
           class="downloadSummary"
         >
           {{ summary }}
+        </p>
+        <p
+          v-if="errorText"
+          class="downloadError"
+          dir="auto"
+        >
+          {{ errorText }}
         </p>
         <ul
           v-if="destinations.length > 0"
@@ -62,14 +76,29 @@
       />
       <template v-else>
         <FtIconButton
-          v-if="download.status === 'completed' && download.destination"
+          v-if="canRetry"
+          :title="t('Downloads.Retry Download')"
+          :icon="['fas', 'sync']"
+          theme="primary"
+          :disabled="retrying"
+          @click="emit('retry')"
+        />
+        <FtIconButton
+          v-if="canPlay"
+          :title="t('Downloads.Play Download')"
+          :icon="['fas', 'play']"
+          theme="primary"
+          @click="emit('play')"
+        />
+        <FtIconButton
+          v-if="canAccessFiles"
           :title="t('Downloads.Show in Folder')"
           :icon="['fas', 'folder-open']"
           theme="secondary"
           @click="emit('open')"
         />
         <FtIconButton
-          v-if="download.status === 'completed' && download.destination"
+          v-if="canAccessFiles"
           :title="t('Downloads.Remove File')"
           :icon="['fas', 'trash']"
           theme="destructive"
@@ -92,14 +121,33 @@ import { useI18n } from 'vue-i18n'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 import { downloadTemplateName } from '../../helpers/downloadTemplates'
+import { formatBytes } from '../../helpers/fileSize'
 
 // keeps a playlist download from filling the page with one line per video
 const MAX_VISIBLE_DESTINATIONS = 3
 
-const props = defineProps({ download: { type: Object, required: true } })
-const emit = defineEmits(['clear', 'open', 'remove'])
+const props = defineProps({
+  download: { type: Object, required: true },
+  retrying: { type: Boolean, default: false }
+})
+const emit = defineEmits(['clear', 'open', 'play', 'remove', 'retry'])
 const { t } = useI18n()
 const inProgress = computed(() => ['downloading', 'processing'].includes(props.download.status))
+const canRetry = computed(() => (
+  ['failed', 'cancelled'].includes(props.download.status) &&
+  (props.download.retryPayload || props.download.videoId || props.download.playlistId)
+))
+const canAccessFiles = computed(() => (
+  props.download.status === 'completed' &&
+  props.download.destination &&
+  props.download.availability !== 'missing'
+))
+const canPlay = computed(() => (
+  props.download.status === 'completed' &&
+  ['video', 'audio'].includes(props.download.mode) &&
+  Array.isArray(props.download.files) &&
+  props.download.files.some(file => file.available !== false)
+))
 const modeLabel = computed(() => {
   switch (props.download.mode) {
     case 'video':
@@ -117,7 +165,10 @@ const summary = computed(() => {
 
   return [
     modeLabel.value,
-    templateName === '' ? '' : t('Downloads.Template Used', { name: templateName })
+    templateName === '' ? '' : t('Downloads.Template Used', { name: templateName }),
+    Number.isFinite(props.download.sizeBytes) && props.download.sizeBytes > 0
+      ? formatBytes(props.download.sizeBytes)
+      : ''
   ].filter(part => part !== '').join(' • ')
 })
 // downloads from before the file list was recorded only know their last file
@@ -129,6 +180,25 @@ const allDestinations = computed(() => {
 })
 const destinations = computed(() => allDestinations.value.slice(0, MAX_VISIBLE_DESTINATIONS))
 const hiddenDestinationCount = computed(() => allDestinations.value.length - destinations.value.length)
+const availabilityText = computed(() => {
+  if (props.download.status !== 'completed') return ''
+  if (props.download.availability === 'missing') {
+    return t('Downloads.Files Missing', { count: props.download.destinationCount }, props.download.destinationCount)
+  }
+  if (props.download.availability === 'partial') {
+    return t('Downloads.Files Available', {
+      available: props.download.availableDestinationCount,
+      total: props.download.destinationCount
+    })
+  }
+  return ''
+})
+const errorText = computed(() => {
+  if (props.download.status !== 'failed' || !props.download.errorMessage) return ''
+  return props.download.errorMessage === 'ENOENT'
+    ? t('Downloads.yt-dlp Not Found')
+    : props.download.errorMessage
+})
 const statusText = computed(() => {
   if (props.download.status === 'downloading') {
     return [`${props.download.percent.toFixed(1)}%`, props.download.speed, props.download.eta ? `ETA ${props.download.eta}` : null].filter(Boolean).join(' • ')
@@ -137,7 +207,9 @@ const statusText = computed(() => {
     case 'processing':
       return t('Downloads.Processing')
     case 'completed':
-      return t('Downloads.Download Complete')
+      return props.download.availability === 'missing'
+        ? t('Downloads.Download Missing')
+        : t('Downloads.Download Complete')
     case 'cancelled':
       return t('Downloads.Download Cancelled')
     default:

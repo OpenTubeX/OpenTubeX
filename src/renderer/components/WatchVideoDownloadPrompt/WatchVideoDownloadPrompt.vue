@@ -269,6 +269,14 @@
             @click="cancelDownload"
           />
           <FtButton
+            v-if="activeDownload !== null"
+            :label="t('Downloads.Open Downloads')"
+            :icon="['fas', 'download']"
+            :text-color="null"
+            :background-color="null"
+            @click="openDownloads"
+          />
+          <FtButton
             :label="activeDownload === null ? t('Cancel') : t('Close')"
             :icon="['fas', 'xmark']"
             :text-color="null"
@@ -592,6 +600,10 @@ const statusLine = computed(() => {
 })
 function cancelDownload() {
   if (downloadId.value !== null) window.ftElectron.ytDlpCancelDownload(downloadId.value)
+}
+function openDownloads() {
+  close()
+  store.dispatch('showSettingsWindow', 'downloads')
 }
 function close() { emit('close') }
 </script>

@@ -36,10 +36,11 @@
   background-color: var(--card-bg-color);
   display: grid;
   grid-template-columns: minmax(0, 1fr) 44px;
-  inset-block-start: 0;
   padding-inline-end: 8px;
-  position: sticky;
-  z-index: 1;
+}
+
+.profileHeaderRow.hasDownloadsShortcut {
+  grid-template-columns: minmax(0, 1fr) 44px 44px;
 }
 
 .profileSummary {
@@ -57,7 +58,7 @@
   text-align: start;
 }
 
-.allSettingsShortcut {
+.quickSettingsShortcut {
   align-items: center;
   align-self: center;
   background: transparent;
@@ -157,6 +158,8 @@
 .quickSettingsMenu {
   background-color: var(--card-bg-color);
   box-shadow: 0 16px 40px rgb(0 0 0 / 55%), 0 3px 10px rgb(0 0 0 / 45%);
+  display: flex;
+  flex-direction: column;
   inset-block-start: 48px;
   inset-inline-end: 0;
   margin: 0;
@@ -164,11 +167,18 @@
   inline-size: min(440px, calc(100vw - 20px));
   line-height: normal;
   overscroll-behavior: contain;
-  overflow-y: auto;
+  overflow: hidden;
   padding: 0;
   position: absolute;
   text-align: start;
   transform-origin: top right;
+}
+
+.quickSettingsScroll {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .quick-settings-menu-enter-active,
@@ -224,6 +234,10 @@
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.selectPair:has(> :only-child) {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .selectPair :deep(.quickSelect + .quickSelect) {
@@ -293,8 +307,8 @@
 
 .profileSummary:hover,
 .profileSummary:focus-visible,
-.allSettingsShortcut:hover,
-.allSettingsShortcut:focus-visible,
+.quickSettingsShortcut:hover,
+.quickSettingsShortcut:focus-visible,
 .profileOption:hover,
 .profileOption:focus-visible,
 .profilePanelHeader button:hover,

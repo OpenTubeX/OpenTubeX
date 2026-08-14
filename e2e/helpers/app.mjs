@@ -317,6 +317,12 @@ export { expect }
  * (regular entry + "more options" flyout), so this clicks the first one.
  */
 export async function goTo(page, route) {
+  if (route === 'downloads') {
+    await page.locator('.topNav .downloadsButton').click()
+    await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
+    return
+  }
+
   if (route === 'settings') {
     await page.locator('.profileTrigger').click()
     await expect(page.locator('.quickSettingsMenu')).toBeVisible()

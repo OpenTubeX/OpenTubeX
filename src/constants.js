@@ -145,6 +145,21 @@ const IpcChannels = {
   YT_DLP_BINARY_UPDATED: 'yt-dlp-binary-updated'
 }
 
+const DOWNLOADED_MEDIA_MIME_TYPES = {
+  aac: 'audio/aac',
+  flac: 'audio/flac',
+  m4a: 'audio/mp4',
+  mp3: 'audio/mpeg',
+  ogg: 'audio/ogg',
+  opus: 'audio/ogg',
+  wav: 'audio/wav',
+  m4v: 'video/mp4',
+  mkv: 'video/x-matroska',
+  mov: 'video/quicktime',
+  mp4: 'video/mp4',
+  webm: 'video/webm'
+}
+
 const DBActions = {
   // The constants in the GENERAL group are usally intermingeled with the ones in other groups, so they need unique values.
   // The other groups however are usually not mixed (e.g. HISTORY and PROFILES),
@@ -676,4 +691,5 @@ export {
   WATCHED_MAX_REMAINING_SECONDS,
   LIGHT_BASE_THEMES,
   DARK_BASE_THEMES,
+  DOWNLOADED_MEDIA_MIME_TYPES,
 }

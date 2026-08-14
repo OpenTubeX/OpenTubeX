@@ -2208,6 +2208,20 @@ a:visited {
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+:root.utilityWindowMorphActive .utilityWindowMorphTarget {
+  view-transition-name: utility-window-morph;
+}
+
+:root.utilityWindowMorphActive::view-transition-group(utility-window-morph) {
+  animation-duration: 260ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+:root.utilityWindowMorphActive::view-transition-old(root),
+:root.utilityWindowMorphActive::view-transition-new(root) {
+  animation: none;
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 200ms;

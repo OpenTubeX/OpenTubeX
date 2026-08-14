@@ -51,8 +51,11 @@ router.isReady().then(async () => {
 // to avoid accessing electron api from web app build
 if (process.env.IS_ELECTRON) {
   window.ftElectron.handleChangeView((route, tabId) => {
-    if (typeof route === 'string' && (route === '/settings' || route.startsWith('/settings/profile'))) {
-      store.dispatch('showSettingsWindow', route.startsWith('/settings/profile') ? 'profile' : null)
+    if (typeof route === 'string' && (route === '/downloads' || route === '/settings' || route.startsWith('/settings/profile'))) {
+      const view = route === '/downloads'
+        ? 'downloads'
+        : route.startsWith('/settings/profile') ? 'profile' : null
+      store.dispatch('showSettingsWindow', view)
       return
     }
     const targetTabId = tabId ?? store.getters.getActiveTabId

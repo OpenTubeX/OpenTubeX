@@ -93,6 +93,7 @@
       <video
         ref="video"
         class="player"
+        :class="{ audioOnly: format === 'audio' }"
         :style="videoZoomStyle"
         preload="auto"
         crossorigin="anonymous"
@@ -112,6 +113,13 @@
         @enterpictureinpicture="handleEnterPictureInPicture"
         @leavepictureinpicture="handleLeavePictureInPicture"
       />
+      <img
+        v-if="format === 'audio' && thumbnail"
+        class="audioPoster"
+        :src="thumbnail"
+        alt=""
+        aria-hidden="true"
+      >
       <div
         v-if="voiceOverTranslationState === 'loading'"
         class="voiceOverTranslationProgress shaka-no-propagation"

@@ -1,7 +1,8 @@
-import { chmod, readFile, writeFile } from 'node:fs/promises'
+import { chmod, copyFile, mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, goTo, goToSettingsSection, waitForAppReady } from '../../helpers/app.mjs'
+import { DEMO_MEDIA_LENGTH, DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
 import { DBActions, PlaylistVideoAddResult } from '../../../src/constants.js'
 
 function historyEntry(videoId, title) {
@@ -209,7 +210,7 @@ test.describe('video downloads', () => {
     await expect(generalSection.getByRole('combobox', { name: 'Extra Thumbnail Action Button' })).toHaveText('None')
     await page.locator('.settingsCloseButton').click()
 
-    await expect(page.locator('.sideNav a[href="#/downloads"]')).toHaveCount(0)
+    await expect(page.locator('.topNav .downloadsButton')).toHaveCount(0)
     await video.hover()
     await expect(video.locator('.extraThumbnailActionIcon')).toHaveCount(0)
     await video.locator('.optionsButton').click()
@@ -325,6 +326,349 @@ test.describe('video downloads', () => {
     }, result.id)).toMatchObject({ title: '', status: 'completed' })
   })
 
+  test('plays a downloaded video locally and reconciles it after external deletion', async ({ app, page }) => {
+    const downloadedFile = path.join(app.userDataDir, 'downloaded-demo.webm')
+    const downloadThumbnail = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="640" height="360"%3E%3Cpath fill="%23b00020" d="M0 0h640v360H0z"/%3E%3C/svg%3E'
+    const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
+    const argumentsFile = path.join(app.userDataDir, 'yt-dlp-arguments.txt')
+    await copyFile(DEMO_MEDIA_PATH, downloadedFile)
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf '%s\\n' "$@" >> '${argumentsFile}'`,
+      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t30\\t640\\t360\\t${downloadedFile}\\n'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const result = await page.evaluate((thumbnail) => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      title: 'Downloaded demo',
+      thumbnail,
+      mode: 'video'
+    }), downloadThumbnail)
+    await expect.poll(() => page.evaluate(async (id) => {
+      const downloads = await window.ftElectron.ytDlpListDownloads()
+      return downloads.find(download => download.id === id)
+    }, result.id)).toMatchObject({
+      status: 'completed',
+      availability: 'available',
+      files: [{
+        videoId: 'eeeeeeeeeee',
+        path: downloadedFile,
+        duration: 30,
+        width: 640,
+        height: 360,
+        available: true
+      }]
+    })
+
+    await page.evaluate(() => {
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
+        x: 12,
+        y: 12,
+        width: 400,
+        height: 650
+      }))
+    })
+    await goTo(page, 'downloads')
+    await expect(page.getByText('Total size: 140 KiB', { exact: true })).toBeVisible()
+    expect(await page.evaluate(async (id) => {
+      const download = (await window.ftElectron.ytDlpListDownloads()).find(record => record.id === id)
+      return download.sizeBytes
+    }, result.id)).toBe(DEMO_MEDIA_LENGTH)
+    const audioResult = await page.evaluate((thumbnail) => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      title: 'Downloaded audio alternative',
+      thumbnail,
+      mode: 'audio'
+    }), downloadThumbnail)
+    await expect.poll(() => page.evaluate(async (id) => {
+      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+    }, audioResult.id)).toBe('completed')
+    const temporaryPaths = (await readFile(argumentsFile, 'utf8'))
+      .split('\n')
+      .filter(argument => argument.startsWith('temp:'))
+    expect(temporaryPaths).toHaveLength(2)
+    expect(new Set(temporaryPaths).size).toBe(2)
+    const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Downloaded demo' })
+    await expect(downloadRow.locator('.downloadSummary')).toContainText('140 KiB')
+    await expect(page.locator('.settingsBackButton')).toHaveCount(0)
+    await expect(downloadRow).toHaveCSS('flex-direction', 'column')
+    await expect(downloadRow.locator('.downloadMain')).toHaveCSS('flex-direction', 'column')
+    await expect.poll(async () => {
+      const [mainBounds, thumbnailBounds] = await Promise.all([
+        downloadRow.locator('.downloadMain').boundingBox(),
+        downloadRow.locator('.downloadThumbnail').boundingBox()
+      ])
+      return thumbnailBounds.x + thumbnailBounds.width / 2 - (mainBounds.x + mainBounds.width / 2)
+    }).toBeCloseTo(0, 0)
+    await downloadRow.getByTitle('Play download').click()
+    await expect(page).toHaveURL(new RegExp(`/watch/eeeeeeeeeee\\?downloadId=${result.id}`))
+    await expect(page.locator('.infoArea .videoTitle')).toContainText('Downloaded demo')
+    await expect.poll(() => page.locator('video.player').evaluate(video => video.currentTime), {
+      timeout: 30_000
+    }).toBeGreaterThan(0)
+    await expect.poll(() => page.locator('video.player').evaluate(video => video.duration)).toBeGreaterThan(30)
+    await expect(page.locator('.legacy-quality-button')).toHaveAttribute('shaka-status', '640×360 • Local file')
+    const sourceSwitchLoadGeneration = await page.evaluate(() => {
+      const findWatchView = (vnode) => {
+        if (vnode?.component?.type?.name === 'Watch') return vnode.component.proxy
+        if (vnode?.component?.subTree) {
+          const match = findWatchView(vnode.component.subTree)
+          if (match) return match
+        }
+        if (Array.isArray(vnode?.children)) {
+          for (const child of vnode.children) {
+            const match = findWatchView(child)
+            if (match) return match
+          }
+        }
+        return null
+      }
+      const watchView = findWatchView(document.querySelector('#app').__vue_app__._container._vnode)
+      // This offline fixture cannot fetch an online source. Preserve a known
+      // playable source so this test isolates in-place source routing instead
+      // of exercising the separate unavailable-online fallback.
+      watchView.onlinePlaybackSource = {
+        manifestSrc: watchView.manifestSrc,
+        manifestMimeType: watchView.manifestMimeType,
+        sabrData: watchView.sabrData,
+        legacyFormats: watchView.legacyFormats,
+        streamingDataExpiryDate: watchView.streamingDataExpiryDate,
+        activeFormat: watchView.activeFormat,
+        activePlaybackEngine: watchView.activePlaybackEngine,
+        activePlaybackEngineVersion: watchView.activePlaybackEngineVersion,
+        hasBeenLoaded: true
+      }
+      return watchView.videoLoadGeneration
+    })
+    await page.getByRole('button', { name: 'Change Media Formats' }).click()
+    const formatPrompt = page.getByRole('dialog', { name: 'Change Media Formats' })
+    await expect(formatPrompt.locator('.engineBadge')).toHaveText('Local file')
+    await expect(formatPrompt.getByText('Stream extraction method', { exact: true })).toHaveCount(0)
+    await expect(formatPrompt.getByRole('button', { name: /Local video file/ })).toHaveAttribute('aria-pressed', 'true')
+    await expect(formatPrompt.getByText('Use Legacy Formats', { exact: true })).toHaveCount(0)
+    await formatPrompt.getByRole('button', { name: /Local video file/ }).click()
+    await page.locator('video.player').evaluate(video => { video.currentTime = 15 })
+    await expect.poll(() => page.locator('video.player').evaluate(video => video.currentTime)).toBeGreaterThan(14)
+
+    await page.getByRole('button', { name: 'Change Media Formats' }).click()
+    await formatPrompt.getByRole('button', { name: /Online video/ }).click()
+    await expect(page).not.toHaveURL(/downloadId=/)
+    await page.getByRole('button', { name: 'Change Media Formats' }).click()
+    await expect(formatPrompt.locator('.engineBadge')).not.toHaveText('Local file')
+    await expect(formatPrompt.getByRole('button', { name: /Local video file/ })).toBeVisible()
+    await expect(formatPrompt.getByRole('button', { name: /Local audio file/ })).toBeVisible()
+    await formatPrompt.getByRole('button', { name: /Local audio file/ }).click()
+    await expect(page).toHaveURL(new RegExp(`downloadId=${audioResult.id}`))
+    await expect(page.locator('.audioPoster')).toBeVisible()
+    await page.getByRole('button', { name: 'Change Media Formats' }).click()
+    await expect(formatPrompt.getByRole('button', { name: /Local audio file/ })).toHaveAttribute('aria-pressed', 'true')
+    await formatPrompt.getByRole('button', { name: /Online video/ }).click()
+    await expect(page).not.toHaveURL(/downloadId=/)
+    expect(await page.evaluate(() => {
+      const findWatchView = (vnode) => {
+        if (vnode?.component?.type?.name === 'Watch') return vnode.component.proxy
+        if (vnode?.component?.subTree) {
+          const match = findWatchView(vnode.component.subTree)
+          if (match) return match
+        }
+        if (Array.isArray(vnode?.children)) {
+          for (const child of vnode.children) {
+            const match = findWatchView(child)
+            if (match) return match
+          }
+        }
+        return null
+      }
+      return findWatchView(document.querySelector('#app').__vue_app__._container._vnode).videoLoadGeneration
+    })).toBe(sourceSwitchLoadGeneration)
+    await expect(page.locator('.videoPlayerPlaceholder.ft-shimmer')).toHaveCount(0)
+    await expect(page.locator('.tab.active .tabTitleText')).toHaveText('Downloaded demo')
+
+    await unlink(downloadedFile)
+    await page.locator('.topNav .downloadsButton').click()
+    await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
+    await expect(downloadRow).toContainText('Download unavailable')
+    await expect(downloadRow).toContainText('The downloaded file is no longer available on the filesystem.')
+    await expect(downloadRow.getByTitle('Play download')).toHaveCount(0)
+    await expect(downloadRow.getByTitle('Show in Folder')).toHaveCount(0)
+    await expect(downloadRow.getByTitle('Remove File')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Clear failed, canceled, and missing' }).click()
+    await expect(downloadRow).toHaveCount(0)
+    await expect(page.locator('.downloadRow').filter({ hasText: 'Downloaded audio alternative' })).toHaveCount(0)
+  })
+
+  test('plays an audio download in the normal player', async ({ app, page }) => {
+    const downloadedFile = path.join(app.userDataDir, 'downloaded-audio.wav')
+    const executable = path.join(app.userDataDir, 'fake-audio-yt-dlp.sh')
+    const sampleRate = 8_000
+    const duration = 2
+    const samples = sampleRate * duration
+    const wav = Buffer.alloc(44 + samples * 2)
+    wav.write('RIFF', 0)
+    wav.writeUInt32LE(wav.length - 8, 4)
+    wav.write('WAVEfmt ', 8)
+    wav.writeUInt32LE(16, 16)
+    wav.writeUInt16LE(1, 20)
+    wav.writeUInt16LE(1, 22)
+    wav.writeUInt32LE(sampleRate, 24)
+    wav.writeUInt32LE(sampleRate * 2, 28)
+    wav.writeUInt16LE(2, 32)
+    wav.writeUInt16LE(16, 34)
+    wav.write('data', 36)
+    wav.writeUInt32LE(samples * 2, 40)
+    await writeFile(downloadedFile, wav)
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t${duration}\\tNA\\tNA\\t${downloadedFile}\\n'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      title: 'Downloaded audio',
+      mode: 'audio'
+    }))
+    await expect.poll(() => page.evaluate(async (id) => {
+      const downloads = await window.ftElectron.ytDlpListDownloads()
+      return downloads.find(download => download.id === id)
+    }, result.id)).toMatchObject({
+      status: 'completed',
+      files: [{ videoId: 'eeeeeeeeeee', duration, available: true }]
+    })
+
+    await goTo(page, 'downloads')
+    const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Downloaded audio' })
+    await expect(downloadRow.locator('.downloadSummary')).toContainText('31 KiB')
+    await downloadRow.getByTitle('Play download').click()
+    await expect(page).toHaveURL(new RegExp(`/watch/eeeeeeeeeee\\?downloadId=${result.id}`))
+    await expect.poll(() => page.locator('video.player').evaluate(video => video.currentTime), {
+      timeout: 30_000
+    }).toBeGreaterThan(0)
+    await expect.poll(() => page.locator('video.player').evaluate(video => video.duration)).toBe(duration)
+  })
+
+  test('serves an empty downloaded file without failing the protocol request', async ({ app, page }) => {
+    const downloadedFile = path.join(app.userDataDir, 'empty-audio.wav')
+    const executable = path.join(app.userDataDir, 'fake-empty-audio-yt-dlp.sh')
+    await writeFile(downloadedFile, '')
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\tNA\\tNA\\t${downloadedFile}\\n'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      title: 'Empty audio',
+      mode: 'audio'
+    }))
+    await expect.poll(() => page.evaluate(async (id) => {
+      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+    }, result.id)).toBe('completed')
+
+    const response = await page.evaluate(async (id) => {
+      const result = await fetch(`downloadmedia://file/${id}/eeeeeeeeeee`)
+      return {
+        status: result.status,
+        contentLength: result.headers.get('content-length'),
+        contentType: result.headers.get('content-type'),
+        bodyLength: (await result.arrayBuffer()).byteLength
+      }
+    }, result.id)
+    expect(response).toEqual({
+      status: 200,
+      contentLength: '0',
+      contentType: 'audio/wav',
+      bodyLength: 0
+    })
+  })
+
+  test('rejects a downloaded media path that is not a file', async ({ app, page }) => {
+    const downloadedDirectory = path.join(app.userDataDir, 'download-directory.webm')
+    const executable = path.join(app.userDataDir, 'fake-directory-yt-dlp.sh')
+    await mkdir(downloadedDirectory)
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\tNA\\tNA\\t${downloadedDirectory}\\n'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      title: 'Directory download',
+      mode: 'video'
+    }))
+    await expect.poll(() => page.evaluate(async (id) => {
+      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+    }, result.id)).toBe('completed')
+
+    expect(await page.evaluate(async (id) => {
+      return (await fetch(`downloadmedia://file/${id}/eeeeeeeeeee`)).status
+    }, result.id)).toBe(404)
+  })
+
+  test('maps playlist files to video IDs and reports partial availability', async ({ app, page }) => {
+    const availableFile = path.join(app.userDataDir, 'available.webm')
+    const missingFile = path.join(app.userDataDir, 'missing.webm')
+    const executable = path.join(app.userDataDir, 'fake-playlist-yt-dlp.sh')
+    await copyFile(DEMO_MEDIA_PATH, availableFile)
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t${availableFile}\\n'`,
+      `printf '__OPENTUBEX_FILE__:fffffffffff\\t${missingFile}\\n'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      playlistId: 'PL1234567890',
+      playlistKey: 'PL1234567890',
+      isPlaylist: true,
+      title: 'Partially available playlist',
+      mode: 'video'
+    }))
+    await expect.poll(() => page.evaluate(async (id) => {
+      const downloads = await window.ftElectron.ytDlpListDownloads()
+      return downloads.find(download => download.id === id)
+    }, result.id)).toMatchObject({
+      status: 'completed',
+      availability: 'partial',
+      availableDestinationCount: 1,
+      destinationCount: 2,
+      files: [
+        { videoId: 'eeeeeeeeeee', path: availableFile, available: true },
+        { videoId: 'fffffffffff', path: missingFile, available: false }
+      ]
+    })
+
+    await goTo(page, 'downloads')
+    const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Partially available playlist' })
+    await expect(downloadRow).toContainText('1 of 2 downloaded files are available.')
+    await expect(downloadRow.getByTitle('Play download')).toBeVisible()
+    await expect(downloadRow.getByTitle('Show in Folder')).toBeVisible()
+    await expect(downloadRow.getByTitle('Remove File')).toBeVisible()
+  })
+
   test('broadcasts active downloads to other windows', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
     await writeFile(executable, '#!/bin/sh\nprintf "[download] 10.0%% at 1MiB/s ETA 00:10\\n"\nexec sleep 30\n')
@@ -339,7 +683,7 @@ test.describe('video downloads', () => {
       page.locator('.topNav .navNewWindowButton').click()
     ])
     await waitForAppReady(otherWindow)
-    await otherWindow.locator('.sideNav a[href="#/downloads"]:visible').first().click()
+    await otherWindow.locator('.topNav .downloadsButton').click()
 
     await page.bringToFront()
     await goTo(page, 'history')
@@ -357,14 +701,20 @@ test.describe('video downloads', () => {
       otherWindow.locator('.topNav .navNewWindowButton').click()
     ])
     await waitForAppReady(lateWindow)
-    await lateWindow.locator('.sideNav a[href="#/downloads"]:visible').first().click()
+    await lateWindow.locator('.topNav .downloadsButton').click()
     const hydratedDownload = lateWindow.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
     await expect(hydratedDownload).toContainText('0.0%')
 
     await hydratedDownload.getByTitle('Cancel Download').click()
-    await expect(otherDownload).toContainText('Download cancelled')
+    await expect(otherDownload).toContainText('Download canceled')
 
-    await hydratedDownload.getByTitle('Clear From List').click()
+    await hydratedDownload.getByTitle('Retry download').click()
+    await expect(otherDownload).toContainText('0.0%')
+    await expect(hydratedDownload.getByTitle('Cancel Download')).toBeVisible()
+    await hydratedDownload.getByTitle('Cancel Download').click()
+    await expect(otherDownload).toContainText('Download canceled')
+
+    await lateWindow.getByRole('button', { name: 'Clear failed, canceled, and missing' }).click()
     await expect(otherDownload).toHaveCount(0)
   })
 
@@ -384,10 +734,13 @@ test.describe('video downloads', () => {
     await page.getByRole('option', { name: 'Download Video' }).click()
     await page.getByRole('button', { name: 'Download', exact: true }).click()
     await expect(page.getByText('Download complete', { exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Open Downloads', exact: true }).click()
+    await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
+    await expect(page.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })).toBeVisible()
 
     const { page: relaunchedPage } = await app.relaunch()
     await goTo(relaunchedPage, 'downloads')
-    await expect(relaunchedPage.getByText('Bookmarkable video', { exact: true })).toBeVisible()
+    await expect(relaunchedPage.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })).toBeVisible()
   })
 
   test('downloads subtitles on their own and lists the files they wrote', async ({ app, page }) => {
@@ -447,9 +800,12 @@ test.describe('video downloads', () => {
 
   test('keeps the source subtitle destination when conversion fails', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
+    const attemptMarker = path.join(app.userDataDir, 'subtitle-retry-attempted')
     await writeFile(executable, [
       '#!/bin/sh',
       'printf "[info] Writing video subtitles to: /tmp/subtitles.en.vtt\\n"',
+      `if [ -f ${attemptMarker} ]; then exit 0; fi`,
+      `printf retried > ${attemptMarker}`,
       'printf "Subtitle conversion failed\\n" >&2',
       'sleep 0.2',
       'exit 1'
@@ -475,6 +831,89 @@ test.describe('video downloads', () => {
     await goTo(page, 'downloads')
     const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
     await expect(downloadRow.locator('.destination')).toHaveText('/tmp/subtitles.en.vtt')
+    await expect(downloadRow.locator('.downloadError')).toContainText('Subtitle conversion failed')
+    await downloadRow.getByTitle('Retry download').click()
+    await expect.poll(() => page.evaluate(async () => {
+      return (await window.ftElectron.ytDlpListDownloads())
+        .filter(download => download.title === 'Bookmarkable video')
+        .map(download => download.status)
+    })).toEqual(['completed'])
+    await expect(downloadRow.getByTitle('Retry download')).toHaveCount(0)
+  })
+
+  test('starts only one retry when its button is activated twice', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'slow-failing-yt-dlp.sh')
+    const attemptsFile = path.join(app.userDataDir, 'retry-attempts.txt')
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf 'retry\\n' >> '${attemptsFile}'`,
+      'sleep 0.5',
+      'exit 1'
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      title: 'Retry once',
+      mode: 'video'
+    }))
+    await expect.poll(() => page.evaluate(async (id) => {
+      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+    }, result.id)).toBe('failed')
+    await writeFile(attemptsFile, '')
+
+    await goTo(page, 'downloads')
+    const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Retry once' }).first()
+    await downloadRow.getByTitle('Retry download').dblclick()
+
+    await expect.poll(() => page.evaluate(async (originalId) => {
+      const matchingDownloads = (await window.ftElectron.ytDlpListDownloads())
+        .filter(download => download.title === 'Retry once' && download.status === 'failed')
+      return matchingDownloads.length === 1 && matchingDownloads[0].id !== originalId
+    }, result.id)).toBe(true)
+    expect(await readFile(attemptsFile, 'utf8')).toBe('retry\n')
+  })
+
+  test('serializes retry requests in the main process', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'concurrent-retry-yt-dlp.sh')
+    const attemptsFile = path.join(app.userDataDir, 'concurrent-retry-attempts.txt')
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf 'retry\\n' >> '${attemptsFile}'`,
+      'sleep 0.5',
+      'exit 1'
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const original = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 'ffffffffffg',
+      title: 'Concurrent retry',
+      mode: 'video'
+    }))
+    await expect.poll(() => page.evaluate(async (id) => {
+      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+    }, original.id)).toBe('failed')
+    await writeFile(attemptsFile, '')
+
+    const results = await page.evaluate(async (id) => {
+      const record = (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)
+      return Promise.all([
+        window.ftElectron.ytDlpDownload(record.retryPayload, id),
+        window.ftElectron.ytDlpDownload(record.retryPayload, id)
+      ])
+    }, original.id)
+
+    expect(results.filter(result => result && 'id' in result)).toHaveLength(1)
+    expect(results.filter(result => result?.error === 'download-already-retrying')).toHaveLength(1)
+    await expect.poll(() => readFile(attemptsFile, 'utf8')).toBe('retry\n')
   })
 })
 
@@ -504,8 +943,9 @@ test('asks for confirmation before removing a downloaded file', async ({ page })
   expect(rowLayout.thumbnailRight).toBeLessThanOrEqual(rowLayout.detailsLeft)
 
   await page.getByTitle('Remove File').click()
-  await expect(page.getByRole('dialog')).toContainText('Remove downloaded file?')
-  await expect(page.getByRole('dialog')).toContainText('Finished download')
+  const removePrompt = page.getByRole('dialog', { name: 'Remove downloaded file?' })
+  await expect(removePrompt).toContainText('Remove downloaded file?')
+  await expect(removePrompt).toContainText('Finished download')
   await page.getByRole('button', { name: 'Cancel' }).click()
   await expect(page.getByText('Finished download')).toBeVisible()
 })

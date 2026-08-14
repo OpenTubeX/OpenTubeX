@@ -278,12 +278,13 @@ export default {
 
   /**
    * @param {import('../main/ytDlp').YtDlpDownloadPayload} payload
+   * @param {number} [retryDownloadId]
    * @returns {Promise<{ id: number } | { error: string } | null>}
    */
-  ytDlpDownload: (payload) => {
+  ytDlpDownload: (payload, retryDownloadId) => {
     // require the user to have interacted with the page recently
     if (navigator.userActivation.isActive) {
-      return ipcRenderer.invoke(IpcChannels.YT_DLP_DOWNLOAD, payload)
+      return ipcRenderer.invoke(IpcChannels.YT_DLP_DOWNLOAD, payload, retryDownloadId)
     }
 
     return Promise.resolve(null)

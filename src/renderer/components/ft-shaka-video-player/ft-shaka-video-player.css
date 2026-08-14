@@ -35,6 +35,20 @@
   transition: inline-size 250ms ease;
 }
 
+.audioPoster {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.player.audioOnly {
+  opacity: 0;
+}
+
 /*
   Holding shift over a zoomed video turns the pointer into a handle for moving
   the visible part of the frame. shaka-player's controls cover the video, so

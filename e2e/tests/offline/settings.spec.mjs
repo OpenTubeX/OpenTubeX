@@ -137,6 +137,33 @@ test.describe('settings', () => {
     await expect(page.locator('.settingsWindow')).toBeHidden()
   })
 
+  test('minimizes utility windows into the header and restores their view', async ({ page }) => {
+    for (const view of [null, 'about', 'downloads']) {
+      await page.evaluate((windowView) => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return store.dispatch('showSettingsWindow', windowView)
+      }, view)
+
+      const windowName = view === 'about' ? 'About' : view === 'downloads' ? 'Downloads' : 'Settings'
+      const settingsWindow = page.getByRole('dialog', { name: windowName, exact: true })
+      await expect(settingsWindow).toBeVisible()
+      await settingsWindow.getByRole('button', { name: /Minimi[sz]e/ }).click()
+
+      await expect(settingsWindow).toBeHidden()
+      const minimizedButton = page.locator('.minimizedUtilityButton')
+      await expect(minimizedButton).toBeVisible()
+      await expect(minimizedButton).toHaveAccessibleName(`Restore: ${windowName}`)
+      if (view === 'downloads') {
+        await expect(page.locator('.downloadsButton')).toHaveCount(0)
+      }
+
+      await minimizedButton.click()
+      await expect(page.getByRole('dialog', { name: windowName, exact: true })).toBeVisible()
+      await page.locator('.settingsCloseButton').click()
+      await expect(page.locator('.minimizedUtilityButton')).toHaveCount(0)
+    }
+  })
+
   test('restores the last selected category when reopened', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="privacy"]').click()
@@ -321,6 +348,168 @@ test.describe('settings', () => {
     const restoredBounds = await settingsWindow.boundingBox()
     expect(restoredBounds.width).toBeCloseTo(resizedBounds.width, 0)
     expect(restoredBounds.height).toBeCloseTo(resizedBounds.height, 0)
+  })
+
+  test('keeps stacked theme selects compact in a narrow settings window', async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
+        x: 40,
+        y: 40,
+        width: 400,
+        height: 700
+      }))
+    })
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="theme"]').click()
+
+    const selects = page.locator('.settingsContent .themeSelectRow .select')
+    await expect(selects.first()).toBeVisible()
+    expect(await selects.evaluateAll(elements => elements.every(element => element.offsetHeight === 45))).toBe(true)
+    expect(await selects.evaluateAll(elements => elements.every(element => {
+      const buttonBounds = element.querySelector('.select-text').getBoundingClientRect()
+      const arrowBounds = element.querySelector('.iconSelect').getBoundingClientRect()
+      return Math.abs(
+        arrowBounds.top + arrowBounds.height / 2 - (buttonBounds.top + buttonBounds.height / 2)
+      ) <= 1
+    }))).toBe(true)
+  })
+
+  test('clamps Theme settings after a narrow-to-wide reflow', async ({ page }) => {
+    await page.setViewportSize({ width: 340, height: 600 })
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="theme"]').click()
+
+    const content = page.locator('.settingsContent')
+    await content.evaluate(element => element.scrollTo(0, element.scrollHeight))
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await page.setViewportSize({ width: 1200, height: 800 })
+    await expect.poll(() => content.evaluate(element => {
+      const section = Array.from(element.children).find(child => {
+        return child.classList.contains('section') && getComputedStyle(child).display !== 'none'
+      })
+      const maximum = Math.max(0, section.offsetTop + section.offsetHeight +
+        Number.parseFloat(getComputedStyle(element).paddingBottom) - element.clientHeight)
+      return element.scrollTop <= maximum + 1
+    })).toBe(true)
+  })
+
+  test('opens Downloads from the download settings category', async ({ page }) => {
+    const routeBeforeOpening = page.url()
+    const downloadSection = await goToSettingsSection(page, 'download')
+
+    await downloadSection.getByRole('button', { name: 'Open Downloads' }).click()
+    await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
+    await expect(page.locator('.settingsWindow')).toHaveCount(1)
+    expect(page.url()).toBe(routeBeforeOpening)
+  })
+
+  test('moves the Downloads shortcut from the header into Quick Settings', async ({ page }) => {
+    const downloadSection = await goToSettingsSection(page, 'download')
+    const placementToggle = downloadSection.getByRole('checkbox', {
+      name: 'Move Downloads to Quick Settings'
+    })
+    await expect(placementToggle).not.toBeChecked()
+    await downloadSection.locator('label.switch-label')
+      .filter({ hasText: 'Move Downloads to Quick Settings' }).click()
+
+    await expect(placementToggle).toBeChecked()
+    await expect(page.locator('.topNav .downloadsButton')).toHaveCount(0)
+    await page.locator('.profileTrigger').click()
+
+    const menu = page.getByRole('dialog', { name: 'Quick settings' })
+    const downloadsShortcut = menu.getByRole('button', { name: 'Downloads' })
+    const allSettingsShortcut = menu.getByRole('button', { name: 'All settings' })
+    await expect(downloadsShortcut).toBeVisible()
+    const [downloadsBounds, allSettingsBounds] = await Promise.all([
+      downloadsShortcut.boundingBox(),
+      allSettingsShortcut.boundingBox()
+    ])
+    expect(downloadsBounds.x).toBeLessThan(allSettingsBounds.x)
+
+    await downloadsShortcut.click()
+    await expect(menu).toBeHidden()
+    await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
+    await expect(page.locator('.settingsWindow')).toHaveCount(1)
+  })
+
+  test('clamps the Downloads scroll position when a wider layout becomes shorter', async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
+        x: 40,
+        y: 40,
+        width: 400,
+        height: 650
+      }))
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      for (let index = 0; index < 8; index++) {
+        store.commit('upsertYtDlpDownload', {
+          id: index + 1,
+          title: `Responsive download ${index + 1}`,
+          status: 'completed',
+          mode: 'video',
+          availability: 'available',
+          destination: `/tmp/responsive-download-${index + 1}.webm`,
+          sizeBytes: 1024 * (index + 1)
+        })
+      }
+    })
+    await goTo(page, 'downloads')
+    const downloadsScroll = page.locator('.settingsDownloadsPage')
+    await downloadsScroll.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => downloadsScroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    const resizeHandle = page.locator('.resize-e')
+    const handleBounds = await resizeHandle.boundingBox()
+    await page.mouse.move(handleBounds.x + handleBounds.width / 2, handleBounds.y + handleBounds.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(handleBounds.x + 600, handleBounds.y + handleBounds.height / 2)
+    await page.mouse.up()
+
+    await expect.poll(() => downloadsScroll.evaluate(element => {
+      const content = element.firstElementChild
+      const maximumScrollTop = Math.max(0, content.offsetTop + content.offsetHeight +
+        Number.parseFloat(getComputedStyle(element).paddingBottom) - element.clientHeight)
+      return element.scrollTop <= maximumScrollTop + 1
+    })).toBe(true)
+  })
+
+  test('resets standalone scroll position when switching views', async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
+        x: 40,
+        y: 40,
+        width: 400,
+        height: 650
+      }))
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      for (let index = 0; index < 8; index++) {
+        store.commit('upsertYtDlpDownload', {
+          id: index + 1,
+          title: `View switch download ${index + 1}`,
+          status: 'completed',
+          mode: 'video',
+          availability: 'available',
+          destination: `/tmp/view-switch-download-${index + 1}.webm`
+        })
+      }
+    })
+    await goTo(page, 'downloads')
+    const downloadsScroll = page.locator('.settingsDownloadsPage')
+    await downloadsScroll.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => downloadsScroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('showSettingsWindow', 'about')
+    })
+    await expect(page.getByRole('dialog', { name: 'About', exact: true })).toBeVisible()
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('showSettingsWindow', 'downloads')
+    })
+
+    await expect.poll(() => page.locator('.settingsDownloadsPage').evaluate(element => element.scrollTop)).toBe(0)
   })
 
   test('clamps the settings scroll position after repeated resizing', async ({ page }) => {

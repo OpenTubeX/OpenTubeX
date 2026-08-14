@@ -404,6 +404,10 @@
   grid-column: 1 / -1;
 }
 
+.settingsDownloadsPage {
+  background: var(--base-color);
+}
+
 .settingsKeyboardShortcutPage {
   overflow: hidden;
 }

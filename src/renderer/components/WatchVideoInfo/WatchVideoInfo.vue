@@ -247,7 +247,7 @@
             :title="t('Change Format.Change Media Formats')"
             theme="secondary"
             :icon="['fas', 'file-video']"
-            @click="showFormatPrompt = true"
+            @click="openFormatPrompt"
           />
           <FtShareButton
             v-if="!hideSharingActions && !hideShareButton"
@@ -268,9 +268,13 @@
       :dash-available="dashAvailable"
       :legacy-available="legacyAvailable"
       :audio-available="audioAvailable"
+      :local-file-playback="localFilePlayback"
+      :local-playback-downloads="localPlaybackDownloads"
       :can-change-playback-engine="USING_ELECTRON && !isPostLiveDvr"
       @change-format="changeFormat"
       @change-playback-engine="changePlaybackEngine"
+      @use-local-source="emit('use-local-source', $event)"
+      @use-online-source="emit('use-online-source')"
       @close="showFormatPrompt = false"
     />
     <WatchVideoDownloadPrompt
@@ -465,6 +469,14 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  localFilePlayback: {
+    type: Boolean,
+    default: false
+  },
+  localPlaybackDownloads: {
+    type: Array,
+    default: () => []
+  },
   isPostLiveDvr: {
     type: Boolean,
     default: false
@@ -518,6 +530,8 @@ const props = defineProps({
 const emit = defineEmits([
   'change-format',
   'change-playback-engine',
+  'use-local-source',
+  'use-online-source',
   'pause-player',
   'save-watched-progress',
   'save-channel-playback-speed',
@@ -687,6 +701,18 @@ const publishedDateText = computed(() => {
  */
 function changeFormat(value) {
   emit('change-format', value)
+}
+
+async function openFormatPrompt() {
+  if (USING_ELECTRON) {
+    try {
+      const downloads = await window.ftElectron.ytDlpListDownloads()
+      downloads.forEach(download => store.commit('upsertYtDlpDownload', download))
+    } catch (error) {
+      console.warn('Could not refresh downloads for the media format selector', error)
+    }
+  }
+  showFormatPrompt.value = true
 }
 
 /**
