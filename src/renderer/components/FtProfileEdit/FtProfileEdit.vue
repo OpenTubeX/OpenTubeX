@@ -374,12 +374,19 @@ function updateProfileBgColorFromPicker(color) {
     const resolvedSemanticColor = semanticProfileBgColor.value === THEME_BG_COLOR
       ? themeColor.value
       : '#000000'
-    if (color.toLowerCase() === resolvedSemanticColor.toLowerCase()) {
+    if (normalizeHexColor(color) === normalizeHexColor(resolvedSemanticColor)) {
       profileBgColor.value = semanticProfileBgColor.value
       return
     }
   }
   profileBgColor.value = color
+}
+
+function normalizeHexColor(color) {
+  const normalized = color.toLowerCase()
+  if (!/^#[\da-f]{3,4}$/.test(normalized)) return normalized
+
+  return '#' + [...normalized.slice(1)].map(character => character.repeat(2)).join('')
 }
 
 const translatedProfileName = computed(() => {

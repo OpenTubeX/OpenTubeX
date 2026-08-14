@@ -243,6 +243,34 @@ test.describe('profile manager', () => {
     })
   })
 
+  test.describe('shorthand theme color profiles', () => {
+    test.use({ seed: { settings: { baseTheme: 'hotPink' } } })
+
+    test('preserves the theme color when cancelling picker changes', async ({ app, page }) => {
+      await openProfileList(page)
+      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.card .profileList').getByText('All Channels').click()
+      await page.locator('.themeColorOption').click()
+
+      const preview = page.locator('.profilePreviewIcon')
+      await expect(preview).toHaveCSS('background-color', 'rgb(0, 0, 0)')
+
+      await page.locator('.profileColorPicker .colorFieldTrigger').click()
+      const colorPicker = page.locator('.colorPickerPopover')
+      await colorPicker.locator('input[type="text"]').fill('#123456')
+      await colorPicker.locator('input[type="text"]').press('Enter')
+      await page.getByRole('heading', { name: 'Profile Preview' }).click()
+      await page.getByRole('button', { name: 'Update Profile' }).click()
+
+      await expect.poll(async () => {
+        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        const profile = records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
+        return profile?.bgColor
+      }).toBe('var(--primary-color)')
+    })
+  })
+
   test('customizes a profile icon with a cropped SVG or emoji', async ({ app, page }) => {
     await openProfileList(page)
     await page.locator('.profilePanelHeader button').last().click()
