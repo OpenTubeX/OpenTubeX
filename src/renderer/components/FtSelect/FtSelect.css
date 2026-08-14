@@ -85,7 +85,7 @@
   padding-inline: 0;
   margin: 0;
   list-style: none;
-  font-family: Roboto, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  font-family: var(--app-font-family);
   font-size: 16px;
   color: var(--secondary-text-color);
   background-color: var(--card-bg-color);

@@ -68,6 +68,13 @@ export default {
     return ipcRenderer.invoke(IpcChannels.GET_SYSTEM_LOCALE)
   },
 
+  /**
+   * @returns {Promise<string[]>}
+   */
+  getSystemFonts: () => {
+    return ipcRenderer.invoke(IpcChannels.GET_SYSTEM_FONTS)
+  },
+
   loadCustomTheme: () => {
     return ipcRenderer.invoke(IpcChannels.CUSTOM_THEME_LOAD)
   },

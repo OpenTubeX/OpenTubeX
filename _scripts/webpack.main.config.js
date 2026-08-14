@@ -79,6 +79,11 @@ if (!isDevMode) {
             ignore: ['**/.*', '**/locales/**', '**/pwabuilder-sw.js', '**/manifest.json', '**/dashFiles/**', '**/storyboards/**'],
           },
         },
+        {
+          from: path.join(path.dirname(require.resolve('font-list')), 'libs/darwin/fontlist'),
+          to: 'fontlist',
+          toType: 'file'
+        },
       ]
     })
   )

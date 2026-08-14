@@ -196,7 +196,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['change', 'reset'])
+const emit = defineEmits(['change', 'open', 'reset'])
 
 const id = useId()
 const selectRoot = useTemplateRef('selectRoot')
@@ -237,6 +237,15 @@ watch(() => props.disabled, (disabled) => {
   if (disabled) closeDropdown()
 })
 
+watch([() => props.selectNames, () => props.selectValues], async () => {
+  if (!dropdownShown.value) return
+
+  activeIndex.value = Math.max(0, selectedIndex.value)
+  await nextTick()
+  updateDropdownPosition()
+  scrollActiveOptionIntoView()
+}, { flush: 'post' })
+
 onBeforeUnmount(() => {
   removeDropdownListeners()
   if (typeaheadTimer !== null) {
@@ -255,6 +264,7 @@ function toggleDropdown() {
 function openDropdown() {
   if (props.disabled) return
 
+  emit('open')
   activeIndex.value = Math.max(0, selectedIndex.value)
   dropdownTarget.value = selectRoot.value?.closest('.prompt') ?? document.fullscreenElement ?? document.body
   dropdownShown.value = true

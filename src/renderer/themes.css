@@ -1,9 +1,11 @@
 body {
   margin: 0;
   min-block-size: 100vh;
+  font-family: var(--app-font-family);
   color: var(--primary-text-color);
   background-color: var(--bg-color);
 
+  --app-font-family: 'Roboto', system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --ui-roundness: 1;
   --scrollbar-thumb-width: 6px;
   --border-color: var(--tertiary-text-color);

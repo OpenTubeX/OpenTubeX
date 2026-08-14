@@ -55,6 +55,7 @@
   color: var(--primary-text-color);
   cursor: pointer;
   display: grid;
+  font-family: inherit;
   gap: 12px;
   grid-template-columns: 40px 1fr 12px;
   inline-size: 100%;

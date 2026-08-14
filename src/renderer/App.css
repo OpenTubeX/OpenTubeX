@@ -10,7 +10,7 @@
 
   display: flex;
   flex-wrap: wrap;
-  font-family: Roboto, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  font-family: var(--app-font-family);
   block-size: 100%;
 }
 

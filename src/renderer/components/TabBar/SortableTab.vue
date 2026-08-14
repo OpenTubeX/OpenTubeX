@@ -791,7 +791,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
   backdrop-filter: var(--card-bg-blur, none);
   box-shadow: 0 8px 26px rgb(0 0 0 / 32%);
   color: var(--primary-text-color);
-  font-family: Roboto, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  font-family: var(--app-font-family);
   font-weight: 400;
   letter-spacing: 0;
   pointer-events: none;

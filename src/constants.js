@@ -3,6 +3,7 @@ const IpcChannels = {
   ENABLE_PROXY: 'enable-proxy',
   DISABLE_PROXY: 'disable-proxy',
   GET_SYSTEM_LOCALE: 'get-system-locale',
+  GET_SYSTEM_FONTS: 'get-system-fonts',
   GET_NAVIGATION_HISTORY: 'get-navigation-history',
   IS_WAYLAND_PLATFORM: 'is-wayland-platform',
   STOP_POWER_SAVE_BLOCKER: 'stop-power-save-blocker',

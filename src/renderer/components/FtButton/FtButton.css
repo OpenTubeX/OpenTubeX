@@ -1,5 +1,5 @@
 .btn {
-  font-family: Roboto, sans-serif;
+  font-family: var(--app-font-family);
   min-inline-size: 100px;
   font-size: 0.9rem;
   padding-block: 10px;
