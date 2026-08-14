@@ -60,3 +60,24 @@ export function getGroupedTabInsertIndex(tabs, openerTabId, isPinned) {
 
   return insertIndex
 }
+
+/**
+ * Restore opener relationships after every saved tab exists, including links
+ * to openers that appeared later in the saved order.
+ * @param {Map<string, {placementOpenerTabId?: string | null}>} tabs
+ * @param {Array<{id?: string, placementOpenerTabId?: string | null}>} savedTabs
+ */
+export function restoreTabPlacementOpeners(tabs, savedTabs) {
+  const savedTabsById = new Map(savedTabs.map(tab => [tab.id, tab]))
+
+  for (const [tabId, tab] of tabs) {
+    const openerTabId = savedTabsById.get(tabId)?.placementOpenerTabId
+    tab.placementOpenerTabId = (
+      typeof openerTabId === 'string' &&
+      openerTabId !== tabId &&
+      tabs.has(openerTabId)
+    )
+      ? openerTabId
+      : null
+  }
+}

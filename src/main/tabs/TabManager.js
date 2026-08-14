@@ -11,7 +11,11 @@ import {
   saveTabSession
 } from './TabSessionStore.js'
 import { TabRendererBridge } from './TabRendererBridge.js'
-import { buildReorderedTabMap, getGroupedTabInsertIndex } from './tabOrder.js'
+import {
+  buildReorderedTabMap,
+  getGroupedTabInsertIndex,
+  restoreTabPlacementOpeners
+} from './tabOrder.js'
 import {
   createTabAvatarFileName,
   createTabPreviewFileName,
@@ -2813,6 +2817,8 @@ export class TabManager {
           preloadInBackground: loadInBackground && !makeActive
         })
       }
+
+      restoreTabPlacementOpeners(this.tabs, sessionData.tabs)
 
       if (!this.activeTabId) {
         const firstTabId = this.tabs.keys().next().value
