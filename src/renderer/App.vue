@@ -256,17 +256,19 @@
             class="tabSwitcherPreview"
           >
             <img
-              v-if="tabSwitcherPreviewUrls[tab.id]"
+              v-if="getUsableTabSwitcherPreviewUrl(tab)"
               :src="tabSwitcherPreviewUrls[tab.id]"
               :alt="`${formatTabSwitcherTitle(tab.title)} preview`"
               draggable="false"
+              @error="handleTabSwitcherPreviewError(tab)"
             >
             <img
-              v-else-if="!tabSwitcherPreviewPending[tab.id] && getTabPreviewFallbackUrl(tab)"
-              :src="getTabPreviewFallbackUrl(tab)"
+              v-else-if="!tabSwitcherPreviewPending[tab.id] && getUsableTabSwitcherAvatarUrl(tab)"
+              :src="getUsableTabSwitcherAvatarUrl(tab)"
               :alt="`${formatTabSwitcherTitle(tab.title)} preview`"
               class="tabSwitcherPreviewAvatar"
               draggable="false"
+              @error="handleTabSwitcherAvatarError(tab)"
             >
             <span
               v-else-if="!tabSwitcherPreviewPending[tab.id]"
@@ -274,18 +276,19 @@
               aria-hidden="true"
             >
               <FtIcon
-                :icon="['fas', 'display']"
+                :icon="getTabPageIcon(tab) || ['fas', 'display']"
                 class="tabSwitcherFallbackIcon"
               />
             </span>
           </span>
           <span class="tabSwitcherTitle">
             <img
-              v-if="showTabIcons && getTabAvatarUrl(tab)"
-              :src="getTabAvatarUrl(tab)"
+              v-if="showTabIcons && getUsableTabSwitcherAvatarUrl(tab)"
+              :src="getUsableTabSwitcherAvatarUrl(tab)"
               class="tabSwitcherTitleAvatar"
               alt=""
               draggable="false"
+              @error="handleTabSwitcherAvatarError(tab)"
             >
             <FtIcon
               v-else-if="showTabIcons && getTabPageIcon(tab)"
@@ -560,6 +563,8 @@ const tabSwitcherVisible = ref(false)
 const tabSwitcherSelectedIndex = ref(-1)
 const tabSwitcherPreviewUrls = ref({})
 const tabSwitcherPreviewPending = ref({})
+const tabSwitcherFailedAvatarUrls = ref({})
+const tabSwitcherFailedPreviewUrls = ref({})
 const tabSwitcherPointerActive = ref(false)
 const tabSwitcherRef = useTemplateRef('tabSwitcherRef')
 const subscriptionAutoRefreshTimers = {
@@ -2345,6 +2350,30 @@ function loadTabSwitcherPreviews() {
   })
 }
 
+function getUsableTabSwitcherAvatarUrl(tab) {
+  const avatarUrl = getTabAvatarUrl(tab) || getTabPreviewFallbackUrl(tab)
+  return avatarUrl !== tabSwitcherFailedAvatarUrls.value[tab.id] ? avatarUrl : null
+}
+
+function getUsableTabSwitcherPreviewUrl(tab) {
+  const previewUrl = tabSwitcherPreviewUrls.value[tab.id]
+  return previewUrl !== tabSwitcherFailedPreviewUrls.value[tab.id] ? previewUrl : null
+}
+
+function handleTabSwitcherAvatarError(tab) {
+  tabSwitcherFailedAvatarUrls.value = {
+    ...tabSwitcherFailedAvatarUrls.value,
+    [tab.id]: getUsableTabSwitcherAvatarUrl(tab)
+  }
+}
+
+function handleTabSwitcherPreviewError(tab) {
+  tabSwitcherFailedPreviewUrls.value = {
+    ...tabSwitcherFailedPreviewUrls.value,
+    [tab.id]: getUsableTabSwitcherPreviewUrl(tab)
+  }
+}
+
 /**
  * @param {number} index
  */
@@ -2426,6 +2455,8 @@ function cancelTabSwitcher() {
   tabSwitcherSelectedIndex.value = -1
   tabSwitcherPreviewUrls.value = {}
   tabSwitcherPreviewPending.value = {}
+  tabSwitcherFailedAvatarUrls.value = {}
+  tabSwitcherFailedPreviewUrls.value = {}
   tabSwitcherPointerActive.value = false
   tabSwitcherPreviewRequestId++
   window.ftElectron.tabs.setPreviewCapturePaused(false)

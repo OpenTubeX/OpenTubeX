@@ -39,11 +39,12 @@
         aria-hidden="true"
       />
       <img
-        v-else-if="showIcon && tabAvatarUrl"
+        v-else-if="showIcon && usableTabAvatarUrl"
         :src="tabAvatarUrl"
         class="tabAvatar"
         alt=""
         draggable="false"
+        @error="handleAvatarError"
       >
       <FtIcon
         v-else-if="showIcon && tabPageIcon"
@@ -90,13 +91,15 @@
             :src="tooltipPreviewUrl"
             :alt="tooltipPreviewAlt"
             draggable="false"
+            @error="handleTooltipPreviewError"
           >
           <img
-            v-else-if="channelThumbnailUrl"
-            :src="channelThumbnailUrl"
+            v-else-if="usableTabAvatarUrl"
+            :src="usableTabAvatarUrl"
             :alt="tooltipPreviewAlt"
             class="tabTooltipPreviewAvatar"
             draggable="false"
+            @error="handleAvatarError"
           >
           <div
             v-else
@@ -104,7 +107,7 @@
             aria-hidden="true"
           >
             <FtIcon
-              :icon="['fas', 'display']"
+              :icon="tabPageIcon || ['fas', 'display']"
               class="tabTooltipFallbackIcon"
             />
           </div>
@@ -189,6 +192,7 @@ const tabRef = useTemplateRef('tabRef')
 const tooltipRef = useTemplateRef('tooltipRef')
 const isTooltipVisible = ref(false)
 const tooltipPreviewUrl = ref(null)
+const failedAvatarUrl = ref(null)
 const tooltipStyle = ref({})
 const tooltipRequestId = ref(0)
 let showTooltipTimeoutId = null
@@ -240,9 +244,21 @@ const tooltipEstimatedHeight = computed(() => props.showPreview
 
 // When a tab points at a channel page and no screenshot has been captured yet,
 // fall back to the channel's profile picture (cached by the Channel view).
-const channelThumbnailUrl = computed(() => getTabPreviewFallbackUrl(props.tab))
 const tabAvatarUrl = computed(() => getTabAvatarUrl(props.tab))
+const previewFallbackUrl = computed(() => getTabPreviewFallbackUrl(props.tab))
+const usableTabAvatarUrl = computed(() => {
+  const avatarUrl = tabAvatarUrl.value || previewFallbackUrl.value
+  return avatarUrl !== failedAvatarUrl.value ? avatarUrl : null
+})
 const tabPageIcon = computed(() => getTabPageIcon(props.tab))
+
+function handleAvatarError() {
+  failedAvatarUrl.value = usableTabAvatarUrl.value
+}
+
+function handleTooltipPreviewError() {
+  tooltipPreviewUrl.value = null
+}
 
 function handleClick(event) {
   emit('activate', event, props.tab.id)
@@ -448,6 +464,12 @@ watch(() => props.showPreview, (showPreview) => {
     if (showPreview) {
       loadTooltipPreview()
     }
+  }
+})
+
+watch(tabAvatarUrl, (avatarUrl) => {
+  if (avatarUrl !== failedAvatarUrl.value) {
+    failedAvatarUrl.value = null
   }
 })
 </script>
