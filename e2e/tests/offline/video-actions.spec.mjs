@@ -685,6 +685,43 @@ test.describe('video downloads', () => {
     })).toEqual(['completed'])
     await expect(downloadRow.getByTitle('Retry download')).toHaveCount(0)
   })
+
+  test('starts only one retry when its button is activated twice', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'slow-failing-yt-dlp.sh')
+    const attemptsFile = path.join(app.userDataDir, 'retry-attempts.txt')
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf 'retry\n' >> ${attemptsFile}`,
+      'sleep 0.5',
+      'exit 1'
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      title: 'Retry once',
+      mode: 'video'
+    }))
+    await expect.poll(() => page.evaluate(async (id) => {
+      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+    }, result.id)).toBe('failed')
+    await writeFile(attemptsFile, '')
+
+    await goTo(page, 'downloads')
+    const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Retry once' }).first()
+    await downloadRow.getByTitle('Retry download').dblclick()
+
+    await expect.poll(() => page.evaluate(async (originalId) => {
+      const matchingDownloads = (await window.ftElectron.ytDlpListDownloads())
+        .filter(download => download.title === 'Retry once' && download.status === 'failed')
+      return matchingDownloads.length === 1 && matchingDownloads[0].id !== originalId
+    }, result.id)).toBe(true)
+    expect(await readFile(attemptsFile, 'utf8')).toBe('retry\n')
+  })
 })
 
 test('asks for confirmation before removing a downloaded file', async ({ page }) => {

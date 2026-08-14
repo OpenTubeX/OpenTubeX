@@ -80,6 +80,7 @@
           :title="t('Downloads.Retry Download')"
           :icon="['fas', 'sync']"
           theme="primary"
+          :disabled="retrying"
           @click="emit('retry')"
         />
         <FtIconButton
@@ -125,7 +126,10 @@ import { formatBytes } from '../../helpers/fileSize'
 // keeps a playlist download from filling the page with one line per video
 const MAX_VISIBLE_DESTINATIONS = 3
 
-const props = defineProps({ download: { type: Object, required: true } })
+const props = defineProps({
+  download: { type: Object, required: true },
+  retrying: { type: Boolean, default: false }
+})
 const emit = defineEmits(['clear', 'open', 'play', 'remove', 'retry'])
 const { t } = useI18n()
 const inProgress = computed(() => ['downloading', 'processing'].includes(props.download.status))

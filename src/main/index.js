@@ -1897,7 +1897,12 @@ function runApp() {
       const file = await getYtDlpDownloadFile(Number(rawId), videoId ?? '')
       if (file === null) return new Response(null, { status: 404 })
 
-      const fileSize = (await asyncFs.stat(file.path)).size
+      let fileSize
+      try {
+        fileSize = (await asyncFs.stat(file.path)).size
+      } catch {
+        return new Response(null, { status: 404 })
+      }
       const extension = path.extname(file.path).toLowerCase()
       const mimeType = file.mode === 'audio' && extension === '.webm'
         ? 'audio/webm'

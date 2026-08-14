@@ -38,6 +38,7 @@
         v-for="download in finishedDownloads"
         :key="download.id"
         :download="download"
+        :retrying="retryingDownloadIds.includes(download.id)"
         @clear="clearDownload(download.id)"
         @open="openDownload(download.id)"
         @play="playDownload(download)"
@@ -82,6 +83,7 @@ import { showToast } from '../../helpers/utils'
 const { t } = useI18n()
 const router = useRouter()
 const pendingRemoval = ref(null)
+const retryingDownloadIds = ref([])
 const downloads = computed(() => Object.values(store.getters.getYtDlpDownloads).sort((a, b) => b.id - a.id))
 const activeDownloads = computed(() => downloads.value.filter(download => ['downloading', 'processing'].includes(download.status)))
 const finishedDownloads = computed(() => downloads.value.filter(download => !['downloading', 'processing'].includes(download.status)))
@@ -142,6 +144,9 @@ async function playDownload(download) {
   router.push({ path: `/watch/${firstFile.videoId}`, query })
 }
 async function retryDownload(download) {
+  if (retryingDownloadIds.value.includes(download.id)) return
+  retryingDownloadIds.value = [...retryingDownloadIds.value, download.id]
+
   // Download records in the store are Vue proxies, which Electron IPC cannot
   // clone. Retry payloads are JSON-compatible by definition, so detach them
   // before sending them back to the main process.
@@ -161,6 +166,8 @@ async function retryDownload(download) {
     result = await window.ftElectron.ytDlpDownload(retryPayload)
   } catch (error) {
     console.error('Could not retry download', error)
+  } finally {
+    retryingDownloadIds.value = retryingDownloadIds.value.filter(id => id !== download.id)
   }
   if (result == null || !('id' in result)) {
     showToast({ message: t('Downloads.Download Failed'), icon: ['fas', 'circle-exclamation'] })
