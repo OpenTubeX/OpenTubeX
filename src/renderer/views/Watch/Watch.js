@@ -565,6 +565,9 @@ export default defineComponent({
 
       return caption ? this.captions.indexOf(caption) : 0
     },
+    transcriptAvailable: function () {
+      return this.captions.length > 0
+    },
     ambientModeActive: function () {
       return this.$store.getters.getAmbientMode &&
         this.activeFormat !== 'audio' &&
@@ -1007,6 +1010,11 @@ export default defineComponent({
     canSkipToPreviousVideo() {
       this.syncMediaSessionSkipHandlers()
     },
+    transcriptAvailable(available) {
+      if (!available && this.showTranscript) {
+        this.closeTranscript()
+      }
+    },
   },
   created: function () {
     this.theatreModeAnimations = []
@@ -1333,6 +1341,10 @@ export default defineComponent({
       this.$refs.player?.toggleSponsorBlockInfo()
     },
     toggleTranscript() {
+      if (!this.transcriptAvailable) {
+        return
+      }
+
       if (this.customShortsPlayerActive && !this.showTranscript) {
         this.resetShortsAuxPanelScroll()
         this.shortsMetadataOpen = false

@@ -18,6 +18,26 @@ const WATCH_PAGE_SEED = {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+for (const { name, options, expectedCount } of [
+  { name: 'hides transcript actions without captions', options: {}, expectedCount: 0 },
+  {
+    name: 'shows transcript actions with captions',
+    options: { captionCueSettings: 'align:center' },
+    expectedCount: 1
+  }
+]) {
+  test(name, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, options)
+    await openMockedVideo(page)
+
+    await expect(page.locator('.infoArea .watchVideoInfo')
+      .getByRole('button', { name: 'Show transcript' }))
+      .toHaveCount(expectedCount)
+    await expect(page.locator('.fullscreenActions .fullscreenTranscriptToggle'))
+      .toHaveCount(expectedCount)
+  })
+}
+
 test('a background watch tab stays loading until its cached avatar is ready', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
 
@@ -790,7 +810,7 @@ test.describe('watch page', () => {
   })
 
   test('resets the Shorts auxiliary viewport when switching panels', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
+    await mockPlayableWatchPage(app, page, { captionCueSettings: 'align:center' })
     await openMockedVideo(page)
 
     const watchComponent = await page.evaluateHandle(findWatchComponent)
@@ -824,7 +844,7 @@ test.describe('watch page', () => {
   })
 
   test('shares the Shorts information dock with fullscreen and keeps its settings menu visible', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
+    await mockPlayableWatchPage(app, page, { captionCueSettings: 'align:center' })
     await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/jNQXAC9IVRw')
     await page.locator(sel.searchInput).press('Enter')
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw\?short=true/)
