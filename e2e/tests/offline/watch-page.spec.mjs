@@ -1578,6 +1578,32 @@ test.describe('fullscreen playlist dock', () => {
   })
 })
 
+test('treats an empty comments response as no comments', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+
+  let commentRequestCount = 0
+  await page.route(/\/youtubei\/v1\/next/, (route, request) => {
+    const body = JSON.parse(request.postData() ?? '{}')
+    if (!body.continuation) {
+      return route.fallback()
+    }
+
+    commentRequestCount++
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: '{}'
+    })
+  })
+
+  await openMockedVideo(page)
+  await page.locator('.commentAutoLoadSentinel').scrollIntoViewIfNeeded()
+
+  await expect(page.locator('.noCommentMsg')).toHaveText('There are no comments available for this video')
+  await expect(page.locator('.toast', { hasText: 'Local API Error' })).toHaveCount(0)
+  expect(commentRequestCount).toBe(1)
+})
+
 test.describe('manual comment loading', () => {
   // These drive the click-to-load path and the reply pagination on top of a
   // single loaded page, so they turn off the automatic pagination that would
