@@ -290,8 +290,7 @@
   display: grid;
   grid-template-columns: 30px 1fr;
   align-items: center;
-  content-visibility: auto;
-  contain-intrinsic-block-size: auto 72px;
+  border-radius: calc(8px * var(--ui-roundness));
   transition: background 0.2s ease-out;
 }
 

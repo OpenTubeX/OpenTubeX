@@ -58,6 +58,10 @@ $watched-transition-duration: 0.5s;
   &.watched {
     background-color: var(--bg-color);
 
+    @include is-watch-playlist-item {
+      background-color: transparent;
+    }
+
     @include low-contrast-when-watched(var(--primary-text-color));
 
     .thumbnailImage {
