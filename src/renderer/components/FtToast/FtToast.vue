@@ -70,13 +70,6 @@ import FtToastItem from './FtToastItem.vue'
 let removeShowToastListener = null
 const { t } = useI18n()
 
-const props = defineProps({
-  showSubscriptionRefresh: {
-    type: Boolean,
-    default: false
-  }
-})
-
 /**
  * @typedef ToastState the live state handed to {@link FtToastItem}
  * @property {string} message
@@ -228,7 +221,7 @@ const showProgressToast = computed(() => {
   return fullscreenTarget.value === null &&
     store.getters.getShowProgressBarToast &&
     (store.getters.getShowProgressBar ||
-      (props.showSubscriptionRefresh && store.getters.getSubscriptionFeedRefreshInProgress))
+      store.getters.getSubscriptionFeedRefreshInProgress)
 })
 const progressToastPercentage = computed(() => {
   return store.getters.getShowProgressBar

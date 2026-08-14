@@ -140,7 +140,8 @@ test.describe('incremental subscription feed refresh', () => {
     await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible({ timeout: 3_000 })
     await expect(page.getByText('Fresh video 1', { exact: true })).toHaveCount(0)
     await expect(page.getByText('Cached video 1', { exact: true })).toBeVisible()
-    await expect(page.locator('.tabsProgressBar')).toBeVisible()
+    await expect(page.getByTestId('subscription-refresh-toast')).toBeVisible()
+    await expect(page.locator('.tabsProgressBar')).toHaveCount(0)
 
     await expect(page.getByText('Fresh video 1', { exact: true })).toBeVisible({ timeout: 30_000 })
     await expect(page.locator('.tab.active .loadingDot')).toHaveCount(0)
@@ -174,20 +175,47 @@ test.describe('incremental subscription feed refresh', () => {
     await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible({ timeout: 3_000 })
   })
 
-  test('keeps a manual refresh in the progress toast after navigation', async ({ page }) => {
+  test('keeps a manual refresh in the progress toast across navigation', async ({ page }) => {
     await routeFeeds(page, () => 8_000)
     await goTo(page, 'subscriptions')
 
     await page.getByRole('button', { name: /Refresh Videos/ }).click()
-    await expect(page.getByTestId('subscription-refresh-toast')).toHaveCount(0)
-    await goTo(page, 'history')
-
     const refreshToast = page.getByTestId('subscription-refresh-toast')
     await expect(refreshToast).toContainText('Refreshing subscription videos')
     await expect(page.locator('.app > .progressBar')).toHaveCount(0)
 
     await expect(refreshToast).toBeVisible()
+    await goTo(page, 'history')
+    await expect(refreshToast).toBeVisible()
     await expect(refreshToast).toHaveCount(0, { timeout: 30_000 })
+  })
+})
+
+test.describe('subscription refresh bottom progress', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        showProgressBarToast: false
+      },
+      profiles: [profileWith(2)],
+      subscriptionCache: [cachedChannel(0), cachedChannel(1)]
+    }
+  })
+
+  test('keeps the global progress bar visible across navigation', async ({ page }) => {
+    await routeFeeds(page, () => 8_000)
+    await goTo(page, 'subscriptions')
+
+    await page.getByRole('button', { name: /Refresh Videos/ }).click()
+    const progressBar = page.locator('.app > .progressBar')
+    await expect(progressBar).toBeVisible()
+    await expect(page.locator('.tab.active .loadingDot')).toBeVisible()
+    await expect(page.locator('.tabsProgressBar')).toHaveCount(0)
+
+    await goTo(page, 'history')
+    await expect(progressBar).toBeVisible()
+    await expect(progressBar).toHaveCount(0, { timeout: 30_000 })
   })
 })
 
