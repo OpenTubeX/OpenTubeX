@@ -54,7 +54,7 @@ experience. Some of its major areas of focus are:
 <summary>Show feature list</summary>
 
 - Manage and automatically apply playback speed, video quality, subtitles and volume for individual channels. You can enable each option in settings. Playback speeds can be saved automatically whenever you change them through the player options, or you can leave automatic saving off and use the dedicated button below the player to save the current speed for that channel manually.
- <img height="150" alt="image" src="https://github.com/user-attachments/assets/e8fe58f3-80f0-4280-946e-abf997f0eac3" />
+ <img height="300" alt="image" src="https://github.com/user-attachments/assets/c713c463-93c3-4f21-96a2-4a653c2c8399" />
  <br />
  <img height="75" alt="image" src="https://github.com/user-attachments/assets/560a55c0-f653-4c21-ae30-5cdeff6ac428" />
  <br />
