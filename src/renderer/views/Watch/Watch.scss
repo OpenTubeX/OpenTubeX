@@ -1407,41 +1407,6 @@
   }
 }
 
-.liveChatSkeleton {
-  box-sizing: border-box;
-  block-size: 510px;
-  padding-block: 26px 16px;
-  padding-inline: 16px;
-  background: var(--card-bg-color);
-  border-radius: calc(10px * var(--ui-roundness));
-}
-
-.skeletonLiveChatTitle {
-  inline-size: 42%;
-  margin-block-end: 30px;
-}
-
-.skeletonLiveChatMessage {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-block: 14px;
-}
-
-.skeletonLiveChatLine {
-  inline-size: calc(55% + var(--skeleton-offset, 0%));
-}
-
-.skeletonLiveChatMessage:nth-child(3n) .skeletonLiveChatLine {
-  inline-size: 75%;
-}
-
-.skeletonLiveChatAvatar {
-  flex: 0 0 25px;
-  block-size: 25px;
-  border-radius: 50%;
-}
-
 .recommendationsSkeleton {
   display: flex;
   flex-direction: column;

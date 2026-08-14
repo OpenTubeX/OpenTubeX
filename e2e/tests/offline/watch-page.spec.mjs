@@ -430,7 +430,7 @@ test.describe('watch page', () => {
     })
   })
 
-  test('shows a live chat skeleton while chat availability loads', async ({ app, page }) => {
+  test('does not speculate about live chat while availability loads', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
 
     let releaseMetadata
@@ -442,10 +442,8 @@ test.describe('watch page', () => {
     await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
     await page.locator(sel.searchInput).press('Enter')
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-    const sidebarSkeletons = page.locator(`${activeTab} .sidebarArea > :is(.liveChatSkeleton, .recommendationsSkeleton)`)
-    await expect(sidebarSkeletons).toHaveCount(2)
-    await expect(sidebarSkeletons.nth(0)).toHaveClass(/liveChatSkeleton/)
-    await expect(sidebarSkeletons.nth(1)).toHaveClass(/recommendationsSkeleton/)
+    await expect(page.locator(`${activeTab} .sidebarArea > .liveChatSkeleton`)).toHaveCount(0)
+    await expect(page.locator(`${activeTab} .sidebarArea > .recommendationsSkeleton`)).toBeVisible()
 
     await expect.poll(() => typeof releaseMetadata).toBe('function')
     releaseMetadata()
