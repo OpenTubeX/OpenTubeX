@@ -1701,9 +1701,10 @@ export default defineComponent({
     } = {}) {
       const previousVideoTitle = this.videoTitle
 
-      if (!preserveTitle) {
-        this.hasResolvedVideoTitle = false
-      }
+      // A preserved title belongs to the previous successful request. Keep it
+      // visible during a reload, but require the current request to resolve its
+      // own metadata before it can be cached.
+      this.hasResolvedVideoTitle = false
       if (!preserveShortsPanels) {
         this.shortsCommentsOpen = false
       }

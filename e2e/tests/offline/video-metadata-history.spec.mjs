@@ -38,7 +38,7 @@ test('stores and presents every previous metadata version', async ({ app, page }
     await openMockedVideo(page)
 
     const watchView = await watchViewHandle(page)
-    await watchView.evaluate(async (view, thumbnailBaseUrl) => {
+    const rejectedPreservedTitle = await watchView.evaluate(async (view, thumbnailBaseUrl) => {
       await window.ftElectron.videoMetadataCache.clear()
 
       const observedAt = Date.now() - 10_000
@@ -58,13 +58,21 @@ test('stores and presents every previous metadata version', async ({ app, page }
         })
       }
 
+      view.resetVideoState({ preserveTitle: true })
+      view.isLoading = false
+      await view.updateVideoMetadataCache()
+      const preservedTitleWasRejected = !view.hasResolvedVideoTitle
+
       view.videoTitle = 'Current title'
       view.videoDescription = 'Current description'
       view.thumbnail = `${thumbnailBaseUrl}?revision=5`
       view.videoMetadataHistory = history
+      view.hasResolvedVideoTitle = true
       await view.$nextTick()
+      return preservedTitleWasRejected
     }, `http://127.0.0.1:${port}/thumbnail.png`)
     await watchView.dispose()
+    expect(rejectedPreservedTitle).toBe(true)
 
     const cachePath = path.join(app.userDataDir, 'video-metadata-cache.db')
     const cacheDocuments = (await readFile(cachePath, 'utf8')).trim().split('\n')
