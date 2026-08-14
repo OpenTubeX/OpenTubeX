@@ -1843,7 +1843,7 @@ function onDragStart(event) {
   }
 }
 
-parseVideoData()
+watch(() => props.data, parseVideoData, { immediate: true })
 
 showDeArrowTitle.value = useDeArrowTitles.value
 showDeArrowThumbnail.value = useDeArrowThumbnails.value
