@@ -3608,7 +3608,14 @@ export default defineComponent({
 
         elementList = uiConfig.overflowMenuButtons
 
-        uiConfig.controlPanelElements.push('ft_caption_toggle', 'overflow_menu', 'fullscreen')
+        uiConfig.controlPanelElements.push(
+          ...(props.shortsPlayer && useQuickPlaybackSpeedBar.value && !isLive.value
+            ? ['ft_quick_playback_rate_bar']
+            : []),
+          'ft_caption_toggle',
+          'overflow_menu',
+          'fullscreen'
+        )
       } else {
         uiConfig.controlPanelElements.push(
           ...(useQuickPlaybackSpeedBar.value && !isLive.value ? ['ft_quick_playback_rate_bar'] : []),
@@ -6252,10 +6259,47 @@ export default defineComponent({
 
     function handlePlayerMouseLeave(event) {
       handleScrollMiniPlayerLeave(event)
+      container.value?.style.removeProperty('--shorts-quick-playback-rate-bar-opacity')
 
       if (props.shortsPlayer && !video.value.paused) {
         ui?.getControls().getControlsContainer().removeAttribute('shown')
       }
+    }
+
+    /**
+     * Fade the Shorts quick playback controls in as the pointer approaches
+     * without adding an invisible element that intercepts clicks.
+     * @param {MouseEvent} event
+     */
+    function updateShortsQuickPlaybackRateBarProximity(event) {
+      const playerContainer = container.value
+      if (!playerContainer) {
+        return
+      }
+
+      if (!props.shortsPlayer) {
+        playerContainer.style.removeProperty('--shorts-quick-playback-rate-bar-opacity')
+        return
+      }
+
+      const target = event.target instanceof Element ? event.target : null
+      const playbackRateBar = playerContainer.querySelector('.ft-quick-playback-rate-bar')
+      if (!playbackRateBar || target?.closest('.shaka-seek-bar-container')) {
+        playerContainer.style.setProperty('--shorts-quick-playback-rate-bar-opacity', '0')
+        return
+      }
+
+      const proximity = 36
+      const bounds = playbackRateBar.getBoundingClientRect()
+      const distanceX = Math.max(bounds.left - event.clientX, 0, event.clientX - bounds.right)
+      const distanceY = Math.max(bounds.top - event.clientY, 0, event.clientY - bounds.bottom)
+      const distance = Math.hypot(distanceX, distanceY)
+      const opacity = Math.max(0, 1 - (distance / proximity))
+
+      playerContainer.style.setProperty(
+        '--shorts-quick-playback-rate-bar-opacity',
+        opacity.toFixed(3)
+      )
     }
 
     /**
@@ -6266,6 +6310,8 @@ export default defineComponent({
      * @param {MouseEvent} event
      */
     function handlePlayerMouseMove(event) {
+      updateShortsQuickPlaybackRateBarProximity(event)
+
       const videoElement = video.value
       revealPausedInterface()
 

@@ -59,6 +59,7 @@ test.describe('Shorts transcript navigation', () => {
       settings: {
         ...WATCH_PAGE_SEED,
         useCustomShortsPlayer: true,
+        useQuickPlaybackSpeedBar: true,
         fetchSubscriptionsAutomatically: false
       },
       profiles: [{
@@ -78,6 +79,58 @@ test.describe('Shorts transcript navigation', () => {
         shortsTimestamp: new Date().toISOString()
       }]
     }
+  })
+
+  test('shows quick playback speeds near the pointer without covering the seek preview', async ({ app, page, attachScreenshot }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.locator(sel.searchInput)
+      .fill(`https://www.youtube.com/shorts/${CAPTIONED_SHORT_IDS[0]}`)
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[0]}\\?short=true`))
+    const video = await waitForPlayback(page)
+
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const controlPanel = player.locator('.shaka-controls-button-panel')
+    const playbackRateBar = controlPanel.locator('.ft-quick-playback-rate-bar')
+    const seekBar = player.locator('.shaka-seek-bar-container')
+    const opacity = () => controlPanel.evaluate(element => Number(getComputedStyle(element).opacity))
+
+    await expect(playbackRateBar).toHaveCount(1)
+    await expect(playbackRateBar.getByRole('button')).toHaveCount(9)
+
+    const [playerBounds, rateBarBounds] = await Promise.all([
+      player.boundingBox(),
+      playbackRateBar.boundingBox(),
+    ])
+    expect(playerBounds).not.toBeNull()
+    expect(rateBarBounds).not.toBeNull()
+
+    await page.mouse.move(playerBounds.x + playerBounds.width / 2, playerBounds.y + 80)
+    await expect.poll(opacity).toBe(0)
+
+    await page.mouse.move(rateBarBounds.x + rateBarBounds.width / 2, rateBarBounds.y - 24)
+    await expect.poll(opacity).toBeGreaterThan(0.2)
+    expect(await opacity()).toBeLessThan(0.5)
+
+    await page.mouse.move(rateBarBounds.x + rateBarBounds.width / 2, rateBarBounds.y - 6)
+    await expect.poll(opacity).toBeGreaterThan(0.75)
+
+    await page.mouse.move(rateBarBounds.x + rateBarBounds.width / 2, rateBarBounds.y + rateBarBounds.height / 2)
+    await expect.poll(opacity).toBe(1)
+    await attachScreenshot('Shorts quick playback speed bar')
+
+    const seekBarBounds = await seekBar.boundingBox()
+    expect(seekBarBounds).not.toBeNull()
+    await page.mouse.move(
+      seekBarBounds.x + seekBarBounds.width / 2,
+      seekBarBounds.y + seekBarBounds.height / 2
+    )
+    await expect.poll(opacity).toBe(0)
+    expect(await seekBar.evaluate(element => getComputedStyle(element).zIndex)).toBe('3')
+    expect(await controlPanel.evaluate(element => getComputedStyle(element).zIndex)).toBe('2')
+
+    await playbackRateBar.getByRole('button', { name: '1.25x', exact: true }).click()
+    await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.25)
   })
 
   test('preserves the panel until navigation reaches a captionless Short', async ({ app, page }) => {
