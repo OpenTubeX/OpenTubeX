@@ -512,7 +512,7 @@ Settings:
     Load Missing Tab Icons: Load Missing Tab Icons
     Loading Missing Tab Icons: Loading Missing Tab Icons…
     No Missing Tab Icons: All supported tab icons are already loaded
-    Loaded Tab Icons: 'Missing tab icons loaded: {count}'
+    Loaded Tab Icons: 'Missing tab icon loaded: {count} | Missing tab icons loaded: {count}'
     Loaded Tab Icons With Failures: Loaded {loaded} tab icons; {failed} could not be loaded
     Show Tab Previews: Show Tab Previews
     Use Fixed Tab Width: Use Fixed Tab Width in Horizontal Mode

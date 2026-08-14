@@ -2493,15 +2493,23 @@ const multipleTabsActionPromptTitle = computed(() => {
 const multipleTabsActionPromptMessage = computed(() => {
   const count = multipleTabsActionPromptCount.value
   const parameters = { count }
-  if (multipleTabsActionPrompt.value === 'load') return t('Load Multiple Tabs Confirmation.Message', parameters)
-  if (multipleTabsActionPrompt.value === 'unload') return t('Unload Multiple Tabs Confirmation.Message', parameters)
+  if (multipleTabsActionPrompt.value === 'load') return t('Load Multiple Tabs Confirmation.Message', parameters, count)
+  if (multipleTabsActionPrompt.value === 'unload') return t('Unload Multiple Tabs Confirmation.Message', parameters, count)
   return t('Close Multiple Tabs Confirmation.Message', parameters, count)
 })
 const multipleTabsActionPromptNames = computed(() => [
   multipleTabsActionPrompt.value === 'load'
-    ? t('Load Multiple Tabs Confirmation.Load Tabs', { count: multipleTabsActionPromptCount.value })
+    ? t(
+        'Load Multiple Tabs Confirmation.Load Tabs',
+        { count: multipleTabsActionPromptCount.value },
+        multipleTabsActionPromptCount.value
+      )
     : multipleTabsActionPrompt.value === 'unload'
-      ? t('Unload Multiple Tabs Confirmation.Unload Tabs', { count: multipleTabsActionPromptCount.value })
+      ? t(
+          'Unload Multiple Tabs Confirmation.Unload Tabs',
+          { count: multipleTabsActionPromptCount.value },
+          multipleTabsActionPromptCount.value
+        )
       : t(
           'Close Multiple Tabs Confirmation.Close Tabs',
           { count: multipleTabsActionPromptCount.value },

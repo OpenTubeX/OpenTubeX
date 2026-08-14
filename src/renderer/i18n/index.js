@@ -1,7 +1,7 @@
 import { createI18n } from 'vue-i18n'
 import { ref } from 'vue'
 import { createWebURL } from '../helpers/utils'
-import { createPluralRules } from './plurals'
+import { createPluralRules, expandMultipleOnlyPluralMessages } from './plurals'
 // List of locales approved for use
 import activeLocales from '../../../static/locales/activeLocales.json'
 
@@ -51,7 +51,7 @@ export async function loadLocale(locale) {
 
   const response = await fetch(url)
   const data = await response.json()
-  i18n.global.setLocaleMessage(locale, data)
+  i18n.global.setLocaleMessage(locale, expandMultipleOnlyPluralMessages(locale, data))
 }
 
 // Set by _scripts/ProcessLocalesPlugin.js
@@ -70,7 +70,7 @@ if (process.env.HOT_RELOAD_LOCALES) {
           Object.keys(i18n.global.messages.value[locale]).length > 0) {
           const localeData = JSON.parse(data)
 
-          i18n.global.setLocaleMessage(locale, localeData)
+          i18n.global.setLocaleMessage(locale, expandMultipleOnlyPluralMessages(locale, localeData))
         }
       }
     }
