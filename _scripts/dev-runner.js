@@ -10,7 +10,6 @@ const { createHash } = require('crypto')
 const { spawn } = require('child_process')
 const { mkdirSync, realpathSync } = require('fs')
 const { tmpdir } = require('os')
-const net = require('net')
 
 const ProcessLocalesPlugin = require('./ProcessLocalesPlugin')
 
@@ -44,39 +43,49 @@ process.env.OPENTUBEX_RELAUNCH_EXIT_CODE = relaunchExitCode
 
 let port = 9080
 
-function findAvailablePort() {
-  return new Promise((resolve, reject) => {
-    const server = net.createServer()
-    server.unref()
-    server.on('error', reject)
-    server.listen(0, 'localhost', () => {
-      const address = server.address()
-      server.close(error => {
-        if (error) {
-          reject(error)
-        } else if (typeof address === 'object' && address !== null) {
-          resolve(address.port)
-        } else {
-          reject(new Error('Unable to allocate a development server port'))
-        }
-      })
-    })
-  })
-}
-
-async function configureWorktree() {
-  port = await findAvailablePort()
-
+function configureWorktree() {
+  // Let the operating system atomically assign the port when the development
+  // server starts, instead of probing a port that another process could claim.
+  port = 0
   const projectPath = realpathSync(path.resolve(__dirname, '..'))
   const profileId = createHash('sha256').update(projectPath).digest('hex').slice(0, 12)
   const profilePath = path.join(tmpdir(), `opentubex-dev-${profileId}`)
   mkdirSync(profilePath, { recursive: true, mode: 0o700 })
 
-  process.env.OPENTUBEX_DEV_SERVER_PORT = String(port)
   process.env.OPENTUBEX_DEV_USER_DATA_DIR = profilePath
 
-  console.log(`Using development server port ${port}`)
   console.log(`Using worktree profile ${profilePath}`)
+}
+
+/** @param {WebpackDevServer} devServer */
+function getListeningPort(devServer) {
+  return new Promise((resolve, reject) => {
+    const server = devServer.server
+    if (!server) {
+      reject(new Error('Development server was not created'))
+      return
+    }
+
+    const onError = error => {
+      server.off('listening', onListening)
+      reject(error)
+    }
+    const onListening = () => {
+      server.off('error', onError)
+      const address = server.address()
+      if (typeof address === 'object' && address !== null) {
+        resolve(address.port)
+      } else {
+        reject(new Error('Unable to determine the development server port'))
+      }
+    }
+
+    if (server.listening) onListening()
+    else {
+      server.once('error', onError)
+      server.once('listening', onListening)
+    }
+  })
 }
 
 function loadWebpackConfigs() {
@@ -285,7 +294,10 @@ function startRenderer(callback) {
 
     if (firstTime) {
       firstTime = false
-      callback()
+      getListeningPort(server).then(callback).catch(error => {
+        console.error(error)
+        process.exitCode = 1
+      })
     }
   })
 }
@@ -324,11 +336,15 @@ function startWeb () {
   })
 }
 async function start() {
-  if (worktree) await configureWorktree()
+  if (worktree) configureWorktree()
   loadWebpackConfigs()
 
   if (!web) {
-    startRenderer(() => {
+    startRenderer(devServerPort => {
+      if (worktree) {
+        process.env.OPENTUBEX_DEV_SERVER_PORT = String(devServerPort)
+        console.log(`Using development server port ${devServerPort}`)
+      }
       startBotGuardScript()
       startPreload()
       startMain()

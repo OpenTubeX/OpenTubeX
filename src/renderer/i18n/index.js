@@ -56,7 +56,7 @@ export async function loadLocale(locale) {
 
 // Set by _scripts/ProcessLocalesPlugin.js
 if (process.env.HOT_RELOAD_LOCALES) {
-  const websocket = new WebSocket(`ws://localhost:${process.env.OPENTUBEX_DEV_SERVER_PORT}/ws`)
+  const websocket = new WebSocket(`ws://${window.location.host}/ws`)
 
   websocket.onmessage = (event) => {
     const message = JSON.parse(event.data)
