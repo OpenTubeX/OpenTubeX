@@ -1914,9 +1914,9 @@ test.describe('dark theme settings', () => {
     await goTo(page, 'settings')
 
     await expect(page.locator('.settingsWindowHeader'))
-      .toHaveCSS('background-color', 'rgb(38, 38, 38)')
+      .toHaveCSS('background-color', 'rgb(18, 18, 18)')
     await expect(page.locator('.settingsSearch'))
-      .toHaveCSS('background-color', 'rgb(48, 48, 48)')
+      .toHaveCSS('background-color', 'rgb(31, 31, 31)')
   })
 })
 
