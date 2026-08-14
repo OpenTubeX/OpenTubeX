@@ -1,9 +1,13 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { buildReorderedTabMap } from '../../src/main/tabs/tabOrder.js'
+import {
+  buildReorderedTabMap,
+  getGroupedTabInsertIndex,
+  restoreTabPlacementOpeners
+} from '../../src/main/tabs/tabOrder.js'
 
-function createTabs() {
+function createTabs () {
   return new Map([
     ['pinned', { isPinned: true }],
     ['first', { isPinned: false }],
@@ -40,4 +44,57 @@ test('builds a valid changed order without changing tab objects', () => {
   assert.deepEqual(Array.from(reorderedTabs.keys()), ['pinned', 'second', 'first'])
   assert.equal(reorderedTabs.get('first'), tabs.get('first'))
   assert.equal(reorderedTabs.get('second'), tabs.get('second'))
+})
+
+test('appends new tabs to the contiguous group created from their opener', () => {
+  const tabs = new Map([
+    ['subscriptions', { isPinned: false }],
+    ['first-video', { isPinned: false, placementOpenerTabId: 'subscriptions' }],
+    ['second-video', { isPinned: false, placementOpenerTabId: 'subscriptions' }],
+    ['existing', { isPinned: false }]
+  ])
+
+  assert.equal(getGroupedTabInsertIndex(tabs, 'subscriptions', false), 3)
+})
+
+test('does not follow a grouped tab that was moved elsewhere', () => {
+  const tabs = new Map([
+    ['subscriptions', { isPinned: false }],
+    ['first-video', { isPinned: false, placementOpenerTabId: 'subscriptions' }],
+    ['existing', { isPinned: false }],
+    ['moved-video', { isPinned: false, placementOpenerTabId: 'subscriptions' }]
+  ])
+
+  assert.equal(getGroupedTabInsertIndex(tabs, 'subscriptions', false), 2)
+})
+
+test('starts an unpinned group after all pinned tabs', () => {
+  const tabs = new Map([
+    ['subscriptions', { isPinned: true }],
+    ['other-pinned', { isPinned: true }],
+    ['existing', { isPinned: false }]
+  ])
+
+  assert.equal(getGroupedTabInsertIndex(tabs, 'subscriptions', false), 2)
+})
+
+test('restores forward opener links after every saved tab exists', () => {
+  const tabs = new Map([
+    ['moved-video', { placementOpenerTabId: null }],
+    ['subscriptions', { placementOpenerTabId: null }],
+    ['invalid', { placementOpenerTabId: null }],
+    ['self-linked', { placementOpenerTabId: null }]
+  ])
+  const savedTabs = [
+    { id: 'moved-video', placementOpenerTabId: 'subscriptions' },
+    { id: 'subscriptions' },
+    { id: 'invalid', placementOpenerTabId: 'missing' },
+    { id: 'self-linked', placementOpenerTabId: 'self-linked' }
+  ]
+
+  restoreTabPlacementOpeners(tabs, savedTabs)
+
+  assert.equal(tabs.get('moved-video').placementOpenerTabId, 'subscriptions')
+  assert.equal(tabs.get('invalid').placementOpenerTabId, null)
+  assert.equal(tabs.get('self-linked').placementOpenerTabId, null)
 })

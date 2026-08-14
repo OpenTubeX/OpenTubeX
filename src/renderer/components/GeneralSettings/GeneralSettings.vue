@@ -535,18 +535,19 @@ function updateLandingPage(value) {
   store.dispatch('updateLandingPage', value)
 }
 
-const NEW_TAB_POSITION_VALUES = ['end', 'afterCurrent']
+const NEW_TAB_POSITION_VALUES = ['end', 'afterCurrent', 'afterCurrentInOrder']
 
 const newTabPositionNames = computed(() => [
   t('Settings.General Settings.New Tab Position.At the end'),
-  t('Settings.General Settings.New Tab Position.After current tab')
+  t('Settings.General Settings.New Tab Position.After current tab'),
+  t('Settings.General Settings.New Tab Position.After current tab in opened order')
 ])
 
-/** @type {import('vue').ComputedRef<'end' | 'afterCurrent'>} */
+/** @type {import('vue').ComputedRef<'end' | 'afterCurrent' | 'afterCurrentInOrder'>} */
 const newTabPosition = computed(() => store.getters.getNewTabPosition)
 
 /**
- * @param {'end' | 'afterCurrent'} value
+ * @param {'end' | 'afterCurrent' | 'afterCurrentInOrder'} value
  */
 function updateNewTabPosition(value) {
   store.dispatch('updateNewTabPosition', value)

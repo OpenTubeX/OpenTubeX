@@ -11,7 +11,11 @@ import {
   saveTabSession
 } from './TabSessionStore.js'
 import { TabRendererBridge } from './TabRendererBridge.js'
-import { buildReorderedTabMap } from './tabOrder.js'
+import {
+  buildReorderedTabMap,
+  getGroupedTabInsertIndex,
+  restoreTabPlacementOpeners
+} from './tabOrder.js'
 import {
   createTabAvatarFileName,
   createTabPreviewFileName,
@@ -33,8 +37,8 @@ import { isOpenTubeXUrl } from '../utils.js'
 /** @type {Map<number, TabManager>} windowId -> TabManager */
 const tabManagers = new Map()
 
-const DEFAULT_NEW_TAB_POSITION = 'afterCurrent'
-const VALID_NEW_TAB_POSITIONS = new Set(['end', 'afterCurrent'])
+const DEFAULT_NEW_TAB_POSITION = 'afterCurrentInOrder'
+const VALID_NEW_TAB_POSITIONS = new Set(['end', 'afterCurrent', 'afterCurrentInOrder'])
 const DEFAULT_TAB_CLOSE_FOCUS = 'previousTab'
 const VALID_TAB_CLOSE_FOCUS = new Set(['previousTab', 'nextTab'])
 // Closing a tab has to pick the replacement synchronously, so the preference is
@@ -83,6 +87,7 @@ const TAB_AVATAR_SIZE = 64
  * @property {boolean} pendingActivation
  * @property {number} mountRevision
  * @property {number} refreshKey
+ * @property {string | null} placementOpenerTabId
  * @property {NavigationHistoryEntry[] | null} navigationHistory
  * @property {number} navigationHistoryIndex
  * @property {boolean} persistNavigationHistory
@@ -99,7 +104,7 @@ const TAB_AVATAR_SIZE = 64
 export class TabManager {
   /**
    * @param {unknown} value
-   * @returns {'end' | 'afterCurrent'}
+   * @returns {'end' | 'afterCurrent' | 'afterCurrentInOrder'}
    */
   static normalizeNewTabPosition(value) {
     return VALID_NEW_TAB_POSITIONS.has(value)
@@ -189,7 +194,7 @@ export class TabManager {
   }
 
   /**
-   * @returns {Promise<'end' | 'afterCurrent'>}
+   * @returns {Promise<'end' | 'afterCurrent' | 'afterCurrentInOrder'>}
    */
   static async getStoredNewTabPosition() {
     try {
@@ -882,6 +887,7 @@ export class TabManager {
       history = null,
       historyIndex = null,
       persistHistory = history != null,
+      openerTabId = this.activeTabId,
       _deferUpdates = false
     } = options
 
@@ -930,17 +936,25 @@ export class TabManager {
       pendingActivation: false,
       mountRevision: shouldMount ? 1 : 0,
       refreshKey: 0,
+      placementOpenerTabId: this.tabs.has(openerTabId) ? openerTabId : null,
       navigationHistory: restoredNavigationHistory?.history ?? null,
       navigationHistoryIndex: restoredNavigationHistory?.historyIndex ?? 0,
       persistNavigationHistory: Boolean(persistHistory) && restoredNavigationHistory != null
     }
 
     let preferredIndex = this.tabs.size
-    if (TabManager.normalizeNewTabPosition(openPosition) === 'afterCurrent' && this.activeTabId != null) {
+    const normalizedOpenPosition = TabManager.normalizeNewTabPosition(openPosition)
+    if (normalizedOpenPosition === 'afterCurrent' && this.activeTabId != null) {
       const activeTabIndex = Array.from(this.tabs.keys()).indexOf(this.activeTabId)
       if (activeTabIndex !== -1) {
         preferredIndex = activeTabIndex + 1
       }
+    } else if (normalizedOpenPosition === 'afterCurrentInOrder' && tabInfo.placementOpenerTabId != null) {
+      preferredIndex = getGroupedTabInsertIndex(
+        this.tabs,
+        tabInfo.placementOpenerTabId,
+        tabInfo.isPinned
+      ) ?? preferredIndex
     }
 
     this._insertTabEntry(id, tabInfo, preferredIndex)
@@ -1042,7 +1056,7 @@ export class TabManager {
    * @returns {Promise<TabInfo>}
    */
   async createTabWithPreferenceFromOpener(options = {}, openerTabId = this.activeTabId) {
-    return this.createTabWithPreference(this._withOpenerTabColor(options, openerTabId))
+    return this.createTabWithPreference(this._withOpenerTab(options, openerTabId))
   }
 
   /**
@@ -1050,13 +1064,17 @@ export class TabManager {
    * @param {string | undefined | null} openerTabId
    * @returns {object}
    */
-  _withOpenerTabColor(options, openerTabId) {
+  _withOpenerTab(options, openerTabId) {
     if (Object.hasOwn(options, 'color')) {
-      return options
+      return { ...options, openerTabId }
     }
 
     const openerColor = TabManager.normalizeTabColor(this.tabs.get(openerTabId)?.color)
-    return openerColor == null ? options : { ...options, color: openerColor }
+    return {
+      ...options,
+      openerTabId,
+      ...(openerColor != null && { color: openerColor })
+    }
   }
 
   /**
@@ -2374,6 +2392,7 @@ export class TabManager {
       pendingActivation: false,
       mountRevision: 1,
       refreshKey: 0,
+      placementOpenerTabId: null,
       isTransferStaged: true
     }
 
@@ -2606,7 +2625,10 @@ export class TabManager {
           title: tab.title,
           isPinned: tab.isPinned,
           color: TabManager.normalizeTabColor(tab.color),
-          isUnloaded: tab.loadState === 'unloaded' || this._deferredUnloadTabIds.has(tab.id)
+          isUnloaded: tab.loadState === 'unloaded' || this._deferredUnloadTabIds.has(tab.id),
+          ...(tab.placementOpenerTabId != null && {
+            placementOpenerTabId: tab.placementOpenerTabId
+          })
         }
 
         const previewFileName = normalizeTabPreviewFileName(tab.previewFileName)
@@ -2654,6 +2676,9 @@ export class TabManager {
         isPinned: tab.isPinned,
         color: tab.color,
         isUnloaded: tab.isUnloaded || this._deferredUnloadTabIds.has(tab.id),
+        ...(this.tabs.get(tab.id)?.placementOpenerTabId != null && {
+          placementOpenerTabId: this.tabs.get(tab.id).placementOpenerTabId
+        }),
         ...(this.tabs.get(tab.id)?.persistNavigationHistory && tab.history != null && {
           history: tab.history,
           historyIndex: tab.historyIndex
@@ -2732,7 +2757,7 @@ export class TabManager {
   }
 
   /**
-   * @param {{ tabs?: Array<{id?: string, url: string, title?: string, avatarFileName?: string | null, isPinned?: boolean, color?: string | null, isUnloaded?: boolean, previewFileName?: string | null, previewCapturedAt?: number, history?: object[], historyIndex?: number}>, activeTabId?: string }} sessionData
+   * @param {{ tabs?: Array<{id?: string, url: string, title?: string, avatarFileName?: string | null, isPinned?: boolean, color?: string | null, isUnloaded?: boolean, previewFileName?: string | null, previewCapturedAt?: number, placementOpenerTabId?: string | null, history?: object[], historyIndex?: number}>, activeTabId?: string }} sessionData
    * @param {{ loadInactiveTabs?: boolean, restoreTabLoadState?: boolean }} [options]
    * @returns {Promise<boolean>}
    */
@@ -2785,10 +2810,15 @@ export class TabManager {
           persistHistory: restoreNavigationHistory,
           makeActive,
           openPosition: 'end',
+          openerTabId: typeof tabData.placementOpenerTabId === 'string'
+            ? tabData.placementOpenerTabId
+            : null,
           lazyLoad: restoreAsUnloaded,
           preloadInBackground: loadInBackground && !makeActive
         })
       }
+
+      restoreTabPlacementOpeners(this.tabs, sessionData.tabs)
 
       if (!this.activeTabId) {
         const firstTabId = this.tabs.keys().next().value
@@ -2988,12 +3018,12 @@ export async function setupTabsIPC(options = {}) {
       ...tabOptions
     } = options != null && typeof options === 'object' ? options : {}
 
+    const resolvedOpenerTabId = typeof openerTabId === 'string'
+      ? openerTabId
+      : manager.presentedTabId ?? manager.activeTabId
     const tab = inheritColorFromOpener === true
-      ? await manager.createTabWithPreferenceFromOpener(
-          tabOptions,
-          typeof openerTabId === 'string' ? openerTabId : manager.presentedTabId ?? manager.activeTabId
-        )
-      : await manager.createTabWithPreference(tabOptions)
+      ? await manager.createTabWithPreferenceFromOpener(tabOptions, resolvedOpenerTabId)
+      : await manager.createTabWithPreference({ ...tabOptions, openerTabId: resolvedOpenerTabId })
 
     return {
       id: tab.id,

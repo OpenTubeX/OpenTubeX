@@ -300,7 +300,7 @@ const state = {
   showLiveChatTimestamps: false,
   liveChatFilter: 'TOP_CHAT',
   landingPage: 'subscriptions',
-  newTabPosition: 'afterCurrent',
+  newTabPosition: 'afterCurrentInOrder',
   tabCloseFocus: 'previousTab',
   startupBehavior: 'loadLastActiveTab',
   showTabIcons: true,
