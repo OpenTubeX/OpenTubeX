@@ -495,18 +495,22 @@ const uploadedTime = ref('')
 const uploadedTimeIsRelative = ref(false)
 const relativeTimeNow = useRelativeTimeClock()
 const relativeTimeDataLoadedAt = ref(Date.now())
+const relativeTimeClockAtLoad = ref(relativeTimeNow.value)
 const lengthSeconds = ref(0)
 const duration = ref('')
 const description = ref('')
 const published = ref(undefined)
 const displayedUploadedTime = computed(() => {
   if (uploadedTimeIsRelative.value && published.value) {
-    return getRelativeTimeFromDate(
-      published.value,
-      false,
-      true,
-      Math.max(relativeTimeNow.value, relativeTimeDataLoadedAt.value)
-    )
+    const clockNow = relativeTimeNow.value
+    // Use the load-time clock while the shared tick is unchanged so reused cards
+    // aren't formatted against a stale value. Follow later ticks, including
+    // backward clock corrections.
+    const now = clockNow === relativeTimeClockAtLoad.value
+      ? relativeTimeDataLoadedAt.value
+      : clockNow
+
+    return getRelativeTimeFromDate(published.value, false, true, now)
   }
 
   return uploadedTime.value
@@ -1597,6 +1601,7 @@ function handleExtraThumbnailAction() {
 
 function parseVideoData() {
   relativeTimeDataLoadedAt.value = Date.now()
+  relativeTimeClockAtLoad.value = relativeTimeNow.value
   uploadedTime.value = ''
   uploadedTimeIsRelative.value = false
   published.value = undefined
