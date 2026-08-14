@@ -28,6 +28,7 @@ function historyEntry(videoId, title, timeWatched, isWatched = false, extra = {}
 
 test.use({
   seed: {
+    settings: { uiRoundness: 200 },
     history: [
       historyEntry('aaaaaaaaaaa', 'First test video', now - 1000, true),
       historyEntry('bbbbbbbbbbb', 'Second test video', now - 2000),
@@ -84,9 +85,15 @@ test.describe('watch history', () => {
   test('always shows watched indicators', async ({ page }) => {
     await goTo(page, 'history')
 
-    const watchedIndicator = page.locator('.videoWatched')
+    const watchedVideo = page.locator('.ft-list-video').filter({ hasText: 'First test video' })
+    const watchedIndicator = watchedVideo.locator('.videoWatched')
+    const durationIndicator = watchedVideo.locator('.videoDuration')
     await expect(page.getByRole('checkbox', { name: 'Show Watched Indicators' })).toHaveCount(0)
     await expect(watchedIndicator).toHaveText('Watched')
+    await expect(watchedIndicator).toHaveCSS('border-radius', '10px')
+    await expect(watchedIndicator).toHaveCSS('font-size', '15px')
+    await expect(durationIndicator).toHaveCSS('border-radius', '10px')
+    await expect(durationIndicator).toHaveCSS('font-size', '15px')
   })
 
   test('keeps an existing entry in place when toggling watched status', async ({ page }) => {
