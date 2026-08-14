@@ -188,13 +188,15 @@ function hide() {
  * @param {number} index
  */
 function focusItem(index) {
+  if (promptButtons.length === 0) return
+
   if (index < 0) {
     index = promptButtons.length - 1
   } else if (index >= promptButtons.length) {
     index = 0
   }
 
-  promptButtons[index].focus()
+  promptButtons[index]?.focus()
   store.dispatch('showOutlines')
 }
 

@@ -328,6 +328,7 @@ test.describe('video downloads', () => {
 
   test('plays a downloaded video locally and reconciles it after external deletion', async ({ app, page }) => {
     const downloadedFile = path.join(app.userDataDir, 'downloaded-demo.webm')
+    const downloadThumbnail = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="640" height="360"%3E%3Cpath fill="%23b00020" d="M0 0h640v360H0z"/%3E%3C/svg%3E'
     const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
     const argumentsFile = path.join(app.userDataDir, 'yt-dlp-arguments.txt')
     await copyFile(DEMO_MEDIA_PATH, downloadedFile)
@@ -342,11 +343,12 @@ test.describe('video downloads', () => {
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
-    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+    const result = await page.evaluate((thumbnail) => window.ftElectron.ytDlpDownload({
       videoId: 'eeeeeeeeeee',
       title: 'Downloaded demo',
+      thumbnail,
       mode: 'video'
-    }))
+    }), downloadThumbnail)
     await expect.poll(() => page.evaluate(async (id) => {
       const downloads = await window.ftElectron.ytDlpListDownloads()
       return downloads.find(download => download.id === id)
@@ -377,11 +379,12 @@ test.describe('video downloads', () => {
       const download = (await window.ftElectron.ytDlpListDownloads()).find(record => record.id === id)
       return download.sizeBytes
     }, result.id)).toBe(DEMO_MEDIA_LENGTH)
-    const audioResult = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+    const audioResult = await page.evaluate((thumbnail) => window.ftElectron.ytDlpDownload({
       videoId: 'eeeeeeeeeee',
       title: 'Downloaded audio alternative',
+      thumbnail,
       mode: 'audio'
-    }))
+    }), downloadThumbnail)
     await expect.poll(() => page.evaluate(async (id) => {
       return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
     }, audioResult.id)).toBe('completed')
@@ -410,6 +413,38 @@ test.describe('video downloads', () => {
     }).toBeGreaterThan(0)
     await expect.poll(() => page.locator('video.player').evaluate(video => video.duration)).toBeGreaterThan(30)
     await expect(page.locator('.legacy-quality-button')).toHaveAttribute('shaka-status', '640×360 • Local file')
+    const sourceSwitchLoadGeneration = await page.evaluate(() => {
+      const findWatchView = (vnode) => {
+        if (vnode?.component?.type?.name === 'Watch') return vnode.component.proxy
+        if (vnode?.component?.subTree) {
+          const match = findWatchView(vnode.component.subTree)
+          if (match) return match
+        }
+        if (Array.isArray(vnode?.children)) {
+          for (const child of vnode.children) {
+            const match = findWatchView(child)
+            if (match) return match
+          }
+        }
+        return null
+      }
+      const watchView = findWatchView(document.querySelector('#app').__vue_app__._container._vnode)
+      // This offline fixture cannot fetch an online source. Preserve a known
+      // playable source so this test isolates in-place source routing instead
+      // of exercising the separate unavailable-online fallback.
+      watchView.onlinePlaybackSource = {
+        manifestSrc: watchView.manifestSrc,
+        manifestMimeType: watchView.manifestMimeType,
+        sabrData: watchView.sabrData,
+        legacyFormats: watchView.legacyFormats,
+        streamingDataExpiryDate: watchView.streamingDataExpiryDate,
+        activeFormat: watchView.activeFormat,
+        activePlaybackEngine: watchView.activePlaybackEngine,
+        activePlaybackEngineVersion: watchView.activePlaybackEngineVersion,
+        hasBeenLoaded: true
+      }
+      return watchView.videoLoadGeneration
+    })
     await page.getByRole('button', { name: 'Change Media Formats' }).click()
     const formatPrompt = page.getByRole('dialog', { name: 'Change Media Formats' })
     await expect(formatPrompt.locator('.engineBadge')).toHaveText('Local file')
@@ -429,10 +464,30 @@ test.describe('video downloads', () => {
     await expect(formatPrompt.getByRole('button', { name: /Local audio file/ })).toBeVisible()
     await formatPrompt.getByRole('button', { name: /Local audio file/ }).click()
     await expect(page).toHaveURL(new RegExp(`downloadId=${audioResult.id}`))
+    await expect(page.locator('.audioPoster')).toBeVisible()
     await page.getByRole('button', { name: 'Change Media Formats' }).click()
     await expect(formatPrompt.getByRole('button', { name: /Local audio file/ })).toHaveAttribute('aria-pressed', 'true')
     await formatPrompt.getByRole('button', { name: /Online video/ }).click()
     await expect(page).not.toHaveURL(/downloadId=/)
+    expect(await page.evaluate(() => {
+      const findWatchView = (vnode) => {
+        if (vnode?.component?.type?.name === 'Watch') return vnode.component.proxy
+        if (vnode?.component?.subTree) {
+          const match = findWatchView(vnode.component.subTree)
+          if (match) return match
+        }
+        if (Array.isArray(vnode?.children)) {
+          for (const child of vnode.children) {
+            const match = findWatchView(child)
+            if (match) return match
+          }
+        }
+        return null
+      }
+      return findWatchView(document.querySelector('#app').__vue_app__._container._vnode).videoLoadGeneration
+    })).toBe(sourceSwitchLoadGeneration)
+    await expect(page.locator('.videoPlayerPlaceholder.ft-shimmer')).toHaveCount(0)
+    await expect(page.locator('.tab.active .tabTitleText')).toHaveText('Downloaded demo')
 
     await unlink(downloadedFile)
     await page.locator('.topNav .downloadsButton').click()

@@ -1635,8 +1635,9 @@ export async function handleYtDlpDownload(event, payload, retryDownloadId) {
     const result = await startYtDlpDownload(event, payload)
     if (result && 'id' in result) {
       downloadRecords.delete(retryDownloadId)
-      await saveDownloadRecords()
       broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, [retryDownloadId])
+      await saveDownloadRecords()
+        .catch(error => console.warn('Could not save download history', error))
     }
     return result
   } finally {

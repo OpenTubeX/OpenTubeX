@@ -284,6 +284,25 @@ export default defineComponent({
       activePlaybackEngine: 'built-in',
       /** @type {string | null} the yt-dlp version that extracted the current streams */
       activePlaybackEngineVersion: null,
+      /**
+       * The online streams stay cached while a downloaded file is selected so
+       * changing playback sources does not have to reload the watch page.
+       * @type {{
+       *   manifestSrc: string | null,
+       *   manifestMimeType: MANIFEST_TYPE_DASH | MANIFEST_TYPE_HLS | MANIFEST_TYPE_SABR,
+       *   sabrData: SabrData | null,
+       *   legacyFormats: object[],
+       *   streamingDataExpiryDate: Date | null,
+       *   activeFormat: 'dash' | 'audio' | 'legacy',
+       *   activePlaybackEngine: 'built-in' | 'yt-dlp',
+       *   activePlaybackEngineVersion: string | null,
+       *   hasBeenLoaded: boolean
+       * } | null}
+       */
+      onlinePlaybackSource: null,
+      playbackSourceKey: 0,
+      localPlaybackDownloadId: null,
+      sabrPlaybackLoaded: false,
       /** @type {{
        *   manifestSrc: string | null,
        *   manifestMimeType: MANIFEST_TYPE_DASH | MANIFEST_TYPE_HLS | MANIFEST_TYPE_SABR,
@@ -1009,7 +1028,22 @@ export default defineComponent({
         }
       }
     },
-    async 'tabRoute.fullPath'() {
+    async 'tabRoute.fullPath'(fullPath, previousFullPath) {
+      if (
+        this.playbackSourceRouteBase(fullPath) ===
+        this.playbackSourceRouteBase(previousFullPath)
+      ) {
+        const downloadId = Number(this.tabRoute.query.downloadId)
+        if (Number.isInteger(downloadId)) {
+          if (downloadId !== this.localPlaybackDownloadId &&
+            !this.applyDownloadedPlaybackSource(downloadId)) {
+            await this.reloadView()
+          }
+        } else if (this.localFilePlayback && !this.restoreOnlinePlaybackSource()) {
+          await this.reloadView()
+        }
+        return
+      }
       await this.reloadView()
     },
     userPlaylistsReady() {
@@ -1679,6 +1713,9 @@ export default defineComponent({
       this.sabrData = null
       this.activePlaybackEngine = 'built-in'
       this.activePlaybackEngineVersion = null
+      this.onlinePlaybackSource = null
+      this.localPlaybackDownloadId = null
+      this.sabrPlaybackLoaded = false
       this.builtInPlaybackSource = null
       this.ytDlpStreamsPending = false
       this.legacyFormats = []
@@ -1717,8 +1754,7 @@ export default defineComponent({
      * Keeps the normal online metadata while replacing its streaming formats
      * with a completed file selected from the Downloads page.
      */
-    applyDownloadedPlaybackSource: function () {
-      const downloadId = Number(this.tabRoute.query.downloadId)
+    applyDownloadedPlaybackSource: function (downloadId = Number(this.tabRoute.query.downloadId)) {
       if (!Number.isInteger(downloadId)) return false
 
       const download = this.$store.getters.getYtDlpDownloads[downloadId]
@@ -1735,6 +1771,7 @@ export default defineComponent({
           : DOWNLOADED_MEDIA_MIME_TYPES[extension]
       if (mimeType === undefined) return false
 
+      this.cacheOnlinePlaybackSource()
       this.sabrData = null
       const url = `downloadmedia://file/${downloadId}/${this.videoId}`
       if (download.mode === 'audio') {
@@ -1764,11 +1801,92 @@ export default defineComponent({
       if (Number.isFinite(file.duration) && file.duration > 0) {
         this.videoLengthSeconds = file.duration
       }
+      this.thumbnail = download.thumbnail || this.thumbnail
+      if (this.errorMessage) {
+        const fileName = file.path.split(/[/\\]/).at(-1)?.replace(/\.[^.]+$/, '') ?? this.videoId
+        this.videoTitle = download.videoId === this.videoId ? download.title : fileName
+        this.hasResolvedVideoTitle = true
+        this.errorMessage = null
+        this.isLoading = false
+        this.updateTitle()
+      }
       this.streamingDataExpiryDate = null
       this.activePlaybackEngine = 'built-in'
       this.activePlaybackEngineVersion = null
       this.localFilePlayback = true
+      this.localPlaybackDownloadId = downloadId
+      this.playbackSourceKey++
       return true
+    },
+
+    cacheOnlinePlaybackSource: function () {
+      if (
+        this.localFilePlayback ||
+        (this.manifestSrc === null && this.legacyFormats.length === 0)
+      ) return
+
+      this.onlinePlaybackSource = {
+        manifestSrc: this.manifestSrc,
+        manifestMimeType: this.manifestMimeType,
+        sabrData: this.sabrData,
+        legacyFormats: this.legacyFormats,
+        streamingDataExpiryDate: this.streamingDataExpiryDate,
+        activeFormat: this.activeFormat,
+        activePlaybackEngine: this.activePlaybackEngine,
+        activePlaybackEngineVersion: this.activePlaybackEngineVersion,
+        hasBeenLoaded: this.sabrPlaybackLoaded
+      }
+    },
+
+    restoreOnlinePlaybackSource: function () {
+      const source = this.onlinePlaybackSource
+      if (
+        source === null ||
+        (source.manifestSrc === null && source.legacyFormats.length === 0) ||
+        (
+          source.streamingDataExpiryDate !== null &&
+          new Date() > source.streamingDataExpiryDate
+        )
+      ) return false
+
+      this.manifestSrc = source.manifestSrc
+      this.manifestMimeType = source.manifestMimeType
+      this.sabrData = source.sabrData
+      this.legacyFormats = source.legacyFormats
+      this.streamingDataExpiryDate = source.streamingDataExpiryDate
+      this.activeFormat = source.manifestMimeType === MANIFEST_TYPE_SABR &&
+        !source.hasBeenLoaded && source.legacyFormats.length > 0
+        ? 'legacy'
+        : source.activeFormat
+      this.activePlaybackEngine = source.activePlaybackEngine
+      this.activePlaybackEngineVersion = source.activePlaybackEngineVersion
+      this.localFilePlayback = false
+      this.localPlaybackDownloadId = null
+      this.playbackSourceKey++
+      return true
+    },
+
+    playbackSourceRouteBase: function (fullPath) {
+      const url = new URL(fullPath, 'https://opentubex.invalid')
+      url.searchParams.delete('downloadId')
+      return `${url.pathname}${url.search}${url.hash}`
+    },
+
+    replacePlaybackSourceRoute: async function (downloadId = null) {
+      const query = { ...this.tabRoute.query }
+      if (downloadId === null) {
+        delete query.downloadId
+      } else {
+        query.downloadId = String(downloadId)
+      }
+
+      const location = { path: this.tabRoute.path, query }
+      const fullPath = this.tabRouter.resolve(location).fullPath
+      if (fullPath === this.tabRoute.fullPath) return
+
+      await this.tabRouter.replace(location)
+      await this.$nextTick()
+      this.updateTitle()
     },
 
     finishDownloadedPlaybackWithoutMetadata: function () {
@@ -3570,6 +3688,17 @@ export default defineComponent({
       this.sabrReloadCaptionIndex = null
       this.sabrReloadPlaybackRate = null
 
+      if (
+        !this.localFilePlayback &&
+        this.manifestMimeType === MANIFEST_TYPE_SABR &&
+        this.activeFormat !== 'legacy'
+      ) {
+        this.sabrPlaybackLoaded = true
+        if (this.onlinePlaybackSource !== null) {
+          this.onlinePlaybackSource.hasBeenLoaded = true
+        }
+      }
+
       if (this.tabRoute.query.downloadId && Number.isFinite(mediaMetadata?.duration) && mediaMetadata.duration > 0) {
         this.videoLengthSeconds = mediaMetadata.duration
       }
@@ -3667,9 +3796,14 @@ export default defineComponent({
     useOnlinePlaybackSource: async function () {
       if (!this.localFilePlayback || typeof this.tabRoute.query.downloadId !== 'string') return
 
+      const playbackPosition = this.getTimestamp()
+      if (this.restoreOnlinePlaybackSource()) {
+        await this.replacePlaybackSourceRoute()
+        return
+      }
+
       const query = { ...this.tabRoute.query }
       delete query.downloadId
-      const playbackPosition = this.getTimestamp()
       if (playbackPosition > 0) query.oneTimeTimestamp = playbackPosition
       await this.tabRouter.replace({ path: this.tabRoute.path, query })
     },
@@ -3678,10 +3812,9 @@ export default defineComponent({
       if (!Number.isInteger(downloadId) ||
         !this.localPlaybackDownloads.some(download => download.id === downloadId)) return
 
-      const query = { ...this.tabRoute.query, downloadId: String(downloadId) }
-      const playbackPosition = this.getTimestamp()
-      if (playbackPosition > 0) query.oneTimeTimestamp = playbackPosition
-      await this.tabRouter.replace({ path: this.tabRoute.path, query })
+      if (!this.applyDownloadedPlaybackSource(downloadId)) return
+
+      await this.replacePlaybackSourceRoute(downloadId)
     },
 
     /**

@@ -93,6 +93,7 @@
           :playback-engine="activePlaybackEngine"
           :sabr-data="sabrData"
           :legacy-formats="legacyFormats"
+          :playback-source-key="playbackSourceKey"
           :start-time="startTimeSeconds"
           :captions="captions"
           :caption-translations="captionTranslations"
