@@ -170,14 +170,6 @@
   font-weight: bold;
 }
 
-.tabsProgressBar {
-  position: absolute;
-  inset-block-end: 0;
-  inset-inline-start: 0;
-  block-size: 3px;
-  background-color: var(--primary-color);
-}
-
 .subscriptionIcon {
   color: var(--primary-color);
 }

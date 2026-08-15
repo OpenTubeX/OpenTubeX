@@ -144,9 +144,7 @@
       v-if="showCreatePlaylistPrompt"
     />
     <FtContextMenu v-if="isElectron" />
-    <FtToast
-      :show-subscription-refresh="presentedRoutePath !== '/subscriptions'"
-    />
+    <FtToast />
     <FtProgressBar
       v-if="showProgressBar"
       :progress="displayedProgressBarPercentage"
@@ -496,19 +494,9 @@ const progressUsesToast = computed(() => {
   return store.getters.getShowProgressBarToast
 })
 
-const presentedRoutePath = computed(() => {
-  if (isElectron) {
-    return store.getters.getTabById(presentedTabId.value)?.route.path ?? ''
-  }
-  return route.path
-})
-
 const showProgressBar = computed(() => {
-  // The Subscriptions view shows its own progress bar below the tab bar
   return (localProgressBarVisible.value && !progressUsesToast.value) ||
-    (subscriptionRefreshInProgress.value &&
-      !progressUsesToast.value &&
-      presentedRoutePath.value !== '/subscriptions')
+    (subscriptionRefreshInProgress.value && !progressUsesToast.value)
 })
 const displayedProgressBarPercentage = computed(() => {
   return localProgressBarVisible.value

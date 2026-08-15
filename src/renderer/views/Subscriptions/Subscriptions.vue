@@ -185,12 +185,6 @@
             @cancel="cancelRefresh"
           />
         </div>
-        <div
-          v-if="currentTabRefreshing"
-          class="tabsProgressBar"
-          data-tab-loading-indicator
-          :style="{ inlineSize: refreshProgressPercentage + '%' }"
-        />
       </div>
       <SubscriptionsVideos
         v-if="currentTab === 'videos'"
@@ -344,11 +338,6 @@ const currentTabRefreshing = computed(() => {
 
   const currentFeedTab = currentTab.value === 'community' ? 'posts' : currentTab.value
   return refreshingFeedTab.value !== null && refreshingFeedTab.value === currentFeedTab
-})
-
-/** @type {import('vue').ComputedRef<number>} */
-const refreshProgressPercentage = computed(() => {
-  return store.getters.getSubscriptionFeedRefreshProgress
 })
 
 /** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | null>} */
