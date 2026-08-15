@@ -1240,6 +1240,9 @@ export class TabManager {
     tab.pendingActivation = false
     this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_MOUNT, false)
     this._resolveTabMountWaiters(tabId, mountRevision, false)
+    if (tabId === this._startupPriorityTabId) {
+      this._resumeDeferredStartupWatchTabs()
+    }
 
     // The failed tab was activated as the replacement for one or more tabs whose
     // close/unload was deferred until it presented. Since it will never present,

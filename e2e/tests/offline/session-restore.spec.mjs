@@ -205,6 +205,9 @@ test.describe('restored watch tab startup priority', () => {
     await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', ACTIVE_WATCH_TAB_ID)
     await expect(backgroundWatchTab).toHaveClass(/unloaded/)
     await expect(subscriptionsTab).not.toHaveClass(/unloaded/)
+    await page.evaluate(activeTabId => {
+      window.ftElectron.tabs.setLoading(true, activeTabId)
+    }, ACTIVE_WATCH_TAB_ID)
     await expect.poll(async () => {
       const state = await page.evaluate(() => window.ftElectron.tabs.getState())
       return state.tabs.find(tab => tab.id === ACTIVE_WATCH_TAB_ID)?.isLoading
@@ -237,6 +240,22 @@ test.describe('restored watch tab startup priority', () => {
     await subscriptionsTab.click()
 
     await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', SUBSCRIPTIONS_TAB_ID)
+    await expect(backgroundWatchTab).not.toHaveClass(/unloaded/)
+  })
+
+  test('releases background watch tabs when the priority mount fails', async ({ page }) => {
+    const backgroundWatchTab = page.locator(`.tab[data-tab-id="${BACKGROUND_WATCH_TAB_ID}"]`)
+
+    await expect(backgroundWatchTab).toHaveClass(/unloaded/)
+    const mountRevision = await page.evaluate(async activeTabId => {
+      const state = await window.ftElectron.tabs.getState()
+      return state.tabs.find(tab => tab.id === activeTabId)?.mountRevision
+    }, ACTIVE_WATCH_TAB_ID)
+
+    await page.evaluate(({ activeTabId, mountRevision }) => {
+      window.ftElectron.tabs.mountFailed(activeTabId, mountRevision)
+    }, { activeTabId: ACTIVE_WATCH_TAB_ID, mountRevision })
+
     await expect(backgroundWatchTab).not.toHaveClass(/unloaded/)
   })
 })
