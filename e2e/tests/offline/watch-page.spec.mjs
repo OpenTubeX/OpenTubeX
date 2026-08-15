@@ -628,7 +628,7 @@ test.describe('watch page', () => {
     await expect(page.locator(`${activeTab} .ftVideoPlayer`)).toBeVisible()
   })
 
-  test('keeps live chat and replay visibility independent and restores a closed chat', async ({ app, page }) => {
+  test('keeps live chat and replay visibility independent and restores a closed chat', async ({ app, page, attachScreenshot }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
 
@@ -697,6 +697,26 @@ test.describe('watch page', () => {
     await expect(activeChatToggle).toBeVisible()
     await activeChatToggle.click()
     await expect(activeChat).toBeVisible()
+
+    await activeChat.locator('.liveChatSkeleton').evaluate(element => {
+      const owner = document.createElement('a')
+      owner.className = 'channelName owner'
+      owner.textContent = 'Channel owner'
+      for (const attribute of element.getAttributeNames()) {
+        if (attribute.startsWith('data-v-')) {
+          owner.setAttribute(attribute, '')
+        }
+      }
+      element.replaceWith(owner)
+    })
+
+    const owner = activeChat.locator('.channelName.owner', { hasText: 'Channel owner' })
+    await expect(owner).toHaveCSS('border-radius', '2px')
+    await page.locator('body').evaluate(element => {
+      element.style.setProperty('--ui-roundness', '2')
+    })
+    await expect(owner).toHaveCSS('border-radius', '4px')
+    await attachScreenshot('rounded live chat owner label')
 
     await watchView.evaluate(async (view) => {
       view.$store.commit('setHideLiveChat', true)
