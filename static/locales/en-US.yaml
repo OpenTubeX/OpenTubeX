@@ -1848,6 +1848,8 @@ Change Format:
     Audio: Audio only, useful for saving bandwidth or listening in the background
   yt-dlp Fallback Template: 'yt-dlp could not provide the streams, using the built-in
     engine instead: {error}'
+  yt-dlp Default Clients Fallback: The preferred yt-dlp clients could not provide playable
+    streams, trying yt-dlp's default clients instead
   Built-in Fallback Template: 'The built-in engine could not play the stream, trying
     yt-dlp instead: {error}'
 Share:

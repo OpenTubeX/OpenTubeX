@@ -4640,7 +4640,17 @@ export default defineComponent({
     ) {
       let source
       try {
-        source = await getYtDlpPlaybackSource(videoId, this.ytDlpPlaybackCacheKey)
+        source = await getYtDlpPlaybackSource(videoId, this.ytDlpPlaybackCacheKey, () => {
+          if (
+            this.isCurrentVideoLoad(loadGeneration, videoId) &&
+            playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration
+          ) {
+            this.showTabToast({
+              message: this.t('Change Format.yt-dlp Default Clients Fallback'),
+              icon: ['fas', 'exchange-alt'],
+            })
+          }
+        })
       } catch (error) {
         if (
           !this.isCurrentVideoLoad(loadGeneration, videoId) ||
