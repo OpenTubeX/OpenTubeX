@@ -32,6 +32,7 @@ import {
 } from './subscription-entries'
 import { mapConcurrently } from './concurrent-map'
 import { includeAutomaticDownloadChannels, startAutomaticDownloadsForChannel } from './automaticDownloads'
+import { extractAssignedJsonObject } from './assigned-json'
 import { getLocalPremiereState } from './premiere'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
@@ -59,7 +60,6 @@ let activeRefresh = null
 let cancelCount = 0
 
 const IS_UPCOMING_REGEX = /"isUpcoming"\s*:\s*true/
-const PLAYER_RESPONSE_REGEX = /ytInitialPlayerResponse\s*=\s*(\{.+?\});/
 const SCHEDULED_START_REGEX = /"scheduledStartTime"\s*:\s*"(\d+)"/
 const SUBSCRIPTION_FETCH_BATCH_SIZE = 80
 const SUBSCRIPTION_FETCH_BATCH_DELAY_MS = 2000
@@ -467,7 +467,7 @@ async function fetchRssVideoUpcomingInfoUncached(videoId) {
     const premiereDate = scheduledStartMatch
       ? new Date(parseInt(scheduledStartMatch[1], 10) * 1000)
       : undefined
-    const playerResponseText = html.match(PLAYER_RESPONSE_REGEX)?.[1]
+    const playerResponseText = extractAssignedJsonObject(html, 'ytInitialPlayerResponse')
     let isPremiere
 
     if (playerResponseText) {
