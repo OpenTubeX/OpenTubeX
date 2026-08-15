@@ -60,14 +60,26 @@ const seed = {
           premiereDate: new Date(now + 30 * 24 * HOUR).toISOString()
         })
       ],
-      videosTimestamp: new Date(now - 2 * HOUR).toISOString()
+      videosTimestamp: new Date(now - 2 * HOUR).toISOString(),
+      shorts: [],
+      shortsTimestamp: new Date(now - 2 * HOUR).toISOString(),
+      liveStreams: [],
+      liveStreamsTimestamp: new Date(now - 2 * HOUR).toISOString(),
+      communityPosts: [],
+      communityPostsTimestamp: new Date(now - 2 * HOUR).toISOString()
     },
     {
       _id: CHANNEL_B,
       videos: [
         feedVideo('bbbbbbbbbb1', 'Video B newest', CHANNEL_B, now - 0.5 * HOUR)
       ],
-      videosTimestamp: new Date(now - 1 * HOUR).toISOString()
+      videosTimestamp: new Date(now - 1 * HOUR).toISOString(),
+      shorts: [],
+      shortsTimestamp: new Date(now - 1 * HOUR).toISOString(),
+      liveStreams: [],
+      liveStreamsTimestamp: new Date(now - 1 * HOUR).toISOString(),
+      communityPosts: [],
+      communityPostsTimestamp: new Date(now - 1 * HOUR).toISOString()
     }
   ]
 }
@@ -124,7 +136,7 @@ test.describe('subscriptions feed from cache', () => {
     await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
   })
 
-  test('shows a hidden upcoming premiere when its scheduled time arrives', async ({ page }) => {
+  test('shows a hidden upcoming premiere as a premiere when its scheduled time arrives', async ({ page }) => {
     // The app opens on Subscriptions, so leave it before installing the clock;
     // timers created before installation cannot be advanced by Playwright.
     await goTo(page, 'trending')
@@ -138,7 +150,7 @@ test.describe('subscriptions feed from cache', () => {
 
     const premiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
     await expect(premiere).toBeVisible()
-    await expect(premiere.locator('.videoDuration')).toHaveText('Live')
+    await expect(premiere.locator('.videoDuration')).toHaveText('Premiere')
   })
 
   test('an open video menu does not lift feed content over the sticky header', async ({ page }) => {
@@ -181,15 +193,19 @@ test.describe('subscriptions feed from cache', () => {
     await expect(page.getByRole('option', { name: 'Add to Queue' })).toBeVisible()
   })
 
-  test('shows when the cache was last refreshed, from the oldest channel timestamp', async ({ page }) => {
+  test('shows when the feed was last updated without being held back by a stale channel', async ({ page }) => {
     await goTo(page, 'subscriptions')
     await expect(page.getByText('Video B newest')).toBeVisible()
 
     // Cache timestamps must survive the IPC round trip as dates (7ad96d185).
-    // The displayed value is the oldest per-channel timestamp (2 hours ago).
-    const lastRefresh = page.locator('.lastRefreshTimestamp').first()
-    await expect(lastRefresh).toBeVisible()
-    await expect(lastRefresh).toContainText('2 hours ago')
+    // The displayed value is the latest per-channel timestamp (1 hour ago).
+    for (const tab of ['videos', 'shorts', 'live', 'posts']) {
+      await page.locator(`[data-subscription-feed-tab="${tab}"]`).click()
+
+      const lastRefresh = page.locator('.headerRefreshWidget .lastRefreshTimestamp')
+      await expect(lastRefresh).toBeVisible()
+      await expect(lastRefresh).toContainText('1 hour ago')
+    }
   })
 
   test('updates relative timestamps without reloading the page', async ({ page }) => {

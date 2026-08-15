@@ -43,6 +43,7 @@ export function updateUpcomingPremiereState(video, now) {
     return {
       ...video,
       isUpcoming: false,
+      isPremiere: true,
       premiere: false,
       liveNow: true
     }
