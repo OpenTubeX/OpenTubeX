@@ -745,6 +745,7 @@ function loadDatastores() {
     db.subscriptionCache.loadDatabaseAsync(),
     db.tabSession.loadDatabaseAsync(),
     db.liveReminders.loadDatabaseAsync(),
+    db.videoMetadataCache.loadDatabaseAsync(),
   ])
 }
 
@@ -759,6 +760,7 @@ function compactAllDatastores() {
     db.subscriptionCache.compactDatafileAsync(),
     db.tabSession.compactDatafileAsync(),
     db.liveReminders.compactDatafileAsync(),
+    db.videoMetadataCache.compactDatafileAsync(),
   ])
 }
 

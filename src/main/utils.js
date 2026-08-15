@@ -1,7 +1,73 @@
+import { BlockList, isIP } from 'node:net'
+
 export const DEFAULT_PROXY_SETTINGS = {
   protocol: 'socks5',
   hostname: '127.0.0.1',
   port: '9050'
+}
+
+const NON_PUBLIC_NETWORK_ADDRESSES = new BlockList()
+
+for (const [address, prefix, family] of [
+  ['0.0.0.0', 8, 'ipv4'],
+  ['10.0.0.0', 8, 'ipv4'],
+  ['100.64.0.0', 10, 'ipv4'],
+  ['127.0.0.0', 8, 'ipv4'],
+  ['169.254.0.0', 16, 'ipv4'],
+  ['172.16.0.0', 12, 'ipv4'],
+  ['192.0.0.0', 24, 'ipv4'],
+  ['192.0.2.0', 24, 'ipv4'],
+  ['192.168.0.0', 16, 'ipv4'],
+  ['198.18.0.0', 15, 'ipv4'],
+  ['198.51.100.0', 24, 'ipv4'],
+  ['203.0.113.0', 24, 'ipv4'],
+  ['224.0.0.0', 4, 'ipv4'],
+  ['240.0.0.0', 4, 'ipv4'],
+  ['::', 128, 'ipv6'],
+  ['::1', 128, 'ipv6'],
+  ['64:ff9b::', 96, 'ipv6'],
+  ['64:ff9b:1::', 48, 'ipv6'],
+  ['100::', 64, 'ipv6'],
+  ['2001:2::', 48, 'ipv6'],
+  ['2001:10::', 28, 'ipv6'],
+  ['2001:db8::', 32, 'ipv6'],
+  ['2002::', 16, 'ipv6'],
+  ['fc00::', 7, 'ipv6'],
+  ['fe80::', 10, 'ipv6'],
+  ['fec0::', 10, 'ipv6'],
+  ['ff00::', 8, 'ipv6']
+]) {
+  NON_PUBLIC_NETWORK_ADDRESSES.addSubnet(address, prefix, family)
+}
+
+/**
+ * Rejects addresses which must not be reachable through an untrusted URL.
+ * Unknown address formats are rejected as well.
+ *
+ * @param {string} address
+ */
+export function isNonPublicNetworkAddress(address) {
+  let normalizedAddress = address.startsWith('[') && address.endsWith(']')
+    ? address.slice(1, -1)
+    : address
+  const family = isIP(normalizedAddress)
+
+  if (family === 0) return true
+  if (family === 6) {
+    normalizedAddress = new URL(`http://[${normalizedAddress}]/`).hostname.slice(1, -1)
+    const mappedAddress = normalizedAddress.match(/^::ffff:([\da-f]{1,4}):([\da-f]{1,4})$/i)
+    if (mappedAddress) {
+      const high = Number.parseInt(mappedAddress[1], 16)
+      const low = Number.parseInt(mappedAddress[2], 16)
+      return isNonPublicNetworkAddress([
+        high >> 8,
+        high & 0xff,
+        low >> 8,
+        low & 0xff
+      ].join('.'))
+    }
+  }
+  return NON_PUBLIC_NETWORK_ADDRESSES.check(normalizedAddress, family === 4 ? 'ipv4' : 'ipv6')
 }
 
 /**

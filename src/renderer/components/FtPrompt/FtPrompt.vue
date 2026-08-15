@@ -11,9 +11,9 @@
     >
       <FtCard
         ref="promptCard"
-        v-overlay-scrollbars
+        v-overlay-scrollbars="!fixedLayout"
         class="promptCard"
-        :class="{ autosize, [theme]: true, [cardClass]: cardClass !== '' }"
+        :class="{ autosize, fixedLayout, [theme]: true, [cardClass]: cardClass !== '' }"
         role="dialog"
         aria-modal="true"
         :aria-labelledby="id"
@@ -30,7 +30,19 @@
           </h2>
         </slot>
 
-        <slot>
+        <template v-if="fixedLayout">
+          <div
+            ref="promptContentScroller"
+            v-overlay-scrollbars
+            class="promptContentScroller"
+          >
+            <slot />
+          </div>
+          <div class="promptFixedFooter">
+            <slot name="footer" />
+          </div>
+        </template>
+        <slot v-else>
           <p
             v-for="extraLabel in extraLabels"
             :key="extraLabel"
@@ -61,6 +73,7 @@
 <script setup>
 import { nextTick, onBeforeMount, onBeforeUnmount, onMounted, useId, useTemplateRef } from 'vue'
 
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import store from '../../store/index'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -108,6 +121,10 @@ const props = defineProps({
   lockScroll: {
     type: Boolean,
     default: true
+  },
+  fixedLayout: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -117,9 +134,11 @@ const id = useId()
 const teleportTarget = document.fullscreenElement ?? '.app'
 
 const promptCard = useTemplateRef('promptCard')
+const promptContentScroller = useTemplateRef('promptContentScroller')
 
 let promptButtons = []
 let lastActiveElement = null
+let promptContentResizeObserver = null
 
 onBeforeMount(() => {
   if (props.lockScroll) {
@@ -135,10 +154,21 @@ onMounted(() => {
   nextTick(() => {
     promptButtons = Array.from(promptCard.value.$el.querySelectorAll('.btn.ripple, .iconButton'))
     focusItem(0)
+
+    const scroller = promptContentScroller.value
+    const content = scroller?.firstElementChild
+    if (scroller && content && typeof ResizeObserver === 'function') {
+      const clampScroll = () => clampOverlayScrollTop(scroller, content)
+      promptContentResizeObserver = new ResizeObserver(clampScroll)
+      promptContentResizeObserver.observe(scroller)
+      promptContentResizeObserver.observe(content)
+      clampScroll()
+    }
   })
 })
 
 onBeforeUnmount(() => {
+  promptContentResizeObserver?.disconnect()
   document.removeEventListener('keydown', handleEscape, true)
   store.commit('removeOpenPrompt', id)
   if (props.lockScroll) {

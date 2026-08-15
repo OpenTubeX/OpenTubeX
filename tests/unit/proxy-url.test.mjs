@@ -1,7 +1,28 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { buildProxyUrl } from '../../src/main/utils.js'
+import { buildProxyUrl, isNonPublicNetworkAddress } from '../../src/main/utils.js'
+
+test('identifies network addresses which are unsafe for untrusted fetches', () => {
+  for (const address of [
+    '127.0.0.1',
+    '10.0.0.1',
+    '100.64.0.1',
+    '169.254.169.254',
+    '192.168.1.1',
+    '::1',
+    '[::ffff:127.0.0.1]',
+    'fc00::1',
+    'fe80::1',
+    'not-an-address'
+  ]) {
+    assert.equal(isNonPublicNetworkAddress(address), true, address)
+  }
+
+  for (const address of ['8.8.8.8', '1.1.1.1', '2606:4700:4700::1111']) {
+    assert.equal(isNonPublicNetworkAddress(address), false, address)
+  }
+})
 
 test('builds a proxy URL from the proxy settings', () => {
   assert.equal(buildProxyUrl({

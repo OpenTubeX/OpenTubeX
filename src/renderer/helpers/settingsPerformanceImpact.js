@@ -32,6 +32,8 @@ const SETTING_PERFORMANCE_IMPACTS = new Map([
   ['updateRelativeTimestamps', { level: 'moderate', resources: ['CPU'] }],
   // screenshots of the tabs are captured and cached on disk
   ['showTabPreviews', { level: 'moderate', resources: ['Memory', 'Disk'] }],
+  // keeps every title, description, and thumbnail revision found for visited videos
+  ['enableVideoMetadataCache', { level: 'moderate', resources: ['Disk', 'Network'] }],
 
   // the feeds keep being fetched in the background while the app is open
   ['subscriptionFeedAutoRefreshInterval', { level: 'moderate', resources: ['Network'] }],
