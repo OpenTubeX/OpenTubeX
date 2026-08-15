@@ -87,9 +87,7 @@ const mutations = {
 
     state.tabs = incomingTabs.map(tab => reconcileTab(previousTabsById.get(tab.id), tab))
     for (const tab of incomingTabs) {
-      if (!Object.prototype.hasOwnProperty.call(state.skipSilenceByTabId, tab.id)) {
-        state.skipSilenceByTabId[tab.id] = tab.skipSilence === true
-      }
+      state.skipSilenceByTabId[tab.id] = tab.skipSilence === true
     }
     state.selectedTabIds = state.selectedTabIds.filter(tabId => incomingIds.has(tabId))
     state.activeTabId = payload.activeTabId ?? null
