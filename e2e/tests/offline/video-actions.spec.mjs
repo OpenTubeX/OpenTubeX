@@ -50,6 +50,24 @@ const SEED = {
   history: [historyEntry('eeeeeeeeeee', 'Bookmarkable video')]
 }
 
+function silentWav(duration, sampleRate = 8_000) {
+  const samples = sampleRate * duration
+  const wav = Buffer.alloc(44 + samples * 2)
+  wav.write('RIFF', 0)
+  wav.writeUInt32LE(wav.length - 8, 4)
+  wav.write('WAVEfmt ', 8)
+  wav.writeUInt32LE(16, 16)
+  wav.writeUInt16LE(1, 20)
+  wav.writeUInt16LE(1, 22)
+  wav.writeUInt32LE(sampleRate, 24)
+  wav.writeUInt32LE(sampleRate * 2, 28)
+  wav.writeUInt16LE(2, 32)
+  wav.writeUInt16LE(16, 34)
+  wav.write('data', 36)
+  wav.writeUInt32LE(samples * 2, 40)
+  return wav
+}
+
 test.use({ seed: SEED })
 
 test('persists the yt-dlp playback cache across app restarts', async ({ app, page }) => {
@@ -328,14 +346,20 @@ test.describe('video downloads', () => {
 
   test('plays a downloaded video locally and reconciles it after external deletion', async ({ app, page }) => {
     const downloadedFile = path.join(app.userDataDir, 'downloaded-demo.webm')
+    const downloadedAudioFile = path.join(app.userDataDir, 'downloaded-audio-alternative.wav')
     const downloadThumbnail = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="640" height="360"%3E%3Cpath fill="%23b00020" d="M0 0h640v360H0z"/%3E%3C/svg%3E'
     const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
     const argumentsFile = path.join(app.userDataDir, 'yt-dlp-arguments.txt')
     await copyFile(DEMO_MEDIA_PATH, downloadedFile)
+    await writeFile(downloadedAudioFile, silentWav(2))
     await writeFile(executable, [
       '#!/bin/sh',
       `printf '%s\\n' "$@" >> '${argumentsFile}'`,
-      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t30\\t640\\t360\\t${downloadedFile}\\n'`
+      'if printf \'%s\\n\' "$@" | grep -q -- \'--extract-audio\'; then',
+      `  printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t2\\tNA\\tNA\\t${downloadedAudioFile}\\n'`,
+      'else',
+      `  printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t30\\t640\\t360\\t${downloadedFile}\\n'`,
+      'fi'
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
@@ -489,7 +513,10 @@ test.describe('video downloads', () => {
     await expect(page.locator('.videoPlayerPlaceholder.ft-shimmer')).toHaveCount(0)
     await expect(page.locator('.tab.active .tabTitleText')).toHaveText('Downloaded demo')
 
-    await unlink(downloadedFile)
+    await Promise.all([
+      unlink(downloadedFile),
+      unlink(downloadedAudioFile)
+    ])
     await page.locator('.topNav .downloadsButton').click()
     await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
     await expect(downloadRow).toContainText('Download unavailable')
@@ -497,7 +524,7 @@ test.describe('video downloads', () => {
     await expect(downloadRow.getByTitle('Play download')).toHaveCount(0)
     await expect(downloadRow.getByTitle('Show in Folder')).toHaveCount(0)
     await expect(downloadRow.getByTitle('Remove File')).toHaveCount(0)
-    await page.getByRole('button', { name: 'Clear failed, canceled, and missing' }).click()
+    await page.getByRole('button', { name: 'Clear failed, canceled, skipped, and missing' }).click()
     await expect(downloadRow).toHaveCount(0)
     await expect(page.locator('.downloadRow').filter({ hasText: 'Downloaded audio alternative' })).toHaveCount(0)
   })
@@ -505,23 +532,8 @@ test.describe('video downloads', () => {
   test('plays an audio download in the normal player', async ({ app, page }) => {
     const downloadedFile = path.join(app.userDataDir, 'downloaded-audio.wav')
     const executable = path.join(app.userDataDir, 'fake-audio-yt-dlp.sh')
-    const sampleRate = 8_000
     const duration = 2
-    const samples = sampleRate * duration
-    const wav = Buffer.alloc(44 + samples * 2)
-    wav.write('RIFF', 0)
-    wav.writeUInt32LE(wav.length - 8, 4)
-    wav.write('WAVEfmt ', 8)
-    wav.writeUInt32LE(16, 16)
-    wav.writeUInt16LE(1, 20)
-    wav.writeUInt16LE(1, 22)
-    wav.writeUInt32LE(sampleRate, 24)
-    wav.writeUInt32LE(sampleRate * 2, 28)
-    wav.writeUInt16LE(2, 32)
-    wav.writeUInt16LE(16, 34)
-    wav.write('data', 36)
-    wav.writeUInt32LE(samples * 2, 40)
-    await writeFile(downloadedFile, wav)
+    await writeFile(downloadedFile, silentWav(duration))
     await writeFile(executable, [
       '#!/bin/sh',
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t${duration}\\tNA\\tNA\\t${downloadedFile}\\n'`
@@ -714,7 +726,7 @@ test.describe('video downloads', () => {
     await hydratedDownload.getByTitle('Cancel Download').click()
     await expect(otherDownload).toContainText('Download canceled')
 
-    await lateWindow.getByRole('button', { name: 'Clear failed, canceled, and missing' }).click()
+    await lateWindow.getByRole('button', { name: 'Clear failed, canceled, skipped, and missing' }).click()
     await expect(otherDownload).toHaveCount(0)
   })
 
