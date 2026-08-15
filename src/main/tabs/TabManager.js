@@ -548,6 +548,7 @@ export class TabManager {
       stagedTab.previewDataUrl = detached.previewDataUrl
       stagedTab.previewCapturedAt = detached.previewCapturedAt
       stagedTab.previewFileName = detached.previewFileName
+      stagedTab.skipSilence = detached.skipSilence === true
 
       stagedTab.isTransferStaged = false
       target.activateTab(tabId)
