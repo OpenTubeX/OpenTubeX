@@ -3037,6 +3037,11 @@
   bottom: var(--caption-hidden-bottom-gap) !important;
 }
 
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hidePlayerControlsWhenPaused
+:is(:deep(.shaka-text-container), :deep(.shaka-speech-to-text-container)) {
+  bottom: var(--caption-hidden-bottom-gap) !important;
+}
+
 .ftVideoPlayer.shortsPlayer :deep(.shaka-text-container),
 .ftVideoPlayer.shortsPlayer :deep(.shaka-speech-to-text-container) {
   /*

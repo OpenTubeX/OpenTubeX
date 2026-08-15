@@ -1530,6 +1530,47 @@ test.describe('fullscreen captions', () => {
   })
 })
 
+test.describe('bottom captions', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...WATCH_PAGE_SEED,
+        enableSubtitlesByDefault: true,
+        showPlayerControlsWhenPaused: false,
+        pausedInterfaceHideDelay: 0.5,
+      }
+    }
+  })
+
+  test('lowers captions with the hidden paused controls', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, { captionCueSettings: 'align:center' })
+    const video = await openMockedVideo(page)
+
+    const player = page.locator('.ftVideoPlayer')
+    const captions = player.locator('.shaka-text-container')
+    await expect(captions.locator('[translate="no"]')).toBeVisible()
+    await page.locator('body').press('s')
+    await expect(player).toHaveClass(/fullWindow/)
+    await video.evaluate(element => element.pause())
+    await expect(player).toHaveClass(/playerPaused/)
+
+    const playerBounds = await player.boundingBox()
+    await page.mouse.move(
+      playerBounds.x + playerBounds.width / 2,
+      playerBounds.y + playerBounds.height / 2
+    )
+    await expect(player).toHaveClass(/pausedInterfaceRevealed/)
+    const raisedBottom = await captions.evaluate(element => {
+      return Number.parseFloat(getComputedStyle(element).bottom)
+    })
+
+    await expect(player).not.toHaveClass(/pausedInterfaceRevealed/, { timeout: 1500 })
+    await expect.poll(() => captions.evaluate(element => {
+      return Number.parseFloat(getComputedStyle(element).bottom)
+    })).toBeLessThan(raisedBottom)
+  })
+})
+
 test.describe('fullscreen playlist dock', () => {
   test.use({
     seed: {
