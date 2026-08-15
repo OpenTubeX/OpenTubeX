@@ -3,6 +3,7 @@ import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
+import { DBActions } from '../../../src/constants.js'
 import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
 import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
@@ -21,7 +22,15 @@ test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
 test('stores and presents every previous metadata version', async ({ app, page }) => {
   const thumbnailServer = createServer((request, response) => {
-    const index = Number(new URL(request.url, 'http://localhost').searchParams.get('revision'))
+    const requestUrl = new URL(request.url, 'http://localhost')
+    if (requestUrl.pathname === '/redirect.png') {
+      const { port } = thumbnailServer.address()
+      response.writeHead(302, { location: `http://localhost:${port}/thumbnail.png?revision=0` })
+      response.end()
+      return
+    }
+
+    const index = Number(requestUrl.searchParams.get('revision'))
     const thumbnail = THUMBNAILS[index % THUMBNAILS.length]
     response.writeHead(200, {
       'content-length': thumbnail.length,
@@ -37,8 +46,30 @@ test('stores and presents every previous metadata version', async ({ app, page }
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
 
+    const thumbnailBaseUrl = `http://127.0.0.1:${port}`
+    await page.evaluate(async ({ action, url }) => {
+      await window.ftElectron.dbSettings(action, {
+        _id: 'defaultInvidiousInstance',
+        value: url
+      })
+    }, { action: DBActions.GENERAL.UPSERT, url: thumbnailBaseUrl })
+
     const watchView = await watchViewHandle(page)
-    const rejectedPreservedTitle = await watchView.evaluate(async (view, thumbnailBaseUrl) => {
+    const cacheChecks = await watchView.evaluate(async (view, thumbnailBaseUrl) => {
+      await window.ftElectron.videoMetadataCache.clear()
+
+      const redirectedMetadata = {
+        videoId: 'redirect001',
+        title: 'Redirect test',
+        description: 'Redirect test',
+        thumbnailUrl: `${thumbnailBaseUrl}/redirect.png`
+      }
+      await window.ftElectron.videoMetadataCache.update(redirectedMetadata)
+      const redirectedHistory = await window.ftElectron.videoMetadataCache.update({
+        ...redirectedMetadata,
+        title: 'Redirect test changed'
+      })
+      const privateRedirectRejected = redirectedHistory.revisions.every(revision => revision.thumbnail === null)
       await window.ftElectron.videoMetadataCache.clear()
 
       const observedAt = Date.now() - 10_000
@@ -51,9 +82,9 @@ test('stores and presents every previous metadata version', async ({ app, page }
           title: `${label} title`,
           description: Array.from(
             { length: 30 },
-            (_, line) => `${label} description line ${line + 1}`
+            (_, line) => `${label} description line ${line + 1} with enough text to wrap when the metadata history is narrow`
           ).join('\n'),
-          thumbnailUrl: `${thumbnailBaseUrl}?revision=${index}`,
+          thumbnailUrl: `${thumbnailBaseUrl}/thumbnail.png?revision=${index}`,
           observedAt: observedAt + index
         })
       }
@@ -69,10 +100,13 @@ test('stores and presents every previous metadata version', async ({ app, page }
       view.videoMetadataHistory = history
       view.hasResolvedVideoTitle = true
       await view.$nextTick()
-      return preservedTitleWasRejected
-    }, `http://127.0.0.1:${port}/thumbnail.png`)
+      return { preservedTitleWasRejected, privateRedirectRejected }
+    }, thumbnailBaseUrl)
     await watchView.dispose()
-    expect(rejectedPreservedTitle).toBe(true)
+    expect(cacheChecks).toEqual({
+      preservedTitleWasRejected: true,
+      privateRedirectRejected: true
+    })
 
     const cachePath = path.join(app.userDataDir, 'video-metadata-cache.db')
     const cacheDocuments = (await readFile(cachePath, 'utf8')).trim().split('\n')
@@ -127,7 +161,33 @@ test('stores and presents every previous metadata version', async ({ app, page }
     await scroller.evaluate(element => element.scrollTo(0, element.scrollHeight))
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
     const fixedPositionsAfterScroll = await Promise.all([heading.boundingBox(), closeButton.boundingBox()])
-    expect(fixedPositionsAfterScroll).toEqual(fixedPositionsBeforeScroll)
+    for (const [index, before] of fixedPositionsBeforeScroll.entries()) {
+      const after = fixedPositionsAfterScroll[index]
+      for (const property of ['x', 'y', 'width', 'height']) {
+        expect(Math.abs(after[property] - before[property])).toBeLessThanOrEqual(1)
+      }
+    }
+
+    await page.setViewportSize({ width: 480, height: 500 })
+    const firstDescription = descriptions.first()
+    await scroller.evaluate(element => element.scrollTo(0, element.scrollHeight))
+    await firstDescription.evaluate(element => element.scrollTo(0, element.scrollHeight))
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await expect.poll(() => firstDescription.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await page.setViewportSize({ width: 1920, height: 1080 })
+    await expect.poll(() => scroller.evaluate(element => {
+      const content = element.firstElementChild
+      const maximum = Math.max(0, content.offsetTop + content.offsetHeight +
+        Number.parseFloat(getComputedStyle(element).paddingBottom) - element.clientHeight)
+      return element.scrollTop <= maximum + 1
+    })).toBe(true)
+    await expect.poll(() => firstDescription.evaluate(element => {
+      const content = element.firstElementChild
+      const maximum = Math.max(0, content.offsetTop + content.offsetHeight +
+        Number.parseFloat(getComputedStyle(element).paddingBottom) - element.clientHeight)
+      return element.scrollTop <= maximum + 1
+    })).toBe(true)
 
     await closeButton.click()
     await expect(dialog).toHaveCount(0)

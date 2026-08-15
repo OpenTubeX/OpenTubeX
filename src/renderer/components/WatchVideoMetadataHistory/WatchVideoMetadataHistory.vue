@@ -73,11 +73,14 @@
               <time :datetime="dateTime(version.cachedAt)">{{ formatDate(version.cachedAt) }}</time>
             </div>
             <div
+              ref="descriptionScrollers"
               v-overlay-scrollbars
               class="metadataText metadataDescription"
               dir="auto"
             >
-              {{ version.value || $t('Video.Metadata Cache.Empty') }}
+              <div class="metadataDescriptionContent">
+                {{ version.value || $t('Video.Metadata Cache.Empty') }}
+              </div>
             </div>
           </li>
         </ol>
@@ -96,9 +99,10 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import FtButton from '../FtButton/FtButton.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
@@ -112,6 +116,34 @@ const props = defineProps({
 
 const emit = defineEmits(['close'])
 const { locale, t } = useI18n()
+const descriptionScrollers = useTemplateRef('descriptionScrollers')
+
+let descriptionResizeObserver = null
+
+onMounted(() => {
+  nextTick(() => {
+    const scrollers = descriptionScrollers.value ?? []
+    const clampDescriptions = () => {
+      for (const scroller of scrollers) {
+        const content = scroller.firstElementChild
+        if (content) clampOverlayScrollTop(scroller, content)
+      }
+    }
+
+    if (typeof ResizeObserver === 'function') {
+      descriptionResizeObserver = new ResizeObserver(clampDescriptions)
+      for (const scroller of scrollers) {
+        descriptionResizeObserver.observe(scroller)
+        if (scroller.firstElementChild) {
+          descriptionResizeObserver.observe(scroller.firstElementChild)
+        }
+      }
+    }
+    clampDescriptions()
+  })
+})
+
+onBeforeUnmount(() => descriptionResizeObserver?.disconnect())
 
 const dateFormatter = computed(() => new Intl.DateTimeFormat(locale.value, {
   dateStyle: 'medium',

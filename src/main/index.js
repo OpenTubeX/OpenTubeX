@@ -47,7 +47,7 @@ import { getYtDlpDownloadFile, handleYtDlpCancelDownload, handleYtDlpClearDownlo
 import { handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
 import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
-import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isOpenTubeXUrl } from './utils'
+import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isNonPublicNetworkAddress, isOpenTubeXUrl } from './utils'
 import { TabManager, setupTabsIPC } from './tabs/TabManager'
 import { clearAllTabSessions, loadAllTabSessions } from './tabs/TabSessionStore'
 import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../renderer/helpers/share'
@@ -3071,6 +3071,7 @@ function runApp() {
   })
 
   const MAX_VIDEO_METADATA_THUMBNAIL_BYTES = 5 * 1024 * 1024
+  const MAX_VIDEO_METADATA_THUMBNAIL_REDIRECTS = 3
   const VIDEO_METADATA_THUMBNAIL_MIME_TYPES = new Set([
     'image/avif',
     'image/gif',
@@ -3079,6 +3080,24 @@ function runApp() {
     'image/webp'
   ])
   let videoMetadataCacheGeneration = 0
+
+  async function isAllowedVideoMetadataThumbnailUrl(parsedUrl, allowedPrivateOrigin) {
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) return false
+    if (parsedUrl.origin === allowedPrivateOrigin) return true
+
+    const hostname = parsedUrl.hostname.startsWith('[') && parsedUrl.hostname.endsWith(']')
+      ? parsedUrl.hostname.slice(1, -1)
+      : parsedUrl.hostname
+
+    try {
+      const { endpoints } = await session.defaultSession.resolveHost(hostname, {
+        cacheUsage: 'disallowed'
+      })
+      return endpoints.length > 0 && endpoints.every(({ address }) => !isNonPublicNetworkAddress(address))
+    } catch {
+      return false
+    }
+  }
 
   async function fetchVideoMetadataThumbnail(url) {
     if (typeof url !== 'string' || url.length > 20_000) return null
@@ -3091,11 +3110,41 @@ function runApp() {
     }
     if (!['http:', 'https:'].includes(parsedUrl.protocol)) return null
 
+    let allowedPrivateOrigin = null
+    try {
+      const configuredInstance = (await baseHandlers.settings._findOne('defaultInvidiousInstance'))?.value
+      if (typeof configuredInstance === 'string' && configuredInstance !== '') {
+        allowedPrivateOrigin = new URL(configuredInstance).origin
+      }
+    } catch { }
+
     const abortController = new AbortController()
     const timeout = setTimeout(() => abortController.abort(), 15_000)
 
     try {
-      const response = await net.fetch(parsedUrl.href, { signal: abortController.signal })
+      let response
+
+      for (let redirectCount = 0; redirectCount <= MAX_VIDEO_METADATA_THUMBNAIL_REDIRECTS; redirectCount += 1) {
+        if (!await isAllowedVideoMetadataThumbnailUrl(parsedUrl, allowedPrivateOrigin)) return null
+
+        response = await net.fetch(parsedUrl.href, {
+          credentials: 'omit',
+          redirect: 'manual',
+          signal: abortController.signal
+        })
+
+        if (response.status < 300 || response.status >= 400) break
+        if (redirectCount === MAX_VIDEO_METADATA_THUMBNAIL_REDIRECTS) return null
+
+        const location = response.headers.get('location')
+        if (location === null) return null
+
+        await response.body?.cancel()
+        parsedUrl = new URL(location, parsedUrl)
+        if (parsedUrl.href.length > 20_000) return null
+      }
+
+      if (!response) return null
       const mimeType = response.headers.get('content-type')?.split(';', 1)[0].toLowerCase()
       const contentLength = Number(response.headers.get('content-length'))
 
