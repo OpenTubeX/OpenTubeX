@@ -16,7 +16,25 @@ import {
 test.describe('settings', () => {
   test('imports current OpenTubeX subscriptions without rejecting profile icons', async ({ page }) => {
     const dataSection = await goToSettingsSection(page, 'data')
-    await page.evaluate(() => {
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('createProfile', {
+        _id: 'unrelated-test-profile',
+        name: 'A Test',
+        bgColor: '#111111',
+        textColor: '#FFFFFF',
+        icon: { type: 'emoji', value: '🚫' },
+        subscriptions: []
+      })
+      await store.dispatch('createProfile', {
+        _id: 'exact-test-profile',
+        name: 'Test',
+        bgColor: '#222222',
+        textColor: '#FFFFFF',
+        icon: { type: 'emoji', value: '⏳' },
+        subscriptions: []
+      })
+
       const exportedProfile = {
         _id: 'allChannels',
         name: 'Profile.All Channels',
@@ -29,7 +47,19 @@ test.describe('settings', () => {
           thumbnail: null
         }]
       }
-      const contents = `${JSON.stringify(exportedProfile)}\n`
+      const exportedNamedProfile = {
+        _id: 'imported-test-profile',
+        name: 'Test',
+        bgColor: '#333333',
+        textColor: '#FFFFFF',
+        icon: { type: 'emoji', value: '🔎' },
+        subscriptions: [{
+          id: 'UCnamedProfileImport',
+          name: 'Named Profile Channel',
+          thumbnail: null
+        }]
+      }
+      const contents = `${JSON.stringify(exportedProfile)}\n${JSON.stringify(exportedNamedProfile)}\n`
 
       Object.defineProperty(window, 'showOpenFilePicker', {
         configurable: true,
@@ -51,14 +81,33 @@ test.describe('settings', () => {
     await expect(page.locator('.toast', { hasText: 'Unknown data key' })).toHaveCount(0)
     await expect.poll(() => page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      const profile = store.getters.getProfileList[0]
+      const profiles = store.getters.getProfileList
+      const profile = profiles[0]
+      const unrelatedProfile = profiles.find(({ _id }) => _id === 'unrelated-test-profile')
+      const exactProfile = profiles.find(({ _id }) => _id === 'exact-test-profile')
       return {
         hasSubscription: profile.subscriptions.some(({ id }) => id === 'UCcurrentFormatImport'),
-        icon: profile.icon
+        icon: profile.icon,
+        unrelatedProfile: {
+          hasSubscription: unrelatedProfile.subscriptions.some(({ id }) => id === 'UCnamedProfileImport'),
+          icon: unrelatedProfile.icon
+        },
+        exactProfile: {
+          hasSubscription: exactProfile.subscriptions.some(({ id }) => id === 'UCnamedProfileImport'),
+          icon: exactProfile.icon
+        }
       }
     })).toEqual({
       hasSubscription: true,
-      icon: { type: 'emoji', value: '🧪' }
+      icon: { type: 'emoji', value: '🧪' },
+      unrelatedProfile: {
+        hasSubscription: false,
+        icon: { type: 'emoji', value: '🚫' }
+      },
+      exactProfile: {
+        hasSubscription: true,
+        icon: { type: 'emoji', value: '🔎' }
+      }
     })
   })
 
