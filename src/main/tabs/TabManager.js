@@ -3373,8 +3373,10 @@ export async function setupTabsIPC(options = {}) {
   ipcMain.on(IpcChannels.TABS_SET_SKIP_SILENCE, (event, enabled, tabId) => {
     const manager = getManager(event)
     const tab = typeof tabId === 'string' ? manager?.tabs.get(tabId) : null
-    if (tab) {
-      tab.skipSilence = enabled === true
+    const skipSilence = enabled === true
+    if (tab && tab.skipSilence !== skipSilence) {
+      tab.skipSilence = skipSilence
+      manager._broadcastStateUpdate()
     }
   })
 
