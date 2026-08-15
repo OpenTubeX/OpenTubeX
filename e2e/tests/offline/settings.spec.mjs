@@ -14,6 +14,47 @@ import {
 } from '../../helpers/app.mjs'
 
 test.describe('settings', () => {
+  test('imports current OpenTubeX subscriptions without rejecting profile icons', async ({ page }) => {
+    const dataSection = await goToSettingsSection(page, 'data')
+    await page.evaluate(() => {
+      const exportedProfile = {
+        _id: 'allChannels',
+        name: 'Profile.All Channels',
+        bgColor: 'transparent',
+        textColor: '#FFFFFF',
+        icon: { type: 'emoji', value: '🧪' },
+        subscriptions: [{
+          id: 'UCcurrentFormatImport',
+          name: 'Current Format Channel',
+          thumbnail: null
+        }]
+      }
+      const contents = `${JSON.stringify(exportedProfile)}\n`
+
+      Object.defineProperty(window, 'showOpenFilePicker', {
+        configurable: true,
+        value: async () => [{
+          getFile: async () => new File(
+            [contents],
+            'opentubex-subscriptions.db',
+            { type: 'application/x-freetube-db' }
+          )
+        }]
+      })
+    })
+
+    await dataSection.getByRole('button', { name: 'Import subscriptions', exact: true }).click()
+
+    await expect(page.locator('.toast', {
+      hasText: 'All subscriptions and profiles have been successfully imported'
+    })).toBeVisible()
+    await expect(page.locator('.toast', { hasText: 'Unknown data key' })).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getProfileList[0].subscriptions.some(({ id }) => id === 'UCcurrentFormatImport')
+    })).toBe(true)
+  })
+
   test('groups confirmation preferences together', async ({ page }) => {
     await goTo(page, 'settings')
 

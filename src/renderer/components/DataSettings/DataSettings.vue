@@ -98,6 +98,7 @@
     <FtSettingsSubpage
       :open="showExportSubscriptionsPrompt"
       :title="t('Settings.Data Settings.Select Export Type')"
+      :icon="['fas', 'file-download']"
       @close="showExportSubscriptionsPrompt = false"
     >
       <FtFlexBox>
@@ -112,6 +113,7 @@
     <FtSettingsSubpage
       :open="showExportWatchHistoryPrompt"
       :title="t('Settings.Data Settings.Select Export Type')"
+      :icon="['fas', 'file-download']"
       @close="showExportWatchHistoryPrompt = false"
     >
       <FtFlexBox>
@@ -126,6 +128,7 @@
     <FtSettingsSubpage
       :open="showExportSearchHistoryPrompt"
       :title="t('Settings.Data Settings.Select Export Type')"
+      :icon="['fas', 'file-download']"
       @close="showExportSearchHistoryPrompt = false"
     >
       <FtFlexBox>
@@ -396,6 +399,10 @@ function importFreeTubeSubscriptions(textDecode) {
     'textColor',
     'subscriptions'
   ]
+  const optionalKeys = [
+    'icon'
+  ]
+  const knownKeys = [...requiredKeys, ...optionalKeys]
 
   textDecode.forEach((profileData) => {
     // We would technically already be done by the time the data is parsed,
@@ -404,7 +411,7 @@ function importFreeTubeSubscriptions(textDecode) {
 
     const profileObject = {}
     Object.keys(profileData).forEach((key) => {
-      if (!requiredKeys.includes(key)) {
+      if (!knownKeys.includes(key)) {
         const message = t('Settings.Data Settings.Unknown data key')
         showToast({ message: `${message}: ${key}`, icon: ['fas', 'circle-exclamation'] })
       } else {
@@ -412,7 +419,8 @@ function importFreeTubeSubscriptions(textDecode) {
       }
     })
 
-    if (Object.keys(profileObject).length < requiredKeys.length) {
+    const hasAllRequiredKeys = requiredKeys.every(key => Object.hasOwn(profileObject, key))
+    if (!hasAllRequiredKeys) {
       const message = t('Settings.Data Settings.Profile object has insufficient data, skipping item')
       showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
     } else {
