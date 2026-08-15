@@ -5,6 +5,11 @@ import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 
 const ALPHA_CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const BETA_CHANNEL_ID = 'UCbbbbbbbbbbbbbbbbbbbbbb'
+const EXTRA_CHANNELS = Array.from({ length: 20 }, (_, index) => ({
+  id: `UC${String(index).padStart(22, '0')}`,
+  name: `Extra Channel ${index + 1}`,
+  thumbnail: ''
+}))
 const PROFILES = [
   {
     _id: 'allChannels',
@@ -13,7 +18,8 @@ const PROFILES = [
     textColor: '#FFFFFF',
     subscriptions: [
       { id: ALPHA_CHANNEL_ID, name: 'Alpha Channel', thumbnail: '' },
-      { id: BETA_CHANNEL_ID, name: 'Beta Channel', thumbnail: '' }
+      { id: BETA_CHANNEL_ID, name: 'Beta Channel', thumbnail: '' },
+      ...EXTRA_CHANNELS
     ]
   }
 ]
@@ -94,9 +100,16 @@ test.describe('download settings', () => {
 
     const manager = page.locator('.settingsSubpageContent')
     const search = manager.getByRole('textbox', { name: 'Search channels' })
+    const scroller = manager.locator('.automaticDownloadsScroller')
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
     await search.fill('beta')
     await expect(manager.getByText('Beta Channel', { exact: true })).toBeVisible()
     await expect(manager.getByText('Alpha Channel', { exact: true })).toHaveCount(0)
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+    await expect(scroller.locator(':scope > .os-scrollbar-vertical'))
+      .toHaveClass(/os-scrollbar-unusable/)
 
     await manager.getByText('Beta Channel', { exact: true }).click()
     await expect.poll(() => page.evaluate((channelId) => {
