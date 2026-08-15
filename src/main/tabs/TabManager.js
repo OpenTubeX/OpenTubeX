@@ -82,6 +82,7 @@ const TAB_AVATAR_SIZE = 64
  * @property {string | null} previewFileName
  * @property {ReturnType<typeof setTimeout> | null} previewCaptureTimeoutId
  * @property {Promise<string | null> | null} previewCapturePromise
+ * @property {boolean} skipSilence
  * @property {TabLoadState} loadState
  * @property {boolean} preloadInBackground
  * @property {boolean} pendingActivation
@@ -937,6 +938,7 @@ export class TabManager {
       previewFileName: restoredPreviewFileName,
       previewCaptureTimeoutId: null,
       previewCapturePromise: null,
+      skipSilence: false,
       loadState: startsUnloaded ? 'unloaded' : 'mounting',
       preloadInBackground: Boolean(preloadInBackground),
       pendingActivation: false,
@@ -2337,7 +2339,8 @@ export class TabManager {
       color: tab.color,
       previewDataUrl: tab.previewDataUrl,
       previewCapturedAt: tab.previewCapturedAt,
-      previewFileName: tab.previewFileName
+      previewFileName: tab.previewFileName,
+      skipSilence: tab.skipSilence === true
     }
   }
 
@@ -2413,6 +2416,7 @@ export class TabManager {
       previewFileName: normalizeTabPreviewFileName(snapshot.previewFileName),
       previewCaptureTimeoutId: null,
       previewCapturePromise: null,
+      skipSilence: snapshot.skipSilence === true,
       loadState: 'mounting',
       preloadInBackground: true,
       pendingActivation: false,
@@ -2560,6 +2564,7 @@ export class TabManager {
         isUnloaded: tab.loadState === 'unloaded',
         isLoading: this._getTabLoadingState(tab),
         isPlaying: tab.isPlaying || false,
+        skipSilence: tab.skipSilence === true,
         isPinned: tab.isPinned || false,
         color: TabManager.normalizeTabColor(tab.color),
         loadState: tab.loadState,
@@ -3361,6 +3366,14 @@ export async function setupTabsIPC(options = {}) {
     if (manager && tab && typeof playbackState === 'string') {
       tab.isPlaying = playbackState === 'playing'
       manager._broadcastStateUpdate()
+    }
+  })
+
+  ipcMain.on(IpcChannels.TABS_SET_SKIP_SILENCE, (event, enabled, tabId) => {
+    const manager = getManager(event)
+    const tab = typeof tabId === 'string' ? manager?.tabs.get(tabId) : null
+    if (tab) {
+      tab.skipSilence = enabled === true
     }
   })
 

@@ -1272,17 +1272,11 @@ export default defineComponent({
 
     /** @param {boolean} value */
     function updateSkipSilence(value) {
-      store.commit('setTabSkipSilence', {
+      return store.dispatch('updateTabSkipSilence', {
         tabId: mediaTabId,
         value
       })
     }
-
-    watch(showSkipSilenceButton, (visible) => {
-      if (!visible) {
-        updateSkipSilence(false)
-      }
-    })
 
     watch(displayVideoPlayButton, (newValue) => {
       ui.configure({

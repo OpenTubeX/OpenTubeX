@@ -674,4 +674,26 @@ test.describe('fast-forward through silence shortcut', () => {
       }
     })
   })
+
+  test('disables the setting for an unmounted player when the control is hidden', async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateShowSkipSilenceButton', true)
+    })
+    await page.locator('body').press('h')
+
+    await page.locator('.sideNav a[href="#/history"]').first().evaluate(link => link.click())
+    await expect(page.locator(`${activeTab} .ftVideoPlayer`)).toHaveCount(0)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateShowSkipSilenceButton', false)
+    })
+
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getTabSkipSilence(store.getters.getActiveTabId)
+    })).toBe(false)
+  })
 })

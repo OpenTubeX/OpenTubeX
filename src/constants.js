@@ -79,6 +79,7 @@ const IpcChannels = {
   TABS_IS_ACTIVE: 'tabs-is-active',
   TABS_GO_HISTORY: 'tabs-go-history',
   TABS_SET_PLAYBACK_STATE: 'tabs-set-playback-state',
+  TABS_SET_SKIP_SILENCE: 'tabs-set-skip-silence',
   TABS_REQUEST_PICTURE_IN_PICTURE: 'tabs-request-picture-in-picture',
   WINDOW_MINIMIZED_STATE: 'window-minimized-state',
   WINDOW_FOCUSED_STATE: 'window-focused-state',

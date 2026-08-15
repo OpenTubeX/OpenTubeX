@@ -86,6 +86,11 @@ const mutations = {
     }
 
     state.tabs = incomingTabs.map(tab => reconcileTab(previousTabsById.get(tab.id), tab))
+    for (const tab of incomingTabs) {
+      if (!Object.prototype.hasOwnProperty.call(state.skipSilenceByTabId, tab.id)) {
+        state.skipSilenceByTabId[tab.id] = tab.skipSilence === true
+      }
+    }
     state.selectedTabIds = state.selectedTabIds.filter(tabId => incomingIds.has(tabId))
     state.activeTabId = payload.activeTabId ?? null
     state.mainPresentedTabId = payload.presentedTabId ?? null
@@ -218,6 +223,12 @@ const mutations = {
 
   setTabSkipSilence(state, { tabId, value }) {
     state.skipSilenceByTabId[tabId] = value === true
+  },
+
+  clearTabSkipSilence(state) {
+    for (const tabId of Object.keys(state.skipSilenceByTabId)) {
+      state.skipSilenceByTabId[tabId] = false
+    }
   }
 }
 
@@ -235,6 +246,18 @@ const actions = {
 
     return () => {
       removeStateListener()
+    }
+  },
+
+  updateTabSkipSilence({ commit }, { tabId, value }) {
+    commit('setTabSkipSilence', { tabId, value })
+    window.ftElectron?.tabs?.setSkipSilence?.(value, tabId)
+  },
+
+  clearTabSkipSilence({ commit, state }) {
+    commit('clearTabSkipSilence')
+    for (const tab of state.tabs) {
+      window.ftElectron?.tabs?.setSkipSilence?.(false, tab.id)
     }
   },
 

@@ -608,6 +608,12 @@ const sideEffectHandlers = {
     }
   },
 
+  showSkipSilenceButton: ({ dispatch }, value) => {
+    if (!value) {
+      dispatch('clearTabSkipSilence')
+    }
+  },
+
   rememberTabNavigationHistory: (_, value) => {
     // Sync (or clear) the histories of already-open tabs right away,
     // so toggling doesn't require a navigation in every tab first.

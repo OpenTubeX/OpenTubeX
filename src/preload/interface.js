@@ -1085,6 +1085,15 @@ export default {
     },
 
     /**
+     * Set silence skipping for a logical tab.
+     * @param {boolean} enabled
+     * @param {string} tabId
+     */
+    setSkipSilence: (enabled, tabId) => {
+      ipcRenderer.send(IpcChannels.TABS_SET_SKIP_SILENCE, enabled === true, tabId)
+    },
+
+    /**
      * Publish a logical tab title.
      * @param {string} title
      * @param {string} tabId
