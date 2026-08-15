@@ -168,23 +168,29 @@
           </button>
           <div
             v-if="showColorSources"
+            ref="colorSourceListRef"
             v-overlay-scrollbars
             class="colorSourceList"
             :class="{ above: colorSourcesAbove }"
             :aria-label="t('Color Picker.Copy From Another Color')"
           >
-            <button
-              v-for="color in otherColors"
-              :key="color.key"
-              type="button"
-              @click="copyFromColor(color.value)"
+            <div
+              ref="colorSourceContentRef"
+              class="colorSourceContent"
             >
-              <span class="sourceSwatch checkerboard">
-                <span :style="{ backgroundColor: color.value }" />
-              </span>
-              <span>{{ color.label }}</span>
-              <code>{{ color.value }}</code>
-            </button>
+              <button
+                v-for="color in otherColors"
+                :key="color.key"
+                type="button"
+                @click="copyFromColor(color.value)"
+              >
+                <span class="sourceSwatch checkerboard">
+                  <span :style="{ backgroundColor: color.value }" />
+                </span>
+                <span>{{ color.label }}</span>
+                <code>{{ color.value }}</code>
+              </button>
+            </div>
           </div>
         </div>
         <small
@@ -200,6 +206,8 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const props = defineProps({
   modelValue: {
@@ -223,11 +231,13 @@ const props = defineProps({
     default: null
   }
 })
-const emit = defineEmits(['update:modelValue', 'update:blurValue', 'change'])
+const emit = defineEmits(['update:modelValue', 'update:blurValue', 'change', 'apply', 'cancel', 'reset'])
 const { t } = useI18n()
 const triggerRef = useTemplateRef('triggerRef')
 const popoverRef = useTemplateRef('popoverRef')
 const copyFromButtonRef = useTemplateRef('copyFromButtonRef')
+const colorSourceListRef = useTemplateRef('colorSourceListRef')
+const colorSourceContentRef = useTemplateRef('colorSourceContentRef')
 const open = ref(false)
 const hue = ref(0)
 const saturation = ref(0)
@@ -246,6 +256,7 @@ let draggingSaturationValue = false
 let statusTimeout = null
 let copiedTimeout = null
 let lastEmittedColor = null
+let colorSourcesResizeObserver = null
 
 const opaqueHex = computed(() => formatHex(hsvToRgb(hue.value, saturation.value, value.value), 255))
 const supportsBlur = computed(() => props.blurValue !== null)
@@ -275,6 +286,17 @@ watch(open, async value => {
   await nextTick()
   positionPopover()
 })
+watch(showColorSources, async value => {
+  stopObservingColorSources()
+  if (!value) return
+
+  await nextTick()
+  const bounds = copyFromButtonRef.value?.getBoundingClientRect()
+  if (bounds !== undefined) {
+    colorSourcesAbove.value = window.innerHeight - bounds.bottom < 230 && bounds.top > 230
+  }
+  observeColorSources()
+})
 function syncFromModel(color, force = false) {
   if (!force && color === lastEmittedColor) {
     lastEmittedColor = null
@@ -301,6 +323,8 @@ function togglePicker() {
 
 function closePicker(apply = false) {
   if (!apply && !resetDisabled.value) resetColor()
+  if (apply) emit('apply')
+  else emit('cancel')
   open.value = false
 }
 
@@ -399,6 +423,7 @@ function resetColor() {
     emit('update:blurValue', blurStrength.value)
   }
   emit('change')
+  emit('reset')
 }
 
 function normalizedColor(color) {
@@ -419,13 +444,28 @@ function copyFromColor(color) {
   showColorSources.value = false
 }
 
-async function toggleColorSources() {
+function toggleColorSources() {
   showColorSources.value = !showColorSources.value
-  if (!showColorSources.value) return
-  await nextTick()
-  const bounds = copyFromButtonRef.value?.getBoundingClientRect()
-  if (bounds === undefined) return
-  colorSourcesAbove.value = window.innerHeight - bounds.bottom < 230 && bounds.top > 230
+}
+
+function clampColorSourcesScroll() {
+  if (colorSourceListRef.value !== null && colorSourceContentRef.value !== null) {
+    clampOverlayScrollTop(colorSourceListRef.value, colorSourceContentRef.value)
+  }
+}
+
+function observeColorSources() {
+  if (colorSourceListRef.value === null || colorSourceContentRef.value === null) return
+
+  colorSourcesResizeObserver = new ResizeObserver(clampColorSourcesScroll)
+  colorSourcesResizeObserver.observe(colorSourceListRef.value)
+  colorSourcesResizeObserver.observe(colorSourceContentRef.value)
+  clampColorSourcesScroll()
+}
+
+function stopObservingColorSources() {
+  colorSourcesResizeObserver?.disconnect()
+  colorSourcesResizeObserver = null
 }
 
 function showStatus(message) {
@@ -530,6 +570,7 @@ function clamp(number, minimum, maximum) {
 
 onBeforeUnmount(() => {
   removeOpenListeners()
+  stopObservingColorSources()
   window.removeEventListener('pointermove', updateSaturationValue)
   if (statusTimeout !== null) clearTimeout(statusTimeout)
   if (copiedTimeout !== null) clearTimeout(copiedTimeout)
@@ -898,13 +939,16 @@ onBeforeUnmount(() => {
   block-size: min(220px, calc(100vh - 24px));
   max-block-size: 220px;
   overflow-y: auto;
-  display: grid;
-  gap: 2px;
   border: 1px solid var(--border-color);
   border-radius: calc(6px * var(--ui-roundness));
   padding: 4px;
   background: var(--side-nav-color);
   box-shadow: 0 8px 24px rgb(0 0 0 / 40%);
+}
+
+.colorSourceContent {
+  display: grid;
+  gap: 2px;
 }
 
 .colorSourceList.above {

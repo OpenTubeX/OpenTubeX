@@ -216,6 +216,15 @@ test.describe('profile manager', () => {
       await page.getByRole('heading', { name: 'Profile Preview' }).click()
       await expect(preview).toHaveCSS('background-color', 'rgb(76, 175, 80)')
 
+      await page.locator('.profileColorPicker .colorFieldTrigger').click()
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return store.dispatch('updateMainColor', 'Orange')
+      })
+      await expect(preview).toHaveCSS('background-color', 'rgb(255, 152, 0)')
+      await page.getByRole('heading', { name: 'Profile Preview' }).click()
+      await expect(preview).toHaveCSS('background-color', 'rgb(255, 152, 0)')
+
       await page.getByRole('button', { name: 'Update Profile' }).click()
 
       await expect.poll(async () => {
@@ -227,7 +236,7 @@ test.describe('profile manager', () => {
 
       ;({ page } = await app.relaunch())
       // the profile keeps the resolved theme color after restart
-      await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(76, 175, 80)')
+      await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(255, 152, 0)')
       // switching the theme color has to repaint the profile, without touching the profile itself
       await goToSettingsSection(page, 'theme')
 

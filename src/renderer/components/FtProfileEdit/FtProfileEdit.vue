@@ -49,6 +49,9 @@
             :model-value="customColorPickerValue"
             :allow-alpha="false"
             @update:model-value="updateProfileBgColorFromPicker"
+            @apply="rememberSemanticProfileBgColor"
+            @cancel="restoreSemanticProfileBgColor"
+            @reset="restoreSemanticProfileBgColor"
           />
           <FtInput
             class="colorSelection"
@@ -367,6 +370,12 @@ function rememberSemanticProfileBgColor() {
   semanticProfileBgColor.value = isSemanticProfileBgColor(profileBgColor.value)
     ? profileBgColor.value
     : null
+}
+
+function restoreSemanticProfileBgColor() {
+  if (semanticProfileBgColor.value !== null) {
+    profileBgColor.value = semanticProfileBgColor.value
+  }
 }
 
 function updateProfileBgColorFromPicker(color) {

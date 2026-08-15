@@ -207,6 +207,28 @@ test.describe('default appearance', () => {
 test.describe('custom theme editor', () => {
   test.use({ seed: { settings: { baseTheme: 'dark' } } })
 
+  test('clamps the color-source list after a responsive reflow', async ({ app, page }) => {
+    await setWindowWidth(app, 420)
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await page.getByRole('button', { name: 'Page background', exact: true }).click()
+    const picker = page.getByRole('dialog', { name: 'Page background' })
+    await picker.getByRole('button', { name: 'Copy from another color' }).click()
+
+    const list = page.locator('.colorSourceList')
+    await expect(list).toHaveAttribute('data-overlayscrollbars-viewport')
+    await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => list.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await setWindowWidth(app, 1200)
+    await expect.poll(() => list.evaluate((element) => {
+      const content = element.querySelector('.colorSourceContent')
+      const contentEnd = content.offsetTop + content.offsetHeight +
+        Number.parseFloat(getComputedStyle(element).paddingBottom)
+      return element.scrollTop <= Math.max(0, contentEnd - element.clientHeight) + 1
+    })).toBe(true)
+  })
+
   test('applies a new theme created from System Default', async ({ page }) => {
     await goToSettingsSection(page, 'theme')
     const baseTheme = page.getByRole('combobox', { name: 'Base Theme' })
