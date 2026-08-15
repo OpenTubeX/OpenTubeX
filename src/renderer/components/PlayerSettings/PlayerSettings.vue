@@ -675,10 +675,6 @@ const showSkipSilenceButton = computed(() => store.getters.getShowSkipSilenceBut
  */
 function updateShowSkipSilenceButton(value) {
   store.dispatch('updateShowSkipSilenceButton', value)
-
-  if (!value) {
-    store.dispatch('updateSkipSilence', false)
-  }
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

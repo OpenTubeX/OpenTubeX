@@ -1179,7 +1179,7 @@ export default defineComponent({
     })
 
     const skipSilence = computed(() => {
-      return store.getters.getSkipSilence
+      return store.getters.getTabSkipSilence(mediaTabId)
     })
 
     const showSkipSilenceButton = computed(() => {
@@ -1272,7 +1272,10 @@ export default defineComponent({
 
     /** @param {boolean} value */
     function updateSkipSilence(value) {
-      return store.dispatch('updateSkipSilence', value)
+      return store.dispatch('updateTabSkipSilence', {
+        tabId: mediaTabId,
+        value
+      })
     }
 
     watch(displayVideoPlayButton, (newValue) => {
@@ -8109,14 +8112,9 @@ export default defineComponent({
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_SKIP_SILENCE): {
           event.preventDefault()
           const enabled = !skipSilence.value
-          try {
-            await updateSkipSilence(enabled)
-          } catch (error) {
-            console.error('Failed to update skip-silence setting:', error)
-            break
-          }
+          updateSkipSilence(enabled)
 
-          // Only confirm the state that was actually persisted.
+          // Only confirm the state that was actually applied to this tab.
           if (skipSilence.value !== enabled) {
             break
           }
