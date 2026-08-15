@@ -6284,7 +6284,17 @@ export default defineComponent({
 
       const target = event.target instanceof Element ? event.target : null
       const playbackRateBar = playerContainer.querySelector('.ft-quick-playback-rate-bar')
-      if (!playbackRateBar || target?.closest('.shaka-seek-bar-container')) {
+      const seekBarTarget = target?.closest('.shaka-seek-bar-container')
+      const focusedElement = document.activeElement
+      if (
+        seekBarTarget &&
+        focusedElement instanceof HTMLElement &&
+        playbackRateBar?.contains(focusedElement)
+      ) {
+        focusedElement.blur()
+      }
+
+      if (!playbackRateBar || seekBarTarget) {
         playerContainer.style.setProperty('--shorts-quick-playback-rate-bar-opacity', '0')
         return
       }

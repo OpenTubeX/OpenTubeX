@@ -131,18 +131,16 @@ test.describe('Shorts transcript navigation', () => {
     await expect.poll(opacity).toBe(1)
     await attachScreenshot('Shorts quick playback speed bar')
 
-    const seekBarBounds = await seekBar.boundingBox()
-    expect(seekBarBounds).not.toBeNull()
-    await seekBar.dispatchEvent('mousemove', {
-      clientX: seekBarBounds.x + seekBarBounds.width / 2,
-      clientY: seekBarBounds.y + seekBarBounds.height / 2
-    })
+    const playbackRateButton = playbackRateBar.getByRole('button', { name: '1.25x', exact: true })
+    await playbackRateButton.click()
+    await expect(playbackRateButton).toBeFocused()
+    await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.25)
+
+    await seekBar.hover()
     await expect.poll(opacity).toBe(0)
+    await expect(playbackRateButton).not.toBeFocused()
     expect(await seekBar.evaluate(element => getComputedStyle(element).zIndex)).toBe('3')
     expect(await controlPanel.evaluate(element => getComputedStyle(element).zIndex)).toBe('2')
-
-    await playbackRateBar.getByRole('button', { name: '1.25x', exact: true }).click()
-    await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.25)
   })
 
   test('preserves the panel until navigation reaches a captionless Short', async ({ app, page }) => {
