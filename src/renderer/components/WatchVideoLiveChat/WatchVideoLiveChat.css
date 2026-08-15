@@ -509,6 +509,7 @@
 .owner {
   margin-inline-end: 2px;
   background-color: var(--primary-color);
+  border-radius: calc(2px * var(--ui-roundness));
   color: var(--text-with-main-color);
 }
 
