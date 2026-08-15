@@ -88,14 +88,14 @@ const lastPostsRefreshTimestamp = computed(() => {
     return ''
   }
 
-  let minTimestamp = null
+  let latestTimestamp = null
   cacheEntriesForAllActiveProfileChannels.value.forEach((cacheEntry) => {
-    if (!minTimestamp || cacheEntry.timestamp.getTime() < minTimestamp.getTime()) {
-      minTimestamp = cacheEntry.timestamp
+    if (!latestTimestamp || cacheEntry.timestamp.getTime() > latestTimestamp.getTime()) {
+      latestTimestamp = cacheEntry.timestamp
     }
   })
 
-  return getRelativeTimeFromDate(minTimestamp.getTime(), true, true, now.value)
+  return getRelativeTimeFromDate(latestTimestamp.getTime(), true, true, now.value)
 })
 
 const refreshTitle = computed(() => {

@@ -30,10 +30,11 @@ test('reads premiere times from Local API dates and Invidious timestamps', () =>
   assert.equal(getUpcomingPremiereTimestamp({ premiereDate: 'invalid' }), null)
 })
 
-test('marks an upcoming premiere as live when its scheduled time arrives', () => {
+test('marks an upcoming premiere as running when its scheduled time arrives', () => {
   const scheduledTime = now + HOUR
   const upcoming = video('premiere', scheduledTime, {
     isUpcoming: true,
+    isPremiere: true,
     premiere: true,
     premiereDate: new Date(scheduledTime)
   })
@@ -52,6 +53,18 @@ test('marks an upcoming premiere as live when its scheduled time arrives', () =>
     premiere: undefined
   }, scheduledTime), {
     ...upcoming,
+    isUpcoming: false,
+    premiere: false,
+    liveNow: true
+  })
+
+  const scheduledStream = {
+    ...upcoming,
+    videoId: 'scheduled-stream',
+    isPremiere: false
+  }
+  assert.deepEqual(updateUpcomingPremiereState(scheduledStream, scheduledTime), {
+    ...scheduledStream,
     isUpcoming: false,
     premiere: false,
     liveNow: true
@@ -411,14 +424,21 @@ test('a settled lookup records the verdict both ways', () => {
   const premiereDate = new Date('2026-01-02T03:04:05Z')
   const premiere = applyRssPremiereVerdict(
     { videoId: 'b', published: 1234 },
-    { isUpcoming: true, premiereDate }
+    { isUpcoming: true, isPremiere: true, premiereDate }
   )
   assert.equal(premiere.isUpcoming, true)
+  assert.equal(premiere.isPremiere, true)
   assert.equal(premiere.premiereDate, premiereDate)
   assert.equal(premiere.published, premiereDate.getTime())
   assert.equal(premiere.subscriptionFeedPublished, 1234)
   // An upcoming premiere goes live eventually, so it is never a durable negative.
   assert.equal(collectResolvedNonPremiereVideoIds([{ ch: { videos: [premiere] } }]).size, 0)
+
+  const scheduledStream = applyRssPremiereVerdict(
+    { videoId: 'c', published: 1234 },
+    { isUpcoming: true, isPremiere: false, premiereDate }
+  )
+  assert.equal(scheduledStream.isPremiere, false)
 })
 
 test('an upcoming premiere without a scheduled time keeps its original date', () => {

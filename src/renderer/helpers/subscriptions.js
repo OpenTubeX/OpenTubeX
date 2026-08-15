@@ -32,6 +32,8 @@ import {
 } from './subscription-entries'
 import { mapConcurrently } from './concurrent-map'
 import { includeAutomaticDownloadChannels, startAutomaticDownloadsForChannel } from './automaticDownloads'
+import { extractAssignedJsonObject } from './assigned-json'
+import { getLocalPremiereState } from './premiere'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
 export const SUBSCRIPTION_REFRESH_CHANNEL_EVENT = 'opentubex-subscription-refresh-channel'
@@ -375,7 +377,7 @@ export function isVideoHiddenByPreferences(video, {
  * @type {Set<string>}
  */
 const rssNonPremiereVideoIds = new Set()
-/** @type {Map<string, Promise<{ isUpcoming: boolean, premiereDate?: Date }>>} */
+/** @type {Map<string, Promise<{ isUpcoming: boolean, failed?: boolean, isPremiere?: boolean, premiereDate?: Date }>>} */
 const rssUpcomingInfoRequests = new Map()
 
 let rssNonPremiereVideoIdsSeeded = false
@@ -465,9 +467,20 @@ async function fetchRssVideoUpcomingInfoUncached(videoId) {
     const premiereDate = scheduledStartMatch
       ? new Date(parseInt(scheduledStartMatch[1], 10) * 1000)
       : undefined
+    const playerResponseText = extractAssignedJsonObject(html, 'ytInitialPlayerResponse')
+    let isPremiere
+
+    if (playerResponseText) {
+      try {
+        isPremiere = getLocalPremiereState(JSON.parse(playerResponseText).videoDetails)
+      } catch {
+        // The upcoming state is still useful when YouTube's embedded response is malformed.
+      }
+    }
 
     return {
       isUpcoming: true,
+      isPremiere,
       premiereDate
     }
   } catch {

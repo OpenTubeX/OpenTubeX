@@ -1921,7 +1921,8 @@ export function parseLocalListVideo(item, channelId, channelName) {
 
 const VIEWS_OR_WATCHING_REGEX = /views?|watching|waiting/i
 const VIEWS_IN_NUMBER_ONLY = /^\d+(\.\d)?[bkm]?$/i
-const PREMIERES_TIME_REGEX = /^(premieres|scheduled for) /i
+const PREMIERE_TIME_REGEX = /^premieres? /i
+const UPCOMING_TIME_REGEX = /^(premieres?|scheduled for) /i
 // Sometimes got `Streamed N (unit) ago`
 const PUBLISH_TIME_REGEX = /^(streamed )?\d+ ?\w+? ago/i
 const COLLABORATIVE_AUTHOR_TEXT_REGEX = /\s+and\s+/i
@@ -1941,7 +1942,7 @@ function isViewCountText(text) {
 function isPremieresTimeText(text) {
   if (typeof text !== 'string') { return false }
 
-  return PREMIERES_TIME_REGEX.test(text)
+  return UPCOMING_TIME_REGEX.test(text)
 }
 
 /**
@@ -2035,6 +2036,7 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
           isPremiere = /premiere/i.test(liveBadge.text ?? '')
         } else if (thumbnailBottomOverlayView.badges.some(badge => badge.text?.toLowerCase() === 'upcoming')) {
           isUpcoming = true
+          isPremiere = metadataParts.some(part => PREMIERE_TIME_REGEX.test(part.text?.text ?? ''))
 
           // The premiere date can be in any non-views, non-relative-time part, often with a
           // "Premieres "/"Scheduled for " prefix that breaks Date.parse. Try every candidate
