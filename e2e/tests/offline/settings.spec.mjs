@@ -1372,12 +1372,13 @@ test.describe('settings', () => {
     await page.locator('.settingsMenu [data-section="theme"]').click()
 
     const selectRows = page.locator('.themeSelectRow')
-    await expect(selectRows).toHaveCount(3)
-    await expect(selectRows.nth(0).locator('.select')).toHaveCount(3)
-    await expect(selectRows.nth(1).locator('.select')).toHaveCount(2)
+    await expect(selectRows).toHaveCount(4)
+    await expect(selectRows.nth(0).locator('.select')).toHaveCount(1)
+    await expect(selectRows.nth(1).locator('.select')).toHaveCount(3)
     await expect(selectRows.nth(2).locator('.select')).toHaveCount(2)
+    await expect(selectRows.nth(3).locator('.select')).toHaveCount(2)
 
-    const baseThemeLabel = selectRows.nth(0).locator('.select').first().locator('.select-label')
+    const baseThemeLabel = selectRows.nth(1).locator('.select').first().locator('.select-label')
     const alignedLabelParts = await baseThemeLabel
       .locator('.select-icon, .select-placeholder, .syncedSettingIndicator, .changedSettingIndicatorPlaceholder')
       .evaluateAll(elements => elements.map(element => {
