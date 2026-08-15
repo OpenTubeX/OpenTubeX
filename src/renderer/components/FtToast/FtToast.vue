@@ -488,6 +488,14 @@ watch(progressToast, (element) => {
   progressToastResizeObserver.observe(element)
 })
 
+watch(
+  () => [tabBarPosition.value, store.getters.getVerticalTabBarWidth],
+  async () => {
+    await nextTick()
+    resetProgressToastProximity()
+  }
+)
+
 // The holder is recreated when the toasts are teleported into or out of a
 // fullscreen element, so the observers have to be pointed at the new one.
 watch(fullscreenTarget, () => nextTick(trackFrontToast))

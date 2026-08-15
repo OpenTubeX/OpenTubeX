@@ -56,6 +56,7 @@ test.describe('overlay scrollbars', () => {
       store.commit('setTabBarPosition', 'left')
     })
 
+    await expect(page.locator('.tabBar.position-left')).toBeVisible()
     const scrollbarBox = await page.locator(PAGE_SCROLLBAR).boundingBox()
     const innerWidth = await page.evaluate(() => window.innerWidth)
 
