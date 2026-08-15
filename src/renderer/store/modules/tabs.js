@@ -18,7 +18,8 @@ const state = {
   containerIds: [],
   tabBarScrollPosition: 0,
   currentWatchTimestamps: {},
-  videoZoomByTabId: {}
+  videoZoomByTabId: {},
+  skipSilenceByTabId: {}
 }
 
 const getters = {
@@ -35,6 +36,7 @@ const getters = {
   getCurrentWatchTimestamp: (state) => state.currentWatchTimestamps[state.activeTabId] ?? null,
   getWatchTimestamp: (state) => (tabId) => state.currentWatchTimestamps[tabId] ?? null,
   getTabVideoZoom: (state) => (tabId) => state.videoZoomByTabId[tabId] ?? DEFAULT_VIDEO_ZOOM,
+  getTabSkipSilence: (state) => (tabId) => state.skipSilenceByTabId[tabId] ?? false,
   getTabHistoryState: (state) => (tabId) => {
     const tab = state.tabs.find(candidate => candidate.id === tabId)
     if (!tab) {
@@ -103,6 +105,11 @@ const mutations = {
     for (const tabId of Object.keys(state.videoZoomByTabId)) {
       if (tabId !== 'web' && !incomingIds.has(tabId)) {
         delete state.videoZoomByTabId[tabId]
+      }
+    }
+    for (const tabId of Object.keys(state.skipSilenceByTabId)) {
+      if (tabId !== 'web' && !incomingIds.has(tabId)) {
+        delete state.skipSilenceByTabId[tabId]
       }
     }
   },
@@ -207,6 +214,10 @@ const mutations = {
 
   setTabVideoZoom(state, { tabId, value }) {
     state.videoZoomByTabId[tabId] = value
+  },
+
+  setTabSkipSilence(state, { tabId, value }) {
+    state.skipSilenceByTabId[tabId] = value === true
   }
 }
 

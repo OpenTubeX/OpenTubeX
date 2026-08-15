@@ -618,7 +618,7 @@ test.describe('fast-forward through silence shortcut', () => {
     const popup = page.locator(`${activeTab} .valueChangePopup`)
     const skipSilence = () => page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      return store.getters.getSkipSilence
+      return store.getters.getTabSkipSilence(store.getters.getActiveTabId)
     })
 
     await page.locator('body').press('h')
@@ -632,5 +632,46 @@ test.describe('fast-forward through silence shortcut', () => {
     await expect(popup).toHaveText(/Off/)
     await expect.poll(skipSilence).toBe(false)
     await attachScreenshot('skip silence disabled')
+  })
+
+  test('keeps the setting within its tab', async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+
+    const readSkipSilenceState = () => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return {
+        activeTabId: store.getters.getActiveTabId,
+        values: { ...store.state.tabs.skipSilenceByTabId }
+      }
+    })
+
+    await page.locator('body').press('h')
+    const firstTabId = (await readSkipSilenceState()).activeTabId
+    await expect.poll(readSkipSilenceState).toMatchObject({
+      values: { [firstTabId]: true }
+    })
+
+    await page.locator('.tabBar .newTabButton').click()
+    await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+    await openMockedVideo(page)
+
+    const secondTabId = (await readSkipSilenceState()).activeTabId
+    expect(secondTabId).not.toBe(firstTabId)
+    await expect.poll(readSkipSilenceState).toMatchObject({
+      values: { [firstTabId]: true }
+    })
+    expect(await page.evaluate((tabId) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getTabSkipSilence(tabId)
+    }, secondTabId)).toBe(false)
+
+    await page.locator('body').press('h')
+    await page.locator('body').press('h')
+    await expect.poll(readSkipSilenceState).toMatchObject({
+      values: {
+        [firstTabId]: true,
+        [secondTabId]: false
+      }
+    })
   })
 })
