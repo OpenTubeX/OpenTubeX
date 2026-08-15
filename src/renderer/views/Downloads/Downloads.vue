@@ -9,7 +9,7 @@
       </p>
       <FtButton
         v-if="clearableDownloads.length > 0"
-        :label="t('Downloads.Clear Failed Canceled And Missing')"
+        :label="t('Downloads.Clear Failed Canceled Skipped And Missing')"
         :icon="['fas', 'trash']"
         :text-color="null"
         :background-color="null"
@@ -88,7 +88,7 @@ const downloads = computed(() => Object.values(store.getters.getYtDlpDownloads).
 const activeDownloads = computed(() => downloads.value.filter(download => ['downloading', 'processing'].includes(download.status)))
 const finishedDownloads = computed(() => downloads.value.filter(download => !['downloading', 'processing'].includes(download.status)))
 const clearableDownloads = computed(() => finishedDownloads.value.filter(download => (
-  ['failed', 'cancelled'].includes(download.status) ||
+  ['failed', 'cancelled', 'skipped'].includes(download.status) ||
   (download.status === 'completed' && download.availability === 'missing')
 )))
 const totalSizeBytes = computed(() => downloads.value.reduce((total, download) => total + (download.sizeBytes ?? 0), 0))

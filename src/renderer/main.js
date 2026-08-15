@@ -7,6 +7,7 @@ import { initializeTabNavigationService } from './tabs/TabNavigationService'
 import { showExternalPlayerUnsupportedActionToast, showToast } from './helpers/utils'
 import { installViewTransitions } from './helpers/viewTransitions'
 import { initializeAppScrollbars, overlayScrollbarsDirective } from './helpers/overlayScrollbars'
+import { releaseAutomaticDownloadSchedule } from './helpers/automaticDownloads'
 // import the styles
 import 'overlayscrollbars/styles/overlayscrollbars.css'
 // Only the positioning and stacking rules are used, FtToast supplies the design
@@ -89,13 +90,14 @@ if (process.env.IS_ELECTRON) {
 
   window.ftElectron.handleYtDlpDownloadStatus((download) => {
     store.commit('upsertYtDlpDownload', download)
+    releaseAutomaticDownloadSchedule(download)
 
-    if (download.status === 'completed') {
+    if (download.status === 'completed' && download.automatic !== true) {
       showToast({
         message: i18n.global.t('Downloads.Download Complete Template', { title: download.title }),
         icon: ['fas', 'download'],
       })
-    } else if (download.status === 'failed') {
+    } else if (download.status === 'failed' && download.automatic !== true) {
       showToast({
         message: download.errorMessage === 'ENOENT'
           ? i18n.global.t('Downloads.yt-dlp Not Found')

@@ -336,7 +336,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
-import { DEFAULT_DOWNLOAD_TEMPLATES } from '../../helpers/downloadTemplates'
+import { DEFAULT_DOWNLOAD_TEMPLATES, replaceAutomaticDownloadTemplateReferences } from '../../helpers/downloadTemplates'
 import { showToast } from '../../helpers/utils'
 
 const props = defineProps({
@@ -541,9 +541,15 @@ function closeSaveTemplatePrompt() {
 }
 function deleteTemplate() {
   if (!selectedCustomTemplate.value) return
+  const deletedValue = `template:${selectedCustomTemplate.value.name}`
   const templates = customTemplates.value.filter(template => template.name !== selectedCustomTemplate.value.name)
   store.dispatch('updateYtDlpDownloadTemplates', JSON.stringify(templates))
   store.dispatch('updateYtDlpSelectedTemplate', 'video:best')
+  store.dispatch('updateYtDlpAutomaticDownloadRules', replaceAutomaticDownloadTemplateReferences(
+    store.getters.getYtDlpAutomaticDownloadRules,
+    deletedValue,
+    'video:best'
+  ))
   loadTemplate('video:best')
 }
 

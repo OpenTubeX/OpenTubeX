@@ -1,5 +1,5 @@
 import { ipcRenderer, webFrame } from 'electron/renderer'
-import { IpcChannels } from '../constants.js'
+import { DBActions, IpcChannels } from '../constants.js'
 
 /**
  * Linux fix for dynamically updating theme preference, this works on
@@ -279,11 +279,11 @@ export default {
   /**
    * @param {import('../main/ytDlp').YtDlpDownloadPayload} payload
    * @param {number} [retryDownloadId]
-   * @returns {Promise<{ id: number } | { error: string } | null>}
+   * @returns {Promise<{ id: number } | { error: string } | { skipped: string } | null>}
    */
   ytDlpDownload: (payload, retryDownloadId) => {
     // require the user to have interacted with the page recently
-    if (navigator.userActivation.isActive) {
+    if (payload?.automatic === true || navigator.userActivation.isActive) {
       return ipcRenderer.invoke(IpcChannels.YT_DLP_DOWNLOAD, payload, retryDownloadId)
     }
 
@@ -470,6 +470,10 @@ export default {
    * @param {any} [data]
    */
   dbSettings: (action, data) => {
+    if (action === DBActions.GENERAL.UPSERT && data?._id === 'ytDlpAutomaticDownloadRules' &&
+      !navigator.userActivation.isActive) {
+      return Promise.resolve(null)
+    }
     return ipcRenderer.invoke(IpcChannels.DB_SETTINGS, data ? { action, data } : { action })
   },
 

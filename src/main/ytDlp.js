@@ -4,7 +4,7 @@ import { chmod, mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from 'no
 import { dirname, join } from 'node:path'
 import { promisify } from 'node:util'
 import { inflateRawSync } from 'node:zlib'
-import { app, BrowserWindow, net, shell } from 'electron'
+import { app, BrowserWindow, net, Notification, shell } from 'electron'
 import { settings } from '../datastores/handlers/base'
 import { buildProxyUrl, isOpenTubeXUrl } from './utils'
 import { IpcChannels } from '../constants'
@@ -57,6 +57,16 @@ function takeGetInfoAbortSignal(key) {
  * @property {boolean} [embedMetadata]
  * @property {string} [customArgs] additional yt-dlp command line arguments
  * @property {string} [template] the template the options came from, only used for display purposes
+ * @property {boolean} [automatic] whether a subscription refresh started the download
+ * @property {string} [channelId] channel whose persisted rule authorized the automatic download
+ * @property {'video' | 'short' | 'livestream'} [automaticMediaType]
+ * @property {string} [refreshOwnerTabId] logical tab that owns the subscription refresh
+ * @property {number} [minDurationSeconds]
+ * @property {number} [maxDurationSeconds]
+ * @property {number} [minFileSizeMb]
+ * @property {number} [maxFileSizeMb]
+ * @property {number} [maxAgeDays]
+ * @property {{ startedTitle?: string, startedBody?: string, completedTitle?: string, completedBody?: string, failedTitle?: string, failedBody?: string }} [notification]
  */
 
 /**
@@ -69,8 +79,9 @@ function takeGetInfoAbortSignal(key) {
  * @property {string} thumbnail
  * @property {'video' | 'audio' | 'subtitles' | 'custom'} mode
  * @property {string} template
+ * @property {boolean} [automatic]
  * @property {YtDlpDownloadPayload} [retryPayload]
- * @property {'downloading' | 'processing' | 'completed' | 'failed' | 'cancelled'} status
+ * @property {'downloading' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'skipped'} status
  * @property {number} percent
  * @property {string | null} speed
  * @property {string | null} eta
@@ -85,6 +96,33 @@ function takeGetInfoAbortSignal(key) {
  */
 
 const ID_REGEX = /^[\w-]{11}$/
+const CHANNEL_ID_REGEX = /^UC[\w-]{22}$/
+const AUTOMATIC_DISCOVERY_CACHE_TTL_MS = 60_000
+const AUTOMATIC_DISCOVERY_TIMEOUT_MS = 15_000
+const AUTOMATIC_DISCOVERY_E2E_FIXTURE = 'automatic-download-discovery.xml'
+const AUTOMATIC_TITLE_TERM_LIMIT = 20
+const AUTOMATIC_TITLE_TERM_LENGTH_LIMIT = 100
+const AUTOMATIC_NUMBER_LIMITS = Object.freeze({
+  minDurationSeconds: 31_536_000,
+  maxDurationSeconds: 31_536_000,
+  minFileSizeMb: 1_000_000,
+  maxFileSizeMb: 1_000_000,
+  maxAgeDays: 36_500
+})
+const BUILT_IN_AUTOMATIC_TEMPLATE_OPTIONS = new Map([
+  ['video:best', { mode: 'video' }],
+  ['video:best:mp4', { mode: 'video', videoFormat: 'mp4' }],
+  ['video:1080', { mode: 'video', quality: '1080' }],
+  ['video:1080:mp4', { mode: 'video', quality: '1080', videoFormat: 'mp4' }],
+  ['video:720', { mode: 'video', quality: '720' }],
+  ['video:720:mp4', { mode: 'video', quality: '720', videoFormat: 'mp4' }],
+  ['video:480', { mode: 'video', quality: '480' }],
+  ['video:480:mp4', { mode: 'video', quality: '480', videoFormat: 'mp4' }],
+  ['audio:best', { mode: 'audio', embedThumbnail: true, embedMetadata: true }],
+  ['audio:mp3', { mode: 'audio', audioFormat: 'mp3', embedThumbnail: true, embedMetadata: true }],
+  ['subtitles:srt', { mode: 'subtitles', subtitleFormat: 'srt' }],
+  ['subtitles:vtt', { mode: 'subtitles', subtitleFormat: 'vtt' }]
+])
 const PLAYLIST_ID_REGEX = /^[\w-]{10,128}$/
 const QUALITY_REGEX = /^\d{3,4}$/
 const VIDEO_FORMATS = ['mp4', 'mkv', 'webm']
@@ -126,6 +164,8 @@ let downloadRecordsSaveQueue = Promise.resolve()
 let binaryInstallCounter = 0
 let managedBinaryInstallQueue = Promise.resolve()
 const retryingDownloadIds = new Set()
+const automaticDiscoveryCache = new Map()
+const activeAutomaticDownloadNotifications = new Set()
 
 /** @type {Map<number, { child: import('node:child_process').ChildProcess, cancelled: boolean }>} */
 const activeDownloads = new Map()
@@ -142,6 +182,33 @@ function broadcastToRenderers(channel, payload) {
   }
 }
 
+function showAutomaticDownloadNotification(payload, phase) {
+  if (payload.automatic !== true || !Notification.isSupported()) {
+    return
+  }
+
+  const title = payload.notification?.[`${phase}Title`]
+  const body = payload.notification?.[`${phase}Body`]
+  if (typeof title !== 'string' || title.length === 0 || title.length > 200 ||
+    typeof body !== 'string' || body.length === 0 || body.length > 500) {
+    return
+  }
+
+  const notification = new Notification({ title, body })
+  activeAutomaticDownloadNotifications.add(notification)
+  notification.once('close', () => activeAutomaticDownloadNotifications.delete(notification))
+  notification.once('click', () => {
+    activeAutomaticDownloadNotifications.delete(notification)
+    const browserWindow = BrowserWindow.getAllWindows().find(window => !window.isDestroyed())
+    if (browserWindow) {
+      if (browserWindow.isMinimized()) browserWindow.restore()
+      browserWindow.show()
+      browserWindow.focus()
+    }
+  })
+  notification.show()
+}
+
 function getDownloadRecordsPath() {
   return join(app.getPath('userData'), 'downloads.json')
 }
@@ -153,7 +220,7 @@ function loadDownloadRecords() {
       if (!Array.isArray(records)) return
       for (const record of records) {
         if (Number.isInteger(record?.id) && typeof record.title === 'string' &&
-          ['completed', 'failed', 'cancelled'].includes(record.status)) {
+          ['completed', 'failed', 'cancelled', 'skipped'].includes(record.status)) {
           if (!downloadRecords.has(record.id)) downloadRecords.set(record.id, record)
           downloadCounter = Math.max(downloadCounter, record.id)
         }
@@ -163,6 +230,12 @@ function loadDownloadRecords() {
     }
   })()
   return downloadRecordsLoadPromise
+}
+
+function hasAutomaticDownloadRecord(videoId) {
+  return [...downloadRecords.values()].some(record => (
+    record.videoId === videoId && ['downloading', 'processing', 'completed', 'skipped'].includes(record.status)
+  ))
 }
 
 function saveDownloadRecords() {
@@ -1186,22 +1259,230 @@ function splitArguments(argsString) {
   return args
 }
 
+function automaticNumber(value, maximum) {
+  return Number.isFinite(Number(value)) && Number(value) > 0 && Number(value) <= maximum
+    ? Number(value)
+    : null
+}
+
+/**
+ * Loads recent video IDs for a channel from a main-process-owned source. This
+ * prevents a renderer from turning a persisted channel rule into permission to
+ * download an arbitrary video that was not present in the subscription feed.
+ * @param {string} channelId
+ * @returns {Promise<Map<string, number> | null>}
+ */
+async function getAutomaticDiscoveryVideoIds(channelId) {
+  const cached = automaticDiscoveryCache.get(channelId)
+  if (cached?.expiresAt > Date.now()) {
+    return cached.videos
+  }
+
+  let feed
+  if (process.env.OPENTUBEX_E2E_USER_DATA_DIR) {
+    try {
+      feed = await readFile(join(app.getPath('userData'), AUTOMATIC_DISCOVERY_E2E_FIXTURE), 'utf8')
+    } catch {
+      return null
+    }
+  } else {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), AUTOMATIC_DISCOVERY_TIMEOUT_MS)
+    try {
+      const response = await net.fetch(
+        `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`,
+        { signal: controller.signal }
+      )
+      if (!response.ok) {
+        return null
+      }
+      feed = await response.text()
+    } catch {
+      return null
+    } finally {
+      clearTimeout(timeout)
+    }
+  }
+
+  const videos = new Map()
+  for (const entry of feed.matchAll(/<entry\b[\s\S]*?<\/entry>/g)) {
+    const entryChannelId = entry[0].match(/<yt:channelId>([^<]+)<\/yt:channelId>/)?.[1]
+    const videoId = entry[0].match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1]
+    const published = Date.parse(entry[0].match(/<published>([^<]+)<\/published>/)?.[1])
+    if (entryChannelId === channelId && ID_REGEX.test(videoId) && Number.isFinite(published)) {
+      videos.set(videoId, published)
+    }
+  }
+
+  automaticDiscoveryCache.set(channelId, {
+    expiresAt: Date.now() + AUTOMATIC_DISCOVERY_CACHE_TTL_MS,
+    videos
+  })
+  return videos
+}
+
+function automaticTitleTerms(value) {
+  return typeof value === 'string'
+    ? value.split(',')
+        .map(term => term.trim().slice(0, AUTOMATIC_TITLE_TERM_LENGTH_LIMIT))
+        .filter(Boolean)
+        .slice(0, AUTOMATIC_TITLE_TERM_LIMIT)
+    : []
+}
+
+function escapeRegularExpression(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function automaticTitleRegex(includedTerms, excludedTerms) {
+  if (includedTerms.length === 0 && excludedTerms.length === 0) {
+    return null
+  }
+
+  const include = includedTerms.length === 0
+    ? ''
+    : `(?=.*(?:${includedTerms.map(escapeRegularExpression).join('|')}))`
+  const exclude = excludedTerms.length === 0
+    ? ''
+    : `(?!.*(?:${excludedTerms.map(escapeRegularExpression).join('|')}))`
+  return `(?i)^${include}${exclude}.*$`
+}
+
+async function getAutomaticTemplateOptions(template) {
+  const builtInOptions = BUILT_IN_AUTOMATIC_TEMPLATE_OPTIONS.get(template)
+  if (builtInOptions) {
+    return builtInOptions
+  }
+  if (!template.startsWith('template:')) {
+    return null
+  }
+
+  let templates
+  try {
+    templates = JSON.parse((await settings._findOne('ytDlpDownloadTemplates'))?.value || '[]')
+  } catch {
+    return null
+  }
+  if (!Array.isArray(templates)) {
+    return null
+  }
+
+  const customTemplate = templates.find(candidate => (
+    candidate?.name === template.slice('template:'.length)
+  ))
+  if (customTemplate?.options !== null && typeof customTemplate?.options === 'object' &&
+    !Array.isArray(customTemplate.options)) {
+    return { mode: 'video', ...customTemplate.options }
+  }
+  if (typeof customTemplate?.args === 'string') {
+    return { mode: 'video', customArgs: customTemplate.args }
+  }
+  return null
+}
+
+/**
+ * Rebuilds automatic-only options from settings owned by the main process.
+ * A renderer-provided `automatic` flag alone must never waive the activation
+ * boundary or select arbitrary yt-dlp arguments.
+ * @param {YtDlpDownloadPayload} payload
+ * @param {boolean} [discoveryPreviouslyAuthorized]
+ * @returns {Promise<YtDlpDownloadPayload | null>}
+ */
+async function authorizeAutomaticDownload(payload, discoveryPreviouslyAuthorized = false) {
+  if (typeof payload.channelId !== 'string' || !CHANNEL_ID_REGEX.test(payload.channelId) ||
+    typeof payload.videoId !== 'string' || !ID_REGEX.test(payload.videoId)) {
+    return null
+  }
+
+  let rules
+  try {
+    rules = JSON.parse((await settings._findOne('ytDlpAutomaticDownloadRules'))?.value || '{}')
+  } catch {
+    return null
+  }
+  if (rules === null || typeof rules !== 'object' || Array.isArray(rules) ||
+    !Object.hasOwn(rules, payload.channelId)) {
+    return null
+  }
+
+  const rule = rules[payload.channelId]
+  if (rule === null || typeof rule !== 'object' || Array.isArray(rule)) {
+    return null
+  }
+  const template = typeof rule.template === 'string' && rule.template !== '' ? rule.template : 'video:best'
+  if (payload.template !== template) {
+    return null
+  }
+
+  const mediaTypeAllowed = payload.automaticMediaType === 'short'
+    ? rule.includeShorts === true
+    : payload.automaticMediaType === 'livestream'
+      ? rule.includeLivestreams === true
+      : payload.automaticMediaType === 'video' && rule.includeVideos !== false
+  if (!mediaTypeAllowed) {
+    return null
+  }
+
+  const templateOptions = await getAutomaticTemplateOptions(template)
+  if (templateOptions === null) {
+    return null
+  }
+
+  if (!discoveryPreviouslyAuthorized) {
+    const discoveredVideos = await getAutomaticDiscoveryVideoIds(payload.channelId)
+    const enabledAt = automaticNumber(rule.enabledAt, Number.MAX_SAFE_INTEGER)
+    if (enabledAt === null || (discoveredVideos?.get(payload.videoId) ?? -Infinity) < enabledAt) {
+      return null
+    }
+  }
+
+  const sanitizedPayload = {
+    videoId: payload.videoId,
+    channelId: payload.channelId,
+    title: payload.title,
+    thumbnail: payload.thumbnail,
+    notification: payload.notification
+  }
+  for (const [key, maximum] of Object.entries(AUTOMATIC_NUMBER_LIMITS)) {
+    sanitizedPayload[key] = automaticNumber(rule[key], maximum)
+  }
+  sanitizedPayload.titleIncludes = automaticTitleTerms(rule.titleIncludes)
+  sanitizedPayload.titleExcludes = automaticTitleTerms(rule.titleExcludes)
+
+  return {
+    ...sanitizedPayload,
+    ...structuredClone(templateOptions),
+    template,
+    automatic: true
+  }
+}
+
 /**
  * @param {import('electron').IpcMainInvokeEvent} event
- * @param {YtDlpDownloadPayload} payload
- * @returns {Promise<{ id: number } | { error: string } | null>}
+ * @param {YtDlpDownloadPayload} incomingPayload
+ * @param {boolean} automaticDownloadAuthorized
+ * @param {boolean} [automaticDiscoveryPreviouslyAuthorized]
+ * @returns {Promise<{ id: number } | { error: string } | { skipped: string } | null>}
  */
-async function startYtDlpDownload(event, payload) {
-  if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) {
+async function startYtDlpDownload(
+  event,
+  incomingPayload,
+  automaticDownloadAuthorized,
+  automaticDiscoveryPreviouslyAuthorized = false
+) {
+  if (!isOpenTubeXUrl(event.senderFrame.url) || typeof incomingPayload !== 'object' || incomingPayload === null) {
+    return null
+  }
+
+  const payload = incomingPayload.automatic === true && automaticDownloadAuthorized
+    ? await authorizeAutomaticDownload(incomingPayload, automaticDiscoveryPreviouslyAuthorized)
+    : incomingPayload.automatic === true ? null : incomingPayload
+  if (payload === null || (payload.automatic !== true && !event.sender.isFocused())) {
     return null
   }
 
   if ((await settings._findOne('enableDownloads'))?.value === false) {
     return { error: 'downloads-disabled' }
-  }
-
-  if (typeof payload !== 'object' || payload === null) {
-    return null
   }
 
   if (!['video', 'audio', 'subtitles', 'custom'].includes(payload.mode)) {
@@ -1240,6 +1521,10 @@ async function startYtDlpDownload(event, payload) {
   }
 
   await loadDownloadRecords()
+
+  if (payload.automatic === true && isSingleVideo && hasAutomaticDownloadRecord(payload.videoId)) {
+    return { skipped: 'already-downloaded' }
+  }
 
   const args = [
     '--newline',
@@ -1376,6 +1661,29 @@ async function startYtDlpDownload(event, payload) {
   if (!subtitlesOnly && payload.embedMetadata === true) {
     args.push('--embed-metadata', '--embed-chapters')
   }
+  if (payload.automatic === true) {
+    const minDurationSeconds = automaticNumber(payload.minDurationSeconds, AUTOMATIC_NUMBER_LIMITS.minDurationSeconds)
+    const maxDurationSeconds = automaticNumber(payload.maxDurationSeconds, AUTOMATIC_NUMBER_LIMITS.maxDurationSeconds)
+    const minFileSizeMb = automaticNumber(payload.minFileSizeMb, AUTOMATIC_NUMBER_LIMITS.minFileSizeMb)
+    const maxFileSizeMb = automaticNumber(payload.maxFileSizeMb, AUTOMATIC_NUMBER_LIMITS.maxFileSizeMb)
+    const maxAgeDays = automaticNumber(payload.maxAgeDays, AUTOMATIC_NUMBER_LIMITS.maxAgeDays)
+    const titleRegex = automaticTitleRegex(
+      Array.isArray(payload.titleIncludes) ? payload.titleIncludes : [],
+      Array.isArray(payload.titleExcludes) ? payload.titleExcludes : []
+    )
+    const durationFilters = [
+      `channel_id = ${payload.channelId}`,
+      minDurationSeconds === null ? null : `duration >= ${minDurationSeconds}`,
+      maxDurationSeconds === null ? null : `duration <= ${maxDurationSeconds}`
+    ].filter(Boolean)
+
+    if (durationFilters.length > 0) args.push('--match-filter', durationFilters.join(' & '))
+    if (minFileSizeMb !== null) args.push('--min-filesize', `${minFileSizeMb}M`)
+    if (maxFileSizeMb !== null) args.push('--max-filesize', `${maxFileSizeMb}M`)
+    if (maxAgeDays !== null) args.push('--dateafter', `now-${Math.ceil(maxAgeDays)}days`)
+    if (titleRegex !== null) args.push('--match-title', titleRegex)
+    args.push('--no-overwrites')
+  }
   const startTime = !subtitlesOnly && typeof payload.startTime === 'string' && TIME_REGEX.test(payload.startTime) ? payload.startTime : ''
   const endTime = !subtitlesOnly && typeof payload.endTime === 'string' && TIME_REGEX.test(payload.endTime) ? payload.endTime : ''
   if (startTime !== '' || endTime !== '') {
@@ -1409,6 +1717,13 @@ async function startYtDlpDownload(event, payload) {
   const temporaryDownloadFolder = await mkdtemp(join(app.getPath('temp'), 'opentubex-download-'))
   args.push('--paths', `temp:${temporaryDownloadFolder}`)
 
+  // Authorization and executable setup contain awaits, so another refresh can
+  // start the same video after the initial fast-path check above.
+  if (payload.automatic === true && isSingleVideo && hasAutomaticDownloadRecord(payload.videoId)) {
+    await rm(temporaryDownloadFolder, { recursive: true, force: true })
+    return { skipped: 'already-downloaded' }
+  }
+
   const id = ++downloadCounter
   const child = spawn(executable, args, { windowsHide: true })
   const entry = { child, cancelled: false }
@@ -1426,6 +1741,7 @@ async function startYtDlpDownload(event, payload) {
     thumbnail: typeof payload.thumbnail === 'string' ? payload.thumbnail.slice(0, 2048) : '',
     mode: payload.mode,
     template: typeof payload.template === 'string' ? payload.template.slice(0, 255) : '',
+    automatic: payload.automatic === true,
     retryPayload: structuredClone(payload),
     status: 'downloading',
     percent: 0,
@@ -1437,6 +1753,7 @@ async function startYtDlpDownload(event, payload) {
     errorMessage: null
   }
   downloadRecords.set(id, status)
+  showAutomaticDownloadNotification(payload, 'started')
 
   let lastSent = 0
   let finished = false
@@ -1565,6 +1882,7 @@ async function startYtDlpDownload(event, payload) {
     removeTemporaryDownloadFolder()
     status.status = 'failed'
     status.errorMessage = error.code === 'ENOENT' ? 'ENOENT' : error.message
+    showAutomaticDownloadNotification(payload, 'failed')
     sendStatus(true)
     saveDownloadRecords().catch(error => console.warn('Could not save download history', error))
   })
@@ -1591,11 +1909,19 @@ async function startYtDlpDownload(event, payload) {
         ))
         status.destination = convertedSubtitleDestinations.get(status.destination) ?? status.destination
       }
-      status.status = 'completed'
-      status.percent = 100
+      status.status = payload.automatic === true && status.destinations.length === 0
+        ? 'skipped'
+        : 'completed'
+      if (status.status === 'completed') status.percent = 100
     } else {
       status.status = 'failed'
       status.errorMessage = stderrLines.join('\n')
+    }
+
+    if (status.status === 'completed') {
+      showAutomaticDownloadNotification(payload, 'completed')
+    } else if (status.status === 'failed') {
+      showAutomaticDownloadNotification(payload, 'failed')
     }
 
     sendStatus(true)
@@ -1609,11 +1935,12 @@ async function startYtDlpDownload(event, payload) {
  * @param {import('electron').IpcMainInvokeEvent} event
  * @param {YtDlpDownloadPayload} payload
  * @param {number} [retryDownloadId]
- * @returns {Promise<{ id: number } | { error: string } | null>}
+ * @param {boolean} [automaticDownloadAuthorized]
+ * @returns {Promise<{ id: number } | { error: string } | { skipped: string } | null>}
  */
-export async function handleYtDlpDownload(event, payload, retryDownloadId) {
+export async function handleYtDlpDownload(event, payload, retryDownloadId, automaticDownloadAuthorized = false) {
   if (retryDownloadId === undefined) {
-    return startYtDlpDownload(event, payload)
+    return startYtDlpDownload(event, payload, automaticDownloadAuthorized)
   }
 
   if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused() ||
@@ -1632,7 +1959,8 @@ export async function handleYtDlpDownload(event, payload, retryDownloadId) {
       return { error: 'download-not-retryable' }
     }
 
-    const result = await startYtDlpDownload(event, payload)
+    const retryPayload = retryRecord.automatic === true ? retryRecord.retryPayload : payload
+    const result = await startYtDlpDownload(event, retryPayload, true, retryRecord.automatic === true)
     if (result && 'id' in result) {
       downloadRecords.delete(retryDownloadId)
       broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, [retryDownloadId])

@@ -31,6 +31,7 @@ import {
   updateUpcomingPremiereState
 } from './subscription-entries'
 import { mapConcurrently } from './concurrent-map'
+import { includeAutomaticDownloadChannels, startAutomaticDownloadsForChannel } from './automaticDownloads'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
 export const SUBSCRIPTION_REFRESH_CHANNEL_EVENT = 'opentubex-subscription-refresh-channel'
@@ -611,7 +612,9 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
   errorChannels = []
 }, activeProfile) {
   const activeSubscriptionList = getValidSubscriptionChannels(activeProfile.subscriptions)
-  if (activeSubscriptionList.length === 0) {
+  const activeSubscriptionIds = new Set(activeSubscriptionList.map(channel => channel.id))
+  const subscriptionList = includeAutomaticDownloadChannels(activeSubscriptionList, 'videos')
+  if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('videos', activeProfile._id)
     return []
   }
@@ -646,7 +649,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
       }
 
       channelCount++
-      setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
+      setSubscriptionRefreshProgress((channelCount / subscriptionList.length) * 100)
 
       if (videos != null) {
         const previousCache = store.getters.getVideoCache[channel.id]
@@ -661,6 +664,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
           channelId: channel.id,
           videos
         })
+        await startAutomaticDownloadsForChannel(channel, videos, 'videos', t, electronRefreshOwnerTabId)
         notifySubscriptionChannelRefreshed('videos')
       }
 
@@ -672,12 +676,13 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
         })
       }
 
-      return videos ?? store.getters.getVideoCache[channel.id]?.videos ?? []
+      const channelVideos = videos ?? store.getters.getVideoCache[channel.id]?.videos ?? []
+      return activeSubscriptionIds.has(channel.id) ? channelVideos : []
     }
 
     const videoListFromRemote = useRss
-      ? await fetchSubscriptionsConcurrently(activeSubscriptionList, fetchChannel)
-      : await fetchSubscriptionsInBatches(activeSubscriptionList, fetchChannel)
+      ? await fetchSubscriptionsConcurrently(subscriptionList, fetchChannel)
+      : await fetchSubscriptionsInBatches(subscriptionList, fetchChannel)
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
 
@@ -715,7 +720,9 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
   errorChannels = []
 }, activeProfile) {
   const activeSubscriptionList = getValidSubscriptionChannels(activeProfile.subscriptions)
-  if (activeSubscriptionList.length === 0) {
+  const activeSubscriptionIds = new Set(activeSubscriptionList.map(channel => channel.id))
+  const subscriptionList = includeAutomaticDownloadChannels(activeSubscriptionList, 'shorts')
+  if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('shorts', activeProfile._id)
     return []
   }
@@ -731,7 +738,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
   let channelCount = 0
 
   try {
-    const videoListFromRemote = await fetchSubscriptionsConcurrently(activeSubscriptionList, async (channel) => {
+    const videoListFromRemote = await fetchSubscriptionsConcurrently(subscriptionList, async (channel) => {
       let videos, name
 
       if (!process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious') {
@@ -741,7 +748,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
       }
 
       channelCount++
-      setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
+      setSubscriptionRefreshProgress((channelCount / subscriptionList.length) * 100)
 
       if (videos != null) {
         const previousCache = store.getters.getShortsCache[channel.id]
@@ -756,6 +763,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
           channelId: channel.id,
           videos
         })
+        await startAutomaticDownloadsForChannel(channel, videos, 'shorts', t, electronRefreshOwnerTabId)
         notifySubscriptionChannelRefreshed('shorts')
       }
 
@@ -766,7 +774,8 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
         })
       }
 
-      return videos ?? store.getters.getShortsCache[channel.id]?.videos ?? []
+      const channelVideos = videos ?? store.getters.getShortsCache[channel.id]?.videos ?? []
+      return activeSubscriptionIds.has(channel.id) ? channelVideos : []
     })
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
@@ -805,7 +814,9 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
   errorChannels = []
 }, activeProfile) {
   const activeSubscriptionList = getValidSubscriptionChannels(activeProfile.subscriptions)
-  if (activeSubscriptionList.length === 0) {
+  const activeSubscriptionIds = new Set(activeSubscriptionList.map(channel => channel.id))
+  const subscriptionList = includeAutomaticDownloadChannels(activeSubscriptionList, 'live')
+  if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('live', activeProfile._id)
     return []
   }
@@ -840,7 +851,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
       }
 
       channelCount++
-      setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
+      setSubscriptionRefreshProgress((channelCount / subscriptionList.length) * 100)
 
       if (videos != null) {
         const previousCache = store.getters.getLiveCache[channel.id]
@@ -855,6 +866,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
           channelId: channel.id,
           videos
         })
+        await startAutomaticDownloadsForChannel(channel, videos, 'live', t, electronRefreshOwnerTabId)
         notifySubscriptionChannelRefreshed('live')
       }
 
@@ -866,12 +878,13 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
         })
       }
 
-      return videos ?? store.getters.getLiveCache[channel.id]?.videos ?? []
+      const channelVideos = videos ?? store.getters.getLiveCache[channel.id]?.videos ?? []
+      return activeSubscriptionIds.has(channel.id) ? channelVideos : []
     }
 
     const videoListFromRemote = useRss
-      ? await fetchSubscriptionsConcurrently(activeSubscriptionList, fetchChannel)
-      : await fetchSubscriptionsInBatches(activeSubscriptionList, fetchChannel)
+      ? await fetchSubscriptionsConcurrently(subscriptionList, fetchChannel)
+      : await fetchSubscriptionsInBatches(subscriptionList, fetchChannel)
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
 
