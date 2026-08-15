@@ -198,6 +198,28 @@ test.describe('profile manager', () => {
   test.describe('theme color profiles', () => {
     test.use({ seed: { settings: { mainColor: 'Green' } } })
 
+    test('keeps a keyboard-selected swatch when the custom picker was open', async ({ app, page }) => {
+      await openProfileList(page)
+      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.card .profileList').getByText('All Channels').click()
+      await page.locator('.themeColorOption').click()
+      await page.locator('.profileColorPicker .colorFieldTrigger').click()
+
+      const redSwatch = page.locator('.colorOptions .colorOption').nth(1)
+      await redSwatch.focus()
+      await redSwatch.press('Enter')
+      await expect(page.locator('.colorPickerPopover')).toHaveCount(0)
+      await expect(page.locator('.profilePreviewIcon')).toHaveCSS('background-color', 'rgb(213, 0, 0)')
+
+      await page.getByRole('button', { name: 'Update Profile' }).click()
+      await expect.poll(async () => {
+        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        const profile = records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
+        return profile?.bgColor
+      }).toBe('#d50000')
+    })
+
     test('follows the theme color when the theme color option is picked', async ({ app, page }) => {
       await openProfileList(page)
       await page.locator('.profilePanelHeader button').last().click()

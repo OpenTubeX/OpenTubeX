@@ -44,6 +44,7 @@
             />
           </FtFlexBox>
           <FtColorPicker
+            ref="profileColorPickerRef"
             class="profileColorPicker"
             :label="$t('Profile.Custom Color')"
             :model-value="customColorPickerValue"
@@ -310,6 +311,7 @@ const profileIcon = ref(deepCopy(props.profile.icon ?? null))
 
 const imageInput = useTemplateRef('imageInput')
 const cropCanvas = useTemplateRef('cropCanvas')
+const profileColorPickerRef = useTemplateRef('profileColorPickerRef')
 const cropDialogOpen = ref(false)
 const cropZoom = ref(1)
 const cropOffset = { x: 0, y: 0 }
@@ -362,6 +364,7 @@ function isSemanticProfileBgColor(color) {
 }
 
 function selectProfileBgColor(color) {
+  profileColorPickerRef.value?.close(true)
   profileBgColor.value = color
   rememberSemanticProfileBgColor()
 }

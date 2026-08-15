@@ -322,6 +322,7 @@ function togglePicker() {
 }
 
 function closePicker(apply = false) {
+  if (!open.value) return
   if (!apply && !resetDisabled.value) resetColor()
   if (apply) emit('apply')
   else emit('cancel')
@@ -567,6 +568,8 @@ function hsvToRgb(h, s, v) {
 function clamp(number, minimum, maximum) {
   return Math.min(maximum, Math.max(minimum, number))
 }
+
+defineExpose({ close: closePicker })
 
 onBeforeUnmount(() => {
   removeOpenListeners()
