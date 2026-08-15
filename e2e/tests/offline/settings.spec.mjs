@@ -51,8 +51,15 @@ test.describe('settings', () => {
     await expect(page.locator('.toast', { hasText: 'Unknown data key' })).toHaveCount(0)
     await expect.poll(() => page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      return store.getters.getProfileList[0].subscriptions.some(({ id }) => id === 'UCcurrentFormatImport')
-    })).toBe(true)
+      const profile = store.getters.getProfileList[0]
+      return {
+        hasSubscription: profile.subscriptions.some(({ id }) => id === 'UCcurrentFormatImport'),
+        icon: profile.icon
+      }
+    })).toEqual({
+      hasSubscription: true,
+      icon: { type: 'emoji', value: '🧪' }
+    })
   })
 
   test('groups confirmation preferences together', async ({ page }) => {

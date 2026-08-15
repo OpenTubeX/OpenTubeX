@@ -425,6 +425,9 @@ function importFreeTubeSubscriptions(textDecode) {
       showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
     } else {
       if (profileObject._id === MAIN_PROFILE_ID) {
+        if (Object.hasOwn(profileObject, 'icon')) {
+          primaryProfile.value.icon = profileObject.icon
+        }
         primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(profileObject.subscriptions)
         primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.filter((sub, index) => {
           const profileIndex = primaryProfile.value.subscriptions.findIndex((x) => {
@@ -441,6 +444,9 @@ function importFreeTubeSubscriptions(textDecode) {
 
         if (existingProfileIndex !== -1) {
           const existingProfile = deepCopy(profileList.value[existingProfileIndex])
+          if (Object.hasOwn(profileObject, 'icon')) {
+            existingProfile.icon = profileObject.icon
+          }
           existingProfile.subscriptions = existingProfile.subscriptions.concat(profileObject.subscriptions)
           existingProfile.subscriptions = existingProfile.subscriptions.filter((sub, index) => {
             const profileIndex = existingProfile.subscriptions.findIndex((x) => {
