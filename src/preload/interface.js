@@ -175,6 +175,18 @@ export default {
   },
 
   /**
+   * Listen for native window focus changes, which are more reliable than DOM
+   * focus events when another application closes its covering window.
+   * @param {(focused: boolean) => void} handler
+   * @returns {() => void} unsubscribe
+   */
+  handleWindowFocusedState: (handler) => {
+    const listener = (_, focused) => handler(focused)
+    ipcRenderer.on(IpcChannels.WINDOW_FOCUSED_STATE, listener)
+    return () => ipcRenderer.removeListener(IpcChannels.WINDOW_FOCUSED_STATE, listener)
+  },
+
+  /**
    * @param {string} key
    * @returns {Promise<ArrayBuffer>}
    */

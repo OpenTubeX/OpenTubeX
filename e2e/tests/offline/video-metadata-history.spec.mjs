@@ -123,6 +123,11 @@ test('stores and presents every previous metadata version', async ({ app, page }
 
     const dialog = page.getByRole('dialog', { name: 'Metadata history' })
     await expect(dialog).toBeVisible()
+    // Geometry captured during the prompt's scale/translate entrance animation
+    // can differ by fractional pixels even though the fixed header never moves.
+    await dialog.evaluate(element => Promise.all(
+      element.getAnimations({ subtree: false }).map(animation => animation.finished)
+    ))
     await expect(dialog.getByRole('heading', { name: 'Title history' })).toBeVisible()
     await expect(dialog.getByRole('heading', { name: 'Thumbnail history' })).toBeVisible()
     await expect(dialog.getByRole('heading', { name: 'Description history' })).toBeVisible()

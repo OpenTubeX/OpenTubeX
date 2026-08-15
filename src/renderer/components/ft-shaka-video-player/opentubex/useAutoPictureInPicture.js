@@ -44,6 +44,7 @@ export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isT
   })
   let stopActiveTabWatch = null
   let removeMinimizedListener = null
+  let removeFocusedListener = null
   let blurTriggerRecheckTimeout = null
 
   function canAutoPipNow() {
@@ -133,6 +134,11 @@ export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isT
     updateAutoPip()
   }
 
+  function handleFocusedState(focused) {
+    applyFocusState(state, focused)
+    updateAutoPip()
+  }
+
   function clearBlurTriggerRecheck() {
     if (blurTriggerRecheckTimeout != null) {
       clearTimeout(blurTriggerRecheckTimeout)
@@ -151,11 +157,12 @@ export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isT
   function setupAutoPictureInPicture() {
     if (process.env.IS_ELECTRON) {
       removeMinimizedListener = window.ftElectron?.handleWindowMinimizedState?.(handleMinimizedState) ?? null
+      removeFocusedListener = window.ftElectron?.handleWindowFocusedState?.(handleFocusedState) ?? null
     } else {
       document.addEventListener('visibilitychange', refreshVisibilityState)
+      window.addEventListener('focus', refreshFocusState)
+      window.addEventListener('blur', refreshFocusState)
     }
-    window.addEventListener('focus', refreshFocusState)
-    window.addEventListener('blur', refreshFocusState)
     stopActiveTabWatch = watch(isActiveTab, updateAutoPip)
   }
 
@@ -174,11 +181,13 @@ export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isT
     if (process.env.IS_ELECTRON) {
       removeMinimizedListener?.()
       removeMinimizedListener = null
+      removeFocusedListener?.()
+      removeFocusedListener = null
     } else {
       document.removeEventListener('visibilitychange', refreshVisibilityState)
+      window.removeEventListener('focus', refreshFocusState)
+      window.removeEventListener('blur', refreshFocusState)
     }
-    window.removeEventListener('focus', refreshFocusState)
-    window.removeEventListener('blur', refreshFocusState)
     clearBlurTriggerRecheck()
     stopActiveTabWatch?.()
     stopActiveTabWatch = null
