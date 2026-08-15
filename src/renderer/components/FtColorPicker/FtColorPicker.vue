@@ -58,6 +58,7 @@
           </div>
         </div>
         <div
+          ref="saturationValueRef"
           class="saturationValue"
           role="slider"
           tabindex="0"
@@ -235,6 +236,7 @@ const emit = defineEmits(['update:modelValue', 'update:blurValue', 'change', 'ap
 const { t } = useI18n()
 const triggerRef = useTemplateRef('triggerRef')
 const popoverRef = useTemplateRef('popoverRef')
+const saturationValueRef = useTemplateRef('saturationValueRef')
 const copyFromButtonRef = useTemplateRef('copyFromButtonRef')
 const colorSourceListRef = useTemplateRef('colorSourceListRef')
 const colorSourceContentRef = useTemplateRef('colorSourceContentRef')
@@ -285,6 +287,7 @@ watch(open, async value => {
   window.addEventListener('scroll', positionPopover, true)
   await nextTick()
   positionPopover()
+  saturationValueRef.value?.focus()
 })
 watch(showColorSources, async value => {
   stopObservingColorSources()

@@ -229,6 +229,25 @@ test.describe('custom theme editor', () => {
     })).toBe(true)
   })
 
+  test('moves keyboard focus into the color picker', async ({ page }) => {
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+
+    const trigger = page.getByRole('button', { name: 'Page background', exact: true })
+    await trigger.focus()
+    await page.keyboard.press('Enter')
+
+    const picker = page.getByRole('dialog', { name: 'Page background' })
+    const saturationSlider = picker.getByRole('slider', { name: 'Saturation and brightness' })
+    await expect(saturationSlider).toBeFocused()
+    const valueBefore = await saturationSlider.getAttribute('aria-valuetext')
+    await page.keyboard.press('ArrowRight')
+    await expect(saturationSlider).not.toHaveAttribute('aria-valuetext', valueBefore)
+
+    await page.keyboard.press('Escape')
+    await expect(picker).toHaveCount(0)
+  })
+
   test('applies a new theme created from System Default', async ({ page }) => {
     await goToSettingsSection(page, 'theme')
     const baseTheme = page.getByRole('combobox', { name: 'Base Theme' })
