@@ -364,7 +364,7 @@ function isSemanticProfileBgColor(color) {
 }
 
 function selectProfileBgColor(color) {
-  profileColorPickerRef.value?.close(true)
+  profileColorPickerRef.value?.close(true, false)
   profileBgColor.value = color
   rememberSemanticProfileBgColor()
 }

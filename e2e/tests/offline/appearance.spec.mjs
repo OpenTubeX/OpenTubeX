@@ -246,6 +246,12 @@ test.describe('custom theme editor', () => {
 
     await page.keyboard.press('Escape')
     await expect(picker).toHaveCount(0)
+    await expect(trigger).toBeFocused()
+
+    await page.keyboard.press('Enter')
+    await picker.getByRole('button', { name: 'Apply' }).click()
+    await expect(picker).toHaveCount(0)
+    await expect(trigger).toBeFocused()
   })
 
   test('applies a new theme created from System Default', async ({ page }) => {

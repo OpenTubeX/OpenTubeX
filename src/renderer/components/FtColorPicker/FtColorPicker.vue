@@ -324,12 +324,13 @@ function togglePicker() {
   }
 }
 
-function closePicker(apply = false) {
+function closePicker(apply = false, restoreFocus = true) {
   if (!open.value) return
   if (!apply && !resetDisabled.value) resetColor()
   if (apply) emit('apply')
   else emit('cancel')
   open.value = false
+  if (restoreFocus) nextTick(() => triggerRef.value?.focus())
 }
 
 function emitCurrentColor() {
@@ -497,7 +498,7 @@ function positionPopover() {
 
 function closeFromOutside(event) {
   if (triggerRef.value?.contains(event.target) || popoverRef.value?.contains(event.target)) return
-  closePicker()
+  closePicker(false, false)
 }
 
 function removeOpenListeners() {
