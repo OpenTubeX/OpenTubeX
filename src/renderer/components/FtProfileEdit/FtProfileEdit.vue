@@ -375,30 +375,16 @@ function rememberSemanticProfileBgColor() {
     : null
 }
 
-function restoreSemanticProfileBgColor() {
-  if (semanticProfileBgColor.value !== null) {
-    profileBgColor.value = semanticProfileBgColor.value
-  }
+async function restoreSemanticProfileBgColor() {
+  const semanticColor = semanticProfileBgColor.value
+  if (semanticColor === null) return
+
+  await nextTick()
+  profileBgColor.value = semanticColor
 }
 
 function updateProfileBgColorFromPicker(color) {
-  if (semanticProfileBgColor.value !== null) {
-    const resolvedSemanticColor = semanticProfileBgColor.value === THEME_BG_COLOR
-      ? themeColor.value
-      : '#000000'
-    if (normalizeHexColor(color) === normalizeHexColor(resolvedSemanticColor)) {
-      profileBgColor.value = semanticProfileBgColor.value
-      return
-    }
-  }
   profileBgColor.value = color
-}
-
-function normalizeHexColor(color) {
-  const normalized = color.toLowerCase()
-  if (!/^#[\da-f]{3,4}$/.test(normalized)) return normalized
-
-  return '#' + [...normalized.slice(1)].map(character => character.repeat(2)).join('')
 }
 
 const translatedProfileName = computed(() => {

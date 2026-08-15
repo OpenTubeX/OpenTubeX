@@ -302,6 +302,33 @@ test.describe('profile manager', () => {
     })
   })
 
+  test('applies opaque black to an image profile that was transparent', async ({ app, page }) => {
+    await openProfileList(page)
+    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.card .profileList').getByText('All Channels').click()
+
+    await page.locator('.imageInput').setInputFiles({
+      name: 'globe.svg',
+      mimeType: 'image/svg+xml',
+      buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="12" cy="12" r="10"/></svg>')
+    })
+    await page.getByRole('button', { name: 'Apply Crop' }).click()
+
+    await page.locator('.profileColorPicker .colorFieldTrigger').click()
+    const colorPicker = page.locator('.colorPickerPopover')
+    await colorPicker.locator('input[type="text"]').fill('#000000')
+    await colorPicker.locator('input[type="text"]').press('Enter')
+    await colorPicker.getByRole('button', { name: 'Apply' }).click()
+    await expect(page.locator('.profilePreviewIcon')).toHaveCSS('background-color', 'rgb(0, 0, 0)')
+
+    await page.getByRole('button', { name: 'Update Profile' }).click()
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)?.bgColor
+    }).toBe('#000000')
+  })
+
   test('customizes a profile icon with a cropped SVG or emoji', async ({ app, page }) => {
     await openProfileList(page)
     await page.locator('.profilePanelHeader button').last().click()
