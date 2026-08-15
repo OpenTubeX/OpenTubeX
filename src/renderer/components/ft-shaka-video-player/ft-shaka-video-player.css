@@ -2990,6 +2990,13 @@
   transition: inset-inline-end 250ms ease, bottom cubic-bezier(0.4, 0, 0.6, 1) 0.1s;
 }
 
+:deep(.shaka-text-region) {
+  /* The app already provides the configured edge gap, so don't stack Shaka's 5% safe area on it. */
+  inset: 0 !important;
+  block-size: 100% !important;
+  inline-size: 100% !important;
+}
+
 :deep(.shaka-controls-container:not([shown='true'], [casting='true']) ~ .shaka-text-container) {
   bottom: var(--caption-hidden-bottom-gap) !important;
 }
