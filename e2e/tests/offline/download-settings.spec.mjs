@@ -215,7 +215,12 @@ test.describe('automatic download authorization', () => {
       videoId: 'ddddddddddd'
     })).toBeNull()
 
-    const result = await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), authorizedPayload)
+    const concurrentResults = await page.evaluate((download) => Promise.all([
+      window.ftElectron.ytDlpDownload(download),
+      window.ftElectron.ytDlpDownload(download)
+    ]), authorizedPayload)
+    const result = concurrentResults.find(download => 'id' in download)
+    expect(concurrentResults).toContainEqual({ skipped: 'already-downloaded' })
     expect(result).toEqual({ id: expect.any(Number) })
     await expect.poll(() => page.evaluate(async (id) => {
       return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status

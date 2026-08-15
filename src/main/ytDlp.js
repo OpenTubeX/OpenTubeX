@@ -232,6 +232,12 @@ function loadDownloadRecords() {
   return downloadRecordsLoadPromise
 }
 
+function hasAutomaticDownloadRecord(videoId) {
+  return [...downloadRecords.values()].some(record => (
+    record.videoId === videoId && ['downloading', 'processing', 'completed', 'skipped'].includes(record.status)
+  ))
+}
+
 function saveDownloadRecords() {
   downloadRecordsSaveQueue = downloadRecordsSaveQueue
     .catch(() => {})
@@ -1516,9 +1522,7 @@ async function startYtDlpDownload(
 
   await loadDownloadRecords()
 
-  if (payload.automatic === true && isSingleVideo && [...downloadRecords.values()].some(record => (
-    record.videoId === payload.videoId && ['downloading', 'processing', 'completed', 'skipped'].includes(record.status)
-  ))) {
+  if (payload.automatic === true && isSingleVideo && hasAutomaticDownloadRecord(payload.videoId)) {
     return { skipped: 'already-downloaded' }
   }
 
@@ -1712,6 +1716,13 @@ async function startYtDlpDownload(
   // existing video file when both variants have the same source extension.
   const temporaryDownloadFolder = await mkdtemp(join(app.getPath('temp'), 'opentubex-download-'))
   args.push('--paths', `temp:${temporaryDownloadFolder}`)
+
+  // Authorization and executable setup contain awaits, so another refresh can
+  // start the same video after the initial fast-path check above.
+  if (payload.automatic === true && isSingleVideo && hasAutomaticDownloadRecord(payload.videoId)) {
+    await rm(temporaryDownloadFolder, { recursive: true, force: true })
+    return { skipped: 'already-downloaded' }
+  }
 
   const id = ++downloadCounter
   const child = spawn(executable, args, { windowsHide: true })
