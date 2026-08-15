@@ -439,7 +439,7 @@ function importFreeTubeSubscriptions(textDecode) {
         store.dispatch('updateProfile', primaryProfile.value)
       } else {
         const existingProfileIndex = profileList.value.findIndex((profile) => {
-          return profile.name === profileObject.name
+          return profile._id !== MAIN_PROFILE_ID && profile.name === profileObject.name
         })
 
         if (existingProfileIndex !== -1) {

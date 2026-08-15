@@ -45,7 +45,21 @@ test('imports current OpenTubeX subscriptions without rejecting profile icons', 
         thumbnail: null
       }]
     }
-    const contents = `${JSON.stringify(exportedProfile)}\n${JSON.stringify(exportedNamedProfile)}\n`
+    const exportedPrimaryNameProfile = {
+      _id: 'primary-name-profile',
+      name: 'Profile.All Channels',
+      bgColor: '#444444',
+      textColor: '#FFFFFF',
+      icon: { type: 'emoji', value: '🛰️' },
+      subscriptions: [{
+        id: 'UCprimaryNameImport',
+        name: 'Primary Name Channel',
+        thumbnail: null
+      }]
+    }
+    const contents = [exportedProfile, exportedNamedProfile, exportedPrimaryNameProfile]
+      .map(profile => JSON.stringify(profile))
+      .join('\n') + '\n'
 
     Object.defineProperty(window, 'showOpenFilePicker', {
       configurable: true,
@@ -71,6 +85,7 @@ test('imports current OpenTubeX subscriptions without rejecting profile icons', 
     const profile = profiles[0]
     const unrelatedProfile = profiles.find(({ _id }) => _id === 'unrelated-test-profile')
     const exactProfile = profiles.find(({ _id }) => _id === 'exact-test-profile')
+    const primaryNameProfile = profiles.find(({ _id }) => _id === 'primary-name-profile')
     return {
       hasSubscription: profile.subscriptions.some(({ id }) => id === 'UCcurrentFormatImport'),
       icon: profile.icon,
@@ -81,6 +96,10 @@ test('imports current OpenTubeX subscriptions without rejecting profile icons', 
       exactProfile: {
         hasSubscription: exactProfile.subscriptions.some(({ id }) => id === 'UCnamedProfileImport'),
         icon: exactProfile.icon
+      },
+      primaryNameProfile: {
+        hasSubscription: primaryNameProfile.subscriptions.some(({ id }) => id === 'UCprimaryNameImport'),
+        icon: primaryNameProfile.icon
       }
     }
   })).toEqual({
@@ -93,6 +112,10 @@ test('imports current OpenTubeX subscriptions without rejecting profile icons', 
     exactProfile: {
       hasSubscription: true,
       icon: { type: 'emoji', value: '🔎' }
+    },
+    primaryNameProfile: {
+      hasSubscription: true,
+      icon: { type: 'emoji', value: '🛰️' }
     }
   })
 })
