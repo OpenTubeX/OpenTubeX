@@ -489,7 +489,7 @@ test.describe('watch page', () => {
       ipcMain.handle('yt-dlp-get-playback-info', (_event, _videoId, useDefaultClients) => {
         globalThis.__ytDlpIpBlockFallbackCalls++
         globalThis.__ytDlpIpBlockFallbackDefaultClients.push(useDefaultClients)
-        return globalThis.__ytDlpIpBlockFallbackCalls === 1
+        return globalThis.__ytDlpIpBlockFallbackCalls <= 2
           ? {
               isLive: true,
               liveStatus: 'is_live',
@@ -506,8 +506,11 @@ test.describe('watch page', () => {
     await page.locator(sel.searchInput).press('Enter')
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
 
-    await expect.poll(() => app.electronApp.evaluate(() => globalThis.__ytDlpIpBlockFallbackCalls)).toBe(2)
-    expect(await app.electronApp.evaluate(() => globalThis.__ytDlpIpBlockFallbackDefaultClients)).toEqual([false, true])
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.__ytDlpIpBlockFallbackCalls)).toBe(3)
+    expect(await app.electronApp.evaluate(() => globalThis.__ytDlpIpBlockFallbackDefaultClients)).toEqual([false, true, true])
+    await expect(page.locator('.toast', {
+      hasText: 'The preferred yt-dlp clients could not provide playable streams'
+    })).toHaveCount(1)
     const watchView = await watchViewHandle(page)
     expect(await watchView.evaluate((view) => ({
       ipBlockDetected: view.ipBlockDetectedInCurrentChain,

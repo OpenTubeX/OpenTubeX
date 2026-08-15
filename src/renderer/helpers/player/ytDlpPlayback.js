@@ -288,9 +288,10 @@ async function convertAdaptiveFormats(formats, duration) {
  * DVR window available, so that they can be rewound.
  * @param {string} videoId
  * @param {string} cacheKey identifies the yt-dlp executable and proxy configuration
+ * @param {() => void} [onDefaultClientsFallback] called before retrying with yt-dlp's default clients
  * @returns {Promise<YtDlpPlaybackSource>}
  */
-export async function getYtDlpPlaybackSource(videoId, cacheKey = '') {
+export async function getYtDlpPlaybackSource(videoId, cacheKey = '', onDefaultClientsFallback) {
   let cachedSource = dashPlaybackSourceCache.get(videoId, cacheKey)
 
   if (cachedSource === null) {
@@ -316,7 +317,16 @@ export async function getYtDlpPlaybackSource(videoId, cacheKey = '') {
 
   let extractionError = null
 
-  for (const useDefaultClients of [false, true]) {
+  // A fresh extraction with the same default clients can return working URLs after
+  // an immediately preceding extraction returned URLs that respond with 403. Give
+  // yt-dlp's defaults one bounded retry before falling back to the built-in source.
+  let defaultClientsFallbackAnnounced = false
+  for (const useDefaultClients of [false, true, true]) {
+    if (useDefaultClients && !defaultClientsFallbackAnnounced) {
+      defaultClientsFallbackAnnounced = true
+      onDefaultClientsFallback?.()
+    }
+
     const info = await window.ftElectron.ytDlpGetPlaybackInfo(videoId, useDefaultClients)
 
     if (info === null) {
