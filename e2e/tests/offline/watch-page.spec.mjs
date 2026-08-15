@@ -159,7 +159,7 @@ test('a background watch tab stays loading until its cached avatar is ready', as
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     store.commit('setVideoAvatar', {
       videoId: 'jNQXAC9IVRw',
-      avatar: 'data:image/png;base64,iVBORw0KGgo='
+      avatar: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+Xw4AAAAASUVORK5CYII='
     })
 
     window.__backgroundWatchIconStates = []
@@ -189,14 +189,17 @@ test('a background watch tab stays loading until its cached avatar is ready', as
 
   await expect(tab.locator('.loadingDot')).toBeVisible()
   await expect(tab.locator('.loadingDot')).toHaveCount(0)
-  await expect(tab.locator('.tabAvatar')).toBeVisible()
+  await expect.poll(() => page.evaluate(tabId => (
+    window.__backgroundWatchIconStates.some(state => state.id === tabId && !state.loading && state.avatar)
+  ), watchTab.id)).toBe(true)
 
   const states = await page.evaluate(
     tabId => window.__backgroundWatchIconStates.filter(state => state.id === tabId),
     watchTab.id
   )
   expect(states.some(state => state.loading)).toBe(true)
-  expect(states.some(state => state.pageIcon)).toBe(false)
+  expect(states.some(state => !state.loading && state.avatar)).toBe(true)
+  expect(states.some(state => state.loading && state.pageIcon)).toBe(false)
 })
 
 for (const { defaultViewingMode, currentTheatreMode } of [
