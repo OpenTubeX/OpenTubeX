@@ -142,3 +142,120 @@ test.describe('active watch tab restore', () => {
     )).toBeVisible()
   })
 })
+
+test.describe('restored watch tab startup priority', () => {
+  const ACTIVE_WATCH_TAB_ID = 'e2e-active-watch-tab'
+  const BACKGROUND_WATCH_TAB_ID = 'e2e-background-watch-tab'
+  const SUBSCRIPTIONS_TAB_ID = 'e2e-background-subscriptions-tab'
+  const priorityRestoreSeed = {
+    settings: {
+      backendPreference: 'invidious',
+      defaultInvidiousInstance: '',
+      startupBehavior: 'loadAllTabs'
+    },
+    tabSessions: [
+      {
+        _id: 'e2e-window-session',
+        value: {
+          tabs: [
+            {
+              id: BACKGROUND_WATCH_TAB_ID,
+              url: 'app://bundle/index.html#/watch/background-video',
+              title: 'Background video',
+              isUnloaded: false
+            },
+            {
+              id: ACTIVE_WATCH_TAB_ID,
+              url: 'app://bundle/index.html#/watch/active-video',
+              title: 'Active video',
+              isUnloaded: false
+            },
+            {
+              id: SUBSCRIPTIONS_TAB_ID,
+              url: 'app://bundle/index.html#/subscriptions',
+              title: 'Subscriptions',
+              isUnloaded: false
+            }
+          ],
+          activeTabId: ACTIVE_WATCH_TAB_ID,
+          bounds: { x: 0, y: 0, width: 1600, height: 900, maximized: false }
+        }
+      }
+    ]
+  }
+  const invidiousServer = createServer()
+
+  test.use({ seed: priorityRestoreSeed })
+
+  test.beforeAll(async () => {
+    await new Promise(resolve => invidiousServer.listen(0, '127.0.0.1', resolve))
+    const address = invidiousServer.address()
+    priorityRestoreSeed.settings.defaultInvidiousInstance = `http://127.0.0.1:${address.port}`
+  })
+
+  test.afterAll(async () => {
+    invidiousServer.closeAllConnections()
+    await new Promise(resolve => invidiousServer.close(resolve))
+  })
+
+  test('defers background watch tabs until the active watch load finishes', async ({ page }) => {
+    const backgroundWatchTab = page.locator(`.tab[data-tab-id="${BACKGROUND_WATCH_TAB_ID}"]`)
+    const subscriptionsTab = page.locator(`.tab[data-tab-id="${SUBSCRIPTIONS_TAB_ID}"]`)
+
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', ACTIVE_WATCH_TAB_ID)
+    await expect(backgroundWatchTab).toHaveClass(/unloaded/)
+    await expect(subscriptionsTab).not.toHaveClass(/unloaded/)
+    await page.evaluate(activeTabId => {
+      window.ftElectron.tabs.setLoading(true, activeTabId)
+    }, ACTIVE_WATCH_TAB_ID)
+    await expect.poll(async () => {
+      const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+      return state.tabs.find(tab => tab.id === ACTIVE_WATCH_TAB_ID)?.isLoading
+    }).toBe(true)
+
+    await page.evaluate(activeTabId => {
+      window.ftElectron.tabs.setLoading(false, activeTabId)
+    }, ACTIVE_WATCH_TAB_ID)
+
+    await expect(backgroundWatchTab).not.toHaveClass(/unloaded/)
+    await expect(page.locator(
+      `.tabContent[data-tab-id="${BACKGROUND_WATCH_TAB_ID}"] [data-tab-loading-indicator]`
+    )).toHaveCount(1)
+    await expect.poll(async () => {
+      const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+      return state.tabs.find(tab => tab.id === BACKGROUND_WATCH_TAB_ID)?.loadState
+    }).not.toBe('unloaded')
+  })
+
+  test('releases background watch tabs when a loaded tab becomes active', async ({ page }) => {
+    const backgroundWatchTab = page.locator(`.tab[data-tab-id="${BACKGROUND_WATCH_TAB_ID}"]`)
+    const subscriptionsTab = page.locator(`.tab[data-tab-id="${SUBSCRIPTIONS_TAB_ID}"]`)
+
+    await expect(backgroundWatchTab).toHaveClass(/unloaded/)
+    await expect.poll(async () => {
+      const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+      return state.tabs.find(tab => tab.id === SUBSCRIPTIONS_TAB_ID)?.loadState
+    }).toBe('loaded')
+
+    await subscriptionsTab.click()
+
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', SUBSCRIPTIONS_TAB_ID)
+    await expect(backgroundWatchTab).not.toHaveClass(/unloaded/)
+  })
+
+  test('releases background watch tabs when the priority mount fails', async ({ page }) => {
+    const backgroundWatchTab = page.locator(`.tab[data-tab-id="${BACKGROUND_WATCH_TAB_ID}"]`)
+
+    await expect(backgroundWatchTab).toHaveClass(/unloaded/)
+    const mountRevision = await page.evaluate(async activeTabId => {
+      const state = await window.ftElectron.tabs.getState()
+      return state.tabs.find(tab => tab.id === activeTabId)?.mountRevision
+    }, ACTIVE_WATCH_TAB_ID)
+
+    await page.evaluate(({ activeTabId, mountRevision }) => {
+      window.ftElectron.tabs.mountFailed(activeTabId, mountRevision)
+    }, { activeTabId: ACTIVE_WATCH_TAB_ID, mountRevision })
+
+    await expect(backgroundWatchTab).not.toHaveClass(/unloaded/)
+  })
+})
