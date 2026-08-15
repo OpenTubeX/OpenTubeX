@@ -57,6 +57,7 @@ const seed = {
         feedVideo('aaaaaaaaaa2', 'Video A older', CHANNEL_A, now - 3 * HOUR),
         feedVideo('aaaaaaaaaa3', 'Upcoming premiere video', CHANNEL_A, now + 30 * 24 * HOUR, {
           isUpcoming: true,
+          isPremiere: true,
           premiereDate: new Date(now + 30 * 24 * HOUR).toISOString()
         })
       ],
@@ -345,7 +346,7 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
     await goTo(page, 'subscriptions')
 
     const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
-    await expect(upcomingPremiere.locator('.videoDuration')).toHaveText('Upcoming')
+    await expect(upcomingPremiere.locator('.videoDuration')).toHaveText('Premiere')
     await expect(upcomingPremiere.getByRole('button', { name: 'Notify me' })).toBeVisible()
     await upcomingPremiere.evaluate(element => { element.dataset.reuseMarker = 'upcoming-premiere' })
     const reusedCard = page.locator('[data-reuse-marker="upcoming-premiere"]')

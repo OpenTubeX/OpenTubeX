@@ -43,7 +43,6 @@ export function updateUpcomingPremiereState(video, now) {
     return {
       ...video,
       isUpcoming: false,
-      isPremiere: true,
       premiere: false,
       liveNow: true
     }
@@ -348,7 +347,7 @@ export function collectResolvedNonPremiereVideoIds(caches) {
  * for a resolved "not a premiere" and the next refresh looks it up again.
  *
  * @param {object} video
- * @param {{ isUpcoming: boolean, failed?: boolean, premiereDate?: Date }} upcomingInfo
+ * @param {{ isUpcoming: boolean, failed?: boolean, isPremiere?: boolean, premiereDate?: Date }} upcomingInfo
  */
 export function applyRssPremiereVerdict(video, upcomingInfo) {
   if (upcomingInfo.failed) {
@@ -366,6 +365,10 @@ export function applyRssPremiereVerdict(video, upcomingInfo) {
     ...video,
     isUpcoming: true,
     subscriptionFeedPublished: getSubscriptionFeedPublishedTimestamp(video, video.published)
+  }
+
+  if (typeof upcomingInfo.isPremiere === 'boolean') {
+    enrichedVideo.isPremiere = upcomingInfo.isPremiere
   }
 
   if (upcomingInfo.premiereDate) {

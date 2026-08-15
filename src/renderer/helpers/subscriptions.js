@@ -32,6 +32,7 @@ import {
 } from './subscription-entries'
 import { mapConcurrently } from './concurrent-map'
 import { includeAutomaticDownloadChannels, startAutomaticDownloadsForChannel } from './automaticDownloads'
+import { getLocalPremiereState } from './premiere'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
 export const SUBSCRIPTION_REFRESH_CHANNEL_EVENT = 'opentubex-subscription-refresh-channel'
@@ -58,6 +59,7 @@ let activeRefresh = null
 let cancelCount = 0
 
 const IS_UPCOMING_REGEX = /"isUpcoming"\s*:\s*true/
+const PLAYER_RESPONSE_REGEX = /ytInitialPlayerResponse\s*=\s*(\{.+?\});/
 const SCHEDULED_START_REGEX = /"scheduledStartTime"\s*:\s*"(\d+)"/
 const SUBSCRIPTION_FETCH_BATCH_SIZE = 80
 const SUBSCRIPTION_FETCH_BATCH_DELAY_MS = 2000
@@ -375,7 +377,7 @@ export function isVideoHiddenByPreferences(video, {
  * @type {Set<string>}
  */
 const rssNonPremiereVideoIds = new Set()
-/** @type {Map<string, Promise<{ isUpcoming: boolean, premiereDate?: Date }>>} */
+/** @type {Map<string, Promise<{ isUpcoming: boolean, failed?: boolean, isPremiere?: boolean, premiereDate?: Date }>>} */
 const rssUpcomingInfoRequests = new Map()
 
 let rssNonPremiereVideoIdsSeeded = false
@@ -465,9 +467,20 @@ async function fetchRssVideoUpcomingInfoUncached(videoId) {
     const premiereDate = scheduledStartMatch
       ? new Date(parseInt(scheduledStartMatch[1], 10) * 1000)
       : undefined
+    const playerResponseText = html.match(PLAYER_RESPONSE_REGEX)?.[1]
+    let isPremiere
+
+    if (playerResponseText) {
+      try {
+        isPremiere = getLocalPremiereState(JSON.parse(playerResponseText).videoDetails)
+      } catch {
+        // The upcoming state is still useful when YouTube's embedded response is malformed.
+      }
+    }
 
     return {
       isUpcoming: true,
+      isPremiere,
       premiereDate
     }
   } catch {
