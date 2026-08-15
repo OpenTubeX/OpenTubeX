@@ -109,32 +109,6 @@ const AUTOMATIC_NUMBER_LIMITS = Object.freeze({
   maxFileSizeMb: 1_000_000,
   maxAgeDays: 36_500
 })
-const AUTOMATIC_TEMPLATE_OPTION_KEYS = new Set([
-  'mode',
-  'quality',
-  'videoFormat',
-  'videoCodec',
-  'audioFormat',
-  'filenameTemplate',
-  'startTime',
-  'endTime',
-  'splitChapters',
-  'removeSponsorblock',
-  'sponsorBlockCategories',
-  'includeSubtitles',
-  'embedSubtitles',
-  'subtitleLanguages',
-  'subtitleFormat',
-  'embedThumbnail',
-  'embedMetadata',
-  'customArgs'
-])
-const AUTOMATIC_RULE_OPTION_KEYS = new Set([
-  ...Object.keys(AUTOMATIC_NUMBER_LIMITS),
-  'enabledAt',
-  'titleIncludes',
-  'titleExcludes'
-])
 const BUILT_IN_AUTOMATIC_TEMPLATE_OPTIONS = new Map([
   ['video:best', { mode: 'video' }],
   ['video:best:mp4', { mode: 'video', videoFormat: 'mp4' }],
@@ -1456,9 +1430,13 @@ async function authorizeAutomaticDownload(payload, discoveryPreviouslyAuthorized
     }
   }
 
-  const sanitizedPayload = Object.fromEntries(Object.entries(payload).filter(([key]) => (
-    !AUTOMATIC_TEMPLATE_OPTION_KEYS.has(key) && !AUTOMATIC_RULE_OPTION_KEYS.has(key)
-  )))
+  const sanitizedPayload = {
+    videoId: payload.videoId,
+    channelId: payload.channelId,
+    title: payload.title,
+    thumbnail: payload.thumbnail,
+    notification: payload.notification
+  }
   for (const [key, maximum] of Object.entries(AUTOMATIC_NUMBER_LIMITS)) {
     sanitizedPayload[key] = automaticNumber(rule[key], maximum)
   }

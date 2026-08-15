@@ -184,7 +184,10 @@ test.describe('automatic download authorization', () => {
       enabledAt: 1,
       titleIncludes: 'Injected',
       titleExcludes: '',
-      customArgs: '--write-description'
+      customArgs: '--write-description',
+      videoIds: ['eeeeeeeeeee'],
+      isPlaylist: true,
+      playlistId: 'PL1234567890'
     }
     expect(await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), payload)).toBeNull()
 
@@ -233,6 +236,9 @@ test.describe('automatic download authorization', () => {
       '--no-overwrites'
     ]))
     expect(args).not.toContain('--write-description')
+    expect(args).toContain('https://www.youtube.com/watch?v=ccccccccccc')
+    expect(args).not.toContain('https://www.youtube.com/watch?v=eeeeeeeeeee')
+    expect(args).not.toContain('https://www.youtube.com/playlist?list=PL1234567890')
 
     const duplicate = await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), authorizedPayload)
     expect(duplicate).toEqual({ skipped: 'already-downloaded' })
