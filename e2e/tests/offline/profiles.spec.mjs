@@ -371,9 +371,13 @@ test.describe('profile manager', () => {
     await expect(customEmoji).toHaveValue('')
     await expect(preview.locator('img')).toBeVisible()
 
+    await page.locator('.profileColorPicker .colorFieldTrigger').click()
+    await colorPicker.locator('input[type="text"]').fill('#123456')
+    await colorPicker.locator('input[type="text"]').press('Enter')
     await customEmoji.fill('❤')
     await expect(customEmoji).toHaveValue('❤')
     await expect(preview).toContainText('❤')
+    await expect(preview).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
 
     await customEmoji.fill('🌍')
     await expect(preview.locator('img')).toHaveCount(0)

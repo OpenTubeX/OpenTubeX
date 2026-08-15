@@ -380,7 +380,7 @@ async function restoreSemanticProfileBgColor() {
   if (semanticColor === null) return
 
   await nextTick()
-  profileBgColor.value = semanticColor
+  if (semanticProfileBgColor.value === semanticColor) profileBgColor.value = semanticColor
 }
 
 function updateProfileBgColorFromPicker(color) {
@@ -633,7 +633,7 @@ function clearProfileIcon() {
 }
 
 function restoreOpaqueProfileColor() {
-  if (profileBgColor.value === 'transparent') {
+  if (profileBgColor.value === 'transparent' || semanticProfileBgColor.value === 'transparent') {
     selectProfileBgColor(lastOpaqueProfileBgColor.value)
   }
 }
