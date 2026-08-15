@@ -22,6 +22,7 @@
 .ft-tag-box li {
   list-style: none;
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   margin: 5px;
   border-radius: calc(5px * var(--ui-roundness));
   display: flex;

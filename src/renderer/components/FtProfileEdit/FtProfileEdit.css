@@ -38,6 +38,7 @@ h3 {
 
 .emojiOption {
   background: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   border: 2px solid transparent;
   border-radius: 8px;
   cursor: pointer;
@@ -60,6 +61,7 @@ h3 {
 
 .customEmojiInput {
   background: var(--search-bar-color);
+  backdrop-filter: var(--search-bar-blur, none);
   border: 1px solid var(--divider-color);
   border-radius: calc(4px * var(--ui-roundness));
   color: var(--primary-text-color);
@@ -144,11 +146,9 @@ h3 {
   min-inline-size: 250px;
 }
 
-.customColorSection {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
+.profileColorPicker {
+  inline-size: min(350px, 100%);
+  margin-inline: auto;
   margin-block-start: 5px;
 }
 

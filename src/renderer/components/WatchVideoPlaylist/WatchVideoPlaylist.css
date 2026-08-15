@@ -68,6 +68,7 @@
   inline-size: max-content;
   max-inline-size: 100%;
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   border: 1px solid var(--primary-border-color);
   border-radius: calc(8px * var(--ui-roundness));
   padding-block: 8px;

@@ -6,7 +6,7 @@
   padding: 5px;
   color: var(--primary-text-color);
   background-color: color-mix(in srgb, var(--card-bg-color) 96%, var(--bg-color));
-  border: 1px solid color-mix(in srgb, var(--tertiary-text-color) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
   border-radius: calc(8px * var(--ui-roundness));
   box-shadow: 0 12px 32px rgb(0 0 0 / 34%);
 }
@@ -89,6 +89,7 @@
   padding: 1px;
   color: var(--primary-color);
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   border-radius: 50%;
   font-size: 8px;
 }
@@ -121,7 +122,7 @@
   block-size: 1px;
   margin-block: 4px;
   margin-inline: 7px;
-  background-color: color-mix(in srgb, var(--tertiary-text-color) 45%, transparent);
+  background-color: color-mix(in srgb, var(--border-color) 45%, transparent);
 }
 
 .submenuScroll {

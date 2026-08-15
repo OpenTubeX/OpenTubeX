@@ -68,20 +68,17 @@
       </div>
 
       <div class="colorGrid">
-        <label
+        <FtColorPicker
           v-for="([key, property, label]) in CUSTOM_THEME_EDITABLE_COLORS"
           :key="key"
-          class="colorField"
-        >
-          <input
-            :value="draft.colors[key]"
-            type="color"
-            @input="updateColor(key, property, $event.target.value)"
-            @change="commitColorChanges"
-          >
-          <span>{{ colorNames[label] ?? label }}</span>
-          <code>{{ draft.colors[key] }}</code>
-        </label>
+          :model-value="draft.colors[key]"
+          :blur-value="getBlurValue(key)"
+          :label="colorNames[label] ?? label"
+          :other-colors="getOtherColors(key)"
+          @update:model-value="updateColor(key, property, $event)"
+          @update:blur-value="updateBlur(key, $event)"
+          @change="commitThemeChanges"
+        />
       </div>
 
       <div class="editorFooter">
@@ -136,15 +133,19 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import FtColorPicker from '../FtColorPicker/FtColorPicker.vue'
 
 import store from '../../store/index'
 import { useColorTranslations } from '../../composables/colors'
 import {
   cloneDefaultCustomTheme,
+  CUSTOM_THEME_BLURS,
   CUSTOM_THEME_COLORS,
   CUSTOM_THEME_EDITABLE_COLORS,
+  customThemeBackdropBlur,
   customThemeIdFromValue,
   customThemeValue,
+  hexColorToRgbComponents,
   normalizeCustomTheme,
 } from '../../../customTheme'
 import {
@@ -193,11 +194,16 @@ const BASE_THEME_TRANSLATION_KEYS = [
   'Everforest Light Hard', 'Everforest Light Medium', 'Everforest Light Low',
   'Gruvbox Dark', 'Gruvbox Light', 'Solarized Dark', 'Solarized Light'
 ]
-const MAIN_COLOR_KEYS = ['primary', 'primaryHover', 'primaryActive', 'textWithPrimary']
+const MAIN_COLOR_KEYS = [
+  'primary', 'primaryHover', 'primaryActive', 'textWithPrimary',
+  'coloredHeaderHover', 'coloredHeaderHoverText',
+  'coloredHeaderPressed', 'coloredHeaderPressedText'
+]
 const SECONDARY_COLOR_KEYS = [
   'accent', 'accentHover', 'accentActive', 'accentLight', 'accentVisited',
   'textWithAccent', 'link', 'linkVisited'
 ]
+const blurProperties = new Map(CUSTOM_THEME_BLURS.map(([key, property]) => [key, property]))
 const baseThemeNames = computed(() => {
   const translations = tm('Settings.Theme Settings.Base Theme')
   return BASE_THEME_TRANSLATION_KEYS.map(key => translations[key] ?? key)
@@ -208,7 +214,22 @@ const colorNames = computed(() => tm('Settings.Theme Settings.Custom Theme.Color
 const isSavedTheme = computed(() => store.getters.getCustomThemes.some(({ id }) => id === draft.id))
 const hasChanges = computed(() => savedTheme.value === null || !themesMatch(draft, savedTheme.value))
 const isUsingThemeSourceColors = computed(() => themeSourceColors.value !== null &&
-  CUSTOM_THEME_EDITABLE_COLORS.every(([key]) => draft.colors[key] === themeSourceColors.value[key]))
+  CUSTOM_THEME_EDITABLE_COLORS.every(([key]) => draft.colors[key] === themeSourceColors.value[key]) &&
+  CUSTOM_THEME_BLURS.every(([key]) => draft.blurs[key] === 0))
+
+function getBlurValue(key) {
+  return blurProperties.has(key) ? draft.blurs[key] : null
+}
+
+function getOtherColors(currentKey) {
+  return CUSTOM_THEME_EDITABLE_COLORS
+    .filter(([key]) => key !== currentKey)
+    .map(([key, , label]) => ({
+      key,
+      label: colorNames.value[label] ?? label,
+      value: draft.colors[key]
+    }))
+}
 
 watch(() => props.open, async (open) => {
   const loadId = ++editorLoadId
@@ -276,6 +297,7 @@ function setDraft(theme) {
   draft.mainColor = theme.mainColor
   draft.secondaryColor = theme.secondaryColor
   draft.isDark = theme.isDark
+  draft.blurs = { ...theme.blurs }
   draft.colors = { ...theme.colors }
 }
 
@@ -287,7 +309,12 @@ function themesMatch(first, second) {
     first.mainColor === second.mainColor &&
     first.secondaryColor === second.secondaryColor &&
     first.isDark === second.isDark &&
+    blursMatch(first.blurs, second.blurs) &&
     colorsMatch(first.colors, second.colors)
+}
+
+function blursMatch(first, second) {
+  return CUSTOM_THEME_BLURS.every(([key]) => first[key] === second[key])
 }
 
 function colorsMatch(first, second) {
@@ -338,12 +365,25 @@ function updateColor(key, property, value) {
   }
 }
 
-function commitColorChanges() {
+function updateBlur(key, value) {
+  const property = blurProperties.get(key)
+  if (property === undefined) return
+  draft.blurs[key] = value
+  if (previewing) {
+    document.body.style.setProperty(
+      property,
+      customThemeBackdropBlur(draft.colors[key], value)
+    )
+  }
+}
+
+function commitThemeChanges() {
   flushColorPreviews()
   // Keep drag-time changes outside Vue's render cycle. Replacing the object
   // once the native picker commits updates the displayed hex value without
   // writing back into an open color picker on every pointer movement.
   draft.colors = { ...draft.colors }
+  draft.blurs = { ...draft.blurs }
 }
 
 function flushColorPreviews() {
@@ -353,10 +393,17 @@ function flushColorPreviews() {
   }
   for (const [key, { property, value }] of pendingColorPreviews) {
     document.body.style.setProperty(property, value)
+    const blurProperty = blurProperties.get(key)
+    if (blurProperty !== undefined) {
+      document.body.style.setProperty(
+        blurProperty,
+        customThemeBackdropBlur(value, draft.blurs[key])
+      )
+    }
     if (key === 'accent') {
       document.body.style.setProperty(
         '--accent-color-rgb',
-        value.match(/[\da-f]{2}/gi).map(component => Number.parseInt(component, 16)).join(' ')
+        hexColorToRgbComponents(value)
       )
     }
   }
@@ -400,6 +447,7 @@ function copyThemeSources() {
   const sourceColors = readThemeSourceColors()
   themeSourceColors.value = sourceColors
   draft.colors = { ...sourceColors }
+  draft.blurs = Object.fromEntries(CUSTOM_THEME_BLURS.map(([key]) => [key, 0]))
   draft.isDark = !['light', 'pastelPink', 'catppuccinLatte', 'everforestLightHard',
     'everforestLightMedium', 'everforestLightLow', 'gruvboxLight', 'solarizedLight']
     .includes(draft.basedOn)
@@ -426,25 +474,23 @@ function readThemeSourceColors() {
   const probe = document.createElement('span')
   probe.hidden = true
   document.body.append(probe)
-  const backgroundHex = readColor(probe, '--bg-color', [255, 255, 255])
-  const background = backgroundHex.match(/[\da-f]{2}/gi).map(value => Number.parseInt(value, 16))
   const colors = Object.fromEntries(CUSTOM_THEME_COLORS.map(([key, property]) =>
-    [key, readColor(probe, property, background)]))
+    [key, readColor(probe, property)]))
   probe.remove()
   return colors
 }
 
-function readColor(probe, property, background) {
+function readColor(probe, property) {
   probe.style.color = `var(${property})`
   const color = getComputedStyle(probe).color
   const match = color.match(/rgba?\(\s*(\d+)[, ]+\s*(\d+)[, ]+\s*(\d+)(?:\s*[,/]\s*([\d.]+))?\s*\)/)
   if (!match) return '#000000'
 
-  const alpha = match[4] === undefined ? 1 : Number.parseFloat(match[4])
-  return '#' + match.slice(1, 4).map((value, index) => {
-    const composited = Math.round(Number.parseInt(value, 10) * alpha + background[index] * (1 - alpha))
-    return composited.toString(16).padStart(2, '0')
-  }).join('')
+  const rgb = match.slice(1, 4)
+    .map(value => Number.parseInt(value, 10).toString(16).padStart(2, '0'))
+    .join('')
+  const alpha = match[4] === undefined ? 255 : Math.round(Number.parseFloat(match[4]) * 255)
+  return `#${rgb}${alpha < 255 ? alpha.toString(16).padStart(2, '0') : ''}`
 }
 
 async function saveAndApply() {
@@ -610,38 +656,13 @@ onBeforeUnmount(() => {
   padding-inline: 12px;
   color: var(--primary-text-color);
   background: var(--search-bar-color);
+  backdrop-filter: var(--search-bar-blur, none);
 }
 
 .colorGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 10px;
-}
-
-.colorField {
-  display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  min-block-size: 46px;
-  border-radius: calc(8px * var(--ui-roundness));
-  padding: 6px 10px;
-  color: var(--primary-text-color);
-  background: var(--card-bg-color);
-}
-
-.colorField input {
-  inline-size: 38px;
-  block-size: 32px;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-.colorField code {
-  color: var(--tertiary-text-color);
-  font-size: 0.78rem;
 }
 
 @container (width < 560px) {

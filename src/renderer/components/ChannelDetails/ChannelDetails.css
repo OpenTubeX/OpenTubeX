@@ -17,6 +17,7 @@
 .infoContainer {
   position: relative;
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   border-radius: 0 0 calc(8px * var(--ui-roundness)) calc(8px * var(--ui-roundness));
   margin-block-start: 10px;
   padding-block: 0;
@@ -107,7 +108,7 @@
 .tab:hover,
 .tab:focus {
   font-weight: bold;
-  border-block-end: 3px solid var(--tertiary-text-color);
+  border-block-end: 3px solid var(--border-color);
 }
 
 .selectedTab {

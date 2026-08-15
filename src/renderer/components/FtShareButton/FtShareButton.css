@@ -29,7 +29,7 @@
 }
 
 .divider {
-  background: var(--tertiary-text-color);
+  background: var(--border-color);
   grid-row: span 3;
   margin-block: 0;
   margin-inline: 12px;

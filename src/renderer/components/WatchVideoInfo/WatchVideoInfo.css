@@ -32,6 +32,7 @@
 .videoBadge {
   align-items: center;
   background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
   border-radius: calc(5px * var(--ui-roundness));
   display: inline-flex;
   gap: 3px;

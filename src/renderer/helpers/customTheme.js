@@ -1,5 +1,8 @@
 import {
+  CUSTOM_THEME_BLURS,
   CUSTOM_THEME_COLORS,
+  customThemeBackdropBlur,
+  hexColorToRgbComponents,
   isCustomThemeValue,
   normalizeCustomTheme,
   normalizeCustomThemes,
@@ -22,15 +25,24 @@ export function applyThemeToDocument(baseTheme, mainColor, secColor, customTheme
   for (const [, property] of CUSTOM_THEME_COLORS) {
     document.body.style.removeProperty(property)
   }
+  for (const [, property] of CUSTOM_THEME_BLURS) {
+    document.body.style.removeProperty(property)
+  }
   document.body.style.removeProperty('--accent-color-rgb')
 
   if (isCustomThemeValue(baseTheme) && customTheme) {
     for (const [key, property] of CUSTOM_THEME_COLORS) {
       document.body.style.setProperty(property, customTheme.colors[key])
     }
+    for (const [key, property] of CUSTOM_THEME_BLURS) {
+      document.body.style.setProperty(
+        property,
+        customThemeBackdropBlur(customTheme.colors[key], customTheme.blurs[key])
+      )
+    }
     document.body.style.setProperty(
       '--accent-color-rgb',
-      customTheme.colors.accent.match(/[\da-f]{2}/gi).map(value => Number.parseInt(value, 16)).join(' ')
+      hexColorToRgbComponents(customTheme.colors.accent)
     )
   }
 }

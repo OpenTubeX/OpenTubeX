@@ -784,6 +784,7 @@
       overflow: hidden;
       border-radius: calc(12px * var(--ui-roundness));
       background-color: var(--card-bg-color);
+      backdrop-filter: var(--card-bg-blur, none);
       box-shadow: 0 8px 32px rgb(0 0 0 / 35%);
       opacity: 0;
       visibility: hidden;
@@ -1086,6 +1087,7 @@
     min-block-size: 0;
     overflow: hidden;
     background-color: var(--card-bg-color);
+    backdrop-filter: var(--card-bg-blur, none);
     border-radius: calc(8px * var(--ui-roundness));
     color: var(--primary-text-color);
     box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
@@ -1127,6 +1129,7 @@
 
     :deep(.chapterThumbnail) {
       background-color: var(--secondary-card-bg-color);
+      backdrop-filter: var(--secondary-card-bg-blur, none);
     }
 
   }
@@ -1295,6 +1298,7 @@
   padding: 16px;
   border-radius: calc(5px * var(--ui-roundness));
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   box-sizing: border-box;
 
   .skeletonTitle {
@@ -1328,6 +1332,7 @@
   padding-inline: 16px;
   border-radius: calc(5px * var(--ui-roundness));
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
 
   .skeletonPlaylistTitle {
     inline-size: 45%;
@@ -1416,6 +1421,7 @@
   padding-block: 16px;
   padding-inline: 16px;
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
 
   .skeletonRecommendation {

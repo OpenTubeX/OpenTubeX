@@ -267,6 +267,7 @@ function isSegmentPassed(segment) {
   overflow: hidden;
   color: var(--primary-text-color);
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   border-radius: calc(8px * var(--ui-roundness));
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
 }
@@ -444,6 +445,7 @@ function isSegmentPassed(segment) {
   padding-inline: 0;
   color: inherit;
   background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
   border: 0;
   border-radius: calc(6px * var(--ui-roundness));
   cursor: pointer;
@@ -546,6 +548,7 @@ function isSegmentPassed(segment) {
   padding-inline: 10px 12px;
   color: var(--primary-text-color);
   background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
   border: 1px solid transparent;
   border-radius: calc(10px * var(--ui-roundness));
   cursor: pointer;
@@ -583,6 +586,7 @@ function isSegmentPassed(segment) {
   block-size: 30px;
   color: var(--secondary-text-color);
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   border-radius: calc(8px * var(--ui-roundness));
   font-size: 13px;
   transition: background-color 160ms ease, color 160ms ease;
@@ -618,6 +622,7 @@ function isSegmentPassed(segment) {
   inline-size: 44px;
   block-size: 24px;
   background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
   border: 1px solid var(--side-nav-hover-color);
   border-radius: calc(999px * var(--ui-roundness));
   transition: background-color 160ms ease, border-color 160ms ease;

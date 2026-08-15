@@ -6,6 +6,7 @@
   padding-inline: 10px;
   box-shadow: 0 2px 1px 0 var(--primary-shadow-color);
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   border-inline-start: 2px solid var(--primary-shadow-color);
   display: flex;
   align-items: center;
@@ -113,6 +114,7 @@
   border: 0;
   box-shadow: none;
   background-color: transparent;
+  backdrop-filter: none;
   gap: 12px;
   justify-content: flex-end;
   z-index: auto;

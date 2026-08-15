@@ -118,7 +118,7 @@
   padding-block: 0.75em;
   padding-inline: 1em;
   background-color: color-mix(in srgb, var(--card-bg-color) 88%, var(--primary-text-color));
-  border: 1px solid var(--tertiary-text-color);
+  border: 1px solid var(--border-color);
   border-radius: calc(6px * var(--ui-roundness));
 }
 
@@ -176,7 +176,7 @@
   padding: 8px;
   color: var(--primary-text-color);
   background-color: color-mix(in srgb, var(--bg-color) 94%, #000);
-  border: 1px solid var(--tertiary-text-color);
+  border: 1px solid var(--border-color);
   border-radius: calc(8px * var(--ui-roundness));
   box-shadow: 0 12px 32px rgb(0 0 0 / 32%);
 }
@@ -195,7 +195,8 @@
   padding-inline: 8px;
   color: var(--primary-text-color);
   background-color: var(--card-bg-color);
-  border: 1px solid var(--tertiary-text-color);
+  backdrop-filter: var(--card-bg-blur, none);
+  border: 1px solid var(--border-color);
   border-radius: calc(6px * var(--ui-roundness));
   outline: none;
 }
@@ -274,7 +275,7 @@
   overflow: auto;
   padding: 12px;
   background-color: color-mix(in srgb, var(--bg-color) 92%, #000);
-  border: 1px solid var(--tertiary-text-color);
+  border: 1px solid var(--border-color);
   border-radius: calc(8px * var(--ui-roundness));
   box-shadow: 0 16px 40px rgb(0 0 0 / 38%);
 }
@@ -287,6 +288,7 @@
   padding: 8px;
   color: var(--primary-text-color);
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   border: 2px solid transparent;
   border-radius: calc(8px * var(--ui-roundness));
   cursor: pointer;

@@ -1,5 +1,6 @@
 .getNextPage {
   background-color: var(--search-bar-color);
+  backdrop-filter: var(--search-bar-blur, none);
   inline-size: 100%;
   block-size: 45px;
   line-height: 45px;

@@ -142,6 +142,7 @@
 
 .downloadFooter {
   background: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   border-block-start: 1px solid var(--side-nav-color);
   flex: none;
   padding-block: 8px 10px;

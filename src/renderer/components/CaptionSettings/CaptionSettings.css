@@ -68,6 +68,7 @@
   border: 1px solid var(--border-color);
   border-radius: calc(5px * var(--ui-roundness));
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
 }
 
 .captionControl :deep(.pure-material-slider) {
@@ -82,30 +83,15 @@
 }
 
 .captionColorControl {
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: center;
-  gap: 0;
+  padding: 0;
   color: color-mix(in srgb, var(--primary-text-color) 87%, transparent);
-  cursor: pointer;
 }
 
-.captionColorControl > span {
-  min-block-size: 20px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.captionColorControl input {
+.captionColorControl :deep(.colorFieldTrigger) {
   inline-size: 100%;
-  block-size: 45px;
-  box-sizing: border-box;
-  padding: 2px;
-  border: 1px solid var(--border-color);
-  border-radius: calc(4px * var(--ui-roundness));
-  background: transparent;
-  cursor: pointer;
+  block-size: 100%;
+  min-block-size: 76px;
+  border-radius: inherit;
 }
 
 .captionActions {

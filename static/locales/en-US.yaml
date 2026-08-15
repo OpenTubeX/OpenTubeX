@@ -1,6 +1,20 @@
 # Put the name of your locale in the same language
 Locale Name: English (US)
 
+Color Picker:
+  Hue: Hue
+  Opacity: Opacity
+  Backdrop Blur: Backdrop blur
+  Hex Color: Hex color
+  Apply Color: Apply
+  Reset Color: Reset
+  Copy Color: Copy
+  Copy From Another Color: Copy from another color
+  Color Copied: Color copied
+  Invalid Color: Enter a valid hex color
+  Clipboard Unavailable: Clipboard unavailable
+  Saturation and Brightness: Saturation and brightness
+
 # Webkit Menu Bar
 File: File
 New Window: New Window
@@ -582,7 +596,7 @@ Settings:
       Delete Theme Confirmation: Delete “{name}”? This cannot be undone.
       Save and Apply: Save and apply
       Discard Changes: Discard changes
-      Reset Colors: Reset colors
+      Reset Colors: Reset colors and effects
       Theme File: OpenTubeX theme file
       Theme Saved: Custom theme saved and applied
       Theme Imported: Theme imported into the editor
@@ -594,47 +608,60 @@ Settings:
       Unable to Delete: Unable to delete the custom theme
       Invalid Theme File: Invalid custom theme file
       Colors:
-        Primary text: Primary text
+        Main text: Main text
         Secondary text: Secondary text
-        Tertiary text: Tertiary text
-        Titles: Titles
+        Subtle text: Subtle text
+        Borders and dividers: Borders and dividers
+        Subtle surfaces and indicators: Subtle surfaces and indicators
+        Title text: Title text
         Logo icon: Logo icon
         Logo text: Logo text
         Logo hover: Logo hover
-        Background: Background
-        Cards: Cards
-        Secondary cards: Secondary cards
+        Logo pressed: Logo pressed
+        Page background: Page background
+        Card background: Card background
+        Secondary card background: Secondary card background
         Favorite icon: Favorite icon
-        Errors: Errors
-        Scrollbar: Scrollbar
-        Scrollbar hover: Scrollbar hover
-        Dropdown hover text: Dropdown hover text
-        Side navigation: Side navigation
-        Side navigation hover: Side navigation hover
-        Side navigation hover text: Side navigation hover text
-        Side navigation active: Side navigation active
-        Side navigation active text: Side navigation active text
-        Search bar: Search bar
-        Settings search bar: Settings search bar
+        Error color: Error color
+        Scrollbar thumb: Scrollbar thumb
+        Scrollbar thumb hover: Scrollbar thumb hover
+        Scrollbar thumb pressed: Scrollbar thumb pressed
+        Dropdown item hover text: Dropdown item hover text
+        Dropdown item hover background: Dropdown item hover background
+        Navigation and panel background: Navigation and panel background
+        Neutral item hover and focus background: Neutral item hover and focus background
+        Neutral item hover and focus text and icons: Neutral item hover and focus text and icons
+        Neutral item pressed background: Neutral item pressed background
+        Neutral item pressed text and icons: Neutral item pressed text and icons
+        Header button hover and focus background: Header button hover and focus background
+        Header button hover and focus text and icons: Header button hover and focus text and icons
+        Header button pressed background: Header button pressed background
+        Header button pressed text and icons: Header button pressed text and icons
+        Colored header button hover and focus background: Colored header button hover and focus background
+        Colored header button hover and focus text and icons: Colored header button hover and focus text and icons
+        Colored header button pressed background: Colored header button pressed background
+        Colored header button pressed text and icons: Colored header button pressed text and icons
+        Search and dropdown background: Search and dropdown background
+        Settings search background: Settings search background
         Instance menu: Instance menu
         Input background: Input background
-        Shadows: Shadows
-        Primary color: Primary color
-        Primary hover: Primary hover
-        Primary active: Primary active
-        Text on primary: Text on primary
-        Accent color: Accent color
-        Accent hover: Accent hover
-        Accent active: Accent active
-        Light accent: Light accent
+        Shadow color: Shadow color
+        Primary controls and highlights: Primary controls and highlights
+        Primary control hover and focus: Primary control hover and focus
+        Primary control pressed: Primary control pressed
+        Text and icons on primary controls: Text and icons on primary controls
+        Secondary controls and highlights: Secondary controls and highlights
+        Secondary control hover and focus: Secondary control hover and focus
+        Secondary control pressed: Secondary control pressed
+        Light secondary color: Light secondary color
         Visited accent: Visited accent
-        Text on accent: Text on accent
+        Text and icons on secondary controls: Text and icons on secondary controls
         Links: Links
         Visited links: Visited links
         Destructive action: Destructive action
-        Destructive hover: Destructive hover
-        Destructive active: Destructive active
-        Text on destructive action: Text on destructive action
+        Destructive hover and focus: Destructive hover and focus
+        Destructive pressed: Destructive pressed
+        Text and icons on destructive actions: Text and icons on destructive actions
     Main Color Theme:
       Main Color Theme: Main Color Theme
       Red: Red

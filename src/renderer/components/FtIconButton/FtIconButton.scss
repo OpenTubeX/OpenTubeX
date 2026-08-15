@@ -28,6 +28,7 @@
 
   &.base {
     background-color: var(--card-bg-color);
+    backdrop-filter: var(--card-bg-blur, none);
     color: var(--primary-text-color);
 
     &:not(.disabled) {
@@ -246,7 +247,7 @@
   }
 
   .listItemDivider {
-    border-block-start: 1px solid var(--tertiary-text-color);
+    border-block-start: 1px solid var(--border-color);
     margin-block: 1px;
     margin-inline: auto;
     // Too "visible" with current color

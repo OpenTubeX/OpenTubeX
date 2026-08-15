@@ -198,6 +198,28 @@ test.describe('profile manager', () => {
   test.describe('theme color profiles', () => {
     test.use({ seed: { settings: { mainColor: 'Green' } } })
 
+    test('keeps a keyboard-selected swatch when the custom picker was open', async ({ app, page }) => {
+      await openProfileList(page)
+      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.card .profileList').getByText('All Channels').click()
+      await page.locator('.themeColorOption').click()
+      await page.locator('.profileColorPicker .colorFieldTrigger').click()
+
+      const redSwatch = page.locator('.colorOptions .colorOption').nth(1)
+      await redSwatch.focus()
+      await redSwatch.press('Enter')
+      await expect(page.locator('.colorPickerPopover')).toHaveCount(0)
+      await expect(page.locator('.profilePreviewIcon')).toHaveCSS('background-color', 'rgb(213, 0, 0)')
+
+      await page.getByRole('button', { name: 'Update Profile' }).click()
+      await expect.poll(async () => {
+        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        const profile = records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
+        return profile?.bgColor
+      }).toBe('#d50000')
+    })
+
     test('follows the theme color when the theme color option is picked', async ({ app, page }) => {
       await openProfileList(page)
       await page.locator('.profilePanelHeader button').last().click()
@@ -208,6 +230,23 @@ test.describe('profile manager', () => {
       // 'Green' is the seeded main color theme
       const preview = page.locator('.profilePreviewIcon')
       await expect(preview).toHaveCSS('background-color', 'rgb(76, 175, 80)')
+
+      await page.locator('.profileColorPicker .colorFieldTrigger').click()
+      const colorPicker = page.locator('.colorPickerPopover')
+      await colorPicker.locator('input[type="text"]').fill('#123456')
+      await colorPicker.locator('input[type="text"]').press('Enter')
+      await page.getByRole('heading', { name: 'Profile Preview' }).click()
+      await expect(preview).toHaveCSS('background-color', 'rgb(76, 175, 80)')
+
+      await page.locator('.profileColorPicker .colorFieldTrigger').click()
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return store.dispatch('updateMainColor', 'Orange')
+      })
+      await expect(preview).toHaveCSS('background-color', 'rgb(255, 152, 0)')
+      await page.getByRole('heading', { name: 'Profile Preview' }).click()
+      await expect(preview).toHaveCSS('background-color', 'rgb(255, 152, 0)')
+
       await page.getByRole('button', { name: 'Update Profile' }).click()
 
       await expect.poll(async () => {
@@ -219,7 +258,7 @@ test.describe('profile manager', () => {
 
       ;({ page } = await app.relaunch())
       // the profile keeps the resolved theme color after restart
-      await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(76, 175, 80)')
+      await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(255, 152, 0)')
       // switching the theme color has to repaint the profile, without touching the profile itself
       await goToSettingsSection(page, 'theme')
 
@@ -233,6 +272,61 @@ test.describe('profile manager', () => {
       await page.locator('.selectDropdown .selectOption').nth(blueIndex).click()
       await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(33, 150, 243)')
     })
+  })
+
+  test.describe('shorthand theme color profiles', () => {
+    test.use({ seed: { settings: { baseTheme: 'hotPink' } } })
+
+    test('preserves the theme color when cancelling picker changes', async ({ app, page }) => {
+      await openProfileList(page)
+      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.card .profileList').getByText('All Channels').click()
+      await page.locator('.themeColorOption').click()
+
+      const preview = page.locator('.profilePreviewIcon')
+      await expect(preview).toHaveCSS('background-color', 'rgb(0, 0, 0)')
+
+      await page.locator('.profileColorPicker .colorFieldTrigger').click()
+      const colorPicker = page.locator('.colorPickerPopover')
+      await colorPicker.locator('input[type="text"]').fill('#123456')
+      await colorPicker.locator('input[type="text"]').press('Enter')
+      await page.getByRole('heading', { name: 'Profile Preview' }).click()
+      await page.getByRole('button', { name: 'Update Profile' }).click()
+
+      await expect.poll(async () => {
+        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        const profile = records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
+        return profile?.bgColor
+      }).toBe('var(--primary-color)')
+    })
+  })
+
+  test('applies opaque black to an image profile that was transparent', async ({ app, page }) => {
+    await openProfileList(page)
+    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.card .profileList').getByText('All Channels').click()
+
+    await page.locator('.imageInput').setInputFiles({
+      name: 'globe.svg',
+      mimeType: 'image/svg+xml',
+      buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="12" cy="12" r="10"/></svg>')
+    })
+    await page.getByRole('button', { name: 'Apply Crop' }).click()
+
+    await page.locator('.profileColorPicker .colorFieldTrigger').click()
+    const colorPicker = page.locator('.colorPickerPopover')
+    await colorPicker.locator('input[type="text"]').fill('#000000')
+    await colorPicker.locator('input[type="text"]').press('Enter')
+    await colorPicker.getByRole('button', { name: 'Apply' }).click()
+    await expect(page.locator('.profilePreviewIcon')).toHaveCSS('background-color', 'rgb(0, 0, 0)')
+
+    await page.getByRole('button', { name: 'Update Profile' }).click()
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)?.bgColor
+    }).toBe('#000000')
   })
 
   test('customizes a profile icon with a cropped SVG or emoji', async ({ app, page }) => {
@@ -255,6 +349,14 @@ test.describe('profile manager', () => {
     const preview = page.locator('.profilePreviewIcon')
     await expect(preview.locator('img')).toBeVisible()
     await expect(preview).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+
+    await page.locator('.profileColorPicker .colorFieldTrigger').click()
+    const colorPicker = page.locator('.colorPickerPopover')
+    await colorPicker.locator('input[type="text"]').fill('#123456')
+    await colorPicker.locator('input[type="text"]').press('Enter')
+    await page.getByRole('heading', { name: 'Profile Preview' }).click()
+    await expect(preview).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+
     await page.getByRole('button', { name: 'Update Profile' }).click()
 
     await expect.poll(async () => {
@@ -269,9 +371,13 @@ test.describe('profile manager', () => {
     await expect(customEmoji).toHaveValue('')
     await expect(preview.locator('img')).toBeVisible()
 
+    await page.locator('.profileColorPicker .colorFieldTrigger').click()
+    await colorPicker.locator('input[type="text"]').fill('#123456')
+    await colorPicker.locator('input[type="text"]').press('Enter')
     await customEmoji.fill('❤')
     await expect(customEmoji).toHaveValue('❤')
     await expect(preview).toContainText('❤')
+    await expect(preview).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
 
     await customEmoji.fill('🌍')
     await expect(preview.locator('img')).toHaveCount(0)
