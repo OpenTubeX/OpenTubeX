@@ -350,7 +350,7 @@ function getTopChromeBottom() {
 
   let bottom = 0
 
-  for (const selector of ['.topNav', '.tabBar:not(.vertical)']) {
+  for (const selector of ['.topNav', '.tabBar.position-top']) {
     const element = document.querySelector(selector)
 
     if (element != null) {

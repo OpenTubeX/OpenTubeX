@@ -49,6 +49,7 @@ test('excludes both the horizontal tab bar and the header', () => {
     contentTop: 92,
     contentLeft: 0,
     contentRight: VIEWPORT_WIDTH,
+    contentBottom: VIEWPORT_HEIGHT,
     viewportWidth: VIEWPORT_WIDTH,
     viewportHeight: VIEWPORT_HEIGHT,
     devicePixelRatio: 1
@@ -65,6 +66,7 @@ test('excludes the vertical tab bar column and the header', () => {
     contentTop: 60,
     contentLeft: 220,
     contentRight: VIEWPORT_WIDTH,
+    contentBottom: VIEWPORT_HEIGHT,
     viewportWidth: VIEWPORT_WIDTH,
     viewportHeight: VIEWPORT_HEIGHT,
     devicePixelRatio: 1
@@ -86,6 +88,28 @@ test('crops the inline-end vertical tab bar for right-to-left layouts', () => {
   assert.equal(bounds.contentTop, 60)
 })
 
+test('excludes a horizontal tab bar on the bottom edge', () => {
+  const { window, document } = createEnvironment({
+    tabBar: createElement({
+      left: 0,
+      right: VIEWPORT_WIDTH,
+      top: VIEWPORT_HEIGHT - 32,
+      bottom: VIEWPORT_HEIGHT
+    }),
+    topNav: createElement({ left: 0, right: VIEWPORT_WIDTH, top: 0, bottom: 60 })
+  })
+
+  assert.deepEqual(measureTabPreviewContentBounds(window, document), {
+    contentTop: 60,
+    contentLeft: 0,
+    contentRight: VIEWPORT_WIDTH,
+    contentBottom: VIEWPORT_HEIGHT - 32,
+    viewportWidth: VIEWPORT_WIDTH,
+    viewportHeight: VIEWPORT_HEIGHT,
+    devicePixelRatio: 1
+  })
+})
+
 test('keeps the full viewport when the chrome is missing or collapsed', () => {
   const hidden = createEnvironment({
     topNav: createElement({ left: 0, right: 0, top: 0, bottom: 0 })
@@ -94,6 +118,7 @@ test('keeps the full viewport when the chrome is missing or collapsed', () => {
     contentTop: 0,
     contentLeft: 0,
     contentRight: VIEWPORT_WIDTH,
+    contentBottom: VIEWPORT_HEIGHT,
     viewportWidth: VIEWPORT_WIDTH,
     viewportHeight: VIEWPORT_HEIGHT,
     devicePixelRatio: 1

@@ -107,6 +107,17 @@
       </div>
     </div>
     <template v-if="usingElectron">
+      <FtFlexBox class="themeSelectRow">
+        <FtSelect
+          :placeholder="t('Settings.Theme Settings.Tab Layout.Tab Layout')"
+          :value="tabBarPosition"
+          setting-key="tabBarPosition"
+          :select-names="tabBarPositionNames"
+          :select-values="TAB_BAR_POSITIONS"
+          :icon="['fac', 'horizontal-tabs']"
+          @change="updateTabBarPosition"
+        />
+      </FtFlexBox>
       <FtFlexBox>
         <div class="switchColumn">
           <FtSlider
@@ -326,6 +337,10 @@ import {
   MIN_FIXED_TAB_WIDTH
 } from '../constants/tabWidth'
 import {
+  normalizeTabBarPosition,
+  TAB_BAR_POSITIONS
+} from '../constants/tabBarPosition'
+import {
   MAX_SCROLLBAR_THUMB_WIDTH,
   MIN_SCROLLBAR_THUMB_WIDTH,
   normalizeScrollbarThumbWidth,
@@ -413,6 +428,22 @@ const iconPackNames = computed(() => [
   t('Settings.Theme Settings.Icon Pack.Material Symbols'),
   t('Settings.Theme Settings.Icon Pack.Remix Icon')
 ])
+
+const tabBarPositionNames = computed(() => [
+  t('Settings.Theme Settings.Tab Layout.Horizontal Top'),
+  t('Settings.Theme Settings.Tab Layout.Horizontal Bottom'),
+  t('Settings.Theme Settings.Tab Layout.Vertical Left'),
+  t('Settings.Theme Settings.Tab Layout.Vertical Right')
+])
+
+const tabBarPosition = computed(() => normalizeTabBarPosition(store.getters.getTabBarPosition))
+
+/**
+ * @param {'top' | 'bottom' | 'left' | 'right'} value
+ */
+function updateTabBarPosition(value) {
+  store.dispatch('updateTabBarPosition', value)
+}
 
 const COLOR_VALUES = colors.map(color => color.name)
 const colorNames = useColorTranslations()

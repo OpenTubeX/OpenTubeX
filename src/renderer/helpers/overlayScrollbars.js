@@ -55,12 +55,42 @@ function create(initialization) {
   instance.on('destroyed', () => instances.delete(instance))
 
   if (initialization === document.body) {
+    updateBodyScrollbarPosition(instance)
     optimizeBodyScrollbarDrag(instance)
   } else if (initialization.elements?.viewport instanceof HTMLElement) {
     reconcileScrollbarOnResize(initialization.elements.viewport, instance)
   }
 
   return instance
+}
+
+/**
+ * Keeps the page scrollbar clear of a right-side vertical tab rail.
+ * OverlayScrollbars appends this element directly to the body, so app padding
+ * cannot move it out from underneath the fixed rail by itself. A left-side
+ * rail does not cover the scrollbar's normal window edge and needs no offset.
+ *
+ * @param {import('overlayscrollbars').OverlayScrollbars} instance
+ */
+function updateBodyScrollbarPosition(instance) {
+  const { scrollbar } = instance.elements().scrollbarVertical
+  const position = store.getters.getTabBarPosition
+  const width = `${store.getters.getVerticalTabBarWidth}px`
+
+  // OverlayScrollbars transitions physical edges by default. Moving between
+  // layouts should be atomic so the page scrollbar never sweeps across (or
+  // briefly remains behind) the fixed tab rail.
+  scrollbar.classList.add('os-scrollbar-transitionless')
+  scrollbar.style.removeProperty('left')
+  scrollbar.style.removeProperty('right')
+
+  if (position === 'right') {
+    scrollbar.style.right = width
+  }
+
+  requestAnimationFrame(() => {
+    scrollbar.classList.remove('os-scrollbar-transitionless')
+  })
 }
 
 /**
@@ -222,6 +252,17 @@ function optimizeBodyScrollbarDrag(instance) {
  */
 export function initializeAppScrollbars() {
   create(document.body)
+
+  watch(
+    () => [store.getters.getTabBarPosition, store.getters.getVerticalTabBarWidth],
+    () => {
+      for (const [instance, initialization] of instances) {
+        if (initialization === document.body) {
+          updateBodyScrollbarPosition(instance)
+        }
+      }
+    }
+  )
 
   // Rebuilt rather than reconfigured: switching `autoHide` on a live instance
   // leaves its already scheduled hide behind, so the scrollbars disappear again

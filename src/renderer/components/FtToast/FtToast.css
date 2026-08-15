@@ -220,7 +220,7 @@
 /* stylelint-disable liberty/use-logical-spec */
 .progress-toast-holder.position-bottom-left,
 .progress-toast-holder.position-top-left {
-  left: 24px;
+  left: calc(24px + var(--left-tab-bar-offset, 0px));
   justify-content: flex-start;
 }
 
@@ -233,16 +233,23 @@
 
 .progress-toast-holder.position-bottom-right,
 .progress-toast-holder.position-top-right {
-  right: 24px;
+  right: calc(24px + var(--right-tab-bar-offset, 0px));
   justify-content: flex-end;
 }
 /* stylelint-enable liberty/use-logical-spec */
 
 /* Keep top-positioned toasts below the horizontal tab bar. */
-.progress-toast-holder.horizontal-tabs.position-top-left,
-.progress-toast-holder.horizontal-tabs.position-top-center,
-.progress-toast-holder.horizontal-tabs.position-top-right {
+.progress-toast-holder.top-tabs.position-top-left,
+.progress-toast-holder.top-tabs.position-top-center,
+.progress-toast-holder.top-tabs.position-top-right {
   inset-block-start: 56px;
+}
+
+/* Keep bottom-positioned toasts above the bottom horizontal tab bar. */
+.progress-toast-holder.bottom-tabs.position-bottom-left,
+.progress-toast-holder.bottom-tabs.position-bottom-center,
+.progress-toast-holder.bottom-tabs.position-bottom-right {
+  inset-block-end: 58px;
 }
 
 :is(.toast-holder, .progress-toast-holder) .toast-slot {
@@ -317,15 +324,27 @@
   transform: translate(18px, -18px) scale(0.5);
 }
 
-.progress-toast-holder.horizontal-tabs.position-top-left .persistent-slot.minimized {
+.progress-toast-holder.top-tabs.position-top-left .persistent-slot.minimized {
   transform: translateX(-18px) scale(0.5);
 }
 
-.progress-toast-holder.horizontal-tabs.position-top-center .persistent-slot.minimized {
+.progress-toast-holder.top-tabs.position-top-center .persistent-slot.minimized {
   transform: scale(0.5);
 }
 
-.progress-toast-holder.horizontal-tabs.position-top-right .persistent-slot.minimized {
+.progress-toast-holder.top-tabs.position-top-right .persistent-slot.minimized {
+  transform: translateX(18px) scale(0.5);
+}
+
+.progress-toast-holder.bottom-tabs.position-bottom-left .persistent-slot.minimized {
+  transform: translateX(-18px) scale(0.5);
+}
+
+.progress-toast-holder.bottom-tabs.position-bottom-center .persistent-slot.minimized {
+  transform: scale(0.5);
+}
+
+.progress-toast-holder.bottom-tabs.position-bottom-right .persistent-slot.minimized {
   transform: translateX(18px) scale(0.5);
 }
 

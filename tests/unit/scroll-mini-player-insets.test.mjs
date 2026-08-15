@@ -17,16 +17,26 @@ import {
 /**
  * @param {object} options
  * @param {{ left: number, right: number } | null} [options.verticalTabBarRect]
+ * @param {{ top: number, bottom: number } | null} [options.tabBarRect]
  * @param {number} options.clientWidth usable width (excludes the scrollbar)
  * @param {number} [options.scrollbarWidth]
  * @param {number} [options.clientHeight]
  */
-function stubViewport ({ verticalTabBarRect = null, clientWidth, scrollbarWidth = 0, clientHeight = 800 }) {
+function stubViewport ({
+  verticalTabBarRect = null,
+  tabBarRect = null,
+  clientWidth,
+  scrollbarWidth = 0,
+  clientHeight = 800
+}) {
   global.window = { innerWidth: clientWidth + scrollbarWidth, innerHeight: clientHeight }
   global.document = {
     querySelector (selector) {
       if (selector === '.tabBar.vertical' && verticalTabBarRect) {
         return { getBoundingClientRect: () => verticalTabBarRect }
+      }
+      if (selector === '.tabBar' && tabBarRect) {
+        return { getBoundingClientRect: () => tabBarRect }
       }
       return null
     },
@@ -84,6 +94,19 @@ test('without a vertical tab bar both inline insets stay at the margin', () => {
 
   assert.equal(insets.left, MARGIN)
   assert.equal(insets.right, MARGIN)
+})
+
+test('a bottom tab bar pads the bottom inset', () => {
+  stubViewport({
+    tabBarRect: { top: 766, bottom: 800 },
+    clientWidth: 1000,
+    clientHeight: 800
+  })
+
+  const insets = getViewportInsets()
+
+  assert.equal(insets.top, MARGIN)
+  assert.equal(insets.bottom, 34 + MARGIN)
 })
 
 test('the left dock edge follows the tab rail width', () => {

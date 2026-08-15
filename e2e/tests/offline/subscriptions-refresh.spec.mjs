@@ -443,6 +443,20 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
     expect(minimizedBounds.y).toBeCloseTo(expandedBounds.y, 0)
     expect(minimizedBounds.y).toBeGreaterThanOrEqual(tabBarBounds.y + tabBarBounds.height)
 
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setVerticalTabBarWidth', 220)
+      store.commit('setTabBarPosition', 'left')
+    })
+    const leftTabBar = page.locator('.tabBar.position-left')
+    await expect(leftTabBar).toBeVisible()
+    await expect(refreshToast).not.toHaveClass(/minimized/)
+    const [shiftedBounds, leftTabBarBounds] = await Promise.all([
+      refreshToast.boundingBox(),
+      leftTabBar.boundingBox()
+    ])
+    expect(shiftedBounds.x).toBeGreaterThanOrEqual(leftTabBarBounds.x + leftTabBarBounds.width)
+
     const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
     await page.mouse.move(viewport.width / 2, viewport.height / 2)
     await expect(refreshToast).not.toHaveClass(/minimized/)

@@ -136,7 +136,7 @@ const showTabToast = useTabToast()
 const isElectron = process.env.IS_ELECTRON
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const hasHorizontalTabBar = computed(() => isElectron && !store.getters.getUseVerticalTabBar)
+const hasHorizontalTabBar = computed(() => isElectron && store.getters.getTabBarPosition === 'top')
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => {

@@ -145,6 +145,11 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  tabBarPosition: {
+    type: String,
+    default: 'top',
+    validator: value => ['top', 'bottom', 'left', 'right'].includes(value)
+  },
   isDragging: {
     type: Boolean,
     default: false
@@ -211,7 +216,8 @@ const tabClasses = computed(() => ({
   dragging: props.isDragging,
   settling: props.isSettling,
   noTransition: props.suppressTransition,
-  vertical: props.vertical
+  vertical: props.vertical,
+  bottom: props.tabBarPosition === 'bottom'
 }))
 
 const tabStyle = computed(() => {
@@ -376,10 +382,41 @@ function updateTooltipPosition() {
       TOOLTIP_MARGIN_PX,
       Math.min(window.innerHeight - tooltipEstimatedHeight.value, rect.top)
     )
+    const tabBarRect = element.closest('.tabBar')?.getBoundingClientRect()
+    let adjacentEdge = props.tabBarPosition === 'right'
+      ? (tabBarRect?.left ?? rect.left)
+      : (tabBarRect?.right ?? rect.right)
+    if (props.tabBarPosition === 'right') {
+      const pageScrollbar = document.querySelector(
+        'body > .os-scrollbar-vertical:not(.os-scrollbar-unusable)'
+      )
+      if (pageScrollbar instanceof HTMLElement) {
+        adjacentEdge = Math.min(adjacentEdge, pageScrollbar.getBoundingClientRect().left)
+      }
+    }
 
+    const availableWidth = props.tabBarPosition === 'right'
+      ? adjacentEdge - TOOLTIP_OFFSET_PX - TOOLTIP_MARGIN_PX
+      : window.innerWidth - adjacentEdge - TOOLTIP_OFFSET_PX - TOOLTIP_MARGIN_PX
+    const constrainedWidth = Math.min(tooltipWidth, Math.max(120, availableWidth))
+    const horizontalPosition = props.tabBarPosition === 'right'
+      ? {
+          left: 'auto',
+          // Anchor the outer tooltip edge directly to the rail. Calculating a
+          // left position from its width drifts when preview content changes
+          // the tooltip's final box size after the first render.
+          right: `${Math.round(window.innerWidth - adjacentEdge + TOOLTIP_OFFSET_PX)}px`,
+          transformOrigin: 'right top'
+        }
+      : {
+          left: `${Math.round(adjacentEdge + TOOLTIP_OFFSET_PX)}px`,
+          right: 'auto',
+          transformOrigin: 'left top'
+        }
     tooltipStyle.value = {
-      insetInlineStart: `${Math.round(rect.right + TOOLTIP_OFFSET_PX)}px`,
-      insetBlockStart: `${Math.round(top)}px`
+      ...horizontalPosition,
+      maxInlineSize: `${Math.round(constrainedWidth)}px`,
+      top: `${Math.round(top)}px`
     }
     return
   }
@@ -392,9 +429,12 @@ function updateTooltipPosition() {
     )
   )
 
+  const top = props.tabBarPosition === 'bottom'
+    ? rect.top - tooltipEstimatedHeight.value - TOOLTIP_OFFSET_PX
+    : rect.bottom + TOOLTIP_OFFSET_PX
   tooltipStyle.value = {
-    insetInlineStart: `${Math.round(left)}px`,
-    insetBlockStart: `${Math.round(rect.bottom + TOOLTIP_OFFSET_PX)}px`
+    left: `${Math.round(left)}px`,
+    top: `${Math.round(Math.max(TOOLTIP_MARGIN_PX, top))}px`
   }
 }
 
@@ -512,6 +552,12 @@ watch(tabAvatarUrl, (avatarUrl) => {
   min-inline-size: 0;
   max-inline-size: none;
   border-radius: calc(6px * var(--ui-roundness));
+  border-block-end: 1px solid transparent;
+}
+
+.tab.bottom {
+  border-radius: 0 0 calc(6px * var(--ui-roundness)) calc(6px * var(--ui-roundness));
+  border-block-start: 0;
   border-block-end: 1px solid transparent;
 }
 
@@ -733,6 +779,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
 }
 
 .tabTooltip {
+  box-sizing: border-box;
   position: fixed;
   z-index: 10000;
   inline-size: max-content;

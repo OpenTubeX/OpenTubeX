@@ -3,6 +3,7 @@
  * @property {number} contentTop
  * @property {number} contentLeft
  * @property {number} contentRight
+ * @property {number} contentBottom
  * @property {number} viewportWidth
  * @property {number} viewportHeight
  * @property {number} devicePixelRatio
@@ -39,6 +40,7 @@ export function measureTabPreviewContentBounds(window, document) {
   let contentTop = 0
   let contentLeft = 0
   let contentRight = viewportWidth
+  let contentBottom = viewportHeight
 
   if (tabBar != null) {
     const rect = tabBar.getBoundingClientRect()
@@ -50,8 +52,10 @@ export function measureTabPreviewContentBounds(window, document) {
       } else {
         contentRight = clampX(rect.left)
       }
-    } else {
+    } else if (rect.top < viewportHeight - rect.bottom) {
       contentTop = clampY(rect.bottom)
+    } else {
+      contentBottom = clampY(rect.top)
     }
   }
 
@@ -67,6 +71,7 @@ export function measureTabPreviewContentBounds(window, document) {
     contentTop,
     contentLeft,
     contentRight,
+    contentBottom,
     viewportWidth,
     viewportHeight,
     // Display scaling times page zoom. NativeImage reports and exports sizes in
@@ -124,8 +129,14 @@ export function getTabPreviewTargetSize({ width, height }, contentBounds) {
 export function cropTabPreviewToContent(image, contentBounds) {
   const { contentTop = 0, contentLeft = 0, viewportWidth, viewportHeight } = contentBounds
   const contentRight = contentBounds.contentRight ?? viewportWidth
+  const contentBottom = contentBounds.contentBottom ?? viewportHeight
 
-  if (contentTop <= 0 && contentLeft <= 0 && contentRight >= viewportWidth) {
+  if (
+    contentTop <= 0 &&
+    contentLeft <= 0 &&
+    contentRight >= viewportWidth &&
+    contentBottom >= viewportHeight
+  ) {
     return image
   }
 
@@ -138,9 +149,10 @@ export function cropTabPreviewToContent(image, contentBounds) {
   const scaleY = height / viewportHeight
   const cropX = Math.min(width, Math.max(0, Math.ceil(contentLeft * scaleX)))
   const cropRight = Math.min(width, Math.max(0, Math.floor(contentRight * scaleX)))
+  const cropBottom = Math.min(height, Math.max(0, Math.floor(contentBottom * scaleY)))
   const cropY = Math.min(height, Math.max(0, Math.ceil(contentTop * scaleY)))
   const cropWidth = cropRight - cropX
-  const cropHeight = height - cropY
+  const cropHeight = cropBottom - cropY
   return cropWidth <= 0 || cropHeight <= 0
     ? null
     : image.crop({ x: cropX, y: cropY, width: cropWidth, height: cropHeight })

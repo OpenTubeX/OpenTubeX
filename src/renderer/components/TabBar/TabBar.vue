@@ -4,7 +4,7 @@
     ref="tabBarRef"
     class="tabBar"
     data-tutorial="tabs"
-    :class="{ vertical }"
+    :class="[`position-${tabBarPosition}`, { vertical }]"
     :style="fixedTabWidthStyle"
   >
     <div
@@ -28,6 +28,7 @@
           :tab="tab"
           :index="index"
           :vertical="vertical"
+          :tab-bar-position="tabBarPosition"
           :offset="tabOffsets[tab.id] || 0"
           :is-dragging="draggingTabIds.has(tab.id)"
           :is-settling="isSettling && settlingTabIds.has(tab.id)"
@@ -89,6 +90,7 @@ import store from '../../store/index'
 import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import { normalizeFixedTabWidth } from '../../constants/tabWidth'
+import { isVerticalTabBarPosition, normalizeTabBarPosition } from '../../constants/tabBarPosition'
 import { getTabAvatarUrl } from '../../tabs/tabPreview'
 import { removeLegacyTabAvatar } from '../../helpers/channelThumbnailStorage'
 import { fetchTabAvatarBytes } from '../../helpers/tabAvatar'
@@ -112,8 +114,8 @@ const isElectron = process.env.IS_ELECTRON
 /** @type {import('vue').ComputedRef<Array<{id: string, url: string, title: string, isActive: boolean, isPinned?: boolean, color?: string | null}>>} */
 const tabs = computed(() => store.getters.getTabs)
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const vertical = computed(() => store.getters.getUseVerticalTabBar)
+const tabBarPosition = computed(() => normalizeTabBarPosition(store.getters.getTabBarPosition))
+const vertical = computed(() => isVerticalTabBarPosition(tabBarPosition.value))
 const showTabIcons = computed(() => store.getters.getShowTabIcons)
 const showTabPreviews = computed(() => store.getters.getShowTabPreviews)
 const migratingAvatarTabIds = new Set()
@@ -667,8 +669,9 @@ function handleResizePointerMove(event) {
   if (!bar) return
 
   const rect = bar.getBoundingClientRect()
-  const isRtl = getComputedStyle(bar).direction === 'rtl'
-  const width = isRtl ? rect.right - event.clientX : event.clientX - rect.left
+  const width = tabBarPosition.value === 'right'
+    ? rect.right - event.clientX
+    : event.clientX - rect.left
   const clampedWidth = Math.round(
     Math.max(MIN_VERTICAL_TAB_BAR_WIDTH, Math.min(MAX_VERTICAL_TAB_BAR_WIDTH, width))
   )

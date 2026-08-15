@@ -21,5 +21,12 @@ export function migrateLegacySettings(settings) {
     migratedSettings.hideLiveChatReplay = migratedSettings.hideLiveChat === true
   }
 
+  if (Object.hasOwn(migratedSettings, 'useVerticalTabBar')) {
+    if (!Object.hasOwn(migratedSettings, 'tabBarPosition')) {
+      migratedSettings.tabBarPosition = migratedSettings.useVerticalTabBar === true ? 'left' : 'top'
+    }
+    delete migratedSettings.useVerticalTabBar
+  }
+
   return migratedSettings
 }

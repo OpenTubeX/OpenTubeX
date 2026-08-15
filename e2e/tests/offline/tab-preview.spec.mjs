@@ -74,6 +74,35 @@ test.describe('tab previews', () => {
     expect(width).toBeGreaterThanOrEqual(Math.round(displayed.width))
   })
 
+  test('keeps the tooltip clear of the page scrollbar beside right vertical tabs', async ({ page, attachScreenshot }) => {
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setVerticalTabBarWidth', 220)
+      store.commit('setTabBarPosition', 'right')
+
+      const content = document.createElement('div')
+      content.dataset.tabPreviewOverflow = ''
+      content.style.height = '3000px'
+      document.body.append(content)
+    })
+    await expect.poll(() => page.evaluate(
+      () => document.documentElement.scrollHeight > window.innerHeight
+    )).toBe(true)
+    await hoverTabForPreview(page, 0)
+
+    const [tooltipBox, scrollbarBox, tabBarBox] = await Promise.all([
+      page.locator('.tabTooltip').boundingBox(),
+      page.locator('body > .os-scrollbar-vertical').boundingBox(),
+      page.locator('.tabBar.position-right').boundingBox()
+    ])
+    const gap = scrollbarBox.x - (tooltipBox.x + tooltipBox.width)
+    expect(gap).toBeGreaterThanOrEqual(5)
+    expect(gap).toBeLessThanOrEqual(7)
+    expect(tooltipBox.x + tooltipBox.width).toBeLessThan(scrollbarBox.x)
+    expect(scrollbarBox.x + scrollbarBox.width).toBeLessThanOrEqual(tabBarBox.x + 1)
+    await attachScreenshot('tab preview beside right tabs')
+  })
+
   test('repositions an open tooltip after previews are disabled', async ({ page }) => {
     await hoverTabForPreview(page, 0)
 

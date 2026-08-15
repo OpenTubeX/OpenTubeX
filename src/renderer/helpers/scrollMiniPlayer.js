@@ -210,6 +210,7 @@ export function getViewportInsets() {
   let topInset = MARGIN
   let leftInset = MARGIN
   let rightInset = MARGIN
+  let bottomInset = MARGIN
 
   const topNav = document.querySelector('.topNav')
   const tabBar = document.querySelector('.tabBar')
@@ -220,12 +221,20 @@ export function getViewportInsets() {
     topInset = Math.max(topInset, rect.bottom + MARGIN)
   } else if (tabBar) {
     const rect = tabBar.getBoundingClientRect()
-    topInset = Math.max(topInset, rect.bottom + MARGIN)
+    if (rect.top < window.innerHeight - rect.bottom) {
+      topInset = Math.max(topInset, rect.bottom + MARGIN)
+    }
   }
 
-  // Keep clear of the fixed vertical tab bar column. It sits on the inline-start
-  // side, which is the right edge under RTL, so derive the physical side from
-  // its bounds rather than assuming the left.
+  if (tabBar && !verticalTabBar) {
+    const rect = tabBar.getBoundingClientRect()
+    if (rect.top >= window.innerHeight - rect.bottom) {
+      bottomInset = Math.max(bottomInset, window.innerHeight - rect.top + MARGIN)
+    }
+  }
+
+  // Keep clear of the fixed vertical tab bar column. Its setting names a
+  // physical edge, so derive that edge from the measured bounds.
   if (verticalTabBar) {
     const rect = verticalTabBar.getBoundingClientRect()
     const viewportWidth = getViewportWidth()
@@ -240,7 +249,7 @@ export function getViewportInsets() {
     top: topInset,
     left: leftInset,
     right: rightInset,
-    bottom: MARGIN,
+    bottom: bottomInset,
   }
 }
 

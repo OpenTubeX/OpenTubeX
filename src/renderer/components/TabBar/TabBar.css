@@ -2,7 +2,7 @@
   box-sizing: border-box;
   display: flex;
 
-  /* Sit tabs on the bottom edge so the top radii clear the window chrome and
+  /* Top tabs sit on the bottom edge so their radii clear the window chrome and
      the scrollport clip (overflow-y cannot stay visible while overflow-x scrolls). */
   align-items: flex-end;
   background-color: var(--side-nav-color);
@@ -113,7 +113,32 @@
   font-size: 12px;
 }
 
-/* ===== Vertical layout: fixed column on the inline-start side ===== */
+/* ===== Bottom layout: fixed row on the bottom edge ===== */
+
+.tabBar.position-bottom {
+  align-items: flex-start;
+  block-size: 34px;
+  min-block-size: 34px;
+  position: fixed;
+  inset-block: auto 0;
+
+  /* Some decorated Linux windows paint the last two client pixels underneath
+     the compositor frame. Keep the mirrored tab and its 2px edge gap above
+     that area instead of letting the rounded border disappear behind it. */
+  padding-block: 0 4px;
+}
+
+.tabBar.position-bottom .tabsScrollbar {
+  inset-block: 0 auto;
+}
+
+/* overflow-y is hidden on this scrollport. Leave a pixel inside its clip edge
+   so the selected tab's rounded bottom border is painted in full. */
+.tabBar.position-bottom .tabsContainer {
+  padding-block-end: 1px;
+}
+
+/* ===== Vertical layout: fixed column on either side ===== */
 
 .tabBar.vertical {
   flex-direction: column;
@@ -123,7 +148,6 @@
   overflow: visible;
   position: fixed;
   inset-block: 0;
-  inset-inline-start: 0;
   inline-size: var(--vertical-tab-bar-width, 220px);
   block-size: auto;
   min-block-size: 0;
@@ -133,6 +157,31 @@
   padding-block: 4px 0;
   border-block-end: 0;
 }
+
+/* These settings name physical window edges, independent of text direction. */
+/* stylelint-disable liberty/use-logical-spec */
+.tabBar.vertical.position-left {
+  left: 0;
+  right: auto;
+}
+
+.tabBar.vertical.position-right {
+  left: auto;
+  right: 0;
+}
+
+/* Keep the scrollbar against the window edge, leaving tab content and the
+   resize divider unobstructed on the content-facing side. */
+.tabBar.vertical.position-left .tabsContainer :deep(.os-scrollbar-vertical) {
+  left: 0;
+  right: auto;
+}
+
+.tabBar.vertical.position-right .tabsContainer :deep(.os-scrollbar-vertical) {
+  left: auto;
+  right: 0;
+}
+/* stylelint-enable liberty/use-logical-spec */
 
 .tabBar.vertical .newTabButton {
   align-self: stretch;
@@ -156,7 +205,8 @@
 .tabBarResizeHandle {
   position: absolute;
   inset-block: 0;
-  inset-inline-end: -2.5px;
+  /* stylelint-disable-next-line liberty/use-logical-spec */
+  right: -2.5px;
   inline-size: 5px;
   cursor: col-resize;
   z-index: 1;
@@ -178,3 +228,10 @@
     transparent 4px
   );
 }
+
+/* stylelint-disable liberty/use-logical-spec */
+.tabBar.position-right .tabBarResizeHandle {
+  left: -2.5px;
+  right: auto;
+}
+/* stylelint-enable liberty/use-logical-spec */
