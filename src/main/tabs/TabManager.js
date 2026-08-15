@@ -460,6 +460,22 @@ export class TabManager {
   }
 
   /**
+   * @returns {Set<string>} video IDs referenced by tabs in any window
+   */
+  static getOpenVideoIds() {
+    const videoIds = new Set()
+    for (const manager of tabManagers.values()) {
+      for (const tab of manager.tabs.values()) {
+        const videoId = TabManager.getVideoIdFromUrl(tab.url)
+        if (videoId !== null) {
+          videoIds.add(videoId)
+        }
+      }
+    }
+    return videoIds
+  }
+
+  /**
    * @param {number} excludeWindowId
    * @returns {Array<{ windowId: number, label: string }>}
    */

@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto'
 import { readFile, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
+import { TabManager } from './tabs/TabManager'
 import { isOpenTubeXUrl } from './utils'
 
 const CACHE_FILENAME = 'yt-dlp-playback-cache.json'
@@ -146,8 +147,10 @@ export async function handleYtDlpPlaybackCacheSet(event, videoId, cacheKey, expi
 
   await loadEntries()
   entries.delete(entry.videoId)
+  const openVideoIds = TabManager.getOpenVideoIds()
   while (entries.size >= MAX_ENTRIES) {
-    entries.delete(entries.keys().next().value)
+    const videoId = Array.from(entries.keys()).find(videoId => !openVideoIds.has(videoId)) ?? entries.keys().next().value
+    entries.delete(videoId)
   }
   entries.set(entry.videoId, entry)
   await saveEntries()
