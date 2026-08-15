@@ -2453,6 +2453,17 @@ function runApp() {
     newWindow.on('hide', () => sendMinimizedState(true))
     newWindow.on('show', () => sendMinimizedState(false))
 
+    // Renderer focus events can be skipped on Windows when focus returns after
+    // another application's window is closed. Forward the native state so
+    // blur-triggered auto PiP can still re-embed the video.
+    const sendFocusedState = (focused) => {
+      if (!newWindow.isDestroyed() && !newWindow.webContents.isDestroyed()) {
+        newWindow.webContents.send(IpcChannels.WINDOW_FOCUSED_STATE, focused)
+      }
+    }
+    newWindow.on('focus', () => sendFocusedState(true))
+    newWindow.on('blur', () => sendFocusedState(false))
+
     if (isTrayOnMinimizeSupported) {
       function manageTray(window, removeWindow = false) {
         if (tray) {

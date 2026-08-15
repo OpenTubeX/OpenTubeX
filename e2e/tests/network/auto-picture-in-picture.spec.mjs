@@ -7,9 +7,9 @@ const VIDEO = { id: 'jNQXAC9IVRw', title: 'Me at the zoo', url: 'https://www.you
 test.use({ seed: { settings: { autoPictureInPictureTriggers: ['tab', 'minimize', 'blur'] } } })
 
 /**
- * The renderer derives the focus part of the auto PiP triggers from
+ * The renderer initializes the focus part of the auto PiP triggers from
  * `document.hasFocus()`, which is not controllable from the test (and is
- * unreliable without a window manager), so it is driven explicitly here.
+ * unreliable without a window manager), so the initial value is stubbed here.
  */
 async function stubFocus(page) {
   await page.evaluate(() => {
@@ -18,11 +18,17 @@ async function stubFocus(page) {
   })
 }
 
-async function setFocused(page, focused) {
+async function emitFocusedState(app, focused) {
+  await app.electronApp.evaluate(({ BrowserWindow }, event) => {
+    BrowserWindow.getAllWindows()[0].emit(event)
+  }, focused ? 'focus' : 'blur')
+}
+
+async function setFocused(app, page, focused) {
   await page.evaluate((value) => {
     window.__e2eFocused = value
-    window.dispatchEvent(new Event(value ? 'focus' : 'blur'))
   }, focused)
+  await emitFocusedState(app, focused)
 }
 
 /**
@@ -45,7 +51,7 @@ function openVideo(page) {
 }
 
 test.describe('automatic Picture-in-Picture', () => {
-  test.beforeEach(async ({ page, innertube }) => {
+  test.beforeEach(async ({ app, page, innertube }) => {
     // Auto PiP only applies to a playing video, and recorded fixtures cannot
     // hydrate a watch page or serve media streams.
     test.skip(innertube.replay, 'no recorded fixtures for this video')
@@ -55,7 +61,7 @@ test.describe('automatic Picture-in-Picture', () => {
     await waitForPlaybackOrSkip(test, page)
     // The blur trigger would fire on its own if the harness window never
     // gained focus, so start from a known focused state.
-    await setFocused(page, true)
+    await setFocused(app, page, true)
     await expect.poll(() => pictureInPictureActive(page)).toBe(false)
   })
 
@@ -78,7 +84,7 @@ test.describe('automatic Picture-in-Picture', () => {
     await setMinimized(app, false)
     await expect.poll(() => pictureInPictureActive(page)).toBe(false)
 
-    await setFocused(page, false)
+    await setFocused(app, page, false)
     // Longer than the delay after which the blur trigger is re-checked, so a
     // reopen would have happened by now.
     await page.waitForTimeout(2000)
@@ -91,11 +97,23 @@ test.describe('automatic Picture-in-Picture', () => {
     await setMinimized(app, false)
     await expect.poll(() => pictureInPictureActive(page)).toBe(false)
 
-    await setFocused(page, true)
-    await setFocused(page, false)
+    await setFocused(app, page, true)
+    await setFocused(app, page, false)
     await expect.poll(() => pictureInPictureActive(page)).toBe(true)
 
-    await setFocused(page, true)
+    await setFocused(app, page, true)
+    await expect.poll(() => pictureInPictureActive(page)).toBe(false)
+  })
+
+  // Regression (#773): Windows can restore native BrowserWindow focus after
+  // the covering window is closed without dispatching a renderer focus event.
+  test('native focus closes PiP when renderer focus remains stale', async ({ app, page }) => {
+    await setFocused(app, page, false)
+    await expect.poll(() => pictureInPictureActive(page)).toBe(true)
+
+    // Deliberately keep document.hasFocus() false and only emit the native
+    // event that Electron receives when the covering application closes.
+    await emitFocusedState(app, true)
     await expect.poll(() => pictureInPictureActive(page)).toBe(false)
   })
 
@@ -105,7 +123,7 @@ test.describe('automatic Picture-in-Picture', () => {
   test('blur and minimize together open PiP exactly once', async ({ app, page }) => {
     // Deliberately not awaiting the PiP state in between, so the second
     // trigger lands while the PiP request is still in flight.
-    await setFocused(page, false)
+    await setFocused(app, page, false)
     await setMinimized(app, true)
 
     await expect.poll(() => pictureInPictureActive(page)).toBe(true)
@@ -125,8 +143,8 @@ test.describe('automatic Picture-in-Picture', () => {
 
     // Re-evaluating the triggers while the window is still minimized must not
     // undo the manual dismissal.
-    await setFocused(page, false)
-    await setFocused(page, true)
+    await setFocused(app, page, false)
+    await setFocused(app, page, true)
     await page.waitForTimeout(2000)
     expect(await pictureInPictureActive(page)).toBe(false)
   })
