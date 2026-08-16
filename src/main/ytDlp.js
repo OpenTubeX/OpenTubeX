@@ -158,6 +158,7 @@ const MERGER_REGEX = /^\[Merger\] Merging formats into "(.+)"$/
 // yt-dlp doesn't include subtitle files in its `after_move:%(filepath)s` output
 const SUBTITLE_DESTINATION_REGEX = /^\[info\] Writing video subtitles to: (.+)$/
 const FINAL_PATH_PREFIX = '__OPENTUBEX_FILE__:'
+const FINAL_METADATA_PREFIX = '__OPENTUBEX_METADATA__:'
 
 let downloadCounter = 0
 let downloadRecordsSaveQueue = Promise.resolve()
@@ -1532,6 +1533,12 @@ async function startYtDlpDownload(
     '--print',
     `after_move:${FINAL_PATH_PREFIX}%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(filepath)s`
   ]
+  if (isSingleVideo) {
+    args.push(
+      '--print',
+      `after_move:${FINAL_METADATA_PREFIX}%(id)j\t%(title)j\t%(thumbnail)j`
+    )
+  }
 
   if (!isRemotePlaylist) {
     args.push('--no-playlist')
@@ -1782,6 +1789,23 @@ async function startYtDlpDownload(
    * @param {string} line
    */
   function handleStdoutLine(line) {
+    if (line.startsWith(FINAL_METADATA_PREFIX)) {
+      const [rawVideoId, rawTitle, rawThumbnail] = line.slice(FINAL_METADATA_PREFIX.length).split('\t')
+      try {
+        const videoId = JSON.parse(rawVideoId)
+        const title = JSON.parse(rawTitle)
+        const thumbnail = JSON.parse(rawThumbnail)
+        if (videoId === status.videoId) {
+          if (typeof title === 'string' && title !== '') status.title = title.slice(0, 255)
+          if (typeof thumbnail === 'string') status.thumbnail = thumbnail.slice(0, 2048)
+          sendStatus(true)
+        }
+      } catch {
+        // A malformed metadata line must not interfere with the download itself.
+      }
+      return
+    }
+
     if (line.startsWith(FINAL_PATH_PREFIX)) {
       const parts = line.slice(FINAL_PATH_PREFIX.length).split('\t')
       const hasMediaMetadata = parts.length >= 5
