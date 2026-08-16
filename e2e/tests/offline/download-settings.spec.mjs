@@ -1,10 +1,15 @@
 import { chmod, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
 
 const ALPHA_CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const BETA_CHANNEL_ID = 'UCbbbbbbbbbbbbbbbbbbbbbb'
+const EXTRA_CHANNELS = Array.from({ length: 20 }, (_, index) => ({
+  id: `UC${String(index).padStart(22, '0')}`,
+  name: `Extra Channel ${index + 1}`,
+  thumbnail: ''
+}))
 const PROFILES = [
   {
     _id: 'allChannels',
@@ -13,7 +18,8 @@ const PROFILES = [
     textColor: '#FFFFFF',
     subscriptions: [
       { id: ALPHA_CHANNEL_ID, name: 'Alpha Channel', thumbnail: '' },
-      { id: BETA_CHANNEL_ID, name: 'Beta Channel', thumbnail: '' }
+      { id: BETA_CHANNEL_ID, name: 'Beta Channel', thumbnail: '' },
+      ...EXTRA_CHANNELS
     ]
   }
 ]
@@ -28,6 +34,21 @@ const AUTOMATIC_RULE = {
   maxAgeDays: 7,
   titleIncludes: 'Automatic',
   titleExcludes: 'Trailer'
+}
+
+async function scrollToBottom(scroller) {
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+}
+
+async function expectScrollAtRenderedEnd(scroller) {
+  await expect.poll(() => scroller.evaluate((element) => {
+    const content = element.querySelector(':scope > div')
+    const contentEnd = content.offsetTop + content.offsetHeight +
+      Number.parseFloat(getComputedStyle(element).paddingBottom)
+    const maximumScrollTop = Math.max(0, contentEnd - element.clientHeight)
+    return Math.abs(element.scrollTop - maximumScrollTop)
+  })).toBeLessThanOrEqual(1)
 }
 
 test.use({
@@ -88,15 +109,22 @@ test.describe('download settings', () => {
     })).toEqual(['Podcast', 'Podcast Copy'])
   })
 
-  test('searches channels and keeps the template and media switches aligned', async ({ app, page }) => {
+  test('clamps the automatic download manager after dynamic content changes', async ({ app, page }) => {
     await goToSettingsSection(page, 'download')
     await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
 
     const manager = page.locator('.settingsSubpageContent')
     const search = manager.getByRole('textbox', { name: 'Search channels' })
+    const scroller = manager.locator('.automaticDownloadsScroller')
+    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+    await scrollToBottom(scroller)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
     await search.fill('beta')
     await expect(manager.getByText('Beta Channel', { exact: true })).toBeVisible()
     await expect(manager.getByText('Alpha Channel', { exact: true })).toHaveCount(0)
+    await expectScrollAtRenderedEnd(scroller)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
 
     await manager.getByText('Beta Channel', { exact: true }).click()
     await expect.poll(() => page.evaluate((channelId) => {
@@ -125,6 +153,27 @@ test.describe('download settings', () => {
       expect(center).toBeCloseTo(geometry.centers[0], 0)
     }
     expect(geometry.widths[0]).toBeGreaterThan(geometry.widths[1])
+
+    await page.getByRole('button', { name: 'Maximize' }).click()
+    await setWindowSize(app, page, { width: 560, height: 800 })
+    await expect.poll(() => manager.evaluate(element => element.clientWidth)).toBeLessThanOrEqual(600)
+    await scrollToBottom(scroller)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+    await manager.getByText('Beta Channel', { exact: true }).click()
+    await expect(options).toHaveCount(0)
+    await expectScrollAtRenderedEnd(scroller)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+    await manager.getByText('Beta Channel', { exact: true }).click()
+    await expect(options).toBeVisible()
+    await scrollToBottom(scroller)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+    await setWindowSize(app, page, { width: 1200, height: 900 })
+    await expect.poll(() => manager.evaluate(element => element.clientWidth)).toBeGreaterThan(760)
+    await expectScrollAtRenderedEnd(scroller)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
 
     const { page: relaunchedPage } = await app.relaunch()
     await goToSettingsSection(relaunchedPage, 'download')

@@ -350,8 +350,18 @@ export function clampOverlayScrollTop(element, contentElement = null) {
       Number.parseFloat(getComputedStyle(element).paddingBottom)
   const maximumScrollTop = Math.max(0, contentEnd - element.clientHeight)
   if (element.scrollTop > maximumScrollTop) {
-    element.scrollTop = maximumScrollTop
-    instance?.update(true)
+    if (instance) {
+      // Chromium can preserve the old overflow range when content shrinks
+      // beneath a non-zero offset. Remeasure from the true origin so both the
+      // viewport and OverlayScrollbars discard that stale range, then restore
+      // the clamped position within the newly measured range.
+      element.scrollTop = 0
+      instance.update(true)
+      element.scrollTop = Math.min(maximumScrollTop, instance.state().overflowAmount.y)
+      instance.update(true)
+    } else {
+      element.scrollTop = maximumScrollTop
+    }
   }
 }
 

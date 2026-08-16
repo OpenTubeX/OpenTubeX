@@ -27,162 +27,165 @@
       />
     </div>
     <div
+      ref="automaticDownloadsScroller"
       v-overlay-scrollbars
       class="automaticDownloadsScroller"
     >
-      <p
-        v-if="channels.length === 0"
-        class="emptyState"
-      >
-        {{ t('Settings.Download Settings.Automatic Downloads No Channels') }}
-      </p>
-      <p
-        v-else-if="visibleChannels.length === 0"
-        class="emptyState"
-      >
-        {{ t('Settings.Download Settings.No Matching Automatic Download Channels') }}
-      </p>
-      <ul
-        v-else
-        class="channelRules"
-      >
-        <li
-          v-for="channel in visibleChannels"
-          :key="channel.id"
-          class="channelRule"
+      <div ref="automaticDownloadsContent">
+        <p
+          v-if="channels.length === 0"
+          class="emptyState"
         >
-          <div class="channelRuleHeader">
-            <img
-              v-if="channel.thumbnail"
-              class="channelThumbnail"
-              :src="channel.thumbnail"
-              alt=""
-            >
-            <span
-              v-else
-              class="channelThumbnail channelThumbnailPlaceholder"
-            >
-              <FtIcon :icon="['fas', 'circle-user']" />
-            </span>
-            <FtToggleSwitch
-              class="channelToggle"
-              :label="channel.name || channel.id"
-              :compact="true"
-              :default-value="rules[channel.id] !== undefined"
-              @change="enabled => setChannelEnabled(channel.id, enabled)"
-            />
-          </div>
-          <div
-            v-if="rules[channel.id] !== undefined"
-            class="channelRuleOptions"
+          {{ t('Settings.Download Settings.Automatic Downloads No Channels') }}
+        </p>
+        <p
+          v-else-if="visibleChannels.length === 0"
+          class="emptyState"
+        >
+          {{ t('Settings.Download Settings.No Matching Automatic Download Channels') }}
+        </p>
+        <ul
+          v-else
+          class="channelRules"
+        >
+          <li
+            v-for="channel in visibleChannels"
+            :key="channel.id"
+            class="channelRule"
           >
-            <div class="templateAndTypes">
-              <FtSelect
-                class="templateSelect"
-                :placeholder="t('Downloads.Template')"
-                :value="ruleFor(channel.id).template"
-                :select-names="templateNames"
-                :select-values="templateValues"
-                :show-icon="false"
-                @change="value => updateRule(channel.id, 'template', value)"
-              />
+            <div class="channelRuleHeader">
+              <img
+                v-if="channel.thumbnail"
+                class="channelThumbnail"
+                :src="channel.thumbnail"
+                alt=""
+              >
+              <span
+                v-else
+                class="channelThumbnail channelThumbnailPlaceholder"
+              >
+                <FtIcon :icon="['fas', 'circle-user']" />
+              </span>
               <FtToggleSwitch
-                :label="t('Settings.Download Settings.Automatic Downloads Videos')"
+                class="channelToggle"
+                :label="channel.name || channel.id"
                 :compact="true"
-                :default-value="ruleFor(channel.id).includeVideos"
-                @change="value => updateRule(channel.id, 'includeVideos', value)"
-              />
-              <FtToggleSwitch
-                :label="t('Global.Shorts')"
-                :compact="true"
-                :default-value="ruleFor(channel.id).includeShorts"
-                @change="value => updateRule(channel.id, 'includeShorts', value)"
-              />
-              <FtToggleSwitch
-                :label="t('Settings.Download Settings.Automatic Downloads Livestreams')"
-                :compact="true"
-                :default-value="ruleFor(channel.id).includeLivestreams"
-                @change="value => updateRule(channel.id, 'includeLivestreams', value)"
+                :default-value="rules[channel.id] !== undefined"
+                @change="enabled => setChannelEnabled(channel.id, enabled)"
               />
             </div>
-            <div class="filterGrid">
-              <FtInput
-                input-type="number"
-                :placeholder="t('Settings.Download Settings.Minimum Duration Seconds')"
-                :show-label="true"
-                :show-action-button="false"
-                :maxlength="9"
-                :value="displayNumber(ruleFor(channel.id).minDurationSeconds)"
-                @input="value => updateNumber(channel.id, 'minDurationSeconds', value)"
-              />
-              <FtInput
-                input-type="number"
-                :placeholder="t('Settings.Download Settings.Maximum Duration Seconds')"
-                :show-label="true"
-                :show-action-button="false"
-                :maxlength="9"
-                :value="displayNumber(ruleFor(channel.id).maxDurationSeconds)"
-                @input="value => updateNumber(channel.id, 'maxDurationSeconds', value)"
-              />
-              <FtInput
-                input-type="number"
-                :placeholder="t('Settings.Download Settings.Minimum File Size MB')"
-                :show-label="true"
-                :show-action-button="false"
-                :maxlength="9"
-                :value="displayNumber(ruleFor(channel.id).minFileSizeMb)"
-                @input="value => updateNumber(channel.id, 'minFileSizeMb', value)"
-              />
-              <FtInput
-                input-type="number"
-                :placeholder="t('Settings.Download Settings.Maximum File Size MB')"
-                :show-label="true"
-                :show-action-button="false"
-                :maxlength="9"
-                :value="displayNumber(ruleFor(channel.id).maxFileSizeMb)"
-                @input="value => updateNumber(channel.id, 'maxFileSizeMb', value)"
-              />
-              <FtInput
-                input-type="number"
-                :placeholder="t('Settings.Download Settings.Maximum Age Days')"
-                :show-label="true"
-                :show-action-button="false"
-                :maxlength="6"
-                :value="displayNumber(ruleFor(channel.id).maxAgeDays)"
-                @input="value => updateNumber(channel.id, 'maxAgeDays', value)"
-              />
+            <div
+              v-if="rules[channel.id] !== undefined"
+              class="channelRuleOptions"
+            >
+              <div class="templateAndTypes">
+                <FtSelect
+                  class="templateSelect"
+                  :placeholder="t('Downloads.Template')"
+                  :value="ruleFor(channel.id).template"
+                  :select-names="templateNames"
+                  :select-values="templateValues"
+                  :show-icon="false"
+                  @change="value => updateRule(channel.id, 'template', value)"
+                />
+                <FtToggleSwitch
+                  :label="t('Settings.Download Settings.Automatic Downloads Videos')"
+                  :compact="true"
+                  :default-value="ruleFor(channel.id).includeVideos"
+                  @change="value => updateRule(channel.id, 'includeVideos', value)"
+                />
+                <FtToggleSwitch
+                  :label="t('Global.Shorts')"
+                  :compact="true"
+                  :default-value="ruleFor(channel.id).includeShorts"
+                  @change="value => updateRule(channel.id, 'includeShorts', value)"
+                />
+                <FtToggleSwitch
+                  :label="t('Settings.Download Settings.Automatic Downloads Livestreams')"
+                  :compact="true"
+                  :default-value="ruleFor(channel.id).includeLivestreams"
+                  @change="value => updateRule(channel.id, 'includeLivestreams', value)"
+                />
+              </div>
+              <div class="filterGrid">
+                <FtInput
+                  input-type="number"
+                  :placeholder="t('Settings.Download Settings.Minimum Duration Seconds')"
+                  :show-label="true"
+                  :show-action-button="false"
+                  :maxlength="9"
+                  :value="displayNumber(ruleFor(channel.id).minDurationSeconds)"
+                  @input="value => updateNumber(channel.id, 'minDurationSeconds', value)"
+                />
+                <FtInput
+                  input-type="number"
+                  :placeholder="t('Settings.Download Settings.Maximum Duration Seconds')"
+                  :show-label="true"
+                  :show-action-button="false"
+                  :maxlength="9"
+                  :value="displayNumber(ruleFor(channel.id).maxDurationSeconds)"
+                  @input="value => updateNumber(channel.id, 'maxDurationSeconds', value)"
+                />
+                <FtInput
+                  input-type="number"
+                  :placeholder="t('Settings.Download Settings.Minimum File Size MB')"
+                  :show-label="true"
+                  :show-action-button="false"
+                  :maxlength="9"
+                  :value="displayNumber(ruleFor(channel.id).minFileSizeMb)"
+                  @input="value => updateNumber(channel.id, 'minFileSizeMb', value)"
+                />
+                <FtInput
+                  input-type="number"
+                  :placeholder="t('Settings.Download Settings.Maximum File Size MB')"
+                  :show-label="true"
+                  :show-action-button="false"
+                  :maxlength="9"
+                  :value="displayNumber(ruleFor(channel.id).maxFileSizeMb)"
+                  @input="value => updateNumber(channel.id, 'maxFileSizeMb', value)"
+                />
+                <FtInput
+                  input-type="number"
+                  :placeholder="t('Settings.Download Settings.Maximum Age Days')"
+                  :show-label="true"
+                  :show-action-button="false"
+                  :maxlength="6"
+                  :value="displayNumber(ruleFor(channel.id).maxAgeDays)"
+                  @input="value => updateNumber(channel.id, 'maxAgeDays', value)"
+                />
+              </div>
+              <div class="titleFilters">
+                <FtInput
+                  :placeholder="t('Settings.Download Settings.Title Includes')"
+                  :show-label="true"
+                  :show-action-button="false"
+                  :maxlength="200"
+                  :value="ruleFor(channel.id).titleIncludes"
+                  @input="value => updateRule(channel.id, 'titleIncludes', value)"
+                />
+                <FtInput
+                  :placeholder="t('Settings.Download Settings.Title Excludes')"
+                  :show-label="true"
+                  :show-action-button="false"
+                  :maxlength="200"
+                  :value="ruleFor(channel.id).titleExcludes"
+                  @input="value => updateRule(channel.id, 'titleExcludes', value)"
+                />
+              </div>
+              <p class="filterHint">
+                {{ t('Settings.Download Settings.Title Filter Hint') }}
+              </p>
             </div>
-            <div class="titleFilters">
-              <FtInput
-                :placeholder="t('Settings.Download Settings.Title Includes')"
-                :show-label="true"
-                :show-action-button="false"
-                :maxlength="200"
-                :value="ruleFor(channel.id).titleIncludes"
-                @input="value => updateRule(channel.id, 'titleIncludes', value)"
-              />
-              <FtInput
-                :placeholder="t('Settings.Download Settings.Title Excludes')"
-                :show-label="true"
-                :show-action-button="false"
-                :maxlength="200"
-                :value="ruleFor(channel.id).titleExcludes"
-                @input="value => updateRule(channel.id, 'titleExcludes', value)"
-              />
-            </div>
-            <p class="filterHint">
-              {{ t('Settings.Download Settings.Title Filter Hint') }}
-            </p>
-          </div>
-        </li>
-      </ul>
+          </li>
+        </ul>
+      </div>
     </div>
   </FtSettingsSubpage>
 </template>
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
@@ -199,10 +202,44 @@ import {
   parseAutomaticDownloadRules
 } from '../../helpers/automaticDownloadRules'
 import { DEFAULT_DOWNLOAD_TEMPLATES } from '../../helpers/downloadTemplates'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const { locale, t } = useI18n()
 const showManager = ref(false)
 const searchQuery = ref('')
+const automaticDownloadsScroller = useTemplateRef('automaticDownloadsScroller')
+const automaticDownloadsContent = useTemplateRef('automaticDownloadsContent')
+
+let contentResizeObserver = null
+let observationGeneration = 0
+
+watch(showManager, async (open) => {
+  const generation = ++observationGeneration
+  stopObservingContent()
+  if (!open) return
+
+  await nextTick()
+  if (generation !== observationGeneration || !showManager.value) return
+  const scroller = automaticDownloadsScroller.value
+  const content = automaticDownloadsContent.value
+  if (!scroller || !content) return
+
+  const clampScroll = () => clampOverlayScrollTop(scroller, content)
+  contentResizeObserver = new ResizeObserver(clampScroll)
+  contentResizeObserver.observe(scroller)
+  contentResizeObserver.observe(content)
+  clampScroll()
+})
+
+onBeforeUnmount(() => {
+  observationGeneration += 1
+  stopObservingContent()
+})
+
+function stopObservingContent() {
+  contentResizeObserver?.disconnect()
+  contentResizeObserver = null
+}
 
 const rules = computed(() => parseAutomaticDownloadRules(store.getters.getYtDlpAutomaticDownloadRules))
 const channels = computed(() => {
