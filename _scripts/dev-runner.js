@@ -283,7 +283,7 @@ function startRenderer(callback) {
 
   let firstTime = true
 
-  compiler.watch({ aggregateTimeout: 250 }, (err, result) => {
+  const watching = compiler.watch({ aggregateTimeout: 250 }, (err, result) => {
     if (err) console.error(err)
 
     if (result) {
@@ -296,7 +296,9 @@ function startRenderer(callback) {
       firstTime = false
       getListeningPort(server).then(callback).catch(error => {
         console.error(error)
-        process.exitCode = 1
+        watching.close(() => {
+          process.exitCode = 1
+        })
       })
     }
   })
