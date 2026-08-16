@@ -180,6 +180,7 @@
           <FtIcon :icon="['fas', 'gauge-high']" />
         </button>
         <button
+          v-if="showMinimizeButton"
           type="button"
           class="settingsHeaderButton"
           :aria-label="t('Minimize')"
@@ -473,6 +474,11 @@ const isProfileManagerOpen = computed(() => store.getters.getSettingsWindowView 
 const isAboutOpen = computed(() => store.getters.getSettingsWindowView === 'about')
 const isDownloadsOpen = computed(() => store.getters.getSettingsWindowView === 'downloads')
 const isStandaloneViewOpen = computed(() => isAboutOpen.value || isDownloadsOpen.value)
+const showMinimizeButton = computed(() => {
+  if (isDownloadsOpen.value) return !store.getters.getMoveDownloadsToAppHeader
+  if (isAboutOpen.value) return true
+  return !store.getters.getMoveSettingsToAppHeader
+})
 const isKeyboardShortcutPromptOpen = computed(() => store.getters.getIsKeyboardShortcutPromptShown)
 const windowTitle = computed(() => {
   if (isAboutOpen.value) return t('About.About')

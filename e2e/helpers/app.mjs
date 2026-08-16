@@ -318,7 +318,13 @@ export { expect }
  */
 export async function goTo(page, route) {
   if (route === 'downloads') {
-    await page.locator('.topNav .downloadsButton').click()
+    const headerButton = page.locator('.topNav .downloadsButton')
+    if (await headerButton.isVisible()) {
+      await headerButton.click()
+    } else {
+      await page.locator('.profileTrigger').click()
+      await page.locator('.quickSettingsMenu .downloadsShortcut').click()
+    }
     await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
     return
   }

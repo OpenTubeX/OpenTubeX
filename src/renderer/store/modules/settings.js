@@ -250,7 +250,8 @@ const state = {
   ytDlpFfmpegSource: 'system',
   ytDlpFfmpegPath: '',
   enableDownloads: true,
-  moveDownloadsToQuickSettings: false,
+  moveDownloadsToAppHeader: false,
+  moveSettingsToAppHeader: false,
   ytDlpDownloadFolderPath: '',
   ytDlpDownloadTemplates: '[]',
   ytDlpSelectedTemplate: 'video:best',
@@ -774,6 +775,16 @@ const customActions = {
     normalizeAppFont(value)
   ),
 
+  updateMoveDownloadsToAppHeader: async ({ commit }, value) => {
+    try {
+      await DBSettingHandlers.upsert('moveDownloadsToAppHeader', value)
+      commit('setMoveDownloadsToAppHeader', value)
+      await DBSettingHandlers.delete('moveDownloadsToQuickSettings')
+    } catch (error) {
+      console.error(error)
+    }
+  },
+
   updateBaseTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
     commit,
     'baseTheme',
@@ -891,6 +902,12 @@ const customActions = {
 
       const legacyAutoPipModeEntry = userSettings.find(entry => entry._id === 'autoPictureInPictureMode')
       const legacyAutoPipTabEntry = userSettings.find(entry => entry._id === 'autoPictureInPictureOnTabChange')
+      const legacyDownloadsPlacementEntry = userSettings.find(
+        entry => entry._id === 'moveDownloadsToQuickSettings'
+      )
+      const hasDownloadsHeaderPlacementSetting = userSettings.some(
+        entry => entry._id === 'moveDownloadsToAppHeader'
+      )
       const hasPipTriggersSetting = userSettings.some(entry => entry._id === 'autoPictureInPictureTriggers')
       const hasScrollMiniSetting = userSettings.some(entry => entry._id === 'scrollMiniPlayerEnabled')
       const legacyProgressToastEntry = userSettings.find(entry => entry._id === 'showSubscriptionRefreshToast')
@@ -903,6 +920,13 @@ const customActions = {
       const hasMigratedChannelSettingsSync = userSettings.some(
         entry => entry._id === CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING
       )
+
+      if (legacyDownloadsPlacementEntry && !hasDownloadsHeaderPlacementSetting) {
+        await dispatch(
+          'updateMoveDownloadsToAppHeader',
+          legacyDownloadsPlacementEntry.value !== true
+        )
+      }
 
       if (!hasMigratedChannelSettingsSync) {
         try {

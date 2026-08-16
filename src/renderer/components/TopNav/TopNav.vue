@@ -152,6 +152,21 @@
             :icon="['fas', 'download']"
           />
         </button>
+        <button
+          v-if="showSettingsButton"
+          type="button"
+          class="settingsButton navButton"
+          :class="{ active: settingsWindowOpen }"
+          :aria-label="t('Settings.Settings')"
+          :title="t('Settings.Settings')"
+          :aria-pressed="settingsWindowOpen"
+          @click="toggleSettingsWindow"
+        >
+          <FtIcon
+            class="navIcon"
+            :icon="['fas', 'cog']"
+          />
+        </button>
         <FtQuickSettingsMenu />
       </div>
     </div>
@@ -299,7 +314,8 @@ const newWindowText = computed(() => {
 
 const isElectron = process.env.IS_ELECTRON
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
-const moveDownloadsToQuickSettings = computed(() => store.getters.getMoveDownloadsToQuickSettings)
+const moveDownloadsToAppHeader = computed(() => store.getters.getMoveDownloadsToAppHeader)
+const moveSettingsToAppHeader = computed(() => store.getters.getMoveSettingsToAppHeader)
 const settingsWindowMinimized = computed(() => store.getters.getSettingsWindowMinimized)
 const settingsWindowMorphing = computed(() => store.getters.getSettingsWindowMorphing)
 const settingsWindowView = computed(() => store.getters.getSettingsWindowView)
@@ -307,11 +323,20 @@ const downloadsWindowOpen = computed(() => (
   store.getters.getSettingsWindowOpen &&
   store.getters.getSettingsWindowView === 'downloads'
 ))
+const settingsWindowOpen = computed(() => (
+  store.getters.getSettingsWindowOpen &&
+  !['about', 'downloads'].includes(store.getters.getSettingsWindowView)
+))
 const showDownloadsButton = computed(() => (
   isElectron &&
   enableDownloads.value &&
-  !moveDownloadsToQuickSettings.value &&
+  moveDownloadsToAppHeader.value &&
   !(settingsWindowMinimized.value && settingsWindowView.value === 'downloads')
+))
+const showSettingsButton = computed(() => (
+  isElectron &&
+  moveSettingsToAppHeader.value &&
+  !(settingsWindowMinimized.value && !['about', 'downloads'].includes(settingsWindowView.value))
 ))
 const minimizedSettingsWindowTitle = computed(() => {
   if (settingsWindowView.value === 'about') return t('About.About')
@@ -327,6 +352,10 @@ const restoreSettingsWindowLabel = computed(() => `${t('Restore')}: ${minimizedS
 
 function toggleDownloadsWindow() {
   store.dispatch(downloadsWindowOpen.value ? 'hideSettingsWindow' : 'showSettingsWindow', 'downloads')
+}
+
+function toggleSettingsWindow() {
+  store.dispatch(settingsWindowOpen.value ? 'hideSettingsWindow' : 'showSettingsWindow')
 }
 
 function restoreSettingsWindow() {

@@ -76,7 +76,7 @@ function defineCase () {
 
     const topNav = page.locator('.topNav')
     const topBefore = await topNav.evaluate(element => element.getBoundingClientRect().top)
-    await page.locator('.collaboratorChannelButton').evaluate(element => element.click())
+    await page.locator('.channelResolverButton').evaluate(element => element.click())
     await expect(page.locator('.prompt')).toBeVisible()
 
     await expect.poll(() => topNav.evaluate(element => element.getBoundingClientRect().top))
@@ -130,7 +130,7 @@ function defineCase () {
       })
     })
 
-    await page.click('.collaboratorChannelButton')
+    await page.click('.channelResolverButton')
     await expect(page.locator('.prompt')).toBeVisible()
 
     // Give any 300ms feed transition time to run.
@@ -222,15 +222,15 @@ test.describe('while collaborators are loading', () => {
     })
 
     await goTo(page, 'subscriptions')
-    await page.click('.collaboratorChannelButton')
+    await page.click('.channelResolverButton')
 
-    await expect(page.locator('.collaboratorChannelButton')).toBeDisabled()
+    await expect(page.locator('.channelResolverButton')).toBeDisabled()
     await page.locator('.topNav').hover()
     await expect(page.locator('.topNav')).toHaveCSS('cursor', 'wait')
     await attachScreenshot('loading collaborators')
 
     releaseRequests()
-    await expect(page.locator('.collaboratorChannelButton')).toBeEnabled()
+    await expect(page.locator('.channelResolverButton')).toBeEnabled()
     await expect(page.locator('.topNav')).not.toHaveCSS('cursor', 'wait')
   })
 })

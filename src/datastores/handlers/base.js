@@ -68,6 +68,10 @@ class Settings {
     return db.settings.updateAsync({ _id }, { _id, value }, { upsert: true })
   }
 
+  static delete(_id) {
+    return db.settings.removeAsync({ _id })
+  }
+
   // ******************** //
   // Unique Electron main process handlers
   static _findAppReadyRelatedSettings() {

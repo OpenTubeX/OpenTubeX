@@ -12,15 +12,6 @@
       />
     </FtFlexBox>
     <FtFlexBox v-if="enableDownloads">
-      <FtToggleSwitch
-        :label="t('Settings.Download Settings.Move Downloads to Quick Settings')"
-        :default-value="moveDownloadsToQuickSettings"
-        setting-key="moveDownloadsToQuickSettings"
-        :compact="true"
-        @change="updateMoveDownloadsToQuickSettings"
-      />
-    </FtFlexBox>
-    <FtFlexBox v-if="enableDownloads">
       <FtButton
         :label="t('Downloads.Open Downloads')"
         :icon="['fas', 'download']"
@@ -66,7 +57,6 @@ const { t } = useI18n()
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
-const moveDownloadsToQuickSettings = computed(() => store.getters.getMoveDownloadsToQuickSettings)
 
 /** @type {import('vue').ComputedRef<string>} */
 const ytDlpDownloadFolderPath = computed(() => store.getters.getYtDlpDownloadFolderPath)
@@ -80,10 +70,6 @@ function updateEnableDownloads(value) {
 
 function openDownloads() {
   store.dispatch('showSettingsWindow', 'downloads')
-}
-
-function updateMoveDownloadsToQuickSettings(value) {
-  store.dispatch('updateMoveDownloadsToQuickSettings', value)
 }
 
 /**

@@ -516,6 +516,8 @@ Settings:
     Theme Settings: Theme
     Match Top Bar with Main Color: Match Top Bar with Main Color
     Expand Side Bar by Default: Expand Side Bar by Default
+    Move Downloads to App Header: Move Downloads to App Header
+    Move Settings to App Header: Move Settings to App Header
     Hide Side Bar on Watch Pages: Hide Side Bar on Watch Pages
     Disable Smooth Scrolling: Disable Smooth Scrolling
     UI Scale: UI Scale
@@ -924,7 +926,6 @@ Settings:
   Download Settings:
     Download Settings: Downloads
     Enable Downloads: Enable Downloads
-    Move Downloads to Quick Settings: Move Downloads to Quick Settings
     Managed Tools Download Started Template: 'Required external software was not found: {tools}. Downloading managed copies…'
     Managed Tools Download Finished Template: 'Finished downloading {tools}'
     Managed Tools Update Started Template: 'An update was found for {tools}. Downloading…'

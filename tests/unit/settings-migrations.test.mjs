@@ -55,3 +55,21 @@ test('prefers an explicit tab bar position over the legacy preference', () => {
     tabBarPosition: 'right',
   })
 })
+
+test('inverts the legacy Downloads placement preference', () => {
+  assert.deepEqual(migrateLegacySettings({ moveDownloadsToQuickSettings: false }), {
+    moveDownloadsToAppHeader: true,
+  })
+  assert.deepEqual(migrateLegacySettings({ moveDownloadsToQuickSettings: true }), {
+    moveDownloadsToAppHeader: false,
+  })
+})
+
+test('prefers the current Downloads placement preference', () => {
+  assert.deepEqual(migrateLegacySettings({
+    moveDownloadsToQuickSettings: false,
+    moveDownloadsToAppHeader: false,
+  }), {
+    moveDownloadsToAppHeader: false,
+  })
+})

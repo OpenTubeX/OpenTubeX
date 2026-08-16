@@ -4168,6 +4168,10 @@ function runApp() {
           }
           return null
 
+        case DBActions.GENERAL.DELETE:
+          await baseHandlers.settings.delete(data)
+          return null
+
         default:
           // eslint-disable-next-line no-throw-literal
           throw 'invalid settings db action'

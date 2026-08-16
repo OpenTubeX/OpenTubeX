@@ -142,7 +142,8 @@
   }
 }
 
-.downloadsButton {
+.downloadsButton,
+.settingsButton {
   margin-inline-end: 8px;
 
   &.active {
