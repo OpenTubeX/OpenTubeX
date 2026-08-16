@@ -1,7 +1,38 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { getLocalVideoAvatarUrl, parseLocalVideoCollaborators } from '../../src/renderer/helpers/video-collaborators.js'
+import {
+  getLocalVideoAvatarUrl,
+  isCollaborativeVideoAuthor,
+  parseLocalVideoChannels,
+  parseLocalVideoCollaborators
+} from '../../src/renderer/helpers/video-collaborators.js'
+
+test('recognizes a collaboration byline without treating ordinary channel names as collaborations', () => {
+  assert.equal(isCollaborativeVideoAuthor('Creator One and Creator Two'), true)
+  assert.equal(isCollaborativeVideoAuthor('Creator One & Creator Two'), false)
+  assert.equal(isCollaborativeVideoAuthor(undefined), false)
+})
+
+test('resolves a regular video owner when no collaborators are present', () => {
+  assert.deepEqual(parseLocalVideoChannels({
+    secondary_info: {
+      owner: {
+        author: {
+          id: 'UCowner',
+          name: 'Bread and Butter',
+          best_thumbnail: { url: 'https://images.test/owner-avatar.jpg' }
+        },
+        subscriber_count: { text: '10 subscribers' }
+      }
+    }
+  }), [{
+    id: 'UCowner',
+    name: 'Bread and Butter',
+    thumbnail: 'https://images.test/owner-avatar.jpg',
+    subtitle: '10 subscribers'
+  }])
+})
 
 test('uses the primary collaborator avatar without reading the attachment-backed owner thumbnail', () => {
   const author = {

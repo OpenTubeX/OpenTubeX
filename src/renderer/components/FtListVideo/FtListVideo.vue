@@ -192,12 +192,12 @@
       </RouterLink>
       <div class="infoLine">
         <button
-          v-if="shouldShowCollaboratorsButton"
+          v-if="shouldShowChannelResolverButton"
           type="button"
-          class="channelName collaboratorChannelButton"
+          class="channelName channelResolverButton"
           dir="auto"
           :disabled="isFetchingCollaborators"
-          @click.stop.prevent="openCollaboratorsPrompt"
+          @click.stop.prevent="openChannelByline"
         >
           {{ channelName }}
         </button>
@@ -379,7 +379,7 @@ import {
   deepCopy,
   debounce
 } from '../../helpers/utils.js'
-import { getLocalVideoCollaborators } from '../../helpers/api/local.js'
+import { getLocalVideoChannels } from '../../helpers/api/local.js'
 import { isHistoryEntryWatched } from '../../helpers/history.js'
 import { getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries.js'
 import { deArrowData, deArrowThumbnail, getSponsorBlockVideoLabel } from '../../helpers/sponsorblock.js'
@@ -1369,7 +1369,9 @@ const deArrowCache = computed(() => store.getters.getDeArrowCache[id.value])
 
 const disableChannelLinks = computed(() => store.getters.getDisableChannelLinks)
 
-const shouldShowCollaboratorsButton = computed(() => !!props.data.hasCollaborators && channelName.value !== null)
+const shouldShowChannelResolverButton = computed(() => !disableChannelLinks.value && channelName.value !== null && (
+  !!props.data.hasCollaborators || channelId.value === null
+))
 
 async function handleWatchPageLinkClick(event) {
   // `auxclick` also fires for the right mouse button after `contextmenu`.
@@ -1559,8 +1561,8 @@ function openInExternalPlayer() {
   }
 }
 
-async function openCollaboratorsPrompt() {
-  if (isFetchingCollaborators.value) {
+async function openChannelByline() {
+  if (disableChannelLinks.value || isFetchingCollaborators.value) {
     return
   }
 
@@ -1574,9 +1576,9 @@ async function openCollaboratorsPrompt() {
   const videoId = id.value
 
   try {
-    const collaborators = await getLocalVideoCollaborators(videoId)
+    const collaborators = await getLocalVideoChannels(videoId)
 
-    if (id.value !== videoId) {
+    if (id.value !== videoId || disableChannelLinks.value) {
       return
     }
 
@@ -1584,6 +1586,8 @@ async function openCollaboratorsPrompt() {
 
     if (channelCollaborators.value.length > 1) {
       showCollaboratorsPrompt.value = true
+    } else if (channelCollaborators.value.length === 1) {
+      openInternalPath({ path: `/channel/${channelCollaborators.value[0].id}` })
     }
   } catch (error) {
     if (id.value === videoId) {

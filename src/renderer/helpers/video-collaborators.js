@@ -6,6 +6,18 @@
  * @property {string} subtitle
  */
 
+const COLLABORATIVE_AUTHOR_TEXT_REGEX = /\s+and\s+/i
+
+/**
+ * YouTube replaces the regular channel link with a collaboration dialog for
+ * videos with multiple authors.
+ * @param {string | undefined} author
+ * @returns {boolean}
+ */
+export function isCollaborativeVideoAuthor(author) {
+  return typeof author === 'string' && COLLABORATIVE_AUTHOR_TEXT_REGEX.test(author)
+}
+
 /**
  * @param {import('youtubei.js').YT.VideoInfo} videoInfo
  * @returns {LocalVideoCollaborator[]}
@@ -32,6 +44,35 @@ export function parseLocalVideoCollaborators(videoInfo) {
         }]
       : []
   }) ?? []
+}
+
+/**
+ * Resolve every channel represented by local video information. Regular
+ * videos expose one owner while collaboration videos expose multiple entries.
+ * @param {import('youtubei.js').YT.VideoInfo} videoInfo
+ * @returns {LocalVideoCollaborator[]}
+ */
+export function parseLocalVideoChannels(videoInfo) {
+  const collaborators = parseLocalVideoCollaborators(videoInfo)
+  if (collaborators.length > 0) {
+    return collaborators
+  }
+
+  const owner = videoInfo.secondary_info?.owner
+  const author = owner?.author
+  const channelId = (author?.id !== 'N/A' ? author?.id : undefined) ??
+    author?.endpoint?.payload?.browseId ??
+    owner?.endpoint?.payload?.browseId
+  const name = author?.name
+
+  return channelId && name
+    ? [{
+        id: channelId,
+        name,
+        thumbnail: author.best_thumbnail?.url ?? '',
+        subtitle: owner.subscriber_count?.text ?? ''
+      }]
+    : []
 }
 
 /**
