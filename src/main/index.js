@@ -128,7 +128,8 @@ function runApp() {
       : []),
   ])
 
-  const ROOT_APP_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:9080' : 'app://bundle/index.html'
+  const devServerPort = process.env.OPENTUBEX_DEV_SERVER_PORT ?? '9080'
+  const ROOT_APP_URL = process.env.NODE_ENV === 'development' ? `http://localhost:${devServerPort}` : 'app://bundle/index.html'
   const CUSTOM_THEMES_PATH = path.join(app.getPath('userData'), CUSTOM_THEMES_DIRECTORY)
 
   function getCustomThemePath(id) {

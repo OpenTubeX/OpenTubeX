@@ -115,7 +115,8 @@ export function isOpenTubeXUrl(url) {
   }
 
   if (process.env.NODE_ENV === 'development') {
-    return url_ !== null && url_.protocol === 'http:' && url_.host === 'localhost:9080' && (url_.pathname === '/' || url_.pathname === '/index.html')
+    const devServerPort = process.env.OPENTUBEX_DEV_SERVER_PORT ?? '9080'
+    return url_ !== null && url_.protocol === 'http:' && url_.host === `localhost:${devServerPort}` && (url_.pathname === '/' || url_.pathname === '/index.html')
   } else {
     return url_ !== null && url_.protocol === 'app:' && url_.host === 'bundle' && (url_.pathname === '/' || url_.pathname === '/index.html')
   }
