@@ -211,12 +211,15 @@ const automaticDownloadsScroller = useTemplateRef('automaticDownloadsScroller')
 const automaticDownloadsContent = useTemplateRef('automaticDownloadsContent')
 
 let contentResizeObserver = null
+let observationGeneration = 0
 
 watch(showManager, async (open) => {
+  const generation = ++observationGeneration
   stopObservingContent()
   if (!open) return
 
   await nextTick()
+  if (generation !== observationGeneration || !showManager.value) return
   const scroller = automaticDownloadsScroller.value
   const content = automaticDownloadsContent.value
   if (!scroller || !content) return
@@ -228,7 +231,10 @@ watch(showManager, async (open) => {
   clampScroll()
 })
 
-onBeforeUnmount(stopObservingContent)
+onBeforeUnmount(() => {
+  observationGeneration += 1
+  stopObservingContent()
+})
 
 function stopObservingContent() {
   contentResizeObserver?.disconnect()
