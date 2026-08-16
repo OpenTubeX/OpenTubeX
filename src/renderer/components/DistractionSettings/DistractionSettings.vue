@@ -109,6 +109,51 @@
     <h4
       class="groupTitle"
     >
+      {{ t('Settings.Distraction Free Settings.Sections.Visible While Paused') }}
+    </h4>
+    <div class="switchColumnGrid">
+      <div class="switchColumn">
+        <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Show Player Controls')"
+          :compact="true"
+          :default-value="showPlayerControlsWhenPaused"
+          setting-key="showPlayerControlsWhenPaused"
+          @change="updateShowPlayerControlsWhenPaused"
+        />
+        <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Show Video Title')"
+          :compact="true"
+          :default-value="showVideoTitleWhenPaused"
+          setting-key="showVideoTitleWhenPaused"
+          @change="updateShowVideoTitleWhenPaused"
+        />
+      </div>
+      <div class="switchColumn">
+        <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Show Bottom Right Actions Dock')"
+          :compact="true"
+          :default-value="showFullscreenActionsWhenPaused"
+          setting-key="showFullscreenActionsWhenPaused"
+          @change="updateShowFullscreenActionsWhenPaused"
+        />
+      </div>
+    </div>
+    <FtFlexBox>
+      <FtSlider
+        :label="t('Settings.Distraction Free Settings.Paused Interface Hide Delay')"
+        :default-value="pausedInterfaceHideDelay"
+        setting-key="pausedInterfaceHideDelay"
+        :min-value="0.5"
+        :max-value="10"
+        :step="0.5"
+        value-extension="s"
+        :disabled="pausedInterfaceVisibilityUnchanged"
+        @change="updatePausedInterfaceHideDelay"
+      />
+    </FtFlexBox>
+    <h4
+      class="groupTitle"
+    >
       {{ t('Settings.Distraction Free Settings.Sections.Side Bar') }}
     </h4>
     <div class="switchColumnGrid">
@@ -353,6 +398,7 @@ import { useI18n } from 'vue-i18n'
 
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import FtSlider from '../FtSlider/FtSlider.vue'
 import FtInputTags from '../FtInputTags/FtInputTags.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 
@@ -731,6 +777,52 @@ const showDistractionFreeTitles = computed(() => store.getters.getShowDistractio
  */
 function updateShowDistractionFreeTitles(value) {
   store.dispatch('updateShowDistractionFreeTitles', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showPlayerControlsWhenPaused = computed(() => store.getters.getShowPlayerControlsWhenPaused)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowPlayerControlsWhenPaused(value) {
+  store.dispatch('updateShowPlayerControlsWhenPaused', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showVideoTitleWhenPaused = computed(() => store.getters.getShowVideoTitleWhenPaused)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowVideoTitleWhenPaused(value) {
+  store.dispatch('updateShowVideoTitleWhenPaused', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showFullscreenActionsWhenPaused = computed(() => store.getters.getShowFullscreenActionsWhenPaused)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowFullscreenActionsWhenPaused(value) {
+  store.dispatch('updateShowFullscreenActionsWhenPaused', value)
+}
+
+const pausedInterfaceVisibilityUnchanged = computed(() => {
+  return showPlayerControlsWhenPaused.value &&
+    showVideoTitleWhenPaused.value &&
+    showFullscreenActionsWhenPaused.value
+})
+
+/** @type {import('vue').ComputedRef<number>} */
+const pausedInterfaceHideDelay = computed(() => store.getters.getPausedInterfaceHideDelay)
+
+/**
+ * @param {number} value
+ */
+function updatePausedInterfaceHideDelay(value) {
+  store.dispatch('updatePausedInterfaceHideDelay', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

@@ -48,6 +48,53 @@ test('playback starts', async ({ app, page, attachScreenshot }) => {
   await attachScreenshot('playing video')
 })
 
+test('hides configured paused interface elements until pointer activity', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  const watchComponent = await page.evaluateHandle(findWatchComponent)
+  await watchComponent.evaluate(async (component) => {
+    await Promise.all([
+      component.proxy.$store.dispatch('updateShowPlayerControlsWhenPaused', false),
+      component.proxy.$store.dispatch('updateShowVideoTitleWhenPaused', false),
+      component.proxy.$store.dispatch('updateShowFullscreenActionsWhenPaused', false),
+      component.proxy.$store.dispatch('updatePausedInterfaceHideDelay', 0.5),
+    ])
+    await component.proxy.$nextTick()
+  })
+
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const title = player.locator('.playerFullscreenTitleOverlay')
+  const actions = player.locator('.fullscreenActions')
+  const controls = player.locator('.shaka-controls-button-panel')
+  const seekBar = player.locator('.shaka-seek-bar-container')
+
+  await page.locator('body').press('s')
+  await expect(player).toHaveClass(/fullWindow/)
+  await video.evaluate(element => element.pause())
+  await expect(player).toHaveClass(/playerPaused/)
+  await expect(title).toHaveCSS('opacity', '0')
+  await expect(actions).toHaveCSS('opacity', '0')
+  await expect(controls).toHaveCSS('opacity', '0')
+  await expect(seekBar).toHaveCSS('opacity', '0')
+  await expect(seekBar).toHaveCSS('pointer-events', 'none')
+
+  const playerBounds = await player.boundingBox()
+  await page.mouse.move(
+    playerBounds.x + playerBounds.width / 2,
+    playerBounds.y + playerBounds.height / 2
+  )
+  await expect(player).toHaveClass(/pausedInterfaceRevealed/)
+  await expect(title).toHaveCSS('opacity', '1')
+  await expect(actions).toHaveCSS('opacity', '1')
+  await expect(seekBar).toHaveCSS('opacity', '1')
+
+  await expect(player).not.toHaveClass(/pausedInterfaceRevealed/, { timeout: 1500 })
+  await expect(title).toHaveCSS('opacity', '0')
+  await expect(actions).toHaveCSS('opacity', '0')
+  await expect(controls).toHaveCSS('opacity', '0')
+  await expect(seekBar).toHaveCSS('opacity', '0')
+  await watchComponent.dispose()
+})
+
 test('hides the tab play indicator while buffering', async ({ app, page, attachScreenshot }) => {
   const video = await openDemoVideo({ app, page })
 

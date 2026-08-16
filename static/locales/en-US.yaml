@@ -1058,6 +1058,7 @@ Settings:
       Channel Page: Channel Page
       Watch Page: Watch Page
       General: General
+      Visible While Paused: Visible While Paused in Full Window / Full Screen
     Hide Video Views: Hide Video Views
     Shorten View Counts: Shorten View Counts
     Hide Video Likes And Dislikes: Hide Video Likes And Dislikes
@@ -1102,6 +1103,10 @@ Settings:
     Hide Subscriptions Live: Hide Subscriptions Live
     Hide Subscriptions Posts: Hide Subscriptions Posts
     Show Added Items: Show Added Items
+    Show Player Controls: Show Player Controls
+    Show Video Title: Show Video Title
+    Show Bottom Right Actions Dock: Show Bottom Right Actions Dock
+    Paused Interface Hide Delay: Paused Interface Hide Delay
   Data Settings:
     Data Settings: Data
     Select Export Type: Select Export Type

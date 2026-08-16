@@ -572,6 +572,7 @@ Settings:
       Channel Page: Channel Page
       Watch Page: Watch Page
       Subscriptions Page: Subscriptions page
+      Visible While Paused: Visible While Paused in Full Window / Full Screen
     Hide Channel Podcasts: Hide channel "podcasts" tab
     Hide Channel Releases: Hide channel "releases" tab
     Hide Subscriptions Shorts: Hide subscriptions shorts
@@ -587,6 +588,10 @@ Settings:
     Hide Videos, Playlists and Channels Containing Text: Hide videos and playlists containing text
     Hide Channel Home: Hide Channel "Home" Tab
     Show Added Items: Show Added Items
+    Show Player Controls: Show Player Controls
+    Show Video Title: Show Video Title
+    Show Bottom Right Actions Dock: Show Bottom Right Actions Dock
+    Paused Interface Hide Delay: Paused Interface Hide Delay
     Hide Channel Courses: Hide Channel "Courses" Tab
   The app needs to restart for changes to take effect. Restart and apply change?: The app needs to restart for changes to take effect. Do you want to restart and apply the changes?
   Proxy Settings:

@@ -2795,6 +2795,49 @@
   opacity: 1;
 }
 
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused.hideVideoTitleWhenPaused
+:deep(.playerFullscreenTitleOverlay) {
+  transition-duration: 150ms, 150ms;
+  transition-delay: 0s, 0s;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused.hideFullscreenActionsWhenPaused
+.fullscreenActions {
+  transition-duration: 150ms, 250ms;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused.hidePlayerControlsWhenPaused
+  :is(
+    :deep(.shaka-scrim-container),
+    :deep(.shaka-controls-button-panel),
+    :deep(.shaka-seek-bar-container),
+    :deep(.shaka-play-button-container),
+    :deep(.shaka-fast-forward-container),
+    :deep(.shaka-rewind-container)
+  ) {
+  transition-duration: 150ms;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hideVideoTitleWhenPaused
+:deep(.playerFullscreenTitleOverlay),
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hideFullscreenActionsWhenPaused
+.fullscreenActions,
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hidePlayerControlsWhenPaused
+:deep(.shaka-scrim-container),
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hidePlayerControlsWhenPaused
+:deep(.shaka-controls-button-panel),
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hidePlayerControlsWhenPaused
+:deep(.shaka-seek-bar-container),
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hidePlayerControlsWhenPaused
+:deep(.shaka-play-button-container),
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hidePlayerControlsWhenPaused
+:deep(.shaka-fast-forward-container),
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hidePlayerControlsWhenPaused
+:deep(.shaka-rewind-container) {
+  opacity: 0;
+  pointer-events: none;
+}
+
 :deep(.shaka-controls-button-panel>.ft-shaka-skip-button .shaka-ui-icon) {
   font-size: 32px;
 }
