@@ -672,6 +672,7 @@ test.describe('watch page', () => {
     await expect(replay).toBeVisible()
     const skeleton = replay.locator('.liveChatSkeleton')
     await expect(skeleton).toBeVisible()
+    await expect(skeleton.locator('.liveChatSkeletonMessage')).toHaveCount(24)
     expect(await skeleton.evaluate((element) => {
       const firstMessage = element.querySelector('.liveChatSkeletonMessage')
       const avatar = firstMessage.querySelector('.liveChatSkeletonAvatar')
@@ -681,12 +682,13 @@ test.describe('watch page', () => {
 
       return {
         avatarInset: avatar.getBoundingClientRect().top - skeletonRect.top,
-        fillsViewport: element.scrollHeight >= element.clientHeight,
+        clipsOverflow: element.scrollHeight > element.clientHeight &&
+          getComputedStyle(element).overflowY === 'hidden',
         linesAligned: Math.abs(author.getBoundingClientRect().top - text.getBoundingClientRect().top) <= 1
       }
     })).toEqual({
       avatarInset: 5,
-      fillsViewport: true,
+      clipsOverflow: true,
       linesAligned: true
     })
     const skeletonLines = skeleton.locator('.liveChatSkeletonContent').first().locator('div')
