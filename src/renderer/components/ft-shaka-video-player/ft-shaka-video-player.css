@@ -228,6 +228,65 @@
   display: none;
 }
 
+/*
+  Keep the quick speed presets in their familiar lower-player position without
+  bringing back the standard Shorts control panel. The row scrolls when custom
+  labels or presets outgrow the narrow portrait player.
+*/
+.ftVideoPlayer.shortsPlayer :deep(
+  .shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar)
+) {
+  position: absolute;
+  inset-block-end: 14px;
+  inset-inline: 16px;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  inline-size: auto;
+  block-size: auto;
+  padding: 0;
+  opacity: var(--shorts-quick-playback-rate-bar-opacity, 0);
+  pointer-events: none;
+  transition: opacity 50ms linear;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(
+  .shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar:is(:hover, :focus-within))
+) {
+  opacity: 1;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(
+  .shaka-controls-button-panel > :not(.ft-quick-playback-rate-bar)
+) {
+  display: none !important;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(
+  .shaka-controls-button-panel > .ft-quick-playback-rate-bar
+) {
+  max-inline-size: 100%;
+  margin: 0;
+  padding-block: 2px;
+  padding-inline: 6px;
+  border-radius: calc(999px * var(--ui-roundness));
+  background-color: rgb(0 0 0 / 32%);
+  backdrop-filter: blur(8px) saturate(120%);
+  pointer-events: auto;
+}
+
+.ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) :deep(
+  .shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar)
+) {
+  inset-inline: auto;
+  inset-inline-start: max(
+    calc((100% - var(--shorts-video-width)) / 2),
+    var(--shorts-metadata-min-width)
+  );
+  inline-size: var(--shorts-video-width);
+}
+
 .ftVideoPlayer.shortsPlayer :deep(.shaka-bottom-controls) {
   position: absolute;
   inset-block-end: 0;
@@ -257,6 +316,12 @@
   z-index: 1;
   opacity: 1;
   transition: none;
+}
+
+.ftVideoPlayer.shortsPlayer:has(:deep(.ft-quick-playback-rate-bar)) :deep(
+  .shaka-seek-bar-container
+) {
+  z-index: 3;
 }
 
 .ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) {

@@ -59,6 +59,7 @@ test.describe('Shorts transcript navigation', () => {
       settings: {
         ...WATCH_PAGE_SEED,
         useCustomShortsPlayer: true,
+        useQuickPlaybackSpeedBar: true,
         fetchSubscriptionsAutomatically: false
       },
       profiles: [{
@@ -78,6 +79,70 @@ test.describe('Shorts transcript navigation', () => {
         shortsTimestamp: new Date().toISOString()
       }]
     }
+  })
+
+  test('shows quick playback speeds near the pointer without covering the seek preview', async ({ app, page, attachScreenshot }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.locator(sel.searchInput)
+      .fill(`https://www.youtube.com/shorts/${CAPTIONED_SHORT_IDS[0]}`)
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[0]}\\?short=true`))
+    const video = await waitForPlayback(page)
+
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const controlPanel = player.locator('.shaka-controls-button-panel')
+    const playbackRateBar = controlPanel.locator('.ft-quick-playback-rate-bar')
+    const seekBar = player.locator('.shaka-seek-bar-container')
+    const opacity = () => controlPanel.evaluate(element => Number(getComputedStyle(element).opacity))
+
+    await expect(playbackRateBar).toHaveCount(1)
+    await expect(playbackRateBar.getByRole('button')).toHaveCount(9)
+
+    const playerBounds = await player.boundingBox()
+    expect(playerBounds).not.toBeNull()
+
+    await player.dispatchEvent('mousemove', {
+      clientX: playerBounds.x + playerBounds.width / 2,
+      clientY: playerBounds.y + 80
+    })
+    await expect.poll(opacity).toBe(0)
+
+    let rateBarBounds = await playbackRateBar.boundingBox()
+    expect(rateBarBounds).not.toBeNull()
+    await player.dispatchEvent('mousemove', {
+      clientX: rateBarBounds.x + rateBarBounds.width / 2,
+      clientY: rateBarBounds.y - 24
+    })
+    await expect.poll(opacity).toBeGreaterThan(0.2)
+    expect(await opacity()).toBeLessThan(0.5)
+
+    rateBarBounds = await playbackRateBar.boundingBox()
+    expect(rateBarBounds).not.toBeNull()
+    await player.dispatchEvent('mousemove', {
+      clientX: rateBarBounds.x + rateBarBounds.width / 2,
+      clientY: rateBarBounds.y - 6
+    })
+    await expect.poll(opacity).toBeGreaterThan(0.75)
+
+    rateBarBounds = await playbackRateBar.boundingBox()
+    expect(rateBarBounds).not.toBeNull()
+    await playbackRateBar.dispatchEvent('mousemove', {
+      clientX: rateBarBounds.x + rateBarBounds.width / 2,
+      clientY: rateBarBounds.y + rateBarBounds.height / 2
+    })
+    await expect.poll(opacity).toBe(1)
+    await attachScreenshot('Shorts quick playback speed bar')
+
+    const playbackRateButton = playbackRateBar.getByRole('button', { name: '1.25x', exact: true })
+    await playbackRateButton.click()
+    await expect(playbackRateButton).toBeFocused()
+    await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.25)
+
+    await seekBar.hover()
+    await expect.poll(opacity).toBe(0)
+    await expect(playbackRateButton).not.toBeFocused()
+    expect(await seekBar.evaluate(element => getComputedStyle(element).zIndex)).toBe('3')
+    expect(await controlPanel.evaluate(element => getComputedStyle(element).zIndex)).toBe('2')
   })
 
   test('preserves the panel until navigation reaches a captionless Short', async ({ app, page }) => {
@@ -156,12 +221,6 @@ test('a background watch tab stays loading until its cached avatar is ready', as
   await mockPlayableWatchPage(app, page)
 
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    store.commit('setVideoAvatar', {
-      videoId: 'jNQXAC9IVRw',
-      avatar: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+Xw4AAAAASUVORK5CYII='
-    })
-
     window.__backgroundWatchIconStates = []
     const record = () => {
       for (const tab of document.querySelectorAll('.tab')) {
@@ -188,6 +247,16 @@ test('a background watch tab stays loading until its cached avatar is ready', as
   const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
 
   await expect(tab.locator('.loadingDot')).toBeVisible()
+  const avatarCached = await page.evaluate(async tabId => {
+    const avatarBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUzZpk7I4HSAAAACklEQVQI12NgAAAAAgAB4iG8MwAAAABJRU5ErkJggg=='
+    const avatarBytes = Uint8Array.from(atob(avatarBase64), character => character.charCodeAt(0))
+    return await window.ftElectron.tabs.updateAvatar(
+      avatarBytes.buffer,
+      tabId,
+      '/watch/jNQXAC9IVRw'
+    )
+  }, watchTab.id)
+  expect(avatarCached).toBe(true)
   await expect(tab.locator('.loadingDot')).toHaveCount(0)
   await expect.poll(() => page.evaluate(tabId => (
     window.__backgroundWatchIconStates.some(state => state.id === tabId && !state.loading && state.avatar)
