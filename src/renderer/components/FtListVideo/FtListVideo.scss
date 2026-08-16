@@ -142,7 +142,7 @@
   grid-column: 1 / -1;
 }
 
-.channelName.collaboratorChannelButton {
+.channelName.channelResolverButton {
   background: none;
   border: 0;
   color: inherit;
@@ -153,7 +153,7 @@
   text-decoration: underline;
 }
 
-.channelName.collaboratorChannelButton:disabled {
+.channelName.channelResolverButton:disabled {
   cursor: wait;
 }
 

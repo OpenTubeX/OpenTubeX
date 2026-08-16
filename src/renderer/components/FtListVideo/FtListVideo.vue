@@ -192,12 +192,12 @@
       </RouterLink>
       <div class="infoLine">
         <button
-          v-if="shouldShowCollaboratorsButton"
+          v-if="shouldShowChannelResolverButton"
           type="button"
-          class="channelName collaboratorChannelButton"
+          class="channelName channelResolverButton"
           dir="auto"
           :disabled="isFetchingCollaborators"
-          @click.stop.prevent="openCollaboratorsPrompt"
+          @click.stop.prevent="openChannelByline"
         >
           {{ channelName }}
         </button>
@@ -383,7 +383,6 @@ import { getLocalVideoChannels } from '../../helpers/api/local.js'
 import { isHistoryEntryWatched } from '../../helpers/history.js'
 import { getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries.js'
 import { deArrowData, deArrowThumbnail, getSponsorBlockVideoLabel } from '../../helpers/sponsorblock.js'
-import { isCollaborativeVideoAuthor } from '../../helpers/video-collaborators.js'
 import {
   morphThumbnailIntoNewTab,
   requestWatchPageViewTransition
@@ -1370,9 +1369,8 @@ const deArrowCache = computed(() => store.getters.getDeArrowCache[id.value])
 
 const disableChannelLinks = computed(() => store.getters.getDisableChannelLinks)
 
-const shouldShowCollaboratorsButton = computed(() => channelName.value !== null && (
-  !!props.data.hasCollaborators ||
-  (channelId.value === null && isCollaborativeVideoAuthor(channelName.value))
+const shouldShowChannelResolverButton = computed(() => channelName.value !== null && (
+  !!props.data.hasCollaborators || channelId.value === null
 ))
 
 async function handleWatchPageLinkClick(event) {
@@ -1563,7 +1561,7 @@ function openInExternalPlayer() {
   }
 }
 
-async function openCollaboratorsPrompt() {
+async function openChannelByline() {
   if (isFetchingCollaborators.value) {
     return
   }
