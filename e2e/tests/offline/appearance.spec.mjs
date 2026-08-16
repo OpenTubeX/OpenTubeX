@@ -223,6 +223,32 @@ test.describe('default appearance', () => {
       return Math.abs(button.top - dropdown.bottom - 4)
     }, [await appFont.getAttribute('id'), await fontDropdown.getAttribute('id')])).toBeLessThanOrEqual(2)
 
+    await page.setViewportSize({ width: 600, height: 320 })
+    await expect.poll(() => fontDropdown.evaluate(menu => menu.clientWidth)).toBeLessThanOrEqual(584)
+    await appFont.evaluate(element => element.scrollIntoView({ block: 'center' }))
+    await expect.poll(() => fontDropdown.evaluate(menu => menu.scrollHeight - menu.clientHeight))
+      .toBeGreaterThan(0)
+    await fontDropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight })
+    await expect.poll(() => fontDropdown.evaluate(menu => menu.scrollTop)).toBeGreaterThan(0)
+    await page.setViewportSize({ width: 1200, height: 720 })
+    await expect.poll(() => fontDropdown.evaluate(menu => {
+      const lastOption = menu.querySelector('.selectOption:last-of-type')
+      const offsetTopFromDocument = (element) => {
+        let offsetTop = 0
+        for (let current = element; current !== null; current = current.offsetParent) {
+          offsetTop += current.offsetTop
+        }
+        return offsetTop
+      }
+      const contentEnd = offsetTopFromDocument(lastOption) - offsetTopFromDocument(menu) +
+        lastOption.offsetHeight + Number.parseFloat(getComputedStyle(menu).paddingBottom)
+      const maximumScrollTop = Math.max(0, contentEnd - menu.clientHeight)
+      return Math.abs(menu.scrollTop - maximumScrollTop) <= 1
+    })).toBe(true)
+    await appFont.evaluate(element => element.scrollIntoView({ block: 'center' }))
+    await expect(appFont).toBeInViewport()
+    await fontDropdown.evaluate(menu => { menu.scrollTop = 0 })
+
     const selectedFont = (await fontOptions.nth(3).textContent()).trim()
     await fontOptions.nth(3).click()
     await expect(appFont).toHaveText(selectedFont)

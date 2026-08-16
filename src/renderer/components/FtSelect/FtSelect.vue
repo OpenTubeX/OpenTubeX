@@ -140,6 +140,7 @@ import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplat
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtPerformanceImpact from '../FtPerformanceImpact/FtPerformanceImpact.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const props = defineProps({
   placeholder: {
@@ -226,7 +227,7 @@ const selectedLocale = computed(() => {
 watch(dropdownShown, (shown) => {
   if (shown) {
     document.addEventListener('pointerdown', handleOutsidePointerDown, true)
-    window.addEventListener('resize', updateDropdownPosition)
+    window.addEventListener('resize', refreshDropdownLayout)
     window.addEventListener('scroll', updateDropdownPosition, true)
   } else {
     removeDropdownListeners()
@@ -242,7 +243,7 @@ watch([() => props.selectNames, () => props.selectValues], async () => {
 
   activeIndex.value = Math.max(0, selectedIndex.value)
   await nextTick()
-  updateDropdownPosition()
+  await refreshDropdownLayout()
   scrollActiveOptionIntoView()
 }, { flush: 'post' })
 
@@ -269,8 +270,8 @@ function openDropdown() {
   dropdownTarget.value = selectRoot.value?.closest('.prompt') ?? document.fullscreenElement ?? document.body
   dropdownShown.value = true
 
-  nextTick(() => {
-    updateDropdownPosition()
+  nextTick(async () => {
+    await refreshDropdownLayout()
     scrollActiveOptionIntoView()
   })
 }
@@ -324,6 +325,15 @@ function updateDropdownPosition() {
     top: `${snapToDevicePixels(top)}px`,
     maxBlockSize: naturalHeight > menuHeight ? `${menuHeight}px` : null
   }
+}
+
+async function refreshDropdownLayout() {
+  updateDropdownPosition()
+  await nextTick()
+
+  const menu = dropdown.value
+  const contentEnd = options.value?.at(-1) ?? null
+  if (menu !== null) clampOverlayScrollTop(menu, contentEnd)
 }
 
 /**
@@ -523,7 +533,7 @@ function handleDropdownPointerDown() {
 
 function removeDropdownListeners() {
   document.removeEventListener('pointerdown', handleOutsidePointerDown, true)
-  window.removeEventListener('resize', updateDropdownPosition)
+  window.removeEventListener('resize', refreshDropdownLayout)
   window.removeEventListener('scroll', updateDropdownPosition, true)
 }
 
