@@ -109,6 +109,7 @@ Subscriptions:
   New Since Last Refresh: Nowości od ostatniego odświeżenia
   Mark All as Seen: Oznacz wszystkie jako widziane
   No New Content: Brak nowych treści.
+  Mark as Seen: Oznacz jako widziane
 Trending:
   Trending: 'Na czasie'
   Trending Tabs: Karty „Na czasie”
@@ -201,6 +202,11 @@ User Playlists:
   Export list of URLs: Eksportuj listę adresów URL
   Quick Bookmark Icon: Ikona szybkiej zakładki
   Save to: Zapisz do…
+  Move Video to the Top: Przenieś wideo na górę
+  Move Video to the Bottom: Przesuń wideo na dół
+  Custom Emoji: Niestandardowe emoji
+  Choose Image: Wybierz obraz
+  Use Bookmark Icon: Użyj ikony zakładki
 History:
   # On History Page
   History: 'Historia'
@@ -918,6 +924,14 @@ Settings:
     Remove Engine: Usuń {engine}
     Invalid Engine: Wprowadź nazwę i prawidłowy adres URL wyszukiwania HTTP lub HTTPS zawierający %s.
     Engine Limit: Możesz dodać maksymalnie {count} niestandardowych wyszukiwarek.
+  Quick Settings:
+    Quick Settings: Szybkie ustawienia
+    Appearance: Wygląd
+    Playback: Odtwarzanie
+    Content: Treści
+    Language and Region: Język i region
+    All Settings: Wszystkie ustawienia
+    Profile Selector Hint: Możesz również kliknąć prawym przyciskiem myszy ikonę profilu, aby przełączać profile
 About:
   #On About page
   About: 'O projekcie'
@@ -1788,8 +1802,32 @@ Restore: Przywróć
 Close Window Confirmation:
   Title: Zamknąć okno?
   Close Window: Zamknij okno
+  Message: To okno zawiera {count} karty. Czy na pewno chcesz je zamknąć? | To okno zawiera {count} kart. Czy na pewno chcesz je zamknąć?
 Confirmations:
   Never Ask Again: Nie pytaj ponownie
   Settings Hint: Możesz ponownie włączyć to potwierdzenie w Ustawienia → Ogólne → Potwierdź przed…
 Close Multiple Tabs Confirmation:
   Title: Zamknąć wiele kart?
+  Message: Spowoduje to zamknięcie {count} kart.
+  Close Tabs: Zamknij {count} karty | Zamknij {count} kart
+Color Picker:
+  Hue: Odcień
+  Opacity: Nieprzezroczystość
+  Backdrop Blur: Rozmycie tła
+  Hex Color: Kolor szesnastkowo
+  Apply Color: Zastosuj
+  Reset Color: Zresetuj
+  Copy Color: Kopiuj
+  Copy From Another Color: Skopiuj z innego koloru
+  Color Copied: Kolor skopiowany
+  Invalid Color: Wprowadź prawidłowy kod szesnastkowy koloru
+  Clipboard Unavailable: Schowek niedostępny
+  Saturation and Brightness: Nasycenie i jasność
+Load Multiple Tabs Confirmation:
+  Title: Załadować wiele kart?
+  Message: Spowoduje to załadowanie {count} kart.
+  Load Tabs: Załaduj {count} karty | Załaduj {count} kart
+Unload Multiple Tabs Confirmation:
+  Title: Uśpić wiele kart?
+  Message: Spowoduje to uśpienie {count} kart.
+  Unload Tabs: Uśpij {count} karty | Uśpij {count} kart
