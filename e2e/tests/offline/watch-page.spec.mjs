@@ -98,12 +98,8 @@ test.describe('Shorts transcript navigation', () => {
     await expect(playbackRateBar).toHaveCount(1)
     await expect(playbackRateBar.getByRole('button')).toHaveCount(9)
 
-    const [playerBounds, rateBarBounds] = await Promise.all([
-      player.boundingBox(),
-      playbackRateBar.boundingBox(),
-    ])
+    const playerBounds = await player.boundingBox()
     expect(playerBounds).not.toBeNull()
-    expect(rateBarBounds).not.toBeNull()
 
     await player.dispatchEvent('mousemove', {
       clientX: playerBounds.x + playerBounds.width / 2,
@@ -111,6 +107,8 @@ test.describe('Shorts transcript navigation', () => {
     })
     await expect.poll(opacity).toBe(0)
 
+    let rateBarBounds = await playbackRateBar.boundingBox()
+    expect(rateBarBounds).not.toBeNull()
     await player.dispatchEvent('mousemove', {
       clientX: rateBarBounds.x + rateBarBounds.width / 2,
       clientY: rateBarBounds.y - 24
@@ -118,12 +116,16 @@ test.describe('Shorts transcript navigation', () => {
     await expect.poll(opacity).toBeGreaterThan(0.2)
     expect(await opacity()).toBeLessThan(0.5)
 
+    rateBarBounds = await playbackRateBar.boundingBox()
+    expect(rateBarBounds).not.toBeNull()
     await player.dispatchEvent('mousemove', {
       clientX: rateBarBounds.x + rateBarBounds.width / 2,
       clientY: rateBarBounds.y - 6
     })
     await expect.poll(opacity).toBeGreaterThan(0.75)
 
+    rateBarBounds = await playbackRateBar.boundingBox()
+    expect(rateBarBounds).not.toBeNull()
     await playbackRateBar.dispatchEvent('mousemove', {
       clientX: rateBarBounds.x + rateBarBounds.width / 2,
       clientY: rateBarBounds.y + rateBarBounds.height / 2
