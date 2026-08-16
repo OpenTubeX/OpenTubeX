@@ -379,7 +379,7 @@ import {
   deepCopy,
   debounce
 } from '../../helpers/utils.js'
-import { getLocalVideoCollaborators } from '../../helpers/api/local.js'
+import { getLocalVideoChannels } from '../../helpers/api/local.js'
 import { isHistoryEntryWatched } from '../../helpers/history.js'
 import { getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries.js'
 import { deArrowData, deArrowThumbnail, getSponsorBlockVideoLabel } from '../../helpers/sponsorblock.js'
@@ -1578,7 +1578,7 @@ async function openCollaboratorsPrompt() {
   const videoId = id.value
 
   try {
-    const collaborators = await getLocalVideoCollaborators(videoId)
+    const collaborators = await getLocalVideoChannels(videoId)
 
     if (id.value !== videoId) {
       return
@@ -1588,6 +1588,8 @@ async function openCollaboratorsPrompt() {
 
     if (channelCollaborators.value.length > 1) {
       showCollaboratorsPrompt.value = true
+    } else if (channelCollaborators.value.length === 1) {
+      openInternalPath({ path: `/channel/${channelCollaborators.value[0].id}` })
     }
   } catch (error) {
     if (id.value === videoId) {
