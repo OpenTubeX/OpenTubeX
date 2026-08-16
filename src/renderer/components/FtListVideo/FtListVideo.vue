@@ -1369,7 +1369,7 @@ const deArrowCache = computed(() => store.getters.getDeArrowCache[id.value])
 
 const disableChannelLinks = computed(() => store.getters.getDisableChannelLinks)
 
-const shouldShowChannelResolverButton = computed(() => channelName.value !== null && (
+const shouldShowChannelResolverButton = computed(() => !disableChannelLinks.value && channelName.value !== null && (
   !!props.data.hasCollaborators || channelId.value === null
 ))
 
@@ -1562,7 +1562,7 @@ function openInExternalPlayer() {
 }
 
 async function openChannelByline() {
-  if (isFetchingCollaborators.value) {
+  if (disableChannelLinks.value || isFetchingCollaborators.value) {
     return
   }
 
@@ -1578,7 +1578,7 @@ async function openChannelByline() {
   try {
     const collaborators = await getLocalVideoChannels(videoId)
 
-    if (id.value !== videoId) {
+    if (id.value !== videoId || disableChannelLinks.value) {
       return
     }
 
