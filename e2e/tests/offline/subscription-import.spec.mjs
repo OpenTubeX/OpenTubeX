@@ -57,7 +57,24 @@ test('imports current OpenTubeX subscriptions without rejecting profile icons', 
         thumbnail: null
       }]
     }
-    const contents = [exportedProfile, exportedNamedProfile, exportedPrimaryNameProfile]
+    const exportedIdCollisionProfile = {
+      _id: 'unrelated-test-profile',
+      name: 'Collision Import',
+      bgColor: '#555555',
+      textColor: '#FFFFFF',
+      icon: { type: 'emoji', value: '🛡️' },
+      subscriptions: [{
+        id: 'UCidCollisionImport',
+        name: 'ID Collision Channel',
+        thumbnail: null
+      }]
+    }
+    const contents = [
+      exportedProfile,
+      exportedNamedProfile,
+      exportedPrimaryNameProfile,
+      exportedIdCollisionProfile
+    ]
       .map(profile => JSON.stringify(profile))
       .join('\n') + '\n'
 
@@ -86,11 +103,13 @@ test('imports current OpenTubeX subscriptions without rejecting profile icons', 
     const unrelatedProfile = profiles.find(({ _id }) => _id === 'unrelated-test-profile')
     const exactProfile = profiles.find(({ _id }) => _id === 'exact-test-profile')
     const primaryNameProfile = profiles.find(({ _id }) => _id === 'primary-name-profile')
+    const idCollisionProfile = profiles.find(({ name }) => name === 'Collision Import')
     return {
       hasSubscription: profile.subscriptions.some(({ id }) => id === 'UCcurrentFormatImport'),
       icon: profile.icon,
       unrelatedProfile: {
         hasSubscription: unrelatedProfile.subscriptions.some(({ id }) => id === 'UCnamedProfileImport'),
+        hasIdCollisionSubscription: unrelatedProfile.subscriptions.some(({ id }) => id === 'UCidCollisionImport'),
         icon: unrelatedProfile.icon
       },
       exactProfile: {
@@ -100,6 +119,11 @@ test('imports current OpenTubeX subscriptions without rejecting profile icons', 
       primaryNameProfile: {
         hasSubscription: primaryNameProfile.subscriptions.some(({ id }) => id === 'UCprimaryNameImport'),
         icon: primaryNameProfile.icon
+      },
+      idCollisionProfile: {
+        hasGeneratedId: idCollisionProfile._id !== 'unrelated-test-profile',
+        hasSubscription: idCollisionProfile.subscriptions.some(({ id }) => id === 'UCidCollisionImport'),
+        icon: idCollisionProfile.icon
       }
     }
   })).toEqual({
@@ -107,6 +131,7 @@ test('imports current OpenTubeX subscriptions without rejecting profile icons', 
     icon: { type: 'emoji', value: '🧪' },
     unrelatedProfile: {
       hasSubscription: false,
+      hasIdCollisionSubscription: false,
       icon: { type: 'emoji', value: '🚫' }
     },
     exactProfile: {
@@ -116,6 +141,11 @@ test('imports current OpenTubeX subscriptions without rejecting profile icons', 
     primaryNameProfile: {
       hasSubscription: true,
       icon: { type: 'emoji', value: '🛰️' }
+    },
+    idCollisionProfile: {
+      hasGeneratedId: true,
+      hasSubscription: true,
+      icon: { type: 'emoji', value: '🛡️' }
     }
   })
 })

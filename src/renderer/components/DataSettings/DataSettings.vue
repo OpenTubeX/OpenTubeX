@@ -457,7 +457,17 @@ function importFreeTubeSubscriptions(textDecode) {
           })
           store.dispatch('updateProfile', existingProfile)
         } else {
-          store.dispatch('updateProfile', profileObject)
+          const hasProfileIdCollision = profileList.value.some((profile) => {
+            return profile._id === profileObject._id
+          })
+
+          if (hasProfileIdCollision) {
+            const newProfile = { ...profileObject }
+            delete newProfile._id
+            store.dispatch('createProfile', newProfile)
+          } else {
+            store.dispatch('updateProfile', profileObject)
+          }
         }
 
         primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(profileObject.subscriptions)
