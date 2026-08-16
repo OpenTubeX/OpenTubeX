@@ -45,7 +45,7 @@
 }
 
 .description {
-  font-family: Roboto, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  font-family: var(--app-font-family);
   font-size: 17px;
   line-height: 1.4;
   white-space: pre-wrap;

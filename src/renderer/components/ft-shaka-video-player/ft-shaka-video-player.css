@@ -2936,7 +2936,7 @@
   max-width: 220px;
   overflow: hidden;
   color: #fff;
-  font-family: Roboto, Arial, sans-serif;
+  font-family: var(--app-font-family);
   font-size: 14px;
   font-weight: 400;
   line-height: normal;
@@ -3476,7 +3476,7 @@
   color: #fff;
   font-size: 13px;
   font-weight: bold;
-  font-family: Roboto, Arial, sans-serif;
+  font-family: var(--app-font-family);
   text-align: center;
   white-space: nowrap;
   text-overflow: ellipsis;

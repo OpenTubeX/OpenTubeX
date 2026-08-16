@@ -256,6 +256,16 @@
     </FtFlexBox>
     <FtFlexBox class="themeSelectRow">
       <FtSelect
+        :placeholder="t('Settings.Theme Settings.Font.App Font')"
+        :value="appFont"
+        setting-key="appFont"
+        :select-names="fontNames"
+        :select-values="fontValues"
+        :icon="['fas', 'font']"
+        @change="updateAppFont"
+        @open="loadSystemFonts"
+      />
+      <FtSelect
         :placeholder="$t('Settings.Theme Settings.Main Color Theme.Main Color Theme')"
         :value="mainColor"
         setting-key="mainColor"
@@ -351,8 +361,9 @@ import { setAnimationSpeed } from '../helpers/animationSpeed'
 import { getMissingTabAvatarTabs, loadMissingTabAvatars } from '../helpers/loadTabAvatars'
 import { showToast } from '../helpers/utils'
 import { ICON_PACKS } from '../icons/iconPackState'
+import { DEFAULT_APP_FONT, normalizeAppFont, SYSTEM_APP_FONT } from '../helpers/appFont'
 
-const { t } = useI18n()
+const { locale, t } = useI18n()
 
 // Themes are devided into 3 groups.
 // The first group contains the default themes.
@@ -449,6 +460,53 @@ const COLOR_VALUES = colors.map(color => color.name)
 const colorNames = useColorTranslations()
 const showCustomThemeEditor = ref(false)
 const editingCustomThemeId = ref(null)
+const systemFonts = ref([])
+let systemFontsPromise = null
+
+const appFont = computed(() => normalizeAppFont(store.getters.getAppFont))
+const fontValues = computed(() => [
+  DEFAULT_APP_FONT,
+  SYSTEM_APP_FONT,
+  ...[...new Set([
+    appFont.value,
+    ...systemFonts.value
+  ])]
+    .filter(font => font !== DEFAULT_APP_FONT && font !== SYSTEM_APP_FONT)
+    .toSorted(new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' }).compare)
+])
+const fontNames = computed(() => [
+  DEFAULT_APP_FONT,
+  t('Settings.Theme Settings.Font.System Default'),
+  ...fontValues.value.slice(2)
+])
+
+function updateAppFont(value) {
+  store.dispatch('updateAppFont', value)
+}
+
+async function loadSystemFonts() {
+  if (systemFontsPromise !== null) return
+
+  const fontRequest = process.env.IS_ELECTRON
+    ? window.ftElectron.getSystemFonts()
+    : typeof window.queryLocalFonts === 'function'
+      ? window.queryLocalFonts().then(fonts => fonts.map(({ family }) => family))
+      : Promise.resolve([])
+
+  systemFontsPromise = fontRequest
+    .then(fonts => {
+      const families = fonts
+        .map(font => font.trim())
+        .filter(Boolean)
+      systemFonts.value = [...new Set(families)]
+    })
+    .catch(error => {
+      console.error('Failed to load system fonts', error)
+      showToast(t('Settings.Theme Settings.Font.Unable to Load'))
+    })
+
+  await systemFontsPromise
+}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const barColor = computed(() => {

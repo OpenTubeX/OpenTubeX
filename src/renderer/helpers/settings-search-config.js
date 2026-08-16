@@ -38,6 +38,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'Tab Layout': ['Tab Layout'],
     'Toast Position': ['Toast Position'],
     'Base Theme': ['Base Theme'],
+    Font: ['App Font'],
     'Main Color Theme': ['Main Color Theme']
   },
   player: {

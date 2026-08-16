@@ -554,6 +554,10 @@ Settings:
       Icon Pack: Icon Pack
       Material Symbols: Material Symbols
       Remix Icon: Remix Icon
+    Font:
+      App Font: App font
+      System Default: System default
+      Unable to Load: Unable to load installed system fonts
     Always Show Scrollbars: Always Show Scrollbars
     Hide Side Bar Labels: Hide Side Bar Labels
     Hide OpenTubeX Header Logo: Hide OpenTubeX Header Logo

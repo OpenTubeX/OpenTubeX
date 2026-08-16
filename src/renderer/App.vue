@@ -363,6 +363,7 @@ import {
 import { translateWindowTitle } from './helpers/strings'
 import { initializePlatformInfo } from './helpers/platform'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
+import { getAppFontFamily } from './helpers/appFont'
 import { getTabAccentColor } from './constants/tabColors'
 import { getThumbnailListStyles } from './constants/thumbnailSize'
 import {
@@ -1747,12 +1748,14 @@ function clearSubscriptionTabAutoRefreshTimer(tab) {
 
 /** @type {import('vue').ComputedRef<string>} */
 const baseTheme = computed(() => store.getters.getBaseTheme)
+const appFont = computed(() => store.getters.getAppFont)
 let removeCustomThemeListener = () => {}
 const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
 const systemUsesDarkTheme = ref(systemColorScheme.matches)
 systemColorScheme.addEventListener('change', handleSystemColorSchemeChange)
 
 watch(baseTheme, updateTheme)
+watch(appFont, updateAppFont)
 watch(() => store.getters.getSystemLightTheme, updateTheme)
 watch(() => store.getters.getSystemDarkTheme, updateTheme)
 
@@ -1789,6 +1792,10 @@ function updateTheme() {
   const customTheme = customThemes.find(theme => `custom:${theme.id}` === effectiveTheme) ??
     (effectiveTheme === 'custom' ? customThemes[0] : null) ?? null
   applyThemeToDocument(effectiveTheme, mainColor.value, secColor.value, customTheme)
+}
+
+function updateAppFont() {
+  document.body.style.setProperty('--app-font-family', getAppFontFamily(appFont.value))
 }
 
 async function sanitizeAppearanceSettings(customThemes) {
@@ -1829,6 +1836,7 @@ function updateThumbnailListSize() {
 }
 
 updateTheme()
+updateAppFont()
 updateUiRoundness()
 updateScrollbarThumbWidth()
 updateThumbnailListSize()

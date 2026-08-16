@@ -223,6 +223,10 @@
     "ri": "flask-line",
     "material": "science-outline"
   },
+  "font": {
+    "ri": "font-family",
+    "material": "text-fields-rounded"
+  },
   "folder-open": {
     "ri": "folder-open-line",
     "material": "folder-open-outline"

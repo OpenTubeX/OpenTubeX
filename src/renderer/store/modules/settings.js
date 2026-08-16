@@ -23,6 +23,7 @@ import { DEFAULT_SEGMENT_PREFETCH_LIMIT } from '../../helpers/player/segmentPref
 import { currentIconPack, isIconPack, setIconPack } from '../../icons/iconPackState'
 import { resolveBaseTheme } from '../../../appearanceSettings.js'
 import { resolveColor } from '../../helpers/colors.js'
+import { DEFAULT_APP_FONT, normalizeAppFont } from '../../helpers/appFont.js'
 
 const YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING = 'ytDlpPlaybackEngineDefaultMigration'
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
@@ -200,6 +201,7 @@ const state = {
   confirmCloseWindowWithMultipleTabs: true,
   confirmLoadMultipleTabs: true,
   confirmUnloadMultipleTabs: true,
+  appFont: DEFAULT_APP_FONT,
   baseTheme: 'system',
   systemLightTheme: 'light',
   systemDarkTheme: 'dark',
@@ -630,6 +632,8 @@ const sideEffectHandlers = {
 const settingsWithSideEffects = Object.keys(sideEffectHandlers)
 
 export const NON_TRANSFERABLE_SETTINGS = new Set([
+  // Installed fonts are specific to the current operating system.
+  'appFont',
   /* Depends on process.env.IS_ELECTRON */
   // ProxySettings
   'useProxy',
@@ -764,6 +768,12 @@ async function updateValidatedSetting(commit, settingId, value) {
 }
 
 const customActions = {
+  updateAppFont: ({ commit }, value) => updateValidatedSetting(
+    commit,
+    'appFont',
+    normalizeAppFont(value)
+  ),
+
   updateBaseTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
     commit,
     'baseTheme',

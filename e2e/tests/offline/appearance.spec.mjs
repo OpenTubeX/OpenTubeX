@@ -202,6 +202,87 @@ test.describe('default appearance', () => {
     await page.emulateMedia({ colorScheme: 'dark' })
     await expect(page.locator('body')).toHaveClass(/catppuccinMocha/)
   })
+
+  test('lists installed fonts and persists the selected app font', async ({ app, page }) => {
+    await goToSettingsSection(page, 'theme')
+
+    const appFont = page.getByRole('combobox', { name: 'App font' })
+    await expect(appFont).toHaveText('Roboto')
+    await expect(page.locator('.select').filter({ has: appFont }).locator('.select-icon')).toBeVisible()
+    await appFont.click()
+
+    const fontDropdown = page.locator(`#${await appFont.getAttribute('aria-controls')}`)
+    const fontOptions = fontDropdown.getByRole('option')
+    await expect.poll(() => fontOptions.count()).toBeGreaterThan(3)
+    await expect(fontOptions.nth(0)).toHaveText('Roboto')
+    await expect(fontOptions.nth(1)).toHaveText('System default')
+    await expect(fontDropdown).toHaveClass(/above/)
+    expect(await page.evaluate(([buttonId, dropdownId]) => {
+      const button = document.getElementById(buttonId).getBoundingClientRect()
+      const dropdown = document.getElementById(dropdownId).getBoundingClientRect()
+      return Math.abs(button.top - dropdown.bottom - 4)
+    }, [await appFont.getAttribute('id'), await fontDropdown.getAttribute('id')])).toBeLessThanOrEqual(2)
+
+    await page.setViewportSize({ width: 600, height: 320 })
+    await expect.poll(() => fontDropdown.evaluate(menu => menu.clientWidth)).toBeLessThanOrEqual(584)
+    await appFont.evaluate(element => element.scrollIntoView({ block: 'center' }))
+    await expect.poll(() => fontDropdown.evaluate(menu => menu.scrollHeight - menu.clientHeight))
+      .toBeGreaterThan(0)
+    await fontDropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight })
+    await expect.poll(() => fontDropdown.evaluate(menu => menu.scrollTop)).toBeGreaterThan(0)
+    await page.setViewportSize({ width: 1200, height: 720 })
+    await expect.poll(() => fontDropdown.evaluate(menu => {
+      const lastOption = menu.querySelector('.selectOption:last-of-type')
+      const offsetTopFromDocument = (element) => {
+        let offsetTop = 0
+        for (let current = element; current !== null; current = current.offsetParent) {
+          offsetTop += current.offsetTop
+        }
+        return offsetTop
+      }
+      const contentEnd = offsetTopFromDocument(lastOption) - offsetTopFromDocument(menu) +
+        lastOption.offsetHeight + Number.parseFloat(getComputedStyle(menu).paddingBottom)
+      const maximumScrollTop = Math.max(0, contentEnd - menu.clientHeight)
+      return Math.abs(menu.scrollTop - maximumScrollTop) <= 1
+    })).toBe(true)
+    await appFont.evaluate(element => element.scrollIntoView({ block: 'center' }))
+    await expect(appFont).toBeInViewport()
+    await fontDropdown.evaluate(menu => { menu.scrollTop = 0 })
+
+    const selectedFont = (await fontOptions.nth(3).textContent()).trim()
+    await fontOptions.nth(3).click()
+    await expect(appFont).toHaveText(selectedFont)
+    expect(await page.locator('body').evaluate(body => getComputedStyle(body).fontFamily))
+      .toContain(selectedFont)
+
+    await appFont.click()
+    await expect(fontOptions.nth(0)).toHaveText('Roboto')
+    await expect(fontOptions.nth(1)).toHaveText('System default')
+    await expect(fontOptions.nth(3)).toHaveText(selectedFont)
+    await expect(fontOptions.nth(3)).toHaveAttribute('aria-selected', 'true')
+    await appFont.click()
+
+    await page.locator('.profileTrigger').click()
+    const profileSummary = page.locator('.profileSummary')
+    await expect(profileSummary).toBeVisible()
+    expect(await profileSummary.evaluate(element => getComputedStyle(element).fontFamily))
+      .toContain(selectedFont)
+
+    ;({ page } = await app.relaunch())
+    expect(await page.locator('body').evaluate(body => getComputedStyle(body).fontFamily))
+      .toContain(selectedFont)
+
+    await goToSettingsSection(page, 'theme')
+    const relaunchedAppFont = page.getByRole('combobox', { name: 'App font' })
+    await relaunchedAppFont.click()
+    const relaunchedFontOptions = page.locator(`#${await relaunchedAppFont.getAttribute('aria-controls')}`)
+      .getByRole('option')
+    await expect.poll(() => relaunchedFontOptions.count()).toBeGreaterThan(3)
+    await expect(relaunchedFontOptions.nth(0)).toHaveText('Roboto')
+    await expect(relaunchedFontOptions.nth(1)).toHaveText('System default')
+    await expect(relaunchedFontOptions.nth(3)).toHaveText(selectedFont)
+    await expect(relaunchedFontOptions.nth(3)).toHaveAttribute('aria-selected', 'true')
+  })
 })
 
 test.describe('custom theme editor', () => {

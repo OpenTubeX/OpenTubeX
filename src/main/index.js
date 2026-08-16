@@ -9,6 +9,7 @@ import path from 'path'
 import cp from 'child_process'
 import { randomUUID } from 'crypto'
 import { load as loadYaml } from 'js-yaml'
+import { getFonts } from 'font-list'
 
 import {
   IpcChannels,
@@ -3453,6 +3454,16 @@ function runApp() {
       // we should switch to getPreferredSystemLanguages at some point and iterate through until we find a supported locale
       return app.getSystemLocale()
     }
+  })
+
+  ipcMain.handle(IpcChannels.GET_SYSTEM_FONTS, async (event) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) return []
+
+    const fonts = await getFonts({ disableQuoting: true })
+    return [...new Set(fonts
+      .filter(font => typeof font === 'string')
+      .map(font => font.trim())
+      .filter(Boolean))]
   })
 
   ipcMain.handle(IpcChannels.IS_WAYLAND_PLATFORM, (event) => {
