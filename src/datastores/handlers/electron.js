@@ -29,6 +29,10 @@ class Settings {
   static upsert(_id, value) {
     return dbSettings(DBActions.GENERAL.UPSERT, { _id, value })
   }
+
+  static delete(_id) {
+    return dbSettings(DBActions.GENERAL.DELETE, _id)
+  }
 }
 
 class History {

@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
+import { DBActions } from '../../../src/constants.js'
 import {
   test,
   expect,
@@ -2192,12 +2193,18 @@ test.describe('Downloads placement migration', () => {
   test.use({ seed: { settings: { moveDownloadsToQuickSettings: false } } })
 
   test('preserves an existing app header placement choice', async ({ app }) => {
-    await expect.poll(async () => {
-      const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+    await expect.poll(() => app.page.evaluate(async (findAction) => {
+      const settings = Object.fromEntries(
+        (await window.ftElectron.dbSettings(findAction)).map(({ _id, value }) => [_id, value])
       )
-      return settings.moveDownloadsToAppHeader
-    }).toBe(true)
+      return {
+        legacyPlacement: settings.moveDownloadsToQuickSettings,
+        headerPlacement: settings.moveDownloadsToAppHeader
+      }
+    }, DBActions.GENERAL.FIND)).toEqual({
+      legacyPlacement: undefined,
+      headerPlacement: true
+    })
 
     await expect(app.page.locator('.topNav .downloadsButton')).toBeVisible()
   })

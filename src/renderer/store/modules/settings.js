@@ -775,6 +775,16 @@ const customActions = {
     normalizeAppFont(value)
   ),
 
+  updateMoveDownloadsToAppHeader: async ({ commit }, value) => {
+    try {
+      await DBSettingHandlers.upsert('moveDownloadsToAppHeader', value)
+      commit('setMoveDownloadsToAppHeader', value)
+      await DBSettingHandlers.delete('moveDownloadsToQuickSettings')
+    } catch (error) {
+      console.error(error)
+    }
+  },
+
   updateBaseTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
     commit,
     'baseTheme',

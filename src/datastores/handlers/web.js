@@ -18,6 +18,10 @@ class Settings {
   static upsert(_id, value) {
     return baseHandlers.settings.upsert(_id, value)
   }
+
+  static delete(_id) {
+    return baseHandlers.settings.delete(_id)
+  }
 }
 
 // For the settings we use the wrapper class to hide some methods only needed in the Electron main process
