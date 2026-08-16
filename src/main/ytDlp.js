@@ -1798,6 +1798,7 @@ async function startYtDlpDownload(
         if (videoId === status.videoId) {
           if (typeof title === 'string' && title !== '') status.title = title.slice(0, 255)
           if (typeof thumbnail === 'string') status.thumbnail = thumbnail.slice(0, 2048)
+          else if (thumbnail === null) status.thumbnail = ''
           sendStatus(true)
         }
       } catch {

@@ -421,6 +421,36 @@ test.describe('video downloads', () => {
     await expect(downloadRow.locator('.downloadThumbnail')).toHaveAttribute('src', currentThumbnail)
   })
 
+  test('clears a stale feed thumbnail when yt-dlp finds none', async ({ app, page }) => {
+    const downloadedFile = path.join(app.userDataDir, 'no-thumbnail-demo.webm')
+    const executable = path.join(app.userDataDir, 'no-thumbnail-yt-dlp.sh')
+    await writeFile(downloadedFile, '')
+    await writeFile(executable, [
+      '#!/bin/sh',
+      'printf \'__OPENTUBEX_METADATA__:"eeeeeeeeeee"\\t"Current video title"\\tnull\\n\'',
+      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\t640\\t360\\t${downloadedFile}\\n'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      title: 'Translated feed title',
+      thumbnail: 'https://images.example/stale-feed-thumbnail.jpg',
+      mode: 'video'
+    }))
+    await expect.poll(() => page.evaluate(async (id) => {
+      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)
+    }, result.id)).toMatchObject({
+      title: 'Current video title',
+      thumbnail: '',
+      status: 'completed'
+    })
+  })
+
   test('plays a downloaded video locally and reconciles it after external deletion', async ({ app, page }) => {
     const downloadedFile = path.join(app.userDataDir, 'downloaded-demo.webm')
     const downloadedAudioFile = path.join(app.userDataDir, 'downloaded-audio-alternative.wav')
