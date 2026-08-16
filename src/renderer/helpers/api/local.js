@@ -8,7 +8,7 @@ import { loadSearchContinuation } from '../search-continuation'
 import { parseLocalShortLinkedVideo } from '../player/shorts'
 import { getPaidPromotionDurationMs } from '../player/paidPromotion'
 import { getLocalPremiereState } from '../premiere'
-import { parseLocalVideoCollaborators } from '../video-collaborators'
+import { isCollaborativeVideoAuthor, parseLocalVideoCollaborators } from '../video-collaborators'
 import {
   CHANNEL_HANDLE_REGEX,
   calculatePublishedDate,
@@ -1899,7 +1899,7 @@ export function parseLocalListVideo(item, channelId, channelName) {
       title: video.title.text?.trim(),
       author: video.author.name !== 'N/A' ? video.author.name : channelName,
       authorId: video.author.id !== 'N/A' ? video.author.id : channelId,
-      hasCollaborators: video.author.id === 'N/A' && COLLABORATIVE_AUTHOR_TEXT_REGEX.test(video.author.name),
+      hasCollaborators: video.author.id === 'N/A' && isCollaborativeVideoAuthor(video.author.name),
       description: video.description,
       viewCount,
       published,
@@ -1925,8 +1925,6 @@ const PREMIERE_TIME_REGEX = /^premieres? /i
 const UPCOMING_TIME_REGEX = /^(premieres?|scheduled for) /i
 // Sometimes got `Streamed N (unit) ago`
 const PUBLISH_TIME_REGEX = /^(streamed )?\d+ ?\w+? ago/i
-const COLLABORATIVE_AUTHOR_TEXT_REGEX = /\s+and\s+/i
-
 /**
  * @param {string | undefined} text
  */
@@ -2102,7 +2100,7 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
       const imageAuthorId = lockupView.metadata.image?.renderer_context?.command_context?.on_tap?.payload?.browseId
       const author = authorPart?.text ?? channelName
       const authorId = authorPart?.endpoint?.payload?.browseId ?? imageAuthorId ?? channelId
-      const hasCollaborators = authorPart?.endpoint == null && COLLABORATIVE_AUTHOR_TEXT_REGEX.test(author ?? '')
+      const hasCollaborators = authorPart?.endpoint == null && isCollaborativeVideoAuthor(author)
 
       return {
         type: 'video',

@@ -1,7 +1,17 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { getLocalVideoAvatarUrl, parseLocalVideoCollaborators } from '../../src/renderer/helpers/video-collaborators.js'
+import {
+  getLocalVideoAvatarUrl,
+  isCollaborativeVideoAuthor,
+  parseLocalVideoCollaborators
+} from '../../src/renderer/helpers/video-collaborators.js'
+
+test('recognizes a collaboration byline without treating ordinary channel names as collaborations', () => {
+  assert.equal(isCollaborativeVideoAuthor('Creator One and Creator Two'), true)
+  assert.equal(isCollaborativeVideoAuthor('Creator One & Creator Two'), false)
+  assert.equal(isCollaborativeVideoAuthor(undefined), false)
+})
 
 test('uses the primary collaborator avatar without reading the attachment-backed owner thumbnail', () => {
   const author = {

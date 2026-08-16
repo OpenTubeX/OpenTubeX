@@ -383,6 +383,7 @@ import { getLocalVideoCollaborators } from '../../helpers/api/local.js'
 import { isHistoryEntryWatched } from '../../helpers/history.js'
 import { getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries.js'
 import { deArrowData, deArrowThumbnail, getSponsorBlockVideoLabel } from '../../helpers/sponsorblock.js'
+import { isCollaborativeVideoAuthor } from '../../helpers/video-collaborators.js'
 import {
   morphThumbnailIntoNewTab,
   requestWatchPageViewTransition
@@ -1369,7 +1370,10 @@ const deArrowCache = computed(() => store.getters.getDeArrowCache[id.value])
 
 const disableChannelLinks = computed(() => store.getters.getDisableChannelLinks)
 
-const shouldShowCollaboratorsButton = computed(() => !!props.data.hasCollaborators && channelName.value !== null)
+const shouldShowCollaboratorsButton = computed(() => channelName.value !== null && (
+  !!props.data.hasCollaborators ||
+  (channelId.value === null && isCollaborativeVideoAuthor(channelName.value))
+))
 
 async function handleWatchPageLinkClick(event) {
   // `auxclick` also fires for the right mouse button after `contextmenu`.

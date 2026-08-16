@@ -6,6 +6,18 @@
  * @property {string} subtitle
  */
 
+const COLLABORATIVE_AUTHOR_TEXT_REGEX = /\s+and\s+/i
+
+/**
+ * YouTube replaces the regular channel link with a collaboration dialog for
+ * videos with multiple authors.
+ * @param {string | undefined} author
+ * @returns {boolean}
+ */
+export function isCollaborativeVideoAuthor(author) {
+  return typeof author === 'string' && COLLABORATIVE_AUTHOR_TEXT_REGEX.test(author)
+}
+
 /**
  * @param {import('youtubei.js').YT.VideoInfo} videoInfo
  * @returns {LocalVideoCollaborator[]}
