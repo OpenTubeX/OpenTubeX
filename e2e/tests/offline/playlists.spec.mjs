@@ -220,12 +220,25 @@ test.describe('custom playlist order', () => {
     await page.getByText('Large custom playlist').click()
 
     const expectHeaderBelowNavigation = async () => {
-      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+      const playlistHeader = page.locator('.playlistInfoContainer')
+      await expect(playlistHeader).toBeVisible()
+      await page.evaluate(() => window.scrollTo(0, Number.MAX_SAFE_INTEGER))
+      await expect.poll(async () => page.evaluate(() => {
+        const previousScrollY = window.scrollY
+        window.scrollTo(0, Number.MAX_SAFE_INTEGER)
+        return window.scrollY - previousScrollY
+      })).toBe(0)
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
 
       await expect.poll(async () => {
-        const header = await page.locator('.playlistInfoContainer').boundingBox()
-        const navigation = await page.locator('.topNav').boundingBox()
-        return header != null && navigation != null && header.y >= navigation.y + navigation.height
+        const [header, navigation, viewportHeight] = await Promise.all([
+          playlistHeader.boundingBox(),
+          page.locator('.topNav').boundingBox(),
+          page.evaluate(() => window.innerHeight)
+        ])
+        return header != null && navigation != null &&
+          header.y >= navigation.y + navigation.height &&
+          header.y < viewportHeight && header.y + header.height > 0
       }).toBe(true)
     }
 

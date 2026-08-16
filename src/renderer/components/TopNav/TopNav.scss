@@ -10,9 +10,9 @@
 .topNav {
   background-color: var(--card-bg-color);
   box-shadow: 0 2px 1px 0 var(--primary-shadow-color);
-  block-size: 60px;
+  block-size: var(--top-nav-height, 60px);
   inset-inline: 0;
-  line-height: 60px;
+  line-height: var(--top-nav-height, 60px);
   position: sticky;
   inset-block-start: 0;
   inline-size: 100%;
@@ -54,10 +54,10 @@
 
 /* Only the top tab bar sits above the navigation. */
 .app.topTabs .topNav {
-  inset-block-start: 32px;
+  inset-block-start: var(--top-tab-bar-height, 32px);
 
   @media only screen and (width <= 680px) {
-    inset-block-start: 32px;
+    inset-block-start: var(--top-tab-bar-height, 32px);
   }
 }
 
@@ -299,7 +299,7 @@
       background-color: var(--side-nav-color);
       inset-inline: 0;
       position: fixed;
-      inset-block-start: 60px;
+      inset-block-start: var(--top-nav-height, 60px);
 
       @include top-nav-is-colored {
         background-color: var(--primary-color-hover);
@@ -320,13 +320,13 @@
    the same vertical/horizontal offsets as the top nav when a tab bar is present. */
 .app.topTabs .middle .searchContainer {
   @media only screen and (width <= 680px) {
-    inset-block-start: 92px;
+    inset-block-start: calc(var(--top-tab-bar-height, 32px) + var(--top-nav-height, 60px));
   }
 }
 
 .app.verticalTabs .middle .searchContainer {
   @media only screen and (width <= 680px) {
-    inset-block-start: 60px;
+    inset-block-start: var(--top-nav-height, 60px);
   }
 }
 

@@ -4,7 +4,9 @@
 }
 
 .app {
-  --top-nav-sticky-offset: 60px;
+  --top-nav-height: 60px;
+  --top-tab-bar-height: 32px;
+  --top-nav-sticky-offset: var(--top-nav-height);
 
   display: flex;
   flex-wrap: wrap;
@@ -477,7 +479,7 @@
 }
 
 .app.topTabs {
-  --top-nav-sticky-offset: 92px;
+  --top-nav-sticky-offset: calc(var(--top-tab-bar-height) + var(--top-nav-height));
 }
 
 @media only screen and (width <= 680px) {
