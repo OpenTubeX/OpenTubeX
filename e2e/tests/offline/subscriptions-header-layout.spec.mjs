@@ -82,6 +82,37 @@ function headerBoxes (page) {
 }
 
 test.describe('subscriptions header layout', () => {
+  test('keeps the New feed sort control compact beside refresh', async ({ app, page, attachScreenshot }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await setWindowWidth(app, page, 340)
+
+    const layout = await page.evaluate(() => {
+      const toBox = element => {
+        const rect = element.getBoundingClientRect()
+        return { start: rect.left, end: rect.right, top: rect.top, bottom: rect.bottom }
+      }
+      const select = document.querySelector('.headerSortSelect .select-text')
+
+      return {
+        select: toBox(select),
+        label: toBox(document.querySelector('.headerSortSelect .select-label')),
+        refresh: toBox(document.querySelector('.headerRefreshWidget .refreshButton')),
+        selectedText: select.textContent.trim()
+      }
+    })
+
+    expect(layout.selectedText).toBe('Newest first')
+    expect(layout.select.end).toBeLessThanOrEqual(layout.refresh.start)
+    expect(Math.abs(
+      (layout.select.top + layout.select.bottom) / 2 -
+      (layout.refresh.top + layout.refresh.bottom) / 2
+    )).toBeLessThanOrEqual(1)
+    expect(layout.label.top).toBeGreaterThanOrEqual(layout.select.top)
+    expect(layout.label.bottom).toBeLessThanOrEqual(layout.select.bottom)
+    await attachScreenshot('compact New feed header actions')
+  })
+
   test('puts the tabs beside the title when they fit', async ({ page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
 

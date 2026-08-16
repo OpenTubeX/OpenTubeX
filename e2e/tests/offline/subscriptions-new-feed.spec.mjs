@@ -195,6 +195,77 @@ test.describe('new subscriptions feed', () => {
   })
 })
 
+test.describe('new subscriptions feed sorting', () => {
+  const newestVideo = video('sort-newest-video', 'Newest video', now - HOUR, {
+    isNewInSubscriptionFeed: true
+  })
+  const oldestVideo = video('sort-oldest-video', 'Oldest video', now - 3 * HOUR, {
+    isNewInSubscriptionFeed: true
+  })
+  const newestPost = post('sort-newest-post', 'Newest post', now - 2 * HOUR)
+  const oldestPost = post('sort-oldest-post', 'Oldest post', now - 4 * HOUR)
+
+  test.use({
+    seed: {
+      settings: commonSettings,
+      profiles: [profile()],
+      subscriptionCache: [{
+        _id: CHANNEL_ID,
+        videos: [oldestVideo, newestVideo],
+        videosTimestamp: new Date(now).toISOString(),
+        shorts: [],
+        shortsTimestamp: new Date(now).toISOString(),
+        liveStreams: [],
+        liveStreamsTimestamp: new Date(now).toISOString(),
+        communityPosts: [oldestPost, newestPost],
+        communityPostsTimestamp: new Date(now).toISOString()
+      }]
+    }
+  })
+
+  test('sorts every section oldest first and persists the preference', async ({ app, page }) => {
+    const videoTitles = page => page.locator('.newFeed > .autoGrid .ft-list-video').evaluateAll(cards => {
+      return cards.map(card => card.querySelector('.title').textContent.trim())
+    })
+    const postTexts = page => page.locator('.newFeed .postsSection .ft-list-post').evaluateAll(posts => {
+      return posts.map(post => post.querySelector('.postText').textContent.trim())
+    })
+
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+
+    await expect.poll(() => videoTitles(page)).toEqual(['Newest video', 'Oldest video'])
+    await expect.poll(() => postTexts(page)).toEqual(['Newest post', 'Oldest post'])
+
+    const sortSelect = page.locator('.headerSortSelect').getByRole('combobox')
+    await expect(sortSelect).toHaveText('Newest first')
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setNewSubscriptionFeedSortBy', 'unsupported')
+    })
+    await expect(sortSelect).toHaveText('Newest first')
+    await expect.poll(() => videoTitles(page)).toEqual(['Newest video', 'Oldest video'])
+
+    await sortSelect.click()
+    await page.getByRole('option', { name: 'Oldest first' }).click()
+
+    await expect(sortSelect).toHaveText('Oldest first')
+    await expect.poll(() => videoTitles(page)).toEqual(['Oldest video', 'Newest video'])
+    await expect.poll(() => postTexts(page)).toEqual(['Oldest post', 'Newest post'])
+    await expect.poll(() => page.evaluate(() => {
+      return document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getNewSubscriptionFeedSortBy
+    })).toBe('oldest')
+
+    const relaunched = await app.relaunch()
+    await goTo(relaunched.page, 'subscriptions')
+    await relaunched.page.locator('[data-subscription-feed-tab="all"]').click()
+
+    await expect(relaunched.page.locator('.headerSortSelect').getByRole('combobox')).toHaveText('Oldest first')
+    await expect.poll(() => videoTitles(relaunched.page)).toEqual(['Oldest video', 'Newest video'])
+    await expect.poll(() => postTexts(relaunched.page)).toEqual(['Oldest post', 'Newest post'])
+  })
+})
+
 test.describe('new feed settings and seen state', () => {
   const videoPost = {
     ...post('new-post-2', 'New video post', now - 40 * 60000),

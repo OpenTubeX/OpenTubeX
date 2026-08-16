@@ -169,21 +169,35 @@
               {{ $t('Subscriptions.Mark All as Seen') }}
             </button>
           </div>
-          <FtRefreshWidget
+          <div
             v-if="currentTabPanel !== null"
-            embedded
-            class="headerRefreshWidget"
-            :disable-refresh="subscriptionFeedRefreshInProgress || currentTabPanel.isLoading || activeSubscriptionList.length === 0"
-            :last-refresh-timestamp="currentTabPanel.lastRefreshTimestamp"
-            :next-auto-refresh-timestamp="currentTabPanel.nextAutoRefreshTimestamp"
-            :next-auto-refresh-tooltip="currentTabPanel.nextAutoRefreshTooltip"
-            :next-auto-refresh-at="currentAutoRefresh.timestamp"
-            :auto-refresh-interval="currentAutoRefresh.interval"
-            :title="currentTabPanel.refreshTitle"
-            :refresh-in-progress="subscriptionFeedRefreshInProgress"
-            @click="refreshCurrentTab"
-            @cancel="cancelRefresh"
-          />
+            class="headerActions"
+          >
+            <FtSelect
+              v-if="currentTab === 'new'"
+              class="headerSortSelect"
+              :placeholder="$t('Global.Sort By')"
+              :value="newFeedSortBy"
+              :select-names="newFeedSortByNames"
+              :select-values="NEW_FEED_SORT_BY_VALUES"
+              :icon="newFeedSortByIcon"
+              @change="updateNewFeedSortBy"
+            />
+            <FtRefreshWidget
+              embedded
+              class="headerRefreshWidget"
+              :disable-refresh="subscriptionFeedRefreshInProgress || currentTabPanel.isLoading || activeSubscriptionList.length === 0"
+              :last-refresh-timestamp="currentTabPanel.lastRefreshTimestamp"
+              :next-auto-refresh-timestamp="currentTabPanel.nextAutoRefreshTimestamp"
+              :next-auto-refresh-tooltip="currentTabPanel.nextAutoRefreshTooltip"
+              :next-auto-refresh-at="currentAutoRefresh.timestamp"
+              :auto-refresh-interval="currentAutoRefresh.interval"
+              :title="currentTabPanel.refreshTitle"
+              :refresh-in-progress="subscriptionFeedRefreshInProgress"
+              @click="refreshCurrentTab"
+              @cancel="cancelRefresh"
+            />
+          </div>
         </div>
       </div>
       <SubscriptionsVideos
@@ -250,6 +264,7 @@ import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtPrompt from '../../components/FtPrompt/FtPrompt.vue'
 import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vue'
+import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import SubscriptionsNew from '../../components/SubscriptionsNew.vue'
 import SubscriptionsVideos from '../../components/SubscriptionsVideos.vue'
 import SubscriptionsLive from '../../components/SubscriptionsLive.vue'
@@ -257,6 +272,7 @@ import SubscriptionsShorts from '../../components/SubscriptionsShorts.vue'
 import SubscriptionsPosts from '../../components/SubscriptionsPosts.vue'
 
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
+import { getIconForSortPreference } from '../../helpers/utils'
 import store from '../../store/index'
 import { useTabContext } from '../../tabs/TabContext'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
@@ -283,6 +299,7 @@ const {
   showRefreshWarning: showAllFeedsRefreshWarning
 } = useRefreshAllSubscriptionFeeds()
 const currentTabStorageKey = 'Subscriptions/currentTab'
+const NEW_FEED_SORT_BY_VALUES = ['newest', 'oldest']
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSubscriptionsVideos = computed(() => {
@@ -311,6 +328,22 @@ const showNewSubscriptionFeedIndicators = computed(() => {
 const showNewSubscriptionFeed = computed(() => {
   return store.getters.getShowNewSubscriptionFeed
 })
+
+const newFeedSortBy = computed(() => {
+  const value = store.getters.getNewSubscriptionFeedSortBy
+  return NEW_FEED_SORT_BY_VALUES.includes(value) ? value : 'newest'
+})
+const newFeedSortByNames = computed(() => [
+  t('Subscriptions.Newest First'),
+  t('Subscriptions.Oldest First')
+])
+const newFeedSortByIcon = computed(() => getIconForSortPreference(newFeedSortBy.value))
+
+function updateNewFeedSortBy(value) {
+  if (NEW_FEED_SORT_BY_VALUES.includes(value)) {
+    store.dispatch('updateNewSubscriptionFeedSortBy', value)
+  }
+}
 
 const activeSubscriptionList = computed(() => {
   return store.getters.getActiveProfile.subscriptions

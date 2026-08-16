@@ -146,6 +146,14 @@ const newContentByCategory = computed(() => {
 })
 
 const forbiddenTitles = computed(() => store.getters.getForbiddenTitlesParsed)
+const sortBy = computed(() => {
+  return store.getters.getNewSubscriptionFeedSortBy === 'oldest' ? 'oldest' : 'newest'
+})
+
+function applySortPreference(entries) {
+  return sortBy.value === 'oldest' ? entries.toReversed() : entries
+}
+
 const newMediaByCategory = computed(() => {
   let mediaEntries = ['videos', 'shorts', 'live'].flatMap(category => {
     return newContentByCategory.value[category].map(entry => ({ category, entry }))
@@ -181,7 +189,7 @@ const newMediaByCategory = computed(() => {
     })
   }
 
-  return mediaEntries.reduce((entries, { category, entry }) => {
+  const entriesByCategory = mediaEntries.reduce((entries, { category, entry }) => {
     entries[category].push(entry)
     return entries
   }, {
@@ -189,17 +197,25 @@ const newMediaByCategory = computed(() => {
     shorts: [],
     live: []
   })
+
+  Object.keys(entriesByCategory).forEach(category => {
+    entriesByCategory[category] = applySortPreference(entriesByCategory[category])
+  })
+
+  return entriesByCategory
 })
 
 const newVideos = computed(() => newMediaByCategory.value.videos)
 const newShorts = computed(() => newMediaByCategory.value.shorts)
 const newLive = computed(() => newMediaByCategory.value.live)
-const newPosts = computed(() => newContentByCategory.value.posts.filter(entry => {
-  const lowerCaseAuthor = entry.author?.toLowerCase()
+const newPosts = computed(() => applySortPreference(
+  newContentByCategory.value.posts.filter(entry => {
+    const lowerCaseAuthor = entry.author?.toLowerCase()
 
-  return entry.postId != null &&
-    !forbiddenTitles.value.some(text => lowerCaseAuthor?.includes(text))
-}))
+    return entry.postId != null &&
+      !forbiddenTitles.value.some(text => lowerCaseAuthor?.includes(text))
+  })
+))
 const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
 
 const hasAdditionalContent = computed(() => {
