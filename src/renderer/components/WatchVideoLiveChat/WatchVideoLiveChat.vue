@@ -144,11 +144,12 @@
     <div
       v-if="isLoading"
       class="liveChatSkeleton"
+      :style="{ blockSize: chatHeight }"
       data-tab-loading-indicator
       aria-hidden="true"
     >
       <div
-        v-for="index in 8"
+        v-for="index in 24"
         :key="index"
         class="liveChatSkeletonMessage"
       >

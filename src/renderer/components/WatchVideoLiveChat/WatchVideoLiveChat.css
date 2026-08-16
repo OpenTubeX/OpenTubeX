@@ -13,14 +13,14 @@
   flex-direction: column;
   box-sizing: border-box;
   min-block-size: 0;
-  padding-block: 8px;
-  gap: 14px;
+  overflow: hidden;
 }
 
 .liveChatSkeletonMessage {
   display: flex;
   align-items: center;
-  gap: 10px;
+  padding-block: 5px 7px;
+  gap: 5px;
 }
 
 .liveChatSkeletonAvatar {
@@ -32,7 +32,7 @@
 .liveChatSkeletonContent {
   display: flex;
   flex: 1 1 auto;
-  flex-direction: column;
+  align-items: center;
   gap: 6px;
 }
 
@@ -43,19 +43,19 @@
 }
 
 .liveChatSkeletonAuthor {
-  inline-size: 28%;
+  inline-size: 24%;
 }
 
 .liveChatSkeletonText {
-  inline-size: 65%;
+  inline-size: 55%;
 }
 
 .liveChatSkeletonMessage:nth-child(3n + 1) .liveChatSkeletonText {
-  inline-size: 82%;
+  inline-size: 70%;
 }
 
 .liveChatSkeletonMessage:nth-child(3n + 2) .liveChatSkeletonText {
-  inline-size: 48%;
+  inline-size: 40%;
 }
 
 .relative {
@@ -617,4 +617,8 @@
   display: flex;
   justify-content: space-between;
   margin-block: 1em;
+}
+
+.card.hasError .titleContainer {
+  margin-block-start: 0;
 }
