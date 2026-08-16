@@ -329,7 +329,10 @@ const showNewSubscriptionFeed = computed(() => {
   return store.getters.getShowNewSubscriptionFeed
 })
 
-const newFeedSortBy = computed(() => store.getters.getNewSubscriptionFeedSortBy)
+const newFeedSortBy = computed(() => {
+  const value = store.getters.getNewSubscriptionFeedSortBy
+  return NEW_FEED_SORT_BY_VALUES.includes(value) ? value : 'newest'
+})
 const newFeedSortByNames = computed(() => [
   t('Subscriptions.Newest First'),
   t('Subscriptions.Oldest First')

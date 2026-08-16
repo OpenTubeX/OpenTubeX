@@ -239,6 +239,13 @@ test.describe('new subscriptions feed sorting', () => {
 
     const sortSelect = page.locator('.headerSortSelect').getByRole('combobox')
     await expect(sortSelect).toHaveText('Newest first')
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setNewSubscriptionFeedSortBy', 'unsupported')
+    })
+    await expect(sortSelect).toHaveText('Newest first')
+    await expect.poll(() => videoTitles(page)).toEqual(['Newest video', 'Oldest video'])
+
     await sortSelect.click()
     await page.getByRole('option', { name: 'Oldest first' }).click()
 

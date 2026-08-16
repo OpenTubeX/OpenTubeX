@@ -146,7 +146,9 @@ const newContentByCategory = computed(() => {
 })
 
 const forbiddenTitles = computed(() => store.getters.getForbiddenTitlesParsed)
-const sortBy = computed(() => store.getters.getNewSubscriptionFeedSortBy)
+const sortBy = computed(() => {
+  return store.getters.getNewSubscriptionFeedSortBy === 'oldest' ? 'oldest' : 'newest'
+})
 
 function applySortPreference(entries) {
   return sortBy.value === 'oldest' ? entries.toReversed() : entries
