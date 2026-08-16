@@ -215,6 +215,40 @@ test.describe('custom playlist order', () => {
     await expect(page.locator('.playlistItemsCard .h3Title').first()).toHaveText('Custom playlist video 3')
   })
 
+  test('keeps the playlist header below the navigation while scrolling the grid', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Large custom playlist').click()
+
+    const expectHeaderBelowNavigation = async () => {
+      const playlistHeader = page.locator('.playlistInfoContainer')
+      await expect(playlistHeader).toBeVisible()
+      await page.evaluate(() => window.scrollTo(0, Number.MAX_SAFE_INTEGER))
+      await expect.poll(async () => page.evaluate(() => {
+        const previousScrollY = window.scrollY
+        window.scrollTo(0, Number.MAX_SAFE_INTEGER)
+        return window.scrollY - previousScrollY
+      })).toBe(0)
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+
+      await expect.poll(async () => {
+        const [header, navigation, viewportHeight] = await Promise.all([
+          playlistHeader.boundingBox(),
+          page.locator('.topNav').boundingBox(),
+          page.evaluate(() => window.innerHeight)
+        ])
+        return header != null && navigation != null &&
+          header.y >= navigation.y + navigation.height &&
+          header.y < viewportHeight && header.y + header.height > 0
+      }).toBe(true)
+    }
+
+    await expectHeaderBelowNavigation()
+
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
+    await expectHeaderBelowNavigation()
+  })
+
   test('moves a video to the top from its options menu', async ({ page }) => {
     await goTo(page, 'userplaylists')
     await page.getByText('Large custom playlist').click()
