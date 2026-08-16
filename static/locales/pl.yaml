@@ -341,6 +341,7 @@ Settings:
       Everforest Dark Low: Everforest Lekko Ciemny
       Everforest Light Medium: Everforest Jasny
       Catppuccin Latte: Catppuccin Latte
+      Custom: Niestandardowe
     Main Color Theme:
       Main Color Theme: 'Główny kolor motywu'
       Red: 'Czerwony'
@@ -454,6 +455,49 @@ Settings:
       Top Left: Górny lewy
       Top Center: Górny środek
       Top Right: Górny prawy
+    Icon Pack:
+      Icon Pack: Pakiet ikon
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Czcionka aplikacji
+      System Default: Domyślna systemowa
+      Unable to Load: Nie można załadować zainstalowanych czcionek systemowych
+    Light Theme: Jasny motyw
+    Dark Theme: Ciemny motyw
+    Custom Theme:
+      Create Custom Theme: Utwórz niestandardowy motyw
+      Edit Custom Theme: Edytuj niestandardowy motyw
+      Custom Theme Creator: Kreator niestandardowych motywów
+      Theme Name: Nazwa motywu
+      Is Dark Theme: Ciemny motyw
+      Based On: Na podstawie
+      Import Theme: Importuj motyw
+      Export Theme: Eksportuj motyw
+      Delete Theme: Usuń motyw
+      Delete Theme Confirmation: Usunąć „{name}”? Tego nie będzie można już cofnąć.
+      Save and Apply: Zapisz i zastosuj
+      Discard Changes: Odrzuć zmiany
+      Reset Colors: Zresetuj kolory i efekty
+      Theme File: Plik motywu OpenTubeX
+      Theme Saved: Niestandardowy motyw został zapisany i zastosowany
+      Theme Imported: Motyw zaimportowany do edytora
+      Theme Exported: Motyw wyeksportowany
+      Theme Deleted: Motyw niestandardowy został usunięty
+      Unable to Load: Nie można załadować niestandardowego motywu
+      Unable to Save: Nie można zapisać niestandardowego motywu
+      Unable to Export: Nie można wyeksportować niestandardowego motywu
+      Unable to Delete: Nie można usunąć niestandardowego motywu
+      Invalid Theme File: Nieprawidłowy plik motywu niestandardowego
+      Colors:
+        Main text: Tekst główny
+        Secondary text: Tekst pomocniczy
+        Subtle text: Subtelny tekst
+        Borders and dividers: Granice i podziały
+        Subtle surfaces and indicators: Subtelne powierzchnie i wskaźniki
+        Title text: Tekst tytułowy
+        Logo icon: Ikona logo
+        Logo text: Tekst logo
   Player Settings:
     Player Settings: 'Odtwarzacz'
     Play Next Video: 'Automatycznie otwórz polecane wideo'
