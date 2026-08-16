@@ -403,6 +403,8 @@ function importFreeTubeSubscriptions(textDecode) {
     'icon'
   ]
   const knownKeys = [...requiredKeys, ...optionalKeys]
+  const updatedPrimaryProfile = primaryProfile.value
+  let shouldUpdatePrimaryProfile = false
 
   textDecode.forEach((profileData) => {
     // We would technically already be done by the time the data is parsed,
@@ -426,17 +428,8 @@ function importFreeTubeSubscriptions(textDecode) {
     } else {
       if (profileObject._id === MAIN_PROFILE_ID) {
         if (Object.hasOwn(profileObject, 'icon')) {
-          primaryProfile.value.icon = profileObject.icon
+          updatedPrimaryProfile.icon = profileObject.icon
         }
-        primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(profileObject.subscriptions)
-        primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.filter((sub, index) => {
-          const profileIndex = primaryProfile.value.subscriptions.findIndex((x) => {
-            return x.id === sub.id
-          })
-
-          return profileIndex === index
-        })
-        store.dispatch('updateProfile', primaryProfile.value)
       } else {
         const existingProfileIndex = profileList.value.findIndex((profile) => {
           return profile._id !== MAIN_PROFILE_ID && profile.name === profileObject.name
@@ -469,19 +462,23 @@ function importFreeTubeSubscriptions(textDecode) {
             store.dispatch('updateProfile', profileObject)
           }
         }
-
-        primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(profileObject.subscriptions)
-        primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.filter((sub, index) => {
-          const profileIndex = primaryProfile.value.subscriptions.findIndex((x) => {
-            return x.id === sub.id
-          })
-
-          return profileIndex === index
-        })
-        store.dispatch('updateProfile', primaryProfile.value)
       }
+
+      updatedPrimaryProfile.subscriptions = updatedPrimaryProfile.subscriptions.concat(profileObject.subscriptions)
+      updatedPrimaryProfile.subscriptions = updatedPrimaryProfile.subscriptions.filter((sub, index) => {
+        const profileIndex = updatedPrimaryProfile.subscriptions.findIndex((x) => {
+          return x.id === sub.id
+        })
+
+        return profileIndex === index
+      })
+      shouldUpdatePrimaryProfile = true
     }
   })
+
+  if (shouldUpdatePrimaryProfile) {
+    store.dispatch('updateProfile', updatedPrimaryProfile)
+  }
 
   showToast({
     message: t('Settings.Data Settings.All subscriptions and profiles have been successfully imported'),
