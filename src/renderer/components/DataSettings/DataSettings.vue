@@ -98,6 +98,7 @@
     <FtSettingsSubpage
       :open="showExportSubscriptionsPrompt"
       :title="t('Settings.Data Settings.Select Export Type')"
+      :icon="['fas', 'file-download']"
       @close="showExportSubscriptionsPrompt = false"
     >
       <FtFlexBox>
@@ -112,6 +113,7 @@
     <FtSettingsSubpage
       :open="showExportWatchHistoryPrompt"
       :title="t('Settings.Data Settings.Select Export Type')"
+      :icon="['fas', 'file-download']"
       @close="showExportWatchHistoryPrompt = false"
     >
       <FtFlexBox>
@@ -126,6 +128,7 @@
     <FtSettingsSubpage
       :open="showExportSearchHistoryPrompt"
       :title="t('Settings.Data Settings.Select Export Type')"
+      :icon="['fas', 'file-download']"
       @close="showExportSearchHistoryPrompt = false"
     >
       <FtFlexBox>
@@ -396,6 +399,12 @@ function importFreeTubeSubscriptions(textDecode) {
     'textColor',
     'subscriptions'
   ]
+  const optionalKeys = [
+    'icon'
+  ]
+  const knownKeys = [...requiredKeys, ...optionalKeys]
+  const updatedPrimaryProfile = primaryProfile.value
+  let shouldUpdatePrimaryProfile = false
 
   textDecode.forEach((profileData) => {
     // We would technically already be done by the time the data is parsed,
@@ -404,7 +413,7 @@ function importFreeTubeSubscriptions(textDecode) {
 
     const profileObject = {}
     Object.keys(profileData).forEach((key) => {
-      if (!requiredKeys.includes(key)) {
+      if (!knownKeys.includes(key)) {
         const message = t('Settings.Data Settings.Unknown data key')
         showToast({ message: `${message}: ${key}`, icon: ['fas', 'circle-exclamation'] })
       } else {
@@ -412,27 +421,25 @@ function importFreeTubeSubscriptions(textDecode) {
       }
     })
 
-    if (Object.keys(profileObject).length < requiredKeys.length) {
+    const hasAllRequiredKeys = requiredKeys.every(key => Object.hasOwn(profileObject, key))
+    if (!hasAllRequiredKeys) {
       const message = t('Settings.Data Settings.Profile object has insufficient data, skipping item')
       showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
     } else {
       if (profileObject._id === MAIN_PROFILE_ID) {
-        primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(profileObject.subscriptions)
-        primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.filter((sub, index) => {
-          const profileIndex = primaryProfile.value.subscriptions.findIndex((x) => {
-            return x.id === sub.id
-          })
-
-          return profileIndex === index
-        })
-        store.dispatch('updateProfile', primaryProfile.value)
+        if (Object.hasOwn(profileObject, 'icon')) {
+          updatedPrimaryProfile.icon = profileObject.icon
+        }
       } else {
         const existingProfileIndex = profileList.value.findIndex((profile) => {
-          return profile.name.includes(profileObject.name)
+          return profile._id !== MAIN_PROFILE_ID && profile.name === profileObject.name
         })
 
         if (existingProfileIndex !== -1) {
           const existingProfile = deepCopy(profileList.value[existingProfileIndex])
+          if (Object.hasOwn(profileObject, 'icon')) {
+            existingProfile.icon = profileObject.icon
+          }
           existingProfile.subscriptions = existingProfile.subscriptions.concat(profileObject.subscriptions)
           existingProfile.subscriptions = existingProfile.subscriptions.filter((sub, index) => {
             const profileIndex = existingProfile.subscriptions.findIndex((x) => {
@@ -443,21 +450,35 @@ function importFreeTubeSubscriptions(textDecode) {
           })
           store.dispatch('updateProfile', existingProfile)
         } else {
-          store.dispatch('updateProfile', profileObject)
-        }
-
-        primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(profileObject.subscriptions)
-        primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.filter((sub, index) => {
-          const profileIndex = primaryProfile.value.subscriptions.findIndex((x) => {
-            return x.id === sub.id
+          const hasProfileIdCollision = profileList.value.some((profile) => {
+            return profile._id === profileObject._id
           })
 
-          return profileIndex === index
-        })
-        store.dispatch('updateProfile', primaryProfile.value)
+          if (hasProfileIdCollision) {
+            const newProfile = { ...profileObject }
+            delete newProfile._id
+            store.dispatch('createProfile', newProfile)
+          } else {
+            store.dispatch('updateProfile', profileObject)
+          }
+        }
       }
+
+      updatedPrimaryProfile.subscriptions = updatedPrimaryProfile.subscriptions.concat(profileObject.subscriptions)
+      updatedPrimaryProfile.subscriptions = updatedPrimaryProfile.subscriptions.filter((sub, index) => {
+        const profileIndex = updatedPrimaryProfile.subscriptions.findIndex((x) => {
+          return x.id === sub.id
+        })
+
+        return profileIndex === index
+      })
+      shouldUpdatePrimaryProfile = true
     }
   })
+
+  if (shouldUpdatePrimaryProfile) {
+    store.dispatch('updateProfile', updatedPrimaryProfile)
+  }
 
   showToast({
     message: t('Settings.Data Settings.All subscriptions and profiles have been successfully imported'),
