@@ -69,11 +69,54 @@
   opacity: 0.5;
 }
 
-.headerRefreshWidget {
+.headerActions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+
   /* Size to its content so the header row positions the whole widget: tucked to
      the inline-end while it fits beside the title, and flush to the inline-start
      once it wraps onto its own line. */
   max-inline-size: 100%;
+}
+
+.headerActions .headerSortSelect {
+  flex-shrink: 0;
+  inline-size: 220px;
+  margin-block-start: 0;
+}
+
+.headerSortSelect :deep(.select-text) {
+  block-size: 36px;
+  padding-inline-start: 86px;
+  font-size: 0.9rem;
+}
+
+.headerSortSelect :deep(.nativeSelect) {
+  block-size: 36px;
+}
+
+.headerSortSelect :deep(.select-label),
+.headerSortSelect :deep(.select-text ~ .select-label) {
+  inset-block-start: 50%;
+  inset-inline-start: 12px;
+  z-index: 1;
+  max-inline-size: 68px;
+  overflow: hidden;
+  color: var(--tertiary-text-color);
+  font-size: 0.8rem;
+  pointer-events: none;
+  text-overflow: ellipsis;
+  transform: translateY(-50%);
+}
+
+.headerSortSelect :deep(.select-label-text) {
+  overflow: hidden;
+}
+
+.headerSortSelect :deep(.select-placeholder) {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .message {
@@ -123,7 +166,7 @@
   margin-block-start: 0;
 }
 
-.subscriptionsHeader.singleRow .headerRefreshWidget {
+.subscriptionsHeader.singleRow .headerActions {
   margin-inline-start: auto;
 }
 
