@@ -14,6 +14,8 @@ function legacyTheme() {
   for (const key of [
     'border',
     'subtleSurface',
+    'selectionBackground',
+    'selectionText',
     'logoPressed',
     'scrollbarActive',
     'dropdownHover',
@@ -37,6 +39,8 @@ test('migrates legacy custom themes without changing their existing appearance',
 
   assert.equal(migrated.version, 2)
   assert.equal(migrated.colors.border, theme.colors.tertiaryText)
+  assert.equal(migrated.colors.selectionBackground, theme.colors.primary)
+  assert.equal(migrated.colors.selectionText, theme.colors.textWithPrimary)
   assert.equal(migrated.colors.logoPressed, theme.colors.logoTertiary)
   assert.equal(migrated.colors.headerHover, theme.colors.sideNavHover)
   assert.equal(migrated.colors.headerPressed, theme.colors.tertiaryText)

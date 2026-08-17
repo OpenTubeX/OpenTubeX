@@ -196,6 +196,7 @@ const BASE_THEME_TRANSLATION_KEYS = [
 ]
 const MAIN_COLOR_KEYS = [
   'primary', 'primaryHover', 'primaryActive', 'textWithPrimary',
+  'selectionBackground', 'selectionText',
   'coloredHeaderHover', 'coloredHeaderHoverText',
   'coloredHeaderPressed', 'coloredHeaderPressedText'
 ]
