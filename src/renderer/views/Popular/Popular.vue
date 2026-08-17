@@ -96,6 +96,7 @@ onBeforeUnmount(() => {
 
 async function fetchPopularInfo() {
   isLoading.value = true
+  hasLoaded.value = false
 
   try {
     const items = await getInvidiousPopularFeed()
