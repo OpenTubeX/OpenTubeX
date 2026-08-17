@@ -303,7 +303,7 @@ test.describe('video downloads', () => {
     expect(results).toEqual(customArguments.map(() => ({ error: 'unsupported-custom-argument' })))
   })
 
-  test('applies global custom arguments before per-download arguments', async ({ app, page }) => {
+  test('applies global custom arguments before download-specific arguments', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'capture-global-yt-dlp-args.sh')
     const capturedArgs = path.join(app.userDataDir, 'captured-global-yt-dlp-args.txt')
     await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
@@ -314,13 +314,14 @@ test.describe('video downloads', () => {
       await store.dispatch('updateYtDlpDownloadCustomArgs', globalArgs)
     }, {
       ytDlpPath: executable,
-      globalArgs: '--cookies-from-browser "firefox:default-release" --format webm'
+      globalArgs: '--cookies-from-browser "firefox:default-release" --merge-output-format webm --format webm'
     })
 
     await page.bringToFront()
     await page.evaluate(() => window.ftElectron.ytDlpDownload({
       videoId: 'eeeeeeeeeee',
       mode: 'video',
+      videoFormat: 'mp4',
       customArgs: '--format mp4'
     }))
 
@@ -330,6 +331,12 @@ test.describe('video downloads', () => {
       .map((argument, index) => argument === '--format' ? index : -1)
       .filter(index => index >= 0)
     expect(passedArguments[passedArguments.indexOf('--cookies-from-browser') + 1]).toBe('firefox:default-release')
+    const mergeFormatIndexes = passedArguments
+      .map((argument, index) => argument === '--merge-output-format' ? index : -1)
+      .filter(index => index >= 0)
+    expect(passedArguments[mergeFormatIndexes[0] + 1]).toBe('webm')
+    expect(passedArguments[mergeFormatIndexes[1] + 1]).toBe('mp4')
+    expect(mergeFormatIndexes[1]).toBeGreaterThan(mergeFormatIndexes[0])
     expect(passedArguments[formatIndexes[0] + 1]).toBe('webm')
     expect(passedArguments[formatIndexes[1] + 1]).toBe('mp4')
     expect(formatIndexes[1]).toBeGreaterThan(formatIndexes[0])

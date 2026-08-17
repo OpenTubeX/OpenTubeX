@@ -1549,6 +1549,7 @@ async function startYtDlpDownload(
   }
 
   await pushProxyArgument(args)
+  args.push(...globalCustomArgs)
 
   const ffmpeg = await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg')
 
@@ -1700,7 +1701,7 @@ async function startYtDlpDownload(
   if (startTime !== '' || endTime !== '') {
     args.push('--download-sections', `*${startTime || '0'}-${endTime || 'inf'}`, '--force-keyframes-at-cuts')
   }
-  args.push(...globalCustomArgs, ...customArgs)
+  args.push(...customArgs)
 
   if (isRemotePlaylist) {
     args.push(`https://www.youtube.com/playlist?list=${payload.playlistId}`)
