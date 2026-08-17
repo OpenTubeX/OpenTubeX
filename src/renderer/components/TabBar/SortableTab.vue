@@ -675,7 +675,6 @@ watch(tabAvatarUrl, (avatarUrl) => {
 
 .tab.pinned .tabTitle {
   padding-inline-start: 9px;
-  font-size: 11px;
 }
 
 .pinBadge {
