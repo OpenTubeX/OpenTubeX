@@ -401,6 +401,8 @@ test.describe('video downloads', () => {
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
+    await page.bringToFront()
+    await page.locator('body').click({ position: { x: 1, y: 1 } })
     const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
       videoId: 'eeeeeeeeeee',
       title: 'Translated feed title',
@@ -436,6 +438,8 @@ test.describe('video downloads', () => {
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
+    await page.bringToFront()
+    await page.locator('body').click({ position: { x: 1, y: 1 } })
     const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
       videoId: 'eeeeeeeeeee',
       title: 'Translated feed title',
