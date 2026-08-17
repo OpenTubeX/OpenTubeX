@@ -739,6 +739,37 @@ test.describe('tab bar', () => {
     expect(pinnedCloseBox.x).toBe(unpinnedCloseBox.x)
   })
 
+  test('keeps the vertical tab scrollbar inside the window edge', async ({ page }) => {
+    await page.setViewportSize({ width: 800, height: 450 })
+    for (let index = 0; index < 15; index++) {
+      await page.keyboard.press('Control+t')
+    }
+
+    for (const position of ['left', 'right']) {
+      await page.evaluate(position => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setTabBarPosition', position)
+      }, position)
+
+      const container = page.locator('.tabsContainer')
+      const scrollbar = container.locator(':scope > .os-scrollbar-vertical')
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+      const [containerBox, scrollbarBox] = await Promise.all([
+        container.boundingBox(),
+        scrollbar.boundingBox()
+      ])
+
+      if (position === 'left') {
+        expect(Math.abs(containerBox.x)).toBeLessThanOrEqual(1)
+        expect(Math.abs(scrollbarBox.x)).toBeLessThanOrEqual(1)
+      } else {
+        expect(Math.abs(containerBox.x + containerBox.width - 800)).toBeLessThanOrEqual(1)
+        expect(Math.abs(scrollbarBox.x + scrollbarBox.width - 800)).toBeLessThanOrEqual(1)
+      }
+    }
+  })
+
   test('uses the same title font size for pinned and unpinned tabs', async ({ page }) => {
     await page.keyboard.press('Control+t')
 
