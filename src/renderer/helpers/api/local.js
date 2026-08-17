@@ -402,12 +402,13 @@ export async function getLocalSearchContinuation(continuationData) {
 }
 
 /**
- * @param {string} videoId
+ * @param {string} url
+ * @param {string} kind
  * @param {(input, init) => Promise<Response>} fetchFunc
  */
-async function getWatchHTMLWatchPage(videoId, fetchFunc) {
+async function getHTMLPage(url, kind, fetchFunc) {
   // This returns session/tracking cookies but they get removed in onHeadersReceived in the main process before they are saved by Electron
-  const htmlResponse = await fetchFunc(`https://www.youtube.com/watch?v=${videoId}&bpctr=9999999999&has_verified=1`,
+  const htmlResponse = await fetchFunc(url,
     {
       headers: {
         // We need to be able to parse the localised strings in the /next response data (e.g. view counts and published dates)
@@ -419,7 +420,7 @@ async function getWatchHTMLWatchPage(videoId, fetchFunc) {
   const isIpBlockResponse = htmlResponse.status === 429 || htmlResponse.url.startsWith('https://www.google.com/sorry/')
 
   if (!htmlResponse.ok) {
-    const error = new Error(`YouTube returned HTTP ${htmlResponse.status} for the HTML watch page`)
+    const error = new Error(`YouTube returned HTTP ${htmlResponse.status} for the ${kind} HTML page`)
     error.isIpBlock = isIpBlockResponse
     throw error
   }
@@ -429,7 +430,7 @@ async function getWatchHTMLWatchPage(videoId, fetchFunc) {
   const ytConfigStr = htmlPage.match(/ytcfg\.set\(({.+?})\);/s)?.[1]
   if (!ytConfigStr) {
     // required for botguard
-    const error = new Error('Could not find ytcfg in the HTML page')
+    const error = new Error(`Could not find ytcfg in the ${kind} HTML page`)
     error.isIpBlock = isIpBlockResponse
     throw error
   }
@@ -440,7 +441,7 @@ async function getWatchHTMLWatchPage(videoId, fetchFunc) {
 
   if (!initialAttestationDataMatch) {
     // required for botguard
-    throw new Error('Could not find challenge in the HTML page')
+    throw new Error(`Could not find challenge in the ${kind} HTML page`)
   }
 
   let initialAttestationData
@@ -448,42 +449,74 @@ async function getWatchHTMLWatchPage(videoId, fetchFunc) {
   try {
     initialAttestationData = parseLooseJSON(initialAttestationDataMatch[1])
   } catch (e) {
-    const error = new Error('Failed to parse the initial attestation data', { cause: e })
+    const error = new Error(`Failed to parse the ${kind} page initial attestation data`, { cause: e })
     console.error(error, initialAttestationDataMatch[1])
     throw error
   }
 
-  /** @type {string | undefined} */
   let playerId = ytConfig.PLAYER_JS_URL?.match(/player\/([^/]+)\//)?.[1]
 
   playerId ??= htmlPage.match(/<script[^>]+src="[^">]+player\/([^/]+)\/[^"]+\/base.js"/)?.[1]
 
-  const playerResponseStr = htmlPage.match(/ytInitialPlayerResponse\s*=\s*(\{.+?\});/)?.[1]
-  let playerResponse
-
-  // not fatal if it is missing as we can retrieve it from Innertube ourselves
-  if (playerResponseStr) {
-    try {
-      playerResponse = JSON.parse(playerResponseStr)
-    } catch (e) {
-      console.warn('/player response extracted from the HTML page is invalid JSON', e)
-    }
-  } else {
-    console.warn('Could not find /player response in the HTML page')
+  return {
+    htmlPage,
+    ytConfig,
+    initialAttestationData,
+    playerId
   }
+}
 
-  const nextResponseStr = htmlPage.match(/(?:window\s*\[\s*["']ytInitialData["']\s*\]|ytInitialData)\s*=\s*(\{.+?\});/)?.[1]
-  let nextResponse
+/**
+ * @param {string} videoId
+ * @param {(input, init) => Promise<Response>} fetchFunc
+ */
+async function getWatchHTMLWatchPage(videoId, fetchFunc) {
+  let htmlPage, ytConfig, initialAttestationData
 
-  // not fatal if it is missing as we can retrieve it from Innertube ourselves
-  if (nextResponseStr) {
-    try {
-      nextResponse = JSON.parse(nextResponseStr)
-    } catch (e) {
-      console.warn('/next response extracted from the HTML page is invalid JSON', e)
-    }
+  let playerResponse, nextResponse
+  /** @type {string | undefined} */
+  let playerId
+
+  if (sessionStorage.getItem('playerHtmlHomepageFallback') === '1') {
+    ({ ytConfig, initialAttestationData, playerId } = await getHTMLPage('https://www.youtube.com', 'home', fetchFunc))
   } else {
-    console.warn('Could not find /next response in the HTML page')
+    try {
+      ({ htmlPage, ytConfig, initialAttestationData, playerId } = await getHTMLPage(`https://www.youtube.com/watch?v=${videoId}&bpctr=9999999999&has_verified=1`, 'watch', fetchFunc))
+
+      const playerResponseStr = htmlPage.match(/ytInitialPlayerResponse\s*=\s*(\{.+?\});/)?.[1]
+
+      // not fatal if it is missing as we can retrieve it from Innertube ourselves
+      if (playerResponseStr) {
+        try {
+          playerResponse = JSON.parse(playerResponseStr)
+        } catch (e) {
+          console.warn('/player response extracted from the HTML page is invalid JSON', e)
+        }
+      } else {
+        console.warn('Could not find /player response in the HTML page')
+      }
+
+      const nextResponseStr = htmlPage.match(/(?:window\s*\[\s*["']ytInitialData["']\s*\]|ytInitialData)\s*=\s*(\{.+?\});/)?.[1]
+
+      // not fatal if it is missing as we can retrieve it from Innertube ourselves
+      if (nextResponseStr) {
+        try {
+          nextResponse = JSON.parse(nextResponseStr)
+        } catch (e) {
+          console.warn('/next response extracted from the HTML page is invalid JSON', e)
+        }
+      } else {
+        console.warn('Could not find /next response in the HTML page')
+      }
+    } catch (watchError) {
+      console.warn('Falling back to the YT home page for the rest of the session because of:', watchError)
+
+      // Fall back to the home page for the rest of the session/until OpenTubeX is restarted
+      // assuming that getting the watch page captcha once is a sign that it will continue happening
+      sessionStorage.setItem('playerHtmlHomepageFallback', '1')
+
+      ;({ ytConfig, initialAttestationData, playerId } = await getHTMLPage('https://www.youtube.com', 'home', fetchFunc))
+    }
   }
 
   const session = buildSessionFromYtConfig(ytConfig, fetchFunc)
