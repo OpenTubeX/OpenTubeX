@@ -755,18 +755,26 @@ test.describe('tab bar', () => {
       const scrollbar = container.locator(':scope > .os-scrollbar-vertical')
       await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
 
-      const [containerBox, scrollbarBox] = await Promise.all([
-        container.boundingBox(),
-        scrollbar.boundingBox()
-      ])
+      await expect.poll(async () => {
+        const [containerBox, scrollbarBox] = await Promise.all([
+          container.boundingBox(),
+          scrollbar.boundingBox()
+        ])
+        if (containerBox === null || scrollbarBox === null) return Infinity
 
-      if (position === 'left') {
-        expect(Math.abs(containerBox.x)).toBeLessThanOrEqual(1)
-        expect(Math.abs(scrollbarBox.x)).toBeLessThanOrEqual(1)
-      } else {
-        expect(Math.abs(containerBox.x + containerBox.width - 800)).toBeLessThanOrEqual(1)
-        expect(Math.abs(scrollbarBox.x + scrollbarBox.width - 800)).toBeLessThanOrEqual(1)
-      }
+        const containerEdge = position === 'left'
+          ? containerBox.x
+          : containerBox.x + containerBox.width
+        const scrollbarEdge = position === 'left'
+          ? scrollbarBox.x
+          : scrollbarBox.x + scrollbarBox.width
+        const expectedEdge = position === 'left' ? 0 : 800
+
+        return Math.max(
+          Math.abs(containerEdge - expectedEdge),
+          Math.abs(scrollbarEdge - expectedEdge)
+        )
+      }).toBeLessThanOrEqual(1)
     }
   })
 
