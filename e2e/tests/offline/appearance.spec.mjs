@@ -412,6 +412,12 @@ test.describe('custom theme editor', () => {
     await setEditorColor('Logo icon', '#123456')
     await expect(resetColorsButton).toBeEnabled()
     await setEditorColor('Logo text', '#654321')
+    await setEditorColor('Selected text background', '#345678')
+    await setEditorColor('Selected text', '#fedcba')
+    await expect.poll(() => page.evaluate(() => {
+      const selectionStyle = getComputedStyle(document.body, '::selection')
+      return [selectionStyle.backgroundColor, selectionStyle.color]
+    })).toEqual(['rgb(52, 86, 120)', 'rgb(254, 220, 186)'])
     await setEditorColor('Page background', '#101112')
     await sourceMainColor.click()
     await page.locator(`#${await sourceMainColor.getAttribute('aria-controls')}`)

@@ -13,6 +13,8 @@ body {
   --subtle-surface-color: var(--tertiary-text-color);
   --dropdown-item-hover-color: var(--scrollbar-color-hover);
   --dropdown-item-hover-text-color: var(--scrollbar-text-color-hover);
+  --selection-background-color: var(--primary-color);
+  --selection-text-color: var(--text-with-main-color);
 
   /*
     This works because CSS variables are just a find and replace and
@@ -54,6 +56,11 @@ body {
   --colored-header-button-hover-text-color: var(--text-with-main-color);
   --colored-header-button-pressed-color: var(--primary-color-active);
   --colored-header-button-pressed-text-color: var(--text-with-main-color);
+}
+
+::selection {
+  color: var(--selection-text-color);
+  background-color: var(--selection-background-color);
 }
 
 /*************** RULE TWEAKS ***************/
