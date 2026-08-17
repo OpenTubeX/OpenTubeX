@@ -5313,6 +5313,13 @@ export default defineComponent({
         const reloadLocation = {
           path: this.tabRoute.path,
           query: { ...this.tabRoute.query, oneTimeTimestamp: timestamp },
+          // This only carries the resume position for the same video. Keep the
+          // resolved title throughout navigation instead of briefly replacing
+          // it with the updated watch URL while the metadata reloads.
+          state: {
+            skipTabRouteLoading: true,
+            tabTitle: this.videoTitle,
+          },
         }
 
         if (this.tabRouter.resolve(reloadLocation).fullPath !== this.tabRoute.fullPath) {

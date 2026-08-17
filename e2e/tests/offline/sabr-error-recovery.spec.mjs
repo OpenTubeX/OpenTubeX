@@ -470,6 +470,64 @@ test('a SABR reload preserves the active video quality', async ({ app, page }) =
   expect(quality).toBe('720')
 })
 
+test('a SABR reload preserves the tab title while adding its resume timestamp', async ({ app, page }) => {
+  await mockUnplayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const titles = await page.evaluate(async () => {
+    const app = document.querySelector('#app')?.__vue_app__
+
+    const findWatchView = (vnode) => {
+      if (vnode?.component?.type?.name === 'Watch') {
+        return vnode.component.proxy
+      }
+      if (vnode?.component?.subTree) {
+        const match = findWatchView(vnode.component.subTree)
+        if (match) return match
+      }
+      if (Array.isArray(vnode?.children)) {
+        for (const child of vnode.children) {
+          const match = findWatchView(child)
+          if (match) return match
+        }
+      }
+      return null
+    }
+
+    const watchView = findWatchView(app?._container?._vnode)
+    if (!watchView) {
+      throw new Error('Unable to access the watch view')
+    }
+
+    watchView.getTimestamp = () => 42
+    watchView.reloadView = async () => {}
+    watchView.showTabToast = () => {}
+
+    const titleBeforeReload = watchView.$store.getters.getTabById(watchView.tabId).contentTitle
+    const publishedTitles = []
+    const unsubscribe = watchView.$store.subscribe((mutation) => {
+      if (mutation.type === 'setTabContentTitle' && mutation.payload.tabId === watchView.tabId) {
+        publishedTitles.push(mutation.payload.title)
+      }
+    })
+
+    try {
+      await watchView.performSabrReload({}, 'Synthetic SABR reload')
+    } finally {
+      unsubscribe()
+    }
+
+    return { titleBeforeReload, publishedTitles }
+  })
+
+  expect(titles.publishedTitles).toEqual([titles.titleBeforeReload])
+  await expect(page).toHaveURL(/oneTimeTimestamp=42/)
+  await expect(page).toHaveTitle(`${titles.titleBeforeReload} - OpenTubeX`)
+})
+
 test('a second SABR failure after successful playback refetches instead of dropping to legacy', async ({ app, page }) => {
   await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
