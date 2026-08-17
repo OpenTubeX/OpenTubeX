@@ -509,6 +509,9 @@ Settings:
         Title text: Tekst tytułowy
         Logo icon: Ikona logo
         Logo text: Tekst logo
+    Move Downloads to App Header: Przenieś „pobrane” do nagłówka aplikacji
+    Move Settings to App Header: Przenieś „ustawienia” do nagłówka aplikacji
+    Scrollbar Width: Szerokość paska przewijania
   Player Settings:
     Player Settings: 'Odtwarzacz'
     Play Next Video: 'Automatycznie otwórz polecane wideo'
