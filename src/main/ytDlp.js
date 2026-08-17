@@ -1813,7 +1813,13 @@ async function startYtDlpDownload(
   // sandbox's capacity-limited runtime directory does not hold the media data.
   // Audio extraction otherwise reuses and then deletes an existing video file
   // when both variants have the same source extension.
-  const temporaryDownloadFolder = await mkdtemp(join(downloadFolder, '.opentubex-download-'))
+  let temporaryDownloadFolder
+  try {
+    temporaryDownloadFolder = await mkdtemp(join(downloadFolder, '.opentubex-download-'))
+  } catch {
+    // Let yt-dlp report an unavailable destination through the tracked job.
+    temporaryDownloadFolder = await mkdtemp(join(app.getPath('temp'), 'opentubex-download-'))
+  }
   args.push('--paths', `temp:${temporaryDownloadFolder}`)
 
   // Authorization and executable setup contain awaits, so another refresh can

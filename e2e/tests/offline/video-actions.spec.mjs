@@ -700,6 +700,29 @@ test.describe('video downloads', () => {
     await expect(page.locator('.downloadRow').filter({ hasText: 'Downloaded audio alternative' })).toHaveCount(0)
   })
 
+  test('tracks a download when its configured folder is unavailable', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'failing-yt-dlp.sh')
+    const unavailableDownloadFolder = path.join(app.userDataDir, 'missing', 'downloads')
+    await writeFile(executable, '#!/bin/sh\nexit 1')
+    await chmod(executable, 0o755)
+    await page.evaluate(async ({ unavailableDownloadFolder, ytDlpPath }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+      await store.dispatch('updateYtDlpDownloadFolderPath', unavailableDownloadFolder)
+    }, { unavailableDownloadFolder, ytDlpPath: executable })
+
+    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      title: 'Unavailable download folder',
+      thumbnail: '',
+      mode: 'video'
+    }))
+    expect(result.id).toBeGreaterThan(0)
+    await expect.poll(() => page.evaluate(async (id) => {
+      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+    }, result.id)).toBe('failed')
+  })
+
   test('plays an audio download in the normal player', async ({ app, page }) => {
     const downloadedFile = path.join(app.userDataDir, 'downloaded-audio.wav')
     const executable = path.join(app.userDataDir, 'fake-audio-yt-dlp.sh')
