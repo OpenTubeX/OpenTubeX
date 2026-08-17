@@ -153,9 +153,14 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
 
 .search .ft-input {
   display: block;
-  padding-block: 0 var(--search-input-padding-block-end, 0);
+
+  /* Keep themed text selection close to the glyphs while the padding centers
+     the line and compensates for taller fallback fonts. */
+  padding-block:
+    var(--search-input-padding-block-start, 12.5px)
+    var(--search-input-padding-block-end, 12.5px);
   font-family: inherit;
-  line-height: var(--search-input-line-height, 45px);
+  line-height: 20px;
   margin-block-end: 0;
 }
 
