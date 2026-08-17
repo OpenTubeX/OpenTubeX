@@ -246,6 +246,7 @@ Trending:
   Sports: Sports
   Trending Tabs: Trending Tabs
 Most Popular: Most Popular
+Most Popular Feed Empty: This Invidious instance's Most Popular feed is empty.
 Feed:
   Cancel Refresh: Cancel refresh
   Feed Last Updated: '{feedName} feed last updated: {date}'

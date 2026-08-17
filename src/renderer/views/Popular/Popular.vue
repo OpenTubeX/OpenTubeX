@@ -29,9 +29,16 @@
         v-if="isLoading"
       />
       <ft-element-list
-        v-else
+        v-else-if="shownResults.length > 0"
         :data="shownResults"
       />
+      <p
+        v-else
+        class="emptyMessage"
+        role="status"
+      >
+        {{ $t("Most Popular Feed Empty") }}
+      </p>
     </ft-card>
   </div>
 </template>

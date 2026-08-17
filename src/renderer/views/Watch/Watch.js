@@ -3034,7 +3034,7 @@ export default defineComponent({
               this.thumbnail = `${this.currentInvidiousInstanceUrl}/vi/${this.videoId}/maxres3.jpg`
               break
             default:
-              this.thumbnail = result.videoThumbnails[0].url
+              this.thumbnail = new URL(result.videoThumbnails[0].url, this.currentInvidiousInstanceUrl).toString()
               break
           }
 
