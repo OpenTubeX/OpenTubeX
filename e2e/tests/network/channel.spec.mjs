@@ -82,6 +82,23 @@ test.describe('channel page', () => {
     await expect(page.locator(sel.activeTab)).toContainText('Blender')
     await expect(page.locator(sel.activeTab)).not.toContainText('/channel/')
 
+    const selectedChannelTab = page.locator('.channelDetails [role="tab"][aria-selected="true"]')
+    const initialChannelTabId = await selectedChannelTab.getAttribute('id')
+    await page.keyboard.press('ArrowRight')
+    await expect(selectedChannelTab).not.toHaveAttribute('id', initialChannelTabId)
+    await expect(page.locator('.app')).toHaveClass(/hideOutlines/)
+
+    await page.locator(sel.tabs).nth(1).click()
+    const subscriptionVideosTab = page.locator('[data-subscription-feed-tab="videos"]')
+    const subscriptionShortsTab = page.locator('[data-subscription-feed-tab="shorts"]')
+    await expect(subscriptionVideosTab).toHaveAttribute('aria-selected', 'true')
+    await page.keyboard.press('ArrowRight')
+    await expect(subscriptionShortsTab).toHaveAttribute('aria-selected', 'true')
+    await expect(page.locator('.app')).toHaveClass(/hideOutlines/)
+
+    await page.locator(sel.tabs).first().click()
+    await expect(page.locator(sel.activeTab)).toContainText('Blender')
+
     const videosTab = page.getByRole('tab', { name: 'Videos' })
     await videosTab.click()
     await expect(videosTab).toHaveAttribute('aria-selected', 'true')
