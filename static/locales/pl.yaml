@@ -569,8 +569,8 @@ Settings:
       On Window Minimize: Podczas minimalizowania okna
       On Window Hide: Gdy okno traci skupienie lub jest przełączane
       Wayland Minimize Unsupported: Wayland nie zgłasza aplikacjom minimalizacji okna, więc ten wyzwalacz jest niedostępny. Zamiast tego użyj opcji „Gdy okno traci skupienie lub jest przełączane”, która obejmuje również minimalizowanie.
-    Fast-Forward Through Silence: Szybkie przewijanie poprzez ciszę
-    Show Fast-Forward Through Silence Toggle: Pokaż przełącznik szybkiego przewijania poprzez ciszę
+    Skip Silence: Pomijanie ciszy
+    Show Skip Silence Toggle: Pokaż przełącznik pomijania ciszy
     Hold to Double Playback Speed: Przytrzymaj, aby podwoić prędkość odtwarzania
     Automatically Open Chapters: Automatycznie otwieraj rozdziały
     Use YouTube-style Shorts: Użyj stylu Filmów Short z YouTube
@@ -1444,7 +1444,7 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Jeśli włączone, a prędkość odtwarzania jest inna niż 1x, odtwarzacz wyświetla w nawiasach po normalnym wyświetlaniu znaczników czasu znaczniki czasu dostosowane do prędkości odtwarzania.
     Default Volume: Wyłączone, gdy opcja zapamiętywania głośności na kanale jest włączona. Wyłącz zapamiętywanie głośności na kanale, aby ustawić stałą głośność początkową dla każdego filmu.
     Enable Caption Translations: Po włączeniu, przycisk napisów i skrót C będą preferować automatycznie przetłumaczoną ścieżkę w preferowanym języku napisów, jeśli film nie zawiera pasującej oryginalnej ścieżki.
-    Show Fast-Forward Through Silence Toggle: Pokazuje przełącznik szybkiego przewijania przez ciszę w menu ustawień odtwarzacza.
+    Show Skip Silence Toggle: Pokazuje przełącznik pomijania ciszy w menu ustawień odtwarzacza.
     Hold to Double Playback Speed: Przytrzymaj klawisz spacji lub lewy przycisk myszy nad odtwarzaczem, aby tymczasowo podwoić aktualną prędkość odtwarzania.
     Ambient Mode: Rzutuje kolory odtwarzanego wideo na obszar wokół odtwarzacza.
   External Player Settings:
@@ -1638,7 +1638,7 @@ KeyboardShortcutPrompt:
   Reserved Shortcut Conflict: '{shortcut} jest zarezerwowany dla {actions} i nie można go ponownie przypisać.'
   Reassign: Przypisz ponownie
   Undo: Cofnij
-  Toggle Fast-Forward Through Silence: Przełączanie szybkiego przewijania przez ciszę
+  Toggle Skip Silence: Przełącz pomijanie ciszy
   Toggle Tab Orientation: Przełączanie między kartami poziomymi i pionowymi
 shortcutLabelSeparator: ｜
 Compact side navigation: Skompresuj boczną nawigację

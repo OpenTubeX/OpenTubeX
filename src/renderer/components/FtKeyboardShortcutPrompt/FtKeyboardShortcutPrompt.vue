@@ -379,7 +379,7 @@ const localizedShortcutNameToShortcutsMappings = computed(() => {
     [t('KeyboardShortcutPrompt.Decrease Video Speed'), ['DECREASE_VIDEO_SPEED', 'DECREASE_VIDEO_SPEED_ALT']],
     [t('KeyboardShortcutPrompt.Increase Video Speed'), ['INCREASE_VIDEO_SPEED', 'INCREASE_VIDEO_SPEED_ALT']],
     [t('KeyboardShortcutPrompt.Toggle Normal Playback Speed'), ['TOGGLE_NORMAL_PLAYBACK_SPEED']],
-    [t('KeyboardShortcutPrompt.Toggle Fast-Forward Through Silence'), ['TOGGLE_SKIP_SILENCE']],
+    [t('KeyboardShortcutPrompt.Toggle Skip Silence'), ['TOGGLE_SKIP_SILENCE']],
     [t('KeyboardShortcutPrompt.Home'), ['HOME']],
     [t('KeyboardShortcutPrompt.End'), ['END']],
     [t('KeyboardShortcutPrompt.Skip by Tenths'), ['SKIP_N_TENTHS']],

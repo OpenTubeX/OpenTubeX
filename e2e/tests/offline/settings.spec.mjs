@@ -14,6 +14,22 @@ import {
   waitForAppReady
 } from '../../helpers/app.mjs'
 
+test.describe('skip silence settings search', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  test('opens and highlights the visibility toggle', async ({ page }) => {
+    await goTo(page, 'settings')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+
+    await search.fill('Skip Silence')
+    await page.getByRole('button', { name: 'Show Skip Silence Toggle', exact: true }).click()
+
+    await expect(page.locator('.switch-ctn.settingsSearchTarget'))
+      .toContainText('Show Skip Silence Toggle')
+    await expect(page.locator('.section.settingsSearchTarget')).toHaveCount(0)
+  })
+})
+
 test.describe('settings', () => {
   test('groups confirmation preferences together', async ({ page }) => {
     await goTo(page, 'settings')

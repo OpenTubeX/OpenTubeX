@@ -36,11 +36,11 @@
           @change="updateRememberVolume"
         />
         <FtToggleSwitch
-          :label="t('Settings.Player Settings.Show Fast-Forward Through Silence Toggle')"
+          :label="t('Settings.Player Settings.Show Skip Silence Toggle')"
           :compact="true"
           :default-value="showSkipSilenceButton"
           setting-key="showSkipSilenceButton"
-          :tooltip="t('Tooltips.Player Settings.Show Fast-Forward Through Silence Toggle')"
+          :tooltip="t('Tooltips.Player Settings.Show Skip Silence Toggle')"
           @change="updateShowSkipSilenceButton"
         />
         <FtToggleSwitch

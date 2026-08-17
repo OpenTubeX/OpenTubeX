@@ -643,7 +643,7 @@ test.describe('scroll mini player', () => {
   })
 })
 
-test.describe('fast-forward through silence shortcut', () => {
+test.describe('skip silence shortcut', () => {
   test.use({
     seed: {
       settings: {

@@ -82,5 +82,6 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
 
 export const SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS = {
   general: new Set(['System Default']),
+  player: new Set(['Skip Silence']),
   'caption-appearance': new Set(['Application Language'])
 }

@@ -1007,6 +1007,10 @@ export default defineComponent({
       const volume = Number(store.getters.getVoiceOverTranslationVolume) / 100
       return Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : 1
     })
+    const voiceOverTranslationOriginalVolume = computed(() => {
+      const volume = Number(store.getters.getVoiceOverTranslationOriginalVolume) / 100
+      return Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : 0.1
+    })
     const voiceOverTranslationAvailable = computed(() => {
       return process.env.IS_ELECTRON &&
         useVoiceOverTranslationSetting.value &&
@@ -1022,6 +1026,7 @@ export default defineComponent({
       videoId: computed(() => props.videoId),
       responseLanguage: voiceOverTranslationLanguage,
       autoPrepare: voiceOverTranslationAutoPrepare,
+      originalVolume: voiceOverTranslationOriginalVolume,
       voiceVolume: voiceOverTranslationVolume,
       onError: error => {
         const message = error instanceof RangeError
@@ -1223,30 +1228,26 @@ export default defineComponent({
       return store.getters.getShowSkipSilenceButton
     })
 
-    const silenceSkippingEnabled = computed(() => {
-      return skipSilence.value
-    })
-
-    const originalAudioGain = computed(() => {
-      if (!voiceOverTranslation.enabled.value) {
-        return 1
-      }
-
-      const volume = Number(store.getters.getVoiceOverTranslationOriginalVolume) / 100
-      return Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : 0.1
-    })
-
     const silenceSkipping = useSilenceSkipping({
-      enabled: silenceSkippingEnabled,
+      available: showSkipSilenceButton,
+      enabled: skipSilence,
       isLive,
       video,
-      outputGain: originalAudioGain,
     })
 
-    const silenceSkippingIndicatorMessage = computed(() => {
-      const rate = silenceSkipping.accelerationRate.value
-      return rate === null ? '' : `${Number.parseFloat(rate.toFixed(2))}x`
-    })
+    /** @type {shaka.extern.RequestFilter} */
+    function silenceSkippingRequestFilter(type, _request, context) {
+      if (type === RequestType.SEGMENT) {
+        silenceSkipping.handleSegmentRequest(context)
+      }
+    }
+
+    /** @type {shaka.extern.ResponseFilter} */
+    function silenceSkippingResponseFilter(type, response, context) {
+      if (type === RequestType.SEGMENT) {
+        silenceSkipping.handleSegmentResponse(response, context)
+      }
+    }
 
     const captionSettings = computed(() => parseCaptionSettings(store.getters.getDefaultCaptionSettings))
     const captionCssVariables = computed(() => getCaptionCssVariables(captionSettings.value))
@@ -7589,12 +7590,12 @@ export default defineComponent({
 
       const playerRate = normalizePlaybackRate(player?.getPlaybackRate())
       if (playerRate !== null) {
-        return silenceSkipping.getNormalPlaybackRate(playerRate)
+        return playerRate
       }
 
       const videoRate = normalizePlaybackRate(video.value?.playbackRate)
       if (videoRate !== null) {
-        return silenceSkipping.getNormalPlaybackRate(videoRate)
+        return videoRate
       }
 
       return normalizePlaybackRate(props.currentPlaybackRate)
@@ -7642,11 +7643,9 @@ export default defineComponent({
         return
       }
 
-      silenceSkipping.suspend()
       const playbackRate = getCurrentPlaybackRate()
       if (playbackRate === null) {
         temporaryPlaybackRateSources.delete(source)
-        silenceSkipping.resume()
         return
       }
 
@@ -7669,7 +7668,6 @@ export default defineComponent({
         wasPausedBeforeTemporaryPlayback = false
         temporaryPlaybackRateActive = false
         showTemporaryPlaybackRateIndicator.value = false
-        silenceSkipping.resume()
         console.error('Failed to apply temporary playback rate:', error)
       }
     }
@@ -7723,7 +7721,6 @@ export default defineComponent({
         wasPausedBeforeTemporaryPlayback = false
         temporaryPlaybackRateActive = false
         showTemporaryPlaybackRateIndicator.value = false
-        silenceSkipping.resume()
       }
     }
 
@@ -7823,7 +7820,7 @@ export default defineComponent({
      * @param {number} step
      */
     function changePlayBackRate(step) {
-      applyPlaybackRate(getCurrentPlaybackRate() + step)
+      applyPlaybackRate(player.getPlaybackRate() + step)
     }
 
     /**
@@ -7834,7 +7831,7 @@ export default defineComponent({
     }
 
     function toggleNormalPlaybackRate() {
-      const currentRate = getCurrentPlaybackRate()
+      const currentRate = player.getPlaybackRate()
 
       if (!isNormalPlaybackRate(currentRate)) {
         togglePlaybackRate = currentRate
@@ -7934,7 +7931,7 @@ export default defineComponent({
      * @param {WheelEvent} event
      */
     function mouseScrollSkip(event) {
-      const seekMultiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
+      const seekMultiplier = seekIntervalMultiplyByPlaybackRate.value ? player.getPlaybackRate() : 1
       if ((event.deltaY < 0 || event.deltaX > 0)) {
         seekBySeconds(defaultSkipInterval.value * seekMultiplier, true)
       } else if ((event.deltaY > 0 || event.deltaX < 0)) {
@@ -8225,7 +8222,7 @@ export default defineComponent({
 
           const localization = ui.getControls().getLocalization()
           const message = localization.resolve(enabled ? 'ON' : 'OFF')
-          showValueChange(message, 'forward-fast', true)
+          showValueChange(message, 'volume-xmark', true)
           blurTooltipButtons()
           break
         }
@@ -8263,14 +8260,14 @@ export default defineComponent({
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LARGE_REWIND): {
           // Rewind by 2x the time-skip interval (in seconds)
           event.preventDefault()
-          const largeRewindMultiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
+          const largeRewindMultiplier = seekIntervalMultiplyByPlaybackRate.value ? player.getPlaybackRate() : 1
           seekBySeconds(-defaultSkipInterval.value * largeRewindMultiplier * 2, false, true)
           break
         }
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LARGE_FAST_FORWARD): {
           // Fast-Forward by 2x the time-skip interval (in seconds)
           event.preventDefault()
-          const largeFastForwardMultiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
+          const largeFastForwardMultiplier = seekIntervalMultiplyByPlaybackRate.value ? player.getPlaybackRate() : 1
           seekBySeconds(defaultSkipInterval.value * largeFastForwardMultiplier * 2, false, true)
           break
         }
@@ -8325,14 +8322,14 @@ export default defineComponent({
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.SMALL_REWIND): {
           event.preventDefault()
           // Rewind by the time-skip interval (in seconds)
-          const smallRewindMultiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
+          const smallRewindMultiplier = seekIntervalMultiplyByPlaybackRate.value ? player.getPlaybackRate() : 1
           seekBySeconds(-defaultSkipInterval.value * smallRewindMultiplier, false, true)
           break
         }
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.SMALL_FAST_FORWARD): {
           event.preventDefault()
           // Fast-Forward by the time-skip interval (in seconds)
-          const smallFastForwardMultiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
+          const smallFastForwardMultiplier = seekIntervalMultiplyByPlaybackRate.value ? player.getPlaybackRate() : 1
           seekBySeconds(defaultSkipInterval.value * smallFastForwardMultiplier, false, true)
           break
         }
@@ -8707,7 +8704,7 @@ export default defineComponent({
               return
             }
 
-            emit('playback-rate-user-set', getCurrentPlaybackRate())
+            emit('playback-rate-user-set', player.getPlaybackRate())
           }, 10)
         }
       }
@@ -8803,6 +8800,8 @@ export default defineComponent({
         player.getNetworkingEngine().registerRequestFilter(requestFilter)
         player.getNetworkingEngine().registerResponseFilter(responseFilter)
       }
+      player.getNetworkingEngine().registerRequestFilter(silenceSkippingRequestFilter)
+      player.getNetworkingEngine().registerResponseFilter(silenceSkippingResponseFilter)
 
       await setLocale(locale.value)
 
@@ -8911,6 +8910,7 @@ export default defineComponent({
       window.addEventListener('blur', handleTemporaryPlaybackRateFocusLoss)
 
       player.addEventListener('loading', () => {
+        silenceSkipping.reset()
         hasLoaded.value = false
         annotationVideoAspectRatio.value = null
         if (props.shortsPlayer) {
@@ -8965,7 +8965,7 @@ export default defineComponent({
 
       player?.addEventListener('ratechange', () => {
         const playbackRate = player.getPlaybackRate()
-        if (!temporaryPlaybackRateActive && !silenceSkipping.handlePlaybackRateChange(playbackRate)) {
+        if (!temporaryPlaybackRateActive) {
           emit('playback-rate-updated', playbackRate)
         }
         scheduleSponsorBlockSkip()
@@ -9856,8 +9856,6 @@ export default defineComponent({
       invertValueChangeContentOrder,
       showTemporaryPlaybackRateIndicator,
       temporaryPlaybackRateIndicatorMessage,
-      silenceSkippingActive: silenceSkipping.isAccelerating,
-      silenceSkippingIndicatorMessage,
 
       scrollMiniPlayerActive,
       scrollMiniPlayerAnimating,

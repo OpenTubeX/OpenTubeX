@@ -1067,7 +1067,7 @@
   background-image: none;
 }
 
-/* Names that don't fit into a tile (`Fast-Forward Through Silence`) get cut off. */
+/* Names that don't fit into a tile get cut off. */
 :deep(.shaka-overflow-menu.ft-menu-grid .shaka-overflow-button-label > span:not(.shaka-current-selection-span)) {
   display: -webkit-box;
   overflow: hidden;
