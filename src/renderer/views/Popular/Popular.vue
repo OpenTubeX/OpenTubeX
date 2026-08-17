@@ -33,7 +33,7 @@
         :data="shownResults"
       />
       <p
-        v-else
+        v-else-if="hasLoaded"
         class="emptyMessage"
         role="status"
       >
@@ -80,6 +80,7 @@ const popularCache = computed(() => {
 })
 
 const shownResults = shallowRef(popularCache.value || [])
+const hasLoaded = ref(popularCache.value !== null)
 
 onMounted(() => {
   document.addEventListener('keydown', keyboardShortcutHandler)
@@ -101,6 +102,7 @@ async function fetchPopularInfo() {
 
     store.commit('setLastPopularRefreshTimestamp', new Date())
     shownResults.value = items
+    hasLoaded.value = true
     isLoading.value = false
     store.commit('setPopularCache', items)
   } catch (err) {
