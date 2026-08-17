@@ -110,6 +110,8 @@ Subscriptions:
   Mark All as Seen: Oznacz wszystkie jako widziane
   No New Content: Brak nowych treści.
   Mark as Seen: Oznacz jako widziane
+  Newest First: Najnowsze na początku
+  Oldest First: Najstarsze na początku
 Trending:
   Trending: 'Na czasie'
   Trending Tabs: Karty „Na czasie”
@@ -282,6 +284,7 @@ Settings:
       New Tab Position: Położenie Nowej Karty
       At the end: Na końcu
       After current tab: Za aktywną kartą
+      After current tab in opened order: Po bieżącej karcie, w kolejności otwierania
     Startup Behavior:
       Startup Behavior: Przy uruchomieniu
       Load all tabs: Załaduj wszystkie karty
@@ -315,8 +318,16 @@ Settings:
       Stream Extraction Method: Metoda ekstrakcji strumienia
       yt-dlp: yt-dlp
       Built-in: Wbudowany
+    Update Relative Timestamps: Aktualizuj względne znaczniki czasu
+    Confirm Before: Potwierdź przed…
+    Confirmation Options:
+      Closing App: Zamknięciem OpenTubeX
+      Closing Window: Zamknięciem okna z wieloma kartami
+      Closing Tabs: Zamknięciem wielu kart
+      Loading Tabs: Ładowaniem wielu kart
+      Unloading Tabs: Usypianiem wielu kart
   Theme Settings:
-    Theme Settings: 'Wygląd'
+    Theme Settings: 'Motyw'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
     Base Theme:
       Base Theme: 'Bazowy motyw'
@@ -976,6 +987,17 @@ Settings:
     Language and Region: Język i region
     All Settings: Wszystkie ustawienia
     Profile Selector Hint: Możesz również kliknąć prawym przyciskiem myszy ikonę profilu, aby przełączać profile
+  Performance Impact:
+    Show Performance Impact: Pokaż wskaźniki wpływu na wydajność
+    Moderate: Umiarkowany wpływ
+    High: Wysoki wpływ
+    Description: To ustawienie może zwiększyć wykorzystanie {resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: pamięci
+      Network: transmisji danych
+      Disk: dysku
 About:
   #On About page
   About: 'O projekcie'
