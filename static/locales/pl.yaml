@@ -903,6 +903,7 @@ Settings:
     Download Folder: 'Pobierane pliki zapisuj do:'
     Choose Download Folder: Wybierz folder pobierania
     Templates Hint: Niestandardowe szablony pobierania można tworzyć i zarządzać nimi w oknie pobierania, które znajduje się pod odtwarzaczem wideo.
+    Enable Downloads: Włącz pobieranie filmów
   External Software Settings:
     yt-dlp Source: Źródło yt-dlp
     yt-dlp Channel: Kanał wersji yt-dlp
@@ -1034,6 +1035,12 @@ Settings:
     No Matching Channels: Żadne kanały nie pasują do Twojego wyszukiwania
     Forget Channel: Wyczyść wszystkie ustawienia dla tego kanału
     Forget Value: Wyczyść to ustawienie
+    Add Setting: Zapamiętaj inne ustawienie dla tego kanału
+    Playback Speed: Prędkość odtwarzania
+    Video Quality: Rozdzielczość wideo
+    Subtitles State: Napisy
+    Subtitles Enabled: Napisy włączone
+    Volume: Głośność
 About:
   #On About page
   About: 'O projekcie'
