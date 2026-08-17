@@ -322,6 +322,7 @@ export default defineComponent({
       // metadata is already there at that point, so the rest of the page is shown
       // immediately and only the player waits behind a thumbnail placeholder.
       ytDlpStreamsPending: false,
+      ytDlpDefaultClientsFallbackToastShown: false,
       legacyFormats: [],
       captions: [],
       captionTranslations: [],
@@ -778,7 +779,22 @@ export default defineComponent({
     },
     playbackEngineSelection: function () {
       if (this.ytDlpStreamsPending) {
-        return this.playbackEngineFallbackTarget ?? this.videoPlaybackEngine
+        if (this.playbackEngineFallbackTarget !== null) {
+          return this.playbackEngineFallbackTarget
+        }
+
+        // A live stream without built-in formats automatically falls back to
+        // yt-dlp even when the configured default remains the built-in engine.
+        if (
+          this.videoPlaybackEngine === 'built-in' &&
+          this.isLive &&
+          this.manifestSrc === null &&
+          this.legacyFormats.length === 0
+        ) {
+          return 'yt-dlp'
+        }
+
+        return this.videoPlaybackEngine
       }
 
       return this.activePlaybackEngine
@@ -1645,6 +1661,7 @@ export default defineComponent({
         this.streamErrorReloadAttemptedForCurrentVideo = false
         this.playbackEngineFallbackAttemptedForCurrentVideo = false
         this.playbackEngineFallbackTarget = null
+        this.ytDlpDefaultClientsFallbackToastShown = false
         this.sabrErrorRecoveryAttempts = 0
         this.sabrErrorRecoveriesForCurrentVideo = 0
         this.sabrErrorRecoveryLastSeconds = null
@@ -3895,9 +3912,29 @@ export default defineComponent({
 
       this.playbackEngineFallbackAttemptedForCurrentVideo = false
       this.playbackEngineFallbackTarget = playbackEngine
+      this.errorMessage = null
 
-      if (playbackEngine === this.activePlaybackEngine) {
+      const activePlaybackSourceAvailable = this.activeFormat === 'legacy'
+        ? this.legacyFormats.length > 0
+        : this.manifestSrc !== null
+
+      if (playbackEngine === this.activePlaybackEngine && activePlaybackSourceAvailable) {
         this.ytDlpStreamsPending = false
+        return
+      }
+
+      // `ytDlpStreamsPending` removes the current player from the DOM. Destroy
+      // Shaka first so its live manifest refreshes and segment retries cannot
+      // survive the engine switch as an orphaned player.
+      if (this.$refs.player) {
+        await this.destroyPlayer()
+      }
+
+      if (
+        !this.isCurrentVideoLoad(loadGeneration, videoId) ||
+        playbackEngineSwitchGeneration !== this.playbackEngineSwitchGeneration ||
+        this.playbackEngineFallbackTarget !== playbackEngine
+      ) {
         return
       }
 
@@ -3914,7 +3951,20 @@ export default defineComponent({
 
       if (playbackEngine === 'yt-dlp') {
         try {
-          await this.extractYtDlpPlaybackSource(loadGeneration, videoId, playbackEngineSwitchGeneration)
+          const sourceApplied = await this.extractYtDlpPlaybackSource(
+            loadGeneration,
+            videoId,
+            playbackEngineSwitchGeneration
+          )
+          if (
+            !sourceApplied &&
+            this.isCurrentVideoLoad(loadGeneration, videoId) &&
+            playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration &&
+            this.manifestSrc === null &&
+            this.legacyFormats.length === 0
+          ) {
+            this.errorMessage = this.t('This video is unavailable because of missing formats. This can happen due to country unavailability.')
+          }
         } finally {
           if (
             this.isCurrentVideoLoad(loadGeneration, videoId) &&
@@ -3946,6 +3996,7 @@ export default defineComponent({
       this.streamingDataExpiryDate = source.streamingDataExpiryDate
       this.activePlaybackEngine = 'built-in'
       this.activePlaybackEngineVersion = null
+      this.errorMessage = null
       this.alignActiveFormatWithAvailableSources()
       this.ytDlpStreamsPending = false
     },
@@ -4426,6 +4477,18 @@ export default defineComponent({
 
         this.playbackEngineFallbackAttemptedForCurrentVideo = true
         this.playbackEngineFallbackTarget = 'built-in'
+
+        if (this.$refs.player) {
+          await this.destroyPlayer()
+        }
+
+        if (
+          !this.isCurrentVideoLoad(loadGeneration, videoId) ||
+          playbackEngineSwitchGeneration !== this.playbackEngineSwitchGeneration
+        ) {
+          return true
+        }
+
         this.ytDlpStreamsPending = true
         await this.$nextTick()
         if (
@@ -4474,6 +4537,18 @@ export default defineComponent({
 
       this.playbackEngineFallbackAttemptedForCurrentVideo = true
       this.playbackEngineFallbackTarget = 'yt-dlp'
+
+      if (this.$refs.player) {
+        await this.destroyPlayer()
+      }
+
+      if (
+        !this.isCurrentVideoLoad(loadGeneration, videoId) ||
+        playbackEngineSwitchGeneration !== this.playbackEngineSwitchGeneration
+      ) {
+        return true
+      }
+
       this.ytDlpStreamsPending = true
       this.showTabToast({
         message: this.t('Change Format.Built-in Fallback Template', { error: reason }),
@@ -4543,11 +4618,22 @@ export default defineComponent({
      */
     applyYtDlpPlaybackSource: async function (loadGeneration, videoId) {
       const playbackEngineSwitchGeneration = this.playbackEngineSwitchGeneration
-      const builtInLiveSourceMissing =
-        this.videoPlaybackEngine === 'built-in' &&
+      const liveSourceMissing =
         this.isLive &&
         this.manifestSrc === null &&
         this.legacyFormats.length === 0
+      const builtInLiveSourceMissing =
+        this.videoPlaybackEngine === 'built-in' &&
+        liveSourceMissing
+
+      // A manual Built-in selection is authoritative. If its metadata reload
+      // still has no live source, report that result instead of silently
+      // switching back to yt-dlp or leaving an unexplained empty player area.
+      if (liveSourceMissing && this.playbackEngineFallbackTarget === 'built-in') {
+        this.ytDlpStreamsPending = false
+        this.errorMessage = this.t('This video is unavailable because of missing formats. This can happen due to country unavailability.')
+        return
+      }
 
       if (
         !process.env.IS_ELECTRON ||
@@ -4643,8 +4729,10 @@ export default defineComponent({
         source = await getYtDlpPlaybackSource(videoId, this.ytDlpPlaybackCacheKey, () => {
           if (
             this.isCurrentVideoLoad(loadGeneration, videoId) &&
-            playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration
+            playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration &&
+            !this.ytDlpDefaultClientsFallbackToastShown
           ) {
+            this.ytDlpDefaultClientsFallbackToastShown = true
             this.showTabToast({
               message: this.t('Change Format.yt-dlp Default Clients Fallback'),
               icon: ['fas', 'exchange-alt'],
@@ -4694,6 +4782,7 @@ export default defineComponent({
       this.sabrData = null
       this.activePlaybackEngine = 'yt-dlp'
       this.activePlaybackEngineVersion = source.version
+      this.errorMessage = null
 
       this.alignActiveFormatWithAvailableSources()
 

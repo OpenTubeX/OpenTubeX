@@ -1279,7 +1279,7 @@ export async function handleYtDlpGetPlaybackInfo(event, videoId, useDefaultClien
   if (useDefaultClients !== true) {
     // Prefer clients whose URLs are not currently subject to selective PO-token
     // enforcement. The renderer retries with yt-dlp's defaults if none of these
-    // formats are playable for the current video.
+    // formats are playable or they expose only a minimal live DVR window.
     args.push(
       '--extractor-args',
       'youtube:player_client=web_embedded,default,-android_vr'

@@ -21,7 +21,16 @@ import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpP
 // yt-dlp appends the audio track or a suffix like "-drc" to the itag for some formats
 const ITAG_REGEX = /^\d+/
 const URL_PROBE_TIMEOUT = 10_000
+const MINIMUM_LIVE_DVR_WINDOW_SECONDS = 30
 const dashPlaybackSourceCache = new YtDlpPlaybackSourceCache()
+
+/**
+ * @param {string} url
+ */
+function hasLimitedLiveDvrWindow(url) {
+  const match = url.match(/\/(?:manifest|playlist)_duration\/(\d+)\//)
+  return match !== null && parseInt(match[1], 10) <= MINIMUM_LIVE_DVR_WINDOW_SECONDS
+}
 
 /**
  * Ensures playback-error recovery extracts fresh signed stream URLs.
@@ -316,6 +325,7 @@ export async function getYtDlpPlaybackSource(videoId, cacheKey = '', onDefaultCl
   }
 
   let extractionError = null
+  let limitedLiveSource = null
 
   // A fresh extraction with the same default clients can return working URLs after
   // an immediately preceding extraction returned URLs that respond with 403. Give
@@ -385,7 +395,7 @@ export async function getYtDlpPlaybackSource(videoId, cacheKey = '', onDefaultCl
       info.hlsManifestUrl !== null &&
       await probeYtDlpHlsManifest(info.hlsManifestUrl)
     ) {
-      return {
+      const source = {
         manifestSrc: info.hlsManifestUrl,
         manifestMimeType: MANIFEST_TYPE_HLS,
         legacyFormats: await legacyFormatsPromise,
@@ -393,9 +403,28 @@ export async function getYtDlpPlaybackSource(videoId, cacheKey = '', onDefaultCl
         isLive: info.isLive,
         version: info.version
       }
+
+      // The preferred web clients sometimes expose only the last 30 seconds of an
+      // otherwise rewindable live stream. Let the existing default-client fallback
+      // try to obtain its full DVR manifest, while retaining this playable source in
+      // case those clients fail.
+      if (
+        !useDefaultClients &&
+        (info.isLive || info.liveStatus === 'is_live') &&
+        hasLimitedLiveDvrWindow(info.hlsManifestUrl)
+      ) {
+        limitedLiveSource = source
+        continue
+      }
+
+      return source
     }
 
     extractionError = new Error('yt-dlp did not return any playable formats')
+  }
+
+  if (limitedLiveSource !== null) {
+    return limitedLiveSource
   }
 
   throw extractionError ?? new Error('yt-dlp did not return any playable formats')

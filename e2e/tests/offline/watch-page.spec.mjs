@@ -434,13 +434,16 @@ async function mockTranslatedEndscreen(app, page) {
 }
 
 test.describe('watch page', () => {
-  test('shows the selected extraction method while yt-dlp streams are pending', async ({ app, page }) => {
+  test('shows the automatic yt-dlp live fallback while streams are pending', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
 
     const watchView = await watchViewHandle(page)
     await watchView.evaluate(async (view) => {
-      view.playbackEngineFallbackTarget = 'yt-dlp'
+      view.isLive = true
+      view.manifestSrc = null
+      view.legacyFormats = []
+      view.playbackEngineFallbackTarget = null
       view.ytDlpStreamsPending = true
       await view.$nextTick()
     })
@@ -543,13 +546,8 @@ test.describe('watch page', () => {
     })
   })
 
-  test('an IP-blocked HTML watch page retries yt-dlp with its default clients', async ({ app, page }) => {
+  test('an IP-blocked playback fallback retries yt-dlp with its default clients', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
-    await page.route(/^https:\/\/www\.youtube\.com\/watch\?/, (route) => route.fulfill({
-      status: 429,
-      contentType: 'text/html',
-      body: '<title>Sorry...</title>'
-    }))
     await page.route('https://example.invalid/rejected.m3u8', route => route.fulfill({
       contentType: 'text/html',
       body: '<html>expired</html>'
@@ -574,16 +572,21 @@ test.describe('watch page', () => {
       })
     })
 
-    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
-    await page.locator(sel.searchInput).press('Enter')
-    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await openMockedVideo(page)
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate(async (view) => {
+      view.ipBlockDetectedInCurrentChain = true
+      view.playbackEngineFallbackAttemptedForCurrentVideo = true
+      view.playbackEngineFallbackTarget = 'yt-dlp'
+      view.runIpBlockRecoveryScriptAndReload = async () => false
+      await view.applyYtDlpPlaybackSource(view.videoLoadGeneration, view.videoId)
+    })
 
     await expect.poll(() => app.electronApp.evaluate(() => globalThis.__ytDlpIpBlockFallbackCalls)).toBe(3)
     expect(await app.electronApp.evaluate(() => globalThis.__ytDlpIpBlockFallbackDefaultClients)).toEqual([false, true, true])
     await expect(page.locator('.toast', {
       hasText: 'The preferred yt-dlp clients could not provide playable streams'
     })).toHaveCount(1)
-    const watchView = await watchViewHandle(page)
     expect(await watchView.evaluate((view) => ({
       ipBlockDetected: view.ipBlockDetectedInCurrentChain,
       fallbackAttempted: view.playbackEngineFallbackAttemptedForCurrentVideo,
@@ -606,6 +609,61 @@ test.describe('watch page', () => {
       await view.applyYtDlpPlaybackSource(view.videoLoadGeneration, view.videoId)
       return recoveryCalls
     })).toBe(1)
+  })
+
+  test('retries yt-dlp with its default clients for a limited live DVR manifest', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route(/^https:\/\/example\.invalid\/.*\.m3u8$/, route => route.fulfill({
+      contentType: 'application/x-mpegURL',
+      body: '#EXTM3U\n'
+    }))
+    await openMockedVideo(page)
+
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.__ytDlpLiveDvrFallbackDefaultClients = []
+      ipcMain.removeHandler('yt-dlp-get-playback-info')
+      ipcMain.handle('yt-dlp-get-playback-info', (_event, _videoId, useDefaultClients) => {
+        globalThis.__ytDlpLiveDvrFallbackDefaultClients.push(useDefaultClients)
+        return {
+          isLive: true,
+          liveStatus: 'is_live',
+          hlsManifestUrl: useDefaultClients
+            ? 'https://example.invalid/playlist_type/DVR/full.m3u8'
+            : 'https://example.invalid/manifest_duration/30/limited.m3u8',
+          formats: [],
+          duration: null,
+          version: 'test'
+        }
+      })
+    })
+
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate((view) => view.handlePlaybackEngineChange('yt-dlp'))
+
+    expect(await app.electronApp.evaluate(
+      () => globalThis.__ytDlpLiveDvrFallbackDefaultClients
+    )).toEqual([false, true])
+    expect(await watchView.evaluate((view) => ({
+      activeEngine: view.activePlaybackEngine,
+      manifest: view.manifestSrc
+    }))).toEqual({
+      activeEngine: 'yt-dlp',
+      manifest: 'https://example.invalid/playlist_type/DVR/full.m3u8'
+    })
+
+    // A stream error can cause a fresh extraction for the same video. The retry
+    // still uses the default clients, but should not repeat the same notification.
+    await watchView.evaluate((view) => view.extractYtDlpPlaybackSource(
+      view.videoLoadGeneration,
+      view.videoId,
+      view.playbackEngineSwitchGeneration
+    ))
+    expect(await app.electronApp.evaluate(
+      () => globalThis.__ytDlpLiveDvrFallbackDefaultClients
+    )).toEqual([false, true, false, true])
+    await expect(page.locator('.toast', {
+      hasText: 'The preferred yt-dlp clients could not provide playable streams'
+    })).toHaveCount(1)
   })
 
   test('falls back to yt-dlp when the built-in live source has no manifest', async ({ app, page }) => {
@@ -652,7 +710,7 @@ test.describe('watch page', () => {
     const watchView = await watchViewHandle(page)
     await watchView.evaluate(async (view) => {
       view.isLoading = false
-      view.errorMessage = null
+      view.errorMessage = 'Previous playback source failed'
       view.videoTitle = 'Active live stream'
       view.isLive = true
       view.manifestSrc = null
@@ -669,6 +727,7 @@ test.describe('watch page', () => {
       activeFormat: view.activeFormat,
       activePlaybackEngine: view.activePlaybackEngine,
       activePlaybackEngineVersion: view.activePlaybackEngineVersion,
+      errorMessage: view.errorMessage,
       legacyFormats: view.legacyFormats,
       playerReady: view.playerReady,
       ytDlpStreamsPending: view.ytDlpStreamsPending
@@ -677,9 +736,43 @@ test.describe('watch page', () => {
       activeFormat: 'dash',
       activePlaybackEngine: 'yt-dlp',
       activePlaybackEngineVersion: 'test',
+      errorMessage: null,
       legacyFormats: [],
       playerReady: true,
       ytDlpStreamsPending: false
+    })
+  })
+
+  test('does not override a manual built-in selection when its live source is unavailable', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const watchView = await watchViewHandle(page)
+    const result = await watchView.evaluate(async (view) => {
+      view.isLive = true
+      view.isPostLiveDvr = false
+      view.manifestSrc = null
+      view.legacyFormats = []
+      view.activePlaybackEngine = 'built-in'
+      view.playbackEngineFallbackTarget = 'built-in'
+      view.ytDlpStreamsPending = true
+      view.errorMessage = null
+
+      await view.applyYtDlpPlaybackSource(view.videoLoadGeneration, view.videoId)
+
+      return {
+        activeEngine: view.activePlaybackEngine,
+        fallbackTarget: view.playbackEngineFallbackTarget,
+        pending: view.ytDlpStreamsPending,
+        errorMessage: view.errorMessage
+      }
+    })
+
+    expect(result).toEqual({
+      activeEngine: 'built-in',
+      fallbackTarget: 'built-in',
+      pending: false,
+      errorMessage: 'This video is unavailable because of missing formats. This can happen due to country unavailability.'
     })
   })
 

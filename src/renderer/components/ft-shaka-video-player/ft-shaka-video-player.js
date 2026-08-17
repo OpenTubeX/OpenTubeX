@@ -8434,6 +8434,13 @@ export default defineComponent({
      * @param {object?} details
      */
     function handleError(error, context, details) {
+      // A previous critical error is already being handled, or the player is
+      // unloading/destroying. Shaka can still dispatch errors from its queued
+      // segment requests during that window; neither log nor emit them again.
+      if (ignoreErrors) {
+        return
+      }
+
       // These two errors are just wrappers around another error, so use the original error instead
       // As they can be nested (e.g. multiple googlevideo redirects because the Invidious server was far away from the user) we should pick the inner most one
       while (error.code === ErrorCode.REQUEST_FILTER_ERROR || error.code === ErrorCode.RESPONSE_FILTER_ERROR) {
