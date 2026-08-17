@@ -528,7 +528,9 @@ export function useSilenceSkipping({ available, enabled, isLive, video }) {
         processAppendQueue()
       } catch (error) {
         console.warn('Unable to create look-ahead audio analysis for silence skipping', error)
-        destroyAnalysisPipeline()
+        if (generation === analysisGeneration) {
+          destroyAnalysisPipeline()
+        }
       }
     }, { once: true })
   }
@@ -559,7 +561,9 @@ export function useSilenceSkipping({ available, enabled, isLive, video }) {
       await ensureAnalysisPlayback()
     } catch (error) {
       console.warn('Unable to analyse downloaded audio for silence skipping', error)
-      destroyAnalysisPipeline()
+      if (generation === analysisGeneration) {
+        destroyAnalysisPipeline()
+      }
     }
   }
 
