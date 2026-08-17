@@ -1093,7 +1093,7 @@ export default {
 
     /**
      * Keep native media menus in sync with the renderer-owned Media Session.
-     * @param {{ownerId: string | null, playbackState: 'playing' | 'paused' | 'none', hasMetadata: boolean, actions: string[]}} state
+     * @param {{playbackState: 'playing' | 'paused' | 'none', playbackStarted: boolean, hasMetadata: boolean, actions: string[]}} state
      */
     setMediaSessionState: (state) => {
       ipcRenderer.send(IpcChannels.TABS_SET_MEDIA_SESSION_STATE, state)

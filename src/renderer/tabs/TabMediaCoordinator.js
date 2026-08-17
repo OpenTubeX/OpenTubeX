@@ -73,7 +73,7 @@ function getActionHandlers(entry) {
   return handlers
 }
 
-function applyOwner() {
+function applyOwner(playbackStartedTabId = null) {
   if (!('mediaSession' in navigator)) {
     return
   }
@@ -94,8 +94,8 @@ function applyOwner() {
   }
 
   globalThis.window?.ftElectron?.tabs?.setMediaSessionState?.({
-    ownerId: ownerTabId,
     playbackState: owner?.playbackState ?? 'none',
+    playbackStarted: ownerTabId === playbackStartedTabId && owner?.playbackState === 'playing',
     hasMetadata: owner?.metadata != null,
     actions: Object.keys(actionHandlers)
       .filter(action => typeof actionHandlers[action] === 'function')
@@ -160,7 +160,7 @@ export const tabMediaCoordinator = {
     if (playbackState === 'playing') {
       entry.lastPlayedAt = ++playSequence
     }
-    applyOwner()
+    applyOwner(playbackState === 'playing' ? tabId : null)
     applyPowerSaveState()
   },
 

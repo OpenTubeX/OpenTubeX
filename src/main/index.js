@@ -221,16 +221,13 @@ function runApp() {
     const playbackState = ['playing', 'paused', 'none'].includes(state.playbackState)
       ? state.playbackState
       : 'none'
-    const ownerId = typeof state.ownerId === 'string' ? state.ownerId : null
     const shouldAdvanceSequence = shouldAdvanceDockMediaSequence(
-      previous,
       playbackState,
-      ownerId
+      state.playbackStarted
     )
     dockMediaSessions.set(windowId, {
       manager,
       playbackState,
-      ownerId,
       hasMetadata: state.hasMetadata === true,
       actions: new Set(Array.isArray(state.actions) ? state.actions : []),
       lastPlayedAt: shouldAdvanceSequence
