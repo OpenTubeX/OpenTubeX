@@ -640,6 +640,19 @@ Settings:
     Use YouTube-style Shorts: Użyj stylu Filmów Short z YouTube
     Loop Shorts: Zapętlaj filmy short
     Enable Video Zoom: Włącz powiększanie wideo
+    Voice-over Translation:
+      Title: Tłumaczenie głosowe
+      Enable: Włącz tłumaczenie głosowe
+      Prepare in Background: Rozpocznij przygotowywanie tłumaczeń głosowych w tle
+      Background Preparation Tooltip: Wysyła identyfikator, czas trwania i wybrany język bieżącego filmu do usługi tłumaczeniowej natychmiast po załadowaniu obsługiwanego filmu.
+      Language: Język tłumaczenia głosowego
+      Supported Source Languages: 'Obsługiwane języki źródłowe: rosyjski, angielski, chiński, koreański, litewski, łotewski, arabski, francuski, włoski, hiszpański, niemiecki i japoński.'
+      Voice Volume: Głośność przetłumaczonego głosu
+      Original Volume: Głośność oryginalnego dźwięku
+      Russian: rosyjski
+      English: angielski
+      Kazakh: kazachski
+    Parallel Segment Loading: Równoległe ładowanie segmentów
   Subscription Settings:
     Subscription Settings: 'Subskrypcje'
     Fetch Feeds from RSS: Pobierz subskrypcje z RSS
@@ -1002,6 +1015,25 @@ Settings:
       Memory: pamięci
       Network: transmisji danych
       Disk: dysku
+  Channel Settings:
+    Channel Settings: Ustawienia kanału
+    Channel Settings Description: Zapamiętuje ustawienia wybrane podczas oglądania każdego kanału osobno, dzięki czemu zostaną one zastosowane ponownie przy następnym oglądaniu danego kanału.
+    Enable Playback Speed: Zapamiętywanie prędkości odtwarzania
+    Enable Video Quality: Zapamiętywanie rozdzielczości wideo
+    Enable Subtitles State: Zapamiętywanie ustawień napisów
+    Enable Volume: Zapamiętywanie głośności
+    Auto Update: Automatyczna aktualizacja po zmianie za pomocą opcji odtwarzacza
+    Auto Update Subtitles: Automatyczna aktualizacja po przełączeniu
+    Auto Update Volume: Automatyczna aktualizacja przy każdej zmianie głośności
+    Manage Saved Channels: Zarządzaj zapisanymi kanałami ({channelCount})
+    Saved Channels: Zapisane ustawienia kanału
+    Enable Saved Channel Settings Sync: Synchronizuj zapisane ustawienia kanału
+    Disable Saved Channel Settings Sync: Zatrzymaj synchronizację zapisanych ustawień kanału
+    Search Channels: Wyszukaj kanały
+    No Saved Channels: Nie zapisano jeszcze żadnych ustawień specyficznych dla kanału
+    No Matching Channels: Żadne kanały nie pasują do Twojego wyszukiwania
+    Forget Channel: Wyczyść wszystkie ustawienia dla tego kanału
+    Forget Value: Wyczyść to ustawienie
 About:
   #On About page
   About: 'O projekcie'
