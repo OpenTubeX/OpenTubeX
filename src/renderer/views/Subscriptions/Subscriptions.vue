@@ -968,8 +968,7 @@ watch([selectedTab, visibleTabs, refreshingFeedTab], () => nextTick(updateTabsIn
 
 onMounted(() => {
   if (typeof ResizeObserver === 'function') {
-    // Tab widths shift on hover (bold text) and when the per-tab loader
-    // appears, which also resizes the container
+    // Per-tab loaders resize the container while a refresh is running
     tabsResizeObserver = new ResizeObserver(() => updateTabsIndicator())
 
     if (tabsContainerRef.value?.$el instanceof HTMLElement) {

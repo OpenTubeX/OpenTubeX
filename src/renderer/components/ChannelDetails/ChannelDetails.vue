@@ -90,7 +90,10 @@
             @keydown.left.right="focusTab('home', $event)"
             @keydown.enter.space.prevent="changeTab('home')"
           >
-            {{ $t("Channel.Home.Home") }}
+            <span
+              class="tabLabel"
+              :data-label="$t('Channel.Home.Home')"
+            ><span>{{ $t("Channel.Home.Home") }}</span></span>
           </div>
           <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
           <div
@@ -106,7 +109,10 @@
             @keydown.left.right="focusTab('videos', $event)"
             @keydown.enter.space.prevent="changeTab('videos')"
           >
-            {{ $t("Channel.Videos.Videos") }}
+            <span
+              class="tabLabel"
+              :data-label="$t('Channel.Videos.Videos')"
+            ><span>{{ $t("Channel.Videos.Videos") }}</span></span>
           </div>
           <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
           <div
@@ -122,7 +128,10 @@
             @keydown.left.right="focusTab('shorts', $event)"
             @keydown.enter.space.prevent="changeTab('shorts')"
           >
-            {{ $t("Global.Shorts") }}
+            <span
+              class="tabLabel"
+              :data-label="$t('Global.Shorts')"
+            ><span>{{ $t("Global.Shorts") }}</span></span>
           </div>
           <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
           <div
@@ -138,7 +147,10 @@
             @keydown.left.right="focusTab('live', $event)"
             @keydown.enter.space.prevent="changeTab('live')"
           >
-            {{ $t("Channel.Live.Live") }}
+            <span
+              class="tabLabel"
+              :data-label="$t('Channel.Live.Live')"
+            ><span>{{ $t("Channel.Live.Live") }}</span></span>
           </div>
           <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
           <div
@@ -154,7 +166,10 @@
             @keydown.left.right="focusTab('releases', $event)"
             @keydown.enter.space.prevent="changeTab('releases')"
           >
-            {{ $t("Channel.Releases.Releases") }}
+            <span
+              class="tabLabel"
+              :data-label="$t('Channel.Releases.Releases')"
+            ><span>{{ $t("Channel.Releases.Releases") }}</span></span>
           </div>
           <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
           <div
@@ -170,7 +185,10 @@
             @keydown.left.right="focusTab('podcasts', $event)"
             @keydown.enter.space.prevent="changeTab('podcasts')"
           >
-            {{ $t("Channel.Podcasts.Podcasts") }}
+            <span
+              class="tabLabel"
+              :data-label="$t('Channel.Podcasts.Podcasts')"
+            ><span>{{ $t("Channel.Podcasts.Podcasts") }}</span></span>
           </div>
           <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
           <div
@@ -186,7 +204,10 @@
             @keydown.left.right="focusTab('courses', $event)"
             @keydown.enter.space.prevent="changeTab('courses')"
           >
-            {{ $t("Channel.Courses.Courses") }}
+            <span
+              class="tabLabel"
+              :data-label="$t('Channel.Courses.Courses')"
+            ><span>{{ $t("Channel.Courses.Courses") }}</span></span>
           </div>
           <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
           <div
@@ -202,7 +223,10 @@
             @keydown.left.right="focusTab('playlists', $event)"
             @keydown.enter.space.prevent="changeTab('playlists')"
           >
-            {{ $t("Channel.Playlists.Playlists") }}
+            <span
+              class="tabLabel"
+              :data-label="$t('Channel.Playlists.Playlists')"
+            ><span>{{ $t("Channel.Playlists.Playlists") }}</span></span>
           </div>
           <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
           <div
@@ -218,7 +242,10 @@
             @keydown.left.right="focusTab('community', $event)"
             @keydown.enter.space.prevent="changeTab('community')"
           >
-            {{ $t("Global.Posts") }}
+            <span
+              class="tabLabel"
+              :data-label="$t('Global.Posts')"
+            ><span>{{ $t("Global.Posts") }}</span></span>
           </div>
           <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
           <div
@@ -233,7 +260,10 @@
             @keydown.left.right="focusTab('about', $event)"
             @keydown.enter.space.prevent="changeTab('about')"
           >
-            {{ $t("Channel.About.About") }}
+            <span
+              class="tabLabel"
+              :data-label="$t('Channel.About.About')"
+            ><span>{{ $t("Channel.About.About") }}</span></span>
           </div>
         </div>
 
