@@ -1329,10 +1329,15 @@ Tutorial:
     Description: Find videos and channels, or paste a supported video URL directly into the search field.
   Tabs:
     Title: Keep pages open in tabs
-    Description: Open several pages at once and switch between them without losing your place.
+    Description: Open several pages at once without losing your place. Choose where tabs fit best in your layout.
   Quick Settings:
     Title: Make it yours
-    Description: Select your profile in the top-right to switch profiles, change common preferences, or open all settings. Right-click it to go straight to profile selection.
+    Description: Choose a theme and default video quality. Change these and other preferences from your profile menu at any time, or right-click it to switch profiles.
+  Import Data:
+    Title: Bring your data with you
+    Description: Optionally import subscriptions, history, playlists, search history, or settings from another supported app or backup.
+    Action: Import data
+    Not Now: Not now
   Settings Moved:
     Title: Settings have moved
     Description: Select your profile in the top-right for quick controls. Right-click it to go straight to profile selection. The cog in that menu opens all settings, and About and Downloads have moved to this menu too.
