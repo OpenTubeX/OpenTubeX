@@ -274,6 +274,8 @@
       background-size: 100px;
       block-size: 40px;
       margin-inline-start: 5px;
+      position: relative;
+      inset-block-start: 1px;
       inline-size: 100px;
 
       @media only screen and (width <= 680px) {
