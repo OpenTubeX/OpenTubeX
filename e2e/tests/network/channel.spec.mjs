@@ -90,9 +90,6 @@ test.describe('channel page', () => {
     await expect(page.locator(sel.activeTab)).not.toContainText('/channel/')
     expect(await page.evaluate(() => history.length)).toBe(historyLength)
 
-    await aboutTab.click()
-    await expect(page.locator('.about .bubblePadding').first()).toHaveCSS('border-radius', '16px')
-
     await page.locator(sel.backButton).click()
     await expect(page).toHaveURL(/#\/subscriptions/)
   })

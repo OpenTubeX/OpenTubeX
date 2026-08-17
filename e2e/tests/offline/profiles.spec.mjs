@@ -103,7 +103,7 @@ test.describe('default profile setting', () => {
 test.describe('profile channel thumbnails', () => {
   test.use({
     seed: {
-      settings: { hideUnsubscribeButton: true },
+      settings: { hideUnsubscribeButton: true, uiRoundness: 200 },
       profiles: [{
         ...mainProfile,
         subscriptions: [{
@@ -121,6 +121,7 @@ test.describe('profile channel thumbnails', () => {
     await page.locator('.card .profileList').getByText('All Channels').click()
 
     const channel = page.locator('#subscriptionsPanel').getByRole('link', { name: 'Deleted Channel' })
+    await expect(channel).toHaveCSS('border-radius', '16px')
     await expect(channel.locator('img.bubble')).toHaveCount(0)
     const fallbackAvatar = channel.locator('.bubble:not(img)')
     await expect(fallbackAvatar).toBeVisible()
