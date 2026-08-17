@@ -9,7 +9,7 @@ It originated as a fork of [FreeTube](https://github.com/FreeTubeApp/FreeTube)
 and is independently developed and supported. It is not affiliated with,
 endorsed by, maintained by, or supported by the FreeTube project.
 
-<br><p align="center"><a href="https://opentubex.org/downloads/">Download OpenTubeX</a></p>
+<br><p align="center"><a href="https://opentubex.org/downloads/">⬇️ Download OpenTubeX</a></p>
 <p align="center">
   <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml">
     <img alt='Build status' src="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml/badge.svg?branch=development" />
@@ -30,7 +30,8 @@ endorsed by, maintained by, or supported by the FreeTube project.
 <p align="center"><a href="https://opentubex.org/">Website</a> &bull; <a href="PRIVACY.md">Privacy</a> &bull; <a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
 <hr>
 
-## Why OpenTubeX?
+<a id="why-opentubex"></a>
+## ✨ Why OpenTubeX?
 
 OpenTubeX is aimed at users who want extensive control over their viewing
 experience. Some of its major areas of focus are:
@@ -46,7 +47,8 @@ experience. Some of its major areas of focus are:
 >
 > If you have an idea or if you found a bug, please submit a [GitHub issue](https://github.com/OpenTubeX/OpenTubeX/issues/new/choose) so that we can track it.  Please [search the existing issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) before submitting to prevent duplicates!
 
-## Features added by OpenTubeX
+<a id="features-added-by-opentubex"></a>
+## 🚀 Features added by OpenTubeX
 
 [View the feature overview on the OpenTubeX website](https://opentubex.org/extra-features/), or expand the list below.
 
@@ -300,7 +302,8 @@ https://github.com/user-attachments/assets/0df65773-8f13-4c5e-90d6-2db9106dea98
 
 </details>
 
-## Screenshots
+<a id="screenshots"></a>
+## 📸 Screenshots
 | The main OpenTubeX window                                                                         |
 |--------------------------------------------------------------------------------------------------|
 | ![](docs/screenshots/OpenTubeX1.png)                                                            |
@@ -313,7 +316,8 @@ https://github.com/user-attachments/assets/0df65773-8f13-4c5e-90d6-2db9106dea98
 |--------------------------------------------------------------------------------------------------|
 | ![](docs/screenshots/OpenTubeX3.png)                                                            |
 
-## How does it work?
+<a id="how-does-it-work"></a>
+## ⚙️ How does it work?
 OpenTubeX uses a built-in extractor to request data and videos directly from YouTube. The [Invidious API](https://github.com/iv-org/invidious) can be used instead; depending on the video proxy setting, media requests may still go directly to YouTube. OpenTubeX does not use YouTube's official API.
 
 OpenTubeX does not load the standard YouTube website or its page JavaScript, which reduces the browser-based tracking surface. It does not hide network requests: YouTube, an Invidious operator, or an optional service may still observe request metadata, including your IP address unless a proxy is used. See [PRIVACY.md](PRIVACY.md) for the complete threat model.
@@ -323,7 +327,8 @@ By default, subscriptions, playlists, settings, history, profiles and other app 
 > [!IMPORTANT]  
 > Using a VPN or Tor is highly recommended to hide your IP while using OpenTubeX.
 
-## Features
+<a id="features"></a>
+## 🎯 Features
 * Watch videos without ads
 * Use YouTube without Google tracking you using cookies and JavaScript
 * Two extractor APIs to choose from (Built in or Invidious)
@@ -369,7 +374,8 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 >
 > If you have issues with the extension working with OpenTubeX, please create an issue in this repository instead of the extension repository.
 
-## Download Links
+<a id="download-links"></a>
+## 📦 Download Links
 ### Official Downloads
 
 > [!CAUTION]
@@ -406,7 +412,8 @@ The first build with a green check mark is the latest build.
 * Flatpak: [Nightly branch](https://flatpak.opentubex.org/#nightly-builds) (`org.opentubex.OpenTubeX//nightly`)
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-git/) (`opentubex-git`)
 
-## Contributing
+<a id="contributing"></a>
+## 🤝 Contributing
 Thank you very much to the people and projects that make OpenTubeX possible!
 
 If you like to get your hands dirty and want to contribute, we would love to
@@ -415,7 +422,8 @@ have your help.  Send a pull request and someone will review your code.
 > [!IMPORTANT]
 > Please follow the [Contribution Guidelines](https://github.com/OpenTubeX/OpenTubeX/blob/development/CONTRIBUTING.md) before sending your pull request.
 
-## Localization
+<a id="localization"></a>
+## 🌍 Localization
 <a href="https://weblate.d3sox.me/engage/opentubex/">
 <img src="https://weblate.d3sox.me/widgets/opentubex/-/287x66-grey.png" alt="Translation status" />
 <img src="https://weblate.d3sox.me/widget/opentubex/application/matrix-auto.svg" alt="Translation matrix" />
@@ -425,10 +433,12 @@ We are actively looking for translations! We use [Weblate](https://weblate.d3sox
 
 For the Linux Flatpak, the desktop entry comment string can be translated at our [Flatpak repository](https://github.com/OpenTubeX/flatpak/blob/main/org.opentubex.OpenTubeX.desktop).
 
-## Contact
+<a id="contact"></a>
+## 💬 Contact
 If you ever have any questions, feel free to ask on our [Discussions](https://github.com/OpenTubeX/OpenTubeX/discussions) page, join our [Fluxer](https://fluxer.opentubex.org) server, or our [Matrix](https://matrix.opentubex.org) space (`#opentubex:matrix.org`).
 
-## AI-assisted development
+<a id="ai-assisted-development"></a>
+## 🤖 AI-assisted development
 
 OpenTubeX is developed extensively with AI-assisted tools. This allows our small
 maintainer team to develop features, fix bugs, and iterate much more rapidly.
@@ -439,7 +449,8 @@ sends your viewing data to an AI service. If AI-assisted development does not
 align with your preferences, OpenTubeX may simply not be the right project for
 you.
 
-## License
+<a id="license"></a>
+## 📄 License
 [![GNU AGPLv3 Image](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.html)  
 
 OpenTubeX is Free Software: You can use, study share and improve it at your
