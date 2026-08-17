@@ -24,6 +24,16 @@ test.describe('channel page', () => {
     await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-left-radius', '16px')
     await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-right-radius', '16px')
 
+    await page.locator('body').evaluate(element => {
+      element.style.fontFamily = 'Arial, sans-serif'
+    })
+
+    const aboutTab = page.getByRole('tab', { name: 'About' })
+    await expect(aboutTab).toHaveAttribute('aria-selected', 'false')
+    const widthBeforeHover = (await aboutTab.boundingBox()).width
+    await aboutTab.hover()
+    expect((await aboutTab.boundingBox()).width).toBe(widthBeforeHover)
+
     // Channel tab changes must update the route and title without creating a
     // new history entry for every tab selection (796650405, 912e5ea6e).
     await expect(page.locator(sel.activeTab)).toContainText('Blender')
