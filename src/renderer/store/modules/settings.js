@@ -249,6 +249,7 @@ const state = {
   ytDlpPath: '',
   ytDlpFfmpegSource: 'system',
   ytDlpFfmpegPath: '',
+  externalSoftwareUpdateMode: 'automatic',
   enableDownloads: true,
   moveDownloadsToAppHeader: false,
   moveSettingsToAppHeader: false,
@@ -659,6 +660,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'ytDlpPath',
   'ytDlpFfmpegSource',
   'ytDlpFfmpegPath',
+  'externalSoftwareUpdateMode',
   // DownloadSettings
   'ytDlpDownloadFolderPath',
   'ytDlpDownloadCustomArgs',

@@ -262,6 +262,7 @@ const ERROR_TOAST_ICON = ['fas', 'circle-exclamation']
  * @property {string | (({elapsedMs: number, remainingMs: number}) => string)} message
  * @property {number} [time]
  * @property {Function} [action]
+ * @property {{ label: string, action?: Function, primary?: boolean }[]} [buttons]
  * @property {AbortSignal} [abortSignal]
  * @property {string} [image] optional image URL (e.g. a video thumbnail) shown alongside the message
  * @property {[string, string]} [icon] optional semantic icon (e.g. `['fas', 'trash']`) shown
@@ -278,11 +279,12 @@ const ERROR_TOAST_ICON = ['fas', 'circle-exclamation']
 export function showToast(message, time = null, action = null, abortSignal = null) {
   let image = null
   let icon = null
+  let buttons = []
 
   // Allow calling with a single options object while staying backwards compatible
   // with the positional (message, time, action, abortSignal) signature
   if (message !== null && typeof message === 'object') {
-    ({ message, time = null, action = null, abortSignal = null, image = null, icon = null } = message)
+    ({ message, time = null, action = null, abortSignal = null, image = null, icon = null, buttons = [] } = message)
   }
 
   // Sometimes caller just pass user setting based value in and it can be zero
@@ -299,6 +301,7 @@ export function showToast(message, time = null, action = null, abortSignal = nul
       abortSignal,
       image,
       icon,
+      buttons,
     }
   }))
 }

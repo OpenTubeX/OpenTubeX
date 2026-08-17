@@ -147,6 +147,7 @@ const IpcChannels = {
   YT_DLP_PLAYBACK_CACHE_SET: 'yt-dlp-playback-cache-set',
   YT_DLP_PLAYBACK_CACHE_DELETE: 'yt-dlp-playback-cache-delete',
   YT_DLP_PLAYBACK_CACHE_CLEAR: 'yt-dlp-playback-cache-clear',
+  YT_DLP_CHECK_BINARY_UPDATE: 'yt-dlp-check-binary-update',
   YT_DLP_DOWNLOAD_BINARY: 'yt-dlp-download-binary',
   YT_DLP_BINARY_DOWNLOAD_PROGRESS: 'yt-dlp-binary-download-progress',
   YT_DLP_BINARY_UPDATED: 'yt-dlp-binary-updated'

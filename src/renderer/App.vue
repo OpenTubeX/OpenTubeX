@@ -619,9 +619,11 @@ const tabSwitcherSelectedTabId = computed(() => {
 
 /**
  * Falls back to OpenTubeX-managed external software when the configured system
- * executables are unavailable and updates every selected managed executable.
+ * executables are unavailable. Selected managed executables are updated when
+ * automatic updates are enabled or the user accepts an available update.
+ * @param {('yt-dlp' | 'ffmpeg')[] | null} requestedUpdates
  */
-async function initializeManagedExternalSoftware() {
+async function initializeManagedExternalSoftware(requestedUpdates = null) {
   if (!isElectron) {
     return
   }
@@ -646,15 +648,35 @@ async function initializeManagedExternalSoftware() {
     missingBinaries.push('ffprobe')
   }
 
-  if (store.getters.getYtDlpSource === 'managed' || missingBinaries.includes('yt-dlp')) {
+  const updateMode = store.getters.getExternalSoftwareUpdateMode
+  const automaticUpdates = updateMode === 'automatic'
+  let missingManagedBinaries = missingBinaries
+  if (!automaticUpdates && missingBinaries.length > 0) {
+    const managedInfo = await window.ftElectron.ytDlpGetInfo({
+      ytDlpSource: 'managed',
+      ytDlpPath: '',
+      ffmpegSource: 'managed',
+      ffmpegPath: ''
+    })
+    if (managedInfo !== null) {
+      missingManagedBinaries = missingBinaries.filter(binary => {
+        if (binary === 'yt-dlp') {
+          return !managedInfo.ytDlp.available
+        }
+        return binary === 'ffmpeg' ? !managedInfo.ffmpeg.available : !managedInfo.ffprobe.available
+      })
+    }
+  }
+
+  if (missingManagedBinaries.includes('yt-dlp') ||
+    (store.getters.getYtDlpSource === 'managed' &&
+      (automaticUpdates || requestedUpdates?.includes('yt-dlp')))) {
     binariesToUpdate.push('yt-dlp')
   }
-  if (store.getters.getYtDlpFfmpegSource === 'managed' ||
-    missingBinaries.includes('ffmpeg') || missingBinaries.includes('ffprobe')) {
+  if (missingManagedBinaries.includes('ffmpeg') || missingManagedBinaries.includes('ffprobe') ||
+    (store.getters.getYtDlpFfmpegSource === 'managed' &&
+      (automaticUpdates || requestedUpdates?.includes('ffmpeg')))) {
     binariesToUpdate.push('ffmpeg')
-  }
-  if (binariesToUpdate.length === 0) {
-    return
   }
 
   const settingUpdates = []
@@ -667,7 +689,14 @@ async function initializeManagedExternalSoftware() {
   }
   await Promise.all(settingUpdates)
 
-  let downloadStarted = missingBinaries.length > 0
+  if (binariesToUpdate.length === 0) {
+    if (updateMode === 'ask' && requestedUpdates === null) {
+      await notifyAboutManagedExternalSoftwareUpdates([])
+    }
+    return
+  }
+
+  let downloadStarted = missingManagedBinaries.length > 0
   let toolProgressPercentage = 0
 
   function showToolProgress(message) {
@@ -729,7 +758,7 @@ async function initializeManagedExternalSoftware() {
       store.commit('setProgressBarPercentage', toolProgressPercentage)
       const updatedTools = updatedBinaries.join(' and ')
       showToast({
-        message: missingBinaries.length > 0
+        message: missingManagedBinaries.length > 0
           ? t('Settings.Download Settings.Managed Tools Download Finished Template', { tools: updatedTools })
           : t('Settings.Download Settings.Managed Tools Update Finished Template', { tools: updatedTools }),
         icon: ['fas', 'check'],
@@ -752,6 +781,77 @@ async function initializeManagedExternalSoftware() {
       store.commit('setProgressBarIcon', ['fas', 'sync'])
     }
   }
+
+  if (updateMode === 'ask' && requestedUpdates === null) {
+    await notifyAboutManagedExternalSoftwareUpdates(missingManagedBinaries)
+  }
+}
+
+/**
+ * Checks installed managed tools and offers an explicit update action.
+ * @param {('yt-dlp' | 'ffmpeg' | 'ffprobe')[]} binariesInstalledThisRun
+ */
+async function notifyAboutManagedExternalSoftwareUpdates(binariesInstalledThisRun) {
+  const candidates = []
+  if (store.getters.getYtDlpSource === 'managed' && !binariesInstalledThisRun.includes('yt-dlp')) {
+    candidates.push('yt-dlp')
+  }
+  if (store.getters.getYtDlpFfmpegSource === 'managed' &&
+    !binariesInstalledThisRun.includes('ffmpeg') && !binariesInstalledThisRun.includes('ffprobe')) {
+    candidates.push('ffmpeg')
+  }
+
+  const checks = await Promise.all(candidates.map(async binary => {
+    const result = await window.ftElectron.ytDlpCheckBinaryUpdate(binary)
+    if (result !== null && 'error' in result) {
+      console.warn(`Checking for a managed ${binary} update failed`, result.error)
+    }
+    return result?.available === true ? binary : null
+  }))
+  const availableUpdates = checks.filter(binary => binary !== null)
+  if (availableUpdates.length === 0) {
+    return
+  }
+
+  showManagedExternalSoftwareUpdatePrompt(availableUpdates)
+}
+
+/**
+ * @param {('yt-dlp' | 'ffmpeg')[]} availableUpdates
+ */
+function showManagedExternalSoftwareUpdatePrompt(availableUpdates) {
+  showToast({
+    message: t('Settings.Download Settings.Managed Tools Update Available Template', {
+      tools: availableUpdates.join(' and ')
+    }),
+    time: Infinity,
+    icon: ['fas', 'download'],
+    buttons: [
+      { label: t('Cancel') },
+      {
+        label: t('Settings.Download Settings.Update Managed Tools'),
+        primary: true,
+        action: () => {
+          initializeManagedExternalSoftware(availableUpdates)
+            .catch(error => console.error('Failed to update managed external software', error))
+        }
+      }
+    ]
+  })
+}
+
+const MANAGED_TOOLS_UPDATE_PREVIEW_EVENT = 'opentubex:preview-managed-tools-update'
+
+/**
+ * Allows the real actionable update prompt to be previewed from DevTools.
+ * @param {Event} event
+ */
+function previewManagedExternalSoftwareUpdatePrompt(event) {
+  const detail = event instanceof CustomEvent ? event.detail : null
+  const availableUpdates = Array.isArray(detail)
+    ? detail.filter(binary => binary === 'yt-dlp' || binary === 'ffmpeg')
+    : []
+  showManagedExternalSoftwareUpdatePrompt(availableUpdates.length > 0 ? [...new Set(availableUpdates)] : ['yt-dlp'])
 }
 
 const TUTORIAL_AUDIENCE_STORAGE_KEY = 'opentubex.tutorial.audience'
@@ -799,6 +899,7 @@ onMounted(async () => {
   preloadUtilityRoutes()
 
   if (isElectron) {
+    window.addEventListener(MANAGED_TOOLS_UPDATE_PREVIEW_EVENT, previewManagedExternalSoftwareUpdatePrompt)
     removeYtDlpBinaryUpdatedListener = window.ftElectron.addYtDlpBinaryUpdatedListener(
       invalidateAllYtDlpPlaybackSources
     )
@@ -956,6 +1057,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('blur', cancelTabSwitcher)
   window.removeEventListener('online', refreshOverdueSubscriptionFeeds)
   window.removeEventListener('storage', handleSubscriptionAutoRefreshStorage)
+  window.removeEventListener(MANAGED_TOOLS_UPDATE_PREVIEW_EVENT, previewManagedExternalSoftwareUpdatePrompt)
   window.removeEventListener(SUBSCRIPTION_REFRESH_CANCELLED_EVENT, handleSubscriptionRefreshCancelled)
   window.removeEventListener(SUBSCRIPTION_REFRESH_COMPLETED_EVENT, handleSubscriptionRefreshCompleted)
   window.removeEventListener(SUBSCRIPTION_REFRESH_FINISHED_EVENT, handleSubscriptionRefreshFinished)
