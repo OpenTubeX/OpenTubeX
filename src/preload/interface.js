@@ -1092,6 +1092,25 @@ export default {
     },
 
     /**
+     * Keep native media menus in sync with the renderer-owned Media Session.
+     * @param {{playbackState: 'playing' | 'paused' | 'none', hasMetadata: boolean, actions: string[]}} state
+     */
+    setMediaSessionState: (state) => {
+      ipcRenderer.send(IpcChannels.TABS_SET_MEDIA_SESSION_STATE, state)
+    },
+
+    /**
+     * Listen for media actions requested by native application menus.
+     * @param {(action: string) => void} handler
+     * @returns {() => void}
+     */
+    onMediaSessionAction: (handler) => {
+      const listener = (_event, action) => handler(action)
+      ipcRenderer.on(IpcChannels.TABS_REQUEST_MEDIA_SESSION_ACTION, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.TABS_REQUEST_MEDIA_SESSION_ACTION, listener)
+    },
+
+    /**
      * Set silence skipping for a logical tab.
      * @param {boolean} enabled
      * @param {string} tabId

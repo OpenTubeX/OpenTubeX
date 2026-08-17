@@ -132,6 +132,108 @@ function runApp() {
   const ROOT_APP_URL = process.env.NODE_ENV === 'development' ? `http://localhost:${devServerPort}` : 'app://bundle/index.html'
   const CUSTOM_THEMES_PATH = path.join(app.getPath('userData'), CUSTOM_THEMES_DIRECTORY)
 
+  const dockMediaSessions = new Map()
+  const dockMediaTrackedWindowIds = new Set()
+  let dockMediaPlaySequence = 0
+
+  function getDockMediaSession() {
+    const sessions = Array.from(dockMediaSessions.values())
+      .filter(({ manager }) => !manager.browserWindow.isDestroyed())
+    const playingSessions = sessions.filter(({ playbackState }) => playbackState === 'playing')
+
+    if (playingSessions.length > 0) {
+      return playingSessions.reduce((latest, session) => (
+        session.lastPlayedAt > latest.lastPlayedAt ? session : latest
+      ))
+    }
+
+    const focusedSession = sessions.find(({ manager, hasMetadata }) => (
+      hasMetadata && manager.browserWindow.isFocused()
+    ))
+    if (focusedSession) {
+      return focusedSession
+    }
+
+    return sessions
+      .filter(({ hasMetadata }) => hasMetadata)
+      .sort((left, right) => right.updatedAt - left.updatedAt)[0] ?? null
+  }
+
+  function requestDockMediaAction(action) {
+    const session = getDockMediaSession()
+    if (!session || !session.actions.has(action)) {
+      return
+    }
+    session.manager.bridge.send(IpcChannels.TABS_REQUEST_MEDIA_SESSION_ACTION, action)
+  }
+
+  function updateDockMenu() {
+    if (process.platform !== 'darwin' || !app.dock) {
+      return
+    }
+
+    const session = getDockMediaSession()
+    const actions = session?.actions ?? new Set()
+    const toggleAction = session?.playbackState === 'playing' ? 'pause' : 'play'
+    const dockMenu = Menu.buildFromTemplate([
+      {
+        label: 'Previous',
+        enabled: actions.has('previoustrack'),
+        click: () => requestDockMediaAction('previoustrack')
+      },
+      {
+        label: 'Play/Pause',
+        enabled: actions.has(toggleAction),
+        click: () => requestDockMediaAction(toggleAction)
+      },
+      {
+        label: 'Next',
+        enabled: actions.has('nexttrack'),
+        click: () => requestDockMediaAction('nexttrack')
+      },
+      { type: 'separator' },
+      {
+        label: 'New Window',
+        click: () => {
+          createWindow({
+            replaceMainWindow: false,
+            showWindowNow: true
+          })
+        }
+      }
+    ])
+    app.dock.setMenu(dockMenu)
+  }
+
+  function updateDockMediaSession(manager, state) {
+    const windowId = manager.browserWindow.id
+    const previous = dockMediaSessions.get(windowId)
+    const playbackState = ['playing', 'paused', 'none'].includes(state.playbackState)
+      ? state.playbackState
+      : 'none'
+    dockMediaSessions.set(windowId, {
+      manager,
+      playbackState,
+      hasMetadata: state.hasMetadata === true,
+      actions: new Set(Array.isArray(state.actions) ? state.actions : []),
+      lastPlayedAt: playbackState === 'playing'
+        ? ++dockMediaPlaySequence
+        : previous?.lastPlayedAt ?? 0,
+      updatedAt: Date.now()
+    })
+
+    if (!dockMediaTrackedWindowIds.has(windowId)) {
+      dockMediaTrackedWindowIds.add(windowId)
+      manager.browserWindow.on('focus', updateDockMenu)
+      manager.browserWindow.once('closed', () => {
+        dockMediaSessions.delete(windowId)
+        dockMediaTrackedWindowIds.delete(windowId)
+        updateDockMenu()
+      })
+    }
+    updateDockMenu()
+  }
+
   function getCustomThemePath(id) {
     if (!/^[\w-]{1,80}$/.test(id)) throw new TypeError('Invalid custom theme ID')
     return path.join(CUSTOM_THEMES_PATH, `${id}.json`)
@@ -1602,18 +1704,7 @@ function runApp() {
 
   app.on('ready', async (_, __) => {
     if (process.platform === 'darwin') {
-      const dockMenu = Menu.buildFromTemplate([
-        {
-          label: 'New Window',
-          click: () => {
-            createWindow({
-              replaceMainWindow: false,
-              showWindowNow: true
-            })
-          }
-        }
-      ])
-      app.dock.setMenu(dockMenu)
+      updateDockMenu()
     }
 
     if (process.env.NODE_ENV === 'production') {
@@ -2072,7 +2163,8 @@ function runApp() {
         if (BrowserWindow.getAllWindows().length === 1) {
           closeConfirmedWindowIds.add(browserWindow.id)
         }
-      }
+      },
+      mediaSessionStateChanged: updateDockMediaSession
     })
 
     // Restore every window that was open last time the app quit. Each window
