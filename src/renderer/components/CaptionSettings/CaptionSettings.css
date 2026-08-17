@@ -1,3 +1,7 @@
+.captionSettings {
+  user-select: none;
+}
+
 .captionPreview {
   position: relative;
   box-sizing: border-box;
@@ -65,7 +69,6 @@
   min-inline-size: 0;
   min-block-size: 76px;
   padding: 0.75rem;
-  border: 1px solid var(--border-color);
   border-radius: calc(5px * var(--ui-roundness));
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
@@ -98,7 +101,6 @@
   display: flex;
   justify-content: flex-start;
   padding-block-start: 0.25rem;
-  border-block-start: 1px solid var(--border-color);
 }
 
 @container settings-content (width <= 1100px) {
