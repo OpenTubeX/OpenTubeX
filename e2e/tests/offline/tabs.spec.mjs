@@ -739,6 +739,23 @@ test.describe('tab bar', () => {
     expect(pinnedCloseBox.x).toBe(unpinnedCloseBox.x)
   })
 
+  test('uses the same title font size for pinned and unpinned tabs', async ({ page }) => {
+    await page.keyboard.press('Control+t')
+
+    const tabs = page.locator(sel.tabs)
+    const pinnedTab = tabs.first()
+    const pinnedTabId = await pinnedTab.getAttribute('data-tab-id')
+
+    await page.evaluate(tabId => window.ftElectron.tabs.setPinned(tabId, true), pinnedTabId)
+    await expect(pinnedTab).toHaveClass(/pinned/)
+
+    const titleFontSizes = await tabs.locator('.tabTitle').evaluateAll(titles => {
+      return titles.map(title => getComputedStyle(title).fontSize)
+    })
+
+    expect(titleFontSizes[0]).toBe(titleFontSizes[1])
+  })
+
   // Regression: search bar text used to leak between tabs (65f4e2e13)
   test('search bar text is independent per tab', async ({ page }) => {
     const searchInput = page.locator(sel.searchInput)
