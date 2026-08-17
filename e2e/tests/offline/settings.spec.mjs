@@ -938,8 +938,8 @@ test.describe('settings', () => {
 
     expect(colorControlBounds.y).toBeCloseTo(styleControlBounds.y, 0)
     expect(colorControlBounds.height).toBeCloseTo(styleControlBounds.height, 0)
-    expect(colorTriggerBounds.y).toBeCloseTo(colorControlBounds.y + 1, 0)
-    expect(colorTriggerBounds.height).toBeCloseTo(colorControlBounds.height - 2, 0)
+    expect(colorTriggerBounds.y).toBeCloseTo(colorControlBounds.y, 0)
+    expect(colorTriggerBounds.height).toBeCloseTo(colorControlBounds.height, 0)
   })
 
   test('stacks caption controls at narrow settings widths', async ({ page, attachScreenshot }) => {
@@ -1521,7 +1521,9 @@ test.describe('settings', () => {
     await page.locator('.settingsMenu [data-section="caption-appearance"]').click()
 
     await expect(page.locator('.captionSettings')).toHaveCSS('user-select', 'none')
-    await expect(page.locator('.captionControl').first()).toHaveCSS('border-width', '0px')
+    for (const captionControl of await page.locator('.captionControl').all()) {
+      await expect(captionControl).toHaveCSS('border-width', '0px')
+    }
     await expect(page.locator('.captionActions')).toHaveCSS('border-top-width', '0px')
 
     const backgroundOpacity = page.getByRole('slider', { name: /Background Opacity/ })
