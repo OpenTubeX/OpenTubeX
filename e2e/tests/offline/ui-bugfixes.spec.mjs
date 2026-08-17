@@ -115,6 +115,49 @@ test('full-window player shows the title overlay', async ({ page }) => {
   await expect(title).toHaveCSS('display', 'block')
 })
 
+test('paid promotion badge follows the full-window title visibility', async ({ page }) => {
+  const playerStyles = await readFile(
+    path.join(
+      repoRoot,
+      'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.css'
+    ),
+    'utf8'
+  )
+  await page.addStyleTag({
+    content: playerStyles.replaceAll(/:deep\(((?:[^()]|\([^()]*\))*)\)/g, '$1')
+  })
+  await page.evaluate(() => {
+    const player = document.createElement('div')
+    const badge = document.createElement('button')
+    const controls = document.createElement('div')
+    player.className = 'ftVideoPlayer fullWindow'
+    badge.className = 'paidPromotionOverlay'
+    controls.className = 'shaka-controls-container'
+    controls.setAttribute('shown', 'true')
+    player.append(badge, controls)
+    document.body.append(player)
+  })
+
+  const player = page.locator('.ftVideoPlayer')
+  const badge = player.locator('.paidPromotionOverlay')
+  const controls = player.locator('.shaka-controls-container')
+  await expect(badge).toHaveCSS('top', '65px')
+  await expect(badge).toHaveCSS('transition-delay', '0s, 0s')
+
+  await controls.evaluate(element => element.setAttribute('shown', 'false'))
+  await expect(badge).toHaveCSS('transition-delay', '0s, 0.45s')
+  await expect(badge).toHaveCSS('top', '12px')
+
+  await player.evaluate((element) => {
+    element.classList.remove('fullWindow')
+    element.classList.add('presentationModeChanging')
+  })
+  await controls.evaluate(element => element.setAttribute('shown', 'true'))
+  await player.evaluate(element => element.classList.add('fullWindow'))
+  await expect(badge).toHaveCSS('top', '65px')
+  await expect(badge).toHaveCSS('transition-property', 'opacity')
+})
+
 test('Shorts top controls stay visible over white video content', async ({ page }) => {
   await goTo(page, 'history')
   const playerStyles = await readFile(

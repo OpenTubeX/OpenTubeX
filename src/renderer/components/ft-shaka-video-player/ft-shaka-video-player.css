@@ -70,7 +70,8 @@
   inset-block-start: 12px;
   inset-inline-start: 8px;
   opacity: 0.82;
-  transition: opacity 150ms ease;
+  transition: opacity 150ms ease,
+    inset-block-start 150ms ease 450ms;
 }
 
 .paidPromotionOverlay:hover,
@@ -78,9 +79,16 @@
   opacity: 1;
 }
 
-.ftVideoPlayer:is(:fullscreen, .fullWindow) > .paidPromotionOverlay {
+.ftVideoPlayer.presentationModeChanging > .paidPromotionOverlay {
+  transition: opacity 150ms ease;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow):has(
+  :deep(.shaka-controls-container[shown='true'])
+):not(.playerPaused.hideVideoTitleWhenPaused:not(.pausedInterfaceRevealed)) > .paidPromotionOverlay {
   /* Keep the badge clear of the single-line fullscreen title overlay. */
   inset-block-start: 65px;
+  transition-delay: 0s, 0s;
 }
 
 .ftVideoPlayer.shortsPlayer {
