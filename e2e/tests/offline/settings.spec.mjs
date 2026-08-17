@@ -1520,6 +1520,10 @@ test.describe('settings', () => {
     await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
     await page.locator('.settingsMenu [data-section="caption-appearance"]').click()
 
+    await expect(page.locator('.captionSettings')).toHaveCSS('user-select', 'none')
+    await expect(page.locator('.captionControl').first()).toHaveCSS('border-width', '0px')
+    await expect(page.locator('.captionActions')).toHaveCSS('border-top-width', '0px')
+
     const backgroundOpacity = page.getByRole('slider', { name: /Background Opacity/ })
     await backgroundOpacity.fill('50')
 
