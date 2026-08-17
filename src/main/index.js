@@ -62,6 +62,7 @@ import { fetchFaviconDataUrl, resolveFaviconUrl } from './favicon'
 import { LiveReminderManager } from './LiveReminderManager'
 import { requestVoiceOverTranslation } from './voiceOverTranslation'
 import { clearVideoMetadataCache, getVideoMetadataCacheSize, updateVideoMetadataCache } from './videoMetadataCache'
+import { shouldAdvanceDockMediaSequence } from './dockMediaSession'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
 if (process.argv.includes('--version')) {
@@ -220,12 +221,19 @@ function runApp() {
     const playbackState = ['playing', 'paused', 'none'].includes(state.playbackState)
       ? state.playbackState
       : 'none'
+    const ownerId = typeof state.ownerId === 'string' ? state.ownerId : null
+    const shouldAdvanceSequence = shouldAdvanceDockMediaSequence(
+      previous,
+      playbackState,
+      ownerId
+    )
     dockMediaSessions.set(windowId, {
       manager,
       playbackState,
+      ownerId,
       hasMetadata: state.hasMetadata === true,
       actions: new Set(Array.isArray(state.actions) ? state.actions : []),
-      lastPlayedAt: playbackState === 'playing'
+      lastPlayedAt: shouldAdvanceSequence
         ? ++dockMediaPlaySequence
         : previous?.lastPlayedAt ?? 0,
       updatedAt: Date.now()

@@ -94,6 +94,7 @@ function applyOwner() {
   }
 
   globalThis.window?.ftElectron?.tabs?.setMediaSessionState?.({
+    ownerId: ownerTabId,
     playbackState: owner?.playbackState ?? 'none',
     hasMetadata: owner?.metadata != null,
     actions: Object.keys(actionHandlers)
