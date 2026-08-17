@@ -139,8 +139,17 @@ test('walks new users through the essential controls', async ({ page }) => {
   await tutorial.getByRole('button', { name: 'Next' }).click()
   await expect(tutorial).toHaveAccessibleName('Keep pages open in tabs')
   const layout = tutorial.getByRole('combobox', { name: 'Tab Layout' })
+  await layout.focus()
+  await page.keyboard.press('Enter')
+  await expect(layout).toHaveAttribute('aria-expanded', 'true')
+  await page.keyboard.press('Escape')
+  await expect(layout).toHaveAttribute('aria-expanded', 'false')
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('Enter')
+  await expect(layout).toHaveText('Horizontal at bottom')
+  await expect(page.locator('.tabBar.position-bottom')).toBeVisible()
   for (const [label, className] of [
-    ['Horizontal at bottom', 'position-bottom'],
     ['Vertical on left', 'position-left'],
     ['Vertical on right', 'position-right'],
     ['Horizontal at top', 'position-top']

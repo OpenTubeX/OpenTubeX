@@ -4,7 +4,7 @@
       class="tutorialOverlay"
       :class="{ centered: targetRect === null }"
       role="presentation"
-      @keydown.capture="handleKeydown"
+      @keydown="handleKeydown"
     >
       <div
         v-if="targetRect"
@@ -275,8 +275,7 @@ const highlightStyle = computed(() => {
     insetBlockStart: `${targetRect.value.top}px`,
     left: `${targetRect.value.left}px`,
     inlineSize: `${targetRect.value.width}px`,
-    blockSize: `${targetRect.value.height}px`,
-    borderRadius: targetRect.value.borderRadius
+    blockSize: `${targetRect.value.height}px`
   }
 })
 
@@ -390,6 +389,8 @@ async function updatePosition() {
 
 function handleDocumentKeydown(event) {
   if (event.key === 'Escape') {
+    if (event.target.closest?.('.tutorialCard .select.open')) return
+
     event.preventDefault()
     event.stopPropagation()
   }
