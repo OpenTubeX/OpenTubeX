@@ -1,4 +1,6 @@
 .tabBar {
+  --tab-bar-inline-padding: 4px;
+
   box-sizing: border-box;
   display: flex;
 
@@ -11,7 +13,7 @@
 
   /* Keep top radii off the title-bar edge. */
   padding-block-start: 1px;
-  padding-inline: 4px;
+  padding-inline: var(--tab-bar-inline-padding);
   gap: 2px;
   position: sticky;
   inset-block-start: 0;
@@ -155,6 +157,7 @@
   /* No bottom padding: the new-tab button reaches the screen edge, so clicks
      at the very bottom still land on it */
   padding-block: 4px 0;
+  padding-inline: 0;
   border-block-end: 0;
 }
 
@@ -185,6 +188,7 @@
 
 .tabBar.vertical .newTabButton {
   align-self: stretch;
+  margin-inline: var(--tab-bar-inline-padding);
   padding-block-end: 10px;
 }
 
@@ -194,8 +198,10 @@
 }
 
 .tabBar.vertical .tabsContainer {
+  box-sizing: border-box;
   flex-direction: column;
   block-size: 100%;
+  padding-inline: var(--tab-bar-inline-padding);
   overflow: hidden auto;
   overscroll-behavior: contain;
 }
