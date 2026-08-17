@@ -214,6 +214,21 @@
   font-weight: bold;
 }
 
+.tabLabel {
+  display: inline-grid;
+}
+
+.tabLabel::after {
+  content: attr(data-label);
+  grid-area: 1 / 1;
+  font-weight: bold;
+  visibility: hidden;
+}
+
+.tabLabel > span {
+  grid-area: 1 / 1;
+}
+
 .subscriptionIcon {
   color: var(--primary-color);
 }
