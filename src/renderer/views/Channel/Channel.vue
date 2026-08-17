@@ -2505,6 +2505,11 @@ function handlePanelTabNavigation(event) {
 
   const visibleTabs = tabInfoValues.value
   const currentIndex = visibleTabs.indexOf(currentTab.value)
+
+  if (currentIndex === -1) {
+    return
+  }
+
   const offset = event.key === 'ArrowLeft' ? -1 : 1
   const nextIndex = (currentIndex + offset + visibleTabs.length) % visibleTabs.length
 
