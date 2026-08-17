@@ -58,6 +58,43 @@ test.use({
 })
 
 test.describe('download settings', () => {
+  test('stores global yt-dlp arguments and centers wrapped download actions', async ({ app, page }) => {
+    await goToSettingsSection(page, 'download')
+
+    const globalArguments = page.getByRole('textbox', { name: 'Global Additional yt-dlp Arguments' })
+    await globalArguments.fill('--cookies-from-browser firefox')
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getYtDlpDownloadCustomArgs
+    })).toBe('--cookies-from-browser firefox')
+
+    await page.getByRole('button', { name: 'Maximize' }).click()
+    await setWindowSize(app, page, { width: 1501, height: 751 })
+    const actions = page.locator('.downloadActions')
+    await expect.poll(() => actions.locator('.btn').evaluateAll(buttons => (
+      new Set(buttons.map(button => button.offsetTop)).size
+    ))).toBe(1)
+
+    await setWindowSize(app, page, { width: 701, height: 801 })
+    const wrappedGeometry = await actions.evaluate(element => {
+      const container = element.getBoundingClientRect()
+      const buttons = [...element.querySelectorAll('.btn')].map(button => button.getBoundingClientRect())
+      return {
+        containerCenter: container.x + container.width / 2,
+        centers: buttons.map(button => button.x + button.width / 2),
+        tops: buttons.map(button => button.y),
+        actionsBottom: container.bottom
+      }
+    })
+    expect(wrappedGeometry.tops[0]).toBeCloseTo(wrappedGeometry.tops[1], 0)
+    expect(wrappedGeometry.tops[2]).toBeGreaterThan(wrappedGeometry.tops[0])
+    expect(wrappedGeometry.centers[2]).toBeCloseTo(wrappedGeometry.containerCenter, 0)
+
+    const inputsTop = await page.getByRole('textbox', { name: 'Download Folder' })
+      .evaluate(element => element.getBoundingClientRect().top)
+    expect(inputsTop - wrappedGeometry.actionsBottom).toBeGreaterThanOrEqual(20)
+  })
+
   test('creates templates from built-in and custom templates', async ({ page }) => {
     await goToSettingsSection(page, 'download')
 

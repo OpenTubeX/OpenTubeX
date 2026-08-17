@@ -936,6 +936,7 @@ Settings:
     Managed Tools Update Finished Template: 'Finished updating {tools}'
     Managed Tools Download Error Template: 'Could not download the managed tools: {errors}'
     Download Folder: Download Folder
+    Global Additional yt-dlp Arguments: Global Additional yt-dlp Arguments
     Choose Download Folder: Choose Download Folder
     External Software Hint: yt-dlp, FFmpeg, and FFprobe are configured in the External Software settings.
     Download Templates: Download Templates
@@ -2083,6 +2084,7 @@ Tooltips:
     DefaultCustomArgumentsTemplate: "(Default: '{defaultCustomArguments}')"
   Download Settings:
     Download Folder: Videos are saved to this folder. Leave blank to use your system's Downloads folder.
+    Global Additional yt-dlp Arguments: Additional command line arguments passed to yt-dlp for every download, for example --cookies-from-browser firefox.
   External Software Settings:
     yt-dlp Source: OpenTubeX can either use the yt-dlp installed on your system or download
       and manage its own copy of yt-dlp, which is stored in the user data directory.

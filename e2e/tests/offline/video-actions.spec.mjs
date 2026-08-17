@@ -202,6 +202,11 @@ test.describe('video downloads', () => {
 
     await expect(page.getByText('Download failed', { exact: true })).toBeVisible()
     await expect(page.locator('.downloadProgressBarTrack')).toHaveCount(0)
+    const separatorSpacing = await page.locator('.downloadPromptContent').evaluate(prompt => ({
+      above: Number.parseFloat(getComputedStyle(prompt.querySelector('.downloadProgress')).paddingBottom),
+      below: Number.parseFloat(getComputedStyle(prompt.querySelector('.downloadFooter')).paddingTop)
+    }))
+    expect(separatorSpacing.below).toBe(separatorSpacing.above)
   })
 
   test('can retry playback extraction with yt-dlp default clients', async ({ app, page }) => {
@@ -296,6 +301,48 @@ test.describe('video downloads', () => {
       customArgs
     }))), customArguments)
     expect(results).toEqual(customArguments.map(() => ({ error: 'unsupported-custom-argument' })))
+  })
+
+  test('applies global custom arguments before per-download arguments', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'capture-global-yt-dlp-args.sh')
+    const capturedArgs = path.join(app.userDataDir, 'captured-global-yt-dlp-args.txt')
+    await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
+    await chmod(executable, 0o755)
+    await page.evaluate(async ({ ytDlpPath, globalArgs }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+      await store.dispatch('updateYtDlpDownloadCustomArgs', globalArgs)
+    }, {
+      ytDlpPath: executable,
+      globalArgs: '--cookies-from-browser "firefox:default-release" --format webm'
+    })
+
+    await page.bringToFront()
+    await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      mode: 'video',
+      customArgs: '--format mp4'
+    }))
+
+    await expect.poll(async () => readFile(capturedArgs, 'utf8').catch(() => '')).toContain('--cookies-from-browser')
+    const passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
+    const formatIndexes = passedArguments
+      .map((argument, index) => argument === '--format' ? index : -1)
+      .filter(index => index >= 0)
+    expect(passedArguments[passedArguments.indexOf('--cookies-from-browser') + 1]).toBe('firefox:default-release')
+    expect(passedArguments[formatIndexes[0] + 1]).toBe('webm')
+    expect(passedArguments[formatIndexes[1] + 1]).toBe('mp4')
+    expect(formatIndexes[1]).toBeGreaterThan(formatIndexes[0])
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpDownloadCustomArgs', '--exec "echo unsafe"')
+    })
+    await page.bringToFront()
+    expect(await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      mode: 'video'
+    }))).toEqual({ error: 'unsupported-custom-argument' })
   })
 
   test('escapes percent signs in local playlist folder names', async ({ app, page }) => {

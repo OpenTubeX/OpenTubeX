@@ -11,15 +11,18 @@
         @change="updateEnableDownloads"
       />
     </FtFlexBox>
-    <FtFlexBox v-if="enableDownloads">
+    <FtFlexBox
+      v-if="enableDownloads"
+      class="downloadActions"
+    >
       <FtButton
         :label="t('Downloads.Open Downloads')"
         :icon="['fas', 'download']"
         @click="openDownloads"
       />
+      <DownloadTemplateSettings />
+      <AutomaticDownloadSettings />
     </FtFlexBox>
-    <DownloadTemplateSettings v-if="enableDownloads" />
-    <AutomaticDownloadSettings v-if="enableDownloads" />
     <FtFlexBox
       v-if="enableDownloads"
       class="downloadPathInputs settingsFlexStart460px"
@@ -34,6 +37,14 @@
         :tooltip="t('Tooltips.Download Settings.Download Folder')"
         @input="updateYtDlpDownloadFolderPath"
         @click="chooseDownloadFolder"
+      />
+      <FtInput
+        :placeholder="t('Settings.Download Settings.Global Additional yt-dlp Arguments')"
+        :show-action-button="false"
+        :show-label="true"
+        :value="ytDlpDownloadCustomArgs"
+        :tooltip="t('Tooltips.Download Settings.Global Additional yt-dlp Arguments')"
+        @input="updateYtDlpDownloadCustomArgs"
       />
     </FtFlexBox>
   </FtSettingsSection>
@@ -61,6 +72,9 @@ const enableDownloads = computed(() => store.getters.getEnableDownloads)
 /** @type {import('vue').ComputedRef<string>} */
 const ytDlpDownloadFolderPath = computed(() => store.getters.getYtDlpDownloadFolderPath)
 
+/** @type {import('vue').ComputedRef<string>} */
+const ytDlpDownloadCustomArgs = computed(() => store.getters.getYtDlpDownloadCustomArgs)
+
 /**
  * @param {boolean} value
  */
@@ -79,6 +93,13 @@ function updateYtDlpDownloadFolderPath(value) {
   store.dispatch('updateYtDlpDownloadFolderPath', value)
 }
 
+/**
+ * @param {string} value
+ */
+function updateYtDlpDownloadCustomArgs(value) {
+  store.dispatch('updateYtDlpDownloadCustomArgs', value)
+}
+
 async function chooseDownloadFolder() {
   const path = await window.ftElectron.ytDlpChooseDownloadFolder(ytDlpDownloadFolderPath.value)
 
@@ -89,6 +110,22 @@ async function chooseDownloadFolder() {
 </script>
 
 <style scoped>
+.downloadActions {
+  align-items: stretch;
+  gap: 10px;
+  justify-content: center;
+  margin-block-end: 20px;
+}
+
+.downloadActions :deep(.btn) {
+  flex: 1 1 230px;
+  inline-size: 100%;
+  max-inline-size: 340px;
+  block-size: auto;
+  margin: 0;
+  white-space: normal;
+}
+
 .downloadPathInputs {
   column-gap: 12px;
 }

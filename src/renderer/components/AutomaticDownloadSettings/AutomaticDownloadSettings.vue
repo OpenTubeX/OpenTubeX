@@ -1,11 +1,9 @@
 <template>
-  <FtFlexBox>
-    <FtButton
-      :label="t('Settings.Download Settings.Manage Automatic Downloads', { channelCount: enabledRuleCount })"
-      :icon="['fas', 'download']"
-      @click="showManager = true"
-    />
-  </FtFlexBox>
+  <FtButton
+    :label="t('Settings.Download Settings.Manage Automatic Downloads', { channelCount: enabledRuleCount })"
+    :icon="['fas', 'download']"
+    @click="showManager = true"
+  />
   <FtSettingsSubpage
     :open="showManager"
     :title="t('Settings.Download Settings.Automatic Downloads')"
@@ -189,7 +187,6 @@ import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
-import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'

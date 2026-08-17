@@ -149,6 +149,10 @@
   padding-inline: 12px;
 }
 
+.activeDownloadFooter {
+  padding-block-start: 30px;
+}
+
 .downloadFolderRow {
   align-items: center;
   display: flex;

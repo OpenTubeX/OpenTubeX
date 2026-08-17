@@ -1,11 +1,9 @@
 <template>
-  <FtFlexBox>
-    <FtButton
-      :label="t('Settings.Download Settings.Manage Download Templates', { templateCount: customTemplates.length })"
-      :icon="['fas', 'save']"
-      @click="openManager"
-    />
-  </FtFlexBox>
+  <FtButton
+    :label="t('Settings.Download Settings.Manage Download Templates', { templateCount: customTemplates.length })"
+    :icon="['fas', 'save']"
+    @click="openManager"
+  />
   <FtSettingsSubpage
     :open="showManager"
     :title="t('Settings.Download Settings.Download Templates')"
