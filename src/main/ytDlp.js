@@ -1495,10 +1495,14 @@ async function startYtDlpDownload(
     ? payload.subtitleFormat
     : ''
 
+  const globalCustomArgsSetting = (await settings._findOne('ytDlpDownloadCustomArgs'))?.value
+  const globalCustomArgs = typeof globalCustomArgsSetting === 'string' && globalCustomArgsSetting.trim() !== ''
+    ? splitArguments(globalCustomArgsSetting)
+    : []
   const customArgs = typeof payload.customArgs === 'string' && payload.customArgs.trim() !== ''
     ? splitArguments(payload.customArgs)
     : []
-  if (customArgs.some(argument => DENIED_CUSTOM_ARGS.includes(argument.split('=')[0]))) {
+  if ([...globalCustomArgs, ...customArgs].some(argument => DENIED_CUSTOM_ARGS.includes(argument.split('=')[0]))) {
     return { error: 'unsupported-custom-argument' }
   }
 
@@ -1545,6 +1549,7 @@ async function startYtDlpDownload(
   }
 
   await pushProxyArgument(args)
+  args.push(...globalCustomArgs)
 
   const ffmpeg = await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg')
 
@@ -1696,9 +1701,7 @@ async function startYtDlpDownload(
   if (startTime !== '' || endTime !== '') {
     args.push('--download-sections', `*${startTime || '0'}-${endTime || 'inf'}`, '--force-keyframes-at-cuts')
   }
-  if (customArgs.length > 0) {
-    args.push(...customArgs)
-  }
+  args.push(...customArgs)
 
   if (isRemotePlaylist) {
     args.push(`https://www.youtube.com/playlist?list=${payload.playlistId}`)

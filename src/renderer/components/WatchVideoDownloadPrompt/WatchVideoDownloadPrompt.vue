@@ -241,7 +241,10 @@
         </p>
       </div>
 
-      <footer class="downloadFooter">
+      <footer
+        class="downloadFooter"
+        :class="{ activeDownloadFooter: activeDownload !== null }"
+      >
         <p class="downloadFolderRow">
           <FtIcon :icon="['fas', 'folder-open']" />
           <span>{{ downloadFolderDisplay }}</span>

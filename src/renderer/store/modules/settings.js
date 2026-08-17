@@ -253,6 +253,7 @@ const state = {
   moveDownloadsToAppHeader: false,
   moveSettingsToAppHeader: false,
   ytDlpDownloadFolderPath: '',
+  ytDlpDownloadCustomArgs: '',
   ytDlpDownloadTemplates: '[]',
   ytDlpSelectedTemplate: 'video:best',
   ytDlpAutomaticDownloadRules: '{}',
@@ -660,6 +661,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'ytDlpFfmpegPath',
   // DownloadSettings
   'ytDlpDownloadFolderPath',
+  'ytDlpDownloadCustomArgs',
   // Others
   'disableSmoothScrolling',
   'hideToTrayOnMinimize',
