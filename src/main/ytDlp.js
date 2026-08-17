@@ -100,6 +100,7 @@ const CHANNEL_ID_REGEX = /^UC[\w-]{22}$/
 const AUTOMATIC_DISCOVERY_CACHE_TTL_MS = 60_000
 const AUTOMATIC_DISCOVERY_TIMEOUT_MS = 15_000
 const AUTOMATIC_DISCOVERY_E2E_FIXTURE = 'automatic-download-discovery.xml'
+const MANAGED_BINARY_UPDATE_CHECK_TIMEOUT_MS = 15_000
 const AUTOMATIC_TITLE_TERM_LIMIT = 20
 const AUTOMATIC_TITLE_TERM_LENGTH_LIMIT = 100
 const AUTOMATIC_NUMBER_LIMITS = Object.freeze({
@@ -543,7 +544,7 @@ async function downloadFile(url, onProgress, onDownloadStart, validators) {
  * @returns {Promise<boolean>}
  */
 async function isFileUpdateAvailable(url, validators) {
-  if (validators === null) {
+  if (!validators?.etag && !validators?.lastModified) {
     return false
   }
 
@@ -555,7 +556,11 @@ async function isFileUpdateAvailable(url, validators) {
     headers['If-Modified-Since'] = validators.lastModified
   }
 
-  const response = await net.fetch(url, { method: 'HEAD', headers })
+  const response = await net.fetch(url, {
+    method: 'HEAD',
+    headers,
+    signal: AbortSignal.timeout(MANAGED_BINARY_UPDATE_CHECK_TIMEOUT_MS)
+  })
   if (response.status === 304) {
     return false
   }

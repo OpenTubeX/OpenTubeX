@@ -15,8 +15,8 @@
       :tabindex="toast.action ? 0 : null"
       role="status"
       @click="onClick"
-      @keydown.enter.prevent="performAction"
-      @keydown.space.prevent="performAction"
+      @keydown.enter.self.prevent="performAction"
+      @keydown.space.self.prevent="performAction"
       @pointerdown="onPointerDown"
       @pointerup="onPointerUp"
     >
@@ -39,6 +39,7 @@
       <div
         v-if="toast.buttons.length > 0"
         class="toastActions"
+        @click.stop
       >
         <FtButton
           v-for="button in toast.buttons"
