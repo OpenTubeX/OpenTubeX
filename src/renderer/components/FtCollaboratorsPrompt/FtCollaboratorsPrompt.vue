@@ -25,6 +25,7 @@
           class="collaboratorLink"
           :class="{ initialCursor: !enableChannelLinks }"
           @click="emit('close')"
+          @auxclick="handleChannelLinkAuxClick($event, collaborator)"
         >
           <img
             :src="collaborator.thumbnail"
@@ -66,6 +67,7 @@ import { useI18n } from 'vue-i18n'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 
+import { openInternalPath } from '../../helpers/utils'
 import store from '../../store'
 import { useTabContext } from '../../tabs/TabContext'
 
@@ -84,6 +86,21 @@ const { isTabPresented } = useTabContext()
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
 
 const hideUnsubscribeButton = computed(() => store.getters.getHideUnsubscribeButton)
+
+function handleChannelLinkAuxClick(event, collaborator) {
+  if (!process.env.IS_ELECTRON || !enableChannelLinks.value || event.button !== 1) {
+    return
+  }
+
+  event.preventDefault()
+  openInternalPath({
+    path: `/channel/${collaborator.id}`,
+    title: collaborator.name,
+    doCreateNewWindow: event.shiftKey,
+    doCreateNewTab: !event.shiftKey,
+    makeActive: false
+  })
+}
 </script>
 
 <style scoped src="./FtCollaboratorsPrompt.css" />
