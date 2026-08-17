@@ -55,7 +55,10 @@
                   :icon="['fa', 'video']"
                   class="subscriptionIcon"
                 />
-                {{ $t("Global.Videos") }}
+                <span
+                  class="tabLabel"
+                  :data-label="$t('Global.Videos')"
+                ><span>{{ $t("Global.Videos") }}</span></span>
                 <FtLoader
                   v-if="refreshingFeedTab === 'videos'"
                   class="tabLoadingIndicator"
@@ -80,7 +83,10 @@
                   :icon="['fa', 'clapperboard']"
                   class="subscriptionIcon"
                 />
-                {{ $t("Global.Shorts") }}
+                <span
+                  class="tabLabel"
+                  :data-label="$t('Global.Shorts')"
+                ><span>{{ $t("Global.Shorts") }}</span></span>
                 <FtLoader
                   v-if="refreshingFeedTab === 'shorts'"
                   class="tabLoadingIndicator"
@@ -105,7 +111,10 @@
                   :icon="['fa', 'tower-broadcast']"
                   class="subscriptionIcon"
                 />
-                {{ $t("Global.Live") }}
+                <span
+                  class="tabLabel"
+                  :data-label="$t('Global.Live')"
+                ><span>{{ $t("Global.Live") }}</span></span>
                 <FtLoader
                   v-if="refreshingFeedTab === 'live'"
                   class="tabLoadingIndicator"
@@ -130,7 +139,10 @@
                   :icon="['fa', 'message']"
                   class="subscriptionIcon"
                 />
-                {{ $t("Global.Posts") }}
+                <span
+                  class="tabLabel"
+                  :data-label="$t('Global.Posts')"
+                ><span>{{ $t("Global.Posts") }}</span></span>
                 <FtLoader
                   v-if="refreshingFeedTab === 'posts'"
                   class="tabLoadingIndicator"
@@ -155,7 +167,10 @@
                   :icon="['fa', 'fire']"
                   class="subscriptionIcon"
                 />
-                {{ $t("Global.New") }}
+                <span
+                  class="tabLabel"
+                  :data-label="$t('Global.New')"
+                ><span>{{ $t("Global.New") }}</span></span>
               </div>
             </FtFlexBox>
             <button

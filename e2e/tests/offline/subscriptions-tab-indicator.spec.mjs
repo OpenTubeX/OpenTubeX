@@ -55,6 +55,21 @@ test.use({
 })
 
 test.describe('subscriptions feed tab indicator', () => {
+  test('keeps tab widths stable when hovering with fonts whose bold glyphs are wider', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    await page.locator('body').evaluate(element => {
+      element.style.fontFamily = 'Arial, sans-serif'
+    })
+
+    const tab = page.locator('[data-subscription-feed-tab="shorts"]')
+    const widthBeforeHover = (await tab.boundingBox()).width
+
+    await tab.hover()
+
+    expect((await tab.boundingBox()).width).toBe(widthBeforeHover)
+  })
+
   test('only animates the transform, so it runs on the compositor', async ({ page }) => {
     await goTo(page, 'subscriptions')
 
