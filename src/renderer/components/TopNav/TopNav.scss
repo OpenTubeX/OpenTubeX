@@ -230,6 +230,7 @@
 
   .logo {
     align-items: center;
+    border-radius: calc(4px * var(--ui-roundness));
     cursor: pointer;
     display: flex;
     padding-block: 0;
