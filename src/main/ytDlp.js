@@ -536,6 +536,37 @@ async function downloadFile(url, onProgress, onDownloadStart, validators) {
 }
 
 /**
+ * Checks a managed download without transferring its payload.
+ * A missing validator means there is no trustworthy installed-release baseline.
+ * @param {string} url
+ * @param {BinaryDownloadValidators | null} validators
+ * @returns {Promise<boolean>}
+ */
+async function isFileUpdateAvailable(url, validators) {
+  if (validators === null) {
+    return false
+  }
+
+  const headers = {}
+  if (validators.etag) {
+    headers['If-None-Match'] = validators.etag
+  }
+  if (validators.lastModified) {
+    headers['If-Modified-Since'] = validators.lastModified
+  }
+
+  const response = await net.fetch(url, { method: 'HEAD', headers })
+  if (response.status === 304) {
+    return false
+  }
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
+
+  return true
+}
+
+/**
  * @param {string} binaryPath
  * @param {string} source
  * @param {'stable' | 'nightly' | 'master'} [channel]
@@ -905,6 +936,40 @@ async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
 }
 
 /**
+ * Checks whether the selected managed binary has a newer remote asset.
+ * @param {'yt-dlp' | 'ffmpeg'} binary
+ * @returns {Promise<boolean>}
+ */
+async function isManagedBinaryUpdateAvailable(binary) {
+  if (binary === 'yt-dlp') {
+    const configuredChannel = (await settings._findOne('ytDlpChannel'))?.value
+    const channel = Object.hasOwn(YT_DLP_RELEASE_REPOSITORIES, configuredChannel) ? configuredChannel : 'stable'
+    const assetName = getYtDlpAssetName(process.platform, process.arch)
+    const source = `https://github.com/${YT_DLP_RELEASE_REPOSITORIES[channel]}/releases/latest/download/${assetName}`
+    const managedPath = getManagedBinaryPath('yt-dlp')
+    return isFileUpdateAvailable(source, await readDownloadValidators(managedPath, source, channel))
+  }
+
+  const ffmpegPath = getManagedBinaryPath('ffmpeg')
+  if (process.platform === 'win32') {
+    const url = 'https://github.com/yt-dlp/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip'
+    return isFileUpdateAvailable(url, await readDownloadValidators(ffmpegPath, url))
+  }
+
+  const platform = process.platform === 'darwin' ? 'macos' : 'linux'
+  const arch = process.arch === 'arm64' ? 'arm64' : 'amd64'
+  for (const binaryName of ['ffmpeg', 'ffprobe']) {
+    const url = `https://ffmpeg.martin-riedl.de/redirect/latest/${platform}/${arch}/release/${binaryName}.zip`
+    const binaryPath = getManagedBinaryPath(binaryName)
+    if (await isFileUpdateAvailable(url, await readDownloadValidators(binaryPath, url))) {
+      return true
+    }
+  }
+
+  return false
+}
+
+/**
  * @typedef YtDlpBinaryInfo
  * @property {'system' | 'managed'} source
  * @property {boolean} available
@@ -1015,6 +1080,23 @@ export async function handleYtDlpGetInfo(event, options) {
     if (getInfoAbortControllers.get(probeKey)?.signal === signal) {
       getInfoAbortControllers.delete(probeKey)
     }
+  }
+}
+
+/**
+ * @param {import('electron').IpcMainInvokeEvent} event
+ * @param {'yt-dlp' | 'ffmpeg'} binary
+ * @returns {Promise<{ available: boolean } | { error: string } | null>}
+ */
+export async function handleYtDlpCheckBinaryUpdate(event, binary) {
+  if (!isOpenTubeXUrl(event.senderFrame.url) || (binary !== 'yt-dlp' && binary !== 'ffmpeg')) {
+    return null
+  }
+
+  try {
+    return { available: await isManagedBinaryUpdateAvailable(binary) }
+  } catch (error) {
+    return { error: error.message }
   }
 }
 

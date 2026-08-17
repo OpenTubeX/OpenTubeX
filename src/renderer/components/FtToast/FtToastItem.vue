@@ -4,9 +4,14 @@
     class="toast-slot"
   >
     <div
+      ref="toastElement"
       v-overlay-scrollbars
       class="toast"
-      :class="{ hasImage: toast.image, actionable: toast.action }"
+      :class="{
+        hasImage: toast.image,
+        actionable: toast.action,
+        indefinite: !Number.isFinite(toast.duration)
+      }"
       :tabindex="toast.action ? 0 : null"
       role="status"
       @click="onClick"
@@ -31,6 +36,19 @@
       <p class="message">
         {{ toast.message }}
       </p>
+      <div
+        v-if="toast.buttons.length > 0"
+        class="toastActions"
+      >
+        <FtButton
+          v-for="button in toast.buttons"
+          :key="button.label"
+          :label="button.label"
+          :text-color="button.primary ? undefined : null"
+          :background-color="button.primary ? undefined : null"
+          @click="performButtonAction(button)"
+        />
+      </div>
     </div>
     <div
       v-if="showTimeoutIndicator"
@@ -55,6 +73,7 @@ import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
 import store from '../../store'
 import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
+import FtButton from '../FtButton/FtButton.vue'
 
 /** Distance in px the pointer may travel before a click counts as the tail end of a swipe */
 const CLICK_SLOP = 5
@@ -89,8 +108,11 @@ let pointerMoved = false
 let row = null
 
 const slot = useTemplateRef('slot')
+const toastElement = useTemplateRef('toastElement')
 
-const showTimeoutIndicator = computed(() => store.getters.getShowToastTimeoutIndicator)
+const showTimeoutIndicator = computed(() => {
+  return store.getters.getShowToastTimeoutIndicator && Number.isFinite(props.toast.duration)
+})
 const toastProgressRadius = computed(() => 12 * store.getters.getUiRoundness / 100)
 const toastProgressLineWidth = computed(() => Math.min(4, Math.max(2, 2 * store.getters.getUiRoundness / 100)))
 
@@ -114,6 +136,10 @@ function onRowKeydown(event) {
 }
 
 onMounted(() => {
+  // The collapsed stack clips the slot around this card. Pinning the card's
+  // measured width keeps that constraint from shrinking its flex contents and
+  // rewrapping the message while toasts enter or leave the stack.
+  toastElement.value.style.inlineSize = `${toastElement.value.offsetWidth}px`
   row = slot.value?.parentElement ?? null
   row?.addEventListener('keydown', onRowKeydown)
 })
@@ -126,6 +152,14 @@ function performAction() {
   if (!props.toast.action) { return }
 
   props.toast.action()
+  close()
+}
+
+/**
+ * @param {{ action?: Function }} button
+ */
+function performButtonAction(button) {
+  button.action?.()
   close()
 }
 

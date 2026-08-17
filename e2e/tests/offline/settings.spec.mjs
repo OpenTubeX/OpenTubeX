@@ -197,7 +197,7 @@ test.describe('settings', () => {
     await search.fill('update')
     await expect(page.locator('.settingsMenu .title.active')).toHaveCount(0)
     await expect(page.locator('.settingsContent > .section')).toHaveCount(0)
-    await expect(page.locator('.settingsSearchResult')).toHaveCount(3)
+    await expect(page.locator('.settingsSearchResult')).toHaveCount(4)
     expect((await page.locator('.settingsMenu .title').first().boundingBox()).height)
       .toBeLessThanOrEqual(50)
 
@@ -1909,6 +1909,83 @@ test.describe('settings', () => {
     await expect.poll(readable).toBe(2)
   })
 
+  test('does not rewrap an indefinite toast while transient toasts leave the stack', async ({ page }) => {
+    await page.mouse.move(800, 300)
+    await page.evaluate(() => {
+      window.dispatchEvent(new CustomEvent('opentubex:preview-managed-tools-update', {
+        detail: ['yt-dlp', 'ffmpeg']
+      }))
+    })
+
+    const updateToast = page.locator('.toast', { hasText: 'An update is available for yt-dlp and ffmpeg.' })
+    const updateMessage = updateToast.locator('.message')
+    await expect(updateToast).toBeVisible()
+    const initialSize = await updateMessage.evaluate(element => ({
+      width: element.offsetWidth,
+      height: element.offsetHeight
+    }))
+
+    await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('First short-lived toast', 800)
+      window.ftElectron.showToastOnAllTabs('Second short-lived toast', 1000)
+      window.ftElectron.showToastOnAllTabs('Third short-lived toast', 1200)
+      window.ftElectron.showToastOnAllTabs('Fourth short-lived toast', 1400)
+    })
+    await expect(page.locator('.toast', { hasText: 'Fourth short-lived toast' })).toBeVisible()
+
+    const sizes = await updateMessage.evaluate((element) => {
+      const samples = []
+      const start = performance.now()
+      return new Promise((resolve) => {
+        function sample () {
+          samples.push({ width: element.offsetWidth, height: element.offsetHeight })
+          if (performance.now() - start < 2200) {
+            requestAnimationFrame(sample)
+          } else {
+            resolve(samples)
+          }
+        }
+        requestAnimationFrame(sample)
+      })
+    })
+
+    expect(new Set(sizes.map(({ width }) => width))).toEqual(new Set([initialSize.width]))
+    expect(new Set(sizes.map(({ height }) => height))).toEqual(new Set([initialSize.height]))
+    await expect(updateToast).toBeVisible()
+  })
+
+  test('keeps indefinite toast actions after the transient toast limit is exceeded', async ({ page }) => {
+    await page.mouse.move(800, 300)
+    await page.evaluate(() => {
+      window.dispatchEvent(new CustomEvent('opentubex:preview-managed-tools-update', {
+        detail: ['yt-dlp', 'ffmpeg']
+      }))
+      for (let index = 0; index < 8; index++) {
+        window.ftElectron.showToastOnAllTabs(`Transient toast ${index}`, 600)
+      }
+    })
+
+    const updateToast = page.locator('.toast', { hasText: 'An update is available for yt-dlp and ffmpeg.' })
+    await expect(updateToast).toBeVisible()
+    await expect(updateToast.locator('.timeout-indicator-track')).toHaveCount(0)
+    await expect(updateToast).toHaveCSS('background-color', 'rgb(28, 28, 28)')
+
+    await page.waitForTimeout(1200)
+    await expect(updateToast).toBeVisible()
+    await updateToast.getByRole('button', { name: 'Cancel' }).click()
+    await expect(updateToast).toHaveCount(0)
+
+    await page.evaluate(() => {
+      window.dispatchEvent(new CustomEvent('opentubex:preview-managed-tools-update', {
+        detail: ['yt-dlp']
+      }))
+    })
+    const singleToolToast = page.locator('.toast', { hasText: 'An update is available for yt-dlp.' })
+    await expect(singleToolToast).toBeVisible()
+    await singleToolToast.getByRole('button', { name: 'Update' }).click()
+    await expect(singleToolToast).toHaveCount(0)
+  })
+
   test('keeps the stack fanned out while the pointer moves between toasts', async ({ page }) => {
     await page.mouse.move(800, 300)
     await page.evaluate(() => {
@@ -2117,6 +2194,41 @@ test.describe('settings', () => {
       await page.mouse.move(from.x + (to.x - from.x) * step / 16, from.y + (to.y - from.y) * step / 16)
       await expect(rows.first()).toHaveAttribute('data-expanded', 'true')
     }
+  })
+})
+
+test.describe('managed external software update controls', () => {
+  test.use({
+    seed: {
+      settings: {
+        ytDlpSource: 'managed',
+        externalSoftwareUpdateMode: 'ask'
+      }
+    }
+  })
+
+  test('offers automatic, ask, and manual update modes', async ({ app, page }) => {
+    const section = await goToSettingsSection(page, 'external-software')
+    const updateMode = section.locator('.select')
+      .filter({ hasText: 'Managed Tool Updates' })
+      .locator('select')
+
+    await expect(updateMode).toHaveValue('ask')
+    await expect(updateMode.locator('option')).toHaveText([
+      'Update automatically',
+      'Ask before updating',
+      'Only update manually'
+    ])
+    await expect(section.locator('.select').filter({ hasText: 'Managed Tool Updates' }))
+      .toContainText('Managed Tool Updates')
+
+    await updateMode.selectOption('manual')
+    await expect(updateMode).toHaveValue('manual')
+    await expect.poll(async () => {
+      return latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      ).externalSoftwareUpdateMode
+    }).toBe('manual')
   })
 })
 

@@ -254,7 +254,19 @@
 
 :is(.toast-holder, .progress-toast-holder) .toast-slot {
   position: relative;
+  display: flex;
   pointer-events: none;
+}
+
+.toast-holder.position-bottom-center .toast-slot,
+.toast-holder.position-top-center .toast-slot {
+  justify-content: center;
+}
+
+/* stylelint-disable-next-line liberty/use-logical-spec -- names a physical edge */
+.toast-holder.position-bottom-right .toast-slot,
+.toast-holder.position-top-right .toast-slot {
+  justify-content: flex-end;
 }
 
 /* The scale half of the enter and leave animations, kept off the row itself so
@@ -354,16 +366,19 @@
   position: relative;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   gap: 12px;
 
   /* Stay within the viewport on narrow windows, accounting for the holder's
      inline inset and this element's own margins */
   max-inline-size: min(400px, calc(100vw - 60px));
+  inline-size: max-content;
   padding-block: 12px;
   padding-inline: 18px;
   text-align: start;
   overflow-y: auto;
   background-color: rgb(28 28 28 / 92%);
+  backdrop-filter: blur(12px);
   color: #fff;
   border-radius: calc(12px * var(--ui-roundness));
   box-shadow: 0 4px 16px rgb(0 0 0 / 35%);
@@ -377,6 +392,24 @@
 
 :is(.toast-holder, .progress-toast-holder) .toast.actionable {
   cursor: pointer;
+}
+
+:is(.toast-holder, .progress-toast-holder) .toast.indefinite {
+  background-color: rgb(28 28 28);
+  backdrop-filter: none;
+}
+
+:is(.toast-holder, .progress-toast-holder) .toastActions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+:is(.toast-holder, .progress-toast-holder) .toastActions .btn {
+  min-inline-size: auto;
+  padding-block: 6px;
+  padding-inline: 10px;
 }
 
 :is(.toast-holder, .progress-toast-holder) .timeout-indicator-track {
@@ -575,10 +608,18 @@
    behind them are trimmed to the size of the second, which is what they are
    stacked behind, so the pile tucks under it as one run of equally sized cards
    rather than a ragged edge. */
-.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) .toast-slot,
-.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) .toast {
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) .toast-slot {
   box-sizing: border-box;
   inline-size: var(--stacked-toast-width, var(--front-toast-width));
+  block-size: 100%;
+  overflow: hidden;
+}
+
+/* Keep the toast's own layout width stable while its collapsed slot clips the
+   card to the stack width. Changing the card width here reflows its text during
+   fan-out and dismissal animations. */
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) .toast {
+  flex-shrink: 0;
   block-size: 100%;
 }
 

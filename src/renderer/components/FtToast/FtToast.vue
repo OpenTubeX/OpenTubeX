@@ -75,6 +75,7 @@ const { t } = useI18n()
  * @typedef ToastState the live state handed to {@link FtToastItem}
  * @property {string} message
  * @property {Function | null} action
+ * @property {{ label: string, action?: Function, primary?: boolean }[]} buttons
  * @property {string | null} image
  * @property {[string, string] | null} icon
  * @property {number} duration lifetime of the toast in milliseconds
@@ -125,6 +126,8 @@ const messageIntervals = new Map()
  * @type {(number | string)[]}
  */
 const liveToasts = []
+/** Toast ids which must remain until explicitly dismissed. */
+const indefiniteToastIds = new Set()
 /**
  * Removes the abort listener of each toast raised with an abort signal, by toast
  * id.
@@ -390,15 +393,16 @@ function resetProgressToastProximity() {
 }
 
 /**
- * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null, image: string | null, icon: [string, string] | null }>} event
+ * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null, image: string | null, icon: [string, string] | null, buttons: { label: string, action?: Function, primary?: boolean }[] }>} event
  */
-function open({ detail: { message, time, action, abortSignal, image, icon } }) {
+function open({ detail: { message, time, action, abortSignal, image, icon, buttons } }) {
   time ||= 3000
 
   /** @type {ToastState} */
   const state = reactive({
     message: typeof message === 'function' ? message({ elapsedMs: 0, remainingMs: time }) : message,
     action: action ?? null,
+    buttons: buttons ?? [],
     image: image ?? null,
     icon: icon ?? null,
     duration: time
@@ -441,8 +445,15 @@ function open({ detail: { message, time, action, abortSignal, image, icon } }) {
   }
 
   liveToasts.push(id)
+  if (!Number.isFinite(time)) {
+    indefiniteToastIds.add(id)
+  }
   while (liveToasts.length > MAX_VISIBLE_TOASTS) {
-    sonner.dismiss(liveToasts.shift())
+    const transientIndex = liveToasts.findIndex(toastId => !indefiniteToastIds.has(toastId))
+    if (transientIndex === -1) {
+      break
+    }
+    sonner.dismiss(liveToasts.splice(transientIndex, 1)[0])
   }
 }
 
@@ -451,6 +462,7 @@ function open({ detail: { message, time, action, abortSignal, image, icon } }) {
  */
 function forgetToast(toast) {
   clearMessageInterval(toast.id)
+  indefiniteToastIds.delete(toast.id)
   abortListeners.get(toast.id)?.()
   abortListeners.delete(toast.id)
 

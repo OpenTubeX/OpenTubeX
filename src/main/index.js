@@ -44,7 +44,7 @@ import { brotliDecompress } from 'zlib'
 
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
-import { getYtDlpDownloadFile, handleYtDlpCancelDownload, handleYtDlpClearDownloads, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetPlaybackInfo, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpRemoveDownload, shutdownYtDlpDownloads } from './ytDlp'
+import { getYtDlpDownloadFile, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetPlaybackInfo, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpRemoveDownload, shutdownYtDlpDownloads } from './ytDlp'
 import { handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
 import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
@@ -3887,6 +3887,7 @@ function runApp() {
   ipcMain.handle(IpcChannels.YT_DLP_PLAYBACK_CACHE_DELETE, handleYtDlpPlaybackCacheDelete)
   ipcMain.handle(IpcChannels.YT_DLP_PLAYBACK_CACHE_CLEAR, handleYtDlpPlaybackCacheClear)
 
+  ipcMain.handle(IpcChannels.YT_DLP_CHECK_BINARY_UPDATE, handleYtDlpCheckBinaryUpdate)
   ipcMain.handle(IpcChannels.YT_DLP_DOWNLOAD_BINARY, handleYtDlpDownloadBinary)
 
   ipcMain.handle(IpcChannels.YT_DLP_CHOOSE_EXECUTABLE, async (event, currentPath) => {

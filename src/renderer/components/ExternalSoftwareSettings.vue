@@ -35,6 +35,18 @@
         @change="updateYtDlpFfmpegSource"
       />
     </FtFlexBox>
+    <FtFlexBox v-if="ytDlpSource === 'managed' || ytDlpFfmpegSource === 'managed'">
+      <FtSelect
+        class="sourceSelect"
+        :placeholder="t('Settings.External Software Settings.Managed Tool Updates')"
+        :value="externalSoftwareUpdateMode"
+        :select-names="updateModeNames"
+        :select-values="UPDATE_MODE_VALUES"
+        :tooltip="t('Tooltips.External Software Settings.Managed Tool Updates')"
+        :icon="['fas', 'sync']"
+        @change="updateExternalSoftwareUpdateMode"
+      />
+    </FtFlexBox>
     <FtFlexBox class="binaryStatusStart">
       <p
         v-if="ytDlpInfo === null"
@@ -199,10 +211,17 @@ const { t } = useI18n()
 const SOURCE_VALUES = ['system', 'managed']
 const CHANNEL_NAMES = ['Stable', 'Nightly', 'Master']
 const CHANNEL_VALUES = ['stable', 'nightly', 'master']
+const UPDATE_MODE_VALUES = ['automatic', 'ask', 'manual']
 
 const sourceNames = computed(() => [
   t('Settings.External Software Settings.Sources.System'),
   t('Settings.External Software Settings.Sources.Managed')
+])
+
+const updateModeNames = computed(() => [
+  t('Settings.External Software Settings.Update Modes.Automatic'),
+  t('Settings.External Software Settings.Update Modes.Ask'),
+  t('Settings.External Software Settings.Update Modes.Manual')
 ])
 
 /** @type {import('vue').ComputedRef<'system' | 'managed'>} */
@@ -219,6 +238,9 @@ const ytDlpFfmpegSource = computed(() => store.getters.getYtDlpFfmpegSource)
 
 /** @type {import('vue').ComputedRef<string>} */
 const ytDlpFfmpegPath = computed(() => store.getters.getYtDlpFfmpegPath)
+
+/** @type {import('vue').ComputedRef<'automatic' | 'ask' | 'manual'>} */
+const externalSoftwareUpdateMode = computed(() => store.getters.getExternalSoftwareUpdateMode)
 
 /** @typedef {import('../../main/ytDlp').YtDlpBinaryInfo} BinaryInfo */
 
@@ -447,6 +469,13 @@ function updateYtDlpFfmpegSource(value) {
  */
 function updateYtDlpFfmpegPath(value) {
   store.dispatch('updateYtDlpFfmpegPath', value)
+}
+
+/**
+ * @param {'automatic' | 'ask' | 'manual'} value
+ */
+function updateExternalSoftwareUpdateMode(value) {
+  store.dispatch('updateExternalSoftwareUpdateMode', value)
 }
 
 /**
