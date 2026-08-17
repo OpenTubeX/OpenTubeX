@@ -135,6 +135,13 @@ function runApp() {
   const dockMediaSessions = new Map()
   const dockMediaTrackedWindowIds = new Set()
   let dockMediaPlaySequence = 0
+  let dockMediaLabels = {
+    previous: 'Previous',
+    play: 'Play',
+    pause: 'Pause',
+    next: 'Next',
+    newWindow: 'New Window'
+  }
 
   function getDockMediaSession() {
     const sessions = Array.from(dockMediaSessions.values())
@@ -177,23 +184,25 @@ function runApp() {
     const toggleAction = session?.playbackState === 'playing' ? 'pause' : 'play'
     const dockMenu = Menu.buildFromTemplate([
       {
-        label: 'Previous',
+        label: dockMediaLabels.previous,
         enabled: actions.has('previoustrack'),
         click: () => requestDockMediaAction('previoustrack')
       },
       {
-        label: 'Play/Pause',
+        label: session?.playbackState === 'playing'
+          ? dockMediaLabels.pause
+          : dockMediaLabels.play,
         enabled: actions.has(toggleAction),
         click: () => requestDockMediaAction(toggleAction)
       },
       {
-        label: 'Next',
+        label: dockMediaLabels.next,
         enabled: actions.has('nexttrack'),
         click: () => requestDockMediaAction('nexttrack')
       },
       { type: 'separator' },
       {
-        label: 'New Window',
+        label: dockMediaLabels.newWindow,
         click: () => {
           createWindow({
             replaceMainWindow: false,
@@ -1704,6 +1713,14 @@ function runApp() {
 
   app.on('ready', async (_, __) => {
     if (process.platform === 'darwin') {
+      const t = await createMainTranslator()
+      dockMediaLabels = {
+        previous: t('Video.Previous'),
+        play: t('Video.Player.Scroll Mini Player.Play'),
+        pause: t('Video.Player.Scroll Mini Player.Pause'),
+        next: t('Video.Next'),
+        newWindow: t('New Window')
+      }
       updateDockMenu()
     }
 
