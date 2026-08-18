@@ -2749,6 +2749,26 @@ test.describe('invalid toast position', () => {
   })
 })
 
+test.describe('invalid icon pack', () => {
+  test.use({ seed: { settings: { iconPack: 'unsupported' } } })
+
+  test('normalizes the stored value to the applied fallback', async ({ app, page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="theme"]').click()
+
+    const iconPack = page.locator('[data-section="theme"] .select')
+      .filter({ hasText: 'Icon Pack' })
+      .locator('select')
+    await expect(iconPack).toHaveValue('material')
+    await expect(page.locator('[data-icon-pack="material"]').first()).toBeVisible()
+    await expect.poll(async () => {
+      return latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      ).iconPack
+    }).toBe('material')
+  })
+})
+
 test.describe('synced setting indicators', () => {
   test.use({
     seed: {

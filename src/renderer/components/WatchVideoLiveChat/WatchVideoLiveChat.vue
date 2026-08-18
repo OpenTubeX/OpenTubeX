@@ -298,6 +298,7 @@
             tag="div"
             class="liveChatCommentList"
             @after-enter="onLiveChatMessageEntered"
+            @after-leave="onLiveChatMessageLeft"
           >
             <div
               v-for="comment in comments"
@@ -479,7 +480,7 @@ let scrollToLiveHoldTimer = null
  * @property {HTMLElement} viewport
  * @property {HTMLElement} contentElement
  * @property {number} previousScrollTop
- * @property {number} removedCount
+ * @property {Set<HTMLElement>} leavingElements
  * @property {HTMLElement|null} anchorElement
  * @property {number} anchorOffset
  */
@@ -1075,7 +1076,8 @@ function trimLiveChatComments(limit, preserveScrollAnchor) {
 }
 
 /**
- * Coalesces synchronous message batches into one post-render scroll correction.
+ * Coalesces message batches into scroll corrections that run after Vue removes
+ * each leaving node from the TransitionGroup's layout.
  * @param {HTMLElement} viewport
  * @param {HTMLElement} contentElement
  * @param {number} removeCount
@@ -1088,34 +1090,48 @@ function scheduleReadbackTrimRestore(viewport, contentElement, removeCount) {
       viewport,
       contentElement,
       previousScrollTop: viewport.scrollTop,
-      removedCount: 0,
+      leavingElements: new Set(),
       anchorElement: null,
       anchorOffset: 0,
     }
     pendingReadbackTrimRestore = restore
-
-    nextTick(() => {
-      if (pendingReadbackTrimRestore !== restore) {
-        return
-      }
-      pendingReadbackTrimRestore = null
-      if (commentsRef.value !== restore.viewport) {
-        return
-      }
-
-      const nextScrollTop = restore.anchorElement == null
-        ? restore.previousScrollTop
-        : restore.previousScrollTop + restore.anchorElement.offsetTop - restore.anchorOffset
-      restoreOverlayScrollTop(restore.viewport, Math.max(0, nextScrollTop))
-      clampOverlayScrollTop(restore.viewport, restore.contentElement)
-    })
   }
 
-  restore.removedCount += removeCount
-  restore.anchorElement = /** @type {HTMLElement|null} */ (
-    contentElement.children[restore.removedCount] ?? null
-  )
+  const retainedElements = Array.from(contentElement.children)
+    .filter(element => !restore.leavingElements.has(/** @type {HTMLElement} */ (element)))
+  for (const element of retainedElements.slice(0, removeCount)) {
+    restore.leavingElements.add(/** @type {HTMLElement} */ (element))
+  }
+
+  restore.previousScrollTop = viewport.scrollTop
+  restore.anchorElement = /** @type {HTMLElement|null} */ (retainedElements[removeCount] ?? null)
   restore.anchorOffset = restore.anchorElement?.offsetTop ?? 0
+}
+
+/**
+ * @param {HTMLElement} element
+ */
+function onLiveChatMessageLeft(element) {
+  const restore = pendingReadbackTrimRestore
+  if (restore == null || !restore.leavingElements.delete(element)) {
+    return
+  }
+  if (commentsRef.value !== restore.viewport) {
+    pendingReadbackTrimRestore = null
+    return
+  }
+
+  const nextScrollTop = restore.anchorElement == null
+    ? restore.previousScrollTop
+    : restore.previousScrollTop + restore.anchorElement.offsetTop - restore.anchorOffset
+  restoreOverlayScrollTop(restore.viewport, Math.max(0, nextScrollTop))
+  clampOverlayScrollTop(restore.viewport, restore.contentElement)
+
+  restore.previousScrollTop = restore.viewport.scrollTop
+  restore.anchorOffset = restore.anchorElement?.offsetTop ?? 0
+  if (restore.leavingElements.size === 0 && pendingReadbackTrimRestore === restore) {
+    pendingReadbackTrimRestore = null
+  }
 }
 
 /**

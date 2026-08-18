@@ -925,7 +925,7 @@ test.describe('watch page', () => {
     await liveChatComments.dispatchEvent('wheel')
     await liveChatComments.evaluate((element) => {
       const anchor = Array.from(element.querySelectorAll('.comment'))
-        .find(comment => comment.textContent.includes('Mock live chat message 30'))
+        .find(comment => comment.querySelector('.chatMessage')?.textContent === 'Mock live chat message 30')
       element.scrollTop = anchor.offsetTop
     })
     const anchorTop = await readbackAnchor.evaluate((element) => (
