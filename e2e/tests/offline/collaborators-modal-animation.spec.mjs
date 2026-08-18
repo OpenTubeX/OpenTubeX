@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel, waitForAppReady } from '../../helpers/app.mjs'
 
 const now = Date.now()
 const HOUR = 3600000
@@ -162,6 +162,43 @@ function defineCase () {
     expect(shifted, `items shifted: ${JSON.stringify(shifted.slice(0, 3))}`).toEqual([])
   })
 }
+
+test('middle-clicking a collaborator opens its channel in a background tab', async ({ page }) => {
+  await goTo(page, 'subscriptions')
+
+  await page.locator('.channelResolverButton').click()
+  const prompt = page.locator('.prompt')
+  await expect(prompt).toBeVisible()
+
+  await prompt.getByRole('link', { name: 'Channel C' }).click({ button: 'middle' })
+
+  await expect(page.locator(sel.tabs)).toHaveCount(2)
+  await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+  await expect(prompt).toBeVisible()
+  await expect(page).toHaveURL(/#\/subscriptions$/)
+  await expect.poll(() => page.evaluate(async () => {
+    const state = await window.ftElectron.tabs.getState()
+    return state.tabs.find(tab => tab.id !== state.activeTabId)?.route.fullPath
+  })).toBe('/channel/UCcccccccccccccccccccccc')
+})
+
+test('shift-middle-clicking a collaborator opens its channel in a new window', async ({ app, page }) => {
+  await goTo(page, 'subscriptions')
+
+  await page.locator('.channelResolverButton').click()
+  const prompt = page.locator('.prompt')
+  await expect(prompt).toBeVisible()
+
+  const [newWindow] = await Promise.all([
+    app.electronApp.waitForEvent('window'),
+    prompt.getByRole('link', { name: 'Channel C' }).click({ button: 'middle', modifiers: ['Shift'] })
+  ])
+  await waitForAppReady(newWindow)
+
+  await expect(newWindow).toHaveURL(/#\/channel\/UCcccccccccccccccccccccc$/)
+  await expect(page).toHaveURL(/#\/subscriptions$/)
+  await expect(prompt).toBeVisible()
+})
 
 test.describe('at 100% display scale', () => {
   defineCase()
