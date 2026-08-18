@@ -7,6 +7,7 @@ import { inflateRawSync } from 'node:zlib'
 import { app, BrowserWindow, net, Notification, shell } from 'electron'
 import { settings } from '../datastores/handlers/base'
 import { buildProxyUrl, isOpenTubeXUrl } from './utils'
+import { TabManager } from './tabs/TabManager'
 import { IpcChannels } from '../constants'
 import { getMatchingDownloadValidators, getYtDlpAssetName } from './ytDlpAsset'
 import { shouldUseGioTrash } from './trashPlatform'
@@ -203,11 +204,26 @@ function showAutomaticDownloadNotification(payload, phase) {
   notification.once('close', () => activeAutomaticDownloadNotifications.delete(notification))
   notification.once('click', () => {
     activeAutomaticDownloadNotifications.delete(notification)
-    const browserWindow = BrowserWindow.getAllWindows().find(window => !window.isDestroyed())
+    const browserWindow = BrowserWindow.getAllWindows().find(window => (
+      !window.isDestroyed() && TabManager.getForWindow(window.id)
+    )) ?? BrowserWindow.getAllWindows().find(window => !window.isDestroyed())
     if (browserWindow) {
       if (browserWindow.isMinimized()) browserWindow.restore()
       browserWindow.show()
       browserWindow.focus()
+
+      const tabManager = TabManager.getForWindow(browserWindow.id)
+      if (phase === 'started') {
+        browserWindow.webContents.send(IpcChannels.CHANGE_VIEW, '/downloads')
+      } else if (phase === 'completed' && tabManager && ID_REGEX.test(payload.videoId)) {
+        tabManager.createTabWithPreference({
+          route: '/watch',
+          query: { v: payload.videoId },
+          makeActive: true
+        }).catch(error => {
+          console.error('Failed to open automatically downloaded video', error)
+        })
+      }
     }
   })
   notification.show()
