@@ -897,7 +897,9 @@ function clampSettingsContentScroll(event) {
   const section = getActiveSettingsSectionEnd(content)
   if (!section) return
   const contentEnd = section.offsetTop + section.offsetHeight + settingsContentPaddingBottom
-  if (content.scrollTop > Math.max(0, contentEnd - content.clientHeight)) {
+  // At non-100% Electron zoom the real bottom can be a fraction beyond the
+  // integer end reported by the layout properties above.
+  if (content.scrollTop > Math.max(0, contentEnd - content.clientHeight) + 1) {
     clampOverlayScrollTop(content, section)
   }
 }

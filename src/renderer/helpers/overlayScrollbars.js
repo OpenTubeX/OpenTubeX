@@ -349,7 +349,12 @@ export function clampOverlayScrollTop(element, contentElement = null) {
       contentElement.offsetHeight +
       Number.parseFloat(getComputedStyle(element).paddingBottom)
   const maximumScrollTop = Math.max(0, contentEnd - element.clientHeight)
-  if (element.scrollTop > maximumScrollTop) {
+  // Electron zoom can leave the real scroll boundary at a fractional CSS
+  // pixel even though offsetHeight / clientHeight round the calculated end to
+  // an integer. Treat that subpixel difference as the same position; trying
+  // to clamp it makes OverlayScrollbars restore the fractional boundary and
+  // starts a reset / restore loop on every subsequent scroll event.
+  if (element.scrollTop > maximumScrollTop + 1) {
     if (instance) {
       // Chromium can preserve the old overflow range when content shrinks
       // beneath a non-zero offset. Remeasure from the true origin so both the

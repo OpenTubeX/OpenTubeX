@@ -411,6 +411,54 @@ test.describe('settings', () => {
     })).toBe(true)
   })
 
+  test('does not clamp a subpixel Theme settings scroll boundary', async ({ page }) => {
+    await goToSettingsSection(page, 'theme')
+
+    const result = await page.locator('.settingsContent').evaluate(element => {
+      element.scrollTop = element.scrollHeight
+
+      let prototype = Object.getPrototypeOf(element)
+      let descriptor = null
+      while (prototype !== null && descriptor === null) {
+        descriptor = Object.getOwnPropertyDescriptor(prototype, 'scrollTop') ?? null
+        prototype = Object.getPrototypeOf(prototype)
+      }
+      if (descriptor?.get === undefined || descriptor.set === undefined) {
+        throw new Error('Unable to inspect the native scrollTop property')
+      }
+
+      const section = element.querySelector(':scope > .section')
+      const maximum = Math.max(0, section.offsetTop + section.offsetHeight +
+        Number.parseFloat(getComputedStyle(element).paddingBottom) - element.clientHeight)
+      const writes = []
+
+      Object.defineProperty(element, 'scrollTop', {
+        configurable: true,
+        get() {
+          // Electron zoom can put the real boundary between CSS pixels even
+          // though the layout properties used above report integer values.
+          return descriptor.get.call(this) + 0.25
+        },
+        set(value) {
+          writes.push(value)
+          descriptor.set.call(this, value)
+        }
+      })
+
+      try {
+        const observedScrollTop = element.scrollTop
+        element.dispatchEvent(new Event('scroll'))
+        return { maximum, observedScrollTop, writes }
+      } finally {
+        delete element.scrollTop
+      }
+    })
+
+    expect(result.observedScrollTop).toBeGreaterThan(result.maximum)
+    expect(result.observedScrollTop).toBeLessThanOrEqual(result.maximum + 1)
+    expect(result.writes).toEqual([])
+  })
+
   test('opens Downloads from the download settings category', async ({ page }) => {
     const routeBeforeOpening = page.url()
     const downloadSection = await goToSettingsSection(page, 'download')
