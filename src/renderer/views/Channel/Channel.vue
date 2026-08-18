@@ -30,6 +30,8 @@
       <ChannelAbout
         v-if="currentTab === 'about'"
         id="aboutPanel"
+        role="tabpanel"
+        aria-labelledby="aboutTab"
         :description="description"
         :joined="joined"
         :views="viewCount"
@@ -367,6 +369,8 @@ const setTabAvatar = useTabAvatar()
 const { isTabPresented } = useTabContext()
 
 let skipRouteChangeWatcherOnce = false
+let pendingTabRoute = null
+let isReplacingTabRoute = false
 let autoRefreshOnSortByChangeEnabled = false
 /** @type {import('youtubei.js').YT.Channel|null} */
 let channelInstance = null
@@ -2450,27 +2454,51 @@ async function handleFetchMore() {
  */
 async function handleTabChange(tab, moveFocus = true) {
   if (tab !== currentTab.value) {
-    // skip the route change watcher so we don't reload the whole channel,
-    // we already have the data and only need to switch the visible tab
-    skipRouteChangeWatcherOnce = true
+    changeTab(tab, moveFocus)
+    await replaceTabRoute(tab)
+  } else {
+    changeTab(tab, moveFocus)
+  }
+}
 
-    try {
-      await router.replace({
-        path: `/channel/${id.value}/${tab}`,
-        state: { skipTabRouteLoading: true }
-      })
-    } catch (failure) {
-      skipRouteChangeWatcherOnce = false
+/**
+ * Coalesces rapid tab changes so their route replacements cannot race the
+ * route watcher and reload the channel.
+ * @param {string} tab
+ */
+async function replaceTabRoute(tab) {
+  pendingTabRoute = tab
 
-      if (!isNavigationFailure(failure, NavigationFailureType.duplicated)) {
-        throw failure
-      }
-    }
-
-    skipRouteChangeWatcherOnce = false
+  if (isReplacingTabRoute) {
+    return
   }
 
-  changeTab(tab, moveFocus)
+  isReplacingTabRoute = true
+
+  try {
+    while (pendingTabRoute !== null) {
+      const nextTab = pendingTabRoute
+      pendingTabRoute = null
+
+      // We already have the data and only need to switch the visible tab.
+      skipRouteChangeWatcherOnce = true
+
+      try {
+        await router.replace({
+          path: `/channel/${id.value}/${nextTab}`,
+          state: { skipTabRouteLoading: true }
+        })
+      } catch (failure) {
+        if (!isNavigationFailure(failure, NavigationFailureType.duplicated)) {
+          throw failure
+        }
+      } finally {
+        skipRouteChangeWatcherOnce = false
+      }
+    }
+  } finally {
+    isReplacingTabRoute = false
+  }
 }
 
 /**
@@ -2491,7 +2519,7 @@ function handlePanelTabNavigation(event) {
   const isPointerFocusedAppTab =
     store.getters.getOutlinesHidden &&
     target instanceof Element &&
-    target.closest('[data-tab-id]') !== null
+    target.closest('.tab[data-tab-id]') !== null
 
   if (!isDocumentTarget && !isPanelTarget && !isPointerFocusedAppTab) {
     return

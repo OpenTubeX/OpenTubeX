@@ -801,7 +801,7 @@ function handlePanelTabNavigation(event) {
   const isPointerFocusedAppTab =
     store.getters.getOutlinesHidden &&
     target instanceof Element &&
-    target.closest('[data-tab-id]') !== null
+    target.closest('.tab[data-tab-id]') !== null
 
   if (!isDocumentTarget && !isPanelTarget && !isPointerFocusedAppTab) {
     return

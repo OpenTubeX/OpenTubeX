@@ -84,6 +84,13 @@ test.describe('channel page', () => {
 
     const selectedChannelTab = page.locator('.channelDetails [role="tab"][aria-selected="true"]')
     const initialChannelTabId = await selectedChannelTab.getAttribute('id')
+
+    const subscribeButton = page.locator('.ftSubscribeButton .subscribeButton').first()
+    await subscribeButton.focus()
+    await subscribeButton.press('ArrowRight')
+    await expect(selectedChannelTab).toHaveAttribute('id', initialChannelTabId)
+    await subscribeButton.evaluate((button) => button.blur())
+
     await page.keyboard.press('ArrowRight')
     await expect(selectedChannelTab).not.toHaveAttribute('id', initialChannelTabId)
     await expect(page.locator('.app')).toHaveClass(/hideOutlines/)
@@ -91,7 +98,28 @@ test.describe('channel page', () => {
     await expect(selectedChannelTab).toHaveAttribute('id', initialChannelTabId)
     await page.keyboard.press('ArrowLeft')
     await expect(selectedChannelTab).toHaveAttribute('id', 'aboutTab')
-    await page.keyboard.press('ArrowRight')
+    const aboutPanel = page.locator('#aboutPanel')
+    await expect(aboutPanel).toHaveAttribute('role', 'tabpanel')
+    await aboutPanel.dispatchEvent('keydown', { key: 'ArrowRight', bubbles: true })
+    await expect(selectedChannelTab).toHaveAttribute('id', initialChannelTabId)
+
+    const channelTabIds = await page.locator('.channelDetails [role="tab"]').evaluateAll((tabs) => (
+      tabs.map((tab) => tab.id)
+    ))
+    const initialChannelTabIndex = channelTabIds.indexOf(initialChannelTabId)
+    const rapidArrowTabId = channelTabIds[(initialChannelTabIndex + 3) % channelTabIds.length]
+    await page.evaluate(() => {
+      for (let index = 0; index < 3; index++) {
+        document.body.dispatchEvent(new KeyboardEvent('keydown', {
+          key: 'ArrowRight',
+          bubbles: true
+        }))
+      }
+    })
+    await expect(selectedChannelTab).toHaveAttribute('id', rapidArrowTabId)
+    await expect(page).toHaveURL(new RegExp(`/${rapidArrowTabId.replace('Tab', '')}$`))
+    await expect(page.locator('[data-tab-loading-indicator].fullscreen')).toHaveCount(0)
+    await page.locator(`#${initialChannelTabId}`).click()
     await expect(selectedChannelTab).toHaveAttribute('id', initialChannelTabId)
 
     await page.locator(sel.tabs).nth(1).click()
