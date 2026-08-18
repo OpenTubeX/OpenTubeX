@@ -2158,20 +2158,22 @@ function runApp() {
       // --- end of `if experimentsDisableDiskCache` ---
     }
 
-    try {
-      const baseTheme = await baseHandlers.settings._findOne('baseTheme')
+    const themeReady = (async () => {
+      try {
+        const baseTheme = await baseHandlers.settings._findOne('baseTheme')
 
-      if (baseTheme?.value) {
-        if (isCustomThemeValue(baseTheme.value)) {
-          nativeTheme.themeSource = (await getSelectedCustomTheme(baseTheme.value))?.isDark ? 'dark' : 'light'
-        } else {
-          updateThemeSource(baseTheme.value)
+        if (baseTheme?.value) {
+          if (isCustomThemeValue(baseTheme.value)) {
+            nativeTheme.themeSource = (await getSelectedCustomTheme(baseTheme.value))?.isDark ? 'dark' : 'light'
+          } else {
+            updateThemeSource(baseTheme.value)
+          }
         }
-      }
-    } catch {}
+      } catch {}
+    })()
 
     // Setup tab IPC handlers
-    await setupTabsIPC({
+    const tabsIpcReady = setupTabsIPC({
       confirmCloseWindow: (browserWindow) => {
         const isLastWindow = BrowserWindow.getAllWindows().length === 1
         if (isLastWindow) return confirmCloseApp(browserWindow)
@@ -2189,13 +2191,21 @@ function runApp() {
       mediaSessionStateChanged: updateDockMediaSession
     })
 
+    // Reminder initialization is ordered with later reminder operations by the
+    // manager itself, so loading and pruning its datastore need not hold the
+    // first window open.
+    liveReminderManager.initialize().catch(error => {
+      console.error('Failed to initialize live stream reminders', error)
+    })
+    const startupBehaviorReady = getStartupBehavior()
+
+    await Promise.all([themeReady, tabsIpcReady])
+
     // Restore every window that was open last time the app quit. Each window
     // has its own persisted session record, so a multi-window Ctrl+Q session
     // is fully rebuilt here (one window per saved session). If there are no
     // saved sessions yet, fall back to creating a single empty window.
-    await liveReminderManager.initialize()
-
-    const startupBehavior = await getStartupBehavior()
+    const startupBehavior = await startupBehaviorReady
     const shouldRestoreSession = startupBehavior !== 'emptySession'
     const savedSessions = shouldRestoreSession ? await loadAllTabSessions() : []
 
@@ -2203,10 +2213,9 @@ function runApp() {
       await clearAllTabSessions()
     }
 
-    // Before any window can capture a preview, drop cache entries that no
-    // restored tab points at. Without this, previews orphaned by a crash or a
-    // forced quit stay on disk forever.
-    await TabManager.pruneTabPreviewCache(
+    // Start dropping cache entries that no restored tab points at. Captures wait
+    // on this maintenance inside TabManager, but window creation does not.
+    TabManager.startTabPreviewCachePrune(
       savedSessions.flatMap(session => (
         Array.isArray(session?.tabs)
           ? session.tabs.flatMap(tab => [tab?.previewFileName, tab?.avatarFileName])

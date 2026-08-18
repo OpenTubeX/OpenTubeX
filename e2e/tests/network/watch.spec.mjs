@@ -91,6 +91,13 @@ async function setWindowWidth(app, width) {
   }, width)
 }
 
+function disableAutomaticPagination(page) {
+  return page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', false)
+  })
+}
+
 test('theatre mode works until its responsive button cutoff', async ({ app, page }) => {
   await setWindowWidth(app, 1500)
   await page.locator(sel.searchInput).fill(VIDEO_URL)
@@ -373,6 +380,7 @@ test.describe('watch page', () => {
         await unload(...args)
 
         if (window.__blockNextFormatUnload) {
+          window.__blockNextFormatUnload = false
           await new Promise(resolve => {
             window.__finishFormatUnload = resolve
             window.__formatUnloadBlocked = true
@@ -394,15 +402,23 @@ test.describe('watch page', () => {
     }))).toEqual({ format: formats.newFormat, loaded: true })
     expect(page.url()).toBe(initialUrl)
 
+    const playbackPosition = await player.locator('video').evaluate((element) => {
+      if (element.paused) throw new Error('Expected playback before the rapid format switch')
+      return element.currentTime
+    })
     await page.evaluate(() => { window.__blockNextFormatUnload = true })
     await watchComponent.evaluate((component, format) => component.proxy.handleFormatChange(format), formats.oldFormat)
     await expect.poll(() => page.evaluate(() => window.__formatUnloadBlocked)).toBe(true)
     await expect(player.locator('video')).toHaveAttribute('poster', /\S+/)
+    await watchComponent.evaluate((component, format) => component.proxy.handleFormatChange(format), formats.newFormat)
     await page.evaluate(() => window.__finishFormatUnload())
     await expect.poll(() => watchComponent.evaluate((component) => ({
       format: component.proxy.activeFormat,
-      loaded: component.refs.player.hasLoaded
-    }))).toEqual({ format: formats.oldFormat, loaded: true })
+      loaded: component.refs.player.hasLoaded,
+      paused: component.refs.player.$el.querySelector('video').paused
+    }))).toEqual({ format: formats.newFormat, loaded: true, paused: false })
+    await expect.poll(() => player.locator('video').evaluate(element => element.currentTime))
+      .toBeGreaterThanOrEqual(playbackPosition - 1)
     expect(page.url()).toBe(initialUrl)
 
     await watchComponent.dispose()
@@ -615,6 +631,7 @@ test.describe('watch page', () => {
   })
 
   test('comments load on request', async ({ app, page }) => {
+    await disableAutomaticPagination(page)
     await openVideo(page)
 
     const loadComments = page.locator('.getCommentsTitle')
@@ -1315,6 +1332,7 @@ test.describe('watch page', () => {
 
   // Regression: edited comments show their "(edited)" marker (929369543)
   test('edited comments carry the edited badge', async ({ page }) => {
+    await disableAutomaticPagination(page)
     await openVideo(page)
 
     const loadComments = page.locator('.getCommentsTitle')

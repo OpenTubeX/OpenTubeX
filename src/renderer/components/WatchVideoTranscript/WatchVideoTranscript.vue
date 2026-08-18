@@ -150,6 +150,7 @@ import FtInput from '../FtInput/FtInput.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import { getTranscriptPreScrollTop } from './transcriptScroll.js'
 import { filterTranscriptSegments } from './transcriptSearch.js'
+import { findActiveTranscriptSegmentIndex } from './activeTranscriptSegment.js'
 
 import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import {
@@ -206,9 +207,7 @@ const filteredSegments = computed(() => {
   return filterTranscriptSegments(segments.value, normalizedSearchQuery.value)
 })
 const activeSegmentIndex = computed(() => {
-  return segments.value.findLastIndex(segment => (
-    props.currentTime >= segment.start && props.currentTime < segment.end
-  ))
+  return findActiveTranscriptSegmentIndex(segments.value, props.currentTime)
 })
 const statusMessage = computed(() => {
   if (props.captions.length === 0) {
@@ -435,11 +434,16 @@ function parseTranscript(transcript) {
     })
   }
 
+  parsedSegments.sort((a, b) => a.start - b.start)
   const segments = parsedSegments.some(segment => segment.hasInlineTimestamps)
     ? normalizeRollingCaptions(parsedSegments)
     : parsedSegments.filter(segment => segment.text !== '')
 
-  return segments.map(({ start, end, text }, index) => ({ index, start, end, text }))
+  let activeUntil = Number.NEGATIVE_INFINITY
+  return segments.map(({ start, end, text }, index) => {
+    activeUntil = Math.max(activeUntil, end)
+    return { index, start, end, text, activeUntil }
+  })
 }
 
 /**

@@ -181,6 +181,9 @@ const config = {
     new MiniCssExtractPlugin({
       filename: isDevMode ? '[name].css' : '[name].[contenthash].css',
       chunkFilename: isDevMode ? '[id].css' : '[id].[contenthash].css',
+      // Route-level chunks can discover scoped Vue styles in different orders.
+      // Their selectors cannot affect one another, so no global order is needed.
+      ignoreOrder: true,
     }),
     new CopyWebpackPlugin({
       patterns: [

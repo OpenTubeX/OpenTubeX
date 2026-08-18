@@ -20,21 +20,23 @@ export class LiveReminderManager {
     this.pendingOperation = Promise.resolve()
   }
 
-  async initialize() {
-    const reminders = await this.datastore.findAsync({})
+  initialize() {
+    return this.enqueue(async () => {
+      const reminders = await this.datastore.findAsync({})
 
-    for (const reminder of reminders) {
-      if (
-        typeof reminder.videoId !== 'string' ||
-        !Number.isFinite(reminder.startTimestamp) ||
-        reminder.startTimestamp <= this.now()
-      ) {
-        await this.datastore.removeAsync({ _id: reminder._id })
-      } else {
-        this.reminders.set(reminder.videoId, reminder)
-        this.armTimer(reminder)
+      for (const reminder of reminders) {
+        if (
+          typeof reminder.videoId !== 'string' ||
+          !Number.isFinite(reminder.startTimestamp) ||
+          reminder.startTimestamp <= this.now()
+        ) {
+          await this.datastore.removeAsync({ _id: reminder._id })
+        } else {
+          this.reminders.set(reminder.videoId, reminder)
+          this.armTimer(reminder)
+        }
       }
-    }
+    })
   }
 
   async get(videoId) {

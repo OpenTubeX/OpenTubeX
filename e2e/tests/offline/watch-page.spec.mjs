@@ -865,6 +865,7 @@ test.describe('watch page', () => {
     await expect(skeletonLines.nth(1)).toHaveCSS('block-size', '10px')
 
     await setPlayerFullscreen(page, true)
+    await page.locator('video.player').evaluate(element => element.pause())
     const fullscreenLiveChatToggle = page.locator('.fullscreenLiveChatToggle')
     await fullscreenLiveChatToggle.click({ force: true })
     const fullscreenChat = page.locator('.fullscreenLiveChatOverlay.open')
@@ -917,6 +918,60 @@ test.describe('watch page', () => {
     await expect.poll(() => liveChatComments.evaluate(
       element => element.scrollTop
     )).toBeGreaterThan(0)
+
+    const readbackAnchor = liveChatComments.locator('.comment').filter({
+      has: page.getByText('Mock live chat message 30', { exact: true })
+    })
+    await liveChatComments.dispatchEvent('wheel')
+    await liveChatComments.evaluate((element) => {
+      const anchor = Array.from(element.querySelectorAll('.comment'))
+        .find(comment => comment.querySelector('.chatMessage')?.textContent === 'Mock live chat message 30')
+      element.scrollTop = anchor.offsetTop
+    })
+    const anchorTop = await readbackAnchor.evaluate((element) => (
+      element.getBoundingClientRect().top - element.closest('.liveChatComments').getBoundingClientRect().top
+    ))
+
+    await watchView.evaluate((view) => {
+      for (let index = 60; index < 520; index++) {
+        let actionTypeChecks = 0
+        view.liveChat.emit('chat-update', {
+          is: () => ++actionTypeChecks === 2,
+          item: {
+            is: () => true,
+            id: `mock-live-chat-message-${index}`,
+            timestamp: Date.now(),
+            message: { runs: [{ text: `Mock live chat message ${index}` }] },
+            author: {
+              badges: [],
+              id: `mock-live-chat-author-${index}`,
+              name: `Chat author ${index}`,
+              thumbnails: [{ url: '' }],
+              is_moderator: false
+            }
+          }
+        })
+      }
+    })
+
+    await expect(liveChatComments.locator('.comment')).toHaveCount(500)
+    await expect(liveChatComments.locator('.chatMessage').first()).toHaveText('Mock live chat message 20')
+    await expect.poll(() => readbackAnchor.evaluate((element) => Math.round(
+      element.getBoundingClientRect().top - element.closest('.liveChatComments').getBoundingClientRect().top
+    ))).toBe(Math.round(anchorTop))
+    expect(await liveChatComments.evaluate((element) => {
+      const content = element.querySelector('.liveChatCommentList')
+      const maximumScrollTop = Math.max(0, content.offsetTop + content.offsetHeight - element.clientHeight)
+      return {
+        maximumScrollTop,
+        overflowing: maximumScrollTop > 0,
+        scrollTop: element.scrollTop,
+        withinRange: element.scrollTop <= maximumScrollTop + 1
+      }
+    })).toMatchObject({ overflowing: true, withinRange: true })
+    await expect(liveChatComments.locator(':scope > .os-scrollbar-vertical'))
+      .not.toHaveClass(/os-scrollbar-unusable/)
+    await fullscreenChat.getByRole('button', { name: 'Scroll to Bottom' }).click()
 
     await page.locator('.fullscreenCommentsToggle').click({ force: true })
     await expect(page.locator('.fullscreenCommentsOverlay.open')).toBeVisible()

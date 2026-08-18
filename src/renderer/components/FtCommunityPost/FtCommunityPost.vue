@@ -164,7 +164,6 @@
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import autolinker from 'autolinker'
-import { A11y, Navigation, Pagination } from 'swiper/modules'
 import { computed, onMounted, useTemplateRef } from 'vue'
 
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
@@ -183,6 +182,7 @@ import {
 } from '../../helpers/utils'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
+import { loadSwiperModules } from './swiperLoader'
 
 const props = defineProps({
   data: {
@@ -323,29 +323,38 @@ function getBestQualityImage(imageArray, options = {}) {
 const swiperContainerRef = useTemplateRef('swiperContainerRef')
 
 if (postType === 'multiImage' && postContent.content.length > 0) {
-  onMounted(() => {
-    /** @type {import('swiper/element').SwiperContainer} */
-    const swiperOptions = {
-      modules: [A11y, Navigation, Pagination],
+  onMounted(async () => {
+    try {
+      const { A11y, Navigation, Pagination } = await loadSwiperModules()
+      /** @type {import('swiper/element').SwiperContainer|null} */
+      const swiperContainer = swiperContainerRef.value
+      if (!swiperContainer) {
+        return
+      }
 
-      injectStylesUrls: [
-        // This file is created with the copy webpack plugin in the web and renderer webpack configs.
-        // If you add more modules, please remember to add their CSS files to the list in webpack config files.
-        createWebURL(`/swiper-${process.env.SWIPER_VERSION}.css`)
-      ],
+      const swiperOptions = {
+        modules: [A11y, Navigation, Pagination],
 
-      a11y: true,
-      navigation: true,
-      pagination: {
-        enabled: true,
-        clickable: true
-      },
-      slidesPerView: 1
+        injectStylesUrls: [
+          // This file is created with the copy webpack plugin in the web and renderer webpack configs.
+          // If you add more modules, please remember to add their CSS files to the list in webpack config files.
+          createWebURL(`/swiper-${process.env.SWIPER_VERSION}.css`)
+        ],
+
+        a11y: true,
+        navigation: true,
+        pagination: {
+          enabled: true,
+          clickable: true
+        },
+        slidesPerView: 1
+      }
+
+      Object.assign(swiperContainer, swiperOptions)
+      swiperContainer.initialize()
+    } catch (error) {
+      console.error('Failed to initialize community post carousel', error)
     }
-
-    Object.assign(swiperContainerRef.value, swiperOptions)
-
-    swiperContainerRef.value.initialize()
   })
 }
 

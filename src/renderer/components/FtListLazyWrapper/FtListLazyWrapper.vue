@@ -71,10 +71,12 @@ import { computed, ref } from 'vue'
 import { handleDragAndDrop } from '../../helpers/dragAndDrop'
 
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
-import FtListChannel from '../FtListChannel/FtListChannel.vue'
-import FtListPlaylist from '../FtListPlaylist/FtListPlaylist.vue'
-import FtCommunityPost from '../FtCommunityPost/FtCommunityPost.vue'
-import FtListHashtag from '../FtListHashtag/FtListHashtag.vue'
+import {
+  FtCommunityPost,
+  FtListChannel,
+  FtListHashtag,
+  FtListPlaylist,
+} from './lazyListComponents'
 
 import store from '../../store/index'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'

@@ -13,13 +13,9 @@ import 'overlayscrollbars/styles/overlayscrollbars.css'
 // Only the positioning and stacking rules are used, FtToast supplies the design
 import 'vue-sonner/style.css'
 
-import { register as registerSwiper } from 'swiper/element'
-
 import { ObserveVisibility } from 'vue-observe-visibility'
 
 import { FtIcon, FtIconLayers } from './icons/iconComponents'
-import { currentIconPack, setIconPack } from './icons/iconPackState'
-registerSwiper()
 
 const app = createApp(App)
 
@@ -39,12 +35,7 @@ installViewTransitions(router)
 
 const tabNavigation = initializeTabNavigationService(router, store)
 
-router.isReady().then(async () => {
-  const preferredPack = currentIconPack.value
-  const fallbackPack = preferredPack === 'material' ? 'remix' : 'material'
-  if (!await setIconPack(preferredPack) && !await setIconPack(fallbackPack)) {
-    console.error('[icon-pack] failed to load either icon pack')
-  }
+router.isReady().then(() => {
   app.mount('#app')
   initializeAppScrollbars()
 })

@@ -606,9 +606,17 @@ const sideEffectHandlers = {
   },
 
   iconPack: async (_, value) => {
-    if (!isIconPack(value) || !await setIconPack(value)) {
-      throw new Error(`Unable to apply icon pack: ${value}`)
+    const preferredPack = isIconPack(value) ? value : 'material'
+    if (await setIconPack(preferredPack)) {
+      return preferredPack
     }
+
+    const fallbackPack = preferredPack === 'material' ? 'remix' : 'material'
+    if (await setIconPack(fallbackPack)) {
+      return fallbackPack
+    }
+
+    throw new Error(`Unable to apply icon pack: ${value}`)
   },
 
   maxVideoPlaybackRate: ({ dispatch, state }, value) => {
@@ -882,15 +890,23 @@ const customActions = {
       const sideEffectPromises = []
 
       for (const { _id, value } of userSettings) {
+        let resolvedValue = value
         if (settingsWithSideEffects.includes(_id)) {
-          sideEffectPromises.push(
-            dispatch(defaultSideEffectsTriggerId(_id), value)
-          )
+          if (_id === 'iconPack') {
+            resolvedValue = await dispatch(defaultSideEffectsTriggerId(_id), value)
+            if (resolvedValue !== value) {
+              await DBSettingHandlers.upsert(_id, resolvedValue)
+            }
+          } else {
+            sideEffectPromises.push(
+              dispatch(defaultSideEffectsTriggerId(_id), value)
+            )
+          }
           alreadyTriggeredSideEffects.push(_id)
         }
 
         if (mutationIds.includes(defaultMutationId(_id))) {
-          commit(defaultMutationId(_id), value)
+          commit(defaultMutationId(_id), resolvedValue)
         }
       }
 
@@ -997,9 +1013,18 @@ const customActions = {
 
       for (const _id of settingsWithSideEffects) {
         if (!alreadyTriggeredSideEffects.includes(_id)) {
-          sideEffectPromises.push(
-            dispatch(defaultSideEffectsTriggerId(_id), state[_id])
-          )
+          if (_id === 'iconPack') {
+            const value = state[_id]
+            const resolvedValue = await dispatch(defaultSideEffectsTriggerId(_id), value)
+            if (resolvedValue !== value) {
+              await DBSettingHandlers.upsert(_id, resolvedValue)
+              commit(defaultMutationId(_id), resolvedValue)
+            }
+          } else {
+            sideEffectPromises.push(
+              dispatch(defaultSideEffectsTriggerId(_id), state[_id])
+            )
+          }
         }
       }
 
@@ -1011,6 +1036,12 @@ const customActions = {
       }
     } catch (errMessage) {
       console.error(errMessage)
+      // The renderer no longer preloads a default icon bundle before mounting.
+      // Preserve usable fallback icons even when the settings datastore itself
+      // cannot be read during startup.
+      await sideEffectHandlers.iconPack(null, state.iconPack)
+        .then(value => commit('setIconPack', value))
+        .catch(console.error)
       return {
         hasExistingSettings: null,
         tutorialAudience: null,

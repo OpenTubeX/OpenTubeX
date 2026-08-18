@@ -33,7 +33,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useId, useTemplateRef } from 'vue'
+import { nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef } from 'vue'
 
 const buttonRef = useTemplateRef('buttonRef')
 const textRef = useTemplateRef('textRef')
@@ -45,6 +45,9 @@ const TOOLTIP_GAP = 16
 let hovered = false
 let focused = false
 let positionAnimationFrame = null
+let positionMutationObserver = null
+let positionResizeObserver = null
+let trackingPosition = false
 
 /**
  * @param {boolean} value
@@ -65,6 +68,7 @@ function setFocused(value) {
 function updateVisibility() {
   visible.value = hovered || focused
   if (visible.value) {
+    tooltipTarget.value = document.fullscreenElement ?? document.body
     nextTick(() => {
       if (!visible.value) return
       positionTooltip()
@@ -76,19 +80,55 @@ function updateVisibility() {
 }
 
 function startTrackingPosition() {
-  if (!visible.value || positionAnimationFrame !== null) return
-  const trackPosition = () => {
-    positionTooltip()
-    positionAnimationFrame = requestAnimationFrame(trackPosition)
+  if (!visible.value || trackingPosition) return
+  trackingPosition = true
+  window.addEventListener('resize', schedulePositionUpdate)
+  window.addEventListener('scroll', schedulePositionUpdate, true)
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
+
+  positionMutationObserver ??= new MutationObserver((records) => {
+    const tooltip = textRef.value
+    if (tooltip && records.every(({ target }) => target === tooltip || tooltip.contains(target))) {
+      return
+    }
+    schedulePositionUpdate()
+  })
+  positionMutationObserver.observe(document.body, {
+    attributes: true,
+    attributeFilter: ['class', 'hidden', 'style'],
+    childList: true,
+    subtree: true,
+  })
+
+  positionResizeObserver ??= new ResizeObserver(schedulePositionUpdate)
+  if (buttonRef.value) {
+    positionResizeObserver.observe(buttonRef.value)
   }
-  positionAnimationFrame = requestAnimationFrame(trackPosition)
+  if (textRef.value) {
+    positionResizeObserver.observe(textRef.value)
+  }
+  schedulePositionUpdate()
 }
 
 function stopTrackingPosition() {
+  trackingPosition = false
+  window.removeEventListener('resize', schedulePositionUpdate)
+  window.removeEventListener('scroll', schedulePositionUpdate, true)
+  document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  positionMutationObserver?.disconnect()
+  positionResizeObserver?.disconnect()
   if (positionAnimationFrame !== null) {
     cancelAnimationFrame(positionAnimationFrame)
     positionAnimationFrame = null
   }
+}
+
+function schedulePositionUpdate() {
+  if (!visible.value || positionAnimationFrame !== null) return
+  positionAnimationFrame = requestAnimationFrame(() => {
+    positionAnimationFrame = null
+    positionTooltip()
+  })
 }
 
 function positionTooltip() {
@@ -133,29 +173,19 @@ function positionTooltip() {
   }
 }
 
-function handleViewportChange() {
-  if (visible.value) positionTooltip()
-}
-
 async function handleFullscreenChange() {
   tooltipTarget.value = document.fullscreenElement ?? document.body
   if (visible.value) {
     await nextTick()
-    positionTooltip()
+    positionResizeObserver?.disconnect()
+    if (buttonRef.value) positionResizeObserver?.observe(buttonRef.value)
+    if (textRef.value) positionResizeObserver?.observe(textRef.value)
+    schedulePositionUpdate()
   }
 }
 
-onMounted(() => {
-  window.addEventListener('resize', handleViewportChange)
-  window.addEventListener('scroll', handleViewportChange, true)
-  document.addEventListener('fullscreenchange', handleFullscreenChange)
-})
-
 onBeforeUnmount(() => {
   stopTrackingPosition()
-  window.removeEventListener('resize', handleViewportChange)
-  window.removeEventListener('scroll', handleViewportChange, true)
-  document.removeEventListener('fullscreenchange', handleFullscreenChange)
 })
 
 const props = defineProps({

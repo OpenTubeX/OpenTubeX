@@ -3,6 +3,36 @@ import {
 } from '../../../datastores/handlers/index'
 import { ensureSubscriptionFeedEntryState } from '../../helpers/subscription-entries'
 
+const MAX_CONCURRENT_CACHE_WRITES = 8
+
+/**
+ * NeDB serializes writes internally, and Electron adds an IPC round-trip for
+ * each one. Keep a small worker pool instead of creating hundreds of concurrent
+ * promises for large subscription profiles.
+ * @template T
+ * @param {(() => Promise<T>)[]} writes
+ * @returns {Promise<T[]>}
+ */
+async function runSubscriptionCacheWrites(writes) {
+  if (writes.length === 0) {
+    return []
+  }
+
+  /** @type {T[]} */
+  const results = new Array(writes.length)
+  let nextWriteIndex = 0
+  const workerCount = Math.min(MAX_CONCURRENT_CACHE_WRITES, writes.length)
+
+  await Promise.all(Array.from({ length: workerCount }, async () => {
+    while (nextWriteIndex < writes.length) {
+      const writeIndex = nextWriteIndex++
+      results[writeIndex] = await writes[writeIndex]()
+    }
+  }))
+
+  return results
+}
+
 /**
  * Electron datastore payloads are converted to plain JSON before crossing IPC,
  * which serializes dates as ISO strings.
@@ -207,20 +237,22 @@ const actions = {
       }
     }
 
-    const writes = tabs.flatMap(feedTab => {
+    const writes = []
+
+    for (const feedTab of tabs) {
       const config = cacheConfigs[feedTab]
       if (config == null) {
-        return []
+        continue
       }
 
-      return Object.entries(config.cache).map(async ([channelId, cacheEntry]) => {
+      for (const [channelId, cacheEntry] of Object.entries(config.cache)) {
         if (!channelIdSet.has(channelId)) {
-          return null
+          continue
         }
 
         const entries = cacheEntry?.[config.entriesKey]
         if (!entries?.some(entry => entry.isNewInSubscriptionFeed === true)) {
-          return null
+          continue
         }
 
         const seenEntries = entries.map(entry => ({
@@ -228,19 +260,21 @@ const actions = {
           isNewInSubscriptionFeed: false
         }))
 
-        try {
-          await config.updateEntries(channelId, seenEntries, cacheEntry.timestamp)
-          return { tab: feedTab, channelId }
-        } catch (errMessage) {
-          console.error(errMessage)
-          return null
-        }
-      })
-    })
+        writes.push(async () => {
+          try {
+            await config.updateEntries(channelId, seenEntries, cacheEntry.timestamp)
+            return { tab: feedTab, channelId }
+          } catch (errMessage) {
+            console.error(errMessage)
+            return null
+          }
+        })
+      }
+    }
 
     // Updating every successful cache entry in one mutation gives Vue one
     // render, so all cards leave together regardless of feed size.
-    commit('markSubscriptionEntriesAsSeenInCache', (await Promise.all(writes))
+    commit('markSubscriptionEntriesAsSeenInCache', (await runSubscriptionCacheWrites(writes))
       .filter(cacheEntry => cacheEntry != null))
   },
 
@@ -263,49 +297,57 @@ const actions = {
       }
     ]
 
-    await Promise.all(cacheConfigs.flatMap(({ cache, tab, updateEntries }) => {
-      return Object.entries(cache).map(async ([channelId, cacheEntry]) => {
+    const writes = []
+    for (const { cache, tab, updateEntries } of cacheConfigs) {
+      for (const [channelId, cacheEntry] of Object.entries(cache)) {
         const entry = cacheEntry?.videos?.find(video => video.videoId === videoId)
         if (entry?.isNewInSubscriptionFeed !== true) {
-          return
+          continue
         }
 
         const seenEntries = cacheEntry.videos.map(video => video.videoId === videoId
           ? { ...video, isNewInSubscriptionFeed: false }
           : video)
 
-        try {
-          await updateEntries(channelId, seenEntries, cacheEntry.timestamp)
-          commit('markSubscriptionVideoAsSeenByChannel', { tab, channelId, videoId })
-        } catch (errMessage) {
-          console.error(errMessage)
-        }
-      })
-    }))
+        writes.push(async () => {
+          try {
+            await updateEntries(channelId, seenEntries, cacheEntry.timestamp)
+            commit('markSubscriptionVideoAsSeenByChannel', { tab, channelId, videoId })
+          } catch (errMessage) {
+            console.error(errMessage)
+          }
+        })
+      }
+    }
+    await runSubscriptionCacheWrites(writes)
   },
 
   async markSubscriptionPostAsSeen({ commit, state }, postId) {
-    await Promise.all(Object.entries(state.postsCache).map(async ([channelId, cacheEntry]) => {
+    const writes = []
+    for (const [channelId, cacheEntry] of Object.entries(state.postsCache)) {
       const entry = cacheEntry?.posts?.find(post => post.postId === postId)
       if (entry?.isNewInSubscriptionFeed !== true) {
-        return
+        continue
       }
 
       const seenEntries = cacheEntry.posts.map(post => post.postId === postId
         ? { ...post, isNewInSubscriptionFeed: false }
         : post)
 
-      try {
-        await DBSubscriptionCacheHandlers.updateCommunityPostsByChannelId(
-          channelId,
-          seenEntries,
-          cacheEntry.timestamp
-        )
-        commit('markSubscriptionPostAsSeenByChannel', { channelId, postId })
-      } catch (errMessage) {
-        console.error(errMessage)
-      }
-    }))
+      writes.push(async () => {
+        try {
+          await DBSubscriptionCacheHandlers.updateCommunityPostsByChannelId(
+            channelId,
+            seenEntries,
+            cacheEntry.timestamp
+          )
+          commit('markSubscriptionPostAsSeenByChannel', { channelId, postId })
+        } catch (errMessage) {
+          console.error(errMessage)
+        }
+      })
+    }
+    await runSubscriptionCacheWrites(writes)
   },
 
   async clearSubscriptionsCacheForManyChannels({ commit }, channelIds) {
