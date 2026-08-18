@@ -30,7 +30,7 @@ test('shows returning users only where settings moved', async ({ app, page }) =>
   const lastUsedVersion = await page.evaluate(() => localStorage.getItem('opentubex.lastUsedVersion'))
   expect(lastUsedVersion).toMatch(/^\d+\.\d+\.\d+(?:-|$)/)
   await expect(tutorial).toContainText('Right-click it to go straight to profile selection.')
-  await expect(tutorial).toContainText('The cog in that menu opens all settings.')
+  await expect(tutorial).toContainText('The cog in that menu opens all settings, and About and Downloads have moved to this menu too.')
   await expect(tutorial.locator('.tutorialProgress')).toHaveCount(0)
   await expectHighlightCenteredOn(page, '[data-tutorial="quick-settings"]')
 
@@ -102,6 +102,34 @@ test('keeps the tutorial actions reachable in a short window', async ({ app, pag
   })).toBe(true)
 })
 
+test('resets the managed content viewport after a shorter step replaces it', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].setSize(800, 420)
+  })
+  await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
+  await page.reload()
+
+  const tutorial = page.locator('.tutorialCard')
+  for (let step = 0; step < 4; step++) {
+    await tutorial.getByRole('button', { name: 'Next' }).click()
+  }
+  await expect(tutorial).toHaveAccessibleName('Make it yours')
+
+  const scrollViewport = tutorial.locator('.tutorialScroll')
+  const scrollbar = scrollViewport.locator(':scope > .os-scrollbar-vertical')
+  await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+  await scrollViewport.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scrollViewport.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+  await tutorial.getByRole('button', { name: 'Next' }).click()
+  await expect(tutorial).toHaveAccessibleName('Bring your data with you')
+  await expect.poll(() => scrollViewport.evaluate(element => ({
+    scrollTop: element.scrollTop,
+    scrollRange: element.scrollHeight - element.clientHeight
+  }))).toEqual({ scrollTop: 0, scrollRange: 0 })
+  await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+})
+
 test.describe('right-to-left layout', () => {
   test.use({ seed: { settings: { currentLocale: 'ar' } } })
 
@@ -117,28 +145,79 @@ test('walks new users through the essential controls', async ({ page }) => {
 
   const tutorial = page.locator('.tutorialCard')
   await expect(tutorial).toHaveAccessibleName('Welcome to OpenTubeX')
-  await expect(tutorial.locator('.tutorialProgress span')).toHaveCount(5)
+  await expect(tutorial.locator('.tutorialProgress span')).toHaveCount(6)
+  await expect(tutorial.getByRole('button', { name: 'Skip' })).toBeVisible()
 
   await tutorial.getByRole('button', { name: 'Next' }).click()
   await expect(tutorial).toHaveAccessibleName('Your library is always nearby')
   await expect(tutorial.getByRole('heading', { name: 'Your library is always nearby' })).toBeFocused()
+  await expect(tutorial.getByRole('button', { name: 'Skip' })).toHaveCount(0)
   await expectHighlightCenteredOn(page, '[data-tutorial="navigation"]')
 
   await tutorial.getByRole('button', { name: 'Next' }).click()
   await expect(tutorial).toHaveAccessibleName('Search or paste a link')
-  await expectHighlightCenteredOn(page, '[data-tutorial="search"]')
+  await expectHighlightCenteredOn(page, '.searchContainer[data-tutorial="search"] .ft-input')
+  const highlightStyles = await page.locator('.tutorialHighlight').evaluate(element => {
+    const styles = getComputedStyle(element)
+    return { borderRadius: Number.parseFloat(styles.borderRadius), boxShadow: styles.boxShadow }
+  })
+  expect(highlightStyles.borderRadius).toBeGreaterThan(0)
+  expect(highlightStyles.boxShadow).toContain('inset')
 
   await tutorial.getByRole('button', { name: 'Next' }).click()
   await expect(tutorial).toHaveAccessibleName('Keep pages open in tabs')
-  await expectHighlightCenteredOn(page, '[data-tutorial="tabs"]')
+  const layout = tutorial.getByRole('combobox', { name: 'Tab Layout' })
+  await layout.focus()
+  await page.keyboard.press('Enter')
+  await expect(layout).toHaveAttribute('aria-expanded', 'true')
+  await page.keyboard.press('Escape')
+  await expect(layout).toHaveAttribute('aria-expanded', 'false')
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('Enter')
+  await expect(layout).toHaveText('Horizontal at bottom')
+  await expect(page.locator('.tabBar.position-bottom')).toBeVisible()
+  for (const [label, className] of [
+    ['Vertical on left', 'position-left'],
+    ['Vertical on right', 'position-right'],
+    ['Horizontal at top', 'position-top']
+  ]) {
+    await layout.click()
+    await page.locator(`#${await layout.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: label, exact: true }).click()
+    await expect(page.locator(`.tabBar.${className}`)).toBeVisible()
+    await expectHighlightCenteredOn(page, '[data-tutorial="tabs"]')
+    await expect.poll(async () => {
+      const [card, tabs] = await Promise.all([
+        tutorial.evaluate(element => element.getBoundingClientRect().toJSON()),
+        page.locator('[data-tutorial="tabs"]').evaluate(element => element.getBoundingClientRect().toJSON())
+      ])
+      return card.left < tabs.right && card.right > tabs.left && card.top < tabs.bottom && card.bottom > tabs.top
+    }).toBe(false)
+  }
 
   await tutorial.getByRole('button', { name: 'Next' }).click()
   await expect(tutorial).toHaveAccessibleName('Make it yours')
-  await expect(tutorial).toContainText('Right-click it to go straight to profile selection.')
+  await expect(tutorial).toContainText('right-click it to switch profiles.')
   await expectHighlightCenteredOn(page, '[data-tutorial="quick-settings"]')
+  const baseTheme = tutorial.getByRole('combobox', { name: 'Base Theme' })
+  await baseTheme.click()
+  await page.locator(`#${await baseTheme.getAttribute('aria-controls')}`)
+    .getByRole('option', { name: 'Light', exact: true }).click()
+  await expect(page.locator('body')).toHaveClass(/light/)
+  const quality = tutorial.getByRole('combobox', { name: 'Default Quality' })
+  await quality.click()
+  await page.locator(`#${await quality.getAttribute('aria-controls')}`)
+    .getByRole('option', { name: '480p', exact: true }).click()
+  await expect(quality).toHaveText('480p')
 
-  await tutorial.getByRole('button', { name: 'Finish' }).click()
+  await tutorial.getByRole('button', { name: 'Next' }).click()
+  await expect(tutorial).toHaveAccessibleName('Bring your data with you')
+  await expect(tutorial.getByRole('button', { name: 'Not now' })).toBeVisible()
+  await tutorial.getByRole('button', { name: 'Import data' }).click()
   await expect(tutorial).toBeHidden()
+  await expect(page.locator('.settingsContent [data-section="data"]')
+    .getByRole('button', { name: 'Import subscriptions', exact: true })).toBeVisible()
 
   await page.reload()
   await expect(page.locator('.tutorialOverlay')).toHaveCount(0)

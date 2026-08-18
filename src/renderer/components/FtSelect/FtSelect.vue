@@ -267,7 +267,7 @@ function openDropdown() {
 
   emit('open')
   activeIndex.value = Math.max(0, selectedIndex.value)
-  dropdownTarget.value = selectRoot.value?.closest('.prompt') ?? document.fullscreenElement ?? document.body
+  dropdownTarget.value = selectRoot.value?.closest('.prompt, .tutorialCard') ?? document.fullscreenElement ?? document.body
   dropdownShown.value = true
 
   nextTick(async () => {
