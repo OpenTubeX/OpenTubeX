@@ -124,6 +124,20 @@ test('keyboard shortcuts change the playback rate', async ({ app, page, attachSc
   await attachScreenshot('playback rate lowered')
 })
 
+test('playback rate shortcuts use the normal rate while hold-to-double is active', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+
+  await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1)
+  await page.keyboard.down('Space')
+  try {
+    await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(2)
+    await page.locator('body').press('p')
+    await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.25)
+  } finally {
+    await page.keyboard.up('Space')
+  }
+})
+
 test('keeps video zoom within its tab', async ({ app, page, attachScreenshot }) => {
   const video = await openDemoVideo({ app, page })
 

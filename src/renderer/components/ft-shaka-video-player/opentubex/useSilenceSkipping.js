@@ -446,7 +446,15 @@ export function useSilenceSkipping({ available, enabled, isLive, video }) {
       analysisFrame = null
     }
 
-    analysisAudio?.pause()
+    if (analysisAudio) {
+      analysisAudio.removeEventListener('playing', scheduleAnalysis)
+      analysisAudio.removeEventListener('canplay', ensureAnalysisPlayback)
+      analysisAudio.removeEventListener('progress', ensureAnalysisPlayback)
+      analysisAudio.removeEventListener('seeking', resetAnalysisDetection)
+      analysisAudio.removeEventListener('seeked', ensureAnalysisPlayback)
+      analysisAudio.pause()
+    }
+    analysisSourceBuffer?.removeEventListener('updateend', processAppendQueue)
     analysisSourceNode?.disconnect()
     analysisSink?.disconnect()
     analysisAudioContext?.close().catch(() => {})
