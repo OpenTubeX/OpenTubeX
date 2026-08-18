@@ -143,10 +143,23 @@ test('paid promotion badge follows the full-window title visibility', async ({ p
   const controls = player.locator('.shaka-controls-container')
   await expect(badge).toHaveCSS('top', '65px')
   await expect(badge).toHaveCSS('transition-delay', '0s, 0s')
+  const [playerBounds, visibleTitleBadgeBounds] = await Promise.all([
+    player.boundingBox(),
+    badge.boundingBox(),
+  ])
+  expect(playerBounds).not.toBeNull()
+  expect(visibleTitleBadgeBounds).not.toBeNull()
+  expect(visibleTitleBadgeBounds.y - playerBounds.y).toBeCloseTo(65, 0)
 
   await controls.evaluate(element => element.setAttribute('shown', 'false'))
   await expect(badge).toHaveCSS('transition-delay', '0s, 0.45s')
-  await expect(badge).toHaveCSS('top', '12px')
+  await page.waitForTimeout(300)
+  const fadingTitleBadgeBounds = await badge.boundingBox()
+  expect(fadingTitleBadgeBounds.y).toBeCloseTo(visibleTitleBadgeBounds.y, 0)
+  await expect.poll(async () => {
+    const bounds = await badge.boundingBox()
+    return bounds ? bounds.y - playerBounds.y : null
+  }).toBeCloseTo(12, 0)
 
   await player.evaluate((element) => {
     element.classList.remove('fullWindow')
