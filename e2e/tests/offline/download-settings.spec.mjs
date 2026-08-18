@@ -234,10 +234,6 @@ test.describe('automatic download authorization', () => {
     await writeFile(path.join(app.userDataDir, 'automatic-download-discovery.xml'), [
       '<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015">',
       '<entry>',
-      `<yt:videoId>ccccccccccc</yt:videoId><yt:channelId>${BETA_CHANNEL_ID}</yt:channelId>`,
-      '<published>2026-08-14T01:00:00Z</published>',
-      '</entry>',
-      '<entry>',
       `<yt:videoId>ddddddddddd</yt:videoId><yt:channelId>${BETA_CHANNEL_ID}</yt:channelId>`,
       '<published>2026-08-13T23:59:59Z</published>',
       '</entry>',
@@ -245,6 +241,12 @@ test.describe('automatic download authorization', () => {
     ].join(''))
     await writeFile(executable, [
       '#!/bin/sh',
+      'for argument in "$@"; do',
+      '  if [ "$argument" = "--dump-single-json" ]; then',
+      `    printf '%s\\n' '{"id":"ccccccccccc","channel_id":"${BETA_CHANNEL_ID}","timestamp":1786669200}'`,
+      '    exit 0',
+      '  fi',
+      'done',
       `printf '%s\\n' "$@" > ${argumentsFile}`,
       "printf '__OPENTUBEX_FILE__:ccccccccccc\\t120\\t1920\\t1080\\t/tmp/automatic.webm\\n'"
     ].join('\n'))
