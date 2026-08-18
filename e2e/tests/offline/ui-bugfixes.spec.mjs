@@ -153,13 +153,28 @@ test('paid promotion badge follows the full-window title visibility', async ({ p
 
   await controls.evaluate(element => element.setAttribute('shown', 'false'))
   await expect(badge).toHaveCSS('transition-delay', '0s, 0.45s')
-  await page.waitForTimeout(300)
+  const badgePositionTransition = await badge.evaluateHandle((element) => {
+    const transition = element.getAnimations().find(animation =>
+      animation instanceof CSSTransition &&
+      ['inset-block-start', 'top'].includes(animation.transitionProperty)
+    )
+    if (!transition) {
+      throw new Error('Paid promotion badge position transition not found')
+    }
+    transition.pause()
+    return transition
+  })
+  await badgePositionTransition.evaluate((transition) => {
+    transition.currentTime = 300
+  })
   const fadingTitleBadgeBounds = await badge.boundingBox()
   expect(fadingTitleBadgeBounds.y).toBeCloseTo(visibleTitleBadgeBounds.y, 0)
-  await expect.poll(async () => {
-    const bounds = await badge.boundingBox()
-    return bounds ? bounds.y - playerBounds.y : null
-  }).toBeCloseTo(12, 0)
+  await badgePositionTransition.evaluate((transition) => {
+    transition.currentTime = 600
+  })
+  const hiddenTitleBadgeBounds = await badge.boundingBox()
+  expect(hiddenTitleBadgeBounds.y - playerBounds.y).toBeCloseTo(12, 0)
+  await badgePositionTransition.dispose()
 
   await player.evaluate((element) => {
     element.classList.remove('fullWindow')
