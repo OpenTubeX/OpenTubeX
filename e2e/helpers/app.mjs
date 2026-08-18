@@ -268,7 +268,7 @@ export const test = base.extend({
     if (!showTutorial) {
       const tutorial = page.locator('.tutorialOverlay')
       await expect(tutorial).toBeVisible()
-      await tutorial.getByRole('button', { name: 'Got it' }).click()
+      await tutorial.locator('.tutorialActions').getByRole('button').last().click()
       await expect(tutorial).toBeHidden()
     }
 
