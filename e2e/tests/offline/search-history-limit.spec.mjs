@@ -34,7 +34,16 @@ test('shows every saved search in a scrollable list', async ({ page }) => {
   await expect.poll(() => list.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
   await page.locator(sel.searchInput).fill(entries.at(-1)._id)
   await expect(suggestions).toHaveCount(1)
-  await expect.poll(() => list.evaluate(element => element.scrollTop)).toBe(0)
+  await expect.poll(() => list.evaluate(element => ({
+    isOverflowing: element.scrollHeight > element.clientHeight,
+    isScrollbarUsable: !element.querySelector(':scope > .os-scrollbar-vertical')
+      .classList.contains('os-scrollbar-unusable'),
+    scrollTop: element.scrollTop,
+  }))).toEqual({
+    isOverflowing: false,
+    isScrollbarUsable: false,
+    scrollTop: 0,
+  })
 })
 
 test('removing a saved search resets the scrolled list to its rendered start', async ({ page }) => {
@@ -53,13 +62,13 @@ test('removing a saved search resets the scrolled list to its rendered start', a
 
   await expect(suggestions).toHaveCount(entries.length - 1)
   await expect.poll(() => list.evaluate(element => ({
-    hasVisibleScrollbar: element.querySelector(':scope > .os-scrollbar-vertical')
-      .classList.contains('os-scrollbar-visible'),
     isOverflowing: element.scrollHeight > element.clientHeight,
+    isScrollbarUsable: !element.querySelector(':scope > .os-scrollbar-vertical')
+      .classList.contains('os-scrollbar-unusable'),
     scrollTop: element.scrollTop,
   }))).toEqual({
-    hasVisibleScrollbar: true,
     isOverflowing: true,
+    isScrollbarUsable: true,
     scrollTop: 0,
   })
 })

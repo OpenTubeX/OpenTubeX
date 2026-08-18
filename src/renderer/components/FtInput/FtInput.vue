@@ -129,7 +129,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, reactive, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, reactive, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
@@ -137,7 +137,7 @@ import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettin
 
 import store from '../../store/index'
 
-import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { isKeyboardEventKeyPrintableChar, isNullOrEmpty } from '../../helpers/strings'
 import { getInputTextAscentOffset } from './inputTextMetrics'
 
@@ -553,7 +553,7 @@ function handleFocus() {
   searchState.showOptions = true
 }
 
-function updateVisibleDataList(preserveSelectionAfterRemoval = false) {
+async function updateVisibleDataList(preserveSelectionAfterRemoval = false) {
   if (optionsList.value != null) {
     restoreOverlayScrollTop(optionsList.value, 0)
   }
@@ -578,6 +578,11 @@ function updateVisibleDataList(preserveSelectionAfterRemoval = false) {
   }
 
   removalMade.value = false
+
+  await nextTick()
+  const list = optionsList.value
+  const finalOption = list?.querySelector(':scope > li:last-of-type') ?? null
+  if (list !== null) clampOverlayScrollTop(list, finalOption)
 }
 
 defineExpose({
