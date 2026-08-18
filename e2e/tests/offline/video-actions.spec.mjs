@@ -702,8 +702,14 @@ test.describe('video downloads', () => {
 
   test('tracks a download when its configured folder is unavailable', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'failing-yt-dlp.sh')
+    const argumentsFile = path.join(app.userDataDir, 'failing-yt-dlp-arguments.txt')
     const unavailableDownloadFolder = path.join(app.userDataDir, 'missing', 'downloads')
-    await writeFile(executable, '#!/bin/sh\nexit 1')
+    const fallbackDownloadFolder = await app.electronApp.evaluate(({ app }) => app.getPath('temp'))
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf '%s\\n' "$@" > '${argumentsFile}'`,
+      'exit 1'
+    ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async ({ unavailableDownloadFolder, ytDlpPath }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -721,6 +727,12 @@ test.describe('video downloads', () => {
     await expect.poll(() => page.evaluate(async (id) => {
       return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
     }, result.id)).toBe('failed')
+    const temporaryPath = (await readFile(argumentsFile, 'utf8'))
+      .split('\n')
+      .find(argument => argument.startsWith('temp:'))
+    expect(temporaryPath).toBeDefined()
+    expect(path.dirname(temporaryPath.slice('temp:'.length))).toBe(fallbackDownloadFolder)
+    expect(temporaryPath.startsWith(`temp:${unavailableDownloadFolder}`)).toBe(false)
   })
 
   test('plays an audio download in the normal player', async ({ app, page }) => {
