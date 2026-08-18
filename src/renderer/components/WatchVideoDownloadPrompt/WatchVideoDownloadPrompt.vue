@@ -239,6 +239,7 @@
         >
           {{ activeDownload.errorMessage }}
         </p>
+        <DownloadFailureHint v-if="activeDownload.status === 'failed'" />
       </div>
 
       <footer
@@ -330,6 +331,7 @@ import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, reactive, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import DownloadFailureHint from '../DownloadFailureHint/DownloadFailureHint.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'

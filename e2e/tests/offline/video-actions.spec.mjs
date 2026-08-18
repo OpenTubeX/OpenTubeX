@@ -201,6 +201,12 @@ test.describe('video downloads', () => {
     await page.getByRole('button', { name: 'Download', exact: true }).click()
 
     await expect(page.getByText('Download failed', { exact: true })).toBeVisible()
+    const failureHintLink = page.getByRole('link', { name: 'recent yt-dlp issues for YouTube' })
+    await expect(failureHintLink).toHaveAttribute(
+      'href',
+      'https://github.com/yt-dlp/yt-dlp/issues?q=is%3Aissue%20sort%3Acreated-desc%20YouTube'
+    )
+    await expect(page.getByText(/then try switching the yt-dlp channel to Nightly or Master/)).toBeVisible()
     await expect(page.locator('.downloadProgressBarTrack')).toHaveCount(0)
     const separatorSpacing = await page.locator('.downloadPromptContent').evaluate(prompt => ({
       above: Number.parseFloat(getComputedStyle(prompt.querySelector('.downloadProgress')).paddingBottom),
@@ -1050,6 +1056,8 @@ test.describe('video downloads', () => {
     const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
     await expect(downloadRow.locator('.destination')).toHaveText('/tmp/subtitles.en.vtt')
     await expect(downloadRow.locator('.downloadError')).toContainText('Subtitle conversion failed')
+    await expect(downloadRow.getByRole('link', { name: 'recent yt-dlp issues for YouTube' })).toBeVisible()
+    await expect(downloadRow).toContainText('then try switching the yt-dlp channel to Nightly or Master')
     await downloadRow.getByTitle('Retry download').click()
     await expect.poll(() => page.evaluate(async () => {
       return (await window.ftElectron.ytDlpListDownloads())
