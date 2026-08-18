@@ -232,6 +232,14 @@ test.describe('automatic download authorization', () => {
     const executable = path.join(app.userDataDir, 'fake-automatic-yt-dlp.sh')
     const argumentsFile = path.join(app.userDataDir, 'automatic-yt-dlp-arguments.txt')
     const metadataLookupsFile = path.join(app.userDataDir, 'automatic-yt-dlp-metadata-lookups.txt')
+    const releaseDownloadFile = path.join(app.userDataDir, 'release-automatic-download')
+    await app.electronApp.evaluate(({ Notification }) => {
+      Notification.isSupported = () => true
+      globalThis.automaticDownloadNotifications = []
+      Notification.prototype.show = function () {
+        globalThis.automaticDownloadNotifications.push(this)
+      }
+    })
     await writeFile(executable, [
       '#!/bin/sh',
       'for argument in "$@"; do',
@@ -246,6 +254,7 @@ test.describe('automatic download authorization', () => {
       '  fi',
       'done',
       `printf '%s\\n' "$@" > ${argumentsFile}`,
+      `while [ ! -f "${releaseDownloadFile}" ]; do sleep 0.05; done`,
       "printf '__OPENTUBEX_FILE__:ccccccccccc\\t120\\t1920\\t1080\\t/tmp/automatic.webm\\n'"
     ].join('\n'))
     await chmod(executable, 0o755)
@@ -273,7 +282,13 @@ test.describe('automatic download authorization', () => {
       customArgs: '--write-description',
       videoIds: ['eeeeeeeeeee'],
       isPlaylist: true,
-      playlistId: 'PL1234567890'
+      playlistId: 'PL1234567890',
+      notification: {
+        startedTitle: 'Automatic download started',
+        startedBody: 'Automatic video is downloading',
+        completedTitle: 'Automatic download finished',
+        completedBody: 'Automatic video was downloaded'
+      }
     }
     expect(await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), payload)).toBeNull()
 
@@ -312,9 +327,46 @@ test.describe('automatic download authorization', () => {
     const result = concurrentResults.find(download => 'id' in download)
     expect(concurrentResults).toContainEqual({ skipped: 'already-downloaded' })
     expect(result).toEqual({ id: expect.any(Number) })
+
+    await expect.poll(() => app.electronApp.evaluate(() => (
+      globalThis.automaticDownloadNotifications.map(notification => notification.title)
+    ))).toContain('Automatic download started')
+    await app.electronApp.evaluate(() => {
+      globalThis.automaticDownloadNotifications
+        .find(notification => notification.title === 'Automatic download started')
+        .emit('click')
+    })
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getSettingsWindowView
+    })).toBe('downloads')
+
+    const tabCount = await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getTabCount
+    })
+    await writeFile(releaseDownloadFile, '')
     await expect.poll(() => page.evaluate(async (id) => {
       return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
     }, result.id)).toBe('completed')
+    await expect.poll(() => app.electronApp.evaluate(() => (
+      globalThis.automaticDownloadNotifications.map(notification => notification.title)
+    ))).toContain('Automatic download finished')
+    await app.electronApp.evaluate(() => {
+      globalThis.automaticDownloadNotifications
+        .find(notification => notification.title === 'Automatic download finished')
+        .emit('click')
+    })
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return {
+        tabCount: store.getters.getTabCount,
+        route: store.getters.getActiveTab?.route.fullPath
+      }
+    })).toEqual({
+      tabCount: tabCount + 1,
+      route: '/watch?v=ccccccccccc'
+    })
 
     const args = (await readFile(argumentsFile, 'utf8')).trim().split('\n')
     expect(args).toEqual(expect.arrayContaining([
