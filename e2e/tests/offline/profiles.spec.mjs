@@ -33,6 +33,39 @@ async function openProfileList(page) {
 test.describe('profile selector', () => {
   test.use({ seed: { profiles: [mainProfile, secondProfile] } })
 
+  test('ignores stale profile deletion events from another window', async ({ page }) => {
+    await openProfileList(page)
+    await expect(page.locator('.profileList .profileOption')).toHaveCount(2)
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('removeProfileFromList', 'missing-profile')
+    })
+
+    await expect(page.locator('.profileList .profileOption')).toHaveCount(2)
+    await expect(page.locator('.profileList .profileOption').filter({ hasText: 'Second profile' })).toBeVisible()
+  })
+
+  test('ignores channel updates for profiles removed in another window', async ({ page }) => {
+    const profileIds = await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const payload = {
+        channel: { id: 'channel', name: 'Channel', thumbnail: '' },
+        profileIds: ['missing-profile']
+      }
+
+      store.commit('addChannelToProfiles', payload)
+      store.commit('removeChannelFromProfiles', {
+        channelId: payload.channel.id,
+        profileIds: payload.profileIds
+      })
+
+      return store.getters.getProfileList.map(profile => profile._id)
+    })
+
+    expect(profileIds).toEqual(['allChannels', 'e2eprofile'])
+  })
+
   test('opens directly from the profile button context menu', async ({ page }) => {
     await profileIcon(page).click()
     await expect(page.locator('.profileSummaryText')).toContainText('You can also right-click the profile icon to switch profiles')
