@@ -30,7 +30,7 @@ test('shows returning users only where settings moved', async ({ app, page }) =>
   const lastUsedVersion = await page.evaluate(() => localStorage.getItem('opentubex.lastUsedVersion'))
   expect(lastUsedVersion).toMatch(/^\d+\.\d+\.\d+(?:-|$)/)
   await expect(tutorial).toContainText('Right-click it to go straight to profile selection.')
-  await expect(tutorial).toContainText('The cog in that menu opens all settings.')
+  await expect(tutorial).toContainText('The cog in that menu opens all settings, and About and Downloads have moved to this menu too.')
   await expect(tutorial.locator('.tutorialProgress')).toHaveCount(0)
   await expectHighlightCenteredOn(page, '[data-tutorial="quick-settings"]')
 
