@@ -2351,6 +2351,8 @@ Downloads:
   Download Complete: Download complete
   Download Cancelled: Download canceled
   Download Failed: Download failed
+  Download Failure Hint: Check {issuesLink}, then try switching the yt-dlp channel to Nightly or Master in External Software settings.
+  yt-dlp YouTube Issues: recent yt-dlp issues for YouTube
   Automatic Download Started: Automatic download started
   Automatic Download Started Body: 'Downloading "{title}" from {channel} in the background.'
   Automatic Download Complete: Automatic download complete
