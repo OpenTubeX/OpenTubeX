@@ -2020,6 +2020,18 @@ test.describe('settings', () => {
     await expect(page.locator('.toast', { hasText: 'Gamma toast' })).toBeVisible()
     await page.waitForTimeout(700)
 
+    const betaToast = page.locator('.toast', { hasText: 'Beta' })
+    const { trailingSpace, paddingEnd } = await betaToast.evaluate((toast) => {
+      const toastBounds = toast.getBoundingClientRect()
+      const messageBounds = toast.querySelector('.message').getBoundingClientRect()
+
+      return {
+        trailingSpace: toastBounds.right - messageBounds.right,
+        paddingEnd: Number.parseFloat(getComputedStyle(toast).paddingInlineEnd),
+      }
+    })
+    expect(Math.abs(trailingSpace - paddingEnd)).toBeLessThanOrEqual(1)
+
     const rows = page.locator('[data-sonner-toast]')
     await expect(rows.first()).toHaveAttribute('data-expanded', 'false')
 
