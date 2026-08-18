@@ -372,9 +372,9 @@ import {
   normalizeTabBarPosition
 } from './constants/tabBarPosition'
 import {
-  clearTutorialAudience,
   getLastUsedVersion,
   getTutorialAudience,
+  markTutorialCompleted,
   setLastUsedVersion,
   setTutorialAudience,
 } from './helpers/tutorialState'
@@ -863,6 +863,7 @@ function previewManagedExternalSoftwareUpdatePrompt(event) {
 async function initializeTutorial(hasExistingInstallation, lastUsedVersion, persistedAudience) {
   try {
     let audience = getTutorialAudience(persistedAudience)
+    if (audience === 'completed') return false
     if (audience !== 'new' && audience !== 'existing' && lastUsedVersion !== null) return false
     if (hasExistingInstallation === null) return false
 
@@ -892,7 +893,7 @@ async function completeTutorial() {
   }
 
   try {
-    await clearTutorialAudience()
+    await markTutorialCompleted()
   } catch (error) {
     console.error('Failed to save tutorial completion', error)
   }

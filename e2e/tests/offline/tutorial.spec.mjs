@@ -218,6 +218,10 @@ test('walks new users through the essential controls', async ({ page }) => {
   await expect(tutorial).toBeHidden()
   await expect(page.locator('.settingsContent [data-section="data"]')
     .getByRole('button', { name: 'Import subscriptions', exact: true })).toBeVisible()
+  await expect.poll(() => page.evaluate(async () => {
+    const settings = await window.ftElectron.dbSettings(1)
+    return settings.find(({ _id }) => _id === 'tutorialAudience')?.value
+  })).toBe('completed')
 
   await page.reload()
   await expect(page.locator('.tutorialOverlay')).toHaveCount(0)

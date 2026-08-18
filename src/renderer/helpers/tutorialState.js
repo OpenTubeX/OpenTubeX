@@ -21,16 +21,10 @@ function writeLocalStorage(key, value) {
   }
 }
 
-function removeLocalStorage(key) {
-  try {
-    localStorage.removeItem(key)
-  } catch (error) {
-    console.error(`Failed to remove ${key}`, error)
-  }
-}
-
 export function getTutorialAudience(persistedAudience) {
-  return readLocalStorage(TUTORIAL_AUDIENCE_STORAGE_KEY) ?? persistedAudience ?? null
+  const localAudience = readLocalStorage(TUTORIAL_AUDIENCE_STORAGE_KEY)
+  if (localAudience === 'completed' || persistedAudience === 'completed') return 'completed'
+  return localAudience ?? persistedAudience ?? null
 }
 
 export async function setTutorialAudience(audience) {
@@ -42,13 +36,8 @@ export async function setTutorialAudience(audience) {
   }
 }
 
-export async function clearTutorialAudience() {
-  removeLocalStorage(TUTORIAL_AUDIENCE_STORAGE_KEY)
-  try {
-    await DBSettingHandlers.delete(TUTORIAL_AUDIENCE_SETTING_ID)
-  } catch (error) {
-    console.error('Failed to clear the persisted tutorial audience', error)
-  }
+export async function markTutorialCompleted() {
+  await setTutorialAudience('completed')
 }
 
 export function getLastUsedVersion(persistedVersion) {
