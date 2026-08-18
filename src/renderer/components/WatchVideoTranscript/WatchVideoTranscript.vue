@@ -150,6 +150,7 @@ import FtInput from '../FtInput/FtInput.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import { getTranscriptPreScrollTop } from './transcriptScroll.js'
 import { filterTranscriptSegments } from './transcriptSearch.js'
+import { findActiveTranscriptSegmentIndex } from './activeTranscriptSegment.js'
 
 import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import {
@@ -331,35 +332,6 @@ function formatTimestamp(seconds) {
   return formatDurationAsTimestamp(Math.floor(seconds))
 }
 
-/**
- * Captions are ordered by their start timestamp, so seeking and playback can
- * resolve the current cue without rescanning the complete transcript on every
- * player time update.
- * @param {{ index: number, start: number, end: number }[]} transcriptSegments
- * @param {number} currentTime
- * @returns {number}
- */
-function findActiveTranscriptSegmentIndex(transcriptSegments, currentTime) {
-  let low = 0
-  let high = transcriptSegments.length - 1
-  let candidate = -1
-
-  while (low <= high) {
-    const middle = Math.floor((low + high) / 2)
-    if (transcriptSegments[middle].start <= currentTime) {
-      candidate = middle
-      low = middle + 1
-    } else {
-      high = middle - 1
-    }
-  }
-
-  if (candidate < 0 || currentTime >= transcriptSegments[candidate].end) {
-    return -1
-  }
-  return transcriptSegments[candidate].index
-}
-
 function toggleTranscriptSearch() {
   searchOpen.value = !searchOpen.value
   if (!searchOpen.value) {
@@ -467,7 +439,11 @@ function parseTranscript(transcript) {
     ? normalizeRollingCaptions(parsedSegments)
     : parsedSegments.filter(segment => segment.text !== '')
 
-  return segments.map(({ start, end, text }, index) => ({ index, start, end, text }))
+  let activeUntil = Number.NEGATIVE_INFINITY
+  return segments.map(({ start, end, text }, index) => {
+    activeUntil = Math.max(activeUntil, end)
+    return { index, start, end, text, activeUntil }
+  })
 }
 
 /**

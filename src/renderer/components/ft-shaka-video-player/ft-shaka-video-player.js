@@ -9197,6 +9197,23 @@ export default defineComponent({
     }
 
     let formatSwitchGeneration = 0
+    /**
+     * A newer source update can supersede a format switch after it has paused
+     * and unloaded the media element. Keep the user's state from before the
+     * first switch so the latest generation does not mistake that pause for
+     * user intent or restart from the beginning.
+     * @type {{
+     *   oldFormat: 'dash'|'audio'|'legacy',
+     *   wasPaused: boolean,
+     *   playbackRate: number|null,
+     *   playbackPosition: number,
+     *   useAutoQuality: boolean,
+     *   audioBandwidth: number|undefined,
+     *   label: string|undefined,
+     *   previousQuality: number|undefined
+     * } | null}
+     */
+    let pendingFormatSwitchState = null
 
     watch(
       () => [props.format, props.playbackSourceKey],
@@ -9218,7 +9235,7 @@ export default defineComponent({
 
         // format switch happened before the player loaded, probably because of an error
         // as there are no previous player settings to restore, we should treat it like this was the original format
-        if (!hasLoaded.value) {
+        if (!hasLoaded.value && pendingFormatSwitchState === null) {
           await unloadForFormatSwitch()
           if (!isCurrentFormatSwitch()) return
           ensureSabrStream()
@@ -9241,63 +9258,74 @@ export default defineComponent({
         }
 
         const video_ = video.value
+        if (pendingFormatSwitchState === null) {
+          const activeVariant = oldFormat === 'legacy'
+            ? undefined
+            : player.getVariantTracks().find(track => track.active)
+          const activeCaptionIndex = player.getTextTracks().findIndex(caption => caption.active)
 
-        const wasPaused = video_.paused
-        const playbackRate = getCurrentPlaybackRate()
+          pendingFormatSwitchState = {
+            oldFormat,
+            wasPaused: video_.paused,
+            playbackRate: getCurrentPlaybackRate(),
+            playbackPosition: video_.currentTime,
+            // The legacy formats don't have an ABR configuration to carry over,
+            // so fall back to the user's preference when switching away from them.
+            useAutoQuality: oldFormat === 'legacy'
+              ? preferAutoQuality.value
+              : player.getConfiguration().abr.enabled,
+            audioBandwidth: typeof activeVariant?.audioBandwidth === 'number'
+              ? activeVariant.audioBandwidth
+              : undefined,
+            label: activeVariant?.label || undefined,
+            previousQuality: oldFormat === 'dash' && activeVariant
+              ? (activeVariant.height > activeVariant.width ? activeVariant.width : activeVariant.height)
+              : undefined
+          }
 
-        // The legacy formats don't have an ABR configuration to carry over,
-        // so fall back to the user's preference when switching away from them
-        const useAutoQuality = oldFormat === 'legacy'
-          ? preferAutoQuality.value
-          : player.getConfiguration().abr.enabled
+          if (!pendingFormatSwitchState.wasPaused) {
+            video_.pause()
+          }
 
-        if (!wasPaused) {
-          video_.pause()
+          if (activeCaptionIndex >= 0) {
+            restoreCaptionIndex = activeCaptionIndex
+
+            // hide captions before switching as shaka/the browser doesn't clean up the displayed captions
+            // when switching away from the legacy formats
+            player.selectTextTrack(null, false)
+          } else {
+            restoreCaptionIndex = null
+          }
+
+          // Shaka clears its manifest before unload() finishes. A timeupdate can
+          // still arrive from the media element in that window, so stop handlers
+          // from querying player state as soon as the format switch begins.
+          hasLoaded.value = false
         }
 
-        const playbackPosition = video_.currentTime
-
-        const activeCaptionIndex = player.getTextTracks().findIndex(caption => caption.active)
-
-        if (activeCaptionIndex >= 0) {
-          restoreCaptionIndex = activeCaptionIndex
-
-          // hide captions before switching as shaka/the browser doesn't clean up the displayed captions
-          // when switching away from the legacy formats
-          player.selectTextTrack(null, false)
-        } else {
-          restoreCaptionIndex = null
-        }
-
-        // Shaka clears its manifest before unload() finishes. A timeupdate can
-        // still arrive from the media element in that window, so stop handlers
-        // from querying player state as soon as the format switch begins.
-        hasLoaded.value = false
+        const {
+          oldFormat: sourceFormat,
+          wasPaused,
+          playbackRate,
+          playbackPosition,
+          useAutoQuality,
+          audioBandwidth,
+          label,
+          previousQuality
+        } = pendingFormatSwitchState
 
         if (newFormat === 'audio' || newFormat === 'dash') {
-          let label
-          let audioBandwidth
           let dimension
 
-          if (oldFormat === 'legacy' && newFormat === 'dash') {
+          if (sourceFormat === 'legacy' && newFormat === 'dash') {
             if (!useAutoQuality) {
               // Use the preferred quality instead of the active legacy format's dimensions, as the
               // legacy formats top out at 360p and the user may never have chosen that themselves
               dimension = preferredVideoQuality.value
             }
-          } else if (oldFormat !== 'legacy') {
-            const track = player.getVariantTracks().find(track => track.active)
-
-            if (typeof track?.audioBandwidth === 'number') {
-              audioBandwidth = track.audioBandwidth
-            }
-
-            if (track?.label) {
-              label = track.label
-            }
           }
 
-          if (oldFormat === 'audio' && newFormat === 'dash' && !useAutoQuality) {
+          if (sourceFormat === 'audio' && newFormat === 'dash' && !useAutoQuality) {
             dimension = preferredVideoQuality.value
           }
 
@@ -9364,18 +9392,10 @@ export default defineComponent({
             }
           } catch (error) {
             if (!isCurrentFormatSwitch()) return
-            handleError(error, 'loading dash/audio manifest for format switch', `${oldFormat} -> ${newFormat}`)
+            handleError(error, 'loading dash/audio manifest for format switch', `${sourceFormat} -> ${newFormat}`)
           }
           activeLegacyFormat.value = null
         } else {
-          let previousQuality
-
-          if (oldFormat === 'dash') {
-            const previousTrack = player.getVariantTracks().find(track => track.active)
-
-            previousQuality = previousTrack.height > previousTrack.width ? previousTrack.width : previousTrack.height
-          }
-
           await unloadForFormatSwitch()
           if (!isCurrentFormatSwitch()) return
 
@@ -9385,8 +9405,11 @@ export default defineComponent({
           if (!isCurrentFormatSwitch()) return
         }
 
+        pendingFormatSwitchState = null
         if (wasPaused) {
           video_.pause()
+        } else {
+          video_.play()
         }
       }
     )
