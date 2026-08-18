@@ -361,7 +361,7 @@ test.describe('custom theme editor', () => {
     await expect(page.getByRole('searchbox', { name: 'Search settings' })).toHaveCount(0)
 
     const editor = page.locator('.customThemeEditor')
-    const resetColorsButton = editor.getByRole('button', { name: 'Reset colors' })
+    const resetColorsButton = editor.getByRole('button', { name: 'Reset to base theme' })
     await expect(resetColorsButton.locator('.ft-icon')).toBeVisible()
     await expect(resetColorsButton).toBeDisabled()
     await expect(editor.getByText('Instance menu', { exact: true })).toHaveCount(0)

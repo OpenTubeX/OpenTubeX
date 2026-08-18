@@ -605,7 +605,7 @@ Settings:
       Delete Theme Confirmation: Delete “{name}”? This cannot be undone.
       Save and Apply: Save and apply
       Discard Changes: Discard changes
-      Reset Colors: Reset colors and effects
+      Reset Colors: Reset to base theme
       Theme File: OpenTubeX theme file
       Theme Saved: Custom theme saved and applied
       Theme Imported: Theme imported into the editor
