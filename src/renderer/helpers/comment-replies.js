@@ -1,4 +1,20 @@
 /**
+ * @param {{ replies: object[] }} comment
+ * @returns {number}
+ */
+function countLoadedReplies(comment) {
+  return comment.replies.reduce((count, reply) => count + 1 + countLoadedReplies(reply), 0)
+}
+
+/**
+ * @param {{ numReplies: number, replies: object[] }} comment
+ * @returns {number}
+ */
+export function getCommentReplyCount(comment) {
+  return Math.max(comment.numReplies, countLoadedReplies(comment))
+}
+
+/**
  * @param {number} loadedReplyCount
  * @param {number} expectedReplyCount
  * @param {boolean} hasNextContinuation

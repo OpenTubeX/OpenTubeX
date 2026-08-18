@@ -462,6 +462,7 @@ import { useTabContext } from '../../tabs/TabContext'
 import { copyToClipboard, formatNumber, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import {
+  getCommentReplyCount,
   getReplyContinuationToken,
   getReplyLoadState,
   isEmptyReplyContinuation,
@@ -976,11 +977,13 @@ function getMoreComments() {
  * @param {Comment} comment
  */
 function toggleCommentRepliesLinkText(comment) {
+  const replyCount = getCommentReplyCount(comment)
+
   if (comment.showReplies) {
-    return t('Comments.Hide {replyCount} replies', { replyCount: comment.numReplies }, comment.numReplies)
+    return t('Comments.Hide {replyCount} replies', { replyCount }, replyCount)
   }
 
-  return t('Comments.Reply Count', { replyCount: comment.numReplies }, comment.numReplies)
+  return t('Comments.Reply Count', { replyCount }, replyCount)
 }
 
 /**

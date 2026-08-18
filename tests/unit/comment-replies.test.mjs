@@ -2,12 +2,52 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  getCommentReplyCount,
   getReplyContinuationToken,
   getReplyLoadState,
   isEmptyReplyContinuation,
   isMissingReplyResponseError,
   shouldLoadInitialReplies
 } from '../../src/renderer/helpers/comment-replies.js'
+
+test('refreshes a stale advertised count after newer replies load', () => {
+  const comment = {
+    numReplies: 1,
+    replies: [
+      { replies: [] },
+      { replies: [] },
+      { replies: [] }
+    ]
+  }
+
+  assert.equal(getCommentReplyCount(comment), 3)
+})
+
+test('includes nested descendants in the loaded reply count', () => {
+  const comment = {
+    numReplies: 1,
+    replies: [
+      { replies: [] },
+      {
+        replies: [
+          { replies: [] },
+          { replies: [{ replies: [] }] }
+        ]
+      }
+    ]
+  }
+
+  assert.equal(getCommentReplyCount(comment), 5)
+})
+
+test('keeps an advertised reply count above the number loaded so far', () => {
+  const comment = {
+    numReplies: 5,
+    replies: [{ replies: [] }]
+  }
+
+  assert.equal(getCommentReplyCount(comment), 5)
+})
 
 test('exhausts a stale advertised reply without opening the reply panel', () => {
   assert.deepEqual(getReplyLoadState(0, 1, false), {
