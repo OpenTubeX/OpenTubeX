@@ -394,7 +394,11 @@ import Downloads from '../Downloads/Downloads.vue'
 
 import store from '../../store/index'
 import { settingsSubpageKey } from '../../components/FtSettingsSubpage/settingsSubpage'
-import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import {
+  clampOverlayScrollTop,
+  isOverlayScrollTopOutOfBounds,
+  restoreOverlayScrollTop
+} from '../../helpers/overlayScrollbars'
 import { getProxyTestUrl } from '../../helpers/proxy-test'
 import {
   SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS,
@@ -437,7 +441,6 @@ let settingsResizeObserver = null
 let settingsSectionResizeObserver = null
 let profileManagerResizeObserver = null
 let standaloneContentResizeObserver = null
-let settingsContentPaddingBottom = 0
 let observationScheduled = false
 let boundsSaveTimer = null
 let boundsAnimation = null
@@ -829,7 +832,6 @@ function stopObserving() {
   settingsSectionResizeObserver = null
   stopObservingProfileManager()
   stopObservingStandaloneContent()
-  settingsContentPaddingBottom = 0
   window.removeEventListener('resize', clampWindowToViewport)
 }
 
@@ -881,8 +883,6 @@ function observeActiveSettingsSection() {
   const content = settingsContentRef.value
   const section = getActiveSettingsSectionEnd(content)
   if (!content || !section) return
-  settingsContentPaddingBottom = Number.parseFloat(getComputedStyle(content).paddingBottom)
-
   settingsSectionResizeObserver = new ResizeObserver(() => {
     clampOverlayScrollTop(content, section)
   })
@@ -896,8 +896,7 @@ function clampSettingsContentScroll(event) {
   const content = event.currentTarget
   const section = getActiveSettingsSectionEnd(content)
   if (!section) return
-  const contentEnd = section.offsetTop + section.offsetHeight + settingsContentPaddingBottom
-  if (content.scrollTop > Math.max(0, contentEnd - content.clientHeight)) {
+  if (isOverlayScrollTopOutOfBounds(content, section)) {
     clampOverlayScrollTop(content, section)
   }
 }
