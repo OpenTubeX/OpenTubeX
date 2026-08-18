@@ -218,9 +218,33 @@ test('walks new users through the essential controls', async ({ page }) => {
   await expect(tutorial).toBeHidden()
   await expect(page.locator('.settingsContent [data-section="data"]')
     .getByRole('button', { name: 'Import subscriptions', exact: true })).toBeVisible()
+  await expect.poll(() => page.evaluate(async () => {
+    const settings = await window.ftElectron.dbSettings(1)
+    return settings.find(({ _id }) => _id === 'tutorialAudience')?.value
+  })).toBe('completed')
 
   await page.reload()
   await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
+})
+
+test.describe('fresh profile relaunch', () => {
+  test.use({ seed: { freshProfile: true } })
+
+  test('keeps showing the new-user tutorial on the second launch', async ({ app, page }) => {
+    await expect(page.getByRole('dialog', { name: 'Welcome to OpenTubeX' })).toBeVisible()
+
+    // Simulate environments where Chromium does not flush local storage before
+    // the first process exits. The datastore copy must preserve the audience.
+    await page.evaluate(async () => {
+      localStorage.removeItem('opentubex.tutorial.audience')
+      localStorage.removeItem('opentubex.lastUsedVersion')
+      await window.ftElectron.dbSettings(2, { _id: 'confirmCloseApp', value: false })
+    })
+    const { page: relaunchedPage } = await app.relaunch()
+
+    await expect(relaunchedPage.getByRole('dialog', { name: 'Welcome to OpenTubeX' })).toBeVisible()
+    await expect(relaunchedPage.getByRole('dialog', { name: 'Settings have moved' })).toHaveCount(0)
+  })
 })
 
 test('highlights the mobile search button', async ({ app, page }) => {

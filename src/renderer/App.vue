@@ -371,7 +371,13 @@ import {
   isVerticalTabBarPosition,
   normalizeTabBarPosition
 } from './constants/tabBarPosition'
-import { getLastUsedVersion, setLastUsedVersion } from './helpers/lastUsedVersion'
+import {
+  getLastUsedVersion,
+  getTutorialAudience,
+  markTutorialCompleted,
+  setLastUsedVersion,
+  setTutorialAudience,
+} from './helpers/tutorialState'
 import { invalidateAllYtDlpPlaybackSources } from './helpers/player/ytDlpPlayback'
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
@@ -854,17 +860,16 @@ function previewManagedExternalSoftwareUpdatePrompt(event) {
   showManagedExternalSoftwareUpdatePrompt(availableUpdates.length > 0 ? [...new Set(availableUpdates)] : ['yt-dlp'])
 }
 
-const TUTORIAL_AUDIENCE_STORAGE_KEY = 'opentubex.tutorial.audience'
-
-function initializeTutorial(hasExistingInstallation, lastUsedVersion) {
+async function initializeTutorial(hasExistingInstallation, lastUsedVersion, persistedAudience) {
   try {
-    let audience = localStorage.getItem(TUTORIAL_AUDIENCE_STORAGE_KEY)
+    let audience = getTutorialAudience(persistedAudience)
+    if (audience === 'completed') return false
     if (audience !== 'new' && audience !== 'existing' && lastUsedVersion !== null) return false
     if (hasExistingInstallation === null) return false
 
     if (audience !== 'new' && audience !== 'existing') {
       audience = hasExistingInstallation ? 'existing' : 'new'
-      localStorage.setItem(TUTORIAL_AUDIENCE_STORAGE_KEY, audience)
+      await setTutorialAudience(audience)
     }
 
     tutorialIsNewInstallation.value = audience === 'new'
@@ -888,14 +893,13 @@ async function completeTutorial() {
   }
 
   try {
-    localStorage.removeItem(TUTORIAL_AUDIENCE_STORAGE_KEY)
+    await markTutorialCompleted()
   } catch (error) {
     console.error('Failed to save tutorial completion', error)
   }
 }
 
 onMounted(async () => {
-  const lastUsedVersion = getLastUsedVersion()
   preloadUtilityRoutes()
 
   if (isElectron) {
@@ -907,7 +911,8 @@ onMounted(async () => {
     window.ftElectron.tabs.rendererReady()
   }
 
-  const hasExistingSettings = await store.dispatch('grabUserSettings')
+  const tutorialState = await store.dispatch('grabUserSettings')
+  const lastUsedVersion = getLastUsedVersion(tutorialState.lastUsedVersion)
 
   try {
     const themes = await loadCustomThemes()
@@ -937,14 +942,18 @@ onMounted(async () => {
   })
 
   store.dispatch('grabAllProfiles', t('Profile.All Channels')).then(async (hasExistingProfiles) => {
-    const hasExistingInstallation = hasExistingSettings === true || hasExistingProfiles === true
+    const hasExistingInstallation = tutorialState.hasExistingSettings === true || hasExistingProfiles === true
       ? true
-      : hasExistingSettings === null || hasExistingProfiles === null
+      : tutorialState.hasExistingSettings === null || hasExistingProfiles === null
         ? null
         : false
-    const tutorialPending = initializeTutorial(hasExistingInstallation, lastUsedVersion)
+    const tutorialPending = await initializeTutorial(
+      hasExistingInstallation,
+      lastUsedVersion,
+      tutorialState.tutorialAudience
+    )
     if (hasExistingInstallation !== null || lastUsedVersion !== null) {
-      setLastUsedVersion(packageDetails.version)
+      await setLastUsedVersion(packageDetails.version)
     }
 
     const syncDataReady = Promise.all([

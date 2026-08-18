@@ -24,8 +24,16 @@ import { currentIconPack, isIconPack, setIconPack } from '../../icons/iconPackSt
 import { resolveBaseTheme } from '../../../appearanceSettings.js'
 import { resolveColor } from '../../helpers/colors.js'
 import { DEFAULT_APP_FONT, normalizeAppFont } from '../../helpers/appFont.js'
+import {
+  LAST_USED_VERSION_SETTING_ID,
+  TUTORIAL_AUDIENCE_SETTING_ID,
+} from '../../helpers/tutorialState.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
+const TUTORIAL_STATE_SETTING_IDS = new Set([
+  LAST_USED_VERSION_SETTING_ID,
+  TUTORIAL_AUDIENCE_SETTING_ID,
+])
 
 /*
  * Due to the complexity of the settings module in FreeTube, a more
@@ -996,10 +1004,18 @@ const customActions = {
       }
 
       await Promise.allSettled(sideEffectPromises)
-      return userSettings.length > 0
+      return {
+        hasExistingSettings: userSettings.some(({ _id }) => !TUTORIAL_STATE_SETTING_IDS.has(_id)),
+        tutorialAudience: userSettings.find(({ _id }) => _id === TUTORIAL_AUDIENCE_SETTING_ID)?.value ?? null,
+        lastUsedVersion: userSettings.find(({ _id }) => _id === LAST_USED_VERSION_SETTING_ID)?.value ?? null,
+      }
     } catch (errMessage) {
       console.error(errMessage)
-      return null
+      return {
+        hasExistingSettings: null,
+        tutorialAudience: null,
+        lastUsedVersion: null,
+      }
     }
   },
 
