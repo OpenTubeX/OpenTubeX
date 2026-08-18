@@ -510,11 +510,13 @@ test.describe('video downloads', () => {
   })
 
   test('plays a downloaded video locally and reconciles it after external deletion', async ({ app, page }) => {
+    const downloadFolder = path.join(app.userDataDir, 'downloads')
     const downloadedFile = path.join(app.userDataDir, 'downloaded-demo.webm')
     const downloadedAudioFile = path.join(app.userDataDir, 'downloaded-audio-alternative.wav')
     const downloadThumbnail = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="640" height="360"%3E%3Cpath fill="%23b00020" d="M0 0h640v360H0z"/%3E%3C/svg%3E'
     const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
     const argumentsFile = path.join(app.userDataDir, 'yt-dlp-arguments.txt')
+    await mkdir(downloadFolder)
     await copyFile(DEMO_MEDIA_PATH, downloadedFile)
     await writeFile(downloadedAudioFile, silentWav(2))
     await writeFile(executable, [
@@ -527,10 +529,11 @@ test.describe('video downloads', () => {
       'fi'
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
+    await page.evaluate(async ({ downloadFolder, ytDlpPath }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+      await store.dispatch('updateYtDlpDownloadFolderPath', downloadFolder)
+    }, { downloadFolder, ytDlpPath: executable })
 
     const result = await page.evaluate((thumbnail) => window.ftElectron.ytDlpDownload({
       videoId: 'eeeeeeeeeee',
@@ -582,6 +585,9 @@ test.describe('video downloads', () => {
       .filter(argument => argument.startsWith('temp:'))
     expect(temporaryPaths).toHaveLength(2)
     expect(new Set(temporaryPaths).size).toBe(2)
+    expect(temporaryPaths.every(temporaryPath => (
+      path.dirname(temporaryPath.slice('temp:'.length)) === downloadFolder
+    ))).toBe(true)
     const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Downloaded demo' })
     await expect(downloadRow.locator('.downloadSummary')).toContainText('140 KiB')
     await expect(page.locator('.settingsBackButton')).toHaveCount(0)
@@ -692,6 +698,41 @@ test.describe('video downloads', () => {
     await page.getByRole('button', { name: 'Clear failed, canceled, skipped, and missing' }).click()
     await expect(downloadRow).toHaveCount(0)
     await expect(page.locator('.downloadRow').filter({ hasText: 'Downloaded audio alternative' })).toHaveCount(0)
+  })
+
+  test('tracks a download when its configured folder is unavailable', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'failing-yt-dlp.sh')
+    const argumentsFile = path.join(app.userDataDir, 'failing-yt-dlp-arguments.txt')
+    const unavailableDownloadFolder = path.join(app.userDataDir, 'missing', 'downloads')
+    const fallbackDownloadFolder = await app.electronApp.evaluate(({ app }) => app.getPath('temp'))
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf '%s\\n' "$@" > '${argumentsFile}'`,
+      'exit 1'
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async ({ unavailableDownloadFolder, ytDlpPath }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+      await store.dispatch('updateYtDlpDownloadFolderPath', unavailableDownloadFolder)
+    }, { unavailableDownloadFolder, ytDlpPath: executable })
+
+    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      title: 'Unavailable download folder',
+      thumbnail: '',
+      mode: 'video'
+    }))
+    expect(result.id).toBeGreaterThan(0)
+    await expect.poll(() => page.evaluate(async (id) => {
+      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+    }, result.id)).toBe('failed')
+    const temporaryPath = (await readFile(argumentsFile, 'utf8'))
+      .split('\n')
+      .find(argument => argument.startsWith('temp:'))
+    expect(temporaryPath).toBeDefined()
+    expect(path.dirname(temporaryPath.slice('temp:'.length))).toBe(fallbackDownloadFolder)
+    expect(temporaryPath.startsWith(`temp:${unavailableDownloadFolder}`)).toBe(false)
   })
 
   test('plays an audio download in the normal player', async ({ app, page }) => {

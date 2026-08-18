@@ -1808,10 +1808,18 @@ async function startYtDlpDownload(
     }
   }
 
-  // Keep post-processing inputs away from completed files with the same
-  // title and video ID. Audio extraction otherwise reuses and then deletes an
-  // existing video file when both variants have the same source extension.
-  const temporaryDownloadFolder = await mkdtemp(join(app.getPath('temp'), 'opentubex-download-'))
+  // Keep post-processing inputs away from completed files with the same title
+  // and video ID. Put the isolated directory beside the completed files so a
+  // sandbox's capacity-limited runtime directory does not hold the media data.
+  // Audio extraction otherwise reuses and then deletes an existing video file
+  // when both variants have the same source extension.
+  let temporaryDownloadFolder
+  try {
+    temporaryDownloadFolder = await mkdtemp(join(downloadFolder, '.opentubex-download-'))
+  } catch {
+    // Let yt-dlp report an unavailable destination through the tracked job.
+    temporaryDownloadFolder = await mkdtemp(join(app.getPath('temp'), 'opentubex-download-'))
+  }
   args.push('--paths', `temp:${temporaryDownloadFolder}`)
 
   // Authorization and executable setup contain awaits, so another refresh can
