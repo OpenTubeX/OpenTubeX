@@ -274,8 +274,8 @@ const inputTextStyle = computed(() => {
   }
 })
 
-watch(() => props.dataList, updateVisibleDataList, { deep: true })
-watch(inputData, updateVisibleDataList)
+watch(() => props.dataList, () => updateVisibleDataList(removalMade.value), { deep: true })
+watch(inputData, () => updateVisibleDataList())
 watch(() => props.value, (value) => {
   inputData.value = value
 })
@@ -407,9 +407,15 @@ function handleOptionClick(index, event) {
     return
   }
 
+  const selectedValue = visibleDataList.value[index]
+  if (selectedValue == null) {
+    resetSelectedOption()
+    return
+  }
+
   searchState.showOptions = false
   searchState.isPointerInList = false
-  inputData.value = visibleDataList.value[index]
+  inputData.value = selectedValue
   emit('input', inputData.value)
   handleClick(event, getDataListIndex(index))
 }
@@ -482,7 +488,6 @@ function handleKeyDown(event) {
     } else if (searchState.selectedOption !== -1) {
       searchState.showOptions = false
       event.preventDefault()
-      inputData.value = visibleDataList.value[searchState.selectedOption]
       handleOptionClick(searchState.selectedOption)
     } else {
       handleClick(event)
@@ -548,31 +553,31 @@ function handleFocus() {
   searchState.showOptions = true
 }
 
-function updateVisibleDataList() {
+function updateVisibleDataList(preserveSelectionAfterRemoval = false) {
   if (optionsList.value != null) {
     restoreOverlayScrollTop(optionsList.value, 0)
   }
 
-  // Reset selected option before it's updated
-  // Block resetting if it was just the "Remove" button that was pressed
-  if (!removalMade.value || searchState.selectedOption >= props.dataList.length) {
-    searchState.selectedOption = -1
+  if (inputData.value.trim() === '') {
+    visibleDataList.value = props.dataList
+  } else {
+    // get list of items that match input
+    const lowerCaseInputData = inputData.value.toLowerCase()
+
+    visibleDataList.value = props.dataList.filter(x => {
+      return x.toLowerCase().includes(lowerCaseInputData)
+    })
+  }
+
+  // Keep the same row selected only while the removal is reflected in the
+  // data list. A text change must clear it, otherwise its index can point past
+  // the newly filtered list and submit an undefined value.
+  if (!preserveSelectionAfterRemoval || searchState.selectedOption >= visibleDataList.value.length) {
+    resetSelectedOption()
     searchState.keyboardSelectedOptionIndex = -1
-    removeButtonSelectedIndex.value = -1
   }
 
   removalMade.value = false
-
-  if (inputData.value.trim() === '') {
-    visibleDataList.value = props.dataList
-    return
-  }
-  // get list of items that match input
-  const lowerCaseInputData = inputData.value.toLowerCase()
-
-  visibleDataList.value = props.dataList.filter(x => {
-    return x.toLowerCase().includes(lowerCaseInputData)
-  })
 }
 
 defineExpose({
