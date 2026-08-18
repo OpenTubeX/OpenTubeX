@@ -45,6 +45,7 @@ import { tabIdKey, tabLifecycleKey, tabPresentedKey } from '../../tabs/TabContex
 
 const TAB_LOADER_SELECTOR = '[data-tab-loading-indicator]'
 const TAB_LOADER_LOADING_SOURCE = 'loader'
+const TAB_LOADER_SETTLE_DELAY_MS = 100
 const CACHED_ROUTE_NAMES = new Set(['about'])
 
 const props = defineProps({
@@ -96,6 +97,7 @@ watch(resolvedRoute, (route) => {
 let removeRootRegistration = null
 let loaderObserver = null
 let loaderAnimationFrameId = null
+let loaderSettleTimeoutId = null
 let acknowledgedMountRevision = 0
 let previousRefreshKey = props.tab.refreshKey ?? 0
 // Guards against notifying `beforeDispose` twice for the same mounted instance:
@@ -221,6 +223,7 @@ onBeforeUnmount(() => {
     window.cancelAnimationFrame(loaderAnimationFrameId)
     loaderAnimationFrameId = null
   }
+  cancelLoaderSettle()
   removeRootRegistration?.()
   navigation.disposeTab(props.tab.id)
 })
@@ -237,11 +240,35 @@ function scheduleLoaderUpdate() {
 }
 
 function updateLoaderState() {
-  navigation.setLoadingSource(
-    props.tab.id,
-    TAB_LOADER_LOADING_SOURCE,
-    tabContentRef.value?.querySelector(TAB_LOADER_SELECTOR) != null
-  )
+  if (tabContentRef.value?.querySelector(TAB_LOADER_SELECTOR) != null) {
+    cancelLoaderSettle()
+    navigation.setLoadingSource(props.tab.id, TAB_LOADER_LOADING_SOURCE, true)
+    return
+  }
+
+  // Async route placeholders and the mounted view can hand loading indicators
+  // off across adjacent renders. Require a short indicator-free quiet period
+  // before clearing this source so the tab bar cannot flash cached metadata.
+  if (loaderSettleTimeoutId == null) {
+    loaderSettleTimeoutId = window.setTimeout(settleLoaderState, TAB_LOADER_SETTLE_DELAY_MS)
+  }
+}
+
+function settleLoaderState() {
+  loaderSettleTimeoutId = null
+  if (tabContentRef.value?.querySelector(TAB_LOADER_SELECTOR) != null) {
+    navigation.setLoadingSource(props.tab.id, TAB_LOADER_LOADING_SOURCE, true)
+    return
+  }
+
+  navigation.setLoadingSource(props.tab.id, TAB_LOADER_LOADING_SOURCE, false)
+}
+
+function cancelLoaderSettle() {
+  if (loaderSettleTimeoutId != null) {
+    window.clearTimeout(loaderSettleTimeoutId)
+    loaderSettleTimeoutId = null
+  }
 }
 </script>
 

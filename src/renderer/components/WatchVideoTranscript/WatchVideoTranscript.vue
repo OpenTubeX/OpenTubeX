@@ -206,9 +206,7 @@ const filteredSegments = computed(() => {
   return filterTranscriptSegments(segments.value, normalizedSearchQuery.value)
 })
 const activeSegmentIndex = computed(() => {
-  return segments.value.findLastIndex(segment => (
-    props.currentTime >= segment.start && props.currentTime < segment.end
-  ))
+  return findActiveTranscriptSegmentIndex(segments.value, props.currentTime)
 })
 const statusMessage = computed(() => {
   if (props.captions.length === 0) {
@@ -333,6 +331,35 @@ function formatTimestamp(seconds) {
   return formatDurationAsTimestamp(Math.floor(seconds))
 }
 
+/**
+ * Captions are ordered by their start timestamp, so seeking and playback can
+ * resolve the current cue without rescanning the complete transcript on every
+ * player time update.
+ * @param {{ index: number, start: number, end: number }[]} transcriptSegments
+ * @param {number} currentTime
+ * @returns {number}
+ */
+function findActiveTranscriptSegmentIndex(transcriptSegments, currentTime) {
+  let low = 0
+  let high = transcriptSegments.length - 1
+  let candidate = -1
+
+  while (low <= high) {
+    const middle = Math.floor((low + high) / 2)
+    if (transcriptSegments[middle].start <= currentTime) {
+      candidate = middle
+      low = middle + 1
+    } else {
+      high = middle - 1
+    }
+  }
+
+  if (candidate < 0 || currentTime >= transcriptSegments[candidate].end) {
+    return -1
+  }
+  return transcriptSegments[candidate].index
+}
+
 function toggleTranscriptSearch() {
   searchOpen.value = !searchOpen.value
   if (!searchOpen.value) {
@@ -435,6 +462,7 @@ function parseTranscript(transcript) {
     })
   }
 
+  parsedSegments.sort((a, b) => a.start - b.start)
   const segments = parsedSegments.some(segment => segment.hasInlineTimestamps)
     ? normalizeRollingCaptions(parsedSegments)
     : parsedSegments.filter(segment => segment.text !== '')

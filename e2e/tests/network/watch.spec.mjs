@@ -91,6 +91,13 @@ async function setWindowWidth(app, width) {
   }, width)
 }
 
+function disableAutomaticPagination(page) {
+  return page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', false)
+  })
+}
+
 test('theatre mode works until its responsive button cutoff', async ({ app, page }) => {
   await setWindowWidth(app, 1500)
   await page.locator(sel.searchInput).fill(VIDEO_URL)
@@ -615,6 +622,7 @@ test.describe('watch page', () => {
   })
 
   test('comments load on request', async ({ app, page }) => {
+    await disableAutomaticPagination(page)
     await openVideo(page)
 
     const loadComments = page.locator('.getCommentsTitle')
@@ -1315,6 +1323,7 @@ test.describe('watch page', () => {
 
   // Regression: edited comments show their "(edited)" marker (929369543)
   test('edited comments carry the edited badge', async ({ page }) => {
+    await disableAutomaticPagination(page)
     await openVideo(page)
 
     const loadComments = page.locator('.getCommentsTitle')

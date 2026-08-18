@@ -606,8 +606,12 @@ const sideEffectHandlers = {
   },
 
   iconPack: async (_, value) => {
-    if (!isIconPack(value) || !await setIconPack(value)) {
-      throw new Error(`Unable to apply icon pack: ${value}`)
+    const preferredPack = isIconPack(value) ? value : 'material'
+    if (!await setIconPack(preferredPack)) {
+      const fallbackPack = preferredPack === 'material' ? 'remix' : 'material'
+      if (!await setIconPack(fallbackPack)) {
+        throw new Error(`Unable to apply icon pack: ${value}`)
+      }
     }
   },
 
@@ -1011,6 +1015,10 @@ const customActions = {
       }
     } catch (errMessage) {
       console.error(errMessage)
+      // The renderer no longer preloads a default icon bundle before mounting.
+      // Preserve usable fallback icons even when the settings datastore itself
+      // cannot be read during startup.
+      await sideEffectHandlers.iconPack(null, state.iconPack).catch(console.error)
       return {
         hasExistingSettings: null,
         tutorialAudience: null,

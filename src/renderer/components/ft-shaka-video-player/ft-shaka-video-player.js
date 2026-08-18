@@ -8978,7 +8978,7 @@ export default defineComponent({
       cancelSponsorBlockSkipSchedule()
     })
 
-    async function performFirstLoad() {
+    async function performFirstLoad(isCurrentLoad = () => true) {
       if (process.env.SUPPORTS_LOCAL_API && sabrStream) {
         // Longer timeout for receiving larger responses
         player.configure({
@@ -9004,11 +9004,13 @@ export default defineComponent({
         startPreRollTimer(initialLoadDelayMs)
         await new Promise((resolve) => setTimeout(resolve, initialLoadDelayMs))
         clearPreRollTimer()
+        if (!isCurrentLoad()) return
       }
 
       if (props.format === 'dash' || props.format === 'audio') {
         try {
           await player.load(props.manifestSrc, props.startTime, props.manifestMimeType)
+          if (!isCurrentLoad()) return
 
           if (props.format === 'dash') {
             // Let shaka-player's ABR pick the variant when auto quality is preferred
@@ -9024,14 +9026,20 @@ export default defineComponent({
             }
 
             if (variants.length > 0) {
-              const highestBandwidth = Math.max(...variants.map(variant => variant.audioBandwidth))
-              variants = variants.filter(variant => variant.audioBandwidth === highestBandwidth)
+              const highestBandwidth = Math.max(...variants
+                .map(variant => variant.audioBandwidth)
+                .filter(Number.isFinite))
+              const selectedVariant = variants.find(variant => (
+                variant.audioBandwidth === highestBandwidth
+              )) ?? variants[0]
 
-              player.selectVariantTrack(variants[0])
+              player.selectVariantTrack(selectedVariant)
             }
           }
         } catch (error) {
-          handleError(error, 'loading dash/audio manifest and setting default quality in mounted')
+          if (isCurrentLoad()) {
+            handleError(error, 'loading dash/audio manifest and setting default quality in mounted')
+          }
         }
       } else {
         await setLegacyQuality(props.startTime)
@@ -9188,6 +9196,8 @@ export default defineComponent({
       } catch { }
     }
 
+    let formatSwitchGeneration = 0
+
     watch(
       () => [props.format, props.playbackSourceKey],
       /**
@@ -9202,12 +9212,15 @@ export default defineComponent({
        * @param {'dash'|'audio'|'legacy'} oldFormat
        */
       async ([newFormat], [oldFormat]) => {
+        const generation = ++formatSwitchGeneration
+        const isCurrentFormatSwitch = () => generation === formatSwitchGeneration
         ignoreErrors = true
 
         // format switch happened before the player loaded, probably because of an error
         // as there are no previous player settings to restore, we should treat it like this was the original format
         if (!hasLoaded.value) {
           await unloadForFormatSwitch()
+          if (!isCurrentFormatSwitch()) return
           ensureSabrStream()
 
           if (newFormat === 'audio' && props.thumbnail) {
@@ -9223,7 +9236,7 @@ export default defineComponent({
 
           player.configure(getPlayerConfig(newFormat, preferAutoQuality.value))
 
-          await performFirstLoad()
+          await performFirstLoad(isCurrentFormatSwitch)
           return
         }
 
@@ -9275,11 +9288,11 @@ export default defineComponent({
           } else if (oldFormat !== 'legacy') {
             const track = player.getVariantTracks().find(track => track.active)
 
-            if (typeof track.audioBandwidth === 'number') {
+            if (typeof track?.audioBandwidth === 'number') {
               audioBandwidth = track.audioBandwidth
             }
 
-            if (track.label) {
+            if (track?.label) {
               label = track.label
             }
           }
@@ -9289,6 +9302,7 @@ export default defineComponent({
           }
 
           await unloadForFormatSwitch()
+          if (!isCurrentFormatSwitch()) return
           ensureSabrStream()
 
           if (newFormat === 'audio' && props.thumbnail) {
@@ -9303,6 +9317,7 @@ export default defineComponent({
 
           try {
             await player.load(props.manifestSrc, playbackPosition, props.manifestMimeType)
+            if (!isCurrentFormatSwitch()) return
 
             if (useAutoQuality) {
               if (label) {
@@ -9342,10 +9357,13 @@ export default defineComponent({
                   }, null)
                 }
 
-                player.selectVariantTrack(chosenVariant)
+                if (chosenVariant) {
+                  player.selectVariantTrack(chosenVariant)
+                }
               }
             }
           } catch (error) {
+            if (!isCurrentFormatSwitch()) return
             handleError(error, 'loading dash/audio manifest for format switch', `${oldFormat} -> ${newFormat}`)
           }
           activeLegacyFormat.value = null
@@ -9359,10 +9377,12 @@ export default defineComponent({
           }
 
           await unloadForFormatSwitch()
+          if (!isCurrentFormatSwitch()) return
 
           ignoreErrors = false
 
           await setLegacyQuality(playbackPosition, previousQuality, playbackRate)
+          if (!isCurrentFormatSwitch()) return
         }
 
         if (wasPaused) {

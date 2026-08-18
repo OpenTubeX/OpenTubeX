@@ -174,6 +174,9 @@ test.describe('tab bar', () => {
     const videoId = 'jNQXAC9IVRw'
     await page.evaluate(({ videoId }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      // Keep the tab on its avatar after loading so this test observes the
+      // loader/avatar handoff rather than racing the autoplay play icon.
+      store.commit('setAutoplayVideos', false)
       store.commit('setVideoAvatar', {
         videoId,
         avatar: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+Xw4AAAAASUVORK5CYII='

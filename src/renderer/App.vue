@@ -324,11 +324,7 @@ import FtPrompt from './components/FtPrompt/FtPrompt.vue'
 import FtButton from './components/FtButton/FtButton.vue'
 import FtToast from './components/FtToast/FtToast.vue'
 import FtProgressBar from './components/FtProgressBar/FtProgressBar.vue'
-import FtPlaylistAddVideoPrompt from './components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue'
-import FtCreatePlaylistPrompt from './components/FtCreatePlaylistPrompt/FtCreatePlaylistPrompt.vue'
-import FtSearchFilters from './components/FtSearchFilters/FtSearchFilters.vue'
 import FtContextMenu from './components/FtContextMenu/FtContextMenu.vue'
-import FtTutorialOverlay from './components/FtTutorialOverlay/FtTutorialOverlay.vue'
 import { vSaferHtml } from './directives/vSaferHtml.js'
 
 import store from './store/index'
@@ -344,7 +340,6 @@ import { resolveBaseTheme } from '../appearanceSettings'
 import { resolveColor } from './helpers/colors'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
-import { createReleaseNotesMarkdown } from './helpers/releaseNotesMarkdown'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
 import {
   cancelSubscriptionRefresh,
@@ -361,7 +356,6 @@ import {
   SUBSCRIPTION_REFRESH_STARTED_EVENT
 } from './helpers/subscriptions'
 import { translateWindowTitle } from './helpers/strings'
-import { initializePlatformInfo } from './helpers/platform'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getAppFontFamily } from './helpers/appFont'
 import { getTabAccentColor } from './constants/tabColors'
@@ -382,17 +376,18 @@ import { invalidateAllYtDlpPlaybackSources } from './helpers/player/ytDlpPlaybac
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
-import { preloadUtilityRoutes } from './router/index'
+import { preloadResolvedRoute, preloadUtilityRoutes } from './router/index'
 
 const SettingsWindow = defineAsyncComponent(() => import('./views/Settings/Settings.vue'))
-
-const releaseNotesMarkdown = createReleaseNotesMarkdown()
+const FtPlaylistAddVideoPrompt = defineAsyncComponent(() => import('./components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue'))
+const FtCreatePlaylistPrompt = defineAsyncComponent(() => import('./components/FtCreatePlaylistPrompt/FtCreatePlaylistPrompt.vue'))
+const FtSearchFilters = defineAsyncComponent(() => import('./components/FtSearchFilters/FtSearchFilters.vue'))
+const FtTutorialOverlay = defineAsyncComponent(() => import('./components/FtTutorialOverlay/FtTutorialOverlay.vue'))
 
 const route = useRoute()
 const router = useRouter()
 const navigation = process.env.IS_ELECTRON ? getTabNavigationService() : null
 const isElectron = process.env.IS_ELECTRON
-const platformInfoReady = initializePlatformInfo()
 if (isElectron) {
   provide(routerKey, navigation.createPresentedRouterFacade())
 }
@@ -596,6 +591,41 @@ let removeReloadRequestListener = null
 let removeConfirmMultipleTabsActionListener = null
 let removeOpenUrlListener = null
 let removeYtDlpBinaryUpdatedListener = null
+/** @type {number|null} */
+let utilityRoutePreloadId = null
+let utilityRoutePreloadUsesIdleCallback = false
+
+function scheduleUtilityRoutePreload() {
+  if (utilityRoutePreloadId !== null) {
+    return
+  }
+
+  const preload = () => {
+    utilityRoutePreloadId = null
+    preloadUtilityRoutes()
+  }
+
+  if (typeof window.requestIdleCallback === 'function') {
+    utilityRoutePreloadUsesIdleCallback = true
+    utilityRoutePreloadId = window.requestIdleCallback(preload, { timeout: 2000 })
+  } else {
+    utilityRoutePreloadUsesIdleCallback = false
+    utilityRoutePreloadId = window.setTimeout(preload, 1000)
+  }
+}
+
+function cancelUtilityRoutePreload() {
+  if (utilityRoutePreloadId === null) {
+    return
+  }
+
+  if (utilityRoutePreloadUsesIdleCallback) {
+    window.cancelIdleCallback(utilityRoutePreloadId)
+  } else {
+    clearTimeout(utilityRoutePreloadId)
+  }
+  utilityRoutePreloadId = null
+}
 const pendingSubscriptionAutoRefreshes = []
 const pendingSubscriptionAutoRefreshKeys = new Set()
 const cancelledSubscriptionAutoRefreshKeys = new Set()
@@ -900,22 +930,45 @@ async function completeTutorial() {
 }
 
 onMounted(async () => {
-  preloadUtilityRoutes()
+  let tabsReady = Promise.resolve()
 
   if (isElectron) {
     window.addEventListener(MANAGED_TOOLS_UPDATE_PREVIEW_EVENT, previewManagedExternalSoftwareUpdatePrompt)
     removeYtDlpBinaryUpdatedListener = window.ftElectron.addYtDlpBinaryUpdatedListener(
       invalidateAllYtDlpPlaybackSources
     )
-    removeTabsStateListener = await store.dispatch('initializeTabs')
-    window.ftElectron.tabs.rendererReady()
+    tabsReady = store.dispatch('initializeTabs').then((removeListener) => {
+      removeTabsStateListener = removeListener
+      window.ftElectron.tabs.rendererReady()
+    })
   }
 
-  const tutorialState = await store.dispatch('grabUserSettings')
+  const settingsReady = store.dispatch('grabUserSettings')
+  const customThemesReady = loadCustomThemes().catch((error) => {
+    console.error('Failed to load custom theme:', error)
+    return []
+  })
+  const invidiousInstancesReady = store.dispatch('fetchInvidiousInstancesFromFile')
+  const profilesReady = settingsReady.then(() => (
+    store.dispatch('grabAllProfiles', t('Profile.All Channels'))
+  ))
+  tabsReady.then(() => {
+    const initialRoute = isElectron ? store.getters.getActiveTab?.route : route
+    if (initialRoute) {
+      return preloadResolvedRoute(router.resolve(initialRoute.fullPath))
+    }
+  }).catch(error => {
+    console.error('Failed to preload the initial route', error)
+  })
+  const [tutorialState, themes] = await Promise.all([
+    settingsReady,
+    customThemesReady,
+    invidiousInstancesReady,
+    tabsReady,
+  ])
   const lastUsedVersion = getLastUsedVersion(tutorialState.lastUsedVersion)
 
   try {
-    const themes = await loadCustomThemes()
     store.commit('setCustomThemes', themes)
     if (baseTheme.value === 'custom' && themes.length > 0) {
       await store.dispatch('updateBaseTheme', `custom:${themes[0].id}`)
@@ -930,7 +983,6 @@ onMounted(async () => {
   })
   updateTheme()
 
-  await store.dispatch('fetchInvidiousInstancesFromFile')
   if (defaultInvidiousInstance.value === '') {
     await store.dispatch('setRandomCurrentInvidiousInstance')
   }
@@ -941,7 +993,7 @@ onMounted(async () => {
     }
   })
 
-  store.dispatch('grabAllProfiles', t('Profile.All Channels')).then(async (hasExistingProfiles) => {
+  profilesReady.then(async (hasExistingProfiles) => {
     const hasExistingInstallation = tutorialState.hasExistingSettings === true || hasExistingProfiles === true
       ? true
       : tutorialState.hasExistingSettings === null || hasExistingProfiles === null
@@ -978,7 +1030,7 @@ onMounted(async () => {
         .onConfirmMultipleAction(handleConfirmMultipleTabsActionRequest)
     }
 
-    await Promise.all([syncDataReady, platformInfoReady])
+    await syncDataReady
     store.dispatch('initializeSyncServer').catch(error => {
       console.error('Initial sync server sync failed', error)
     })
@@ -986,6 +1038,7 @@ onMounted(async () => {
     dataReady.value = true
 
     await nextTick()
+    scheduleUtilityRoutePreload()
     if (isElectron && tutorialPending) {
       try {
         await window.ftElectron.tabs.setShortcutsBlocked(true)
@@ -1048,6 +1101,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   removeCustomThemeListener()
+  cancelUtilityRoutePreload()
   systemColorScheme.removeEventListener('change', handleSystemColorSchemeChange)
   if (isElectron) {
     window.ftElectron.tabs.setPreviewCapturePaused(false)
@@ -1957,6 +2011,13 @@ const latestVersionNumber = ref('')
 const showReleaseNotes = ref(false)
 const changeLogTitle = ref('')
 const updateChangelog = ref('')
+let releaseNotesMarkdownPromise = null
+
+function getReleaseNotesMarkdown() {
+  releaseNotesMarkdownPromise ??= import('./helpers/releaseNotesMarkdown')
+    .then(({ createReleaseNotesMarkdown }) => createReleaseNotesMarkdown())
+  return releaseNotesMarkdownPromise
+}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const checkForUpdates = computed(() => store.getters.getCheckForUpdates)
@@ -1991,6 +2052,7 @@ async function checkForNewUpdates() {
       // Shorten pull request links to #1234
       .replaceAll(/https:\/\/github\.com\/OpenTubeX\/OpenTubeX\/pull\/(\d+)/g, '[#$1]($&)')
 
+    const releaseNotesMarkdown = await getReleaseNotesMarkdown()
     updateChangelog.value = releaseNotesMarkdown.parse(changelog)
     changeLogTitle.value = t('Update to {version}', { version: release.name ?? tagName })
     latestVersionNumber.value = versionNumber

@@ -58,6 +58,8 @@ const TAB_LOADING_SOURCE_RENDERER = 'renderer'
 const MAX_PERSISTED_NAV_HISTORY_ENTRIES = 25
 const MAX_TAB_AVATAR_DOWNLOAD_BYTES = 2 * 1024 * 1024
 const TAB_AVATAR_SIZE = 64
+/** Prevent newly cached previews or avatars from racing startup pruning. */
+let tabPreviewCacheMaintenance = Promise.resolve()
 
 /**
  * @typedef {'unloaded' | 'mounting' | 'loaded' | 'unloading'} TabLoadState
@@ -157,12 +159,28 @@ export class TabManager {
   }
 
   /**
+   * Starts orphan cleanup without holding window creation. Preview and avatar
+   * persistence wait for this maintenance promise, so a newly written file
+   * cannot be mistaken for an orphan while the directory scan is in flight.
+   * @param {Iterable<string | null | undefined>} referencedFileNames
+   * @returns {Promise<number>}
+   */
+  static startTabPreviewCachePrune(referencedFileNames) {
+    const prune = TabManager.pruneTabPreviewCache(referencedFileNames).catch(error => {
+      console.error('Failed to prune the tab preview cache:', error)
+      return 0
+    })
+    tabPreviewCacheMaintenance = prune.then(() => undefined)
+    return prune
+  }
+
+  /**
    * Deletes cached previews and avatars that no restored session refers to.
    * Tabs delete their own files when they close, but a crash or a forced quit
    * can leave a file behind with nothing left to point at it.
    *
-   * Must run before any window exists: a capture racing this would write a file
-   * that is not in `referencedFileNames` yet and would be deleted right away.
+   * Use `startTabPreviewCachePrune` during startup so captures are held until
+   * this scan completes.
    * @param {Iterable<string | null | undefined>} referencedFileNames
    * @returns {Promise<number>} how many files were deleted
    */
@@ -1785,6 +1803,7 @@ export class TabManager {
    * @returns {Promise<void>}
    */
   async _persistTabAvatar(tab, buffer) {
+    await tabPreviewCacheMaintenance
     const existingFileName = normalizeTabPreviewFileName(tab.avatarFileName)
     // Named after the bytes, so every tab of the same channel ends up on one
     // file. Rewriting it costs a couple of kilobytes and keeps the write atomic
@@ -2052,7 +2071,10 @@ export class TabManager {
     this._previewCaptureLock = new Promise(resolve => {
       releaseLock = resolve
     })
-    await previousCapture.catch(() => {})
+    await Promise.all([
+      previousCapture.catch(() => {}),
+      tabPreviewCacheMaintenance,
+    ])
 
     try {
       // Presentation and window state may have changed while waiting for the lock.

@@ -392,6 +392,16 @@ function resetProgressToastProximity() {
   progressToastMinimized.value = false
 }
 
+function stopProgressToastPointerTracking() {
+  window.removeEventListener('mousemove', onProgressToastPointerMove)
+  window.removeEventListener('resize', resetProgressToastProximity)
+  if (progressToastPointerFrame !== null) {
+    cancelAnimationFrame(progressToastPointerFrame)
+    progressToastPointerFrame = null
+  }
+  resetProgressToastProximity()
+}
+
 /**
  * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null, image: string | null, icon: [string, string] | null, buttons: { label: string, action?: Function, primary?: boolean }[] }>} event
  */
@@ -488,6 +498,7 @@ function clearMessageInterval(id) {
 // known before the toasts can be laid out clear of it.
 watch(progressToast, (element) => {
   progressToastResizeObserver?.disconnect()
+  stopProgressToastPointerTracking()
 
   if (!element) {
     progressToastHeight.value = 0
@@ -498,6 +509,8 @@ watch(progressToast, (element) => {
     progressToastHeight.value = entry.target.getBoundingClientRect().height
   })
   progressToastResizeObserver.observe(element)
+  window.addEventListener('mousemove', onProgressToastPointerMove, { passive: true })
+  window.addEventListener('resize', resetProgressToastProximity)
 })
 
 watch(
@@ -521,8 +534,6 @@ onMounted(() => {
 
   ToastEventBus.addEventListener('toast-open', open)
   document.addEventListener('fullscreenchange', updateFullscreenTarget)
-  window.addEventListener('mousemove', onProgressToastPointerMove)
-  window.addEventListener('resize', resetProgressToastProximity)
   updateFullscreenTarget()
 
   if (process.env.IS_ELECTRON) {
@@ -535,11 +546,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   ToastEventBus.removeEventListener('toast-open', open)
   document.removeEventListener('fullscreenchange', updateFullscreenTarget)
-  window.removeEventListener('mousemove', onProgressToastPointerMove)
-  window.removeEventListener('resize', resetProgressToastProximity)
-  if (progressToastPointerFrame !== null) {
-    cancelAnimationFrame(progressToastPointerFrame)
-  }
+  stopProgressToastPointerTracking()
   progressToastResizeObserver?.disconnect()
   frontToastResizeObserver?.disconnect()
   toastListObserver?.disconnect()
