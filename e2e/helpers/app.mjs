@@ -43,6 +43,7 @@ export function latestSettings(contents) {
  * settings and datastore documents.
  *
  * @param {object} [seed]
+ * @param {boolean} [seed.freshProfile] leave the settings datastore absent for first-run tests
  * @param {Record<string, unknown>} [seed.settings] additional settings.db entries ({ settingId: value })
  * @param {object[]} [seed.history] history.db documents
  * @param {object[]} [seed.playlists] playlists.db documents
@@ -55,9 +56,11 @@ export function latestSettings(contents) {
 export async function createUserDataDir(seed = {}) {
   const userDataDir = await mkdtemp(path.join(tmpdir(), 'opentubex-e2e-'))
 
-  const settings = { ...BASE_SETTINGS, ...seed.settings }
-  const settingsDocs = Object.entries(settings).map(([_id, value]) => ({ _id, value }))
-  await writeFile(path.join(userDataDir, 'settings.db'), toNedbFile(settingsDocs))
+  if (!seed.freshProfile) {
+    const settings = { ...BASE_SETTINGS, ...seed.settings }
+    const settingsDocs = Object.entries(settings).map(([_id, value]) => ({ _id, value }))
+    await writeFile(path.join(userDataDir, 'settings.db'), toNedbFile(settingsDocs))
+  }
 
   const seededStores = {
     history: seed.history,

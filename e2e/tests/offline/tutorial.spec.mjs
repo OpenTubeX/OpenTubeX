@@ -223,6 +223,26 @@ test('walks new users through the essential controls', async ({ page }) => {
   await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
 })
 
+test.describe('fresh profile relaunch', () => {
+  test.use({ seed: { freshProfile: true } })
+
+  test('keeps showing the new-user tutorial on the second launch', async ({ app, page }) => {
+    await expect(page.getByRole('dialog', { name: 'Welcome to OpenTubeX' })).toBeVisible()
+
+    // Simulate environments where Chromium does not flush local storage before
+    // the first process exits. The datastore copy must preserve the audience.
+    await page.evaluate(async () => {
+      localStorage.removeItem('opentubex.tutorial.audience')
+      localStorage.removeItem('opentubex.lastUsedVersion')
+      await window.ftElectron.dbSettings(2, { _id: 'confirmCloseApp', value: false })
+    })
+    const { page: relaunchedPage } = await app.relaunch()
+
+    await expect(relaunchedPage.getByRole('dialog', { name: 'Welcome to OpenTubeX' })).toBeVisible()
+    await expect(relaunchedPage.getByRole('dialog', { name: 'Settings have moved' })).toHaveCount(0)
+  })
+})
+
 test('highlights the mobile search button', async ({ app, page }) => {
   await app.electronApp.evaluate(({ BrowserWindow }) => {
     BrowserWindow.getAllWindows()[0].setSize(600, 700)
