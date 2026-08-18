@@ -39,7 +39,7 @@
           alt=""
         >
         <FtEmbeddedProgress
-          v-if="historyEntryExists"
+          v-if="historyEntryExists && progressPercentage > 0"
           class="watchedProgressBar"
           :progress="progressPercentage"
           :corner-radius="thumbnailProgressRadius"
@@ -1727,7 +1727,7 @@ function markAsWatched() {
 }
 
 async function unmarkAsWatched() {
-  if (inHistory.value && watchedPercentageThreshold.value === 0) {
+  if (watchedPercentageThreshold.value === 0) {
     await store.dispatch('removeFromHistory', id.value)
   } else {
     await store.dispatch('updateHistory', {
