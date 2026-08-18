@@ -509,9 +509,25 @@ Settings:
         Title text: Tekst tytułowy
         Logo icon: Ikona logo
         Logo text: Tekst logo
+        Selected text background: Tło zaznaczonego tekstu
+        Selected text: Zaznaczony tekst
+        Text and icons on destructive actions: Tekst i ikony dotyczące działań destrukcyjnych
     Move Downloads to App Header: Przenieś „pobrane” do nagłówka aplikacji
     Move Settings to App Header: Przenieś „ustawienia” do nagłówka aplikacji
     Scrollbar Width: Szerokość paska przewijania
+    Load Missing Tab Icons: Załaduj brakujące ikony kart
+    Loading Missing Tab Icons: Ładowanie brakujących ikon kart…
+    No Missing Tab Icons: Wszystkie obsługiwane ikony kart są już załadowane
+    Loaded Tab Icons: 'Załadowano brakującą ikonę karty: {count} | Załadowano brakujące ikony kart: {count}'
+    Loaded Tab Icons With Failures: Załadowano {loaded} ikony kart; {failed} nie udało się załadować | Załadowano {loaded} ikon kart; {failed} nie udało się załadować
+    Show Tab Previews: Pokazuj podglądy kart
+    Tab Layout:
+      Tab Layout: Układ kart
+      Horizontal Top: Poziomy na górze
+      Horizontal Bottom: Poziomy na dole
+      Vertical Left: Pionowy po lewej
+      Vertical Right: Pionowy po prawej
+    Use Grid Player Menu: Użyj menu odtwarzacza w układzie siatki
   Player Settings:
     Player Settings: 'Odtwarzacz'
     Play Next Video: 'Automatycznie otwórz polecane wideo'
@@ -904,6 +920,35 @@ Settings:
     Choose Download Folder: Wybierz folder pobierania
     Templates Hint: Niestandardowe szablony pobierania można tworzyć i zarządzać nimi w oknie pobierania, które znajduje się pod odtwarzaczem wideo.
     Enable Downloads: Włącz pobieranie filmów
+    Managed Tools Update Available Template: Dostępna jest aktualizacja dla {tools}.
+    Update Managed Tools: Aktualizuj
+    Global Additional yt-dlp Arguments: Dodatkowe globalne argumenty yt-dlp
+    External Software Hint: yt-dlp, FFmpeg i FFprobe są konfigurowane w ustawieniach oprogramowania zewnętrznego.
+    Download Templates: Szablony pobierania
+    Manage Download Templates: Zarządzaj szablonami pobierania ({templateCount})
+    New Template: Nowy szablon
+    Template Source: Szablon do edycji lub wykorzystania jako baza
+    Built-in Template: '{name} (wbudowany)'
+    Custom Template Name: '{name} (niestandardowy)'
+    Create Template Copy: Utwórz kopię
+    Template Copy Name: '{name} Kopia'
+    Automatic Downloads: Automatyczne pobieranie
+    Manage Automatic Downloads: Zarządzaj automatycznym pobieraniem ({channelCount})
+    Automatic Downloads Description: Wybierz szablon pobierania i filtry dla każdego subskrybowanego kanału. Pasujące filmy będą pobierane w tle po odświeżeniu kanałów subskrypcji.
+    Automatic Downloads New Only: Włączenie kanału rozpocznie się wraz z jego kolejnym przesłaniem. Istniejące filmy i lista zaległości kanału nie zostaną pobrane.
+    Automatic Downloads No Channels: Zanim skonfigurujesz automatyczne pobieranie, zasubskrybuj kanał.
+    Search Automatic Download Channels: Wyszukaj kanały
+    No Matching Automatic Download Channels: Brak kanałów odpowiadających Twojemu wyszukiwaniu.
+    Automatic Downloads Videos: Filmy
+    Automatic Downloads Livestreams: Transmisje na żywo
+    Minimum Duration Seconds: Minimalny czas trwania (sekundy)
+    Maximum Duration Seconds: Maksymalny czas trwania (sekundy)
+    Minimum File Size MB: Minimalny rozmiar pliku (MB)
+    Maximum File Size MB: Maksymalny rozmiar pliku (MB)
+    Maximum Age Days: Maksymalny wiek (dni)
+    Title Includes: Tytuł zawiera
+    Title Excludes: Tytuł nie zawiera
+    Title Filter Hint: Oddzielaj wiele wyrażeń przecinkami. Tytuł filmu musi pasować do co najmniej jednego wyrażenia i nie może zawierać wyrażeń wykluczonych.
   External Software Settings:
     yt-dlp Source: Źródło yt-dlp
     yt-dlp Channel: Kanał wersji yt-dlp
@@ -929,9 +974,14 @@ Settings:
     Downloading FFmpeg: Pobieranie FFmpeg…
     FFmpeg Downloaded Template: Pobrano FFmpeg w wersji {version}
     FFmpeg Download Error Template: 'Pobieranie FFmpeg nie powiodło się: {error}'
-    Managed Tool Already Current Template: '{tool} {version} jest już aktualny'
+    Managed Tool Already Current Template: '{tool} {version} jest już aktualne'
     yt-dlp Executable Path: Ścieżka do pliku wykonywalnego yt-dlp
     FFmpeg Executable Path: Ścieżka do pliku wykonywalnego FFmpeg
+    External Software Settings: Oprogramowanie zewnętrzne
+    Detected FFprobe Version Template: 'Wykryta wersja FFprobe: {version}'
+    FFprobe Managed Not Downloaded: FFprobe nie został jeszcze pobrany. Kliknij poniższy przycisk, aby pobrać go z FFmpeg.
+    System FFprobe Missing Warning: FFprobe nie został znaleziony w Twoim systemie. Jest on wymagany do inspekcji multimediów podczas postprodukcji. Zainstaluj go obok FFmpeg lub zmień źródło na „Zarządzane przez OpenTubeX”.
+    Checking FFprobe: Sprawdzanie FFprobe…
   Sync Settings:
     Sync Settings: Synchronizacja
     Privacy Passphrase Hint: Użyj osobnego hasła, które nie jest tym samym co hasło do Twojego konta. Nigdy nie opuszcza tego urządzenia i jest wymagane na każdym urządzeniu; jeśli je utracisz, nie będzie można odzyskać zaszyfrowanych danych synchronizacji.
