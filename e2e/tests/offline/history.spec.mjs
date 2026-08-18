@@ -190,12 +190,36 @@ test.describe('watch history', () => {
 })
 
 test.describe('watch history with an immediate watched threshold', () => {
+  const immediateHistoryEntry = historyEntry(
+    'ddddddddddd',
+    'Immediately watched video',
+    Date.now(),
+    true
+  )
+
   test.use({
     seed: {
-      settings: { watchedPercentageThreshold: 0 },
-      history: [
-        historyEntry('ddddddddddd', 'Immediately watched video', Date.now(), true)
-      ]
+      settings: {
+        fetchSubscriptionsAutomatically: false,
+        watchedPercentageThreshold: 0,
+      },
+      profiles: [{
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: [{
+          id: immediateHistoryEntry.authorId,
+          name: immediateHistoryEntry.author,
+          thumbnail: '',
+        }]
+      }],
+      history: [immediateHistoryEntry],
+      subscriptionCache: [{
+        _id: immediateHistoryEntry.authorId,
+        videos: [immediateHistoryEntry],
+        videosTimestamp: new Date().toISOString(),
+      }]
     }
   })
 
@@ -214,6 +238,34 @@ test.describe('watch history with an immediate watched threshold', () => {
       const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
       return records.filter(record => record._id === 'ddddddddddd').at(-1)?.$$deleted
     }).toBe(true)
+  })
+
+  test('removes and cleanly re-adds a history entry from the subscriptions feed', async ({ app, page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="videos"]').click()
+
+    const video = page.locator('.ft-list-video').filter({ hasText: 'Immediately watched video' })
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Unmark As Watched' }).click()
+
+    await expect(video).toBeVisible()
+    await expect(video.locator('.watchedProgressBar')).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getHistoryCacheById.ddddddddddd
+    })).toBeUndefined()
+
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Mark As Watched' }).click()
+
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+      const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
+      return records.filter(record => record.videoId === 'ddddddddddd').at(-1)?.watchProgress
+    }).toBe(0)
+    await expect(video.locator('.watchedProgressBar')).toHaveCount(0)
   })
 })
 
