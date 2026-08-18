@@ -1451,6 +1451,10 @@ async function getAutomaticVideoPublishedAt(videoId, channelId) {
     return null
   }
 
+  if (info === null || typeof info !== 'object' || Array.isArray(info)) {
+    return null
+  }
+
   const publishedAt = toFiniteNumber(info.timestamp)
   return info.id === videoId && info.channel_id === channelId && publishedAt !== null
     ? publishedAt * 1000
@@ -1565,12 +1569,21 @@ async function authorizeAutomaticDownload(payload, discoveryPreviouslyAuthorized
   }
 
   if (!discoveryPreviouslyAuthorized) {
-    const discoveredVideos = await getAutomaticDiscoveryVideoIds(payload.channelId)
+    let discoveredVideos = await getAutomaticDiscoveryVideoIds(payload.channelId)
     const enabledAt = automaticNumber(rule.enabledAt, Number.MAX_SAFE_INTEGER)
     let publishedAt = discoveredVideos?.get(payload.videoId) ?? null
     if (enabledAt !== null && publishedAt === null) {
       publishedAt = await getAutomaticVideoPublishedAt(payload.videoId, payload.channelId)
-      if (publishedAt !== null) discoveredVideos?.set(payload.videoId, publishedAt)
+      if (publishedAt !== null) {
+        if (discoveredVideos === null) {
+          discoveredVideos = new Map()
+          automaticDiscoveryCache.set(payload.channelId, {
+            expiresAt: Date.now() + AUTOMATIC_DISCOVERY_CACHE_TTL_MS,
+            videos: discoveredVideos
+          })
+        }
+        discoveredVideos.set(payload.videoId, publishedAt)
+      }
     }
     if (enabledAt === null || publishedAt === null ||
       Math.floor(publishedAt / 1000) < Math.floor(enabledAt / 1000)) {

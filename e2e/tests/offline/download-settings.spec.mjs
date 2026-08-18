@@ -231,19 +231,17 @@ test.describe('automatic download authorization', () => {
   test('starts filtered automatic downloads only for the active subscription refresh', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'fake-automatic-yt-dlp.sh')
     const argumentsFile = path.join(app.userDataDir, 'automatic-yt-dlp-arguments.txt')
-    await writeFile(path.join(app.userDataDir, 'automatic-download-discovery.xml'), [
-      '<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015">',
-      '<entry>',
-      `<yt:videoId>ddddddddddd</yt:videoId><yt:channelId>${BETA_CHANNEL_ID}</yt:channelId>`,
-      '<published>2026-08-13T23:59:59Z</published>',
-      '</entry>',
-      '</feed>'
-    ].join(''))
+    const metadataLookupsFile = path.join(app.userDataDir, 'automatic-yt-dlp-metadata-lookups.txt')
     await writeFile(executable, [
       '#!/bin/sh',
       'for argument in "$@"; do',
       '  if [ "$argument" = "--dump-single-json" ]; then',
-      `    printf '%s\\n' '{"id":"ccccccccccc","channel_id":"${BETA_CHANNEL_ID}","timestamp":1786669200}'`,
+      `    printf '%s\\n' metadata >> ${metadataLookupsFile}`,
+      '    case "$*" in',
+      `      *ccccccccccc*) printf '%s\\n' '{"id":"ccccccccccc","channel_id":"${BETA_CHANNEL_ID}","timestamp":1786669200}' ;;`,
+      `      *ddddddddddd*) printf '%s\\n' '{"id":"ddddddddddd","channel_id":"${BETA_CHANNEL_ID}","timestamp":1786665599}' ;;`,
+      "      *eeeeeeeeeee*) printf '%s\\n' 'null' ;;",
+      '    esac',
       '    exit 0',
       '  fi',
       'done',
@@ -302,6 +300,10 @@ test.describe('automatic download authorization', () => {
       ...authorizedPayload,
       videoId: 'ddddddddddd'
     })).toBeNull()
+    expect(await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), {
+      ...authorizedPayload,
+      videoId: 'eeeeeeeeeee'
+    })).toBeNull()
 
     const concurrentResults = await page.evaluate((download) => Promise.all([
       window.ftElectron.ytDlpDownload(download),
@@ -333,8 +335,10 @@ test.describe('automatic download authorization', () => {
     expect(args).not.toContain('https://www.youtube.com/watch?v=eeeeeeeeeee')
     expect(args).not.toContain('https://www.youtube.com/playlist?list=PL1234567890')
 
+    const metadataLookupsBeforeDuplicate = await readFile(metadataLookupsFile, 'utf8')
     const duplicate = await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), authorizedPayload)
     expect(duplicate).toEqual({ skipped: 'already-downloaded' })
+    expect(await readFile(metadataLookupsFile, 'utf8')).toBe(metadataLookupsBeforeDuplicate)
     await page.evaluate((tabId) => window.ftElectron.subscriptionAutoRefresh.release(tabId), refreshOwnerTabId)
   })
 })
