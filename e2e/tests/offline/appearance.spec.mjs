@@ -418,6 +418,7 @@ test.describe('custom theme editor', () => {
       const selectionStyle = getComputedStyle(document.body, '::selection')
       return [selectionStyle.backgroundColor, selectionStyle.color]
     })).toEqual(['rgb(52, 86, 120)', 'rgb(254, 220, 186)'])
+    await expect(page.locator('.topNav .searchInput .ft-input')).toHaveCSS('line-height', '20px')
     await setEditorColor('Page background', '#101112')
     await sourceMainColor.click()
     await page.locator(`#${await sourceMainColor.getAttribute('aria-controls')}`)

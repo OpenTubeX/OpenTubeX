@@ -266,11 +266,11 @@ const inputTextStyle = computed(() => {
   if (!props.isSearch) return null
 
   const offset = getInputTextAscentOffset(inputDataDisplayed.value)
-  const paddingBlockEnd = offset * 2
+  const centeredPadding = (45 - 20) / 2
 
   return {
-    '--search-input-padding-block-end': `${paddingBlockEnd}px`,
-    '--search-input-line-height': `${45 - paddingBlockEnd}px`
+    '--search-input-padding-block-start': `${centeredPadding - offset}px`,
+    '--search-input-padding-block-end': `${centeredPadding + offset}px`
   }
 })
 
