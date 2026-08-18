@@ -109,6 +109,9 @@ Subscriptions:
   New Since Last Refresh: Nowości od ostatniego odświeżenia
   Mark All as Seen: Oznacz wszystkie jako widziane
   No New Content: Brak nowych treści.
+  Mark as Seen: Oznacz jako widziane
+  Newest First: Najnowsze na początku
+  Oldest First: Najstarsze na początku
 Trending:
   Trending: 'Na czasie'
   Trending Tabs: Karty „Na czasie”
@@ -201,6 +204,11 @@ User Playlists:
   Export list of URLs: Eksportuj listę adresów URL
   Quick Bookmark Icon: Ikona szybkiej zakładki
   Save to: Zapisz do…
+  Move Video to the Top: Przenieś wideo na górę
+  Move Video to the Bottom: Przesuń wideo na dół
+  Custom Emoji: Niestandardowe emoji
+  Choose Image: Wybierz obraz
+  Use Bookmark Icon: Użyj ikony zakładki
 History:
   # On History Page
   History: 'Historia'
@@ -276,6 +284,7 @@ Settings:
       New Tab Position: Położenie Nowej Karty
       At the end: Na końcu
       After current tab: Za aktywną kartą
+      After current tab in opened order: Po bieżącej karcie, w kolejności otwierania
     Startup Behavior:
       Startup Behavior: Przy uruchomieniu
       Load all tabs: Załaduj wszystkie karty
@@ -309,8 +318,16 @@ Settings:
       Stream Extraction Method: Metoda ekstrakcji strumienia
       yt-dlp: yt-dlp
       Built-in: Wbudowany
+    Update Relative Timestamps: Aktualizuj względne znaczniki czasu
+    Confirm Before: Potwierdź przed…
+    Confirmation Options:
+      Closing App: Zamknięciem OpenTubeX
+      Closing Window: Zamknięciem okna z wieloma kartami
+      Closing Tabs: Zamknięciem wielu kart
+      Loading Tabs: Ładowaniem wielu kart
+      Unloading Tabs: Usypianiem wielu kart
   Theme Settings:
-    Theme Settings: 'Wygląd'
+    Theme Settings: 'Motyw'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
     Base Theme:
       Base Theme: 'Bazowy motyw'
@@ -335,6 +352,7 @@ Settings:
       Everforest Dark Low: Everforest Lekko Ciemny
       Everforest Light Medium: Everforest Jasny
       Catppuccin Latte: Catppuccin Latte
+      Custom: Niestandardowe
     Main Color Theme:
       Main Color Theme: 'Główny kolor motywu'
       Red: 'Czerwony'
@@ -448,6 +466,68 @@ Settings:
       Top Left: Górny lewy
       Top Center: Górny środek
       Top Right: Górny prawy
+    Icon Pack:
+      Icon Pack: Pakiet ikon
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Czcionka aplikacji
+      System Default: Domyślna systemowa
+      Unable to Load: Nie można załadować zainstalowanych czcionek systemowych
+    Light Theme: Jasny motyw
+    Dark Theme: Ciemny motyw
+    Custom Theme:
+      Create Custom Theme: Utwórz niestandardowy motyw
+      Edit Custom Theme: Edytuj niestandardowy motyw
+      Custom Theme Creator: Kreator niestandardowych motywów
+      Theme Name: Nazwa motywu
+      Is Dark Theme: Ciemny motyw
+      Based On: Na podstawie
+      Import Theme: Importuj motyw
+      Export Theme: Eksportuj motyw
+      Delete Theme: Usuń motyw
+      Delete Theme Confirmation: Usunąć „{name}”? Tego nie będzie można już cofnąć.
+      Save and Apply: Zapisz i zastosuj
+      Discard Changes: Odrzuć zmiany
+      Reset Colors: Zresetuj kolory i efekty
+      Theme File: Plik motywu OpenTubeX
+      Theme Saved: Niestandardowy motyw został zapisany i zastosowany
+      Theme Imported: Motyw zaimportowany do edytora
+      Theme Exported: Motyw wyeksportowany
+      Theme Deleted: Motyw niestandardowy został usunięty
+      Unable to Load: Nie można załadować niestandardowego motywu
+      Unable to Save: Nie można zapisać niestandardowego motywu
+      Unable to Export: Nie można wyeksportować niestandardowego motywu
+      Unable to Delete: Nie można usunąć niestandardowego motywu
+      Invalid Theme File: Nieprawidłowy plik motywu niestandardowego
+      Colors:
+        Main text: Tekst główny
+        Secondary text: Tekst pomocniczy
+        Subtle text: Subtelny tekst
+        Borders and dividers: Granice i podziały
+        Subtle surfaces and indicators: Subtelne powierzchnie i wskaźniki
+        Title text: Tekst tytułowy
+        Logo icon: Ikona logo
+        Logo text: Tekst logo
+        Selected text background: Tło zaznaczonego tekstu
+        Selected text: Zaznaczony tekst
+        Text and icons on destructive actions: Tekst i ikony dotyczące działań destrukcyjnych
+    Move Downloads to App Header: Przenieś „pobrane” do nagłówka aplikacji
+    Move Settings to App Header: Przenieś „ustawienia” do nagłówka aplikacji
+    Scrollbar Width: Szerokość paska przewijania
+    Load Missing Tab Icons: Załaduj brakujące ikony kart
+    Loading Missing Tab Icons: Ładowanie brakujących ikon kart…
+    No Missing Tab Icons: Wszystkie obsługiwane ikony kart są już załadowane
+    Loaded Tab Icons: 'Załadowano brakującą ikonę karty: {count} | Załadowano brakujące ikony kart: {count}'
+    Loaded Tab Icons With Failures: Załadowano {loaded} ikony kart; {failed} nie udało się załadować | Załadowano {loaded} ikon kart; {failed} nie udało się załadować
+    Show Tab Previews: Pokazuj podglądy kart
+    Tab Layout:
+      Tab Layout: Układ kart
+      Horizontal Top: Poziomy na górze
+      Horizontal Bottom: Poziomy na dole
+      Vertical Left: Pionowy po lewej
+      Vertical Right: Pionowy po prawej
+    Use Grid Player Menu: Użyj menu odtwarzacza w układzie siatki
   Player Settings:
     Player Settings: 'Odtwarzacz'
     Play Next Video: 'Automatycznie otwórz polecane wideo'
@@ -575,6 +655,20 @@ Settings:
     Automatically Open Chapters: Automatycznie otwieraj rozdziały
     Use YouTube-style Shorts: Użyj stylu Filmów Short z YouTube
     Loop Shorts: Zapętlaj filmy short
+    Enable Video Zoom: Włącz powiększanie wideo
+    Voice-over Translation:
+      Title: Tłumaczenie głosowe
+      Enable: Włącz tłumaczenie głosowe
+      Prepare in Background: Rozpocznij przygotowywanie tłumaczeń głosowych w tle
+      Background Preparation Tooltip: Wysyła identyfikator, czas trwania i wybrany język bieżącego filmu do usługi tłumaczeniowej natychmiast po załadowaniu obsługiwanego filmu.
+      Language: Język tłumaczenia głosowego
+      Supported Source Languages: 'Obsługiwane języki źródłowe: rosyjski, angielski, chiński, koreański, litewski, łotewski, arabski, francuski, włoski, hiszpański, niemiecki i japoński.'
+      Voice Volume: Głośność przetłumaczonego głosu
+      Original Volume: Głośność oryginalnego dźwięku
+      Russian: rosyjski
+      English: angielski
+      Kazakh: kazachski
+    Parallel Segment Loading: Równoległe ładowanie segmentów
   Subscription Settings:
     Subscription Settings: 'Subskrypcje'
     Fetch Feeds from RSS: Pobierz subskrypcje z RSS
@@ -825,6 +919,36 @@ Settings:
     Download Folder: 'Pobierane pliki zapisuj do:'
     Choose Download Folder: Wybierz folder pobierania
     Templates Hint: Niestandardowe szablony pobierania można tworzyć i zarządzać nimi w oknie pobierania, które znajduje się pod odtwarzaczem wideo.
+    Enable Downloads: Włącz pobieranie filmów
+    Managed Tools Update Available Template: Dostępna jest aktualizacja dla {tools}.
+    Update Managed Tools: Aktualizuj
+    Global Additional yt-dlp Arguments: Dodatkowe globalne argumenty yt-dlp
+    External Software Hint: yt-dlp, FFmpeg i FFprobe są konfigurowane w ustawieniach oprogramowania zewnętrznego.
+    Download Templates: Szablony pobierania
+    Manage Download Templates: Zarządzaj szablonami pobierania ({templateCount})
+    New Template: Nowy szablon
+    Template Source: Szablon do edycji lub wykorzystania jako baza
+    Built-in Template: '{name} (wbudowany)'
+    Custom Template Name: '{name} (niestandardowy)'
+    Create Template Copy: Utwórz kopię
+    Template Copy Name: '{name} Kopia'
+    Automatic Downloads: Automatyczne pobieranie
+    Manage Automatic Downloads: Zarządzaj automatycznym pobieraniem ({channelCount})
+    Automatic Downloads Description: Wybierz szablon pobierania i filtry dla każdego subskrybowanego kanału. Pasujące filmy będą pobierane w tle po odświeżeniu kanałów subskrypcji.
+    Automatic Downloads New Only: Włączenie kanału rozpocznie się wraz z jego kolejnym przesłaniem. Istniejące filmy i lista zaległości kanału nie zostaną pobrane.
+    Automatic Downloads No Channels: Zanim skonfigurujesz automatyczne pobieranie, zasubskrybuj kanał.
+    Search Automatic Download Channels: Wyszukaj kanały
+    No Matching Automatic Download Channels: Brak kanałów odpowiadających Twojemu wyszukiwaniu.
+    Automatic Downloads Videos: Filmy
+    Automatic Downloads Livestreams: Transmisje na żywo
+    Minimum Duration Seconds: Minimalny czas trwania (sekundy)
+    Maximum Duration Seconds: Maksymalny czas trwania (sekundy)
+    Minimum File Size MB: Minimalny rozmiar pliku (MB)
+    Maximum File Size MB: Maksymalny rozmiar pliku (MB)
+    Maximum Age Days: Maksymalny wiek (dni)
+    Title Includes: Tytuł zawiera
+    Title Excludes: Tytuł nie zawiera
+    Title Filter Hint: Oddzielaj wiele wyrażeń przecinkami. Tytuł filmu musi pasować do co najmniej jednego wyrażenia i nie może zawierać wyrażeń wykluczonych.
   External Software Settings:
     yt-dlp Source: Źródło yt-dlp
     yt-dlp Channel: Kanał wersji yt-dlp
@@ -850,9 +974,14 @@ Settings:
     Downloading FFmpeg: Pobieranie FFmpeg…
     FFmpeg Downloaded Template: Pobrano FFmpeg w wersji {version}
     FFmpeg Download Error Template: 'Pobieranie FFmpeg nie powiodło się: {error}'
-    Managed Tool Already Current Template: '{tool} {version} jest już aktualny'
+    Managed Tool Already Current Template: '{tool} {version} jest już aktualne'
     yt-dlp Executable Path: Ścieżka do pliku wykonywalnego yt-dlp
     FFmpeg Executable Path: Ścieżka do pliku wykonywalnego FFmpeg
+    External Software Settings: Oprogramowanie zewnętrzne
+    Detected FFprobe Version Template: 'Wykryta wersja FFprobe: {version}'
+    FFprobe Managed Not Downloaded: FFprobe nie został jeszcze pobrany. Kliknij poniższy przycisk, aby pobrać go z FFmpeg.
+    System FFprobe Missing Warning: FFprobe nie został znaleziony w Twoim systemie. Jest on wymagany do inspekcji multimediów podczas postprodukcji. Zainstaluj go obok FFmpeg lub zmień źródło na „Zarządzane przez OpenTubeX”.
+    Checking FFprobe: Sprawdzanie FFprobe…
   Sync Settings:
     Sync Settings: Synchronizacja
     Privacy Passphrase Hint: Użyj osobnego hasła, które nie jest tym samym co hasło do Twojego konta. Nigdy nie opuszcza tego urządzenia i jest wymagane na każdym urządzeniu; jeśli je utracisz, nie będzie można odzyskać zaszyfrowanych danych synchronizacji.
@@ -918,6 +1047,50 @@ Settings:
     Remove Engine: Usuń {engine}
     Invalid Engine: Wprowadź nazwę i prawidłowy adres URL wyszukiwania HTTP lub HTTPS zawierający %s.
     Engine Limit: Możesz dodać maksymalnie {count} niestandardowych wyszukiwarek.
+  Quick Settings:
+    Quick Settings: Szybkie ustawienia
+    Appearance: Wygląd
+    Playback: Odtwarzanie
+    Content: Treści
+    Language and Region: Język i region
+    All Settings: Wszystkie ustawienia
+    Profile Selector Hint: Możesz również kliknąć prawym przyciskiem myszy ikonę profilu, aby przełączać profile
+  Performance Impact:
+    Show Performance Impact: Pokaż wskaźniki wpływu na wydajność
+    Moderate: Umiarkowany wpływ
+    High: Wysoki wpływ
+    Description: To ustawienie może zwiększyć wykorzystanie {resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: pamięci
+      Network: transmisji danych
+      Disk: dysku
+  Channel Settings:
+    Channel Settings: Ustawienia kanału
+    Channel Settings Description: Zapamiętuje ustawienia wybrane podczas oglądania każdego kanału osobno, dzięki czemu zostaną one zastosowane ponownie przy następnym oglądaniu danego kanału.
+    Enable Playback Speed: Zapamiętywanie prędkości odtwarzania
+    Enable Video Quality: Zapamiętywanie rozdzielczości wideo
+    Enable Subtitles State: Zapamiętywanie ustawień napisów
+    Enable Volume: Zapamiętywanie głośności
+    Auto Update: Automatyczna aktualizacja po zmianie za pomocą opcji odtwarzacza
+    Auto Update Subtitles: Automatyczna aktualizacja po przełączeniu
+    Auto Update Volume: Automatyczna aktualizacja przy każdej zmianie głośności
+    Manage Saved Channels: Zarządzaj zapisanymi kanałami ({channelCount})
+    Saved Channels: Zapisane ustawienia kanału
+    Enable Saved Channel Settings Sync: Synchronizuj zapisane ustawienia kanału
+    Disable Saved Channel Settings Sync: Zatrzymaj synchronizację zapisanych ustawień kanału
+    Search Channels: Wyszukaj kanały
+    No Saved Channels: Nie zapisano jeszcze żadnych ustawień specyficznych dla kanału
+    No Matching Channels: Żadne kanały nie pasują do Twojego wyszukiwania
+    Forget Channel: Wyczyść wszystkie ustawienia dla tego kanału
+    Forget Value: Wyczyść to ustawienie
+    Add Setting: Zapamiętaj inne ustawienie dla tego kanału
+    Playback Speed: Prędkość odtwarzania
+    Video Quality: Rozdzielczość wideo
+    Subtitles State: Napisy
+    Subtitles Enabled: Napisy włączone
+    Volume: Głośność
 About:
   #On About page
   About: 'O projekcie'
@@ -1639,7 +1812,7 @@ KeyboardShortcutPrompt:
   Reassign: Przypisz ponownie
   Undo: Cofnij
   Toggle Skip Silence: Przełącz pomijanie ciszy
-  Toggle Tab Orientation: Przełączanie między kartami poziomymi i pionowymi
+  Toggle Tab Orientation: Przełączanie między układami kart
 shortcutLabelSeparator: ｜
 Compact side navigation: Skompresuj boczną nawigację
 Expand side navigation: Rozwiń boczną nawigację
@@ -1788,8 +1961,32 @@ Restore: Przywróć
 Close Window Confirmation:
   Title: Zamknąć okno?
   Close Window: Zamknij okno
+  Message: To okno zawiera {count} karty. Czy na pewno chcesz je zamknąć? | To okno zawiera {count} kart. Czy na pewno chcesz je zamknąć?
 Confirmations:
   Never Ask Again: Nie pytaj ponownie
   Settings Hint: Możesz ponownie włączyć to potwierdzenie w Ustawienia → Ogólne → Potwierdź przed…
 Close Multiple Tabs Confirmation:
   Title: Zamknąć wiele kart?
+  Message: Spowoduje to zamknięcie {count} kart.
+  Close Tabs: Zamknij {count} karty | Zamknij {count} kart
+Color Picker:
+  Hue: Odcień
+  Opacity: Nieprzezroczystość
+  Backdrop Blur: Rozmycie tła
+  Hex Color: Kolor w systemie szesnastkowym
+  Apply Color: Zastosuj
+  Reset Color: Zresetuj
+  Copy Color: Kopiuj
+  Copy From Another Color: Skopiuj z innego koloru
+  Color Copied: Kolor skopiowany
+  Invalid Color: Wprowadź prawidłowy kod szesnastkowy koloru
+  Clipboard Unavailable: Schowek niedostępny
+  Saturation and Brightness: Nasycenie i jasność
+Load Multiple Tabs Confirmation:
+  Title: Załadować wiele kart?
+  Message: Spowoduje to załadowanie {count} kart.
+  Load Tabs: Załaduj {count} karty | Załaduj {count} kart
+Unload Multiple Tabs Confirmation:
+  Title: Uśpić wiele kart?
+  Message: Spowoduje to uśpienie {count} kart.
+  Unload Tabs: Uśpij {count} karty | Uśpij {count} kart
