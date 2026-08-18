@@ -284,6 +284,7 @@
           ref="commentsRef"
           v-overlay-scrollbars
           class="liveChatComments"
+          :class="{ atLiveEdge: !showScrollToBottom }"
           :style="{ blockSize: chatHeight }"
           tabindex="0"
           @pointerdown="handleLiveChatPointerDown"
@@ -483,6 +484,8 @@ let skeletonShownAt = 0
 const SCROLL_TO_LIVE_HOLD_MS = 220
 /** Avoid replacing a fast-loading skeleton before it can be perceived. */
 const MINIMUM_SKELETON_DURATION_MS = 1000
+/** Coalesce the repeated viewport resizes produced by stacked dock transitions. */
+const VIEWPORT_RESIZE_SETTLE_MS = 50
 
 /**
  * Replay messages that were fetched but that the player hasn't reached yet.
@@ -691,6 +694,8 @@ watch(() => props.fullscreenOverlay, () => {
 
 /**
  * Keep the live edge glued across dock open/close animations and height shares.
+ * Content changes are synchronized immediately, while viewport changes settle
+ * first so a dock transition does not force scrollbar layout on every frame.
  * OverlayScrollbars otherwise restores a stale scrollTop past the content end —
  * empty view until the user scrolls up (same failure mode as the comments dock).
  */
@@ -700,7 +705,8 @@ watch(commentsRef, (element, _previous, onCleanup) => {
   }
 
   const contentElement = element.querySelector('.liveChatCommentList')
-  const resizeObserver = new ResizeObserver(() => {
+  let viewportResizeTimer = null
+  const syncScrollPosition = () => {
     clampOverlayScrollTop(element, contentElement)
 
     if (!stayAtBottom) {
@@ -708,14 +714,28 @@ watch(commentsRef, (element, _previous, onCleanup) => {
     }
 
     scrollToBottom('instant')
+  }
+  const viewportResizeObserver = new ResizeObserver(() => {
+    if (viewportResizeTimer !== null) {
+      clearTimeout(viewportResizeTimer)
+    }
+    viewportResizeTimer = setTimeout(() => {
+      viewportResizeTimer = null
+      syncScrollPosition()
+    }, VIEWPORT_RESIZE_SETTLE_MS)
   })
+  const contentResizeObserver = new ResizeObserver(syncScrollPosition)
 
-  resizeObserver.observe(element)
+  viewportResizeObserver.observe(element)
   if (contentElement !== null) {
-    resizeObserver.observe(contentElement)
+    contentResizeObserver.observe(contentElement)
   }
   onCleanup(() => {
-    resizeObserver.disconnect()
+    viewportResizeObserver.disconnect()
+    contentResizeObserver.disconnect()
+    if (viewportResizeTimer !== null) {
+      clearTimeout(viewportResizeTimer)
+    }
   })
 }, { flush: 'post' })
 

@@ -90,6 +90,18 @@
   overflow: hidden;
 }
 
+.fullscreenChat .liveChatSkeleton {
+  block-size: auto !important;
+  padding-block: 6px 12px;
+  padding-inline: 16px;
+}
+
+.fullscreenChat .liveChatSkeletonMessage {
+  flex: 1 1 25px;
+  min-block-size: 25px;
+  padding-block: 0;
+}
+
 .liveChatDockHeader {
   display: flex;
   flex: 0 0 52px;
@@ -452,6 +464,17 @@
 
 .liveChatComments:dir(rtl) {
   mask-position: 100% 0, 0 0;
+}
+
+.liveChatComments.atLiveEdge {
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent,
+      #000 var(--live-chat-fade-size),
+      #000 100%
+    ),
+    linear-gradient(#000 0 0);
 }
 
 .liveChatCommentList {

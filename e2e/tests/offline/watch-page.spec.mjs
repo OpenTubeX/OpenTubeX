@@ -817,6 +817,13 @@ test.describe('watch page', () => {
         liveChat.removeEventListener(listeners.get(listener), listener)
         listeners.delete(listener)
       }
+      liveChat.emit = (event, value) => {
+        for (const [listener, listenerEvent] of listeners) {
+          if (listenerEvent === event) {
+            listener(value)
+          }
+        }
+      }
       liveChat.start = () => {}
       liveChat.stop = () => {}
 
@@ -856,6 +863,84 @@ test.describe('watch page', () => {
     const skeletonLines = skeleton.locator('.liveChatSkeletonContent').first().locator('div')
     await expect(skeletonLines.nth(0)).toHaveCSS('block-size', '10px')
     await expect(skeletonLines.nth(1)).toHaveCSS('block-size', '10px')
+
+    await setPlayerFullscreen(page, true)
+    const fullscreenLiveChatToggle = page.locator('.fullscreenLiveChatToggle')
+    await fullscreenLiveChatToggle.click({ force: true })
+    const fullscreenChat = page.locator('.fullscreenLiveChatOverlay.open')
+    const fullscreenSkeleton = fullscreenChat.locator('.liveChatSkeleton')
+    await expect(fullscreenSkeleton).toBeVisible()
+    const fullscreenSkeletonGeometry = await fullscreenSkeleton.evaluate((element) => {
+      const bounds = element.getBoundingClientRect()
+      const firstMessageBounds = element.firstElementChild.getBoundingClientRect()
+      const lastMessageBounds = element.lastElementChild.getBoundingClientRect()
+
+      return {
+        firstMessageInlineInset: Math.round(firstMessageBounds.left - bounds.left),
+        lastMessageBlockInset: Math.round(bounds.bottom - lastMessageBounds.bottom)
+      }
+    })
+    expect(fullscreenSkeletonGeometry.firstMessageInlineInset).toBe(16)
+    expect(fullscreenSkeletonGeometry.lastMessageBlockInset).toBeGreaterThanOrEqual(0)
+    expect(fullscreenSkeletonGeometry.lastMessageBlockInset).toBeLessThan(30)
+
+    await watchView.evaluate((view) => {
+      const actions = Array.from({ length: 60 }, (_, index) => {
+        let actionTypeChecks = 0
+        return {
+          is: () => ++actionTypeChecks === 2,
+          item: {
+            is: () => true,
+            id: `mock-live-chat-message-${index}`,
+            timestamp: Date.now(),
+            message: { runs: [{ text: `Mock live chat message ${index}` }] },
+            author: {
+              badges: [],
+              id: `mock-live-chat-author-${index}`,
+              name: `Chat author ${index}`,
+              thumbnails: [{ url: '' }],
+              is_moderator: false
+            }
+          }
+        }
+      })
+      view.liveChat.emit('start', { actions })
+    })
+
+    const liveChatComments = fullscreenChat.locator('.liveChatComments')
+    await expect(liveChatComments).toBeVisible()
+    await expect(liveChatComments).toHaveClass(/atLiveEdge/)
+    await expect.poll(() => liveChatComments.evaluate(
+      element => element.scrollHeight > element.clientHeight
+    )).toBe(true)
+    await liveChatComments.evaluate((element) => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => liveChatComments.evaluate(
+      element => element.scrollTop
+    )).toBeGreaterThan(0)
+
+    await page.locator('.fullscreenCommentsToggle').click({ force: true })
+    await expect(page.locator('.fullscreenCommentsOverlay.open')).toBeVisible()
+    await expect.poll(() => liveChatComments.evaluate(element =>
+      Math.abs(element.scrollHeight - element.clientHeight - element.scrollTop)
+    )).toBeLessThanOrEqual(1)
+    await page.locator('.fullscreenCommentsToggle').click({ force: true })
+    await expect(page.locator('.fullscreenCommentsOverlay.open')).toHaveCount(0)
+
+    await liveChatComments.locator('.comment').evaluateAll((comments) => {
+      for (const comment of comments.slice(3)) {
+        comment.style.display = 'none'
+      }
+    })
+    await expect.poll(() => liveChatComments.evaluate(element => ({
+      fits: element.scrollHeight <= element.clientHeight,
+      scrollTop: element.scrollTop
+    }))).toEqual({ fits: true, scrollTop: 0 })
+    await expect(liveChatComments.locator(':scope > .os-scrollbar-vertical'))
+      .toHaveClass(/os-scrollbar-unusable/)
+
+    await fullscreenLiveChatToggle.click({ force: true })
+    await expect(fullscreenChat).toHaveCount(0)
+    await setPlayerFullscreen(page, false)
     await watchView.evaluate((view) => {
       view.liveChat.dispatchEvent(new ErrorEvent('error', { message: 'Unavailable' }))
     })
