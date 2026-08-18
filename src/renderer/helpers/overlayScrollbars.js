@@ -20,6 +20,7 @@ OverlayScrollbars.plugin(ClickScrollPlugin)
  * @type {Map<import('overlayscrollbars').OverlayScrollbars, HTMLElement | object>}
  */
 const instances = new Map()
+const SCROLL_BOUNDARY_TOLERANCE = 1
 
 function scrollbarOptions(initialization) {
   const options = {
@@ -343,18 +344,8 @@ export function restoreOverlayScrollTop(element, scrollTop) {
 export function clampOverlayScrollTop(element, contentElement = null) {
   const instance = OverlayScrollbars(element)
   instance?.update(true)
-  const contentEnd = contentElement === null
-    ? element.scrollHeight
-    : offsetTopFromDocument(contentElement) - offsetTopFromDocument(element) +
-      contentElement.offsetHeight +
-      Number.parseFloat(getComputedStyle(element).paddingBottom)
-  const maximumScrollTop = Math.max(0, contentEnd - element.clientHeight)
-  // Electron zoom can leave the real scroll boundary at a fractional CSS
-  // pixel even though offsetHeight / clientHeight round the calculated end to
-  // an integer. Treat that subpixel difference as the same position; trying
-  // to clamp it makes OverlayScrollbars restore the fractional boundary and
-  // starts a reset / restore loop on every subsequent scroll event.
-  if (element.scrollTop > maximumScrollTop + 1) {
+  const maximumScrollTop = getMaximumOverlayScrollTop(element, contentElement)
+  if (isScrollTopOutOfBounds(element, maximumScrollTop)) {
     if (instance) {
       // Chromium can preserve the old overflow range when content shrinks
       // beneath a non-zero offset. Remeasure from the true origin so both the
@@ -368,6 +359,44 @@ export function clampOverlayScrollTop(element, contentElement = null) {
       element.scrollTop = maximumScrollTop
     }
   }
+}
+
+/**
+ * Checks whether a nested scroll container is beyond its content's real end
+ * without forcing an OverlayScrollbars update. Useful for hot scroll handlers
+ * that should only call `clampOverlayScrollTop` when a clamp is necessary.
+ *
+ * @param {HTMLElement} element
+ * @param {HTMLElement | null} contentElement the element whose rendered end defines the real scroll range
+ */
+export function isOverlayScrollTopOutOfBounds(element, contentElement = null) {
+  return isScrollTopOutOfBounds(element, getMaximumOverlayScrollTop(element, contentElement))
+}
+
+/**
+ * @param {HTMLElement} element
+ * @param {HTMLElement | null} contentElement
+ */
+function getMaximumOverlayScrollTop(element, contentElement) {
+  const contentEnd = contentElement === null
+    ? element.scrollHeight
+    : offsetTopFromDocument(contentElement) - offsetTopFromDocument(element) +
+      contentElement.offsetHeight +
+      Number.parseFloat(getComputedStyle(element).paddingBottom)
+  return Math.max(0, contentEnd - element.clientHeight)
+}
+
+/**
+ * @param {HTMLElement} element
+ * @param {number} maximumScrollTop
+ */
+function isScrollTopOutOfBounds(element, maximumScrollTop) {
+  // Electron zoom can leave the real scroll boundary at a fractional CSS
+  // pixel even though offsetHeight / clientHeight round the calculated end to
+  // an integer. Treat that subpixel difference as the same position; trying
+  // to clamp it makes OverlayScrollbars restore the fractional boundary and
+  // starts a reset / restore loop on every subsequent scroll event.
+  return element.scrollTop > maximumScrollTop + SCROLL_BOUNDARY_TOLERANCE
 }
 
 /** @param {HTMLElement} element */
