@@ -29,9 +29,16 @@
         v-if="isLoading"
       />
       <ft-element-list
-        v-else
+        v-else-if="shownResults.length > 0"
         :data="shownResults"
       />
+      <p
+        v-else-if="hasLoaded"
+        class="emptyMessage"
+        role="status"
+      >
+        {{ $t("Most Popular Feed Empty") }}
+      </p>
     </ft-card>
   </div>
 </template>
@@ -73,6 +80,7 @@ const popularCache = computed(() => {
 })
 
 const shownResults = shallowRef(popularCache.value || [])
+const hasLoaded = ref(popularCache.value !== null)
 
 onMounted(() => {
   document.addEventListener('keydown', keyboardShortcutHandler)
@@ -88,12 +96,14 @@ onBeforeUnmount(() => {
 
 async function fetchPopularInfo() {
   isLoading.value = true
+  hasLoaded.value = false
 
   try {
     const items = await getInvidiousPopularFeed()
 
     store.commit('setLastPopularRefreshTimestamp', new Date())
     shownResults.value = items
+    hasLoaded.value = true
     isLoading.value = false
     store.commit('setPopularCache', items)
   } catch (err) {

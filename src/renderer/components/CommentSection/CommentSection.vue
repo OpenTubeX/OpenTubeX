@@ -713,6 +713,8 @@ const canPerformInitialCommentLoading = computed(() => {
   return !props.commentsDisabled && commentData.value.length === 0 && !isLoading.value && !showComments.value
 })
 
+const sortNewest = ref(false)
+
 watch(() => props.highlightedCommentId, (commentId, previousCommentId) => {
   const targetChanged = previousCommentId !== undefined && previousCommentId !== commentId
   if (targetChanged) {
@@ -796,7 +798,6 @@ const sortValues = [
   'newest'
 ]
 
-const sortNewest = ref(false)
 const sortMenuOpen = ref(false)
 
 const currentSortValue = computed(() => sortNewest.value ? 'newest' : 'top')
