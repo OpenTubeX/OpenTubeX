@@ -245,6 +245,7 @@ test.describe('watch history with an immediate watched threshold', () => {
     await page.locator('[data-subscription-feed-tab="videos"]').click()
 
     const video = page.locator('.ft-list-video').filter({ hasText: 'Immediately watched video' })
+    await expect(video.locator('.watchedProgressBar')).toHaveCount(1)
     await video.hover()
     await video.locator('.optionsButton').click()
     await page.getByRole('option', { name: 'Unmark As Watched' }).click()
