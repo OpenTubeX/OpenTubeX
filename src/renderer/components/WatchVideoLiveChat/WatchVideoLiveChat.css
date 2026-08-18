@@ -92,9 +92,14 @@
 
 .fullscreenChat .liveChatSkeleton {
   block-size: auto !important;
-  justify-content: space-evenly;
   padding-block: 6px 12px;
   padding-inline: 16px;
+}
+
+.fullscreenChat .liveChatSkeletonMessage {
+  flex: 1 1 25px;
+  min-block-size: 25px;
+  padding-block: 0;
 }
 
 .liveChatDockHeader {
