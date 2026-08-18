@@ -36,7 +36,7 @@ endorsed by, maintained by, or supported by the FreeTube project.
 OpenTubeX is aimed at users who want extensive control over their viewing
 experience. Some of its major areas of focus are:
 
-- **More playback control**, including per-channel speed and quality preferences, customizable shortcuts, a quick speed bar and fast-forwarding through silence.
+- **More playback control**, including per-channel speed and quality preferences, customizable shortcuts, a quick speed bar and silence skipping.
 - **A browser-style desktop workflow** with tabs, configurable session restoration, multiple windows, a scroll mini-player and a watch queue.
 - **Deeper SponsorBlock integration** with a segment side panel, richer skip controls, channel whitelisting, submissions and full-video labels.
 - **More ways to manage and understand your library** through watch-time statistics, configurable history retention, enhanced subscription refreshes and advanced search history.
@@ -162,7 +162,7 @@ experience. Some of its major areas of focus are:
 - Transcript panel
 <img height="200" alt="image" src="https://github.com/user-attachments/assets/f69a2074-746d-4afe-bee5-9828040f048e" />
 
-- Fast-forward through silence (needs to be enabled via Player settings)
+- Skip silence (needs to be enabled via Player settings)
 <img width="264" height="59" alt="image" src="https://github.com/user-attachments/assets/7886468c-0f08-4ebb-9cfd-2ce07a4230f5" />
 
 - Support for YouTube end-screen annotations

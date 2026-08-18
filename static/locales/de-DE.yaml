@@ -502,8 +502,8 @@ Settings:
     Scroll Playback Rate Over Video Player: Abspielgeschwindigkeit durch Scrollen ändern
     Video Playback Rate Interval: Intervall für Geschwindigkeitseinstellung
     Max Video Playback Rate: Maximale Wiedergabegeschwindigkeit
-    Fast-Forward Through Silence: Stille vorspulen
-    Show Fast-Forward Through Silence Toggle: Schalter „Stille vorspulen“ anzeigen
+    Skip Silence: Stille überspringen
+    Show Skip Silence Toggle: Schalter „Stille überspringen“ anzeigen
     Hold to Double Playback Speed: Für doppelte Wiedergabegeschwindigkeit gedrückt halten
     Screenshot:
       Enable: Screenshots aktivieren
@@ -1356,7 +1356,7 @@ Tooltips:
     Skip by Scrolling Over Video Player: Verwende das Scrollrad, um durch das Video zu springen, MPV-Stil.
     Multiply Seek Interval by Playback Rate: Wenn aktiviert, werden Sprungintervalle (Pfeiltasten und J/L) mit der aktuellen Wiedergabegeschwindigkeit multipliziert. Wenn deaktiviert, bleiben die Sprungintervalle unabhängig von der Wiedergabegeschwindigkeit konstant.
     Show Playback Rate Adjusted Timestamp: Wenn aktiviert und die Wiedergabegeschwindigkeit nicht 1x ist, zeigt der Player nach der normalen Zeitanzeige zusätzliche angepasste Zeitstempel in Klammern an.
-    Show Fast-Forward Through Silence Toggle: Zeigt im Einstellungsmenü des Players einen Ein-/Aus-Schalter zum Vorspulen von Stille an.
+    Show Skip Silence Toggle: Zeigt im Einstellungsmenü des Players einen Ein-/Aus-Schalter zum Überspringen von Stille an.
     Hold to Double Playback Speed: Halte die Leertaste oder die linke Maustaste über dem Player gedrückt, um die aktuelle Wiedergabegeschwindigkeit vorübergehend zu verdoppeln.
     Ambient Mode: Lässt die Farben des Videos in den Bereich um den Player ausstrahlen.
     Default Volume: Deaktiviert, wenn Lautstärke beibehalten aktiviert ist. Schalte Lautstärke beibehalten aus, um eine feste Lautstärke beim Start jedes Videos zu setzen.
@@ -1530,7 +1530,7 @@ KeyboardShortcutPrompt:
   Skip by Tenths: Prozentuales Überspringen des Videos (3 Sprünge bis 30% der Dauer)
   Next Frame: Nächstes Bild (bei pausierter Wiedergabe)
   Small Rewind: X Sekunden zurückspulen, basierend auf dem Rückspulintervall und der aktuellen Wiedergabegeschwindigkeit
-  Toggle Fast-Forward Through Silence: Vorspulen von Stille umschalten
+  Toggle Skip Silence: Überspringen von Stille umschalten
   End: Zum Ende des Videos springen
   Home: Zum Anfang des Videos springen
   Skip to Next Video: Zum nächsten Video in der Playlist bzw. nächsten empfohlenen Video springen
