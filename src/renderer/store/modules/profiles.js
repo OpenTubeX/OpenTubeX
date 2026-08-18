@@ -310,6 +310,7 @@ const mutations = {
   addChannelToProfiles(state, { channel, profileIds }) {
     for (const id of profileIds) {
       const profile = state.profileList.find(profile => profile._id === id)
+      if (!profile) { continue }
 
       if (!profile.subscriptions.some(subscription => subscription.id === channel.id)) {
         profile.subscriptions.push(channel)
@@ -320,6 +321,7 @@ const mutations = {
   removeChannelFromProfiles(state, { channelId, profileIds }) {
     for (const id of profileIds) {
       const profile = state.profileList.find(profile => profile._id === id)
+      if (!profile) { continue }
 
       // use filter instead of splice in case the subscription appears multiple times
       // https://github.com/FreeTubeApp/FreeTube/pull/3468#discussion_r1179290877
@@ -332,7 +334,9 @@ const mutations = {
       return profile._id === profileId
     })
 
-    state.profileList.splice(i, 1)
+    if (i !== -1) {
+      state.profileList.splice(i, 1)
+    }
   }
 }
 
