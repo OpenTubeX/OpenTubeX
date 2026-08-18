@@ -856,6 +856,28 @@ test.describe('watch page', () => {
     const skeletonLines = skeleton.locator('.liveChatSkeletonContent').first().locator('div')
     await expect(skeletonLines.nth(0)).toHaveCSS('block-size', '10px')
     await expect(skeletonLines.nth(1)).toHaveCSS('block-size', '10px')
+
+    await setPlayerFullscreen(page, true)
+    const fullscreenLiveChatToggle = page.locator('.fullscreenLiveChatToggle')
+    await fullscreenLiveChatToggle.click({ force: true })
+    const fullscreenChat = page.locator('.fullscreenLiveChatOverlay.open')
+    const fullscreenSkeleton = fullscreenChat.locator('.liveChatSkeleton')
+    await expect(fullscreenSkeleton).toBeVisible()
+    const fullscreenSkeletonGeometry = await fullscreenSkeleton.evaluate((element) => {
+      const bounds = element.getBoundingClientRect()
+      const firstMessageBounds = element.firstElementChild.getBoundingClientRect()
+      const lastMessageBounds = element.lastElementChild.getBoundingClientRect()
+
+      return {
+        firstMessageInlineInset: Math.round(firstMessageBounds.left - bounds.left),
+        lastMessageBlockInset: Math.round(bounds.bottom - lastMessageBounds.bottom)
+      }
+    })
+    expect(fullscreenSkeletonGeometry.firstMessageInlineInset).toBe(16)
+    expect(fullscreenSkeletonGeometry.lastMessageBlockInset).toBeLessThan(30)
+
+    await fullscreenLiveChatToggle.click({ force: true })
+    await setPlayerFullscreen(page, false)
     await watchView.evaluate((view) => {
       view.liveChat.dispatchEvent(new ErrorEvent('error', { message: 'Unavailable' }))
     })

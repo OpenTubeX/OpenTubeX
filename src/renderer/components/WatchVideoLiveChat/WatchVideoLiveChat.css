@@ -90,6 +90,13 @@
   overflow: hidden;
 }
 
+.fullscreenChat .liveChatSkeleton {
+  block-size: auto !important;
+  justify-content: space-evenly;
+  padding-block: 6px 12px;
+  padding-inline: 16px;
+}
+
 .liveChatDockHeader {
   display: flex;
   flex: 0 0 52px;
@@ -452,6 +459,17 @@
 
 .liveChatComments:dir(rtl) {
   mask-position: 100% 0, 0 0;
+}
+
+.liveChatComments.atLiveEdge {
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent,
+      #000 var(--live-chat-fade-size),
+      #000 100%
+    ),
+    linear-gradient(#000 0 0);
 }
 
 .liveChatCommentList {
