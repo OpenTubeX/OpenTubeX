@@ -1335,7 +1335,7 @@ Tutorial:
     Description: Select your profile in the top-right to switch profiles, change common preferences, or open all settings. Right-click it to go straight to profile selection.
   Settings Moved:
     Title: Settings have moved
-    Description: Select your profile in the top-right for quick controls. Right-click it to go straight to profile selection. The cog in that menu opens all settings.
+    Description: Select your profile in the top-right for quick controls. Right-click it to go straight to profile selection. The cog in that menu opens all settings, and About and Downloads have moved to this menu too.
 About:
   #On About page
   About: About
