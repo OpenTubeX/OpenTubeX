@@ -111,7 +111,8 @@ export function matchesAutomaticDownloadRule(video, source, rawRule, now = Date.
   }
 
   const published = Number(video.subscriptionFeedPublished ?? video.published)
-  if (rule.enabledAt !== null && (!Number.isFinite(published) || published < rule.enabledAt)) {
+  if (rule.enabledAt !== null && (!Number.isFinite(published) ||
+    Math.floor(published / 1000) < Math.floor(rule.enabledAt / 1000))) {
     return false
   }
   if (rule.maxAgeDays !== null && Number.isFinite(published) &&

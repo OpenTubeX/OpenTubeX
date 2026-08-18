@@ -99,6 +99,8 @@ const ID_REGEX = /^[\w-]{11}$/
 const CHANNEL_ID_REGEX = /^UC[\w-]{22}$/
 const AUTOMATIC_DISCOVERY_CACHE_TTL_MS = 60_000
 const AUTOMATIC_DISCOVERY_TIMEOUT_MS = 15_000
+const AUTOMATIC_METADATA_TIMEOUT_MS = 30_000
+const AUTOMATIC_METADATA_MAX_BUFFER = 1024 * 1024
 const AUTOMATIC_DISCOVERY_E2E_FIXTURE = 'automatic-download-discovery.xml'
 const MANAGED_BINARY_UPDATE_CHECK_TIMEOUT_MS = 15_000
 const AUTOMATIC_TITLE_TERM_LIMIT = 20
@@ -1409,6 +1411,56 @@ async function getAutomaticDiscoveryVideoIds(channelId) {
   return videos
 }
 
+/**
+ * Verifies a candidate directly when YouTube's RSS feed has not indexed it
+ * yet. Keep this check in the main process so a renderer cannot authorize an
+ * arbitrary video by supplying its own channel or publication metadata.
+ * @param {string} videoId
+ * @param {string} channelId
+ * @returns {Promise<number | null>} publication time in milliseconds
+ */
+async function getAutomaticVideoPublishedAt(videoId, channelId) {
+  const { source, executable } = await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp')
+
+  if (source === 'managed' && !existsSync(executable)) {
+    const result = await downloadManagedYtDlp()
+    if ('error' in result) return null
+  }
+
+  const args = [
+    '--flat-playlist',
+    '--dump-single-json',
+    '--no-playlist',
+    '--no-warnings',
+    '--no-progress',
+    '--socket-timeout',
+    '15'
+  ]
+  await pushProxyArgument(args)
+  args.push(`https://www.youtube.com/watch?v=${videoId}`)
+
+  let info
+  try {
+    const { stdout } = await execFileAsync(executable, args, {
+      timeout: AUTOMATIC_METADATA_TIMEOUT_MS,
+      maxBuffer: AUTOMATIC_METADATA_MAX_BUFFER,
+      windowsHide: true
+    })
+    info = JSON.parse(stdout)
+  } catch {
+    return null
+  }
+
+  if (info === null || typeof info !== 'object' || Array.isArray(info)) {
+    return null
+  }
+
+  const publishedAt = toFiniteNumber(info.timestamp)
+  return info.id === videoId && info.channel_id === channelId && publishedAt !== null
+    ? publishedAt * 1000
+    : null
+}
+
 function automaticTitleTerms(value) {
   return typeof value === 'string'
     ? value.split(',')
@@ -1517,9 +1569,24 @@ async function authorizeAutomaticDownload(payload, discoveryPreviouslyAuthorized
   }
 
   if (!discoveryPreviouslyAuthorized) {
-    const discoveredVideos = await getAutomaticDiscoveryVideoIds(payload.channelId)
+    let discoveredVideos = await getAutomaticDiscoveryVideoIds(payload.channelId)
     const enabledAt = automaticNumber(rule.enabledAt, Number.MAX_SAFE_INTEGER)
-    if (enabledAt === null || (discoveredVideos?.get(payload.videoId) ?? -Infinity) < enabledAt) {
+    let publishedAt = discoveredVideos?.get(payload.videoId) ?? null
+    if (enabledAt !== null && publishedAt === null) {
+      publishedAt = await getAutomaticVideoPublishedAt(payload.videoId, payload.channelId)
+      if (publishedAt !== null) {
+        if (discoveredVideos === null) {
+          discoveredVideos = new Map()
+          automaticDiscoveryCache.set(payload.channelId, {
+            expiresAt: Date.now() + AUTOMATIC_DISCOVERY_CACHE_TTL_MS,
+            videos: discoveredVideos
+          })
+        }
+        discoveredVideos.set(payload.videoId, publishedAt)
+      }
+    }
+    if (enabledAt === null || publishedAt === null ||
+      Math.floor(publishedAt / 1000) < Math.floor(enabledAt / 1000)) {
       return null
     }
   }

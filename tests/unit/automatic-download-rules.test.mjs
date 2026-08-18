@@ -50,6 +50,14 @@ test('only admits entries announced after the rule was enabled', () => {
   assert.equal(matchesAutomaticDownloadRule(video({ published: undefined }), 'videos', rule, now), false)
 })
 
+test('compares publication and activation times at feed timestamp precision', () => {
+  const enabledAt = now - 2 * DAY + 500
+  const rule = { enabledAt }
+
+  assert.equal(matchesAutomaticDownloadRule(video({ published: enabledAt - 500 }), 'videos', rule, now), true)
+  assert.equal(matchesAutomaticDownloadRule(video({ published: enabledAt - 1000 }), 'videos', rule, now), false)
+})
+
 test('applies content-type, duration, age, and title filters', () => {
   const rule = {
     enabledAt: now - 10 * DAY,
