@@ -86,7 +86,7 @@
             :aria-selected="currentTab === 'home'"
             aria-controls="homePanel"
             :tabindex="(currentTab === 'home' || currentTab === 'search') ? 0 : -1"
-            @click="changeTab('home')"
+            @click="changeTabFromPointer($event, 'home')"
             @keydown.left.right="focusTab('home', $event)"
             @keydown.enter.space.prevent="changeTab('home')"
           >
@@ -105,7 +105,7 @@
             :aria-selected="currentTab === 'videos'"
             aria-controls="videoPanel"
             :tabindex="(currentTab === 'videos' || currentTab === 'search') ? 0 : -1"
-            @click="changeTab('videos')"
+            @click="changeTabFromPointer($event, 'videos')"
             @keydown.left.right="focusTab('videos', $event)"
             @keydown.enter.space.prevent="changeTab('videos')"
           >
@@ -124,7 +124,7 @@
             :aria-selected="currentTab === 'shorts'"
             aria-controls="shortPanel"
             :tabindex="currentTab === 'shorts' ? 0 : -1"
-            @click="changeTab('shorts')"
+            @click="changeTabFromPointer($event, 'shorts')"
             @keydown.left.right="focusTab('shorts', $event)"
             @keydown.enter.space.prevent="changeTab('shorts')"
           >
@@ -143,7 +143,7 @@
             :aria-selected="currentTab === 'live'"
             aria-controls="livePanel"
             :tabindex="currentTab === 'live' ? 0 : -1"
-            @click="changeTab('live')"
+            @click="changeTabFromPointer($event, 'live')"
             @keydown.left.right="focusTab('live', $event)"
             @keydown.enter.space.prevent="changeTab('live')"
           >
@@ -162,7 +162,7 @@
             aria-controls="releasePanel"
             :tabindex="currentTab === 'releases' ? 0 : -1"
             :class="{ selectedTab: currentTab === 'releases' }"
-            @click="changeTab('releases')"
+            @click="changeTabFromPointer($event, 'releases')"
             @keydown.left.right="focusTab('releases', $event)"
             @keydown.enter.space.prevent="changeTab('releases')"
           >
@@ -181,7 +181,7 @@
             aria-controls="podcastPanel"
             :tabindex="currentTab === 'podcasts' ? 0 : -1"
             :class="{ selectedTab: currentTab === 'podcasts' }"
-            @click="changeTab('podcasts')"
+            @click="changeTabFromPointer($event, 'podcasts')"
             @keydown.left.right="focusTab('podcasts', $event)"
             @keydown.enter.space.prevent="changeTab('podcasts')"
           >
@@ -200,7 +200,7 @@
             aria-controls="coursesPanel"
             :tabindex="currentTab === 'courses' ? 0 : -1"
             :class="{ selectedTab: currentTab === 'courses' }"
-            @click="changeTab('courses')"
+            @click="changeTabFromPointer($event, 'courses')"
             @keydown.left.right="focusTab('courses', $event)"
             @keydown.enter.space.prevent="changeTab('courses')"
           >
@@ -219,7 +219,7 @@
             aria-controls="playlistPanel"
             :tabindex="currentTab === 'playlists' ? 0 : -1"
             :class="{ selectedTab: currentTab === 'playlists' }"
-            @click="changeTab('playlists')"
+            @click="changeTabFromPointer($event, 'playlists')"
             @keydown.left.right="focusTab('playlists', $event)"
             @keydown.enter.space.prevent="changeTab('playlists')"
           >
@@ -238,7 +238,7 @@
             aria-controls="communityPanel"
             :tabindex="currentTab === 'community' ? 0 : -1"
             :class="{ selectedTab: currentTab === 'community' }"
-            @click="changeTab('community')"
+            @click="changeTabFromPointer($event, 'community')"
             @keydown.left.right="focusTab('community', $event)"
             @keydown.enter.space.prevent="changeTab('community')"
           >
@@ -256,7 +256,7 @@
             aria-controls="aboutPanel"
             :tabindex="currentTab === 'about' ? 0 : -1"
             :class="{ selectedTab: currentTab === 'about' }"
-            @click="changeTab('about')"
+            @click="changeTabFromPointer($event, 'about')"
             @keydown.left.right="focusTab('about', $event)"
             @keydown.enter.space.prevent="changeTab('about')"
           >
@@ -389,9 +389,22 @@ function subscribed() {
 
 /**
  * @param {string} tab
+ * @param {boolean} moveFocus
  */
-function changeTab(tab) {
-  emit('change-tab', tab)
+function changeTab(tab, moveFocus = true) {
+  emit('change-tab', tab, moveFocus)
+}
+
+/**
+ * @param {MouseEvent} event
+ * @param {string} tab
+ */
+function changeTabFromPointer(event, tab) {
+  changeTab(tab, false)
+
+  if (event.detail > 0 && document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur()
+  }
 }
 
 /**
@@ -415,6 +428,7 @@ function focusTab(currentTab, event) {
     : visibleTabs[(index + 1) % visibleTabs.length]
 
   document.getElementById(`${tab}Tab`).focus()
+  changeTab(tab)
   store.dispatch('showOutlines')
 }
 

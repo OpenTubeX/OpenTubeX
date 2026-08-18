@@ -47,9 +47,9 @@
                 data-subscription-feed-tab="videos"
                 :tabindex="currentTab === 'videos' ? 0 : -1"
                 :class="{ selectedTab: selectedTab === 'videos' }"
-                @click="changeTab('videos')"
+                @click="changeTabFromPointer($event, 'videos')"
                 @keydown.space.enter.prevent="changeTab('videos')"
-                @keydown.left.right="focusTab($event, 'videos')"
+                @keydown.left.right="switchTab($event, 'videos')"
               >
                 <FtIcon
                   :icon="['fa', 'video']"
@@ -75,9 +75,9 @@
                 data-subscription-feed-tab="shorts"
                 :tabindex="currentTab === 'shorts' ? 0 : -1"
                 :class="{ selectedTab: selectedTab === 'shorts' }"
-                @click="changeTab('shorts')"
+                @click="changeTabFromPointer($event, 'shorts')"
                 @keydown.space.enter.prevent="changeTab('shorts')"
-                @keydown.left.right="focusTab($event, 'shorts')"
+                @keydown.left.right="switchTab($event, 'shorts')"
               >
                 <FtIcon
                   :icon="['fa', 'clapperboard']"
@@ -103,9 +103,9 @@
                 data-subscription-feed-tab="live"
                 :tabindex="currentTab === 'live' ? 0 : -1"
                 :class="{ selectedTab: selectedTab === 'live' }"
-                @click="changeTab('live')"
+                @click="changeTabFromPointer($event, 'live')"
                 @keydown.space.enter.prevent="changeTab('live')"
-                @keydown.left.right="focusTab($event, 'live')"
+                @keydown.left.right="switchTab($event, 'live')"
               >
                 <FtIcon
                   :icon="['fa', 'tower-broadcast']"
@@ -131,9 +131,9 @@
                 data-subscription-feed-tab="posts"
                 :tabindex="currentTab === 'community' ? 0 : -1"
                 :class="{ selectedTab: selectedTab === 'community' }"
-                @click="changeTab('community')"
+                @click="changeTabFromPointer($event, 'community')"
                 @keydown.space.enter.prevent="changeTab('community')"
-                @keydown.left.right="focusTab($event, 'community')"
+                @keydown.left.right="switchTab($event, 'community')"
               >
                 <FtIcon
                   :icon="['fa', 'message']"
@@ -159,9 +159,9 @@
                 data-subscription-feed-tab="all"
                 :tabindex="currentTab === 'new' ? 0 : -1"
                 :class="{ selectedTab: selectedTab === 'new' }"
-                @click="changeTab('new')"
+                @click="changeTabFromPointer($event, 'new')"
                 @keydown.space.enter.prevent="changeTab('new')"
-                @keydown.left.right="focusTab($event, 'new')"
+                @keydown.left.right="switchTab($event, 'new')"
               >
                 <FtIcon
                   :icon="['fa', 'fire']"
@@ -462,6 +462,7 @@ let tabChangeSequence = 0
 
 onMounted(() => {
   isMounted = true
+  document.addEventListener('keydown', handlePanelTabNavigation)
 
   if (isElectron) {
     removeFeedReloadRequestListener = window.ftElectron.subscriptionFeeds.onRequestReload(handleFeedReloadRequest)
@@ -471,6 +472,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   isMounted = false
   tabChangeSequence++
+  document.removeEventListener('keydown', handlePanelTabNavigation)
   removeFeedReloadRequestListener?.()
 
   if (pendingTabChangeFrame !== null) {
@@ -613,6 +615,18 @@ function changeTab(tab) {
   })
 }
 
+/**
+ * @param {MouseEvent} event
+ * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} tab
+ */
+function changeTabFromPointer(event, tab) {
+  changeTab(tab)
+
+  if (event.detail > 0 && document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur()
+  }
+}
+
 const videosTab = useTemplateRef('videosTab')
 const liveTab = useTemplateRef('liveTab')
 const shortsTab = useTemplateRef('shortsTab')
@@ -711,8 +725,9 @@ const currentAutoRefresh = computed(() => {
 /**
  * @param {KeyboardEvent} event
  * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} focusedTab
+ * @param {boolean} moveFocus
  */
-function focusTab(event, focusedTab) {
+function switchTab(event, focusedTab, moveFocus = true) {
   if (event.altKey) {
     return
   }
@@ -722,7 +737,9 @@ function focusTab(event, focusedTab) {
   const visibleTabsCached = visibleTabs.value
 
   if (visibleTabsCached.length === 1) {
-    store.commit('setOutlinesHidden', false)
+    if (moveFocus) {
+      store.commit('setOutlinesHidden', false)
+    }
     return
   }
 
@@ -740,25 +757,63 @@ function focusTab(event, focusedTab) {
     index = 0
   }
 
-  switch (visibleTabsCached[index]) {
-    case 'videos':
-      videosTab.value?.focus()
-      break
-    case 'live':
-      liveTab.value?.focus()
-      break
-    case 'shorts':
-      shortsTab.value?.focus()
-      break
-    case 'community':
-      communityTab.value?.focus()
-      break
-    case 'new':
-      newTab.value?.focus()
-      break
+  const nextTab = visibleTabsCached[index]
+
+  changeTab(nextTab)
+
+  if (moveFocus) {
+    switch (nextTab) {
+      case 'videos':
+        videosTab.value?.focus()
+        break
+      case 'live':
+        liveTab.value?.focus()
+        break
+      case 'shorts':
+        shortsTab.value?.focus()
+        break
+      case 'community':
+        communityTab.value?.focus()
+        break
+      case 'new':
+        newTab.value?.focus()
+        break
+    }
+
+    store.commit('setOutlinesHidden', false)
+  }
+}
+
+/**
+ * @param {KeyboardEvent} event
+ */
+function handlePanelTabNavigation(event) {
+  if (
+    (isTabPresented && !isTabPresented.value) ||
+    (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')
+  ) {
+    return
   }
 
-  store.commit('setOutlinesHidden', false)
+  const target = event.target
+  const isDocumentTarget = target === document.body || target === document.documentElement
+  const isPanelTarget = target instanceof Element && target.closest('#subscriptionsPanel') !== null
+  const isPointerFocusedAppTab =
+    store.getters.getOutlinesHidden &&
+    target instanceof Element &&
+    target.closest('.tab[data-tab-id]') !== null
+
+  if (!isDocumentTarget && !isPanelTarget && !isPointerFocusedAppTab) {
+    return
+  }
+
+  if (target instanceof HTMLElement && (
+    target.matches('input, textarea, select') || target.isContentEditable
+  )) {
+    return
+  }
+
+  switchTab(event, selectedTab.value, false)
 }
 
 function refreshCurrentTab() {

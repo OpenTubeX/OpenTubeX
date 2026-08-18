@@ -30,6 +30,8 @@
       <ChannelAbout
         v-if="currentTab === 'about'"
         id="aboutPanel"
+        role="tabpanel"
+        aria-labelledby="aboutTab"
         :description="description"
         :joined="joined"
         :views="viewCount"
@@ -291,7 +293,7 @@
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import autolinker from 'autolinker'
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
 import { YTNodes } from 'youtubei.js'
@@ -350,7 +352,7 @@ import {
   parseLocalPlaylistVideos,
   parseChannelHomeTab
 } from '../../helpers/api/local'
-import { useTabAvatar, useTabTitle } from '../../tabs/TabContext'
+import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
 import { setChannelShortsNavigationContext } from '../../helpers/player/shorts'
 import {
   CHANNEL_SEARCH_FILTERS,
@@ -364,8 +366,11 @@ const route = useRoute()
 const router = useRouter()
 const setTabTitle = useTabTitle()
 const setTabAvatar = useTabAvatar()
+const { isTabPresented } = useTabContext()
 
 let skipRouteChangeWatcherOnce = false
+let pendingTabRoute = null
+let isReplacingTabRoute = false
 let autoRefreshOnSortByChangeEnabled = false
 /** @type {import('youtubei.js').YT.Channel|null} */
 let channelInstance = null
@@ -665,6 +670,8 @@ watch(route, () => {
 }, { deep: true })
 
 onMounted(async () => {
+  document.addEventListener('keydown', handlePanelTabNavigation)
+
   if (route.query.url) {
     await resolveChannelUrl(route.query.url, route.params.currentTab)
     return
@@ -695,6 +702,10 @@ onMounted(async () => {
   if (oldQuery !== '') {
     newSearch(oldQuery)
   }
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', handlePanelTabNavigation)
 })
 
 /**
@@ -2439,38 +2450,107 @@ async function handleFetchMore() {
  * Replaces the current route so the selected tab is preserved without
  * adding every tab change to the navigation history.
  * @param {string} tab
+ * @param {boolean} moveFocus
  */
-async function handleTabChange(tab) {
+async function handleTabChange(tab, moveFocus = true) {
   if (tab !== currentTab.value) {
-    // skip the route change watcher so we don't reload the whole channel,
-    // we already have the data and only need to switch the visible tab
-    skipRouteChangeWatcherOnce = true
-
-    try {
-      await router.replace({
-        path: `/channel/${id.value}/${tab}`,
-        state: { skipTabRouteLoading: true }
-      })
-    } catch (failure) {
-      skipRouteChangeWatcherOnce = false
-
-      if (!isNavigationFailure(failure, NavigationFailureType.duplicated)) {
-        throw failure
-      }
-    }
-
-    skipRouteChangeWatcherOnce = false
+    changeTab(tab, moveFocus)
+    await replaceTabRoute(tab)
+  } else {
+    changeTab(tab, moveFocus)
   }
-
-  changeTab(tab)
 }
 
-function changeTab(tab) {
+/**
+ * Coalesces rapid tab changes so their route replacements cannot race the
+ * route watcher and reload the channel.
+ * @param {string} tab
+ */
+async function replaceTabRoute(tab) {
+  pendingTabRoute = tab
+
+  if (isReplacingTabRoute) {
+    return
+  }
+
+  isReplacingTabRoute = true
+
+  try {
+    while (pendingTabRoute !== null) {
+      const nextTab = pendingTabRoute
+      pendingTabRoute = null
+
+      // We already have the data and only need to switch the visible tab.
+      skipRouteChangeWatcherOnce = true
+
+      try {
+        await router.replace({
+          path: `/channel/${id.value}/${nextTab}`,
+          state: { skipTabRouteLoading: true }
+        })
+      } catch (failure) {
+        if (!isNavigationFailure(failure, NavigationFailureType.duplicated)) {
+          throw failure
+        }
+      } finally {
+        skipRouteChangeWatcherOnce = false
+      }
+    }
+  } finally {
+    isReplacingTabRoute = false
+  }
+}
+
+/**
+ * @param {KeyboardEvent} event
+ */
+function handlePanelTabNavigation(event) {
+  if (
+    (isTabPresented && !isTabPresented.value) ||
+    event.altKey ||
+    (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')
+  ) {
+    return
+  }
+
+  const target = event.target
+  const isDocumentTarget = target === document.body || target === document.documentElement
+  const isPanelTarget = target instanceof Element && target.closest('[role="tabpanel"]') !== null
+  const isPointerFocusedAppTab =
+    store.getters.getOutlinesHidden &&
+    target instanceof Element &&
+    target.closest('.tab[data-tab-id]') !== null
+
+  if (!isDocumentTarget && !isPanelTarget && !isPointerFocusedAppTab) {
+    return
+  }
+
+  if (target instanceof HTMLElement && (
+    target.matches('input, textarea, select') || target.isContentEditable
+  )) {
+    return
+  }
+
+  const visibleTabs = tabInfoValues.value
+  const currentIndex = visibleTabs.indexOf(currentTab.value)
+
+  if (currentIndex === -1) {
+    return
+  }
+
+  const offset = event.key === 'ArrowLeft' ? -1 : 1
+  const nextIndex = (currentIndex + offset + visibleTabs.length) % visibleTabs.length
+
+  event.preventDefault()
+  handleTabChange(visibleTabs[nextIndex], false)
+}
+
+function changeTab(tab, moveFocus = true) {
   // `newTabNode` can be `null` when `tab` === "search"
   const newTabNode = document.getElementById(`${tab}Tab`)
   currentTab.value = tab
 
-  if (newTabNode != null) {
+  if (moveFocus && newTabNode != null) {
     newTabNode.focus()
     store.commit('setOutlinesHidden', false)
   }
