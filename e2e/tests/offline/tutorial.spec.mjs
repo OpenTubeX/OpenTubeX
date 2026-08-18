@@ -102,6 +102,34 @@ test('keeps the tutorial actions reachable in a short window', async ({ app, pag
   })).toBe(true)
 })
 
+test('resets the managed content viewport after a shorter step replaces it', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].setSize(800, 420)
+  })
+  await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
+  await page.reload()
+
+  const tutorial = page.locator('.tutorialCard')
+  for (let step = 0; step < 4; step++) {
+    await tutorial.getByRole('button', { name: 'Next' }).click()
+  }
+  await expect(tutorial).toHaveAccessibleName('Make it yours')
+
+  const scrollViewport = tutorial.locator('.tutorialScroll')
+  const scrollbar = scrollViewport.locator(':scope > .os-scrollbar-vertical')
+  await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+  await scrollViewport.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scrollViewport.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+  await tutorial.getByRole('button', { name: 'Next' }).click()
+  await expect(tutorial).toHaveAccessibleName('Bring your data with you')
+  await expect.poll(() => scrollViewport.evaluate(element => ({
+    scrollTop: element.scrollTop,
+    scrollRange: element.scrollHeight - element.clientHeight
+  }))).toEqual({ scrollTop: 0, scrollRange: 0 })
+  await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+})
+
 test.describe('right-to-left layout', () => {
   test.use({ seed: { settings: { currentLocale: 'ar' } } })
 

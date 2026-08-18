@@ -45,71 +45,82 @@
         >
           {{ step.title }}
         </h2>
-        <p :id="descriptionId">
-          {{ step.description }}
-        </p>
-        <FtSelect
-          v-if="step.showTabLayoutSelect"
-          class="tutorialTabLayoutSelect"
-          :placeholder="t('Settings.Theme Settings.Tab Layout.Tab Layout')"
-          :value="tabBarPosition"
-          setting-key="tabBarPosition"
-          :select-names="tabBarPositionNames"
-          :select-values="TAB_BAR_POSITIONS"
-          :icon="['fac', 'horizontal-tabs']"
-          @change="updateTabBarPosition"
-        />
         <div
-          v-if="step.showAppearanceSelects"
-          class="tutorialSelects"
+          ref="scrollRef"
+          v-overlay-scrollbars
+          class="tutorialScroll"
         >
-          <FtSelect
-            :placeholder="t('Settings.Theme Settings.Base Theme.Base Theme')"
-            :value="baseTheme"
-            setting-key="baseTheme"
-            :select-names="baseThemeNames"
-            :select-values="BASE_THEME_VALUES"
-            :icon="['fas', 'palette']"
-            @change="updateBaseTheme"
-          />
-          <FtSelect
-            :placeholder="t('Settings.Player Settings.Default Quality.Default Quality')"
-            :value="defaultQuality"
-            setting-key="defaultQuality"
-            :select-names="qualityNames"
-            :select-values="qualityValues"
-            :icon="['fas', 'photo-film']"
-            @change="updateDefaultQuality"
-          />
-        </div>
-        <div class="tutorialActions">
-          <FtButton
-            v-if="steps.length > 1 && stepIndex === 0"
-            :label="t('Tutorial.Skip')"
-            :text-color="null"
-            :background-color="null"
-            @click="finishTutorial"
-          />
-          <FtButton
-            v-if="step.showImportAction"
-            :label="t('Tutorial.Import Data.Not Now')"
-            :text-color="null"
-            :background-color="null"
-            @click="finishTutorial"
-          />
-          <FtButton
-            v-if="step.showImportAction"
-            :label="t('Tutorial.Import Data.Action')"
-            :icon="['fas', 'database']"
-            @click="openDataImport"
-          />
-          <FtButton
-            v-else
-            ref="primaryButtonRef"
-            :label="primaryButtonLabel"
-            :icon="isLastStep ? ['fas', 'check'] : ['fas', 'arrow-right']"
-            @click="advanceTutorial"
-          />
+          <div
+            ref="contentRef"
+            class="tutorialContent"
+          >
+            <p :id="descriptionId">
+              {{ step.description }}
+            </p>
+            <FtSelect
+              v-if="step.showTabLayoutSelect"
+              class="tutorialTabLayoutSelect"
+              :placeholder="t('Settings.Theme Settings.Tab Layout.Tab Layout')"
+              :value="tabBarPosition"
+              setting-key="tabBarPosition"
+              :select-names="tabBarPositionNames"
+              :select-values="TAB_BAR_POSITIONS"
+              :icon="['fac', 'horizontal-tabs']"
+              @change="updateTabBarPosition"
+            />
+            <div
+              v-if="step.showAppearanceSelects"
+              class="tutorialSelects"
+            >
+              <FtSelect
+                :placeholder="t('Settings.Theme Settings.Base Theme.Base Theme')"
+                :value="baseTheme"
+                setting-key="baseTheme"
+                :select-names="baseThemeNames"
+                :select-values="BASE_THEME_VALUES"
+                :icon="['fas', 'palette']"
+                @change="updateBaseTheme"
+              />
+              <FtSelect
+                :placeholder="t('Settings.Player Settings.Default Quality.Default Quality')"
+                :value="defaultQuality"
+                setting-key="defaultQuality"
+                :select-names="qualityNames"
+                :select-values="qualityValues"
+                :icon="['fas', 'photo-film']"
+                @change="updateDefaultQuality"
+              />
+            </div>
+            <div class="tutorialActions">
+              <FtButton
+                v-if="steps.length > 1 && stepIndex === 0"
+                :label="t('Tutorial.Skip')"
+                :text-color="null"
+                :background-color="null"
+                @click="finishTutorial"
+              />
+              <FtButton
+                v-if="step.showImportAction"
+                :label="t('Tutorial.Import Data.Not Now')"
+                :text-color="null"
+                :background-color="null"
+                @click="finishTutorial"
+              />
+              <FtButton
+                v-if="step.showImportAction"
+                :label="t('Tutorial.Import Data.Action')"
+                :icon="['fas', 'database']"
+                @click="openDataImport"
+              />
+              <FtButton
+                v-else
+                ref="primaryButtonRef"
+                :label="primaryButtonLabel"
+                :icon="isLastStep ? ['fas', 'check'] : ['fas', 'arrow-right']"
+                @click="advanceTutorial"
+              />
+            </div>
+          </div>
         </div>
       </FtCard>
     </div>
@@ -124,6 +135,7 @@ import { useI18n } from 'vue-i18n'
 import store from '../../store/index'
 import { normalizeTabBarPosition, TAB_BAR_POSITIONS } from '../../constants/tabBarPosition'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtCard from '../ft-card/ft-card.vue'
@@ -146,11 +158,14 @@ const promptId = useId()
 const cardRef = useTemplateRef('cardRef')
 const primaryButtonRef = useTemplateRef('primaryButtonRef')
 const titleRef = useTemplateRef('titleRef')
+const scrollRef = useTemplateRef('scrollRef')
+const contentRef = useTemplateRef('contentRef')
 const stepIndex = ref(0)
 const targetRect = ref(null)
 const cardStyle = ref({})
 let updateFrame = null
 let lastActiveElement = null
+let contentResizeObserver = null
 
 const BASE_THEME_VALUES = [
   'system', 'light', 'dark', 'black', 'nordic', 'hotPink', 'pastelPink',
@@ -287,7 +302,10 @@ onMounted(() => {
   window.addEventListener('scroll', schedulePositionUpdate, true)
   document.addEventListener('keydown', handleDocumentKeydown, true)
   updatePosition()
-  nextTick(() => primaryButtonRef.value?.$el.focus())
+  nextTick(() => {
+    primaryButtonRef.value?.$el.focus()
+    observeTutorialContent()
+  })
 })
 
 onBeforeUnmount(() => {
@@ -295,6 +313,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', schedulePositionUpdate)
   window.removeEventListener('scroll', schedulePositionUpdate, true)
   document.removeEventListener('keydown', handleDocumentKeydown, true)
+  contentResizeObserver?.disconnect()
   store.commit('removeOpenPrompt', promptId)
   unlockBodyScroll()
   nextTick(() => lastActiveElement?.focus())
@@ -306,6 +325,21 @@ function schedulePositionUpdate() {
     updateFrame = null
     updatePosition()
   })
+}
+
+function clampTutorialScroll() {
+  if (scrollRef.value && contentRef.value) {
+    clampOverlayScrollTop(scrollRef.value, contentRef.value)
+  }
+}
+
+function observeTutorialContent() {
+  contentResizeObserver?.disconnect()
+  if (!contentRef.value) return
+
+  contentResizeObserver = new ResizeObserver(clampTutorialScroll)
+  contentResizeObserver.observe(contentRef.value)
+  clampTutorialScroll()
 }
 
 async function updatePosition() {
@@ -434,15 +468,18 @@ async function openDataImport() {
   store.dispatch('showSettingsWindow')
 }
 
-function advanceTutorial() {
+async function advanceTutorial() {
   if (isLastStep.value) {
     finishTutorial()
     return
   }
 
   stepIndex.value++
-  updatePosition()
-  nextTick(() => titleRef.value?.focus())
+  await nextTick()
+  if (scrollRef.value) restoreOverlayScrollTop(scrollRef.value, 0)
+  clampTutorialScroll()
+  await updatePosition()
+  titleRef.value?.focus()
 }
 
 function finishTutorial() {
