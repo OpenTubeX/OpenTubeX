@@ -1572,7 +1572,8 @@ async function authorizeAutomaticDownload(payload, discoveryPreviouslyAuthorized
       publishedAt = await getAutomaticVideoPublishedAt(payload.videoId, payload.channelId)
       if (publishedAt !== null) discoveredVideos?.set(payload.videoId, publishedAt)
     }
-    if (enabledAt === null || publishedAt === null || publishedAt < enabledAt) {
+    if (enabledAt === null || publishedAt === null ||
+      Math.floor(publishedAt / 1000) < Math.floor(enabledAt / 1000)) {
       return null
     }
   }

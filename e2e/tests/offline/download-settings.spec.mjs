@@ -25,7 +25,7 @@ const PROFILES = [
 ]
 const AUTOMATIC_RULE = {
   template: 'video:best',
-  enabledAt: Date.parse('2026-08-14T00:00:00Z'),
+  enabledAt: Date.parse('2026-08-14T01:00:00.500Z'),
   includeVideos: true,
   minDurationSeconds: 60,
   maxDurationSeconds: 180,
