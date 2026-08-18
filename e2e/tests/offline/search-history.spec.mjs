@@ -171,6 +171,24 @@ test.describe('search history suggestions', () => {
     await expect(suggestions(page)).toHaveCount(1)
     await expect(suggestions(page).first()).toContainText('baking bread')
   })
+
+  test('typing a different search immediately after removing a suggestion works', async ({ page }) => {
+    const pageErrors = []
+    page.on('pageerror', (error) => pageErrors.push(error.message))
+
+    const searchInput = page.locator(sel.searchInput)
+    await searchInput.fill('android tutorial')
+
+    const matchingEntry = suggestions(page).first()
+    await matchingEntry.hover()
+    await matchingEntry.locator('.removeButton').click()
+
+    await searchInput.fill('different search')
+    await searchInput.press('Enter')
+
+    await expect(page).toHaveURL(/#\/search\/different%20search/)
+    expect(pageErrors).toEqual([])
+  })
 })
 
 test.describe('search history URL links', () => {
