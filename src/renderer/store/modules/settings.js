@@ -25,7 +25,6 @@ import { resolveBaseTheme } from '../../../appearanceSettings.js'
 import { resolveColor } from '../../helpers/colors.js'
 import { DEFAULT_APP_FONT, normalizeAppFont } from '../../helpers/appFont.js'
 
-const YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING = 'ytDlpPlaybackEngineDefaultMigration'
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
 
 /*
@@ -243,7 +242,7 @@ const state = {
   externalPlayerIgnoreDefaultArgs: false,
   externalPlayerCustomArgs: '[]',
   showAddedExternalPlayerCustomArgs: true,
-  videoPlaybackEngine: 'yt-dlp',
+  videoPlaybackEngine: 'built-in',
   ytDlpSource: 'system',
   ytDlpChannel: 'stable',
   ytDlpPath: '',
@@ -947,28 +946,6 @@ const customActions = {
           await DBSettingHandlers.upsert(CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING, true)
         } catch (error) {
           console.error('Failed to migrate saved channel settings sync', error)
-        }
-      }
-
-      // Switch every existing installation to the new default once, while allowing
-      // users to select the built-in engine again afterwards.
-      const hasMigratedPlaybackEngine = userSettings.some(
-        entry => entry._id === YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING
-      )
-      if (!hasMigratedPlaybackEngine) {
-        try {
-          // Invidious media proxying cannot be passed to yt-dlp. Keep the built-in
-          // engine when it is the user's only protection against direct requests.
-          if (!state.proxyVideos || state.useProxy) {
-            await DBSettingHandlers.upsert('videoPlaybackEngine', 'yt-dlp')
-            commit('setVideoPlaybackEngine', 'yt-dlp')
-          }
-
-          // Persist this only after the engine update above succeeds, so a failed
-          // write is retried on the next launch.
-          await DBSettingHandlers.upsert(YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING, true)
-        } catch (error) {
-          console.error('Failed to migrate the playback engine to yt-dlp', error)
         }
       }
 

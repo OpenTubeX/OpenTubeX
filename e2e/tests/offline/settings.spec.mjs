@@ -2267,43 +2267,27 @@ test.describe('dark theme settings', () => {
   })
 })
 
-test.describe('playback engine migration', () => {
-  test.use({ seed: { settings: { videoPlaybackEngine: 'built-in' } } })
-
-  test('switches existing users to yt-dlp only once', async ({ app }) => {
-    await expect.poll(async () => {
-      const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
-      )
-      return {
-        engine: settings.videoPlaybackEngine,
-        migrated: settings.ytDlpPlaybackEngineDefaultMigration
-      }
-    }).toEqual({ engine: 'yt-dlp', migrated: true })
-
+test.describe('playback engine default', () => {
+  test('uses the built-in engine for new users', async ({ app }) => {
     await goTo(app.page, 'settings')
-    const generalSection = app.page.locator('[data-section="general"]')
-    const playbackEngine = generalSection.locator('.select').filter({ hasText: 'Stream extraction method' })
-    await expect(playbackEngine.locator('select')).toHaveValue('yt-dlp')
     await expect(
-      app.page.locator('[data-section="experimental"] .select').filter({ hasText: 'Stream extraction method' })
-    ).toHaveCount(0)
-
-    await playbackEngine.locator('select').selectOption('built-in')
-    await expect.poll(async () => {
-      const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
-      )
-      return settings.videoPlaybackEngine
-    }).toBe('built-in')
-
-    const { page } = await app.relaunch()
-    await goTo(page, 'settings')
-    await expect(
-      page.locator('[data-section="general"] .select')
+      app.page.locator('[data-section="general"] .select')
         .filter({ hasText: 'Stream extraction method' })
         .locator('select')
     ).toHaveValue('built-in')
+  })
+})
+
+test.describe('saved playback engine', () => {
+  test.use({ seed: { settings: { videoPlaybackEngine: 'yt-dlp' } } })
+
+  test('preserves the existing user choice', async ({ app }) => {
+    await goTo(app.page, 'settings')
+    await expect(
+      app.page.locator('[data-section="general"] .select')
+        .filter({ hasText: 'Stream extraction method' })
+        .locator('select')
+    ).toHaveValue('yt-dlp')
   })
 })
 
@@ -2341,30 +2325,6 @@ test.describe('Downloads placement migration', () => {
     })
 
     await expect(app.page.locator('.topNav .downloadsButton')).toBeVisible()
-  })
-})
-
-test.describe('playback engine proxy migration', () => {
-  test.use({
-    seed: {
-      settings: {
-        proxyVideos: true,
-        useProxy: false,
-        videoPlaybackEngine: 'built-in'
-      }
-    }
-  })
-
-  test('preserves Invidious media proxying for existing users', async ({ app }) => {
-    await expect.poll(async () => {
-      const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
-      )
-      return {
-        engine: settings.videoPlaybackEngine,
-        migrated: settings.ytDlpPlaybackEngineDefaultMigration
-      }
-    }).toEqual({ engine: 'built-in', migrated: true })
   })
 })
 
