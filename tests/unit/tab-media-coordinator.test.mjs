@@ -109,3 +109,97 @@ test('clears the skip actions a source no longer offers', (t) => {
 
   assert.equal(handlers.get('nexttrack'), null)
 })
+
+test('dispatches native menu actions to the media session owner', (t) => {
+  const dispatched = []
+  const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
+
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: {
+      mediaSession: {
+        metadata: null,
+        playbackState: 'none',
+        setActionHandler () {}
+      }
+    }
+  })
+  t.after(() => {
+    tabMediaCoordinator.unregister('dock-tab')
+    if (navigatorDescriptor) {
+      Object.defineProperty(globalThis, 'navigator', navigatorDescriptor)
+    } else {
+      delete globalThis.navigator
+    }
+  })
+
+  tabMediaCoordinator.setPresented('dock-tab')
+  tabMediaCoordinator.setActionHandlers('dock-tab', 'player', {
+    play: () => dispatched.push('play'),
+    pause: () => dispatched.push('pause')
+  })
+  tabMediaCoordinator.setActionHandlers('dock-tab', 'playlist', {
+    previoustrack: () => dispatched.push('previous'),
+    nexttrack: () => dispatched.push('next')
+  })
+  tabMediaCoordinator.setPlaybackState('dock-tab', 'playing')
+
+  tabMediaCoordinator.dispatchAction('play')
+  tabMediaCoordinator.dispatchAction('pause')
+  tabMediaCoordinator.dispatchAction('previoustrack')
+  tabMediaCoordinator.dispatchAction('nexttrack')
+  tabMediaCoordinator.dispatchAction('unsupported')
+
+  assert.deepEqual(dispatched, ['play', 'pause', 'previous', 'next'])
+})
+
+test('reports playback starts without treating owner reselection as a new start', (t) => {
+  const states = []
+  const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
+  const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'window')
+
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: {
+      mediaSession: {
+        metadata: null,
+        playbackState: 'none',
+        setActionHandler () {}
+      }
+    }
+  })
+  Object.defineProperty(globalThis, 'window', {
+    configurable: true,
+    value: {
+      ftElectron: {
+        tabs: {
+          setMediaSessionState: state => states.push(state)
+        }
+      }
+    }
+  })
+  t.after(() => {
+    tabMediaCoordinator.unregister('first-playing-tab')
+    tabMediaCoordinator.unregister('second-playing-tab')
+    for (const [property, descriptor] of [
+      ['navigator', navigatorDescriptor],
+      ['window', windowDescriptor]
+    ]) {
+      if (descriptor) {
+        Object.defineProperty(globalThis, property, descriptor)
+      } else {
+        delete globalThis[property]
+      }
+    }
+  })
+
+  tabMediaCoordinator.setPresented('first-playing-tab')
+  tabMediaCoordinator.setPlaybackState('first-playing-tab', 'playing')
+  assert.equal(states.at(-1).playbackStarted, true)
+
+  tabMediaCoordinator.setPlaybackState('second-playing-tab', 'playing')
+  assert.equal(states.at(-1).playbackStarted, false)
+
+  tabMediaCoordinator.setPresented('second-playing-tab')
+  assert.equal(states.at(-1).playbackStarted, false)
+})

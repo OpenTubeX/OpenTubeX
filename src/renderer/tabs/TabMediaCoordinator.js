@@ -73,7 +73,7 @@ function getActionHandlers(entry) {
   return handlers
 }
 
-function applyOwner() {
+function applyOwner(playbackStartedTabId = null) {
   if (!('mediaSession' in navigator)) {
     return
   }
@@ -92,6 +92,14 @@ function applyOwner() {
       // The action is not supported on this platform.
     }
   }
+
+  globalThis.window?.ftElectron?.tabs?.setMediaSessionState?.({
+    playbackState: owner?.playbackState ?? 'none',
+    playbackStarted: ownerTabId === playbackStartedTabId && owner?.playbackState === 'playing',
+    hasMetadata: owner?.metadata != null,
+    actions: Object.keys(actionHandlers)
+      .filter(action => typeof actionHandlers[action] === 'function')
+  })
 }
 
 function applyPowerSaveState() {
@@ -114,6 +122,17 @@ function applyPowerSaveState() {
 }
 
 export const tabMediaCoordinator = {
+  dispatchAction(action) {
+    if (!MEDIA_SESSION_ACTIONS.includes(action)) {
+      return
+    }
+
+    const handler = getActionHandlers(mediaByTabId.get(ownerTabId))[action]
+    if (typeof handler === 'function') {
+      handler()
+    }
+  },
+
   setPresented(tabId) {
     presentedTabId = tabId
     applyOwner()
@@ -141,7 +160,7 @@ export const tabMediaCoordinator = {
     if (playbackState === 'playing') {
       entry.lastPlayedAt = ++playSequence
     }
-    applyOwner()
+    applyOwner(playbackState === 'playing' ? tabId : null)
     applyPowerSaveState()
   },
 
@@ -196,5 +215,9 @@ export const tabMediaCoordinator = {
     applyPowerSaveState()
   }
 }
+
+globalThis.window?.ftElectron?.tabs?.onMediaSessionAction?.((action) => {
+  tabMediaCoordinator.dispatchAction(action)
+})
 
 export default tabMediaCoordinator

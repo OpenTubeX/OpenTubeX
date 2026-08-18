@@ -3027,11 +3027,13 @@ function cloneRoute(route) {
  * @param {object} [options]
  * @param {(browserWindow: import('electron').BrowserWindow) => boolean | Promise<boolean>} [options.confirmCloseWindow]
  * @param {(browserWindow: import('electron').BrowserWindow) => void} [options.markWindowCloseConfirmed]
+ * @param {(manager: TabManager, state: object) => void} [options.mediaSessionStateChanged]
  */
 export async function setupTabsIPC(options = {}) {
   const {
     confirmCloseWindow = () => true,
-    markWindowCloseConfirmed = () => {}
+    markWindowCloseConfirmed = () => {},
+    mediaSessionStateChanged = () => {}
   } = options
 
   // Loaded before the first window exists, so a tab can never be closed while
@@ -3383,6 +3385,13 @@ export async function setupTabsIPC(options = {}) {
     if (manager && tab && typeof playbackState === 'string') {
       tab.isPlaying = playbackState === 'playing'
       manager._broadcastStateUpdate()
+    }
+  })
+
+  ipcMain.on(IpcChannels.TABS_SET_MEDIA_SESSION_STATE, (event, state) => {
+    const manager = getManager(event)
+    if (manager && state && typeof state === 'object') {
+      mediaSessionStateChanged(manager, state)
     }
   })
 
