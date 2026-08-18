@@ -8,3 +8,6 @@ reviews:
       - "Translations update from Weblate"
     labels:
       - "!translations"
+  auto_review:
+    enabled: false
+    auto_incremental_review: false
