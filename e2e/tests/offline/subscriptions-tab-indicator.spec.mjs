@@ -81,50 +81,77 @@ test.describe('subscriptions feed tab indicator', () => {
     await expect(page.locator('.tabsIndicator')).toHaveCSS('transition-property', 'transform')
   })
 
-  test('starts moving before the new feed is rendered', async ({ page }) => {
+  test('renders the selected feed by the next frame', async ({ page }) => {
     await goTo(page, 'subscriptions')
 
     await expect(page.getByText('video video 000')).toBeVisible()
     await expect(page.locator('.tabsIndicator')).toBeVisible()
 
-    // Record whether the indicator is repositioned before or after the panel
-    // with the new feed is put into the DOM
-    await page.evaluate(() => {
-      window.__mutations = []
+    const state = await page.evaluate(() => {
+      document.querySelector('[data-subscription-feed-tab="shorts"]').click()
 
-      const observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-          if (mutation.type === 'attributes') {
-            if (mutation.target.classList.contains('tabsIndicator')) {
-              window.__mutations.push('indicator')
-            }
-          } else if ([...mutation.addedNodes, ...mutation.removedNodes].some((node) => {
-            return node.nodeType === Node.ELEMENT_NODE &&
-              (node.id === 'subscriptionsPanel' || node.classList.contains('ft-list-video'))
-          })) {
-            window.__mutations.push('panel')
-          }
-        }
-      })
-
-      observer.observe(document.querySelector('.subscriptionsPage'), {
-        subtree: true,
-        childList: true,
-        attributes: true,
-        attributeFilter: ['style']
+      return new Promise(resolve => {
+        requestAnimationFrame(() => {
+          resolve({
+            selectedTab: document.querySelector('[role="tab"][aria-selected="true"]')
+              ?.dataset.subscriptionFeedTab,
+            panelText: document.querySelector('#subscriptionsPanel')?.textContent
+          })
+        })
       })
     })
 
-    await page.locator('[data-subscription-feed-tab="shorts"]').click()
-    await expect(page.getByText('short video 000')).toBeVisible()
+    expect(state.selectedTab).toBe('shorts')
+    expect(state.panelText).toContain('short video 000')
+    expect(state.panelText).not.toContain('video video 000')
+  })
 
-    const mutations = await page.evaluate(() => window.__mutations)
+  test('animates through an intermediate position after rendering a large feed', async ({ page }) => {
+    await goTo(page, 'subscriptions')
 
-    expect(mutations.indexOf('indicator')).toBeGreaterThanOrEqual(0)
-    expect(
-      mutations.indexOf('indicator'),
-      `mutation order: ${mutations.slice(0, 5).join(', ')}`
-    ).toBeLessThan(mutations.indexOf('panel'))
+    await expect(page.getByText('video video 000')).toBeVisible()
+    await expect(page.locator('.tabsIndicator')).toBeVisible()
+
+    const animation = await page.evaluate(() => {
+      const indicator = document.querySelector('.tabsIndicator')
+      const targetTab = document.querySelector('[data-subscription-feed-tab="shorts"]')
+      const startX = indicator.getBoundingClientRect().x
+      const endX = targetTab.getBoundingClientRect().x
+
+      return new Promise(resolve => {
+        let sawIntermediatePosition = false
+        let animationFrame = 0
+
+        const samplePosition = () => {
+          const currentX = indicator.getBoundingClientRect().x
+          const progress = (currentX - startX) / (endX - startX)
+
+          if (progress > 0.05 && progress < 0.95) {
+            sawIntermediatePosition = true
+          }
+
+          animationFrame = requestAnimationFrame(samplePosition)
+        }
+
+        indicator.addEventListener('transitionend', event => {
+          if (event.propertyName !== 'transform') {
+            return
+          }
+
+          cancelAnimationFrame(animationFrame)
+          resolve({
+            elapsedTime: event.elapsedTime,
+            sawIntermediatePosition
+          })
+        }, { once: true })
+
+        animationFrame = requestAnimationFrame(samplePosition)
+        targetTab.click()
+      })
+    })
+
+    expect(animation.sawIntermediatePosition).toBe(true)
+    expect(animation.elapsedTime).toBeCloseTo(0.2, 2)
   })
 
   test('ends up aligned with the selected tab', async ({ page, attachScreenshot }) => {
@@ -159,8 +186,7 @@ test.describe('subscriptions feed tab indicator', () => {
 
     await expect(page.getByText('video video 000')).toBeVisible()
 
-    // Both clicks happen in the same task, so the second one lands while the
-    // first tab change is still deferred
+    // Both clicks happen in the same task, so the last activation must win.
     await page.evaluate(() => {
       document.querySelector('[data-subscription-feed-tab="shorts"]').click()
       document.querySelector('[data-subscription-feed-tab="videos"]').click()
@@ -183,23 +209,7 @@ test.describe('subscriptions feed tab indicator', () => {
     expect(Math.abs(indicator - tab)).toBeLessThan(1)
   })
 
-  test('completes a pending switch when the selected tab is clicked again', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-
-    await expect(page.getByText('video video 000')).toBeVisible()
-    await page.locator('[data-subscription-feed-tab="shorts"]').click()
-
-    // Let the deferred swap reach its first animation frame, then activate the
-    // visually selected tab again before the second frame replaces the panel.
-    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)))
-    await page.locator('[data-subscription-feed-tab="shorts"]').click()
-
-    await expect(page.locator('.tab.selectedTab')).toHaveText(/Shorts/)
-    await expect(page.getByText('short video 000')).toBeVisible()
-    await expect(page.getByText('video video 000')).toHaveCount(0)
-  })
-
-  test('does not restore a pending feed after every tab is hidden', async ({ page }) => {
+  test('keeps the panel hidden after every tab is hidden', async ({ page }) => {
     await goTo(page, 'subscriptions')
 
     await expect(page.getByText('video video 000')).toBeVisible()
@@ -214,10 +224,6 @@ test.describe('subscriptions feed tab indicator', () => {
         store.dispatch('updateHideSubscriptionsCommunity', true)
       ])
     })
-
-    // Wait long enough that the stale second animation frame would have put
-    // the shorts panel back after the all-tabs-hidden state was selected.
-    await page.waitForTimeout(100)
 
     await expect(page.locator('.tabs [role="tab"]')).toHaveCount(0)
     await expect(page.locator('#subscriptionsPanel')).toHaveCount(0)
