@@ -289,7 +289,7 @@ import SubscriptionsPosts from '../../components/SubscriptionsPosts.vue'
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { getIconForSortPreference } from '../../helpers/utils'
 import store from '../../store/index'
-import { useTabContext } from '../../tabs/TabContext'
+import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { useRefreshAllSubscriptionFeeds } from '../../composables/useRefreshAllSubscriptionFeeds'
 import {
@@ -400,6 +400,20 @@ const tabScrollPositions = {
 }
 /** @type {'videos' | 'shorts' | 'live' | 'community' | 'new' | null} */
 let scrollPositionOwnerTab = currentTab.value
+let restoreScrollOnActivate = false
+
+useTabLifecycle({
+  activate: () => {
+    if (!restoreScrollOnActivate) {
+      return
+    }
+
+    restoreScrollOnActivate = false
+    const value = currentTab.value
+    window.scrollTo(0, value === null ? 0 : tabScrollPositions[value])
+    scrollPositionOwnerTab = value
+  }
+})
 
 const subscriptionRefreshTimestamps = computed(() => [
   store.getters.getSubscriptionFeedLastRefreshTimestamp,
@@ -481,8 +495,16 @@ watch(currentTab, async (value) => {
     localStorage.removeItem(currentTabStorageKey)
   }
 
-  if (!isMounted || (isElectron && isTabPresented?.value !== true)) {
+  if (!isMounted) {
     scrollPositionOwnerTab = value
+    return
+  }
+
+  if (isElectron && isTabPresented?.value !== true) {
+    // The shared window scroll still belongs to the presented logical tab.
+    // Restore this feed only after tab activation restores its page-level scroll.
+    scrollPositionOwnerTab = null
+    restoreScrollOnActivate = true
     return
   }
 

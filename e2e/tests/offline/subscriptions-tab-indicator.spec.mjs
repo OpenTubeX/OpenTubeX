@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 
 const now = Date.now()
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
@@ -248,6 +248,29 @@ test.describe('subscriptions feed tab indicator', () => {
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
     await expect(page.locator('[data-subscription-feed-tab="shorts"]'))
       .toHaveAttribute('aria-selected', 'true')
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+  })
+
+  test('restores the fallback feed scroll after a background visibility change', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByText('video video 000')).toBeVisible()
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+
+    await page.locator(sel.newTabButton).click()
+    await goTo(page, 'settings')
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateHideSubscriptionsVideos', true)
+    })
+
+    await page.locator(sel.tabs).first().click()
+    const subscriptionsView = page.locator('.tabContent[aria-hidden="false"]')
+
+    await expect(subscriptionsView.locator('[data-subscription-feed-tab="shorts"]'))
+      .toHaveAttribute('aria-selected', 'true')
+    await expect(subscriptionsView.getByText('short video 000')).toBeVisible()
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
   })
 
