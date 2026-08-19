@@ -258,7 +258,7 @@ test.describe('automatic download authorization', () => {
       'done',
       `printf '%s\\n' "$@" > ${argumentsFile}`,
       `while [ ! -f "${releaseDownloadFile}" ]; do sleep 0.05; done`,
-      `printf '__OPENTUBEX_FILE__:ccccccccccc\\t120\\t1920\\t1080\\t%s\\n' '${downloadedFile}'`
+      `printf '__OPENTUBEX_FILE__:ccccccccccc\\t120\\t640\\t360\\t%s\\n' '${downloadedFile}'`
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
