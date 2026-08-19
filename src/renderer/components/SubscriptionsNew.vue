@@ -80,12 +80,14 @@ import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
+import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
 import { useRefreshAllSubscriptionFeeds } from '../composables/useRefreshAllSubscriptionFeeds'
 import { isHistoryEntryWatched } from '../helpers/history'
 import { isVideoHiddenByPreferences } from '../helpers/subscriptions'
 
 const { t } = useI18n()
 const tabUi = useTemplateRef('tabUi')
+useKeepAliveEffectScope()
 const {
   activeSubscriptionIds,
   attemptedFetch,

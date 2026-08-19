@@ -19,6 +19,7 @@ import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
+import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
 import { useRelativeTimeClock } from '../composables/useRelativeTimeClock'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
 import {
@@ -29,6 +30,7 @@ import { getCachedRelativeTimeFormat, getCachedShortDateTimeFormat, getRelativeT
 
 const { locale, t } = useI18n()
 const tabUi = useTemplateRef('tabUi')
+useKeepAliveEffectScope()
 
 const isLoading = ref(true)
 const videoList = shallowRef([])

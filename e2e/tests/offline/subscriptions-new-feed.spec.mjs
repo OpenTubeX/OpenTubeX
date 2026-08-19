@@ -191,7 +191,9 @@ test.describe('new subscriptions feed', () => {
     const video = page.locator('.ft-list-video').filter({
       has: page.getByText('New video', { exact: true })
     })
+    const markAllAsSeen = page.getByRole('button', { name: 'Mark all as seen' })
     await expect(video.locator('.newContentDot')).toBeVisible()
+    await expect(markAllAsSeen).toBeVisible()
 
     await video.hover()
     await video.locator('.optionsButton').click()
@@ -200,6 +202,7 @@ test.describe('new subscriptions feed', () => {
     await expect(video).toBeVisible()
     await expect(video.locator('.newContentDot')).toHaveCount(0)
     await expect(video).not.toHaveClass(/watched/)
+    await expect(markAllAsSeen).toHaveCount(0)
 
     await video.hover()
     await video.locator('.optionsButton').click()

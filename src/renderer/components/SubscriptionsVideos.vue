@@ -11,13 +11,25 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import {
+  computed,
+  onActivated,
+  onBeforeUnmount,
+  onDeactivated,
+  onMounted,
+  ref,
+  shallowRef,
+  toRaw,
+  useTemplateRef,
+  watch
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
+import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
 import { useRelativeTimeClock } from '../composables/useRelativeTimeClock'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
 import {
@@ -32,6 +44,7 @@ import {
 
 const { locale, t } = useI18n()
 const tabUi = useTemplateRef('tabUi')
+useKeepAliveEffectScope()
 
 const isLoading = ref(true)
 const videoList = shallowRef([])
@@ -73,10 +86,18 @@ const cacheEntriesForAllActiveProfileChannels = computed(() => {
 })
 
 const nextUpcomingPremiereTimestamp = computed(() => {
+  // Cache refreshes can introduce a new upcoming premiere while this component
+  // remains mounted. Read the timestamp so this scan reruns after each refresh.
+  const refreshTimestamp = store.getters.getSubscriptionFeedLastRefreshTimestamp
+  const cacheEntries = cacheEntriesForAllActiveProfileChannels.value
+  if (!refreshTimestamp && cacheEntries.length === 0) {
+    return null
+  }
+
   let nextTimestamp = null
 
-  for (const cacheEntry of cacheEntriesForAllActiveProfileChannels.value) {
-    for (const video of cacheEntry.videos ?? []) {
+  for (const cacheEntry of cacheEntries) {
+    for (const video of toRaw(cacheEntry).videos ?? []) {
       const timestamp = getUpcomingPremiereTimestamp(video)
 
       if (
@@ -118,11 +139,16 @@ function scheduleNextPremiereUpdate(timestamp) {
   }, Math.min(Math.max(timestamp - Date.now(), 0), MAX_TIMEOUT_MS))
 }
 
-onBeforeUnmount(() => {
+function clearPremiereUpdateTimer() {
   if (premiereUpdateTimer !== null) {
     clearTimeout(premiereUpdateTimer)
+    premiereUpdateTimer = null
   }
-})
+}
+
+onActivated(() => scheduleNextPremiereUpdate(nextUpcomingPremiereTimestamp.value))
+onDeactivated(clearPremiereUpdateTimer)
+onBeforeUnmount(clearPremiereUpdateTimer)
 
 const videoCacheForAllActiveProfileChannelsPresent = computed(() => {
   if (
@@ -277,9 +303,10 @@ function loadVideosFromCacheSometimes() {
 
 function loadVideosFromCacheForAllActiveProfileChannels() {
   const videoList_ = cacheEntriesForAllActiveProfileChannels.value.flatMap((cacheEntry) => {
-    const cacheTimestamp = new Date(cacheEntry.timestamp).getTime()
+    const rawCacheEntry = toRaw(cacheEntry)
+    const cacheTimestamp = new Date(rawCacheEntry.timestamp).getTime()
 
-    return (cacheEntry.videos ?? []).map(video => {
+    return (rawCacheEntry.videos ?? []).map(video => {
       return ensureUpcomingSubscriptionFeedPublished(
         video,
         cacheTimestamp,
