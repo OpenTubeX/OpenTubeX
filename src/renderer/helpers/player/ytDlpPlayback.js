@@ -15,6 +15,8 @@ import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpP
  * @property {any[]} legacyFormats
  * @property {Date | null} expiryDate
  * @property {boolean} isLive
+ * @property {number | null} duration
+ * @property {string | null} storyboardSrc
  * @property {string | null} version the yt-dlp version that extracted the streams
  */
 
@@ -298,18 +300,25 @@ async function convertAdaptiveFormats(formats, duration) {
  * @param {string} videoId
  * @param {string} cacheKey identifies the yt-dlp executable and proxy configuration
  * @param {() => void} [onDefaultClientsFallback] called before retrying with yt-dlp's default clients
+ * @param {boolean} [useAuthentication] whether to use the explicitly configured cookie source
  * @returns {Promise<YtDlpPlaybackSource>}
  */
-export async function getYtDlpPlaybackSource(videoId, cacheKey = '', onDefaultClientsFallback) {
-  let cachedSource = dashPlaybackSourceCache.get(videoId, cacheKey)
+export async function getYtDlpPlaybackSource(
+  videoId,
+  cacheKey = '',
+  onDefaultClientsFallback,
+  useAuthentication = false
+) {
+  const effectiveCacheKey = JSON.stringify([cacheKey, useAuthentication])
+  let cachedSource = dashPlaybackSourceCache.get(videoId, effectiveCacheKey)
 
   if (cachedSource === null) {
     try {
-      const entry = await window.ftElectron.ytDlpPlaybackCacheGet(videoId, cacheKey)
+      const entry = await window.ftElectron.ytDlpPlaybackCacheGet(videoId, effectiveCacheKey)
       if (entry !== null) {
         const source = { ...entry.source, expiryDate: new Date(entry.expiryTime) }
-        dashPlaybackSourceCache.set(videoId, cacheKey, source)
-        cachedSource = dashPlaybackSourceCache.get(videoId, cacheKey)
+        dashPlaybackSourceCache.set(videoId, effectiveCacheKey, source)
+        cachedSource = dashPlaybackSourceCache.get(videoId, effectiveCacheKey)
 
         if (cachedSource === null) {
           await window.ftElectron.ytDlpPlaybackCacheDelete(videoId)
@@ -337,7 +346,11 @@ export async function getYtDlpPlaybackSource(videoId, cacheKey = '', onDefaultCl
       onDefaultClientsFallback?.()
     }
 
-    const info = await window.ftElectron.ytDlpGetPlaybackInfo(videoId, useDefaultClients)
+    const info = await window.ftElectron.ytDlpGetPlaybackInfo(
+      videoId,
+      useDefaultClients,
+      useAuthentication
+    )
 
     if (info === null) {
       throw new Error('yt-dlp is not available')
@@ -373,14 +386,18 @@ export async function getYtDlpPlaybackSource(videoId, cacheKey = '', onDefaultCl
           legacyFormats,
           expiryDate: getEarliestYtDlpFormatExpiry(adaptiveFormats),
           isLive: false,
+          duration: info.duration,
+          storyboardSrc: info.storyboardVtt === null
+            ? null
+            : `data:text/vtt;charset=utf-8,${encodeURIComponent(info.storyboardVtt)}`,
           version: info.version
         }
 
-        dashPlaybackSourceCache.set(videoId, cacheKey, source)
+        dashPlaybackSourceCache.set(videoId, effectiveCacheKey, source)
         try {
           await window.ftElectron.ytDlpPlaybackCacheSet(
             videoId,
-            cacheKey,
+            effectiveCacheKey,
             source.expiryDate?.getTime() ?? NaN,
             source
           )
@@ -401,6 +418,10 @@ export async function getYtDlpPlaybackSource(videoId, cacheKey = '', onDefaultCl
         legacyFormats: await legacyFormatsPromise,
         expiryDate: null,
         isLive: info.isLive,
+        duration: info.duration,
+        storyboardSrc: info.storyboardVtt === null
+          ? null
+          : `data:text/vtt;charset=utf-8,${encodeURIComponent(info.storyboardVtt)}`,
         version: info.version
       }
 

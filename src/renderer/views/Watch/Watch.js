@@ -21,6 +21,7 @@ import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtAddToPlaylistDropdown from '../../components/FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
 import FtPaidPromotionBadge from '../../components/FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
+import FtButton from '../../components/FtButton/FtButton.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
 import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
@@ -152,6 +153,7 @@ export default defineComponent({
     FtIconButton,
     FtAddToPlaylistDropdown,
     FtPaidPromotionBadge,
+    FtButton,
     'ft-loader': FtLoader,
   },
   setup: function () {
@@ -391,6 +393,8 @@ export default defineComponent({
       errorMessage: null,
       /** @type {string[]|null} */
       customErrorIcon: null,
+      /** @type {'age' | 'members' | null} */
+      restrictedPlaybackError: null,
       videoGenreIsMusic: false,
       /** @type {Date|null} */
       streamingDataExpiryDate: null,
@@ -583,8 +587,28 @@ export default defineComponent({
         getters.getYtDlpChannel,
         getters.getYtDlpPath,
         getters.getUseProxy,
-        ...proxyConfiguration
+        ...proxyConfiguration,
+        getters.getYtDlpPlaybackAuthMode,
+        getters.getYtDlpPlaybackCookiesPath,
+        getters.getYtDlpPlaybackCookiesBrowser,
+        getters.getYtDlpPlaybackCookiesBrowserProfile
       ])
+    },
+    hasConfiguredRestrictedPlaybackAuthentication: function () {
+      const getters = this.$store.getters
+      const cookiePath = getters.getYtDlpPlaybackCookiesPath
+      const browser = getters.getYtDlpPlaybackCookiesBrowser
+      const cookieFileConfigured = getters.getYtDlpPlaybackAuthMode === 'file' &&
+        typeof cookiePath === 'string' && cookiePath.trim() !== ''
+      const browserConfigured = getters.getYtDlpPlaybackAuthMode === 'browser' &&
+        typeof browser === 'string' && browser.trim() !== ''
+
+      return process.env.IS_ELECTRON && (cookieFileConfigured || browserConfigured)
+    },
+    canTryRestrictedPlaybackWithCookies: function () {
+      return this.restrictedPlaybackError !== null &&
+        this.hasConfiguredRestrictedPlaybackAuthentication &&
+        !this.ytDlpStreamsPending
     },
     defaultAutoplayInterruptionIntervalHours: function () {
       return this.$store.getters.getDefaultAutoplayInterruptionIntervalHours
@@ -1806,6 +1830,7 @@ export default defineComponent({
       this.adEndTimeUnixMs = 0
       this.errorMessage = null
       this.customErrorIcon = null
+      this.restrictedPlaybackError = null
       this.videoGenreIsMusic = false
       this.streamingDataExpiryDate = null
       this.ipBlockDetectedInCurrentChain = false
@@ -2317,6 +2342,117 @@ export default defineComponent({
         videoId === this.tabRoute.params.id
     },
 
+    setRestrictedPlaybackError: function (type) {
+      this.restrictedPlaybackError = type
+      this.errorMessage = type === 'members'
+        ? this.t('Video.MembersOnly')
+        : this.t('Video.AgeRestricted')
+      this.customErrorIcon = type === 'members' ? ['fas', 'money-check-dollar'] : null
+    },
+
+    getRestrictedPlaybackErrorType: function (message) {
+      if (typeof message !== 'string') {
+        return null
+      }
+
+      const normalizedMessage = message.toLowerCase()
+      if (
+        normalizedMessage.includes('members-only') ||
+        normalizedMessage.includes('members only') ||
+        normalizedMessage.includes("available to this channel's members")
+      ) {
+        return 'members'
+      }
+
+      if (
+        normalizedMessage.includes('age-restricted') ||
+        normalizedMessage.includes('age restricted') ||
+        normalizedMessage.includes('confirm your age')
+      ) {
+        return 'age'
+      }
+
+      return null
+    },
+
+    tryRestrictedPlaybackWithCookies: async function () {
+      const restrictedPlaybackError = this.restrictedPlaybackError
+      if (restrictedPlaybackError === null || !this.hasConfiguredRestrictedPlaybackAuthentication) {
+        return
+      }
+
+      const loadGeneration = this.videoLoadGeneration
+      const videoId = this.videoId
+      const playbackEngineSwitchGeneration = ++this.playbackEngineSwitchGeneration
+      this.errorMessage = null
+      this.customErrorIcon = null
+      this.playbackEngineFallbackTarget = 'yt-dlp'
+      this.ytDlpStreamsPending = true
+      this.ytDlpDefaultClientsFallbackToastShown = false
+
+      try {
+        const sourceApplied = await this.extractYtDlpPlaybackSource(
+          loadGeneration,
+          videoId,
+          playbackEngineSwitchGeneration,
+          true
+        )
+
+        if (!this.isCurrentVideoLoad(loadGeneration, videoId) ||
+          playbackEngineSwitchGeneration !== this.playbackEngineSwitchGeneration) {
+          return
+        }
+
+        if (sourceApplied) {
+          this.restrictedPlaybackError = null
+          this.playbackEngineFallbackTarget = null
+          if (this.recommendedVideos.length === 0) {
+            this.loadAuthenticatedYtDlpRecommendations(loadGeneration, videoId)
+          }
+        } else {
+          this.setRestrictedPlaybackError(restrictedPlaybackError)
+        }
+      } catch (error) {
+        if (this.isCurrentVideoLoad(loadGeneration, videoId) &&
+          playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration) {
+          console.error(`Authenticated yt-dlp playback failed for ${videoId}`, error)
+          this.setRestrictedPlaybackError(restrictedPlaybackError)
+          this.showTabToast({
+            message: this.t('Video.Restricted Playback Authentication Failed Template', {
+              error: error.message
+            }),
+            time: 7000,
+            icon: ['fas', 'circle-exclamation']
+          })
+        }
+      } finally {
+        if (this.isCurrentVideoLoad(loadGeneration, videoId) &&
+          playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration) {
+          this.ytDlpStreamsPending = false
+        }
+      }
+    },
+
+    loadAuthenticatedYtDlpRecommendations: async function (loadGeneration, videoId) {
+      try {
+        const result = await window.ftElectron.ytDlpGetRecommendations(videoId)
+        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+
+        if (result === null || 'error' in result) {
+          if (result?.error) {
+            console.warn('yt-dlp could not provide authenticated recommendations', result.error)
+          }
+          return
+        }
+
+        if (this.recommendedVideos.length === 0) {
+          this.recommendedVideos = result.sort(this.sortWatchedVideosLast)
+        }
+      } catch (error) {
+        console.warn('Could not load authenticated yt-dlp recommendations', error)
+      }
+    },
+
     getVideoInformationLocal: async function (loadGeneration = ++this.videoLoadGeneration) {
       if (this.firstLoad) {
         this.isLoading = true
@@ -2575,20 +2711,9 @@ export default defineComponent({
 
         if (playabilityStatus.status === 'UNPLAYABLE' || playabilityStatus.status === 'LOGIN_REQUIRED' || isDrmProtected) {
           if (playabilityStatus.error_screen?.offer_id === 'sponsors_only_video') {
-            // Members-only videos can only be watched while logged into a Google account that is a paid channel member
-            // so there is no point trying any other backends as it will always fail
-            this.errorMessage = this.t('Video.MembersOnly')
-            this.customErrorIcon = ['fas', 'money-check-dollar']
-            this.isLoading = false
-            this.updateTitle()
-            return
+            this.setRestrictedPlaybackError('members')
           } else if (playabilityStatus.reason === 'Sign in to confirm your age' || (result.has_trailer && result.getTrailerInfo() === null)) {
-            // Age-restricted videos can only be watched while logged into a Google account that is age-verified
-            // so there is no point trying any other backends as it will always fail
-            this.errorMessage = this.t('Video.AgeRestricted')
-            this.isLoading = false
-            this.updateTitle()
-            return
+            this.setRestrictedPlaybackError('age')
           } else if (isDrmProtected) {
             // DRM protected videos (e.g. movies) cannot be played in FreeTube,
             // as they require the proprietary and closed source Wideview CDM which is understandably not included in standard Electron builds
@@ -2598,38 +2723,40 @@ export default defineComponent({
             return
           }
 
-          let errorText
+          if (this.restrictedPlaybackError === null) {
+            let errorText
 
-          if (playabilityStatus.reason === BOT_MESSAGE || playabilityStatus.reason === 'Please sign in') {
-            errorText = this.t('Video.IP block')
-            this.ipBlockDetectedInCurrentChain = true
-          } else {
-            errorText = `[${playabilityStatus.status}] ${playabilityStatus.reason}`
+            if (playabilityStatus.reason === BOT_MESSAGE || playabilityStatus.reason === 'Please sign in') {
+              errorText = this.t('Video.IP block')
+              this.ipBlockDetectedInCurrentChain = true
+            } else {
+              errorText = `[${playabilityStatus.status}] ${playabilityStatus.reason}`
 
-            if (playabilityStatus.error_screen?.subreason) {
-              errorText += `: ${playabilityStatus.error_screen.subreason.text}`
+              if (playabilityStatus.error_screen?.subreason) {
+                errorText += `: ${playabilityStatus.error_screen.subreason.text}`
+              }
             }
-          }
 
-          const tryingYtDlpForIpBlock =
-            this.playbackEngineFallbackTarget === 'yt-dlp' &&
-            this.ipBlockDetectedInCurrentChain
+            const tryingYtDlpForIpBlock =
+              this.playbackEngineFallbackTarget === 'yt-dlp' &&
+              this.ipBlockDetectedInCurrentChain
 
-          if (tryingYtDlpForIpBlock) {
-            console.warn('Built-in metadata is IP blocked; continuing so yt-dlp can provide the playback source')
-          } else if (this.backendFallback) {
-            throw new Error(errorText)
-          } else {
-            const didReload = await this.runIpBlockRecoveryScriptAndReload()
-            if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
-            if (didReload) {
+            if (tryingYtDlpForIpBlock) {
+              console.warn('Built-in metadata is IP blocked; continuing so yt-dlp can provide the playback source')
+            } else if (this.backendFallback) {
+              throw new Error(errorText)
+            } else {
+              const didReload = await this.runIpBlockRecoveryScriptAndReload()
+              if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+              if (didReload) {
+                return
+              }
+
+              this.errorMessage = errorText
+              this.isLoading = false
+              this.updateTitle()
               return
             }
-
-            this.errorMessage = errorText
-            this.isLoading = false
-            this.updateTitle()
-            return
           }
         }
 
@@ -2806,7 +2933,10 @@ export default defineComponent({
 
               this.captions = sortCaptions(captionTracks, this.preferredCaptionLocale)
             }
-          } else if (this.playbackEngineFallbackTarget !== 'yt-dlp') {
+          } else if (
+            this.restrictedPlaybackError === null &&
+            this.playbackEngineFallbackTarget !== 'yt-dlp'
+          ) {
             // video might be region locked or something else. This leads to no formats being available
             this.showTabToast({
               message: this.t('This video is unavailable because of missing formats. This can happen due to country unavailability.'),
@@ -2815,7 +2945,7 @@ export default defineComponent({
             })
             this.handleVideoEnded()
             return
-          } else {
+          } else if (this.restrictedPlaybackError === null) {
             console.warn('Built-in metadata has no streams; continuing so yt-dlp can provide the playback source')
           }
 
@@ -2832,7 +2962,7 @@ export default defineComponent({
             this.videoStoryboardSrc = this.createLocalStoryboardUrls(storyboard)
           }
 
-          if (result.streaming_data?.adaptive_formats.length > 0) {
+          if (this.restrictedPlaybackError === null && result.streaming_data?.adaptive_formats.length > 0) {
             this.vrProjection = result.streaming_data.adaptive_formats
               .find(format => {
                 return format.has_video &&
@@ -2878,14 +3008,14 @@ export default defineComponent({
               this.manifestSrc = null
               this.enableLegacyFormat()
             }
-          } else {
+          } else if (this.restrictedPlaybackError === null) {
             console.error(`No adaptive formats for ${this.videoId}, falling back to the legacy formats...`)
             this.manifestSrc = null
             this.enableLegacyFormat()
           }
         }
 
-        if (!this.isUpcoming) {
+        if (!this.isUpcoming && this.restrictedPlaybackError === null) {
           if (!this.applyDownloadedPlaybackSource()) {
             this.alignActiveFormatWithAvailableSources()
 
@@ -3166,6 +3296,14 @@ export default defineComponent({
             this.showTabToast({ message: this.t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
             this.getVideoInformationLocal(loadGeneration)
           } else {
+            const restrictedPlaybackError = this.getRestrictedPlaybackErrorType(err.message || err.toString())
+            if (restrictedPlaybackError !== null) {
+              this.isLoading = false
+              this.thumbnail ||= this.getUnavailableVideoThumbnail()
+              this.setRestrictedPlaybackError(restrictedPlaybackError)
+              return
+            }
+
             const didReload = await this.runIpBlockRecoveryScriptAndReload()
             if (didReload) {
               return
@@ -3772,7 +3910,11 @@ export default defineComponent({
         }
       }
 
-      if (this.tabRoute.query.downloadId && Number.isFinite(mediaMetadata?.duration) && mediaMetadata.duration > 0) {
+      if (
+        Number.isFinite(mediaMetadata?.duration) &&
+        mediaMetadata.duration > 0 &&
+        (this.tabRoute.query.downloadId || !Number.isFinite(this.videoLengthSeconds) || this.videoLengthSeconds <= 0)
+      ) {
         this.videoLengthSeconds = mediaMetadata.duration
       }
 
@@ -4724,7 +4866,8 @@ export default defineComponent({
     extractYtDlpPlaybackSource: async function (
       loadGeneration,
       videoId,
-      playbackEngineSwitchGeneration = this.playbackEngineSwitchGeneration
+      playbackEngineSwitchGeneration = this.playbackEngineSwitchGeneration,
+      useAuthentication = false
     ) {
       let source
       try {
@@ -4740,16 +4883,18 @@ export default defineComponent({
               icon: ['fas', 'exchange-alt'],
             })
           }
-        })
+        }, useAuthentication)
       } catch (error) {
         if (
           !this.isCurrentVideoLoad(loadGeneration, videoId) ||
           playbackEngineSwitchGeneration !== this.playbackEngineSwitchGeneration
         ) { return false }
 
-        console.error(`yt-dlp could not provide streams for ${videoId}, falling back to the built-in engine...`, error)
+        console.error(`yt-dlp could not provide streams for ${videoId}`, error)
         this.showTabToast({
-          message: this.t('Change Format.yt-dlp Fallback Template', { error: error.message }),
+          message: useAuthentication
+            ? this.t('Video.Restricted Playback Authentication Failed Template', { error: error.message })
+            : this.t('Change Format.yt-dlp Fallback Template', { error: error.message }),
           time: 7000,
           icon: ['fas', 'circle-exclamation'],
         })
@@ -4774,6 +4919,13 @@ export default defineComponent({
       this.manifestSrc = source.manifestSrc
       this.manifestMimeType = source.manifestMimeType
       this.legacyFormats = source.legacyFormats
+      this.isLive = source.isLive
+      if (Number.isFinite(source.duration) && source.duration > 0) {
+        this.videoLengthSeconds = source.duration
+      }
+      if (this.videoStoryboardSrc === '' && source.storyboardSrc) {
+        this.videoStoryboardSrc = source.storyboardSrc
+      }
       // HLS manifests refresh themselves, so they don't expire the way the stream URLs do.
       // Keeping the backend's date stops playback errors from being blamed on an
       // expired session, which is what a missing date would compare as.

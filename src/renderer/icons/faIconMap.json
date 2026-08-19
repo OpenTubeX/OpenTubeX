@@ -131,6 +131,10 @@
     "ri": "file-copy-2-line",
     "material": "content-copy-outline"
   },
+  "cookie": {
+    "ri": "cookie-line",
+    "material": "cookie-outline"
+  },
   "database": {
     "ri": "database-2-line",
     "material": "database-outline"

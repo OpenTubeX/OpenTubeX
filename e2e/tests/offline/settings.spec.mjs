@@ -145,6 +145,76 @@ test.describe('settings', () => {
       .toBeGreaterThanOrEqual(16)
   })
 
+  test('shows yt-dlp browsers dynamically and centers the optional profile field', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      ipcMain.removeHandler('yt-dlp-get-info')
+      ipcMain.handle('yt-dlp-get-info', (_event, options) => ({
+        ytDlp: {
+          source: options.ytDlpSource,
+          available: true,
+          version: 'test',
+          supportedBrowsers: ['firefox', 'vivaldi']
+        },
+        ffmpeg: { source: options.ffmpegSource, available: true, version: 'test' },
+        ffprobe: { source: options.ffmpegSource, available: true, version: 'test' }
+      }))
+    })
+
+    const advanced = await goToSettingsSection(page, 'advanced')
+    const authentication = advanced.locator('.settingsSection').filter({
+      has: page.getByRole('heading', { name: 'Restricted Video Authentication', exact: true })
+    })
+    const cookieSource = authentication.locator('.restrictedPlaybackAuthSource select')
+
+    await expect(cookieSource.locator('option')).toHaveText(['None', 'File', 'Browser'])
+    await cookieSource.selectOption('browser')
+
+    const browser = authentication.locator('.restrictedPlaybackAuthDetail select')
+    await expect(browser.locator('option')).toHaveText([
+      'Select a browser',
+      'Firefox',
+      'Vivaldi'
+    ])
+    await browser.selectOption('firefox')
+
+    const profile = authentication.getByPlaceholder('Profile name or path')
+    await profile.fill('/tmp/firefox-profile')
+
+    const [sourceBox, browserBox, profileBox] = await Promise.all([
+      authentication.locator('.restrictedPlaybackAuthSource .select').boundingBox(),
+      authentication.locator('.restrictedPlaybackAuthDetail .select').boundingBox(),
+      authentication.locator('.restrictedPlaybackBrowserProfile .ft-input-component').boundingBox()
+    ])
+    expect(sourceBox).not.toBeNull()
+    expect(browserBox).not.toBeNull()
+    expect(profileBox).not.toBeNull()
+
+    const upperCenter = (
+      sourceBox.x + sourceBox.width / 2 +
+      browserBox.x + browserBox.width / 2
+    ) / 2
+    expect(Math.abs(profileBox.x + profileBox.width / 2 - upperCenter)).toBeLessThanOrEqual(1)
+    expect(profileBox.y).toBeGreaterThan(Math.max(
+      sourceBox.y + sourceBox.height,
+      browserBox.y + browserBox.height
+    ))
+
+    await expect.poll(async () => {
+      const settings = latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      )
+      return {
+        mode: settings.ytDlpPlaybackAuthMode,
+        browser: settings.ytDlpPlaybackCookiesBrowser,
+        profile: settings.ytDlpPlaybackCookiesBrowserProfile
+      }
+    }).toEqual({
+      mode: 'browser',
+      browser: 'firefox',
+      profile: '/tmp/firefox-profile'
+    })
+  })
+
   test('puts theme controls before a separate Layout section', async ({ page }) => {
     const appearance = await goToSettingsSection(page, 'appearance')
     const headings = appearance.getByRole('heading', { level: 3 })

@@ -382,6 +382,14 @@ export default {
     return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_EXECUTABLE, currentPath)
   },
 
+  ytDlpChooseCookies: (currentPath) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_COOKIES, currentPath)
+  },
+
+  ytDlpChooseBrowserProfile: (currentPath) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_BROWSER_PROFILE, currentPath)
+  },
+
   /**
    * @param {{
    *   ytDlpSource: 'system' | 'managed',
@@ -390,7 +398,7 @@ export default {
    *   ffmpegPath: string
    * } | undefined} [options]
    * @returns {Promise<{
-   *   ytDlp: import('../main/ytDlp').YtDlpBinaryInfo,
+   *   ytDlp: import('../main/ytDlp').YtDlpInfo,
    *   ffmpeg: import('../main/ytDlp').YtDlpBinaryInfo,
    *   ffprobe: import('../main/ytDlp').YtDlpBinaryInfo
    * } | null>}
@@ -402,10 +410,19 @@ export default {
   /**
    * @param {string} videoId
    * @param {boolean} [useDefaultClients]
+   * @param {boolean} [useAuthentication]
    * @returns {Promise<import('../main/ytDlp').YtDlpPlaybackInfo | { error: string } | null>}
    */
-  ytDlpGetPlaybackInfo: (videoId, useDefaultClients = false) => {
-    return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_PLAYBACK_INFO, videoId, useDefaultClients)
+  ytDlpGetPlaybackInfo: (videoId, useDefaultClients = false, useAuthentication = false) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_PLAYBACK_INFO, videoId, useDefaultClients, useAuthentication)
+  },
+
+  /**
+   * @param {string} currentVideoId
+   * @returns {Promise<import('../main/ytDlp').YtDlpRecommendation[] | { error: string } | null>}
+   */
+  ytDlpGetRecommendations: (currentVideoId) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_RECOMMENDATIONS, currentVideoId)
   },
 
   ytDlpPlaybackCacheGet: (videoId, cacheKey) => {

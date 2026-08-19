@@ -16,8 +16,13 @@
       v-if="showLabel"
       :for="id"
       class="selectLabel"
-      :class="{ disabled }"
+      :class="{ disabled, hasIcon: icon !== null }"
     >
+      <FtIcon
+        v-if="icon !== null"
+        :icon="icon"
+        class="selectLabelIcon"
+      />
       <span class="selectLabelText">{{ label || placeholder }}</span>
       <FtTooltip
         v-if="tooltip !== ''"
@@ -154,6 +159,10 @@ const props = defineProps({
   },
   label: {
     type: String,
+    default: null
+  },
+  icon: {
+    type: Array,
     default: null
   },
   maxlength: {

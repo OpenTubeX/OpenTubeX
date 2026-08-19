@@ -38,6 +38,78 @@ for (const { name, options, expectedCount } of [
   })
 }
 
+test('shows the restricted playback setup hint until an authenticated retry is available', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.route('https://example.invalid/restricted.m3u8', route => route.fulfill({
+    contentType: 'application/x-mpegURL',
+    body: '#EXTM3U\n'
+  }))
+  await openMockedVideo(page)
+
+  const watchView = await watchViewHandle(page)
+  await watchView.evaluate(async (view) => {
+    view.isLoading = false
+    view.playbackEngineFallbackTarget = 'built-in'
+    view.setRestrictedPlaybackError('age')
+    await view.$nextTick()
+  })
+
+  await expect(page.getByText(
+    'Configure cookies in Settings → External Software → Restricted Video Authentication.'
+  )).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
+
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
+    await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
+  })
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    globalThis.__restrictedPlaybackCalls = []
+    ipcMain.removeHandler('yt-dlp-get-playback-info')
+    ipcMain.handle(
+      'yt-dlp-get-playback-info',
+      (_event, _videoId, useDefaultClients, useAuthentication) => {
+        globalThis.__restrictedPlaybackCalls.push({ useDefaultClients, useAuthentication })
+        return {
+          isLive: true,
+          liveStatus: 'is_live',
+          hlsManifestUrl: 'https://example.invalid/restricted.m3u8',
+          formats: [],
+          duration: null,
+          version: 'test'
+        }
+      }
+    )
+  })
+  await watchView.evaluate((view) => {
+    const extractYtDlpPlaybackSource = view.extractYtDlpPlaybackSource
+    view.extractYtDlpPlaybackSource = async (...args) => {
+      const applied = await extractYtDlpPlaybackSource.apply(view, args)
+      window.__restrictedPlaybackResult = {
+        applied,
+        activeEngine: view.activePlaybackEngine
+      }
+      return applied
+    }
+  })
+
+  await expect(page.getByText(
+    'Configure cookies in Settings → External Software → Restricted Video Authentication.'
+  )).toHaveCount(0)
+  const retry = page.getByRole('button', { name: 'Try with configured cookies' })
+  await expect(retry).toBeVisible()
+  await retry.click()
+
+  await expect.poll(() => app.electronApp.evaluate(
+    () => globalThis.__restrictedPlaybackCalls
+  )).toEqual([{ useDefaultClients: false, useAuthentication: true }])
+  await expect.poll(() => page.evaluate(
+    () => window.__restrictedPlaybackResult
+  )).toEqual({ applied: true, activeEngine: 'yt-dlp' })
+  expect(await watchView.evaluate((view) => view.playbackEngineFallbackTarget)).toBeNull()
+})
+
 test.describe('Shorts transcript navigation', () => {
   const SHORTS_CHANNEL_ID = 'UC-transcript-shorts'
   const CAPTIONED_SHORT_IDS = ['captioned-short-1', 'captioned-short-2']

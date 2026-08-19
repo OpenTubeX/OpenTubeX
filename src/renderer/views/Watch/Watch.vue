@@ -306,11 +306,27 @@
                 aria-hidden="true"
                 class="errorIcon"
               />
-              <p
-                class="errorMessage"
-              >
-                {{ errorMessage }}
-              </p>
+              <div class="errorContent">
+                <p
+                  class="errorMessage"
+                >
+                  {{ errorMessage }}
+                </p>
+                <p
+                  v-if="restrictedPlaybackError !== null && !hasConfiguredRestrictedPlaybackAuthentication"
+                  class="restrictedPlaybackHint"
+                >
+                  {{ $t('Video.Configure Restricted Playback Cookies Hint') }}
+                </p>
+                <FtButton
+                  v-if="canTryRestrictedPlaybackWithCookies"
+                  class="restrictedPlaybackButton"
+                  :label="$t('Video.Try With Configured Cookies')"
+                  :text-color="null"
+                  :background-color="null"
+                  @click="tryRestrictedPlaybackWithCookies"
+                />
+              </div>
             </div>
           </div>
         </div>
