@@ -9004,13 +9004,13 @@ export default defineComponent({
         startPreRollTimer(initialLoadDelayMs)
         await new Promise((resolve) => setTimeout(resolve, initialLoadDelayMs))
         clearPreRollTimer()
-        if (!isCurrentLoad()) return
+        if (!ui || !player || !isCurrentLoad()) return
       }
 
       if (props.format === 'dash' || props.format === 'audio') {
         try {
           await player.load(props.manifestSrc, props.startTime, props.manifestMimeType)
-          if (!isCurrentLoad()) return
+          if (!ui || !player || !isCurrentLoad()) return
 
           if (props.format === 'dash') {
             // Let shaka-player's ABR pick the variant when auto quality is preferred
@@ -9037,7 +9037,7 @@ export default defineComponent({
             }
           }
         } catch (error) {
-          if (isCurrentLoad()) {
+          if (ui && player && isCurrentLoad()) {
             handleError(error, 'loading dash/audio manifest and setting default quality in mounted')
           }
         }

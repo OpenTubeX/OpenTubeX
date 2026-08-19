@@ -11,12 +11,16 @@ import {
   SabrContextUpdate,
   SabrContextWritePolicy,
   NextRequestPolicy,
-  PlaybackCookie,
   ReloadPlaybackContext,
 } from 'googlevideo/protos'
 import shaka from 'shaka-player'
 
 import { deepCopy } from '../utils'
+import {
+  createAbandonedSabrResponse,
+  extractRawProtobufField,
+  parseSabrFormatId
+} from './sabrProtocol'
 
 const AbortableOperation = shaka.util.AbortableOperation
 const ShakaError = shaka.util.Error
@@ -63,6 +67,7 @@ const ShakaError = shaka.util.Error
  * @property {Set<number>} activeSabrContextTypes
  * @property {Map<number, SabrContextUpdate>} sabrContexts
  * @property {?NextRequestPolicy} nextRequestPolicy
+ * @property {Uint8Array | undefined} playbackCookieBytes
  * @property {boolean} playerReloadRequested
  * @property {number} requestNumber
  */
@@ -80,18 +85,8 @@ const ShakaError = shaka.util.Error
  * @property {() => void | undefined} cleanup
  */
 
-/**
- * @param {string} str
- */
-function formatIdFromString(str) {
-  const videoFormatIdParts = str.split('-')
-
-  return {
-    itag: parseInt(videoFormatIdParts[0]),
-    lastModified: videoFormatIdParts[1],
-    xtags: videoFormatIdParts[2]
-  }
-}
+/** NextRequestPolicy.playbackCookie, field 7. */
+const PLAYBACK_COOKIE_FIELD_NUMBER = 7
 
 /**
  * @param {import('googlevideo/protos').FormatId} formatId
@@ -161,7 +156,7 @@ function fillBufferedRanges(player, manifest, audioFormatsActive, streamIsVideo,
       })
     }
 
-    const audioFormatId = formatIdFromString(activeVariant.originalAudioId)
+    const audioFormatId = parseSabrFormatId(activeVariant.originalAudioId)
     const audioSegmentIndex = activeManifestVariant.audio.segmentIndex
 
     if (streamIsVideo) {
@@ -177,12 +172,12 @@ function fillBufferedRanges(player, manifest, audioFormatsActive, streamIsVideo,
     let videoSegmentIndex
 
     if (streamIsAudio && bufferedInfo.video.length > 0) {
-      videoFormatId = formatIdFromString(activeVariant.originalVideoId)
+      videoFormatId = parseSabrFormatId(activeVariant.originalVideoId)
       bufferedRanges.push(createFullBufferRange(videoFormatId))
     } else {
       for (const buffered of bufferedInfo.video) {
         if (!videoFormatId) {
-          videoFormatId = formatIdFromString(activeVariant.originalVideoId)
+          videoFormatId = parseSabrFormatId(activeVariant.originalVideoId)
         }
 
         if (!videoSegmentIndex) {
@@ -347,7 +342,7 @@ async function doRequest(
 
     operationInputs.headersReceived({})
 
-    const { itag, lastModified, xtags } = formatIdFromString(operationInputs.formatIdString)
+    const { itag, lastModified, xtags } = parseSabrFormatId(operationInputs.formatIdString)
     let mediaHeaderId
 
     const reader = response.body.getReader()
@@ -425,7 +420,16 @@ async function doRequest(
             shouldRetryDueToNextRequestPolicy = true
 
             currentState.sabrStreamState.nextRequestPolicy = nextRequestPolicy
-            currentState.abrRequest.streamerContext.playbackCookie = nextRequestPolicy?.playbackCookie ? PlaybackCookie.encode(nextRequestPolicy.playbackCookie).finish() : undefined
+
+            const rawPolicy = part.data.chunks.length === 1
+              ? part.data.chunks[0]
+              : concatenateChunks(part.data.chunks)
+            currentState.sabrStreamState.playbackCookieBytes = extractRawProtobufField(
+              rawPolicy,
+              PLAYBACK_COOKIE_FIELD_NUMBER
+            )
+            currentState.abrRequest.streamerContext.playbackCookie =
+              currentState.sabrStreamState.playbackCookieBytes
 
             currentState.abrRequest.streamerContext.backoffTimeMs = nextRequestPolicy?.backoffTimeMs
             break
@@ -649,6 +653,7 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
     activeSabrContextTypes: new Set(),
     sabrContexts: new Map(),
     nextRequestPolicy: undefined,
+    playbackCookieBytes: undefined,
     playerReloadRequested: false,
     requestNumber: 0,
   }
@@ -659,9 +664,17 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
     const player = getPlayer()
     if (player == null) {
       // This is true during reload, returning a promise to suppress error
-      return new AbortableOperation(Promise.resolve())
+      return new AbortableOperation(Promise.resolve(createAbandonedSabrResponse(uri, request)))
     }
-    const isAudioOnly = player.isAudioOnly()
+
+    let isAudioOnly
+    try {
+      isAudioOnly = player.isAudioOnly()
+    } catch {
+      // Shaka keeps the cast proxy reachable after destroying its sender. A
+      // request queued before teardown can therefore throw on property access.
+      return new AbortableOperation(Promise.resolve(createAbandonedSabrResponse(uri, request)))
+    }
 
     const url = new URL(request.uris[0])
 
@@ -682,21 +695,21 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
     let videoFormatId
 
     if (streamIsAudio) {
-      audioFormatId = formatIdFromString(formatIdString)
+      audioFormatId = parseSabrFormatId(formatIdString)
 
       if (isAudioOnly) {
         // We need to specify a video format even for audio only otherwise we get an error response
-        videoFormatId = formatIdFromString(url.searchParams.get('videoFormatId'))
+        videoFormatId = parseSabrFormatId(url.searchParams.get('videoFormatId'))
       } else {
-        videoFormatId = formatIdFromString((activeVariant ?? variantTracks[0]).originalVideoId)
+        videoFormatId = parseSabrFormatId((activeVariant ?? variantTracks[0]).originalVideoId)
       }
     } else if (streamIsVideo) {
-      videoFormatId = formatIdFromString(formatIdString)
+      videoFormatId = parseSabrFormatId(formatIdString)
 
       // for the first fetching of the initial data there won't be an active variant
       // (shaka-player only sets it to active after it has fetched the init/segment data)
       if (activeVariant) {
-        audioFormatId = formatIdFromString(activeVariant.originalAudioId)
+        audioFormatId = parseSabrFormatId(activeVariant.originalAudioId)
       } else {
         const candidates = variantTracks.filter((track) => track.audioRoles.includes('main'))
 
@@ -704,7 +717,7 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
           return current.audioBandwidth >= previous.audioBandwidth ? current : previous
         }, candidates[0])
 
-        audioFormatId = formatIdFromString(probableAudioFormat.originalAudioId)
+        audioFormatId = parseSabrFormatId(probableAudioFormat.originalAudioId)
       }
     }
 
@@ -754,7 +767,7 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
         clientInfo,
         sabrContexts,
         unsentSabrContexts,
-        playbackCookie: sabrStreamState.nextRequestPolicy?.playbackCookie ? PlaybackCookie.encode(sabrStreamState.nextRequestPolicy.playbackCookie).finish() : undefined,
+        playbackCookie: sabrStreamState.playbackCookieBytes,
       },
       field1000: [],
       videoPlaybackUstreamerConfig,

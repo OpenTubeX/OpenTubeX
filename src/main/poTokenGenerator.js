@@ -2,6 +2,8 @@ import { session, WebContentsView } from 'electron'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 
+import { withTimeout } from './promiseTimeout'
+
 // #region queue
 
 /**
@@ -145,6 +147,9 @@ async function sharedInit() {
   cachedScript = scriptContent.replace(scriptExportMatch[0], `;${scriptExportMatch[1]}(FT_PARAMS)`)
 }
 
+// bgutils-js 4 can leave its callback-backed snapshot pending forever.
+const GENERATE_TIMEOUT_MS = 30 * 1000
+
 /**
  * @param {string} videoId
  * @param {string} context
@@ -209,7 +214,11 @@ async function internalGeneratePotoken(videoId, context, initialAttestationData,
 
     const script = cachedScript.replace('FT_PARAMS', `"${videoId}",${context},${initialAttestationData},${ytConfig}`)
 
-    return await webContentsView.webContents.executeJavaScript(script)
+    return await withTimeout(
+      webContentsView.webContents.executeJavaScript(script),
+      GENERATE_TIMEOUT_MS,
+      `PO token generation timed out after ${GENERATE_TIMEOUT_MS}ms`
+    )
   } finally {
     if (webContentsView) {
       webContentsView.webContents.close({ waitForBeforeUnload: false })
