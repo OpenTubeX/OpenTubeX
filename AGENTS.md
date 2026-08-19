@@ -1,6 +1,3 @@
-- Always start by implementing something first without running tests. Only after I give you the go that it's fine from my side continue with them.
-  - Exception: When it's actually beneficial for the implementation to reproduce something first it is always allowed and encouraged.
-  - Exception: If you have already been granted permission to run them, you may and should use it for the current thread.
 - Always run Electron/Playwright E2E tests under a private X server using `xvfb-run -a -s "-screen 0 1920x1080x24"`.
 - For filtered Electron/Playwright E2E runs, invoke Playwright directly, for example `pnpm exec playwright test -c e2e/playwright.config.mjs e2e/tests/network/channel.spec.mjs --project=network --grep "test name"`. Never use `pnpm run test:e2e -- ...`; the extra `--` stops Playwright from parsing the following path and options and can launch the full suite.
 - Before running modified Electron/Playwright E2E tests, run `pnpm run test:e2e:pack` so `dist-e2e` includes the current CSS and rendering or measurement tests do not run against an unstyled app.
@@ -10,7 +7,6 @@
 - Every nested element that can show a scrollbar through `overflow: auto`, `overflow: scroll`, `overflow-x`, or `overflow-y` must use the app's `v-overlay-scrollbars` directive so it matches the active theme and scrollbar settings. Treat native nested scrollbars as a bug unless the element is explicitly documented as an exception; whenever adding or changing scrollable CSS, verify the corresponding template element has the directive.
 - If the request somehow involves other repos (e.g. Website, APT, RPM, Flatpak, AUR, ...) you can find them in the parent folder.
 - Before considering work done here, you need to reproduce it with the test suite (for bugfixes), and verify that your fix/feature works (unless otherwise told to do so or when it makes no sense to do a test for the change).
-- After creating a PR babysit it. Wait for reviews of CodeRabbit/Greptile. When they come in resolve the reviews.
 - New icons must be registered in the icon registry. Custom icons must also provide mappings for every currently supported icon pack: Material and Remix.
 - For icon-pack mapping work (#388): get human confirmation that remapped glyphs fit visually in Material and Remix before considering the mapping done.
 - Never use the "FreeTube" name for promotion of the project (see discussion #391 for details when in doubt).
