@@ -64,7 +64,11 @@ async function measureVideosSwitch(page) {
       longestFrame = Math.max(longestFrame, timestamp - previousFrame)
       previousFrame = timestamp
 
-      if (target.getAttribute('aria-selected') === 'true') {
+      const panel = document.querySelector('#subscriptionsPanel:not(.newFeed)')
+      const feedIsRendered = target.getAttribute('aria-selected') === 'true' &&
+        panel?.querySelector('.ft-list-video') !== null
+
+      if (feedIsRendered) {
         requestAnimationFrame(finishedAt => resolve({
           elapsed: finishedAt - startedAt,
           longestFrame
