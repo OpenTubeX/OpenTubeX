@@ -2,6 +2,10 @@
   margin-block-end: 1rem;
 }
 
+.proxyTestActions {
+  margin-block-end: 12px;
+}
+
 .proxy-warning {
   padding-block: 12px;
   padding-inline: 4%;

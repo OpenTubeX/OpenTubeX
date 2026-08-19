@@ -20,6 +20,7 @@ import { setReducedMotionPreference } from '../../helpers/reducedMotion'
 import { setAnimationSpeed } from '../../helpers/animationSpeed'
 import { DEFAULT_SEARCH_ENGINES_SETTING } from '../../../searchEngines'
 import { DEFAULT_SEGMENT_PREFETCH_LIMIT } from '../../helpers/player/segmentPrefetch'
+import { normalizeYouTubeCaptionLanguageCode } from '../../helpers/player/youtubeCaptionLanguages'
 import { currentIconPack, isIconPack, setIconPack } from '../../icons/iconPackState'
 import { resolveBaseTheme } from '../../../appearanceSettings.js'
 import { resolveColor } from '../../helpers/colors.js'
@@ -468,8 +469,7 @@ const state = {
   screenshotQuality: 95,
   screenshotFolderPath: '',
   screenshotFilenamePattern: '%Y%M%D-%H%N%S',
-  settingsSectionSortEnabled: false,
-  highlightChangedSettings: false,
+  highlightChangedSettings: true,
   showPerformanceImpactIndicators: false,
   fetchSubscriptionsAutomatically: true,
   showScheduledLiveStreamsFirst: true,
@@ -774,6 +774,9 @@ const customGetters = {
 }
 
 const customMutations = {
+  setPreferredCaptionLocale: (state, value) => {
+    state.preferredCaptionLocale = normalizeYouTubeCaptionLanguageCode(value)
+  },
   setTabBarPosition: (state, value) => {
     state.tabBarPosition = normalizeTabBarPosition(value)
   }
@@ -789,6 +792,12 @@ async function updateValidatedSetting(commit, settingId, value) {
 }
 
 const customActions = {
+  updatePreferredCaptionLocale: ({ commit }, value) => updateValidatedSetting(
+    commit,
+    'preferredCaptionLocale',
+    normalizeYouTubeCaptionLanguageCode(value)
+  ),
+
   updateAppFont: ({ commit }, value) => updateValidatedSetting(
     commit,
     'appFont',
@@ -908,6 +917,16 @@ const customActions = {
         if (mutationIds.includes(defaultMutationId(_id))) {
           commit(defaultMutationId(_id), resolvedValue)
         }
+      }
+
+      const preferredCaptionLocaleEntry = userSettings.find(
+        entry => entry._id === 'preferredCaptionLocale'
+      )
+      if (
+        preferredCaptionLocaleEntry &&
+        preferredCaptionLocaleEntry.value !== state.preferredCaptionLocale
+      ) {
+        await dispatch('updatePreferredCaptionLocale', preferredCaptionLocaleEntry.value)
       }
 
       const hasTabBarPosition = userSettings.some(entry => entry._id === 'tabBarPosition')

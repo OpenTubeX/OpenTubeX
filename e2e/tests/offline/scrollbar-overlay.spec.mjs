@@ -229,7 +229,7 @@ test.describe('overlay scrollbars', () => {
 
     expect(await handle.evaluate((element) => element.clientWidth)).toBe(6)
 
-    const themeSection = await goToSettingsSection(page, 'theme')
+    const themeSection = await goToSettingsSection(page, 'appearance')
     const slider = themeSection.getByRole('slider', { name: /Scrollbar Width/ })
     await slider.focus()
     for (let i = 0; i < 10; i++) {
@@ -245,16 +245,18 @@ test.describe('overlay scrollbars', () => {
     await addPageOverflow(page)
     const scrollbar = page.locator(PAGE_SCROLLBAR)
 
-    await page.mouse.move(800, 400)
-    await page.mouse.wheel(0, 300)
+    const themeSection = await goToSettingsSection(page, 'appearance')
+    // Opening Settings uses controls at the top of the page and can scroll
+    // them into view. Establish the position that the rebuild must preserve
+    // only after the settings window is open.
+    await page.evaluate(() => window.scrollTo(0, 300))
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(300)
-
-    const themeSection = await goToSettingsSection(page, 'theme')
     const toggle = themeSection.getByRole('checkbox', { name: 'Always Show Scrollbars' })
     await expect(toggle).not.toBeChecked()
     // The styled label covers the checkbox input, so click that instead.
     await themeSection.locator('label.switch-label').filter({ hasText: 'Always Show Scrollbars' }).click()
     await expect(toggle).toBeChecked()
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(250)
     await page.getByRole('button', { name: 'Close', exact: true }).click()
     await expect(page.locator('.settingsWindow')).toBeHidden()
 

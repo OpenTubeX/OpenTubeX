@@ -2,45 +2,6 @@
   margin-block: 1rem;
 }
 
-.voiceOverTranslationSettings {
-  margin-block-start: 1rem;
-}
-
-.voiceOverTranslationControls {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
-  align-items: start;
-  gap: 1rem 2rem;
-  inline-size: 100%;
-  margin-block-end: 1rem;
-  padding-inline: 8px;
-  box-sizing: border-box;
-  user-select: none;
-}
-
-.voiceOverTranslationControls :deep(.select),
-.voiceOverTranslationControls :deep(.pure-material-slider) {
-  box-sizing: border-box;
-  inline-size: 100%;
-  margin-inline: 0;
-}
-
-.voiceOverTranslationControls :deep(.pure-material-slider) {
-  margin-block: 5px 0;
-}
-
-.voiceOverTranslationLanguageHint {
-  grid-column: 1 / -1;
-  margin: 0;
-  color: var(--secondary-text-color);
-  font-size: 0.9em;
-  text-align: center;
-}
-
-.voiceOverTranslationLanguageHint.disabled {
-  opacity: 0.38;
-}
-
 .screenshotFolderContainer {
   align-items: center;
   column-gap: 1rem;

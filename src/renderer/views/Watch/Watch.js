@@ -2755,6 +2755,7 @@ export default defineComponent({
             }
 
             if (result.captions) {
+              const captionTranslationLanguages = result.captions.translation_languages ?? []
               const captionTracks = result.captions?.caption_tracks?.map((caption) => {
                 const url = new URL(caption.base_url)
                 url.searchParams.set('fmt', 'vtt')
@@ -2768,7 +2769,8 @@ export default defineComponent({
                 }
               }) ?? []
 
-              this.captionTranslations = (result.captions.translation_languages ?? []).map(language =>
+              this.$store.commit('setYouTubeCaptionLanguageCodes', captionTranslationLanguages)
+              this.captionTranslations = captionTranslationLanguages.map(language =>
                 this.getTranslatedCaption(result.captions, language)
               ).filter(Boolean)
 

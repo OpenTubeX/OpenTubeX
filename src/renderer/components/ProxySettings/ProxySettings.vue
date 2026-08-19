@@ -19,19 +19,6 @@
         @change="handleUpdateProxy"
       />
     </FtFlexBox>
-    <FtFlexBox class="settingsFlexStart500px">
-      <FtInput
-        :placeholder="$t('Settings.Proxy Settings.IP Block Recovery Script Path')"
-        :show-action-button="true"
-        :allow-action-button-when-empty="true"
-        :force-action-button-icon-name="['fas', 'folder-open']"
-        show-label
-        :value="videoIpBlockScriptPath"
-        :tooltip="$t('Tooltips.Proxy Settings.IP Block Recovery Script Path')"
-        @input="handleUpdateVideoIpBlockScriptPath"
-        @click="handlePickVideoIpBlockRecoveryScriptPath"
-      />
-    </FtFlexBox>
     <template
       v-if="useProxy"
     >
@@ -91,7 +78,7 @@
       >
         {{ $t('Settings.Proxy Settings.Clicking on Test Proxy will send a request to') }} {{ proxyTestUrl }}
       </p>
-      <FtFlexBox>
+      <FtFlexBox class="proxyTestActions">
         <FtButton
           :label="$t('Settings.Proxy Settings.Test Proxy')"
           @click="testProxy"
@@ -121,6 +108,19 @@
         </p>
       </div>
     </template>
+    <FtFlexBox class="settingsFlexStart500px">
+      <FtInput
+        :placeholder="$t('Settings.Proxy Settings.IP Block Recovery Script Path')"
+        :show-action-button="true"
+        :allow-action-button-when-empty="true"
+        :force-action-button-icon-name="['fas', 'folder-open']"
+        show-label
+        :value="videoIpBlockScriptPath"
+        :tooltip="$t('Tooltips.Proxy Settings.IP Block Recovery Script Path')"
+        @input="handleUpdateVideoIpBlockScriptPath"
+        @click="handlePickVideoIpBlockRecoveryScriptPath"
+      />
+    </FtFlexBox>
   </FtSettingsSection>
 </template>
 

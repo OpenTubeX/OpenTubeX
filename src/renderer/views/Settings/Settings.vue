@@ -147,18 +147,6 @@
           v-if="!isStandaloneViewOpen"
           type="button"
           class="settingsHeaderButton"
-          :class="{ active: settingsSectionSortEnabled }"
-          :aria-label="t('Settings.Sort Settings Sections (A-Z)')"
-          :title="t('Settings.Sort Settings Sections (A-Z)')"
-          :aria-pressed="settingsSectionSortEnabled"
-          @click="updateSettingsSectionSortEnabled(!settingsSectionSortEnabled)"
-        >
-          <FtIcon :icon="['fas', 'sort-alpha-down']" />
-        </button>
-        <button
-          v-if="!isStandaloneViewOpen"
-          type="button"
-          class="settingsHeaderButton"
           :class="{ active: highlightChangedSettings }"
           :aria-label="t('Settings.Highlight Changed Settings')"
           :title="t('Settings.Highlight Changed Settings')"
@@ -282,7 +270,7 @@
             <component
               :is="activeSettingsSection.component"
               v-if="activeSettingsSection"
-              :key="activeSettingsSection.type"
+              :key="activeSettingsSection.renderKey ?? activeSettingsSection.type"
               class="section"
               :data-section="activeSettingsSection.type"
             />
@@ -326,6 +314,7 @@
             :id="subpageTargetId"
             v-overlay-scrollbars
             class="settingsSubpageScroll"
+            :class="{ settingsSubpageFlush: subpageFlush }"
           />
         </template>
       </template>
@@ -366,28 +355,20 @@ import {
 } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import GeneralSettings from '../../components/GeneralSettings/GeneralSettings.vue'
-import ThemeSettings from '../../components/ThemeSettings.vue'
-import PlayerSettings from '../../components/PlayerSettings/PlayerSettings.vue'
-import CaptionSettings from '../../components/CaptionSettings/CaptionSettings.vue'
-import ChannelSettings from '../../components/ChannelSettings/ChannelSettings.vue'
-import ExternalPlayerSettings from '../../components/ExternalPlayerSettings.vue'
 import DownloadSettings from '../../components/DownloadSettings.vue'
-import ExternalSoftwareSettings from '../../components/ExternalSoftwareSettings.vue'
-import SubscriptionSettings from '../../components/SubscriptionSettings/SubscriptionSettings.vue'
-import PrivacySettings from '../../components/PrivacySettings.vue'
 import DataSettings from '../../components/DataSettings/DataSettings.vue'
 import SyncSettings from '../../components/SyncSettings/SyncSettings.vue'
-import DistractionSettings from '../../components/DistractionSettings/DistractionSettings.vue'
-import ProxySettings from '../../components/ProxySettings/ProxySettings.vue'
-import SponsorBlockSettings from '../../components/SponsorBlockSettings.vue'
-import RydSettings from '../../components/RydSettings.vue'
-import ParentalControlSettings from '../../components/ParentalControlSettings.vue'
-import ExperimentalSettings from '../../components/ExperimentalSettings/ExperimentalSettings.vue'
 import PasswordDialog from '../../components/PasswordDialog/PasswordDialog.vue'
-import ContextMenuSearchSettings from '../../components/ContextMenuSearchSettings/ContextMenuSearchSettings.vue'
 import FtSettingsMenu from '../../components/FtSettingsMenu/FtSettingsMenu.vue'
 import FtKeyboardShortcutPrompt from '../../components/FtKeyboardShortcutPrompt/FtKeyboardShortcutPrompt.vue'
+import AddOnSettings from '../../components/SettingsCategories/AddOnSettings.vue'
+import AdvancedSettings from '../../components/SettingsCategories/AdvancedSettings.vue'
+import AppearanceSettings from '../../components/SettingsCategories/AppearanceSettings.vue'
+import FocusSettings from '../../components/SettingsCategories/FocusSettings.vue'
+import GeneralCategorySettings from '../../components/SettingsCategories/GeneralCategorySettings.vue'
+import PlaybackSettings from '../../components/SettingsCategories/PlaybackSettings.vue'
+import PrivacyAndHistorySettings from '../../components/SettingsCategories/PrivacyAndHistorySettings.vue'
+import SubscriptionCategorySettings from '../../components/SettingsCategories/SubscriptionCategorySettings.vue'
 import ProfileSettings from '../ProfileSettings/ProfileSettings.vue'
 import About from '../About/About.vue'
 import Downloads from '../Downloads/Downloads.vue'
@@ -402,7 +383,7 @@ import {
 import { getProxyTestUrl } from '../../helpers/proxy-test'
 import {
   SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS,
-  SETTINGS_SEARCH_KEYS,
+  SETTINGS_SEARCH_SOURCES,
   SETTINGS_SEARCH_SELECT_GROUP_LABELS,
 } from '../../helpers/settings-search-config'
 
@@ -412,14 +393,36 @@ const SETTINGS_BOUNDS_STORAGE_KEY = 'opentubex-settings-window-bounds'
 const WINDOW_MARGIN = 12
 const MINIMUM_WIDTH = 360
 const MINIMUM_HEIGHT = 360
+const DEFAULT_WIDTH = 1280
+const DEFAULT_HEIGHT = 820
 const RESIZE_DIRECTIONS = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']
+const LEGACY_SETTINGS_SECTION_MAP = {
+  theme: 'appearance',
+  player: 'playback',
+  'caption-appearance': 'playback',
+  channel: 'playback',
+  subscription: 'subscriptions',
+  distraction: 'focus',
+  'parental-control': 'focus',
+  'sponsor-block': 'add-ons',
+  'return-youtube-dislike': 'add-ons',
+  'external-player': 'advanced',
+  'external-software': 'advanced',
+  sync: 'sync',
+  proxy: 'advanced',
+  'context-menu-search': 'general',
+  experimental: 'advanced'
+}
 
 const NON_SETTING_MESSAGE_KEY_PATTERN = /(?:^No\b|^How\b|^Checking\b|^Current .+\b(?:has|is|will)\b|^Operation in Progress$|(?:Description|Hint|Tooltip|Template|Warning|Error|Status|Message|Not Downloaded|Unavailable|Connected|Connecting|Success|Failed|Failure)$)/i
 
 const { locale, t, tm } = useI18n()
 const isInDesktopView = ref(true)
 const isMaximized = ref(false)
-const activeSection = ref(store.getters.getSettingsWindowSection)
+const activeSection = ref(
+  LEGACY_SETTINGS_SECTION_MAP[store.getters.getSettingsWindowSection] ??
+  store.getters.getSettingsWindowSection
+)
 const settingsSearchQuery = ref('')
 const settingsContentTransitionClass = ref('')
 const settingsMenuTransitionClass = ref('')
@@ -435,6 +438,7 @@ const subpageTargetId = `settings-subpage-${useId().replaceAll(':', '')}`
 const subpageBreadcrumbTargetId = `settings-subpage-breadcrumb-${useId().replaceAll(':', '')}`
 const subpageTitle = ref('')
 const subpageIcon = ref(null)
+const subpageFlush = ref(false)
 let closeSubpage = null
 let subpagePersistsOnDeactivate = false
 let settingsResizeObserver = null
@@ -452,6 +456,8 @@ let dragOffsetX = 0
 let dragOffsetY = 0
 let maximizedDragSession = null
 let restoreBounds = null
+/** @type {Array<{ element: HTMLElement, scrollTop: number }>} */
+let minimizedScrollPositions = []
 
 const windowBounds = ref(getInitialBounds())
 const windowStyle = computed(() => isMaximized.value
@@ -469,7 +475,6 @@ const windowStyle = computed(() => isMaximized.value
     })
 const maximizeButtonLabel = computed(() => isMaximized.value ? t('Restore') : t('Maximize'))
 
-const settingsSectionSortEnabled = computed(() => store.getters.getSettingsSectionSortEnabled)
 const settingsWindowMorphing = computed(() => store.getters.getSettingsWindowMorphing)
 const highlightChangedSettings = computed(() => store.getters.getHighlightChangedSettings)
 const showPerformanceImpactIndicators = computed(() => store.getters.getShowPerformanceImpactIndicators)
@@ -494,140 +499,97 @@ const standaloneViewIcon = computed(() => isDownloadsOpen.value
 
 const settingsComponentsData = computed(() => [
   {
-    type: 'theme',
-    title: t('Settings.Theme Settings.Theme Settings'),
+    type: 'appearance',
+    title: t('Settings.Categories.Appearance'),
+    description: t('Settings.Categories.Appearance Description'),
     icon: ['fas', 'display'],
-    component: ThemeSettings
+    component: AppearanceSettings
   },
   {
-    type: 'player',
-    title: t('Settings.Player Settings.Player Settings'),
+    type: 'playback',
+    title: t('Settings.Categories.Playback'),
+    description: t('Settings.Categories.Playback Description'),
     icon: ['fas', 'circle-play'],
-    component: PlayerSettings
+    component: PlaybackSettings
   },
   {
-    type: 'channel',
-    title: t('Settings.Channel Settings.Channel Settings'),
+    type: 'add-ons',
+    renderKey: 'add-ons-standalone-voice-over',
+    title: t('Settings.Categories.Add-ons'),
+    description: t('Settings.Categories.Add-ons Description'),
+    icon: ['fas', 'puzzle-piece'],
+    component: AddOnSettings
+  },
+  {
+    type: 'subscriptions',
+    title: t('Settings.Categories.Subscriptions'),
+    description: t('Settings.Categories.Subscriptions Description'),
     icon: ['fas', 'users'],
-    component: ChannelSettings
-  },
-  {
-    type: 'caption-appearance',
-    title: t('Settings.Player Settings.Caption Appearance.Captions'),
-    icon: ['fas', 'closed-captioning'],
-    component: CaptionSettings
+    component: SubscriptionCategorySettings
   },
   ...(process.env.IS_ELECTRON
     ? [{
-        type: 'external-player',
-        title: t('Settings.External Player Settings.External Player Settings'),
-        icon: ['fas', 'clapperboard'],
-        component: ExternalPlayerSettings
-      }, {
         type: 'download',
         title: t('Settings.Download Settings.Download Settings'),
+        description: t('Settings.Categories.Downloads Description'),
         icon: ['fas', 'download'],
         component: DownloadSettings
-      }, {
-        type: 'external-software',
-        title: t('Settings.External Software Settings.External Software Settings'),
-        icon: ['fas', 'server'],
-        component: ExternalSoftwareSettings
       }]
     : []),
   {
-    type: 'subscription',
-    title: t('Settings.Subscription Settings.Subscription Settings'),
-    icon: ['fas', 'play'],
-    component: SubscriptionSettings
-  },
-  {
-    type: 'distraction',
+    type: 'focus',
     title: t('Settings.Distraction Free Settings.Distraction Free Settings'),
+    description: t('Settings.Categories.Distraction Free Description'),
     icon: ['fas', 'eye-slash'],
-    component: DistractionSettings
-  },
-  {
-    type: 'parental-control',
-    title: t('Settings.Parental Control Settings.Parental Control Settings'),
-    icon: ['fas', 'user-lock'],
-    component: ParentalControlSettings
+    component: FocusSettings
   },
   {
     type: 'privacy',
+    renderKey: 'privacy-with-navigation-history',
     title: t('Settings.Privacy Settings.Privacy Settings'),
+    description: t('Settings.Categories.Privacy Description'),
     icon: ['fas', 'lock'],
-    component: PrivacySettings
+    component: PrivacyAndHistorySettings
   },
   {
     type: 'data',
     title: t('Settings.Data Settings.Data Settings'),
+    description: t('Settings.Categories.Data Description'),
     icon: ['fas', 'database'],
     component: DataSettings
   },
   {
     type: 'sync',
     title: t('Settings.Sync Settings.Sync Settings'),
+    description: t('Settings.Categories.Sync Description'),
     icon: ['fas', 'sync'],
     component: SyncSettings
   },
-  ...(process.env.IS_ELECTRON
-    ? [{
-        type: 'proxy',
-        title: t('Settings.Proxy Settings.Proxy Settings'),
-        icon: ['fas', 'network-wired'],
-        component: ProxySettings
-      }]
-    : []),
   {
-    type: 'sponsor-block',
-    title: t('Settings.SponsorBlock Settings.SponsorBlock Settings'),
-    icon: ['fas', 'shield'],
-    component: SponsorBlockSettings
-  },
-  {
-    type: 'return-youtube-dislike',
-    title: t('Settings.Return YouTube Dislike Settings.Return YouTube Dislike Settings'),
-    icon: ['fas', 'thumbs-down'],
-    component: RydSettings
-  },
-  ...(process.env.IS_ELECTRON
-    ? [{
-        type: 'context-menu-search',
-        title: t('Settings.Context Menu Search Settings.Context Menu Search Settings'),
-        icon: ['fas', 'magnifying-glass'],
-        component: ContextMenuSearchSettings
-      }]
-    : []),
-  ...(process.env.IS_ELECTRON
-    ? [{
-        type: 'experimental',
-        title: t('Settings.Experimental Settings.Experimental Settings'),
-        icon: ['fas', 'flask'],
-        component: ExperimentalSettings
-      }]
-    : [])
+    type: 'advanced',
+    title: t('Settings.Categories.Advanced'),
+    description: t('Settings.Categories.Advanced Description'),
+    icon: ['fas', 'flask'],
+    component: AdvancedSettings
+  }
 ])
 
-const collator = computed(() => new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' }))
-const settingsSectionComponents = computed(() => {
-  const sections = [{
-    type: 'general',
-    title: t('Settings.General Settings.General Settings'),
-    icon: ['fas', 'border-all'],
-    component: GeneralSettings
-  }, ...settingsComponentsData.value]
-
-  return settingsSectionSortEnabled.value
-    ? sections.toSorted((a, b) => collator.value.compare(a.title, b.title))
-    : sections
-})
+const settingsSectionComponents = computed(() => [{
+  type: 'general',
+  renderKey: 'general-without-navigation-history',
+  title: t('Settings.General Settings.General Settings'),
+  description: t('Settings.Categories.General Description'),
+  icon: ['fas', 'border-all'],
+  component: GeneralCategorySettings
+}, ...settingsComponentsData.value])
 const settingsSearchExtraValues = computed(() => ({
   privacy: flattenMessageValues(tm('Settings.Password Settings')),
-  proxy: [
-    `${t('Settings.Proxy Settings.Clicking on Test Proxy will send a request to')} ` +
-    getProxyTestUrl(locale.value)
-  ]
+  advanced: USING_ELECTRON
+    ? [
+        `${t('Settings.Proxy Settings.Clicking on Test Proxy will send a request to')} ` +
+        getProxyTestUrl(locale.value)
+      ]
+    : []
 }))
 const isSearchableSettingsMessage = (sectionType, path, value) => {
   if (/\{[^{}]+\}/.test(value)) return false
@@ -649,15 +611,20 @@ const removeRedundantSearchMatches = (values) => {
 }
 const settingsSearchableValues = computed(() => new Map(
   settingsSectionComponents.value.map((section) => {
-    const messages = tm(SETTINGS_SEARCH_KEYS[section.type])
+    const sources = SETTINGS_SEARCH_SOURCES[section.type] ?? []
     const values = [...new Set([
       section.title,
-      ...flattenMessageValues(
-        messages,
-        SETTINGS_SEARCH_SELECT_GROUP_LABELS[section.type],
+      section.description,
+      ...sources.filter(source => !source.electronOnly || USING_ELECTRON).flatMap(source => flattenMessageValues(
+        tm(source.key),
+        SETTINGS_SEARCH_SELECT_GROUP_LABELS[source.type],
         [],
-        (path, value) => isSearchableSettingsMessage(section.type, path, value)
-      ),
+        (path, value) => (
+          (source.include === undefined || source.include.has(path[0])) &&
+          (source.exclude === undefined || !source.exclude.has(path[0])) &&
+          isSearchableSettingsMessage(source.type, path, value)
+        )
+      )),
       ...(settingsSearchExtraValues.value[section.type] ?? [])
     ])]
     return [section.type, values]
@@ -712,9 +679,10 @@ const unlocked = ref(store.getters.getSettingsPassword === '')
 provide(settingsSubpageKey, {
   targetId: subpageTargetId,
   breadcrumbTargetId: subpageBreadcrumbTargetId,
-  open(title, close, persistOnDeactivate = false, icon = null) {
+  open(title, close, persistOnDeactivate = false, icon = null, flush = false) {
     subpageTitle.value = title
     subpageIcon.value = icon
+    subpageFlush.value = flush
     closeSubpage = close
     subpagePersistsOnDeactivate = persistOnDeactivate
   },
@@ -722,6 +690,7 @@ provide(settingsSubpageKey, {
     if (closeSubpage === close) {
       subpageTitle.value = ''
       subpageIcon.value = null
+      subpageFlush.value = false
       closeSubpage = null
       subpagePersistsOnDeactivate = false
     }
@@ -729,7 +698,10 @@ provide(settingsSubpageKey, {
 })
 
 onMounted(handleMounted)
-onActivated(handleMounted)
+onActivated(() => {
+  handleMounted()
+  nextTick(restoreMinimizedScrollPositions)
+})
 onDeactivated(() => {
   if (!subpagePersistsOnDeactivate) {
     closeSubpage?.()
@@ -937,7 +909,8 @@ function setInitialSection() {
 }
 
 function getRememberedSection() {
-  const rememberedSection = store.getters.getSettingsWindowSection
+  const rememberedSection = LEGACY_SETTINGS_SECTION_MAP[store.getters.getSettingsWindowSection] ??
+    store.getters.getSettingsWindowSection
   return settingsSectionComponents.value.some(({ type }) => type === rememberedSection)
     ? rememberedSection
     : settingsSectionComponents.value[0].type
@@ -950,6 +923,12 @@ function navigateToSection(sectionType) {
   subpageIcon.value = null
   closeSubpage = null
   activeSection.value = sectionType
+  if (previousSection !== sectionType) {
+    nextTick(() => {
+      const content = settingsContentRef.value
+      if (content) restoreOverlayScrollTop(content, 0)
+    })
+  }
   if (isInDesktopView.value && previousSection !== null && previousSection !== sectionType) {
     const previousIndex = settingsSectionComponents.value.findIndex(({ type }) => type === previousSection)
     const nextIndex = settingsSectionComponents.value.findIndex(({ type }) => type === sectionType)
@@ -1127,10 +1106,6 @@ function showKeyboardShortcutPrompt() {
   store.dispatch('showKeyboardShortcutPrompt')
 }
 
-function updateSettingsSectionSortEnabled(value) {
-  store.dispatch('updateSettingsSectionSortEnabled', value)
-}
-
 function updateShowPerformanceImpactIndicators(value) {
   store.dispatch('updateShowPerformanceImpactIndicators', value)
 }
@@ -1155,7 +1130,20 @@ function closeSettings() {
 }
 
 function minimizeSettings() {
+  const settingsWindow = settingsWindowRef.value
+  minimizedScrollPositions = settingsWindow
+    ? [...settingsWindow.querySelectorAll('[data-overlayscrollbars-initialize]')]
+        .filter(element => element.scrollTop > 0)
+        .map(element => ({ element, scrollTop: element.scrollTop }))
+    : []
   store.dispatch('minimizeSettingsWindow')
+}
+
+function restoreMinimizedScrollPositions() {
+  for (const { element, scrollTop } of minimizedScrollPositions) {
+    if (element.isConnected) restoreOverlayScrollTop(element, scrollTop)
+  }
+  minimizedScrollPositions = []
 }
 
 async function toggleMaximized() {
@@ -1387,8 +1375,8 @@ function clampBounds(bounds) {
 }
 
 function getInitialBounds() {
-  const fallbackWidth = Math.min(1080, Math.max(MINIMUM_WIDTH, window.innerWidth - 64))
-  const fallbackHeight = Math.min(720, Math.max(MINIMUM_HEIGHT, window.innerHeight - 120))
+  const fallbackWidth = Math.min(DEFAULT_WIDTH, Math.max(MINIMUM_WIDTH, window.innerWidth - 48))
+  const fallbackHeight = Math.min(DEFAULT_HEIGHT, Math.max(MINIMUM_HEIGHT, window.innerHeight - 80))
   const fallback = {
     x: Math.round((window.innerWidth - fallbackWidth) / 2),
     y: Math.max(WINDOW_MARGIN, Math.round((window.innerHeight - fallbackHeight) / 2)),

@@ -13,10 +13,10 @@
         <div class="captionControl">
           <FtSelect
             :placeholder="t('Settings.Player Settings.Caption Appearance.Preferred Language')"
-            :value="preferredCaptionLocale"
+            :value="preferredCaptionSelectValue"
             setting-key="preferredCaptionLocale"
             :select-names="captionLocaleNames"
-            :select-values="CAPTION_LOCALE_VALUES"
+            :select-values="captionLocaleValues"
             :icon="['fas', 'language']"
             :is-locale-selector="true"
             @change="updatePreferredCaptionLocale"
@@ -154,6 +154,7 @@
         <FtButton
           :label="t('Settings.Player Settings.Caption Appearance.Reset')"
           :icon="['fas', 'undo']"
+          :disabled="isCaptionAppearanceDefault"
           @click="resetCaptionSettings"
         />
       </div>
@@ -182,21 +183,55 @@ import {
   MIN_CAPTION_FONT_SCALE,
   parseCaptionSettings,
 } from '../../helpers/player/caption-settings'
+import {
+  normalizeYouTubeCaptionLanguageCode,
+  YOUTUBE_CAPTION_LANGUAGE_FALLBACK_NAMES,
+} from '../../helpers/player/youtubeCaptionLanguages'
 import store from '../../store/index'
-import allLocales from '../../../../static/locales/activeLocales.json'
 
-const { t } = useI18n()
-
-const CAPTION_LOCALE_VALUES = ['', ...allLocales]
+const { t, locale } = useI18n()
 
 const captionSettings = computed(() => parseCaptionSettings(store.getters.getDefaultCaptionSettings))
+const isCaptionAppearanceDefault = computed(() => (
+  Object.entries(DEFAULT_CAPTION_SETTINGS).every(([setting, defaultValue]) => (
+    Object.is(captionSettings.value[setting], defaultValue)
+  ))
+))
 const captionCssVariables = computed(() => getCaptionCssVariables(captionSettings.value))
 const enableCaptionTranslations = computed(() => store.getters.getEnableCaptionTranslations)
 const preferredCaptionLocale = computed(() => store.getters.getPreferredCaptionLocale)
+const captionLocaleOptions = computed(() => {
+  const displayNames = new Intl.DisplayNames([locale.value, 'en'], {
+    type: 'language',
+    languageDisplay: 'standard',
+  })
+  const collator = new Intl.Collator(locale.value)
+
+  return store.getters.getYouTubeCaptionLanguageCodes
+    .map(code => {
+      const localizedName = displayNames.of(code)
+      return {
+        code,
+        name: localizedName && localizedName !== code
+          ? localizedName
+          : YOUTUBE_CAPTION_LANGUAGE_FALLBACK_NAMES[code] ?? code,
+      }
+    })
+    .sort((a, b) => collator.compare(a.name, b.name))
+})
+const captionLocaleValues = computed(() => [
+  '',
+  ...captionLocaleOptions.value.map(({ code }) => code),
+])
 const captionLocaleNames = computed(() => [
   t('Settings.Player Settings.Caption Appearance.Application Language'),
-  ...process.env.LOCALE_NAMES,
+  ...captionLocaleOptions.value.map(({ name }) => name),
 ])
+const preferredCaptionSelectValue = computed(() => {
+  const canonical = normalizeYouTubeCaptionLanguageCode(preferredCaptionLocale.value)
+  const supportedCodes = new Set(captionLocaleValues.value)
+  return supportedCodes.has(canonical) ? canonical : ''
+})
 const captionAnchorNames = computed(() => [
   t('Settings.Player Settings.Caption Appearance.Anchor.Top Left'),
   t('Settings.Player Settings.Caption Appearance.Anchor.Top Center'),

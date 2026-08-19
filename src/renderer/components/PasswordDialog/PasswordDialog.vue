@@ -24,6 +24,7 @@
     </p>
     <FtButton
       class="unlockButton"
+      :icon="['fas', 'lock']"
       :label="verifying
         ? $t('Settings.Password Dialog.Unlocking')
         : $t('Settings.Password Dialog.Unlock')"

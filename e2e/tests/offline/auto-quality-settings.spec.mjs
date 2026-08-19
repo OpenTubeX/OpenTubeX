@@ -5,9 +5,9 @@ const CHANNEL_NAME = 'Alpha Channel'
 
 async function openDefaultQualitySelect(page) {
   await goTo(page, 'settings')
-  await page.locator('.settingsMenu [data-section="player"]').click()
+  await page.locator('.settingsMenu [data-section="playback"]').click()
 
-  return page.locator('[data-section="player"] .select')
+  return page.locator('[data-section="playback"] .select')
     .filter({ hasText: 'Default Quality' })
     .locator('select')
 }
@@ -69,7 +69,7 @@ test.describe('auto quality setting', () => {
     })
 
     test('is displayed as the quality playback falls back to', async ({ page }) => {
-      await goToSettingsSection(page, 'channel')
+      await goToSettingsSection(page, 'playback')
       await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
 
       const quality = page.locator('.settingsWindow .channelPreference select')

@@ -2,6 +2,112 @@
   <FtSettingsSection
     :title="$t('Settings.Theme Settings.Theme Settings')"
   >
+    <FtFlexBox class="themeSelectRow">
+      <FtSelect
+        :placeholder="$t('Settings.Theme Settings.Base Theme.Base Theme')"
+        :value="baseTheme"
+        setting-key="baseTheme"
+        :select-names="baseThemeNames"
+        :select-values="baseThemeValues"
+        :icon="['fas', 'palette']"
+        @change="updateBaseTheme"
+      />
+      <FtSelect
+        :placeholder="$t('Settings.Theme Settings.Icon Pack.Icon Pack')"
+        :value="iconPack"
+        setting-key="iconPack"
+        :select-names="iconPackNames"
+        :select-values="ICON_PACKS"
+        :icon="['fas', 'icons']"
+        @change="updateIconPack"
+      />
+      <FtSelect
+        :placeholder="$t('Settings.Theme Settings.Toast Position.Toast Position')"
+        :value="toastPosition"
+        setting-key="toastPosition"
+        :select-names="toastPositionNames"
+        :select-values="TOAST_POSITION_VALUES"
+        :icon="['fas', 'message']"
+        @change="updateToastPosition"
+      />
+    </FtFlexBox>
+    <FtFlexBox
+      v-if="baseTheme === 'system'"
+      class="themeSelectRow"
+    >
+      <FtSelect
+        :placeholder="t('Settings.Theme Settings.Light Theme')"
+        :value="systemLightTheme"
+        setting-key="systemLightTheme"
+        :select-names="systemVariantThemeNames"
+        :select-values="systemVariantThemeValues"
+        :icon="['fas', 'sun']"
+        @change="store.dispatch('updateSystemLightTheme', $event)"
+      />
+      <FtSelect
+        :placeholder="t('Settings.Theme Settings.Dark Theme')"
+        :value="systemDarkTheme"
+        setting-key="systemDarkTheme"
+        :select-names="systemVariantThemeNames"
+        :select-values="systemVariantThemeValues"
+        :icon="['fas', 'moon']"
+        @change="store.dispatch('updateSystemDarkTheme', $event)"
+      />
+    </FtFlexBox>
+    <FtFlexBox class="themeSelectRow">
+      <FtSelect
+        :placeholder="t('Settings.Theme Settings.Font.App Font')"
+        :value="appFont"
+        setting-key="appFont"
+        :select-names="fontNames"
+        :select-values="fontValues"
+        :icon="['fas', 'font']"
+        @change="updateAppFont"
+        @open="loadSystemFonts"
+      />
+      <FtSelect
+        :placeholder="$t('Settings.Theme Settings.Main Color Theme.Main Color Theme')"
+        :value="mainColor"
+        setting-key="mainColor"
+        :select-names="colorNames"
+        :select-values="COLOR_VALUES"
+        :disabled="!areColorThemesEnabled"
+        :icon="['fas', 'palette']"
+        icon-color="var(--primary-color)"
+        @change="updateMainColor"
+      />
+      <FtSelect
+        :placeholder="$t('Settings.Theme Settings.Secondary Color Theme')"
+        :value="secColor"
+        setting-key="secColor"
+        :select-names="colorNames"
+        :select-values="COLOR_VALUES"
+        :disabled="!areColorThemesEnabled"
+        :icon="['fas', 'palette']"
+        icon-color="var(--accent-color)"
+        @change="updateSecColor"
+      />
+    </FtFlexBox>
+    <FtFlexBox class="customThemeActions">
+      <FtButton
+        :label="t('Settings.Theme Settings.Custom Theme.Create Custom Theme')"
+        :icon="['fas', 'palette']"
+        @click="openCustomThemeEditor(null)"
+      />
+      <FtButton
+        v-if="selectedCustomThemeId"
+        :label="t('Settings.Theme Settings.Custom Theme.Edit Custom Theme')"
+        :icon="['fas', 'pen']"
+        @click="openCustomThemeEditor(selectedCustomThemeId)"
+      />
+    </FtFlexBox>
+    <CustomThemeEditor
+      :open="showCustomThemeEditor"
+      :theme-id="editingCustomThemeId"
+      @close="showCustomThemeEditor = false"
+    />
+  </FtSettingsSection>
+  <FtSettingsSection :title="t('Settings.Categories.Layout')">
     <div class="switchColumnGrid">
       <div class="switchColumn">
         <FtToggleSwitch
@@ -217,112 +323,6 @@
         @change="updateAnimationSpeed"
       />
     </div>
-    <br>
-    <FtFlexBox class="themeSelectRow">
-      <FtSelect
-        :placeholder="$t('Settings.Theme Settings.Base Theme.Base Theme')"
-        :value="baseTheme"
-        setting-key="baseTheme"
-        :select-names="baseThemeNames"
-        :select-values="baseThemeValues"
-        :icon="['fas', 'palette']"
-        @change="updateBaseTheme"
-      />
-      <FtSelect
-        :placeholder="$t('Settings.Theme Settings.Icon Pack.Icon Pack')"
-        :value="iconPack"
-        setting-key="iconPack"
-        :select-names="iconPackNames"
-        :select-values="ICON_PACKS"
-        :icon="['fas', 'icons']"
-        @change="updateIconPack"
-      />
-      <FtSelect
-        :placeholder="$t('Settings.Theme Settings.Toast Position.Toast Position')"
-        :value="toastPosition"
-        setting-key="toastPosition"
-        :select-names="toastPositionNames"
-        :select-values="TOAST_POSITION_VALUES"
-        :icon="['fas', 'message']"
-        @change="updateToastPosition"
-      />
-    </FtFlexBox>
-    <FtFlexBox
-      v-if="baseTheme === 'system'"
-      class="themeSelectRow"
-    >
-      <FtSelect
-        :placeholder="t('Settings.Theme Settings.Light Theme')"
-        :value="systemLightTheme"
-        setting-key="systemLightTheme"
-        :select-names="systemVariantThemeNames"
-        :select-values="systemVariantThemeValues"
-        :icon="['fas', 'sun']"
-        @change="store.dispatch('updateSystemLightTheme', $event)"
-      />
-      <FtSelect
-        :placeholder="t('Settings.Theme Settings.Dark Theme')"
-        :value="systemDarkTheme"
-        setting-key="systemDarkTheme"
-        :select-names="systemVariantThemeNames"
-        :select-values="systemVariantThemeValues"
-        :icon="['fas', 'moon']"
-        @change="store.dispatch('updateSystemDarkTheme', $event)"
-      />
-    </FtFlexBox>
-    <FtFlexBox class="themeSelectRow">
-      <FtSelect
-        :placeholder="t('Settings.Theme Settings.Font.App Font')"
-        :value="appFont"
-        setting-key="appFont"
-        :select-names="fontNames"
-        :select-values="fontValues"
-        :icon="['fas', 'font']"
-        @change="updateAppFont"
-        @open="loadSystemFonts"
-      />
-      <FtSelect
-        :placeholder="$t('Settings.Theme Settings.Main Color Theme.Main Color Theme')"
-        :value="mainColor"
-        setting-key="mainColor"
-        :select-names="colorNames"
-        :select-values="COLOR_VALUES"
-        :disabled="!areColorThemesEnabled"
-        :icon="['fas', 'palette']"
-        icon-color="var(--primary-color)"
-        @change="updateMainColor"
-      />
-      <FtSelect
-        :placeholder="$t('Settings.Theme Settings.Secondary Color Theme')"
-        :value="secColor"
-        setting-key="secColor"
-        :select-names="colorNames"
-        :select-values="COLOR_VALUES"
-        :disabled="!areColorThemesEnabled"
-        :icon="['fas', 'palette']"
-        icon-color="var(--accent-color)"
-        @change="updateSecColor"
-      />
-    </FtFlexBox>
-    <FtFlexBox class="customThemeActions">
-      <FtButton
-        :label="t('Settings.Theme Settings.Custom Theme.Create Custom Theme')"
-        :icon="['fas', 'palette']"
-        @click="openCustomThemeEditor(null)"
-      />
-      <FtButton
-        v-if="selectedCustomThemeId"
-        :label="t('Settings.Theme Settings.Custom Theme.Edit Custom Theme')"
-        :icon="['fas', 'pen']"
-        @click="openCustomThemeEditor(selectedCustomThemeId)"
-      />
-    </FtFlexBox>
-    <CustomThemeEditor
-      :open="showCustomThemeEditor"
-      :theme-id="editingCustomThemeId"
-      @close="showCustomThemeEditor = false"
-    />
-    <br>
     <FtPrompt
       v-if="showRestartPrompt"
       autosize

@@ -1,23 +1,145 @@
-export const SETTINGS_SEARCH_KEYS = {
-  general: 'Settings.General Settings',
-  theme: 'Settings.Theme Settings',
-  player: 'Settings.Player Settings',
-  channel: 'Settings.Channel Settings',
-  'caption-appearance': 'Settings.Player Settings.Caption Appearance',
-  'external-player': 'Settings.External Player Settings',
-  download: 'Settings.Download Settings',
-  'external-software': 'Settings.External Software Settings',
-  subscription: 'Settings.Subscription Settings',
-  distraction: 'Settings.Distraction Free Settings',
-  'parental-control': 'Settings.Parental Control Settings',
-  privacy: 'Settings.Privacy Settings',
-  data: 'Settings.Data Settings',
-  sync: 'Settings.Sync Settings',
-  proxy: 'Settings.Proxy Settings',
-  'sponsor-block': 'Settings.SponsorBlock Settings',
-  'return-youtube-dislike': 'Settings.Return YouTube Dislike Settings',
-  'context-menu-search': 'Settings.Context Menu Search Settings',
-  experimental: 'Settings.Experimental Settings'
+const GENERAL_EVERYDAY_KEYS = new Set([
+  'Avoid translation',
+  'Auto Load Next Page',
+  'General Settings',
+  'Check for Updates',
+  'Confirm Before',
+  'Confirmation Options',
+  'Default Landing Page',
+  'Extra Thumbnail Action Button',
+  'Locale Preference',
+  'Minimize to system tray',
+  'New Tab Position',
+  'Open Deep Links In New Window',
+  'Reduced Motion',
+  'Region for Trending',
+  'Startup Behavior',
+  'System Default',
+  'Tab Close Focus',
+  'Update Relative Timestamps'
+])
+
+const GENERAL_APPEARANCE_KEYS = new Set([
+  'Thumbnail Preference',
+  'Video View Type'
+])
+
+const GENERAL_PRIVACY_KEYS = new Set([
+  'Enable Search Suggestions',
+  'External Link Handling',
+  'Remember Tab Navigation History'
+])
+
+const GENERAL_PROVIDER_KEYS = new Set([
+  'Clear Default Instance',
+  'Current instance will be randomized on startup',
+  'Current Invidious Instance',
+  'Fallback to Non-Preferred Backend on Failure',
+  'No default instance has been set',
+  'Preferred API Backend',
+  'Set Current Instance as Default',
+  'Stream Extraction Method',
+  'The currently set default instance is {instance}',
+  'View all Invidious instance information'
+])
+
+export const SETTINGS_SEARCH_SOURCES = {
+  general: [{
+    type: 'general',
+    key: 'Settings.General Settings',
+    include: GENERAL_EVERYDAY_KEYS
+  }, {
+    type: 'context-menu-search',
+    key: 'Settings.Context Menu Search Settings',
+    electronOnly: true
+  }],
+  appearance: [{
+    type: 'theme',
+    key: 'Settings.Theme Settings'
+  }, {
+    type: 'general',
+    key: 'Settings.General Settings',
+    include: GENERAL_APPEARANCE_KEYS
+  }],
+  playback: [{
+    type: 'player',
+    key: 'Settings.Player Settings',
+    exclude: new Set(['Proxy Videos Through Invidious', 'Voice-over Translation'])
+  }, {
+    type: 'caption-appearance',
+    key: 'Settings.Player Settings.Caption Appearance'
+  }, {
+    type: 'channel',
+    key: 'Settings.Channel Settings'
+  }],
+  subscriptions: [{
+    type: 'subscription',
+    key: 'Settings.Subscription Settings'
+  }],
+  download: [{
+    type: 'download',
+    key: 'Settings.Download Settings'
+  }],
+  focus: [{
+    type: 'distraction',
+    key: 'Settings.Distraction Free Settings'
+  }, {
+    type: 'parental-control',
+    key: 'Settings.Parental Control Settings'
+  }],
+  'add-ons': [{
+    type: 'sponsor-block',
+    key: 'Settings.SponsorBlock Settings'
+  }, {
+    type: 'return-youtube-dislike',
+    key: 'Settings.Return YouTube Dislike Settings'
+  }, {
+    type: 'player',
+    key: 'Settings.Player Settings',
+    include: new Set(['Voice-over Translation']),
+    electronOnly: true
+  }],
+  privacy: [{
+    type: 'privacy',
+    key: 'Settings.Privacy Settings'
+  }, {
+    type: 'general',
+    key: 'Settings.General Settings',
+    include: GENERAL_PRIVACY_KEYS
+  }],
+  data: [{
+    type: 'data',
+    key: 'Settings.Data Settings'
+  }],
+  sync: [{
+    type: 'sync',
+    key: 'Settings.Sync Settings'
+  }],
+  advanced: [{
+    type: 'general',
+    key: 'Settings.General Settings',
+    include: GENERAL_PROVIDER_KEYS
+  }, {
+    type: 'player',
+    key: 'Settings.Player Settings',
+    include: new Set(['Proxy Videos Through Invidious'])
+  }, {
+    type: 'external-player',
+    key: 'Settings.External Player Settings',
+    electronOnly: true
+  }, {
+    type: 'external-software',
+    key: 'Settings.External Software Settings',
+    electronOnly: true
+  }, {
+    type: 'proxy',
+    key: 'Settings.Proxy Settings',
+    electronOnly: true
+  }, {
+    type: 'experimental',
+    key: 'Settings.Experimental Settings',
+    electronOnly: true
+  }]
 }
 
 export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {

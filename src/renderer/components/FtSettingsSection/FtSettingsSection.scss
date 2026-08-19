@@ -62,6 +62,10 @@
   @extend %switch-grid;
 
   align-items: start;
+
+  @container settings-content (width <= 680px) {
+    justify-items: center;
+  }
 }
 
 :deep(.switchColumn) {
@@ -92,11 +96,41 @@
       inset-inline-start: -85px;
     }
 
+    :deep(.switchColumn) {
+      align-items: center;
+    }
+
+    :deep(.switchColumn > .select.containsTooltip) {
+      box-sizing: border-box;
+      inline-size: min(100%, 270px);
+      margin-inline-end: 0;
+    }
+
+    :deep(.switchColumn > .select.containsTooltip .select-text),
+    :deep(.switchColumn > .select.containsTooltip .nativeSelect),
+    :deep(.switchColumn > .select.containsTooltip .select-bar) {
+      inline-size: calc(100% - 70px);
+    }
+
+    :deep(.switchColumn > .select.containsTooltip .iconSelect) {
+      inset-inline-end: 80px;
+    }
+
+    :deep(.switchColumn > .select.containsTooltip .selectIndicators) {
+      inset-inline: auto 8px;
+    }
+
     :deep(.switch-ctn.containsTooltip) {
-      inset-inline-start: -10px;
-      margin-inline-end: 5px;
+      inset-inline-start: 0;
+      margin-inline: 7px;
       padding-block: 0;
       padding-inline: 10px;
+    }
+
+    :deep(.switchColumn .switch-label > .tooltip) {
+      position: static;
+      inset: auto;
+      vertical-align: middle;
     }
 
     :deep(:not(.select, .selectLabel, .groupTitle, .selectIndicators) > .tooltip) {

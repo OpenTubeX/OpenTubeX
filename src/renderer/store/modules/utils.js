@@ -15,6 +15,10 @@ import {
   loadLegacyVideoAvatarCache,
 } from '../../helpers/channelThumbnailStorage'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import {
+  mergeYouTubeCaptionLanguageCodes,
+  YOUTUBE_CAPTION_LANGUAGE_CODES,
+} from '../../helpers/player/youtubeCaptionLanguages'
 
 const CHANNEL_THUMBNAIL_CACHE_LIMIT = 200
 const VIDEO_AVATAR_CACHE_LIMIT = 200
@@ -92,6 +96,7 @@ const state = {
   newPlaylistVideoObject: [],
   regionNames: [],
   regionValues: [],
+  youtubeCaptionLanguageCodes: [...YOUTUBE_CAPTION_LANGUAGE_CODES],
   searchSettingsByTabId: {},
   externalPlayerNames: [],
   externalPlayerValues: [],
@@ -241,6 +246,10 @@ const getters = {
 
   getRegionValues(state) {
     return state.regionValues
+  },
+
+  getYouTubeCaptionLanguageCodes(state) {
+    return state.youtubeCaptionLanguageCodes
   },
 
   getExternalPlayerNames(state) {
@@ -999,6 +1008,13 @@ const mutations = {
 
   setRegionValues (state, value) {
     state.regionValues = value
+  },
+
+  setYouTubeCaptionLanguageCodes(state, languages) {
+    state.youtubeCaptionLanguageCodes = mergeYouTubeCaptionLanguageCodes([
+      ...state.youtubeCaptionLanguageCodes,
+      ...languages,
+    ])
   },
 
   setExternalPlayerNames (state, value) {

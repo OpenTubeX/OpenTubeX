@@ -378,6 +378,10 @@
     "ri": "shut-down-line",
     "material": "power-settings-new-rounded"
   },
+  "puzzle-piece": {
+    "ri": "puzzle-line",
+    "material": "extension-outline"
+  },
   "question-circle": {
     "ri": "question-line",
     "material": "help-outline"

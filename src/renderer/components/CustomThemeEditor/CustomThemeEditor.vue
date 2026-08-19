@@ -3,8 +3,8 @@
     :open="open"
     :title="t('Settings.Theme Settings.Custom Theme.Custom Theme Creator')"
     :icon="['fas', 'palette']"
-    grow-with-content
     persist-on-deactivate
+    flush
     @close="closeEditor"
   >
     <div class="customThemeEditor">
@@ -67,7 +67,10 @@
         </div>
       </div>
 
-      <div class="colorGrid">
+      <div
+        v-overlay-scrollbars
+        class="colorGrid"
+      >
         <FtColorPicker
           v-for="([key, property, label]) in CUSTOM_THEME_EDITABLE_COLORS"
           :key="key"
@@ -594,10 +597,15 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .customThemeEditor {
+  min-block-size: 0;
+  block-size: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 24px;
+  overflow: hidden;
+  padding-block: 12px;
+  padding-inline: 24px;
 }
 
 .editorFooter,
@@ -608,12 +616,14 @@ onBeforeUnmount(() => {
 }
 
 .editorHeader {
+  flex: none;
   display: flex;
   align-items: end;
   gap: 12px;
 }
 
 .editorFooter {
+  flex: none;
   flex-wrap: wrap;
   justify-content: flex-end;
 }
@@ -630,6 +640,7 @@ onBeforeUnmount(() => {
 }
 
 .themeSources {
+  flex: none;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
@@ -660,10 +671,19 @@ onBeforeUnmount(() => {
   backdrop-filter: var(--search-bar-blur, none);
 }
 
+.editorFooter :deep(.btn) {
+  margin-block: 0;
+}
+
 .colorGrid {
+  min-block-size: 0;
+  flex: 1 1 auto;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-content: start;
   gap: 10px;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 @container (width < 560px) {

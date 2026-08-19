@@ -339,6 +339,7 @@
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Comment Likes')"
           :compact="true"
+          :disabled="hideComments"
           :default-value="hideCommentLikes"
           setting-key="hideCommentLikes"
           @change="updateHideCommentLikes"
@@ -376,6 +377,7 @@
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Profile Pictures in Comments')"
           :compact="true"
+          :disabled="hideComments"
           :default-value="hideCommentPhotos"
           setting-key="hideCommentPhotos"
           @change="updateHideCommentPhotos"
