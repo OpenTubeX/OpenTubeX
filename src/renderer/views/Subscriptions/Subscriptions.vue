@@ -46,7 +46,7 @@
                 aria-controls="subscriptionsPanel"
                 data-subscription-feed-tab="videos"
                 :tabindex="currentTab === 'videos' ? 0 : -1"
-                :class="{ selectedTab: selectedTab === 'videos' }"
+                :class="{ selectedTab: currentTab === 'videos' }"
                 @click="changeTabFromPointer($event, 'videos')"
                 @keydown.space.enter.prevent="changeTab('videos')"
                 @keydown.left.right="switchTab($event, 'videos')"
@@ -74,7 +74,7 @@
                 aria-controls="subscriptionsPanel"
                 data-subscription-feed-tab="shorts"
                 :tabindex="currentTab === 'shorts' ? 0 : -1"
-                :class="{ selectedTab: selectedTab === 'shorts' }"
+                :class="{ selectedTab: currentTab === 'shorts' }"
                 @click="changeTabFromPointer($event, 'shorts')"
                 @keydown.space.enter.prevent="changeTab('shorts')"
                 @keydown.left.right="switchTab($event, 'shorts')"
@@ -102,7 +102,7 @@
                 aria-controls="subscriptionsPanel"
                 data-subscription-feed-tab="live"
                 :tabindex="currentTab === 'live' ? 0 : -1"
-                :class="{ selectedTab: selectedTab === 'live' }"
+                :class="{ selectedTab: currentTab === 'live' }"
                 @click="changeTabFromPointer($event, 'live')"
                 @keydown.space.enter.prevent="changeTab('live')"
                 @keydown.left.right="switchTab($event, 'live')"
@@ -130,7 +130,7 @@
                 aria-controls="subscriptionsPanel"
                 data-subscription-feed-tab="posts"
                 :tabindex="currentTab === 'community' ? 0 : -1"
-                :class="{ selectedTab: selectedTab === 'community' }"
+                :class="{ selectedTab: currentTab === 'community' }"
                 @click="changeTabFromPointer($event, 'community')"
                 @keydown.space.enter.prevent="changeTab('community')"
                 @keydown.left.right="switchTab($event, 'community')"
@@ -158,7 +158,7 @@
                 aria-controls="subscriptionsPanel"
                 data-subscription-feed-tab="all"
                 :tabindex="currentTab === 'new' ? 0 : -1"
-                :class="{ selectedTab: selectedTab === 'new' }"
+                :class="{ selectedTab: currentTab === 'new' }"
                 @click="changeTabFromPointer($event, 'new')"
                 @keydown.space.enter.prevent="changeTab('new')"
                 @keydown.left.right="switchTab($event, 'new')"
@@ -289,7 +289,7 @@ import SubscriptionsPosts from '../../components/SubscriptionsPosts.vue'
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { getIconForSortPreference } from '../../helpers/utils'
 import store from '../../store/index'
-import { useTabContext } from '../../tabs/TabContext'
+import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { useRefreshAllSubscriptionFeeds } from '../../composables/useRefreshAllSubscriptionFeeds'
 import {
@@ -390,7 +390,6 @@ const currentTabRefreshing = computed(() => {
 
 /** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | null>} */
 const currentTab = ref('videos')
-const selectedTab = ref('videos')
 
 const tabScrollPositions = {
   videos: 0,
@@ -399,6 +398,22 @@ const tabScrollPositions = {
   community: 0,
   new: 0
 }
+/** @type {'videos' | 'shorts' | 'live' | 'community' | 'new' | null} */
+let scrollPositionOwnerTab = currentTab.value
+let restoreScrollOnActivate = false
+
+useTabLifecycle({
+  activate: () => {
+    if (!restoreScrollOnActivate) {
+      return
+    }
+
+    restoreScrollOnActivate = false
+    const value = currentTab.value
+    window.scrollTo(0, value === null ? 0 : tabScrollPositions[value])
+    scrollPositionOwnerTab = value
+  }
+})
 
 const subscriptionRefreshTimestamps = computed(() => [
   store.getters.getSubscriptionFeedLastRefreshTimestamp,
@@ -456,9 +471,6 @@ function nextAnimationFrame() {
 
 let isMounted = false
 let removeFeedReloadRequestListener = null
-/** @type {number | null} */
-let pendingTabChangeFrame = null
-let tabChangeSequence = 0
 
 onMounted(() => {
   isMounted = true
@@ -471,17 +483,11 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   isMounted = false
-  tabChangeSequence++
   document.removeEventListener('keydown', handlePanelTabNavigation)
   removeFeedReloadRequestListener?.()
-
-  if (pendingTabChangeFrame !== null) {
-    window.cancelAnimationFrame(pendingTabChangeFrame)
-    pendingTabChangeFrame = null
-  }
 })
 
-watch(currentTab, async (value, previousValue) => {
+watch(currentTab, async (value) => {
   if (value !== null) {
     // Use the last selected feed when opening another subscription view
     localStorage.setItem(currentTabStorageKey, value)
@@ -489,16 +495,36 @@ watch(currentTab, async (value, previousValue) => {
     localStorage.removeItem(currentTabStorageKey)
   }
 
-  if (!isMounted || (isElectron && isTabPresented?.value !== true)) {
+  if (!isMounted) {
+    scrollPositionOwnerTab = value
     return
   }
 
-  if (previousValue !== null) {
-    tabScrollPositions[previousValue] = window.scrollY
+  if (isElectron && isTabPresented?.value !== true) {
+    // The shared window scroll still belongs to the presented logical tab.
+    // Restore this feed only after tab activation restores its page-level scroll.
+    scrollPositionOwnerTab = null
+    restoreScrollOnActivate = true
+    return
   }
 
+  if (scrollPositionOwnerTab !== null) {
+    tabScrollPositions[scrollPositionOwnerTab] = window.scrollY
+  }
+  scrollPositionOwnerTab = null
+
   await nextTick()
+
+  if (
+    value !== currentTab.value ||
+    !isMounted ||
+    (isElectron && isTabPresented?.value !== true)
+  ) {
+    return
+  }
+
   window.scrollTo(0, value === null ? 0 : tabScrollPositions[value])
+  scrollPositionOwnerTab = value
 })
 
 const visibleTabs = computed(() => {
@@ -531,23 +557,13 @@ const visibleTabs = computed(() => {
 
 watch(visibleTabs, (value) => {
   if (value.length === 0) {
-    // Invalidate both scheduled nextTick work and an already queued frame so a
-    // deferred switch cannot restore a feed after its final tab is hidden.
-    tabChangeSequence++
-    if (pendingTabChangeFrame !== null) {
-      window.cancelAnimationFrame(pendingTabChangeFrame)
-      pendingTabChangeFrame = null
-    }
-
-    selectedTab.value = null
     currentTab.value = null
-  } else if (!value.includes(selectedTab.value)) {
+  } else if (!value.includes(currentTab.value)) {
     changeTab(value[0])
   }
 })
 
 if (visibleTabs.value.length === 0) {
-  selectedTab.value = null
   currentTab.value = null
 } else {
   // Restore currentTab
@@ -555,7 +571,6 @@ if (visibleTabs.value.length === 0) {
   if (lastCurrentTabId !== null) {
     changeTab(lastCurrentTabId)
   } else if (!visibleTabs.value.includes(currentTab.value)) {
-    selectedTab.value = visibleTabs.value[0]
     currentTab.value = visibleTabs.value[0]
   }
 }
@@ -564,55 +579,18 @@ if (visibleTabs.value.length === 0) {
  * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} tab
  */
 function changeTab(tab) {
-  // A pending change from a previous click is always dropped, its indicator
-  // placement included, so the last clicked tab wins
-  const hadPendingChange = pendingTabChangeFrame !== null
-
-  if (hadPendingChange) {
-    window.cancelAnimationFrame(pendingTabChangeFrame)
-    pendingTabChangeFrame = null
-  }
-
-  if (tab === selectedTab.value) {
-    if (hadPendingChange) {
-      // Complete the cancelled panel swap so the highlighted tab and its
-      // content cannot get separated by a repeated activation.
-      currentTab.value = tab
-      updateTabsIndicator()
-    }
-
-    return
-  }
-
   // First visible tab or no tab as fallback
   const target = visibleTabs.value.includes(tab)
     ? tab
     : (visibleTabs.value.length > 0 ? visibleTabs.value[0] : null)
 
-  selectedTab.value = target
-  const sequence = ++tabChangeSequence
-
-  if (!isMounted || target === null) {
-    currentTab.value = target
+  if (target === currentTab.value) {
     return
   }
 
-  // Let the selected label reach its final bold width before measuring the
-  // indicator. The content is swapped two frames later, after the compositor
-  // has started moving the indicator toward that stable target.
-  nextTick(() => {
-    if (sequence !== tabChangeSequence) { return }
-
-    moveTabsIndicatorTo(target)
-    pendingTabChangeFrame = window.requestAnimationFrame(() => {
-      pendingTabChangeFrame = window.requestAnimationFrame(() => {
-        if (sequence !== tabChangeSequence) { return }
-
-        pendingTabChangeFrame = null
-        currentTab.value = target
-      })
-    })
-  })
+  // The feed is the primary response to activating a tab. Keep the indicator
+  // animation decorative so it never delays the panel change.
+  currentTab.value = target
 }
 
 /**
@@ -813,7 +791,7 @@ function handlePanelTabNavigation(event) {
     return
   }
 
-  switchTab(event, selectedTab.value, false)
+  switchTab(event, currentTab.value, false)
 }
 
 function refreshCurrentTab() {
@@ -947,14 +925,6 @@ let tabsResizeObserver = null
 // otherwise it visibly flies in from the stale position.
 let tabsIndicatorWasHidden = true
 
-const tabElementRefs = {
-  videos: videosTab,
-  shorts: shortsTab,
-  live: liveTab,
-  community: communityTab,
-  new: newTab
-}
-
 /**
  * @param {HTMLElement} tabElement
  * @returns {boolean} whether the indicator was positioned on the tab
@@ -984,13 +954,6 @@ function placeTabsIndicator(tabElement) {
 }
 
 function updateTabsIndicator() {
-  // While a tab change is pending the indicator already sits on the tab that is
-  // about to be selected, so re-measuring the still selected one (e.g. from the
-  // ResizeObserver when a refresh loader appears) would move it back
-  if (pendingTabChangeFrame !== null) {
-    return
-  }
-
   const container = tabsContainerRef.value?.$el
   const selected = container?.querySelector('.tab.selectedTab')
 
@@ -1003,23 +966,7 @@ function updateTabsIndicator() {
   placeTabsIndicator(selected)
 }
 
-/**
- * Moves the indicator onto a tab before it becomes the selected one, so the
- * animation can start before the new panel is rendered.
- * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} tab
- * @returns {boolean} whether the indicator was moved
- */
-function moveTabsIndicatorTo(tab) {
-  if (!isMounted || tabsIndicatorStyle.value === null || tabsIndicatorWasHidden) {
-    return false
-  }
-
-  const tabElement = tabElementRefs[tab]?.value
-
-  return tabElement instanceof HTMLElement && placeTabsIndicator(tabElement)
-}
-
-watch([selectedTab, visibleTabs, refreshingFeedTab], () => nextTick(updateTabsIndicator))
+watch([currentTab, visibleTabs, refreshingFeedTab], () => nextTick(updateTabsIndicator))
 
 onMounted(() => {
   if (typeof ResizeObserver === 'function') {
