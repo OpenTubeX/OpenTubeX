@@ -11,13 +11,25 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
+import {
+  computed,
+  onActivated,
+  onBeforeUnmount,
+  onDeactivated,
+  onMounted,
+  ref,
+  shallowRef,
+  toRaw,
+  useTemplateRef,
+  watch
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
+import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
 import { useRelativeTimeClock } from '../composables/useRelativeTimeClock'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
 import {
@@ -32,6 +44,7 @@ import {
 
 const { locale, t } = useI18n()
 const tabUi = useTemplateRef('tabUi')
+useKeepAliveEffectScope()
 
 const isLoading = ref(true)
 const videoList = shallowRef([])
@@ -126,11 +139,16 @@ function scheduleNextPremiereUpdate(timestamp) {
   }, Math.min(Math.max(timestamp - Date.now(), 0), MAX_TIMEOUT_MS))
 }
 
-onBeforeUnmount(() => {
+function clearPremiereUpdateTimer() {
   if (premiereUpdateTimer !== null) {
     clearTimeout(premiereUpdateTimer)
+    premiereUpdateTimer = null
   }
-})
+}
+
+onActivated(() => scheduleNextPremiereUpdate(nextUpcomingPremiereTimestamp.value))
+onDeactivated(clearPremiereUpdateTimer)
+onBeforeUnmount(clearPremiereUpdateTimer)
 
 const videoCacheForAllActiveProfileChannelsPresent = computed(() => {
   if (

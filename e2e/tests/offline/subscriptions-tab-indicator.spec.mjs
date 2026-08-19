@@ -155,14 +155,14 @@ test.describe('subscriptions feed tab indicator', () => {
     expect(animation).toBeCloseTo(0.2, 2)
   })
 
-  test('animates a cached feed when switching back to it', async ({ page }) => {
+  test('animates cached feed content when switching back to it', async ({ page }) => {
     await goTo(page, 'subscriptions')
 
     await expect(page.getByText('video video 000')).toBeVisible()
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.locator('#subscriptionsPanel.newFeed')).toBeVisible()
 
-    const hasEntryAnimation = await page.evaluate(() => new Promise(resolve => {
+    const animationTargetClass = await page.evaluate(() => new Promise(resolve => {
       const target = document.querySelector('[data-subscription-feed-tab="videos"]')
 
       function inspectFrame() {
@@ -173,9 +173,43 @@ test.describe('subscriptions feed tab indicator', () => {
 
         requestAnimationFrame(() => {
           const panel = document.querySelector('#subscriptionsPanel')
-          resolve(panel.getAnimations({ subtree: true }).some(animation => {
+          const animation = panel.getAnimations({ subtree: true }).find(animation => {
             return animation.playState === 'running' &&
               animation.effect.getComputedTiming().duration > 0
+          })
+          resolve(animation?.effect.target.className ?? null)
+        })
+      }
+
+      target.click()
+      requestAnimationFrame(inspectFrame)
+    }))
+
+    expect(animationTargetClass).toContain('autoGrid')
+  })
+
+  test('does not animate a cached empty-state message', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await expect(page.getByText('There is no new content.')).toBeVisible()
+    await page.locator('[data-subscription-feed-tab="videos"]').click()
+    await expect(page.getByText('video video 000')).toBeVisible()
+
+    const messageIsAnimated = await page.evaluate(() => new Promise(resolve => {
+      const target = document.querySelector('[data-subscription-feed-tab="all"]')
+
+      function inspectFrame() {
+        if (target.getAttribute('aria-selected') !== 'true') {
+          requestAnimationFrame(inspectFrame)
+          return
+        }
+
+        requestAnimationFrame(() => {
+          const panel = document.querySelector('#subscriptionsPanel')
+          const message = panel.querySelector('.message')
+          resolve(panel.getAnimations({ subtree: true }).some(animation => {
+            return animation.effect.target === message || animation.effect.target.contains(message)
           }))
         })
       }
@@ -184,7 +218,40 @@ test.describe('subscriptions feed tab indicator', () => {
       requestAnimationFrame(inspectFrame)
     }))
 
-    expect(hasEntryAnimation).toBe(true)
+    expect(messageIsAnimated).toBe(false)
+  })
+
+  test('defers hidden feed cache updates until it is activated', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByText('video video 000')).toBeVisible()
+    const retainedPanel = await page.locator('#subscriptionsPanel').elementHandle()
+
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await expect(page.locator('#subscriptionsPanel.newFeed')).toBeVisible()
+    await page.evaluate(channelId => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const replacement = {
+        ...store.getters.getVideoCache[channelId].videos[0],
+        videoId: 'background-update',
+        title: 'Background update'
+      }
+
+      store.commit('updateVideoCacheByChannel', {
+        channelId,
+        entries: [replacement],
+        timestamp: new Date()
+      })
+      window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-channel', {
+        detail: { tab: 'videos' }
+      }))
+    }, CHANNEL_ID)
+
+    await page.waitForTimeout(600)
+    expect(await retainedPanel.textContent()).not.toContain('Background update')
+
+    await page.locator('[data-subscription-feed-tab="videos"]').click()
+    await expect(page.getByText('Background update')).toBeVisible()
   })
 
   test('ends up aligned with the selected tab', async ({ page, attachScreenshot }) => {

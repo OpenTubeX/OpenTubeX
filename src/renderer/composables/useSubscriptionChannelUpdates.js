@@ -1,4 +1,4 @@
-import { onBeforeUnmount, onMounted, watch } from 'vue'
+import { onActivated, onBeforeUnmount, onDeactivated, onMounted, watch } from 'vue'
 
 import { SUBSCRIPTION_REFRESH_CHANNEL_EVENT } from '../helpers/subscriptions'
 import { useTabContext } from '../tabs/TabContext'
@@ -18,6 +18,7 @@ export function useSubscriptionChannelUpdates(tab, onChannelsRefreshed) {
   let timeout = null
   let lastRun = 0
   let updatePending = false
+  let isActive = true
 
   function isPresented() {
     return isTabPresented?.value !== false
@@ -26,7 +27,7 @@ export function useSubscriptionChannelUpdates(tab, onChannelsRefreshed) {
   function run() {
     timeout = null
 
-    if (!isPresented()) {
+    if (!isActive || !isPresented()) {
       return
     }
 
@@ -36,7 +37,7 @@ export function useSubscriptionChannelUpdates(tab, onChannelsRefreshed) {
   }
 
   function schedule() {
-    if (!isPresented() || timeout !== null) {
+    if (!isActive || !isPresented() || timeout !== null) {
       return
     }
 
@@ -77,6 +78,23 @@ export function useSubscriptionChannelUpdates(tab, onChannelsRefreshed) {
 
     if (updatePending) {
       schedule()
+    }
+  })
+
+  onActivated(() => {
+    isActive = true
+
+    if (updatePending) {
+      schedule()
+    }
+  })
+
+  onDeactivated(() => {
+    isActive = false
+
+    if (timeout !== null) {
+      clearTimeout(timeout)
+      timeout = null
     }
   })
 

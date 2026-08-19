@@ -99,6 +99,7 @@ import FtSkeletonGrid from '../FtSkeletonGrid/FtSkeletonGrid.vue'
 
 import store from '../../store/index'
 
+import { useKeepAliveEffectScope } from '../../composables/useKeepAliveEffectScope'
 import { KeyboardShortcuts } from '../../../constants'
 import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isHistoryEntryWatched } from '../../helpers/history'
@@ -109,6 +110,7 @@ import { useTabContext } from '../../tabs/TabContext'
 
 const { tabId, isTabPresented } = useTabContext()
 const root = useTemplateRef('root')
+useKeepAliveEffectScope()
 
 const props = defineProps({
   isLoading: {
@@ -171,9 +173,15 @@ const subscriptionLimit = sessionStorage.getItem(subscriptionLimitStorageKey)
 
 const dataLimit = ref(subscriptionLimit !== null ? parseInt(subscriptionLimit) : props.initialDataLimit)
 const subscriptionEntryVersion = ref(0)
+let subscriptionEntryUpdatePending = false
+let isActive = true
 const unsubscribeFromStore = store.subscribe((mutation) => {
   if (mutation.type === 'markSubscriptionEntriesAsSeenInCache') {
-    subscriptionEntryVersion.value++
+    if (isActive) {
+      subscriptionEntryVersion.value++
+    } else {
+      subscriptionEntryUpdatePending = true
+    }
   }
 })
 
@@ -347,12 +355,23 @@ function removeKeyboardShortcutListener() {
 }
 
 let hasActivated = false
-/** @type {Animation | null} */
-let activationAnimation = null
+/** @type {Animation[]} */
+let activationAnimations = []
+
+function cancelActivationAnimations() {
+  activationAnimations.forEach(animation => animation.cancel())
+  activationAnimations = []
+}
 
 onMounted(addKeyboardShortcutListener)
 onActivated(() => {
+  isActive = true
   addKeyboardShortcutListener()
+
+  if (subscriptionEntryUpdatePending) {
+    subscriptionEntryUpdatePending = false
+    subscriptionEntryVersion.value++
+  }
 
   if (!hasActivated) {
     hasActivated = true
@@ -363,24 +382,26 @@ onActivated(() => {
     return
   }
 
-  activationAnimation?.cancel()
-  activationAnimation = applyAnimationSpeed(root.value.animate([
-    { opacity: 0, transform: 'translateY(10px)' },
-    { opacity: 1, transform: 'translateY(0)' }
-  ], {
-    duration: 300,
-    easing: 'ease'
-  }))
+  cancelActivationAnimations()
+  activationAnimations = Array.from(root.value.querySelectorAll('.autoGrid'))
+    .filter(grid => grid.childElementCount > 0)
+    .map(grid => applyAnimationSpeed(grid.animate([
+      { opacity: 0, transform: 'translateY(10px)' },
+      { opacity: 1, transform: 'translateY(0)' }
+    ], {
+      duration: 300,
+      easing: 'ease'
+    })))
 })
 onDeactivated(() => {
+  isActive = false
   removeKeyboardShortcutListener()
-  activationAnimation?.cancel()
-  activationAnimation = null
+  cancelActivationAnimations()
 })
 
 onBeforeUnmount(() => {
   removeKeyboardShortcutListener()
-  activationAnimation?.cancel()
+  cancelActivationAnimations()
 })
 onBeforeUnmount(unsubscribeFromStore)
 

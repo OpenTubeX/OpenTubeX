@@ -1,4 +1,4 @@
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue'
 
 import store from '../store/index'
 
@@ -39,6 +39,23 @@ function stopClock() {
 export function useRelativeTimeClock() {
   const frozenNow = ref(Date.now())
   const updatesEnabled = computed(() => store.getters.getUpdateRelativeTimestamps)
+  let active = false
+
+  function activate() {
+    if (active) return
+
+    active = true
+    subscriberCount += 1
+    if (updatesEnabled.value) startClock()
+  }
+
+  function deactivate() {
+    if (!active) return
+
+    active = false
+    subscriberCount -= 1
+    if (subscriberCount === 0) stopClock()
+  }
 
   watch(updatesEnabled, (enabled) => {
     if (enabled && subscriberCount > 0) {
@@ -49,15 +66,10 @@ export function useRelativeTimeClock() {
     }
   })
 
-  onMounted(() => {
-    subscriberCount += 1
-    if (updatesEnabled.value) startClock()
-  })
-
-  onBeforeUnmount(() => {
-    subscriberCount -= 1
-    if (subscriberCount === 0) stopClock()
-  })
+  onMounted(activate)
+  onActivated(activate)
+  onDeactivated(deactivate)
+  onBeforeUnmount(deactivate)
 
   return computed(() => updatesEnabled.value ? now.value : frozenNow.value)
 }
