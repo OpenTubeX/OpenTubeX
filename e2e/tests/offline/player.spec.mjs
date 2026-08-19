@@ -685,6 +685,9 @@ test.describe('skip silence shortcut', () => {
     await page.locator('body').press('h')
     await expect(popup).toBeVisible()
     await expect(popup).toHaveText(/On/)
+    await expect(popup.locator('.valueChangeIcons .ft-icon')).toHaveCount(2)
+    await expect(popup.locator('.valueChangeIcons .ft-icon').nth(0)).toHaveAttribute('data-icon', 'forward-step')
+    await expect(popup.locator('.valueChangeIcons .ft-icon').nth(1)).toHaveAttribute('data-icon', 'volume-xmark')
     await expect.poll(skipSilence).toBe(true)
     await attachScreenshot('skip silence enabled')
 
