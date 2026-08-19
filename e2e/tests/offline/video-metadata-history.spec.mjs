@@ -3,7 +3,7 @@ import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { DBActions } from '../../../src/constants.js'
+import { DBActions, IpcChannels } from '../../../src/constants.js'
 import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
 import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
@@ -19,6 +19,33 @@ const THUMBNAILS = [
 ]
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
+
+test('preserves the displayed cache size when clearing fails', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ ipcMain }, channels) => {
+    ipcMain.removeHandler(channels.getSize)
+    ipcMain.handle(channels.getSize, () => 1536)
+    ipcMain.removeHandler(channels.clear)
+    ipcMain.handle(channels.clear, () => {
+      throw new Error('Forced metadata cache clear failure')
+    })
+  }, {
+    clear: IpcChannels.VIDEO_METADATA_CACHE_CLEAR,
+    getSize: IpcChannels.VIDEO_METADATA_CACHE_GET_SIZE
+  })
+
+  const privacySettings = await goToSettingsSection(page, 'privacy')
+  const cacheSize = privacySettings.getByText('Video metadata cache: 1.5 KiB')
+  await expect(cacheSize).toBeVisible()
+
+  await privacySettings.getByRole('button', { name: 'Clear Video Metadata Cache' }).click()
+  await page.getByRole('dialog', {
+    name: 'Are you sure you want to clear the cached video titles, thumbnails, and descriptions?'
+  }).getByRole('button', { name: 'Delete' }).click()
+
+  await expect(page.locator('.toast', { hasText: 'Failed to clear video metadata cache' })).toBeVisible()
+  await expect(page.locator('.toast', { hasText: 'Video metadata cache has been cleared' })).toHaveCount(0)
+  await expect(cacheSize).toBeVisible()
+})
 
 test('stores and presents every previous metadata version', async ({ app, page }) => {
   const thumbnailServer = createServer((request, response) => {

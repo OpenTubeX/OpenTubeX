@@ -120,7 +120,7 @@ async function chooseDownloadFolder() {
 .downloadActions :deep(.btn) {
   flex: 1 1 230px;
   inline-size: 100%;
-  max-inline-size: 340px;
+  max-inline-size: 300px;
   block-size: auto;
   margin: 0;
   white-space: normal;

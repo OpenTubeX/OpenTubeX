@@ -2926,7 +2926,7 @@ function handleLinkClick(event) {
   } else if (externalLinkHandling.value === 'doNothing') {
     // Let user know opening external link is disabled via setting
     showToast({
-      message: t('External link opening has been disabled in the general settings'),
+      message: t('External link opening has been disabled in Settings → Privacy'),
       icon: ['fas', 'link-slash'],
     })
   } else if (externalLinkHandling.value === 'openLinkAfterPrompt') {

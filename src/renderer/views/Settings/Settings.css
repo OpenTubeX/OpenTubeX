@@ -257,6 +257,11 @@
   padding-block-start: 5px;
 }
 
+.settingsContent :deep(.settingsCategory) {
+  display: grid;
+  gap: 20px;
+}
+
 .settingsMenu {
   border-inline-end: 1px solid var(--divider-color);
 }
@@ -369,6 +374,14 @@
   display: none;
 }
 
+.settingsContent :deep(.settingsCategory .sectionTitle) {
+  display: block;
+}
+
+:deep(.settingsCategory.hideFirstSectionTitle > .settingsSection:first-child .sectionTitle) {
+  display: none;
+}
+
 /* Every control reserves the marker gutter while highlighting is on, including
    controls that cannot be reset. Otherwise those controls sit further towards
    the edge than their resettable neighbours. The low-specificity :where keeps
@@ -405,6 +418,11 @@
 
 .settingsSubpageScroll {
   grid-column: 1 / -1;
+}
+
+.settingsSubpageScroll.settingsSubpageFlush {
+  overflow: hidden;
+  padding: 0;
 }
 
 .settingsDownloadsPage {

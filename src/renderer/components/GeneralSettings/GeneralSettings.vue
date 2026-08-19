@@ -1,10 +1,11 @@
 <template>
   <FtSettingsSection
-    :title="t('Settings.General Settings.General Settings')"
+    :title="sectionTitle"
   >
     <div class="switchColumnGrid">
       <div class="switchColumn">
         <FtToggleSwitch
+          v-if="mode === 'general'"
           :label="t('Settings.General Settings.Check for Updates')"
           :default-value="checkForUpdates"
           setting-key="checkForUpdates"
@@ -12,7 +13,7 @@
           @change="updateCheckForUpdates"
         />
         <FtToggleSwitch
-          v-if="SUPPORTS_LOCAL_API"
+          v-if="mode === 'providers' && SUPPORTS_LOCAL_API"
           :label="t('Settings.General Settings.Fallback to Non-Preferred Backend on Failure')"
           :default-value="backendFallback"
           setting-key="backendFallback"
@@ -21,14 +22,7 @@
           @change="updateBackendFallback"
         />
         <FtToggleSwitch
-          :label="t('Settings.General Settings.Auto Load Next Page.Label')"
-          :default-value="generalAutoLoadMorePaginatedItemsEnabled"
-          setting-key="generalAutoLoadMorePaginatedItemsEnabled"
-          :compact="true"
-          :tooltip="t('Settings.General Settings.Auto Load Next Page.Tooltip')"
-          @change="updateGeneralAutoLoadMorePaginatedItemsEnabled"
-        />
-        <FtToggleSwitch
+          v-if="mode === 'general'"
           :label="t('Settings.General Settings.Update Relative Timestamps')"
           :tooltip="t('Tooltips.General Settings.Update Relative Timestamps')"
           :default-value="updateRelativeTimestamps"
@@ -40,7 +34,7 @@
              some platforms hide, so the columns stay even where it is missing
              and this one stays the longer of the two where it is not. -->
         <FtToggleSwitch
-          v-if="!IS_MAC && !isLinuxWayland && USING_ELECTRON"
+          v-if="mode === 'general' && !IS_MAC && !isLinuxWayland && USING_ELECTRON"
           :label="t('Settings.General Settings.Minimize to system tray')"
           :default-value="hideToTrayOnMinimize"
           setting-key="hideToTrayOnMinimize"
@@ -50,14 +44,16 @@
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
-          :label="t('Settings.General Settings.Enable Search Suggestions')"
-          :default-value="enableSearchSuggestions"
-          setting-key="enableSearchSuggestions"
+          v-if="mode === 'providers'"
+          :label="t('Settings.Player Settings.Proxy Videos Through Invidious')"
           :compact="true"
-          @change="updateEnableSearchSuggestions"
+          :default-value="showProxyVideosAsDisabled ? false : proxyVideos"
+          :disabled="showProxyVideosAsDisabled"
+          :tooltip="t('Tooltips.Player Settings.Proxy Videos Through Invidious')"
+          @change="updateProxyVideos"
         />
         <FtToggleSwitch
-          v-if="USING_ELECTRON"
+          v-if="mode === 'general' && USING_ELECTRON"
           :label="t('Settings.General Settings.Open Deep Links In New Window')"
           :default-value="openDeepLinksInNewWindow"
           setting-key="openDeepLinksInNewWindow"
@@ -66,19 +62,19 @@
           @change="updateOpenDeepLinksInNewWindow"
         />
         <FtToggleSwitch
-          v-if="USING_ELECTRON"
-          :label="t('Settings.General Settings.Remember Tab Navigation History')"
-          :default-value="rememberTabNavigationHistory"
-          setting-key="rememberTabNavigationHistory"
+          v-if="mode === 'general'"
+          :label="t('Settings.General Settings.Auto Load Next Page.Label')"
+          :default-value="generalAutoLoadMorePaginatedItemsEnabled"
+          setting-key="generalAutoLoadMorePaginatedItemsEnabled"
           :compact="true"
-          :tooltip="t('Tooltips.General Settings.Remember Tab Navigation History')"
-          @change="updateRememberTabNavigationHistory"
+          :tooltip="t('Settings.General Settings.Auto Load Next Page.Tooltip')"
+          @change="updateGeneralAutoLoadMorePaginatedItemsEnabled"
         />
       </div>
     </div>
-    <div class="switchGrid">
+    <div class="switchGrid generalSelectGrid">
       <FtSelect
-        v-if="USING_ELECTRON"
+        v-if="mode === 'providers' && USING_ELECTRON"
         :placeholder="t('Settings.General Settings.Stream Extraction Method.Stream Extraction Method')"
         :value="videoPlaybackEngine"
         setting-key="videoPlaybackEngine"
@@ -89,6 +85,7 @@
         @change="updateVideoPlaybackEngine"
       />
       <FtSelect
+        v-if="mode === 'providers'"
         :placeholder="t('Settings.General Settings.Preferred API Backend.Preferred API Backend')"
         :value="backendPreference"
         :select-names="backendNames"
@@ -98,6 +95,7 @@
         @change="updateBackendPreference"
       />
       <FtSelect
+        v-if="mode === 'general'"
         :placeholder="t('Settings.General Settings.Default Landing Page')"
         :value="landingPage"
         setting-key="landingPage"
@@ -107,7 +105,7 @@
         @change="updateLandingPage"
       />
       <FtSelect
-        v-if="USING_ELECTRON"
+        v-if="mode === 'general' && USING_ELECTRON"
         :placeholder="t('Settings.General Settings.New Tab Position.New Tab Position')"
         :value="newTabPosition"
         setting-key="newTabPosition"
@@ -117,7 +115,7 @@
         @change="updateNewTabPosition"
       />
       <FtSelect
-        v-if="USING_ELECTRON"
+        v-if="mode === 'general' && USING_ELECTRON"
         :placeholder="t('Settings.General Settings.Tab Close Focus.Tab Close Focus')"
         :value="tabCloseFocus"
         setting-key="tabCloseFocus"
@@ -127,7 +125,7 @@
         @change="updateTabCloseFocus"
       />
       <FtSelect
-        v-if="USING_ELECTRON"
+        v-if="mode === 'general' && USING_ELECTRON"
         :placeholder="t('Settings.General Settings.Startup Behavior.Startup Behavior')"
         :value="startupBehavior"
         setting-key="startupBehavior"
@@ -138,6 +136,7 @@
         @change="updateStartupBehavior"
       />
       <FtSelect
+        v-if="mode === 'appearance'"
         :placeholder="t('Settings.General Settings.Video View Type.Video View Type')"
         :value="listType"
         setting-key="listType"
@@ -147,16 +146,20 @@
         @change="updateListType"
       />
       <FtSelect
+        v-if="mode === 'appearance'"
         :placeholder="t('Settings.General Settings.Thumbnail Preference.Thumbnail Preference')"
         :value="thumbnailPreference"
         setting-key="thumbnailPreference"
+        :is-changed="thumbnailPreferenceChanged"
         :select-names="thumbnailTypeNames"
         :select-values="THUMBNAIL_TYPE_VALUES"
         :tooltip="t('Tooltips.General Settings.Thumbnail Preference')"
         :icon="['fas', 'images']"
         @change="handleThumbnailPreferenceChange"
+        @reset="resetThumbnailPreference"
       />
       <FtSelect
+        v-if="mode === 'general'"
         :placeholder="t('Settings.General Settings.Extra Thumbnail Action Button.Extra Thumbnail Action Button')"
         :value="effectiveExtraThumbnailAction"
         setting-key="extraThumbnailAction"
@@ -166,6 +169,7 @@
         @change="updateExtraThumbnailAction"
       />
       <FtSelect
+        v-if="mode === 'general'"
         :placeholder="t('Settings.General Settings.Locale Preference')"
         :value="currentLocale"
         setting-key="currentLocale"
@@ -176,6 +180,7 @@
         @change="updateCurrentLocale"
       />
       <FtSelect
+        v-if="mode === 'general'"
         :placeholder="t('Settings.General Settings.Reduced Motion.Reduced Motion')"
         :value="reducedMotion"
         setting-key="reducedMotion"
@@ -185,7 +190,7 @@
         @change="updateReducedMotion"
       />
       <FtSelect
-        v-if="SUPPORTS_LOCAL_API && (backendPreference === 'local' || backendFallback)"
+        v-if="mode === 'general' && SUPPORTS_LOCAL_API && (backendPreference === 'local' || backendFallback)"
         :placeholder="t('Settings.General Settings.Avoid translation.Avoid translation')"
         :value="avoidTranslation"
         setting-key="avoidTranslation"
@@ -196,7 +201,7 @@
         @change="updateAvoidTranslation"
       />
       <FtSelect
-        v-if="regionDataLoaded"
+        v-if="mode === 'general' && regionDataLoaded"
         :placeholder="t('Settings.General Settings.Region for Trending')"
         :value="region"
         setting-key="region"
@@ -206,18 +211,9 @@
         :tooltip="t('Tooltips.General Settings.Region for Trending')"
         @change="updateRegion"
       />
-      <FtSelect
-        :placeholder="t('Settings.General Settings.External Link Handling.External Link Handling')"
-        :value="externalLinkHandling"
-        :select-names="externalLinkHandlingNames"
-        :select-values="EXTERNAL_LINK_HANDLING_VALUES"
-        :icon="['fas', 'external-link-alt']"
-        :tooltip="t('Tooltips.General Settings.External Link Handling')"
-        @change="updateExternalLinkHandling"
-      />
     </div>
     <div
-      v-if="backendPreference === 'invidious' || backendFallback"
+      v-if="mode === 'providers' && (backendPreference === 'invidious' || backendFallback)"
     >
       <FtFlexBox class="settingsFlexStart460px">
         <FtInput
@@ -266,7 +262,7 @@
       </FtFlexBox>
     </div>
     <FtFlexBox
-      v-if="USING_ELECTRON"
+      v-if="mode === 'general' && USING_ELECTRON"
       class="confirmations"
     >
       <FtCheckboxList
@@ -293,6 +289,7 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtButton from '../FtButton/FtButton.vue'
 
 import store from '../../store/index'
+import { DEFAULT_SETTINGS } from '../../store/modules/settings'
 import { localeTranslationPercentages } from '../../i18n/index'
 
 import allLocales from '../../../../static/locales/activeLocales.json'
@@ -307,6 +304,21 @@ const PLAYBACK_ENGINE_VALUES = ['yt-dlp', 'built-in']
 
 const { t } = useI18n()
 const router = useRouter()
+
+const props = defineProps({
+  mode: {
+    type: String,
+    default: 'general',
+    validator: value => ['general', 'appearance', 'providers'].includes(value)
+  }
+})
+
+const mode = computed(() => props.mode)
+const sectionTitle = computed(() => ({
+  general: t('Settings.General Settings.General Settings'),
+  appearance: t('Settings.Categories.Content appearance'),
+  providers: t('Settings.Categories.Alternative providers')
+})[mode.value])
 
 const playbackEngineNames = computed(() => [
   t('Settings.General Settings.Stream Extraction Method.yt-dlp'),
@@ -395,6 +407,16 @@ function updateBackendFallback(value) {
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
+const proxyVideos = computed(() => store.getters.getProxyVideos)
+
+/**
+ * @param {boolean} value
+ */
+function updateProxyVideos(value) {
+  store.dispatch('updateProxyVideos', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
 const generalAutoLoadMorePaginatedItemsEnabled = computed(() => {
   return store.getters.getGeneralAutoLoadMorePaginatedItemsEnabled
 })
@@ -417,16 +439,6 @@ function updateHideToTrayOnMinimize(value) {
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const enableSearchSuggestions = computed(() => store.getters.getEnableSearchSuggestions)
-
-/**
- * @param {boolean} value
- */
-function updateEnableSearchSuggestions(value) {
-  store.dispatch('updateEnableSearchSuggestions', value)
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
 const openDeepLinksInNewWindow = computed(() => store.getters.getOpenDeepLinksInNewWindow)
 
 /**
@@ -434,16 +446,6 @@ const openDeepLinksInNewWindow = computed(() => store.getters.getOpenDeepLinksIn
  */
 function updateOpenDeepLinksInNewWindow(value) {
   store.dispatch('updateOpenDeepLinksInNewWindow', value)
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const rememberTabNavigationHistory = computed(() => store.getters.getRememberTabNavigationHistory)
-
-/**
- * @param {boolean} value
- */
-function updateRememberTabNavigationHistory(value) {
-  store.dispatch('updateRememberTabNavigationHistory', value)
 }
 
 const updateRelativeTimestamps = computed(() => store.getters.getUpdateRelativeTimestamps)
@@ -474,6 +476,10 @@ const backendNames = computed(() => {
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
+
+const showProxyVideosAsDisabled = computed(() => {
+  return backendPreference.value !== 'invidious' && !backendFallback.value
+})
 
 /**
  * @param {'local' | 'invidious'} value
@@ -625,12 +631,22 @@ const thumbnailPreference = computed(() => {
   return blurThumbnails.value ? 'blur' : store.getters.getThumbnailPreference
 })
 
+const thumbnailPreferenceChanged = computed(() => (
+  blurThumbnails.value !== DEFAULT_SETTINGS.blurThumbnails ||
+  store.getters.getThumbnailPreference !== DEFAULT_SETTINGS.thumbnailPreference
+))
+
 /**
  * @param {'' | 'start' | 'middle' | 'end' | 'hidden' | 'blur'} value
  */
 function handleThumbnailPreferenceChange(value) {
   store.dispatch('updateBlurThumbnails', value === 'blur')
   store.dispatch('updateThumbnailPreference', value)
+}
+
+function resetThumbnailPreference() {
+  store.dispatch('updateBlurThumbnails', DEFAULT_SETTINGS.blurThumbnails)
+  store.dispatch('updateThumbnailPreference', DEFAULT_SETTINGS.thumbnailPreference)
 }
 
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
@@ -736,24 +752,6 @@ const region = computed(() => store.getters.getRegion)
  */
 function updateRegion(value) {
   store.dispatch('updateRegion', value)
-}
-
-const EXTERNAL_LINK_HANDLING_VALUES = ['', 'openLinkAfterPrompt', 'doNothing']
-
-const externalLinkHandlingNames = computed(() => [
-  t('Settings.General Settings.External Link Handling.Open Link'),
-  t('Settings.General Settings.External Link Handling.Ask Before Opening Link'),
-  t('Settings.General Settings.External Link Handling.No Action')
-])
-
-/** @type {import('vue').ComputedRef<'' | 'openLinkAfterPrompt' | 'doNothing'>} */
-const externalLinkHandling = computed(() => store.getters.getExternalLinkHandling)
-
-/**
- * @param {'' | 'openLinkAfterPrompt' | 'doNothing'} value
- */
-function updateExternalLinkHandling(value) {
-  store.dispatch('updateExternalLinkHandling', value)
 }
 
 /** @type {import('vue').ComputedRef<string[]>} */

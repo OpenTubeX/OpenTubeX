@@ -32,7 +32,7 @@ test.use({
 
 test.describe('channel settings', () => {
   test('configures saved channel setting sync beside the manager and in its breadcrumb', async ({ page }) => {
-    await goToSettingsSection(page, 'channel')
+    await goToSettingsSection(page, 'playback')
 
     const manageButton = page.getByRole('button', { name: 'Manage Saved Channels (1)' })
     const manageControls = manageButton.locator('..')
@@ -75,7 +75,7 @@ test.describe('channel settings', () => {
   })
 
   test('saved channels in the manager open their channel page', async ({ page }) => {
-    await goToSettingsSection(page, 'channel')
+    await goToSettingsSection(page, 'playback')
 
     await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
 
@@ -98,7 +98,7 @@ test.describe('channel settings', () => {
       await store.dispatch('updateDisableChannelLinks', true)
     })
 
-    await goToSettingsSection(page, 'channel')
+    await goToSettingsSection(page, 'playback')
     await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
 
     const channel = page.locator('.settingsWindow .channelLink', { hasText: CHANNEL_NAME })

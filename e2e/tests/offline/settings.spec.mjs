@@ -14,6 +14,61 @@ import {
   waitForAppReady
 } from '../../helpers/app.mjs'
 
+async function expectCompactCustomThemeEditor(page) {
+  const appearance = await goToSettingsSection(page, 'appearance')
+  await appearance.getByRole('button', { name: 'Create custom theme' }).click()
+
+  const editor = page.locator('.customThemeEditor')
+  await expect(editor.locator('.themeNameField > input')).toBeVisible()
+
+  const spacing = await editor.evaluate(element => {
+    const contentBounds = element.closest('.settingsSubpageScroll').getBoundingClientRect()
+    const nameFieldBounds = element.querySelector('.themeNameField').getBoundingClientRect()
+    const buttonBounds = element.querySelector('.editorFooter .btn:last-child').getBoundingClientRect()
+    return {
+      top: nameFieldBounds.top - contentBounds.top,
+      bottom: contentBounds.bottom - buttonBounds.bottom
+    }
+  })
+
+  expect(spacing.top).toBeLessThanOrEqual(12)
+  expect(spacing.bottom).toBeLessThanOrEqual(12)
+}
+
+async function expectAlwaysVisibleScrollbarsToPreserveSettingsScroll(page) {
+  await goToSettingsSection(page, 'appearance')
+  const content = page.locator('.settingsContent')
+  await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  const toggle = page.locator('label.switch-label').filter({ hasText: 'Always Show Scrollbars' })
+  await toggle.scrollIntoViewIfNeeded()
+  const scrollTop = await content.evaluate(element => element.scrollTop)
+
+  await toggle.click()
+  await expect(page.getByRole('checkbox', { name: 'Always Show Scrollbars' })).toBeChecked()
+  await expect.poll(async () => Math.abs(
+    await content.evaluate(element => element.scrollTop) - scrollTop
+  )).toBeLessThanOrEqual(1)
+}
+
+async function expectMinimizeToPreserveSettingsScroll(page) {
+  await goToSettingsSection(page, 'appearance')
+  const content = page.locator('.settingsContent')
+  await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  const scrollTop = await content.evaluate(element => element.scrollTop)
+
+  const settingsWindow = page.getByRole('dialog', { name: 'Settings', exact: true })
+  await settingsWindow.getByRole('button', { name: /Minimi[sz]e/ }).click()
+  await expect(settingsWindow).toBeHidden()
+  await page.getByRole('button', { name: 'Restore: Settings' }).click()
+  await expect(settingsWindow).toBeVisible()
+
+  await expect.poll(async () => Math.abs(
+    await content.evaluate(element => element.scrollTop) - scrollTop
+  )).toBeLessThanOrEqual(1)
+}
+
 test.describe('skip silence settings search', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 
@@ -31,6 +86,285 @@ test.describe('skip silence settings search', () => {
 })
 
 test.describe('settings', () => {
+  test('uses distinct category names and descriptions', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    await expect(page.getByRole('button', { name: 'Sort Settings Sections (A-Z)' }))
+      .toHaveCount(0)
+    expect(await page.locator('.settingsMenu [data-section]').evaluateAll(elements => (
+      elements.map(element => element.dataset.section)
+    ))).toEqual([
+      'general',
+      'appearance',
+      'playback',
+      'add-ons',
+      'subscriptions',
+      'download',
+      'focus',
+      'privacy',
+      'data',
+      'sync',
+      'advanced'
+    ])
+
+    const subscriptions = page.locator('.settingsMenu [data-section="subscriptions"]')
+    await expect(subscriptions.locator('.titleText')).toHaveText('Subscriptions')
+    await expect(subscriptions.locator('.titleDescription'))
+      .toHaveText('Feed refresh and display options')
+
+    const playback = page.locator('.settingsMenu [data-section="playback"]')
+    await expect(playback.locator('.titleDescription'))
+      .toHaveText('Player, captions, and channel preferences')
+
+    const downloads = page.locator('.settingsMenu [data-section="download"]')
+    await expect(downloads.locator('.titleText')).toHaveText('Downloads')
+    await expect(downloads.locator('.titleDescription'))
+      .toHaveText('Folders, templates, and automatic rules')
+
+    const privacy = page.locator('.settingsMenu [data-section="privacy"]')
+    await expect(privacy.locator('.titleDescription'))
+      .toHaveText('History, stored data, and access controls')
+  })
+
+  test('keeps the IP block recovery script last in expanded Proxy settings', async ({ page }) => {
+    const advanced = await goToSettingsSection(page, 'advanced')
+    const proxy = advanced.locator('.settingsSection').filter({
+      has: page.getByRole('heading', { name: 'Proxy', exact: true })
+    })
+
+    await proxy.locator('label.switch-label').filter({ hasText: 'Enable Tor / Proxy' }).click()
+    const [testProxyBox, recoveryScriptBox] = await Promise.all([
+      proxy.getByRole('button', { name: 'Test Proxy', exact: true }).boundingBox(),
+      proxy.getByPlaceholder('IP Block Recovery Script Path').boundingBox()
+    ])
+
+    expect(testProxyBox).not.toBeNull()
+    expect(recoveryScriptBox).not.toBeNull()
+    expect(recoveryScriptBox.y).toBeGreaterThan(testProxyBox.y)
+    expect(recoveryScriptBox.y - (testProxyBox.y + testProxyBox.height))
+      .toBeGreaterThanOrEqual(16)
+  })
+
+  test('puts theme controls before a separate Layout section', async ({ page }) => {
+    const appearance = await goToSettingsSection(page, 'appearance')
+    const headings = appearance.getByRole('heading', { level: 3 })
+
+    await expect(headings).toHaveText(['Theme', 'Layout', 'Video lists and thumbnails'])
+    const theme = appearance.locator('.settingsSection').filter({
+      has: page.getByRole('heading', { name: 'Theme', exact: true })
+    })
+    const layout = appearance.locator('.settingsSection').filter({
+      has: page.getByRole('heading', { name: 'Layout', exact: true })
+    })
+    await expect(theme.getByRole('combobox', { name: 'Base Theme' })).toBeVisible()
+    await expect(theme.getByRole('button', { name: 'Create custom theme' })).toBeVisible()
+    await expect(layout.getByRole('slider', { name: /UI Scale/ })).toBeVisible()
+    await expect(layout.getByRole('combobox', { name: 'Base Theme' })).toHaveCount(0)
+  })
+
+  test('keeps the custom theme editor compact', async ({ page }) => {
+    await expectCompactCustomThemeEditor(page)
+  })
+
+  test.describe('at 95% UI scale', () => {
+    test.use({ seed: { settings: { uiScale: 95 } } })
+
+    test('keeps the custom theme editor compact', async ({ page }) => {
+      await expectCompactCustomThemeEditor(page)
+    })
+  })
+
+  test('caps the width of the download action buttons', async ({ page }) => {
+    const downloads = await goToSettingsSection(page, 'download')
+    const enableDownloads = downloads.getByRole('checkbox', { name: 'Enable Downloads' })
+    if (!await enableDownloads.isChecked()) {
+      await downloads.locator('label.switch-label').filter({ hasText: 'Enable Downloads' }).click()
+    }
+
+    const buttons = downloads.locator('.downloadActions .btn')
+    await expect(buttons).toHaveCount(3)
+    const widths = await buttons.evaluateAll(elements => (
+      elements.map(element => element.getBoundingClientRect().width)
+    ))
+    expect(Math.max(...widths)).toBeLessThanOrEqual(300)
+  })
+
+  test('hides the redundant Privacy heading and keeps the original Distraction Free headings', async ({ page }) => {
+    const privacy = await goToSettingsSection(page, 'privacy')
+    const mainPrivacySection = privacy.locator('.settingsSection').first()
+    const privacyHeading = mainPrivacySection.locator('.sectionTitle')
+    await expect(privacyHeading).toHaveText('Privacy')
+    await expect(privacyHeading).not.toBeVisible()
+
+    const metadataToggle = page.getByRole('checkbox', { name: 'Metadata history' })
+    const metadataSection = privacy.locator('.settingsSection').filter({ has: metadataToggle })
+    await expect(metadataSection).toBeVisible()
+    await expect(metadataSection.getByRole('heading', { name: 'Metadata history' })).toHaveCount(0)
+    await expect(metadataToggle).toBeVisible()
+    await expect(metadataSection.getByText(/^Video metadata cache:/)).toBeVisible()
+    await expect(mainPrivacySection.getByRole('checkbox', { name: 'Metadata history' }))
+      .toHaveCount(0)
+
+    const focus = await goToSettingsSection(page, 'focus')
+    await expect(focus.locator('h4.groupTitle')).toHaveText([
+      'General',
+      'Visible While Paused in Full Window / Full Screen',
+      'Side bar',
+      'Subscriptions page',
+      'Channel Page',
+      'Watch Page'
+    ])
+  })
+
+  test('keeps General help icons close to their selects', async ({ page }) => {
+    await goTo(page, 'settings')
+    const startup = page.locator('.generalSelectGrid .select').filter({ hasText: 'On Startup' })
+    const gaps = await startup.evaluate(element => {
+      const select = element.querySelector('.select-text').getBoundingClientRect()
+      const tooltip = element.querySelector('.selectTooltip').getBoundingClientRect()
+      const root = element.getBoundingClientRect()
+      return {
+        before: tooltip.left - select.right,
+        after: root.right - tooltip.right,
+      }
+    })
+
+    expect(gaps.before).toBeLessThanOrEqual(16)
+    expect(gaps.after).toBeLessThanOrEqual(16)
+  })
+
+  test('keeps SponsorBlock category colors in its flexible layout', async ({ page }) => {
+    const addOns = await goToSettingsSection(page, 'add-ons')
+    await addOns.locator('label.switch-label').filter({ hasText: 'Enable SponsorBlock' }).click()
+
+    const categories = addOns.locator('.sponsorBlockCategory')
+    await expect(categories).toHaveCount(10)
+    expect(await categories.first().locator('..').evaluate(element => (
+      getComputedStyle(element).display
+    ))).toBe('flex')
+
+    const paletteColors = await categories.evaluateAll(elements => elements.slice(0, 2).map(element => (
+      getComputedStyle(element.querySelector('.select-icon')).color
+    )))
+    expect(paletteColors).toEqual(['rgb(76, 175, 80)', 'rgb(255, 235, 59)'])
+  })
+
+  test('keeps General selects compact with tooltip indicators inside their width', async ({ page, attachScreenshot }) => {
+    await goTo(page, 'settings')
+
+    const grid = page.locator('.generalSelectGrid')
+    const measurements = await grid.evaluate(element => {
+      const gridBounds = element.getBoundingClientRect()
+      const contentBounds = element.closest('.sectionBody').getBoundingClientRect()
+      const widths = Array.from(element.querySelectorAll(':scope > .select'))
+        .map(select => select.getBoundingClientRect().width)
+      return {
+        gridWidth: gridBounds.width,
+        centerOffset: Math.abs(
+          gridBounds.left + gridBounds.width / 2 -
+          (contentBounds.left + contentBounds.width / 2)
+        ),
+        minimumSelectWidth: Math.min(...widths),
+        maximumSelectWidth: Math.max(...widths),
+      }
+    })
+
+    expect(measurements.gridWidth).toBeLessThanOrEqual(700)
+    expect(measurements.centerOffset).toBeLessThanOrEqual(1)
+    expect(measurements.maximumSelectWidth - measurements.minimumSelectWidth).toBeLessThanOrEqual(1)
+    await attachScreenshot('compact General setting selects')
+  })
+
+  test('keeps General selects compact in the one-column layout', async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
+        x: 40,
+        y: 40,
+        width: 900,
+        height: 700
+      }))
+    })
+    await goTo(page, 'settings')
+
+    const measurements = await page.locator('.generalSelectGrid').evaluate(element => {
+      const gridBounds = element.getBoundingClientRect()
+      const contentBounds = element.closest('.sectionBody').getBoundingClientRect()
+      const selectWidths = Array.from(element.querySelectorAll(':scope > .select'))
+        .map(select => select.getBoundingClientRect().width)
+      return {
+        columnCount: getComputedStyle(element).gridTemplateColumns.split(' ').length,
+        gridWidth: gridBounds.width,
+        maximumSelectWidth: Math.max(...selectWidths),
+        centerOffset: Math.abs(
+          gridBounds.left + gridBounds.width / 2 -
+          (contentBounds.left + contentBounds.width / 2)
+        )
+      }
+    })
+
+    expect(measurements.columnCount).toBe(1)
+    expect(measurements.gridWidth).toBeLessThanOrEqual(330)
+    expect(measurements.maximumSelectWidth).toBeLessThanOrEqual(330)
+    expect(measurements.centerOffset).toBeLessThanOrEqual(1)
+  })
+
+  test('centers stacked switch columns in narrow settings sections', async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
+        x: 40,
+        y: 40,
+        width: 820,
+        height: 700
+      }))
+    })
+    await goTo(page, 'settings')
+
+    for (const sectionType of ['subscriptions', 'focus', 'privacy']) {
+      await page.locator(`.settingsMenu [data-section="${sectionType}"]`).click()
+      const grids = page.locator(
+        `.settingsContent > [data-section="${sectionType}"] .switchColumnGrid`
+      )
+      await expect(grids.first()).toBeVisible()
+
+      const centerOffsets = await grids.evaluateAll(elements => elements.flatMap(grid => {
+        const gridBounds = grid.getBoundingClientRect()
+        const gridCenter = gridBounds.left + gridBounds.width / 2
+        return Array.from(grid.querySelectorAll(':scope > .switchColumn')).flatMap(column => {
+          return Array.from(column.children)
+            .map(child => child.getBoundingClientRect())
+            .filter(bounds => bounds.width > 0 && bounds.height > 0)
+            .map(bounds => Math.abs(bounds.left + bounds.width / 2 - gridCenter))
+        })
+      }))
+
+      expect(Math.max(...centerOffsets), sectionType).toBeLessThanOrEqual(1)
+
+      const tooltipGaps = await grids.locator('.switch-ctn.containsTooltip').evaluateAll(elements => (
+        elements.map(element => {
+          const label = element.querySelector('.switch-label-text').getBoundingClientRect()
+          const tooltip = element.querySelector('.tooltip .button').getBoundingClientRect()
+          return tooltip.left - label.right
+        })
+      ))
+      expect(Math.max(...tooltipGaps), sectionType).toBeLessThanOrEqual(8)
+    }
+
+    await page.locator('.settingsMenu [data-section="playback"]').click()
+    const channelSettings = page.locator('.settingsContent .settingsSection').filter({
+      has: page.getByRole('heading', { name: 'Channel Settings', exact: true })
+    })
+    const preferenceOffsets = await channelSettings.locator('.preferenceToggles').evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      const center = bounds.left + bounds.width / 2
+      return Array.from(element.querySelectorAll('.preferenceToggle > .switch-ctn'))
+        .map(toggle => {
+          const toggleBounds = toggle.getBoundingClientRect()
+          return Math.abs(toggleBounds.left + toggleBounds.width / 2 - center)
+        })
+    })
+    expect(Math.max(...preferenceOffsets)).toBeLessThanOrEqual(1)
+  })
+
   test('groups confirmation preferences together', async ({ page }) => {
     await goTo(page, 'settings')
 
@@ -54,6 +388,35 @@ test.describe('settings', () => {
     expect(third.y).toBeGreaterThan(first.y)
   })
 
+  test('places online activity controls in General and Privacy without a separate section', async ({ page }) => {
+    const general = await goToSettingsSection(page, 'general')
+    await expect(general.getByText(/^Auto load next page$/i)).toBeVisible()
+
+    const privacyCategory = await goToSettingsSection(page, 'privacy')
+    const privacy = privacyCategory.locator('.settingsSection').first()
+
+    await expect(privacyCategory.getByRole('heading', {
+      name: 'Online activity',
+      exact: true
+    })).toHaveCount(0)
+    await expect(privacyCategory.getByText(/^Auto load next page$/i)).toHaveCount(0)
+    const privacyColumns = privacy.locator('.switchColumn')
+    await expect(privacyColumns).toHaveCount(2)
+    await expect(privacyColumns.nth(1)).toContainText('Enable search suggestions')
+    await expect(privacyColumns.nth(1)).toContainText('Remember Tab Navigation History')
+
+    const select = privacy.locator('.privacyExternalLinkSelect')
+    const centerOffset = await select.evaluate(element => {
+      const selectBounds = element.getBoundingClientRect()
+      const bodyBounds = element.closest('.sectionBody').getBoundingClientRect()
+      return Math.abs(
+        selectBounds.left + selectBounds.width / 2 -
+        (bodyBounds.left + bodyBounds.width / 2)
+      )
+    })
+    expect(centerOffset).toBeLessThanOrEqual(1)
+  })
+
   test('keeps General settings aligned to the bottom of its scroll range', async ({ page }) => {
     await goTo(page, 'settings')
     const content = page.locator('.settingsContent')
@@ -62,8 +425,8 @@ test.describe('settings', () => {
     await page.mouse.wheel(0, 2000)
 
     await expect.poll(() => content.evaluate((element) => {
-      const lastControl = element.querySelector('.confirmations')
-      return element.getBoundingClientRect().bottom - lastControl.getBoundingClientRect().bottom
+      const lastSection = element.querySelector('.settingsCategory > :last-child')
+      return element.getBoundingClientRect().bottom - lastSection.getBoundingClientRect().bottom
     })).toBeLessThanOrEqual(45)
   })
 
@@ -181,6 +544,18 @@ test.describe('settings', () => {
     }
   })
 
+  test('preserves its scroll position after being minimized and restored', async ({ page }) => {
+    await expectMinimizeToPreserveSettingsScroll(page)
+  })
+
+  test.describe('minimized at 95% UI scale', () => {
+    test.use({ seed: { settings: { uiScale: 95 } } })
+
+    test('preserves its scroll position when restored', async ({ page }) => {
+      await expectMinimizeToPreserveSettingsScroll(page)
+    })
+  })
+
   test('restores the last selected category when reopened', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="privacy"]').click()
@@ -214,8 +589,9 @@ test.describe('settings', () => {
     await expect(page.locator('.settingsMenu .title.active')).toHaveCount(0)
     await expect(page.locator('.settingsContent > .section')).toHaveCount(0)
     await expect(page.locator('.settingsSearchResult')).toHaveCount(4)
-    expect((await page.locator('.settingsMenu .title').first().boundingBox()).height)
-      .toBeLessThanOrEqual(50)
+    expect(await page.locator('.settingsMenu .title').evaluateAll(elements => (
+      elements.every(element => element.scrollHeight <= element.clientHeight + 1)
+    ))).toBe(true)
 
     await search.fill('a')
     const searchContent = page.locator('.settingsContent')
@@ -225,11 +601,11 @@ test.describe('settings', () => {
     await search.fill('FFmpeg Source')
     await expect.poll(() => searchContent.evaluate(element => element.scrollTop)).toBe(0)
     await expect(page.locator('.settingsMenu .title')).toHaveCount(1)
-    await expect(page.locator('.settingsMenu [data-section="external-software"]')).toBeVisible()
+    await expect(page.locator('.settingsMenu [data-section="advanced"]')).toBeVisible()
     await expect(page.locator('.settingsSearchResult')).toContainText('FFmpeg Source')
     await page.getByRole('button', { name: 'FFmpeg Source', exact: true }).click()
-    await expect(page.locator('.settingsContent > [data-section="external-software"]')).toBeVisible()
-    await expect(page.locator('.settingsBreadcrumbCategoryIcon[data-icon="server"]')).toBeVisible()
+    await expect(page.locator('.settingsContent > [data-section="advanced"]')).toBeVisible()
+    await expect(page.locator('.settingsBreadcrumbCategoryIcon[data-icon="flask"]')).toBeVisible()
     await expect(page.locator('.select.settingsSearchTarget')).toContainText('FFmpeg Source')
     await expect(page.locator('.section.settingsSearchTarget')).toHaveCount(0)
 
@@ -275,6 +651,16 @@ test.describe('settings', () => {
     expect((await executableHighlight.boundingBox()).height).toBeLessThanOrEqual(45)
     await expect(page.locator('.ft-input-component.settingsSearchTarget')).toHaveCount(0)
 
+    await search.fill('Proxy Videos Through Invidious')
+    await expect(page.locator('.settingsMenu [data-section="advanced"]')).toBeVisible()
+    await page.getByRole('button', { name: 'Proxy Videos Through Invidious', exact: true }).click()
+    await expect(page.locator('.settingsContent > [data-section="advanced"]')).toBeVisible()
+    const providerSection = page.locator('.settingsSection').filter({
+      has: page.getByRole('heading', { name: 'Video and metadata providers', exact: true })
+    })
+    await expect(providerSection.locator('.switch-ctn.settingsSearchTarget'))
+      .toContainText('Proxy Videos Through Invidious')
+
     await search.fill('test')
     await expect(page.getByRole('button', { name: 'Test Proxy', exact: true })).toBeVisible()
     await expect(page.locator('.settingsSearchResultMatch')).not.toContainText('Clicking on Test Proxy')
@@ -282,7 +668,7 @@ test.describe('settings', () => {
     const proxyInfo = 'Clicking on Test Proxy will send a request to ' +
       'https://ipwho.is/?output=json&fields=ip,country,city,region&lang=en'
     await search.fill(proxyInfo)
-    await expect(page.locator('.settingsMenu [data-section="proxy"]')).toBeVisible()
+    await expect(page.locator('.settingsMenu [data-section="advanced"]')).toBeVisible()
     await page.getByRole('button', { name: proxyInfo, exact: true }).click()
     await expect(page.locator('.section.settingsSearchTarget')).toHaveCount(0)
 
@@ -310,6 +696,12 @@ test.describe('settings', () => {
     await search.fill('Application Language')
     await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
 
+    await search.fill('Preferred Caption Language')
+    await expect(page.locator('.settingsMenu [data-section="playback"]')).toBeVisible()
+    await page.getByRole('button', { name: 'Preferred Caption Language', exact: true }).click()
+    await expect(page.locator('.select.settingsSearchTarget'))
+      .toContainText('Preferred Caption Language')
+
     await search.fill('Base Theme')
     await expect(page.getByRole('button', { name: /^Base theme$/i })).toBeVisible()
 
@@ -335,7 +727,7 @@ test.describe('settings', () => {
 
     await page.mouse.move(handleBounds.x + handleBounds.width / 2, handleBounds.y + handleBounds.height / 2)
     await page.mouse.down()
-    await page.mouse.move(handleBounds.x - 360, handleBounds.y - 180)
+    await page.mouse.move(handleBounds.x - 600, handleBounds.y - 180)
     await page.mouse.up()
 
     const resizedBounds = await settingsWindow.boundingBox()
@@ -377,7 +769,7 @@ test.describe('settings', () => {
       }))
     })
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
 
     const selects = page.locator('.settingsContent .themeSelectRow .select')
     await expect(selects.first()).toBeVisible()
@@ -394,7 +786,7 @@ test.describe('settings', () => {
   test('clamps Theme settings after a narrow-to-wide reflow', async ({ page }) => {
     await page.setViewportSize({ width: 340, height: 600 })
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
 
     const content = page.locator('.settingsContent')
     await content.evaluate(element => element.scrollTo(0, element.scrollHeight))
@@ -412,7 +804,7 @@ test.describe('settings', () => {
   })
 
   test('does not clamp a subpixel Theme settings scroll boundary', async ({ page }) => {
-    await goToSettingsSection(page, 'theme')
+    await goToSettingsSection(page, 'appearance')
 
     const result = await page.locator('.settingsContent').evaluate(element => {
       element.scrollTop = element.scrollHeight
@@ -470,7 +862,7 @@ test.describe('settings', () => {
   })
 
   test('moves Downloads and Settings from Quick Settings into the app header', async ({ page }) => {
-    const themeSection = await goToSettingsSection(page, 'theme')
+    const themeSection = await goToSettingsSection(page, 'appearance')
     const downloadsToggle = themeSection.getByRole('checkbox', {
       name: 'Move Downloads to App Header'
     })
@@ -489,6 +881,8 @@ test.describe('settings', () => {
     const allSettingsShortcut = menu.getByRole('button', { name: 'All settings' })
     await expect(downloadsShortcut).toBeVisible()
     await expect(allSettingsShortcut).toBeVisible()
+    await expect(menu.getByRole('heading', { name: 'Playback', exact: true })).toBeVisible()
+    await expect(menu.getByRole('heading', { name: 'Language and region', exact: true })).toBeVisible()
     await page.locator('.profileTrigger').click()
 
     await themeSection.locator('label.switch-label')
@@ -783,20 +1177,20 @@ test.describe('settings', () => {
 
   test('returns from saved channel settings through its clickable breadcrumb', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="channel"]').click()
+    await page.locator('.settingsMenu [data-section="playback"]').click()
     await page.getByRole('button', { name: /Manage Saved Channels/ }).click()
 
     const breadcrumb = page.locator('.settingsBreadcrumb')
     await expect(breadcrumb).toContainText('Settings')
-    await expect(breadcrumb).toContainText('Channel Settings')
+    await expect(breadcrumb).toContainText('Playback')
     await expect(breadcrumb).toContainText('Saved Channel Settings')
     await expect(breadcrumb.locator('.settingsBreadcrumbSubpageIcon[data-icon="users"]')).toBeVisible()
     await breadcrumb
-      .getByRole('button', { name: 'Channel Settings' })
+      .getByRole('button', { name: 'Playback' })
       .locator('.settingsBreadcrumbCategoryIcon')
       .click()
 
-    await expect(page.locator('.settingsContent > [data-section="channel"]')).toBeVisible()
+    await expect(page.locator('.settingsContent > [data-section="playback"]')).toBeVisible()
     await expect(breadcrumb).not.toContainText('Saved Channel Settings')
   })
 
@@ -815,7 +1209,7 @@ test.describe('settings', () => {
       ])
     })
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="channel"]').click()
+    await page.locator('.settingsMenu [data-section="playback"]').click()
     await page.getByRole('button', { name: /Manage Saved Channels/ }).click()
 
     const entries = page.locator('.channelEntry')
@@ -865,7 +1259,7 @@ test.describe('settings', () => {
     await page.getByRole('searchbox', { name: 'Search settings' }).fill('')
     await expect(page.locator('.settingsMenu')).toBeVisible()
     await recordAnimations(page)
-    await page.locator('.settingsMenu [data-section="channel"]').click()
+    await page.locator('.settingsMenu [data-section="playback"]').click()
     await expectAnimation(page, 'settings-compact-slide-forward')
     await page.getByRole('button', { name: /Manage Saved Channels/ }).click()
 
@@ -901,9 +1295,9 @@ test.describe('settings', () => {
     await goTo(page, 'settings')
 
     await recordAnimations(page)
-    await page.locator('.settingsMenu [data-section="player"]').click()
+    await page.locator('.settingsMenu [data-section="playback"]').click()
     await expectAnimation(page, 'settings-section-slide-forward')
-    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
     await expectAnimation(page, 'settings-section-slide-backward')
 
     // The class is cleared once it has played, so nothing replays the slide
@@ -915,14 +1309,26 @@ test.describe('settings', () => {
     expect(await page.evaluate(() => window.__playedAnimations)).toEqual([])
   })
 
+  test('keeps its scroll position when always-visible scrollbars are enabled', async ({ page }) => {
+    await expectAlwaysVisibleScrollbarsToPreserveSettingsScroll(page)
+  })
+
+  test.describe('with 95% UI scale', () => {
+    test.use({ seed: { settings: { uiScale: 95 } } })
+
+    test('keeps its scroll position when always-visible scrollbars are enabled', async ({ page }) => {
+      await expectAlwaysVisibleScrollbarsToPreserveSettingsScroll(page)
+    })
+  })
+
   test.describe('with reduced motion', () => {
     test.use({ seed: { settings: { reducedMotion: 'on' } } })
 
     test('leaves no slide class behind for a suppressed animation', async ({ page }) => {
       await goTo(page, 'settings')
       await recordAnimations(page)
-      await page.locator('.settingsMenu [data-section="player"]').click()
-      await expect(page.locator('.settingsContent > [data-section="player"]')).toBeVisible()
+      await page.locator('.settingsMenu [data-section="playback"]').click()
+      await expect(page.locator('.settingsContent > [data-section="playback"]')).toBeVisible()
 
       // Nothing plays, and nothing is left that could play later: turning
       // reduced motion back off would otherwise slide the settings unprompted.
@@ -938,7 +1344,7 @@ test.describe('settings', () => {
 
   test('keeps quick playback speed actions sticky and reflects the default state', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="player"]').click()
+    await page.locator('.settingsMenu [data-section="playback"]').click()
     const customizeButton = page.getByRole('button', {
       name: 'Customize Quick Playback Speed Bar'
     })
@@ -985,7 +1391,7 @@ test.describe('settings', () => {
 
   test('aligns caption color controls with neighboring selects', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="caption-appearance"]').click()
+    await page.locator('.settingsMenu [data-section="playback"]').click()
 
     const edgeStyle = page.getByRole('combobox', { name: 'Edge Style' })
     await edgeStyle.click()
@@ -1016,7 +1422,7 @@ test.describe('settings', () => {
       }))
     })
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="caption-appearance"]').click()
+    await page.locator('.settingsMenu [data-section="playback"]').click()
 
     const preview = page.locator('.captionPreview')
     const initialPreviewBounds = await preview.boundingBox()
@@ -1203,6 +1609,7 @@ test.describe('settings', () => {
     await expect(combobox).toContainText('English (US) (100%)')
     await expect(dropdown).toHaveCount(0)
 
+    await page.locator('.settingsMenu [data-section="advanced"]').click()
     await page.getByRole('combobox', { name: 'Preferred API backend' }).click()
     await expect(dropdown).toBeVisible()
     expect(await dropdown.evaluate(menu => menu.scrollHeight <= menu.clientHeight)).toBe(true)
@@ -1221,17 +1628,27 @@ test.describe('settings', () => {
     const url = page.url()
     await goTo(page, 'settings')
 
-    const playerSectionLink = page.locator('.settingsMenu [data-section="player"]')
+    const playerSectionLink = page.locator('.settingsMenu [data-section="playback"]')
     await playerSectionLink.click()
     await expect(playerSectionLink).toHaveClass(/active/)
-    await expect(page.locator('.settingsContent > [data-section="player"]')).toBeVisible()
+    await expect(page.locator('.settingsContent > [data-section="playback"]')).toBeVisible()
     await expect(page).toHaveURL(url)
+  })
+
+  test('scrolls to the top when switching categories', async ({ page }) => {
+    await goToSettingsSection(page, 'appearance')
+    const content = page.locator('.settingsContent')
+    await content.evaluate(element => element.scrollTo(0, element.scrollHeight))
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await page.locator('.settingsMenu [data-section="privacy"]').click()
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBe(0)
   })
 
   test('keeps the window and its scroll position when switching tabs', async ({ page }) => {
     await goTo(page, 'settings')
 
-    const playerSectionLink = page.locator('.settingsMenu [data-section="player"]')
+    const playerSectionLink = page.locator('.settingsMenu [data-section="playback"]')
     await playerSectionLink.click()
 
     const settingsContent = page.locator('.settingsContent')
@@ -1267,7 +1684,7 @@ test.describe('settings', () => {
 
   test('enables YouTube-style Shorts by default in player settings', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="player"]').click()
+    await page.locator('.settingsMenu [data-section="playback"]').click()
 
     const toggle = page.getByRole('checkbox', { name: 'Use YouTube-style Shorts' })
     await expect(toggle).toBeChecked()
@@ -1280,10 +1697,12 @@ test.describe('settings', () => {
 
   test('shows voice-over settings disabled until translation is enabled', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="player"]').click()
+    await page.locator('.settingsMenu [data-section="add-ons"]').click()
 
     const settingsContent = page.locator('.settingsContent')
-    const voiceOverSection = page.locator('.voiceOverTranslationSettings')
+    const voiceOverSection = page.locator('.settingsSection').filter({
+      has: page.getByRole('heading', { name: /Voice-over translation/ })
+    })
     await settingsContent.evaluate(element => { element.scrollTop = element.scrollHeight })
     await expect(voiceOverSection).toBeInViewport()
 
@@ -1314,7 +1733,7 @@ test.describe('settings', () => {
 
   test('the tab width slider only becomes usable with fixed tab width on', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
 
     const slider = page.getByRole('slider', { name: /Tab Width/ })
     const fixedWidthToggle = page.locator('.switchColumnGrid > .switchColumn').first()
@@ -1342,7 +1761,7 @@ test.describe('settings', () => {
 
   test('configures animation speed and disables it with reduced motion', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
 
     const slider = page.getByRole('slider', { name: /Animation Speed/ })
     await expect(slider).toHaveValue('100')
@@ -1436,37 +1855,48 @@ test.describe('settings', () => {
 
   test('switches icon packs from Theme settings and persists the choice', async ({ page, attachScreenshot }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
 
     const iconPackSetting = page.locator('.select').filter({ hasText: 'Icon Pack' })
     const select = iconPackSetting.locator('select')
     await expect(select).toHaveValue('material')
+    await expect(page.locator(
+      '.settingsMenu [data-section="add-ons"] [data-icon="puzzle-piece"][data-icon-pack="material"]'
+    )).toBeVisible()
+    await attachScreenshot('material icon pack')
     await select.selectOption('remix')
     await expect(page.locator('[data-icon-pack="remix"]').first()).toBeVisible()
+    await expect(page.locator(
+      '.settingsMenu [data-section="add-ons"] [data-icon="puzzle-piece"][data-icon-pack="remix"]'
+    )).toBeVisible()
     await attachScreenshot('remix icon pack')
 
     await page.reload()
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
     await expect(iconPackSetting.locator('select')).toHaveValue('remix')
     await expect(page.locator('[data-icon-pack="remix"]').first()).toBeVisible()
   })
 
   test('groups theme selects and keeps restart settings aligned', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.getByRole('button', {
-      name: 'Highlight settings changed from defaults'
-    }).click()
-    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
 
-    const selectRows = page.locator('.themeSelectRow')
-    await expect(selectRows).toHaveCount(4)
-    await expect(selectRows.nth(0).locator('.select')).toHaveCount(1)
-    await expect(selectRows.nth(1).locator('.select')).toHaveCount(3)
-    await expect(selectRows.nth(2).locator('.select')).toHaveCount(2)
-    await expect(selectRows.nth(3).locator('.select')).toHaveCount(3)
+    const appearance = page.locator('[data-section="appearance"]')
+    const theme = appearance.locator('.settingsSection').filter({
+      has: page.getByRole('heading', { name: 'Theme', exact: true })
+    })
+    const layout = appearance.locator('.settingsSection').filter({
+      has: page.getByRole('heading', { name: 'Layout', exact: true })
+    })
+    const selectRows = theme.locator('.themeSelectRow')
+    await expect(selectRows).toHaveCount(3)
+    await expect(selectRows.nth(0).locator('.select')).toHaveCount(3)
+    await expect(selectRows.nth(1).locator('.select')).toHaveCount(2)
+    await expect(selectRows.nth(2).locator('.select')).toHaveCount(3)
+    await expect(layout.locator('.themeSelectRow .select')).toHaveCount(1)
 
-    const baseThemeLabel = selectRows.nth(1).locator('.select').first().locator('.select-label')
+    const baseThemeLabel = selectRows.first().locator('.select').first().locator('.select-label')
     const alignedLabelParts = await baseThemeLabel
       .locator('.select-icon, .select-placeholder, .syncedSettingIndicator, .changedSettingIndicatorPlaceholder')
       .evaluateAll(elements => elements.map(element => {
@@ -1486,7 +1916,7 @@ test.describe('settings', () => {
 
   test('keeps the current icon pack when another pack fails to load', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
 
     const errors = []
     page.on('pageerror', error => errors.push(error.message))
@@ -1512,7 +1942,7 @@ test.describe('settings', () => {
 
     await page.reload()
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
     await expect(select).toHaveValue('material')
   })
 
@@ -1540,8 +1970,6 @@ test.describe('settings', () => {
     await page.locator('label.switch-label').filter({ hasText: 'Auto Load Next Page' }).click()
     await expect(autoLoadToggle).not.toBeChecked()
 
-    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
-
     const autoLoadSetting = page.locator('.switch-ctn').filter({ has: autoLoadToggle })
     const resetButton = autoLoadSetting.getByRole('button', { name: 'Reset this setting to its default' })
     await expect(resetButton).toBeVisible()
@@ -1553,24 +1981,47 @@ test.describe('settings', () => {
     await expect(resetButton).toHaveCount(0)
   })
 
+  test('resets the composite thumbnail preference to its displayed default', async ({ page }) => {
+    const appearance = await goToSettingsSection(page, 'appearance')
+    const setting = appearance.locator('.select').filter({
+      has: page.getByRole('combobox', { name: 'Thumbnail Preference' })
+    })
+    const select = setting.locator('select')
+
+    await select.selectOption('blur')
+    await expect(select).toHaveValue('blur')
+
+    const resetButton = setting.getByRole('button', {
+      name: 'Reset this setting to its default'
+    })
+    await expect(resetButton).toBeVisible()
+    await resetButton.click()
+
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return {
+        blurThumbnails: store.getters.getBlurThumbnails,
+        thumbnailPreference: store.getters.getThumbnailPreference
+      }
+    })).toEqual({ blurThumbnails: false, thumbnailPreference: '' })
+    await expect(select).toHaveValue('')
+    await expect(resetButton).toHaveCount(0)
+  })
+
   test('highlights changed backend fallback and deep-link settings', async ({ page }) => {
     await goTo(page, 'settings')
 
-    const backendFallbackToggle = page.getByRole('checkbox', {
+    for (const { section, name } of [{
+      section: 'advanced',
       name: /non-preferred backend/i
-    })
-    const openDeepLinksToggle = page.getByRole('checkbox', {
+    }, {
+      section: 'general',
       name: /Open URLs Passed to OpenTubeX in a New Window/i
-    })
-
-    const backendFallbackSetting = page.locator('.switch-ctn').filter({ has: backendFallbackToggle })
-    const openDeepLinksSetting = page.locator('.switch-ctn').filter({ has: openDeepLinksToggle })
-
-    await backendFallbackSetting.locator('label.switch-label').click()
-    await openDeepLinksSetting.locator('label.switch-label').click()
-    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
-
-    for (const setting of [backendFallbackSetting, openDeepLinksSetting]) {
+    }]) {
+      await goToSettingsSection(page, section)
+      const toggle = page.getByRole('checkbox', { name })
+      const setting = page.locator('.switch-ctn').filter({ has: toggle })
+      await setting.locator('label.switch-label').click()
       await expect(setting.getByRole('button', {
         name: 'Reset this setting to its default'
       })).toBeVisible()
@@ -1581,8 +2032,7 @@ test.describe('settings', () => {
   test('highlights and resets caption appearance settings individually', async ({ page }) => {
     await goTo(page, 'settings')
 
-    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
-    await page.locator('.settingsMenu [data-section="caption-appearance"]').click()
+    await page.locator('.settingsMenu [data-section="playback"]').click()
 
     await expect(page.locator('.captionSettings')).toHaveCSS('user-select', 'none')
     for (const captionControl of await page.locator('.captionControl').all()) {
@@ -1590,8 +2040,21 @@ test.describe('settings', () => {
     }
     await expect(page.locator('.captionActions')).toHaveCSS('border-top-width', '0px')
 
+    const resetCaptionAppearance = page.getByRole('button', {
+      name: 'Reset Caption Appearance',
+      exact: true
+    })
+    await expect(resetCaptionAppearance).toBeDisabled()
+    const [captionActionsBounds, resetCaptionAppearanceBounds] = await Promise.all([
+      page.locator('.captionActions').boundingBox(),
+      resetCaptionAppearance.boundingBox()
+    ])
+    expect(resetCaptionAppearanceBounds.x + resetCaptionAppearanceBounds.width / 2)
+      .toBeCloseTo(captionActionsBounds.x + captionActionsBounds.width / 2, 0)
+
     const backgroundOpacity = page.getByRole('slider', { name: /Background Opacity/ })
     await backgroundOpacity.fill('50')
+    await expect(resetCaptionAppearance).toBeEnabled()
 
     const changedControl = page.locator('.pure-material-slider')
       .filter({ has: backgroundOpacity })
@@ -1608,13 +2071,13 @@ test.describe('settings', () => {
     await resetButton.click()
     await expect(backgroundOpacity).toHaveValue('80')
     await expect(resetButton).toHaveCount(0)
+    await expect(resetCaptionAppearance).toBeDisabled()
   })
 
   test('highlights and resets SponsorBlock category values individually', async ({ page }) => {
     await goTo(page, 'settings')
 
-    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
-    await page.locator('.settingsMenu [data-section="sponsor-block"]').click()
+    await page.locator('.settingsMenu [data-section="add-ons"]').click()
     await page.locator('label.switch-label')
       .filter({ hasText: 'Enable SponsorBlock' })
       .click()
@@ -1648,9 +2111,9 @@ test.describe('settings', () => {
 
   test('positions toasts and dismisses them towards the configured edge', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
 
-    const themeSection = page.locator('[data-section="theme"]')
+    const themeSection = page.locator('[data-section="appearance"]')
     const positionSelect = themeSection.locator('.select')
       .filter({ hasText: 'Toast Position' })
       .locator('select')
@@ -1821,9 +2284,9 @@ test.describe('settings', () => {
 
   test('configures the toast timeout indicator and pauses toasts on hover', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
 
-    const themeSection = page.locator('[data-section="theme"]')
+    const themeSection = page.locator('[data-section="appearance"]')
     const indicatorToggle = themeSection.getByRole('checkbox', { name: 'Show toast timeout indicator' })
     await expect(indicatorToggle).toBeChecked()
     await expect(themeSection.getByRole('checkbox', { name: 'Show Tab Icons' })).toBeVisible()
@@ -2279,6 +2742,33 @@ test.describe('settings', () => {
   })
 })
 
+test.describe('preferred caption language migration', () => {
+  test.use({ seed: { settings: { preferredCaptionLocale: 'zh-TW' } } })
+
+  test('persists the equivalent YouTube language code for existing users', async ({ app, page }) => {
+    await expect.poll(async () => {
+      const settings = latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      )
+      return settings.preferredCaptionLocale
+    }).toBe('zh-Hant')
+
+    const playback = await goToSettingsSection(page, 'playback')
+    await expect(playback.getByRole('combobox', { name: 'Preferred Caption Language' }))
+      .toContainText('Chinese (Traditional)')
+  })
+})
+
+test.describe('existing Japanese caption preference', () => {
+  test.use({ seed: { settings: { preferredCaptionLocale: 'ja' } } })
+
+  test('remains selected before player caption metadata is available', async ({ page }) => {
+    const playback = await goToSettingsSection(page, 'playback')
+    await expect(playback.getByRole('combobox', { name: 'Preferred Caption Language' }))
+      .toContainText('Japanese')
+  })
+})
+
 test.describe('managed external software update controls', () => {
   test.use({
     seed: {
@@ -2290,7 +2780,7 @@ test.describe('managed external software update controls', () => {
   })
 
   test('offers automatic, ask, and manual update modes', async ({ app, page }) => {
-    const section = await goToSettingsSection(page, 'external-software')
+    const section = await goToSettingsSection(page, 'advanced')
     const updateMode = section.locator('.select')
       .filter({ hasText: 'Managed Tool Updates' })
       .locator('select')
@@ -2330,8 +2820,9 @@ test.describe('dark theme settings', () => {
 test.describe('playback engine default', () => {
   test('uses the built-in engine for new users', async ({ app }) => {
     await goTo(app.page, 'settings')
+    await goToSettingsSection(app.page, 'advanced')
     await expect(
-      app.page.locator('[data-section="general"] .select')
+      app.page.locator('[data-section="advanced"] .select')
         .filter({ hasText: 'Stream extraction method' })
         .locator('select')
     ).toHaveValue('built-in')
@@ -2343,8 +2834,9 @@ test.describe('saved playback engine', () => {
 
   test('preserves the existing user choice', async ({ app }) => {
     await goTo(app.page, 'settings')
+    await goToSettingsSection(app.page, 'advanced')
     await expect(
-      app.page.locator('[data-section="general"] .select')
+      app.page.locator('[data-section="advanced"] .select')
         .filter({ hasText: 'Stream extraction method' })
         .locator('select')
     ).toHaveValue('yt-dlp')
@@ -2405,7 +2897,7 @@ test.describe('SponsorBlock highlight settings', () => {
   test('preserves the stored skip option when resetting only the color', async ({ app }) => {
     const { page } = app
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="sponsor-block"]').click()
+    await page.locator('.settingsMenu [data-section="add-ons"]').click()
 
     const highlightCategory = page.locator('.sponsorBlockCategory')
       .filter({ has: page.locator('.sponsorTitle', { hasText: /^Highlight$/ }) })
@@ -2732,9 +3224,9 @@ test.describe('invalid toast position', () => {
 
   test('falls back to bottom left', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
 
-    const positionSelect = page.locator('[data-section="theme"] .select')
+    const positionSelect = page.locator('[data-section="appearance"] .select')
       .filter({ hasText: 'Toast Position' })
       .locator('select')
     await expect(positionSelect).toHaveValue('bottom-left')
@@ -2754,9 +3246,9 @@ test.describe('invalid icon pack', () => {
 
   test('normalizes the stored value to the applied fallback', async ({ app, page }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
 
-    const iconPack = page.locator('[data-section="theme"] .select')
+    const iconPack = page.locator('[data-section="appearance"] .select')
       .filter({ hasText: 'Icon Pack' })
       .locator('select')
     await expect(iconPack).toHaveValue('material')
@@ -2807,7 +3299,6 @@ test.describe('synced setting indicators', () => {
 
   test('spaces setting sync and help icons', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
     await page.locator('.settingsMenu [data-section="privacy"]').click()
 
     const slider = page.locator('label.pure-material-slider')
@@ -2885,7 +3376,7 @@ test.describe('synced setting indicators', () => {
 
   test('spreads the theme sliders evenly over their rows', async ({ page }) => {
     await goTo(page, 'settings')
-    const themeSection = await goToSettingsSection(page, 'theme')
+    const themeSection = await goToSettingsSection(page, 'appearance')
     const sliders = themeSection.locator('.sliderGrid > *')
     await expect(sliders).toHaveCount(5)
 
@@ -2906,9 +3397,8 @@ test.describe('synced setting indicators', () => {
 
   test('does not move a setting when its changed highlight appears', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
 
-    const themeSection = await goToSettingsSection(page, 'theme')
+    const themeSection = await goToSettingsSection(page, 'appearance')
     const slider = themeSection.locator('label.pure-material-slider')
       .filter({ hasText: 'Scrollbar Width' })
     const label = slider.locator('.label')
@@ -2943,31 +3433,27 @@ test.describe('synced setting indicators', () => {
     expect(neighbourAfter.x).toBeCloseTo(neighbourBefore.x, 0)
   })
 
-  test('aligns non-resettable controls while changed settings are highlighted', async ({ page }) => {
+  test('reserves changed-setting markers for non-resettable controls', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
 
-    const playerSection = await goToSettingsSection(page, 'player')
-    const proxyToggle = playerSection.locator('.switch-ctn')
+    const advanced = await goToSettingsSection(page, 'advanced')
+    const providers = advanced.locator('.settingsSection').filter({
+      has: page.getByRole('heading', { name: 'Video and metadata providers', exact: true })
+    })
+    const proxyToggle = providers.locator('.switch-ctn')
       .filter({ hasText: 'Proxy Videos Through Invidious' })
-    const subtitlesToggle = playerSection.locator('.switch-ctn')
-      .filter({ hasText: 'Enable Subtitles by Default' })
     await expect(proxyToggle).toHaveCSS('border-left-width', '3px')
 
-    const [proxyBox, subtitlesBox] = await Promise.all([
-      proxyToggle.boundingBox(),
-      subtitlesToggle.boundingBox()
-    ])
-    expect(proxyBox).not.toBeNull()
-    expect(subtitlesBox).not.toBeNull()
-    expect(proxyBox.x).toBeCloseTo(subtitlesBox.x, 0)
+    const playback = await goToSettingsSection(page, 'playback')
+    await expect(playback.getByText('Proxy Videos Through Invidious', { exact: true }))
+      .toHaveCount(0)
 
-    const themeSection = await goToSettingsSection(page, 'theme')
+    const themeSection = await goToSettingsSection(page, 'appearance')
     const smoothScrollingToggle = themeSection.locator('.switch-ctn')
       .filter({ hasText: 'Disable Smooth Scrolling' })
     await expect(smoothScrollingToggle).toHaveCSS('border-left-width', '3px')
 
-    const playerSectionAgain = await goToSettingsSection(page, 'player')
+    const playerSectionAgain = await goToSettingsSection(page, 'playback')
     const viewingModeSelect = playerSectionAgain.locator('.select')
       .filter({ hasText: 'Default Viewing Mode' })
     const [selectBox, selectLabelBox] = await Promise.all([
@@ -2981,9 +3467,8 @@ test.describe('synced setting indicators', () => {
 
   test('keeps a wrapped slider label beside its icons and above its track', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
 
-    const themeSection = await goToSettingsSection(page, 'theme')
+    const themeSection = await goToSettingsSection(page, 'appearance')
     const slider = themeSection.locator('label.pure-material-slider')
       .filter({ hasText: 'Scrollbar Width' })
     const range = slider.getByRole('slider')
@@ -3034,7 +3519,6 @@ test.describe('synced setting indicators', () => {
 
   test('renders select tooltips above neighboring setting indicators', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
 
     const startupSelect = page.locator('.select').filter({ hasText: 'On Startup' })
     await startupSelect.locator('select').selectOption('restoreTabLoadState')
@@ -3043,12 +3527,12 @@ test.describe('synced setting indicators', () => {
     const tooltipText = page.locator('body > [role="tooltip"]:visible')
     await expect(tooltipText).toBeVisible()
 
-    const thumbnailIndicators = page.locator('.select')
-      .filter({ hasText: 'Thumbnail Preference' })
+    const neighboringIndicators = page.locator('.select')
+      .filter({ hasText: 'Keep original text' })
       .locator('.selectIndicators')
     const [tooltipBox, indicatorsBox] = await Promise.all([
       tooltipText.boundingBox(),
-      thumbnailIndicators.boundingBox()
+      neighboringIndicators.boundingBox()
     ])
     expect(tooltipBox).not.toBeNull()
     expect(indicatorsBox).not.toBeNull()
@@ -3086,7 +3570,7 @@ test.describe('performance impact indicators', () => {
 
   test('only shows the badges once they are switched on', async ({ app }) => {
     const { page } = app
-    const section = await goToSettingsSection(page, 'sponsor-block')
+    const section = await goToSettingsSection(page, 'add-ons')
 
     await expect(section.locator('.performanceImpact')).toHaveCount(0)
 
@@ -3123,7 +3607,7 @@ test.describe('performance impact indicators on selects', () => {
   })
 
   test('keeps the badge inside the select it belongs to', async ({ page }) => {
-    const section = await goToSettingsSection(page, 'player')
+    const section = await goToSettingsSection(page, 'playback')
 
     const defaultQuality = section.locator('.select')
       .filter({ has: page.getByText('Default Quality', { exact: true }) })

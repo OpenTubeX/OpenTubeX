@@ -269,9 +269,33 @@ export function initializeAppScrollbars() {
   // leaves its already scheduled hide behind, so the scrollbars disappear again
   // a second after being switched to "always show".
   watch(() => store.getters.getAlwaysShowScrollbars, () => {
-    for (const [instance, initialization] of [...instances]) {
+    const rebuilds = [...instances].map(([instance, initialization]) => {
+      const { viewport } = instance.elements()
+      const isBody = initialization === document.body
+      return {
+        initialization,
+        instance,
+        isBody,
+        scrollLeft: isBody ? window.scrollX : viewport.scrollLeft,
+        scrollTop: isBody ? window.scrollY : viewport.scrollTop
+      }
+    })
+
+    for (const { instance } of rebuilds) {
       instance.destroy()
-      create(initialization)
+    }
+
+    for (const { initialization, isBody, scrollLeft, scrollTop } of rebuilds) {
+      const replacement = create(initialization)
+      const { viewport } = replacement.elements()
+      replacement.update(true)
+      if (isBody) {
+        window.scrollTo(scrollLeft, scrollTop)
+      } else {
+        viewport.scrollLeft = scrollLeft
+        viewport.scrollTop = scrollTop
+      }
+      replacement.update(true)
     }
   })
 }

@@ -11,6 +11,21 @@
           setting-key="rememberHistory"
           @change="handleRememberHistory"
         />
+        <FtToggleSwitch
+          :label="$t('Settings.Privacy Settings.Remember Search History')"
+          compact
+          :default-value="rememberSearchHistory"
+          setting-key="rememberSearchHistory"
+          @change="updateRememberSearchHistory"
+        />
+        <FtToggleSwitch
+          :label="$t('Settings.Privacy Settings.Save Watched Videos With Last Viewed Playlist')"
+          compact
+          :disabled="!rememberHistory"
+          :default-value="saveVideoHistoryWithLastViewedPlaylist"
+          setting-key="saveVideoHistoryWithLastViewedPlaylist"
+          @change="updateSaveVideoHistoryWithLastViewedPlaylist"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -21,39 +36,35 @@
           setting-key="enableWatchStats"
           @change="updateEnableWatchStats"
         />
-      </div>
-      <div class="switchColumn">
         <FtToggleSwitch
-          :label="$t('Settings.Privacy Settings.Remember Search History')"
+          :label="$t('Settings.General Settings.Enable Search Suggestions')"
+          :default-value="enableSearchSuggestions"
+          setting-key="enableSearchSuggestions"
           compact
-          :default-value="rememberSearchHistory"
-          setting-key="rememberSearchHistory"
-          @change="updateRememberSearchHistory"
+          @change="updateEnableSearchSuggestions"
+        />
+        <FtToggleSwitch
+          v-if="USING_ELECTRON"
+          :label="$t('Settings.General Settings.Remember Tab Navigation History')"
+          :default-value="rememberTabNavigationHistory"
+          setting-key="rememberTabNavigationHistory"
+          :tooltip="$t('Tooltips.General Settings.Remember Tab Navigation History')"
+          compact
+          @change="updateRememberTabNavigationHistory"
         />
       </div>
-      <div
-        v-if="USING_ELECTRON"
-        class="switchColumn"
-      >
-        <FtToggleSwitch
-          :label="$t('Settings.Privacy Settings.Cache Video Metadata')"
-          :tooltip="$t('Settings.Privacy Settings.Cache Video Metadata Tooltip')"
-          compact
-          :default-value="enableVideoMetadataCache"
-          setting-key="enableVideoMetadataCache"
-          @change="updateEnableVideoMetadataCache"
-        />
-      </div>
-      <div class="switchColumn">
-        <FtToggleSwitch
-          :label="$t('Settings.Privacy Settings.Save Watched Videos With Last Viewed Playlist')"
-          compact
-          :disabled="!rememberHistory"
-          :default-value="saveVideoHistoryWithLastViewedPlaylist"
-          setting-key="saveVideoHistoryWithLastViewedPlaylist"
-          @change="updateSaveVideoHistoryWithLastViewedPlaylist"
-        />
-      </div>
+    </div>
+    <div class="privacyExternalLinkHandling">
+      <FtSelect
+        class="privacyExternalLinkSelect"
+        :placeholder="$t('Settings.General Settings.External Link Handling.External Link Handling')"
+        :value="externalLinkHandling"
+        :select-names="externalLinkHandlingNames"
+        :select-values="EXTERNAL_LINK_HANDLING_VALUES"
+        :icon="['fas', 'external-link-alt']"
+        :tooltip="$t('Tooltips.General Settings.External Link Handling')"
+        @change="updateExternalLinkHandling"
+      />
     </div>
     <br>
     <FtFlexBox>
@@ -73,21 +84,6 @@
       />
     </FtFlexBox>
     <br>
-    <div
-      v-if="USING_ELECTRON"
-      class="metadataCacheManagement"
-    >
-      <span>{{ $t('Settings.Privacy Settings.Video Metadata Cache Size', {
-        size: formatBytes(videoMetadataCacheSize)
-      }) }}</span>
-      <FtButton
-        :label="$t('Settings.Privacy Settings.Clear Video Metadata Cache')"
-        theme="destructive"
-        :icon="['fas', 'trash']"
-        @click="showClearMetadataCachePrompt = true"
-      />
-    </div>
-    <br v-if="USING_ELECTRON">
     <FtFlexBox>
       <FtSlider
         :label="$t('Settings.Privacy Settings.Watched Percentage Threshold')"
@@ -153,7 +149,6 @@
         @click="showRemovePlaylistsPrompt = true"
       />
     </FtFlexBox>
-    <PasswordSettings />
     <FtPrompt
       v-if="showSearchCachePrompt"
       autosize
@@ -162,15 +157,6 @@
       :option-values="PROMPT_VALUES"
       is-first-option-destructive
       @click="handleSearchCache"
-    />
-    <FtPrompt
-      v-if="showClearMetadataCachePrompt"
-      autosize
-      :label="$t('Settings.Privacy Settings.Are you sure you want to clear the video metadata cache?')"
-      :option-names="promptNames"
-      :option-values="PROMPT_VALUES"
-      is-first-option-destructive
-      @click="handleClearMetadataCache"
     />
     <FtPrompt
       v-if="showRemoveHistoryPrompt"
@@ -203,7 +189,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from './FtButton/FtButton.vue'
@@ -214,45 +200,14 @@ import FtSelect from './FtSelect/FtSelect.vue'
 import FtSettingsSection from './FtSettingsSection/FtSettingsSection.vue'
 import FtSlider from './FtSlider/FtSlider.vue'
 import FtToggleSwitch from './FtToggleSwitch/FtToggleSwitch.vue'
-import PasswordSettings from './PasswordSettings/PasswordSettings.vue'
 
 import store from '../store/index'
 
 import { MAIN_PROFILE_ID } from '../../constants'
 import { showToast } from '../helpers/utils'
-import { formatBytes } from '../helpers/fileSize'
 
 const { locale, t } = useI18n()
 const USING_ELECTRON = process.env.IS_ELECTRON
-const videoMetadataCacheSize = ref(0)
-let removeVideoMetadataCacheClearedListener = null
-
-async function refreshVideoMetadataCacheSize() {
-  if (!USING_ELECTRON) return
-  try {
-    videoMetadataCacheSize.value = await window.ftElectron.videoMetadataCache.getSize()
-  } catch (error) {
-    console.error('Failed to read the video metadata cache size', error)
-  }
-}
-
-function refreshVideoMetadataCacheSizeWhenVisible() {
-  if (!document.hidden) refreshVideoMetadataCacheSize()
-}
-
-onMounted(() => {
-  refreshVideoMetadataCacheSize()
-  removeVideoMetadataCacheClearedListener = window.ftElectron?.videoMetadataCache?.onCleared?.(
-    refreshVideoMetadataCacheSize
-  ) ?? null
-  document.addEventListener('visibilitychange', refreshVideoMetadataCacheSizeWhenVisible)
-})
-
-onBeforeUnmount(() => {
-  removeVideoMetadataCacheClearedListener?.()
-  document.removeEventListener('visibilitychange', refreshVideoMetadataCacheSizeWhenVisible)
-})
-
 const PROMPT_VALUES = ['delete', 'cancel']
 const promptNames = computed(() => [
   t('Yes, Delete'),
@@ -351,13 +306,41 @@ function updateRememberSearchHistory(value) {
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const enableVideoMetadataCache = computed(() => store.getters.getEnableVideoMetadataCache)
+const enableSearchSuggestions = computed(() => store.getters.getEnableSearchSuggestions)
 
 /**
  * @param {boolean} value
  */
-function updateEnableVideoMetadataCache(value) {
-  store.dispatch('updateEnableVideoMetadataCache', value)
+function updateEnableSearchSuggestions(value) {
+  store.dispatch('updateEnableSearchSuggestions', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const rememberTabNavigationHistory = computed(() => store.getters.getRememberTabNavigationHistory)
+
+/**
+ * @param {boolean} value
+ */
+function updateRememberTabNavigationHistory(value) {
+  store.dispatch('updateRememberTabNavigationHistory', value)
+}
+
+const EXTERNAL_LINK_HANDLING_VALUES = ['', 'openLinkAfterPrompt', 'doNothing']
+
+const externalLinkHandlingNames = computed(() => [
+  t('Settings.General Settings.External Link Handling.Open Link'),
+  t('Settings.General Settings.External Link Handling.Ask Before Opening Link'),
+  t('Settings.General Settings.External Link Handling.No Action')
+])
+
+/** @type {import('vue').ComputedRef<'' | 'openLinkAfterPrompt' | 'doNothing'>} */
+const externalLinkHandling = computed(() => store.getters.getExternalLinkHandling)
+
+/**
+ * @param {'' | 'openLinkAfterPrompt' | 'doNothing'} value
+ */
+function updateExternalLinkHandling(value) {
+  store.dispatch('updateExternalLinkHandling', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -398,24 +381,6 @@ function updateWatchedPercentageThreshold(value) {
 }
 
 const showSearchCachePrompt = ref(false)
-const showClearMetadataCachePrompt = ref(false)
-
-/**
- * @param {'delete' | 'cancel' | null} option
- */
-async function handleClearMetadataCache(option) {
-  showClearMetadataCachePrompt.value = false
-
-  if (option !== 'delete') return
-
-  await window.ftElectron.videoMetadataCache.clear()
-  await refreshVideoMetadataCacheSize()
-  showToast({
-    message: t('Settings.Privacy Settings.Video metadata cache has been cleared'),
-    icon: ['fas', 'trash'],
-  })
-}
-
 /**
  * @param {'delete' | 'cancel' | null} option
  */
@@ -492,11 +457,42 @@ function handleRemovePlaylists(option) {
 </script>
 
 <style scoped>
-.metadataCacheManagement {
-  align-items: center;
+.privacyExternalLinkHandling {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: space-between;
+  justify-content: center;
 }
+
+.privacyExternalLinkSelect.containsTooltip {
+  --privacy-select-indicator-space: 40px;
+
+  box-sizing: border-box;
+  inline-size: min(100%, 330px);
+  margin-inline-end: 0;
+}
+
+.privacyExternalLinkSelect:has(
+  :deep(.syncedSettingIndicator),
+  :deep(.changedSettingIndicator)
+) {
+  --privacy-select-indicator-space: 70px;
+}
+
+.privacyExternalLinkSelect :deep(.select-text),
+.privacyExternalLinkSelect :deep(.nativeSelect),
+.privacyExternalLinkSelect :deep(.select-bar) {
+  inline-size: calc(100% - var(--privacy-select-indicator-space));
+}
+
+.privacyExternalLinkSelect :deep(.iconSelect) {
+  inset-inline-end: calc(var(--privacy-select-indicator-space) + 10px);
+}
+
+.privacyExternalLinkSelect :deep(.selectIndicators) {
+  inset-inline: auto 8px;
+}
+
+.privacyExternalLinkSelect :deep(.changedSettingIndicatorPlaceholder) {
+  display: none;
+}
+
 </style>

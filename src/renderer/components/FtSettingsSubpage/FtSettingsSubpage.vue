@@ -43,6 +43,10 @@ const props = defineProps({
   persistOnDeactivate: {
     type: Boolean,
     default: false
+  },
+  flush: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -53,13 +57,17 @@ function close() {
   emit('close')
 }
 
-watch(() => [props.open, props.title, props.icon, props.persistOnDeactivate], ([open, title, icon, persist]) => {
-  if (open) {
-    settingsWindow.open(title, close, persist, icon)
-  } else {
-    settingsWindow.close(close)
-  }
-}, { immediate: true })
+watch(
+  () => [props.open, props.title, props.icon, props.persistOnDeactivate, props.flush],
+  ([open, title, icon, persist, flush]) => {
+    if (open) {
+      settingsWindow.open(title, close, persist, icon, flush)
+    } else {
+      settingsWindow.close(close)
+    }
+  },
+  { immediate: true }
+)
 
 onBeforeUnmount(() => settingsWindow.close(close))
 </script>

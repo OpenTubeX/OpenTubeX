@@ -1,14 +1,14 @@
 <template>
-  <div class="passwordSettings">
-    <h4 class="groupTitle">
-      {{ $t('Settings.Password Settings.Password Settings') }}
-    </h4>
+  <FtSettingsSection
+    :title="$t('Settings.Password Settings.Password Settings')"
+  >
     <FtFlexBox
       v-if="hasStoredPassword"
       class="settingsFlexStart460px"
     >
       <FtButton
         :label="$t('Settings.Password Settings.Remove Password')"
+        :icon="['fas', 'trash']"
         @click="handleRemovePassword"
       />
     </FtFlexBox>
@@ -17,7 +17,8 @@
       class="settingsFlexStart460px"
     >
       <FtInput
-        :placeholder="$t('Settings.Password Settings.Set Password To Prevent Access')"
+        :placeholder="$t('Settings.Password Settings.Password')"
+        :label="$t('Settings.Password Settings.Set Password To Prevent Access')"
         :show-action-button="false"
         show-label
         input-type="password"
@@ -28,10 +29,11 @@
       <FtButton
         class="centerButton"
         :label="$t('Settings.Password Settings.Set Password')"
+        :icon="['fas', 'key']"
         @click="handleSetPassword"
       />
     </FtFlexBox>
-  </div>
+  </FtSettingsSection>
 </template>
 
 <script setup>
@@ -40,6 +42,7 @@ import { computed, ref } from 'vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtButton from '../FtButton/FtButton.vue'
+import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 
 import store from '../../store/index'
 

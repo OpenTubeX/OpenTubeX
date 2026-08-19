@@ -22,7 +22,13 @@
               :icon="settingsSection.icon"
               class="titleIcon"
             />
-            {{ settingsSection.title }}
+            <span class="titleText">{{ settingsSection.title }}</span>
+            <small
+              v-if="settingsSection.description"
+              class="titleDescription"
+            >
+              {{ settingsSection.description }}
+            </small>
           </div>
           <div class="titleUnderline" />
         </div>

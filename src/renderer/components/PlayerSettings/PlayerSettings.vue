@@ -6,14 +6,6 @@
     <div class="switchColumnGrid">
       <div class="switchColumn">
         <FtToggleSwitch
-          :label="t('Settings.Player Settings.Proxy Videos Through Invidious')"
-          :compact="true"
-          :default-value="showProxyVideosAsDisabled ? false : proxyVideos"
-          :disabled="showProxyVideosAsDisabled"
-          :tooltip="t('Tooltips.Player Settings.Proxy Videos Through Invidious')"
-          @change="updateProxyVideos"
-        />
-        <FtToggleSwitch
           :label="t('Settings.Player Settings.Turn on Subtitles by Default')"
           :compact="true"
           :default-value="enableSubtitlesByDefault"
@@ -519,71 +511,6 @@
       </div>
     </FtSettingsSubpage>
   </FtSettingsSection>
-  <FtSettingsSection
-    v-if="USING_ELECTRON"
-    class="section voiceOverTranslationSettings"
-    :title="t('Settings.Player Settings.Voice-over Translation.Title')"
-  >
-    <div class="switchGrid">
-      <FtToggleSwitch
-        :label="t('Settings.Player Settings.Voice-over Translation.Enable')"
-        :compact="true"
-        :default-value="useVoiceOverTranslation"
-        setting-key="useVoiceOverTranslation"
-        :tooltip="t('Tooltips.Player Settings.Voice-over Translation')"
-        @change="updateUseVoiceOverTranslation"
-      />
-      <FtToggleSwitch
-        :label="t('Settings.Player Settings.Voice-over Translation.Prepare in Background')"
-        :compact="true"
-        :disabled="!useVoiceOverTranslation"
-        :default-value="voiceOverTranslationPrepareInBackground"
-        setting-key="voiceOverTranslationPrepareInBackground"
-        :tooltip="t('Settings.Player Settings.Voice-over Translation.Background Preparation Tooltip')"
-        @change="updateVoiceOverTranslationPrepareInBackground"
-      />
-    </div>
-    <div class="voiceOverTranslationControls">
-      <FtSelect
-        :placeholder="t('Settings.Player Settings.Voice-over Translation.Language')"
-        :value="voiceOverTranslationLanguage"
-        setting-key="voiceOverTranslationLanguage"
-        :select-names="voiceOverTranslationLanguageNames"
-        :select-values="VOICE_OVER_TRANSLATION_LANGUAGE_VALUES"
-        :icon="['fas', 'language']"
-        :disabled="!useVoiceOverTranslation"
-        @change="updateVoiceOverTranslationLanguage"
-      />
-      <FtSlider
-        :label="t('Settings.Player Settings.Voice-over Translation.Voice Volume')"
-        :default-value="voiceOverTranslationVolume"
-        setting-key="voiceOverTranslationVolume"
-        :min-value="0"
-        :max-value="100"
-        :step="1"
-        value-extension="%"
-        :disabled="!useVoiceOverTranslation"
-        @change="updateVoiceOverTranslationVolume"
-      />
-      <FtSlider
-        :label="t('Settings.Player Settings.Voice-over Translation.Original Volume')"
-        :default-value="voiceOverTranslationOriginalVolume"
-        setting-key="voiceOverTranslationOriginalVolume"
-        :min-value="0"
-        :max-value="100"
-        :step="1"
-        value-extension="%"
-        :disabled="!useVoiceOverTranslation"
-        @change="updateVoiceOverTranslationOriginalVolume"
-      />
-      <p
-        class="voiceOverTranslationLanguageHint"
-        :class="{ disabled: !useVoiceOverTranslation }"
-      >
-        {{ t('Settings.Player Settings.Voice-over Translation.Supported Source Languages') }}
-      </p>
-    </div>
-  </FtSettingsSection>
 </template>
 
 <script setup>
@@ -622,20 +549,6 @@ const QUICK_PLAYBACK_SPEED_LIMIT = 14
 
 /** @type {boolean} */
 const USING_ELECTRON = process.env.IS_ELECTRON
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const proxyVideos = computed(() => store.getters.getProxyVideos)
-
-const showProxyVideosAsDisabled = computed(() => {
-  return store.getters.getBackendPreference !== 'invidious' && !store.getters.getBackendFallback
-})
-
-/**
- * @param {boolean} value
- */
-function updateProxyVideos(value) {
-  store.dispatch('updateProxyVideos', value)
-}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const enableSubtitlesByDefault = computed(() => store.getters.getEnableSubtitlesByDefault)
@@ -685,70 +598,6 @@ const enableVideoZoom = computed(() => store.getters.getEnableVideoZoom)
  */
 function updateEnableVideoZoom(value) {
   store.dispatch('updateEnableVideoZoom', value)
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const useVoiceOverTranslation = computed(() => store.getters.getUseVoiceOverTranslation)
-
-/**
- * @param {boolean} value
- */
-function updateUseVoiceOverTranslation(value) {
-  store.dispatch('updateUseVoiceOverTranslation', value)
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const voiceOverTranslationPrepareInBackground = computed(() => {
-  return store.getters.getVoiceOverTranslationPrepareInBackground
-})
-
-/**
- * @param {boolean} value
- */
-function updateVoiceOverTranslationPrepareInBackground(value) {
-  store.dispatch('updateVoiceOverTranslationPrepareInBackground', value)
-}
-
-const VOICE_OVER_TRANSLATION_LANGUAGE_VALUES = ['en', 'ru', 'kk']
-const voiceOverTranslationLanguageNames = computed(() => [
-  t('Settings.Player Settings.Voice-over Translation.English'),
-  t('Settings.Player Settings.Voice-over Translation.Russian'),
-  t('Settings.Player Settings.Voice-over Translation.Kazakh')
-])
-
-/** @type {import('vue').ComputedRef<'ru' | 'en' | 'kk'>} */
-const voiceOverTranslationLanguage = computed(() => {
-  const language = store.getters.getVoiceOverTranslationLanguage
-  return VOICE_OVER_TRANSLATION_LANGUAGE_VALUES.includes(language) ? language : 'en'
-})
-
-/**
- * @param {'ru' | 'en' | 'kk'} value
- */
-function updateVoiceOverTranslationLanguage(value) {
-  store.dispatch('updateVoiceOverTranslationLanguage', value)
-}
-
-/** @type {import('vue').ComputedRef<number>} */
-const voiceOverTranslationVolume = computed(() => store.getters.getVoiceOverTranslationVolume)
-
-/**
- * @param {number} value
- */
-function updateVoiceOverTranslationVolume(value) {
-  store.dispatch('updateVoiceOverTranslationVolume', value)
-}
-
-/** @type {import('vue').ComputedRef<number>} */
-const voiceOverTranslationOriginalVolume = computed(() => {
-  return store.getters.getVoiceOverTranslationOriginalVolume
-})
-
-/**
- * @param {number} value
- */
-function updateVoiceOverTranslationOriginalVolume(value) {
-  store.dispatch('updateVoiceOverTranslationOriginalVolume', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

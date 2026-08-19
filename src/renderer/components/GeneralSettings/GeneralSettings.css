@@ -1,11 +1,58 @@
-.select {
-  min-inline-size: 240px;
-  inline-size: auto;
+.generalSelectGrid.generalSelectGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  justify-content: stretch;
+  column-gap: 40px;
+  inline-size: min(100%, 700px);
+  margin-inline: auto;
+}
+
+.generalSelectGrid :deep(.select) {
+  min-inline-size: 0;
+  inline-size: 100%;
+  box-sizing: border-box;
+}
+
+.generalSelectGrid :deep(.select.containsTooltip) {
+  --general-select-indicator-space: 40px;
+
+  margin-inline-end: 0;
+}
+
+.generalSelectGrid :deep(.select.containsTooltip:has(
+  .syncedSettingIndicator,
+  .changedSettingIndicator
+)) {
+  --general-select-indicator-space: 70px;
+}
+
+.generalSelectGrid :deep(.select.containsTooltip .select-text),
+.generalSelectGrid :deep(.select.containsTooltip .nativeSelect),
+.generalSelectGrid :deep(.select.containsTooltip .select-bar) {
+  inline-size: calc(100% - var(--general-select-indicator-space));
+}
+
+.generalSelectGrid :deep(.select.containsTooltip .iconSelect) {
+  inset-inline-end: calc(var(--general-select-indicator-space) + 10px);
+}
+
+.generalSelectGrid :deep(.select.containsTooltip .selectIndicators) {
+  inset-inline: auto 8px;
+}
+
+.generalSelectGrid :deep(.select.containsTooltip .changedSettingIndicatorPlaceholder) {
+  display: none;
 }
 
 .switchGrid {
   gap: 10px;
   margin-block-end: 12px;
+}
+
+@container settings-content (width <= 680px) {
+  .generalSelectGrid.generalSelectGrid {
+    grid-template-columns: minmax(0, 1fr);
+    inline-size: min(100%, 330px);
+  }
 }
 
 .confirmations {

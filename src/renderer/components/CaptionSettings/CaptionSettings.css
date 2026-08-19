@@ -99,7 +99,7 @@
 
 .captionActions {
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   padding-block-start: 0.25rem;
 }
 

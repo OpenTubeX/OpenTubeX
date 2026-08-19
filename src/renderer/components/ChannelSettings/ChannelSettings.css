@@ -11,6 +11,14 @@
   margin-block-end: 1em;
 }
 
+@container settings-content (width <= 680px) {
+  .preferenceToggle {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 .autoUpdateToggle {
   margin-block-start: 0.5em;
   margin-inline-start: 1em;
