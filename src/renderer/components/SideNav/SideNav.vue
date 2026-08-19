@@ -2,6 +2,7 @@
   <FtFlexBox
     class="sideNav"
     :class="[{ opened: isOpen, expanded: isOpen || props.forceExpanded }, applyHiddenLabels]"
+    data-tutorial="navigation"
     role="navigation"
   >
     <div
@@ -18,7 +19,6 @@
       />
       <router-link
         class="navOption topNavOption mobileShow "
-        data-tutorial="navigation"
         role="button"
         to="/subscriptions"
         :title="$t('Subscriptions.Subscriptions')"

@@ -87,6 +87,7 @@
   list-style: none;
   font-family: var(--app-font-family);
   font-size: 16px;
+  text-align: start;
   color: var(--secondary-text-color);
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
