@@ -3027,7 +3027,7 @@ export default defineComponent({
     // #region player config
 
     const seekingIsPossible = computed(() => {
-      if (props.manifestMimeType !== 'application/x-mpegurl') {
+      if (props.manifestMimeType !== 'application/x-mpegurl' || !props.isLive) {
         return true
       }
 

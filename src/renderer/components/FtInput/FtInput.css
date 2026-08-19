@@ -8,6 +8,24 @@
   vertical-align: middle;
 }
 
+.selectLabel.hasIcon {
+  align-items: center;
+  display: inline-flex;
+  margin-block-end: 4px;
+}
+
+.selectLabelIcon {
+  flex: 0 0 auto;
+  block-size: 14px;
+  font-size: 14px;
+  inline-size: 14px;
+  margin-inline-end: 6px;
+}
+
+.selectLabelIcon :deep(.ft-icon__glyph) {
+  translate: 0 -1px;
+}
+
 body[dir='rtl'] .ft-input-component.search.showClearTextButton .inputAction {
   inset-inline-end: -30px;
 }

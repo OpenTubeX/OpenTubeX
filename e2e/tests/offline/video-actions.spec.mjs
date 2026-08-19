@@ -243,6 +243,45 @@ test.describe('video downloads', () => {
     expect(info.formats[0].availableAt).toBe(123)
   })
 
+  test('passes configured cookies only for explicit restricted playback retries', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'capture-yt-dlp-cookie-args.sh')
+    const capturedArgs = path.join(app.userDataDir, 'captured-yt-dlp-cookie-args.txt')
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf '%s\\n' "$@" > "${capturedArgs}"`,
+      'printf \'%s\\n\' \'{"formats":[{"format_id":"140"}]}\''
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+      await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
+      await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
+      await store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', '/tmp/restricted-profile')
+    }, executable)
+
+    await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee'))
+    let passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
+    expect(passedArguments).not.toContain('--cookies')
+    expect(passedArguments).not.toContain('--cookies-from-browser')
+
+    await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee', false, true))
+    passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
+    let cookiesIndex = passedArguments.indexOf('--cookies-from-browser')
+    expect(passedArguments[cookiesIndex + 1]).toBe('firefox:/tmp/restricted-profile')
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
+      await store.dispatch('updateYtDlpPlaybackCookiesPath', '/tmp/restricted-cookies.txt')
+    })
+    await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee', false, true))
+    passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
+    cookiesIndex = passedArguments.indexOf('--cookies')
+    expect(passedArguments[cookiesIndex + 1]).toBe('/tmp/restricted-cookies.txt')
+    expect(passedArguments).not.toContain('--cookies-from-browser')
+  })
+
   test('disables media download actions and rejects direct requests', async ({ page }) => {
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store

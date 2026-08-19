@@ -189,6 +189,77 @@
       />
     </FtFlexBox>
   </FtSettingsSection>
+  <FtSettingsSection
+    :title="t('Settings.External Software Settings.Restricted Playback Authentication')"
+  >
+    <FtFlexBox class="restrictedPlaybackAuthControls settingsFlexStart460px">
+      <div class="restrictedPlaybackAuthControl restrictedPlaybackAuthSource">
+        <FtSelect
+          :placeholder="t('Settings.External Software Settings.Cookie Source')"
+          :value="ytDlpPlaybackAuthMode"
+          setting-key="ytDlpPlaybackAuthMode"
+          :select-names="authenticationModeNames"
+          :select-values="AUTHENTICATION_MODE_VALUES"
+          :icon="['fas', 'cookie']"
+          :tooltip="t('Tooltips.External Software Settings.Cookie Source')"
+          @change="updateYtDlpPlaybackAuthMode"
+        />
+      </div>
+      <div
+        v-if="ytDlpPlaybackAuthMode !== 'none'"
+        class="restrictedPlaybackAuthControl restrictedPlaybackAuthDetail"
+      >
+        <FtInput
+          v-if="ytDlpPlaybackAuthMode === 'file'"
+          :placeholder="t('Settings.External Software Settings.Cookie File')"
+          :show-action-button="true"
+          :allow-action-button-when-empty="true"
+          :force-action-button-icon-name="['fas', 'folder-open']"
+          :icon="['fas', 'folder-open']"
+          :show-label="true"
+          :value="ytDlpPlaybackCookiesPath"
+          setting-key="ytDlpPlaybackCookiesPath"
+          :tooltip="t('Tooltips.External Software Settings.Cookie File')"
+          @input="updateYtDlpPlaybackCookiesPath"
+          @click="chooseCookiesPath"
+        />
+        <FtSelect
+          v-else
+          :placeholder="t('Settings.External Software Settings.Browser for Cookies')"
+          :value="ytDlpPlaybackCookiesBrowser"
+          setting-key="ytDlpPlaybackCookiesBrowser"
+          :select-names="browserNames"
+          :select-values="browserValues"
+          :disabled="ytDlpInfo === null || !ytDlpInfo.available"
+          :tooltip="t('Tooltips.External Software Settings.Browser for Cookies')"
+          :icon="['fas', 'globe']"
+          @change="updateYtDlpPlaybackCookiesBrowser"
+        />
+      </div>
+    </FtFlexBox>
+    <FtFlexBox
+      v-if="ytDlpPlaybackAuthMode === 'browser'"
+      class="restrictedPlaybackBrowserProfile"
+    >
+      <FtInput
+        :label="t('Settings.External Software Settings.Browser Profile')"
+        :placeholder="t('Settings.External Software Settings.Browser Profile Placeholder')"
+        :show-action-button="true"
+        :allow-action-button-when-empty="true"
+        :force-action-button-icon-name="['fas', 'folder-open']"
+        :icon="['fas', 'folder-open']"
+        :show-label="true"
+        :value="ytDlpPlaybackCookiesBrowserProfile"
+        setting-key="ytDlpPlaybackCookiesBrowserProfile"
+        :tooltip="t('Tooltips.External Software Settings.Browser Profile')"
+        @input="updateYtDlpPlaybackCookiesBrowserProfile"
+        @click="chooseBrowserProfilePath"
+      />
+    </FtFlexBox>
+    <p class="restrictedPlaybackAuthHint">
+      {{ t('Settings.External Software Settings.Restricted Playback Authentication Hint') }}
+    </p>
+  </FtSettingsSection>
 </template>
 
 <script setup>
@@ -212,6 +283,7 @@ const SOURCE_VALUES = ['system', 'managed']
 const CHANNEL_NAMES = ['Stable', 'Nightly', 'Master']
 const CHANNEL_VALUES = ['stable', 'nightly', 'master']
 const UPDATE_MODE_VALUES = ['automatic', 'ask', 'manual']
+const AUTHENTICATION_MODE_VALUES = ['none', 'file', 'browser']
 
 const sourceNames = computed(() => [
   t('Settings.External Software Settings.Sources.System'),
@@ -224,6 +296,12 @@ const updateModeNames = computed(() => [
   t('Settings.External Software Settings.Update Modes.Manual')
 ])
 
+const authenticationModeNames = computed(() => [
+  t('Settings.External Software Settings.Cookie Sources.None'),
+  t('Settings.External Software Settings.Cookie Sources.File'),
+  t('Settings.External Software Settings.Cookie Sources.Browser')
+])
+
 /** @type {import('vue').ComputedRef<'system' | 'managed'>} */
 const ytDlpSource = computed(() => store.getters.getYtDlpSource)
 
@@ -232,6 +310,18 @@ const ytDlpChannel = computed(() => store.getters.getYtDlpChannel)
 
 /** @type {import('vue').ComputedRef<string>} */
 const ytDlpPath = computed(() => store.getters.getYtDlpPath)
+
+/** @type {import('vue').ComputedRef<'none' | 'file' | 'browser'>} */
+const ytDlpPlaybackAuthMode = computed(() => store.getters.getYtDlpPlaybackAuthMode)
+
+/** @type {import('vue').ComputedRef<string>} */
+const ytDlpPlaybackCookiesPath = computed(() => store.getters.getYtDlpPlaybackCookiesPath)
+
+/** @type {import('vue').ComputedRef<string>} */
+const ytDlpPlaybackCookiesBrowser = computed(() => store.getters.getYtDlpPlaybackCookiesBrowser)
+
+/** @type {import('vue').ComputedRef<string>} */
+const ytDlpPlaybackCookiesBrowserProfile = computed(() => store.getters.getYtDlpPlaybackCookiesBrowserProfile)
 
 /** @type {import('vue').ComputedRef<'system' | 'managed'>} */
 const ytDlpFfmpegSource = computed(() => store.getters.getYtDlpFfmpegSource)
@@ -243,12 +333,22 @@ const ytDlpFfmpegPath = computed(() => store.getters.getYtDlpFfmpegPath)
 const externalSoftwareUpdateMode = computed(() => store.getters.getExternalSoftwareUpdateMode)
 
 /** @typedef {import('../../main/ytDlp').YtDlpBinaryInfo} BinaryInfo */
+/** @typedef {import('../../main/ytDlp').YtDlpInfo} YtDlpInfo */
 
-/**
- * @type {import('vue').Ref<Record<'ytDlp' | 'ffmpeg' | 'ffprobe', {
- *   managed: BinaryInfo | null,
- *   system: { path: string, info: BinaryInfo } | null
- * }>>}
+/** @type {import('vue').Ref<{
+ *   ytDlp: {
+ *     managed: YtDlpInfo | null,
+ *     system: { path: string, info: YtDlpInfo } | null
+ *   },
+ *   ffmpeg: {
+ *     managed: BinaryInfo | null,
+ *     system: { path: string, info: BinaryInfo } | null
+ *   },
+ *   ffprobe: {
+ *     managed: BinaryInfo | null,
+ *     system: { path: string, info: BinaryInfo } | null
+ *   }
+ * }>}
  */
 const binariesInfoCache = ref({
   ytDlp: { managed: null, system: null },
@@ -256,12 +356,26 @@ const binariesInfoCache = ref({
   ffprobe: { managed: null, system: null }
 })
 
-/** @type {import('vue').ComputedRef<BinaryInfo | null>} */
+/** @type {import('vue').ComputedRef<YtDlpInfo | null>} */
 const ytDlpInfo = computed(() => ytDlpSource.value === 'managed'
   ? binariesInfoCache.value.ytDlp.managed
   : binariesInfoCache.value.ytDlp.system?.path === ytDlpPath.value
     ? binariesInfoCache.value.ytDlp.system.info
     : null)
+
+const supportedBrowsers = computed(() => ytDlpInfo.value?.supportedBrowsers ?? [])
+const browserValues = computed(() => {
+  const values = ['', ...supportedBrowsers.value]
+
+  if (ytDlpPlaybackCookiesBrowser.value !== '' && !values.includes(ytDlpPlaybackCookiesBrowser.value)) {
+    values.push(ytDlpPlaybackCookiesBrowser.value)
+  }
+
+  return values
+})
+const browserNames = computed(() => browserValues.value.map(browser => browser === ''
+  ? t('Settings.External Software Settings.Select Browser')
+  : browser.charAt(0).toUpperCase() + browser.slice(1)))
 
 /** @type {import('vue').ComputedRef<BinaryInfo | null>} */
 const ffmpegInfo = computed(() => ytDlpFfmpegSource.value === 'managed'
@@ -306,7 +420,11 @@ async function getBinariesInfo(options) {
     const unavailable = { source: options.ytDlpSource, available: false, version: null }
 
     const unavailableFfmpegTool = { ...unavailable, source: options.ffmpegSource }
-    return { ytDlp: unavailable, ffmpeg: unavailableFfmpegTool, ffprobe: unavailableFfmpegTool }
+    return {
+      ytDlp: { ...unavailable, supportedBrowsers: [] },
+      ffmpeg: unavailableFfmpegTool,
+      ffprobe: unavailableFfmpegTool
+    }
   }
 }
 
@@ -458,6 +576,34 @@ function updateYtDlpPath(value) {
 }
 
 /**
+ * @param {'none' | 'file' | 'browser'} value
+ */
+function updateYtDlpPlaybackAuthMode(value) {
+  store.dispatch('updateYtDlpPlaybackAuthMode', value)
+}
+
+/**
+ * @param {string} value
+ */
+function updateYtDlpPlaybackCookiesPath(value) {
+  store.dispatch('updateYtDlpPlaybackCookiesPath', value)
+}
+
+/**
+ * @param {string} value
+ */
+function updateYtDlpPlaybackCookiesBrowser(value) {
+  store.dispatch('updateYtDlpPlaybackCookiesBrowser', value)
+}
+
+/**
+ * @param {string} value
+ */
+function updateYtDlpPlaybackCookiesBrowserProfile(value) {
+  store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', value)
+}
+
+/**
  * @param {'system' | 'managed'} value
  */
 function updateYtDlpFfmpegSource(value) {
@@ -553,6 +699,22 @@ async function chooseExecutablePath(binary) {
     store.dispatch(binary === 'yt-dlp' ? 'updateYtDlpPath' : 'updateYtDlpFfmpegPath', path)
   }
 }
+
+async function chooseCookiesPath() {
+  const path = await window.ftElectron.ytDlpChooseCookies(ytDlpPlaybackCookiesPath.value)
+
+  if (typeof path === 'string' && path.length > 0) {
+    store.dispatch('updateYtDlpPlaybackCookiesPath', path)
+  }
+}
+
+async function chooseBrowserProfilePath() {
+  const path = await window.ftElectron.ytDlpChooseBrowserProfile(ytDlpPlaybackCookiesBrowserProfile.value)
+
+  if (typeof path === 'string' && path.length > 0) {
+    store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', path)
+  }
+}
 </script>
 
 <style scoped>
@@ -567,6 +729,63 @@ async function chooseExecutablePath(binary) {
 .executablePathInputs :deep(.ft-input-component) {
   inline-size: 340px;
   max-inline-size: 100%;
+}
+
+.restrictedPlaybackAuthControls {
+  column-gap: 12px;
+  justify-content: center;
+}
+
+.restrictedPlaybackAuthControl {
+  box-sizing: border-box;
+  flex: 0 1 410px;
+  max-inline-size: 100%;
+}
+
+.restrictedPlaybackAuthDetail {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.restrictedPlaybackAuthControl > :deep(.select),
+.restrictedPlaybackAuthControl > :deep(.ft-input-component) {
+  inline-size: 340px;
+  max-inline-size: 100%;
+}
+
+.restrictedPlaybackAuthControl > :deep(.ft-input-component) {
+  margin-block-start: 14px;
+}
+
+.restrictedPlaybackAuthDetail > :deep(.select) {
+  margin-inline-end: 0;
+}
+
+.restrictedPlaybackBrowserProfile {
+  margin-block-start: 14px;
+}
+
+.restrictedPlaybackBrowserProfile > :deep(.ft-input-component) {
+  inline-size: 340px;
+  max-inline-size: 100%;
+}
+
+@container settings-content (width <= 860px) {
+  .restrictedPlaybackAuthControl {
+    flex-basis: 340px;
+  }
+
+  .restrictedPlaybackAuthDetail {
+    justify-content: flex-start;
+  }
+}
+
+.restrictedPlaybackAuthHint {
+  margin-block: 16px 8px;
+  margin-inline: auto;
+  max-inline-size: 680px;
+  padding-inline: 14px;
+  text-align: center;
 }
 
 .binaryStatusStart {

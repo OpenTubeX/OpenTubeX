@@ -10,6 +10,7 @@ import { buildProxyUrl, isOpenTubeXUrl } from './utils'
 import { TabManager } from './tabs/TabManager'
 import { IpcChannels } from '../constants'
 import { getMatchingDownloadValidators, getYtDlpAssetName } from './ytDlpAsset'
+import { buildYtDlpStoryboardVtt } from './ytDlpStoryboard'
 import { shouldUseGioTrash } from './trashPlatform'
 
 const execFileAsync = promisify(execFile)
@@ -437,6 +438,49 @@ async function getYtDlpVersion(executable, signal) {
     return stdout.trim()
   } catch {
     return null
+  }
+}
+
+/**
+ * @param {string} helpOutput
+ * @returns {string[]}
+ */
+export function parseYtDlpSupportedBrowsers(helpOutput) {
+  const browserList = helpOutput.match(
+    /Currently supported browsers are:\s*([\s\S]*?)\s+Optionally,\s+the KEYRING/i
+  )?.[1]
+
+  if (browserList === undefined) {
+    return []
+  }
+
+  const browsers = browserList
+    .replaceAll(/\s+/g, ' ')
+    .split(',')
+    .map(browser => browser.trim())
+    .filter(browser => /^[a-z0-9_-]+$/i.test(browser))
+
+  return [...new Set(browsers)]
+}
+
+/**
+ * Reads the browser names from yt-dlp's own help output so newly supported
+ * browsers appear without an OpenTubeX update.
+ * @param {string} executable
+ * @param {AbortSignal} [signal]
+ * @returns {Promise<string[]>}
+ */
+async function getYtDlpSupportedBrowsers(executable, signal) {
+  try {
+    const { stdout } = await execFileAsync(executable, ['--help'], {
+      timeout: 60_000,
+      maxBuffer: 2 * 1024 * 1024,
+      windowsHide: true,
+      signal
+    })
+    return parseYtDlpSupportedBrowsers(stdout)
+  } catch {
+    return []
   }
 }
 
@@ -1000,6 +1044,10 @@ async function isManagedBinaryUpdateAvailable(binary) {
  */
 
 /**
+ * @typedef {YtDlpBinaryInfo & { supportedBrowsers: string[] }} YtDlpInfo
+ */
+
+/**
  * @param {{ source: 'system' | 'managed', executable: string }} resolved
  * @param {(executable: string) => Promise<string | null>} getVersion
  * @returns {Promise<YtDlpBinaryInfo>}
@@ -1012,6 +1060,29 @@ async function getBinaryInfo(resolved, getVersion) {
   const version = await getVersion(resolved.executable)
 
   return { source: resolved.source, available: version !== null, version }
+}
+
+/**
+ * @param {{ source: 'system' | 'managed', executable: string }} resolved
+ * @param {AbortSignal} signal
+ * @returns {Promise<YtDlpInfo>}
+ */
+async function getYtDlpInfo(resolved, signal) {
+  if (resolved.source === 'managed' && !existsSync(resolved.executable)) {
+    return { source: resolved.source, available: false, version: null, supportedBrowsers: [] }
+  }
+
+  const [version, supportedBrowsers] = await Promise.all([
+    getYtDlpVersion(resolved.executable, signal),
+    getYtDlpSupportedBrowsers(resolved.executable, signal)
+  ])
+
+  return {
+    source: resolved.source,
+    available: version !== null,
+    version,
+    supportedBrowsers
+  }
 }
 
 /**
@@ -1039,7 +1110,7 @@ function getInfoProbeKey(options) {
  *   ffmpegSource: 'system' | 'managed',
  *   ffmpegPath: string
  * } | undefined} [options]
- * @returns {Promise<{ ytDlp: YtDlpBinaryInfo, ffmpeg: YtDlpBinaryInfo, ffprobe: YtDlpBinaryInfo } | null>}
+ * @returns {Promise<{ ytDlp: YtDlpInfo, ffmpeg: YtDlpBinaryInfo, ffprobe: YtDlpBinaryInfo } | null>}
  */
 export async function handleYtDlpGetInfo(event, options) {
   if (!isOpenTubeXUrl(event.senderFrame.url)) {
@@ -1076,9 +1147,9 @@ export async function handleYtDlpGetInfo(event, options) {
 
   try {
     const [ytDlp, ffmpeg, ffprobe] = await Promise.all([
-      getBinaryInfo(
+      getYtDlpInfo(
         await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp', options?.ytDlpSource, options?.ytDlpPath),
-        (executable) => getYtDlpVersion(executable, signal)
+        signal
       ),
       getBinaryInfo(
         await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg', options?.ffmpegSource, options?.ffmpegPath),
@@ -1203,7 +1274,22 @@ export async function handleYtDlpDownloadBinary(event, binary) {
  * @property {'is_live' | 'post_live' | 'was_live' | 'not_live' | 'is_upcoming' | null} liveStatus
  * @property {number | null} duration
  * @property {string | null} hlsManifestUrl
+ * @property {string | null} storyboardVtt
  * @property {YtDlpPlaybackFormat[]} formats
+ */
+
+/**
+ * @typedef YtDlpRecommendation
+ * @property {'video'} type
+ * @property {string} videoId
+ * @property {string} title
+ * @property {string} author
+ * @property {string | null} authorId
+ * @property {number | null} viewCount
+ * @property {number | ''} lengthSeconds
+ * @property {boolean} liveNow
+ * @property {boolean} isUpcoming
+ * @property {number} [published]
  */
 
 // yt-dlp's JSON dump for a single video is a few hundred kilobytes at most,
@@ -1226,6 +1312,36 @@ function toFiniteNumber(value) {
  */
 function toNonEmptyString(value) {
   return typeof value === 'string' && value.length > 0 ? value : null
+}
+
+/**
+ * Adds the cookie source selected specifically for restricted playback.
+ * @param {string[]} args
+ * @returns {Promise<string | null>} an error message, or null when configured
+ */
+async function pushYtDlpPlaybackAuthenticationArguments(args) {
+  const authenticationMode = (await settings._findOne('ytDlpPlaybackAuthMode'))?.value
+  const browserProfile = (await settings._findOne('ytDlpPlaybackCookiesBrowserProfile'))?.value
+  const authenticationValue = authenticationMode === 'file'
+    ? (await settings._findOne('ytDlpPlaybackCookiesPath'))?.value
+    : authenticationMode === 'browser'
+      ? (await settings._findOne('ytDlpPlaybackCookiesBrowser'))?.value
+      : ''
+
+  if (typeof authenticationValue !== 'string' || authenticationValue.trim() === '') {
+    return 'yt-dlp playback authentication is not configured'
+  }
+
+  if (authenticationMode === 'file') {
+    args.push('--cookies', authenticationValue)
+  } else if (authenticationMode === 'browser' && /^[a-z0-9_-]+$/i.test(authenticationValue)) {
+    const profile = typeof browserProfile === 'string' ? browserProfile.trim() : ''
+    args.push('--cookies-from-browser', profile === '' ? authenticationValue : `${authenticationValue}:${profile}`)
+  } else {
+    return 'yt-dlp playback authentication is invalid'
+  }
+
+  return null
 }
 
 /**
@@ -1264,14 +1380,24 @@ function mapPlaybackFormat(format) {
  * @param {import('electron').IpcMainInvokeEvent} event
  * @param {string} videoId
  * @param {boolean} useDefaultClients
+ * @param {boolean} useAuthentication
  * @returns {Promise<YtDlpPlaybackInfo | { error: string } | null>}
  */
-export async function handleYtDlpGetPlaybackInfo(event, videoId, useDefaultClients = false) {
+export async function handleYtDlpGetPlaybackInfo(
+  event,
+  videoId,
+  useDefaultClients = false,
+  useAuthentication = false
+) {
   if (!isOpenTubeXUrl(event.senderFrame.url)) {
     return null
   }
 
   if (typeof videoId !== 'string' || !ID_REGEX.test(videoId)) {
+    return null
+  }
+
+  if (typeof useDefaultClients !== 'boolean' || typeof useAuthentication !== 'boolean') {
     return null
   }
 
@@ -1302,6 +1428,11 @@ export async function handleYtDlpGetPlaybackInfo(event, videoId, useDefaultClien
       '--extractor-args',
       'youtube:player_client=web_embedded,default,-android_vr'
     )
+  }
+
+  if (useAuthentication) {
+    const authenticationError = await pushYtDlpPlaybackAuthenticationArguments(args)
+    if (authenticationError !== null) return { error: authenticationError }
   }
 
   await pushProxyArgument(args)
@@ -1342,9 +1473,98 @@ export async function handleYtDlpGetPlaybackInfo(event, videoId, useDefaultClien
     hlsManifestUrl: toNonEmptyString(info.manifest_url) ??
       formats.find(format => format.protocol === 'm3u8_native' && format.manifest_url)?.manifest_url ??
       null,
-    // storyboards are provided by the regular API, so drop them here
+    storyboardVtt: buildYtDlpStoryboardVtt(formats, toFiniteNumber(info.duration)),
     formats: formats.filter(format => format.protocol !== 'mhtml').map(mapPlaybackFormat)
   }
+}
+
+/**
+ * Loads the signed-in user's recommendation feed after they explicitly retry a
+ * restricted video. The result stays renderer-local and is never cached.
+ * @param {import('electron').IpcMainInvokeEvent} event
+ * @param {string} currentVideoId
+ * @returns {Promise<YtDlpRecommendation[] | { error: string } | null>}
+ */
+export async function handleYtDlpGetRecommendations(event, currentVideoId) {
+  if (!isOpenTubeXUrl(event.senderFrame.url)) {
+    return null
+  }
+
+  if (typeof currentVideoId !== 'string' || !ID_REGEX.test(currentVideoId)) {
+    return null
+  }
+
+  const { source, executable } = await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp')
+
+  if (source === 'managed' && !existsSync(executable)) {
+    const result = await downloadManagedYtDlp()
+    if ('error' in result) return { error: result.error }
+  }
+
+  const args = [
+    '--dump-single-json',
+    '--flat-playlist',
+    '--playlist-end',
+    '25',
+    '--no-warnings',
+    '--no-progress',
+    '--socket-timeout',
+    '15'
+  ]
+
+  const authenticationError = await pushYtDlpPlaybackAuthenticationArguments(args)
+  if (authenticationError !== null) return { error: authenticationError }
+
+  await pushProxyArgument(args)
+  args.push(':ytrec')
+
+  let stdout
+  try {
+    ({ stdout } = await execFileAsync(executable, args, {
+      timeout: PLAYBACK_INFO_TIMEOUT,
+      maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
+      windowsHide: true
+    }))
+  } catch (error) {
+    if (error.code === 'ENOENT') return { error: 'ENOENT' }
+
+    const stderr = typeof error.stderr === 'string' ? error.stderr.trim() : ''
+    return { error: stderr.split('\n').at(-1) || error.message }
+  }
+
+  let info
+  try {
+    info = JSON.parse(stdout)
+  } catch {
+    return { error: 'yt-dlp returned invalid recommendation JSON' }
+  }
+
+  if (!Array.isArray(info.entries)) return []
+
+  return info.entries.flatMap((rawEntry) => {
+    if (rawEntry === null || typeof rawEntry !== 'object') return []
+
+    const videoId = toNonEmptyString(rawEntry.id)
+    const title = toNonEmptyString(rawEntry.title)
+    if (videoId === null || !ID_REGEX.test(videoId) || videoId === currentVideoId || title === null) return []
+
+    const duration = toFiniteNumber(rawEntry.duration)
+    const timestamp = toFiniteNumber(rawEntry.timestamp)
+    const liveStatus = toNonEmptyString(rawEntry.live_status)
+
+    return [{
+      type: 'video',
+      videoId,
+      title,
+      author: toNonEmptyString(rawEntry.channel) ?? toNonEmptyString(rawEntry.uploader) ?? '',
+      authorId: toNonEmptyString(rawEntry.channel_id),
+      viewCount: toFiniteNumber(rawEntry.view_count),
+      lengthSeconds: duration ?? '',
+      liveNow: rawEntry.is_live === true || liveStatus === 'is_live',
+      isUpcoming: liveStatus === 'is_upcoming',
+      ...(timestamp === null ? {} : { published: timestamp * 1000 })
+    }]
+  })
 }
 
 /**

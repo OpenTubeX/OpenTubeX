@@ -44,7 +44,7 @@ import { brotliDecompress } from 'zlib'
 
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
-import { getYtDlpDownloadFile, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetPlaybackInfo, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpRemoveDownload, shutdownYtDlpDownloads } from './ytDlp'
+import { getYtDlpDownloadFile, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetPlaybackInfo, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpRemoveDownload, shutdownYtDlpDownloads } from './ytDlp'
 import { handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
 import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
@@ -4008,6 +4008,7 @@ function runApp() {
   ipcMain.handle(IpcChannels.YT_DLP_GET_INFO, handleYtDlpGetInfo)
 
   ipcMain.handle(IpcChannels.YT_DLP_GET_PLAYBACK_INFO, handleYtDlpGetPlaybackInfo)
+  ipcMain.handle(IpcChannels.YT_DLP_GET_RECOMMENDATIONS, handleYtDlpGetRecommendations)
   ipcMain.handle(IpcChannels.YT_DLP_PLAYBACK_CACHE_GET, handleYtDlpPlaybackCacheGet)
   ipcMain.handle(IpcChannels.YT_DLP_PLAYBACK_CACHE_SET, handleYtDlpPlaybackCacheSet)
   ipcMain.handle(IpcChannels.YT_DLP_PLAYBACK_CACHE_DELETE, handleYtDlpPlaybackCacheDelete)
@@ -4040,6 +4041,68 @@ function runApp() {
       defaultPath: currentPath,
       properties: ['openFile'],
       filters
+    }
+
+    const window = BrowserWindow.fromWebContents(event.sender)
+    const result = window
+      ? await dialog.showOpenDialog(window, dialogOptions)
+      : await dialog.showOpenDialog(dialogOptions)
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return undefined
+    }
+
+    return result.filePaths[0]
+  })
+
+  ipcMain.handle(IpcChannels.YT_DLP_CHOOSE_COOKIES, async (event, currentPath) => {
+    if (
+      !isOpenTubeXUrl(event.senderFrame.url) ||
+      (currentPath != null && typeof currentPath !== 'string')
+    ) {
+      return
+    }
+
+    if (typeof currentPath !== 'string' || currentPath.length === 0) {
+      currentPath = app.getPath('home')
+    }
+
+    const dialogOptions = {
+      defaultPath: currentPath,
+      properties: ['openFile'],
+      filters: [
+        { name: 'Cookie Files', extensions: ['txt'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
+    }
+
+    const window = BrowserWindow.fromWebContents(event.sender)
+    const result = window
+      ? await dialog.showOpenDialog(window, dialogOptions)
+      : await dialog.showOpenDialog(dialogOptions)
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return undefined
+    }
+
+    return result.filePaths[0]
+  })
+
+  ipcMain.handle(IpcChannels.YT_DLP_CHOOSE_BROWSER_PROFILE, async (event, currentPath) => {
+    if (
+      !isOpenTubeXUrl(event.senderFrame.url) ||
+      (currentPath != null && typeof currentPath !== 'string')
+    ) {
+      return
+    }
+
+    if (typeof currentPath !== 'string' || currentPath.length === 0) {
+      currentPath = app.getPath('home')
+    }
+
+    const dialogOptions = {
+      defaultPath: currentPath,
+      properties: ['openDirectory']
     }
 
     const window = BrowserWindow.fromWebContents(event.sender)
