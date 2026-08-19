@@ -41,6 +41,92 @@ test.describe('side nav navigation', () => {
   })
 })
 
+for (const uiScale of [90, 100, 125]) {
+  test.describe(`side nav without labels at ${uiScale}% UI scale`, () => {
+    test.use({
+      seed: {
+        settings: { hideLabelsSideBar: true, uiScale },
+        profiles: [{
+          _id: 'allChannels',
+          name: 'All Channels',
+          bgColor: '#000000',
+          textColor: '#FFFFFF',
+          subscriptions: [{
+            id: 'UCaaaaaaaaaaaaaaaaaaaaaa',
+            name: 'Alpha Channel',
+            thumbnail: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+Xw4AAAAASUVORK5CYII='
+          }]
+        }]
+      }
+    })
+
+    test('uses square tiles with centered icons and avatars in the collapsed side bar', async ({ page }) => {
+      await goTo(page, 'channel/UCaaaaaaaaaaaaaaaaaaaaaa')
+      const sideNav = page.locator('.sideNav.hiddenLabels')
+      const activeIndicator = sideNav.locator('.activeIndicator')
+      const [avatarBounds, channelTileBounds, channelIndicatorBounds] = await Promise.all([
+        sideNav.locator('.navChannel.router-link-active .channelThumbnail').boundingBox(),
+        sideNav.locator('.navChannel.router-link-active').boundingBox(),
+        activeIndicator.boundingBox()
+      ])
+      const avatarClearance = avatarBounds.x -
+        (channelIndicatorBounds.x + channelIndicatorBounds.width)
+      const avatarInlineCenter = avatarBounds.x + avatarBounds.width / 2
+      const avatarCenter = avatarBounds.y + avatarBounds.height / 2
+      const channelInlineCenter = channelTileBounds.x + channelTileBounds.width / 2
+      const channelCenter = channelTileBounds.y + channelTileBounds.height / 2
+      expect(Math.abs(channelTileBounds.width - 50)).toBeLessThanOrEqual(1)
+      expect(Math.abs(channelTileBounds.height - 50)).toBeLessThanOrEqual(1)
+      expect(Math.abs(avatarInlineCenter - channelInlineCenter)).toBeLessThanOrEqual(1)
+      expect(Math.abs(avatarCenter - channelCenter)).toBeLessThanOrEqual(1)
+      expect(avatarClearance).toBeGreaterThanOrEqual(4)
+
+      await goTo(page, 'history')
+      const sideNavBounds = await sideNav.boundingBox()
+      expect(Math.abs(sideNavBounds.width - 50)).toBeLessThanOrEqual(1)
+      const tileMetrics = await sideNav.locator('.inner > .navOption:visible .navIcon').evaluateAll(
+        icons => icons.map(icon => {
+          const bounds = icon.getBoundingClientRect()
+          const optionBounds = icon.closest('.navOption').getBoundingClientRect()
+          const iconInlineCenter = bounds.left + bounds.width / 2
+          const iconCenter = bounds.top + bounds.height / 2
+          const optionInlineCenter = optionBounds.left + optionBounds.width / 2
+          const optionCenter = optionBounds.top + optionBounds.height / 2
+          return {
+            centerOffset: Math.abs(iconCenter - optionCenter),
+            height: optionBounds.height,
+            inlineCenterOffset: icon.matches(
+              "[data-icon='user-check'][data-icon-pack='material']"
+            )
+              ? null
+              : Math.abs(iconInlineCenter - optionInlineCenter),
+            left: optionBounds.left,
+            width: optionBounds.width
+          }
+        })
+      )
+      expect(tileMetrics.length).toBeGreaterThan(0)
+
+      for (const tile of tileMetrics) {
+        expect(Math.abs(tile.width - 50)).toBeLessThanOrEqual(1)
+        expect(Math.abs(tile.height - 50)).toBeLessThanOrEqual(1)
+        expect(Math.abs(tile.left - sideNavBounds.x)).toBeLessThanOrEqual(1)
+        expect(tile.centerOffset).toBeLessThanOrEqual(1)
+        if (tile.inlineCenterOffset !== null) {
+          expect(tile.inlineCenterOffset).toBeLessThanOrEqual(1)
+        }
+      }
+
+      const activeTile = sideNav.locator('.inner > .navOption.router-link-active:visible')
+      const [activeTileBounds, indicatorBounds] = await Promise.all([
+        activeTile.boundingBox(),
+        activeIndicator.boundingBox()
+      ])
+      expect(Math.abs(activeTileBounds.x - indicatorBounds.x)).toBeLessThanOrEqual(1)
+    })
+  })
+}
+
 test.describe('navigation history titles', () => {
   test.use({
     seed: {

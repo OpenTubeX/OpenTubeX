@@ -170,7 +170,7 @@
 }
 
 .hiddenLabels {
-  inline-size: 60px;
+  inline-size: 50px;
 }
 
 .hiddenLabels .navLabel {
@@ -186,6 +186,17 @@
 }
 
 @media only screen and (width > 680px) {
+  .hiddenLabels .navOption,
+  .hiddenLabels .navChannel {
+    align-items: center;
+    block-size: 50px;
+    box-sizing: border-box;
+    display: flex;
+    inline-size: 50px;
+    justify-content: center;
+    margin-inline: 0 auto;
+  }
+
   .expanded {
     inline-size: 200px;
   }
