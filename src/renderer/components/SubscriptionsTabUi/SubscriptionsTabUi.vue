@@ -100,6 +100,7 @@ import FtSkeletonGrid from '../FtSkeletonGrid/FtSkeletonGrid.vue'
 import store from '../../store/index'
 
 import { useKeepAliveEffectScope } from '../../composables/useKeepAliveEffectScope'
+import { useSubscriptionEntryVersion } from '../../composables/useSubscriptionEntryVersion'
 import { KeyboardShortcuts } from '../../../constants'
 import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isHistoryEntryWatched } from '../../helpers/history'
@@ -172,18 +173,7 @@ const subscriptionLimitStorageKey = tabId
 const subscriptionLimit = sessionStorage.getItem(subscriptionLimitStorageKey)
 
 const dataLimit = ref(subscriptionLimit !== null ? parseInt(subscriptionLimit) : props.initialDataLimit)
-const subscriptionEntryVersion = ref(0)
-let subscriptionEntryUpdatePending = false
-let isActive = true
-const unsubscribeFromStore = store.subscribe((mutation) => {
-  if (mutation.type === 'markSubscriptionEntriesAsSeenInCache') {
-    if (isActive) {
-      subscriptionEntryVersion.value++
-    } else {
-      subscriptionEntryUpdatePending = true
-    }
-  }
-})
+const subscriptionEntryVersion = useSubscriptionEntryVersion()
 
 const activeVideoList = computed(() => {
   let activeEntries
@@ -365,13 +355,7 @@ function cancelActivationAnimations() {
 
 onMounted(addKeyboardShortcutListener)
 onActivated(() => {
-  isActive = true
   addKeyboardShortcutListener()
-
-  if (subscriptionEntryUpdatePending) {
-    subscriptionEntryUpdatePending = false
-    subscriptionEntryVersion.value++
-  }
 
   if (!hasActivated) {
     hasActivated = true
@@ -394,7 +378,6 @@ onActivated(() => {
     })))
 })
 onDeactivated(() => {
-  isActive = false
   removeKeyboardShortcutListener()
   cancelActivationAnimations()
 })
@@ -403,7 +386,6 @@ onBeforeUnmount(() => {
   removeKeyboardShortcutListener()
   cancelActivationAnimations()
 })
-onBeforeUnmount(unsubscribeFromStore)
 
 function refresh() {
   emit('refresh')
