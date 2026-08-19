@@ -102,6 +102,35 @@ test('keeps the tutorial actions reachable in a short window', async ({ app, pag
   })).toBe(true)
 })
 
+test('keeps every import action reachable in a narrow window', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].setSize(340, 600)
+  })
+  await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
+  await page.reload()
+
+  const tutorial = page.locator('.tutorialCard')
+  for (let step = 0; step < 5; step++) {
+    await tutorial.getByRole('button', { name: 'Next' }).click()
+  }
+  await expect(tutorial).toHaveAccessibleName('Bring your data with you')
+
+  const actions = ['Back', 'Not now', 'Import data'].map(name => {
+    return tutorial.getByRole('button', { name })
+  })
+  await Promise.all(actions.map(action => expect(action).toBeVisible()))
+  await expect.poll(async () => {
+    const [cardBounds, ...actionBounds] = await Promise.all([
+      tutorial.evaluate(element => element.getBoundingClientRect().toJSON()),
+      ...actions.map(action => action.evaluate(element => element.getBoundingClientRect().toJSON()))
+    ])
+    return actionBounds.every(bounds => {
+      return bounds.left >= cardBounds.left && bounds.right <= cardBounds.right &&
+        bounds.top >= cardBounds.top && bounds.bottom <= cardBounds.bottom
+    })
+  }).toBe(true)
+})
+
 test('resets the managed content viewport after a shorter step replaces it', async ({ app, page }) => {
   await app.electronApp.evaluate(({ BrowserWindow }) => {
     BrowserWindow.getAllWindows()[0].setSize(800, 420)
@@ -146,13 +175,22 @@ test('walks new users through the essential controls', async ({ page }) => {
   const tutorial = page.locator('.tutorialCard')
   await expect(tutorial).toHaveAccessibleName('Welcome to OpenTubeX')
   await expect(tutorial.locator('.tutorialProgress span')).toHaveCount(6)
-  await expect(tutorial.getByRole('button', { name: 'Skip' })).toBeVisible()
+  const skip = tutorial.getByRole('button', { name: 'Skip' })
+  const next = tutorial.getByRole('button', { name: 'Next' })
+  await expect(skip).toBeVisible()
 
-  await tutorial.getByRole('button', { name: 'Next' }).click()
+  await next.click()
   await expect(tutorial).toHaveAccessibleName('Your library is always nearby')
+  await expect(tutorial).toContainText('Use the navigation to reach subscriptions, playlists, history, and more.')
   await expect(tutorial.getByRole('heading', { name: 'Your library is always nearby' })).toBeFocused()
   await expect(tutorial.getByRole('button', { name: 'Skip' })).toHaveCount(0)
   await expectHighlightCenteredOn(page, '[data-tutorial="navigation"]')
+  const back = tutorial.getByRole('button', { name: 'Back' })
+
+  await back.click()
+  await expect(tutorial).toHaveAccessibleName('Welcome to OpenTubeX')
+  await next.click()
+  await expect(tutorial).toHaveAccessibleName('Your library is always nearby')
 
   await tutorial.getByRole('button', { name: 'Next' }).click()
   await expect(tutorial).toHaveAccessibleName('Search or paste a link')
@@ -170,6 +208,7 @@ test('walks new users through the essential controls', async ({ page }) => {
   await layout.focus()
   await page.keyboard.press('Enter')
   await expect(layout).toHaveAttribute('aria-expanded', 'true')
+  await expect(page.locator('.selectDropdown:visible')).toHaveCSS('text-align', 'start')
   await page.keyboard.press('Escape')
   await expect(layout).toHaveAttribute('aria-expanded', 'false')
   await page.keyboard.press('Enter')

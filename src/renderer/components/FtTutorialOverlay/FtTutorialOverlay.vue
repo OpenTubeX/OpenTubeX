@@ -100,8 +100,17 @@
                 @click="finishTutorial"
               />
               <FtButton
+                v-if="steps.length > 1 && stepIndex > 0"
+                :label="t('Back')"
+                :icon="['fas', 'arrow-left']"
+                :text-color="null"
+                :background-color="null"
+                @click="retreatTutorial"
+              />
+              <FtButton
                 v-if="step.showImportAction"
                 :label="t('Tutorial.Import Data.Not Now')"
+                :icon="['fas', 'xmark']"
                 :text-color="null"
                 :background-color="null"
                 @click="finishTutorial"
@@ -474,7 +483,15 @@ async function advanceTutorial() {
     return
   }
 
-  stepIndex.value++
+  await setTutorialStep(stepIndex.value + 1)
+}
+
+async function retreatTutorial() {
+  await setTutorialStep(stepIndex.value - 1)
+}
+
+async function setTutorialStep(index) {
+  stepIndex.value = index
   await nextTick()
   if (scrollRef.value) restoreOverlayScrollTop(scrollRef.value, 0)
   clampTutorialScroll()
