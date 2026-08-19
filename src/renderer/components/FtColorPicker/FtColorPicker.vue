@@ -308,7 +308,8 @@ function syncFromModel(color, force = false) {
   const parsed = parseHex(color)
   if (parsed === null) return
   const hsv = rgbToHsv(parsed)
-  hue.value = hsv.h
+  // Achromatic RGB colors do not encode a hue, so keep the current selection.
+  if (hsv.s > 0) hue.value = hsv.h
   saturation.value = hsv.s
   value.value = hsv.v
   alpha.value = props.allowAlpha ? parsed.a : 255

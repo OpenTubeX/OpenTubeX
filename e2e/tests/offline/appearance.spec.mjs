@@ -335,6 +335,30 @@ test.describe('custom theme editor', () => {
     await expect(trigger).toBeFocused()
   })
 
+  test('keeps the hue when dragging outside the saturation and brightness area', async ({ page }) => {
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await page.getByRole('button', { name: 'Page background', exact: true }).click()
+
+    const picker = page.getByRole('dialog', { name: 'Page background' })
+    const hexInput = picker.getByRole('textbox', { name: 'Hex color' })
+    const hueSlider = picker.locator('.hueSlider')
+    await hexInput.fill('#00ff00')
+    await hexInput.press('Enter')
+    await expect(hueSlider).toHaveValue('120')
+
+    const saturationSlider = picker.getByRole('slider', { name: 'Saturation and brightness' })
+    const bounds = await saturationSlider.boundingBox()
+    expect(bounds).not.toBeNull()
+    await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height + 50)
+    await expect(hueSlider).toHaveValue('120')
+    await page.mouse.up()
+
+    await expect(hueSlider).toHaveValue('120')
+  })
+
   test('applies a new theme created from System Default', async ({ page }) => {
     await goToSettingsSection(page, 'theme')
     const baseTheme = page.getByRole('combobox', { name: 'Base Theme' })
