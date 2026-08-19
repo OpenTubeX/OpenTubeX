@@ -78,7 +78,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, ref } from 'vue'
 
 import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
 import FtButton from '../FtButton/FtButton.vue'
@@ -97,7 +97,6 @@ import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { useTabContext } from '../../tabs/TabContext'
 
 const { tabId, isTabPresented } = useTabContext()
-const subscriptionLimitStorageKey = tabId ? `Subscriptions/${tabId}/dataLimit` : 'subscriptionLimit'
 
 const props = defineProps({
   isLoading: {
@@ -152,16 +151,31 @@ const props = defineProps({
 
 const emit = defineEmits(['refresh'])
 
+const paginationKey = props.refreshTab ?? (props.onlyShowNew ? 'new' : 'subscriptions')
+const subscriptionLimitStorageKey = tabId
+  ? `Subscriptions/${tabId}/${paginationKey}/dataLimit`
+  : `subscriptionLimit/${paginationKey}`
 const subscriptionLimit = sessionStorage.getItem(subscriptionLimitStorageKey)
 
 const dataLimit = ref(subscriptionLimit !== null ? parseInt(subscriptionLimit) : props.initialDataLimit)
+const subscriptionEntryVersion = ref(0)
+const unsubscribeFromStore = store.subscribe((mutation) => {
+  if (mutation.type === 'markSubscriptionEntriesAsSeenInCache') {
+    subscriptionEntryVersion.value++
+  }
+})
 
 const activeVideoList = computed(() => {
+  let activeEntries
   if (filteredVideoList.value.length < dataLimit.value) {
-    return filteredVideoList.value
+    activeEntries = filteredVideoList.value
   } else {
-    return filteredVideoList.value.slice(0, dataLimit.value)
+    activeEntries = filteredVideoList.value.slice(0, dataLimit.value)
   }
+
+  // Only the rendered page needs field-level reactivity. Tracking every field
+  // in a large cached feed makes mounting the tab scale with the full cache.
+  return activeEntries.map(entry => reactive(entry))
 })
 
 const activeProfileHasSubscriptions = computed(() => {
@@ -211,7 +225,11 @@ const hideUpcomingPremieres = computed(() => store.getters.getHideUpcomingPremie
 const forbiddenTitles = computed(() => store.getters.getForbiddenTitlesParsed)
 
 const filteredVideoList = computed(() => {
-  let videoList = props.videoList
+  // Copy after in-place cache mutations so the rendered page receives fresh
+  // props even though the full cached array stays non-reactive.
+  let videoList = subscriptionEntryVersion.value === 0
+    ? props.videoList
+    : props.videoList.slice()
 
   // Subscription feeds intentionally ignore the general hidden-channel list.
   videoList = videoList.filter(video => !isVideoHiddenByPreferences(video, {
@@ -308,13 +326,20 @@ function keyboardShortcutHandler(event) {
   }
 }
 
-onMounted(() => {
+function addKeyboardShortcutListener() {
   document.addEventListener('keydown', keyboardShortcutHandler)
-})
+}
 
-onBeforeUnmount(() => {
+function removeKeyboardShortcutListener() {
   document.removeEventListener('keydown', keyboardShortcutHandler)
-})
+}
+
+onMounted(addKeyboardShortcutListener)
+onActivated(addKeyboardShortcutListener)
+onDeactivated(removeKeyboardShortcutListener)
+
+onBeforeUnmount(removeKeyboardShortcutListener)
+onBeforeUnmount(unsubscribeFromStore)
 
 function refresh() {
   emit('refresh')

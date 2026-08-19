@@ -46,7 +46,7 @@
                 aria-controls="subscriptionsPanel"
                 data-subscription-feed-tab="videos"
                 :tabindex="currentTab === 'videos' ? 0 : -1"
-                :class="{ selectedTab: currentTab === 'videos' }"
+                :class="{ selectedTab: selectedTab === 'videos' }"
                 @click="changeTabFromPointer($event, 'videos')"
                 @keydown.space.enter.prevent="changeTab('videos')"
                 @keydown.left.right="switchTab($event, 'videos')"
@@ -74,7 +74,7 @@
                 aria-controls="subscriptionsPanel"
                 data-subscription-feed-tab="shorts"
                 :tabindex="currentTab === 'shorts' ? 0 : -1"
-                :class="{ selectedTab: currentTab === 'shorts' }"
+                :class="{ selectedTab: selectedTab === 'shorts' }"
                 @click="changeTabFromPointer($event, 'shorts')"
                 @keydown.space.enter.prevent="changeTab('shorts')"
                 @keydown.left.right="switchTab($event, 'shorts')"
@@ -102,7 +102,7 @@
                 aria-controls="subscriptionsPanel"
                 data-subscription-feed-tab="live"
                 :tabindex="currentTab === 'live' ? 0 : -1"
-                :class="{ selectedTab: currentTab === 'live' }"
+                :class="{ selectedTab: selectedTab === 'live' }"
                 @click="changeTabFromPointer($event, 'live')"
                 @keydown.space.enter.prevent="changeTab('live')"
                 @keydown.left.right="switchTab($event, 'live')"
@@ -130,7 +130,7 @@
                 aria-controls="subscriptionsPanel"
                 data-subscription-feed-tab="posts"
                 :tabindex="currentTab === 'community' ? 0 : -1"
-                :class="{ selectedTab: currentTab === 'community' }"
+                :class="{ selectedTab: selectedTab === 'community' }"
                 @click="changeTabFromPointer($event, 'community')"
                 @keydown.space.enter.prevent="changeTab('community')"
                 @keydown.left.right="switchTab($event, 'community')"
@@ -158,7 +158,7 @@
                 aria-controls="subscriptionsPanel"
                 data-subscription-feed-tab="all"
                 :tabindex="currentTab === 'new' ? 0 : -1"
-                :class="{ selectedTab: currentTab === 'new' }"
+                :class="{ selectedTab: selectedTab === 'new' }"
                 @click="changeTabFromPointer($event, 'new')"
                 @keydown.space.enter.prevent="changeTab('new')"
                 @keydown.left.right="switchTab($event, 'new')"
@@ -215,42 +215,44 @@
           </div>
         </div>
       </div>
-      <SubscriptionsVideos
-        v-if="currentTab === 'videos'"
-        id="subscriptionsPanel"
-        key="subscriptions-videos"
-        ref="videosPanel"
-        role="tabpanel"
-      />
-      <SubscriptionsShorts
-        v-else-if="currentTab === 'shorts'"
-        id="subscriptionsPanel"
-        key="subscriptions-shorts"
-        ref="shortsPanel"
-        role="tabpanel"
-      />
-      <SubscriptionsLive
-        v-else-if="currentTab === 'live'"
-        id="subscriptionsPanel"
-        key="subscriptions-live"
-        ref="livePanel"
-        role="tabpanel"
-      />
-      <SubscriptionsPosts
-        v-else-if="currentTab === 'community'"
-        id="subscriptionsPanel"
-        key="subscriptions-community"
-        ref="communityPanel"
-        role="tabpanel"
-      />
-      <SubscriptionsNew
-        v-else-if="currentTab === 'new'"
-        id="subscriptionsPanel"
-        key="subscriptions-new"
-        ref="newPanel"
-        role="tabpanel"
-      />
-      <p v-else>
+      <KeepAlive>
+        <SubscriptionsVideos
+          v-if="currentTab === 'videos'"
+          id="subscriptionsPanel"
+          key="subscriptions-videos"
+          ref="videosPanel"
+          role="tabpanel"
+        />
+        <SubscriptionsShorts
+          v-else-if="currentTab === 'shorts'"
+          id="subscriptionsPanel"
+          key="subscriptions-shorts"
+          ref="shortsPanel"
+          role="tabpanel"
+        />
+        <SubscriptionsLive
+          v-else-if="currentTab === 'live'"
+          id="subscriptionsPanel"
+          key="subscriptions-live"
+          ref="livePanel"
+          role="tabpanel"
+        />
+        <SubscriptionsPosts
+          v-else-if="currentTab === 'community'"
+          id="subscriptionsPanel"
+          key="subscriptions-community"
+          ref="communityPanel"
+          role="tabpanel"
+        />
+        <SubscriptionsNew
+          v-else-if="currentTab === 'new'"
+          id="subscriptionsPanel"
+          key="subscriptions-new"
+          ref="newPanel"
+          role="tabpanel"
+        />
+      </KeepAlive>
+      <p v-if="currentTab === null">
         {{ $t("Subscriptions.All Subscription Tabs Hidden", {
           subsection: $t('Settings.Distraction Free Settings.Sections.Subscriptions Page'),
           settingsSection: $t('Settings.Distraction Free Settings.Distraction Free Settings')
@@ -390,6 +392,8 @@ const currentTabRefreshing = computed(() => {
 
 /** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | null>} */
 const currentTab = ref('videos')
+const selectedTab = ref('videos')
+let tabChangeSequence = 0
 
 const tabScrollPositions = {
   videos: 0,
@@ -483,6 +487,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   isMounted = false
+  tabChangeSequence++
   document.removeEventListener('keydown', handlePanelTabNavigation)
   removeFeedReloadRequestListener?.()
 })
@@ -557,13 +562,16 @@ const visibleTabs = computed(() => {
 
 watch(visibleTabs, (value) => {
   if (value.length === 0) {
+    tabChangeSequence++
+    selectedTab.value = null
     currentTab.value = null
-  } else if (!value.includes(currentTab.value)) {
+  } else if (!value.includes(selectedTab.value)) {
     changeTab(value[0])
   }
 })
 
 if (visibleTabs.value.length === 0) {
+  selectedTab.value = null
   currentTab.value = null
 } else {
   // Restore currentTab
@@ -571,6 +579,7 @@ if (visibleTabs.value.length === 0) {
   if (lastCurrentTabId !== null) {
     changeTab(lastCurrentTabId)
   } else if (!visibleTabs.value.includes(currentTab.value)) {
+    selectedTab.value = visibleTabs.value[0]
     currentTab.value = visibleTabs.value[0]
   }
 }
@@ -584,13 +593,39 @@ function changeTab(tab) {
     ? tab
     : (visibleTabs.value.length > 0 ? visibleTabs.value[0] : null)
 
+  if (target === selectedTab.value) {
+    return
+  }
+
+  selectedTab.value = target
+  const sequence = ++tabChangeSequence
+
+  if (
+    !isMounted ||
+    target === null ||
+    (isElectron && isTabPresented?.value !== true)
+  ) {
+    currentTab.value = target
+    return
+  }
+
   if (target === currentTab.value) {
     return
   }
 
-  // The feed is the primary response to activating a tab. Keep the indicator
-  // animation decorative so it never delays the panel change.
-  currentTab.value = target
+  // Give the selected label and indicator one paint before mounting the feed.
+  // The panel follows on the next painted frame instead of waiting for the
+  // indicator's 200ms transition.
+  nextTick(async () => {
+    await nextAnimationFrame()
+    await nextAnimationFrame()
+
+    if (sequence !== tabChangeSequence || !isMounted) {
+      return
+    }
+
+    currentTab.value = target
+  })
 }
 
 /**
@@ -791,7 +826,7 @@ function handlePanelTabNavigation(event) {
     return
   }
 
-  switchTab(event, currentTab.value, false)
+  switchTab(event, selectedTab.value, false)
 }
 
 function refreshCurrentTab() {
@@ -966,7 +1001,7 @@ function updateTabsIndicator() {
   placeTabsIndicator(selected)
 }
 
-watch([currentTab, visibleTabs, refreshingFeedTab], () => nextTick(updateTabsIndicator))
+watch([selectedTab, visibleTabs, refreshingFeedTab], () => nextTick(updateTabsIndicator))
 
 onMounted(() => {
   if (typeof ResizeObserver === 'function') {

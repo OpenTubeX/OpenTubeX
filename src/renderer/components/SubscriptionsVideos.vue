@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
@@ -73,10 +73,18 @@ const cacheEntriesForAllActiveProfileChannels = computed(() => {
 })
 
 const nextUpcomingPremiereTimestamp = computed(() => {
+  // Cache refreshes can introduce a new upcoming premiere while this component
+  // remains mounted. Read the timestamp so this scan reruns after each refresh.
+  const refreshTimestamp = store.getters.getSubscriptionFeedLastRefreshTimestamp
+  const cacheEntries = cacheEntriesForAllActiveProfileChannels.value
+  if (!refreshTimestamp && cacheEntries.length === 0) {
+    return null
+  }
+
   let nextTimestamp = null
 
-  for (const cacheEntry of cacheEntriesForAllActiveProfileChannels.value) {
-    for (const video of cacheEntry.videos ?? []) {
+  for (const cacheEntry of cacheEntries) {
+    for (const video of toRaw(cacheEntry).videos ?? []) {
       const timestamp = getUpcomingPremiereTimestamp(video)
 
       if (
@@ -277,9 +285,10 @@ function loadVideosFromCacheSometimes() {
 
 function loadVideosFromCacheForAllActiveProfileChannels() {
   const videoList_ = cacheEntriesForAllActiveProfileChannels.value.flatMap((cacheEntry) => {
-    const cacheTimestamp = new Date(cacheEntry.timestamp).getTime()
+    const rawCacheEntry = toRaw(cacheEntry)
+    const cacheTimestamp = new Date(rawCacheEntry.timestamp).getTime()
 
-    return (cacheEntry.videos ?? []).map(video => {
+    return (rawCacheEntry.videos ?? []).map(video => {
       return ensureUpcomingSubscriptionFeedPublished(
         video,
         cacheTimestamp,
