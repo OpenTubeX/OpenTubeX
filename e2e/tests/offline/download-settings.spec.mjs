@@ -1,7 +1,8 @@
-import { chmod, readFile, writeFile } from 'node:fs/promises'
+import { chmod, copyFile, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import { DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
 
 const ALPHA_CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const BETA_CHANNEL_ID = 'UCbbbbbbbbbbbbbbbbbbbbbb'
@@ -230,6 +231,7 @@ test.describe('automatic download authorization', () => {
 
   test('starts filtered automatic downloads only for the active subscription refresh', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'fake-automatic-yt-dlp.sh')
+    const downloadedFile = path.join(app.userDataDir, 'automatic.webm')
     const argumentsFile = path.join(app.userDataDir, 'automatic-yt-dlp-arguments.txt')
     const metadataLookupsFile = path.join(app.userDataDir, 'automatic-yt-dlp-metadata-lookups.txt')
     const releaseDownloadFile = path.join(app.userDataDir, 'release-automatic-download')
@@ -240,6 +242,7 @@ test.describe('automatic download authorization', () => {
         globalThis.automaticDownloadNotifications.push(this)
       }
     })
+    await copyFile(DEMO_MEDIA_PATH, downloadedFile)
     await writeFile(executable, [
       '#!/bin/sh',
       'for argument in "$@"; do',
@@ -255,7 +258,7 @@ test.describe('automatic download authorization', () => {
       'done',
       `printf '%s\\n' "$@" > ${argumentsFile}`,
       `while [ ! -f "${releaseDownloadFile}" ]; do sleep 0.05; done`,
-      "printf '__OPENTUBEX_FILE__:ccccccccccc\\t120\\t1920\\t1080\\t/tmp/automatic.webm\\n'"
+      `printf '__OPENTUBEX_FILE__:ccccccccccc\\t120\\t1920\\t1080\\t%s\\n' '${downloadedFile}'`
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
@@ -365,8 +368,10 @@ test.describe('automatic download authorization', () => {
       }
     })).toEqual({
       tabCount: tabCount + 1,
-      route: '/watch?v=ccccccccccc'
+      route: `/watch/ccccccccccc?downloadId=${result.id}`
     })
+    await expect(page.locator('.videoPlayerPlaceholder.ft-shimmer')).toHaveCount(0)
+    await expect(page.locator('.legacy-quality-button')).toHaveAttribute('shaka-status', '640×360 • Local file')
 
     const args = (await readFile(argumentsFile, 'utf8')).trim().split('\n')
     expect(args).toEqual(expect.arrayContaining([

@@ -187,7 +187,7 @@ function broadcastToRenderers(channel, payload) {
   }
 }
 
-function showAutomaticDownloadNotification(payload, phase) {
+function showAutomaticDownloadNotification(payload, phase, downloadId = null) {
   if (payload.automatic !== true || !Notification.isSupported()) {
     return
   }
@@ -215,10 +215,10 @@ function showAutomaticDownloadNotification(payload, phase) {
       const tabManager = TabManager.getForWindow(browserWindow.id)
       if (phase === 'started') {
         browserWindow.webContents.send(IpcChannels.CHANGE_VIEW, '/downloads')
-      } else if (phase === 'completed' && tabManager && ID_REGEX.test(payload.videoId)) {
+      } else if (phase === 'completed' && tabManager && ID_REGEX.test(payload.videoId) && Number.isInteger(downloadId)) {
         tabManager.createTabWithPreference({
-          route: '/watch',
-          query: { v: payload.videoId },
+          route: `/watch/${payload.videoId}`,
+          query: { downloadId },
           makeActive: true
         }).catch(error => {
           console.error('Failed to open automatically downloaded video', error)
@@ -2125,7 +2125,7 @@ async function startYtDlpDownload(
     }
 
     if (status.status === 'completed') {
-      showAutomaticDownloadNotification(payload, 'completed')
+      showAutomaticDownloadNotification(payload, 'completed', id)
     } else if (status.status === 'failed') {
       showAutomaticDownloadNotification(payload, 'failed')
     }
