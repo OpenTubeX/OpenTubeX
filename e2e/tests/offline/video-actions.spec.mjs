@@ -268,6 +268,7 @@ test.describe('video downloads', () => {
     await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee', false, true))
     passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
     let cookiesIndex = passedArguments.indexOf('--cookies-from-browser')
+    expect(cookiesIndex).toBeGreaterThanOrEqual(0)
     expect(passedArguments[cookiesIndex + 1]).toBe('firefox:/tmp/restricted-profile')
 
     await page.evaluate(async () => {
@@ -278,6 +279,7 @@ test.describe('video downloads', () => {
     await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee', false, true))
     passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
     cookiesIndex = passedArguments.indexOf('--cookies')
+    expect(cookiesIndex).toBeGreaterThanOrEqual(0)
     expect(passedArguments[cookiesIndex + 1]).toBe('/tmp/restricted-cookies.txt')
     expect(passedArguments).not.toContain('--cookies-from-browser')
   })

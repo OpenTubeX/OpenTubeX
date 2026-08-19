@@ -1,3 +1,5 @@
+const MAX_STORYBOARD_CUES = 50000
+
 /**
  * @param {unknown} value
  * @returns {number | null}
@@ -63,13 +65,20 @@ export function buildYtDlpStoryboardVtt(formats, videoDuration) {
   const cellsPerFragment = storyboard.rows * storyboard.columns
   const durationLimit = finitePositiveNumber(videoDuration) ?? Number.POSITIVE_INFINITY
   let currentTime = 0
+  let generatedCueCount = 0
   let vtt = 'WEBVTT\n\n'
 
   for (const fragment of storyboard.fragments) {
+    if (generatedCueCount >= MAX_STORYBOARD_CUES) break
+
     const fragmentDuration = fragment.duration ?? cellsPerFragment * interval
     const cueCount = Math.min(cellsPerFragment, Math.ceil((fragmentDuration / interval) - 1e-6))
 
-    for (let index = 0; index < cueCount && currentTime < durationLimit; index++) {
+    for (
+      let index = 0;
+      index < cueCount && currentTime < durationLimit && generatedCueCount < MAX_STORYBOARD_CUES;
+      index++
+    ) {
       const endTime = Math.min(currentTime + interval, durationLimit)
       const x = (index % storyboard.columns) * storyboard.width
       const y = Math.floor(index / storyboard.columns) * storyboard.height
@@ -77,6 +86,7 @@ export function buildYtDlpStoryboardVtt(formats, videoDuration) {
       vtt += `${formatVttTimestamp(currentTime)} --> ${formatVttTimestamp(endTime)}\n`
       vtt += `${fragment.url}#xywh=${x},${y},${storyboard.width},${storyboard.height}\n\n`
       currentTime = endTime
+      generatedCueCount++
     }
   }
 

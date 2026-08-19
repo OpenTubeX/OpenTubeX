@@ -49,6 +49,7 @@ test('shows the restricted playback setup hint until an authenticated retry is a
   const watchView = await watchViewHandle(page)
   await watchView.evaluate(async (view) => {
     view.isLoading = false
+    view.playbackEngineFallbackTarget = 'built-in'
     view.setRestrictedPlaybackError('age')
     await view.$nextTick()
   })
@@ -106,6 +107,7 @@ test('shows the restricted playback setup hint until an authenticated retry is a
   await expect.poll(() => page.evaluate(
     () => window.__restrictedPlaybackResult
   )).toEqual({ applied: true, activeEngine: 'yt-dlp' })
+  expect(await watchView.evaluate((view) => view.playbackEngineFallbackTarget)).toBeNull()
 })
 
 test.describe('Shorts transcript navigation', () => {

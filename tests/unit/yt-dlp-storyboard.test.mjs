@@ -37,3 +37,19 @@ test('builds seekbar thumbnails from the highest-resolution yt-dlp storyboard', 
   assert.match(vtt, /00:00:08\.000 --> 00:00:10\.000\nhttps:\/\/i\.ytimg\.com\/high-1\.jpg#xywh=0,0,160,90/)
   assert.doesNotMatch(vtt, /low\.jpg/)
 })
+
+test('limits seekbar thumbnails from oversized yt-dlp storyboard metadata', () => {
+  const vtt = buildYtDlpStoryboardVtt([{
+    protocol: 'mhtml',
+    width: 160,
+    height: 90,
+    fps: 1000,
+    rows: 1000000,
+    columns: 1000000,
+    fragments: [{ url: 'https://i.ytimg.com/oversized.jpg', duration: 100 }]
+  }], null)
+
+  assert.equal((vtt.match(/ --> /g) || []).length, 50000)
+  assert.match(vtt, /00:00:49\.999 --> 00:00:50\.000/)
+  assert.doesNotMatch(vtt, /00:00:50\.000 -->/)
+})

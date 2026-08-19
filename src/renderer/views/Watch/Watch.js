@@ -2386,6 +2386,7 @@ export default defineComponent({
       const playbackEngineSwitchGeneration = ++this.playbackEngineSwitchGeneration
       this.errorMessage = null
       this.customErrorIcon = null
+      this.playbackEngineFallbackTarget = 'yt-dlp'
       this.ytDlpStreamsPending = true
       this.ytDlpDefaultClientsFallbackToastShown = false
 
