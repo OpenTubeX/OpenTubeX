@@ -398,6 +398,8 @@ const tabScrollPositions = {
   community: 0,
   new: 0
 }
+/** @type {'videos' | 'shorts' | 'live' | 'community' | 'new' | null} */
+let scrollPositionOwnerTab = currentTab.value
 
 const subscriptionRefreshTimestamps = computed(() => [
   store.getters.getSubscriptionFeedLastRefreshTimestamp,
@@ -471,7 +473,7 @@ onBeforeUnmount(() => {
   removeFeedReloadRequestListener?.()
 })
 
-watch(currentTab, async (value, previousValue) => {
+watch(currentTab, async (value) => {
   if (value !== null) {
     // Use the last selected feed when opening another subscription view
     localStorage.setItem(currentTabStorageKey, value)
@@ -480,15 +482,27 @@ watch(currentTab, async (value, previousValue) => {
   }
 
   if (!isMounted || (isElectron && isTabPresented?.value !== true)) {
+    scrollPositionOwnerTab = value
     return
   }
 
-  if (previousValue !== null) {
-    tabScrollPositions[previousValue] = window.scrollY
+  if (scrollPositionOwnerTab !== null) {
+    tabScrollPositions[scrollPositionOwnerTab] = window.scrollY
   }
+  scrollPositionOwnerTab = null
 
   await nextTick()
+
+  if (
+    value !== currentTab.value ||
+    !isMounted ||
+    (isElectron && isTabPresented?.value !== true)
+  ) {
+    return
+  }
+
   window.scrollTo(0, value === null ? 0 : tabScrollPositions[value])
+  scrollPositionOwnerTab = value
 })
 
 const visibleTabs = computed(() => {

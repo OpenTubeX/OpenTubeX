@@ -31,7 +31,8 @@ test.use({
     settings: {
       fetchSubscriptionsAutomatically: false,
       hideSubscriptionsVideos: false,
-      hideSubscriptionsShorts: false
+      hideSubscriptionsShorts: false,
+      reducedMotion: 'off'
     },
     profiles: [
       {
@@ -207,6 +208,31 @@ test.describe('subscriptions feed tab indicator', () => {
     })
 
     expect(Math.abs(indicator - tab)).toBeLessThan(1)
+  })
+
+  test('keeps feed scroll positions across microtask-separated switches', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByText('video video 000')).toBeVisible()
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+    const videosScrollTop = await page.evaluate(() => window.scrollY)
+
+    await page.evaluate(() => {
+      document.querySelector('[data-subscription-feed-tab="shorts"]').click()
+      queueMicrotask(() => {
+        document.querySelector('[data-subscription-feed-tab="videos"]').click()
+      })
+    })
+
+    await expect(page.locator('[data-subscription-feed-tab="videos"]'))
+      .toHaveAttribute('aria-selected', 'true')
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(videosScrollTop)
+
+    await page.locator('[data-subscription-feed-tab="shorts"]').click()
+    await expect(page.locator('[data-subscription-feed-tab="shorts"]'))
+      .toHaveAttribute('aria-selected', 'true')
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
   })
 
   test('keeps the panel hidden after every tab is hidden', async ({ page }) => {
