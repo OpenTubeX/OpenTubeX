@@ -70,6 +70,18 @@ const populatedCache = [{
   communityPostsTimestamp: new Date(now - HOUR).toISOString()
 }]
 
+const cacheWithoutNewContent = [{
+  _id: CHANNEL_ID,
+  videos: [oldVideo],
+  videosTimestamp: new Date(now - HOUR).toISOString(),
+  shorts: [],
+  shortsTimestamp: new Date(now - HOUR).toISOString(),
+  liveStreams: [],
+  liveStreamsTimestamp: new Date(now - HOUR).toISOString(),
+  communityPosts: [],
+  communityPostsTimestamp: new Date(now - HOUR).toISOString()
+}]
+
 const watchedHistory = [{
   _id: watchedVideo.videoId,
   ...watchedVideo,
@@ -194,6 +206,45 @@ test.describe('new subscriptions feed', () => {
     await expect(page.getByRole('option', { name: 'Mark as seen' })).toHaveCount(0)
   })
 })
+
+for (const uiScale of [100, 125]) {
+  test.describe(`new subscriptions feed empty state at ${uiScale}% UI scale`, () => {
+    test.use({
+      seed: {
+        settings: {
+          ...commonSettings,
+          uiScale
+        },
+        profiles: [profile()],
+        subscriptionCache: cacheWithoutNewContent
+      }
+    })
+
+    test('uses matching space above and below the message', async ({ page, attachScreenshot }) => {
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-subscription-feed-tab="all"]').click()
+
+      const message = page.getByText('There is no new content.', { exact: true })
+      await expect(message).toBeVisible()
+
+      const spacing = await message.evaluate(element => {
+        const card = element.closest('.card').getBoundingClientRect()
+        const header = element.closest('.card').querySelector('.subscriptionsHeader').getBoundingClientRect()
+        const message = element.getBoundingClientRect()
+
+        return {
+          top: message.top - header.bottom,
+          bottom: card.bottom - message.bottom
+        }
+      })
+
+      expect(spacing.top).toBeGreaterThanOrEqual(15)
+      expect(spacing.top).toBeLessThanOrEqual(17)
+      expect(Math.abs(spacing.top - spacing.bottom)).toBeLessThanOrEqual(1)
+      await attachScreenshot(`empty New feed at ${uiScale}% UI scale`)
+    })
+  })
+}
 
 test.describe('new subscriptions feed sorting', () => {
   const newestVideo = video('sort-newest-video', 'Newest video', now - HOUR, {
