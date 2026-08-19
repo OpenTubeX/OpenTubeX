@@ -1,12 +1,10 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, latestSettings } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
 
 async function openPlayerSettings(page) {
-  await goTo(page, 'settings')
-  await page.locator('.settingsMenu [data-section="player"]').click()
-  await expect(page.locator('.settingsContent > [data-section="player"]')).toBeVisible()
+  await goToSettingsSection(page, 'playback')
 
   return page.getByRole('slider', { name: /Parallel Segment Loading/ })
 }

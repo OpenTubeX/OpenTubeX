@@ -28,7 +28,7 @@ async function enableVerticalTabBar (page, width) {
   await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
 }
 
-async function expectAdjacent (left, right) {
+async function expectHorizontalGap (left, right, expectedGap) {
   const [leftBox, rightBox] = await Promise.all([
     left.boundingBox(),
     right.boundingBox()
@@ -37,8 +37,18 @@ async function expectAdjacent (left, right) {
   expect(leftBox).not.toBeNull()
   expect(rightBox).not.toBeNull()
   expect(Math.abs(leftBox.y - rightBox.y)).toBeLessThan(1)
-  expect(rightBox.x - leftBox.x - leftBox.width).toBeGreaterThanOrEqual(0)
-  expect(rightBox.x - leftBox.x - leftBox.width).toBeLessThanOrEqual(12)
+  expect(Math.abs(rightBox.x - leftBox.x - leftBox.width - expectedGap)).toBeLessThanOrEqual(1)
+}
+
+async function expectChangeMarkerClearOfPreviousSelect (left, right) {
+  const [leftBox, rightSelectBox] = await Promise.all([
+    left.boundingBox(),
+    right.locator('..').boundingBox()
+  ])
+
+  expect(leftBox).not.toBeNull()
+  expect(rightSelectBox).not.toBeNull()
+  expect(rightSelectBox.x - leftBox.x - leftBox.width).toBeGreaterThanOrEqual(11)
 }
 
 async function getTabEdgeBorderCoverage (page, tab, edge, inset = 0) {
@@ -182,8 +192,11 @@ test.describe('default appearance', () => {
     const secondaryColorTheme = page.getByRole('combobox', { name: /Secondary colou?r theme/i })
     await expect(lightTheme).toHaveText('Light')
     await expect(darkTheme).toHaveText('Dark')
-    await expectAdjacent(lightTheme, darkTheme)
-    await expectAdjacent(mainColorTheme, secondaryColorTheme)
+    await expectHorizontalGap(lightTheme, darkTheme, 24)
+    await expectHorizontalGap(mainColorTheme, secondaryColorTheme, 24)
+    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
+    await expectHorizontalGap(lightTheme, darkTheme, 12)
+    await expectHorizontalGap(mainColorTheme, secondaryColorTheme, 12)
     await expect(page.locator('.select').filter({ has: lightTheme }).locator('.select-icon')).toBeVisible()
     await expect(page.locator('.select').filter({ has: darkTheme }).locator('.select-icon')).toBeVisible()
 
@@ -203,6 +216,34 @@ test.describe('default appearance', () => {
     await expect(page.locator('body')).toHaveClass(/catppuccinMocha/)
   })
 
+  test('keeps a changed theme marker clear of the previous select', async ({ page }) => {
+    await goToSettingsSection(page, 'theme')
+
+    const lightTheme = page.getByRole('combobox', { name: 'Light theme' })
+    const darkTheme = page.getByRole('combobox', { name: 'Dark theme' })
+    await darkTheme.click()
+    await page.locator(`#${await darkTheme.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: 'Catppuccin Mocha', exact: true }).click()
+
+    const darkThemeSelect = page.locator('.select').filter({ has: darkTheme })
+    await expect(darkThemeSelect.locator('.changedSettingIndicator')).toBeVisible()
+    await expectChangeMarkerClearOfPreviousSelect(lightTheme, darkTheme)
+  })
+
+  test.describe('at 95% UI scale', () => {
+    test.use({ seed: { settings: { uiScale: 95 } } })
+
+    test('keeps predictable spacing between paired theme selects', async ({ page }) => {
+      await goToSettingsSection(page, 'theme')
+
+      const lightTheme = page.getByRole('combobox', { name: 'Light theme' })
+      const darkTheme = page.getByRole('combobox', { name: 'Dark theme' })
+      await expectHorizontalGap(lightTheme, darkTheme, 24)
+      await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
+      await expectHorizontalGap(lightTheme, darkTheme, 12)
+    })
+  })
+
   test('lists installed fonts and persists the selected app font', async ({ app, page }) => {
     await goToSettingsSection(page, 'theme')
 
@@ -216,11 +257,11 @@ test.describe('default appearance', () => {
     await expect.poll(() => fontOptions.count()).toBeGreaterThan(3)
     await expect(fontOptions.nth(0)).toHaveText('Roboto')
     await expect(fontOptions.nth(1)).toHaveText('System default')
-    await expect(fontDropdown).toHaveClass(/above/)
+    await expect(fontDropdown).toHaveClass(/below/)
     expect(await page.evaluate(([buttonId, dropdownId]) => {
       const button = document.getElementById(buttonId).getBoundingClientRect()
       const dropdown = document.getElementById(dropdownId).getBoundingClientRect()
-      return Math.abs(button.top - dropdown.bottom - 4)
+      return Math.abs(dropdown.top - button.bottom - 4)
     }, [await appFont.getAttribute('id'), await fontDropdown.getAttribute('id')])).toBeLessThanOrEqual(2)
 
     await page.setViewportSize({ width: 600, height: 320 })
@@ -469,9 +510,13 @@ test.describe('custom theme editor', () => {
     await expect(page.locator('.topNav .logoIcon')).toHaveCSS('background-color', 'rgb(18, 52, 86)')
     await expect(page.locator('.topNav .logoText')).toHaveCSS('background-color', 'rgb(101, 67, 33)')
     await setEditorColor('Logo hover', '#abcdef')
+    await page.locator('.settingsCloseButton').click()
+    await expect(page.locator('.settingsWindow')).toBeHidden()
     await page.locator('.topNav .logo').hover()
     await expect(page.locator('.topNav .logoIcon')).toHaveCSS('background-color', 'rgb(171, 205, 239)')
     await expect(page.locator('.topNav .logoText')).toHaveCSS('background-color', 'rgb(171, 205, 239)')
+    await goTo(page, 'settings')
+    await expect(editor).toBeVisible()
 
     await setEditorColor('Scrollbar thumb hover', '#345678')
     await expect(page.locator('.os-scrollbar').first()).toHaveCSS('--os-handle-bg-hover', '#345678')
@@ -501,7 +546,7 @@ test.describe('custom theme editor', () => {
     await backgroundPicker.getByRole('textbox', { name: 'Hex color' }).press('Enter')
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#33445580')
     await expect(backgroundPicker.getByRole('button', { name: 'Reset' })).toBeEnabled()
-    await page.locator('.customThemeEditor .themeNameField input').click()
+    await page.keyboard.press('Escape')
     await expect(page.getByRole('dialog', { name: 'Page background' })).toHaveCount(0)
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#0f0f0f')
 
@@ -584,7 +629,6 @@ test.describe('custom theme editor', () => {
     const quickAppearance = page.locator('.quickSettingsMenu .menuSection').filter({ hasText: 'Appearance' })
     await expect(quickAppearance.getByRole('combobox', { name: 'Base Theme' })).toBeDisabled()
     await expect(quickAppearance.getByRole('combobox', { name: /Main colou?r theme/i })).toHaveCount(0)
-    await expect(quickAppearance.getByRole('button', { name: 'Reset this setting to its default' })).toBeDisabled()
     await page.locator('.topNav .profileTrigger').click()
     await goTo(page, 'settings')
     await expect(page.getByText('Custom theme creator', { exact: true })).toBeVisible()
@@ -659,7 +703,7 @@ test.describe('custom theme editor', () => {
     await page.keyboard.press('Escape')
     await expect(page.locator('.quickSettingsMenu')).toBeHidden()
     await goTo(page, 'settings')
-    await expect(page.locator('.settingsContent > [data-section="theme"]')).toBeVisible()
+    await expect(page.locator('.settingsContent > [data-section="appearance"]')).toBeVisible()
 
     const lightSystemTheme = page.getByRole('combobox', { name: 'Light theme' })
     await lightSystemTheme.click()
