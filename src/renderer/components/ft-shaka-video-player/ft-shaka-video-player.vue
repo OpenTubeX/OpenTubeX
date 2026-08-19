@@ -782,15 +782,16 @@
               showTemporaryPlaybackRateIndicator || invertValueChangeContentOrder
           }"
         >
-          <ft-icon
-            v-if="showTemporaryPlaybackRateIndicator || valueChangeIcon"
-            :icon="[
-              'fas',
-              showTemporaryPlaybackRateIndicator
-                ? 'forward'
-                : valueChangeIcon
-            ]"
-          />
+          <span
+            v-if="showTemporaryPlaybackRateIndicator || valueChangeIcons.length > 0"
+            class="valueChangeIcons"
+          >
+            <ft-icon
+              v-for="icon in showTemporaryPlaybackRateIndicator ? ['forward'] : valueChangeIcons"
+              :key="icon"
+              :icon="['fas', icon]"
+            />
+          </span>
           <span>{{
             showTemporaryPlaybackRateIndicator
               ? temporaryPlaybackRateIndicatorMessage

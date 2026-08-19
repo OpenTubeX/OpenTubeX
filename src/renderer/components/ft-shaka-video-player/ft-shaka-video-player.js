@@ -8222,7 +8222,7 @@ export default defineComponent({
 
           const localization = ui.getControls().getLocalization()
           const message = localization.resolve(enabled ? 'ON' : 'OFF')
-          showValueChange(message, 'volume-xmark', true)
+          showValueChange(message, ['step-forward', 'volume-xmark'], true)
           blurTooltipButtons()
           break
         }
@@ -9671,7 +9671,7 @@ export default defineComponent({
 
     const showValueChangePopup = ref(false)
     const valueChangeMessage = ref('')
-    const valueChangeIcon = ref(null)
+    const valueChangeIcons = ref([])
     const invertValueChangeContentOrder = ref(false)
     const showTemporaryPlaybackRateIndicator = ref(false)
     const temporaryPlaybackRateIndicatorMessage = ref('')
@@ -9684,12 +9684,12 @@ export default defineComponent({
     /**
      * Shows a popup with a message and an icon on top of the video player.
      * @param {string} message - The message to display.
-     * @param {string} icon - The icon to display.
+     * @param {string | string[]} icons - The icons to display.
      * @param {boolean} invertContentOrder - Whether to invert the order of the icon and message.
      */
-    function showValueChange(message, icon = null, invertContentOrder = false) {
+    function showValueChange(message, icons = [], invertContentOrder = false) {
       valueChangeMessage.value = message
-      valueChangeIcon.value = icon
+      valueChangeIcons.value = Array.isArray(icons) ? icons : [icons]
       showValueChangePopup.value = true
       invertValueChangeContentOrder.value = invertContentOrder
 
@@ -9894,7 +9894,7 @@ export default defineComponent({
       handleVideoZoomPointerCancel,
 
       valueChangeMessage,
-      valueChangeIcon,
+      valueChangeIcons,
       showValueChangePopup,
       invertValueChangeContentOrder,
       showTemporaryPlaybackRateIndicator,

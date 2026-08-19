@@ -1599,6 +1599,12 @@
   flex-direction: row-reverse;
 }
 
+.valueChangeIcons {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s ease;
