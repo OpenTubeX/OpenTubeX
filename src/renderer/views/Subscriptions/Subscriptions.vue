@@ -557,14 +557,14 @@ if (visibleTabs.value.length === 0) {
  * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} tab
  */
 function changeTab(tab) {
-  if (tab === currentTab.value) {
-    return
-  }
-
   // First visible tab or no tab as fallback
   const target = visibleTabs.value.includes(tab)
     ? tab
     : (visibleTabs.value.length > 0 ? visibleTabs.value[0] : null)
+
+  if (target === currentTab.value) {
+    return
+  }
 
   // The feed is the primary response to activating a tab. Keep the indicator
   // animation decorative so it never delays the panel change.

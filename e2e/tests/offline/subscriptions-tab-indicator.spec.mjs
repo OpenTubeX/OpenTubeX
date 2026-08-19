@@ -56,6 +56,22 @@ test.use({
 })
 
 test.describe('subscriptions feed tab indicator', () => {
+  test('falls back when the persisted tab is hidden on startup', async ({ page }) => {
+    await page.evaluate(async () => {
+      localStorage.setItem('Subscriptions/currentTab', 'videos')
+
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateHideSubscriptionsVideos', true)
+    })
+
+    await goTo(page, 'subscriptions')
+
+    await expect(page.locator('[data-subscription-feed-tab="videos"]')).toHaveCount(0)
+    await expect(page.locator('[data-subscription-feed-tab="shorts"]'))
+      .toHaveAttribute('aria-selected', 'true')
+    await expect(page.getByText('short video 000')).toBeVisible()
+  })
+
   test('keeps tab widths stable when hovering with fonts whose bold glyphs are wider', async ({ page }) => {
     await goTo(page, 'subscriptions')
 
