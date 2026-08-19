@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="root">
     <FtLoader
       v-if="displayIsLoading && activeVideoList.length === 0 && isCommunity"
     />
@@ -78,7 +78,16 @@
 </template>
 
 <script setup>
-import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, ref } from 'vue'
+import {
+  computed,
+  onActivated,
+  onBeforeUnmount,
+  onDeactivated,
+  onMounted,
+  reactive,
+  ref,
+  useTemplateRef
+} from 'vue'
 
 import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
 import FtButton from '../FtButton/FtButton.vue'
@@ -91,12 +100,15 @@ import FtSkeletonGrid from '../FtSkeletonGrid/FtSkeletonGrid.vue'
 import store from '../../store/index'
 
 import { KeyboardShortcuts } from '../../../constants'
+import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
+import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { useTabContext } from '../../tabs/TabContext'
 
 const { tabId, isTabPresented } = useTabContext()
+const root = useTemplateRef('root')
 
 const props = defineProps({
   isLoading: {
@@ -334,11 +346,42 @@ function removeKeyboardShortcutListener() {
   document.removeEventListener('keydown', keyboardShortcutHandler)
 }
 
-onMounted(addKeyboardShortcutListener)
-onActivated(addKeyboardShortcutListener)
-onDeactivated(removeKeyboardShortcutListener)
+let hasActivated = false
+/** @type {Animation | null} */
+let activationAnimation = null
 
-onBeforeUnmount(removeKeyboardShortcutListener)
+onMounted(addKeyboardShortcutListener)
+onActivated(() => {
+  addKeyboardShortcutListener()
+
+  if (!hasActivated) {
+    hasActivated = true
+    return
+  }
+
+  if (isReducedMotionEnabled()) {
+    return
+  }
+
+  activationAnimation?.cancel()
+  activationAnimation = applyAnimationSpeed(root.value.animate([
+    { opacity: 0, transform: 'translateY(10px)' },
+    { opacity: 1, transform: 'translateY(0)' }
+  ], {
+    duration: 300,
+    easing: 'ease'
+  }))
+})
+onDeactivated(() => {
+  removeKeyboardShortcutListener()
+  activationAnimation?.cancel()
+  activationAnimation = null
+})
+
+onBeforeUnmount(() => {
+  removeKeyboardShortcutListener()
+  activationAnimation?.cancel()
+})
 onBeforeUnmount(unsubscribeFromStore)
 
 function refresh() {

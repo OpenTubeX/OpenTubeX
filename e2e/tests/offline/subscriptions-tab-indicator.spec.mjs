@@ -155,6 +155,38 @@ test.describe('subscriptions feed tab indicator', () => {
     expect(animation).toBeCloseTo(0.2, 2)
   })
 
+  test('animates a cached feed when switching back to it', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByText('video video 000')).toBeVisible()
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await expect(page.locator('#subscriptionsPanel.newFeed')).toBeVisible()
+
+    const hasEntryAnimation = await page.evaluate(() => new Promise(resolve => {
+      const target = document.querySelector('[data-subscription-feed-tab="videos"]')
+
+      function inspectFrame() {
+        if (target.getAttribute('aria-selected') !== 'true') {
+          requestAnimationFrame(inspectFrame)
+          return
+        }
+
+        requestAnimationFrame(() => {
+          const panel = document.querySelector('#subscriptionsPanel')
+          resolve(panel.getAnimations({ subtree: true }).some(animation => {
+            return animation.playState === 'running' &&
+              animation.effect.getComputedTiming().duration > 0
+          }))
+        })
+      }
+
+      target.click()
+      requestAnimationFrame(inspectFrame)
+    }))
+
+    expect(hasEntryAnimation).toBe(true)
+  })
+
   test('ends up aligned with the selected tab', async ({ page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
 
