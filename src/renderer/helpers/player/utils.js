@@ -9,13 +9,33 @@ export const MANIFEST_TYPE_DASH = 'application/dash+xml'
 export const MANIFEST_TYPE_HLS = 'application/x-mpegurl'
 
 /**
- * @param {shaka.util.Error} error
+ * @param {shaka.util.Error | Error} error
  * @param {string} context
  * @param {string} videoId
  * @param {object?} details
  */
 export function logShakaError(error, context, videoId, details) {
   const { Severity, Category, Code } = shaka.util.Error
+
+  if (error?.category === undefined && error?.code === undefined) {
+    /** @type {*[]} */
+    const args = [
+      'Player exception. This is a JavaScript error, not a shaka-player error.\n' +
+      `Video ID: "${videoId}"\n` +
+      `OpenTubeX player context: "${context}"\n`,
+      error
+    ]
+
+    if (details) {
+      args.push(
+        '\n\nOpenTubeX data:',
+        typeof details === 'object' ? deepCopy(details) : details
+      )
+    }
+
+    console.error(...args)
+    return
+  }
 
   // shaka's error type also has a message property but that is apparently only available in uncompiled mode
 
@@ -29,9 +49,9 @@ export function logShakaError(error, context, videoId, details) {
   const codeText = Object.keys(Code).find((/** @type {keyof Code} */ key) => Code[key] === error.code)
 
   const message =
-    'Player Error (category and code explainations here: https://shaka-player-demo.appspot.com/docs/api/shaka.util.Error.html)\n' +
+    'Player Error (category and code explanations here: https://shaka-player-demo.appspot.com/docs/api/shaka.util.Error.html)\n' +
     `Video ID: "${videoId}"\n` +
-    `FreeTube player context: "${context}"\n\n` +
+    `OpenTubeX player context: "${context}"\n\n` +
     `Severity: ${severityText} (${error.severity})\n` +
     `Category: ${categoryText} (${error.category})\n` +
     `Code: ${codeText} (${error.code})\n` +
@@ -49,7 +69,7 @@ export function logShakaError(error, context, videoId, details) {
 
   if (details) {
     args.push(
-      '\n\nFreeTube data:',
+      '\n\nOpenTubeX data:',
       // use deepCopy to get rid of Vue's proxying,
       // as that requires you click the 3 dots for every property in the logged object to see their values
       // doing it like this, results in a "clean" object where everything is immediately visible

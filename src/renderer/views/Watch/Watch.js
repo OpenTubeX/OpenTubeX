@@ -4811,7 +4811,6 @@ export default defineComponent({
      */
     createLocalSabrManifest: function (videoInfo, poToken, clientInfo, storyboards) {
       const url = new URL(videoInfo.streaming_data.server_abr_streaming_url)
-      url.searchParams.set('alr', 'yes')
       url.searchParams.set('cpn', videoInfo.cpn)
       // Shaka's scheme registry is renderer-global. Each retained tab therefore
       // needs its own scheme so one SABR player cannot replace or unregister
