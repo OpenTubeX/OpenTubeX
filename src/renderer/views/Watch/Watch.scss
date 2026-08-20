@@ -856,7 +856,7 @@
     .shortsAuxPanelTarget {
       flex: 1 1 auto;
       min-block-size: 0;
-      overflow: hidden;
+      overflow: hidden auto;
       overflow-anchor: none;
       overscroll-behavior: contain;
     }

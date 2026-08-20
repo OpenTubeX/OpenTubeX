@@ -289,6 +289,49 @@ test.describe('Shorts transcript navigation', () => {
     await expect(transcriptButton).toHaveCount(0)
   })
 
+  test('scrolls long video information independently of Shorts navigation', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.locator(sel.searchInput)
+      .fill(`https://www.youtube.com/shorts/${CAPTIONED_SHORT_IDS[0]}`)
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[0]}\\?short=true`))
+    await waitForPlayback(page)
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate(async (view) => {
+      const lines = Array.from({ length: 80 }, (_, index) => `Description line ${index + 1}`)
+      view.videoDescription = lines.join('\n')
+      view.videoDescriptionHtml = lines.join('<br>')
+      view.toggleShortsMetadata()
+      await view.$nextTick()
+    })
+
+    const panel = page.locator('.shortsAuxPanel')
+    const scroller = panel.locator('.shortsAuxPanelTarget')
+    await expect(panel).toHaveClass(/shortsAuxPanelOpen/)
+    await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
+    await expect(panel.locator('.os-scrollbar-vertical')).toHaveCount(1)
+    await expect.poll(() => scroller.evaluate(element => {
+      return element.scrollHeight > element.clientHeight
+    })).toBe(true)
+
+    const initialScrollTop = await scroller.evaluate(element => element.scrollTop)
+    await scroller.hover()
+    await page.mouse.wheel(0, 10_000)
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop))
+      .toBeGreaterThan(initialScrollTop)
+    await expect.poll(() => scroller.evaluate(element => {
+      const viewportBounds = element.getBoundingClientRect()
+      const descriptionBounds = element.querySelector('.description').getBoundingClientRect()
+      return {
+        atScrollEnd: element.scrollHeight - element.clientHeight - element.scrollTop <= 1,
+        renderedEndVisible: descriptionBounds.bottom <= viewportBounds.bottom + 1
+      }
+    })).toEqual({ atScrollEnd: true, renderedEndVisible: true })
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[0]}\\?short=true`))
+  })
+
   test('keeps loading Shorts when another player keeps the shared caption factory alive', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
 
