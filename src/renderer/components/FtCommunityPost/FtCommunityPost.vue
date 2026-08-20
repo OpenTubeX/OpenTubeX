@@ -14,6 +14,7 @@
           :is="enableChannelLinks ? 'router-link' : 'div'"
           v-if="authorId"
           :to="`/channel/${authorId}`"
+          class="authorThumbnailLink"
           tabindex="-1"
           aria-hidden="true"
         >
