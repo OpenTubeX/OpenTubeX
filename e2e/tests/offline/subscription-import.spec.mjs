@@ -76,7 +76,7 @@ test('imports current OpenTubeX subscriptions without rejecting profile icons', 
       exportedIdCollisionProfile
     ]
       .map(profile => JSON.stringify(profile))
-      .join('\n') + '\n'
+      .join('\n')
 
     Object.defineProperty(window, 'showOpenFilePicker', {
       configurable: true,

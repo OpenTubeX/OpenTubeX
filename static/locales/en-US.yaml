@@ -1200,6 +1200,7 @@ Settings:
       successfully imported
     Invalid subscriptions file: Invalid subscriptions file
     Invalid history file: Invalid history file
+    Invalid JSON row, skipping item: 'Invalid JSON at row {row}, skipping item'
     Subscriptions have been successfully exported: Subscriptions have been successfully
       exported
     History object has insufficient data, skipping item: History object has insufficient
