@@ -3,6 +3,7 @@ import { test, expect, goTo } from '../../helpers/app.mjs'
 const now = Date.now()
 const HOUR = 3600000
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
+const AUTHOR_THUMBNAIL = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="55" height="55"/>'
 
 function video (videoId, title, published, extra = {}) {
   return {
@@ -26,7 +27,7 @@ function post (postId, text, publishedTime) {
     postText: text,
     author: 'Channel A',
     authorId: CHANNEL_ID,
-    authorThumbnails: [],
+    authorThumbnails: [{ url: AUTHOR_THUMBNAIL, width: 55, height: 55 }],
     publishedTime,
     voteCount: 1,
     commentCount: 0,
@@ -211,6 +212,43 @@ test.describe('new subscriptions feed', () => {
 })
 
 for (const uiScale of [100, 125]) {
+  test.describe(`community post author at ${uiScale}% UI scale`, () => {
+    test.use({
+      seed: {
+        settings: {
+          ...commonSettings,
+          uiScale
+        },
+        profiles: [profile()],
+        subscriptionCache: populatedCache
+      }
+    })
+
+    test('centers the channel name and relative time on the avatar', async ({ page }) => {
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-subscription-feed-tab="posts"]').click()
+
+      const post = page.locator('.ft-list-post').filter({ hasText: 'New community post' })
+      await expect(post).toBeVisible()
+
+      const centers = await post.evaluate(element => {
+        const verticalCenter = selector => {
+          const rect = element.querySelector(selector).getBoundingClientRect()
+          return (rect.top + rect.bottom) / 2
+        }
+
+        return {
+          avatar: verticalCenter('.communityThumbnail'),
+          author: verticalCenter('.authorName'),
+          published: verticalCenter('.publishedText')
+        }
+      })
+
+      expect(Math.abs(centers.author - centers.avatar)).toBeLessThanOrEqual(1)
+      expect(Math.abs(centers.published - centers.avatar)).toBeLessThanOrEqual(1)
+    })
+  })
+
   test.describe(`new subscriptions feed empty state at ${uiScale}% UI scale`, () => {
     test.use({
       seed: {
