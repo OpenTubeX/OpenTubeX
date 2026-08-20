@@ -5,7 +5,6 @@
   >
     <div
       ref="toastElement"
-      v-overlay-scrollbars
       class="toast"
       :class="{
         hasImage: toast.image,
