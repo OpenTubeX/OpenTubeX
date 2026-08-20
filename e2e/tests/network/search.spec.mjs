@@ -2,13 +2,48 @@ import { sel } from '../../helpers/app.mjs'
 import { test, expect } from '../../helpers/innertube.mjs'
 
 test.describe('search', () => {
-  test('search returns video results', async ({ page }) => {
+  test('search returns video results', async ({ page, innertube }) => {
     await page.locator(sel.searchInput).fill('big buck bunny')
     await page.locator(sel.searchInput).press('Enter')
 
     await expect(page).toHaveURL(/#\/search\//)
     await expect(page.locator('.ft-list-video').first()).toBeVisible({ timeout: 30_000 })
     expect(await page.locator('.ft-list-video').count()).toBeGreaterThan(3)
+
+    const video = page.locator('.ft-list-video').first()
+    const thumbnail = video.locator('.thumbnailLink')
+    const preview = video.locator('.thumbnailPreview')
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUiScale', 95)
+    })
+
+    await thumbnail.hover()
+    await expect(preview).toHaveAttribute('src', /\/an_webp\//)
+    if (!innertube.replay) {
+      await expect(preview).toHaveClass(/loaded/)
+    }
+    const [thumbnailBox, previewBox] = await Promise.all([
+      video.locator('.thumbnailImage').first().boundingBox(),
+      preview.boundingBox()
+    ])
+    expect(previewBox.x).toBeCloseTo(thumbnailBox.x, 1)
+    expect(previewBox.y).toBeCloseTo(thumbnailBox.y, 1)
+    expect(previewBox.width).toBeCloseTo(thumbnailBox.width, 1)
+    expect(previewBox.height).toBeCloseTo(thumbnailBox.height, 1)
+
+    await page.mouse.move(0, 0)
+    await expect(preview).toHaveCount(0)
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setShowThumbnailPreviews', false)
+    })
+
+    await thumbnail.hover()
+    await page.waitForTimeout(600)
+    await expect(preview).toHaveCount(0)
   })
 
   test('opening a search result loads the watch page', async ({ page, innertube }) => {

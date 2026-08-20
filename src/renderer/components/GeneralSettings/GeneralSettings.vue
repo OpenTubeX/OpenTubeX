@@ -5,6 +5,15 @@
     <div class="switchColumnGrid">
       <div class="switchColumn">
         <FtToggleSwitch
+          v-if="mode === 'appearance'"
+          :label="t('Settings.General Settings.Show Thumbnail Previews')"
+          :default-value="showThumbnailPreviews"
+          setting-key="showThumbnailPreviews"
+          :compact="true"
+          :tooltip="t('Tooltips.General Settings.Show Thumbnail Previews')"
+          @change="updateShowThumbnailPreviews"
+        />
+        <FtToggleSwitch
           v-if="mode === 'general'"
           :label="t('Settings.General Settings.Check for Updates')"
           :default-value="checkForUpdates"
@@ -610,6 +619,16 @@ const listType = computed(() => store.getters.getListType)
  */
 function updateListType(value) {
   store.dispatch('updateListType', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showThumbnailPreviews = computed(() => store.getters.getShowThumbnailPreviews)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowThumbnailPreviews(value) {
+  store.dispatch('updateShowThumbnailPreviews', value)
 }
 
 const THUMBNAIL_TYPE_VALUES = ['', 'start', 'middle', 'end', 'hidden', 'blur']

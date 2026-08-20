@@ -31,12 +31,27 @@
         :to="watchVideoRouterLink"
         @click="handleWatchPageLinkClick"
         @auxclick="handleWatchPageLinkClick"
+        @pointerenter="startThumbnailPreview"
+        @pointerleave="stopThumbnailPreview"
       >
         <img
           :src="thumbnail"
           class="thumbnailImage"
           :class="{ blur: blurThumbnails }"
           alt=""
+        >
+        <img
+          v-if="thumbnailPreviewActive"
+          :src="thumbnailPreviewUrl"
+          class="thumbnailImage thumbnailPreview"
+          :class="{
+            blur: blurThumbnails,
+            loaded: thumbnailPreviewLoaded
+          }"
+          alt=""
+          aria-hidden="true"
+          @load="thumbnailPreviewLoaded = true"
+          @error="thumbnailPreviewLoaded = false"
         >
         <FtEmbeddedProgress
           v-if="historyEntryExists && progressPercentage > 0"
@@ -534,6 +549,10 @@ watch(enableDownloads, (enabled) => {
 })
 const isPremium = ref(false)
 const hideViews = ref(false)
+const thumbnailPreviewActive = ref(false)
+const thumbnailPreviewLoaded = ref(false)
+const THUMBNAIL_PREVIEW_DELAY = 500
+let thumbnailPreviewTimer = null
 const deArrowTogglePinned = ref(false)
 const showDeArrowTitle = ref(false)
 const showDeArrowThumbnail = ref(false)
@@ -620,6 +639,52 @@ const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
+
+const thumbnailPreviewUrl = computed(() => {
+  if (
+    !store.getters.getShowThumbnailPreviews ||
+    thumbnailPreference.value === 'hidden' ||
+    props.appearance === 'youtubeShort'
+  ) {
+    return null
+  }
+
+  return typeof props.data.thumbnailPreviewUrl === 'string'
+    ? props.data.thumbnailPreviewUrl
+    : null
+})
+
+function clearThumbnailPreviewTimer() {
+  if (thumbnailPreviewTimer !== null) {
+    clearTimeout(thumbnailPreviewTimer)
+    thumbnailPreviewTimer = null
+  }
+}
+
+function startThumbnailPreview() {
+  clearThumbnailPreviewTimer()
+
+  const previewUrl = thumbnailPreviewUrl.value
+  if (!previewUrl) {
+    return
+  }
+
+  thumbnailPreviewLoaded.value = false
+  thumbnailPreviewTimer = setTimeout(() => {
+    thumbnailPreviewTimer = null
+    if (thumbnailPreviewUrl.value === previewUrl) {
+      thumbnailPreviewActive.value = true
+    }
+  }, THUMBNAIL_PREVIEW_DELAY)
+}
+
+function stopThumbnailPreview() {
+  clearThumbnailPreviewTimer()
+  thumbnailPreviewActive.value = false
+  thumbnailPreviewLoaded.value = false
+}
+
+watch(thumbnailPreviewUrl, stopThumbnailPreview)
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
@@ -1895,6 +1960,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  clearThumbnailPreviewTimer()
   clearPremiereStartTimer()
   removeLiveReminderUpdatedListener?.()
 })

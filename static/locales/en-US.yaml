@@ -503,6 +503,7 @@ Settings:
       End: End
       Hidden: Hidden
       Blur: Blur
+    Show Thumbnail Previews: Show thumbnail previews
     Extra Thumbnail Action Button:
       Extra Thumbnail Action Button: Extra Thumbnail Action Button
       None: None
@@ -2073,6 +2074,7 @@ Tooltips:
       method when enabled.
     Thumbnail Preference: All thumbnails throughout OpenTubeX will be replaced with
       a frame of the video, blurred or hidden instead of the default thumbnail.
+    Show Thumbnail Previews: Show animated previews when hovering over video thumbnails.
     Startup Behavior: |
       Choose what OpenTubeX does when it starts.
       Load all tabs restores every saved tab immediately, but background tabs will not autoplay videos.

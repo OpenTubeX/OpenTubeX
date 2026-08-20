@@ -20,6 +20,7 @@ const GENERAL_EVERYDAY_KEYS = new Set([
 ])
 
 const GENERAL_APPEARANCE_KEYS = new Set([
+  'Show Thumbnail Previews',
   'Thumbnail Preference',
   'Video View Type'
 ])
