@@ -354,22 +354,50 @@ test.describe('custom playlist order', () => {
     await expect(page.locator('.playlistItemsCard .h3Title').first()).toHaveText('Custom playlist video 3')
   })
 
-  test('keeps the playlist order when persistence fails', async ({ app, page }) => {
+  test('keeps newer playlist state when an earlier reorder fails', async ({ app, page }) => {
     await goTo(page, 'userplaylists')
     await page.getByText('Large custom playlist').click()
 
     const secondVideo = page.locator('.ft-list-video').filter({
       has: page.getByText('Custom playlist video 2', { exact: true })
     })
-    await rejectDatastoreRequests(app.electronApp, IpcChannels.DB_PLAYLISTS)
+    await rejectDatastoreRequests(app.electronApp, IpcChannels.DB_PLAYLISTS, 500)
     await secondVideo.getByTitle('Move Video Up').click()
+    await expect(page.locator('.playlistItemsCard .h3Title').first()).toHaveText('Custom playlist video 2')
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const playlist = store.getters.getPlaylist('large-custom-playlist')
+      store.commit('upsertPlaylistToList', {
+        ...playlist,
+        lastUpdatedAt: Date.now(),
+        videos: playlist.videos.toSpliced(2, 0, {
+          videoId: 'concurrent1',
+          title: 'Concurrent playlist video',
+          author: 'Test Channel',
+          authorId: 'UC-test-channel-id',
+          lengthSeconds: 120,
+          published: Date.now() - 86_400_000,
+          timeAdded: Date.now(),
+          playlistItemId: 'concurrent-playlist-item',
+          type: 'video'
+        })
+      })
+    })
 
     await expect(page.locator('.toast', { hasText: 'There was an issue with updating this playlist.' })).toBeVisible()
     await expect(page.locator('.playlistItemsCard .h3Title').first()).toHaveText('Custom playlist video 1')
+    await expect(page.getByText('Concurrent playlist video', { exact: true })).toBeVisible()
     await expect.poll(() => page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      return store.getters.getPlaylist('large-custom-playlist').videos.slice(0, 2)
-        .map(video => video.playlistItemId)
-    })).toEqual(['custom-playlist-item-0', 'custom-playlist-item-1'])
+      const videos = store.getters.getPlaylist('large-custom-playlist').videos
+      return {
+        firstIds: videos.slice(0, 2).map(video => video.playlistItemId),
+        thirdId: videos[2].playlistItemId,
+      }
+    })).toEqual({
+      firstIds: ['custom-playlist-item-0', 'custom-playlist-item-1'],
+      thirdId: 'concurrent-playlist-item',
+    })
   })
 })

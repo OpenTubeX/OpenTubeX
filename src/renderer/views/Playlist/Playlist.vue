@@ -771,7 +771,6 @@ const videoDraggingPossible = computed(() => {
 async function persistPlaylistOrder(orderedItems) {
   if (playlistOrderUpdateInProgress.value) { return }
 
-  const previousItems = playlistItems.value
   const playlist = {
     playlistName: playlistTitle.value,
     protected: selectedUserPlaylist.value.protected,
@@ -786,7 +785,7 @@ async function persistPlaylistOrder(orderedItems) {
   try {
     await store.dispatch('updatePlaylist', playlist)
   } catch (error) {
-    playlistItems.value = previousItems
+    playlistItems.value = selectedUserPlaylist.value?.videos ?? []
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
       icon: ['fas', 'circle-exclamation'],

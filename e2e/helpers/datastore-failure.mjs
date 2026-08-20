@@ -4,12 +4,16 @@
  *
  * @param {import('@playwright/test').ElectronApplication} electronApp
  * @param {string} channel
+ * @param {number} [delayMs]
  */
-export function rejectDatastoreRequests(electronApp, channel) {
-  return electronApp.evaluate(({ ipcMain }, channel_) => {
-    ipcMain.removeHandler(channel_)
-    ipcMain.handle(channel_, () => {
+export function rejectDatastoreRequests(electronApp, channel, delayMs = 0) {
+  return electronApp.evaluate(({ ipcMain }, options) => {
+    ipcMain.removeHandler(options.channel)
+    ipcMain.handle(options.channel, async () => {
+      if (options.delayMs > 0) {
+        await new Promise(resolve => setTimeout(resolve, options.delayMs))
+      }
       throw new Error('Synthetic datastore failure')
     })
-  }, channel)
+  }, { channel, delayMs })
 }
