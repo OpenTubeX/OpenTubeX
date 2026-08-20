@@ -376,7 +376,6 @@
   padding-block: 12px;
   padding-inline: 18px;
   text-align: start;
-  overflow-y: auto;
   background-color: rgb(28 28 28 / 92%);
   backdrop-filter: blur(12px);
   color: #fff;
