@@ -84,6 +84,39 @@ async function expectExternalSoftwarePathAlignment(tool, sourceName, pathPlaceho
   expect(pathBox.x + pathBox.width).toBeCloseTo(helpBox.x + helpBox.width, 0)
 }
 
+async function expectSubscriptionRefreshIntervalSelectHighlight(page) {
+  await goTo(page, 'settings')
+  const search = page.getByRole('searchbox', { name: 'Search settings' })
+
+  await search.fill('Auto Refresh Interval')
+  await expect(page.locator('.settingsSearchResultMatch')).toHaveText([
+    'Live Auto Refresh Interval',
+    'Posts Auto Refresh Interval',
+    'Videos Auto Refresh Interval',
+    'Shorts Auto Refresh Interval'
+  ])
+  await page.getByRole('button', { name: 'Videos Auto Refresh Interval', exact: true }).click()
+
+  const selectHighlight = page.locator('.select.settingsSearchTarget')
+  const highlightFrame = selectHighlight.locator('.selectSearchHighlightFrame')
+  const selectLabel = selectHighlight.locator('.select-label')
+  const selectTooltip = selectHighlight.locator('.selectTooltip')
+  await expect(selectHighlight).toContainText('Videos Auto Refresh Interval')
+  await expect(highlightFrame).toBeVisible()
+  await expect(selectLabel).toBeVisible()
+  await expect(selectTooltip).toBeVisible()
+  await expect(highlightFrame).toHaveCSS('animation-name', /settings-search-highlight/)
+  const highlightBounds = await highlightFrame.boundingBox()
+  const labelBounds = await selectLabel.boundingBox()
+  const tooltipBounds = await selectTooltip.boundingBox()
+  expect(highlightBounds).not.toBeNull()
+  expect(labelBounds).not.toBeNull()
+  expect(tooltipBounds).not.toBeNull()
+  expect(highlightBounds.y).toBeLessThanOrEqual(labelBounds.y)
+  expect(highlightBounds.x + highlightBounds.width)
+    .toBeGreaterThanOrEqual(tooltipBounds.x + tooltipBounds.width)
+}
+
 test.describe('skip silence settings search', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 
@@ -97,6 +130,123 @@ test.describe('skip silence settings search', () => {
     await expect(page.locator('.switch-ctn.settingsSearchTarget'))
       .toContainText('Show Skip Silence Toggle')
     await expect(page.locator('.section.settingsSearchTarget')).toHaveCount(0)
+  })
+})
+
+test.describe('settings search highlights', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  test('finds and highlights specific subscription refresh interval selects', async ({ page }) => {
+    await expectSubscriptionRefreshIntervalSelectHighlight(page)
+  })
+
+  test.describe('at 95% UI scale', () => {
+    test.use({ seed: { settings: { currentLocale: 'en-US', uiScale: 95 } } })
+
+    test('keeps the select highlight around its label and help icon', async ({ page }) => {
+      await expectSubscriptionRefreshIntervalSelectHighlight(page)
+    })
+  })
+
+  test('highlights a category opened through its description', async ({ page }) => {
+    await goTo(page, 'settings')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+
+    await search.fill('Feed refresh and display options')
+    await page.getByRole('button', { name: 'Feed refresh and display options', exact: true }).click()
+
+    const sectionHighlight = page.locator('.section.settingsSearchTarget')
+    await expect(sectionHighlight).toHaveAttribute('data-section', 'subscriptions')
+    await expect(sectionHighlight).toHaveCSS('animation-name', /settings-search-highlight/)
+  })
+
+  test('highlights a whole settings subsection opened through its heading', async ({ page }) => {
+    await goTo(page, 'settings')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+
+    await search.fill('Context Menu Search')
+    await page.getByRole('button', { name: 'Context Menu Search', exact: true }).click()
+
+    const contextMenuSearchSection = page.locator('.settingsSection').filter({
+      has: page.getByRole('heading', { name: 'Context Menu Search', exact: true })
+    })
+    await expect(contextMenuSearchSection).toHaveClass(/settingsSearchTarget/)
+    await expect(contextMenuSearchSection)
+      .toHaveCSS('animation-name', /settings-search-highlight/)
+  })
+
+  for (const { searchTerm, sectionType, settingLabel } of [{
+    searchTerm: 'Subscription',
+    sectionType: 'subscriptions',
+    settingLabel: 'Fetch Feed on Startup'
+  }, {
+    searchTerm: 'Caption Appearance',
+    sectionType: 'playback',
+    settingLabel: 'Preferred Caption Language'
+  }]) {
+    test(`highlights the subsection represented by the hidden ${searchTerm} title`, async ({ page }) => {
+      await goTo(page, 'settings')
+      const search = page.getByRole('searchbox', { name: 'Search settings' })
+
+      await search.fill(searchTerm)
+      await page.getByRole('button', { name: searchTerm, exact: true }).click()
+
+      const subsectionHighlight = page.locator(
+        `.section[data-section="${sectionType}"] .settingsSection.settingsSearchTarget`
+      )
+      await expect(subsectionHighlight).toContainText(settingLabel)
+      await expect(subsectionHighlight).toHaveCSS('animation-name', /settings-search-highlight/)
+    })
+  }
+
+  test('does not search input placeholders or feedback messages', async ({ page }) => {
+    await goTo(page, 'settings')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+
+    for (const searchTerm of [
+      'Engine name',
+      'Search URL',
+      'Search history and cache have been cleared',
+      'Generated SponsorBlock user ID copied to clipboard'
+    ]) {
+      await search.fill(searchTerm)
+      await expect(page.locator('.settingsNoResults')).toBeVisible()
+      await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
+    }
+  })
+
+  test('only searches controls while their settings are visible', async ({ page }) => {
+    await goTo(page, 'settings')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+
+    for (const searchTerm of [
+      'Screenshot Mode',
+      'Edge Color',
+      'Server URL',
+      'Custom External Player Executable',
+      'SponsorBlock API Url (Default is https://sponsor.ajay.app)',
+      'Return YouTube Dislike API URL (Default is https://ryd-proxy.kavin.rocks)',
+      'Proxy Host',
+      'Edit custom theme',
+      'Remove Password',
+      'Generated SponsorBlock User ID',
+      'Export Generated User ID'
+    ]) {
+      await search.fill(searchTerm)
+      await expect(page.locator('.settingsNoResults')).toBeVisible()
+      await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0, { timeout: 1_000 })
+    }
+
+    await search.fill('')
+    const playback = await goToSettingsSection(page, 'playback')
+    await playback.locator('label.switch-label').filter({ hasText: 'Enable Screenshot' }).click()
+    await playback.getByRole('combobox', { name: 'Edge Style' }).click()
+    await page.getByRole('option', { name: 'Outline', exact: true }).click()
+
+    for (const searchTerm of ['Screenshot Mode', 'Edge Color']) {
+      await search.fill(searchTerm)
+      await expect(page.getByRole('button', { name: searchTerm, exact: true })).toBeVisible()
+    }
   })
 })
 
@@ -788,18 +938,24 @@ test.describe('settings', () => {
     await search.fill('update')
     await expect(page.locator('.settingsMenu .title.active')).toHaveCount(0)
     await expect(page.locator('.settingsContent > .section')).toHaveCount(0)
-    await expect(page.locator('.settingsSearchResult')).toHaveCount(4)
+    await expect(page.locator('.settingsSearchResult')).toHaveCount(1)
     expect(await page.locator('.settingsMenu .title').evaluateAll(elements => (
       elements.every(element => element.scrollHeight <= element.clientHeight + 1)
     ))).toBe(true)
 
     await search.fill('a')
     const searchContent = page.locator('.settingsContent')
+    const searchScrollbar = searchContent.locator(':scope > .os-scrollbar-vertical')
     await searchContent.evaluate(element => { element.scrollTop = element.scrollHeight })
     await expect.poll(() => searchContent.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await expect(searchScrollbar).not.toHaveClass(/os-scrollbar-unusable/)
 
     await search.fill('FFmpeg Source')
     await expect.poll(() => searchContent.evaluate(element => element.scrollTop)).toBe(0)
+    await expect.poll(() => searchContent.evaluate(
+      element => element.scrollHeight <= element.clientHeight + 1
+    )).toBe(true)
+    await expect(searchScrollbar).toHaveClass(/os-scrollbar-unusable/)
     await expect(page.locator('.settingsMenu .title')).toHaveCount(1)
     await expect(page.locator('.settingsMenu [data-section="advanced"]')).toBeVisible()
     await expect(page.locator('.settingsSearchResult')).toContainText('FFmpeg Source')
@@ -862,15 +1018,13 @@ test.describe('settings', () => {
       .toContainText('Proxy Videos Through Invidious')
 
     await search.fill('test')
-    await expect(page.getByRole('button', { name: 'Test Proxy', exact: true })).toBeVisible()
-    await expect(page.locator('.settingsSearchResultMatch')).not.toContainText('Clicking on Test Proxy')
+    await expect(page.getByRole('button', { name: 'Test Proxy', exact: true })).toHaveCount(0)
+    await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
 
     const proxyInfo = 'Clicking on Test Proxy will send a request to ' +
       'https://ipwho.is/?output=json&fields=ip,country,city,region&lang=en'
     await search.fill(proxyInfo)
-    await expect(page.locator('.settingsMenu [data-section="advanced"]')).toBeVisible()
-    await page.getByRole('button', { name: proxyInfo, exact: true }).click()
-    await expect(page.locator('.section.settingsSearchTarget')).toHaveCount(0)
+    await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
 
     await search.fill('Manage Saved Channels')
     await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)

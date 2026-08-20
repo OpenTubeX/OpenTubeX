@@ -94,6 +94,10 @@
         @reset="emit('reset')"
       />
     </span>
+    <span
+      class="selectSearchHighlightFrame"
+      aria-hidden="true"
+    />
     <Teleport :to="dropdownTarget">
       <Transition name="select-dropdown">
         <ul

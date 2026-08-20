@@ -61,3 +61,24 @@ test('playback search retains caption controls without caption option values', (
     SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS['caption-appearance'].has('Application Language')
   )
 })
+
+test('settings search excludes values that only exist in hidden controls', () => {
+  assert.deepEqual(
+    SETTINGS_SEARCH_SELECT_GROUP_LABELS.theme['Icon Pack'],
+    ['Icon Pack']
+  )
+  assert.deepEqual(
+    SETTINGS_SEARCH_SELECT_GROUP_LABELS.theme['Custom Theme'],
+    ['Create Custom Theme', 'Edit Custom Theme']
+  )
+  assert.deepEqual(
+    SETTINGS_SEARCH_SELECT_GROUP_LABELS.player['Auto Picture in Picture'],
+    ['Auto Picture in Picture']
+  )
+  assert.ok(SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS.password.has('Password'))
+  assert.equal(typeof getAtPath(locale, 'Settings.Password Settings.Password'), 'string')
+  assert.ok(
+    SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS['sponsor-block']
+      .has('Generated SponsorBlock User ID Copy Button')
+  )
+})
