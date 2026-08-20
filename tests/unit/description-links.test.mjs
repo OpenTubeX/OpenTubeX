@@ -39,6 +39,20 @@ test('does not link things that only look like hashtags or handles', () => {
   assert.doesNotMatch(html, /<a/)
 })
 
+test('does not link one- or two-digit hashtags', () => {
+  const html = linkifyHashtagsAndHandles('Parts #9, #10 and #99')
+
+  assert.strictEqual(html, 'Parts #9, #10 and #99')
+})
+
+test('links longer numeric and short textual hashtags', () => {
+  const html = linkifyHashtagsAndHandles('#100 #123 #ai #9a #猫')
+
+  for (const tag of ['100', '123', 'ai', '9a', '猫']) {
+    assert.match(html, new RegExp(`<a href="https://youtube\\.com/hashtag/${tag}"[^>]*>#${tag}</a>`))
+  }
+})
+
 test('keeps the escaped HTML of a title escaped', () => {
   // titles are plain text, so they get escaped before their hashtags and handles are linked
   const html = linkifyHashtagsAndHandles('&lt;b&gt;Bold&lt;/b&gt; #Tag')
