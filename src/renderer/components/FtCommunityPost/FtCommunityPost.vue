@@ -76,6 +76,7 @@
           class="communityImage"
           alt=""
           loading="lazy"
+          @error="removeImagePreloader"
         >
       </swiper-slide>
     </swiper-container>
@@ -165,7 +166,7 @@
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import autolinker from 'autolinker'
-import { computed, onMounted, useTemplateRef } from 'vue'
+import { computed, onActivated, onMounted, useTemplateRef } from 'vue'
 
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
 import FtListPlaylist from '../FtListPlaylist/FtListPlaylist.vue'
@@ -321,42 +322,73 @@ function getBestQualityImage(imageArray, options = {}) {
   return url.replace(/-c-fcrop64=[^-]+/i, '')
 }
 
+/**
+ * Swiper only removes its lazy preloader after an image load event. Failed
+ * requests can therefore leave it visible indefinitely.
+ *
+ * @param {Event} event
+ */
+function removeImagePreloader(event) {
+  const image = event.currentTarget
+  if (!(image instanceof HTMLElement)) {
+    return
+  }
+
+  const slide = image.closest('swiper-slide')
+  const preloader = slide?.querySelector('.swiper-lazy-preloader') ??
+    slide?.shadowRoot?.querySelector('.swiper-lazy-preloader')
+  preloader?.remove()
+}
+
 const swiperContainerRef = useTemplateRef('swiperContainerRef')
+let swiperInitializationPromise = null
+
+async function initializeSwiper() {
+  const existingSwiper = swiperContainerRef.value?.swiper
+  if (swiperInitializationPromise || (existingSwiper && !existingSwiper.destroyed)) {
+    return
+  }
+
+  swiperInitializationPromise = loadSwiperModules()
+
+  try {
+    const { A11y, Navigation, Pagination } = await swiperInitializationPromise
+    /** @type {import('swiper/element').SwiperContainer|null} */
+    const swiperContainer = swiperContainerRef.value
+    if (!swiperContainer?.isConnected || (swiperContainer.swiper && !swiperContainer.swiper.destroyed)) {
+      return
+    }
+
+    const swiperOptions = {
+      modules: [A11y, Navigation, Pagination],
+
+      injectStylesUrls: [
+        // This file is created with the copy webpack plugin in the web and renderer webpack configs.
+        // If you add more modules, please remember to add their CSS files to the list in webpack config files.
+        createWebURL(`/swiper-${process.env.SWIPER_VERSION}.css`)
+      ],
+
+      a11y: true,
+      navigation: true,
+      pagination: {
+        enabled: true,
+        clickable: true
+      },
+      slidesPerView: 1
+    }
+
+    Object.assign(swiperContainer, swiperOptions)
+    swiperContainer.initialize()
+  } catch (error) {
+    console.error('Failed to initialize community post carousel', error)
+  } finally {
+    swiperInitializationPromise = null
+  }
+}
 
 if (postType === 'multiImage' && postContent.content.length > 0) {
-  onMounted(async () => {
-    try {
-      const { A11y, Navigation, Pagination } = await loadSwiperModules()
-      /** @type {import('swiper/element').SwiperContainer|null} */
-      const swiperContainer = swiperContainerRef.value
-      if (!swiperContainer) {
-        return
-      }
-
-      const swiperOptions = {
-        modules: [A11y, Navigation, Pagination],
-
-        injectStylesUrls: [
-          // This file is created with the copy webpack plugin in the web and renderer webpack configs.
-          // If you add more modules, please remember to add their CSS files to the list in webpack config files.
-          createWebURL(`/swiper-${process.env.SWIPER_VERSION}.css`)
-        ],
-
-        a11y: true,
-        navigation: true,
-        pagination: {
-          enabled: true,
-          clickable: true
-        },
-        slidesPerView: 1
-      }
-
-      Object.assign(swiperContainer, swiperOptions)
-      swiperContainer.initialize()
-    } catch (error) {
-      console.error('Failed to initialize community post carousel', error)
-    }
-  })
+  onMounted(initializeSwiper)
+  onActivated(initializeSwiper)
 }
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)

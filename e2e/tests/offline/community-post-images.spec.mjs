@@ -1,3 +1,4 @@
+import { createServer } from 'node:http'
 import { deflateSync } from 'node:zlib'
 
 import { test, expect, goTo } from '../../helpers/app.mjs'
@@ -94,6 +95,25 @@ function singleImagePost() {
     postContent: {
       type: 'image',
       content: thumbnails('wide', 800, 450)
+    },
+    type: 'community',
+    isNewInSubscriptionFeed: true
+  }
+}
+
+function interruptedImagePost(imageUrls) {
+  return {
+    postId: 'interrupted-image-post',
+    postText: 'Generic gallery post',
+    author: 'Example Channel',
+    authorId: CHANNEL_ID,
+    authorThumbnails: [],
+    publishedTime: now - 10 * 60000,
+    voteCount: 2,
+    commentCount: 0,
+    postContent: {
+      type: 'multiImage',
+      content: imageUrls.map((url) => [{ width: 640, height: 640, url }])
     },
     type: 'community',
     isNewInSubscriptionFeed: true
@@ -205,4 +225,111 @@ test.describe('community post images', () => {
       expect(carouselLayout.paginationBottom).toBeLessThanOrEqual(carouselLayout.containerBottom + 1)
     }
   })
+
+  test('restores carousel navigation after returning to the Posts tab', async ({ page }) => {
+    await stubPostImages(page)
+
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="posts"]').click()
+
+    const post = page.locator('.ft-list-post').filter({ hasText: 'Multi image community post' })
+    const carousel = post.locator('swiper-container')
+    await expect(post).toBeVisible()
+    await expect.poll(async () => carousel.evaluate((element) => element.swiper?.activeIndex)).toBe(0)
+
+    await page.locator('[data-subscription-feed-tab="videos"]').click()
+    await expect(post).toHaveCount(0)
+    await page.locator('[data-subscription-feed-tab="posts"]').click()
+    await expect(post).toBeVisible()
+
+    await expect.poll(async () => carousel.evaluate((element) => element.swiper?.activeIndex)).toBe(0)
+    await carousel.locator('.swiper-button-next').click()
+    await expect.poll(async () => carousel.evaluate((element) => element.swiper?.activeIndex)).toBe(1)
+  })
+})
+
+const interruptedImageTest = test.extend({
+  interruptedImageUrls: [async ({ browserName: _browserName }, use) => {
+    const image = solidPng(640, 640)
+    const server = createServer((request, response) => {
+      response.setHeader('Access-Control-Allow-Origin', '*')
+      response.setHeader('Content-Type', 'image/png')
+      response.setHeader('Connection', 'close')
+
+      if (request.url === '/interrupted.png') {
+        // Send valid image bytes, then end one byte short of the declared
+        // length so Chromium emits an error after lazy loading has started.
+        response.setHeader('Content-Length', image.length + 1)
+        response.write(image)
+        setTimeout(() => response.end(), 750)
+        return
+      }
+
+      response.setHeader('Content-Length', image.length)
+      response.end(image)
+    })
+
+    await new Promise((resolve, reject) => {
+      const onError = (error) => reject(error)
+      server.once('error', onError)
+      server.listen(0, '127.0.0.1', () => {
+        server.off('error', onError)
+        resolve()
+      })
+    })
+
+    const address = server.address()
+    if (address == null || typeof address === 'string') {
+      throw new Error('Failed to start the gallery image server')
+    }
+
+    try {
+      const baseUrl = `http://127.0.0.1:${address.port}`
+      await use([`${baseUrl}/interrupted.png`, `${baseUrl}/complete.png`])
+    } finally {
+      await new Promise((resolve) => server.close(resolve))
+    }
+  }, { scope: 'worker' }],
+
+  seed: async ({ interruptedImageUrls }, use) => {
+    await use({
+      settings: {
+        fetchSubscriptionsAutomatically: false,
+        hideSubscriptionsCommunity: false,
+        showNewSubscriptionFeed: true,
+        useRssFeeds: false,
+        listType: 'list'
+      },
+      profiles: [{
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: [{ id: CHANNEL_ID, name: 'Example Channel', thumbnail: '' }]
+      }],
+      subscriptionCache: [{
+        _id: CHANNEL_ID,
+        communityPosts: [interruptedImagePost(interruptedImageUrls)],
+        communityPostsTimestamp: new Date(now - 3600000).toISOString()
+      }]
+    })
+  }
+})
+
+interruptedImageTest.use({
+  launchArgs: ['--disable-web-security', '--allow-running-insecure-content']
+})
+
+interruptedImageTest('clears the loader when a gallery image request is interrupted', async ({ page }) => {
+  await goTo(page, 'subscriptions')
+  await page.locator('[data-subscription-feed-tab="posts"]').click()
+
+  const post = page.locator('.ft-list-post').filter({ hasText: 'Generic gallery post' })
+  await expect(post).toBeVisible()
+
+  const firstSlide = post.locator('swiper-slide').first()
+  const image = firstSlide.locator('img.communityImage')
+  await expect.poll(async () => image.evaluate((element) => element.complete)).toBe(true)
+
+  await expect(firstSlide.locator('.swiper-lazy-preloader')).toHaveCount(0)
 })
