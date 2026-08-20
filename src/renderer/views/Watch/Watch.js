@@ -31,6 +31,7 @@ import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../../constants'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { parseLocalVideoGames } from '../../helpers/video-games'
 import { parseChannelPreferences } from '../../helpers/channel-preferences'
+import { getBestQualityImageUrl } from '../../helpers/images.js'
 import {
   buildChaptersVttFile,
   buildVTTFileLocally,
@@ -3139,15 +3140,15 @@ export default defineComponent({
           this.channelId = result.authorId
           this.channelName = result.author
           this.channelCollaborators = []
-          const channelThumb = result.authorThumbnails[1]
-          this.channelThumbnail = channelThumb ? youtubeImageUrlToInvidious(channelThumb.url, this.currentInvidiousInstanceUrl) : ''
+          const channelThumbnailUrl = getBestQualityImageUrl(result.authorThumbnails)
+          this.channelThumbnail = channelThumbnailUrl ? youtubeImageUrlToInvidious(channelThumbnailUrl, this.currentInvidiousInstanceUrl) : ''
           this.$store.commit('setVideoAvatar', {
             videoId: this.videoId,
             avatar: this.channelThumbnail
           })
           this.setTabAvatar(this.channelThumbnail)
           this.updateSubscriptionDetails({
-            channelThumbnailUrl: channelThumb?.url,
+            channelThumbnailUrl,
             channelName: result.author,
             channelId: result.authorId
           })

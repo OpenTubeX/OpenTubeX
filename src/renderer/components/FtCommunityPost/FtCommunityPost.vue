@@ -183,6 +183,7 @@ import {
   getRelativeTimeFromDate,
 } from '../../helpers/utils'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
+import { getBestQualityImageUrl } from '../../helpers/images'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { loadSwiperModules } from './swiperLoader'
 
@@ -306,12 +307,7 @@ function parseCommunityData() {
  * @param {{ preserveYouTubeCrop?: boolean }} [options]
  */
 function getBestQualityImage(imageArray, options = {}) {
-  const imageArrayCopy = Array.from(imageArray)
-  imageArrayCopy.sort((a, b) => {
-    return Number.parseInt(b.width) - Number.parseInt(a.width)
-  })
-
-  const url = imageArrayCopy[0]?.url ?? ''
+  const url = getBestQualityImageUrl(imageArray)
 
   // Multi-image carousels match YouTube's square CDN crops. Single-image
   // posts show the full frame (YouTube omits fcrop64 for those).

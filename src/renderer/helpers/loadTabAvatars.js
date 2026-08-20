@@ -13,6 +13,7 @@ import {
   youtubeImageUrlToInvidious
 } from './api/invidious'
 import { getLocalVideoAvatarUrl } from './video-collaborators'
+import { getBestQualityImageUrl } from './images.js'
 
 const TAB_AVATAR_LOAD_CONCURRENCY = 4
 
@@ -41,14 +42,14 @@ async function resolveInvidiousAvatarUrl(path) {
   const channelId = path.match(/^\/channel\/([^/]+)/)?.[1]
   if (channelId) {
     const channel = await invidiousGetChannelInfo(channelId)
-    const thumbnail = channel.authorThumbnails?.at(-1)?.url
+    const thumbnail = getBestQualityImageUrl(channel.authorThumbnails)
     return thumbnail ? youtubeImageUrlToInvidious(thumbnail, instanceUrl) : null
   }
 
   const videoId = path.match(/^\/watch\/([^/]+)/)?.[1]
   if (videoId) {
     const video = await invidiousGetVideoInformation(videoId)
-    const thumbnail = video.authorThumbnails?.at(-1)?.url
+    const thumbnail = getBestQualityImageUrl(video.authorThumbnails)
     return thumbnail ? youtubeImageUrlToInvidious(thumbnail, instanceUrl) : null
   }
 

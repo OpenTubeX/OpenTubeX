@@ -1,5 +1,6 @@
 import { invidiousGetChannelInfo } from './api/invidious'
 import { getLocalChannel, parseLocalChannelHeader } from './api/local'
+import { getBestQualityImageUrl } from './images.js'
 
 /**
  * @param {string} id
@@ -50,7 +51,7 @@ export async function findChannelTagInfo(id, backendOptions) {
       if (channel.invalid) return { invalidId: true }
       return {
         preferredName: channel.author,
-        icon: channel.authorThumbnails[0].url
+        icon: getBestQualityImageUrl(channel.authorThumbnails)
       }
     } else {
       if (channel.alert) return { invalidId: true }

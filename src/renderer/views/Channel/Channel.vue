@@ -321,6 +321,7 @@ import {
   showToast,
 } from '../../helpers/utils'
 import { isNullOrEmpty } from '../../helpers/strings'
+import { getBestQualityImageUrl } from '../../helpers/images'
 import {
   getInvidiousChannelLive,
   getInvidiousChannelPlaylists,
@@ -1054,7 +1055,7 @@ async function getChannelInfoInvidious() {
     id.value = channelId
     isFamilyFriendly.value = response.isFamilyFriendly
     subCount.value = response.subCount
-    const thumbnail = response.authorThumbnails[3].url
+    const thumbnail = getBestQualityImageUrl(response.authorThumbnails)
     thumbnailUrl.value = youtubeImageUrlToInvidious(thumbnail, currentInvidiousInstanceUrl.value)
     store.dispatch('updateSubscriptionDetails', { channelThumbnailUrl: thumbnail, channelName: channelName_, channelId })
     description.value = autolinker.link(response.description)
@@ -1062,7 +1063,7 @@ async function getChannelInfoInvidious() {
     videoCount.value = null
     joined.value = response.joined * 1000
     relatedChannels.value = response.relatedChannels.map((channel) => {
-      const thumbnailUrl = channel.authorThumbnails.at(-1).url
+      const thumbnailUrl = getBestQualityImageUrl(channel.authorThumbnails)
 
       return {
         name: channel.author,

@@ -68,6 +68,7 @@ import {
   getLocalSearchResults
 } from '../../helpers/api/local'
 import { getInvidiousSearchResults } from '../../helpers/api/invidious'
+import { getBestQualityImageUrl } from '../../helpers/images'
 import { SEARCH_CHAR_LIMIT } from '../../../constants'
 import { useTabContext, useTabTitle } from '../../tabs/TabContext'
 
@@ -442,7 +443,7 @@ function updateSubscriptionDetails(results) {
       channels.push({
         channelId: result.authorId,
         channelName: result.author,
-        channelThumbnailUrl: result.authorThumbnails[0].url.replace(/^\/\//, 'https://')
+        channelThumbnailUrl: getBestQualityImageUrl(result.authorThumbnails).replace(/^\/\//, 'https://')
       })
     }
   }

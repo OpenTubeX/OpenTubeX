@@ -110,6 +110,7 @@ import FtInput from '../../components/FtInput/FtInput.vue'
 import FtSubscribeButton from '../../components/FtSubscribeButton/FtSubscribeButton.vue'
 import { invidiousGetChannelInfo, youtubeImageUrlToInvidious, invidiousImageUrlToInvidious } from '../../helpers/api/invidious'
 import { getLocalChannel, parseLocalChannelHeader } from '../../helpers/api/local'
+import { getBestQualityImageUrl } from '../../helpers/images'
 import { ctrlFHandler } from '../../helpers/utils'
 import { useI18n } from 'vue-i18n'
 import store from '../../store/index'
@@ -265,7 +266,7 @@ function updateThumbnail(channel) {
     setTimeout(() => {
       invidiousGetChannelInfo(channel.id).then(response => {
         store.dispatch('updateSubscriptionDetails', {
-          channelThumbnailUrl: thumbnailURL(response.authorThumbnails[0].url),
+          channelThumbnailUrl: thumbnailURL(getBestQualityImageUrl(response.authorThumbnails)),
           channelName: channel.name,
           channelId: channel.id
         })

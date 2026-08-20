@@ -210,6 +210,7 @@ import {
   throttle,
 } from '../../helpers/utils'
 import { invidiousGetPlaylistInfo, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
+import { getBestQualityImageUrl } from '../../helpers/images'
 import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
@@ -564,12 +565,13 @@ async function getPlaylistInvidious() {
     viewCount.value = result.viewCount
     videoCount.value = result.videoCount
     channelName.value = result.author
-    channelThumbnail.value = youtubeImageUrlToInvidious(result.authorThumbnails[2].url, currentInvidiousInstanceUrl.value)
+    const channelThumbnailUrl = getBestQualityImageUrl(result.authorThumbnails)
+    channelThumbnail.value = youtubeImageUrlToInvidious(channelThumbnailUrl, currentInvidiousInstanceUrl.value)
     channelId.value = result.authorId
     infoSource.value = 'invidious'
 
     store.dispatch('updateSubscriptionDetails', {
-      channelThumbnailUrl: result.authorThumbnails[2].url,
+      channelThumbnailUrl,
       channelName: channelName.value,
       channelId: channelId.value
     })

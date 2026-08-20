@@ -34,6 +34,7 @@ import { mapConcurrently } from './concurrent-map'
 import { includeAutomaticDownloadChannels, startAutomaticDownloadsForChannel } from './automaticDownloads'
 import { extractAssignedJsonObject } from './assigned-json'
 import { getLocalPremiereState } from './premiere'
+import { getBestQualityImageUrl } from './images.js'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
 export const SUBSCRIPTION_REFRESH_CHANNEL_EVENT = 'opentubex-subscription-refresh-channel'
@@ -962,7 +963,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
 
       const channelPost = posts.find(post => post.authorId === channel.id)
       if (channelPost) {
-        let thumbnailUrl = channelPost.authorThumbnails?.[0]?.url
+        let thumbnailUrl = getBestQualityImageUrl(channelPost.authorThumbnails)
 
         if (thumbnailUrl?.startsWith('//')) {
           thumbnailUrl = 'https:' + thumbnailUrl

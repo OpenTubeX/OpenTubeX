@@ -17,7 +17,7 @@
         :post-author-id="authorId"
         :force-state="null"
         :is-post-comments="true"
-        :channel-thumbnail="post.authorThumbnails[0].url"
+        :channel-thumbnail="getBestQualityImageUrl(post.authorThumbnails)"
         :show-sort-by="backendPreference == 'local'"
         :initial-comment-count="post.commentCount"
       />
@@ -40,6 +40,7 @@ import store from '../store/index'
 import { getInvidiousCommunityPost } from '../helpers/api/invidious'
 import { getLocalCommunityPost } from '../helpers/api/local'
 import { showApiErrorToast, showToast } from '../helpers/utils'
+import { getBestQualityImageUrl } from '../helpers/images'
 import { useTabTitle } from '../tabs/TabContext'
 
 const { t } = useI18n()

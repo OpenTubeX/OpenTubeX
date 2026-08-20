@@ -88,6 +88,7 @@ import { vSaferHtml } from '../../directives/vSaferHtml'
 import store from '../../store/index'
 
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
+import { getBestQualityImageUrl } from '../../helpers/images'
 import { formatNumber } from '../../helpers/utils'
 
 const props = defineProps({
@@ -181,7 +182,7 @@ function parseLocalData() {
 function parseInvidiousData() {
   // Can be prefixed with `https://` or `//` (protocol relative)
   /** @type {string} */
-  const thumbnailUrl = props.data.authorThumbnails[2].url
+  const thumbnailUrl = getBestQualityImageUrl(props.data.authorThumbnails)
 
   thumbnail = youtubeImageUrlToInvidious(thumbnailUrl, currentInvidiousInstanceUrl.value)
 
