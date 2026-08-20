@@ -99,11 +99,19 @@ async function expectSubscriptionRefreshIntervalSelectHighlight(page) {
 
   const selectHighlight = page.locator('.select.settingsSearchTarget')
   const highlightFrame = selectHighlight.locator('.selectSearchHighlightFrame')
+  const selectLabel = selectHighlight.locator('.select-label')
+  const selectTooltip = selectHighlight.locator('.selectTooltip')
   await expect(selectHighlight).toContainText('Videos Auto Refresh Interval')
+  await expect(highlightFrame).toBeVisible()
+  await expect(selectLabel).toBeVisible()
+  await expect(selectTooltip).toBeVisible()
   await expect(highlightFrame).toHaveCSS('animation-name', /settings-search-highlight/)
   const highlightBounds = await highlightFrame.boundingBox()
-  const labelBounds = await selectHighlight.locator('.select-label').boundingBox()
-  const tooltipBounds = await selectHighlight.locator('.selectTooltip').boundingBox()
+  const labelBounds = await selectLabel.boundingBox()
+  const tooltipBounds = await selectTooltip.boundingBox()
+  expect(highlightBounds).not.toBeNull()
+  expect(labelBounds).not.toBeNull()
+  expect(tooltipBounds).not.toBeNull()
   expect(highlightBounds.y).toBeLessThanOrEqual(labelBounds.y)
   expect(highlightBounds.x + highlightBounds.width)
     .toBeGreaterThanOrEqual(tooltipBounds.x + tooltipBounds.width)
@@ -198,9 +206,11 @@ test.describe('settings search highlights', () => {
     for (const searchTerm of [
       'Engine name',
       'Search URL',
-      'Search history and cache have been cleared'
+      'Search history and cache have been cleared',
+      'Generated SponsorBlock user ID copied to clipboard'
     ]) {
       await search.fill(searchTerm)
+      await expect(page.locator('.settingsNoResults')).toBeVisible()
       await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
     }
   })
@@ -216,9 +226,14 @@ test.describe('settings search highlights', () => {
       'Custom External Player Executable',
       'SponsorBlock API Url (Default is https://sponsor.ajay.app)',
       'Return YouTube Dislike API URL (Default is https://ryd-proxy.kavin.rocks)',
-      'Proxy Host'
+      'Proxy Host',
+      'Edit custom theme',
+      'Remove Password',
+      'Generated SponsorBlock User ID',
+      'Export Generated User ID'
     ]) {
       await search.fill(searchTerm)
+      await expect(page.locator('.settingsNoResults')).toBeVisible()
       await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0, { timeout: 1_000 })
     }
 
@@ -930,11 +945,17 @@ test.describe('settings', () => {
 
     await search.fill('a')
     const searchContent = page.locator('.settingsContent')
+    const searchScrollbar = searchContent.locator(':scope > .os-scrollbar-vertical')
     await searchContent.evaluate(element => { element.scrollTop = element.scrollHeight })
     await expect.poll(() => searchContent.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await expect(searchScrollbar).not.toHaveClass(/os-scrollbar-unusable/)
 
     await search.fill('FFmpeg Source')
     await expect.poll(() => searchContent.evaluate(element => element.scrollTop)).toBe(0)
+    await expect.poll(() => searchContent.evaluate(
+      element => element.scrollHeight <= element.clientHeight + 1
+    )).toBe(true)
+    await expect(searchScrollbar).toHaveClass(/os-scrollbar-unusable/)
     await expect(page.locator('.settingsMenu .title')).toHaveCount(1)
     await expect(page.locator('.settingsMenu [data-section="advanced"]')).toBeVisible()
     await expect(page.locator('.settingsSearchResult')).toContainText('FFmpeg Source')

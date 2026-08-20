@@ -275,39 +275,42 @@
               :data-section="activeSettingsSection.type"
             />
             <div
-              v-else-if="settingsSearchResults.length > 0"
-              class="settingsSearchResults"
-            >
-              <section
-                v-for="result in settingsSearchResults"
-                :key="result.section.type"
-                class="settingsSearchResult"
-              >
-                <button
-                  type="button"
-                  class="settingsSearchResultHeading"
-                  @click="navigateToSection(result.section.type)"
-                >
-                  <FtIcon :icon="result.section.icon" />
-                  {{ result.section.title }}
-                </button>
-                <button
-                  v-for="match in result.matches"
-                  :key="match"
-                  type="button"
-                  class="settingsSearchResultMatch"
-                  @click="openSearchResult(result.section.type, match)"
-                >
-                  {{ match }}
-                </button>
-              </section>
-            </div>
-            <p
               v-else-if="settingsSearchQuery !== ''"
-              class="settingsNoResults"
+              class="settingsSearchResults"
+              :class="{ settingsSearchResultsEmpty: settingsSearchResults.length === 0 }"
             >
-              {{ t('Settings.No Settings Found') }}
-            </p>
+              <template v-if="settingsSearchResults.length > 0">
+                <section
+                  v-for="result in settingsSearchResults"
+                  :key="result.section.type"
+                  class="settingsSearchResult"
+                >
+                  <button
+                    type="button"
+                    class="settingsSearchResultHeading"
+                    @click="navigateToSection(result.section.type)"
+                  >
+                    <FtIcon :icon="result.section.icon" />
+                    {{ result.section.title }}
+                  </button>
+                  <button
+                    v-for="match in result.matches"
+                    :key="match"
+                    type="button"
+                    class="settingsSearchResultMatch"
+                    @click="openSearchResult(result.section.type, match)"
+                  >
+                    {{ match }}
+                  </button>
+                </section>
+              </template>
+              <p
+                v-else
+                class="settingsNoResults"
+              >
+                {{ t('Settings.No Settings Found') }}
+              </p>
+            </div>
           </div>
           <div
             v-show="subpageTitle"
@@ -373,6 +376,7 @@ import ProfileSettings from '../ProfileSettings/ProfileSettings.vue'
 import About from '../About/About.vue'
 import Downloads from '../Downloads/Downloads.vue'
 
+import { customThemeIdFromValue } from '../../../customTheme'
 import store from '../../store/index'
 import { settingsSubpageKey } from '../../components/FtSettingsSubpage/settingsSubpage'
 import {
@@ -380,6 +384,7 @@ import {
   isOverlayScrollTopOutOfBounds,
   restoreOverlayScrollTop
 } from '../../helpers/overlayScrollbars'
+import { initializePlatformInfo, isLinuxWayland } from '../../helpers/platform'
 import {
   SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS,
   SETTINGS_SEARCH_SOURCES,
@@ -387,6 +392,8 @@ import {
 } from '../../helpers/settings-search-config'
 
 const USING_ELECTRON = !!process.env.IS_ELECTRON
+const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
+const IS_MAC = process.platform === 'darwin'
 const SETTINGS_DESKTOP_WIDTH_THRESHOLD = 760
 const SETTINGS_BOUNDS_STORAGE_KEY = 'opentubex-settings-window-bounds'
 const WINDOW_MARGIN = 12
@@ -413,9 +420,15 @@ const LEGACY_SETTINGS_SECTION_MAP = {
   experimental: 'advanced'
 }
 
-const NON_SETTING_MESSAGE_KEY_PATTERN = /(?:^Are you sure\b|^Failed to\b|^Invalid\b|^No\b|^How\b|^Checking\b|^Downloading\b|^Current .+\b(?:has|is|will)\b|\b(?:has|have) been (?:cleared|removed|saved|updated)\b|^Operation in Progress$|(?:Description|Hint|Tooltip|Placeholder|Template|Warning|Error|Status|Message|Not Downloaded|Unavailable|Connected|Connecting|Success|Failed|Failure|Invalid|Saved|Already Exists)$)/i
+const NON_SETTING_MESSAGE_KEY_PATTERN = /(?:^Are you sure\b|^Failed to\b|^Invalid\b|^No\b|^How\b|^Checking\b|^Downloading\b|^Loading\b|^Loaded\b|^Current .+\b(?:has|is|will)\b|\b(?:has|have) been (?:cleared|removed|saved|updated)\b|^Operation in Progress$|(?:Description|Hint|Tooltip|Placeholder|Template|Warning|Error|Status|Message|Not Downloaded|Unavailable|Connected|Connecting|Success|Failed|Failure|Invalid|Saved|Copied|Already Exists)$)/i
 
 const { locale, t, tm } = useI18n()
+initializePlatformInfo()
+const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
+const systemUsesDarkTheme = ref(systemColorScheme.matches)
+const updateSystemColorScheme = (event) => {
+  systemUsesDarkTheme.value = event.matches
+}
 const settingsSearchSubsectionTargets = computed(() => ({
   subscriptions: [{
     search: t('Settings.Subscription Settings.Subscription Settings'),
@@ -591,9 +604,6 @@ const settingsSectionComponents = computed(() => [{
   icon: ['fas', 'border-all'],
   component: GeneralCategorySettings
 }, ...settingsComponentsData.value])
-const settingsSearchExtraValues = computed(() => ({
-  privacy: flattenMessageValues(tm('Settings.Password Settings'))
-}))
 const getCaptionEdgeStyle = () => {
   const value = store.getters.getDefaultCaptionSettings
   if (value !== null && typeof value === 'object') return value.edgeStyle ?? 'none'
@@ -631,6 +641,31 @@ const isSettingsSearchMessageVisible = (sectionType, path) => {
   ].includes(group)) {
     return store.getters.getBackendPreference === 'invidious' ||
       store.getters.getBackendFallback
+  }
+
+  if (sectionType === 'general') {
+    if (group === 'Minimize to system tray') {
+      return USING_ELECTRON && !IS_MAC && !isLinuxWayland.value
+    }
+    if ([
+      'Open Deep Links In New Window',
+      'New Tab Position',
+      'Tab Close Focus',
+      'Startup Behavior',
+      'Confirm Before',
+      'Confirmation Options',
+      'Stream Extraction Method'
+    ].includes(group)) {
+      return USING_ELECTRON
+    }
+    if (group === 'Fallback to Non-Preferred Backend on Failure') {
+      return SUPPORTS_LOCAL_API
+    }
+    if (group === 'Avoid translation') {
+      return SUPPORTS_LOCAL_API && (
+        store.getters.getBackendPreference === 'local' || store.getters.getBackendFallback
+      )
+    }
   }
 
   if (sectionType === 'sync') {
@@ -679,12 +714,13 @@ const isSettingsSearchMessageVisible = (sectionType, path) => {
     ].includes(group)) {
       return useSponsorBlock
     }
-    if ([
-      'SponsorBlock Private User ID (optional)',
-      'Generated SponsorBlock User ID',
-      'Export Generated User ID'
-    ].includes(group)) {
+    if (group === 'SponsorBlock Private User ID (optional)') {
       return useSponsorBlock && store.getters.getSponsorBlockEnableSubmission
+    }
+    if (group === 'Generated SponsorBlock User ID') return false
+    if (group === 'Export Generated User ID') {
+      return useSponsorBlock && store.getters.getSponsorBlockEnableSubmission &&
+        store.getters.getSponsorBlockGeneratedUserId !== ''
     }
     if (group === 'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)') {
       return useDeArrowThumbnails
@@ -736,14 +772,14 @@ const isSettingsSearchMessageVisible = (sectionType, path) => {
 
   if (sectionType === 'channel') {
     if (group === 'Auto Update') {
-      return store.state.settings.rememberPlaybackSpeedPerChannel ||
-        store.state.settings.rememberVideoQualityPerChannel
+      return store.getters.getRememberPlaybackSpeedPerChannel ||
+        store.getters.getRememberVideoQualityPerChannel
     }
     if (group === 'Auto Update Subtitles') {
-      return store.state.settings.rememberSubtitlesStatePerChannel
+      return store.getters.getRememberSubtitlesStatePerChannel
     }
     if (group === 'Auto Update Volume') {
-      return store.state.settings.rememberVolumePerChannel
+      return store.getters.getRememberVolumePerChannel
     }
     return [
       'Channel Settings',
@@ -754,21 +790,51 @@ const isSettingsSearchMessageVisible = (sectionType, path) => {
     ].includes(group)
   }
 
-  if (sectionType === 'distraction' && group === 'Show Added Items') {
-    let forbiddenTitles = []
-    try {
-      forbiddenTitles = JSON.parse(store.getters.getForbiddenTitles)
-    } catch {
-      // A malformed persisted value is normalized elsewhere and has no visible tags here.
+  if (sectionType === 'distraction') {
+    if (group === 'Show Added Items') {
+      return store.getters.getChannelsHiddenParsed.length > 0 ||
+        store.getters.getForbiddenTitlesParsed.length > 0
     }
-    return store.getters.getChannelsHiddenParsed.length > 0 || forbiddenTitles.length > 0
+    if (group === 'Hide Trending Videos') return SUPPORTS_LOCAL_API
   }
 
   if (sectionType === 'theme') {
+    if (group === 'Custom Theme' && item === 'Edit Custom Theme') {
+      const baseTheme = store.getters.getBaseTheme
+      const selectedTheme = baseTheme === 'system'
+        ? (systemUsesDarkTheme.value
+            ? store.getters.getSystemDarkTheme
+            : store.getters.getSystemLightTheme)
+        : baseTheme
+      return customThemeIdFromValue(selectedTheme) !== null
+    }
     if (group === 'Light Theme' || group === 'Dark Theme') {
       return store.getters.getBaseTheme === 'system'
     }
-    if (group === 'Load Missing Tab Icons') return store.getters.getShowTabIcons
+    if ([
+      'Move Downloads to App Header',
+      'Disable Smooth Scrolling',
+      'Use Fixed Tab Width',
+      'Move Settings to App Header',
+      'Show Tab Icons',
+      'Show Tab Previews',
+      'Tab Layout',
+      'Tab Width',
+      'Load Missing Tab Icons',
+      'UI Scale'
+    ].includes(group)) {
+      return USING_ELECTRON && (
+        group !== 'Load Missing Tab Icons' || store.getters.getShowTabIcons
+      )
+    }
+  }
+
+  if (sectionType === 'password') {
+    const hasStoredPassword = store.getters.getSettingsPassword !== ''
+    if (group === 'Remove Password') return hasStoredPassword
+    if (['Set Password To Prevent Access', 'Set Password'].includes(group)) {
+      return !hasStoredPassword
+    }
   }
 
   return true
@@ -781,6 +847,14 @@ const isSearchableSettingsMessage = (sectionType, path, value) => {
     !NON_SETTING_MESSAGE_KEY_PATTERN.test(messageKey) &&
     isSettingsSearchMessageVisible(sectionType, path)
 }
+const settingsSearchExtraValues = computed(() => ({
+  privacy: flattenMessageValues(
+    tm('Settings.Password Settings'),
+    {},
+    [],
+    (path, value) => isSearchableSettingsMessage('password', path, value)
+  )
+}))
 const removeRedundantSearchMatches = (values) => {
   const keptMatches = []
   const normalizedMatches = []
@@ -880,7 +954,10 @@ provide(settingsSubpageKey, {
   }
 })
 
-onMounted(handleMounted)
+onMounted(() => {
+  handleMounted()
+  systemColorScheme.addEventListener('change', updateSystemColorScheme)
+})
 onActivated(() => {
   handleMounted()
   nextTick(restoreMinimizedScrollPositions)
@@ -894,6 +971,7 @@ onDeactivated(() => {
   stopResizing()
 })
 onBeforeUnmount(() => {
+  systemColorScheme.removeEventListener('change', updateSystemColorScheme)
   stopObserving()
   stopDragging()
   stopResizing()
@@ -966,7 +1044,7 @@ function handleMounted() {
         if (settingsContentRef.value) {
           clampOverlayScrollTop(
             settingsContentRef.value,
-            getActiveSettingsSectionEnd(settingsContentRef.value)
+            getSettingsContentEnd(settingsContentRef.value)
           )
         }
         scheduleStandaloneScrollClamp()
@@ -1036,23 +1114,23 @@ function observeActiveSettingsSection() {
   settingsSectionResizeObserver?.disconnect()
   settingsSectionResizeObserver = null
   const content = settingsContentRef.value
-  const section = getActiveSettingsSectionEnd(content)
-  if (!content || !section) return
+  const contentEnd = getSettingsContentEnd(content)
+  if (!content || !contentEnd) return
   settingsSectionResizeObserver = new ResizeObserver(() => {
-    clampOverlayScrollTop(content, section)
+    clampOverlayScrollTop(content, contentEnd)
   })
-  content.querySelectorAll(':scope > .section').forEach(element => {
+  content.querySelectorAll(':scope > .section, :scope > .settingsSearchResults').forEach(element => {
     settingsSectionResizeObserver.observe(element)
   })
-  clampOverlayScrollTop(content, section)
+  clampOverlayScrollTop(content, contentEnd)
 }
 
 function clampSettingsContentScroll(event) {
   const content = event.currentTarget
-  const section = getActiveSettingsSectionEnd(content)
-  if (!section) return
-  if (isOverlayScrollTopOutOfBounds(content, section)) {
-    clampOverlayScrollTop(content, section)
+  const contentEnd = getSettingsContentEnd(content)
+  if (!contentEnd) return
+  if (isOverlayScrollTopOutOfBounds(content, contentEnd)) {
+    clampOverlayScrollTop(content, contentEnd)
   }
 }
 
@@ -1074,8 +1152,10 @@ function cancelStandaloneScrollClamp() {
   }
 }
 
-function getActiveSettingsSectionEnd(content) {
-  const sections = content?.querySelectorAll(':scope > .section')
+function getSettingsContentEnd(content) {
+  const sections = content?.querySelectorAll(
+    ':scope > .section, :scope > .settingsSearchResults'
+  )
   return sections?.[sections.length - 1] ?? null
 }
 

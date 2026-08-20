@@ -161,13 +161,15 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'Tab Layout': ['Tab Layout'],
     'Toast Position': ['Toast Position'],
     'Base Theme': ['Base Theme'],
+    'Icon Pack': ['Icon Pack'],
     Font: ['App Font'],
-    'Main Color Theme': ['Main Color Theme']
+    'Main Color Theme': ['Main Color Theme'],
+    'Custom Theme': ['Create Custom Theme', 'Edit Custom Theme']
   },
   player: {
     'Caption Appearance': [],
     'Default Viewing Mode': ['Default Viewing Mode', 'Tooltip'],
-    'Auto Picture in Picture': ['Auto Picture in Picture', 'Wayland Minimize Unsupported'],
+    'Auto Picture in Picture': ['Auto Picture in Picture'],
     'Default Video Format': ['Default Video Format'],
     'Default Quality': ['Default Quality'],
     'Screenshot.Modes': []
@@ -231,6 +233,8 @@ export const SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS = {
   general: new Set(['System Default']),
   'context-menu-search': new Set(['Engine Name', 'Search URL']),
   player: new Set(['Skip Silence']),
+  password: new Set(['Password']),
+  'sponsor-block': new Set(['Generated SponsorBlock User ID Copy Button']),
   subscription: new Set(['Auto Refresh Interval']),
   'caption-appearance': new Set(['Application Language']),
   'external-software': new Set([

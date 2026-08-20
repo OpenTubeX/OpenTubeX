@@ -280,6 +280,7 @@
 }
 
 .settingsNoResults {
+  grid-column: 1 / -1;
   margin: auto;
   color: var(--tertiary-text-color);
   text-align: center;
@@ -290,6 +291,10 @@
   grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   align-content: start;
   gap: 12px;
+}
+
+.settingsSearchResultsEmpty {
+  block-size: 100%;
 }
 
 .settingsSearchResult {
@@ -347,7 +352,8 @@
   background: var(--side-nav-hover-color);
 }
 
-.settingsContent :deep(.settingsSearchTarget) {
+.settingsContent :deep(.settingsSearchTarget),
+.settingsContent :deep(.select.settingsSearchTarget > .selectSearchHighlightFrame) {
   outline: 2px solid transparent;
   outline-offset: 4px;
   border-radius: calc(4px * var(--ui-roundness));
@@ -357,13 +363,6 @@
 .settingsContent :deep(.select.settingsSearchTarget) {
   outline: none;
   animation: none;
-}
-
-.settingsContent :deep(.select.settingsSearchTarget > .selectSearchHighlightFrame) {
-  outline: 2px solid transparent;
-  outline-offset: 4px;
-  border-radius: calc(4px * var(--ui-roundness));
-  animation: settings-search-highlight 2.2s ease-in-out;
 }
 
 @keyframes settings-search-highlight {
