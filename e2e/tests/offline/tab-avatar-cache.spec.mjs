@@ -86,7 +86,8 @@ test.describe('loading missing tab icons', () => {
     seed: {
       settings: {
         backendPreference: 'invidious',
-        defaultInvidiousInstance: 'https://invidious.test'
+        defaultInvidiousInstance: 'https://invidious.test',
+        backendFallback: false
       }
     }
   })
@@ -117,7 +118,9 @@ test.describe('loading missing tab icons', () => {
     const themeSection = await goToSettingsSection(page, 'theme')
     const loadButton = themeSection.getByRole('button', { name: 'Load Missing Tab Icons' })
     await loadButton.click()
-    await expect(page.locator('.toast')).toContainText('Missing tab icon loaded: 1')
+    const toast = page.locator('.toast', { hasText: 'Missing tab icon loaded: 1' })
+    await expect(toast).toBeVisible()
+    await expect(toast.locator('.icon[data-prefix="fas"][data-icon="check"]')).toBeVisible()
     await expect(loadButton).toBeDisabled()
 
     await expect.poll(() => page.evaluate(tabId => {
@@ -134,6 +137,26 @@ test.describe('loading missing tab icons', () => {
       avatarLoaded: true,
       isUnloaded: true
     })
+  })
+
+  test('shows an error icon when an icon cannot be loaded', async ({ page }) => {
+    await page.route('https://invidious.test/api/v1/channels/UCmissing?*', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ authorThumbnails: [], tabs: [] })
+    }))
+
+    await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/channel/UCmissing',
+      makeActive: false,
+      lazyLoad: true
+    }))
+
+    const themeSection = await goToSettingsSection(page, 'theme')
+    await themeSection.getByRole('button', { name: 'Load Missing Tab Icons' }).click()
+
+    const toast = page.locator('.toast', { hasText: 'Loaded 0 tab icons; 1 could not be loaded' })
+    await expect(toast).toBeVisible()
+    await expect(toast.locator('.icon[data-prefix="fas"][data-icon="circle-exclamation"]')).toBeVisible()
   })
 })
 
