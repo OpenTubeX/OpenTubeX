@@ -5,7 +5,7 @@ import { useTabContext } from '../tabs/TabContext'
 
 // Rebuilding and sorting the whole feed for every channel would be wasteful
 // with hundreds of subscriptions, so updates are coalesced.
-const FEED_UPDATE_INTERVAL_MS = 500
+const FEED_UPDATE_INTERVAL_MS = 100
 const updateVersions = reactive({
   videos: 0,
   shorts: 0,

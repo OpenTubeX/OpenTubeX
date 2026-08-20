@@ -1,6 +1,7 @@
 import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../constants'
 import { DBProfileHandlers } from '../../../datastores/handlers/index'
 import { deepCopy } from '../../helpers/utils'
+import { getProfileWithUpdatedSubscriptionDetails } from '../../helpers/subscription-profile-details'
 
 const state = {
   profileList: [{
@@ -119,52 +120,10 @@ const actions = {
     const profileList = state.profileList
 
     for (const profile of profileList) {
-      // Only copied if something has actually changed, in which case this variable will be replaced with the copy.
-      let currentProfile = profile
-      let profileUpdated = false
+      const updatedProfile = getProfileWithUpdatedSubscriptionDetails(profile, channels)
 
-      for (const { channelThumbnailUrl, channelName, channelId } of channels) {
-        let channel = currentProfile.subscriptions.find((channel) => {
-          return channel.id === channelId
-        }) ?? null
-
-        if (channel === null) { continue }
-
-        if (channel.name !== channelName && channelName != null) {
-          if (!profileUpdated) {
-            const index = currentProfile.subscriptions.indexOf(channel)
-
-            currentProfile = deepCopy(currentProfile)
-            channel = currentProfile.subscriptions[index]
-            profileUpdated = true
-          }
-
-          channel.name = channelName
-        }
-
-        if (channelThumbnailUrl) {
-          const thumbnail = channelThumbnailUrl
-            // change thumbnail size if different
-            .replace(/=s\d*/, '=s176')
-            // If this is an Invidious URL, convert it to a YouTube one
-            .replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com')
-
-          if (channel.thumbnail !== thumbnail) {
-            if (!profileUpdated) {
-              const index = currentProfile.subscriptions.indexOf(channel)
-
-              currentProfile = deepCopy(currentProfile)
-              channel = currentProfile.subscriptions[index]
-              profileUpdated = true
-            }
-
-            channel.thumbnail = thumbnail
-          }
-        }
-      }
-
-      if (profileUpdated) {
-        await dispatch('updateProfile', currentProfile)
+      if (updatedProfile !== null) {
+        await dispatch('updateProfile', updatedProfile)
       }
     }
   },

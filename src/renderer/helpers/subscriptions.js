@@ -210,35 +210,29 @@ function notifySubscriptionChannelRefreshed(tab) {
 }
 
 async function fetchSubscriptionsConcurrently(channels, fetchChannel) {
-  const results = await mapConcurrently(
+  await mapConcurrently(
     channels,
     SUBSCRIPTION_FETCH_CONCURRENCY,
     async channel => {
       // Channels that haven't started yet are skipped, the ones in flight
       // still finish and are cached.
       if (isRefreshCancelled()) {
-        return []
+        return
       }
 
       if (process.env.IS_ELECTRON) {
         await window.ftElectron.waitForIpBlockRecoveryScript()
       }
 
-      const result = await fetchChannel(channel)
+      await fetchChannel(channel)
 
       // Let input and navigation tasks run between parsing/cache updates.
       await new Promise(resolve => setTimeout(resolve, 0))
-
-      return result
     }
   )
-
-  return results.flat()
 }
 
 async function fetchSubscriptionsInBatches(channels, fetchChannel) {
-  const results = []
-
   for (let index = 0; index < channels.length; index += SUBSCRIPTION_FETCH_BATCH_SIZE) {
     if (isRefreshCancelled()) {
       break
@@ -249,10 +243,8 @@ async function fetchSubscriptionsInBatches(channels, fetchChannel) {
     }
 
     const batch = channels.slice(index, index + SUBSCRIPTION_FETCH_BATCH_SIZE)
-    results.push(...await fetchSubscriptionsConcurrently(batch, fetchChannel))
+    await fetchSubscriptionsConcurrently(batch, fetchChannel)
   }
-
-  return results
 }
 
 /**
@@ -625,7 +617,6 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
   errorChannels = []
 }, activeProfile) {
   const activeSubscriptionList = getValidSubscriptionChannels(activeProfile.subscriptions)
-  const activeSubscriptionIds = new Set(activeSubscriptionList.map(channel => channel.id))
   const subscriptionList = includeAutomaticDownloadChannels(activeSubscriptionList, 'videos')
   if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('videos', activeProfile._id)
@@ -688,14 +679,13 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
           channelThumbnailUrl: thumbnailUrl
         })
       }
-
-      const channelVideos = videos ?? store.getters.getVideoCache[channel.id]?.videos ?? []
-      return activeSubscriptionIds.has(channel.id) ? channelVideos : []
     }
 
-    const videoListFromRemote = useRss
-      ? await fetchSubscriptionsConcurrently(subscriptionList, fetchChannel)
-      : await fetchSubscriptionsInBatches(subscriptionList, fetchChannel)
+    if (useRss) {
+      await fetchSubscriptionsConcurrently(subscriptionList, fetchChannel)
+    } else {
+      await fetchSubscriptionsInBatches(subscriptionList, fetchChannel)
+    }
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
 
@@ -705,7 +695,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
 
     completeSubscriptionRefresh('videos', activeProfile._id)
 
-    return updateVideoListAfterProcessing(videoListFromRemote)
+    return []
   } finally {
     store.commit('setSubscriptionFeedRefreshInProgress', false)
   }
@@ -733,7 +723,6 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
   errorChannels = []
 }, activeProfile) {
   const activeSubscriptionList = getValidSubscriptionChannels(activeProfile.subscriptions)
-  const activeSubscriptionIds = new Set(activeSubscriptionList.map(channel => channel.id))
   const subscriptionList = includeAutomaticDownloadChannels(activeSubscriptionList, 'shorts')
   if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('shorts', activeProfile._id)
@@ -751,7 +740,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
   let channelCount = 0
 
   try {
-    const videoListFromRemote = await fetchSubscriptionsConcurrently(subscriptionList, async (channel) => {
+    await fetchSubscriptionsConcurrently(subscriptionList, async (channel) => {
       let videos, name
 
       if (!process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious') {
@@ -786,9 +775,6 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
           channelName: name
         })
       }
-
-      const channelVideos = videos ?? store.getters.getShortsCache[channel.id]?.videos ?? []
-      return activeSubscriptionIds.has(channel.id) ? channelVideos : []
     })
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
@@ -799,7 +785,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
 
     completeSubscriptionRefresh('shorts', activeProfile._id)
 
-    return updateVideoListAfterProcessing(videoListFromRemote)
+    return []
   } finally {
     store.commit('setSubscriptionFeedRefreshInProgress', false)
   }
@@ -827,7 +813,6 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
   errorChannels = []
 }, activeProfile) {
   const activeSubscriptionList = getValidSubscriptionChannels(activeProfile.subscriptions)
-  const activeSubscriptionIds = new Set(activeSubscriptionList.map(channel => channel.id))
   const subscriptionList = includeAutomaticDownloadChannels(activeSubscriptionList, 'live')
   if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('live', activeProfile._id)
@@ -890,14 +875,13 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
           channelThumbnailUrl: thumbnailUrl
         })
       }
-
-      const channelVideos = videos ?? store.getters.getLiveCache[channel.id]?.videos ?? []
-      return activeSubscriptionIds.has(channel.id) ? channelVideos : []
     }
 
-    const videoListFromRemote = useRss
-      ? await fetchSubscriptionsConcurrently(subscriptionList, fetchChannel)
-      : await fetchSubscriptionsInBatches(subscriptionList, fetchChannel)
+    if (useRss) {
+      await fetchSubscriptionsConcurrently(subscriptionList, fetchChannel)
+    } else {
+      await fetchSubscriptionsInBatches(subscriptionList, fetchChannel)
+    }
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
 
@@ -907,7 +891,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
 
     completeSubscriptionRefresh('live', activeProfile._id)
 
-    return updateVideoListAfterProcessing(videoListFromRemote)
+    return []
   } finally {
     store.commit('setSubscriptionFeedRefreshInProgress', false)
   }
@@ -948,7 +932,6 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
   }
 
   const subscriptionUpdates = []
-  const postListFromRemote = []
   let channelCount = 0
 
   try {
@@ -993,18 +976,9 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
           })
         }
       }
-
-      return posts
     }
 
-    postListFromRemote.push(...await fetchSubscriptionsInBatches(activeSubscriptionList, processChannel))
-
-    postListFromRemote.sort((a, b) => b.publishedTime - a.publishedTime)
-
-    const forbiddenTitles = store.getters.getForbiddenTitlesParsed
-    const filteredPosts = postListFromRemote.filter(post => {
-      return !forbiddenTitles.some(text => post.author.toLowerCase().includes(text))
-    })
+    await fetchSubscriptionsInBatches(activeSubscriptionList, processChannel)
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
 
@@ -1014,7 +988,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
 
     completeSubscriptionRefresh('posts', activeProfile._id)
 
-    return filteredPosts
+    return []
   } finally {
     store.commit('setSubscriptionFeedRefreshInProgress', false)
   }

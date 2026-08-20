@@ -191,6 +191,138 @@ test.describe('incremental subscription feed refresh', () => {
   })
 })
 
+test.describe('subscription refresh performance with many tabs', () => {
+  const channelCount = 933
+  const tabCount = 46
+  const loadedTabCount = 17
+  const subscriptionTabId = 'perf-subscriptions'
+
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        startupBehavior: 'restoreTabLoadState',
+        reducedMotion: 'off'
+      },
+      profiles: [profileWith(channelCount)],
+      subscriptionCache: Array.from({ length: channelCount }, (_, index) => cachedChannel(index)),
+      tabSessions: [{
+        _id: 'perf-window-session',
+        value: {
+          tabs: Array.from({ length: tabCount }, (_, index) => ({
+            id: index === 0 ? subscriptionTabId : `perf-tab-${index}`,
+            url: index === 0
+              ? 'app://bundle/index.html#/subscriptions'
+              : 'app://bundle/index.html#/history',
+            title: index === 0 ? 'Subscriptions' : `Background tab ${index}`,
+            isUnloaded: index >= loadedTabCount
+          })),
+          activeTabId: subscriptionTabId,
+          bounds: { x: 0, y: 0, width: 1600, height: 900, maximized: false }
+        }
+      }]
+    }
+  })
+
+  test('keeps the renderer responsive while refreshing a large profile', async ({ app, page }, testInfo) => {
+    test.setTimeout(120_000)
+    let fulfilledFeedCount = 0
+    await routeFeeds(page, () => 0, (index) => {
+      fulfilledFeedCount++
+      return rssFeed(index)
+    })
+    await expect(page.locator(sel.tabs)).toHaveCount(tabCount)
+    await expect(page.locator(`${sel.tabs}:not(.unloaded)`)).toHaveCount(loadedTabCount)
+    await expect(page.getByText('Cached video 0', { exact: true })).toBeVisible({ timeout: 30_000 })
+
+    const profileUpdate = await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const channels = store.getters.getActiveProfile.subscriptions.map(channel => ({
+        channelId: channel.id,
+        channelName: channel.name
+      }))
+      const startedAt = performance.now()
+      await store.dispatch('batchUpdateSubscriptionDetails', channels)
+      return performance.now() - startedAt
+    })
+
+    const rendererWorkingSet = async () => app.electronApp.evaluate(({ app }) => {
+      return app.getAppMetrics()
+        .filter(metric => metric.type === 'Tab')
+        .reduce((total, metric) => total + metric.memory.workingSetSize, 0)
+    })
+    const memoryBefore = await rendererWorkingSet()
+
+    await page.getByRole('button', { name: /Refresh Videos/ }).evaluate(button => {
+      const startedAt = performance.now()
+      let previousFrame = startedAt
+      let longestFrame = 0
+      let refreshedChannels = 0
+      let completedAt = null
+      const longFrames = []
+      let animationFrame
+
+      const sampleFrame = (timestamp) => {
+        const duration = timestamp - previousFrame
+        longestFrame = Math.max(longestFrame, duration)
+        if (duration >= 50) {
+          longFrames.push({
+            at: timestamp - startedAt,
+            duration,
+            refreshedChannels,
+            completedAt
+          })
+        }
+        previousFrame = timestamp
+        animationFrame = requestAnimationFrame(sampleFrame)
+      }
+      const channelRefreshed = () => refreshedChannels++
+      const refreshCompleted = () => { completedAt = performance.now() - startedAt }
+
+      window.addEventListener('opentubex-subscription-refresh-channel', channelRefreshed)
+      window.addEventListener('opentubex-subscription-refresh-completed', refreshCompleted)
+      animationFrame = requestAnimationFrame(sampleFrame)
+      window.__subscriptionRefreshPerformance = {
+        stop: () => {
+          cancelAnimationFrame(animationFrame)
+          window.removeEventListener('opentubex-subscription-refresh-channel', channelRefreshed)
+          window.removeEventListener('opentubex-subscription-refresh-completed', refreshCompleted)
+          return {
+            elapsed: performance.now() - startedAt,
+            longestFrame,
+            longFrames
+          }
+        }
+      }
+      button.click()
+    })
+
+    const cancelRefresh = page.getByRole('button', { name: 'Cancel refresh' })
+    await expect(cancelRefresh).toBeVisible()
+    await expect(cancelRefresh).toHaveCount(0, { timeout: 90_000 })
+    expect(fulfilledFeedCount).toBe(channelCount)
+    await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)))
+
+    const timing = await page.evaluate(() => window.__subscriptionRefreshPerformance.stop())
+    const memoryAfter = await rendererWorkingSet()
+    const metrics = {
+      ...timing,
+      profileUpdate,
+      rendererWorkingSetBeforeKiB: memoryBefore,
+      rendererWorkingSetAfterKiB: memoryAfter
+    }
+    await testInfo.attach('performance metrics', {
+      body: JSON.stringify(metrics, null, 2),
+      contentType: 'application/json'
+    })
+
+    expect(profileUpdate, JSON.stringify(metrics)).toBeLessThan(50)
+    expect(timing.longestFrame, JSON.stringify(metrics)).toBeLessThan(60)
+    expect(timing.elapsed).toBeLessThan(10_000)
+  })
+})
+
 test.describe('subscription refresh bottom progress', () => {
   test.use({
     seed: {
