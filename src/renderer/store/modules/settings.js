@@ -408,6 +408,7 @@ const state = {
     skip: 'promptToSkip'
   },
   thumbnailPreference: '',
+  showThumbnailPreviews: true,
   thumbnailSize: DEFAULT_THUMBNAIL_SIZE,
   uiRoundness: 100,
   animationSpeed: 100,

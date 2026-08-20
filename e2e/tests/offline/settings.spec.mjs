@@ -2208,6 +2208,21 @@ test.describe('settings', () => {
     await expect(resetButton).toHaveCount(0)
   })
 
+  test('turns thumbnail hover previews off from appearance settings', async ({ page }) => {
+    const appearance = await goToSettingsSection(page, 'appearance')
+    const toggle = appearance.getByRole('checkbox', { name: 'Show thumbnail previews' })
+
+    await expect(toggle).toBeChecked()
+    await appearance.locator('label.switch-label')
+      .filter({ hasText: 'Show thumbnail previews' })
+      .click()
+    await expect(toggle).not.toBeChecked()
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getShowThumbnailPreviews
+    })).toBe(false)
+  })
+
   test('highlights changed backend fallback and deep-link settings', async ({ page }) => {
     await goTo(page, 'settings')
 

@@ -8,6 +8,7 @@ import { loadSearchContinuation } from '../search-continuation'
 import { parseLocalShortLinkedVideo } from '../player/shorts'
 import { getPaidPromotionDurationMs } from '../player/paidPromotion'
 import { getLocalPremiereState } from '../premiere'
+import { getThumbnailPreviewUrl } from '../thumbnailPreview'
 import { isCollaborativeVideoAuthor, parseLocalVideoChannels } from '../video-collaborators'
 import {
   CHANNEL_HANDLE_REGEX,
@@ -1840,6 +1841,7 @@ export function parseLocalListVideo(item, channelId, channelName) {
     return {
       type: 'video',
       videoId: movie.id,
+      thumbnailPreviewUrl: getThumbnailPreviewUrl(movie),
       title: movie.title.text?.trim(),
       author: movie.author.name !== 'N/A' ? movie.author.name : channelName,
       authorId: movie.author.id !== 'N/A' ? movie.author.id : channelId,
@@ -1870,6 +1872,7 @@ export function parseLocalListVideo(item, channelId, channelName) {
     return {
       type: 'video',
       videoId: video.video_id,
+      thumbnailPreviewUrl: getThumbnailPreviewUrl(video),
       title: video.title.text?.trim(),
       author: video.author?.name ?? channelName,
       authorId: (video.author?.id != null && video.author.id !== 'N/A') ? video.author.id : channelId,
@@ -1887,6 +1890,7 @@ export function parseLocalListVideo(item, channelId, channelName) {
     return {
       type: 'video',
       videoId: movie.id,
+      thumbnailPreviewUrl: getThumbnailPreviewUrl(movie),
       title: movie.title.text,
       author: movie.author.name !== 'N/A' ? movie.author.name : channelName,
       authorId: movie.author.id !== 'N/A' ? movie.author.id : channelId,
@@ -1929,6 +1933,7 @@ export function parseLocalListVideo(item, channelId, channelName) {
     return {
       type: 'video',
       videoId: video.video_id,
+      thumbnailPreviewUrl: getThumbnailPreviewUrl(video),
       title: video.title.text?.trim(),
       author: video.author.name !== 'N/A' ? video.author.name : channelName,
       authorId: video.author.id !== 'N/A' ? video.author.id : channelId,
@@ -2138,6 +2143,7 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
       return {
         type: 'video',
         videoId: lockupView.content_id,
+        thumbnailPreviewUrl: getThumbnailPreviewUrl(lockupView),
         title: lockupView.metadata.title.text?.trim(),
         author,
         authorId,
@@ -2280,6 +2286,7 @@ export function parseLocalWatchNextVideo(video) {
     return {
       type: 'video',
       videoId: video.id,
+      thumbnailPreviewUrl: getThumbnailPreviewUrl(video),
       title: video.title.text?.trim(),
       author: video.author.name,
       authorId: video.author.id,
@@ -2299,6 +2306,7 @@ export function parseLocalWatchNextVideo(video) {
     return {
       type: 'video',
       videoId: video.video_id,
+      thumbnailPreviewUrl: getThumbnailPreviewUrl(video),
       title: video.title.text?.trim(),
       author: video.author.name,
       authorId: video.author.id,
