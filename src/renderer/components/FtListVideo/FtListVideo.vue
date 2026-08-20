@@ -41,17 +41,13 @@
           alt=""
         >
         <img
-          v-if="thumbnailPreviewActive"
+          v-if="thumbnailPreviewActive && thumbnailPreviewLoaded"
           :src="thumbnailPreviewUrl"
-          class="thumbnailImage thumbnailPreview"
-          :class="{
-            blur: blurThumbnails,
-            loaded: thumbnailPreviewLoaded
-          }"
+          class="thumbnailImage thumbnailPreview active loaded"
+          :class="{ blur: blurThumbnails }"
           alt=""
           aria-hidden="true"
-          @load="thumbnailPreviewLoaded = true"
-          @error="thumbnailPreviewLoaded = false"
+          @error="resetThumbnailPreview"
         >
         <FtEmbeddedProgress
           v-if="historyEntryExists && progressPercentage > 0"
@@ -551,7 +547,9 @@ const isPremium = ref(false)
 const hideViews = ref(false)
 const thumbnailPreviewActive = ref(false)
 const thumbnailPreviewLoaded = ref(false)
-const THUMBNAIL_PREVIEW_DELAY = 500
+const THUMBNAIL_PREVIEW_DELAY = 250
+let thumbnailPreviewLoader = null
+let thumbnailPreviewLoaderUrl = null
 let thumbnailPreviewTimer = null
 const deArrowTogglePinned = ref(false)
 const showDeArrowTitle = ref(false)
@@ -669,7 +667,30 @@ function startThumbnailPreview() {
     return
   }
 
-  thumbnailPreviewLoaded.value = false
+  if (thumbnailPreviewLoaderUrl !== previewUrl) {
+    const loader = new Image()
+    thumbnailPreviewLoader = loader
+    thumbnailPreviewLoaderUrl = previewUrl
+    thumbnailPreviewLoaded.value = false
+
+    loader.onload = () => {
+      if (
+        thumbnailPreviewLoader === loader &&
+        thumbnailPreviewUrl.value === previewUrl
+      ) {
+        thumbnailPreviewLoaded.value = true
+      }
+    }
+    loader.onerror = () => {
+      if (thumbnailPreviewLoader === loader) {
+        thumbnailPreviewLoader = null
+        thumbnailPreviewLoaderUrl = null
+        thumbnailPreviewLoaded.value = false
+      }
+    }
+    loader.src = previewUrl
+  }
+
   thumbnailPreviewTimer = setTimeout(() => {
     thumbnailPreviewTimer = null
     if (thumbnailPreviewUrl.value === previewUrl) {
@@ -681,10 +702,20 @@ function startThumbnailPreview() {
 function stopThumbnailPreview() {
   clearThumbnailPreviewTimer()
   thumbnailPreviewActive.value = false
+}
+
+function resetThumbnailPreview() {
+  stopThumbnailPreview()
+  if (thumbnailPreviewLoader !== null) {
+    thumbnailPreviewLoader.onload = null
+    thumbnailPreviewLoader.onerror = null
+  }
+  thumbnailPreviewLoader = null
+  thumbnailPreviewLoaderUrl = null
   thumbnailPreviewLoaded.value = false
 }
 
-watch(thumbnailPreviewUrl, stopThumbnailPreview)
+watch(thumbnailPreviewUrl, resetThumbnailPreview)
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
@@ -1960,7 +1991,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  clearThumbnailPreviewTimer()
+  resetThumbnailPreview()
   clearPremiereStartTimer()
   removeLiveReminderUpdatedListener?.()
 })

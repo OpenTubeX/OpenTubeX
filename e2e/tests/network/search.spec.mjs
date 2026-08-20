@@ -3,9 +3,23 @@ import { test, expect } from '../../helpers/innertube.mjs'
 
 test.describe('search', () => {
   test('search returns video results', async ({ page }) => {
+    let blockPreviewRequest = true
     let releasePreviewRequest
+    let previewRequestFinished = false
+    page.on('requestfinished', request => {
+      if (/\/an_webp\//.test(request.url())) {
+        previewRequestFinished = true
+      }
+    })
     await page.route(/\/an_webp\//, async route => {
-      await new Promise(resolve => { releasePreviewRequest = resolve })
+      if (blockPreviewRequest) {
+        await new Promise(resolve => {
+          releasePreviewRequest = () => {
+            blockPreviewRequest = false
+            resolve()
+          }
+        })
+      }
       await route.fulfill({
         contentType: 'image/svg+xml',
         body: '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"/>'
@@ -38,14 +52,23 @@ test.describe('search', () => {
     await expect(video).toHaveClass(/watched/)
 
     await thumbnail.hover()
-    await expect(preview).toHaveAttribute('src', /\/an_webp\//)
     await expect.poll(() => typeof releasePreviewRequest).toBe('function')
-    await expect(preview).not.toHaveClass(/loaded/)
-    await expect(preview).toHaveCSS('opacity', '0')
+    await expect(preview).toHaveCount(0)
+
+    await page.mouse.move(0, 0)
+    await expect(preview).toHaveCount(0)
 
     releasePreviewRequest()
-    await expect(preview).toHaveClass(/loaded/)
+    await expect.poll(() => previewRequestFinished).toBe(true)
+    await expect(preview).toHaveCount(0)
+
+    await thumbnail.hover()
+    await expect(preview).toHaveAttribute('src', /\/an_webp\//)
+    await expect(preview).toHaveClass(/active/, { timeout: 400 })
     await expect(preview).toHaveCSS('opacity', '1')
+    await expect.poll(() => preview.evaluate(image => (
+      image.complete && image.naturalWidth > 0
+    ))).toBe(true)
 
     const [thumbnailBox, previewBox] = await Promise.all([
       video.locator('.thumbnailImage').first().boundingBox(),
