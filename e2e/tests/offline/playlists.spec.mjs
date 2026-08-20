@@ -3,7 +3,7 @@ import path from 'node:path'
 
 import { test, expect, sel, goTo } from '../../helpers/app.mjs'
 import { rejectDatastoreRequests } from '../../helpers/datastore-failure.mjs'
-import { IpcChannels } from '../../../src/constants.js'
+import { DBActions, IpcChannels } from '../../../src/constants.js'
 
 test.describe('playlist creation', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US' } } })
@@ -66,6 +66,37 @@ test.describe('playlist creation', () => {
 
     expect(result.statuses).toEqual(['rejected', 'rejected', 'rejected'])
     expect(result.playlists).toEqual(result.existingPlaylists)
+  })
+
+  test('marks playlists ready when creating defaults fails', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ ipcMain }, options) => {
+      ipcMain.removeHandler(options.channel)
+      ipcMain.handle(options.channel, (_event, request) => {
+        if (request.action === options.findAction) {
+          return []
+        }
+        throw new Error('Synthetic default playlist failure')
+      })
+    }, {
+      channel: IpcChannels.DB_PLAYLISTS,
+      findAction: DBActions.GENERAL.FIND,
+    })
+
+    const result = await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('removeAllPlaylists')
+      store.commit('setPlaylistsReady', false)
+      await store.dispatch('grabAllPlaylists')
+      return {
+        playlistsReady: store.getters.getPlaylistsReady,
+        playlistCount: store.getters.getAllPlaylists.length,
+      }
+    })
+
+    expect(result).toEqual({
+      playlistsReady: true,
+      playlistCount: 0,
+    })
   })
 
   test('keeps the create dialog and its input when persistence fails', async ({ app, page }) => {

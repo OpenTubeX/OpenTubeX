@@ -427,9 +427,10 @@ const actions = {
 
         commit('setAllPlaylists', payload)
       }
-      commit('setPlaylistsReady', true)
     } catch (errMessage) {
       console.error(errMessage)
+    } finally {
+      commit('setPlaylistsReady', true)
     }
   },
 
