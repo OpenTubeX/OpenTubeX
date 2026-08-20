@@ -1350,6 +1350,7 @@ async function importPlaylists() {
   ]
 
   const newPlaylists = []
+  const playlistWrites = []
 
   playlists.forEach((playlistData) => {
     // We would technically already be done by the time the data is parsed,
@@ -1461,17 +1462,28 @@ async function importPlaylists() {
       }
     })
     // Update playlist's `lastUpdatedAt` & other attributes
-    store.dispatch('updatePlaylist', {
+    playlistWrites.push(store.dispatch('updatePlaylist', {
       _id: existingPlaylist._id,
       // Only these attributes would be updated (besides videos)
       playlistName: playlistObject.playlistName,
       description: playlistObject.description,
       videos: playlistVideos
-    })
+    }))
   })
 
   if (newPlaylists.length > 0) {
-    store.dispatch('addPlaylists', newPlaylists)
+    playlistWrites.push(store.dispatch('addPlaylists', newPlaylists))
+  }
+
+  try {
+    await Promise.all(playlistWrites)
+  } catch (error) {
+    showToast({
+      message: t('Settings.Data Settings.Unable to import all playlists'),
+      icon: ['fas', 'circle-exclamation'],
+    })
+    console.error(error)
+    return
   }
 
   showToast({

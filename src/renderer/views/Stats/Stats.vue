@@ -366,8 +366,13 @@ async function handleResetStats(option) {
   showResetPrompt.value = false
   if (option !== 'reset') { return }
 
-  await store.dispatch('clearWatchStats')
-  showToast({ message: t('Stats.Reset success'), icon: ['fas', 'undo'] })
+  try {
+    await store.dispatch('clearWatchStats')
+    showToast({ message: t('Stats.Reset success'), icon: ['fas', 'undo'] })
+  } catch (error) {
+    showToast({ message: t('Stats.Reset failed'), icon: ['fas', 'circle-exclamation'] })
+    console.error(error)
+  }
 }
 
 function toDateKey(date) {

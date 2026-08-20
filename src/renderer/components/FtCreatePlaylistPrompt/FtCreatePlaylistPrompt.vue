@@ -27,6 +27,11 @@
         {{ $t('User Playlists.CreatePlaylistPrompt.Toast["There is already a playlist with this name. Please pick a different name."]') }}
       </p>
     </FtFlexBox>
+    <FtFlexBox v-if="playlistPersistenceFailed">
+      <p>
+        {{ $t('User Playlists.CreatePlaylistPrompt.Toast["There was an issue with creating the playlist."]') }}
+      </p>
+    </FtFlexBox>
     <FtFlexBox>
       <FtButton
         :label="$t('User Playlists.CreatePlaylistPrompt.Create')"
@@ -80,6 +85,8 @@ const playlistWithNameExists = computed(() => {
   return allPlaylists.value.some((playlist) => playlist.playlistName === playlistName_)
 })
 
+const playlistPersistenceFailed = ref(false)
+
 const playlistPersistenceDisabled = computed(() => {
   return playlistName.value === '' || playlistNameBlank.value || playlistWithNameExists.value
 })
@@ -117,6 +124,7 @@ async function createNewPlaylist() {
     videos: initialVideos,
   }
 
+  playlistPersistenceFailed.value = false
   try {
     await store.dispatch('addPlaylist', playlistObject)
     showToast({
@@ -125,14 +133,10 @@ async function createNewPlaylist() {
       }),
       icon: ['fac', 'playlist-check'],
     })
-  } catch (e) {
-    showToast({
-      message: t('User Playlists.CreatePlaylistPrompt.Toast["There was an issue with creating the playlist."]'),
-      icon: ['fas', 'circle-exclamation'],
-    })
-    console.error(e)
-  } finally {
     hideCreatePlaylistPrompt()
+  } catch (e) {
+    playlistPersistenceFailed.value = true
+    console.error(e)
   }
 }
 

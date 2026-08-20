@@ -438,8 +438,10 @@ const sortOrder = computed(() => isUserPlaylist.value ? userPlaylistSortOrder.va
 
 const isSortOrderCustom = computed(() => sortOrder.value === SORT_BY_VALUES.Custom)
 
+const playlistOrderUpdateInProgress = ref(false)
+
 const canMoveVideos = computed(() => {
-  return isUserPlaylist.value && isSortOrderCustom.value && playlistItems.value.length > 1
+  return isUserPlaylist.value && isSortOrderCustom.value && !playlistOrderUpdateInProgress.value && playlistItems.value.length > 1
 })
 
 const MAX_ENHANCED_PLAYLIST_ITEMS = 200
@@ -679,6 +681,8 @@ function applyReversePlaylistState(items) {
  * @param {any[]} items
  */
 async function persistPlaylistOrder(items) {
+  if (playlistOrderUpdateInProgress.value) { return }
+
   const selectedPlaylist = selectedUserPlaylist.value
   if (selectedPlaylist == null) { return }
 
@@ -690,14 +694,19 @@ async function persistPlaylistOrder(items) {
     _id: selectedPlaylist._id,
   }
 
+  playlistOrderUpdateInProgress.value = true
+
   try {
     await store.dispatch('updatePlaylist', playlist)
   } catch (error) {
+    parseUserPlaylist(selectedPlaylist)
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
       icon: ['fas', 'circle-exclamation'],
     })
     console.error(error)
+  } finally {
+    playlistOrderUpdateInProgress.value = false
   }
 }
 

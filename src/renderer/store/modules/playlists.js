@@ -164,36 +164,28 @@ const actions = {
   async addPlaylist({ state, commit, rootState, dispatch }, payload) {
     processNewPlayist(payload)
 
-    try {
-      await DBPlaylistHandlers.create([payload])
+    await DBPlaylistHandlers.create([payload])
 
-      const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId)
-      if (noQuickBookmarkSet) {
-        dispatch('updateQuickBookmarkTargetPlaylistId', payload._id, { root: true })
-      }
-
-      commit('addPlaylist', payload)
-    } catch (errMessage) {
-      console.error(errMessage)
+    const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId)
+    if (noQuickBookmarkSet) {
+      dispatch('updateQuickBookmarkTargetPlaylistId', payload._id, { root: true })
     }
+
+    commit('addPlaylist', payload)
   },
 
   async addPlaylists({ state, commit, rootState, dispatch }, payload) {
     payload.forEach(processNewPlayist)
 
-    try {
-      await DBPlaylistHandlers.create(payload)
+    await DBPlaylistHandlers.create(payload)
 
-      const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId)
-      if (noQuickBookmarkSet) {
-        const chosenPlaylist = findEmptyOrLatestPlayedPlaylist(payload)
-        dispatch('updateQuickBookmarkTargetPlaylistId', chosenPlaylist._id, { root: true })
-      }
-
-      commit('addPlaylists', payload)
-    } catch (errMessage) {
-      console.error(errMessage)
+    const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId)
+    if (noQuickBookmarkSet) {
+      const chosenPlaylist = findEmptyOrLatestPlayedPlaylist(payload)
+      dispatch('updateQuickBookmarkTargetPlaylistId', chosenPlaylist._id, { root: true })
     }
+
+    commit('addPlaylists', payload)
   },
 
   async updatePlaylist({ commit }, playlist) {
@@ -208,12 +200,8 @@ const actions = {
     // Caller no need to assign last updated time
     playlist.lastUpdatedAt = Date.now()
 
-    try {
-      await DBPlaylistHandlers.upsert(playlist)
-      commit('upsertPlaylistToList', playlist)
-    } catch (errMessage) {
-      console.error(errMessage)
-    }
+    await DBPlaylistHandlers.upsert(playlist)
+    commit('upsertPlaylistToList', playlist)
   },
 
   async updatePlaylistLastPlayedAt({ commit }, playlist) {
@@ -311,10 +299,10 @@ const actions = {
       const payload = (await DBPlaylistHandlers.find()).filter((e) => e != null)
       if (payload.length === 0) {
         // Not using `addPlaylists` to ensure required attributes with dynamic values added
-        state.defaultPlaylists.forEach(playlist => {
+        await Promise.all(state.defaultPlaylists.map(playlist => {
           // Deep copy so `addPlaylist` doesn't mutate the defaults template in state
-          dispatch('addPlaylist', deepCopy(playlist))
-        })
+          return dispatch('addPlaylist', deepCopy(playlist))
+        }))
       } else {
         const dateNow = Date.now()
         const currentTime = Date.now()

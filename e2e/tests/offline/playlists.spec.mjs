@@ -2,8 +2,12 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, sel, goTo } from '../../helpers/app.mjs'
+import { rejectDatastoreRequests } from '../../helpers/datastore-failure.mjs'
+import { IpcChannels } from '../../../src/constants.js'
 
 test.describe('playlist creation', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
   test('a playlist can be created through the UI', async ({ page }) => {
     await goTo(page, 'userplaylists')
 
@@ -15,6 +19,70 @@ test.describe('playlist creation', () => {
     await createDialog.getByRole('button', { name: 'Create', exact: true }).click()
 
     await expect(page.getByRole('link', { name: 'Created via UI' })).toBeVisible()
+  })
+
+  test('playlist actions reject when persistence fails', async ({ app, page }) => {
+    await goTo(page, 'userplaylists')
+    await expect(page.getByRole('link', { name: 'Favorites' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Watch Later' })).toBeVisible()
+    await rejectDatastoreRequests(app.electronApp, IpcChannels.DB_PLAYLISTS)
+
+    const result = await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const existingPlaylists = store.state.playlists.playlists.map(({ _id, playlistName }) => ({
+        _id,
+        playlistName,
+      }))
+      const favorites = store.state.playlists.playlists.find(playlist => playlist._id === 'favorites')
+      const [create, createMany, update] = await Promise.allSettled([
+        store.dispatch('addPlaylist', {
+          playlistName: 'Rejected playlist',
+          protected: false,
+          description: '',
+          videos: [],
+        }),
+        store.dispatch('addPlaylists', [{
+          playlistName: 'Another rejected playlist',
+          protected: false,
+          description: '',
+          videos: [],
+        }]),
+        store.dispatch('updatePlaylist', {
+          ...favorites,
+          playlistName: 'Rejected update',
+          videos: favorites.videos.slice(),
+        }),
+      ])
+
+      return {
+        statuses: [create.status, createMany.status, update.status],
+        playlists: store.state.playlists.playlists.map(({ _id, playlistName }) => ({
+          _id,
+          playlistName,
+        })),
+        existingPlaylists,
+      }
+    })
+
+    expect(result.statuses).toEqual(['rejected', 'rejected', 'rejected'])
+    expect(result.playlists).toEqual(result.existingPlaylists)
+  })
+
+  test('keeps the create dialog and its input when persistence fails', async ({ app, page }) => {
+    await goTo(page, 'userplaylists')
+
+    await page.getByTitle('Create New Playlist').click()
+    const createDialog = page.getByRole('dialog')
+    const nameInput = createDialog.locator('.playlistNameInput input')
+    await nameInput.fill('Unsaved playlist')
+    await rejectDatastoreRequests(app.electronApp, IpcChannels.DB_PLAYLISTS)
+    await createDialog.getByRole('button', { name: 'Create', exact: true }).click()
+
+    await expect(createDialog).toBeVisible()
+    await expect(nameInput).toHaveValue('Unsaved playlist')
+    await expect(createDialog.getByText('There was an issue with creating the playlist.')).toBeVisible()
+    await expect(page.locator('.toast', { hasText: 'has been successfully created' })).toHaveCount(0)
+    await expect(page.getByRole('link', { name: 'Unsaved playlist' })).toHaveCount(0)
   })
 })
 
@@ -146,6 +214,30 @@ test.describe('seeded playlists', () => {
     }).toBe(true)
   })
 
+  test('keeps playlist edits open when persistence fails', async ({ app, page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+
+    await page.getByTitle('Edit Playlist Info').click()
+    const titleInput = page.locator('.playlistStats input')
+    const descriptionInput = page.locator('.descriptionInput input')
+    await titleInput.fill('Unsaved playlist title')
+    await descriptionInput.fill('Unsaved playlist description')
+    await rejectDatastoreRequests(app.electronApp, IpcChannels.DB_PLAYLISTS)
+    await page.getByTitle('Save Changes').click()
+
+    await expect(titleInput).toBeVisible()
+    await expect(titleInput).toHaveValue('Unsaved playlist title')
+    await expect(descriptionInput).toHaveValue('Unsaved playlist description')
+    await expect(page.locator('.toast', { hasText: 'There was an issue with updating this playlist.' })).toBeVisible()
+    await expect(page.locator('.toast', { hasText: 'Playlist has been updated.' })).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const playlist = store.getters.getPlaylist('e2eseeded')
+      return [playlist.playlistName, playlist.description]
+    })).toEqual(['My seeded playlist', 'Playlist created by the E2E seed'])
+  })
+
   test('a custom quick bookmark emoji persists across restarts', async ({ app, page }) => {
     await goTo(page, 'userplaylists')
     await page.getByText('Favorites').click()
@@ -260,5 +352,24 @@ test.describe('custom playlist order', () => {
     await page.getByRole('option', { name: 'Move Video to the Top' }).click()
 
     await expect(page.locator('.playlistItemsCard .h3Title').first()).toHaveText('Custom playlist video 3')
+  })
+
+  test('keeps the playlist order when persistence fails', async ({ app, page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Large custom playlist').click()
+
+    const secondVideo = page.locator('.ft-list-video').filter({
+      has: page.getByText('Custom playlist video 2', { exact: true })
+    })
+    await rejectDatastoreRequests(app.electronApp, IpcChannels.DB_PLAYLISTS)
+    await secondVideo.getByTitle('Move Video Up').click()
+
+    await expect(page.locator('.toast', { hasText: 'There was an issue with updating this playlist.' })).toBeVisible()
+    await expect(page.locator('.playlistItemsCard .h3Title').first()).toHaveText('Custom playlist video 1')
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getPlaylist('large-custom-playlist').videos.slice(0, 2)
+        .map(video => video.playlistItemId)
+    })).toEqual(['custom-playlist-item-0', 'custom-playlist-item-1'])
   })
 })

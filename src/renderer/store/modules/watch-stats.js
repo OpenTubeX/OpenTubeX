@@ -55,12 +55,8 @@ const actions = {
   },
 
   async clearWatchStats({ commit }) {
-    try {
-      await DBWatchStatsHandlers.deleteAll()
-      commit('resetWatchStats')
-    } catch (errMessage) {
-      console.error(errMessage)
-    }
+    await DBWatchStatsHandlers.deleteAll()
+    commit('resetWatchStats')
   },
 
   async adjustHistoricalWatchTime({ commit }, { defaultSpeed, channelPlaybackSpeeds }) {

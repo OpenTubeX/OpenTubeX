@@ -1,4 +1,6 @@
 import { test, expect, goTo } from '../../helpers/app.mjs'
+import { rejectDatastoreRequests } from '../../helpers/datastore-failure.mjs'
+import { IpcChannels } from '../../../src/constants.js'
 
 /**
  * @param {Date} date
@@ -55,6 +57,27 @@ test.describe('watch stats', () => {
     await page.getByRole('button', { name: 'Reset', exact: true }).click()
 
     await expect(page.locator('.summaryCard').filter({ hasText: 'Total watch time' })).toContainText('0 min')
+  })
+
+  test('keeps statistics when resetting persistence fails', async ({ app, page }) => {
+    await goTo(page, 'stats')
+    const totalWatchTime = page.locator('.summaryCard').filter({ hasText: 'Total watch time' })
+    await expect(totalWatchTime).toContainText('1 hr 30 min')
+
+    await rejectDatastoreRequests(app.electronApp, IpcChannels.DB_WATCH_STATS)
+    await page.locator('.resetStatsButton').click()
+    await page.getByRole('button', { name: 'Reset', exact: true }).click()
+
+    await expect(totalWatchTime).toContainText('1 hr 30 min')
+    await expect(page.locator('.toast', { hasText: 'Failed to reset watch statistics' })).toBeVisible()
+    await expect(page.locator('.toast', { hasText: 'Watch statistics have been reset' })).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getWatchSecondsByDate
+    })).toEqual({
+      [today]: 3600,
+      [yesterday]: 1800,
+    })
   })
 })
 

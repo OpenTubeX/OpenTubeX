@@ -1,4 +1,6 @@
 import { goTo, test, expect } from '../../helpers/app.mjs'
+import { rejectDatastoreRequests } from '../../helpers/datastore-failure.mjs'
+import { IpcChannels } from '../../../src/constants.js'
 
 const VIDEO_TITLES = ['Skip test video one', 'Skip test video two', 'Skip test video three']
 
@@ -129,6 +131,27 @@ test('only offers skipping to playlist videos that exist', async ({ page, attach
     canPlayNext: true,
     canPlayPrevious: true
   })
+})
+
+test('restores the watch playlist order when persistence fails', async ({ app, page }) => {
+  await page.route(/^https?:\/\//, (route) => route.abort())
+
+  await goTo(page, 'userplaylists')
+  await page.getByText('Skip button playlist').click()
+  await page.getByText(VIDEO_TITLES[0]).first().click()
+
+  const playlistItems = page.locator('.watchVideoPlaylist .playlistItem')
+  await expect(playlistItems).toHaveCount(VIDEO_TITLES.length)
+  await rejectDatastoreRequests(app.electronApp, IpcChannels.DB_PLAYLISTS)
+  await playlistItems.nth(1).getByTitle('Move Video Up').click()
+
+  await expect(page.locator('.toast', { hasText: 'There was an issue with updating this playlist.' })).toBeVisible()
+  await expect(playlistItems.first()).toContainText(VIDEO_TITLES[0])
+  await expect.poll(() => page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return store.getters.getPlaylist('e2eskipplaylist').videos.slice(0, 2)
+      .map(video => video.playlistItemId)
+  })).toEqual(['e2e-skip-item-0', 'e2e-skip-item-1'])
 })
 
 test('offers skipping to a queued video without a playlist', async ({ page }) => {

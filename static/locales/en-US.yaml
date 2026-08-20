@@ -200,6 +200,7 @@ Stats:
   Reset: Reset
   Reset confirmation: Are you sure you want to reset all watch statistics? This cannot be undone.
   Reset success: Watch statistics have been reset
+  Reset failed: Failed to reset watch statistics
   Less than a minute: < 1 min
   Minutes: '{minutes} min'
   Hours: '{hours} hr'
@@ -1212,6 +1213,7 @@ Settings:
     All settings have been successfully exported: All settings have been
       successfully exported
     Unable to read file: Unable to read file
+    Unable to import all playlists: Unable to import all playlists
     Unable to write file: Unable to write file
     Unknown data key: Unknown data key
     Setting object has insufficient data, skipping item: Setting object has insufficient data, skipping item

@@ -756,20 +756,52 @@ async function getNextPageLocal() {
   }
 }
 
+const playlistOrderUpdateInProgress = ref(false)
+
 const canMoveVideos = computed(() => {
-  return isUserPlaylistRequested.value && !playlistInVideoSearchMode.value && isSortOrderCustom.value && !pendingDeletionRemovalInProgress.value
+  return isUserPlaylistRequested.value && !playlistInVideoSearchMode.value && isSortOrderCustom.value &&
+    !pendingDeletionRemovalInProgress.value && !playlistOrderUpdateInProgress.value
 })
 
 const videoDraggingPossible = computed(() => {
   return isUserPlaylistRequested.value && !playlistInVideoSearchMode.value && isSortOrderCustom.value &&
-    !pendingDeletionRemovalInProgress.value && shownPlaylistItems.value.length >= 2
+    !pendingDeletionRemovalInProgress.value && !playlistOrderUpdateInProgress.value && shownPlaylistItems.value.length >= 2
 })
+
+async function persistPlaylistOrder(orderedItems) {
+  if (playlistOrderUpdateInProgress.value) { return }
+
+  const previousItems = playlistItems.value
+  const playlist = {
+    playlistName: playlistTitle.value,
+    protected: selectedUserPlaylist.value.protected,
+    description: playlistDescription.value,
+    videos: deepCopy(orderedItems),
+    _id: playlistId.value
+  }
+
+  playlistItems.value = orderedItems
+  playlistOrderUpdateInProgress.value = true
+
+  try {
+    await store.dispatch('updatePlaylist', playlist)
+  } catch (error) {
+    playlistItems.value = previousItems
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
+    console.error(error)
+  } finally {
+    playlistOrderUpdateInProgress.value = false
+  }
+}
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoUp(videoId, playlistItemId) {
+async function moveVideoUp(videoId, playlistItemId) {
   const playlistItems_ = playlistItems.value.slice()
   const shownIndex = shownPlaylistItems.value.findIndex((video) => {
     return video.videoId === videoId && video.playlistItemId === playlistItemId
@@ -795,31 +827,14 @@ function moveVideoUp(videoId, playlistItemId) {
   playlistItems_[index] = playlistItems_[previousIndex]
   playlistItems_[previousIndex] = video
 
-  const playlist = {
-    playlistName: playlistTitle.value,
-    protected: selectedUserPlaylist.value.protected,
-    description: playlistDescription.value,
-    videos: deepCopy(playlistItems_),
-    _id: playlistId.value
-  }
-
-  try {
-    store.dispatch('updatePlaylist', playlist)
-    playlistItems.value = playlistItems_
-  } catch (e) {
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
-      icon: ['fas', 'circle-exclamation'],
-    })
-    console.error(e)
-  }
+  await persistPlaylistOrder(playlistItems_)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoDown(videoId, playlistItemId) {
+async function moveVideoDown(videoId, playlistItemId) {
   const playlistItems_ = playlistItems.value.slice()
   const shownIndex = shownPlaylistItems.value.findIndex((video) => {
     return video.videoId === videoId && video.playlistItemId === playlistItemId
@@ -845,31 +860,14 @@ function moveVideoDown(videoId, playlistItemId) {
   playlistItems_[index] = playlistItems_[nextIndex]
   playlistItems_[nextIndex] = video
 
-  const playlist = {
-    playlistName: playlistTitle.value,
-    protected: selectedUserPlaylist.value.protected,
-    description: playlistDescription.value,
-    videos: deepCopy(playlistItems_),
-    _id: playlistId.value
-  }
-
-  try {
-    store.dispatch('updatePlaylist', playlist)
-    playlistItems.value = playlistItems_
-  } catch (e) {
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
-      icon: ['fas', 'circle-exclamation'],
-    })
-    console.error(e)
-  }
+  await persistPlaylistOrder(playlistItems_)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoToTheTop(videoId, playlistItemId) {
+async function moveVideoToTheTop(videoId, playlistItemId) {
   const playlistItems_ = playlistItems.value.slice()
 
   const index = playlistItems_.findIndex((video) => {
@@ -889,28 +887,14 @@ function moveVideoToTheTop(videoId, playlistItemId) {
   playlistItems_.splice(index, 1)
   playlistItems_.unshift(videoObject)
 
-  const playlist = {
-    playlistName: playlistTitle.value,
-    protected: selectedUserPlaylist.value.protected,
-    description: playlistDescription.value,
-    videos: deepCopy(playlistItems_),
-    _id: playlistId.value
-  }
-
-  try {
-    store.dispatch('updatePlaylist', playlist)
-    playlistItems.value = playlistItems_
-  } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
-    console.error(e)
-  }
+  await persistPlaylistOrder(playlistItems_)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoToTheBottom(videoId, playlistItemId) {
+async function moveVideoToTheBottom(videoId, playlistItemId) {
   const playlistItems_ = playlistItems.value.slice()
 
   const index = playlistItems_.findIndex((video) => {
@@ -930,21 +914,7 @@ function moveVideoToTheBottom(videoId, playlistItemId) {
   playlistItems_.splice(index, 1)
   playlistItems_.push(videoObject)
 
-  const playlist = {
-    playlistName: playlistTitle.value,
-    protected: selectedUserPlaylist.value.protected,
-    description: playlistDescription.value,
-    videos: deepCopy(playlistItems_),
-    _id: playlistId.value
-  }
-
-  try {
-    store.dispatch('updatePlaylist', playlist)
-    playlistItems.value = playlistItems_
-  } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
-    console.error(e)
-  }
+  await persistPlaylistOrder(playlistItems_)
 }
 
 /**
@@ -957,25 +927,7 @@ function setDraggedVideo(video) {
 async function onDragVideoEnd() {
   if (tempShownPlaylistItems.value != null) {
     // Save on drag end ONLY
-    const playlist = {
-      playlistName: playlistTitle.value,
-      protected: selectedUserPlaylist.value.protected,
-      description: playlistDescription.value,
-      // Save whatever is shown
-      videos: deepCopy(tempShownPlaylistItems.value),
-      _id: playlistId.value
-    }
-
-    try {
-      await store.dispatch('updatePlaylist', playlist)
-      playlistItems.value = tempShownPlaylistItems.value
-    } catch (e) {
-      showToast({
-        message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
-        icon: ['fas', 'circle-exclamation'],
-      })
-      console.error(e)
-    }
+    await persistPlaylistOrder(tempShownPlaylistItems.value)
   }
 
   // Cleanup

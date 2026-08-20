@@ -649,14 +649,13 @@ async function savePlaylistInfo() {
       message: t('User Playlists.SinglePlaylistView.Toast["Playlist has been updated."]'),
       icon: ['fas', 'check'],
     })
+    exitEditMode()
   } catch (e) {
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
       icon: ['fas', 'circle-exclamation'],
     })
     console.error(e)
-  } finally {
-    exitEditMode()
   }
 }
 
