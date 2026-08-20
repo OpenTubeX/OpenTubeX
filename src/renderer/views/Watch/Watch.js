@@ -220,6 +220,7 @@ export default defineComponent({
       isPostLiveDvr: false,
       isUnlisted: false,
       isShort: false,
+      useCustomShortsPlayerForCurrentVideo: false,
       videoAspectRatio: null,
       shortsLinkedVideo: null,
       shortsTouchStartY: null,
@@ -646,7 +647,7 @@ export default defineComponent({
         this.vrProjection !== 'EQUIRECTANGULAR'
     },
     customShortsPlayerActive: function () {
-      return this.$store.getters.getUseCustomShortsPlayer &&
+      return this.useCustomShortsPlayerForCurrentVideo &&
         this.isShort &&
         this.activeFormat !== 'audio'
     },
@@ -1144,6 +1145,7 @@ export default defineComponent({
     this.theatreModeAnimations = []
     this.videoId = this.tabRoute.params.id
     this.isShort = this.tabRoute.query.short === 'true'
+    this.useCustomShortsPlayerForCurrentVideo = this.$store.getters.getUseCustomShortsPlayer
     this.videoAspectRatio = this.isShort ? 9 / 16 : null
     this.activeFormat = this.defaultVideoFormat
     // So that the value for this session remains unchanged even if setting changed
@@ -1702,6 +1704,7 @@ export default defineComponent({
         this.videoId = this.tabRoute.params.id
         const videoIdChanged = this.videoId !== previousVideoId
         if (videoIdChanged) {
+          this.useCustomShortsPlayerForCurrentVideo = this.$store.getters.getUseCustomShortsPlayer
           this.ipBlockRecoveryAttemptedForCurrentVideo = false
           this.streamErrorReloadAttemptedForCurrentVideo = false
           this.playbackEngineFallbackAttemptedForCurrentVideo = false

@@ -1,4 +1,4 @@
-import { sel, setPlayerFullscreen, test, expect } from '../../helpers/app.mjs'
+import { goTo, sel, setPlayerFullscreen, test, expect } from '../../helpers/app.mjs'
 import { activeTab, findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { demoPlayerResponse } from '../../helpers/media.mjs'
@@ -151,6 +151,44 @@ test.describe('Shorts transcript navigation', () => {
         shortsTimestamp: new Date().toISOString()
       }]
     }
+  })
+
+  test('keeps the current Short from expanding when YouTube-style Shorts are disabled', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUiScale', 95)
+    })
+    await page.locator(sel.searchInput)
+      .fill(`https://www.youtube.com/shorts/${CAPTIONED_SHORT_IDS[0]}`)
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[0]}\\?short=true`))
+    await waitForPlayback(page)
+
+    const player = page.locator('.ftVideoPlayer')
+    await expect(player).toHaveClass(/shortsPlayer/)
+    const shortsBounds = await player.boundingBox()
+    expect(shortsBounds).not.toBeNull()
+
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="playback"]').click()
+    const toggle = page.getByRole('checkbox', { name: 'Use YouTube-style Shorts' })
+    await expect(toggle).toBeChecked()
+    await page.locator('label.switch-label')
+      .filter({ hasText: 'Use YouTube-style Shorts' })
+      .click()
+    await expect(toggle).not.toBeChecked()
+    await expect(player).toHaveClass(/shortsPlayer/)
+
+    const bounds = await player.boundingBox()
+    expect(bounds).not.toBeNull()
+    expect(bounds.width).toBeLessThanOrEqual(shortsBounds.width + 1)
+
+    await page.locator('.settingsWindow').getByRole('button', { name: 'Close' }).click()
+    await page.locator('.shortsNavigationButton').last().click()
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[1]}\\?short=true`))
+    await waitForPlayback(page)
+    await expect(player).not.toHaveClass(/shortsPlayer/)
   })
 
   test('shows quick playback speeds near the pointer without covering the seek preview', async ({ app, page, attachScreenshot }) => {
