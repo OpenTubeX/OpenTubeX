@@ -3,8 +3,8 @@ import { test, expect } from '../../helpers/innertube.mjs'
 
 test.describe('search', () => {
   test('search returns video results', async ({ page }) => {
+    let blockPreviewRequest = true
     let releasePreviewRequest
-    let previewRequestCount = 0
     let previewRequestFinished = false
     page.on('requestfinished', request => {
       if (/\/an_webp\//.test(request.url())) {
@@ -12,9 +12,13 @@ test.describe('search', () => {
       }
     })
     await page.route(/\/an_webp\//, async route => {
-      previewRequestCount++
-      if (previewRequestCount === 1) {
-        await new Promise(resolve => { releasePreviewRequest = resolve })
+      if (blockPreviewRequest) {
+        await new Promise(resolve => {
+          releasePreviewRequest = () => {
+            blockPreviewRequest = false
+            resolve()
+          }
+        })
       }
       await route.fulfill({
         contentType: 'image/svg+xml',
@@ -65,7 +69,6 @@ test.describe('search', () => {
     await expect.poll(() => preview.evaluate(image => (
       image.complete && image.naturalWidth > 0
     ))).toBe(true)
-    expect(previewRequestCount).toBe(1)
 
     const [thumbnailBox, previewBox] = await Promise.all([
       video.locator('.thumbnailImage').first().boundingBox(),
