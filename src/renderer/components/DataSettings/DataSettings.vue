@@ -547,9 +547,11 @@ function importFreeTubeSubscriptions(profileRecords) {
     }
   })
 
-  if (shouldUpdatePrimaryProfile) {
-    store.dispatch('updateProfile', updatedPrimaryProfile)
+  if (!shouldUpdatePrimaryProfile) {
+    return
   }
+
+  store.dispatch('updateProfile', updatedPrimaryProfile)
 
   showToast({
     message: t('Settings.Data Settings.All subscriptions and profiles have been successfully imported'),
@@ -1082,6 +1084,7 @@ async function importFreeTubeWatchHistory(historyRecords) {
 
   // deep copy so we don't get errors from Electron when we try to pass reactive objects through the IPC channels
   const historyItems = new Map(deepCopy(Object.entries(historyCacheById.value)))
+  let importedCount = 0
 
   historyRecords.forEach((historyData) => {
     // We would technically already be done by the time the data is parsed,
@@ -1121,8 +1124,13 @@ async function importFreeTubeWatchHistory(historyRecords) {
       historyObject.description = historyObject.description ?? ''
 
       historyItems.set(historyObject.videoId, historyObject)
+      importedCount++
     }
   })
+
+  if (importedCount === 0) {
+    return
+  }
 
   await store.dispatch('overwriteHistory', historyItems)
 
@@ -1431,6 +1439,7 @@ async function importPlaylists() {
   ]
 
   const newPlaylists = []
+  let importedCount = 0
 
   playlists.forEach((playlistData) => {
     // We would technically already be done by the time the data is parsed,
@@ -1483,6 +1492,8 @@ async function importPlaylists() {
       showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
       return
     }
+
+    importedCount++
 
     const existingPlaylist = allPlaylists.value.find((playlist) => {
       if (playlistObject._id != null && playlist._id === playlistObject._id) {
@@ -1556,6 +1567,10 @@ async function importPlaylists() {
       videos: playlistVideos
     })
   })
+
+  if (importedCount === 0) {
+    return
+  }
 
   if (newPlaylists.length > 0) {
     store.dispatch('addPlaylists', newPlaylists)
@@ -1634,6 +1649,7 @@ async function importSearchHistory() {
 async function importFreeTubeSearchHistory(searchHistoryRecords) {
   // deep copy so we don't get errors from Electron when we try to pass reactive objects through the IPC channels
   const historyItems = new Map(deepCopy(searchHistoryEntries.value).map(entry => [entry._id, entry]))
+  let importedCount = 0
 
   searchHistoryRecords.forEach((entry) => {
     if (!isJsonObject(entry) || typeof entry._id !== 'string' || typeof entry.lastUpdatedAt !== 'number') {
@@ -1643,6 +1659,7 @@ async function importFreeTubeSearchHistory(searchHistoryRecords) {
       })
       console.error('Missing keys:', entry)
     } else {
+      importedCount++
       const existingEntry = historyItems.get(entry._id)
 
       if (existingEntry == null || entry.lastUpdatedAt > existingEntry.lastUpdatedAt) {
@@ -1658,6 +1675,10 @@ async function importFreeTubeSearchHistory(searchHistoryRecords) {
       }
     }
   })
+
+  if (importedCount === 0) {
+    return
+  }
 
   const newSearchHistoryEntries = Array.from(historyItems.values())
 

@@ -169,7 +169,7 @@ test('line-delimited search history keeps valid rows around a malformed row', as
   expect(pageErrors).toEqual([])
 })
 
-test('malformed-only line-delimited imports do not report success', async ({ page }) => {
+test('invalid-only line-delimited imports do not report success', async ({ page }) => {
   const pageErrors = []
   page.on('pageerror', error => pageErrors.push(error.message))
   const dataSection = await goToSettingsSection(page, 'data')
@@ -205,6 +205,10 @@ test('malformed-only line-delimited imports do not report success', async ({ pag
     await expect(page.locator('.toast', {
       hasText: 'Invalid JSON at row 2, skipping item'
     })).toHaveCount(expectedErrorCount)
+    await expect(page.locator('.toast', { hasText: success })).toHaveCount(0)
+
+    await mockImportFile(page, filename, '{}')
+    await dataSection.getByRole('button', { name: button, exact: true }).click()
     await expect(page.locator('.toast', { hasText: success })).toHaveCount(0)
   }
 
