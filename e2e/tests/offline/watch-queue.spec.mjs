@@ -78,10 +78,7 @@ test('manages a temporary queue from video menus and the watch sidebar', async (
 
   const draggedItem = reorderButton('Queue video three')
   await expect(draggedItem).toHaveAttribute('title', 'Drag Queue video three to reorder queue')
-  const dataTransfer = await page.evaluateHandle(() => new DataTransfer())
-  await draggedItem.dispatchEvent('dragstart', { dataTransfer })
-  await queueItem('Queue video two').dispatchEvent('drop', { dataTransfer })
-  await draggedItem.dispatchEvent('dragend', { dataTransfer })
+  await draggedItem.dragTo(queueItem('Queue video two'))
   await expect(queue.locator('.queueVideoTitle')).toHaveText([
     'Queue video one',
     'Queue video two',
