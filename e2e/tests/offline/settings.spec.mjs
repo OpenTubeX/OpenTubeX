@@ -69,6 +69,21 @@ async function expectMinimizeToPreserveSettingsScroll(page) {
   )).toBeLessThanOrEqual(1)
 }
 
+async function expectExternalSoftwarePathAlignment(tool, sourceName, pathPlaceholder) {
+  const source = tool.locator('.select').filter({ hasText: sourceName })
+  const [sourceBox, helpBox, pathBox] = await Promise.all([
+    source.locator('.select-text').boundingBox(),
+    source.locator('.selectIndicators button').boundingBox(),
+    tool.getByPlaceholder(pathPlaceholder).boundingBox()
+  ])
+
+  expect(sourceBox).not.toBeNull()
+  expect(helpBox).not.toBeNull()
+  expect(pathBox).not.toBeNull()
+  expect(pathBox.x).toBeCloseTo(sourceBox.x, 0)
+  expect(pathBox.x + pathBox.width).toBeCloseTo(helpBox.x + helpBox.width, 0)
+}
+
 test.describe('skip silence settings search', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 
@@ -143,6 +158,121 @@ test.describe('settings', () => {
     expect(recoveryScriptBox.y).toBeGreaterThan(testProxyBox.y)
     expect(recoveryScriptBox.y - (testProxyBox.y + testProxyBox.height))
       .toBeGreaterThanOrEqual(16)
+  })
+
+  test('keeps each external tool grouped when its source changes', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      ipcMain.removeHandler('yt-dlp-get-info')
+      ipcMain.handle('yt-dlp-get-info', (_event, options) => ({
+        ytDlp: {
+          source: options.ytDlpSource,
+          available: true,
+          version: '2026.08.19',
+          supportedBrowsers: []
+        },
+        ffmpeg: { source: options.ffmpegSource, available: true, version: '8.0' },
+        ffprobe: { source: options.ffmpegSource, available: true, version: '8.0' }
+      }))
+    })
+
+    const advanced = await goToSettingsSection(page, 'advanced')
+    const externalSoftware = advanced.locator('.settingsSection').filter({
+      has: page.getByRole('heading', { name: 'External Software', exact: true })
+    })
+    const tools = externalSoftware.locator('.externalSoftwareTool')
+    const ytDlpTool = tools.nth(0)
+    const ffmpegTool = tools.nth(1)
+
+    await expect(tools.locator('.externalSoftwareToolTitle')).toHaveText([
+      'yt-dlp',
+      'FFmpeg / FFprobe'
+    ])
+    await expect(ytDlpTool.getByRole('combobox', { name: 'yt-dlp Source' })).toBeVisible()
+    await expect(ytDlpTool.getByPlaceholder('yt-dlp Executable Path')).toBeVisible()
+    await expect(ffmpegTool.getByRole('combobox', { name: 'FFmpeg Source' })).toBeVisible()
+    await expect(ffmpegTool.getByPlaceholder('FFmpeg Executable Path')).toBeVisible()
+
+    const ytDlpSource = ytDlpTool.locator('.select').filter({ hasText: 'yt-dlp Source' })
+    const ffmpegSource = ffmpegTool.locator('.select').filter({ hasText: 'FFmpeg Source' })
+    await expect(ytDlpSource.locator('.select-icon')).toHaveCount(0)
+    await expect(ffmpegSource.locator('.select-icon')).toHaveCount(0)
+    await expectExternalSoftwarePathAlignment(
+      ytDlpTool,
+      'yt-dlp Source',
+      'yt-dlp Executable Path'
+    )
+    await expectExternalSoftwarePathAlignment(
+      ffmpegTool,
+      'FFmpeg Source',
+      'FFmpeg Executable Path'
+    )
+    const positionWithinTool = source => source.evaluate(element => {
+      const sourceBounds = element.getBoundingClientRect()
+      const toolBounds = element.closest('.externalSoftwareTool').getBoundingClientRect()
+      return {
+        x: sourceBounds.x - toolBounds.x,
+        y: sourceBounds.y - toolBounds.y
+      }
+    })
+    const positionsBefore = await Promise.all([
+      positionWithinTool(ytDlpSource),
+      positionWithinTool(ffmpegSource)
+    ])
+
+    await ytDlpSource.locator('select').selectOption('managed')
+    await expect(ytDlpTool.getByRole('combobox', { name: 'yt-dlp Channel' })).toBeVisible()
+    await expect(ytDlpTool.getByPlaceholder('yt-dlp Executable Path')).toHaveCount(0)
+    await expect(ytDlpTool.getByRole('button', { name: 'Update yt-dlp' })).toBeVisible()
+    await expect(ffmpegTool.getByPlaceholder('FFmpeg Executable Path')).toBeVisible()
+
+    const positionsAfter = await Promise.all([
+      positionWithinTool(ytDlpSource),
+      positionWithinTool(ffmpegSource)
+    ])
+    for (const index of [0, 1]) {
+      expect(positionsAfter[index].x).toBeCloseTo(positionsBefore[index].x, 0)
+      expect(positionsAfter[index].y).toBeCloseTo(positionsBefore[index].y, 0)
+    }
+
+    await ffmpegSource.locator('select').selectOption('managed')
+    await expect(ffmpegTool.getByPlaceholder('FFmpeg Executable Path')).toHaveCount(0)
+    await expect(ffmpegTool.getByRole('button', { name: 'Update FFmpeg and FFprobe' })).toBeVisible()
+    await expect(externalSoftware.getByRole('combobox', { name: 'Managed Tool Updates' })).toBeVisible()
+  })
+
+  test.describe('external software at 95% UI scale', () => {
+    test.use({
+      seed: {
+        settings: {
+          uiScale: 95,
+          ytDlpSource: 'system',
+          ytDlpFfmpegSource: 'system'
+        }
+      }
+    })
+
+    test('aligns path inputs with source controls when the cards stack', async ({ page }) => {
+      await page.setViewportSize({ width: 1000, height: 800 })
+      const advanced = await goToSettingsSection(page, 'advanced')
+      const tools = advanced.locator('.externalSoftwareTool')
+      const [ytDlpBox, ffmpegBox] = await Promise.all([
+        tools.nth(0).boundingBox(),
+        tools.nth(1).boundingBox()
+      ])
+
+      expect(ffmpegBox.y).toBeGreaterThan(ytDlpBox.y + ytDlpBox.height)
+
+      await expectExternalSoftwarePathAlignment(
+        tools.nth(0),
+        'yt-dlp Source',
+        'yt-dlp Executable Path'
+      )
+      await expectExternalSoftwarePathAlignment(
+        tools.nth(1),
+        'FFmpeg Source',
+        'FFmpeg Executable Path'
+      )
+    })
   })
 
   test('shows yt-dlp browsers dynamically and centers the optional profile field', async ({ app, page }) => {

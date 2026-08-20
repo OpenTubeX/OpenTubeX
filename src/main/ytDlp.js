@@ -1421,12 +1421,14 @@ export async function handleYtDlpGetPlaybackInfo(
   ]
 
   if (useDefaultClients !== true) {
-    // Prefer clients whose URLs are not currently subject to selective PO-token
-    // enforcement. The renderer retries with yt-dlp's defaults if none of these
-    // formats are playable or they expose only a minimal live DVR window.
+    // Prefer yt-dlp's maintained client order, while retaining web_embedded for
+    // alternate audio and excluding older Android VR defaults whose URLs can be
+    // subject to selective PO-token enforcement. The renderer retries with
+    // yt-dlp's defaults if none of these formats are playable or they expose only
+    // a minimal live DVR window.
     args.push(
       '--extractor-args',
-      'youtube:player_client=web_embedded,default,-android_vr'
+      'youtube:player_client=default,web_embedded,-android_vr'
     )
   }
 
