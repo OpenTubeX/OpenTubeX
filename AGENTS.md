@@ -1,6 +1,17 @@
 - Always run Electron/Playwright E2E tests under a private X server using `xvfb-run -a -s "-screen 0 1920x1080x24"`.
 - For filtered Electron/Playwright E2E runs, invoke Playwright directly, for example `pnpm exec playwright test -c e2e/playwright.config.mjs e2e/tests/network/channel.spec.mjs --project=network --grep "test name"`. Never use `pnpm run test:e2e -- ...`; the extra `--` stops Playwright from parsing the following path and options and can launch the full suite.
 - Before running modified Electron/Playwright E2E tests, run `pnpm run test:e2e:pack` so `dist-e2e` includes the current CSS and rendering or measurement tests do not run against an unstyled app.
+- If production webpack packing crashes natively under Node with signals such as `SIGSEGV`, `SIGBUS`, or `SIGTRAP`, limit the minimizers to one worker with a two-CPU systemd user scope instead of retrying at the default worker count:
+  ```sh
+  systemd-run --user --scope --collect --quiet \
+    --working-directory="$PWD" \
+    -p CPUQuota=200% \
+    -p MemoryHigh=2G \
+    -p MemoryMax=3G \
+    env NODE_OPTIONS='--max-old-space-size=1536 --v8-pool-size=1' \
+    pnpm run test:e2e:pack
+  ```
+  Use the CPU quota for packaging only. It distorts renderer frame-timing tests; run those with one Playwright worker and the memory limits, but without `CPUQuota`.
 - The in-app UI Scale setting changes Electron's zoom factor and can produce legitimate fractional CSS-pixel geometry. Changes involving scrolling, measurements, positioning, reflow, or animation boundaries must also work at non-100% UI scales; do not treat a subpixel difference from integer layout properties as stale or invalid state.
 - Custom Shaka overflow-menu controls must hide while any submenu is open; follow the existing `submenuopen` / `submenuclose` visibility pattern using `isSubMenuOpened` and `shaka-hidden`.
 - Headers in scrollable menus and panels must stay outside the content's scroll viewport so neither content nor its scrollbar can pass behind the header; prefer a fixed header plus a separate inner scroller over covering content with a sticky header. When switching between menu views, explicitly restore the actual scroll viewport to the intended position; use `restoreOverlayScrollTop` for OverlayScrollbars-managed elements instead of relying on focus or DOM replacement to reset it. Any reflow or dynamic update that can shorten scrollable content—including resize, responsive layout changes, searching, filtering, collapsing, removing, or replacing content—must clamp the scroll position against the real rendered content end after the DOM update; observe a stable content wrapper when practical and use `clampOverlayScrollTop` with that content element instead of trusting a possibly stale `scrollHeight`. Cover every relevant shortening trigger with a regression test that first scrolls to the bottom, triggers the shorter state, and verifies that no obsolete offset or empty space remains and that the rendered scrollbar thumb/overflow state matches the new scroll range.

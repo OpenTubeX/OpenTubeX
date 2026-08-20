@@ -1,7 +1,7 @@
 import { test, expect, goTo } from '../../helpers/app.mjs'
 
 const now = Date.now()
-const channelCount = 600
+const channelCount = 933
 const videosPerChannel = 36
 
 const profiles = [{
@@ -84,7 +84,7 @@ async function measureVideosSwitch(page) {
   }))
 }
 
-test('switches a production-sized cached feed without repeating expensive work', async ({ page }) => {
+test('switches a production-profile-sized cached feed without repeating expensive work', async ({ page }) => {
   await goTo(page, 'trending')
   await page.evaluate(() => localStorage.setItem('Subscriptions/currentTab', 'new'))
   await goTo(page, 'subscriptions')

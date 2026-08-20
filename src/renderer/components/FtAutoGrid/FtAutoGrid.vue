@@ -114,6 +114,13 @@ function applyThumbnailSizeStyles() {
 watch(() => store.getters.getThumbnailSize, applyThumbnailSizeStyles)
 
 function captureLeavingItemLayout(element) {
+  // Only the New feed takes leaving items out of flow and consumes these
+  // geometry variables. Measuring every removed card in other feeds forces
+  // repeated layouts during a large subscription refresh.
+  if (!(element instanceof Element) || element.closest('.newFeed') === null) {
+    return
+  }
+
   const itemRect = element.getBoundingClientRect()
   const gridRect = gridElement.value.$el.getBoundingClientRect()
 
