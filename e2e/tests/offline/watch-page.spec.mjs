@@ -187,6 +187,7 @@ test.describe('Shorts transcript navigation', () => {
     await page.locator('.settingsWindow').getByRole('button', { name: 'Close' }).click()
     await page.locator('.shortsNavigationButton').last().click()
     await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[1]}\\?short=true`))
+    await waitForPlayback(page)
     await expect(player).not.toHaveClass(/shortsPlayer/)
   })
 
