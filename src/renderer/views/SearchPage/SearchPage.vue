@@ -46,7 +46,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
@@ -86,6 +86,7 @@ const searchPage = ref(1)
 /** @type {import('vue').ShallowRef<import('youtubei.js').YT.Search | string | null>} */
 const nextPageRef = shallowRef(null)
 const shownResults = shallowRef([])
+let requestGeneration = 0
 
 const query = ref('')
 const processedQuery = computed(() => query.value.trim())
@@ -140,56 +141,70 @@ function getRouteSearchSettings() {
   }
 }
 
-watch(route, () => {
-  const query_ = route.params.query.trim()
-  const searchSettings = getRouteSearchSettings()
+watch(route, startSearch, { deep: true })
+onMounted(startSearch)
+onBeforeUnmount(() => { requestGeneration++ })
 
+function isCurrentRequest(generation) {
+  return generation === requestGeneration
+}
+
+function resetSearchState(settings) {
+  isLoading.value = false
+  isLoadingMore.value = false
+  hasMoreResults.value = false
+  apiUsed.value = backendPreference.value
+  searchSettings.value = settings
+  searchPage.value = 1
+  nextPageRef.value = null
+  shownResults.value = []
+}
+
+function startSearch() {
+  const routeSearchSettings = getRouteSearchSettings()
   const payload = {
-    query: query_,
+    query: String(route.params.query ?? '').trim(),
     options: {},
-    searchSettings: searchSettings
+    searchSettings: routeSearchSettings
+  }
+  const generation = ++requestGeneration
+
+  resetSearchState(routeSearchSettings)
+  query.value = payload.query
+  restoreActiveSearchFilters(routeSearchSettings)
+
+  if (!isCurrentRequest(generation)) {
+    return
+  }
+  setTabTitle(payload.query)
+  checkSearchCache(payload, generation)
+}
+
+function updateSearchHistoryEntry(payload, generation) {
+  if (!isCurrentRequest(generation)) {
+    return
   }
 
-  query.value = query_
-  restoreActiveSearchFilters(searchSettings)
-
-  setTabTitle(processedQuery.value)
-  checkSearchCache(payload)
-}, { deep: true })
-
-onMounted(() => {
-  query.value = route.params.query
-  setTabTitle(processedQuery.value)
-
-  searchSettings.value = getRouteSearchSettings()
-  restoreActiveSearchFilters(searchSettings.value)
-
-  const payload = {
-    query: processedQuery.value,
-    options: {},
-    searchSettings: searchSettings.value
-  }
-
-  checkSearchCache(payload)
-})
-
-function updateSearchHistoryEntry(searchSettings) {
   const persistentSearchHistoryPayload = {
-    _id: processedQuery.value,
+    _id: payload.query,
     lastUpdatedAt: Date.now(),
     searchSettings: {
-      prioritize: searchSettings.prioritize,
-      time: searchSettings.time,
-      type: searchSettings.type,
-      duration: searchSettings.duration,
-      features: [...searchSettings.features]
+      prioritize: payload.searchSettings.prioritize,
+      time: payload.searchSettings.time,
+      type: payload.searchSettings.type,
+      duration: payload.searchSettings.duration,
+      features: [...payload.searchSettings.features]
     }
   }
 
   store.dispatch('updateSearchHistoryEntry', persistentSearchHistoryPayload)
 }
 
-function checkSearchCache(payload) {
+function checkSearchCache(payload, generation) {
+  if (!isCurrentRequest(generation)) {
+    return
+  }
+
   if (payload.query.length > SEARCH_CHAR_LIMIT) {
     console.warn(`Search character limit is: ${SEARCH_CHAR_LIMIT}`)
     showToast({
@@ -205,7 +220,7 @@ function checkSearchCache(payload) {
 
   if (sameSearch.length > 0) {
     // No loading effect needed here, only rendered result update
-    replaceShownResults(sameSearch[0])
+    replaceShownResults(sameSearch[0], generation)
   } else {
     // Show loading effect coz there will be network request(s)
     isLoading.value = true
@@ -214,20 +229,23 @@ function checkSearchCache(payload) {
 
     switch (backendPreference.value) {
       case 'local':
-        performSearchLocal(payload)
+        performSearchLocal(payload, generation)
         break
       case 'invidious':
-        performSearchInvidious(payload, { resetSearchPage: true })
+        performSearchInvidious(payload, generation, { resetSearchPage: true })
         break
     }
   }
 
   if (rememberSearchHistory.value) {
-    updateSearchHistoryEntry(payload.searchSettings)
+    updateSearchHistoryEntry(payload, generation)
   }
 }
 
-async function performSearchLocal(payload) {
+async function performSearchLocal(payload, generation) {
+  if (!isCurrentRequest(generation)) {
+    return
+  }
   isLoading.value = true
 
   try {
@@ -236,6 +254,9 @@ async function performSearchLocal(payload) {
       payload.searchSettings,
       showFamilyFriendlyOnly.value
     )
+    if (!isCurrentRequest(generation)) {
+      return
+    }
 
     apiUsed.value = 'local'
 
@@ -243,12 +264,10 @@ async function performSearchLocal(payload) {
     nextPageRef.value = continuationData
     hasMoreResults.value = results.length > 0 && continuationData != null
 
-    isLoading.value = false
-
     const historyPayload = {
       query: payload.query,
       data: shownResults.value,
-      searchSettings: searchSettings.value,
+      searchSettings: payload.searchSettings,
       nextPageRef: nextPageRef.value ? extractLocalCacheableSearchContinuation(nextPageRef.value) : null,
       hasMoreResults: hasMoreResults.value,
       apiUsed: apiUsed.value
@@ -258,6 +277,9 @@ async function performSearchLocal(payload) {
 
     updateSubscriptionDetails(results)
   } catch (err) {
+    if (!isCurrentRequest(generation)) {
+      return
+    }
     console.error(err)
 
     const errorMessage = t('Local API Error (Click to copy)')
@@ -265,16 +287,22 @@ async function performSearchLocal(payload) {
 
     if (backendPreference.value === 'local' && backendFallback.value) {
       showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      await performSearchInvidious(payload)
-    } else {
+      resetSearchState(payload.searchSettings)
+      await performSearchInvidious(payload, generation, { resetSearchPage: true })
+    }
+  } finally {
+    if (isCurrentRequest(generation)) {
       isLoading.value = false
     }
   }
 }
 
-async function getNextpageLocal(payload) {
+async function getNextpageLocal(payload, generation) {
   try {
     const { results, continuationData } = await getLocalSearchContinuation(payload.options.nextPageRef)
+    if (!isCurrentRequest(generation)) {
+      return
+    }
 
     nextPageRef.value = continuationData
     hasMoreResults.value = results.length > 0 && continuationData != null
@@ -285,7 +313,7 @@ async function getNextpageLocal(payload) {
     const historyPayload = {
       query: payload.query,
       data: shownResults.value,
-      searchSettings: searchSettings.value,
+      searchSettings: payload.searchSettings,
       nextPageRef: nextPageRef.value ? extractLocalCacheableSearchContinuation(nextPageRef.value) : null,
       hasMoreResults: hasMoreResults.value,
       apiUsed: apiUsed.value
@@ -295,6 +323,9 @@ async function getNextpageLocal(payload) {
 
     updateSubscriptionDetails(results)
   } catch (err) {
+    if (!isCurrentRequest(generation)) {
+      return
+    }
     console.error(err)
 
     const errorMessage = t('Local API Error (Click to copy)')
@@ -302,25 +333,33 @@ async function getNextpageLocal(payload) {
 
     if (backendPreference.value === 'local' && backendFallback.value) {
       showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      await performSearchInvidious(payload)
-    } else {
-      isLoading.value = false
+      resetSearchState(payload.searchSettings)
+      await performSearchInvidious(payload, generation, { resetSearchPage: true })
     }
   }
 }
 
-async function performSearchInvidious(payload, options = { resetSearchPage: false }) {
-  if (options.resetSearchPage) {
-    searchPage.value = 1
+async function performSearchInvidious(payload, generation, { resetSearchPage = false } = {}) {
+  if (!isCurrentRequest(generation)) {
+    return
   }
 
-  if (searchPage.value === 1) {
+  const requestedPage = resetSearchPage ? 1 : searchPage.value
+  if (resetSearchPage) {
+    searchPage.value = requestedPage
+  }
+
+  if (requestedPage === 1) {
     isLoading.value = true
   }
 
   try {
-    const results = await getInvidiousSearchResults(payload.query, searchPage.value, payload.searchSettings)
+    const results = await getInvidiousSearchResults(payload.query, requestedPage, payload.searchSettings)
+    if (!isCurrentRequest(generation)) {
+      return
+    }
     if (!results) {
+      hasMoreResults.value = false
       return
     }
 
@@ -328,20 +367,18 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
 
     apiUsed.value = 'invidious'
 
-    if (searchPage.value !== 1) {
+    if (requestedPage !== 1) {
       shownResults.value = shownResults.value.concat(results)
     } else {
       shownResults.value = results
     }
 
-    isLoading.value = false
-
-    searchPage.value++
+    searchPage.value = requestedPage + 1
 
     const historyPayload = {
       query: payload.query,
       data: shownResults.value,
-      searchSettings: searchSettings.value,
+      searchSettings: payload.searchSettings,
       searchPage: searchPage.value,
       hasMoreResults: hasMoreResults.value,
       apiUsed: apiUsed.value
@@ -351,6 +388,9 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
 
     updateSubscriptionDetails(results)
   } catch (err) {
+    if (!isCurrentRequest(generation)) {
+      return
+    }
     console.error(err)
 
     const errorMessage = t('Invidious API Error (Click to copy)')
@@ -358,16 +398,22 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
       showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
-      await performSearchLocal(payload)
-    } else {
+      resetSearchState(payload.searchSettings)
+      await performSearchLocal(payload, generation)
+    }
+  } finally {
+    if (isCurrentRequest(generation) && requestedPage === 1) {
       isLoading.value = false
-      // TODO: Show toast with error message
     }
   }
 }
 
 async function nextPage() {
   if (isLoadingMore.value) {
+    return
+  }
+  const generation = requestGeneration
+  if (!isCurrentRequest(generation)) {
     return
   }
 
@@ -383,9 +429,11 @@ async function nextPage() {
     if (nextPageRef.value !== null) {
       isLoadingMore.value = true
       try {
-        await getNextpageLocal(payload)
+        await getNextpageLocal(payload, generation)
       } finally {
-        isLoadingMore.value = false
+        if (isCurrentRequest(generation)) {
+          isLoadingMore.value = false
+        }
       }
     } else {
       showToast({ message: t('Search Filters.There are no more results for this search'), icon: ['fas', 'search'] })
@@ -393,14 +441,19 @@ async function nextPage() {
   } else {
     isLoadingMore.value = true
     try {
-      await performSearchInvidious(payload)
+      await performSearchInvidious(payload, generation)
     } finally {
-      isLoadingMore.value = false
+      if (isCurrentRequest(generation)) {
+        isLoadingMore.value = false
+      }
     }
   }
 }
 
-function replaceShownResults(history) {
+function replaceShownResults(history, generation) {
+  if (!isCurrentRequest(generation)) {
+    return
+  }
   query.value = history.query
   shownResults.value = history.data
   searchSettings.value = history.searchSettings
@@ -410,12 +463,10 @@ function replaceShownResults(history) {
     history.apiUsed === 'local' ? nextPageRef.value !== null : true
   )
 
-  if (typeof (history.searchPage) !== 'undefined') {
-    searchPage.value = history.searchPage
-  }
+  searchPage.value = history.searchPage ?? 1
 
-  // This is kept in case there is some race condition
   isLoading.value = false
+  isLoadingMore.value = false
 }
 
 /**
