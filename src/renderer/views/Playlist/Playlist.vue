@@ -210,7 +210,7 @@ import {
   throttle,
 } from '../../helpers/utils'
 import { invidiousGetPlaylistInfo, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
-import { getSortedPlaylistItems, videoDurationPresent, videoDurationWithFallback, SORT_BY_VALUES } from '../../helpers/playlists'
+import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { useTabToast } from '../../composables/useTabToast'
@@ -667,28 +667,10 @@ const historyCacheById = computed(() => store.getters.getHistoryCacheById)
 
 function getPlaylistItemsWithDuration() {
   const modifiedPlaylistItems = deepCopy(shownPlaylistItems.value)
-  let anyVideoMissingDuration = false
-
-  modifiedPlaylistItems.forEach(video => {
-    if (videoDurationPresent(video)) { return }
-
-    const videoHistory = historyCacheById[video.videoId]
-
-    if (typeof videoHistory !== 'undefined') {
-      const fetchedLengthSeconds = videoDurationWithFallback(videoHistory)
-      video.lengthSeconds = fetchedLengthSeconds
-
-      // if the video duration is 0, it will be the fallback value, so mark it as missing a duration
-      if (fetchedLengthSeconds === 0) {
-        anyVideoMissingDuration = true
-      }
-    } else {
-      // Mark at least one video have no duration, show notice later
-      // Also assign fallback duration here
-      anyVideoMissingDuration = true
-      video.lengthSeconds = 0
-    }
-  })
+  const anyVideoMissingDuration = fillMissingPlaylistVideoDurations(
+    modifiedPlaylistItems,
+    historyCacheById.value
+  )
 
   // Show notice if not already shown before returning playlist items
   if (anyVideoMissingDuration && !alreadyShownNotice) {

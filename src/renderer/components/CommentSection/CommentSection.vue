@@ -413,7 +413,7 @@
       </div>
       <FtSpinner
         v-if="shouldShowAutoLoadMoreCommentsSpinner"
-        label="Loading more comments"
+        :label="$t('Comments.Load More Comments')"
       />
       <h4
         v-else-if="canPerformMoreCommentLoading"

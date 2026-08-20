@@ -11,7 +11,7 @@
     </div>
     <FtSpinner
       v-if="loading || generalAutoLoadMorePaginatedItemsEnabled"
-      label="Loading more"
+      :label="$t('Global.Loading More')"
     />
     <slot v-else />
   </div>
