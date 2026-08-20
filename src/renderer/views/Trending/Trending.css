@@ -85,6 +85,11 @@
   color: var(--primary-color);
 }
 
+.statusMessage {
+  margin-block: 48px;
+  text-align: center;
+}
+
 @media only screen and (width <= 680px) {
   .card {
     inline-size: 100%;
