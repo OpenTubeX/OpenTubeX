@@ -234,7 +234,7 @@ test.describe('video downloads', () => {
 
     let passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
     const extractorArgsIndex = passedArguments.indexOf('--extractor-args')
-    expect(passedArguments[extractorArgsIndex + 1]).toBe('youtube:player_client=web_embedded,default,-android_vr')
+    expect(passedArguments[extractorArgsIndex + 1]).toBe('youtube:player_client=default,web_embedded,-android_vr')
 
     const info = await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee', true))
 

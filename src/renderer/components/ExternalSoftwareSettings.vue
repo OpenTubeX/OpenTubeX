@@ -2,42 +2,198 @@
   <FtSettingsSection
     :title="t('Settings.External Software Settings.External Software Settings')"
   >
-    <FtFlexBox>
+    <div class="externalSoftwareTools">
+      <section
+        class="externalSoftwareTool"
+        aria-labelledby="yt-dlp-settings-heading"
+      >
+        <h4
+          id="yt-dlp-settings-heading"
+          class="externalSoftwareToolTitle"
+        >
+          <FtIcon :icon="['fas', 'download']" />
+          {{ YT_DLP_NAME }}
+        </h4>
+        <div class="externalSoftwareToolControls">
+          <FtSelect
+            class="externalSoftwareSelect"
+            :placeholder="t('Settings.External Software Settings.yt-dlp Source')"
+            :value="ytDlpSource"
+            :select-names="sourceNames"
+            :select-values="SOURCE_VALUES"
+            :tooltip="t('Tooltips.External Software Settings.yt-dlp Source')"
+            @change="updateYtDlpSource"
+          />
+          <FtSelect
+            v-if="ytDlpSource === 'managed'"
+            class="externalSoftwareSelect"
+            :placeholder="t('Settings.External Software Settings.yt-dlp Channel')"
+            :value="ytDlpChannel"
+            :select-names="CHANNEL_NAMES"
+            :select-values="CHANNEL_VALUES"
+            :tooltip="t('Tooltips.External Software Settings.yt-dlp Channel')"
+            :icon="['fas', 'download']"
+            @change="updateYtDlpChannel"
+          />
+          <FtInput
+            v-else
+            class="externalSoftwarePath"
+            :placeholder="t('Settings.External Software Settings.yt-dlp Executable Path')"
+            :show-action-button="true"
+            :allow-action-button-when-empty="true"
+            :force-action-button-icon-name="['fas', 'folder-open']"
+            :show-label="true"
+            :value="ytDlpPath"
+            :tooltip="t('Tooltips.External Software Settings.yt-dlp Executable Path')"
+            @input="updateYtDlpPath"
+            @click="chooseExecutablePath('yt-dlp')"
+          />
+        </div>
+        <div class="externalSoftwareToolStatus">
+          <p
+            v-if="ytDlpInfo === null"
+            class="ytDlpStatus"
+          >
+            {{ t('Settings.External Software Settings.Checking yt-dlp') }}
+          </p>
+          <p
+            v-else-if="!ytDlpInfo.available"
+            class="ytDlpStatus ytDlpWarning"
+          >
+            <FtIcon :icon="['fas', 'circle-exclamation']" />
+            {{ ytDlpSource === 'managed'
+              ? t('Settings.External Software Settings.Managed Not Downloaded')
+              : t('Settings.External Software Settings.System yt-dlp Missing Warning') }}
+          </p>
+          <p
+            v-else
+            class="ytDlpStatus"
+          >
+            {{ t('Settings.External Software Settings.Detected Version Template', { version: ytDlpInfo.version }) }}
+          </p>
+        </div>
+        <FtButton
+          v-if="ytDlpSource === 'managed'"
+          class="externalSoftwareToolAction"
+          :label="ytDlpBinaryDownloadInProgress
+            ? t('Settings.External Software Settings.Downloading yt-dlp')
+            : (ytDlpInfo === null
+              ? t('Settings.External Software Settings.Checking yt-dlp')
+              : ytDlpInfo.available
+                ? t('Settings.External Software Settings.Update yt-dlp')
+                : t('Settings.External Software Settings.Download yt-dlp'))"
+          :icon="['fas', 'download']"
+          :disabled="ytDlpBinaryDownloadInProgress || ytDlpInfo === null"
+          :text-color="null"
+          :background-color="null"
+          @click="downloadBinary('yt-dlp')"
+        />
+      </section>
+
+      <section
+        class="externalSoftwareTool"
+        aria-labelledby="ffmpeg-settings-heading"
+      >
+        <h4
+          id="ffmpeg-settings-heading"
+          class="externalSoftwareToolTitle"
+        >
+          <FtIcon :icon="['fas', 'file-video']" />
+          {{ FFMPEG_TOOL_NAME }}
+        </h4>
+        <div class="externalSoftwareToolControls">
+          <FtSelect
+            class="externalSoftwareSelect"
+            :placeholder="t('Settings.External Software Settings.FFmpeg Source')"
+            :value="ytDlpFfmpegSource"
+            :select-names="sourceNames"
+            :select-values="SOURCE_VALUES"
+            :tooltip="t('Tooltips.External Software Settings.FFmpeg Source')"
+            @change="updateYtDlpFfmpegSource"
+          />
+          <FtInput
+            v-if="ytDlpFfmpegSource === 'system'"
+            class="externalSoftwarePath"
+            :placeholder="t('Settings.External Software Settings.FFmpeg Executable Path')"
+            :show-action-button="true"
+            :allow-action-button-when-empty="true"
+            :force-action-button-icon-name="['fas', 'folder-open']"
+            :show-label="true"
+            :value="ytDlpFfmpegPath"
+            :tooltip="t('Tooltips.External Software Settings.FFmpeg Executable Path')"
+            @input="updateYtDlpFfmpegPath"
+            @click="chooseExecutablePath('ffmpeg')"
+          />
+        </div>
+        <div class="externalSoftwareToolStatus">
+          <p
+            v-if="ffmpegInfo === null"
+            class="ytDlpStatus"
+          >
+            {{ t('Settings.External Software Settings.Checking FFmpeg') }}
+          </p>
+          <p
+            v-else-if="!ffmpegInfo.available"
+            class="ytDlpStatus ytDlpWarning"
+          >
+            <FtIcon :icon="['fas', 'circle-exclamation']" />
+            {{ ytDlpFfmpegSource === 'managed'
+              ? t('Settings.External Software Settings.FFmpeg Managed Not Downloaded')
+              : t('Settings.External Software Settings.System FFmpeg Missing Warning') }}
+          </p>
+          <p
+            v-else
+            class="ytDlpStatus"
+          >
+            {{ t('Settings.External Software Settings.Detected FFmpeg Version Template', { version: ffmpegInfo.version }) }}
+          </p>
+          <p
+            v-if="ffprobeInfo === null"
+            class="ytDlpStatus"
+          >
+            {{ t('Settings.External Software Settings.Checking FFprobe') }}
+          </p>
+          <p
+            v-else-if="!ffprobeInfo.available"
+            class="ytDlpStatus ytDlpWarning"
+          >
+            <FtIcon :icon="['fas', 'circle-exclamation']" />
+            {{ ytDlpFfmpegSource === 'managed'
+              ? t('Settings.External Software Settings.FFprobe Managed Not Downloaded')
+              : t('Settings.External Software Settings.System FFprobe Missing Warning') }}
+          </p>
+          <p
+            v-else
+            class="ytDlpStatus"
+          >
+            {{ t('Settings.External Software Settings.Detected FFprobe Version Template', { version: ffprobeInfo.version }) }}
+          </p>
+        </div>
+        <FtButton
+          v-if="ytDlpFfmpegSource === 'managed'"
+          class="externalSoftwareToolAction"
+          :label="ffmpegBinaryDownloadInProgress
+            ? t('Settings.External Software Settings.Downloading FFmpeg and FFprobe')
+            : (ffmpegInfo === null
+              ? t('Settings.External Software Settings.Checking FFmpeg')
+              : ffmpegToolsAvailable
+                ? t('Settings.External Software Settings.Update FFmpeg and FFprobe')
+                : t('Settings.External Software Settings.Download FFmpeg and FFprobe'))"
+          :icon="['fas', 'download']"
+          :disabled="ffmpegBinaryDownloadInProgress || ffmpegInfo === null"
+          :text-color="null"
+          :background-color="null"
+          @click="downloadBinary('ffmpeg')"
+        />
+      </section>
+    </div>
+
+    <div
+      v-if="ytDlpSource === 'managed' || ytDlpFfmpegSource === 'managed'"
+      class="managedSoftwareControls"
+    >
       <FtSelect
-        v-if="ytDlpSource === 'managed'"
-        class="sourceSelect"
-        :placeholder="t('Settings.External Software Settings.yt-dlp Channel')"
-        :value="ytDlpChannel"
-        :select-names="CHANNEL_NAMES"
-        :select-values="CHANNEL_VALUES"
-        :tooltip="t('Tooltips.External Software Settings.yt-dlp Channel')"
-        :icon="['fas', 'download']"
-        @change="updateYtDlpChannel"
-      />
-      <FtSelect
-        class="sourceSelect"
-        :placeholder="t('Settings.External Software Settings.yt-dlp Source')"
-        :value="ytDlpSource"
-        :select-names="sourceNames"
-        :select-values="SOURCE_VALUES"
-        :tooltip="t('Tooltips.External Software Settings.yt-dlp Source')"
-        :icon="['fas', 'download']"
-        @change="updateYtDlpSource"
-      />
-      <FtSelect
-        class="sourceSelect"
-        :placeholder="t('Settings.External Software Settings.FFmpeg Source')"
-        :value="ytDlpFfmpegSource"
-        :select-names="sourceNames"
-        :select-values="SOURCE_VALUES"
-        :tooltip="t('Tooltips.External Software Settings.FFmpeg Source')"
-        :icon="['fas', 'file-video']"
-        @change="updateYtDlpFfmpegSource"
-      />
-    </FtFlexBox>
-    <FtFlexBox v-if="ytDlpSource === 'managed' || ytDlpFfmpegSource === 'managed'">
-      <FtSelect
-        class="sourceSelect"
+        class="externalSoftwareSelect"
         :placeholder="t('Settings.External Software Settings.Managed Tool Updates')"
         :value="externalSoftwareUpdateMode"
         :select-names="updateModeNames"
@@ -46,108 +202,7 @@
         :icon="['fas', 'sync']"
         @change="updateExternalSoftwareUpdateMode"
       />
-    </FtFlexBox>
-    <FtFlexBox class="binaryStatusStart">
-      <p
-        v-if="ytDlpInfo === null"
-        class="ytDlpStatus"
-      >
-        {{ t('Settings.External Software Settings.Checking yt-dlp') }}
-      </p>
-      <p
-        v-else-if="!ytDlpInfo.available"
-        class="ytDlpStatus ytDlpWarning"
-      >
-        <FtIcon :icon="['fas', 'circle-exclamation']" />
-        {{ ytDlpSource === 'managed'
-          ? t('Settings.External Software Settings.Managed Not Downloaded')
-          : t('Settings.External Software Settings.System yt-dlp Missing Warning') }}
-      </p>
-      <p
-        v-else
-        class="ytDlpStatus"
-      >
-        {{ t('Settings.External Software Settings.Detected Version Template', { version: ytDlpInfo.version }) }}
-      </p>
-    </FtFlexBox>
-    <FtFlexBox>
-      <p
-        v-if="ffmpegInfo === null"
-        class="ytDlpStatus"
-      >
-        {{ t('Settings.External Software Settings.Checking FFmpeg') }}
-      </p>
-      <p
-        v-else-if="!ffmpegInfo.available"
-        class="ytDlpStatus ytDlpWarning"
-      >
-        <FtIcon :icon="['fas', 'circle-exclamation']" />
-        {{ ytDlpFfmpegSource === 'managed'
-          ? t('Settings.External Software Settings.FFmpeg Managed Not Downloaded')
-          : t('Settings.External Software Settings.System FFmpeg Missing Warning') }}
-      </p>
-      <p
-        v-else
-        class="ytDlpStatus"
-      >
-        {{ t('Settings.External Software Settings.Detected FFmpeg Version Template', { version: ffmpegInfo.version }) }}
-      </p>
-    </FtFlexBox>
-    <FtFlexBox class="binaryStatusEnd">
-      <p
-        v-if="ffprobeInfo === null"
-        class="ytDlpStatus"
-      >
-        {{ t('Settings.External Software Settings.Checking FFprobe') }}
-      </p>
-      <p
-        v-else-if="!ffprobeInfo.available"
-        class="ytDlpStatus ytDlpWarning"
-      >
-        <FtIcon :icon="['fas', 'circle-exclamation']" />
-        {{ ytDlpFfmpegSource === 'managed'
-          ? t('Settings.External Software Settings.FFprobe Managed Not Downloaded')
-          : t('Settings.External Software Settings.System FFprobe Missing Warning') }}
-      </p>
-      <p
-        v-else
-        class="ytDlpStatus"
-      >
-        {{ t('Settings.External Software Settings.Detected FFprobe Version Template', { version: ffprobeInfo.version }) }}
-      </p>
-    </FtFlexBox>
-    <FtFlexBox v-if="ytDlpSource === 'managed' || ytDlpFfmpegSource === 'managed'">
-      <FtButton
-        v-if="ytDlpSource === 'managed'"
-        :label="ytDlpBinaryDownloadInProgress
-          ? t('Settings.External Software Settings.Downloading yt-dlp')
-          : (ytDlpInfo === null
-            ? t('Settings.External Software Settings.Checking yt-dlp')
-            : ytDlpInfo.available
-              ? t('Settings.External Software Settings.Update yt-dlp')
-              : t('Settings.External Software Settings.Download yt-dlp'))"
-        :icon="['fas', 'download']"
-        :disabled="ytDlpBinaryDownloadInProgress || ytDlpInfo === null"
-        :text-color="null"
-        :background-color="null"
-        @click="downloadBinary('yt-dlp')"
-      />
-      <FtButton
-        v-if="ytDlpFfmpegSource === 'managed'"
-        :label="ffmpegBinaryDownloadInProgress
-          ? t('Settings.External Software Settings.Downloading FFmpeg and FFprobe')
-          : (ffmpegInfo === null
-            ? t('Settings.External Software Settings.Checking FFmpeg')
-            : ffmpegToolsAvailable
-              ? t('Settings.External Software Settings.Update FFmpeg and FFprobe')
-              : t('Settings.External Software Settings.Download FFmpeg and FFprobe'))"
-        :icon="['fas', 'download']"
-        :disabled="ffmpegBinaryDownloadInProgress || ffmpegInfo === null"
-        :text-color="null"
-        :background-color="null"
-        @click="downloadBinary('ffmpeg')"
-      />
-    </FtFlexBox>
+    </div>
     <!-- extra wrapper, as the section adds inline padding to direct div children,
       which would offset the fill inside the track -->
     <div v-if="binaryDownloadProgress !== null">
@@ -159,35 +214,6 @@
         />
       </div>
     </div>
-    <FtFlexBox
-      v-if="ytDlpSource === 'system' || ytDlpFfmpegSource === 'system'"
-      class="executablePathInputs settingsFlexStart460px"
-    >
-      <FtInput
-        v-if="ytDlpSource === 'system'"
-        :placeholder="t('Settings.External Software Settings.yt-dlp Executable Path')"
-        :show-action-button="true"
-        :allow-action-button-when-empty="true"
-        :force-action-button-icon-name="['fas', 'folder-open']"
-        :show-label="true"
-        :value="ytDlpPath"
-        :tooltip="t('Tooltips.External Software Settings.yt-dlp Executable Path')"
-        @input="updateYtDlpPath"
-        @click="chooseExecutablePath('yt-dlp')"
-      />
-      <FtInput
-        v-if="ytDlpFfmpegSource === 'system'"
-        :placeholder="t('Settings.External Software Settings.FFmpeg Executable Path')"
-        :show-action-button="true"
-        :allow-action-button-when-empty="true"
-        :force-action-button-icon-name="['fas', 'folder-open']"
-        :show-label="true"
-        :value="ytDlpFfmpegPath"
-        :tooltip="t('Tooltips.External Software Settings.FFmpeg Executable Path')"
-        @input="updateYtDlpFfmpegPath"
-        @click="chooseExecutablePath('ffmpeg')"
-      />
-    </FtFlexBox>
   </FtSettingsSection>
   <FtSettingsSection
     :title="t('Settings.External Software Settings.Restricted Playback Authentication')"
@@ -279,6 +305,8 @@ import { showToast } from '../helpers/utils'
 
 const { t } = useI18n()
 
+const YT_DLP_NAME = 'yt-dlp'
+const FFMPEG_TOOL_NAME = 'FFmpeg / FFprobe'
 const SOURCE_VALUES = ['system', 'managed']
 const CHANNEL_NAMES = ['Stable', 'Nightly', 'Master']
 const CHANNEL_VALUES = ['stable', 'nightly', 'master']
@@ -718,17 +746,83 @@ async function chooseBrowserProfilePath() {
 </script>
 
 <style scoped>
-.sourceSelect {
+.externalSoftwareTools {
+  --external-software-select-gutter: 70px;
+  --external-software-help-width: 28px;
+
+  align-items: stretch;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-block: 8px 18px;
+  margin-inline: auto;
+  max-inline-size: 860px;
+}
+
+.externalSoftwareTool {
+  border-radius: calc(6px * var(--ui-roundness));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  padding-block: 14px 18px;
+  padding-inline: 18px;
+}
+
+.externalSoftwareToolTitle {
+  align-items: center;
+  display: flex;
+  font-size: 18px;
+  gap: 8px;
+  margin-block: 0 6px;
+  margin-inline: 0;
+}
+
+.externalSoftwareToolTitle :deep(.ft-icon) {
+  color: var(--accent-color);
+}
+
+.externalSoftwareToolControls {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.externalSoftwareSelect {
+  inline-size: calc(100% - var(--external-software-select-gutter));
+  max-inline-size: 340px;
+}
+
+.externalSoftwarePath {
+  inline-size: calc(
+    100% - var(--external-software-select-gutter) + var(--external-software-help-width)
+  );
+  margin-block-start: 24px;
+  max-inline-size: calc(340px + var(--external-software-help-width));
+}
+
+.externalSoftwareToolStatus {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-block: 20px 14px;
+  text-align: center;
+}
+
+.externalSoftwareToolAction {
+  align-self: center;
+  margin-block: auto 5px;
+}
+
+.managedSoftwareControls {
+  display: flex;
+  justify-content: center;
+  margin-block-end: 12px;
+}
+
+.managedSoftwareControls .externalSoftwareSelect {
   inline-size: 250px;
-}
-
-.executablePathInputs {
-  column-gap: 12px;
-}
-
-.executablePathInputs :deep(.ft-input-component) {
-  inline-size: 340px;
-  max-inline-size: 100%;
+  margin-inline-start: 70px;
 }
 
 .restrictedPlaybackAuthControls {
@@ -788,14 +882,6 @@ async function chooseBrowserProfilePath() {
   text-align: center;
 }
 
-.binaryStatusStart {
-  margin-block-start: 8px;
-}
-
-.binaryStatusEnd {
-  margin-block-end: 8px;
-}
-
 .ytDlpStatus {
   margin-block: 0;
 }
@@ -843,8 +929,32 @@ async function chooseBrowserProfilePath() {
   }
 }
 
-@media only screen and (width <= 800px) {
-  .sourceSelect {
+@container settings-content (width <= 800px) {
+  .externalSoftwareTools {
+    grid-template-columns: minmax(0, 1fr);
+    max-inline-size: 520px;
+  }
+}
+
+@container settings-content (width <= 460px) {
+  .externalSoftwareTools {
+    --external-software-select-gutter: 28px;
+  }
+
+  .externalSoftwareTool {
+    padding-inline: 14px;
+  }
+
+  .externalSoftwareSelect,
+  .managedSoftwareControls .externalSoftwareSelect {
+    margin-inline: 0 28px;
+  }
+
+  .externalSoftwareSelect {
+    inline-size: calc(100% - var(--external-software-select-gutter));
+  }
+
+  .managedSoftwareControls .externalSoftwareSelect {
     inline-size: calc(100% - 28px);
   }
 }
