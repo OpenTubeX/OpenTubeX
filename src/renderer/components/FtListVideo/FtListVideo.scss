@@ -54,6 +54,10 @@
   opacity: 1;
 }
 
+.ft-list-item.watched .thumbnailPreview:not(.loaded) {
+  opacity: 0;
+}
+
 .youtubeShort.grid {
   .videoThumbnail .thumbnailImage {
     aspect-ratio: 2 / 3;
