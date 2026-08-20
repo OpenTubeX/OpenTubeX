@@ -203,6 +203,8 @@ export default defineComponent({
       // Same-tab navigation keeps the current layout while its skeleton loads.
       // A newly mounted watch tab falls back to the configured default instead.
       loadingTheatreMode: null,
+      suppressTabLoadingIndicator: false,
+      suppressTabLoadingIndicatorOnNextReload: false,
       applyDefaultTheatreModeAfterLoad: false,
       theatreLayoutAvailable: window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH,
       videoPlayerLoaded: false,
@@ -231,6 +233,7 @@ export default defineComponent({
       shortsCompletionBlockedBySeek: false,
       shortsPlaybackAfterSeekSeconds: 0,
       videoLoadGeneration: 0,
+      preparingVideoLoadGeneration: null,
       hasAiGeneratedContent: false,
       hasPaidPromotion: false,
       paidPromotionDurationMs: 10000,
@@ -1067,6 +1070,12 @@ export default defineComponent({
         }
       }
     },
+    errorMessage(message) {
+      if (message) {
+        this.suppressTabLoadingIndicator = false
+        this.suppressTabLoadingIndicatorOnNextReload = false
+      }
+    },
     isTabPresented: {
       immediate: true,
       handler() {
@@ -1662,44 +1671,53 @@ export default defineComponent({
     },
 
     async reloadView({ preserveTitle = false } = {}) {
+      this.suppressTabLoadingIndicator = this.suppressTabLoadingIndicatorOnNextReload
+      this.suppressTabLoadingIndicatorOnNextReload = false
       const loadGeneration = ++this.videoLoadGeneration
+      this.preparingVideoLoadGeneration = loadGeneration
       const requestedVideoId = this.tabRoute.params.id
       this.loadingTheatreMode = this.useTheatreMode
       preserveTitle ||= this.preserveTitleOnNextReload
       this.preserveTitleOnNextReload = false
 
-      await this.handleRouteChange()
-      if (!this.isCurrentVideoLoad(loadGeneration, requestedVideoId)) { return }
-
-      if (this.$refs.player) {
-        await this.destroyPlayer()
+      try {
+        await this.handleRouteChange()
         if (!this.isCurrentVideoLoad(loadGeneration, requestedVideoId)) { return }
-      }
 
-      // react to route changes...
-      const previousVideoId = this.videoId
-      this.videoId = this.tabRoute.params.id
-      const videoIdChanged = this.videoId !== previousVideoId
-      if (videoIdChanged) {
-        this.ipBlockRecoveryAttemptedForCurrentVideo = false
-        this.streamErrorReloadAttemptedForCurrentVideo = false
-        this.playbackEngineFallbackAttemptedForCurrentVideo = false
-        this.playbackEngineFallbackTarget = null
-        this.ytDlpDefaultClientsFallbackToastShown = false
-        this.sabrErrorRecoveryAttempts = 0
-        this.sabrErrorRecoveriesForCurrentVideo = 0
-        this.sabrErrorRecoveryLastSeconds = null
-        this.sabrErrorRecoveryPlayedSeconds = 0
+        if (this.$refs.player) {
+          await this.destroyPlayer()
+          if (!this.isCurrentVideoLoad(loadGeneration, requestedVideoId)) { return }
+        }
+
+        // react to route changes...
+        const previousVideoId = this.videoId
+        this.videoId = this.tabRoute.params.id
+        const videoIdChanged = this.videoId !== previousVideoId
+        if (videoIdChanged) {
+          this.ipBlockRecoveryAttemptedForCurrentVideo = false
+          this.streamErrorReloadAttemptedForCurrentVideo = false
+          this.playbackEngineFallbackAttemptedForCurrentVideo = false
+          this.playbackEngineFallbackTarget = null
+          this.ytDlpDefaultClientsFallbackToastShown = false
+          this.sabrErrorRecoveryAttempts = 0
+          this.sabrErrorRecoveriesForCurrentVideo = 0
+          this.sabrErrorRecoveryLastSeconds = null
+          this.sabrErrorRecoveryPlayedSeconds = 0
+        }
+        this.ipBlockDetectedInCurrentChain = false
+        const preserveShortsPanels = videoIdChanged &&
+          this.customShortsPlayerActive &&
+          this.tabRoute.query.short === 'true'
+        this.resetVideoState({
+          preserveTitle,
+          placeholderTitle: videoIdChanged ? this.getPendingVideoTitle() : '',
+          preserveShortsPanels,
+        })
+      } finally {
+        if (this.preparingVideoLoadGeneration === loadGeneration) {
+          this.preparingVideoLoadGeneration = null
+        }
       }
-      this.ipBlockDetectedInCurrentChain = false
-      const preserveShortsPanels = videoIdChanged &&
-        this.customShortsPlayerActive &&
-        this.tabRoute.query.short === 'true'
-      this.resetVideoState({
-        preserveTitle,
-        placeholderTitle: videoIdChanged ? this.getPendingVideoTitle() : '',
-        preserveShortsPanels,
-      })
 
       this.firstLoad = true
       this.videoPlayerLoaded = false
@@ -3894,6 +3912,10 @@ export default defineComponent({
     },
 
     handleVideoLoaded: function (mediaMetadata) {
+      if (this.isLoading || this.preparingVideoLoadGeneration !== null) { return }
+
+      this.suppressTabLoadingIndicator = false
+      this.suppressTabLoadingIndicatorOnNextReload = false
       // Only used one time = remove after use
       this.oneTimeTimestamp = null
       this.sabrReloadCaptionIndex = null
@@ -5515,6 +5537,8 @@ export default defineComponent({
       try {
         await this.performSabrReload(payload, toastMessage)
       } catch (error) {
+        this.suppressTabLoadingIndicator = false
+        this.suppressTabLoadingIndicatorOnNextReload = false
         console.error('SABR reload failed', error)
         return false
       }
@@ -5547,6 +5571,7 @@ export default defineComponent({
       this.sabrReloadVideoQuality = this.normalizeVideoQuality(payload?.videoQuality) ||
         this.normalizeVideoQuality(this.currentVideoQuality) || null
       this.preserveTitleOnNextReload = true
+      this.suppressTabLoadingIndicatorOnNextReload = true
       this.showTabToast({ message: toastMessage, icon: ['fas', 'sync'] })
 
       const timestamp = this.getTimestamp()
