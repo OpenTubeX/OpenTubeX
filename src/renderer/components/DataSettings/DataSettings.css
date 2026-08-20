@@ -2,6 +2,12 @@
   justify-content: center;
 }
 
+.exportTypeButtons {
+  align-content: center;
+  align-items: center;
+  flex: 1;
+}
+
 .importFormatsHint {
   color: var(--secondary-text-color);
   font-size: 0.9em;

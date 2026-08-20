@@ -228,6 +228,10 @@ export default {
     return ipcRenderer.invoke(IpcChannels.GENERATE_PO_TOKEN, videoId, context, initialAttestationData, ytConfig)
   },
 
+  openProfileDirectory: () => {
+    ipcRenderer.send(IpcChannels.OPEN_PROFILE_DIRECTORY)
+  },
+
   chooseDefaultFolder: () => {
     ipcRenderer.send(IpcChannels.CHOOSE_DEFAULT_FOLDER)
   },

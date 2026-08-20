@@ -3599,6 +3599,20 @@ function runApp() {
     }
   })
 
+  ipcMain.on(IpcChannels.OPEN_PROFILE_DIRECTORY, (event) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+      return
+    }
+
+    shell.openPath(app.getPath('userData')).then((error) => {
+      if (error) {
+        console.error(`Unable to open profile directory: ${error}`)
+      }
+    }).catch((error) => {
+      console.error('Unable to open profile directory', error)
+    })
+  })
+
   /**
    * @param {import('electron').WebContents} webContents
    * @param {string | undefined} [currentPath]

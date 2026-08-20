@@ -8,14 +8,17 @@
     <FtFlexBox class="box">
       <FtButton
         :label="$t('Settings.Data Settings.Import Subscriptions')"
+        :icon="['fas', 'folder-open']"
         @click="importSubscriptions"
       />
       <FtButton
         :label="$t('Settings.Data Settings.Manage Subscriptions')"
+        :icon="['fas', 'users']"
         @click="openProfileSettings"
       />
       <FtButton
         :label="$t('Settings.Data Settings.Export Subscriptions')"
+        :icon="['fas', 'file-download']"
         @click="showExportSubscriptionsPrompt = true"
       />
     </FtFlexBox>
@@ -35,10 +38,12 @@
     <FtFlexBox class="box">
       <FtButton
         :label="$t('Settings.Data Settings.Import History')"
+        :icon="['fas', 'folder-open']"
         @click="importWatchHistory"
       />
       <FtButton
         :label="$t('Settings.Data Settings.Export History')"
+        :icon="['fas', 'file-download']"
         @click="showExportWatchHistoryPrompt = true"
       />
     </FtFlexBox>
@@ -51,10 +56,12 @@
     <FtFlexBox class="box">
       <FtButton
         :label="$t('Settings.Data Settings.Import Playlists')"
+        :icon="['fas', 'folder-open']"
         @click="importPlaylists"
       />
       <FtButton
         :label="$t('Settings.Data Settings.Export Playlists')"
+        :icon="['fas', 'file-download']"
         @click="exportPlaylists"
       />
     </FtFlexBox>
@@ -67,10 +74,12 @@
     <FtFlexBox class="box">
       <FtButton
         :label="t('Settings.Data Settings.Import search history')"
+        :icon="['fas', 'folder-open']"
         @click="importSearchHistory"
       />
       <FtButton
         :label="t('Settings.Data Settings.Export search history')"
+        :icon="['fas', 'file-download']"
         @click="showExportSearchHistoryPrompt = true"
       />
     </FtFlexBox>
@@ -88,24 +97,39 @@
     <FtFlexBox class="box">
       <FtButton
         :label="t('Settings.Data Settings.Import Settings')"
+        :icon="['fas', 'folder-open']"
         @click="importSettings"
       />
       <FtButton
         :label="t('Settings.Data Settings.Export Settings')"
+        :icon="['fas', 'file-download']"
         @click="exportSettings"
       />
     </FtFlexBox>
+    <template v-if="isElectron">
+      <h4 class="groupTitle">
+        {{ t('Settings.Data Settings.Profile Directory') }}
+      </h4>
+      <FtFlexBox class="box">
+        <FtButton
+          :label="t('Settings.Data Settings.Open Profile Directory')"
+          :icon="['fas', 'folder-open']"
+          @click="openProfileDirectory"
+        />
+      </FtFlexBox>
+    </template>
     <FtSettingsSubpage
       :open="showExportSubscriptionsPrompt"
       :title="t('Settings.Data Settings.Select Export Type')"
       :icon="['fas', 'file-download']"
       @close="showExportSubscriptionsPrompt = false"
     >
-      <FtFlexBox>
+      <FtFlexBox class="exportTypeButtons">
         <FtButton
           v-for="(name, index) in exportSubscriptionsPromptNames.slice(0, SUBSCRIPTIONS_PROMPT_VALUES.length - 1)"
           :key="SUBSCRIPTIONS_PROMPT_VALUES[index]"
           :label="name"
+          :icon="['fas', 'file-download']"
           @click="exportSubscriptions(SUBSCRIPTIONS_PROMPT_VALUES[index])"
         />
       </FtFlexBox>
@@ -116,11 +140,12 @@
       :icon="['fas', 'file-download']"
       @close="showExportWatchHistoryPrompt = false"
     >
-      <FtFlexBox>
+      <FtFlexBox class="exportTypeButtons">
         <FtButton
           v-for="(name, index) in exportWatchSearchHistoryPromptNames.slice(0, WATCH_SEARCH_HISTORY_PROMPT_VALUES.length)"
           :key="WATCH_SEARCH_HISTORY_PROMPT_VALUES[index]"
           :label="name"
+          :icon="['fas', 'file-download']"
           @click="exportWatchHistory(WATCH_SEARCH_HISTORY_PROMPT_VALUES[index])"
         />
       </FtFlexBox>
@@ -131,11 +156,12 @@
       :icon="['fas', 'file-download']"
       @close="showExportSearchHistoryPrompt = false"
     >
-      <FtFlexBox>
+      <FtFlexBox class="exportTypeButtons">
         <FtButton
           v-for="(name, index) in exportWatchSearchHistoryPromptNames.slice(0, WATCH_SEARCH_HISTORY_PROMPT_VALUES.length)"
           :key="WATCH_SEARCH_HISTORY_PROMPT_VALUES[index]"
           :label="name"
+          :icon="['fas', 'file-download']"
           @click="exportSearchHistory(WATCH_SEARCH_HISTORY_PROMPT_VALUES[index])"
         />
       </FtFlexBox>
@@ -179,8 +205,14 @@ import {
 
 const IMPORT_DIRECTORY_ID = 'data-settings-import'
 const START_IN_DIRECTORY = 'downloads'
+const isElectron = process.env.IS_ELECTRON
 
 const { t } = useI18n()
+
+function openProfileDirectory() {
+  window.ftElectron.openProfileDirectory()
+}
+
 function openProfileSettings() {
   store.dispatch('showSettingsWindow', 'profile')
 }

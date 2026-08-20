@@ -319,6 +319,43 @@ test.describe('settings', () => {
     expect(paletteColors).toEqual(['rgb(76, 175, 80)', 'rgb(255, 235, 59)'])
   })
 
+  test('offers a custom SponsorBlock category color initialized from its default', async ({ app, page }) => {
+    const addOns = await goToSettingsSection(page, 'add-ons')
+    await addOns.locator('label.switch-label').filter({ hasText: 'Enable SponsorBlock' }).click()
+
+    const sponsorCategory = addOns.locator('.sponsorBlockCategory')
+      .filter({ has: page.locator('.sponsorTitle', { hasText: /^Sponsor$/ }) })
+    const colorSelect = sponsorCategory.locator('.select-text').first()
+    await colorSelect.click()
+
+    const colorOptions = page.locator('.selectDropdown .selectOption')
+    await expect(colorOptions.first()).toHaveText('Custom color')
+    await colorOptions.first().click()
+
+    const picker = sponsorCategory.locator('.ftColorPicker')
+    await expect(picker.getByRole('button', { name: 'Custom color' })).toBeVisible()
+    await expect(picker.locator('code')).toHaveText('#4caf50')
+    await expect(sponsorCategory.locator('.select-icon').first())
+      .toHaveCSS('color', 'rgb(76, 175, 80)')
+
+    await picker.getByRole('button', { name: 'Custom color' }).click()
+    const pickerDialog = page.getByRole('dialog', { name: 'Custom color' })
+    const hexColor = pickerDialog.getByLabel('Hex color')
+    await hexColor.fill('#123456')
+    await hexColor.press('Enter')
+    await pickerDialog.getByRole('button', { name: 'Apply' }).click()
+
+    await expect(picker.locator('code')).toHaveText('#123456')
+    await expect(sponsorCategory.locator('.select-icon').first())
+      .toHaveCSS('color', 'rgb(18, 52, 86)')
+    await expect.poll(async () => {
+      const settings = latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      )
+      return settings.sponsorBlockSponsor
+    }).toEqual({ color: '#123456', skip: 'autoSkip' })
+  })
+
   test('keeps General selects compact with tooltip indicators inside their width', async ({ page, attachScreenshot }) => {
     await goTo(page, 'settings')
 
@@ -1683,6 +1720,39 @@ test.describe('settings', () => {
     await page.getByRole('combobox', { name: 'Preferred API backend' }).click()
     await expect(dropdown).toBeVisible()
     expect(await dropdown.evaluate(menu => menu.scrollHeight <= menu.clientHeight)).toBe(true)
+  })
+
+  test('contains wheel scrolling at the ends of select dropdowns', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    await page.evaluate(() => {
+      document.body.style.minBlockSize = '4000px'
+      document.scrollingElement.scrollTop = 1000
+    })
+    await expect.poll(() => page.evaluate(() => document.scrollingElement.scrollTop))
+      .toBe(1000)
+
+    await page.getByRole('combobox', { name: /Language preference|Locale Preference/ }).click()
+    const dropdown = page.locator('.selectDropdown')
+    await expect(dropdown).toBeVisible()
+    await dropdown.hover()
+
+    for (const { dropdownEnd, wheelDelta } of [
+      { dropdownEnd: 'bottom', wheelDelta: 1000 },
+      { dropdownEnd: 'top', wheelDelta: -1000 }
+    ]) {
+      await dropdown.evaluate((element, end) => {
+        element.scrollTop = end === 'bottom' ? element.scrollHeight : 0
+      }, dropdownEnd)
+      const pageScrollTop = await page.evaluate(() => document.scrollingElement.scrollTop)
+
+      for (let index = 0; index < 5; index++) {
+        await page.mouse.wheel(0, wheelDelta)
+      }
+
+      await expect.poll(() => page.evaluate(() => document.scrollingElement.scrollTop))
+        .toBe(pageScrollTop)
+    }
   })
 
   test('closes without replacing the underlying page', async ({ page }) => {
@@ -3598,7 +3668,7 @@ test.describe('synced setting indicators', () => {
     await expect(tooltipText).toBeVisible()
 
     const neighboringIndicators = page.locator('.select')
-      .filter({ hasText: 'Keep original text' })
+      .filter({ hasText: 'Prefer untranslated video text' })
       .locator('.selectIndicators')
     const [tooltipBox, indicatorsBox] = await Promise.all([
       tooltipText.boundingBox(),

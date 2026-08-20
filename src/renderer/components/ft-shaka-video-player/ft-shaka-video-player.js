@@ -53,7 +53,7 @@ import {
   removeFromArrayIfExists,
   copyToClipboard,
 } from '../../helpers/utils'
-import { colors } from '../../helpers/colors'
+import { isHexColor, resolveColorValue } from '../../helpers/colors'
 import { applyAnimationSpeed, getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import {
   FULLSCREEN_DOCK_GAP,
@@ -2159,7 +2159,7 @@ export default defineComponent({
      */
     function getSponsorBlockToastColor(category) {
       const colorName = sponsorSkips.value.categoryData[category]?.color
-      return colors.find(color => color.name === colorName)?.value ?? '#39be70'
+      return resolveColorValue(colorName, '#39be70')
     }
 
     /**
@@ -8513,11 +8513,22 @@ export default defineComponent({
       return sponsorBlockAverageVideoDuration || getSponsorBlockSubmissionVideoDuration() || 0
     }
 
-    function createSponsorBlockMarker(duration, startTime, endTime, title, className, isPointMarker = false) {
+    function createSponsorBlockMarker(
+      duration,
+      startTime,
+      endTime,
+      title,
+      className,
+      isPointMarker = false,
+      customColor = null
+    ) {
       const markerDiv = document.createElement('div')
 
       markerDiv.title = title
       markerDiv.className = className
+      if (customColor !== null) {
+        markerDiv.style.setProperty('--primary-color', customColor)
+      }
       if (isPointMarker) {
         markerDiv.style.left = `calc(${(startTime / duration) * 100}% - 1px)`
       } else {
@@ -8539,14 +8550,16 @@ export default defineComponent({
       const markers = sponsorBlockSegments.map((segment) => {
         const isPointMarker = isSponsorBlockPointSegment(segment)
         const color = sponsorSkips.value.categoryData[segment.category]?.color ?? 'Green'
+        const customColor = isHexColor(color) ? color : null
 
         return createSponsorBlockMarker(
           duration,
           segment.startTime,
           segment.endTime,
           translateSponsorBlockCategory(segment.category),
-          `sponsorBlockMarker${isPointMarker ? ' sponsorBlockPointMarker' : ''} main${color}`,
-          isPointMarker
+          `sponsorBlockMarker${isPointMarker ? ' sponsorBlockPointMarker' : ''}${customColor === null ? ` main${color}` : ''}`,
+          isPointMarker,
+          customColor
         )
       })
 
