@@ -12,8 +12,25 @@
       v-if="isLoading"
       :fullscreen="true"
     />
+    <FtFlexBox
+      v-else-if="playlistError"
+      class="playlistErrorState"
+    >
+      <div class="errorStateContent">
+        <p class="message">
+          {{ playlistError }}
+        </p>
+        <FtButton
+          v-if="playlistErrorRetryable"
+          :label="t('User Playlists.SinglePlaylistView.Retry')"
+          background-color="var(--primary-color)"
+          text-color="var(--text-with-main-color)"
+          @click="getPlaylistInfo"
+        />
+      </div>
+    </FtFlexBox>
     <div
-      v-if="!isLoading"
+      v-if="!isLoading && !playlistError"
       class="playlistInfoContainer"
       :class="{
         promptOpen,
@@ -52,11 +69,11 @@
     </div>
 
     <FtCard
-      v-if="!isLoading"
+      v-if="!isLoading && !playlistError"
       class="playlistItemsCard"
     >
       <template
-        v-if="shownPlaylistItems.length > 0"
+        v-if="shownPlaylistItems.length > 0 || moreVideoDataAvailable"
       >
         <FtSelect
           v-if="isUserPlaylistRequested && shownPlaylistItems.length > 1"
@@ -137,33 +154,49 @@
               @remove-from-playlist="removeVideoFromPlaylist"
             />
           </TransitionGroup>
-          <FtAutoLoadNextPageWrapper
-            v-if="moreVideoDataAvailable && !isLoadingMore"
-            @load-next-page="getNextPage"
-          >
-            <FtFlexBox>
-              <FtButton
-                :label="t('Subscriptions.Load More Videos')"
-                background-color="var(--primary-color)"
-                text-color="var(--text-with-main-color)"
-                @click="getNextPage"
-              />
-            </FtFlexBox>
-          </FtAutoLoadNextPageWrapper>
-          <div
-            v-if="isLoadingMore"
-            class="loadNextPageWrapper"
-          >
-            <FtLoader />
-          </div>
         </AutoScrollWrapper>
         <FtFlexBox
-          v-else
+          v-else-if="playlistInVideoSearchMode"
         >
           <p class="message">
             {{ t("User Playlists['Empty Search Message']") }}
           </p>
         </FtFlexBox>
+        <FtFlexBox
+          v-if="nextPageError && moreVideoDataAvailable && !isLoadingMore"
+          class="paginationErrorState"
+        >
+          <div class="errorStateContent">
+            <p class="message">
+              {{ nextPageError }}
+            </p>
+            <FtButton
+              :label="t('User Playlists.SinglePlaylistView.Retry')"
+              background-color="var(--primary-color)"
+              text-color="var(--text-with-main-color)"
+              @click="getNextPage"
+            />
+          </div>
+        </FtFlexBox>
+        <FtAutoLoadNextPageWrapper
+          v-else-if="moreVideoDataAvailable && !isLoadingMore"
+          @load-next-page="getNextPage"
+        >
+          <FtFlexBox>
+            <FtButton
+              :label="t('Subscriptions.Load More Videos')"
+              background-color="var(--primary-color)"
+              text-color="var(--text-with-main-color)"
+              @click="getNextPage"
+            />
+          </FtFlexBox>
+        </FtAutoLoadNextPageWrapper>
+        <div
+          v-if="isLoadingMore"
+          class="loadNextPageWrapper"
+        >
+          <FtLoader />
+        </div>
       </template>
       <FtFlexBox
         v-else
@@ -210,6 +243,8 @@ import {
   throttle,
 } from '../../helpers/utils'
 import { invidiousGetPlaylistInfo, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
+import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../../helpers/api/invidious-playlists'
+import { runRetryablePlaylistRequest } from '../../helpers/playlist-pagination'
 import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
@@ -224,6 +259,8 @@ const setTabTitle = useTabTitle()
 const showTabToast = useTabToast()
 
 const isLoading = ref(true)
+const playlistError = ref('')
+const playlistErrorRetryable = ref(false)
 const playlistTitle = ref('')
 const playlistDescription = ref('')
 const firstVideoId = ref('')
@@ -247,7 +284,10 @@ const draggedVideo = ref({ videoId: null, playlistItemId: null })
 const userPlaylistVisibleLimit = ref(100)
 /** @type {import('vue').ShallowRef<import('youtubei.js').YT.Playlist | null>} */
 const continuationData = shallowRef(null)
+/** @type {import('vue').Ref<number | null>} */
+const nextInvidiousPlaylistPage = ref(null)
 const isLoadingMore = ref(false)
+const nextPageError = ref('')
 const playlistInEditMode = ref(false)
 const forceListView = ref(false)
 let alreadyShownNotice = false
@@ -308,9 +348,13 @@ const selectedUserPlaylistVideos = computed(() => selectedUserPlaylist.value?.vi
 const selectedUserPlaylistVideoCount = computed(() => selectedUserPlaylistVideos.value.length)
 
 const moreVideoDataAvailable = computed(() => {
-  return isUserPlaylistRequested.value
-    ? userPlaylistVisibleLimit.value < sometimesFilteredUserPlaylistItems.value.length
-    : continuationData.value !== null
+  if (isUserPlaylistRequested.value) {
+    return userPlaylistVisibleLimit.value < sometimesFilteredUserPlaylistItems.value.length
+  }
+  if (infoSource.value === 'invidious') {
+    return nextInvidiousPlaylistPage.value !== null
+  }
+  return continuationData.value !== null
 })
 
 const processedVideoSearchQuery = computed(() => videoSearchQuery.value.trim().toLowerCase())
@@ -446,6 +490,9 @@ const shownVideoCount = computed(() => isUserPlaylistRequested.value ? shownPlay
 
 function getPlaylistInfo() {
   isLoading.value = true
+  playlistError.value = ''
+  playlistErrorRetryable.value = false
+  nextPageError.value = ''
 
   if (isUserPlaylistRequested.value) {
     if (!userPlaylistsReady.value) { return }
@@ -453,6 +500,8 @@ function getPlaylistInfo() {
     if (selectedUserPlaylist.value != null) {
       parseUserPlaylist(selectedUserPlaylist.value)
     } else {
+      isLoading.value = false
+      playlistError.value = t('User Playlists.SinglePlaylistView.Toast.This playlist does not exist')
       showTabToast({
         message: t('User Playlists.SinglePlaylistView.Toast.This playlist does not exist'),
         icon: ['fas', 'circle-exclamation'],
@@ -460,9 +509,9 @@ function getPlaylistInfo() {
     }
   } else {
     if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
-      getPlaylistInvidious()
+      return getPlaylistInvidious()
     } else {
-      getPlaylistLocal()
+      return getPlaylistLocal()
     }
   }
 }
@@ -484,6 +533,11 @@ function resetState() {
   infoSource.value = 'local'
   playlistItems.value = []
   continuationData.value = null
+  nextInvidiousPlaylistPage.value = null
+  isLoadingMore.value = false
+  nextPageError.value = ''
+  playlistError.value = ''
+  playlistErrorRetryable.value = false
   fetchedLocalPlaylistItemCount = 0
 }
 
@@ -547,9 +601,11 @@ async function getPlaylistLocal() {
 
     if (backendPreference.value === 'local' && backendFallback.value) {
       console.warn('Falling back to Invidious API')
-      getPlaylistInvidious()
+      return getPlaylistInvidious()
     } else {
       isLoading.value = false
+      playlistError.value = t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']")
+      playlistErrorRetryable.value = true
     }
   }
 }
@@ -578,6 +634,15 @@ async function getPlaylistInvidious() {
     lastUpdated.value = dateString.toLocaleDateString(locale.value, { year: 'numeric', month: 'short', day: 'numeric' })
 
     playlistItems.value = result.videos
+    const hasMorePages = hasMoreInvidiousPlaylistPages(
+      result.videoCount,
+      1,
+      result.videos.length,
+      result.pageVideoCount
+    )
+    nextInvidiousPlaylistPage.value = hasMorePages
+      ? 2
+      : null
 
     updatePageTitle()
 
@@ -587,10 +652,11 @@ async function getPlaylistInvidious() {
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
       console.warn('Error getting data with Invidious, falling back to local backend')
-      getPlaylistLocal()
+      return getPlaylistLocal()
     } else {
       isLoading.value = false
-      // TODO: Show toast with error message
+      playlistError.value = t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']")
+      playlistErrorRetryable.value = true
     }
   }
 }
@@ -685,9 +751,11 @@ function getPlaylistItemsWithDuration() {
   return modifiedPlaylistItems
 }
 
-function getNextPage() {
+async function getNextPage() {
+  if (isLoadingMore.value) return
+
   if (process.env.SUPPORTS_LOCAL_API && infoSource.value === 'local') {
-    getNextPageLocal()
+    return await getNextPageLocal()
   } else if (infoSource.value === 'user') {
     // Stop users from spamming the load more button, by replacing it with a loading symbol until the newly added items are renderered
     isLoadingMore.value = true
@@ -702,40 +770,81 @@ function getNextPage() {
       isLoadingMore.value = false
     })
   } else if (infoSource.value === 'invidious') {
-    console.error('Playlist pagination is not currently supported when the Invidious backend is selected.')
+    return await getNextPageInvidious()
   }
 }
 
 async function getNextPageLocal() {
-  isLoadingMore.value = true
+  if (isLoadingMore.value || continuationData.value == null) return
 
-  const result = await getLocalPlaylistContinuation(continuationData.value)
+  await runRetryablePlaylistRequest({
+    request: async () => {
+      let shouldGetNextPage
+      do {
+        shouldGetNextPage = false
+        const result = await getLocalPlaylistContinuation(continuationData.value)
 
-  let shouldGetNextPage = false
+        if (result) {
+          const parsedVideos = parseLocalPlaylistVideos(result.items)
+          fetchedLocalPlaylistItemCount += result.items.length
+          playlistItems.value = playlistItems.value.concat(parsedVideos)
 
-  if (result) {
-    const parsedVideos = parseLocalPlaylistVideos(result.items)
-    fetchedLocalPlaylistItemCount += result.items.length
-    playlistItems.value = playlistItems.value.concat(parsedVideos)
+          if (result.has_continuation) {
+            continuationData.value = result
 
-    if (result.has_continuation) {
-      continuationData.value = result
+            // Keep crossing pages that contain filtered entries until this page is
+            // full or every advertised playlist item has been fetched.
+            shouldGetNextPage = parsedVideos.length < 100 && fetchedLocalPlaylistItemCount < videoCount.value
+          } else {
+            continuationData.value = null
+          }
+        } else {
+          continuationData.value = null
+        }
+      } while (shouldGetNextPage)
+    },
+    setLoading: loading => { isLoadingMore.value = loading },
+    setError: (error) => {
+      if (error == null) {
+        nextPageError.value = ''
+      } else {
+        console.error(error)
+        nextPageError.value = t("User Playlists.SinglePlaylistView['More videos could not be loaded.']")
+      }
+    },
+  })
+}
 
-      // Keep crossing pages that contain filtered entries until this page is
-      // full or every advertised playlist item has been fetched.
-      shouldGetNextPage = parsedVideos.length < 100 && fetchedLocalPlaylistItemCount < videoCount.value
-    } else {
-      continuationData.value = null
-    }
-  } else {
-    continuationData.value = null
-  }
+async function getNextPageInvidious() {
+  if (isLoadingMore.value || nextInvidiousPlaylistPage.value == null) return
 
-  isLoadingMore.value = false
+  const requestedPage = nextInvidiousPlaylistPage.value
 
-  if (shouldGetNextPage) {
-    getNextPageLocal()
-  }
+  await runRetryablePlaylistRequest({
+    request: async () => {
+      const result = await invidiousGetPlaylistInfo(playlistId.value, requestedPage)
+      const mergedVideos = mergeInvidiousPlaylistVideos(playlistItems.value, result.videos)
+      playlistItems.value = mergedVideos
+      const hasMorePages = hasMoreInvidiousPlaylistPages(
+        videoCount.value,
+        requestedPage,
+        mergedVideos.length,
+        result.pageVideoCount
+      )
+      nextInvidiousPlaylistPage.value = hasMorePages
+        ? requestedPage + 1
+        : null
+    },
+    setLoading: loading => { isLoadingMore.value = loading },
+    setError: (error) => {
+      if (error == null) {
+        nextPageError.value = ''
+      } else {
+        console.error(error)
+        nextPageError.value = t("User Playlists.SinglePlaylistView['More videos could not be loaded.']")
+      }
+    },
+  })
 }
 
 const canMoveVideos = computed(() => {

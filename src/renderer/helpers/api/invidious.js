@@ -292,6 +292,7 @@ export async function searchInvidiousChannel(channelId, query, page) {
 
 /**
  * @param {string} playlistId
+ * @param {number} [page]
  * @returns {Promise<{
  *  title: string,
  *  playlistId: string,
@@ -312,15 +313,18 @@ export async function searchInvidiousChannel(channelId, query, page) {
  *    videoThumbnails: InvidiousThumbnailObject[],
  *    index: number,
  *    lengthSeconds: number
- *  }[]
+ *  }[],
+ *  pageVideoCount: number
  * }>}
  */
-export async function invidiousGetPlaylistInfo(playlistId) {
+export async function invidiousGetPlaylistInfo(playlistId, page) {
   const playlist = await invidiousAPICall({
     resource: 'playlists',
     id: playlistId,
+    params: page == null ? {} : { page },
   })
 
+  playlist.pageVideoCount = playlist.videos.length
   playlist.videos = filterUnavailableInvidiousPlaylistVideos(playlist.videos)
   normalizeManyInvidiousVideosAttributes(playlist.videos)
   setMultiplePublishedTimestamps(playlist.videos)
