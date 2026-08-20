@@ -11,7 +11,11 @@ const STALE_WATCH_URL = 'app://bundle/index.html#/watch/jNQXAC9IVRw?oneTimeTimes
 
 test.use({
   seed: {
-    settings: { currentLocale: 'de-DE', startupBehavior: 'restoreTabLoadState' },
+    settings: {
+      currentLocale: 'de-DE',
+      rememberTabNavigationHistory: true,
+      startupBehavior: 'restoreTabLoadState'
+    },
     tabSessions: [
       {
         _id: 'e2e-window-session',
@@ -33,7 +37,16 @@ test.use({
               id: WATCH_TAB_ID,
               url: STALE_WATCH_URL,
               title: 'Saved video',
-              isUnloaded: true
+              isUnloaded: true,
+              history: [{
+                route: {
+                  path: '/watch/jNQXAC9IVRw',
+                  query: { oneTimeTimestamp: '12', timestamp: '34' }
+                },
+                title: 'Saved video',
+                scroll: { left: 0, top: 0 }
+              }],
+              historyIndex: 0
             }
           ],
           activeTabId: HISTORY_TAB_ID,
@@ -55,6 +68,26 @@ async function readSavedSession(userDataDir) {
   return records.at(-1)?.value
 }
 
+test('does not restore consumed watch timestamps after an app restart', async ({ app, page }) => {
+  await expect.poll(async () => {
+    const session = await readSavedSession(app.userDataDir)
+    const watchTab = session?.tabs.find((tab) => tab.id === WATCH_TAB_ID)
+    return {
+      url: watchTab?.url,
+      historyQuery: watchTab?.history?.[0]?.route?.query
+    }
+  }).toEqual({
+    url: 'app://bundle/index.html#/watch/jNQXAC9IVRw',
+    historyQuery: {}
+  })
+
+  ;({ page } = await app.relaunch())
+  await expect.poll(async () => {
+    const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+    return state.tabs.find((tab) => tab.id === WATCH_TAB_ID)?.url
+  }).toBe('app://bundle/index.html#/watch/jNQXAC9IVRw')
+})
+
 test('restores tab order, titles, active route, and saved load state across restarts', async ({ app, page }) => {
   const tabs = page.locator(sel.tabs)
   await expect(tabs).toHaveCount(3)
@@ -65,13 +98,6 @@ test('restores tab order, titles, active route, and saved load state across rest
   await expect(tabs.nth(0)).not.toHaveClass(/unloaded/)
   await expect(tabs.nth(2)).toHaveClass(/unloaded/)
   await expect(page).toHaveURL(/#\/history/)
-
-  // oneTimeTimestamp is only valid for an in-process player reload. Persisting
-  // it used to override the newer watch progress when a session was restored.
-  await expect.poll(async () => {
-    const session = await readSavedSession(app.userDataDir)
-    return session?.tabs.find((tab) => tab.id === WATCH_TAB_ID)?.url
-  }).toBe('app://bundle/index.html#/watch/jNQXAC9IVRw?timestamp=34')
 
   await tabs.nth(0).click()
   await expect(page).toHaveURL(/#\/subscriptions/)
