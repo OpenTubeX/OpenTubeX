@@ -292,6 +292,7 @@ const playlistInEditMode = ref(false)
 const forceListView = ref(false)
 let alreadyShownNotice = false
 let fetchedLocalPlaylistItemCount = 0
+let playlistRequestGeneration = 0
 const videoSearchQuery = ref('')
 const promptOpen = ref(false)
 /** @type {import('vue').Ref<string[]>} */
@@ -519,6 +520,7 @@ function getPlaylistInfo() {
 const getPlaylistInfoDebounce = debounce(getPlaylistInfo, 100)
 
 function resetState() {
+  playlistRequestGeneration++
   isLoading.value = true
   playlistTitle.value = ''
   playlistDescription.value = ''
@@ -777,12 +779,17 @@ async function getNextPage() {
 async function getNextPageLocal() {
   if (isLoadingMore.value || continuationData.value == null) return
 
+  const requestGeneration = playlistRequestGeneration
+  const requestedPlaylistId = playlistId.value
+  const requestIsCurrent = () => requestGeneration === playlistRequestGeneration && requestedPlaylistId === playlistId.value
+
   await runRetryablePlaylistRequest({
     request: async () => {
       let shouldGetNextPage
       do {
         shouldGetNextPage = false
         const result = await getLocalPlaylistContinuation(continuationData.value)
+        if (!requestIsCurrent()) return
 
         if (result) {
           const parsedVideos = parseLocalPlaylistVideos(result.items)
@@ -803,8 +810,14 @@ async function getNextPageLocal() {
         }
       } while (shouldGetNextPage)
     },
-    setLoading: loading => { isLoadingMore.value = loading },
+    setLoading: (loading) => {
+      if (requestIsCurrent()) {
+        isLoadingMore.value = loading
+      }
+    },
     setError: (error) => {
+      if (!requestIsCurrent()) return
+
       if (error == null) {
         nextPageError.value = ''
       } else {
@@ -818,13 +831,19 @@ async function getNextPageLocal() {
 async function getNextPageInvidious() {
   if (isLoadingMore.value || nextInvidiousPlaylistPage.value == null) return
 
+  const requestGeneration = playlistRequestGeneration
+  const requestedPlaylistId = playlistId.value
   const requestedPage = nextInvidiousPlaylistPage.value
+  const requestIsCurrent = () => requestGeneration === playlistRequestGeneration && requestedPlaylistId === playlistId.value
 
   await runRetryablePlaylistRequest({
     request: async () => {
-      const result = await invidiousGetPlaylistInfo(playlistId.value, requestedPage)
+      const result = await invidiousGetPlaylistInfo(requestedPlaylistId, requestedPage)
+      if (!requestIsCurrent()) return
+
       const mergedVideos = mergeInvidiousPlaylistVideos(playlistItems.value, result.videos)
       playlistItems.value = mergedVideos
+      firstVideoId.value ||= mergedVideos[0]?.videoId ?? ''
       const hasMorePages = hasMoreInvidiousPlaylistPages(
         videoCount.value,
         requestedPage,
@@ -835,8 +854,14 @@ async function getNextPageInvidious() {
         ? requestedPage + 1
         : null
     },
-    setLoading: loading => { isLoadingMore.value = loading },
+    setLoading: (loading) => {
+      if (requestIsCurrent()) {
+        isLoadingMore.value = loading
+      }
+    },
     setError: (error) => {
+      if (!requestIsCurrent()) return
+
       if (error == null) {
         nextPageError.value = ''
       } else {
@@ -1260,6 +1285,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  playlistRequestGeneration++
   window.removeEventListener('resize', handleResize)
 })
 

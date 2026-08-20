@@ -1,4 +1,4 @@
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect, sel } from '../../helpers/app.mjs'
 
 test.use({
   seed: {
@@ -116,4 +116,69 @@ test('retries the failed Invidious page and merges its overlapping videos once',
   await expect(playlistPage.getByText('Playlist video 2', { exact: true })).toHaveCount(1)
   await expect(playlistPage.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
   expect(requestedPages).toEqual(['2', '2'])
+})
+
+test('uses the first playable video found on a later Invidious page', async ({ page }) => {
+  await page.route(/\/api\/v1\/playlists\/later-playable\?/, async (route) => {
+    const pageNumber = new URL(route.request().url()).searchParams.get('page')
+    if (pageNumber === null) {
+      await route.fulfill({
+        json: playlistResponse([{
+          ...playlistVideo(0),
+          title: '',
+          author: '',
+          authorId: null
+        }], 150)
+      })
+      return
+    }
+
+    await route.fulfill({ json: playlistResponse([playlistVideo(1)], 150) })
+  })
+
+  await openPlaylistTab(page, '/playlist/later-playable')
+  const playlistPage = page.locator('.playlistPage')
+  await expect(playlistPage.getByText('Playlist video 2', { exact: true })).toBeVisible()
+  await expect(playlistPage.locator('.playlistThumbnail a')).toHaveAttribute('href', /\/watch\/video-00001/)
+})
+
+test('ignores an Invidious continuation that finishes after playlist navigation', async ({ page }) => {
+  let markContinuationStarted
+  const continuationStarted = new Promise((resolve) => { markContinuationStarted = resolve })
+  let releaseContinuation
+  const continuationRelease = new Promise((resolve) => { releaseContinuation = resolve })
+  let markContinuationFinished
+  const continuationFinished = new Promise((resolve) => { markContinuationFinished = resolve })
+
+  await page.route(/\/api\/v1\/playlists\/(stale-source|fresh-target)\?/, async (route) => {
+    const requestUrl = new URL(route.request().url())
+    const pageNumber = requestUrl.searchParams.get('page')
+
+    if (requestUrl.pathname.endsWith('/stale-source') && pageNumber !== null) {
+      markContinuationStarted()
+      await continuationRelease
+      await route.fulfill({ json: playlistResponse([playlistVideo(99)], 150) })
+      markContinuationFinished()
+      return
+    }
+
+    const videos = requestUrl.pathname.endsWith('/stale-source')
+      ? [playlistVideo(0)]
+      : [playlistVideo(49)]
+    const count = requestUrl.pathname.endsWith('/stale-source') ? 150 : 1
+    await route.fulfill({ json: playlistResponse(videos, count) })
+  })
+
+  await openPlaylistTab(page, '/playlist/stale-source')
+  await continuationStarted
+
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/playlist?list=fresh-target')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(/#\/playlist\/fresh-target/)
+  await expect(page.locator('.playlistPage').getByText('Playlist video 50', { exact: true })).toBeVisible()
+
+  releaseContinuation()
+  await continuationFinished
+  await page.waitForTimeout(100)
+  await expect(page.locator('.playlistPage').getByText('Playlist video 100', { exact: true })).toHaveCount(0)
 })
