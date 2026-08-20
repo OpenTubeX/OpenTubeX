@@ -16,6 +16,10 @@
   inline-size: 100%;
 }
 
+.sponsorBlockColorPicker {
+  margin-block-start: 12px;
+}
+
 @media only screen and (width <= 680px) {
   .sponsorBlockCategory {
     inline-size: 100%;

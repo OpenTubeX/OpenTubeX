@@ -93,6 +93,7 @@
   z-index: 12;
   box-sizing: border-box;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding-block: 4px;
   padding-inline: 0;
   margin: 0;

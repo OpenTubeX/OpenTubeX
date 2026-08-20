@@ -123,6 +123,7 @@ const IpcChannels = {
 
   GENERATE_PO_TOKEN: 'generate-po-token',
 
+  OPEN_PROFILE_DIRECTORY: 'open-profile-directory',
   CHOOSE_DEFAULT_FOLDER: 'choose-default-folder',
   CHOOSE_IP_BLOCK_RECOVERY_SCRIPT: 'choose-ip-block-recovery-script',
   WRITE_TO_DEFAULT_FOLDER: 'write-to-default-folder',

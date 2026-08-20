@@ -1671,6 +1671,47 @@ test.describe('watch page', () => {
     await expect(sponsorBlock.locator('.os-scrollbar-vertical')).toHaveCount(1)
   })
 
+  test('uses a custom SponsorBlock category color for markers and prompts', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route('**/api/skipSegments/**', route => route.fulfill({
+      body: JSON.stringify([{
+        videoID: 'jNQXAC9IVRw',
+        segments: [{
+          UUID: 'custom-color-sponsor',
+          actionType: 'skip',
+          category: 'sponsor',
+          description: '',
+          locked: 0,
+          segment: [15, 20],
+          videoDuration: 30,
+          votes: 1
+        }]
+      }]),
+      contentType: 'application/json'
+    }))
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseSponsorBlock', true)
+      store.commit('setSponsorBlockSponsor', { color: '#123456', skip: 'promptToSkip' })
+    })
+
+    await openMockedVideo(page)
+
+    const marker = page.locator('.sponsorBlockMarker')
+    await expect(marker).toHaveCount(1)
+    await expect(marker).toHaveCSS('background-color', 'rgb(18, 52, 86)')
+
+    const video = page.locator('.ftVideoPlayer video')
+    await video.evaluate(element => {
+      element.pause()
+      element.currentTime = 16
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+    const prompt = page.locator('.skippedSegment').filter({ hasText: 'Skip Sponsor?' })
+    await expect(prompt).toBeVisible()
+    await expect(prompt.locator('.skippedSegmentShield')).toHaveCSS('color', 'rgb(18, 52, 86)')
+  })
+
   test('does not restore a SponsorBlock prompt when a skip remains inside the segment', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.route('**/api/skipSegments/**', route => route.fulfill({

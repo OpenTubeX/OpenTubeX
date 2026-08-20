@@ -483,7 +483,7 @@ Settings:
       Force Off: Force off
     System Default: System Default
     Avoid translation:
-      Avoid translation: Keep original text
+      Avoid translation: Prefer untranslated video text
       Disabled: Disabled
       Watch Only: Video UI Only
       Entire App: Entire App
@@ -1161,6 +1161,8 @@ Settings:
     Paused Interface Hide Delay: Paused Interface Hide Delay
   Data Settings:
     Data Settings: Data
+    Profile Directory: Profile directory
+    Open Profile Directory: Open profile directory
     Select Export Type: Select Export Type
     Import Subscriptions: Import Subscriptions
     Subscription File: Subscription File
@@ -1319,6 +1321,7 @@ Settings:
       Prompt To Skip: Prompt To Skip
       Do Nothing: Do Nothing
     Category Color: Category Color
+    Custom Color: Custom color
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Enable Return YouTube Dislike

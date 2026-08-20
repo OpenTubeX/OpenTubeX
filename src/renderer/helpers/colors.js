@@ -91,6 +91,16 @@ export const colors = [
 ]
 
 const COLOR_VALUES = new Set(colors.map(({ name }) => name))
+const OPAQUE_HEX_COLOR_PATTERN = /^#[\da-f]{6}$/i
+
+export function isHexColor(value) {
+  return typeof value === 'string' && OPAQUE_HEX_COLOR_PATTERN.test(value)
+}
+
+export function resolveColorValue(value, fallback) {
+  if (isHexColor(value)) return value
+  return colors.find(color => color.name === value)?.value ?? fallback
+}
 
 export function resolveColor(value, fallback) {
   return COLOR_VALUES.has(value) ? value : fallback

@@ -9,16 +9,24 @@
     <FtSelect
       :describe-by-id="id"
       :placeholder="$t('Settings.SponsorBlock Settings.Category Color')"
-      :value="sponsorBlockValues.color"
+      :value="colorSelectValue"
       :setting-key="settingKey"
       :is-changed="isValueChanged('color')"
       :select-names="colorNames"
-      :select-values="COLOR_VALUES"
+      :select-values="COLOR_SELECT_VALUES"
       :icon="['fas', 'palette']"
-      :class="'sec' + sponsorBlockValues.color"
-      icon-color="rgb(var(--accent-color-rgb))"
+      :class="colorSelectClass"
+      :icon-color="colorIconColor"
       @change="updateColor"
       @reset="resetValue('color')"
+    />
+    <FtColorPicker
+      v-if="customColorSelected"
+      class="sponsorBlockColorPicker"
+      :label="t('Settings.SponsorBlock Settings.Custom Color')"
+      :model-value="sponsorBlockValues.color"
+      :allow-alpha="false"
+      @update:model-value="updateColor"
     />
     <FtSelect
       :describe-by-id="id"
@@ -39,12 +47,13 @@
 import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtColorPicker from '../FtColorPicker/FtColorPicker.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 
 import store from '../../store/index'
 import { DEFAULT_SETTINGS } from '../../store/modules/settings'
 
-import { colors } from '../../helpers/colors'
+import { colors, isHexColor } from '../../helpers/colors'
 import { useColorTranslations } from '../../composables/colors'
 
 const props = defineProps({
@@ -82,8 +91,15 @@ const selectableSkipValues = computed(() => {
 
 const skipNames = computed(() => selectableSkipValues.value.map(value => skipOptionNamesByValue.value[value]))
 
+const CUSTOM_COLOR_VALUE = 'custom'
 const COLOR_VALUES = colors.map(color => color.name)
-const colorNames = useColorTranslations()
+const COLOR_VALUE_SET = new Set(COLOR_VALUES)
+const COLOR_SELECT_VALUES = [CUSTOM_COLOR_VALUE, ...COLOR_VALUES]
+const presetColorNames = useColorTranslations()
+const colorNames = computed(() => [
+  t('Settings.SponsorBlock Settings.Custom Color'),
+  ...presetColorNames.value
+])
 
 const id = useId()
 
@@ -122,6 +138,21 @@ const sponsorBlockValues = computed(() => ({
     ? 'promptToSkip'
     : storedSponsorBlockValues.value.skip
 }))
+
+const customColorSelected = computed(() => isHexColor(sponsorBlockValues.value.color))
+const colorSelectValue = computed(() => {
+  if (customColorSelected.value) return CUSTOM_COLOR_VALUE
+  if (COLOR_VALUE_SET.has(sponsorBlockValues.value.color)) return sponsorBlockValues.value.color
+  return DEFAULT_SETTINGS[settingKey.value].color
+})
+const colorSelectClass = computed(() => (
+  customColorSelected.value ? null : `sec${colorSelectValue.value}`
+))
+const colorIconColor = computed(() => (
+  customColorSelected.value
+    ? sponsorBlockValues.value.color
+    : 'rgb(var(--accent-color-rgb))'
+))
 
 const translatedCategoryName = computed(() => {
   switch (props.categoryName) {
@@ -193,8 +224,21 @@ function resetValue(property) {
 function updateColor(color) {
   updateSponsorCategory({
     ...storedSponsorBlockValues.value,
-    color,
+    color: color === CUSTOM_COLOR_VALUE ? resolveDefaultCustomColor() : color,
   })
+}
+
+function resolveDefaultCustomColor() {
+  const defaultColorName = DEFAULT_SETTINGS[settingKey.value].color
+  const probe = document.createElement('span')
+  probe.className = `main${defaultColorName}`
+  probe.hidden = true
+  document.body.append(probe)
+  const color = getComputedStyle(probe).getPropertyValue('--primary-color').trim()
+  probe.remove()
+
+  if (isHexColor(color)) return color.toLowerCase()
+  return colors.find(({ name }) => name === defaultColorName)?.value.toLowerCase() ?? '#000000'
 }
 
 /**
