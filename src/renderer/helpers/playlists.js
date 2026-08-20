@@ -77,6 +77,32 @@ export function videoDurationWithFallback(video) {
   return 0
 }
 
+/**
+ * Fills playlist durations from matching history entries when possible.
+ * @param {object[]} playlistItems
+ * @param {Record<string, object>} historyCacheById
+ * @returns {boolean} whether any playlist item still lacks a duration
+ */
+export function fillMissingPlaylistVideoDurations(playlistItems, historyCacheById) {
+  let anyVideoMissingDuration = false
+
+  for (const video of playlistItems) {
+    if (videoDurationPresent(video)) { continue }
+
+    const videoHistory = historyCacheById[video.videoId]
+    const fetchedLengthSeconds = videoHistory == null
+      ? 0
+      : videoDurationWithFallback(videoHistory)
+
+    video.lengthSeconds = fetchedLengthSeconds
+    if (fetchedLengthSeconds === 0) {
+      anyVideoMissingDuration = true
+    }
+  }
+
+  return anyVideoMissingDuration
+}
+
 function publishedWithFallback(video) {
   const published = video.published
   return typeof published === 'number' && !isNaN(published) && published !== 0 ? published : 0

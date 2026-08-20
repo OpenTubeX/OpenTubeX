@@ -83,7 +83,7 @@
       >
         <FtFlexBox>
           <FtButton
-            label="Load More"
+            :label="$t('User Playlists.Load More Playlists')"
             background-color="var(--primary-color)"
             text-color="var(--text-with-main-color)"
             @click="increaseLimit"

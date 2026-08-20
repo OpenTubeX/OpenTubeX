@@ -505,8 +505,10 @@
 /* Fade a toast out as it is pushed towards the edge it is anchored to */
 [data-sonner-toast][data-swiping='true'] .toast,
 [data-sonner-toast][data-swiping='true'] .timeout-indicator-track {
+  /* Keeping the division inside abs() stops postcss-calc from misreading the
+     pixel divisor as a scalar. The browser still resolves px / px to a number. */
   /* stylelint-disable-next-line scss/no-global-function-names -- CSS abs(), not the Sass one */
-  opacity: max(0, calc(1 - abs(var(--swipe-amount-x, 0px)) / 200px));
+  opacity: max(0, calc(1 - abs(var(--swipe-amount-x, 0px) / 200px)));
 }
 
 [data-sonner-toast][data-swiping='true'] .toast {

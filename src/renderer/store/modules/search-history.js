@@ -1,5 +1,6 @@
 import { MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT } from '../../../constants'
 import { DBSearchHistoryHandlers } from '../../../datastores/handlers/index'
+import { sortSearchHistoryByLastUpdatedAt } from '../../helpers/search-history'
 
 const state = {
   searchHistoryEntries: []
@@ -65,7 +66,7 @@ const actions = {
     try {
       // sort before sending saving to the database and passing to other windows
       // so that the other windows can use it as is, without having to sort the array themselves
-      historyItems.sort((a, b) => b.timeWatched - a.timeWatched)
+      sortSearchHistoryByLastUpdatedAt(historyItems)
 
       await DBSearchHistoryHandlers.overwrite(historyItems)
       commit('setSearchHistoryEntries', historyItems)

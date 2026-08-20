@@ -91,6 +91,7 @@ Are you sure you want to open this link?: Are you sure you want to open this lin
 # Anything shared among components / views should be put here
 Global:
   Ambient Mode: Ambient Mode
+  Loading More: Loading more
   Videos: Videos
   Shorts: Shorts
   Live: Live
@@ -255,6 +256,7 @@ Feed:
 Playlists: Playlists
 User Playlists:
   Your Playlists: Your Playlists
+  Load More Playlists: Load More Playlists
   You have no playlists. Click on the create new playlist button to create a new one.: You have no playlists. Click on the create new playlist button to create a new one.
   Empty Search Message: There are no videos in this playlist that match your search
   Search bar placeholder: Search for Playlists
