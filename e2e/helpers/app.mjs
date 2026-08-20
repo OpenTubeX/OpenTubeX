@@ -350,13 +350,31 @@ export async function goTo(page, route) {
   await expect(page).toHaveURL(new RegExp(`#/${route}`))
 }
 
+const SETTINGS_CATEGORY_BY_LEGACY_SECTION = {
+  theme: 'appearance',
+  player: 'playback',
+  'caption-appearance': 'playback',
+  channel: 'playback',
+  subscription: 'subscriptions',
+  distraction: 'focus',
+  'parental-control': 'focus',
+  'sponsor-block': 'add-ons',
+  'return-youtube-dislike': 'add-ons',
+  'external-player': 'advanced',
+  'external-software': 'advanced',
+  proxy: 'advanced',
+  'context-menu-search': 'general',
+  experimental: 'advanced'
+}
+
 /** Opens Settings and selects one category in the two-column modal layout. */
 export async function goToSettingsSection(page, section) {
   if (!await page.locator('.settingsWindow').isVisible()) {
     await goTo(page, 'settings')
   }
-  await page.locator(`.settingsMenu [data-section="${section}"]`).click()
-  const content = page.locator(`.settingsContent > [data-section="${section}"]`)
+  const category = SETTINGS_CATEGORY_BY_LEGACY_SECTION[section] ?? section
+  await page.locator(`.settingsMenu [data-section="${category}"]`).click()
+  const content = page.locator(`.settingsContent > [data-section="${category}"]`)
   await expect(content).toBeVisible()
   return content
 }

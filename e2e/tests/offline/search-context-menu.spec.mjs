@@ -1,4 +1,4 @@
-import { test, expect, goTo, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
 import { DEFAULT_SEARCH_ENGINES } from '../../../src/searchEngines.js'
 
 const allExternalSearchEnginesEnabled = JSON.stringify(
@@ -286,16 +286,10 @@ test('keeps the newest overlapping context menu session executable', async ({ pa
 })
 
 test('adds a custom search engine from settings', async ({ page }) => {
-  await goTo(page, 'settings')
-  const sectionOrder = await page.locator('.settingsMenu [data-section]').evaluateAll(items => {
-    return items.map(item => item.dataset.section)
+  const general = await goToSettingsSection(page, 'general')
+  const section = general.locator('.settingsSection').filter({
+    has: page.getByRole('heading', { name: 'Context Menu Search', exact: true })
   })
-  expect(sectionOrder.indexOf('context-menu-search'))
-    .toBe(sectionOrder.indexOf('return-youtube-dislike') + 1)
-
-  await page.locator('.settingsMenu [data-section="context-menu-search"]').click()
-
-  const section = page.locator('.settingsContent > [data-section="context-menu-search"]')
   await section.getByLabel('Engine name').fill('Example Search')
   await section.getByLabel('Search URL').fill('https://example.com/search?q=%s')
   const addButton = section.getByRole('button', { name: 'Add engine' })
@@ -407,10 +401,10 @@ test.describe('with the maximum custom search engines configured', () => {
   })
 
   test('rejects another engine without clearing its inputs', async ({ page }) => {
-    await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="context-menu-search"]').click()
-
-    const addRow = page.locator('.settingsContent > [data-section="context-menu-search"] .addEngine')
+    const general = await goToSettingsSection(page, 'general')
+    const addRow = general.locator('.settingsSection').filter({
+      has: page.getByRole('heading', { name: 'Context Menu Search', exact: true })
+    }).locator('.addEngine')
     const nameInput = addRow.getByLabel('Engine name')
     const urlInput = addRow.getByLabel('Search URL')
     await nameInput.fill('One Too Many')

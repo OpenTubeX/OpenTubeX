@@ -1,4 +1,4 @@
-import { test, expect, sel, goTo } from '../../helpers/app.mjs'
+import { test, expect, sel, goTo, goToSettingsSection } from '../../helpers/app.mjs'
 
 /**
  * Returns the box of an element that has stopped moving. Menus and submenus
@@ -1026,11 +1026,11 @@ test.describe('closed tabs', () => {
       await page.locator(sel.tabs).first().click()
       await page.keyboard.press('Control+w')
 
-      await goTo(page, 'settings')
+      const privacy = await goToSettingsSection(page, 'privacy')
       await expect(page.locator('.settingsWindow')).not.toHaveClass(/settings-window-enter-active/)
-      const rememberHistory = page.getByRole('checkbox', { name: 'Remember Tab Navigation History' })
+      const rememberHistory = privacy.getByRole('checkbox', { name: 'Remember Tab Navigation History' })
       await expect(rememberHistory).toBeChecked()
-      await page.locator('label.switch-label').filter({ hasText: 'Remember Tab Navigation History' }).click()
+      await privacy.locator('label.switch-label').filter({ hasText: 'Remember Tab Navigation History' }).click()
       await expect(rememberHistory).not.toBeChecked()
 
       await page.keyboard.press('Control+Shift+t')
