@@ -19,7 +19,7 @@ test('keeps toast wrapping stable without scrollbars in player fullscreen', asyn
   await page.evaluate(() => {
     window.ftElectron.showToastOnAllTabs(
       'IP block recovery script finished',
-      1000,
+      30000,
       ['fas', 'check']
     )
   })
@@ -47,6 +47,8 @@ test('keeps toast wrapping stable without scrollbars in player fullscreen', asyn
   })
 
   const windowed = await measure()
+  await toast.locator('..').locator('..').focus()
+  await page.keyboard.press('Escape')
   await expect(toast).toHaveCount(0)
 
   await setPlayerFullscreen(page, true)
