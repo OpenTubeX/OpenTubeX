@@ -717,7 +717,7 @@ test.describe('watch page', () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
     })
-    await expect(page.getByLabel('Load More Comments')).toHaveCount(0)
+    await expect(page.getByRole('status', { name: 'Load More Comments' })).toHaveCount(0)
 
     // Exercise reply loading and its continuation path, not only the initial
     // top-level comment batch (8bcf0b58d).
