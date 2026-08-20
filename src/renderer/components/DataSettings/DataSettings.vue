@@ -270,7 +270,7 @@ function parseImportedJson(content, invalidMessage) {
 
 /**
  * @param {string} content
- * @returns {unknown[]}
+ * @returns {unknown[] | null}
  */
 function parseImportedLineDelimitedJson(content) {
   const { records, errors } = parseLineDelimitedJson(content)
@@ -283,7 +283,7 @@ function parseImportedLineDelimitedJson(content) {
     })
   })
 
-  return records
+  return records.length === 0 ? null : records
 }
 
 /**
@@ -352,7 +352,10 @@ async function importSubscriptions() {
   if (filename.endsWith('.csv')) {
     importCsvYouTubeSubscriptions(content)
   } else if (filename.endsWith('.db')) {
-    importFreeTubeSubscriptions(parseImportedLineDelimitedJson(content))
+    const records = parseImportedLineDelimitedJson(content)
+    if (records !== null) {
+      importFreeTubeSubscriptions(records)
+    }
   } else if (filename.endsWith('.opml') || filename.endsWith('.xml')) {
     importOpmlYouTubeSubscriptions(content)
   } else if (filename.endsWith('.json')) {
@@ -1024,7 +1027,10 @@ async function importWatchHistory() {
   const { filename, content } = response
 
   if (filename.endsWith('.db')) {
-    importFreeTubeWatchHistory(parseImportedLineDelimitedJson(content))
+    const records = parseImportedLineDelimitedJson(content)
+    if (records !== null) {
+      importFreeTubeWatchHistory(records)
+    }
   } else if (filename.endsWith('.json')) {
     const jsonContent = parseImportedJson(content, t('Settings.Data Settings.Invalid history file'))
     if (jsonContent === null) {
@@ -1377,6 +1383,9 @@ async function importPlaylists() {
     // otherwise assume this is the correct database format,
     // which is also what we export now (used in 0.20.0 and later versions)
     playlists = parseImportedLineDelimitedJson(data)
+    if (playlists === null) {
+      return
+    }
   }
 
   const requiredKeys = [
@@ -1610,7 +1619,10 @@ async function importSearchHistory() {
   const { filename, content } = response
 
   if (filename.endsWith('.db')) {
-    importFreeTubeSearchHistory(parseImportedLineDelimitedJson(content))
+    const records = parseImportedLineDelimitedJson(content)
+    if (records !== null) {
+      importFreeTubeSearchHistory(records)
+    }
   } else if (filename.endsWith('.json')) {
     importYouTubeSearchHistory(JSON.parse(content))
   }

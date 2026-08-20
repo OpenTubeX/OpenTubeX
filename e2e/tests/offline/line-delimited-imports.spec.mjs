@@ -168,3 +168,45 @@ test('line-delimited search history keeps valid rows around a malformed row', as
   })).toEqual(['issue866-search-a', 'issue866-search-b'])
   expect(pageErrors).toEqual([])
 })
+
+test('malformed-only line-delimited imports do not report success', async ({ page }) => {
+  const pageErrors = []
+  page.on('pageerror', error => pageErrors.push(error.message))
+  const dataSection = await goToSettingsSection(page, 'data')
+  let expectedErrorCount = 0
+  const imports = [
+    {
+      filename: 'issue-866-subscriptions.db',
+      button: 'Import subscriptions',
+      success: 'All subscriptions and profiles have been successfully imported'
+    },
+    {
+      filename: 'issue-866-watch-history.db',
+      button: 'Import history',
+      success: 'All watched history has been successfully imported'
+    },
+    {
+      filename: 'issue-866-playlists.db',
+      button: 'Import playlists',
+      success: 'All playlists has been successfully imported'
+    },
+    {
+      filename: 'issue-866-search-history.db',
+      button: 'Import search history',
+      success: 'All search history has been successfully imported'
+    }
+  ]
+
+  for (const { filename, button, success } of imports) {
+    await mockImportFile(page, filename, ' \t \r\n{"broken":')
+    await dataSection.getByRole('button', { name: button, exact: true }).click()
+
+    expectedErrorCount++
+    await expect(page.locator('.toast', {
+      hasText: 'Invalid JSON at row 2, skipping item'
+    })).toHaveCount(expectedErrorCount)
+    await expect(page.locator('.toast', { hasText: success })).toHaveCount(0)
+  }
+
+  expect(pageErrors).toEqual([])
+})
