@@ -1184,6 +1184,63 @@ test.describe('video downloads', () => {
   })
 })
 
+test('exposes download progress to assistive technology', async ({ page }) => {
+  await goTo(page, 'downloads')
+
+  const upsertDownload = (status, percent) => page.evaluate(({ status, percent }) => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('upsertYtDlpDownload', {
+      id: 42,
+      title: 'Accessible download',
+      status,
+      percent,
+      speed: '1 MiB/s',
+      eta: '00:10',
+      mode: 'video'
+    })
+  }, { status, percent })
+
+  await upsertDownload('downloading', 42)
+  const row = page.locator('.downloadRow').filter({ hasText: 'Accessible download' })
+  const progress = row.getByRole('progressbar')
+  const fill = row.locator('.progressFill')
+  await expect(progress).toHaveAccessibleName('Accessible download')
+  await expect(progress).toHaveAttribute('aria-valuemin', '0')
+  await expect(progress).toHaveAttribute('aria-valuemax', '100')
+  await expect(progress).toHaveAttribute('aria-valuenow', '42')
+  await expect(progress).toHaveAttribute('aria-valuetext', '42.0% • 1 MiB/s • ETA 00:10')
+  await expect(fill).toHaveAttribute('aria-hidden', 'true')
+  await expect(row.locator('.downloadStatus')).toHaveAttribute('aria-hidden', 'true')
+
+  await upsertDownload('downloading', 142)
+  await expect(progress).toHaveAttribute('aria-valuenow', '100')
+  await expect(progress).toHaveAttribute('aria-valuetext', '100.0% • 1 MiB/s • ETA 00:10')
+  expect(await fill.evaluate(element => element.style.inlineSize)).toBe('100%')
+
+  await upsertDownload('downloading', -42)
+  await expect(progress).toHaveAttribute('aria-valuenow', '0')
+  await expect(progress).toHaveAttribute('aria-valuetext', '0.0% • 1 MiB/s • ETA 00:10')
+  expect(await fill.evaluate(element => element.style.inlineSize)).toBe('0%')
+
+  await upsertDownload('processing', 42)
+  await expect(progress).toHaveAccessibleName('Accessible download')
+  await expect(progress).toHaveAttribute('aria-valuetext', 'Processing…')
+  expect(await progress.getAttribute('aria-valuenow')).toBeNull()
+  await expect(row.locator('[role="status"], [aria-live]')).toHaveCount(0)
+
+  const session = await page.context().newCDPSession(page)
+  const { nodes } = await session.send('Accessibility.getFullAXTree')
+  await session.detach()
+  const tree = nodes.filter(node => !node.ignored)
+  const processingBar = tree.find(node => (
+    node.role?.value === 'progressbar' && node.name?.value === 'Accessible download'
+  ))
+  expect(processingBar).toBeDefined()
+  expect(typeof processingBar?.value?.value).not.toBe('number')
+  expect(tree.flatMap(node => [node.name?.value, node.value?.value])
+    .filter(value => value === 'Processing…').length).toBeLessThanOrEqual(1)
+})
+
 test('asks for confirmation before removing a downloaded file', async ({ page }) => {
   await goTo(page, 'downloads')
   await page.evaluate(() => {
