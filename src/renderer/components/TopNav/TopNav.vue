@@ -100,7 +100,7 @@
             show-data-when-empty
             @input="getSearchSuggestionsDebounce"
             @click="goToSearch"
-            @clear="clearLastSuggestionQuery"
+            @clear="handleSearchInputClear"
             @remove="removeSearchHistoryEntryInDbAndCache"
           >
             <template #extraAction>
@@ -727,6 +727,11 @@ async function goToSearch(queryText, { event, dataListIndex }) {
 
 function clearLastSuggestionQuery() {
   lastSuggestionQuery.value = ''
+}
+
+function handleSearchInputClear() {
+  currentSearchText = ''
+  clearLastSuggestionQuery()
 }
 
 /**

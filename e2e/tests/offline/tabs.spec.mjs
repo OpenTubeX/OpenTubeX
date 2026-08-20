@@ -816,6 +816,20 @@ test.describe('tab bar', () => {
     await expect(searchInput).toHaveValue('second tab query')
   })
 
+  test('cleared search bar text stays empty after switching tabs', async ({ page }) => {
+    const searchInput = page.locator(sel.searchInput)
+    await page.locator(sel.newTabButton).click()
+
+    await searchInput.fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator('.topNav .searchInput .clearInputTextButton').click()
+    await expect(searchInput).toHaveValue('')
+
+    await page.locator(sel.tabs).first().click()
+    await page.locator(sel.tabs).nth(1).click()
+
+    await expect(searchInput).toHaveValue('')
+  })
+
   test('search filters are independent per tab', async ({ page }) => {
     const filterButton = page.locator('.navFilterButton')
 
