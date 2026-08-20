@@ -26,6 +26,17 @@ function historyEntry(videoId, title, timeWatched, isWatched = false, extra = {}
   }
 }
 
+function matchingHistoryEntries(prefix, count, timeOffset = 0) {
+  return Array.from({ length: count }, (_, index) => {
+    const suffix = String(index).padStart(6, '0')
+    return historyEntry(
+      `${prefix.toLowerCase()}${suffix}`,
+      `${prefix} match ${suffix}`,
+      now - timeOffset - index
+    )
+  })
+}
+
 test.use({
   seed: {
     settings: { uiRoundness: 200 },
@@ -186,6 +197,92 @@ test.describe('watch history', () => {
         latestRecords.find(record => record.videoId === 'eeeeeeeeeee')?.isWatched === false &&
         latestRecords.find(record => record.videoId === 'fffffffffff')?.isWatched === true
     }).toBe(true)
+  })
+})
+
+test.describe('history search pagination', () => {
+  test.use({
+    seed: {
+      settings: { generalAutoLoadMorePaginatedItemsEnabled: false },
+      history: [
+        ...matchingHistoryEntries('Decoy', 100),
+        ...matchingHistoryEntries('Alpha', 220, 1000),
+        ...matchingHistoryEntries('Beta', 130, 2000),
+        ...matchingHistoryEntries('Gamma', 20, 3000)
+      ]
+    }
+  })
+
+  test('loads every filtered batch and resets the limit for a new query', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const historySearch = page.locator('.ft-input-component').filter({
+      has: page.getByRole('textbox', { name: 'Search in History' })
+    })
+    const filterInput = historySearch.getByRole('textbox', { name: 'Search in History' })
+    const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
+    const loadMoreButton = page.getByRole('button', { name: 'Load More Videos' })
+
+    await filterInput.fill('Alpha match')
+    await expect(videos.first()).toContainText('Alpha match')
+    await expect(videos).toHaveCount(100)
+    await expect(loadMoreButton).toBeVisible()
+
+    await loadMoreButton.click()
+    await expect(videos).toHaveCount(200)
+    await expect(loadMoreButton).toBeVisible()
+
+    await filterInput.fill('Beta match')
+    await expect(videos.first()).toContainText('Beta match')
+    await expect(videos).toHaveCount(100)
+    await expect(loadMoreButton).toBeVisible()
+
+    await loadMoreButton.click()
+    await expect(videos).toHaveCount(130)
+    await expect(loadMoreButton).toHaveCount(0)
+
+    await historySearch.getByRole('button', { name: 'Clear Input' }).click()
+    await expect(filterInput).toHaveValue('')
+    await expect(videos.first()).toContainText('Decoy match')
+    await expect(videos).toHaveCount(100)
+    await expect(loadMoreButton).toBeVisible()
+
+    await filterInput.fill('Gamma match')
+    await expect(videos.first()).toContainText('Gamma match')
+    await expect(videos).toHaveCount(20)
+    await expect(loadMoreButton).toHaveCount(0)
+  })
+})
+
+test.describe('history search automatic pagination', () => {
+  test.use({
+    seed: {
+      settings: {
+        generalAutoLoadMorePaginatedItemsEnabled: true,
+        uiScale: 125
+      },
+      history: [
+        ...matchingHistoryEntries('Decoy', 100),
+        ...matchingHistoryEntries('Automatic', 150, 1000)
+      ]
+    }
+  })
+
+  test('loads the next filtered batch when the pagination control enters view', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const filterInput = page.getByRole('textbox', { name: 'Search in History' })
+    const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
+
+    await filterInput.fill('Automatic match')
+    await expect(videos.first()).toContainText('Automatic match')
+    await expect(videos).toHaveCount(100)
+    await expect(page.getByRole('button', { name: 'Load More Videos' })).toHaveCount(0)
+    await expect(page.locator('.ft-auto-load-next-page-wrapper')).toBeAttached()
+
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    await expect(videos).toHaveCount(150)
+    await expect(page.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
   })
 })
 

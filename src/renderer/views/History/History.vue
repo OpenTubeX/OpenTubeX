@@ -375,8 +375,10 @@ function filterHistory() {
     filteredQuery = filterVideosWithQuery(historyCacheSorted.value, query.value.toLowerCase(), (s) => s.toLowerCase())
   }
 
-  activeData.value = filteredQuery.length < searchDataLimit.value ? filteredQuery : filteredQuery.slice(0, searchDataLimit.value)
-  showLoadMoreButton.value = activeData.value.length > searchDataLimit.value
+  const filteredResultCount = filteredQuery.length
+
+  showLoadMoreButton.value = filteredResultCount > searchDataLimit.value
+  activeData.value = filteredResultCount < searchDataLimit.value ? filteredQuery : filteredQuery.slice(0, searchDataLimit.value)
 }
 
 const filterHistoryAsync = debounce(filterHistory, 500)
