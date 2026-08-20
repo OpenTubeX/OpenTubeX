@@ -19,6 +19,12 @@
         {{ t('Video.Clear Queue') }}
       </button>
     </header>
+    <p
+      :id="reorderInstructionsId"
+      class="queueReorderInstructions"
+    >
+      {{ t('Video.Reorder Queue Item Instructions') }}
+    </p>
     <TransitionGroup
       ref="queueItems"
       v-overlay-scrollbars
@@ -27,26 +33,31 @@
       class="queueItems"
     >
       <li
-        v-for="item in items"
+        v-for="(item, index) in items"
         :key="item.queueItemId"
         class="queueItem"
         :class="{ dragging: draggedQueueItemId === item.queueItemId }"
+        :aria-posinset="index + 1"
+        :aria-setsize="items.length"
         @dragover.prevent
         @drop.prevent="dropDraggedItem(item.queueItemId)"
       >
-        <span
+        <button
+          :ref="element => setQueueDragHandle(item.queueItemId, element)"
+          type="button"
           class="queueDragHandle"
           draggable="true"
-          tabindex="0"
-          :aria-label="t('Video.Drag to Reorder Queue', { title: item.title })"
+          :aria-label="t('Video.Reorder Queue Item', { title: item.title })"
+          :aria-describedby="reorderInstructionsId"
+          aria-keyshortcuts="ArrowUp ArrowDown"
           :title="t('Video.Drag to Reorder Queue', { title: item.title })"
           @dragstart="startDrag($event, item.queueItemId)"
           @dragend="endDrag"
-          @keydown.up.prevent="move(item.queueItemId, -1)"
-          @keydown.down.prevent="move(item.queueItemId, 1)"
+          @keydown.up.prevent="moveWithKeyboard(item.queueItemId, -1)"
+          @keydown.down.prevent="moveWithKeyboard(item.queueItemId, 1)"
         >
           <FtIcon :icon="['fas', 'bars']" />
-        </span>
+        </button>
         <RouterLink
           class="queueVideo"
           :to="`/watch/${item.videoId}`"
@@ -80,12 +91,20 @@
         </div>
       </li>
     </TransitionGroup>
+    <p
+      class="queueReorderStatus"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      {{ queueReorderStatus }}
+    </p>
   </FtCard>
 </template>
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -100,8 +119,12 @@ const backendPreference = computed(() => store.getters.getBackendPreference)
 const invidiousUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
 const draggedQueueItemId = ref(null)
 const queueItems = useTemplateRef('queueItems')
+const reorderInstructionsId = useId()
+const queueReorderStatus = ref('')
+const queueDragHandles = new Map()
 let queueObserver = null
 let queueClampFrame = null
+let queueAnnouncementSequence = 0
 
 onMounted(() => {
   const container = queueItems.value?.$el ?? queueItems.value
@@ -141,6 +164,51 @@ function playQueuedVideo(queueItemId, event) {
 
 function move(queueItemId, offset) {
   store.commit('moveVideoInWatchQueue', { queueItemId, offset })
+}
+
+function setQueueDragHandle(queueItemId, element) {
+  if (element) {
+    queueDragHandles.set(queueItemId, element)
+  } else {
+    queueDragHandles.delete(queueItemId)
+  }
+}
+
+async function announceQueueReorder(message) {
+  const sequence = ++queueAnnouncementSequence
+  queueReorderStatus.value = ''
+  await nextTick()
+
+  if (sequence === queueAnnouncementSequence) {
+    queueReorderStatus.value = message
+  }
+}
+
+async function moveWithKeyboard(queueItemId, offset) {
+  const currentIndex = items.value.findIndex(item => item.queueItemId === queueItemId)
+  if (currentIndex === -1) {
+    return
+  }
+
+  const item = items.value[currentIndex]
+  const total = items.value.length
+  const targetIndex = currentIndex + offset
+  if (targetIndex < 0 || targetIndex >= total) {
+    const message = offset < 0
+      ? t('Video.Queue Item Cannot Move Up', { title: item.title, total })
+      : t('Video.Queue Item Cannot Move Down', { title: item.title, total })
+    await announceQueueReorder(message)
+    return
+  }
+
+  move(queueItemId, offset)
+  await nextTick()
+  queueDragHandles.get(queueItemId)?.focus({ preventScroll: true })
+  await announceQueueReorder(t('Video.Queue Item Moved', {
+    title: item.title,
+    position: targetIndex + 1,
+    total
+  }))
 }
 
 function startDrag(event, queueItemId) {

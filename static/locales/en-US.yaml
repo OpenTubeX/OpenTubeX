@@ -1550,6 +1550,11 @@ Video:
   Queue Video Count: '{count} video | {count} videos'
   Remove from Queue: 'Remove {title} from queue'
   Drag to Reorder Queue: 'Drag {title} to reorder queue'
+  Reorder Queue Item: 'Reorder {title}'
+  Reorder Queue Item Instructions: Use the Up and Down Arrow keys to move this video in the queue.
+  Queue Item Moved: 'Moved {title} to position {position} of {total}.'
+  Queue Item Cannot Move Up: 'Cannot move {title} up. It is already at position 1 of {total}.'
+  Queue Item Cannot Move Down: 'Cannot move {title} down. It is already at position {total} of {total}.'
   Metadata: Video information
   Close Metadata: Close video information
   Metadata Cache:

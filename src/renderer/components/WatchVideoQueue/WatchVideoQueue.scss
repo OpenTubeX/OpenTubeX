@@ -21,6 +21,18 @@
   font-size: 13px;
 }
 
+.queueReorderInstructions,
+.queueReorderStatus {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .clearQueue {
   border: 0;
   background: transparent;
@@ -60,11 +72,16 @@
   place-items: center;
   inline-size: 30px;
   block-size: 30px;
+  padding: 0;
+  border: 0;
   border-radius: 50%;
+  background: transparent;
   color: var(--secondary-text-color);
   cursor: grab;
+  font: inherit;
 
-  &:hover {
+  &:hover,
+  &:focus-visible {
     background-color: var(--side-nav-hover-color);
     color: var(--primary-text-color);
   }
