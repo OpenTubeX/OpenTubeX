@@ -37,6 +37,63 @@ function matchingHistoryEntries(prefix, count, timeOffset = 0) {
   })
 }
 
+async function scrollPageToEnd(page) {
+  await page.evaluate(() => {
+    document.activeElement?.blur()
+    window.scrollTo(0, document.documentElement.scrollHeight)
+  })
+  await expect.poll(() => page.evaluate(() => {
+    const maximumScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+    return Math.abs(window.scrollY - maximumScrollY)
+  })).toBeLessThanOrEqual(1)
+}
+
+async function expectPageScrollWithinRenderedRange(page) {
+  await expect.poll(() => page.evaluate(() => {
+    const content = document.querySelector('.app > .routerView')
+    const contentBox = content.getBoundingClientRect()
+    const contentMarginBottom = Number.parseFloat(getComputedStyle(content).marginBottom) || 0
+    const renderedMaximumScrollY = Math.max(
+      0,
+      contentBox.bottom + window.scrollY + contentMarginBottom - window.innerHeight
+    )
+    const documentMaximumScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+    const scrollbar = document.querySelector('body > .os-scrollbar-vertical')
+    const track = scrollbar?.querySelector('.os-scrollbar-track')
+    const handle = scrollbar?.querySelector('.os-scrollbar-handle')
+    let scrollbarMatchesOverflow = scrollbar?.classList.contains('os-scrollbar-unusable') === true
+
+    if (documentMaximumScrollY > 1 && track && handle) {
+      const trackBox = track.getBoundingClientRect()
+      const handleBox = handle.getBoundingClientRect()
+      const trackRange = trackBox.height - handleBox.height
+      const expectedHandleOffset = window.scrollY / documentMaximumScrollY * trackRange
+      const handleOffset = handleBox.top - trackBox.top
+      scrollbarMatchesOverflow =
+        scrollbar.classList.contains('os-scrollbar-visible') &&
+        !scrollbar.classList.contains('os-scrollbar-unusable') &&
+        Math.abs(handleOffset - expectedHandleOffset) <= 1
+    }
+
+    return {
+      documentRangeMatchesContent: Math.abs(documentMaximumScrollY - renderedMaximumScrollY) <= 1,
+      scrollWithinRenderedRange: window.scrollY <= renderedMaximumScrollY + 1,
+      scrollbarMatchesOverflow
+    }
+  })).toEqual({
+    documentRangeMatchesContent: true,
+    scrollWithinRenderedRange: true,
+    scrollbarMatchesOverflow: true
+  })
+}
+
+async function updateInputWithoutScrolling(input, value) {
+  await input.evaluate((element, nextValue) => {
+    element.value = nextValue
+    element.dispatchEvent(new Event('input', { bubbles: true }))
+  }, value)
+}
+
 test.use({
   seed: {
     settings: { uiRoundness: 200 },
@@ -232,25 +289,31 @@ test.describe('history search pagination', () => {
     await expect(videos).toHaveCount(200)
     await expect(loadMoreButton).toBeVisible()
 
-    await filterInput.fill('Beta match')
+    await scrollPageToEnd(page)
+    await updateInputWithoutScrolling(filterInput, 'Beta match')
     await expect(videos.first()).toContainText('Beta match')
     await expect(videos).toHaveCount(100)
     await expect(loadMoreButton).toBeVisible()
+    await expectPageScrollWithinRenderedRange(page)
 
     await loadMoreButton.click()
     await expect(videos).toHaveCount(130)
     await expect(loadMoreButton).toHaveCount(0)
 
-    await historySearch.getByRole('button', { name: 'Clear Input' }).click()
+    await scrollPageToEnd(page)
+    await historySearch.getByRole('button', { name: 'Clear Input' }).evaluate(button => button.click())
     await expect(filterInput).toHaveValue('')
     await expect(videos.first()).toContainText('Decoy match')
     await expect(videos).toHaveCount(100)
     await expect(loadMoreButton).toBeVisible()
+    await expectPageScrollWithinRenderedRange(page)
 
-    await filterInput.fill('Gamma match')
+    await scrollPageToEnd(page)
+    await updateInputWithoutScrolling(filterInput, 'Gamma match')
     await expect(videos.first()).toContainText('Gamma match')
     await expect(videos).toHaveCount(20)
     await expect(loadMoreButton).toHaveCount(0)
+    await expectPageScrollWithinRenderedRange(page)
   })
 })
 
