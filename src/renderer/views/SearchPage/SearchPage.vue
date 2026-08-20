@@ -161,9 +161,14 @@ function resetSearchState(settings) {
 }
 
 function startSearch() {
+  if (typeof route.params.query !== 'string') {
+    requestGeneration++
+    return
+  }
+
   const routeSearchSettings = getRouteSearchSettings()
   const payload = {
-    query: String(route.params.query ?? '').trim(),
+    query: route.params.query.trim(),
     options: {},
     searchSettings: routeSearchSettings
   }

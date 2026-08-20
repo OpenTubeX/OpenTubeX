@@ -359,6 +359,37 @@ test('keeps the newer search pagination loader when an old page settles', async 
   await expect(page.getByLabel('Loading more')).toHaveCount(0)
 })
 
+test('does not start an empty search while leaving the search route', async ({ page }) => {
+  let releaseSearch
+  let markSearchStarted
+  const searchStarted = new Promise(resolve => { markSearchStarted = resolve })
+  const requestedQueries = []
+
+  await page.route('**/api/v1/search/**', async (route, request) => {
+    const query = new URL(request.url()).searchParams.get('q')
+    requestedQueries.push(query)
+    if (query === 'leaving search') {
+      markSearchStarted()
+      await new Promise(resolve => { releaseSearch = resolve })
+    }
+    await route.fulfill({
+      json: [invidiousVideo(`${query} result`, `${query || 'empty'}-video`)]
+    })
+  })
+
+  await page.locator(sel.searchInput).fill('leaving search')
+  await page.locator(sel.searchInput).press('Enter')
+  await searchStarted
+
+  try {
+    await page.locator(`${sel.sideNavLink('history')}:visible`).first().click()
+    await expect(page).toHaveURL(/#\/history/)
+    expect(requestedQueries).toEqual(['leaving search'])
+  } finally {
+    releaseSearch?.()
+  }
+})
+
 test('ignores a stale hashtag response after the route changes', async ({ page }) => {
   let releaseFirstRequest
   let markFirstRequestStarted
