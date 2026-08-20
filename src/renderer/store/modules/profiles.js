@@ -129,12 +129,14 @@ const actions = {
   },
 
   async updateSubscriptionDetails({ dispatch, state }, { channelThumbnailUrl, channelName, channelId }) {
-    const thumbnail = channelThumbnailUrl
-      // change thumbnail size if different
-      ?.replace(/=s\d*/, '=s176')
-      // If this is an Invidious URL, convert it to a YouTube one
-      .replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com') ??
-      null
+    let thumbnail = null
+    if (channelThumbnailUrl) {
+      thumbnail = channelThumbnailUrl
+        // change thumbnail size if different
+        .replace(/=s\d*/, '=s176')
+        // If this is an Invidious URL, convert it to a YouTube one
+        .replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com')
+    }
     const profileList = state.profileList
 
     for (const profile of profileList) {

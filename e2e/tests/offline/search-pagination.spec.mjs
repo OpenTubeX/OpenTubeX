@@ -84,3 +84,39 @@ test('explains when a search returns no results', async ({ page }) => {
   await expect(page.getByText('Your search results have returned 0 results')).toBeVisible()
   await expect(page.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
 })
+
+test('shows a fallback avatar for a channel result without thumbnails', async ({ page }) => {
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('addToSessionSearchHistory', {
+      query: 'channel without thumbnail',
+      data: [{
+        type: 'channel',
+        author: 'Channel Without Thumbnail',
+        authorId: 'UCthumbnailfallbacktest',
+        authorThumbnails: [],
+        subCount: 0,
+        videoCount: 1,
+        description: ''
+      }],
+      searchSettings: {
+        prioritize: 'relevance',
+        time: '',
+        type: 'all',
+        duration: '',
+        features: []
+      },
+      nextPageRef: null,
+      hasMoreResults: false,
+      apiUsed: 'invidious'
+    })
+  })
+
+  await page.locator(sel.searchInput).fill('channel without thumbnail')
+  await page.locator(sel.searchInput).press('Enter')
+
+  const channel = page.locator('.ft-list-channel')
+  await expect(channel).toBeVisible()
+  await expect(channel.locator('img.channelImage')).toHaveCount(0)
+  await expect(channel.locator('.channelImage[data-icon="circle-user"]')).toBeVisible()
+})

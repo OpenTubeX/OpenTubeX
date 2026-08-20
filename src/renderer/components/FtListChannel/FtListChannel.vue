@@ -16,10 +16,16 @@
         aria-hidden="true"
       >
         <img
+          v-if="thumbnail"
           :src="thumbnail"
           :class="!isGame ? 'channelImage' : 'gameImage'"
           alt=""
         >
+        <FtIcon
+          v-else
+          class="channelImage channelImageFallback"
+          :icon="['fas', 'circle-user']"
+        />
       </component>
     </div>
     <div class="infoAndSubscribe">
@@ -80,6 +86,7 @@
 </template>
 
 <script setup>
+import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
 
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'

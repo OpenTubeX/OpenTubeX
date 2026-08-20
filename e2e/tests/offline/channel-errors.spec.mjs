@@ -22,6 +22,10 @@ test.use({
         id: CACHED_CHANNEL_ID,
         name: 'Deleted Channel',
         thumbnail: 'data:image/png;base64,invalid'
+      }, {
+        id: EMPTY_THUMBNAIL_CHANNEL_ID,
+        name: 'Saved Thumbnail Channel',
+        thumbnail: 'https://yt3.googleusercontent.com/saved-avatar=s176'
       }]
     }]
   }
@@ -93,6 +97,10 @@ test('renders a channel fallback for an empty Invidious thumbnail array', async 
   await expect(channel.locator('.info')).not.toHaveClass(/infoHasError/)
   await expect(channel.locator('img.thumbnail')).toHaveCount(0)
   await expect(channel.locator('.thumbnail:not(img)')).toBeVisible()
+  await expect.poll(() => page.evaluate((channelId) => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return store.getters.getActiveProfile.subscriptions.find(subscription => subscription.id === channelId)?.thumbnail
+  }, EMPTY_THUMBNAIL_CHANNEL_ID)).toBe('https://yt3.googleusercontent.com/saved-avatar=s176')
 })
 
 test('shows fallback metadata for unavailable channels', async ({ page }) => {
