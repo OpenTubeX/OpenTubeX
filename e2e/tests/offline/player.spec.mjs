@@ -1,9 +1,10 @@
-import { setWindowSize, test, expect } from '../../helpers/app.mjs'
+import { sel, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import {
   activeTab,
   expectDockedToBottomRight,
   findWatchComponent,
   openMockedVideo,
+  waitForPlayback,
 } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -46,6 +47,21 @@ test('playback starts', async ({ app, page, attachScreenshot }) => {
     .toBeGreaterThan(1)
 
   await attachScreenshot('playing video')
+})
+
+test('does not restore a consumed link timestamp after an app restart', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw&t=2')
+  const timestampNavigation = page.waitForURL(/#\/watch\/jNQXAC9IVRw\?timestamp=2/)
+  await page.locator(sel.searchInput).press('Enter')
+
+  await timestampNavigation
+  const video = await waitForPlayback(page)
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(2)
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw$/)
+
+  ;({ page } = await app.relaunch())
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw$/)
 })
 
 test('hides configured paused interface elements until pointer activity', async ({ app, page }) => {

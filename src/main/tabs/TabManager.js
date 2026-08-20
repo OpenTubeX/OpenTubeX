@@ -267,11 +267,9 @@ export class TabManager {
       .filter(entry => typeof entry?.route?.path === 'string')
       .map(entry => {
         const route = normalizeRoute(entry.route)
-        // Watch timestamps only apply to the navigation that opened the video.
-        // Replaying them after a restart would override newer watch progress.
-        if (route.path.startsWith('/watch/')) {
+        // `oneTimeTimestamp` must not survive persistence (see stripOneTimeTimestampFromUrl)
+        if ('oneTimeTimestamp' in route.query) {
           delete route.query.oneTimeTimestamp
-          delete route.query.timestamp
         }
         return {
           route: normalizeRoute(route),
@@ -335,18 +333,15 @@ export class TabManager {
   }
 
   /**
-   * Watch timestamps are only meant to be consumed by the navigation that
-   * opened the video. If one survives into a persisted tab session, restoring
-   * the tab jumps to the stale position instead of the newer watch progress
-   * saved in the history database.
+   * `oneTimeTimestamp` is only meant to be consumed once by the Watch view
+   * (e.g. after a SABR player reload). If it survives into a persisted tab
+   * session, restoring the tab jumps to the stale reload position instead of
+   * the newer watch progress saved in the history database.
    * @param {string} url
    * @returns {string}
    */
-  static stripWatchTimestampsFromUrl(url) {
-    if (
-      typeof url !== 'string' ||
-      (!url.includes('oneTimeTimestamp=') && !url.includes('timestamp='))
-    ) {
+  static stripOneTimeTimestampFromUrl(url) {
+    if (typeof url !== 'string' || !url.includes('oneTimeTimestamp=')) {
       return url
     }
 
@@ -356,12 +351,11 @@ export class TabManager {
     }
 
     const route = TabManager.getRouteFromUrl(url)
-    if (!route.path.startsWith('/watch/')) {
+    if (!('oneTimeTimestamp' in route.query)) {
       return url
     }
 
     delete route.query.oneTimeTimestamp
-    delete route.query.timestamp
     return url.slice(0, hashIndex + 1) + normalizeRoute(route).fullPath
   }
 
@@ -2721,7 +2715,7 @@ export class TabManager {
       .map(tab => {
         const tabData = {
           id: tab.id,
-          url: TabManager.stripWatchTimestampsFromUrl(tab.url),
+          url: TabManager.stripOneTimeTimestampFromUrl(tab.url),
           title: tab.title,
           isPinned: tab.isPinned,
           color: TabManager.normalizeTabColor(tab.color),
@@ -2771,7 +2765,7 @@ export class TabManager {
       .filter(tab => !this._deferredCloseTabIds.has(tab.id))
       .map(tab => ({
         id: tab.id,
-        url: TabManager.stripWatchTimestampsFromUrl(tab.url),
+        url: TabManager.stripOneTimeTimestampFromUrl(tab.url),
         title: tab.title,
         isPinned: tab.isPinned,
         color: tab.color,
@@ -2903,7 +2897,7 @@ export class TabManager {
         const tab = this.createTab({
           id: typeof tabData.id === 'string' ? tabData.id : undefined,
           // Strip here as well to heal sessions persisted before the strip on save existed
-          url: TabManager.stripWatchTimestampsFromUrl(tabData.url),
+          url: TabManager.stripOneTimeTimestampFromUrl(tabData.url),
           title: hasSavedTitle ? tabData.title : undefined,
           avatarDataUrl,
           avatarFileName: avatarDataUrl == null ? null : avatarFileName,

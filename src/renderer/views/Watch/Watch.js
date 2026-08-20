@@ -1086,6 +1086,14 @@ export default defineComponent({
     },
     async 'tabRoute.fullPath'(fullPath, previousFullPath) {
       if (
+        !('timestamp' in this.tabRoute.query) &&
+        this.watchRouteWithoutTimestamp(fullPath) ===
+          this.watchRouteWithoutTimestamp(previousFullPath)
+      ) {
+        return
+      }
+
+      if (
         this.playbackSourceRouteBase(fullPath) ===
         this.playbackSourceRouteBase(previousFullPath)
       ) {
@@ -1983,6 +1991,12 @@ export default defineComponent({
     playbackSourceRouteBase: function (fullPath) {
       const url = new URL(fullPath, 'https://opentubex.invalid')
       url.searchParams.delete('downloadId')
+      return `${url.pathname}${url.search}${url.hash}`
+    },
+
+    watchRouteWithoutTimestamp: function (fullPath) {
+      const url = new URL(fullPath, 'https://opentubex.invalid')
+      url.searchParams.delete('timestamp')
       return `${url.pathname}${url.search}${url.hash}`
     },
 
@@ -3911,7 +3925,7 @@ export default defineComponent({
       return isHistoryEntryWatched(this.$store.getters.getHistoryCacheById[videoId])
     },
 
-    handleVideoLoaded: function (mediaMetadata) {
+    handleVideoLoaded: async function (mediaMetadata) {
       if (this.isLoading || this.preparingVideoLoadGeneration !== null) { return }
 
       this.suppressTabLoadingIndicator = false
@@ -3960,6 +3974,10 @@ export default defineComponent({
         }
 
         this.updateLocalPlaylistLastPlayedAtSometimes()
+
+        if (process.env.IS_ELECTRON && this.timestamp !== null) {
+          await this.consumeTimestamp()
+        }
       }
     },
 
@@ -4014,6 +4032,19 @@ export default defineComponent({
 
       const timestamp = parseInt(this.tabRoute.query.timestamp)
       this.timestamp = isNaN(timestamp) || timestamp < 0 ? null : timestamp
+    },
+
+    consumeTimestamp: async function () {
+      const query = { ...this.tabRoute.query }
+      if (!('timestamp' in query)) return
+
+      delete query.timestamp
+      await this.tabRouter.replace({
+        path: this.tabRoute.path,
+        query,
+        hash: this.tabRoute.hash
+      })
+      this.timestamp = null
     },
 
     handleFormatChange: function (format) {

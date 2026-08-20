@@ -68,7 +68,7 @@ async function readSavedSession(userDataDir) {
   return records.at(-1)?.value
 }
 
-test('does not restore consumed watch timestamps after an app restart', async ({ app, page }) => {
+test('keeps an unconsumed link timestamp across an app restart', async ({ app, page }) => {
   await expect.poll(async () => {
     const session = await readSavedSession(app.userDataDir)
     const watchTab = session?.tabs.find((tab) => tab.id === WATCH_TAB_ID)
@@ -77,15 +77,15 @@ test('does not restore consumed watch timestamps after an app restart', async ({
       historyQuery: watchTab?.history?.[0]?.route?.query
     }
   }).toEqual({
-    url: 'app://bundle/index.html#/watch/jNQXAC9IVRw',
-    historyQuery: {}
+    url: 'app://bundle/index.html#/watch/jNQXAC9IVRw?timestamp=34',
+    historyQuery: { timestamp: '34' }
   })
 
   ;({ page } = await app.relaunch())
   await expect.poll(async () => {
     const state = await page.evaluate(() => window.ftElectron.tabs.getState())
     return state.tabs.find((tab) => tab.id === WATCH_TAB_ID)?.url
-  }).toBe('app://bundle/index.html#/watch/jNQXAC9IVRw')
+  }).toBe('app://bundle/index.html#/watch/jNQXAC9IVRw?timestamp=34')
 })
 
 test('restores tab order, titles, active route, and saved load state across restarts', async ({ app, page }) => {
