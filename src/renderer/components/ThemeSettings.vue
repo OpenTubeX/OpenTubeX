@@ -722,11 +722,20 @@ async function loadTabIcons() {
   try {
     const { loaded, failed } = await loadMissingTabAvatars(store.getters.getTabs)
     if (loaded === 0 && failed === 0) {
-      showToast(t('Settings.Theme Settings.No Missing Tab Icons'))
+      showToast({
+        message: t('Settings.Theme Settings.No Missing Tab Icons'),
+        icon: ['fas', 'circle-info'],
+      })
     } else if (failed > 0) {
-      showToast(t('Settings.Theme Settings.Loaded Tab Icons With Failures', { loaded, failed }))
+      showToast({
+        message: t('Settings.Theme Settings.Loaded Tab Icons With Failures', { loaded, failed }),
+        icon: ['fas', 'circle-exclamation'],
+      })
     } else {
-      showToast(t('Settings.Theme Settings.Loaded Tab Icons', { count: loaded }, loaded))
+      showToast({
+        message: t('Settings.Theme Settings.Loaded Tab Icons', { count: loaded }, loaded),
+        icon: ['fas', 'check'],
+      })
     }
   } finally {
     loadingTabIcons.value = false
