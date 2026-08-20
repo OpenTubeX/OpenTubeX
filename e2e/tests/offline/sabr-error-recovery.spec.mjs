@@ -1,5 +1,11 @@
-import { goTo, sel, test, expect } from '../../helpers/app.mjs'
-import { mockUnplayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
+import { goTo, sel, setPlayerFullscreen, test, expect } from '../../helpers/app.mjs'
+import { openMockedVideo } from '../../helpers/player.mjs'
+import {
+  mockPlayableWatchPage,
+  mockUnplayableWatchPage,
+  watchHistoryEntry,
+  watchViewHandle
+} from '../../helpers/watch.mjs'
 
 // Mirror the module-level Watch constants, which cannot be imported here.
 const MAX_SABR_ERROR_RECOVERIES = 3
@@ -468,6 +474,50 @@ test('a SABR reload preserves the active video quality', async ({ app, page }) =
   })
 
   expect(quality).toBe('720')
+})
+
+test('sizes the fullscreen playback-error reload toast to its content', async ({ app, page }) => {
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setPlayerFullscreen(page, true)
+
+  const watchView = await watchViewHandle(page)
+  await watchView.evaluate(async (view) => {
+    view.getTimestamp = () => 0
+    view.reloadView = async () => {}
+    view.tryPlaybackEngineFallback = async () => false
+    view.errorMessage = ''
+    view.isLoading = false
+    view.isLive = false
+    view.isPostLiveDvr = false
+    view.activeFormat = 'dash'
+    view.manifestMimeType = 'application/sabr+json'
+
+    await view.handlePlayerError({
+      severity: 2,
+      category: 1,
+      code: 1002,
+      data: ['https://example.invalid/sabr', 500]
+    })
+  })
+
+  const toast = page.locator('.toast', { hasText: 'Refreshing SABR stream after playback error' })
+  await expect(toast).toBeVisible()
+  await expect(toast).toHaveCount(1)
+  await expect(toast.locator('..')).toHaveCSS('transform', 'none')
+
+  const { trailingSpace, paddingEnd } = await toast.evaluate((element) => {
+    const toastBounds = element.getBoundingClientRect()
+    const messageBounds = element.querySelector('.message').getBoundingClientRect()
+
+    return {
+      trailingSpace: toastBounds.right - messageBounds.right,
+      paddingEnd: Number.parseFloat(getComputedStyle(element).paddingInlineEnd)
+    }
+  })
+
+  expect(Math.abs(trailingSpace - paddingEnd)).toBeLessThanOrEqual(1)
 })
 
 test('a SABR reload preserves the tab title while adding its resume timestamp', async ({ app, page }) => {
