@@ -380,7 +380,6 @@ import {
   isOverlayScrollTopOutOfBounds,
   restoreOverlayScrollTop
 } from '../../helpers/overlayScrollbars'
-import { getProxyTestUrl } from '../../helpers/proxy-test'
 import {
   SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS,
   SETTINGS_SEARCH_SOURCES,
@@ -414,9 +413,19 @@ const LEGACY_SETTINGS_SECTION_MAP = {
   experimental: 'advanced'
 }
 
-const NON_SETTING_MESSAGE_KEY_PATTERN = /(?:^No\b|^How\b|^Checking\b|^Current .+\b(?:has|is|will)\b|^Operation in Progress$|(?:Description|Hint|Tooltip|Template|Warning|Error|Status|Message|Not Downloaded|Unavailable|Connected|Connecting|Success|Failed|Failure)$)/i
+const NON_SETTING_MESSAGE_KEY_PATTERN = /(?:^Are you sure\b|^Failed to\b|^Invalid\b|^No\b|^How\b|^Checking\b|^Downloading\b|^Current .+\b(?:has|is|will)\b|\b(?:has|have) been (?:cleared|removed|saved|updated)\b|^Operation in Progress$|(?:Description|Hint|Tooltip|Placeholder|Template|Warning|Error|Status|Message|Not Downloaded|Unavailable|Connected|Connecting|Success|Failed|Failure|Invalid|Saved|Already Exists)$)/i
 
 const { locale, t, tm } = useI18n()
+const settingsSearchSubsectionTargets = computed(() => ({
+  subscriptions: [{
+    search: t('Settings.Subscription Settings.Subscription Settings'),
+    target: t('Settings.Subscription Settings.Subscription Settings')
+  }],
+  playback: [{
+    search: t('Settings.Player Settings.Caption Appearance.Caption Appearance'),
+    target: t('Settings.Player Settings.Caption Appearance.Captions')
+  }]
+}))
 const isInDesktopView = ref(true)
 const isMaximized = ref(false)
 const activeSection = ref(
@@ -583,20 +592,194 @@ const settingsSectionComponents = computed(() => [{
   component: GeneralCategorySettings
 }, ...settingsComponentsData.value])
 const settingsSearchExtraValues = computed(() => ({
-  privacy: flattenMessageValues(tm('Settings.Password Settings')),
-  advanced: USING_ELECTRON
-    ? [
-        `${t('Settings.Proxy Settings.Clicking on Test Proxy will send a request to')} ` +
-        getProxyTestUrl(locale.value)
-      ]
-    : []
+  privacy: flattenMessageValues(tm('Settings.Password Settings'))
 }))
+const getCaptionEdgeStyle = () => {
+  const value = store.getters.getDefaultCaptionSettings
+  if (value !== null && typeof value === 'object') return value.edgeStyle ?? 'none'
+  try {
+    return JSON.parse(value).edgeStyle ?? 'none'
+  } catch {
+    return 'none'
+  }
+}
+const isSettingsSearchMessageVisible = (sectionType, path) => {
+  const [group, item] = path
+
+  if (sectionType === 'player' && group === 'Screenshot') {
+    if (item === 'Enable') return true
+    if (!store.getters.getEnableScreenshot) return false
+    if (item === 'Mode') return true
+    if (['Format Label', 'Quality Label', 'File Name Label'].includes(item)) {
+      return store.getters.getScreenshotMode !== 'clipboard'
+    }
+    if (['Folder Label', 'Folder Button'].includes(item)) {
+      return USING_ELECTRON && store.getters.getScreenshotMode === 'default_folder'
+    }
+    return false
+  }
+
+  if (sectionType === 'caption-appearance' && group === 'Edge Color') {
+    return getCaptionEdgeStyle() !== 'none'
+  }
+
+  if (sectionType === 'general' && [
+    'Current Invidious Instance',
+    'View all Invidious instance information',
+    'Set Current Instance as Default',
+    'Clear Default Instance'
+  ].includes(group)) {
+    return store.getters.getBackendPreference === 'invidious' ||
+      store.getters.getBackendFallback
+  }
+
+  if (sectionType === 'sync') {
+    if (['Sync Settings', 'Enable Sync'].includes(group)) return true
+    if (!store.getters.getSyncServerEnabled) return false
+    const connected = store.getters.getSyncServerToken !== ''
+    if (['Password', 'Privacy Passphrase', 'Log In', 'Register'].includes(group)) {
+      return !connected
+    }
+    if ([
+      'Automatic Sync',
+      'Profiles',
+      'Settings',
+      'Sync Now',
+      'Disconnect',
+      'Delete Account'
+    ].includes(group)) {
+      return connected
+    }
+    if (group === 'Open Tabs') {
+      return connected && USING_ELECTRON && store.getters.getSyncServerPrivacyMode === 'enhanced'
+    }
+    return true
+  }
+
+  if (sectionType === 'external-player' && [
+    'Custom External Player Executable',
+    'Custom External Player Arguments'
+  ].includes(group)) {
+    return store.getters.getExternalPlayer !== ''
+  }
+
+  if (sectionType === 'sponsor-block') {
+    const useSponsorBlock = store.getters.getUseSponsorBlock
+    const useDeArrowTitles = store.getters.getUseDeArrowTitles
+    const useDeArrowThumbnails = store.getters.getUseDeArrowThumbnails
+    if (group === 'SponsorBlock API Url (Default is https://sponsor.ajay.app)') {
+      return useSponsorBlock || useDeArrowTitles || useDeArrowThumbnails
+    }
+    if ([
+      'Enable SponsorBlock Submission',
+      'Notify when sponsor segment is skipped',
+      'Skip notification timeout',
+      'Skip Options',
+      'Category Color'
+    ].includes(group)) {
+      return useSponsorBlock
+    }
+    if ([
+      'SponsorBlock Private User ID (optional)',
+      'Generated SponsorBlock User ID',
+      'Export Generated User ID'
+    ].includes(group)) {
+      return useSponsorBlock && store.getters.getSponsorBlockEnableSubmission
+    }
+    if (group === 'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)') {
+      return useDeArrowThumbnails
+    }
+  }
+
+  if (sectionType === 'return-youtube-dislike' && group === 'Return YouTube Dislike Url') {
+    return store.getters.getUseReturnYouTubeDislikes
+  }
+
+  if (sectionType === 'proxy') {
+    if ([
+      'Proxy Settings',
+      'Enable Tor / Proxy',
+      'IP Block Recovery Script Path'
+    ].includes(group)) {
+      return true
+    }
+    if (['Proxy Username', 'Proxy Password'].includes(group)) {
+      return store.getters.getUseProxy &&
+        ['http', 'https'].includes(store.getters.getProxyProtocol)
+    }
+    return store.getters.getUseProxy && [
+      'Proxy Protocol',
+      'Proxy Host',
+      'Proxy Port Number',
+      'Test Proxy'
+    ].includes(group)
+  }
+
+  if (sectionType === 'download') {
+    return ['Download Settings', 'Enable Downloads'].includes(group) ||
+      store.getters.getEnableDownloads
+  }
+
+  if (sectionType === 'external-software') {
+    if (group === 'yt-dlp Channel') return store.getters.getYtDlpSource === 'managed'
+    if (group === 'Managed Tool Updates') {
+      return store.getters.getYtDlpSource === 'managed' ||
+        store.getters.getYtDlpFfmpegSource === 'managed'
+    }
+    if (group === 'yt-dlp Executable Path') return store.getters.getYtDlpSource === 'system'
+    if (group === 'FFmpeg Executable Path') return store.getters.getYtDlpFfmpegSource === 'system'
+    if (group === 'Cookie File') return store.getters.getYtDlpPlaybackAuthMode === 'file'
+    if (group === 'Browser for Cookies' || group === 'Browser Profile') {
+      return store.getters.getYtDlpPlaybackAuthMode === 'browser'
+    }
+  }
+
+  if (sectionType === 'channel') {
+    if (group === 'Auto Update') {
+      return store.state.settings.rememberPlaybackSpeedPerChannel ||
+        store.state.settings.rememberVideoQualityPerChannel
+    }
+    if (group === 'Auto Update Subtitles') {
+      return store.state.settings.rememberSubtitlesStatePerChannel
+    }
+    if (group === 'Auto Update Volume') {
+      return store.state.settings.rememberVolumePerChannel
+    }
+    return [
+      'Channel Settings',
+      'Enable Playback Speed',
+      'Enable Video Quality',
+      'Enable Subtitles State',
+      'Enable Volume'
+    ].includes(group)
+  }
+
+  if (sectionType === 'distraction' && group === 'Show Added Items') {
+    let forbiddenTitles = []
+    try {
+      forbiddenTitles = JSON.parse(store.getters.getForbiddenTitles)
+    } catch {
+      // A malformed persisted value is normalized elsewhere and has no visible tags here.
+    }
+    return store.getters.getChannelsHiddenParsed.length > 0 || forbiddenTitles.length > 0
+  }
+
+  if (sectionType === 'theme') {
+    if (group === 'Light Theme' || group === 'Dark Theme') {
+      return store.getters.getBaseTheme === 'system'
+    }
+    if (group === 'Load Missing Tab Icons') return store.getters.getShowTabIcons
+  }
+
+  return true
+}
 const isSearchableSettingsMessage = (sectionType, path, value) => {
   if (/\{[^{}]+\}/.test(value)) return false
   const messagePath = path.join('.')
   const messageKey = path.at(-1) ?? ''
   return !SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS[sectionType]?.has(messagePath) &&
-    !NON_SETTING_MESSAGE_KEY_PATTERN.test(messageKey)
+    !NON_SETTING_MESSAGE_KEY_PATTERN.test(messageKey) &&
+    isSettingsSearchMessageVisible(sectionType, path)
 }
 const removeRedundantSearchMatches = (values) => {
   const keptMatches = []
@@ -991,22 +1174,44 @@ async function openSearchResult(sectionType, label) {
   const content = settingsContentRef.value
   if (!content) return
   const normalizedLabel = normalizeSearchText(label.trim())
-  const visibleTextElements = [...content.querySelectorAll(
-    'label, button, p, h1, h2, h3, h4, span, legend, div'
-  )]
-    .filter(element => element.getClientRects().length > 0)
-  const labelElement = visibleTextElements
-    .filter(element => getSearchTargetText(element) === normalizedLabel)
-    .at(-1) ?? visibleTextElements
-    .filter(element => getSearchTargetText(element).startsWith(`${normalizedLabel}:`))
-    .at(-1)
-  const control = labelElement?.closest(
-    '.switch-ctn, .select, .ft-input-component, .pure-material-slider, ' +
-    '.pure-checkbox, .captionControl, .preferenceToggle'
-  ) ?? labelElement
-  const target = control?.classList.contains('ft-input-component')
-    ? control.querySelector('.ft-input')
-    : control
+  const section = settingsSectionComponents.value.find(({ type }) => type === sectionType)
+  const isSectionMatch = [section?.title, section?.description]
+    .some(value => normalizeSearchText(value ?? '') === normalizedLabel)
+  let target = isSectionMatch
+    ? content.querySelector(`.section[data-section="${sectionType}"]`)
+    : null
+  if (target === null) {
+    const subsectionTarget = settingsSearchSubsectionTargets.value[sectionType]?.find(
+      ({ search }) => normalizeSearchText(search) === normalizedLabel
+    )
+    if (subsectionTarget) {
+      const targetHeading = normalizeSearchText(subsectionTarget.target)
+      const headingElement = [...content.querySelectorAll('h1, h2, h3, h4')]
+        .find(element => getSearchTargetText(element) === targetHeading)
+      target = headingElement?.closest('.settingsSection') ?? null
+    }
+  }
+  if (target === null) {
+    const visibleTextElements = [...content.querySelectorAll(
+      'label, button, p, h1, h2, h3, h4, span, legend, div'
+    )]
+      .filter(element => element.getClientRects().length > 0)
+    const labelElement = visibleTextElements
+      .filter(element => getSearchTargetText(element) === normalizedLabel)
+      .at(-1) ?? visibleTextElements
+      .filter(element => getSearchTargetText(element).startsWith(`${normalizedLabel}:`))
+      .at(-1)
+    const settingsSection = labelElement?.matches('h1, h2, h3, h4')
+      ? labelElement.closest('.settingsSection')
+      : null
+    const control = settingsSection ?? labelElement?.closest(
+      '.switch-ctn, .select, .ft-input-component, .pure-material-slider, ' +
+      '.pure-checkbox, .captionControl, .preferenceToggle'
+    ) ?? labelElement
+    target = control?.classList.contains('ft-input-component')
+      ? control.querySelector('.ft-input')
+      : control
+  }
   if (!target) return
 
   target.scrollIntoView({ block: 'center', behavior: 'smooth' })

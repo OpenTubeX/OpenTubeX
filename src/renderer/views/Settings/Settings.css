@@ -354,6 +354,18 @@
   animation: settings-search-highlight 2.2s ease-in-out;
 }
 
+.settingsContent :deep(.select.settingsSearchTarget) {
+  outline: none;
+  animation: none;
+}
+
+.settingsContent :deep(.select.settingsSearchTarget > .selectSearchHighlightFrame) {
+  outline: 2px solid transparent;
+  outline-offset: 4px;
+  border-radius: calc(4px * var(--ui-roundness));
+  animation: settings-search-highlight 2.2s ease-in-out;
+}
+
 @keyframes settings-search-highlight {
   0%,
   40%,

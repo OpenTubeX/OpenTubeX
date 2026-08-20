@@ -31,6 +31,18 @@
   margin-inline-end: 70px;
 }
 
+.selectSearchHighlightFrame {
+  display: block;
+  position: absolute;
+  inset-block: -24px 0;
+  inset-inline: 0;
+  pointer-events: none;
+}
+
+.select.containsTooltip > .selectSearchHighlightFrame {
+  inset-inline-end: -30px;
+}
+
 .select-text {
   position: relative;
   font-family: inherit;

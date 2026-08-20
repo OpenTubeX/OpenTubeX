@@ -172,6 +172,26 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'Default Quality': ['Default Quality'],
     'Screenshot.Modes': []
   },
+  channel: {
+    '': [
+      'Channel Settings',
+      'Enable Playback Speed',
+      'Enable Video Quality',
+      'Enable Subtitles State',
+      'Enable Volume',
+      'Auto Update',
+      'Auto Update Subtitles',
+      'Auto Update Volume'
+    ]
+  },
+  download: {
+    '': [
+      'Download Settings',
+      'Enable Downloads',
+      'Download Folder',
+      'Global Additional yt-dlp Arguments'
+    ]
+  },
   data: {
     '': [
       'Data Settings',
@@ -198,13 +218,31 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'Edge Style': ['Edge Style']
   },
   'external-player': { Players: [] },
-  'external-software': { Sources: [] },
+  'external-software': {
+    Sources: [],
+    'Update Modes': [],
+    'Cookie Sources': []
+  },
   privacy: { 'Watched Progress Saving Mode.Modes': [] },
   'sponsor-block': { 'Skip Options': ['Skip Option'] }
 }
 
 export const SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS = {
   general: new Set(['System Default']),
+  'context-menu-search': new Set(['Engine Name', 'Search URL']),
   player: new Set(['Skip Silence']),
-  'caption-appearance': new Set(['Application Language'])
+  subscription: new Set(['Auto Refresh Interval']),
+  'caption-appearance': new Set(['Application Language']),
+  'external-software': new Set([
+    'Download yt-dlp',
+    'Update yt-dlp',
+    'Downloading yt-dlp',
+    'Download FFmpeg',
+    'Update FFmpeg',
+    'Downloading FFmpeg',
+    'Download FFmpeg and FFprobe',
+    'Update FFmpeg and FFprobe',
+    'Downloading FFmpeg and FFprobe',
+    'Select Browser'
+  ])
 }
