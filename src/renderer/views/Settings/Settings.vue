@@ -463,6 +463,7 @@ const subpageIcon = ref(null)
 const subpageFlush = ref(false)
 let closeSubpage = null
 let subpagePersistsOnDeactivate = false
+let closeSubpageOnActivate = false
 let settingsResizeObserver = null
 let settingsSectionResizeObserver = null
 let profileManagerResizeObserver = null
@@ -959,12 +960,16 @@ onMounted(() => {
   systemColorScheme.addEventListener('change', updateSystemColorScheme)
 })
 onActivated(() => {
+  if (closeSubpageOnActivate) {
+    closeSubpageOnActivate = false
+    closeSubpage?.()
+  }
   handleMounted()
   nextTick(restoreMinimizedScrollPositions)
 })
 onDeactivated(() => {
   if (!subpagePersistsOnDeactivate) {
-    closeSubpage?.()
+    closeSubpageOnActivate = true
   }
   stopObserving()
   stopDragging()
@@ -1410,7 +1415,6 @@ function handleResize(width) {
 }
 
 function closeSettings() {
-  store.dispatch('hideKeyboardShortcutPrompt')
   store.dispatch('hideSettingsWindow')
 }
 
