@@ -50,6 +50,14 @@ test('rejects YouTube\'s decodable moving-thumbnail error image', () => {
     naturalHeight: 90
   }), false)
   assert.equal(isThumbnailPreviewImageUsable({
+    naturalWidth: 0,
+    naturalHeight: 180
+  }), false)
+  assert.equal(isThumbnailPreviewImageUsable({
+    naturalWidth: 320,
+    naturalHeight: 0
+  }), false)
+  assert.equal(isThumbnailPreviewImageUsable({
     naturalWidth: 320,
     naturalHeight: 180
   }), true)
