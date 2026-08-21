@@ -946,6 +946,20 @@ test.describe('settings', () => {
     await expect(page.locator('.settingsContent > [data-section="playback"]')).toBeVisible()
   })
 
+  test('reopens Keyboard Shortcuts when its shortcut is pressed during closing', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.getByRole('button', { name: 'Show Keyboard Shortcuts' }).click()
+    await expect(page.locator('.shortcutColumns')).toBeVisible()
+
+    const settingsWindow = page.locator('.settingsWindow')
+    await page.locator('.settingsCloseButton').click()
+    await expect(settingsWindow).toHaveClass(/settings-window-leave-active/)
+    await page.keyboard.press('Shift+?')
+
+    await expect(settingsWindow).toBeVisible()
+    await expect(page.locator('.shortcutColumns')).toBeVisible()
+  })
+
   test('minimizes utility windows into the header and restores their view', async ({ page }) => {
     for (const view of [null, 'about', 'downloads']) {
       await page.evaluate((windowView) => {
