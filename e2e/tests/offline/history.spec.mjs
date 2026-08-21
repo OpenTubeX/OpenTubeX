@@ -260,7 +260,10 @@ test.describe('watch history', () => {
 test.describe('history search pagination', () => {
   test.use({
     seed: {
-      settings: { generalAutoLoadMorePaginatedItemsEnabled: false },
+      settings: {
+        generalAutoLoadMorePaginatedItemsEnabled: false,
+        uiScale: 125
+      },
       history: [
         ...matchingHistoryEntries('Decoy', 100),
         ...matchingHistoryEntries('Alpha', 220, 1000),
