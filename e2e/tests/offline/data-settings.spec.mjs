@@ -81,3 +81,45 @@ test('does not show a delayed IPC error after opening the profile directory', as
   await page.waitForTimeout(2500)
   expect(await page.evaluate(() => globalThis.profileDirectoryErrorToastShown)).toBe(false)
 })
+
+test('imports the members-only flag from exported watch history', async ({ page }) => {
+  const dataSection = await goToSettingsSection(page, 'data')
+  await page.evaluate(() => {
+    const historyEntry = {
+      author: 'Members Channel',
+      authorId: 'UCmembersOnlyImport',
+      isLive: false,
+      isMembersOnly: true,
+      lengthSeconds: 120,
+      published: Date.now() - 86_400_000,
+      timeWatched: Date.now(),
+      title: 'Members-only import',
+      type: 'video',
+      videoId: 'member00001',
+      watchProgress: 30
+    }
+    const contents = `${JSON.stringify(historyEntry)}\n`
+
+    Object.defineProperty(window, 'showOpenFilePicker', {
+      configurable: true,
+      value: async () => [{
+        getFile: async () => new File(
+          [contents],
+          'opentubex-history.db',
+          { type: 'application/x-freetube-db' }
+        )
+      }]
+    })
+  })
+
+  await dataSection.getByRole('button', { name: 'Import history', exact: true }).click()
+
+  await expect(page.locator('.toast', {
+    hasText: 'All watched history has been successfully imported'
+  })).toBeVisible()
+  await expect(page.locator('.toast', { hasText: 'Unknown data key' })).toHaveCount(0)
+  await expect.poll(() => page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return store.getters.getHistoryCacheById.member00001?.isMembersOnly
+  })).toBe(true)
+})

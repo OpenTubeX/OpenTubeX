@@ -49,7 +49,7 @@ const seed = {
     {
       _id: CHANNEL_A,
       videos: [
-        feedVideo('aaaaaaaaaa1', 'Video A newer', CHANNEL_A, now - 1 * HOUR),
+        feedVideo('aaaaaaaaaa1', 'Video A newer', CHANNEL_A, now - 1 * HOUR, { isMembersOnly: true }),
         feedVideo('aaaaaaaaaa4', 'Running premiere video', CHANNEL_A, now - 2 * HOUR, {
           isPremiere: true,
           liveNow: true
@@ -135,6 +135,16 @@ test.describe('subscriptions feed from cache', () => {
 
     // The subscription feed honours the hide-upcoming-premieres setting.
     await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
+  })
+
+  test('labels members-only videos', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    const video = page.locator('.ft-list-video').filter({ hasText: 'Video A newer' })
+    const badge = video.locator('.membersOnlyTag')
+    await expect(badge).toHaveText('Members only')
+    await expect(badge.locator('[data-icon="users"]')).toBeVisible()
+    await expect(badge).toHaveCSS('white-space', 'nowrap')
   })
 
   test('shows a hidden upcoming premiere as a premiere when its scheduled time arrives', async ({ page }) => {

@@ -1030,6 +1030,7 @@ async function importFreeTubeWatchHistory(textDecode) {
     'lastViewedPlaylistId',
     'lastViewedPlaylistItemId',
     'lastViewedPlaylistType',
+    'isMembersOnly',
     'isWatched',
     'viewCount',
     'description',

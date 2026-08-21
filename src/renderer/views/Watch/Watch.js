@@ -15,6 +15,7 @@ import WatchVideoPlaylist from '../../components/WatchVideoPlaylist/WatchVideoPl
 import WatchVideoQueue from '../../components/WatchVideoQueue/WatchVideoQueue.vue'
 import WatchVideoRecommendations from '../../components/WatchVideoRecommendations/WatchVideoRecommendations.vue'
 import FtAgeRestricted from '../../components/FtAgeRestricted/FtAgeRestricted.vue'
+import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import FtSubscribeButton from '../../components/FtSubscribeButton/FtSubscribeButton.vue'
 import FtShareButton from '../../components/FtShareButton/FtShareButton.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
@@ -599,15 +600,7 @@ export default defineComponent({
       ])
     },
     hasConfiguredRestrictedPlaybackAuthentication: function () {
-      const getters = this.$store.getters
-      const cookiePath = getters.getYtDlpPlaybackCookiesPath
-      const browser = getters.getYtDlpPlaybackCookiesBrowser
-      const cookieFileConfigured = getters.getYtDlpPlaybackAuthMode === 'file' &&
-        typeof cookiePath === 'string' && cookiePath.trim() !== ''
-      const browserConfigured = getters.getYtDlpPlaybackAuthMode === 'browser' &&
-        typeof browser === 'string' && browser.trim() !== ''
-
-      return process.env.IS_ELECTRON && (cookieFileConfigured || browserConfigured)
+      return hasConfiguredRestrictedPlaybackAuthentication(this.$store.getters)
     },
     canTryRestrictedPlaybackWithCookies: function () {
       return this.restrictedPlaybackError !== null &&

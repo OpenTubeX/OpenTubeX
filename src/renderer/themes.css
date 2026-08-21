@@ -38,6 +38,7 @@ body {
   --destructive-text-color: #000;
   --destructive-hover-color: #e53935;
   --destructive-active-color: #c62828;
+  --members-only-color: #1b7331;
   --favorite-icon-filter: grayscale(1) sepia(1) saturate(2.2) hue-rotate(68deg) brightness(0.9);
 
   /* For the 'About' page, show the logo with the primary text color by default */
@@ -126,6 +127,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .everforestDarkMedium,
 .everforestDarkLow {
   --primary-shadow-color: rgb(0 0 0 / 75%);
+  --members-only-color: #55c86b;
 
   .invidiousLogo {
     background-image: url('./assets/img/invidious-logo-dark.svg');
