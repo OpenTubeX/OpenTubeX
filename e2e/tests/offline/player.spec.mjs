@@ -342,12 +342,18 @@ async function expectEllipsizedPlayerMenuLabelTitles({ app, page }) {
   const overflowMenu = player.locator('.shaka-overflow-menu')
   const zoomButton = overflowMenu.getByRole('button', { name: 'Zoom' })
   const expectFullTextOnHover = async (label, fullText) => {
-    await label.evaluate((element, text) => { element.textContent = text }, fullText)
-    expect(await label.evaluate((element) => {
+    const isOverflowing = () => label.evaluate((element) => {
       return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth
-    })).toBe(true)
+    })
+
+    await label.evaluate((element, text) => { element.textContent = text }, fullText)
+    expect(await isOverflowing()).toBe(true)
     await expect(label).toHaveAttribute('title', fullText, { timeout: 1000 })
     await label.hover()
+
+    await label.evaluate((element) => { element.textContent = 'Short label' })
+    expect(await isOverflowing()).toBe(false)
+    await expect(label).not.toHaveAttribute('title', { timeout: 1000 })
   }
 
   await expectFullTextOnHover(
