@@ -1049,6 +1049,24 @@ test.describe('settings', () => {
     await expectMinimizeToPreserveSettingsScroll(page)
   })
 
+  test('keeps the current settings subpage when minimized and restored', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="playback"]').click()
+    await page.getByRole('button', { name: /Manage Saved Channels/ }).click()
+
+    const settingsWindow = page.getByRole('dialog', { name: 'Settings', exact: true })
+    const breadcrumb = page.locator('.settingsBreadcrumb')
+    await expect(breadcrumb).toContainText('Saved Channel Settings')
+
+    await settingsWindow.getByRole('button', { name: /Minimi[sz]e/ }).click()
+    await expect(settingsWindow).toBeHidden()
+    await page.getByRole('button', { name: 'Restore: Settings' }).click()
+
+    await expect(settingsWindow).toBeVisible()
+    await expect(page.locator('.channelListContainer')).toBeVisible()
+    await expect(breadcrumb).toContainText('Saved Channel Settings')
+  })
+
   test.describe('minimized at 95% UI scale', () => {
     test.use({ seed: { settings: { uiScale: 95 } } })
 

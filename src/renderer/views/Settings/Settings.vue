@@ -962,7 +962,15 @@ onMounted(() => {
 onActivated(() => {
   if (closeSubpageOnActivate) {
     closeSubpageOnActivate = false
-    closeSubpage?.()
+    const deferredCloseSubpage = closeSubpage
+    deferredCloseSubpage?.()
+    if (closeSubpage === deferredCloseSubpage) {
+      subpageTitle.value = ''
+      subpageIcon.value = null
+      subpageFlush.value = false
+      closeSubpage = null
+      subpagePersistsOnDeactivate = false
+    }
   }
   handleMounted()
   nextTick(restorePreservedScrollPositions)
@@ -970,9 +978,9 @@ onActivated(() => {
 onDeactivated(() => {
   if (!settingsWindowMorphing.value) {
     preserveScrollPositions()
-  }
-  if (!subpagePersistsOnDeactivate) {
-    closeSubpageOnActivate = true
+    if (!subpagePersistsOnDeactivate) {
+      closeSubpageOnActivate = true
+    }
   }
   stopObserving()
   stopDragging()
