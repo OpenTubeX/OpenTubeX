@@ -4355,6 +4355,12 @@ export default defineComponent({
     function setupOverflowMenuLayout(controlsContainer) {
       overflowMenuResizeObserver?.disconnect()
       overflowMenuResizeObserver = null
+      overflowMenuMutationObserver?.disconnect()
+      overflowMenuMutationObserver = null
+      if (overflowMenuTitleFrame !== null) {
+        cancelAnimationFrame(overflowMenuTitleFrame)
+        overflowMenuTitleFrame = null
+      }
       overflowMenuIdleHeight = 0
 
       if (overflowMenuElement) {
@@ -4368,6 +4374,11 @@ export default defineComponent({
       }
 
       menu.classList.toggle('ft-menu-grid', usePlayerMenuGrid.value)
+
+      for (const label of menu.querySelectorAll('[data-ft-overflow-title]')) {
+        label.removeAttribute('title')
+        delete label.dataset.ftOverflowTitle
+      }
 
       // The caption appearance submenu has controls rather than options, so it
       // keeps its own layout.
@@ -4386,10 +4397,23 @@ export default defineComponent({
         return
       }
 
+      overflowMenuMutationObserver = new MutationObserver(() => {
+        scheduleOverflowMenuLabelTitles(menu)
+      })
+      overflowMenuMutationObserver.observe(menu, {
+        attributeFilter: ['class'],
+        attributes: true,
+        characterData: true,
+        childList: true,
+        subtree: true,
+      })
+
       // Opening a submenu replaces the tiles, which would otherwise resize the
       // popup around them. Remember how tall the menu is while its own tiles are
       // shown, so that a shorter submenu only leaves empty space below itself.
       overflowMenuResizeObserver = new ResizeObserver(() => {
+        scheduleOverflowMenuLabelTitles(menu)
+
         if (menu.querySelector(':scope > .shaka-sub-menu:not(.shaka-hidden)')) {
           return
         }
@@ -4403,6 +4427,45 @@ export default defineComponent({
       controls.removeEventListener('submenuclose', releaseOverflowMenuHeight)
       controls.addEventListener('submenuopen', keepOverflowMenuHeight)
       controls.addEventListener('submenuclose', releaseOverflowMenuHeight)
+      scheduleOverflowMenuLabelTitles(menu)
+    }
+
+    /**
+     * Schedule title measurements after Shaka has finished updating the menu.
+     *
+     * @param {HTMLElement} menu
+     */
+    function scheduleOverflowMenuLabelTitles(menu) {
+      if (overflowMenuTitleFrame !== null) {
+        return
+      }
+
+      overflowMenuTitleFrame = requestAnimationFrame(() => {
+        overflowMenuTitleFrame = null
+        updateOverflowMenuLabelTitles(menu)
+      })
+    }
+
+    /**
+     * Add a native tooltip only when a visible player-menu label is clipped.
+     *
+     * @param {HTMLElement} menu
+     */
+    function updateOverflowMenuLabelTitles(menu) {
+      for (const label of menu.querySelectorAll('.ft-menu-grid button span')) {
+        const isVisible = label.clientWidth > 0 && label.clientHeight > 0
+        const isClipped = isVisible && (
+          label.scrollWidth > label.clientWidth || label.scrollHeight > label.clientHeight
+        )
+
+        if (isClipped && (!label.hasAttribute('title') || 'ftOverflowTitle' in label.dataset)) {
+          label.title = label.textContent.trim()
+          label.dataset.ftOverflowTitle = ''
+        } else if (!isClipped && 'ftOverflowTitle' in label.dataset) {
+          label.removeAttribute('title')
+          delete label.dataset.ftOverflowTitle
+        }
+      }
     }
 
     function keepOverflowMenuHeight() {
@@ -4410,12 +4473,16 @@ export default defineComponent({
       if (menu instanceof HTMLElement && overflowMenuIdleHeight > 0) {
         menu.style.minBlockSize = `${overflowMenuIdleHeight}px`
       }
+      if (menu instanceof HTMLElement) {
+        scheduleOverflowMenuLabelTitles(menu)
+      }
     }
 
     function releaseOverflowMenuHeight() {
       const menu = container.value?.querySelector('.shaka-overflow-menu')
       if (menu instanceof HTMLElement) {
         menu.style.minBlockSize = ''
+        scheduleOverflowMenuLabelTitles(menu)
       }
     }
 
@@ -4578,6 +4645,12 @@ export default defineComponent({
 
     /** @type {ResizeObserver|null} */
     let overflowMenuResizeObserver = null
+
+    /** @type {MutationObserver|null} */
+    let overflowMenuMutationObserver = null
+
+    /** @type {number|null} */
+    let overflowMenuTitleFrame = null
 
     /** How tall the overflow menu is while its own tiles are shown. */
     let overflowMenuIdleHeight = 0
@@ -9546,6 +9619,16 @@ export default defineComponent({
       if (overflowMenuResizeObserver) {
         overflowMenuResizeObserver.disconnect()
         overflowMenuResizeObserver = null
+      }
+
+      if (overflowMenuMutationObserver) {
+        overflowMenuMutationObserver.disconnect()
+        overflowMenuMutationObserver = null
+      }
+
+      if (overflowMenuTitleFrame !== null) {
+        cancelAnimationFrame(overflowMenuTitleFrame)
+        overflowMenuTitleFrame = null
       }
 
       if (overflowMenuElement) {
