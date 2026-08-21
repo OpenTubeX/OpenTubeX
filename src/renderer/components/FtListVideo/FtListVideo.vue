@@ -1924,6 +1924,7 @@ async function addToQuickBookmarkPlaylist() {
     published: published.value,
     premiereDate: props.data.premiereDate,
     premiereTimestamp: props.data.premiereTimestamp,
+    isMembersOnly: isMembersOnly.value,
   }
 
   const playlistName = quickBookmarkPlaylist.value.playlistName

@@ -1650,25 +1650,35 @@ test.describe('list video actions', () => {
     }).toEqual(['eeeeeeeeeee'])
   })
 
-  test('quick bookmark saves the video to the target playlist', async ({ app, page }) => {
-    await goTo(page, 'history')
+  test.describe('members-only quick bookmarks', () => {
+    test.use({
+      seed: {
+        ...SEED,
+        history: [{ ...historyEntry('eeeeeeeeeee', 'Bookmarkable video'), isMembersOnly: true }]
+      }
+    })
 
-    const video = page.locator('.ft-list-video').first()
-    await video.hover()
-    await expect(video.locator('.quickBookmarkVideoIcon [data-icon="clock"]')).toBeVisible()
-    await video.locator('.quickBookmarkVideoIcon').click()
+    test('quick bookmark saves the video to the target playlist', async ({ app, page }) => {
+      await goTo(page, 'history')
 
-    // Once saved, the button keeps the configured icon and indicates state with color.
-    await expect(video.locator('.quickBookmarkVideoIcon.bookmarked')).toBeVisible()
-    await expect(video.locator('.quickBookmarkVideoIcon [data-icon="clock"]')).toBeVisible()
-    await expect(video.locator('.quickBookmarkVideoIcon .overlayIcon')).toHaveCount(0)
-    await expect(video.locator('.quickBookmarkVideoIcon .iconButton')).toHaveCSS('color', 'rgb(110, 170, 115)')
-    await expect(page.locator('.toast .message', { hasText: 'Video has been saved to Favorites' })).toBeVisible()
+      const video = page.locator('.ft-list-video').first()
+      await video.hover()
+      await expect(video.locator('.quickBookmarkVideoIcon [data-icon="clock"]')).toBeVisible()
+      await video.locator('.quickBookmarkVideoIcon').click()
 
-    await expect.poll(async () => {
-      const favorites = await readPlaylist(app, 'favorites')
-      return favorites?.videos?.map((entry) => entry.videoId)
-    }).toEqual(['eeeeeeeeeee'])
+      // Once saved, the button keeps the configured icon and indicates state with color.
+      await expect(video.locator('.quickBookmarkVideoIcon.bookmarked')).toBeVisible()
+      await expect(video.locator('.quickBookmarkVideoIcon [data-icon="clock"]')).toBeVisible()
+      await expect(video.locator('.quickBookmarkVideoIcon .overlayIcon')).toHaveCount(0)
+      await expect(video.locator('.quickBookmarkVideoIcon .iconButton')).toHaveCSS('color', 'rgb(110, 170, 115)')
+      await expect(page.locator('.toast .message', { hasText: 'Video has been saved to Favorites' })).toBeVisible()
+
+      await expect.poll(async () => {
+        const favorites = await readPlaylist(app, 'favorites')
+        const entry = favorites?.videos?.[0]
+        return { videoId: entry?.videoId, isMembersOnly: entry?.isMembersOnly }
+      }).toEqual({ videoId: 'eeeeeeeeeee', isMembersOnly: true })
+    })
   })
 
   test('the options dropdown toggles watched status separately from removing history', async ({ app, page }) => {
