@@ -369,6 +369,8 @@ function reconcileTab(previous, incoming) {
   let history = previous.history
   let historyIndex = previous.historyIndex
   let route = previous.route
+  let pendingReloadRoute = previous.pendingReloadRoute
+  let contentTitle = previous.contentTitle
 
   // Ordinary incoming routes echo renderer-owned navigation and can be stale.
   // A sync revision explicitly hands authority to the remote session instead.
@@ -381,6 +383,8 @@ function reconcileTab(previous, incoming) {
     history = restored.history
     historyIndex = restored.historyIndex
     route = incomingRoute
+    pendingReloadRoute = null
+    contentTitle = title
   } else if (incoming.loadState === 'unloaded' && previous.loadState !== 'unloaded') {
     const currentEntry = normalizeHistoryEntry(history[historyIndex] ?? { route })
     history = [currentEntry]
@@ -394,7 +398,8 @@ function reconcileTab(previous, incoming) {
     route,
     history,
     historyIndex,
-    contentTitle: previous.contentTitle,
+    pendingReloadRoute,
+    contentTitle,
     refreshKey: incoming.refreshKey ?? previous.refreshKey ?? 0
   }
 }

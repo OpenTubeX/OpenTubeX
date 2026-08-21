@@ -2859,6 +2859,8 @@ export class TabManager {
           tab.color = TabManager.normalizeTabColor(tabData.color)
         } else {
           const hasSavedTitle = typeof tabData.title === 'string' && tabData.title.trim().length > 0
+          // createTab inserts into previousTabs through this.tabs. The synced
+          // map and restored placement openers below replace that temporary order.
           tab = this.createTab({
             id: syncedId,
             url: TabManager.stripOneTimeTimestampFromUrl(tabData.url),
@@ -2885,6 +2887,9 @@ export class TabManager {
       for (const tab of removedTabs) {
         this._clearTabPreviewRefresh(tab)
         this._resolveTabMountWaiters(tab.id, Number.MAX_SAFE_INTEGER, false)
+        if (this.presentedTabId === tab.id) {
+          this.presentedTabId = null
+        }
         this._deleteTabPreviewFile(tab.previewFileName).catch(error => {
           console.error('Failed to delete remotely closed tab preview:', error)
         })
