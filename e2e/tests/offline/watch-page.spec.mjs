@@ -291,7 +291,7 @@ test.describe('Shorts transcript navigation', () => {
 
   test('docks, scrolls, and clamps video information across Shorts navigation', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
-    await setWindowSize(app, page, { width: 1325, height: 1012 })
+    await setWindowSize(app, page, { width: 1325, height: 760 })
     await page.locator(sel.searchInput)
       .fill(`https://www.youtube.com/shorts/${CAPTIONED_SHORT_IDS[0]}`)
     await page.locator(sel.searchInput).press('Enter')
@@ -355,6 +355,28 @@ test.describe('Shorts transcript navigation', () => {
         renderedEndVisible: descriptionBounds.bottom <= viewportBounds.bottom + 1
       }
     })).toEqual({ atScrollEnd: true, renderedEndVisible: true })
+
+    await setWindowSize(app, page, { width: 1326, height: 1012 })
+    await expect.poll(() => scroller.evaluate(element => {
+      const contentEnd = element.querySelector('.shortsAuxPanelContentEnd')
+      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+      const viewportBounds = element.getBoundingClientRect()
+      const contentEndBounds = contentEnd.getBoundingClientRect()
+      const maximumScrollTop = Math.max(0, contentEnd.offsetTop - element.clientHeight)
+      const hasVerticalOverflow = maximumScrollTop > 1
+      return {
+        atRenderedEnd: maximumScrollTop === 0
+          ? element.scrollTop <= 1
+          : Math.abs(contentEndBounds.bottom - viewportBounds.bottom) <= 1,
+        scrollbarMatchesOverflow:
+          scrollbar?.classList.contains('os-scrollbar-visible') === hasVerticalOverflow,
+        withinRenderedRange: element.scrollTop <= maximumScrollTop + 1
+      }
+    })).toEqual({
+      atRenderedEnd: true,
+      scrollbarMatchesOverflow: true,
+      withinRenderedRange: true
+    })
     await page.mouse.wheel(0, 500)
     await page.waitForTimeout(100)
     await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[0]}\\?short=true`))
@@ -1522,6 +1544,45 @@ test.describe('watch page', () => {
     await expect(page.locator('.shortsAuxPanelTarget .watchVideoTranscript')).toBeVisible()
     await page.waitForTimeout(250)
     expect(await target.evaluate(element => element.scrollTop)).toBe(0)
+
+    const transcript = page.locator('.shortsAuxPanelTarget .watchVideoTranscript')
+    await transcript.evaluate(element => { element.style.blockSize = '200%' })
+    await target.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => target.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await watchComponent.evaluate(async (component) => {
+      component.proxy.closeTranscript()
+      await component.proxy.$nextTick()
+    })
+    await expect(transcript).toHaveCount(0)
+    await expect.poll(() => target.evaluate(element => element.scrollTop)).toBe(0)
+
+    await watchComponent.evaluate(async (component) => {
+      component.proxy.handleSponsorBlockInfoChange({
+        open: true,
+        loading: false,
+        pendingUuid: null,
+        segments: [],
+        submissionEnabled: false
+      })
+      await component.proxy.$nextTick()
+    })
+    const sponsorBlock = page.locator('.shortsAuxPanelTarget .watchVideoSponsorBlock')
+    await expect(sponsorBlock).toBeVisible()
+    await sponsorBlock.evaluate(element => { element.style.blockSize = '200%' })
+    await target.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => target.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await watchComponent.evaluate(async (component) => {
+      component.proxy.handleSponsorBlockInfoChange({
+        open: false,
+        loading: false,
+        pendingUuid: null,
+        segments: [],
+        submissionEnabled: false
+      })
+      await component.proxy.$nextTick()
+    })
+    await expect(sponsorBlock).toHaveCount(0)
+    await expect.poll(() => target.evaluate(element => element.scrollTop)).toBe(0)
 
     await watchComponent.dispose()
   })

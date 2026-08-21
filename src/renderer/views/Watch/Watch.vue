@@ -691,6 +691,11 @@
             @close="closeTranscript"
             @timestamp-event="playTranscriptSegment"
           />
+          <div
+            ref="shortsAuxPanelContentEnd"
+            class="shortsAuxPanelContentEnd"
+            aria-hidden="true"
+          />
         </div>
       </div>
     </div>
