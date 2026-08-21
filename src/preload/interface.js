@@ -674,6 +674,14 @@ export default {
 
   subscriptionAutoRefresh: {
     /**
+     * Get the identifier for the current application-window session.
+     * @returns {Promise<string | null>}
+     */
+    getSessionId: () => {
+      return ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_GET_SESSION_ID)
+    },
+
+    /**
      * Atomically claim ownership of the subscription auto refresh.
      * @param {string} tabId
      * @param {'videos' | 'shorts' | 'live' | 'posts'} feedTab

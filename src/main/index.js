@@ -358,6 +358,7 @@ function runApp() {
   /** @type {{ webContents: import('electron').WebContents, tabId: string } | null} */
   let subscriptionAutoRefreshOwner = null
   let subscriptionAutoRefreshProgress = 0
+  let subscriptionAutoRefreshSessionId = randomUUID()
   /** @type {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }> | null} */
   let ipBlockRecoveryScriptPromise = null
   const faviconPromises = new Map()
@@ -3413,6 +3414,10 @@ function runApp() {
     }
   })
 
+  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_GET_SESSION_ID, (event) => {
+    return isOpenTubeXUrl(event.senderFrame.url) ? subscriptionAutoRefreshSessionId : null
+  })
+
   ipcMain.on(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_SET_PROGRESS, (event, tabId, percentage) => {
     if (
       subscriptionAutoRefreshOwner?.webContents.id !== event.sender.id ||
@@ -4958,6 +4963,7 @@ function runApp() {
   }
 
   function handleQuit() {
+    subscriptionAutoRefreshSessionId = randomUUID()
     cleanUpResources().finally(() => {
       mainWindow = null
       if (process.platform !== 'darwin') {

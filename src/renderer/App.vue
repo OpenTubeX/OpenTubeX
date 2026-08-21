@@ -581,6 +581,7 @@ const LEGACY_SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX = 'opentubex.subscript
 const SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.completed.'
 const SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.deadline.'
 const SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY = 'opentubex.subscriptionAutoRefresh.inProgress'
+const SUBSCRIPTION_AUTO_REFRESH_SESSION_STORAGE_KEY = 'opentubex.subscriptionAutoRefresh.sessionId'
 let historyCleanupTimer = null
 const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live', 'posts']
 let removeSubscriptionAutoRefreshActiveChangedListener = null
@@ -1190,13 +1191,42 @@ function scheduleHistoryCleanup(days) {
   }, HISTORY_CLEANUP_INTERVAL)
 }
 
-watch([dataReady, activeSubscriptionProfileId], ([ready, profileId]) => {
+watch([dataReady, activeSubscriptionProfileId], async ([ready, profileId]) => {
   clearSubscriptionFeedAutoRefreshTimer()
   if (ready && profileId) {
     migrateLegacySubscriptionAutoRefreshDeadlines()
-    synchronizeSubscriptionAutoRefreshProfile(profileId)
+    if (!await resetSubscriptionAutoRefreshForNewSession()) {
+      synchronizeSubscriptionAutoRefreshProfile(profileId)
+    }
   }
 })
+
+async function resetSubscriptionAutoRefreshForNewSession() {
+  if (!process.env.IS_ELECTRON) {
+    return false
+  }
+
+  try {
+    const sessionId = await window.ftElectron.subscriptionAutoRefresh.getSessionId()
+    if (sessionId === null) {
+      return false
+    }
+
+    if (localStorage.getItem(SUBSCRIPTION_AUTO_REFRESH_SESSION_STORAGE_KEY) === sessionId) {
+      return false
+    }
+
+    // Write the marker last so concurrently restored windows either observe a
+    // complete reset or harmlessly perform the same reset themselves.
+    for (const tab of subscriptionAutoRefreshTabs) {
+      resetSubscriptionTabAutoRefreshForAllProfiles(tab)
+    }
+    localStorage.setItem(SUBSCRIPTION_AUTO_REFRESH_SESSION_STORAGE_KEY, sessionId)
+    return true
+  } catch {
+    return false
+  }
+}
 
 watch([subscriptionFeedAutoRefreshInterval, hideSubscriptionsVideos], () => {
   resetSubscriptionTabAutoRefreshForAllProfiles('videos')

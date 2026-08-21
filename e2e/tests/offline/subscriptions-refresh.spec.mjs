@@ -1,4 +1,4 @@
-import { test, expect, goTo, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel, waitForAppReady } from '../../helpers/app.mjs'
 
 const HOUR = 3_600_000
 const now = Date.now()
@@ -426,6 +426,66 @@ test.describe('subscription feed refresh controls', () => {
 
     await expect(page.locator('.newContentDot')).toHaveCount(0)
     await expect(markAllAsSeen).toHaveCount(0)
+  })
+})
+
+test.describe('subscription feed auto refresh after restart', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        subscriptionFeedAutoRefreshInterval: '60000'
+      },
+      profiles: [profileWith(12)],
+      subscriptionCache: Array.from({ length: 12 }, (_, index) => cachedChannel(index))
+    }
+  })
+
+  test('restarts an expired refresh interval instead of catching up on startup', async ({ app }) => {
+    await routeFeeds(app.page, () => 8_000)
+    await goTo(app.page, 'subscriptions')
+    await expect(app.page.getByText(/Next auto refresh:/i)).toBeVisible()
+    await expect(app.page.getByTestId('subscription-refresh-toast')).toHaveCount(0)
+
+    await app.page.evaluate(() => {
+      localStorage.setItem(
+        'opentubex.subscriptionAutoRefresh.completed.allChannels/videos',
+        String(Date.now() - 2 * 60 * 60 * 1000)
+      )
+      localStorage.setItem(
+        'opentubex.subscriptionAutoRefresh.deadline.allChannels/videos',
+        String(Date.now() - 60 * 1000)
+      )
+    })
+
+    const { page } = await app.relaunch()
+    await routeFeeds(page, () => 8_000)
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByTestId('subscription-refresh-toast')).toHaveCount(0)
+    await page.waitForTimeout(2_000)
+    await expect(page.getByTestId('subscription-refresh-toast')).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => Number(localStorage.getItem(
+      'opentubex.subscriptionAutoRefresh.deadline.allChannels/videos'
+    )))).toBeGreaterThan(Date.now() + 30_000)
+  })
+
+  test('keeps the current deadline when another window opens', async ({ app }) => {
+    const deadline = Date.now() + 10 * 60 * 1000
+    await app.page.evaluate((timestamp) => localStorage.setItem(
+      'opentubex.subscriptionAutoRefresh.deadline.allChannels/videos',
+      String(timestamp)
+    ), deadline)
+
+    const [newWindow] = await Promise.all([
+      app.electronApp.waitForEvent('window'),
+      app.page.locator('.topNav .navNewWindowButton').click()
+    ])
+    await waitForAppReady(newWindow)
+
+    await expect.poll(() => newWindow.evaluate(() => Number(localStorage.getItem(
+      'opentubex.subscriptionAutoRefresh.deadline.allChannels/videos'
+    )))).toBe(deadline)
   })
 })
 
