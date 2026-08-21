@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  getCommentReplyAccessibleLabel,
   getCommentReplyCount,
   getReplyContinuationToken,
   getReplyLoadState,
@@ -9,6 +10,20 @@ import {
   isMissingReplyResponseError,
   shouldLoadInitialReplies
 } from '../../src/renderer/helpers/comment-replies.js'
+
+test('describes collapsed replies from the video uploader', () => {
+  const comment = {
+    hasOwnerReplied: true,
+    numReplies: 3,
+    replies: [],
+    showReplies: false
+  }
+
+  assert.equal(
+    getCommentReplyAccessibleLabel(comment, key => key, 'Uploader'),
+    'Comments.View {replyCount} replies from {channelName} and others'
+  )
+})
 
 test('refreshes a stale advertised count after newer replies load', () => {
   const comment = {

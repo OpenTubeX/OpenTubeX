@@ -15,6 +15,33 @@ export function getCommentReplyCount(comment) {
 }
 
 /**
+ * @param {{ hasOwnerReplied?: boolean, numReplies: number, replies: object[], showReplies: boolean }} comment
+ * @param {(key: string, values: object, count: number) => string} translate
+ * @param {string} channelName
+ */
+export function getCommentReplyAccessibleLabel(comment, translate, channelName) {
+  const replyCount = getCommentReplyCount(comment)
+
+  if (comment.showReplies) {
+    return translate('Comments.Hide {replyCount} replies', { replyCount }, replyCount)
+  }
+
+  if (comment.hasOwnerReplied) {
+    if (replyCount > 1) {
+      return translate(
+        'Comments.View {replyCount} replies from {channelName} and others',
+        { replyCount, channelName },
+        replyCount
+      )
+    }
+
+    return translate('Comments.View 1 reply from {channelName}', { channelName }, 1)
+  }
+
+  return translate('Comments.Reply Count', { replyCount }, replyCount)
+}
+
+/**
  * @param {number} loadedReplyCount
  * @param {number} expectedReplyCount
  * @param {boolean} hasNextContinuation

@@ -277,6 +277,7 @@
               type="button"
               class="commentReplyContinuationButton"
               aria-expanded="false"
+              :aria-label="commentReplyAccessibleLabel(comment)"
               :disabled="isReplyLoading(comment.id)"
               @click="toggleCommentReplies(index)"
             >
@@ -288,7 +289,20 @@
                 :label="$t('Comments.Getting comment replies, please wait')"
               />
               <template v-else>
-                <span>{{ toggleCommentRepliesLinkText(comment) }}</span>
+                <span class="commentReplyToggleLabel">
+                  <FtRetryImage
+                    v-if="comment.hasOwnerReplied && channelThumbnail"
+                    :src="channelThumbnail"
+                    class="commentReplyOwnerThumbnail"
+                    aria-hidden="true"
+                  />
+                  <span
+                    v-if="comment.hasOwnerReplied && channelThumbnail"
+                    class="commentReplyOwnerSeparator"
+                    aria-hidden="true"
+                  >•</span>
+                  <span class="commentReplyToggleText">{{ toggleCommentRepliesLinkText(comment) }}</span>
+                </span>
                 <FtIcon
                   :icon="['fas', 'angle-down']"
                   aria-hidden="true"
@@ -462,6 +476,7 @@ import { useTabContext } from '../../tabs/TabContext'
 import { copyToClipboard, formatNumber, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import {
+  getCommentReplyAccessibleLabel,
   getCommentReplyCount,
   getReplyContinuationToken,
   getReplyLoadState,
@@ -984,6 +999,13 @@ function toggleCommentRepliesLinkText(comment) {
   }
 
   return t('Comments.Reply Count', { replyCount }, replyCount)
+}
+
+/**
+ * @param {Comment} comment
+ */
+function commentReplyAccessibleLabel(comment) {
+  return getCommentReplyAccessibleLabel(comment, t, props.channelName)
 }
 
 /**

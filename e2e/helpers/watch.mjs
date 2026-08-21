@@ -46,6 +46,28 @@ async function fixture(dir, name) {
   }
 }
 
+function addOwnerReplyMarker(body) {
+  const response = JSON.parse(body)
+  const pending = [response]
+
+  while (pending.length > 0) {
+    const value = pending.pop()
+    if (!value || typeof value !== 'object') continue
+
+    const replies = value.commentThreadRenderer?.replies?.commentRepliesRenderer
+    if (replies) {
+      replies.viewRepliesCreatorThumbnail = {
+        thumbnails: [{ url: 'https://images.test/channel-owner.png' }]
+      }
+      return Buffer.from(JSON.stringify(response))
+    }
+
+    pending.push(...Object.values(value))
+  }
+
+  throw new Error('Unable to add an owner-reply marker to the comment fixture')
+}
+
 /**
  * Serves the watch page for `jNQXAC9IVRw` from the committed Innertube
  * fixtures, without any network access.
@@ -63,12 +85,14 @@ async function fixture(dir, name) {
  * @param {boolean} [options.captionTranslations] include a translatable caption and target languages
  * @param {string} [options.captionCueSettings] append WebVTT settings to the test caption cue
  * @param {string[]|null} [options.captionVideoIds] limit captions to these video IDs
+ * @param {boolean} [options.ownerReply] mark the first reply thread as containing a video-owner reply
  */
 export async function mockWatchPage(app, page, {
   playable = false,
   captionTranslations = false,
   captionCueSettings = '',
-  captionVideoIds = null
+  captionVideoIds = null,
+  ownerReply = false
 } = {}) {
   const counters = new Map()
   const includeCaptions = captionTranslations || captionCueSettings !== '' || captionVideoIds !== null
@@ -189,6 +213,9 @@ export async function mockWatchPage(app, page, {
       }
 
       if (body) {
+        if (ownerReply && body.includes('commentThreadRenderer')) {
+          body = addOwnerReplyMarker(body)
+        }
         return route.fulfill({ status: 200, contentType: 'application/json', body })
       }
       console.warn(`[e2e] Missing watch page fixture: ${key}`)

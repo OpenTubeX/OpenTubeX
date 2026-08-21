@@ -2302,6 +2302,27 @@ test.describe('manual comment loading', () => {
     }
   })
 
+  test('identifies collapsed replies from the video uploader', async ({ app, page, attachScreenshot }) => {
+    await mockPlayableWatchPage(app, page, { ownerReply: true })
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const ownerReplyToggle = page.getByRole('button', {
+      name: /replies from .+ and others/
+    })
+    await expect(ownerReplyToggle).toBeVisible()
+    await expect(ownerReplyToggle.locator('.commentReplyOwnerThumbnail')).toBeVisible()
+    await expect(ownerReplyToggle.locator('.commentReplyOwnerSeparator')).toHaveText('•')
+    await expect(ownerReplyToggle.locator('.commentReplyToggleText')).toHaveText(/\d+ replies/)
+    await expect(ownerReplyToggle).not.toContainText('from')
+    await ownerReplyToggle.scrollIntoViewIfNeeded()
+    await attachScreenshot('uploader reply indicator')
+  })
+
   test('stale reply controls disappear after an empty final reply page', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
