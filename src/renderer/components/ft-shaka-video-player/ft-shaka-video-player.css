@@ -2693,8 +2693,8 @@
 /*
   Ambient glow surface used in fullscreen and full window mode, where the
   host-level canvases are not visible. It sits behind the video and shines
-  around it (and through the translucent side panels): always in full window
-  mode, in fullscreen only while a side panel is open.
+  around it and through the translucent side panels. Keeping it active in
+  fullscreen also replaces letterbox and pillarbox bars with the glow.
 */
 .ambientFullscreenCanvas {
   position: absolute;
@@ -2706,7 +2706,7 @@
   opacity: 0;
   filter: blur(clamp(24px, 4vw, 52px)) saturate(1.05);
   pointer-events: none;
-  transition: opacity 250ms ease;
+  transition: opacity 250ms ease, inline-size 250ms ease;
 }
 
 /* Suppressed during presentation mode switches; see the block near the end of the file. */
@@ -2715,8 +2715,7 @@
 }
 
 .ftVideoPlayer.fullWindow .ambientFullscreenCanvas,
-.ftVideoPlayer.shortsPlayer:fullscreen .ambientFullscreenCanvas,
-.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .ambientFullscreenCanvas {
+.ftVideoPlayer:fullscreen .ambientFullscreenCanvas {
   opacity: 0.42;
 }
 
@@ -3890,8 +3889,8 @@
   aside instead of covering it. Kept at the end of the file so the
   higher-specificity .player rules follow the scroll mini player ones.
 */
-.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .player,
-.ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .player {
+.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :is(.player, .ambientFullscreenCanvas),
+.ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :is(.player, .ambientFullscreenCanvas) {
   inline-size: calc(100% - var(--side-panel-width));
 }
 

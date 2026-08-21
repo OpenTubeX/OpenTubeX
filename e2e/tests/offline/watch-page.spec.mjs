@@ -38,6 +38,84 @@ for (const { name, options, expectedCount } of [
   })
 }
 
+test('keeps fullscreen ambient mode centered on letterboxed video beside a dock', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateAmbientMode', true)
+  })
+
+  await video.evaluate(async (element) => {
+    const source = document.createElement('canvas')
+    source.width = 190
+    source.height = 90
+    source.getContext('2d').fillStyle = '#ff0000'
+    source.getContext('2d').fillRect(0, 0, source.width, source.height)
+
+    const stream = source.captureStream(10)
+    element.srcObject = stream
+    await element.play()
+    window.__ambientModeTestMedia = { source, stream }
+  })
+  await expect.poll(() => video.evaluate(element => [element.videoWidth, element.videoHeight]))
+    .toEqual([190, 90])
+
+  await setPlayerFullscreen(page, true)
+  const player = page.locator('.ftVideoPlayer')
+  const ambient = player.locator('.ambientFullscreenCanvas')
+  await expect.poll(() => ambient.evaluate(element => Number(getComputedStyle(element).opacity)))
+    .toBeGreaterThan(0)
+  await expect.poll(() => ambient.evaluate((element) => {
+    const [red, green, blue, alpha] = element.getContext('2d').getImageData(40, 22, 1, 1).data
+    return red > 200 && green < 20 && blue < 20 && alpha === 255
+  })).toBe(true)
+
+  const watchComponent = await page.evaluateHandle(findWatchComponent)
+  await watchComponent.evaluate(component => {
+    component.proxy.$refs.player.setFullscreenMetadata(true)
+  })
+  await expect(page.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
+  await expect.poll(async () => {
+    const [playerBounds, videoBounds] = await Promise.all([
+      player.boundingBox(),
+      video.boundingBox()
+    ])
+    return playerBounds.width - videoBounds.width
+  }).toBeGreaterThan(100)
+  await expect.poll(async () => {
+    const [ambientBounds, videoBounds] = await Promise.all([
+      ambient.boundingBox(),
+      video.boundingBox()
+    ])
+    const ambientCenter = ambientBounds.x + ambientBounds.width / 2
+    const videoCenter = videoBounds.x + videoBounds.width / 2
+    return Math.abs(ambientCenter - videoCenter)
+  }).toBeLessThanOrEqual(1)
+
+  await player.evaluate((element) => {
+    for (const overlay of element.querySelectorAll('.shaka-controls-container, .playerFullscreenTitleOverlay')) {
+      overlay.style.visibility = 'hidden'
+    }
+  })
+  const screenshot = await player.screenshot()
+  const letterboxPixel = await page.evaluate(async (base64) => {
+    const image = new Image()
+    image.src = `data:image/png;base64,${base64}`
+    await image.decode()
+
+    const canvas = new OffscreenCanvas(image.width, image.height)
+    const context = canvas.getContext('2d')
+    context.drawImage(image, 0, 0)
+    return [...context.getImageData(Math.floor(image.width / 2), 20, 1, 1).data]
+  }, screenshot.toString('base64'))
+
+  expect(letterboxPixel[0]).toBeGreaterThan(40)
+  expect(letterboxPixel[0]).toBeGreaterThan(letterboxPixel[1] * 2)
+  expect(letterboxPixel[0]).toBeGreaterThan(letterboxPixel[2] * 2)
+})
+
 test('shows the restricted playback setup hint until an authenticated retry is available', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.route('https://example.invalid/restricted.m3u8', route => route.fulfill({
