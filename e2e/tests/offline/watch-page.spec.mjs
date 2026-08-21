@@ -1,4 +1,4 @@
-import { goTo, sel, setPlayerFullscreen, test, expect } from '../../helpers/app.mjs'
+import { goTo, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { activeTab, findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { demoPlayerResponse } from '../../helpers/media.mjs'
@@ -289,8 +289,9 @@ test.describe('Shorts transcript navigation', () => {
     await expect(transcriptButton).toHaveCount(0)
   })
 
-  test('scrolls long video information independently of Shorts navigation', async ({ app, page }) => {
+  test('docks, scrolls, and clamps video information across Shorts navigation', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
+    await setWindowSize(app, page, { width: 1325, height: 1012 })
     await page.locator(sel.searchInput)
       .fill(`https://www.youtube.com/shorts/${CAPTIONED_SHORT_IDS[0]}`)
     await page.locator(sel.searchInput).press('Enter')
@@ -309,18 +310,43 @@ test.describe('Shorts transcript navigation', () => {
 
     const panel = page.locator('.shortsAuxPanel')
     const scroller = panel.locator('.shortsAuxPanelTarget')
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
     await expect(panel).toHaveClass(/shortsAuxPanelOpen/)
+    await expect.poll(async () => {
+      const [panelBounds, playerBounds] = await Promise.all([
+        panel.boundingBox(),
+        player.boundingBox()
+      ])
+      const bottomDelta = Math.abs(
+        panelBounds.y + panelBounds.height - playerBounds.y - playerBounds.height
+      )
+      const topDelta = Math.abs(panelBounds.y - playerBounds.y)
+      return Math.max(bottomDelta, topDelta)
+    }).toBeLessThanOrEqual(1)
     await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
     await expect(panel.locator('.os-scrollbar-vertical')).toHaveCount(1)
     await expect.poll(() => scroller.evaluate(element => {
-      return element.scrollHeight > element.clientHeight
-    })).toBe(true)
+      return element.scrollHeight - element.clientHeight
+    })).toBeGreaterThan(100)
 
     const initialScrollTop = await scroller.evaluate(element => element.scrollTop)
-    await scroller.hover()
-    await page.mouse.wheel(0, 10_000)
+    const pointer = await scroller.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return {
+        x: bounds.left + bounds.width / 2,
+        y: Math.min(bounds.bottom - 1, window.innerHeight - 1)
+      }
+    })
+    await page.mouse.move(pointer.x, pointer.y)
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[0]}\\?short=true`))
+    expect(await scroller.evaluate((element, point) => {
+      const hit = document.elementFromPoint(point.x, point.y)
+      return element.contains(hit)
+    }, pointer)).toBe(true)
+    await page.mouse.wheel(0, 500)
     await expect.poll(() => scroller.evaluate(element => element.scrollTop))
       .toBeGreaterThan(initialScrollTop)
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
     await expect.poll(() => scroller.evaluate(element => {
       const viewportBounds = element.getBoundingClientRect()
       const descriptionBounds = element.querySelector('.description').getBoundingClientRect()
@@ -329,7 +355,41 @@ test.describe('Shorts transcript navigation', () => {
         renderedEndVisible: descriptionBounds.bottom <= viewportBounds.bottom + 1
       }
     })).toEqual({ atScrollEnd: true, renderedEndVisible: true })
+    await page.mouse.wheel(0, 500)
+    await page.waitForTimeout(100)
     await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[0]}\\?short=true`))
+
+    await page.locator('.shortsNavigationButton').last().click()
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[1]}\\?short=true`))
+    await waitForPlayback(page)
+    await expect(panel).toHaveClass(/shortsAuxPanelOpen/)
+    await expect.poll(() => scroller.evaluate(element => {
+      const content = element.querySelector('.watchVideo')
+      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+      const viewportBounds = element.getBoundingClientRect()
+      const contentBounds = content?.getBoundingClientRect()
+      const maximumScrollTop = Math.max(
+        0,
+        (content?.offsetTop ?? 0) + (content?.offsetHeight ?? 0) - element.clientHeight
+      )
+      const hasVerticalOverflow = element.scrollHeight > element.clientHeight + 1
+      return {
+        atRenderedEnd: contentBounds != null &&
+          (maximumScrollTop === 0
+            ? element.scrollTop <= 1
+            : Math.abs(contentBounds.bottom - viewportBounds.bottom) <= 1),
+        horizontalOverflowHidden: getComputedStyle(element).overflowX === 'hidden' &&
+          element.scrollWidth <= element.clientWidth + 1,
+        scrollbarMatchesOverflow:
+          scrollbar?.classList.contains('os-scrollbar-visible') === hasVerticalOverflow,
+        withinRenderedRange: element.scrollTop <= maximumScrollTop + 1
+      }
+    })).toEqual({
+      atRenderedEnd: true,
+      horizontalOverflowHidden: true,
+      scrollbarMatchesOverflow: true,
+      withinRenderedRange: true
+    })
   })
 
   test('keeps loading Shorts when another player keeps the shared caption factory alive', async ({ app, page }) => {

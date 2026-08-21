@@ -26,7 +26,7 @@ import FtButton from '../../components/FtButton/FtButton.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
 import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
-import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../../constants'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
@@ -1058,6 +1058,10 @@ export default defineComponent({
         this.shortsTransitionPreview = ''
         this.shortsTransitionDirection = 0
 
+        if (this.shortsMetadataOpen) {
+          this.clampShortsAuxPanelScroll()
+        }
+
         if (this.applyDefaultTheatreModeAfterLoad) {
           this.applyDefaultTheatreModeAfterLoad = false
           this.useTheatreMode = this.theatreTogglePossible
@@ -1555,6 +1559,17 @@ export default defineComponent({
           requestAnimationFrame(() => restoreOverlayScrollTop(target, 0))
         })
       }
+    },
+    clampShortsAuxPanelScroll() {
+      this.$nextTick(() => {
+        requestAnimationFrame(() => {
+          const target = this.$refs.shortsAuxPanelTarget
+          const content = target?.querySelector('.watchVideo')
+          if (target != null && content != null) {
+            clampOverlayScrollTop(target, content)
+          }
+        })
+      })
     },
     handleSidebarPanelBeforeLeave() {
       this.sidebarPanelLeaving = true

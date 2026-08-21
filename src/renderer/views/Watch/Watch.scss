@@ -321,6 +321,11 @@
       display: none;
     }
 
+    .videoArea {
+      position: relative;
+      overscroll-behavior: contain;
+    }
+
     .videoArea .videoAreaMargin {
       position: relative;
       display: grid;
@@ -793,10 +798,11 @@
 
     .shortsCommentsPanel,
     .shortsAuxPanel {
-      position: fixed;
+      position: absolute;
       z-index: 20;
-      inset-block: 80px 16px;
+      inset-block-start: 0;
       inset-inline-end: 88px;
+      block-size: var(--shorts-player-height);
       inline-size: min(420px, calc(100vw - 32px));
       overflow: hidden;
       border-radius: calc(12px * var(--ui-roundness));
