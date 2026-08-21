@@ -2125,7 +2125,7 @@ function handleKeyboardShortcuts(event) {
   if (matchesKeyboardShortcut(event, shortcuts.SHOW_SHORTCUTS) && !isTypingTarget(event.target)) {
     event.preventDefault()
     store.dispatch(isKeyboardShortcutPromptShown.value && settingsWindowOpen.value
-      ? 'hideKeyboardShortcutPrompt'
+      ? 'hideSettingsWindow'
       : 'showKeyboardShortcutPrompt')
   }
 

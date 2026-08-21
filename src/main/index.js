@@ -5144,7 +5144,7 @@ function runApp() {
   })
    */
 
-  function navigateTo(path, browserWindow) {
+  function navigateTo(path, browserWindow, toggle = false) {
     if (browserWindow == null) {
       return
     }
@@ -5153,10 +5153,11 @@ function runApp() {
     if (tabManager?.activeTabId && isOpenTubeXUrl(browserWindow.webContents.getURL())) {
       browserWindow.webContents.send(IpcChannels.CHANGE_VIEW, {
         tabId: tabManager.activeTabId,
-        route: path
+        route: path,
+        toggle
       })
     } else if (isOpenTubeXUrl(browserWindow.webContents.getURL())) {
-      browserWindow.webContents.send(IpcChannels.CHANGE_VIEW, path)
+      browserWindow.webContents.send(IpcChannels.CHANGE_VIEW, toggle ? { route: path, toggle } : path)
     }
   }
 
@@ -5208,7 +5209,7 @@ function runApp() {
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_SETTINGS),
             click: (_menuItem, browserWindow, _event) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
-              navigateTo('/settings', browserWindow)
+              navigateTo('/settings', browserWindow, true)
             },
             type: 'normal'
           },

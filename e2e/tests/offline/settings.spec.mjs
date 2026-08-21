@@ -69,6 +69,18 @@ async function expectMinimizeToPreserveSettingsScroll(page) {
   )).toBeLessThanOrEqual(1)
 }
 
+async function pressSettingsShortcut(app) {
+  await app.electronApp.evaluate(({ BrowserWindow, Menu }) => {
+    const browserWindow = BrowserWindow.getAllWindows()[0]
+    const fileMenu = Menu.getApplicationMenu()?.items.find(item => item.label === 'File')
+    const preferencesItem = fileMenu?.submenu?.items.find(item => item.label === 'Preferences')
+    if (!browserWindow || !preferencesItem) {
+      throw new Error('Preferences application-menu item was not found')
+    }
+    preferencesItem.click(undefined, browserWindow, undefined)
+  })
+}
+
 async function expectExternalSoftwarePathAlignment(tool, sourceName, pathPlaceholder) {
   const source = tool.locator('.select').filter({ hasText: sourceName })
   const [sourceBox, helpBox, pathBox] = await Promise.all([
@@ -958,6 +970,52 @@ test.describe('settings', () => {
 
     await expect(settingsWindow).toBeVisible()
     await expect(page.locator('.shortcutColumns')).toBeVisible()
+  })
+
+  test('toggles Settings and Keyboard Shortcuts with their app shortcuts', async ({ app, page }) => {
+    const settingsWindow = page.locator('.settingsWindow')
+
+    await pressSettingsShortcut(app)
+    await expect(settingsWindow).toBeVisible()
+    await expect(page.locator('.shortcutColumns')).toHaveCount(0)
+
+    await pressSettingsShortcut(app)
+    await expect(settingsWindow).toHaveClass(/settings-window-leave-active/)
+    await expect(settingsWindow).toBeHidden()
+
+    await page.keyboard.press('Shift+?')
+    await expect(settingsWindow).toBeVisible()
+    await expect(page.locator('.shortcutColumns')).toBeVisible()
+
+    await page.keyboard.press('Shift+?')
+    await expect(settingsWindow).toHaveClass(/settings-window-leave-active/)
+    await expect(page.locator('.shortcutColumns')).toBeVisible()
+    await expect(settingsWindow).toBeHidden()
+  })
+
+  test('preserves category scroll when Settings is toggled but resets it when switching categories', async ({ app, page }) => {
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('updateUiScale', 95)
+    })
+    await pressSettingsShortcut(app)
+
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
+    const content = page.locator('.settingsContent')
+    await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    const scrollTop = await content.evaluate(element => element.scrollTop)
+
+    await pressSettingsShortcut(app)
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+    await pressSettingsShortcut(app)
+    await expect(page.locator('.settingsWindow')).toBeVisible()
+    await expect.poll(async () => Math.abs(
+      await content.evaluate(element => element.scrollTop) - scrollTop
+    )).toBeLessThanOrEqual(1)
+
+    await page.locator('.settingsMenu [data-section="playback"]').click()
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBe(0)
   })
 
   test('minimizes utility windows into the header and restores their view', async ({ page }) => {

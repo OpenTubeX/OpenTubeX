@@ -480,7 +480,7 @@ let dragOffsetY = 0
 let maximizedDragSession = null
 let restoreBounds = null
 /** @type {Array<{ element: HTMLElement, scrollTop: number }>} */
-let minimizedScrollPositions = []
+let preservedScrollPositions = []
 
 const windowBounds = ref(getInitialBounds())
 const windowStyle = computed(() => isMaximized.value
@@ -965,9 +965,12 @@ onActivated(() => {
     closeSubpage?.()
   }
   handleMounted()
-  nextTick(restoreMinimizedScrollPositions)
+  nextTick(restorePreservedScrollPositions)
 })
 onDeactivated(() => {
+  if (!settingsWindowMorphing.value) {
+    preserveScrollPositions()
+  }
   if (!subpagePersistsOnDeactivate) {
     closeSubpageOnActivate = true
   }
@@ -1419,20 +1422,24 @@ function closeSettings() {
 }
 
 function minimizeSettings() {
+  preserveScrollPositions()
+  store.dispatch('minimizeSettingsWindow')
+}
+
+function preserveScrollPositions() {
   const settingsWindow = settingsWindowRef.value
-  minimizedScrollPositions = settingsWindow
+  preservedScrollPositions = settingsWindow
     ? [...settingsWindow.querySelectorAll('[data-overlayscrollbars-initialize]')]
         .filter(element => element.scrollTop > 0)
         .map(element => ({ element, scrollTop: element.scrollTop }))
     : []
-  store.dispatch('minimizeSettingsWindow')
 }
 
-function restoreMinimizedScrollPositions() {
-  for (const { element, scrollTop } of minimizedScrollPositions) {
+function restorePreservedScrollPositions() {
+  for (const { element, scrollTop } of preservedScrollPositions) {
     if (element.isConnected) restoreOverlayScrollTop(element, scrollTop)
   }
-  minimizedScrollPositions = []
+  preservedScrollPositions = []
 }
 
 async function toggleMaximized() {
