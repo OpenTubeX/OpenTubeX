@@ -181,6 +181,14 @@
   white-space-collapse: collapse;
 }
 
+.membersOnlyTag {
+  align-items: center;
+  color: var(--members-only-color);
+  display: inline-flex;
+  gap: 3px;
+  white-space: nowrap;
+}
+
 .videoTagLine .videoTag:first-child {
   margin-inline-start: 0;
 }

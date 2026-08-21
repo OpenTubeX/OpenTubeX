@@ -3,11 +3,13 @@ import Autolinker from 'autolinker'
 import { parseLooseJSON } from 'bgutils-js/utils'
 
 import { SEARCH_CHAR_LIMIT } from '../../../constants'
+import store from '../../store/index'
 import { PlayerCache } from './PlayerCache'
 import { loadSearchContinuation } from '../search-continuation'
 import { parseLocalShortLinkedVideo } from '../player/shorts'
 import { getPaidPromotionDurationMs } from '../player/paidPromotion'
 import { getLocalPremiereState } from '../premiere'
+import { shouldHideMembersOnlyContent } from '../restricted-playback'
 import { getThumbnailPreviewUrl } from '../thumbnailPreview'
 import { isCollaborativeVideoAuthor, parseLocalVideoChannels } from '../video-collaborators'
 import {
@@ -1474,7 +1476,9 @@ export function parseLocalChannelVideos(videos, channelId, channelName) {
 
   for (const video of videos) {
     // `BADGE_STYLE_TYPE_MEMBERS_ONLY` used for both `members only` and `members first` videos
-    if (video.is(YTNodes.Video) && video.badges.some(badge => badge.style === 'BADGE_STYLE_TYPE_MEMBERS_ONLY')) {
+    const isMembersOnly = video.is(YTNodes.Video) &&
+      video.badges.some(badge => badge.style === 'BADGE_STYLE_TYPE_MEMBERS_ONLY')
+    if (shouldHideMembersOnlyContent(isMembersOnly, store.getters)) {
       continue
     }
     const parsedVideo = parseLocalListVideo(video, channelId, channelName)
@@ -1662,11 +1666,16 @@ export function parseChannelHomeTab(homeTab, channelId, channelName) {
 
         const playlistId = shelf.play_all_button?.endpoint.payload.playlistId
 
-        // filter out the members-only video section as none of the videos in that section are playable as they require a paid channel membership
-        if (!playlistId || !playlistId.startsWith('UUMO')) {
+        const isMembersOnly = playlistId?.startsWith('UUMO') ?? false
+        if (!shouldHideMembersOnlyContent(isMembersOnly, store.getters)) {
           shelves.push({
             title: shelf.title.text,
-            content: shelf.content.items.map((item) => parseListItem(item, channelId, channelName)).filter(_ => _),
+            content: shelf.content.items
+              .map((item) => parseListItem(item, channelId, channelName))
+              .filter(_ => _)
+              .map(item => isMembersOnly && item.type === 'video'
+                ? { ...item, isMembersOnly: true }
+                : item),
             playlistId,
             subtitle: shelf.subtitle?.text
           })
@@ -1819,7 +1828,7 @@ export function parseLocalPlaylistVideo(video) {
 }
 
 /**
- * Parses playlist entries and removes videos that cannot be played, such as members-only videos.
+ * Parses playlist entries and removes members-only videos unless authenticated playback is configured.
  * @param {(import('youtubei.js').YTNodes.PlaylistVideo|import('youtubei.js').YTNodes.ReelItem|import('youtubei.js').YTNodes.ShortsLockupView|import('youtubei.js').YTNodes.LockupView)[]} videos
  */
 export function parseLocalPlaylistVideos(videos) {
@@ -1909,6 +1918,7 @@ export function parseLocalListVideo(item, channelId, channelName) {
   } else {
     /** @type {import('youtubei.js').YTNodes.Video} */
     const video = item
+    const isMembersOnly = video.badges.some(badge => badge.style === 'BADGE_STYLE_TYPE_MEMBERS_ONLY')
 
     // When video is passed in via like community post attachment
     if (video.title?.text === 'This video isn\'t publicly available') {
@@ -1958,7 +1968,8 @@ export function parseLocalListVideo(item, channelId, channelName) {
       isVr180: video.badges.some(badge => badge.label === 'VR180'),
       isVr360: video.badges.some(badge => badge.label === '360°'),
       is3d: video.badges.some(badge => badge.label === '3D'),
-      hasCaptions: video.has_captions
+      hasCaptions: video.has_captions,
+      isMembersOnly
     }
   }
 }
@@ -2047,7 +2058,7 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
       const isMemberOnly = lockupView.metadata.metadata?.metadata_rows.some(row => {
         return row.badges.some(badge => badge.style === 'BADGE_MEMBERS_ONLY')
       })
-      if (isMemberOnly) {
+      if (shouldHideMembersOnlyContent(isMemberOnly, store.getters)) {
         return null
       }
 
@@ -2161,7 +2172,8 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
         isPremiere,
         isUpcoming,
         premiereDate,
-        isShort: lockupView.content_type === 'SHORT'
+        isShort: lockupView.content_type === 'SHORT',
+        isMembersOnly: Boolean(isMemberOnly)
       }
     }
     default:

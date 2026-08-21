@@ -247,9 +247,19 @@
         @close="showCollaboratorsPrompt = false"
       />
       <div
-        v-if="is4k || hasCaptions || is8k || isNew || isVr180 || isVr360 || is3D"
+        v-if="isMembersOnly || is4k || hasCaptions || is8k || isNew || isVr180 || isVr360 || is3D"
         class="videoTagLine"
       >
+        <div
+          v-if="isMembersOnly"
+          class="videoTag membersOnlyTag"
+        >
+          <FtIcon
+            :icon="['fas', 'users']"
+            aria-hidden="true"
+          />
+          {{ t('Search Listing.Label.Members Only') }}
+        </div>
         <div
           v-if="isNew"
           class="videoTag"
@@ -536,6 +546,7 @@ const isVr180 = ref(false)
 const isVr360 = ref(false)
 const is3D = ref(false)
 const hasCaptions = ref(false)
+const isMembersOnly = ref(false)
 const isUpcoming = ref(false)
 const showDownloadPrompt = ref(false)
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
@@ -1749,6 +1760,7 @@ function parseVideoData() {
   isVr360.value = props.data.isVr360
   is3D.value = props.data.is3d
   hasCaptions.value = props.data.hasCaptions
+  isMembersOnly.value = props.data.isMembersOnly === true
   isPremium.value = props.data.premium || false
   viewCount.value = props.data.viewCount
 
@@ -1813,6 +1825,7 @@ function markAsWatched() {
     timeWatched: historyEntry.value?.timeWatched ?? Date.now(),
     isLive: false,
     isUpcoming: false,
+    isMembersOnly: isMembersOnly.value,
     type: 'video'
   }
 
@@ -1863,6 +1876,7 @@ const addToPlaylistVideoData = computed(() => ({
   published: published.value,
   premiereDate: props.data.premiereDate,
   premiereTimestamp: props.data.premiereTimestamp,
+  isMembersOnly: isMembersOnly.value,
 }))
 
 /**
