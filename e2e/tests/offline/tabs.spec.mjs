@@ -46,6 +46,66 @@ async function openThreeTabsAndActivate(page, activeIndex) {
 }
 
 test.describe('tab bar', () => {
+  test('reconciles synced sessions without remounting retained tabs', async ({ page }) => {
+    const initialState = await page.evaluate(() => window.ftElectron.tabs.getState())
+    const retainedTabId = initialState.activeTabId
+    const remoteClosedTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/about',
+      title: 'Closed remotely',
+      makeActive: false,
+      lazyLoad: true
+    }))
+    const secondRetainedTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/history',
+      title: 'Retained history',
+      makeActive: true
+    }))
+
+    await expect(page.locator(`.tabContent[data-tab-id="${secondRetainedTab.id}"]`)).toBeVisible()
+    await page.locator(`.tab[data-tab-id="${retainedTabId}"]`).click()
+    await expect(page.locator(`.tabContent[data-tab-id="${retainedTabId}"]`)).toBeVisible()
+
+    const result = await page.evaluate(async ({ retainedTabIds, remoteClosedTabId }) => {
+      const retainedNodes = retainedTabIds.map(tabId => (
+        document.querySelector(`.tabContent[data-tab-id="${tabId}"]`)
+      ))
+      const [session] = await window.ftElectron.tabs.getSyncSessions()
+      const remoteSession = {
+        ...session,
+        tabs: [
+          ...session.tabs.filter(tab => tab.id !== remoteClosedTabId),
+          {
+            id: 'remote-new-tab',
+            url: 'app://bundle/#/settings',
+            title: 'Opened remotely',
+            isPinned: false,
+            color: null,
+            isUnloaded: true
+          }
+        ],
+        activeTabId: retainedTabIds[1],
+        updatedAt: session.updatedAt + 1
+      }
+
+      const applied = await window.ftElectron.tabs.applySyncSessions([remoteSession])
+      return {
+        applied,
+        retainedNodesConnected: retainedNodes.map(node => node?.isConnected === true)
+      }
+    }, {
+      retainedTabIds: [retainedTabId, secondRetainedTab.id],
+      remoteClosedTabId: remoteClosedTab.id
+    })
+
+    expect(result).toEqual({
+      applied: true,
+      retainedNodesConnected: [true, true]
+    })
+    await expect(page.locator(`.tab[data-tab-id="${remoteClosedTab.id}"]`)).toHaveCount(0)
+    await expect(page.locator('.tab[data-tab-id="remote-new-tab"]')).toHaveCount(1)
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', secondRetainedTab.id)
+  })
+
   test('new tab button opens a tab and activates it', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
     await expect(page.locator(sel.tabs)).toHaveCount(2)

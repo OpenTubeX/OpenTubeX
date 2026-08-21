@@ -2791,33 +2791,128 @@ export class TabManager {
   }
 
   /**
-   * Replace this window's live tabs with a synced session.
+   * Reconcile this window's live tabs with a synced session.
+   * Existing tab objects stay alive so their mounted renderer state is not
+   * discarded when another device only adds, removes, or selects a tab.
    * @param {object} sessionData
    * @returns {Promise<boolean>}
    */
   async replaceFromSyncData(sessionData) {
+    if (!sessionData || !Array.isArray(sessionData.tabs) || sessionData.tabs.length === 0) {
+      return false
+    }
+
     this._sessionPersistenceDisabled = true
     try {
-      for (const tab of this.tabs.values()) {
+      const restoreNavigationHistory = await TabManager.getStoredRememberTabNavigationHistory()
+      const previousTabs = this.tabs
+      const syncedTabs = new Map()
+      const removedTabs = new Set(previousTabs.values())
+
+      for (const tabData of sessionData.tabs) {
+        const syncedId = typeof tabData.id === 'string' && tabData.id.length > 0
+          ? tabData.id
+          : undefined
+        let tab = syncedId == null ? null : previousTabs.get(syncedId)
+
+        if (tab) {
+          removedTabs.delete(tab)
+          const nextUrl = TabManager.stripOneTimeTimestampFromUrl(tabData.url)
+          if (tab.url !== nextUrl) {
+            const previewFileName = tab.previewFileName
+            const avatarFileName = tab.avatarFileName
+            tab.url = nextUrl
+            tab.route = TabManager.getRouteFromUrl(nextUrl)
+            tab.previewDataUrl = null
+            tab.previewCapturedAt = 0
+            tab.previewFileName = null
+            tab.avatarDataUrl = null
+            tab.avatarFileName = null
+            const navigationHistory = restoreNavigationHistory
+              ? TabManager.sanitizeNavigationHistory(tabData.history, tabData.historyIndex)
+              : null
+            tab.navigationHistory = navigationHistory?.history ?? null
+            tab.navigationHistoryIndex = navigationHistory?.historyIndex ?? 0
+            this._deleteTabPreviewFile(previewFileName).catch(error => {
+              console.error('Failed to delete stale synced tab preview:', error)
+            })
+            this._releaseTabAvatarFile(avatarFileName).catch(error => {
+              console.error('Failed to delete stale synced tab avatar:', error)
+            })
+          }
+          if (typeof tabData.title === 'string' && tabData.title.trim().length > 0) {
+            tab.title = tabData.title
+          }
+          tab.isPinned = tabData.isPinned === true
+          tab.color = TabManager.normalizeTabColor(tabData.color)
+        } else {
+          const hasSavedTitle = typeof tabData.title === 'string' && tabData.title.trim().length > 0
+          tab = this.createTab({
+            id: syncedId,
+            url: TabManager.stripOneTimeTimestampFromUrl(tabData.url),
+            title: hasSavedTitle ? tabData.title : undefined,
+            isPinned: tabData.isPinned === true,
+            color: tabData.color,
+            history: restoreNavigationHistory ? tabData.history : null,
+            historyIndex: restoreNavigationHistory ? tabData.historyIndex : null,
+            persistHistory: restoreNavigationHistory,
+            makeActive: false,
+            openPosition: 'end',
+            lazyLoad: tabData.isUnloaded === true,
+            preloadInBackground: tabData.isUnloaded === false,
+            _deferUpdates: true
+          })
+        }
+
+        syncedTabs.set(tab.id, tab)
+      }
+
+      this.tabs = syncedTabs
+      restoreTabPlacementOpeners(this.tabs, sessionData.tabs)
+
+      for (const tab of removedTabs) {
         this._clearTabPreviewRefresh(tab)
         this._resolveTabMountWaiters(tab.id, Number.MAX_SAFE_INTEGER, false)
+        this._deleteTabPreviewFile(tab.previewFileName).catch(error => {
+          console.error('Failed to delete remotely closed tab preview:', error)
+        })
+        this._releaseTabAvatarFile(tab.avatarFileName).catch(error => {
+          console.error('Failed to delete remotely closed tab avatar:', error)
+        })
       }
-      this.tabs.clear()
-      this.activeTabId = null
-      this.presentedTabId = null
-      this.closedTabs = []
+
+      const retainedTabIds = new Set(this.tabs.keys())
+      this.selectedTabIds = this.selectedTabIds.filter(tabId => retainedTabIds.has(tabId))
+      this.contextMenuSelectedTabIds = this.contextMenuSelectedTabIds.filter(tabId => retainedTabIds.has(tabId))
+      if (!retainedTabIds.has(this.contextMenuTabId)) {
+        this.contextMenuTabId = null
+      }
       this._deferredCloseTabIds.clear()
       this._deferredUnloadTabIds.clear()
-      this._deferredStartupWatchTabIds.clear()
-      this._startupPriorityTabId = null
-      this._startupPriorityLoadingObserved = false
-      this.selectionRevision += 1
-      this._broadcastStateUpdate()
+      this._deferredStartupWatchTabIds = new Set(
+        [...this._deferredStartupWatchTabIds].filter(tabId => retainedTabIds.has(tabId))
+      )
+      if (!retainedTabIds.has(this._startupPriorityTabId)) {
+        this._startupPriorityTabId = null
+        this._startupPriorityLoadingObserved = false
+      }
+
       this.sessionId = sessionData.sessionId
       this.sessionUpdatedAt = Number.isFinite(sessionData.updatedAt)
         ? sessionData.updatedAt
         : Date.now()
-      return await this.restoreFromData(sessionData, { restoreTabLoadState: true })
+
+      const nextActiveTabId = this.tabs.has(sessionData.activeTabId)
+        ? sessionData.activeTabId
+        : this.tabs.keys().next().value
+      if (nextActiveTabId !== this.activeTabId || this.tabs.get(nextActiveTabId)?.loadState === 'unloaded') {
+        this.activateTab(nextActiveTabId)
+      } else {
+        this.browserWindow.setTitle(this.tabs.get(nextActiveTabId).title)
+        this._broadcastStateUpdate()
+      }
+
+      return this.tabs.size > 0
     } finally {
       this._sessionPersistenceDisabled = false
     }
