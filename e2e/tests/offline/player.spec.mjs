@@ -329,6 +329,50 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   await watchComponent.dispose()
 })
 
+/**
+ * @param {{ app: import('../../helpers/app.mjs').ElectronAppFixture, page: import('@playwright/test').Page }} fixtures
+ */
+async function expectEllipsizedPlayerMenuLabelTitles({ app, page }) {
+  await openDemoVideo({ app, page })
+
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click()
+
+  const overflowMenu = player.locator('.shaka-overflow-menu')
+  const zoomButton = overflowMenu.getByRole('button', { name: 'Zoom' })
+  const expectFullTextOnHover = async (label, fullText) => {
+    await label.evaluate((element, text) => { element.textContent = text }, fullText)
+    expect(await label.evaluate((element) => {
+      return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth
+    })).toBe(true)
+    await expect(label).toHaveAttribute('title', fullText, { timeout: 1000 })
+    await label.hover()
+  }
+
+  await expectFullTextOnHover(
+    zoomButton.locator('.shaka-overflow-button-label > span').first(),
+    'Zoom to a very long player menu option that cannot fit in its tile'
+  )
+
+  await zoomButton.click()
+  await expectFullTextOnHover(
+    player.locator('.video-zoom-menu > button:not(.shaka-back-to-overflow-button) > span').first(),
+    'An unusually long submenu option like the descriptive audio tracks'
+  )
+}
+
+test('ellipsized player menu labels expose their full text on hover', expectEllipsizedPlayerMenuLabelTitles)
+
+test.describe('at 125% display scale', () => {
+  test.use({ launchArgs: ['--force-device-scale-factor=1.25'] })
+
+  test(
+    'ellipsized player menu labels expose their full text on hover',
+    expectEllipsizedPlayerMenuLabelTitles
+  )
+})
+
 test('auto-translates captions into an arbitrary language', async ({ app, page, attachScreenshot }) => {
   await mockPlayableWatchPage(app, page, { captionTranslations: true })
   await openMockedVideo(page)
