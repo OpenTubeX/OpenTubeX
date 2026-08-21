@@ -204,8 +204,6 @@ export default defineComponent({
       // Same-tab navigation keeps the current layout while its skeleton loads.
       // A newly mounted watch tab falls back to the configured default instead.
       loadingTheatreMode: null,
-      suppressTabLoadingIndicator: false,
-      suppressTabLoadingIndicatorOnNextReload: false,
       applyDefaultTheatreModeAfterLoad: false,
       theatreLayoutAvailable: window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH,
       videoPlayerLoaded: false,
@@ -1068,12 +1066,6 @@ export default defineComponent({
         }
       }
     },
-    errorMessage(message) {
-      if (message) {
-        this.suppressTabLoadingIndicator = false
-        this.suppressTabLoadingIndicatorOnNextReload = false
-      }
-    },
     isTabPresented: {
       immediate: true,
       handler() {
@@ -1703,8 +1695,6 @@ export default defineComponent({
     },
 
     async reloadView({ preserveTitle = false } = {}) {
-      this.suppressTabLoadingIndicator = this.suppressTabLoadingIndicatorOnNextReload
-      this.suppressTabLoadingIndicatorOnNextReload = false
       const loadGeneration = ++this.videoLoadGeneration
       this.preparingVideoLoadGeneration = loadGeneration
       const requestedVideoId = this.tabRoute.params.id
@@ -3958,8 +3948,6 @@ export default defineComponent({
     handleVideoLoaded: async function (mediaMetadata) {
       if (this.isLoading || this.preparingVideoLoadGeneration !== null) { return }
 
-      this.suppressTabLoadingIndicator = false
-      this.suppressTabLoadingIndicatorOnNextReload = false
       // Only used one time = remove after use
       this.oneTimeTimestamp = null
       this.sabrReloadCaptionIndex = null
@@ -5598,8 +5586,6 @@ export default defineComponent({
       try {
         await this.performSabrReload(payload, toastMessage)
       } catch (error) {
-        this.suppressTabLoadingIndicator = false
-        this.suppressTabLoadingIndicatorOnNextReload = false
         console.error('SABR reload failed', error)
         return false
       }
@@ -5632,7 +5618,6 @@ export default defineComponent({
       this.sabrReloadVideoQuality = this.normalizeVideoQuality(payload?.videoQuality) ||
         this.normalizeVideoQuality(this.currentVideoQuality) || null
       this.preserveTitleOnNextReload = true
-      this.suppressTabLoadingIndicatorOnNextReload = true
       this.showTabToast({ message: toastMessage, icon: ['fas', 'sync'] })
 
       const timestamp = this.getTimestamp()

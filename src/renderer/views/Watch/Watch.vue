@@ -2,8 +2,6 @@
   <div
     ref="videoLayout"
     class="videoLayout"
-    :data-tab-loading-generation="videoLoadGeneration"
-    :data-tab-loading-suppressed="suppressTabLoadingIndicator ? '' : undefined"
     :class="{
       ambientModeActive,
       isLoading,

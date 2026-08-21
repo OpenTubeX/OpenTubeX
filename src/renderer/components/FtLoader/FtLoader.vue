@@ -2,7 +2,7 @@
   <div
     class="container"
     :class="{ fullscreen }"
-    data-tab-loading-indicator
+    :data-tab-loading-indicator="tabLoadingIndicator ? '' : undefined"
   >
     <div class="spinner">
       <div class="double-bounce1" />
@@ -16,6 +16,10 @@ defineProps({
   fullscreen: {
     type: Boolean,
     default: false
+  },
+  tabLoadingIndicator: {
+    type: Boolean,
+    default: true
   }
 })
 </script>
