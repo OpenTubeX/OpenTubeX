@@ -5374,7 +5374,7 @@ export default defineComponent({
 
       const fittedWidth = Math.min(elementWidth, elementHeight * contentAspectRatio)
       const fittedHeight = Math.min(elementHeight, elementWidth / contentAspectRatio)
-      const minimumBarSize = Math.max(1, window.devicePixelRatio)
+      const minimumBarSize = 1
 
       return elementWidth - fittedWidth > minimumBarSize ||
         elementHeight - fittedHeight > minimumBarSize
