@@ -76,14 +76,10 @@ test('reads aspect ratios from local and Invidious formats', () => {
   assert.equal(getVideoAspectRatio([{ audioQuality: 'AUDIO_QUALITY_MEDIUM' }]), null)
 })
 
-test('detects square and portrait Shorts up to three minutes long', () => {
+test('detects portrait Shorts up to three minutes long', () => {
   assert.equal(isYouTubeShort({
     duration: 180,
     formats: [{ width: 1080, height: 1920 }],
-  }), true)
-  assert.equal(isYouTubeShort({
-    duration: 60,
-    formats: [{ width: 1080, height: 1080 }],
   }), true)
 })
 
@@ -94,6 +90,21 @@ test('does not mistake landscape or long portrait videos for Shorts', () => {
   }), false)
   assert.equal(isYouTubeShort({
     duration: 181,
+    formats: [{ width: 1080, height: 1920 }],
+  }), false)
+})
+
+test('does not infer a Short from ambiguous square watch-page media', () => {
+  assert.equal(isYouTubeShort({
+    duration: 120,
+    formats: [{ width: 1080, height: 1080 }],
+  }), false)
+})
+
+test('trusts an explicit non-Short classification over portrait dimensions', () => {
+  assert.equal(isYouTubeShort({
+    explicit: false,
+    duration: 120,
     formats: [{ width: 1080, height: 1920 }],
   }), false)
 })

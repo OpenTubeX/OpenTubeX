@@ -2107,7 +2107,12 @@ export default defineComponent({
     },
 
     updateShortsPlayerState: function (duration, formats) {
-      const explicit = this.tabRoute.query.short === 'true'
+      const shortQuery = this.tabRoute.query.short
+      const explicit = shortQuery === 'true'
+        ? true
+        : shortQuery === 'false'
+          ? false
+          : null
       const sourceAspectRatio = getVideoAspectRatio(formats)
       this.isShort = isYouTubeShort({ explicit, duration, formats })
 

@@ -130,19 +130,20 @@ export function getVideoAspectRatio(formats) {
 }
 
 /**
- * YouTube classifies square or vertical uploads up to three minutes long as
- * Shorts. Explicit navigation metadata wins because stream dimensions may not
- * be available until after the player has started loading.
+ * Portrait media up to three minutes long is a useful fallback when no content
+ * classification exists. Square media is ambiguous, so only explicit
+ * navigation metadata classifies it as a Short. Explicit metadata also wins
+ * over the geometry fallback.
  *
  * @param {object} options
- * @param {boolean} [options.explicit]
+ * @param {boolean | null} [options.explicit]
  * @param {number} [options.duration]
  * @param {object[]} [options.formats]
  * @returns {boolean}
  */
-export function isYouTubeShort({ explicit = false, duration, formats = [] }) {
-  if (explicit) {
-    return true
+export function isYouTubeShort({ explicit = null, duration, formats = [] }) {
+  if (typeof explicit === 'boolean') {
+    return explicit
   }
 
   const aspectRatio = getVideoAspectRatio(formats)
@@ -150,7 +151,7 @@ export function isYouTubeShort({ explicit = false, duration, formats = [] }) {
   return Number(duration) > 0 &&
     Number(duration) <= MAX_SHORT_DURATION_SECONDS &&
     aspectRatio !== null &&
-    aspectRatio <= 1
+    aspectRatio < 1
 }
 
 /**

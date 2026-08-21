@@ -1623,7 +1623,13 @@ function handleSearchResponse(response) {
     .filter((item) => {
       return item.type === 'Video' || item.type === 'Channel' || item.type === 'Playlist' || item.type === 'HashtagTile' || item.type === 'Movie' || item.type === 'LockupView'
     })
-    .map((item) => parseListItem(item))
+    .map((item) => {
+      const parsedItem = parseListItem(item)
+
+      return parsedItem?.type === 'video' && typeof parsedItem.isShort !== 'boolean'
+        ? { ...parsedItem, isShort: false }
+        : parsedItem
+    })
     .filter((item) => item)
 
   return {
@@ -2154,7 +2160,8 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
         liveNow,
         isPremiere,
         isUpcoming,
-        premiereDate
+        premiereDate,
+        isShort: lockupView.content_type === 'SHORT'
       }
     }
     default:
