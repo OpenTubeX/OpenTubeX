@@ -717,6 +717,64 @@ test('an error from the outgoing player is ignored while the view reloads', asyn
   expect(result.errorMessage).toBe('')
 })
 
+test('a loaded event from the outgoing player is ignored while the view reloads', async ({ app, page }) => {
+  await mockUnplayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const watchView = await watchViewHandle(page)
+  const result = await watchView.evaluate(async (view) => {
+    let historyCalls = 0
+    let playlistCalls = 0
+    let localPlaylistCalls = 0
+    let timestampCalls = 0
+    let stateDuringPreparation = null
+
+    view.isLoading = false
+    view.videoPlayerLoaded = false
+    view.isUpcoming = false
+    view.rememberHistory = true
+    view.oneTimeTimestamp = 73
+    view.sabrReloadCaptionIndex = 2
+    view.sabrReloadPlaybackRate = 1.5
+    view.addToHistory = () => { historyCalls++ }
+    view.handlePlaylistPersisting = () => { playlistCalls++ }
+    view.updateLocalPlaylistLastPlayedAtSometimes = () => { localPlaylistCalls++ }
+    view.consumeTimestamp = async () => { timestampCalls++ }
+    view.getVideoInformationLocal = async () => {}
+    view.handleRouteChange = async () => {
+      await Promise.resolve()
+      await view.handleVideoLoaded({})
+      stateDuringPreparation = {
+        oneTimeTimestamp: view.oneTimeTimestamp,
+        sabrReloadCaptionIndex: view.sabrReloadCaptionIndex,
+        sabrReloadPlaybackRate: view.sabrReloadPlaybackRate,
+        videoPlayerLoaded: view.videoPlayerLoaded,
+        historyCalls,
+        playlistCalls,
+        localPlaylistCalls,
+        timestampCalls
+      }
+    }
+
+    await view.reloadView()
+    return stateDuringPreparation
+  })
+
+  expect(result).toEqual({
+    oneTimeTimestamp: 73,
+    sabrReloadCaptionIndex: 2,
+    sabrReloadPlaybackRate: 1.5,
+    videoPlayerLoaded: false,
+    historyCalls: 0,
+    playlistCalls: 0,
+    localPlaylistCalls: 0,
+    timestampCalls: 0
+  })
+})
+
 test('a SABR reload request from the outgoing player is ignored', async ({ app, page }) => {
   await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')

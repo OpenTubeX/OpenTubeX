@@ -233,6 +233,7 @@ export default defineComponent({
       shortsCompletionBlockedBySeek: false,
       shortsPlaybackAfterSeekSeconds: 0,
       videoLoadGeneration: 0,
+      preparingVideoLoadGeneration: null,
       hasAiGeneratedContent: false,
       hasPaidPromotion: false,
       paidPromotionDurationMs: 10000,
@@ -1695,44 +1696,51 @@ export default defineComponent({
 
     async reloadView({ preserveTitle = false } = {}) {
       const loadGeneration = ++this.videoLoadGeneration
+      this.preparingVideoLoadGeneration = loadGeneration
       const requestedVideoId = this.tabRoute.params.id
       this.loadingTheatreMode = this.useTheatreMode
       preserveTitle ||= this.preserveTitleOnNextReload
       this.preserveTitleOnNextReload = false
 
-      await this.handleRouteChange()
-      if (!this.isCurrentVideoLoad(loadGeneration, requestedVideoId)) { return }
-
-      if (this.$refs.player) {
-        await this.destroyPlayer()
+      try {
+        await this.handleRouteChange()
         if (!this.isCurrentVideoLoad(loadGeneration, requestedVideoId)) { return }
-      }
 
-      // react to route changes...
-      const previousVideoId = this.videoId
-      this.videoId = this.tabRoute.params.id
-      const videoIdChanged = this.videoId !== previousVideoId
-      if (videoIdChanged) {
-        this.useCustomShortsPlayerForCurrentVideo = this.$store.getters.getUseCustomShortsPlayer
-        this.ipBlockRecoveryAttemptedForCurrentVideo = false
-        this.streamErrorReloadAttemptedForCurrentVideo = false
-        this.playbackEngineFallbackAttemptedForCurrentVideo = false
-        this.playbackEngineFallbackTarget = null
-        this.ytDlpDefaultClientsFallbackToastShown = false
-        this.sabrErrorRecoveryAttempts = 0
-        this.sabrErrorRecoveriesForCurrentVideo = 0
-        this.sabrErrorRecoveryLastSeconds = null
-        this.sabrErrorRecoveryPlayedSeconds = 0
+        if (this.$refs.player) {
+          await this.destroyPlayer()
+          if (!this.isCurrentVideoLoad(loadGeneration, requestedVideoId)) { return }
+        }
+
+        // react to route changes...
+        const previousVideoId = this.videoId
+        this.videoId = this.tabRoute.params.id
+        const videoIdChanged = this.videoId !== previousVideoId
+        if (videoIdChanged) {
+          this.useCustomShortsPlayerForCurrentVideo = this.$store.getters.getUseCustomShortsPlayer
+          this.ipBlockRecoveryAttemptedForCurrentVideo = false
+          this.streamErrorReloadAttemptedForCurrentVideo = false
+          this.playbackEngineFallbackAttemptedForCurrentVideo = false
+          this.playbackEngineFallbackTarget = null
+          this.ytDlpDefaultClientsFallbackToastShown = false
+          this.sabrErrorRecoveryAttempts = 0
+          this.sabrErrorRecoveriesForCurrentVideo = 0
+          this.sabrErrorRecoveryLastSeconds = null
+          this.sabrErrorRecoveryPlayedSeconds = 0
+        }
+        this.ipBlockDetectedInCurrentChain = false
+        const preserveShortsPanels = videoIdChanged &&
+          this.customShortsPlayerActive &&
+          this.tabRoute.query.short === 'true'
+        this.resetVideoState({
+          preserveTitle,
+          placeholderTitle: videoIdChanged ? this.getPendingVideoTitle() : '',
+          preserveShortsPanels,
+        })
+      } finally {
+        if (this.preparingVideoLoadGeneration === loadGeneration) {
+          this.preparingVideoLoadGeneration = null
+        }
       }
-      this.ipBlockDetectedInCurrentChain = false
-      const preserveShortsPanels = videoIdChanged &&
-        this.customShortsPlayerActive &&
-        this.tabRoute.query.short === 'true'
-      this.resetVideoState({
-        preserveTitle,
-        placeholderTitle: videoIdChanged ? this.getPendingVideoTitle() : '',
-        preserveShortsPanels,
-      })
 
       this.firstLoad = true
       this.videoPlayerLoaded = false
@@ -3938,6 +3946,8 @@ export default defineComponent({
     },
 
     handleVideoLoaded: async function (mediaMetadata) {
+      if (this.isLoading || this.preparingVideoLoadGeneration !== null) { return }
+
       // Only used one time = remove after use
       this.oneTimeTimestamp = null
       this.sabrReloadCaptionIndex = null
