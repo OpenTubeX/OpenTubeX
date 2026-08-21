@@ -1417,8 +1417,11 @@ const watchPageLinkQuery = computed(() => {
     query.downloadId = props.downloadId
   }
 
+  if (typeof props.data.isShort === 'boolean') {
+    query.short = String(props.data.isShort)
+  }
+
   if (props.data.isShort === true) {
-    query.short = 'true'
     if (props.data.shortSource === 'channel' && props.data.shortChannelId) {
       query.shortSource = 'channel'
       query.shortChannelId = props.data.shortChannelId
