@@ -721,6 +721,32 @@ export default defineComponent({
     /** @type {import('vue').Ref<HTMLElement | null>} */
     const fullscreenPlaylistTarget = ref(null)
     const showFullscreenPlaylist = ref(false)
+    const fullscreenDockOpen = computed(() => {
+      return showFullscreenMetadata.value || showFullscreenTranscript.value ||
+        showFullscreenSponsorBlock.value || showFullscreenComments.value ||
+        showFullscreenLiveChat.value || showFullscreenPlaylist.value ||
+        (showChaptersOverlay.value && props.chapters.length > 0)
+    })
+    const fullscreenDockLayoutOpen = ref(false)
+    let fullscreenDockLayoutFrame = null
+    watch(fullscreenDockOpen, (open) => {
+      if (fullscreenDockLayoutFrame !== null) {
+        cancelAnimationFrame(fullscreenDockLayoutFrame)
+        fullscreenDockLayoutFrame = null
+      }
+
+      if (open) {
+        fullscreenDockLayoutOpen.value = true
+      } else {
+        // Paint the layout once after teleported dock content settles, then start the reverse transition.
+        fullscreenDockLayoutFrame = requestAnimationFrame(() => {
+          fullscreenDockLayoutFrame = requestAnimationFrame(() => {
+            fullscreenDockLayoutFrame = null
+            fullscreenDockLayoutOpen.value = false
+          })
+        })
+      }
+    }, { flush: 'post' })
     const chapterThumbnails = ref([])
     const currentChapterTitle = computed(() => {
       return props.chapters[props.currentChapterIndex]?.title ?? t('Chapters.Chapters')
@@ -9450,6 +9476,9 @@ export default defineComponent({
 
     onBeforeUnmount(() => {
       clearTimeout(paidPromotionTimer)
+      if (fullscreenDockLayoutFrame !== null) {
+        cancelAnimationFrame(fullscreenDockLayoutFrame)
+      }
       cancelPendingVolumeUserSet()
       fullWindowAnimation?.cancel()
       hasLoaded.value = false
@@ -9812,6 +9841,7 @@ export default defineComponent({
       fullscreenPlaylistOverlay,
       fullscreenPlaylistTarget,
       showFullscreenPlaylist,
+      fullscreenDockLayoutOpen,
       closeFullscreenPlaylist,
       setFullscreenPlaylist,
       showFullscreenShareAction,
