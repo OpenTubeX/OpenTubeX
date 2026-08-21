@@ -851,6 +851,29 @@
 
     .shortsCommentsPanel :deep(.fullscreenCommentCard) {
       block-size: 100%;
+      color: var(--primary-text-color);
+    }
+
+    .shortsCommentsPanel :deep(.commentsContentWrapper) {
+      // This panel sits on a themed card instead of over the video.
+      --scrollbar-color: inherit;
+      --scrollbar-color-hover: inherit;
+    }
+
+    .shortsCommentsPanel :deep(.fullscreenCommentHeader) {
+      color: var(--primary-text-color);
+      background-color: transparent;
+      border-block-end-color: var(--side-nav-hover-color);
+    }
+
+    .shortsCommentsPanel :deep(.fullscreenCommentAction) {
+      color: inherit;
+    }
+
+    .shortsCommentsPanel :deep(.fullscreenCommentAction:hover),
+    .shortsCommentsPanel :deep(.fullscreenCommentAction:focus-visible),
+    .shortsCommentsPanel :deep(.fullscreenCommentAction.active) {
+      background-color: var(--side-nav-hover-color);
     }
 
     .shortsAuxPanelOpen {
@@ -875,8 +898,9 @@
       justify-content: space-between;
       padding-block: 0;
       padding-inline: 14px 8px;
-      border-block-end: 1px solid rgb(255 255 255 / 10%);
-      background-color: rgb(20 20 20 / 52%);
+      border-block-end: 1px solid var(--side-nav-hover-color);
+      color: var(--primary-text-color);
+      background-color: transparent;
     }
 
     .shortsAuxPanelHeader h2 {
@@ -1022,7 +1046,7 @@
       padding: 0;
       border: 0;
       border-radius: 50%;
-      color: #fff;
+      color: inherit;
       background-color: transparent;
       cursor: pointer;
       font-size: 18px;
@@ -1030,7 +1054,7 @@
 
     .shortsAuxPanelClose:hover,
     .shortsAuxPanelClose:focus-visible {
-      background-color: rgb(255 255 255 / 20%);
+      background-color: var(--side-nav-hover-color);
     }
 
     @media (height <= 850px) {
