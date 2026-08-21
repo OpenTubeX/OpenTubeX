@@ -463,6 +463,7 @@ const subpageIcon = ref(null)
 const subpageFlush = ref(false)
 let closeSubpage = null
 let subpagePersistsOnDeactivate = false
+let closeSubpageOnActivate = false
 let settingsResizeObserver = null
 let settingsSectionResizeObserver = null
 let profileManagerResizeObserver = null
@@ -479,7 +480,7 @@ let dragOffsetY = 0
 let maximizedDragSession = null
 let restoreBounds = null
 /** @type {Array<{ element: HTMLElement, scrollTop: number }>} */
-let minimizedScrollPositions = []
+let preservedScrollPositions = []
 
 const windowBounds = ref(getInitialBounds())
 const windowStyle = computed(() => isMaximized.value
@@ -959,12 +960,27 @@ onMounted(() => {
   systemColorScheme.addEventListener('change', updateSystemColorScheme)
 })
 onActivated(() => {
+  if (closeSubpageOnActivate) {
+    closeSubpageOnActivate = false
+    const deferredCloseSubpage = closeSubpage
+    deferredCloseSubpage?.()
+    if (closeSubpage === deferredCloseSubpage) {
+      subpageTitle.value = ''
+      subpageIcon.value = null
+      subpageFlush.value = false
+      closeSubpage = null
+      subpagePersistsOnDeactivate = false
+    }
+  }
   handleMounted()
-  nextTick(restoreMinimizedScrollPositions)
+  nextTick(restorePreservedScrollPositions)
 })
 onDeactivated(() => {
-  if (!subpagePersistsOnDeactivate) {
-    closeSubpage?.()
+  if (!settingsWindowMorphing.value) {
+    preserveScrollPositions()
+    if (!subpagePersistsOnDeactivate) {
+      closeSubpageOnActivate = true
+    }
   }
   stopObserving()
   stopDragging()
@@ -1410,25 +1426,28 @@ function handleResize(width) {
 }
 
 function closeSettings() {
-  store.dispatch('hideKeyboardShortcutPrompt')
   store.dispatch('hideSettingsWindow')
 }
 
 function minimizeSettings() {
+  preserveScrollPositions()
+  store.dispatch('minimizeSettingsWindow')
+}
+
+function preserveScrollPositions() {
   const settingsWindow = settingsWindowRef.value
-  minimizedScrollPositions = settingsWindow
+  preservedScrollPositions = settingsWindow
     ? [...settingsWindow.querySelectorAll('[data-overlayscrollbars-initialize]')]
         .filter(element => element.scrollTop > 0)
         .map(element => ({ element, scrollTop: element.scrollTop }))
     : []
-  store.dispatch('minimizeSettingsWindow')
 }
 
-function restoreMinimizedScrollPositions() {
-  for (const { element, scrollTop } of minimizedScrollPositions) {
+function restorePreservedScrollPositions() {
+  for (const { element, scrollTop } of preservedScrollPositions) {
     if (element.isConnected) restoreOverlayScrollTop(element, scrollTop)
   }
-  minimizedScrollPositions = []
+  preservedScrollPositions = []
 }
 
 async function toggleMaximized() {

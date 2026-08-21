@@ -581,7 +581,7 @@ export default {
   },
 
   /**
-   * @param {(route: string, tabId?: string) => void} handler
+   * @param {(route: string, tabId?: string, toggle?: boolean) => void} handler
    * @returns {() => void}
    */
   handleChangeView: (handler) => {
@@ -589,7 +589,7 @@ export default {
       if (typeof payload === 'string') {
         handler(payload)
       } else {
-        handler(payload?.route, payload?.tabId)
+        handler(payload?.route, payload?.tabId, payload?.toggle)
       }
     }
     ipcRenderer.on(IpcChannels.CHANGE_VIEW, listener)
