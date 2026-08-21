@@ -90,6 +90,7 @@ let tabPreviewCacheMaintenance = Promise.resolve()
  * @property {boolean} pendingActivation
  * @property {number} mountRevision
  * @property {number} refreshKey
+ * @property {number} syncedNavigationRevision
  * @property {string | null} placementOpenerTabId
  * @property {NavigationHistoryEntry[] | null} navigationHistory
  * @property {number} navigationHistoryIndex
@@ -979,6 +980,7 @@ export class TabManager {
       pendingActivation: false,
       mountRevision: shouldMount ? 1 : 0,
       refreshKey: 0,
+      syncedNavigationRevision: 0,
       placementOpenerTabId: this.tabs.has(openerTabId) ? openerTabId : null,
       navigationHistory: restoredNavigationHistory?.history ?? null,
       navigationHistoryIndex: restoredNavigationHistory?.historyIndex ?? 0,
@@ -2379,7 +2381,8 @@ export class TabManager {
       previewDataUrl: tab.previewDataUrl,
       previewCapturedAt: tab.previewCapturedAt,
       previewFileName: tab.previewFileName,
-      skipSilence: tab.skipSilence === true
+      skipSilence: tab.skipSilence === true,
+      syncedNavigationRevision: tab.syncedNavigationRevision
     }
   }
 
@@ -2461,6 +2464,9 @@ export class TabManager {
       pendingActivation: false,
       mountRevision: 1,
       refreshKey: 0,
+      syncedNavigationRevision: Number.isInteger(snapshot.syncedNavigationRevision)
+        ? snapshot.syncedNavigationRevision
+        : 0,
       placementOpenerTabId: null,
       isTransferStaged: true
     }
@@ -2610,7 +2616,8 @@ export class TabManager {
         preloadInBackground: tab.preloadInBackground,
         pendingActivation: tab.pendingActivation,
         mountRevision: tab.mountRevision,
-        refreshKey: tab.refreshKey
+        refreshKey: tab.refreshKey,
+        syncedNavigationRevision: tab.syncedNavigationRevision
       }
     })
 
@@ -2833,6 +2840,11 @@ export class TabManager {
               : null
             tab.navigationHistory = navigationHistory?.history ?? null
             tab.navigationHistoryIndex = navigationHistory?.historyIndex ?? 0
+            tab.persistNavigationHistory = restoreNavigationHistory && navigationHistory != null
+            // The renderer normally ignores main-process route echoes because
+            // it owns live navigation. Mark this remote route as authoritative.
+            tab.syncedNavigationRevision += 1
+            this._historyAnnouncedTabIds.delete(tab.id)
             this._deleteTabPreviewFile(previewFileName).catch(error => {
               console.error('Failed to delete stale synced tab preview:', error)
             })

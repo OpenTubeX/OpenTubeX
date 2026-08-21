@@ -73,7 +73,15 @@ test.describe('tab bar', () => {
       const remoteSession = {
         ...session,
         tabs: [
-          ...session.tabs.filter(tab => tab.id !== remoteClosedTabId),
+          ...session.tabs
+            .filter(tab => tab.id !== remoteClosedTabId)
+            .map(tab => tab.id === retainedTabIds[0]
+              ? {
+                  ...tab,
+                  url: 'app://bundle/#/playlists',
+                  title: 'Playlists'
+                }
+              : tab),
           {
             id: 'remote-new-tab',
             url: 'app://bundle/#/settings',
@@ -104,6 +112,10 @@ test.describe('tab bar', () => {
     await expect(page.locator(`.tab[data-tab-id="${remoteClosedTab.id}"]`)).toHaveCount(0)
     await expect(page.locator('.tab[data-tab-id="remote-new-tab"]')).toHaveCount(1)
     await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', secondRetainedTab.id)
+    await expect.poll(() => page.evaluate(tabId => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getTabById(tabId).route.fullPath
+    }, retainedTabId)).toBe('/playlists')
   })
 
   test('new tab button opens a tab and activates it', async ({ page }) => {
