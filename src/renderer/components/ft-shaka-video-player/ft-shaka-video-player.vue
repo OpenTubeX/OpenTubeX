@@ -57,6 +57,7 @@
         fullscreenPlaylistOpen: showFullscreenPlaylist,
         chaptersOverlayOpen: showChaptersOverlay && chapters.length > 0,
         fullscreenDockLayoutOpen,
+        fullscreenAmbientBarsVisible,
         fullscreenDockResizing,
         fullscreenDockReordering,
         presentationModeChanging,
@@ -116,6 +117,7 @@
         @canplay="handleCanPlay"
         @volumechange="updateVolume"
         @timeupdate="handleTimeupdate"
+        @loadedmetadata="updateVideoElementGeometry"
         @enterpictureinpicture="handleEnterPictureInPicture"
         @leavepictureinpicture="handleLeavePictureInPicture"
       />
