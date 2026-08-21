@@ -1532,6 +1532,7 @@ test.describe('watch page', () => {
     await page.locator(sel.searchInput).press('Enter')
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw\?short=true/)
     await waitForPlayback(page)
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
 
     const watchComponent = await page.evaluateHandle(findWatchComponent)
     await watchComponent.evaluate(async (component) => {
@@ -1570,6 +1571,21 @@ test.describe('watch page', () => {
     const fullscreenMetadata = player.locator('.fullscreenMetadataOverlay.open')
     await expect(fullscreenMetadata).toBeVisible()
 
+    await moreOptions.click({ force: true })
+    await expect(overflowMenu).toBeVisible()
+    await expect.poll(async () => {
+      const [buttonBounds, menuBounds] = await Promise.all([
+        moreOptions.boundingBox(),
+        overflowMenu.boundingBox()
+      ])
+      return Math.max(
+        Math.abs(buttonBounds.x + buttonBounds.width - menuBounds.x - menuBounds.width),
+        Math.abs(buttonBounds.y + buttonBounds.height + 8 - menuBounds.y)
+      )
+    }).toBeLessThanOrEqual(1)
+    await page.keyboard.press('Escape')
+    await expect(overflowMenu).toBeHidden()
+
     await watchComponent.evaluate(component => {
       component.proxy.$refs.player.setFullscreenTranscript(true)
     })
@@ -1602,9 +1618,90 @@ test.describe('watch page', () => {
     await moreOptions.click({ force: true })
     await overflowMenu.getByRole('button', { name: 'Video information' }).click()
     await expect(player.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
+
+    await moreOptions.click({ force: true })
+    await expect(overflowMenu).toBeVisible()
     await setPlayerFullscreen(page, false)
+    await expect(overflowMenu).toBeHidden()
     await expect(auxPanel).toHaveClass(/shortsAuxPanelOpen/)
 
+    await moreOptions.click()
+    await expect(overflowMenu).toBeVisible()
+    await expect.poll(async () => {
+      const [buttonBounds, menuBounds] = await Promise.all([
+        moreOptions.boundingBox(),
+        overflowMenu.boundingBox()
+      ])
+      return Math.max(
+        Math.abs(buttonBounds.x + buttonBounds.width - menuBounds.x - menuBounds.width),
+        Math.abs(buttonBounds.y + buttonBounds.height + 8 - menuBounds.y)
+      )
+    }).toBeLessThanOrEqual(1)
+
+    await watchComponent.dispose()
+  })
+
+  test('matches the Shorts information header to the comments header', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw\?short=true/)
+    await waitForPlayback(page)
+
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async (component) => {
+      component.proxy.toggleShortsMetadata()
+      await component.proxy.$nextTick()
+    })
+
+    const headerStyles = async (headerSelector, closeSelector) => page.evaluate(
+      ({ headerSelector, closeSelector }) => {
+        const header = document.querySelector(headerSelector)
+        const heading = header?.querySelector('h2, h3')
+        const close = document.querySelector(closeSelector)
+        const headerStyle = getComputedStyle(header)
+        const headingStyle = getComputedStyle(heading)
+        const closeStyle = getComputedStyle(close)
+        return {
+          header: {
+            height: headerStyle.height,
+            padding: headerStyle.padding,
+            backgroundColor: headerStyle.backgroundColor,
+            borderBottomColor: headerStyle.borderBottomColor
+          },
+          heading: {
+            margin: headingStyle.margin,
+            fontSize: headingStyle.fontSize
+          },
+          close: {
+            width: closeStyle.width,
+            height: closeStyle.height,
+            color: closeStyle.color,
+            backgroundColor: closeStyle.backgroundColor,
+            borderRadius: closeStyle.borderRadius,
+            fontSize: closeStyle.fontSize
+          }
+        }
+      },
+      { headerSelector, closeSelector }
+    )
+
+    const informationStyles = await headerStyles(
+      '.shortsAuxPanelHeader',
+      '.shortsAuxPanelClose'
+    )
+
+    await watchComponent.evaluate(async (component) => {
+      component.proxy.toggleShortsComments()
+      await component.proxy.$nextTick()
+    })
+    await expect(page.locator('.shortsCommentsPanel .fullscreenCommentHeader')).toBeVisible()
+    const commentsStyles = await headerStyles(
+      '.shortsCommentsPanel .fullscreenCommentHeader',
+      '.shortsCommentsPanel .fullscreenCommentAction:last-of-type'
+    )
+
+    expect(informationStyles).toEqual(commentsStyles)
     await watchComponent.dispose()
   })
 

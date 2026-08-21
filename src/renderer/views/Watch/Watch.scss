@@ -843,12 +843,17 @@
     }
 
     .shortsAuxPanelHeader {
+      position: relative;
+      z-index: 2;
       display: flex;
+      box-sizing: border-box;
       flex: 0 0 52px;
       align-items: center;
       justify-content: space-between;
-      padding-inline: 16px 8px;
-      border-block-end: 1px solid color-mix(in srgb, var(--primary-text-color) 10%, transparent);
+      padding-block: 0;
+      padding-inline: 14px 8px;
+      border-block-end: 1px solid rgb(255 255 255 / 10%);
+      background-color: rgb(20 20 20 / 52%);
     }
 
     .shortsAuxPanelHeader h2 {
@@ -986,16 +991,23 @@
     }
 
     .shortsAuxPanelClose {
-      display: grid;
-      place-items: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       inline-size: 36px;
       block-size: 36px;
       padding: 0;
       border: 0;
       border-radius: 50%;
-      color: var(--primary-text-color);
-      background-color: var(--side-nav-hover-color);
+      color: #fff;
+      background-color: transparent;
       cursor: pointer;
+      font-size: 18px;
+    }
+
+    .shortsAuxPanelClose:hover,
+    .shortsAuxPanelClose:focus-visible {
+      background-color: rgb(255 255 255 / 20%);
     }
 
     @media (height <= 850px) {
