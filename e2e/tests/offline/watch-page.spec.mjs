@@ -506,6 +506,57 @@ test('a background watch tab stays loading until its cached avatar is ready', as
   expect(states.some(state => state.loading && state.pageIcon)).toBe(false)
 })
 
+test('keeps background comment loading local to the loaded watch page', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', false)
+  })
+  await openMockedVideo(page)
+
+  const watchTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+  const watchTab = page.locator(`.tab[data-tab-id="${watchTabId}"]`)
+  const watchContent = page.locator(`.tabContent[data-tab-id="${watchTabId}"]`)
+  await expect(watchContent.locator('.getCommentsTitle')).toHaveCount(1)
+  await expect(watchTab).not.toHaveClass(/loading/)
+
+  let commentRequestStarted = false
+  let releaseComments = () => {}
+  const commentsReleased = new Promise(resolve => { releaseComments = resolve })
+  await page.route(/\/youtubei\/v1\/next/, async (route, request) => {
+    const body = JSON.parse(request.postData() ?? '{}')
+    if (!body.continuation) return route.fallback()
+
+    commentRequestStarted = true
+    await commentsReleased
+    return route.fallback()
+  })
+
+  try {
+    await page.locator(sel.newTabButton).click()
+    await expect(watchContent).toHaveAttribute('aria-hidden', 'true')
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
+    })
+    await expect.poll(() => commentRequestStarted).toBe(true)
+    await expect(watchContent.locator('.commentsArea .commentLoader')).toHaveCount(1)
+    await expect(watchContent.locator('.commentsArea [data-tab-loading-indicator]')).toHaveCount(0)
+    await expect(watchTab).not.toHaveClass(/loading/)
+  } finally {
+    releaseComments()
+  }
+
+  await expect(watchContent.locator('.commentsArea .commentLoader')).toHaveCount(0)
+
+  const watchView = await watchViewHandle(page)
+  await watchView.evaluate(view => { view.isLoading = true })
+  await expect(watchTab).toHaveClass(/loading/)
+  await watchView.evaluate(view => { view.isLoading = false })
+  await expect(watchTab).not.toHaveClass(/loading/)
+  await watchView.dispose()
+})
+
 for (const { defaultViewingMode, currentTheatreMode } of [
   { defaultViewingMode: 'theatre', currentTheatreMode: false },
   { defaultViewingMode: 'default', currentTheatreMode: true }

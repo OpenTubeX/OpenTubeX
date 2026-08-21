@@ -44,9 +44,6 @@ import { tabRuntimeRegistry } from '../../tabs/TabRuntimeRegistry'
 import { tabIdKey, tabLifecycleKey, tabPresentedKey } from '../../tabs/TabContext'
 
 const TAB_LOADER_SELECTOR = '[data-tab-loading-indicator]'
-const TAB_LOADER_SUPPRESSION_SELECTOR = '[data-tab-loading-suppressed]'
-const TAB_LOADER_GENERATION_ATTRIBUTE = 'data-tab-loading-generation'
-const TAB_LOADER_GENERATION_SELECTOR = `[${TAB_LOADER_GENERATION_ATTRIBUTE}]`
 const TAB_LOADER_LOADING_SOURCE = 'loader'
 const TAB_LOADER_SETTLE_DELAY_MS = 100
 const CACHED_ROUTE_NAMES = new Set(['about'])
@@ -101,9 +98,6 @@ let removeRootRegistration = null
 let loaderObserver = null
 let loaderAnimationFrameId = null
 let loaderSettleTimeoutId = null
-// A suppression boundary can disappear before its loader does, while Vue can
-// reuse that element for a newer load. Remember both the element and its load.
-const suppressedLoaderGenerations = new WeakMap()
 let acknowledgedMountRevision = 0
 let previousRefreshKey = props.tab.refreshKey ?? 0
 // Guards against notifying `beforeDispose` twice for the same mounted instance:
@@ -197,11 +191,7 @@ onMounted(() => {
     loaderObserver = new MutationObserver(scheduleLoaderUpdate)
     loaderObserver.observe(tabContentRef.value, {
       attributes: true,
-      attributeFilter: [
-        'data-tab-loading-indicator',
-        'data-tab-loading-suppressed',
-        TAB_LOADER_GENERATION_ATTRIBUTE
-      ],
+      attributeFilter: ['data-tab-loading-indicator'],
       childList: true,
       subtree: true
     })
@@ -250,7 +240,7 @@ function scheduleLoaderUpdate() {
 }
 
 function updateLoaderState() {
-  if (hasUnsuppressedLoader()) {
+  if (tabContentRef.value?.querySelector(TAB_LOADER_SELECTOR) != null) {
     cancelLoaderSettle()
     navigation.setLoadingSource(props.tab.id, TAB_LOADER_LOADING_SOURCE, true)
     return
@@ -266,33 +256,12 @@ function updateLoaderState() {
 
 function settleLoaderState() {
   loaderSettleTimeoutId = null
-  if (hasUnsuppressedLoader()) {
+  if (tabContentRef.value?.querySelector(TAB_LOADER_SELECTOR) != null) {
     navigation.setLoadingSource(props.tab.id, TAB_LOADER_LOADING_SOURCE, true)
     return
   }
 
   navigation.setLoadingSource(props.tab.id, TAB_LOADER_LOADING_SOURCE, false)
-}
-
-function hasUnsuppressedLoader() {
-  const root = tabContentRef.value
-  if (!root) return false
-
-  for (const loader of root.querySelectorAll(TAB_LOADER_SELECTOR)) {
-    const generation = loader.closest(TAB_LOADER_GENERATION_SELECTOR)
-      ?.getAttribute(TAB_LOADER_GENERATION_ATTRIBUTE) ?? null
-
-    if (loader.closest(TAB_LOADER_SUPPRESSION_SELECTOR) !== null) {
-      suppressedLoaderGenerations.set(loader, generation)
-    } else if (
-      !suppressedLoaderGenerations.has(loader) ||
-      suppressedLoaderGenerations.get(loader) !== generation
-    ) {
-      return true
-    }
-  }
-
-  return false
 }
 
 function cancelLoaderSettle() {
