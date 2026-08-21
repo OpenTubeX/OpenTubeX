@@ -690,7 +690,11 @@ function startThumbnailPreview() {
         thumbnailPreviewLoader === loader &&
         thumbnailPreviewUrl.value === previewUrl
       ) {
-        thumbnailPreviewLoaded.value = isThumbnailPreviewImageUsable(loader)
+        if (isThumbnailPreviewImageUsable(loader)) {
+          thumbnailPreviewLoaded.value = true
+        } else {
+          resetThumbnailPreview()
+        }
       }
     }
     loader.onerror = () => {

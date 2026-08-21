@@ -94,6 +94,17 @@ test.describe('search', () => {
     await page.mouse.move(0, 0)
     await expect(preview).toHaveCount(0)
 
+    await page.evaluate(() => {
+      const NativeImage = window.Image
+      window.__thumbnailPreviewLoaderCount = 0
+      window.Image = new Proxy(NativeImage, {
+        construct(target, args) {
+          window.__thumbnailPreviewLoaderCount++
+          return Reflect.construct(target, args)
+        }
+      })
+    })
+
     returnPreviewPlaceholder = true
     const secondVideo = page.locator('.ft-list-video').nth(1)
     await secondVideo.locator('.thumbnailLink').hover()
@@ -101,6 +112,13 @@ test.describe('search', () => {
     await page.waitForTimeout(600)
     await expect(secondVideo.locator('.thumbnailPreview')).toHaveCount(0)
     await expect(secondVideo.locator('.thumbnailImage').first()).toBeVisible()
+    const loaderCountAfterPlaceholder = await page.evaluate(() => window.__thumbnailPreviewLoaderCount)
+
+    await page.mouse.move(0, 0)
+    returnPreviewPlaceholder = false
+    await secondVideo.locator('.thumbnailLink').hover()
+    await expect.poll(() => page.evaluate(() => window.__thumbnailPreviewLoaderCount))
+      .toBeGreaterThan(loaderCountAfterPlaceholder)
 
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
