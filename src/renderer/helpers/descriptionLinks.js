@@ -1,12 +1,25 @@
 import autolinker from 'autolinker'
 
+const SHORT_NUMERIC_HASHTAG_PATTERN = /^\p{Number}{1,2}$/u
+
+function linkYouTubeMatch(match) {
+  if (match.type === 'hashtag' && SHORT_NUMERIC_HASHTAG_PATTERN.test(match.getHashtag())) {
+    return false
+  }
+
+  return true
+}
+
 // YouTube only links the `#hashtags` and `@handles` that it recognised itself,
 // the rest stays plain text, so we link those ourselves.
 // Autolinker skips text inside existing links and HTML attributes,
 // so the ones that came linked from the backend are left untouched.
 const HASHTAG_AND_HANDLE_OPTIONS = {
   hashtag: 'youtube',
-  mention: 'youtube'
+  mention: 'youtube',
+  // YouTube treats one- and two-digit `#` sequences as numbering. Numeric
+  // hashtags become links once they contain at least three digits.
+  replaceFn: linkYouTubeMatch
 }
 
 /**

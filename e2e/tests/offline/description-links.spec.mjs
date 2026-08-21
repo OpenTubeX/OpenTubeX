@@ -10,7 +10,7 @@ import { demoPlayerResponse, routeWatchPageHtml } from '../../helpers/media.mjs'
 const fixtureDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'watch', 'shows-video-metadata')
 const sharedDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'shared')
 
-const VIDEO_TITLE = 'Sketching again #ShiorinSketch'
+const VIDEO_TITLE = 'Numbered video #9 #ShiorinSketch'
 const VIDEO_DESCRIPTION = 'Follow @SomeCreator for more #ShiorinSketch clips'
 
 async function fixture(dir, name) {
@@ -97,7 +97,7 @@ async function mockWatchPage(app, page) {
   })
 }
 
-test.describe('unlinked hashtags and handles', () => {
+test.describe('hashtag and handle linkification', () => {
   test.use({
     seed: {
       history: [{
@@ -119,7 +119,7 @@ test.describe('unlinked hashtags and handles', () => {
     }
   })
 
-  test('are clickable in the video title and description', async ({ app, page }) => {
+  test('links valid tags but leaves short numeric references plain', async ({ app, page }) => {
     await mockWatchPage(app, page)
 
     await goTo(page, 'history')
@@ -127,6 +127,7 @@ test.describe('unlinked hashtags and handles', () => {
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
 
     const titleLink = page.locator('.videoTitle a')
+    await expect(titleLink).toHaveCount(1)
     await expect(titleLink).toHaveText('#ShiorinSketch')
     await expect(titleLink).toHaveAttribute('href', 'https://youtube.com/hashtag/ShiorinSketch')
     await expect(page.locator('.videoTitle')).toHaveText(VIDEO_TITLE)
