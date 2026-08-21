@@ -137,7 +137,10 @@
 .ftVideoPlayer.shortsPlayer:has(:deep(.shaka-controls-container[shown='true'])) > .shortsTopControls {
   visibility: visible;
   opacity: 1;
-  transition: opacity 150ms ease;
+  transition:
+    opacity 150ms ease,
+    inset-inline-start 250ms ease,
+    max-inline-size 250ms ease;
 }
 
 .shortsTopControlsGroup {
@@ -354,6 +357,7 @@
   );
   inline-size: var(--shorts-video-width);
   transform: none;
+  transition: inset-inline-start 250ms ease, inline-size 250ms ease;
 }
 
 .ftVideoPlayer.shortsPlayer :deep(.shaka-seek-bar-container .shaka-range-element::-webkit-slider-thumb) {
@@ -3866,6 +3870,7 @@
 */
 .ftVideoPlayer.presentationModeChanging .player,
 .ftVideoPlayer.presentationModeChanging :deep(.shaka-controls-container),
+.ftVideoPlayer.presentationModeChanging :deep(.shaka-seek-bar-container),
 .ftVideoPlayer.presentationModeChanging :deep(.shaka-spinner-container),
 .ftVideoPlayer.presentationModeChanging .countdownOverlay,
 .ftVideoPlayer.presentationModeChanging :deep(.videoAnnotations),

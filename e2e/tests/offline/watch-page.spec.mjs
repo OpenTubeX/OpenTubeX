@@ -1570,6 +1570,38 @@ test.describe('watch page', () => {
     await setPlayerFullscreen(page, true)
     const fullscreenMetadata = player.locator('.fullscreenMetadataOverlay.open')
     await expect(fullscreenMetadata).toBeVisible()
+    await expect(player).not.toHaveClass(/presentationModeChanging/)
+
+    expect(await player.evaluate(element => {
+      const movingProperties = [
+        ['.player', 'inline-size'],
+        ['.shaka-controls-container', 'inset-inline-end'],
+        ['.shaka-seek-bar-container', 'inset-inline-start'],
+        ['.shaka-seek-bar-container', 'inline-size'],
+        ['.shortsTopControls', 'inset-inline-start'],
+        ['.shortsTopControls', 'max-inline-size'],
+        ['.fullscreenActions', 'inset-inline-end']
+      ]
+      return movingProperties.map(([selector, property]) => {
+        const style = getComputedStyle(element.querySelector(selector))
+        const properties = style.transitionProperty.split(', ')
+        const durations = style.transitionDuration.split(', ')
+        const index = properties.indexOf(property)
+        return index === -1 ? null : durations[index % durations.length]
+      })
+    })).toEqual(Array(7).fill('0.25s'))
+
+    expect(await player.evaluate(element => {
+      const wasChanging = element.classList.contains('presentationModeChanging')
+      element.classList.add('presentationModeChanging')
+      const transitionProperty = getComputedStyle(
+        element.querySelector('.shaka-seek-bar-container')
+      ).transitionProperty
+      if (!wasChanging) {
+        element.classList.remove('presentationModeChanging')
+      }
+      return transitionProperty
+    })).toBe('none')
 
     await moreOptions.click({ force: true })
     await expect(overflowMenu).toBeVisible()
