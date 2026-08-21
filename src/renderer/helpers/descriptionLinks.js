@@ -3,7 +3,7 @@ import autolinker from 'autolinker'
 const SHORT_NUMERIC_HASHTAG_PATTERN = /^\p{Number}{1,2}$/u
 
 function linkYouTubeMatch(match) {
-  if (match.getType() === 'hashtag' && SHORT_NUMERIC_HASHTAG_PATTERN.test(match.getHashtag())) {
+  if (match.type === 'hashtag' && SHORT_NUMERIC_HASHTAG_PATTERN.test(match.getHashtag())) {
     return false
   }
 
