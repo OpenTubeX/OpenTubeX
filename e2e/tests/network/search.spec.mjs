@@ -4,7 +4,9 @@ import { test, expect } from '../../helpers/innertube.mjs'
 test.describe('search', () => {
   test('search returns video results', async ({ page }) => {
     let blockPreviewRequest = true
+    let returnPreviewPlaceholder = false
     let releasePreviewRequest
+    let placeholderPreviewRequested = false
     let previewRequestFinished = false
     page.on('requestfinished', request => {
       if (/\/an_webp\//.test(request.url())) {
@@ -12,6 +14,16 @@ test.describe('search', () => {
       }
     })
     await page.route(/\/an_webp\//, async route => {
+      if (returnPreviewPlaceholder) {
+        placeholderPreviewRequested = true
+        await route.fulfill({
+          status: 404,
+          contentType: 'image/svg+xml',
+          body: '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="90"/>'
+        })
+        return
+      }
+
       if (blockPreviewRequest) {
         await new Promise(resolve => {
           releasePreviewRequest = () => {
@@ -81,6 +93,32 @@ test.describe('search', () => {
 
     await page.mouse.move(0, 0)
     await expect(preview).toHaveCount(0)
+
+    await page.evaluate(() => {
+      const NativeImage = window.Image
+      window.__thumbnailPreviewLoaderCount = 0
+      window.Image = new Proxy(NativeImage, {
+        construct(target, args) {
+          window.__thumbnailPreviewLoaderCount++
+          return Reflect.construct(target, args)
+        }
+      })
+    })
+
+    returnPreviewPlaceholder = true
+    const secondVideo = page.locator('.ft-list-video').nth(1)
+    await secondVideo.locator('.thumbnailLink').hover()
+    await expect.poll(() => placeholderPreviewRequested).toBe(true)
+    await page.waitForTimeout(600)
+    await expect(secondVideo.locator('.thumbnailPreview')).toHaveCount(0)
+    await expect(secondVideo.locator('.thumbnailImage').first()).toBeVisible()
+    const loaderCountAfterPlaceholder = await page.evaluate(() => window.__thumbnailPreviewLoaderCount)
+
+    await page.mouse.move(0, 0)
+    returnPreviewPlaceholder = false
+    await secondVideo.locator('.thumbnailLink').hover()
+    await expect.poll(() => page.evaluate(() => window.__thumbnailPreviewLoaderCount))
+      .toBeGreaterThan(loaderCountAfterPlaceholder)
 
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
