@@ -137,7 +137,10 @@
 .ftVideoPlayer.shortsPlayer:has(:deep(.shaka-controls-container[shown='true'])) > .shortsTopControls {
   visibility: visible;
   opacity: 1;
-  transition: opacity 150ms ease;
+  transition:
+    opacity 150ms ease,
+    inset-inline-start 250ms ease,
+    max-inline-size 250ms ease;
 }
 
 .shortsTopControlsGroup {
@@ -470,6 +473,7 @@
 }
 
 .ftVideoPlayer.shortsPlayer:fullscreen:is(
+  .fullscreenDockLayoutOpen,
   .fullscreenMetadataOpen,
   .fullscreenTranscriptOpen,
   .fullscreenSponsorBlockOpen,
@@ -479,6 +483,7 @@
   .chaptersOverlayOpen
 ),
   .ftVideoPlayer.shortsPlayer.fullWindow:is(
+  .fullscreenDockLayoutOpen,
   .fullscreenMetadataOpen,
   .fullscreenTranscriptOpen,
   .fullscreenSponsorBlockOpen,
@@ -2711,12 +2716,17 @@
 
 .ftVideoPlayer.fullWindow .ambientFullscreenCanvas,
 .ftVideoPlayer.shortsPlayer:fullscreen .ambientFullscreenCanvas,
-.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .ambientFullscreenCanvas {
+.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .ambientFullscreenCanvas {
   opacity: 0.42;
 }
 
+.ftVideoPlayer:is(:fullscreen, .fullWindow) :deep(.shaka-controls-container) {
+  inline-size: 100%;
+  inset-inline: 0 auto;
+}
+
 :deep(.shaka-controls-container) {
-  transition: inset-inline-end 250ms ease;
+  transition: inline-size 250ms ease;
 }
 
 :deep(.shaka-spinner-container),
@@ -2827,16 +2837,16 @@
 }
 
 /* Keep the floating fullscreen actions next to the video instead of under the panel. */
-.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .fullscreenActions,
-.ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .fullscreenActions {
+.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .fullscreenActions,
+.ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .fullscreenActions {
   inset-inline-end: calc(var(--side-panel-width) + 24px);
 }
 
 /* Keep SponsorBlock notices inside the video area when a dock is open. */
-.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper,
-.ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper,
-.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .sponsorBlockSubmissionWrapper,
-.ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .sponsorBlockSubmissionWrapper {
+.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper,
+.ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper,
+.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .sponsorBlockSubmissionWrapper,
+.ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .sponsorBlockSubmissionWrapper {
   inset-inline-end: calc(var(--side-panel-width) + 2%);
 }
 
@@ -3880,21 +3890,24 @@
   aside instead of covering it. Kept at the end of the file so the
   higher-specificity .player rules follow the scroll mini player ones.
 */
-.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .player,
-.ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .player {
+.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .player,
+.ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .player {
   inline-size: calc(100% - var(--side-panel-width));
 }
 
-.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :is(
-  :deep(.shaka-controls-container),
+.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :deep(.shaka-controls-container),
+.ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :deep(.shaka-controls-container) {
+  inline-size: calc(100% - var(--side-panel-width));
+}
+
+.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :is(
   :deep(.shaka-spinner-container),
   .countdownOverlay,
   :deep(.videoAnnotations),
   :deep(.shaka-text-container),
   :deep(.shaka-speech-to-text-container)
 ),
-  .ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :is(
-  :deep(.shaka-controls-container),
+  .ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :is(
   :deep(.shaka-spinner-container),
   .countdownOverlay,
   :deep(.videoAnnotations),

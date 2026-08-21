@@ -721,6 +721,32 @@ export default defineComponent({
     /** @type {import('vue').Ref<HTMLElement | null>} */
     const fullscreenPlaylistTarget = ref(null)
     const showFullscreenPlaylist = ref(false)
+    const fullscreenDockOpen = computed(() => {
+      return showFullscreenMetadata.value || showFullscreenTranscript.value ||
+        showFullscreenSponsorBlock.value || showFullscreenComments.value ||
+        showFullscreenLiveChat.value || showFullscreenPlaylist.value ||
+        (showChaptersOverlay.value && props.chapters.length > 0)
+    })
+    const fullscreenDockLayoutOpen = ref(false)
+    let fullscreenDockLayoutFrame = null
+    watch(fullscreenDockOpen, (open) => {
+      if (fullscreenDockLayoutFrame !== null) {
+        cancelAnimationFrame(fullscreenDockLayoutFrame)
+        fullscreenDockLayoutFrame = null
+      }
+
+      if (open) {
+        fullscreenDockLayoutOpen.value = true
+      } else {
+        // Paint the layout once after teleported dock content settles, then start the reverse transition.
+        fullscreenDockLayoutFrame = requestAnimationFrame(() => {
+          fullscreenDockLayoutFrame = requestAnimationFrame(() => {
+            fullscreenDockLayoutFrame = null
+            fullscreenDockLayoutOpen.value = false
+          })
+        })
+      }
+    }, { flush: 'post' })
     const chapterThumbnails = ref([])
     const currentChapterTitle = computed(() => {
       return props.chapters[props.currentChapterIndex]?.title ?? t('Chapters.Chapters')
@@ -6212,7 +6238,9 @@ export default defineComponent({
 
     function openShortsOverflowMenu(event) {
       const buttonRect = event.currentTarget.getBoundingClientRect()
-      const containerRect = container.value.getBoundingClientRect()
+      const controlsContainer = ui?.getControls().getControlsContainer()
+      const containerRect = controlsContainer?.getBoundingClientRect() ??
+        container.value.getBoundingClientRect()
       container.value.style.setProperty(
         '--shorts-menu-top',
         `${buttonRect.bottom - containerRect.top + 8}px`
@@ -6222,6 +6250,16 @@ export default defineComponent({
         `${containerRect.right - buttonRect.right}px`
       )
       container.value?.querySelector('.shaka-overflow-menu-button')?.click()
+    }
+
+    function resetShortsOverflowMenu() {
+      const controls = ui?.getControls()
+      controls?.dispatchEvent(new shaka.util.FakeEvent('submenuclose'))
+      controls?.getControlsContainer()
+        .querySelectorAll('.shaka-overflow-menu, .shaka-settings-menu')
+        .forEach(menu => menu.classList.add('shaka-hidden'))
+      container.value?.style.removeProperty('--shorts-menu-top')
+      container.value?.style.removeProperty('--shorts-menu-right')
     }
 
     function positionShortsContextMenu() {
@@ -6769,18 +6807,11 @@ export default defineComponent({
 
     function registerFullWindowButton() {
       events.addEventListener('setFullWindow', async (/** @type {CustomEvent} */ event) => {
-        const controls = ui?.getControls()
-
         // Moving the player while its overflow menu is open can leave both the
         // menu DOM and its submenu state stuck. Reset both synchronously; the
         // public hide method uses a timer and can otherwise lose a race with
         // the layout transition and the next overflow-button click.
-        controls?.dispatchEvent(new shaka.util.FakeEvent('submenuclose'))
-        controls?.getControlsContainer()
-          .querySelectorAll('.shaka-overflow-menu, .shaka-settings-menu')
-          .forEach(menu => menu.classList.add('shaka-hidden'))
-        container.value?.style.removeProperty('--shorts-menu-top')
-        container.value?.style.removeProperty('--shorts-menu-right')
+        resetShortsOverflowMenu()
 
         fullWindowAnimation?.cancel()
         fullWindowAnimation = null
@@ -8647,6 +8678,9 @@ export default defineComponent({
 
     function fullscreenChangeHandler() {
       isFullscreen.value = isNativeFullscreenActive()
+      if (props.shortsPlayer) {
+        resetShortsOverflowMenu()
+      }
       suppressPanelTransitions(100)
       syncChapterOverlayButton()
 
@@ -9442,6 +9476,9 @@ export default defineComponent({
 
     onBeforeUnmount(() => {
       clearTimeout(paidPromotionTimer)
+      if (fullscreenDockLayoutFrame !== null) {
+        cancelAnimationFrame(fullscreenDockLayoutFrame)
+      }
       cancelPendingVolumeUserSet()
       fullWindowAnimation?.cancel()
       hasLoaded.value = false
@@ -9804,6 +9841,7 @@ export default defineComponent({
       fullscreenPlaylistOverlay,
       fullscreenPlaylistTarget,
       showFullscreenPlaylist,
+      fullscreenDockLayoutOpen,
       closeFullscreenPlaylist,
       setFullscreenPlaylist,
       showFullscreenShareAction,

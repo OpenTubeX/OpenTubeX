@@ -382,9 +382,17 @@
           <h1
             v-if="!isLoading"
             class="shortsExternalTitle"
-            dir="auto"
           >
-            {{ videoTitle }}
+            <button
+              type="button"
+              class="shortsExternalTitleButton"
+              dir="auto"
+              :aria-label="`${$t('Video.Metadata')}: ${videoTitle}`"
+              :aria-expanded="shortsMetadataOpen"
+              @click="toggleShortsMetadata"
+            >
+              {{ videoTitle }}
+            </button>
           </h1>
           <RouterLink
             v-if="!isLoading && shortsLinkedVideo?.videoId"
@@ -682,6 +690,11 @@
             class="watchVideoSideBar watchVideoTranscript"
             @close="closeTranscript"
             @timestamp-event="playTranscriptSegment"
+          />
+          <div
+            ref="shortsAuxPanelContentEnd"
+            class="shortsAuxPanelContentEnd"
+            aria-hidden="true"
           />
         </div>
       </div>

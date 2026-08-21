@@ -1,4 +1,4 @@
-import { goTo, sel, setPlayerFullscreen, test, expect } from '../../helpers/app.mjs'
+import { goTo, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { activeTab, findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { demoPlayerResponse } from '../../helpers/media.mjs'
@@ -287,6 +287,131 @@ test.describe('Shorts transcript navigation', () => {
     await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONLESS_SHORT_ID}\\?short=true`))
     await expect(transcriptPanel).toHaveCount(0)
     await expect(transcriptButton).toHaveCount(0)
+  })
+
+  test('docks, scrolls, and clamps video information across Shorts navigation', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await setWindowSize(app, page, { width: 1325, height: 760 })
+    await page.locator(sel.searchInput)
+      .fill(`https://www.youtube.com/shorts/${CAPTIONED_SHORT_IDS[0]}`)
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[0]}\\?short=true`))
+    await waitForPlayback(page)
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate(async (view) => {
+      const lines = Array.from({ length: 80 }, (_, index) => `Description line ${index + 1}`)
+      view.videoDescription = lines.join('\n')
+      view.videoDescriptionHtml = lines.join('<br>')
+      view.toggleShortsMetadata()
+      await view.$nextTick()
+    })
+
+    const panel = page.locator('.shortsAuxPanel')
+    const scroller = panel.locator('.shortsAuxPanelTarget')
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    await expect(panel).toHaveClass(/shortsAuxPanelOpen/)
+    await expect.poll(async () => {
+      const [panelBounds, playerBounds] = await Promise.all([
+        panel.boundingBox(),
+        player.boundingBox()
+      ])
+      const bottomDelta = Math.abs(
+        panelBounds.y + panelBounds.height - playerBounds.y - playerBounds.height
+      )
+      const topDelta = Math.abs(panelBounds.y - playerBounds.y)
+      return Math.max(bottomDelta, topDelta)
+    }).toBeLessThanOrEqual(1)
+    await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
+    await expect(panel.locator('.os-scrollbar-vertical')).toHaveCount(1)
+    await expect.poll(() => scroller.evaluate(element => {
+      return element.scrollHeight - element.clientHeight
+    })).toBeGreaterThan(100)
+
+    const initialScrollTop = await scroller.evaluate(element => element.scrollTop)
+    const pointer = await scroller.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return {
+        x: bounds.left + bounds.width / 2,
+        y: Math.min(bounds.bottom - 1, window.innerHeight - 1)
+      }
+    })
+    await page.mouse.move(pointer.x, pointer.y)
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[0]}\\?short=true`))
+    expect(await scroller.evaluate((element, point) => {
+      const hit = document.elementFromPoint(point.x, point.y)
+      return element.contains(hit)
+    }, pointer)).toBe(true)
+    await page.mouse.wheel(0, 500)
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop))
+      .toBeGreaterThan(initialScrollTop)
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => {
+      const viewportBounds = element.getBoundingClientRect()
+      const descriptionBounds = element.querySelector('.description').getBoundingClientRect()
+      return {
+        atScrollEnd: element.scrollHeight - element.clientHeight - element.scrollTop <= 1,
+        renderedEndVisible: descriptionBounds.bottom <= viewportBounds.bottom + 1
+      }
+    })).toEqual({ atScrollEnd: true, renderedEndVisible: true })
+
+    await setWindowSize(app, page, { width: 1326, height: 1012 })
+    await expect.poll(() => scroller.evaluate(element => {
+      const contentEnd = element.querySelector('.shortsAuxPanelContentEnd')
+      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+      const viewportBounds = element.getBoundingClientRect()
+      const contentEndBounds = contentEnd.getBoundingClientRect()
+      const maximumScrollTop = Math.max(0, contentEnd.offsetTop - element.clientHeight)
+      const hasVerticalOverflow = maximumScrollTop > 1
+      return {
+        atRenderedEnd: maximumScrollTop === 0
+          ? element.scrollTop <= 1
+          : Math.abs(contentEndBounds.bottom - viewportBounds.bottom) <= 1,
+        scrollbarMatchesOverflow:
+          scrollbar?.classList.contains('os-scrollbar-visible') === hasVerticalOverflow,
+        withinRenderedRange: element.scrollTop <= maximumScrollTop + 1
+      }
+    })).toEqual({
+      atRenderedEnd: true,
+      scrollbarMatchesOverflow: true,
+      withinRenderedRange: true
+    })
+    await page.mouse.wheel(0, 500)
+    await page.waitForTimeout(100)
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[0]}\\?short=true`))
+
+    await page.locator('.shortsNavigationButton').last().click()
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[1]}\\?short=true`))
+    await waitForPlayback(page)
+    await expect(panel).toHaveClass(/shortsAuxPanelOpen/)
+    await expect.poll(() => scroller.evaluate(element => {
+      const content = element.querySelector('.videoDescription')
+      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+      const viewportBounds = element.getBoundingClientRect()
+      const contentBounds = content?.getBoundingClientRect()
+      const maximumScrollTop = Math.max(
+        0,
+        (content?.offsetTop ?? 0) + (content?.offsetHeight ?? 0) - element.clientHeight
+      )
+      const hasVerticalOverflow = element.scrollHeight > element.clientHeight + 1
+      return {
+        atRenderedEnd: contentBounds != null &&
+          (maximumScrollTop === 0
+            ? element.scrollTop <= 1
+            : Math.abs(contentBounds.bottom - viewportBounds.bottom) <= 1),
+        horizontalOverflowHidden: getComputedStyle(element).overflowX === 'hidden' &&
+          element.scrollWidth <= element.clientWidth + 1,
+        scrollbarMatchesOverflow:
+          scrollbar?.classList.contains('os-scrollbar-visible') === hasVerticalOverflow,
+        withinRenderedRange: element.scrollTop <= maximumScrollTop + 1
+      }
+    })).toEqual({
+      atRenderedEnd: true,
+      horizontalOverflowHidden: true,
+      scrollbarMatchesOverflow: true,
+      withinRenderedRange: true
+    })
   })
 
   test('keeps loading Shorts when another player keeps the shared caption factory alive', async ({ app, page }) => {
@@ -1420,6 +1545,45 @@ test.describe('watch page', () => {
     await page.waitForTimeout(250)
     expect(await target.evaluate(element => element.scrollTop)).toBe(0)
 
+    const transcript = page.locator('.shortsAuxPanelTarget .watchVideoTranscript')
+    await transcript.evaluate(element => { element.style.blockSize = '200%' })
+    await target.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => target.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await watchComponent.evaluate(async (component) => {
+      component.proxy.closeTranscript()
+      await component.proxy.$nextTick()
+    })
+    await expect(transcript).toHaveCount(0)
+    await expect.poll(() => target.evaluate(element => element.scrollTop)).toBe(0)
+
+    await watchComponent.evaluate(async (component) => {
+      component.proxy.handleSponsorBlockInfoChange({
+        open: true,
+        loading: false,
+        pendingUuid: null,
+        segments: [],
+        submissionEnabled: false
+      })
+      await component.proxy.$nextTick()
+    })
+    const sponsorBlock = page.locator('.shortsAuxPanelTarget .watchVideoSponsorBlock')
+    await expect(sponsorBlock).toBeVisible()
+    await sponsorBlock.evaluate(element => { element.style.blockSize = '200%' })
+    await target.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => target.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await watchComponent.evaluate(async (component) => {
+      component.proxy.handleSponsorBlockInfoChange({
+        open: false,
+        loading: false,
+        pendingUuid: null,
+        segments: [],
+        submissionEnabled: false
+      })
+      await component.proxy.$nextTick()
+    })
+    await expect(sponsorBlock).toHaveCount(0)
+    await expect.poll(() => target.evaluate(element => element.scrollTop)).toBe(0)
+
     await watchComponent.dispose()
   })
 
@@ -1429,6 +1593,7 @@ test.describe('watch page', () => {
     await page.locator(sel.searchInput).press('Enter')
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw\?short=true/)
     await waitForPlayback(page)
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
 
     const watchComponent = await page.evaluateHandle(findWatchComponent)
     await watchComponent.evaluate(async (component) => {
@@ -1466,6 +1631,95 @@ test.describe('watch page', () => {
     await setPlayerFullscreen(page, true)
     const fullscreenMetadata = player.locator('.fullscreenMetadataOverlay.open')
     await expect(fullscreenMetadata).toBeVisible()
+    await expect(player).not.toHaveClass(/presentationModeChanging/)
+
+    expect(await player.evaluate(element => {
+      const movingProperties = [
+        ['.player', 'inline-size'],
+        ['.shaka-controls-container', 'inline-size'],
+        ['.shortsTopControls', 'inset-inline-start'],
+        ['.shortsTopControls', 'max-inline-size'],
+        ['.fullscreenActions', 'inset-inline-end']
+      ]
+      return movingProperties.map(([selector, property]) => {
+        const style = getComputedStyle(element.querySelector(selector))
+        const properties = style.transitionProperty.split(', ')
+        const durations = style.transitionDuration.split(', ')
+        const index = properties.indexOf(property)
+        return index === -1 ? null : durations[index % durations.length]
+      })
+    })).toEqual(Array(5).fill('0.25s'))
+
+    expect(await player.evaluate(element => {
+      return getComputedStyle(
+        element.querySelector('.shaka-seek-bar-container')
+      ).transitionProperty
+    })).toBe('none')
+
+    const closingMotion = player.evaluate(element => new Promise(resolve => {
+      const controls = element.querySelector('.shaka-controls-container')
+      const seek = element.querySelector('.shaka-seek-bar-container')
+      const initial = {
+        controlsWidth: controls.getBoundingClientRect().width,
+        seekLeft: seek.getBoundingClientRect().left
+      }
+      const observer = new MutationObserver(() => {
+        if (!element.classList.contains('fullscreenDockLayoutOpen')) {
+          observer.disconnect()
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve({
+            initial,
+            intermediate: {
+              controlsWidth: controls.getBoundingClientRect().width,
+              seekLeft: seek.getBoundingClientRect().left
+            }
+          })))
+        }
+      })
+      observer.observe(element, { attributes: true, attributeFilter: ['class'] })
+    }))
+    await watchComponent.evaluate(component => {
+      component.proxy.$refs.player.setFullscreenMetadata(false)
+    })
+    const { initial, intermediate } = await closingMotion
+    await expect(fullscreenMetadata).toHaveCount(0)
+    const fullscreenWidth = (await player.boundingBox()).width
+    expect(intermediate.controlsWidth).toBeGreaterThan(initial.controlsWidth)
+    expect(intermediate.controlsWidth).toBeLessThan(fullscreenWidth)
+    expect(intermediate.seekLeft).toBeGreaterThan(initial.seekLeft)
+    await expect.poll(async () => {
+      return player.locator('.shaka-controls-container').evaluate(element => {
+        return element.getBoundingClientRect().width
+      })
+    }).toBeCloseTo(fullscreenWidth, 0)
+    const closedSeekLeft = await player.locator('.shaka-seek-bar-container').evaluate(element => {
+      return element.getBoundingClientRect().left
+    })
+    expect(intermediate.seekLeft).toBeLessThan(closedSeekLeft)
+
+    await watchComponent.evaluate(component => {
+      component.proxy.$refs.player.setFullscreenMetadata(true)
+    })
+    await expect(fullscreenMetadata).toBeVisible()
+    await expect.poll(async () => {
+      return player.locator('.shaka-controls-container').evaluate(element => {
+        return element.getBoundingClientRect().width
+      })
+    }).toBeCloseTo(initial.controlsWidth, 0)
+
+    await moreOptions.click({ force: true })
+    await expect(overflowMenu).toBeVisible()
+    await expect.poll(async () => {
+      const [buttonBounds, menuBounds] = await Promise.all([
+        moreOptions.boundingBox(),
+        overflowMenu.boundingBox()
+      ])
+      return Math.max(
+        Math.abs(buttonBounds.x + buttonBounds.width - menuBounds.x - menuBounds.width),
+        Math.abs(buttonBounds.y + buttonBounds.height + 8 - menuBounds.y)
+      )
+    }).toBeLessThanOrEqual(1)
+    await page.keyboard.press('Escape')
+    await expect(overflowMenu).toBeHidden()
 
     await watchComponent.evaluate(component => {
       component.proxy.$refs.player.setFullscreenTranscript(true)
@@ -1499,9 +1753,95 @@ test.describe('watch page', () => {
     await moreOptions.click({ force: true })
     await overflowMenu.getByRole('button', { name: 'Video information' }).click()
     await expect(player.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
+
+    await moreOptions.click({ force: true })
+    await expect(overflowMenu).toBeVisible()
     await setPlayerFullscreen(page, false)
+    await expect(overflowMenu).toBeHidden()
     await expect(auxPanel).toHaveClass(/shortsAuxPanelOpen/)
 
+    await moreOptions.click()
+    await expect(overflowMenu).toBeVisible()
+    await expect.poll(async () => {
+      const [buttonBounds, menuBounds] = await Promise.all([
+        moreOptions.boundingBox(),
+        overflowMenu.boundingBox()
+      ])
+      return Math.max(
+        Math.abs(buttonBounds.x + buttonBounds.width - menuBounds.x - menuBounds.width),
+        Math.abs(buttonBounds.y + buttonBounds.height + 8 - menuBounds.y)
+      )
+    }).toBeLessThanOrEqual(1)
+
+    await watchComponent.dispose()
+  })
+
+  test('toggles information from the Shorts title and matches the comments header', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw\?short=true/)
+    await waitForPlayback(page)
+
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    const titleButton = page.locator('.shortsExternalTitleButton')
+    await expect(titleButton).toHaveAttribute('aria-expanded', 'false')
+    await titleButton.click()
+    await expect(page.locator('.shortsAuxPanel')).toHaveClass(/shortsAuxPanelOpen/)
+    await expect(titleButton).toHaveAttribute('aria-expanded', 'true')
+
+    const headerStyles = async (headerSelector, closeSelector) => page.evaluate(
+      ({ headerSelector, closeSelector }) => {
+        const header = document.querySelector(headerSelector)
+        const heading = header?.querySelector('h2, h3')
+        const close = document.querySelector(closeSelector)
+        const headerStyle = getComputedStyle(header)
+        const headingStyle = getComputedStyle(heading)
+        const closeStyle = getComputedStyle(close)
+        return {
+          header: {
+            height: headerStyle.height,
+            padding: headerStyle.padding,
+            backgroundColor: headerStyle.backgroundColor,
+            borderBottomColor: headerStyle.borderBottomColor
+          },
+          heading: {
+            margin: headingStyle.margin,
+            fontSize: headingStyle.fontSize
+          },
+          close: {
+            width: closeStyle.width,
+            height: closeStyle.height,
+            color: closeStyle.color,
+            backgroundColor: closeStyle.backgroundColor,
+            borderRadius: closeStyle.borderRadius,
+            fontSize: closeStyle.fontSize
+          }
+        }
+      },
+      { headerSelector, closeSelector }
+    )
+
+    const informationStyles = await headerStyles(
+      '.shortsAuxPanelHeader',
+      '.shortsAuxPanelClose'
+    )
+
+    await titleButton.click()
+    await expect(page.locator('.shortsAuxPanel')).not.toHaveClass(/shortsAuxPanelOpen/)
+    await expect(titleButton).toHaveAttribute('aria-expanded', 'false')
+
+    await watchComponent.evaluate(async (component) => {
+      component.proxy.toggleShortsComments()
+      await component.proxy.$nextTick()
+    })
+    await expect(page.locator('.shortsCommentsPanel .fullscreenCommentHeader')).toBeVisible()
+    const commentsStyles = await headerStyles(
+      '.shortsCommentsPanel .fullscreenCommentHeader',
+      '.shortsCommentsPanel .fullscreenCommentAction:last-of-type'
+    )
+
+    expect(informationStyles).toEqual(commentsStyles)
     await watchComponent.dispose()
   })
 

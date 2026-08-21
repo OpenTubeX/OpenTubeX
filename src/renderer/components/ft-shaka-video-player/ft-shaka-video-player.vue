@@ -56,6 +56,7 @@
         fullscreenLiveChatOpen: showFullscreenLiveChat,
         fullscreenPlaylistOpen: showFullscreenPlaylist,
         chaptersOverlayOpen: showChaptersOverlay && chapters.length > 0,
+        fullscreenDockLayoutOpen,
         fullscreenDockResizing,
         fullscreenDockReordering,
         presentationModeChanging,

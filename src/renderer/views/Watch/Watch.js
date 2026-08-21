@@ -26,7 +26,7 @@ import FtButton from '../../components/FtButton/FtButton.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
 import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
-import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../../constants'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
@@ -1058,6 +1058,10 @@ export default defineComponent({
         this.shortsTransitionPreview = ''
         this.shortsTransitionDirection = 0
 
+        if (this.shortsMetadataOpen) {
+          this.clampShortsAuxPanelScroll()
+        }
+
         if (this.applyDefaultTheatreModeAfterLoad) {
           this.applyDefaultTheatreModeAfterLoad = false
           this.useTheatreMode = this.theatreTogglePossible
@@ -1331,6 +1335,9 @@ export default defineComponent({
     },
     updateShortsViewportHeight() {
       this.shortsViewportHeight = window.innerHeight
+      if (this.shortsAuxPanelOpen) {
+        this.clampShortsAuxPanelScroll()
+      }
     },
     handleFullscreenMetadataChange({ open, target, presentationActive = false }) {
       this.fullscreenMetadataTarget = target
@@ -1338,6 +1345,7 @@ export default defineComponent({
 
       if (this.customShortsPlayerActive && presentationActive) {
         this.shortsMetadataOpen = this.fullscreenMetadataOpen
+        this.clampShortsAuxPanelScroll()
       }
 
       if (this.fullscreenMetadataOpen) {
@@ -1477,6 +1485,10 @@ export default defineComponent({
       this.sponsorBlockInfoSegments = segments
       this.sponsorBlockInfoSubmissionEnabled = submissionEnabled
 
+      if (!open && this.customShortsPlayerActive) {
+        this.clampShortsAuxPanelScroll()
+      }
+
       if (open && this.fullscreenMetadataOpen && !this.fullscreenSponsorBlockOpen) {
         this.$nextTick(() => this.$refs.player?.setFullscreenSponsorBlock(true))
       } else if (!open && this.fullscreenSponsorBlockOpen) {
@@ -1518,6 +1530,7 @@ export default defineComponent({
         this.$nextTick(() => this.$refs.player?.setFullscreenTranscript(true))
       } else if (!this.showTranscript) {
         this.$refs.player?.dismissFullscreenTranscript()
+        this.clampShortsAuxPanelScroll()
       }
     },
     closeTranscript() {
@@ -1526,6 +1539,7 @@ export default defineComponent({
       }
       this.showTranscript = false
       this.$refs.player?.dismissFullscreenTranscript()
+      this.clampShortsAuxPanelScroll()
     },
     closeShortsComments() {
       this.shortsCommentsOpen = false
@@ -1536,6 +1550,10 @@ export default defineComponent({
         this.resetShortsAuxPanelScroll()
       }
       this.shortsMetadataOpen = shouldOpen
+
+      if (!shouldOpen) {
+        this.clampShortsAuxPanelScroll()
+      }
 
       if (shouldOpen) {
         if (this.showTranscript) {
@@ -1555,6 +1573,17 @@ export default defineComponent({
           requestAnimationFrame(() => restoreOverlayScrollTop(target, 0))
         })
       }
+    },
+    clampShortsAuxPanelScroll() {
+      this.$nextTick(() => {
+        requestAnimationFrame(() => {
+          const target = this.$refs.shortsAuxPanelTarget
+          const content = this.$refs.shortsAuxPanelContentEnd
+          if (target != null && content != null) {
+            clampOverlayScrollTop(target, content)
+          }
+        })
+      })
     },
     handleSidebarPanelBeforeLeave() {
       this.sidebarPanelLeaving = true

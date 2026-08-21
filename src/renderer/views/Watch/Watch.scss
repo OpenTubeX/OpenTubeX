@@ -321,6 +321,11 @@
       display: none;
     }
 
+    .videoArea {
+      position: relative;
+      overscroll-behavior: contain;
+    }
+
     .videoArea .videoAreaMargin {
       position: relative;
       display: grid;
@@ -553,10 +558,33 @@
 
     .shortsExternalTitle {
       margin-block: 12px 0;
-      margin-inline: 0;
+      margin-inline: -12px 0;
+    }
+
+    .shortsExternalTitleButton {
+      max-inline-size: 100%;
+      padding-block: 8px;
+      padding-inline: 12px;
+      border: 0;
+      border-radius: calc(12px * var(--ui-roundness));
+      color: inherit;
+      background: transparent;
+      cursor: pointer;
       overflow-wrap: anywhere;
+      font: inherit;
       font-size: 20px;
       line-height: 1.3;
+      text-align: start;
+    }
+
+    .shortsExternalTitleButton:hover,
+    .shortsExternalTitleButton:focus-visible {
+      background-color: var(--side-nav-hover-color);
+    }
+
+    .shortsExternalTitleButton:focus-visible {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
     }
 
     .shortsMetadataSkeleton {
@@ -793,10 +821,11 @@
 
     .shortsCommentsPanel,
     .shortsAuxPanel {
-      position: fixed;
+      position: absolute;
       z-index: 20;
-      inset-block: 80px 16px;
+      inset-block-start: 0;
       inset-inline-end: 88px;
+      block-size: var(--shorts-player-height);
       inline-size: min(420px, calc(100vw - 32px));
       overflow: hidden;
       border-radius: calc(12px * var(--ui-roundness));
@@ -837,12 +866,17 @@
     }
 
     .shortsAuxPanelHeader {
+      position: relative;
+      z-index: 2;
       display: flex;
+      box-sizing: border-box;
       flex: 0 0 52px;
       align-items: center;
       justify-content: space-between;
-      padding-inline: 16px 8px;
-      border-block-end: 1px solid color-mix(in srgb, var(--primary-text-color) 10%, transparent);
+      padding-block: 0;
+      padding-inline: 14px 8px;
+      border-block-end: 1px solid rgb(255 255 255 / 10%);
+      background-color: rgb(20 20 20 / 52%);
     }
 
     .shortsAuxPanelHeader h2 {
@@ -856,7 +890,7 @@
     .shortsAuxPanelTarget {
       flex: 1 1 auto;
       min-block-size: 0;
-      overflow: hidden;
+      overflow: hidden auto;
       overflow-anchor: none;
       overscroll-behavior: contain;
     }
@@ -980,16 +1014,23 @@
     }
 
     .shortsAuxPanelClose {
-      display: grid;
-      place-items: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       inline-size: 36px;
       block-size: 36px;
       padding: 0;
       border: 0;
       border-radius: 50%;
-      color: var(--primary-text-color);
-      background-color: var(--side-nav-hover-color);
+      color: #fff;
+      background-color: transparent;
       cursor: pointer;
+      font-size: 18px;
+    }
+
+    .shortsAuxPanelClose:hover,
+    .shortsAuxPanelClose:focus-visible {
+      background-color: rgb(255 255 255 / 20%);
     }
 
     @media (height <= 850px) {
@@ -1038,9 +1079,8 @@
         opacity: 1;
       }
 
-      .shortsExternalTitle {
+      .shortsExternalTitleButton {
         display: -webkit-box;
-        max-block-size: 2.6em;
         overflow: hidden;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
