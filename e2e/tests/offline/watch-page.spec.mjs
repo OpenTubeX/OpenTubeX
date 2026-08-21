@@ -1641,7 +1641,7 @@ test.describe('watch page', () => {
     await watchComponent.dispose()
   })
 
-  test('matches the Shorts information header to the comments header', async ({ app, page }) => {
+  test('toggles information from the Shorts title and matches the comments header', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/jNQXAC9IVRw')
     await page.locator(sel.searchInput).press('Enter')
@@ -1649,10 +1649,11 @@ test.describe('watch page', () => {
     await waitForPlayback(page)
 
     const watchComponent = await page.evaluateHandle(findWatchComponent)
-    await watchComponent.evaluate(async (component) => {
-      component.proxy.toggleShortsMetadata()
-      await component.proxy.$nextTick()
-    })
+    const titleButton = page.locator('.shortsExternalTitleButton')
+    await expect(titleButton).toHaveAttribute('aria-expanded', 'false')
+    await titleButton.click()
+    await expect(page.locator('.shortsAuxPanel')).toHaveClass(/shortsAuxPanelOpen/)
+    await expect(titleButton).toHaveAttribute('aria-expanded', 'true')
 
     const headerStyles = async (headerSelector, closeSelector) => page.evaluate(
       ({ headerSelector, closeSelector }) => {
@@ -1690,6 +1691,10 @@ test.describe('watch page', () => {
       '.shortsAuxPanelHeader',
       '.shortsAuxPanelClose'
     )
+
+    await titleButton.click()
+    await expect(page.locator('.shortsAuxPanel')).not.toHaveClass(/shortsAuxPanelOpen/)
+    await expect(titleButton).toHaveAttribute('aria-expanded', 'false')
 
     await watchComponent.evaluate(async (component) => {
       component.proxy.toggleShortsComments()

@@ -558,10 +558,33 @@
 
     .shortsExternalTitle {
       margin-block: 12px 0;
-      margin-inline: 0;
+      margin-inline: -12px 0;
+    }
+
+    .shortsExternalTitleButton {
+      max-inline-size: 100%;
+      padding-block: 8px;
+      padding-inline: 12px;
+      border: 0;
+      border-radius: calc(12px * var(--ui-roundness));
+      color: inherit;
+      background: transparent;
+      cursor: pointer;
       overflow-wrap: anywhere;
+      font: inherit;
       font-size: 20px;
       line-height: 1.3;
+      text-align: start;
+    }
+
+    .shortsExternalTitleButton:hover,
+    .shortsExternalTitleButton:focus-visible {
+      background-color: var(--side-nav-hover-color);
+    }
+
+    .shortsExternalTitleButton:focus-visible {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
     }
 
     .shortsMetadataSkeleton {
@@ -1056,9 +1079,8 @@
         opacity: 1;
       }
 
-      .shortsExternalTitle {
+      .shortsExternalTitleButton {
         display: -webkit-box;
-        max-block-size: 2.6em;
         overflow: hidden;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
