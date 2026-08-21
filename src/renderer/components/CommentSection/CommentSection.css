@@ -498,6 +498,22 @@
   background-color: transparent;
 }
 
+.commentReplyToggleLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.commentReplyOwnerThumbnail {
+  inline-size: 24px;
+  block-size: 24px;
+  border-radius: 50%;
+}
+
+.commentReplyOwnerSeparator {
+  font-weight: normal;
+}
+
 .getMoreComments {
   padding-block-end: 1em;
   text-align: center;
