@@ -364,7 +364,7 @@ test.describe('Shorts transcript navigation', () => {
     await waitForPlayback(page)
     await expect(panel).toHaveClass(/shortsAuxPanelOpen/)
     await expect.poll(() => scroller.evaluate(element => {
-      const content = element.querySelector('.watchVideo')
+      const content = element.querySelector('.videoDescription')
       const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
       const viewportBounds = element.getBoundingClientRect()
       const contentBounds = content?.getBoundingClientRect()

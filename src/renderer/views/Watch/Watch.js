@@ -1564,7 +1564,8 @@ export default defineComponent({
       this.$nextTick(() => {
         requestAnimationFrame(() => {
           const target = this.$refs.shortsAuxPanelTarget
-          const content = target?.querySelector('.watchVideo')
+          const contentElements = target?.querySelectorAll(':scope > .watchVideo')
+          const content = contentElements?.[contentElements.length - 1]
           if (target != null && content != null) {
             clampOverlayScrollTop(target, content)
           }
