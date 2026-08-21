@@ -5362,13 +5362,30 @@ export default defineComponent({
         !scrollMiniPlayerActive.value
     })
 
+    const fullscreenAmbientBarsVisible = computed(() => {
+      const contentAspectRatio = annotationVideoAspectRatio.value
+      const elementWidth = videoElementWidth.value
+      const elementHeight = videoElementHeight.value
+
+      if (!isFullscreen.value || contentAspectRatio === null ||
+        elementWidth === 0 || elementHeight === 0) {
+        return false
+      }
+
+      const fittedWidth = Math.min(elementWidth, elementHeight * contentAspectRatio)
+      const fittedHeight = Math.min(elementHeight, elementWidth / contentAspectRatio)
+      const minimumBarSize = 1
+
+      return elementWidth - fittedWidth > minimumBarSize ||
+        elementHeight - fittedHeight > minimumBarSize
+    })
+
     const { ambientCanvas, ambientFullscreenCanvas, ambientLayoutCanvas } = useAmbientMode({
       enabled: ambientModeVisible,
       video,
     })
 
-    /** @type {ResizeObserver} */
-    const videoResizeObserver = new ResizeObserver(() => {
+    function updateVideoElementGeometry() {
       if (video.value) {
         const devicePixelRatio = window.devicePixelRatio > 1 ? window.devicePixelRatio : 1
         const video_ = video.value
@@ -5379,7 +5396,10 @@ export default defineComponent({
         updateAnnotationVideoAspectRatio()
         updateScrollMiniVideoAspectRatio()
       }
-    })
+    }
+
+    /** @type {ResizeObserver} */
+    const videoResizeObserver = new ResizeObserver(updateVideoElementGeometry)
 
     /** @type {PictureInPictureWindow | null} */
     let pipWindow = null
@@ -9771,6 +9791,7 @@ export default defineComponent({
       toggleShortsCaptions,
       handlePlaying,
       handleWaiting,
+      updateVideoElementGeometry,
       openShortsOverflowMenu,
       positionShortsContextMenu,
       handlePlayerMouseMove,
@@ -9782,6 +9803,7 @@ export default defineComponent({
       ambientFullscreenCanvas,
       ambientLayoutCanvas,
       ambientModeVisible,
+      fullscreenAmbientBarsVisible,
       captionCssVariables,
       captionPlayerVariables,
       captionAppearanceSampleBottom,
