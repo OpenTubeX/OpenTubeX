@@ -403,6 +403,7 @@ import {
 import { getLocalVideoChannels } from '../../helpers/api/local.js'
 import { isHistoryEntryWatched } from '../../helpers/history.js'
 import { getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries.js'
+import { isThumbnailPreviewImageUsable } from '../../helpers/thumbnailPreview.js'
 import { deArrowData, deArrowThumbnail, getSponsorBlockVideoLabel } from '../../helpers/sponsorblock.js'
 import {
   morphThumbnailIntoNewTab,
@@ -689,7 +690,7 @@ function startThumbnailPreview() {
         thumbnailPreviewLoader === loader &&
         thumbnailPreviewUrl.value === previewUrl
       ) {
-        thumbnailPreviewLoaded.value = true
+        thumbnailPreviewLoaded.value = isThumbnailPreviewImageUsable(loader)
       }
     }
     loader.onerror = () => {

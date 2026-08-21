@@ -22,3 +22,16 @@ export function getThumbnailPreviewUrl(video) {
     thumbnail => typeof thumbnail?.url === 'string'
   )?.url ?? null
 }
+
+/**
+ * YouTube's failed moving-thumbnail requests return a decodable 120x90 error
+ * image. Image loaders report it as loaded even though the response is a 404.
+ *
+ * @param {{ naturalWidth: number, naturalHeight: number }} image
+ * @returns {boolean}
+ */
+export function isThumbnailPreviewImageUsable(image) {
+  return image.naturalWidth > 0 &&
+    image.naturalHeight > 0 &&
+    !(image.naturalWidth === 120 && image.naturalHeight === 90)
+}
