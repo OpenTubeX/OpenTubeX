@@ -123,6 +123,21 @@ test('controls queue order, running jobs, bandwidth, and retry-all', async ({ ap
   ))
   await expect(first).toContainText('Paused')
   await expect(second).toContainText('Paused')
+  await clickUntil(page, moved.getByTitle('Resume Download'), async () => (
+    (await moved.textContent()).includes('Queued, position 1')
+  ))
+  const [submittedWhilePaused] = await submitDownloads(page, [
+    { videoId: 'mmmmmmmmmmm', title: 'Submitted while paused', mode: 'video' },
+  ])
+  await expect.poll(() => page.evaluate(async id => (
+    (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+  ), submittedWhilePaused.id)).toBe('paused')
+  const submittedWhilePausedRow = page.locator('.downloadRow').filter({ hasText: 'Submitted while paused' })
+  await clickUntil(page, submittedWhilePausedRow.getByTitle('Cancel Download'), async () => (
+    (await page.evaluate(async id => (
+      (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+    ), submittedWhilePaused.id)) === 'cancelled'
+  ))
   await clickUntil(page, page.getByRole('button', { name: 'Resume all' }), async () => (
     (await first.textContent()).includes('0.0%')
   ))
