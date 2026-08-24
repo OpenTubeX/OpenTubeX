@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, sel, goTo } from '../../helpers/app.mjs'
+import { test, expect, sel, goTo, goToSettingsSection } from '../../helpers/app.mjs'
 
 test.describe('playlist creation', () => {
   test('a playlist can be created through the UI', async ({ page }) => {
@@ -161,6 +161,58 @@ test.describe('seeded playlists', () => {
     await goTo(page, 'userplaylists')
     await page.getByText('Favorites').click()
     await expect(page.getByTitle('Quick Bookmark Enabled').locator('.ft-custom-icon__emoji')).toHaveText('❤️‍🔥')
+  })
+})
+
+test.describe('playlist view type', () => {
+  test.use({
+    seed: {
+      settings: {
+        listType: 'list'
+      },
+      playlists: [{
+        _id: 'playlist-view-type',
+        playlistName: 'Playlist view type',
+        protected: false,
+        description: '',
+        videos: [{
+          videoId: 'eeeeeeeeeee',
+          title: 'Playlist view video',
+          author: 'Test Channel',
+          authorId: 'UC-test-channel-id',
+          lengthSeconds: 120,
+          published: Date.now() - 86_400_000,
+          timeAdded: Date.now(),
+          playlistItemId: 'playlist-view-item',
+          type: 'video'
+        }],
+        createdAt: Date.now() - 86_400_000,
+        lastUpdatedAt: Date.now()
+      }]
+    }
+  })
+
+  test('defaults to grid independently and persists list view', async ({ app, page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Playlist view type').click()
+    await expect(page.locator('.playlistPage')).toHaveClass(/grid/)
+
+    const appearance = await goToSettingsSection(page, 'appearance')
+    const playlistViewSetting = appearance.locator('.select').filter({
+      has: page.getByRole('combobox', { name: 'Playlist View Type' })
+    })
+    const playlistViewSelect = playlistViewSetting.locator('select')
+    await expect(playlistViewSelect).toHaveValue('grid')
+    await playlistViewSelect.selectOption('list')
+    await page.locator('.settingsCloseButton').click()
+
+    await expect(page.locator('.playlistPage')).toHaveClass(/list/)
+    await expect(page.locator('.playlistItems')).toBeVisible()
+
+    ;({ page } = await app.relaunch())
+    await goTo(page, 'userplaylists')
+    await page.getByText('Playlist view type').click()
+    await expect(page.locator('.playlistPage')).toHaveClass(/list/)
   })
 })
 

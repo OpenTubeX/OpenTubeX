@@ -498,6 +498,10 @@ Settings:
       Video View Type: Video View Type
       Grid: Grid
       List: List
+    Playlist View Type:
+      Playlist View Type: Playlist View Type
+      Grid: Grid
+      List: List
     Thumbnail Preference:
       Thumbnail Preference: Thumbnail Preference
       Default: Default

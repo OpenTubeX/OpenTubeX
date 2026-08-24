@@ -335,6 +335,7 @@ const state = {
   useFixedTabWidth: false,
   fixedTabWidth: DEFAULT_FIXED_TAB_WIDTH,
   listType: 'grid',
+  playlistViewType: 'grid',
   maxVideoPlaybackRate: 3,
   onlyShowLatestFromChannel: false,
   onlyShowLatestFromChannelNumber: 1,

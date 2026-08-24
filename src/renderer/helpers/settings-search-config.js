@@ -20,6 +20,7 @@ const GENERAL_EVERYDAY_KEYS = new Set([
 ])
 
 const GENERAL_APPEARANCE_KEYS = new Set([
+  'Playlist View Type',
   'Show Thumbnail Previews',
   'Thumbnail Preference',
   'Video View Type'
@@ -152,6 +153,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'Reduced Motion': ['Reduced Motion'],
     'Avoid translation': ['Avoid translation'],
     'Preferred API Backend': ['Preferred API Backend'],
+    'Playlist View Type': ['Playlist View Type'],
     'Video View Type': ['Video View Type'],
     'Thumbnail Preference': ['Thumbnail Preference'],
     'Extra Thumbnail Action Button': ['Extra Thumbnail Action Button'],
