@@ -16,6 +16,7 @@ import {
   compareQueuedDownloads,
   normalizeDownloadBandwidth,
   normalizeDownloadConcurrency,
+  updatePendingDownloadStatuses,
 } from './downloadQueue'
 
 const execFileAsync = promisify(execFile)
@@ -262,6 +263,18 @@ function broadcastDownloadStatus(record) {
   broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOAD_STATUS, { ...record })
 }
 
+function setPendingDownloadStatus(status) {
+  const updated = updatePendingDownloadStatuses(
+    downloadRecords,
+    queuedDownloadWaiters.keys(),
+    status
+  )
+  for (const record of updated) {
+    broadcastDownloadStatus(record)
+  }
+  return updated
+}
+
 async function getDownloadQueueSettings() {
   const concurrency = await settings._findOne('ytDlpMaxConcurrentDownloads')
   return {
@@ -304,6 +317,9 @@ async function requestDownloadQueueDrain() {
 function waitForDownloadSlot(id) {
   return new Promise(resolve => {
     queuedDownloadWaiters.set(id, resolve)
+    if (downloadQueuePaused && setPendingDownloadStatus('paused').length > 0) {
+      saveDownloadRecords().catch(error => console.warn('Could not save download history', error))
+    }
     requestDownloadQueueDrain().catch(error => console.warn('Could not schedule downloads', error))
   })
 }
@@ -2253,7 +2269,7 @@ async function startYtDlpDownload(
     template: typeof payload.template === 'string' ? payload.template.slice(0, 255) : '',
     automatic: payload.automatic === true,
     retryPayload: structuredClone(payload),
-    status: 'queued',
+    status: downloadQueuePaused ? 'paused' : 'queued',
     started: false,
     queuePosition: ++downloadQueuePositionCounter,
     percent: 0,
@@ -2690,6 +2706,7 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
       } else {
         downloadQueuePaused = true
         record.status = 'pausing'
+        setPendingDownloadStatus('paused')
       }
     } else {
       return false
@@ -2700,6 +2717,7 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
       entry.paused = false
       record.status = 'downloading'
     } else if (record.status === 'paused' && queuedDownloadWaiters.has(id)) {
+      downloadQueuePaused = false
       record.status = 'queued'
     } else if (record.status === 'paused') {
       return restartPersistedDownload(event, record)
@@ -2743,12 +2761,7 @@ export async function handleYtDlpQueueAction(event, action) {
   }
   if (action === 'pause-all') {
     downloadQueuePaused = true
-    for (const record of downloadRecords.values()) {
-      if (record.status === 'queued') {
-        record.status = 'paused'
-        broadcastDownloadStatus(record)
-      }
-    }
+    setPendingDownloadStatus('paused')
     for (const [id, entry] of activeDownloads) {
       const record = downloadRecords.get(id)
       if (!record || entry.paused) continue
@@ -2762,6 +2775,7 @@ export async function handleYtDlpQueueAction(event, action) {
     }
   } else if (action === 'resume-all') {
     downloadQueuePaused = false
+    setPendingDownloadStatus('queued')
     const persistedPaused = []
     for (const record of downloadRecords.values()) {
       const entry = activeDownloads.get(record.id)
@@ -2769,9 +2783,6 @@ export async function handleYtDlpQueueAction(event, action) {
         entry.child.kill('SIGCONT')
         entry.paused = false
         record.status = 'downloading'
-        broadcastDownloadStatus(record)
-      } else if (record.status === 'paused' && queuedDownloadWaiters.has(record.id)) {
-        record.status = 'queued'
         broadcastDownloadStatus(record)
       } else if (record.status === 'paused') {
         persistedPaused.push(record)

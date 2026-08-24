@@ -1055,6 +1055,8 @@ Settings:
     Managed Tools Download Error Template: 'Die verwalteten Tools konnten nicht heruntergeladen werden: {errors}'
     Download Folder: Download-Ordner
     Global Additional yt-dlp Arguments: Globale zusätzliche yt-dlp-Argumente
+    Concurrent Downloads: Gleichzeitige Downloads
+    Bandwidth Limit: Bandbreitenlimit (KiB/s, 0 für unbegrenzt)
     Choose Download Folder: Download-Ordner auswählen
     Templates Hint: Benutzerdefinierte Download-Vorlagen können im Download-Dialog erstellt und verwaltet werden, der sich unterhalb des Video-Players befindet.
     External Software Hint: yt-dlp und FFmpeg werden in den Einstellungen für externe Software konfiguriert.
@@ -1964,6 +1966,8 @@ Tooltips:
   Download Settings:
     Download Folder: Videos werden in diesem Ordner gespeichert. Leer lassen, um den Downloads-Ordner deines Systems zu verwenden.
     Global Additional yt-dlp Arguments: Zusätzliche Befehlszeilenargumente, die bei jedem Download an yt-dlp übergeben werden, zum Beispiel --cookies-from-browser firefox.
+    Concurrent Downloads: Die maximale Anzahl von yt-dlp-Aufträgen, die gleichzeitig ausgeführt werden dürfen.
+    Bandwidth Limit: Begrenzt die gesamte Übertragungsrate der Warteschlange, indem das Limit auf gleichzeitige Aufträge verteilt wird. Gib 0 für kein Limit ein.
   External Software Settings:
     yt-dlp Source: OpenTubeX kann entweder das auf deinem System installierte yt-dlp verwenden oder eine eigene Kopie von yt-dlp herunterladen und verwalten, die im Benutzerdatenverzeichnis gespeichert wird.
     yt-dlp Channel: Wähle aus, welchen yt-dlp-Veröffentlichungskanal OpenTubeX herunterlädt und verwaltet. Für die meisten Benutzer wird „Stable“ empfohlen.
@@ -2108,6 +2112,7 @@ KeyboardShortcutPrompt:
   History Backward: Eine Seite zurückgehen
   New Window: Ein neues Fenster öffnen
   Navigate to Settings: Zur Einstellungsseite navigieren
+  Navigate to Downloads: Downloads öffnen
   Navigate to History: Zur Verlaufsseite navigieren
   Stats: Video-Statistiken anzeigen
   Fullscreen: Vollbildmodus umschalten
@@ -2287,10 +2292,17 @@ Downloads:
   Choose Folder: Ändern
   System Downloads Folder: Downloads-Ordner des Systems
   Processing: Verarbeitung läuft…
+  Queued: In Warteschlange
+  Queued Position: 'Position in Warteschlange: {position}'
+  Paused: Pausiert
+  Pausing: Der aktuelle Auftrag wird abgeschlossen, dann wird die Warteschlange pausiert
   Download Complete: Download abgeschlossen
   Download Cancelled: Download abgebrochen
   Download Failed: Download fehlgeschlagen
   File Name Shortened: Der Dateiname wurde gekürzt, weil der Videotitel zu lang war.
+  Insufficient Disk Space: Nicht genügend Speicherplatz. Ungefähr {required} werden benötigt und {available} sind verfügbar.
+  Unknown Download Size: Die Downloadgröße ist unbekannt. Auf dem Zieldateisystem sind {available} verfügbar.
+  Disk Space Check Unavailable: Der verfügbare Speicherplatz konnte vor Beginn dieses Downloads nicht geprüft werden.
   Cancel Download: Download abbrechen
   yt-dlp Not Found: yt-dlp wurde nicht gefunden. Installiere es oder lege den Pfad in den Download-Einstellungen fest.
   Download Complete Template: Download von „{title}“ ist abgeschlossen
@@ -2305,7 +2317,9 @@ Downloads:
   Downloads: Downloads
   Download Playlist: Wiedergabeliste herunterladen
   Downloading: Wird heruntergeladen
+  Queue: Warteschlange
   Downloaded: Heruntergeladen
+  Canceled: Abgebrochen
   Open Downloads: Downloads öffnen
   No Downloads: Noch keine Downloads
   No Downloads Description: Gestartete Downloads erscheinen hier.
@@ -2314,6 +2328,13 @@ Downloads:
   Show in Folder: Im Ordner anzeigen
   Play Download: Download wiedergeben
   Retry Download: Download erneut versuchen
+  Pause Download: Download pausieren
+  Resume Download: Download fortsetzen
+  Move Earlier: Nach vorne verschieben
+  Move Later: Nach hinten verschieben
+  Pause All: Alle pausieren
+  Resume All: Alle fortsetzen
+  Retry All: Alle fehlgeschlagenen Downloads erneut versuchen
   Total Size: 'Gesamtgröße: {size}'
   Local File: Lokale Datei
   Available Offline: Offline verfügbar

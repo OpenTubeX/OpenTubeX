@@ -5,6 +5,7 @@ import {
   compareQueuedDownloads,
   normalizeDownloadBandwidth,
   normalizeDownloadConcurrency,
+  updatePendingDownloadStatuses,
 } from '../../src/main/downloadQueue.js'
 
 test('normalizes download queue limits', () => {
@@ -24,4 +25,22 @@ test('sorts queued downloads by position', () => {
     { id: 4, queuePosition: 1 },
   ]
   assert.deepEqual(downloads.sort(compareQueuedDownloads).map(download => download.id), [2, 4, 1, 3])
+})
+
+test('updates only pending download statuses when pausing and resuming the queue', () => {
+  const records = new Map([
+    [1, { id: 1, status: 'queued' }],
+    [2, { id: 2, status: 'paused' }],
+    [3, { id: 3, status: 'completed' }],
+  ])
+  const pendingIds = [1, 2, 3]
+
+  assert.deepEqual(updatePendingDownloadStatuses(records, pendingIds, 'paused'), [records.get(1)])
+  assert.equal(records.get(1).status, 'paused')
+  assert.equal(records.get(3).status, 'completed')
+
+  assert.deepEqual(updatePendingDownloadStatuses(records, pendingIds, 'queued'), [records.get(1), records.get(2)])
+  assert.equal(records.get(1).status, 'queued')
+  assert.equal(records.get(2).status, 'queued')
+  assert.equal(records.get(3).status, 'completed')
 })
