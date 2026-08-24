@@ -651,7 +651,7 @@ async function runCleanup(action) {
       break
     case 'playback-caches':
       await Promise.all([
-        invalidateAllYtDlpPlaybackSources(),
+        requireCleanupSuccess(invalidateAllYtDlpPlaybackSources()),
         requireCleanupSuccess(window.ftElectron.storage.clear('player-cache'))
       ])
       break
