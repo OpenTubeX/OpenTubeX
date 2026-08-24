@@ -1,0 +1,263 @@
+.commandPaletteBackdrop {
+  align-items: flex-start;
+  animation: command-palette-backdrop-enter 120ms ease-out;
+  background: rgb(0 0 0 / 68%);
+  block-size: 100%;
+  box-sizing: border-box;
+  display: flex;
+  inline-size: 100%;
+  inset: 0;
+  justify-content: center;
+  padding-block: min(14vh, 120px) 24px;
+  padding-inline: 16px;
+  position: fixed;
+  z-index: 10002;
+}
+
+:global(body.playerFullWindow) .commandPaletteBackdrop {
+  z-index: 1002;
+}
+
+.commandPalette {
+  animation: command-palette-enter 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: var(--card-bg-color);
+  border: 1px solid var(--divider-color);
+  border-radius: calc(12px * var(--ui-roundness));
+  box-shadow: 0 24px 64px rgb(0 0 0 / 50%);
+  color: var(--primary-text-color);
+  display: flex;
+  flex-direction: column;
+  inline-size: min(680px, 100%);
+  max-block-size: min(680px, calc(100vh - min(14vh, 120px) - 48px));
+  min-block-size: 260px;
+  overflow: hidden;
+}
+
+.commandPaletteHeader {
+  align-items: center;
+  border-block-end: 1px solid var(--divider-color);
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  gap: 4px;
+  padding-block: 12px;
+  padding-inline: 14px 8px;
+}
+
+.commandPaletteClose {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  block-size: 40px;
+  inline-size: 40px;
+  justify-content: center;
+}
+
+.commandPaletteClose:hover,
+.commandPaletteClose:focus-visible {
+  background: var(--side-nav-hover-color);
+}
+
+.commandPaletteSearch {
+  align-items: center;
+  background: color-mix(in srgb, var(--card-bg-color) 88%, var(--primary-text-color));
+  border: 1px solid var(--divider-color);
+  border-radius: calc(8px * var(--ui-roundness));
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 20px minmax(0, 1fr);
+  padding-inline: 12px;
+}
+
+.commandPaletteSearch:focus-within {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 1px var(--accent-color);
+}
+
+.commandPaletteSearch input {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  min-block-size: 46px;
+  min-inline-size: 0;
+  outline: 0;
+  padding: 0;
+}
+
+.commandPaletteSearch input::placeholder {
+  color: var(--secondary-text-color);
+}
+
+.commandPaletteResults {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.commandPaletteResultsContent {
+  padding-block: 6px 10px;
+}
+
+.commandPaletteGroup h3 {
+  color: var(--secondary-text-color);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-block: 10px 4px;
+  margin-inline: 0;
+  padding-inline: 18px;
+  text-transform: uppercase;
+}
+
+.commandPaletteOption {
+  align-items: center;
+  cursor: pointer;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  margin-inline: 6px;
+  min-block-size: 48px;
+  padding-block: 6px;
+  padding-inline: 12px;
+}
+
+.commandPaletteOption.selected {
+  background: var(--side-nav-hover-color);
+  border-radius: calc(7px * var(--ui-roundness));
+}
+
+.commandPaletteOption:not(.disabled):active {
+  background: color-mix(in srgb, var(--side-nav-hover-color) 82%, var(--primary-text-color));
+}
+
+.commandPaletteOption.disabled {
+  color: var(--secondary-text-color);
+  cursor: default;
+}
+
+.commandPaletteOptionIcon {
+  font-size: 16px;
+  justify-self: center;
+}
+
+.commandPaletteOptionIconImage {
+  block-size: 20px;
+  border-radius: 50%;
+  inline-size: 20px;
+  justify-self: center;
+  object-fit: cover;
+}
+
+.commandPaletteOptionProfileIcon {
+  block-size: 20px;
+  font-size: 12px;
+  inline-size: 20px;
+  justify-self: center;
+}
+
+.commandPaletteOptionText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.commandPaletteOptionText > span,
+.commandPaletteOptionText small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.commandPaletteOptionText small {
+  color: var(--secondary-text-color);
+  font-size: 12px;
+}
+
+.commandPaletteOptionMatch {
+  font-weight: 700;
+}
+
+kbd {
+  background: color-mix(in srgb, var(--card-bg-color) 78%, var(--primary-text-color));
+  border: 1px solid var(--divider-color);
+  border-radius: calc(4px * var(--ui-roundness));
+  color: var(--secondary-text-color);
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1;
+  min-inline-size: 20px;
+  padding-block: 4px;
+  padding-inline: 6px;
+  text-align: center;
+}
+
+.commandPaletteEmpty {
+  color: var(--secondary-text-color);
+  margin-block: 48px;
+  text-align: center;
+}
+
+.commandPaletteFooter {
+  border-block-start: 1px solid var(--divider-color);
+  color: var(--secondary-text-color);
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  font-size: 11px;
+  gap: 14px;
+  padding-block: 9px;
+  padding-inline: 18px;
+}
+
+.commandPaletteFooter span {
+  align-items: center;
+  display: inline-flex;
+  gap: 4px;
+}
+
+.visuallyHidden {
+  block-size: 1px;
+  clip-path: inset(50%);
+  inline-size: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+}
+
+@keyframes command-palette-backdrop-enter {
+  from { opacity: 0; }
+}
+
+@keyframes command-palette-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.985);
+  }
+}
+
+:global(:root[data-reduced-motion='reduce']) .commandPaletteBackdrop,
+:global(:root[data-reduced-motion='reduce']) .commandPalette {
+  animation: none;
+}
+
+@media only screen and (width <= 520px) {
+  .commandPaletteBackdrop {
+    padding-block-start: 12px;
+    padding-inline: 8px;
+  }
+
+  .commandPalette {
+    max-block-size: calc(100vh - 24px);
+  }
+
+  .commandPaletteFooter {
+    display: none;
+  }
+}

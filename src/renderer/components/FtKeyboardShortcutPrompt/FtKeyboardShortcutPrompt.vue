@@ -212,6 +212,7 @@ const generalAppShortcuts = computed(() => getLocalizedShortcutNamesAndValues(
   configuredKeyboardShortcuts.value.APP.GENERAL,
   ['APP', 'GENERAL'],
   [
+    'OPEN_COMMAND_PALETTE',
     'SHOW_SHORTCUTS',
     'HISTORY_BACKWARD',
     'HISTORY_FORWARD',
@@ -319,6 +320,7 @@ const hasModifiedKeyboardShortcuts = computed(() => shortcutColumns.value.some(c
 
 const localizedShortcutNameToShortcutsMappings = computed(() => {
   return [
+    [t('CommandPalette.Open'), ['OPEN_COMMAND_PALETTE']],
     [t('KeyboardShortcutPrompt.Show Keyboard Shortcuts'), ['SHOW_SHORTCUTS']],
     [t('KeyboardShortcutPrompt.History Backward'), [
       'HISTORY_BACKWARD',

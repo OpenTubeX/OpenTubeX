@@ -54,7 +54,7 @@
         </p>
       </router-link>
       <router-link
-        v-if=" SUPPORTS_LOCAL_API && trendingVisible"
+        v-if="trendingVisible"
         class="navOption"
         :title="$t('Trending.Trending')"
         :aria-label="hideLabelsSideBar ? $t('Trending.Trending') : null"
@@ -182,6 +182,7 @@ import { computed, ref, onMounted, onBeforeUnmount, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
 
 import store from '../../store/index'
+import { isMostPopularAvailable, isTrendingAvailable } from '../../helpers/navigationAvailability'
 
 const SUPPORTS_LOCAL_API = process.env.SUPPORTS_LOCAL_API
 
@@ -192,7 +193,11 @@ const menuRef = useTemplateRef('menuRef')
 /** @type {import('vue').ComputedRef<boolean>} */
 const trendingVisible = computed(() => {
   return !store.getters.getHideTrendingVideos &&
-    (store.getters.getBackendFallback || store.getters.getBackendPreference === 'local')
+    isTrendingAvailable({
+      supportsLocalApi: !!SUPPORTS_LOCAL_API,
+      backendPreference: store.getters.getBackendPreference,
+      backendFallback: store.getters.getBackendFallback,
+    })
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -203,7 +208,10 @@ const hideLabelsSideBar = computed(() => {
 /** @type {import('vue').ComputedRef<boolean>} */
 const popularVisible = computed(() => {
   return !store.getters.getHidePopularVideos &&
-    (store.getters.getBackendFallback || store.getters.getBackendPreference === 'invidious')
+    isMostPopularAvailable({
+      backendPreference: store.getters.getBackendPreference,
+      backendFallback: store.getters.getBackendFallback,
+    })
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */

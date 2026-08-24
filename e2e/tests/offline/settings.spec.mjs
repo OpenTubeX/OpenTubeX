@@ -9,6 +9,7 @@ import {
   goTo,
   goToSettingsSection,
   latestSettings,
+  openNewWindowFromTabBar,
   recordAnimations,
   sel,
   waitForAppReady
@@ -3612,10 +3613,7 @@ test.describe('sync settings', () => {
   })
 
   test('stops an active sync in another window when sync is disabled', async ({ app, page }) => {
-    const [otherWindow] = await Promise.all([
-      app.electronApp.waitForEvent('window'),
-      page.locator('.topNav .navNewWindowButton').click()
-    ])
+    const otherWindow = await openNewWindowFromTabBar(app, page)
     await waitForAppReady(otherWindow)
 
     let finishSyncRequest

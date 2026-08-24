@@ -277,6 +277,7 @@ const SyncEvents = {
 const DefaultKeyboardShortcuts = {
   APP: {
     GENERAL: {
+      OPEN_COMMAND_PALETTE: 'ctrl+K',
       SHOW_SHORTCUTS: 'shift+?',
       HISTORY_BACKWARD: 'alt+arrowleft',
       HISTORY_FORWARD: 'alt+arrowright',

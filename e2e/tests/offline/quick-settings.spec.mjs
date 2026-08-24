@@ -1,6 +1,20 @@
 import { test, expect } from '../../helpers/app.mjs'
 
 test.describe('quick settings menu', () => {
+  test('opens the command palette from the header action', async ({ page }) => {
+    await page.locator('.profileTrigger').click()
+    const menu = page.getByRole('dialog', { name: 'Quick settings' })
+    const shortcut = menu.getByRole('button', { name: 'Open command palette' })
+
+    await expect(shortcut).toBeVisible()
+    await expect(shortcut).toHaveClass(/commandPaletteShortcut/)
+    await expect(shortcut.locator('[data-icon="terminal"]')).toBeVisible()
+    await expect(menu.locator('.menuLinks').getByRole('button', { name: 'Open command palette' })).toHaveCount(0)
+
+    await shortcut.click()
+    await expect(page.getByRole('dialog', { name: 'Command palette' })).toBeVisible()
+  })
+
   test('fits a maximized 1080p window and spaces both sliders consistently', async ({ app, page }) => {
     await app.electronApp.evaluate(({ BrowserWindow }) => {
       BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 1920, height: 1080 })

@@ -1,13 +1,25 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, waitForAppReady } from '../../helpers/app.mjs'
+import { openNewWindowFromTabBar, test, expect, waitForAppReady } from '../../helpers/app.mjs'
 
-test('the new window button opens a second working window', async ({ app, page }) => {
-  const [newWindow] = await Promise.all([
-    app.electronApp.waitForEvent('window'),
-    page.locator('.topNav .navNewWindowButton').click()
-  ])
+test('new windows move from the app header to the tab bar context menu', async ({ app, page }) => {
+  await expect(page.locator('.topNav .navNewWindowButton')).toHaveCount(0)
+
+  await page.locator('.newTabButton').click({ button: 'right' })
+  await expect(page.getByRole('menuitem', { name: 'New Window', exact: true })).toBeVisible()
+  await page.keyboard.press('Escape')
+
+  const viewportBounds = await page.locator('.tabsViewport').boundingBox()
+  if (!viewportBounds) throw new Error('Tab viewport was not found')
+  const newWindowPromise = app.electronApp.waitForEvent('window')
+  await page.mouse.click(
+    viewportBounds.x + viewportBounds.width - 4,
+    viewportBounds.y + viewportBounds.height / 2,
+    { button: 'right' }
+  )
+  await page.getByRole('menuitem', { name: 'New Window', exact: true }).click()
+  const newWindow = await newWindowPromise
 
   await waitForAppReady(newWindow)
 
@@ -21,10 +33,7 @@ async function openSecondWindowWithTwoTabs(app, page) {
   const existingWindowIds = await app.electronApp.evaluate(({ BrowserWindow }) => (
     BrowserWindow.getAllWindows().map(window => window.id)
   ))
-  const [newWindow] = await Promise.all([
-    app.electronApp.waitForEvent('window'),
-    page.locator('.topNav .navNewWindowButton').click()
-  ])
+  const newWindow = await openNewWindowFromTabBar(app, page)
   await waitForAppReady(newWindow)
   await newWindow.locator('.newTabButton').click()
 

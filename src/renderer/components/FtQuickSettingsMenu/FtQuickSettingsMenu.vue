@@ -95,10 +95,6 @@
         <template v-else>
           <div
             class="profileHeaderRow"
-            :class="{
-              hasTwoShortcuts: showDownloadsShortcut && showSettingsShortcut,
-              hasNoShortcuts: !showDownloadsShortcut && !showSettingsShortcut
-            }"
           >
             <button
               type="button"
@@ -115,6 +111,15 @@
                 <small>{{ t('Settings.Quick Settings.Profile Selector Hint') }}</small>
               </span>
               <FtIcon :icon="['fas', 'angle-right']" />
+            </button>
+            <button
+              type="button"
+              class="quickSettingsShortcut commandPaletteShortcut"
+              :aria-label="t('CommandPalette.Open')"
+              :title="t('CommandPalette.Open')"
+              @click="openCommandPalette"
+            >
+              <FtIcon :icon="['fas', 'terminal']" />
             </button>
             <button
               v-if="showDownloadsShortcut"
@@ -340,10 +345,9 @@ import {
   THUMBNAIL_SIZE_STEP
 } from '../../constants/thumbnailSize'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
-import { showToast } from '../../helpers/utils'
 import { getFirstCharacter } from '../../helpers/strings'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { MAIN_PROFILE_ID } from '../../../constants'
+import { switchActiveProfile, translateProfileName as getTranslatedProfileName } from '../../helpers/profileSwitching'
 import { customThemeValue, isCustomThemeValue } from '../../../customTheme'
 
 const { locale, t } = useI18n()
@@ -634,17 +638,11 @@ function closeMenu() {
 }
 
 function translateProfileName(profile) {
-  return profile._id === MAIN_PROFILE_ID ? t('Profile.All Channels') : profile.name
+  return getTranslatedProfileName(profile, t)
 }
 
 function setActiveProfile(profile) {
-  if (profile._id !== activeProfile.value._id) {
-    store.commit('setActiveProfile', profile._id)
-    showToast({
-      message: t('Profile.{profile} is now the active profile', { profile: translateProfileName(profile) }),
-      icon: ['fas', 'user-check']
-    })
-  }
+  switchActiveProfile(store, profile, t)
   menuOpen.value = false
 }
 
@@ -705,6 +703,11 @@ function openDownloads() {
 function openKeyboardShortcuts() {
   menuOpen.value = false
   store.dispatch('showKeyboardShortcutPrompt')
+}
+
+function openCommandPalette() {
+  menuOpen.value = false
+  window.dispatchEvent(new CustomEvent('opentubex:open-command-palette'))
 }
 
 function openAbout() {

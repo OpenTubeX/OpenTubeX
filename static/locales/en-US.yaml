@@ -2001,6 +2001,7 @@ Context Menu:
   Blue: Blue
   Purple: Purple
   New Tab: New Tab
+  New Window: New Window
   Reopen Closed Tab: Reopen Closed Tab
   Reload Tab: Reload Tab
   Reload Tabs: Reload Tabs
@@ -2346,6 +2347,44 @@ KeyboardShortcutPrompt:
   End: Seek to the end of the video
   Skip to Next Video: Skip to the next video in a playlist or next recommended video
   Skip to Previous Video: Skip to the previous video in a playlist
+CommandPalette:
+  Title: Command palette
+  Open: Open command palette
+  Search Label: Search commands
+  Search Placeholder: Search commands and settings…
+  Results: Commands
+  No Results: No matching commands
+  Result Count: 1 command found | {count} commands found
+  Move: Move
+  Run: Run
+  Keys:
+    Up: ↑
+    Down: ↓
+    Enter: Enter
+    Escape: Esc
+  Switch to Tab: 'Switch to tab: {title}'
+  Switch Profile: 'Switch profile: {name}'
+  Open Playlist: 'Open playlist: {name}'
+  Cancel Download: 'Cancel download: {title}'
+  Groups:
+    App: App
+    Navigation: Navigation
+    Settings: Settings
+    Tabs: Tabs
+    Profiles: Profiles
+    Playlists: Playlists
+    Downloads: Downloads
+    Playback: Playback
+  Unavailable:
+    Current Page: Already on this page
+    No History: No page in this direction
+    Desktop: Only available in the desktop app
+    Build: Not available in this build
+    One Tab: Open another tab first
+    Active Tab: This is the active tab
+    Active Profile: This is the active profile
+    Download Finished: This download is no longer running
+    Video: Open a video first
 Downloads:
   Downloads: Downloads
   Download: Download

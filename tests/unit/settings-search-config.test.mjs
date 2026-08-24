@@ -9,6 +9,7 @@ import {
   SETTINGS_SEARCH_SOURCES,
   SETTINGS_SEARCH_SELECT_GROUP_LABELS,
 } from '../../src/renderer/helpers/settings-search-config.js'
+import { createSettingsSearchIndex } from '../../src/renderer/helpers/settingsSearch.js'
 
 const locale = loadYaml(await readFile(
   new URL('../../static/locales/en-US.yaml', import.meta.url),
@@ -81,4 +82,46 @@ test('settings search excludes values that only exist in hidden controls', () =>
     SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS['sponsor-block']
       .has('Generated SponsorBlock User ID Copy Button')
   )
+})
+
+test('shared settings search index includes only settings available on this platform', () => {
+  const store = {
+    getters: new Proxy({
+      getBaseTheme: 'dark',
+      getDefaultCaptionSettings: '{}',
+      getSystemDarkTheme: 'dark',
+      getSystemLightTheme: 'light',
+    }, {
+      get(target, key) {
+        return target[key] ?? false
+      }
+    })
+  }
+  const sections = [{
+    type: 'appearance',
+    title: locale.Settings.Categories.Appearance,
+    description: locale.Settings.Categories['Appearance Description'],
+  }]
+  const options = {
+    sections,
+    tm: path => getAtPath(locale, path),
+    store,
+    supportsLocalApi: true,
+    isMac: false,
+    isLinuxWayland: false,
+    systemUsesDarkTheme: true,
+  }
+
+  const desktopValues = createSettingsSearchIndex({
+    ...options,
+    usingElectron: true,
+  }).get('appearance')
+  const webValues = createSettingsSearchIndex({
+    ...options,
+    usingElectron: false,
+  }).get('appearance')
+
+  assert.ok(desktopValues.includes('Show thumbnail previews'))
+  assert.ok(desktopValues.includes('UI Scale'))
+  assert.ok(!webValues.includes('UI Scale'))
 })
