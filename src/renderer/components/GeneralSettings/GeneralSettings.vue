@@ -156,6 +156,16 @@
       />
       <FtSelect
         v-if="mode === 'appearance'"
+        :placeholder="t('Settings.General Settings.Playlist View Type.Playlist View Type')"
+        :value="playlistViewType"
+        setting-key="playlistViewType"
+        :select-names="viewTypeNames"
+        :select-values="VIEW_TYPE_VALUES"
+        :icon="playlistViewType === 'grid' ? ['fas', 'grip'] : ['fas', 'list']"
+        @change="updatePlaylistViewType"
+      />
+      <FtSelect
+        v-if="mode === 'appearance'"
         :placeholder="t('Settings.General Settings.Thumbnail Preference.Thumbnail Preference')"
         :value="thumbnailPreference"
         setting-key="thumbnailPreference"
@@ -619,6 +629,16 @@ const listType = computed(() => store.getters.getListType)
  */
 function updateListType(value) {
   store.dispatch('updateListType', value)
+}
+
+/** @type {import('vue').ComputedRef<'grid' | 'list'>} */
+const playlistViewType = computed(() => store.getters.getPlaylistViewType)
+
+/**
+ * @param {'grid' | 'list'} value
+ */
+function updatePlaylistViewType(value) {
+  store.dispatch('updatePlaylistViewType', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
