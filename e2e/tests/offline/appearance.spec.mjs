@@ -29,15 +29,16 @@ async function enableVerticalTabBar (page, width) {
 }
 
 async function expectHorizontalGap (left, right, expectedGap) {
-  const [leftBox, rightBox] = await Promise.all([
-    left.boundingBox(),
-    right.boundingBox()
-  ])
+  await expect.poll(async () => {
+    const [leftBox, rightBox] = await Promise.all([
+      left.boundingBox(),
+      right.boundingBox()
+    ])
 
-  expect(leftBox).not.toBeNull()
-  expect(rightBox).not.toBeNull()
-  expect(Math.abs(leftBox.y - rightBox.y)).toBeLessThan(1)
-  expect(Math.abs(rightBox.x - leftBox.x - leftBox.width - expectedGap)).toBeLessThanOrEqual(1)
+    return leftBox !== null && rightBox !== null &&
+      Math.abs(leftBox.y - rightBox.y) < 1 &&
+      Math.abs(rightBox.x - leftBox.x - leftBox.width - expectedGap) <= 1
+  }).toBe(true)
 }
 
 async function expectChangeMarkerClearOfPreviousSelect (left, right) {
