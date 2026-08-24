@@ -1141,6 +1141,44 @@ test.describe('video downloads', () => {
     ])
   })
 
+  test('warns when a subtitle playlist contains a shortened video title', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'long-subtitle-playlist-title-yt-dlp.sh')
+    const argumentsFile = path.join(app.userDataDir, 'long-subtitle-playlist-title-arguments.txt')
+    const longTitle = '界'.repeat(80)
+    const metadataLine = `__OPENTUBEX_METADATA__:${JSON.stringify('eeeeeeeeeee')}\t${JSON.stringify(longTitle)}\tnull`
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf '%s\\n' "$@" > ${argumentsFile}`,
+      `printf '%s\\n' '${metadataLine}'`,
+      'printf "[info] Writing video subtitles to: /tmp/subtitles.en.srt\\n"'
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoIds: ['eeeeeeeeeee'],
+      isPlaylist: true,
+      title: 'Subtitle playlist with a long title',
+      mode: 'subtitles',
+      subtitleFormat: 'srt'
+    }))
+    await expect.poll(() => page.evaluate(async (id) => {
+      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)
+    }, result.id)).toMatchObject({
+      status: 'completed',
+      titleTruncated: true
+    })
+    const passedArguments = (await readFile(argumentsFile, 'utf8')).split('\n')
+    expect(passedArguments).toContain('video:__OPENTUBEX_METADATA__:%(id)j\t%(title)j\t%(thumbnail)j')
+
+    await goTo(page, 'downloads')
+    const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Subtitle playlist with a long title' })
+    await expect(downloadRow.getByText('The file name was shortened because the video title was too long.')).toBeVisible()
+  })
+
   test('keeps the source subtitle destination when conversion fails', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
     const attemptMarker = path.join(app.userDataDir, 'subtitle-retry-attempted')

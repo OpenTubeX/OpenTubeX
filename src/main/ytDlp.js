@@ -1935,7 +1935,7 @@ async function startYtDlpDownload(
     '--print',
     `after_move:${FINAL_PATH_PREFIX}%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(filepath)s`,
     '--print',
-    `after_move:${FINAL_METADATA_PREFIX}%(id)j\t%(title)j\t%(thumbnail)j`
+    `${subtitlesOnly ? 'video' : 'after_move'}:${FINAL_METADATA_PREFIX}%(id)j\t%(title)j\t%(thumbnail)j`
   ]
 
   if (!isRemotePlaylist) {
