@@ -19,7 +19,6 @@ export function createSettingsSearchIndex(options) {
   const {
     sections,
     tm,
-    usingElectron,
   } = options
   const extraValues = {
     privacy: flattenSettingsSearchMessageValues(
@@ -35,22 +34,34 @@ export function createSettingsSearchIndex(options) {
     const values = [...new Set([
       section.title,
       section.description,
-      ...sources.filter(source => !source.electronOnly || usingElectron).flatMap(source => (
-        flattenSettingsSearchMessageValues(
-          tm(source.key),
-          SETTINGS_SEARCH_SELECT_GROUP_LABELS[source.type],
-          [],
-          (path, value) => (
-            (source.include === undefined || source.include.has(path[0])) &&
-            (source.exclude === undefined || !source.exclude.has(path[0])) &&
-            isSearchableSettingsMessage(source.type, path, value, options)
-          )
-        )
-      )),
+      ...sources.flatMap(source => getSettingsSearchSourceValues(source, options)),
       ...(extraValues[section.type] ?? [])
     ])]
     return [section.type, values]
   }))
+}
+
+export function findSettingsSearchTab(sectionType, label, options) {
+  const normalizedLabel = normalizeSettingsSearchText(label, options.locale)
+  return SETTINGS_SEARCH_SOURCES[sectionType]?.find(source => (
+    source.tab !== undefined &&
+    getSettingsSearchSourceValues(source, options)
+      .some(value => normalizeSettingsSearchText(value, options.locale) === normalizedLabel)
+  ))?.tab
+}
+
+function getSettingsSearchSourceValues(source, options) {
+  if (source.electronOnly && !options.usingElectron) return []
+  return flattenSettingsSearchMessageValues(
+    options.tm(source.key),
+    SETTINGS_SEARCH_SELECT_GROUP_LABELS[source.type],
+    [],
+    (path, value) => (
+      (source.include === undefined || source.include.has(path[0])) &&
+      (source.exclude === undefined || !source.exclude.has(path[0])) &&
+      isSearchableSettingsMessage(source.type, path, value, options)
+    )
+  )
 }
 
 function isSearchableSettingsMessage(sectionType, path, value, options) {

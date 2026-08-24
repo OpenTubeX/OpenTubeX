@@ -389,6 +389,7 @@ import {
 import { initializePlatformInfo, isLinuxWayland } from '../../helpers/platform'
 import {
   createSettingsSearchIndex,
+  findSettingsSearchTab,
   normalizeSettingsSearchText,
   removeRedundantSettingsSearchMatches,
 } from '../../helpers/settingsSearch'
@@ -1042,11 +1043,16 @@ async function openSearchResult(sectionType, label) {
   await nextTick()
 
   const normalizedLabel = normalizeSearchText(label.trim())
-  const searchTab = SETTINGS_SEARCH_SOURCES[sectionType]?.find(source => (
-    source.tab !== undefined &&
-    getSettingsSearchSourceValues(source)
-      .some(value => normalizeSearchText(value) === normalizedLabel)
-  ))?.tab
+  const searchTab = findSettingsSearchTab(sectionType, label, {
+    tm,
+    store,
+    usingElectron: USING_ELECTRON,
+    supportsLocalApi: SUPPORTS_LOCAL_API,
+    isMac: IS_MAC,
+    isLinuxWayland: isLinuxWayland.value,
+    systemUsesDarkTheme: systemUsesDarkTheme.value,
+    locale: locale.value,
+  })
   if (searchTab) {
     await activeSettingsSectionRef.value?.activateTab(searchTab)
     await nextTick()
