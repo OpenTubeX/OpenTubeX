@@ -224,6 +224,19 @@ test('keeps the unsupported active-pause fallback resumable', async ({ app, page
   await expect.poll(() => readFile(startsFile, 'utf8')).toContain(`${resumedVideoId}\n`)
   await writeFile(path.join(app.userDataDir, `release-${resumedVideoId}`), '')
 
+  const [resumeAllActive] = await submitDownloads(page, [
+    { videoId: 'ppppppppppp', title: 'Resume-all fallback download', mode: 'video' },
+  ])
+  await expect.poll(() => readFile(startsFile, 'utf8')).toContain('ppppppppppp\n')
+  await pauseWithoutProcessSupport(resumeAllActive.id)
+  await goTo(page, 'downloads')
+  await clickUntil(page, page.getByRole('button', { name: 'Resume all' }), async () => (
+    (await page.evaluate(async id => (
+      (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+    ), resumeAllActive.id)) === 'downloading'
+  ))
+  await writeFile(path.join(app.userDataDir, 'release-ppppppppppp'), '')
+
   const [completedPause] = await submitDownloads(page, [
     { videoId: 'ooooooooooo', title: 'Completed fallback pause', mode: 'video' },
   ])

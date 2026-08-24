@@ -2841,6 +2841,9 @@ export async function handleYtDlpQueueAction(event, action) {
         entry.paused = false
         record.status = 'downloading'
         broadcastDownloadStatus(record)
+      } else if (entry && record.status === 'pausing') {
+        record.status = 'downloading'
+        broadcastDownloadStatus(record)
       } else if (record.status === 'paused') {
         persistedPaused.push(record)
       }
