@@ -196,6 +196,7 @@ let runningDownloadCount = 0
 let persistedDownloadQueueRestorePromise = null
 let shuttingDownDownloads = false
 let downloadQueuePaused = false
+let downloadQueuePauseAllRequested = false
 
 /** @type {Map<number, { child: import('node:child_process').ChildProcess, cancelled: boolean, paused: boolean, restarting: boolean, restartStatus: 'queued' | 'paused' }>} */
 const activeDownloads = new Map()
@@ -302,7 +303,6 @@ async function drainDownloadQueue() {
 
     const resolve = queuedDownloadWaiters.get(next.id)
     queuedDownloadWaiters.delete(next.id)
-    individuallyResumedDownloadIds.delete(next.id)
     runningDownloadCount++
     resolve?.(true)
   }
@@ -2242,24 +2242,9 @@ async function startYtDlpDownload(
     }
   }
 
-  // Keep post-processing inputs away from completed files with the same title
-  // and video ID. Put the isolated directory beside the completed files so a
-  // sandbox's capacity-limited runtime directory does not hold the media data.
-  // Audio extraction otherwise reuses and then deletes an existing video file
-  // when both variants have the same source extension.
-  let temporaryDownloadFolder
-  try {
-    temporaryDownloadFolder = await mkdtemp(join(downloadFolder, '.opentubex-download-'))
-  } catch {
-    // Let yt-dlp report an unavailable destination through the tracked job.
-    temporaryDownloadFolder = await mkdtemp(join(app.getPath('temp'), 'opentubex-download-'))
-  }
-  args.push('--paths', `temp:${temporaryDownloadFolder}`)
-
   // Authorization and executable setup contain awaits, so another refresh can
   // start the same video after the initial fast-path check above.
   if (payload.automatic === true && isSingleVideo && hasAutomaticDownloadRecord(payload.videoId)) {
-    await rm(temporaryDownloadFolder, { recursive: true, force: true })
     return { skipped: 'already-downloaded' }
   }
 
@@ -2318,9 +2303,31 @@ async function startYtDlpDownload(
   onQueued?.({ id })
 
   if (!await waitForDownloadSlot(id)) {
-    await rm(temporaryDownloadFolder, { recursive: true, force: true })
     return { id }
   }
+
+  // Keep post-processing inputs away from completed files with the same title
+  // and video ID. Put the isolated directory beside the completed files so a
+  // sandbox's capacity-limited runtime directory does not hold the media data.
+  // Audio extraction otherwise reuses and then deletes an existing video file
+  // when both variants have the same source extension.
+  let temporaryDownloadFolder
+  try {
+    temporaryDownloadFolder = await mkdtemp(join(downloadFolder, '.opentubex-download-'))
+  } catch {
+    try {
+      temporaryDownloadFolder = await mkdtemp(join(app.getPath('temp'), 'opentubex-download-'))
+    } catch (error) {
+      individuallyResumedDownloadIds.delete(id)
+      status.status = 'failed'
+      status.errorMessage = error.code === 'ENOENT' ? 'ENOENT' : error.message
+      sendStatus(true)
+      releaseDownloadSlot()
+      await saveDownloadRecords()
+      return { id }
+    }
+  }
+  args.push('--paths', `temp:${temporaryDownloadFolder}`)
 
   try {
     const fileSystem = await statfs(downloadFolder)
@@ -2328,6 +2335,7 @@ async function startYtDlpDownload(
     if (status.estimatedSizeBytes === undefined) {
       status.spaceWarning = 'unknown-estimate'
     } else if (status.availableSpaceBytes < status.estimatedSizeBytes) {
+      individuallyResumedDownloadIds.delete(id)
       status.status = 'failed'
       status.errorMessage = 'INSUFFICIENT_SPACE'
       sendStatus(true)
@@ -2341,13 +2349,22 @@ async function startYtDlpDownload(
   }
 
   async function abortQueuedPreparation() {
+    individuallyResumedDownloadIds.delete(id)
     releaseDownloadSlot()
     await rm(temporaryDownloadFolder, { recursive: true, force: true })
     await saveDownloadRecords()
     return { id }
   }
 
-  if (status.status !== 'queued') return abortQueuedPreparation()
+  function queuedPreparationWasInterrupted() {
+    if (status.status !== 'queued') return true
+    if (!downloadQueuePaused || individuallyResumedDownloadIds.has(id)) return false
+    status.status = 'paused'
+    sendStatus(true)
+    return true
+  }
+
+  if (queuedPreparationWasInterrupted()) return abortQueuedPreparation()
 
   const bandwidthLimit = normalizeDownloadBandwidth(
     (await settings._findOne('ytDlpDownloadBandwidthLimit'))?.value
@@ -2358,8 +2375,9 @@ async function startYtDlpDownload(
     ))
     args.push('--limit-rate', `${bandwidthShare}K`)
   }
-  if (status.status !== 'queued') return abortQueuedPreparation()
+  if (queuedPreparationWasInterrupted()) return abortQueuedPreparation()
 
+  individuallyResumedDownloadIds.delete(id)
   status.status = 'downloading'
   status.started = true
   const child = spawn(executable, args, { windowsHide: true })
@@ -2746,11 +2764,19 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
       record.status = 'downloading'
     } else if (record.status === 'paused') {
       if (!queuedDownloadWaiters.has(id)) {
-        return restartPersistedDownload(event, record, true)
+        const result = await restartPersistedDownload(event, record, true)
+        return Boolean(result && 'id' in result)
       }
       resumePendingDownload(record, individuallyResumedDownloadIds, downloadQueuePaused)
     } else if (record.status === 'pausing') {
       record.status = 'downloading'
+      const anotherDownloadIsPausing = [...downloadRecords.values()]
+        .some(download => download.id !== id && download.status === 'pausing')
+      if (!downloadQueuePauseAllRequested && !anotherDownloadIsPausing) {
+        downloadQueuePaused = false
+        individuallyResumedDownloadIds.clear()
+        setPendingDownloadStatus('queued')
+      }
     } else {
       return false
     }
@@ -2788,6 +2814,7 @@ export async function handleYtDlpQueueAction(event, action) {
   }
   if (action === 'pause-all') {
     downloadQueuePaused = true
+    downloadQueuePauseAllRequested = true
     individuallyResumedDownloadIds.clear()
     setPendingDownloadStatus('paused')
     for (const [id, entry] of activeDownloads) {
@@ -2803,6 +2830,7 @@ export async function handleYtDlpQueueAction(event, action) {
     }
   } else if (action === 'resume-all') {
     downloadQueuePaused = false
+    downloadQueuePauseAllRequested = false
     individuallyResumedDownloadIds.clear()
     setPendingDownloadStatus('queued')
     const persistedPaused = []

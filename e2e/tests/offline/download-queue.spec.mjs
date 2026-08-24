@@ -1,4 +1,4 @@
-import { chmod, readFile, writeFile } from 'node:fs/promises'
+import { chmod, readFile, readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, goTo } from '../../helpers/app.mjs'
@@ -87,6 +87,7 @@ test('controls queue order, running jobs, bandwidth, and retry-all', async ({ ap
   await chmod(executable, 0o755)
   await configureQueue(page, {
     ytDlpPath: executable,
+    ytDlpDownloadFolderPath: app.userDataDir,
     ytDlpMaxConcurrentDownloads: 1,
     ytDlpDownloadBandwidthLimit: '900',
   })
@@ -101,6 +102,9 @@ test('controls queue order, running jobs, bandwidth, and retry-all', async ({ ap
   const results = await submitDownloads(page, payloads)
   expect(results.every(result => Number.isInteger(result?.id))).toBe(true)
   await expect.poll(() => readFile(startsFile, 'utf8').catch(() => '')).toBe('aaaaaaaaaaa\n')
+  await expect.poll(async () => (
+    (await readdir(app.userDataDir)).filter(name => name.startsWith('.opentubex-download-')).length
+  )).toBe(1)
 
   await goTo(page, 'downloads')
   const first = page.locator('.downloadRow').filter({ hasText: 'First queued download' })
@@ -168,7 +172,7 @@ test('controls queue order, running jobs, bandwidth, and retry-all', async ({ ap
   await expect(completed).not.toContainText('Download complete')
 })
 
-test('keeps the unsupported active-pause fallback resumable after completion', async ({ app, page }) => {
+test('keeps the unsupported active-pause fallback resumable', async ({ app, page }) => {
   const executable = path.join(app.userDataDir, 'fallback-pause-yt-dlp.sh')
   const startsFile = path.join(app.userDataDir, 'fallback-pause-starts.txt')
   await writeFile(executable, [
@@ -181,30 +185,54 @@ test('keeps the unsupported active-pause fallback resumable after completion', a
   await chmod(executable, 0o755)
   await configureQueue(page, { ytDlpPath: executable, ytDlpMaxConcurrentDownloads: 1 })
 
+  const originalPlatform = await app.electronApp.evaluate(() => process.platform)
+  async function pauseWithoutProcessSupport(id) {
+    await app.electronApp.evaluate((_electron, platform) => {
+      Object.defineProperty(process, 'platform', { configurable: true, value: platform })
+    }, 'win32')
+    try {
+      await expect.poll(async () => {
+        await page.bringToFront()
+        return page.evaluate(downloadId => window.ftElectron.ytDlpControlDownload(downloadId, 'pause'), id)
+      }).toBe(true)
+    } finally {
+      await app.electronApp.evaluate((_electron, platform) => {
+        Object.defineProperty(process, 'platform', { configurable: true, value: platform })
+      }, originalPlatform)
+    }
+  }
+
   const [active] = await submitDownloads(page, [
     { videoId: 'kkkkkkkkkkk', title: 'Fallback active download', mode: 'video' },
   ])
   await expect.poll(() => readFile(startsFile, 'utf8').catch(() => '')).toBe('kkkkkkkkkkk\n')
 
-  const originalPlatform = await app.electronApp.evaluate(() => process.platform)
-  await app.electronApp.evaluate((_electron, platform) => {
-    Object.defineProperty(process, 'platform', { configurable: true, value: platform })
-  }, 'win32')
-  try {
-    await expect.poll(async () => {
-      await page.bringToFront()
-      return page.evaluate(id => window.ftElectron.ytDlpControlDownload(id, 'pause'), active.id)
-    }).toBe(true)
-  } finally {
-    await app.electronApp.evaluate((_electron, platform) => {
-      Object.defineProperty(process, 'platform', { configurable: true, value: platform })
-    }, originalPlatform)
-  }
-
-  await writeFile(path.join(app.userDataDir, 'release-kkkkkkkkkkk'), '')
+  await pauseWithoutProcessSupport(active.id)
+  await expect.poll(async () => {
+    await page.bringToFront()
+    return page.evaluate(id => window.ftElectron.ytDlpControlDownload(id, 'resume'), active.id)
+  }).toBe(true)
+  const resumedVideoId = 'nnnnnnnnnnn'
+  const [resumedPending] = await submitDownloads(page, [
+    { videoId: resumedVideoId, title: 'Pending after fallback resume', mode: 'video' },
+  ])
   await expect.poll(() => page.evaluate(async id => (
     (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
-  ), active.id)).toBe('completed')
+  ), resumedPending.id)).toBe('queued')
+
+  await writeFile(path.join(app.userDataDir, 'release-kkkkkkkkkkk'), '')
+  await expect.poll(() => readFile(startsFile, 'utf8')).toContain(`${resumedVideoId}\n`)
+  await writeFile(path.join(app.userDataDir, `release-${resumedVideoId}`), '')
+
+  const [completedPause] = await submitDownloads(page, [
+    { videoId: 'ooooooooooo', title: 'Completed fallback pause', mode: 'video' },
+  ])
+  await expect.poll(() => readFile(startsFile, 'utf8')).toContain('ooooooooooo\n')
+  await pauseWithoutProcessSupport(completedPause.id)
+  await writeFile(path.join(app.userDataDir, 'release-ooooooooooo'), '')
+  await expect.poll(() => page.evaluate(async id => (
+    (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+  ), completedPause.id)).toBe('completed')
 
   await submitDownloads(page, [
     { videoId: 'lllllllllll', title: 'Fallback paused download', mode: 'video' },
@@ -213,7 +241,7 @@ test('keeps the unsupported active-pause fallback resumable after completion', a
   const paused = page.locator('.downloadRow').filter({ hasText: 'Fallback paused download' })
   await expect(paused).toContainText('Paused')
   await clickUntil(page, page.getByRole('button', { name: 'Resume all' }), async () => (
-    await readFile(startsFile, 'utf8').catch(() => '') === 'kkkkkkkkkkk\nlllllllllll\n'
+    (await readFile(startsFile, 'utf8').catch(() => '')).endsWith('lllllllllll\n')
   ))
   await writeFile(path.join(app.userDataDir, 'release-lllllllllll'), '')
 })
