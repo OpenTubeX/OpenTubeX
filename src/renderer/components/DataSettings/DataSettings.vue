@@ -1446,7 +1446,7 @@ async function importPlaylists() {
     // however we want to limit the possibility of malicious data being sent
     // to the app, so we'll only grab the data we need here.
 
-    if (!isJsonObject(playlistData)) {
+    if (!isJsonObject(playlistData) || !Array.isArray(playlistData.videos)) {
       const message = t('Settings.Data Settings.Playlist insufficient data', { playlist: '' })
       showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
       return
@@ -1463,6 +1463,10 @@ async function importPlaylists() {
       } else if (key === 'videos') {
         const videoArray = []
         playlistData.videos.forEach((video) => {
+          if (!isJsonObject(video)) {
+            return
+          }
+
           const videoPropertyKeys = Object.keys(video)
           const videoObjectHasAllRequiredKeys = requiredVideoKeys.every((k) => videoPropertyKeys.includes(k))
 

@@ -65,6 +65,15 @@ function playlistRecord(_id) {
   }
 }
 
+function playlistVideo(videoId) {
+  return {
+    lengthSeconds: 60,
+    timeAdded: 1,
+    title: videoId,
+    videoId
+  }
+}
+
 function searchRecord(_id, lastUpdatedAt) {
   return { _id, lastUpdatedAt }
 }
@@ -124,10 +133,23 @@ test('line-delimited playlists keep valid rows around a malformed row', async ({
   page.on('pageerror', error => pageErrors.push(error.message))
   const dataSection = await goToSettingsSection(page, 'data')
 
-  await mockImportFile(page, 'issue-866-playlists.db', lineDelimitedFixture(
-    playlistRecord('issue866-playlist-a'),
-    playlistRecord('issue866-playlist-b')
-  ))
+  const playlistWithInvalidVideo = playlistRecord('issue866-playlist-mixed-videos')
+  playlistWithInvalidVideo.videos = [null, playlistVideo('issue866-playlist-video')]
+  const content = [
+    JSON.stringify(playlistRecord('issue866-playlist-a')),
+    ' \t ',
+    '',
+    '{"broken":',
+    JSON.stringify(playlistWithInvalidVideo),
+    JSON.stringify({
+      _id: 'issue866-playlist-invalid-videos',
+      playlistName: 'issue866-playlist-invalid-videos',
+      videos: null
+    }),
+    JSON.stringify(playlistRecord('issue866-playlist-b'))
+  ].join('\r\n')
+
+  await mockImportFile(page, 'issue-866-playlists.db', content)
   await dataSection.getByRole('button', { name: 'Import playlists', exact: true }).click()
 
   await expectRowError(page)
@@ -136,11 +158,21 @@ test('line-delimited playlists keep valid rows around a malformed row', async ({
   })).toBeVisible()
   await expect.poll(() => page.evaluate(() => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    return store.getters.getAllPlaylists
-      .map(({ _id }) => _id)
-      .filter(id => id.startsWith('issue866-playlist-'))
-      .sort()
-  })).toEqual(['issue866-playlist-a', 'issue866-playlist-b'])
+    const playlists = store.getters.getAllPlaylists
+      .filter(({ _id }) => _id.startsWith('issue866-playlist-'))
+    const mixedPlaylist = playlists.find(({ _id }) => _id === 'issue866-playlist-mixed-videos')
+    return {
+      ids: playlists.map(({ _id }) => _id).sort(),
+      mixedVideoIds: mixedPlaylist?.videos.map(({ videoId }) => videoId)
+    }
+  })).toEqual({
+    ids: [
+      'issue866-playlist-a',
+      'issue866-playlist-b',
+      'issue866-playlist-mixed-videos'
+    ],
+    mixedVideoIds: ['issue866-playlist-video']
+  })
   expect(pageErrors).toEqual([])
 })
 
