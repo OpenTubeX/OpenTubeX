@@ -286,6 +286,34 @@ test('reports cleanup rejection instead of success', async ({ app, page }) => {
   await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
 })
 
+test('reports rejected download record cleanup', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ ipcMain }, channels) => {
+    ipcMain.removeHandler(channels.STORAGE_GET_USAGE)
+    ipcMain.handle(channels.STORAGE_GET_USAGE, () => ({
+      downloadRecords: 1024,
+      otherProfileData: 0,
+      profileTotal: 1024
+    }))
+    ipcMain.removeHandler(channels.YT_DLP_LIST_DOWNLOADS)
+    ipcMain.handle(channels.YT_DLP_LIST_DOWNLOADS, () => [{
+      id: 'finished-download',
+      status: 'completed',
+      sizeBytes: 1024
+    }])
+    ipcMain.removeHandler(channels.YT_DLP_CLEAR_DOWNLOADS)
+    ipcMain.handle(channels.YT_DLP_CLEAR_DOWNLOADS, () => false)
+  }, IpcChannels)
+
+  const storage = await goToSettingsSection(page, 'storage')
+  await storage.getByRole('button', { name: 'Clear download history records' }).click()
+  await page.getByRole('dialog', { name: 'Clear all finished download records?' })
+    .getByRole('button', { name: 'Clear records' })
+    .click()
+
+  await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
+  await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
+})
+
 test('reports rejected yt-dlp playback cleanup', async ({ app, page }) => {
   await app.electronApp.evaluate(({ ipcMain }, channels) => {
     ipcMain.removeHandler(channels.STORAGE_GET_USAGE)

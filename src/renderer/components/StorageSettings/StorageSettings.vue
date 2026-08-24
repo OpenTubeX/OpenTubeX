@@ -633,7 +633,7 @@ async function runCleanup(action) {
   switch (action) {
     case 'download-records': {
       const ids = finishedDownloads.value.map(download => download.id)
-      await window.ftElectron.ytDlpClearDownloads(ids)
+      await requireCleanupSuccess(window.ftElectron.ytDlpClearDownloads(ids))
       ids.forEach(id => store.commit('removeYtDlpDownload', id))
       break
     }
