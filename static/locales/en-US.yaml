@@ -858,6 +858,7 @@ Settings:
     Remember Volume: Remember Volume
     Skip Silence: Skip Silence
     Show Skip Silence Toggle: Show Skip Silence Toggle
+    Enable Skip Silence by Default: Enable Skip Silence by Default
     Enable Video Zoom: Enable Video Zoom
     Voice-over Translation:
       Title: Voice-over translation
@@ -2122,6 +2123,7 @@ Tooltips:
     Use YouTube-style Shorts: Displays Shorts in a portrait grid on subscription and channel pages and uses the YouTube-style Shorts player.
     Loop Shorts: When enabled, Shorts restart automatically. When disabled, Shorts stop at the end and show a replay button.
     Show Skip Silence Toggle: Shows an on/off toggle for skipping silence in the player's settings menu.
+    Enable Skip Silence by Default: Enables silence skipping for new tabs. Changing it in one tab does not affect other tabs.
     Enable Video Zoom: Shows the Zoom control in the player's settings menu and enables its keyboard shortcuts and panning controls.
     Voice-over Translation: Sends the video ID, duration, and selected language to the unofficial Yandex voice-over translation service when you request a translation. Disabled by default.
     Hold to Double Playback Speed: Hold the Spacebar or left mouse button over the player to temporarily double the current playback speed.

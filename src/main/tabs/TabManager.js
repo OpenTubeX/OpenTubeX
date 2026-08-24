@@ -44,6 +44,10 @@ const VALID_TAB_CLOSE_FOCUS = new Set(['previousTab', 'nextTab'])
 // Closing a tab has to pick the replacement synchronously, so the preference is
 // cached here instead of being read from the settings store on every close.
 let tabCloseFocus = DEFAULT_TAB_CLOSE_FOCUS
+// Tab creation is also synchronous after its placement preferences have loaded.
+// Cache whether silence skipping should start enabled for newly-created tabs.
+let enableSkipSilenceByDefault = false
+let showSkipSilenceButton = false
 const VALID_TAB_COLORS = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'purple'])
 const TAB_PREVIEW_REFRESH_DELAY_MS = 700
 const TAB_PREVIEW_CAPTURE_STYLE_ID = 'opentubex-tab-preview-capture-style'
@@ -141,6 +145,36 @@ export class TabManager {
       TabManager.setTabCloseFocus((await baseHandlers.settings._findOne('tabCloseFocus'))?.value)
     } catch (error) {
       console.error('Failed to load tab close focus preference:', error)
+    }
+  }
+
+  /**
+   * @param {unknown} value
+   */
+  static setEnableSkipSilenceByDefault(value) {
+    enableSkipSilenceByDefault = value === true
+  }
+
+  /**
+   * @param {unknown} value
+   */
+  static setShowSkipSilenceButton(value) {
+    showSkipSilenceButton = value === true
+  }
+
+  /**
+   * @returns {Promise<void>}
+   */
+  static async refreshStoredSkipSilenceSettings() {
+    try {
+      const [showButtonSetting, defaultSetting] = await Promise.all([
+        baseHandlers.settings._findOne('showSkipSilenceButton'),
+        baseHandlers.settings._findOne('enableSkipSilenceByDefault')
+      ])
+      TabManager.setShowSkipSilenceButton(showButtonSetting?.value)
+      TabManager.setEnableSkipSilenceByDefault(defaultSetting?.value)
+    } catch (error) {
+      console.error('Failed to load skip silence preferences:', error)
     }
   }
 
@@ -930,6 +964,7 @@ export class TabManager {
       history = null,
       historyIndex = null,
       persistHistory = history != null,
+      skipSilence = showSkipSilenceButton && enableSkipSilenceByDefault,
       openerTabId = this.activeTabId,
       _deferUpdates = false
     } = options
@@ -974,7 +1009,7 @@ export class TabManager {
       previewFileName: restoredPreviewFileName,
       previewCaptureTimeoutId: null,
       previewCapturePromise: null,
-      skipSilence: false,
+      skipSilence: skipSilence === true,
       loadState: startsUnloaded ? 'unloaded' : 'mounting',
       preloadInBackground: Boolean(preloadInBackground),
       pendingActivation: false,
@@ -3170,9 +3205,11 @@ export async function setupTabsIPC(options = {}) {
     mediaSessionStateChanged = () => {}
   } = options
 
-  // Loaded before the first window exists, so a tab can never be closed while
-  // the preference still holds its default.
-  await TabManager.refreshStoredTabCloseFocus()
+  // Load synchronous tab-lifecycle preferences before the first window exists.
+  await Promise.all([
+    TabManager.refreshStoredTabCloseFocus(),
+    TabManager.refreshStoredSkipSilenceSettings()
+  ])
 
   const getManager = event => TabManager.getFromWebContents(event.sender)
 
@@ -3243,6 +3280,8 @@ export async function setupTabsIPC(options = {}) {
       openerTabId,
       // Never let a renderer choose the internal tab id; it is always generated.
       id,
+      // Silence skipping starts from the main-owned default, not renderer input.
+      skipSilence,
       ...tabOptions
     } = options != null && typeof options === 'object' ? options : {}
 

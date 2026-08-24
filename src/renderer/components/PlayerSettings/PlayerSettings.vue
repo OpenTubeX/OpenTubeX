@@ -36,6 +36,15 @@
           @change="updateShowSkipSilenceButton"
         />
         <FtToggleSwitch
+          :label="t('Settings.Player Settings.Enable Skip Silence by Default')"
+          :compact="true"
+          :disabled="!showSkipSilenceButton"
+          :default-value="enableSkipSilenceByDefault"
+          setting-key="enableSkipSilenceByDefault"
+          :tooltip="t('Tooltips.Player Settings.Enable Skip Silence by Default')"
+          @change="updateEnableSkipSilenceByDefault"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Player Settings.Enable Video Zoom')"
           :compact="true"
           :default-value="enableVideoZoom"
@@ -588,6 +597,16 @@ const showSkipSilenceButton = computed(() => store.getters.getShowSkipSilenceBut
  */
 function updateShowSkipSilenceButton(value) {
   store.dispatch('updateShowSkipSilenceButton', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const enableSkipSilenceByDefault = computed(() => store.getters.getEnableSkipSilenceByDefault)
+
+/**
+ * @param {boolean} value
+ */
+function updateEnableSkipSilenceByDefault(value) {
+  store.dispatch('updateEnableSkipSilenceByDefault', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

@@ -4353,6 +4353,12 @@ function runApp() {
             case 'tabCloseFocus':
               TabManager.setTabCloseFocus(data.value)
               break
+            case 'showSkipSilenceButton':
+              TabManager.setShowSkipSilenceButton(data.value)
+              break
+            case 'enableSkipSilenceByDefault':
+              TabManager.setEnableSkipSilenceByDefault(data.value)
+              break
             case 'hideToTrayOnMinimize':
               if (isTrayOnMinimizeSupported) {
                 trayOnMinimize = data.value
