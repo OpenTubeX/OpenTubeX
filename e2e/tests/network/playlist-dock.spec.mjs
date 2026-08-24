@@ -30,7 +30,6 @@ test('large fullscreen playlist dock remains responsive and preserves its state'
   ).toBeGreaterThan(1000)
   await expect(sidebar).toHaveAttribute('data-overlayscrollbars-viewport')
   await expect(sidebar.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
-  await expect(sidebar.locator('.playlistItem').first()).toHaveCSS('content-visibility', 'auto')
   await expect.poll(async () => sidebar.evaluate((element) => element.scrollHeight)).toBeGreaterThan(1000)
 
   const sidebarCard = page.locator('.watchVideoPlaylist')

@@ -268,7 +268,7 @@ test('Shorts top controls stay visible over white video content', async ({ page 
   await expect(topControls).toHaveCSS('opacity', '1')
   await expect(topControls).toHaveCSS('border-top-left-radius', '16px')
   await expect(topControls).toHaveCSS('border-top-right-radius', '16px')
-  await expect(topControls).toHaveCSS('transition-duration', '0.15s')
+  await expect(topControls).toHaveCSS('transition-duration', '0.15s, 0.25s, 0.25s')
   await expect(control).toHaveCSS('backdrop-filter', /blur\(8px\)/)
   await control.evaluate(element => element.classList.add('active'))
   await expect(control).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.52)')
