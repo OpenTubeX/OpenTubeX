@@ -24,3 +24,10 @@ export function updatePendingDownloadStatuses(records, pendingIds, status) {
   }
   return updated
 }
+
+export function resumePendingDownload(record, pendingIds, individuallyResumedIds, queuePaused) {
+  if (record?.status !== 'paused' || !pendingIds.has(record.id)) return false
+  record.status = 'queued'
+  if (queuePaused) individuallyResumedIds.add(record.id)
+  return true
+}

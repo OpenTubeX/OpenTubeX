@@ -16,6 +16,7 @@ import {
   compareQueuedDownloads,
   normalizeDownloadBandwidth,
   normalizeDownloadConcurrency,
+  resumePendingDownload,
   updatePendingDownloadStatuses,
 } from './downloadQueue'
 
@@ -2580,13 +2581,23 @@ function queueYtDlpDownload(
   })
 }
 
-async function restartPersistedDownload(event, record) {
+async function restartPersistedDownload(event, record, resumeIndividually = false) {
   if (!record?.retryPayload) return { error: 'download-not-resumable' }
   downloadRecords.delete(record.id)
   const result = await queueYtDlpDownload(event, record.retryPayload, true, record.automatic === true, true)
   if (result && 'id' in result) {
+    const restartedRecord = downloadRecords.get(result.id)
+    if (resumeIndividually && resumePendingDownload(
+      restartedRecord,
+      queuedDownloadWaiters,
+      individuallyResumedDownloadIds,
+      downloadQueuePaused
+    )) {
+      broadcastDownloadStatus(restartedRecord)
+    }
     broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, [record.id])
     await saveDownloadRecords()
+    if (resumeIndividually) await requestDownloadQueueDrain()
     return result
   }
   record.status = 'failed'
@@ -2722,11 +2733,15 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
       entry.child.kill('SIGCONT')
       entry.paused = false
       record.status = 'downloading'
-    } else if (record.status === 'paused' && queuedDownloadWaiters.has(id)) {
-      record.status = 'queued'
-      if (downloadQueuePaused) individuallyResumedDownloadIds.add(id)
     } else if (record.status === 'paused') {
-      return restartPersistedDownload(event, record)
+      if (!resumePendingDownload(
+        record,
+        queuedDownloadWaiters,
+        individuallyResumedDownloadIds,
+        downloadQueuePaused
+      )) {
+        return restartPersistedDownload(event, record, true)
+      }
     } else if (record.status === 'pausing') {
       record.status = 'downloading'
     } else {
