@@ -2239,6 +2239,12 @@ function handleKeyboardShortcuts(event) {
     return
   }
 
+  if (matchesKeyboardShortcut(event, shortcuts.NAVIGATE_TO_DOWNLOADS)) {
+    event.preventDefault()
+    store.dispatch('showSettingsWindow', 'downloads')
+    return
+  }
+
   if (findbarVisible.value && handleFindbarNavigationShortcut(event)) {
     return
   }

@@ -329,6 +329,22 @@ export default {
 
   /**
    * @param {number} id
+   * @param {'pause' | 'resume' | 'move'} action
+   * @param {number} [value]
+   */
+  ytDlpControlDownload: (id, action, value) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_CONTROL_DOWNLOAD, id, action, value)
+  },
+
+  /**
+   * @param {'pause-all' | 'resume-all' | 'retry-all' | 'refresh'} action
+   */
+  ytDlpQueueAction: (action) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_QUEUE_ACTION, action)
+  },
+
+  /**
+   * @param {number} id
    */
   ytDlpOpenDownload: (id) => {
     return ipcRenderer.invoke(IpcChannels.YT_DLP_OPEN_DOWNLOAD, id)

@@ -13,6 +13,7 @@
 }
 
 .downloadsHeader {
+  flex-wrap: wrap;
   gap: 20px;
   justify-content: space-between;
   min-block-size: 40px;
@@ -22,6 +23,14 @@
 .downloadsHeader p {
   color: var(--secondary-text-color);
   margin: 0;
+}
+
+.downloadHeaderActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
 .downloadRow h3,
@@ -73,6 +82,7 @@
 
 .downloadStatus,
 .downloadAvailability,
+.downloadSpaceWarning,
 .downloadSummary,
 .destination {
   color: var(--secondary-text-color);
@@ -85,6 +95,10 @@
 
 .downloadAvailability.missing {
   color: var(--destructive-color);
+}
+
+.downloadSpaceWarning {
+  color: var(--primary-color);
 }
 
 .downloadError {
@@ -157,6 +171,7 @@
   }
 
   .downloadActions {
+    flex-wrap: wrap;
     justify-content: flex-end;
   }
 

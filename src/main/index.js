@@ -44,7 +44,7 @@ import { brotliDecompress } from 'zlib'
 
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
-import { getYtDlpDownloadFile, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetPlaybackInfo, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpRemoveDownload, shutdownYtDlpDownloads } from './ytDlp'
+import { getYtDlpDownloadFile, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetPlaybackInfo, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
 import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
@@ -1727,6 +1727,7 @@ function runApp() {
   let proxyUrl
 
   app.on('ready', async (_, __) => {
+    restoreYtDlpDownloadQueue().catch(error => console.warn('Could not restore the download queue', error))
     if (process.platform === 'darwin') {
       const t = await createMainTranslator()
       dockMediaLabels = {
@@ -4039,6 +4040,8 @@ function runApp() {
   })
 
   ipcMain.on(IpcChannels.YT_DLP_CANCEL_DOWNLOAD, handleYtDlpCancelDownload)
+  ipcMain.handle(IpcChannels.YT_DLP_CONTROL_DOWNLOAD, handleYtDlpControlDownload)
+  ipcMain.handle(IpcChannels.YT_DLP_QUEUE_ACTION, handleYtDlpQueueAction)
   ipcMain.handle(IpcChannels.YT_DLP_LIST_DOWNLOADS, handleYtDlpListDownloads)
   ipcMain.handle(IpcChannels.YT_DLP_CLEAR_DOWNLOADS, handleYtDlpClearDownloads)
   ipcMain.handle(IpcChannels.YT_DLP_OPEN_DOWNLOAD, handleYtDlpOpenDownload)
@@ -4396,6 +4399,10 @@ function runApp() {
               } else {
                 updateThemeSource(data.value)
               }
+              break
+            case 'ytDlpMaxConcurrentDownloads':
+            case 'ytDlpDownloadBandwidthLimit':
+              await refreshYtDlpDownloadQueue()
               break
 
             default:
@@ -5428,6 +5435,15 @@ function runApp() {
             label: 'Playlists',
             click: (_menuItem, browserWindow, _event) => {
               navigateTo('/userplaylists', browserWindow)
+            },
+            type: 'normal'
+          },
+          {
+            label: 'Downloads',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_DOWNLOADS),
+            click: (_menuItem, browserWindow, _event) => {
+              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
+              navigateTo('/downloads', browserWindow)
             },
             type: 'normal'
           },

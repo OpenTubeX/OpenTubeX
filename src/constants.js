@@ -139,6 +139,8 @@ const IpcChannels = {
 
   YT_DLP_DOWNLOAD: 'yt-dlp-download',
   YT_DLP_CANCEL_DOWNLOAD: 'yt-dlp-cancel-download',
+  YT_DLP_CONTROL_DOWNLOAD: 'yt-dlp-control-download',
+  YT_DLP_QUEUE_ACTION: 'yt-dlp-queue-action',
   YT_DLP_DOWNLOAD_STATUS: 'yt-dlp-download-status',
   YT_DLP_DOWNLOADS_REMOVED: 'yt-dlp-downloads-removed',
   YT_DLP_LIST_DOWNLOADS: 'yt-dlp-list-downloads',
@@ -288,6 +290,7 @@ const DefaultKeyboardShortcuts = {
       HISTORY_FORWARD_ALT_MAC: 'cmd+]',
       FULLSCREEN: 'f11',
       NAVIGATE_TO_SETTINGS: 'ctrl+,',
+      NAVIGATE_TO_DOWNLOADS: 'ctrl+J',
       NAVIGATE_TO_HISTORY: 'ctrl+H',
       NAVIGATE_TO_HISTORY_MAC: 'cmd+Y',
       NEW_WINDOW: 'ctrl+N',
