@@ -53,6 +53,16 @@
         >
           {{ errorText }}
         </p>
+        <p
+          v-if="download.titleTruncated"
+          class="downloadWarning"
+        >
+          <FtIcon
+            :icon="['fas', 'triangle-exclamation']"
+            aria-hidden="true"
+          />
+          {{ t('Downloads.File Name Shortened') }}
+        </p>
         <DownloadFailureHint v-if="download.status === 'failed'" />
         <ul
           v-if="destinations.length > 0"
@@ -126,6 +136,7 @@
 </template>
 
 <script setup>
+import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import DownloadFailureHint from '../../components/DownloadFailureHint/DownloadFailureHint.vue'

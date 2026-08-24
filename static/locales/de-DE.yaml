@@ -2205,6 +2205,7 @@ Downloads:
   Download Complete: Download abgeschlossen
   Download Cancelled: Download abgebrochen
   Download Failed: Download fehlgeschlagen
+  File Name Shortened: Der Dateiname wurde gekürzt, weil der Videotitel zu lang war.
   Cancel Download: Download abbrechen
   yt-dlp Not Found: yt-dlp wurde nicht gefunden. Installiere es oder lege den Pfad in den Download-Einstellungen fest.
   Download Complete Template: Download von „{title}“ ist abgeschlossen

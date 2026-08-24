@@ -220,6 +220,13 @@
   white-space: pre-wrap;
 }
 
+.downloadWarning {
+  color: var(--primary-color);
+  font-size: 0.9rem;
+  margin-block-end: 0;
+  text-align: center;
+}
+
 @keyframes download-progress-indeterminate {
   50% {
     opacity: 0.4;

@@ -239,6 +239,16 @@
         >
           {{ activeDownload.errorMessage }}
         </p>
+        <p
+          v-if="activeDownload.titleTruncated"
+          class="downloadWarning"
+        >
+          <FtIcon
+            :icon="['fas', 'triangle-exclamation']"
+            aria-hidden="true"
+          />
+          {{ t('Downloads.File Name Shortened') }}
+        </p>
         <DownloadFailureHint v-if="activeDownload.status === 'failed'" />
       </div>
 

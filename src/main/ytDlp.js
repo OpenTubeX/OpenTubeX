@@ -94,6 +94,7 @@ function takeGetInfoAbortSignal(key) {
  * @property {number} [availableDestinationCount]
  * @property {number} [destinationCount]
  * @property {number} [sizeBytes]
+ * @property {boolean} [titleTruncated]
  * @property {string | null} errorMessage
  */
 
@@ -164,6 +165,9 @@ const MERGER_REGEX = /^\[Merger\] Merging formats into "(.+)"$/
 const SUBTITLE_DESTINATION_REGEX = /^\[info\] Writing video subtitles to: (.+)$/
 const FINAL_PATH_PREFIX = '__OPENTUBEX_FILE__:'
 const FINAL_METADATA_PREFIX = '__OPENTUBEX_METADATA__:'
+// yt-dlp's B conversion limits UTF-8 bytes. Leave room for IDs, extensions,
+// format suffixes, and temporary-file suffixes within a 255-byte file name.
+const DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT = 200
 
 let downloadCounter = 0
 let downloadRecordsSaveQueue = Promise.resolve()
@@ -1929,14 +1933,10 @@ async function startYtDlpDownload(
     '--newline',
     '--progress',
     '--print',
-    `after_move:${FINAL_PATH_PREFIX}%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(filepath)s`
+    `after_move:${FINAL_PATH_PREFIX}%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(filepath)s`,
+    '--print',
+    `${subtitlesOnly ? 'video' : 'after_move'}:${FINAL_METADATA_PREFIX}%(id)j\t%(title)j\t%(thumbnail)j`
   ]
-  if (isSingleVideo) {
-    args.push(
-      '--print',
-      `after_move:${FINAL_METADATA_PREFIX}%(id)j\t%(title)j\t%(thumbnail)j`
-    )
-  }
 
   if (!isRemotePlaylist) {
     args.push('--no-playlist')
@@ -1967,6 +1967,7 @@ async function startYtDlpDownload(
   let outputTemplate = typeof payload.filenameTemplate === 'string' && payload.filenameTemplate.trim() !== ''
     ? payload.filenameTemplate.trim()
     : '{title} [{id}].{ext}'
+  const truncatesLongTitles = outputTemplate.includes('{title}')
   let localPlaylistTitle = typeof payload.title === 'string'
     ? payload.title.replaceAll(/[<>:"/\\|?*]/g, '_')
       .split('').map(character => {
@@ -1980,7 +1981,7 @@ async function startYtDlpDownload(
   }
   localPlaylistTitle = localPlaylistTitle.replaceAll('%', '%%')
   const templateFields = {
-    title: '%(title)s',
+    title: `%(title).${DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT}B`,
     author: '%(uploader)s',
     upload_date: '%(upload_date)s',
     id: '%(id)s',
@@ -2162,6 +2163,7 @@ async function startYtDlpDownload(
     destination: null,
     destinations: [],
     files: [],
+    titleTruncated: false,
     errorMessage: null
   }
   downloadRecords.set(id, status)
@@ -2200,12 +2202,18 @@ async function startYtDlpDownload(
         const videoId = JSON.parse(rawVideoId)
         const title = JSON.parse(rawTitle)
         const thumbnail = JSON.parse(rawThumbnail)
+        if (typeof title === 'string' && title !== '') {
+          status.titleTruncated ||= truncatesLongTitles &&
+            Buffer.byteLength(title, 'utf8') > DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT
+        }
         if (videoId === status.videoId) {
-          if (typeof title === 'string' && title !== '') status.title = title.slice(0, 255)
+          if (typeof title === 'string' && title !== '') {
+            status.title = title.slice(0, 255)
+          }
           if (typeof thumbnail === 'string') status.thumbnail = thumbnail.slice(0, 2048)
           else if (thumbnail === null) status.thumbnail = ''
-          sendStatus(true)
         }
+        sendStatus(true)
       } catch {
         // A malformed metadata line must not interfere with the download itself.
       }
