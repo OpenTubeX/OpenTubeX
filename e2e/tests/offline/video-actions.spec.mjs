@@ -221,7 +221,7 @@ test.describe('video downloads', () => {
     await writeFile(executable, [
       '#!/bin/sh',
       `printf '%s\\n' "$@" > "${capturedArgs}"`,
-      'printf \'%s\\n\' \'{"formats":[{"format_id":"140","available_at":123}]}\''
+      'printf \'%s\\n\' \'{"title":"Playback title","formats":[{"format_id":"140","available_at":123}]}\''
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
@@ -240,6 +240,7 @@ test.describe('video downloads', () => {
 
     passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
     expect(passedArguments).not.toContain('--extractor-args')
+    expect(info.title).toBe('Playback title')
     expect(info.formats[0].availableAt).toBe(123)
   })
 

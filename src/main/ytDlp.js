@@ -1270,6 +1270,7 @@ export async function handleYtDlpDownloadBinary(event, binary) {
 /**
  * @typedef YtDlpPlaybackInfo
  * @property {string | null} version the version of yt-dlp that extracted this
+ * @property {string | null} title
  * @property {boolean} isLive
  * @property {'is_live' | 'post_live' | 'was_live' | 'not_live' | 'is_upcoming' | null} liveStatus
  * @property {number | null} duration
@@ -1469,6 +1470,7 @@ export async function handleYtDlpGetPlaybackInfo(
 
   return {
     version: toNonEmptyString(info._version?.version),
+    title: toNonEmptyString(info.title),
     isLive: !!info.is_live,
     liveStatus: toNonEmptyString(info.live_status),
     duration: toFiniteNumber(info.duration),
