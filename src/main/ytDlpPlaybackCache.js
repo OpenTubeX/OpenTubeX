@@ -60,7 +60,8 @@ function isValidEntry(entry) {
     entry.source.manifestMimeType === 'application/dash+xml' &&
     typeof entry.source.manifestSrc === 'string' &&
     entry.source.manifestSrc.startsWith('data:application/dash+xml;') &&
-    Array.isArray(entry.source.legacyFormats)
+    Array.isArray(entry.source.legacyFormats) &&
+    (entry.source.title === null || typeof entry.source.title === 'string')
 }
 
 async function loadEntries() {
@@ -137,6 +138,7 @@ export async function handleYtDlpPlaybackCacheSet(event, videoId, cacheKey, expi
           manifestSrc: source.manifestSrc,
           manifestMimeType: source.manifestMimeType,
           legacyFormats: source.legacyFormats,
+          title: source.title,
           isLive: source.isLive,
           version: source.version
         }
