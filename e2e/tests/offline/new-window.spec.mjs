@@ -6,9 +6,11 @@ import { openNewWindowFromTabBar, test, expect, waitForAppReady } from '../../he
 test('new windows move from the app header to the tab bar context menu', async ({ app, page }) => {
   await expect(page.locator('.topNav .navNewWindowButton')).toHaveCount(0)
 
+  const newWindowMenuItem = page.getByRole('menuitem', { name: 'New Window', exact: true })
   await page.locator('.newTabButton').click({ button: 'right' })
-  await expect(page.getByRole('menuitem', { name: 'New Window', exact: true })).toBeVisible()
+  await expect(newWindowMenuItem).toBeVisible()
   await page.keyboard.press('Escape')
+  await expect(newWindowMenuItem).toBeHidden()
 
   const viewportBounds = await page.locator('.tabsViewport').boundingBox()
   if (!viewportBounds) throw new Error('Tab viewport was not found')
@@ -18,7 +20,7 @@ test('new windows move from the app header to the tab bar context menu', async (
     viewportBounds.y + viewportBounds.height / 2,
     { button: 'right' }
   )
-  await page.getByRole('menuitem', { name: 'New Window', exact: true }).click()
+  await newWindowMenuItem.click()
   const newWindow = await newWindowPromise
 
   await waitForAppReady(newWindow)
