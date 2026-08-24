@@ -348,7 +348,7 @@ import { MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants
 import { resolveBaseTheme } from '../appearanceSettings'
 import { resolveColor } from './helpers/colors'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
-import { keyboardEventInitFromShortcut } from './helpers/commandPalette'
+import { keyboardEventInitFromShortcut, OPEN_COMMAND_PALETTE_EVENT } from './helpers/commandPalette'
 import { createCommandPaletteRegistry } from './helpers/commandPaletteRegistry'
 import { initializePlatformInfo, isLinuxWayland } from './helpers/platform'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
@@ -1085,7 +1085,7 @@ onMounted(async () => {
   setWindowTitle()
 
   document.addEventListener('keydown', handleKeyboardShortcuts)
-  window.addEventListener('opentubex:open-command-palette', openCommandPalette)
+  window.addEventListener(OPEN_COMMAND_PALETTE_EVENT, openCommandPalette)
   document.addEventListener('keyup', handleKeyboardShortcutKeyup)
   document.addEventListener('mousedown', handleMouseDown)
   document.addEventListener('dragstart', handleDragStart)
@@ -1130,7 +1130,7 @@ onBeforeUnmount(() => {
   clearInterval(historyCleanupTimer)
   store.dispatch('stopSyncServerAutoSync')
   document.removeEventListener('keydown', handleKeyboardShortcuts)
-  window.removeEventListener('opentubex:open-command-palette', openCommandPalette)
+  window.removeEventListener(OPEN_COMMAND_PALETTE_EVENT, openCommandPalette)
   document.removeEventListener('keyup', handleKeyboardShortcutKeyup)
   document.removeEventListener('mousedown', handleMouseDown)
   document.removeEventListener('dragstart', handleDragStart)

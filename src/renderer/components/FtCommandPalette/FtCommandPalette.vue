@@ -258,7 +258,7 @@ watch([query, () => props.commands], async () => {
   await nextTick()
   if (resultsRef.value) restoreOverlayScrollTop(resultsRef.value, 0)
   clampResultsScroll()
-}, { deep: true })
+})
 
 watch(selectedIndex, scrollSelectionIntoView)
 

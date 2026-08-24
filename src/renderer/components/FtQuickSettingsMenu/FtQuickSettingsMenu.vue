@@ -338,6 +338,7 @@ import store from '../../store/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
 import { localeTranslationPercentages } from '../../i18n/index'
 import { colors } from '../../helpers/colors'
+import { OPEN_COMMAND_PALETTE_EVENT } from '../../helpers/commandPalette'
 import { useColorTranslations } from '../../composables/colors'
 import {
   MAX_THUMBNAIL_SIZE,
@@ -707,7 +708,7 @@ function openKeyboardShortcuts() {
 
 function openCommandPalette() {
   menuOpen.value = false
-  window.dispatchEvent(new CustomEvent('opentubex:open-command-palette'))
+  window.dispatchEvent(new CustomEvent(OPEN_COMMAND_PALETTE_EVENT))
 }
 
 function openAbout() {

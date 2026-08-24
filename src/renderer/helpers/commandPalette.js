@@ -1,3 +1,5 @@
+export const OPEN_COMMAND_PALETTE_EVENT = 'opentubex:open-command-palette'
+
 /**
  * Normalizes command text without losing words written in non-Latin scripts.
  * @param {string} value
