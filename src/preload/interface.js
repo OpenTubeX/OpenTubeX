@@ -672,6 +672,20 @@ export default {
     }
   },
 
+  storage: {
+    /** @returns {Promise<Record<string, number | null>>} */
+    getUsage: () => ipcRenderer.invoke(IpcChannels.STORAGE_GET_USAGE),
+
+    /**
+     * @param {'http-cache' | 'tab-previews' | 'yt-dlp-playback' | 'player-cache'} category
+     * @returns {Promise<boolean>}
+     */
+    clear: (category) => ipcRenderer.invoke(IpcChannels.STORAGE_CLEAR, category),
+
+    /** @returns {Promise<boolean>} */
+    compactDatabases: () => ipcRenderer.invoke(IpcChannels.STORAGE_COMPACT_DATABASES)
+  },
+
   subscriptionAutoRefresh: {
     /**
      * Atomically claim ownership of the subscription auto refresh.

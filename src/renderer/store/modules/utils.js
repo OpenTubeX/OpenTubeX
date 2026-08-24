@@ -84,6 +84,7 @@ const state = {
   settingsWindowOpen: false,
   settingsWindowMinimized: false,
   settingsWindowMorphing: false,
+  settingsWindowReturnView: null,
   settingsWindowView: null,
   settingsWindowSection: null,
   customThemeEditorOpen: false,
@@ -182,6 +183,10 @@ const getters = {
 
   getSettingsWindowMorphing(state) {
     return state.settingsWindowMorphing
+  },
+
+  getSettingsWindowReturnView(state) {
+    return state.settingsWindowReturnView
   },
 
   getSettingsWindowView(state) {
@@ -418,7 +423,16 @@ const actions = {
 
   showSettingsWindow ({ commit }, view = null) {
     commit('setIsKeyboardShortcutPromptShown', false)
+    commit('setSettingsWindowReturnView', null)
     commit('setSettingsWindowView', view)
+    commit('setSettingsWindowMinimized', false)
+    commit('setSettingsWindowOpen', true)
+  },
+
+  showDownloadsFromSettings ({ commit }) {
+    commit('setIsKeyboardShortcutPromptShown', false)
+    commit('setSettingsWindowReturnView', 'settings')
+    commit('setSettingsWindowView', 'downloads')
     commit('setSettingsWindowMinimized', false)
     commit('setSettingsWindowOpen', true)
   },
@@ -428,12 +442,14 @@ const actions = {
       state.settingsWindowView !== null ||
       state.isKeyboardShortcutPromptShown
     commit('setIsKeyboardShortcutPromptShown', false)
+    commit('setSettingsWindowReturnView', null)
     commit('setSettingsWindowView', null)
     commit('setSettingsWindowMinimized', false)
     commit('setSettingsWindowOpen', open)
   },
 
   hideSettingsWindow ({ commit }) {
+    commit('setSettingsWindowReturnView', null)
     commit('setSettingsWindowMinimized', false)
     commit('setSettingsWindowOpen', false)
   },
@@ -456,6 +472,7 @@ const actions = {
 
   showSettingsWindowRoot ({ commit }) {
     commit('setIsKeyboardShortcutPromptShown', false)
+    commit('setSettingsWindowReturnView', null)
     commit('setSettingsWindowView', null)
   },
 
@@ -904,6 +921,10 @@ const mutations = {
 
   setSettingsWindowMorphing (state, payload) {
     state.settingsWindowMorphing = payload
+  },
+
+  setSettingsWindowReturnView (state, payload) {
+    state.settingsWindowReturnView = payload
   },
 
   setSettingsWindowView (state, payload) {

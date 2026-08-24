@@ -48,8 +48,9 @@ export function invalidateYtDlpPlaybackSource(videoId) {
 
 export function invalidateAllYtDlpPlaybackSources() {
   dashPlaybackSourceCache.clear()
-  window.ftElectron.ytDlpPlaybackCacheClear().catch(error => {
+  return window.ftElectron.ytDlpPlaybackCacheClear().catch(error => {
     console.warn('Could not clear the persistent yt-dlp playback cache', error)
+    return false
   })
 }
 

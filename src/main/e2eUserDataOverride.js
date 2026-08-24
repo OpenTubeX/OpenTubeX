@@ -8,4 +8,5 @@ import { app } from 'electron'
 const userDataPath = process.env.OPENTUBEX_E2E_USER_DATA_DIR ?? process.env.OPENTUBEX_DEV_USER_DATA_DIR
 if (userDataPath) {
   app.setPath('userData', userDataPath)
+  app.setPath('sessionData', userDataPath)
 }

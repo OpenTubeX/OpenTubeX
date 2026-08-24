@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="$t('Settings.Data Settings.Data Settings')"
+    hide-title
   >
     <h4 class="groupTitle">
       {{ $t('Subscriptions.Subscriptions') }}
@@ -106,18 +107,6 @@
         @click="exportSettings"
       />
     </FtFlexBox>
-    <template v-if="isElectron">
-      <h4 class="groupTitle">
-        {{ t('Settings.Data Settings.Profile Directory') }}
-      </h4>
-      <FtFlexBox class="box">
-        <FtButton
-          :label="t('Settings.Data Settings.Open Profile Directory')"
-          :icon="['fas', 'folder-open']"
-          @click="openProfileDirectory"
-        />
-      </FtFlexBox>
-    </template>
     <FtSettingsSubpage
       :open="showExportSubscriptionsPrompt"
       :title="t('Settings.Data Settings.Select Export Type')"
@@ -206,13 +195,7 @@ import { parseLineDelimitedJson } from '../../helpers/line-delimited-json'
 
 const IMPORT_DIRECTORY_ID = 'data-settings-import'
 const START_IN_DIRECTORY = 'downloads'
-const isElectron = process.env.IS_ELECTRON
-
 const { t } = useI18n()
-
-function openProfileDirectory() {
-  window.ftElectron.openProfileDirectory()
-}
 
 function openProfileSettings() {
   store.dispatch('showSettingsWindow', 'profile')

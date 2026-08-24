@@ -4,8 +4,8 @@ test('shows icons on data actions and vertically centers export choices', async 
   const dataSection = await goToSettingsSection(page, 'data')
   const actionButtons = dataSection.locator('.ft-flex-box.box > .btn')
 
-  await expect(actionButtons).toHaveCount(12)
-  await expect.poll(() => actionButtons.locator(':scope > .ft-icon').count()).toBe(12)
+  await expect(actionButtons).toHaveCount(11)
+  await expect.poll(() => actionButtons.locator(':scope > .ft-icon').count()).toBe(11)
 
   await dataSection.getByRole('button', { name: /Export Subscriptions/i }).click()
   const exportChoices = page.locator('.settingsSubpageContent .exportTypeButtons')
@@ -40,9 +40,8 @@ test('opens the profile directory in the file manager', async ({ app }) => {
     }
   })
 
-  const dataSection = await goToSettingsSection(page, 'data')
-  await expect(dataSection.locator('.groupTitle').last()).toHaveText(/Profile directory/i)
-  await dataSection.getByRole('button', { name: /Open Profile Directory/i }).click()
+  const storageSection = await goToSettingsSection(page, 'storage')
+  await storageSection.getByRole('button', { name: /Open Profile Directory/i }).click()
 
   await expect.poll(() => electronApp.evaluate(() => globalThis.openedProfileDirectory))
     .toBe(userDataDir)
@@ -61,7 +60,7 @@ test('does not show a delayed IPC error after opening the profile directory', as
     }
   })
 
-  const dataSection = await goToSettingsSection(page, 'data')
+  const storageSection = await goToSettingsSection(page, 'storage')
   await page.evaluate(() => {
     globalThis.profileDirectoryErrorToastShown = false
     const observer = new MutationObserver(() => {
@@ -72,7 +71,7 @@ test('does not show a delayed IPC error after opening the profile directory', as
     })
     observer.observe(document.body, { childList: true, subtree: true })
   })
-  await dataSection.getByRole('button', { name: /Open Profile Directory/i }).click()
+  await storageSection.getByRole('button', { name: /Open Profile Directory/i }).click()
 
   await expect.poll(() => electronApp.evaluate(() => globalThis.openedProfileDirectory))
     .toBe(userDataDir)

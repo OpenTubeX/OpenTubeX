@@ -68,23 +68,6 @@
     </div>
     <br>
     <FtFlexBox>
-      <FtInput
-        :placeholder="$t('Settings.Privacy Settings.Automatic History Retention Placeholder')"
-        :label="$t('Settings.Privacy Settings.Automatic History Retention')"
-        input-type="number"
-        :value="historyRetentionDaysInput"
-        setting-key="historyRetentionDays"
-        :show-label="true"
-        :allow-action-button-when-empty="true"
-        :force-action-button-icon-name="['fas', 'check']"
-        :tooltip="$t('Settings.Privacy Settings.Automatic History Retention Tooltip')"
-        :disabled="!rememberHistory"
-        @input="historyRetentionDaysInput = $event"
-        @click="saveHistoryRetention"
-      />
-    </FtFlexBox>
-    <br>
-    <FtFlexBox>
       <FtSlider
         :label="$t('Settings.Privacy Settings.Watched Percentage Threshold')"
         :default-value="watchedPercentageThreshold"
@@ -122,80 +105,14 @@
         @change="updateWatchedProgressSavingMode"
       />
     </FtFlexBox>
-    <br>
-    <FtFlexBox>
-      <FtButton
-        :label="$t('Settings.Privacy Settings.Clear Search History and Cache')"
-        theme="destructive"
-        :icon="['fas', 'trash']"
-        @click="showSearchCachePrompt = true"
-      />
-      <FtButton
-        :label="$t('Settings.Privacy Settings.Remove Watch History')"
-        theme="destructive"
-        :icon="['fas', 'trash']"
-        @click="showRemoveHistoryPrompt = true"
-      />
-      <FtButton
-        :label="$t('Settings.Privacy Settings.Remove All Subscriptions / Profiles')"
-        theme="destructive"
-        :icon="['fas', 'trash']"
-        @click="showRemoveSubscriptionsPrompt = true"
-      />
-      <FtButton
-        :label="$t('Settings.Privacy Settings.Remove All Playlists')"
-        theme="destructive"
-        :icon="['fas', 'trash']"
-        @click="showRemovePlaylistsPrompt = true"
-      />
-    </FtFlexBox>
-    <FtPrompt
-      v-if="showSearchCachePrompt"
-      autosize
-      :label="$t('Settings.Privacy Settings.Are you sure you want to clear out your search history and cache?')"
-      :option-names="promptNames"
-      :option-values="PROMPT_VALUES"
-      is-first-option-destructive
-      @click="handleSearchCache"
-    />
-    <FtPrompt
-      v-if="showRemoveHistoryPrompt"
-      autosize
-      :label="$t('Settings.Privacy Settings.Are you sure you want to remove your entire watch history?')"
-      :option-names="promptNames"
-      :option-values="PROMPT_VALUES"
-      is-first-option-destructive
-      @click="handleRemoveHistory"
-    />
-    <FtPrompt
-      v-if="showRemoveSubscriptionsPrompt"
-      autosize
-      :label="removeSubscriptionsPromptMessage"
-      :option-names="promptNames"
-      :option-values="PROMPT_VALUES"
-      is-first-option-destructive
-      @click="handleRemoveSubscriptions"
-    />
-    <FtPrompt
-      v-if="showRemovePlaylistsPrompt"
-      autosize
-      :label="$t('Settings.Privacy Settings.Are you sure you want to remove all your playlists?')"
-      :option-names="promptNames"
-      :option-values="PROMPT_VALUES"
-      is-first-option-destructive
-      @click="handleRemovePlaylists"
-    />
   </FtSettingsSection>
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import FtButton from './FtButton/FtButton.vue'
 import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
-import FtInput from './FtInput/FtInput.vue'
-import FtPrompt from './FtPrompt/FtPrompt.vue'
 import FtSelect from './FtSelect/FtSelect.vue'
 import FtSettingsSection from './FtSettingsSection/FtSettingsSection.vue'
 import FtSlider from './FtSlider/FtSlider.vue'
@@ -203,20 +120,8 @@ import FtToggleSwitch from './FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../store/index'
 
-import { MAIN_PROFILE_ID } from '../../constants'
-import { showToast } from '../helpers/utils'
-
 const { locale, t } = useI18n()
 const USING_ELECTRON = process.env.IS_ELECTRON
-const PROMPT_VALUES = ['delete', 'cancel']
-const promptNames = computed(() => [
-  t('Yes, Delete'),
-  t('Cancel')
-])
-
-const removeSubscriptionsPromptMessage = computed(() => {
-  return t('Settings.Privacy Settings["Are you sure you want to remove all subscriptions and profiles?  This cannot be undone."]')
-})
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const rememberHistory = computed(() => store.getters.getRememberHistory)
@@ -258,41 +163,6 @@ function updateStatsWeekStartsOn(value) {
  */
 function handleRememberHistory(value) {
   store.dispatch('updateRememberHistory', value)
-}
-
-/** @type {import('vue').ComputedRef<string>} */
-const historyRetentionDays = computed(() => store.getters.getHistoryRetentionDays)
-const historyRetentionDaysInput = ref(historyRetentionDays.value)
-
-watch(historyRetentionDays, value => {
-  historyRetentionDaysInput.value = value
-})
-
-function parseDays(value, allowEmpty = false) {
-  if (allowEmpty && value === '') {
-    return ''
-  }
-
-  const days = Number(value)
-  return Number.isInteger(days) && days > 0 ? String(days) : null
-}
-
-async function saveHistoryRetention() {
-  const days = parseDays(historyRetentionDaysInput.value, true)
-  if (days === null) {
-    showToast({
-      message: t('Settings.Privacy Settings.Invalid History Retention Days'),
-      icon: ['fas', 'circle-exclamation'],
-    })
-    return
-  }
-
-  historyRetentionDaysInput.value = days
-  await store.dispatch('updateHistoryRetentionDays', days)
-  if (days !== '') {
-    await store.dispatch('removeHistoryOlderThan', days)
-  }
-  showToast({ message: t('Settings.Privacy Settings.History Retention Saved'), icon: ['fas', 'check'] })
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -380,80 +250,6 @@ function updateWatchedPercentageThreshold(value) {
   store.dispatch('updateWatchedPercentageThreshold', value)
 }
 
-const showSearchCachePrompt = ref(false)
-/**
- * @param {'delete' | 'cancel' | null} option
- */
-function handleSearchCache(option) {
-  showSearchCachePrompt.value = false
-
-  if (option !== 'delete') { return }
-
-  store.dispatch('clearSessionSearchHistory')
-  store.dispatch('removeAllSearchHistoryEntries')
-  showToast({
-    message: t('Settings.Privacy Settings.Search history and cache have been cleared'),
-    icon: ['fas', 'trash'],
-  })
-}
-
-const showRemoveHistoryPrompt = ref(false)
-
-/**
- * @param {'delete' | 'cancel' | null} option
- */
-function handleRemoveHistory(option) {
-  showRemoveHistoryPrompt.value = false
-
-  if (option !== 'delete') { return }
-
-  store.dispatch('removeAllHistory')
-  showToast({ message: t('Settings.Privacy Settings.Watch history has been cleared'), icon: ['fas', 'trash'] })
-}
-
-const showRemoveSubscriptionsPrompt = ref(false)
-
-const profileList = computed(() => store.getters.getProfileList)
-
-/**
- * @param {'delete' | 'cancel' | null} option
- */
-function handleRemoveSubscriptions(option) {
-  showRemoveSubscriptionsPrompt.value = false
-
-  if (option !== 'delete') { return }
-
-  store.dispatch('updateActiveProfile', MAIN_PROFILE_ID)
-
-  profileList.value.forEach((profile) => {
-    if (profile._id === MAIN_PROFILE_ID) {
-      const newProfile = {
-        ...profile,
-        subscriptions: []
-      }
-      store.dispatch('updateProfile', newProfile)
-    } else {
-      store.dispatch('removeProfile', profile._id)
-    }
-  })
-
-  store.dispatch('clearSubscriptionsCache')
-}
-
-const showRemovePlaylistsPrompt = ref(false)
-
-/**
- * @param {'delete' | 'cancel' | null} option
- */
-function handleRemovePlaylists(option) {
-  showRemovePlaylistsPrompt.value = false
-
-  if (option !== 'delete') { return }
-
-  store.dispatch('removeAllPlaylists')
-  store.dispatch('updateQuickBookmarkTargetPlaylistId', 'favorites')
-  showToast({ message: t('Settings.Privacy Settings.All playlists have been removed'), icon: ['fas', 'trash'] })
-}
 </script>
 
 <style scoped>

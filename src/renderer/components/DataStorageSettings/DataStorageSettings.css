@@ -1,0 +1,62 @@
+.dataStorageTabs {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dataStorageTab {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--secondary-text-color);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 8px;
+  justify-content: center;
+  min-block-size: 44px;
+  padding-block: 8px 10px;
+  padding-inline: 12px;
+  position: relative;
+}
+
+.dataStorageTab::after {
+  background: transparent;
+  block-size: 2px;
+  border-radius: 2px;
+  content: '';
+  inset-block-end: 0;
+  inset-inline: 12px;
+  position: absolute;
+}
+
+.dataStorageTab:hover {
+  color: var(--primary-text-color);
+}
+
+.dataStorageTab.selected {
+  color: var(--primary-text-color);
+  font-weight: 600;
+}
+
+.dataStorageTab.selected::after {
+  background: var(--primary-color);
+}
+
+.dataStorageTab:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.dataStorageTab :deep(.ft-icon) {
+  color: currentcolor;
+}
+
+.dataStorageTab.selected :deep(.ft-icon) {
+  color: var(--primary-color);
+}
+
+.dataStoragePanel {
+  min-inline-size: 0;
+}

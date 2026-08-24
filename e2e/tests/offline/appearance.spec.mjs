@@ -610,7 +610,7 @@ test.describe('custom theme editor', () => {
     await expect.poll(async () => (await readSavedThemes(app.userDataDir)).map(({ name }) => name))
       .toEqual(['Midnight'])
     await expect(editor).toHaveCount(0)
-    await goToSettingsSection(page, 'privacy')
+    await goToSettingsSection(page, 'storage')
     const removeHistoryButton = page.getByRole('button', { name: 'Remove Watch History' })
     await expect(removeHistoryButton).toHaveCSS('background-color', 'rgb(18, 58, 188)')
     await expect(removeHistoryButton).toHaveCSS('color', 'rgb(254, 220, 186)')

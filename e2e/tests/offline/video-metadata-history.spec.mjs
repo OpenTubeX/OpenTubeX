@@ -22,22 +22,23 @@ test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
 test('preserves the displayed cache size when clearing fails', async ({ app, page }) => {
   await app.electronApp.evaluate(({ ipcMain }, channels) => {
-    ipcMain.removeHandler(channels.getSize)
-    ipcMain.handle(channels.getSize, () => 1536)
+    ipcMain.removeHandler(channels.getUsage)
+    ipcMain.handle(channels.getUsage, () => ({ videoMetadata: 1536 }))
     ipcMain.removeHandler(channels.clear)
     ipcMain.handle(channels.clear, () => {
       throw new Error('Forced metadata cache clear failure')
     })
   }, {
     clear: IpcChannels.VIDEO_METADATA_CACHE_CLEAR,
-    getSize: IpcChannels.VIDEO_METADATA_CACHE_GET_SIZE
+    getUsage: IpcChannels.STORAGE_GET_USAGE
   })
 
-  const privacySettings = await goToSettingsSection(page, 'privacy')
-  const cacheSize = privacySettings.getByText('Video metadata cache: 1.5 KiB')
+  const storageSettings = await goToSettingsSection(page, 'storage')
+  const metadata = storageSettings.locator('.storageItem').filter({ hasText: 'Metadata history' })
+  const cacheSize = metadata.getByText('1.5 KiB')
   await expect(cacheSize).toBeVisible()
 
-  await privacySettings.getByRole('button', { name: 'Clear Video Metadata Cache' }).click()
+  await metadata.getByRole('button', { name: 'Clear Video Metadata Cache' }).click()
   await page.getByRole('dialog', {
     name: 'Are you sure you want to clear the cached video titles, thumbnails, and descriptions?'
   }).getByRole('button', { name: 'Delete' }).click()
@@ -226,15 +227,16 @@ test('stores and presents every previous metadata version', async ({ app, page }
     await closeButton.click()
     await expect(dialog).toHaveCount(0)
 
-    const privacySettings = await goToSettingsSection(page, 'privacy')
-    await expect(privacySettings.getByRole('checkbox', { name: 'Metadata history' })).toBeChecked()
-    await expect(privacySettings.getByText(/^Video metadata cache: (?!0 B)/)).toBeVisible()
-    await privacySettings.getByRole('button', { name: 'Clear Video Metadata Cache' }).click()
+    const storageSettings = await goToSettingsSection(page, 'storage')
+    const metadata = storageSettings.locator('.storageItem').filter({ hasText: 'Metadata history' })
+    await expect(metadata.getByRole('checkbox', { name: 'Metadata history' })).toBeChecked()
+    await expect(metadata.locator('.storageSize')).not.toHaveText('0 B')
+    await metadata.getByRole('button', { name: 'Clear Video Metadata Cache' }).click()
     await page.getByRole('dialog', {
       name: 'Are you sure you want to clear the cached video titles, thumbnails, and descriptions?'
     }).getByRole('button', { name: 'Delete' }).click()
 
-    await expect(privacySettings.getByText('Video metadata cache: 0 B')).toBeVisible()
+    await expect(metadata.locator('.storageSize')).toHaveText('0 B')
     await expect(historyButton).toHaveCount(0)
   } finally {
     thumbnailServer.close()

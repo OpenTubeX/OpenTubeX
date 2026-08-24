@@ -51,6 +51,10 @@
     "ri": "bookmark-line",
     "material": "bookmark-outline"
   },
+  "box-archive": {
+    "ri": "archive-2-line",
+    "material": "inventory-2-outline"
+  },
   "border-all": {
     "ri": "grid-line",
     "material": "grid-view-outline"
@@ -302,6 +306,10 @@
   "language": {
     "ri": "translate",
     "material": "translate-rounded"
+  },
+  "layer-group": {
+    "ri": "stack-line",
+    "material": "layers-outline"
   },
   "link": {
     "ri": "link",

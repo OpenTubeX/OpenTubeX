@@ -1,0 +1,77 @@
+.storageItem {
+  background: color-mix(in srgb, var(--side-nav-hover-color) 55%, transparent);
+  border: 1px solid var(--side-nav-hover-color);
+  border-radius: calc(6px * var(--ui-roundness));
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  padding: 16px;
+}
+
+.storageItemHeader {
+  align-items: start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.storageItem h4 {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.storageKind {
+  display: block;
+  font-size: 0.85rem;
+  margin-block-start: 3px;
+  opacity: 0.72;
+}
+
+.storageSize {
+  flex: none;
+  white-space: nowrap;
+}
+
+.storageDescription {
+  line-height: 1.4;
+  margin-block: 8px;
+}
+
+.storageLocation {
+  align-items: center;
+  display: flex;
+  gap: 7px;
+  margin-block: 8px 14px;
+  min-inline-size: 0;
+  opacity: 0.8;
+}
+
+.storageLocation code {
+  overflow-wrap: anywhere;
+}
+
+.storageActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-block-start: auto;
+  padding-block-start: 4px;
+}
+
+.storageActions :deep(.btn),
+.storageActions :deep(.switch-ctn),
+.storageActions :deep(.ft-input-component) {
+  margin: 0;
+}
+
+.storageActions :deep(.ft-input-component) {
+  inline-size: min(100%, 360px);
+}
+
+@container settings-content (width <= 430px) {
+  .storageItemHeader {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
