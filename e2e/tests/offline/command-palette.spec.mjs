@@ -62,6 +62,39 @@ test('opens with the configured shortcut and supports accessible fuzzy keyboard 
   await expect(page).toHaveURL(/#\/trending/)
 })
 
+test('clamps the results scroll position after filtering to a shorter list', async ({ page }) => {
+  await page.keyboard.press('Control+k')
+
+  const input = page.getByRole('combobox', { name: 'Search commands' })
+  const results = page.locator('.commandPaletteResults')
+  const scrollbar = results.locator(':scope > .os-scrollbar-vertical')
+
+  await results.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => results.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+  await input.fill('toggle captions on off')
+  await expect(page.getByRole('option')).toHaveCount(1)
+  await expect.poll(() => results.evaluate(element => {
+    const content = element.querySelector('.commandPaletteResultsContent')
+    const contentRect = content.getBoundingClientRect()
+    const viewportRect = element.getBoundingClientRect()
+
+    return {
+      scrollTop: element.scrollTop,
+      hasOverflow: element.scrollHeight > element.clientHeight + 1,
+      contentStartsInViewport: contentRect.top >= viewportRect.top - 1,
+      contentEndsInViewport: contentRect.bottom <= viewportRect.bottom + 1
+    }
+  })).toEqual({
+    scrollTop: 0,
+    hasOverflow: false,
+    contentStartsInViewport: true,
+    contentEndsInViewport: true
+  })
+  await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+})
+
 test('uses arrow keys and opens a specific settings section', async ({ page }) => {
   await page.keyboard.press('Control+k')
   const input = page.getByRole('combobox', { name: 'Search commands' })
