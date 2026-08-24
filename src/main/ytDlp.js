@@ -266,9 +266,12 @@ function broadcastDownloadStatus(record) {
 }
 
 function setPendingDownloadStatus(status) {
+  const pendingIds = status === 'paused'
+    ? [...queuedDownloadWaiters.keys()].filter(id => !individuallyResumedDownloadIds.has(id))
+    : queuedDownloadWaiters.keys()
   const updated = updatePendingDownloadStatuses(
     downloadRecords,
-    queuedDownloadWaiters.keys(),
+    pendingIds,
     status
   )
   for (const record of updated) {
@@ -2558,7 +2561,8 @@ function queueYtDlpDownload(
   payload,
   automaticDownloadAuthorized,
   automaticDiscoveryPreviouslyAuthorized = false,
-  previouslyAccepted = false
+  previouslyAccepted = false,
+  onQueued
 ) {
   return new Promise(resolve => {
     let resolved = false
@@ -2567,12 +2571,16 @@ function queueYtDlpDownload(
       resolved = true
       resolve(result)
     }
+    const resolveQueued = result => {
+      onQueued?.(result)
+      resolveOnce(result)
+    }
     startYtDlpDownload(
       event,
       payload,
       automaticDownloadAuthorized,
       automaticDiscoveryPreviouslyAuthorized,
-      resolveOnce,
+      resolveQueued,
       previouslyAccepted
     ).then(resolveOnce).catch(error => {
       console.error('Could not queue download', error)
@@ -2584,20 +2592,23 @@ function queueYtDlpDownload(
 async function restartPersistedDownload(event, record, resumeIndividually = false) {
   if (!record?.retryPayload) return { error: 'download-not-resumable' }
   downloadRecords.delete(record.id)
-  const result = await queueYtDlpDownload(event, record.retryPayload, true, record.automatic === true, true)
-  if (result && 'id' in result) {
-    const restartedRecord = downloadRecords.get(result.id)
-    if (resumeIndividually && resumePendingDownload(
-      restartedRecord,
-      queuedDownloadWaiters,
-      individuallyResumedDownloadIds,
-      downloadQueuePaused
-    )) {
-      broadcastDownloadStatus(restartedRecord)
+  const result = await queueYtDlpDownload(
+    event,
+    record.retryPayload,
+    true,
+    record.automatic === true,
+    true,
+    queuedResult => {
+      if (!resumeIndividually || !queuedResult || !('id' in queuedResult)) return
+      const restartedRecord = downloadRecords.get(queuedResult.id)
+      if (resumePendingDownload(restartedRecord, individuallyResumedDownloadIds, downloadQueuePaused)) {
+        broadcastDownloadStatus(restartedRecord)
+      }
     }
+  )
+  if (result && 'id' in result) {
     broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, [record.id])
     await saveDownloadRecords()
-    if (resumeIndividually) await requestDownloadQueueDrain()
     return result
   }
   record.status = 'failed'
@@ -2734,14 +2745,10 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
       entry.paused = false
       record.status = 'downloading'
     } else if (record.status === 'paused') {
-      if (!resumePendingDownload(
-        record,
-        queuedDownloadWaiters,
-        individuallyResumedDownloadIds,
-        downloadQueuePaused
-      )) {
+      if (!queuedDownloadWaiters.has(id)) {
         return restartPersistedDownload(event, record, true)
       }
+      resumePendingDownload(record, individuallyResumedDownloadIds, downloadQueuePaused)
     } else if (record.status === 'pausing') {
       record.status = 'downloading'
     } else {

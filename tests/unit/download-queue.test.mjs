@@ -48,10 +48,9 @@ test('updates only pending download statuses when pausing and resuming the queue
 
 test('preserves an individual resume when a restarted download joins a paused queue', () => {
   const record = { id: 5, status: 'paused' }
-  const pendingIds = new Map([[record.id, () => {}]])
   const individuallyResumedIds = new Set()
 
-  assert.equal(resumePendingDownload(record, pendingIds, individuallyResumedIds, true), true)
+  assert.equal(resumePendingDownload(record, individuallyResumedIds, true), true)
   assert.equal(record.status, 'queued')
   assert.deepEqual([...individuallyResumedIds], [record.id])
 })

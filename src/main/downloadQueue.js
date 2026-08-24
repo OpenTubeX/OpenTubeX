@@ -25,8 +25,8 @@ export function updatePendingDownloadStatuses(records, pendingIds, status) {
   return updated
 }
 
-export function resumePendingDownload(record, pendingIds, individuallyResumedIds, queuePaused) {
-  if (record?.status !== 'paused' || !pendingIds.has(record.id)) return false
+export function resumePendingDownload(record, individuallyResumedIds, queuePaused) {
+  if (record?.status !== 'paused') return false
   record.status = 'queued'
   if (queuePaused) individuallyResumedIds.add(record.id)
   return true
