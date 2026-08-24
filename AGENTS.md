@@ -10,3 +10,4 @@
 - New icons must be registered in the icon registry. Custom icons must also provide mappings for every currently supported icon pack: Material and Remix.
 - For icon-pack mapping work (#388): get human confirmation that remapped glyphs fit visually in Material and Remix before considering the mapping done.
 - Never use the "FreeTube" name for promotion of the project (see discussion #391 for details when in doubt).
+- When adding or changing translatable strings, update only the English (`en-US`) and German (`de-DE`) locales. Weblate handles all other translations.

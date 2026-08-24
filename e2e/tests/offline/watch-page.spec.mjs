@@ -38,6 +38,98 @@ for (const { name, options, expectedCount } of [
   })
 }
 
+test.describe('fullscreen ambient mode', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...WATCH_PAGE_SEED,
+        uiScale: 95
+      }
+    }
+  })
+
+  test('stays off without bars and centers letterbox glow beside a dock', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateAmbientMode', true)
+    })
+
+    await setPlayerFullscreen(page, true)
+    const player = page.locator('.ftVideoPlayer')
+    const ambient = player.locator('.ambientFullscreenCanvas')
+    await expect.poll(() => ambient.evaluate(element => Number(getComputedStyle(element).opacity)))
+      .toBe(0)
+
+    await video.evaluate(async (element) => {
+      const source = document.createElement('canvas')
+      source.width = 190
+      source.height = 90
+      source.getContext('2d').fillStyle = '#ff0000'
+      source.getContext('2d').fillRect(0, 0, source.width, source.height)
+
+      const stream = source.captureStream(10)
+      element.srcObject = stream
+      await element.play()
+      window.__ambientModeTestMedia = { source, stream }
+    })
+    await expect.poll(() => video.evaluate(element => [element.videoWidth, element.videoHeight]))
+      .toEqual([190, 90])
+
+    await expect.poll(() => ambient.evaluate(element => Number(getComputedStyle(element).opacity)))
+      .toBeGreaterThan(0)
+    await expect.poll(() => ambient.evaluate((element) => {
+      const [red, green, blue, alpha] = element.getContext('2d').getImageData(40, 22, 1, 1).data
+      return red > 200 && green < 20 && blue < 20 && alpha === 255
+    })).toBe(true)
+
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(component => {
+      component.proxy.$refs.player.setFullscreenMetadata(true)
+    })
+    await expect(page.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
+    await expect.poll(async () => {
+      const [playerBounds, videoBounds] = await Promise.all([
+        player.boundingBox(),
+        video.boundingBox()
+      ])
+      return playerBounds.width - videoBounds.width
+    }).toBeGreaterThan(100)
+    await expect.poll(async () => {
+      const [ambientBounds, videoBounds] = await Promise.all([
+        ambient.boundingBox(),
+        video.boundingBox()
+      ])
+      const ambientCenter = ambientBounds.x + ambientBounds.width / 2
+      const videoCenter = videoBounds.x + videoBounds.width / 2
+      return Math.abs(ambientCenter - videoCenter)
+    }).toBeLessThanOrEqual(1)
+
+    await player.evaluate((element) => {
+      for (const overlay of element.querySelectorAll('.shaka-controls-container, .playerFullscreenTitleOverlay')) {
+        overlay.style.visibility = 'hidden'
+      }
+    })
+    const screenshot = await player.screenshot()
+    const letterboxPixel = await page.evaluate(async (base64) => {
+      const image = new Image()
+      image.src = `data:image/png;base64,${base64}`
+      await image.decode()
+
+      const canvas = new OffscreenCanvas(image.width, image.height)
+      const context = canvas.getContext('2d')
+      context.drawImage(image, 0, 0)
+      return [...context.getImageData(Math.floor(image.width / 2), 20, 1, 1).data]
+    }, screenshot.toString('base64'))
+
+    expect(letterboxPixel[0]).toBeGreaterThan(40)
+    expect(letterboxPixel[0]).toBeGreaterThan(letterboxPixel[1] * 2)
+    expect(letterboxPixel[0]).toBeGreaterThan(letterboxPixel[2] * 2)
+  })
+})
+
 test('shows the restricted playback setup hint until an authenticated retry is available', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.route('https://example.invalid/restricted.m3u8', route => route.fulfill({
@@ -504,6 +596,57 @@ test('a background watch tab stays loading until its cached avatar is ready', as
   expect(states.some(state => state.loading)).toBe(true)
   expect(states.some(state => !state.loading && state.avatar)).toBe(true)
   expect(states.some(state => state.loading && state.pageIcon)).toBe(false)
+})
+
+test('keeps background comment loading local to the loaded watch page', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', false)
+  })
+  await openMockedVideo(page)
+
+  const watchTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+  const watchTab = page.locator(`.tab[data-tab-id="${watchTabId}"]`)
+  const watchContent = page.locator(`.tabContent[data-tab-id="${watchTabId}"]`)
+  await expect(watchContent.locator('.getCommentsTitle')).toHaveCount(1)
+  await expect(watchTab).not.toHaveClass(/loading/)
+
+  let commentRequestStarted = false
+  let releaseComments = () => {}
+  const commentsReleased = new Promise(resolve => { releaseComments = resolve })
+  await page.route(/\/youtubei\/v1\/next/, async (route, request) => {
+    const body = JSON.parse(request.postData() ?? '{}')
+    if (!body.continuation) return route.fallback()
+
+    commentRequestStarted = true
+    await commentsReleased
+    return route.fallback()
+  })
+
+  try {
+    await page.locator(sel.newTabButton).click()
+    await expect(watchContent).toHaveAttribute('aria-hidden', 'true')
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
+    })
+    await expect.poll(() => commentRequestStarted).toBe(true)
+    await expect(watchContent.locator('.commentsArea .commentLoader')).toHaveCount(1)
+    await expect(watchContent.locator('.commentsArea [data-tab-loading-indicator]')).toHaveCount(0)
+    await expect(watchTab).not.toHaveClass(/loading/)
+  } finally {
+    releaseComments()
+  }
+
+  await expect(watchContent.locator('.commentsArea .commentLoader')).toHaveCount(0)
+
+  const watchView = await watchViewHandle(page)
+  await watchView.evaluate(view => { view.isLoading = true })
+  await expect(watchTab).toHaveClass(/loading/)
+  await watchView.evaluate(view => { view.isLoading = false })
+  await expect(watchTab).not.toHaveClass(/loading/)
+  await watchView.dispose()
 })
 
 for (const { defaultViewingMode, currentTheatreMode } of [
@@ -1777,6 +1920,11 @@ test.describe('watch page', () => {
   })
 
   test('toggles information from the Shorts title and matches the comments header', async ({ app, page }) => {
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBaseTheme', 'light')
+    })
+    await expect(page.locator('body')).toHaveClass(/light/)
     await mockPlayableWatchPage(app, page)
     await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/jNQXAC9IVRw')
     await page.locator(sel.searchInput).press('Enter')
@@ -1807,7 +1955,8 @@ test.describe('watch page', () => {
           },
           heading: {
             margin: headingStyle.margin,
-            fontSize: headingStyle.fontSize
+            fontSize: headingStyle.fontSize,
+            color: headingStyle.color
           },
           close: {
             width: closeStyle.width,
@@ -1836,11 +1985,32 @@ test.describe('watch page', () => {
       await component.proxy.$nextTick()
     })
     await expect(page.locator('.shortsCommentsPanel .fullscreenCommentHeader')).toBeVisible()
+    const commentText = page.locator('.shortsCommentsPanel .commentText').first()
+    await expect(commentText).toBeVisible()
+    const commentContrast = await commentText.evaluate(element => {
+      const parseRgb = value => value.match(/[\d.]+/g).slice(0, 3).map(Number)
+      const luminance = value => {
+        const channels = parseRgb(value).map(channel => {
+          const normalized = channel / 255
+          return normalized <= 0.04045
+            ? normalized / 12.92
+            : ((normalized + 0.055) / 1.055) ** 2.4
+        })
+        return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]
+      }
+      const foreground = luminance(getComputedStyle(element).color)
+      const background = luminance(getComputedStyle(element.closest('.shortsCommentsPanel')).backgroundColor)
+      return (Math.max(foreground, background) + 0.05) /
+        (Math.min(foreground, background) + 0.05)
+    })
+    expect(commentContrast).toBeGreaterThanOrEqual(4.5)
     const commentsStyles = await headerStyles(
       '.shortsCommentsPanel .fullscreenCommentHeader',
       '.shortsCommentsPanel .fullscreenCommentAction:last-of-type'
     )
 
+    expect(informationStyles.header.backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    expect(informationStyles.heading.color).toBe(informationStyles.close.color)
     expect(informationStyles).toEqual(commentsStyles)
     await watchComponent.dispose()
   })

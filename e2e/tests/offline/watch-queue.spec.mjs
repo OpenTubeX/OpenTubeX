@@ -59,30 +59,76 @@ test('manages a temporary queue from video menus and the watch sidebar', async (
 
   const queueItems = queue.locator('.queueItem')
   const queueItem = title => queueItems.filter({ hasText: title })
-  const draggedItem = queueItem('Queue video three').locator('.queueDragHandle')
-  const dataTransfer = await page.evaluateHandle(() => new DataTransfer())
-  await draggedItem.dispatchEvent('dragstart', { dataTransfer })
-  await queueItem('Queue video two').dispatchEvent('drop', { dataTransfer })
-  await draggedItem.dispatchEvent('dragend', { dataTransfer })
+  const reorderButton = title => queueItem(title).getByRole('button', { name: `Reorder ${title}` })
+  const moveStatus = queue.locator('[role="status"]')
+
+  await expect(moveStatus).toHaveCount(1)
+  await expect(moveStatus).toHaveAttribute('aria-live', 'polite')
+  await expect(moveStatus).toHaveAttribute('aria-atomic', 'true')
+  await expect(queueItems.locator('[role="status"]')).toHaveCount(0)
+
+  const middleReorderButton = reorderButton('Queue video one')
+  await expect(middleReorderButton).toHaveAccessibleName('Reorder Queue video one')
+  await expect(middleReorderButton).toHaveAccessibleDescription(
+    'Use the Up and Down Arrow keys to move this video in the queue.'
+  )
+  await expect(middleReorderButton).toHaveAttribute('aria-keyshortcuts', 'ArrowUp ArrowDown')
+  await expect(queueItem('Queue video one')).toHaveAttribute('aria-posinset', '2')
+  await expect(queueItem('Queue video one')).toHaveAttribute('aria-setsize', '3')
+
+  const draggedItem = reorderButton('Queue video three')
+  await expect(draggedItem).toHaveAttribute('title', 'Drag Queue video three to reorder queue')
+  await draggedItem.dragTo(queueItem('Queue video two'))
   await expect(queue.locator('.queueVideoTitle')).toHaveText([
     'Queue video one',
     'Queue video two',
     'Queue video three'
   ])
 
-  const thirdDragHandle = queueItem('Queue video three').locator('.queueDragHandle')
-  await thirdDragHandle.press('ArrowUp')
-  await expect(queue.locator('.queueVideoTitle')).toHaveText([
-    'Queue video one',
-    'Queue video three',
-    'Queue video two'
-  ])
-  await queueItem('Queue video three').locator('.queueDragHandle').press('ArrowDown')
+  const firstReorderButton = reorderButton('Queue video one')
+  await firstReorderButton.press('ArrowUp')
   await expect(queue.locator('.queueVideoTitle')).toHaveText([
     'Queue video one',
     'Queue video two',
     'Queue video three'
   ])
+  await expect(firstReorderButton).toBeFocused()
+  await expect(moveStatus).toHaveText(
+    'Cannot move Queue video one up. It is already at position 1 of 3.'
+  )
+
+  const thirdReorderButton = reorderButton('Queue video three')
+  await thirdReorderButton.press('ArrowDown')
+  await expect(queue.locator('.queueVideoTitle')).toHaveText([
+    'Queue video one',
+    'Queue video two',
+    'Queue video three'
+  ])
+  await expect(thirdReorderButton).toBeFocused()
+  await expect(moveStatus).toHaveText(
+    'Cannot move Queue video three down. It is already at position 3 of 3.'
+  )
+
+  await thirdReorderButton.press('ArrowUp')
+  await expect(queue.locator('.queueVideoTitle')).toHaveText([
+    'Queue video one',
+    'Queue video three',
+    'Queue video two'
+  ])
+  await expect(queueItem('Queue video three')).toHaveAttribute('aria-posinset', '2')
+  await expect(queueItem('Queue video three')).toHaveAttribute('aria-setsize', '3')
+  await expect(thirdReorderButton).toBeFocused()
+  await expect(moveStatus).toHaveText('Moved Queue video three to position 2 of 3.')
+
+  await page.keyboard.press('ArrowDown')
+  await expect(queue.locator('.queueVideoTitle')).toHaveText([
+    'Queue video one',
+    'Queue video two',
+    'Queue video three'
+  ])
+  await expect(queueItem('Queue video three')).toHaveAttribute('aria-posinset', '3')
+  await expect(thirdReorderButton).toBeFocused()
+  await expect(moveStatus).toHaveText('Moved Queue video three to position 3 of 3.')
 
   await queue.getByRole('button', { name: 'Remove Queue video three from queue' }).click()
   await expect(queue.locator('.queueVideoTitle')).toHaveText([

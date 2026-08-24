@@ -68,6 +68,72 @@ async function readSavedSession(userDataDir) {
   return records.at(-1)?.value
 }
 
+test.describe('skip silence session restore', () => {
+  const LEGACY_TAB_ID = 'e2e-legacy-skip-silence-tab'
+  const SAVED_TAB_ID = 'e2e-saved-skip-silence-tab'
+
+  test.use({
+    seed: {
+      settings: {
+        startupBehavior: 'restoreTabLoadState',
+        showSkipSilenceButton: true,
+        enableSkipSilenceByDefault: true
+      },
+      tabSessions: [
+        {
+          _id: 'e2e-window-session',
+          value: {
+            tabs: [
+              {
+                id: LEGACY_TAB_ID,
+                url: 'app://bundle/index.html#/history',
+                title: 'Legacy tab',
+                isUnloaded: true
+              },
+              {
+                id: SAVED_TAB_ID,
+                url: 'app://bundle/index.html#/subscriptions',
+                title: 'Saved tab',
+                skipSilence: true,
+                isUnloaded: false
+              }
+            ],
+            activeTabId: SAVED_TAB_ID,
+            bounds: { x: 0, y: 0, width: 1600, height: 900, maximized: false }
+          }
+        }
+      ]
+    }
+  })
+
+  const readSkipSilenceByTabId = (page) => page.evaluate(async () => {
+    const state = await window.ftElectron.tabs.getState()
+    return Object.fromEntries(state.tabs.map(tab => [tab.id, tab.skipSilence]))
+  })
+
+  test('preserves each tab value across restarts without applying the new-tab default', async ({ app, page }) => {
+    await expect.poll(() => readSkipSilenceByTabId(page)).toEqual({
+      [LEGACY_TAB_ID]: false,
+      [SAVED_TAB_ID]: true
+    })
+
+    await page.evaluate(async (tabId) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateTabSkipSilence', { tabId, value: false })
+    }, SAVED_TAB_ID)
+    await expect.poll(async () => {
+      const session = await readSavedSession(app.userDataDir)
+      return session?.tabs.find(tab => tab.id === SAVED_TAB_ID)?.skipSilence
+    }).toBe(false)
+
+    ;({ page } = await app.relaunch())
+    await expect.poll(() => readSkipSilenceByTabId(page)).toEqual({
+      [LEGACY_TAB_ID]: false,
+      [SAVED_TAB_ID]: false
+    })
+  })
+})
+
 test('keeps an unconsumed link timestamp across an app restart', async ({ app, page }) => {
   await expect.poll(async () => {
     const session = await readSavedSession(app.userDataDir)

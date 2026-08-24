@@ -1,7 +1,14 @@
 import { chmod, copyFile, mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, goToSettingsSection, waitForAppReady } from '../../helpers/app.mjs'
+import {
+  test,
+  expect,
+  goTo,
+  goToSettingsSection,
+  openNewWindowFromTabBar,
+  waitForAppReady
+} from '../../helpers/app.mjs'
 import { DEMO_MEDIA_LENGTH, DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
 import { DBActions, PlaylistVideoAddResult } from '../../../src/constants.js'
 
@@ -76,6 +83,7 @@ test('persists the yt-dlp playback cache across app restarts', async ({ app, pag
     manifestSrc: 'data:application/dash+xml;charset=UTF-8,manifest',
     manifestMimeType: 'application/dash+xml',
     legacyFormats: [],
+    title: 'Cached video title',
     isLive: false,
     version: '2026.08.13'
   }
@@ -99,6 +107,7 @@ test('limits persisted yt-dlp playback entries by UTF-8 byte size', async ({ pag
     manifestSrc: `data:application/dash+xml;charset=UTF-8,${'€'.repeat(700_000)}`,
     manifestMimeType: 'application/dash+xml',
     legacyFormats: [],
+    title: 'Cached video title',
     isLive: false,
     version: '2026.08.13'
   }
@@ -121,6 +130,7 @@ test('prefers evicting yt-dlp playback entries without open tabs', async ({ page
       manifestSrc: 'data:application/dash+xml;charset=UTF-8,manifest',
       manifestMimeType: 'application/dash+xml',
       legacyFormats: [],
+      title: 'Cached video title',
       isLive: false,
       version: '2026.08.13'
     }
@@ -221,7 +231,7 @@ test.describe('video downloads', () => {
     await writeFile(executable, [
       '#!/bin/sh',
       `printf '%s\\n' "$@" > "${capturedArgs}"`,
-      'printf \'%s\\n\' \'{"formats":[{"format_id":"140","available_at":123}]}\''
+      'printf \'%s\\n\' \'{"title":"Playback title","formats":[{"format_id":"140","available_at":123}]}\''
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
@@ -240,6 +250,7 @@ test.describe('video downloads', () => {
 
     passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
     expect(passedArguments).not.toContain('--extractor-args')
+    expect(info.title).toBe('Playback title')
     expect(info.formats[0].availableAt).toBe(123)
   })
 
@@ -943,10 +954,7 @@ test.describe('video downloads', () => {
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
-    const [otherWindow] = await Promise.all([
-      app.electronApp.waitForEvent('window'),
-      page.locator('.topNav .navNewWindowButton').click()
-    ])
+    const otherWindow = await openNewWindowFromTabBar(app, page)
     await waitForAppReady(otherWindow)
     await goTo(otherWindow, 'downloads')
 
@@ -961,10 +969,7 @@ test.describe('video downloads', () => {
     const otherDownload = otherWindow.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
     await expect(otherDownload).toContainText('0.0%')
 
-    const [lateWindow] = await Promise.all([
-      app.electronApp.waitForEvent('window'),
-      otherWindow.locator('.topNav .navNewWindowButton').click()
-    ])
+    const lateWindow = await openNewWindowFromTabBar(app, otherWindow)
     await waitForAppReady(lateWindow)
     await goTo(lateWindow, 'downloads')
     const hydratedDownload = lateWindow.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
@@ -1182,6 +1187,63 @@ test.describe('video downloads', () => {
     expect(results.filter(result => result?.error === 'download-already-retrying')).toHaveLength(1)
     await expect.poll(() => readFile(attemptsFile, 'utf8')).toBe('retry\n')
   })
+})
+
+test('exposes download progress to assistive technology', async ({ page }) => {
+  await goTo(page, 'downloads')
+
+  const upsertDownload = (status, percent) => page.evaluate(({ status, percent }) => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('upsertYtDlpDownload', {
+      id: 42,
+      title: 'Accessible download',
+      status,
+      percent,
+      speed: '1 MiB/s',
+      eta: '00:10',
+      mode: 'video'
+    })
+  }, { status, percent })
+
+  await upsertDownload('downloading', 42)
+  const row = page.locator('.downloadRow').filter({ hasText: 'Accessible download' })
+  const progress = row.getByRole('progressbar')
+  const fill = row.locator('.progressFill')
+  await expect(progress).toHaveAccessibleName('Accessible download')
+  await expect(progress).toHaveAttribute('aria-valuemin', '0')
+  await expect(progress).toHaveAttribute('aria-valuemax', '100')
+  await expect(progress).toHaveAttribute('aria-valuenow', '42')
+  await expect(progress).toHaveAttribute('aria-valuetext', '42.0% • 1 MiB/s • ETA 00:10')
+  await expect(fill).toHaveAttribute('aria-hidden', 'true')
+  await expect(row.locator('.downloadStatus')).toHaveAttribute('aria-hidden', 'true')
+
+  await upsertDownload('downloading', 142)
+  await expect(progress).toHaveAttribute('aria-valuenow', '100')
+  await expect(progress).toHaveAttribute('aria-valuetext', '100.0% • 1 MiB/s • ETA 00:10')
+  expect(await fill.evaluate(element => element.style.inlineSize)).toBe('100%')
+
+  await upsertDownload('downloading', -42)
+  await expect(progress).toHaveAttribute('aria-valuenow', '0')
+  await expect(progress).toHaveAttribute('aria-valuetext', '0.0% • 1 MiB/s • ETA 00:10')
+  expect(await fill.evaluate(element => element.style.inlineSize)).toBe('0%')
+
+  await upsertDownload('processing', 42)
+  await expect(progress).toHaveAccessibleName('Accessible download')
+  await expect(progress).toHaveAttribute('aria-valuetext', 'Processing…')
+  expect(await progress.getAttribute('aria-valuenow')).toBeNull()
+  await expect(row.locator('[role="status"], [aria-live]')).toHaveCount(0)
+
+  const session = await page.context().newCDPSession(page)
+  const { nodes } = await session.send('Accessibility.getFullAXTree')
+  await session.detach()
+  const tree = nodes.filter(node => !node.ignored)
+  const processingBar = tree.find(node => (
+    node.role?.value === 'progressbar' && node.name?.value === 'Accessible download'
+  ))
+  expect(processingBar).toBeDefined()
+  expect(typeof processingBar?.value?.value).not.toBe('number')
+  expect(tree.flatMap(node => [node.name?.value, node.value?.value])
+    .filter(value => value === 'Processing…').length).toBeLessThanOrEqual(1)
 })
 
 test('asks for confirmation before removing a downloaded file', async ({ page }) => {
@@ -1566,10 +1628,7 @@ test.describe('list video actions', () => {
   })
 
   test('two windows adding the same video only store it once', async ({ app, page }) => {
-    const [secondWindow] = await Promise.all([
-      app.electronApp.waitForEvent('window'),
-      page.locator('.topNav .navNewWindowButton').click()
-    ])
+    const secondWindow = await openNewWindowFromTabBar(app, page)
     await waitForAppReady(secondWindow)
 
     // Issue the add both windows' playlist controls make, rather than clicking

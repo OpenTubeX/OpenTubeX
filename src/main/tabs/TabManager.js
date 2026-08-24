@@ -44,6 +44,10 @@ const VALID_TAB_CLOSE_FOCUS = new Set(['previousTab', 'nextTab'])
 // Closing a tab has to pick the replacement synchronously, so the preference is
 // cached here instead of being read from the settings store on every close.
 let tabCloseFocus = DEFAULT_TAB_CLOSE_FOCUS
+// Tab creation is also synchronous after its placement preferences have loaded.
+// Cache whether silence skipping should start enabled for newly-created tabs.
+let enableSkipSilenceByDefault = false
+let showSkipSilenceButton = false
 const VALID_TAB_COLORS = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'purple'])
 const TAB_PREVIEW_REFRESH_DELAY_MS = 700
 const TAB_PREVIEW_CAPTURE_STYLE_ID = 'opentubex-tab-preview-capture-style'
@@ -90,6 +94,7 @@ let tabPreviewCacheMaintenance = Promise.resolve()
  * @property {boolean} pendingActivation
  * @property {number} mountRevision
  * @property {number} refreshKey
+ * @property {number} syncedNavigationRevision
  * @property {string | null} placementOpenerTabId
  * @property {NavigationHistoryEntry[] | null} navigationHistory
  * @property {number} navigationHistoryIndex
@@ -140,6 +145,36 @@ export class TabManager {
       TabManager.setTabCloseFocus((await baseHandlers.settings._findOne('tabCloseFocus'))?.value)
     } catch (error) {
       console.error('Failed to load tab close focus preference:', error)
+    }
+  }
+
+  /**
+   * @param {unknown} value
+   */
+  static setEnableSkipSilenceByDefault(value) {
+    enableSkipSilenceByDefault = value === true
+  }
+
+  /**
+   * @param {unknown} value
+   */
+  static setShowSkipSilenceButton(value) {
+    showSkipSilenceButton = value === true
+  }
+
+  /**
+   * @returns {Promise<void>}
+   */
+  static async refreshStoredSkipSilenceSettings() {
+    try {
+      const [showButtonSetting, defaultSetting] = await Promise.all([
+        baseHandlers.settings._findOne('showSkipSilenceButton'),
+        baseHandlers.settings._findOne('enableSkipSilenceByDefault')
+      ])
+      TabManager.setShowSkipSilenceButton(showButtonSetting?.value)
+      TabManager.setEnableSkipSilenceByDefault(defaultSetting?.value)
+    } catch (error) {
+      console.error('Failed to load skip silence preferences:', error)
     }
   }
 
@@ -929,6 +964,7 @@ export class TabManager {
       history = null,
       historyIndex = null,
       persistHistory = history != null,
+      skipSilence = showSkipSilenceButton && enableSkipSilenceByDefault,
       openerTabId = this.activeTabId,
       _deferUpdates = false
     } = options
@@ -973,12 +1009,13 @@ export class TabManager {
       previewFileName: restoredPreviewFileName,
       previewCaptureTimeoutId: null,
       previewCapturePromise: null,
-      skipSilence: false,
+      skipSilence: skipSilence === true,
       loadState: startsUnloaded ? 'unloaded' : 'mounting',
       preloadInBackground: Boolean(preloadInBackground),
       pendingActivation: false,
       mountRevision: shouldMount ? 1 : 0,
       refreshKey: 0,
+      syncedNavigationRevision: 0,
       placementOpenerTabId: this.tabs.has(openerTabId) ? openerTabId : null,
       navigationHistory: restoredNavigationHistory?.history ?? null,
       navigationHistoryIndex: restoredNavigationHistory?.historyIndex ?? 0,
@@ -2379,7 +2416,8 @@ export class TabManager {
       previewDataUrl: tab.previewDataUrl,
       previewCapturedAt: tab.previewCapturedAt,
       previewFileName: tab.previewFileName,
-      skipSilence: tab.skipSilence === true
+      skipSilence: tab.skipSilence === true,
+      syncedNavigationRevision: tab.syncedNavigationRevision
     }
   }
 
@@ -2461,6 +2499,9 @@ export class TabManager {
       pendingActivation: false,
       mountRevision: 1,
       refreshKey: 0,
+      syncedNavigationRevision: Number.isInteger(snapshot.syncedNavigationRevision)
+        ? snapshot.syncedNavigationRevision
+        : 0,
       placementOpenerTabId: null,
       isTransferStaged: true
     }
@@ -2610,7 +2651,8 @@ export class TabManager {
         preloadInBackground: tab.preloadInBackground,
         pendingActivation: tab.pendingActivation,
         mountRevision: tab.mountRevision,
-        refreshKey: tab.refreshKey
+        refreshKey: tab.refreshKey,
+        syncedNavigationRevision: tab.syncedNavigationRevision
       }
     })
 
@@ -2719,6 +2761,7 @@ export class TabManager {
           title: tab.title,
           isPinned: tab.isPinned,
           color: TabManager.normalizeTabColor(tab.color),
+          skipSilence: tab.skipSilence === true,
           isUnloaded: tab.loadState === 'unloaded' || this._deferredUnloadTabIds.has(tab.id),
           ...(tab.placementOpenerTabId != null && {
             placementOpenerTabId: tab.placementOpenerTabId
@@ -2791,33 +2834,138 @@ export class TabManager {
   }
 
   /**
-   * Replace this window's live tabs with a synced session.
+   * Reconcile this window's live tabs with a synced session.
+   * Existing tab objects stay alive so their mounted renderer state is not
+   * discarded when another device only adds, removes, or selects a tab.
    * @param {object} sessionData
    * @returns {Promise<boolean>}
    */
   async replaceFromSyncData(sessionData) {
+    if (!sessionData || !Array.isArray(sessionData.tabs) || sessionData.tabs.length === 0) {
+      return false
+    }
+
     this._sessionPersistenceDisabled = true
     try {
-      for (const tab of this.tabs.values()) {
+      const restoreNavigationHistory = await TabManager.getStoredRememberTabNavigationHistory()
+      const previousTabs = this.tabs
+      const syncedTabs = new Map()
+      const removedTabs = new Set(previousTabs.values())
+
+      for (const tabData of sessionData.tabs) {
+        const syncedId = typeof tabData.id === 'string' && tabData.id.length > 0
+          ? tabData.id
+          : undefined
+        let tab = syncedId == null ? null : previousTabs.get(syncedId)
+
+        if (tab) {
+          removedTabs.delete(tab)
+          const nextUrl = TabManager.stripOneTimeTimestampFromUrl(tabData.url)
+          if (tab.url !== nextUrl) {
+            const previewFileName = tab.previewFileName
+            const avatarFileName = tab.avatarFileName
+            tab.url = nextUrl
+            tab.route = TabManager.getRouteFromUrl(nextUrl)
+            tab.previewDataUrl = null
+            tab.previewCapturedAt = 0
+            tab.previewFileName = null
+            tab.avatarDataUrl = null
+            tab.avatarFileName = null
+            const navigationHistory = restoreNavigationHistory
+              ? TabManager.sanitizeNavigationHistory(tabData.history, tabData.historyIndex)
+              : null
+            tab.navigationHistory = navigationHistory?.history ?? null
+            tab.navigationHistoryIndex = navigationHistory?.historyIndex ?? 0
+            tab.persistNavigationHistory = restoreNavigationHistory && navigationHistory != null
+            // The renderer normally ignores main-process route echoes because
+            // it owns live navigation. Mark this remote route as authoritative.
+            tab.syncedNavigationRevision += 1
+            this._historyAnnouncedTabIds.delete(tab.id)
+            this._deleteTabPreviewFile(previewFileName).catch(error => {
+              console.error('Failed to delete stale synced tab preview:', error)
+            })
+            this._releaseTabAvatarFile(avatarFileName).catch(error => {
+              console.error('Failed to delete stale synced tab avatar:', error)
+            })
+          }
+          if (typeof tabData.title === 'string' && tabData.title.trim().length > 0) {
+            tab.title = tabData.title
+          }
+          tab.isPinned = tabData.isPinned === true
+          tab.color = TabManager.normalizeTabColor(tabData.color)
+        } else {
+          const hasSavedTitle = typeof tabData.title === 'string' && tabData.title.trim().length > 0
+          // createTab inserts into previousTabs through this.tabs. The synced
+          // map and restored placement openers below replace that temporary order.
+          tab = this.createTab({
+            id: syncedId,
+            url: TabManager.stripOneTimeTimestampFromUrl(tabData.url),
+            title: hasSavedTitle ? tabData.title : undefined,
+            isPinned: tabData.isPinned === true,
+            color: tabData.color,
+            history: restoreNavigationHistory ? tabData.history : null,
+            historyIndex: restoreNavigationHistory ? tabData.historyIndex : null,
+            persistHistory: restoreNavigationHistory,
+            makeActive: false,
+            openPosition: 'end',
+            lazyLoad: tabData.isUnloaded === true,
+            preloadInBackground: tabData.isUnloaded === false,
+            _deferUpdates: true
+          })
+        }
+
+        syncedTabs.set(tab.id, tab)
+      }
+
+      this.tabs = syncedTabs
+      restoreTabPlacementOpeners(this.tabs, sessionData.tabs)
+
+      for (const tab of removedTabs) {
         this._clearTabPreviewRefresh(tab)
         this._resolveTabMountWaiters(tab.id, Number.MAX_SAFE_INTEGER, false)
+        if (this.presentedTabId === tab.id) {
+          this.presentedTabId = null
+        }
+        this._deleteTabPreviewFile(tab.previewFileName).catch(error => {
+          console.error('Failed to delete remotely closed tab preview:', error)
+        })
+        this._releaseTabAvatarFile(tab.avatarFileName).catch(error => {
+          console.error('Failed to delete remotely closed tab avatar:', error)
+        })
       }
-      this.tabs.clear()
-      this.activeTabId = null
-      this.presentedTabId = null
-      this.closedTabs = []
+
+      const retainedTabIds = new Set(this.tabs.keys())
+      this.selectedTabIds = this.selectedTabIds.filter(tabId => retainedTabIds.has(tabId))
+      this.contextMenuSelectedTabIds = this.contextMenuSelectedTabIds.filter(tabId => retainedTabIds.has(tabId))
+      if (!retainedTabIds.has(this.contextMenuTabId)) {
+        this.contextMenuTabId = null
+      }
       this._deferredCloseTabIds.clear()
       this._deferredUnloadTabIds.clear()
-      this._deferredStartupWatchTabIds.clear()
-      this._startupPriorityTabId = null
-      this._startupPriorityLoadingObserved = false
-      this.selectionRevision += 1
-      this._broadcastStateUpdate()
+      this._deferredStartupWatchTabIds = new Set(
+        [...this._deferredStartupWatchTabIds].filter(tabId => retainedTabIds.has(tabId))
+      )
+      if (!retainedTabIds.has(this._startupPriorityTabId)) {
+        this._startupPriorityTabId = null
+        this._startupPriorityLoadingObserved = false
+      }
+
       this.sessionId = sessionData.sessionId
       this.sessionUpdatedAt = Number.isFinite(sessionData.updatedAt)
         ? sessionData.updatedAt
         : Date.now()
-      return await this.restoreFromData(sessionData, { restoreTabLoadState: true })
+
+      const nextActiveTabId = this.tabs.has(sessionData.activeTabId)
+        ? sessionData.activeTabId
+        : this.tabs.keys().next().value
+      if (nextActiveTabId !== this.activeTabId || this.tabs.get(nextActiveTabId)?.loadState === 'unloaded') {
+        this.activateTab(nextActiveTabId)
+      } else {
+        this.browserWindow.setTitle(this.tabs.get(nextActiveTabId).title)
+        this._broadcastStateUpdate()
+      }
+
+      return this.tabs.size > 0
     } finally {
       this._sessionPersistenceDisabled = false
     }
@@ -2854,7 +3002,7 @@ export class TabManager {
   }
 
   /**
-   * @param {{ tabs?: Array<{id?: string, url: string, title?: string, avatarFileName?: string | null, isPinned?: boolean, color?: string | null, isUnloaded?: boolean, previewFileName?: string | null, previewCapturedAt?: number, placementOpenerTabId?: string | null, history?: object[], historyIndex?: number}>, activeTabId?: string }} sessionData
+   * @param {{ tabs?: Array<{id?: string, url: string, title?: string, avatarFileName?: string | null, isPinned?: boolean, color?: string | null, skipSilence?: boolean, isUnloaded?: boolean, previewFileName?: string | null, previewCapturedAt?: number, placementOpenerTabId?: string | null, history?: object[], historyIndex?: number}>, activeTabId?: string }} sessionData
    * @param {{ loadInactiveTabs?: boolean, restoreTabLoadState?: boolean }} [options]
    * @returns {Promise<boolean>}
    */
@@ -2903,6 +3051,9 @@ export class TabManager {
           avatarFileName: avatarDataUrl == null ? null : avatarFileName,
           isPinned: tabData.isPinned === true,
           color: tabData.color,
+          // Legacy sessions did not persist this field and must retain the old
+          // disabled behavior instead of inheriting the new-tab default.
+          skipSilence: tabData.skipSilence === true,
           // Preview images are only needed when the switcher asks for them.
           // Keep the cache reference and let getTabPreview load it on demand
           // instead of serially reading every restored tab before first paint.
@@ -3058,9 +3209,11 @@ export async function setupTabsIPC(options = {}) {
     mediaSessionStateChanged = () => {}
   } = options
 
-  // Loaded before the first window exists, so a tab can never be closed while
-  // the preference still holds its default.
-  await TabManager.refreshStoredTabCloseFocus()
+  // Load synchronous tab-lifecycle preferences before the first window exists.
+  await Promise.all([
+    TabManager.refreshStoredTabCloseFocus(),
+    TabManager.refreshStoredSkipSilenceSettings()
+  ])
 
   const getManager = event => TabManager.getFromWebContents(event.sender)
 
@@ -3131,6 +3284,8 @@ export async function setupTabsIPC(options = {}) {
       openerTabId,
       // Never let a renderer choose the internal tab id; it is always generated.
       id,
+      // Silence skipping starts from the main-owned default, not renderer input.
+      skipSilence,
       ...tabOptions
     } = options != null && typeof options === 'object' ? options : {}
 
@@ -3424,6 +3579,7 @@ export async function setupTabsIPC(options = {}) {
     if (tab && tab.skipSilence !== skipSilence) {
       tab.skipSilence = skipSilence
       manager._broadcastStateUpdate()
+      manager._saveSession()
     }
   })
 

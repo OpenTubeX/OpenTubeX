@@ -329,6 +329,56 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   await watchComponent.dispose()
 })
 
+/**
+ * @param {{ app: import('../../helpers/app.mjs').ElectronAppFixture, page: import('@playwright/test').Page }} fixtures
+ */
+async function expectEllipsizedPlayerMenuLabelTitles({ app, page }) {
+  await openDemoVideo({ app, page })
+
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click()
+
+  const overflowMenu = player.locator('.shaka-overflow-menu')
+  const zoomButton = overflowMenu.getByRole('button', { name: 'Zoom' })
+  const expectFullTextOnHover = async (label, fullText) => {
+    const isOverflowing = () => label.evaluate((element) => {
+      return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth
+    })
+
+    await label.evaluate((element, text) => { element.textContent = text }, fullText)
+    expect(await isOverflowing()).toBe(true)
+    await expect(label).toHaveAttribute('title', fullText, { timeout: 1000 })
+    await label.hover()
+
+    await label.evaluate((element) => { element.textContent = 'Short label' })
+    expect(await isOverflowing()).toBe(false)
+    await expect(label).not.toHaveAttribute('title', { timeout: 1000 })
+  }
+
+  await expectFullTextOnHover(
+    zoomButton.locator('.shaka-overflow-button-label > span').first(),
+    'Zoom to a very long player menu option that cannot fit in its tile'
+  )
+
+  await zoomButton.click()
+  await expectFullTextOnHover(
+    player.locator('.video-zoom-menu > button:not(.shaka-back-to-overflow-button) > span').first(),
+    'An unusually long submenu option like the descriptive audio tracks'
+  )
+}
+
+test('ellipsized player menu labels expose their full text on hover', expectEllipsizedPlayerMenuLabelTitles)
+
+test.describe('at 125% display scale', () => {
+  test.use({ launchArgs: ['--force-device-scale-factor=1.25'] })
+
+  test(
+    'ellipsized player menu labels expose their full text on hover',
+    expectEllipsizedPlayerMenuLabelTitles
+  )
+})
+
 test('auto-translates captions into an arbitrary language', async ({ app, page, attachScreenshot }) => {
   await mockPlayableWatchPage(app, page, { captionTranslations: true })
   await openMockedVideo(page)
@@ -755,6 +805,54 @@ test.describe('skip silence shortcut', () => {
     })
   })
 
+  test('applies the default only to newly-created tabs', async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+
+    const readSkipSilenceState = () => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return {
+        activeTabId: store.getters.getActiveTabId,
+        values: { ...store.state.tabs.skipSilenceByTabId }
+      }
+    })
+
+    const firstTabId = (await readSkipSilenceState()).activeTabId
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateShowSkipSilenceButton', true)
+      await store.dispatch('updateEnableSkipSilenceByDefault', true)
+    })
+
+    await expect.poll(readSkipSilenceState).toMatchObject({
+      values: { [firstTabId]: false }
+    })
+    await page.locator('body').press('h')
+    await expect.poll(readSkipSilenceState).toMatchObject({
+      values: { [firstTabId]: true }
+    })
+
+    await page.locator('.tabBar .newTabButton').click()
+    await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+    await openMockedVideo(page)
+
+    const secondTabId = (await readSkipSilenceState()).activeTabId
+    expect(secondTabId).not.toBe(firstTabId)
+    await expect.poll(readSkipSilenceState).toMatchObject({
+      values: {
+        [firstTabId]: true,
+        [secondTabId]: true
+      }
+    })
+
+    await page.locator('body').press('h')
+    await expect.poll(readSkipSilenceState).toMatchObject({
+      values: {
+        [firstTabId]: true,
+        [secondTabId]: false
+      }
+    })
+  })
+
   test('disables the setting for an unmounted player when the control is hidden', async ({ app, page }) => {
     await openDemoVideo({ app, page })
 
@@ -775,5 +873,26 @@ test.describe('skip silence shortcut', () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return store.getters.getTabSkipSilence(store.getters.getActiveTabId)
     })).toBe(false)
+  })
+})
+
+test.describe('skip silence default', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...PLAYER_SEED,
+        showSkipSilenceButton: true,
+        enableSkipSilenceByDefault: true
+      }
+    }
+  })
+
+  test('enables silence skipping in the initial tab', async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getTabSkipSilence(store.getters.getActiveTabId)
+    })).toBe(true)
   })
 })

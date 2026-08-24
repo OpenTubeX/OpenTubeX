@@ -489,6 +489,10 @@
     "ri": "refresh-line",
     "material": "sync-rounded"
   },
+  "terminal": {
+    "ri": "terminal-box-line",
+    "material": "terminal-rounded"
+  },
   "thumbs-down": {
     "ri": "thumb-down-line",
     "material": "thumb-down-outline"

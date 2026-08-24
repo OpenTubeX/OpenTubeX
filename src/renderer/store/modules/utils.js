@@ -434,7 +434,6 @@ const actions = {
   },
 
   hideSettingsWindow ({ commit }) {
-    commit('setIsKeyboardShortcutPromptShown', false)
     commit('setSettingsWindowMinimized', false)
     commit('setSettingsWindowOpen', false)
   },

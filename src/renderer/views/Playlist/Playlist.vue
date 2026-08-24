@@ -280,7 +280,7 @@ const sortOrder = computed(() => isUserPlaylistRequested.value ? userPlaylistSor
 const playlistId = computed(() => route.params.id)
 
 /** @type {import('vue').ComputedRef<'grid' | 'list'>} */
-const listType = computed(() => !forceListView.value ? store.getters.getListType : 'list')
+const listType = computed(() => !forceListView.value ? store.getters.getPlaylistViewType : 'list')
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const userPlaylistsReady = computed(() => store.getters.getPlaylistsReady)

@@ -1066,6 +1066,15 @@ function runApp() {
           }
         },
         {
+          label: contextMenuLabel('New Window'),
+          visible: isTabBarContextMenu && contextMenuTab == null,
+          click: () => {
+            createWindow({ replaceMainWindow: false }).catch(error => {
+              console.error('Failed to create a new window from the tab bar context menu:', error)
+            })
+          }
+        },
+        {
           label: contextMenuLabel('Reopen Closed Tab'),
           visible: isTabBarContextMenu && contextMenuTab == null,
           enabled: manager?.closedTabs.length > 0,
@@ -4353,6 +4362,12 @@ function runApp() {
             case 'tabCloseFocus':
               TabManager.setTabCloseFocus(data.value)
               break
+            case 'showSkipSilenceButton':
+              TabManager.setShowSkipSilenceButton(data.value)
+              break
+            case 'enableSkipSilenceByDefault':
+              TabManager.setEnableSkipSilenceByDefault(data.value)
+              break
             case 'hideToTrayOnMinimize':
               if (isTrayOnMinimizeSupported) {
                 trayOnMinimize = data.value
@@ -5144,7 +5159,7 @@ function runApp() {
   })
    */
 
-  function navigateTo(path, browserWindow) {
+  function navigateTo(path, browserWindow, toggle = false) {
     if (browserWindow == null) {
       return
     }
@@ -5153,10 +5168,11 @@ function runApp() {
     if (tabManager?.activeTabId && isOpenTubeXUrl(browserWindow.webContents.getURL())) {
       browserWindow.webContents.send(IpcChannels.CHANGE_VIEW, {
         tabId: tabManager.activeTabId,
-        route: path
+        route: path,
+        toggle
       })
     } else if (isOpenTubeXUrl(browserWindow.webContents.getURL())) {
-      browserWindow.webContents.send(IpcChannels.CHANGE_VIEW, path)
+      browserWindow.webContents.send(IpcChannels.CHANGE_VIEW, toggle ? { route: path, toggle } : path)
     }
   }
 
@@ -5208,7 +5224,7 @@ function runApp() {
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_SETTINGS),
             click: (_menuItem, browserWindow, _event) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
-              navigateTo('/settings', browserWindow)
+              navigateTo('/settings', browserWindow, true)
             },
             type: 'normal'
           },

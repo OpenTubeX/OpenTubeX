@@ -14,6 +14,7 @@ import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpP
  * @property {MANIFEST_TYPE_DASH | MANIFEST_TYPE_HLS} manifestMimeType
  * @property {any[]} legacyFormats
  * @property {Date | null} expiryDate
+ * @property {string | null} title
  * @property {boolean} isLive
  * @property {number | null} duration
  * @property {string | null} storyboardSrc
@@ -385,6 +386,7 @@ export async function getYtDlpPlaybackSource(
           manifestMimeType: MANIFEST_TYPE_DASH,
           legacyFormats,
           expiryDate: getEarliestYtDlpFormatExpiry(adaptiveFormats),
+          title: info.title,
           isLive: false,
           duration: info.duration,
           storyboardSrc: info.storyboardVtt === null
@@ -417,6 +419,7 @@ export async function getYtDlpPlaybackSource(
         manifestMimeType: MANIFEST_TYPE_HLS,
         legacyFormats: await legacyFormatsPromise,
         expiryDate: null,
+        title: info.title,
         isLive: info.isLive,
         duration: info.duration,
         storyboardSrc: info.storyboardVtt === null

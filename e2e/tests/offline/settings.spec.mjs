@@ -9,6 +9,7 @@ import {
   goTo,
   goToSettingsSection,
   latestSettings,
+  openNewWindowFromTabBar,
   recordAnimations,
   sel,
   waitForAppReady
@@ -67,6 +68,18 @@ async function expectMinimizeToPreserveSettingsScroll(page) {
   await expect.poll(async () => Math.abs(
     await content.evaluate(element => element.scrollTop) - scrollTop
   )).toBeLessThanOrEqual(1)
+}
+
+async function pressSettingsShortcut(app) {
+  await app.electronApp.evaluate(({ BrowserWindow, Menu }) => {
+    const browserWindow = BrowserWindow.getAllWindows()[0]
+    const fileMenu = Menu.getApplicationMenu()?.items.find(item => item.label === 'File')
+    const preferencesItem = fileMenu?.submenu?.items.find(item => item.label === 'Preferences')
+    if (!browserWindow || !preferencesItem) {
+      throw new Error('Preferences application-menu item was not found')
+    }
+    preferencesItem.click(undefined, browserWindow, undefined)
+  })
 }
 
 async function expectExternalSoftwarePathAlignment(tool, sourceName, pathPlaceholder) {
@@ -130,6 +143,24 @@ test.describe('skip silence settings search', () => {
     await expect(page.locator('.switch-ctn.settingsSearchTarget'))
       .toContainText('Show Skip Silence Toggle')
     await expect(page.locator('.section.settingsSearchTarget')).toHaveCount(0)
+  })
+
+  test('opens the default toggle and reflects its dependency', async ({ page }) => {
+    await goTo(page, 'settings')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+
+    await search.fill('Enable Skip Silence by Default')
+    await page.getByRole('button', { name: 'Enable Skip Silence by Default', exact: true }).click()
+
+    const defaultToggle = page.getByRole('checkbox', {
+      name: /^Enable Skip Silence by Default/
+    })
+    await expect(defaultToggle).toBeDisabled()
+
+    await page.locator('label.switch-label')
+      .filter({ hasText: 'Show Skip Silence Toggle' })
+      .click()
+    await expect(defaultToggle).toBeEnabled()
   })
 })
 
@@ -904,6 +935,108 @@ test.describe('settings', () => {
     await expect(page.locator('.settingsWindow')).toBeHidden()
   })
 
+  test('keeps the current compact view throughout the close animation at 95% UI scale', async ({ page }) => {
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
+        x: 40,
+        y: 40,
+        width: 500,
+        height: 450
+      }))
+      return store.dispatch('updateUiScale', 95)
+    })
+
+    const settingsWindow = page.locator('.settingsWindow')
+    const settingsMenu = page.locator('.settingsMenu')
+
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="playback"]').click()
+    await page.getByRole('button', { name: /Manage Saved Channels/ }).click()
+    await expect(page.locator('.channelListContainer')).toBeVisible()
+
+    await page.locator('.settingsCloseButton').click()
+    await expect(settingsWindow).toHaveClass(/settings-window-leave-active/)
+    await expect(settingsMenu).toBeHidden()
+    await expect(page.locator('.channelListContainer')).toBeVisible()
+    await expect(settingsWindow).toBeHidden()
+
+    await goTo(page, 'settings')
+    await page.getByRole('button', { name: 'Show Keyboard Shortcuts' }).click()
+    await expect(settingsMenu).toBeHidden()
+    await expect(page.locator('.shortcutColumns')).toBeVisible()
+
+    await page.locator('.settingsCloseButton').click()
+    await expect(settingsWindow).toHaveClass(/settings-window-leave-active/)
+    await expect(settingsMenu).toBeHidden()
+    await expect(page.locator('.shortcutColumns')).toBeVisible()
+    await expect(settingsWindow).toBeHidden()
+
+    await goTo(page, 'settings')
+    await expect(page.locator('.shortcutColumns')).toHaveCount(0)
+    await expect(page.locator('.settingsContent > [data-section="playback"]')).toBeVisible()
+  })
+
+  test('reopens Keyboard Shortcuts when its shortcut is pressed during closing', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.getByRole('button', { name: 'Show Keyboard Shortcuts' }).click()
+    await expect(page.locator('.shortcutColumns')).toBeVisible()
+
+    const settingsWindow = page.locator('.settingsWindow')
+    await page.locator('.settingsCloseButton').click()
+    await expect(settingsWindow).toHaveClass(/settings-window-leave-active/)
+    await page.keyboard.press('Shift+?')
+
+    await expect(settingsWindow).toBeVisible()
+    await expect(page.locator('.shortcutColumns')).toBeVisible()
+  })
+
+  test('toggles Settings and Keyboard Shortcuts with their app shortcuts', async ({ app, page }) => {
+    const settingsWindow = page.locator('.settingsWindow')
+
+    await pressSettingsShortcut(app)
+    await expect(settingsWindow).toBeVisible()
+    await expect(page.locator('.shortcutColumns')).toHaveCount(0)
+
+    await pressSettingsShortcut(app)
+    await expect(settingsWindow).toHaveClass(/settings-window-leave-active/)
+    await expect(settingsWindow).toBeHidden()
+
+    await page.keyboard.press('Shift+?')
+    await expect(settingsWindow).toBeVisible()
+    await expect(page.locator('.shortcutColumns')).toBeVisible()
+
+    await page.keyboard.press('Shift+?')
+    await expect(settingsWindow).toHaveClass(/settings-window-leave-active/)
+    await expect(page.locator('.shortcutColumns')).toBeVisible()
+    await expect(settingsWindow).toBeHidden()
+  })
+
+  test('preserves category scroll when Settings is toggled but resets it when switching categories', async ({ app, page }) => {
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('updateUiScale', 95)
+    })
+    await pressSettingsShortcut(app)
+
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
+    const content = page.locator('.settingsContent')
+    await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    const scrollTop = await content.evaluate(element => element.scrollTop)
+
+    await pressSettingsShortcut(app)
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+    await pressSettingsShortcut(app)
+    await expect(page.locator('.settingsWindow')).toBeVisible()
+    await expect.poll(async () => Math.abs(
+      await content.evaluate(element => element.scrollTop) - scrollTop
+    )).toBeLessThanOrEqual(1)
+
+    await page.locator('.settingsMenu [data-section="playback"]').click()
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBe(0)
+  })
+
   test('minimizes utility windows into the header and restores their view', async ({ page }) => {
     for (const view of [null, 'about', 'downloads']) {
       await page.evaluate((windowView) => {
@@ -933,6 +1066,24 @@ test.describe('settings', () => {
 
   test('preserves its scroll position after being minimized and restored', async ({ page }) => {
     await expectMinimizeToPreserveSettingsScroll(page)
+  })
+
+  test('keeps the current settings subpage when minimized and restored', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="playback"]').click()
+    await page.getByRole('button', { name: /Manage Saved Channels/ }).click()
+
+    const settingsWindow = page.getByRole('dialog', { name: 'Settings', exact: true })
+    const breadcrumb = page.locator('.settingsBreadcrumb')
+    await expect(breadcrumb).toContainText('Saved Channel Settings')
+
+    await settingsWindow.getByRole('button', { name: /Minimi[sz]e/ }).click()
+    await expect(settingsWindow).toBeHidden()
+    await page.getByRole('button', { name: 'Restore: Settings' }).click()
+
+    await expect(settingsWindow).toBeVisible()
+    await expect(page.locator('.channelListContainer')).toBeVisible()
+    await expect(breadcrumb).toContainText('Saved Channel Settings')
   })
 
   test.describe('minimized at 95% UI scale', () => {
@@ -3462,10 +3613,7 @@ test.describe('sync settings', () => {
   })
 
   test('stops an active sync in another window when sync is disabled', async ({ app, page }) => {
-    const [otherWindow] = await Promise.all([
-      app.electronApp.waitForEvent('window'),
-      page.locator('.topNav .navNewWindowButton').click()
-    ])
+    const otherWindow = await openNewWindowFromTabBar(app, page)
     await waitForAppReady(otherWindow)
 
     let finishSyncRequest

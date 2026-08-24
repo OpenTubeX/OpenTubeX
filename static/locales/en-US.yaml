@@ -498,6 +498,10 @@ Settings:
       Video View Type: Video View Type
       Grid: Grid
       List: List
+    Playlist View Type:
+      Playlist View Type: Playlist View Type
+      Grid: Grid
+      List: List
     Thumbnail Preference:
       Thumbnail Preference: Thumbnail Preference
       Default: Default
@@ -854,6 +858,7 @@ Settings:
     Remember Volume: Remember Volume
     Skip Silence: Skip Silence
     Show Skip Silence Toggle: Show Skip Silence Toggle
+    Enable Skip Silence by Default: Enable Skip Silence by Default
     Enable Video Zoom: Enable Video Zoom
     Voice-over Translation:
       Title: Voice-over translation
@@ -1195,6 +1200,7 @@ Settings:
       successfully imported
     Invalid subscriptions file: Invalid subscriptions file
     Invalid history file: Invalid history file
+    Invalid JSON row, skipping item: 'Invalid JSON at row {row}, skipping item'
     Subscriptions have been successfully exported: Subscriptions have been successfully
       exported
     History object has insufficient data, skipping item: History object has insufficient
@@ -1553,6 +1559,11 @@ Video:
   Queue Video Count: '{count} video | {count} videos'
   Remove from Queue: 'Remove {title} from queue'
   Drag to Reorder Queue: 'Drag {title} to reorder queue'
+  Reorder Queue Item: 'Reorder {title}'
+  Reorder Queue Item Instructions: Use the Up and Down Arrow keys to move this video in the queue.
+  Queue Item Moved: 'Moved {title} to position {position} of {total}.'
+  Queue Item Cannot Move Up: 'Cannot move {title} up. It is already at position 1 of {total}.'
+  Queue Item Cannot Move Down: 'Cannot move {title} down. It is already at position {total} of {total}.'
   Metadata: Video information
   Close Metadata: Close video information
   Metadata Cache:
@@ -1990,6 +2001,7 @@ Context Menu:
   Blue: Blue
   Purple: Purple
   New Tab: New Tab
+  New Window: New Window
   Reopen Closed Tab: Reopen Closed Tab
   Reload Tab: Reload Tab
   Reload Tabs: Reload Tabs
@@ -2118,6 +2130,7 @@ Tooltips:
     Use YouTube-style Shorts: Displays Shorts in a portrait grid on subscription and channel pages and uses the YouTube-style Shorts player.
     Loop Shorts: When enabled, Shorts restart automatically. When disabled, Shorts stop at the end and show a replay button.
     Show Skip Silence Toggle: Shows an on/off toggle for skipping silence in the player's settings menu.
+    Enable Skip Silence by Default: Enables silence skipping for new tabs. Changing it in one tab does not affect other tabs.
     Enable Video Zoom: Shows the Zoom control in the player's settings menu and enables its keyboard shortcuts and panning controls.
     Voice-over Translation: Sends the video ID, duration, and selected language to the unofficial Yandex voice-over translation service when you request a translation. Disabled by default.
     Hold to Double Playback Speed: Hold the Spacebar or left mouse button over the player to temporarily double the current playback speed.
@@ -2334,6 +2347,44 @@ KeyboardShortcutPrompt:
   End: Seek to the end of the video
   Skip to Next Video: Skip to the next video in a playlist or next recommended video
   Skip to Previous Video: Skip to the previous video in a playlist
+CommandPalette:
+  Title: Command palette
+  Open: Open command palette
+  Search Label: Search commands
+  Search Placeholder: Search commands and settings…
+  Results: Commands
+  No Results: No matching commands
+  Result Count: 1 command found | {count} commands found
+  Move: Move
+  Run: Run
+  Keys:
+    Up: ↑
+    Down: ↓
+    Enter: Enter
+    Escape: Esc
+  Switch to Tab: 'Switch to tab: {title}'
+  Switch Profile: 'Switch profile: {name}'
+  Open Playlist: 'Open playlist: {name}'
+  Cancel Download: 'Cancel download: {title}'
+  Groups:
+    App: App
+    Navigation: Navigation
+    Settings: Settings
+    Tabs: Tabs
+    Profiles: Profiles
+    Playlists: Playlists
+    Downloads: Downloads
+    Playback: Playback
+  Unavailable:
+    Current Page: Already on this page
+    No History: No page in this direction
+    Desktop: Only available in the desktop app
+    Build: Not available in this build
+    One Tab: Open another tab first
+    Active Tab: This is the active tab
+    Active Profile: This is the active profile
+    Download Finished: This download is no longer running
+    Video: Open a video first
 Downloads:
   Downloads: Downloads
   Download: Download

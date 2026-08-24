@@ -204,8 +204,6 @@ export default defineComponent({
       // Same-tab navigation keeps the current layout while its skeleton loads.
       // A newly mounted watch tab falls back to the configured default instead.
       loadingTheatreMode: null,
-      suppressTabLoadingIndicator: false,
-      suppressTabLoadingIndicatorOnNextReload: false,
       applyDefaultTheatreModeAfterLoad: false,
       theatreLayoutAvailable: window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH,
       videoPlayerLoaded: false,
@@ -1068,12 +1066,6 @@ export default defineComponent({
         }
       }
     },
-    errorMessage(message) {
-      if (message) {
-        this.suppressTabLoadingIndicator = false
-        this.suppressTabLoadingIndicatorOnNextReload = false
-      }
-    },
     isTabPresented: {
       immediate: true,
       handler() {
@@ -1703,8 +1695,6 @@ export default defineComponent({
     },
 
     async reloadView({ preserveTitle = false } = {}) {
-      this.suppressTabLoadingIndicator = this.suppressTabLoadingIndicatorOnNextReload
-      this.suppressTabLoadingIndicatorOnNextReload = false
       const loadGeneration = ++this.videoLoadGeneration
       this.preparingVideoLoadGeneration = loadGeneration
       const requestedVideoId = this.tabRoute.params.id
@@ -2404,6 +2394,15 @@ export default defineComponent({
         videoId === this.tabRoute.params.id
     },
 
+    isYtDlpPlaybackRequested: function () {
+      return process.env.IS_ELECTRON &&
+        this.playbackEngineFallbackTarget !== 'built-in' &&
+        (
+          this.videoPlaybackEngine === 'yt-dlp' ||
+          this.playbackEngineFallbackTarget === 'yt-dlp'
+        )
+    },
+
     setRestrictedPlaybackError: function (type) {
       this.restrictedPlaybackError = type
       this.errorMessage = type === 'members'
@@ -2800,7 +2799,7 @@ export default defineComponent({
             }
 
             const tryingYtDlpForIpBlock =
-              this.playbackEngineFallbackTarget === 'yt-dlp' &&
+              this.isYtDlpPlaybackRequested() &&
               this.ipBlockDetectedInCurrentChain
 
             if (tryingYtDlpForIpBlock) {
@@ -2997,7 +2996,7 @@ export default defineComponent({
             }
           } else if (
             this.restrictedPlaybackError === null &&
-            this.playbackEngineFallbackTarget !== 'yt-dlp'
+            !this.isYtDlpPlaybackRequested()
           ) {
             // video might be region locked or something else. This leads to no formats being available
             this.showTabToast({
@@ -3958,8 +3957,6 @@ export default defineComponent({
     handleVideoLoaded: async function (mediaMetadata) {
       if (this.isLoading || this.preparingVideoLoadGeneration !== null) { return }
 
-      this.suppressTabLoadingIndicator = false
-      this.suppressTabLoadingIndicatorOnNextReload = false
       // Only used one time = remove after use
       this.oneTimeTimestamp = null
       this.sabrReloadCaptionIndex = null
@@ -5021,6 +5018,12 @@ export default defineComponent({
       this.activePlaybackEngineVersion = source.version
       this.errorMessage = null
 
+      if (!this.hasResolvedVideoTitle && source.title) {
+        this.videoTitle = source.title
+        this.hasResolvedVideoTitle = true
+        this.updateTitle()
+      }
+
       this.alignActiveFormatWithAvailableSources()
 
       return true
@@ -5598,8 +5601,6 @@ export default defineComponent({
       try {
         await this.performSabrReload(payload, toastMessage)
       } catch (error) {
-        this.suppressTabLoadingIndicator = false
-        this.suppressTabLoadingIndicatorOnNextReload = false
         console.error('SABR reload failed', error)
         return false
       }
@@ -5632,7 +5633,6 @@ export default defineComponent({
       this.sabrReloadVideoQuality = this.normalizeVideoQuality(payload?.videoQuality) ||
         this.normalizeVideoQuality(this.currentVideoQuality) || null
       this.preserveTitleOnNextReload = true
-      this.suppressTabLoadingIndicatorOnNextReload = true
       this.showTabToast({ message: toastMessage, icon: ['fas', 'sync'] })
 
       const timestamp = this.getTimestamp()

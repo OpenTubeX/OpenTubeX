@@ -42,12 +42,18 @@ router.isReady().then(() => {
 
 // to avoid accessing electron api from web app build
 if (process.env.IS_ELECTRON) {
-  window.ftElectron.handleChangeView((route, tabId) => {
+  window.ftElectron.handleChangeView((route, tabId, toggle) => {
     if (typeof route === 'string' && (route === '/downloads' || route === '/settings' || route.startsWith('/settings/profile'))) {
       const view = route === '/downloads'
         ? 'downloads'
         : route.startsWith('/settings/profile') ? 'profile' : null
-      store.dispatch('showSettingsWindow', view)
+      const settingsWindowOpen = store.getters.getSettingsWindowOpen &&
+        !['about', 'downloads'].includes(store.getters.getSettingsWindowView)
+      if (toggle && route === '/settings' && settingsWindowOpen) {
+        store.dispatch('hideSettingsWindow')
+      } else {
+        store.dispatch('showSettingsWindow', view)
+      }
       return
     }
     const targetTabId = tabId ?? store.getters.getActiveTabId

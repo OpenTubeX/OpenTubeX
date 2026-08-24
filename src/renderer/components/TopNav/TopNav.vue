@@ -55,17 +55,6 @@
             :icon="['fas', 'search']"
           />
         </button>
-        <button
-          class="navNewWindowButton navButton"
-          :aria-label="t('Open New Window')"
-          :title="newWindowText"
-          @click="createNewWindow"
-        >
-          <FtIcon
-            class="navIcon"
-            :icon="['fas', 'clone']"
-          />
-        </button>
         <RouterLink
           v-if="!hideHeaderLogo"
           class="logo"
@@ -305,13 +294,6 @@ function historyForward(offset) {
   goToOffset(offset ?? 1)
 }
 
-const newWindowText = computed(() => {
-  return localizeAndAddKeyboardShortcutToActionTitle(
-    t('Open New Window'),
-    appKeyboardShortcuts.value.NEW_WINDOW
-  )
-})
-
 const isElectron = process.env.IS_ELECTRON
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 const moveDownloadsToAppHeader = computed(() => store.getters.getMoveDownloadsToAppHeader)
@@ -360,21 +342,6 @@ function toggleSettingsWindow() {
 
 function restoreSettingsWindow() {
   store.dispatch('restoreSettingsWindow')
-}
-
-function createNewWindow() {
-  // In the Electron build, use the dedicated IPC-based helper so that a real
-  // new BrowserWindow is created instead of a new tab via window.open.
-  if (process.env.IS_ELECTRON) {
-    openInternalPath({
-      path: landingPage.value,
-      doCreateNewWindow: true
-    })
-  } else {
-    const url = new URL(window.location.href)
-    url.hash = landingPage.value
-    window.open(url.toString(), '_blank', 'noreferrer')
-  }
 }
 
 const usingOnlySearchHistoryResults = computed(() => lastSuggestionQuery.value.length === 0)

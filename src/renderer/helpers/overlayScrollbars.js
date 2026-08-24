@@ -366,21 +366,29 @@ export function restoreOverlayScrollTop(element, scrollTop) {
  * @param {HTMLElement | null} contentElement the element whose rendered end defines the real scroll range
  */
 export function clampOverlayScrollTop(element, contentElement = null) {
+  if (element === document.body) {
+    const scrollOffsetElement = document.documentElement
+    const maximumScrollTop = getMaximumOverlayScrollTop(scrollOffsetElement, contentElement, window.innerHeight)
+    scrollOffsetElement.scrollTop = Math.min(scrollOffsetElement.scrollTop, maximumScrollTop)
+    return
+  }
+
   const instance = OverlayScrollbars(element)
+  const scrollOffsetElement = instance?.elements().scrollOffsetElement ?? element
   instance?.update(true)
-  const maximumScrollTop = getMaximumOverlayScrollTop(element, contentElement)
-  if (isScrollTopOutOfBounds(element, maximumScrollTop)) {
+  const maximumScrollTop = getMaximumOverlayScrollTop(scrollOffsetElement, contentElement)
+  if (isScrollTopOutOfBounds(scrollOffsetElement, maximumScrollTop)) {
     if (instance) {
       // Chromium can preserve the old overflow range when content shrinks
       // beneath a non-zero offset. Remeasure from the true origin so both the
       // viewport and OverlayScrollbars discard that stale range, then restore
       // the clamped position within the newly measured range.
-      element.scrollTop = 0
+      scrollOffsetElement.scrollTop = 0
       instance.update(true)
-      element.scrollTop = Math.min(maximumScrollTop, instance.state().overflowAmount.y)
+      scrollOffsetElement.scrollTop = Math.min(maximumScrollTop, instance.state().overflowAmount.y)
       instance.update(true)
     } else {
-      element.scrollTop = maximumScrollTop
+      scrollOffsetElement.scrollTop = maximumScrollTop
     }
   }
 }
@@ -400,14 +408,19 @@ export function isOverlayScrollTopOutOfBounds(element, contentElement = null) {
 /**
  * @param {HTMLElement} element
  * @param {HTMLElement | null} contentElement
+ * @param {number} [viewportHeight]
  */
-function getMaximumOverlayScrollTop(element, contentElement) {
+function getMaximumOverlayScrollTop(element, contentElement, viewportHeight = element.clientHeight) {
+  const contentMarginBlockEnd = contentElement === null
+    ? 0
+    : Number.parseFloat(getComputedStyle(contentElement).marginBlockEnd) || 0
   const contentEnd = contentElement === null
     ? element.scrollHeight
     : offsetTopFromDocument(contentElement) - offsetTopFromDocument(element) +
       contentElement.offsetHeight +
+      contentMarginBlockEnd +
       Number.parseFloat(getComputedStyle(element).paddingBottom)
-  return Math.max(0, contentEnd - element.clientHeight)
+  return Math.max(0, contentEnd - viewportHeight)
 }
 
 /**

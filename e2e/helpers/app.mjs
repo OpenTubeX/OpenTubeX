@@ -177,6 +177,14 @@ export async function waitForAppReady(page) {
   await expect(page.locator('.tabBar')).toBeVisible()
 }
 
+/** Opens a new app window through the tab bar's empty-space context menu. */
+export async function openNewWindowFromTabBar(app, page) {
+  const newWindowPromise = app.electronApp.waitForEvent('window')
+  await page.locator(sel.newTabButton).click({ button: 'right' })
+  await page.getByRole('menuitem', { name: 'New Window', exact: true }).click()
+  return newWindowPromise
+}
+
 /**
  * Attaches a screenshot to the HTML report, so visual behaviour can be
  * reviewed there instead of only on failure. Never fails the test: a

@@ -442,6 +442,8 @@
       </h4>
       <FtLoader
         v-if="isLoading"
+        :tab-loading-indicator="false"
+        class="commentLoader"
       />
       <div
         v-if="!isLoading && !isLoadingMoreComments"

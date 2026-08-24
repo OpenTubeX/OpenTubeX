@@ -10,7 +10,10 @@
         <h3 dir="auto">
           {{ download.title }}
         </h3>
-        <p class="downloadStatus">
+        <p
+          class="downloadStatus"
+          :aria-hidden="inProgress ? 'true' : undefined"
+        >
           {{ statusText }}
         </p>
         <p
@@ -23,12 +26,18 @@
         <div
           v-if="inProgress"
           class="progressTrack"
-          :aria-label="statusText"
+          role="progressbar"
+          :aria-label="download.title || t('Downloads.Downloading')"
+          :aria-valuenow="download.status === 'downloading' ? progressPercentage : undefined"
+          :aria-valuetext="statusText"
+          aria-valuemin="0"
+          aria-valuemax="100"
         >
           <div
             class="progressFill"
             :class="{ indeterminate: download.status === 'processing' }"
-            :style="{ inlineSize: `${download.percent}%` }"
+            :style="{ inlineSize: `${progressPercentage}%` }"
+            aria-hidden="true"
           />
         </div>
         <p
@@ -135,6 +144,11 @@ const props = defineProps({
 const emit = defineEmits(['clear', 'open', 'play', 'remove', 'retry'])
 const { t } = useI18n()
 const inProgress = computed(() => ['downloading', 'processing'].includes(props.download.status))
+const progressPercentage = computed(() => (
+  Number.isFinite(props.download.percent)
+    ? Math.min(100, Math.max(0, props.download.percent))
+    : 0
+))
 const canRetry = computed(() => (
   ['failed', 'cancelled'].includes(props.download.status) &&
   (props.download.retryPayload || props.download.videoId || props.download.playlistId)
@@ -203,7 +217,7 @@ const errorText = computed(() => {
 })
 const statusText = computed(() => {
   if (props.download.status === 'downloading') {
-    return [`${props.download.percent.toFixed(1)}%`, props.download.speed, props.download.eta ? `ETA ${props.download.eta}` : null].filter(Boolean).join(' • ')
+    return [`${progressPercentage.value.toFixed(1)}%`, props.download.speed, props.download.eta ? `ETA ${props.download.eta}` : null].filter(Boolean).join(' • ')
   }
   switch (props.download.status) {
     case 'processing':

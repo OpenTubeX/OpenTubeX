@@ -6,6 +6,7 @@ import { gunzipSync } from 'node:zlib'
 import { goTo, repoRoot, sel, test, expect } from '../../helpers/app.mjs'
 import { fixtureKey } from '../../helpers/innertube.mjs'
 import { demoPlayerResponse, routeWatchPageHtml } from '../../helpers/media.mjs'
+import { watchViewHandle } from '../../helpers/watch.mjs'
 
 const fixtureDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'watch', 'shows-video-metadata')
 const sharedDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'shared')
@@ -144,6 +145,57 @@ function expectNoRenderErrors(errors) {
   )
   expect(renderErrors, `Renderer errors:\n${errors.join('\n')}`).toEqual([])
 }
+
+test('an IP-blocked response still uses the configured yt-dlp extractor and title', async ({ app, page }) => {
+  await mockBlockedVideo({
+    app,
+    page,
+    omitVideoMetadata: true
+  })
+  await page.route('https://example.invalid/recovered.m3u8', route => route.fulfill({
+    contentType: 'application/x-mpegURL',
+    body: '#EXTM3U\n'
+  }))
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    globalThis.__ipBlockedYtDlpCalls = 0
+    ipcMain.removeHandler('yt-dlp-get-playback-info')
+    ipcMain.handle('yt-dlp-get-playback-info', () => {
+      globalThis.__ipBlockedYtDlpCalls++
+      return {
+        title: 'Title recovered by yt-dlp',
+        isLive: false,
+        liveStatus: 'not_live',
+        hlsManifestUrl: 'https://example.invalid/recovered.m3u8',
+        formats: [],
+        duration: 60,
+        version: 'test'
+      }
+    })
+  })
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateVideoPlaybackEngine', 'yt-dlp')
+  })
+
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+
+  await expect.poll(() => app.electronApp.evaluate(
+    () => globalThis.__ipBlockedYtDlpCalls
+  )).toBeGreaterThan(0)
+  const watchView = await watchViewHandle(page)
+  await expect.poll(() => watchView.evaluate(view => ({
+    title: view.videoTitle,
+    titleResolved: view.hasResolvedVideoTitle
+  }))).toEqual({
+    title: 'Title recovered by yt-dlp',
+    titleResolved: true
+  })
+  expect(await watchView.evaluate(view => view.errorMessage ?? '')).not.toContain('blocked')
+  await expect(page.locator('.infoArea .videoTitle')).toHaveText('Title recovered by yt-dlp')
+  await expect(page.locator('.tabBar .tab.active')).toContainText('Title recovered by yt-dlp')
+})
 
 test('watch page IP-block error does not break later navigation', async ({ app, page }) => {
   const errors = captureRenderErrors(page)

@@ -26,6 +26,74 @@ function historyEntry(videoId, title, timeWatched, isWatched = false, extra = {}
   }
 }
 
+function matchingHistoryEntries(prefix, count, timeOffset = 0) {
+  return Array.from({ length: count }, (_, index) => {
+    const suffix = String(index).padStart(6, '0')
+    return historyEntry(
+      `${prefix.toLowerCase()}${suffix}`,
+      `${prefix} match ${suffix}`,
+      now - timeOffset - index
+    )
+  })
+}
+
+async function scrollPageToEnd(page) {
+  await page.evaluate(() => {
+    document.activeElement?.blur()
+    window.scrollTo(0, document.documentElement.scrollHeight)
+  })
+  await expect.poll(() => page.evaluate(() => {
+    const maximumScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+    return Math.abs(window.scrollY - maximumScrollY)
+  })).toBeLessThanOrEqual(1)
+}
+
+async function expectPageScrollWithinRenderedRange(page) {
+  await expect.poll(() => page.evaluate(() => {
+    const content = document.querySelector('.app > .routerView')
+    const contentBox = content.getBoundingClientRect()
+    const contentMarginBottom = Number.parseFloat(getComputedStyle(content).marginBottom) || 0
+    const renderedMaximumScrollY = Math.max(
+      0,
+      contentBox.bottom + window.scrollY + contentMarginBottom - window.innerHeight
+    )
+    const documentMaximumScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+    const scrollbar = document.querySelector('body > .os-scrollbar-vertical')
+    const track = scrollbar?.querySelector('.os-scrollbar-track')
+    const handle = scrollbar?.querySelector('.os-scrollbar-handle')
+    let scrollbarMatchesOverflow = scrollbar?.classList.contains('os-scrollbar-unusable') === true
+
+    if (documentMaximumScrollY > 1 && track && handle) {
+      const trackBox = track.getBoundingClientRect()
+      const handleBox = handle.getBoundingClientRect()
+      const trackRange = trackBox.height - handleBox.height
+      const expectedHandleOffset = window.scrollY / documentMaximumScrollY * trackRange
+      const handleOffset = handleBox.top - trackBox.top
+      scrollbarMatchesOverflow =
+        scrollbar.classList.contains('os-scrollbar-visible') &&
+        !scrollbar.classList.contains('os-scrollbar-unusable') &&
+        Math.abs(handleOffset - expectedHandleOffset) <= 1
+    }
+
+    return {
+      documentRangeMatchesContent: Math.abs(documentMaximumScrollY - renderedMaximumScrollY) <= 1,
+      scrollWithinRenderedRange: window.scrollY <= renderedMaximumScrollY + 1,
+      scrollbarMatchesOverflow
+    }
+  })).toEqual({
+    documentRangeMatchesContent: true,
+    scrollWithinRenderedRange: true,
+    scrollbarMatchesOverflow: true
+  })
+}
+
+async function updateInputWithoutScrolling(input, value) {
+  await input.evaluate((element, nextValue) => {
+    element.value = nextValue
+    element.dispatchEvent(new Event('input', { bubbles: true }))
+  }, value)
+}
+
 test.use({
   seed: {
     settings: { uiRoundness: 200 },
@@ -186,6 +254,101 @@ test.describe('watch history', () => {
         latestRecords.find(record => record.videoId === 'eeeeeeeeeee')?.isWatched === false &&
         latestRecords.find(record => record.videoId === 'fffffffffff')?.isWatched === true
     }).toBe(true)
+  })
+})
+
+test.describe('history search pagination', () => {
+  test.use({
+    seed: {
+      settings: {
+        generalAutoLoadMorePaginatedItemsEnabled: false,
+        uiScale: 125
+      },
+      history: [
+        ...matchingHistoryEntries('Decoy', 100),
+        ...matchingHistoryEntries('Alpha', 220, 1000),
+        ...matchingHistoryEntries('Beta', 130, 2000),
+        ...matchingHistoryEntries('Gamma', 20, 3000)
+      ]
+    }
+  })
+
+  test('loads every filtered batch and resets the limit for a new query', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const historySearch = page.locator('.ft-input-component').filter({
+      has: page.getByRole('textbox', { name: 'Search in History' })
+    })
+    const filterInput = historySearch.getByRole('textbox', { name: 'Search in History' })
+    const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
+    const loadMoreButton = page.getByRole('button', { name: 'Load More Videos' })
+
+    await filterInput.fill('Alpha match')
+    await expect(videos.first()).toContainText('Alpha match')
+    await expect(videos).toHaveCount(100)
+    await expect(loadMoreButton).toBeVisible()
+
+    await loadMoreButton.click()
+    await expect(videos).toHaveCount(200)
+    await expect(loadMoreButton).toBeVisible()
+
+    await scrollPageToEnd(page)
+    await updateInputWithoutScrolling(filterInput, 'Beta match')
+    await expect(videos.first()).toContainText('Beta match')
+    await expect(videos).toHaveCount(100)
+    await expect(loadMoreButton).toBeVisible()
+    await expectPageScrollWithinRenderedRange(page)
+
+    await loadMoreButton.click()
+    await expect(videos).toHaveCount(130)
+    await expect(loadMoreButton).toHaveCount(0)
+
+    await scrollPageToEnd(page)
+    await historySearch.getByRole('button', { name: 'Clear Input' }).evaluate(button => button.click())
+    await expect(filterInput).toHaveValue('')
+    await expect(videos.first()).toContainText('Decoy match')
+    await expect(videos).toHaveCount(100)
+    await expect(loadMoreButton).toBeVisible()
+    await expectPageScrollWithinRenderedRange(page)
+
+    await scrollPageToEnd(page)
+    await updateInputWithoutScrolling(filterInput, 'Gamma match')
+    await expect(videos.first()).toContainText('Gamma match')
+    await expect(videos).toHaveCount(20)
+    await expect(loadMoreButton).toHaveCount(0)
+    await expectPageScrollWithinRenderedRange(page)
+  })
+})
+
+test.describe('history search automatic pagination', () => {
+  test.use({
+    seed: {
+      settings: {
+        generalAutoLoadMorePaginatedItemsEnabled: true,
+        uiScale: 125
+      },
+      history: [
+        ...matchingHistoryEntries('Decoy', 100),
+        ...matchingHistoryEntries('Automatic', 150, 1000)
+      ]
+    }
+  })
+
+  test('loads the next filtered batch when the pagination control enters view', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const filterInput = page.getByRole('textbox', { name: 'Search in History' })
+    const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
+
+    await filterInput.fill('Automatic match')
+    await expect(videos.first()).toContainText('Automatic match')
+    await expect(videos).toHaveCount(100)
+    await expect(page.getByRole('button', { name: 'Load More Videos' })).toHaveCount(0)
+    await expect(page.locator('.ft-auto-load-next-page-wrapper')).toBeAttached()
+
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    await expect(videos).toHaveCount(150)
+    await expect(page.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
   })
 })
 

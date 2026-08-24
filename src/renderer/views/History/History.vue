@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="historyContent">
     <FtCard
       class="card"
     >
@@ -171,7 +171,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
 
@@ -188,6 +188,7 @@ import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store'
 
 import { canMarkHistoryEntryAsWatched } from '../../helpers/history'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { ctrlFHandler, debounce, getIconForSortPreference, showToast } from '../../helpers/utils'
 import { useTabContext } from '../../tabs/TabContext'
 
@@ -205,6 +206,8 @@ const doCaseSensitiveSearch = ref(false)
 const showLoadMoreButton = ref(false)
 const query = ref('')
 const activeData = ref([])
+const historyContent = useTemplateRef('historyContent')
+const searchBar = useTemplateRef('searchBar')
 const historyCleanupPeriod = ref('30')
 const customHistoryCleanupDays = ref('')
 const showMarkAllPrompt = ref(false)
@@ -365,6 +368,7 @@ function filterHistory() {
   if (query.value.length === 0) {
     activeData.value = fullData.value
     showLoadMoreButton.value = activeData.value.length < historyCacheSorted.value.length
+    clampHistoryScroll()
     return
   }
 
@@ -375,8 +379,20 @@ function filterHistory() {
     filteredQuery = filterVideosWithQuery(historyCacheSorted.value, query.value.toLowerCase(), (s) => s.toLowerCase())
   }
 
-  activeData.value = filteredQuery.length < searchDataLimit.value ? filteredQuery : filteredQuery.slice(0, searchDataLimit.value)
-  showLoadMoreButton.value = activeData.value.length > searchDataLimit.value
+  const filteredResultCount = filteredQuery.length
+
+  showLoadMoreButton.value = filteredResultCount > searchDataLimit.value
+  activeData.value = filteredResultCount < searchDataLimit.value ? filteredQuery : filteredQuery.slice(0, searchDataLimit.value)
+  clampHistoryScroll()
+}
+
+function clampHistoryScroll() {
+  nextTick(() => {
+    const content = historyContent.value?.closest('.app > .routerView')
+    if (content instanceof HTMLElement) {
+      clampOverlayScrollTop(document.body, content)
+    }
+  })
 }
 
 const filterHistoryAsync = debounce(filterHistory, 500)
@@ -426,8 +442,6 @@ if (oldQuery != null && oldQuery !== '') {
   // Only display unfiltered data when no query used last time
   filterHistory()
 }
-
-const searchBar = useTemplateRef('searchBar')
 
 /**
  * @param {KeyboardEvent} event

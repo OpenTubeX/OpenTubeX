@@ -504,6 +504,7 @@ Settings:
     All subscriptions have been successfully imported: 'All subscriptions have been successfully imported'
     Invalid subscriptions file: 'Invalid subscriptions file'
     Invalid history file: 'Invalid history file'
+    Invalid JSON row, skipping item: 'Invalid JSON at row {row}, skipping item'
     Subscriptions have been successfully exported: 'Subscriptions have been successfully exported'
     History object has insufficient data, skipping item: 'History object has insufficient data, skipping item'
     All watched history has been successfully imported: 'All watched history has been successfully imported'

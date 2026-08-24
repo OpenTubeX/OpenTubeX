@@ -1,4 +1,4 @@
-import { goTo, sel, setPlayerFullscreen, test, expect } from '../../helpers/app.mjs'
+import { goTo, setPlayerFullscreen, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import {
   mockPlayableWatchPage,
@@ -578,110 +578,6 @@ test('a SABR reload preserves the tab title while adding its resume timestamp', 
   await expect(page).toHaveTitle(`${titles.titleBeforeReload} - OpenTubeX`)
 })
 
-test('a background SABR refresh does not flash the tab loading indicator', async ({ app, page }) => {
-  await mockUnplayableWatchPage(app, page)
-  await goTo(page, 'history')
-  await page.getByText('SABR test video').click()
-  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
-
-  const watchView = await watchViewHandle(page)
-  const watchTabId = await watchView.evaluate(view => view.tabId)
-  const watchTab = page.locator(`.tab[data-tab-id="${watchTabId}"]`)
-  const watchContent = page.locator(`.tabContent[data-tab-id="${watchTabId}"]`)
-  const historyTab = await page.evaluate(() => window.ftElectron.tabs.create({
-    route: '/history',
-    title: 'History',
-    makeActive: false,
-    preloadInBackground: true
-  }))
-  const historyTabElement = page.locator(`.tab[data-tab-id="${historyTab.id}"]`)
-  await expect(page.locator(sel.tabs)).toHaveCount(2)
-
-  await watchView.evaluate(view => {
-    view.activeFormat = 'dash'
-    view.manifestMimeType = 'application/sabr+json'
-    view.manifestSrc = 'sabr://test'
-    view.isLive = false
-    view.isPostLiveDvr = false
-    view.isLoading = false
-    view.getTimestamp = () => 42
-    view.showTabToast = () => {}
-    view.handleRouteChange = async () => {
-      window.__backgroundSabrRouteChangeStarted = true
-      await new Promise(resolve => { window.__finishBackgroundSabrRouteChange = resolve })
-    }
-    view.getVideoInformationLocal = async () => {
-      window.__backgroundSabrRefreshStarted = true
-      await new Promise(resolve => { window.__finishBackgroundSabrMetadata = resolve })
-      view.ytDlpStreamsPending = true
-      view.isLoading = false
-      window.__backgroundSabrStreamsStarted = true
-      await new Promise(resolve => { window.__finishBackgroundSabrStreams = resolve })
-      view.ytDlpStreamsPending = false
-    }
-
-    window.__backgroundSabrRouteChangeStarted = false
-    window.__backgroundSabrRefreshStarted = false
-    window.__backgroundSabrStreamsStarted = false
-    window.__backgroundSabrRefreshPromise = null
-    window.setTimeout(() => {
-      window.__backgroundSabrRefreshPromise = view.onPlayerReloadRequested({ wasPlaying: true })
-    }, 250)
-  })
-
-  try {
-    await historyTabElement.click()
-    await expect(historyTabElement).toHaveClass(/active/)
-    await expect.poll(() => page.evaluate(() => window.__backgroundSabrRouteChangeStarted)).toBe(true)
-    await watchView.evaluate(view => view.handleVideoLoaded({}))
-    await expect(watchContent.locator('.videoLayout')).toHaveAttribute('data-tab-loading-suppressed', '')
-
-    await page.evaluate(() => window.__finishBackgroundSabrRouteChange())
-    await expect.poll(() => page.evaluate(() => window.__backgroundSabrRefreshStarted)).toBe(true)
-    await expect(watchContent.locator('.videoPlayerPlaceholder')).toHaveCount(1)
-    await expect(watchContent.locator('.videoLayout')).toHaveAttribute('data-tab-loading-suppressed', '')
-    await expect(watchContent.locator('[data-tab-loading-indicator]')).not.toHaveCount(0)
-    await expect(watchTab).not.toHaveClass(/loading/)
-
-    await page.evaluate(() => window.__finishBackgroundSabrMetadata())
-    await expect.poll(() => page.evaluate(() => window.__backgroundSabrStreamsStarted)).toBe(true)
-    await expect(watchContent.locator('.streamPlaceholder')).toHaveCount(1)
-    await expect(watchContent.locator('.videoLayout')).toHaveAttribute('data-tab-loading-suppressed', '')
-    await expect(watchContent.locator('[data-tab-loading-indicator]')).not.toHaveCount(0)
-    await expect(watchTab).not.toHaveClass(/loading/)
-
-    await watchView.evaluate(view => { view.suppressTabLoadingIndicator = false })
-    await expect(watchContent.locator('.videoLayout')).not.toHaveAttribute('data-tab-loading-suppressed', '')
-    await page.waitForTimeout(250)
-    await expect(watchContent.locator('[data-tab-loading-indicator]')).not.toHaveCount(0)
-    await expect(watchTab).not.toHaveClass(/loading/)
-
-    await watchView.evaluate(view => { view.videoLoadGeneration++ })
-    await expect(watchTab).toHaveClass(/loading/)
-
-    await page.evaluate(async () => {
-      window.__finishBackgroundSabrStreams()
-      await window.__backgroundSabrRefreshPromise
-    })
-    await expect(watchContent.locator('[data-tab-loading-indicator]')).toHaveCount(0)
-
-    await watchView.evaluate(view => { view.isLoading = true })
-    await expect(watchTab).toHaveClass(/loading/)
-    await watchView.evaluate(view => { view.isLoading = false })
-    await expect(watchTab).not.toHaveClass(/loading/)
-  } finally {
-    await page.evaluate(async () => {
-      window.__finishBackgroundSabrRouteChange?.()
-      window.__finishBackgroundSabrMetadata?.()
-      await new Promise(resolve => window.setTimeout(resolve, 0))
-      window.__finishBackgroundSabrStreams?.()
-      await window.__backgroundSabrRefreshPromise
-    })
-    await watchView.dispose()
-  }
-})
-
 test('a second SABR failure after successful playback refetches instead of dropping to legacy', async ({ app, page }) => {
   await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
@@ -819,6 +715,64 @@ test('an error from the outgoing player is ignored while the view reloads', asyn
   expect(result.reloads).toHaveLength(0)
   expect(result.finalFormat).toBe('dash')
   expect(result.errorMessage).toBe('')
+})
+
+test('a loaded event from the outgoing player is ignored while the view reloads', async ({ app, page }) => {
+  await mockUnplayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const watchView = await watchViewHandle(page)
+  const result = await watchView.evaluate(async (view) => {
+    let historyCalls = 0
+    let playlistCalls = 0
+    let localPlaylistCalls = 0
+    let timestampCalls = 0
+    let stateDuringPreparation = null
+
+    view.isLoading = false
+    view.videoPlayerLoaded = false
+    view.isUpcoming = false
+    view.rememberHistory = true
+    view.oneTimeTimestamp = 73
+    view.sabrReloadCaptionIndex = 2
+    view.sabrReloadPlaybackRate = 1.5
+    view.addToHistory = () => { historyCalls++ }
+    view.handlePlaylistPersisting = () => { playlistCalls++ }
+    view.updateLocalPlaylistLastPlayedAtSometimes = () => { localPlaylistCalls++ }
+    view.consumeTimestamp = async () => { timestampCalls++ }
+    view.getVideoInformationLocal = async () => {}
+    view.handleRouteChange = async () => {
+      await Promise.resolve()
+      await view.handleVideoLoaded({})
+      stateDuringPreparation = {
+        oneTimeTimestamp: view.oneTimeTimestamp,
+        sabrReloadCaptionIndex: view.sabrReloadCaptionIndex,
+        sabrReloadPlaybackRate: view.sabrReloadPlaybackRate,
+        videoPlayerLoaded: view.videoPlayerLoaded,
+        historyCalls,
+        playlistCalls,
+        localPlaylistCalls,
+        timestampCalls
+      }
+    }
+
+    await view.reloadView()
+    return stateDuringPreparation
+  })
+
+  expect(result).toEqual({
+    oneTimeTimestamp: 73,
+    sabrReloadCaptionIndex: 2,
+    sabrReloadPlaybackRate: 1.5,
+    videoPlayerLoaded: false,
+    historyCalls: 0,
+    playlistCalls: 0,
+    localPlaylistCalls: 0,
+    timestampCalls: 0
+  })
 })
 
 test('a SABR reload request from the outgoing player is ignored', async ({ app, page }) => {
