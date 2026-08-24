@@ -2394,6 +2394,15 @@ export default defineComponent({
         videoId === this.tabRoute.params.id
     },
 
+    isYtDlpPlaybackRequested: function () {
+      return process.env.IS_ELECTRON &&
+        this.playbackEngineFallbackTarget !== 'built-in' &&
+        (
+          this.videoPlaybackEngine === 'yt-dlp' ||
+          this.playbackEngineFallbackTarget === 'yt-dlp'
+        )
+    },
+
     setRestrictedPlaybackError: function (type) {
       this.restrictedPlaybackError = type
       this.errorMessage = type === 'members'
@@ -2790,7 +2799,7 @@ export default defineComponent({
             }
 
             const tryingYtDlpForIpBlock =
-              this.playbackEngineFallbackTarget === 'yt-dlp' &&
+              this.isYtDlpPlaybackRequested() &&
               this.ipBlockDetectedInCurrentChain
 
             if (tryingYtDlpForIpBlock) {
@@ -2987,7 +2996,7 @@ export default defineComponent({
             }
           } else if (
             this.restrictedPlaybackError === null &&
-            this.playbackEngineFallbackTarget !== 'yt-dlp'
+            !this.isYtDlpPlaybackRequested()
           ) {
             // video might be region locked or something else. This leads to no formats being available
             this.showTabToast({
@@ -5008,6 +5017,12 @@ export default defineComponent({
       this.activePlaybackEngine = 'yt-dlp'
       this.activePlaybackEngineVersion = source.version
       this.errorMessage = null
+
+      if (!this.hasResolvedVideoTitle && source.title) {
+        this.videoTitle = source.title
+        this.hasResolvedVideoTitle = true
+        this.updateTitle()
+      }
 
       this.alignActiveFormatWithAvailableSources()
 

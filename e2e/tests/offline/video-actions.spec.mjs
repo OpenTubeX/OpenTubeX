@@ -76,6 +76,7 @@ test('persists the yt-dlp playback cache across app restarts', async ({ app, pag
     manifestSrc: 'data:application/dash+xml;charset=UTF-8,manifest',
     manifestMimeType: 'application/dash+xml',
     legacyFormats: [],
+    title: 'Cached video title',
     isLive: false,
     version: '2026.08.13'
   }
@@ -99,6 +100,7 @@ test('limits persisted yt-dlp playback entries by UTF-8 byte size', async ({ pag
     manifestSrc: `data:application/dash+xml;charset=UTF-8,${'€'.repeat(700_000)}`,
     manifestMimeType: 'application/dash+xml',
     legacyFormats: [],
+    title: 'Cached video title',
     isLive: false,
     version: '2026.08.13'
   }
@@ -121,6 +123,7 @@ test('prefers evicting yt-dlp playback entries without open tabs', async ({ page
       manifestSrc: 'data:application/dash+xml;charset=UTF-8,manifest',
       manifestMimeType: 'application/dash+xml',
       legacyFormats: [],
+      title: 'Cached video title',
       isLive: false,
       version: '2026.08.13'
     }
@@ -221,7 +224,7 @@ test.describe('video downloads', () => {
     await writeFile(executable, [
       '#!/bin/sh',
       `printf '%s\\n' "$@" > "${capturedArgs}"`,
-      'printf \'%s\\n\' \'{"formats":[{"format_id":"140","available_at":123}]}\''
+      'printf \'%s\\n\' \'{"title":"Playback title","formats":[{"format_id":"140","available_at":123}]}\''
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
@@ -240,6 +243,7 @@ test.describe('video downloads', () => {
 
     passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
     expect(passedArguments).not.toContain('--extractor-args')
+    expect(info.title).toBe('Playback title')
     expect(info.formats[0].availableAt).toBe(123)
   })
 
