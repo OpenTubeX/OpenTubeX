@@ -49,6 +49,7 @@ import { handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYt
 import { generatePoToken } from './poTokenGenerator'
 import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
 import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isNonPublicNetworkAddress, isOpenTubeXUrl } from './utils'
+import { isInvidiousInstanceUrl } from './invidiousAuthorization'
 import { TabManager, setupTabsIPC } from './tabs/TabManager'
 import { clearAllTabSessions, loadAllTabSessions } from './tabs/TabSessionStore'
 import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../renderer/helpers/share'
@@ -1973,7 +1974,7 @@ function runApp() {
       } else if (webContents) {
         const invidiousAuthorization = invidiousAuthorizations.get(webContents.id)
 
-        if (invidiousAuthorization && url.startsWith(invidiousAuthorization.url)) {
+        if (invidiousAuthorization && isInvidiousInstanceUrl(url, invidiousAuthorization.url)) {
           requestHeaders.Authorization = invidiousAuthorization.authorization
         }
       }
@@ -2096,7 +2097,7 @@ function runApp() {
           if (rawWebContentsId) {
             const invidiousAuthorization = invidiousAuthorizations.get(parseInt(rawWebContentsId))
 
-            if (invidiousAuthorization && url.startsWith(invidiousAuthorization.url)) {
+            if (invidiousAuthorization && isInvidiousInstanceUrl(url, invidiousAuthorization.url)) {
               headers = {
                 Authorization: invidiousAuthorization.authorization
               }
