@@ -2456,6 +2456,7 @@ Downloads:
   Download Complete: Download complete
   Download Cancelled: Download canceled
   Download Failed: Download failed
+  File Name Shortened: The file name was shortened because the video title was too long.
   Download Failure Hint: Check {issuesLink}, then try switching the yt-dlp channel to Nightly or Master in Settings → Advanced → External Software.
   yt-dlp YouTube Issues: recent yt-dlp issues for YouTube
   Automatic Download Started: Automatic download started

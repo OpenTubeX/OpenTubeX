@@ -93,6 +93,11 @@
   white-space: pre-wrap;
 }
 
+.downloadWarning {
+  color: var(--primary-color);
+  font-size: 0.9rem;
+}
+
 .destinationList {
   list-style: none;
   margin-block: 4px;

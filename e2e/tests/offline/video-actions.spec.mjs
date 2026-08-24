@@ -225,6 +225,43 @@ test.describe('video downloads', () => {
     expect(separatorSpacing.below).toBe(separatorSpacing.above)
   })
 
+  test('shortens overly long generated file names and warns when it happens', async ({ app, page }) => {
+    const downloadedFile = path.join(app.userDataDir, 'shortened-title.webm')
+    const executable = path.join(app.userDataDir, 'long-title-yt-dlp.sh')
+    const capturedArgs = path.join(app.userDataDir, 'long-title-yt-dlp-args.txt')
+    const longTitle = '界'.repeat(80)
+    const metadataLine = `__OPENTUBEX_METADATA__:${JSON.stringify('eeeeeeeeeee')}\t${JSON.stringify(longTitle)}\tnull`
+    await writeFile(downloadedFile, '')
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf '%s\\n' "$@" > '${capturedArgs}'`,
+      `printf '%s\\n' '${metadataLine}'`,
+      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\t640\\t360\\t${downloadedFile}\\n'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    await goTo(page, 'history')
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Download Video' }).click()
+    await page.getByRole('button', { name: 'Download', exact: true }).click()
+
+    await expect(page.getByText('Download complete', { exact: true })).toBeVisible()
+    await expect(page.getByText('The file name was shortened because the video title was too long.')).toBeVisible()
+    const passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
+    expect(passedArguments[passedArguments.indexOf('--output') + 1]).toBe('%(title).200B [%(id)s].%(ext)s')
+
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+    await goTo(page, 'downloads')
+    const downloadRow = page.locator('.downloadRow').filter({ hasText: longTitle })
+    await expect(downloadRow.getByText('The file name was shortened because the video title was too long.')).toBeVisible()
+  })
+
   test('can retry playback extraction with yt-dlp default clients', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'capture-yt-dlp-playback-args.sh')
     const capturedArgs = path.join(app.userDataDir, 'captured-yt-dlp-playback-args.txt')
@@ -532,6 +569,7 @@ test.describe('video downloads', () => {
     await goTo(page, 'downloads')
     const downloadRow = page.locator('.downloadRow').filter({ hasText: currentTitle })
     await expect(downloadRow).toBeVisible()
+    await expect(downloadRow.locator('.downloadWarning')).toHaveCount(0)
     await expect(downloadRow.locator('.downloadThumbnail')).toHaveAttribute('src', currentThumbnail)
   })
 
