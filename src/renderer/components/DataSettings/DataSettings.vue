@@ -202,6 +202,7 @@ import {
   getLibreTubeSubscriptions,
   isLibreTubeWatchHistoryBackup,
 } from '../../helpers/libretube'
+import { parseLineDelimitedJson } from '../../helpers/line-delimited-json'
 
 const IMPORT_DIRECTORY_ID = 'data-settings-import'
 const START_IN_DIRECTORY = 'downloads'
@@ -267,6 +268,32 @@ function parseImportedJson(content, invalidMessage) {
   }
 }
 
+/**
+ * @param {string} content
+ * @returns {unknown[] | null}
+ */
+function parseImportedLineDelimitedJson(content) {
+  const { records, errors } = parseLineDelimitedJson(content)
+
+  errors.forEach((error) => {
+    console.error('Unable to parse imported JSON row', error)
+    showToast({
+      message: t('Settings.Data Settings.Invalid JSON row, skipping item', { row: error.rowNumber }),
+      icon: ['fas', 'circle-exclamation'],
+    })
+  })
+
+  return records.length === 0 ? null : records
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is Record<string, unknown>}
+ */
+function isJsonObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
+
 const SUBSCRIPTIONS_PROMPT_VALUES = [
   'freetube',
   'youtubenew',
@@ -325,7 +352,10 @@ async function importSubscriptions() {
   if (filename.endsWith('.csv')) {
     importCsvYouTubeSubscriptions(content)
   } else if (filename.endsWith('.db')) {
-    importFreeTubeSubscriptions(content)
+    const records = parseImportedLineDelimitedJson(content)
+    if (records !== null) {
+      importFreeTubeSubscriptions(records)
+    }
   } else if (filename.endsWith('.opml') || filename.endsWith('.xml')) {
     importOpmlYouTubeSubscriptions(content)
   } else if (filename.endsWith('.json')) {
@@ -411,17 +441,20 @@ function convertOldFreeTubeFormatToNew(oldData) {
 }
 
 /**
- * @param {string} textDecode
+ * @param {unknown[]} profileRecords
  */
-function importFreeTubeSubscriptions(textDecode) {
-  textDecode = textDecode.split('\n')
-  textDecode.pop()
-  textDecode = textDecode.map(data => JSON.parse(data))
-
-  const firstEntry = textDecode[0]
-  if (firstEntry.channelId && firstEntry.channelName && firstEntry.channelThumbnail && firstEntry._id && firstEntry.profile) {
+function importFreeTubeSubscriptions(profileRecords) {
+  const firstEntry = profileRecords[0]
+  if (
+    isJsonObject(firstEntry) &&
+    firstEntry.channelId &&
+    firstEntry.channelName &&
+    firstEntry.channelThumbnail &&
+    firstEntry._id &&
+    firstEntry.profile
+  ) {
     // Old FreeTube subscriptions format detected, so convert it to the new one:
-    textDecode = convertOldFreeTubeFormatToNew(textDecode)
+    profileRecords = convertOldFreeTubeFormatToNew(profileRecords)
   }
 
   const requiredKeys = [
@@ -438,10 +471,16 @@ function importFreeTubeSubscriptions(textDecode) {
   const updatedPrimaryProfile = primaryProfile.value
   let shouldUpdatePrimaryProfile = false
 
-  textDecode.forEach((profileData) => {
+  profileRecords.forEach((profileData) => {
     // We would technically already be done by the time the data is parsed,
     // however we want to limit the possibility of malicious data being sent
     // to the app, so we'll only grab the data we need here.
+
+    if (!isJsonObject(profileData)) {
+      const message = t('Settings.Data Settings.Profile object has insufficient data, skipping item')
+      showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
+      return
+    }
 
     const profileObject = {}
     Object.keys(profileData).forEach((key) => {
@@ -508,9 +547,11 @@ function importFreeTubeSubscriptions(textDecode) {
     }
   })
 
-  if (shouldUpdatePrimaryProfile) {
-    store.dispatch('updateProfile', updatedPrimaryProfile)
+  if (!shouldUpdatePrimaryProfile) {
+    return
   }
+
+  store.dispatch('updateProfile', updatedPrimaryProfile)
 
   showToast({
     message: t('Settings.Data Settings.All subscriptions and profiles have been successfully imported'),
@@ -796,7 +837,7 @@ function exportSubscriptions(option) {
 async function exportFreeTubeSubscriptions() {
   const subscriptionsDb = profileList.value.map((profile) => {
     return JSON.stringify(profile)
-  }).join('\n') + '\n'// a trailing line is expected
+  }).join('\n') + '\n'
   const dateStr = getTodayDateStrLocalTimezone()
   const exportFileName = 'opentubex-subscriptions-' + dateStr + '.db'
 
@@ -988,7 +1029,10 @@ async function importWatchHistory() {
   const { filename, content } = response
 
   if (filename.endsWith('.db')) {
-    importFreeTubeWatchHistory(content.split('\n'))
+    const records = parseImportedLineDelimitedJson(content)
+    if (records !== null) {
+      importFreeTubeWatchHistory(records)
+    }
   } else if (filename.endsWith('.json')) {
     const jsonContent = parseImportedJson(content, t('Settings.Data Settings.Invalid history file'))
     if (jsonContent === null) {
@@ -1006,11 +1050,9 @@ async function importWatchHistory() {
 }
 
 /**
- * @param {string[]} textDecode
+ * @param {unknown[]} historyRecords
  */
-async function importFreeTubeWatchHistory(textDecode) {
-  textDecode.pop()
-
+async function importFreeTubeWatchHistory(historyRecords) {
   const requiredKeys = [
     'author',
     'authorId',
@@ -1042,12 +1084,21 @@ async function importFreeTubeWatchHistory(textDecode) {
 
   // deep copy so we don't get errors from Electron when we try to pass reactive objects through the IPC channels
   const historyItems = new Map(deepCopy(Object.entries(historyCacheById.value)))
+  let importedCount = 0
 
-  textDecode.forEach((history) => {
-    const historyData = JSON.parse(history)
+  historyRecords.forEach((historyData) => {
     // We would technically already be done by the time the data is parsed,
     // however we want to limit the possibility of malicious data being sent
     // to the app, so we'll only grab the data we need here.
+
+    if (!isJsonObject(historyData)) {
+      showToast({
+        message: t('Settings.Data Settings.History object has insufficient data, skipping item'),
+        icon: ['fas', 'circle-exclamation'],
+      })
+      console.error('Invalid history record:', historyData)
+      return
+    }
 
     const historyObject = {}
 
@@ -1073,8 +1124,13 @@ async function importFreeTubeWatchHistory(textDecode) {
       historyObject.description = historyObject.description ?? ''
 
       historyItems.set(historyObject.videoId, historyObject)
+      importedCount++
     }
   })
+
+  if (importedCount === 0) {
+    return
+  }
 
   await store.dispatch('overwriteHistory', historyItems)
 
@@ -1320,7 +1376,7 @@ async function importPlaylists() {
     return
   }
 
-  let data = response.content
+  const data = response.content
 
   let playlists
 
@@ -1334,10 +1390,10 @@ async function importPlaylists() {
   } else {
     // otherwise assume this is the correct database format,
     // which is also what we export now (used in 0.20.0 and later versions)
-    data = data.split('\n')
-    data.pop()
-
-    playlists = data.map(playlistJson => JSON.parse(playlistJson))
+    playlists = parseImportedLineDelimitedJson(data)
+    if (playlists === null) {
+      return
+    }
   }
 
   const requiredKeys = [
@@ -1383,11 +1439,18 @@ async function importPlaylists() {
   ]
 
   const newPlaylists = []
+  let importedCount = 0
 
   playlists.forEach((playlistData) => {
     // We would technically already be done by the time the data is parsed,
     // however we want to limit the possibility of malicious data being sent
     // to the app, so we'll only grab the data we need here.
+
+    if (!isJsonObject(playlistData) || !Array.isArray(playlistData.videos)) {
+      const message = t('Settings.Data Settings.Playlist insufficient data', { playlist: '' })
+      showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
+      return
+    }
 
     const playlistObject = {}
     const videoIdToBeAddedSet = new Set()
@@ -1400,6 +1463,10 @@ async function importPlaylists() {
       } else if (key === 'videos') {
         const videoArray = []
         playlistData.videos.forEach((video) => {
+          if (!isJsonObject(video)) {
+            return
+          }
+
           const videoPropertyKeys = Object.keys(video)
           const videoObjectHasAllRequiredKeys = requiredVideoKeys.every((k) => videoPropertyKeys.includes(k))
 
@@ -1429,6 +1496,8 @@ async function importPlaylists() {
       showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
       return
     }
+
+    importedCount++
 
     const existingPlaylist = allPlaylists.value.find((playlist) => {
       if (playlistObject._id != null && playlist._id === playlistObject._id) {
@@ -1503,6 +1572,10 @@ async function importPlaylists() {
     })
   })
 
+  if (importedCount === 0) {
+    return
+  }
+
   if (newPlaylists.length > 0) {
     store.dispatch('addPlaylists', newPlaylists)
   }
@@ -1519,7 +1592,7 @@ async function exportPlaylists() {
 
   const playlistsDb = allPlaylists.value.map(playlist => {
     return JSON.stringify(playlist)
-  }).join('\n') + '\n'// a trailing line is expected
+  }).join('\n') + '\n'
 
   await promptAndWriteToFile(
     exportFileName,
@@ -1565,31 +1638,32 @@ async function importSearchHistory() {
   const { filename, content } = response
 
   if (filename.endsWith('.db')) {
-    importFreeTubeSearchHistory(content.split('\n'))
+    const records = parseImportedLineDelimitedJson(content)
+    if (records !== null) {
+      importFreeTubeSearchHistory(records)
+    }
   } else if (filename.endsWith('.json')) {
     importYouTubeSearchHistory(JSON.parse(content))
   }
 }
 
 /**
- * @param {string[]} textDecode
+ * @param {unknown[]} searchHistoryRecords
  */
-async function importFreeTubeSearchHistory(textDecode) {
-  textDecode.pop()
-
+async function importFreeTubeSearchHistory(searchHistoryRecords) {
   // deep copy so we don't get errors from Electron when we try to pass reactive objects through the IPC channels
   const historyItems = new Map(deepCopy(searchHistoryEntries.value).map(entry => [entry._id, entry]))
+  let importedCount = 0
 
-  textDecode.forEach((rawEntry) => {
-    const entry = JSON.parse(rawEntry)
-
-    if (typeof entry._id !== 'string' || typeof entry.lastUpdatedAt !== 'number') {
+  searchHistoryRecords.forEach((entry) => {
+    if (!isJsonObject(entry) || typeof entry._id !== 'string' || typeof entry.lastUpdatedAt !== 'number') {
       showToast({
         message: t('Settings.Data Settings.History object has insufficient data, skipping item'),
         icon: ['fas', 'circle-exclamation'],
       })
       console.error('Missing keys:', entry)
     } else {
+      importedCount++
       const existingEntry = historyItems.get(entry._id)
 
       if (existingEntry == null || entry.lastUpdatedAt > existingEntry.lastUpdatedAt) {
@@ -1605,6 +1679,10 @@ async function importFreeTubeSearchHistory(textDecode) {
       }
     }
   })
+
+  if (importedCount === 0) {
+    return
+  }
 
   const newSearchHistoryEntries = Array.from(historyItems.values())
 
