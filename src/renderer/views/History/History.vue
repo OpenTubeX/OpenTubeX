@@ -388,8 +388,9 @@ function filterHistory() {
 
 function clampHistoryScroll() {
   nextTick(() => {
-    if (historyContent.value !== null) {
-      clampOverlayScrollTop(document.body, historyContent.value)
+    const content = historyContent.value?.closest('.app > .routerView')
+    if (content instanceof HTMLElement) {
+      clampOverlayScrollTop(document.body, content)
     }
   })
 }
