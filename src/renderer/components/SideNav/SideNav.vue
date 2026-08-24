@@ -60,7 +60,7 @@
         </p>
       </router-link>
       <router-link
-        v-if="SUPPORTS_LOCAL_API && !hideTrendingVideos && (backendFallback || backendPreference === 'local')"
+        v-if="trendingAvailable && !hideTrendingVideos"
         class="navOption mobileHidden"
         role="button"
         to="/trending"
@@ -82,7 +82,7 @@
         </p>
       </router-link>
       <router-link
-        v-if="!hidePopularVideos && (backendFallback || backendPreference === 'invidious')"
+        v-if="popularAvailable && !hidePopularVideos"
         class="navOption mobileHidden"
         role="button"
         to="/popular"
@@ -232,6 +232,7 @@ import SideNavMoreOptions from '../SideNavMoreOptions/SideNavMoreOptions.vue'
 import store from '../../store/index'
 
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
+import { isMostPopularAvailable, isTrendingAvailable } from '../../helpers/navigationAvailability'
 import { deepCopy, localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import { getConfiguredKeyboardShortcuts } from '../../../constants'
 
@@ -264,6 +265,17 @@ const backendFallback = computed(() => {
 const backendPreference = computed(() => {
   return store.getters.getBackendPreference
 })
+
+const trendingAvailable = computed(() => isTrendingAvailable({
+  supportsLocalApi: !!SUPPORTS_LOCAL_API,
+  backendPreference: backendPreference.value,
+  backendFallback: backendFallback.value,
+}))
+
+const popularAvailable = computed(() => isMostPopularAvailable({
+  backendPreference: backendPreference.value,
+  backendFallback: backendFallback.value,
+}))
 
 /** @type {import('vue').ComputedRef<string>} */
 const currentInvidiousInstanceUrl = computed(() => {

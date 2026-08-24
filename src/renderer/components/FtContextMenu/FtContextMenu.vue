@@ -232,6 +232,7 @@ const itemIcons = {
   'Move Tabs': ['fas', 'exchange-alt'],
   'Move Tabs to Window': ['fas', 'display'],
   'New Tab': ['fas', 'plus'],
+  'New Window': ['fas', 'clone'],
   'Open in a New Tab': ['fas', 'arrow-up-right-from-square'],
   'Open in a New Window': ['fas', 'external-link-alt'],
   'Other Tabs': ['fas', 'times-circle'],

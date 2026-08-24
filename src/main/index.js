@@ -1066,6 +1066,15 @@ function runApp() {
           }
         },
         {
+          label: contextMenuLabel('New Window'),
+          visible: isTabBarContextMenu && contextMenuTab == null,
+          click: () => {
+            createWindow({ replaceMainWindow: false }).catch(error => {
+              console.error('Failed to create a new window from the tab bar context menu:', error)
+            })
+          }
+        },
+        {
           label: contextMenuLabel('Reopen Closed Tab'),
           visible: isTabBarContextMenu && contextMenuTab == null,
           enabled: manager?.closedTabs.length > 0,

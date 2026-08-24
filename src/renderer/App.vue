@@ -79,13 +79,22 @@
       @after-leave="resetClosedSettingsWindowView"
     >
       <KeepAlive>
-        <SettingsWindow v-if="settingsWindowOpen" />
+        <SettingsWindow
+          v-if="settingsWindowOpen"
+          :search-target="settingsSearchTarget"
+          @search-target-opened="clearSettingsSearchTarget"
+        />
       </KeepAlive>
     </Transition>
     <FtTutorialOverlay
       v-if="showTutorial"
       :new-installation="tutorialIsNewInstallation"
       @close="completeTutorial"
+    />
+    <FtCommandPalette
+      v-if="commandPaletteOpen"
+      :commands="commandPaletteCommands"
+      @close="closeCommandPalette"
     />
     <FtPrompt
       v-if="showReleaseNotes"
@@ -339,6 +348,9 @@ import { MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants
 import { resolveBaseTheme } from '../appearanceSettings'
 import { resolveColor } from './helpers/colors'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
+import { keyboardEventInitFromShortcut, OPEN_COMMAND_PALETTE_EVENT } from './helpers/commandPalette'
+import { createCommandPaletteRegistry } from './helpers/commandPaletteRegistry'
+import { initializePlatformInfo, isLinuxWayland } from './helpers/platform'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
 import {
@@ -383,15 +395,18 @@ const FtPlaylistAddVideoPrompt = defineAsyncComponent(() => import('./components
 const FtCreatePlaylistPrompt = defineAsyncComponent(() => import('./components/FtCreatePlaylistPrompt/FtCreatePlaylistPrompt.vue'))
 const FtSearchFilters = defineAsyncComponent(() => import('./components/FtSearchFilters/FtSearchFilters.vue'))
 const FtTutorialOverlay = defineAsyncComponent(() => import('./components/FtTutorialOverlay/FtTutorialOverlay.vue'))
+const FtCommandPalette = defineAsyncComponent(() => import('./components/FtCommandPalette/FtCommandPalette.vue'))
 
 const route = useRoute()
 const router = useRouter()
+const availableRoutePaths = new Set(router.getRoutes().map(candidate => candidate.path))
 const navigation = process.env.IS_ELECTRON ? getTabNavigationService() : null
 const isElectron = process.env.IS_ELECTRON
 if (isElectron) {
   provide(routerKey, navigation.createPresentedRouterFacade())
 }
-const { locale, t } = useI18n()
+const { locale, t, tm } = useI18n()
+initializePlatformInfo()
 
 const tabContainers = computed(() => {
   return store.getters.getTabContainerIds
@@ -568,6 +583,8 @@ const tabSwitcherFailedAvatarUrls = ref({})
 const tabSwitcherFailedPreviewUrls = ref({})
 const tabSwitcherPointerActive = ref(false)
 const tabSwitcherRef = useTemplateRef('tabSwitcherRef')
+const commandPaletteOpen = ref(false)
+const settingsSearchTarget = ref(null)
 const subscriptionAutoRefreshTimers = {
   videos: null,
   shorts: null,
@@ -1068,6 +1085,7 @@ onMounted(async () => {
   setWindowTitle()
 
   document.addEventListener('keydown', handleKeyboardShortcuts)
+  window.addEventListener(OPEN_COMMAND_PALETTE_EVENT, openCommandPalette)
   document.addEventListener('keyup', handleKeyboardShortcutKeyup)
   document.addEventListener('mousedown', handleMouseDown)
   document.addEventListener('dragstart', handleDragStart)
@@ -1112,6 +1130,7 @@ onBeforeUnmount(() => {
   clearInterval(historyCleanupTimer)
   store.dispatch('stopSyncServerAutoSync')
   document.removeEventListener('keydown', handleKeyboardShortcuts)
+  window.removeEventListener(OPEN_COMMAND_PALETTE_EVENT, openCommandPalette)
   document.removeEventListener('keyup', handleKeyboardShortcutKeyup)
   document.removeEventListener('mousedown', handleMouseDown)
   document.removeEventListener('dragstart', handleDragStart)
@@ -2086,6 +2105,114 @@ function openDownloadsPage() {
 /** @type {import('vue').ComputedRef<boolean>} */
 const outlinesHidden = computed(() => store.getters.getOutlinesHidden)
 
+const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
+  t,
+  tm,
+  locale: locale.value,
+  routePath: route.path,
+  store,
+  isElectron,
+  navigate: navigateFromCommandPalette,
+  openSettingsSection,
+  openSettingsSearchResult,
+  openSettingsView,
+  goHistory: goHistoryFromCommandPalette,
+  openFindbar,
+  focusSearch: focusSearchFromCommandPalette,
+  showKeyboardShortcuts: () => store.dispatch('showKeyboardShortcutPrompt'),
+  createTab: () => store.dispatch('createTab', { makeActive: true }),
+  closeTabs: closeTabsFromCommandPalette,
+  reloadTabs: reloadTabsFromCommandPalette,
+  runShortcut: runShortcutFromCommandPalette,
+  createWindow: createWindowFromCommandPalette,
+  routeAvailable: path => availableRoutePaths.has(path),
+  supportsLocalApi: !!process.env.SUPPORTS_LOCAL_API,
+  isMac: process.platform === 'darwin',
+  isLinuxWayland: isLinuxWayland.value,
+  systemUsesDarkTheme: systemUsesDarkTheme.value,
+}))
+
+function openCommandPalette() {
+  if (showTutorial.value || (!commandPaletteOpen.value && isAnyPromptOpen.value)) return
+  commandPaletteOpen.value = true
+}
+
+function closeCommandPalette() {
+  commandPaletteOpen.value = false
+}
+
+function navigateFromCommandPalette(location) {
+  if (isElectron) {
+    return navigation.push(presentedTabId.value, location)
+  }
+  return router.push(location)
+}
+
+function goHistoryFromCommandPalette(offset) {
+  if (isElectron) {
+    return navigation.go(presentedTabId.value, offset)
+  }
+  return router.go(offset)
+}
+
+function openSettingsView(view) {
+  store.dispatch('showSettingsWindow', view)
+}
+
+function openSettingsSection(section) {
+  store.commit('setSettingsWindowSection', section)
+  store.dispatch('showSettingsWindow')
+}
+
+function openSettingsSearchResult(section, label) {
+  settingsSearchTarget.value = { section, label }
+  store.commit('setSettingsWindowSection', section)
+  store.dispatch('showSettingsWindow')
+}
+
+function clearSettingsSearchTarget(target) {
+  if (settingsSearchTarget.value === target) {
+    settingsSearchTarget.value = null
+  }
+}
+
+function focusSearchFromCommandPalette() {
+  setTimeout(() => {
+    const input = document.querySelector('.topNav .searchInput .ft-input')
+    input?.focus()
+    input?.select()
+  })
+}
+
+function createWindowFromCommandPalette() {
+  if (isElectron) {
+    openInternalPath({
+      path: landingPage.value,
+      doCreateNewWindow: true
+    })
+    return
+  }
+
+  const url = new URL(window.location.href)
+  url.hash = landingPage.value
+  window.open(url.toString(), '_blank', 'noreferrer')
+}
+
+async function closeTabsFromCommandPalette() {
+  const hasRemainingTabs = await closeShortcutTabs()
+  if (!hasRemainingTabs) window.close()
+}
+
+function reloadTabsFromCommandPalette() {
+  for (const tabId of getShortcutTabIds()) prepareAndReloadTab(tabId)
+}
+
+function runShortcutFromCommandPalette(shortcut) {
+  nextTick(() => {
+    document.dispatchEvent(new KeyboardEvent('keydown', keyboardEventInitFromShortcut(shortcut)))
+  })
+}
+
 /**
  * @param {KeyboardEvent} event
  */
@@ -2093,6 +2220,18 @@ function handleKeyboardShortcuts(event) {
   if (showTutorial.value) return
 
   const shortcuts = KeyboardShortcuts.APP.GENERAL
+
+  if (matchesKeyboardShortcut(event, shortcuts.OPEN_COMMAND_PALETTE)) {
+    event.preventDefault()
+    if (commandPaletteOpen.value) {
+      closeCommandPalette()
+    } else {
+      openCommandPalette()
+    }
+    return
+  }
+
+  if (commandPaletteOpen.value) return
 
   if (matchesKeyboardShortcut(event, shortcuts.FIND_IN_PAGE)) {
     event.preventDefault()

@@ -211,12 +211,14 @@ test('stores and presents every previous metadata version', async ({ app, page }
     await expect.poll(() => scroller.evaluate(element => {
       const content = element.firstElementChild
       const maximum = Math.max(0, content.offsetTop + content.offsetHeight +
+        Number.parseFloat(getComputedStyle(content).marginBlockEnd) +
         Number.parseFloat(getComputedStyle(element).paddingBottom) - element.clientHeight)
       return element.scrollTop <= maximum + 1
     })).toBe(true)
     await expect.poll(() => firstDescription.evaluate(element => {
       const content = element.firstElementChild
       const maximum = Math.max(0, content.offsetTop + content.offsetHeight +
+        Number.parseFloat(getComputedStyle(content).marginBlockEnd) +
         Number.parseFloat(getComputedStyle(element).paddingBottom) - element.clientHeight)
       return element.scrollTop <= maximum + 1
     })).toBe(true)

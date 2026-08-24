@@ -40,17 +40,10 @@
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 44px;
-  padding-inline-end: 8px;
-}
-
-.profileHeaderRow.hasTwoShortcuts {
-  grid-template-columns: minmax(0, 1fr) 44px 44px;
-}
-
-.profileHeaderRow.hasNoShortcuts {
+  grid-auto-columns: 44px;
+  grid-auto-flow: column;
   grid-template-columns: minmax(0, 1fr);
-  padding-inline-end: 0;
+  padding-inline-end: 8px;
 }
 
 .profileSummary {

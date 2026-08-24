@@ -222,12 +222,6 @@
     }
   }
 
-  .navNewWindowButton {
-    @media only screen and (width <= 680px) {
-      display: none;
-    }
-  }
-
   .logo {
     align-items: center;
     border-radius: calc(4px * var(--ui-roundness));

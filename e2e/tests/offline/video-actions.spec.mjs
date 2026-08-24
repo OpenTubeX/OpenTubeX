@@ -1,7 +1,14 @@
 import { chmod, copyFile, mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, goToSettingsSection, waitForAppReady } from '../../helpers/app.mjs'
+import {
+  test,
+  expect,
+  goTo,
+  goToSettingsSection,
+  openNewWindowFromTabBar,
+  waitForAppReady
+} from '../../helpers/app.mjs'
 import { DEMO_MEDIA_LENGTH, DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
 import { DBActions, PlaylistVideoAddResult } from '../../../src/constants.js'
 
@@ -947,10 +954,7 @@ test.describe('video downloads', () => {
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
-    const [otherWindow] = await Promise.all([
-      app.electronApp.waitForEvent('window'),
-      page.locator('.topNav .navNewWindowButton').click()
-    ])
+    const otherWindow = await openNewWindowFromTabBar(app, page)
     await waitForAppReady(otherWindow)
     await goTo(otherWindow, 'downloads')
 
@@ -965,10 +969,7 @@ test.describe('video downloads', () => {
     const otherDownload = otherWindow.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
     await expect(otherDownload).toContainText('0.0%')
 
-    const [lateWindow] = await Promise.all([
-      app.electronApp.waitForEvent('window'),
-      otherWindow.locator('.topNav .navNewWindowButton').click()
-    ])
+    const lateWindow = await openNewWindowFromTabBar(app, otherWindow)
     await waitForAppReady(lateWindow)
     await goTo(lateWindow, 'downloads')
     const hydratedDownload = lateWindow.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
@@ -1627,10 +1628,7 @@ test.describe('list video actions', () => {
   })
 
   test('two windows adding the same video only store it once', async ({ app, page }) => {
-    const [secondWindow] = await Promise.all([
-      app.electronApp.waitForEvent('window'),
-      page.locator('.topNav .navNewWindowButton').click()
-    ])
+    const secondWindow = await openNewWindowFromTabBar(app, page)
     await waitForAppReady(secondWindow)
 
     // Issue the add both windows' playlist controls make, rather than clicking
