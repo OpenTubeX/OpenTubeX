@@ -264,6 +264,28 @@ test('shows the page before asynchronous size calculation finishes', async ({ ap
   }
 })
 
+test('reports cleanup rejection instead of success', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ ipcMain }, channels) => {
+    ipcMain.removeHandler(channels.STORAGE_GET_USAGE)
+    ipcMain.handle(channels.STORAGE_GET_USAGE, () => ({
+      tabPreviews: 1024,
+      otherProfileData: 0,
+      profileTotal: 1024
+    }))
+    ipcMain.removeHandler(channels.STORAGE_CLEAR)
+    ipcMain.handle(channels.STORAGE_CLEAR, () => false)
+  }, IpcChannels)
+
+  const storage = await goToSettingsSection(page, 'storage')
+  await storage.getByRole('button', { name: 'Clear tab image cache' }).click()
+  await page.getByRole('dialog', { name: 'Clear tab thumbnails and channel avatars?' })
+    .getByRole('button', { name: 'Clear cache' })
+    .click()
+
+  await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
+  await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
+})
+
 test('isolates browser session data with the test profile', async ({ app }) => {
   const paths = await app.electronApp.evaluate(({ app: electronApp }) => ({
     userData: electronApp.getPath('userData'),

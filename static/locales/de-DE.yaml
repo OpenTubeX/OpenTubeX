@@ -243,6 +243,10 @@ Most Popular Feed Empty: Der Feed „Am beliebtesten“ dieser Invidious-Instanz
 Settings:
   # On Settings Page
   Settings: Einstellungen
+  Categories:
+    Privacy Description: Datenschutz beim Ansehen und Zugriffskontrollen
+    Data And Storage Description: Import, Export, Speicherbelegung und Bereinigung
+    Advanced Description: Anbieter, externe Anwendungen und Netzwerk
   General Settings:
     General Settings: Allgemein
     Playback Engine:
@@ -789,6 +793,86 @@ Settings:
     Are you sure you want to clear the video metadata cache?: Möchtest du die zwischengespeicherten Videotitel, Vorschaubilder und Beschreibungen wirklich löschen?
     Video metadata cache has been cleared: Videometadaten-Cache wurde geleert
     Video Metadata Cache Size: 'Videometadaten-Cache: {size}'
+  Storage Settings:
+    Storage: Speicher
+    Downloaded Media: Erfasste heruntergeladene Medien
+    Storage Breakdown: Speicheraufteilung
+    Shown Total: Angezeigte Gesamtgröße
+    Calculating: Wird berechnet…
+    Not Available: Genaue Größe nicht verfügbar
+    At Least: 'Mindestens {size}'
+    Failed To Read Storage: Einige Speichergrößen konnten nicht ermittelt werden
+    Downloads: Downloads
+    Downloaded Media Description: Video-, Audio- und Untertiteldateien, die noch im Downloadverlauf erfasst sind.
+    Selected Download Folders: Vom Benutzer ausgewählte Downloadordner
+    Download History Records: Downloadverlaufseinträge
+    Download History Records Description: '{count} abgeschlossener Downloadverlaufseintrag. Dieser Eintrag erfasst Status und Dateispeicherorte, enthält aber nicht die heruntergeladenen Medien. | {count} abgeschlossene Downloadverlaufseinträge. Diese Einträge erfassen Status und Dateispeicherorte, enthalten aber nicht die heruntergeladenen Medien.'
+    Clear Download History Records: Downloadverlaufseinträge löschen
+    Clear Download History Confirmation: Alle abgeschlossenen Downloadverlaufseinträge löschen?
+    Download Files Stay On Disk: Heruntergeladene Dateien bleiben auf der Festplatte, werden aber nicht mehr auf der Downloads-Seite angezeigt.
+    Clear Records: Einträge löschen
+    Replaceable Caches: Ersetzbare Caches
+    Application Caches: Anwendungscaches
+    Browser Caches: Browser-Caches
+    Browser Caches Hint: HTTP-, GPU-, Code-, Shader-, Service-Worker- und Wörterbuch-Caches von Chromium.
+    Stored App Data: Gespeicherte Anwendungsdaten
+    Browser Runtime Data: Browser-Laufzeitdaten
+    Browser Runtime Data Hint: Sitzungs- und lokaler Speicher, Cookies, Datenschutz- und Netzwerkstatus sowie Absturzdateien von Chromium.
+    Subscription Feed Cache: Abo- und Feed-Cache
+    Subscription Feed Cache Description: Speichert abgerufene Abo-Videos, Shorts, Livestreams und Beiträge. OpenTubeX erstellt den Cache bei der nächsten Feed-Aktualisierung neu.
+    Clear Subscription Feed Cache: Abo- und Feed-Cache leeren
+    Clear Subscription Feed Cache Confirmation: Abo- und Feed-Cache leeren?
+    Subscription Feed Cache Effect: Abo-Feeds können leer erscheinen, bis sie aktualisiert werden. Abos und Profile werden nicht geändert.
+    Session Search Cache: Sitzungssuchcache
+    In Memory: Im Arbeitsspeicher
+    Session Search Cache Description: '{count} Suche wird für eine schnellere Rückwärtsnavigation im Arbeitsspeicher zwischengespeichert. Dieser Cache wird beim Beenden von OpenTubeX verworfen. | {count} Suchen werden für eine schnellere Rückwärtsnavigation im Arbeitsspeicher zwischengespeichert. Dieser Cache wird beim Beenden von OpenTubeX verworfen.'
+    Clear Session Search Cache: Sitzungssuchcache leeren
+    Clear Session Search Cache Confirmation: Sitzungssuchcache leeren?
+    Session Search Cache Effect: Zwischengespeicherte Ergebnisseiten werden verworfen. Der gespeicherte Suchverlauf wird nicht geändert.
+    HTTP Cache: HTTP-Cache
+    HTTP Cache Description: Electron speichert Netzwerkantworten auf der Festplatte, damit wiederholte Anfragen ohne erneutes Herunterladen derselben Daten geladen werden können. OpenTubeX erstellt diesen Cache bei Bedarf neu.
+    Managed By Electron: Von Electron verwaltet
+    Clear HTTP Cache: HTTP-Cache leeren
+    Clear HTTP Cache Confirmation: HTTP-Cache von Electron leeren?
+    HTTP Cache Effect: Bilder und andere Netzwerkressourcen können einmalig langsamer laden, während der Cache neu erstellt wird.
+    Tab Image Cache: Tab-Vorschaubilder und Kanalavatare
+    Tab Image Cache Description: Speichert Vorschaubilder und Kanalavatare für geöffnete und wiederhergestellte Tabs. OpenTubeX erstellt sie bei der Nutzung der Tabs neu.
+    Clear Tab Image Cache: Tab-Bildcache leeren
+    Clear Tab Image Cache Confirmation: Tab-Vorschaubilder und Kanalavatare löschen?
+    Tab Image Cache Effect: Tab-Bilder können kurzzeitig verschwinden und werden bei der Nutzung ihrer Tabs neu erstellt.
+    Playback Caches: Wiedergabe-Caches
+    Playback Caches Description: Speichert begrenzte yt-dlp-Streaminformationen und YouTube-Playerdateien. OpenTubeX ruft sie erneut ab, wenn sie für ein Video benötigt werden.
+    Clear Playback Caches: Wiedergabe-Caches leeren
+    Clear Playback Caches Confirmation: yt-dlp- und Player-Caches leeren?
+    Playback Caches Effect: Die nächste lokale Wiedergabe kann länger dauern, während Stream- und Playerdaten erneut abgerufen werden.
+    Clear Cache: Cache leeren
+    History Data: Gespeicherte Verläufe
+    Video Metadata Description: Speichert frühere Titel, Vorschaubilder und Beschreibungen unterstützter Videos. Alte Versionen können nach dem Löschen nicht wiederhergestellt werden.
+    Video Metadata Effect: Gespeicherte Metadatenversionen werden dauerhaft gelöscht. Aktuelle Videodetails können weiterhin erneut abgerufen werden.
+    Watch History: Wiedergabeverlauf und -statistiken
+    Watch History Description: Im Wiedergabeverlauf werden angesehene Videos und der Fortschritt gespeichert. Wiedergabestatistiken enthalten die täglichen Wiedergabezeiten. Die Aufbewahrungsdauer gilt nur für den Wiedergabeverlauf.
+    Clear Watch Statistics: Wiedergabestatistiken löschen
+    Watch History Effect: Einträge angesehener Videos und gespeicherter Fortschritt werden gelöscht. Wiedergabestatistiken bleiben erhalten.
+    Clear Watch Statistics Confirmation: Alle Wiedergabestatistiken löschen?
+    Watch Statistics Effect: Tägliche Wiedergabezeiten werden gelöscht. Der Wiedergabeverlauf bleibt erhalten.
+    Search History: Suchverlauf
+    Search History Description: Speichert Suchanfragen, die du behalten möchtest.
+    Delete Search History: Suchverlauf löschen
+    Delete Search History Confirmation: Den gesamten gespeicherten Suchverlauf löschen?
+    Search History Effect: Gespeicherte Suchvorschläge aus früheren Suchanfragen verschwinden. Der Cache der aktuellen Sitzung bleibt erhalten.
+    Other User Data: Andere Benutzerdaten
+    Other Profile Files: Andere Profildateien
+    Other Profile Files Hint: Sicherungen, temporäre Dateien und Profileinträge, die OpenTubeX noch nicht erkennt.
+    Subscriptions And Profiles: Abos und Profile
+    Subscriptions And Profiles Description: Speichert abonnierte Kanäle, Profilnamen und Profilzugehörigkeiten.
+    Subscriptions And Profiles Effect: Alle Abos und zusätzlichen Profile werden dauerhaft gelöscht. Feed-Cache-Daten werden ebenfalls gelöscht.
+    Playlists: Playlists
+    Playlists Description: Speichert Namen und Beschreibungen von Playlists sowie darin gespeicherte Videos.
+    Playlists Effect: Jede Playlist und ihre gespeicherten Videos werden dauerhaft gelöscht. Heruntergeladene Mediendateien bleiben erhalten.
+    Settings And Sessions: Einstellungen, Tab-Sitzungen und Erinnerungen
+    Settings And Sessions Description: Speichert Anwendungseinstellungen, wiederherstellbare Tabs und Livestream-Erinnerungen. Öffne das Profilverzeichnis, um diese Dateien zu prüfen oder zu sichern; auf dieser Seite werden sie nicht gelöscht.
+    Cleanup Complete: Speicherbereinigung abgeschlossen
+    Cleanup Failed: Speicherbereinigung fehlgeschlagen
   Data Settings:
     How do I import my subscriptions?: Wie importiere ich meine Abos?
     Unknown data key: Unbekannter Datenschlüssel
@@ -812,6 +896,7 @@ Settings:
     Import Subscriptions: Abos importieren
     Select Export Type: Exporttyp auswählen
     Data Settings: Daten
+    Data And Storage: Daten & Speicher
     Manage Subscriptions: Abos verwalten
     Export Playlists: Playlists exportieren
     Import Playlists: Playlists importieren

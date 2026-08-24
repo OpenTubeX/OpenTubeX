@@ -619,8 +619,14 @@ function requestCleanup(action) {
 }
 
 async function compactAndRefresh() {
-  if (USING_ELECTRON) await window.ftElectron.storage.compactDatabases()
+  if (USING_ELECTRON) {
+    await requireCleanupSuccess(window.ftElectron.storage.compactDatabases())
+  }
   await refreshUsage()
+}
+
+async function requireCleanupSuccess(cleanup) {
+  if (!await cleanup) throw new Error('Cleanup request was rejected')
 }
 
 async function runCleanup(action) {
@@ -638,19 +644,19 @@ async function runCleanup(action) {
       await store.dispatch('clearSessionSearchHistory')
       break
     case 'http-cache':
-      await window.ftElectron.storage.clear('http-cache')
+      await requireCleanupSuccess(window.ftElectron.storage.clear('http-cache'))
       break
     case 'tab-previews':
-      await window.ftElectron.storage.clear('tab-previews')
+      await requireCleanupSuccess(window.ftElectron.storage.clear('tab-previews'))
       break
     case 'playback-caches':
       await Promise.all([
         invalidateAllYtDlpPlaybackSources(),
-        window.ftElectron.storage.clear('player-cache')
+        requireCleanupSuccess(window.ftElectron.storage.clear('player-cache'))
       ])
       break
     case 'video-metadata':
-      await window.ftElectron.videoMetadataCache.clear()
+      await requireCleanupSuccess(window.ftElectron.videoMetadataCache.clear())
       break
     case 'watch-history':
       await store.dispatch('removeAllHistory')
