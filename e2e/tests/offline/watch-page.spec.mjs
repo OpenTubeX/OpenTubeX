@@ -1920,6 +1920,11 @@ test.describe('watch page', () => {
   })
 
   test('toggles information from the Shorts title and matches the comments header', async ({ app, page }) => {
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBaseTheme', 'light')
+    })
+    await expect(page.locator('body')).toHaveClass(/light/)
     await mockPlayableWatchPage(app, page)
     await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/jNQXAC9IVRw')
     await page.locator(sel.searchInput).press('Enter')
@@ -1950,7 +1955,8 @@ test.describe('watch page', () => {
           },
           heading: {
             margin: headingStyle.margin,
-            fontSize: headingStyle.fontSize
+            fontSize: headingStyle.fontSize,
+            color: headingStyle.color
           },
           close: {
             width: closeStyle.width,
@@ -1979,11 +1985,32 @@ test.describe('watch page', () => {
       await component.proxy.$nextTick()
     })
     await expect(page.locator('.shortsCommentsPanel .fullscreenCommentHeader')).toBeVisible()
+    const commentText = page.locator('.shortsCommentsPanel .commentText').first()
+    await expect(commentText).toBeVisible()
+    const commentContrast = await commentText.evaluate(element => {
+      const parseRgb = value => value.match(/[\d.]+/g).slice(0, 3).map(Number)
+      const luminance = value => {
+        const channels = parseRgb(value).map(channel => {
+          const normalized = channel / 255
+          return normalized <= 0.04045
+            ? normalized / 12.92
+            : ((normalized + 0.055) / 1.055) ** 2.4
+        })
+        return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]
+      }
+      const foreground = luminance(getComputedStyle(element).color)
+      const background = luminance(getComputedStyle(element.closest('.shortsCommentsPanel')).backgroundColor)
+      return (Math.max(foreground, background) + 0.05) /
+        (Math.min(foreground, background) + 0.05)
+    })
+    expect(commentContrast).toBeGreaterThanOrEqual(4.5)
     const commentsStyles = await headerStyles(
       '.shortsCommentsPanel .fullscreenCommentHeader',
       '.shortsCommentsPanel .fullscreenCommentAction:last-of-type'
     )
 
+    expect(informationStyles.header.backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    expect(informationStyles.heading.color).toBe(informationStyles.close.color)
     expect(informationStyles).toEqual(commentsStyles)
     await watchComponent.dispose()
   })
