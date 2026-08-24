@@ -2761,6 +2761,7 @@ export class TabManager {
           title: tab.title,
           isPinned: tab.isPinned,
           color: TabManager.normalizeTabColor(tab.color),
+          skipSilence: tab.skipSilence === true,
           isUnloaded: tab.loadState === 'unloaded' || this._deferredUnloadTabIds.has(tab.id),
           ...(tab.placementOpenerTabId != null && {
             placementOpenerTabId: tab.placementOpenerTabId
@@ -3001,7 +3002,7 @@ export class TabManager {
   }
 
   /**
-   * @param {{ tabs?: Array<{id?: string, url: string, title?: string, avatarFileName?: string | null, isPinned?: boolean, color?: string | null, isUnloaded?: boolean, previewFileName?: string | null, previewCapturedAt?: number, placementOpenerTabId?: string | null, history?: object[], historyIndex?: number}>, activeTabId?: string }} sessionData
+   * @param {{ tabs?: Array<{id?: string, url: string, title?: string, avatarFileName?: string | null, isPinned?: boolean, color?: string | null, skipSilence?: boolean, isUnloaded?: boolean, previewFileName?: string | null, previewCapturedAt?: number, placementOpenerTabId?: string | null, history?: object[], historyIndex?: number}>, activeTabId?: string }} sessionData
    * @param {{ loadInactiveTabs?: boolean, restoreTabLoadState?: boolean }} [options]
    * @returns {Promise<boolean>}
    */
@@ -3050,6 +3051,9 @@ export class TabManager {
           avatarFileName: avatarDataUrl == null ? null : avatarFileName,
           isPinned: tabData.isPinned === true,
           color: tabData.color,
+          // Legacy sessions did not persist this field and must retain the old
+          // disabled behavior instead of inheriting the new-tab default.
+          skipSilence: tabData.skipSilence === true,
           // Preview images are only needed when the switcher asks for them.
           // Keep the cache reference and let getTabPreview load it on demand
           // instead of serially reading every restored tab before first paint.
@@ -3575,6 +3579,7 @@ export async function setupTabsIPC(options = {}) {
     if (tab && tab.skipSilence !== skipSilence) {
       tab.skipSilence = skipSilence
       manager._broadcastStateUpdate()
+      manager._saveSession()
     }
   })
 
