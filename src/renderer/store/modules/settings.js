@@ -448,6 +448,7 @@ const state = {
   rememberVolume: true,
   enableVideoZoom: true,
   showSkipSilenceButton: false,
+  enableSkipSilenceByDefault: false,
   useVoiceOverTranslation: false,
   voiceOverTranslationPrepareInBackground: false,
   voiceOverTranslationLanguage: 'en',

@@ -657,6 +657,7 @@ Settings:
     Max Video Playback Rate: Maximale Wiedergabegeschwindigkeit
     Skip Silence: Stille überspringen
     Show Skip Silence Toggle: Schalter „Stille überspringen“ anzeigen
+    Enable Skip Silence by Default: „Stille überspringen“ standardmäßig aktivieren
     Hold to Double Playback Speed: Für doppelte Wiedergabegeschwindigkeit gedrückt halten
     Screenshot:
       Enable: Screenshots aktivieren
@@ -1844,6 +1845,7 @@ Tooltips:
     Multiply Seek Interval by Playback Rate: Wenn aktiviert, werden Sprungintervalle (Pfeiltasten und J/L) mit der aktuellen Wiedergabegeschwindigkeit multipliziert. Wenn deaktiviert, bleiben die Sprungintervalle unabhängig von der Wiedergabegeschwindigkeit konstant.
     Show Playback Rate Adjusted Timestamp: Wenn aktiviert und die Wiedergabegeschwindigkeit nicht 1x ist, zeigt der Player nach der normalen Zeitanzeige zusätzliche angepasste Zeitstempel in Klammern an.
     Show Skip Silence Toggle: Zeigt im Einstellungsmenü des Players einen Ein-/Aus-Schalter zum Überspringen von Stille an.
+    Enable Skip Silence by Default: Aktiviert „Stille überspringen“ für neue Tabs. Änderungen in einem Tab wirken sich nicht auf andere Tabs aus.
     Hold to Double Playback Speed: Halte die Leertaste oder die linke Maustaste über dem Player gedrückt, um die aktuelle Wiedergabegeschwindigkeit vorübergehend zu verdoppeln.
     Ambient Mode: Lässt die Farben des Videos in den Bereich um den Player ausstrahlen.
     Default Volume: Deaktiviert, wenn Lautstärke beibehalten aktiviert ist. Schalte Lautstärke beibehalten aus, um eine feste Lautstärke beim Start jedes Videos zu setzen.

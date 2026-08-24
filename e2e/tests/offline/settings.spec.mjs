@@ -143,6 +143,24 @@ test.describe('skip silence settings search', () => {
       .toContainText('Show Skip Silence Toggle')
     await expect(page.locator('.section.settingsSearchTarget')).toHaveCount(0)
   })
+
+  test('opens the default toggle and reflects its dependency', async ({ page }) => {
+    await goTo(page, 'settings')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+
+    await search.fill('Enable Skip Silence by Default')
+    await page.getByRole('button', { name: 'Enable Skip Silence by Default', exact: true }).click()
+
+    const defaultToggle = page.getByRole('checkbox', {
+      name: /^Enable Skip Silence by Default/
+    })
+    await expect(defaultToggle).toBeDisabled()
+
+    await page.locator('label.switch-label')
+      .filter({ hasText: 'Show Skip Silence Toggle' })
+      .click()
+    await expect(defaultToggle).toBeEnabled()
+  })
 })
 
 test.describe('settings search highlights', () => {

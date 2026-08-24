@@ -805,6 +805,54 @@ test.describe('skip silence shortcut', () => {
     })
   })
 
+  test('applies the default only to newly-created tabs', async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+
+    const readSkipSilenceState = () => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return {
+        activeTabId: store.getters.getActiveTabId,
+        values: { ...store.state.tabs.skipSilenceByTabId }
+      }
+    })
+
+    const firstTabId = (await readSkipSilenceState()).activeTabId
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateShowSkipSilenceButton', true)
+      await store.dispatch('updateEnableSkipSilenceByDefault', true)
+    })
+
+    await expect.poll(readSkipSilenceState).toMatchObject({
+      values: { [firstTabId]: false }
+    })
+    await page.locator('body').press('h')
+    await expect.poll(readSkipSilenceState).toMatchObject({
+      values: { [firstTabId]: true }
+    })
+
+    await page.locator('.tabBar .newTabButton').click()
+    await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+    await openMockedVideo(page)
+
+    const secondTabId = (await readSkipSilenceState()).activeTabId
+    expect(secondTabId).not.toBe(firstTabId)
+    await expect.poll(readSkipSilenceState).toMatchObject({
+      values: {
+        [firstTabId]: true,
+        [secondTabId]: true
+      }
+    })
+
+    await page.locator('body').press('h')
+    await expect.poll(readSkipSilenceState).toMatchObject({
+      values: {
+        [firstTabId]: true,
+        [secondTabId]: false
+      }
+    })
+  })
+
   test('disables the setting for an unmounted player when the control is hidden', async ({ app, page }) => {
     await openDemoVideo({ app, page })
 
@@ -825,5 +873,26 @@ test.describe('skip silence shortcut', () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return store.getters.getTabSkipSilence(store.getters.getActiveTabId)
     })).toBe(false)
+  })
+})
+
+test.describe('skip silence default', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...PLAYER_SEED,
+        showSkipSilenceButton: true,
+        enableSkipSilenceByDefault: true
+      }
+    }
+  })
+
+  test('enables silence skipping in the initial tab', async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getTabSkipSilence(store.getters.getActiveTabId)
+    })).toBe(true)
   })
 })
