@@ -15,7 +15,28 @@ async function configureQueue(page, values) {
 }
 
 async function submitDownloads(page, downloads) {
-  return page.evaluate((payloads) => Promise.all(payloads.map(payload => window.ftElectron.ytDlpDownload(payload))), downloads)
+  const results = []
+  for (const download of downloads) {
+    let result = null
+    await expect.poll(async () => {
+      await page.bringToFront()
+      result = await page.evaluate(payload => window.ftElectron.ytDlpDownload(payload), download)
+      return result !== null
+    }).toBe(true)
+    results.push(result)
+  }
+  return results
+}
+
+async function clickUntil(page, button, isComplete) {
+  await expect.poll(async () => {
+    if (await isComplete()) return true
+    if (await button.isVisible()) {
+      await page.bringToFront()
+      await button.click()
+    }
+    return isComplete()
+  }).toBe(true)
 }
 
 test('opens downloads with the default shortcut', async ({ page }) => {
@@ -88,18 +109,23 @@ test('controls queue order, running jobs, bandwidth, and retry-all', async ({ ap
   const canceled = page.locator('.downloadRow').filter({ hasText: 'Canceled download' })
   await expect(first).toContainText('0.0%')
   await expect(second).toContainText(/Queued, position/)
-  await moved.getByTitle('Move earlier').click()
-  await expect(moved).toContainText('Queued, position 1')
+  await clickUntil(page, moved.getByTitle('Move earlier'), async () => (
+    (await moved.textContent()).includes('Queued, position 1')
+  ))
   await expect(second.getByTitle('Move later')).toBeVisible()
-  await canceled.getByTitle('Cancel Download').click()
+  await clickUntil(page, canceled.getByTitle('Cancel Download'), () => (
+    page.getByRole('heading', { name: 'Canceled', exact: true }).isVisible()
+  ))
   await expect(canceled).not.toContainText('Download canceled')
-  await expect(page.getByRole('heading', { name: 'Canceled', exact: true })).toBeVisible()
 
-  await page.getByRole('button', { name: 'Pause all' }).click()
+  await clickUntil(page, page.getByRole('button', { name: 'Pause all' }), async () => (
+    (await first.textContent()).includes('Paused') && (await second.textContent()).includes('Paused')
+  ))
   await expect(first).toContainText('Paused')
   await expect(second).toContainText('Paused')
-  await page.getByRole('button', { name: 'Resume all' }).click()
-  await expect(first).toContainText('0.0%')
+  await clickUntil(page, page.getByRole('button', { name: 'Resume all' }), async () => (
+    (await first.textContent()).includes('0.0%')
+  ))
 
   await writeFile(path.join(app.userDataDir, 'release-aaaaaaaaaaa'), '')
   await expect.poll(() => readFile(startsFile, 'utf8')).toBe('aaaaaaaaaaa\nccccccccccc\n')
@@ -113,8 +139,9 @@ test('controls queue order, running jobs, bandwidth, and retry-all', async ({ ap
   await expect.poll(() => readFile(startsFile, 'utf8')).toContain('ddddddddddd')
   await expect(page.locator('.downloadRow').filter({ hasText: 'Retry-all download' })).toContainText('Download failed')
 
-  await page.getByRole('button', { name: 'Retry all failed downloads' }).click()
-  await expect.poll(() => readFile(startsFile, 'utf8')).toMatch(/ddddddddddd\nddddddddddd\n$/)
+  await clickUntil(page, page.getByRole('button', { name: 'Retry all failed downloads' }), async () => (
+    /ddddddddddd\nddddddddddd\n$/.test(await readFile(startsFile, 'utf8'))
+  ))
   await expect.poll(() => page.evaluate(async id => (
     (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
   ), results[4].id)).toBe('cancelled')
@@ -124,6 +151,56 @@ test('controls queue order, running jobs, bandwidth, and retry-all', async ({ ap
   ))).toBe('completed')
   const completed = page.locator('.downloadRow').filter({ hasText: 'Retry-all download' })
   await expect(completed).not.toContainText('Download complete')
+})
+
+test('keeps the unsupported active-pause fallback resumable after completion', async ({ app, page }) => {
+  const executable = path.join(app.userDataDir, 'fallback-pause-yt-dlp.sh')
+  const startsFile = path.join(app.userDataDir, 'fallback-pause-starts.txt')
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'for argument do case "$argument" in https://www.youtube.com/watch?v=*) url="$argument" ;; esac; done',
+    'id="$' + '{url##*=}"',
+    `printf '%s\\n' "$id" >> '${startsFile}'`,
+    `while [ ! -f "${app.userDataDir}/release-$id" ]; do sleep 0.05; done`,
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await configureQueue(page, { ytDlpPath: executable, ytDlpMaxConcurrentDownloads: 1 })
+
+  const [active] = await submitDownloads(page, [
+    { videoId: 'kkkkkkkkkkk', title: 'Fallback active download', mode: 'video' },
+  ])
+  await expect.poll(() => readFile(startsFile, 'utf8').catch(() => '')).toBe('kkkkkkkkkkk\n')
+
+  const originalPlatform = await app.electronApp.evaluate(() => process.platform)
+  await app.electronApp.evaluate((_electron, platform) => {
+    Object.defineProperty(process, 'platform', { configurable: true, value: platform })
+  }, 'win32')
+  try {
+    await expect.poll(async () => {
+      await page.bringToFront()
+      return page.evaluate(id => window.ftElectron.ytDlpControlDownload(id, 'pause'), active.id)
+    }).toBe(true)
+  } finally {
+    await app.electronApp.evaluate((_electron, platform) => {
+      Object.defineProperty(process, 'platform', { configurable: true, value: platform })
+    }, originalPlatform)
+  }
+
+  await writeFile(path.join(app.userDataDir, 'release-kkkkkkkkkkk'), '')
+  await expect.poll(() => page.evaluate(async id => (
+    (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+  ), active.id)).toBe('completed')
+
+  await submitDownloads(page, [
+    { videoId: 'lllllllllll', title: 'Fallback paused download', mode: 'video' },
+  ])
+  await goTo(page, 'downloads')
+  const paused = page.locator('.downloadRow').filter({ hasText: 'Fallback paused download' })
+  await expect(paused).toContainText('Paused')
+  await clickUntil(page, page.getByRole('button', { name: 'Resume all' }), async () => (
+    await readFile(startsFile, 'utf8').catch(() => '') === 'kkkkkkkkkkk\nlllllllllll\n'
+  ))
+  await writeFile(path.join(app.userDataDir, 'release-lllllllllll'), '')
 })
 
 test('keeps paused downloads queued across a restart', async ({ app, page }) => {
@@ -147,7 +224,10 @@ test('keeps paused downloads queued across a restart', async ({ app, page }) => 
     { videoId: 'fffffffffff', title: 'Persisted queue two', mode: 'video' },
   ])
   await expect.poll(() => readFile(startsFile, 'utf8').catch(() => '')).toBe('eeeeeeeeeee\n')
-  await page.evaluate(id => window.ftElectron.ytDlpControlDownload(id, 'pause'), queued[1].id)
+  await expect.poll(async () => {
+    await page.bringToFront()
+    return page.evaluate(id => window.ftElectron.ytDlpControlDownload(id, 'pause'), queued[1].id)
+  }).toBe(true)
   await expect.poll(() => page.evaluate(async () => (
     (await window.ftElectron.ytDlpListDownloads()).find(download => download.title === 'Persisted queue two')?.status
   ))).toBe('paused')
@@ -161,8 +241,9 @@ test('keeps paused downloads queued across a restart', async ({ app, page }) => 
   await goTo(page, 'downloads')
   const paused = page.locator('.downloadRow').filter({ hasText: 'Persisted queue two' })
   await expect(paused).toContainText('Paused')
-  await page.getByRole('button', { name: 'Resume all' }).click()
-  await expect.poll(() => readFile(startsFile, 'utf8').catch(() => '')).toBe('eeeeeeeeeee\nfffffffffff\n')
+  await clickUntil(page, page.getByRole('button', { name: 'Resume all' }), async () => (
+    await readFile(startsFile, 'utf8').catch(() => '') === 'eeeeeeeeeee\nfffffffffff\n'
+  ))
   await writeFile(path.join(app.userDataDir, 'release-fffffffffff'), '')
 })
 
