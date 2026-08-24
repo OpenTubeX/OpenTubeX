@@ -1933,14 +1933,10 @@ async function startYtDlpDownload(
     '--newline',
     '--progress',
     '--print',
-    `after_move:${FINAL_PATH_PREFIX}%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(filepath)s`
+    `after_move:${FINAL_PATH_PREFIX}%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(filepath)s`,
+    '--print',
+    `after_move:${FINAL_METADATA_PREFIX}%(id)j\t%(title)j\t%(thumbnail)j`
   ]
-  if (isSingleVideo) {
-    args.push(
-      '--print',
-      `after_move:${FINAL_METADATA_PREFIX}%(id)j\t%(title)j\t%(thumbnail)j`
-    )
-  }
 
   if (!isRemotePlaylist) {
     args.push('--no-playlist')
@@ -2206,16 +2202,18 @@ async function startYtDlpDownload(
         const videoId = JSON.parse(rawVideoId)
         const title = JSON.parse(rawTitle)
         const thumbnail = JSON.parse(rawThumbnail)
+        if (typeof title === 'string' && title !== '') {
+          status.titleTruncated ||= truncatesLongTitles &&
+            Buffer.byteLength(title, 'utf8') > DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT
+        }
         if (videoId === status.videoId) {
           if (typeof title === 'string' && title !== '') {
             status.title = title.slice(0, 255)
-            status.titleTruncated = truncatesLongTitles &&
-              Buffer.byteLength(title, 'utf8') > DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT
           }
           if (typeof thumbnail === 'string') status.thumbnail = thumbnail.slice(0, 2048)
           else if (thumbnail === null) status.thumbnail = ''
-          sendStatus(true)
         }
+        sendStatus(true)
       } catch {
         // A malformed metadata line must not interfere with the download itself.
       }

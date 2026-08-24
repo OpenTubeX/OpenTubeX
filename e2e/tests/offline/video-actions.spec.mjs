@@ -262,6 +262,41 @@ test.describe('video downloads', () => {
     await expect(downloadRow.getByText('The file name was shortened because the video title was too long.')).toBeVisible()
   })
 
+  test('warns when a playlist contains a shortened video title', async ({ app, page }) => {
+    const downloadedFile = path.join(app.userDataDir, 'shortened-playlist-title.webm')
+    const executable = path.join(app.userDataDir, 'long-playlist-title-yt-dlp.sh')
+    const longTitle = '界'.repeat(80)
+    const metadataLine = `__OPENTUBEX_METADATA__:${JSON.stringify('eeeeeeeeeee')}\t${JSON.stringify(longTitle)}\tnull`
+    await writeFile(downloadedFile, '')
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf '%s\\n' '${metadataLine}'`,
+      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\t640\\t360\\t${downloadedFile}\\n'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoIds: ['eeeeeeeeeee'],
+      isPlaylist: true,
+      title: 'Playlist with a long title',
+      mode: 'video'
+    }))
+    await expect.poll(() => page.evaluate(async (id) => {
+      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)
+    }, result.id)).toMatchObject({
+      status: 'completed',
+      titleTruncated: true
+    })
+
+    await goTo(page, 'downloads')
+    const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Playlist with a long title' })
+    await expect(downloadRow.getByText('The file name was shortened because the video title was too long.')).toBeVisible()
+  })
+
   test('can retry playback extraction with yt-dlp default clients', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'capture-yt-dlp-playback-args.sh')
     const capturedArgs = path.join(app.userDataDir, 'captured-yt-dlp-playback-args.txt')
