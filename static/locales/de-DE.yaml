@@ -1055,7 +1055,7 @@ Settings:
     Managed Tools Download Error Template: 'Die verwalteten Tools konnten nicht heruntergeladen werden: {errors}'
     Download Folder: Download-Ordner
     Global Additional yt-dlp Arguments: Globale zusätzliche yt-dlp-Argumente
-    Concurrent Downloads: Gleichzeitige Downloads
+    Concurrent Downloads: Parallele Downloads
     Bandwidth Limit: Bandbreitenlimit (KiB/s, 0 für unbegrenzt)
     Choose Download Folder: Download-Ordner auswählen
     Templates Hint: Benutzerdefinierte Download-Vorlagen können im Download-Dialog erstellt und verwaltet werden, der sich unterhalb des Video-Players befindet.
@@ -1966,8 +1966,8 @@ Tooltips:
   Download Settings:
     Download Folder: Videos werden in diesem Ordner gespeichert. Leer lassen, um den Downloads-Ordner deines Systems zu verwenden.
     Global Additional yt-dlp Arguments: Zusätzliche Befehlszeilenargumente, die bei jedem Download an yt-dlp übergeben werden, zum Beispiel --cookies-from-browser firefox.
-    Concurrent Downloads: Die maximale Anzahl von yt-dlp-Aufträgen, die gleichzeitig ausgeführt werden dürfen.
-    Bandwidth Limit: Begrenzt die gesamte Übertragungsrate der Warteschlange, indem das Limit auf gleichzeitige Aufträge verteilt wird. Gib 0 für kein Limit ein.
+    Concurrent Downloads: Die maximale Anzahl von yt-dlp-Downloads, die gleichzeitig ausgeführt werden dürfen.
+    Bandwidth Limit: Begrenzt die gesamte Übertragungsrate der Warteschlange, indem das Limit auf parallele Downloads verteilt wird. Gib 0 für kein Limit ein.
   External Software Settings:
     yt-dlp Source: OpenTubeX kann entweder das auf deinem System installierte yt-dlp verwenden oder eine eigene Kopie von yt-dlp herunterladen und verwalten, die im Benutzerdatenverzeichnis gespeichert wird.
     yt-dlp Channel: Wähle aus, welchen yt-dlp-Veröffentlichungskanal OpenTubeX herunterlädt und verwaltet. Für die meisten Benutzer wird „Stable“ empfohlen.
@@ -2295,7 +2295,7 @@ Downloads:
   Queued: In Warteschlange
   Queued Position: 'Position in Warteschlange: {position}'
   Paused: Pausiert
-  Pausing: Der aktuelle Auftrag wird abgeschlossen, dann wird die Warteschlange pausiert
+  Pausing: Der aktuelle Download wird abgeschlossen, dann wird die Warteschlange pausiert
   Download Complete: Download abgeschlossen
   Download Cancelled: Download abgebrochen
   Download Failed: Download fehlgeschlagen
