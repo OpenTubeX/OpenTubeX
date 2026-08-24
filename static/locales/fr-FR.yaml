@@ -187,6 +187,8 @@ User Playlists:
   Export Playlist: Exporter cette playlist
   TotalTimePlaylist: 'Durée totale : {duration}'
   Export list of URLs: Exporter la liste des URL
+  Move Video to the Top: Déplacer la vidéo au début
+  Move Video to the Bottom: Déplacer la vidéo à la fin
 History:
   # On History Page
   History: 'Historique'
@@ -422,6 +424,9 @@ Settings:
       External Player: Lecteur externe ({externalPlayerName})
       Full Screen: Plein écran
       Theater: Mode cinéma
+      Full Window (Always On): Pleine fenêtre (toujours activé)
+      Full Screen (Always On): Plein écran (toujours activé)
+      Tooltip: La plupart des modes d'affichage par défaut ne s'appliquent qu'au début de chaque session de visionnage. Les modifications apportées au cours de la session sont conservées jusqu'à la fin de celle-ci. Les modes d'affichage permanents s'appliquent chaque fois que vous passez à une nouvelle vidéo, quelles que soient les modifications de mode d'affichage effectuées lors du visionnage de la vidéo précédente.
   Subscription Settings:
     Subscription Settings: 'Abonnements'
     Fetch Feeds from RSS: Récupération de flux RSS
@@ -492,13 +497,13 @@ Settings:
       Label: Exportation des listes de lecture pour les anciennes versions de OpenTubeX
     Search history file: Fichier d'historique de recherche
     Search history: Historique des recherches
-    Import search history: Importer l'historique de recherche
+    Import search history: Importer l'historique des recherches
     Export search history: Exporter l'historique des recherches
     All search history has been successfully imported: Tous les historiques de recherche ont été importées avec succès
     All search history has been successfully exported: Tous les historiques de recherche ont été exportées avec succès
     Settings File: Fichier de paramètres
-    Import Settings: Paramètres d'importation
-    Export Settings: Paramètres d'exportation
+    Import Settings: Importer les paramètres
+    Export Settings: Exporter les paramètres
     Settings Tooltip: "Les paramètres spécifiques au système d'exploitation ou à l'utilisateur, ou encore ceux de nature expérimentale, ne peuvent être ni exportés ni importés (par exemple : proxy, lecteur externe, dossier de captures d'écran...)"
     All settings have been successfully imported: Tous les paramètres ont été importés avec succès
     All settings have been successfully exported: Tous les paramètres ont été exportés avec succès
@@ -795,7 +800,7 @@ Video:
     Audio Tracks: Pistes audio
     Theatre Mode: Mode théâtre
     Exit Theatre Mode: Quitter le mode théâtre
-    Full Window: Plein écran
+    Full Window: Pleine fenêtre
     Show Stats: Afficher les stats
     Hide Stats: Masquer les stats
     Stats:
@@ -814,7 +819,7 @@ Video:
       Dropped Frames / Total Frames: 'Images perdues : {droppedFrames} / Images totales : {totalFrames}'
     Skipped segment: '{segmentCategory} ignoré'
     TranslatedCaptionTemplate: '{language} (traduit depuis : {originalLanguage})'
-    Exit Full Window: Quitter le plein écran
+    Exit Full Window: Quitter le mode pleine fenêtre
     Take Screenshot: Prendre une capture d'écran
     You appear to be offline: Vous semblez être hors ligne.
     Playback will resume automatically when your connection comes back: La lecture reprendra automatiquement quand votre connexion reviendra.
@@ -1126,7 +1131,7 @@ KeyboardShortcutPrompt:
   Small Fast Forward: Avancer de X secondes en fonction de l'intervalle d'avance rapide et de la vitesse de lecture vidéo actuelle
   Last Chapter: Dernier chapitre
   Next Chapter: Chapitre suivant
-  Full Window: Activer/désactiver la fenêtre maximisée
+  Full Window: Activer/désactiver le mode pleine fenêtre
   Skip by Tenths: Sauter dans la vidéo par pourcentage (3 sauts pour atteindre 30 % de la durée)
   Home: Aller au début de la vidéo
   End: Aller à la fin de la vidéo

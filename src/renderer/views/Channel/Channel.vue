@@ -2552,7 +2552,6 @@ function changeTab(tab, moveFocus = true) {
 
   if (moveFocus && newTabNode != null) {
     newTabNode.focus()
-    store.commit('setOutlinesHidden', false)
   }
 }
 

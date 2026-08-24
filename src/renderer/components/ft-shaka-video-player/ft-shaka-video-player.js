@@ -5830,6 +5830,8 @@ export default defineComponent({
         previousQuality = preferredVideoQuality.value
       }
 
+      if (props.legacyFormats.length === 0) { return }
+
       const format = findLegacyFormatForQuality(props.legacyFormats, previousQuality)
 
       hasMultipleAudioTracks.value = false
@@ -8991,7 +8993,7 @@ export default defineComponent({
               firstVariant.width / firstVariant.height < 1.5
           }
         })
-      } else {
+      } else if (props.legacyFormats.length > 0) {
         // force the player aspect ratio to 16:9 to avoid overflowing the layout, when the video is too tall
 
         const firstFormat = props.legacyFormats[0]
