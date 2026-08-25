@@ -29,6 +29,7 @@ Resize Tab Bar: Größe der Tableiste ändern
 # Anything shared among components / views should be put here
 Global:
   Ambient Mode: Beleuchtung wie im Kino
+  Loading More: Weitere Inhalte werden geladen
   Videos: Videos
   Shorts: Shorts
   Live: Live
@@ -126,6 +127,7 @@ Most Popular: Am beliebtesten
 Playlists: Playlists
 User Playlists:
   Your Playlists: Deine Playlists
+  Load More Playlists: Weitere Playlists laden
   Search bar placeholder: Nach Playlists suchen
   Empty Search Message: Es gibt keine Videos in dieser Playlist, die deiner Suche entsprechen
   This playlist currently has no videos.: Diese Playlist enthält derzeit keine Videos.
@@ -244,9 +246,26 @@ Settings:
   # On Settings Page
   Settings: Einstellungen
   Categories:
+    General Description: Sprache, Start, Tabs und App-Verhalten
+    Appearance: Darstellung
+    Appearance Description: Design, Layout und Vorschaubilder
+    Content appearance: Videolisten und Vorschaubilder
+    Layout: Layout
+    Playback: Wiedergabe
+    Playback Description: Player, Untertitel und Kanaleinstellungen
+    Subscriptions: Abos
+    Subscriptions Description: Feed-Aktualisierung und Anzeigeoptionen
+    Downloads Description: Ordner, Vorlagen und automatische Regeln
+    Distraction Free Description: Inhalte ausblenden und die Anzeige begrenzen
+    Add-ons: Erweiterungen
+    Add-ons Description: SponsorBlock, DeArrow, Dislikes und Voice-over-Übersetzung
     Privacy Description: Datenschutz beim Ansehen und Zugriffskontrollen
+    Online activity: Onlineaktivität
     Data And Storage Description: Import, Export, Speicherbelegung und Bereinigung
+    Sync Description: Einstellungen und Daten geräteübergreifend synchronisieren
+    Advanced: Erweitert
     Advanced Description: Anbieter, externe Anwendungen und Netzwerk
+    Alternative providers: Video- und Metadatenanbieter
   General Settings:
     General Settings: Allgemein
     Playback Engine:
@@ -272,6 +291,10 @@ Settings:
       Video View Type: Videoübersicht
       Grid: Raster
       List: Liste
+    Playlist View Type:
+      Playlist View Type: Playlist-Ansicht
+      Grid: Raster
+      List: Liste
     Thumbnail Preference:
       Thumbnail Preference: Vorschaubilder
       Default: Standard
@@ -280,6 +303,7 @@ Settings:
       End: Ende
       Hidden: Versteckt
       Blur: Unschärfe
+    Show Thumbnail Previews: Animierte Vorschaubilder anzeigen
     Region for Trending: Region für Trends
         #! List countries
     Check for Updates: Auf Updates prüfen
@@ -717,6 +741,7 @@ Settings:
     Enable Video Zoom: Videozoom aktivieren
     Voice-over Translation:
       Title: Voice-over-Übersetzung
+      Attribution: (bereitgestellt von Yandex)
       Enable: Voice-over-Übersetzung aktivieren
       Prepare in Background: Voice-over-Übersetzungen im Hintergrund vorbereiten
       Background Preparation Tooltip: >-
@@ -791,6 +816,7 @@ Settings:
       verbleiben. Bei 0 % werden sie zu Beginn der Wiedergabe und bei 100 % am Ende markiert.
     Clear Video Metadata Cache: Videometadaten-Cache leeren
     Are you sure you want to clear the video metadata cache?: Möchtest du die zwischengespeicherten Videotitel, Vorschaubilder und Beschreibungen wirklich löschen?
+    Failed to clear video metadata cache: Videometadaten-Cache konnte nicht geleert werden
     Video metadata cache has been cleared: Videometadaten-Cache wurde geleert
     Video Metadata Cache Size: 'Videometadaten-Cache: {size}'
   Storage Settings:
@@ -874,6 +900,8 @@ Settings:
     Cleanup Complete: Speicherbereinigung abgeschlossen
     Cleanup Failed: Speicherbereinigung fehlgeschlagen
   Data Settings:
+    Profile Directory: Profilverzeichnis
+    Open Profile Directory: Profilverzeichnis öffnen
     How do I import my subscriptions?: Wie importiere ich meine Abos?
     Unknown data key: Unbekannter Datenschlüssel
     Unable to write file: Datei kann nicht geschrieben werden
@@ -883,6 +911,7 @@ Settings:
     History object has insufficient data, skipping item: Verlaufsobjekt hat unzureichende Daten, Element wird übersprungen
     Subscriptions have been successfully exported: Abos wurden erfolgreich exportiert
     Invalid history file: Ungültige Verlaufsdatei
+    Invalid JSON row, skipping item: Ungültiges JSON in Zeile {row}, Eintrag wird übersprungen
     Invalid subscriptions file: Ungültige Abo-Datei
     All subscriptions and profiles have been successfully imported: Alle Abos und Profile wurden erfolgreich importiert
     All subscriptions have been successfully imported: Alle Abos wurden erfolgreich importiert
@@ -1031,6 +1060,7 @@ Settings:
       Prompt To Skip: Zum Überspringen auffordern
       Do Nothing: Nichts tun
     Category Color: Kategoriefarbe
+    Custom Color: Benutzerdefinierte Farbe
     UseDeArrowTitles: DeArrow-Videotitel verwenden
     UseDeArrowThumbnails: DeArrow für Miniaturansichten verwenden
     'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': DeArrow-Thumbnail-Generator-API-URL (Standard ist https://dearrow-thumb.ajay.app)
@@ -1126,6 +1156,18 @@ Settings:
     Managed Tool Already Current Template: '{tool} {version} ist bereits auf dem neuesten Stand'
     yt-dlp Executable Path: Pfad zur ausführbaren yt-dlp-Datei
     FFmpeg Executable Path: Pfad zur ausführbaren FFmpeg-Datei
+    Restricted Playback Authentication: Authentifizierung für eingeschränkte Videos
+    Cookie Source: Cookie-Quelle
+    Cookie Sources:
+      None: Keine
+      File: Datei
+      Browser: Browser
+    Cookie File: Cookie-Datei
+    Browser for Cookies: Browser für Cookies
+    Browser Profile: Browserprofil (optional)
+    Browser Profile Placeholder: Profilname oder -pfad
+    Select Browser: Browser auswählen
+    Restricted Playback Authentication Hint: OpenTubeX übergibt diese Cookies erst an yt-dlp, nachdem du bei einem altersbeschränkten oder nur für Mitglieder verfügbaren Video „Mit konfigurierten Cookies versuchen“ ausgewählt hast. Die Verwendung von yt-dlp mit einem Google-Konto kann zu vorübergehenden oder dauerhaften Kontoeinschränkungen führen.
     Detected FFprobe Version Template: 'Erkannte FFprobe-Version: {version}'
     FFprobe Managed Not Downloaded: >-
       FFprobe wurde noch nicht heruntergeladen. Klicke auf die Schaltfläche unten, um es zusammen mit FFmpeg
@@ -1157,6 +1199,7 @@ Settings:
     Unlock: Entsperren
     Unlocking: Wird entsperrt…
   Password Settings:
+    Password: Passwort
     Remove Password: Passwort entfernen
     Password Settings: Passwort
     Set Password To Prevent Access: Passwort festlegen, um den Zugriff auf die Einstellungen zu verhindern
@@ -1637,6 +1680,9 @@ Video:
   AI-generated content: KI-generierte Inhalte
   MembersOnly: Videos, die nur für Mitglieder bestimmt sind, können mit OpenTubeX nicht angesehen werden, da sie einen Google-Login und eine kostenpflichtige Kanalmitgliedschaft erfordern.
   AgeRestricted: Videos mit Altersbeschränkung können mit OpenTubeX nicht angesehen werden, da sie eine Google-Anmeldung und die Verwendung eines altersgeprüften YouTube-Kontos erfordern.
+  Configure Restricted Playback Cookies Hint: Konfiguriere Cookies unter Einstellungen → Erweitert → Externe Software → Authentifizierung für eingeschränkte Videos.
+  Try With Configured Cookies: Mit konfigurierten Cookies versuchen
+  Restricted Playback Authentication Failed Template: 'yt-dlp konnte mit den konfigurierten Cookies nicht auf dieses Video zugreifen: {error}'
   DeArrow:
     Show Modified Details: Geänderte Details anzeigen
     Show Original Details: Originale Details anzeigen
@@ -1665,6 +1711,11 @@ Video:
   Queue Video Count: '{count} Video | {count} Videos'
   Remove from Queue: '{title} aus der Warteschlange entfernen'
   Drag to Reorder Queue: Ziehe {title}, um die Warteschlange neu anzuordnen
+  Reorder Queue Item: 'Reihenfolge von {title} ändern'
+  Reorder Queue Item Instructions: Verwende die Pfeiltasten nach oben und unten, um dieses Video in der Warteschlange zu verschieben.
+  Queue Item Moved: '{title} wurde an Position {position} von {total} verschoben.'
+  Queue Item Cannot Move Up: '{title} kann nicht nach oben verschoben werden. Es befindet sich bereits an Position 1 von {total}.'
+  Queue Item Cannot Move Down: '{title} kann nicht nach unten verschoben werden. Es befindet sich bereits an Position {total} von {total}.'
   Metadata: Videoinformationen
   Close Metadata: Videoinformationen schließen
   Metadata Cache:
@@ -1891,6 +1942,7 @@ Tooltips:
   General Settings:
     Playback Engine: Legt fest, welche Engine die Videostreams ermittelt. yt-dlp muss verfügbar sein, wenn es ausgewählt ist.
     Thumbnail Preference: Alle Vorschaubilder in OpenTubeX werden verpixelt, versteckt oder durch ein Einzelbild aus dem Video ersetzt, anstatt das Standard-Vorschaubild anzuzeigen.
+    Show Thumbnail Previews: Zeigt animierte Vorschaubilder, wenn du den Mauszeiger über ein Videovorschaubild bewegst.
     Invidious Instance: Die Invidious-Instanz, mit der sich OpenTubeX für API-Aufrufe verbinden wird.
     Fallback to Non-Preferred Backend on Failure: Wenn deine bevorzugte API ein Problem hat, wird OpenTubeX automatisch versuchen, deine nicht-bevorzugte API als Ausweichmethode zu verwenden, wenn sie aktiviert ist.
     Preferred API Backend: Wähle das Backend aus, welches OpenTubeX zum Laden der Daten nutzen soll. Die lokale API ist ein eingebauter Extrahierer. Die Invidious-API erfordert einen Invidious-Server, zu dem eine Verbindung hergestellt werden muss.
@@ -1974,6 +2026,10 @@ Tooltips:
     FFmpeg Source: OpenTubeX kann entweder das auf deinem System installierte FFmpeg verwenden oder einen eigenen statischen FFmpeg-Build herunterladen und verwalten, der im Benutzerdatenverzeichnis gespeichert wird.
     Managed Tool Updates: Lege fest, ob verwaltete Tools automatisch, nach Rückfrage oder nur über die manuellen Schaltflächen aktualisiert werden. Fehlende Tools werden bei Bedarf weiterhin heruntergeladen.
     yt-dlp Executable Path: Standardmäßig nimmt OpenTubeX an, dass yt-dlp über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
+    Cookie Source: Lege fest, ob yt-dlp eine Netscape-Cookie-Datei oder Cookies aus einem installierten Browser lesen soll, wenn du die Wiedergabe eines eingeschränkten Videos ausdrücklich erneut versuchst.
+    Cookie File: Wähle eine Cookie-Datei im Netscape-Format für erneute Wiedergabeversuche von altersbeschränkten oder nur für Mitglieder verfügbaren Videos aus.
+    Browser for Cookies: Die Browserunterstützung wird anhand der ausgewählten ausführbaren yt-dlp-Datei ermittelt. OpenTubeX weist yt-dlp erst nach einem ausdrücklichen erneuten Versuch bei einem eingeschränkten Video an, Cookies aus diesem Browser zu lesen.
+    Browser Profile: Optionaler Name oder Ordner des Browserprofils. Lasse das Feld leer, um das zuletzt verwendete Profil zu nutzen.
     FFmpeg Executable Path: FFmpeg wird zum Zusammenführen von getrennten Video- und Audiospuren sowie zur Audiokonvertierung benötigt. Standardmäßig nimmt OpenTubeX an, dass FFmpeg über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
   Experimental Settings:
     Replace HTTP Cache: Deaktiviert den festplattenbasierten HTTP-Cache von Electron und aktiviert einen benutzerdefinierten In-Memory-Image-Cache. Dies führt zu einer erhöhten RAM-Auslastung.
@@ -2007,7 +2063,7 @@ Search Bar:
   Clear Input: Eingabe löschen
   Remove: Entfernen
 Are you sure you want to open this link?: Bist du sicher, dass du diesen Link öffnen willst?
-External link opening has been disabled in the general settings: Das Öffnen externer Links wurde in den allgemeinen Einstellungen deaktiviert
+External link opening has been disabled in Settings → Privacy: Das Öffnen externer Links wurde unter Einstellungen → Datenschutz deaktiviert
 Screenshot Success: Screenshot wurde gespeichert
 Screenshot Error: Screenshot fehlgeschlagen. {error}
 New Window: Neues Fenster
@@ -2063,6 +2119,7 @@ Search Listing:
     VR180: VR180
     360 Video: 360°
     New: Neu
+    Members Only: Nur für Mitglieder
     3D: 3D
 Keys:
   arrowdown: Pfeil nach unten
@@ -2226,6 +2283,7 @@ Context Menu:
   Blue: Blau
   Purple: Violett
   New Tab: Neuer Tab
+  New Window: Neues Fenster
   Reopen Closed Tab: Geschlossenen Tab wieder öffnen
   Reload Tab: Tab neu laden
   Reload Tabs: Tabs neu laden
@@ -2280,6 +2338,44 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} h'
   Hours and minutes: '{hours} h {minutes} min'
+CommandPalette:
+  Title: Befehlspalette
+  Open: Befehlspalette öffnen
+  Search Label: Befehle durchsuchen
+  Search Placeholder: Befehle und Einstellungen durchsuchen…
+  Results: Befehle
+  No Results: Keine passenden Befehle
+  Result Count: 1 Befehl gefunden | {count} Befehle gefunden
+  Move: Verschieben
+  Run: Ausführen
+  Keys:
+    Up: ↑
+    Down: ↓
+    Enter: Enter
+    Escape: Esc
+  Switch to Tab: 'Zum Tab wechseln: {title}'
+  Switch Profile: 'Profil wechseln: {name}'
+  Open Playlist: 'Playlist öffnen: {name}'
+  Cancel Download: 'Download abbrechen: {title}'
+  Groups:
+    App: Anwendung
+    Navigation: Navigation
+    Settings: Einstellungen
+    Tabs: Tabs
+    Profiles: Profile
+    Playlists: Playlists
+    Downloads: Downloads
+    Playback: Wiedergabe
+  Unavailable:
+    Current Page: Du bist bereits auf dieser Seite
+    No History: Keine Seite in dieser Richtung
+    Desktop: Nur in der Desktop-Anwendung verfügbar
+    Build: In diesem Build nicht verfügbar
+    One Tab: Öffne zuerst einen weiteren Tab
+    Active Tab: Dies ist der aktive Tab
+    Active Profile: Dies ist das aktive Profil
+    Download Finished: Dieser Download läuft nicht mehr
+    Video: Öffne zuerst ein Video
 Downloads:
   Download: Herunterladen
   Download Video: Video herunterladen
@@ -2303,6 +2399,8 @@ Downloads:
   Insufficient Disk Space: Nicht genügend Speicherplatz. Ungefähr {required} werden benötigt und {available} sind verfügbar.
   Unknown Download Size: Die Downloadgröße ist unbekannt. Auf dem Zieldateisystem sind {available} verfügbar.
   Disk Space Check Unavailable: Der verfügbare Speicherplatz konnte vor Beginn dieses Downloads nicht geprüft werden.
+  Download Failure Hint: Prüfe {issuesLink} und wechsle dann unter Einstellungen → Erweitert → Externe Software den yt-dlp-Kanal auf Nightly oder Master.
+  yt-dlp YouTube Issues: aktuelle yt-dlp-Probleme mit YouTube
   Cancel Download: Download abbrechen
   yt-dlp Not Found: yt-dlp wurde nicht gefunden. Installiere es oder lege den Pfad in den Download-Einstellungen fest.
   Download Complete Template: Download von „{title}“ ist abgeschlossen
@@ -2444,6 +2542,11 @@ Tutorial:
     Description: >-
       Wähle oben rechts dein Profil aus, um das Profil zu wechseln, häufige Einstellungen zu ändern oder alle
       Einstellungen zu öffnen. Mit einem Rechtsklick gelangst du direkt zur Profilauswahl.
+  Import Data:
+    Title: Nimm deine Daten mit
+    Description: Importiere bei Bedarf Abos, Verlauf, Playlists, Suchverlauf oder Einstellungen aus einer anderen unterstützten Anwendung oder Sicherung.
+    Action: Daten importieren
+    Not Now: Nicht jetzt
   Settings Moved:
     Title: Die Einstellungen wurden verschoben
     Description: >-
