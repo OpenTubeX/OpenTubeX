@@ -40,7 +40,12 @@ async function clickUntil(page, button, isComplete) {
 }
 
 test('opens downloads with the default shortcut', async ({ page }) => {
-  await page.keyboard.press('Control+J')
+  await expect.poll(async () => {
+    if (/#\/downloads$/.test(page.url())) return true
+    await page.bringToFront()
+    await page.keyboard.press('Control+J')
+    return /#\/downloads$/.test(page.url())
+  }).toBe(true)
   await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
 })
 
@@ -170,6 +175,55 @@ test('controls queue order, running jobs, bandwidth, and retry-all', async ({ ap
   ))).toBe('completed')
   const completed = page.locator('.downloadRow').filter({ hasText: 'Retry-all download' })
   await expect(completed).not.toContainText('Download complete')
+})
+
+test('clears pause-all after every download is individually resumed', async ({ app, page }) => {
+  const executable = path.join(app.userDataDir, 'individual-resume-yt-dlp.sh')
+  const startsFile = path.join(app.userDataDir, 'individual-resume-starts.txt')
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'for argument do case "$argument" in https://www.youtube.com/watch?v=*) url="$argument" ;; esac; done',
+    'id="$' + '{url##*=}"',
+    `printf '%s\\n' "$id" >> '${startsFile}'`,
+    `while [ ! -f "${app.userDataDir}/release-$id" ]; do sleep 0.05; done`,
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await configureQueue(page, { ytDlpPath: executable, ytDlpMaxConcurrentDownloads: 1 })
+
+  const [active, pending] = await submitDownloads(page, [
+    { videoId: 'rrrrrrrrrrr', title: 'Individually resumed active download', mode: 'video' },
+    { videoId: 'sssssssssss', title: 'Individually resumed pending download', mode: 'video' },
+  ])
+  await expect.poll(() => readFile(startsFile, 'utf8').catch(() => '')).toBe('rrrrrrrrrrr\n')
+
+  await expect.poll(async () => {
+    await page.bringToFront()
+    return page.evaluate(() => window.ftElectron.ytDlpQueueAction('pause-all'))
+  }).toBe(true)
+  await expect.poll(() => page.evaluate(async ids => (
+    (await window.ftElectron.ytDlpListDownloads())
+      .filter(download => ids.includes(download.id))
+      .map(download => download.status)
+  ), [active.id, pending.id])).toEqual(['paused', 'paused'])
+
+  for (const download of [active, pending]) {
+    await expect.poll(async () => {
+      await page.bringToFront()
+      return page.evaluate(id => window.ftElectron.ytDlpControlDownload(id, 'resume'), download.id)
+    }).toBe(true)
+  }
+
+  const [submittedAfterResume] = await submitDownloads(page, [
+    { videoId: 'ttttttttttt', title: 'Submitted after individual resumes', mode: 'video' },
+  ])
+  await expect.poll(() => page.evaluate(async id => (
+    (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+  ), submittedAfterResume.id)).toBe('queued')
+
+  for (const videoId of ['rrrrrrrrrrr', 'sssssssssss', 'ttttttttttt']) {
+    await writeFile(path.join(app.userDataDir, `release-${videoId}`), '')
+    await expect.poll(() => readFile(startsFile, 'utf8')).toContain(`${videoId}\n`)
+  }
 })
 
 test('keeps the unsupported active-pause fallback resumable', async ({ app, page }) => {

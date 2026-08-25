@@ -2661,7 +2661,10 @@ async function restorePersistedDownloadQueue(event) {
         !queuedDownloadWaiters.has(record.id) && !activeDownloads.has(record.id))
       .sort(compareQueuedDownloads)
     for (const record of persisted) await restartPersistedDownload(event, record)
-  })()
+  })().catch(error => {
+    persistedDownloadQueueRestorePromise = null
+    throw error
+  })
   return persistedDownloadQueueRestorePromise
 }
 
@@ -2744,6 +2747,15 @@ export function handleYtDlpCancelDownload(event, id) {
   }
 }
 
+function clearQueuePauseAfterLastIndividualResume() {
+  if (!downloadQueuePauseAllRequested || [...downloadRecords.values()]
+    .some(download => ['paused', 'pausing'].includes(download.status))) return
+
+  downloadQueuePaused = false
+  downloadQueuePauseAllRequested = false
+  individuallyResumedDownloadIds.clear()
+}
+
 /**
  * @param {import('electron').IpcMainInvokeEvent} event
  * @param {number} id
@@ -2781,7 +2793,9 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
     } else if (record.status === 'paused') {
       if (!queuedDownloadWaiters.has(id)) {
         const result = await restartPersistedDownload(event, record, true)
-        return Boolean(result && 'id' in result)
+        const resumed = Boolean(result && 'id' in result)
+        if (resumed) clearQueuePauseAfterLastIndividualResume()
+        return resumed
       }
       resumePendingDownload(record, individuallyResumedDownloadIds, downloadQueuePaused)
     } else if (record.status === 'pausing') {
@@ -2796,6 +2810,7 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
     } else {
       return false
     }
+    clearQueuePauseAfterLastIndividualResume()
   } else if (action === 'move' && ['queued', 'paused'].includes(record.status) && !entry && (value === -1 || value === 1)) {
     const peers = [...downloadRecords.values()]
       .filter(download => ['queued', 'paused'].includes(download.status) && !activeDownloads.has(download.id))

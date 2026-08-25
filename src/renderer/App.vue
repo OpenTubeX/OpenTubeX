@@ -2241,7 +2241,7 @@ function handleKeyboardShortcuts(event) {
 
   if (matchesKeyboardShortcut(event, shortcuts.NAVIGATE_TO_DOWNLOADS)) {
     event.preventDefault()
-    store.dispatch('showSettingsWindow', 'downloads')
+    openInternalPath({ path: '/downloads' })
     return
   }
 

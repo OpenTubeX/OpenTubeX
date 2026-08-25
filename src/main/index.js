@@ -1727,7 +1727,11 @@ function runApp() {
   let proxyUrl
 
   app.on('ready', async (_, __) => {
-    restoreYtDlpDownloadQueue().catch(error => console.warn('Could not restore the download queue', error))
+    try {
+      await restoreYtDlpDownloadQueue()
+    } catch (error) {
+      console.warn('Could not restore the download queue', error)
+    }
     if (process.platform === 'darwin') {
       const t = await createMainTranslator()
       dockMediaLabels = {
