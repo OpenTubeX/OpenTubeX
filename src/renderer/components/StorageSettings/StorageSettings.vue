@@ -622,10 +622,13 @@ function requestCleanup(action) {
 }
 
 async function compactAndRefresh() {
-  if (USING_ELECTRON) {
-    await requireCleanupSuccess(window.ftElectron.storage.compactDatabases())
+  try {
+    if (USING_ELECTRON) {
+      await requireCleanupSuccess(window.ftElectron.storage.compactDatabases())
+    }
+  } finally {
+    await refreshUsage()
   }
-  await refreshUsage()
 }
 
 async function requireCleanupSuccess(cleanup) {
@@ -641,7 +644,7 @@ async function performCleanup(action) {
       break
     }
     case 'subscription-cache':
-      await store.dispatch('clearSubscriptionsCache')
+      await requireCleanupSuccess(store.dispatch('clearSubscriptionsCache'))
       break
     case 'session-search':
       await store.dispatch('clearSessionSearchHistory')
@@ -662,19 +665,19 @@ async function performCleanup(action) {
       await requireCleanupSuccess(window.ftElectron.videoMetadataCache.clear())
       break
     case 'watch-history':
-      await store.dispatch('removeAllHistory')
+      await requireCleanupSuccess(store.dispatch('removeAllHistory'))
       break
     case 'watch-statistics':
-      await store.dispatch('clearWatchStats')
+      await requireCleanupSuccess(store.dispatch('clearWatchStats'))
       break
     case 'search-history':
-      await store.dispatch('removeAllSearchHistoryEntries')
+      await requireCleanupSuccess(store.dispatch('removeAllSearchHistoryEntries'))
       break
     case 'subscriptions-profiles':
       await removeSubscriptionsAndProfiles()
       break
     case 'playlists':
-      await store.dispatch('removeAllPlaylists')
+      await requireCleanupSuccess(store.dispatch('removeAllPlaylists'))
       await store.dispatch('updateQuickBookmarkTargetPlaylistId', 'favorites')
       break
   }
@@ -721,7 +724,7 @@ async function removeSubscriptionsAndProfiles() {
     }
     return store.dispatch('removeProfile', profile._id)
   }))
-  await store.dispatch('clearSubscriptionsCache')
+  await requireCleanupSuccess(store.dispatch('clearSubscriptionsCache'))
 }
 
 function parseDays(value, allowEmpty = false) {

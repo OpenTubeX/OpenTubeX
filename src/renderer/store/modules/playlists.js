@@ -449,8 +449,10 @@ const actions = {
     try {
       await DBPlaylistHandlers.deleteAll()
       commit('removeAllPlaylists')
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 

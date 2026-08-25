@@ -323,6 +323,60 @@ test('reports cleanup rejection instead of success', async ({ app, page }) => {
   await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
 })
 
+test('reports rejected store cleanup instead of success', async ({ page }) => {
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store._actions.removeAllSearchHistoryEntries = [() => Promise.resolve(false)]
+  })
+
+  const storage = await goToSettingsSection(page, 'storage')
+  const searchHistory = storage.locator('.storageItem').filter({
+    has: page.getByRole('heading', { name: 'Search history', exact: true })
+  })
+  await searchHistory.getByRole('button', { name: 'Delete search history' }).click()
+  await page.getByRole('dialog', { name: 'Delete all saved search history?' })
+    .getByRole('button', { name: 'Delete' })
+    .click()
+
+  await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
+  await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
+  expect(await page.evaluate(() => (
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .getters.getSearchHistoryEntries.length
+  ))).toBe(1)
+})
+
+test('refreshes sizes when database compaction fails', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ ipcMain }, channels) => {
+    globalThis.__searchHistoryBytes = 1024
+    ipcMain.removeHandler(channels.STORAGE_GET_USAGE)
+    ipcMain.handle(channels.STORAGE_GET_USAGE, () => ({
+      searchHistory: globalThis.__searchHistoryBytes,
+      otherProfileData: 0,
+      profileTotal: globalThis.__searchHistoryBytes
+    }))
+    ipcMain.removeHandler(channels.STORAGE_COMPACT_DATABASES)
+    ipcMain.handle(channels.STORAGE_COMPACT_DATABASES, () => {
+      globalThis.__searchHistoryBytes = 0
+      return false
+    })
+  }, IpcChannels)
+
+  const storage = await goToSettingsSection(page, 'storage')
+  const searchHistory = storage.locator('.storageItem').filter({
+    has: page.getByRole('heading', { name: 'Search history', exact: true })
+  })
+  await expect(searchHistory.locator('.storageSize')).toHaveText('1 KiB')
+  await searchHistory.getByRole('button', { name: 'Delete search history' }).click()
+  await page.getByRole('dialog', { name: 'Delete all saved search history?' })
+    .getByRole('button', { name: 'Delete' })
+    .click()
+
+  await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
+  await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
+  await expect(searchHistory.locator('.storageSize')).toHaveText('0 B')
+})
+
 test('reports rejected download record cleanup', async ({ app, page }) => {
   await app.electronApp.evaluate(({ ipcMain }, channels) => {
     ipcMain.removeHandler(channels.STORAGE_GET_USAGE)

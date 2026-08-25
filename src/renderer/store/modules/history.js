@@ -151,8 +151,10 @@ const actions = {
       await DBHistoryHandlers.deleteAll()
       commit('setHistoryCacheSorted', [])
       commit('setHistoryCacheById', {})
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 
