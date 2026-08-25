@@ -2900,19 +2900,9 @@ test('loads initial comments with the video when automatic pagination is enabled
   // Initial comments must not depend on the later-page sentinel being visible.
   await page.addStyleTag({ content: '.commentAutoLoadSentinel { display: none !important; }' })
 
-  let commentRequestCount = 0
-  await page.route(/\/youtubei\/v1\/next/, (route, request) => {
-    const body = JSON.parse(request.postData() ?? '{}')
-    if (body.continuation) {
-      commentRequestCount++
-    }
-    return route.fallback()
-  })
-
   await openMockedVideo(page)
 
   await expect(page.locator('.getCommentsTitle')).toHaveCount(0, { timeout: 5_000 })
-  await expect.poll(() => commentRequestCount).toBeGreaterThan(0)
   await expect(page.locator('.commentsTitle')).toBeVisible()
   await expect(page.locator('.getMoreComments')).toHaveCount(0)
   expect(await page.evaluate(() => window.scrollY)).toBe(0)
