@@ -49,6 +49,28 @@ test('playback starts', async ({ app, page, attachScreenshot }) => {
   await attachScreenshot('playing video')
 })
 
+test('shows the replay icon when playback ends before Shaka updates its play icon', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  const watchComponent = await page.evaluateHandle(findWatchComponent)
+  const replayIconPath = await watchComponent.evaluate(component => component.refs.player.replayIcon)
+  const playButton = page.locator(`${activeTab} .shaka-play-button`).first()
+  const nativeIconPath = playButton.locator(
+    ':scope > .shaka-ui-icon:not(.ft-play-pause-morph-icon) > path'
+  )
+
+  await video.evaluate(element => element.pause())
+  await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'play')
+
+  await video.evaluate(element => {
+    Object.defineProperty(element, 'ended', { configurable: true, value: true })
+    element.dispatchEvent(new Event('ended'))
+  })
+
+  await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'replay')
+  await expect(nativeIconPath).toHaveAttribute('d', replayIconPath)
+  await watchComponent.dispose()
+})
+
 test('does not restore a consumed link timestamp after an app restart', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw&t=2')
