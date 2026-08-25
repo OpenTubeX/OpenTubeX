@@ -18,6 +18,12 @@ test('uses the earliest expiry from the yt-dlp formats', () => {
   ]), new Date(1000 * 1000))
 })
 
+test('reads the expiry from a yt-dlp HLS manifest path', () => {
+  assert.deepEqual(getEarliestYtDlpFormatExpiry([{
+    url: 'https://example.com/api/manifest/hls_playlist/expire/2000/master.m3u8'
+  }]), new Date(2000 * 1000))
+})
+
 test('reuses DASH sources until the early expiry margin', () => {
   let now = 1000000
   const cache = new YtDlpPlaybackSourceCache({

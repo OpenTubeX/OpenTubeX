@@ -132,10 +132,7 @@ test.describe('fullscreen ambient mode', () => {
 
 test('shows the restricted playback setup hint until an authenticated retry is available', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
-  await page.route('https://example.invalid/restricted.m3u8', route => route.fulfill({
-    contentType: 'application/x-mpegURL',
-    body: '#EXTM3U\n'
-  }))
+  await page.route('https://example.invalid/restricted.mp4?expire=4102444800', route => route.fulfill({ body: 'video' }))
   await openMockedVideo(page)
 
   const watchView = await watchViewHandle(page)
@@ -164,11 +161,32 @@ test('shows the restricted playback setup hint until an authenticated retry is a
       (_event, _videoId, useDefaultClients, useAuthentication) => {
         globalThis.__restrictedPlaybackCalls.push({ useDefaultClients, useAuthentication })
         return {
-          isLive: true,
-          liveStatus: 'is_live',
-          hlsManifestUrl: 'https://example.invalid/restricted.m3u8',
-          formats: [],
-          duration: null,
+          isLive: false,
+          liveStatus: 'not_live',
+          hlsManifestUrl: null,
+          formats: [{
+            formatId: '18',
+            url: 'https://example.invalid/restricted.mp4?expire=4102444800',
+            manifestUrl: null,
+            protocol: 'https',
+            ext: 'mp4',
+            container: 'mp4_dash',
+            vcodec: 'avc1.42001E',
+            acodec: 'mp4a.40.2',
+            width: 640,
+            height: 360,
+            fps: 30,
+            bitrate: 500000,
+            audioSampleRate: 44100,
+            audioChannels: 2,
+            language: null,
+            formatNote: '360p',
+            dynamicRange: 'SDR',
+            availableAt: null
+          }],
+          duration: 60,
+          storyboardVtt: null,
+          title: 'Restricted video',
           version: 'test'
         }
       }
@@ -180,7 +198,10 @@ test('shows the restricted playback setup hint until an authenticated retry is a
       const applied = await extractYtDlpPlaybackSource.apply(view, args)
       window.__restrictedPlaybackResult = {
         applied,
-        activeEngine: view.activePlaybackEngine
+        activeEngine: view.activePlaybackEngine,
+        activeFormat: view.activeFormat,
+        legacyFormats: view.legacyFormats.length,
+        manifest: view.manifestSrc
       }
       return applied
     }
@@ -198,8 +219,39 @@ test('shows the restricted playback setup hint until an authenticated retry is a
   )).toEqual([{ useDefaultClients: false, useAuthentication: true }])
   await expect.poll(() => page.evaluate(
     () => window.__restrictedPlaybackResult
-  )).toEqual({ applied: true, activeEngine: 'yt-dlp' })
+  )).toEqual({
+    applied: true,
+    activeEngine: 'yt-dlp',
+    activeFormat: 'legacy',
+    legacyFormats: 1,
+    manifest: null
+  })
   expect(await watchView.evaluate((view) => view.playbackEngineFallbackTarget)).toBeNull()
+
+  await watchView.evaluate(async (view) => {
+    window.__restrictedPlaybackResult = null
+    view.manifestSrc = null
+    view.legacyFormats = []
+    view.activeFormat = 'dash'
+    view.activePlaybackEngine = 'built-in'
+    view.playbackEngineFallbackTarget = 'built-in'
+    view.setRestrictedPlaybackError('age')
+    await view.$nextTick()
+  })
+
+  await expect.poll(() => page.evaluate(
+    () => window.__restrictedPlaybackResult
+  )).toEqual({
+    applied: true,
+    activeEngine: 'yt-dlp',
+    activeFormat: 'legacy',
+    legacyFormats: 1,
+    manifest: null
+  })
+  await expect.poll(() => app.electronApp.evaluate(
+    () => globalThis.__restrictedPlaybackCalls
+  )).toEqual([{ useDefaultClients: false, useAuthentication: true }])
+  await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
 })
 
 test.describe('Shorts transcript navigation', () => {
@@ -1042,6 +1094,49 @@ test.describe('watch page', () => {
     await expect(page.locator('.toast', {
       hasText: 'The preferred yt-dlp clients could not provide playable streams'
     })).toHaveCount(1)
+  })
+
+  test('treats yt-dlp live status as live and does not cache its HLS source', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route('https://example.invalid/live-status.m3u8', route => route.fulfill({
+      contentType: 'application/x-mpegURL',
+      body: '#EXTM3U\n'
+    }))
+    await openMockedVideo(page)
+
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.__ytDlpLiveStatusCalls = 0
+      ipcMain.removeHandler('yt-dlp-get-playback-info')
+      ipcMain.handle('yt-dlp-get-playback-info', () => {
+        globalThis.__ytDlpLiveStatusCalls++
+        return {
+          isLive: false,
+          liveStatus: 'is_live',
+          hlsManifestUrl: 'https://example.invalid/live-status.m3u8',
+          formats: [{
+            url: 'https://example.invalid/live-segment.mp4?expire=4102444800',
+            protocol: 'https',
+            vcodec: null,
+            acodec: null
+          }],
+          duration: null,
+          storyboardVtt: null,
+          title: 'Live video',
+          version: 'test'
+        }
+      })
+    })
+
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate((view) => view.handlePlaybackEngineChange('yt-dlp'))
+    expect(await watchView.evaluate((view) => view.isLive)).toBe(true)
+
+    await watchView.evaluate((view) => view.extractYtDlpPlaybackSource(
+      view.videoLoadGeneration,
+      view.videoId,
+      view.playbackEngineSwitchGeneration
+    ))
+    expect(await app.electronApp.evaluate(() => globalThis.__ytDlpLiveStatusCalls)).toBe(2)
   })
 
   test('falls back to yt-dlp when the built-in live source has no manifest', async ({ app, page }) => {

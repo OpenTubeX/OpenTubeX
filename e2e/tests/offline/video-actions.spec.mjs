@@ -102,6 +102,28 @@ test('persists the yt-dlp playback cache across app restarts', async ({ app, pag
   })).toBeNull()
 })
 
+test('persists an authenticated HLS playback source across app restarts', async ({ app, page }) => {
+  const expiryTime = Date.now() + 60 * 60 * 1000
+  const source = {
+    manifestSrc: 'https://example.invalid/api/manifest/hls_playlist/expire/4102444800/master.m3u8',
+    manifestMimeType: 'application/x-mpegurl',
+    legacyFormats: [],
+    title: 'Cached restricted video',
+    isLive: false,
+    version: '2026.08.19'
+  }
+
+  expect(await page.evaluate(({ expiryTime, source }) => {
+    return window.ftElectron.ytDlpPlaybackCacheSet('rrrrrrrrrrr', 'authenticated-settings', expiryTime, source)
+  }, { expiryTime, source })).toBe(true)
+
+  ;({ page } = await app.relaunch())
+
+  expect(await page.evaluate(() => {
+    return window.ftElectron.ytDlpPlaybackCacheGet('rrrrrrrrrrr', 'authenticated-settings')
+  })).toEqual({ expiryTime, source })
+})
+
 test('limits persisted yt-dlp playback entries by UTF-8 byte size', async ({ page }) => {
   const source = {
     manifestSrc: `data:application/dash+xml;charset=UTF-8,${'€'.repeat(700_000)}`,
@@ -350,6 +372,10 @@ test.describe('video downloads', () => {
 
     await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee', false, true))
     passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
+    const extractorArgsIndex = passedArguments.indexOf('--extractor-args')
+    expect(passedArguments[extractorArgsIndex + 1]).toBe(
+      'youtube:player_client=default,web_safari'
+    )
     let cookiesIndex = passedArguments.indexOf('--cookies-from-browser')
     expect(cookiesIndex).toBeGreaterThanOrEqual(0)
     expect(passedArguments[cookiesIndex + 1]).toBe('firefox:/tmp/restricted-profile')

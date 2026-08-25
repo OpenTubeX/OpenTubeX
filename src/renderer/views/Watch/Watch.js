@@ -2409,6 +2409,12 @@ export default defineComponent({
         ? this.t('Video.MembersOnly')
         : this.t('Video.AgeRestricted')
       this.customErrorIcon = type === 'members' ? ['fas', 'money-check-dollar'] : null
+
+      if (this.hasConfiguredRestrictedPlaybackAuthentication) {
+        this.tryCachedRestrictedPlayback(type).catch(error => {
+          console.warn('Could not restore cached authenticated playback', error)
+        })
+      }
     },
 
     getRestrictedPlaybackErrorType: function (message) {
@@ -2434,6 +2440,34 @@ export default defineComponent({
       }
 
       return null
+    },
+
+    tryCachedRestrictedPlayback: async function (restrictedPlaybackError) {
+      const loadGeneration = this.videoLoadGeneration
+      const videoId = this.videoId
+      const playbackEngineSwitchGeneration = this.playbackEngineSwitchGeneration
+      const previousFallbackTarget = this.playbackEngineFallbackTarget
+
+      const sourceApplied = await this.extractYtDlpPlaybackSource(
+        loadGeneration,
+        videoId,
+        playbackEngineSwitchGeneration,
+        true,
+        true
+      )
+
+      if (!this.isCurrentVideoLoad(loadGeneration, videoId) ||
+        playbackEngineSwitchGeneration !== this.playbackEngineSwitchGeneration ||
+        this.restrictedPlaybackError !== restrictedPlaybackError) {
+        return
+      }
+
+      if (sourceApplied) {
+        this.restrictedPlaybackError = null
+        this.playbackEngineFallbackTarget = null
+      } else {
+        this.playbackEngineFallbackTarget = previousFallbackTarget
+      }
     },
 
     tryRestrictedPlaybackWithCookies: async function () {
@@ -4942,12 +4976,15 @@ export default defineComponent({
      * @param {number} loadGeneration
      * @param {string} videoId
      * @param {number} playbackEngineSwitchGeneration
+     * @param {boolean} useAuthentication
+     * @param {boolean} cachedOnly
      */
     extractYtDlpPlaybackSource: async function (
       loadGeneration,
       videoId,
       playbackEngineSwitchGeneration = this.playbackEngineSwitchGeneration,
-      useAuthentication = false
+      useAuthentication = false,
+      cachedOnly = false
     ) {
       let source
       try {
@@ -4963,7 +5000,7 @@ export default defineComponent({
               icon: ['fas', 'exchange-alt'],
             })
           }
-        }, useAuthentication)
+        }, useAuthentication, cachedOnly)
       } catch (error) {
         if (
           !this.isCurrentVideoLoad(loadGeneration, videoId) ||
@@ -4981,12 +5018,14 @@ export default defineComponent({
         return false
       }
 
+      if (source === null) { return false }
+
       if (
         !this.isCurrentVideoLoad(loadGeneration, videoId) ||
         playbackEngineSwitchGeneration !== this.playbackEngineSwitchGeneration
       ) { return false }
 
-      if (this.playbackEngineFallbackTarget === 'built-in') { return false }
+      if (this.playbackEngineFallbackTarget === 'built-in' && !cachedOnly) { return false }
 
       this.builtInPlaybackSource = {
         manifestSrc: this.manifestSrc,
