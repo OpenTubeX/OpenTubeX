@@ -32,6 +32,7 @@ import {
   normalizeCustomTheme,
   normalizeCustomThemes,
 } from '../customTheme'
+import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
 import { liveReminders } from '../datastores'
 import { extractExpiryTimestamp, ImageCache } from './ImageCache'
@@ -1928,6 +1929,10 @@ function runApp() {
     }
     session.defaultSession.webRequest.onBeforeSendHeaders(onBeforeSendHeadersRequestFilter, ({ requestHeaders, url, webContents }, callback) => {
       const urlObj = new URL(url)
+
+      if (webContents && isOpenTubeXUrl(webContents.getURL())) {
+        applySyncServerUserAgent(requestHeaders)
+      }
 
       if (url.startsWith('https://www.youtube.com/youtubei/')) {
         // make InnerTube requests work with the fetch function
