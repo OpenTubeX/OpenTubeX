@@ -4,6 +4,7 @@ import test from 'node:test'
 import {
   buildReorderedTabMap,
   getGroupedTabInsertIndex,
+  resetTabPlacementOpeners,
   restoreTabPlacementOpeners
 } from '../../src/main/tabs/tabOrder.js'
 
@@ -44,6 +45,21 @@ test('builds a valid changed order without changing tab objects', () => {
   assert.deepEqual(Array.from(reorderedTabs.keys()), ['pinned', 'second', 'first'])
   assert.equal(reorderedTabs.get('first'), tabs.get('first'))
   assert.equal(reorderedTabs.get('second'), tabs.get('second'))
+})
+
+test('resets opened-order chains after a manual reorder', () => {
+  const tabs = new Map([
+    ['subscriptions', { placementOpenerTabId: null }],
+    ['first-video', { placementOpenerTabId: 'subscriptions' }],
+    ['second-video', { placementOpenerTabId: 'subscriptions' }]
+  ])
+
+  resetTabPlacementOpeners(tabs)
+
+  assert.deepEqual(
+    Array.from(tabs.values(), tab => tab.placementOpenerTabId),
+    [null, null, null]
+  )
 })
 
 test('appends new tabs to the contiguous group created from their opener', () => {

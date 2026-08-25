@@ -32,6 +32,16 @@ export function buildReorderedTabMap(tabs, tabIds) {
 }
 
 /**
+ * Start a new opened-order chain after the user manually rearranges tabs.
+ * @param {Map<string, {placementOpenerTabId?: string | null}>} tabs
+ */
+export function resetTabPlacementOpeners(tabs) {
+  for (const tab of tabs.values()) {
+    tab.placementOpenerTabId = null
+  }
+}
+
+/**
  * Find the end of the contiguous group created from an opener. Tabs moved out
  * of that group do not become its new insertion point.
  * @param {Map<string, {isPinned?: boolean, placementOpenerTabId?: string | null}>} tabs

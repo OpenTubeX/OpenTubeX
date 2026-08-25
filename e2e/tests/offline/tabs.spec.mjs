@@ -152,7 +152,7 @@ test.describe('tab bar', () => {
     await expect(page.locator(sel.tabs).nth(1).locator('[data-icon="rss"]')).toBeVisible()
   })
 
-  test('opens background tabs beside their opener in creation order', async ({ page }) => {
+  test('restarts background tab creation order after a manual move', async ({ page }) => {
     const openerTabId = await page.locator(sel.tabs).getAttribute('data-tab-id')
     const existingTab = await page.evaluate(() => window.ftElectron.tabs.create({
       route: '/history',
@@ -181,9 +181,12 @@ test.describe('tab bar', () => {
       tabs => tabs.map(tab => tab.dataset.tabId)
     )).toEqual([openerTabId, firstVideo.id, secondVideo.id, existingTab.id])
 
-    await page.evaluate(({ tabId }) => window.ftElectron.tabs.move(tabId, 3), {
-      tabId: secondVideo.id
-    })
+    await page.evaluate(tabIds => window.ftElectron.tabs.reorder(tabIds), [
+      openerTabId,
+      firstVideo.id,
+      existingTab.id,
+      secondVideo.id
+    ])
     const thirdVideo = await page.evaluate(openerTabId => window.ftElectron.tabs.create({
       route: '/watch/third',
       title: 'Third video',
@@ -191,10 +194,24 @@ test.describe('tab bar', () => {
       lazyLoad: true,
       openerTabId
     }), openerTabId)
+    const fourthVideo = await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/watch/fourth',
+      title: 'Fourth video',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), openerTabId)
 
     await expect.poll(async () => page.locator(sel.tabs).evaluateAll(
       tabs => tabs.map(tab => tab.dataset.tabId)
-    )).toEqual([openerTabId, firstVideo.id, thirdVideo.id, existingTab.id, secondVideo.id])
+    )).toEqual([
+      openerTabId,
+      thirdVideo.id,
+      fourthVideo.id,
+      firstVideo.id,
+      existingTab.id,
+      secondVideo.id
+    ])
   })
 
   test('fixed internal routes use their page title before mounting', async ({ page }) => {

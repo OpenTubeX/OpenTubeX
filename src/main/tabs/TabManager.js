@@ -14,6 +14,7 @@ import { TabRendererBridge } from './TabRendererBridge.js'
 import {
   buildReorderedTabMap,
   getGroupedTabInsertIndex,
+  resetTabPlacementOpeners,
   restoreTabPlacementOpeners
 } from './tabOrder.js'
 import {
@@ -2385,6 +2386,7 @@ export class TabManager {
    * @param {number} toIndex
    */
   moveTab(tabId, toIndex) {
+    const currentTabIds = Array.from(this.tabs.keys())
     const entries = Array.from(this.tabs.entries())
     const fromIndex = entries.findIndex(([id]) => id === tabId)
     if (fromIndex === -1) return
@@ -2402,6 +2404,9 @@ export class TabManager {
 
     entries.splice(targetIndex, 0, entry)
     this.tabs = new Map(entries)
+    if (entries.some(([id], index) => id !== currentTabIds[index])) {
+      resetTabPlacementOpeners(this.tabs)
+    }
     this._broadcastStateUpdate()
     this._saveSession()
   }
@@ -2415,6 +2420,7 @@ export class TabManager {
     if (reorderedTabs == null || reorderedTabs === this.tabs) return
 
     this.tabs = reorderedTabs
+    resetTabPlacementOpeners(this.tabs)
     this._broadcastStateUpdate()
     this._saveSession()
   }
