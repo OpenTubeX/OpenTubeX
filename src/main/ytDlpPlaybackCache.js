@@ -40,6 +40,16 @@ function isValidCacheKey(cacheKey) {
   return typeof cacheKey === 'string' && cacheKey.length <= MAX_CACHE_KEY_LENGTH
 }
 
+function isHttpsUrl(value) {
+  if (typeof value !== 'string') return false
+
+  try {
+    return new URL(value).protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 function isValidEntry(entry) {
   if (entry === null || typeof entry !== 'object') return false
 
@@ -50,18 +60,29 @@ function isValidEntry(entry) {
     return false
   }
 
+  const source = entry.source
+  const legacyFormats = source?.legacyFormats
+  const hasDashManifest = source?.manifestMimeType === 'application/dash+xml' &&
+    typeof source.manifestSrc === 'string' &&
+    source.manifestSrc.startsWith('data:application/dash+xml;')
+  const hasHlsManifest = source?.manifestMimeType === 'application/x-mpegurl' &&
+    isHttpsUrl(source.manifestSrc)
+  const hasLegacyFormatsOnly = source?.manifestMimeType === 'application/dash+xml' &&
+    source.manifestSrc === null &&
+    Array.isArray(legacyFormats) &&
+    legacyFormats.length > 0 &&
+    legacyFormats.every(format => isHttpsUrl(format?.url))
+
   return Buffer.byteLength(serializedEntry, 'utf8') <= MAX_ENTRY_LENGTH &&
     VIDEO_ID_REGEX.test(entry.videoId) &&
     CACHE_KEY_HASH_REGEX.test(entry.cacheKeyHash) &&
     Number.isFinite(entry.expiryTime) &&
-    entry.source !== null &&
-    typeof entry.source === 'object' &&
-    entry.source.isLive === false &&
-    entry.source.manifestMimeType === 'application/dash+xml' &&
-    typeof entry.source.manifestSrc === 'string' &&
-    entry.source.manifestSrc.startsWith('data:application/dash+xml;') &&
-    Array.isArray(entry.source.legacyFormats) &&
-    (entry.source.title === null || typeof entry.source.title === 'string')
+    source !== null &&
+    typeof source === 'object' &&
+    source.isLive === false &&
+    (hasDashManifest || hasHlsManifest || hasLegacyFormatsOnly) &&
+    Array.isArray(legacyFormats) &&
+    (source.title === null || typeof source.title === 'string')
 }
 
 async function loadEntries() {

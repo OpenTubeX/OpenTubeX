@@ -10,7 +10,7 @@ import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpP
 
 /**
  * @typedef {object} YtDlpPlaybackSource
- * @property {string} manifestSrc
+ * @property {string | null} manifestSrc
  * @property {MANIFEST_TYPE_DASH | MANIFEST_TYPE_HLS} manifestMimeType
  * @property {any[]} legacyFormats
  * @property {Date | null} expiryDate
@@ -25,7 +25,23 @@ import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpP
 const ITAG_REGEX = /^\d+/
 const URL_PROBE_TIMEOUT = 10_000
 const MINIMUM_LIVE_DVR_WINDOW_SECONDS = 30
-const dashPlaybackSourceCache = new YtDlpPlaybackSourceCache()
+const playbackSourceCache = new YtDlpPlaybackSourceCache()
+
+async function cacheYtDlpPlaybackSource(videoId, cacheKey, source) {
+  playbackSourceCache.set(videoId, cacheKey, source)
+  if (source.expiryDate === null) return
+
+  try {
+    await window.ftElectron.ytDlpPlaybackCacheSet(
+      videoId,
+      cacheKey,
+      source.expiryDate.getTime(),
+      source
+    )
+  } catch (error) {
+    console.warn('Could not save the persistent yt-dlp playback cache', error)
+  }
+}
 
 /**
  * @param {string} url
@@ -40,14 +56,14 @@ function hasLimitedLiveDvrWindow(url) {
  * @param {string} videoId
  */
 export function invalidateYtDlpPlaybackSource(videoId) {
-  dashPlaybackSourceCache.delete(videoId)
+  playbackSourceCache.delete(videoId)
   window.ftElectron.ytDlpPlaybackCacheDelete(videoId).catch(error => {
     console.warn('Could not remove an entry from the persistent yt-dlp playback cache', error)
   })
 }
 
 export function invalidateAllYtDlpPlaybackSources() {
-  dashPlaybackSourceCache.clear()
+  playbackSourceCache.clear()
   return window.ftElectron.ytDlpPlaybackCacheClear().catch(error => {
     console.warn('Could not clear the persistent yt-dlp playback cache', error)
     return false
@@ -303,24 +319,26 @@ async function convertAdaptiveFormats(formats, duration) {
  * @param {string} cacheKey identifies the yt-dlp executable and proxy configuration
  * @param {() => void} [onDefaultClientsFallback] called before retrying with yt-dlp's default clients
  * @param {boolean} [useAuthentication] whether to use the explicitly configured cookie source
- * @returns {Promise<YtDlpPlaybackSource>}
+ * @param {boolean} [cachedOnly] prevents a cache miss from starting a new extraction
+ * @returns {Promise<YtDlpPlaybackSource | null>}
  */
 export async function getYtDlpPlaybackSource(
   videoId,
   cacheKey = '',
   onDefaultClientsFallback,
-  useAuthentication = false
+  useAuthentication = false,
+  cachedOnly = false
 ) {
   const effectiveCacheKey = JSON.stringify([cacheKey, useAuthentication])
-  let cachedSource = dashPlaybackSourceCache.get(videoId, effectiveCacheKey)
+  let cachedSource = playbackSourceCache.get(videoId, effectiveCacheKey)
 
   if (cachedSource === null) {
     try {
       const entry = await window.ftElectron.ytDlpPlaybackCacheGet(videoId, effectiveCacheKey)
       if (entry !== null) {
         const source = { ...entry.source, expiryDate: new Date(entry.expiryTime) }
-        dashPlaybackSourceCache.set(videoId, effectiveCacheKey, source)
-        cachedSource = dashPlaybackSourceCache.get(videoId, effectiveCacheKey)
+        playbackSourceCache.set(videoId, effectiveCacheKey, source)
+        cachedSource = playbackSourceCache.get(videoId, effectiveCacheKey)
 
         if (cachedSource === null) {
           await window.ftElectron.ytDlpPlaybackCacheDelete(videoId)
@@ -333,6 +351,10 @@ export async function getYtDlpPlaybackSource(
 
   if (cachedSource !== null) {
     return cachedSource
+  }
+
+  if (cachedOnly) {
+    return null
   }
 
   let extractionError = null
@@ -368,9 +390,8 @@ export async function getYtDlpPlaybackSource(
     }
 
     const httpFormats = info.formats.filter(format => format.protocol === 'https' && format.url !== null)
-    const legacyFormatsPromise = convertLegacyFormats(
-      httpFormats.filter(format => isVideoFormat(format) && isAudioFormat(format))
-    )
+    const legacyHttpFormats = httpFormats.filter(format => isVideoFormat(format) && isAudioFormat(format))
+    const legacyFormatsPromise = convertLegacyFormats(legacyHttpFormats)
 
     // live streams are only available as HLS, which is what makes rewinding within
     // the DVR window possible
@@ -396,17 +417,7 @@ export async function getYtDlpPlaybackSource(
           version: info.version
         }
 
-        dashPlaybackSourceCache.set(videoId, effectiveCacheKey, source)
-        try {
-          await window.ftElectron.ytDlpPlaybackCacheSet(
-            videoId,
-            effectiveCacheKey,
-            source.expiryDate?.getTime() ?? NaN,
-            source
-          )
-        } catch (error) {
-          console.warn('Could not save the persistent yt-dlp playback cache', error)
-        }
+        await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
         return source
       }
     }
@@ -419,7 +430,9 @@ export async function getYtDlpPlaybackSource(
         manifestSrc: info.hlsManifestUrl,
         manifestMimeType: MANIFEST_TYPE_HLS,
         legacyFormats: await legacyFormatsPromise,
-        expiryDate: null,
+        expiryDate: getEarliestYtDlpFormatExpiry(
+          info.formats.filter(format => format.url !== null)
+        ),
         title: info.title,
         isLive: info.isLive,
         duration: info.duration,
@@ -442,7 +455,30 @@ export async function getYtDlpPlaybackSource(
         continue
       }
 
+      await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
       return source
+    }
+
+    if (!info.isLive && info.liveStatus !== 'is_live') {
+      const legacyFormats = await legacyFormatsPromise
+      if (legacyFormats.length > 0) {
+        const source = {
+          manifestSrc: null,
+          manifestMimeType: MANIFEST_TYPE_DASH,
+          legacyFormats,
+          expiryDate: getEarliestYtDlpFormatExpiry(legacyHttpFormats),
+          title: info.title,
+          isLive: false,
+          duration: info.duration,
+          storyboardSrc: info.storyboardVtt === null
+            ? null
+            : `data:text/vtt;charset=utf-8,${encodeURIComponent(info.storyboardVtt)}`,
+          version: info.version
+        }
+
+        await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
+        return source
+      }
     }
 
     extractionError = new Error('yt-dlp did not return any playable formats')

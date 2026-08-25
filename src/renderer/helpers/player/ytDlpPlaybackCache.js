@@ -9,7 +9,10 @@ export function getEarliestYtDlpFormatExpiry(formats) {
   let earliestExpiry = Infinity
 
   for (const format of formats) {
-    const expire = parseInt(new URL(format.url).searchParams.get('expire'))
+    const url = new URL(format.url)
+    const queryExpiry = parseInt(url.searchParams.get('expire'))
+    const pathExpiry = parseInt(url.pathname.match(/\/expire\/(\d+)(?:\/|$)/)?.[1])
+    const expire = Number.isFinite(queryExpiry) ? queryExpiry : pathExpiry
 
     if (Number.isFinite(expire)) {
       earliestExpiry = Math.min(earliestExpiry, expire)

@@ -1545,14 +1545,17 @@ export async function handleYtDlpGetPlaybackInfo(
   ]
 
   if (useDefaultClients !== true) {
-    // Prefer yt-dlp's maintained client order, while retaining web_embedded for
-    // alternate audio and excluding older Android VR defaults whose URLs can be
-    // subject to selective PO-token enforcement. The renderer retries with
-    // yt-dlp's defaults if none of these formats are playable or they expose only
-    // a minimal live DVR window.
+    // Keep yt-dlp's account-aware defaults first. For authenticated playback,
+    // upstream recommends appending web_safari to obtain its merged HLS formats:
+    // https://github.com/yt-dlp/yt-dlp/issues/17143
+    // Without authentication, retain web_embedded for alternate audio and exclude
+    // Android VR URLs that can face selective PO-token enforcement. The renderer
+    // retries with yt-dlp's defaults if these formats are not playable.
     args.push(
       '--extractor-args',
-      'youtube:player_client=default,web_embedded,-android_vr'
+      useAuthentication
+        ? 'youtube:player_client=default,web_safari'
+        : 'youtube:player_client=default,web_embedded,-android_vr'
     )
   }
 
