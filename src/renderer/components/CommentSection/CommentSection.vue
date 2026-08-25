@@ -430,7 +430,7 @@
         :label="$t('Comments.Load More Comments')"
       />
       <h4
-        v-else-if="canPerformMoreCommentLoading"
+        v-else-if="!generalAutoLoadMorePaginatedItemsEnabled && canPerformMoreCommentLoading"
         class="getMoreComments"
         role="button"
         tabindex="0"
@@ -473,7 +473,6 @@ import FtSpinner from '../FtSpinner/FtSpinner.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 
 import store from '../../store/index'
-import { useTabContext } from '../../tabs/TabContext'
 
 import { copyToClipboard, formatNumber, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
@@ -502,7 +501,6 @@ import {
 } from '../../helpers/api/invidious'
 
 const { t } = useI18n()
-const { isTabPresented } = useTabContext()
 const relativeTimeNow = useRelativeTimeClock()
 
 function formatCommentTime(comment) {
@@ -753,17 +751,11 @@ watch(() => props.highlightedCommentId, (commentId, previousCommentId) => {
   }
 }, { immediate: true })
 
-watch(
-  [generalAutoLoadMorePaginatedItemsEnabled, () => isTabPresented?.value],
-  ([autoLoadEnabled, presented]) => {
-    // Background tabs have no layout, so their visibility observer cannot
-    // trigger the initial load.
-    if (autoLoadEnabled && presented === false && canPerformInitialCommentLoading.value) {
-      getCommentData()
-    }
-  },
-  { immediate: true }
-)
+watch(generalAutoLoadMorePaginatedItemsEnabled, (autoLoadEnabled) => {
+  if (autoLoadEnabled && canPerformInitialCommentLoading.value) {
+    getCommentData()
+  }
+}, { immediate: true })
 
 const canPerformMoreCommentLoading = computed(() => {
   return commentData.value.length > 0 && !isLoading.value && !isLoadingMoreComments.value && showComments.value && !!nextPageToken.value
