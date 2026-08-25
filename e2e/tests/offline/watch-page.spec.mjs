@@ -812,6 +812,36 @@ async function mockTranslatedEndscreen(app, page) {
 }
 
 test.describe('watch page', () => {
+  test('keeps private and DRM errors ineligible for extraction retry after locale changes', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate(async (view) => {
+      view.setNonRetryablePlaybackError('private')
+      await view.$nextTick()
+    })
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateCurrentLocale', 'de-DE')
+    })
+    await expect.poll(() => watchView.evaluate(view => view.currentLocale)).toBe('de-DE')
+    expect(await watchView.evaluate(view => view.errorMessage === view.t('Video.Private'))).toBe(false)
+    await expect(page.locator('.errorActions')).toHaveCount(0)
+
+    await watchView.evaluate(async (view) => {
+      view.setNonRetryablePlaybackError('drm')
+      await view.$nextTick()
+    })
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateCurrentLocale', 'en-US')
+    })
+    await expect.poll(() => watchView.evaluate(view => view.currentLocale)).toBe('en-US')
+    expect(await watchView.evaluate(view => view.errorMessage === view.t('Video.DRMProtected'))).toBe(false)
+    await expect(page.locator('.errorActions')).toHaveCount(0)
+  })
+
   test('retries an error with the other extraction method without changing the default', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.route('https://example.invalid/retry.m3u8', route => route.fulfill({
