@@ -214,6 +214,64 @@ test.describe('tab bar', () => {
     ])
   })
 
+  test('single-tab moves reset creation order only when the order changes', async ({ page }) => {
+    const openerTabId = await page.locator(sel.tabs).getAttribute('data-tab-id')
+    const firstVideo = await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/watch/first',
+      title: 'First video',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), openerTabId)
+    const secondVideo = await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/watch/second',
+      title: 'Second video',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), openerTabId)
+
+    await page.evaluate(tabId => window.ftElectron.tabs.move(tabId, 2), secondVideo.id)
+    const thirdVideo = await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/watch/third',
+      title: 'Third video',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), openerTabId)
+
+    await expect.poll(async () => page.locator(sel.tabs).evaluateAll(
+      tabs => tabs.map(tab => tab.dataset.tabId)
+    )).toEqual([openerTabId, firstVideo.id, secondVideo.id, thirdVideo.id])
+
+    await page.evaluate(tabId => window.ftElectron.tabs.move(tabId, 4), secondVideo.id)
+    const fourthVideo = await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/watch/fourth',
+      title: 'Fourth video',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), openerTabId)
+    const fifthVideo = await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/watch/fifth',
+      title: 'Fifth video',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), openerTabId)
+
+    await expect.poll(async () => page.locator(sel.tabs).evaluateAll(
+      tabs => tabs.map(tab => tab.dataset.tabId)
+    )).toEqual([
+      openerTabId,
+      fourthVideo.id,
+      fifthVideo.id,
+      firstVideo.id,
+      thirdVideo.id,
+      secondVideo.id
+    ])
+  })
+
   test('fixed internal routes use their page title before mounting', async ({ page }) => {
     const fixedRoutes = [
       ['/subscriptions', 'Subscriptions'],
