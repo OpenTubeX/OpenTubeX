@@ -52,22 +52,35 @@ test('playback starts', async ({ app, page, attachScreenshot }) => {
 test('shows the replay icon when playback ends before Shaka updates its play icon', async ({ app, page }) => {
   const video = await openDemoVideo({ app, page })
   const watchComponent = await page.evaluateHandle(findWatchComponent)
-  const replayIconPath = await watchComponent.evaluate(component => component.refs.player.replayIcon)
-  const playButton = page.locator(`${activeTab} .shaka-play-button`).first()
-  const nativeIconPath = playButton.locator(
+  const replayIconPath = await watchComponent.evaluate(component => {
+    return component.refs.player.$.setupState.replayIcon
+  })
+  const playButtons = page.locator(`${activeTab} .shaka-play-button`)
+  const nativeIconPaths = playButtons.locator(
     ':scope > .shaka-ui-icon:not(.ft-play-pause-morph-icon) > path'
   )
 
+  await watchComponent.evaluate(async component => {
+    await component.proxy.$store.dispatch('updateDisplayVideoPlayButton', true)
+    await component.proxy.$nextTick()
+  })
+  await expect(playButtons).toHaveCount(2)
   await video.evaluate(element => element.pause())
-  await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'play')
+  await expect.poll(() => playButtons.evaluateAll(buttons => {
+    return buttons.map(button => button.getAttribute('data-ft-play-pause-state'))
+  })).toEqual(['play', 'play'])
 
   await video.evaluate(element => {
     Object.defineProperty(element, 'ended', { configurable: true, value: true })
     element.dispatchEvent(new Event('ended'))
   })
 
-  await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'replay')
-  await expect(nativeIconPath).toHaveAttribute('d', replayIconPath)
+  await expect.poll(() => playButtons.evaluateAll(buttons => {
+    return buttons.map(button => button.getAttribute('data-ft-play-pause-state'))
+  })).toEqual(['replay', 'replay'])
+  await expect.poll(() => nativeIconPaths.evaluateAll(paths => {
+    return paths.map(path => path.getAttribute('d'))
+  })).toEqual([replayIconPath, replayIconPath])
   await watchComponent.dispose()
 })
 
