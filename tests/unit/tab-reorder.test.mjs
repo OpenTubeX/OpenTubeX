@@ -108,10 +108,22 @@ test('keeps the newest local order through stale reorder acknowledgments', () =>
 
   const finalAcknowledgment = reconcilePendingTabOrder(
     newestOrderIds.map(id => tabs.find(tab => tab.id === id)),
-    newestOrderIds
+    newestOrderIds,
+    true
   )
   assert.deepEqual(finalAcknowledgment.tabs.map(tab => tab.id), newestOrderIds)
   assert.equal(finalAcknowledgment.pendingTabOrder, null)
+})
+
+test('keeps a pending order when a stale snapshot happens to match it', () => {
+  const newestOrderIds = ['a', 'b', 'e', 'c', 'd']
+  const result = reconcilePendingTabOrder(
+    newestOrderIds.map(id => tabs.find(tab => tab.id === id)),
+    newestOrderIds
+  )
+
+  assert.deepEqual(result.tabs.map(tab => tab.id), newestOrderIds)
+  assert.deepEqual(result.pendingTabOrder, newestOrderIds)
 })
 
 test('reconciles opened and closed tabs into a pending local order', () => {

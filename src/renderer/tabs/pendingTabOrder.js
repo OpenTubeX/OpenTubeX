@@ -12,10 +12,7 @@ export function reconcilePendingTabOrder(tabs, pendingTabOrder, acknowledged = f
   const tabIds = tabs.map(tab => tab.id)
   if (
     pendingTabOrder != null &&
-    (acknowledged || (
-      tabIds.length === pendingTabOrder.length &&
-      tabIds.every((tabId, index) => tabId === pendingTabOrder[index])
-    ))
+    acknowledged
   ) {
     return { tabs, pendingTabOrder: null }
   }
