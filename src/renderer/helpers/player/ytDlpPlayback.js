@@ -28,6 +28,8 @@ const MINIMUM_LIVE_DVR_WINDOW_SECONDS = 30
 const playbackSourceCache = new YtDlpPlaybackSourceCache()
 
 async function cacheYtDlpPlaybackSource(videoId, cacheKey, source) {
+  if (source.isLive) return
+
   playbackSourceCache.set(videoId, cacheKey, source)
   if (source.expiryDate === null) return
 
@@ -389,13 +391,14 @@ export async function getYtDlpPlaybackSource(
       continue
     }
 
+    const isLive = info.isLive || info.liveStatus === 'is_live'
     const httpFormats = info.formats.filter(format => format.protocol === 'https' && format.url !== null)
     const legacyHttpFormats = httpFormats.filter(format => isVideoFormat(format) && isAudioFormat(format))
     const legacyFormatsPromise = convertLegacyFormats(legacyHttpFormats)
 
     // live streams are only available as HLS, which is what makes rewinding within
     // the DVR window possible
-    if (!info.isLive && info.liveStatus !== 'is_live') {
+    if (!isLive) {
       const adaptiveFormats = httpFormats.filter(format => !(isVideoFormat(format) && isAudioFormat(format)))
       const localFormats = await convertAdaptiveFormats(adaptiveFormats, info.duration)
 
@@ -434,7 +437,7 @@ export async function getYtDlpPlaybackSource(
           info.formats.filter(format => format.url !== null)
         ),
         title: info.title,
-        isLive: info.isLive,
+        isLive,
         duration: info.duration,
         storyboardSrc: info.storyboardVtt === null
           ? null
@@ -448,7 +451,7 @@ export async function getYtDlpPlaybackSource(
       // case those clients fail.
       if (
         !useDefaultClients &&
-        (info.isLive || info.liveStatus === 'is_live') &&
+        isLive &&
         hasLimitedLiveDvrWindow(info.hlsManifestUrl)
       ) {
         limitedLiveSource = source
@@ -459,7 +462,7 @@ export async function getYtDlpPlaybackSource(
       return source
     }
 
-    if (!info.isLive && info.liveStatus !== 'is_live') {
+    if (!isLive) {
       const legacyFormats = await legacyFormatsPromise
       if (legacyFormats.length > 0) {
         const source = {

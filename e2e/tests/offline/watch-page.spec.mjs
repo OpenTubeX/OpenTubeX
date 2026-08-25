@@ -1096,6 +1096,49 @@ test.describe('watch page', () => {
     })).toHaveCount(1)
   })
 
+  test('treats yt-dlp live status as live and does not cache its HLS source', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route('https://example.invalid/live-status.m3u8', route => route.fulfill({
+      contentType: 'application/x-mpegURL',
+      body: '#EXTM3U\n'
+    }))
+    await openMockedVideo(page)
+
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.__ytDlpLiveStatusCalls = 0
+      ipcMain.removeHandler('yt-dlp-get-playback-info')
+      ipcMain.handle('yt-dlp-get-playback-info', () => {
+        globalThis.__ytDlpLiveStatusCalls++
+        return {
+          isLive: false,
+          liveStatus: 'is_live',
+          hlsManifestUrl: 'https://example.invalid/live-status.m3u8',
+          formats: [{
+            url: 'https://example.invalid/live-segment.mp4?expire=4102444800',
+            protocol: 'https',
+            vcodec: null,
+            acodec: null
+          }],
+          duration: null,
+          storyboardVtt: null,
+          title: 'Live video',
+          version: 'test'
+        }
+      })
+    })
+
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate((view) => view.handlePlaybackEngineChange('yt-dlp'))
+    expect(await watchView.evaluate((view) => view.isLive)).toBe(true)
+
+    await watchView.evaluate((view) => view.extractYtDlpPlaybackSource(
+      view.videoLoadGeneration,
+      view.videoId,
+      view.playbackEngineSwitchGeneration
+    ))
+    expect(await app.electronApp.evaluate(() => globalThis.__ytDlpLiveStatusCalls)).toBe(2)
+  })
+
   test('falls back to yt-dlp when the built-in live source has no manifest', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.route('https://example.invalid/live.m3u8', route => route.fulfill({
