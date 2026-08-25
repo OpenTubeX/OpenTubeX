@@ -268,34 +268,74 @@ function renderSummary(base, candidate, comparison, reportOnly) {
   return `${lines.join('\n')}\n`
 }
 
-async function main() {
-  const options = parseArguments(process.argv.slice(2))
-  const base = await targetFor('base', options.baseRoot)
-  const candidate = await targetFor('candidate', options.candidateRoot)
-  const samples = await runSamples(base, candidate, options)
-  const comparison = compareSamples(samples)
-  const summary = renderSummary(base, candidate, comparison, options.reportOnly)
-  const result = {
-    base: { root: base.root, commit: base.commit },
-    candidate: { root: candidate.root, commit: candidate.commit },
-    sampleCount: options.samples,
-    warmupCount: options.warmups,
-    reportOnly: options.reportOnly,
-    samples,
-    metrics: comparison.metrics,
-    failures: comparison.failures
-  }
+function renderFailureSummary(error) {
+  const message = error instanceof Error ? error.message : String(error)
+  return [
+    '# Performance comparison',
+    '',
+    'The benchmark failed before all samples completed.',
+    '',
+    `Error: ${message}`,
+    ''
+  ].join('\n')
+}
 
-  console.log(summary)
+async function writeReports(options, result, summary) {
   if (options.output) {
     await writeFile(options.output, `${JSON.stringify(result, null, 2)}\n`)
   }
   if (options.summary) {
     await writeFile(options.summary, summary)
   }
+}
 
-  if (!options.reportOnly && comparison.failures.length > 0) {
-    process.exitCode = 1
+async function main() {
+  const options = parseArguments(process.argv.slice(2))
+  let base
+  let candidate
+
+  try {
+    base = await targetFor('base', options.baseRoot)
+    candidate = await targetFor('candidate', options.candidateRoot)
+    const samples = await runSamples(base, candidate, options)
+    const comparison = compareSamples(samples)
+    const summary = renderSummary(base, candidate, comparison, options.reportOnly)
+    const result = {
+      base: { root: base.root, commit: base.commit },
+      candidate: { root: candidate.root, commit: candidate.commit },
+      sampleCount: options.samples,
+      warmupCount: options.warmups,
+      reportOnly: options.reportOnly,
+      samples,
+      metrics: comparison.metrics,
+      failures: comparison.failures
+    }
+
+    console.log(summary)
+    await writeReports(options, result, summary)
+
+    if (!options.reportOnly && comparison.failures.length > 0) {
+      process.exitCode = 1
+    }
+  } catch (error) {
+    const summary = renderFailureSummary(error)
+    const result = {
+      base: base ? { root: base.root, commit: base.commit } : { root: options.baseRoot },
+      candidate: candidate
+        ? { root: candidate.root, commit: candidate.commit }
+        : { root: options.candidateRoot },
+      sampleCount: options.samples,
+      warmupCount: options.warmups,
+      reportOnly: options.reportOnly,
+      failures: [error instanceof Error ? error.message : String(error)],
+      error: error instanceof Error
+        ? { name: error.name, message: error.message, stack: error.stack }
+        : { message: String(error) }
+    }
+
+    console.error(summary)
+    await writeReports(options, result, summary)
+    throw error
   }
 }
 
