@@ -818,6 +818,24 @@ export default defineComponent({
 
       return this.activePlaybackEngine
     },
+    otherPlaybackEngine: function () {
+      return this.playbackEngineSelection === 'yt-dlp' ? 'built-in' : 'yt-dlp'
+    },
+    retryWithOtherPlaybackEngineLabel: function () {
+      return this.otherPlaybackEngine === 'yt-dlp'
+        ? this.t('Video.Retry With yt-dlp Extraction')
+        : this.t('Video.Retry With Built-in Extraction')
+    },
+    canRetryWithOtherPlaybackEngine: function () {
+      return process.env.IS_ELECTRON &&
+        this.errorMessage !== null &&
+        !this.localFilePlayback &&
+        !this.isUpcoming &&
+        !this.isPostLiveDvr &&
+        this.restrictedPlaybackError === null &&
+        this.errorMessage !== this.t('Video.Private') &&
+        this.errorMessage !== this.t('Video.DRMProtected')
+    },
     /** @returns {'sabr' | 'dash' | 'hls' | 'none'} */
     playbackStreamType: function () {
       if (this.manifestSrc === null || this.activeFormat === 'legacy') {
@@ -4223,6 +4241,11 @@ export default defineComponent({
       this.errorMessage = null
       this.alignActiveFormatWithAvailableSources()
       this.ytDlpStreamsPending = false
+    },
+
+    retryWithOtherPlaybackEngine: function () {
+      this.customErrorIcon = null
+      return this.handlePlaybackEngineChange(this.otherPlaybackEngine)
     },
 
     enableDashFormat: function () {

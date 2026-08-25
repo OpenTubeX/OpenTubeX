@@ -222,6 +222,9 @@ test('watch page IP-block error does not break later navigation', async ({ app, 
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
     await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
     await expect(page.locator('.errorMessage')).toContainText('blocked')
+    await expect(page.locator('.errorActions').getByRole('button')).toHaveText(
+      /Retry with (?:built-in|yt-dlp) extraction/
+    )
 
     const tabs = page.locator('.tabBar .tab')
     await page.locator('.newTabButton').click()
