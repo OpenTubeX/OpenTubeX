@@ -7,14 +7,40 @@
       <p>
         {{ t('Downloads.Total Size', { size: formattedTotalSize }) }}
       </p>
-      <FtButton
-        v-if="clearableDownloads.length > 0"
-        :label="t('Downloads.Clear Failed Canceled Skipped And Missing')"
-        :icon="['fas', 'trash']"
-        :text-color="null"
-        :background-color="null"
-        @click="clearFailedAndMissing"
-      />
+      <div class="downloadHeaderActions">
+        <FtButton
+          v-if="pausableDownloads.length > 0"
+          :label="t('Downloads.Pause All')"
+          :icon="['fas', 'pause']"
+          :text-color="null"
+          :background-color="null"
+          @click="queueAction('pause-all')"
+        />
+        <FtButton
+          v-if="resumableDownloads.length > 0"
+          :label="t('Downloads.Resume All')"
+          :icon="['fas', 'play']"
+          :text-color="null"
+          :background-color="null"
+          @click="queueAction('resume-all')"
+        />
+        <FtButton
+          v-if="failedDownloads.length > 0"
+          :label="t('Downloads.Retry All')"
+          :icon="['fas', 'sync']"
+          :text-color="null"
+          :background-color="null"
+          @click="queueAction('retry-all')"
+        />
+        <FtButton
+          v-if="clearableDownloads.length > 0"
+          :label="t('Downloads.Clear Failed Canceled Skipped And Missing')"
+          :icon="['fas', 'trash']"
+          :text-color="null"
+          :background-color="null"
+          @click="clearFailedAndMissing"
+        />
+      </div>
     </div>
 
     <section
@@ -26,6 +52,26 @@
         v-for="download in activeDownloads"
         :key="download.id"
         :download="download"
+        @pause="controlDownload(download.id, 'pause')"
+        @resume="controlDownload(download.id, 'resume')"
+      />
+    </section>
+
+    <section
+      v-if="queuedDownloads.length > 0"
+      class="downloadSection"
+    >
+      <h2>{{ t('Downloads.Queue') }}</h2>
+      <DownloadRow
+        v-for="(download, index) in queuedDownloads"
+        :key="download.id"
+        :download="download"
+        :queue-position="index + 1"
+        :can-move-earlier="index > 0"
+        :can-move-later="index < queuedDownloads.length - 1"
+        @move="controlDownload(download.id, 'move', $event)"
+        @pause="controlDownload(download.id, 'pause')"
+        @resume="controlDownload(download.id, 'resume')"
       />
     </section>
 
@@ -43,6 +89,21 @@
         @open="openDownload(download.id)"
         @play="playDownload(download)"
         @remove="pendingRemoval = download"
+        @retry="retryDownload(download)"
+      />
+    </section>
+
+    <section
+      v-if="canceledDownloads.length > 0"
+      class="downloadSection"
+    >
+      <h2>{{ t('Downloads.Canceled') }}</h2>
+      <DownloadRow
+        v-for="download in canceledDownloads"
+        :key="download.id"
+        :download="download"
+        :retrying="retryingDownloadIds.includes(download.id)"
+        @clear="clearDownload(download.id)"
         @retry="retryDownload(download)"
       />
     </section>
@@ -85,9 +146,21 @@ const router = useRouter()
 const pendingRemoval = ref(null)
 const retryingDownloadIds = ref([])
 const downloads = computed(() => Object.values(store.getters.getYtDlpDownloads).sort((a, b) => b.id - a.id))
-const activeDownloads = computed(() => downloads.value.filter(download => ['downloading', 'processing'].includes(download.status)))
-const finishedDownloads = computed(() => downloads.value.filter(download => !['downloading', 'processing'].includes(download.status)))
-const clearableDownloads = computed(() => finishedDownloads.value.filter(download => (
+const activeDownloads = computed(() => downloads.value.filter(download => (
+  ['downloading', 'processing', 'pausing'].includes(download.status) ||
+  (download.status === 'paused' && download.started === true)
+)))
+const queuedDownloads = computed(() => downloads.value
+  .filter(download => download.status === 'queued' || (download.status === 'paused' && download.started !== true))
+  .sort((a, b) => (a.queuePosition ?? a.id) - (b.queuePosition ?? b.id)))
+const canceledDownloads = computed(() => downloads.value.filter(download => download.status === 'cancelled'))
+const finishedDownloads = computed(() => downloads.value.filter(download => (
+  !['queued', 'downloading', 'processing', 'pausing', 'paused', 'cancelled'].includes(download.status)
+)))
+const pausableDownloads = computed(() => downloads.value.filter(download => ['queued', 'downloading', 'processing'].includes(download.status)))
+const resumableDownloads = computed(() => downloads.value.filter(download => ['paused', 'pausing'].includes(download.status)))
+const failedDownloads = computed(() => finishedDownloads.value.filter(download => download.status === 'failed'))
+const clearableDownloads = computed(() => downloads.value.filter(download => (
   ['failed', 'cancelled', 'skipped'].includes(download.status) ||
   (download.status === 'completed' && download.availability === 'missing')
 )))
@@ -122,6 +195,13 @@ async function clearFailedAndMissing() {
   const ids = clearableDownloads.value.map(download => download.id)
   await window.ftElectron.ytDlpClearDownloads(ids)
   ids.forEach(id => store.commit('removeYtDlpDownload', id))
+}
+async function controlDownload(id, action, value) {
+  await window.ftElectron.ytDlpControlDownload(id, action, value)
+}
+async function queueAction(action) {
+  await window.ftElectron.ytDlpQueueAction(action)
+  await refreshDownloads()
 }
 async function openDownload(id) {
   if (!await window.ftElectron.ytDlpOpenDownload(id)) {

@@ -267,6 +267,8 @@ const state = {
   moveSettingsToAppHeader: false,
   ytDlpDownloadFolderPath: '',
   ytDlpDownloadCustomArgs: '',
+  ytDlpMaxConcurrentDownloads: 2,
+  ytDlpDownloadBandwidthLimit: '0',
   ytDlpDownloadTemplates: '[]',
   ytDlpSelectedTemplate: 'video:best',
   ytDlpAutomaticDownloadRules: '{}',

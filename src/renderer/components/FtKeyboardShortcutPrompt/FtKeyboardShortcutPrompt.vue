@@ -218,6 +218,7 @@ const generalAppShortcuts = computed(() => getLocalizedShortcutNamesAndValues(
     'HISTORY_FORWARD',
     ...isMac ? ['HISTORY_BACKWARD_ALT_MAC', 'HISTORY_FORWARD_ALT_MAC'] : [],
     'NAVIGATE_TO_SETTINGS',
+    'NAVIGATE_TO_DOWNLOADS',
     isMac ? 'NAVIGATE_TO_HISTORY_MAC' : 'NAVIGATE_TO_HISTORY',
   ]
 ))
@@ -331,6 +332,7 @@ const localizedShortcutNameToShortcutsMappings = computed(() => {
       'HISTORY_FORWARD_ALT_MAC',
     ]],
     [t('KeyboardShortcutPrompt.Navigate to Settings'), ['NAVIGATE_TO_SETTINGS']],
+    [t('KeyboardShortcutPrompt.Navigate to Downloads'), ['NAVIGATE_TO_DOWNLOADS']],
     [t('KeyboardShortcutPrompt.Navigate to History'), ['NAVIGATE_TO_HISTORY', 'NAVIGATE_TO_HISTORY_MAC']],
     [t('KeyboardShortcutPrompt.New Window'), ['NEW_WINDOW']],
     [t('KeyboardShortcutPrompt.New Tab'), ['NEW_TAB']],

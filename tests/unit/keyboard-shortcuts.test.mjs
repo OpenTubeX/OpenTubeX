@@ -45,3 +45,7 @@ test('keeps contextual app shortcuts fixed', () => {
     sanitizedOverrides
   )
 })
+
+test('opens downloads with Ctrl or Command+J by default', () => {
+  assert.equal(getConfiguredKeyboardShortcuts().APP.GENERAL.NAVIGATE_TO_DOWNLOADS, 'ctrl+J')
+})

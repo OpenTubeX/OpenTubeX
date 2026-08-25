@@ -970,6 +970,8 @@ Settings:
     Managed Tools Download Error Template: 'Could not download the managed tools: {errors}'
     Download Folder: Download Folder
     Global Additional yt-dlp Arguments: Global Additional yt-dlp Arguments
+    Concurrent Downloads: Concurrent downloads
+    Bandwidth Limit: Bandwidth limit (KiB/s, 0 for unlimited)
     Choose Download Folder: Choose Download Folder
     Download Templates: Download Templates
     Manage Download Templates: 'Manage Download Templates ({templateCount})'
@@ -2238,6 +2240,8 @@ Tooltips:
   Download Settings:
     Download Folder: Videos are saved to this folder. Leave blank to use your system's Downloads folder.
     Global Additional yt-dlp Arguments: Additional command line arguments passed to yt-dlp for every download, for example --cookies-from-browser firefox.
+    Concurrent Downloads: The maximum number of yt-dlp jobs that may run at once.
+    Bandwidth Limit: Caps the queue's combined transfer rate by dividing this limit between concurrent jobs. Enter 0 for no limit.
   External Software Settings:
     yt-dlp Source: OpenTubeX can either use the yt-dlp installed on your system or download
       and manage its own copy of yt-dlp, which is stored in the user data directory.
@@ -2384,6 +2388,7 @@ KeyboardShortcutPrompt:
   Switch to Tab: Switch to tab 1–9
   Toggle Tab Orientation: Switch between tab layouts
   Navigate to Settings: Navigate to the Settings page
+  Navigate to Downloads: Open Downloads
   Navigate to History: Navigate to the History page
   Refresh: Refresh feed with latest content
   Find in Page: Find text on the current page
@@ -2472,7 +2477,9 @@ Downloads:
   Download Video: Download Video
   Download Playlist: Download Playlist
   Downloading: Downloading
+  Queue: Queue
   Downloaded: Downloaded
+  Canceled: Canceled
   Open Downloads: Open Downloads
   No Downloads: No downloads yet
   No Downloads Description: Downloads you start will appear here.
@@ -2481,6 +2488,13 @@ Downloads:
   Show in Folder: Show in Folder
   Play Download: Play download
   Retry Download: Retry download
+  Pause Download: Pause download
+  Resume Download: Resume download
+  Move Earlier: Move earlier
+  Move Later: Move later
+  Pause All: Pause all
+  Resume All: Resume all
+  Retry All: Retry all failed downloads
   Total Size: 'Total size: {size}'
   Local File: Local file
   Available Offline: Available offline
@@ -2534,10 +2548,17 @@ Downloads:
   Folder Required: Choose a download folder to enable downloads.
   System Downloads Folder: System Downloads Folder
   Processing: Processing…
+  Queued: Queued
+  Queued Position: 'Queued, position {position}'
+  Paused: Paused
+  Pausing: The current job will finish, then the queue will pause
   Download Complete: Download complete
   Download Cancelled: Download canceled
   Download Failed: Download failed
   File Name Shortened: The file name was shortened because the video title was too long.
+  Insufficient Disk Space: Not enough disk space. About {required} is needed and {available} is available.
+  Unknown Download Size: Download size is unknown. {available} is available on the destination filesystem.
+  Disk Space Check Unavailable: Available disk space could not be checked before starting this download.
   Download Failure Hint: Check {issuesLink}, then try switching the yt-dlp channel to Nightly or Master in Settings → Advanced → External Software.
   yt-dlp YouTube Issues: recent yt-dlp issues for YouTube
   Automatic Download Started: Automatic download started

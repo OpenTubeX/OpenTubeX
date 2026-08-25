@@ -11,6 +11,7 @@
           {{ download.title }}
         </h3>
         <p
+          v-if="statusText"
           class="downloadStatus"
           :aria-hidden="inProgress ? 'true' : undefined"
         >
@@ -45,6 +46,12 @@
           class="downloadSummary"
         >
           {{ summary }}
+        </p>
+        <p
+          v-if="spaceWarningText"
+          class="downloadSpaceWarning"
+        >
+          {{ spaceWarningText }}
         </p>
         <p
           v-if="errorText"
@@ -87,13 +94,44 @@
       </div>
     </div>
     <div class="downloadActions">
-      <FtIconButton
-        v-if="inProgress"
-        :title="t('Downloads.Cancel Download')"
-        :icon="['fas', 'times']"
-        theme="destructive"
-        @click="cancelDownload"
-      />
+      <template v-if="controllable">
+        <FtIconButton
+          v-if="queuePending"
+          :title="t('Downloads.Move Earlier')"
+          :icon="['fas', 'arrow-up']"
+          theme="secondary"
+          :disabled="!canMoveEarlier"
+          @click="emit('move', -1)"
+        />
+        <FtIconButton
+          v-if="queuePending"
+          :title="t('Downloads.Move Later')"
+          :icon="['fas', 'arrow-down']"
+          theme="secondary"
+          :disabled="!canMoveLater"
+          @click="emit('move', 1)"
+        />
+        <FtIconButton
+          v-if="download.status === 'paused' || download.status === 'pausing'"
+          :title="t('Downloads.Resume Download')"
+          :icon="['fas', 'play']"
+          theme="primary"
+          @click="emit('resume')"
+        />
+        <FtIconButton
+          v-else
+          :title="t('Downloads.Pause Download')"
+          :icon="['fas', 'pause']"
+          theme="secondary"
+          @click="emit('pause')"
+        />
+        <FtIconButton
+          :title="t('Downloads.Cancel Download')"
+          :icon="['fas', 'times']"
+          theme="destructive"
+          @click="cancelDownload"
+        />
+      </template>
       <template v-else>
         <FtIconButton
           v-if="canRetry"
@@ -150,15 +188,22 @@ const MAX_VISIBLE_DESTINATIONS = 3
 
 const props = defineProps({
   download: { type: Object, required: true },
-  retrying: { type: Boolean, default: false }
+  retrying: { type: Boolean, default: false },
+  queuePosition: { type: Number, default: 0 },
+  canMoveEarlier: { type: Boolean, default: false },
+  canMoveLater: { type: Boolean, default: false }
 })
-const emit = defineEmits(['clear', 'open', 'play', 'remove', 'retry'])
+const emit = defineEmits(['clear', 'move', 'open', 'pause', 'play', 'remove', 'resume', 'retry'])
 const { t } = useI18n()
 const inProgress = computed(() => ['downloading', 'processing'].includes(props.download.status))
 const progressPercentage = computed(() => (
   Number.isFinite(props.download.percent)
     ? Math.min(100, Math.max(0, props.download.percent))
     : 0
+))
+const controllable = computed(() => ['queued', 'downloading', 'processing', 'pausing', 'paused'].includes(props.download.status))
+const queuePending = computed(() => (
+  ['queued', 'paused'].includes(props.download.status) && props.download.started !== true
 ))
 const canRetry = computed(() => (
   ['failed', 'cancelled'].includes(props.download.status) &&
@@ -222,23 +267,45 @@ const availabilityText = computed(() => {
 })
 const errorText = computed(() => {
   if (props.download.status !== 'failed' || !props.download.errorMessage) return ''
+  if (props.download.errorMessage === 'INSUFFICIENT_SPACE') {
+    return t('Downloads.Insufficient Disk Space', {
+      required: formatBytes(props.download.estimatedSizeBytes),
+      available: formatBytes(props.download.availableSpaceBytes)
+    })
+  }
   return props.download.errorMessage === 'ENOENT'
     ? t('Downloads.yt-dlp Not Found')
     : props.download.errorMessage
+})
+const spaceWarningText = computed(() => {
+  if (!['queued', 'downloading', 'processing', 'pausing', 'paused'].includes(props.download.status)) return ''
+  if (props.download.spaceWarning === 'unknown-estimate' && Number.isFinite(props.download.availableSpaceBytes)) {
+    return t('Downloads.Unknown Download Size', { available: formatBytes(props.download.availableSpaceBytes) })
+  }
+  if (props.download.spaceWarning === 'space-check-unavailable') {
+    return t('Downloads.Disk Space Check Unavailable')
+  }
+  return ''
 })
 const statusText = computed(() => {
   if (props.download.status === 'downloading') {
     return [`${progressPercentage.value.toFixed(1)}%`, props.download.speed, props.download.eta ? `ETA ${props.download.eta}` : null].filter(Boolean).join(' • ')
   }
   switch (props.download.status) {
+    case 'queued':
+      return props.queuePosition > 0
+        ? t('Downloads.Queued Position', { position: props.queuePosition })
+        : t('Downloads.Queued')
+    case 'paused':
+      return t('Downloads.Paused')
+    case 'pausing':
+      return t('Downloads.Pausing')
     case 'processing':
       return t('Downloads.Processing')
     case 'completed':
-      return props.download.availability === 'missing'
-        ? t('Downloads.Download Missing')
-        : t('Downloads.Download Complete')
+      return ''
     case 'cancelled':
-      return t('Downloads.Download Cancelled')
+      return ''
     case 'skipped':
       return t('Downloads.Automatic Download Skipped')
     default:

@@ -821,7 +821,7 @@ test.describe('video downloads', () => {
     ])
     await goTo(page, 'downloads')
     await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
-    await expect(downloadRow).toContainText('Download unavailable')
+    await expect(downloadRow).not.toContainText('Download unavailable')
     await expect(downloadRow).toContainText('The downloaded file is no longer available on the filesystem.')
     await expect(downloadRow.getByTitle('Play download')).toHaveCount(0)
     await expect(downloadRow.getByTitle('Show in Folder')).toHaveCount(0)
@@ -1049,13 +1049,15 @@ test.describe('video downloads', () => {
     await expect(hydratedDownload).toContainText('0.0%')
 
     await hydratedDownload.getByTitle('Cancel Download').click()
-    await expect(otherDownload).toContainText('Download canceled')
+    await expect(otherWindow.getByRole('heading', { name: 'Canceled', exact: true })).toBeVisible()
+    await expect(otherDownload.getByTitle('Retry download')).toBeVisible()
+    await expect(otherDownload).not.toContainText('Download canceled')
 
     await hydratedDownload.getByTitle('Retry download').click()
     await expect(otherDownload).toContainText('0.0%')
     await expect(hydratedDownload.getByTitle('Cancel Download')).toBeVisible()
     await hydratedDownload.getByTitle('Cancel Download').click()
-    await expect(otherDownload).toContainText('Download canceled')
+    await expect(otherDownload.getByTitle('Retry download')).toBeVisible()
 
     await lateWindow.getByRole('button', { name: 'Clear failed, canceled, skipped, and missing' }).click()
     await expect(otherDownload).toHaveCount(0)

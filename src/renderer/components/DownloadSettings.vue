@@ -47,6 +47,29 @@
         @input="updateYtDlpDownloadCustomArgs"
       />
     </FtFlexBox>
+    <FtFlexBox
+      v-if="enableDownloads"
+      class="downloadQueueInputs settingsFlexStart460px"
+    >
+      <FtSelect
+        :placeholder="t('Settings.Download Settings.Concurrent Downloads')"
+        :value="ytDlpMaxConcurrentDownloads"
+        setting-key="ytDlpMaxConcurrentDownloads"
+        :select-names="['1', '2', '3', '4', '5', '6', '8', '10']"
+        :select-values="[1, 2, 3, 4, 5, 6, 8, 10]"
+        :tooltip="t('Tooltips.Download Settings.Concurrent Downloads')"
+        @change="updateYtDlpMaxConcurrentDownloads"
+      />
+      <FtInput
+        input-type="number"
+        :placeholder="t('Settings.Download Settings.Bandwidth Limit')"
+        :show-action-button="false"
+        :show-label="true"
+        :value="ytDlpDownloadBandwidthLimit"
+        :tooltip="t('Tooltips.Download Settings.Bandwidth Limit')"
+        @input="updateYtDlpDownloadBandwidthLimit"
+      />
+    </FtFlexBox>
   </FtSettingsSection>
 </template>
 
@@ -56,6 +79,7 @@ import { useI18n } from 'vue-i18n'
 
 import FtSettingsSection from './FtSettingsSection/FtSettingsSection.vue'
 import FtInput from './FtInput/FtInput.vue'
+import FtSelect from './FtSelect/FtSelect.vue'
 import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
 import FtToggleSwitch from './FtToggleSwitch/FtToggleSwitch.vue'
 import FtButton from './FtButton/FtButton.vue'
@@ -74,6 +98,8 @@ const ytDlpDownloadFolderPath = computed(() => store.getters.getYtDlpDownloadFol
 
 /** @type {import('vue').ComputedRef<string>} */
 const ytDlpDownloadCustomArgs = computed(() => store.getters.getYtDlpDownloadCustomArgs)
+const ytDlpMaxConcurrentDownloads = computed(() => store.getters.getYtDlpMaxConcurrentDownloads)
+const ytDlpDownloadBandwidthLimit = computed(() => store.getters.getYtDlpDownloadBandwidthLimit)
 
 /**
  * @param {boolean} value
@@ -98,6 +124,18 @@ function updateYtDlpDownloadFolderPath(value) {
  */
 function updateYtDlpDownloadCustomArgs(value) {
   store.dispatch('updateYtDlpDownloadCustomArgs', value)
+}
+
+function updateQueueSetting(action, value) {
+  return store.dispatch(action, value)
+}
+
+function updateYtDlpMaxConcurrentDownloads(value) {
+  return updateQueueSetting('updateYtDlpMaxConcurrentDownloads', value)
+}
+
+function updateYtDlpDownloadBandwidthLimit(value) {
+  return updateQueueSetting('updateYtDlpDownloadBandwidthLimit', value)
 }
 
 async function chooseDownloadFolder() {
@@ -130,9 +168,24 @@ async function chooseDownloadFolder() {
   column-gap: 12px;
 }
 
-.downloadPathInputs :deep(.ft-input-component) {
+.downloadPathInputs :deep(.ft-input-component),
+.downloadQueueInputs > * {
   inline-size: 340px;
   max-inline-size: 100%;
+}
+
+.downloadQueueInputs {
+  align-items: flex-end;
+  column-gap: 12px;
+  margin-block-start: 16px;
+}
+
+.downloadQueueInputs :deep(.select.containsTooltip) {
+  margin-inline-end: 0;
+}
+
+.downloadQueueInputs :deep(.ft-input) {
+  margin-block-end: 0;
 }
 
 </style>

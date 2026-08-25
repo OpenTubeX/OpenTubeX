@@ -575,7 +575,7 @@ function matchesDownload(download) {
 
 const runningDownload = Object.values(store.getters.getYtDlpDownloads).filter(download =>
   matchesDownload(download) &&
-  (download.status === 'downloading' || download.status === 'processing')
+  ['queued', 'downloading', 'processing', 'pausing', 'paused'].includes(download.status)
 ).at(-1)
 const downloadId = ref(runningDownload?.id ?? null)
 const downloadFolderPath = computed(() => store.getters.getYtDlpDownloadFolderPath)
@@ -609,10 +609,14 @@ const activeDownload = computed(() => downloadId.value === null
   : store.getters.getYtDlpDownloads[downloadId.value] ?? {
     id: downloadId.value, status: 'downloading', percent: 0, speed: null, eta: null, errorMessage: null
   })
-const downloadInProgress = computed(() => activeDownload.value !== null && ['downloading', 'processing'].includes(activeDownload.value.status))
+const downloadInProgress = computed(() => activeDownload.value !== null &&
+  ['queued', 'downloading', 'processing', 'pausing', 'paused'].includes(activeDownload.value.status))
 const statusLine = computed(() => {
   const download = activeDownload.value
   if (!download) return ''
+  if (download.status === 'queued') return t('Downloads.Queued')
+  if (download.status === 'paused') return t('Downloads.Paused')
+  if (download.status === 'pausing') return t('Downloads.Pausing')
   if (download.status === 'downloading') return [`${download.percent.toFixed(1)}%`, download.speed, download.eta ? `ETA ${download.eta}` : null].filter(Boolean).join(' • ')
   if (download.status === 'processing') return t('Downloads.Processing')
   if (download.status === 'completed') return t('Downloads.Download Complete')

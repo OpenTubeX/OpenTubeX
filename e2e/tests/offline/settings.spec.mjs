@@ -36,6 +36,36 @@ async function expectCompactCustomThemeEditor(page) {
   expect(spacing.bottom).toBeLessThanOrEqual(12)
 }
 
+async function expectDownloadQueueSettingsAlignment(page) {
+  const downloads = await goToSettingsSection(page, 'download')
+  const enableDownloads = downloads.getByRole('checkbox', { name: 'Enable Downloads' })
+  if (!await enableDownloads.isChecked()) {
+    await downloads.locator('label.switch-label').filter({ hasText: 'Enable Downloads' }).click()
+  }
+
+  const bounds = await downloads.evaluate(element => {
+    const pathInputs = element.querySelectorAll('.downloadPathInputs .ft-input')
+    const queueSelect = element.querySelector('.downloadQueueInputs .select-text')
+    const queueSelectLabel = element.querySelector('.downloadQueueInputs .select-label')
+    const bandwidthInput = element.querySelector('.downloadQueueInputs .ft-input')
+    const bandwidthLabel = element.querySelector('.downloadQueueInputs .selectLabel')
+
+    return {
+      folder: pathInputs[0].getBoundingClientRect().toJSON(),
+      customArguments: pathInputs[1].getBoundingClientRect().toJSON(),
+      queueSelect: queueSelect.getBoundingClientRect().toJSON(),
+      queueSelectLabel: queueSelectLabel.getBoundingClientRect().toJSON(),
+      bandwidthInput: bandwidthInput.getBoundingClientRect().toJSON(),
+      bandwidthLabel: bandwidthLabel.getBoundingClientRect().toJSON()
+    }
+  })
+
+  expect(Math.abs(bounds.folder.x - bounds.queueSelect.x)).toBeLessThanOrEqual(1)
+  expect(Math.abs(bounds.customArguments.x - bounds.bandwidthInput.x)).toBeLessThanOrEqual(1)
+  expect(Math.abs(bounds.queueSelect.y - bounds.bandwidthInput.y)).toBeLessThanOrEqual(1)
+  expect(Math.abs(bounds.queueSelectLabel.y - bounds.bandwidthLabel.y)).toBeLessThanOrEqual(1)
+}
+
 async function expectAlwaysVisibleScrollbarsToPreserveSettingsScroll(page) {
   await goToSettingsSection(page, 'appearance')
   const content = page.locator('.settingsContent')
@@ -571,6 +601,10 @@ test.describe('settings', () => {
     test('keeps the custom theme editor compact', async ({ page }) => {
       await expectCompactCustomThemeEditor(page)
     })
+
+    test('aligns the download queue controls with the other fields', async ({ page }) => {
+      await expectDownloadQueueSettingsAlignment(page)
+    })
   })
 
   test('caps the width of the download action buttons', async ({ page }) => {
@@ -586,6 +620,10 @@ test.describe('settings', () => {
       elements.map(element => element.getBoundingClientRect().width)
     ))
     expect(Math.max(...widths)).toBeLessThanOrEqual(300)
+  })
+
+  test('aligns the download queue controls with the other fields', async ({ page }) => {
+    await expectDownloadQueueSettingsAlignment(page)
   })
 
   test('hides the redundant Privacy heading and keeps the original Distraction Free headings', async ({ page }) => {

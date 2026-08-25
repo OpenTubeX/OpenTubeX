@@ -52,6 +52,7 @@ export function latestSettings(contents) {
  * @param {object[]} [seed.subscriptionCache] subscription-cache.db documents
  * @param {object[]} [seed.tabSessions] tab-session.db documents
  * @param {object[]} [seed.watchStats] watch-stats.db documents
+ * @param {object[]} [seed.downloads] persisted downloads
  */
 export async function createUserDataDir(seed = {}) {
   const userDataDir = await mkdtemp(path.join(tmpdir(), 'opentubex-e2e-'))
@@ -75,6 +76,9 @@ export async function createUserDataDir(seed = {}) {
     if (docs?.length) {
       await writeFile(path.join(userDataDir, `${store}.db`), toNedbFile(docs))
     }
+  }
+  if (seed.downloads?.length) {
+    await writeFile(path.join(userDataDir, 'downloads.json'), JSON.stringify(seed.downloads))
   }
 
   return userDataDir
