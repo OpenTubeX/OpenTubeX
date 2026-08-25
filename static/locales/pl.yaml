@@ -1592,7 +1592,7 @@ Tooltips:
     Fallback to Non-Preferred Backend on Failure: Po włączeniu, kiedy Twój preferowany API napotka problem, OpenTubeX automatycznie spróbuje użyć niepreferowanego API jako metody zapasowej.
     Preferred API Backend: Wybierz back-end , który OpenTubeX użyje do uzyskiwania danych. Lokalne API jest wbudowanym ekstraktorem. API Invidious wymaga połączenia z serwerem Invidious.
     Region for Trending: Obszar filmów „Na czasie” pozwala wybrać kraj, z którego chciałbyś zobaczyć filmy zdobywające popularność.
-    Invidious Instance: Serwer Invidious, którym OpenTubeX będzie się łączył do wywołań API.
+    Invidious Instance: Serwer Invidious, z którym OpenTubeX będzie się łączył do wywołań API. Zmiana tego ustawienia wpływa tylko na aktywne okno, chyba że instancja zostanie ustawiona jako domyślna.
     Thumbnail Preference: Wszystkie miniaturki na OpenTubeX zostaną ukryte, rozmazane albo zastąpione klatką z filmu zamiast miniaturki domyślnej.
     External Link Handling: "Wybierz domyślne zachowanie kiedy odnośnik, który nie może zostać otworzony w OpenTubeX, został kliknięty.\nDomyślnie OpenTubeX otworzy kliknięty odnośnik w domyślnej przeglądarce.\n"
     Open Deep Links In New Window: Odnośniki URL przekazane do OpenTubeX (np. przez rozszerzenie przeglądarki, albo argumenty linii komend) są otwierane w nowym oknie.

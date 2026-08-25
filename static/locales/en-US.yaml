@@ -2185,7 +2185,8 @@ Tooltips:
       Load last active tab restores the previous session with the other tabs opened but unloaded; they load when you click them.
       Start with an empty session skips the saved tabs and opens a fresh window.
     Invidious Instance: The Invidious instance that OpenTubeX will connect to for API
-      calls.
+      calls. Changes to this setting apply only to the current window unless you set
+      this instance as the default.
     Region for Trending: The region of trends allows you to pick which country's trending
       videos you want to have displayed.
     External Link Handling: |

@@ -2659,21 +2659,23 @@ export function parseLocalComment(comment, commentThread = undefined) {
   let hasReplyToken = false
 
   if (commentThread?.has_replies) {
-    hasOwnerReplied = commentThread.comment_replies_data.has_channel_owner_replied
+    hasOwnerReplied = !!commentThread.comment_replies_data?.has_channel_owner_replied
     replyToken = commentThread
     hasReplyToken = true
   }
 
-  const commentTextRuns = comment.voice_reply_container?.transcript_text ? comment.voice_reply_container.transcript_text.runs : comment.content.runs
-  const published = calculatePublishedDate(comment.published_time.replace('(edited)', '').trim())
+  const commentTextRuns = comment.voice_reply_container?.transcript_text?.runs ?? comment.content?.runs ?? []
+  const publishedText = comment.published_time ?? ''
+  const published = calculatePublishedDate(publishedText.replace('(edited)', '').trim())
+  const authorId = comment.author?.id ?? ''
 
   return {
     id: comment.comment_id,
     dataType: 'local',
-    authorLink: comment.author.id,
-    author: comment.author.name,
-    authorId: comment.author.id,
-    authorThumb: comment.author.best_thumbnail?.url ?? '',
+    authorLink: authorId,
+    author: comment.author?.name ?? '',
+    authorId,
+    authorThumb: comment.author?.best_thumbnail?.url ?? '',
     isPinned: comment.is_pinned,
     isOwner: !!comment.author_is_channel_owner,
     isMember: !!comment.is_member,
@@ -2684,12 +2686,14 @@ export function parseLocalComment(comment, commentThread = undefined) {
     replyToken,
     showReplies: false,
     replies: [],
-    memberIconUrl: comment.is_member ? comment.member_badge.url : '',
+    memberIconUrl: comment.member_badge?.url ?? '',
     time: getRelativeTimeFromDate(published, false),
     published,
-    isEdited: comment.published_time.includes('(edited)'),
-    likes: comment.like_count,
-    numReplies: parseLocalSubscriberCount(comment.reply_count)
+    isEdited: publishedText.includes('(edited)'),
+    likes: parseLocalSubscriberCount(String(comment.like_count ?? '0')),
+    numReplies: hasReplyToken
+      ? parseLocalSubscriberCount(String(comment.reply_count_a11y ?? comment.reply_count ?? '0'))
+      : 0
   }
 }
 

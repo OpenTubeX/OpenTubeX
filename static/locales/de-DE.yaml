@@ -1945,7 +1945,7 @@ Tooltips:
     Playback Engine: Legt fest, welche Engine die Videostreams ermittelt. yt-dlp muss verfügbar sein, wenn es ausgewählt ist.
     Thumbnail Preference: Alle Vorschaubilder in OpenTubeX werden verpixelt, versteckt oder durch ein Einzelbild aus dem Video ersetzt, anstatt das Standard-Vorschaubild anzuzeigen.
     Show Thumbnail Previews: Zeigt animierte Vorschaubilder, wenn du den Mauszeiger über ein Videovorschaubild bewegst.
-    Invidious Instance: Die Invidious-Instanz, mit der sich OpenTubeX für API-Aufrufe verbinden wird.
+    Invidious Instance: Die Invidious-Instanz, mit der sich OpenTubeX für API-Aufrufe verbinden wird. Änderungen an dieser Einstellung gelten nur für das aktuelle Fenster, es sei denn, du legst diese Instanz als Standard fest.
     Fallback to Non-Preferred Backend on Failure: Wenn deine bevorzugte API ein Problem hat, wird OpenTubeX automatisch versuchen, deine nicht-bevorzugte API als Ausweichmethode zu verwenden, wenn sie aktiviert ist.
     Preferred API Backend: Wähle das Backend aus, welches OpenTubeX zum Laden der Daten nutzen soll. Die lokale API ist ein eingebauter Extrahierer. Die Invidious-API erfordert einen Invidious-Server, zu dem eine Verbindung hergestellt werden muss.
     Startup Behavior: |

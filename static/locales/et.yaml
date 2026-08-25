@@ -988,7 +988,7 @@ Tooltips:
     Thumbnail Preference: Vaikimisi pisipildi asemel kuvab OpenTubeX kõikjal läbi rakenduse kaadrit videost ja seda hägusena ja peidetuna.
     Fallback to Non-Preferred Backend on Failure: Kui sinu eelistatud APi ei toimi, siis kui vähegi võimalik, OpenTubeX üritab kasutada alternatiivi.
     Preferred API Backend: Vali taustateenus, mida OpenTubeX kasutab andmete laadimisel. Kohalik API on rakenduses olemas ja Invidious'e API eeldab välise teenuseserveri kasutamist.
-    Invidious Instance: Invidious'e teenuse server, mida OpenTubeX kasutab API kutse tegemisel.
+    Invidious Instance: Invidious'e teenuse server, mida OpenTubeX kasutab API-päringute tegemisel. Kui sa just ei määra seda serverit vaikimisi serveriks, siis antud seadistuse muudatus kehtib vaid praeguse akna jaoks.
     External Link Handling: "Vali vaikekäitumine, kui vajutatakse linki, mida ei saa avada OpenTubeXs.\nVaikimisi avaneb link kasutaja vaikebrauseris.\n"
     Open Deep Links In New Window: OpenTubeX'ile brauseritest või käsurealt antud võrguaadressid avatakse uues aknas.
   Player Settings:
