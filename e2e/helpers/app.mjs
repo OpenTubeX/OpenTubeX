@@ -86,8 +86,15 @@ export async function createUserDataDir(seed = {}) {
 
 /**
  * Launches the packed app (dist/main.js) against the given userData directory.
+ *
+ * @param {string} userDataDir
+ * @param {string[]} [extraArgs]
+ * @param {object} [options]
+ * @param {string} [options.appRoot] repository root containing dist-e2e
+ * @param {string} [options.executablePath] Electron executable to launch
  */
-export async function launchApp(userDataDir, extraArgs = []) {
+export async function launchApp(userDataDir, extraArgs = [], options = {}) {
+  const appRoot = options.appRoot ?? repoRoot
   // Force X11 so the app renders on the xvfb display instead of escaping
   // to the user's real Wayland session.
   const env = {
@@ -104,13 +111,16 @@ export async function launchApp(userDataDir, extraArgs = []) {
   // (which rebuilds dist/ in development mode) can't clobber it.
   const launchOptions = {
     args: [
-      path.join(repoRoot, 'dist-e2e', 'main.js'),
+      path.join(appRoot, 'dist-e2e', 'main.js'),
       ...extraArgs,
       '--ozone-platform=x11',
       '--mute-audio'
     ],
-    cwd: repoRoot,
+    cwd: appRoot,
     env
+  }
+  if (options.executablePath) {
+    launchOptions.executablePath = options.executablePath
   }
 
   let electronApp
@@ -151,7 +161,7 @@ export async function launchApp(userDataDir, extraArgs = []) {
       const url = page.url()
       await electronApp.close().catch(() => {})
       throw new Error(
-        `Unexpected app URL ${url} — dist-e2e must contain a production build, run "pnpm run test:e2e:pack"`
+        `Unexpected app URL ${url}. ${path.join(appRoot, 'dist-e2e')} must contain a production build`
       )
     }
   }
