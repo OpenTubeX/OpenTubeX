@@ -271,13 +271,23 @@ ${malformedImage}
   }
 })
 
-test('GitHub user attachment storage redirects are accepted narrowly', () => {
-  assert.equal(
-    validateDownloadedImageUrl('https://github-production-user-asset-6210df.s3.amazonaws.com/image.png').hostname,
+test('GitHub image storage redirects are accepted narrowly', () => {
+  for (const hostname of [
     'github-production-user-asset-6210df.s3.amazonaws.com',
-  )
+    'release-assets.githubusercontent.com',
+  ]) {
+    assert.equal(
+      validateDownloadedImageUrl(`https://${hostname}/image.png`).hostname,
+      hostname,
+    )
+  }
+
   assert.throws(
     () => validateDownloadedImageUrl('https://untrusted-bucket.s3.amazonaws.com/image.png'),
+    /must be hosted by GitHub/,
+  )
+  assert.throws(
+    () => validateDownloadedImageUrl('https://release-assets.githubusercontent.com.example.com/image.png'),
     /must be hosted by GitHub/,
   )
 })

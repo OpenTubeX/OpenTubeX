@@ -24,6 +24,7 @@ const ALLOWED_IMAGE_HOSTS = new Set([
 const ALLOWED_IMAGE_DOWNLOAD_HOSTS = new Set([
   ...ALLOWED_IMAGE_HOSTS,
   'github-production-user-asset-6210df.s3.amazonaws.com',
+  'release-assets.githubusercontent.com',
 ])
 const MERGED_PULL_REQUESTS_QUERY = `
 query($owner: String!, $repo: String!, $base: String!, $endCursor: String) {
