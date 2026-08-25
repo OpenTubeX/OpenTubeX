@@ -713,7 +713,8 @@ test.describe('tab bar', () => {
     ])
   })
 
-  test('keeps consecutive selected drags aligned while the first drop settles', async ({ page }) => {
+  test('keeps consecutive selected drags aligned while reorder updates are delayed', async ({ app, page }) => {
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
@@ -726,6 +727,15 @@ test.describe('tab bar', () => {
     await tabs.nth(2).click()
     await expect(tabs.nth(2)).toHaveClass(/active/)
     await tabs.nth(3).click({ modifiers: ['Control'] })
+
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      const channel = 'tabs-reorder'
+      const [listener] = ipcMain.listeners(channel)
+      ipcMain.removeListener(channel, listener)
+      ipcMain.on(channel, (event, ...args) => {
+        setTimeout(() => listener(event, ...args), 1000)
+      })
+    })
 
     await page.evaluate(() => {
       const tabs = Array.from(document.querySelectorAll('.tabBar .tab'))
@@ -751,6 +761,24 @@ test.describe('tab bar', () => {
       drag(tabs[3], tabs[0])
       drag(tabs[2], tabs[4])
     })
+
+    await page.waitForTimeout(600)
+    const visualOrderWhileWaiting = await tabs.evaluateAll(elements => {
+      return elements
+        .map(element => ({
+          id: element.dataset.tabId,
+          start: element.getBoundingClientRect().left
+        }))
+        .sort((a, b) => a.start - b.start)
+        .map(({ id }) => id)
+    })
+    expect(visualOrderWhileWaiting).toEqual([
+      originalIds[0],
+      originalIds[1],
+      originalIds[4],
+      originalIds[2],
+      originalIds[3]
+    ])
 
     await expect.poll(() => {
       return tabs.evaluateAll(elements => {
