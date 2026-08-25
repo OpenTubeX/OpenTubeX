@@ -57,8 +57,8 @@ jobs:
           echo EOF
         } >> "$GITHUB_OUTPUT"
 
-    - name: Restore pnpm cache
-      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+    - name: Cache pnpm store
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         key: ${{ format('node-cache-{0}-{1}-pnpm-{2}', runner.os, runner.arch, hashFiles('pnpm-lock.yaml')) }}
         path: ${{ steps.cache_dir.outputs.cache_dir }}
