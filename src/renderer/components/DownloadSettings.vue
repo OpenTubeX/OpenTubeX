@@ -83,7 +83,7 @@ function updateEnableDownloads(value) {
 }
 
 function openDownloads() {
-  store.dispatch('showSettingsWindow', 'downloads')
+  store.dispatch('showDownloadsFromSettings')
 }
 
 /**

@@ -63,6 +63,7 @@ import { LiveReminderManager } from './LiveReminderManager'
 import { requestVoiceOverTranslation } from './voiceOverTranslation'
 import { clearVideoMetadataCache, getVideoMetadataCacheSize, updateVideoMetadataCache } from './videoMetadataCache'
 import { shouldAdvanceDockMediaSequence } from './dockMediaSession'
+import { clearStorage, compactStorageDatabases, getStorageUsage } from './storage'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
 if (process.argv.includes('--version')) {
@@ -3360,6 +3361,21 @@ function runApp() {
   ipcMain.handle(IpcChannels.VIDEO_METADATA_CACHE_GET_SIZE, async (event) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) return 0
     return getVideoMetadataCacheSize()
+  })
+
+  ipcMain.handle(IpcChannels.STORAGE_GET_USAGE, async (event) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) return {}
+    return getStorageUsage()
+  })
+
+  ipcMain.handle(IpcChannels.STORAGE_CLEAR, async (event, category) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) return false
+    return clearStorage(category)
+  })
+
+  ipcMain.handle(IpcChannels.STORAGE_COMPACT_DATABASES, async (event) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) return false
+    return compactStorageDatabases()
   })
 
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, async (event, tabId, feedTab) => {

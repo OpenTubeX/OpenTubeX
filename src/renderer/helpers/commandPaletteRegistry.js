@@ -300,14 +300,14 @@ function addSettingsSearchCommands(commands, context) {
 
   for (const section of sections) {
     const values = searchIndex.get(section.type) ?? []
-    const settingValues = values.filter(value => (
-      value !== section.title && value !== section.description
+    const settingValues = values.filter(match => (
+      match.label !== section.title && match.label !== section.description
     ))
-    settingValues.forEach((label, index) => {
-      commands.push(command(`settings.search.${section.type}.${index}`, label, groups.settings, {
+    settingValues.forEach((match, index) => {
+      commands.push(command(`settings.search.${section.type}.${index}`, match.label, groups.settings, {
         detail: section.title,
         icon: settingsSectionIcon(section.type),
-        run: () => openSettingsSearchResult(section.type, label),
+        run: () => openSettingsSearchResult(section.type, match),
         searchOnly: true,
       }))
     })

@@ -415,12 +415,12 @@ Settings:
     Distraction Free Description: Hide content and set viewing limits
     Add-ons: Add-ons
     Add-ons Description: SponsorBlock, DeArrow, dislikes, and voice-over translation
-    Privacy Description: History, stored data, and access controls
+    Privacy Description: Viewing privacy and access controls
     Online activity: Online activity
-    Data Description: Import, export, and manage your data
+    Data And Storage Description: Import, export, disk usage, and cleanup
     Sync Description: Keep settings and data in sync across devices
     Advanced: Advanced
-    Advanced Description: Providers, external apps, network, and experiments
+    Advanced Description: Providers, external apps, and network
     Alternative providers: Video and metadata providers
   Highlight Changed Settings: Highlight settings changed from defaults
   Reset Setting to Default: Reset this setting to its default
@@ -1095,6 +1095,86 @@ Settings:
     Remove All Playlists: Remove All Playlists
     All playlists have been removed: All playlists have been removed
     Are you sure you want to remove all your playlists?: Are you sure you want to remove all your playlists?
+  Storage Settings:
+    Storage: Storage
+    Downloaded Media: Tracked downloaded media
+    Storage Breakdown: Storage breakdown
+    Shown Total: Shown total
+    Calculating: Calculating…
+    Not Available: Exact size unavailable
+    At Least: 'At least {size}'
+    Failed To Read Storage: Some storage sizes could not be read
+    Downloads: Downloads
+    Downloaded Media Description: Video, audio, and subtitle files that download history still tracks.
+    Selected Download Folders: User-selected download folders
+    Download History Records: Download history records
+    Download History Records Description: '{count} finished download record. This record tracks status and file locations but does not contain the downloaded media. | {count} finished download records. These records track status and file locations but do not contain the downloaded media.'
+    Clear Download History Records: Clear download history records
+    Clear Download History Confirmation: Clear all finished download records?
+    Download Files Stay On Disk: Downloaded files will stay on disk, but they will no longer appear on the Downloads page.
+    Clear Records: Clear records
+    Replaceable Caches: Replaceable caches
+    Application Caches: Application caches
+    Browser Caches: Browser caches
+    Browser Caches Hint: Chromium’s HTTP, GPU, code, shader, service-worker, and dictionary caches.
+    Stored App Data: Stored app data
+    Browser Runtime Data: Browser runtime data
+    Browser Runtime Data Hint: Chromium’s session and local storage, cookies, privacy and network state, and crash files.
+    Subscription Feed Cache: Subscription and feed cache
+    Subscription Feed Cache Description: Stores fetched subscription videos, Shorts, live streams, and posts. OpenTubeX recreates it on the next feed refresh.
+    Clear Subscription Feed Cache: Clear subscription and feed cache
+    Clear Subscription Feed Cache Confirmation: Clear the subscription and feed cache?
+    Subscription Feed Cache Effect: Subscription feeds may appear empty until they refresh. Your subscriptions and profiles will not be changed.
+    Session Search Cache: Session search cache
+    In Memory: In memory
+    Session Search Cache Description: '{count} search is cached in memory for faster back navigation. This cache is discarded when OpenTubeX closes. | {count} searches are cached in memory for faster back navigation. This cache is discarded when OpenTubeX closes.'
+    Clear Session Search Cache: Clear session search cache
+    Clear Session Search Cache Confirmation: Clear the session search cache?
+    Session Search Cache Effect: Cached result pages will be discarded. Saved search history will not be changed.
+    HTTP Cache: HTTP cache
+    HTTP Cache Description: Electron stores network responses on disk so repeated requests can load without downloading the same data again. OpenTubeX recreates this cache as needed.
+    Managed By Electron: Managed by Electron
+    Clear HTTP Cache: Clear HTTP cache
+    Clear HTTP Cache Confirmation: Clear Electron's HTTP cache?
+    HTTP Cache Effect: Images and other network resources may load more slowly once while the cache is rebuilt.
+    Tab Image Cache: Tab thumbnails and channel avatars
+    Tab Image Cache Description: Stores preview images and channel avatars for open and restored tabs. OpenTubeX recreates them while tabs are used.
+    Clear Tab Image Cache: Clear tab image cache
+    Clear Tab Image Cache Confirmation: Clear tab thumbnails and channel avatars?
+    Tab Image Cache Effect: Tab images may disappear briefly and will be recreated as their tabs are used.
+    Playback Caches: Playback caches
+    Playback Caches Description: Stores bounded yt-dlp stream information and YouTube player files. OpenTubeX refetches them when a video needs them.
+    Clear Playback Caches: Clear playback caches
+    Clear Playback Caches Confirmation: Clear the yt-dlp and player caches?
+    Playback Caches Effect: The next local playback request may take longer while stream and player data is fetched again.
+    Clear Cache: Clear cache
+    History Data: Stored histories
+    Video Metadata Description: Stores past titles, thumbnails, and descriptions for supported videos. Old revisions cannot be recreated after deletion.
+    Video Metadata Effect: Saved metadata revisions will be deleted permanently. Current video details can still be fetched again.
+    Watch History: Watch history and statistics
+    Watch History Description: Watch history records viewed videos and progress. Watch statistics store daily viewing totals. Retention only applies to watch history.
+    Clear Watch Statistics: Clear watch statistics
+    Watch History Effect: Viewed-video records and saved progress will be deleted. Watch statistics will remain.
+    Clear Watch Statistics Confirmation: Delete all watch statistics?
+    Watch Statistics Effect: Daily viewing totals will be deleted. Watch history will remain.
+    Search History: Search history
+    Search History Description: Stores searches you chose to remember.
+    Delete Search History: Delete search history
+    Delete Search History Confirmation: Delete all saved search history?
+    Search History Effect: Saved search suggestions from your previous searches will disappear. The current session cache will remain.
+    Other User Data: Other user data
+    Other Profile Files: Other profile files
+    Other Profile Files Hint: Backups, temporary files, and profile entries OpenTubeX does not recognize yet.
+    Subscriptions And Profiles: Subscriptions and profiles
+    Subscriptions And Profiles Description: Stores subscribed channels, profile names, and profile membership.
+    Subscriptions And Profiles Effect: All subscriptions and extra profiles will be deleted permanently. Feed cache data will also be cleared.
+    Playlists: Playlists
+    Playlists Description: Stores playlist names, descriptions, and saved videos.
+    Playlists Effect: Every playlist and its saved-video list will be deleted permanently. Downloaded media files will remain.
+    Settings And Sessions: Settings, tab sessions, and reminders
+    Settings And Sessions Description: Stores app preferences, restorable tabs, and live-stream reminders. Open the profile directory to inspect or back up these files; this page does not delete them.
+    Cleanup Complete: Storage cleanup finished
+    Cleanup Failed: Storage cleanup failed
   Subscription Settings:
     Subscription Settings: Subscription
     Fetch Feeds from RSS: Fetch Feeds from RSS
@@ -1169,6 +1249,7 @@ Settings:
     Paused Interface Hide Delay: Paused Interface Hide Delay
   Data Settings:
     Data Settings: Data
+    Data And Storage: Data & Storage
     Profile Directory: Profile directory
     Open Profile Directory: Open profile directory
     Select Export Type: Select Export Type

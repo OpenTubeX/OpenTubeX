@@ -45,6 +45,24 @@ const GENERAL_PROVIDER_KEYS = new Set([
   'View all Invidious instance information'
 ])
 
+const PRIVACY_STORAGE_KEYS = new Set([
+  'Automatic History Retention',
+  'Automatic History Retention Placeholder',
+  'Automatic History Retention Tooltip',
+  'Cache Video Metadata',
+  'Cache Video Metadata Tooltip',
+  'Clear Search History and Cache',
+  'Clear Video Metadata Cache',
+  'Remove Watch History',
+  'Remove All Subscriptions / Profiles',
+  'Remove All Playlists'
+])
+
+const DATA_STORAGE_KEYS = new Set([
+  'Profile Directory',
+  'Open Profile Directory'
+])
+
 export const SETTINGS_SEARCH_SOURCES = {
   general: [{
     type: 'general',
@@ -103,7 +121,8 @@ export const SETTINGS_SEARCH_SOURCES = {
   }],
   privacy: [{
     type: 'privacy',
-    key: 'Settings.Privacy Settings'
+    key: 'Settings.Privacy Settings',
+    exclude: PRIVACY_STORAGE_KEYS
   }, {
     type: 'general',
     key: 'Settings.General Settings',
@@ -111,7 +130,24 @@ export const SETTINGS_SEARCH_SOURCES = {
   }],
   data: [{
     type: 'data',
-    key: 'Settings.Data Settings'
+    key: 'Settings.Data Settings',
+    exclude: DATA_STORAGE_KEYS,
+    tab: 'data'
+  }, {
+    type: 'storage',
+    key: 'Settings.Storage Settings',
+    tab: 'storage'
+  }, {
+    type: 'privacy',
+    key: 'Settings.Privacy Settings',
+    include: PRIVACY_STORAGE_KEYS,
+    tab: 'storage'
+  }, {
+    type: 'data',
+    key: 'Settings.Data Settings',
+    include: DATA_STORAGE_KEYS,
+    electronOnly: true,
+    tab: 'storage'
   }],
   sync: [{
     type: 'sync',

@@ -1,0 +1,200 @@
+.storageSettings {
+  --storage-chart-downloads: var(--primary-color);
+  --storage-chart-app-caches: var(--accent-color);
+  --storage-chart-browser-caches: color-mix(in srgb, var(--primary-color) 48%, var(--accent-color));
+  --storage-chart-app-data: color-mix(in srgb, var(--primary-color) 42%, var(--primary-text-color));
+  --storage-chart-browser-runtime: color-mix(in srgb, var(--accent-color) 38%, var(--primary-text-color));
+  --storage-chart-profile-other: color-mix(in srgb, var(--primary-text-color) 52%, var(--card-bg-color));
+}
+
+.storageBreakdown {
+  align-items: center;
+  display: grid;
+  gap: 28px;
+  grid-template-columns: 168px minmax(0, 1fr);
+  margin-block: 4px;
+  margin-inline: 20px;
+}
+
+.storageDonut {
+  aspect-ratio: 1;
+  display: grid;
+  inline-size: 168px;
+  place-items: center;
+  position: relative;
+}
+
+.storageDonutChart {
+  block-size: 100%;
+  inline-size: 100%;
+  inset: 0;
+  overflow: visible;
+  position: absolute;
+  transform: rotate(-90deg);
+}
+
+.storageDonutTrack,
+.storageDonutSegment {
+  fill: none;
+  stroke-width: 10;
+}
+
+.storageDonutTrack {
+  stroke: var(--side-nav-hover-color);
+}
+
+.storageDonutSegment {
+  cursor: help;
+}
+
+.storageDonutSegment:hover,
+.storageDonutSegment:focus {
+  filter: brightness(1.15) drop-shadow(0 0 1px var(--primary-text-color));
+  stroke-width: 11;
+}
+
+.storageDonutCenter {
+  align-items: center;
+  aspect-ratio: 1;
+  background: var(--card-bg-color);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  inline-size: 62%;
+  justify-content: center;
+  padding: 8px;
+  pointer-events: none;
+  position: relative;
+  text-align: center;
+}
+
+.storageDonutCenter span {
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
+.storageDonutCenter strong {
+  font-size: 1.1rem;
+  margin-block-start: 3px;
+}
+
+.storageDonutTooltip {
+  background: color-mix(in srgb, var(--primary-text-color) 88%, var(--card-bg-color));
+  border-radius: calc(6px * var(--ui-roundness));
+  box-sizing: border-box;
+  color: var(--card-bg-color);
+  display: grid;
+  font-size: 0.78rem;
+  gap: 2px;
+  inline-size: max-content;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  max-inline-size: 220px;
+  padding-block: 7px;
+  padding-inline: 9px;
+  pointer-events: none;
+  position: absolute;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.storageBreakdownDetails ul {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin-block: 0;
+  margin-inline: 0;
+  padding: 0;
+}
+
+.storageBreakdownDetails li {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 12px minmax(0, 1fr) auto 3.5rem;
+}
+
+.storageLegendLabel {
+  align-items: center;
+  display: flex;
+  gap: 5px;
+  min-inline-size: 0;
+}
+
+.storageLegendLabel > span:first-child {
+  flex: 1;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.storageSettings .storageLegendLabel :deep(.tooltip) {
+  flex: 0 0 auto;
+  inset: auto;
+  position: relative;
+}
+
+.storageSettings .storageLegendLabel :deep(.button) {
+  min-block-size: 24px;
+  min-inline-size: 24px;
+}
+
+.storageLegendMarker {
+  block-size: 12px;
+  border: 1px solid color-mix(in srgb, var(--primary-text-color) 32%, transparent);
+  border-radius: 3px;
+  inline-size: 12px;
+}
+
+.storageLegendPercentage {
+  min-inline-size: 0;
+  opacity: 0.72;
+  text-align: end;
+}
+
+.storageSettings :deep(.sectionBody) {
+  padding-block-end: 16px;
+}
+
+.storageSettings :deep(.sectionBody:has(> .storageItem)) {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.storageSettings :deep(.sectionBody:has(.storageItem) .sectionTitle) {
+  grid-column: 1 / -1;
+}
+
+@container settings-content (width > 760px) {
+  .storageSettings :deep(.sectionBody:has(> .storageItem)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container settings-content (width > 1180px) {
+  .storageSettings :deep(.sectionBody:has(> .storageItem)) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container settings-content (width <= 600px) {
+  .storageBreakdown {
+    grid-template-columns: 144px minmax(0, 1fr);
+  }
+
+  .storageDonut {
+    inline-size: 144px;
+  }
+}
+
+@container settings-content (width <= 430px) {
+  .storageBreakdown {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .storageBreakdownDetails {
+    inline-size: 100%;
+  }
+}

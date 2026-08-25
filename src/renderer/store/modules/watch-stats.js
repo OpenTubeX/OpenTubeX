@@ -58,8 +58,10 @@ const actions = {
     try {
       await DBWatchStatsHandlers.deleteAll()
       commit('resetWatchStats')
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 

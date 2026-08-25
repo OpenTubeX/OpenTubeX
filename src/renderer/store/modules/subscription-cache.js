@@ -363,8 +363,10 @@ const actions = {
     try {
       await DBSubscriptionCacheHandlers.deleteAll()
       commit('clearCaches')
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 }

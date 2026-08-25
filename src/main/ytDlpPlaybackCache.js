@@ -1,7 +1,7 @@
 import { app } from 'electron'
 import { Buffer } from 'node:buffer'
 import { createHash } from 'node:crypto'
-import { readFile, rename, writeFile } from 'node:fs/promises'
+import { readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import { TabManager } from './tabs/TabManager'
@@ -170,8 +170,18 @@ export async function handleYtDlpPlaybackCacheDelete(event, videoId) {
 export async function handleYtDlpPlaybackCacheClear(event) {
   if (!isOpenTubeXUrl(event.senderFrame.url)) return false
 
+  await clearYtDlpPlaybackCache()
+  return true
+}
+
+export async function clearYtDlpPlaybackCache() {
   await loadEntries()
   entries.clear()
-  await saveEntries()
-  return true
+  writeQueue = writeQueue
+    .catch(() => {})
+    .then(() => Promise.all([
+      rm(cachePath(), { force: true }),
+      rm(`${cachePath()}.tmp`, { force: true })
+    ]))
+  await writeQueue
 }

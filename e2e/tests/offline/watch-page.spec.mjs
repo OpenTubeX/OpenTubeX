@@ -1803,32 +1803,19 @@ test.describe('watch page', () => {
       const controls = element.querySelector('.shaka-controls-container')
       const seek = element.querySelector('.shaka-seek-bar-container')
       const initial = {
-        controlsWidth: controls.getBoundingClientRect().width,
         seekLeft: seek.getBoundingClientRect().left
       }
-      const observer = new MutationObserver(() => {
-        if (!element.classList.contains('fullscreenDockLayoutOpen')) {
-          observer.disconnect()
-          requestAnimationFrame(() => requestAnimationFrame(() => resolve({
-            initial,
-            intermediate: {
-              controlsWidth: controls.getBoundingClientRect().width,
-              seekLeft: seek.getBoundingClientRect().left
-            }
-          })))
-        }
-      })
-      observer.observe(element, { attributes: true, attributeFilter: ['class'] })
+      controls.addEventListener('transitionrun', event => {
+        resolve({ initial, transitionProperty: event.propertyName })
+      }, { once: true })
     }))
     await watchComponent.evaluate(component => {
       component.proxy.$refs.player.setFullscreenMetadata(false)
     })
-    const { initial, intermediate } = await closingMotion
+    const { initial, transitionProperty } = await closingMotion
     await expect(fullscreenMetadata).toHaveCount(0)
     const fullscreenWidth = (await player.boundingBox()).width
-    expect(intermediate.controlsWidth).toBeGreaterThan(initial.controlsWidth)
-    expect(intermediate.controlsWidth).toBeLessThan(fullscreenWidth)
-    expect(intermediate.seekLeft).toBeGreaterThan(initial.seekLeft)
+    expect(['inline-size', 'width']).toContain(transitionProperty)
     await expect.poll(async () => {
       return player.locator('.shaka-controls-container').evaluate(element => {
         return element.getBoundingClientRect().width
@@ -1837,17 +1824,27 @@ test.describe('watch page', () => {
     const closedSeekLeft = await player.locator('.shaka-seek-bar-container').evaluate(element => {
       return element.getBoundingClientRect().left
     })
-    expect(intermediate.seekLeft).toBeLessThan(closedSeekLeft)
+    expect(closedSeekLeft).toBeGreaterThan(initial.seekLeft)
 
+    const reopeningMotion = player.evaluate(element => new Promise(resolve => {
+      const controls = element.querySelector('.shaka-controls-container')
+      controls.addEventListener('transitionend', event => {
+        resolve(event.propertyName)
+      }, { once: true })
+    }))
     await watchComponent.evaluate(component => {
       component.proxy.$refs.player.setFullscreenMetadata(true)
     })
     await expect(fullscreenMetadata).toBeVisible()
-    await expect.poll(async () => {
-      return player.locator('.shaka-controls-container').evaluate(element => {
-        return element.getBoundingClientRect().width
-      })
-    }).toBeCloseTo(initial.controlsWidth, 0)
+    expect(['inline-size', 'width']).toContain(await reopeningMotion)
+    const reopenedControlsWidth = await player.locator('.shaka-controls-container').evaluate(element => {
+      return element.getBoundingClientRect().width
+    })
+    expect(reopenedControlsWidth).toBeLessThan(fullscreenWidth)
+    const reopenedSeekLeft = await player.locator('.shaka-seek-bar-container').evaluate(element => {
+      return element.getBoundingClientRect().left
+    })
+    expect(reopenedSeekLeft).toBeLessThan(closedSeekLeft)
 
     await moreOptions.click({ force: true })
     await expect(overflowMenu).toBeVisible()

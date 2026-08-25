@@ -248,6 +248,34 @@ export class TabManager {
   }
 
   /**
+   * Clears persisted tab thumbnails and channel avatars without leaving live
+   * tabs pointing at files that no longer exist. Enabled caches resume after
+   * cleanup and refill as tabs are used.
+   * @returns {Promise<void>}
+   */
+  static async clearTabPreviewCache() {
+    const states = Array.from(tabManagers.values(), manager => ({
+      manager,
+      previewsEnabled: manager._tabPreviewsEnabled,
+      avatarsEnabled: manager._avatarsEnabled
+    }))
+
+    try {
+      await Promise.all(states.map(async ({ manager, previewsEnabled, avatarsEnabled }) => {
+        if (previewsEnabled) await manager.setTabPreviewsEnabled(false)
+        if (avatarsEnabled) await manager.setTabAvatarsEnabled(false)
+      }))
+
+      await TabManager.pruneTabPreviewCache([])
+    } finally {
+      await Promise.all(states.map(async ({ manager, previewsEnabled, avatarsEnabled }) => {
+        if (previewsEnabled) await manager.setTabPreviewsEnabled(true)
+        if (avatarsEnabled) await manager.setTabAvatarsEnabled(true)
+      }))
+    }
+  }
+
+  /**
    * @returns {Promise<'end' | 'afterCurrent' | 'afterCurrentInOrder'>}
    */
   static async getStoredNewTabPosition() {

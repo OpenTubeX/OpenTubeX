@@ -13,13 +13,12 @@ const NON_SETTING_MESSAGE_KEY_PATTERN = /(?:^Are you sure\b|^Failed to\b|^Invali
  * command palette. Visibility follows the controls currently rendered by the
  * active settings state.
  * @param {object} options
- * @returns {Map<string, string[]>}
+ * @returns {Map<string, Array<{label: string, tab?: string}>>}
  */
 export function createSettingsSearchIndex(options) {
   const {
     sections,
     tm,
-    usingElectron,
   } = options
   const extraValues = {
     privacy: flattenSettingsSearchMessageValues(
@@ -32,25 +31,37 @@ export function createSettingsSearchIndex(options) {
 
   return new Map(sections.map((section) => {
     const sources = SETTINGS_SEARCH_SOURCES[section.type] ?? []
-    const values = [...new Set([
-      section.title,
-      section.description,
-      ...sources.filter(source => !source.electronOnly || usingElectron).flatMap(source => (
-        flattenSettingsSearchMessageValues(
-          tm(source.key),
-          SETTINGS_SEARCH_SELECT_GROUP_LABELS[source.type],
-          [],
-          (path, value) => (
-            (source.include === undefined || source.include.has(path[0])) &&
-            (source.exclude === undefined || !source.exclude.has(path[0])) &&
-            isSearchableSettingsMessage(source.type, path, value, options)
-          )
-        )
-      )),
-      ...(extraValues[section.type] ?? [])
-    ])]
-    return [section.type, values]
+    const matches = [
+      { label: section.title },
+      { label: section.description },
+      ...sources.flatMap(source => getSettingsSearchSourceValues(source, options).map(label => ({
+        label,
+        ...(source.tab === undefined ? {} : { tab: source.tab })
+      }))),
+      ...(extraValues[section.type] ?? []).map(label => ({ label }))
+    ]
+    return [section.type, matches.filter((match, index) => (
+      matches.findIndex(candidate => candidate.label === match.label) === index
+    ))]
   }))
+}
+
+export function findSettingsSearchTab(match) {
+  return match.tab
+}
+
+function getSettingsSearchSourceValues(source, options) {
+  if (source.electronOnly && !options.usingElectron) return []
+  return flattenSettingsSearchMessageValues(
+    options.tm(source.key),
+    SETTINGS_SEARCH_SELECT_GROUP_LABELS[source.type],
+    [],
+    (path, value) => (
+      (source.include === undefined || source.include.has(path[0])) &&
+      (source.exclude === undefined || !source.exclude.has(path[0])) &&
+      isSearchableSettingsMessage(source.type, path, value, options)
+    )
+  )
 }
 
 function isSearchableSettingsMessage(sectionType, path, value, options) {
@@ -339,10 +350,10 @@ export function flattenSettingsSearchMessageValues(
 export function removeRedundantSettingsSearchMatches(values, locale) {
   const keptMatches = []
   const normalizedMatches = []
-  for (const value of values.toSorted((a, b) => a.length - b.length)) {
-    const normalizedValue = normalizeSettingsSearchText(value, locale)
+  for (const match of values.toSorted((a, b) => a.label.length - b.label.length)) {
+    const normalizedValue = normalizeSettingsSearchText(match.label, locale)
     if (normalizedMatches.some(shorterValue => normalizedValue.includes(shorterValue))) continue
-    keptMatches.push(value)
+    keptMatches.push(match)
     normalizedMatches.push(normalizedValue)
   }
   return keptMatches

@@ -88,8 +88,10 @@ const actions = {
     try {
       await DBSearchHistoryHandlers.deleteAll()
       commit('setSearchHistoryEntries', [])
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 }

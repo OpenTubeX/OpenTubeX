@@ -270,9 +270,12 @@
             <component
               :is="activeSettingsSection.component"
               v-if="activeSettingsSection"
+              ref="activeSettingsSectionRef"
               :key="activeSettingsSection.renderKey ?? activeSettingsSection.type"
+              :initial-tab="activeSettingsSection.type === 'data' ? activeDataStorageTab : undefined"
               class="section"
               :data-section="activeSettingsSection.type"
+              @update:active-tab="setActiveDataStorageTab"
             />
             <div
               v-else-if="settingsSearchQuery !== ''"
@@ -295,12 +298,12 @@
                   </button>
                   <button
                     v-for="match in result.matches"
-                    :key="match"
+                    :key="`${match.label}-${match.tab ?? ''}`"
                     type="button"
                     class="settingsSearchResultMatch"
                     @click="openSearchResult(result.section.type, match)"
                   >
-                    {{ match }}
+                    {{ match.label }}
                   </button>
                 </section>
               </template>
@@ -359,7 +362,7 @@ import {
 import { useI18n } from 'vue-i18n'
 
 import DownloadSettings from '../../components/DownloadSettings.vue'
-import DataSettings from '../../components/DataSettings/DataSettings.vue'
+import DataStorageSettings from '../../components/DataStorageSettings/DataStorageSettings.vue'
 import SyncSettings from '../../components/SyncSettings/SyncSettings.vue'
 import PasswordDialog from '../../components/PasswordDialog/PasswordDialog.vue'
 import FtSettingsMenu from '../../components/FtSettingsMenu/FtSettingsMenu.vue'
@@ -386,6 +389,7 @@ import {
 import { initializePlatformInfo, isLinuxWayland } from '../../helpers/platform'
 import {
   createSettingsSearchIndex,
+  findSettingsSearchTab,
   normalizeSettingsSearchText,
   removeRedundantSettingsSearchMatches,
 } from '../../helpers/settingsSearch'
@@ -423,6 +427,7 @@ const LEGACY_SETTINGS_SECTION_MAP = {
   sync: 'sync',
   proxy: 'advanced',
   'context-menu-search': 'general',
+  storage: 'data',
   experimental: 'advanced'
 }
 
@@ -442,6 +447,10 @@ const settingsSearchSubsectionTargets = computed(() => ({
   playback: [{
     search: t('Settings.Player Settings.Caption Appearance.Caption Appearance'),
     target: t('Settings.Player Settings.Caption Appearance.Captions')
+  }],
+  data: [{
+    search: t('Settings.Privacy Settings.Clear Search History and Cache'),
+    target: t('Settings.Storage Settings.Search History')
   }]
 }))
 const isInDesktopView = ref(true)
@@ -450,12 +459,18 @@ const activeSection = ref(
   LEGACY_SETTINGS_SECTION_MAP[store.getters.getSettingsWindowSection] ??
   store.getters.getSettingsWindowSection
 )
+const activeDataStorageTab = ref(
+  store.getters.getSettingsWindowSection === 'storage'
+    ? 'storage'
+    : 'data'
+)
 const settingsSearchQuery = ref('')
 const settingsContentTransitionClass = ref('')
 const settingsMenuTransitionClass = ref('')
 const settingsWindowRef = useTemplateRef('settingsWindowRef')
 const settingsPageRef = useTemplateRef('settingsPageRef')
 const settingsContentRef = useTemplateRef('settingsContentRef')
+const activeSettingsSectionRef = useTemplateRef('activeSettingsSectionRef')
 const standaloneScrollRef = useTemplateRef('standaloneScrollRef')
 const profileManagerScrollRef = useTemplateRef('profileManagerScrollRef')
 const settingsSearchInputRef = useTemplateRef('settingsSearchInputRef')
@@ -478,6 +493,7 @@ let boundsSaveTimer = null
 let boundsAnimation = null
 let searchHighlightTimer = null
 let standaloneClampFrame = null
+let downloadsReturnScrollTop = 0
 let draggingPointerId = null
 let resizeSession = null
 let dragOffsetX = 0
@@ -509,6 +525,9 @@ const showPerformanceImpactIndicators = computed(() => store.getters.getShowPerf
 const isProfileManagerOpen = computed(() => store.getters.getSettingsWindowView === 'profile')
 const isAboutOpen = computed(() => store.getters.getSettingsWindowView === 'about')
 const isDownloadsOpen = computed(() => store.getters.getSettingsWindowView === 'downloads')
+const canReturnFromDownloads = computed(() => (
+  isDownloadsOpen.value && store.getters.getSettingsWindowReturnView === 'settings'
+))
 const isStandaloneViewOpen = computed(() => isAboutOpen.value || isDownloadsOpen.value)
 const showMinimizeButton = computed(() => {
   if (isDownloadsOpen.value) return !store.getters.getMoveDownloadsToAppHeader
@@ -581,10 +600,10 @@ const settingsComponentsData = computed(() => [
   },
   {
     type: 'data',
-    title: t('Settings.Data Settings.Data Settings'),
-    description: t('Settings.Categories.Data Description'),
-    icon: ['fas', 'database'],
-    component: DataSettings
+    title: t('Settings.Data Settings.Data And Storage'),
+    description: t('Settings.Categories.Data And Storage Description'),
+    icon: ['fas', 'box-archive'],
+    component: DataStorageSettings
   },
   {
     type: 'sync',
@@ -627,7 +646,7 @@ const settingsSearchResults = computed(() => {
   return settingsSectionComponents.value.flatMap((section) => {
     const values = settingsSearchableValues.value.get(section.type) ?? []
     const matches = removeRedundantSettingsSearchMatches(
-      values.filter(value => normalizeSearchText(value).includes(query)),
+      values.filter(match => normalizeSearchText(match.label).includes(query)),
       locale.value
     )
     return matches.length === 0 ? [] : [{ section, matches: matches.slice(0, 6) }]
@@ -659,6 +678,7 @@ const currentSectionIcon = computed(() => {
   return activeSettingsSection.value?.icon ?? null
 })
 const showBackButton = computed(() => {
+  if (isDownloadsOpen.value) return canReturnFromDownloads.value
   if (isStandaloneViewOpen.value) return false
 
   return isKeyboardShortcutPromptOpen.value || isProfileManagerOpen.value || subpageTitle.value !== '' ||
@@ -744,6 +764,9 @@ watch(isProfileManagerOpen, (open) => {
 })
 watch(() => store.getters.getSettingsWindowView, async (view) => {
   stopObservingStandaloneContent()
+  if (view === 'downloads' && canReturnFromDownloads.value) {
+    downloadsReturnScrollTop = settingsContentRef.value?.scrollTop ?? 0
+  }
   if (!['about', 'downloads'].includes(view)) return
   await nextTick()
   const scrollViewport = standaloneScrollRef.value
@@ -756,7 +779,8 @@ watch(activeSection, (section) => {
   }
   nextTick(observeActiveSettingsSection)
 })
-watch(() => store.getters.getSettingsWindowSection, (section) => {
+watch(() => store.getters.getSettingsWindowSection, async (section) => {
+  if (section === 'storage') activeDataStorageTab.value = 'storage'
   const normalizedSection = LEGACY_SETTINGS_SECTION_MAP[section] ?? section
   if (
     normalizedSection !== activeSection.value &&
@@ -764,11 +788,15 @@ watch(() => store.getters.getSettingsWindowSection, (section) => {
   ) {
     navigateToSection(normalizedSection)
   }
+  if (section === 'storage') {
+    await nextTick()
+    await activeSettingsSectionRef.value?.activateTab('storage')
+  }
 })
 watch(() => props.searchTarget, async (target) => {
   if (!target) return
   await nextTick()
-  await openSearchResult(target.section, target.label)
+  await openSearchResult(target.section, target)
   emit('search-target-opened', target)
 }, { immediate: true })
 
@@ -974,6 +1002,10 @@ function navigateToSection(sectionType) {
   }
 }
 
+function setActiveDataStorageTab(tab) {
+  if (['data', 'storage'].includes(tab)) activeDataStorageTab.value = tab
+}
+
 /**
  * @param {Readonly<import('vue').ShallowRef<HTMLElement | {$el?: HTMLElement} | null>>} elementRef
  * @param {import('vue').Ref<string>} classRef
@@ -1010,14 +1042,21 @@ async function animateSettingsElement(elementRef, classRef, className) {
   }
 }
 
-async function openSearchResult(sectionType, label) {
+async function openSearchResult(sectionType, match) {
   settingsSearchQuery.value = ''
   navigateToSection(sectionType)
   await nextTick()
 
+  const { label } = match
+  const normalizedLabel = normalizeSearchText(label.trim())
+  const searchTab = findSettingsSearchTab(match)
+  if (searchTab) {
+    await activeSettingsSectionRef.value?.activateTab(searchTab)
+    await nextTick()
+  }
+
   const content = settingsContentRef.value
   if (!content) return
-  const normalizedLabel = normalizeSearchText(label.trim())
   const section = settingsSectionComponents.value.find(({ type }) => type === sectionType)
   const isSectionMatch = [section?.title, section?.description]
     .some(value => normalizeSearchText(value ?? '') === normalizedLabel)
@@ -1091,7 +1130,15 @@ function handleSettingsSearch() {
 }
 
 function goBack() {
-  if (isKeyboardShortcutPromptOpen.value) {
+  if (canReturnFromDownloads.value) {
+    store.dispatch('showSettingsWindowRoot')
+    nextTick(() => {
+      const content = settingsContentRef.value
+      if (!content) return
+      restoreOverlayScrollTop(content, downloadsReturnScrollTop)
+      content.focus()
+    })
+  } else if (isKeyboardShortcutPromptOpen.value) {
     store.dispatch('hideKeyboardShortcutPrompt')
   } else if (isProfileManagerOpen.value) {
     returnToSettingsMenu()

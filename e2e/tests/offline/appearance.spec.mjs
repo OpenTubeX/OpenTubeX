@@ -29,15 +29,16 @@ async function enableVerticalTabBar (page, width) {
 }
 
 async function expectHorizontalGap (left, right, expectedGap) {
-  const [leftBox, rightBox] = await Promise.all([
-    left.boundingBox(),
-    right.boundingBox()
-  ])
+  await expect.poll(async () => {
+    const [leftBox, rightBox] = await Promise.all([
+      left.boundingBox(),
+      right.boundingBox()
+    ])
 
-  expect(leftBox).not.toBeNull()
-  expect(rightBox).not.toBeNull()
-  expect(Math.abs(leftBox.y - rightBox.y)).toBeLessThan(1)
-  expect(Math.abs(rightBox.x - leftBox.x - leftBox.width - expectedGap)).toBeLessThanOrEqual(1)
+    return leftBox !== null && rightBox !== null &&
+      Math.abs(leftBox.y - rightBox.y) < 1 &&
+      Math.abs(rightBox.x - leftBox.x - leftBox.width - expectedGap) <= 1
+  }).toBe(true)
 }
 
 async function expectChangeMarkerClearOfPreviousSelect (left, right) {
@@ -610,7 +611,7 @@ test.describe('custom theme editor', () => {
     await expect.poll(async () => (await readSavedThemes(app.userDataDir)).map(({ name }) => name))
       .toEqual(['Midnight'])
     await expect(editor).toHaveCount(0)
-    await goToSettingsSection(page, 'privacy')
+    await goToSettingsSection(page, 'storage')
     const removeHistoryButton = page.getByRole('button', { name: 'Remove Watch History' })
     await expect(removeHistoryButton).toHaveCSS('background-color', 'rgb(18, 58, 188)')
     await expect(removeHistoryButton).toHaveCSS('color', 'rgb(254, 220, 186)')

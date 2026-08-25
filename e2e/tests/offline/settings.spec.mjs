@@ -319,7 +319,13 @@ test.describe('settings', () => {
 
     const privacy = page.locator('.settingsMenu [data-section="privacy"]')
     await expect(privacy.locator('.titleDescription'))
-      .toHaveText('History, stored data, and access controls')
+      .toHaveText('Viewing privacy and access controls')
+
+    const data = page.locator('.settingsMenu [data-section="data"]')
+    await expect(data.locator('.titleText')).toHaveText('Data & Storage')
+    await expect(data.locator('.titleDescription'))
+      .toHaveText('Import, export, disk usage, and cleanup')
+    await expect(data.locator('.titleIcon')).toHaveAttribute('data-icon', 'box-archive')
   })
 
   test('keeps the IP block recovery script last in expanded Proxy settings', async ({ page }) => {
@@ -339,6 +345,18 @@ test.describe('settings', () => {
     expect(recoveryScriptBox.y).toBeGreaterThan(testProxyBox.y)
     expect(recoveryScriptBox.y - (testProxyBox.y + testProxyBox.height))
       .toBeGreaterThanOrEqual(16)
+  })
+
+  test('keeps Replace HTTP Cache in Experimental settings', async ({ page }) => {
+    await goToSettingsSection(page, 'data')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+    await search.fill('Replace HTTP Cache')
+    await page.getByRole('button', { name: 'Replace HTTP cache', exact: true }).click()
+    const advanced = page.locator('.settingsContent > [data-section="advanced"]')
+
+    await expect(advanced).toBeVisible()
+    await expect(advanced.getByRole('heading', { name: 'Experimental', exact: true })).toBeVisible()
+    await expect(advanced.getByRole('checkbox', { name: 'Replace HTTP Cache' })).toBeVisible()
   })
 
   test('keeps each external tool grouped when its source changes', async ({ app, page }) => {
@@ -577,14 +595,7 @@ test.describe('settings', () => {
     await expect(privacyHeading).toHaveText('Privacy')
     await expect(privacyHeading).not.toBeVisible()
 
-    const metadataToggle = page.getByRole('checkbox', { name: 'Metadata history' })
-    const metadataSection = privacy.locator('.settingsSection').filter({ has: metadataToggle })
-    await expect(metadataSection).toBeVisible()
-    await expect(metadataSection.getByRole('heading', { name: 'Metadata history' })).toHaveCount(0)
-    await expect(metadataToggle).toBeVisible()
-    await expect(metadataSection.getByText(/^Video metadata cache:/)).toBeVisible()
-    await expect(mainPrivacySection.getByRole('checkbox', { name: 'Metadata history' }))
-      .toHaveCount(0)
+    await expect(privacy.getByRole('checkbox', { name: 'Metadata history' })).toHaveCount(0)
 
     const focus = await goToSettingsSection(page, 'focus')
     await expect(focus.locator('h4.groupTitle')).toHaveText([
@@ -1393,14 +1404,24 @@ test.describe('settings', () => {
     expect(result.writes).toEqual([])
   })
 
-  test('opens Downloads from the download settings category', async ({ page }) => {
+  test('returns to download settings when Downloads was opened from there', async ({ page }) => {
     const routeBeforeOpening = page.url()
     const downloadSection = await goToSettingsSection(page, 'download')
 
     await downloadSection.getByRole('button', { name: 'Open Downloads' }).click()
-    await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
+    const downloadsDialog = page.getByRole('dialog', { name: 'Downloads', exact: true })
+    await expect(downloadsDialog).toBeVisible()
+    await downloadsDialog.getByRole('button', { name: 'Back', exact: true }).click()
+
+    await expect(page.getByRole('dialog', { name: 'Settings', exact: true })).toBeVisible()
+    await expect(downloadSection).toBeVisible()
     await expect(page.locator('.settingsWindow')).toHaveCount(1)
     expect(page.url()).toBe(routeBeforeOpening)
+
+    await page.locator('.settingsCloseButton').click()
+    await goTo(page, 'downloads')
+    await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })
+      .getByRole('button', { name: 'Back', exact: true })).toHaveCount(0)
   })
 
   test('moves Downloads and Settings from Quick Settings into the app header', async ({ page }) => {
@@ -2438,11 +2459,17 @@ test.describe('settings', () => {
     await expect(page.locator(
       '.settingsMenu [data-section="add-ons"] [data-icon="puzzle-piece"][data-icon-pack="material"]'
     )).toBeVisible()
+    await expect(page.locator(
+      '.settingsMenu [data-section="data"] [data-icon="box-archive"][data-icon-pack="material"]'
+    )).toBeVisible()
     await attachScreenshot('material icon pack')
     await select.selectOption('remix')
     await expect(page.locator('[data-icon-pack="remix"]').first()).toBeVisible()
     await expect(page.locator(
       '.settingsMenu [data-section="add-ons"] [data-icon="puzzle-piece"][data-icon-pack="remix"]'
+    )).toBeVisible()
+    await expect(page.locator(
+      '.settingsMenu [data-section="data"] [data-icon="box-archive"][data-icon-pack="remix"]'
     )).toBeVisible()
     await attachScreenshot('remix icon pack')
 
@@ -3890,13 +3917,11 @@ test.describe('synced setting indicators', () => {
 
     const slider = page.locator('label.pure-material-slider')
       .filter({ hasText: 'Watched Percentage Threshold' })
-    const input = page.locator('label.selectLabel')
-      .filter({ hasText: 'Automatic History Retention' })
     const select = page.locator('.select')
       .filter({ hasText: 'Save Watched Progress' })
     await select.locator('select').selectOption('never')
 
-    for (const setting of [slider, input, select]) {
+    for (const setting of [slider, select]) {
       const [syncBox, helpBox] = await Promise.all([
         setting.locator('.syncedSettingIndicator').boundingBox(),
         setting.locator('.selectTooltip').boundingBox()
@@ -3919,31 +3944,42 @@ test.describe('synced setting indicators', () => {
     expect(Math.abs(syncBox.y - resetBox.y)).toBeLessThanOrEqual(1)
     expect(resetBox.x - syncBox.x - syncBox.width).toBeGreaterThanOrEqual(6)
 
-    await select.locator('.selectTooltip button').focus()
+    const storage = await goToSettingsSection(page, 'storage')
+    const input = storage.locator('label.selectLabel')
+      .filter({ hasText: 'Automatic History Retention' })
+    const [inputSyncBox, inputHelpBox] = await Promise.all([
+      input.locator('.syncedSettingIndicator').boundingBox(),
+      input.locator('.selectTooltip').boundingBox()
+    ])
+    expect(inputSyncBox).not.toBeNull()
+    expect(inputHelpBox).not.toBeNull()
+    expect(inputSyncBox.x - inputHelpBox.x - inputHelpBox.width).toBeGreaterThanOrEqual(6)
+
+    await input.locator('.selectTooltip button').focus()
     const tooltipText = page.locator('body > [role="tooltip"]:visible')
     await expect(tooltipText).toBeVisible()
 
     const [tooltipTextBox, sectionBox] = await Promise.all([
       tooltipText.boundingBox(),
-      select.locator('xpath=ancestor::*[@data-section="privacy"]').boundingBox()
+      input.locator('xpath=ancestor::*[@data-section="data"]').boundingBox()
     ])
     expect(tooltipTextBox).not.toBeNull()
     expect(sectionBox).not.toBeNull()
     expect(tooltipTextBox.width).toBeLessThan(sectionBox.width / 2)
 
-    const removePlaylistsButton = page.getByRole('button', { name: 'Remove All Playlists' })
-    const removePlaylistsButtonBox = await removePlaylistsButton.boundingBox()
-    expect(removePlaylistsButtonBox).not.toBeNull()
+    const removeHistoryButton = page.getByRole('button', { name: 'Remove Watch History' })
+    const removeHistoryButtonBox = await removeHistoryButton.boundingBox()
+    expect(removeHistoryButtonBox).not.toBeNull()
 
-    const overlapLeft = Math.max(tooltipTextBox.x, removePlaylistsButtonBox.x)
+    const overlapLeft = Math.max(tooltipTextBox.x, removeHistoryButtonBox.x)
     const overlapRight = Math.min(
       tooltipTextBox.x + tooltipTextBox.width,
-      removePlaylistsButtonBox.x + removePlaylistsButtonBox.width
+      removeHistoryButtonBox.x + removeHistoryButtonBox.width
     )
-    const overlapTop = Math.max(tooltipTextBox.y, removePlaylistsButtonBox.y)
+    const overlapTop = Math.max(tooltipTextBox.y, removeHistoryButtonBox.y)
     const overlapBottom = Math.min(
       tooltipTextBox.y + tooltipTextBox.height,
-      removePlaylistsButtonBox.y + removePlaylistsButtonBox.height
+      removeHistoryButtonBox.y + removeHistoryButtonBox.height
     )
     expect(overlapLeft).toBeLessThan(overlapRight)
     expect(overlapTop).toBeLessThan(overlapBottom)
