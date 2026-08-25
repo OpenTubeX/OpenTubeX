@@ -69,6 +69,17 @@
   inline-size: min(100%, 360px);
 }
 
+.storageActions :deep(.pure-material-slider) {
+  box-sizing: border-box;
+  inline-size: min(100%, 380px);
+  margin: 0;
+}
+
+.storageActions :deep(.pure-material-slider .selectTooltip) {
+  inset: auto;
+  position: relative;
+}
+
 @container settings-content (width <= 430px) {
   .storageItemHeader {
     flex-direction: column;

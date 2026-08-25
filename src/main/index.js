@@ -45,7 +45,7 @@ import { brotliDecompress } from 'zlib'
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
 import { getYtDlpDownloadFile, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetPlaybackInfo, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
-import { handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
+import { applyYtDlpPlaybackCacheSettings, handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
 import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
 import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isNonPublicNetworkAddress, isOpenTubeXUrl } from './utils'
@@ -1728,6 +1728,11 @@ function runApp() {
   let proxyUrl
 
   app.on('ready', async (_, __) => {
+    try {
+      await applyYtDlpPlaybackCacheSettings()
+    } catch (error) {
+      console.warn('Could not apply the yt-dlp playback cache settings', error)
+    }
     try {
       await restoreYtDlpDownloadQueue()
     } catch (error) {
@@ -4408,6 +4413,13 @@ function runApp() {
             case 'ytDlpMaxConcurrentDownloads':
             case 'ytDlpDownloadBandwidthLimit':
               await refreshYtDlpDownloadQueue()
+              break
+            case 'ytDlpPlaybackCacheMaxEntrySize':
+              try {
+                await applyYtDlpPlaybackCacheSettings()
+              } catch (error) {
+                console.warn('Could not apply the yt-dlp playback cache settings', error)
+              }
               break
 
             default:

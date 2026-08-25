@@ -134,6 +134,34 @@ test('moves storage controls into one searchable category', async ({ app, attach
   await expect(storage.getByRole('heading', { name: 'Stored histories' })).toBeVisible()
   await expect(storage.getByRole('heading', { name: 'Other user data' })).toBeVisible()
   await expect(storage.getByRole('checkbox', { name: 'Metadata history' })).toBeChecked()
+  const playbackCaches = storage.locator('.storageItem').filter({
+    has: page.getByRole('heading', { name: 'Playback caches', exact: true })
+  })
+  await expect(playbackCaches).toContainText(
+    'The URL cache applies only to streams fetched with yt-dlp.'
+  )
+  const playbackCacheSize = storage.getByRole('slider', {
+    name: /yt-dlp stream URL cache limit/
+  })
+  const playbackCacheTooltip = 'Sets the maximum size of each cached yt-dlp stream entry. Set it to 0 MB to disable persistent caching for yt-dlp streams.'
+  await playbackCaches.getByRole('button', { name: playbackCacheTooltip }).focus()
+  await expect(page.getByRole('tooltip')).toHaveText(playbackCacheTooltip)
+  await expect(playbackCacheSize).toHaveValue('5')
+  await playbackCacheSize.fill('4')
+  await expect.poll(() => page.evaluate(() => (
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .getters.getYtDlpPlaybackCacheMaxEntrySize
+  ))).toBe(4)
+  await playbackCacheSize.fill('0')
+  await expect.poll(() => page.evaluate(() => (
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .getters.getYtDlpPlaybackCacheMaxEntrySize
+  ))).toBe(0)
+  await playbackCacheSize.fill('5')
+  await expect.poll(() => page.evaluate(() => (
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .getters.getYtDlpPlaybackCacheMaxEntrySize
+  ))).toBe(5)
   await expect(storage.getByLabel('Automatic History Retention (Days)')).toHaveValue('30')
   await expect(storage.getByRole('checkbox', { name: 'Replace HTTP Cache' })).toHaveCount(0)
   await expect(storage.locator('.storageKind')).toHaveCount(0)
@@ -166,6 +194,7 @@ test('moves storage controls into one searchable category', async ({ app, attach
   await attachScreenshot('storage settings overview')
 
   const cacheSegment = breakdown.locator('[data-chart-segment="browser-caches"]')
+  await breakdown.scrollIntoViewIfNeeded()
   const chartBox = await breakdown.locator('.storageDonutChart').boundingBox()
   await page.mouse.move(
     chartBox.x + chartBox.width * 0.8,

@@ -5,6 +5,10 @@ import {
   getEarliestYtDlpFormatExpiry,
   YtDlpPlaybackSourceCache
 } from '../../src/renderer/helpers/player/ytDlpPlaybackCache.js'
+import {
+  DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
+  normalizeYtDlpPlaybackCacheMaxEntrySize
+} from '../../src/ytDlpPlaybackCacheSettings.js'
 
 function source (expiryDate) {
   return { expiryDate }
@@ -22,6 +26,24 @@ test('reads the expiry from a yt-dlp HLS manifest path', () => {
   assert.deepEqual(getEarliestYtDlpFormatExpiry([{
     url: 'https://example.com/api/manifest/hls_playlist/expire/2000/master.m3u8'
   }]), new Date(2000 * 1000))
+})
+
+test('normalizes the persistent playback cache entry size', () => {
+  assert.equal(normalizeYtDlpPlaybackCacheMaxEntrySize(4), 4)
+  assert.equal(normalizeYtDlpPlaybackCacheMaxEntrySize('8'), 8)
+  assert.equal(normalizeYtDlpPlaybackCacheMaxEntrySize(0), 0)
+  assert.equal(
+    normalizeYtDlpPlaybackCacheMaxEntrySize(-1),
+    DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB
+  )
+  assert.equal(
+    normalizeYtDlpPlaybackCacheMaxEntrySize(17),
+    DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB
+  )
+  assert.equal(
+    normalizeYtDlpPlaybackCacheMaxEntrySize(1.5),
+    DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB
+  )
 })
 
 test('reuses DASH sources until the early expiry margin', () => {

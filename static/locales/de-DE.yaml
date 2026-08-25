@@ -867,7 +867,9 @@ Settings:
     Clear Tab Image Cache Confirmation: Tab-Vorschaubilder und Kanalavatare löschen?
     Tab Image Cache Effect: Tab-Bilder können kurzzeitig verschwinden und werden bei der Nutzung ihrer Tabs neu erstellt.
     Playback Caches: Wiedergabe-Caches
-    Playback Caches Description: Speichert begrenzte yt-dlp-Streaminformationen und YouTube-Playerdateien. OpenTubeX ruft sie erneut ab, wenn sie für ein Video benötigt werden.
+    Playback Caches Description: Speichert yt-dlp-Stream-URLs sitzungsübergreifend sowie YouTube-Playerdateien. Der URL-Cache gilt nur für Streams, die mit yt-dlp abgerufen werden.
+    Playback URL Cache Entry Size: Cache-Limit für yt-dlp-Stream-URLs
+    Playback URL Cache Entry Size Tooltip: Legt die maximale Größe eines zwischengespeicherten yt-dlp-Stream-Eintrags fest. Setze den Wert auf 0 MB, um die dauerhafte Zwischenspeicherung von yt-dlp-Streams zu deaktivieren.
     Clear Playback Caches: Wiedergabe-Caches leeren
     Clear Playback Caches Confirmation: yt-dlp- und Player-Caches leeren?
     Playback Caches Effect: Die nächste lokale Wiedergabe kann länger dauern, während Stream- und Playerdaten erneut abgerufen werden.

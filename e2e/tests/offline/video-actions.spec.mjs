@@ -124,7 +124,7 @@ test('persists an authenticated HLS playback source across app restarts', async 
   })).toEqual({ expiryTime, source })
 })
 
-test('limits persisted yt-dlp playback entries by UTF-8 byte size', async ({ page }) => {
+test('uses the configured UTF-8 byte limit for persisted yt-dlp playback entries', async ({ page }) => {
   const source = {
     manifestSrc: `data:application/dash+xml;charset=UTF-8,${'€'.repeat(700_000)}`,
     manifestMimeType: 'application/dash+xml',
@@ -134,6 +134,11 @@ test('limits persisted yt-dlp playback entries by UTF-8 byte size', async ({ pag
     version: '2026.08.13'
   }
 
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return store.dispatch('updateYtDlpPlaybackCacheMaxEntrySize', 2)
+  })
+
   expect(await page.evaluate(source => {
     return window.ftElectron.ytDlpPlaybackCacheSet(
       'eeeeeeeeeee',
@@ -142,6 +147,48 @@ test('limits persisted yt-dlp playback entries by UTF-8 byte size', async ({ pag
       source
     )
   }, source)).toBe(false)
+
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return store.dispatch('updateYtDlpPlaybackCacheMaxEntrySize', 4)
+  })
+
+  expect(await page.evaluate(source => {
+    return window.ftElectron.ytDlpPlaybackCacheSet(
+      'eeeeeeeeeee',
+      'settings',
+      Date.now() + 60 * 60 * 1000,
+      source
+    )
+  }, source)).toBe(true)
+})
+
+test('a zero size limit disables and clears the persistent yt-dlp playback cache', async ({ app, page }) => {
+  const source = {
+    manifestSrc: 'data:application/dash+xml;charset=UTF-8,manifest',
+    manifestMimeType: 'application/dash+xml',
+    legacyFormats: [],
+    title: 'Cached video title',
+    isLive: false,
+    version: '2026.08.13'
+  }
+  const expiryTime = Date.now() + 60 * 60 * 1000
+
+  expect(await page.evaluate(({ expiryTime, source }) => {
+    return window.ftElectron.ytDlpPlaybackCacheSet('eeeeeeeeeee', 'settings', expiryTime, source)
+  }, { expiryTime, source })).toBe(true)
+
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return store.dispatch('updateYtDlpPlaybackCacheMaxEntrySize', 0)
+  })
+
+  expect(await page.evaluate(({ expiryTime, source }) => Promise.all([
+    window.ftElectron.ytDlpPlaybackCacheGet('eeeeeeeeeee', 'settings'),
+    window.ftElectron.ytDlpPlaybackCacheSet('fffffffffff', 'settings', expiryTime, source)
+  ]), { expiryTime, source })).toEqual([null, false])
+  await expect(readFile(path.join(app.userDataDir, 'yt-dlp-playback-cache.json')))
+    .rejects.toMatchObject({ code: 'ENOENT' })
 })
 
 test('prefers evicting yt-dlp playback entries without open tabs', async ({ page }) => {

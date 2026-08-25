@@ -159,3 +159,32 @@ test('settings search results retain their source tab', () => {
   const applicationCaches = values.find(({ label }) => label === 'Application caches')
   assert.equal(findSettingsSearchTab(applicationCaches), 'storage')
 })
+
+test('persistent playback cache search results follow desktop visibility', () => {
+  const sections = [{
+    type: 'data',
+    title: locale.Settings.Categories.Data,
+    description: locale.Settings.Categories['Data Description'],
+  }]
+  const options = {
+    sections,
+    tm: path => getAtPath(locale, path),
+    store: {
+      getters: new Proxy({}, {
+        get(target, key) {
+          return target[key] ?? false
+        }
+      })
+    },
+    supportsLocalApi: true,
+    isMac: false,
+    isLinuxWayland: false,
+    systemUsesDarkTheme: true,
+  }
+
+  const desktopValues = createSettingsSearchIndex({ ...options, usingElectron: true }).get('data')
+  const webValues = createSettingsSearchIndex({ ...options, usingElectron: false }).get('data')
+
+  assert.ok(desktopValues.some(({ label }) => label === 'yt-dlp stream URL cache limit'))
+  assert.ok(!webValues.some(({ label }) => label === 'yt-dlp stream URL cache limit'))
+})

@@ -186,6 +186,17 @@
           :description="t('Settings.Storage Settings.Playback Caches Description')"
           location="yt-dlp-playback-cache.json, player_cache/"
         >
+          <FtSlider
+            :label="t('Settings.Storage Settings.Playback URL Cache Entry Size')"
+            :tooltip="t('Settings.Storage Settings.Playback URL Cache Entry Size Tooltip')"
+            :default-value="ytDlpPlaybackCacheMaxEntrySize"
+            setting-key="ytDlpPlaybackCacheMaxEntrySize"
+            :min-value="MIN_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB"
+            :max-value="MAX_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB"
+            :step="1"
+            value-extension=" MB"
+            @change="updateYtDlpPlaybackCacheMaxEntrySize"
+          />
           <FtButton
             :label="t('Settings.Storage Settings.Clear Playback Caches')"
             theme="destructive"
@@ -332,11 +343,17 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
+import FtSlider from '../FtSlider/FtSlider.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import StorageItem from './StorageItem.vue'
 
 import { MAIN_PROFILE_ID } from '../../../constants'
+import {
+  MAX_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
+  MIN_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
+  normalizeYtDlpPlaybackCacheMaxEntrySize
+} from '../../../ytDlpPlaybackCacheSettings'
 import { formatBytes } from '../../helpers/fileSize'
 import { invalidateAllYtDlpPlaybackSources } from '../../helpers/player/ytDlpPlayback'
 import { showToast } from '../../helpers/utils'
@@ -364,9 +381,16 @@ const downloadedMediaText = computed(() => hasLoadedUsage.value
   ? formatBytes(downloadedMediaBytes.value)
   : t('Settings.Storage Settings.Calculating'))
 const sessionSearchCount = computed(() => store.getters.getSessionSearchHistory.length)
+const ytDlpPlaybackCacheMaxEntrySize = computed(() => (
+  normalizeYtDlpPlaybackCacheMaxEntrySize(store.getters.getYtDlpPlaybackCacheMaxEntrySize)
+))
 const downloadFolderLocation = computed(() => (
   store.getters.getYtDlpDownloadFolderPath || t('Settings.Storage Settings.Selected Download Folders')
 ))
+
+function updateYtDlpPlaybackCacheMaxEntrySize(value) {
+  return store.dispatch('updateYtDlpPlaybackCacheMaxEntrySize', value)
+}
 
 function sumSizeText(...keys) {
   if (!hasLoadedUsage.value) return t('Settings.Storage Settings.Calculating')

@@ -4,13 +4,18 @@ import { createHash } from 'node:crypto'
 import { readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
+import { settings } from '../datastores/handlers/base'
+import {
+  DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
+  normalizeYtDlpPlaybackCacheMaxEntrySize
+} from '../ytDlpPlaybackCacheSettings'
 import { TabManager } from './tabs/TabManager'
 import { isOpenTubeXUrl } from './utils'
 
 const CACHE_FILENAME = 'yt-dlp-playback-cache.json'
 const MAX_ENTRIES = 50
 const EXPIRY_MARGIN_MS = 2 * 60 * 1000
-const MAX_ENTRY_LENGTH = 2_000_000
+const BYTES_PER_MEGABYTE = 1_000_000
 const MAX_CACHE_KEY_LENGTH = 20_000
 const VIDEO_ID_REGEX = /^[\w-]{11}$/
 const CACHE_KEY_HASH_REGEX = /^[a-f\d]{64}$/
@@ -19,6 +24,8 @@ const CACHE_KEY_HASH_REGEX = /^[a-f\d]{64}$/
 const entries = new Map()
 let loadPromise = null
 let writeQueue = Promise.resolve()
+let cacheEnabled = true
+let maxEntryLength = DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB * BYTES_PER_MEGABYTE
 
 /**
  * @typedef {object} YtDlpPlaybackCacheEntry
@@ -73,7 +80,7 @@ function isValidEntry(entry) {
     legacyFormats.length > 0 &&
     legacyFormats.every(format => isHttpsUrl(format?.url))
 
-  return Buffer.byteLength(serializedEntry, 'utf8') <= MAX_ENTRY_LENGTH &&
+  return Buffer.byteLength(serializedEntry, 'utf8') <= maxEntryLength &&
     VIDEO_ID_REGEX.test(entry.videoId) &&
     CACHE_KEY_HASH_REGEX.test(entry.cacheKeyHash) &&
     Number.isFinite(entry.expiryTime) &&
@@ -125,8 +132,10 @@ export async function handleYtDlpPlaybackCacheGet(event, videoId, cacheKey) {
     !VIDEO_ID_REGEX.test(videoId) ||
     !isValidCacheKey(cacheKey)
   ) return null
+  if (!cacheEnabled) return null
 
   await loadEntries()
+  if (!cacheEnabled) return null
   const entry = entries.get(videoId)
   if (entry === undefined) return null
 
@@ -148,6 +157,7 @@ export async function handleYtDlpPlaybackCacheSet(event, videoId, cacheKey, expi
     !VIDEO_ID_REGEX.test(videoId) ||
     !isValidCacheKey(cacheKey)
   ) return false
+  if (!cacheEnabled) return false
 
   const entry = {
     videoId,
@@ -169,6 +179,7 @@ export async function handleYtDlpPlaybackCacheSet(event, videoId, cacheKey, expi
   if (Date.now() >= entry.expiryTime - EXPIRY_MARGIN_MS) return false
 
   await loadEntries()
+  if (!cacheEnabled) return false
   entries.delete(entry.videoId)
   const openVideoIds = TabManager.getOpenVideoIds()
   while (entries.size >= MAX_ENTRIES) {
@@ -205,4 +216,27 @@ export async function clearYtDlpPlaybackCache() {
       rm(`${cachePath()}.tmp`, { force: true })
     ]))
   await writeQueue
+}
+
+export async function applyYtDlpPlaybackCacheSettings() {
+  const maxEntrySizeSetting = await settings._findOne('ytDlpPlaybackCacheMaxEntrySize')
+  const maxEntrySize = normalizeYtDlpPlaybackCacheMaxEntrySize(maxEntrySizeSetting?.value)
+
+  cacheEnabled = maxEntrySize > 0
+  maxEntryLength = maxEntrySize * BYTES_PER_MEGABYTE
+
+  await loadEntries()
+  if (!cacheEnabled) {
+    await clearYtDlpPlaybackCache()
+    return
+  }
+
+  let changed = false
+  for (const [videoId, entry] of entries) {
+    if (!isValidEntry(entry)) {
+      entries.delete(videoId)
+      changed = true
+    }
+  }
+  if (changed) await saveEntries()
 }
