@@ -564,12 +564,13 @@ async function getPlaylistInvidious() {
     viewCount.value = result.viewCount
     videoCount.value = result.videoCount
     channelName.value = result.author
-    channelThumbnail.value = youtubeImageUrlToInvidious(result.authorThumbnails[2].url, currentInvidiousInstanceUrl.value)
+    const authorThumbnail = result.authorThumbnails.at(-1)?.url ?? null
+    channelThumbnail.value = youtubeImageUrlToInvidious(authorThumbnail, currentInvidiousInstanceUrl.value)
     channelId.value = result.authorId
     infoSource.value = 'invidious'
 
     store.dispatch('updateSubscriptionDetails', {
-      channelThumbnailUrl: result.authorThumbnails[2].url,
+      channelThumbnailUrl: authorThumbnail,
       channelName: channelName.value,
       channelId: channelId.value
     })

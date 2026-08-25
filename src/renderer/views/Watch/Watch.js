@@ -3182,7 +3182,7 @@ export default defineComponent({
           this.channelId = result.authorId
           this.channelName = result.author
           this.channelCollaborators = []
-          const channelThumb = result.authorThumbnails[1]
+          const channelThumb = result.authorThumbnails.at(-1)
           this.channelThumbnail = channelThumb ? youtubeImageUrlToInvidious(channelThumb.url, this.currentInvidiousInstanceUrl) : ''
           this.$store.commit('setVideoAvatar', {
             videoId: this.videoId,

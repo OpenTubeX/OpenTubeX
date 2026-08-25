@@ -180,8 +180,8 @@ function parseLocalData() {
 
 function parseInvidiousData() {
   // Can be prefixed with `https://` or `//` (protocol relative)
-  /** @type {string} */
-  const thumbnailUrl = props.data.authorThumbnails[2].url
+  /** @type {string | null} */
+  const thumbnailUrl = props.data.authorThumbnails.at(-1)?.url ?? null
 
   thumbnail = youtubeImageUrlToInvidious(thumbnailUrl, currentInvidiousInstanceUrl.value)
 
