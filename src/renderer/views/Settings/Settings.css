@@ -599,7 +599,7 @@
   user-select: none !important;
 }
 
-@container settings-window (width <= 560px) {
+@container settings-window (width < 760px) {
   .settingsWindowHeader {
     flex-wrap: wrap;
     padding-block: 5px;
@@ -612,7 +612,9 @@
     flex-basis: 100%;
     min-inline-size: 100%;
   }
+}
 
+@container settings-window (width <= 560px) {
   .settingsHeaderButton {
     inline-size: 34px;
     block-size: 34px;

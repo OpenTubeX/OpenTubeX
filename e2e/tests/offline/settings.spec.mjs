@@ -1874,8 +1874,10 @@ test.describe('settings', () => {
     })
     await expect.poll(() => channelList.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 
+    const settingsBackButton = page.locator('.settingsBackButton')
+    await settingsBackButton.click()
     await recordAnimations(page)
-    await page.locator('.settingsBreadcrumbRoot .settingsWindowIcon').click()
+    await settingsBackButton.click()
     await expect(page.locator('.settingsMenu')).toBeVisible()
     await expectAnimation(page, 'settings-compact-slide-backward')
 
@@ -1887,7 +1889,7 @@ test.describe('settings', () => {
     })
     await expect.poll(() => shortcuts.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 
-    await page.locator('.settingsBreadcrumbRoot .settingsWindowIcon').click()
+    await settingsBackButton.click()
     await expect(page.locator('.settingsMenu')).toBeVisible()
     await expect(page.locator('.settingsContent')).toBeHidden()
   })
@@ -4282,5 +4284,33 @@ test.describe('performance impact indicators on selects', () => {
       badge.boundingBox()
     ])
     expect(badgeBox.x + badgeBox.width).toBeLessThanOrEqual(selectBox.x + selectBox.width)
+  })
+})
+
+test.describe('localized compact settings breadcrumb', () => {
+  test.use({ seed: { settings: { currentLocale: 'de-DE' } } })
+
+  test('prioritizes the current category over the redundant root label', async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
+        x: 40,
+        y: 40,
+        width: 650,
+        height: 520
+      }))
+    })
+    await goToSettingsSection(page, 'focus')
+
+    const breadcrumb = page.locator('.settingsBreadcrumb')
+    const root = breadcrumb.locator('.settingsBreadcrumbRoot')
+    const category = breadcrumb.locator('.settingsBreadcrumbLabel')
+
+    await expect(page.locator('.settingsPage')).toHaveClass(/compactSettings/)
+    await expect(root).toBeHidden()
+    await expect(breadcrumb.locator('.settingsBreadcrumbSeparator').first()).toBeHidden()
+    await expect(category.locator('.settingsBreadcrumbText')).toHaveText('Ablenkungsfreier Modus')
+    await expect.poll(() => category.locator('.settingsBreadcrumbText').evaluate(element => (
+      element.scrollWidth <= element.clientWidth + 1
+    ))).toBe(true)
   })
 })
