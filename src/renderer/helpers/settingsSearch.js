@@ -224,6 +224,10 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
       store.getters.getEnableDownloads
   }
 
+  if (sectionType === 'storage') {
+    if (group === 'Playback URL Cache Entry Size') return usingElectron
+  }
+
   if (sectionType === 'external-software') {
     if (group === 'yt-dlp Channel') return store.getters.getYtDlpSource === 'managed'
     if (group === 'Managed Tool Updates') {

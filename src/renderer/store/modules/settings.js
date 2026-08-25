@@ -29,6 +29,7 @@ import {
   LAST_USED_VERSION_SETTING_ID,
   TUTORIAL_AUDIENCE_SETTING_ID,
 } from '../../helpers/tutorialState.js'
+import { DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB } from '../../../ytDlpPlaybackCacheSettings.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
 const TUTORIAL_STATE_SETTING_IDS = new Set([
@@ -259,6 +260,7 @@ const state = {
   ytDlpPlaybackCookiesPath: '',
   ytDlpPlaybackCookiesBrowser: '',
   ytDlpPlaybackCookiesBrowserProfile: '',
+  ytDlpPlaybackCacheMaxEntrySize: DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
   ytDlpFfmpegSource: 'system',
   ytDlpFfmpegPath: '',
   externalSoftwareUpdateMode: 'automatic',
@@ -686,6 +688,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'ytDlpPlaybackCookiesPath',
   'ytDlpPlaybackCookiesBrowser',
   'ytDlpPlaybackCookiesBrowserProfile',
+  'ytDlpPlaybackCacheMaxEntrySize',
   'ytDlpFfmpegSource',
   'ytDlpFfmpegPath',
   'externalSoftwareUpdateMode',

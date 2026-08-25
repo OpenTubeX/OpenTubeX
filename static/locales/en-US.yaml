@@ -1145,7 +1145,9 @@ Settings:
     Clear Tab Image Cache Confirmation: Clear tab thumbnails and channel avatars?
     Tab Image Cache Effect: Tab images may disappear briefly and will be recreated as their tabs are used.
     Playback Caches: Playback caches
-    Playback Caches Description: Stores bounded yt-dlp stream information and YouTube player files. OpenTubeX refetches them when a video needs them.
+    Playback Caches Description: Stores yt-dlp stream URLs between app sessions, plus YouTube player files. The URL cache applies only to streams fetched with yt-dlp.
+    Playback URL Cache Entry Size: yt-dlp stream URL cache limit
+    Playback URL Cache Entry Size Tooltip: Sets the maximum size of each cached yt-dlp stream entry. Set it to 0 MB to disable persistent caching for yt-dlp streams.
     Clear Playback Caches: Clear playback caches
     Clear Playback Caches Confirmation: Clear the yt-dlp and player caches?
     Playback Caches Effect: The next local playback request may take longer while stream and player data is fetched again.
