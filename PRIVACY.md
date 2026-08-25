@@ -24,8 +24,8 @@ Rows for optional services apply only when the feature is enabled. An IP address
 | DeArrow | Configured SponsorBlock/DeArrow and thumbnail-service operators | IP address, timing, video-ID hash prefixes for branding lookups, and full video identifiers and timestamps for generated-thumbnail requests |
 | Return YouTube Dislike | Configured Return YouTube Dislike operator | IP address, video identifiers, and timing |
 | Voice-over translation | Unofficial Yandex voice-over translation service | IP address, YouTube video identifier and URL, video duration, requested output language, and timing |
-| Enhanced-privacy sync | Configured sync operator | IP address, OpenTubeX application version, account identifier, authentication data, encrypted payloads, collection names, payload sizes, revisions, and timing; not the decrypted selected data |
-| Legacy sync | Configured sync operator | IP address, OpenTubeX application version, account identifier, authentication data, selected synced data, and timing |
+| Enhanced-privacy sync | Configured sync operator | IP address, OpenTubeX application version from Electron desktop builds, account identifier, authentication data, encrypted payloads, collection names, payload sizes, revisions, and timing; not the decrypted selected data |
+| Legacy sync | Configured sync operator | IP address, OpenTubeX application version from Electron desktop builds, account identifier, authentication data, selected synced data, and timing |
 | `yt-dlp` playback and downloads | YouTube and the configured proxy, if any | IP address, requested page and media resources, video identifier, formats, and timing. OpenTubeX's proxy setting is passed to `yt-dlp`. |
 
 Voice-over translation is disabled by default. When it is enabled, no translation-service request is made until you request a translation. The separate background-preparation option is also disabled by default; enabling it requests a translation whenever a supported non-live video loads. These requests omit browser credentials and cookies.
