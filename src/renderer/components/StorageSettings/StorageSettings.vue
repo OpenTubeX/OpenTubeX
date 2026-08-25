@@ -718,12 +718,13 @@ async function handleCleanupPrompt(option) {
 
 async function removeSubscriptionsAndProfiles() {
   await store.dispatch('updateActiveProfile', MAIN_PROFILE_ID)
-  await Promise.all(profileList.value.map(profile => {
+  const cleanupResults = await Promise.all(profileList.value.map(profile => {
     if (profile._id === MAIN_PROFILE_ID) {
       return store.dispatch('updateProfile', { ...profile, subscriptions: [] })
     }
     return store.dispatch('removeProfile', profile._id)
   }))
+  await requireCleanupSuccess(cleanupResults.every(Boolean))
   await requireCleanupSuccess(store.dispatch('clearSubscriptionsCache'))
 }
 

@@ -184,8 +184,10 @@ const actions = {
     try {
       await DBProfileHandlers.upsert(profile)
       commit('upsertProfileToList', profile)
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 
@@ -228,8 +230,10 @@ const actions = {
     try {
       await DBProfileHandlers.delete(profileId)
       commit('removeProfileFromList', profileId)
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 

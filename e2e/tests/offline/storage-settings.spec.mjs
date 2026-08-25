@@ -240,6 +240,7 @@ test('separates replaceable search results from saved search history', async ({ 
     saved: document.querySelector('#app').__vue_app__.config.globalProperties.$store
       .getters.getSearchHistoryEntries.length
   }))).toEqual({ cached: 0, saved: 1 })
+  await expect(storage.locator('.storageSettings')).toHaveAttribute('aria-busy', 'false')
 
   const searchHistory = storage.locator('.storageItem').filter({
     has: page.getByRole('heading', { name: 'Search history', exact: true })
@@ -343,6 +344,26 @@ test('reports rejected store cleanup instead of success', async ({ page }) => {
   expect(await page.evaluate(() => (
     document.querySelector('#app').__vue_app__.config.globalProperties.$store
       .getters.getSearchHistoryEntries.length
+  ))).toBe(1)
+})
+
+test('reports rejected profile cleanup instead of success', async ({ page }) => {
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store._actions.updateProfile = [() => Promise.resolve(false)]
+  })
+
+  const storage = await goToSettingsSection(page, 'storage')
+  await storage.getByRole('button', { name: 'Remove All Subscriptions / Profiles' }).click()
+  await page.getByRole('dialog', {
+    name: 'Are you sure you want to remove all subscriptions and profiles? This cannot be undone.'
+  }).getByRole('button', { name: 'Yes, Delete' }).click()
+
+  await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
+  await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
+  expect(await page.evaluate(() => (
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .getters.getProfileList[0].subscriptions.length
   ))).toBe(1)
 })
 
