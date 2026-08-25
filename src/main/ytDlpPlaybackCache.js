@@ -179,7 +179,7 @@ export async function handleYtDlpPlaybackCacheSet(event, videoId, cacheKey, expi
   if (Date.now() >= entry.expiryTime - EXPIRY_MARGIN_MS) return false
 
   await loadEntries()
-  if (!cacheEnabled) return false
+  if (!cacheEnabled || !isValidEntry(entry)) return false
   entries.delete(entry.videoId)
   const openVideoIds = TabManager.getOpenVideoIds()
   while (entries.size >= MAX_ENTRIES) {
