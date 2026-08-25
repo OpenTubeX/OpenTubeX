@@ -2891,6 +2891,33 @@ test('treats an empty comments response as no comments', async ({ app, page }) =
   expect(commentRequestCount).toBe(1)
 })
 
+test('loads initial comments with the video when automatic pagination is enabled', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
+  })
+  // Initial comments must not depend on the later-page sentinel being visible.
+  await page.addStyleTag({ content: '.commentAutoLoadSentinel { display: none !important; }' })
+
+  let commentRequestCount = 0
+  await page.route(/\/youtubei\/v1\/next/, (route, request) => {
+    const body = JSON.parse(request.postData() ?? '{}')
+    if (body.continuation) {
+      commentRequestCount++
+    }
+    return route.fallback()
+  })
+
+  await openMockedVideo(page)
+
+  await expect(page.locator('.getCommentsTitle')).toHaveCount(0, { timeout: 5_000 })
+  await expect.poll(() => commentRequestCount).toBeGreaterThan(0)
+  await expect(page.locator('.commentsTitle')).toBeVisible()
+  await expect(page.locator('.getMoreComments')).toHaveCount(0)
+  expect(await page.evaluate(() => window.scrollY)).toBe(0)
+})
+
 test.describe('manual comment loading', () => {
   // These drive the click-to-load path and the reply pagination on top of a
   // single loaded page, so they turn off the automatic pagination that would
@@ -2912,6 +2939,7 @@ test.describe('manual comment loading', () => {
     await loadComments.scrollIntoViewIfNeeded()
     await loadComments.click()
     await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('.getMoreComments')).toHaveCount(1)
 
     const ownerReplyToggle = page.getByRole('button', {
       name: /replies from .+ and others/
