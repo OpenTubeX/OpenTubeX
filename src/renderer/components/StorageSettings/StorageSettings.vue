@@ -632,7 +632,7 @@ async function requireCleanupSuccess(cleanup) {
   if (!await cleanup) throw new Error('Cleanup request was rejected')
 }
 
-async function runCleanup(action) {
+async function performCleanup(action) {
   switch (action) {
     case 'download-records': {
       const ids = finishedDownloads.value.map(download => download.id)
@@ -678,8 +678,14 @@ async function runCleanup(action) {
       await store.dispatch('updateQuickBookmarkTargetPlaylistId', 'favorites')
       break
   }
+}
 
-  await compactAndRefresh()
+async function runCleanup(action) {
+  try {
+    await performCleanup(action)
+  } finally {
+    await compactAndRefresh()
+  }
   showToast({
     message: t('Settings.Storage Settings.Cleanup Complete'),
     icon: ['fas', 'trash']

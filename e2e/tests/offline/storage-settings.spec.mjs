@@ -353,27 +353,36 @@ test('reports rejected download record cleanup', async ({ app, page }) => {
 
 test('reports rejected yt-dlp playback cleanup', async ({ app, page }) => {
   await app.electronApp.evaluate(({ ipcMain }, channels) => {
+    globalThis.__playerCacheBytes = 1024
     ipcMain.removeHandler(channels.STORAGE_GET_USAGE)
     ipcMain.handle(channels.STORAGE_GET_USAGE, () => ({
       ytDlpPlayback: 1024,
-      playerCache: 0,
+      playerCache: globalThis.__playerCacheBytes,
       otherProfileData: 0,
-      profileTotal: 1024
+      profileTotal: 1024 + globalThis.__playerCacheBytes
     }))
     ipcMain.removeHandler(channels.STORAGE_CLEAR)
-    ipcMain.handle(channels.STORAGE_CLEAR, () => true)
+    ipcMain.handle(channels.STORAGE_CLEAR, () => {
+      globalThis.__playerCacheBytes = 0
+      return true
+    })
     ipcMain.removeHandler(channels.YT_DLP_PLAYBACK_CACHE_CLEAR)
     ipcMain.handle(channels.YT_DLP_PLAYBACK_CACHE_CLEAR, () => false)
   }, IpcChannels)
 
   const storage = await goToSettingsSection(page, 'storage')
-  await storage.getByRole('button', { name: 'Clear playback caches' }).click()
+  const playbackCaches = storage.locator('.storageItem').filter({
+    has: page.getByRole('heading', { name: 'Playback caches', exact: true })
+  })
+  await expect(playbackCaches.locator('.storageSize')).toHaveText('2 KiB')
+  await playbackCaches.getByRole('button', { name: 'Clear playback caches' }).click()
   await page.getByRole('dialog', { name: 'Clear the yt-dlp and player caches?' })
     .getByRole('button', { name: 'Clear cache' })
     .click()
 
   await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
   await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
+  await expect(playbackCaches.locator('.storageSize')).toHaveText('1 KiB')
 })
 
 test('isolates browser session data with the test profile', async ({ app }) => {
