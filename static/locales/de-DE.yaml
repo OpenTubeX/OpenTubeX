@@ -1675,6 +1675,8 @@ Video:
       'Off': Aus
     Resize dock: Leiste in der Größe ändern
   IP block: YouTube hat deine IP-Adresse für die Videowiedergabe gesperrt. Bitte versuche, einen anderen VPN oder Proxy zu nutzen.
+  Retry With Built-in Extraction: Erneut mit der integrierten Extraktion versuchen
+  Retry With yt-dlp Extraction: Erneut mit der yt-dlp-Extraktion versuchen
   Unlisted: Nicht gelistet
   AI: KI
   AI-generated content: KI-generierte Inhalte

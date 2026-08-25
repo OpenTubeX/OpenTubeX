@@ -864,6 +864,104 @@ async function mockTranslatedEndscreen(app, page) {
 }
 
 test.describe('watch page', () => {
+  test('keeps private and DRM errors ineligible for extraction retry after locale changes', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate(async (view) => {
+      view.setNonRetryablePlaybackError('private')
+      await view.$nextTick()
+    })
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateCurrentLocale', 'de-DE')
+    })
+    await expect.poll(() => watchView.evaluate(view => view.currentLocale)).toBe('de-DE')
+    expect(await watchView.evaluate(view => view.errorMessage === view.t('Video.Private'))).toBe(false)
+    await expect(page.locator('.errorActions')).toHaveCount(0)
+
+    await watchView.evaluate(async (view) => {
+      view.setNonRetryablePlaybackError('drm')
+      await view.$nextTick()
+    })
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateCurrentLocale', 'en-US')
+    })
+    await expect.poll(() => watchView.evaluate(view => view.currentLocale)).toBe('en-US')
+    expect(await watchView.evaluate(view => view.errorMessage === view.t('Video.DRMProtected'))).toBe(false)
+    await expect(page.locator('.errorActions')).toHaveCount(0)
+  })
+
+  test('retries an error with the other extraction method without changing the default', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route('https://example.invalid/retry.m3u8', route => route.fulfill({
+      contentType: 'application/x-mpegURL',
+      body: '#EXTM3U\n'
+    }))
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      ipcMain.removeHandler('yt-dlp-get-playback-info')
+      ipcMain.handle('yt-dlp-get-playback-info', () => ({
+        isLive: false,
+        liveStatus: 'not_live',
+        hlsManifestUrl: 'https://example.invalid/retry.m3u8',
+        formats: [],
+        duration: 600,
+        version: 'test'
+      }))
+    })
+    await openMockedVideo(page)
+
+    const watchView = await watchViewHandle(page)
+    const builtInManifest = await watchView.evaluate((view) => view.manifestSrc)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUiScale', 125)
+    })
+    await watchView.evaluate(async (view) => {
+      view.errorMessage = 'The built-in extraction failed'
+      await view.$nextTick()
+    })
+
+    const ytDlpRetry = page.getByRole('button', { name: 'Retry with yt-dlp extraction' })
+    const [buttonBounds, errorBounds] = await Promise.all([
+      ytDlpRetry.boundingBox(),
+      page.locator('.errorWrapper').boundingBox()
+    ])
+    expect(buttonBounds.x).toBeGreaterThanOrEqual(errorBounds.x)
+    expect(buttonBounds.x + buttonBounds.width).toBeLessThanOrEqual(errorBounds.x + errorBounds.width)
+    await ytDlpRetry.click()
+    await expect.poll(() => watchView.evaluate((view) => ({
+      activeEngine: view.activePlaybackEngine,
+      errorMessage: view.errorMessage,
+      manifest: view.manifestSrc
+    }))).toEqual({
+      activeEngine: 'yt-dlp',
+      errorMessage: null,
+      manifest: 'https://example.invalid/retry.m3u8'
+    })
+
+    await watchView.evaluate(async (view) => {
+      view.errorMessage = 'The yt-dlp extraction failed'
+      await view.$nextTick()
+    })
+    await page.getByRole('button', { name: 'Retry with built-in extraction' }).click()
+    await expect.poll(() => watchView.evaluate((view) => ({
+      activeEngine: view.activePlaybackEngine,
+      errorMessage: view.errorMessage,
+      manifest: view.manifestSrc
+    }))).toEqual({
+      activeEngine: 'built-in',
+      errorMessage: null,
+      manifest: builtInManifest
+    })
+    expect(await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getVideoPlaybackEngine
+    })).toBe('built-in')
+  })
+
   test('shows the automatic yt-dlp live fallback while streams are pending', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

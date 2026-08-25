@@ -234,8 +234,17 @@
         font-size: 14px;
       }
 
-      .restrictedPlaybackButton {
+      .errorActions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .errorActionButton {
         margin: 0;
+        min-block-size: 44px;
+        max-inline-size: 100%;
+        white-space: normal;
       }
 
       @media only screen and (width <= 680px) {

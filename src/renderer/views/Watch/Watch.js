@@ -398,6 +398,8 @@ export default defineComponent({
       customErrorIcon: null,
       /** @type {'age' | 'members' | null} */
       restrictedPlaybackError: null,
+      /** @type {'private' | 'drm' | null} */
+      nonRetryablePlaybackError: null,
       videoGenreIsMusic: false,
       /** @type {Date|null} */
       streamingDataExpiryDate: null,
@@ -817,6 +819,23 @@ export default defineComponent({
       }
 
       return this.activePlaybackEngine
+    },
+    otherPlaybackEngine: function () {
+      return this.playbackEngineSelection === 'yt-dlp' ? 'built-in' : 'yt-dlp'
+    },
+    retryWithOtherPlaybackEngineLabel: function () {
+      return this.otherPlaybackEngine === 'yt-dlp'
+        ? this.t('Video.Retry With yt-dlp Extraction')
+        : this.t('Video.Retry With Built-in Extraction')
+    },
+    canRetryWithOtherPlaybackEngine: function () {
+      return process.env.IS_ELECTRON &&
+        this.errorMessage !== null &&
+        !this.localFilePlayback &&
+        !this.isUpcoming &&
+        !this.isPostLiveDvr &&
+        this.restrictedPlaybackError === null &&
+        this.nonRetryablePlaybackError === null
     },
     /** @returns {'sabr' | 'dash' | 'hls' | 'none'} */
     playbackStreamType: function () {
@@ -1872,6 +1891,7 @@ export default defineComponent({
       this.errorMessage = null
       this.customErrorIcon = null
       this.restrictedPlaybackError = null
+      this.nonRetryablePlaybackError = null
       this.videoGenreIsMusic = false
       this.streamingDataExpiryDate = null
       this.ipBlockDetectedInCurrentChain = false
@@ -2417,6 +2437,17 @@ export default defineComponent({
       }
     },
 
+    /**
+     * Sets an error that switching stream extraction methods cannot resolve.
+     * @param {'private' | 'drm'} type
+     */
+    setNonRetryablePlaybackError: function (type) {
+      this.nonRetryablePlaybackError = type
+      this.errorMessage = type === 'private'
+        ? this.t('Video.Private')
+        : this.t('Video.DRMProtected')
+    },
+
     getRestrictedPlaybackErrorType: function (message) {
       if (typeof message !== 'string') {
         return null
@@ -2580,7 +2611,7 @@ export default defineComponent({
         if (playabilityStatus.status === 'LOGIN_REQUIRED' && playabilityStatus.error_screen?.reason?.text === 'Private video') {
           // Private videos cannot be played in FreeTube, as they require to be logged as the owner of the video
           // so there is no point continuing or trying any other backends as it will always fail
-          this.errorMessage = this.t('Video.Private')
+          this.setNonRetryablePlaybackError('private')
           this.thumbnail = this.getUnavailableVideoThumbnail()
           this.isLoading = false
           this.updateTitle()
@@ -2812,7 +2843,7 @@ export default defineComponent({
           } else if (isDrmProtected) {
             // DRM protected videos (e.g. movies) cannot be played in FreeTube,
             // as they require the proprietary and closed source Wideview CDM which is understandably not included in standard Electron builds
-            this.errorMessage = this.t('Video.DRMProtected')
+            this.setNonRetryablePlaybackError('drm')
             this.isLoading = false
             this.updateTitle()
             return
@@ -4257,6 +4288,11 @@ export default defineComponent({
       this.errorMessage = null
       this.alignActiveFormatWithAvailableSources()
       this.ytDlpStreamsPending = false
+    },
+
+    retryWithOtherPlaybackEngine: function () {
+      this.customErrorIcon = null
+      return this.handlePlaybackEngineChange(this.otherPlaybackEngine)
     },
 
     enableDashFormat: function () {

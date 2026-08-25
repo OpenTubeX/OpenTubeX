@@ -1675,6 +1675,8 @@ Video:
     Empty: This transcript does not contain any text.
     No Results: No transcript segments match your search.
   IP block: 'YouTube has blocked your IP address from watching videos. Please try switching to a different VPN or proxy.'
+  Retry With Built-in Extraction: Retry with built-in extraction
+  Retry With yt-dlp Extraction: Retry with yt-dlp extraction
   Reloading video after streaming URL error: Reloading video after streaming URL error
   MembersOnly: This members-only video requires a Google account with an active membership to this channel.
   AgeRestricted: This age-restricted video requires an age-verified Google account.

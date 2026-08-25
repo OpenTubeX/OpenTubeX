@@ -318,14 +318,27 @@
                 >
                   {{ $t('Video.Configure Restricted Playback Cookies Hint') }}
                 </p>
-                <FtButton
-                  v-if="canTryRestrictedPlaybackWithCookies"
-                  class="restrictedPlaybackButton"
-                  :label="$t('Video.Try With Configured Cookies')"
-                  :text-color="null"
-                  :background-color="null"
-                  @click="tryRestrictedPlaybackWithCookies"
-                />
+                <div
+                  v-if="canTryRestrictedPlaybackWithCookies || canRetryWithOtherPlaybackEngine"
+                  class="errorActions"
+                >
+                  <FtButton
+                    v-if="canTryRestrictedPlaybackWithCookies"
+                    class="errorActionButton"
+                    :label="$t('Video.Try With Configured Cookies')"
+                    :text-color="null"
+                    :background-color="null"
+                    @click="tryRestrictedPlaybackWithCookies"
+                  />
+                  <FtButton
+                    v-if="canRetryWithOtherPlaybackEngine"
+                    class="errorActionButton"
+                    :label="retryWithOtherPlaybackEngineLabel"
+                    :text-color="null"
+                    :background-color="null"
+                    @click="retryWithOtherPlaybackEngine"
+                  />
+                </div>
               </div>
             </div>
           </div>
