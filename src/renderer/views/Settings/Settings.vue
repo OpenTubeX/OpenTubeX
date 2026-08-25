@@ -44,6 +44,7 @@
         </span>
         <button
           v-else-if="showBackButton"
+          v-show="isInDesktopView"
           type="button"
           class="settingsBreadcrumbRoot"
           @click="returnToSettingsMenu"
@@ -68,6 +69,7 @@
         </span>
         <template v-if="!isStandaloneViewOpen && currentSectionTitle">
           <FtIcon
+            v-show="isInDesktopView"
             class="settingsBreadcrumbSeparator"
             :icon="['fas', 'angle-right']"
           />
