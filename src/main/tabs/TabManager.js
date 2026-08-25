@@ -688,6 +688,7 @@ export class TabManager {
     this.contextMenuSelectedTabIds = []
     /** @type {string[]} */
     this.selectedTabIds = []
+    this.lastReorderRequestId = null
     this.contextMenuSurface = 'content'
     this.contextMenuSubscriptionFeedTab = null
     this.contextMenuTabBarVertical = false
@@ -2409,10 +2410,15 @@ export class TabManager {
   /**
    * Apply a complete tab order in one state update.
    * @param {string[]} tabIds
+   * @param {string | null} requestId
    */
-  reorderTabs(tabIds) {
+  reorderTabs(tabIds, requestId) {
+    this.lastReorderRequestId = requestId
     const reorderedTabs = buildReorderedTabMap(this.tabs, tabIds)
-    if (reorderedTabs == null || reorderedTabs === this.tabs) return
+    if (reorderedTabs == null || reorderedTabs === this.tabs) {
+      this._broadcastStateUpdate()
+      return
+    }
 
     this.tabs = reorderedTabs
     this._broadcastStateUpdate()
@@ -2689,6 +2695,7 @@ export class TabManager {
       activeTabId: this.activeTabId,
       presentedTabId: this.presentedTabId,
       selectionRevision: this.selectionRevision,
+      reorderRequestId: this.lastReorderRequestId,
       tabBarScrollPosition: this.tabBarScrollPosition
     }
   }
@@ -3422,11 +3429,15 @@ export async function setupTabsIPC(options = {}) {
     }
   })
 
-  ipcMain.on(IpcChannels.TABS_REORDER, (event, tabIds) => {
+  ipcMain.on(IpcChannels.TABS_REORDER, (event, tabIds, requestId) => {
     const manager = getManager(event)
     const normalizedTabIds = Array.isArray(tabIds) ? Array.from(tabIds) : null
-    if (manager && normalizedTabIds?.every(tabId => typeof tabId === 'string')) {
-      manager.reorderTabs(normalizedTabIds)
+    if (
+      manager &&
+      normalizedTabIds?.every(tabId => typeof tabId === 'string') &&
+      (requestId === null || typeof requestId === 'string')
+    ) {
+      manager.reorderTabs(normalizedTabIds, requestId)
     }
   })
 

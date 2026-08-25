@@ -26,6 +26,23 @@ async function boundingBoxWhenSettled(locator) {
 }
 
 /**
+ * Delay reorder handling in the main process without delaying other tab
+ * operations, simulating a busy system around the renderer-to-main handoff.
+ * @param {{electronApp: import('@playwright/test').ElectronApplication}} app
+ * @param {number} [delayMs]
+ */
+async function delayTabReorders(app, delayMs = 1000) {
+  await app.electronApp.evaluate(({ ipcMain }, delay) => {
+    const channel = 'tabs-reorder'
+    const [listener] = ipcMain.listeners(channel)
+    ipcMain.removeListener(channel, listener)
+    ipcMain.on(channel, (event, ...args) => {
+      setTimeout(() => listener(event, ...args), delay)
+    })
+  }, delayMs)
+}
+
+/**
  * Leaves three tabs open with the requested one active and returns their ids in
  * tab bar order.
  * @param {import('@playwright/test').Page} page
@@ -728,14 +745,7 @@ test.describe('tab bar', () => {
     await expect(tabs.nth(2)).toHaveClass(/active/)
     await tabs.nth(3).click({ modifiers: ['Control'] })
 
-    await app.electronApp.evaluate(({ ipcMain }) => {
-      const channel = 'tabs-reorder'
-      const [listener] = ipcMain.listeners(channel)
-      ipcMain.removeListener(channel, listener)
-      ipcMain.on(channel, (event, ...args) => {
-        setTimeout(() => listener(event, ...args), 1000)
-      })
-    })
+    await delayTabReorders(app)
 
     await page.evaluate(() => {
       const tabs = Array.from(document.querySelectorAll('.tabBar .tab'))
@@ -791,6 +801,57 @@ test.describe('tab bar', () => {
       originalIds[2],
       originalIds[3]
     ])
+  })
+
+  test('restores the authoritative order when an intervening tab invalidates a reorder', async ({ app, page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+
+    const tabs = page.locator(sel.tabs)
+    const originalIds = await tabs.evaluateAll(elements => {
+      return elements.map(element => element.dataset.tabId)
+    })
+    await delayTabReorders(app)
+
+    await page.evaluate(() => {
+      const tabs = Array.from(document.querySelectorAll('.tabBar .tab'))
+      const sourceRect = tabs[3].getBoundingClientRect()
+      const targetRect = tabs[0].getBoundingClientRect()
+      tabs[3].dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true,
+        button: 0,
+        clientX: sourceRect.left + sourceRect.width / 2,
+        clientY: sourceRect.top + sourceRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointermove', {
+        bubbles: true,
+        buttons: 1,
+        clientX: targetRect.left + targetRect.width / 2,
+        clientY: targetRect.top + targetRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+    })
+
+    await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/history',
+      title: 'Intervening tab',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), originalIds[0])
+
+    const authoritativeOrder = await page.evaluate(async () => {
+      return (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.id)
+    })
+    await expect(tabs).toHaveCount(5)
+    await expect.poll(() => tabs.evaluateAll(elements => {
+      return elements.map(element => element.dataset.tabId)
+    })).toEqual(authoritativeOrder)
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.state.tabs.pendingTabOrder
+    })).toBeNull()
   })
 
   test('keeps a submenu open while moving toward it diagonally', async ({ page }) => {

@@ -5,14 +5,17 @@
  * @template {{id: string}} T
  * @param {T[]} tabs
  * @param {string[] | null} pendingTabOrder
+ * @param {boolean} acknowledged
  * @returns {{tabs: T[], pendingTabOrder: string[] | null}}
  */
-export function reconcilePendingTabOrder(tabs, pendingTabOrder) {
+export function reconcilePendingTabOrder(tabs, pendingTabOrder, acknowledged = false) {
   const tabIds = tabs.map(tab => tab.id)
   if (
     pendingTabOrder != null &&
-    tabIds.length === pendingTabOrder.length &&
-    tabIds.every((tabId, index) => tabId === pendingTabOrder[index])
+    (acknowledged || (
+      tabIds.length === pendingTabOrder.length &&
+      tabIds.every((tabId, index) => tabId === pendingTabOrder[index])
+    ))
   ) {
     return { tabs, pendingTabOrder: null }
   }

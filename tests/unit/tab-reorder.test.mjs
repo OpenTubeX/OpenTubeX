@@ -123,3 +123,15 @@ test('reconciles opened and closed tabs into a pending local order', () => {
   assert.deepEqual(result.tabs.map(tab => tab.id), ['a', 'b', 'e', 'd', 'f'])
   assert.deepEqual(result.pendingTabOrder, ['a', 'b', 'e', 'd', 'f'])
 })
+
+test('accepts the authoritative order when a pending reorder is rejected', () => {
+  const authoritativeTabs = [tabs[0], tabs[1], { id: 'f' }, tabs[2], tabs[3], tabs[4]]
+  const result = reconcilePendingTabOrder(
+    authoritativeTabs,
+    ['a', 'c', 'b', 'e', 'd'],
+    true
+  )
+
+  assert.equal(result.tabs, authoritativeTabs)
+  assert.equal(result.pendingTabOrder, null)
+})

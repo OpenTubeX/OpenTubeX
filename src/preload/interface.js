@@ -1020,9 +1020,10 @@ export default {
     /**
      * Apply a complete tab order atomically.
      * @param {string[]} tabIds
+     * @param {string | null} [requestId]
      */
-    reorder: (tabIds) => {
-      ipcRenderer.send(IpcChannels.TABS_REORDER, tabIds)
+    reorder: (tabIds, requestId = null) => {
+      ipcRenderer.send(IpcChannels.TABS_REORDER, tabIds, requestId)
     },
 
     /**

@@ -10,6 +10,7 @@ const HALF_NAV_HISTORY_DISPLAY_LIMIT = Math.trunc(NAV_HISTORY_DISPLAY_LIMIT / 2)
 const state = {
   tabs: [],
   pendingTabOrder: null,
+  pendingTabOrderRequestId: null,
   activeTabId: null,
   selectedTabIds: [],
   presentedTabId: null,
@@ -88,9 +89,17 @@ const mutations = {
     }
 
     const reconciledTabs = incomingTabs.map(tab => reconcileTab(previousTabsById.get(tab.id), tab))
-    const reconciledOrder = reconcilePendingTabOrder(reconciledTabs, state.pendingTabOrder)
+    const pendingOrderAcknowledged = payload.reorderRequestId === state.pendingTabOrderRequestId
+    const reconciledOrder = reconcilePendingTabOrder(
+      reconciledTabs,
+      state.pendingTabOrder,
+      pendingOrderAcknowledged
+    )
     state.tabs = reconciledOrder.tabs
     state.pendingTabOrder = reconciledOrder.pendingTabOrder
+    if (reconciledOrder.pendingTabOrder == null) {
+      state.pendingTabOrderRequestId = null
+    }
     for (const tab of incomingTabs) {
       state.skipSilenceByTabId[tab.id] = tab.skipSilence === true
     }
@@ -131,7 +140,7 @@ const mutations = {
     state.selectedTabIds = Array.from(new Set(tabIds.filter(tabId => existingIds.has(tabId))))
   },
 
-  reorderTabsOptimistically(state, tabIds) {
+  reorderTabsOptimistically(state, { tabIds, requestId }) {
     const tabsById = new Map(state.tabs.map(tab => [tab.id, tab]))
     if (
       tabIds.length !== state.tabs.length ||
@@ -142,6 +151,7 @@ const mutations = {
     }
 
     state.pendingTabOrder = [...tabIds]
+    state.pendingTabOrderRequestId = requestId
     state.tabs = tabIds.map(tabId => tabsById.get(tabId))
   },
 
@@ -333,8 +343,9 @@ const actions = {
 
   reorderTabs({ commit }, tabIds) {
     if (process.env.IS_ELECTRON) {
-      commit('reorderTabsOptimistically', tabIds)
-      window.ftElectron.tabs.reorder(tabIds)
+      const requestId = window.crypto.randomUUID()
+      commit('reorderTabsOptimistically', { tabIds, requestId })
+      window.ftElectron.tabs.reorder(tabIds, requestId)
     }
   },
 
