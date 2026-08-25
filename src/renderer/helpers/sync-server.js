@@ -1,4 +1,5 @@
 import { MAIN_PROFILE_ID } from '../../constants'
+import packageDetails from '../../../package.json'
 import {
   CUSTOM_THEMES_SYNC_KEY,
   customThemeIdFromValue,
@@ -22,6 +23,7 @@ import {
   getSyncProfileBackground,
   getSyncProfileTextColor
 } from './profile-sync.js'
+import { createSyncServerRequestHeaders } from './sync-server-request'
 
 const LEGACY_HISTORY_PAGE_SIZE = 50
 const BULK_SYNC_CHUNK_SIZE = 100
@@ -85,14 +87,12 @@ export class SyncServerClient {
     const controller = new AbortController()
     this.requestControllers.add(controller)
     const timeout = setTimeout(() => controller.abort(), timeoutMs)
-    const headers = { Accept: 'application/json', ...options.headers }
-
-    if (options.body != null) {
-      headers['Content-Type'] = 'application/json'
-    }
-    if (this.token) {
-      headers.Authorization = this.token
-    }
+    const headers = createSyncServerRequestHeaders({
+      hasBody: options.body != null,
+      headers: options.headers,
+      token: this.token,
+      version: process.env.IS_ELECTRON ? packageDetails.version : '',
+    })
 
     try {
       const response = await fetch(`${this.serverUrl}${path}`, {
