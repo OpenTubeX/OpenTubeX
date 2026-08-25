@@ -56,31 +56,45 @@ test('shows the replay icon when playback ends before Shaka updates its play ico
     return component.refs.player.$.setupState.replayIcon
   })
   const playButtons = page.locator(`${activeTab} .shaka-play-button`)
-  const nativeIconPaths = playButtons.locator(
-    ':scope > .shaka-ui-icon:not(.ft-play-pause-morph-icon) > path'
-  )
+  const readPlayControls = () => playButtons.evaluateAll(buttons => buttons.map(button => ({
+    state: button.getAttribute('data-ft-play-pause-state'),
+    path: button.querySelector(
+      ':scope > .shaka-ui-icon:not(.ft-play-pause-morph-icon) > path'
+    )?.getAttribute('d')
+  })))
 
   await watchComponent.evaluate(async component => {
     await component.proxy.$store.dispatch('updateDisplayVideoPlayButton', true)
     await component.proxy.$nextTick()
   })
   await expect(playButtons).toHaveCount(2)
+  const initialControls = await readPlayControls()
+  const pauseIconPath = initialControls[0].path
+  expect(pauseIconPath).toBeTruthy()
+  expect(initialControls.map(control => control.path)).toEqual([pauseIconPath, pauseIconPath])
   await video.evaluate(element => element.pause())
-  await expect.poll(() => playButtons.evaluateAll(buttons => {
-    return buttons.map(button => button.getAttribute('data-ft-play-pause-state'))
-  })).toEqual(['play', 'play'])
+  await expect.poll(async () => (await readPlayControls()).map(control => control.state))
+    .toEqual(['play', 'play'])
 
   await video.evaluate(element => {
     Object.defineProperty(element, 'ended', { configurable: true, value: true })
     element.dispatchEvent(new Event('ended'))
   })
 
-  await expect.poll(() => playButtons.evaluateAll(buttons => {
-    return buttons.map(button => button.getAttribute('data-ft-play-pause-state'))
-  })).toEqual(['replay', 'replay'])
-  await expect.poll(() => nativeIconPaths.evaluateAll(paths => {
-    return paths.map(path => path.getAttribute('d'))
-  })).toEqual([replayIconPath, replayIconPath])
+  await expect.poll(readPlayControls).toEqual([
+    { state: 'replay', path: replayIconPath },
+    { state: 'replay', path: replayIconPath }
+  ])
+
+  await video.evaluate(async element => {
+    delete element.ended
+    element.currentTime = 0
+    await element.play()
+  })
+  await expect.poll(readPlayControls).toEqual([
+    { state: 'pause', path: pauseIconPath },
+    { state: 'pause', path: pauseIconPath }
+  ])
   await watchComponent.dispose()
 })
 
