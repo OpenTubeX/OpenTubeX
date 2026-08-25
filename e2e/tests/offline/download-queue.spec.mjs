@@ -303,6 +303,34 @@ test('keeps paused downloads queued across a restart', async ({ app, page }) => 
   await writeFile(path.join(app.userDataDir, 'release-fffffffffff'), '')
 })
 
+test.describe('persisted queue with downloads disabled', () => {
+  const persistedDownload = {
+    id: 1,
+    videoId: 'qqqqqqqqqqq',
+    title: 'Disabled persisted download',
+    mode: 'video',
+    template: '',
+    retryPayload: { videoId: 'qqqqqqqqqqq', title: 'Disabled persisted download', mode: 'video' },
+    status: 'queued',
+    queuePosition: 1,
+    percent: 0,
+    speed: null,
+    eta: null,
+    destination: null,
+    destinations: [],
+    files: [],
+    errorMessage: null,
+  }
+  test.use({ seed: { settings: { enableDownloads: false }, downloads: [persistedDownload] } })
+
+  test('keeps persisted downloads queued while downloads are disabled', async ({ page }) => {
+    await expect.poll(() => page.evaluate(async id => {
+      const downloads = await window.ftElectron.ytDlpListDownloads()
+      return downloads.find(download => download.id === id)
+    }, persistedDownload.id)).toMatchObject({ status: 'queued', errorMessage: null })
+  })
+})
+
 test('checks destination space before starting a download', async ({ app, page }) => {
   const executable = path.join(app.userDataDir, 'space-check-yt-dlp.sh')
   const startsFile = path.join(app.userDataDir, 'space-check-starts.txt')

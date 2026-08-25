@@ -2348,8 +2348,14 @@ async function startYtDlpDownload(
     status.spaceWarning = 'space-check-unavailable'
   }
 
-  async function abortQueuedPreparation() {
+  async function abortQueuedPreparation(error) {
     individuallyResumedDownloadIds.delete(id)
+    if (error) {
+      console.error('Could not prepare queued download', error)
+      status.status = 'failed'
+      status.errorMessage = 'download-queue-failed'
+      sendStatus(true)
+    }
     releaseDownloadSlot()
     await rm(temporaryDownloadFolder, { recursive: true, force: true })
     await saveDownloadRecords()
@@ -2366,14 +2372,18 @@ async function startYtDlpDownload(
 
   if (queuedPreparationWasInterrupted()) return abortQueuedPreparation()
 
-  const bandwidthLimit = normalizeDownloadBandwidth(
-    (await settings._findOne('ytDlpDownloadBandwidthLimit'))?.value
-  )
-  if (bandwidthLimit > 0) {
-    const bandwidthShare = Math.max(1, Math.floor(
-      bandwidthLimit / (await getDownloadQueueSettings()).concurrency
-    ))
-    args.push('--limit-rate', `${bandwidthShare}K`)
+  try {
+    const bandwidthLimit = normalizeDownloadBandwidth(
+      (await settings._findOne('ytDlpDownloadBandwidthLimit'))?.value
+    )
+    if (bandwidthLimit > 0) {
+      const bandwidthShare = Math.max(1, Math.floor(
+        bandwidthLimit / (await getDownloadQueueSettings()).concurrency
+      ))
+      args.push('--limit-rate', `${bandwidthShare}K`)
+    }
+  } catch (error) {
+    return abortQueuedPreparation(error)
   }
   if (queuedPreparationWasInterrupted()) return abortQueuedPreparation()
 
@@ -2626,6 +2636,12 @@ async function restartPersistedDownload(event, record, resumeIndividually = fals
   )
   if (result && 'id' in result) {
     broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, [record.id])
+    await saveDownloadRecords()
+    return result
+  }
+  if (result?.error === 'downloads-disabled') {
+    downloadRecords.set(record.id, record)
+    broadcastDownloadStatus(record)
     await saveDownloadRecords()
     return result
   }
