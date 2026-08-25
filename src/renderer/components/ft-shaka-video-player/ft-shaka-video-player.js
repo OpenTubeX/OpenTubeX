@@ -4965,6 +4965,12 @@ export default defineComponent({
             createPlayPauseMorphIcon(button, PLAY_MORPH_PATH)
           }
 
+          if (nextState === 'replay') {
+            button.querySelector(
+              ':scope > .shaka-ui-icon:not(.ft-play-pause-morph-icon) > path'
+            )?.setAttribute('d', shaka.ui.Enums.MaterialDesignSVGIcons.REPLAY)
+          }
+
           button.setAttribute('data-ft-play-pause-state', nextState)
         })
       })
