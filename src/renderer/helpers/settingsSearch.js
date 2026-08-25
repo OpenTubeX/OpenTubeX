@@ -13,7 +13,7 @@ const NON_SETTING_MESSAGE_KEY_PATTERN = /(?:^Are you sure\b|^Failed to\b|^Invali
  * command palette. Visibility follows the controls currently rendered by the
  * active settings state.
  * @param {object} options
- * @returns {Map<string, string[]>}
+ * @returns {Map<string, Array<{label: string, tab?: string}>>}
  */
 export function createSettingsSearchIndex(options) {
   const {
@@ -31,23 +31,23 @@ export function createSettingsSearchIndex(options) {
 
   return new Map(sections.map((section) => {
     const sources = SETTINGS_SEARCH_SOURCES[section.type] ?? []
-    const values = [...new Set([
-      section.title,
-      section.description,
-      ...sources.flatMap(source => getSettingsSearchSourceValues(source, options)),
-      ...(extraValues[section.type] ?? [])
-    ])]
-    return [section.type, values]
+    const matches = [
+      { label: section.title },
+      { label: section.description },
+      ...sources.flatMap(source => getSettingsSearchSourceValues(source, options).map(label => ({
+        label,
+        ...(source.tab === undefined ? {} : { tab: source.tab })
+      }))),
+      ...(extraValues[section.type] ?? []).map(label => ({ label }))
+    ]
+    return [section.type, matches.filter((match, index) => (
+      matches.findIndex(candidate => candidate.label === match.label) === index
+    ))]
   }))
 }
 
-export function findSettingsSearchTab(sectionType, label, options) {
-  const normalizedLabel = normalizeSettingsSearchText(label, options.locale)
-  return SETTINGS_SEARCH_SOURCES[sectionType]?.find(source => (
-    source.tab !== undefined &&
-    getSettingsSearchSourceValues(source, options)
-      .some(value => normalizeSettingsSearchText(value, options.locale) === normalizedLabel)
-  ))?.tab
+export function findSettingsSearchTab(match) {
+  return match.tab
 }
 
 function getSettingsSearchSourceValues(source, options) {
@@ -350,10 +350,10 @@ export function flattenSettingsSearchMessageValues(
 export function removeRedundantSettingsSearchMatches(values, locale) {
   const keptMatches = []
   const normalizedMatches = []
-  for (const value of values.toSorted((a, b) => a.length - b.length)) {
-    const normalizedValue = normalizeSettingsSearchText(value, locale)
+  for (const match of values.toSorted((a, b) => a.label.length - b.label.length)) {
+    const normalizedValue = normalizeSettingsSearchText(match.label, locale)
     if (normalizedMatches.some(shorterValue => normalizedValue.includes(shorterValue))) continue
-    keptMatches.push(value)
+    keptMatches.push(match)
     normalizedMatches.push(normalizedValue)
   }
   return keptMatches

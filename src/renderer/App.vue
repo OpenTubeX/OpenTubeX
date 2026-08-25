@@ -2164,8 +2164,8 @@ function openSettingsSection(section) {
   store.dispatch('showSettingsWindow')
 }
 
-function openSettingsSearchResult(section, label) {
-  settingsSearchTarget.value = { section, label }
+function openSettingsSearchResult(section, match) {
+  settingsSearchTarget.value = { section, ...match }
   store.commit('setSettingsWindowSection', section)
   store.dispatch('showSettingsWindow')
 }

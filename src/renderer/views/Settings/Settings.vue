@@ -298,12 +298,12 @@
                   </button>
                   <button
                     v-for="match in result.matches"
-                    :key="match"
+                    :key="`${match.label}-${match.tab ?? ''}`"
                     type="button"
                     class="settingsSearchResultMatch"
                     @click="openSearchResult(result.section.type, match)"
                   >
-                    {{ match }}
+                    {{ match.label }}
                   </button>
                 </section>
               </template>
@@ -646,7 +646,7 @@ const settingsSearchResults = computed(() => {
   return settingsSectionComponents.value.flatMap((section) => {
     const values = settingsSearchableValues.value.get(section.type) ?? []
     const matches = removeRedundantSettingsSearchMatches(
-      values.filter(value => normalizeSearchText(value).includes(query)),
+      values.filter(match => normalizeSearchText(match.label).includes(query)),
       locale.value
     )
     return matches.length === 0 ? [] : [{ section, matches: matches.slice(0, 6) }]
@@ -779,7 +779,8 @@ watch(activeSection, (section) => {
   }
   nextTick(observeActiveSettingsSection)
 })
-watch(() => store.getters.getSettingsWindowSection, (section) => {
+watch(() => store.getters.getSettingsWindowSection, async (section) => {
+  if (section === 'storage') activeDataStorageTab.value = 'storage'
   const normalizedSection = LEGACY_SETTINGS_SECTION_MAP[section] ?? section
   if (
     normalizedSection !== activeSection.value &&
@@ -787,11 +788,15 @@ watch(() => store.getters.getSettingsWindowSection, (section) => {
   ) {
     navigateToSection(normalizedSection)
   }
+  if (section === 'storage') {
+    await nextTick()
+    await activeSettingsSectionRef.value?.activateTab('storage')
+  }
 })
 watch(() => props.searchTarget, async (target) => {
   if (!target) return
   await nextTick()
-  await openSearchResult(target.section, target.label)
+  await openSearchResult(target.section, target)
   emit('search-target-opened', target)
 }, { immediate: true })
 
@@ -1037,22 +1042,14 @@ async function animateSettingsElement(elementRef, classRef, className) {
   }
 }
 
-async function openSearchResult(sectionType, label) {
+async function openSearchResult(sectionType, match) {
   settingsSearchQuery.value = ''
   navigateToSection(sectionType)
   await nextTick()
 
+  const { label } = match
   const normalizedLabel = normalizeSearchText(label.trim())
-  const searchTab = findSettingsSearchTab(sectionType, label, {
-    tm,
-    store,
-    usingElectron: USING_ELECTRON,
-    supportsLocalApi: SUPPORTS_LOCAL_API,
-    isMac: IS_MAC,
-    isLinuxWayland: isLinuxWayland.value,
-    systemUsesDarkTheme: systemUsesDarkTheme.value,
-    locale: locale.value,
-  })
+  const searchTab = findSettingsSearchTab(match)
   if (searchTab) {
     await activeSettingsSectionRef.value?.activateTab(searchTab)
     await nextTick()

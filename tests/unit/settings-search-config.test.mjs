@@ -9,7 +9,10 @@ import {
   SETTINGS_SEARCH_SOURCES,
   SETTINGS_SEARCH_SELECT_GROUP_LABELS,
 } from '../../src/renderer/helpers/settings-search-config.js'
-import { createSettingsSearchIndex } from '../../src/renderer/helpers/settingsSearch.js'
+import {
+  createSettingsSearchIndex,
+  findSettingsSearchTab,
+} from '../../src/renderer/helpers/settingsSearch.js'
 
 const locale = loadYaml(await readFile(
   new URL('../../static/locales/en-US.yaml', import.meta.url),
@@ -121,7 +124,38 @@ test('shared settings search index includes only settings available on this plat
     usingElectron: false,
   }).get('appearance')
 
-  assert.ok(desktopValues.includes('Show thumbnail previews'))
-  assert.ok(desktopValues.includes('UI Scale'))
-  assert.ok(!webValues.includes('UI Scale'))
+  assert.ok(desktopValues.some(({ label }) => label === 'Show thumbnail previews'))
+  assert.ok(desktopValues.some(({ label }) => label === 'UI Scale'))
+  assert.ok(!webValues.some(({ label }) => label === 'UI Scale'))
+})
+
+test('settings search results retain their source tab', () => {
+  const store = {
+    getters: new Proxy({}, {
+      get() {
+        return false
+      }
+    })
+  }
+  const values = createSettingsSearchIndex({
+    sections: [{
+      type: 'data',
+      title: locale.Settings.Categories.Data,
+      description: locale.Settings.Categories['Data Description'],
+    }],
+    tm: path => getAtPath(locale, path),
+    store,
+    usingElectron: true,
+    supportsLocalApi: true,
+    isMac: false,
+    isLinuxWayland: false,
+    systemUsesDarkTheme: true,
+  }).get('data')
+
+  const searchHistory = values.filter(({ label }) => label === 'Search history')
+  assert.equal(searchHistory.length, 1)
+  assert.equal(findSettingsSearchTab(searchHistory[0]), 'data')
+
+  const applicationCaches = values.find(({ label }) => label === 'Application caches')
+  assert.equal(findSettingsSearchTab(applicationCaches), 'storage')
 })

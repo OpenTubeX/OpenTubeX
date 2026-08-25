@@ -57,6 +57,43 @@ test('calculates storage usage only after the Storage tab opens', async ({ app, 
   )).toBe(1)
 })
 
+test('opens the Storage tab when legacy storage navigation changes while mounted', async ({ page }) => {
+  const dataAndStorage = await goToSettingsSection(page, 'data')
+  await expect(dataAndStorage.locator('[data-settings-tab="data"]'))
+    .toHaveAttribute('aria-selected', 'true')
+
+  await page.evaluate(() => {
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .commit('setSettingsWindowSection', 'storage')
+  })
+
+  await expect(dataAndStorage.locator('[data-settings-tab="storage"]'))
+    .toHaveAttribute('aria-selected', 'true')
+})
+
+test('keeps unavailable storage categories visible and marks the total as partial', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ ipcMain }, channels) => {
+    ipcMain.removeHandler(channels.STORAGE_GET_USAGE)
+    ipcMain.handle(channels.STORAGE_GET_USAGE, () => ({
+      tabPreviews: 1024,
+      profileTotal: 1024
+    }))
+    ipcMain.removeHandler(channels.YT_DLP_LIST_DOWNLOADS)
+    ipcMain.handle(channels.YT_DLP_LIST_DOWNLOADS, () => [])
+  }, IpcChannels)
+
+  const storage = await goToSettingsSection(page, 'storage')
+  const breakdown = storage.locator('.storageBreakdown')
+  await expect(breakdown.locator('.storageDonutCenter')).toContainText('At least 1 KiB')
+  await expect(breakdown.locator('li')).toHaveText([
+    'Application cachesAt least 1 KiB100%',
+    'Browser cachesExact size unavailable',
+    'Stored app dataExact size unavailable',
+    'Browser runtime dataExact size unavailable',
+    'Other profile filesExact size unavailable'
+  ])
+})
+
 test('moves storage controls into one searchable category', async ({ app, attachScreenshot, page }) => {
   const mebibyte = 1024 * 1024
   await app.electronApp.evaluate(({ ipcMain }, { channels, mebibyte }) => {

@@ -453,17 +453,17 @@ const chartItems = computed(() => chartCategories.value.map(item => {
       : item.bytes > 0
         ? t('Settings.Storage Settings.At Least', { size: formatBytes(item.bytes) })
         : t('Settings.Storage Settings.Not Available')
-  const percentage = chartTotalBytes.value > 0
+  const percentage = item.bytes > 0 && chartTotalBytes.value > 0
     ? formatChartPercentage(item.bytes, chartTotalBytes.value)
     : ''
   return {
     ...item,
     size,
     percentage,
-    details: `${size} · ${percentage}`,
-    tooltip: `${item.label}: ${size}, ${percentage}`
+    details: [size, percentage].filter(Boolean).join(' · '),
+    tooltip: [item.label, size, percentage].filter(Boolean).join(', ')
   }
-}).filter(item => !hasLoadedUsage.value || item.bytes > 0))
+}).filter(item => !hasLoadedUsage.value || item.bytes > 0 || !item.exact))
 const chartSegments = computed(() => {
   let start = 0
   return chartItems.value
@@ -478,8 +478,11 @@ const chartSegments = computed(() => {
 const activeChartItem = computed(() => chartItems.value.find(item => (
   item.key === (hoveredChartKey.value ?? focusedChartKey.value)
 )) ?? null)
+const chartTotalIsExact = computed(() => chartCategories.value.every(item => item.exact))
 const chartTotalText = computed(() => hasLoadedUsage.value
-  ? formatBytes(chartTotalBytes.value)
+  ? chartTotalIsExact.value
+    ? formatBytes(chartTotalBytes.value)
+    : t('Settings.Storage Settings.At Least', { size: formatBytes(chartTotalBytes.value) })
   : t('Settings.Storage Settings.Calculating'))
 const chartAriaLabel = computed(() => {
   if (!hasLoadedUsage.value) {
