@@ -1,6 +1,7 @@
 import packageDetails from '../../../../package.json'
 import { getTabPageIcon } from '../../tabs/tabPageIcon'
 import { DEFAULT_VIDEO_ZOOM } from '../../helpers/player/videoZoom'
+import { reconcilePendingTabOrder } from '../../tabs/pendingTabOrder'
 
 const MAX_LOGICAL_HISTORY_ENTRIES = 100
 const NAV_HISTORY_DISPLAY_LIMIT = 15
@@ -8,6 +9,8 @@ const HALF_NAV_HISTORY_DISPLAY_LIMIT = Math.trunc(NAV_HISTORY_DISPLAY_LIMIT / 2)
 
 const state = {
   tabs: [],
+  pendingTabOrder: null,
+  pendingTabOrderRequestId: null,
   activeTabId: null,
   selectedTabIds: [],
   presentedTabId: null,
@@ -85,7 +88,18 @@ const mutations = {
       }
     }
 
-    state.tabs = incomingTabs.map(tab => reconcileTab(previousTabsById.get(tab.id), tab))
+    const reconciledTabs = incomingTabs.map(tab => reconcileTab(previousTabsById.get(tab.id), tab))
+    const pendingOrderAcknowledged = payload.reorderRequestId === state.pendingTabOrderRequestId
+    const reconciledOrder = reconcilePendingTabOrder(
+      reconciledTabs,
+      state.pendingTabOrder,
+      pendingOrderAcknowledged
+    )
+    state.tabs = reconciledOrder.tabs
+    state.pendingTabOrder = reconciledOrder.pendingTabOrder
+    if (reconciledOrder.pendingTabOrder == null) {
+      state.pendingTabOrderRequestId = null
+    }
     for (const tab of incomingTabs) {
       state.skipSilenceByTabId[tab.id] = tab.skipSilence === true
     }
@@ -124,6 +138,21 @@ const mutations = {
   setSelectedTabIds(state, tabIds) {
     const existingIds = new Set(state.tabs.map(tab => tab.id))
     state.selectedTabIds = Array.from(new Set(tabIds.filter(tabId => existingIds.has(tabId))))
+  },
+
+  reorderTabsOptimistically(state, { tabIds, requestId }) {
+    const tabsById = new Map(state.tabs.map(tab => [tab.id, tab]))
+    if (
+      tabIds.length !== state.tabs.length ||
+      new Set(tabIds).size !== tabIds.length ||
+      !tabIds.every(tabId => tabsById.has(tabId))
+    ) {
+      return
+    }
+
+    state.pendingTabOrder = [...tabIds]
+    state.pendingTabOrderRequestId = requestId
+    state.tabs = tabIds.map(tabId => tabsById.get(tabId))
   },
 
   setTabTransition(state, { revision, tabId }) {
@@ -312,9 +341,11 @@ const actions = {
     }
   },
 
-  reorderTabs(_context, tabIds) {
+  reorderTabs({ commit }, tabIds) {
     if (process.env.IS_ELECTRON) {
-      window.ftElectron.tabs.reorder(tabIds)
+      const requestId = window.crypto.randomUUID()
+      commit('reorderTabsOptimistically', { tabIds, requestId })
+      window.ftElectron.tabs.reorder(tabIds, requestId)
     }
   },
 
