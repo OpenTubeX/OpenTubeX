@@ -247,6 +247,8 @@ Trending:
   Gaming: Gaming
   Sports: Sports
   Trending Tabs: Trending Tabs
+  Load Error: Trending could not be loaded.
+  Unsupported Backend: Trending requires the Local API. Select the Local API or enable backend fallback.
 Most Popular: Most Popular
 Most Popular Feed Empty: This Invidious instance's Most Popular feed is empty.
 Feed:

@@ -98,6 +98,13 @@
         <FtLoader
           v-if="isLoading[currentTab]"
         />
+        <p
+          v-else-if="currentErrorMessage"
+          class="statusMessage"
+          role="status"
+        >
+          {{ currentErrorMessage }}
+        </p>
         <FtElementList
           v-else
           :key="currentTab"
@@ -111,7 +118,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
@@ -165,13 +172,29 @@ const trendingCache = computed(() => {
 })
 
 const isLoading = ref({ gaming: false, sports: false, podcasts: false })
-const shownResults = shallowRef([])
+const errorMessages = ref({ gaming: null, sports: null, podcasts: null })
 
 const { tabId } = useTabContext()
 const currentTabStorageKey = tabId ? `Trending/${tabId}/currentTab` : 'Trending/currentTab'
 
 /** @type {import('vue').Ref<'gaming' | 'sports' | 'podcasts'>} */
 const currentTab = ref('gaming')
+
+const isBackendSupported = computed(() => {
+  return process.env.SUPPORTS_LOCAL_API && (backendFallback.value || backendPreference.value === 'local')
+})
+
+const currentErrorMessage = computed(() => {
+  if (!isBackendSupported.value) {
+    return t('Trending.Unsupported Backend')
+  }
+
+  return errorMessages.value[currentTab.value]
+})
+
+const shownResults = computed(() => {
+  return trendingCache.value[currentTab.value] ?? []
+})
 
 // Restore last used tab so navigating into a video and back returns here
 const lastCurrentTabId = sessionStorage.getItem(currentTabStorageKey)
@@ -181,44 +204,60 @@ if (lastCurrentTabId !== null && Object.hasOwn(isLoading.value, lastCurrentTabId
 
 const cacheEntry = trendingCache.value[currentTab.value]
 
-if (cacheEntry && cacheEntry.length > 0) {
-  shownResults.value = cacheEntry
-} else {
+if (cacheEntry === null) {
   onMounted(() => {
     getTrendingInfo()
   })
 }
 
 function getTrendingInfo(refresh = false) {
+  const category = currentTab.value
+
+  if (isLoading.value[category]) {
+    return
+  }
+
+  if (!isBackendSupported.value) {
+    return
+  }
+
   if (refresh) {
-    store.commit('clearTrendingCache', currentTab.value)
+    store.commit('clearTrendingCache', category)
   }
 
-  if (process.env.SUPPORTS_LOCAL_API && (backendFallback.value || backendPreference.value === 'local')) {
-    getTrendingInfoLocal()
-  }
-
-  store.commit('setLastTrendingRefreshTimestamp', { page: currentTab.value, timestamp: new Date() })
+  getTrendingInfoLocal(category)
 }
 
-async function getTrendingInfoLocal() {
-  isLoading.value[currentTab.value] = true
+/**
+ * @param {'gaming' | 'sports' | 'podcasts'} category
+ */
+async function getTrendingInfoLocal(category) {
+  isLoading.value[category] = true
+  errorMessages.value[category] = null
 
   try {
-    const results = await getLocalTrending(region.value, currentTab.value)
+    const results = await getLocalTrending(region.value, category)
 
-    shownResults.value = results
-    isLoading.value[currentTab.value] = false
+    store.commit('setTrendingCache', { value: results, page: category })
+    store.commit('setLastTrendingRefreshTimestamp', { page: category, timestamp: new Date() })
 
-    store.commit('setTrendingCache', { value: results, page: currentTab.value })
-    nextTick(() => {
-      focusTab(currentTab.value)
-    })
+    if (currentTab.value === category) {
+      nextTick(() => {
+        if (currentTab.value === category) {
+          focusTab(category)
+        }
+      })
+    }
   } catch (error) {
     console.error(error)
-    const errorMessage = t('Local API Error (Click to copy)')
-    showApiErrorToast(errorMessage, error, showTabToast)
-    isLoading.value[currentTab.value] = false
+    errorMessages.value[category] = t('Trending.Load Error')
+
+    if (currentTab.value === category) {
+      const errorMessage = t('Local API Error (Click to copy)')
+      showApiErrorToast(errorMessage, error, showTabToast)
+    }
+  } finally {
+    isLoading.value[category] = false
   }
 }
 
@@ -264,11 +303,9 @@ function changeTab(tab) {
   // Save last used tab, restored when the view is mounted again
   sessionStorage.setItem(currentTabStorageKey, tab)
 
-  const cacheEntry = trendingCache.value[currentTab.value]
+  const cacheEntry = trendingCache.value[tab]
 
-  if (cacheEntry && cacheEntry.length > 0) {
-    shownResults.value = cacheEntry
-  } else {
+  if (cacheEntry === null && !isLoading.value[tab] && errorMessages.value[tab] === null) {
     getTrendingInfo()
   }
 }
