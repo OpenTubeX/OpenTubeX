@@ -1311,7 +1311,7 @@ Settings:
     Use Text Pairing Code: Stattdessen Textcode verwenden
     Show QR Code: QR-Code anzeigen
     Text Pairing Code Hint: Kopiere diesen Code auf das vorhandene Gerät. Er enthält das Kopplungsgeheimnis. Lösche ihn nach der Kopplung aus dem Zwischenablageverlauf.
-    Pairing QR Warning: Zeige diesen Code nur dem Gerät, das du hinzufügen möchtest. Er läuft nach zwei Minuten ab.
+    Pairing QR Warning: Zeige diesen Code nur dem vertrauenswürdigen, bereits verbundenen Gerät, das diese Anfrage genehmigt. Er läuft nach zwei Minuten ab.
     Pairing Expires: 'Der Kopplungscode läuft um {time} ab.'
     Verifying Pairing: Der übertragene Datenschutzschlüssel wird überprüft…
     Completing Pairing: Gerätekopplung wird abgeschlossen…

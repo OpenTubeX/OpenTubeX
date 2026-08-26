@@ -1354,7 +1354,7 @@ Settings:
     Use Text Pairing Code: Use text code instead
     Show QR Code: Show QR code
     Text Pairing Code Hint: Copy this code to the existing device. It contains the pairing secret, so clear it from clipboard history after pairing.
-    Pairing QR Warning: Show this code only to the device you want to add. It expires after two minutes.
+    Pairing QR Warning: Show this code only to the trusted, already connected device that will approve this request. It expires after two minutes.
     Pairing Expires: 'Pairing code expires at {time}.'
     Verifying Pairing: Verifying the transferred privacy key…
     Completing Pairing: Completing device pairing…

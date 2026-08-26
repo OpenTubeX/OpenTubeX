@@ -3806,7 +3806,7 @@ test.describe('secure pairing manual entry', () => {
     await expect(dialog.locator('.pairingVerificationCode')).toHaveText(/^\d{6}$/)
     expect(approvedPayload.approving_device_id).toMatch(/^[\w-]{22}$/)
     expect(approvedPayload.encrypted_payload).toMatch(/^[\w-]+$/)
-    expect(JSON.stringify(approvedPayload)).not.toMatch(/fresh\.pairing\.token|sync-user/)
+    expect(JSON.stringify(approvedPayload)).not.toMatch(/fresh\.pairing\.token|pairing-user/)
     await expect(dialog.locator('.promptFixedFooter').getByRole('button', { name: 'Close' }))
       .toBeVisible()
   })
