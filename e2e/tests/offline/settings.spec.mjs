@@ -646,6 +646,21 @@ test.describe('settings', () => {
     ])
   })
 
+  test('disables the comment translation button setting when comments are hidden', async ({ page }) => {
+    const focus = await goToSettingsSection(page, 'focus')
+    const hideTranslationButtons = focus.getByRole('checkbox', {
+      name: /^Hide Comment Translation Buttons/
+    })
+    const hideComments = focus.getByRole('checkbox', { name: /^Hide comments/ })
+
+    await expect(hideTranslationButtons).toBeEnabled()
+    await hideTranslationButtons.locator('..').locator('label.switch-label').click()
+    await expect(hideTranslationButtons).toBeChecked()
+    await hideComments.locator('..').locator('label.switch-label').click()
+    await expect(hideComments).toBeChecked()
+    await expect(hideTranslationButtons).toBeDisabled()
+  })
+
   test('keeps General help icons close to their selects', async ({ page }) => {
     await goTo(page, 'settings')
     const startup = page.locator('.generalSelectGrid .select').filter({ hasText: 'On Startup' })

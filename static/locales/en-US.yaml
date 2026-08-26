@@ -1213,6 +1213,7 @@ Settings:
     Hide Video Likes And Dislikes: Hide Video Likes And Dislikes
     Hide Channel Subscribers: Hide Channel Subscribers
     Hide Comment Likes: Hide Comment Likes
+    Hide Comment Translation Buttons: Hide Comment Translation Buttons
     Hide Recommended Videos: Hide Recommended Videos
     Hide Trending Videos: Hide Trending Videos
     Hide Popular Videos: Hide Popular Videos
@@ -2153,6 +2154,10 @@ Comments:
   Highlighted comment: Highlighted comment
   Highlighted reply: Highlighted reply
   YouTube comment link copied to clipboard: YouTube comment link copied to clipboard
+  Translate to {language}: Translate to {language}
+  Show original: Show original
+  Translating comment, please wait: Translating comment, please wait
+  Comment translation failed: Comment translation failed
 
 Up Next: Up Next
 Description:
