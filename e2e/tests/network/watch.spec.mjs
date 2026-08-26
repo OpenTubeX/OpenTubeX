@@ -282,7 +282,8 @@ test.describe('watch page metadata', () => {
 })
 
 test.describe('watch page', () => {
-  test('shows a pasted comment link as the first unpinned highlighted comment', async ({ page }) => {
+  test('shows a pasted comment link as the first unpinned highlighted comment', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
     const commentId = 'UgxZaBRFEKqDUoZULy94AaABAg'
     await page.locator(sel.searchInput).fill(
       `${VIDEO_URL}&lc=${commentId}&pp=0gcJCSIANpG00pGi`
