@@ -318,6 +318,9 @@ User Playlists:
     EarliestPlayedFirst: 'Date Played (Oldest)'
   SinglePlaylistView:
     Search for Videos: Search for Videos
+    Retry: Retry
+    This playlist could not be loaded.: This playlist could not be loaded.
+    More videos could not be loaded.: More videos could not be loaded.
 
     Toast:
       This video cannot be moved up.: This video cannot be moved up.
