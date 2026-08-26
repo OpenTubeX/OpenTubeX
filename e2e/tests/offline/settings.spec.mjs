@@ -663,7 +663,7 @@ test.describe('settings', () => {
     expect(gaps.after).toBeLessThanOrEqual(16)
   })
 
-  test('keeps SponsorBlock category colors in its flexible layout', async ({ page }) => {
+  test('keeps SponsorBlock category controls inside its flexible layout', async ({ page }) => {
     const addOns = await goToSettingsSection(page, 'add-ons')
     await addOns.locator('label.switch-label').filter({ hasText: 'Enable SponsorBlock' }).click()
 
@@ -677,6 +677,28 @@ test.describe('settings', () => {
       getComputedStyle(element.querySelector('.select-icon')).color
     )))
     expect(paletteColors).toEqual(['rgb(76, 175, 80)', 'rgb(255, 235, 59)'])
+
+    const expectControlsInsideCategories = async () => {
+      const maximumOverflow = await categories.evaluateAll(elements => Math.max(...elements.flatMap(element => {
+        const categoryBounds = element.getBoundingClientRect()
+        return Array.from(element.querySelectorAll('.select')).map(select => {
+          const selectBounds = select.getBoundingClientRect()
+          return Math.max(
+            categoryBounds.left - selectBounds.left,
+            selectBounds.right - categoryBounds.right
+          )
+        })
+      })))
+      expect(maximumOverflow).toBeLessThanOrEqual(1)
+    }
+
+    await expectControlsInsideCategories()
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUiScale', 95)
+    })
+    await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(0.95, 2)
+    await expectControlsInsideCategories()
   })
 
   test('offers a custom SponsorBlock category color initialized from its default', async ({ app, page }) => {
