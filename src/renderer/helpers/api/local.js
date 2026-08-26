@@ -2709,7 +2709,7 @@ export function parseLocalComment(comment, commentThread = undefined) {
     time: getRelativeTimeFromDate(published, false),
     published,
     isEdited: publishedText.includes('(edited)'),
-    likes: parseLocalSubscriberCount(String(comment.like_count ?? '0')),
+    likes: parseLocalSubscriberCount(comment.like_count?.trim() || '0'),
     numReplies: hasReplyToken
       ? parseLocalSubscriberCount(String(comment.reply_count_a11y ?? comment.reply_count ?? '0'))
       : 0

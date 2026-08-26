@@ -3562,6 +3562,21 @@ test.describe('manual comment loading', () => {
     await expect(commentLikes).toContainText('4,600,000')
   })
 
+  test('renders whitespace-only zero like counts as zero', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, { blankCommentLikes: true })
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const commentLikes = page.locator('.commentThread')
+      .filter({ hasText: "We're so honored" })
+      .locator('.commentLikeCount')
+    await expect(commentLikes).toHaveText('0')
+  })
+
   test.describe('comment filtering at 125% UI scale', () => {
     test.use({
       seed: {
