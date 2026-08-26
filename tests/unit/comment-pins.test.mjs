@@ -3,6 +3,8 @@ import test from 'node:test'
 
 import {
   getCommentPinStorageKey,
+  getCommentReplyPinMarker,
+  hasPinnedCommentReply,
   loadCommentPins,
   saveCommentPins
 } from '../../src/renderer/helpers/commentPins.js'
@@ -28,6 +30,22 @@ test('keeps personal comment pins separate by profile and video', () => {
   assert.deepEqual(loadCommentPins(firstVideo, storage), new Set(['comment-a', 'comment-b']))
   assert.deepEqual(loadCommentPins(secondVideo, storage), new Set())
   assert.deepEqual(loadCommentPins(secondProfile, storage), new Set())
+})
+
+test('tracks pinned replies separately from their root comment', () => {
+  const firstReplyMarker = getCommentReplyPinMarker('root/comment', 'reply:one')
+  const secondReplyMarker = getCommentReplyPinMarker('root/comment', 'reply:two')
+  const commentIds = new Set(['reply:one', firstReplyMarker, 'reply:two', secondReplyMarker])
+
+  assert.equal(commentIds.has('root/comment'), false)
+  assert.equal(hasPinnedCommentReply(commentIds, 'root/comment'), true)
+  assert.equal(hasPinnedCommentReply(commentIds, 'other-root'), false)
+
+  commentIds.delete(firstReplyMarker)
+  assert.equal(hasPinnedCommentReply(commentIds, 'root/comment'), true)
+
+  commentIds.delete(secondReplyMarker)
+  assert.equal(hasPinnedCommentReply(commentIds, 'root/comment'), false)
 })
 
 test('removes empty pin groups and ignores malformed storage', () => {
