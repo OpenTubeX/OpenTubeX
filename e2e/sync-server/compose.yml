@@ -13,4 +13,4 @@ services:
       - sync-server-data:/app/data
 
 volumes:
-  sync-server-data:
+  sync-server-data: {}
