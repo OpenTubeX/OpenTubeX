@@ -1340,6 +1340,48 @@ Settings:
     Password: Password
     Log In: Log in
     Register: Register
+    Pair Another Device: Pair another device
+    Pair With Existing Device: Pair with an existing device
+    Device Name: Device name
+    This Device: This device
+    Device Name Required: Enter a name for this device.
+    Pairing Device Name Hint: Choose a name that you will recognize on the device approving this request.
+    Create Pairing Code: Create pairing code
+    Creating Pairing Code: Creating a secure pairing code…
+    Pairing QR Alt: 'Pairing QR code for {device}'
+    Scan Pairing Code: 'On an already connected device, open "Pair another device" and scan this code.'
+    Pairing Code: Pairing code
+    Use Text Pairing Code: Use text code instead
+    Show QR Code: Show QR code
+    Text Pairing Code Hint: Copy this code to the existing device. It contains the pairing secret, so clear it from clipboard history after pairing.
+    Pairing QR Warning: Show this code only to the device you want to add. It expires after two minutes.
+    Pairing Expires: 'Pairing code expires at {time}.'
+    Verifying Pairing: Verifying the transferred privacy key…
+    Completing Pairing: Completing device pairing…
+    Compare Pairing Codes: Compare pairing codes
+    Pairing Code Match Hint: Confirm only if this code matches the code on your existing device.
+    Pairing Codes Match: Codes match
+    Pairing Approval Code Hint: Keep this window open and compare this code with the new device. The new device must not continue if the codes differ.
+    Pairing Scan Hint: Scan the pairing code shown on the device you are adding.
+    Enter Pairing Code: Enter code manually
+    Pairing Code Entry Hint: Paste the pairing code shown on the device you are adding.
+    Check Pairing Code: Check code
+    Scan QR Code: Scan QR code
+    Waiting For Pairing Code: Waiting for a pairing code…
+    Checking Pairing Request: Checking the pairing request…
+    Approving Pairing Request: Encrypting and sending the privacy key…
+    Pairing Approval Warning: Approve only if you can see this request on the device you are adding. Pairing grants account access and transfers the privacy key.
+    Approve Pairing: Approve pairing
+    Try Again: Try again
+    Scan Again: Scan again
+    Camera Unavailable: OpenTubeX could not access a camera. Check the camera permission or enter the pairing code manually.
+    Pairing Unsupported: This sync server does not support secure device pairing.
+    Pairing Failed: Device pairing failed. Try again with a new code.
+    Pairing Request Changed: The pairing request changed, expired, or was already used. Create a new code.
+    Pairing Server Mismatch: This code belongs to a different sync server.
+    Pairing Verification Unavailable: No encrypted sync collection is available to verify the transferred key. Sync the existing device, then try again.
+    Pairing Completed: Device pairing completed
+    Pairing Approved: Device pairing approved
     Disconnect: Disconnect
     Delete Account: Delete sync account
     Delete Account Confirmation: Delete sync account?

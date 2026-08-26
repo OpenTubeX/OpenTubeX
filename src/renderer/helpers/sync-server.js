@@ -154,6 +154,67 @@ export class SyncServerClient {
     return capabilities.bulk_sync === 1
   }
 
+  async supportsKeyPairing() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.key_pairing === 1
+  }
+
+  createPairingSession(recipient) {
+    return this.request('/v1/pairing', {
+      method: 'POST',
+      body: {
+        version: 1,
+        id: recipient.sessionId,
+        recipient_public_key: recipient.recipientPublicKey,
+        recipient_device_id: recipient.recipientDeviceId,
+        recipient_device_name: recipient.recipientDeviceName,
+        recipient_token_hash: recipient.recipientTokenHash,
+      },
+    })
+  }
+
+  getPairingSession(sessionId, recipientToken) {
+    return this.request(`/v1/pairing/${encodeURIComponent(sessionId)}`, {
+      headers: { 'X-Pairing-Token': recipientToken },
+    })
+  }
+
+  claimPairingSession(request) {
+    return this.request(`/v1/pairing/${encodeURIComponent(request.sessionId)}/claim`, {
+      method: 'POST',
+      body: {
+        version: request.version,
+        recipient_public_key: request.recipientPublicKey,
+        recipient_device_id: request.recipientDeviceId,
+        recipient_device_name: request.recipientDeviceName,
+      },
+    })
+  }
+
+  approvePairingSession(sessionId, approvingDeviceId, encryptedPayload) {
+    return this.request(`/v1/pairing/${encodeURIComponent(sessionId)}`, {
+      method: 'PUT',
+      body: {
+        approving_device_id: approvingDeviceId,
+        encrypted_payload: encryptedPayload,
+      },
+    })
+  }
+
+  consumePairingSession(sessionId, recipientToken) {
+    return this.request(`/v1/pairing/${encodeURIComponent(sessionId)}/consume`, {
+      method: 'POST',
+      headers: { 'X-Pairing-Token': recipientToken },
+    })
+  }
+
+  cancelPairingSession(sessionId, recipientToken) {
+    return this.request(`/v1/pairing/${encodeURIComponent(sessionId)}`, {
+      method: 'DELETE',
+      headers: { 'X-Pairing-Token': recipientToken },
+    })
+  }
+
   getEncryptedSyncManifest() {
     return this.request('/v1/encrypted_sync', { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS })
   }

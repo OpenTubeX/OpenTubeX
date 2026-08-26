@@ -2,6 +2,7 @@
 const IpcChannels = {
   ENABLE_PROXY: 'enable-proxy',
   DISABLE_PROXY: 'disable-proxy',
+  GET_DEVICE_NAME: 'get-device-name',
   GET_SYSTEM_LOCALE: 'get-system-locale',
   GET_SYSTEM_FONTS: 'get-system-fonts',
   GET_NAVIGATION_HISTORY: 'get-navigation-history',

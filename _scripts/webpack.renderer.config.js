@@ -215,6 +215,11 @@ const config = {
     })
   ],
   resolve: {
+    fallback: {
+      // @hpke/core prefers Web Crypto in supported browsers. Its old-Node
+      // fallback is unreachable in Electron's renderer and must not be bundled.
+      crypto: false
+    },
     alias: {
       '@root': path.resolve(__dirname, '..'),
       DB_HANDLERS_ELECTRON_RENDERER_OR_WEB$: path.resolve(__dirname, '../src/datastores/handlers/electron.js'),

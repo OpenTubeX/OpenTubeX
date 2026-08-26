@@ -41,6 +41,7 @@ import { createReadStream } from 'node:fs'
 import asyncFs from 'fs/promises'
 import { promisify } from 'util'
 import { Readable } from 'node:stream'
+import { hostname } from 'node:os'
 import { brotliDecompress } from 'zlib'
 
 import packageDetails from '../../package.json'
@@ -1801,6 +1802,7 @@ function runApp() {
     // - "fullscreen": So that the video player can enter full screen
     // - "clipboard-sanitized-write": To allow the user to copy video URLs and error messages
     // - "fileSystem" Needed for the Web File System API (e.g. importing and exporting data)
+    // - video-only "media": To scan secure sync pairing QR codes
 
     session.defaultSession.setPermissionCheckHandler((webContents, permission, requestingOrigin, details) => {
       if (!isOpenTubeXUrl(requestingOrigin)) {
@@ -1810,6 +1812,7 @@ function runApp() {
       return (
         permission === 'fullscreen' ||
         permission === 'clipboard-sanitized-write' ||
+        (permission === 'media' && details.mediaType === 'video') ||
         (permission === 'fileSystem' && !details.isDirectory)
       )
     })
@@ -1824,6 +1827,8 @@ function runApp() {
       callback(
         permission === 'fullscreen' ||
         permission === 'clipboard-sanitized-write' ||
+        (permission === 'media' &&
+          details.mediaTypes?.length === 1 && details.mediaTypes[0] === 'video') ||
         (permission === 'fileSystem' && !details.isDirectory)
       )
     })
@@ -3616,6 +3621,12 @@ function runApp() {
   })
 
   // #endregion navigation history
+
+  ipcMain.handle(IpcChannels.GET_DEVICE_NAME, (event) => {
+    if (isOpenTubeXUrl(event.senderFrame.url)) {
+      return hostname()
+    }
+  })
 
   ipcMain.handle(IpcChannels.GET_SYSTEM_LOCALE, (event) => {
     if (isOpenTubeXUrl(event.senderFrame.url)) {

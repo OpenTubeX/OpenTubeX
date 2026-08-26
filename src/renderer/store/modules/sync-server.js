@@ -387,6 +387,32 @@ async function runSync(context, { allowDataLoss = false } = {}) {
 }
 
 const actions = {
+  async completeSyncServerPairing(
+    { commit, dispatch, rootState },
+    { serverUrl, username, token, privacyKey, privacySalt }
+  ) {
+    if (!rootState.settings.syncServerEnabled) {
+      throw new Error('Enable sync first')
+    }
+    const normalizedUrl = normalizeSyncServerUrl(serverUrl)
+    const trimmedUsername = username.trim()
+    if (!trimmedUsername || !token || !privacyKey || !privacySalt) {
+      throw new Error('Incomplete pairing result')
+    }
+
+    await dispatch('updateSyncServerUrl', normalizedUrl, { root: true })
+    await dispatch('updateSyncServerUsername', trimmedUsername, { root: true })
+    await dispatch('updateSyncServerSnapshot', '{}', { root: true })
+    await dispatch('updateSyncServerLastSyncAt', 0, { root: true })
+    await dispatch('updateSyncServerPrivacyMode', 'enhanced', { root: true })
+    await dispatch('updateSyncServerPrivacyKey', privacyKey, { root: true })
+    await dispatch('updateSyncServerPrivacySalt', privacySalt, { root: true })
+    await dispatch('updateSyncServerToken', token, { root: true })
+    commit('setSyncServerSessionExpired', false)
+
+    return dispatch('startSyncServerAutoSync')
+  },
+
   async authenticateSyncServer(
     { commit, dispatch, rootState, state },
     { mode, serverUrl, username, password, privacyPassphrase }

@@ -1297,6 +1297,48 @@ Settings:
     Password: Passwort
     Log In: Anmelden
     Register: Registrieren
+    Pair Another Device: Weiteres Gerät koppeln
+    Pair With Existing Device: Mit vorhandenem Gerät koppeln
+    Device Name: Gerätename
+    This Device: Dieses Gerät
+    Device Name Required: Gib einen Namen für dieses Gerät ein.
+    Pairing Device Name Hint: Wähle einen Namen, den du auf dem Gerät wiedererkennst, das diese Anfrage genehmigt.
+    Create Pairing Code: Kopplungscode erstellen
+    Creating Pairing Code: Sicherer Kopplungscode wird erstellt…
+    Pairing QR Alt: 'Kopplungs-QR-Code für {device}'
+    Scan Pairing Code: 'Öffne auf einem bereits verbundenen Gerät "Weiteres Gerät koppeln" und scanne diesen Code.'
+    Pairing Code: Kopplungscode
+    Use Text Pairing Code: Stattdessen Textcode verwenden
+    Show QR Code: QR-Code anzeigen
+    Text Pairing Code Hint: Kopiere diesen Code auf das vorhandene Gerät. Er enthält das Kopplungsgeheimnis. Lösche ihn nach der Kopplung aus dem Zwischenablageverlauf.
+    Pairing QR Warning: Zeige diesen Code nur dem Gerät, das du hinzufügen möchtest. Er läuft nach zwei Minuten ab.
+    Pairing Expires: 'Der Kopplungscode läuft um {time} ab.'
+    Verifying Pairing: Der übertragene Datenschutzschlüssel wird überprüft…
+    Completing Pairing: Gerätekopplung wird abgeschlossen…
+    Compare Pairing Codes: Kopplungscodes vergleichen
+    Pairing Code Match Hint: Bestätige nur, wenn dieser Code mit dem Code auf deinem vorhandenen Gerät übereinstimmt.
+    Pairing Codes Match: Codes stimmen überein
+    Pairing Approval Code Hint: Halte dieses Fenster geöffnet und vergleiche den Code mit dem neuen Gerät. Fahre auf dem neuen Gerät nicht fort, wenn die Codes abweichen.
+    Pairing Scan Hint: Scanne den Kopplungscode auf dem Gerät, das du hinzufügen möchtest.
+    Enter Pairing Code: Code manuell eingeben
+    Pairing Code Entry Hint: Füge den Kopplungscode ein, der auf dem Gerät angezeigt wird, das du hinzufügen möchtest.
+    Check Pairing Code: Code prüfen
+    Scan QR Code: QR-Code scannen
+    Waiting For Pairing Code: Warten auf einen Kopplungscode…
+    Checking Pairing Request: Kopplungsanfrage wird geprüft…
+    Approving Pairing Request: Datenschutzschlüssel wird verschlüsselt und gesendet…
+    Pairing Approval Warning: Genehmige die Anfrage nur, wenn sie auf dem Gerät angezeigt wird, das du hinzufügen möchtest. Die Kopplung gewährt Kontozugriff und überträgt den Datenschutzschlüssel.
+    Approve Pairing: Kopplung genehmigen
+    Try Again: Erneut versuchen
+    Scan Again: Erneut scannen
+    Camera Unavailable: OpenTubeX konnte nicht auf eine Kamera zugreifen. Prüfe die Kameraberechtigung oder gib den Kopplungscode manuell ein.
+    Pairing Unsupported: Dieser Sync-Server unterstützt keine sichere Gerätekopplung.
+    Pairing Failed: Die Gerätekopplung ist fehlgeschlagen. Versuche es mit einem neuen Code erneut.
+    Pairing Request Changed: Die Kopplungsanfrage wurde geändert, ist abgelaufen oder wurde bereits verwendet. Erstelle einen neuen Code.
+    Pairing Server Mismatch: Dieser Code gehört zu einem anderen Sync-Server.
+    Pairing Verification Unavailable: Es sind keine verschlüsselten Synchronisierungsdaten verfügbar, mit denen der übertragene Schlüssel überprüft werden kann. Synchronisiere das vorhandene Gerät und versuche es erneut.
+    Pairing Completed: Gerätekopplung abgeschlossen
+    Pairing Approved: Gerätekopplung genehmigt
     Disconnect: Verbindung trennen
     Delete Account: Synchronisierungskonto löschen
     Delete Account Confirmation: Synchronisierungskonto löschen?

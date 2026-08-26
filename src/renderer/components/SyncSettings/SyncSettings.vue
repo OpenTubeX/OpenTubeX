@@ -26,7 +26,7 @@
         <FtInput
           :placeholder="t('Settings.Sync Settings.Username')"
           :show-action-button="false"
-          :value="username"
+          :value="connected ? savedUsername : username"
           :disabled="connected || serverCredentialsDisabled"
           show-label
           @input="username = $event"
@@ -206,6 +206,16 @@
           {{ t('Settings.Sync Settings.Settings not supported') }}
         </p>
         <FtFlexBox class="actions">
+          <SyncPairing
+            :connected="connected"
+            :supported="pairingSupported"
+            :disabled="busy || privacyMode !== 'enhanced' || !privacyKey || !privacySalt"
+            :server-url="serverUrl"
+            :username="savedUsername"
+            :privacy-key="privacyKey"
+            :privacy-salt="privacySalt"
+            @paired="pairingCompleted"
+          />
           <FtButton
             :label="t('Settings.Sync Settings.Sync Now')"
             :icon="['fas', 'sync']"
@@ -231,16 +241,24 @@
         v-else-if="!busy"
         class="actions"
       >
+        <SyncPairing
+          :connected="connected"
+          :supported="pairingSupported"
+          :disabled="pairingActionDisabled"
+          :server-url="serverUrl"
+          :username="username"
+          @paired="pairingCompleted"
+        />
         <FtButton
           :label="t('Settings.Sync Settings.Log In')"
           :icon="['fas', 'right-to-bracket']"
-          :disabled="serverCredentialsDisabled"
+          :disabled="authenticationActionsDisabled"
           @click="authenticate('login')"
         />
         <FtButton
           :label="t('Settings.Sync Settings.Register')"
           :icon="['fas', 'user-plus']"
-          :disabled="serverCredentialsDisabled"
+          :disabled="authenticationActionsDisabled"
           @click="authenticate('register')"
         />
       </FtFlexBox>
@@ -327,6 +345,7 @@ import FtLoader from '../FtLoader/FtLoader.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import SyncPairing from './SyncPairing.vue'
 
 import store from '../../store/index'
 import {
@@ -351,6 +370,7 @@ const username = ref(store.getters.getSyncServerUsername)
 const password = ref('')
 const privacyPassphrase = ref('')
 const serverPrivacySupported = ref(null)
+const serverPairingSupported = ref(false)
 const serverCheckStatus = ref('idle')
 const serverCheckError = ref('')
 const localError = ref('')
@@ -375,6 +395,17 @@ const privacyPolicyUrl = computed(() => {
 const serverCredentialsDisabled = computed(() => (
   authenticating.value ||
   (!connected.value && serverCheckStatus.value !== 'valid')
+))
+const accountCredentialsReady = computed(() => (
+  username.value.trim() !== '' && password.value !== ''
+))
+const pairingActionDisabled = computed(() => (
+  serverCredentialsDisabled.value
+))
+const authenticationActionsDisabled = computed(() => (
+  serverCredentialsDisabled.value ||
+  !accountCredentialsReady.value ||
+  (serverPrivacySupported.value === true && privacyPassphrase.value === '')
 ))
 const status = computed(() => store.getters.getSyncServerStatus)
 const busy = computed(() => status.value === 'syncing')
@@ -406,6 +437,15 @@ const syncSessionsEnabled = computed(() => store.getters.getSyncServerSyncSessio
 const syncSettingsEnabled = computed(() => store.getters.getSyncServerSyncSettings)
 const historySupported = computed(() => store.getters.getSyncServerHistorySupported)
 const privacyMode = computed(() => store.getters.getSyncServerPrivacyMode)
+const privacyKey = computed(() => store.getters.getSyncServerPrivacyKey)
+const privacySalt = computed(() => store.getters.getSyncServerPrivacySalt)
+const pairingSupported = computed(() => {
+  try {
+    return serverPairingSupported.value && normalizeSyncServerUrl(serverUrl.value).startsWith('https://')
+  } catch {
+    return false
+  }
+})
 const settingsSupported = computed(() => privacyMode.value === 'enhanced')
 const sessionsSupported = computed(() => (
   process.env.IS_ELECTRON && privacyMode.value === 'enhanced'
@@ -430,21 +470,27 @@ watch([serverUrl, connected, syncEnabled], ([value, isConnected, isEnabled], [pr
   const sequence = ++serverCheckSequence
   const disconnected = wasConnected && !isConnected && value === previousValue
   serverPrivacySupported.value = null
+  serverPairingSupported.value = false
   serverCheckStatus.value = disconnected ? 'valid' : 'idle'
   serverCheckError.value = ''
-  if (!isEnabled || isConnected || !value.trim()) return
+  if (!isEnabled || !value.trim()) return
 
   serverCheckTimer = setTimeout(async () => {
-    if (!disconnected) serverCheckStatus.value = 'checking'
-    const client = new SyncServerClient(value)
+    if (!disconnected && !isConnected) serverCheckStatus.value = 'checking'
+    const client = new SyncServerClient(
+      value,
+      isConnected ? store.getters.getSyncServerToken : ''
+    )
     serverCheckClient = client
     try {
       const capabilities = await client.getCapabilities()
       if (sequence !== serverCheckSequence) return
       serverPrivacySupported.value = capabilities.encrypted_sync === 1
+      serverPairingSupported.value = capabilities.key_pairing === 1
       serverCheckStatus.value = 'valid'
     } catch {
       if (sequence !== serverCheckSequence) return
+      if (isConnected) return
       serverCheckStatus.value = 'error'
       serverCheckError.value = t('Settings.Sync Settings.Server Unavailable')
     } finally {
@@ -472,7 +518,7 @@ async function saveServerUrl() {
 }
 
 async function authenticate(mode) {
-  if (busy.value || serverCredentialsDisabled.value) return
+  if (busy.value || authenticationActionsDisabled.value) return
   localError.value = ''
   authenticating.value = true
   try {
@@ -510,6 +556,20 @@ async function syncNow() {
     }
     localError.value = error.message
   }
+}
+
+function pairingCompleted(result) {
+  serverUrl.value = store.getters.getSyncServerUrl
+  username.value = store.getters.getSyncServerUsername
+  password.value = ''
+  privacyPassphrase.value = ''
+  const message = result === 'approved'
+    ? t('Settings.Sync Settings.Pairing Approved')
+    : t('Settings.Sync Settings.Pairing Completed')
+  showToast({
+    message,
+    icon: ['fas', 'key'],
+  })
 }
 
 async function confirmDataLossSync() {
