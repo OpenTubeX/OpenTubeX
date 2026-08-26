@@ -1,0 +1,134 @@
+name: Performance Comparison
+
+on:
+  pull_request:
+    branches: [ master, development, '**-RC' ]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  performance:
+    name: Compare performance with base
+    if: ${{ github.head_ref != 'weblate-translations' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    permissions:
+      contents: read
+
+    steps:
+    - name: Check out candidate
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        path: candidate
+        persist-credentials: false
+
+    - name: Check out base
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        ref: ${{ github.event.pull_request.base.sha }}
+        path: base
+        persist-credentials: false
+
+    - name: Use Node.js 24.x
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: 24.x
+        package-manager-cache: false
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+      with:
+        version: 11
+        cache: false
+
+    - name: Get pnpm cache directory
+      id: cache_dir
+      shell: bash
+      run: |
+        {
+          echo 'cache_dir<<EOF'
+          pnpm store path
+          echo EOF
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Cache pnpm store
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        key: ${{ format('performance-{0}-{1}-pnpm-{2}', runner.os, runner.arch, hashFiles('base/pnpm-lock.yaml', 'candidate/pnpm-lock.yaml')) }}
+        path: ${{ steps.cache_dir.outputs.cache_dir }}
+
+    - name: Install candidate dependencies
+      run: pnpm --dir candidate run ci
+      shell: bash
+
+    - name: Install base dependencies
+      run: pnpm --dir base run ci
+      shell: bash
+
+    - name: Get Electron versions
+      id: electron
+      run: |
+        printf 'base=%s\n' "$(node -p "require('./base/node_modules/electron/package.json').version")" >> "$GITHUB_OUTPUT"
+        printf 'candidate=%s\n' "$(node -p "require('./candidate/node_modules/electron/package.json').version")" >> "$GITHUB_OUTPUT"
+      shell: bash
+
+    - name: Cache Electron binaries
+      id: electron_cache
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        key: ${{ format('performance-electron-{0}-{1}-{2}-{3}', runner.os, runner.arch, steps.electron.outputs.base, steps.electron.outputs.candidate) }}
+        path: |
+          base/node_modules/.pnpm/electron@*/node_modules/electron/dist
+          base/node_modules/.pnpm/electron@*/node_modules/electron/path.txt
+          candidate/node_modules/.pnpm/electron@*/node_modules/electron/dist
+          candidate/node_modules/.pnpm/electron@*/node_modules/electron/path.txt
+
+    - name: Install Electron binaries
+      if: steps.electron_cache.outputs.cache-hit != 'true'
+      run: |
+        pnpm --dir base exec install-electron
+        pnpm --dir candidate exec install-electron
+      shell: bash
+
+    - name: Build base app
+      run: pnpm --dir base run test:e2e:pack
+      shell: bash
+
+    - name: Build candidate app
+      run: pnpm --dir candidate run test:e2e:pack
+      shell: bash
+
+    # Start in report-only mode so ordinary PRs establish the runner's natural
+    # variance before this becomes a required regression gate.
+    - name: Compare performance
+      run: |
+        xvfb-run -a -s "-screen 0 1920x1080x24" \
+          node candidate/e2e/performance/compare.mjs \
+          --base base \
+          --candidate candidate \
+          --output performance-results.json \
+          --summary performance-summary.md \
+          --report-only
+      shell: bash
+
+    - name: Publish performance summary
+      if: ${{ always() }}
+      run: |
+        if [ -f performance-summary.md ]; then
+          sed -n '1,$p' performance-summary.md >> "$GITHUB_STEP_SUMMARY"
+        fi
+      shell: bash
+
+    - name: Upload performance results
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: performance-results
+        path: performance-results.json
+        if-no-files-found: ignore
+        retention-days: 30

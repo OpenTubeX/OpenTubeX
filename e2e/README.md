@@ -113,3 +113,26 @@ Pull requests without changed or affected E2E tests pass without running tests.
 Network tests use the fixture fallback on retry.
 
 On failure the Playwright HTML report and traces are uploaded as artifacts.
+
+## Performance comparison
+
+The pull-request performance workflow builds the base and candidate commits,
+then runs the large cached-subscription benchmark against both builds on one
+runner. It alternates between builds, discards two warm-ups per build, and
+compares the median of seven samples. The Actions summary shows the comparison,
+and the raw samples are uploaded as `performance-results.json`.
+
+The workflow initially reports regressions without failing so its thresholds
+can be checked against normal runner variance. Without `--report-only`, the
+command exits with a failure when the candidate crosses an absolute limit or is
+both 15% and 20 ms slower for elapsed time, or both 20% and 16 ms slower for a
+longest-frame measurement.
+
+To compare two checkouts locally, build `dist-e2e` in both and run:
+
+```bash
+xvfb-run -a -s "-screen 0 1920x1080x24" \
+  pnpm run test:performance -- \
+  --base /path/to/base-checkout \
+  --candidate /path/to/candidate-checkout
+```
