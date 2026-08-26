@@ -3010,7 +3010,7 @@ function getEventLink(event) {
  * @param {HTMLAnchorElement} link
  */
 function isExternalLink(link) {
-  return !link.href.startsWith(window.location.origin)
+  return link.origin !== window.location.origin
 }
 
 /**
