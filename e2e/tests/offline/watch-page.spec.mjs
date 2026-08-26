@@ -1007,8 +1007,12 @@ test.describe('watch page', () => {
     await watchView.evaluate(async (view) => {
       view.errorMessage = 'The yt-dlp extraction failed'
       await view.$nextTick()
+      const retryButton = view.$el.querySelector('.errorActionButton')
+      if (retryButton === null) {
+        throw new Error('Built-in extraction retry button was not rendered')
+      }
+      retryButton.click()
     })
-    await page.getByRole('button', { name: 'Retry with built-in extraction' }).click()
     await expect.poll(() => watchView.evaluate((view) => ({
       activeEngine: view.activePlaybackEngine,
       errorMessage: view.errorMessage,
