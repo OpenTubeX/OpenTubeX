@@ -1903,6 +1903,7 @@ Video:
       Zoom: Zoom
       Off: 'Off'
     TranslatedCaptionTemplate: '{language} (translated from "{originalLanguage}")'
+    Auto-generated Caption Template: '{language} (auto-generated)'
     Audio Tracks: Audio Tracks
     Autoplay is off: Autoplay is off
     Autoplay is on: Autoplay is on

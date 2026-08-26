@@ -1705,6 +1705,7 @@ Video:
       MutePrompt: '{segmentCategory} stummschalten?'
       SkipActionType: Überspringen
     TranslatedCaptionTemplate: '{language} (übersetzt von {originalLanguage})'
+    Auto-generated Caption Template: '{language} (automatisch erstellt)'
     Exit Full Window: Vollständiges Fenster beenden
     Hide Stats: Statistiken ausblenden
     Autoplay is off: Automatische Wiedergabe ist ausgeschaltet
