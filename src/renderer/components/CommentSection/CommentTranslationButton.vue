@@ -49,6 +49,10 @@ const props = defineProps({
   targetLanguageName: {
     type: String,
     required: true
+  },
+  ignoredLanguages: {
+    type: Array,
+    required: true
   }
 })
 
@@ -56,13 +60,13 @@ const translationAvailable = ref(false)
 let detectionGeneration = 0
 
 watch(
-  [() => props.comment.translationText, () => props.targetLanguage],
-  async ([text, targetLanguage]) => {
+  [() => props.comment.translationText, () => props.targetLanguage, () => props.ignoredLanguages],
+  async ([text, targetLanguage, ignoredLanguages]) => {
     const generation = ++detectionGeneration
     translationAvailable.value = false
 
     try {
-      const available = await shouldOfferCommentTranslation(text, targetLanguage)
+      const available = await shouldOfferCommentTranslation(text, targetLanguage, ignoredLanguages)
       if (generation === detectionGeneration) {
         translationAvailable.value = available
       }

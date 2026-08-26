@@ -1,20 +1,66 @@
 import Autolinker from 'autolinker'
 
-const MIN_LANGUAGE_SCORE_MARGIN = 0.3
+import {
+  detectCommentTranslationAvailability,
+} from './comment-language-detection.js'
+
+export {
+  COMMENT_TRANSLATION_LANGUAGE_CODES,
+  normalizeCommentTranslationLanguageCode,
+} from './comment-language-detection.js'
+
 let languageDetectorPromise
-
-function normalizeDetectedLanguageTarget(language) {
-  const baseLanguage = language.split('-')[0]
-  if (baseLanguage === 'nb' || baseLanguage === 'nn') {
-    return 'no'
-  }
-
-  return baseLanguage
-}
+let languageDetectorWorker
+let nextLanguageDetectionId = 0
+const pendingLanguageDetections = new Map()
 
 async function getLanguageDetector() {
   languageDetectorPromise ??= import('eld/extrasmall').then(({ eld }) => eld)
   return await languageDetectorPromise
+}
+
+function getLanguageDetectorWorker() {
+  if (languageDetectorWorker) return languageDetectorWorker
+
+  languageDetectorWorker = new Worker(
+    new URL('../workers/comment-language-detector.worker.js', import.meta.url),
+    { type: 'module' }
+  )
+  languageDetectorWorker.addEventListener('message', ({ data }) => {
+    const pending = pendingLanguageDetections.get(data.id)
+    if (!pending) return
+
+    pendingLanguageDetections.delete(data.id)
+    if (data.error) {
+      pending.reject(new Error(data.error))
+    } else {
+      pending.resolve(data.available === true)
+    }
+  })
+  languageDetectorWorker.addEventListener('error', (event) => {
+    const error = new Error(event.message || 'Comment language detection worker failed')
+    for (const { reject } of pendingLanguageDetections.values()) {
+      reject(error)
+    }
+    pendingLanguageDetections.clear()
+    languageDetectorWorker?.terminate()
+    languageDetectorWorker = undefined
+  })
+
+  return languageDetectorWorker
+}
+
+/**
+ * Stop language detection and release the worker that owns the eld library.
+ */
+export function terminateCommentTranslationLanguageDetector() {
+  languageDetectorWorker?.terminate()
+  languageDetectorWorker = undefined
+
+  for (const { resolve } of pendingLanguageDetections.values()) {
+    resolve(false)
+  }
+  pendingLanguageDetections.clear()
 }
 
 /**
@@ -23,27 +69,36 @@ async function getLanguageDetector() {
  * button-free instead of prompting for a translation it may not need.
  * @param {string} text
  * @param {string} targetLanguage
+ * @param {string[]} [ignoredLanguages]
  * @returns {Promise<boolean>}
  */
-export async function shouldOfferCommentTranslation(text, targetLanguage) {
-  if (!text.trim() || !targetLanguage) {
-    return false
+export async function shouldOfferCommentTranslation(text, targetLanguage, ignoredLanguages = []) {
+  if (typeof Worker === 'undefined') {
+    const detector = await getLanguageDetector()
+    return detectCommentTranslationAvailability(
+      detector,
+      text,
+      targetLanguage,
+      ignoredLanguages
+    )
   }
 
-  const detector = await getLanguageDetector()
-  const normalizedTarget = normalizeDetectedLanguageTarget(targetLanguage)
-  const supportedLanguages = Object.values(detector.info().Languages)
-  if (!supportedLanguages.includes(normalizedTarget)) {
-    return false
-  }
-
-  const result = detector.detect(text.replaceAll(/(?:^|\s)@\S+/g, ' '))
-  if (!result.language || !result.isReliable() || result.language === normalizedTarget) {
-    return false
-  }
-
-  const scores = result.getScores()
-  return scores[result.language] - (scores[normalizedTarget] ?? 0) >= MIN_LANGUAGE_SCORE_MARGIN
+  const id = ++nextLanguageDetectionId
+  const worker = getLanguageDetectorWorker()
+  return await new Promise((resolve, reject) => {
+    pendingLanguageDetections.set(id, { resolve, reject })
+    try {
+      worker.postMessage({
+        id,
+        text,
+        targetLanguage,
+        ignoredLanguages: [...ignoredLanguages],
+      })
+    } catch (error) {
+      pendingLanguageDetections.delete(id)
+      reject(error)
+    }
+  })
 }
 
 /**

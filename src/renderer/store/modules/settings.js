@@ -30,6 +30,7 @@ import {
   TUTORIAL_AUDIENCE_SETTING_ID,
 } from '../../helpers/tutorialState.js'
 import { DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB } from '../../../ytDlpPlaybackCacheSettings.js'
+import { terminateCommentTranslationLanguageDetector } from '../../helpers/comment-translations'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
 const TUTORIAL_STATE_SETTING_IDS = new Set([
@@ -206,6 +207,7 @@ const state = {
   backendPreference: !process.env.SUPPORTS_LOCAL_API ? 'invidious' : 'local',
   barColor: false,
   checkForUpdates: true,
+  commentTranslationIgnoredLanguages: [],
   confirmCloseApp: true,
   confirmCloseMultipleTabs: true,
   confirmCloseWindowWithMultipleTabs: true,
@@ -220,6 +222,7 @@ const state = {
   secColor: 'Blue',
   defaultAutoplayInterruptionIntervalHours: 3,
   defaultCaptionSettings: '{}',
+  enableCommentTranslations: true,
   enableCaptionTranslations: false,
   preferredCaptionLocale: '',
   defaultInterval: 5,
@@ -520,6 +523,12 @@ const state = {
 export const DEFAULT_SETTINGS = Object.freeze(structuredClone(state))
 
 const sideEffectHandlers = {
+  enableCommentTranslations: (_store, value) => {
+    if (!value) {
+      terminateCommentTranslationLanguageDetector()
+    }
+  },
+
   keyboardShortcuts: (_store, value) => {
     applyKeyboardShortcutOverrides(value)
   },

@@ -222,3 +222,41 @@ test('comment translation button setting follows local API availability', () => 
   assert.ok(localApiValues.some(({ label }) => label === 'Hide Comment Translation Buttons'))
   assert.ok(!webValues.some(({ label }) => label === 'Hide Comment Translation Buttons'))
 })
+
+test('ignored comment translation languages follow local API availability', () => {
+  const options = {
+    sections: [{
+      type: 'general',
+      title: 'General',
+      description: locale.Settings.Categories['General Description'],
+    }],
+    tm: path => getAtPath(locale, path),
+    store: {
+      getters: new Proxy({}, {
+        get() {
+          return false
+        }
+      })
+    },
+    usingElectron: true,
+    isMac: false,
+    isLinuxWayland: false,
+    systemUsesDarkTheme: true,
+  }
+
+  const localApiValues = createSettingsSearchIndex({
+    ...options,
+    supportsLocalApi: true,
+  }).get('general')
+  const webValues = createSettingsSearchIndex({
+    ...options,
+    supportsLocalApi: false,
+  }).get('general')
+
+  assert.ok(localApiValues.some(({ label }) => label === 'Never translate comments in'))
+  assert.ok(localApiValues.some(({ label }) => label === 'Enable comment translations'))
+  assert.ok(localApiValues.some(({ label }) => label === 'Comment translations'))
+  assert.ok(!webValues.some(({ label }) => label === 'Never translate comments in'))
+  assert.ok(!webValues.some(({ label }) => label === 'Enable comment translations'))
+  assert.ok(!webValues.some(({ label }) => label === 'Comment translations'))
+})

@@ -2,9 +2,12 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  COMMENT_TRANSLATION_LANGUAGE_CODES,
   formatCommentTranslation,
   getCommentTranslationSource,
-  shouldOfferCommentTranslation
+  normalizeCommentTranslationLanguageCode,
+  shouldOfferCommentTranslation,
+  terminateCommentTranslationLanguageDetector,
 } from '../../src/renderer/helpers/comment-translations.js'
 
 test('does not offer translation for the target language or ambiguous text', async () => {
@@ -16,6 +19,64 @@ test('does not offer translation for the target language or ambiguous text', asy
 test('offers translation for a confidently detected different language', async () => {
   assert.equal(await shouldOfferCommentTranslation('Das ist ein deutscher Kommentar.', 'en'), true)
   assert.equal(await shouldOfferCommentTranslation('Este comentario está escrito en español.', 'en'), true)
+})
+
+test('does not offer translation for an ignored language', async () => {
+  assert.equal(
+    await shouldOfferCommentTranslation('Das ist ein deutscher Kommentar.', 'en', ['de']),
+    false
+  )
+  assert.equal(
+    await shouldOfferCommentTranslation('Este comentario está escrito en español.', 'en', ['de']),
+    true
+  )
+})
+
+test('normalizes app locales to supported comment detection languages', () => {
+  assert.equal(normalizeCommentTranslationLanguageCode('de-DE'), 'de')
+  assert.equal(normalizeCommentTranslationLanguageCode('nb-NO'), 'no')
+  assert.equal(normalizeCommentTranslationLanguageCode('fil'), 'tl')
+  assert.ok(COMMENT_TRANSLATION_LANGUAGE_CODES.includes('de'))
+})
+
+test('terminates in-flight language detection with its worker', async (t) => {
+  const OriginalWorker = globalThis.Worker
+  let worker
+
+  class LanguageDetectorWorker {
+    constructor() {
+      this.listeners = new Map()
+      this.terminated = false
+      worker = this
+    }
+
+    addEventListener(type, listener) {
+      this.listeners.set(type, listener)
+    }
+
+    postMessage() {}
+
+    terminate() {
+      this.terminated = true
+    }
+  }
+
+  globalThis.Worker = LanguageDetectorWorker
+  t.after(() => {
+    terminateCommentTranslationLanguageDetector()
+    globalThis.Worker = OriginalWorker
+  })
+
+  const detection = shouldOfferCommentTranslation(
+    'Das ist ein deutscher Kommentar.',
+    'en'
+  )
+  assert.equal(worker.terminated, false)
+
+  terminateCommentTranslationLanguageDetector()
+
+  assert.equal(worker.terminated, true)
+  assert.equal(await detection, false)
 })
 
 test('keeps plain comment text as the translation source', () => {

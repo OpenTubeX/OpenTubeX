@@ -128,6 +128,7 @@
         :loading="loadingTranslationIds.has(reply.id)"
         :target-language="translationLanguage"
         :target-language-name="translationLanguageName"
+        :ignored-languages="commentTranslationIgnoredLanguages"
         @translate-comment="emit('translate-comment', $event)"
       />
       <p class="commentLikeCount">
@@ -176,6 +177,7 @@
         :translation-enabled="translationEnabled"
         :translation-language="translationLanguage"
         :translation-language-name="translationLanguageName"
+        :comment-translation-ignored-languages="commentTranslationIgnoredLanguages"
         :highlighted-comment-id="highlightedCommentId"
         :highlight="highlight"
         :personal-pinned-comment-ids="personalPinnedCommentIds"
@@ -282,6 +284,10 @@ const props = defineProps({
   },
   translationLanguageName: {
     type: String,
+    required: true
+  },
+  commentTranslationIgnoredLanguages: {
+    type: Array,
     required: true
   },
   highlightedCommentId: {

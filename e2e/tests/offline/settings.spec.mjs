@@ -662,6 +662,42 @@ test.describe('settings', () => {
     await expect(hideTranslationButtons).toBeDisabled()
   })
 
+  test('adds and removes languages that comment translation should ignore', async ({ page }) => {
+    const general = await goToSettingsSection(page, 'general')
+    const enableTranslations = general.getByRole('checkbox', {
+      name: 'Enable comment translations'
+    })
+    const languageSelect = general.getByRole('combobox', {
+      name: 'Never translate comments in'
+    })
+
+    await expect(enableTranslations).toBeChecked()
+    await languageSelect.click()
+    await expect(page.getByRole('option', { name: 'English', exact: true })).toHaveCount(0)
+    await page.getByRole('option', { name: 'German', exact: true }).click()
+
+    const ignoredLanguages = general.getByRole('list', {
+      name: 'Never translate comments in'
+    })
+    await expect(ignoredLanguages).toContainText('German')
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getCommentTranslationIgnoredLanguages
+    })).toEqual(['de'])
+
+    const removeGerman = ignoredLanguages.getByRole('button', {
+      name: 'Translate German comments again'
+    })
+    await enableTranslations.locator('..').locator('label.switch-label').click()
+    await expect(enableTranslations).not.toBeChecked()
+    await expect(languageSelect).toBeDisabled()
+    await expect(removeGerman).toBeDisabled()
+
+    await enableTranslations.locator('..').locator('label.switch-label').click()
+    await removeGerman.click()
+    await expect(ignoredLanguages).toHaveCount(0)
+  })
+
   test('keeps General help icons close to their selects', async ({ page }) => {
     await goTo(page, 'settings')
     const startup = page.locator('.generalSelectGrid .select').filter({ hasText: 'On Startup' })

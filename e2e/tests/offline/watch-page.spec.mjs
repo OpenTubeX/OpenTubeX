@@ -3191,6 +3191,62 @@ test.describe('manual comment loading', () => {
     await expect(englishComment.locator(':scope > .commentTranslation .commentTranslationButton')).toHaveCount(0)
   })
 
+  test('does not offer to translate comments in an ignored language', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await Promise.all([
+        store.dispatch('updateCurrentLocale', 'de-DE'),
+        store.dispatch('updateCommentTranslationIgnoredLanguages', ['en'])
+      ])
+    })
+
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('.commentTranslationButton')).toHaveCount(0)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateCommentTranslationIgnoredLanguages', [])
+    })
+    await expect(page.locator('.commentTranslationButton').first()).toBeVisible()
+  })
+
+  test('disables comment translations globally and restarts detection when re-enabled', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateCurrentLocale', 'de-DE')
+    })
+
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+    const translationButtons = page.locator('.commentTranslationButton')
+    await expect(translationButtons.first()).toBeVisible()
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateEnableCommentTranslations', false)
+    })
+    await expect(translationButtons).toHaveCount(0)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateEnableCommentTranslations', true)
+    })
+    await expect(translationButtons.first()).toBeVisible()
+  })
+
   test('hides comment translation buttons through the distraction-free setting', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
 
