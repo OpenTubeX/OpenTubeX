@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -2539,6 +2540,110 @@ test.describe('settings', () => {
     await expect(privacyPolicy).toHaveCount(0)
   })
 
+  test('creates and cancels a secure sync pairing code without uploading key material', async ({ page }) => {
+    const serverUrl = 'https://pairing.example'
+    let createdSession
+    let cancelledSessionId
+    let cancelledRecipientToken
+
+    await page.route(`${serverUrl}/**`, async route => {
+      const request = route.request()
+      const url = new URL(request.url())
+      if (url.pathname === '/health') {
+        await route.fulfill({
+          json: {
+            status: 'ok',
+            capabilities: { encrypted_sync: 1, key_pairing: 1 }
+          }
+        })
+        return
+      }
+      if (url.pathname === '/v1/pairing' && request.method() === 'POST') {
+        createdSession = request.postDataJSON()
+        await route.fulfill({
+          status: 201,
+          json: {
+            version: 1,
+            id: createdSession.id,
+            account_id: null,
+            recipient_public_key: createdSession.recipient_public_key,
+            recipient_device_id: createdSession.recipient_device_id,
+            recipient_device_name: createdSession.recipient_device_name,
+            approving_device_id: null,
+            expires_at: Date.now() + 120_000,
+            approved: false
+          }
+        })
+        return
+      }
+      if (url.pathname.startsWith('/v1/pairing/') && request.method() === 'DELETE') {
+        cancelledSessionId = url.pathname.split('/').at(-1)
+        cancelledRecipientToken = request.headers()['x-pairing-token']
+        await route.fulfill({ status: 204 })
+        return
+      }
+      await route.fulfill({ status: 404 })
+    })
+
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByText('Enable Sync', { exact: true }).click()
+    await syncSection.getByLabel('Server URL').fill(serverUrl)
+    await syncSection.getByLabel('Server URL').press('Tab')
+    const pairButton = syncSection.getByRole('button', { name: 'Pair with an existing device' })
+    const loginButton = syncSection.getByRole('button', { name: 'Log in' })
+    const registerButton = syncSection.getByRole('button', { name: 'Register' })
+    await expect(pairButton).toBeEnabled()
+    await expect(loginButton).toBeDisabled()
+    await expect(registerButton).toBeDisabled()
+
+    await pairButton.click()
+    const dialog = page.getByRole('dialog', { name: 'Pair with an existing device' })
+    const deviceName = await page.evaluate(() => window.ftElectron.getDeviceName())
+    await expect(dialog.getByLabel('Device name')).toHaveValue(deviceName)
+    await dialog.getByLabel('Device name').fill('Travel laptop')
+    await dialog.getByRole('button', { name: 'Create pairing code' }).click()
+
+    await expect(dialog.getByRole('img', { name: 'Pairing QR code for Travel laptop' })).toBeVisible()
+    await expect(dialog.getByText('Pairing code expires at')).toBeVisible()
+    expect(createdSession).toMatchObject({ version: 1, recipient_device_name: 'Travel laptop' })
+    expect(createdSession.recipient_token_hash).toMatch(/^[\w-]{43}$/)
+    expect(JSON.stringify(createdSession)).not.toMatch(/privacy|passphrase|password|username|jwt/i)
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('updateUiScale', 95)
+    })
+    await page.setViewportSize({ width: 600, height: 420 })
+    const textCodeButton = dialog.getByRole('button', { name: 'Use text code instead' })
+    await expect(textCodeButton).toBeInViewport()
+    await expect(dialog.locator('.promptContentScroller')).toHaveJSProperty('scrollTop', 0)
+    await textCodeButton.click()
+    const codeField = dialog.getByRole('textbox', { name: 'Pairing code' })
+    await expect(codeField).toHaveValue(/^opentubex-pairing:/)
+    await expect(codeField).toHaveAttribute('readonly', '')
+
+    await page.setViewportSize({ width: 600, height: 300 })
+    const contentScroller = dialog.locator('.promptContentScroller')
+    const cancelButton = dialog.locator('.promptFixedFooter').getByRole('button', { name: 'Cancel' })
+    await expect(contentScroller).toHaveAttribute('data-overlayscrollbars-viewport')
+    await expect(cancelButton).toBeVisible()
+    const cancelBoundsBeforeScroll = await cancelButton.boundingBox()
+    await contentScroller.evaluate(element => element.scrollTo(0, element.scrollHeight))
+    await expect.poll(() => contentScroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    const cancelBoundsAfterScroll = await cancelButton.boundingBox()
+    expect(Math.abs(cancelBoundsAfterScroll.y - cancelBoundsBeforeScroll.y)).toBeLessThanOrEqual(1)
+
+    await cancelButton.click()
+    await expect(dialog).toHaveCount(0)
+    await expect.poll(() => cancelledSessionId).toBe(createdSession.id)
+    expect(cancelledRecipientToken).toMatch(/^[\w-]{43}$/)
+    expect(createHash('sha256')
+      .update(Buffer.from(cancelledRecipientToken, 'base64url'))
+      .digest('base64url')).toBe(createdSession.recipient_token_hash)
+  })
+
   test('keeps the sync server idle until sync is enabled', async ({ page }) => {
     const syncRequests = []
     await page.route('https://sync.d3sox.me/**', async (route) => {
@@ -3646,6 +3751,111 @@ test.describe('SponsorBlock highlight settings', () => {
   })
 })
 
+test.describe('secure pairing manual entry', () => {
+  const serverUrl = 'https://pairing.example'
+
+  test.use({
+    seed: {
+      settings: {
+        syncServerAutoSync: false,
+        syncServerEnabled: true,
+        syncServerPrivacyKey: `${'A'.repeat(43)}=`,
+        syncServerPrivacyMode: 'enhanced',
+        syncServerPrivacySalt: `${'A'.repeat(22)}==`,
+        syncServerToken: 'pairing-test-token',
+        syncServerUrl: serverUrl,
+        syncServerUsername: 'pairing-user'
+      }
+    }
+  })
+
+  test('accepts a text code when no camera is available', async ({ page }) => {
+    const accountId = '0198e2d4-8ad2-7f73-8d6e-4f076707ce25'
+    let approvedPayload
+    const request = {
+      version: 1,
+      origin: serverUrl,
+      sessionId: 'ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8',
+      recipientPublicKey: 'sfG4QN56MkGwJ0jPmwW3TcjF6EUSmHOIF712qo6-jCs',
+      recipientDeviceId: 'MDEyMzQ1Njc4OTo7PD0-Pw',
+      recipientDeviceName: 'Window B',
+      pairingSecret: 'oKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr8'
+    }
+    const pairingCode = `opentubex-pairing:${Buffer.from(JSON.stringify(request)).toString('base64url')}`
+
+    await page.route(`${serverUrl}/**`, async route => {
+      const url = new URL(route.request().url())
+      if (url.pathname === '/health') {
+        await route.fulfill({
+          json: {
+            status: 'ok',
+            capabilities: { encrypted_sync: 1, key_pairing: 1 }
+          }
+        })
+        return
+      }
+      if (url.pathname === `/v1/pairing/${request.sessionId}/claim`) {
+        await route.fulfill({
+          json: {
+            session: {
+              version: request.version,
+              id: request.sessionId,
+              account_id: accountId,
+              recipient_public_key: request.recipientPublicKey,
+              recipient_device_id: request.recipientDeviceId,
+              recipient_device_name: request.recipientDeviceName,
+              approving_device_id: null,
+              expires_at: Date.now() + 120_000,
+              approved: false
+            },
+            jwt: 'fresh.pairing.token'
+          }
+        })
+        return
+      }
+      if (url.pathname === `/v1/pairing/${request.sessionId}` &&
+          route.request().method() === 'PUT') {
+        approvedPayload = route.request().postDataJSON()
+        await route.fulfill({ status: 204 })
+        return
+      }
+      await route.fulfill({ status: 404 })
+    })
+
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+    const syncSection = page.locator('[data-section="sync"]')
+    await expect(syncSection.getByText('Enhanced privacy is enabled.')).toBeVisible()
+
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'mediaDevices', {
+        configurable: true,
+        value: {
+          enumerateDevices: () => Promise.resolve([]),
+          getUserMedia: () => Promise.reject(new Error('No camera'))
+        }
+      })
+    })
+
+    await syncSection.getByRole('button', { name: 'Pair another device' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Pair another device' })
+    await expect(dialog.getByRole('alert')).toContainText('could not access a camera')
+    await dialog.getByRole('button', { name: 'Enter code manually' }).click()
+    await dialog.getByRole('textbox', { name: 'Pairing code' }).fill(pairingCode)
+    await dialog.getByRole('button', { name: 'Check code' }).click()
+
+    await expect(dialog.getByText(serverUrl, { exact: true })).toBeVisible()
+    await expect(dialog.getByText('Window B', { exact: true })).toBeVisible()
+    await dialog.getByRole('button', { name: 'Approve pairing' }).click()
+    await expect(dialog.locator('.pairingVerificationCode')).toHaveText(/^\d{6}$/)
+    expect(approvedPayload.approving_device_id).toMatch(/^[\w-]{22}$/)
+    expect(approvedPayload.encrypted_payload).toMatch(/^[\w-]+$/)
+    expect(JSON.stringify(approvedPayload)).not.toMatch(/fresh\.pairing\.token|pairing-user/)
+    await expect(dialog.locator('.promptFixedFooter').getByRole('button', { name: 'Close' }))
+      .toBeVisible()
+  })
+})
+
 test.describe('sync settings', () => {
   test.use({
     seed: {
@@ -3661,6 +3871,32 @@ test.describe('sync settings', () => {
         syncServerLastSyncAt: 1234
       }
     }
+  })
+
+  test('shows the paired username when the connected field becomes disabled', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+
+    const syncSection = page.locator('[data-section="sync"]')
+    const username = syncSection.getByLabel('Username')
+    await syncSection.getByRole('button', { name: 'Disconnect' }).click()
+    await expect(username).toBeEnabled()
+    await username.fill('')
+    await expect(username).toHaveValue('')
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('completeSyncServerPairing', {
+        serverUrl: 'https://sync.d3sox.me',
+        username: 'paired-user',
+        token: 'paired-token',
+        privacyKey: 'paired-privacy-key',
+        privacySalt: 'paired-privacy-salt'
+      })
+    })
+
+    await expect(username).toBeDisabled()
+    await expect(username).toHaveValue('paired-user')
   })
 
   test('clears a sync error and enables credentials after disconnecting', async ({ page }) => {
