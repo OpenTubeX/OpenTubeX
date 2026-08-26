@@ -107,7 +107,7 @@ jobs:
     # variance before this becomes a required regression gate.
     - name: Compare performance
       run: |
-        xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' \
+        xvfb-run -a -s "-screen 0 1920x1080x24" \
           node candidate/e2e/performance/compare.mjs \
           --base base \
           --candidate candidate \

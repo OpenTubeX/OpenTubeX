@@ -131,7 +131,7 @@ longest-frame measurement.
 To compare two checkouts locally, build `dist-e2e` in both and run:
 
 ```bash
-xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' \
+xvfb-run -a -s "-screen 0 1920x1080x24" \
   pnpm run test:performance -- \
   --base /path/to/base-checkout \
   --candidate /path/to/candidate-checkout
