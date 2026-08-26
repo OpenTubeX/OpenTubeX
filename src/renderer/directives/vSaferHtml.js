@@ -72,6 +72,7 @@ export const vSaferHtml = (element, { value, oldValue, modifiers }) => {
             'br',
             'b',
             'i',
+            'mark',
             's',
             {
               name: 'a',
@@ -90,7 +91,7 @@ export const vSaferHtml = (element, { value, oldValue, modifiers }) => {
     } else {
       if (domPurifyStrictConfig === undefined) {
         domPurifyStrictConfig = {
-          ALLOWED_TAGS: ['br', 'b', 'i', 's', 'a', 'img'],
+          ALLOWED_TAGS: ['br', 'b', 'i', 'mark', 's', 'a', 'img'],
           ALLOWED_ATTR: ['alt', 'data-time', 'dir', 'height', 'href', 'lang', 'loading', 'src', 'style', 'tabindex', 'title', 'width']
         }
       }

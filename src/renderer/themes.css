@@ -64,6 +64,38 @@ body {
   background-color: var(--selection-background-color);
 }
 
+input[type='search']::-webkit-search-cancel-button {
+  /* Chromium only exposes this native control through its prefixed appearance. */
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-appearance: none;
+  appearance: none;
+  block-size: 24px;
+  inline-size: 24px;
+  margin-inline-start: 8px;
+  border-radius: 50%;
+  background-color: var(--secondary-text-color);
+  cursor: pointer;
+  mask-image:
+    linear-gradient(45deg, transparent 44%, #000 44% 56%, transparent 56%),
+    linear-gradient(-45deg, transparent 44%, #000 44% 56%, transparent 56%);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: 12px 12px;
+  opacity: 0.7;
+  transition:
+    background-color 0.15s ease-in-out,
+    opacity 0.15s ease-in-out;
+}
+
+input[type='search']::-webkit-search-cancel-button:hover {
+  background-color: var(--primary-color);
+  opacity: 1;
+}
+
+input[type='search']::-webkit-search-cancel-button:active {
+  background-color: var(--primary-color-active);
+}
+
 /*************** RULE TWEAKS ***************/
 
 /* Default sidenav hover text color and primary input color not needed to be changed for most themes */

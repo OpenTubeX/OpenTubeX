@@ -18,6 +18,34 @@ const WATCH_PAGE_SEED = {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+test('offers a YouTube link action in the watch tab context menu', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+
+  await page.locator('.tab.active').click({ button: 'right' })
+  await expect(page.getByRole('menuitem', { name: 'Copy YouTube Link', exact: true })).toBeVisible()
+})
+
+test('uses the stored watch route for a dev-server tab link action', async ({ app, page }) => {
+  const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
+    url: 'http://localhost:9080/#/watch/jNQXAC9IVRw',
+    title: 'Dev watch tab',
+    makeActive: false,
+    lazyLoad: true
+  }))
+
+  await expect.poll(async () => {
+    const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+    return state.tabs.find(tab => tab.id === watchTab.id)?.route.fullPath
+  }).toBe('/watch/jNQXAC9IVRw')
+  await page.locator(`.tab[data-tab-id="${watchTab.id}"]`).click({ button: 'right' })
+  const copyYouTubeLink = page.getByRole('menuitem', { name: 'Copy YouTube Link', exact: true })
+  await expect(copyYouTubeLink).toBeVisible()
+  await copyYouTubeLink.click()
+  await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText()))
+    .toBe('https://youtu.be/jNQXAC9IVRw')
+})
+
 for (const { name, options, expectedCount } of [
   { name: 'hides transcript actions without captions', options: {}, expectedCount: 0 },
   {
@@ -3006,6 +3034,65 @@ test('loads initial comments with the video when automatic pagination is enabled
   expect(await page.evaluate(() => window.scrollY)).toBe(0)
 })
 
+test('pauses automatic comment pagination while filtering', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+
+  let commentRequestCount = 0
+  await page.route(/\/youtubei\/v1\/next/, async (route, request) => {
+    const body = JSON.parse(request.postData() ?? '{}')
+    if (body.continuation) {
+      commentRequestCount++
+    }
+    await route.fallback()
+  })
+
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
+  })
+  await openMockedVideo(page)
+  await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+  await page.getByRole('button', { name: 'From creator' }).click()
+  const requestCountAfterFiltering = commentRequestCount
+
+  await page.waitForTimeout(750)
+  expect(commentRequestCount).toBe(requestCountAfterFiltering)
+  await expect(page.locator('.getMoreComments')).toBeVisible()
+})
+
+async function expectCommentHeaderToolsAligned(page) {
+  const commentHeaderActions = [
+    page.getByRole('button', { name: 'Search loaded comments' }),
+    page.getByRole('button', { name: 'From creator' }),
+    page.getByRole('button', { name: 'Reload Comments' })
+  ]
+  const actionCenters = await Promise.all(commentHeaderActions.map(action => (
+    action.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return bounds.top + bounds.height / 2
+    })
+  )))
+  expect(Math.max(...actionCenters) - Math.min(...actionCenters)).toBeLessThanOrEqual(1)
+
+  const actionRightEdges = await Promise.all(commentHeaderActions.map(action => (
+    action.evaluate(element => element.getBoundingClientRect().right)
+  )))
+  const sortControlLeft = await page.locator('.commentHeaderActions .select').evaluate(element => {
+    return element.getBoundingClientRect().left
+  })
+  expect(Math.max(...actionRightEdges)).toBeLessThan(sortControlLeft)
+
+  const commentHeaderBottom = await page.locator('.commentHeader').evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    return bounds.bottom
+  })
+  const searchInputTop = await page.getByRole('searchbox', { name: 'Search loaded comments' }).evaluate(element => {
+    return element.getBoundingClientRect().top
+  })
+  expect(searchInputTop - commentHeaderBottom).toBeGreaterThanOrEqual(7.5)
+}
+
 test.describe('manual comment loading', () => {
   // These drive the click-to-load path and the reply pagination on top of a
   // single loaded page, so they turn off the automatic pagination that would
@@ -3149,6 +3236,174 @@ test.describe('manual comment loading', () => {
     await expect(ownerReplyToggle).not.toContainText('from')
     await ownerReplyToggle.scrollIntoViewIfNeeded()
     await attachScreenshot('uploader reply indicator')
+  })
+
+  test('searches the comments loaded for the current video', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const comments = page.locator('.commentThread')
+    const initialCommentCount = await comments.count()
+    expect(initialCommentCount).toBeGreaterThan(1)
+
+    await expect(page.getByRole('searchbox', { name: 'Search loaded comments' })).toHaveCount(0)
+    await page.getByRole('button', { name: 'Search loaded comments' }).click()
+    const commentSearchInput = page.getByRole('searchbox', { name: 'Search loaded comments' })
+    await expect(commentSearchInput).toBeFocused()
+    await expect(page.locator('.commentTools .clearInputTextButton')).toHaveCount(0)
+    await expectCommentHeaderToolsAligned(page)
+    await commentSearchInput.fill('honored')
+
+    const searchCancelButtonStyles = await page.evaluate(() => {
+      const rules = [...document.styleSheets].flatMap(sheet => [...sheet.cssRules])
+      const baseRule = rules.find(rule => (
+        rule.selectorText?.includes('input[type="search"]::-webkit-search-cancel-button') &&
+        !rule.selectorText.includes(':hover') &&
+        !rule.selectorText.includes(':active')
+      ))
+      const hoverRule = rules.find(rule => rule.selectorText?.includes('::-webkit-search-cancel-button:hover'))
+
+      return {
+        appearance: baseRule?.style.getPropertyValue('-webkit-appearance'),
+        backgroundColor: baseRule?.style.backgroundColor,
+        blockSize: baseRule?.style.blockSize,
+        hoverBackgroundColor: hoverRule?.style.backgroundColor,
+        inlineSize: baseRule?.style.inlineSize,
+        maskSize: baseRule?.style.maskSize
+      }
+    })
+    expect(searchCancelButtonStyles).toEqual({
+      appearance: 'none',
+      backgroundColor: 'var(--secondary-text-color)',
+      blockSize: '24px',
+      hoverBackgroundColor: 'var(--primary-color)',
+      inlineSize: '24px',
+      maskSize: '12px 12px',
+    })
+
+    await expect(comments).toHaveCount(1)
+    await expect(comments).toContainText("We're so honored that the first ever YouTube video was filmed here!")
+    await expect(comments.locator('.commentText mark')).toHaveText('honored')
+    await expect(page.getByText(`1 of ${initialCommentCount} loaded comments`)).toBeVisible()
+
+    await commentSearchInput.fill('WahilPro')
+    await expect(comments).toHaveCount(1)
+    await expect(comments.locator('.commentAuthor mark')).toHaveText('WahilPro')
+  })
+
+  test('keeps personal comment pins for the current video', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const pinnedComment = page.locator('.commentThread').filter({ hasText: 'Who is here today?' })
+    await pinnedComment.getByRole('button', { name: 'Pin comment by @WahilPro' }).click()
+    await expect(pinnedComment).toContainText('Pinned by you')
+    await expect(pinnedComment.getByRole('button', { name: 'Unpin comment by @WahilPro' })).toHaveAttribute('aria-pressed', 'true')
+    await expect(pinnedComment).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(pinnedComment.locator('.commentPersonalPin')).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(page.locator('.commentThread').first()).toContainText('Who is here today?')
+
+    const reloadResponse = page.waitForResponse(/\/youtubei\/v1\/next/, { timeout: 30_000 })
+    await page.getByRole('button', { name: 'Reload Comments' }).click()
+    await reloadResponse
+
+    await expect(page.locator('.commentThread').first()).toContainText('Who is here today?')
+    await expect(page.locator('.commentThread').first()).toContainText('Pinned by you')
+  })
+
+  test('filters loaded comments to the video creator', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const creatorFilter = page.getByRole('button', { name: 'From creator' })
+    await expect(creatorFilter.locator('.commentCreatorFilterAvatar')).toHaveAttribute('src', /.+/)
+    await creatorFilter.click()
+
+    await expect(page.locator('.commentThread')).toHaveCount(1)
+    await expect(page.locator('.commentThread')).toContainText('@jawed')
+    await expect(page.locator('.commentThread')).toContainText('Hello')
+  })
+
+  test('applies the shortened view count setting to comment likes', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const commentLikes = page.locator('.commentThread')
+      .filter({ hasText: "We're so honored" })
+      .locator('.commentLikeCount')
+    await expect(commentLikes).toContainText(/4\.6\s?m/i)
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('updateShortenViewCounts', false)
+    })
+    await expect(commentLikes).toContainText('4,600,000')
+  })
+
+  test.describe('comment filtering at 125% UI scale', () => {
+    test.use({
+      seed: {
+        settings: {
+          ...WATCH_PAGE_SEED,
+          generalAutoLoadMorePaginatedItemsEnabled: false,
+          uiScale: 125
+        }
+      }
+    })
+
+    test('clamps fullscreen comment scrolling after filtering', async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await openMockedVideo(page)
+
+      const loadComments = page.locator('.getCommentsTitle')
+      await loadComments.scrollIntoViewIfNeeded()
+      await loadComments.click()
+      await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+      await page.getByRole('button', { name: 'Search loaded comments' }).click()
+      await expectCommentHeaderToolsAligned(page)
+      await page.getByRole('button', { name: 'Search loaded comments' }).click()
+
+      await setPlayerFullscreen(page, true)
+      await page.locator('.fullscreenCommentsToggle').click({ force: true })
+
+      const dock = page.locator('.fullscreenCommentsOverlay.open')
+      const scroller = dock.locator('.commentsContentWrapper')
+      const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+      await expect(dock.getByRole('button', { name: 'From creator' }).locator('.commentCreatorFilterAvatar')).toHaveAttribute('src', /.+/)
+      await expect.poll(() => scroller.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+      await dock.getByRole('button', { name: 'Search loaded comments' }).click()
+      await dock.getByRole('searchbox', { name: 'Search loaded comments' }).fill('honored')
+
+      await expect(dock.locator('.commentThread')).toHaveCount(1)
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+    })
   })
 
   test('stale reply controls disappear after an empty final reply page', async ({ app, page }) => {

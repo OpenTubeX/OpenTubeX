@@ -1010,7 +1010,7 @@ Settings:
     Hide Channel Courses: Tab „Kurse“ im Kanal ausblenden
     Hide Channel Posts: Tab „Beiträge“ im Kanal ausblenden
     Hide Subscriptions Posts: Beiträge aus Abos ausblenden
-    Shorten View Counts: Aufrufzahlen abkürzen
+    Shorten View Counts: Aufrufzahlen und Kommentar-Likes abkürzen
     Hide Live Chat Replay: Livechat-Wiederholung ausblenden
     Hide End-Screen Annotations: Anmerkungen auf dem Abspann ausblenden
     Hide Paid Promotion Badge: Hinweis auf bezahlte Werbung ausblenden
@@ -1847,6 +1847,10 @@ Comments:
   Top comments: Top-Kommentare
   Show More Replies: Weitere Antworten anzeigen
   Pinned by: Angeheftet von
+  Pinned by you: Von dir angeheftet
+  From creator: Vom Ersteller
+  Pin comment by author: Kommentar von {author} anheften
+  Unpin comment by author: Kommentar von {author} lösen
   Member: Mitglied
   View {replyCount} replies: '1 Antwort ansehen | {replyCount} Antworten ansehen'
   Hearted: Gefällt mir
@@ -1868,6 +1872,9 @@ Comments:
     sie gelöscht oder ausgeblendet, daher wurde die Antwortschaltfläche entfernt.
   Highlighted comment: Hervorgehobener Kommentar
   Highlighted reply: Hervorgehobene Antwort
+  Search loaded comments: Geladene Kommentare durchsuchen
+  Loaded comment search result count: 1 von {total} geladenen Kommentaren | {count} von {total} geladenen Kommentaren
+  No loaded comments match your filters: Keine geladenen Kommentare entsprechen deinen Filtern
   Translate to {language}: Auf {language} übersetzen
   Show original: Original anzeigen
   Translating comment, please wait: Kommentar wird übersetzt, bitte warten
@@ -2049,8 +2056,8 @@ Tooltips:
     Hide Videos, Playlists and Channels Containing Text: Gib ein Wort, einen Teil eines Wortes oder einen Satz ein (Groß-/Kleinschreibung wird ignoriert), um alle Videos und Playlists, welche es in ihren Originaltiteln enthalten, auf ganz OpenTubeX auszublenden. Dein Verlauf, deine eigenen Playlists und Videos innerhalb Playlists sind davon nicht betroffen.
     Hide Videos on Watch: Blendet bereits angesehene Videos aus den Tabs „Videos“, „Shorts“ und „Live“ der Abo- und Kanalseiten aus. Beeinflusst nicht den „Home“-Tab der Kanalseiten
     Shorten View Counts: >-
-      Zeigt von YouTube bereits gerundete Aufrufzahlen in abgekürzter Form an, z. B. 14 Tsd. statt 14.000. Exakte
-      Aufrufzahlen werden immer vollständig angezeigt.
+      Zeigt von YouTube bereits gerundete Aufrufzahlen und Like-Zahlen von Kommentaren in abgekürzter Form an,
+      z. B. 14 Tsd. statt 14.000. Exakte Zahlen werden immer vollständig angezeigt.
   SponsorBlock Settings:
     UseDeArrowTitles: Videotitel durch von der Community eingereichte Titel von DeArrow ersetzen.
     UseDeArrowThumbnails: Video-Miniaturansichten durch Miniaturansichten von DeArrow ersetzen.

@@ -19,7 +19,6 @@
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Shorten View Counts')"
           :compact="true"
-          :disabled="hideVideoViews"
           :default-value="shortenViewCounts"
           setting-key="shortenViewCounts"
           :tooltip="t('Tooltips.Distraction Free Settings.Shorten View Counts')"
