@@ -31,8 +31,10 @@
 .player {
   width: 100%;
 
-  /* Animates the push when a docked side panel opens. */
-  transition: inline-size 250ms ease;
+  /* Animates dock pushes and user-selected video zoom levels. */
+  transition:
+    inline-size 250ms ease,
+    transform 200ms ease-out;
 }
 
 .audioPoster {
@@ -3915,6 +3917,11 @@
 ) {
   inline-size: auto;
   inset-inline-end: var(--side-panel-width);
+}
+
+/* Panning must track the pointer instead of easing toward it. */
+.ftVideoPlayer.videoZoomPanning > .player {
+  transition: inline-size 250ms ease;
 }
 
 .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) > .player {
