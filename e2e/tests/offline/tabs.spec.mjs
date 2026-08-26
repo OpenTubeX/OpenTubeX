@@ -805,6 +805,120 @@ test.describe('tab bar', () => {
     ])
   })
 
+  test('animates vertical tabs when a new drag interrupts settling', async ({ page }) => {
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).toHaveClass(/tabBar-left/)
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+
+    const neighborAnimation = await page.evaluate(() => {
+      const tabs = Array.from(document.querySelectorAll('.tabBar .tab'))
+
+      function pointerEvent(type, target, point, buttons = 0) {
+        target.dispatchEvent(new PointerEvent(type, {
+          bubbles: true,
+          button: 0,
+          buttons,
+          clientX: point.left + point.width / 2,
+          clientY: point.top + point.height / 2
+        }))
+      }
+
+      function drag(source, target) {
+        const sourceRect = source.getBoundingClientRect()
+        const targetRect = target.getBoundingClientRect()
+        pointerEvent('pointerdown', source, sourceRect, 1)
+        pointerEvent('pointermove', window, targetRect, 1)
+        pointerEvent('pointerup', window, targetRect)
+      }
+
+      drag(tabs[3], tabs[0])
+
+      const sourceRect = tabs[1].getBoundingClientRect()
+      const targetRect = tabs[3].getBoundingClientRect()
+      pointerEvent('pointerdown', tabs[1], sourceRect, 1)
+      pointerEvent('pointermove', window, targetRect, 1)
+
+      return new Promise(resolve => {
+        let inspectedFrames = 0
+
+        function inspectAnimation() {
+          inspectedFrames++
+          const animation = tabs[2].getAnimations().find(candidate => {
+            return candidate.effect instanceof KeyframeEffect &&
+              candidate.effect.target === tabs[2] &&
+              candidate.effect.getKeyframes().some(frame => frame.transform != null) &&
+              candidate.effect.getComputedTiming().duration > 0
+          })
+          if (!animation && inspectedFrames < 4) {
+            requestAnimationFrame(inspectAnimation)
+            return
+          }
+
+          pointerEvent('pointerup', window, targetRect)
+          resolve({
+            duration: animation?.effect.getComputedTiming().duration ?? 0,
+            playState: animation?.playState ?? null
+          })
+        }
+
+        requestAnimationFrame(inspectAnimation)
+      })
+    })
+
+    expect(neighborAnimation).toEqual({
+      duration: 200,
+      playState: 'running'
+    })
+  })
+
+  test('restores animations when a deferred drag ends before its resume frame', async ({ page }) => {
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).toHaveClass(/tabBar-left/)
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+
+    const transitionProperties = await page.evaluate(() => {
+      const tabs = Array.from(document.querySelectorAll('.tabBar .tab'))
+
+      function pointerEvent(type, target, point, buttons = 0) {
+        target.dispatchEvent(new PointerEvent(type, {
+          bubbles: true,
+          button: 0,
+          buttons,
+          clientX: point.left + point.width / 2,
+          clientY: point.top + point.height / 2
+        }))
+      }
+
+      const firstSourceRect = tabs[3].getBoundingClientRect()
+      const firstTargetRect = tabs[0].getBoundingClientRect()
+      pointerEvent('pointerdown', tabs[3], firstSourceRect, 1)
+      pointerEvent('pointermove', window, firstTargetRect, 1)
+      pointerEvent('pointercancel', window, firstTargetRect)
+
+      const secondSourceRect = tabs[1].getBoundingClientRect()
+      pointerEvent('pointerdown', tabs[1], secondSourceRect, 1)
+
+      return new Promise(resolve => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            pointerEvent('pointerup', window, secondSourceRect)
+            requestAnimationFrame(() => {
+              resolve(tabs.map(tab => getComputedStyle(tab).transitionProperty))
+            })
+          })
+        })
+      })
+    })
+
+    expect(transitionProperties.every(properties => properties.includes('transform'))).toBe(true)
+  })
+
   test('keeps consecutive selected drags aligned while reorder updates are delayed', async ({ app, page }) => {
     await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
     await page.locator(sel.newTabButton).click()
