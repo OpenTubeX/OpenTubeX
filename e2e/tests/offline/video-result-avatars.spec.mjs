@@ -65,7 +65,7 @@ test.describe('Invidious search video avatars', () => {
     }
   })
 
-  test('shares one unknown channel lookup across video and playlist results', async ({ page }) => {
+  test('loads shared avatars and vertically aligns result metadata', async ({ page }) => {
     let channelRequests = 0
 
     await page.route(`${instanceUrl}/api/v1/search/**`, route => route.fulfill({
@@ -102,6 +102,19 @@ test.describe('Invidious search video avatars', () => {
     await expect(page.locator('.ft-list-video').filter({
       has: page.getByRole('heading', { name: 'Avatar search playlist' })
     }).locator('.channelAvatarImage')).toHaveAttribute('src', avatarUrl)
+    const infoLine = page.locator('.ft-list-video').filter({
+      has: page.getByRole('heading', { name: 'First avatar search result' })
+    }).locator('.infoLine')
+    await expect.poll(() => infoLine.evaluate(element => {
+      const channelRect = element.querySelector('.channelName').getBoundingClientRect()
+      const channelCenter = (channelRect.top + channelRect.bottom) / 2
+
+      return Math.max(...['.viewCount', '.uploadedTime'].map(selector => {
+        const detailRect = element.querySelector(selector).getBoundingClientRect()
+        const detailCenter = (detailRect.top + detailRect.bottom) / 2
+        return Math.abs(channelCenter - detailCenter)
+      }))
+    })).toBeLessThanOrEqual(0.5)
     expect(channelRequests).toBe(1)
   })
 
