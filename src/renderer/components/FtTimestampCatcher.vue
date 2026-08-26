@@ -104,10 +104,11 @@ const emit = defineEmits(['timestamp-event'])
  * @param {PointerEvent} event
  */
 function catchTimestampClick(event) {
-  /** @type {HTMLAnchorElement} */
-  const target = event.target
+  const target = event.target instanceof Element
+    ? event.target.closest('a[data-time]')
+    : null
 
-  if (target.tagName === 'A' && target.dataset.time) {
+  if (target?.dataset.time) {
     const timeSeconds = parseInt(target.dataset.time)
 
     if (!isNaN(timeSeconds)) {

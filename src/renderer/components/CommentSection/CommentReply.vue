@@ -44,6 +44,16 @@
           class="commentThumbnail"
         />
       </component>
+      <p
+        v-if="isPersonallyPinned"
+        class="commentPinned commentPersonalPin"
+      >
+        <FtIcon
+          :icon="['fas', 'thumbtack']"
+          aria-hidden="true"
+        />
+        {{ $t('Comments.Pinned by you') }}
+      </p>
       <p class="commentAuthorWrapper">
         <component
           :is="enableChannelLinks ? 'router-link' : 'span'"
@@ -52,7 +62,15 @@
           :class="{ commentOwner: reply.isOwner }"
           :to="`/channel/${reply.authorLink}`"
         >
-          {{ reply.author }}
+          <template
+            v-for="(segment, segmentIndex) in authorSearchSegments"
+            :key="segmentIndex"
+          >
+            <mark v-if="segment.highlighted">{{ segment.text }}</mark>
+            <template v-else>
+              {{ segment.text }}
+            </template>
+          </template>
         </component>
         <img
           v-if="reply.isMember"
@@ -75,6 +93,19 @@
         </span>
         <button
           type="button"
+          class="commentPinButton"
+          :class="{ active: isPersonallyPinned }"
+          :title="personalPinActionLabel"
+          :aria-label="personalPinActionLabel"
+          :aria-pressed="isPersonallyPinned"
+          @click="emit('toggle-personal-pin', reply.id)"
+        >
+          <FtIcon
+            :icon="['fas', isPersonallyPinned ? 'thumbtack-slash' : 'thumbtack']"
+          />
+        </button>
+        <button
+          type="button"
           class="commentCopyLink"
           :title="$t('Comments.Copy YouTube Link')"
           :aria-label="$t('Comments.Copy YouTube Link')"
@@ -88,6 +119,7 @@
         :input-html="reply.showTranslated && reply.translatedLanguage === translationLanguage
           ? reply.translatedText
           : reply.text"
+        :highlight="highlight"
         @timestamp-event="emit('timestamp-event', $event)"
       />
       <CommentTranslationButton
@@ -101,7 +133,7 @@
       <p class="commentLikeCount">
         <template v-if="!hideCommentLikes">
           <FtIcon :icon="['fas', 'thumbs-up']" />
-          {{ reply.likes }}
+          {{ formatViewCount(reply.likes, shortenViewCounts) }}
         </template>
         <span
           v-if="reply.isHearted"
@@ -126,7 +158,7 @@
       </p>
     </div>
     <div
-      v-if="node.children.length > 0 || (reply.dataType === 'local' && reply.hasReplyToken) || loadingReplyIds.has(reply.id)"
+      v-if="node.children.length > 0 || (!filtering && ((reply.dataType === 'local' && reply.hasReplyToken) || loadingReplyIds.has(reply.id)))"
       class="commentReplyChildren"
     >
       <CommentReply
@@ -145,13 +177,18 @@
         :translation-language="translationLanguage"
         :translation-language-name="translationLanguageName"
         :highlighted-comment-id="highlightedCommentId"
+        :highlight="highlight"
+        :personal-pinned-comment-ids="personalPinnedCommentIds"
+        :filtering="filtering"
+        :shorten-view-counts="shortenViewCounts"
         @copy-youtube-link="emit('copy-youtube-link', $event)"
         @get-more-replies="emit('get-more-replies', $event)"
+        @toggle-personal-pin="emit('toggle-personal-pin', $event)"
         @timestamp-event="emit('timestamp-event', $event)"
         @translate-comment="emit('translate-comment', $event)"
       />
       <div
-        v-if="loadingReplyIds.has(reply.id) || (reply.dataType === 'local' && reply.hasReplyToken)"
+        v-if="!filtering && (loadingReplyIds.has(reply.id) || (reply.dataType === 'local' && reply.hasReplyToken))"
         class="commentReplyContinuation"
       >
         <button
@@ -182,13 +219,17 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 import CommentTranslationButton from './CommentTranslationButton.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import FtSpinner from '../FtSpinner/FtSpinner.vue'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
-import { getRelativeTimeFromDate } from '../../helpers/utils'
+import { formatViewCount, getRelativeTimeFromDate } from '../../helpers/utils'
+
+const { t } = useI18n()
 
 const props = defineProps({
   node: {
@@ -246,6 +287,22 @@ const props = defineProps({
   highlightedCommentId: {
     type: String,
     default: null
+  },
+  highlight: {
+    type: String,
+    default: ''
+  },
+  personalPinnedCommentIds: {
+    type: Set,
+    required: true
+  },
+  filtering: {
+    type: Boolean,
+    required: true
+  },
+  shortenViewCounts: {
+    type: Boolean,
+    required: true
   }
 })
 
@@ -258,8 +315,49 @@ function formatCommentTime(comment) {
 }
 
 const reply = props.node.reply
+const isPersonallyPinned = computed(() => props.personalPinnedCommentIds.has(reply.id))
+const personalPinActionLabel = computed(() => {
+  return isPersonallyPinned.value
+    ? t('Comments.Unpin comment by author', { author: reply.author })
+    : t('Comments.Pin comment by author', { author: reply.author })
+})
+const authorSearchSegments = computed(() => {
+  const query = props.highlight
+  if (query === '') {
+    return [{ text: reply.author, highlighted: false }]
+  }
 
-const emit = defineEmits(['copy-youtube-link', 'get-more-replies', 'timestamp-event', 'translate-comment'])
+  const normalizedAuthor = reply.author.toLocaleLowerCase()
+  const segments = []
+  let start = 0
+  let matchIndex = normalizedAuthor.indexOf(query)
+
+  while (matchIndex !== -1) {
+    if (matchIndex > start) {
+      segments.push({ text: reply.author.slice(start, matchIndex), highlighted: false })
+    }
+    segments.push({
+      text: reply.author.slice(matchIndex, matchIndex + query.length),
+      highlighted: true
+    })
+    start = matchIndex + query.length
+    matchIndex = normalizedAuthor.indexOf(query, start)
+  }
+
+  if (start < reply.author.length) {
+    segments.push({ text: reply.author.slice(start), highlighted: false })
+  }
+
+  return segments
+})
+
+const emit = defineEmits([
+  'copy-youtube-link',
+  'get-more-replies',
+  'timestamp-event',
+  'toggle-personal-pin',
+  'translate-comment'
+])
 </script>
 
 <style scoped src="./CommentSection.css" />

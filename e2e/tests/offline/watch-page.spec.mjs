@@ -3053,7 +3053,8 @@ test('pauses automatic comment pagination while filtering', async ({ app, page }
   await openMockedVideo(page)
   await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
 
-  await page.getByRole('button', { name: 'From creator' }).click()
+  await page.getByRole('button', { name: 'Filter loaded comments' }).click()
+  await page.getByRole('checkbox', { name: 'From creator' }).click()
   const requestCountAfterFiltering = commentRequestCount
 
   await page.waitForTimeout(750)
@@ -3063,8 +3064,7 @@ test('pauses automatic comment pagination while filtering', async ({ app, page }
 
 async function expectCommentHeaderToolsAligned(page) {
   const commentHeaderActions = [
-    page.getByRole('button', { name: 'Search loaded comments' }),
-    page.getByRole('button', { name: 'From creator' }),
+    page.getByRole('button', { name: 'Filter loaded comments' }),
     page.getByRole('button', { name: 'Reload Comments' })
   ]
   const actionCenters = await Promise.all(commentHeaderActions.map(action => (
@@ -3252,7 +3252,10 @@ test.describe('manual comment loading', () => {
     expect(initialCommentCount).toBeGreaterThan(1)
 
     await expect(page.getByRole('searchbox', { name: 'Search loaded comments' })).toHaveCount(0)
-    await page.getByRole('button', { name: 'Search loaded comments' }).click()
+    await page.getByRole('button', { name: 'Filter loaded comments' }).click()
+    const searchFilter = page.getByRole('checkbox', { name: 'Search loaded comments' })
+    await expect(searchFilter).toBeFocused()
+    await searchFilter.click()
     const commentSearchInput = page.getByRole('searchbox', { name: 'Search loaded comments' })
     await expect(commentSearchInput).toBeFocused()
     await expect(page.locator('.commentTools .clearInputTextButton')).toHaveCount(0)
@@ -3296,6 +3299,58 @@ test.describe('manual comment loading', () => {
     await expect(comments.locator('.commentAuthor mark')).toHaveText('WahilPro')
   })
 
+  test('searches loaded replies and keeps their parent thread', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const thread = page.locator('.commentThread').first()
+    await thread.locator('.commentReplyRootToggle button').click()
+    const firstReply = thread.locator('.commentReplyContent').first()
+    await expect(firstReply).toBeVisible({ timeout: 30_000 })
+    const replyAuthor = await firstReply.locator('.commentAuthor').innerText()
+
+    await page.getByRole('button', { name: 'Filter loaded comments' }).click()
+    await page.getByRole('checkbox', { name: 'Search loaded comments' }).click()
+    await page.getByRole('searchbox', { name: 'Search loaded comments' }).fill(replyAuthor)
+
+    await expect(page.locator('.commentThread')).toHaveCount(1)
+    await expect(page.locator('.commentReplyContent')).toHaveCount(1)
+    await expect(page.locator('.commentReplyContent .commentAuthor mark')).toHaveText(replyAuthor)
+  })
+
+  test('filters comments with timestamps and keeps highlighted timestamps clickable', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, { commentTimestamp: true })
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    await page.getByRole('button', { name: 'Filter loaded comments' }).click()
+    await page.getByRole('checkbox', { name: 'Contains timestamps' }).click()
+    await expect(page.locator('.commentThread')).toHaveCount(1)
+
+    await page.getByRole('checkbox', { name: 'Search loaded comments' }).click()
+    const search = page.getByRole('searchbox', { name: 'Search loaded comments' })
+    await search.fill('0:05')
+    const timestamp = page.locator('.commentThread .commentText a[data-time="5"]')
+    await expect(timestamp.locator('mark')).toHaveText('0:05')
+
+    const video = page.locator('video')
+    await video.evaluate(element => {
+      element.pause()
+      element.currentTime = 0
+    })
+    await timestamp.locator('mark').click()
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(5, 1)
+  })
+
   test('keeps personal comment pins for the current video', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -3321,6 +3376,34 @@ test.describe('manual comment loading', () => {
     await expect(page.locator('.commentThread').first()).toContainText('Pinned by you')
   })
 
+  test('keeps personal pins on loaded replies', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    let thread = page.locator('.commentThread').first()
+    await thread.locator('.commentReplyRootToggle button').click()
+    let firstReply = thread.locator('.commentReplyContent').first()
+    await expect(firstReply).toBeVisible({ timeout: 30_000 })
+    const replyAuthor = await firstReply.locator('.commentAuthor').innerText()
+    await firstReply.getByRole('button', { name: `Pin comment by ${replyAuthor}` }).click()
+    await expect(firstReply).toContainText('Pinned by you')
+
+    const reloadResponse = page.waitForResponse(/\/youtubei\/v1\/next/, { timeout: 30_000 })
+    await page.getByRole('button', { name: 'Reload Comments' }).click()
+    await reloadResponse
+
+    thread = page.locator('.commentThread').first()
+    await thread.locator('.commentReplyRootToggle button').click()
+    firstReply = thread.locator('.commentReplyContent').filter({ hasText: replyAuthor })
+    await expect(firstReply.getByRole('button', { name: `Unpin comment by ${replyAuthor}` })).toHaveAttribute('aria-pressed', 'true')
+    await expect(firstReply).toContainText('Pinned by you')
+  })
+
   test('filters loaded comments to the video creator', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -3330,7 +3413,8 @@ test.describe('manual comment loading', () => {
     await loadComments.click()
     await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
 
-    const creatorFilter = page.getByRole('button', { name: 'From creator' })
+    await page.getByRole('button', { name: 'Filter loaded comments' }).click()
+    const creatorFilter = page.getByRole('checkbox', { name: 'From creator' })
     await expect(creatorFilter.locator('.commentCreatorFilterAvatar')).toHaveAttribute('src', /.+/)
     await creatorFilter.click()
 
@@ -3380,9 +3464,10 @@ test.describe('manual comment loading', () => {
       await loadComments.click()
       await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
 
-      await page.getByRole('button', { name: 'Search loaded comments' }).click()
+      await page.getByRole('button', { name: 'Filter loaded comments' }).click()
+      await page.getByRole('checkbox', { name: 'Search loaded comments' }).click()
       await expectCommentHeaderToolsAligned(page)
-      await page.getByRole('button', { name: 'Search loaded comments' }).click()
+      await page.getByRole('searchbox', { name: 'Search loaded comments' }).press('Escape')
 
       await setPlayerFullscreen(page, true)
       await page.locator('.fullscreenCommentsToggle').click({ force: true })
@@ -3390,14 +3475,17 @@ test.describe('manual comment loading', () => {
       const dock = page.locator('.fullscreenCommentsOverlay.open')
       const scroller = dock.locator('.commentsContentWrapper')
       const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
-      await expect(dock.getByRole('button', { name: 'From creator' }).locator('.commentCreatorFilterAvatar')).toHaveAttribute('src', /.+/)
+      await dock.getByRole('button', { name: 'Filter loaded comments' }).click()
+      await expect(dock.getByRole('checkbox', { name: 'From creator' }).locator('.commentCreatorFilterAvatar')).toHaveAttribute('src', /.+/)
+      await dock.getByRole('button', { name: 'Filter loaded comments' }).click()
       await expect.poll(() => scroller.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
       await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
 
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 
-      await dock.getByRole('button', { name: 'Search loaded comments' }).click()
+      await dock.getByRole('button', { name: 'Filter loaded comments' }).click()
+      await dock.getByRole('checkbox', { name: 'Search loaded comments' }).click()
       await dock.getByRole('searchbox', { name: 'Search loaded comments' }).fill('honored')
 
       await expect(dock.locator('.commentThread')).toHaveCount(1)

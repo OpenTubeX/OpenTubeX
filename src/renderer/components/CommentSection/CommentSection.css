@@ -101,6 +101,64 @@
   --comment-creator-filter-avatar-size: 24px;
 }
 
+.commentFilterMenuAnchor {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.commentFilterMenu {
+  position: absolute;
+  z-index: 5;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: 0;
+  display: flex;
+  flex-direction: column;
+  inline-size: min(240px, calc(100vw - 32px));
+  padding: 6px;
+  color: var(--primary-text-color);
+  background-color: color-mix(in srgb, var(--card-bg-color) 96%, var(--bg-color));
+  border: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
+  border-radius: calc(10px * var(--ui-roundness));
+  box-shadow: 0 8px 24px rgb(0 0 0 / 28%);
+}
+
+.commentFilterMenu button {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 14px;
+  min-block-size: 40px;
+  align-items: center;
+  gap: 10px;
+  padding-block: 8px;
+  padding-inline: 10px;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  background: transparent;
+  border: 0;
+  border-radius: calc(8px * var(--ui-roundness));
+  cursor: pointer;
+}
+
+.commentFilterMenu :where(button:hover, button:focus-visible) {
+  color: var(--side-nav-hover-text-color);
+  background-color: var(--side-nav-hover-color);
+}
+
+.commentFilterMenuIcon {
+  display: grid;
+  place-items: center;
+  inline-size: 24px;
+}
+
+.fullscreenCommentFilterMenu {
+  color: #fff;
+  background-color: rgb(12 12 12 / 82%);
+  border-color: rgb(255 255 255 / 12%);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 40%);
+  backdrop-filter: blur(14px) saturate(1.05);
+}
+
 .fullscreenSortMenu {
   position: absolute;
   z-index: 3;
