@@ -129,6 +129,9 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     if (group === 'Fallback to Non-Preferred Backend on Failure') {
       return supportsLocalApi
     }
+    if (group === 'Comment Translation') {
+      return supportsLocalApi
+    }
     if (group === 'Avoid translation') {
       return supportsLocalApi && (
         store.getters.getBackendPreference === 'local' || store.getters.getBackendFallback

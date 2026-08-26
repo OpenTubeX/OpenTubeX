@@ -309,6 +309,13 @@ Settings:
     Check for Updates: Auf Updates prüfen
     View all Invidious instance information: Alle Informationen zur Invidious-Instanz anzeigen
     System Default: Systemvorgabe
+    Comment Translation:
+      Title: Kommentarübersetzungen
+      Enable: Kommentarübersetzungen aktivieren
+      Never Translate: Kommentare in diesen Sprachen nie übersetzen
+      Choose Language: Sprache auswählen
+      Description: Kommentare in der App-Sprache sind bereits ausgeschlossen. Füge weitere Sprachen hinzu, die du verstehst.
+      Remove Language: Kommentare auf {language} wieder übersetzen
     Current instance will be randomized on startup: Beim Start wird eine zufällige Instanz festgelegt
     No default instance has been set: Es wurde keine Standardinstanz festgelegt
     The currently set default instance is {instance}: Die aktuelle Standardinstanz ist {instance}

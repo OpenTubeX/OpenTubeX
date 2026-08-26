@@ -490,6 +490,13 @@ Settings:
       Force On: Force on
       Force Off: Force off
     System Default: System Default
+    Comment Translation:
+      Title: Comment translations
+      Enable: Enable comment translations
+      Never Translate: Never translate comments in
+      Choose Language: Choose a language
+      Description: Comments in the app language are already excluded. Add any other languages you can read.
+      Remove Language: Translate {language} comments again
     Avoid translation:
       Avoid translation: Prefer untranslated video text
       Disabled: Disabled

@@ -1,0 +1,62 @@
+.commentTranslationSettings {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block-end: 12px !important;
+}
+
+.commentTranslationDescription {
+  color: var(--tertiary-text-color);
+  margin-block: 0 4px;
+  max-inline-size: 700px;
+  text-align: center;
+}
+
+.commentTranslationLanguageSelect {
+  inline-size: min(100%, 330px);
+}
+
+.commentTranslationLanguages {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  list-style: none;
+  margin-block: 18px 0;
+  padding: 0;
+  max-inline-size: 700px;
+}
+
+.commentTranslationLanguage {
+  align-items: center;
+  background-color: var(--search-bar-color);
+  border: 1px solid var(--border-color);
+  border-radius: calc(22px * var(--ui-roundness));
+  display: flex;
+  min-block-size: 44px;
+  padding-inline-start: 14px;
+}
+
+.commentTranslationLanguageRemove {
+  align-items: center;
+  align-self: stretch;
+  background: transparent;
+  border: 0;
+  color: var(--tertiary-text-color);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  min-inline-size: 44px;
+  padding: 0;
+}
+
+.commentTranslationLanguageRemove:hover,
+.commentTranslationLanguageRemove:focus-visible {
+  color: var(--primary-text-color);
+}
+
+.commentTranslationLanguageRemove:disabled {
+  color: var(--tertiary-text-color);
+  cursor: not-allowed;
+  opacity: 0.4;
+}

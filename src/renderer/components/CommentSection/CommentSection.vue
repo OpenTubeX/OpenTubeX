@@ -329,7 +329,9 @@
             :loading="loadingTranslationIds.has(comment.id)"
             :target-language="translationLanguage"
             :target-language-name="translationLanguageName"
+            :ignored-languages="commentTranslationIgnoredLanguages"
             @translate-comment="toggleCommentTranslation"
+            @translation-unavailable="restoreCommentTranslation"
           />
           <p class="commentLikeCount">
             <template
@@ -422,6 +424,7 @@
               :translation-enabled="translationEnabled"
               :translation-language="translationLanguage"
               :translation-language-name="translationLanguageName"
+              :comment-translation-ignored-languages="commentTranslationIgnoredLanguages"
               :highlighted-comment-id="highlightedCommentId"
               :highlight="normalizedCommentSearchQuery"
               :personal-pinned-comment-ids="personalPinnedCommentIds"
@@ -432,6 +435,7 @@
               @toggle-personal-pin="togglePersonalCommentPin"
               @timestamp-event="onTimestamp"
               @translate-comment="toggleCommentTranslation"
+              @translation-unavailable="restoreCommentTranslation"
             />
             <div
               v-if="!hasActiveCommentFilters && (isReplyLoading(comment.id) || comment.hasReplyToken)"
@@ -1077,7 +1081,9 @@ const backendFallback = computed(() => {
 })
 
 const translationEnabled = computed(() => {
-  return process.env.SUPPORTS_LOCAL_API && !store.getters.getHideCommentTranslationButtons
+  return process.env.SUPPORTS_LOCAL_API &&
+    store.getters.getEnableCommentTranslations &&
+    !store.getters.getHideCommentTranslationButtons
 })
 
 const translationLanguage = computed(() => {
@@ -1091,6 +1097,11 @@ const translationLanguageName = computed(() => {
   }
 
   return new Intl.DisplayNames([locale.value, 'en'], { type: 'language' }).of(language) ?? language
+})
+
+const commentTranslationIgnoredLanguages = computed(() => {
+  const languages = store.getters.getCommentTranslationIgnoredLanguages
+  return Array.isArray(languages) ? languages : []
 })
 
 /**
@@ -1126,6 +1137,13 @@ async function toggleCommentTranslation(comment) {
     nextLoadingTranslationIds.delete(comment.id)
     loadingTranslationIds.value = nextLoadingTranslationIds
   }
+}
+
+/**
+ * @param {Comment} comment
+ */
+function restoreCommentTranslation(comment) {
+  comment.showTranslated = false
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

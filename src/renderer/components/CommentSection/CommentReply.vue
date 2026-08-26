@@ -128,7 +128,9 @@
         :loading="loadingTranslationIds.has(reply.id)"
         :target-language="translationLanguage"
         :target-language-name="translationLanguageName"
+        :ignored-languages="commentTranslationIgnoredLanguages"
         @translate-comment="emit('translate-comment', $event)"
+        @translation-unavailable="emit('translation-unavailable', $event)"
       />
       <p class="commentLikeCount">
         <template v-if="!hideCommentLikes">
@@ -176,6 +178,7 @@
         :translation-enabled="translationEnabled"
         :translation-language="translationLanguage"
         :translation-language-name="translationLanguageName"
+        :comment-translation-ignored-languages="commentTranslationIgnoredLanguages"
         :highlighted-comment-id="highlightedCommentId"
         :highlight="highlight"
         :personal-pinned-comment-ids="personalPinnedCommentIds"
@@ -186,6 +189,7 @@
         @toggle-personal-pin="emit('toggle-personal-pin', $event)"
         @timestamp-event="emit('timestamp-event', $event)"
         @translate-comment="emit('translate-comment', $event)"
+        @translation-unavailable="emit('translation-unavailable', $event)"
       />
       <div
         v-if="!filtering && (loadingReplyIds.has(reply.id) || (reply.dataType === 'local' && reply.hasReplyToken))"
@@ -284,6 +288,10 @@ const props = defineProps({
     type: String,
     required: true
   },
+  commentTranslationIgnoredLanguages: {
+    type: Array,
+    required: true
+  },
   highlightedCommentId: {
     type: String,
     default: null
@@ -356,7 +364,8 @@ const emit = defineEmits([
   'get-more-replies',
   'timestamp-event',
   'toggle-personal-pin',
-  'translate-comment'
+  'translate-comment',
+  'translation-unavailable'
 ])
 </script>
 
