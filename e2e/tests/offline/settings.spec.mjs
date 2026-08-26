@@ -870,6 +870,54 @@ test.describe('settings', () => {
     expect(Math.max(...preferenceOffsets)).toBeLessThanOrEqual(1)
   })
 
+  test('aligns Playback toggles and selects in a narrow settings window', async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
+        x: 40,
+        y: 40,
+        width: 400,
+        height: 700
+      }))
+    })
+    const playback = await goToSettingsSection(page, 'playback')
+    const playerSettings = playback.locator('.settingsSection').filter({
+      has: page.getByRole('heading', { name: 'Player', exact: true })
+    })
+
+    async function expectControlsAligned() {
+      const firstToggles = playerSettings.locator('.switchColumn').first()
+        .locator(':scope > .switch-ctn')
+      await expect(firstToggles.first()).toBeVisible()
+      const toggleLabelLeftEdges = await firstToggles.evaluateAll(elements => elements.slice(0, 3)
+        .map(element => element.querySelector('.switch-label-text').getBoundingClientRect().left))
+      expect.soft(Math.max(...toggleLabelLeftEdges) - Math.min(...toggleLabelLeftEdges))
+        .toBeLessThanOrEqual(1)
+
+      const tooltipToggle = playerSettings.locator('.switch-ctn')
+        .filter({ hasText: 'Show Skip Silence Toggle' })
+      const toggleCenterOffset = await tooltipToggle.evaluate(element => {
+        const label = element.querySelector('.switch-label').getBoundingClientRect()
+        const text = element.querySelector('.switch-label-text').getBoundingClientRect()
+        return Math.abs(label.top + label.height / 2 - (text.top + text.height / 2))
+      })
+      expect.soft(toggleCenterOffset).toBeLessThanOrEqual(1)
+
+      const selectLeftEdges = await playerSettings.locator('.select .select-text')
+        .evaluateAll(elements => elements.map(element => element.getBoundingClientRect().left))
+      expect.soft(selectLeftEdges).toHaveLength(4)
+      expect.soft(Math.max(...selectLeftEdges) - Math.min(...selectLeftEdges))
+        .toBeLessThanOrEqual(1)
+    }
+
+    await expectControlsAligned()
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUiScale', 125)
+    })
+    await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(1.25, 2)
+    await expectControlsAligned()
+  })
+
   test('groups confirmation preferences together', async ({ page }) => {
     await goTo(page, 'settings')
 
@@ -4358,6 +4406,60 @@ test.describe('synced setting indicators', () => {
     expect([...rowSizes.values()]).toEqual([3, 2])
     // The row they landed on doesn't change how much room they get.
     expect(new Set(boxes.map(({ width }) => width)).size).toBe(1)
+  })
+
+  test('wraps the playback sliders in the same grid as the theme sliders', async ({ page }) => {
+    await goTo(page, 'settings')
+    const playbackSection = await goToSettingsSection(page, 'playback')
+    const sliders = playbackSection.locator('.sliderGrid > *')
+    await expect(sliders).toHaveCount(7)
+    await expect(sliders.nth(5)).toContainText(/Max video playback rate/i)
+    await expect(sliders.nth(6)).toContainText(/Parallel segment loading/i)
+
+    const boxes = await sliders.evaluateAll((elements) => elements.map((element) => {
+      const { x, y, width } = element.getBoundingClientRect()
+      return { x: Math.round(x), y: Math.round(y), width: Math.round(width) }
+    }))
+
+    const rowSizes = new Map()
+    for (const { y } of boxes) {
+      rowSizes.set(y, (rowSizes.get(y) ?? 0) + 1)
+    }
+    expect([...rowSizes.values()]).toEqual([3, 3, 1])
+    expect(new Set(boxes.map(({ width }) => width)).size).toBe(1)
+
+    const lastSlider = boxes.at(-1)
+    const gridCenter = await playbackSection.locator('.sliderGrid').evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return bounds.x + bounds.width / 2
+    })
+    expect(lastSlider.x + lastSlider.width / 2).toBeCloseTo(gridCenter, 0)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUiScale', 125)
+    })
+    await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(1.25, 2)
+
+    const scaledLayout = await playbackSection.locator('.sliderGrid').evaluate(element => {
+      const gridBounds = element.getBoundingClientRect()
+      const sliderBounds = Array.from(element.children, child => child.getBoundingClientRect())
+      const rowSizes = new Map()
+      for (const bounds of sliderBounds) {
+        const y = Math.round(bounds.y)
+        rowSizes.set(y, (rowSizes.get(y) ?? 0) + 1)
+      }
+
+      return {
+        maximumOverflow: Math.max(...sliderBounds.flatMap(bounds => [
+          gridBounds.left - bounds.left,
+          bounds.right - gridBounds.right
+        ])),
+        maximumRowSize: Math.max(...rowSizes.values())
+      }
+    })
+    expect(scaledLayout.maximumOverflow).toBeLessThanOrEqual(1)
+    expect(scaledLayout.maximumRowSize).toBeLessThanOrEqual(3)
   })
 
   test('does not move a setting when its changed highlight appears', async ({ page }) => {

@@ -133,6 +133,11 @@
       vertical-align: middle;
     }
 
+    :deep(.switchColumn .switch-ctn.containsTooltip .switch-label) {
+      align-items: center;
+      display: inline-flex;
+    }
+
     :deep(:not(.select, .selectLabel, .groupTitle, .selectIndicators) > .tooltip) {
       display: inline-block;
       position: absolute;
