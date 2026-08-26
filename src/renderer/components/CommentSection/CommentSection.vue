@@ -236,7 +236,9 @@
           </p>
           <FtTimestampCatcher
             class="commentText"
-            :input-html="comment.showTranslated ? comment.translatedText : comment.text"
+            :input-html="comment.showTranslated && comment.translatedLanguage === translationLanguage
+              ? comment.translatedText
+              : comment.text"
             @timestamp-event="onTimestamp"
           />
           <CommentTranslationButton
@@ -748,7 +750,7 @@ const translationLanguageName = computed(() => {
  * @param {Comment} comment
  */
 async function toggleCommentTranslation(comment) {
-  if (comment.showTranslated) {
+  if (comment.showTranslated && comment.translatedLanguage === translationLanguage.value) {
     comment.showTranslated = false
     return
   }

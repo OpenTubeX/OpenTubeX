@@ -85,7 +85,9 @@
       </p>
       <FtTimestampCatcher
         class="commentText"
-        :input-html="reply.showTranslated ? reply.translatedText : reply.text"
+        :input-html="reply.showTranslated && reply.translatedLanguage === translationLanguage
+          ? reply.translatedText
+          : reply.text"
         @timestamp-event="emit('timestamp-event', $event)"
       />
       <CommentTranslationButton

@@ -17,7 +17,7 @@
         border-width="2px"
         :label="$t('Comments.Translating comment, please wait')"
       />
-      <template v-else-if="comment.showTranslated">
+      <template v-else-if="comment.showTranslated && comment.translatedLanguage === targetLanguage">
         {{ $t('Comments.Show original') }}
       </template>
       <template v-else>

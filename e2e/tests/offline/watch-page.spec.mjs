@@ -3058,9 +3058,10 @@ test.describe('manual comment loading', () => {
     await loadComments.click()
     await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
 
-    const comment = page.locator('.commentThread').filter({
+    const translatableComment = page.locator('.commentThread').filter({
       has: page.locator(':scope > .commentTranslation .commentTranslationButton')
     }).first()
+    const comment = page.locator(`#${await translatableComment.getAttribute('id')}`)
     await expect(comment).toBeVisible()
     const commentText = comment.locator(':scope > .commentText')
     const originalText = await commentText.textContent()
@@ -3075,6 +3076,16 @@ test.describe('manual comment loading', () => {
     await translate.click()
     await expect(commentText).toHaveText('Translated comment text')
     expect(translationRequestCount).toBe(1)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateCurrentLocale', 'fr-FR')
+    })
+
+    await expect(commentText).toHaveText(originalText)
+    await translate.click()
+    await expect(commentText).toHaveText('Translated comment text')
+    expect(translationRequestCount).toBe(2)
   })
 
   test('does not offer to translate a comment already in the app language', async ({ app, page }) => {

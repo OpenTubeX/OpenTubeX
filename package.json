@@ -69,7 +69,7 @@
     "autolinker": "^4.1.5",
     "bgutils-js": "^4.0.3",
     "dompurify": "^3.4.13",
-    "eld": "2.1.0",
+    "eld": "^2.1.0",
     "font-list": "^2.1.0",
     "googlevideo": "^4.1.1",
     "marked": "^18.0.10",
