@@ -503,6 +503,7 @@ Settings:
     Move Settings to App Header: Einstellungen in die App-Kopfzeile verschieben
     UI Roundness: Rundung der Benutzeroberfläche
     Scrollbar Width: Scrollbar-Breite
+    Scroll Speed: Scrollgeschwindigkeit
     Animation Speed: Animationsgeschwindigkeit
     Show Tab Icons: Tab-Symbole anzeigen
     Load Missing Tab Icons: Fehlende Tab-Symbole laden
@@ -2140,6 +2141,7 @@ Tooltips:
     Always Show Scrollbars: >-
       Hält die Scrollbars immer sichtbar. Wenn deaktiviert, werden sie kurz nach dem Ende der Mausbewegung
       ausgeblendet und bei der nächsten Bewegung wieder eingeblendet.
+    Scroll Speed: Ändert die Scrollweite von Mausrad- und Touchpad-Gesten.
     Use Fixed Tab Width: Gibt jedem Tab in der horizontalen Tableiste dieselbe Breite, statt sie an den Titel anzupassen.
     Use Grid Player Menu: Ordnet das Einstellungsmenü des Videoplayers als Kachelraster statt als Liste an.
 Playing Next Video Interval: Nächstes Video wird sofort abgespielt. Zum Abbrechen klicken. | Nächstes Video wird in {nextVideoInterval} Sekunden abgespielt. Zum Abbrechen klicken. | Nächstes Video wird in {nextVideoInterval} Sekunden abgespielt. Zum Abbrechen klicken.

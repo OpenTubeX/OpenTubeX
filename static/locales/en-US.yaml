@@ -566,6 +566,7 @@ Settings:
     UI Scale: UI Scale
     UI Roundness: UI Roundness
     Scrollbar Width: Scrollbar Width
+    Scroll Speed: Scroll Speed
     Animation Speed: Animation Speed
     Thumbnail Size: Thumbnail Size
     Show Tab Icons: Show Tab Icons
@@ -2369,6 +2370,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Shows a persistent notification with live progress for background operations, such as subscription refreshes and managed tool downloads, instead of using the global progress bar.
     Always Show Scrollbars: Keeps the scrollbars visible at all times. When disabled, they fade out shortly after you stop moving the mouse and reappear as soon as you move it again.
+    Scroll Speed: Changes how far mouse-wheel and touchpad wheel gestures scroll.
     Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
     Use Grid Player Menu: Arranges the video player's settings menu as a grid of tiles instead of a list of rows.
   Experimental Settings:

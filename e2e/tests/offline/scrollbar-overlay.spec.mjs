@@ -32,6 +32,25 @@ test.describe('overlay scrollbars', () => {
     expect(clientWidth).toBe(innerWidth)
   })
 
+  test('applies the configured wheel speed to page scrolling', async ({ page }) => {
+    await addPageOverflow(page)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setScrollSpeed', 200)
+      window.ftElectron.setZoomFactor(1.25)
+      document.addEventListener('wheel', (event) => {
+        window.__scrollSpeedTestDelta = event.deltaY
+      }, { capture: true, once: true })
+    })
+
+    await page.mouse.move(800, 400)
+    await page.mouse.wheel(0, 120)
+    await expect.poll(() => page.evaluate(() => (
+      window.__scrollSpeedTestDelta > 0 &&
+      window.scrollY === window.__scrollSpeedTestDelta * 2
+    ))).toBe(true)
+  })
+
   test('the page scrollbar stays on the content side of right vertical tabs', async ({ page }) => {
     await addPageOverflow(page)
     await page.evaluate(() => {

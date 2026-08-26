@@ -2350,6 +2350,8 @@ test.describe('settings', () => {
     await goTo(page, 'settings')
 
     await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setScrollSpeed', 200)
       document.body.style.minBlockSize = '4000px'
       document.scrollingElement.scrollTop = 1000
     })
@@ -2586,6 +2588,35 @@ test.describe('settings', () => {
       return store.dispatch('updateReducedMotion', 'off')
     })
     await expect(slider).toBeEnabled()
+  })
+
+  test('configures wheel scroll speed', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
+
+    const slider = page.getByRole('slider', { name: /Scroll Speed/ })
+    await expect(slider).toHaveValue('100')
+    await slider.fill('200')
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getScrollSpeed
+    })).toBe(200)
+
+    const content = page.locator('.settingsContent')
+    await content.evaluate(element => { element.scrollTop = 0 })
+    await content.hover({ position: { x: 20, y: 20 } })
+    await page.mouse.wheel(0, 120)
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBe(240)
+
+    await slider.fill('50')
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getScrollSpeed
+    })).toBe(50)
+    await content.evaluate(element => { element.scrollTop = 0 })
+    await content.hover({ position: { x: 20, y: 20 } })
+    await page.mouse.wheel(0, 120)
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBe(60)
   })
 
   test('keeps the watched progress mode when history is toggled', async ({ page }) => {
@@ -4433,19 +4464,19 @@ test.describe('synced setting indicators', () => {
     await goTo(page, 'settings')
     const themeSection = await goToSettingsSection(page, 'appearance')
     const sliders = themeSection.locator('.sliderGrid > *')
-    await expect(sliders).toHaveCount(5)
+    await expect(sliders).toHaveCount(6)
 
     const boxes = await sliders.evaluateAll((elements) => elements.map((element) => {
       const { y, width } = element.getBoundingClientRect()
       return { y: Math.round(y), width: Math.round(width) }
     }))
 
-    // Three and two, rather than four squeezed together and a lone fifth.
+    // Two even rows, rather than four squeezed together and two below.
     const rowSizes = new Map()
     for (const { y } of boxes) {
       rowSizes.set(y, (rowSizes.get(y) ?? 0) + 1)
     }
-    expect([...rowSizes.values()]).toEqual([3, 2])
+    expect([...rowSizes.values()]).toEqual([3, 3])
     // The row they landed on doesn't change how much room they get.
     expect(new Set(boxes.map(({ width }) => width)).size).toBe(1)
   })
