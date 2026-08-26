@@ -3,6 +3,7 @@ import { pathToFileURL } from 'node:url'
 
 import {
   comparePerformanceSamples,
+  isValidPerformanceValue,
   performanceMetrics,
   renderPerformanceSummary
 } from '../e2e/performance/report.mjs'
@@ -28,7 +29,7 @@ function validateSamples(samples, sampleCount) {
     for (const sample of samples[name]) {
       for (const metric of performanceMetrics) {
         const value = sample?.[metric.key]
-        if (!Number.isFinite(value) || value <= 0) {
+        if (!isValidPerformanceValue(metric, value)) {
           throw new Error(`${name} sample ${metric.key} is invalid`)
         }
       }

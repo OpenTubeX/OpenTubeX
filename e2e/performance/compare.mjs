@@ -8,10 +8,8 @@ import {
   expect,
   launchApp
 } from '../helpers/app.mjs'
-import {
-  largeSubscriptionsSeed,
-  runLargeSubscriptionsBenchmark
-} from './subscriptions.mjs'
+import { largeSubscriptionsSeed } from './subscriptions.mjs'
+import { runPerformanceScenarios } from './scenarios.mjs'
 import {
   comparePerformanceSamples,
   renderPerformanceSummary
@@ -110,15 +108,50 @@ async function closeTutorial(page) {
 async function collectSample(target) {
   const userDataDir = await createUserDataDir(largeSubscriptionsSeed)
   let electronApp
+  const startupStartedAt = performance.now()
+  const startup = {}
 
   try {
-    const launched = await launchApp(userDataDir, [], {
+    const launched = await launchApp(userDataDir, ['--js-flags=--expose-gc'], {
       appRoot: target.root,
-      executablePath: target.executablePath
+      executablePath: target.executablePath,
+      onPhase: async (phase, page) => {
+        startup[`startup${phase[0].toUpperCase()}${phase.slice(1)}Ms`] =
+          performance.now() - startupStartedAt
+
+        if (phase === 'routeCommitted') {
+          await page.evaluate(() => {
+            const measurement = {
+              animationFrame: null,
+              longestFrame: 0,
+              previousFrame: performance.now()
+            }
+            const sampleFrame = timestamp => {
+              measurement.longestFrame = Math.max(
+                measurement.longestFrame,
+                timestamp - measurement.previousFrame
+              )
+              measurement.previousFrame = timestamp
+              measurement.animationFrame = requestAnimationFrame(sampleFrame)
+            }
+            measurement.animationFrame = requestAnimationFrame(sampleFrame)
+            window.__performanceStartupFrames = measurement
+          })
+        } else if (phase === 'interactive') {
+          startup.startupLongestFrameMs = await page.evaluate(() => {
+            const measurement = window.__performanceStartupFrames
+            cancelAnimationFrame(measurement.animationFrame)
+            return Math.max(
+              measurement.longestFrame,
+              performance.now() - measurement.previousFrame
+            )
+          })
+        }
+      }
     })
     electronApp = launched.electronApp
     await closeTutorial(launched.page)
-    return await runLargeSubscriptionsBenchmark(launched.page)
+    return await runPerformanceScenarios(launched, startup, target.root)
   } finally {
     await electronApp?.close().catch(() => {})
     await rm(userDataDir, { recursive: true, force: true })

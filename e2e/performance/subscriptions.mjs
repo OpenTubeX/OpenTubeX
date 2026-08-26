@@ -45,6 +45,7 @@ export const largeSubscriptionsSeed = {
     hideSubscriptionsLive: true,
     hideSubscriptionsCommunity: true,
     showNewSubscriptionFeed: true,
+    generalAutoLoadMorePaginatedItemsEnabled: false,
     reducedMotion: 'off',
     uiScale: 95
   },

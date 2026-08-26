@@ -12,10 +12,24 @@ const runUrl = 'https://github.com/OpenTubeX/OpenTubeX/actions/runs/123'
 
 function sample (overrides = {}) {
   return {
+    startupElectronConnectedMs: 500,
+    startupWindowCreatedMs: 600,
+    startupRouteCommittedMs: 700,
+    startupInteractiveMs: 800,
+    startupLongestFrameMs: 50,
+    subscribedChannelsNavigationElapsedMs: 120,
+    subscribedChannelsNavigationLongestFrameMs: 40,
+    channelSearchElapsedMs: 60,
+    channelSearchLongestFrameMs: 30,
     firstSwitchElapsedMs: 100,
     firstSwitchLongestFrameMs: 50,
     repeatedSwitchElapsedMs: 80,
     repeatedSwitchLongestFrameMs: 40,
+    largeFeedScrollLongestFrameMs: 20,
+    navigationMemoryGrowthMiB: 2,
+    playbackStartElapsedMs: 1000,
+    playbackStartLongestFrameMs: 50,
+    packedCodeSizeKiB: 4000,
     ...overrides
   }
 }
@@ -42,7 +56,7 @@ test('renders a fixed sticky comment from raw samples', () => {
   const comment = renderPerformanceComment(input, { headSha, runUrl })
 
   assert.ok(comment.startsWith(`${performanceCommentMarker}\n## Performance comparison`))
-  assert.match(comment, /First switch elapsed \| 100\.0 ms \| 100\.0 ms \| 0\.0%/)
+  assert.match(comment, /First subscription switch elapsed \| 100\.0 ms \| 100\.0 ms \| 0\.0%/)
   assert.match(comment, /No regression crossed the configured thresholds\./)
   assert.match(comment, /\[View workflow run\]\(https:\/\/github\.com\/OpenTubeX\/OpenTubeX\/actions\/runs\/123\)/)
   assert.doesNotMatch(comment, /@maintainers/)
@@ -55,9 +69,28 @@ test('recomputes regressions instead of trusting artifact conclusions', () => {
 
   const comment = renderPerformanceComment(input, { headSha, runUrl })
 
-  assert.match(comment, /Repeated switch elapsed .+ Regression/)
-  assert.match(comment, /Repeated switch elapsed is 180\.0 ms, above the 150 ms limit/)
-  assert.match(comment, /Repeated switch elapsed regressed by 100\.0 ms \(\+125\.0%\)/)
+  assert.match(comment, /Repeated subscription switch elapsed .+ Regression/)
+  assert.match(comment, /Repeated subscription switch elapsed is 180\.0 ms, at or above the 150\.0 ms limit/)
+  assert.match(comment, /Repeated subscription switch elapsed regressed by 100\.0 ms \(\+125\.0%\)/)
+})
+
+test('reports diagnostic startup phases without gating on them', () => {
+  const comment = renderPerformanceComment(
+    result({ startupElectronConnectedMs: 10000 }),
+    { headSha, runUrl }
+  )
+
+  assert.match(comment, /Startup: Electron connected .+ Diagnostic \| Reported/)
+  assert.match(comment, /No regression crossed the configured thresholds\./)
+})
+
+test('accepts zero memory growth and renders its absolute change', () => {
+  const input = result({ navigationMemoryGrowthMiB: 0 })
+  input.samples.base = Array.from({ length: 7 }, () => sample({ navigationMemoryGrowthMiB: 0 }))
+
+  const comment = renderPerformanceComment(input, { headSha, runUrl })
+
+  assert.match(comment, /Memory growth after 10 navigation cycles \| 0\.0 MiB \| 0\.0 MiB \| 0\.0 MiB/)
 })
 
 test('rejects stale, report-only, and malformed artifacts', () => {
