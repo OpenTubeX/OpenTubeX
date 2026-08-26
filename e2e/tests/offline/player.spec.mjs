@@ -669,13 +669,15 @@ test.describe('scroll mini player', () => {
       }
     })
 
-    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    const player = page.locator('.ftVideoPlayer')
     await scrollBelowPlayer(player)
     await expect(player).toHaveClass(/scrollMiniPlayer/)
     await expect.poll(() => page.evaluate(() => window.scrollMiniPlayerAnimationCount)).toBe(1)
 
     await page.locator('.tabBar .newTabButton').click()
     await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+    await expect(player).toBeHidden()
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
     await attachScreenshot('second tab open')
     const animationCountBeforeReturn = await page.evaluate(
       () => window.scrollMiniPlayerAnimationCount
