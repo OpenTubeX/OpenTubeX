@@ -2001,6 +2001,14 @@ Video:
       InfoPanelHasSegments: 'This video has segments in the database!'
       InfoPanelNoSegments: No segments found
       RefreshSegments: Refresh segments
+      RefreshInfo: Refresh SponsorBlock information
+      ContributionStatsTitle: Your contributions
+      ContributionStatsLoading: Loading contribution stats...
+      ContributionStatsError: Contribution stats are unavailable. Try refreshing.
+      ContributionStatsNoUserId: Submit a segment or import your SponsorBlock user ID to see contribution stats.
+      Submissions: Submissions
+      Segments: Segments
+      TimeSaved: Time saved
       AutoSkipEnabled: Automatically skip segments
       AutoSkipOn: 'On'
       AutoSkipOff: 'Off'

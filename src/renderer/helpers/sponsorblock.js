@@ -26,6 +26,20 @@ async function getVideoHash(videoId) {
     hashArray[1].toString(16).padStart(2, '0')
 }
 
+async function getUserHash(userId) {
+  const textEncoder = new TextEncoder()
+  let hashHex = userId
+
+  for (let round = 0; round < 5000; round++) {
+    const hashBuffer = await crypto.subtle.digest('SHA-256', textEncoder.encode(hashHex))
+    hashHex = Array.from(new Uint8Array(hashBuffer), value => {
+      return value.toString(16).padStart(2, '0')
+    }).join('')
+  }
+
+  return hashHex
+}
+
 /**
  * @typedef {'sponsor' | 'selfpromo' | 'interaction' | 'intro' | 'outro' | 'preview' | 'hook' | 'music_offtopic' | 'filler' | 'poi_highlight' | 'exclusive_access' | 'chapter'} SponsorBlockCategory
  */
@@ -188,6 +202,52 @@ export async function deArrowThumbnail(videoId, timestamp) {
  */
 export function validateSponsorBlockUserId(rawUserId) {
   return rawUserId.trim()
+}
+
+/**
+ * @returns {string}
+ */
+function getExistingSponsorBlockUserId() {
+  const importedUserId = validateSponsorBlockUserId(store.getters.getSponsorBlockUserId)
+  return importedUserId || store.getters.getSponsorBlockGeneratedUserId
+}
+
+/**
+ * @returns {Promise<{
+ *   segmentCount: number,
+ *   viewCount: number,
+ *   minutesSaved: number
+ * } | null>}
+ */
+export async function getSponsorBlockContributionStats() {
+  const userId = getExistingSponsorBlockUserId()
+  if (userId === '') {
+    return null
+  }
+
+  const searchParams = new URLSearchParams({
+    publicUserID: await getUserHash(userId),
+    values: JSON.stringify(['segmentCount', 'viewCount', 'minutesSaved'])
+  })
+  const requestUrl = `${store.getters.getSponsorBlockUrl}/api/userInfo?${searchParams}`
+
+  try {
+    const response = await fetch(requestUrl)
+    if (!response.ok) {
+      throw new Error(await response.text())
+    }
+
+    const stats = await response.json()
+    return Object.fromEntries(
+      ['segmentCount', 'viewCount', 'minutesSaved'].map((key) => {
+        const value = Number(stats[key])
+        return [key, Number.isFinite(value) && value >= 0 ? value : 0]
+      })
+    )
+  } catch (error) {
+    console.error('failed to fetch SponsorBlock contribution stats', requestUrl, error)
+    throw error
+  }
 }
 
 /**

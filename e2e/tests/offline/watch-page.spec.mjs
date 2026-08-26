@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 import { goTo, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { activeTab, findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
@@ -2473,6 +2474,145 @@ test.describe('watch page', () => {
     await expect(sponsorBlock.locator('.sponsorBlockSegments'))
       .not.toHaveAttribute('data-overlayscrollbars-viewport')
     await expect(sponsorBlock.locator('.os-scrollbar-vertical')).toHaveCount(1)
+  })
+
+  test('shows SponsorBlock contribution stats for the existing user ID', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+
+    let expectedPublicUserId = 'test-contributor'
+    for (let round = 0; round < 5000; round++) {
+      expectedPublicUserId = crypto.createHash('sha256').update(expectedPublicUserId).digest('hex')
+    }
+
+    let userInfoRequests = 0
+    let requestedUserInfoUrl = null
+    let segmentRequests = 0
+    await page.route('**/api/skipSegments/**', async (route) => {
+      segmentRequests++
+      const segments = segmentRequests === 1
+        ? Array.from({ length: 18 }, (_, index) => ({
+            UUID: `contribution-stats-segment-${index}`,
+            actionType: 'skip',
+            category: 'sponsor',
+            description: '',
+            locked: 0,
+            segment: [index, index + 0.5],
+            videoDuration: 19,
+            votes: 1
+          }))
+        : []
+      await route.fulfill({
+        body: JSON.stringify([{ videoID: 'jNQXAC9IVRw', segments }]),
+        contentType: 'application/json'
+      })
+    })
+    await page.route('**/api/userInfo?*', async (route) => {
+      userInfoRequests++
+      requestedUserInfoUrl = new URL(route.request().url())
+      const publicUserIdMatches = requestedUserInfoUrl.searchParams.get('publicUserID') === expectedPublicUserId
+      await route.fulfill({
+        body: JSON.stringify(publicUserIdMatches
+          ? {
+              segmentCount: 42,
+              viewCount: 1234,
+              minutesSaved: 22759
+            }
+          : {
+              segmentCount: 0,
+              viewCount: 0,
+              minutesSaved: 0
+            }),
+        contentType: 'application/json'
+      })
+    })
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseSponsorBlock', true)
+      store.commit('setSponsorBlockGeneratedUserId', 'test-contributor')
+      await store.dispatch('updateUiScale', 125)
+    })
+    await openMockedVideo(page)
+    await page.getByRole('button', { name: 'Open SponsorBlock info' }).click()
+
+    const panel = page.locator('.watchVideoSponsorBlock')
+    const stats = panel.locator('.sponsorBlockContributionStats')
+    await expect(stats).toContainText('Your contributions')
+    await expect(stats.locator('dt')).toHaveText(['Submissions', 'Segments', 'Time saved'])
+    await expect(stats.locator('dd')).toHaveText(['42', '1,234', '379 hr 19 min'])
+    const metricLayout = await stats.locator('.sponsorBlockContributionMetric').evaluateAll(metrics => {
+      return metrics.map((metric) => {
+        const labelBounds = metric.querySelector('dt').getBoundingClientRect()
+        const valueBounds = metric.querySelector('dd').getBoundingClientRect()
+        const metricBounds = metric.getBoundingClientRect()
+        return {
+          labelBottom: labelBounds.bottom,
+          metricCenter: metricBounds.left + metricBounds.width / 2,
+          valueCenter: valueBounds.top + valueBounds.height / 2,
+          valueTop: valueBounds.top
+        }
+      })
+    })
+    expect(metricLayout.every(({ labelBottom, valueTop }) => labelBottom <= valueTop)).toBe(true)
+    expect(Math.abs(
+      (metricLayout[1].metricCenter - metricLayout[0].metricCenter) -
+      (metricLayout[2].metricCenter - metricLayout[1].metricCenter)
+    )).toBeLessThanOrEqual(1)
+    expect(Math.max(...metricLayout.map(({ valueCenter }) => valueCenter)) -
+      Math.min(...metricLayout.map(({ valueCenter }) => valueCenter))).toBeLessThanOrEqual(1)
+    await expect(panel.locator('.sponsorBlockSegment')).toHaveCount(18)
+    expect(userInfoRequests).toBe(1)
+    expect(requestedUserInfoUrl.searchParams.get('publicUserID')).toBe(expectedPublicUserId)
+    expect(JSON.parse(requestedUserInfoUrl.searchParams.get('values'))).toEqual([
+      'segmentCount',
+      'viewCount',
+      'minutesSaved'
+    ])
+
+    await panel.getByRole('button', { name: 'Close' }).click()
+    await page.getByRole('button', { name: 'Open SponsorBlock info' }).click()
+    await expect.poll(() => userInfoRequests).toBe(1)
+
+    const content = panel.locator('.sponsorBlockContent')
+    await content.evaluate((element) => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await page.getByRole('button', { name: 'Refresh SponsorBlock information' }).click()
+    await expect.poll(() => userInfoRequests).toBe(2)
+    await expect(panel.locator('.sponsorBlockSegment')).toHaveCount(0)
+    await expect.poll(() => content.evaluate((element) => {
+      const scrollbar = element.querySelector('.os-scrollbar-vertical')
+      const hasVerticalOverflow = element.scrollHeight > element.clientHeight + 1
+      return {
+        hasVerticalOverflow,
+        hasVisibleScrollbar: scrollbar?.classList.contains('os-scrollbar-visible'),
+        scrollTop: element.scrollTop
+      }
+    })).toEqual({
+      hasVerticalOverflow: false,
+      hasVisibleScrollbar: false,
+      scrollTop: 0
+    })
+  })
+
+  test('does not create a SponsorBlock user ID to load contribution stats', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+
+    let userInfoRequests = 0
+    await page.route('**/api/userInfo?*', (route) => {
+      userInfoRequests++
+      return route.abort()
+    })
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseSponsorBlock', true)
+    })
+    await openMockedVideo(page)
+    await page.getByRole('button', { name: 'Open SponsorBlock info' }).click()
+
+    await expect(page.locator('.sponsorBlockContributionStats')).toContainText(
+      'Submit a segment or import your SponsorBlock user ID to see contribution stats.'
+    )
+    expect(userInfoRequests).toBe(0)
   })
 
   test('uses a custom SponsorBlock category color for markers and prompts', async ({ app, page }) => {

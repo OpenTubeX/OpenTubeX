@@ -83,7 +83,7 @@ import { resolveSponsorBlockEnterTarget, resolveSponsorBlockEnterTargets } from 
 import { createSponsorBlockMuteController } from '../../helpers/player/sponsorBlockMute'
 import { findSponsorBlockSeekBarSegment } from '../../helpers/player/sponsorBlockSeekBar'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
-import { voteOnSponsorBlockSegment } from '../../helpers/sponsorblock'
+import { getSponsorBlockContributionStats, voteOnSponsorBlockSegment } from '../../helpers/sponsorblock'
 import {
   DEFAULT_CAPTION_SETTINGS,
   getCaptionCssVariables,
@@ -1731,6 +1731,10 @@ export default defineComponent({
     const sponsorBlockInfoSegments = ref([])
     const sponsorBlockInfoOpen = ref(props.sponsorBlockInfoOpen)
     const sponsorBlockInfoLoading = ref(false)
+    const sponsorBlockContributionStats = ref(null)
+    const sponsorBlockContributionStatsError = ref(false)
+    const sponsorBlockContributionStatsLoaded = ref(false)
+    const sponsorBlockContributionStatsLoading = ref(false)
     const sponsorBlockVotePending = ref(null)
     const sponsorBlockUserVotes = reactive({})
     let terminalSponsorBlockOutroStarted = false
@@ -1816,6 +1820,9 @@ export default defineComponent({
         scheduleSponsorBlockSkip()
         emitSponsorBlockInfoState()
         refreshSponsorBlockMarkers()
+        if (sponsorBlockInfoOpen.value) {
+          refreshSponsorBlockContributionStats()
+        }
       },
       props,
       showOverlayControls,
@@ -1999,13 +2006,40 @@ export default defineComponent({
     }
 
     async function refreshSponsorBlockInfo() {
-      await setupSponsorBlock()
+      await Promise.all([
+        setupSponsorBlock(),
+        refreshSponsorBlockContributionStats()
+      ])
+    }
+
+    async function refreshSponsorBlockContributionStats() {
+      if (sponsorBlockContributionStatsLoading.value) {
+        return
+      }
+
+      sponsorBlockContributionStatsLoading.value = true
+      sponsorBlockContributionStatsError.value = false
+      emitSponsorBlockInfoState()
+
+      try {
+        sponsorBlockContributionStats.value = await getSponsorBlockContributionStats()
+      } catch {
+        sponsorBlockContributionStatsError.value = true
+      } finally {
+        sponsorBlockContributionStatsLoaded.value = true
+        sponsorBlockContributionStatsLoading.value = false
+        emitSponsorBlockInfoState()
+      }
     }
 
     function emitSponsorBlockInfoState() {
       const detail = {
         open: sponsorBlockInfoOpen.value,
         loading: sponsorBlockInfoLoading.value,
+        contributionStats: sponsorBlockContributionStats.value,
+        contributionStatsError: sponsorBlockContributionStatsError.value,
+        contributionStatsLoaded: sponsorBlockContributionStatsLoaded.value,
+        contributionStatsLoading: sponsorBlockContributionStatsLoading.value,
         submissionEnabled: sponsorBlockEnableSubmission.value,
         pendingUuid: sponsorBlockVotePending.value,
         segments: sponsorBlockInfoSegments.value.map(segment => ({
@@ -2023,6 +2057,13 @@ export default defineComponent({
 
     function toggleSponsorBlockInfo() {
       sponsorBlockInfoOpen.value = !sponsorBlockInfoOpen.value
+      if (
+        sponsorBlockInfoOpen.value &&
+        !sponsorBlockContributionStatsLoaded.value &&
+        !sponsorBlockContributionStatsLoading.value
+      ) {
+        refreshSponsorBlockContributionStats()
+      }
       if (!sponsorBlockInfoOpen.value) {
         restoreFullscreenSponsorBlock = false
       }
@@ -9108,6 +9149,9 @@ export default defineComponent({
 
       if (useSponsorBlock.value) {
         setupSponsorBlock()
+        if (sponsorBlockInfoOpen.value) {
+          refreshSponsorBlockContributionStats()
+        }
       }
 
       // shaka-player doesn't start with the cursor hidden, so hide it here for instances in which the
