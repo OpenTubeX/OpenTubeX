@@ -222,6 +222,7 @@ const suppressTransitions = ref(false)
  * @property {boolean} started
  * @property {boolean} moved
  * @property {number} draggedOffset
+ * @property {boolean} deferPositionUpdates
  */
 
 /** @type {DragSession | null} */
@@ -263,6 +264,7 @@ function handleTabContainerPointerDown(event) {
     return
   }
 
+  const interruptedSettle = isSettling.value
   const pendingTabOrder = finishSettle(true)
 
   const container = dropZoneRef.value
@@ -318,12 +320,38 @@ function handleTabContainerPointerDown(event) {
     gap,
     started: false,
     moved: false,
-    draggedOffset: 0
+    draggedOffset: 0,
+    deferPositionUpdates: interruptedSettle
   }
+  const currentDragSession = dragSession
 
   window.addEventListener('pointermove', handleDragPointerMove)
   window.addEventListener('pointerup', handleDragPointerUp)
   window.addEventListener('pointercancel', handleDragPointerCancel)
+
+  if (interruptedSettle) {
+    resumeDragAfterSettle(currentDragSession)
+  }
+}
+
+/**
+ * Let the interrupted reorder render once without transitions before applying
+ * offsets from the new drag. Otherwise the old layout swap and new transform
+ * animation are combined into one frame and neighboring tabs jump.
+ * @param {DragSession} session
+ */
+function resumeDragAfterSettle(session) {
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (dragSession !== session) return
+
+        session.deferPositionUpdates = false
+        suppressTransitions.value = false
+        updateActiveDragPosition()
+      })
+    })
+  })
 }
 
 /**
@@ -355,10 +383,13 @@ function handleDragPointerMove(event) {
   // Prevent text selection while dragging
   event.preventDefault()
 
-  updateActiveDragPosition()
+  updateActiveDragPosition(!dragSession.deferPositionUpdates)
 }
 
-function updateActiveDragPosition() {
+/**
+ * @param {boolean} [updateVisuals]
+ */
+function updateActiveDragPosition(updateVisuals = true) {
   if (!dragSession || !dragSession.started) return
 
   const container = dropZoneRef.value
@@ -416,13 +447,15 @@ function updateActiveDragPosition() {
 
   dragSession.indexShift = indexShift
   dragSession.reorderedTabIds = reorderedTabIds
-  tabOffsets.value = computeTabOffsets(
-    rects,
-    reorderedTabIds,
-    gap,
-    draggedTabIdSet,
-    draggedOffset
-  )
+  if (updateVisuals) {
+    tabOffsets.value = computeTabOffsets(
+      rects,
+      reorderedTabIds,
+      gap,
+      draggedTabIdSet,
+      draggedOffset
+    )
+  }
 }
 
 function handleDragPointerUp() {
@@ -509,7 +542,9 @@ async function commitReorder(pendingReorder, cleanupVisuals = true) {
 
   nextTick(() => {
     requestAnimationFrame(() => {
-      suppressTransitions.value = false
+      if (!dragSession?.deferPositionUpdates) {
+        suppressTransitions.value = false
+      }
     })
   })
 }
@@ -612,7 +647,9 @@ function finishSettle(cancel) {
     if (!pendingReorder) {
       nextTick(() => {
         requestAnimationFrame(() => {
-          suppressTransitions.value = false
+          if (!dragSession?.deferPositionUpdates) {
+            suppressTransitions.value = false
+          }
         })
       })
     }
