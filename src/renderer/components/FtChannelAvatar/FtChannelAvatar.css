@@ -1,0 +1,23 @@
+.channelAvatar {
+  block-size: 24px;
+  color: var(--tertiary-text-color);
+  display: inline-grid;
+  flex: 0 0 24px;
+  inline-size: 24px;
+  place-items: center;
+}
+
+.channelAvatarImage,
+.channelAvatarFallback {
+  block-size: 24px;
+  border-radius: 50%;
+  inline-size: 24px;
+}
+
+.channelAvatarImage {
+  object-fit: cover;
+}
+
+.channelAvatarFallback {
+  font-size: 24px;
+}

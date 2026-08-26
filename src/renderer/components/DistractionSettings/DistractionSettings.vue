@@ -50,6 +50,13 @@
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Hide Channel Avatars')"
+          :compact="true"
+          :default-value="hideChannelAvatars"
+          setting-key="hideChannelAvatars"
+          @change="updateHideChannelAvatars"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Live Streams')"
           :compact="true"
           :default-value="hideLiveStreams"
@@ -443,6 +450,16 @@ const hideVideoViews = computed(() => store.getters.getHideVideoViews)
  */
 function updateHideVideoViews(value) {
   store.dispatch('updateHideVideoViews', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideChannelAvatars = computed(() => store.getters.getHideChannelAvatars)
+
+/**
+ * @param {boolean} value
+ */
+function updateHideChannelAvatars(value) {
+  store.dispatch('updateHideChannelAvatars', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

@@ -13,6 +13,7 @@ import { getLocalPremiereState } from '../premiere'
 import { shouldHideMembersOnlyContent } from '../restricted-playback'
 import { getThumbnailPreviewUrl } from '../thumbnailPreview'
 import { isCollaborativeVideoAuthor, parseLocalVideoChannels } from '../video-collaborators'
+import { getResultAuthorThumbnailUrl } from '../result-channel-avatar'
 import {
   CHANNEL_HANDLE_REGEX,
   calculatePublishedDate,
@@ -1583,6 +1584,7 @@ export function parseLocalListPlaylist(playlist, channelId = undefined, channelN
       playlistId: gridPlaylist.id,
       channelName: gridPlaylist.author?.name,
       channelId: gridPlaylist.author?.id,
+      authorThumbnailUrl: getResultAuthorThumbnailUrl(gridPlaylist),
       videoCount: extractNumberFromString(gridPlaylist.video_count.text)
     }
   } else {
@@ -1619,6 +1621,7 @@ export function parseLocalListPlaylist(playlist, channelId = undefined, channelN
       thumbnail: thumbnailRenderer ? thumbnailRenderer.thumbnail[0].url : playlist.thumbnails[0].url,
       channelName: internalChannelName,
       channelId: internalChannelId,
+      authorThumbnailUrl: getResultAuthorThumbnailUrl(playlist),
       playlistId: playlist.id,
       videoCount: extractNumberFromString(playlist.video_count.text)
     }
@@ -1966,6 +1969,7 @@ export function parseLocalListVideo(item, channelId, channelName) {
       title: video.title.text?.trim(),
       author: video.author.name !== 'N/A' ? video.author.name : channelName,
       authorId: video.author.id !== 'N/A' ? video.author.id : channelId,
+      authorThumbnailUrl: getResultAuthorThumbnailUrl(video),
       hasCollaborators: video.author.id === 'N/A' && isCollaborativeVideoAuthor(video.author.name),
       description: video.description,
       viewCount,

@@ -52,13 +52,21 @@
           dir="auto"
           :to="`/channel/${channelId}`"
         >
-          {{ channelName }}
+          <FtChannelAvatar
+            v-if="showChannelAvatar"
+            :thumbnail="channelThumbnail"
+          />
+          <span class="channelNameText">{{ channelName }}</span>
         </RouterLink>
         <bdi
           v-else
           class="channelName"
         >
-          {{ channelName }}
+          <FtChannelAvatar
+            v-if="showChannelAvatar"
+            :thumbnail="channelThumbnail"
+          />
+          <span class="channelNameText">{{ channelName }}</span>
         </bdi>
       </div>
       <div class="buttonStack playlistButtonStack">
@@ -107,14 +115,16 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, toRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtChannelAvatar from '../FtChannelAvatar/FtChannelAvatar.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 
 import store from '../../store/index'
 
+import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar'
 import { showToast } from '../../helpers/utils'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
@@ -146,9 +156,9 @@ let playlistId = ''
 let title = ''
 /** @type {string} */
 let thumbnail = thumbnailPlaceholder
-/** @type {string | null} */
-let channelId = null
-let channelName = ''
+/** @type {import('vue').Ref<string | null>} */
+const channelId = ref(null)
+const channelName = ref('')
 let videoCount = 0
 
 /** @type {import('vue').ComputedRef<'grid' | 'list'>} */
@@ -208,8 +218,8 @@ function parseInvidiousData() {
     .replace('https://i.ytimg.com', currentInvidiousInstanceUrl.value)
     .replace('hqdefault', 'mqdefault')
 
-  channelName = props.data.author
-  channelId = props.data.authorId
+  channelName.value = props.data.author
+  channelId.value = props.data.authorId
   playlistId = props.data.playlistId
   videoCount = props.data.videoCount
 
@@ -223,8 +233,8 @@ function parseLocalData() {
 
   thumbnail = props.data.thumbnail
 
-  channelName = props.data.channelName
-  channelId = props.data.channelId
+  channelName.value = props.data.channelName
+  channelId.value = props.data.channelId
   playlistId = props.data.playlistId
   videoCount = props.data.videoCount
 }
@@ -240,11 +250,26 @@ function parseUserData() {
     thumbnail = `${origin}/vi/${props.data.videos[0].videoId}/mqdefault.jpg`
   }
 
-  channelName = ''
-  channelId = ''
+  channelName.value = ''
+  channelId.value = ''
   playlistId = props.data._id
   videoCount = props.data.videos.length
 }
+
+const showChannelAvatar = computed(() => (
+  !store.getters.getHideChannelAvatars &&
+  (props.appearance === 'result' || props.appearance === 'youtubeShort') &&
+  typeof channelName.value === 'string' &&
+  channelName.value !== '' &&
+  typeof channelId.value === 'string' &&
+  channelId.value !== ''
+))
+
+const { channelThumbnail } = useResultChannelAvatar(
+  toRef(props, 'data'),
+  channelId,
+  showChannelAvatar
+)
 
 /** @type {import('vue').ComputedRef<string | null>} */
 const quickBookmarkPlaylistId = computed(() => store.getters.getQuickBookmarkTargetPlaylistId)

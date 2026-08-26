@@ -276,6 +276,7 @@ const state = {
   ytDlpAutomaticDownloadRules: '{}',
   expandSideBar: false,
   hideActiveSubscriptions: false,
+  hideChannelAvatars: false,
   hideChannelCommunity: false,
   hideChannelHome: false,
   hideChannelPlaylists: false,
