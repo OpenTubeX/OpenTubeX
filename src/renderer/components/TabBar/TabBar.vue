@@ -344,7 +344,12 @@ function resumeDragAfterSettle(session) {
   nextTick(() => {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        if (dragSession !== session) return
+        if (dragSession !== session) {
+          if (!dragSession?.deferPositionUpdates) {
+            suppressTransitions.value = false
+          }
+          return
+        }
 
         session.deferPositionUpdates = false
         suppressTransitions.value = false
