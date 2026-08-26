@@ -65,6 +65,9 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   const scrollMiniVideoAspectRatio = ref(DEFAULT_ASPECT_RATIO)
   const scrollMiniPlayerEnabled = computed(() => store.getters.getScrollMiniPlayerEnabled)
   const scrollMiniPlayerOnAllTabs = computed(() => store.getters.getScrollMiniPlayerOnAllTabs)
+  const autoPictureInPictureOnTabChange = computed(
+    () => store.getters.getAutoPictureInPictureTriggers.includes('tab')
+  )
   const scrollMiniPlayerActive = ref(false)
   const scrollMiniPlayerAnimating = ref(false)
   const scrollMiniPlaceholderHeight = ref(0)
@@ -389,6 +392,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
   function canShowCrossTabMiniPlayer() {
     return !isActiveTab.value &&
+      !autoPictureInPictureOnTabChange.value &&
       scrollMiniPlayerOnAllTabs.value &&
       canUseScrollMiniPlayerBase()
   }
@@ -400,7 +404,8 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
       return scrollMiniPlayerEnabled.value
     }
 
-    return scrollMiniPlayerOnAllTabs.value &&
+    return !autoPictureInPictureOnTabChange.value &&
+      scrollMiniPlayerOnAllTabs.value &&
       isCrossTabMiniPlayerOwner(crossTabMiniPlayerCandidate)
   }
 
@@ -1026,6 +1031,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
   watch(scrollMiniPlayerEnabled, () => updateScrollMiniPlayer())
   watch(scrollMiniPlayerOnAllTabs, () => updateScrollMiniPlayer())
+  watch(autoPictureInPictureOnTabChange, () => updateScrollMiniPlayer())
   watch(fullWindowEnabled, () => {
     refreshCrossTabMiniPlayer(crossTabMiniPlayerCandidate)
     updateScrollMiniPlayer()

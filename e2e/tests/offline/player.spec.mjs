@@ -771,6 +771,30 @@ test.describe('scroll mini player', () => {
       await expectOverlayAbovePlayer(player, downloads)
     })
 
+    test('hides an existing mini player when automatic PiP takes over tab changes', async ({ app, page }) => {
+      const video = await openDemoVideo({ app, page })
+      await video.evaluate(element => element.pause())
+
+      const player = page.locator('.ftVideoPlayer')
+      await page.locator('.tabBar .newTabButton').click()
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+
+      await page.locator('.profileTrigger').click()
+      await page.getByRole('dialog', { name: 'Quick settings' })
+        .getByRole('button', { name: 'All settings' }).click()
+      const settings = page.getByRole('dialog', { name: 'Settings', exact: true })
+      await settings.locator('.settingsMenu [data-section="playback"]').click()
+      await settings.locator('.pure-checkbox label')
+        .filter({ hasText: 'When switching tabs' }).click()
+
+      await expect(settings.getByRole('checkbox', {
+        name: 'When switching tabs',
+        exact: true
+      })).toBeChecked()
+      await expect(player).toBeHidden()
+      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    })
+
     test.describe('with automatic Picture-in-Picture', () => {
       test.use({
         seed: {
@@ -805,6 +829,21 @@ test.describe('scroll mini player', () => {
         await expect.poll(() => page.evaluate(
           () => document.pictureInPictureElement === null
         )).toBe(true)
+      })
+
+      test('does not fall back to the cross-tab mini player while paused', async ({ app, page }) => {
+        const video = await openDemoVideo({ app, page })
+        await video.evaluate(element => element.pause())
+        await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+
+        const player = page.locator('.ftVideoPlayer')
+        await page.locator('.tabBar .newTabButton').click()
+
+        await expect.poll(() => page.evaluate(
+          () => document.pictureInPictureElement === null
+        )).toBe(true)
+        await expect(player).toBeHidden()
+        await expect(player).not.toHaveClass(/scrollMiniPlayer/)
       })
     })
   })
