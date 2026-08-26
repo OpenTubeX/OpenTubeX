@@ -13,6 +13,7 @@
 }
 
 .sponsorBlockCategory :deep(.select) {
+  box-sizing: border-box;
   inline-size: 100%;
 }
 
