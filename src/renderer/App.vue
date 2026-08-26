@@ -2998,17 +2998,69 @@ function handleExternalLinkOpeningPromptAnswer(option) {
 
 /**
  * @param {PointerEvent} event
+ * @returns {HTMLAnchorElement | null}
  */
-function isExternalLink(event) {
-  return event.target.tagName === 'A' && !event.target.href.startsWith(window.location.origin)
+function getEventLink(event) {
+  const target = event.target instanceof Element ? event.target : null
+  const link = target?.closest('a[href]')
+  return link instanceof HTMLAnchorElement ? link : null
+}
+
+/**
+ * @param {HTMLAnchorElement} link
+ */
+function isExternalLink(link) {
+  return link.origin !== window.location.origin
+}
+
+/**
+ * Opens modified clicks on ordinary internal links through the app's tab and
+ * window APIs. Components with specialized navigation can opt out by calling
+ * preventDefault() before the event reaches the document.
+ * @param {PointerEvent} event
+ * @param {HTMLAnchorElement | null} link
+ */
+function handleInternalLinkShortcut(event, link) {
+  if (!process.env.IS_ELECTRON || event.defaultPrevented || link === null || isExternalLink(link)) {
+    return false
+  }
+
+  const isMiddleClick = event.type === 'auxclick' && event.button === 1
+  const ctrlOrCmdPressed = process.platform === 'darwin' ? event.metaKey : event.ctrlKey
+  const isCtrlOrCmdClick = event.type === 'click' && event.button === 0 && ctrlOrCmdPressed && !event.altKey
+  if (!isMiddleClick && !isCtrlOrCmdClick) {
+    return false
+  }
+
+  const hashRoute = new URL(link.href).hash.slice(1)
+  if (!hashRoute.startsWith('/')) {
+    return false
+  }
+
+  const destination = router.resolve(hashRoute)
+  event.preventDefault()
+  openInternalPath({
+    path: destination.path,
+    query: destination.query,
+    title: link.dataset.tabTitle || undefined,
+    doCreateNewWindow: event.shiftKey,
+    doCreateNewTab: !event.shiftKey,
+    makeActive: isCtrlOrCmdClick
+  })
+  return true
 }
 
 /**
  * @param {PointerEvent} event
  */
 function handleClick(event) {
-  if (isExternalLink(event)) {
-    handleLinkClick(event)
+  const link = getEventLink(event)
+  if (handleInternalLinkShortcut(event, link)) {
+    return
+  }
+
+  if (link !== null && isExternalLink(link)) {
+    handleLinkClick(event, link)
   }
 }
 
@@ -3016,11 +3068,17 @@ function handleClick(event) {
  * @param {PointerEvent} event
  */
 function handleAuxClick(event) {
+  const link = getEventLink(event)
+
   // auxclick fires for all clicks not performed with the primary button
   // only handle the link click if it was the middle button,
   // otherwise the context menu breaks
-  if (isExternalLink(event) && event.button === 1) {
-    handleLinkClick(event)
+  if (event.button === 1 && handleInternalLinkShortcut(event, link)) {
+    return
+  }
+
+  if (link !== null && isExternalLink(link) && event.button === 1) {
+    handleLinkClick(event, link)
     return
   }
 
@@ -3043,9 +3101,10 @@ function handleAuxClick(event) {
 
 /**
  * @param {PointerEvent} event
+ * @param {HTMLAnchorElement} link
  */
-function handleLinkClick(event) {
-  const href = event.target.href
+function handleLinkClick(event, link) {
+  const href = link.href
   event.preventDefault()
 
   // Check if it's a YouTube link, but exclude live chat pop out

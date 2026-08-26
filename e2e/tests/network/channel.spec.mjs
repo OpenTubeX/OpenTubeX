@@ -100,6 +100,28 @@ test.describe('channel page', () => {
     await expect(selectedChannelTab).toHaveAttribute('id', 'aboutTab')
     const aboutPanel = page.locator('#aboutPanel')
     await expect(aboutPanel).toHaveAttribute('role', 'tabpanel')
+
+    const sourceTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+    const tagLink = aboutPanel.locator('.aboutTagLink').first()
+    await expect(tagLink).toBeVisible()
+    const tagName = (await tagLink.textContent()).trim()
+    await tagLink.click({ button: 'middle' })
+
+    await expect(page.locator(sel.tabs)).toHaveCount(3)
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', sourceTabId)
+    await expect(page).toHaveURL(/\/about$/)
+    await expect.poll(() => page.evaluate(async () => {
+      const state = await window.ftElectron.tabs.getState()
+      return state.tabs.find(tab => tab.route.path.startsWith('/search/'))?.id
+    })).toBeTruthy()
+    const tagTabId = await page.evaluate(async () => {
+      const state = await window.ftElectron.tabs.getState()
+      return state.tabs.find(tab => tab.route.path.startsWith('/search/')).id
+    })
+    await expect(page.locator(`.tab[data-tab-id="${tagTabId}"]`)).toContainText(tagName)
+    await page.evaluate(id => window.ftElectron.tabs.close(id), tagTabId)
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+
     await aboutPanel.dispatchEvent('keydown', { key: 'ArrowRight', bubbles: true })
     await expect(selectedChannelTab).toHaveAttribute('id', initialChannelTabId)
 
