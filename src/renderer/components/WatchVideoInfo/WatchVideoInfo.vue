@@ -8,14 +8,28 @@
         dir="auto"
       />
       <div
-        v-if="isUnlisted || hasAiGeneratedContent || sponsorBlockFullVideoCategory"
+        v-if="isUnlisted || isAgeRestricted || hasAiGeneratedContent || sponsorBlockFullVideoCategory"
         class="videoBadges"
       >
         <div
           v-if="isUnlisted"
-          class="videoBadge"
+          class="videoBadge unlistedBadge"
         >
+          <FtIcon
+            :icon="['fas', 'eye-slash']"
+            aria-hidden="true"
+          />
           {{ t('Video.Unlisted') }}
+        </div>
+        <div
+          v-if="isAgeRestricted"
+          class="videoBadge ageRestrictedBadge"
+        >
+          <FtIcon
+            :icon="['fas', 'user-lock']"
+            aria-hidden="true"
+          />
+          {{ t('Video.Age Restricted Badge') }}
         </div>
         <div
           v-if="hasAiGeneratedContent"
@@ -440,6 +454,10 @@ const props = defineProps({
   isUnlisted: {
     type: Boolean,
     required: false
+  },
+  isAgeRestricted: {
+    type: Boolean,
+    default: false
   },
   hasAiGeneratedContent: {
     type: Boolean,

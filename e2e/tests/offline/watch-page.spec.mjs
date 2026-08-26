@@ -46,6 +46,40 @@ test('uses the stored watch route for a dev-server tab link action', async ({ ap
     .toBe('https://youtu.be/jNQXAC9IVRw')
 })
 
+test('shows age-restricted and unlisted badges below the video title', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.route(/\/youtubei\/v1\/player/, (route, request) => {
+    const videoId = JSON.parse(request.postData() ?? '{}').videoId ?? 'jNQXAC9IVRw'
+    const response = demoPlayerResponse(videoId)
+    response.microformat.playerMicroformatRenderer.isFamilySafe = false
+    response.microformat.playerMicroformatRenderer.isUnlisted = true
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(response)
+    })
+  })
+
+  await openMockedVideo(page)
+
+  const videoInfo = page.locator('.infoArea .watchVideoInfo')
+  const ageRestrictedBadge = videoInfo.locator('.ageRestrictedBadge')
+  const unlistedBadge = videoInfo.locator('.unlistedBadge')
+  await expect(videoInfo.locator('.videoBadges')).toHaveCount(1)
+  await expect(ageRestrictedBadge).toHaveText('Age restricted')
+  await expect(ageRestrictedBadge.locator('[data-icon="user-lock"]')).toBeVisible()
+  await expect(unlistedBadge).toHaveText('Unlisted')
+  await expect(unlistedBadge.locator('[data-icon="eye-slash"]')).toBeVisible()
+
+  const [badgeBounds, titleBounds] = await Promise.all([
+    ageRestrictedBadge.boundingBox(),
+    videoInfo.locator('.videoTitle').boundingBox()
+  ])
+  expect(badgeBounds).not.toBeNull()
+  expect(titleBounds).not.toBeNull()
+  expect(badgeBounds.y).toBeGreaterThanOrEqual(titleBounds.y + titleBounds.height)
+})
+
 for (const { name, options, expectedCount } of [
   { name: 'hides transcript actions without captions', options: {}, expectedCount: 0 },
   {
