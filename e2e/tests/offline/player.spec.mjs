@@ -39,6 +39,36 @@ function scrollBelowPlayer(player) {
   })
 }
 
+/** Asserts that the overlay owns a point where it intersects the detached player. */
+async function expectOverlayAbovePlayer(player, overlay) {
+  await expect(overlay).toBeVisible()
+  const playerElement = await player.elementHandle()
+  expect(playerElement).not.toBeNull()
+
+  const result = await overlay.evaluate((overlayElement, playerElement) => {
+    const overlayRect = overlayElement.getBoundingClientRect()
+    const playerRect = playerElement.getBoundingClientRect()
+    const left = Math.max(overlayRect.left, playerRect.left)
+    const right = Math.min(overlayRect.right, playerRect.right)
+    const top = Math.max(overlayRect.top, playerRect.top)
+    const bottom = Math.min(overlayRect.bottom, playerRect.bottom)
+
+    if (right <= left || bottom <= top) {
+      return { intersects: false, overlayIsTopmost: false }
+    }
+
+    const topmost = document.elementFromPoint((left + right) / 2, (top + bottom) / 2)
+    return {
+      intersects: true,
+      overlayIsTopmost: topmost !== null && overlayElement.contains(topmost)
+    }
+  }, playerElement)
+
+  await playerElement.dispose()
+  expect(result.intersects).toBe(true)
+  expect(result.overlayIsTopmost).toBe(true)
+}
+
 test('playback starts', async ({ app, page, attachScreenshot }) => {
   const video = await openDemoVideo({ app, page })
 
@@ -639,13 +669,15 @@ test.describe('scroll mini player', () => {
       }
     })
 
-    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    const player = page.locator('.ftVideoPlayer')
     await scrollBelowPlayer(player)
     await expect(player).toHaveClass(/scrollMiniPlayer/)
     await expect.poll(() => page.evaluate(() => window.scrollMiniPlayerAnimationCount)).toBe(1)
 
     await page.locator('.tabBar .newTabButton').click()
     await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+    await expect(player).toBeHidden()
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
     await attachScreenshot('second tab open')
     const animationCountBeforeReturn = await page.evaluate(
       () => window.scrollMiniPlayerAnimationCount
@@ -659,6 +691,163 @@ test.describe('scroll mini player', () => {
     await page.waitForTimeout(350)
     expect(await page.evaluate(() => window.scrollMiniPlayerAnimationCount))
       .toBe(animationCountBeforeReturn)
+  })
+
+  test.describe('on all tabs', () => {
+    test.use({
+      seed: {
+        settings: {
+          ...PLAYER_SEED,
+          scrollMiniPlayerOnAllTabs: true,
+          uiScale: 125
+        }
+      }
+    })
+
+    test('keeps the most recently left video visible across tabs', async ({ app, page, attachScreenshot }) => {
+      const video = await openDemoVideo({ app, page })
+      const playbackTimeBeforeSwitch = await video.evaluate(element => element.currentTime)
+
+      const player = page.locator('.ftVideoPlayer')
+      await page.locator('.tabBar .newTabButton').click()
+      await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+      await expect(player).toBeVisible()
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      const returnButton = player.locator('.scrollMiniScrollTop')
+      await expect(returnButton).toHaveAttribute(
+        'title',
+        'Return to video tab'
+      )
+      await expect(returnButton).toHaveAttribute('tabindex', '0')
+      const floatingVideo = player.locator('video')
+      await expect.poll(() => floatingVideo.evaluate(element => element.currentTime))
+        .toBeGreaterThan(playbackTimeBeforeSwitch)
+
+      const playPauseButton = player.locator('.scrollMiniPlayPause')
+      await playPauseButton.click()
+      await expect.poll(() => floatingVideo.evaluate(element => element.paused)).toBe(true)
+      await playPauseButton.click()
+      await expect.poll(() => floatingVideo.evaluate(element => element.paused)).toBe(false)
+      await attachScreenshot('mini player on another tab')
+
+      await page.locator('.tabBar .newTabButton').click()
+      await expect(page.locator('.tabBar .tab')).toHaveCount(3)
+      await expect(player).toBeVisible()
+
+      await player.locator('.scrollMiniScrollTop').click()
+      await expect(page.locator(`${activeTab} .ftVideoPlayer`)).toBeVisible()
+      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    })
+
+    test('removes the mini player when its source tab closes', async ({ app, page }) => {
+      await openDemoVideo({ app, page })
+
+      await page.locator('.tabBar .newTabButton').click()
+      await expect(page.locator('.ftVideoPlayer')).toBeVisible()
+
+      await page.locator('.tabBar .tab').first().locator('.closeButton').click()
+      await expect(page.locator('.tabBar .tab')).toHaveCount(1)
+      await expect(page.locator('.ftVideoPlayer')).toHaveCount(0)
+    })
+
+    test('keeps menus and utility windows above the mini player', async ({ app, page }) => {
+      await openDemoVideo({ app, page })
+
+      const player = page.locator('.ftVideoPlayer')
+      await page.locator('.tabBar .newTabButton').click()
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+
+      await page.locator('.profileTrigger').click()
+      const quickSettings = page.getByRole('dialog', { name: 'Quick settings' })
+      await expectOverlayAbovePlayer(player, quickSettings)
+
+      await quickSettings.getByRole('button', { name: 'All settings' }).click()
+      const settings = page.getByRole('dialog', { name: 'Settings', exact: true })
+      await expectOverlayAbovePlayer(player, settings)
+      await settings.getByRole('button', { name: 'Close', exact: true }).click()
+
+      await page.locator('.profileTrigger').click()
+      await page.getByRole('dialog', { name: 'Quick settings' })
+        .getByRole('button', { name: 'Downloads' }).click()
+      const downloads = page.getByRole('dialog', { name: 'Downloads', exact: true })
+      await expectOverlayAbovePlayer(player, downloads)
+    })
+
+    test('hides an existing mini player when automatic PiP takes over tab changes', async ({ app, page }) => {
+      const video = await openDemoVideo({ app, page })
+      await video.evaluate(element => element.pause())
+
+      const player = page.locator('.ftVideoPlayer')
+      await page.locator('.tabBar .newTabButton').click()
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+
+      await page.locator('.profileTrigger').click()
+      await page.getByRole('dialog', { name: 'Quick settings' })
+        .getByRole('button', { name: 'All settings' }).click()
+      const settings = page.getByRole('dialog', { name: 'Settings', exact: true })
+      await settings.locator('.settingsMenu [data-section="playback"]').click()
+      await settings.locator('.pure-checkbox label')
+        .filter({ hasText: 'When switching tabs' }).click()
+
+      await expect(settings.getByRole('checkbox', {
+        name: 'When switching tabs',
+        exact: true
+      })).toBeChecked()
+      await expect(player).toBeHidden()
+      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    })
+
+    test.describe('with automatic Picture-in-Picture', () => {
+      test.use({
+        seed: {
+          settings: {
+            ...PLAYER_SEED,
+            autoPictureInPictureTriggers: ['tab'],
+            scrollMiniPlayerOnAllTabs: true,
+            uiScale: 125
+          }
+        }
+      })
+
+      test('uses PiP instead of the cross-tab mini player', async ({ app, page }) => {
+        await openDemoVideo({ app, page })
+        const player = page.locator('.ftVideoPlayer')
+        const video = player.locator('video')
+
+        await page.locator('.tabBar .newTabButton').click()
+        await expect.poll(() => video.evaluate(
+          element => document.pictureInPictureElement === element
+        )).toBe(true)
+        await expect(player).toBeHidden()
+        await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+
+        // A later scroll update must not bring the in-app player back while
+        // the same video is still presented by the native PiP window.
+        await page.evaluate(() => window.dispatchEvent(new Event('scroll')))
+        await expect(player).toBeHidden()
+        await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+
+        await page.evaluate(() => document.exitPictureInPicture())
+        await expect.poll(() => page.evaluate(
+          () => document.pictureInPictureElement === null
+        )).toBe(true)
+      })
+
+      test('does not fall back to the cross-tab mini player while paused', async ({ app, page }) => {
+        const video = await openDemoVideo({ app, page })
+        await video.evaluate(element => element.pause())
+        await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+
+        const player = page.locator('.ftVideoPlayer')
+        await page.locator('.tabBar .newTabButton').click()
+
+        await expect.poll(() => page.evaluate(
+          () => document.pictureInPictureElement === null
+        )).toBe(true)
+        await expect(player).toBeHidden()
+        await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+      })
+    })
   })
 
   test('scales the captions down with the scroll mini player', async ({ app, page, attachScreenshot }) => {

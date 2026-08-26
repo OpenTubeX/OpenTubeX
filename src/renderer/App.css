@@ -30,6 +30,14 @@
   container-type: inline-size;
 }
 
+.crossTabMiniPlayerLayer {
+  position: relative;
+
+  /* Keep the detached player above route content, but below app chrome and
+     utility windows. Its own z-index remains local to this stacking context. */
+  z-index: 4;
+}
+
 .banner {
   inline-size: 85%;
   margin-block: 40px;

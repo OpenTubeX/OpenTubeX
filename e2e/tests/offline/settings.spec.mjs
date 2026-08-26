@@ -2368,6 +2368,35 @@ test.describe('settings', () => {
     await expect(toggle).not.toBeChecked()
   })
 
+  test('disables the cross-tab mini player while automatic PiP on tab change is enabled', async ({ page }) => {
+    const playback = await goToSettingsSection(page, 'playback')
+    const miniPlayerToggle = playback.getByRole('checkbox', {
+      name: 'Keep a mini player on screen when switching tabs'
+    })
+    const automaticPipToggle = playback.getByRole('checkbox', {
+      name: 'When switching tabs',
+      exact: true
+    })
+    const automaticPipLabel = playback.locator('.pure-checkbox label')
+      .filter({ hasText: 'When switching tabs' })
+
+    await expect(miniPlayerToggle).toBeEnabled()
+    await playback.locator('label.switch-label')
+      .filter({ hasText: 'Keep a mini player on screen when switching tabs' })
+      .click()
+    await expect(miniPlayerToggle).toBeChecked()
+
+    await automaticPipLabel.click()
+    await expect(automaticPipToggle).toBeChecked()
+    await expect(miniPlayerToggle).toBeDisabled()
+    await expect(miniPlayerToggle).toBeChecked()
+
+    await automaticPipLabel.click()
+    await expect(automaticPipToggle).not.toBeChecked()
+    await expect(miniPlayerToggle).toBeEnabled()
+    await expect(miniPlayerToggle).toBeChecked()
+  })
+
   test('shows voice-over settings disabled until translation is enabled', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="add-ons"]').click()

@@ -2,6 +2,13 @@ import { computed, nextTick, ref, watch } from 'vue'
 
 import store from '../../../store/index'
 import { applyAnimationSpeed } from '../../../helpers/animationSpeed'
+import {
+  isCrossTabMiniPlayerOwner,
+  markCrossTabMiniPlayerActive,
+  markCrossTabMiniPlayerInactive,
+  refreshCrossTabMiniPlayer,
+  unregisterCrossTabMiniPlayer,
+} from '../../../helpers/crossTabMiniPlayer'
 import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
 import {
   animateScrollMiniPlayerBounce,
@@ -48,13 +55,19 @@ const SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS = 300
  *   fullWindowEnabled: import('vue').Ref<boolean>,
  *   getUi: () => import('shaka-player').ui.Overlay | null,
  *   isActiveTab: import('vue').ComputedRef<boolean>,
+ *   pictureInPictureActive: import('vue').Ref<boolean>,
  *   props: { format: string, videoId: string },
+ *   tabId?: string | null,
  *   video: import('vue').Ref<HTMLVideoElement | null>
  * }} options
  */
-export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isActiveTab, props, video }) {
+export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isActiveTab, pictureInPictureActive, props, tabId = null, video }) {
   const scrollMiniVideoAspectRatio = ref(DEFAULT_ASPECT_RATIO)
   const scrollMiniPlayerEnabled = computed(() => store.getters.getScrollMiniPlayerEnabled)
+  const scrollMiniPlayerOnAllTabs = computed(() => store.getters.getScrollMiniPlayerOnAllTabs)
+  const autoPictureInPictureOnTabChange = computed(
+    () => store.getters.getAutoPictureInPictureTriggers.includes('tab')
+  )
   const scrollMiniPlayerActive = ref(false)
   const scrollMiniPlayerAnimating = ref(false)
   const scrollMiniPlaceholderHeight = ref(0)
@@ -71,7 +84,18 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   const scrollMiniPlaceholder = ref(null)
   const scrollMiniVolumeTrack = ref(null)
 
+  const crossTabMiniPlayerCandidate = {
+    canShow: () => canShowCrossTabMiniPlayer(),
+    hide: () => deactivateScrollMiniPlayer(),
+    show: () => activateScrollMiniPlayer(false),
+  }
+
   const scrollMiniPlayerStyle = computed(() => scrollMiniPlayerRectToStyle(scrollMiniPlayerRect.value))
+  const scrollMiniPlayerDetached = computed(() => {
+    return scrollMiniPlayerActive.value &&
+      !isActiveTab.value &&
+      isCrossTabMiniPlayerOwner(crossTabMiniPlayerCandidate)
+  })
   const scrollMiniVolumePercent = computed(() => Math.round(scrollMiniVolume.value * 100))
   const scrollMiniVolumeIcon = computed(() => {
     if (scrollMiniVolume.value === 0) {
@@ -305,7 +329,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   }
 
   function isNativePipActive() {
-    return Boolean(getUi()?.getControls?.()?.isPiPEnabled?.())
+    return pictureInPictureActive.value
   }
 
   function isNativeFullscreenActive() {
@@ -356,9 +380,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     togglePlayerFullScreen()
   }
 
-  function canUseScrollMiniPlayer() {
-    if (!isActiveTab.value) return false
-    if (!scrollMiniPlayerEnabled.value) return false
+  function canUseScrollMiniPlayerBase() {
     if (props.format === 'audio') return false
     if (fullWindowEnabled.value) return false
     if (isNativeFullscreenActive()) return false
@@ -366,6 +388,25 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     const videoElement = video.value
     if (!videoElement || videoElement.ended) return false
     return true
+  }
+
+  function canShowCrossTabMiniPlayer() {
+    return !isActiveTab.value &&
+      !autoPictureInPictureOnTabChange.value &&
+      scrollMiniPlayerOnAllTabs.value &&
+      canUseScrollMiniPlayerBase()
+  }
+
+  function canUseScrollMiniPlayer() {
+    if (!canUseScrollMiniPlayerBase()) return false
+
+    if (isActiveTab.value) {
+      return scrollMiniPlayerEnabled.value
+    }
+
+    return !autoPictureInPictureOnTabChange.value &&
+      scrollMiniPlayerOnAllTabs.value &&
+      isCrossTabMiniPlayerOwner(crossTabMiniPlayerCandidate)
   }
 
   function getScrollMiniAnchor() {
@@ -641,6 +682,10 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
   /** @param {{ animateActivation?: boolean }} [options] */
   function updateScrollMiniPlayer({ animateActivation = true } = {}) {
+    if (!isActiveTab.value) {
+      refreshCrossTabMiniPlayer(crossTabMiniPlayerCandidate)
+    }
+
     // Check first: everything below reads layout, which forces a synchronous
     // reflow. Measuring before knowing whether the mini player can run at all
     // would do that on every scroll event even with the feature turned off.
@@ -654,6 +699,16 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     rememberInlinePlayerLayoutHeight()
 
     repairScrollMiniPlaceholderHeight()
+
+    if (!isActiveTab.value) {
+      if (scrollMiniPlayerActive.value) {
+        syncScrollMiniPlayerState()
+        updateScrollMiniDragHandleContrast()
+      } else if (canActivateScrollMiniPlayer()) {
+        activateScrollMiniPlayer(false)
+      }
+      return
+    }
 
     const anchor = getScrollMiniAnchor()
     if (!anchor) return
@@ -721,6 +776,12 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   function scrollMiniScrollToTop(event) {
     event?.preventDefault()
     event?.stopPropagation()
+
+    if (scrollMiniPlayerDetached.value && tabId) {
+      store.dispatch('activateTab', tabId)
+      return
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -917,6 +978,8 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   }
 
   function teardownScrollMiniPlayer() {
+    unregisterCrossTabMiniPlayer(crossTabMiniPlayerCandidate)
+
     if (scrollMiniIntersectionObserver) {
       scrollMiniIntersectionObserver.disconnect()
       scrollMiniIntersectionObserver = null
@@ -950,6 +1013,16 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     }
   })
 
+  watch(isActiveTab, (active) => {
+    if (active) {
+      markCrossTabMiniPlayerActive(crossTabMiniPlayerCandidate)
+    } else {
+      markCrossTabMiniPlayerInactive(crossTabMiniPlayerCandidate)
+    }
+
+    nextTick(() => updateScrollMiniPlayer({ animateActivation: false }))
+  }, { flush: 'sync' })
+
   watch(
     () => store.getters.getScrollMiniPlayerSavedRect,
     loadScrollMiniPlayerSavedRectFromSettings,
@@ -957,7 +1030,12 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   )
 
   watch(scrollMiniPlayerEnabled, () => updateScrollMiniPlayer())
-  watch(fullWindowEnabled, () => updateScrollMiniPlayer())
+  watch(scrollMiniPlayerOnAllTabs, () => updateScrollMiniPlayer())
+  watch(autoPictureInPictureOnTabChange, () => updateScrollMiniPlayer())
+  watch(fullWindowEnabled, () => {
+    refreshCrossTabMiniPlayer(crossTabMiniPlayerCandidate)
+    updateScrollMiniPlayer()
+  })
 
   // Toggling or resizing the vertical tab bar changes the usable area without
   // firing a window resize, so re-dock explicitly (after the DOM updates, so the
@@ -991,6 +1069,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     scrollMiniPlaceholderHeight,
     scrollMiniPlayerActive,
     scrollMiniPlayerAnimating,
+    scrollMiniPlayerDetached,
     scrollMiniPlayerStyle,
     scrollMiniPlayPauseVisible,
     scrollMiniResizeCorner,

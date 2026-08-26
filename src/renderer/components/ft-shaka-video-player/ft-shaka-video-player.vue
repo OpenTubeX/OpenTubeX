@@ -38,9 +38,15 @@
       :style="{ height: `${scrollMiniPlaceholderHeight}px` }"
       aria-hidden="true"
     />
+    <!-- eslint-disable vue/html-indent -->
+    <Teleport
+      to="#cross-tab-mini-player-layer"
+      :disabled="!scrollMiniPlayerDetached"
+    >
     <div
       ref="container"
       class="ftVideoPlayer shaka-video-container"
+      :data-tab-id="tabId"
       :class="{
         autoQualityUnavailable: !autoQualitySupported,
         fullWindow: fullWindowEnabled,
@@ -1160,9 +1166,11 @@
         />
         <button
           type="button"
-          tabindex="-1"
+          :tabindex="scrollMiniPlayerDetached ? 0 : -1"
           class="scrollMiniScrollTop"
-          :title="$t('Video.Player.Scroll Mini Player.Back to Top')"
+          :title="scrollMiniPlayerDetached
+            ? $t('Video.Player.Scroll Mini Player.Return to Video Tab')
+            : $t('Video.Player.Scroll Mini Player.Back to Top')"
           @click.stop.prevent="scrollMiniScrollToTop"
           @mousedown.stop.prevent
         >
@@ -1170,7 +1178,7 @@
         </button>
         <button
           type="button"
-          tabindex="-1"
+          :tabindex="scrollMiniPlayerDetached ? 0 : -1"
           class="scrollMiniPlayPause"
           :class="{ isHidden: !scrollMiniPlayPauseVisible }"
           :title="scrollMiniIsPaused ? $t('Video.Player.Scroll Mini Player.Play') : $t('Video.Player.Scroll Mini Player.Pause')"
@@ -1200,7 +1208,7 @@
           >
             <input
               type="range"
-              tabindex="-1"
+              :tabindex="scrollMiniPlayerDetached ? 0 : -1"
               class="shaka-range-element scrollMiniVolumeBar"
               min="0"
               max="100"
@@ -1236,6 +1244,8 @@
         />
       </div>
     </div>
+    </Teleport>
+    <!-- eslint-enable vue/html-indent -->
   </div>
 </template>
 

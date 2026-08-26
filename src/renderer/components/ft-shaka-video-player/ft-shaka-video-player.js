@@ -1215,18 +1215,12 @@ export default defineComponent({
           applyPendingPresentationModes()
           remeasureControlPanelWidth()
         })
-        // An already-scrolled tab that was inactive never got to reevaluate its
-        // scroll position, so restore the mini-player state now that it is active.
-        updateScrollMiniPlayer({ animateActivation: false })
       } else {
         if (controlPanelLayoutFrame !== null) {
           cancelAnimationFrame(controlPanelLayoutFrame)
           controlPanelLayoutFrame = null
         }
         handleTemporaryPlaybackRateFocusLoss()
-        if (scrollMiniPlayerActive.value) {
-          deactivateScrollMiniPlayer()
-        }
       }
     })
 
@@ -5019,7 +5013,12 @@ export default defineComponent({
       shortsPaused.value = false
       shortsEnded.value = false
       const isCurrentPictureInPictureVideo = document.pictureInPictureElement === video.value
-      if (process.env.IS_ELECTRON && !isActiveTab.value && !isCurrentPictureInPictureVideo) {
+      if (
+        process.env.IS_ELECTRON &&
+        !isActiveTab.value &&
+        !isCurrentPictureInPictureVideo &&
+        !scrollMiniPlayerDetached.value
+      ) {
         video.value.pause()
         return
       }
@@ -5361,6 +5360,7 @@ export default defineComponent({
     const videoElementHeight = ref(0)
     /** Height of the video element in CSS pixels, used to scale the captions with the player. */
     const videoElementLayoutHeight = ref(0)
+    const pictureInPictureActive = ref(false)
 
     const captionPlayerVariables = computed(() => {
       return getCaptionPlayerVariables(videoElementLayoutHeight.value)
@@ -5397,6 +5397,7 @@ export default defineComponent({
       scrollMiniPlaceholderHeight,
       scrollMiniPlayerActive,
       scrollMiniPlayerAnimating,
+      scrollMiniPlayerDetached,
       scrollMiniPlayerStyle,
       scrollMiniPlayPauseVisible,
       scrollMiniResizeCorner,
@@ -5422,7 +5423,9 @@ export default defineComponent({
       fullWindowEnabled,
       getUi: () => ui,
       isActiveTab,
+      pictureInPictureActive,
       props,
+      tabId,
       video,
     })
 
@@ -5489,6 +5492,7 @@ export default defineComponent({
      * @param {PictureInPictureEvent} event
      */
     function handleEnterPictureInPicture(event) {
+      pictureInPictureActive.value = true
       pipWindow = event.pictureInPictureWindow
       tabMediaCoordinator.setPictureInPicture(mediaTabId, true)
       handlePictureInPictureResize()
@@ -5503,6 +5507,7 @@ export default defineComponent({
     }
 
     function handleLeavePictureInPicture() {
+      pictureInPictureActive.value = false
       tabMediaCoordinator.setPictureInPicture(mediaTabId, false)
 
       if (pipWindow) {
@@ -9965,6 +9970,7 @@ export default defineComponent({
       toggleQuickBookmark,
 
       autoQualitySupported,
+      tabId,
 
       fullWindowEnabled,
       fullWindowPlaceholderHeight,
@@ -10066,6 +10072,7 @@ export default defineComponent({
 
       scrollMiniPlayerActive,
       scrollMiniPlayerAnimating,
+      scrollMiniPlayerDetached,
       scrollMiniPlaceholderHeight,
       scrollMiniPlayerStyle,
       scrollMiniIsPaused,

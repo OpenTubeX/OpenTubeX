@@ -42,6 +42,10 @@
       :inert="isAnyPromptOpen"
     >
       <div
+        id="cross-tab-mini-player-layer"
+        class="crossTabMiniPlayerLayer"
+      />
+      <div
         v-if="showUpdatesBanner"
         class="banner-wrapper"
       >
