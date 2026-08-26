@@ -1210,7 +1210,7 @@ Settings:
       Visible While Paused: Visible While Paused in Full Window / Full Screen
     Hide Video Views: Hide Video Views
     Hide Channel Avatars: Hide Channel Avatars
-    Shorten View Counts: Shorten View Counts
+    Shorten View Counts: Shorten View and Comment Like Counts
     Hide Video Likes And Dislikes: Hide Video Likes And Dislikes
     Hide Channel Subscribers: Hide Channel Subscribers
     Hide Comment Likes: Hide Comment Likes
@@ -2148,12 +2148,22 @@ Comments:
   YouTube did not provide advertised replies: YouTube showed that this comment has replies, but did not provide them. They may have been deleted or hidden, so the reply button was removed.
   Load More Comments: Load More Comments
   Pinned by: Pinned by
+  Pinned by you: Pinned by you
+  Filter loaded comments: Filter loaded comments
+  Comment filters: Comment filters
+  From creator: From creator
+  Contains timestamps: Contains timestamps
+  Pin comment by author: Pin comment by {author}
+  Unpin comment by author: Unpin comment by {author}
   Member: Member
   Subscribed: Subscribed
   Edited: (edited)
   Hearted: Hearted
   Highlighted comment: Highlighted comment
   Highlighted reply: Highlighted reply
+  Search loaded comments: Search loaded comments
+  Loaded comment search result count: 1 of {total} loaded comments | {count} of {total} loaded comments
+  No loaded comments match your filters: No loaded comments match your filters
   YouTube comment link copied to clipboard: YouTube comment link copied to clipboard
   Translate to {language}: Translate to {language}
   Show original: Show original
@@ -2276,7 +2286,7 @@ Tooltips:
       and for audio conversion. By default, OpenTubeX will assume that FFmpeg can be found
       via the PATH environment variable. If needed, a custom path can be set here.
   Distraction Free Settings:
-    Shorten View Counts: Shows view counts that YouTube has already rounded in a shortened form, e.g. 14K instead of 14,000. Exact view counts are always shown in full.
+    Shorten View Counts: Shows view and comment like counts that YouTube has already rounded in a shortened form, e.g. 14K instead of 14,000. Exact counts are always shown in full.
     Hide Channels: Enter a channel ID to hide all videos, playlists and the channel itself from appearing in search, trending, most popular and recommended.
        The channel ID entered must be a complete match and is case sensitive.
     Hide Subscriptions Live: 'This setting is overridden by the app-wide "{appWideSetting}" setting, in the "{subsection}" section of the "{settingsSection}"'

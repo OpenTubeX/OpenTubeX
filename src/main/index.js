@@ -791,7 +791,7 @@ function runApp() {
         all: 'Reload All Feeds'
       }
       const contextMenuTabYouTubeUrls = contextMenuTabs.map(tab => {
-        const route = getOpenTubeXRouteFromUrl(tab.url)
+        const route = tab.route?.fullPath ?? getOpenTubeXRouteFromUrl(tab.url)
         return isShareableOpenTubeXRoute(route)
           ? transformOpenTubeXRouteUrl(route, true)
           : null

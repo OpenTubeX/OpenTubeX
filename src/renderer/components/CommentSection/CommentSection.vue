@@ -14,8 +14,22 @@
       <div
         class="fullscreenCommentActions"
         @focusout="handleFullscreenActionsFocusout"
-        @keydown.esc.stop.prevent="sortMenuOpen = false"
+        @keydown.esc.stop.prevent="closeCommentMenus"
       >
+        <CommentFilterMenu
+          v-if="canUseCommentTools"
+          ref="commentFilterMenu"
+          :open="commentFilterMenuOpen"
+          fullscreen
+          :channel-thumbnail="channelThumbnail"
+          :creator-comments-only="creatorCommentsOnly"
+          :timestamp-comments-only="timestampCommentsOnly"
+          :search-open="commentSearchOpen"
+          @update:open="setCommentFilterMenuOpen"
+          @toggle-search="toggleCommentSearch"
+          @toggle-creator="toggleCreatorCommentsFilter"
+          @toggle-timestamps="toggleTimestampCommentsFilter"
+        />
         <button
           v-if="showSortBy && !commentsDisabled"
           type="button"
@@ -24,7 +38,7 @@
           :aria-label="$t('Global.Sort By')"
           :title="$t('Global.Sort By')"
           :aria-expanded="String(sortMenuOpen)"
-          @click="sortMenuOpen = !sortMenuOpen"
+          @click="toggleSortMenu"
         >
           <FtIcon :icon="['fas', 'arrow-down-short-wide']" />
         </button>
@@ -68,55 +82,90 @@
       </div>
     </header>
     <div
+      v-if="!fullscreenOverlay && showComments && !isLoading && commentData.length > 0"
+      class="commentHeader"
+    >
+      <h3 class="commentsTitle">
+        <span>{{ commentsTitle }}</span>
+        <span
+          class="commentTitleAction"
+          role="button"
+          tabindex="0"
+          @click="showComments = false"
+          @keydown.space.prevent="showComments = false"
+          @keydown.enter.prevent="showComments = false"
+        >
+          {{ $t("Comments.Hide Comments") }}
+        </span>
+      </h3>
+      <div
+        class="commentHeaderActions"
+        :class="{ commentHeaderActionsEmpty: !showSortBy }"
+      >
+        <CommentFilterMenu
+          v-if="canUseCommentTools"
+          ref="commentFilterMenu"
+          :open="commentFilterMenuOpen"
+          :aligned="showSortBy"
+          :channel-thumbnail="channelThumbnail"
+          :creator-comments-only="creatorCommentsOnly"
+          :timestamp-comments-only="timestampCommentsOnly"
+          :search-open="commentSearchOpen"
+          @update:open="setCommentFilterMenuOpen"
+          @toggle-search="toggleCommentSearch"
+          @toggle-creator="toggleCreatorCommentsFilter"
+          @toggle-timestamps="toggleTimestampCommentsFilter"
+        />
+        <FtIconButton
+          :title="$t('Comments.Reload Comments')"
+          :icon="['fas', 'sync']"
+          :size="12"
+          :padding="8"
+          :use-shadow="false"
+          class="reloadComments"
+          :class="{ reloadCommentsAligned: showSortBy }"
+          @click="reloadCommentData"
+        />
+        <FtSelect
+          v-if="showSortBy"
+          :placeholder="$t('Global.Sort By')"
+          :value="currentSortValue"
+          :select-names="sortNames"
+          :select-values="sortValues"
+          :icon="['fas', 'arrow-down-short-wide']"
+          @change="handleSortChange"
+        />
+      </div>
+    </div>
+    <div
+      v-if="canUseCommentTools && commentSearchOpen"
+      ref="commentSearch"
+      class="commentTools"
+      @keydown.esc.stop.prevent="closeCommentSearch"
+    >
+      <FtInput
+        input-type="search"
+        :placeholder="$t('Comments.Search loaded comments')"
+        :show-action-button="false"
+        :value="commentSearchQuery"
+        @input="updateCommentSearchQuery"
+      />
+      <p
+        v-if="hasActiveCommentFilters"
+        class="commentFilterCount"
+        aria-live="polite"
+      >
+        {{ $t('Comments.Loaded comment search result count', {
+          count: matchingCommentCount,
+          total: loadedCommentCount
+        }, matchingCommentCount) }}
+      </p>
+    </div>
+    <div
       ref="commentsContentWrapper"
       v-overlay-scrollbars
       class="commentsContentWrapper"
     >
-      <div
-        v-if="!fullscreenOverlay && showComments && !isLoading && commentData.length > 0"
-        class="commentHeader"
-      >
-        <h3
-          v-if="commentData.length > 0"
-          class="commentsTitle"
-        >
-          <span>{{ commentsTitle }}</span>
-          <span
-            class="commentTitleAction"
-            role="button"
-            tabindex="0"
-            @click="showComments = false"
-            @keydown.space.prevent="showComments = false"
-            @keydown.enter.prevent="showComments = false"
-          >
-            {{ $t("Comments.Hide Comments") }}
-          </span>
-        </h3>
-        <div
-          class="commentHeaderActions"
-          :class="{ commentHeaderActionsEmpty: !showSortBy }"
-        >
-          <FtSelect
-            v-if="showSortBy"
-            :placeholder="$t('Global.Sort By')"
-            :value="currentSortValue"
-            :select-names="sortNames"
-            :select-values="sortValues"
-            :icon="['fas', 'arrow-down-short-wide']"
-            @change="handleSortChange"
-          />
-          <FtIconButton
-            :title="$t('Comments.Reload Comments')"
-            :icon="['fas', 'sync']"
-            :size="12"
-            :padding="8"
-            :use-shadow="false"
-            class="reloadComments"
-            :class="{ reloadCommentsAligned: showSortBy }"
-            @click="reloadCommentData"
-          />
-        </div>
-      </div>
       <h4
         v-if="canPerformInitialCommentLoading"
         class="getCommentsTitle"
@@ -141,15 +190,16 @@
       </h4>
       <div
         v-if="commentData.length > 0 && showComments"
+        ref="commentsList"
       >
         <div
-          v-for="(comment, index) in commentData"
+          v-for="({ comment, index, replyNodes }) in visibleCommentEntries"
           :id="'comment' + index"
           :key="comment.id"
           class="comment commentThread"
           :class="{
-            commentThreadExpanded: comment.showReplies,
-            commentThreadCollapsed: comment.numReplies > 0 && !comment.showReplies,
+            commentThreadExpanded: shouldShowCommentReplies(comment, replyNodes),
+            commentThreadCollapsed: !hasActiveCommentFilters && comment.numReplies > 0 && !comment.showReplies,
             highlightedComment: comment.id === highlightedCommentId
           }"
         >
@@ -188,6 +238,16 @@
             {{ $t("Comments.Pinned by") }} <bdi>{{ channelName }}</bdi>
           </p>
           <p
+            v-if="isCommentPersonallyPinned(comment.id)"
+            class="commentPinned commentPersonalPin"
+          >
+            <FtIcon
+              :icon="['fas', 'thumbtack']"
+              aria-hidden="true"
+            />
+            {{ $t('Comments.Pinned by you') }}
+          </p>
+          <p
             class="commentAuthorWrapper"
           >
             <component
@@ -199,7 +259,15 @@
               }"
               :to="`/channel/${comment.authorLink}`"
             >
-              {{ comment.author }}
+              <template
+                v-for="(segment, segmentIndex) in getCommentAuthorSearchSegments(comment.author)"
+                :key="segmentIndex"
+              >
+                <mark v-if="segment.highlighted">{{ segment.text }}</mark>
+                <template v-else>
+                  {{ segment.text }}
+                </template>
+              </template>
             </component>
             <img
               v-if="comment.isMember"
@@ -224,6 +292,19 @@
             </span>
             <button
               type="button"
+              class="commentPinButton"
+              :class="{ active: isCommentPersonallyPinned(comment.id) }"
+              :title="personalPinActionLabel(comment)"
+              :aria-label="personalPinActionLabel(comment)"
+              :aria-pressed="isCommentPersonallyPinned(comment.id)"
+              @click="togglePersonalCommentPin(comment.id)"
+            >
+              <FtIcon
+                :icon="['fas', isCommentPersonallyPinned(comment.id) ? 'thumbtack-slash' : 'thumbtack']"
+              />
+            </button>
+            <button
+              type="button"
               class="commentCopyLink"
               :title="$t('Comments.Copy YouTube Link')"
               :aria-label="$t('Comments.Copy YouTube Link')"
@@ -239,6 +320,7 @@
             :input-html="comment.showTranslated && comment.translatedLanguage === translationLanguage
               ? comment.translatedText
               : comment.text"
+            :highlight="normalizedCommentSearchQuery"
             @timestamp-event="onTimestamp"
           />
           <CommentTranslationButton
@@ -256,7 +338,7 @@
               <FtIcon
                 :icon="['fas', 'thumbs-up']"
               />
-              {{ comment.likes }}
+              {{ formatCommentLikeCount(comment.likes) }}
             </template>
             <span
               v-if="comment.isHearted"
@@ -280,7 +362,7 @@
             </span>
           </p>
           <div
-            v-if="comment.numReplies > 0 && !comment.showReplies"
+            v-if="!hasActiveCommentFilters && comment.numReplies > 0 && !comment.showReplies"
             class="commentReplyContinuation commentReplyRootToggle"
           >
             <button
@@ -321,11 +403,11 @@
             </button>
           </div>
           <div
-            v-if="comment.showReplies"
+            v-if="shouldShowCommentReplies(comment, replyNodes)"
             class="commentReplies"
           >
             <CommentReply
-              v-for="node in replyTrees[index]"
+              v-for="node in replyNodes"
               :key="node.reply.id"
               :node="node"
               :thread-index="index"
@@ -341,13 +423,18 @@
               :translation-language="translationLanguage"
               :translation-language-name="translationLanguageName"
               :highlighted-comment-id="highlightedCommentId"
+              :highlight="normalizedCommentSearchQuery"
+              :personal-pinned-comment-ids="personalPinnedCommentIds"
+              :filtering="hasActiveCommentFilters"
+              :shorten-view-counts="shortenViewCounts"
               @copy-youtube-link="copyCommentYoutubeLink"
               @get-more-replies="getCommentReplies(index, $event)"
+              @toggle-personal-pin="togglePersonalCommentPin"
               @timestamp-event="onTimestamp"
               @translate-comment="toggleCommentTranslation"
             />
             <div
-              v-if="isReplyLoading(comment.id) || comment.hasReplyToken"
+              v-if="!hasActiveCommentFilters && (isReplyLoading(comment.id) || comment.hasReplyToken)"
               class="commentReplyContinuation"
             >
               <button
@@ -373,7 +460,7 @@
               </button>
             </div>
             <div
-              v-if="comment.numReplies > 0"
+              v-if="!hasActiveCommentFilters && comment.numReplies > 0"
               class="commentReplyContinuation"
             >
               <button
@@ -391,6 +478,12 @@
             </div>
           </div>
         </div>
+        <p
+          v-if="visibleCommentEntries.length === 0"
+          class="noCommentFilterResults"
+        >
+          {{ $t('Comments.No loaded comments match your filters') }}
+        </p>
       </div>
       <div
         v-else-if="commentsDisabled || (showComments && !isLoading)"
@@ -445,7 +538,7 @@
         :label="$t('Comments.Load More Comments')"
       />
       <h4
-        v-else-if="!generalAutoLoadMorePaginatedItemsEnabled && canPerformMoreCommentLoading"
+        v-else-if="shouldShowManualLoadMoreComments"
         class="getMoreComments"
         role="button"
         tabindex="0"
@@ -479,9 +572,11 @@ import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
+import CommentFilterMenu from './CommentFilterMenu.vue'
 import CommentReply from './CommentReply.vue'
 import CommentTranslationButton from './CommentTranslationButton.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import FtInput from '../FtInput/FtInput.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
@@ -490,7 +585,7 @@ import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 
 import store from '../../store/index'
 
-import { copyToClipboard, formatNumber, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
+import { copyToClipboard, formatNumber, formatViewCount, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import {
   getCommentReplyAccessibleLabel,
@@ -501,8 +596,9 @@ import {
   isMissingReplyResponseError,
   shouldLoadInitialReplies
 } from '../../helpers/comment-replies'
-import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getYoutubeCommunityPostCommentUrl, getYoutubeVideoCommentUrl } from '../../helpers/share'
+import { getCommentPinStorageKey, loadCommentPins, saveCommentPins } from '../../helpers/commentPins'
 import {
   getLocalCommunityPostComments,
   getLocalComments,
@@ -520,6 +616,11 @@ import {
 
 const { locale, t } = useI18n()
 const relativeTimeNow = useRelativeTimeClock()
+const shortenViewCounts = computed(() => store.getters.getShortenViewCounts)
+
+function formatCommentLikeCount(likeCount) {
+  return formatViewCount(likeCount, shortenViewCounts.value)
+}
 
 function formatCommentTime(comment) {
   return comment.published
@@ -582,6 +683,19 @@ const nextPageToken = shallowRef(null)
 const commentData = ref([])
 const commentCount = ref(props.initialCommentCount)
 const commentsContentWrapper = useTemplateRef('commentsContentWrapper')
+const commentsList = useTemplateRef('commentsList')
+const commentFilterMenu = useTemplateRef('commentFilterMenu')
+const commentSearch = useTemplateRef('commentSearch')
+const commentSearchOpen = ref(false)
+const commentSearchQuery = ref('')
+const commentFilterMenuOpen = ref(false)
+const creatorCommentsOnly = ref(false)
+const timestampCommentsOnly = ref(false)
+const activeProfileId = computed(() => store.getters.getActiveProfile._id)
+const commentPinStorageKey = computed(() => {
+  return getCommentPinStorageKey(activeProfileId.value, props.id, props.isPostComments)
+})
+const personalPinnedCommentIds = ref(loadCommentPins(commentPinStorageKey.value))
 let fullscreenScrollTop = 0
 let highlightedTargetGeneration = 0
 const MAX_HIGHLIGHTED_REPLY_PAGES = 20
@@ -614,7 +728,240 @@ function resetCommentsScroll() {
   }
 }
 
-const replyTrees = computed(() => commentData.value.map(buildReplyTree))
+const COMMENT_TIMESTAMP_PATTERN = /(?:(?:\d+):)?\d+:\d+/
+
+function getCommentPlainText(comment) {
+  const document = new DOMParser().parseFromString(comment.text ?? '', 'text/html')
+  return document.body.textContent ?? ''
+}
+
+function getCommentSearchText(comment) {
+  return `${comment.author ?? ''} ${getCommentPlainText(comment)}`.toLocaleLowerCase()
+}
+
+const normalizedCommentSearchQuery = computed(() => {
+  return commentSearchQuery.value.trim().toLocaleLowerCase()
+})
+
+const hasActiveCommentFilters = computed(() => {
+  return normalizedCommentSearchQuery.value !== '' ||
+    creatorCommentsOnly.value ||
+    timestampCommentsOnly.value
+})
+
+function commentMatchesActiveFilters(comment) {
+  if (creatorCommentsOnly.value && !comment.isOwner) {
+    return false
+  }
+
+  if (timestampCommentsOnly.value && !COMMENT_TIMESTAMP_PATTERN.test(getCommentPlainText(comment))) {
+    return false
+  }
+
+  return normalizedCommentSearchQuery.value === '' ||
+    getCommentSearchText(comment).includes(normalizedCommentSearchQuery.value)
+}
+
+function replyNodeHasPersonalPin(node) {
+  return isCommentPersonallyPinned(node.reply.id) || node.children.some(replyNodeHasPersonalPin)
+}
+
+function sortReplyNodesByPersonalPins(nodes) {
+  return nodes
+    .map(node => ({
+      ...node,
+      children: sortReplyNodesByPersonalPins(node.children)
+    }))
+    .sort((first, second) => {
+      return Number(replyNodeHasPersonalPin(second)) - Number(replyNodeHasPersonalPin(first))
+    })
+}
+
+function filterReplyNodes(nodes) {
+  return sortReplyNodesByPersonalPins(nodes.flatMap(node => {
+    const children = filterReplyNodes(node.children)
+    if (!commentMatchesActiveFilters(node.reply) && children.length === 0) {
+      return []
+    }
+
+    return [{ ...node, children }]
+  }))
+}
+
+function getVisibleReplyNodes(comment) {
+  const nodes = buildReplyTree(comment)
+  return hasActiveCommentFilters.value
+    ? filterReplyNodes(nodes)
+    : sortReplyNodesByPersonalPins(nodes)
+}
+
+function commentTreeHasPersonalPin(comment) {
+  return isCommentPersonallyPinned(comment.id) || comment.replies.some(commentTreeHasPersonalPin)
+}
+
+const visibleCommentEntries = computed(() => {
+  return commentData.value
+    .map((comment, index) => ({
+      comment,
+      index,
+      replyNodes: getVisibleReplyNodes(comment)
+    }))
+    .filter(({ comment, replyNodes }) => {
+      return !hasActiveCommentFilters.value ||
+        commentMatchesActiveFilters(comment) ||
+        replyNodes.length > 0
+    })
+    .sort(({ comment: first }, { comment: second }) => {
+      return Number(commentTreeHasPersonalPin(second)) - Number(commentTreeHasPersonalPin(first))
+    })
+})
+
+function countLoadedComments(comment) {
+  return 1 + comment.replies.reduce((count, reply) => count + countLoadedComments(reply), 0)
+}
+
+function countMatchingComments(comment) {
+  return Number(commentMatchesActiveFilters(comment)) +
+    comment.replies.reduce((count, reply) => count + countMatchingComments(reply), 0)
+}
+
+const loadedCommentCount = computed(() => {
+  return commentData.value.reduce((count, comment) => count + countLoadedComments(comment), 0)
+})
+
+const matchingCommentCount = computed(() => {
+  if (!hasActiveCommentFilters.value) {
+    return loadedCommentCount.value
+  }
+
+  return commentData.value.reduce((count, comment) => count + countMatchingComments(comment), 0)
+})
+
+function shouldShowCommentReplies(comment, replyNodes) {
+  return replyNodes.length > 0 && (comment.showReplies || hasActiveCommentFilters.value)
+}
+
+function getCommentAuthorSearchSegments(author) {
+  const query = normalizedCommentSearchQuery.value
+  if (query === '') {
+    return [{ text: author, highlighted: false }]
+  }
+
+  const normalizedAuthor = author.toLocaleLowerCase()
+  const segments = []
+  let start = 0
+  let matchIndex = normalizedAuthor.indexOf(query)
+
+  while (matchIndex !== -1) {
+    if (matchIndex > start) {
+      segments.push({ text: author.slice(start, matchIndex), highlighted: false })
+    }
+    segments.push({
+      text: author.slice(matchIndex, matchIndex + query.length),
+      highlighted: true
+    })
+    start = matchIndex + query.length
+    matchIndex = normalizedAuthor.indexOf(query, start)
+  }
+
+  if (start < author.length) {
+    segments.push({ text: author.slice(start), highlighted: false })
+  }
+
+  return segments
+}
+
+const canUseCommentTools = computed(() => {
+  return commentData.value.length > 0 && showComments.value && !isLoading.value
+})
+
+function clampCommentsScrollAfterRender() {
+  nextTick(() => {
+    if (commentsContentWrapper.value != null && commentsList.value != null) {
+      clampOverlayScrollTop(commentsContentWrapper.value, commentsList.value)
+    }
+  })
+}
+
+function updateCommentSearchQuery(query) {
+  commentSearchQuery.value = query
+  clampCommentsScrollAfterRender()
+}
+
+function toggleCommentSearch() {
+  commentSearchOpen.value = !commentSearchOpen.value
+  commentFilterMenuOpen.value = false
+
+  if (!commentSearchOpen.value) {
+    updateCommentSearchQuery('')
+    nextTick(() => commentFilterMenu.value?.focusTrigger())
+    return
+  }
+
+  nextTick(() => commentSearch.value?.querySelector('input')?.focus())
+}
+
+function closeCommentSearch() {
+  commentSearchOpen.value = false
+  updateCommentSearchQuery('')
+  nextTick(() => commentFilterMenu.value?.focusTrigger())
+}
+
+function isCommentPersonallyPinned(commentId) {
+  return personalPinnedCommentIds.value.has(commentId)
+}
+
+function personalPinActionLabel(comment) {
+  if (isCommentPersonallyPinned(comment.id)) {
+    return t('Comments.Unpin comment by author', { author: comment.author })
+  }
+
+  return t('Comments.Pin comment by author', { author: comment.author })
+}
+
+function togglePersonalCommentPin(commentId) {
+  const commentIds = new Set(personalPinnedCommentIds.value)
+  if (commentIds.has(commentId)) {
+    commentIds.delete(commentId)
+  } else {
+    commentIds.add(commentId)
+  }
+
+  personalPinnedCommentIds.value = commentIds
+  saveCommentPins(commentPinStorageKey.value, commentIds)
+  clampCommentsScrollAfterRender()
+}
+
+function toggleCreatorCommentsFilter() {
+  creatorCommentsOnly.value = !creatorCommentsOnly.value
+  clampCommentsScrollAfterRender()
+}
+
+function toggleTimestampCommentsFilter() {
+  timestampCommentsOnly.value = !timestampCommentsOnly.value
+  clampCommentsScrollAfterRender()
+}
+
+function setCommentFilterMenuOpen(open) {
+  commentFilterMenuOpen.value = open
+  if (open) {
+    sortMenuOpen.value = false
+  }
+}
+
+function closeCommentMenus() {
+  commentFilterMenuOpen.value = false
+  sortMenuOpen.value = false
+}
+
+watch(commentPinStorageKey, (contentKey) => {
+  personalPinnedCommentIds.value = loadCommentPins(contentKey)
+  commentFilterMenuOpen.value = false
+  creatorCommentsOnly.value = false
+  timestampCommentsOnly.value = false
+  commentSearchOpen.value = false
+  commentSearchQuery.value = ''
+})
 
 function normalizeCommentAuthor(author) {
   return String(author)
@@ -832,6 +1179,17 @@ const canPerformMoreCommentLoading = computed(() => {
   return commentData.value.length > 0 && !isLoading.value && !isLoadingMoreComments.value && showComments.value && !!nextPageToken.value
 })
 
+const canAutomaticallyLoadMoreComments = computed(() => {
+  return generalAutoLoadMorePaginatedItemsEnabled.value &&
+    !hasActiveCommentFilters.value &&
+    canPerformMoreCommentLoading.value
+})
+
+const shouldShowManualLoadMoreComments = computed(() => {
+  return canPerformMoreCommentLoading.value &&
+    (!generalAutoLoadMorePaginatedItemsEnabled.value || hasActiveCommentFilters.value)
+})
+
 const shouldShowAutoLoadMoreCommentsSpinner = computed(() => {
   return commentData.value.length > 0 &&
     !isLoading.value &&
@@ -840,7 +1198,7 @@ const shouldShowAutoLoadMoreCommentsSpinner = computed(() => {
 })
 
 const observeVisibilityOptions = computed(() => {
-  if (!generalAutoLoadMorePaginatedItemsEnabled.value) {
+  if (!generalAutoLoadMorePaginatedItemsEnabled.value || hasActiveCommentFilters.value) {
     return false
   }
 
@@ -855,7 +1213,7 @@ const observeVisibilityOptions = computed(() => {
       // It's possible the comments are being loaded/already loaded
       if (canPerformInitialCommentLoading.value) {
         getCommentData()
-      } else if (canPerformMoreCommentLoading.value) {
+      } else if (canAutomaticallyLoadMoreComments.value) {
         getMoreComments()
       }
     },
@@ -883,9 +1241,16 @@ const sortMenuOpen = ref(false)
 
 const currentSortValue = computed(() => sortNewest.value ? 'newest' : 'top')
 
+function toggleSortMenu() {
+  sortMenuOpen.value = !sortMenuOpen.value
+  if (sortMenuOpen.value) {
+    commentFilterMenuOpen.value = false
+  }
+}
+
 function handleSortChange(value) {
   const newest = value === 'newest'
-  sortMenuOpen.value = false
+  closeCommentMenus()
 
   if (sortNewest.value === newest) {
     return
@@ -909,7 +1274,7 @@ function reloadCommentData() {
 
 function handleFullscreenActionsFocusout(event) {
   if (!event.currentTarget.contains(event.relatedTarget)) {
-    sortMenuOpen.value = false
+    closeCommentMenus()
   }
 }
 

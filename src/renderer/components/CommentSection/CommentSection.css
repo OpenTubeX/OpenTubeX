@@ -4,13 +4,13 @@
 
   /* Contain floated comment content inside the card. */
   display: flow-root;
+  container-name: comments;
+  container-type: inline-size;
 }
 
 .commentsContentWrapper {
   /* Contain floated comment avatars inside the comments area. */
   display: flow-root;
-  container-name: comments;
-  container-type: inline-size;
 }
 
 .fullscreenCommentCard {
@@ -88,6 +88,75 @@
 .fullscreenCommentAction:focus-visible,
 .fullscreenCommentAction.active {
   background-color: rgb(255 255 255 / 20%);
+}
+
+.commentCreatorFilterAvatar {
+  inline-size: var(--comment-creator-filter-avatar-size, 20px);
+  block-size: var(--comment-creator-filter-avatar-size, 20px);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.fullscreenCommentAction .commentCreatorFilterAvatar {
+  --comment-creator-filter-avatar-size: 24px;
+}
+
+.commentFilterMenuAnchor {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.commentFilterMenu {
+  position: absolute;
+  z-index: 5;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: 0;
+  display: flex;
+  flex-direction: column;
+  inline-size: min(240px, calc(100vw - 32px));
+  padding: 6px;
+  color: var(--primary-text-color);
+  background-color: color-mix(in srgb, var(--card-bg-color) 96%, var(--bg-color));
+  border: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
+  border-radius: calc(10px * var(--ui-roundness));
+  box-shadow: 0 8px 24px rgb(0 0 0 / 28%);
+}
+
+.commentFilterMenu button {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 14px;
+  min-block-size: 40px;
+  align-items: center;
+  gap: 10px;
+  padding-block: 8px;
+  padding-inline: 10px;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  background: transparent;
+  border: 0;
+  border-radius: calc(8px * var(--ui-roundness));
+  cursor: pointer;
+}
+
+.commentFilterMenu :where(button:hover, button:focus-visible) {
+  color: var(--side-nav-hover-text-color);
+  background-color: var(--side-nav-hover-color);
+}
+
+.commentFilterMenuIcon {
+  display: grid;
+  place-items: center;
+  inline-size: 24px;
+}
+
+.fullscreenCommentFilterMenu {
+  color: #fff;
+  background-color: rgb(12 12 12 / 82%);
+  border-color: rgb(255 255 255 / 12%);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 40%);
+  backdrop-filter: blur(14px) saturate(1.05);
 }
 
 .fullscreenSortMenu {
@@ -207,6 +276,73 @@
   margin-inline-end: 8px;
 }
 
+.commentHeaderIconAction {
+  display: inline-flex;
+  inline-size: 28px;
+  block-size: 28px;
+  flex: 0 0 28px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--title-color);
+  background-color: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.commentHeaderIconAction:hover,
+.commentHeaderIconAction:focus-visible,
+.commentHeaderIconAction.active {
+  color: var(--side-nav-hover-text-color);
+  background-color: var(--side-nav-hover-color);
+}
+
+.commentHeaderIconActionAligned {
+  margin-block-start: 39px;
+}
+
+.commentTools {
+  padding-block: 8px;
+}
+
+.fullscreenCommentCard > .commentTools {
+  flex: 0 0 auto;
+  padding-block: 12px;
+  padding-inline: 14px;
+  background-color: rgb(20 20 20 / 52%);
+  border-block-end: 1px solid rgb(255 255 255 / 10%);
+}
+
+.fullscreenCommentCard > .commentTools :deep(.ft-input) {
+  color: #fff;
+  background-color: rgb(0 0 0 / 35%);
+}
+
+.commentTools :deep(.ft-input) {
+  margin-block-end: 0;
+}
+
+.commentFilterCount,
+.noCommentFilterResults {
+  color: var(--secondary-text-color);
+}
+
+.commentFilterCount {
+  margin-block: 8px 0;
+  font-size: 13px;
+}
+
+.noCommentFilterResults {
+  margin-block: 24px;
+  text-align: center;
+}
+
+.fullscreenCommentCard > .commentTools .commentFilterCount {
+  color: #fff;
+}
+
 @container comments (width <= 520px) {
   .commentHeaderActions {
     flex: 1 0 100%;
@@ -221,6 +357,16 @@
 
 .reloadComments {
   color: var(--title-color);
+}
+
+.reloadComments :deep(.iconButton) {
+  inline-size: 28px;
+  block-size: 28px;
+
+  /* FtIconButton's inline padding scales independently of authored CSS at
+     non-100% Electron zoom factors. Keep this toolbar control a fixed size. */
+  /* stylelint-disable-next-line declaration-no-important */
+  padding: 0 !important;
 }
 
 .reloadCommentsAligned {
@@ -413,7 +559,8 @@
   margin-block-start: 0;
 }
 
-.commentCopyLink {
+.commentCopyLink,
+.commentPinButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -431,9 +578,29 @@
 }
 
 .commentCopyLink:hover,
-.commentCopyLink:focus-visible {
+.commentCopyLink:focus-visible,
+.commentPinButton:hover,
+.commentPinButton:focus-visible,
+.commentPinButton.active {
   color: var(--side-nav-hover-text-color);
   background-color: var(--side-nav-hover-color);
+}
+
+.commentPersonalPin {
+  display: table;
+  padding-block: 2px;
+  padding-inline: 5px;
+  color: var(--primary-text-color);
+  background-color: color-mix(in srgb, var(--side-nav-hover-color) 45%, transparent);
+  border-radius: calc(4px * var(--ui-roundness));
+}
+
+.commentAuthor mark,
+.commentText :deep(mark) {
+  padding-inline: 1px;
+  color: var(--text-with-accent-color);
+  background-color: var(--accent-color);
+  border-radius: calc(2px * var(--ui-roundness));
 }
 
 .commentHeartBadge {

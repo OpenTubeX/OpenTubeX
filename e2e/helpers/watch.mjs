@@ -68,6 +68,26 @@ function addOwnerReplyMarker(body) {
   throw new Error('Unable to add an owner-reply marker to the comment fixture')
 }
 
+function addCommentTimestamp(body) {
+  const response = JSON.parse(body)
+  const pending = [response]
+
+  while (pending.length > 0) {
+    const value = pending.pop()
+    if (!value || typeof value !== 'object') continue
+
+    const payload = value.commentEntityPayload
+    if (payload?.properties?.replyLevel === 0 && payload.properties.content?.content) {
+      payload.properties.content.content += ' Start at 0:05.'
+      return Buffer.from(JSON.stringify(response))
+    }
+
+    pending.push(...Object.values(value))
+  }
+
+  throw new Error('Unable to add a timestamp to the comment fixture')
+}
+
 /**
  * Serves the watch page for `jNQXAC9IVRw` from the committed Innertube
  * fixtures, without any network access.
@@ -86,13 +106,15 @@ function addOwnerReplyMarker(body) {
  * @param {string} [options.captionCueSettings] append WebVTT settings to the test caption cue
  * @param {string[]|null} [options.captionVideoIds] limit captions to these video IDs
  * @param {boolean} [options.ownerReply] mark the first reply thread as containing a video-owner reply
+ * @param {boolean} [options.commentTimestamp] add a timestamp to one top-level comment
  */
 export async function mockWatchPage(app, page, {
   playable = false,
   captionTranslations = false,
   captionCueSettings = '',
   captionVideoIds = null,
-  ownerReply = false
+  ownerReply = false,
+  commentTimestamp = false
 } = {}) {
   const counters = new Map()
   const includeCaptions = captionTranslations || captionCueSettings !== '' || captionVideoIds !== null
@@ -215,6 +237,9 @@ export async function mockWatchPage(app, page, {
       if (body) {
         if (ownerReply && body.includes('commentThreadRenderer')) {
           body = addOwnerReplyMarker(body)
+        }
+        if (commentTimestamp && body.includes('commentEntityPayload')) {
+          body = addCommentTimestamp(body)
         }
         return route.fulfill({ status: 200, contentType: 'application/json', body })
       }
