@@ -8,6 +8,8 @@ import { test as baseAppTest, expect, setPlayerFullscreen } from './app.mjs'
 import { demoPlayerResponse, routeDemoMedia, routeIframeApi, routeWatchPageHtml, stubPoToken } from './media.mjs'
 
 const fixturesRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'innertube')
+// A 1x1 PNG used for channel avatars while external requests are blocked.
+const AVATAR_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')
 
 // Request body fields that change between runs (session data, tokens,
 // timestamps) and must not influence the fixture key.
@@ -146,6 +148,10 @@ export async function setupInnertube(app, testInfo) {
     await routeIframeApi(page)
     await routeWatchPageHtml(page)
     await routeDemoMedia(page)
+    await page.route(/^https:\/\/yt3\.(?:ggpht|googleusercontent)\.com\//, route => route.fulfill({
+      contentType: 'image/png',
+      body: AVATAR_PNG
+    }))
 
     await page.route(/^https?:\/\//, async (route, request) => {
       const url = request.url()
