@@ -40,6 +40,7 @@
 <!-- Agent instructions:
 For a noteworthy visible change, add media when it makes the change easier to understand. Prefer a still image unless motion is the point; recordings must use animated WebP.
 Capture the default dark theme. When both app themes can be captured and differ, run `node _scripts/releaseNoteMedia.mjs --dark DARK_FILE --light LIGHT_FILE --alt "DESCRIPTION"`. GitHub will display the matching theme and use dark as the fallback.
+Capture or crop to the smallest region that still makes the change clear. Do not include the full window when the affected component can be understood on its own.
 For one dark capture, run `node _scripts/releaseNoteMedia.mjs FILE --alt "DESCRIPTION"`.
 Check for personal information, tokens, private repository names, and unrelated desktop content before uploading. Uploaded media is public.
 Paste only the generated markup between the marker comments. Leave this section empty when media would not help.
