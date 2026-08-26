@@ -213,6 +213,47 @@ ${NOTE_MARKERS}
   })
 })
 
+test('dark and light release note images are parsed from a picture element', () => {
+  const result = parseReleaseNote(`
+${NOTE_MARKERS}
+<!-- release-note-image:start -->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/light.webp">
+  <img alt="The settings panel" src="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp">
+</picture>
+<!-- release-note-image:end -->
+`)
+
+  assert.deepEqual(result.images, [{
+    alt: 'The settings panel',
+    darkUrl: 'https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp',
+    lightUrl: 'https://github.com/OpenTubeX/media/releases/download/attachments/light.webp',
+    url: 'https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp',
+  }])
+})
+
+test('themed release note images require a dark fallback and both theme sources', () => {
+  const releaseNoteWithPicture = (sources, fallback = 'dark.webp') => `
+${NOTE_MARKERS}
+<!-- release-note-image:start -->
+<picture>
+  ${sources}
+  <img alt="Settings" src="https://github.com/OpenTubeX/media/releases/download/attachments/${fallback}">
+</picture>
+<!-- release-note-image:end -->
+`
+
+  assert.throws(() => parseReleaseNote(releaseNoteWithPicture(`
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp">
+  `)), /one dark source, one light source/)
+
+  assert.throws(() => parseReleaseNote(releaseNoteWithPicture(`
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp">
+    <source media="(prefers-color-scheme: light)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/light.webp">
+  `, 'light.webp')), /dark source as its fallback/)
+})
+
 test('HTML entities in image attributes are decoded only once', () => {
   const result = parseReleaseNote(`
 ${NOTE_MARKERS}
@@ -267,7 +308,7 @@ ${NOTE_MARKERS}
 ![Screenshot](https://github.com/user-attachments/assets/example)
 ${malformedImage}
 <!-- release-note-image:end -->
-`), /must be Markdown images or <img> tags/)
+`), /must be Markdown images/)
   }
 })
 
@@ -337,6 +378,48 @@ test('images up to 300 pixels have no dimensions', async () => {
     result,
     '<img src="https://github.com/user-attachments/assets/example" alt="Compact player">',
   )
+})
+
+test('themed images keep the dark fallback and limit either tall variant', async () => {
+  const result = await normalizeReleaseImage({
+    alt: 'Settings',
+    darkUrl: 'https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp',
+    lightUrl: 'https://github.com/OpenTubeX/media/releases/download/attachments/light.webp',
+    url: 'https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp',
+  }, 'Fallback', async (url) => png(800, url.href.endsWith('light.webp') ? 301 : 300))
+
+  assert.equal(result, `<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/light.webp">
+  <img src="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp" alt="Settings" height="300">
+</picture>`)
+})
+
+test('themed images stay inside their release note list item', async () => {
+  const result = await renderReleaseNotes([{
+    body: pullRequestBody('Highlights', {
+      images: `<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/light.webp">
+  <img alt="Settings" src="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp">
+</picture>`,
+      note: 'Adds theme-aware settings.',
+    }),
+    number: 42,
+    title: 'Theme-aware settings',
+  }], {
+    loadImage: async () => png(800, 300),
+  })
+
+  assert.equal(result, `## Highlights
+
+- Adds theme-aware settings. (#42)
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp">
+    <source media="(prefers-color-scheme: light)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/light.webp">
+    <img src="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp" alt="Settings">
+  </picture>
+`)
 })
 
 test('release notes render under their selected categories', async () => {
