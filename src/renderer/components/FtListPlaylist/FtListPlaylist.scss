@@ -4,6 +4,19 @@
   filter: blur(20px);
 }
 
+.channelName {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+  max-inline-size: 100%;
+  vertical-align: middle;
+}
+
+.channelNameText {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
 .playlistButtonStack {
   align-items: flex-start;
   display: flex;

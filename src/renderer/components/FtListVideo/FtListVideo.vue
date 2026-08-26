@@ -210,7 +210,11 @@
           :disabled="isFetchingCollaborators"
           @click.stop.prevent="openChannelByline"
         >
-          {{ channelName }}
+          <FtChannelAvatar
+            v-if="showChannelAvatar"
+            :thumbnail="channelThumbnail"
+          />
+          <span class="channelNameText">{{ channelName }}</span>
         </button>
         <component
           :is="disableChannelLinks ? 'span' : 'router-link'"
@@ -220,10 +224,21 @@
           :to="`/channel/${channelId}`"
           @auxclick="handleChannelLinkClick"
         >
-          {{ channelName }}
+          <FtChannelAvatar
+            v-if="showChannelAvatar"
+            :thumbnail="channelThumbnail"
+          />
+          <span class="channelNameText">{{ channelName }}</span>
         </component>
-        <bdi v-else-if="channelName !== null">
-          {{ channelName }}
+        <bdi
+          v-else-if="channelName !== null"
+          class="channelName"
+        >
+          <FtChannelAvatar
+            v-if="showChannelAvatar"
+            :thumbnail="channelThumbnail"
+          />
+          <span class="channelNameText">{{ channelName }}</span>
         </bdi>
         <span
           v-if="!isLive && !isUpcoming && !isPremium && !hideViews && viewCount != null"
@@ -370,11 +385,12 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
+import FtChannelAvatar from '../FtChannelAvatar/FtChannelAvatar.vue'
 import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPrompt.vue'
 import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
@@ -411,6 +427,7 @@ import {
 } from '../../helpers/viewTransitions.js'
 import { setCollaboratorsLoading } from './collaboratorsLoading.js'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock.js'
+import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar.js'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -738,6 +755,19 @@ const backendPreference = computed(() => store.getters.getBackendPreference)
 
 /** @type {import('vue').ComputedRef<string>} */
 const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
+
+const showChannelAvatar = computed(() => (
+  !store.getters.getHideChannelAvatars &&
+  (props.appearance === 'result' || props.appearance === 'youtubeShort') &&
+  channelName.value !== null &&
+  channelId.value !== null
+))
+
+const { channelThumbnail } = useResultChannelAvatar(
+  toRef(props, 'data'),
+  channelId,
+  showChannelAvatar
+)
 
 const showPlaylists = computed(() => !store.getters.getHidePlaylists)
 const useSponsorBlock = computed(() => store.getters.getUseSponsorBlock)

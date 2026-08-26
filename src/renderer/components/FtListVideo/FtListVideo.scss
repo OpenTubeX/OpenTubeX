@@ -4,6 +4,19 @@
   outline: 3px solid var(--side-nav-hover-color);
 }
 
+.channelName {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+  max-inline-size: 100%;
+  vertical-align: middle;
+}
+
+.channelNameText {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
 .grabBar {
   color: var(--tertiary-text-color);
   cursor: grab;

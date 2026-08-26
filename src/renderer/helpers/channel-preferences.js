@@ -63,6 +63,8 @@ export function parseChannelPreferences(value, settingKey) {
  * @type {Map<string, ChannelInfo>}
  */
 const resolvedChannels = new Map()
+/** @type {Map<string, Promise<ChannelInfo | null>>} */
+const pendingChannels = new Map()
 
 /**
  * Resolves a channel id to a name and avatar without a network request, if possible.
@@ -91,10 +93,25 @@ export async function fetchChannelInfo(channelId, backendOptions) {
     return resolvedChannels.get(channelId)
   }
 
+  if (pendingChannels.has(channelId)) {
+    return await pendingChannels.get(channelId)
+  }
+
   if (!checkYoutubeChannelId(channelId)) {
     return null
   }
 
+  const request = resolveChannelInfo(channelId, backendOptions)
+  pendingChannels.set(channelId, request)
+
+  try {
+    return await request
+  } finally {
+    pendingChannels.delete(channelId)
+  }
+}
+
+async function resolveChannelInfo(channelId, backendOptions) {
   try {
     const { preferredName, icon, invalidId } = await findChannelTagInfo(channelId, backendOptions)
 
