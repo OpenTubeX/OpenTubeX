@@ -3173,6 +3173,14 @@ test.describe('manual comment loading', () => {
     await translate.click()
     await expect(commentText).toHaveText('Translated comment text')
     expect(translationRequestCount).toBe(2)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateCommentTranslationIgnoredLanguages', ['en'])
+    })
+
+    await expect(commentText).toHaveText(originalText)
+    await expect(translate).toHaveCount(0)
   })
 
   test('does not offer to translate a comment already in the app language', async ({ app, page }) => {

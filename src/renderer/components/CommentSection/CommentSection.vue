@@ -331,6 +331,7 @@
             :target-language-name="translationLanguageName"
             :ignored-languages="commentTranslationIgnoredLanguages"
             @translate-comment="toggleCommentTranslation"
+            @translation-unavailable="restoreCommentTranslation"
           />
           <p class="commentLikeCount">
             <template
@@ -434,6 +435,7 @@
               @toggle-personal-pin="togglePersonalCommentPin"
               @timestamp-event="onTimestamp"
               @translate-comment="toggleCommentTranslation"
+              @translation-unavailable="restoreCommentTranslation"
             />
             <div
               v-if="!hasActiveCommentFilters && (isReplyLoading(comment.id) || comment.hasReplyToken)"
@@ -1135,6 +1137,13 @@ async function toggleCommentTranslation(comment) {
     nextLoadingTranslationIds.delete(comment.id)
     loadingTranslationIds.value = nextLoadingTranslationIds
   }
+}
+
+/**
+ * @param {Comment} comment
+ */
+function restoreCommentTranslation(comment) {
+  comment.showTranslated = false
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

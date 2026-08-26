@@ -58,6 +58,7 @@ const props = defineProps({
 
 const translationAvailable = ref(false)
 let detectionGeneration = 0
+const emit = defineEmits(['translate-comment', 'translation-unavailable'])
 
 watch(
   [() => props.comment.translationText, () => props.targetLanguage, () => props.ignoredLanguages],
@@ -69,6 +70,9 @@ watch(
       const available = await shouldOfferCommentTranslation(text, targetLanguage, ignoredLanguages)
       if (generation === detectionGeneration) {
         translationAvailable.value = available
+        if (!available && props.comment.showTranslated) {
+          emit('translation-unavailable', props.comment)
+        }
       }
     } catch (error) {
       console.error('Comment language detection failed', error)
@@ -76,8 +80,6 @@ watch(
   },
   { immediate: true }
 )
-
-const emit = defineEmits(['translate-comment'])
 </script>
 
 <style scoped src="./CommentSection.css" />
