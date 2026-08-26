@@ -198,6 +198,7 @@ const state = {
   // Combinable triggers for automatically entering Picture-in-Picture: 'tab', 'minimize', 'blur'
   autoPictureInPictureTriggers: [],
   scrollMiniPlayerEnabled: true,
+  scrollMiniPlayerOnAllTabs: false,
   scrollMiniPlayerSavedRect: '',
   scrollbarThumbWidth: DEFAULT_SCROLLBAR_THUMB_WIDTH,
   avoidTranslation: 'disabled',

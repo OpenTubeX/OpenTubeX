@@ -3672,7 +3672,9 @@ export async function setupTabsIPC(options = {}) {
       (async () => {
         const root = Array.from(document.querySelectorAll('.tabContent[data-tab-id]'))
           .find(element => element.dataset.tabId === ${JSON.stringify(tabId)})
-        const target = root?.querySelector('video.player')
+        const detachedPlayer = Array.from(document.querySelectorAll('.ftVideoPlayer[data-tab-id]'))
+          .find(element => element.dataset.tabId === ${JSON.stringify(tabId)})
+        const target = root?.querySelector('video.player') ?? detachedPlayer?.querySelector('video.player')
         if (!target?.ui?.getControls) return false
 
         if (document.pictureInPictureElement && document.pictureInPictureElement !== target) {

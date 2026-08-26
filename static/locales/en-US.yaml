@@ -842,6 +842,7 @@ Settings:
     Scroll Mini Player:
       Scroll Mini Player: Scroll mini player
       When Scrolling Down: Keep a mini player on screen when scrolling down
+      On All Tabs: Keep a mini player on screen when switching tabs
     Scroll Volume Over Video Player: Scroll Volume Over Video Player
     Scroll Playback Rate Over Video Player: Scroll Playback Rate Over Video Player
     Skip by Scrolling Over Video Player: Skip by Scrolling Over Video Player
@@ -1883,6 +1884,7 @@ Video:
     Playback will resume automatically when your connection comes back: Playback will resume automatically when your connection comes back.
     Scroll Mini Player:
       Back to Top: Back to top
+      Return to Video Tab: Return to video tab
       Volume: Volume
       Play: Play
       Pause: Pause

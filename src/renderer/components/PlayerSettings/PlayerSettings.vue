@@ -170,6 +170,15 @@
           setting-key="scrollMiniPlayerEnabled"
           @change="updateScrollMiniPlayerEnabled"
         />
+        <FtToggleSwitch
+          v-if="USING_ELECTRON"
+          :label="t('Settings.Player Settings.Scroll Mini Player.On All Tabs')"
+          :compact="true"
+          :default-value="scrollMiniPlayerOnAllTabs"
+          :disabled="autoPictureInPictureTriggers.includes('tab')"
+          setting-key="scrollMiniPlayerOnAllTabs"
+          @change="updateScrollMiniPlayerOnAllTabs"
+        />
       </div>
     </div>
     <FtFlexBox class="autoPictureInPictureSettings">
@@ -853,11 +862,21 @@ const autoPictureInPictureTriggers = computed({
 /** @type {import('vue').ComputedRef<boolean>} */
 const scrollMiniPlayerEnabled = computed(() => store.getters.getScrollMiniPlayerEnabled)
 
+/** @type {import('vue').ComputedRef<boolean>} */
+const scrollMiniPlayerOnAllTabs = computed(() => store.getters.getScrollMiniPlayerOnAllTabs)
+
 /**
  * @param {boolean} value
  */
 function updateScrollMiniPlayerEnabled(value) {
   store.dispatch('updateScrollMiniPlayerEnabled', value)
+}
+
+/**
+ * @param {boolean} value
+ */
+function updateScrollMiniPlayerOnAllTabs(value) {
+  store.dispatch('updateScrollMiniPlayerOnAllTabs', value)
 }
 
 const FORMAT_VALUES = ['dash', 'legacy', 'audio']
