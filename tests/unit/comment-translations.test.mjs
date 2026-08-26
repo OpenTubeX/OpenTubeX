@@ -28,7 +28,7 @@ test('keeps plain comment text as the translation source', () => {
 test('escapes translated markup and links translated URLs', () => {
   const formatted = formatCommentTranslation('<script>alert(1)</script> https://example.com')
 
-  assert.doesNotMatch(formatted, /<script>/)
+  assert.equal(formatted.includes('<script>'), false)
   assert.match(formatted, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/)
   assert.match(formatted, /<a href="https:\/\/example\.com"/)
 })
