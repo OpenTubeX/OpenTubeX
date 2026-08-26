@@ -119,14 +119,14 @@ On failure the Playwright HTML report and traces are uploaded as artifacts.
 The pull-request performance workflow builds the base and candidate commits,
 then runs the large cached-subscription benchmark against both builds on one
 runner. It alternates between builds, discards two warm-ups per build, and
-compares the median of seven samples. The Actions summary shows the comparison,
-and the raw samples are uploaded as `performance-results.json`.
+compares the median of seven samples. A single pull-request comment and the
+Actions summary show the comparison, and the raw samples are uploaded as
+`performance-results.json`.
 
-The workflow initially reports regressions without failing so its thresholds
-can be checked against normal runner variance. Without `--report-only`, the
-command exits with a failure when the candidate crosses an absolute limit or is
-both 15% and 20 ms slower for elapsed time, or both 20% and 16 ms slower for a
-longest-frame measurement.
+The workflow fails when the candidate crosses an absolute limit or is both 15%
+and 20 ms slower for elapsed time, or both 20% and 16 ms slower for a
+longest-frame measurement. A trusted follow-up workflow updates the comment so
+pull requests from forks never receive a write-capable token.
 
 To compare two checkouts locally, build `dist-e2e` in both and run:
 
