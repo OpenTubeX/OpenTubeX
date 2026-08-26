@@ -85,8 +85,16 @@
       </p>
       <FtTimestampCatcher
         class="commentText"
-        :input-html="reply.text"
+        :input-html="reply.showTranslated ? reply.translatedText : reply.text"
         @timestamp-event="emit('timestamp-event', $event)"
+      />
+      <CommentTranslationButton
+        v-if="translationEnabled && reply.translationText"
+        :comment="reply"
+        :loading="loadingTranslationIds.has(reply.id)"
+        :target-language="translationLanguage"
+        :target-language-name="translationLanguageName"
+        @translate-comment="emit('translate-comment', $event)"
       />
       <p class="commentLikeCount">
         <template v-if="!hideCommentLikes">
@@ -130,10 +138,15 @@
         :subscribed-channel-ids="subscribedChannelIds"
         :channel-thumbnail="channelThumbnail"
         :loading-reply-ids="loadingReplyIds"
+        :loading-translation-ids="loadingTranslationIds"
+        :translation-enabled="translationEnabled"
+        :translation-language="translationLanguage"
+        :translation-language-name="translationLanguageName"
         :highlighted-comment-id="highlightedCommentId"
         @copy-youtube-link="emit('copy-youtube-link', $event)"
         @get-more-replies="emit('get-more-replies', $event)"
         @timestamp-event="emit('timestamp-event', $event)"
+        @translate-comment="emit('translate-comment', $event)"
       />
       <div
         v-if="loadingReplyIds.has(reply.id) || (reply.dataType === 'local' && reply.hasReplyToken)"
@@ -169,6 +182,7 @@
 import { FtIcon } from '@opentubex/icons'
 
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
+import CommentTranslationButton from './CommentTranslationButton.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import FtSpinner from '../FtSpinner/FtSpinner.vue'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
@@ -211,6 +225,22 @@ const props = defineProps({
     type: Set,
     required: true
   },
+  loadingTranslationIds: {
+    type: Set,
+    required: true
+  },
+  translationEnabled: {
+    type: Boolean,
+    required: true
+  },
+  translationLanguage: {
+    type: String,
+    required: true
+  },
+  translationLanguageName: {
+    type: String,
+    required: true
+  },
   highlightedCommentId: {
     type: String,
     default: null
@@ -227,7 +257,7 @@ function formatCommentTime(comment) {
 
 const reply = props.node.reply
 
-const emit = defineEmits(['copy-youtube-link', 'get-more-replies', 'timestamp-event'])
+const emit = defineEmits(['copy-youtube-link', 'get-more-replies', 'timestamp-event', 'translate-comment'])
 </script>
 
 <style scoped src="./CommentSection.css" />

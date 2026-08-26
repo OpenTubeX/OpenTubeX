@@ -6,6 +6,7 @@ import { SEARCH_CHAR_LIMIT } from '../../../constants'
 import store from '../../store/index'
 import { PlayerCache } from './PlayerCache'
 import { loadSearchContinuation } from '../search-continuation'
+import { formatCommentTranslation, getCommentTranslationSource } from '../comment-translations'
 import { parseLocalShortLinkedVideo } from '../player/shorts'
 import { getPaidPromotionDurationMs } from '../player/paidPromotion'
 import { getLocalPremiereState } from '../premiere'
@@ -148,6 +149,18 @@ export async function getLocalSearchSuggestions(query) {
   }
 
   return await searchSuggestionsSession.getSearchSuggestions(query)
+}
+
+/**
+ * Translate comment text with YouTube's comment translation service.
+ * @param {string} text
+ * @param {string} targetLanguage
+ * @returns {Promise<string>}
+ */
+export async function translateCommentText(text, targetLanguage) {
+  const innertube = await createInnertube()
+  const response = await innertube.interact.translate(text, targetLanguage)
+  return formatCommentTranslation(response.translated_content)
 }
 
 export function clearLocalSearchSuggestionsSession() {
@@ -2635,6 +2648,7 @@ export function mapLocalLegacyFormat(format) {
  * @property {boolean} isOwner
  * @property {boolean} isMember
  * @property {string} text
+ * @property {string} translationText
  * @property {boolean} isHearted
  * @property {boolean} hasOwnerReplied
  * @property {boolean} hasReplyToken
@@ -2680,6 +2694,7 @@ export function parseLocalComment(comment, commentThread = undefined) {
     isOwner: !!comment.author_is_channel_owner,
     isMember: !!comment.is_member,
     text: Autolinker.link(parseLocalTextRuns(commentTextRuns, 16, { looseChannelNameDetection: true })),
+    translationText: getCommentTranslationSource(commentTextRuns),
     isHearted: !!comment.is_hearted,
     hasOwnerReplied,
     hasReplyToken,

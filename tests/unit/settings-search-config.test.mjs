@@ -188,3 +188,37 @@ test('persistent playback cache search results follow desktop visibility', () =>
   assert.ok(desktopValues.some(({ label }) => label === 'yt-dlp stream URL cache limit'))
   assert.ok(!webValues.some(({ label }) => label === 'yt-dlp stream URL cache limit'))
 })
+
+test('comment translation button setting follows local API availability', () => {
+  const options = {
+    sections: [{
+      type: 'focus',
+      title: 'Distraction Free',
+      description: locale.Settings.Categories['Distraction Free Description'],
+    }],
+    tm: path => getAtPath(locale, path),
+    store: {
+      getters: new Proxy({}, {
+        get() {
+          return false
+        }
+      })
+    },
+    usingElectron: true,
+    isMac: false,
+    isLinuxWayland: false,
+    systemUsesDarkTheme: true,
+  }
+
+  const localApiValues = createSettingsSearchIndex({
+    ...options,
+    supportsLocalApi: true,
+  }).get('focus')
+  const webValues = createSettingsSearchIndex({
+    ...options,
+    supportsLocalApi: false,
+  }).get('focus')
+
+  assert.ok(localApiValues.some(({ label }) => label === 'Hide Comment Translation Buttons'))
+  assert.ok(!webValues.some(({ label }) => label === 'Hide Comment Translation Buttons'))
+})

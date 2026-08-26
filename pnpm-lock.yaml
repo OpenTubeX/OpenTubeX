@@ -35,6 +35,9 @@ importers:
       dompurify:
         specifier: ^3.4.13
         version: 3.4.13
+      eld:
+        specifier: 2.1.0
+        version: 2.1.0
       font-list:
         specifier: ^2.1.0
         version: 2.1.0
@@ -2470,6 +2473,10 @@ packages:
     resolution: {integrity: sha512-UeJmFfOrAQS8OJWPZ4qtgHyWExa088/MtK5UEyoJGFH67cDEXkZSviOiKRCZ4Xij0zxI3JECgYs3oKx+AizQBA==}
     engines: {node: '>=0.10.0'}
     hasBin: true
+
+  eld@2.1.0:
+    resolution: {integrity: sha512-hDQ9FX17th7NDNMO8/St6m3ADQVqjF0sQoOHI6NUAxC7yDaPmZ9wC9d8zau/9FIqOV7KtNwrPKRt6fkkrzZj0g==}
+    engines: {node: '>=14.17.0'}
 
   electron-builder-squirrel-windows@26.15.7:
     resolution: {integrity: sha512-B4uvn2NzFSuf084udWqugludFull6CRJiWe2dLzMnZLl6G5hdAGk0fsBMGlBSpKjvQCJn8IPc+S7OnJ+GXqwLA==}
@@ -7779,6 +7786,8 @@ snapshots:
   ejs@3.1.10:
     dependencies:
       jake: 10.9.4
+
+  eld@2.1.0: {}
 
   electron-builder-squirrel-windows@26.15.7(dmg-builder@26.15.7):
     dependencies:

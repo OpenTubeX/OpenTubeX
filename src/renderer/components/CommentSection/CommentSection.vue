@@ -236,8 +236,16 @@
           </p>
           <FtTimestampCatcher
             class="commentText"
-            :input-html="comment.text"
+            :input-html="comment.showTranslated ? comment.translatedText : comment.text"
             @timestamp-event="onTimestamp"
+          />
+          <CommentTranslationButton
+            v-if="translationEnabled && comment.translationText"
+            :comment="comment"
+            :loading="loadingTranslationIds.has(comment.id)"
+            :target-language="translationLanguage"
+            :target-language-name="translationLanguageName"
+            @translate-comment="toggleCommentTranslation"
           />
           <p class="commentLikeCount">
             <template
@@ -326,10 +334,15 @@
               :subscribed-channel-ids="subscribedChannelIds"
               :channel-thumbnail="channelThumbnail"
               :loading-reply-ids="loadingReplyIds"
+              :loading-translation-ids="loadingTranslationIds"
+              :translation-enabled="translationEnabled"
+              :translation-language="translationLanguage"
+              :translation-language-name="translationLanguageName"
               :highlighted-comment-id="highlightedCommentId"
               @copy-youtube-link="copyCommentYoutubeLink"
               @get-more-replies="getCommentReplies(index, $event)"
               @timestamp-event="onTimestamp"
+              @translate-comment="toggleCommentTranslation"
             />
             <div
               v-if="isReplyLoading(comment.id) || comment.hasReplyToken"
@@ -465,6 +478,7 @@ import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
 import CommentReply from './CommentReply.vue'
+import CommentTranslationButton from './CommentTranslationButton.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import FtRetryImage from '../FtRetryImage.vue'
@@ -491,8 +505,10 @@ import {
   getLocalCommunityPostComments,
   getLocalComments,
   parseLocalComment,
-  parseLocalSubscriberCount
+  parseLocalSubscriberCount,
+  translateCommentText
 } from '../../helpers/api/local'
+import { normalizeYouTubeCaptionLanguageCode } from '../../helpers/player/youtubeCaptionLanguages'
 import {
   getInvidiousCommunityPostCommentReplies,
   getInvidiousCommunityPostComments,
@@ -500,7 +516,7 @@ import {
   invidiousGetComments
 } from '../../helpers/api/invidious'
 
-const { t } = useI18n()
+const { locale, t } = useI18n()
 const relativeTimeNow = useRelativeTimeClock()
 
 function formatCommentTime(comment) {
@@ -555,6 +571,7 @@ const props = defineProps({
 const isLoading = ref(false)
 const isLoadingMoreComments = ref(false)
 const loadingReplyIds = ref(new Set())
+const loadingTranslationIds = ref(new Set())
 const showComments = ref(false)
 const nextPageToken = shallowRef(null)
 
@@ -709,6 +726,58 @@ const backendPreference = computed(() => {
 const backendFallback = computed(() => {
   return store.getters.getBackendFallback
 })
+
+const translationEnabled = computed(() => {
+  return process.env.SUPPORTS_LOCAL_API && !store.getters.getHideCommentTranslationButtons
+})
+
+const translationLanguage = computed(() => {
+  return normalizeYouTubeCaptionLanguageCode(locale.value)
+})
+
+const translationLanguageName = computed(() => {
+  const language = translationLanguage.value
+  if (!language) {
+    return locale.value
+  }
+
+  return new Intl.DisplayNames([locale.value, 'en'], { type: 'language' }).of(language) ?? language
+})
+
+/**
+ * @param {Comment} comment
+ */
+async function toggleCommentTranslation(comment) {
+  if (comment.showTranslated) {
+    comment.showTranslated = false
+    return
+  }
+
+  const targetLanguage = translationLanguage.value
+  if (!targetLanguage || loadingTranslationIds.value.has(comment.id)) {
+    return
+  }
+
+  if (comment.translatedText && comment.translatedLanguage === targetLanguage) {
+    comment.showTranslated = true
+    return
+  }
+
+  loadingTranslationIds.value = new Set(loadingTranslationIds.value).add(comment.id)
+
+  try {
+    comment.translatedText = await translateCommentText(comment.translationText, targetLanguage)
+    comment.translatedLanguage = targetLanguage
+    comment.showTranslated = true
+  } catch (error) {
+    console.error(error)
+    showApiErrorToast(t('Comments.Comment translation failed'), error)
+  } finally {
+    const nextLoadingTranslationIds = new Set(loadingTranslationIds.value)
+    nextLoadingTranslationIds.delete(comment.id)
+    loadingTranslationIds.value = nextLoadingTranslationIds
+  }
+}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideCommentLikes = computed(() => {

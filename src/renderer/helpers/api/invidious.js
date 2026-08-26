@@ -443,6 +443,7 @@ export async function invidiousGetVideoInformation(videoId) {
  * @property {string} author
  * @property {number} likes
  * @property {string} text
+ * @property {string} translationText
  * @property {string} dataType
  * @property {boolean} isOwner
  * @property {boolean} isPinned
@@ -630,6 +631,7 @@ function parseInvidiousCommentData(response) {
       author: comment.author,
       likes: comment.likeCount,
       text: autolinker.link(invidiousImageUrlToInvidious(comment.contentHtml, getCurrentInstanceUrl())),
+      translationText: comment.content,
       dataType: 'invidious',
       isOwner: comment.authorIsChannelOwner,
       isPinned: comment.isPinned,

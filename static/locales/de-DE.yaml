@@ -966,6 +966,7 @@ Settings:
     Hide Recommended Videos: Empfohlene Videos ausblenden
     Hide Channel Subscribers: Abozahl für Kanäle ausblenden
     Hide Comment Likes: Likes bei Kommentaren ausblenden
+    Hide Comment Translation Buttons: Schaltflächen zum Übersetzen von Kommentaren ausblenden
     Hide Video Likes And Dislikes: Likes und Dislikes ausblenden
     Hide Video Views: Videoaufrufe ausblenden
     Distraction Free Settings: Ablenkungsfreier Modus
@@ -1866,6 +1867,10 @@ Comments:
     sie gelöscht oder ausgeblendet, daher wurde die Antwortschaltfläche entfernt.
   Highlighted comment: Hervorgehobener Kommentar
   Highlighted reply: Hervorgehobene Antwort
+  Translate to {language}: Auf {language} übersetzen
+  Show original: Original anzeigen
+  Translating comment, please wait: Kommentar wird übersetzt, bitte warten
+  Comment translation failed: Kommentar konnte nicht übersetzt werden
 Up Next: Nächster Titel
 
 # Toast Messages

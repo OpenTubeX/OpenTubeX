@@ -3019,6 +3019,105 @@ test.describe('manual comment loading', () => {
     }
   })
 
+  test('translates a comment and restores its original text', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateCurrentLocale', 'de-DE')
+    })
+
+    let translationRequestCount = 0
+    await page.route(/\/youtubei\/v1\/comment\/perform_comment_action/, route => {
+      translationRequestCount++
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          frameworkUpdates: {
+            entityBatchUpdate: {
+              mutations: [{
+                payload: {
+                  commentEntityPayload: {
+                    translatedContent: {
+                      content: 'Translated comment text'
+                    }
+                  }
+                }
+              }]
+            }
+          }
+        })
+      })
+    })
+
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const comment = page.locator('.commentThread').filter({
+      has: page.locator(':scope > .commentTranslation .commentTranslationButton')
+    }).first()
+    await expect(comment).toBeVisible()
+    const commentText = comment.locator(':scope > .commentText')
+    const originalText = await commentText.textContent()
+    const translate = comment.locator(':scope > .commentTranslation .commentTranslationButton')
+
+    await translate.click()
+
+    await expect(commentText).toHaveText('Translated comment text')
+    await translate.click()
+    await expect(commentText).toHaveText(originalText)
+
+    await translate.click()
+    await expect(commentText).toHaveText('Translated comment text')
+    expect(translationRequestCount).toBe(1)
+  })
+
+  test('does not offer to translate a comment already in the app language', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const englishComment = page.locator('.commentThread').filter({
+      hasText: "We're so honored that the first ever YouTube video was filmed here!"
+    })
+    await expect(englishComment).toBeVisible()
+    await expect(englishComment.locator(':scope > .commentTranslation .commentTranslationButton')).toHaveCount(0)
+  })
+
+  test('hides comment translation buttons through the distraction-free setting', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateCurrentLocale', 'de-DE')
+    })
+
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const translationButtons = page.locator('.commentTranslationButton')
+    await expect(translationButtons.first()).toBeVisible()
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateHideCommentTranslationButtons', true)
+    })
+    await expect(translationButtons).toHaveCount(0)
+  })
+
   test('identifies collapsed replies from the video uploader', async ({ app, page, attachScreenshot }) => {
     await mockPlayableWatchPage(app, page, { ownerReply: true })
     await openMockedVideo(page)
