@@ -96,6 +96,7 @@
             v-if="!hideSearchBar"
             class="aboutTagLink"
             :title="$t('Channel.About.Tags.Search for', { tag })"
+            :data-tab-title="tag"
             :to="{
               path: `/search/${encodeURIComponent(tag)}`,
               query: searchSettings

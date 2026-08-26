@@ -4,6 +4,7 @@
     class="bubblePadding"
     :aria-labelledby="id"
     :to="`/channel/${channelId}`"
+    :data-tab-title="channelName"
   >
     <img
       v-if="channelThumbnail != null && !thumbnailLoadFailed"

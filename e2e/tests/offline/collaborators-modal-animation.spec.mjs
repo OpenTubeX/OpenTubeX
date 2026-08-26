@@ -180,6 +180,7 @@ test('middle-clicking a collaborator opens its channel in a background tab', asy
     const state = await window.ftElectron.tabs.getState()
     return state.tabs.find(tab => tab.id !== state.activeTabId)?.route.fullPath
   })).toBe('/channel/UCcccccccccccccccccccccc')
+  await expect(page.locator(sel.tabs).nth(1)).toContainText('Channel C')
 })
 
 test('shift-middle-clicking a collaborator opens its channel in a new window', async ({ app, page }) => {
