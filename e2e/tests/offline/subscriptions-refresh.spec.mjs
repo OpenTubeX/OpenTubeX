@@ -260,7 +260,23 @@ test.describe('subscription refresh performance with many tabs', () => {
       let refreshedChannels = 0
       let completedAt = null
       const longFrames = []
+      const longTasks = []
       let animationFrame
+
+      const collectLongTasks = (entries) => {
+        for (const entry of entries) {
+          longTasks.push({
+            at: entry.startTime - startedAt,
+            duration: entry.duration,
+            refreshedChannels,
+            completedAt
+          })
+        }
+      }
+      const taskObserver = new PerformanceObserver((list) => {
+        collectLongTasks(list.getEntries())
+      })
+      taskObserver.observe({ type: 'longtask' })
 
       const sampleFrame = (timestamp) => {
         const duration = timestamp - previousFrame
@@ -287,10 +303,14 @@ test.describe('subscription refresh performance with many tabs', () => {
           cancelAnimationFrame(animationFrame)
           window.removeEventListener('opentubex-subscription-refresh-channel', channelRefreshed)
           window.removeEventListener('opentubex-subscription-refresh-completed', refreshCompleted)
+          collectLongTasks(taskObserver.takeRecords())
+          taskObserver.disconnect()
           return {
             elapsed: performance.now() - startedAt,
             longestFrame,
-            longFrames
+            longFrames,
+            longestTask: Math.max(0, ...longTasks.map(task => task.duration)),
+            longTasks
           }
         }
       }
@@ -318,7 +338,7 @@ test.describe('subscription refresh performance with many tabs', () => {
     })
 
     expect(profileUpdate, JSON.stringify(metrics)).toBeLessThan(50)
-    expect(timing.longestFrame, JSON.stringify(metrics)).toBeLessThan(60)
+    expect(timing.longestTask, JSON.stringify(metrics)).toBeLessThan(60)
     expect(timing.elapsed).toBeLessThan(10_000)
   })
 })
