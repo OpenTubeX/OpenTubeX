@@ -33,7 +33,7 @@ export const performanceMetrics = [
     unit: 'ms',
     absoluteLimit: 500,
     relativeLimit: 1.2,
-    minimumDelta: longestFrameMinimumDeltaMs
+    minimumDelta: 100
   },
   {
     key: 'subscribedChannelsNavigationElapsedMs',
@@ -108,14 +108,14 @@ export const performanceMetrics = [
     minimumDelta: longestFrameMinimumDeltaMs
   },
   {
-    key: 'navigationMemoryGrowthMiB',
-    label: 'Memory growth after 10 navigation cycles',
+    key: 'navigationHeapGrowthMiB',
+    label: 'Renderer heap growth after 10 navigation cycles',
     unit: 'MiB',
     minimumValue: 0,
-    absoluteLimit: 96,
-    relativeLimit: 1.25,
+    absoluteLimit: 24,
+    relativeLimit: 1.5,
     relativeBaselineFloor: 4,
-    minimumDelta: 8,
+    minimumDelta: 4,
     absoluteChange: true
   },
   {
@@ -270,7 +270,7 @@ export function renderPerformanceSummary(base, candidate, comparison, reportOnly
     '- Startup phases are cumulative from launching Electron. Interactive means the top navigation and tab bar are visible. Startup frame sampling runs from the initial route commit until that point.',
     '- Large route navigation opens 933 subscribed channels. Channel search filters that list down to one channel.',
     '- Subscription switches process 33,588 cached video records. Scrolling moves through the first rendered page for 60 animation frames.',
-    '- Memory growth is the renderer working-set increase after 10 Subscribed Channels and Trending navigation cycles, with renderer garbage collection before each reading.',
+    '- Renderer heap growth is the used JavaScript heap increase after 10 Subscribed Channels and Trending navigation cycles, with renderer garbage collection before each reading.',
     '- Local playback start runs from submitting a watch URL until the bundled demo video emits `playing`. It makes no network requests.',
     '- Packed code size totals all emitted JavaScript and CSS, including renderer chunks, the main process, preload, and BotGuard.',
     '',

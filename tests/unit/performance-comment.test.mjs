@@ -45,7 +45,7 @@ function sample (overrides = {}) {
     repeatedSwitchElapsedMs: 80,
     repeatedSwitchLongestFrameMs: 40,
     largeFeedScrollLongestFrameMs: 20,
-    navigationMemoryGrowthMiB: 2,
+    navigationHeapGrowthMiB: 6.5,
     playbackStartElapsedMs: 1000,
     playbackStartLongestFrameMs: 50,
     packedCodeSizeKiB: 4000,
@@ -127,13 +127,49 @@ test('reports diagnostic startup phases without gating on them', () => {
   assert.match(comment, /No regression crossed the configured thresholds\./)
 })
 
-test('accepts zero memory growth and renders its absolute change', () => {
-  const input = result({ navigationMemoryGrowthMiB: 0 })
-  input.samples.base = Array.from({ length: 7 }, () => sample({ navigationMemoryGrowthMiB: 0 }))
+test('ignores startup frame scheduling noise below 100 ms', () => {
+  const input = result({ startupLongestFrameMs: 300 })
+  input.samples.base = Array.from({ length: 7 }, () => sample({
+    startupLongestFrameMs: 249.9
+  }))
 
   const comment = renderPerformanceComment(input, { headSha, runUrl })
 
-  assert.match(comment, /Memory growth after 10 navigation cycles \| 0\.0 MiB \| 0\.0 MiB \| 0\.0 MiB/)
+  assert.match(comment, /Startup: renderer longest frame .+ \+20\.0% .+ Pass/)
+  assert.doesNotMatch(comment, /Startup: renderer longest frame regressed/)
+})
+
+test('reports startup frame regressions above the scheduling noise floor', () => {
+  const input = result({ startupLongestFrameMs: 400 })
+  input.samples.base = Array.from({ length: 7 }, () => sample({
+    startupLongestFrameMs: 249.9
+  }))
+
+  const comment = renderPerformanceComment(input, { headSha, runUrl })
+
+  assert.match(comment, /Startup: renderer longest frame .+ Regression/)
+  assert.match(comment, /Startup: renderer longest frame regressed by 150\.1 ms/)
+})
+
+test('gates renderer heap growth after repeated navigation', () => {
+  const input = result({ navigationHeapGrowthMiB: 12 })
+  input.samples.base = Array.from({ length: 7 }, () => sample({
+    navigationHeapGrowthMiB: 6.5
+  }))
+
+  const comment = renderPerformanceComment(input, { headSha, runUrl })
+
+  assert.match(comment, /Renderer heap growth after 10 navigation cycles .+ \+5\.5 MiB .+ Regression/)
+  assert.match(comment, /Renderer heap growth after 10 navigation cycles regressed by 5\.5 MiB/)
+})
+
+test('accepts zero heap growth and renders its absolute change', () => {
+  const input = result({ navigationHeapGrowthMiB: 0 })
+  input.samples.base = Array.from({ length: 7 }, () => sample({ navigationHeapGrowthMiB: 0 }))
+
+  const comment = renderPerformanceComment(input, { headSha, runUrl })
+
+  assert.match(comment, /Renderer heap growth after 10 navigation cycles \| 0\.0 MiB \| 0\.0 MiB \| 0\.0 MiB/)
 })
 
 test('accepts zero when a metric omits its minimum value', () => {

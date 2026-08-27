@@ -122,26 +122,28 @@ async function measureLargeFeedScroll(page) {
   }), { scrollFrames })
 }
 
-async function collectRendererWorkingSetKiB(electronApp) {
-  return electronApp.evaluate(({ app }) => app.getAppMetrics()
-    .filter(metric => metric.type === 'Tab')
-    .reduce((total, metric) => total + metric.memory.workingSetSize, 0))
-}
-
-async function collectMemoryAfterGc(electronApp, page) {
-  await page.evaluate(async () => {
+async function collectRendererHeapAfterGcKiB(page) {
+  return page.evaluate(async () => {
     if (typeof globalThis.gc !== 'function') {
       throw new Error('Renderer garbage collection is unavailable')
     }
-    globalThis.gc()
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+
+    for (let index = 0; index < 3; index++) {
+      globalThis.gc()
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    }
+
+    const usedJSHeapSize = performance.memory?.usedJSHeapSize
+    if (!Number.isFinite(usedJSHeapSize)) {
+      throw new Error('Precise renderer heap information is unavailable')
+    }
+    return usedJSHeapSize / 1024
   })
-  return collectRendererWorkingSetKiB(electronApp)
 }
 
-async function measureNavigationMemoryGrowth(electronApp, page) {
+async function measureNavigationHeapGrowth(page) {
   await goTo(page, 'trending')
-  const before = await collectMemoryAfterGc(electronApp, page)
+  const before = await collectRendererHeapAfterGcKiB(page)
 
   for (let index = 0; index < navigationCycles; index++) {
     await goTo(page, 'subscribedchannels')
@@ -149,7 +151,7 @@ async function measureNavigationMemoryGrowth(electronApp, page) {
     await goTo(page, 'trending')
   }
 
-  const after = await collectMemoryAfterGc(electronApp, page)
+  const after = await collectRendererHeapAfterGcKiB(page)
   return Math.max(0, after - before) / 1024
 }
 
@@ -212,7 +214,7 @@ export async function runPerformanceScenarios({ electronApp, page }, startup, ap
   const channelSearch = await measureChannelSearch(page)
   const subscriptionSwitches = await runLargeSubscriptionsBenchmark(page)
   const scroll = await measureLargeFeedScroll(page)
-  const navigationMemoryGrowthMiB = await measureNavigationMemoryGrowth(electronApp, page)
+  const navigationHeapGrowthMiB = await measureNavigationHeapGrowth(page)
   const playbackStart = await measurePlaybackStart(electronApp, page)
 
   return {
@@ -223,7 +225,7 @@ export async function runPerformanceScenarios({ electronApp, page }, startup, ap
     channelSearchLongestFrameMs: channelSearch.longestFrame,
     ...subscriptionSwitches,
     largeFeedScrollLongestFrameMs: scroll.longestFrame,
-    navigationMemoryGrowthMiB,
+    navigationHeapGrowthMiB,
     playbackStartElapsedMs: playbackStart.elapsed,
     playbackStartLongestFrameMs: playbackStart.longestFrame,
     packedCodeSizeKiB: await packedCodeSizeKiB(appRoot)

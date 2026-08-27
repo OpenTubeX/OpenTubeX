@@ -112,7 +112,10 @@ async function collectSample(target) {
   const startup = {}
 
   try {
-    const launched = await launchApp(userDataDir, ['--js-flags=--expose-gc'], {
+    const launched = await launchApp(userDataDir, [
+      '--js-flags=--expose-gc',
+      '--enable-precise-memory-info'
+    ], {
       appRoot: target.root,
       executablePath: target.executablePath,
       onPhase: async (phase, page) => {
