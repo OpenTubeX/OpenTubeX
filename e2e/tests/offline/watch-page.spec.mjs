@@ -2569,11 +2569,35 @@ test.describe('watch page', () => {
       'minutesSaved'
     ])
 
+    const content = panel.locator('.sponsorBlockContent')
+    await panel.evaluate((element) => { element.style.inlineSize = '240px' })
+    await expect(panel).toHaveCSS('width', '240px')
+    await content.evaluate((element) => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    const narrowScrollTop = await content.evaluate(element => element.scrollTop)
+    await panel.evaluate((element) => { element.style.inlineSize = '' })
+    await expect.poll(() => panel.evaluate(element => element.getBoundingClientRect().width))
+      .toBeGreaterThan(240)
+    await expect.poll(() => content.evaluate((element, previousScrollTop) => {
+      const viewportBounds = element.getBoundingClientRect()
+      const contentEndBounds = element.querySelector('.sponsorBlockFooter').getBoundingClientRect()
+      const maximumScrollTop = Math.max(
+        0,
+        element.scrollTop + contentEndBounds.bottom - viewportBounds.bottom
+      )
+      return {
+        scrollTopReduced: element.scrollTop < previousScrollTop,
+        withinRenderedRange: element.scrollTop <= maximumScrollTop + 1
+      }
+    }, narrowScrollTop)).toEqual({
+      scrollTopReduced: true,
+      withinRenderedRange: true
+    })
+
     await panel.getByRole('button', { name: 'Close' }).click()
     await page.getByRole('button', { name: 'Open SponsorBlock info' }).click()
     await expect.poll(() => userInfoRequests).toBe(1)
 
-    const content = panel.locator('.sponsorBlockContent')
     await content.evaluate((element) => { element.scrollTop = element.scrollHeight })
     await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
     await page.getByRole('button', { name: 'Refresh SponsorBlock information' }).click()
@@ -2702,6 +2726,7 @@ test.describe('watch page', () => {
   test('previews and submits edited SponsorBlock timestamps', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     let submittedBody = null
+    let userInfoRequests = 0
 
     await page.route('**/api/skipSegments/**', route => route.fulfill({
       body: JSON.stringify([]),
@@ -2718,13 +2743,28 @@ test.describe('watch page', () => {
         contentType: 'application/json'
       })
     })
+    await page.route('**/api/userInfo?*', async route => {
+      userInfoRequests++
+      await route.fulfill({
+        body: JSON.stringify({
+          segmentCount: userInfoRequests,
+          viewCount: 0,
+          minutesSaved: 0
+        }),
+        contentType: 'application/json'
+      })
+    })
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setUseSponsorBlock', true)
+      store.commit('setSponsorBlockGeneratedUserId', 'test-contributor')
       await store.dispatch('updateSponsorBlockEnableSubmission', true)
     })
 
     await openMockedVideo(page)
+    await page.getByRole('button', { name: 'Open SponsorBlock info' }).click()
+    await expect.poll(() => userInfoRequests).toBe(1)
+    await page.locator('.watchVideoSponsorBlock').getByRole('button', { name: 'Close' }).click()
 
     const video = page.locator('.ftVideoPlayer video')
     await video.evaluate(element => {
@@ -2767,6 +2807,9 @@ test.describe('watch page', () => {
       description: '',
       segment: [11.722, 12]
     }])
+
+    await page.getByRole('button', { name: 'Open SponsorBlock info' }).click()
+    await expect.poll(() => userInfoRequests).toBe(2)
   })
 
   test('skips SponsorBlock segments at their boundary without timeupdate events', async ({ app, page }) => {

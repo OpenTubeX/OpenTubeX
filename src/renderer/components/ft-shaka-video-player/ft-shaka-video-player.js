@@ -1822,6 +1822,8 @@ export default defineComponent({
         refreshSponsorBlockMarkers()
         if (sponsorBlockInfoOpen.value) {
           refreshSponsorBlockContributionStats()
+        } else {
+          sponsorBlockContributionStatsLoaded.value = false
         }
       },
       props,

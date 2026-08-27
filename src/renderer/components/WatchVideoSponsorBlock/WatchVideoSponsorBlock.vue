@@ -307,6 +307,7 @@ const { t } = useI18n()
 const contentScroller = useTemplateRef('contentScroller')
 const contentEnd = useTemplateRef('contentEnd')
 let clampFrame = null
+let contentResizeObserver = null
 
 function scheduleScrollClamp() {
   nextTick(() => {
@@ -319,7 +320,13 @@ function scheduleScrollClamp() {
   })
 }
 
-onMounted(scheduleScrollClamp)
+onMounted(() => {
+  scheduleScrollClamp()
+  if (contentScroller.value) {
+    contentResizeObserver = new ResizeObserver(scheduleScrollClamp)
+    contentResizeObserver.observe(contentScroller.value)
+  }
+})
 
 watch(
   () => [
@@ -335,6 +342,8 @@ watch(
 )
 
 onBeforeUnmount(() => {
+  contentResizeObserver?.disconnect()
+  contentResizeObserver = null
   if (clampFrame !== null) {
     cancelAnimationFrame(clampFrame)
   }
