@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url'
 
 const MEDIA_REPOSITORY = 'OpenTubeX/media'
 const MEDIA_RELEASE = 'attachments'
+const MAX_RELEASE_ASSETS = 1000
 const MIME_EXTENSIONS = new Map([
   ['image/gif', 'gif'],
   ['image/jpeg', 'jpg'],
@@ -88,6 +89,85 @@ function run(command, args, options = {}) {
   return result.stdout.trim()
 }
 
+function getReleaseAssetCount(releaseTag) {
+  let releaseId
+
+  try {
+    releaseId = run('gh', [
+      'api',
+      `repos/${MEDIA_REPOSITORY}/releases/tags/${releaseTag}`,
+      '--jq',
+      '.id',
+    ])
+  } catch (error) {
+    if (error.message.includes('(HTTP 404)')) { return null }
+    throw error
+  }
+
+  const pageCounts = run('gh', [
+    'api',
+    `repos/${MEDIA_REPOSITORY}/releases/${releaseId}/assets?per_page=100`,
+    '--paginate',
+    '--jq',
+    'length',
+  ])
+
+  if (!pageCounts) { return 0 }
+
+  return pageCounts.split('\n').reduce((total, value) => {
+    if (!/^\d+$/.test(value)) {
+      throw new Error(`Could not count assets in release ${releaseTag}.`)
+    }
+
+    return total + Number(value)
+  }, 0)
+}
+
+function createRolloverRelease(releaseTag) {
+  run('gh', [
+    'release',
+    'create',
+    releaseTag,
+    '--repo',
+    MEDIA_REPOSITORY,
+    '--title',
+    releaseTag,
+    '--notes',
+    `Continues ${MEDIA_RELEASE} because the earlier releases do not have enough asset slots.`,
+    '--latest=false',
+  ])
+}
+
+export function selectReleaseTag(requiredSlots, {
+  countAssets = getReleaseAssetCount,
+  createRelease = createRolloverRelease,
+  maxReleaseAssets = MAX_RELEASE_ASSETS,
+} = {}) {
+  let releaseNumber = 1
+
+  while (true) {
+    const releaseTag = releaseNumber === 1 ? MEDIA_RELEASE : `${MEDIA_RELEASE}-${releaseNumber}`
+    const assetCount = countAssets(releaseTag)
+
+    if (assetCount !== null) {
+      if (assetCount + requiredSlots <= maxReleaseAssets) { return releaseTag }
+      releaseNumber += 1
+      continue
+    }
+
+    if (releaseNumber === 1) {
+      throw new Error(`Release not found: ${MEDIA_RELEASE}`)
+    }
+
+    try {
+      createRelease(releaseTag)
+    } catch (error) {
+      // Another upload may have created the release after our lookup.
+      if (countAssets(releaseTag) === null) { throw error }
+    }
+  }
+}
+
 function slugify(value) {
   return value
     .replaceAll(/[^A-Za-z0-9._-]+/g, '-')
@@ -137,7 +217,6 @@ function prepareMedia(input, timestamp, tempDirectory) {
     assetName,
     theme: input.theme,
     uploadPath,
-    url: `https://github.com/${MEDIA_REPOSITORY}/releases/download/${MEDIA_RELEASE}/${assetName}`,
   }
 }
 
@@ -168,11 +247,11 @@ export function renderMediaMarkup(media, alt) {
 </picture>`
 }
 
-function upload(media) {
+function upload(media, releaseTag) {
   execFileSync('gh', [
     'release',
     'upload',
-    MEDIA_RELEASE,
+    releaseTag,
     ...media.map(({ uploadPath }) => uploadPath),
     '--repo',
     MEDIA_REPOSITORY,
@@ -188,14 +267,19 @@ function main() {
   try {
     const timestamp = new Date().toISOString().replaceAll(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z')
     const media = options.inputs.map((input) => prepareMedia(input, timestamp, tempDirectory))
+    const releaseTag = selectReleaseTag(media.length)
 
-    upload(media)
+    for (const item of media) {
+      item.url = `https://github.com/${MEDIA_REPOSITORY}/releases/download/${releaseTag}/${item.assetName}`
+    }
+
+    upload(media, releaseTag)
 
     console.log('\nPaste this inside the release-note-image markers:\n')
     console.log(renderMediaMarkup(media, options.alt))
     console.log('\nDelete the uploaded assets with:')
     for (const { assetName } of media) {
-      console.log(`gh release delete-asset ${MEDIA_RELEASE} ${assetName} --repo ${MEDIA_REPOSITORY} --yes`)
+      console.log(`gh release delete-asset ${releaseTag} ${assetName} --repo ${MEDIA_REPOSITORY} --yes`)
     }
   } finally {
     fs.rmSync(tempDirectory, { force: true, recursive: true })
