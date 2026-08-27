@@ -1168,7 +1168,7 @@ Settings:
     Managed Tool Already Current Template: '{tool} {version} ist bereits auf dem neuesten Stand'
     yt-dlp Executable Path: Pfad zur ausführbaren yt-dlp-Datei
     FFmpeg Executable Path: Pfad zur ausführbaren FFmpeg-Datei
-    Restricted Playback Authentication: Authentifizierung für eingeschränkte Videos
+    Restricted Playback Authentication: yt-dlp-Wiedergabe-Cookies
     Cookie Source: Cookie-Quelle
     Cookie Sources:
       None: Keine
@@ -1179,7 +1179,8 @@ Settings:
     Browser Profile: Browserprofil (optional)
     Browser Profile Placeholder: Profilname oder -pfad
     Select Browser: Browser auswählen
-    Restricted Playback Authentication Hint: OpenTubeX übergibt diese Cookies erst an yt-dlp, nachdem du bei einem altersbeschränkten oder nur für Mitglieder verfügbaren Video „Mit konfigurierten Cookies versuchen“ ausgewählt hast. Die Verwendung von yt-dlp mit einem Google-Konto kann zu vorübergehenden oder dauerhaften Kontoeinschränkungen führen.
+    Always Use Cookies: Cookies immer verwenden
+    Restricted Playback Authentication Hint: Standardmäßig übergibt OpenTubeX diese Cookies erst an yt-dlp, nachdem du bei einem altersbeschränkten oder nur für Mitglieder verfügbaren Video „Mit konfigurierten Cookies versuchen“ ausgewählt hast. Aktiviere „Cookies immer verwenden“, um sie bei jeder Stream-Extraktion mit yt-dlp zu verwenden. Diese Einstellung wechselt die Methode zur Stream-Extraktion nicht zu yt-dlp. Wenn yt-dlp ausgewählt ist, können kontogebundene Formate verfügbar werden, einschließlich der höheren 1080p-Bitrate von YouTube Premium, wenn das Konto darauf Zugriff hat. Die Verwendung von yt-dlp mit einem Google-Konto kann zu vorübergehenden oder dauerhaften Kontoeinschränkungen führen.
     Detected FFprobe Version Template: 'Erkannte FFprobe-Version: {version}'
     FFprobe Managed Not Downloaded: >-
       FFprobe wurde noch nicht heruntergeladen. Klicke auf die Schaltfläche unten, um es zusammen mit FFmpeg
@@ -1747,7 +1748,7 @@ Video:
   AI-generated content: KI-generierte Inhalte
   MembersOnly: Videos, die nur für Mitglieder bestimmt sind, können mit OpenTubeX nicht angesehen werden, da sie einen Google-Login und eine kostenpflichtige Kanalmitgliedschaft erfordern.
   AgeRestricted: Videos mit Altersbeschränkung können mit OpenTubeX nicht angesehen werden, da sie eine Google-Anmeldung und die Verwendung eines altersgeprüften YouTube-Kontos erfordern.
-  Configure Restricted Playback Cookies Hint: Konfiguriere Cookies unter Einstellungen → Erweitert → Externe Software → Authentifizierung für eingeschränkte Videos.
+  Configure Restricted Playback Cookies Hint: Konfiguriere Cookies unter Einstellungen → Erweitert → Externe Software → yt-dlp-Wiedergabe-Cookies.
   Try With Configured Cookies: Mit konfigurierten Cookies versuchen
   Restricted Playback Authentication Failed Template: 'yt-dlp konnte mit den konfigurierten Cookies nicht auf dieses Video zugreifen: {error}'
   DeArrow:
@@ -2108,10 +2109,11 @@ Tooltips:
     FFmpeg Source: OpenTubeX kann entweder das auf deinem System installierte FFmpeg verwenden oder einen eigenen statischen FFmpeg-Build herunterladen und verwalten, der im Benutzerdatenverzeichnis gespeichert wird.
     Managed Tool Updates: Lege fest, ob verwaltete Tools automatisch, nach Rückfrage oder nur über die manuellen Schaltflächen aktualisiert werden. Fehlende Tools werden bei Bedarf weiterhin heruntergeladen.
     yt-dlp Executable Path: Standardmäßig nimmt OpenTubeX an, dass yt-dlp über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
-    Cookie Source: Lege fest, ob yt-dlp eine Netscape-Cookie-Datei oder Cookies aus einem installierten Browser lesen soll, wenn du die Wiedergabe eines eingeschränkten Videos ausdrücklich erneut versuchst.
-    Cookie File: Wähle eine Cookie-Datei im Netscape-Format für erneute Wiedergabeversuche von altersbeschränkten oder nur für Mitglieder verfügbaren Videos aus.
-    Browser for Cookies: Die Browserunterstützung wird anhand der ausgewählten ausführbaren yt-dlp-Datei ermittelt. OpenTubeX weist yt-dlp erst nach einem ausdrücklichen erneuten Versuch bei einem eingeschränkten Video an, Cookies aus diesem Browser zu lesen.
+    Cookie Source: Lege fest, ob yt-dlp für die authentifizierte Wiedergabe eine Netscape-Cookie-Datei oder Cookies aus einem installierten Browser lesen soll.
+    Cookie File: Wähle eine Cookie-Datei im Netscape-Format für die authentifizierte Wiedergabe aus.
+    Browser for Cookies: Die Browserunterstützung wird anhand der ausgewählten ausführbaren yt-dlp-Datei ermittelt. OpenTubeX weist yt-dlp an, Cookies aus diesem Browser zu lesen, wenn eine authentifizierte Wiedergabe angefordert wird.
     Browser Profile: Optionaler Name oder Ordner des Browserprofils. Lasse das Feld leer, um das zuletzt verwendete Profil zu nutzen.
+    Always Use Cookies: Verwendet die konfigurierten Cookies bei jeder Stream-Extraktion mit yt-dlp. Dies wechselt die Methode zur Stream-Extraktion nicht zu yt-dlp.
     FFmpeg Executable Path: FFmpeg wird zum Zusammenführen von getrennten Video- und Audiospuren sowie zur Audiokonvertierung benötigt. Standardmäßig nimmt OpenTubeX an, dass FFmpeg über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
   Experimental Settings:
     Replace HTTP Cache: Deaktiviert den festplattenbasierten HTTP-Cache von Electron und aktiviert einen benutzerdefinierten In-Memory-Image-Cache. Dies führt zu einer erhöhten RAM-Auslastung.

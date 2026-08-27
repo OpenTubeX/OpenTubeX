@@ -216,7 +216,7 @@ test('shows the restricted playback setup hint and loads yt-dlp subtitles after 
   })
 
   await expect(page.getByText(
-    'Configure cookies in Settings → External Software → Restricted Video Authentication.'
+    'Configure cookies in Settings → External Software → yt-dlp Playback Cookies.'
   )).toBeVisible()
   await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
 
@@ -296,7 +296,7 @@ test('shows the restricted playback setup hint and loads yt-dlp subtitles after 
   })
 
   await expect(page.getByText(
-    'Configure cookies in Settings → External Software → Restricted Video Authentication.'
+    'Configure cookies in Settings → External Software → yt-dlp Playback Cookies.'
   )).toHaveCount(0)
   const retry = page.getByRole('button', { name: 'Try with configured cookies' })
   await expect(retry).toBeVisible()
@@ -393,6 +393,44 @@ test('shows the restricted playback setup hint and loads yt-dlp subtitles after 
     () => globalThis.__restrictedPlaybackCalls
   )).toEqual([{ useDefaultClients: false, useAuthentication: true, includeSubtitles: true }])
   await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
+})
+
+test('uses configured cookies for every yt-dlp extraction when enabled', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
+    await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
+    await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
+  })
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    globalThis.__alwaysUseCookiesCalls = []
+    ipcMain.removeHandler('yt-dlp-get-playback-info')
+    ipcMain.handle(
+      'yt-dlp-get-playback-info',
+      (_event, _videoId, useDefaultClients, useAuthentication) => {
+        globalThis.__alwaysUseCookiesCalls.push({ useDefaultClients, useAuthentication })
+        return { error: 'expected test extraction failure' }
+      }
+    )
+  })
+
+  const watchView = await watchViewHandle(page)
+  expect(await watchView.evaluate((view) => {
+    view.playbackEngineFallbackTarget = 'yt-dlp'
+    return view.extractYtDlpPlaybackSource(
+      view.videoLoadGeneration,
+      view.videoId,
+      view.playbackEngineSwitchGeneration
+    )
+  })).toBe(false)
+  expect(await app.electronApp.evaluate(() => globalThis.__alwaysUseCookiesCalls)).toEqual([
+    { useDefaultClients: false, useAuthentication: true },
+    { useDefaultClients: true, useAuthentication: true },
+    { useDefaultClients: true, useAuthentication: true }
+  ])
 })
 
 test.describe('Shorts transcript navigation', () => {

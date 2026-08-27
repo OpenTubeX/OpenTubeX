@@ -282,6 +282,16 @@
         @click="chooseBrowserProfilePath"
       />
     </FtFlexBox>
+    <FtFlexBox>
+      <FtToggleSwitch
+        :label="t('Settings.External Software Settings.Always Use Cookies')"
+        :default-value="ytDlpPlaybackAlwaysUseCookies"
+        setting-key="ytDlpPlaybackAlwaysUseCookies"
+        :tooltip="t('Tooltips.External Software Settings.Always Use Cookies')"
+        compact
+        @change="updateYtDlpPlaybackAlwaysUseCookies"
+      />
+    </FtFlexBox>
     <p class="restrictedPlaybackAuthHint">
       {{ t('Settings.External Software Settings.Restricted Playback Authentication Hint') }}
     </p>
@@ -298,6 +308,7 @@ import FtButton from './FtButton/FtButton.vue'
 import FtInput from './FtInput/FtInput.vue'
 import FtSelect from './FtSelect/FtSelect.vue'
 import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
+import FtToggleSwitch from './FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../store/index'
 
@@ -350,6 +361,9 @@ const ytDlpPlaybackCookiesBrowser = computed(() => store.getters.getYtDlpPlaybac
 
 /** @type {import('vue').ComputedRef<string>} */
 const ytDlpPlaybackCookiesBrowserProfile = computed(() => store.getters.getYtDlpPlaybackCookiesBrowserProfile)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const ytDlpPlaybackAlwaysUseCookies = computed(() => store.getters.getYtDlpPlaybackAlwaysUseCookies)
 
 /** @type {import('vue').ComputedRef<'system' | 'managed'>} */
 const ytDlpFfmpegSource = computed(() => store.getters.getYtDlpFfmpegSource)
@@ -629,6 +643,13 @@ function updateYtDlpPlaybackCookiesBrowser(value) {
  */
 function updateYtDlpPlaybackCookiesBrowserProfile(value) {
   store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', value)
+}
+
+/**
+ * @param {boolean} value
+ */
+function updateYtDlpPlaybackAlwaysUseCookies(value) {
+  store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', value)
 }
 
 /**

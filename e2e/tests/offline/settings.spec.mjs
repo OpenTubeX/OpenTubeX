@@ -522,11 +522,13 @@ test.describe('settings', () => {
 
     const advanced = await goToSettingsSection(page, 'advanced')
     const authentication = advanced.locator('.settingsSection').filter({
-      has: page.getByRole('heading', { name: 'Restricted Video Authentication', exact: true })
+      has: page.getByRole('heading', { name: 'yt-dlp Playback Cookies', exact: true })
     })
     const cookieSource = authentication.locator('.restrictedPlaybackAuthSource select')
+    const alwaysUseCookies = authentication.getByLabel('Always Use Cookies')
 
     await expect(cookieSource.locator('option')).toHaveText(['None', 'File', 'Browser'])
+    await expect(alwaysUseCookies).not.toBeChecked()
     await cookieSource.selectOption('browser')
 
     const browser = authentication.locator('.restrictedPlaybackAuthDetail select')
@@ -539,6 +541,8 @@ test.describe('settings', () => {
 
     const profile = authentication.getByPlaceholder('Profile name or path')
     await profile.fill('/tmp/firefox-profile')
+    await alwaysUseCookies.locator('..').locator('label.switch-label').click()
+    await expect(alwaysUseCookies).toBeChecked()
 
     const [sourceBox, browserBox, profileBox] = await Promise.all([
       authentication.locator('.restrictedPlaybackAuthSource .select').boundingBox(),
@@ -566,12 +570,14 @@ test.describe('settings', () => {
       return {
         mode: settings.ytDlpPlaybackAuthMode,
         browser: settings.ytDlpPlaybackCookiesBrowser,
-        profile: settings.ytDlpPlaybackCookiesBrowserProfile
+        profile: settings.ytDlpPlaybackCookiesBrowserProfile,
+        alwaysUse: settings.ytDlpPlaybackAlwaysUseCookies
       }
     }).toEqual({
       mode: 'browser',
       browser: 'firefox',
-      profile: '/tmp/firefox-profile'
+      profile: '/tmp/firefox-profile',
+      alwaysUse: true
     })
   })
 
