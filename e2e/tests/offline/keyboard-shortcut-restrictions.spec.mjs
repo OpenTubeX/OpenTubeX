@@ -1,5 +1,15 @@
 import { test, expect, goTo } from '../../helpers/app.mjs'
 
+test('opens Downloads without navigating or reloading the active tab', async ({ page }) => {
+  const activeView = page.locator('.tabContent[aria-hidden="false"] > .routerView')
+  await activeView.evaluate(element => { element.dataset.downloadShortcutSentinel = 'mounted' })
+
+  await page.keyboard.press('Control+j')
+
+  await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
+  expect(await activeView.getAttribute('data-download-shortcut-sentinel')).toBe('mounted')
+})
+
 test('context-dependent shortcuts are shown as non-editable', async ({ page }) => {
   await goTo(page, 'settings')
   await page.getByRole('button', { name: 'Show Keyboard Shortcuts' }).click()
