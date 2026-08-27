@@ -18,6 +18,9 @@ import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpP
  * @property {boolean} isLive
  * @property {number | null} duration
  * @property {string | null} storyboardSrc
+ * @property {import('../../../main/ytDlp').YtDlpPlaybackCaption[]} captions
+ * @property {import('../../../main/ytDlp').YtDlpPlaybackCaption[]} captionTranslations
+ * @property {boolean} subtitlesIncluded whether yt-dlp checked for automatic subtitles
  * @property {string | null} version the yt-dlp version that extracted the streams
  */
 
@@ -322,6 +325,7 @@ async function convertAdaptiveFormats(formats, duration) {
  * @param {() => void} [onDefaultClientsFallback] called before retrying with yt-dlp's default clients
  * @param {boolean} [useAuthentication] whether to use the explicitly configured cookie source
  * @param {boolean} [cachedOnly] prevents a cache miss from starting a new extraction
+ * @param {boolean} [includeSubtitles] whether yt-dlp should request automatic subtitles
  * @returns {Promise<YtDlpPlaybackSource | null>}
  */
 export async function getYtDlpPlaybackSource(
@@ -329,7 +333,8 @@ export async function getYtDlpPlaybackSource(
   cacheKey = '',
   onDefaultClientsFallback,
   useAuthentication = false,
-  cachedOnly = false
+  cachedOnly = false,
+  includeSubtitles = true
 ) {
   const effectiveCacheKey = JSON.stringify([cacheKey, useAuthentication])
   let cachedSource = playbackSourceCache.get(videoId, effectiveCacheKey)
@@ -338,7 +343,13 @@ export async function getYtDlpPlaybackSource(
     try {
       const entry = await window.ftElectron.ytDlpPlaybackCacheGet(videoId, effectiveCacheKey)
       if (entry !== null) {
-        const source = { ...entry.source, expiryDate: new Date(entry.expiryTime) }
+        const source = {
+          ...entry.source,
+          captions: entry.source.captions ?? [],
+          captionTranslations: entry.source.captionTranslations ?? [],
+          subtitlesIncluded: entry.source.subtitlesIncluded ?? false,
+          expiryDate: new Date(entry.expiryTime)
+        }
         playbackSourceCache.set(videoId, effectiveCacheKey, source)
         cachedSource = playbackSourceCache.get(videoId, effectiveCacheKey)
 
@@ -351,12 +362,12 @@ export async function getYtDlpPlaybackSource(
     }
   }
 
-  if (cachedSource !== null) {
+  if (cachedSource !== null && (!includeSubtitles || cachedSource.subtitlesIncluded)) {
     return cachedSource
   }
 
   if (cachedOnly) {
-    return null
+    return cachedSource
   }
 
   let extractionError = null
@@ -375,16 +386,19 @@ export async function getYtDlpPlaybackSource(
     const info = await window.ftElectron.ytDlpGetPlaybackInfo(
       videoId,
       useDefaultClients,
-      useAuthentication
+      useAuthentication,
+      includeSubtitles
     )
 
     if (info === null) {
-      throw new Error('yt-dlp is not available')
+      extractionError = new Error('yt-dlp is not available')
+      break
     }
 
     if ('error' in info) {
       if (info.error === 'ENOENT') {
-        throw new Error('yt-dlp could not be found')
+        extractionError = new Error('yt-dlp could not be found')
+        break
       }
 
       extractionError = new Error(info.error)
@@ -417,6 +431,9 @@ export async function getYtDlpPlaybackSource(
           storyboardSrc: info.storyboardVtt === null
             ? null
             : `data:text/vtt;charset=utf-8,${encodeURIComponent(info.storyboardVtt)}`,
+          captions: info.captions ?? [],
+          captionTranslations: info.captionTranslations ?? [],
+          subtitlesIncluded: includeSubtitles,
           version: info.version
         }
 
@@ -442,6 +459,9 @@ export async function getYtDlpPlaybackSource(
         storyboardSrc: info.storyboardVtt === null
           ? null
           : `data:text/vtt;charset=utf-8,${encodeURIComponent(info.storyboardVtt)}`,
+        captions: info.captions ?? [],
+        captionTranslations: info.captionTranslations ?? [],
+        subtitlesIncluded: includeSubtitles,
         version: info.version
       }
 
@@ -476,6 +496,9 @@ export async function getYtDlpPlaybackSource(
           storyboardSrc: info.storyboardVtt === null
             ? null
             : `data:text/vtt;charset=utf-8,${encodeURIComponent(info.storyboardVtt)}`,
+          captions: info.captions ?? [],
+          captionTranslations: info.captionTranslations ?? [],
+          subtitlesIncluded: includeSubtitles,
           version: info.version
         }
 
@@ -489,6 +512,10 @@ export async function getYtDlpPlaybackSource(
 
   if (limitedLiveSource !== null) {
     return limitedLiveSource
+  }
+
+  if (cachedSource !== null) {
+    return cachedSource
   }
 
   throw extractionError ?? new Error('yt-dlp did not return any playable formats')
