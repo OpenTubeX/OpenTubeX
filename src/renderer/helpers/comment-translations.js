@@ -111,6 +111,16 @@ export function getCommentTranslationSource(runs) {
 }
 
 /**
+ * @param {string} text
+ * @returns {string}
+ */
+export function sanitizeCommentTranslationSource(text) {
+  // InnerTube rejects emoji and other symbols with HTTP 400. Match the
+  // character set used by youtubei.js' CommentView translation method.
+  return text.replaceAll(/[^\p{L}\p{N}\p{P}\p{Z}]/gu, '')
+}
+
+/**
  * Escape translated text before adding links and passing it to the comment renderer.
  * @param {unknown} translatedText
  * @returns {string}
