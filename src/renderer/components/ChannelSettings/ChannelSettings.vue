@@ -142,7 +142,7 @@
                 />
                 <FtSlider
                   v-if="preference.type === 'playbackSpeed'"
-                  :label="t('Settings.Channel Settings.Playback Speed')"
+                  :label="t('Settings.Player Settings.Playback Speed')"
                   :default-value="preference.value"
                   :min-value="videoPlaybackRateInterval"
                   :max-value="maxVideoPlaybackRate"
@@ -276,7 +276,7 @@ const PREFERENCE_ICONS = Object.freeze({
 })
 
 const preferenceLabels = computed(() => ({
-  playbackSpeed: t('Settings.Channel Settings.Playback Speed'),
+  playbackSpeed: t('Settings.Player Settings.Playback Speed'),
   videoQuality: t('Settings.Channel Settings.Video Quality'),
   subtitlesState: t('Settings.Channel Settings.Subtitles Enabled'),
   volume: t('Settings.Channel Settings.Volume')

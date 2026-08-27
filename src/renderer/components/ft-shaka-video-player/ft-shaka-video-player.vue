@@ -193,7 +193,7 @@
               max="100"
               step="any"
               :value="scrollMiniVolumePercent"
-              :aria-label="$t('Video.Player.Scroll Mini Player.Volume')"
+              :aria-label="$t('Settings.Channel Settings.Volume')"
               @input.stop="updateScrollMiniVolume"
               @click.stop
             >
@@ -615,7 +615,7 @@
         }"
         :style="fullscreenDockStyle('sponsorBlock')"
         role="dialog"
-        :aria-label="$t('Video.Player.SponsorBlock.InfoPanelTitle')"
+        :aria-label="$t('Settings.SponsorBlock Settings.SponsorBlock Settings')"
         :aria-hidden="String(!showFullscreenSponsorBlock)"
         :inert="!showFullscreenSponsorBlock"
         @click.stop
@@ -1100,7 +1100,7 @@
                   class="sponsorBlockDraftActionButton"
                   @click="deleteSponsorBlockDraft(segment.id)"
                 >
-                  {{ $t('Video.Player.SponsorBlock.DeleteSegment') }}
+                  {{ $t('Delete') }}
                 </button>
                 <button
                   v-if="!isSponsorBlockFullVideoSegment(segment)"
@@ -1132,7 +1132,7 @@
                   {{
                     isSponsorBlockDraftEditing(segment.id)
                       ? $t('Video.Player.SponsorBlock.SaveSegment')
-                      : $t('Video.Player.SponsorBlock.EditSegment')
+                      : $t('Edit')
                   }}
                 </button>
               </div>
@@ -1214,7 +1214,7 @@
               max="100"
               step="any"
               :value="scrollMiniVolumePercent"
-              :aria-label="$t('Video.Player.Scroll Mini Player.Volume')"
+              :aria-label="$t('Settings.Channel Settings.Volume')"
               @input.stop="updateScrollMiniVolume"
               @pointerdown.stop="handleScrollMiniVolumePointerDown"
             >

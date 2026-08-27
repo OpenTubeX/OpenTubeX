@@ -373,7 +373,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
   /** @private */
   updateLocalisedStrings_() {
     const optionsLabel = i18n.global.t('Video.Player.Caption Appearance.Options')
-    const title = i18n.global.t('Video.Player.Caption Appearance.Title')
+    const title = i18n.global.t('Settings.Player Settings.Caption Appearance.Caption Appearance')
 
     this.optionsButton_.textContent = optionsLabel
     this.optionsButton_.ariaLabel = optionsLabel

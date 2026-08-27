@@ -227,7 +227,7 @@ const modeLabel = computed(() => {
     case 'audio':
       return t('Downloads.Audio')
     case 'subtitles':
-      return t('Downloads.Subtitles')
+      return t('Search Listing.Label.Subtitles')
     default:
       return ''
   }

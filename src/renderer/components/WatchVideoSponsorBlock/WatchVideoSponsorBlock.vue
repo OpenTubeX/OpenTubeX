@@ -8,7 +8,7 @@
         >
           <ft-icon :icon="['fas', 'shield-halved']" />
         </span>
-        <h3>{{ $t('Video.Player.SponsorBlock.InfoPanelTitle') }}</h3>
+        <h3>{{ $t('Settings.SponsorBlock Settings.SponsorBlock Settings') }}</h3>
       </div>
       <div class="sponsorBlockHeaderActions">
         <button

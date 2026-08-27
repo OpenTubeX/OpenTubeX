@@ -256,9 +256,7 @@ Settings:
     Appearance Description: Design, Layout und Vorschaubilder
     Content appearance: Videolisten und Vorschaubilder
     Layout: Layout
-    Playback: Wiedergabe
     Playback Description: Player, Untertitel und Kanaleinstellungen
-    Subscriptions: Abos
     Subscriptions Description: Feed-Aktualisierung und Anzeigeoptionen
     Downloads Description: Ordner, Vorlagen und automatische Regeln
     Distraction Free Description: Inhalte ausblenden und die Anzeige begrenzen
@@ -298,8 +296,6 @@ Settings:
       List: Liste
     Playlist View Type:
       Playlist View Type: Playlist-Ansicht
-      Grid: Raster
-      List: Liste
     Thumbnail Preference:
       Thumbnail Preference: Vorschaubilder
       Default: Standard
@@ -547,7 +543,6 @@ Settings:
       Edit Custom Theme: Benutzerdefiniertes Design bearbeiten
       Custom Theme Creator: Editor für benutzerdefinierte Designs
       Theme Name: Name des Designs
-      Is Dark Theme: Dunkles Design
       Based On: Basiert auf
       Import Theme: Design importieren
       Export Theme: Design exportieren
@@ -841,7 +836,6 @@ Settings:
     Not Available: Genaue Größe nicht verfügbar
     At Least: 'Mindestens {size}'
     Failed To Read Storage: Einige Speichergrößen konnten nicht ermittelt werden
-    Downloads: Downloads
     Downloaded Media Description: Video-, Audio- und Untertiteldateien, die noch im Downloadverlauf erfasst sind.
     Selected Download Folders: Vom Benutzer ausgewählte Downloadordner
     Download History Records: Downloadverlaufseinträge
@@ -907,7 +901,6 @@ Settings:
     Subscriptions And Profiles: Abos und Profile
     Subscriptions And Profiles Description: Speichert abonnierte Kanäle, Profilnamen und Profilzugehörigkeiten.
     Subscriptions And Profiles Effect: Alle Abos und zusätzlichen Profile werden dauerhaft gelöscht. Feed-Cache-Daten werden ebenfalls gelöscht.
-    Playlists: Playlists
     Playlists Description: Speichert Namen und Beschreibungen von Playlists sowie darin gespeicherte Videos.
     Playlists Effect: Jede Playlist und ihre gespeicherten Videos werden dauerhaft gelöscht. Heruntergeladene Mediendateien bleiben erhalten.
     Settings And Sessions: Einstellungen, Tab-Sitzungen und Erinnerungen
@@ -1125,9 +1118,7 @@ Settings:
       Beim Aktivieren eines Kanals wird erst dessen nächster neuer Upload heruntergeladen. Vorhandene Videos und ältere
       Videos des Kanals werden nicht heruntergeladen.
     Automatic Downloads No Channels: Abonniere einen Kanal, bevor du automatische Downloads einrichtest.
-    Search Automatic Download Channels: Kanäle durchsuchen
     No Matching Automatic Download Channels: Keine Kanäle entsprechen deiner Suche.
-    Automatic Downloads Videos: Videos
     Automatic Downloads Livestreams: Livestreams
     Minimum Duration Seconds: Mindestdauer (Sekunden)
     Maximum Duration Seconds: Höchstdauer (Sekunden)
@@ -1217,7 +1208,6 @@ Settings:
     Unlock: Entsperren
     Unlocking: Wird entsperrt…
   Password Settings:
-    Password: Passwort
     Remove Password: Passwort entfernen
     Password Settings: Passwort
     Set Password To Prevent Access: Passwort festlegen, um den Zugriff auf die Einstellungen zu verhindern
@@ -1285,9 +1275,7 @@ Settings:
     Forget Channel: Alle Einstellungen für diesen Kanal vergessen
     Forget Value: Diese Einstellung vergessen
     Add Setting: Eine weitere Einstellung für diesen Kanal speichern
-    Playback Speed: Wiedergabegeschwindigkeit
     Video Quality: Videoqualität
-    Subtitles State: Untertitel
     Subtitles Enabled: Untertitel aktiviert
     Volume: Lautstärke
   Sync Settings:
@@ -1310,7 +1298,6 @@ Settings:
     Checking Server: Synchronisierungsserver wird überprüft…
     Server Unavailable: Verbindung zu diesem Synchronisierungsserver fehlgeschlagen. Überprüfe die URL und versuche es erneut.
     Username: Benutzername
-    Password: Passwort
     Log In: Anmelden
     Register: Registrieren
     Pair Another Device: Weiteres Gerät koppeln
@@ -1368,7 +1355,6 @@ Settings:
     Automatic Sync: Nach Änderungen und alle fünf Minuten automatisch synchronisieren
     Profiles: Profile
     Open Tabs: Offene Tabs und Sitzung
-    Settings: Einstellungen
     Disable Setting Sync: Synchronisierung dieser Einstellung beenden
     Enable Setting Sync: Diese Einstellung synchronisieren
     Sync Now: Jetzt synchronisieren
@@ -1497,7 +1483,6 @@ Video:
     Title: Transkript
     Search: Transkript durchsuchen
     Language: Transkriptsprache
-    Copy: Kopieren
     Save: Speichern
     Show: Transkript anzeigen
     Hide: Transkript ausblenden
@@ -1597,7 +1582,6 @@ Video:
   Player:
     Caption Appearance:
       Options: Optionen
-      Title: Untertiteldarstellung
       Sample: So sehen Untertitel aus
     Sleep Timer:
       Sleep Timer: Einschlaftimer
@@ -1644,9 +1628,7 @@ Video:
       ClearSegmentsPrompt: Bist du sicher, dass du alle entworfenen SponsorBlock-Segmente für dieses Video löschen möchtest?
       CompleteSegmentsBeforeSubmitting: Vervollständige jedes entworfene Segment, bevor du es absendest.
       CategoryLabel: Kategorie
-      DeleteSegment: Löschen
       DuplicateSegments: Doppelte entworfene Segmente sind nicht erlaubt.
-      EditSegment: Bearbeiten
       EndAction: (Ende)
       EndActionLabel: Ende
       EndTimeAfterStart: Die Endzeit des Segments muss nach der Startzeit liegen.
@@ -1684,7 +1666,6 @@ Video:
       SkipToastReskip: Nochmal überspringen
       SkipPrompt: '{segmentCategory} überspringen?'
       SkipPromptAction: Überspringen
-      InfoPanelTitle: SponsorBlock
       InfoPanelLoading: Segmente werden noch geladen...
       InfoPanelHasSegments: 'Dieses Video hat Segmente in der Datenbank!'
       InfoPanelNoSegments: Keine Segmente gefunden
@@ -1727,13 +1708,11 @@ Video:
     Scroll Mini Player:
       Back to Top: Zurück nach oben
       Return to Video Tab: Zum Video-Tab zurückkehren
-      Volume: Lautstärke
       Play: Abspielen
       Pause: Pausieren
       Drag Handle: Mini-Player verschieben
     MusicPlaybackRateOverride: Musikvideo erkannt, wird mit 1-facher Geschwindigkeit wiedergegeben
     Voice-over Translation:
-      Voice-over Translation: Voice-over-Übersetzung
       Start: Übersetzen
       Cancel: Abbrechen
       Progress: Voice-over-Übersetzung wird vorbereitet…
@@ -1792,7 +1771,6 @@ Video:
   Metadata: Videoinformationen
   Close Metadata: Videoinformationen schließen
   Metadata Cache:
-    History: Metadatenverlauf
     Title History: Titelverlauf
     Thumbnail History: Vorschaubildverlauf
     Description History: Beschreibungsverlauf
@@ -1863,9 +1841,6 @@ Change Format:
   Playback Engine: Wiedergabe-Engine
   Streaming Protocol: Streamingprotokoll
   Not Available For This Video: Für dieses Video nicht verfügbar
-  Engines:
-    Built-in: Integriert
-    yt-dlp: yt-dlp
   Protocols:
     Progressive: Progressiv
   Descriptions:
@@ -1931,7 +1906,6 @@ Comments:
   Hide {replyCount} replies: 1 Antwort ausblenden | {replyCount} Antworten ausblenden
   View 1 reply from {channelName}: 1 Antwort von {channelName} ansehen
   View {replyCount} replies from {channelName} and others: '{replyCount} Antworten von {channelName} und anderen ansehen'
-  Copy YouTube Link: YouTube-Link kopieren
   Reload Comments: Kommentare neu laden
   YouTube comment link copied to clipboard: YouTube Kommentar-Link in die Zwischenablage kopiert
   Comment Count: 1 Kommentar | {count} Kommentare
@@ -2246,7 +2220,6 @@ KeyboardShortcutPrompt:
   Shortcut Conflict: '{shortcut} ist bereits für {actions} belegt. Möchtest du die Tastenkombination neu zuweisen?'
   Reserved Shortcut Conflict: '{shortcut} ist für {actions} reserviert und kann nicht neu zugewiesen werden.'
   Reassign: Neu zuweisen
-  Undo: Rückgängig
   Sections:
     Video:
       Playback: 'Video: Wiedergabe'
@@ -2260,7 +2233,6 @@ KeyboardShortcutPrompt:
   History Backward: Eine Seite zurückgehen
   New Window: Ein neues Fenster öffnen
   Navigate to Settings: Zur Einstellungsseite navigieren
-  Navigate to Downloads: Downloads öffnen
   Navigate to History: Zur Verlaufsseite navigieren
   Stats: Video-Statistiken anzeigen
   Fullscreen: Vollbildmodus umschalten
@@ -2333,9 +2305,6 @@ Close find bar: Suchleiste schließen
 No matches: Keine Treffer
 Context Menu:
   Context Menu: Kontextmenü
-  Cut: Ausschneiden
-  Copy: Kopieren
-  Paste: Einfügen
   Select All: Alles auswählen
   Save Image As…: Bild speichern unter…
   Copy Image: Bild kopieren
@@ -2345,7 +2314,6 @@ Context Menu:
   Reload Live: Live neu laden
   Reload Posts: Beiträge neu laden
   Reload All Feeds: Alle Feeds neu laden
-  Close Tab: Tab schließen
   Close Multiple Tabs: '{count} Tabs schließen'
   Duplicate Tab: Tab duplizieren
   Duplicate Multiple Tabs: '{count} Tabs duplizieren'
@@ -2354,7 +2322,6 @@ Context Menu:
   Move Tab to Group: Tab in Gruppe verschieben
   Collapse Group: Gruppe einklappen
   Move Tabs to Group: Tabs in Gruppe verschieben
-  Ungrouped: Ohne Gruppe
   Manage Tab Groups…: Tab-Gruppen verwalten …
   To Beginning: An den Anfang
   To End: Ans Ende
@@ -2372,14 +2339,7 @@ Context Menu:
   Unpin Tabs: Tabs lösen
   Tab Color: Tab-Farbe
   Default: Standard
-  Red: Rot
-  Orange: Orange
-  Yellow: Gelb
-  Green: Grün
-  Blue: Blau
   Purple: Violett
-  New Tab: Neuer Tab
-  New Window: Neues Fenster
   Reopen Closed Tab: Geschlossenen Tab wieder öffnen
   Reload Tab: Tab neu laden
   Reload Tabs: Tabs neu laden
@@ -2402,7 +2362,6 @@ Context Menu:
 Tab Organizer:
   Title: Tab-Organizer
   Open Tab Count: '{count} offener Tab | {count} offene Tabs'
-  Search Placeholder: Tabs durchsuchen
   Search Label: Tabs durchsuchen
   Selected Count: '{count} Tab ausgewählt | {count} Tabs ausgewählt'
   Tab Count: '{count} Tab | {count} Tabs'
@@ -2416,7 +2375,6 @@ Tab Organizer:
   Load: Laden
   Unload: Entladen
   Unload All: Alle entladen
-  Close: Schließen
   Close All: Alle schließen
   Ungroup: Gruppierung aufheben
   Group Name: Gruppenname
@@ -2439,7 +2397,6 @@ Tab Organizer:
   No Open Results: Keine offenen Tabs entsprechen der Suche.
   Recently Closed: Kürzlich geschlossen
   Clear: Leeren
-  Restore: Wiederherstellen
   No Closed Results: Keine kürzlich geschlossenen Tabs entsprechen der Suche.
   Drag Tab: Ziehen, um den Tab in eine Gruppe zu verschieben
 
@@ -2491,7 +2448,6 @@ CommandPalette:
   Keys:
     Up: ↑
     Down: ↓
-    Enter: Enter
     Escape: Esc
   Switch to Tab: 'Zum Tab wechseln: {title}'
   Switch Profile: 'Profil wechseln: {name}'
@@ -2500,12 +2456,7 @@ CommandPalette:
   Groups:
     App: Anwendung
     Navigation: Navigation
-    Settings: Einstellungen
     Tabs: Tabs
-    Profiles: Profile
-    Playlists: Playlists
-    Downloads: Downloads
-    Playback: Wiedergabe
   Unavailable:
     Current Page: Du bist bereits auf dieser Seite
     No History: Keine Seite in dieser Richtung
@@ -2550,9 +2501,7 @@ Downloads:
     Video Resolution: Video - {resolution}
     Audio Best: Audio - Beste Qualität
     Audio Format: Audio - {format}
-    Custom Arguments: Benutzerdefinierte yt-dlp-Argumente
     Subtitles Format: Untertitel – {format}
-  Downloads: Downloads
   Download Playlist: Wiedergabeliste herunterladen
   Downloading: Wird heruntergeladen
   Queue: Warteschlange
@@ -2592,7 +2541,6 @@ Downloads:
   Media Type: Medientyp
   Video: Video
   Audio: Audio
-  Subtitles: Untertitel
   Maximum Resolution: Maximale Auflösung
   Best Available: Beste verfügbare
   Automatic: Automatisch
@@ -2606,7 +2554,6 @@ Downloads:
   End Time: Endzeit (HH:MM:SS)
   Split by Chapters: Nach Kapiteln in separate Dateien aufteilen
   Remove Segments: Segmente entfernen
-  SponsorBlock: SponsorBlock
   Subtitles and Metadata: Untertitel und Metadaten
   Include Subtitles: Untertitel einbeziehen
   Embed Subtitles: Untertitel in die Mediendatei einbetten

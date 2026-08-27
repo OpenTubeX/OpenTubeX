@@ -16,7 +16,7 @@
         {{ t('Settings.Download Settings.Automatic Downloads New Only') }}
       </p>
       <FtInput
-        :placeholder="t('Settings.Download Settings.Search Automatic Download Channels')"
+        :placeholder="t('Settings.Channel Settings.Search Channels')"
         :show-action-button="false"
         :show-clear-text-button="true"
         :value="searchQuery"
@@ -87,7 +87,7 @@
                   @change="value => updateRule(channel.id, 'template', value)"
                 />
                 <FtToggleSwitch
-                  :label="t('Settings.Download Settings.Automatic Downloads Videos')"
+                  :label="t('Global.Videos')"
                   :compact="true"
                   :default-value="ruleFor(channel.id).includeVideos"
                   @change="value => updateRule(channel.id, 'includeVideos', value)"

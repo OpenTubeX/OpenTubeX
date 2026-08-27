@@ -63,7 +63,7 @@ export class VoiceOverTranslationButton extends shaka.ui.Element {
   }
 
   update_() {
-    const label = i18n.global.t('Video.Player.Voice-over Translation.Voice-over Translation')
+    const label = i18n.global.t('Settings.Player Settings.Voice-over Translation.Title')
     let stateLabel
 
     if (this.state_.value === 'loading') {

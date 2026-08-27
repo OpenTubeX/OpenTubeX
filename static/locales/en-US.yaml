@@ -413,9 +413,7 @@ Settings:
     Appearance Description: Theme, layout, and thumbnails
     Content appearance: Video lists and thumbnails
     Layout: Layout
-    Playback: Playback
     Playback Description: Player, captions, and channel preferences
-    Subscriptions: Subscriptions
     Subscriptions Description: Feed refresh and display options
     Downloads Description: Folders, templates, and automatic rules
     Distraction Free Description: Hide content and set viewing limits
@@ -513,8 +511,6 @@ Settings:
       List: List
     Playlist View Type:
       Playlist View Type: Playlist View Type
-      Grid: Grid
-      List: List
     Thumbnail Preference:
       Thumbnail Preference: Thumbnail Preference
       Default: Default
@@ -638,7 +634,6 @@ Settings:
       Edit Custom Theme: Edit custom theme
       Custom Theme Creator: Custom theme creator
       Theme Name: Theme name
-      Is Dark Theme: Dark theme
       Based On: Based on
       Import Theme: Import theme
       Export Theme: Export theme
@@ -957,9 +952,7 @@ Settings:
     Forget Channel: Forget all settings for this channel
     Forget Value: Forget this setting
     Add Setting: Remember another setting for this channel
-    Playback Speed: Playback Speed
     Video Quality: Video Quality
-    Subtitles State: Subtitles
     Subtitles Enabled: Subtitles Enabled
     Volume: Volume
   External Player Settings:
@@ -1000,9 +993,7 @@ Settings:
     Automatic Downloads Description: Select a download template and filters for each subscribed channel. Matching videos download in the background when subscription feeds refresh.
     Automatic Downloads New Only: Enabling a channel starts with its next new upload. Existing videos and the channel backlog are not downloaded.
     Automatic Downloads No Channels: Subscribe to a channel before configuring automatic downloads.
-    Search Automatic Download Channels: Search channels
     No Matching Automatic Download Channels: No channels match your search.
-    Automatic Downloads Videos: Videos
     Automatic Downloads Livestreams: Livestreams
     Minimum Duration Seconds: Minimum duration (seconds)
     Maximum Duration Seconds: Maximum duration (seconds)
@@ -1121,7 +1112,6 @@ Settings:
     Not Available: Exact size unavailable
     At Least: 'At least {size}'
     Failed To Read Storage: Some storage sizes could not be read
-    Downloads: Downloads
     Downloaded Media Description: Video, audio, and subtitle files that download history still tracks.
     Selected Download Folders: User-selected download folders
     Download History Records: Download history records
@@ -1187,7 +1177,6 @@ Settings:
     Subscriptions And Profiles: Subscriptions and profiles
     Subscriptions And Profiles Description: Stores subscribed channels, profile names, and profile membership.
     Subscriptions And Profiles Effect: All subscriptions and extra profiles will be deleted permanently. Feed cache data will also be cleared.
-    Playlists: Playlists
     Playlists Description: Stores playlist names, descriptions, and saved videos.
     Playlists Effect: Every playlist and its saved-video list will be deleted permanently. Downloaded media files will remain.
     Settings And Sessions: Settings, tab sessions, and reminders
@@ -1349,7 +1338,6 @@ Settings:
     Checking Server: Checking sync server…
     Server Unavailable: Unable to connect to this sync server. Check the URL and try again.
     Username: Username
-    Password: Password
     Log In: Log in
     Register: Register
     Pair Another Device: Pair another device
@@ -1405,7 +1393,6 @@ Settings:
     Automatic Sync: Sync automatically after changes and every five minutes
     Profiles: Profiles
     Open Tabs: Open tabs and session
-    Settings: Settings
     Disable Setting Sync: Stop syncing this setting
     Enable Setting Sync: Sync this setting
     Sync Now: Sync now
@@ -1500,7 +1487,6 @@ Settings:
   No Settings Found: No settings found
   Password Settings:
     Password Settings: Password
-    Password: Password
     Set Password To Prevent Access: Set a password to prevent access to settings
     Set Password: Set Password
     Remove Password: Remove Password
@@ -1712,7 +1698,6 @@ Video:
   Metadata: Video information
   Close Metadata: Close video information
   Metadata Cache:
-    History: Metadata history
     Title History: Title history
     Thumbnail History: Thumbnail history
     Description History: Description history
@@ -1723,7 +1708,6 @@ Video:
     Title: Transcript
     Search: Search transcript
     Language: Transcript language
-    Copy: Copy
     Save: Save
     Show: Show transcript
     Hide: Hide transcript
@@ -1881,7 +1865,6 @@ Video:
       looping playlists: looping playlists
   Player:
     Voice-over Translation:
-      Voice-over Translation: Voice-over translation
       Start: Translate
       Cancel: Cancel
       Progress: Preparing voice-over translation…
@@ -1890,7 +1873,6 @@ Video:
       Duration Error: Voice-over translation is only available for videos up to four hours long.
     Caption Appearance:
       Options: Options
-      Title: Caption Appearance
       Sample: Captions look like this
     Auto-translate: Auto-translate
     Sleep Timer:
@@ -1945,7 +1927,6 @@ Video:
     Scroll Mini Player:
       Back to Top: Back to top
       Return to Video Tab: Return to video tab
-      Volume: Volume
       Play: Play
       Pause: Pause
       Drag Handle: Move mini player
@@ -1957,9 +1938,7 @@ Video:
       CompleteSegmentsBeforeSubmitting: Complete every drafted segment before submitting.
       CategoryLabel: Category
       ActionTypeLabel: Segment type
-      DeleteSegment: Delete
       DuplicateSegments: Duplicate drafted segments are not allowed.
-      EditSegment: Edit
       EndAction: (End)
       EndActionLabel: End
       EndTimeAfterStart: The segment end time must be after the start time.
@@ -1999,7 +1978,6 @@ Video:
       SkipToastReskip: Reskip
       MutedSegment: '{segmentCategory} Muted'
       MuteToastUnmute: Unmute
-      InfoPanelTitle: SponsorBlock
       InfoPanelLoading: Segments still loading...
       InfoPanelHasSegments: 'This video has segments in the database!'
       InfoPanelNoSegments: No segments found
@@ -2075,9 +2053,6 @@ Change Format:
   Playback Engine: Playback engine
   Streaming Protocol: Streaming protocol
   Not Available For This Video: Not available for this video
-  Engines:
-    Built-in: Built-in
-    yt-dlp: yt-dlp
   Protocols:
     Progressive: Progressive
   Descriptions:
@@ -2116,9 +2091,6 @@ Clipboard:
 
 Context Menu:
   Context Menu: Context menu
-  Cut: Cut
-  Copy: Copy
-  Paste: Paste
   Select All: Select All
   Save Image As…: Save Image As…
   Copy Image: Copy Image
@@ -2129,7 +2101,6 @@ Context Menu:
   Reload Live: Reload Live
   Reload Posts: Reload Posts
   Reload All Feeds: Reload All Feeds
-  Close Tab: Close Tab
   Close Multiple Tabs: Close {count} Tabs
   Duplicate Tab: Duplicate Tab
   Duplicate Multiple Tabs: Duplicate {count} Tabs
@@ -2138,7 +2109,6 @@ Context Menu:
   Move Tab to Group: Move Tab to Group
   Collapse Group: Collapse Group
   Move Tabs to Group: Move Tabs to Group
-  Ungrouped: Ungrouped
   Manage Tab Groups…: Manage Tab Groups…
   To Beginning: To Beginning
   To End: To End
@@ -2156,14 +2126,7 @@ Context Menu:
   Unpin Tabs: Unpin Tabs
   Tab Color: Tab Color
   Default: Default
-  Red: Red
-  Orange: Orange
-  Yellow: Yellow
-  Green: Green
-  Blue: Blue
   Purple: Purple
-  New Tab: New Tab
-  New Window: New Window
   Reopen Closed Tab: Reopen Closed Tab
   Reload Tab: Reload Tab
   Reload Tabs: Reload Tabs
@@ -2186,7 +2149,6 @@ Context Menu:
 Tab Organizer:
   Title: Tab Organizer
   Open Tab Count: '{count} open tab | {count} open tabs'
-  Search Placeholder: Search tabs
   Search Label: Search tabs
   Selected Count: '{count} tab selected | {count} tabs selected'
   Tab Count: '{count} tab | {count} tabs'
@@ -2200,7 +2162,6 @@ Tab Organizer:
   Load: Load
   Unload: Unload
   Unload All: Unload All
-  Close: Close
   Close All: Close All
   Ungroup: Ungroup
   Group Name: Group name
@@ -2223,7 +2184,6 @@ Tab Organizer:
   No Open Results: No open tabs match this search.
   Recently Closed: Recently Closed
   Clear: Clear
-  Restore: Restore
   No Closed Results: No recently closed tabs match this search.
   Drag Tab: Drag to move to a group
 
@@ -2240,7 +2200,6 @@ Comments:
   Comment Count: 1 Comment | {count} Comments
   Show Comments: Show Comments
   Click to View Comments: Click to View Comments
-  Copy YouTube Link: Copy YouTube Link
   Getting comment replies, please wait: Getting comment replies, please wait
   There are no more comments for this video: There are no more comments for this video
   Hide Comments: Hide Comments
@@ -2505,7 +2464,6 @@ KeyboardShortcutPrompt:
   Shortcut Conflict: '{shortcut} is already assigned to {actions}. Do you want to reassign it?'
   Reserved Shortcut Conflict: '{shortcut} is reserved for {actions} and cannot be reassigned.'
   Reassign: Reassign
-  Undo: Undo
   Sections:
     Video:
       Playback: Video: Playback
@@ -2528,7 +2486,6 @@ KeyboardShortcutPrompt:
   Switch to Tab: Switch to tab 1–9
   Toggle Tab Orientation: Switch between tab layouts
   Navigate to Settings: Navigate to the Settings page
-  Navigate to Downloads: Open Downloads
   Navigate to History: Navigate to the History page
   Refresh: Refresh feed with latest content
   Find in Page: Find text on the current page
@@ -2586,7 +2543,6 @@ CommandPalette:
   Keys:
     Up: ↑
     Down: ↓
-    Enter: Enter
     Escape: Esc
   Switch to Tab: 'Switch to tab: {title}'
   Switch Profile: 'Switch profile: {name}'
@@ -2595,12 +2551,7 @@ CommandPalette:
   Groups:
     App: App
     Navigation: Navigation
-    Settings: Settings
     Tabs: Tabs
-    Profiles: Profiles
-    Playlists: Playlists
-    Downloads: Downloads
-    Playback: Playback
   Unavailable:
     Current Page: Already on this page
     No History: No page in this direction
@@ -2612,7 +2563,6 @@ CommandPalette:
     Download Finished: This download is no longer running
     Video: Open a video first
 Downloads:
-  Downloads: Downloads
   Download: Download
   Download Video: Download Video
   Download Playlist: Download Playlist
@@ -2653,7 +2603,6 @@ Downloads:
   Media Type: Media Type
   Video: Video
   Audio: Audio
-  Subtitles: Subtitles
   Maximum Resolution: Maximum Resolution
   Best Available: Best Available
   Automatic: Automatic
@@ -2667,7 +2616,6 @@ Downloads:
   End Time: End Time (HH:MM:SS)
   Split by Chapters: Split into separate files by chapter
   Remove Segments: Remove segments
-  SponsorBlock: SponsorBlock
   Subtitles and Metadata: Subtitles and Metadata
   Include Subtitles: Include subtitles
   Embed Subtitles: Embed subtitles in the media file
@@ -2717,4 +2665,3 @@ Downloads:
     Audio Best: Audio - Best Quality
     Audio Format: Audio - {format}
     Subtitles Format: Subtitles - {format}
-    Custom Arguments: Custom yt-dlp Arguments
