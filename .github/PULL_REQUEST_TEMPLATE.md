@@ -40,7 +40,7 @@
 <!-- Agent instructions:
 For a noteworthy visible change, add media when it makes the change easier to understand. Prefer a still image unless motion is the point; recordings must use animated WebP.
 After implementing a visible change, proactively capture the result and show the local media to the user for approval before uploading it or updating the pull request.
-Capture the default dark theme. When both app themes can be captured and differ, run `node _scripts/releaseNoteMedia.mjs --dark DARK_FILE --light LIGHT_FILE --alt "DESCRIPTION"`. GitHub will display the matching theme and use dark as the fallback.
+When the affected UI differs between dark and light themes, capturing both themes is required. A dark-only image is incomplete. Run `node _scripts/releaseNoteMedia.mjs --dark DARK_FILE --light LIGHT_FILE --alt "DESCRIPTION"`; GitHub will display the matching theme and use dark as the fallback. Use a single default-dark capture only when the light theme cannot be captured or looks identical.
 Capture or crop to the smallest region that still makes the change clear. Do not include the full window when the affected component can be understood on its own.
 Use English unless localization is the subject. Keep components at their normal dimensions and placement instead of resizing them to fill the frame.
 Use deterministic local fixtures for visible remote images. Reusable avatar and thumbnail fixtures are available through `e2e/helpers/visual-fixtures.mjs`. Before capturing, verify that every visible image has loaded successfully (`complete === true` and `naturalWidth > 0`).
