@@ -53,10 +53,32 @@ function removePromotionSections(lines) {
   })
 }
 
+function stripHtmlMarkup(value) {
+  let plainText = ''
+
+  for (let index = 0; index < value.length;) {
+    if (value.startsWith('<!--', index)) {
+      const commentEnd = value.indexOf('-->', index + 4)
+
+      index = commentEnd === -1 ? value.length : commentEnd + 3
+    } else if (value[index] === '<') {
+      const tagEnd = value.indexOf('>', index + 1)
+
+      index = tagEnd === -1 ? index + 1 : tagEnd + 1
+    } else if (value[index] === '>') {
+      index += 1
+    } else {
+      plainText += value[index]
+      index += 1
+    }
+  }
+
+  return plainText
+}
+
 export function cleanReleaseNotes(markdown) {
   let notes = markdown.replaceAll('\r\n', '\n')
 
-  notes = notes.replaceAll(/<!--[^]*?-->/g, '')
   notes = notes.replaceAll(/<(?:picture|svg|video)\b[^]*?<\/(?:picture|svg|video)>/gi, '')
   notes = notes.replaceAll(/<a\b[^>]*>\s*<img\b[^>]*>\s*<\/a>/gi, '')
   notes = notes.replaceAll(/<img\b[^>]*\/?\s*>/gi, '')
@@ -89,7 +111,7 @@ export function cleanReleaseNotes(markdown) {
 
   notes = lines.join('\n')
   notes = notes.replaceAll(/<br\s*\/?>/gi, '\n')
-  notes = notes.replaceAll(/<[^>]+>/g, '')
+  notes = stripHtmlMarkup(notes)
   notes = decodeHtml(notes)
   notes = notes.replaceAll(/^#{1,6}\s+/gm, '')
   notes = notes.replaceAll(/\[([^\]]+)\]\([^)]*\)/g, '$1')

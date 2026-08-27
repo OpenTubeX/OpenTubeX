@@ -92,6 +92,17 @@ More improvements
 - Read the guide.`)
 })
 
+test('release note cleanup removes incomplete HTML markup', () => {
+  assert.equal(
+    cleanReleaseNotes('## Fixed bugs\n\n- Removed <script and an orphan > marker.'),
+    'Fixed bugs\n\n- Removed  marker.'
+  )
+  assert.equal(
+    cleanReleaseNotes('## Fixed bugs\n\n- Kept this.\n<!-- unfinished comment'),
+    'Fixed bugs\n\n- Kept this.'
+  )
+})
+
 test('manifest preparation applies release metadata and validates installers', (context) => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'winget-manifest-test-'))
   context.after(() => fs.rmSync(directory, { recursive: true }))
