@@ -415,6 +415,46 @@ test.describe('custom theme editor', () => {
     })).toMatch(/^custom:/)
   })
 
+  test('opens a pre-filled theme discussion with the current draft', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ shell }) => {
+      globalThis.openedThemeDiscussionUrl = null
+      shell.openExternal = async (url) => {
+        globalThis.openedThemeDiscussionUrl = url
+      }
+    })
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await page.getByRole('textbox', { name: 'Theme name' }).fill('Aurora & Night')
+
+    const shareButton = page.getByRole('button', { name: 'Share theme' })
+    await expect(shareButton.locator('.ft-icon')).toBeVisible()
+    await shareButton.click()
+
+    await expect.poll(() => app.electronApp.evaluate(() => {
+      return globalThis.openedThemeDiscussionUrl
+    })).not.toBeNull()
+    const openedUrl = await app.electronApp.evaluate(() => globalThis.openedThemeDiscussionUrl)
+    const discussionUrl = new URL(openedUrl)
+    expect(discussionUrl.origin).toBe('https://github.com')
+    expect(discussionUrl.pathname).toBe('/OpenTubeX/OpenTubeX/discussions/new')
+    expect(discussionUrl.searchParams.get('category')).toBe('themes')
+    expect(discussionUrl.searchParams.get('title')).toBe('Aurora & Night')
+
+    const body = discussionUrl.searchParams.get('body')
+    expect(body).toContain('## Description')
+    expect(body).toContain('## Screenshots')
+    expect(body).toContain('Drag and drop one or more screenshots here.')
+    expect(body).toContain('<details>')
+    expect(body).toContain('<summary>Theme JSON</summary>')
+    const themeJson = body.match(/```json\n([\s\S]+)\n```/)
+    expect(themeJson).not.toBeNull()
+    expect(JSON.parse(themeJson[1])).toMatchObject({
+      version: 2,
+      name: 'Aurora & Night',
+      basedOn: 'dark'
+    })
+  })
+
   test('copies built-in themes, previews efficiently, persists, and survives closing settings', async ({ app, page }) => {
     await goToSettingsSection(page, 'theme')
     await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()

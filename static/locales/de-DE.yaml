@@ -546,6 +546,12 @@ Settings:
       Based On: Basiert auf
       Import Theme: Design importieren
       Export Theme: Design exportieren
+      Share Theme: Design teilen
+      Share Description Heading: Beschreibung
+      Share Description Prompt: Beschreibe das Design und was andere vor der Verwendung wissen sollten.
+      Share Screenshots Heading: Screenshots
+      Share Screenshots Prompt: Ziehe einen oder mehrere Screenshots hierher.
+      Share Code Summary: Design-JSON
       Delete Theme: Design löschen
       Delete Theme Confirmation: „{name}“ löschen? Dies kann nicht rückgängig gemacht werden.
       Save and Apply: Speichern und anwenden
@@ -559,6 +565,7 @@ Settings:
       Unable to Load: Benutzerdefiniertes Design konnte nicht geladen werden
       Unable to Save: Benutzerdefiniertes Design konnte nicht gespeichert werden
       Unable to Export: Benutzerdefiniertes Design konnte nicht exportiert werden
+      Unable to Share: Benutzerdefiniertes Design konnte nicht geteilt werden
       Unable to Delete: Benutzerdefiniertes Design konnte nicht gelöscht werden
       Invalid Theme File: Ungültige Datei für ein benutzerdefiniertes Design
       Colors:
