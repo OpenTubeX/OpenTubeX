@@ -27,6 +27,9 @@ jobs:
     if: ${{ github.event_name != 'pull_request' || github.head_ref != 'weblate-translations' }}
     runs-on: ubuntu-latest
 
+    outputs:
+      matrix: ${{ steps.shards.outputs.matrix }}
+
     permissions:
       contents: read
 
@@ -66,6 +69,54 @@ jobs:
     - run: pnpm run ci
       shell: bash
 
+    - name: Create E2E shard matrix
+      id: shards
+      env:
+        SELECTED_PROJECT: ${{ github.event_name == 'workflow_dispatch' && inputs.project || 'all' }}
+      run: |
+        # JavaScript template literals belong to Node.
+        # shellcheck disable=SC2016
+        pnpm exec playwright test -c e2e/playwright.config.mjs --list --reporter=json |
+          node --input-type=module -e '
+            let input = ""
+            for await (const chunk of process.stdin) input += chunk
+
+            const counts = {}
+            const visit = (value) => {
+              if (Array.isArray(value)) {
+                value.forEach(visit)
+              } else if (value && typeof value === "object") {
+                if (value.projectName) {
+                  counts[value.projectName] = (counts[value.projectName] ?? 0) + 1
+                } else {
+                  Object.values(value).forEach(visit)
+                }
+              }
+            }
+
+            visit(JSON.parse(input).suites)
+
+            const projects = process.env.SELECTED_PROJECT === "all"
+              ? ["offline", "network"]
+              : [process.env.SELECTED_PROJECT]
+            const testsPerShard = 200
+            const maxShards = 8
+            const include = projects.flatMap((project) => {
+              const testCount = counts[project]
+              if (!testCount) throw new Error(`No tests found for project ${project}`)
+
+              const shardTotal = Math.min(maxShards, Math.ceil(testCount / testsPerShard))
+              return Array.from({ length: shardTotal }, (_, index) => ({
+                project,
+                shard: index + 1,
+                shardTotal
+              }))
+            })
+
+            console.log(`matrix=${JSON.stringify({ include })}`)
+          ' >> "$GITHUB_OUTPUT"
+      shell: bash
+
     - name: Get Electron version
       id: electron
       run: printf 'version=%s\n' "$(node -p "require('./node_modules/electron/package.json').version")" >> "$GITHUB_OUTPUT"
@@ -96,14 +147,13 @@ jobs:
         retention-days: 1
 
   e2e-shard:
-    name: e2e (${{ matrix.shard }}/4)
+    name: e2e (${{ matrix.project }} ${{ matrix.shard }}/${{ matrix.shardTotal }})
     if: ${{ github.event_name != 'pull_request' || github.head_ref != 'weblate-translations' }}
     needs: prepare-e2e
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        shard: [ 1, 2, 3, 4 ]
+      matrix: ${{ fromJSON(needs.prepare-e2e.outputs.matrix) }}
     env:
       OPENTUBEX_SYNC_SERVER_URL: http://127.0.0.1:8080
 
@@ -167,18 +217,8 @@ jobs:
         name: dist-e2e
         path: dist-e2e
 
-    - name: Determine test project
-      id: project
-      shell: bash
-      run: |
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          echo "project=${{ inputs.project }}" >> "$GITHUB_OUTPUT"
-        else
-          echo "project=all" >> "$GITHUB_OUTPUT"
-        fi
-
     - name: Start sync server
-      if: ${{ steps.project.outputs.project != 'offline' }}
+      if: ${{ matrix.project == 'network' }}
       run: docker compose -f e2e/sync-server/compose.yml up -d --wait --pull always
       shell: bash
 
@@ -186,20 +226,16 @@ jobs:
     # attempt and automatically falls back to recorded fixtures on retry.
     - name: Run E2E tests
       run: |
-        test_args=("--shard=${{ matrix.shard }}/4")
+        test_args=("--shard=${{ matrix.shard }}/${{ matrix.shardTotal }}")
         if [ "${{ github.event_name }}" = "pull_request" ]; then
           test_args+=("--only-changed=origin/${GITHUB_BASE_REF}" "--pass-with-no-tests")
         fi
 
-        if [ "${{ steps.project.outputs.project }}" = "all" ]; then
-          xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm run test:e2e "${test_args[@]}"
-        else
-          xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm run test:e2e:${{ steps.project.outputs.project }} "${test_args[@]}"
-        fi
+        xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm run test:e2e:${{ matrix.project }} "${test_args[@]}"
       shell: bash
 
     - name: Stop sync server
-      if: ${{ always() && steps.project.outputs.project != 'offline' }}
+      if: ${{ always() && matrix.project == 'network' }}
       run: docker compose -f e2e/sync-server/compose.yml down -v
       shell: bash
 
@@ -209,7 +245,7 @@ jobs:
       if: ${{ !cancelled() }}
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
-        name: playwright-report-${{ matrix.shard }}
+        name: playwright-report-${{ matrix.project }}-${{ matrix.shard }}
         path: |
           e2e/report/
           e2e/results/
