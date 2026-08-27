@@ -103,6 +103,27 @@ test('release note cleanup removes incomplete HTML markup', () => {
   )
 })
 
+test('release note cleanup preserves comparison operators', () => {
+  assert.equal(
+    cleanReleaseNotes('## Performance\n\n- Keep count < 10 and latency > 20 ms.'),
+    'Performance\n\n- Keep count < 10 and latency > 20 ms.'
+  )
+})
+
+test('release note cleanup removes reference-style linked badges', () => {
+  assert.equal(
+    cleanReleaseNotes(`## Fixed bugs
+
+[![Build badge][badge-image]][badge-link]
+
+- Fixed a bug.
+
+[badge-image]: https://example.com/build.svg
+[badge-link]: https://example.com/build`),
+    'Fixed bugs\n\n- Fixed a bug.'
+  )
+})
+
 test('manifest preparation applies release metadata and validates installers', (context) => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'winget-manifest-test-'))
   context.after(() => fs.rmSync(directory, { recursive: true }))

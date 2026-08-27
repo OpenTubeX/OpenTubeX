@@ -62,11 +62,14 @@ function stripHtmlMarkup(value) {
 
       index = commentEnd === -1 ? value.length : commentEnd + 3
     } else if (value[index] === '<') {
-      const tagEnd = value.indexOf('>', index + 1)
+      const tag = value.slice(index).match(/^<\/?[a-z][a-z0-9:-]*(?:\s[^<>]*)?\s*\/?>/i)
 
-      index = tagEnd === -1 ? index + 1 : tagEnd + 1
-    } else if (value[index] === '>') {
-      index += 1
+      if (tag) {
+        index += tag[0].length
+      } else {
+        plainText += value[index]
+        index += 1
+      }
     } else {
       plainText += value[index]
       index += 1
@@ -83,6 +86,7 @@ export function cleanReleaseNotes(markdown) {
   notes = notes.replaceAll(/<a\b[^>]*>\s*<img\b[^>]*>\s*<\/a>/gi, '')
   notes = notes.replaceAll(/<img\b[^>]*\/?\s*>/gi, '')
   notes = notes.replaceAll(/\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)/g, '')
+  notes = notes.replaceAll(/\[!\[[^\]]*\]\[[^\]]*\]\]\[[^\]]*\]/g, '')
   notes = notes.replaceAll(/!\[[^\]]*\]\([^)]*\)/g, '')
   notes = notes.replaceAll(/!\[[^\]]*\]\[[^\]]*\]/g, '')
 
