@@ -17,6 +17,11 @@
   overflow-wrap: anywhere;
 }
 
+.infoLine > .viewCount,
+.infoLine > .uploadedTime {
+  vertical-align: middle;
+}
+
 .grabBar {
   color: var(--tertiary-text-color);
   cursor: grab;
