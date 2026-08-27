@@ -117,6 +117,7 @@ export function cleanReleaseNotes(markdown) {
   notes = notes.replaceAll(/<br\s*\/?>/gi, '\n')
   notes = stripHtmlMarkup(notes)
   notes = decodeHtml(notes)
+  notes = stripHtmlMarkup(notes)
   notes = notes.replaceAll(/^#{1,6}\s+/gm, '')
   notes = notes.replaceAll(/\[([^\]]+)\]\([^)]*\)/g, '$1')
   notes = notes.replaceAll(/\[([^\]]+)\]\[[^\]]*\]/g, '$1')

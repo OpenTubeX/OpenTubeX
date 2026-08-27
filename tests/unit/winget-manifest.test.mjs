@@ -110,6 +110,13 @@ test('release note cleanup preserves comparison operators', () => {
   )
 })
 
+test('release note cleanup removes escaped HTML markup', () => {
+  assert.equal(
+    cleanReleaseNotes('## Highlights\n\n- Use &lt;kbd&gt;Ctrl&lt;/kbd&gt; and reject &lt;script&gt;alert(1)&lt;/script&gt;.'),
+    'Highlights\n\n- Use Ctrl and reject alert(1).'
+  )
+})
+
 test('release note cleanup removes reference-style linked badges', () => {
   assert.equal(
     cleanReleaseNotes(`## Fixed bugs
