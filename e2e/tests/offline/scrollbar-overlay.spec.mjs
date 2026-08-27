@@ -202,6 +202,85 @@ test.describe('overlay scrollbars', () => {
       expect(measurements.scrollTop).toBe(120)
     })
 
+    test('only adds a blocking wheel listener while a custom speed is active', async ({ page }) => {
+      const listenerCounts = await page.evaluate(() => {
+        const viewport = document.createElement('div')
+        viewport.style.overflowY = 'auto'
+        const content = document.createElement('div')
+        content.style.height = '300px'
+        viewport.append(content)
+        document.body.append(viewport)
+
+        const counts = { added: 0, removed: 0 }
+        const addEventListener = viewport.addEventListener.bind(viewport)
+        const removeEventListener = viewport.removeEventListener.bind(viewport)
+        viewport.addEventListener = (type, listener, options) => {
+          if (type === 'wheel' && options?.passive === false) counts.added++
+          addEventListener(type, listener, options)
+        }
+        viewport.removeEventListener = (type, listener, options) => {
+          if (type === 'wheel') counts.removed++
+          removeEventListener(type, listener, options)
+        }
+
+        const app = document.querySelector('#app').__vue_app__
+        const store = app.config.globalProperties.$store
+        app._context.directives['overlay-scrollbars'].mounted(viewport, { value: true })
+        const afterDefaultSetup = { ...counts }
+        store.commit('setScrollSpeed', 200)
+        const afterCustomSpeed = { ...counts }
+        store.commit('setScrollSpeed', 100)
+
+        return { afterDefaultSetup, afterCustomSpeed, afterReset: counts }
+      })
+
+      expect(listenerCounts).toEqual({
+        afterDefaultSetup: { added: 0, removed: 0 },
+        afterCustomSpeed: { added: 1, removed: 0 },
+        afterReset: { added: 1, removed: 1 },
+      })
+    })
+
+    test('bubbles scaled wheel input from a nested boundary to the page', async ({ page }) => {
+      await addPageOverflow(page)
+      await page.evaluate(() => {
+        const viewport = document.createElement('div')
+        viewport.dataset.scrollSpeedBubbleTest = ''
+        Object.assign(viewport.style, {
+          height: '100px',
+          left: '100px',
+          overflowY: 'auto',
+          position: 'fixed',
+          top: '100px',
+          width: '200px',
+          zIndex: '9999',
+        })
+        const content = document.createElement('div')
+        content.style.height = '300px'
+        viewport.append(content)
+        document.body.append(viewport)
+
+        const app = document.querySelector('#app').__vue_app__
+        const store = app.config.globalProperties.$store
+        app._context.directives['overlay-scrollbars'].mounted(viewport, { value: true })
+        store.commit('setScrollSpeed', 200)
+        viewport.scrollTop = viewport.scrollHeight
+        window.scrollTo(0, 0)
+        document.addEventListener('wheel', (event) => {
+          window.__scrollSpeedBubbleTestDelta = event.deltaY
+        }, { capture: true, once: true })
+      })
+
+      const viewport = page.locator('[data-scroll-speed-bubble-test]')
+      await viewport.hover()
+      await page.mouse.wheel(0, 120)
+
+      await expect.poll(() => page.evaluate(() => (
+        window.__scrollSpeedBubbleTestDelta > 0 &&
+        window.scrollY === window.__scrollSpeedBubbleTestDelta * 2
+      ))).toBe(true)
+    })
+
     test('reconciles an end position after the viewport grows', async ({ page }) => {
       await page.evaluate(() => {
         const viewport = document.createElement('div')

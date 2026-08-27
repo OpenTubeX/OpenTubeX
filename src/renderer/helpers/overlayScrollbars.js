@@ -2,6 +2,11 @@ import { watch } from 'vue'
 import { ClickScrollPlugin, OverlayScrollbars } from 'overlayscrollbars'
 
 import store from '../store/index'
+import {
+  addScrollSpeedHandler,
+  DEFAULT_SCROLL_SPEED,
+  normalizeScrollSpeed
+} from './scrollSpeed'
 
 // Kept out of the core bundle by the library, so `clickScroll` below silently
 // does nothing unless it is registered.
@@ -20,6 +25,8 @@ OverlayScrollbars.plugin(ClickScrollPlugin)
  * @type {Map<import('overlayscrollbars').OverlayScrollbars, HTMLElement | object>}
  */
 const instances = new Map()
+/** @type {WeakMap<import('overlayscrollbars').OverlayScrollbars, () => void>} */
+const removeScrollSpeedHandlers = new WeakMap()
 const SCROLL_BOUNDARY_TOLERANCE = 1
 
 function scrollbarOptions(initialization) {
@@ -53,7 +60,11 @@ function scrollbarOptions(initialization) {
 function create(initialization) {
   const instance = OverlayScrollbars(initialization, scrollbarOptions(initialization))
   instances.set(instance, initialization)
-  instance.on('destroyed', () => instances.delete(instance))
+  updateScrollSpeedHandler(instance)
+  instance.on('destroyed', () => {
+    instances.delete(instance)
+    removeScrollSpeedHandler(instance)
+  })
 
   if (initialization === document.body) {
     updateBodyScrollbarPosition(instance)
@@ -63,6 +74,34 @@ function create(initialization) {
   }
 
   return instance
+}
+
+/**
+ * Blocking wheel listeners keep Chromium's scrolling on the main thread, so
+ * only install them while a custom speed is active. At 100%, Chromium handles
+ * wheel and touchpad input without renderer involvement.
+ *
+ * @param {import('overlayscrollbars').OverlayScrollbars} instance
+ */
+function updateScrollSpeedHandler(instance) {
+  const usesCustomSpeed = normalizeScrollSpeed(store.getters.getScrollSpeed) !== DEFAULT_SCROLL_SPEED
+  const hasHandler = removeScrollSpeedHandlers.has(instance)
+
+  if (usesCustomSpeed && !hasHandler) {
+    const { scrollOffsetElement } = instance.elements()
+    removeScrollSpeedHandlers.set(instance, addScrollSpeedHandler(
+      scrollOffsetElement,
+      () => store.getters.getScrollSpeed
+    ))
+  } else if (!usesCustomSpeed && hasHandler) {
+    removeScrollSpeedHandler(instance)
+  }
+}
+
+/** @param {import('overlayscrollbars').OverlayScrollbars} instance */
+function removeScrollSpeedHandler(instance) {
+  removeScrollSpeedHandlers.get(instance)?.()
+  removeScrollSpeedHandlers.delete(instance)
 }
 
 /**
@@ -253,6 +292,16 @@ function optimizeBodyScrollbarDrag(instance) {
  */
 export function initializeAppScrollbars() {
   create(document.body)
+
+  watch(
+    () => normalizeScrollSpeed(store.getters.getScrollSpeed),
+    () => {
+      for (const instance of instances.keys()) {
+        updateScrollSpeedHandler(instance)
+      }
+    },
+    { flush: 'sync' }
+  )
 
   watch(
     () => [store.getters.getTabBarPosition, store.getters.getVerticalTabBarWidth],

@@ -7,7 +7,6 @@ import { initializeTabNavigationService } from './tabs/TabNavigationService'
 import { showExternalPlayerUnsupportedActionToast, showToast } from './helpers/utils'
 import { installViewTransitions } from './helpers/viewTransitions'
 import { initializeAppScrollbars, overlayScrollbarsDirective } from './helpers/overlayScrollbars'
-import { initializeScrollSpeed } from './helpers/scrollSpeed'
 import { releaseAutomaticDownloadSchedule } from './helpers/automaticDownloads'
 // import the styles
 import 'overlayscrollbars/styles/overlayscrollbars.css'
@@ -39,7 +38,6 @@ const tabNavigation = initializeTabNavigationService(router, store)
 router.isReady().then(() => {
   app.mount('#app')
   initializeAppScrollbars()
-  initializeScrollSpeed(() => store.getters.getScrollSpeed)
 })
 
 // to avoid accessing electron api from web app build

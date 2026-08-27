@@ -3,7 +3,6 @@ export const MIN_SCROLL_SPEED = 25
 export const MAX_SCROLL_SPEED = 300
 export const SCROLL_SPEED_STEP = 5
 
-const SCROLLABLE_OVERFLOW = new Set(['auto', 'scroll'])
 const CONTAINED_OVERSCROLL = new Set(['contain', 'none'])
 
 /**
@@ -18,14 +17,15 @@ export function normalizeScrollSpeed(value) {
 }
 
 /**
- * Applies the configured speed to ordinary wheel scrolling. Wheel gestures
- * owned by a component, such as player controls and Shorts navigation, call
- * preventDefault before reaching this handler and keep their existing action.
+ * Applies the configured speed to one scrolling element. Register this on
+ * every OverlayScrollbars scroll offset element so native event bubbling can
+ * hand input from a nested boundary to its parent.
  *
+ * @param {HTMLElement} element
  * @param {() => number} getScrollSpeed
  * @returns {() => void} removes the listener
  */
-export function initializeScrollSpeed(getScrollSpeed) {
+export function addScrollSpeedHandler(element, getScrollSpeed) {
   const handleWheel = (event) => {
     if (event.defaultPrevented || event.ctrlKey || event.metaKey) {
       return
@@ -41,25 +41,25 @@ export function initializeScrollSpeed(getScrollSpeed) {
       return
     }
 
-    const target = findWheelScrollTarget(event, wheel.axis, wheel.delta)
-    if (target === null) {
+    if (!canScroll(element, wheel.axis, wheel.delta)) {
+      if (hasContainedOverscroll(element, wheel.axis)) {
+        // The default scroll is canceled at a contained boundary. Parent
+        // handlers see defaultPrevented and leave the page in place.
+        event.preventDefault()
+      }
       return
     }
 
     event.preventDefault()
-    if (target.element === null) {
-      return
-    }
-
-    const distance = wheelDeltaInPixels(event, target.element, wheel.axis, wheel.delta) *
+    const distance = wheelDeltaInPixels(event, element, wheel.axis, wheel.delta) *
       speed / DEFAULT_SCROLL_SPEED
-    target.element.scrollBy(wheel.axis === 'x'
+    element.scrollBy(wheel.axis === 'x'
       ? { left: distance }
       : { top: distance })
   }
 
-  document.addEventListener('wheel', handleWheel, { passive: false })
-  return () => document.removeEventListener('wheel', handleWheel)
+  element.addEventListener('wheel', handleWheel, { passive: false })
+  return () => element.removeEventListener('wheel', handleWheel)
 }
 
 /**
@@ -78,41 +78,16 @@ function getPrimaryWheelMovement(event) {
 }
 
 /**
- * @param {WheelEvent} event
+ * @param {HTMLElement} element
  * @param {'x' | 'y'} axis
- * @param {number} delta
- * @returns {{ element: HTMLElement | null } | null}
+ * @returns {boolean}
  */
-function findWheelScrollTarget(event, axis, delta) {
-  for (const target of event.composedPath()) {
-    if (!(target instanceof HTMLElement) ||
-      target === document.body ||
-      target === document.documentElement) {
-      continue
-    }
-
-    const style = getComputedStyle(target)
-    const overflow = axis === 'x' ? style.overflowX : style.overflowY
-    if (!SCROLLABLE_OVERFLOW.has(overflow)) {
-      continue
-    }
-
-    if (canScroll(target, axis, delta)) {
-      return { element: target }
-    }
-
-    const overscrollBehavior = axis === 'x'
-      ? style.overscrollBehaviorX
-      : style.overscrollBehaviorY
-    if (CONTAINED_OVERSCROLL.has(overscrollBehavior)) {
-      return { element: null }
-    }
-  }
-
-  const page = document.scrollingElement
-  return page instanceof HTMLElement && canScroll(page, axis, delta)
-    ? { element: page }
-    : null
+function hasContainedOverscroll(element, axis) {
+  const style = getComputedStyle(element)
+  const overscrollBehavior = axis === 'x'
+    ? style.overscrollBehaviorX
+    : style.overscrollBehaviorY
+  return CONTAINED_OVERSCROLL.has(overscrollBehavior)
 }
 
 /**
