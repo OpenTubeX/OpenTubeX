@@ -179,6 +179,10 @@
   font-size: 12px;
 }
 
+.tabBarActions {
+  display: contents;
+}
+
 /* ===== Bottom layout: fixed row on the bottom edge ===== */
 
 .tabBar.position-bottom {
@@ -250,14 +254,17 @@
 }
 /* stylelint-enable liberty/use-logical-spec */
 
-.tabBar.vertical .newTabButton,
-.tabBar.vertical .tabOrganizerButton {
-  align-self: stretch;
+.tabBar.vertical .tabBarActions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 2px;
   margin-inline: var(--tab-bar-inline-padding);
-  padding-block-end: 10px;
 }
 
+.tabBar.vertical .newTabButton,
 .tabBar.vertical .tabOrganizerButton {
+  flex: 1;
+  margin: 0;
   padding-block: 6px;
 }
 

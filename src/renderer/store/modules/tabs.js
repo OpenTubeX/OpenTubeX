@@ -2,6 +2,7 @@ import packageDetails from '../../../../package.json'
 import { getTabPageIcon } from '../../tabs/tabPageIcon'
 import { DEFAULT_VIDEO_ZOOM } from '../../helpers/player/videoZoom'
 import { reconcilePendingTabOrder } from '../../tabs/pendingTabOrder'
+import { formatTabTitle } from '../../tabs/tabTitle'
 
 const MAX_LOGICAL_HISTORY_ENTRIES = 100
 const NAV_HISTORY_DISPLAY_LIMIT = 15
@@ -588,11 +589,10 @@ function buildFullPath(path, query, hash) {
 }
 
 function stripDocumentTitle(title) {
-  const suffix = ` - ${packageDetails.productName}`
   if (title === packageDetails.productName) {
     return ''
   }
-  return title.endsWith(suffix) ? title.slice(0, -suffix.length) : title
+  return formatTabTitle(title)
 }
 
 function searchParamsToQuery(searchParams) {

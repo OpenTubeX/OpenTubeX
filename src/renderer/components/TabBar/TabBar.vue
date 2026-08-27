@@ -84,29 +84,32 @@
         />
       </div>
     </div>
-    <button
-      class="tabOrganizerButton"
-      :aria-label="t('Tab Organizer.Title')"
-      :title="t('Tab Organizer.Title')"
-      @click="openTabOrganizer"
-    >
-      <FtIcon
-        :icon="['fas', 'layer-group']"
-        class="newTabIcon"
-        aria-hidden="true"
-      />
-    </button>
-    <button
-      class="newTabButton"
-      :aria-label="t('New Tab')"
-      :title="newTabTooltip"
-      @click="createNewTab"
-    >
-      <FtIcon
-        :icon="['fas', 'plus']"
-        class="newTabIcon"
-      />
-    </button>
+    <div class="tabBarActions">
+      <button
+        class="tabOrganizerButton"
+        :aria-label="t('Tab Organizer.Title')"
+        :title="t('Tab Organizer.Title')"
+        @click="openTabOrganizer"
+      >
+        <FtIcon
+          :icon="['fas', 'layer-group']"
+          class="newTabIcon"
+          aria-hidden="true"
+        />
+      </button>
+      <button
+        class="newTabButton"
+        :aria-label="t('New Tab')"
+        :title="newTabTooltip"
+        @click="createNewTab"
+      >
+        <FtIcon
+          :icon="['fas', 'plus']"
+          class="newTabIcon"
+          aria-hidden="true"
+        />
+      </button>
+    </div>
     <div
       v-if="vertical"
       class="tabBarResizeHandle"

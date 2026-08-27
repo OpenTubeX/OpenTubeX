@@ -265,14 +265,14 @@
             <img
               v-if="getUsableTabSwitcherPreviewUrl(tab)"
               :src="tabSwitcherPreviewUrls[tab.id]"
-              :alt="`${formatTabSwitcherTitle(tab.title)} preview`"
+              :alt="`${formatTabTitle(tab.title)} preview`"
               draggable="false"
               @error="handleTabSwitcherPreviewError(tab)"
             >
             <img
               v-else-if="!tabSwitcherPreviewPending[tab.id] && getUsableTabSwitcherAvatarUrl(tab)"
               :src="getUsableTabSwitcherAvatarUrl(tab)"
-              :alt="`${formatTabSwitcherTitle(tab.title)} preview`"
+              :alt="`${formatTabTitle(tab.title)} preview`"
               class="tabSwitcherPreviewAvatar"
               draggable="false"
               @error="handleTabSwitcherAvatarError(tab)"
@@ -304,7 +304,7 @@
               aria-hidden="true"
             />
             <span class="tabSwitcherTitleText">
-              {{ formatTabSwitcherTitle(tab.title) }}
+              {{ formatTabTitle(tab.title) }}
             </span>
           </span>
         </button>
@@ -363,6 +363,7 @@ import {
   SUBSCRIPTION_REFRESH_STARTED_EVENT
 } from './helpers/subscriptions'
 import { translateWindowTitle } from './helpers/strings'
+import { formatTabTitle } from './tabs/tabTitle'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getAppFontFamily } from './helpers/appFont'
 import { getTabAccentColor } from './constants/tabColors'
@@ -2826,19 +2827,6 @@ function cancelTabSwitcher() {
   tabSwitcherPointerActive.value = false
   tabSwitcherPreviewRequestId++
   window.ftElectron.tabs.setPreviewCapturePaused(false)
-}
-
-/**
- * @param {string} title
- * @returns {string}
- */
-function formatTabSwitcherTitle(title) {
-  if (!title) return title
-  const suffix = ` - ${packageDetails.productName}`
-  if (title.endsWith(suffix)) {
-    return title.slice(0, -suffix.length)
-  }
-  return title
 }
 
 /**

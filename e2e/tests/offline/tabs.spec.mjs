@@ -604,6 +604,36 @@ test.describe('tab bar', () => {
     await expect(page.locator(`${sel.tabs}.unloaded`)).toHaveCount(5)
   })
 
+  test('unloads an active selected tab from the tab context menu', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    const tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveCount(3)
+
+    await tabs.first().click()
+    const initialState = await page.evaluate(() => window.ftElectron.tabs.getState())
+    const selectedTabIds = initialState.tabs.slice(0, 2).map(tab => tab.id)
+    const survivingTabId = initialState.tabs[2].id
+    await expect.poll(() => page.evaluate(tabId => {
+      return window.ftElectron.tabs.getState().then(state => state.presentedTabId === tabId)
+    }, selectedTabIds[0])).toBe(true)
+
+    await tabs.nth(1).click({ modifiers: ['Control'] })
+    await tabs.nth(1).click({ button: 'right' })
+    await page.getByRole('menuitem', { name: 'Unload Tabs', exact: true }).click()
+
+    await expect.poll(() => page.evaluate(async selectedTabIds => {
+      const state = await window.ftElectron.tabs.getState()
+      return {
+        activeTabId: state.activeTabId,
+        unloaded: selectedTabIds.map(tabId => state.tabs.find(tab => tab.id === tabId)?.isUnloaded)
+      }
+    }, selectedTabIds), { timeout: 2_000 }).toEqual({
+      activeTabId: survivingTabId,
+      unloaded: [true, true]
+    })
+  })
+
   test('does not confirm when closing fewer tabs than the threshold', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
@@ -2099,6 +2129,79 @@ test.describe('background tab shortcuts', () => {
 })
 
 test.describe('tab organizer', () => {
+  test('selects a visible range with Shift-click', async ({ page }) => {
+    await page.evaluate(async () => {
+      for (let index = 1; index <= 3; index++) {
+        if (index === 2) {
+          await window.ftElectron.tabs.create({
+            route: '/history?range=hidden',
+            title: 'Hidden gap tab',
+            makeActive: false,
+            lazyLoad: true
+          })
+        }
+        await window.ftElectron.tabs.create({
+          route: `/history?range=${index}`,
+          title: `Range tab ${index}`,
+          makeActive: false,
+          lazyLoad: true
+        })
+      }
+    })
+
+    await page.locator(sel.tabOrganizerButton).click()
+    const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    await organizer.getByRole('searchbox', { name: 'Search tabs' }).fill('Range tab')
+    const rangeRows = organizer.locator('.tabOrganizerRow').filter({ hasText: 'Range tab' })
+    await expect(rangeRows).toHaveCount(3)
+
+    await rangeRows.first().locator('.tabSelection label').click()
+    await rangeRows.last().locator('.tabSelection label').click({ modifiers: ['Shift'] })
+
+    await expect(rangeRows.locator('input[type="checkbox"]:checked')).toHaveCount(3)
+    await expect(rangeRows.last().getByRole('checkbox')).toBeFocused()
+    await expect(organizer.getByText('3 tabs selected', { exact: true })).toBeVisible()
+    await expect(organizer.locator('.tabOrganizerRow').filter({ hasNotText: 'Range tab' })
+      .locator('input[type="checkbox"]:checked')).toHaveCount(0)
+  })
+
+  test('unloads an active tab as part of a group bulk action', async ({ page }) => {
+    const groupedTabIds = await page.evaluate(async () => {
+      const backgroundTab = await window.ftElectron.tabs.create({
+        route: '/history',
+        title: 'Bulk background tab',
+        makeActive: false,
+        lazyLoad: false
+      })
+      const activeTab = await window.ftElectron.tabs.create({
+        route: '/subscriptions',
+        title: 'Bulk active tab',
+        makeActive: true,
+        lazyLoad: false
+      })
+      const group = await window.ftElectron.tabs.createGroup({ name: 'Bulk unload group' })
+      await window.ftElectron.tabs.setGroup([backgroundTab.id, activeTab.id], group.id)
+      return [backgroundTab.id, activeTab.id]
+    })
+
+    await page.locator(sel.tabOrganizerButton).click()
+    const group = page.getByRole('dialog', { name: 'Tab Organizer' })
+      .locator('.tabGroup')
+      .filter({ hasText: 'Bulk unload group' })
+    await group.getByRole('button', { name: 'Unload All' }).click()
+
+    await expect.poll(() => page.evaluate(async tabIds => {
+      const state = await window.ftElectron.tabs.getState()
+      return {
+        activeTabIsOutsideGroup: !tabIds.includes(state.activeTabId),
+        unloaded: tabIds.map(tabId => state.tabs.find(tab => tab.id === tabId)?.isUnloaded)
+      }
+    }, groupedTabIds), { timeout: 2_000 }).toEqual({
+      activeTabIsOutsideGroup: true,
+      unloaded: [true, true]
+    })
+  })
+
   test('clamps its scroll position after collapsing and filtering at fractional UI scale', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 })
     await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
@@ -2278,7 +2381,7 @@ test.describe('tab organizer', () => {
     await researchGroup.getByRole('option', { name: 'Blue', exact: true }).click()
     await expect(researchGroup.getByRole('button', { name: 'Collapse group' }).locator('svg')).toBeVisible()
     await expect(researchGroup.getByRole('button', { name: 'Activate First' })).toHaveCount(0)
-    await expect(researchGroup.getByRole('button', { name: 'Unload All' })).toBeVisible()
+    await expect(researchGroup.getByRole('button', { name: 'Unload All' })).toBeDisabled()
     await expect(researchGroup.getByRole('button', { name: 'Close All' })).toBeVisible()
     await expect(researchGroup.getByRole('button', { name: 'Ungroup' }).locator('[data-icon="link-slash"]')).toBeVisible()
     await expect(researchGroup.locator('.tabOrganizerRow')).toContainText('Alpha video')
@@ -2377,6 +2480,50 @@ test.describe('tab organizer', () => {
     await expect(reopenedGroup.locator('.tabOrganizerRow')).toContainText('Alpha video')
     await expect(reopenedGroup.getByRole('button', { name: 'Expand group' }))
       .toHaveAttribute('aria-expanded', 'true')
+  })
+
+  test('lays out vertical tab actions and organizer tab metadata', async ({ page }) => {
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setTabBarPosition', 'left')
+      await window.ftElectron.setZoomFactor(0.95)
+      const tab = await window.ftElectron.tabs.create({
+        route: '/history',
+        title: 'History entry - OpenTubeX',
+        makeActive: false,
+        lazyLoad: true
+      })
+      await window.ftElectron.tabs.createGroup({ name: 'Unloaded group' })
+        .then(group => window.ftElectron.tabs.setGroup([tab.id], group.id))
+    })
+
+    await expect(page.locator('.app')).toHaveClass(/verticalTabsLeft/)
+    const organizerButton = page.locator(sel.tabOrganizerButton)
+    const newTabButton = page.locator(sel.newTabButton)
+    const [organizerButtonBox, newTabButtonBox] = await Promise.all([
+      organizerButton.boundingBox(),
+      newTabButton.boundingBox()
+    ])
+    expect(Math.abs(organizerButtonBox.y - newTabButtonBox.y)).toBeLessThanOrEqual(1)
+    expect(newTabButtonBox.x).toBeGreaterThanOrEqual(organizerButtonBox.x + organizerButtonBox.width)
+
+    await organizerButton.click()
+    const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    const group = organizer.locator('.tabGroup').filter({ hasText: 'Unloaded group' })
+    const row = group.locator('.tabOrganizerRow')
+    await expect(row.locator('.tabIdentity > span')).toHaveText('History entry')
+    await expect(row).not.toContainText(' - OpenTubeX')
+    await expect(row.locator('.tabIcon [data-icon="clock-rotate-left"]')).toBeVisible()
+    await expect(group.getByRole('button', { name: 'Unload All' })).toBeDisabled()
+
+    const [iconBox, titleBox, urlBox] = await Promise.all([
+      row.locator('.tabIcon').boundingBox(),
+      row.locator('.tabIdentity > span').boundingBox(),
+      row.locator('.tabIdentity > small').boundingBox()
+    ])
+    expect(Math.abs(
+      iconBox.y + iconBox.height / 2 - (titleBox.y + urlBox.y + urlBox.height) / 2
+    )).toBeLessThanOrEqual(1)
   })
 })
 
