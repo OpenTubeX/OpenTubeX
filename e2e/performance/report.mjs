@@ -1,3 +1,5 @@
+const longestFrameMinimumDeltaMs = 20
+
 export const performanceMetrics = [
   {
     key: 'startupElectronConnectedMs',
@@ -31,7 +33,7 @@ export const performanceMetrics = [
     unit: 'ms',
     absoluteLimit: 500,
     relativeLimit: 1.2,
-    minimumDelta: 16
+    minimumDelta: longestFrameMinimumDeltaMs
   },
   {
     key: 'subscribedChannelsNavigationElapsedMs',
@@ -47,7 +49,7 @@ export const performanceMetrics = [
     unit: 'ms',
     absoluteLimit: 200,
     relativeLimit: 1.2,
-    minimumDelta: 16
+    minimumDelta: longestFrameMinimumDeltaMs
   },
   {
     key: 'channelSearchElapsedMs',
@@ -63,7 +65,7 @@ export const performanceMetrics = [
     unit: 'ms',
     absoluteLimit: 100,
     relativeLimit: 1.2,
-    minimumDelta: 16
+    minimumDelta: longestFrameMinimumDeltaMs
   },
   {
     key: 'firstSwitchElapsedMs',
@@ -79,7 +81,7 @@ export const performanceMetrics = [
     unit: 'ms',
     absoluteLimit: 200,
     relativeLimit: 1.2,
-    minimumDelta: 16
+    minimumDelta: longestFrameMinimumDeltaMs
   },
   {
     key: 'repeatedSwitchElapsedMs',
@@ -95,7 +97,7 @@ export const performanceMetrics = [
     unit: 'ms',
     absoluteLimit: 100,
     relativeLimit: 1.2,
-    minimumDelta: 16
+    minimumDelta: longestFrameMinimumDeltaMs
   },
   {
     key: 'largeFeedScrollLongestFrameMs',
@@ -103,7 +105,7 @@ export const performanceMetrics = [
     unit: 'ms',
     absoluteLimit: 100,
     relativeLimit: 1.2,
-    minimumDelta: 16
+    minimumDelta: longestFrameMinimumDeltaMs
   },
   {
     key: 'navigationMemoryGrowthMiB',
@@ -130,7 +132,7 @@ export const performanceMetrics = [
     unit: 'ms',
     absoluteLimit: 750,
     relativeLimit: 1.2,
-    minimumDelta: 16
+    minimumDelta: longestFrameMinimumDeltaMs
   },
   {
     key: 'packedCodeSizeKiB',

@@ -93,6 +93,30 @@ test('recomputes regressions instead of trusting artifact conclusions', () => {
   assert.match(comment, /Repeated subscription switch elapsed regressed by 100\.0 ms \(\+125\.0%\)/)
 })
 
+test('ignores a one-frame shift in longest-frame samples', () => {
+  const input = result({ subscribedChannelsNavigationLongestFrameMs: 83.3 })
+  input.samples.base = Array.from({ length: 7 }, () => sample({
+    subscribedChannelsNavigationLongestFrameMs: 66.7
+  }))
+
+  const comment = renderPerformanceComment(input, { headSha, runUrl })
+
+  assert.match(comment, /Large route navigation longest frame .+ \+24\.9% .+ Pass/)
+  assert.doesNotMatch(comment, /Large route navigation longest frame regressed/)
+})
+
+test('reports a two-frame shift in longest-frame samples', () => {
+  const input = result({ subscribedChannelsNavigationLongestFrameMs: 100 })
+  input.samples.base = Array.from({ length: 7 }, () => sample({
+    subscribedChannelsNavigationLongestFrameMs: 66.7
+  }))
+
+  const comment = renderPerformanceComment(input, { headSha, runUrl })
+
+  assert.match(comment, /Large route navigation longest frame .+ Regression/)
+  assert.match(comment, /Large route navigation longest frame regressed by 33\.3 ms/)
+})
+
 test('reports diagnostic startup phases without gating on them', () => {
   const comment = renderPerformanceComment(
     result({ startupElectronConnectedMs: 10000 }),
