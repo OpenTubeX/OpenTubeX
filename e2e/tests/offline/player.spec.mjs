@@ -266,6 +266,55 @@ test('keeps video zoom within its tab', async ({ app, page, attachScreenshot }) 
   await expect(page.locator(`${activeTab} video`)).toHaveCSS('transform', 'matrix(1.25, 0, 0, 1.25, 0, 0)')
 })
 
+test('smoothly transitions video zoom at fractional UI scale', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+
+  await page.locator('body').press('z')
+  const zoomTransition = await video.evaluateHandle((element) => {
+    const transition = element.getAnimations().find(animation =>
+      animation instanceof CSSTransition && animation.transitionProperty === 'transform'
+    )
+
+    if (!transition) {
+      throw new Error('Video zoom transition not found')
+    }
+
+    transition.pause()
+    return transition
+  })
+
+  expect(await zoomTransition.evaluate(transition => transition.effect.getTiming())).toMatchObject({
+    duration: 200,
+    easing: 'ease-out',
+  })
+  await zoomTransition.evaluate(transition => { transition.currentTime = 100 })
+  const intermediateScale = await video.evaluate((element) => {
+    return new DOMMatrix(getComputedStyle(element).transform).a
+  })
+  expect(intermediateScale).toBeGreaterThan(1)
+  expect(intermediateScale).toBeLessThan(1.25)
+
+  await zoomTransition.dispose()
+
+  // A new choice replaces the in-flight transition and becomes its final state.
+  await page.locator('body').press('z')
+  await expect(video).toHaveCSS('transform', 'matrix(1.5, 0, 0, 1.5, 0, 0)')
+
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return store.dispatch('updateReducedMotion', 'on')
+  })
+  await page.locator('body').press('Shift+Z')
+  await page.locator('body').press('Shift+Z')
+  await expect(video).toHaveCSS('transform', 'none')
+  expect(await video.evaluate((element) => {
+    return element.getAnimations().some(animation =>
+      animation instanceof CSSTransition && animation.transitionProperty === 'transform'
+    )
+  })).toBe(false)
+})
+
 test('shift-dragging moves the visible part of a zoomed video', async ({ app, page, attachScreenshot }) => {
   const video = await openDemoVideo({ app, page })
   const readTranslation = () => video.evaluate((element) => {
@@ -288,6 +337,11 @@ test('shift-dragging moves the visible part of a zoomed video', async ({ app, pa
   await page.mouse.down()
   await page.mouse.move(center.x - 120, center.y - 40, { steps: 4 })
   await expect(player).toHaveClass(/videoZoomPanning/)
+  expect(await video.evaluate((element) => {
+    return element.getAnimations().some(animation =>
+      animation instanceof CSSTransition && animation.transitionProperty === 'transform'
+    )
+  })).toBe(false)
   await page.mouse.up()
   await page.keyboard.up('Shift')
   await attachScreenshot('panned video')
