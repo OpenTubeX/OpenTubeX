@@ -367,7 +367,7 @@ export async function getYtDlpPlaybackSource(
   }
 
   if (cachedOnly) {
-    return null
+    return cachedSource
   }
 
   let extractionError = null
@@ -391,12 +391,14 @@ export async function getYtDlpPlaybackSource(
     )
 
     if (info === null) {
-      throw new Error('yt-dlp is not available')
+      extractionError = new Error('yt-dlp is not available')
+      break
     }
 
     if ('error' in info) {
       if (info.error === 'ENOENT') {
-        throw new Error('yt-dlp could not be found')
+        extractionError = new Error('yt-dlp could not be found')
+        break
       }
 
       extractionError = new Error(info.error)
@@ -510,6 +512,10 @@ export async function getYtDlpPlaybackSource(
 
   if (limitedLiveSource !== null) {
     return limitedLiveSource
+  }
+
+  if (cachedSource !== null) {
+    return cachedSource
   }
 
   throw extractionError ?? new Error('yt-dlp did not return any playable formats')

@@ -1045,6 +1045,10 @@ test.describe('watch page', () => {
       ipcMain.removeHandler('yt-dlp-get-playback-info')
       ipcMain.handle('yt-dlp-get-playback-info', (_event, _videoId, _useDefaultClients, _useAuthentication, includeSubtitles) => {
         globalThis.__ytDlpRetryIncludeSubtitles.push(includeSubtitles)
+        if (includeSubtitles) {
+          return { error: 'subtitle extraction failed' }
+        }
+
         return {
           isLive: false,
           liveStatus: 'not_live',
@@ -1124,7 +1128,8 @@ test.describe('watch page', () => {
         view.playbackEngineSwitchGeneration
       )
     })).toBe(true)
-    expect(await app.electronApp.evaluate(() => globalThis.__ytDlpRetryIncludeSubtitles)).toEqual([false, true])
+    expect(await app.electronApp.evaluate(() => globalThis.__ytDlpRetryIncludeSubtitles))
+      .toEqual([false, true, true, true])
   })
 
   test('shows the automatic yt-dlp live fallback while streams are pending', async ({ app, page }) => {
