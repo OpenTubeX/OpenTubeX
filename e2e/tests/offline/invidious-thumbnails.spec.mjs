@@ -15,6 +15,13 @@ test.use({
   }
 })
 
+test.beforeEach(async ({ page }) => {
+  await page.route(PROXIED_AUTHOR_THUMBNAIL, route => route.fulfill({
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg"/>'
+  }))
+})
+
 test('loads a playlist with one author thumbnail', async ({ page }) => {
   await page.route(`${INSTANCE_URL}/api/v1/playlists/**`, route => route.fulfill({
     json: {

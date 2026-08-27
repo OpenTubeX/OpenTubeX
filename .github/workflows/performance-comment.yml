@@ -1,0 +1,84 @@
+name: Performance Comment
+
+on:
+  workflow_run:
+    workflows: [Performance Comparison]
+    types: [completed]
+
+permissions: {}
+
+concurrency:
+  group: performance-comment-${{ github.event.workflow_run.pull_requests[0].number }}
+  cancel-in-progress: true
+
+jobs:
+  comment:
+    name: Update performance comment
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.pull_requests[0].number != null
+    runs-on: ubuntu-slim
+
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: write
+
+    steps:
+    - name: Check out trusted reporter
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        ref: ${{ github.event.repository.default_branch }}
+        persist-credentials: false
+
+    - name: Download performance results
+      continue-on-error: true
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      with:
+        name: performance-results
+        path: performance-results
+        run-id: ${{ github.event.workflow_run.id }}
+        github-token: ${{ github.token }}
+
+    - name: Render performance comment
+      shell: bash
+      env:
+        RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}
+      run: |
+        node _scripts/performanceComment.mjs \
+          --input performance-results/performance-results.json \
+          --output performance-comment.md \
+          --head-sha "$RUN_SHA" \
+          --run-url "$RUN_URL"
+
+    - name: Create or update pull request comment
+      shell: bash
+      env:
+        COMMENT_PATH: performance-comment.md
+        GH_TOKEN: ${{ github.token }}
+        PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+        REPOSITORY: ${{ github.repository }}
+        RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+      run: |
+        pr="$(gh api "repos/$REPOSITORY/pulls/$PR_NUMBER")"
+        if [[ "$(jq -r '.state' <<< "$pr")" != 'open' || \
+          "$(jq -r '.head.sha' <<< "$pr")" != "$RUN_SHA" ]]; then
+          echo "Skipping stale performance results for pull request #$PR_NUMBER."
+          exit 0
+        fi
+
+        comment_id="$(
+          gh api --paginate "repos/$REPOSITORY/issues/$PR_NUMBER/comments" \
+            --jq '.[] | select(.user.login == "github-actions[bot]") | select(.body | startswith("<!-- performance-comparison -->")) | .id' |
+            tail -n 1
+        )"
+        jq -Rs '{ body: . }' "$COMMENT_PATH" > performance-comment.json
+
+        if [[ -n "$comment_id" ]]; then
+          gh api --method PATCH "repos/$REPOSITORY/issues/comments/$comment_id" \
+            --input performance-comment.json > /dev/null
+        else
+          gh api --method POST "repos/$REPOSITORY/issues/$PR_NUMBER/comments" \
+            --input performance-comment.json > /dev/null
+        fi

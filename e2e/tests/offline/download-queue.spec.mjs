@@ -40,13 +40,14 @@ async function clickUntil(page, button, isComplete) {
 }
 
 test('opens downloads with the default shortcut', async ({ page }) => {
+  const downloads = page.getByRole('dialog', { name: 'Downloads', exact: true })
   await expect.poll(async () => {
-    if (/#\/downloads$/.test(page.url())) return true
+    if (await downloads.isVisible()) return true
     await page.bringToFront()
     await page.keyboard.press('Control+J')
-    return /#\/downloads$/.test(page.url())
+    return downloads.isVisible()
   }).toBe(true)
-  await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
+  await expect(downloads).toBeVisible()
 })
 
 test('separates canceled downloads without offering retry-all', async ({ page }) => {

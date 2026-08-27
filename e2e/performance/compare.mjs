@@ -8,41 +8,12 @@ import {
   expect,
   launchApp
 } from '../helpers/app.mjs'
+import { largeSubscriptionsSeed } from './subscriptions.mjs'
+import { runPerformanceScenarios } from './scenarios.mjs'
 import {
-  largeSubscriptionsSeed,
-  runLargeSubscriptionsBenchmark
-} from './subscriptions.mjs'
-
-const METRICS = [
-  {
-    key: 'firstSwitchElapsedMs',
-    label: 'First switch elapsed',
-    absoluteLimit: 250,
-    relativeLimit: 1.15,
-    minimumDelta: 20
-  },
-  {
-    key: 'firstSwitchLongestFrameMs',
-    label: 'First switch longest frame',
-    absoluteLimit: 200,
-    relativeLimit: 1.2,
-    minimumDelta: 16
-  },
-  {
-    key: 'repeatedSwitchElapsedMs',
-    label: 'Repeated switch elapsed',
-    absoluteLimit: 150,
-    relativeLimit: 1.15,
-    minimumDelta: 20
-  },
-  {
-    key: 'repeatedSwitchLongestFrameMs',
-    label: 'Repeated switch longest frame',
-    absoluteLimit: 100,
-    relativeLimit: 1.2,
-    minimumDelta: 16
-  }
-]
+  comparePerformanceSamples,
+  renderPerformanceSummary
+} from './report.mjs'
 
 function parseArguments(argv) {
   const options = {
@@ -105,15 +76,6 @@ function parsePositiveInteger(argument, value) {
   return parsed
 }
 
-function median(values) {
-  const sorted = [...values].sort((left, right) => left - right)
-  const midpoint = Math.floor(sorted.length / 2)
-  if (sorted.length % 2 === 1) {
-    return sorted[midpoint]
-  }
-  return (sorted[midpoint - 1] + sorted[midpoint]) / 2
-}
-
 function commitLabel(root) {
   return execFileSync('git', ['-C', root, 'rev-parse', '--short=9', 'HEAD'], {
     encoding: 'utf8'
@@ -146,15 +108,50 @@ async function closeTutorial(page) {
 async function collectSample(target) {
   const userDataDir = await createUserDataDir(largeSubscriptionsSeed)
   let electronApp
+  const startupStartedAt = performance.now()
+  const startup = {}
 
   try {
-    const launched = await launchApp(userDataDir, [], {
+    const launched = await launchApp(userDataDir, ['--js-flags=--expose-gc'], {
       appRoot: target.root,
-      executablePath: target.executablePath
+      executablePath: target.executablePath,
+      onPhase: async (phase, page) => {
+        startup[`startup${phase[0].toUpperCase()}${phase.slice(1)}Ms`] =
+          performance.now() - startupStartedAt
+
+        if (phase === 'routeCommitted') {
+          await page.evaluate(() => {
+            const measurement = {
+              animationFrame: null,
+              longestFrame: 0,
+              previousFrame: performance.now()
+            }
+            const sampleFrame = timestamp => {
+              measurement.longestFrame = Math.max(
+                measurement.longestFrame,
+                timestamp - measurement.previousFrame
+              )
+              measurement.previousFrame = timestamp
+              measurement.animationFrame = requestAnimationFrame(sampleFrame)
+            }
+            measurement.animationFrame = requestAnimationFrame(sampleFrame)
+            window.__performanceStartupFrames = measurement
+          })
+        } else if (phase === 'interactive') {
+          startup.startupLongestFrameMs = await page.evaluate(() => {
+            const measurement = window.__performanceStartupFrames
+            cancelAnimationFrame(measurement.animationFrame)
+            return Math.max(
+              measurement.longestFrame,
+              performance.now() - measurement.previousFrame
+            )
+          })
+        }
+      }
     })
     electronApp = launched.electronApp
     await closeTutorial(launched.page)
-    return await runLargeSubscriptionsBenchmark(launched.page)
+    return await runPerformanceScenarios(launched, startup, target.root)
   } finally {
     await electronApp?.close().catch(() => {})
     await rm(userDataDir, { recursive: true, force: true })
@@ -181,91 +178,6 @@ async function runSamples(base, candidate, options) {
   }
 
   return samples
-}
-
-function compareSamples(samples) {
-  const failures = []
-  const metrics = METRICS.map(definition => {
-    const baseValues = samples.base.map(sample => sample[definition.key])
-    const candidateValues = samples.candidate.map(sample => sample[definition.key])
-    const baseMedian = median(baseValues)
-    const candidateMedian = median(candidateValues)
-    const delta = candidateMedian - baseMedian
-    const ratio = candidateMedian / baseMedian
-    const exceedsAbsoluteLimit = candidateMedian >= definition.absoluteLimit
-    const relativeRegression = ratio > definition.relativeLimit &&
-      delta > definition.minimumDelta
-
-    if (exceedsAbsoluteLimit) {
-      failures.push(
-        `${definition.label} is ${candidateMedian.toFixed(1)} ms, ` +
-        `above the ${definition.absoluteLimit} ms limit`
-      )
-    }
-    if (relativeRegression) {
-      failures.push(
-        `${definition.label} regressed by ${delta.toFixed(1)} ms ` +
-        `(${formatPercent(ratio - 1)})`
-      )
-    }
-
-    return {
-      ...definition,
-      baseValues,
-      candidateValues,
-      baseMedian,
-      candidateMedian,
-      delta,
-      ratio,
-      exceedsAbsoluteLimit,
-      relativeRegression,
-      passed: !exceedsAbsoluteLimit && !relativeRegression
-    }
-  })
-
-  return { metrics, failures }
-}
-
-function formatPercent(value) {
-  const sign = value > 0 ? '+' : ''
-  return `${sign}${(value * 100).toFixed(1)}%`
-}
-
-function renderSummary(base, candidate, comparison, reportOnly) {
-  const lines = [
-    '# Performance comparison',
-    '',
-    `Compared \`${base.commit}\` with \`${candidate.commit}\` on the same runner.`,
-    ''
-  ]
-
-  if (reportOnly) {
-    lines.push('This workflow reports regressions without failing while thresholds are calibrated.', '')
-  }
-
-  lines.push(
-    '| Metric | Base median | Candidate median | Change | Absolute limit | Result |',
-    '| --- | ---: | ---: | ---: | ---: | --- |'
-  )
-  for (const metric of comparison.metrics) {
-    lines.push(
-      `| ${metric.label} | ${metric.baseMedian.toFixed(1)} ms | ` +
-      `${metric.candidateMedian.toFixed(1)} ms | ${formatPercent(metric.ratio - 1)} | ` +
-      `${metric.absoluteLimit} ms | ${metric.passed ? 'Pass' : 'Regression'} |`
-    )
-  }
-
-  lines.push('')
-  if (comparison.failures.length === 0) {
-    lines.push('No regression crossed the configured thresholds.')
-  } else {
-    lines.push('Detected regressions:', '')
-    for (const failure of comparison.failures) {
-      lines.push(`- ${failure}`)
-    }
-  }
-
-  return `${lines.join('\n')}\n`
 }
 
 function renderFailureSummary(error) {
@@ -298,8 +210,8 @@ async function main() {
     base = await targetFor('base', options.baseRoot)
     candidate = await targetFor('candidate', options.candidateRoot)
     const samples = await runSamples(base, candidate, options)
-    const comparison = compareSamples(samples)
-    const summary = renderSummary(base, candidate, comparison, options.reportOnly)
+    const comparison = comparePerformanceSamples(samples)
+    const summary = renderPerformanceSummary(base, candidate, comparison, options.reportOnly)
     const result = {
       base: { root: base.root, commit: base.commit },
       candidate: { root: candidate.root, commit: candidate.commit },

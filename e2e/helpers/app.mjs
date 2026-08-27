@@ -92,6 +92,7 @@ export async function createUserDataDir(seed = {}) {
  * @param {object} [options]
  * @param {string} [options.appRoot] repository root containing dist-e2e
  * @param {string} [options.executablePath] Electron executable to launch
+ * @param {(phase: 'electronConnected'|'windowCreated'|'routeCommitted'|'interactive', page?: import('@playwright/test').Page) => void|Promise<void>} [options.onPhase]
  */
 export async function launchApp(userDataDir, extraArgs = [], options = {}) {
   const appRoot = options.appRoot ?? repoRoot
@@ -140,8 +141,18 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}) {
       await new Promise((resolve) => setTimeout(resolve, (attempt + 1) * 1000))
     }
   }
+  const notifyPhase = async (phase, page) => {
+    try {
+      await options.onPhase?.(phase, page)
+    } catch (error) {
+      await electronApp.close().catch(() => {})
+      throw error
+    }
+  }
+  await notifyPhase('electronConnected')
 
   const page = await electronApp.firstWindow()
+  await notifyPhase('windowCreated', page)
 
   // Fail fast if dist-e2e contains a development build (it would load the
   // dev server on localhost instead of the bundled files). A transient
@@ -165,6 +176,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}) {
       )
     }
   }
+  await notifyPhase('routeCommitted', page)
 
   // Safety guard: if the userData override ever stops working, abort
   // instead of silently running tests against the user's real profile.
@@ -178,6 +190,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}) {
   }
 
   await waitForAppReady(page)
+  await notifyPhase('interactive', page)
 
   return { electronApp, page }
 }

@@ -103,17 +103,14 @@ jobs:
       run: pnpm --dir candidate run test:e2e:pack
       shell: bash
 
-    # Start in report-only mode so ordinary PRs establish the runner's natural
-    # variance before this becomes a required regression gate.
     - name: Compare performance
       run: |
         xvfb-run -a -s "-screen 0 1920x1080x24" \
-          node candidate/e2e/performance/compare.mjs \
+          node base/e2e/performance/compare.mjs \
           --base base \
           --candidate candidate \
           --output performance-results.json \
-          --summary performance-summary.md \
-          --report-only
+          --summary performance-summary.md
       shell: bash
 
     - name: Publish performance summary
