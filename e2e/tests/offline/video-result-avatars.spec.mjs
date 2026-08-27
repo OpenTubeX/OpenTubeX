@@ -1,4 +1,5 @@
 import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
+import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const AVATAR = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" fill="red"/></svg>'
@@ -85,10 +86,9 @@ test.describe('Invidious search video avatars', () => {
         }
       })
     })
-    await page.route(avatarUrl, route => route.fulfill({
-      body: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" fill="red"/></svg>',
-      contentType: 'image/svg+xml'
-    }))
+    await page.route(avatarUrl, route => fulfillVisualFixture(route, 'avatar'))
+    await page.route(`${instanceUrl}/vi/**`, route => fulfillVisualFixture(route, 'video-thumbnail'))
+    await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
 
     await page.locator(sel.searchInput).fill('avatar results')
     await page.locator(sel.searchInput).press('Enter')
@@ -97,8 +97,9 @@ test.describe('Invidious search video avatars', () => {
     await expect(avatars).toHaveCount(3)
     await expect(avatars.first()).toHaveAttribute('src', avatarUrl)
     await expect.poll(() => avatars.evaluateAll(images => {
-      return images.every(image => image.complete && image.naturalWidth === 24)
+      return images.every(image => image.complete && image.naturalWidth === 48)
     })).toBe(true)
+    await expectImagesLoaded(page.locator('.ft-list-video .thumbnailImage'))
     await expect(page.locator('.ft-list-video').filter({
       has: page.getByRole('heading', { name: 'Avatar search playlist' })
     }).locator('.channelAvatarImage')).toHaveAttribute('src', avatarUrl)
