@@ -1,0 +1,377 @@
+name: Submit winget update
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      releaseTag:
+        description: Published release tag to retry, for example v0.32.1-beta
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: winget-${{ github.event.release.tag_name || inputs.releaseTag }}
+  cancel-in-progress: false
+
+jobs:
+  submit:
+    if: github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+    - name: Check out OpenTubeX
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Resolve release
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_TAG: ${{ github.event.release.tag_name || inputs.releaseTag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if [[ ! "$RELEASE_TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-beta$ ]]; then
+          echo "Ignoring unrelated release tag: $RELEASE_TAG"
+          echo 'eligible=false' >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        version="${BASH_REMATCH[1]}"
+        release_json="${RUNNER_TEMP}/winget-release.json"
+        topics_json="${RUNNER_TEMP}/winget-topics.json"
+
+        gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" > "$release_json"
+        gh api "repos/${GITHUB_REPOSITORY}/topics" > "$topics_json"
+
+        if [[ "$(jq --raw-output .draft "$release_json")" != false ||
+          "$(jq --raw-output .published_at "$release_json")" == null ]]; then
+          echo "::error::${RELEASE_TAG} is not a published release."
+          exit 1
+        fi
+
+        for architecture in x64 arm64; do
+          asset="opentubex-${version}-beta-setup-${architecture}.exe"
+          count="$(jq --arg asset "$asset" '[.assets[] | select(.name == $asset)] | length' "$release_json")"
+
+          if [[ "$count" != 1 ]]; then
+            echo "::error::Expected one release asset named ${asset}, found ${count}."
+            exit 1
+          fi
+        done
+
+        {
+          echo 'eligible=true'
+          echo "version=$version"
+          echo "tag=$RELEASE_TAG"
+          echo "release_json=$release_json"
+          echo "topics_json=$topics_json"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Check for an accepted manifest or open pull request
+      if: steps.release.outputs.eligible == 'true'
+      id: duplicate
+      env:
+        GH_TOKEN: ${{ github.token }}
+        VERSION: ${{ steps.release.outputs.version }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        manifest_path="manifests/o/OpenTubeX/OpenTubeX/${VERSION}"
+
+        if gh api "repos/microsoft/winget-pkgs/contents/${manifest_path}" >/dev/null 2>&1; then
+          echo "winget already contains OpenTubeX.OpenTubeX ${VERSION}."
+          echo 'needed=false' >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        existing_pr="$({
+          gh pr list \
+            --repo microsoft/winget-pkgs \
+            --state open \
+            --search "\"OpenTubeX.OpenTubeX\" \"${VERSION}\" in:title" \
+            --json title,url \
+            --limit 100
+        } | jq --arg version "$VERSION" \
+          'first(.[] | select((.title | contains("OpenTubeX.OpenTubeX")) and (.title | contains($version)))) // empty')"
+
+        if [[ -n "$existing_pr" ]]; then
+          echo "An open pull request already updates OpenTubeX.OpenTubeX ${VERSION}:"
+          jq --raw-output .url <<< "$existing_pr"
+          echo 'needed=false' >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        echo 'needed=true' >> "$GITHUB_OUTPUT"
+
+    - name: Install Komac 2.16.0
+      if: steps.duplicate.outputs.needed == 'true'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        archive='komac-2.16.0-x86_64-unknown-linux-gnu.tar.gz'
+        install_dir="${RUNNER_TEMP}/komac-2.16.0"
+        mkdir -p "$install_dir"
+
+        gh release download v2.16.0 \
+          --repo russellbanks/Komac \
+          --pattern "$archive" \
+          --dir "$install_dir"
+
+        echo '7d2707fa6210f2789a3702de49fbd150b736dbf426ee0b9bc8e098736f9fd82d  '"$install_dir/$archive" \
+          | sha256sum --check --status
+        tar --extract --gzip --file "$install_dir/$archive" --directory "$install_dir"
+        chmod 755 "$install_dir/komac"
+        echo "$install_dir" >> "$GITHUB_PATH"
+
+    - name: Generate and validate manifests
+      if: steps.duplicate.outputs.needed == 'true'
+      id: manifest
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        RELEASE_JSON: ${{ steps.release.outputs.release_json }}
+        RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        TOPICS_JSON: ${{ steps.release.outputs.topics_json }}
+        VERSION: ${{ steps.release.outputs.version }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        output_dir="${RUNNER_TEMP}/komac-output"
+        manifest_dir="${output_dir}/manifests/o/OpenTubeX/OpenTubeX/${VERSION}"
+        release_url="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}"
+        x64_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/opentubex-${VERSION}-beta-setup-x64.exe"
+        arm64_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/opentubex-${VERSION}-beta-setup-arm64.exe"
+
+        # --submit --dry-run avoids Komac's interactive prompt. Submission is
+        # handled below because Komac only supports personal forks.
+        komac update OpenTubeX.OpenTubeX \
+          --version "$VERSION" \
+          --urls "$x64_url" "$arm64_url" \
+          --release-notes-url "$release_url" \
+          --output "$output_dir" \
+          --skip-pr-check \
+          --submit \
+          --dry-run
+
+        node _scripts/prepareWingetManifest.mjs \
+          --manifest-dir "$manifest_dir" \
+          --release-json "$RELEASE_JSON" \
+          --topics-json "$TOPICS_JSON"
+
+        # Komac reparses and validates the final, post-processed manifests.
+        komac submit --dry-run --yes "$manifest_dir"
+
+        echo "directory=$manifest_dir" >> "$GITHUB_OUTPUT"
+
+    - name: Validate winget credentials
+      if: steps.duplicate.outputs.needed == 'true'
+      env:
+        WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if [[ -z "$WINGET_TOKEN" ]]; then
+          echo '::error::The WINGET_TOKEN repository secret is missing.'
+          exit 1
+        fi
+
+        echo "::add-mask::${WINGET_TOKEN}"
+
+    - name: Create or synchronize the organization fork
+      if: steps.duplicate.outputs.needed == 'true'
+      env:
+        GH_TOKEN: ${{ secrets.WINGET_TOKEN }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if ! gh api repos/OpenTubeX/winget-pkgs >/dev/null 2>&1; then
+          echo 'Creating OpenTubeX/winget-pkgs.'
+          gh api \
+            --method POST \
+            repos/microsoft/winget-pkgs/forks \
+            -f organization=OpenTubeX \
+            -f name=winget-pkgs \
+            -F default_branch_only=true \
+            >/dev/null
+
+          for attempt in {1..30}; do
+            if gh api repos/OpenTubeX/winget-pkgs >/dev/null 2>&1; then
+              break
+            fi
+
+            if (( attempt == 30 )); then
+              echo '::error::OpenTubeX/winget-pkgs was not ready after 60 seconds.'
+              exit 1
+            fi
+
+            sleep 2
+          done
+        fi
+
+        parent="$(gh api repos/OpenTubeX/winget-pkgs --jq '.parent.full_name // ""')"
+
+        if [[ "$parent" != microsoft/winget-pkgs ]]; then
+          echo "::error::OpenTubeX/winget-pkgs is not a fork of microsoft/winget-pkgs."
+          exit 1
+        fi
+
+        gh api \
+          --method POST \
+          repos/OpenTubeX/winget-pkgs/merge-upstream \
+          -f branch=master \
+          >/dev/null
+
+    - name: Create the signed version commit
+      if: steps.duplicate.outputs.needed == 'true'
+      env:
+        BRANCH: OpenTubeX.OpenTubeX-${{ steps.release.outputs.version }}
+        GH_TOKEN: ${{ secrets.WINGET_TOKEN }}
+        MANIFEST_DIR: ${{ steps.manifest.outputs.directory }}
+        VERSION: ${{ steps.release.outputs.version }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        work_dir="${RUNNER_TEMP}/winget-pkgs"
+        package_dir="manifests/o/OpenTubeX/OpenTubeX/${VERSION}"
+        gh auth setup-git
+
+        git init "$work_dir"
+        git -C "$work_dir" remote add origin https://github.com/OpenTubeX/winget-pkgs.git
+        git -C "$work_dir" remote add upstream https://github.com/microsoft/winget-pkgs.git
+        git -C "$work_dir" fetch --depth=1 --filter=blob:none upstream master
+        upstream_sha="$(git -C "$work_dir" rev-parse FETCH_HEAD)"
+
+        remote_sha="$(gh api "repos/OpenTubeX/winget-pkgs/git/ref/heads/${BRANCH}" --jq .object.sha 2>/dev/null || true)"
+
+        if [[ -n "$remote_sha" ]]; then
+          git -C "$work_dir" push origin "${upstream_sha}:refs/heads/${BRANCH}" \
+            --force-with-lease="refs/heads/${BRANCH}:${remote_sha}"
+        else
+          git -C "$work_dir" push origin "${upstream_sha}:refs/heads/${BRANCH}"
+        fi
+
+        branch_id="$(gh api "repos/OpenTubeX/winget-pkgs/git/ref/heads/${BRANCH}" --jq .node_id)"
+        mutation="${RUNNER_TEMP}/winget-commit.json"
+        response="${RUNNER_TEMP}/winget-commit-response.json"
+
+        jq --null-input \
+          --arg query 'mutation($input: CreateCommitOnBranchInput!) { createCommitOnBranch(input: $input) { commit { oid url } } }' \
+          --arg branch_id "$branch_id" \
+          --arg expected_head_oid "$upstream_sha" \
+          --arg headline "Update OpenTubeX.OpenTubeX to ${VERSION}" \
+          --arg installer_path "${package_dir}/OpenTubeX.OpenTubeX.installer.yaml" \
+          --arg installer_contents "$(base64 --wrap=0 "$MANIFEST_DIR/OpenTubeX.OpenTubeX.installer.yaml")" \
+          --arg locale_path "${package_dir}/OpenTubeX.OpenTubeX.locale.en-US.yaml" \
+          --arg locale_contents "$(base64 --wrap=0 "$MANIFEST_DIR/OpenTubeX.OpenTubeX.locale.en-US.yaml")" \
+          --arg version_path "${package_dir}/OpenTubeX.OpenTubeX.yaml" \
+          --arg version_contents "$(base64 --wrap=0 "$MANIFEST_DIR/OpenTubeX.OpenTubeX.yaml")" \
+          '{
+            query: $query,
+            variables: {
+              input: {
+                branch: { id: $branch_id },
+                expectedHeadOid: $expected_head_oid,
+                fileChanges: {
+                  additions: [
+                    { path: $installer_path, contents: $installer_contents },
+                    { path: $locale_path, contents: $locale_contents },
+                    { path: $version_path, contents: $version_contents }
+                  ]
+                },
+                message: { headline: $headline }
+              }
+            }
+          }' > "$mutation"
+
+        gh api graphql --input "$mutation" > "$response"
+        commit_sha="$(jq --raw-output '.data.createCommitOnBranch.commit.oid // empty' "$response")"
+
+        if [[ -z "$commit_sha" ]]; then
+          jq .errors "$response" >&2
+          echo '::error::GitHub did not create the winget manifest commit.'
+          exit 1
+        fi
+
+        # createCommitOnBranch uses GitHub's signing key. Fail instead of
+        # opening a pull request with an unsigned automation commit.
+        if [[ "$(gh api "repos/OpenTubeX/winget-pkgs/commits/${commit_sha}" --jq .commit.verification.verified)" != true ]]; then
+          echo '::error::GitHub did not report the winget manifest commit as signed.'
+          exit 1
+        fi
+
+    - name: Open winget pull request
+      if: steps.duplicate.outputs.needed == 'true'
+      env:
+        BRANCH: OpenTubeX.OpenTubeX-${{ steps.release.outputs.version }}
+        GH_TOKEN: ${{ secrets.WINGET_TOKEN }}
+        VERSION: ${{ steps.release.outputs.version }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        existing_pr="$(gh pr list \
+          --repo microsoft/winget-pkgs \
+          --state open \
+          --search "\"OpenTubeX.OpenTubeX\" \"${VERSION}\" in:title" \
+          --json title,url \
+          --limit 100 \
+          | jq --arg version "$VERSION" \
+            'first(.[] | select((.title | contains("OpenTubeX.OpenTubeX")) and (.title | contains($version)))) // empty')"
+
+        if [[ -n "$existing_pr" ]]; then
+          echo "An open pull request appeared while this workflow was running:"
+          jq --raw-output .url <<< "$existing_pr"
+          exit 0
+        fi
+
+        template="${RUNNER_TEMP}/winget-pr-template.md"
+        body="${RUNNER_TEMP}/winget-pr-body.md"
+        gh api repos/microsoft/winget-pkgs/contents/.github/PULL_REQUEST_TEMPLATE.md \
+          --jq .content \
+          | base64 --decode > "$template"
+
+        awk -v version="$VERSION" '
+          { print }
+          /^<!-- Describe what this PR changes\./ {
+            print ""
+            print "Updates OpenTubeX.OpenTubeX to " version " using the x64 and ARM64 installers from the published OpenTubeX release."
+            print "The manifest keeps user and machine installation scopes and uses the current OpenTubeX repository topics."
+          }
+        ' "$template" \
+          | sed \
+            -e "s/- \[ \] Checked that there aren't other open/- [x] Checked that there aren't other open/" \
+            -e 's/- \[ \] This PR only modifies/- [x] This PR only modifies/' \
+          > "$body"
+
+        cat >> "$body" <<EOF
+
+        Komac 2.16.0 generated and validated the manifests before this branch was pushed.
+        EOF
+
+        pr_url="$(gh pr create \
+          --repo microsoft/winget-pkgs \
+          --base master \
+          --head "OpenTubeX:${BRANCH}" \
+          --title "Update: OpenTubeX.OpenTubeX to ${VERSION}" \
+          --body-file "$body")"
+
+        {
+          echo '## winget submission'
+          echo
+          echo "Created ready-for-review pull request: ${pr_url}"
+        } >> "$GITHUB_STEP_SUMMARY"
