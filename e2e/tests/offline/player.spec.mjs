@@ -1,4 +1,4 @@
-import { sel, setWindowSize, test, expect } from '../../helpers/app.mjs'
+import { goTo, sel, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import {
   activeTab,
   expectDockedToBottomRight,
@@ -217,6 +217,28 @@ test('keyboard shortcuts change the playback rate', async ({ app, page, attachSc
   await page.locator('body').press('o')
   await expect.poll(() => video.evaluate((element) => element.playbackRate)).toBeLessThan(raisedRate)
   await attachScreenshot('playback rate lowered')
+})
+
+test('player shortcuts do not run while typing in a focused select', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  await goTo(page, 'settings')
+
+  const region = page.getByRole('combobox', { name: 'Region for Trending' })
+  await region.focus()
+  await expect(region).toHaveAttribute('aria-expanded', 'false')
+  await region.pressSequentially('kenya')
+  await expect(region.locator('.selectedValue')).toHaveText('Kenya')
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+
+  await region.click()
+  await expect(region).toHaveAttribute('aria-expanded', 'true')
+
+  await region.pressSequentially('kenya')
+
+  await expect(region).toHaveAttribute('aria-activedescendant', /-option-\d+$/)
+  const activeOptionId = await region.getAttribute('aria-activedescendant')
+  await expect(page.locator(`#${activeOptionId}`)).toHaveText('Kenya')
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
 })
 
 test('playback rate shortcuts use the normal rate while hold-to-double is active', async ({ app, page }) => {

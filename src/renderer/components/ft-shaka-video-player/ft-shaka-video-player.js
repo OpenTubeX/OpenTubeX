@@ -8189,6 +8189,7 @@ export default defineComponent({
         target.tagName === 'INPUT' ||
         target.tagName === 'TEXTAREA' ||
         target.tagName === 'SELECT' ||
+        target.getAttribute('role') === 'combobox' ||
         target.isContentEditable
     }
 
