@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <defs>
+    <linearGradient id="avatar-gradient" x2="1" y2="1">
+      <stop stop-color="#2563eb" />
+      <stop offset="1" stop-color="#7c3aed" />
+    </linearGradient>
+  </defs>
+  <circle cx="24" cy="24" r="24" fill="url(#avatar-gradient)" />
+  <text x="24" y="29" fill="#fff" font-family="sans-serif" font-size="14" font-weight="700" text-anchor="middle">OT</text>
+</svg>
