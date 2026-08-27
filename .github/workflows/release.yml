@@ -371,6 +371,42 @@ jobs:
           --ref "$GITHUB_REF_NAME" \
           -f "releaseTag=$TAG"
 
+  trigger-winget:
+    name: Trigger winget update
+    needs: publish-release
+    if: inputs.publishRelease
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write
+      contents: read
+
+    steps:
+    - name: Resolve release tag
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
+        echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+    - name: Trigger winget workflow
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ steps.release.outputs.tag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        gh workflow run winget.yml \
+          --repo "$GITHUB_REPOSITORY" \
+          --ref "$GITHUB_REF_NAME" \
+          -f "releaseTag=$TAG"
+
   trigger-aur-update:
     name: Trigger AUR repository update
     needs: publish-release
