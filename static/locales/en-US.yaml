@@ -1068,7 +1068,8 @@ Settings:
     Browser Profile Placeholder: Profile name or path
     Select Browser: Select a browser
     Always Use Cookies: Always Use Cookies
-    Restricted Playback Authentication Hint: By default, OpenTubeX only passes these cookies to yt-dlp after you choose "Try with configured cookies" on an age-restricted or members-only video. Enable "Always Use Cookies" to use them whenever yt-dlp extracts streams. This setting does not switch the stream extraction method to yt-dlp. With yt-dlp selected, account-only formats may become available, including YouTube Premium's enhanced-bitrate 1080p when the account has access. Using yt-dlp with a Google account can lead to temporary or permanent account restrictions.
+    Restricted Playback Authentication Hint: By default, OpenTubeX only passes these cookies to yt-dlp after you choose "Try with configured cookies" on an age-restricted or members-only video.
+    Restricted Playback Authentication Warning: Using yt-dlp with a Google account can lead to temporary or permanent account restrictions.
   Privacy Settings:
     Privacy Settings: Privacy
     Remember History: Remember Watch History
@@ -2364,7 +2365,7 @@ Tooltips:
     Cookie File: Select a Netscape-formatted cookie file for authenticated playback.
     Browser for Cookies: Browser support is read from the selected yt-dlp executable. OpenTubeX asks yt-dlp to read this browser when authenticated playback is requested.
     Browser Profile: Optional browser profile name or folder. Leave blank to use the most recently accessed profile.
-    Always Use Cookies: Use the configured cookies whenever yt-dlp extracts streams. This does not switch the stream extraction method to yt-dlp.
+    Always Use Cookies: Use the configured cookies whenever yt-dlp extracts streams. This does not switch the stream extraction method to yt-dlp. With yt-dlp selected, account-only formats may become available, including YouTube Premium's enhanced bitrate when the account has access.
     FFmpeg Executable Path: FFmpeg is required for merging separate video and audio streams
       and for audio conversion. By default, OpenTubeX will assume that FFmpeg can be found
       via the PATH environment variable. If needed, a custom path can be set here.

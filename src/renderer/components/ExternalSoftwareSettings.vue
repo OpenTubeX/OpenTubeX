@@ -294,6 +294,7 @@
     </FtFlexBox>
     <p class="restrictedPlaybackAuthHint">
       {{ t('Settings.External Software Settings.Restricted Playback Authentication Hint') }}
+      <strong>{{ t('Settings.External Software Settings.Restricted Playback Authentication Warning') }}</strong>
     </p>
   </FtSettingsSection>
 </template>

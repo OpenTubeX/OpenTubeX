@@ -1186,7 +1186,8 @@ Settings:
     Browser Profile Placeholder: Profilname oder -pfad
     Select Browser: Browser auswählen
     Always Use Cookies: Cookies immer verwenden
-    Restricted Playback Authentication Hint: Standardmäßig übergibt OpenTubeX diese Cookies erst an yt-dlp, nachdem du bei einem altersbeschränkten oder nur für Mitglieder verfügbaren Video „Mit konfigurierten Cookies versuchen“ ausgewählt hast. Aktiviere „Cookies immer verwenden“, um sie bei jeder Stream-Extraktion mit yt-dlp zu verwenden. Diese Einstellung wechselt die Methode zur Stream-Extraktion nicht zu yt-dlp. Wenn yt-dlp ausgewählt ist, können kontogebundene Formate verfügbar werden, einschließlich der höheren 1080p-Bitrate von YouTube Premium, wenn das Konto darauf Zugriff hat. Die Verwendung von yt-dlp mit einem Google-Konto kann zu vorübergehenden oder dauerhaften Kontoeinschränkungen führen.
+    Restricted Playback Authentication Hint: Standardmäßig übergibt OpenTubeX diese Cookies erst an yt-dlp, nachdem du bei einem altersbeschränkten oder nur für Mitglieder verfügbaren Video „Mit konfigurierten Cookies versuchen“ ausgewählt hast.
+    Restricted Playback Authentication Warning: Die Verwendung von yt-dlp mit einem Google-Konto kann zu vorübergehenden oder dauerhaften Kontoeinschränkungen führen.
     Detected FFprobe Version Template: 'Erkannte FFprobe-Version: {version}'
     FFprobe Managed Not Downloaded: >-
       FFprobe wurde noch nicht heruntergeladen. Klicke auf die Schaltfläche unten, um es zusammen mit FFmpeg
@@ -2104,7 +2105,7 @@ Tooltips:
     Cookie File: Wähle eine Cookie-Datei im Netscape-Format für die authentifizierte Wiedergabe aus.
     Browser for Cookies: Die Browserunterstützung wird anhand der ausgewählten ausführbaren yt-dlp-Datei ermittelt. OpenTubeX weist yt-dlp an, Cookies aus diesem Browser zu lesen, wenn eine authentifizierte Wiedergabe angefordert wird.
     Browser Profile: Optionaler Name oder Ordner des Browserprofils. Lasse das Feld leer, um das zuletzt verwendete Profil zu nutzen.
-    Always Use Cookies: Verwendet die konfigurierten Cookies bei jeder Stream-Extraktion mit yt-dlp. Dies wechselt die Methode zur Stream-Extraktion nicht zu yt-dlp.
+    Always Use Cookies: Verwendet die konfigurierten Cookies bei jeder Stream-Extraktion mit yt-dlp. Dies wechselt die Methode zur Stream-Extraktion nicht zu yt-dlp. Wenn yt-dlp ausgewählt ist, können kontogebundene Formate verfügbar werden, einschließlich der höheren Bitrate von YouTube Premium, wenn das Konto darauf Zugriff hat.
     FFmpeg Executable Path: FFmpeg wird zum Zusammenführen von getrennten Video- und Audiospuren sowie zur Audiokonvertierung benötigt. Standardmäßig nimmt OpenTubeX an, dass FFmpeg über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
   Experimental Settings:
     Replace HTTP Cache: Deaktiviert den festplattenbasierten HTTP-Cache von Electron und aktiviert einen benutzerdefinierten In-Memory-Image-Cache. Dies führt zu einer erhöhten RAM-Auslastung.
