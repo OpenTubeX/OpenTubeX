@@ -493,6 +493,7 @@ const state = {
   showScheduledLiveStreamsFirst: true,
   showNewSubscriptionFeed: true,
   showNewSubscriptionFeedIndicators: false,
+  newSubscriptionFeedView: 'combined',
   newSubscriptionFeedSortBy: 'newest',
   subscriptionFeedAutoRefreshInterval: '0',
   subscriptionShortsAutoRefreshInterval: '0',

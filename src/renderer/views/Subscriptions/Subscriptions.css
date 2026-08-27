@@ -28,12 +28,32 @@
   box-shadow: 0 1px 0 var(--primary-shadow-color);
 }
 
+.subscriptionsHeader.tabbedNewFeed {
+  box-shadow: none;
+}
+
 .headerRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px 20px;
   flex-wrap: wrap;
+}
+
+.feedTabsControlsRow {
+  align-items: center;
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  min-inline-size: 0;
+}
+
+.subscriptionsHeader.tabbedNewFeed .headerRow {
+  margin-inline: -16px;
+  padding-block-end: 8px;
+  padding-inline: 16px;
+  border-block-end: 1px solid var(--primary-shadow-color);
 }
 
 .pageTitle {
@@ -74,14 +94,32 @@
   display: flex;
   gap: 12px;
 
-  /* Size to its content so the header row positions the whole widget: tucked to
-     the inline-end while it fits beside the title, and flush to the inline-start
-     once it wraps onto its own line. */
+  /* Size to its content so the header row keeps the whole widget together. */
   max-inline-size: 100%;
 }
 
-.headerActions .headerSortSelect {
+.headerViewToggle {
   flex-shrink: 0;
+}
+
+.headerViewToggle :deep(.iconButton) {
+  block-size: 36px;
+  inline-size: 36px;
+}
+
+.headerViewToggle :deep(.iconButton[aria-pressed='true']) {
+  background-color: var(--side-nav-active-color);
+  color: var(--side-nav-active-text-color);
+}
+
+.subscriptionsHeader .headerActions .headerRefreshWidget {
+  flex: 0 0 auto;
+  inline-size: auto;
+}
+
+.headerActions .headerSortSelect {
+  flex: 1 1 220px;
+  min-inline-size: 0;
   inline-size: 220px;
   margin-block-start: 0;
 }
@@ -140,11 +178,25 @@
   color: var(--tertiary-text-color);
 }
 
-/* Two line layout: the tabs are moved past the refresh widget, so that they end
-   up on the line below the one with the title */
-.subscriptionsHeader:not(.singleRow) .tabsRow {
-  order: 1;
+/* Two line layout: the grouped tabs and controls move below the title together.
+   Giving the tabs a zero basis lets their own flex container wrap before the
+   controls are pushed onto another line. */
+.subscriptionsHeader:not(.singleRow) .feedTabsControlsRow {
   flex-basis: 100%;
+}
+
+.subscriptionsHeader:not(.singleRow) .tabsRow {
+  flex: 1 1 0;
+  min-inline-size: 0;
+}
+
+.subscriptionsHeader:not(.singleRow) .tabs {
+  min-inline-size: 0;
+}
+
+.subscriptionsHeader:not(.singleRow) .headerActions {
+  flex: 0 1 auto;
+  margin-inline-start: auto;
 }
 
 .subscriptionsHeader.singleRow .headerRow {
@@ -157,9 +209,14 @@
   flex-shrink: 0;
 }
 
+.subscriptionsHeader.singleRow .feedTabsControlsRow,
 .subscriptionsHeader.singleRow .tabsRow,
 .subscriptionsHeader.singleRow .tabs {
   flex-wrap: nowrap;
+}
+
+.subscriptionsHeader.singleRow .feedTabsControlsRow > * {
+  flex-shrink: 0;
 }
 
 .subscriptionsHeader.singleRow .tabsRow {
@@ -233,6 +290,37 @@
   color: var(--primary-color);
 }
 
+.newFeedTabs {
+  align-items: stretch;
+  justify-content: center;
+  gap: 4px 10px;
+  margin-block: 8px -3px;
+  position: relative;
+  color: var(--tertiary-text-color);
+}
+
+.newFeedTab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-block-size: 44px;
+  padding-block: 9px;
+  padding-inline: 15px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: center;
+}
+
+.newFeedTab:hover {
+  color: var(--primary-text-color);
+  font-weight: bold;
+}
+
 .tab .tabLoadingIndicator {
   display: inline-flex;
   inline-size: auto;
@@ -263,6 +351,54 @@
   }
 
   .tabs {
+    gap: 4px;
+  }
+
+  .tab {
+    padding-inline: 10px;
+  }
+
+  .feedTabsControlsRow {
+    gap: 8px;
+  }
+
+  .headerActions {
+    gap: 6px;
+  }
+
+  .headerActions .headerSortSelect {
+    flex-basis: 128px;
+    inline-size: 128px;
+  }
+
+  .headerSortSelect :deep(.select-text) {
+    padding-inline-start: 36px;
+  }
+
+  .headerSortSelect :deep(.select-label),
+  .headerSortSelect :deep(.select-text ~ .select-label) {
+    max-inline-size: 16px;
+  }
+
+  .headerSortSelect :deep(.select-label-text) {
+    /* The icon and selected value keep the compact control understandable. */
+    display: none;
+  }
+
+  .markAllSeenButton {
+    min-block-size: 36px;
+  }
+
+  .markAllSeenLabel {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .newFeedTabs {
     gap: 4px;
   }
 }

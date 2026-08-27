@@ -141,6 +141,96 @@ test.describe('new subscriptions feed', () => {
     await expect(page.locator('.headerRefreshWidget .lastRefreshTimestamp')).toHaveCount(0)
   })
 
+  test('switches between the combined and tabbed views and remembers the choice', async ({ app, page, attachScreenshot }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+
+    const showTabbedView = page.getByRole('button', { name: 'Show tabbed view' })
+    await expect(showTabbedView).toHaveAttribute('aria-pressed', 'false')
+    await showTabbedView.click()
+
+    const newContentTabs = page.getByRole('tablist', { name: 'New content tabs' })
+    const newContentTabsIndicator = newContentTabs.locator('.newFeedTabsIndicator')
+    await expect(newContentTabs).toBeVisible()
+    await expect(newContentTabsIndicator).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Show combined view' })).toHaveAttribute('aria-pressed', 'true')
+    await expect(newContentTabs.locator('[data-new-feed-tab="videos"]')).toHaveAttribute('aria-selected', 'true')
+    await expect(page.getByText('New video', { exact: true })).toBeVisible()
+    await expect(page.getByText('New short', { exact: true })).toHaveCount(0)
+
+    const centerDifference = await page.evaluate(() => {
+      const header = document.querySelector('.subscriptionsHeader').getBoundingClientRect()
+      const tabs = [...document.querySelectorAll('[data-new-feed-tab]')]
+        .map(tab => tab.getBoundingClientRect())
+
+      return Math.abs(
+        (tabs[0].left + tabs.at(-1).right) / 2 -
+        (header.left + header.right) / 2
+      )
+    })
+    expect(centerDifference).toBeLessThanOrEqual(1)
+    await attachScreenshot('tabbed New feed')
+
+    const shortsTab = newContentTabs.locator('[data-new-feed-tab="shorts"]')
+    await shortsTab.click()
+    await expect(shortsTab).toHaveAttribute('aria-selected', 'true')
+    await expect(newContentTabsIndicator).toHaveCSS('transition-property', 'transform')
+    await expect(page.getByText('New short', { exact: true })).toBeVisible()
+    await expect(page.getByText('New video', { exact: true })).toHaveCount(0)
+
+    await page.waitForTimeout(400)
+    const indicatorAlignment = await page.evaluate(() => {
+      const indicator = document.querySelector('.newFeedTabsIndicator').getBoundingClientRect()
+      const tab = document.querySelector('[data-new-feed-tab="shorts"]').getBoundingClientRect()
+
+      return {
+        x: Math.abs(indicator.x - tab.x),
+        width: Math.abs(indicator.width - tab.width),
+        top: Math.abs(indicator.top - tab.bottom)
+      }
+    })
+    expect(indicatorAlignment.x).toBeLessThan(2)
+    expect(indicatorAlignment.width).toBeLessThan(2)
+    expect(indicatorAlignment.top).toBeLessThan(2)
+
+    await shortsTab.focus()
+    await shortsTab.press('ArrowRight')
+    await expect(newContentTabs.locator('[data-new-feed-tab="live"]')).toBeFocused()
+    await expect(page.getByText('New live stream', { exact: true })).toBeVisible()
+
+    const liveTab = newContentTabs.locator('[data-new-feed-tab="live"]')
+    const altArrowWasNotPrevented = await liveTab.evaluate(element => {
+      return element.dispatchEvent(new KeyboardEvent('keydown', {
+        key: 'ArrowRight',
+        altKey: true,
+        bubbles: true,
+        cancelable: true
+      }))
+    })
+    expect(altArrowWasNotPrevented).toBe(true)
+    await expect(liveTab).toHaveAttribute('aria-selected', 'true')
+    await expect(liveTab).toBeFocused()
+
+    await newContentTabs.locator('[data-new-feed-tab="posts"]').click()
+    await expect(page.getByText('New community post', { exact: true })).toBeVisible()
+
+    const relaunched = await app.relaunch()
+    await goTo(relaunched.page, 'subscriptions')
+    await relaunched.page.locator('[data-subscription-feed-tab="all"]').click()
+
+    const relaunchedTabs = relaunched.page.getByRole('tablist', { name: 'New content tabs' })
+    await expect(relaunchedTabs).toBeVisible()
+    await expect(relaunchedTabs.locator('[data-new-feed-tab="posts"]')).toHaveAttribute('aria-selected', 'true')
+    await expect(relaunched.page.getByText('New community post', { exact: true })).toBeVisible()
+
+    await relaunched.page.getByRole('button', { name: 'Show combined view' }).click()
+    await expect(relaunchedTabs).toHaveCount(0)
+    await expect(relaunched.page.getByRole('heading', { name: 'Videos', exact: true })).toBeVisible()
+    await expect(relaunched.page.getByRole('heading', { name: 'Shorts', exact: true })).toBeVisible()
+    await expect(relaunched.page.getByRole('heading', { name: 'Live', exact: true })).toBeVisible()
+    await expect(relaunched.page.getByRole('heading', { name: 'Posts', exact: true })).toBeVisible()
+  })
+
   test('shows Shorts as portrait cards with their duration and upload time', async ({ page }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="shorts"]').click()

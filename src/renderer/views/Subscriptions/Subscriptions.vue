@@ -6,7 +6,10 @@
     <FtCard class="card">
       <div
         class="subscriptionsHeader"
-        :class="{ singleRow: headerFitsOneRow }"
+        :class="{
+          singleRow: headerFitsOneRow,
+          tabbedNewFeed: currentTab === 'new' && newFeedView === 'tabbed'
+        }"
       >
         <div
           ref="headerRowRef"
@@ -20,200 +23,258 @@
             {{ $t("Subscriptions.Subscriptions") }}
           </h2>
           <div
-            ref="tabsRowRef"
-            class="tabsRow"
+            ref="feedTabsControlsRowRef"
+            class="feedTabsControlsRow"
           >
-            <FtFlexBox
-              ref="tabsContainerRef"
-              class="tabs"
-              role="tablist"
-              :aria-label="$t('Subscriptions.Subscriptions Tabs')"
+            <div
+              ref="tabsRowRef"
+              class="tabsRow"
             >
-              <div
-                v-if="tabsIndicatorStyle"
-                class="tabsIndicator"
-                data-animation-speed-managed
-                :style="[tabsIndicatorStyle, { transitionDuration: tabsIndicatorTransitionDuration }]"
-                aria-hidden="true"
+              <FtFlexBox
+                ref="tabsContainerRef"
+                class="tabs"
+                role="tablist"
+                :aria-label="$t('Subscriptions.Subscriptions Tabs')"
+              >
+                <div
+                  v-if="tabsIndicatorStyle"
+                  class="tabsIndicator"
+                  data-animation-speed-managed
+                  :style="[tabsIndicatorStyle, { transitionDuration: tabsIndicatorTransitionDuration }]"
+                  aria-hidden="true"
+                />
+                <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+                <div
+                  v-if="!hideSubscriptionsVideos"
+                  ref="videosTab"
+                  class="tab"
+                  role="tab"
+                  :aria-selected="currentTab === 'videos'"
+                  aria-controls="subscriptionsPanel"
+                  data-subscription-feed-tab="videos"
+                  :tabindex="currentTab === 'videos' ? 0 : -1"
+                  :class="{ selectedTab: selectedTab === 'videos' }"
+                  @click="changeTabFromPointer($event, 'videos')"
+                  @keydown.space.enter.prevent="changeTab('videos')"
+                  @keydown.left.right="switchTab($event, 'videos')"
+                >
+                  <FtIcon
+                    :icon="['fa', 'video']"
+                    class="subscriptionIcon"
+                  />
+                  <span
+                    class="tabLabel"
+                    :data-label="$t('Global.Videos')"
+                  ><span>{{ $t("Global.Videos") }}</span></span>
+                  <FtLoader
+                    v-if="refreshingFeedTab === 'videos'"
+                    class="tabLoadingIndicator"
+                  />
+                </div>
+                <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+                <div
+                  v-if="!hideSubscriptionsShorts"
+                  ref="shortsTab"
+                  class="tab"
+                  role="tab"
+                  :aria-selected="currentTab === 'shorts'"
+                  aria-controls="subscriptionsPanel"
+                  data-subscription-feed-tab="shorts"
+                  :tabindex="currentTab === 'shorts' ? 0 : -1"
+                  :class="{ selectedTab: selectedTab === 'shorts' }"
+                  @click="changeTabFromPointer($event, 'shorts')"
+                  @keydown.space.enter.prevent="changeTab('shorts')"
+                  @keydown.left.right="switchTab($event, 'shorts')"
+                >
+                  <FtIcon
+                    :icon="['fa', 'clapperboard']"
+                    class="subscriptionIcon"
+                  />
+                  <span
+                    class="tabLabel"
+                    :data-label="$t('Global.Shorts')"
+                  ><span>{{ $t("Global.Shorts") }}</span></span>
+                  <FtLoader
+                    v-if="refreshingFeedTab === 'shorts'"
+                    class="tabLoadingIndicator"
+                  />
+                </div>
+                <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+                <div
+                  v-if="!hideSubscriptionsLive"
+                  ref="liveTab"
+                  class="tab"
+                  role="tab"
+                  :aria-selected="currentTab === 'live'"
+                  aria-controls="subscriptionsPanel"
+                  data-subscription-feed-tab="live"
+                  :tabindex="currentTab === 'live' ? 0 : -1"
+                  :class="{ selectedTab: selectedTab === 'live' }"
+                  @click="changeTabFromPointer($event, 'live')"
+                  @keydown.space.enter.prevent="changeTab('live')"
+                  @keydown.left.right="switchTab($event, 'live')"
+                >
+                  <FtIcon
+                    :icon="['fa', 'tower-broadcast']"
+                    class="subscriptionIcon"
+                  />
+                  <span
+                    class="tabLabel"
+                    :data-label="$t('Global.Live')"
+                  ><span>{{ $t("Global.Live") }}</span></span>
+                  <FtLoader
+                    v-if="refreshingFeedTab === 'live'"
+                    class="tabLoadingIndicator"
+                  />
+                </div>
+                <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+                <div
+                  v-if="visibleTabs.includes('community')"
+                  ref="communityTab"
+                  class="tab"
+                  role="tab"
+                  :aria-selected="currentTab === 'community'"
+                  aria-controls="subscriptionsPanel"
+                  data-subscription-feed-tab="posts"
+                  :tabindex="currentTab === 'community' ? 0 : -1"
+                  :class="{ selectedTab: selectedTab === 'community' }"
+                  @click="changeTabFromPointer($event, 'community')"
+                  @keydown.space.enter.prevent="changeTab('community')"
+                  @keydown.left.right="switchTab($event, 'community')"
+                >
+                  <FtIcon
+                    :icon="['fa', 'message']"
+                    class="subscriptionIcon"
+                  />
+                  <span
+                    class="tabLabel"
+                    :data-label="$t('Global.Posts')"
+                  ><span>{{ $t("Global.Posts") }}</span></span>
+                  <FtLoader
+                    v-if="refreshingFeedTab === 'posts'"
+                    class="tabLoadingIndicator"
+                  />
+                </div>
+                <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+                <div
+                  v-if="visibleTabs.includes('new')"
+                  ref="newTab"
+                  class="tab"
+                  role="tab"
+                  :aria-selected="currentTab === 'new'"
+                  aria-controls="subscriptionsPanel"
+                  data-subscription-feed-tab="all"
+                  :tabindex="currentTab === 'new' ? 0 : -1"
+                  :class="{ selectedTab: selectedTab === 'new' }"
+                  @click="changeTabFromPointer($event, 'new')"
+                  @keydown.space.enter.prevent="changeTab('new')"
+                  @keydown.left.right="switchTab($event, 'new')"
+                >
+                  <FtIcon
+                    :icon="['fa', 'fire']"
+                    class="subscriptionIcon"
+                  />
+                  <span
+                    class="tabLabel"
+                    :data-label="$t('Global.New')"
+                  ><span>{{ $t("Global.New") }}</span></span>
+                </div>
+              </FtFlexBox>
+              <button
+                v-if="currentTabHasNewContent"
+                class="markAllSeenButton"
+                type="button"
+                :disabled="markingSeenTab !== null || currentTabRefreshing"
+                @click="markAllAsSeen(currentTab)"
+              >
+                <FtIcon :icon="['fas', 'check']" />
+                <span class="markAllSeenLabel">
+                  {{ $t('Subscriptions.Mark All as Seen') }}
+                </span>
+              </button>
+            </div>
+            <div
+              v-if="currentTabPanel !== null"
+              class="headerActions"
+            >
+              <FtIconButton
+                v-if="currentTab === 'new'"
+                class="headerViewToggle"
+                :title="newFeedView === 'tabbed'
+                  ? $t('Subscriptions.Show Combined View')
+                  : $t('Subscriptions.Show Tabbed View')"
+                :icon="newFeedView === 'tabbed' ? ['fas', 'layer-group'] : ['fas', 'clone']"
+                :aria-pressed="newFeedView === 'tabbed'"
+                :use-shadow="false"
+                :padding="8"
+                :size="20"
+                theme="base-no-default"
+                @click="toggleNewFeedView"
               />
-              <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-              <div
-                v-if="!hideSubscriptionsVideos"
-                ref="videosTab"
-                class="tab"
-                role="tab"
-                :aria-selected="currentTab === 'videos'"
-                aria-controls="subscriptionsPanel"
-                data-subscription-feed-tab="videos"
-                :tabindex="currentTab === 'videos' ? 0 : -1"
-                :class="{ selectedTab: selectedTab === 'videos' }"
-                @click="changeTabFromPointer($event, 'videos')"
-                @keydown.space.enter.prevent="changeTab('videos')"
-                @keydown.left.right="switchTab($event, 'videos')"
-              >
-                <FtIcon
-                  :icon="['fa', 'video']"
-                  class="subscriptionIcon"
-                />
-                <span
-                  class="tabLabel"
-                  :data-label="$t('Global.Videos')"
-                ><span>{{ $t("Global.Videos") }}</span></span>
-                <FtLoader
-                  v-if="refreshingFeedTab === 'videos'"
-                  class="tabLoadingIndicator"
-                />
-              </div>
-              <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-              <div
-                v-if="!hideSubscriptionsShorts"
-                ref="shortsTab"
-                class="tab"
-                role="tab"
-                :aria-selected="currentTab === 'shorts'"
-                aria-controls="subscriptionsPanel"
-                data-subscription-feed-tab="shorts"
-                :tabindex="currentTab === 'shorts' ? 0 : -1"
-                :class="{ selectedTab: selectedTab === 'shorts' }"
-                @click="changeTabFromPointer($event, 'shorts')"
-                @keydown.space.enter.prevent="changeTab('shorts')"
-                @keydown.left.right="switchTab($event, 'shorts')"
-              >
-                <FtIcon
-                  :icon="['fa', 'clapperboard']"
-                  class="subscriptionIcon"
-                />
-                <span
-                  class="tabLabel"
-                  :data-label="$t('Global.Shorts')"
-                ><span>{{ $t("Global.Shorts") }}</span></span>
-                <FtLoader
-                  v-if="refreshingFeedTab === 'shorts'"
-                  class="tabLoadingIndicator"
-                />
-              </div>
-              <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-              <div
-                v-if="!hideSubscriptionsLive"
-                ref="liveTab"
-                class="tab"
-                role="tab"
-                :aria-selected="currentTab === 'live'"
-                aria-controls="subscriptionsPanel"
-                data-subscription-feed-tab="live"
-                :tabindex="currentTab === 'live' ? 0 : -1"
-                :class="{ selectedTab: selectedTab === 'live' }"
-                @click="changeTabFromPointer($event, 'live')"
-                @keydown.space.enter.prevent="changeTab('live')"
-                @keydown.left.right="switchTab($event, 'live')"
-              >
-                <FtIcon
-                  :icon="['fa', 'tower-broadcast']"
-                  class="subscriptionIcon"
-                />
-                <span
-                  class="tabLabel"
-                  :data-label="$t('Global.Live')"
-                ><span>{{ $t("Global.Live") }}</span></span>
-                <FtLoader
-                  v-if="refreshingFeedTab === 'live'"
-                  class="tabLoadingIndicator"
-                />
-              </div>
-              <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-              <div
-                v-if="visibleTabs.includes('community')"
-                ref="communityTab"
-                class="tab"
-                role="tab"
-                :aria-selected="currentTab === 'community'"
-                aria-controls="subscriptionsPanel"
-                data-subscription-feed-tab="posts"
-                :tabindex="currentTab === 'community' ? 0 : -1"
-                :class="{ selectedTab: selectedTab === 'community' }"
-                @click="changeTabFromPointer($event, 'community')"
-                @keydown.space.enter.prevent="changeTab('community')"
-                @keydown.left.right="switchTab($event, 'community')"
-              >
-                <FtIcon
-                  :icon="['fa', 'message']"
-                  class="subscriptionIcon"
-                />
-                <span
-                  class="tabLabel"
-                  :data-label="$t('Global.Posts')"
-                ><span>{{ $t("Global.Posts") }}</span></span>
-                <FtLoader
-                  v-if="refreshingFeedTab === 'posts'"
-                  class="tabLoadingIndicator"
-                />
-              </div>
-              <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-              <div
-                v-if="visibleTabs.includes('new')"
-                ref="newTab"
-                class="tab"
-                role="tab"
-                :aria-selected="currentTab === 'new'"
-                aria-controls="subscriptionsPanel"
-                data-subscription-feed-tab="all"
-                :tabindex="currentTab === 'new' ? 0 : -1"
-                :class="{ selectedTab: selectedTab === 'new' }"
-                @click="changeTabFromPointer($event, 'new')"
-                @keydown.space.enter.prevent="changeTab('new')"
-                @keydown.left.right="switchTab($event, 'new')"
-              >
-                <FtIcon
-                  :icon="['fa', 'fire']"
-                  class="subscriptionIcon"
-                />
-                <span
-                  class="tabLabel"
-                  :data-label="$t('Global.New')"
-                ><span>{{ $t("Global.New") }}</span></span>
-              </div>
-            </FtFlexBox>
-            <button
-              v-if="currentTabHasNewContent"
-              class="markAllSeenButton"
-              type="button"
-              :disabled="markingSeenTab !== null || currentTabRefreshing"
-              @click="markAllAsSeen(currentTab)"
-            >
-              <FtIcon :icon="['fas', 'check']" />
-              {{ $t('Subscriptions.Mark All as Seen') }}
-            </button>
-          </div>
-          <div
-            v-if="currentTabPanel !== null"
-            class="headerActions"
-          >
-            <FtSelect
-              v-if="currentTab === 'new'"
-              class="headerSortSelect"
-              :placeholder="$t('Global.Sort By')"
-              :value="newFeedSortBy"
-              :select-names="newFeedSortByNames"
-              :select-values="NEW_FEED_SORT_BY_VALUES"
-              :icon="newFeedSortByIcon"
-              @change="updateNewFeedSortBy"
-            />
-            <FtRefreshWidget
-              embedded
-              class="headerRefreshWidget"
-              :disable-refresh="subscriptionFeedRefreshInProgress || currentTabPanel.isLoading || activeSubscriptionList.length === 0"
-              :last-refresh-timestamp="currentTabPanel.lastRefreshTimestamp"
-              :next-auto-refresh-timestamp="currentTabPanel.nextAutoRefreshTimestamp"
-              :next-auto-refresh-tooltip="currentTabPanel.nextAutoRefreshTooltip"
-              :next-auto-refresh-at="currentAutoRefresh.timestamp"
-              :auto-refresh-interval="currentAutoRefresh.interval"
-              :title="currentTabPanel.refreshTitle"
-              :refresh-in-progress="subscriptionFeedRefreshInProgress"
-              @click="refreshCurrentTab"
-              @cancel="cancelRefresh"
-            />
+              <FtSelect
+                v-if="currentTab === 'new'"
+                class="headerSortSelect"
+                :placeholder="$t('Global.Sort By')"
+                :value="newFeedSortBy"
+                :select-names="newFeedSortByNames"
+                :select-values="NEW_FEED_SORT_BY_VALUES"
+                :icon="newFeedSortByIcon"
+                @change="updateNewFeedSortBy"
+              />
+              <FtRefreshWidget
+                embedded
+                class="headerRefreshWidget"
+                :disable-refresh="subscriptionFeedRefreshInProgress || currentTabPanel.isLoading || activeSubscriptionList.length === 0"
+                :last-refresh-timestamp="currentTabPanel.lastRefreshTimestamp"
+                :next-auto-refresh-timestamp="currentTabPanel.nextAutoRefreshTimestamp"
+                :next-auto-refresh-tooltip="currentTabPanel.nextAutoRefreshTooltip"
+                :next-auto-refresh-at="currentAutoRefresh.timestamp"
+                :auto-refresh-interval="currentAutoRefresh.interval"
+                :title="currentTabPanel.refreshTitle"
+                :refresh-in-progress="subscriptionFeedRefreshInProgress"
+                @click="refreshCurrentTab"
+                @cancel="cancelRefresh"
+              />
+            </div>
           </div>
         </div>
+        <FtFlexBox
+          v-if="currentTab === 'new' && newFeedView === 'tabbed'"
+          ref="newFeedTabsContainerRef"
+          class="newFeedTabs"
+          role="tablist"
+          :aria-label="$t('Subscriptions.New Content Tabs')"
+        >
+          <div
+            v-if="newFeedTabsIndicatorStyle"
+            class="tabsIndicator newFeedTabsIndicator"
+            data-animation-speed-managed
+            :style="[newFeedTabsIndicatorStyle, { transitionDuration: tabsIndicatorTransitionDuration }]"
+            aria-hidden="true"
+          />
+          <button
+            v-for="tab in visibleNewFeedTabs"
+            :key="tab.id"
+            :ref="element => setNewFeedTabRef(tab.id, element)"
+            class="newFeedTab"
+            :class="{ selectedTab: currentNewFeedTab === tab.id }"
+            type="button"
+            role="tab"
+            :aria-selected="currentNewFeedTab === tab.id"
+            aria-controls="subscriptionsPanel"
+            :data-new-feed-tab="tab.id"
+            :tabindex="currentNewFeedTab === tab.id ? 0 : -1"
+            @click="changeNewFeedTab(tab.id)"
+            @keydown.left.right="switchNewFeedTab($event, tab.id)"
+            @keydown.home.end.prevent="switchNewFeedTab($event, tab.id)"
+          >
+            <FtIcon
+              :icon="tab.icon"
+              class="subscriptionIcon"
+            />
+            <span>{{ tab.label }}</span>
+          </button>
+        </FtFlexBox>
       </div>
       <KeepAlive>
         <SubscriptionsVideos
@@ -250,6 +311,7 @@
           key="subscriptions-new"
           ref="newPanel"
           role="tabpanel"
+          :active-category="newFeedView === 'tabbed' ? currentNewFeedTab : null"
         />
       </KeepAlive>
       <p v-if="currentTab === null">
@@ -279,6 +341,7 @@ import { useI18n } from 'vue-i18n'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
+import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtPrompt from '../../components/FtPrompt/FtPrompt.vue'
 import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vue'
 import FtSelect from '../../components/FtSelect/FtSelect.vue'
@@ -316,6 +379,7 @@ const {
   showRefreshWarning: showAllFeedsRefreshWarning
 } = useRefreshAllSubscriptionFeeds()
 const currentTabStorageKey = 'Subscriptions/currentTab'
+const currentNewFeedTabStorageKey = 'Subscriptions/currentNewFeedTab'
 const NEW_FEED_SORT_BY_VALUES = ['newest', 'oldest']
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -355,11 +419,20 @@ const newFeedSortByNames = computed(() => [
   t('Subscriptions.Oldest First')
 ])
 const newFeedSortByIcon = computed(() => getIconForSortPreference(newFeedSortBy.value))
+const newFeedView = computed(() => {
+  return store.getters.getNewSubscriptionFeedView === 'tabbed' ? 'tabbed' : 'combined'
+})
 
 function updateNewFeedSortBy(value) {
   if (NEW_FEED_SORT_BY_VALUES.includes(value)) {
     store.dispatch('updateNewSubscriptionFeedSortBy', value)
   }
+}
+
+async function toggleNewFeedView() {
+  const value = newFeedView.value === 'tabbed' ? 'combined' : 'tabbed'
+  await store.dispatch('updateNewSubscriptionFeedView', value)
+  resetNewFeedScroll()
 }
 
 const activeSubscriptionList = computed(() => {
@@ -560,6 +633,37 @@ const visibleTabs = computed(() => {
   return tabs
 })
 
+const newFeedTabDefinitions = computed(() => [
+  { id: 'videos', icon: ['fa', 'video'], label: t('Global.Videos') },
+  { id: 'shorts', icon: ['fa', 'clapperboard'], label: t('Global.Shorts') },
+  { id: 'live', icon: ['fa', 'tower-broadcast'], label: t('Global.Live') },
+  { id: 'posts', icon: ['fa', 'message'], label: t('Global.Posts') }
+])
+
+const visibleNewFeedTabs = computed(() => {
+  const visibleCategories = new Set(visibleTabs.value.map(tab => {
+    return tab === 'community' ? 'posts' : tab
+  }))
+
+  return newFeedTabDefinitions.value.filter(tab => visibleCategories.has(tab.id))
+})
+
+const storedNewFeedTab = localStorage.getItem(currentNewFeedTabStorageKey)
+/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'posts'>} */
+const currentNewFeedTab = ref(storedNewFeedTab ?? 'videos')
+/** @type {Map<string, HTMLElement>} */
+const newFeedTabRefs = new Map()
+
+watch(visibleNewFeedTabs, tabs => {
+  if (!tabs.some(tab => tab.id === currentNewFeedTab.value)) {
+    currentNewFeedTab.value = tabs[0]?.id ?? 'videos'
+  }
+}, { immediate: true })
+
+watch(currentNewFeedTab, value => {
+  localStorage.setItem(currentNewFeedTabStorageKey, value)
+})
+
 watch(visibleTabs, (value) => {
   if (value.length === 0) {
     tabChangeSequence++
@@ -637,6 +741,96 @@ function changeTabFromPointer(event, tab) {
 
   if (event.detail > 0 && document.activeElement instanceof HTMLElement) {
     document.activeElement.blur()
+  }
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ */
+function changeNewFeedTab(tab) {
+  if (
+    tab === currentNewFeedTab.value ||
+    !visibleNewFeedTabs.value.some(visibleTab => visibleTab.id === tab)
+  ) {
+    return
+  }
+
+  currentNewFeedTab.value = tab
+  resetNewFeedScroll()
+}
+
+/**
+ * @param {KeyboardEvent} event
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} focusedTab
+ */
+function switchNewFeedTab(event, focusedTab) {
+  if (event.altKey) {
+    return
+  }
+
+  event.preventDefault()
+
+  const tabs = visibleNewFeedTabs.value
+  let index = tabs.findIndex(tab => tab.id === focusedTab)
+
+  if (event.key === 'Home') {
+    index = 0
+  } else if (event.key === 'End') {
+    index = tabs.length - 1
+  } else if (event.key === 'ArrowLeft') {
+    index = index <= 0 ? tabs.length - 1 : index - 1
+  } else {
+    index = index >= tabs.length - 1 ? 0 : index + 1
+  }
+
+  const tab = tabs[index]?.id
+  if (tab == null) {
+    return
+  }
+
+  changeNewFeedTab(tab)
+  nextTick(() => newFeedTabRefs.get(tab)?.focus())
+  store.commit('setOutlinesHidden', false)
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {Element | import('vue').ComponentPublicInstance | null} element
+ */
+function setNewFeedTabRef(tab, element) {
+  if (element instanceof HTMLElement) {
+    newFeedTabRefs.set(tab, element)
+  } else {
+    newFeedTabRefs.delete(tab)
+  }
+}
+
+async function resetNewFeedScroll() {
+  tabScrollPositions.new = 0
+
+  if (
+    currentTab.value !== 'new' ||
+    (isElectron && isTabPresented?.value !== true)
+  ) {
+    return
+  }
+
+  if (isElectron && tabId) {
+    getTabNavigationService().resetScroll(tabId)
+  } else {
+    window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
+  }
+
+  await nextTick()
+  await nextAnimationFrame()
+
+  if (
+    isMounted &&
+    currentTab.value === 'new' &&
+    (!isElectron || isTabPresented?.value === true)
+  ) {
+    window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
+    scrollPositionOwnerTab = 'new'
   }
 }
 
@@ -872,6 +1066,7 @@ async function handleFeedReloadRequest(payload) {
 
 // ===== Single row header =====
 const headerRowRef = useTemplateRef('headerRowRef')
+const feedTabsControlsRowRef = useTemplateRef('feedTabsControlsRowRef')
 const tabsRowRef = useTemplateRef('tabsRowRef')
 /** @type {import('vue').Ref<boolean>} */
 const headerFitsOneRow = ref(false)
@@ -886,6 +1081,7 @@ let headerResizeObserver = null
  */
 function singleLineWidth(container, childWidth = child => child.getBoundingClientRect().width) {
   const children = Array.from(container.children)
+    .filter(child => getComputedStyle(child).position !== 'absolute')
   const columnGap = Number.parseFloat(getComputedStyle(container).columnGap) || 0
 
   return children.reduce((total, child) => total + childWidth(child), 0) +
@@ -893,28 +1089,57 @@ function singleLineWidth(container, childWidth = child => child.getBoundingClien
 }
 
 /**
- * The tabs sit next to the page title while the title, the tabs and the refresh
- * widget fit onto one line together, otherwise the tabs drop onto a line of
- * their own. The single row layout doesn't let its children shrink and the tabs
- * are measured through their content, so the measurement is the same in both
- * layouts and they can't flip back and forth.
+ * The inline size available to flex children. getBoundingClientRect includes
+ * the padding used to extend the tabbed-view separator across the header.
+ * @param {HTMLElement} element
+ */
+function contentBoxWidth(element) {
+  const style = getComputedStyle(element)
+  return element.getBoundingClientRect().width -
+    (Number.parseFloat(style.paddingInlineStart) || 0) -
+    (Number.parseFloat(style.paddingInlineEnd) || 0) -
+    (Number.parseFloat(style.borderInlineStartWidth) || 0) -
+    (Number.parseFloat(style.borderInlineEndWidth) || 0)
+}
+
+/**
+ * The tabs and actions sit next to the page title while all three fit onto one
+ * line. Otherwise the tabs and actions move together below the title. The
+ * single row layout doesn't let its children shrink and the tabs are measured
+ * through their content, so the measurement is stable in both layouts.
  */
 function updateHeaderFitsOneRow() {
   const row = headerRowRef.value
+  const feedTabsControlsRow = feedTabsControlsRowRef.value
   const tabsRow = tabsRowRef.value
+  const tabs = tabsContainerRef.value?.$el
 
-  if (!(row instanceof HTMLElement) || row.getClientRects().length === 0) {
+  if (
+    !(row instanceof HTMLElement) ||
+    !(feedTabsControlsRow instanceof HTMLElement) ||
+    !(tabsRow instanceof HTMLElement) ||
+    !(tabs instanceof HTMLElement) ||
+    row.getClientRects().length === 0
+  ) {
     return
   }
 
+  const tabsRowWidth = singleLineWidth(tabsRow, child => {
+    return child === tabs ? singleLineWidth(tabs) : child.getBoundingClientRect().width
+  })
+  const feedTabsControlsRowWidth = singleLineWidth(feedTabsControlsRow, child => {
+    return child === tabsRow ? tabsRowWidth : child.getBoundingClientRect().width
+  })
   const requiredWidth = singleLineWidth(row, child => {
-    // The tabs stretch across the whole header while they have their own line
-    return child === tabsRow ? singleLineWidth(child) : child.getBoundingClientRect().width
+    // The grouped row stretches across the header in the split layout
+    return child === feedTabsControlsRow
+      ? feedTabsControlsRowWidth
+      : child.getBoundingClientRect().width
   })
 
   // Fractional widths throughout, as rounding the available space up would let
   // the single row layout overflow, which puts the tabs onto a second line again
-  headerFitsOneRow.value = requiredWidth <= row.getBoundingClientRect().width
+  headerFitsOneRow.value = requiredWidth <= contentBoxWidth(row)
 }
 
 function observeHeaderRow() {
@@ -935,7 +1160,15 @@ function observeHeaderRow() {
     headerResizeObserver.observe(child)
   }
 
+  for (const child of feedTabsControlsRowRef.value?.children ?? []) {
+    headerResizeObserver.observe(child)
+  }
+
   for (const child of tabsRowRef.value?.children ?? []) {
+    headerResizeObserver.observe(child)
+  }
+
+  for (const child of tabsContainerRef.value?.$el?.children ?? []) {
     headerResizeObserver.observe(child)
   }
 }
@@ -949,8 +1182,11 @@ watch([currentTabPanel, currentTabHasNewContent], () => nextTick(() => {
 
 // ===== Sliding feed tab indicator =====
 const tabsContainerRef = useTemplateRef('tabsContainerRef')
+const newFeedTabsContainerRef = useTemplateRef('newFeedTabsContainerRef')
 /** @type {import('vue').Ref<Record<string, string> | null>} */
 const tabsIndicatorStyle = ref(null)
+/** @type {import('vue').Ref<Record<string, string> | null>} */
+const newFeedTabsIndicatorStyle = ref(null)
 const tabsIndicatorTransitionDuration = computed(() => {
   return `${200 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)}ms`
 })
@@ -958,59 +1194,88 @@ let tabsResizeObserver = null
 // Place the indicator without animating when it was last measured while
 // hidden (e.g. in a background browser tab, where all offsets read 0),
 // otherwise it visibly flies in from the stale position.
-let tabsIndicatorWasHidden = true
+const tabsIndicatorState = { wasHidden: true }
+const newFeedTabsIndicatorState = { wasHidden: true }
 
 /**
- * @param {HTMLElement} tabElement
- * @returns {boolean} whether the indicator was positioned on the tab
+ * @param {import('vue').ShallowRef<import('vue').ComponentPublicInstance | null>} containerRef
+ * @param {string} selectedTabSelector
+ * @param {import('vue').Ref<Record<string, string> | null>} indicatorStyle
+ * @param {{ wasHidden: boolean }} state
  */
-function placeTabsIndicator(tabElement) {
-  if (tabElement.getClientRects().length === 0) {
-    tabsIndicatorWasHidden = true
-    return false
-  }
-
-  // Physical values to match the physical offset measurements (RTL-safe).
-  // The indicator sits just below the tab, like the old selectedTab border
-  // (which extended past the box through its -3px margin).
-  // Only the transform is animated, so the movement runs on the compositor and
-  // doesn't stutter while the main thread renders a large feed.
-  const style = {
-    transform: `translate(${tabElement.offsetLeft}px, ${tabElement.offsetTop + tabElement.offsetHeight}px) scaleX(${tabElement.offsetWidth})`
-  }
-
-  if (tabsIndicatorWasHidden) {
-    style.transition = 'none'
-    tabsIndicatorWasHidden = false
-  }
-
-  tabsIndicatorStyle.value = style
-  return true
-}
-
-function updateTabsIndicator() {
-  const container = tabsContainerRef.value?.$el
-  const selected = container?.querySelector('.tab.selectedTab')
+function updateTabIndicator(containerRef, selectedTabSelector, indicatorStyle, state) {
+  const container = containerRef.value?.$el
+  const selected = container?.querySelector(selectedTabSelector)
 
   if (!(selected instanceof HTMLElement)) {
-    tabsIndicatorStyle.value = null
-    tabsIndicatorWasHidden = true
+    indicatorStyle.value = null
+    state.wasHidden = true
     return
   }
 
-  placeTabsIndicator(selected)
+  if (selected.getClientRects().length === 0) {
+    indicatorStyle.value = null
+    state.wasHidden = true
+    return
+  }
+
+  // Physical values match the physical offset measurements and remain RTL-safe.
+  // The indicator sits just below the tab and only its transform is animated,
+  // keeping movement on the compositor while a large feed renders.
+  const style = {
+    transform: `translate(${selected.offsetLeft}px, ${selected.offsetTop + selected.offsetHeight}px) scaleX(${selected.offsetWidth})`
+  }
+
+  if (state.wasHidden) {
+    style.transition = 'none'
+  }
+
+  indicatorStyle.value = style
+  state.wasHidden = false
+}
+
+const updateTabsIndicator = () => updateTabIndicator(
+  tabsContainerRef,
+  '.tab.selectedTab',
+  tabsIndicatorStyle,
+  tabsIndicatorState
+)
+const updateNewFeedTabsIndicator = () => updateTabIndicator(
+  newFeedTabsContainerRef,
+  '.newFeedTab.selectedTab',
+  newFeedTabsIndicatorStyle,
+  newFeedTabsIndicatorState
+)
+
+function observeTabContainers() {
+  if (tabsResizeObserver === null) {
+    return
+  }
+
+  tabsResizeObserver.disconnect()
+
+  for (const container of [tabsContainerRef.value?.$el, newFeedTabsContainerRef.value?.$el]) {
+    if (container instanceof HTMLElement) {
+      tabsResizeObserver.observe(container)
+    }
+  }
 }
 
 watch([selectedTab, visibleTabs, refreshingFeedTab], () => nextTick(updateTabsIndicator))
+watch([currentNewFeedTab, visibleNewFeedTabs], () => nextTick(updateNewFeedTabsIndicator))
+watch([currentTab, newFeedView], () => nextTick(() => {
+  observeTabContainers()
+  updateNewFeedTabsIndicator()
+}))
 
 onMounted(() => {
   if (typeof ResizeObserver === 'function') {
     // Per-tab loaders resize the container while a refresh is running
-    tabsResizeObserver = new ResizeObserver(() => updateTabsIndicator())
-
-    if (tabsContainerRef.value?.$el instanceof HTMLElement) {
-      tabsResizeObserver.observe(tabsContainerRef.value.$el)
-    }
+    tabsResizeObserver = new ResizeObserver(() => {
+      updateTabsIndicator()
+      updateNewFeedTabsIndicator()
+    })
+    observeTabContainers()
 
     headerResizeObserver = new ResizeObserver(() => updateHeaderFitsOneRow())
     observeHeaderRow()
@@ -1019,6 +1284,7 @@ onMounted(() => {
   nextTick(() => {
     updateHeaderFitsOneRow()
     updateTabsIndicator()
+    updateNewFeedTabsIndicator()
   })
 })
 
