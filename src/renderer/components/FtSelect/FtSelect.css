@@ -88,6 +88,40 @@
   white-space: nowrap;
 }
 
+.select-text.withOptionVisuals,
+.selectOption.hasOptionVisuals {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.optionIcon {
+  color: var(--secondary-text-color);
+  flex: 0 0 10px;
+  font-size: 10px;
+  inline-size: 10px;
+  text-align: center;
+}
+
+.optionColorDot {
+  background: var(--option-color);
+  block-size: 10px;
+  border-radius: 50%;
+  flex: 0 0 10px;
+  inline-size: 10px;
+}
+
+.optionColorDot.empty {
+  background: transparent;
+  border: 1px solid var(--tertiary-text-color);
+  box-sizing: border-box;
+}
+
+.optionName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .selectDropdown {
   position: fixed;
   z-index: 12;

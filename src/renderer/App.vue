@@ -88,6 +88,10 @@
       :commands="commandPaletteCommands"
       @close="closeCommandPalette"
     />
+    <TabOrganizer
+      v-if="tabOrganizerOpen"
+      @close="closeTabOrganizer"
+    />
     <FtPrompt
       v-if="showReleaseNotes"
       theme="readable-width"
@@ -387,6 +391,8 @@ const FtCreatePlaylistPrompt = defineAsyncComponent(() => import('./components/F
 const FtSearchFilters = defineAsyncComponent(() => import('./components/FtSearchFilters/FtSearchFilters.vue'))
 const FtTutorialOverlay = defineAsyncComponent(() => import('./components/FtTutorialOverlay/FtTutorialOverlay.vue'))
 const FtCommandPalette = defineAsyncComponent(() => import('./components/FtCommandPalette/FtCommandPalette.vue'))
+const TabOrganizer = defineAsyncComponent(() => import('./components/TabOrganizer/TabOrganizer.vue'))
+const OPEN_TAB_ORGANIZER_EVENT = 'opentubex:open-tab-organizer'
 
 const route = useRoute()
 const router = useRouter()
@@ -575,6 +581,7 @@ const tabSwitcherFailedPreviewUrls = ref({})
 const tabSwitcherPointerActive = ref(false)
 const tabSwitcherRef = useTemplateRef('tabSwitcherRef')
 const commandPaletteOpen = ref(false)
+const tabOrganizerOpen = ref(false)
 const settingsSearchTarget = ref(null)
 const subscriptionAutoRefreshTimers = {
   videos: null,
@@ -599,6 +606,7 @@ let removeReloadRequestListener = null
 let removeConfirmMultipleTabsActionListener = null
 let removeOpenUrlListener = null
 let removeYtDlpBinaryUpdatedListener = null
+let removeOpenTabOrganizerListener = null
 /** @type {number|null} */
 let utilityRoutePreloadId = null
 let utilityRoutePreloadUsesIdleCallback = false
@@ -1077,6 +1085,7 @@ onMounted(async () => {
 
   document.addEventListener('keydown', handleKeyboardShortcuts)
   window.addEventListener(OPEN_COMMAND_PALETTE_EVENT, openCommandPalette)
+  window.addEventListener(OPEN_TAB_ORGANIZER_EVENT, openTabOrganizer)
   document.addEventListener('keyup', handleKeyboardShortcutKeyup)
   document.addEventListener('mousedown', handleMouseDown)
   document.addEventListener('dragstart', handleDragStart)
@@ -1090,6 +1099,7 @@ onMounted(async () => {
   window.addEventListener(SUBSCRIPTION_REFRESH_STARTED_EVENT, handleSubscriptionRefreshStarted)
   document.addEventListener('visibilitychange', handleSubscriptionAutoRefreshVisibilityChange)
   if (process.env.IS_ELECTRON) {
+    removeOpenTabOrganizerListener = window.ftElectron.tabs.onOpenOrganizer(openTabOrganizer)
     removeSubscriptionAutoRefreshStateChangedListener = window.ftElectron.subscriptionAutoRefresh.onStateChanged(
       applySubscriptionAutoRefreshState
     )
@@ -1122,6 +1132,7 @@ onBeforeUnmount(() => {
   store.dispatch('stopSyncServerAutoSync')
   document.removeEventListener('keydown', handleKeyboardShortcuts)
   window.removeEventListener(OPEN_COMMAND_PALETTE_EVENT, openCommandPalette)
+  window.removeEventListener(OPEN_TAB_ORGANIZER_EVENT, openTabOrganizer)
   document.removeEventListener('keyup', handleKeyboardShortcutKeyup)
   document.removeEventListener('mousedown', handleMouseDown)
   document.removeEventListener('dragstart', handleDragStart)
@@ -1145,6 +1156,7 @@ onBeforeUnmount(() => {
   removeConfirmMultipleTabsActionListener?.()
   removeOpenUrlListener?.()
   removeYtDlpBinaryUpdatedListener?.()
+  removeOpenTabOrganizerListener?.()
 })
 
 watch([activeTabId, selectionRevision], ([tabId, revision]) => {
@@ -2161,6 +2173,15 @@ function closeCommandPalette() {
   commandPaletteOpen.value = false
 }
 
+function openTabOrganizer() {
+  if (!isElectron || showTutorial.value || (!tabOrganizerOpen.value && isAnyPromptOpen.value)) return
+  tabOrganizerOpen.value = true
+}
+
+function closeTabOrganizer() {
+  tabOrganizerOpen.value = false
+}
+
 function navigateFromCommandPalette(location) {
   if (isElectron) {
     return navigation.push(presentedTabId.value, location)
@@ -2251,7 +2272,7 @@ function handleKeyboardShortcuts(event) {
     return
   }
 
-  if (commandPaletteOpen.value) return
+  if (commandPaletteOpen.value || tabOrganizerOpen.value) return
 
   if (matchesKeyboardShortcut(event, shortcuts.FIND_IN_PAGE)) {
     event.preventDefault()

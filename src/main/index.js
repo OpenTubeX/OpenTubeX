@@ -837,6 +837,14 @@ function runApp() {
       const selectedTabColor = contextMenuTabs.every(tab => tab.color === contextMenuTabs[0]?.color)
         ? contextMenuTabs[0]?.color ?? null
         : undefined
+      const selectedTabGroupId = contextMenuTabs.length > 0 &&
+        contextMenuTabs.every(tab => tab.groupId === contextMenuTabs[0].groupId)
+        ? contextMenuTabs[0].groupId ?? null
+        : undefined
+      const tabGroups = Array.from(manager?.tabGroups.values() ?? [])
+      const selectedTabGroup = typeof selectedTabGroupId === 'string'
+        ? manager?.tabGroups.get(selectedTabGroupId)
+        : null
       const hasSelectedUnloadedTab = contextMenuTabs.some(tab => tab.loadState === 'unloaded')
       const hasSelectedLoadedTab = contextMenuTabs.some(tab => !['unloaded', 'unloading'].includes(tab.loadState))
       /**
@@ -967,6 +975,43 @@ function runApp() {
               }
             }
           ]
+        },
+        {
+          label: contextMenuLabel(isBulkTabAction ? 'Move Tabs to Group' : 'Move Tab to Group'),
+          visible: contextMenuTab != null,
+          submenu: [
+            {
+              label: contextMenuLabel('Ungrouped'),
+              type: 'radio',
+              checked: selectedTabGroupId === null,
+              click: () => {
+                manager?.setTabsGroup(contextMenuTabs.map(tab => tab.id), null)
+              }
+            },
+            ...tabGroups.map(group => ({
+              label: group.name,
+              type: 'radio',
+              groupColor: group.color ?? 'default',
+              checked: selectedTabGroupId === group.id,
+              click: () => {
+                manager?.setTabsGroup(contextMenuTabs.map(tab => tab.id), group.id)
+              }
+            })),
+            { type: 'separator' },
+            {
+              label: contextMenuLabel('Manage Tab Groups…'),
+              click: () => {
+                manager?.bridge.send(IpcChannels.TABS_OPEN_ORGANIZER)
+              }
+            }
+          ]
+        },
+        {
+          label: contextMenuLabel('Collapse Group'),
+          visible: contextMenuTab != null && selectedTabGroup != null && !selectedTabGroup.isCollapsed,
+          click: () => {
+            manager?.updateTabGroup(selectedTabGroup.id, { isCollapsed: true })
+          }
         },
         {
           type: 'separator',
@@ -1475,6 +1520,7 @@ function runApp() {
         enabled: item.enabled !== false,
         checked: item.checked === true,
         icon: typeof item.icon === 'string' ? item.icon : undefined,
+        groupColor: typeof item.groupColor === 'string' ? item.groupColor : undefined,
         faviconSource: typeof item.faviconSource === 'string' ? item.faviconSource : undefined,
         actionId: hasAction ? actionId : undefined,
         submenu
@@ -2214,6 +2260,7 @@ function runApp() {
           ? confirmCloseWindowWithMultipleTabs(browserWindow, manager.tabs.size)
           : true
       },
+      confirmMultipleTabsAction,
       markWindowCloseConfirmed: (browserWindow) => {
         if (BrowserWindow.getAllWindows().length === 1) {
           closeConfirmedWindowIds.add(browserWindow.id)

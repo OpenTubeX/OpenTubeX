@@ -40,23 +40,11 @@
               aria-haspopup="menu"
               @pointerdown.prevent
             >
-              <span
-                class="itemIcon"
-                aria-hidden="true"
-              >
-                <img
-                  v-if="hasImageIcon(item)"
-                  class="itemImageIcon"
-                  :src="item.icon"
-                  alt=""
-                  referrerpolicy="no-referrer"
-                  @error="handleImageIconError(item.icon)"
-                >
-                <FtIcon
-                  v-else
-                  :icon="getItemIcon(item)"
-                />
-              </span>
+              <FtContextMenuItemIcon
+                :item="item"
+                :icon="getItemIcon(item)"
+                :icon-class="getItemIconClass(item)"
+              />
               <span>{{ localizedLabel(item) }}</span>
               <span
                 class="submenuArrow"
@@ -93,29 +81,11 @@
                     @pointerdown.prevent
                     @click="execute(child)"
                   >
-                    <span
-                      class="itemIcon"
-                      :class="getItemIconClass(child)"
-                      aria-hidden="true"
-                    >
-                      <img
-                        v-if="hasImageIcon(child)"
-                        class="itemImageIcon"
-                        :src="child.icon"
-                        alt=""
-                        referrerpolicy="no-referrer"
-                        @error="handleImageIconError(child.icon)"
-                      >
-                      <FtIcon
-                        v-else
-                        :icon="getItemIcon(child, item.label)"
-                      />
-                      <FtIcon
-                        v-if="child.checked"
-                        class="checkedMark"
-                        :icon="['fas', 'check']"
-                      />
-                    </span>
+                    <FtContextMenuItemIcon
+                      :item="child"
+                      :icon="getItemIcon(child, item.label)"
+                      :icon-class="getItemIconClass(child)"
+                    />
                     <span>{{ localizedLabel(child) }}</span>
                   </button>
                 </template>
@@ -133,29 +103,11 @@
             @pointerdown.prevent
             @click="execute(item)"
           >
-            <span
-              class="itemIcon"
-              :class="getItemIconClass(item)"
-              aria-hidden="true"
-            >
-              <img
-                v-if="hasImageIcon(item)"
-                class="itemImageIcon"
-                :src="item.icon"
-                alt=""
-                referrerpolicy="no-referrer"
-                @error="handleImageIconError(item.icon)"
-              >
-              <FtIcon
-                v-else
-                :icon="getItemIcon(item)"
-              />
-              <FtIcon
-                v-if="item.checked"
-                class="checkedMark"
-                :icon="['fas', 'check']"
-              />
-            </span>
+            <FtContextMenuItemIcon
+              :item="item"
+              :icon="getItemIcon(item)"
+              :icon-class="getItemIconClass(item)"
+            />
             <span>{{ localizedLabel(item) }}</span>
           </button>
         </template>
@@ -165,11 +117,11 @@
 </template>
 
 <script setup>
-import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
+import FtContextMenuItemIcon from './FtContextMenuItemIcon.vue'
 
 const { t } = useI18n()
 const menuRef = useTemplateRef('menuRef')
@@ -180,7 +132,6 @@ const sessionId = ref(null)
 const position = ref({ x: 0, y: 0 })
 const submenusOpenStart = ref(false)
 const verticalTabLayout = ref(false)
-const failedImageIcons = ref(new Set())
 let openRequest = 0
 
 const menuStyle = computed(() => ({
@@ -215,6 +166,7 @@ const itemIcons = {
   'Cancel Refresh': ['fas', 'xmark'],
   'Close Tab': ['fas', 'xmark'],
   'Close Tabs': ['fas', 'rectangle-xmark'],
+  'Collapse Group': ['fas', 'compress'],
   'Copy Image': ['fas', 'images'],
   'Copy Image Address': ['fas', 'link'],
   'Copy Invidious Link': ['fas', 'link'],
@@ -228,8 +180,10 @@ const itemIcons = {
   'Load Tab': ['fas', 'download'],
   'Load Tabs': ['fas', 'download'],
   'Move Tab': ['fas', 'exchange-alt'],
+  'Move Tab to Group': ['fas', 'layer-group'],
   'Move Tab to Window': ['fas', 'display'],
   'Move Tabs': ['fas', 'exchange-alt'],
+  'Move Tabs to Group': ['fas', 'layer-group'],
   'Move Tabs to Window': ['fas', 'display'],
   'New Tab': ['fas', 'plus'],
   'New Window': ['fas', 'clone'],
@@ -271,23 +225,21 @@ function getItemIcon(item, parentLabel = '') {
   if (/^Search /.test(item.label)) return ['fas', 'search']
   if (/is too long for search/.test(item.label)) return ['fas', 'circle-exclamation']
   if (parentLabel === 'Move Tab to Window' || parentLabel === 'Move Tabs to Window') return ['fas', 'display']
+  if (parentLabel === 'Move Tab to Group' || parentLabel === 'Move Tabs to Group') {
+    if (item.label === 'Manage Tab Groups…') return ['fas', 'edit']
+    if (item.label === 'Ungrouped') return ['fas', 'link-slash']
+    return ['fas', 'layer-group']
+  }
   return itemIcons[item.label] ?? ['fas', 'circle']
 }
 
 function getItemIconClass(item) {
+  if (item.label === 'Move Tab to Group' || item.label === 'Move Tabs to Group') {
+    return 'groupMenuIcon'
+  }
   return colorLabels.has(item.label)
     ? ['colorIcon', `color-${item.label.toLowerCase()}`]
     : undefined
-}
-
-function hasImageIcon(item) {
-  return typeof item.icon === 'string' &&
-    item.icon.length > 0 &&
-    !failedImageIcons.value.has(item.icon)
-}
-
-function handleImageIconError(icon) {
-  failedImageIcons.value = new Set([...failedImageIcons.value, icon])
 }
 
 function resolveItemFavicons(menuItems) {

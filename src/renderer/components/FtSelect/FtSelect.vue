@@ -34,7 +34,7 @@
       role="combobox"
       aria-haspopup="listbox"
       class="select-text"
-      :class="{ disabled }"
+      :class="{ disabled, withOptionVisuals: hasOptionVisuals }"
       :aria-controls="`${id}-listbox`"
       :aria-describedby="describeById"
       :aria-expanded="dropdownShown"
@@ -45,6 +45,19 @@
       @click="toggleDropdown"
       @keydown="handleButtonKeydown"
     >
+      <FtIcon
+        v-if="selectedOptionIcon"
+        :icon="selectedOptionIcon"
+        class="optionIcon"
+        aria-hidden="true"
+      />
+      <span
+        v-else-if="selectedOptionColor !== undefined"
+        class="optionColorDot"
+        :class="{ empty: selectedOptionColor == null }"
+        :style="selectedOptionColor == null ? null : { '--option-color': selectedOptionColor }"
+        aria-hidden="true"
+      />
       <span class="selectedValue">{{ selectedName }}</span>
     </button>
     <FtIcon
@@ -118,7 +131,11 @@
             :key="selectValues[index]"
             ref="options"
             class="selectOption"
-            :class="{ active: index === activeIndex, selected: selectValues[index] === value }"
+            :class="{
+              active: index === activeIndex,
+              selected: selectValues[index] === value,
+              hasOptionVisuals
+            }"
             role="option"
             tabindex="-1"
             :aria-selected="selectValues[index] === value"
@@ -129,7 +146,20 @@
             @click="selectOption(index)"
             @keydown.enter.space.prevent="selectOption(index)"
           >
-            {{ name }}
+            <FtIcon
+              v-if="optionIcons[index]"
+              :icon="optionIcons[index]"
+              class="optionIcon"
+              aria-hidden="true"
+            />
+            <span
+              v-else-if="optionColors[index] !== undefined"
+              class="optionColorDot"
+              :class="{ empty: optionColors[index] == null }"
+              :style="optionColors[index] == null ? null : { '--option-color': optionColors[index] }"
+              aria-hidden="true"
+            />
+            <span class="optionName">{{ name }}</span>
           </li>
         </ul>
       </Transition>
@@ -162,6 +192,14 @@ const props = defineProps({
   selectValues: {
     type: Array,
     required: true
+  },
+  optionColors: {
+    type: Array,
+    default: () => []
+  },
+  optionIcons: {
+    type: Array,
+    default: () => []
   },
   tooltip: {
     type: String,
@@ -220,6 +258,12 @@ let pointerDownInDropdown = false
 
 const selectedIndex = computed(() => props.selectValues.indexOf(props.value))
 const selectedName = computed(() => props.selectNames[selectedIndex.value] ?? '')
+const hasOptionVisuals = computed(() =>
+  props.optionColors.some(color => color === null || (typeof color === 'string' && color.length > 0)) ||
+  props.optionIcons.some(icon => Array.isArray(icon))
+)
+const selectedOptionColor = computed(() => props.optionColors[selectedIndex.value])
+const selectedOptionIcon = computed(() => props.optionIcons[selectedIndex.value] ?? null)
 const selectedLocale = computed(() => {
   if (!props.isLocaleSelector || props.value === 'system' || props.value === '') {
     return null
@@ -271,7 +315,7 @@ function openDropdown() {
 
   emit('open')
   activeIndex.value = Math.max(0, selectedIndex.value)
-  dropdownTarget.value = selectRoot.value?.closest('.prompt, .tutorialCard') ?? document.fullscreenElement ?? document.body
+  dropdownTarget.value = selectRoot.value?.closest('.prompt, .tutorialCard, .tabOrganizerBackdrop') ?? document.fullscreenElement ?? document.body
   dropdownShown.value = true
 
   nextTick(async () => {

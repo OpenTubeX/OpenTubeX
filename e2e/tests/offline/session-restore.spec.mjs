@@ -7,6 +7,7 @@ import { test, expect, sel, goTo } from '../../helpers/app.mjs'
 const SUBSCRIPTIONS_TAB_ID = 'e2e-subscriptions-tab'
 const HISTORY_TAB_ID = 'e2e-history-tab'
 const WATCH_TAB_ID = 'e2e-watch-tab'
+const GROUP_ID = 'e2e-saved-group'
 const STALE_WATCH_URL = 'app://bundle/index.html#/watch/jNQXAC9IVRw?oneTimeTimestamp=12&timestamp=34'
 
 test.use({
@@ -31,13 +32,15 @@ test.use({
               id: HISTORY_TAB_ID,
               url: 'app://bundle/index.html#/history',
               title: 'Verlauf',
-              isUnloaded: false
+              isUnloaded: false,
+              groupId: GROUP_ID
             },
             {
               id: WATCH_TAB_ID,
               url: STALE_WATCH_URL,
               title: 'Saved video',
               isUnloaded: true,
+              groupId: GROUP_ID,
               history: [{
                 route: {
                   path: '/watch/jNQXAC9IVRw',
@@ -49,6 +52,12 @@ test.use({
               historyIndex: 0
             }
           ],
+          groups: [{
+            id: GROUP_ID,
+            name: 'Recherche',
+            color: 'blue',
+            isCollapsed: true
+          }],
           activeTabId: HISTORY_TAB_ID,
           bounds: { x: 0, y: 0, width: 1600, height: 900, maximized: false }
         }
@@ -156,14 +165,16 @@ test('keeps an unconsumed link timestamp across an app restart', async ({ app, p
 
 test('restores tab order, titles, active route, and saved load state across restarts', async ({ app, page }) => {
   const tabs = page.locator(sel.tabs)
-  await expect(tabs).toHaveCount(3)
+  await expect(tabs).toHaveCount(1)
   await expect(tabs.nth(0)).toContainText('Abos')
-  await expect(tabs.nth(1)).toContainText('Verlauf')
-  await expect(tabs.nth(2)).toContainText('Saved video')
-  await expect(tabs.nth(1)).toHaveClass(/active/)
+  const collapsedGroup = page.getByRole('button', { name: 'Recherche ausklappen, 2 Tabs', exact: true })
+  await expect(collapsedGroup).toHaveClass(/active/)
   await expect(tabs.nth(0)).not.toHaveClass(/unloaded/)
-  await expect(tabs.nth(2)).toHaveClass(/unloaded/)
   await expect(page).toHaveURL(/#\/history/)
+  await expect.poll(() => page.evaluate(async () => {
+    const state = await window.ftElectron.tabs.getState()
+    return state.groups
+  })).toEqual([{ id: GROUP_ID, name: 'Recherche', color: 'blue', isCollapsed: true }])
 
   await tabs.nth(0).click()
   await expect(page).toHaveURL(/#\/subscriptions/)
@@ -172,12 +183,28 @@ test('restores tab order, titles, active route, and saved load state across rest
 
   ;({ page } = await app.relaunch())
   const restoredTabs = page.locator(sel.tabs)
-  await expect(restoredTabs).toHaveCount(3)
+  await expect(restoredTabs).toHaveCount(1)
   await expect(restoredTabs.nth(0)).toHaveClass(/active/)
   await expect(restoredTabs.nth(0)).toContainText('Abos')
-  await expect(restoredTabs.nth(1)).toContainText('Verlauf')
   await expect(restoredTabs.filter({ hasText: /Settings\.Settings|History\.History/ })).toHaveCount(0)
   await expect(page).toHaveURL(/#\/subscriptions/)
+  const restoredCollapsedGroup = page.getByRole('button', { name: 'Recherche ausklappen, 2 Tabs', exact: true })
+  await expect(restoredCollapsedGroup).not.toHaveClass(/active/)
+  await expect.poll(() => page.evaluate(async (groupId) => {
+    const state = await window.ftElectron.tabs.getState()
+    return {
+      groups: state.groups,
+      groupedTabIds: state.tabs.filter(tab => tab.groupId === groupId).map(tab => tab.id)
+    }
+  }, GROUP_ID)).toEqual({
+    groups: [{ id: GROUP_ID, name: 'Recherche', color: 'blue', isCollapsed: true }],
+    groupedTabIds: [HISTORY_TAB_ID, WATCH_TAB_ID]
+  })
+
+  await restoredCollapsedGroup.click()
+  await expect(restoredTabs).toHaveCount(3)
+  await expect(restoredTabs.nth(1)).toContainText('Verlauf')
+  await expect(restoredTabs.nth(2)).toContainText('Saved video')
   await expect(restoredTabs.nth(1)).not.toHaveClass(/unloaded/)
   await expect(restoredTabs.nth(2)).toHaveClass(/unloaded/)
 

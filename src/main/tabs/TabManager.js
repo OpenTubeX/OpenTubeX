@@ -50,6 +50,7 @@ let tabCloseFocus = DEFAULT_TAB_CLOSE_FOCUS
 let enableSkipSilenceByDefault = false
 let showSkipSilenceButton = false
 const VALID_TAB_COLORS = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'purple'])
+const MAX_TAB_GROUP_NAME_LENGTH = 80
 const TAB_PREVIEW_REFRESH_DELAY_MS = 700
 const TAB_PREVIEW_CAPTURE_STYLE_ID = 'opentubex-tab-preview-capture-style'
 const TAB_PREVIEW_CAPTURE_CLASS = 'opentubex-tab-preview-capturing'
@@ -100,6 +101,7 @@ let tabPreviewCacheMaintenance = Promise.resolve()
  * @property {NavigationHistoryEntry[] | null} navigationHistory
  * @property {number} navigationHistoryIndex
  * @property {boolean} persistNavigationHistory
+ * @property {string | null} groupId
  */
 
 /**
@@ -185,6 +187,16 @@ export class TabManager {
    */
   static normalizeTabColor(value) {
     return VALID_TAB_COLORS.has(value) ? value : null
+  }
+
+  /**
+   * @param {unknown} value
+   * @returns {string}
+   */
+  static normalizeTabGroupName(value) {
+    return typeof value === 'string'
+      ? value.trim().slice(0, MAX_TAB_GROUP_NAME_LENGTH)
+      : ''
   }
 
   /**
@@ -681,8 +693,10 @@ export class TabManager {
     /** @type {string|null} */
     this.presentedTabId = null
     this.selectionRevision = 0
-    /** @type {Array<{ url: string, title?: string, isPinned?: boolean, color?: string | null }>} */
+    /** @type {Array<{ id: string, url: string, title?: string, isPinned?: boolean, color?: string | null, groupId?: string | null, history?: object[] | null, historyIndex?: number, tabIndex: number }>} */
     this.closedTabs = []
+    /** @type {Map<string, {id: string, name: string, color: string | null, isCollapsed: boolean}>} */
+    this.tabGroups = new Map()
     this.tabBarScrollPosition = 0
     this.contextMenuTabId = null
     /** @type {string[]} */
@@ -995,7 +1009,9 @@ export class TabManager {
       historyIndex = null,
       persistHistory = history != null,
       skipSilence = showSkipSilenceButton && enableSkipSilenceByDefault,
+      groupId = null,
       openerTabId = this.activeTabId,
+      _preferredIndex = null,
       _deferUpdates = false
     } = options
 
@@ -1049,22 +1065,26 @@ export class TabManager {
       placementOpenerTabId: this.tabs.has(openerTabId) ? openerTabId : null,
       navigationHistory: restoredNavigationHistory?.history ?? null,
       navigationHistoryIndex: restoredNavigationHistory?.historyIndex ?? 0,
-      persistNavigationHistory: Boolean(persistHistory) && restoredNavigationHistory != null
+      persistNavigationHistory: Boolean(persistHistory) && restoredNavigationHistory != null,
+      groupId: typeof groupId === 'string' && this.tabGroups.has(groupId) ? groupId : null
     }
 
-    let preferredIndex = this.tabs.size
-    const normalizedOpenPosition = TabManager.normalizeNewTabPosition(openPosition)
-    if (normalizedOpenPosition === 'afterCurrent' && this.activeTabId != null) {
-      const activeTabIndex = Array.from(this.tabs.keys()).indexOf(this.activeTabId)
-      if (activeTabIndex !== -1) {
-        preferredIndex = activeTabIndex + 1
+    const hasPreferredIndex = Number.isInteger(_preferredIndex) && _preferredIndex >= 0
+    let preferredIndex = hasPreferredIndex ? _preferredIndex : this.tabs.size
+    if (!hasPreferredIndex) {
+      const normalizedOpenPosition = TabManager.normalizeNewTabPosition(openPosition)
+      if (normalizedOpenPosition === 'afterCurrent' && this.activeTabId != null) {
+        const activeTabIndex = Array.from(this.tabs.keys()).indexOf(this.activeTabId)
+        if (activeTabIndex !== -1) {
+          preferredIndex = activeTabIndex + 1
+        }
+      } else if (normalizedOpenPosition === 'afterCurrentInOrder' && tabInfo.placementOpenerTabId != null) {
+        preferredIndex = getGroupedTabInsertIndex(
+          this.tabs,
+          tabInfo.placementOpenerTabId,
+          tabInfo.isPinned
+        ) ?? preferredIndex
       }
-    } else if (normalizedOpenPosition === 'afterCurrentInOrder' && tabInfo.placementOpenerTabId != null) {
-      preferredIndex = getGroupedTabInsertIndex(
-        this.tabs,
-        tabInfo.placementOpenerTabId,
-        tabInfo.isPinned
-      ) ?? preferredIndex
     }
 
     this._insertTabEntry(id, tabInfo, preferredIndex)
@@ -1472,6 +1492,37 @@ export class TabManager {
   }
 
   /**
+   * Return the tab's position in the live and recently-closed tabs combined.
+   * Closed positions keep later closes from collapsing into the same index.
+   * @param {string} tabId
+   * @returns {number}
+   */
+  _getClosedTabIndex(tabId) {
+    let tabIndex = Array.from(this.tabs.keys()).indexOf(tabId)
+    if (tabIndex < 0) return tabIndex
+
+    const closedTabIndexes = this.closedTabs
+      .map(tab => tab.tabIndex)
+      .sort((a, b) => a - b)
+    for (const closedTabIndex of closedTabIndexes) {
+      if (closedTabIndex <= tabIndex) tabIndex += 1
+    }
+    return tabIndex
+  }
+
+  /**
+   * Convert a retained logical position back into the current live tab order.
+   * @param {{ tabIndex: number }} closedTab
+   * @returns {number}
+   */
+  _getClosedTabRestoreIndex(closedTab) {
+    const earlierClosedTabCount = this.closedTabs.reduce((count, tab) => {
+      return count + Number(tab.tabIndex < closedTab.tabIndex)
+    }, 0)
+    return closedTab.tabIndex - earlierClosedTabCount
+  }
+
+  /**
    * @param {string} tabId
    * @returns {boolean}
    */
@@ -1519,15 +1570,21 @@ export class TabManager {
 
     this._clearTabPreviewRefresh(tab)
     this.closedTabs.push({
+      id: randomUUID(),
       url: tab.url,
       title: tab.title,
       isPinned: tab.isPinned,
       color: tab.color,
+      groupId: tab.groupId,
       history: tab.navigationHistory,
-      historyIndex: tab.navigationHistoryIndex
+      historyIndex: tab.navigationHistoryIndex,
+      tabIndex: this._getClosedTabIndex(tabId)
     })
     if (this.closedTabs.length > 10) {
-      this.closedTabs.shift()
+      const removedClosedTab = this.closedTabs.shift()
+      for (const closedTab of this.closedTabs) {
+        if (closedTab.tabIndex > removedClosedTab.tabIndex) closedTab.tabIndex -= 1
+      }
     }
 
     const nextTabId = this.activeTabId === tabId
@@ -1662,27 +1719,44 @@ export class TabManager {
       avatarDataUrl: tab.avatarDataUrl,
       isPinned: tab.isPinned,
       color: tab.color,
+      groupId: tab.groupId,
       makeActive: true
     })
   }
 
   /**
+   * @param {string | null} [closedTabId]
    * @returns {Promise<TabInfo|null>}
    */
-  async restoreClosedTab() {
-    const closedTab = this.closedTabs.pop()
+  async restoreClosedTab(closedTabId = null) {
+    const index = closedTabId == null
+      ? this.closedTabs.length - 1
+      : this.closedTabs.findIndex(tab => tab.id === closedTabId)
+    if (index < 0) return null
+
+    const [closedTab] = this.closedTabs.splice(index, 1)
     if (!closedTab) return null
+    const restoreIndex = this._getClosedTabRestoreIndex(closedTab)
 
     return this.createTab({
       url: closedTab.url,
       title: closedTab.title,
       isPinned: closedTab.isPinned,
       color: closedTab.color,
+      groupId: closedTab.groupId,
       history: closedTab.history,
       historyIndex: closedTab.historyIndex,
       persistHistory: await TabManager.getStoredRememberTabNavigationHistory(),
+      _preferredIndex: restoreIndex,
       makeActive: true
     })
+  }
+
+  clearClosedTabs() {
+    if (this.closedTabs.length === 0) return false
+    this.closedTabs = []
+    this._broadcastStateUpdate()
+    return true
   }
 
   /**
@@ -1727,6 +1801,130 @@ export class TabManager {
     this._broadcastStateUpdate()
     this._saveSession()
     return true
+  }
+
+  /**
+   * @param {{name?: unknown, color?: unknown}} group
+   * @returns {{id: string, name: string, color: string | null, isCollapsed: boolean} | null}
+   */
+  createTabGroup(group = {}) {
+    const name = TabManager.normalizeTabGroupName(group.name)
+    if (name.length === 0) return null
+
+    const tabGroup = {
+      id: randomUUID(),
+      name,
+      color: TabManager.normalizeTabColor(group.color),
+      isCollapsed: false
+    }
+    this.tabGroups.set(tabGroup.id, tabGroup)
+    this._broadcastStateUpdate()
+    this._saveSession()
+    return { ...tabGroup }
+  }
+
+  /**
+   * @param {string} groupId
+   * @param {{name?: unknown, color?: unknown, isCollapsed?: unknown}} changes
+   * @returns {boolean}
+   */
+  updateTabGroup(groupId, changes = {}) {
+    const group = this.tabGroups.get(groupId)
+    if (!group) return false
+
+    const nextName = Object.hasOwn(changes, 'name')
+      ? TabManager.normalizeTabGroupName(changes.name)
+      : group.name
+    if (nextName.length === 0) return false
+
+    const nextColor = Object.hasOwn(changes, 'color')
+      ? TabManager.normalizeTabColor(changes.color)
+      : group.color
+    const nextCollapsed = Object.hasOwn(changes, 'isCollapsed')
+      ? changes.isCollapsed === true
+      : group.isCollapsed
+    if (
+      nextName === group.name &&
+      nextColor === group.color &&
+      nextCollapsed === group.isCollapsed
+    ) {
+      return false
+    }
+
+    group.name = nextName
+    group.color = nextColor
+    group.isCollapsed = nextCollapsed
+    this._broadcastStateUpdate()
+    this._saveSession()
+    return true
+  }
+
+  /**
+   * @param {string[]} tabIds
+   * @param {string | null} groupId
+   * @returns {number}
+   */
+  setTabsGroup(tabIds, groupId) {
+    const nextGroupId = typeof groupId === 'string' && this.tabGroups.has(groupId)
+      ? groupId
+      : null
+    if (groupId != null && nextGroupId == null) return 0
+
+    let changed = 0
+    for (const tabId of new Set(tabIds)) {
+      const tab = this.tabs.get(tabId)
+      if (tab && tab.groupId !== nextGroupId) {
+        tab.groupId = nextGroupId
+        changed += 1
+      }
+    }
+    if (changed > 0) {
+      this._broadcastStateUpdate()
+      this._saveSession()
+    }
+    return changed
+  }
+
+  /**
+   * @param {string} groupId
+   * @returns {boolean}
+   */
+  deleteTabGroup(groupId) {
+    if (!this.tabGroups.delete(groupId)) return false
+
+    for (const tab of this.tabs.values()) {
+      if (tab.groupId === groupId) tab.groupId = null
+    }
+    for (const tab of this.closedTabs) {
+      if (tab.groupId === groupId) tab.groupId = null
+    }
+    this._broadcastStateUpdate()
+    this._saveSession()
+    return true
+  }
+
+  /**
+   * Replace group metadata from a persisted or synced session before its tabs
+   * are created. Invalid and duplicate entries are ignored.
+   * @param {unknown} groups
+   */
+  _restoreTabGroups(groups) {
+    const restored = new Map()
+    if (Array.isArray(groups)) {
+      for (const candidate of groups) {
+        const id = typeof candidate?.id === 'string' ? candidate.id : ''
+        const name = TabManager.normalizeTabGroupName(candidate?.name)
+        if (id.length === 0 || name.length === 0 || restored.has(id)) continue
+
+        restored.set(id, {
+          id,
+          name,
+          color: TabManager.normalizeTabColor(candidate.color),
+          isCollapsed: candidate.isCollapsed === true
+        })
+      }
+    }
+    this.tabGroups = restored
   }
 
   /**
@@ -2453,6 +2651,8 @@ export class TabManager {
       avatarFileName: tab.avatarFileName,
       isPinned: tab.isPinned,
       color: tab.color,
+      groupId: tab.groupId,
+      group: tab.groupId == null ? null : { ...this.tabGroups.get(tab.groupId) },
       previewDataUrl: tab.previewDataUrl,
       previewCapturedAt: tab.previewCapturedAt,
       previewFileName: tab.previewFileName,
@@ -2514,6 +2714,20 @@ export class TabManager {
       throw new Error(`Cannot adopt duplicate tab ID ${snapshot.id}`)
     }
 
+    const groupName = TabManager.normalizeTabGroupName(snapshot.group?.name)
+    if (
+      typeof snapshot.groupId === 'string' &&
+      !this.tabGroups.has(snapshot.groupId) &&
+      groupName.length > 0
+    ) {
+      this.tabGroups.set(snapshot.groupId, {
+        id: snapshot.groupId,
+        name: groupName,
+        color: TabManager.normalizeTabColor(snapshot.group.color),
+        isCollapsed: snapshot.group.isCollapsed === true
+      })
+    }
+
     /** @type {TabInfo} */
     const tabInfo = {
       id: snapshot.id,
@@ -2543,6 +2757,9 @@ export class TabManager {
         ? snapshot.syncedNavigationRevision
         : 0,
       placementOpenerTabId: null,
+      groupId: typeof snapshot.groupId === 'string' && this.tabGroups.has(snapshot.groupId)
+        ? snapshot.groupId
+        : null,
       isTransferStaged: true
     }
 
@@ -2687,6 +2904,7 @@ export class TabManager {
         skipSilence: tab.skipSilence === true,
         isPinned: tab.isPinned || false,
         color: TabManager.normalizeTabColor(tab.color),
+        groupId: tab.groupId,
         loadState: tab.loadState,
         preloadInBackground: tab.preloadInBackground,
         pendingActivation: tab.pendingActivation,
@@ -2698,6 +2916,16 @@ export class TabManager {
 
     return {
       tabs,
+      groups: Array.from(this.tabGroups.values(), group => ({ ...group })),
+      closedTabs: this.closedTabs.toReversed().map(tab => ({
+        id: tab.id,
+        url: tab.url,
+        route: cloneRoute(TabManager.getRouteFromUrl(tab.url)),
+        title: tab.title ?? TabManager.formatDefaultTabTitle(tab.url),
+        isPinned: tab.isPinned === true,
+        color: TabManager.normalizeTabColor(tab.color),
+        groupId: tab.groupId ?? null
+      })),
       activeTabId: this.activeTabId,
       presentedTabId: this.presentedTabId,
       selectionRevision: this.selectionRevision,
@@ -2802,6 +3030,7 @@ export class TabManager {
           title: tab.title,
           isPinned: tab.isPinned,
           color: TabManager.normalizeTabColor(tab.color),
+          groupId: tab.groupId,
           skipSilence: tab.skipSilence === true,
           isUnloaded: tab.loadState === 'unloaded' || this._deferredUnloadTabIds.has(tab.id),
           ...(tab.placementOpenerTabId != null && {
@@ -2833,6 +3062,7 @@ export class TabManager {
 
     await saveTabSession(this.sessionId, {
       tabs,
+      groups: Array.from(this.tabGroups.values(), group => ({ ...group })),
       activeTabId,
       bounds: this._getCurrentBounds(),
       updatedAt: this.sessionUpdatedAt
@@ -2853,6 +3083,7 @@ export class TabManager {
         title: tab.title,
         isPinned: tab.isPinned,
         color: tab.color,
+        groupId: tab.groupId,
         isUnloaded: tab.isUnloaded || this._deferredUnloadTabIds.has(tab.id),
         ...(this.tabs.get(tab.id)?.placementOpenerTabId != null && {
           placementOpenerTabId: this.tabs.get(tab.id).placementOpenerTabId
@@ -2869,6 +3100,7 @@ export class TabManager {
     return {
       sessionId: this.sessionId,
       tabs,
+      groups: Array.from(this.tabGroups.values(), group => ({ ...group })),
       activeTabId,
       updatedAt: this.sessionUpdatedAt
     }
@@ -2889,6 +3121,7 @@ export class TabManager {
     this._sessionPersistenceDisabled = true
     try {
       const restoreNavigationHistory = await TabManager.getStoredRememberTabNavigationHistory()
+      this._restoreTabGroups(sessionData.groups)
       const previousTabs = this.tabs
       const syncedTabs = new Map()
       const removedTabs = new Set(previousTabs.values())
@@ -2934,6 +3167,9 @@ export class TabManager {
           }
           tab.isPinned = tabData.isPinned === true
           tab.color = TabManager.normalizeTabColor(tabData.color)
+          tab.groupId = typeof tabData.groupId === 'string' && this.tabGroups.has(tabData.groupId)
+            ? tabData.groupId
+            : null
         } else {
           const hasSavedTitle = typeof tabData.title === 'string' && tabData.title.trim().length > 0
           // createTab inserts into previousTabs through this.tabs. The synced
@@ -2944,6 +3180,7 @@ export class TabManager {
             title: hasSavedTitle ? tabData.title : undefined,
             isPinned: tabData.isPinned === true,
             color: tabData.color,
+            groupId: tabData.groupId,
             history: restoreNavigationHistory ? tabData.history : null,
             historyIndex: restoreNavigationHistory ? tabData.historyIndex : null,
             persistHistory: restoreNavigationHistory,
@@ -3062,6 +3299,7 @@ export class TabManager {
 
     try {
       const restoreNavigationHistory = await TabManager.getStoredRememberTabNavigationHistory()
+      this._restoreTabGroups(sessionData.groups)
       const activeTabData = sessionData.tabs.find(tab => tab.id === sessionData.activeTabId)
       const prioritizeActiveWatchTab = activeTabData != null &&
         TabManager.getRouteFromUrl(activeTabData.url).path.startsWith('/watch/')
@@ -3092,6 +3330,7 @@ export class TabManager {
           avatarFileName: avatarDataUrl == null ? null : avatarFileName,
           isPinned: tabData.isPinned === true,
           color: tabData.color,
+          groupId: tabData.groupId,
           // Legacy sessions did not persist this field and must retain the old
           // disabled behavior instead of inheriting the new-tab default.
           skipSilence: tabData.skipSilence === true,
@@ -3240,12 +3479,14 @@ function cloneRoute(route) {
 /**
  * @param {object} [options]
  * @param {(browserWindow: import('electron').BrowserWindow) => boolean | Promise<boolean>} [options.confirmCloseWindow]
+ * @param {(manager: TabManager, count: number, action: 'close' | 'load' | 'unload') => boolean | Promise<boolean>} [options.confirmMultipleTabsAction]
  * @param {(browserWindow: import('electron').BrowserWindow) => void} [options.markWindowCloseConfirmed]
  * @param {(manager: TabManager, state: object) => void} [options.mediaSessionStateChanged]
  */
 export async function setupTabsIPC(options = {}) {
   const {
     confirmCloseWindow = () => true,
+    confirmMultipleTabsAction = () => true,
     markWindowCloseConfirmed = () => {},
     mediaSessionStateChanged = () => {}
   } = options
@@ -3327,6 +3568,8 @@ export async function setupTabsIPC(options = {}) {
       id,
       // Silence skipping starts from the main-owned default, not renderer input.
       skipSilence,
+      // Restored tabs alone may choose their previous position.
+      _preferredIndex,
       ...tabOptions
     } = options != null && typeof options === 'object' ? options : {}
 
@@ -3461,6 +3704,93 @@ export async function setupTabsIPC(options = {}) {
     }
   })
 
+  ipcMain.handle(IpcChannels.TABS_CREATE_GROUP, (event, group) => {
+    return getManager(event)?.createTabGroup(group) ?? null
+  })
+
+  ipcMain.handle(IpcChannels.TABS_UPDATE_GROUP, (event, groupId, changes) => {
+    const manager = getManager(event)
+    return manager != null && typeof groupId === 'string'
+      ? manager.updateTabGroup(groupId, changes)
+      : false
+  })
+
+  ipcMain.handle(IpcChannels.TABS_DELETE_GROUP, (event, groupId) => {
+    const manager = getManager(event)
+    return manager != null && typeof groupId === 'string'
+      ? manager.deleteTabGroup(groupId)
+      : false
+  })
+
+  ipcMain.handle(IpcChannels.TABS_SET_GROUP, (event, tabIds, groupId) => {
+    const manager = getManager(event)
+    if (!manager || !Array.isArray(tabIds) || (groupId !== null && typeof groupId !== 'string')) {
+      return 0
+    }
+    return manager.setTabsGroup(tabIds.filter(tabId => typeof tabId === 'string'), groupId)
+  })
+
+  ipcMain.handle(IpcChannels.TABS_RUN_ORGANIZER_ACTION, async (event, action, tabIds) => {
+    const manager = getManager(event)
+    if (!manager || !['close', 'load', 'unload'].includes(action) || !Array.isArray(tabIds)) {
+      return { success: false, hasRemainingTabs: manager?.tabs.size > 0 }
+    }
+
+    const uniqueTabIds = Array.from(new Set(tabIds.filter(tabId => (
+      typeof tabId === 'string' && manager.tabs.has(tabId)
+    ))))
+    const actionableTabIds = action === 'load'
+      ? uniqueTabIds.filter(tabId => manager.tabs.get(tabId)?.loadState === 'unloaded')
+      : action === 'unload'
+        ? uniqueTabIds.filter(tabId => !['unloaded', 'unloading'].includes(manager.tabs.get(tabId)?.loadState))
+        : uniqueTabIds
+    if (actionableTabIds.length === 0) {
+      return { success: true, hasRemainingTabs: manager.tabs.size > 0 }
+    }
+    if (!await confirmMultipleTabsAction(manager, actionableTabIds.length, action)) {
+      return { success: false, hasRemainingTabs: manager.tabs.size > 0 }
+    }
+
+    if (action === 'load') {
+      await manager.runBatched(() => {
+        for (const tabId of actionableTabIds) manager.loadTab(tabId)
+      })
+      return { success: true, hasRemainingTabs: true }
+    }
+    if (action === 'unload') {
+      await manager.unloadTabs(actionableTabIds)
+      return { success: true, hasRemainingTabs: true }
+    }
+
+    if (actionableTabIds.length === manager.tabs.size && !await confirmCloseWindow(manager.browserWindow)) {
+      return { success: false, hasRemainingTabs: true }
+    }
+    const hasRemainingTabs = await manager.closeTabs(actionableTabIds)
+    if (!hasRemainingTabs) {
+      markWindowCloseConfirmed(manager.browserWindow)
+      manager.browserWindow.close()
+    }
+    return { success: true, hasRemainingTabs }
+  })
+
+  ipcMain.handle(IpcChannels.TABS_GET_MOVE_TARGETS, (event) => {
+    const manager = getManager(event)
+    return manager ? TabManager.listMoveTargets(manager.browserWindow.id) : []
+  })
+
+  ipcMain.handle(IpcChannels.TABS_MOVE_TO_WINDOW, async (event, tabIds, targetWindowId) => {
+    const manager = getManager(event)
+    if (!manager || !Array.isArray(tabIds) || !Number.isInteger(targetWindowId)) return 0
+
+    let moved = 0
+    for (const tabId of new Set(tabIds)) {
+      if (typeof tabId === 'string' && manager.tabs.has(tabId) && await TabManager.moveTabToWindow(tabId, targetWindowId)) {
+        moved += 1
+      }
+    }
+    return moved
+  })
+
   ipcMain.handle(IpcChannels.TABS_CAPTURE_PREVIEW, (event, tabId) => {
     const manager = getManager(event)
     return manager && typeof tabId === 'string' ? manager.captureTabPreview(tabId) : null
@@ -3504,12 +3834,16 @@ export async function setupTabsIPC(options = {}) {
     manager._scheduleTabPreviewRefresh(tab, delayMs)
   })
 
-  ipcMain.handle(IpcChannels.TABS_RESTORE_CLOSED, async (event) => {
+  ipcMain.handle(IpcChannels.TABS_RESTORE_CLOSED, async (event, closedTabId = null) => {
     const manager = getManager(event)
-    const tab = await manager?.restoreClosedTab()
+    const tab = await manager?.restoreClosedTab(typeof closedTabId === 'string' ? closedTabId : null)
     return tab
       ? { id: tab.id, url: tab.url, route: cloneRoute(tab.route), title: tab.title, isPinned: tab.isPinned, color: tab.color }
       : null
+  })
+
+  ipcMain.handle(IpcChannels.TABS_CLEAR_CLOSED, (event) => {
+    return getManager(event)?.clearClosedTabs() ?? false
   })
 
   ipcMain.on(IpcChannels.TABS_RELOAD, (event, tabId) => {

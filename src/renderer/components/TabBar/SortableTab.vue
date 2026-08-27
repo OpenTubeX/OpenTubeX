@@ -2,8 +2,9 @@
   <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
   <div
     ref="tabRef"
-    class="tab"
+    class="tab tabBarReorderItem"
     :data-tab-id="tab.id"
+    :data-reorder-id="tab.id"
     :class="tabClasses"
     :style="tabStyle"
     :aria-label="displayTitle"
@@ -27,6 +28,12 @@
       aria-hidden="true"
     />
     <span class="tabTitle">
+      <FtIcon
+        v-if="group"
+        :icon="['fas', 'layer-group']"
+        class="groupBadge"
+        aria-hidden="true"
+      />
       <span
         v-if="tab.isLoading"
         class="loadingDot"
@@ -83,6 +90,18 @@
           {{ displayTitle }}
         </div>
         <div
+          v-if="group"
+          class="tabTooltipGroup"
+          :style="{ '--tab-group-color': groupColor || 'var(--secondary-text-color)' }"
+        >
+          <FtIcon
+            :icon="['fas', 'layer-group']"
+            class="tabTooltipGroupIcon"
+            aria-hidden="true"
+          />
+          {{ group.name }}
+        </div>
+        <div
           v-if="showPreview"
           class="tabTooltipPreview"
         >
@@ -128,6 +147,10 @@ const props = defineProps({
   tab: {
     type: Object,
     required: true
+  },
+  group: {
+    type: Object,
+    default: null
   },
   closeLabel: {
     type: String,
@@ -204,6 +227,7 @@ let showTooltipTimeoutId = null
 let suppressTooltipUntilPointerLeave = false
 
 const tabColor = computed(() => getTabAccentColor(props.tab.color))
+const groupColor = computed(() => getTabAccentColor(props.group?.color))
 
 const tabClasses = computed(() => ({
   active: props.tab.isActive,
@@ -226,7 +250,8 @@ const tabStyle = computed(() => {
   /** @type {Record<string, string | undefined>} */
   const style = {
     transform: transform || undefined,
-    '--tab-accent-color': tabColor.value || undefined
+    '--tab-accent-color': tabColor.value || undefined,
+    '--tab-group-color': groupColor.value || 'var(--secondary-text-color)'
   }
 
   return style
@@ -651,6 +676,12 @@ watch(tabAvatarUrl, (avatarUrl) => {
   color: var(--primary-text-color);
 }
 
+.groupBadge {
+  color: var(--tab-group-color);
+  flex: 0 0 auto;
+  font-size: 10px;
+}
+
 .tabAvatar {
   inline-size: 16px;
   block-size: 16px;
@@ -799,6 +830,25 @@ watch(tabAvatarUrl, (avatarUrl) => {
 
 .tabTooltip.withPreview {
   inline-size: min(340px, calc(100vw - 16px));
+}
+
+.tabTooltipGroup {
+  align-items: center;
+  color: var(--secondary-text-color);
+  display: flex;
+  font-size: 11px;
+  gap: 6px;
+  margin-block-start: 3px;
+}
+
+.tabTooltip.withPreview .tabTooltipGroup {
+  margin-block-end: 7px;
+}
+
+.tabTooltipGroupIcon {
+  color: var(--tab-group-color);
+  flex: 0 0 auto;
+  font-size: 10px;
 }
 
 .tab-tooltip-enter-active,
