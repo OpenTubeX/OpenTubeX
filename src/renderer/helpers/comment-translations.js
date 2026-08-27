@@ -121,6 +121,22 @@ export function sanitizeCommentTranslationSource(text) {
 }
 
 /**
+ * @param {string} text
+ * @param {string} targetLanguage
+ * @param {(text: string, targetLanguage: string) => Promise<{translated_content: unknown}>} translate
+ * @returns {Promise<string>}
+ */
+export async function requestCommentTranslation(text, targetLanguage, translate) {
+  const source = sanitizeCommentTranslationSource(text)
+  if (source.trim() === '') {
+    return formatCommentTranslation(source)
+  }
+
+  const response = await translate(source, targetLanguage)
+  return formatCommentTranslation(response.translated_content)
+}
+
+/**
  * Escape translated text before adding links and passing it to the comment renderer.
  * @param {unknown} translatedText
  * @returns {string}

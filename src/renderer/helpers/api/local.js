@@ -7,9 +7,8 @@ import store from '../../store/index'
 import { PlayerCache } from './PlayerCache'
 import { loadSearchContinuation } from '../search-continuation'
 import {
-  formatCommentTranslation,
   getCommentTranslationSource,
-  sanitizeCommentTranslationSource
+  requestCommentTranslation
 } from '../comment-translations'
 import { parseLocalShortLinkedVideo } from '../player/shorts'
 import { getPaidPromotionDurationMs } from '../player/paidPromotion'
@@ -163,10 +162,10 @@ export async function getLocalSearchSuggestions(query) {
  * @returns {Promise<string>}
  */
 export async function translateCommentText(text, targetLanguage) {
-  const innertube = await createInnertube()
-  const source = sanitizeCommentTranslationSource(text)
-  const response = await innertube.interact.translate(source, targetLanguage)
-  return formatCommentTranslation(response.translated_content)
+  return await requestCommentTranslation(text, targetLanguage, async (source, language) => {
+    const innertube = await createInnertube()
+    return await innertube.interact.translate(source, language)
+  })
 }
 
 export function clearLocalSearchSuggestionsSession() {
