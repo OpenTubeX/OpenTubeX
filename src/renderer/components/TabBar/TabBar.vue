@@ -372,8 +372,8 @@ function handleTabContainerPointerDown(event) {
   // Ignore clicks on the close button
   if (target.closest('.closeButton')) return
 
-  const tabEl = target.closest('.tab[data-tab-id]')
-  if (!(tabEl instanceof HTMLElement)) {
+  const reorderItemEl = target.closest('.tabBarReorderItem[data-reorder-id]')
+  if (!(reorderItemEl instanceof HTMLElement)) {
     clearTabSelection()
     return
   }
@@ -384,7 +384,7 @@ function handleTabContainerPointerDown(event) {
   const container = dropZoneRef.value
   if (!container) return
 
-  const tabId = tabEl.dataset.tabId
+  const tabId = reorderItemEl.dataset.reorderId
   const currentTabs = tabs.value
   const currentTabsById = new Map(currentTabs.map(tab => [tab.id, tab]))
   const orderedTabs = pendingTabOrder
@@ -1335,11 +1335,17 @@ watch(tabBarScrollPosition, (newPosition) => {
   })
 })
 
-watch(tabs, () => {
-  nextTick(() => {
-    updateScrollbar()
-  })
-}, { deep: true })
+watch(stripItems, () => {
+  const container = dropZoneRef.value
+  if (container) {
+    const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth)
+    container.scrollLeft = Math.min(container.scrollLeft, maxScroll)
+    if (scrollTarget != null) {
+      scrollTarget = Math.min(scrollTarget, maxScroll)
+    }
+  }
+  updateScrollbar()
+}, { flush: 'post' })
 
 watch(vertical, () => {
   cancelScrollAnimation()

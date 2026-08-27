@@ -1232,12 +1232,78 @@ test.describe('tab bar', () => {
       return (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.id)
     })).toEqual(reorderedIds)
 
+    await page.evaluate((groupId) => {
+      const source = document.querySelector(`.collapsedTabGroup[data-group-id="${groupId}"]`)
+      const target = document.querySelector('.tabBar .tab')
+      const sourceRect = source.getBoundingClientRect()
+      const targetRect = target.getBoundingClientRect()
+      source.dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true,
+        button: 0,
+        clientX: sourceRect.left + sourceRect.width / 2,
+        clientY: sourceRect.top + sourceRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointermove', {
+        bubbles: true,
+        buttons: 1,
+        clientX: targetRect.left + targetRect.width / 2,
+        clientY: targetRect.top + targetRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+    }, setup.groupId)
+
+    const groupReorderedIds = [
+      setup.firstId,
+      setup.secondId,
+      setup.trailingId,
+      setup.originalOrder[0]
+    ]
+    await expect.poll(() => page.evaluate(async () => {
+      return (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.id)
+    })).toEqual(groupReorderedIds)
+
     await collapsedGroup.click()
     await expect(page.locator('.collapsedTabGroup')).toHaveCount(0)
     await expect(page.locator(sel.tabs)).toHaveCount(4)
     await expect.poll(() => page.locator(sel.tabs).evaluateAll(tabs => {
       return tabs.map(tab => tab.dataset.tabId)
-    })).toEqual(reorderedIds)
+    })).toEqual(groupReorderedIds)
+  })
+
+  test('clamps its custom scrollbar after collapsing a group at the scroll end', async ({ page }) => {
+    await page.setViewportSize({ width: 800, height: 600 })
+    const groupId = await page.evaluate(async () => {
+      const tabIds = []
+      for (let index = 0; index < 18; index++) {
+        const tab = await window.ftElectron.tabs.create({
+          route: `/watch/tab-bar-scroll-${index}`,
+          title: `Scrollable tab ${index}`,
+          makeActive: false,
+          lazyLoad: true
+        })
+        tabIds.push(tab.id)
+      }
+      const group = await window.ftElectron.tabs.createGroup({ name: 'Scrollable group', color: 'green' })
+      await window.ftElectron.tabs.setGroup(tabIds.slice(2), group.id)
+      return group.id
+    })
+
+    const container = page.locator('.tabsContainer')
+    const scrollbar = page.locator('.tabsScrollbar')
+    await expect(scrollbar).toBeVisible()
+    await container.evaluate(element => { element.scrollLeft = element.scrollWidth })
+    await expect.poll(() => container.evaluate(element => (
+      element.scrollLeft > 0 &&
+      Math.abs(element.scrollLeft - (element.scrollWidth - element.clientWidth)) <= 1
+    ))).toBe(true)
+
+    await page.evaluate(groupId => window.ftElectron.tabs.updateGroup(groupId, { isCollapsed: true }), groupId)
+    await expect(page.getByRole('button', { name: 'Expand Scrollable group, 16 tabs', exact: true })).toBeVisible()
+    await expect.poll(() => container.evaluate(element => ({
+      maxScroll: Math.max(0, element.scrollWidth - element.clientWidth),
+      scrollLeft: element.scrollLeft
+    }))).toEqual({ maxScroll: 0, scrollLeft: 0 })
+    await expect(scrollbar).toBeHidden()
   })
 
   test('keeps a submenu inside the viewport for a bottom vertical tab', async ({ page }) => {
@@ -2309,6 +2375,8 @@ test.describe('tab organizer', () => {
     await expect(reopenedGroup.getByRole('button', { name: 'Expand group' })).toBeVisible()
     await reopenedOrganizer.getByRole('searchbox', { name: 'Search tabs' }).fill('Alpha video')
     await expect(reopenedGroup.locator('.tabOrganizerRow')).toContainText('Alpha video')
+    await expect(reopenedGroup.getByRole('button', { name: 'Expand group' }))
+      .toHaveAttribute('aria-expanded', 'true')
   })
 })
 

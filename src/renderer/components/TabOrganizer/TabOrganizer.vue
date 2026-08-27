@@ -208,7 +208,7 @@
                   type="button"
                   class="collapseButton"
                   :aria-label="section.isCollapsed ? t('Tab Organizer.Expand Group') : t('Tab Organizer.Collapse Group')"
-                  :aria-expanded="!section.isCollapsed"
+                  :aria-expanded="!section.isCollapsed || normalizedQuery.length > 0"
                   @click="toggleGroup(section)"
                 >
                   <FtIcon
@@ -582,8 +582,13 @@ onBeforeMount(lockBodyScroll)
 onMounted(async () => {
   lastActiveElement = document.activeElement
   store.commit('addOpenPrompt', promptId)
-  await window.ftElectron.tabs.setShortcutsBlocked(true)
-  moveTargets.value = await window.ftElectron.tabs.getMoveTargets()
+  await window.ftElectron.tabs.setShortcutsBlocked(true).catch(error => {
+    console.error('Failed to block shortcuts for the tab organizer:', error)
+  })
+  moveTargets.value = await window.ftElectron.tabs.getMoveTargets().catch(error => {
+    console.error('Failed to load tab organizer move targets:', error)
+    return []
+  })
   await nextTick()
   searchRef.value?.focus()
 
