@@ -608,6 +608,10 @@ export default defineComponent({
     hasConfiguredRestrictedPlaybackAuthentication: function () {
       return hasConfiguredRestrictedPlaybackAuthentication(this.$store.getters)
     },
+    alwaysUseYtDlpPlaybackCookies: function () {
+      return this.$store.getters.getYtDlpPlaybackAlwaysUseCookies &&
+        this.hasConfiguredRestrictedPlaybackAuthentication
+    },
     canTryRestrictedPlaybackWithCookies: function () {
       return this.restrictedPlaybackError !== null &&
         this.hasConfiguredRestrictedPlaybackAuthentication &&
@@ -5039,7 +5043,7 @@ export default defineComponent({
       loadGeneration,
       videoId,
       playbackEngineSwitchGeneration = this.playbackEngineSwitchGeneration,
-      useAuthentication = false,
+      useAuthentication = this.alwaysUseYtDlpPlaybackCookies,
       cachedOnly = false
     ) {
       let source
