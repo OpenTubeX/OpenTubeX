@@ -1683,6 +1683,14 @@ Video:
       InfoPanelHasSegments: 'Dieses Video hat Segmente in der Datenbank!'
       InfoPanelNoSegments: Keine Segmente gefunden
       RefreshSegments: Segmente aktualisieren
+      RefreshInfo: SponsorBlock-Informationen aktualisieren
+      ContributionStatsTitle: Deine Beiträge
+      ContributionStatsLoading: Beitragsstatistiken werden geladen...
+      ContributionStatsError: Beitragsstatistiken sind nicht verfügbar. Versuche, sie zu aktualisieren.
+      ContributionStatsNoUserId: Reiche ein Segment ein oder importiere deine SponsorBlock-Benutzer-ID, um Beitragsstatistiken anzuzeigen.
+      Submissions: Beiträge
+      Segments: Segmente
+      TimeSaved: Gesparte Zeit
       AutoSkipEnabled: Segmente automatisch überspringen
       AutoSkipOn: An
       AutoSkipOff: Aus

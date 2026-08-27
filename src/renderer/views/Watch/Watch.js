@@ -340,6 +340,10 @@ export default defineComponent({
       sponsorBlockInfoPendingUuid: null,
       sponsorBlockInfoSegments: [],
       sponsorBlockInfoSubmissionEnabled: false,
+      sponsorBlockContributionStats: null,
+      sponsorBlockContributionStatsError: false,
+      sponsorBlockContributionStatsLoaded: false,
+      sponsorBlockContributionStatsLoading: false,
       videoChapterThumbnails: [],
       fullscreenMetadataOpen: false,
       shortsMetadataOpen: false,
@@ -1486,7 +1490,17 @@ export default defineComponent({
     handleChapterThumbnailsChange(thumbnails) {
       this.videoChapterThumbnails = thumbnails
     },
-    handleSponsorBlockInfoChange({ open, loading, pendingUuid, segments, submissionEnabled }) {
+    handleSponsorBlockInfoChange({
+      open,
+      loading,
+      pendingUuid,
+      segments,
+      submissionEnabled,
+      contributionStats,
+      contributionStatsError,
+      contributionStatsLoaded,
+      contributionStatsLoading,
+    }) {
       if (!open && this.showSidebarSponsorBlock) {
         this.sidebarPanelLeaving = true
       }
@@ -1495,6 +1509,10 @@ export default defineComponent({
       this.sponsorBlockInfoPendingUuid = pendingUuid
       this.sponsorBlockInfoSegments = segments
       this.sponsorBlockInfoSubmissionEnabled = submissionEnabled
+      this.sponsorBlockContributionStats = contributionStats
+      this.sponsorBlockContributionStatsError = contributionStatsError
+      this.sponsorBlockContributionStatsLoaded = contributionStatsLoaded
+      this.sponsorBlockContributionStatsLoading = contributionStatsLoading
 
       if (!open && this.customShortsPlayerActive) {
         this.clampShortsAuxPanelScroll()

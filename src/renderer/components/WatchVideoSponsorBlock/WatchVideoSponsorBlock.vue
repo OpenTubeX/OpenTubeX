@@ -13,14 +13,14 @@
       <div class="sponsorBlockHeaderActions">
         <button
           type="button"
-          :disabled="loading"
-          :aria-label="$t('Video.Player.SponsorBlock.RefreshSegments')"
-          :title="$t('Video.Player.SponsorBlock.RefreshSegments')"
+          :disabled="loading || contributionStatsLoading"
+          :aria-label="$t('Video.Player.SponsorBlock.RefreshInfo')"
+          :title="$t('Video.Player.SponsorBlock.RefreshInfo')"
           @click="$emit('refresh')"
         >
           <ft-icon
             :icon="['fas', 'sync']"
-            :spin="loading"
+            :spin="loading || contributionStatsLoading"
           />
         </button>
         <button
@@ -34,6 +34,7 @@
       </div>
     </header>
     <div
+      ref="contentScroller"
       v-overlay-scrollbars
       class="sponsorBlockContent"
     >
@@ -46,6 +47,54 @@
             ? $t('Video.Player.SponsorBlock.InfoPanelHasSegments')
             : $t('Video.Player.SponsorBlock.InfoPanelNoSegments') }}
       </div>
+      <section
+        class="sponsorBlockContributionStats"
+        :aria-busy="String(contributionStatsLoading || !contributionStatsLoaded)"
+      >
+        <h4>{{ $t('Video.Player.SponsorBlock.ContributionStatsTitle') }}</h4>
+        <div
+          v-if="contributionStatsLoading || !contributionStatsLoaded"
+          class="sponsorBlockContributionStatsStatus"
+          role="status"
+        >
+          <ft-icon
+            :icon="['fas', 'sync']"
+            spin
+            aria-hidden="true"
+          />
+          {{ $t('Video.Player.SponsorBlock.ContributionStatsLoading') }}
+        </div>
+        <div
+          v-else-if="contributionStatsError"
+          class="sponsorBlockContributionStatsStatus"
+          role="status"
+        >
+          {{ $t('Video.Player.SponsorBlock.ContributionStatsError') }}
+        </div>
+        <div
+          v-else-if="contributionStats === null"
+          class="sponsorBlockContributionStatsStatus"
+        >
+          {{ $t('Video.Player.SponsorBlock.ContributionStatsNoUserId') }}
+        </div>
+        <dl
+          v-else
+          class="sponsorBlockContributionStatsGrid"
+        >
+          <div class="sponsorBlockContributionMetric">
+            <dt>{{ $t('Video.Player.SponsorBlock.Submissions') }}</dt>
+            <dd>{{ formatNumber(contributionStats.segmentCount) }}</dd>
+          </div>
+          <div class="sponsorBlockContributionMetric">
+            <dt>{{ $t('Video.Player.SponsorBlock.Segments') }}</dt>
+            <dd>{{ formatNumber(contributionStats.viewCount) }}</dd>
+          </div>
+          <div class="sponsorBlockContributionMetric">
+            <dt>{{ $t('Video.Player.SponsorBlock.TimeSaved') }}</dt>
+            <dd>{{ formatMinutesSaved(contributionStats.minutesSaved) }}</dd>
+          </div>
+        </dl>
+      </section>
       <div
         v-if="loading && segments.length === 0"
         class="sponsorBlockLoading"
@@ -142,7 +191,10 @@
           </div>
         </div>
       </div>
-      <footer class="sponsorBlockFooter">
+      <footer
+        ref="contentEnd"
+        class="sponsorBlockFooter"
+      >
         <div class="sponsorBlockFooterOptions">
           <div class="sponsorBlockOption">
             <label
@@ -215,13 +267,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { isSponsorBlockFullVideoSegment } from '../../helpers/player/sponsorBlockFullVideo'
+import { formatNumber } from '../../helpers/utils'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const props = defineProps({
   autoSkipDisabled: Boolean,
   canWhitelistChannel: Boolean,
   channelWhitelisted: Boolean,
+  contributionStats: {
+    type: Object,
+    default: null
+  },
+  contributionStatsError: Boolean,
+  contributionStatsLoaded: Boolean,
+  contributionStatsLoading: Boolean,
   currentTime: {
     type: Number,
     default: 0
@@ -241,6 +303,70 @@ const props = defineProps({
 defineEmits(['auto-skip-change', 'channel-whitelist-change', 'close', 'refresh', 'skip', 'vote'])
 
 const selectedUuid = ref(null)
+const { t } = useI18n()
+const contentScroller = useTemplateRef('contentScroller')
+const contentEnd = useTemplateRef('contentEnd')
+let clampFrame = null
+let contentResizeObserver = null
+
+function scheduleScrollClamp() {
+  nextTick(() => {
+    clampFrame ??= requestAnimationFrame(() => {
+      clampFrame = null
+      if (contentScroller.value && contentEnd.value) {
+        clampOverlayScrollTop(contentScroller.value, contentEnd.value)
+      }
+    })
+  })
+}
+
+onMounted(() => {
+  scheduleScrollClamp()
+  if (contentScroller.value) {
+    contentResizeObserver = new ResizeObserver(scheduleScrollClamp)
+    contentResizeObserver.observe(contentScroller.value)
+  }
+})
+
+watch(
+  () => [
+    props.loading,
+    props.segments.length,
+    props.contributionStats,
+    props.contributionStatsError,
+    props.contributionStatsLoaded,
+    props.contributionStatsLoading,
+    selectedUuid.value,
+  ],
+  scheduleScrollClamp
+)
+
+onBeforeUnmount(() => {
+  contentResizeObserver?.disconnect()
+  contentResizeObserver = null
+  if (clampFrame !== null) {
+    cancelAnimationFrame(clampFrame)
+  }
+})
+
+function formatMinutesSaved(minutes) {
+  const safeMinutes = Number.isFinite(minutes) ? Math.max(minutes, 0) : 0
+  const totalMinutes = Math.round(safeMinutes)
+  if (safeMinutes > 0 && totalMinutes === 0) {
+    return t('Stats.Less than a minute')
+  }
+
+  const hours = Math.floor(totalMinutes / 60)
+  const remainingMinutes = totalMinutes % 60
+  if (hours === 0) {
+    return t('Stats.Minutes', { minutes: remainingMinutes })
+  }
+  if (remainingMinutes === 0) {
+    return t('Stats.Hours', { hours })
+  }
+
+  return t('Stats.Hours and minutes', { hours, minutes: remainingMinutes })
+}
 
 function selectSegment(uuid) {
   selectedUuid.value = selectedUuid.value === uuid ? null : uuid
@@ -346,6 +472,67 @@ function isSegmentPassed(segment) {
   flex: 1 1 auto;
   min-block-size: 0;
   overflow-y: auto;
+}
+
+.sponsorBlockContributionStats {
+  margin-block: 2px 8px;
+  margin-inline: 8px;
+  padding-block: 10px;
+  padding-inline: 10px;
+  background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
+  border-radius: calc(6px * var(--ui-roundness));
+}
+
+.sponsorBlockContributionStats h4 {
+  margin-block: 0 12px;
+  font-size: 13px;
+}
+
+.sponsorBlockContributionStatsStatus {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-block-size: 42px;
+  color: var(--secondary-text-color);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.sponsorBlockContributionStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.sponsorBlockContributionMetric {
+  display: grid;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  row-gap: 4px;
+  min-inline-size: 0;
+  padding-inline: 8px;
+  text-align: center;
+}
+
+.sponsorBlockContributionMetric + .sponsorBlockContributionMetric {
+  border-inline-start: 1px solid var(--side-nav-hover-color);
+}
+
+.sponsorBlockContributionMetric dt {
+  color: var(--secondary-text-color);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.sponsorBlockContributionMetric dd {
+  align-self: center;
+  min-inline-size: 0;
+  margin: 0;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .sponsorBlockSegments {
