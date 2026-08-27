@@ -88,6 +88,27 @@ function addCommentTimestamp(body) {
   throw new Error('Unable to add a timestamp to the comment fixture')
 }
 
+function blankCommentLikeCount(body) {
+  const response = JSON.parse(body)
+  const pending = [response]
+
+  while (pending.length > 0) {
+    const value = pending.pop()
+    if (!value || typeof value !== 'object') continue
+
+    const payload = value.commentEntityPayload
+    if (payload?.properties?.content?.content === "We're so honored that the first ever YouTube video was filmed here!") {
+      payload.toolbar.likeCountNotliked = ' '
+      payload.toolbar.likeCountA11y = '0 likes'
+      return Buffer.from(JSON.stringify(response))
+    }
+
+    pending.push(...Object.values(value))
+  }
+
+  throw new Error('Unable to blank the comment like count in the fixture')
+}
+
 /**
  * Serves the watch page for `jNQXAC9IVRw` from the committed Innertube
  * fixtures, without any network access.
@@ -107,6 +128,7 @@ function addCommentTimestamp(body) {
  * @param {string[]|null} [options.captionVideoIds] limit captions to these video IDs
  * @param {boolean} [options.ownerReply] mark the first reply thread as containing a video-owner reply
  * @param {boolean} [options.commentTimestamp] add a timestamp to one top-level comment
+ * @param {boolean} [options.blankCommentLikes] replace one comment's zero-like count with YouTube's whitespace representation
  */
 export async function mockWatchPage(app, page, {
   playable = false,
@@ -114,7 +136,8 @@ export async function mockWatchPage(app, page, {
   captionCueSettings = '',
   captionVideoIds = null,
   ownerReply = false,
-  commentTimestamp = false
+  commentTimestamp = false,
+  blankCommentLikes = false
 } = {}) {
   const counters = new Map()
   const includeCaptions = captionTranslations || captionCueSettings !== '' || captionVideoIds !== null
@@ -240,6 +263,9 @@ export async function mockWatchPage(app, page, {
         }
         if (commentTimestamp && body.includes('commentEntityPayload')) {
           body = addCommentTimestamp(body)
+        }
+        if (blankCommentLikes && body.includes("We're so honored")) {
+          body = blankCommentLikeCount(body)
         }
         return route.fulfill({ status: 200, contentType: 'application/json', body })
       }
