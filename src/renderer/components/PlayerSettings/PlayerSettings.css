@@ -2,6 +2,38 @@
   margin-block: 1rem;
 }
 
+@container settings-content (width <= 680px) {
+  .playerSwitchGrid .switchColumn {
+    align-items: stretch;
+    inline-size: min(100%, 294px);
+  }
+
+  .playerSelectGrid {
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .playerSelectGrid :deep(.select) {
+    box-sizing: border-box;
+    inline-size: min(100%, 270px);
+    margin-inline-end: 0;
+  }
+
+  .playerSelectGrid :deep(.select-text),
+  .playerSelectGrid :deep(.nativeSelect),
+  .playerSelectGrid :deep(.select-bar) {
+    inline-size: calc(100% - 70px);
+  }
+
+  .playerSelectGrid :deep(.iconSelect) {
+    inset-inline-end: 80px;
+  }
+
+  .playerSelectGrid :deep(.selectIndicators) {
+    inset-inline: auto 8px;
+  }
+}
+
 .screenshotFolderContainer {
   align-items: center;
   column-gap: 1rem;

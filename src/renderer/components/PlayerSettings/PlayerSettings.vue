@@ -3,7 +3,7 @@
     v-bind="$attrs"
     :title="t('Settings.Player Settings.Player Settings')"
   >
-    <div class="switchColumnGrid">
+    <div class="switchColumnGrid playerSwitchGrid">
       <div class="switchColumn">
         <FtToggleSwitch
           :label="t('Settings.Player Settings.Turn on Subtitles by Default')"
@@ -192,7 +192,7 @@
         :tooltips="isLinuxWayland ? { minimize: t('Settings.Player Settings.Auto Picture in Picture.Wayland Minimize Unsupported') } : {}"
       />
     </FtFlexBox>
-    <FtFlexBox>
+    <FtFlexBox class="playerSelectGrid">
       <FtSelect
         :placeholder="t('Settings.Player Settings.Default Viewing Mode.Default Viewing Mode')"
         :value="defaultViewingMode"
@@ -232,7 +232,7 @@
         @change="updateVideoPlaybackRateInterval"
       />
     </FtFlexBox>
-    <FtFlexBox>
+    <FtSliderGrid>
       <FtSlider
         :label="t('Settings.Player Settings.Next Video Interval')"
         :default-value="defaultInterval"
@@ -286,16 +286,6 @@
         @change="updateDefaultPlayback"
       />
       <FtSlider
-        :label="t('Settings.Player Settings.Parallel Segment Loading')"
-        :default-value="segmentPrefetchLimit"
-        setting-key="segmentPrefetchLimit"
-        :min-value="DEFAULT_SEGMENT_PREFETCH_LIMIT"
-        :max-value="MAX_SEGMENT_PREFETCH_LIMIT"
-        :step="1"
-        :tooltip="t('Tooltips.Player Settings.Parallel Segment Loading')"
-        @change="updateSegmentPrefetchLimit"
-      />
-      <FtSlider
         :label="t('Settings.Player Settings.Max Video Playback Rate')"
         :default-value="maxVideoPlaybackRate"
         setting-key="maxVideoPlaybackRate"
@@ -305,7 +295,17 @@
         value-extension="x"
         @change="updateMaxVideoPlaybackRate"
       />
-    </FtFlexBox>
+      <FtSlider
+        :label="t('Settings.Player Settings.Parallel Segment Loading')"
+        :default-value="segmentPrefetchLimit"
+        setting-key="segmentPrefetchLimit"
+        :min-value="DEFAULT_SEGMENT_PREFETCH_LIMIT"
+        :max-value="MAX_SEGMENT_PREFETCH_LIMIT"
+        :step="1"
+        :tooltip="t('Tooltips.Player Settings.Parallel Segment Loading')"
+        @change="updateSegmentPrefetchLimit"
+      />
+    </FtSliderGrid>
     <br>
     <FtFlexBox>
       <FtToggleSwitch
@@ -541,6 +541,7 @@ import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 import FtSlider from '../FtSlider/FtSlider.vue'
+import FtSliderGrid from '../FtSliderGrid/FtSliderGrid.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
