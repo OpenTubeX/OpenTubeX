@@ -38,12 +38,14 @@
       <div
         v-if="toast.buttons.length > 0"
         class="toastActions"
+        :class="{ vertical: toast.verticalButtons }"
         @click.stop
       >
         <FtButton
           v-for="button in toast.buttons"
           :key="button.label"
           :label="button.label"
+          :icon="button.icon"
           :text-color="button.primary ? undefined : null"
           :background-color="button.primary ? undefined : null"
           @click="performButtonAction(button)"

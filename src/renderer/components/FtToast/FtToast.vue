@@ -75,7 +75,8 @@ const { t } = useI18n()
  * @typedef ToastState the live state handed to {@link FtToastItem}
  * @property {string} message
  * @property {Function | null} action
- * @property {{ label: string, action?: Function, primary?: boolean }[]} buttons
+ * @property {{ label: string, action?: Function, primary?: boolean, icon?: [string, string] }[]} buttons
+ * @property {boolean} verticalButtons whether buttons should be stacked vertically
  * @property {string | null} image
  * @property {[string, string] | null} icon
  * @property {number} duration lifetime of the toast in milliseconds
@@ -403,9 +404,9 @@ function stopProgressToastPointerTracking() {
 }
 
 /**
- * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null, image: string | null, icon: [string, string] | null, buttons: { label: string, action?: Function, primary?: boolean }[] }>} event
+ * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null, image: string | null, icon: [string, string] | null, buttons: { label: string, action?: Function, primary?: boolean, icon?: [string, string] }[], verticalButtons: boolean }>} event
  */
-function open({ detail: { message, time, action, abortSignal, image, icon, buttons } }) {
+function open({ detail: { message, time, action, abortSignal, image, icon, buttons, verticalButtons } }) {
   time ||= 3000
 
   /** @type {ToastState} */
@@ -413,6 +414,7 @@ function open({ detail: { message, time, action, abortSignal, image, icon, butto
     message: typeof message === 'function' ? message({ elapsedMs: 0, remainingMs: time }) : message,
     action: action ?? null,
     buttons: buttons ?? [],
+    verticalButtons: verticalButtons ?? false,
     image: image ?? null,
     icon: icon ?? null,
     duration: time
