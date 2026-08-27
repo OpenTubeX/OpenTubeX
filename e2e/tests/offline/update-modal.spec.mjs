@@ -83,6 +83,23 @@ test('the update notification stays dismissed for the current app session', asyn
   expect(dismissBox.y + dismissBox.height).toBeLessThanOrEqual(updateBox.y)
   expect(updateBox.y - dismissBox.y - dismissBox.height).toBeLessThanOrEqual(4.5)
 
+  const toastRow = notification.locator('xpath=../..')
+  await expect(toastRow).toHaveAttribute('data-dismissible', 'false')
+  await toastRow.focus()
+  await page.keyboard.press('Escape')
+  await expect(toastRow).toHaveAttribute('data-removed', 'false')
+  await expect(notification).toBeVisible()
+
+  const notificationBox = await notification.boundingBox()
+  expect(notificationBox).not.toBeNull()
+  const swipeY = notificationBox.y + notificationBox.height / 2
+  await page.mouse.move(notificationBox.x + notificationBox.width / 2, swipeY)
+  await page.mouse.down()
+  await page.mouse.move(notificationBox.x + notificationBox.width / 2 - 200, swipeY, { steps: 5 })
+  await page.mouse.up()
+  await expect(toastRow).toHaveAttribute('data-swipe-out', 'false')
+  await expect(notification).toBeVisible()
+
   await page.getByRole('button', { name: 'New Tab' }).click()
   await expect(page.locator('.toast', { hasText: 'is now available' })).toHaveCount(1)
 

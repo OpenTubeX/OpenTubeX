@@ -2053,6 +2053,7 @@ function showAvailableUpdateToast() {
       versionNumber: update.versionNumber
     }),
     time: Infinity,
+    dismissible: false,
     icon: ['fas', 'sync'],
     verticalButtons: true,
     buttons: [

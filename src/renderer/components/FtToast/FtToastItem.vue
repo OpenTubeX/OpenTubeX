@@ -119,6 +119,11 @@ const toastProgressRadius = computed(() => 12 * store.getters.getUiRoundness / 1
 const toastProgressLineWidth = computed(() => Math.min(4, Math.max(2, 2 * store.getters.getUiRoundness / 100)))
 
 function close() {
+  if (!props.toast.dismissible) {
+    props.toast.dismiss()
+    return
+  }
+
   emit('closeToast')
 }
 
@@ -131,7 +136,7 @@ function close() {
  * @param {KeyboardEvent} event
  */
 function onRowKeydown(event) {
-  if (event.key !== 'Escape') { return }
+  if (event.key !== 'Escape' || !props.toast.dismissible) { return }
 
   event.preventDefault()
   close()

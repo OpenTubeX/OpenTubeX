@@ -77,6 +77,8 @@ const { t } = useI18n()
  * @property {Function | null} action
  * @property {{ label: string, action?: Function, primary?: boolean, icon?: [string, string] }[]} buttons
  * @property {boolean} verticalButtons whether buttons should be stacked vertically
+ * @property {boolean} dismissible whether Escape and swipe gestures can dismiss the toast
+ * @property {Function} dismiss closes the toast even when gestures are disabled
  * @property {string | null} image
  * @property {[string, string] | null} icon
  * @property {number} duration lifetime of the toast in milliseconds
@@ -404,10 +406,13 @@ function stopProgressToastPointerTracking() {
 }
 
 /**
- * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null, image: string | null, icon: [string, string] | null, buttons: { label: string, action?: Function, primary?: boolean, icon?: [string, string] }[], verticalButtons: boolean }>} event
+ * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null, image: string | null, icon: [string, string] | null, buttons: { label: string, action?: Function, primary?: boolean, icon?: [string, string] }[], verticalButtons: boolean, dismissible: boolean }>} event
  */
-function open({ detail: { message, time, action, abortSignal, image, icon, buttons, verticalButtons } }) {
+function open({ detail: { message, time, action, abortSignal, image, icon, buttons, verticalButtons, dismissible } }) {
   time ||= 3000
+
+  /** @type {number | string | null} */
+  let toastId = null
 
   /** @type {ToastState} */
   const state = reactive({
@@ -415,6 +420,12 @@ function open({ detail: { message, time, action, abortSignal, image, icon, butto
     action: action ?? null,
     buttons: buttons ?? [],
     verticalButtons: verticalButtons ?? false,
+    dismissible: dismissible ?? true,
+    dismiss: () => {
+      if (toastId !== null) {
+        sonner.dismiss(toastId)
+      }
+    },
     image: image ?? null,
     icon: icon ?? null,
     duration: time
@@ -422,6 +433,7 @@ function open({ detail: { message, time, action, abortSignal, image, icon, butto
 
   const id = sonner.custom(toastItem, {
     duration: time,
+    dismissible: state.dismissible,
     // Stated rather than left to the toaster's default: sonner counts the
     // toasts at a position to work out how they stack in front of one another,
     // and a toast that names no position is left out of that count, which puts
@@ -431,6 +443,7 @@ function open({ detail: { message, time, action, abortSignal, image, icon, butto
     onDismiss: forgetToast,
     onAutoClose: forgetToast
   })
+  toastId = id
 
   if (typeof message === 'function') {
     let elapsed = 0
