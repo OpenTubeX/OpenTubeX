@@ -54,6 +54,68 @@
   -webkit-app-region: no-drag;
 }
 
+.collapsedTabGroup {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 30px;
+  inline-size: 30px;
+  block-size: 30px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-block-end: 0;
+  border-radius: calc(6px * var(--ui-roundness)) calc(6px * var(--ui-roundness)) 0 0;
+  background-color: color-mix(in srgb, var(--tab-group-color) 18%, var(--bg-color));
+  color: var(--tab-group-color);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease, transform 0.2s ease;
+  touch-action: manipulation;
+  -webkit-app-region: no-drag;
+}
+
+.collapsedTabGroup:hover {
+  background-color: color-mix(in srgb, var(--tab-group-color) 24%, var(--card-bg-color));
+}
+
+.collapsedTabGroup:focus-visible {
+  outline: 2px solid var(--accent-color, var(--primary-text-color));
+  outline-offset: -2px;
+}
+
+.collapsedTabGroup.active {
+  border-color: color-mix(in srgb, var(--tab-group-color) 55%, var(--border-color));
+  background-color: color-mix(in srgb, var(--tab-group-color) 28%, var(--card-bg-color));
+  box-shadow: inset 0 2px 0 var(--tab-group-color);
+}
+
+.collapsedTabGroup.noTransition {
+  transition: background-color 0.15s ease;
+}
+
+.collapsedTabGroup.bottom {
+  border-block-start: 0;
+  border-block-end: 1px solid transparent;
+  border-radius: 0 0 calc(6px * var(--ui-roundness)) calc(6px * var(--ui-roundness));
+}
+
+.collapsedTabGroup.vertical {
+  flex-basis: 30px;
+  inline-size: calc(100% - 1px);
+  border-block-end: 1px solid transparent;
+  border-radius: calc(6px * var(--ui-roundness));
+}
+
+.collapsedTabGroup.bottom.active,
+.collapsedTabGroup.vertical.active {
+  border-color: color-mix(in srgb, var(--tab-group-color) 55%, var(--border-color));
+}
+
+.collapsedTabGroup svg {
+  font-size: 12px;
+}
+
 .tabsScrollbar {
   position: absolute;
   inset-inline: 0;
@@ -90,7 +152,8 @@
   opacity: 1;
 }
 
-.newTabButton {
+.newTabButton,
+.tabOrganizerButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -106,7 +169,8 @@
   -webkit-app-region: no-drag;
 }
 
-.newTabButton:hover {
+.newTabButton:hover,
+.tabOrganizerButton:hover {
   background-color: var(--side-nav-hover-color);
   color: var(--primary-text-color);
 }
@@ -186,10 +250,15 @@
 }
 /* stylelint-enable liberty/use-logical-spec */
 
-.tabBar.vertical .newTabButton {
+.tabBar.vertical .newTabButton,
+.tabBar.vertical .tabOrganizerButton {
   align-self: stretch;
   margin-inline: var(--tab-bar-inline-padding);
   padding-block-end: 10px;
+}
+
+.tabBar.vertical .tabOrganizerButton {
+  padding-block: 6px;
 }
 
 .tabBar.vertical .tabsViewport {

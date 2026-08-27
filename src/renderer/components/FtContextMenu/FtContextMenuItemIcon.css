@@ -1,0 +1,26 @@
+.itemImageIcon {
+  inline-size: 16px;
+  block-size: 16px;
+  object-fit: contain;
+}
+
+.checkedMark {
+  position: absolute;
+  inset-block-end: -5px;
+  inset-inline-end: -5px;
+  padding: 1px;
+  color: var(--primary-color);
+  background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+  border-radius: 50%;
+  font-size: 8px;
+}
+
+.groupColorSwatch {
+  background: var(--group-color);
+  block-size: 10px;
+  border: 1px solid color-mix(in srgb, var(--primary-text-color) 24%, transparent);
+  border-radius: 50%;
+  box-sizing: border-box;
+  inline-size: 10px;
+}

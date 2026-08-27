@@ -74,6 +74,27 @@ test.describe('tab previews', () => {
     expect(width).toBeGreaterThanOrEqual(Math.round(displayed.width))
   })
 
+  test('shows the tab group icon above the preview with clear spacing', async ({ page }) => {
+    const activeTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+    await page.evaluate(async (tabId) => {
+      const group = await window.ftElectron.tabs.createGroup({ name: 'Preview group', color: 'blue' })
+      await window.ftElectron.tabs.setGroup([tabId], group.id)
+    }, activeTabId)
+    await expect(page.locator(sel.activeTab).locator('.groupBadge')).toBeVisible()
+
+    await hoverTabForPreview(page, 0)
+    const group = page.locator('.tabTooltipGroup')
+    const preview = page.locator('.tabTooltipPreview')
+    await expect(group).toContainText('Preview group')
+    await expect(group.locator('[data-icon="layer-group"]')).toBeVisible()
+
+    const [groupBox, previewBox] = await Promise.all([
+      group.boundingBox(),
+      preview.boundingBox()
+    ])
+    expect(previewBox.y - (groupBox.y + groupBox.height)).toBeGreaterThanOrEqual(6)
+  })
+
   test('keeps the tooltip clear of the page scrollbar beside right vertical tabs', async ({ page, attachScreenshot }) => {
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store

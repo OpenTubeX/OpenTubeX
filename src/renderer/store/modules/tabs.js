@@ -9,6 +9,8 @@ const HALF_NAV_HISTORY_DISPLAY_LIMIT = Math.trunc(NAV_HISTORY_DISPLAY_LIMIT / 2)
 
 const state = {
   tabs: [],
+  groups: [],
+  closedTabs: [],
   pendingTabOrder: null,
   pendingTabOrderRequestId: null,
   activeTabId: null,
@@ -27,6 +29,8 @@ const state = {
 
 const getters = {
   getTabs: (state) => state.tabs,
+  getTabGroups: (state) => state.groups,
+  getClosedTabs: (state) => state.closedTabs,
   getActiveTabId: (state) => state.activeTabId,
   getActiveTab: (state) => state.tabs.find(tab => tab.id === state.activeTabId) ?? null,
   getSelectedTabIds: (state) => state.selectedTabIds,
@@ -96,6 +100,8 @@ const mutations = {
       pendingOrderAcknowledged
     )
     state.tabs = reconciledOrder.tabs
+    state.groups = Array.isArray(payload.groups) ? payload.groups : []
+    state.closedTabs = Array.isArray(payload.closedTabs) ? payload.closedTabs : []
     state.pendingTabOrder = reconciledOrder.pendingTabOrder
     if (reconciledOrder.pendingTabOrder == null) {
       state.pendingTabOrderRequestId = null
@@ -361,9 +367,39 @@ const actions = {
     }
   },
 
-  async restoreClosedTab() {
+  async restoreClosedTab(_context, closedTabId = null) {
     if (!process.env.IS_ELECTRON) return null
-    return await window.ftElectron.tabs.restoreClosed()
+    return await window.ftElectron.tabs.restoreClosed(closedTabId)
+  },
+
+  async clearClosedTabs() {
+    if (!process.env.IS_ELECTRON) return false
+    return await window.ftElectron.tabs.clearClosed()
+  },
+
+  async createTabGroup(_context, group) {
+    if (!process.env.IS_ELECTRON) return null
+    return await window.ftElectron.tabs.createGroup(group)
+  },
+
+  async updateTabGroup(_context, { groupId, changes }) {
+    if (!process.env.IS_ELECTRON) return false
+    return await window.ftElectron.tabs.updateGroup(groupId, changes)
+  },
+
+  async deleteTabGroup(_context, groupId) {
+    if (!process.env.IS_ELECTRON) return false
+    return await window.ftElectron.tabs.deleteGroup(groupId)
+  },
+
+  async setTabsGroup(_context, { tabIds, groupId }) {
+    if (!process.env.IS_ELECTRON) return 0
+    return await window.ftElectron.tabs.setGroup(tabIds, groupId)
+  },
+
+  async runTabOrganizerAction(_context, { action, tabIds }) {
+    if (!process.env.IS_ELECTRON) return { success: false, hasRemainingTabs: true }
+    return await window.ftElectron.tabs.runOrganizerAction(action, tabIds)
   },
 
   reloadTab(_context, tabId) {

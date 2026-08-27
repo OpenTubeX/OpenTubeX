@@ -2351,6 +2351,11 @@ Context Menu:
   Duplicate Multiple Tabs: '{count} Tabs duplizieren'
   Move Tab: Tab verschieben
   Move Tabs: Tabs verschieben
+  Move Tab to Group: Tab in Gruppe verschieben
+  Collapse Group: Gruppe einklappen
+  Move Tabs to Group: Tabs in Gruppe verschieben
+  Ungrouped: Ohne Gruppe
+  Manage Tab Groups…: Tab-Gruppen verwalten …
   To Beginning: An den Anfang
   To End: Ans Ende
   Close Tabs: Tabs schließen
@@ -2394,6 +2399,50 @@ Context Menu:
   Search With Multiple: Suchen mit …
   Selection Too Long: 'Auswahl ist zu lang für die Suche (> {count} Zeichen)'
   Cancel Refresh: Aktualisierung abbrechen
+Tab Organizer:
+  Title: Tab-Organizer
+  Open Tab Count: '{count} offener Tab | {count} offene Tabs'
+  Search Placeholder: Tabs durchsuchen
+  Search Label: Tabs durchsuchen
+  Selected Count: '{count} Tab ausgewählt | {count} Tabs ausgewählt'
+  Tab Count: '{count} Tab | {count} Tabs'
+  Select All: Alle auswählen
+  Select None: Auswahl aufheben
+  Move To Group: Ausgewählte Tabs in Gruppe verschieben
+  Choose Group: Gruppe auswählen
+  Ungrouped: Ohne Gruppe
+  Pin: Anheften
+  Unpin: Lösen
+  Load: Laden
+  Unload: Entladen
+  Unload All: Alle entladen
+  Close: Schließen
+  Close All: Alle schließen
+  Ungroup: Gruppierung aufheben
+  Group Name: Gruppenname
+  Color: Farbe
+  No Color: Keine Farbe
+  Create Group: Gruppe erstellen
+  Expand Group: Gruppe ausklappen
+  Collapse Group: Gruppe einklappen
+  Expand Group Label: '{name} ausklappen, {count} Tab | {name} ausklappen, {count} Tabs'
+  Rename Group: '{name} umbenennen'
+  Change Group Color: Farbe für {name} ändern
+  Move To Window: In Fenster verschieben
+  Choose Window: Fenster auswählen
+  Select Tab: '{title} auswählen'
+  Active: Aktiv
+  Pinned: Angeheftet
+  Unloaded: Entladen
+  Playing: Wiedergabe
+  Close Tab: '{title} schließen'
+  No Open Results: Keine offenen Tabs entsprechen der Suche.
+  Recently Closed: Kürzlich geschlossen
+  Clear: Leeren
+  Restore: Wiederherstellen
+  No Closed Results: Keine kürzlich geschlossenen Tabs entsprechen der Suche.
+  Drag Tab: Ziehen, um den Tab in eine Gruppe zu verschieben
+
 Stats:
   Stats: Statistik
   Watch time summary: Übersicht der Wiedergabezeit

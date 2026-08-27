@@ -100,6 +100,12 @@ test.describe('tab bar', () => {
       const [session] = await window.ftElectron.tabs.getSyncSessions()
       const remoteSession = {
         ...session,
+        groups: [{
+          id: 'remote-research-group',
+          name: 'Remote research',
+          color: 'purple',
+          isCollapsed: true
+        }],
         tabs: [
           ...session.tabs
             .filter(tab => tab.id !== remoteClosedTabId)
@@ -107,7 +113,8 @@ test.describe('tab bar', () => {
               ? {
                   ...tab,
                   url: 'app://bundle/#/playlists',
-                  title: 'Playlists'
+                  title: 'Playlists',
+                  groupId: 'remote-research-group'
                 }
               : tab),
           {
@@ -116,6 +123,7 @@ test.describe('tab bar', () => {
             title: 'Opened remotely',
             isPinned: false,
             color: null,
+            groupId: 'remote-research-group',
             isUnloaded: true
           }
         ],
@@ -127,7 +135,11 @@ test.describe('tab bar', () => {
       const stateAfterApply = await window.ftElectron.tabs.getState()
       return {
         applied,
-        removedPresentedTabCleared: stateAfterApply.presentedTabId !== remoteClosedTabId
+        removedPresentedTabCleared: stateAfterApply.presentedTabId !== remoteClosedTabId,
+        groups: stateAfterApply.groups,
+        groupedTabIds: stateAfterApply.tabs
+          .filter(tab => tab.groupId === 'remote-research-group')
+          .map(tab => tab.id)
       }
     }, {
       retainedTabIds: [retainedTabId, secondRetainedTab.id],
@@ -136,9 +148,18 @@ test.describe('tab bar', () => {
 
     expect(result).toEqual({
       applied: true,
-      removedPresentedTabCleared: true
+      removedPresentedTabCleared: true,
+      groups: [{
+        id: 'remote-research-group',
+        name: 'Remote research',
+        color: 'purple',
+        isCollapsed: true
+      }],
+      groupedTabIds: [retainedTabId, 'remote-new-tab']
     })
     await expect(page.locator(`.tab[data-tab-id="${remoteClosedTab.id}"]`)).toHaveCount(0)
+    await expect(page.locator('.tab[data-tab-id="remote-new-tab"]')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Expand Remote research, 2 tabs', exact: true }).click()
     await expect(page.locator('.tab[data-tab-id="remote-new-tab"]')).toHaveCount(1)
     await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', secondRetainedTab.id)
     await expect.poll(() => page.evaluate(tabId => {
@@ -1071,6 +1092,220 @@ test.describe('tab bar', () => {
     await expect(submenu).toBeVisible()
   })
 
+  test('moves selected tabs between groups from the tab context menu', async ({ page }) => {
+    const { firstTabId, secondTabId, groupId } = await page.evaluate(async () => {
+      const first = await window.ftElectron.tabs.create({
+        route: '/about',
+        title: 'First grouped tab',
+        makeActive: false,
+        lazyLoad: true
+      })
+      const second = await window.ftElectron.tabs.create({
+        route: '/history',
+        title: 'Second grouped tab',
+        makeActive: false,
+        lazyLoad: true
+      })
+      const group = await window.ftElectron.tabs.createGroup({ name: 'Research', color: 'blue' })
+      return { firstTabId: first.id, secondTabId: second.id, groupId: group.id }
+    })
+
+    await page.evaluate((tabIds) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('setTabSelection', tabIds)
+    }, [firstTabId, secondTabId])
+    await page.locator(`.tab[data-tab-id="${secondTabId}"]`).click({ button: 'right' })
+
+    const moveTabsToGroup = page.getByRole('menuitem', { name: 'Move Tabs to Group', exact: true })
+    await expect(moveTabsToGroup.locator('.itemIcon')).toHaveClass(/groupMenuIcon/)
+    await moveTabsToGroup.hover()
+    const bulkSubmenu = moveTabsToGroup.locator('xpath=following-sibling::*[@role="menu"]')
+    const researchItem = bulkSubmenu.getByRole('menuitemradio', { name: 'Research', exact: true })
+    await expect(researchItem.locator('.groupColorSwatch')).toHaveCSS('background-color', 'rgb(63, 127, 214)')
+    await researchItem.click()
+
+    await expect.poll(() => page.evaluate(async (targetGroupId) => {
+      const state = await window.ftElectron.tabs.getState()
+      return state.tabs.filter(tab => tab.groupId === targetGroupId).map(tab => tab.id)
+    }, groupId)).toEqual([firstTabId, secondTabId])
+
+    await page.evaluate((tabId) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('setTabSelection', [tabId])
+    }, firstTabId)
+    await page.locator(`.tab[data-tab-id="${firstTabId}"]`).click({ button: 'right' })
+
+    const moveTabToGroup = page.getByRole('menuitem', { name: 'Move Tab to Group', exact: true })
+    await moveTabToGroup.hover()
+    const singleSubmenu = moveTabToGroup.locator('xpath=following-sibling::*[@role="menu"]')
+    const ungroupedItem = singleSubmenu.getByRole('menuitemradio', { name: 'Ungrouped', exact: true })
+    await expect(ungroupedItem.locator('[data-icon="link-slash"]')).toBeVisible()
+    await ungroupedItem.click()
+    await expect.poll(() => page.evaluate(async (tabId) => {
+      return (await window.ftElectron.tabs.getState()).tabs.find(tab => tab.id === tabId)?.groupId
+    }, firstTabId)).toBeNull()
+
+    await page.locator(`.tab[data-tab-id="${firstTabId}"]`).click({ button: 'right' })
+    const manageGroups = page.getByRole('menuitem', { name: 'Move Tab to Group', exact: true })
+    await manageGroups.hover()
+    await manageGroups.locator('xpath=following-sibling::*[@role="menu"]')
+      .getByRole('menuitem', { name: 'Manage Tab Groups…', exact: true })
+      .click()
+    await expect(page.getByRole('dialog', { name: 'Tab Organizer' })).toBeVisible()
+  })
+
+  test('collapses a group into one tab bar button and preserves reorder positions', async ({ page }) => {
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+    const setup = await page.evaluate(async () => {
+      const first = await window.ftElectron.tabs.create({
+        route: '/about',
+        title: 'First research tab',
+        makeActive: false,
+        lazyLoad: true
+      })
+      const second = await window.ftElectron.tabs.create({
+        route: '/history',
+        title: 'Second research tab',
+        makeActive: true,
+        lazyLoad: true
+      })
+      const trailing = await window.ftElectron.tabs.create({
+        route: '/playlists',
+        title: 'Trailing tab',
+        makeActive: false,
+        lazyLoad: true
+      })
+      const group = await window.ftElectron.tabs.createGroup({ name: 'Research', color: 'blue' })
+      await window.ftElectron.tabs.setGroup([first.id, second.id], group.id)
+      const state = await window.ftElectron.tabs.getState()
+      return {
+        firstId: first.id,
+        secondId: second.id,
+        trailingId: trailing.id,
+        groupId: group.id,
+        originalOrder: state.tabs.map(tab => tab.id)
+      }
+    })
+
+    await page.locator(`.tab[data-tab-id="${setup.firstId}"]`).click({ button: 'right' })
+    const collapseGroup = page.getByRole('menuitem', { name: 'Collapse Group', exact: true })
+    await expect(collapseGroup.locator('[data-icon="compress"]')).toBeVisible()
+    await collapseGroup.click()
+
+    await expect(page.locator(`.tab[data-tab-id="${setup.firstId}"]`)).toHaveCount(0)
+    await expect(page.locator(`.tab[data-tab-id="${setup.secondId}"]`)).toHaveCount(0)
+    const collapsedGroup = page.getByRole('button', { name: 'Expand Research, 2 tabs', exact: true })
+    await expect(collapsedGroup).toHaveCount(1)
+    await expect(collapsedGroup).toHaveClass(/active/)
+    await expect(collapsedGroup).toHaveAttribute('title', 'Expand Research, 2 tabs')
+    await expect.poll(() => page.evaluate(async (groupId) => {
+      return (await window.ftElectron.tabs.getState()).groups.find(group => group.id === groupId)?.isCollapsed
+    }, setup.groupId)).toBe(true)
+
+    await page.evaluate((trailingId) => {
+      const source = document.querySelector(`.tab[data-tab-id="${trailingId}"]`)
+      const target = document.querySelector('.tabBar .tab')
+      const sourceRect = source.getBoundingClientRect()
+      const targetRect = target.getBoundingClientRect()
+      source.dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true,
+        button: 0,
+        clientX: sourceRect.left + sourceRect.width / 2,
+        clientY: sourceRect.top + sourceRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointermove', {
+        bubbles: true,
+        buttons: 1,
+        clientX: targetRect.left + targetRect.width / 2,
+        clientY: targetRect.top + targetRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+    }, setup.trailingId)
+
+    const reorderedIds = [
+      setup.trailingId,
+      setup.originalOrder[0],
+      setup.firstId,
+      setup.secondId
+    ]
+    await expect.poll(() => page.evaluate(async () => {
+      return (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.id)
+    })).toEqual(reorderedIds)
+
+    await page.evaluate((groupId) => {
+      const source = document.querySelector(`.collapsedTabGroup[data-group-id="${groupId}"]`)
+      const target = document.querySelector('.tabBar .tab')
+      const sourceRect = source.getBoundingClientRect()
+      const targetRect = target.getBoundingClientRect()
+      source.dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true,
+        button: 0,
+        clientX: sourceRect.left + sourceRect.width / 2,
+        clientY: sourceRect.top + sourceRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointermove', {
+        bubbles: true,
+        buttons: 1,
+        clientX: targetRect.left + targetRect.width / 2,
+        clientY: targetRect.top + targetRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+    }, setup.groupId)
+
+    const groupReorderedIds = [
+      setup.firstId,
+      setup.secondId,
+      setup.trailingId,
+      setup.originalOrder[0]
+    ]
+    await expect.poll(() => page.evaluate(async () => {
+      return (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.id)
+    })).toEqual(groupReorderedIds)
+
+    await collapsedGroup.click()
+    await expect(page.locator('.collapsedTabGroup')).toHaveCount(0)
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
+    await expect.poll(() => page.locator(sel.tabs).evaluateAll(tabs => {
+      return tabs.map(tab => tab.dataset.tabId)
+    })).toEqual(groupReorderedIds)
+  })
+
+  test('clamps its custom scrollbar after collapsing a group at the scroll end', async ({ page }) => {
+    await page.setViewportSize({ width: 800, height: 600 })
+    const groupId = await page.evaluate(async () => {
+      const tabIds = []
+      for (let index = 0; index < 18; index++) {
+        const tab = await window.ftElectron.tabs.create({
+          route: `/watch/tab-bar-scroll-${index}`,
+          title: `Scrollable tab ${index}`,
+          makeActive: false,
+          lazyLoad: true
+        })
+        tabIds.push(tab.id)
+      }
+      const group = await window.ftElectron.tabs.createGroup({ name: 'Scrollable group', color: 'green' })
+      await window.ftElectron.tabs.setGroup(tabIds.slice(2), group.id)
+      return group.id
+    })
+
+    const container = page.locator('.tabsContainer')
+    const scrollbar = page.locator('.tabsScrollbar')
+    await expect(scrollbar).toBeVisible()
+    await container.evaluate(element => { element.scrollLeft = element.scrollWidth })
+    await expect.poll(() => container.evaluate(element => (
+      element.scrollLeft > 0 &&
+      Math.abs(element.scrollLeft - (element.scrollWidth - element.clientWidth)) <= 1
+    ))).toBe(true)
+
+    await page.evaluate(groupId => window.ftElectron.tabs.updateGroup(groupId, { isCollapsed: true }), groupId)
+    await expect(page.getByRole('button', { name: 'Expand Scrollable group, 16 tabs', exact: true })).toBeVisible()
+    await expect.poll(() => container.evaluate(element => ({
+      maxScroll: Math.max(0, element.scrollWidth - element.clientWidth),
+      scrollLeft: element.scrollLeft
+    }))).toEqual({ maxScroll: 0, scrollLeft: 0 })
+    await expect(scrollbar).toBeHidden()
+  })
+
   test('keeps a submenu inside the viewport for a bottom vertical tab', async ({ page }) => {
     await page.setViewportSize({ width: 800, height: 450 })
     await page.keyboard.press('F1')
@@ -1369,6 +1604,161 @@ test.describe('tab bar', () => {
 })
 
 test.describe('closed tabs', () => {
+  test('restores regular and pinned tabs at their previous positions', async ({ page }) => {
+    const { closedTabId, expectedRoutes } = await page.evaluate(async () => {
+      await window.ftElectron.tabs.create({
+        route: '/about',
+        title: 'Before restored tab',
+        makeActive: false,
+        lazyLoad: true
+      })
+      const restored = await window.ftElectron.tabs.create({
+        route: '/history',
+        title: 'Restored in place',
+        makeActive: false,
+        lazyLoad: true
+      })
+      const after = await window.ftElectron.tabs.create({
+        route: '/userplaylists',
+        title: 'After restored tab',
+        makeActive: false,
+        lazyLoad: true
+      })
+      const expectedRoutes = (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.route.fullPath)
+
+      await window.ftElectron.tabs.activate(after.id)
+      await window.ftElectron.tabs.close(restored.id)
+      const closedTabId = (await window.ftElectron.tabs.getState()).closedTabs
+        .find(tab => tab.title === 'Restored in place')?.id
+
+      return { closedTabId, expectedRoutes }
+    })
+
+    expect(closedTabId).toBeTruthy()
+    await page.locator(sel.tabOrganizerButton).click()
+    const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    await organizer.locator('.closedTabRow')
+      .filter({ hasText: 'Restored in place' })
+      .getByRole('button', { name: 'Restore' })
+      .click()
+
+    await expect.poll(() => page.evaluate(async () => {
+      return (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.route.fullPath)
+    })).toEqual(expectedRoutes)
+
+    const pinned = await page.evaluate(async () => {
+      await window.ftElectron.tabs.create({
+        route: '/watch/pinned-before',
+        title: 'Pinned before restored tab',
+        isPinned: true,
+        makeActive: false,
+        lazyLoad: true
+      })
+      const restored = await window.ftElectron.tabs.create({
+        route: '/watch/pinned-restored',
+        title: 'Pinned restored in place',
+        isPinned: true,
+        makeActive: false,
+        lazyLoad: true
+      })
+      await window.ftElectron.tabs.create({
+        route: '/watch/pinned-after',
+        title: 'Pinned after restored tab',
+        isPinned: true,
+        makeActive: false,
+        lazyLoad: true
+      })
+      const expectedRoutes = (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.route.fullPath)
+
+      await window.ftElectron.tabs.close(restored.id)
+      const closedTabId = (await window.ftElectron.tabs.getState()).closedTabs
+        .find(tab => tab.title === 'Pinned restored in place')?.id
+      return { closedTabId, expectedRoutes }
+    })
+
+    expect(pinned.closedTabId).toBeTruthy()
+    await organizer.locator('.closedTabRow')
+      .filter({ hasText: 'Pinned restored in place' })
+      .getByRole('button', { name: 'Restore' })
+      .click()
+
+    await expect.poll(() => page.evaluate(async () => {
+      return (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.route.fullPath)
+    })).toEqual(pinned.expectedRoutes)
+  })
+
+  test('preserves relative order when several closed tabs are restored out of closing order', async ({ page }) => {
+    const closedTabIds = await page.evaluate(async () => {
+      const tabs = []
+      for (const title of ['Restore order A', 'Restore order B', 'Restore order C', 'Restore order D']) {
+        tabs.push(await window.ftElectron.tabs.create({
+          route: `/watch/${title.at(-1).toLowerCase()}`,
+          title,
+          makeActive: false,
+          lazyLoad: true
+        }))
+      }
+
+      await window.ftElectron.tabs.close(tabs[1].id)
+      await window.ftElectron.tabs.close(tabs[2].id)
+      const closedTabs = (await window.ftElectron.tabs.getState()).closedTabs
+      return {
+        older: closedTabs.find(tab => tab.title === 'Restore order B')?.id,
+        newer: closedTabs.find(tab => tab.title === 'Restore order C')?.id
+      }
+    })
+
+    expect(closedTabIds.older).toBeTruthy()
+    expect(closedTabIds.newer).toBeTruthy()
+    await page.evaluate(async ({ older, newer }) => {
+      await window.ftElectron.tabs.restoreClosed(older)
+      await window.ftElectron.tabs.restoreClosed(newer)
+    }, closedTabIds)
+
+    await expect.poll(() => page.evaluate(async () => {
+      return (await window.ftElectron.tabs.getState()).tabs
+        .map(tab => tab.route.fullPath)
+        .filter(route => /^\/watch\/[a-d]$/.test(route))
+    })).toEqual(['/watch/a', '/watch/b', '/watch/c', '/watch/d'])
+  })
+
+  test('restores any recently closed tab and clears the retained list', async ({ page }) => {
+    await page.evaluate(async () => {
+      const older = await window.ftElectron.tabs.create({
+        route: '/userplaylists',
+        title: 'Older closed tab',
+        makeActive: false,
+        lazyLoad: true
+      })
+      const newer = await window.ftElectron.tabs.create({
+        route: '/history',
+        title: 'Newer closed tab',
+        makeActive: false,
+        lazyLoad: true
+      })
+      await window.ftElectron.tabs.close(older.id)
+      await window.ftElectron.tabs.close(newer.id)
+    })
+
+    await page.locator(sel.tabOrganizerButton).click()
+    const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    const closedRows = organizer.locator('.closedTabRow')
+    await expect(closedRows).toHaveCount(2)
+    await expect(closedRows.nth(0)).toContainText('Newer closed tab')
+    await expect(closedRows.nth(1)).toContainText('Older closed tab')
+
+    await closedRows.filter({ hasText: 'Older closed tab' }).getByRole('button', { name: 'Restore' }).click()
+    await expect(closedRows.filter({ hasText: 'Older closed tab' })).toHaveCount(0)
+    await expect(closedRows.filter({ hasText: 'Newer closed tab' })).toHaveCount(1)
+    await expect.poll(() => page.evaluate(async () => {
+      const state = await window.ftElectron.tabs.getState()
+      return state.tabs.some(tab => tab.route.fullPath === '/userplaylists')
+    })).toBe(true)
+
+    await organizer.getByRole('button', { name: 'Clear', exact: true }).click()
+    await expect(closedRows).toHaveCount(0)
+  })
+
   test('does not restore a tab whose deferred close is interrupted by shutdown', async ({ app }) => {
     let page = app.page
     const closedTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
@@ -1705,6 +2095,288 @@ test.describe('background tab shortcuts', () => {
       requestAnimationFrame(resolve)
     })))
     expect(subscriptionRefreshRequests).toEqual([])
+  })
+})
+
+test.describe('tab organizer', () => {
+  test('clamps its scroll position after collapsing and filtering at fractional UI scale', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+    await page.evaluate(async () => {
+      const tabIds = []
+      for (let index = 0; index < 24; index++) {
+        const tab = await window.ftElectron.tabs.create({
+          route: `/watch/organizer-scroll-${index}`,
+          title: index === 23 ? 'Only matching tab' : `Scrollable tab ${index}`,
+          makeActive: false,
+          lazyLoad: true
+        })
+        tabIds.push(tab.id)
+      }
+      const group = await window.ftElectron.tabs.createGroup({ name: 'Scrollable group', color: 'green' })
+      await window.ftElectron.tabs.setGroup(tabIds, group.id)
+    })
+
+    await page.locator(sel.tabOrganizerButton).click()
+    const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    const scroller = organizer.locator('.tabOrganizerScroll')
+    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+    const group = organizer.locator('.tabGroup').filter({ hasText: 'Scrollable group' })
+    const collapseButton = group.getByRole('button', { name: 'Collapse group' })
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await collapseButton.evaluate(element => element.click())
+    await expect(group.locator('.tabOrganizerRow')).toHaveCount(0)
+    await expect.poll(() => scroller.evaluate(element => ({
+      distanceFromEnd: Math.abs(element.scrollTop - Math.max(0, element.scrollHeight - element.clientHeight)),
+      scrollTop: element.scrollTop
+    }))).toEqual({ distanceFromEnd: 0, scrollTop: 0 })
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+    await group.getByRole('button', { name: 'Expand group' }).evaluate(element => element.click())
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await organizer.getByRole('searchbox', { name: 'Search tabs' }).fill('Only matching tab')
+    await expect(group.locator('.tabOrganizerRow')).toHaveCount(1)
+    await expect.poll(() => scroller.evaluate(element => ({
+      distanceFromEnd: Math.abs(element.scrollTop - Math.max(0, element.scrollHeight - element.clientHeight)),
+      scrollTop: element.scrollTop
+    }))).toEqual({ distanceFromEnd: 0, scrollTop: 0 })
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+  })
+
+  test('searches tab metadata and manages persistent collapsible groups', async ({ page }) => {
+    const { betaId } = await page.evaluate(async () => {
+      await window.ftElectron.tabs.create({
+        route: '/watch/jNQXAC9IVRw',
+        title: 'Alpha video',
+        isPinned: true,
+        makeActive: false,
+        lazyLoad: true
+      })
+      const beta = await window.ftElectron.tabs.create({
+        route: '/history',
+        title: 'Beta channel',
+        makeActive: false,
+        lazyLoad: true
+      })
+      return { betaId: beta.id }
+    })
+
+    await page.locator(sel.tabOrganizerButton).click()
+    const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    const search = organizer.getByRole('searchbox', { name: 'Search tabs' })
+    const openRows = organizer.locator('.tabGroup .tabOrganizerRow')
+    await expect(organizer).toBeVisible()
+    await expect(search).toHaveAttribute('placeholder', 'Search tabs')
+
+    await search.fill('/history')
+    await expect(openRows).toHaveCount(1)
+    await expect(openRows).toContainText('Beta channel')
+
+    await organizer.getByRole('button', { name: 'Select All' }).click()
+    await search.fill('')
+    const betaCheckbox = openRows
+      .filter({ hasText: 'Beta channel' })
+      .getByRole('checkbox', { name: 'Select Beta channel' })
+    const alphaCheckbox = openRows
+      .filter({ hasText: 'Alpha video' })
+      .getByRole('checkbox', { name: 'Select Alpha video' })
+    await expect(betaCheckbox).toBeChecked()
+    await expect(alphaCheckbox).not.toBeChecked()
+    await organizer.getByRole('button', { name: 'Select None' }).click()
+
+    await search.fill('Alpha video')
+    await expect(openRows).toHaveCount(1)
+    await expect(openRows).toContainText('Pinned')
+    await expect(openRows).toContainText('Unloaded')
+    const alphaRow = openRows.filter({ hasText: 'Alpha video' })
+    await expect(alphaCheckbox).toHaveClass(/checkbox/)
+    await alphaRow.locator('.tabSelection label').click()
+    await expect(alphaCheckbox).toBeChecked()
+    const alphaIdentity = alphaRow.locator('.tabIdentity')
+    await alphaIdentity.hover()
+    await expect(alphaIdentity).toHaveCSS('outline-style', 'none')
+
+    await search.fill('')
+    const bulkActions = organizer.locator('.bulkActions')
+    const pinButton = bulkActions.getByRole('button', { name: 'Pin', exact: true })
+    const unpinButton = bulkActions.getByRole('button', { name: 'Unpin', exact: true })
+    const loadButton = bulkActions.getByRole('button', { name: 'Load', exact: true })
+    const unloadButton = bulkActions.getByRole('button', { name: 'Unload', exact: true })
+    const selectNoneButton = organizer.getByRole('button', { name: 'Select None' })
+    await expect(selectNoneButton).toBeVisible()
+    await expect(pinButton).toBeDisabled()
+    await expect(unpinButton).toBeEnabled()
+    await expect(loadButton).toBeEnabled()
+    await expect(unloadButton).toBeDisabled()
+    await selectNoneButton.click()
+    await expect(alphaCheckbox).not.toBeChecked()
+    await expect(pinButton).toBeDisabled()
+    await expect(unpinButton).toBeDisabled()
+    await expect(loadButton).toBeDisabled()
+    await expect(unloadButton).toBeDisabled()
+    const selectAllButton = organizer.getByRole('button', { name: 'Select All' })
+    await expect(selectAllButton).toBeVisible()
+    await selectAllButton.click()
+    await expect(pinButton).toBeEnabled()
+    await expect(unpinButton).toBeEnabled()
+    await expect(loadButton).toBeEnabled()
+    await expect(unloadButton).toBeEnabled()
+    await selectNoneButton.click()
+    await alphaRow.locator('.tabSelection label').click()
+
+    const groupSelect = bulkActions.getByRole('combobox', { name: 'Move selected tabs to group' })
+    await expect(groupSelect).toBeVisible()
+    await expect(bulkActions.locator(':scope > :last-child')).toHaveClass(/tabOrganizerSearch/)
+    const groupSelectLabel = bulkActions.locator('.select-label')
+    await expect(groupSelectLabel).toHaveText('Move selected tabs to group')
+    await expect(groupSelectLabel).toBeVisible()
+    const [
+      selectionBox,
+      actionsBox,
+      groupSelectBox,
+      groupSelectLabelBox,
+      searchContainerBox,
+      searchInputBox,
+      searchIconBox
+    ] = await Promise.all([
+      organizer.locator('.selectionControls').boundingBox(),
+      bulkActions.boundingBox(),
+      groupSelect.boundingBox(),
+      groupSelectLabel.boundingBox(),
+      organizer.locator('.tabOrganizerSearch').boundingBox(),
+      search.boundingBox(),
+      organizer.locator('.tabOrganizerSearch .searchIcon').boundingBox()
+    ])
+    expect(actionsBox.y - (selectionBox.y + selectionBox.height)).toBeLessThanOrEqual(10)
+    expect(groupSelectLabelBox.y + groupSelectLabelBox.height).toBeLessThanOrEqual(groupSelectBox.y)
+    expect(Math.abs(searchContainerBox.y - groupSelectBox.y)).toBeLessThanOrEqual(1)
+    expect(searchContainerBox.x).toBeGreaterThanOrEqual(groupSelectBox.x + groupSelectBox.width + 7)
+    expect(actionsBox.x + actionsBox.width - (searchContainerBox.x + searchContainerBox.width)).toBeLessThanOrEqual(1)
+    expect(searchIconBox.x).toBeGreaterThan(searchInputBox.x)
+    expect(searchIconBox.x + searchIconBox.width).toBeLessThan(searchInputBox.x + searchInputBox.width)
+    expect(Math.abs(
+      searchIconBox.y + searchIconBox.height / 2 - (searchInputBox.y + searchInputBox.height / 2)
+    )).toBeLessThanOrEqual(1)
+    await organizer.getByLabel('Group name').fill('Research')
+    await organizer.getByRole('button', { name: 'Create Group' }).click()
+
+    let researchGroup = organizer.locator('.tabGroup').filter({ hasText: 'Research' })
+    await expect(groupSelect.locator('.optionColorDot, .optionIcon')).toHaveCount(0)
+    await groupSelect.click()
+    const chooseGroupOption = page.getByRole('option', { name: 'Choose a group', exact: true })
+    const ungroupedOption = page.getByRole('option', { name: 'Ungrouped', exact: true })
+    const researchOption = page.getByRole('option', { name: 'Research', exact: true })
+    await expect(chooseGroupOption.locator('.optionColorDot, .optionIcon')).toHaveCount(0)
+    await expect(ungroupedOption.locator('[data-icon="link-slash"]')).toBeVisible()
+    await expect(researchOption.locator('.optionColorDot.empty')).toBeVisible()
+    await chooseGroupOption.click()
+    await researchGroup.getByRole('button', { name: 'Change color for Research' }).click()
+    await researchGroup.getByRole('option', { name: 'Blue', exact: true }).click()
+    await expect(researchGroup.getByRole('button', { name: 'Collapse group' }).locator('svg')).toBeVisible()
+    await expect(researchGroup.getByRole('button', { name: 'Activate First' })).toHaveCount(0)
+    await expect(researchGroup.getByRole('button', { name: 'Unload All' })).toBeVisible()
+    await expect(researchGroup.getByRole('button', { name: 'Close All' })).toBeVisible()
+    await expect(researchGroup.getByRole('button', { name: 'Ungroup' }).locator('[data-icon="link-slash"]')).toBeVisible()
+    await expect(researchGroup.locator('.tabOrganizerRow')).toContainText('Alpha video')
+    await expect(page.locator('.tab[data-tab-id]').filter({ has: page.locator('.groupBadge') })).toHaveCount(1)
+    await expect.poll(() => page.evaluate(async () => {
+      const state = await window.ftElectron.tabs.getState()
+      const group = state.groups.find(candidate => candidate.name === 'Research')
+      return {
+        color: group?.color,
+        groupedTitles: state.tabs.filter(tab => tab.groupId === group?.id).map(tab => tab.title)
+      }
+    })).toEqual({ color: 'blue', groupedTitles: ['Alpha video'] })
+
+    await researchGroup.getByRole('button', { name: 'Rename Research' }).click()
+    const renameInput = organizer.locator('.groupRenameInput')
+    await renameInput.fill('Reading')
+    await renameInput.press('Enter')
+    researchGroup = organizer.locator('.tabGroup').filter({ hasText: 'Reading' })
+    await researchGroup.getByRole('button', { name: 'Change color for Reading' }).click()
+    await researchGroup.getByRole('option', { name: 'Purple', exact: true }).click()
+    await expect.poll(() => page.evaluate(async () => {
+      const group = (await window.ftElectron.tabs.getState()).groups.find(candidate => candidate.name === 'Reading')
+      return group?.color
+    })).toBe('purple')
+
+    const betaRow = organizer.locator('.tabOrganizerRow').filter({ hasText: 'Beta channel' })
+    const researchTabRow = researchGroup.locator('.tabOrganizerRow').first()
+    const dragData = await page.evaluateHandle(() => new DataTransfer())
+    await betaRow.dispatchEvent('dragstart', { dataTransfer: dragData })
+    await researchTabRow.dispatchEvent('dragenter', { dataTransfer: dragData })
+    await expect(researchGroup).toHaveClass(/dropTarget/)
+    await betaRow.dispatchEvent('dragend', { dataTransfer: dragData })
+    await betaRow.dragTo(researchTabRow)
+    await expect.poll(() => page.evaluate(async (tabId) => {
+      return (await window.ftElectron.tabs.getState()).tabs.find(tab => tab.id === tabId)?.groupId
+    }, betaId)).not.toBeNull()
+    const groupCount = researchGroup.locator('.tabGroupCount')
+    await expect(groupCount).toHaveText('2 tabs')
+
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+    await page.setViewportSize({ width: 440, height: 800 })
+    await expect(groupCount).toHaveCSS('white-space', 'nowrap')
+    const responsiveActions = researchGroup.locator('.groupActions')
+    const responsiveActionButtons = responsiveActions.locator(':scope > button')
+    const [
+      responsiveHeaderBox,
+      responsiveSelectionBox,
+      responsiveLabelBox,
+      responsiveButtonBoxes,
+      responsiveBulkActionsBox,
+      responsiveGroupSelectBox,
+      responsiveSearchBox
+    ] = await Promise.all([
+      researchGroup.locator('.tabGroupHeader').boundingBox(),
+      organizer.locator('.selectionControls').boundingBox(),
+      organizer.locator('.bulkActionSelect .select-label').boundingBox(),
+      responsiveActionButtons.evaluateAll(buttons => buttons.map(button => {
+        const { x, y, width, height } = button.getBoundingClientRect()
+        return { x, y, width, height }
+      })),
+      bulkActions.boundingBox(),
+      groupSelect.boundingBox(),
+      organizer.locator('.tabOrganizerSearch').boundingBox()
+    ])
+    expect(responsiveLabelBox.y).toBeGreaterThanOrEqual(responsiveSelectionBox.y + responsiveSelectionBox.height)
+    expect(responsiveSearchBox.y).toBeGreaterThanOrEqual(responsiveGroupSelectBox.y + responsiveGroupSelectBox.height)
+    expect(Math.abs(responsiveSearchBox.x - responsiveBulkActionsBox.x)).toBeLessThanOrEqual(1)
+    expect(Math.abs(
+      responsiveBulkActionsBox.x + responsiveBulkActionsBox.width -
+      (responsiveSearchBox.x + responsiveSearchBox.width)
+    )).toBeLessThanOrEqual(1)
+    expect(Math.max(...responsiveButtonBoxes.map(box => box.y)) - Math.min(...responsiveButtonBoxes.map(box => box.y)))
+      .toBeLessThanOrEqual(1)
+    const firstResponsiveActionBox = responsiveButtonBoxes[0]
+    const responsiveActionStartGap = firstResponsiveActionBox.x - responsiveHeaderBox.x
+    expect(responsiveActionStartGap).toBeGreaterThanOrEqual(4)
+    expect(responsiveActionStartGap).toBeLessThanOrEqual(8)
+    await page.setViewportSize({ width: 1280, height: 800 })
+
+    const ungroupedGroup = organizer.getByRole('heading', { name: 'Ungrouped', exact: true }).locator('../..')
+    await betaRow.dragTo(ungroupedGroup)
+    await expect.poll(() => page.evaluate(async (tabId) => {
+      return (await window.ftElectron.tabs.getState()).tabs.find(tab => tab.id === tabId)?.groupId
+    }, betaId)).toBeNull()
+
+    await researchGroup.getByRole('button', { name: 'Collapse group' }).click()
+    await expect(researchGroup.locator('.tabOrganizerRow')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Expand Reading, 1 tab', exact: true })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await page.locator(sel.tabOrganizerButton).click()
+
+    const reopenedOrganizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    const reopenedGroup = reopenedOrganizer.locator('.tabGroup').filter({ hasText: 'Reading' })
+    await expect(reopenedGroup.getByRole('button', { name: 'Expand group' })).toBeVisible()
+    await reopenedOrganizer.getByRole('searchbox', { name: 'Search tabs' }).fill('Alpha video')
+    await expect(reopenedGroup.locator('.tabOrganizerRow')).toContainText('Alpha video')
+    await expect(reopenedGroup.getByRole('button', { name: 'Expand group' }))
+      .toHaveAttribute('aria-expanded', 'true')
   })
 })
 

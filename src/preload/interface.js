@@ -1058,6 +1058,34 @@ export default {
       ipcRenderer.send(IpcChannels.TABS_SET_COLOR, tabId, color)
     },
 
+    createGroup: (group) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_CREATE_GROUP, group)
+    },
+
+    updateGroup: (groupId, changes) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_UPDATE_GROUP, groupId, changes)
+    },
+
+    deleteGroup: (groupId) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_DELETE_GROUP, groupId)
+    },
+
+    setGroup: (tabIds, groupId) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_SET_GROUP, tabIds, groupId)
+    },
+
+    runOrganizerAction: (action, tabIds) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_RUN_ORGANIZER_ACTION, action, tabIds)
+    },
+
+    getMoveTargets: () => {
+      return ipcRenderer.invoke(IpcChannels.TABS_GET_MOVE_TARGETS)
+    },
+
+    moveToWindow: (tabIds, targetWindowId) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_MOVE_TO_WINDOW, tabIds, targetWindowId)
+    },
+
     /**
      * Capture a thumbnail preview for a tab when available.
      * @param {string} tabId
@@ -1104,8 +1132,12 @@ export default {
      * Restore the last closed tab
      * @returns {Promise<{id: string, url: string, title: string}|null>}
      */
-    restoreClosed: () => {
-      return ipcRenderer.invoke(IpcChannels.TABS_RESTORE_CLOSED)
+    restoreClosed: (closedTabId = null) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_RESTORE_CLOSED, closedTabId)
+    },
+
+    clearClosed: () => {
+      return ipcRenderer.invoke(IpcChannels.TABS_CLEAR_CLOSED)
     },
 
     /**
@@ -1283,6 +1315,17 @@ export default {
       const listener = (_event, state) => handler(state)
       ipcRenderer.on(IpcChannels.TABS_STATE_UPDATED, listener)
       return () => ipcRenderer.removeListener(IpcChannels.TABS_STATE_UPDATED, listener)
+    },
+
+    /**
+     * Listen for requests to open the tab organizer from native UI.
+     * @param {() => void} handler
+     * @returns {() => void}
+     */
+    onOpenOrganizer: (handler) => {
+      const listener = () => handler()
+      ipcRenderer.on(IpcChannels.TABS_OPEN_ORGANIZER, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.TABS_OPEN_ORGANIZER, listener)
     },
 
     /**

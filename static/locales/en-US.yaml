@@ -2135,6 +2135,11 @@ Context Menu:
   Duplicate Multiple Tabs: Duplicate {count} Tabs
   Move Tab: Move Tab
   Move Tabs: Move Tabs
+  Move Tab to Group: Move Tab to Group
+  Collapse Group: Collapse Group
+  Move Tabs to Group: Move Tabs to Group
+  Ungrouped: Ungrouped
+  Manage Tab Groups…: Manage Tab Groups…
   To Beginning: To Beginning
   To End: To End
   Close Tabs: Close Tabs
@@ -2177,6 +2182,50 @@ Context Menu:
   Search With: Search with {engine}
   Search With Multiple: Search with...
   Selection Too Long: 'Selection is too long for search (> {count} characters)'
+
+Tab Organizer:
+  Title: Tab Organizer
+  Open Tab Count: '{count} open tab | {count} open tabs'
+  Search Placeholder: Search tabs
+  Search Label: Search tabs
+  Selected Count: '{count} tab selected | {count} tabs selected'
+  Tab Count: '{count} tab | {count} tabs'
+  Select All: Select All
+  Select None: Select None
+  Move To Group: Move selected tabs to group
+  Choose Group: Choose a group
+  Ungrouped: Ungrouped
+  Pin: Pin
+  Unpin: Unpin
+  Load: Load
+  Unload: Unload
+  Unload All: Unload All
+  Close: Close
+  Close All: Close All
+  Ungroup: Ungroup
+  Group Name: Group name
+  Color: Color
+  No Color: No color
+  Create Group: Create Group
+  Expand Group: Expand group
+  Collapse Group: Collapse group
+  Expand Group Label: 'Expand {name}, {count} tab | Expand {name}, {count} tabs'
+  Rename Group: Rename {name}
+  Change Group Color: Change color for {name}
+  Move To Window: Move to Window
+  Choose Window: Choose a window
+  Select Tab: Select {title}
+  Active: Active
+  Pinned: Pinned
+  Unloaded: Unloaded
+  Playing: Playing
+  Close Tab: Close {title}
+  No Open Results: No open tabs match this search.
+  Recently Closed: Recently Closed
+  Clear: Clear
+  Restore: Restore
+  No Closed Results: No recently closed tabs match this search.
+  Drag Tab: Drag to move to a group
 
 Chapters:
   Chapters: Chapters

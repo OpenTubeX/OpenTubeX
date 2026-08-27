@@ -458,6 +458,7 @@ export const sel = {
   tabs: '.tabBar .tab',
   activeTab: '.tabBar .tab.active',
   newTabButton: '.tabBar .newTabButton',
+  tabOrganizerButton: '.tabBar .tabOrganizerButton',
   // Keyboard accelerators (Alt+Arrow) are handled by the Electron menu and
   // don't fire from synthesized input, so tests click these buttons instead.
   backButton: '.topNav button[title^="Back"]',

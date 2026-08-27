@@ -22,27 +22,54 @@
         @mousedown.middle="handleTabListMiddleMouseDown"
         @auxclick="handleTabListAuxClick"
       >
-        <SortableTab
-          v-for="(tab, index) in tabs"
-          :key="tab.id"
-          :tab="tab"
-          :index="index"
-          :vertical="vertical"
-          :tab-bar-position="tabBarPosition"
-          :offset="tabOffsets[tab.id] || 0"
-          :is-dragging="draggingTabIds.has(tab.id)"
-          :is-settling="isSettling && settlingTabIds.has(tab.id)"
-          :suppress-transition="suppressTransitions"
-          :disable-tooltips="draggingTabIds.size > 0"
-          :close-tooltips-signal="closeTooltipsSignal"
-          :show-icon="showTabIcons"
-          :show-preview="showTabPreviews"
-          :is-selected="selectedTabIds.has(tab.id)"
-          :close-label="t('Close Tab')"
-          @activate="handleActivate"
-          @close="closeTab"
-          @middle-click="handleMiddleClick"
-        />
+        <template
+          v-for="(item, index) in stripItems"
+          :key="item.id"
+        >
+          <SortableTab
+            v-if="item.type === 'tab'"
+            :tab="item.tab"
+            :group="tabGroupById.get(item.tab.groupId) ?? null"
+            :index="index"
+            :vertical="vertical"
+            :tab-bar-position="tabBarPosition"
+            :offset="tabOffsets[item.id] || 0"
+            :is-dragging="draggingTabIds.has(item.id)"
+            :is-settling="isSettling && settlingTabIds.has(item.id)"
+            :suppress-transition="suppressTransitions"
+            :disable-tooltips="draggingTabIds.size > 0"
+            :close-tooltips-signal="closeTooltipsSignal"
+            :show-icon="showTabIcons"
+            :show-preview="showTabPreviews"
+            :is-selected="selectedTabIds.has(item.id)"
+            :close-label="t('Close Tab')"
+            @activate="handleActivate"
+            @close="closeTab"
+            @middle-click="handleMiddleClick"
+          />
+          <button
+            v-else
+            class="tabBarReorderItem collapsedTabGroup"
+            :class="{
+              active: item.isActive,
+              bottom: tabBarPosition === 'bottom',
+              noTransition: suppressTransitions,
+              vertical
+            }"
+            :data-reorder-id="item.id"
+            :data-group-id="item.group.id"
+            :style="collapsedGroupStyle(item)"
+            :aria-label="collapsedGroupLabel(item)"
+            :title="collapsedGroupLabel(item)"
+            :aria-expanded="false"
+            @click="expandTabGroup(item.group.id)"
+          >
+            <FtIcon
+              :icon="['fas', 'layer-group']"
+              aria-hidden="true"
+            />
+          </button>
+        </template>
       </div>
       <div
         v-show="showScrollbar && !vertical"
@@ -57,6 +84,18 @@
         />
       </div>
     </div>
+    <button
+      class="tabOrganizerButton"
+      :aria-label="t('Tab Organizer.Title')"
+      :title="t('Tab Organizer.Title')"
+      @click="openTabOrganizer"
+    >
+      <FtIcon
+        :icon="['fas', 'layer-group']"
+        class="newTabIcon"
+        aria-hidden="true"
+      />
+    </button>
     <button
       class="newTabButton"
       :aria-label="t('New Tab')"
@@ -92,6 +131,7 @@ import { localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils
 import { normalizeFixedTabWidth } from '../../constants/tabWidth'
 import { isVerticalTabBarPosition, normalizeTabBarPosition } from '../../constants/tabBarPosition'
 import { getTabAvatarUrl } from '../../tabs/tabPreview'
+import { getTabAccentColor } from '../../constants/tabColors'
 import { removeLegacyTabAvatar } from '../../helpers/channelThumbnailStorage'
 import { fetchTabAvatarBytes } from '../../helpers/tabAvatar'
 import { loadMissingTabAvatars } from '../../helpers/loadTabAvatars'
@@ -110,9 +150,83 @@ const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
 ).APP.GENERAL)
 
 const isElectron = process.env.IS_ELECTRON
+const OPEN_TAB_ORGANIZER_EVENT = 'opentubex:open-tab-organizer'
+
+function openTabOrganizer() {
+  window.dispatchEvent(new CustomEvent(OPEN_TAB_ORGANIZER_EVENT))
+}
 
 /** @type {import('vue').ComputedRef<Array<{id: string, url: string, title: string, isActive: boolean, isPinned?: boolean, color?: string | null}>>} */
 const tabs = computed(() => store.getters.getTabs)
+const tabGroupById = computed(() => new Map(
+  store.getters.getTabGroups.map(group => [group.id, group])
+))
+const stripItems = computed(() => buildStripItems(tabs.value))
+
+/**
+ * Replace each collapsed group with one compact strip item at the position of
+ * its first tab. The item retains all underlying ids so reordering nearby tabs
+ * can still produce a complete, valid main-process tab order.
+ * @param {Array<object>} currentTabs
+ */
+function buildStripItems(currentTabs) {
+  const collapsedGroupTabs = new Map()
+  for (const tab of currentTabs) {
+    const group = tabGroupById.value.get(tab.groupId)
+    if (!group?.isCollapsed) continue
+
+    const groupTabs = collapsedGroupTabs.get(group.id) ?? []
+    groupTabs.push(tab)
+    collapsedGroupTabs.set(group.id, groupTabs)
+  }
+
+  const addedGroupIds = new Set()
+  const items = []
+  for (const tab of currentTabs) {
+    const group = tabGroupById.value.get(tab.groupId)
+    if (!group?.isCollapsed) {
+      items.push({ id: tab.id, type: 'tab', tab, tabIds: [tab.id], isPinned: tab.isPinned })
+      continue
+    }
+    if (addedGroupIds.has(group.id)) continue
+
+    addedGroupIds.add(group.id)
+    const groupTabs = collapsedGroupTabs.get(group.id) ?? [tab]
+    items.push({
+      id: `group:${group.id}`,
+      type: 'group',
+      group,
+      tabIds: groupTabs.map(groupTab => groupTab.id),
+      isPinned: tab.isPinned,
+      isActive: groupTabs.some(groupTab => groupTab.isActive)
+    })
+  }
+  return items
+}
+
+function collapsedGroupLabel(item) {
+  return t(
+    'Tab Organizer.Expand Group Label',
+    { name: item.group.name, count: item.tabIds.length },
+    item.tabIds.length
+  )
+}
+
+function collapsedGroupStyle(item) {
+  const offset = tabOffsets.value[item.id] || 0
+  const translation = vertical.value ? `0, ${offset}px` : `${offset}px, 0`
+  return {
+    '--tab-group-color': getTabAccentColor(item.group.color) || 'var(--secondary-text-color)',
+    transform: offset !== 0 ? `translate3d(${translation}, 0)` : undefined
+  }
+}
+
+function expandTabGroup(groupId) {
+  store.dispatch('updateTabGroup', {
+    groupId,
+    changes: { isCollapsed: false }
+  })
+}
 
 const tabBarPosition = computed(() => normalizeTabBarPosition(store.getters.getTabBarPosition))
 const vertical = computed(() => isVerticalTabBarPosition(tabBarPosition.value))
@@ -258,8 +372,8 @@ function handleTabContainerPointerDown(event) {
   // Ignore clicks on the close button
   if (target.closest('.closeButton')) return
 
-  const tabEl = target.closest('.tab[data-tab-id]')
-  if (!(tabEl instanceof HTMLElement)) {
+  const reorderItemEl = target.closest('.tabBarReorderItem[data-reorder-id]')
+  if (!(reorderItemEl instanceof HTMLElement)) {
     clearTabSelection()
     return
   }
@@ -270,17 +384,18 @@ function handleTabContainerPointerDown(event) {
   const container = dropZoneRef.value
   if (!container) return
 
-  const tabId = tabEl.dataset.tabId
+  const tabId = reorderItemEl.dataset.reorderId
   const currentTabs = tabs.value
   const currentTabsById = new Map(currentTabs.map(tab => [tab.id, tab]))
-  const tabsList = pendingTabOrder
+  const orderedTabs = pendingTabOrder
     ? pendingTabOrder.map(tabId => currentTabsById.get(tabId)).filter(Boolean)
     : currentTabs
+  const tabsList = buildStripItems(orderedTabs)
   const sourceIndex = tabsList.findIndex(t => t.id === tabId)
   if (sourceIndex === -1) return
   const tabIds = getDraggedTabIds(tabsList, selectedTabIds.value, tabId)
 
-  const tabEls = Array.from(container.querySelectorAll('.tab[data-tab-id]'))
+  const tabEls = Array.from(container.querySelectorAll('.tabBarReorderItem[data-reorder-id]'))
   if (tabEls.length === 0) return
 
   const containerRect = container.getBoundingClientRect()
@@ -291,7 +406,7 @@ function handleTabContainerPointerDown(event) {
   const measuredRects = tabEls.map(el => {
     const rect = el.getBoundingClientRect()
     return {
-      id: el.dataset.tabId,
+      id: el.dataset.reorderId,
       start: (vertical.value ? rect.top - containerRect.top : rect.left - containerRect.left) + containerScroll,
       size: vertical.value ? rect.height : rect.width
     }
@@ -526,12 +641,13 @@ function handleDragPointerUp() {
  * @param {boolean} [cleanupVisuals]
  */
 async function commitReorder(pendingReorder, cleanupVisuals = true) {
-  const reorderedTabIds = buildCurrentShiftedTabIds(
-    tabs.value,
+  const reorderedItemIds = buildCurrentShiftedTabIds(
+    stripItems.value,
     pendingReorder.tabIds,
     pendingReorder.indexShift,
     pendingReorder.isPinned
   )
+  const reorderedTabIds = expandStripOrder(reorderedItemIds)
   if (!tabOrderMatches(reorderedTabIds)) {
     suppressTransitions.value = true
     const reordered = waitForTabOrder(reorderedTabIds)
@@ -552,6 +668,22 @@ async function commitReorder(pendingReorder, cleanupVisuals = true) {
       }
     })
   })
+}
+
+/**
+ * Expand visible strip items back into the complete tab order. A group may
+ * contain both pinned and unpinned tabs, so retain the visible order within
+ * each pin partition and then restore the required pinned boundary.
+ * @param {string[]} itemIds
+ * @returns {string[]}
+ */
+function expandStripOrder(itemIds) {
+  const itemById = new Map(stripItems.value.map(item => [item.id, item]))
+  const tabById = new Map(tabs.value.map(tab => [tab.id, tab]))
+  const expandedIds = itemIds.flatMap(itemId => itemById.get(itemId)?.tabIds ?? [])
+  return [true, false].flatMap(isPinned => (
+    expandedIds.filter(tabId => (tabById.get(tabId)?.isPinned === true) === isPinned)
+  ))
 }
 
 /**
@@ -637,12 +769,12 @@ function finishSettle(cancel) {
   const pendingReorder = pendingSettleReorder
   pendingSettleReorder = null
   const pendingTabOrder = pendingReorder
-    ? buildCurrentShiftedTabIds(
-        tabs.value,
+    ? expandStripOrder(buildCurrentShiftedTabIds(
+        stripItems.value,
         pendingReorder.tabIds,
         pendingReorder.indexShift,
         pendingReorder.isPinned
-      )
+      ))
     : null
   if (cancel) {
     suppressTransitions.value = true
@@ -1203,11 +1335,17 @@ watch(tabBarScrollPosition, (newPosition) => {
   })
 })
 
-watch(tabs, () => {
-  nextTick(() => {
-    updateScrollbar()
-  })
-}, { deep: true })
+watch(stripItems, () => {
+  const container = dropZoneRef.value
+  if (container) {
+    const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth)
+    container.scrollLeft = Math.min(container.scrollLeft, maxScroll)
+    if (scrollTarget != null) {
+      scrollTarget = Math.min(scrollTarget, maxScroll)
+    }
+  }
+  updateScrollbar()
+}, { flush: 'post' })
 
 watch(vertical, () => {
   cancelScrollAnimation()
