@@ -6,6 +6,8 @@ import {
   formatCommentTranslation,
   getCommentTranslationSource,
   normalizeCommentTranslationLanguageCode,
+  requestCommentTranslation,
+  sanitizeCommentTranslationSource,
   shouldOfferCommentTranslation,
   terminateCommentTranslationLanguageDetector,
 } from '../../src/renderer/helpers/comment-translations.js'
@@ -84,6 +86,41 @@ test('keeps plain comment text as the translation source', () => {
     { text: 'Hallo ' },
     { text: 'Welt' }
   ]), 'Hallo Welt')
+})
+
+test('removes characters rejected by YouTube comment translations', () => {
+  assert.equal(
+    sanitizeCommentTranslationSource('Thanks 💗 and 💙‼️'),
+    'Thanks  and ‼'
+  )
+})
+
+test('does not request a translation without supported text', async () => {
+  let requestCount = 0
+
+  await assert.rejects(
+    requestCommentTranslation('💗💙', 'en', async () => {
+      requestCount++
+      return { translated_content: 'unused' }
+    }),
+    /YouTube did not return a comment translation/
+  )
+  assert.equal(requestCount, 0)
+})
+
+test('requests a translation with sanitized text', async () => {
+  const requests = []
+  const translatedText = await requestCommentTranslation(
+    'Danke 💗',
+    'en',
+    async (text, targetLanguage) => {
+      requests.push({ text, targetLanguage })
+      return { translated_content: 'Thanks' }
+    }
+  )
+
+  assert.equal(translatedText, 'Thanks')
+  assert.deepEqual(requests, [{ text: 'Danke ', targetLanguage: 'en' }])
 })
 
 test('escapes translated markup and links translated URLs', () => {
