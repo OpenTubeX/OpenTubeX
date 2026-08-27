@@ -63,7 +63,7 @@ jobs:
       run: |
         pr="$(gh api "repos/$REPOSITORY/pulls/$PR_NUMBER")"
         if [[ "$(jq -r '.state' <<< "$pr")" != 'open' || \
-          "$(jq -r '.merge_commit_sha' <<< "$pr")" != "$RUN_SHA" ]]; then
+          "$(jq -r '.head.sha' <<< "$pr")" != "$RUN_SHA" ]]; then
           echo "Skipping stale performance results for pull request #$PR_NUMBER."
           exit 0
         fi

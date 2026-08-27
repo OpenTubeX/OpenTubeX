@@ -6,6 +6,7 @@ import {
   renderPerformanceComment,
   renderUnavailablePerformanceComment
 } from '../../_scripts/performanceComment.mjs'
+import { isValidPerformanceValue } from '../../e2e/performance/report.mjs'
 
 const headSha = 'abcdef1234567890abcdef1234567890abcdef12'
 const runUrl = 'https://github.com/OpenTubeX/OpenTubeX/actions/runs/123'
@@ -91,6 +92,11 @@ test('accepts zero memory growth and renders its absolute change', () => {
   const comment = renderPerformanceComment(input, { headSha, runUrl })
 
   assert.match(comment, /Memory growth after 10 navigation cycles \| 0\.0 MiB \| 0\.0 MiB \| 0\.0 MiB/)
+})
+
+test('accepts zero when a metric omits its minimum value', () => {
+  assert.equal(isValidPerformanceValue({}, 0), true)
+  assert.equal(isValidPerformanceValue({}, -1), false)
 })
 
 test('rejects stale, report-only, and malformed artifacts', () => {

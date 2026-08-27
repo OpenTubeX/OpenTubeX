@@ -155,7 +155,7 @@ function metricValue(definition, value) {
 }
 
 export function isValidPerformanceValue(definition, value) {
-  const minimumValue = definition.minimumValue ?? Number.MIN_VALUE
+  const minimumValue = definition.minimumValue ?? 0
   return Number.isFinite(value) && value >= minimumValue
 }
 

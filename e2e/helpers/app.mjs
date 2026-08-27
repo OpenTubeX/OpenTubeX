@@ -141,10 +141,18 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}) {
       await new Promise((resolve) => setTimeout(resolve, (attempt + 1) * 1000))
     }
   }
-  await options.onPhase?.('electronConnected')
+  const notifyPhase = async (phase, page) => {
+    try {
+      await options.onPhase?.(phase, page)
+    } catch (error) {
+      await electronApp.close().catch(() => {})
+      throw error
+    }
+  }
+  await notifyPhase('electronConnected')
 
   const page = await electronApp.firstWindow()
-  await options.onPhase?.('windowCreated', page)
+  await notifyPhase('windowCreated', page)
 
   // Fail fast if dist-e2e contains a development build (it would load the
   // dev server on localhost instead of the bundled files). A transient
@@ -168,7 +176,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}) {
       )
     }
   }
-  await options.onPhase?.('routeCommitted', page)
+  await notifyPhase('routeCommitted', page)
 
   // Safety guard: if the userData override ever stops working, abort
   // instead of silently running tests against the user's real profile.
@@ -182,7 +190,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}) {
   }
 
   await waitForAppReady(page)
-  await options.onPhase?.('interactive', page)
+  await notifyPhase('interactive', page)
 
   return { electronApp, page }
 }
