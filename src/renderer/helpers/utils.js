@@ -262,7 +262,9 @@ const ERROR_TOAST_ICON = ['fas', 'circle-exclamation']
  * @property {string | (({elapsedMs: number, remainingMs: number}) => string)} message
  * @property {number} [time]
  * @property {Function} [action]
- * @property {{ label: string, action?: Function, primary?: boolean }[]} [buttons]
+ * @property {{ label: string, action?: Function, primary?: boolean, icon?: [string, string] }[]} [buttons]
+ * @property {boolean} [verticalButtons] whether buttons should be stacked vertically
+ * @property {boolean} [dismissible] whether Escape and swipe gestures can dismiss the toast
  * @property {AbortSignal} [abortSignal]
  * @property {string} [image] optional image URL (e.g. a video thumbnail) shown alongside the message
  * @property {[string, string]} [icon] optional semantic icon (e.g. `['fas', 'trash']`) shown
@@ -280,11 +282,13 @@ export function showToast(message, time = null, action = null, abortSignal = nul
   let image = null
   let icon = null
   let buttons = []
+  let verticalButtons = false
+  let dismissible = true
 
   // Allow calling with a single options object while staying backwards compatible
   // with the positional (message, time, action, abortSignal) signature
   if (message !== null && typeof message === 'object') {
-    ({ message, time = null, action = null, abortSignal = null, image = null, icon = null, buttons = [] } = message)
+    ({ message, time = null, action = null, abortSignal = null, image = null, icon = null, buttons = [], verticalButtons = false, dismissible = true } = message)
   }
 
   // Sometimes caller just pass user setting based value in and it can be zero
@@ -302,6 +306,8 @@ export function showToast(message, time = null, action = null, abortSignal = nul
       image,
       icon,
       buttons,
+      verticalButtons,
+      dismissible,
     }
   }))
 }

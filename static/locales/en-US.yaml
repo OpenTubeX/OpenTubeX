@@ -81,8 +81,9 @@ Next match: Next match
 Close find bar: Close find bar
 No matches: No matches
 
-Version {versionNumber} is now available!  Click for more details: Version {versionNumber} is now available!  Click
-  for more details
+Version {versionNumber} is now available.: Version {versionNumber} is now available.
+See changes and update: See changes and update
+Dismiss: Dismiss
 Update to {version}: Update to {version}
 Download From Site: Download From Site
 Are you sure you want to open this link?: Are you sure you want to open this link?

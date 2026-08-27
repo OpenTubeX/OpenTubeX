@@ -22,25 +22,6 @@ function historyEntry(videoId, title, timeWatched) {
   }
 }
 
-test('update banners have equal top and bottom spacing', async ({ page }) => {
-  await page.evaluate(() => {
-    const routerView = document.querySelector('.routerView')
-    const banner = document.createElement('div')
-    banner.className = 'banner'
-    banner.textContent = 'Update available'
-    for (const attribute of routerView.attributes) {
-      if (attribute.name.startsWith('data-v-')) {
-        banner.setAttribute(attribute.name, '')
-      }
-    }
-    routerView.prepend(banner)
-  })
-
-  const banner = page.locator('.banner', { hasText: 'Update available' })
-  await expect(banner).toHaveCSS('margin-top', '40px')
-  await expect(banner).toHaveCSS('margin-bottom', '40px')
-})
-
 test('collapsed description paints the More control above its text', async ({ page }) => {
   await page.addStyleTag({
     path: path.join(

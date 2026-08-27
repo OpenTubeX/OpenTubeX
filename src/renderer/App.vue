@@ -45,18 +45,6 @@
         id="cross-tab-mini-player-layer"
         class="crossTabMiniPlayerLayer"
       />
-      <div
-        v-if="showUpdatesBanner"
-        class="banner-wrapper"
-      >
-        <FtNotificationBanner
-          v-if="showUpdatesBanner"
-          class="banner"
-          :message="updateBannerMessage"
-          role="link"
-          @click="handleUpdateBannerClick"
-        />
-      </div>
       <template v-if="isElectron">
         <TabContent
           v-for="tab in tabContainers"
@@ -103,7 +91,7 @@
     <FtPrompt
       v-if="showReleaseNotes"
       theme="readable-width"
-      @click="toggleShowReleaseNotes"
+      @click="closeReleaseNotes"
     >
       <template #label="{ labelId }">
         <h1
@@ -129,7 +117,7 @@
           :label="t('Close')"
           :text-color="null"
           :background-color="null"
-          @click="toggleShowReleaseNotes"
+          @click="closeReleaseNotes"
         />
       </FtFlexBox>
     </FtPrompt>
@@ -332,7 +320,6 @@ import TopNav from './components/TopNav/TopNav.vue'
 import SideNav from './components/SideNav/SideNav.vue'
 import TabBar from './components/TabBar/TabBar.vue'
 import TabContent from './components/TabContent/TabContent.vue'
-import FtNotificationBanner from './components/FtNotificationBanner/FtNotificationBanner.vue'
 import FtPrompt from './components/FtPrompt/FtPrompt.vue'
 import FtButton from './components/FtButton/FtButton.vue'
 import FtToast from './components/FtToast/FtToast.vue'
@@ -2029,11 +2016,12 @@ updateUiRoundness()
 updateScrollbarThumbWidth()
 updateThumbnailListSize()
 
-const showUpdatesBanner = ref(false)
-const latestVersionNumber = ref('')
 const showReleaseNotes = ref(false)
 const changeLogTitle = ref('')
 const updateChangelog = ref('')
+const DISMISSED_UPDATE_VERSION_STORAGE_KEY = 'opentubex-dismissed-update-version'
+/** @type {{ tagName: string, versionNumber: string } | null} */
+let availableUpdate = null
 let releaseNotesMarkdownPromise = null
 
 function getReleaseNotesMarkdown() {
@@ -2045,11 +2033,46 @@ function getReleaseNotesMarkdown() {
 /** @type {import('vue').ComputedRef<boolean>} */
 const checkForUpdates = computed(() => store.getters.getCheckForUpdates)
 
-const updateBannerMessage = computed(() => {
-  return t('Version {versionNumber} is now available!  Click for more details', {
-    versionNumber: latestVersionNumber.value
+function dismissAvailableUpdate() {
+  if (availableUpdate !== null) {
+    sessionStorage.setItem(DISMISSED_UPDATE_VERSION_STORAGE_KEY, availableUpdate.tagName)
+  }
+}
+
+function showAvailableUpdateToast() {
+  const update = availableUpdate
+  if (
+    update === null ||
+    sessionStorage.getItem(DISMISSED_UPDATE_VERSION_STORAGE_KEY) === update.tagName
+  ) {
+    return
+  }
+
+  showToast({
+    message: t('Version {versionNumber} is now available.', {
+      versionNumber: update.versionNumber
+    }),
+    time: Infinity,
+    dismissible: false,
+    icon: ['fas', 'sync'],
+    verticalButtons: true,
+    buttons: [
+      {
+        label: t('Dismiss'),
+        icon: ['fas', 'xmark'],
+        action: dismissAvailableUpdate
+      },
+      {
+        label: t('See changes and update'),
+        icon: ['fas', 'file-lines'],
+        primary: true,
+        action: () => {
+          showReleaseNotes.value = true
+        }
+      }
+    ]
   })
-})
+}
 
 async function checkForNewUpdates() {
   if (!checkForUpdates.value) {
@@ -2068,6 +2091,9 @@ async function checkForNewUpdates() {
     const release = releases[0]
     const tagName = release.tag_name
     const versionNumber = tagName.replace('v', '').replace('-beta', '')
+    if (sessionStorage.getItem(DISMISSED_UPDATE_VERSION_STORAGE_KEY) === tagName) {
+      return
+    }
 
     const changelog = formatReleaseChangelog(releases)
       // Link usernames to their GitHub profiles
@@ -2078,32 +2104,22 @@ async function checkForNewUpdates() {
     const releaseNotesMarkdown = await getReleaseNotesMarkdown()
     updateChangelog.value = releaseNotesMarkdown.parse(changelog)
     changeLogTitle.value = t('Update to {version}', { version: release.name ?? tagName })
-    latestVersionNumber.value = versionNumber
-    showUpdatesBanner.value = true
+    availableUpdate = { tagName, versionNumber }
+    showAvailableUpdateToast()
   } catch (error) {
     console.error('errored while checking for updates', releasesUrl, error)
   }
 }
 
-function toggleShowReleaseNotes() {
-  showReleaseNotes.value = !showReleaseNotes.value
-}
-
-/**
- * @param {boolean} response
- */
-function handleUpdateBannerClick(response) {
-  if (response) {
-    showReleaseNotes.value = true
-  } else {
-    showUpdatesBanner.value = false
-  }
+function closeReleaseNotes() {
+  showReleaseNotes.value = false
+  showAvailableUpdateToast()
 }
 
 function openDownloadsPage() {
+  dismissAvailableUpdate()
   openExternalLink('https://opentubex.org/downloads/')
   showReleaseNotes.value = false
-  showUpdatesBanner.value = false
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

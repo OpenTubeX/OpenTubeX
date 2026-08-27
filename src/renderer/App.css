@@ -38,21 +38,6 @@
   z-index: 4;
 }
 
-.banner {
-  inline-size: 85%;
-  margin-block: 40px;
-  margin-inline: auto;
-}
-
-.banner + .banner {
-  margin-block: 20px;
-}
-
-.banner-wrapper {
-  margin-block: 0;
-  margin-inline: 10px;
-}
-
 .flexBox {
   display: block;
   user-select: unset;
@@ -412,11 +397,6 @@
   .routerView {
     margin-block: 68px;
     margin-inline: 8px;
-  }
-
-  .banner {
-    inline-size: 90%;
-    margin-block: 60px;
   }
 
   .flexBox {

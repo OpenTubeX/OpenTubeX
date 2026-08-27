@@ -2025,7 +2025,9 @@ Profile:
   Theme Color: Designfarbe
 The playlist has been reversed: Die Playlist wurde umgedreht
 Download From Site: Von der Website herunterladen
-Version {versionNumber} is now available!  Click for more details: Version {versionNumber} ist jetzt verfügbar!  Für mehr Details klicken
+Version {versionNumber} is now available.: Version {versionNumber} ist jetzt verfügbar.
+See changes and update: Änderungen ansehen und aktualisieren
+Dismiss: Ausblenden
 Tooltips:
   General Settings:
     Playback Engine: Legt fest, welche Engine die Videostreams ermittelt. yt-dlp muss verfügbar sein, wenn es ausgewählt ist.

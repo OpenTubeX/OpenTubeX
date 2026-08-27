@@ -34,7 +34,7 @@ const NEWEST_NOTES = [
  * Serves the given releases to the in-app update check and restarts the
  * renderer so that it runs with the stub in place.
  */
-async function showUpdatePrompt(page, releases) {
+async function showUpdateNotification(page, releases) {
   await page.route(RELEASES_URL, (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify(releases)
@@ -49,9 +49,83 @@ async function showUpdatePrompt(page, releases) {
   await page.reload()
   await waitForAppReady(page)
 
-  await page.locator('.banner-wrapper .banner').click()
+  const notification = page.locator('.toast', { hasText: 'is now available' })
+  await expect(notification).toBeVisible()
+  return notification
+}
+
+async function showUpdatePrompt(page, releases) {
+  const notification = await showUpdateNotification(page, releases)
+  await notification.getByRole('button', { name: 'See changes and update' }).click()
   await expect(page.locator('.changeLogTitle')).toBeVisible()
 }
+
+test('the update notification stays dismissed for the current app session', async ({ page }) => {
+  const notification = await showUpdateNotification(page, [
+    release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, NEWEST_NOTES)
+  ])
+
+  await expect(notification).toHaveClass(/indefinite/)
+  await expect(notification.locator('.timeout-indicator-track')).toHaveCount(0)
+  const updateButton = notification.getByRole('button', { name: 'See changes and update' })
+  const dismissButton = notification.getByRole('button', { name: 'Dismiss' })
+  await expect(updateButton).toBeVisible()
+  await expect(updateButton.locator('[data-icon="file-lines"]')).toBeVisible()
+  await expect(dismissButton).toBeVisible()
+  await expect(dismissButton.locator('[data-icon="xmark"]')).toBeVisible()
+  expect(await notification.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
+
+  const dismissBox = await dismissButton.boundingBox()
+  const updateBox = await updateButton.boundingBox()
+  expect(dismissBox).not.toBeNull()
+  expect(updateBox).not.toBeNull()
+  expect(Math.abs(dismissBox.x - updateBox.x)).toBeLessThanOrEqual(1)
+  expect(dismissBox.y + dismissBox.height).toBeLessThanOrEqual(updateBox.y)
+  expect(updateBox.y - dismissBox.y - dismissBox.height).toBeLessThanOrEqual(4.5)
+
+  const toastRow = notification.locator('xpath=../..')
+  await expect(toastRow).toHaveAttribute('data-dismissible', 'false')
+  await toastRow.focus()
+  await page.keyboard.press('Escape')
+  await expect(toastRow).toHaveAttribute('data-removed', 'false')
+  await expect(notification).toBeVisible()
+
+  const notificationBox = await notification.boundingBox()
+  expect(notificationBox).not.toBeNull()
+  const swipeY = notificationBox.y + notificationBox.height / 2
+  await page.mouse.move(notificationBox.x + notificationBox.width / 2, swipeY)
+  await page.mouse.down()
+  await page.mouse.move(notificationBox.x + notificationBox.width / 2 - 200, swipeY, { steps: 5 })
+  await page.mouse.up()
+  await expect(toastRow).toHaveAttribute('data-swipe-out', 'false')
+  await expect(notification).toBeVisible()
+
+  await page.getByRole('button', { name: 'New Tab' }).click()
+  await expect(page.locator('.toast', { hasText: 'is now available' })).toHaveCount(1)
+
+  await notification.getByRole('button', { name: 'Dismiss' }).click()
+  await expect(notification).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'New Tab' }).click()
+  await expect(page.locator('.toast', { hasText: 'is now available' })).toHaveCount(0)
+
+  await page.reload()
+  await waitForAppReady(page)
+  await expect(page.locator('.toast', { hasText: 'is now available' })).toHaveCount(0)
+})
+
+test('closing the release notes restores the update notification', async ({ page }) => {
+  await showUpdatePrompt(page, [
+    release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, NEWEST_NOTES)
+  ])
+
+  const notification = page.locator('.toast', { hasText: 'is now available' })
+  await expect(notification).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(page.locator('.changeLogTitle')).toHaveCount(0)
+  await expect(notification).toBeVisible()
+})
 
 test('a single update shows its version once and renders the release notes', async ({ page, attachScreenshot }) => {
   await showUpdatePrompt(page, [
