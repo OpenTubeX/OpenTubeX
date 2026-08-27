@@ -3488,22 +3488,38 @@ test.describe('manual comment loading', () => {
     await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
 
     let thread = page.locator('.commentThread').first()
+    const parentAuthor = await thread.locator(':scope > .commentAuthorWrapper .commentAuthor').innerText()
     await thread.locator('.commentReplyRootToggle button').click()
     let firstReply = thread.locator('.commentReplyContent').first()
     await expect(firstReply).toBeVisible({ timeout: 30_000 })
     const replyAuthor = await firstReply.locator('.commentAuthor').innerText()
     await firstReply.getByRole('button', { name: `Pin comment by ${replyAuthor}` }).click()
     await expect(firstReply).toContainText('Pinned by you')
+    await expect(thread.locator(':scope > .commentPersonalPin')).toContainText('A reply is pinned')
+    await expect(thread.getByRole('button', { name: `Pin comment by ${parentAuthor}` })).toHaveAttribute('aria-pressed', 'false')
 
     const reloadResponse = page.waitForResponse(/\/youtubei\/v1\/next/, { timeout: 30_000 })
     await page.getByRole('button', { name: 'Reload Comments' }).click()
     await reloadResponse
 
     thread = page.locator('.commentThread').first()
+    await expect(thread.locator(':scope > .commentPersonalPin')).toContainText('A reply is pinned')
+    const parentPinButton = thread.getByRole('button', { name: `Pin comment by ${parentAuthor}` })
+    await expect(parentPinButton).toHaveAttribute('aria-pressed', 'false')
     await thread.locator('.commentReplyRootToggle button').click()
     firstReply = thread.locator('.commentReplyContent').filter({ hasText: replyAuthor })
-    await expect(firstReply.getByRole('button', { name: `Unpin comment by ${replyAuthor}` })).toHaveAttribute('aria-pressed', 'true')
+    const replyUnpinButton = firstReply.getByRole('button', { name: `Unpin comment by ${replyAuthor}` })
+    await expect(replyUnpinButton).toHaveAttribute('aria-pressed', 'true')
     await expect(firstReply).toContainText('Pinned by you')
+
+    await replyUnpinButton.click()
+    await expect(thread.locator(':scope > .commentPersonalPin')).toHaveCount(0)
+    await firstReply.getByRole('button', { name: `Pin comment by ${replyAuthor}` }).click()
+    await expect(thread.locator(':scope > .commentPersonalPin')).toContainText('A reply is pinned')
+
+    await parentPinButton.click()
+    await expect(thread.locator(':scope > .commentPersonalPin')).toContainText('Pinned by you')
+    await expect(thread.getByRole('button', { name: `Unpin comment by ${parentAuthor}` })).toHaveAttribute('aria-pressed', 'true')
   })
 
   test('filters loaded comments to the video creator', async ({ app, page }) => {

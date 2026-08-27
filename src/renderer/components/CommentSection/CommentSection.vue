@@ -238,14 +238,19 @@
             {{ $t("Comments.Pinned by") }} <bdi>{{ channelName }}</bdi>
           </p>
           <p
-            v-if="isCommentPersonallyPinned(comment.id)"
+            v-if="commentTreeHasPersonalPin(comment)"
             class="commentPinned commentPersonalPin"
           >
             <FtIcon
               :icon="['fas', 'thumbtack']"
               aria-hidden="true"
             />
-            {{ $t('Comments.Pinned by you') }}
+            <template v-if="isCommentPersonallyPinned(comment.id)">
+              {{ $t('Comments.Pinned by you') }}
+            </template>
+            <template v-else>
+              {{ $t('Comments.A reply is pinned') }}
+            </template>
           </p>
           <p
             class="commentAuthorWrapper"
@@ -432,7 +437,7 @@
               :shorten-view-counts="shortenViewCounts"
               @copy-youtube-link="copyCommentYoutubeLink"
               @get-more-replies="getCommentReplies(index, $event)"
-              @toggle-personal-pin="togglePersonalCommentPin"
+              @toggle-personal-pin="togglePersonalCommentPin($event, comment.id)"
               @timestamp-event="onTimestamp"
               @translate-comment="toggleCommentTranslation"
               @translation-unavailable="restoreCommentTranslation"
@@ -602,7 +607,13 @@ import {
 } from '../../helpers/comment-replies'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getYoutubeCommunityPostCommentUrl, getYoutubeVideoCommentUrl } from '../../helpers/share'
-import { getCommentPinStorageKey, loadCommentPins, saveCommentPins } from '../../helpers/commentPins'
+import {
+  getCommentPinStorageKey,
+  getCommentReplyPinMarker,
+  hasPinnedCommentReply,
+  loadCommentPins,
+  saveCommentPins
+} from '../../helpers/commentPins'
 import {
   getLocalCommunityPostComments,
   getLocalComments,
@@ -800,7 +811,9 @@ function getVisibleReplyNodes(comment) {
 }
 
 function commentTreeHasPersonalPin(comment) {
-  return isCommentPersonallyPinned(comment.id) || comment.replies.some(commentTreeHasPersonalPin)
+  return isCommentPersonallyPinned(comment.id) ||
+    hasPinnedCommentReply(personalPinnedCommentIds.value, comment.id) ||
+    comment.replies.some(commentTreeHasPersonalPin)
 }
 
 const visibleCommentEntries = computed(() => {
@@ -923,12 +936,18 @@ function personalPinActionLabel(comment) {
   return t('Comments.Pin comment by author', { author: comment.author })
 }
 
-function togglePersonalCommentPin(commentId) {
+function togglePersonalCommentPin(commentId, rootCommentId = null) {
   const commentIds = new Set(personalPinnedCommentIds.value)
   if (commentIds.has(commentId)) {
     commentIds.delete(commentId)
+    if (rootCommentId !== null) {
+      commentIds.delete(getCommentReplyPinMarker(rootCommentId, commentId))
+    }
   } else {
     commentIds.add(commentId)
+    if (rootCommentId !== null) {
+      commentIds.add(getCommentReplyPinMarker(rootCommentId, commentId))
+    }
   }
 
   personalPinnedCommentIds.value = commentIds

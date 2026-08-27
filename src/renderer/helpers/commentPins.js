@@ -1,4 +1,9 @@
 const STORAGE_KEY = 'opentubex-comment-pins'
+const REPLY_PIN_MARKER_PREFIX = 'opentubex-reply-pin:'
+
+function getReplyPinMarkerPrefix(rootCommentId) {
+  return `${REPLY_PIN_MARKER_PREFIX}${encodeURIComponent(rootCommentId)}:`
+}
 
 function readStoredPins(storage) {
   try {
@@ -18,6 +23,15 @@ function readStoredPins(storage) {
 
 export function getCommentPinStorageKey(profileId, contentId, isPost = false) {
   return `${profileId}:${isPost ? 'post' : 'video'}:${contentId}`
+}
+
+export function getCommentReplyPinMarker(rootCommentId, replyId) {
+  return `${getReplyPinMarkerPrefix(rootCommentId)}${encodeURIComponent(replyId)}`
+}
+
+export function hasPinnedCommentReply(commentIds, rootCommentId) {
+  const markerPrefix = getReplyPinMarkerPrefix(rootCommentId)
+  return Array.from(commentIds).some(commentId => commentId.startsWith(markerPrefix))
 }
 
 export function loadCommentPins(contentKey, storage = localStorage) {
