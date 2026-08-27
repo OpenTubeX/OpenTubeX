@@ -1,6 +1,6 @@
 <!-- Thanks for sending a pull request! Make sure to follow the contributing guidelines. -->
 <!-- Important note, we may remove your pull request if you do not use this provided PR template correctly. -->
-<!-- Agent instructions: Preserve every heading, comment, and marker in this template. Never remove or rewrite the release-note-category:start/end, release-note:start/end, or release-note-image:start/end marker pairs. Never remove or rewrite the Release note images section; leave its contents for a human. -->
+<!-- Agent instructions: Preserve every heading, comment, and marker in this template. Never remove or rewrite the release-note-category:start/end, release-note:start/end, or release-note-image:start/end marker pairs. -->
 
 ## Pull Request Type
 <!-- Please select what type of pull request this is: [x] -->
@@ -35,9 +35,16 @@
 <!-- release-note:end -->
 
 ## Release note images
-<!-- Human-only: Agents must preserve this entire section and leave it empty. -->
-<!-- Optional. Paste one or more Markdown images or HTML image tags here. -->
-<!-- The release notes will use an HTML image tag and limit images taller than 300 pixels. -->
+<!-- Optional. Paste one or more Markdown images, HTML image tags, or dark/light <picture> elements here. -->
+<!-- The release notes normalize the markup and limit images taller than 300 pixels. -->
+<!-- Agent instructions:
+For a noteworthy visible change, add media when it makes the change easier to understand. Prefer a still image unless motion is the point; recordings must use animated WebP.
+Capture the default dark theme. When both app themes can be captured and differ, run `node _scripts/releaseNoteMedia.mjs --dark DARK_FILE --light LIGHT_FILE --alt "DESCRIPTION"`. GitHub will display the matching theme and use dark as the fallback.
+Capture or crop to the smallest region that still makes the change clear. Do not include the full window when the affected component can be understood on its own.
+For one dark capture, run `node _scripts/releaseNoteMedia.mjs FILE --alt "DESCRIPTION"`.
+Check for personal information, tokens, private repository names, and unrelated desktop content before uploading. Uploaded media is public.
+Paste only the generated markup between the marker comments. Leave this section empty when media would not help.
+-->
 <!-- release-note-image:start -->
 
 <!-- release-note-image:end -->

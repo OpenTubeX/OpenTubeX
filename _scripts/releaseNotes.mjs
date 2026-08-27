@@ -81,22 +81,86 @@ function extractHtmlAttribute(tag, attribute) {
   return match?.[1] ?? match?.[2] ?? null
 }
 
+function parseThemedReleaseImage(picture) {
+  const content = picture
+    .replace(/^<picture\s*>/i, '')
+    .replace(/<\/picture\s*>$/i, '')
+  const tags = [...content.matchAll(/<source\b[^>]*>|<img\b[^>]*>/gi)]
+  let end = 0
+
+  for (const tag of tags) {
+    if (content.slice(end, tag.index).trim()) {
+      throw new Error('A themed release note image may contain only two <source> tags and one <img> tag.')
+    }
+
+    end = tag.index + tag[0].length
+  }
+
+  if (content.slice(end).trim()) {
+    throw new Error('A themed release note image may contain only two <source> tags and one <img> tag.')
+  }
+
+  const sources = new Map()
+  let fallback = null
+
+  for (const tag of tags) {
+    if (/^<img\b/i.test(tag[0])) {
+      if (fallback) { throw new Error('A themed release note image must contain exactly one <img> tag.') }
+
+      const url = extractHtmlAttribute(tag[0], 'src')
+
+      if (!url) { throw new Error('A themed release note image is missing its fallback src attribute.') }
+
+      fallback = {
+        alt: decodeHtml(extractHtmlAttribute(tag[0], 'alt') ?? ''),
+        url: decodeHtml(url),
+      }
+      continue
+    }
+
+    const media = extractHtmlAttribute(tag[0], 'media')
+    const theme = media?.match(/^\(prefers-color-scheme:\s*(dark|light)\)$/i)?.[1].toLowerCase()
+    const url = extractHtmlAttribute(tag[0], 'srcset')
+
+    if (!theme || !url || sources.has(theme)) {
+      throw new Error('A themed release note image needs one dark and one light <source> tag.')
+    }
+
+    sources.set(theme, decodeHtml(url))
+  }
+
+  if (!fallback || sources.size !== 2 || !sources.has('dark') || !sources.has('light')) {
+    throw new Error('A themed release note image needs one dark source, one light source, and one fallback image.')
+  }
+
+  if (fallback.url !== sources.get('dark')) {
+    throw new Error('A themed release note image must use the dark source as its fallback image.')
+  }
+
+  return {
+    alt: fallback.alt,
+    darkUrl: sources.get('dark'),
+    lightUrl: sources.get('light'),
+    url: fallback.url,
+  }
+}
+
 export function parseReleaseImages(section) {
   if (!section) { return [] }
 
-  const matches = [...section.matchAll(/!\[([^\]]*)\]\(([^\s)]+)(?:\s+["'][^"']*["'])?\)|<img\b[^>]*>/gi)]
+  const matches = [...section.matchAll(/!\[([^\]]*)\]\(([^\s)]+)(?:\s+["'][^"']*["'])?\)|<picture\s*>[\s\S]*?<\/picture\s*>|<img\b[^>]*>/gi)]
   let end = 0
 
   for (const match of matches) {
     if (section.slice(end, match.index).trim()) {
-      throw new Error('Release note images must be Markdown images or <img> tags.')
+      throw new Error('Release note images must be Markdown images, <img> tags, or themed <picture> elements.')
     }
 
     end = match.index + match[0].length
   }
 
   if (section.slice(end).trim()) {
-    throw new Error('Release note images must be Markdown images or <img> tags.')
+    throw new Error('Release note images must be Markdown images, <img> tags, or themed <picture> elements.')
   }
 
   const images = matches
@@ -107,6 +171,8 @@ export function parseReleaseImages(section) {
           url: match[2],
         }
       }
+
+      if (/^<picture\b/i.test(match[0])) { return parseThemedReleaseImage(match[0]) }
 
       const url = extractHtmlAttribute(match[0], 'src')
 
@@ -119,7 +185,7 @@ export function parseReleaseImages(section) {
     })
 
   if (images.length === 0) {
-    throw new Error('Release note images must be Markdown images or <img> tags.')
+    throw new Error('Release note images must be Markdown images, <img> tags, or themed <picture> elements.')
   }
 
   return images
@@ -150,7 +216,10 @@ export function parseReleaseNote(body) {
 
   const images = parseReleaseNoteImages(body)
 
-  for (const image of images) { validateImageUrl(image.url) }
+  for (const image of images) {
+    validateImageUrl(image.url)
+    if (image.lightUrl) { validateImageUrl(image.lightUrl) }
+  }
 
   return { images, note }
 }
@@ -333,16 +402,34 @@ function escapeHtmlAttribute(value) {
 }
 
 export async function normalizeReleaseImage(image, fallbackAlt, loadImage = downloadImage) {
-  const url = validateImageUrl(image.url)
-  const buffer = await loadImage(url)
-  const size = probeImageSize(buffer)
+  const variants = [
+    { theme: 'dark', url: validateImageUrl(image.url) },
+    ...(image.lightUrl ? [{ theme: 'light', url: validateImageUrl(image.lightUrl) }] : []),
+  ]
+  const normalized = []
 
-  if (!size) { throw new Error(`Could not determine the dimensions of ${url}.`) }
+  for (const variant of variants) {
+    const buffer = await loadImage(variant.url)
+    const size = probeImageSize(buffer)
+
+    if (!size) { throw new Error(`Could not determine the dimensions of ${variant.url}.`) }
+
+    normalized.push({ ...variant, size })
+  }
 
   const alt = image.alt || fallbackAlt
-  const height = size.height > MAX_IMAGE_HEIGHT ? ` height="${MAX_IMAGE_HEIGHT}"` : ''
+  const height = normalized.some(({ size }) => size.height > MAX_IMAGE_HEIGHT)
+    ? ` height="${MAX_IMAGE_HEIGHT}"`
+    : ''
+  const darkUrl = escapeHtmlAttribute(normalized[0].url.href)
 
-  return `<img src="${escapeHtmlAttribute(url.href)}" alt="${escapeHtmlAttribute(alt)}"${height}>`
+  if (normalized.length === 2) {
+    const lightUrl = escapeHtmlAttribute(normalized[1].url.href)
+
+    return `<picture>\n  <source media="(prefers-color-scheme: dark)" srcset="${darkUrl}">\n  <source media="(prefers-color-scheme: light)" srcset="${lightUrl}">\n  <img src="${darkUrl}" alt="${escapeHtmlAttribute(alt)}"${height}>\n</picture>`
+  }
+
+  return `<img src="${darkUrl}" alt="${escapeHtmlAttribute(alt)}"${height}>`
 }
 
 function gitIsAncestor(ancestor, descendant) {
@@ -436,7 +523,7 @@ export async function renderReleaseNotes(pullRequests, {
 
     for (const image of parsed.images) {
       try {
-        releaseNote += `\n  ${await normalizeReleaseImage(image, pullRequest.title, loadImage)}`
+        releaseNote += `\n  ${indentContinuationLines(await normalizeReleaseImage(image, pullRequest.title, loadImage))}`
       } catch (error) {
         const imageError = new Error(`PR #${pullRequest.number}: ${error.message}`, { cause: error })
 
