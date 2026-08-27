@@ -3,8 +3,8 @@ name: Create Draft Release
 on:
   workflow_dispatch:
     inputs:
-      tag:
-        description: New release tag (for example, v0.30.0-beta)
+      version:
+        description: New package version (for example, 0.33.0)
         required: true
         type: string
       previousTag:
@@ -32,12 +32,8 @@ jobs:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
-        persist-credentials: false
+        persist-credentials: true
         ref: ${{ inputs.target }}
-
-    - name: Resolve release target
-      id: target
-      run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
     - name: Resolve previous release tag
       id: previous
@@ -66,6 +62,41 @@ jobs:
 
         echo "tag=$previous_tag" >> "$GITHUB_OUTPUT"
 
+    - name: Bump package version
+      id: release
+      env:
+        VERSION: ${{ inputs.version }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if [[ ! "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+          echo 'Version must use the x.y.z format, for example 0.33.0.' >&2
+          exit 1
+        fi
+
+        node --input-type=module <<'EOF'
+        import { readFileSync, writeFileSync } from 'node:fs';
+
+        const file = 'package.json';
+        const packageJson = JSON.parse(readFileSync(file, 'utf8'));
+        packageJson.version = process.env.VERSION;
+        writeFileSync(file, `${JSON.stringify(packageJson, null, 2)}\n`);
+        EOF
+
+        git add package.json
+        if ! git diff --cached --quiet; then
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m "chore(release): bump to $VERSION"
+        fi
+
+        echo "tag=v${VERSION}-beta" >> "$GITHUB_OUTPUT"
+
+    - name: Resolve release target
+      id: target
+      run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
     - name: Generate release notes
       env:
         GH_TOKEN: ${{ github.token }}
@@ -74,11 +105,16 @@ jobs:
         TARGET_SHA: ${{ steps.target.outputs.sha }}
       run: node _scripts/releaseNotes.mjs generate release-notes.md
 
+    - name: Push package version
+      env:
+        TARGET_BRANCH: ${{ inputs.target }}
+      run: git push origin "HEAD:$TARGET_BRANCH"
+
     - name: Create draft release
       env:
         GH_TOKEN: ${{ github.token }}
-        TAG: ${{ inputs.tag }}
-        TARGET_BRANCH: ${{ inputs.target }}
+        TAG: ${{ steps.release.outputs.tag }}
+        TARGET_SHA: ${{ steps.target.outputs.sha }}
       run: |
         set -euo pipefail
 
@@ -89,7 +125,7 @@ jobs:
 
         release="$(gh api --method POST "repos/${GITHUB_REPOSITORY}/releases" \
           -f tag_name="$TAG" \
-          -f target_commitish="$TARGET_BRANCH" \
+          -f target_commitish="$TARGET_SHA" \
           -f name="$release_title" \
           -F draft=true \
           -F body=@release-notes.md)"
