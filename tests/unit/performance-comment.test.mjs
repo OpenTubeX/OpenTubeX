@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import test from 'node:test'
+
+import { load as loadYaml } from 'js-yaml'
 
 import {
   performanceCommentMarker,
@@ -10,6 +13,21 @@ import { isValidPerformanceValue } from '../../e2e/performance/report.mjs'
 
 const headSha = 'abcdef1234567890abcdef1234567890abcdef12'
 const runUrl = 'https://github.com/OpenTubeX/OpenTubeX/actions/runs/123'
+
+test('benchmarks the pull request head reported to the comment workflow', async () => {
+  const workflow = loadYaml(await readFile(
+    '.github/workflows/performance.yml',
+    'utf8'
+  ))
+  const checkout = workflow.jobs.performance.steps.find(
+    step => step.name === 'Check out candidate'
+  )
+
+  assert.equal(
+    checkout.with.ref,
+    '${{ github.event.pull_request.head.sha }}'
+  )
+})
 
 function sample (overrides = {}) {
   return {
