@@ -3782,9 +3782,14 @@ test.describe('manual comment loading', () => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
 
+    const initialCommentsResponsePromise = page.waitForResponse(response => {
+      if (!/\/youtubei\/v1\/next/.test(response.url())) return false
+      return Boolean(JSON.parse(response.request().postData() ?? '{}').continuation)
+    }, { timeout: 30_000 })
     const loadComments = page.locator('.getCommentsTitle')
     await loadComments.scrollIntoViewIfNeeded()
     await loadComments.click()
+    const initialCommentsResponse = await initialCommentsResponsePromise
     await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
 
     const pinnedComment = page.locator('.commentThread').filter({ hasText: 'Who is here today?' })
@@ -3795,10 +3800,35 @@ test.describe('manual comment loading', () => {
     await expect(pinnedComment.locator('.commentPersonalPin')).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
     await expect(page.locator('.commentThread').first()).toContainText('Who is here today?')
 
+    const commentsWithoutPinned = await initialCommentsResponse.json()
+    const mutations = commentsWithoutPinned.frameworkUpdates.entityBatchUpdate.mutations
+    const pinnedMutation = mutations.find(mutation => {
+      return mutation.payload?.commentEntityPayload?.properties?.content?.content === 'Who is here today?'
+    })
+    const pinnedCommentId = pinnedMutation.payload.commentEntityPayload.properties.commentId
+    commentsWithoutPinned.frameworkUpdates.entityBatchUpdate.mutations = mutations.filter(mutation => {
+      return mutation.payload?.commentEntityPayload?.properties?.commentId !== pinnedCommentId
+    })
+    for (const endpoint of commentsWithoutPinned.onResponseReceivedEndpoints) {
+      const command = endpoint.reloadContinuationItemsCommand ?? endpoint.appendContinuationItemsAction
+      if (!Array.isArray(command?.continuationItems)) continue
+
+      command.continuationItems = command.continuationItems.filter(item => {
+        return item.commentThreadRenderer?.commentViewModel?.commentViewModel?.commentId !== pinnedCommentId
+      })
+    }
+    expect(JSON.stringify(commentsWithoutPinned)).not.toContain('Who is here today?')
+
+    await page.route(/\/youtubei\/v1\/next/, route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(commentsWithoutPinned)
+    }), { times: 1 })
     const reloadResponse = page.waitForResponse(/\/youtubei\/v1\/next/, { timeout: 30_000 })
     await page.getByRole('button', { name: 'Reload Comments' }).click()
     await reloadResponse
 
+    await expect(pinnedComment).toHaveCount(1)
     await expect(page.locator('.commentThread').first()).toContainText('Who is here today?')
     await expect(page.locator('.commentThread').first()).toContainText('Pinned by you')
   })
@@ -3909,8 +3939,111 @@ test.describe('manual comment loading', () => {
           ...WATCH_PAGE_SEED,
           generalAutoLoadMorePaginatedItemsEnabled: false,
           uiScale: 125
-        }
+        },
+        profiles: [{
+          _id: 'allChannels',
+          name: 'All Channels',
+          bgColor: '#d50000',
+          textColor: '#FFFFFF',
+          subscriptions: []
+        }, {
+          _id: 'commentPinsProfile',
+          name: 'Comment pins profile',
+          bgColor: '#558B2F',
+          textColor: '#FFFFFF',
+          subscriptions: []
+        }]
       }
+    })
+
+    test('clamps fullscreen comment scrolling after switching pin storage groups', async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await openMockedVideo(page)
+
+      const loadComments = page.locator('.getCommentsTitle')
+      await loadComments.scrollIntoViewIfNeeded()
+      await loadComments.click()
+      await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+      const liveCommentCount = await page.locator('.commentThread').count()
+      const persistedCommentCount = 20
+      await page.evaluate(({ persistedCommentCount }) => {
+        const commentSnapshots = Array.from({ length: persistedCommentCount }, (_, index) => ({
+          id: `persisted-comment-${index}`,
+          author: `@PersistedAuthor${index}`,
+          authorId: `UC-persisted-${index}`,
+          authorLink: `UC-persisted-${index}`,
+          authorThumb: '',
+          dataType: 'local',
+          hasOwnerReplied: false,
+          hasReplyToken: false,
+          isEdited: false,
+          isHearted: false,
+          isMember: false,
+          isOwner: false,
+          isPinned: false,
+          likes: 0,
+          memberIconUrl: '',
+          numReplies: 0,
+          published: 0,
+          replies: [],
+          showReplies: false,
+          text: `Persisted pinned comment ${index}`,
+          time: 'now',
+          translationText: ''
+        }))
+        localStorage.setItem('opentubex-comment-pins', JSON.stringify({
+          'allChannels:video:jNQXAC9IVRw': {
+            commentIds: commentSnapshots.map(comment => comment.id),
+            commentSnapshots
+          }
+        }))
+      }, { persistedCommentCount })
+
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return store.dispatch('updateActiveProfile', 'commentPinsProfile')
+      })
+      await expect.poll(() => page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return store.getters.getActiveProfile._id
+      })).toBe('commentPinsProfile')
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return store.dispatch('updateActiveProfile', 'allChannels')
+      })
+      await expect(page.locator('.commentThread')).toHaveCount(liveCommentCount + persistedCommentCount)
+
+      await setPlayerFullscreen(page, true)
+      await page.locator('.fullscreenCommentsToggle').click({ force: true })
+
+      const dock = page.locator('.fullscreenCommentsOverlay.open')
+      const scroller = dock.locator('.commentsContentWrapper')
+      const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+      const commentsList = dock.locator('.commentThread').first().locator('..')
+      await expect.poll(() => scroller.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      const previousContentHeight = await commentsList.evaluate(element => element.offsetHeight)
+
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return store.dispatch('updateActiveProfile', 'commentPinsProfile')
+      })
+      await expect(dock.locator('.commentThread')).toHaveCount(liveCommentCount)
+      await expect.poll(() => commentsList.evaluate(element => element.offsetHeight))
+        .toBeLessThan(previousContentHeight)
+      await expect.poll(() => scroller.evaluate(element => {
+        const contentElement = element.querySelector('.commentThread')?.parentElement
+        if (!contentElement) return false
+
+        const viewportBounds = element.getBoundingClientRect()
+        const contentBounds = contentElement.getBoundingClientRect()
+        const contentMarginBlockEnd = Number.parseFloat(getComputedStyle(contentElement).marginBlockEnd) || 0
+        const viewportPaddingBottom = Number.parseFloat(getComputedStyle(element).paddingBottom) || 0
+        const renderedEndGap = viewportBounds.bottom - contentBounds.bottom
+        return Math.abs(renderedEndGap - contentMarginBlockEnd - viewportPaddingBottom) <= 1
+      })).toBe(true)
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
     })
 
     test('clamps fullscreen comment scrolling after filtering', async ({ app, page }) => {

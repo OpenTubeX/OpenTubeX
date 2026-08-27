@@ -123,6 +123,8 @@ Trending:
   Trending Tabs: Trends-Tabs
   Gaming: Gaming
   Sports: Sport
+  Load Error: Trends konnten nicht geladen werden.
+  Unsupported Backend: Trends benötigen die lokale API. Wähle die lokale API aus oder aktiviere den Backend-Fallback.
 Most Popular: Am beliebtesten
 Playlists: Playlists
 User Playlists:
@@ -175,6 +177,9 @@ User Playlists:
       This playlist has a video with a duration error: Diese Playlist enthält mindestens ein Video ohne Dauer. Daher wird die Playlist so sortiert, als ob die Dauer null wäre.
       Video has been removed. Click here to undo.: Video wurde entfernt. Klicke hier, um das Entfernen rückgängig zu machen.
     Search for Videos: Nach Videos suchen
+    Retry: Erneut versuchen
+    This playlist could not be loaded.: Diese Playlist konnte nicht geladen werden.
+    More videos could not be loaded.: Weitere Videos konnten nicht geladen werden.
   AddVideoPrompt:
     N playlists selected: '{playlistCount} ausgewählt'
     Search in Playlists: In Playlists suchen

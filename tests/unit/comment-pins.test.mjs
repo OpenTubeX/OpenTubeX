@@ -2,10 +2,12 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  createCommentPinSnapshot,
   getCommentPinStorageKey,
   getCommentReplyPinMarker,
   hasPinnedCommentReply,
   loadCommentPins,
+  mergePinnedCommentSnapshots,
   saveCommentPins
 } from '../../src/renderer/helpers/commentPins.js'
 
@@ -25,11 +27,78 @@ test('keeps personal comment pins separate by profile and video', () => {
   const secondVideo = getCommentPinStorageKey('profile-a', 'video-b')
   const secondProfile = getCommentPinStorageKey('profile-b', 'video-a')
 
-  saveCommentPins(firstVideo, new Set(['comment-a', 'comment-b']), storage)
+  saveCommentPins(firstVideo, {
+    commentIds: new Set(['comment-a', 'comment-b']),
+    commentSnapshots: []
+  }, storage)
 
-  assert.deepEqual(loadCommentPins(firstVideo, storage), new Set(['comment-a', 'comment-b']))
-  assert.deepEqual(loadCommentPins(secondVideo, storage), new Set())
-  assert.deepEqual(loadCommentPins(secondProfile, storage), new Set())
+  assert.deepEqual(loadCommentPins(firstVideo, storage), {
+    commentIds: new Set(['comment-a', 'comment-b']),
+    commentSnapshots: []
+  })
+  assert.deepEqual(loadCommentPins(secondVideo, storage), {
+    commentIds: new Set(),
+    commentSnapshots: []
+  })
+  assert.deepEqual(loadCommentPins(secondProfile, storage), {
+    commentIds: new Set(),
+    commentSnapshots: []
+  })
+})
+
+test('restores a pinned comment that is missing from the current response', () => {
+  const storage = createMemoryStorage()
+  const contentKey = getCommentPinStorageKey('profile-a', 'video-a')
+  const pinnedComment = {
+    id: 'pinned-comment',
+    author: 'Pinned author',
+    authorId: 'UCpinned',
+    authorLink: 'UCpinned',
+    authorThumb: 'https://example.com/pinned.jpg',
+    dataType: 'local',
+    hasOwnerReplied: false,
+    hasReplyToken: true,
+    isEdited: false,
+    isHearted: false,
+    isMember: false,
+    isOwner: false,
+    isPinned: false,
+    likes: 4,
+    memberIconUrl: '',
+    numReplies: 0,
+    published: 123,
+    replies: [],
+    showReplies: false,
+    text: 'Pinned text',
+    time: '1 day ago',
+    translationText: 'Pinned text'
+  }
+
+  saveCommentPins(contentKey, {
+    commentIds: new Set([pinnedComment.id]),
+    commentSnapshots: [createCommentPinSnapshot(pinnedComment)]
+  }, storage)
+
+  const restored = loadCommentPins(contentKey, storage)
+  const currentComment = { ...pinnedComment, id: 'current-comment', text: 'Current text' }
+  assert.deepEqual(restored.commentIds, new Set([pinnedComment.id]))
+  assert.equal(restored.commentSnapshots[0].hasReplyToken, false)
+  assert.deepEqual(
+    mergePinnedCommentSnapshots([currentComment], restored.commentSnapshots),
+    [
+      { comment: restored.commentSnapshots[0], index: null, persisted: true },
+      { comment: currentComment, index: 0, persisted: false }
+    ]
+  )
+
+  const livePinnedComment = { ...pinnedComment, text: 'Fresh pinned text' }
+  assert.deepEqual(
+    mergePinnedCommentSnapshots([currentComment, livePinnedComment], restored.commentSnapshots),
+    [
+      { comment: currentComment, index: 0, persisted: false },
+      { comment: livePinnedComment, index: 1, persisted: false }
+    ]
+  )
 })
 
 test('tracks pinned replies separately from their root comment', () => {
@@ -52,12 +121,26 @@ test('removes empty pin groups and ignores malformed storage', () => {
   const contentKey = getCommentPinStorageKey('profile-a', 'video-a')
   const storage = createMemoryStorage('{not-json')
 
-  assert.deepEqual(loadCommentPins(contentKey, storage), new Set())
+  assert.deepEqual(loadCommentPins(contentKey, storage), {
+    commentIds: new Set(),
+    commentSnapshots: []
+  })
 
-  saveCommentPins(contentKey, new Set(['comment-a']), storage)
-  saveCommentPins(contentKey, new Set(), storage)
+  saveCommentPins(contentKey, { commentIds: new Set(['comment-a']), commentSnapshots: [] }, storage)
+  saveCommentPins(contentKey, { commentIds: new Set(), commentSnapshots: [] }, storage)
 
   assert.equal(storage.getItem('opentubex-comment-pins'), null)
+
+  const malformedSnapshotStorage = createMemoryStorage(JSON.stringify({
+    [contentKey]: {
+      commentIds: ['comment-a'],
+      commentSnapshots: [{ id: 'comment-a' }]
+    }
+  }))
+  assert.deepEqual(loadCommentPins(contentKey, malformedSnapshotStorage), {
+    commentIds: new Set(['comment-a']),
+    commentSnapshots: []
+  })
 })
 
 test('keeps pinning usable when storage is unavailable', () => {
@@ -68,7 +151,16 @@ test('keeps pinning usable when storage is unavailable', () => {
     removeItem: () => { throw new Error('storage unavailable') }
   }
 
-  assert.deepEqual(loadCommentPins(contentKey, storage), new Set())
-  assert.doesNotThrow(() => saveCommentPins(contentKey, new Set(['comment-a']), storage))
-  assert.doesNotThrow(() => saveCommentPins(contentKey, new Set(), storage))
+  assert.deepEqual(loadCommentPins(contentKey, storage), {
+    commentIds: new Set(),
+    commentSnapshots: []
+  })
+  assert.doesNotThrow(() => saveCommentPins(contentKey, {
+    commentIds: new Set(['comment-a']),
+    commentSnapshots: []
+  }, storage))
+  assert.doesNotThrow(() => saveCommentPins(contentKey, {
+    commentIds: new Set(),
+    commentSnapshots: []
+  }, storage))
 })
