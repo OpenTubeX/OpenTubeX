@@ -37,7 +37,9 @@ test('opens with the configured shortcut and supports accessible fuzzy keyboard 
   ])
   expect(searchBounds).not.toBeNull()
   expect(closeBounds).not.toBeNull()
-  expect(Math.abs(searchBounds.y - closeBounds.y)).toBeLessThanOrEqual(4)
+  const searchCenterY = searchBounds.y + searchBounds.height / 2
+  const closeCenterY = closeBounds.y + closeBounds.height / 2
+  expect(Math.abs(searchCenterY - closeCenterY)).toBeLessThanOrEqual(1)
   expect(closeBounds.x).toBeGreaterThan(searchBounds.x + searchBounds.width)
   await expect(page.locator('.commandPaletteResults')).toHaveAttribute(
     'data-overlayscrollbars-viewport'
