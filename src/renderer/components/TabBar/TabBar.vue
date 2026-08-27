@@ -68,6 +68,9 @@
               :icon="['fas', 'layer-group']"
               aria-hidden="true"
             />
+            <span class="collapsedTabGroupName">
+              {{ item.group.name }}
+            </span>
           </button>
         </template>
       </div>

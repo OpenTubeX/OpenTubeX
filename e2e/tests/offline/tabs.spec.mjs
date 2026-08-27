@@ -1228,6 +1228,8 @@ test.describe('tab bar', () => {
     await expect(collapsedGroup).toHaveCount(1)
     await expect(collapsedGroup).toHaveClass(/active/)
     await expect(collapsedGroup).toHaveAttribute('title', 'Expand Research, 2 tabs')
+    await expect(collapsedGroup.locator('.collapsedTabGroupName')).toHaveText('Research')
+    await expect(collapsedGroup.locator('[data-icon="layer-group"]')).toBeVisible()
     await expect.poll(() => page.evaluate(async (groupId) => {
       return (await window.ftElectron.tabs.getState()).groups.find(group => group.id === groupId)?.isCollapsed
     }, setup.groupId)).toBe(true)
