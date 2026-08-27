@@ -51,9 +51,7 @@ export function markCrossTabMiniPlayerActive(candidate) {
     latestCandidate = null
   }
 
-  if (owner === candidate) {
-    owner = null
-  }
+  releaseCrossTabMiniPlayerOwnership(candidate)
 }
 
 /**
@@ -82,6 +80,24 @@ export function isCrossTabMiniPlayerOwner(candidate) {
 }
 
 /**
+ * @returns {boolean}
+ */
+export function hasCrossTabMiniPlayerOwner() {
+  return owner !== null
+}
+
+/**
+ * Releases a player that no longer presents its detached mini player.
+ *
+ * @param {CrossTabMiniPlayerCandidate} candidate
+ */
+export function releaseCrossTabMiniPlayerOwnership(candidate) {
+  if (owner === candidate) {
+    owner = null
+  }
+}
+
+/**
  * Removes an unmounted player from the coordinator.
  *
  * @param {CrossTabMiniPlayerCandidate} candidate
@@ -90,7 +106,5 @@ export function unregisterCrossTabMiniPlayer(candidate) {
   if (latestCandidate === candidate) {
     latestCandidate = null
   }
-  if (owner === candidate) {
-    owner = null
-  }
+  releaseCrossTabMiniPlayerOwnership(candidate)
 }

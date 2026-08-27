@@ -3,10 +3,12 @@ import { computed, nextTick, ref, watch } from 'vue'
 import store from '../../../store/index'
 import { applyAnimationSpeed } from '../../../helpers/animationSpeed'
 import {
+  hasCrossTabMiniPlayerOwner,
   isCrossTabMiniPlayerOwner,
   markCrossTabMiniPlayerActive,
   markCrossTabMiniPlayerInactive,
   refreshCrossTabMiniPlayer,
+  releaseCrossTabMiniPlayerOwnership,
   unregisterCrossTabMiniPlayer,
 } from '../../../helpers/crossTabMiniPlayer'
 import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
@@ -391,17 +393,19 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   }
 
   function canShowCrossTabMiniPlayer() {
+    const videoElement = video.value
     return !isActiveTab.value &&
       !autoPictureInPictureOnTabChange.value &&
       scrollMiniPlayerOnAllTabs.value &&
-      canUseScrollMiniPlayerBase()
+      canUseScrollMiniPlayerBase() &&
+      (isCrossTabMiniPlayerOwner(crossTabMiniPlayerCandidate) || !videoElement.paused)
   }
 
   function canUseScrollMiniPlayer() {
     if (!canUseScrollMiniPlayerBase()) return false
 
     if (isActiveTab.value) {
-      return scrollMiniPlayerEnabled.value
+      return scrollMiniPlayerEnabled.value && !hasCrossTabMiniPlayerOwner()
     }
 
     return !autoPictureInPictureOnTabChange.value &&
@@ -656,6 +660,8 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
   /** @param {boolean} [animate] */
   function deactivateScrollMiniPlayer(animate = false) {
+    releaseCrossTabMiniPlayerOwnership(crossTabMiniPlayerCandidate)
+
     const playerContainer = container.value
     const shouldAnimate = animate && playerContainer !== null && !isReducedMotionEnabled()
     const previousRect = shouldAnimate ? playerContainer.getBoundingClientRect() : null
