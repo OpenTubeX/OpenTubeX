@@ -1002,6 +1002,7 @@ watch(commentPinStorageKey, (contentKey) => {
   timestampCommentsOnly.value = false
   commentSearchOpen.value = false
   commentSearchQuery.value = ''
+  clampCommentsScrollAfterRender()
 })
 
 function normalizeCommentAuthor(author) {
