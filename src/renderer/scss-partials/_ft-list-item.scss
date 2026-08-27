@@ -52,6 +52,19 @@ $watched-transition-duration: 0.5s;
   }
 }
 
+.channelName {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+  max-inline-size: 100%;
+  vertical-align: middle;
+}
+
+.channelNameText {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
 .ft-list-item {
   padding: 6px;
 

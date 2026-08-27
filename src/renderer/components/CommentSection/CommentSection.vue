@@ -82,7 +82,7 @@
       </div>
     </header>
     <div
-      v-if="!fullscreenOverlay && showComments && !isLoading && commentData.length > 0"
+      v-if="!fullscreenOverlay && showComments && !isLoading && commentEntries.length > 0"
       class="commentHeader"
     >
       <h3 class="commentsTitle">
@@ -178,7 +178,7 @@
         {{ $t("Comments.Click to View Comments") }}
       </h4>
       <h4
-        v-if="commentData.length > 0 && !isLoading && !showComments"
+        v-if="commentEntries.length > 0 && !isLoading && !showComments"
         class="getCommentsTitle"
         role="button"
         tabindex="0"
@@ -189,12 +189,12 @@
         {{ $t("Comments.Click to View Comments") }}
       </h4>
       <div
-        v-if="commentData.length > 0 && showComments"
+        v-if="commentEntries.length > 0 && showComments"
         ref="commentsList"
       >
         <div
           v-for="({ comment, index, replyNodes }) in visibleCommentEntries"
-          :id="'comment' + index"
+          :id="index === null ? `comment-pinned-${comment.id}` : 'comment' + index"
           :key="comment.id"
           class="comment commentThread"
           :class="{
@@ -302,7 +302,7 @@
               :title="personalPinActionLabel(comment)"
               :aria-label="personalPinActionLabel(comment)"
               :aria-pressed="isCommentPersonallyPinned(comment.id)"
-              @click="togglePersonalCommentPin(comment.id)"
+              @click="togglePersonalCommentPin(comment.id, comment)"
             >
               <FtIcon
                 :icon="['fas', isCommentPersonallyPinned(comment.id) ? 'thumbtack-slash' : 'thumbtack']"
@@ -369,7 +369,7 @@
             </span>
           </p>
           <div
-            v-if="!hasActiveCommentFilters && comment.numReplies > 0 && !comment.showReplies"
+            v-if="index !== null && !hasActiveCommentFilters && comment.numReplies > 0 && !comment.showReplies"
             class="commentReplyContinuation commentReplyRootToggle"
           >
             <button
@@ -417,7 +417,7 @@
               v-for="node in replyNodes"
               :key="node.reply.id"
               :node="node"
-              :thread-index="index"
+              :thread-index="index ?? -1"
               root-level
               :enable-channel-links="enableChannelLinks"
               :hide-comment-likes="hideCommentLikes"
@@ -437,13 +437,13 @@
               :shorten-view-counts="shortenViewCounts"
               @copy-youtube-link="copyCommentYoutubeLink"
               @get-more-replies="getCommentReplies(index, $event)"
-              @toggle-personal-pin="togglePersonalCommentPin($event, comment.id)"
+              @toggle-personal-pin="togglePersonalCommentPin($event, comment)"
               @timestamp-event="onTimestamp"
               @translate-comment="toggleCommentTranslation"
               @translation-unavailable="restoreCommentTranslation"
             />
             <div
-              v-if="!hasActiveCommentFilters && (isReplyLoading(comment.id) || comment.hasReplyToken)"
+              v-if="index !== null && !hasActiveCommentFilters && (isReplyLoading(comment.id) || comment.hasReplyToken)"
               class="commentReplyContinuation"
             >
               <button
@@ -469,7 +469,7 @@
               </button>
             </div>
             <div
-              v-if="!hasActiveCommentFilters && comment.numReplies > 0"
+              v-if="index !== null && !hasActiveCommentFilters && comment.numReplies > 0"
               class="commentReplyContinuation"
             >
               <button
@@ -608,10 +608,12 @@ import {
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getYoutubeCommunityPostCommentUrl, getYoutubeVideoCommentUrl } from '../../helpers/share'
 import {
+  createCommentPinSnapshot,
   getCommentPinStorageKey,
   getCommentReplyPinMarker,
   hasPinnedCommentReply,
   loadCommentPins,
+  mergePinnedCommentSnapshots,
   saveCommentPins
 } from '../../helpers/commentPins'
 import {
@@ -710,7 +712,9 @@ const activeProfileId = computed(() => store.getters.getActiveProfile._id)
 const commentPinStorageKey = computed(() => {
   return getCommentPinStorageKey(activeProfileId.value, props.id, props.isPostComments)
 })
-const personalPinnedCommentIds = ref(loadCommentPins(commentPinStorageKey.value))
+const initialCommentPinState = loadCommentPins(commentPinStorageKey.value)
+const personalPinnedCommentIds = ref(initialCommentPinState.commentIds)
+const personalPinnedCommentSnapshots = ref(initialCommentPinState.commentSnapshots)
 let fullscreenScrollTop = 0
 let highlightedTargetGeneration = 0
 const MAX_HIGHLIGHTED_REPLY_PAGES = 20
@@ -816,9 +820,13 @@ function commentTreeHasPersonalPin(comment) {
     comment.replies.some(commentTreeHasPersonalPin)
 }
 
+const commentEntries = computed(() => {
+  return mergePinnedCommentSnapshots(commentData.value, personalPinnedCommentSnapshots.value)
+})
+
 const visibleCommentEntries = computed(() => {
-  return commentData.value
-    .map((comment, index) => ({
+  return commentEntries.value
+    .map(({ comment, index }) => ({
       comment,
       index,
       replyNodes: getVisibleReplyNodes(comment)
@@ -843,7 +851,7 @@ function countMatchingComments(comment) {
 }
 
 const loadedCommentCount = computed(() => {
-  return commentData.value.reduce((count, comment) => count + countLoadedComments(comment), 0)
+  return commentEntries.value.reduce((count, { comment }) => count + countLoadedComments(comment), 0)
 })
 
 const matchingCommentCount = computed(() => {
@@ -851,7 +859,7 @@ const matchingCommentCount = computed(() => {
     return loadedCommentCount.value
   }
 
-  return commentData.value.reduce((count, comment) => count + countMatchingComments(comment), 0)
+  return commentEntries.value.reduce((count, { comment }) => count + countMatchingComments(comment), 0)
 })
 
 function shouldShowCommentReplies(comment, replyNodes) {
@@ -889,7 +897,7 @@ function getCommentAuthorSearchSegments(author) {
 }
 
 const canUseCommentTools = computed(() => {
-  return commentData.value.length > 0 && showComments.value && !isLoading.value
+  return commentEntries.value.length > 0 && showComments.value && !isLoading.value
 })
 
 function clampCommentsScrollAfterRender() {
@@ -936,22 +944,30 @@ function personalPinActionLabel(comment) {
   return t('Comments.Pin comment by author', { author: comment.author })
 }
 
-function togglePersonalCommentPin(commentId, rootCommentId = null) {
+function togglePersonalCommentPin(commentId, rootComment) {
   const commentIds = new Set(personalPinnedCommentIds.value)
+  const isReply = commentId !== rootComment.id
   if (commentIds.has(commentId)) {
     commentIds.delete(commentId)
-    if (rootCommentId !== null) {
-      commentIds.delete(getCommentReplyPinMarker(rootCommentId, commentId))
+    if (isReply) {
+      commentIds.delete(getCommentReplyPinMarker(rootComment.id, commentId))
     }
   } else {
     commentIds.add(commentId)
-    if (rootCommentId !== null) {
-      commentIds.add(getCommentReplyPinMarker(rootCommentId, commentId))
+    if (isReply) {
+      commentIds.add(getCommentReplyPinMarker(rootComment.id, commentId))
     }
   }
 
+  const commentSnapshots = personalPinnedCommentSnapshots.value
+    .filter(comment => comment.id !== rootComment.id)
+  if (commentIds.has(rootComment.id) || hasPinnedCommentReply(commentIds, rootComment.id)) {
+    commentSnapshots.push(createCommentPinSnapshot(rootComment))
+  }
+
   personalPinnedCommentIds.value = commentIds
-  saveCommentPins(commentPinStorageKey.value, commentIds)
+  personalPinnedCommentSnapshots.value = commentSnapshots
+  saveCommentPins(commentPinStorageKey.value, { commentIds, commentSnapshots })
   clampCommentsScrollAfterRender()
 }
 
@@ -978,7 +994,9 @@ function closeCommentMenus() {
 }
 
 watch(commentPinStorageKey, (contentKey) => {
-  personalPinnedCommentIds.value = loadCommentPins(contentKey)
+  const pinState = loadCommentPins(contentKey)
+  personalPinnedCommentIds.value = pinState.commentIds
+  personalPinnedCommentSnapshots.value = pinState.commentSnapshots
   commentFilterMenuOpen.value = false
   creatorCommentsOnly.value = false
   timestampCommentsOnly.value = false

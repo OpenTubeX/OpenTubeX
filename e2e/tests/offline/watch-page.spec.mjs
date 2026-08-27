@@ -3782,9 +3782,14 @@ test.describe('manual comment loading', () => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
 
+    const initialCommentsResponsePromise = page.waitForResponse(response => {
+      if (!/\/youtubei\/v1\/next/.test(response.url())) return false
+      return Boolean(JSON.parse(response.request().postData() ?? '{}').continuation)
+    }, { timeout: 30_000 })
     const loadComments = page.locator('.getCommentsTitle')
     await loadComments.scrollIntoViewIfNeeded()
     await loadComments.click()
+    const initialCommentsResponse = await initialCommentsResponsePromise
     await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
 
     const pinnedComment = page.locator('.commentThread').filter({ hasText: 'Who is here today?' })
@@ -3795,10 +3800,35 @@ test.describe('manual comment loading', () => {
     await expect(pinnedComment.locator('.commentPersonalPin')).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
     await expect(page.locator('.commentThread').first()).toContainText('Who is here today?')
 
+    const commentsWithoutPinned = await initialCommentsResponse.json()
+    const mutations = commentsWithoutPinned.frameworkUpdates.entityBatchUpdate.mutations
+    const pinnedMutation = mutations.find(mutation => {
+      return mutation.payload?.commentEntityPayload?.properties?.content?.content === 'Who is here today?'
+    })
+    const pinnedCommentId = pinnedMutation.payload.commentEntityPayload.properties.commentId
+    commentsWithoutPinned.frameworkUpdates.entityBatchUpdate.mutations = mutations.filter(mutation => {
+      return mutation.payload?.commentEntityPayload?.properties?.commentId !== pinnedCommentId
+    })
+    for (const endpoint of commentsWithoutPinned.onResponseReceivedEndpoints) {
+      const command = endpoint.reloadContinuationItemsCommand ?? endpoint.appendContinuationItemsAction
+      if (!Array.isArray(command?.continuationItems)) continue
+
+      command.continuationItems = command.continuationItems.filter(item => {
+        return item.commentThreadRenderer?.commentViewModel?.commentViewModel?.commentId !== pinnedCommentId
+      })
+    }
+    expect(JSON.stringify(commentsWithoutPinned)).not.toContain('Who is here today?')
+
+    await page.route(/\/youtubei\/v1\/next/, route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(commentsWithoutPinned)
+    }), { times: 1 })
     const reloadResponse = page.waitForResponse(/\/youtubei\/v1\/next/, { timeout: 30_000 })
     await page.getByRole('button', { name: 'Reload Comments' }).click()
     await reloadResponse
 
+    await expect(pinnedComment).toHaveCount(1)
     await expect(page.locator('.commentThread').first()).toContainText('Who is here today?')
     await expect(page.locator('.commentThread').first()).toContainText('Pinned by you')
   })
