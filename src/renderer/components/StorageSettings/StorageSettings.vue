@@ -87,7 +87,7 @@
 
     <FtSettingsSection
       v-if="USING_ELECTRON"
-      :title="t('Settings.Storage Settings.Downloads')"
+      :title="t('Settings.Download Settings.Download Settings')"
     >
       <StorageItem
         :title="t('Settings.Storage Settings.Downloaded Media')"
@@ -295,7 +295,7 @@
         />
       </StorageItem>
       <StorageItem
-        :title="t('Settings.Storage Settings.Playlists')"
+        :title="t('Playlists')"
         :size="sizeText('playlists')"
         :description="t('Settings.Storage Settings.Playlists Description')"
         location="playlists.db"

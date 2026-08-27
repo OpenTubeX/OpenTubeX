@@ -12,9 +12,9 @@ import { getFirstCharacter } from './strings'
 const SETTINGS_SECTIONS = [
   ['general', 'Settings.General Settings.General Settings', 'Settings.Categories.General Description', ['preferences', 'options']],
   ['appearance', 'Settings.Categories.Appearance', 'Settings.Categories.Appearance Description', ['theme', 'display']],
-  ['playback', 'Settings.Categories.Playback', 'Settings.Categories.Playback Description', ['player', 'video']],
+  ['playback', 'Settings.Quick Settings.Playback', 'Settings.Categories.Playback Description', ['player', 'video']],
   ['add-ons', 'Settings.Categories.Add-ons', 'Settings.Categories.Add-ons Description', ['addons', 'extensions', 'sponsorblock']],
-  ['subscriptions', 'Settings.Categories.Subscriptions', 'Settings.Categories.Subscriptions Description', ['feeds', 'channels']],
+  ['subscriptions', 'Subscriptions.Subscriptions', 'Settings.Categories.Subscriptions Description', ['feeds', 'channels']],
   ['download', 'Settings.Download Settings.Download Settings', 'Settings.Categories.Downloads Description', ['yt-dlp', 'files']],
   ['focus', 'Settings.Distraction Free Settings.Distraction Free Settings', 'Settings.Categories.Distraction Free Description', ['distraction free', 'hide']],
   ['privacy', 'Settings.Privacy Settings.Privacy Settings', 'Settings.Categories.Privacy Description', ['history', 'security']],
@@ -75,12 +75,12 @@ export function createCommandPaletteRegistry(context) {
   const groups = {
     app: t('CommandPalette.Groups.App'),
     navigation: t('CommandPalette.Groups.Navigation'),
-    settings: t('CommandPalette.Groups.Settings'),
+    settings: t('Settings.Settings'),
     tabs: t('CommandPalette.Groups.Tabs'),
-    profiles: t('CommandPalette.Groups.Profiles'),
-    playlists: t('CommandPalette.Groups.Playlists'),
-    downloads: t('CommandPalette.Groups.Downloads'),
-    playback: t('CommandPalette.Groups.Playback'),
+    profiles: t('Settings.Sync Settings.Profiles'),
+    playlists: t('Playlists'),
+    downloads: t('Settings.Download Settings.Download Settings'),
+    playback: t('Settings.Quick Settings.Playback'),
   }
   const commands = []
   const configuredShortcuts = getConfiguredKeyboardShortcuts(store.getters.getKeyboardShortcuts)
@@ -173,7 +173,7 @@ export function createCommandPaletteRegistry(context) {
       icon: ['fas', 'info-circle'],
       run: () => openSettingsView('about'),
     }),
-    command('downloads.open', t('Downloads.Downloads'), groups.downloads, {
+    command('downloads.open', t('Settings.Download Settings.Download Settings'), groups.downloads, {
       aliases: ['files', 'yt-dlp'],
       icon: ['fas', 'download'],
       disabledReason: !isElectron ? t('CommandPalette.Unavailable.Desktop') : '',

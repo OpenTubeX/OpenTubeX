@@ -242,7 +242,7 @@
           />
           <FtIconButton
             v-if="metadataHistory"
-            :title="t('Video.Metadata Cache.History')"
+            :title="t('Settings.Privacy Settings.Cache Video Metadata')"
             :icon="['fas', 'clock-rotate-left']"
             @click="showMetadataHistory = true"
           />
@@ -876,11 +876,11 @@ function createChannelSettingSaveAction(type, visible, label, settingLabel, icon
 
 const channelSettingSaveActions = computed(() => [
   createChannelSettingSaveAction('playbackSpeed', showSaveChannelPlaybackSpeedButton.value,
-    t('Video.Save Channel Playback Speed'), t('Settings.Channel Settings.Playback Speed'), ['fas', 'gauge']),
+    t('Video.Save Channel Playback Speed'), t('Settings.Player Settings.Playback Speed'), ['fas', 'gauge']),
   createChannelSettingSaveAction('videoQuality', showSaveChannelVideoQualityButton.value,
     t('Video.Save Channel Video Quality'), t('Settings.Channel Settings.Video Quality'), ['fas', 'photo-film']),
   createChannelSettingSaveAction('subtitlesState', showSaveChannelSubtitlesStateButton.value,
-    t('Video.Save Channel Subtitles State'), t('Settings.Channel Settings.Subtitles State'),
+    t('Video.Save Channel Subtitles State'), t('Search Listing.Label.Subtitles'),
     ['fas', 'closed-captioning']),
   createChannelSettingSaveAction('volume', showSaveChannelVolumeButton.value,
     t('Video.Save Channel Volume'), t('Settings.Channel Settings.Volume'), ['fas', 'volume-high'])

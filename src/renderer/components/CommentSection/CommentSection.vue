@@ -311,8 +311,8 @@
             <button
               type="button"
               class="commentCopyLink"
-              :title="$t('Comments.Copy YouTube Link')"
-              :aria-label="$t('Comments.Copy YouTube Link')"
+              :title="$t('Video.Copy YouTube Link')"
+              :aria-label="$t('Video.Copy YouTube Link')"
               @click="copyCommentYoutubeLink(comment.id)"
             >
               <FtIcon

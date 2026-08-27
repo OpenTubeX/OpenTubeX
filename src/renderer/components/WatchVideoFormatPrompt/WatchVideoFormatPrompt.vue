@@ -160,7 +160,7 @@ const { t } = useI18n()
 
 const engineLabel = computed(() => {
   if (props.playbackEngineSelection !== 'yt-dlp') {
-    return t('Change Format.Engines.Built-in')
+    return t('Settings.General Settings.Stream Extraction Method.Built-in')
   }
 
   // showing the version makes it verifiable that the streams really came from yt-dlp
@@ -185,11 +185,11 @@ const streamTypeLabel = computed(() => {
 const engines = computed(() => [
   {
     value: 'yt-dlp',
-    label: t('Change Format.Engines.yt-dlp')
+    label: t('Settings.General Settings.Stream Extraction Method.yt-dlp')
   },
   {
     value: 'built-in',
-    label: t('Change Format.Engines.Built-in')
+    label: t('Settings.General Settings.Stream Extraction Method.Built-in')
   }
 ])
 

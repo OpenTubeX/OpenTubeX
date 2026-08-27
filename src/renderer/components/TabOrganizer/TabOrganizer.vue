@@ -116,7 +116,7 @@
                 :icon="['fas', 'rectangle-xmark']"
                 aria-hidden="true"
               />
-              {{ t('Tab Organizer.Close') }}
+              {{ t('Close') }}
             </button>
             <FtSelect
               class="compactSelect bulkActionSelect"
@@ -141,7 +141,7 @@
                 v-model="query"
                 type="search"
                 autocomplete="off"
-                :placeholder="t('Tab Organizer.Search Placeholder')"
+                :placeholder="t('Tab Organizer.Search Label')"
                 :aria-label="t('Tab Organizer.Search Label')"
               >
             </label>
@@ -390,7 +390,7 @@
                     type="button"
                     class="iconButton"
                     :aria-label="t('Tab Organizer.Close Tab', { title: tab.title })"
-                    :title="t('Tab Organizer.Close')"
+                    :title="t('Close')"
                     @click="runAction('close', [tab.id])"
                   >
                     <FtIcon
@@ -443,7 +443,7 @@
                       :icon="['fas', 'clock-rotate-left']"
                       aria-hidden="true"
                     />
-                    {{ t('Tab Organizer.Restore') }}
+                    {{ t('Restore') }}
                   </button>
                 </li>
               </ul>
@@ -509,11 +509,11 @@ const canUnpinSelectedTabs = computed(() => selectedTabs.value.some(tab => tab.i
 const canLoadSelectedTabs = computed(() => selectedTabs.value.some(tab => tab.isUnloaded))
 const canUnloadSelectedTabs = computed(() => selectedTabs.value.some(tab => !tab.isUnloaded))
 const localizedTabColors = computed(() => [
-  { value: 'red', label: t('Context Menu.Red') },
-  { value: 'orange', label: t('Context Menu.Orange') },
-  { value: 'yellow', label: t('Context Menu.Yellow') },
-  { value: 'green', label: t('Context Menu.Green') },
-  { value: 'blue', label: t('Context Menu.Blue') },
+  { value: 'red', label: t('Settings.Theme Settings.Main Color Theme.Red') },
+  { value: 'orange', label: t('Settings.Theme Settings.Main Color Theme.Orange') },
+  { value: 'yellow', label: t('Settings.Theme Settings.Main Color Theme.Yellow') },
+  { value: 'green', label: t('Settings.Theme Settings.Main Color Theme.Green') },
+  { value: 'blue', label: t('Settings.Theme Settings.Main Color Theme.Blue') },
   { value: 'purple', label: t('Context Menu.Purple') }
 ])
 const editableGroupColors = computed(() => [

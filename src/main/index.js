@@ -722,6 +722,21 @@ function runApp() {
 
   // Registered per-webContents in 'web-contents-created' so the shared
   // BrowserWindow renderer can resolve native menu targets through TabManager.
+  const sharedContextMenuLabelKeys = {
+    Blue: 'Settings.Theme Settings.Main Color Theme.Blue',
+    'Close Tab': 'Close Tab',
+    Copy: 'Copy',
+    Cut: 'Cut',
+    Green: 'Settings.Theme Settings.Main Color Theme.Green',
+    'New Tab': 'New Tab',
+    'New Window': 'New Window',
+    Orange: 'Settings.Theme Settings.Main Color Theme.Orange',
+    Paste: 'Paste',
+    Red: 'Settings.Theme Settings.Main Color Theme.Red',
+    Ungrouped: 'Tab Organizer.Ungrouped',
+    Yellow: 'Settings.Theme Settings.Main Color Theme.Yellow'
+  }
+
   /**
    * @param {string} key
    * @param {Record<string, string | number>} [parameters]
@@ -730,7 +745,7 @@ function runApp() {
    */
   function contextMenuLabel(key, parameters = {}, fallback = key) {
     return {
-      key: `Context Menu.${key}`,
+      key: sharedContextMenuLabelKeys[key] ?? `Context Menu.${key}`,
       parameters,
       fallback
     }

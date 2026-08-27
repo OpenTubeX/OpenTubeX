@@ -273,7 +273,6 @@ export const SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS = {
   general: new Set(['System Default']),
   'context-menu-search': new Set(['Engine Name', 'Search URL']),
   player: new Set(['Skip Silence']),
-  password: new Set(['Password']),
   'sponsor-block': new Set(['Generated SponsorBlock User ID Copy Button']),
   subscription: new Set(['Auto Refresh Interval']),
   'caption-appearance': new Set(['Application Language']),

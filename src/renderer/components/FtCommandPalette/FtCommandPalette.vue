@@ -148,7 +148,7 @@
           aria-hidden="true"
         >
           <span><kbd>{{ t('CommandPalette.Keys.Up') }}</kbd><kbd>{{ t('CommandPalette.Keys.Down') }}</kbd> {{ t('CommandPalette.Move') }}</span>
-          <span><kbd>{{ t('CommandPalette.Keys.Enter') }}</kbd> {{ t('CommandPalette.Run') }}</span>
+          <span><kbd>{{ t('Keys.enter') }}</kbd> {{ t('CommandPalette.Run') }}</span>
           <span><kbd>{{ t('CommandPalette.Keys.Escape') }}</kbd> {{ t('Close') }}</span>
         </footer>
         <p

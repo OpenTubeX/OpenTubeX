@@ -125,8 +125,8 @@
               v-if="showDownloadsShortcut"
               type="button"
               class="quickSettingsShortcut downloadsShortcut"
-              :aria-label="t('Downloads.Downloads')"
-              :title="t('Downloads.Downloads')"
+              :aria-label="t('Settings.Download Settings.Download Settings')"
+              :title="t('Settings.Download Settings.Download Settings')"
               @click="openDownloads"
             >
               <FtIcon :icon="['fas', 'download']" />

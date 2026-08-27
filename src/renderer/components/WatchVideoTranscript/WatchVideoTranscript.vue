@@ -44,7 +44,7 @@
           class="transcriptActions"
         >
           <FtIconButton
-            :title="t('Video.Transcript.Copy')"
+            :title="t('Copy')"
             :icon="['fas', 'copy']"
             :disabled="isLoading || segments.length === 0"
             theme="base-no-default"

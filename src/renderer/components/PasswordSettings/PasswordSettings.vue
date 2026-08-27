@@ -17,7 +17,7 @@
       class="settingsFlexStart460px"
     >
       <FtInput
-        :placeholder="$t('Settings.Password Settings.Password')"
+        :placeholder="$t('Settings.Password Dialog.Password')"
         :label="$t('Settings.Password Settings.Set Password To Prevent Access')"
         :show-action-button="false"
         show-label

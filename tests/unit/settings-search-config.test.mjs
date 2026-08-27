@@ -79,8 +79,8 @@ test('settings search excludes values that only exist in hidden controls', () =>
     SETTINGS_SEARCH_SELECT_GROUP_LABELS.player['Auto Picture in Picture'],
     ['Auto Picture in Picture']
   )
-  assert.ok(SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS.password.has('Password'))
-  assert.equal(typeof getAtPath(locale, 'Settings.Password Settings.Password'), 'string')
+  assert.equal(getAtPath(locale, 'Settings.Password Settings.Password'), undefined)
+  assert.equal(typeof getAtPath(locale, 'Settings.Password Dialog.Password'), 'string')
   assert.ok(
     SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS['sponsor-block']
       .has('Generated SponsorBlock User ID Copy Button')

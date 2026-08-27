@@ -1,6 +1,6 @@
 <template>
   <FtPrompt
-    :label="$t('Video.Metadata Cache.History')"
+    :label="$t('Settings.Privacy Settings.Cache Video Metadata')"
     card-class="videoMetadataHistoryPrompt"
     fixed-layout
     @click="emit('close')"

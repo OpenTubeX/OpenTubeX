@@ -539,7 +539,7 @@ const showMinimizeButton = computed(() => {
 const isKeyboardShortcutPromptOpen = computed(() => store.getters.getIsKeyboardShortcutPromptShown)
 const windowTitle = computed(() => {
   if (isAboutOpen.value) return t('About.About')
-  if (isDownloadsOpen.value) return t('Downloads.Downloads')
+  if (isDownloadsOpen.value) return t('Settings.Download Settings.Download Settings')
   return t('Settings.Settings')
 })
 const standaloneViewIcon = computed(() => isDownloadsOpen.value
@@ -556,7 +556,7 @@ const settingsComponentsData = computed(() => [
   },
   {
     type: 'playback',
-    title: t('Settings.Categories.Playback'),
+    title: t('Settings.Quick Settings.Playback'),
     description: t('Settings.Categories.Playback Description'),
     icon: ['fas', 'circle-play'],
     component: PlaybackSettings
@@ -571,7 +571,7 @@ const settingsComponentsData = computed(() => [
   },
   {
     type: 'subscriptions',
-    title: t('Settings.Categories.Subscriptions'),
+    title: t('Subscriptions.Subscriptions'),
     description: t('Settings.Categories.Subscriptions Description'),
     icon: ['fas', 'users'],
     component: SubscriptionCategorySettings

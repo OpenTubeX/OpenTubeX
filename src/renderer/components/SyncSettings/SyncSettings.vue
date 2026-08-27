@@ -33,7 +33,7 @@
         />
         <FtInput
           v-if="!connected"
-          :placeholder="t('Settings.Sync Settings.Password')"
+          :placeholder="t('Settings.Password Dialog.Password')"
           :show-action-button="false"
           :value="password"
           :disabled="serverCredentialsDisabled"
@@ -180,7 +180,7 @@
             @change="store.dispatch('updateSyncServerSyncSessions', $event)"
           />
           <FtToggleSwitch
-            :label="t('Settings.Sync Settings.Settings')"
+            :label="t('Settings.Settings')"
             :default-value="syncSettingsEnabled"
             :disabled="busy || settingsSupported === false"
             compact
@@ -301,7 +301,7 @@
             {{ t('Settings.Sync Settings.Delete Account Warning') }}
           </p>
           <FtInput
-            :placeholder="t('Settings.Sync Settings.Password')"
+            :placeholder="t('Settings.Password Dialog.Password')"
             :show-action-button="false"
             :value="deleteAccountPassword"
             input-type="password"

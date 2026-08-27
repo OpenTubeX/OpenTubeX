@@ -61,7 +61,7 @@
           <FtSelect
             :placeholder="t('Downloads.Media Type')"
             :value="options.mode"
-            :select-names="[t('Downloads.Video'), t('Downloads.Audio'), t('Downloads.Subtitles')]"
+            :select-names="[t('Downloads.Video'), t('Downloads.Audio'), t('Search Listing.Label.Subtitles')]"
             :select-values="['video', 'audio', 'subtitles']"
             @change="setOption('mode', $event)"
           />
@@ -134,7 +134,7 @@
         </section>
 
         <section class="optionSection">
-          <h3>{{ t('Downloads.SponsorBlock') }}</h3>
+          <h3>{{ t('Settings.SponsorBlock Settings.SponsorBlock Settings') }}</h3>
           <div class="toggleGrid">
             <FtToggleSwitch
               compact

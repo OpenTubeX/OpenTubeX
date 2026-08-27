@@ -131,8 +131,8 @@
           type="button"
           class="downloadsButton navButton"
           :class="{ active: downloadsWindowOpen }"
-          :aria-label="t('Downloads.Downloads')"
-          :title="t('Downloads.Downloads')"
+          :aria-label="t('Settings.Download Settings.Download Settings')"
+          :title="t('Settings.Download Settings.Download Settings')"
           :aria-pressed="downloadsWindowOpen"
           @click="toggleDownloadsWindow"
         >
@@ -322,7 +322,7 @@ const showSettingsButton = computed(() => (
 ))
 const minimizedSettingsWindowTitle = computed(() => {
   if (settingsWindowView.value === 'about') return t('About.About')
-  if (settingsWindowView.value === 'downloads') return t('Downloads.Downloads')
+  if (settingsWindowView.value === 'downloads') return t('Settings.Download Settings.Download Settings')
   return t('Settings.Settings')
 })
 const minimizedSettingsWindowIcon = computed(() => {

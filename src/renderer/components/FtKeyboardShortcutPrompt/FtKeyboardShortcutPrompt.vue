@@ -185,8 +185,8 @@ const shortcutConflictCanBeReassigned = computed(() =>
 )
 
 const shortcutConflictOptionNames = computed(() => shortcutConflictCanBeReassigned.value
-  ? [t('KeyboardShortcutPrompt.Reassign'), t('KeyboardShortcutPrompt.Undo')]
-  : [t('KeyboardShortcutPrompt.Undo')]
+  ? [t('KeyboardShortcutPrompt.Reassign'), t('Undo')]
+  : [t('Undo')]
 )
 
 const shortcutConflictOptionValues = computed(() => shortcutConflictCanBeReassigned.value
@@ -332,7 +332,7 @@ const localizedShortcutNameToShortcutsMappings = computed(() => {
       'HISTORY_FORWARD_ALT_MAC',
     ]],
     [t('KeyboardShortcutPrompt.Navigate to Settings'), ['NAVIGATE_TO_SETTINGS']],
-    [t('KeyboardShortcutPrompt.Navigate to Downloads'), ['NAVIGATE_TO_DOWNLOADS']],
+    [t('Downloads.Open Downloads'), ['NAVIGATE_TO_DOWNLOADS']],
     [t('KeyboardShortcutPrompt.Navigate to History'), ['NAVIGATE_TO_HISTORY', 'NAVIGATE_TO_HISTORY_MAC']],
     [t('KeyboardShortcutPrompt.New Window'), ['NEW_WINDOW']],
     [t('KeyboardShortcutPrompt.New Tab'), ['NEW_TAB']],

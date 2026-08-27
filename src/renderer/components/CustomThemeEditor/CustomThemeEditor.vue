@@ -59,7 +59,7 @@
         />
         <div class="darkThemeControl">
           <FtToggleSwitch
-            :label="t('Settings.Theme Settings.Custom Theme.Is Dark Theme')"
+            :label="t('Settings.Theme Settings.Dark Theme')"
             :default-value="draft.isDark"
             compact
             @change="updateDarkTheme"
