@@ -3697,16 +3697,20 @@ test.describe('manual comment loading', () => {
     await expect(ownerReplyToggle.locator('.commentReplyToggleText')).toHaveText(/\d+ replies/)
     await expect(ownerReplyToggle).not.toContainText('from')
     const ownerReplyThread = page.locator('.commentThread').filter({ has: ownerReplyToggle })
-    const ownerReplyCommentText = await ownerReplyThread.locator('.commentText').first().innerText()
+    const ownerReplyThreadElement = await ownerReplyThread.elementHandle()
+    expect(ownerReplyThreadElement).not.toBeNull()
     await expect(ownerReplyThread.locator('.commentReplyContent')).toHaveCount(0)
     await ownerReplyToggle.scrollIntoViewIfNeeded()
     await attachScreenshot('uploader reply indicator')
 
     await page.getByRole('button', { name: 'Filter loaded comments' }).click()
     await page.getByRole('checkbox', { name: 'From creator' }).click()
-    const filteredOwnerReplyThread = page.locator('.commentThread').filter({ hasText: ownerReplyCommentText })
-    await expect(filteredOwnerReplyThread).toBeVisible()
-    await expect(filteredOwnerReplyThread.locator('.commentReplyContent')).toHaveCount(0)
+    await expect.poll(() => ownerReplyThreadElement.evaluate(element => ({
+      isConnected: element.isConnected,
+      isVisible: element.getClientRects().length > 0,
+      loadedReplyCount: element.querySelectorAll('.commentReplyContent').length
+    }))).toEqual({ isConnected: true, isVisible: true, loadedReplyCount: 0 })
+    await ownerReplyThreadElement.dispose()
   })
 
   test('searches the comments loaded for the current video', async ({ app, page }) => {
@@ -4090,7 +4094,7 @@ test.describe('manual comment loading', () => {
       await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
     })
 
-    test('clamps fullscreen comment scrolling after filtering', async ({ app, page }) => {
+    test('clamps fullscreen comment scrolling after creator and search filtering', async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       await openMockedVideo(page)
 
@@ -4116,6 +4120,21 @@ test.describe('manual comment loading', () => {
       await expect.poll(() => scroller.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
       await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
 
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+      await dock.getByRole('button', { name: 'Filter loaded comments' }).click()
+      const creatorFilter = dock.getByRole('checkbox', { name: 'From creator' })
+      await creatorFilter.click()
+
+      await expect(dock.locator('.commentThread')).toHaveCount(1)
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+      await creatorFilter.click()
+      await expect.poll(() => scroller.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+      await dock.getByRole('button', { name: 'Filter loaded comments' }).click()
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 
