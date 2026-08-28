@@ -85,6 +85,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   const scrollMiniAnchor = ref(null)
   const scrollMiniPlaceholder = ref(null)
   const scrollMiniVolumeTrack = ref(null)
+  const scrollMiniPlayerDismissed = ref(false)
 
   const crossTabMiniPlayerCandidate = {
     canShow: () => canShowCrossTabMiniPlayer(),
@@ -791,6 +792,15 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  function dismissCrossTabMiniPlayer(event) {
+    event?.preventDefault()
+    event?.stopPropagation()
+
+    if (!scrollMiniPlayerDetached.value) return
+
+    scrollMiniPlayerDismissed.value = true
+  }
+
   function scrollMiniTogglePlayPause(event) {
     event?.preventDefault()
     event?.stopPropagation()
@@ -1021,6 +1031,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
   watch(isActiveTab, (active) => {
     if (active) {
+      scrollMiniPlayerDismissed.value = false
       markCrossTabMiniPlayerActive(crossTabMiniPlayerCandidate)
     } else {
       markCrossTabMiniPlayerInactive(crossTabMiniPlayerCandidate)
@@ -1053,6 +1064,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
   return {
     deactivateScrollMiniPlayer,
+    dismissCrossTabMiniPlayer,
     handleFullscreenButtonClick,
     handleScrollMiniControlsPointerMove,
     handleScrollMiniDragPointerDown,
@@ -1076,6 +1088,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     scrollMiniPlayerActive,
     scrollMiniPlayerAnimating,
     scrollMiniPlayerDetached,
+    scrollMiniPlayerDismissed,
     scrollMiniPlayerStyle,
     scrollMiniPlayPauseVisible,
     scrollMiniResizeCorner,

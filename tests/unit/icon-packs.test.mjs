@@ -44,6 +44,14 @@ test('resolves aliases, brands, filled bookmarks, and custom fallbacks', () => {
   assert.equal(resolveIconifyId(['fab', 'youtube'], 'remix'), 'simple-icons:youtube')
   assert.equal(resolveIconifyId(['fas', 'bookmark'], 'remix'), 'ri:bookmark-fill')
   assert.equal(resolveIconifyId(['far', 'bookmark'], 'remix'), 'ri:bookmark-line')
+  assert.equal(
+    resolveIconifyId(['fac', 'back-to-tab'], 'material'),
+    'material-symbols:back-to-tab-rounded'
+  )
+  assert.equal(
+    resolveIconifyId(['fac', 'back-to-tab'], 'remix'),
+    'ri:arrow-go-back-line'
+  )
   assert.equal(resolveIconifyId(['fac', 'unmapped-custom'], 'material'), 'otx:unmapped-custom')
 })
 

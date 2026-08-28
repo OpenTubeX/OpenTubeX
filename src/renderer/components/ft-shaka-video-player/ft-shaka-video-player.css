@@ -3703,6 +3703,11 @@
   isolation: isolate;
 }
 
+.ftVideoPlayer.scrollMiniPlayerDismissed {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .ftVideoPlayer.scrollMiniPlayerAnimating {
   position: relative;
   z-index: 150;
@@ -3744,6 +3749,7 @@
 }
 
 .scrollMiniScrollTop,
+.scrollMiniDismiss,
 .scrollMiniPlayPause,
 .scrollMiniVolume,
 .scrollMiniDragHandle,
@@ -3784,10 +3790,10 @@
   box-shadow: 0 0 3px rgb(255 255 255 / 50%);
 }
 
-.scrollMiniScrollTop {
+.scrollMiniScrollTop,
+.scrollMiniDismiss {
   position: absolute;
   top: 8px;
-  right: 8px;
   width: 28px;
   height: 28px;
   padding: 0;
@@ -3802,7 +3808,20 @@
   justify-content: center;
 }
 
-.scrollMiniScrollTop:hover {
+.scrollMiniScrollTop {
+  right: 8px;
+}
+
+.scrollMiniScrollTop-detached {
+  right: 44px;
+}
+
+.scrollMiniDismiss {
+  right: 8px;
+}
+
+.scrollMiniScrollTop:hover,
+.scrollMiniDismiss:hover {
   background: rgb(0 0 0 / 75%);
 }
 

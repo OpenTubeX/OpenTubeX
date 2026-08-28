@@ -39,6 +39,10 @@
     "ri": "external-link-line",
     "material": "open-in-new-rounded"
   },
+  "back-to-tab": {
+    "ri": "arrow-go-back-line",
+    "material": "back-to-tab-rounded"
+  },
   "bars": {
     "ri": "menu-line",
     "material": "menu-rounded"

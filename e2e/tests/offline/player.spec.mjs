@@ -756,6 +756,8 @@ test.describe('scroll mini player', () => {
     const player = page.locator('.ftVideoPlayer')
     await scrollBelowPlayer(player)
     await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player.locator('.scrollMiniScrollTop .ft-icon'))
+      .toHaveAttribute('data-icon', 'angle-up')
     await expect.poll(() => page.evaluate(() => window.scrollMiniPlayerAnimations.length)).toBe(1)
     await attachScreenshot('scroll mini player')
 
@@ -844,6 +846,14 @@ test.describe('scroll mini player', () => {
         'Return to video tab'
       )
       await expect(returnButton).toHaveAttribute('tabindex', '0')
+      await expect(returnButton.locator('.ft-icon'))
+        .toHaveAttribute('data-icon', 'back-to-tab')
+      const dismissButton = player.getByRole('button', { name: 'Hide mini player' })
+      await expect(dismissButton).toBeVisible()
+      expect(await dismissButton.evaluate(button => {
+        return button.getBoundingClientRect().left >
+          button.previousElementSibling.getBoundingClientRect().left
+      })).toBe(true)
       const floatingVideo = player.locator('video')
       await expect.poll(() => floatingVideo.evaluate(element => element.currentTime))
         .toBeGreaterThan(playbackTimeBeforeSwitch)
@@ -862,6 +872,41 @@ test.describe('scroll mini player', () => {
       await player.locator('.scrollMiniScrollTop').click()
       await expect(page.locator(`${activeTab} .ftVideoPlayer`)).toBeVisible()
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    })
+
+    test('hides the detached mini player until its video tab is revisited', async ({ app, page }) => {
+      await openDemoVideo({ app, page })
+      const player = page.locator('.ftVideoPlayer')
+      const video = player.locator('video')
+      const playbackTimeBeforeSwitch = await video.evaluate(element => element.currentTime)
+      const videoTab = page.locator('.tabBar .tab').first()
+
+      await page.locator('.tabBar .newTabButton').click()
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      await player.getByRole('button', { name: 'Hide mini player' }).click()
+
+      await expect(player).toHaveCSS('opacity', '0')
+      await expect(player).toHaveAttribute('aria-hidden', 'true')
+      await expect(player).toHaveAttribute('inert', '')
+      await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+      await expect.poll(() => video.evaluate(element => element.currentTime))
+        .toBeGreaterThan(playbackTimeBeforeSwitch)
+
+      await page.locator('.tabBar .newTabButton').click()
+      await expect(page.locator('.tabBar .tab')).toHaveCount(3)
+      await expect(player).toHaveCSS('opacity', '0')
+
+      await videoTab.click()
+      await expect(player).toBeVisible()
+      await expect(player).toHaveCSS('opacity', '1')
+      await expect(player).not.toHaveAttribute('inert', '')
+      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+      await expect(player.getByRole('button', { name: 'Hide mini player' })).toHaveCount(0)
+
+      await page.locator('.tabBar .tab').nth(1).click()
+      await expect(player).toBeVisible()
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      await expect(player.getByRole('button', { name: 'Hide mini player' })).toBeVisible()
     })
 
     test('does not show a second mini player after switching between watch tabs', async ({ app, page }) => {

@@ -47,6 +47,8 @@
       ref="container"
       class="ftVideoPlayer shaka-video-container"
       :data-tab-id="tabId"
+      :inert="scrollMiniPlayerDismissed"
+      :aria-hidden="scrollMiniPlayerDismissed ? 'true' : undefined"
       :class="{
         autoQualityUnavailable: !autoQualitySupported,
         fullWindow: fullWindowEnabled,
@@ -55,6 +57,7 @@
         sixteenByNine: (format === 'audio' || forceAspectRatio) && !fullWindowEnabled && !scrollMiniPlayerActive,
         scrollMiniPlayer: scrollMiniPlayerActive,
         scrollMiniPlayerAnimating,
+        scrollMiniPlayerDismissed,
         fullscreenMetadataOpen: showFullscreenMetadata,
         fullscreenTranscriptOpen: showFullscreenTranscript,
         fullscreenSponsorBlockOpen: showFullscreenSponsorBlock,
@@ -1183,13 +1186,29 @@
           type="button"
           :tabindex="scrollMiniPlayerDetached ? 0 : -1"
           class="scrollMiniScrollTop"
+          :class="{ 'scrollMiniScrollTop-detached': scrollMiniPlayerDetached }"
           :title="scrollMiniPlayerDetached
             ? $t('Video.Player.Scroll Mini Player.Return to Video Tab')
             : $t('Video.Player.Scroll Mini Player.Back to Top')"
           @click.stop.prevent="scrollMiniScrollToTop"
           @mousedown.stop.prevent
         >
-          <ft-icon :icon="['fas', 'angle-up']" />
+          <ft-icon
+            :icon="scrollMiniPlayerDetached
+              ? ['fac', 'back-to-tab']
+              : ['fas', 'angle-up']"
+          />
+        </button>
+        <button
+          v-if="scrollMiniPlayerDetached"
+          type="button"
+          class="scrollMiniDismiss"
+          :title="$t('Video.Player.Scroll Mini Player.Hide')"
+          :aria-label="$t('Video.Player.Scroll Mini Player.Hide')"
+          @click.stop.prevent="dismissCrossTabMiniPlayer"
+          @mousedown.stop.prevent
+        >
+          <ft-icon :icon="['fas', 'times']" />
         </button>
         <button
           type="button"
