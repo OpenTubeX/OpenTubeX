@@ -303,6 +303,7 @@
                   <button
                     v-if="section.allTabs.length > 0"
                     type="button"
+                    :disabled="section.allTabs.every(tab => tab.isUnloaded)"
                     @click="runAction('unload', section.allTabs.map(tab => tab.id))"
                   >
                     <FtIcon
@@ -368,16 +369,31 @@
                   <FtCheckboxList
                     class="tabSelection"
                     :model-value="selectedTabIds.has(tab.id) ? [tab.id] : []"
-                    :labels="[t('Tab Organizer.Select Tab', { title: tab.title })]"
+                    :labels="[t('Tab Organizer.Select Tab', { title: formatTabTitle(tab.title) })]"
                     :values="[tab.id]"
+                    @click.capture="handleTabSelectionClick($event, tab.id)"
                     @update:model-value="toggleTabSelection(tab.id, $event.includes(tab.id))"
                   />
+                  <span class="tabIcon">
+                    <img
+                      v-if="usableTabAvatarUrl(tab)"
+                      :src="usableTabAvatarUrl(tab)"
+                      alt=""
+                      draggable="false"
+                      @error="handleTabAvatarError(tab)"
+                    >
+                    <FtIcon
+                      v-else
+                      :icon="getTabPageIcon(tab) || ['fas', 'display']"
+                      aria-hidden="true"
+                    />
+                  </span>
                   <button
                     type="button"
                     class="tabIdentity"
                     @click="activateTab(tab.id)"
                   >
-                    <span>{{ tab.title }}</span>
+                    <span>{{ formatTabTitle(tab.title) }}</span>
                     <small>{{ tab.route.fullPath || tab.url }}</small>
                   </button>
                   <div class="tabIndicators">
@@ -389,7 +405,7 @@
                   <button
                     type="button"
                     class="iconButton"
-                    :aria-label="t('Tab Organizer.Close Tab', { title: tab.title })"
+                    :aria-label="t('Tab Organizer.Close Tab', { title: formatTabTitle(tab.title) })"
                     :title="t('Close')"
                     @click="runAction('close', [tab.id])"
                   >
@@ -431,8 +447,14 @@
                   :key="tab.id"
                   class="tabOrganizerRow closedTabRow"
                 >
+                  <span class="tabIcon">
+                    <FtIcon
+                      :icon="getTabPageIcon(tab) || ['fas', 'display']"
+                      aria-hidden="true"
+                    />
+                  </span>
                   <div class="tabIdentity">
-                    <span>{{ tab.title }}</span>
+                    <span>{{ formatTabTitle(tab.title) }}</span>
                     <small>{{ tab.route.fullPath || tab.url }}</small>
                   </div>
                   <button
@@ -469,6 +491,8 @@ import { useI18n } from 'vue-i18n'
 import { getTabAccentColor } from '../../constants/tabColors'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import store from '../../store/index'
+import { getTabAvatarUrl, getTabPageIcon } from '../../tabs/tabPreview'
+import { formatTabTitle } from '../../tabs/tabTitle'
 import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
 import FtSelect from '../FtSelect/FtSelect.vue'
@@ -489,12 +513,14 @@ const dragTargetGroupId = ref(undefined)
 const editingNameGroupId = ref(null)
 const editingGroupName = ref('')
 const editingColorGroupId = ref(null)
+const failedTabAvatarUrls = ref({})
 const dialogRef = useTemplateRef('dialogRef')
 const searchRef = useTemplateRef('searchRef')
 const scrollRef = useTemplateRef('scrollRef')
 const scrollContentRef = useTemplateRef('scrollContentRef')
 let lastActiveElement = null
 let resizeObserver = null
+let selectionAnchorId = null
 
 const tabs = computed(() => store.getters.getTabs)
 const groups = computed(() => store.getters.getTabGroups)
@@ -627,6 +653,18 @@ function matchesSearch(tab) {
   return haystack.includes(needle)
 }
 
+function usableTabAvatarUrl(tab) {
+  const avatarUrl = getTabAvatarUrl(tab)
+  return failedTabAvatarUrls.value[tab.id] === avatarUrl ? null : avatarUrl
+}
+
+function handleTabAvatarError(tab) {
+  failedTabAvatarUrls.value = {
+    ...failedTabAvatarUrls.value,
+    [tab.id]: getTabAvatarUrl(tab)
+  }
+}
+
 function close() {
   emit('close')
 }
@@ -642,7 +680,33 @@ function toggleTabSelection(tabId, checked) {
   store.dispatch('setTabSelection', [...next])
 }
 
+function handleTabSelectionClick(event, tabId) {
+  if (!event.shiftKey) {
+    selectionAnchorId = tabId
+    return
+  }
+
+  const displayedTabIds = displayedSections.value.flatMap(section => (
+    !section.isCollapsed || normalizedQuery.value.length > 0
+      ? section.tabs.map(tab => tab.id)
+      : []
+  ))
+  const anchorIndex = displayedTabIds.indexOf(selectionAnchorId)
+  const targetIndex = displayedTabIds.indexOf(tabId)
+  if (anchorIndex === -1 || targetIndex === -1) {
+    selectionAnchorId = tabId
+    return
+  }
+
+  event.preventDefault()
+  event.stopPropagation()
+  event.currentTarget.querySelector('input[type="checkbox"]')?.focus()
+  const [start, end] = [anchorIndex, targetIndex].sort((a, b) => a - b)
+  store.dispatch('setTabSelection', displayedTabIds.slice(start, end + 1))
+}
+
 function toggleAllTabsSelection() {
+  selectionAnchorId = null
   store.dispatch('setTabSelection', hasSelectedTabs.value ? [] : visibleTabs.value.map(tab => tab.id))
 }
 

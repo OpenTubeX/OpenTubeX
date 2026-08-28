@@ -139,9 +139,9 @@
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
-import packageDetails from '@root/package.json'
 import { getTabAccentColor } from '../../constants/tabColors'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from '../../tabs/tabPreview'
+import { formatTabTitle } from '../../tabs/tabTitle'
 
 const props = defineProps({
   tab: {
@@ -257,15 +257,7 @@ const tabStyle = computed(() => {
   return style
 })
 
-const displayTitle = computed(() => {
-  const title = props.tab.title
-  if (!title) return title
-  const suffix = ` - ${packageDetails.productName}`
-  if (title.endsWith(suffix)) {
-    return title.slice(0, -suffix.length)
-  }
-  return title
-})
+const displayTitle = computed(() => formatTabTitle(props.tab.title))
 
 const tooltipId = computed(() => `tab-tooltip-${props.tab.id}`)
 const tooltipPreviewAlt = computed(() => `${displayTitle.value} preview`)

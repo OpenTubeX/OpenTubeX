@@ -58,11 +58,14 @@
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex: 0 0 30px;
-  inline-size: 30px;
+  justify-content: flex-start;
+  flex: 0 0 auto;
+  gap: 6px;
+  min-inline-size: var(--fixed-tab-width, 100px);
+  max-inline-size: var(--fixed-tab-width, 200px);
   block-size: 30px;
-  padding: 0;
+  padding-inline: 10px;
+  padding-block: 0;
   border: 1px solid transparent;
   border-block-end: 0;
   border-radius: calc(6px * var(--ui-roundness)) calc(6px * var(--ui-roundness)) 0 0;
@@ -103,6 +106,8 @@
 .collapsedTabGroup.vertical {
   flex-basis: 30px;
   inline-size: calc(100% - 1px);
+  min-inline-size: 0;
+  max-inline-size: none;
   border-block-end: 1px solid transparent;
   border-radius: calc(6px * var(--ui-roundness));
 }
@@ -113,7 +118,18 @@
 }
 
 .collapsedTabGroup svg {
+  flex: 0 0 auto;
   font-size: 12px;
+}
+
+.collapsedTabGroupName {
+  color: var(--primary-text-color);
+  font-size: 12px;
+  line-height: 16px;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tabsScrollbar {
@@ -177,6 +193,10 @@
 
 .newTabIcon {
   font-size: 12px;
+}
+
+.tabBarActions {
+  display: contents;
 }
 
 /* ===== Bottom layout: fixed row on the bottom edge ===== */
@@ -250,14 +270,17 @@
 }
 /* stylelint-enable liberty/use-logical-spec */
 
-.tabBar.vertical .newTabButton,
-.tabBar.vertical .tabOrganizerButton {
-  align-self: stretch;
+.tabBar.vertical .tabBarActions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 2px;
   margin-inline: var(--tab-bar-inline-padding);
-  padding-block-end: 10px;
 }
 
+.tabBar.vertical .newTabButton,
 .tabBar.vertical .tabOrganizerButton {
+  flex: 1;
+  margin: 0;
   padding-block: 6px;
 }
 

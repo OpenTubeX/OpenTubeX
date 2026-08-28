@@ -2524,22 +2524,27 @@ export class TabManager {
         console.error('Failed to refresh preview before unloading tab:', error)
       })
 
-      const nextTabId = this.activeTabId !== tabId && this.tabs.has(this.activeTabId)
-        ? this.activeTabId
-        : this._getNeighborTabId(tabId, true)
-      if (nextTabId) {
-        this._deferredUnloadTabIds.add(tabId)
-        this.bridge.send(IpcChannels.TABS_EXIT_FULLSCREEN, tabId)
-        if (this.activeTabId === tabId) {
-          this.activeTabId = null
-          if (this._prepareNeighborActivation(nextTabId)) {
-            this.activateTab(nextTabId)
+      // A bulk unload may have already activated and presented the replacement
+      // while the preview refresh was in flight. Only defer when this tab is
+      // still presented, otherwise no later presentation event would finalize it.
+      if (tab.id === this.presentedTabId) {
+        const nextTabId = this.activeTabId !== tabId && this.tabs.has(this.activeTabId)
+          ? this.activeTabId
+          : this._getNeighborTabId(tabId, true)
+        if (nextTabId) {
+          this._deferredUnloadTabIds.add(tabId)
+          this.bridge.send(IpcChannels.TABS_EXIT_FULLSCREEN, tabId)
+          if (this.activeTabId === tabId) {
+            this.activeTabId = null
+            if (this._prepareNeighborActivation(nextTabId)) {
+              this.activateTab(nextTabId)
+            }
           }
+          this._saveSession()
+          return true
         }
-        this._saveSession()
         return true
       }
-      return true
     }
 
     if (tab.id === this.presentedTabId) {
