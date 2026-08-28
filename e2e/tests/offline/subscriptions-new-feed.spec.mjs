@@ -147,6 +147,7 @@ test.describe('new subscriptions feed', () => {
 
     const showTabbedView = page.getByRole('button', { name: 'Show tabbed view' })
     await expect(showTabbedView).toHaveAttribute('aria-pressed', 'false')
+    await expect(showTabbedView.locator('[data-icon="horizontal-tabs"]')).toBeVisible()
     await showTabbedView.click()
 
     const newContentTabs = page.getByRole('tablist', { name: 'New content tabs' })
