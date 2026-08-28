@@ -7,7 +7,7 @@
 - Every nested element that can show a scrollbar through `overflow: auto`, `overflow: scroll`, `overflow-x`, or `overflow-y` must use the app's `v-overlay-scrollbars` directive so it matches the active theme and scrollbar settings. Treat native nested scrollbars as a bug unless the element is explicitly documented as an exception; whenever adding or changing scrollable CSS, verify the corresponding template element has the directive.
 - If the request somehow involves other repos (e.g. Website, APT, RPM, Flatpak, AUR, ...) you can find them in the parent folder.
 - Before considering work done here, you need to reproduce it with the test suite (for bugfixes), and verify that your fix/feature works (unless otherwise told to do so or when it makes no sense to do a test for the change).
-- New icons must be registered in the icon registry. Custom icons must also provide mappings for every currently supported icon pack: Material and Remix.
+- New icons must be registered in the icon registry and mapped for every currently supported icon pack: Material and Remix. If neither pack has a suitable glyph, a raw custom icon may be used directly without a registry entry or pack mappings.
 - For icon-pack mapping work (#388): get human confirmation that remapped glyphs fit visually in Material and Remix before considering the mapping done.
 - Never use the "FreeTube" name for promotion of the project (see discussion #391 for details when in doubt).
 - When adding or changing translatable strings, update only the English (`en-US`) and German (`de-DE`) locales. Weblate handles all other translations.

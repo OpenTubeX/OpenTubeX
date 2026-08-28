@@ -17,6 +17,42 @@ const WATCH_PAGE_SEED = {
   ytDlpPlaybackEngineDefaultMigration: true
 }
 
+async function scrollPlayerMenuToBottom(menu) {
+  await menu.evaluate((element) => {
+    element.style.blockSize = '180px'
+    element.style.maxBlockSize = '180px'
+    element.style.gridTemplateColumns = '1fr'
+    element.scrollTop = element.scrollHeight
+  })
+  await expect.poll(() => menu.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+}
+
+async function expectPlayerMenuScrollState(menu, atEnd = true) {
+  await expect.poll(() => menu.evaluate((element, expectAtEnd) => {
+    const visibleButtons = [...element.children].filter(child => (
+      child instanceof HTMLButtonElement && !child.classList.contains('shaka-hidden')
+    ))
+    const contentEnd = visibleButtons.at(-1)
+    const viewportBounds = element.getBoundingClientRect()
+    const contentEndBounds = contentEnd.getBoundingClientRect()
+    const maximumScrollTop = Math.max(
+      0,
+      element.scrollTop + contentEndBounds.bottom - viewportBounds.bottom +
+        Number.parseFloat(getComputedStyle(contentEnd).marginBlockEnd) +
+        Number.parseFloat(getComputedStyle(element).paddingBottom)
+    )
+    const hasVerticalOverflow = maximumScrollTop > 1
+    const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+    return {
+      scrollPositionValid: expectAtEnd
+        ? Math.abs(element.scrollTop - maximumScrollTop) <= 1
+        : element.scrollTop <= maximumScrollTop + 1,
+      scrollbarMatchesOverflow:
+        scrollbar?.classList.contains('os-scrollbar-visible') === hasVerticalOverflow,
+    }
+  }, atEnd)).toEqual({ scrollPositionValid: true, scrollbarMatchesOverflow: true })
+}
+
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
 test('offers a YouTube link action in the watch tab context menu', async ({ app, page }) => {
@@ -100,6 +136,202 @@ for (const { name, options, expectedCount } of [
       .toHaveCount(expectedCount)
   })
 }
+
+test('repeats an A-B range and manages it from the player menu', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  const player = page.locator('.ftVideoPlayer')
+
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+  await video.evaluate((element) => {
+    element.pause()
+    element.currentTime = 5.25
+  })
+
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+  await player.getByRole('button', { name: /^Set repeat start/ }).click()
+
+  await expect(player.locator('.ab-repeat-strip')).toHaveCount(0)
+  const abRepeatPopup = player.locator('.valueChangePopup')
+  await expect(abRepeatPopup.locator('.valueChangeCustomIcon')).toBeVisible()
+  await expect(abRepeatPopup).toHaveCSS('white-space', 'nowrap')
+  await expect.poll(() => abRepeatPopup.locator(':scope > span:last-child').evaluate((element) => {
+    const range = document.createRange()
+    range.selectNodeContents(element)
+    return [...range.getClientRects()].filter(rect => rect.width > 0).length
+  })).toBe(1)
+  await expect(player.locator('.abRepeatMarkerA')).toHaveAttribute(
+    'aria-label',
+    'Adjust point A, currently 0:05.25'
+  )
+
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+  const pendingRangeClearAction = player.getByRole('button', { name: /^Clear A-B repeat range/ })
+  await expect(pendingRangeClearAction).toBeVisible()
+  await pendingRangeClearAction.click()
+  await expect(player.locator('.shaka-overflow-menu:not(.shaka-hidden)')).toBeVisible()
+  await expect(player.locator('.abRepeatMarker')).toHaveCount(0)
+  await player.getByRole('button', { name: /^Set repeat start/ }).click()
+
+  await video.evaluate((element) => { element.currentTime = 4 })
+  await page.keyboard.press('Shift+B')
+  await expect(player.locator('.valueChangePopup')).toContainText('Point B must be after point A.')
+  await expect(player.locator('.abRepeatMarker')).toHaveCount(1)
+  await expect(player.locator('.abRepeatMarkerB')).toHaveCount(0)
+
+  await video.evaluate((element) => { element.currentTime = 6.25 })
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+  await expect(player.getByRole('button', { name: /^Clear A-B repeat range/ })).toBeVisible()
+  await expect(player.locator('.ab-repeat-button .shaka-current-selection-span'))
+    .toHaveText('A 0:05.25')
+  await expect(player.getByRole('button', { name: /^Set repeat end/ })).toBeVisible()
+  const overflowMenu = player.locator('.shaka-overflow-menu:not(.shaka-hidden)')
+  const loopAction = overflowMenu.locator('.loop-button')
+  const abRepeatAction = overflowMenu.locator('.ab-repeat-button')
+  await expect(loopAction).toBeVisible()
+  await scrollPlayerMenuToBottom(overflowMenu)
+  await page.keyboard.press('Shift+B')
+  await expect(overflowMenu).toBeVisible()
+  await expect(loopAction).not.toBeVisible()
+  await expectPlayerMenuScrollState(overflowMenu)
+
+  const [loopIconPath, abRepeatIconPath, clearIconPath, sponsorBlockClearIconPath] = await Promise.all([
+    loopAction.locator('svg path').getAttribute('d'),
+    abRepeatAction.locator('svg path').getAttribute('d'),
+    overflowMenu.locator('.ab-repeat-clear-button svg path').getAttribute('d'),
+    player.locator('.sponsorblock-clear-button svg path').getAttribute('d'),
+  ])
+  expect(abRepeatIconPath).not.toBe(loopIconPath)
+  expect(clearIconPath).not.toBe(sponsorBlockClearIconPath)
+
+  await overflowMenu.evaluate((element) => {
+    element.style.blockSize = ''
+    element.style.maxBlockSize = ''
+    element.style.gridTemplateColumns = ''
+    element.scrollTop = 0
+  })
+
+  await abRepeatAction.click()
+  await expect(overflowMenu).toBeVisible()
+  await expect(abRepeatAction).toHaveAttribute('aria-pressed', 'false')
+  await expect(abRepeatAction).toHaveAccessibleName('Resume A-B repeat')
+  await expect(loopAction).not.toBeVisible()
+
+  await abRepeatAction.click()
+  await expect(overflowMenu).toBeVisible()
+  await expect(abRepeatAction).toHaveAttribute('aria-pressed', 'true')
+  await expect(abRepeatAction).toHaveAccessibleName('Pause A-B repeat')
+  await expect(loopAction).not.toBeVisible()
+  await page.keyboard.press('Escape')
+
+  const markers = player.locator('.abRepeatMarker')
+  await expect(markers).toHaveCount(2)
+  await expect(player.locator('.abRepeatRange')).toHaveCount(1)
+  const seekBar = player.locator('.shaka-seek-bar-container')
+  const markerPositions = await markers.evaluateAll((elements) => elements.map(element => {
+    const bounds = element.getBoundingClientRect()
+    const seekBounds = element.closest('.shaka-seek-bar-container').getBoundingClientRect()
+    return (bounds.left + bounds.width / 2 - seekBounds.left) / seekBounds.width
+  }))
+  expect(markerPositions[0]).toBeCloseTo(5.25 / 30, 2)
+  expect(markerPositions[1]).toBeCloseTo(6.25 / 30, 2)
+  await expect(seekBar).toBeVisible()
+
+  const endHandle = player.locator('.abRepeatMarkerB')
+  const [seekBounds, endHandleBounds] = await Promise.all([
+    seekBar.boundingBox(),
+    endHandle.boundingBox(),
+  ])
+  await page.mouse.move(
+    endHandleBounds.x + endHandleBounds.width / 2,
+    endHandleBounds.y + endHandleBounds.height / 2
+  )
+  await page.mouse.down()
+  await page.mouse.move(
+    seekBounds.x + seekBounds.width * (6.5 / 30),
+    seekBounds.y + seekBounds.height / 2
+  )
+  await page.mouse.up()
+  await expect(endHandle).toHaveAttribute('aria-label', /Adjust point B, currently 0:06\.5/)
+
+  await video.evaluate((element) => { element.currentTime = 8 })
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(5.25, 2)
+
+  await video.evaluate(async (element) => {
+    const currentTime = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime')
+    Object.defineProperty(element, 'currentTime', {
+      configurable: true,
+      get: currentTime.get,
+      set(value) {
+        if (Math.abs(value - 5.25) < 0.001 && currentTime.get.call(this) > 5.25) {
+          window.__abRepeatBoundaryTime = currentTime.get.call(this)
+        }
+        currentTime.set.call(this, value)
+      }
+    })
+    element.currentTime = 5.75
+    element.playbackRate = 2
+    await element.play()
+  })
+
+  await expect.poll(() => page.evaluate(() => window.__abRepeatBoundaryTime ?? null)).not.toBeNull()
+  const boundaryTime = await page.evaluate(() => window.__abRepeatBoundaryTime)
+  expect(boundaryTime).toBeGreaterThan(6.485)
+  expect(boundaryTime).toBeLessThanOrEqual(6.5)
+
+  await video.evaluate(element => element.pause())
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+  const clearAction = player.getByRole('button', { name: /^Clear A-B repeat range/ })
+  await expect(clearAction).toBeVisible()
+  const clearMenu = player.locator('.shaka-overflow-menu:not(.shaka-hidden)')
+  await scrollPlayerMenuToBottom(clearMenu)
+  await page.keyboard.press('Shift+X')
+  await expect(player.locator('.shaka-overflow-menu:not(.shaka-hidden)')).toBeVisible()
+  await expect(clearAction).not.toBeVisible()
+  await expect(player.getByRole('button', { name: /^Set repeat start/ })).toBeVisible()
+  await expect(clearMenu.locator('.loop-button')).toBeVisible()
+  await expect(player.locator('.abRepeatMarker')).toHaveCount(0)
+  await expect(player.locator('.abRepeatRange')).toHaveCount(0)
+  await expectPlayerMenuScrollState(clearMenu, false)
+
+  await player.getByRole('button', { name: /^Set repeat start/ }).click()
+  await expect(player.locator('.abRepeatMarker')).toHaveCount(1)
+  await openMockedVideo(page, 'aqz-KE-bpKQ')
+  await expect(player.locator('.abRepeatMarker')).toHaveCount(0)
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+  await expect(player.getByRole('button', { name: /^Set repeat start/ })).toBeVisible()
+  await expect(player.getByRole('button', { name: /^Clear A-B repeat range/ })).not.toBeVisible()
+})
+
+test.describe('with A-B repeat disabled', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...WATCH_PAGE_SEED,
+        disableAbRepeat: true
+      }
+    }
+  })
+
+  test('removes the control and ignores its shortcuts', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const player = page.locator('.ftVideoPlayer')
+
+    await player.hover()
+    await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+    await expect(player.locator('.ab-repeat-button')).toHaveCount(0)
+    await expect(player.locator('.ab-repeat-clear-button')).toHaveCount(0)
+    await page.keyboard.press('Escape')
+    await page.keyboard.press('Shift+A')
+    await expect(player.locator('.abRepeatMarker')).toHaveCount(0)
+  })
+})
 
 test.describe('fullscreen ambient mode', () => {
   test.use({

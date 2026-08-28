@@ -694,6 +694,19 @@ test.describe('settings', () => {
     await expect(hideTranslationButtons).toBeDisabled()
   })
 
+  test('disables A-B repeat from Distraction Free settings', async ({ page }) => {
+    const focus = await goToSettingsSection(page, 'focus')
+    const disableAbRepeat = focus.getByRole('checkbox', { name: 'Disable A-B Repeat' })
+
+    await expect(disableAbRepeat).not.toBeChecked()
+    await disableAbRepeat.locator('..').locator('label.switch-label').click()
+    await expect(disableAbRepeat).toBeChecked()
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getDisableAbRepeat
+    })).toBe(true)
+  })
+
   test('adds and removes languages that comment translation should ignore', async ({ page }) => {
     const general = await goToSettingsSection(page, 'general')
     const enableTranslations = general.getByRole('checkbox', {

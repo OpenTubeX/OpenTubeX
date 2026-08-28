@@ -1,5 +1,33 @@
 import shaka from 'shaka-player'
 
+import { scheduleOverflowMenuScrollClamp } from './overflowMenu'
+
+/**
+ * @typedef {{
+ *   isEnabled: () => boolean,
+ *   isVisible?: (location: 'controls' | 'context' | 'overflow') => boolean,
+ *   subscribe?: (callback: () => void) => () => void,
+ *   toggle: () => void,
+ * }} LoopButtonContext
+ */
+
+/** @type {WeakMap<shaka.ui.Controls, LoopButtonContext>} */
+const loopButtonContexts = new WeakMap()
+
+/**
+ * @param {shaka.ui.Controls} controls
+ * @param {LoopButtonContext} context
+ * @returns {() => void}
+ */
+export function setLoopButtonContext(controls, context) {
+  loopButtonContexts.set(controls, context)
+  return () => {
+    if (loopButtonContexts.get(controls) === context) {
+      loopButtonContexts.delete(controls)
+    }
+  }
+}
+
 export class LoopButton extends shaka.ui.Element {
   /**
    * @param {HTMLElement} parent
@@ -9,14 +37,25 @@ export class LoopButton extends shaka.ui.Element {
     super(parent, controls)
 
     /** @private */
-    this.loopEnabled_ = this.video.loop
+    this.context_ = loopButtonContexts.get(controls) ?? null
+
+    /** @private @type {'controls' | 'context' | 'overflow'} */
+    this.location_ = parent.classList.contains('shaka-overflow-menu')
+      ? 'overflow'
+      : parent.classList.contains('shaka-context-menu') ? 'context' : 'controls'
+
+    /** @private */
+    this.stopStateWatch_ = this.context_?.subscribe?.(() => this.updateState_()) ?? null
+
+    /** @private */
+    this.loopEnabled_ = this.isLoopEnabled_()
+
+    /** @private */
+    this.loopVisible_ = this.isLoopVisible_()
 
     /** @private */
     this.statePoller_ = window.setInterval(() => {
-      if (this.loopEnabled_ !== this.video.loop) {
-        this.loopEnabled_ = this.video.loop
-        this.updateLocalisedStrings_()
-      }
+      this.updateState_()
     }, 250)
 
     /** @private */
@@ -46,8 +85,12 @@ export class LoopButton extends shaka.ui.Element {
     this.parent.appendChild(this.button_)
 
     this.eventManager.listen(this.button_, 'click', () => {
-      this.video.loop = !this.video.loop
-      this.loopEnabled_ = this.video.loop
+      if (this.context_) {
+        this.context_.toggle()
+      } else {
+        this.video.loop = !this.video.loop
+      }
+      this.loopEnabled_ = this.isLoopEnabled_()
       this.updateLocalisedStrings_()
     })
 
@@ -87,26 +130,57 @@ export class LoopButton extends shaka.ui.Element {
 
   release() {
     window.clearInterval(this.statePoller_)
+    this.stopStateWatch_?.()
     super.release()
+  }
+
+  /**
+   * @returns {boolean}
+   * @private
+   */
+  isLoopEnabled_() {
+    return this.context_?.isEnabled() ?? this.video.loop
+  }
+
+  /**
+   * @returns {boolean}
+   * @private
+   */
+  isLoopVisible_() {
+    return !this.player.isLive() && !this.isSubMenuOpened &&
+      (this.context_?.isVisible?.(this.location_) ?? true)
+  }
+
+  /** @private */
+  updateState_() {
+    const loopEnabled = this.isLoopEnabled_()
+    if (this.loopEnabled_ !== loopEnabled) {
+      this.loopEnabled_ = loopEnabled
+      this.updateLocalisedStrings_()
+    }
+
+    this.updateVisibility_()
   }
 
   /** @private */
   updateLocalisedStrings_() {
     this.nameSpan_.textContent = this.localization.resolve('LOOP')
-    this.currentState_.textContent = this.localization.resolve(this.video.loop ? 'ON' : 'OFF')
-    this.icon_.use(this.video.loop
+    this.currentState_.textContent = this.localization.resolve(this.loopEnabled_ ? 'ON' : 'OFF')
+    this.icon_.use(this.loopEnabled_
       ? shaka.ui.Enums.MaterialDesignSVGIcons.UNLOOP
       : shaka.ui.Enums.MaterialDesignSVGIcons.LOOP)
-    this.button_.ariaLabel = this.localization.resolve(this.video.loop ? 'EXIT_LOOP_MODE' : 'ENTER_LOOP_MODE')
-    this.button_.ariaPressed = this.video.loop ? 'true' : 'false'
+    this.button_.ariaLabel = this.localization.resolve(this.loopEnabled_ ? 'EXIT_LOOP_MODE' : 'ENTER_LOOP_MODE')
+    this.button_.ariaPressed = this.loopEnabled_ ? 'true' : 'false'
   }
 
   /** @private */
   updateVisibility_() {
-    if (this.player.isLive() || this.isSubMenuOpened) {
-      this.button_.classList.add('shaka-hidden')
-    } else {
-      this.button_.classList.remove('shaka-hidden')
+    const loopVisible = this.isLoopVisible_()
+    this.button_.classList.toggle('shaka-hidden', !loopVisible)
+
+    if (this.loopVisible_ && !loopVisible && !this.player.isLive() && !this.isSubMenuOpened) {
+      scheduleOverflowMenuScrollClamp(this.parent)
     }
+    this.loopVisible_ = loopVisible
   }
 }

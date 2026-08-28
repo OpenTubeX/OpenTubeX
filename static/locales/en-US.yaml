@@ -1241,6 +1241,7 @@ Settings:
     Hide Sharing Actions: Hide Sharing Actions
     Hide Videos on Watch: Hide Videos on Watch
     Hide Chapters: Hide Chapters
+    Disable A-B Repeat: Disable A-B Repeat
     Hide End-Screen Annotations: Hide End-Screen Annotations
     Hide Paid Promotion Badge: Hide Paid Promotion Badge
     Hide Channels: Hide Videos From Channels
@@ -1894,6 +1895,21 @@ Video:
       Remaining: '{time} remaining'
       Cancel timer: Cancel timer
       Timer ended: Sleep timer ended
+    A-B Repeat:
+      A-B Repeat: A-B repeat
+      On: 'On'
+      Off: 'Off'
+      Point A: Point A
+      Point B: Point B
+      Set Repeat Start: Set repeat start
+      Set Repeat End: Set repeat end
+      Pause Repeat: Pause A-B repeat
+      Resume Repeat: Resume A-B repeat
+      Adjust Point: 'Adjust point {point}, currently {timestamp}'
+      Clear Range: Clear A-B repeat range
+      End Before Start: Point B must be after point A.
+      Outside Duration: The timestamp must be within the video.
+      Cleared: A-B repeat cleared
     Zoom:
       Zoom: Zoom
       Off: 'Off'
@@ -2514,6 +2530,9 @@ KeyboardShortcutPrompt:
   Increase Video Speed: 'Increase video speed based on Video Playback Rate Interval'
   Toggle Normal Playback Speed: Toggle between 1x speed and the previous playback speed
   Toggle Skip Silence: Toggle skip silence
+  Set A-B Repeat Point A: Set A-B repeat point A
+  Set A-B Repeat Point B: Set A-B repeat point B
+  Clear A-B Repeat: Clear A-B repeat
   Full Window: Toggle full window
   Theatre Mode: Toggle theater mode
   Take Screenshot: Take screenshot

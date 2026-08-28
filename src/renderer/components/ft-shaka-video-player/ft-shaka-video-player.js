@@ -9,6 +9,11 @@ import { KeyboardShortcuts } from '../../../constants'
 import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { AmbientModeButton } from './player-components/AmbientModeButton'
+import {
+  AB_REPEAT_ICON,
+  AbRepeatControl,
+  setAbRepeatContext,
+} from './player-components/AbRepeatControl'
 import { AudioTrackSelection } from './player-components/AudioTrackSelection'
 import { CaptionSelection } from './player-components/CaptionSelection'
 import { CaptionToggleButton, CLOSED_CAPTIONS_OUTLINED } from './player-components/CaptionToggleButton'
@@ -16,7 +21,7 @@ import { ChapterOverlayButton } from './player-components/ChapterOverlayButton'
 import { CopyVideoUrlButton, setCopyVideoUrlContext } from './player-components/CopyVideoUrlButton'
 import { FullWindowButton } from './player-components/FullWindowButton'
 import { LegacyQualitySelection } from './player-components/LegacyQualitySelection'
-import { LoopButton } from './player-components/LoopButton'
+import { LoopButton, setLoopButtonContext } from './player-components/LoopButton'
 import { QuickPlaybackRateBar, setQuickPlaybackRateBarContext } from './player-components/QuickPlaybackRateBar'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { SkipSilenceButton } from './player-components/SkipSilenceButton'
@@ -82,6 +87,13 @@ import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotio
 import { resolveSponsorBlockEnterTarget, resolveSponsorBlockEnterTargets } from '../../helpers/player/sponsorBlockShortcut'
 import { createSponsorBlockMuteController } from '../../helpers/player/sponsorBlockMute'
 import { findSponsorBlockSeekBarSegment } from '../../helpers/player/sponsorBlockSeekBar'
+import {
+  AbRepeatValidation,
+  formatAbRepeatTimestamp,
+  getAbRepeatBoundaryDelay,
+  isCompleteAbRepeatRange,
+  validateAbRepeatRange,
+} from '../../helpers/player/abRepeat'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { getSponsorBlockContributionStats, voteOnSponsorBlockSegment } from '../../helpers/sponsorblock'
 import {
@@ -105,12 +117,16 @@ import WatchVideoChapters from '../WatchVideoChapters/WatchVideoChapters.vue'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 /** @typedef {import('../../helpers/sponsorblock').SponsorBlockCategory} SponsorBlockCategory */
+/** @typedef {string | { path: string, viewBox: string }} ValueChangeIcon */
 
 const SPONSORBLOCK_HIGHLIGHT_LABEL_PLAYBACK_MS = 5000
 const SPONSORBLOCK_SEGMENT_START_TOLERANCE_SECONDS = 0.1
 const SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS = 150
 const SPONSORBLOCK_SKIP_POLL_INTERVAL_MS = 4
 const SPONSORBLOCK_TERMINAL_OUTRO_TOLERANCE_SECONDS = 1
+const AB_REPEAT_MIN_RANGE_SECONDS = 0.05
+const AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS = 0.012
+const AB_REPEAT_VALUE_CHANGE_ICON = AB_REPEAT_ICON
 const SPONSORBLOCK_NOT_FOUND_REFETCH_RECENT_VIDEO_AGE_MS = 24 * 60 * 60 * 1000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_MIN_DELAY_MS = 10000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_MAX_DELAY_MS = 40000
@@ -3580,6 +3596,335 @@ export default defineComponent({
 
     // #endregion video zoom panning
 
+    // #region A-B repeat
+
+    const abRepeatStart = ref(null)
+    const abRepeatEnd = ref(null)
+    const abRepeatEnabled = ref(false)
+    const abRepeatDuration = ref(Number.POSITIVE_INFINITY)
+    const disableAbRepeat = computed(() => store.getters.getDisableAbRepeat)
+    const abRepeatValidation = computed(() => validateAbRepeatRange(
+      abRepeatStart.value,
+      abRepeatEnd.value,
+      abRepeatDuration.value
+    ))
+    const abRepeatAvailable = computed(() => isCompleteAbRepeatRange(
+      abRepeatStart.value,
+      abRepeatEnd.value,
+      abRepeatDuration.value
+    ))
+    /**
+     * @param {string | null} validation
+     * @returns {string}
+     */
+    function getAbRepeatValidationMessage(validation) {
+      switch (validation) {
+        case AbRepeatValidation.END_NOT_AFTER_START:
+          return t('Video.Player.A-B Repeat.End Before Start')
+        case AbRepeatValidation.OUTSIDE_DURATION:
+          return t('Video.Player.A-B Repeat.Outside Duration')
+        default:
+          return ''
+      }
+    }
+    const abRepeatValidationMessage = computed(() => (
+      getAbRepeatValidationMessage(abRepeatValidation.value)
+    ))
+
+    let abRepeatBoundaryTimeout = null
+    let abRepeatDragCleanup = null
+
+    function clearAbRepeatBoundarySchedule() {
+      clearTimeout(abRepeatBoundaryTimeout)
+      abRepeatBoundaryTimeout = null
+    }
+
+    /**
+     * @param {'start' | 'end'} point
+     * @param {number} value
+     * @returns {number}
+     */
+    function clampAbRepeatBoundary(point, value) {
+      const seekRange = player?.seekRange()
+      const rangeStart = Number.isFinite(seekRange?.start) ? seekRange.start : 0
+      const rangeEnd = Number.isFinite(seekRange?.end) ? seekRange.end : getAbRepeatDuration()
+
+      if (point === 'start') {
+        const latestStart = abRepeatEnd.value === null
+          ? rangeEnd
+          : abRepeatEnd.value - AB_REPEAT_MIN_RANGE_SECONDS
+        return Math.min(Math.max(value, rangeStart), Math.max(rangeStart, latestStart))
+      }
+
+      const earliestEnd = abRepeatStart.value === null
+        ? rangeStart
+        : abRepeatStart.value + AB_REPEAT_MIN_RANGE_SECONDS
+      return Math.max(Math.min(value, rangeEnd), Math.min(rangeEnd, earliestEnd))
+    }
+
+    /**
+     * @param {'start' | 'end'} point
+     * @param {number} clientX
+     * @param {HTMLElement} seekBar
+     */
+    function setAbRepeatBoundaryFromPointer(point, clientX, seekBar) {
+      const bounds = seekBar.getBoundingClientRect()
+      const seekRange = player?.seekRange()
+      if (!seekRange || bounds.width <= 0) {
+        return
+      }
+
+      const position = Math.min(Math.max((clientX - bounds.left) / bounds.width, 0), 1)
+      const value = seekRange.start + position * (seekRange.end - seekRange.start)
+      setAbRepeatBoundary(point, clampAbRepeatBoundary(point, value))
+    }
+
+    /**
+     * @param {'start' | 'end'} point
+     * @param {PointerEvent} event
+     */
+    function startAbRepeatMarkerDrag(point, event) {
+      const seekBar = container.value?.querySelector('.shaka-seek-bar-container')
+      if (!(seekBar instanceof HTMLElement)) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+      abRepeatDragCleanup?.()
+
+      const pointerId = event.pointerId
+      let latestClientX = event.clientX
+      let updateFrame = null
+
+      const applyPendingPosition = () => {
+        updateFrame = null
+        setAbRepeatBoundaryFromPointer(point, latestClientX, seekBar)
+      }
+      const queuePosition = (clientX) => {
+        latestClientX = clientX
+        if (updateFrame === null) {
+          updateFrame = requestAnimationFrame(applyPendingPosition)
+        }
+      }
+      const handlePointerMove = (moveEvent) => {
+        if (moveEvent.pointerId !== pointerId) {
+          return
+        }
+        moveEvent.preventDefault()
+        queuePosition(moveEvent.clientX)
+      }
+      const cleanup = () => {
+        window.removeEventListener('pointermove', handlePointerMove)
+        window.removeEventListener('pointerup', handlePointerEnd)
+        window.removeEventListener('pointercancel', handlePointerEnd)
+        if (updateFrame !== null) {
+          cancelAnimationFrame(updateFrame)
+          updateFrame = null
+        }
+        container.value?.classList.remove('abRepeatDragging')
+        abRepeatDragCleanup = null
+      }
+      const handlePointerEnd = (endEvent) => {
+        if (endEvent.pointerId !== pointerId) {
+          return
+        }
+        setAbRepeatBoundaryFromPointer(point, endEvent.clientX, seekBar)
+        cleanup()
+      }
+
+      abRepeatDragCleanup = cleanup
+      container.value?.classList.add('abRepeatDragging')
+      window.addEventListener('pointermove', handlePointerMove, { passive: false })
+      window.addEventListener('pointerup', handlePointerEnd)
+      window.addEventListener('pointercancel', handlePointerEnd)
+    }
+
+    /**
+     * @param {'start' | 'end'} point
+     * @param {KeyboardEvent} event
+     */
+    function handleAbRepeatMarkerKeydown(point, event) {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+      const currentValue = point === 'start' ? abRepeatStart.value : abRepeatEnd.value
+      if (currentValue === null) {
+        return
+      }
+
+      const direction = event.key === 'ArrowLeft' ? -1 : 1
+      const step = event.shiftKey ? 1 : 0.1
+      setAbRepeatBoundary(point, clampAbRepeatBoundary(point, currentValue + direction * step))
+      requestAnimationFrame(() => {
+        container.value?.querySelector(`.abRepeatMarker${point === 'start' ? 'A' : 'B'}`)?.focus()
+      })
+    }
+
+    function getAbRepeatDuration() {
+      const duration = video.value?.duration
+      return Number.isFinite(duration) && duration >= 0
+        ? duration
+        : Number.POSITIVE_INFINITY
+    }
+
+    function hasValidAbRepeatRange() {
+      return abRepeatAvailable.value
+    }
+
+    function repeatAbRangeFromStart() {
+      const videoElement = video.value
+      if (!videoElement || !hasValidAbRepeatRange()) {
+        return
+      }
+
+      clearAbRepeatBoundarySchedule()
+      videoElement.currentTime = abRepeatStart.value
+    }
+
+    function checkAbRepeatBoundary() {
+      clearAbRepeatBoundarySchedule()
+      const videoElement = video.value
+      if (!videoElement || !abRepeatEnabled.value || !hasValidAbRepeatRange()) {
+        return
+      }
+
+      if (
+        videoElement.currentTime < abRepeatStart.value - AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS ||
+        videoElement.currentTime >= abRepeatEnd.value - AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS
+      ) {
+        repeatAbRangeFromStart()
+        return
+      }
+
+      scheduleAbRepeatBoundary()
+    }
+
+    function scheduleAbRepeatBoundary() {
+      clearAbRepeatBoundarySchedule()
+
+      const videoElement = video.value
+      if (
+        !videoElement ||
+        videoElement.paused ||
+        videoElement.seeking ||
+        !abRepeatEnabled.value ||
+        !hasValidAbRepeatRange()
+      ) {
+        return
+      }
+
+      if (videoElement.currentTime < abRepeatStart.value || videoElement.currentTime >= abRepeatEnd.value) {
+        repeatAbRangeFromStart()
+        return
+      }
+
+      const delay = getAbRepeatBoundaryDelay(
+        videoElement.currentTime,
+        abRepeatEnd.value,
+        videoElement.playbackRate
+      )
+
+      abRepeatBoundaryTimeout = setTimeout(checkAbRepeatBoundary, Math.max(4, delay))
+    }
+
+    /**
+     * @param {'start' | 'end'} point
+     * @param {number | null} value
+     * @returns {string | null}
+     */
+    function setAbRepeatBoundary(point, value) {
+      if (disableAbRepeat.value) {
+        return null
+      }
+
+      const nextStart = point === 'start' ? value : abRepeatStart.value
+      const nextEnd = point === 'end' ? value : abRepeatEnd.value
+      const validation = validateAbRepeatRange(nextStart, nextEnd, abRepeatDuration.value)
+      if (validation !== null) {
+        return validation
+      }
+
+      const hadValidRange = hasValidAbRepeatRange()
+      if (point === 'start') {
+        abRepeatStart.value = value
+      } else {
+        abRepeatEnd.value = value
+      }
+
+      const validRange = hasValidAbRepeatRange()
+      if (!validRange) {
+        abRepeatEnabled.value = false
+      } else if (!hadValidRange) {
+        abRepeatEnabled.value = true
+      }
+      if (validRange && video.value) {
+        video.value.loop = false
+      }
+
+      refreshAbRepeatMarkers()
+      scheduleAbRepeatBoundary()
+      return null
+    }
+
+    /** @param {'start' | 'end'} point */
+    function setCurrentAbRepeatBoundary(point) {
+      const currentTime = video.value?.currentTime
+      if (disableAbRepeat.value || isLive.value || !Number.isFinite(currentTime)) {
+        return
+      }
+
+      const validation = setAbRepeatBoundary(point, currentTime)
+      const label = point === 'start'
+        ? t('Video.Player.A-B Repeat.Point A')
+        : t('Video.Player.A-B Repeat.Point B')
+      const message = getAbRepeatValidationMessage(validation) ||
+        `${label} ${formatAbRepeatTimestamp(currentTime)}`
+      showValueChange(message, AB_REPEAT_VALUE_CHANGE_ICON)
+    }
+
+    function toggleAbRepeat() {
+      if (disableAbRepeat.value || !hasValidAbRepeatRange()) {
+        return
+      }
+
+      abRepeatEnabled.value = !abRepeatEnabled.value
+      if (abRepeatEnabled.value && video.value) {
+        video.value.loop = false
+      }
+      refreshAbRepeatMarkers()
+      scheduleAbRepeatBoundary()
+    }
+
+    function clearAbRepeat() {
+      abRepeatDragCleanup?.()
+      abRepeatStart.value = null
+      abRepeatEnd.value = null
+      abRepeatEnabled.value = false
+      clearAbRepeatBoundarySchedule()
+      refreshAbRepeatMarkers()
+    }
+
+    function resetAbRepeat() {
+      abRepeatDuration.value = Number.POSITIVE_INFINITY
+      clearAbRepeat()
+    }
+
+    function handleAbRepeatDurationChange() {
+      abRepeatDuration.value = getAbRepeatDuration()
+      if (abRepeatValidation.value !== null) {
+        abRepeatEnabled.value = false
+      }
+      refreshAbRepeatMarkers()
+      scheduleAbRepeatBoundary()
+      updateVideoElementGeometry()
+    }
+
+    // #endregion A-B repeat
+
     const showInvidiousShareOptions = computed(() => {
       return store.getters.getBackendPreference === 'invidious' || store.getters.getBackendFallback
     })
@@ -3663,6 +4008,7 @@ export default defineComponent({
           'ft_ambient_mode',
           'ft_video_zoom',
           'ft_loop',
+          'ft_ab_repeat',
           'ft_screenshot',
           'picture_in_picture',
           'ft_full_window',
@@ -3710,6 +4056,7 @@ export default defineComponent({
           'ft_ambient_mode',
           'ft_video_zoom',
           'ft_loop',
+          'ft_ab_repeat',
           'recenter_vr',
           'toggle_stereoscopic',
         )
@@ -3753,6 +4100,10 @@ export default defineComponent({
       if (isLive.value) {
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'loop')
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_loop')
+      }
+
+      if (isLive.value || disableAbRepeat.value) {
+        removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_ab_repeat')
       }
 
       if (!useVrMode.value) {
@@ -4363,6 +4714,7 @@ export default defineComponent({
       if (hasLoaded.value && props.chapters.length > 0) {
         createChapterMarkers()
       }
+      refreshAbRepeatMarkers()
 
       setupChapterPreview()
       setupSponsorBlockSeekBarTooltip()
@@ -4557,6 +4909,7 @@ export default defineComponent({
     }, { immediate: true })
 
     watch(() => props.videoId, () => {
+      resetAbRepeat()
       voiceOverTranslation.reset()
       showPoster.value = true
       sponsorBlockMuteController.reset()
@@ -4576,6 +4929,12 @@ export default defineComponent({
       sponsorBlockSubmissionError.value = ''
       updateSponsorBlockSubmissionState()
     }, { immediate: true })
+
+    watch(disableAbRepeat, (disabled) => {
+      if (disabled) {
+        resetAbRepeat()
+      }
+    })
 
     watch(
       [() => props.videoId, () => props.paidPromotion, () => props.shortsPlayer],
@@ -5073,6 +5432,7 @@ export default defineComponent({
       sleepTimer.resumeCountdown()
       startSponsorBlockHighlightLabelCountdown()
       scheduleSponsorBlockSkip()
+      scheduleAbRepeatBoundary()
 
       tabMediaCoordinator.setPlaybackState(mediaTabId, 'playing')
 
@@ -5112,6 +5472,7 @@ export default defineComponent({
       sleepTimer.pauseCountdown()
       pauseSponsorBlockHighlightLabelCountdown()
       cancelSponsorBlockSkipSchedule()
+      clearAbRepeatBoundarySchedule()
 
       tabMediaCoordinator.setPlaybackState(mediaTabId, 'paused')
 
@@ -5139,6 +5500,7 @@ export default defineComponent({
 
       pauseSponsorBlockHighlightLabelCountdown()
       cancelSponsorBlockSkipSchedule()
+      clearAbRepeatBoundarySchedule()
 
       tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
 
@@ -5158,8 +5520,13 @@ export default defineComponent({
     function handleSeeking() {
       shortsEnded.value = false
       cancelSponsorBlockSkipSchedule()
+      clearAbRepeatBoundarySchedule()
       syncPlayPauseControlIcons()
       emit('seeking')
+    }
+
+    function handleAbRepeatSeeked() {
+      checkAbRepeatBoundary()
     }
 
     function applyPendingPresentationModes() {
@@ -5290,6 +5657,7 @@ export default defineComponent({
 
     function handleTimeupdate() {
       if (video.value) {
+        checkAbRepeatBoundary()
         const currentTime = video.value.currentTime
         sponsorBlockCurrentTime.value = currentTime
         annotationCurrentTime.value = currentTime
@@ -7239,6 +7607,54 @@ export default defineComponent({
     }
 
     /** @type {(() => void) | null} */
+    let removeAbRepeatContext = null
+    /** @type {(() => void) | null} */
+    let removeLoopButtonContext = null
+
+    function registerAbRepeatControl() {
+      const controls = ui?.getControls()
+      if (controls) {
+        removeAbRepeatContext?.()
+        removeAbRepeatContext = setAbRepeatContext(controls, {
+          start: abRepeatStart,
+          end: abRepeatEnd,
+          enabled: abRepeatEnabled,
+          validation: abRepeatValidation,
+          validationMessage: abRepeatValidationMessage,
+          setCurrentBoundary: setCurrentAbRepeatBoundary,
+          toggle: toggleAbRepeat,
+          clear: clearAbRepeat,
+          getShortcut: action => ({
+            start: KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.SET_AB_REPEAT_START,
+            end: KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.SET_AB_REPEAT_END,
+            clear: KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.CLEAR_AB_REPEAT,
+          })[action],
+        })
+        removeLoopButtonContext?.()
+        removeLoopButtonContext = setLoopButtonContext(controls, {
+          isEnabled: () => Boolean(video.value?.loop || abRepeatEnabled.value),
+          isVisible: location => location !== 'overflow' || !abRepeatAvailable.value,
+          subscribe: callback => watch([abRepeatAvailable, abRepeatEnabled], callback),
+          toggle: () => {
+            if (abRepeatAvailable.value) {
+              toggleAbRepeat()
+            } else if (video.value) {
+              video.value.loop = !video.value.loop
+            }
+          },
+        })
+      }
+
+      class AbRepeatControlFactory {
+        create(rootElement, controls) {
+          return new AbRepeatControl(rootElement, controls)
+        }
+      }
+
+      registerOwnElement(shakaOverflowMenu, 'ft_ab_repeat', new AbRepeatControlFactory())
+    }
+
+    /** @type {(() => void) | null} */
     let removeCopyVideoUrlContext = null
 
     /** @type {(() => void) | null} */
@@ -7540,6 +7956,12 @@ export default defineComponent({
      * (e.g. {@linkcode events}, {@linkcode fullWindowEnabled}) can get garbage collected
      */
     function cleanUpCustomPlayerControls() {
+      removeAbRepeatContext?.()
+      removeAbRepeatContext = null
+
+      removeLoopButtonContext?.()
+      removeLoopButtonContext = null
+
       removeCopyVideoUrlContext?.()
       removeCopyVideoUrlContext = null
 
@@ -7603,6 +8025,7 @@ export default defineComponent({
       shakaOverflowMenu.registerElement('ft_voice_over_translation', null)
       shakaOverflowMenu.registerElement('ft_sleep_timer', null)
       shakaOverflowMenu.registerElement('ft_loop', null)
+      shakaOverflowMenu.registerElement('ft_ab_repeat', null)
 
       shakaControls.registerElement('ft_screenshot', null)
       shakaOverflowMenu.registerElement('ft_screenshot', null)
@@ -8438,6 +8861,19 @@ export default defineComponent({
           video_.paused ? video_.play() : video_.pause()
           blurTooltipButtons()
           break
+        case !disableAbRepeat.value && matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.SET_AB_REPEAT_START):
+          event.preventDefault()
+          setCurrentAbRepeatBoundary('start')
+          break
+        case !disableAbRepeat.value && matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.SET_AB_REPEAT_END):
+          event.preventDefault()
+          setCurrentAbRepeatBoundary('end')
+          break
+        case !disableAbRepeat.value && matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.CLEAR_AB_REPEAT):
+          event.preventDefault()
+          clearAbRepeat()
+          showValueChange(t('Video.Player.A-B Repeat.Cleared'), AB_REPEAT_VALUE_CHANGE_ICON)
+          break
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LARGE_REWIND): {
           // Rewind by 2x the time-skip interval (in seconds)
           event.preventDefault()
@@ -8681,6 +9117,67 @@ export default defineComponent({
 
     // #region seek bar markers
 
+    function clearAbRepeatMarkers() {
+      container.value?.querySelectorAll('.abRepeatMarker, .abRepeatRange').forEach(marker => marker.remove())
+    }
+
+    function refreshAbRepeatMarkers() {
+      clearAbRepeatMarkers()
+
+      const seekBarContainer = container.value?.querySelector('.shaka-seek-bar-container')
+      if (
+        disableAbRepeat.value ||
+        !seekBarContainer ||
+        !player ||
+        (abRepeatStart.value === null && abRepeatEnd.value === null)
+      ) {
+        return
+      }
+
+      const { start, end } = player.seekRange()
+      const duration = end - start
+      if (!Number.isFinite(duration) || duration <= 0) {
+        return
+      }
+
+      const markers = []
+      if (hasValidAbRepeatRange()) {
+        const range = document.createElement('div')
+        range.className = `abRepeatRange${abRepeatEnabled.value ? '' : ' abRepeatRangeInactive'}`
+        range.style.left = `${((abRepeatStart.value - start) / duration) * 100}%`
+        range.style.width = `${((abRepeatEnd.value - abRepeatStart.value) / duration) * 100}%`
+        markers.push(range)
+      }
+
+      markers.push(...[
+        ['A', abRepeatStart.value],
+        ['B', abRepeatEnd.value],
+      ]
+        .filter(([_point, time]) => time !== null && time >= start && time <= end)
+        .map(([point, time]) => {
+          const marker = document.createElement('button')
+          marker.type = 'button'
+          marker.className = `abRepeatMarker abRepeatMarker${point}${abRepeatEnabled.value ? '' : ' abRepeatMarkerInactive'}`
+          marker.style.left = `calc(${((time - start) / duration) * 100}% - 22px)`
+          marker.dataset.point = point
+          marker.ariaLabel = t('Video.Player.A-B Repeat.Adjust Point', {
+            point,
+            timestamp: formatAbRepeatTimestamp(time),
+          })
+          marker.addEventListener('pointerdown', event => startAbRepeatMarkerDrag(
+            point === 'A' ? 'start' : 'end',
+            event
+          ))
+          marker.addEventListener('keydown', event => handleAbRepeatMarkerKeydown(
+            point === 'A' ? 'start' : 'end',
+            event
+          ))
+          return marker
+        }))
+
+      addMarkers(markers)
+    }
+
     function clearSponsorBlockMarkers() {
       container.value.querySelectorAll('.sponsorBlockMarker').forEach(marker => marker.remove())
     }
@@ -8791,7 +9288,7 @@ export default defineComponent({
     }
 
     /**
-     * @param {HTMLDivElement[]} markers
+     * @param {HTMLElement[]} markers
      */
     function addMarkers(markers) {
       const seekBarContainer = container.value.querySelector('.shaka-seek-bar-container')
@@ -9025,6 +9522,7 @@ export default defineComponent({
       registerSkipSilenceButton()
       registerVoiceOverTranslationButton()
       registerSleepTimer()
+      registerAbRepeatControl()
 
       registerTheatreModeButton()
       registerFullWindowButton()
@@ -9169,6 +9667,7 @@ export default defineComponent({
           emit('playback-rate-updated', playbackRate)
         }
         scheduleSponsorBlockSkip()
+        scheduleAbRepeatBoundary()
       })
     })
     onUnmounted(() => {
@@ -9176,6 +9675,8 @@ export default defineComponent({
       clearPreRollTimer()
       clearTimeout(sponsorBlockHighlightLabelTimeout)
       cancelSponsorBlockSkipSchedule()
+      clearAbRepeatBoundarySchedule()
+      abRepeatDragCleanup?.()
     })
 
     async function performFirstLoad(isCurrentLoad = () => true) {
@@ -9376,6 +9877,7 @@ export default defineComponent({
       if (props.chapters.length > 0) {
         createChapterMarkers()
       }
+      refreshAbRepeatMarkers()
 
       applyPendingPresentationModes()
 
@@ -9897,7 +10399,7 @@ export default defineComponent({
     /**
      * Shows a popup with a message and an icon on top of the video player.
      * @param {string} message - The message to display.
-     * @param {string | string[]} icons - The icons to display.
+     * @param {ValueChangeIcon | ValueChangeIcon[]} icons - The icons to display.
      * @param {boolean} invertContentOrder - Whether to invert the order of the icon and message.
      */
     function showValueChange(message, icons = [], invertContentOrder = false) {
@@ -10095,6 +10597,8 @@ export default defineComponent({
       handleCanPlay,
       handleEnded,
       handleSeeking,
+      handleAbRepeatSeeked,
+      handleAbRepeatDurationChange,
       updateVolume,
       handleTimeupdate,
       handleEnterPictureInPicture,

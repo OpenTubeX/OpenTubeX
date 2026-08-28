@@ -1209,6 +1209,10 @@
   -webkit-line-clamp: 2;
 }
 
+:deep(.ab-repeat-button[aria-pressed='true'] .shaka-ui-icon) {
+  color: var(--primary-color);
+}
+
 /* Keep the translation header and scrollbar outside each other's regions. */
 :deep(.shaka-overflow-menu:has(> .ft-caption-translation-menu:not(.shaka-hidden))) {
   block-size: min(50vh, 340px);
@@ -1606,10 +1610,22 @@
   flex-direction: row-reverse;
 }
 
+.valueChangePopup:has(.valueChangeCustomIcon) {
+  width: max-content;
+  white-space: nowrap;
+}
+
 .valueChangeIcons {
   display: inline-flex;
   align-items: center;
   gap: 2px;
+}
+
+.valueChangeCustomIcon {
+  flex: none;
+  width: 1em;
+  height: 1em;
+  fill: currentcolor;
 }
 
 .fade-enter-active,
@@ -2050,6 +2066,7 @@
 
 :deep(.sponsorBlockMarker) {
   position: absolute;
+  z-index: 1;
   height: 100%;
   background-color: var(--primary-color);
 
@@ -2067,10 +2084,88 @@
 
 :deep(.chapterMarker) {
   position: absolute;
+  z-index: 1;
   width: 2px;
   height: 100%;
   background-color: #000;
   opacity: 0.6;
+}
+
+:deep(.abRepeatRange) {
+  position: absolute;
+  z-index: 0;
+  inset-block: -2px;
+  border-block: 2px solid color-mix(in srgb, var(--primary-color) 78%, #fff);
+  background: color-mix(in srgb, var(--primary-color) 32%, transparent);
+}
+
+:deep(.abRepeatRangeInactive) {
+  opacity: 0.55;
+}
+
+:deep(.abRepeatMarker) {
+  position: absolute;
+  z-index: 3;
+  inset-block-start: -21px;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  border: 0;
+  color: #fff;
+  background: transparent;
+  filter: drop-shadow(0 0 1px #000);
+  cursor: ew-resize;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+:deep(.abRepeatMarker::before) {
+  position: absolute;
+  inset-block: 13px 0;
+  inset-inline-start: 21px;
+  inline-size: 2px;
+  background: currentcolor;
+  content: '';
+}
+
+:deep(.abRepeatMarker::after) {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 13px;
+  display: grid;
+  place-items: center;
+  inline-size: 18px;
+  block-size: 18px;
+  border-radius: calc(5px * var(--ui-roundness));
+  color: #000;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  background: #fff;
+  content: attr(data-point);
+  text-shadow: none;
+}
+
+:deep(.abRepeatMarkerB) {
+  color: var(--primary-color);
+}
+
+:deep(.abRepeatMarkerB::after) {
+  background: var(--primary-color);
+}
+
+:deep(.abRepeatMarkerInactive) {
+  opacity: 0.55;
+}
+
+:deep(.abRepeatMarker:focus-visible) {
+  border-radius: calc(6px * var(--ui-roundness));
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.abRepeatDragging :deep(.abRepeatMarker) {
+  cursor: grabbing;
 }
 
 :deep(.playerFullscreenTitleOverlay) {
