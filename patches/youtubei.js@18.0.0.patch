@@ -306,3 +306,15 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b0cf4a9ba22fa9e1e482d9084738319e
      }
      /**
       * Ensures actions are emitted at the right speed.
+diff --git a/dist/src/utils/ProtoUtils.js b/dist/src/utils/ProtoUtils.js
+--- a/dist/src/utils/ProtoUtils.js
++++ b/dist/src/utils/ProtoUtils.js
+@@ -31,7 +31,7 @@ export function encodeCommentActionParams(type, args = {}) {
+         };
+     }
+     const writer = PeformCommentActionParams.encode(data);
+-    return encodeURIComponent(u8ToBase64(writer.finish()));
++    return u8ToBase64(writer.finish(), true);
+ }
+ export function encodeNextParams(video_ids, playlist_title) {
+     const writer = NextParams.encode({ videoId: video_ids, playlistTitle: playlist_title });
