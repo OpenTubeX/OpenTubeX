@@ -24,7 +24,8 @@ test.use({
       fetchSubscriptionsAutomatically: false,
       hideSubscriptionsVideos: false,
       hideSubscriptionsShorts: false,
-      showNewSubscriptionFeedIndicators: true
+      showNewSubscriptionFeedIndicators: true,
+      uiScale: 95
     },
     profiles: [
       {
@@ -95,6 +96,8 @@ test.describe('subscriptions header layout', () => {
       const select = document.querySelector('.headerSortSelect .select-text')
 
       return {
+        header: toBox(document.querySelector('.subscriptionsHeader')),
+        viewToggle: toBox(document.querySelector('.headerViewToggle .iconButton')),
         select: toBox(select),
         label: toBox(document.querySelector('.headerSortSelect .select-label')),
         refresh: toBox(document.querySelector('.headerRefreshWidget .refreshButton')),
@@ -103,7 +106,14 @@ test.describe('subscriptions header layout', () => {
     })
 
     expect(layout.selectedText).toBe('Newest first')
+    expect(layout.viewToggle.start).toBeGreaterThanOrEqual(layout.header.start)
+    expect(layout.viewToggle.end).toBeLessThanOrEqual(layout.select.start)
     expect(layout.select.end).toBeLessThanOrEqual(layout.refresh.start)
+    expect(layout.refresh.end).toBeLessThanOrEqual(layout.header.end)
+    expect(Math.abs(
+      (layout.viewToggle.top + layout.viewToggle.bottom) / 2 -
+      (layout.select.top + layout.select.bottom) / 2
+    )).toBeLessThanOrEqual(1)
     expect(Math.abs(
       (layout.select.top + layout.select.bottom) / 2 -
       (layout.refresh.top + layout.refresh.bottom) / 2
@@ -111,6 +121,90 @@ test.describe('subscriptions header layout', () => {
     expect(layout.label.top).toBeGreaterThanOrEqual(layout.select.top)
     expect(layout.label.bottom).toBeLessThanOrEqual(layout.select.bottom)
     await attachScreenshot('compact New feed header actions')
+  })
+
+  test('separates the main feed tabs from the centered New feed tabs', async ({ app, page, attachScreenshot }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await page.getByRole('button', { name: 'Show tabbed view' }).click()
+
+    const separatorLayout = () => page.evaluate(() => {
+      const header = document.querySelector('.subscriptionsHeader')
+      const headerRow = header.querySelector('.headerRow')
+      const mainTabs = [...header.querySelectorAll('[data-subscription-feed-tab]')]
+      const newFeedTabs = [...header.querySelectorAll('[data-new-feed-tab]')]
+      const headerRowRect = headerRow.getBoundingClientRect()
+      const headerStyle = getComputedStyle(header)
+      const headerRowStyle = getComputedStyle(headerRow)
+
+      return {
+        headerShadow: headerStyle.boxShadow,
+        separatorWidth: Number.parseFloat(headerRowStyle.borderBottomWidth),
+        separatorY: headerRowRect.bottom,
+        mainTabsBottom: Math.max(...mainTabs.map(tab => tab.getBoundingClientRect().bottom)),
+        newFeedTabsTop: Math.min(...newFeedTabs.map(tab => tab.getBoundingClientRect().top))
+      }
+    })
+
+    for (const width of [1400, 700]) {
+      await setWindowWidth(app, page, width)
+      const layout = await separatorLayout()
+
+      expect(layout.headerShadow).toBe('none')
+      expect(layout.separatorWidth).toBeGreaterThan(0)
+      expect(layout.separatorWidth).toBeLessThanOrEqual(1.1)
+      expect(layout.separatorY).toBeGreaterThanOrEqual(layout.mainTabsBottom)
+      expect(layout.newFeedTabsTop).toBeGreaterThanOrEqual(layout.separatorY)
+    }
+
+    await attachScreenshot('New feed tabs separator')
+  })
+
+  test('keeps the New feed controls on the same line as the main feed tabs', async ({ app, page, attachScreenshot }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await page.getByRole('button', { name: 'Show tabbed view' }).click()
+
+    for (const width of [1120, 680, 375, 340]) {
+      await setWindowWidth(app, page, width)
+      await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)
+
+      const layout = await page.evaluate(() => {
+        const toBox = selector => {
+          const rect = document.querySelector(selector).getBoundingClientRect()
+          return { start: rect.left, end: rect.right, top: rect.top, bottom: rect.bottom }
+        }
+
+        const header = toBox('.subscriptionsHeader')
+        const upperTabs = [...document.querySelectorAll('[data-subscription-feed-tab]')]
+          .map(tab => {
+            const rect = tab.getBoundingClientRect()
+            return { start: rect.left, end: rect.right }
+          })
+
+        return {
+          header,
+          title: toBox('.pageTitle'),
+          tabs: toBox('.tabs'),
+          actions: toBox('.headerActions'),
+          upperTabs
+        }
+      })
+
+      expect(layout.tabs.top).toBeGreaterThanOrEqual(layout.title.bottom)
+      expect(layout.actions.top).toBeGreaterThanOrEqual(layout.title.bottom)
+      expect(layout.actions.top).toBeLessThan(layout.tabs.bottom)
+      expect(layout.tabs.top).toBeLessThan(layout.actions.bottom)
+      expect(layout.actions.start).toBeGreaterThanOrEqual(layout.header.start)
+      expect(layout.actions.end).toBeLessThanOrEqual(layout.header.end)
+      expect(Math.min(...layout.upperTabs.map(tab => tab.start))).toBeGreaterThanOrEqual(layout.header.start)
+      expect(Math.max(...layout.upperTabs.map(tab => tab.end))).toBeLessThanOrEqual(layout.header.end)
+      await expect.poll(() => page.evaluate(() => {
+        return document.documentElement.scrollWidth - document.documentElement.clientWidth
+      })).toBeLessThanOrEqual(2)
+    }
+
+    await attachScreenshot('New feed controls aligned with main tabs')
   })
 
   test('puts the tabs beside the title when they fit', async ({ page, attachScreenshot }) => {
@@ -139,11 +233,11 @@ test.describe('subscriptions header layout', () => {
 
     const { title, tabs, refreshWidget } = await headerBoxes(page)
 
-    // Two lines: title and refresh widget above, the tabs below both
-    expect(refreshWidget.top).toBeLessThan(title.bottom)
-    expect(refreshWidget.end).toBeGreaterThan(title.end)
+    // Two lines: the title is above, with the tabs and refresh widget together
     expect(tabs.top).toBeGreaterThanOrEqual(title.bottom)
-    expect(tabs.top).toBeGreaterThanOrEqual(refreshWidget.bottom)
+    expect(refreshWidget.top).toBeGreaterThanOrEqual(title.bottom)
+    expect(refreshWidget.top).toBeLessThan(tabs.bottom)
+    expect(tabs.top).toBeLessThan(refreshWidget.bottom)
   })
 
   test('merges the rows again when the window grows back', async ({ app, page, attachScreenshot }) => {

@@ -1,25 +1,26 @@
 <template>
   <SubscriptionsTabUi
-    ref="tabUi"
     class="newFeed"
     :is-loading="isLoading"
-    :video-list="newVideos"
+    :video-list="displayedEntries"
     :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
     :only-show-new="true"
-    :has-additional-content="hasAdditionalContent"
+    :has-additional-content="showCombinedView && hasAdditionalContent"
+    :is-community="activeCategory === 'posts'"
+    :youtube-style-shorts="activeCategory === 'shorts' && useCustomShortsPlayer"
     :track-global-refresh="false"
     stable-item-keys
     @refresh="refresh"
   >
     <template #before-list="{ hasVisibleContent }">
-      <h3 v-if="hasVisibleContent">
+      <h3 v-if="showCombinedView && hasVisibleContent">
         {{ $t('Global.Videos') }}
       </h3>
     </template>
     <Transition name="new-feed-section">
       <section
-        v-if="newShorts.length > 0"
+        v-if="showCombinedView && newShorts.length > 0"
         class="mediaSection"
       >
         <h3>{{ $t('Global.Shorts') }}</h3>
@@ -33,7 +34,7 @@
     </Transition>
     <Transition name="new-feed-section">
       <section
-        v-if="newLive.length > 0"
+        v-if="showCombinedView && newLive.length > 0"
         class="mediaSection"
       >
         <h3>{{ $t('Global.Live') }}</h3>
@@ -46,7 +47,7 @@
     </Transition>
     <Transition name="new-feed-section">
       <section
-        v-if="newPosts.length > 0"
+        v-if="showCombinedView && newPosts.length > 0"
         class="postsSection"
       >
         <h3>{{ $t('Global.Posts') }}</h3>
@@ -71,7 +72,7 @@
 </template>
 
 <script setup>
-import { computed, useTemplateRef } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtElementList from './FtElementList/FtElementList.vue'
@@ -85,8 +86,15 @@ import { useRefreshAllSubscriptionFeeds } from '../composables/useRefreshAllSubs
 import { isHistoryEntryWatched } from '../helpers/history'
 import { isVideoHiddenByPreferences } from '../helpers/subscriptions'
 
+const props = defineProps({
+  activeCategory: {
+    type: String,
+    default: null,
+    validator: value => value === null || ['videos', 'shorts', 'live', 'posts'].includes(value)
+  }
+})
+
 const { t } = useI18n()
-const tabUi = useTemplateRef('tabUi')
 useKeepAliveEffectScope()
 const {
   activeSubscriptionIds,
@@ -219,6 +227,19 @@ const newPosts = computed(() => applySortPreference(
   })
 ))
 const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
+const showCombinedView = computed(() => props.activeCategory === null)
+const displayedEntries = computed(() => {
+  switch (props.activeCategory) {
+    case 'shorts':
+      return newShorts.value
+    case 'live':
+      return newLive.value
+    case 'posts':
+      return newPosts.value
+    default:
+      return newVideos.value
+  }
+})
 
 const hasAdditionalContent = computed(() => {
   return newShorts.value.length > 0 || newLive.value.length > 0 || newPosts.value.length > 0
@@ -229,7 +250,7 @@ const isLoading = computed(() => {
 })
 
 const hasNewContent = computed(() => {
-  return hasAdditionalContent.value || tabUi.value?.hasNewContent === true
+  return newVideos.value.length > 0 || hasAdditionalContent.value
 })
 
 defineExpose({
