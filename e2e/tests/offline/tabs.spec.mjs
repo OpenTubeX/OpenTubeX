@@ -1338,6 +1338,59 @@ test.describe('tab bar', () => {
     await expect(scrollbar).toBeHidden()
   })
 
+  test('clamps its vertical scrollbar after collapsing an expanded group at the scroll end', async ({ page, attachScreenshot }) => {
+    await page.setViewportSize({ width: 800, height: 450 })
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+    const groupId = await page.evaluate(async () => {
+      const tabIds = []
+      for (let index = 0; index < 14; index++) {
+        const tab = await window.ftElectron.tabs.create({
+          route: `/watch/vertical-tab-bar-scroll-${index}`,
+          title: `Vertical scrollable tab ${index}`,
+          makeActive: false,
+          lazyLoad: true
+        })
+        tabIds.push(tab.id)
+      }
+      const group = await window.ftElectron.tabs.createGroup({
+        name: 'Vertical scrollable group',
+        color: 'green'
+      })
+      await window.ftElectron.tabs.setGroup(tabIds.slice(2), group.id)
+      await window.ftElectron.tabs.updateGroup(group.id, { isCollapsed: true })
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setTabBarPosition', 'left')
+      return group.id
+    })
+
+    const container = page.locator('.tabsContainer')
+    const scrollbar = container.locator(':scope > .os-scrollbar-vertical')
+    const collapsedGroup = page.getByRole('button', {
+      name: 'Expand Vertical scrollable group, 12 tabs',
+      exact: true
+    })
+    await expect(collapsedGroup).toBeVisible()
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+    await collapsedGroup.click()
+    await expect(page.locator('.tab[data-tab-id]')).toHaveCount(15)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await container.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => container.evaluate(element => (
+      element.scrollTop > 0 &&
+      Math.abs(element.scrollTop - (element.scrollHeight - element.clientHeight)) <= 1
+    ))).toBe(true)
+
+    await page.evaluate(groupId => window.ftElectron.tabs.updateGroup(groupId, { isCollapsed: true }), groupId)
+    await expect(collapsedGroup).toBeVisible()
+    await expect.poll(() => container.evaluate(element => ({
+      maxScroll: Math.max(0, element.scrollHeight - element.clientHeight),
+      scrollTop: element.scrollTop
+    }))).toEqual({ maxScroll: 0, scrollTop: 0 })
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+    await attachScreenshot('vertical tab group collapsed without stale scroll range')
+  })
+
   test('keeps a submenu inside the viewport for a bottom vertical tab', async ({ page }) => {
     await page.setViewportSize({ width: 800, height: 450 })
     await page.keyboard.press('F1')

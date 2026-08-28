@@ -141,6 +141,7 @@ import { getTabAccentColor } from '../../constants/tabColors'
 import { removeLegacyTabAvatar } from '../../helpers/channelThumbnailStorage'
 import { fetchTabAvatarBytes } from '../../helpers/tabAvatar'
 import { loadMissingTabAvatars } from '../../helpers/loadTabAvatars'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import SortableTab from './SortableTab.vue'
 import {
   buildCurrentShiftedTabIds,
@@ -1344,10 +1345,15 @@ watch(tabBarScrollPosition, (newPosition) => {
 watch(stripItems, () => {
   const container = dropZoneRef.value
   if (container) {
-    const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth)
-    container.scrollLeft = Math.min(container.scrollLeft, maxScroll)
-    if (scrollTarget != null) {
-      scrollTarget = Math.min(scrollTarget, maxScroll)
+    if (vertical.value) {
+      const renderedItems = container.querySelectorAll(':scope > .tabBarReorderItem')
+      clampOverlayScrollTop(container, renderedItems[renderedItems.length - 1] ?? null)
+    } else {
+      const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth)
+      container.scrollLeft = Math.min(container.scrollLeft, maxScroll)
+      if (scrollTarget != null) {
+        scrollTarget = Math.min(scrollTarget, maxScroll)
+      }
     }
   }
   updateScrollbar()
