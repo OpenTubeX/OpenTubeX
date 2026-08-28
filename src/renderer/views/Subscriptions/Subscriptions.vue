@@ -884,7 +884,9 @@ async function markAllAsSeen(tab) {
   markingSeenTab.value = tab
   try {
     const feedTabs = tab === 'new'
-      ? visibleTabs.value.filter(visibleTab => visibleTab !== 'new')
+      ? newFeedView.value === 'tabbed'
+        ? [currentNewFeedTab.value]
+        : visibleTabs.value.filter(visibleTab => visibleTab !== 'new')
       : [tab]
 
     const channelIds = activeSubscriptionList.value.map(channel => channel.id)
@@ -1246,6 +1248,10 @@ const updateNewFeedTabsIndicator = () => updateTabIndicator(
   newFeedTabsIndicatorStyle,
   newFeedTabsIndicatorState
 )
+const updateTabIndicators = () => {
+  updateTabsIndicator()
+  updateNewFeedTabsIndicator()
+}
 
 function observeTabContainers() {
   if (tabsResizeObserver === null) {
@@ -1271,20 +1277,19 @@ watch([currentTab, newFeedView], () => nextTick(() => {
 onMounted(() => {
   if (typeof ResizeObserver === 'function') {
     // Per-tab loaders resize the container while a refresh is running
-    tabsResizeObserver = new ResizeObserver(() => {
-      updateTabsIndicator()
-      updateNewFeedTabsIndicator()
-    })
+    tabsResizeObserver = new ResizeObserver(updateTabIndicators)
     observeTabContainers()
 
-    headerResizeObserver = new ResizeObserver(() => updateHeaderFitsOneRow())
+    headerResizeObserver = new ResizeObserver(() => {
+      updateHeaderFitsOneRow()
+      updateTabIndicators()
+    })
     observeHeaderRow()
   }
 
   nextTick(() => {
     updateHeaderFitsOneRow()
-    updateTabsIndicator()
-    updateNewFeedTabsIndicator()
+    updateTabIndicators()
   })
 })
 

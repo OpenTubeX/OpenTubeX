@@ -83,9 +83,16 @@ function headerBoxes (page) {
 }
 
 test.describe('subscriptions header layout', () => {
-  test('keeps the New feed sort control compact beside refresh', async ({ app, page, attachScreenshot }) => {
+  test('keeps the New feed sort control wide until its row needs to shrink', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
+
+    await setWindowWidth(app, page, 640)
+    const roomySelectWidth = await page.locator('.headerSortSelect .select-text').evaluate(element => {
+      return element.getBoundingClientRect().width
+    })
+    expect(roomySelectWidth).toBeGreaterThanOrEqual(210)
+
     await setWindowWidth(app, page, 340)
 
     const layout = await page.evaluate(() => {
@@ -106,6 +113,7 @@ test.describe('subscriptions header layout', () => {
     })
 
     expect(layout.selectedText).toBe('Newest first')
+    expect(layout.select.end - layout.select.start).toBeLessThan(roomySelectWidth)
     expect(layout.viewToggle.start).toBeGreaterThanOrEqual(layout.header.start)
     expect(layout.viewToggle.end).toBeLessThanOrEqual(layout.select.start)
     expect(layout.select.end).toBeLessThanOrEqual(layout.refresh.start)
@@ -160,51 +168,59 @@ test.describe('subscriptions header layout', () => {
     await attachScreenshot('New feed tabs separator')
   })
 
-  test('keeps the New feed controls on the same line as the main feed tabs', async ({ app, page, attachScreenshot }) => {
+  test('puts the New feed controls below the main feed tabs at narrow widths', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await page.getByRole('button', { name: 'Show tabbed view' }).click()
 
-    for (const width of [1120, 680, 375, 340]) {
+    const readLayout = () => page.evaluate(() => {
+      const toBox = selector => {
+        const rect = document.querySelector(selector).getBoundingClientRect()
+        return { start: rect.left, end: rect.right, top: rect.top, bottom: rect.bottom }
+      }
+
+      return {
+        row: toBox('.feedTabsControlsRow'),
+        header: toBox('.subscriptionsHeader'),
+        title: toBox('.pageTitle'),
+        tabs: toBox('.tabs'),
+        actions: toBox('.headerActions'),
+        upperTabs: [...document.querySelectorAll('[data-subscription-feed-tab]')]
+          .map(tab => {
+            const rect = tab.getBoundingClientRect()
+            return { start: rect.left, end: rect.right, top: rect.top }
+          })
+      }
+    })
+
+    await setWindowWidth(app, page, 1120)
+    const wideLayout = await readLayout()
+    expect(wideLayout.actions.top).toBeLessThan(wideLayout.tabs.bottom)
+    expect(wideLayout.tabs.top).toBeLessThan(wideLayout.actions.bottom)
+    expect(Math.abs(wideLayout.row.end - wideLayout.actions.end)).toBeLessThanOrEqual(1)
+
+    for (const width of [900, 680, 375, 340]) {
       await setWindowWidth(app, page, width)
       await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)
 
-      const layout = await page.evaluate(() => {
-        const toBox = selector => {
-          const rect = document.querySelector(selector).getBoundingClientRect()
-          return { start: rect.left, end: rect.right, top: rect.top, bottom: rect.bottom }
-        }
-
-        const header = toBox('.subscriptionsHeader')
-        const upperTabs = [...document.querySelectorAll('[data-subscription-feed-tab]')]
-          .map(tab => {
-            const rect = tab.getBoundingClientRect()
-            return { start: rect.left, end: rect.right }
-          })
-
-        return {
-          header,
-          title: toBox('.pageTitle'),
-          tabs: toBox('.tabs'),
-          actions: toBox('.headerActions'),
-          upperTabs
-        }
-      })
+      const layout = await readLayout()
 
       expect(layout.tabs.top).toBeGreaterThanOrEqual(layout.title.bottom)
-      expect(layout.actions.top).toBeGreaterThanOrEqual(layout.title.bottom)
-      expect(layout.actions.top).toBeLessThan(layout.tabs.bottom)
-      expect(layout.tabs.top).toBeLessThan(layout.actions.bottom)
+      expect(layout.actions.top - layout.tabs.bottom).toBeGreaterThanOrEqual(8)
+      expect(Math.abs(layout.actions.start - layout.tabs.start)).toBeLessThanOrEqual(1)
       expect(layout.actions.start).toBeGreaterThanOrEqual(layout.header.start)
       expect(layout.actions.end).toBeLessThanOrEqual(layout.header.end)
       expect(Math.min(...layout.upperTabs.map(tab => tab.start))).toBeGreaterThanOrEqual(layout.header.start)
       expect(Math.max(...layout.upperTabs.map(tab => tab.end))).toBeLessThanOrEqual(layout.header.end)
+      if (width >= 680) {
+        expect(new Set(layout.upperTabs.map(tab => tab.top)).size).toBe(1)
+      }
       await expect.poll(() => page.evaluate(() => {
         return document.documentElement.scrollWidth - document.documentElement.clientWidth
       })).toBeLessThanOrEqual(2)
     }
 
-    await attachScreenshot('New feed controls aligned with main tabs')
+    await attachScreenshot('New feed controls below main tabs')
   })
 
   test('puts the tabs beside the title when they fit', async ({ page, attachScreenshot }) => {
@@ -222,7 +238,7 @@ test.describe('subscriptions header layout', () => {
     expect(refreshWidget.top).toBeLessThan(tabs.bottom)
   })
 
-  test('drops the tabs onto their own line when the window is too narrow', async ({ app, page, attachScreenshot }) => {
+  test('moves the controls below the tabs before the tabs wrap', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
     await expect(page.locator('.subscriptionsHeader')).toHaveClass(/singleRow/)
 
@@ -232,12 +248,14 @@ test.describe('subscriptions header layout', () => {
     await attachScreenshot('two row header')
 
     const { title, tabs, refreshWidget } = await headerBoxes(page)
+    const tabRows = await page.locator('[data-subscription-feed-tab]').evaluateAll(tabs => {
+      return new Set(tabs.map(tab => tab.getBoundingClientRect().top)).size
+    })
 
-    // Two lines: the title is above, with the tabs and refresh widget together
+    // The controls move down before taking enough space to wrap the tabs.
     expect(tabs.top).toBeGreaterThanOrEqual(title.bottom)
-    expect(refreshWidget.top).toBeGreaterThanOrEqual(title.bottom)
-    expect(refreshWidget.top).toBeLessThan(tabs.bottom)
-    expect(tabs.top).toBeLessThan(refreshWidget.bottom)
+    expect(refreshWidget.top - tabs.bottom).toBeGreaterThanOrEqual(8)
+    expect(tabRows).toBe(1)
   })
 
   test('merges the rows again when the window grows back', async ({ app, page, attachScreenshot }) => {
@@ -299,10 +317,10 @@ test.describe('subscriptions header layout', () => {
     // Narrow enough that the tabs no longer fit on one line inside their own
     // row, so their rendered width is the shrunken one rather than the width
     // they would need. That must not be mistaken for fitting next to the title.
-    await setWindowWidth(app, page, 700)
+    await setWindowWidth(app, page, 500)
 
     const wrapped = await page.evaluate(() => {
-      const tabs = [...document.querySelectorAll('.tab')]
+      const tabs = [...document.querySelectorAll('[data-subscription-feed-tab]')]
       return new Set(tabs.map(tab => tab.getBoundingClientRect().top)).size > 1
     })
     expect(wrapped, 'the tabs are expected to wrap at this width').toBe(true)
