@@ -343,6 +343,7 @@ import { MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants
 import { resolveBaseTheme } from '../appearanceSettings'
 import { resolveColor } from './helpers/colors'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
+import { hasVisibleGamepadLayer, initializeGamepadNavigation } from './helpers/gamepadNavigation'
 import { keyboardEventInitFromShortcut, OPEN_COMMAND_PALETTE_EVENT } from './helpers/commandPalette'
 import { createCommandPaletteRegistry } from './helpers/commandPaletteRegistry'
 import { initializePlatformInfo, isLinuxWayland } from './helpers/platform'
@@ -608,6 +609,7 @@ let removeConfirmMultipleTabsActionListener = null
 let removeOpenUrlListener = null
 let removeYtDlpBinaryUpdatedListener = null
 let removeOpenTabOrganizerListener = null
+let removeGamepadNavigation = () => {}
 /** @type {number|null} */
 let utilityRoutePreloadId = null
 let utilityRoutePreloadUsesIdleCallback = false
@@ -947,6 +949,11 @@ async function completeTutorial() {
 }
 
 onMounted(async () => {
+  removeGamepadNavigation = initializeGamepadNavigation({
+    onBack: handleGamepadBack,
+    onNavigate: () => store.dispatch('showOutlines'),
+    onPlayPause: handleGamepadPlayPause,
+  })
   let tabsReady = Promise.resolve()
 
   if (isElectron) {
@@ -1120,6 +1127,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  removeGamepadNavigation()
   removeCustomThemeListener()
   cancelUtilityRoutePreload()
   systemColorScheme.removeEventListener('change', handleSystemColorSchemeChange)
@@ -2253,6 +2261,34 @@ function runShortcutFromCommandPalette(shortcut) {
   nextTick(() => {
     document.dispatchEvent(new KeyboardEvent('keydown', keyboardEventInitFromShortcut(shortcut)))
   })
+}
+
+function handleGamepadPlayPause() {
+  document.dispatchEvent(new KeyboardEvent(
+    'keydown',
+    keyboardEventInitFromShortcut(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.PLAY)
+  ))
+}
+
+function handleGamepadBack() {
+  const hadOpenLayer = hasVisibleGamepadLayer()
+  const target = document.activeElement instanceof HTMLElement ? document.activeElement : document
+  const escapeEvent = new KeyboardEvent('keydown', {
+    key: 'Escape',
+    code: 'Escape',
+    bubbles: true,
+    cancelable: true,
+  })
+
+  if (!target.dispatchEvent(escapeEvent) || hadOpenLayer) {
+    return
+  }
+  if (document.fullscreenElement !== null) {
+    document.exitFullscreen()
+    return
+  }
+
+  goHistoryFromCommandPalette(-1)
 }
 
 /**

@@ -614,9 +614,27 @@ function closeProfilePanel() {
 function handleMenuFocusOut(event) {
   if (event.relatedTarget === null) {
     const controlChangedDuringClick = pointerDownInsideMenu || pendingSettingUpdateCount > 0
+    const focusTarget = event.target
+    const focusTargetLabel = focusTarget instanceof HTMLElement
+      ? focusTarget.closest('label')
+      : null
+    const associatedControl = focusTargetLabel instanceof HTMLLabelElement
+      ? focusTargetLabel.control
+      : null
     setTimeout(() => {
-      if (controlChangedDuringClick) {
-        focusMenu()
+      const focusedControlWasRemoved = focusTarget instanceof Node && !focusTarget.isConnected
+      if (controlChangedDuringClick || focusedControlWasRemoved) {
+        const menu = menuRef.value?.$el
+        if (
+          focusedControlWasRemoved &&
+          associatedControl instanceof HTMLElement &&
+          associatedControl.isConnected &&
+          menu?.contains(associatedControl)
+        ) {
+          associatedControl.focus({ preventScroll: true, focusVisible: true })
+        } else if (!menu?.matches(':focus-within')) {
+          focusMenu()
+        }
         return
       }
       if (document.hasFocus() && !menuRef.value?.$el.matches(':focus-within')) {
@@ -661,11 +679,20 @@ async function updateSetting(setting, value) {
 }
 
 async function runSettingUpdate(update) {
+  const menu = menuRef.value?.$el
+  const focusTarget = document.activeElement instanceof HTMLElement && menu?.contains(document.activeElement)
+    ? document.activeElement
+    : null
   pendingSettingUpdateCount++
   try {
     await update()
   } finally {
-    await focusMenu()
+    await nextTick()
+    if (focusTarget?.isConnected && menu?.contains(focusTarget)) {
+      focusTarget.focus({ preventScroll: true })
+    } else if (!menu?.matches(':focus-within')) {
+      await focusMenu()
+    }
     pendingSettingUpdateCount--
   }
 }

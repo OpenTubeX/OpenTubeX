@@ -76,6 +76,11 @@
   text-decoration: inherit;
 }
 
+.navOption:focus-visible,
+.navChannel:focus-visible {
+  z-index: 2;
+}
+
 .navOption:hover,
 .navChannel:hover {
   background-color: var(--side-nav-hover-color);

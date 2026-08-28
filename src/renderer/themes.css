@@ -16,6 +16,7 @@ body {
   --dropdown-item-hover-text-color: var(--scrollbar-text-color-hover);
   --selection-background-color: var(--primary-color);
   --selection-text-color: var(--text-with-main-color);
+  --focus-ring-contrast-color: #000;
 
   /*
     This works because CSS variables are just a find and replace and
@@ -63,6 +64,13 @@ body {
 ::selection {
   color: var(--selection-text-color);
   background-color: var(--selection-background-color);
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -3px;
+  border-radius: calc(4px * var(--ui-roundness));
+  box-shadow: inset 0 0 0 1px var(--focus-ring-contrast-color);
 }
 
 input[type='search']::-webkit-search-cancel-button {
@@ -159,6 +167,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .everforestDarkHard,
 .everforestDarkMedium,
 .everforestDarkLow {
+  --focus-ring-contrast-color: #fff;
   --primary-shadow-color: rgb(0 0 0 / 75%);
   --members-only-color: #55c86b;
 
