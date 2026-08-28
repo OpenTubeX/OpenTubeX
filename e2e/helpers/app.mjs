@@ -18,6 +18,7 @@ const BASE_SETTINGS = {
   externalLinkHandling: 'doNothing',
   confirmCloseApp: false,
   confirmCloseWindowWithMultipleTabs: false,
+  useAITranslationCompletions: false,
   // Desktop-sized window so the responsive layout doesn't collapse into
   // its mobile variant (which hides the search bar, among other things).
   bounds: { x: 0, y: 0, width: 1600, height: 900, maximized: false }
