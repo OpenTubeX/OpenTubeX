@@ -121,7 +121,7 @@ import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const SPONSORBLOCK_HIGHLIGHT_LABEL_PLAYBACK_MS = 5000
 const SPONSORBLOCK_SEGMENT_START_TOLERANCE_SECONDS = 0.1
-const SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS = 150
+const SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS = 500
 const SPONSORBLOCK_SKIP_POLL_INTERVAL_MS = 4
 const SPONSORBLOCK_TERMINAL_OUTRO_TOLERANCE_SECONDS = 1
 const AB_REPEAT_MIN_RANGE_SECONDS = 0.05
@@ -1865,12 +1865,15 @@ export default defineComponent({
     let sponsorBlockNotFoundRefetchTimeout = null
     let sponsorBlockSkipScheduleTimeout = null
     let sponsorBlockSkipScheduleInterval = null
+    let sponsorBlockSkipScheduleTaskController = null
 
     function cancelSponsorBlockSkipSchedule() {
       clearTimeout(sponsorBlockSkipScheduleTimeout)
       clearInterval(sponsorBlockSkipScheduleInterval)
+      sponsorBlockSkipScheduleTaskController?.abort()
       sponsorBlockSkipScheduleTimeout = null
       sponsorBlockSkipScheduleInterval = null
+      sponsorBlockSkipScheduleTaskController = null
     }
 
     function clearSponsorBlockNotFoundRefetchTimeout() {
@@ -2857,11 +2860,11 @@ export default defineComponent({
     }
 
     function startSponsorBlockSkipPolling(segment) {
-      sponsorBlockSkipScheduleInterval = setInterval(() => {
+      function checkBoundary() {
         const videoElement = video.value
         if (!videoElement || videoElement.paused || videoElement.ended) {
           cancelSponsorBlockSkipSchedule()
-          return
+          return false
         }
 
         const currentTime = videoElement.currentTime
@@ -2869,14 +2872,47 @@ export default defineComponent({
           const remainingMs = (segment.startTime - currentTime) * 1000 / videoElement.playbackRate
           if (remainingMs > SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS) {
             scheduleSponsorBlockSkip()
+            return false
           }
-          return
+          return true
         }
 
         cancelSponsorBlockSkipSchedule()
         skipSponsorBlockSegments(currentTime)
         scheduleSponsorBlockSkip()
-      }, SPONSORBLOCK_SKIP_POLL_INTERVAL_MS)
+        return false
+      }
+
+      function scheduleTaskCheck() {
+        return scheduleSponsorBlockSkipTask(() => {
+          if (checkBoundary()) {
+            scheduleTaskCheck()
+          }
+        }, SPONSORBLOCK_SKIP_POLL_INTERVAL_MS)
+      }
+
+      if (!scheduleTaskCheck()) {
+        sponsorBlockSkipScheduleInterval = setInterval(checkBoundary, SPONSORBLOCK_SKIP_POLL_INTERVAL_MS)
+      }
+    }
+
+    function scheduleSponsorBlockSkipTask(callback, delayMs) {
+      if (typeof window.scheduler?.postTask !== 'function') {
+        return false
+      }
+
+      const controller = sponsorBlockSkipScheduleTaskController ?? new AbortController()
+      sponsorBlockSkipScheduleTaskController = controller
+      window.scheduler.postTask(callback, {
+        delay: delayMs,
+        priority: 'user-blocking',
+        signal: controller.signal
+      }).catch((error) => {
+        if (error !== controller.signal.reason) {
+          console.error(error)
+        }
+      })
+      return true
     }
 
     function scheduleSponsorBlockSkip() {
@@ -2908,10 +2944,15 @@ export default defineComponent({
         return
       }
 
-      sponsorBlockSkipScheduleTimeout = setTimeout(() => {
-        sponsorBlockSkipScheduleTimeout = null
-        startSponsorBlockSkipPolling(segment)
-      }, delayMs - SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS)
+      if (!scheduleSponsorBlockSkipTask(
+        () => startSponsorBlockSkipPolling(segment),
+        delayMs - SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS
+      )) {
+        sponsorBlockSkipScheduleTimeout = setTimeout(() => {
+          sponsorBlockSkipScheduleTimeout = null
+          startSponsorBlockSkipPolling(segment)
+        }, delayMs - SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS)
+      }
     }
 
     function syncSponsorBlockMuteSegments(currentTime, autoMuteEnabled = true) {
