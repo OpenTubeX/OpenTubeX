@@ -28,6 +28,11 @@
             :icon="['fas', 'download']"
             @click="exportTheme"
           />
+          <FtIconButton
+            :title="t('Settings.Theme Settings.Custom Theme.Share Theme')"
+            :icon="['fas', 'share-alt']"
+            @click="shareTheme"
+          />
         </div>
       </div>
       <div class="themeSources">
@@ -158,7 +163,9 @@ import {
   saveCustomTheme,
 } from '../../helpers/customTheme'
 import { colors } from '../../helpers/colors'
-import { readFileWithPicker, showToast, writeFileWithPicker } from '../../helpers/utils'
+import { openExternalLink, readFileWithPicker, showToast, writeFileWithPicker } from '../../helpers/utils'
+
+const CUSTOM_THEME_DISCUSSION_URL = 'https://github.com/OpenTubeX/OpenTubeX/discussions/new'
 
 const props = defineProps({
   open: {
@@ -580,6 +587,43 @@ async function exportTheme() {
     }
   } catch (error) {
     showError(t('Settings.Theme Settings.Custom Theme.Unable to Export'), error)
+  }
+}
+
+async function shareTheme() {
+  try {
+    const theme = normalizeCustomTheme(draft)
+    const themeJson = JSON.stringify(theme, null, 2)
+    const longestBacktickRun = Math.max(
+      2,
+      ...Array.from(themeJson.matchAll(/`+/g), match => match[0].length)
+    )
+    const codeFence = '`'.repeat(longestBacktickRun + 1)
+    const body = [
+      `## ${t('Settings.Theme Settings.Custom Theme.Share Description Heading')}`,
+      '',
+      `<!-- ${t('Settings.Theme Settings.Custom Theme.Share Description Prompt')} -->`,
+      '',
+      `## ${t('Settings.Theme Settings.Custom Theme.Share Screenshots Heading')}`,
+      '',
+      `<!-- ${t('Settings.Theme Settings.Custom Theme.Share Screenshots Prompt')} -->`,
+      '',
+      '<details>',
+      `<summary>${t('Settings.Theme Settings.Custom Theme.Share Code Summary')}</summary>`,
+      '',
+      `${codeFence}json`,
+      themeJson,
+      codeFence,
+      '',
+      '</details>'
+    ].join('\n')
+    const url = new URL(CUSTOM_THEME_DISCUSSION_URL)
+    url.searchParams.set('category', 'themes')
+    url.searchParams.set('title', theme.name)
+    url.searchParams.set('body', body)
+    await openExternalLink(url.toString())
+  } catch (error) {
+    showError(t('Settings.Theme Settings.Custom Theme.Unable to Share'), error)
   }
 }
 
