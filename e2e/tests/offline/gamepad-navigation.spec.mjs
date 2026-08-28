@@ -111,8 +111,11 @@ test('navigates and activates the interface with a standard gamepad', async ({ a
   await connectMockGamepad(page)
 
   const categories = page.locator('.settingsMenu [data-section]')
-  await categories.first().focus()
+  await page.evaluate(() => document.activeElement?.blur())
+  await pressGamepadButton(page, 'primary')
+  await expect.poll(() => page.evaluate(() => document.activeElement !== document.body)).toBe(true)
 
+  await categories.first().focus()
   await moveGamepadAxis(page, 1, 1)
   await expect(categories.nth(1)).toBeFocused()
   await pressGamepadButton(page, 'down')
@@ -151,6 +154,7 @@ test.describe('at 95% UI scale', () => {
   test('keeps spatial gamepad navigation aligned', async ({ page }) => {
     await goTo(page, 'settings')
     await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(0.95, 2)
+    await page.bringToFront()
     await connectMockGamepad(page)
 
     const categories = page.locator('.settingsMenu [data-section]')
@@ -233,6 +237,7 @@ test('adjusts and leaves sliders and commits select options', async ({ attachScr
 test('keeps a changed quick settings slider focused', async ({ attachScreenshot, page }) => {
   const trigger = page.locator('.profileTrigger')
   await trigger.focus()
+  await page.bringToFront()
   await connectMockGamepad(page)
   await pressGamepadButton(page, 'primary')
 
@@ -251,6 +256,7 @@ test('keeps a changed quick settings slider focused', async ({ attachScreenshot,
 
   await expect(slider).not.toHaveValue(initialValue)
   await expect(slider).toBeFocused()
+  await expect.poll(() => slider.evaluate(element => element.matches(':focus-visible'))).toBe(true)
   await expect(slider).toHaveAttribute('data-gamepad-active', 'true')
   await expect(menu).not.toBeFocused()
   await attachScreenshot('active quick settings gamepad slider')
@@ -270,6 +276,7 @@ test.describe('quick settings changed-setting controls', () => {
   test('keeps quick settings open after resetting with a gamepad', async ({ page }) => {
     const trigger = page.locator('.profileTrigger')
     await trigger.focus()
+    await page.bringToFront()
     await connectMockGamepad(page)
     await pressGamepadButton(page, 'primary')
 
@@ -355,6 +362,7 @@ test.describe('configured gamepad highlight roundness', () => {
 test('uses the menu button to toggle playback', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
+  await page.bringToFront()
   await connectMockGamepad(page)
 
   await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
@@ -367,6 +375,7 @@ test('uses the menu button to toggle playback', async ({ app, page }) => {
 test('backs out of the player menu without leaving the video', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
+  await page.bringToFront()
   await connectMockGamepad(page)
 
   const pageUrl = page.url()

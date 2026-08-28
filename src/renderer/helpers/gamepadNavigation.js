@@ -216,7 +216,11 @@ export function moveGamepadFocus(direction) {
 
 export function activateGamepadFocus() {
   const activeElement = document.activeElement
-  if (!(activeElement instanceof HTMLElement) || !isVisible(activeElement)) {
+  if (
+    !(activeElement instanceof HTMLElement) ||
+    activeElement === document.body ||
+    !isVisible(activeElement)
+  ) {
     return moveGamepadFocus('down')
   }
 

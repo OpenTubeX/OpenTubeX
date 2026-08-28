@@ -689,7 +689,7 @@ async function runSettingUpdate(update) {
   } finally {
     await nextTick()
     if (focusTarget?.isConnected && menu?.contains(focusTarget)) {
-      focusTarget.focus({ preventScroll: true })
+      focusTarget.focus({ preventScroll: true, focusVisible: true })
     } else if (!menu?.matches(':focus-within')) {
       await focusMenu()
     }
