@@ -1,0 +1,1479 @@
+# Optional AI-generated translations for keys missing from ../ja.yaml.
+Color Picker:
+  Hue: 色相
+  Opacity: 不透明度
+  Backdrop Blur: 背景のぼかし
+  Hex Color: 16進数カラー
+  Apply Color: 適用
+  Reset Color: リセット
+  Copy Color: コピー
+  Copy From Another Color: 別の色からコピー
+  Color Copied: 色をコピーしました
+  Invalid Color: 有効な16進数カラーを入力してください
+  Clipboard Unavailable: クリップボードを利用できません
+  Saturation and Brightness: 彩度と明度
+New Tab: 新しいタブ
+Maximize: 最大化
+Restore: 元に戻す
+Close Tab: タブを閉じる
+Close Confirmation:
+  Title: OpenTubeXを終了しますか？
+  Message: OpenTubeXを終了してもよろしいですか？
+  Quit: 終了
+  Never Ask Again: 今後は確認しない
+Close Window Confirmation:
+  Title: ウィンドウを閉じますか？
+  Message: このウィンドウには{count}個のタブがあります。閉じてもよろしいですか？
+  Close Window: ウィンドウを閉じる
+Confirmations:
+  Never Ask Again: 今後は確認しない
+  Settings Hint: この確認は「設定」→「一般」→「事前に確認…」で再度有効にできます
+Close Multiple Tabs Confirmation:
+  Title: 複数のタブを閉じますか？
+  Message: '{count}個のタブを閉じます。'
+  Close Tabs: '{count}個のタブを閉じる'
+Load Multiple Tabs Confirmation:
+  Title: 複数のタブを読み込みますか？
+  Message: '{count}個のタブを読み込みます。'
+  Load Tabs: '{count}個のタブを読み込む'
+Unload Multiple Tabs Confirmation:
+  Title: 複数のタブを解放しますか？
+  Message: '{count}個のタブをメモリから解放します。'
+  Unload Tabs: '{count}個のタブを解放する'
+Use Vertical Tabs: 縦型タブを使用
+Use Horizontal Tabs: 横型タブを使用
+Resize Tab Bar: タブバーのサイズを変更
+Find in page: ページ内検索
+Previous match: 前の一致
+Next match: 次の一致
+Close find bar: 検索バーを閉じる
+No matches: 一致する項目はありません
+Version {versionNumber} is now available.: バージョン{versionNumber}を利用できます。
+See changes and update: 変更内容を確認して更新
+Dismiss: 閉じる
+Update to {version}: バージョン{version}に更新
+Global:
+  Ambient Mode: アンビエントモード
+  Loading More: さらに読み込み中
+  New: 新着
+Search Listing:
+  Label:
+    Members Only: メンバー限定
+Stats:
+  Stats: 統計
+  Watch time summary: 視聴時間の概要
+  Today: 今日
+  This week: 今週
+  Total watch time: 合計視聴時間
+  Daily average: 1日平均
+  So far today: 今日の現時点まで
+  Since: '{day}以降'
+  All recorded time: 記録された全期間
+  Per calendar day: 暦日あたり
+  Day by day: 日別
+  Highest: '最長: {duration}'
+  Week by week: 週別
+  Last 14 days: 過去14日間
+  Last 8 weeks: 過去8週間
+  Daily chart aria: 過去14日間の日別視聴時間
+  Weekly chart aria: 過去8週間の週別視聴時間
+  No data: 動画を視聴すると、ここに視聴時間が表示されます。
+  Estimate note: この更新より前の視聴時間は、保存された再生位置から推定されています。
+  Adjust imported watch time: インポートした視聴時間を調整
+  Imported watch time: インポートした視聴時間
+  Imported watch time explanation: 普段使用していた再生速度を選択してください。インポートした動画の長さをこの速度で割り、実際の視聴時間を推定します。
+  Playback speed: 再生速度
+  Channel speed note: チャンネルごとの再生速度が保存されている場合は、そちらを使用します。
+  Apply playback speed: 再生速度を適用
+  Imported watch time adjusted: インポートした視聴時間を調整しました
+  Reset statistics: 統計をリセット
+  Reset: リセット
+  Reset confirmation: すべての視聴統計をリセットしてもよろしいですか？この操作は元に戻せません。
+  Reset success: 視聴統計をリセットしました
+  Less than a minute: < 1分
+  Minutes: '{minutes}分'
+  Hours: '{hours}時間'
+  Hours and minutes: '{hours}時間{minutes}分'
+Subscriptions:
+  Refreshing Subscription Videos: 登録チャンネルの動画を更新中
+  Refreshing Subscription Shorts: 登録チャンネルのショート動画を更新中
+  Refreshing Subscription Live Streams: 登録チャンネルのライブ配信を更新中
+  Refreshing Subscription Posts: 登録チャンネルの投稿を更新中
+  New Content: 新着コンテンツ
+  New Feed Refresh Warning Title: 登録チャンネルのすべてのフィードを更新しますか？
+  New Feed Refresh Warning: RSSを使用せずに{count}件の登録チャンネルですべてのコンテンツを更新すると、時間がかかる場合があります。続行しますか？
+  New Since Last Refresh: 前回の更新以降の新着
+  Mark as Seen: 確認済みにする
+  Mark All as Seen: すべて確認済みにする
+  No New Content: 新着コンテンツはありません。
+  New Content Tabs: 新着コンテンツのタブ
+  Show Tabbed View: タブ表示
+  Show Combined View: まとめて表示
+  Newest First: 新しい順
+  Oldest First: 古い順
+Trending:
+  Load Error: トレンドを読み込めませんでした。
+  Unsupported Backend: トレンドにはLocal APIが必要です。Local APIを選択するか、バックエンドのフォールバックを有効にしてください。
+Most Popular Feed Empty: このInvidiousインスタンスの「人気」フィードは空です。
+Feed:
+  Cancel Refresh: 更新をキャンセル
+  Next Auto Refresh: '次回の自動更新: {date}'
+User Playlists:
+  Load More Playlists: プレイリストをさらに読み込む
+  Save to: 保存先…
+  Quick Bookmark Icon: クイックブックマークのアイコン
+  Custom Emoji: カスタム絵文字
+  Choose Image: 画像を選択
+  Use Bookmark Icon: ブックマークアイコンを使用
+  SinglePlaylistView:
+    Retry: 再試行
+    This playlist could not be loaded.: このプレイリストを読み込めませんでした。
+    More videos could not be loaded.: 動画をさらに読み込めませんでした。
+History:
+  Mark All As Watched: すべて視聴済みにする
+  Mark All As Watched Confirmation: 履歴内のすべての動画を視聴済みにしてもよろしいですか？
+  All History Marked as Watched: 履歴内のすべての動画を視聴済みにしました
+  Delete Old History: 古い履歴を削除
+  Select History Age: 削除する履歴の経過期間を選択してください。
+  Delete Entries Older Than: 次の期間より古い履歴を削除
+  Number of Days: 日数
+  History Cleanup Warning: 条件に一致する視聴履歴が完全に削除されます。
+  1 Day: 1日
+  1 Week: 1週間
+  1 Month: 1か月
+  3 Months: 3か月
+  1 Year: 1年
+  Custom: カスタム
+  History Older Than Days Removed: '{days}日より古い視聴履歴を削除しました'
+Settings:
+  Quick Settings:
+    Quick Settings: クイック設定
+    Appearance: 外観
+    Playback: 再生
+    Content: コンテンツ
+    Language and Region: 言語と地域
+    All Settings: すべての設定
+    Profile Selector Hint: プロフィールアイコンを右クリックしてプロフィールを切り替えることもできます
+  Categories:
+    General Description: 言語、起動、タブ、アプリの動作
+    Appearance: 外観
+    Appearance Description: テーマ、レイアウト、サムネイル
+    Content appearance: 動画一覧とサムネイル
+    Layout: レイアウト
+    Playback Description: プレーヤー、字幕、チャンネル設定
+    Subscriptions Description: フィードの更新と表示オプション
+    Downloads Description: フォルダー、テンプレート、自動処理ルール
+    Distraction Free Description: コンテンツの非表示と視聴制限
+    Add-ons: アドオン
+    Add-ons Description: SponsorBlock、DeArrow、低評価、吹き替え翻訳
+    Privacy Description: 視聴時のプライバシーとアクセス制御
+    Online activity: オンラインでの動作
+    Data And Storage Description: インポート、エクスポート、ディスク使用量、クリーンアップ
+    Sync Description: デバイス間で設定とデータを同期
+    Advanced: 詳細設定
+    Advanced Description: プロバイダー、外部アプリ、ネットワーク
+    Alternative providers: 動画とメタデータのプロバイダー
+  Highlight Changed Settings: 既定値から変更した設定を強調表示
+  Reset Setting to Default: この設定を既定値に戻す
+  Performance Impact:
+    Show Performance Impact: パフォーマンスへの影響を表示
+    Moderate: 中程度の影響
+    High: 大きな影響
+    Description: この設定により{resources}の使用量が増える場合があります
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: メモリ
+      Network: ネットワーク
+      Disk: ディスク
+  General Settings:
+    Update Relative Timestamps: 相対日時を自動更新
+    Stream Extraction Method:
+      Stream Extraction Method: ストリーム抽出方式
+      yt-dlp: yt-dlp
+      Built-in: 内蔵
+    Confirm Before: 事前に確認…
+    Confirmation Options:
+      Closing App: OpenTubeXを終了するとき
+      Closing Window: 複数のタブがあるウィンドウを閉じるとき
+      Closing Tabs: 複数のタブを閉じるとき
+      Loading Tabs: 複数のタブを読み込むとき
+      Unloading Tabs: 複数のタブを解放するとき
+    Remember Tab Navigation History: タブの移動履歴を記憶
+    New Tab Position:
+      New Tab Position: 新しいタブの位置
+      At the end: 末尾
+      After current tab: 現在のタブの後ろ
+      After current tab in opened order: 現在のタブの後ろに開いた順で配置
+    Tab Close Focus:
+      Tab Close Focus: タブを閉じた後
+      Previous tab: 前のタブを選択
+      Next tab: 次のタブを選択
+    Startup Behavior:
+      Startup Behavior: 起動時
+      Load all tabs: すべてのタブを読み込む
+      Load previously loaded tabs: 前回読み込まれていたタブを読み込む
+      Load last active tab: 最後に使用したタブを読み込む
+      Start with an empty session: 空のセッションで開始
+    Use AI Translation Completions: 未翻訳部分をAI生成テキストで補完
+    Reduced Motion:
+      Reduced Motion: 視覚効果を減らす
+      System: システム設定
+      Force On: 常に有効
+      Force Off: 常に無効
+    Comment Translation:
+      Title: コメントの翻訳
+      Enable: コメントの翻訳を有効化
+      Never Translate: 次の言語のコメントは翻訳しない
+      Choose Language: 言語を選択
+      Description: アプリの表示言語のコメントはすでに除外されています。ほかに読める言語を追加してください。
+      Remove Language: '{language}のコメントを再び翻訳する'
+    Avoid translation:
+      Avoid translation: 動画の原文を優先
+      Disabled: 無効
+      Watch Only: 動画画面のみ
+      Entire App: アプリ全体
+    Playlist View Type:
+      Playlist View Type: プレイリストの表示形式
+    Show Thumbnail Previews: サムネイルのプレビューを表示
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: サムネイルの追加操作ボタン
+      None: なし
+      Mark as Watched: 視聴済みにする
+      Copy YouTube Link: YouTubeリンクをコピー
+      Open in YouTube: YouTubeで開く
+  Context Menu Search Settings:
+    Context Menu Search Settings: コンテキストメニュー検索
+    Description: 選択したテキストを右クリックしたときに表示する検索エンジンを選択します。検索結果は既定のブラウザーで開きます。
+    Icon Hint: 検索エンジンを有効にすると、そのサイトに接続してファビコンを読み込みます。
+    Engine Name: 検索エンジン名
+    Search URL: 検索URL
+    URL Hint: エンコードした選択テキストをURLに挿入する位置に%sを使用してください。
+    Add Custom Engine: カスタム検索エンジンを追加
+    Add Engine: 検索エンジンを追加
+    Remove Engine: '{engine}を削除'
+    Invalid Engine: 名前と、%sを含む有効なHTTPまたはHTTPSの検索URLを入力してください。
+    Engine Limit: カスタム検索エンジンは{count}件まで追加できます。
+  Theme Settings:
+    Move Downloads to App Header: ダウンロードをアプリのヘッダーに移動
+    Move Settings to App Header: 設定をアプリのヘッダーに移動
+    Hide Side Bar on Watch Pages: 動画再生ページでサイドバーを非表示
+    UI Roundness: UIの丸み
+    Scrollbar Width: スクロールバーの幅
+    Animation Speed: アニメーション速度
+    Thumbnail Size: サムネイルのサイズ
+    Show Tab Icons: タブのアイコンを表示
+    Load Missing Tab Icons: 未読み込みのタブアイコンを読み込む
+    Loading Missing Tab Icons: 未読み込みのタブアイコンを読み込み中…
+    No Missing Tab Icons: 対応しているタブアイコンはすべて読み込み済みです
+    Loaded Tab Icons: '読み込んだタブアイコン: {count}件'
+    Loaded Tab Icons With Failures: タブアイコンを{loaded}件読み込みました。{failed}件は読み込めませんでした
+    Show Tab Previews: タブのプレビューを表示
+    Use Fixed Tab Width: 横表示でタブの幅を固定
+    Tab Width: タブの幅
+    Tab Layout:
+      Tab Layout: タブの配置
+      Horizontal Top: 上部に横表示
+      Horizontal Bottom: 下部に横表示
+      Vertical Left: 左側に縦表示
+      Vertical Right: 右側に縦表示
+    Show Toast Timeout Indicator: トーストの表示残り時間を表示
+    Use Grid Player Menu: プレーヤーメニューをグリッド表示
+    Show Progress as Notification: 進行状況を通知として表示
+    Operation in Progress: 処理中
+    Toast Position:
+      Toast Position: トーストの位置
+      Bottom Left: 左下
+      Bottom Center: 下中央
+      Bottom Right: 右下
+      Top Left: 左上
+      Top Center: 上中央
+      Top Right: 右上
+    Icon Pack:
+      Icon Pack: アイコンパック
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: アプリのフォント
+      System Default: システムの既定値
+      Unable to Load: インストール済みのシステムフォントを読み込めませんでした
+    Always Show Scrollbars: スクロールバーを常に表示
+    Base Theme:
+      Custom: カスタム
+    Light Theme: ライトテーマ
+    Dark Theme: ダークテーマ
+    Custom Theme:
+      Create Custom Theme: カスタムテーマを作成
+      Edit Custom Theme: カスタムテーマを編集
+      Custom Theme Creator: カスタムテーマ作成
+      Theme Name: テーマ名
+      Based On: ベーステーマ
+      Import Theme: テーマをインポート
+      Export Theme: テーマをエクスポート
+      Share Theme: テーマを共有
+      Share Description Heading: 説明
+      Share Description Prompt: テーマの説明と、使用前に知っておくべきことを入力してください。
+      Share Screenshots Heading: スクリーンショット
+      Share Screenshots Prompt: 1枚以上のスクリーンショットをここにドラッグ＆ドロップしてください。
+      Share Code Summary: テーマJSON
+      Delete Theme: テーマを削除
+      Delete Theme Confirmation: 「{name}」を削除しますか？この操作は元に戻せません。
+      Save and Apply: 保存して適用
+      Discard Changes: 変更を破棄
+      Reset Colors: ベーステーマに戻す
+      Theme File: OpenTubeXテーマファイル
+      Theme Saved: カスタムテーマを保存して適用しました
+      Theme Imported: テーマをエディターにインポートしました
+      Theme Exported: テーマをエクスポートしました
+      Theme Deleted: カスタムテーマを削除しました
+      Unable to Load: カスタムテーマを読み込めませんでした
+      Unable to Save: カスタムテーマを保存できませんでした
+      Unable to Export: カスタムテーマをエクスポートできませんでした
+      Unable to Share: カスタムテーマを共有できませんでした
+      Unable to Delete: カスタムテーマを削除できませんでした
+      Invalid Theme File: カスタムテーマファイルが無効です
+      Colors:
+        Main text: メインテキスト
+        Secondary text: サブテキスト
+        Subtle text: 控えめなテキスト
+        Borders and dividers: 境界線と区切り線
+        Subtle surfaces and indicators: 控えめな表面とインジケーター
+        Title text: タイトルテキスト
+        Selected text background: 選択テキストの背景
+        Selected text: 選択テキスト
+        Logo icon: ロゴアイコン
+        Logo text: ロゴテキスト
+        Logo hover: ロゴのホバー
+        Logo pressed: ロゴの押下時
+        Page background: ページの背景
+        Card background: カードの背景
+        Secondary card background: サブカードの背景
+        Favorite icon: お気に入りアイコン
+        Error color: エラーの色
+        Scrollbar thumb: スクロールバーのつまみ
+        Scrollbar thumb hover: スクロールバーのつまみのホバー
+        Scrollbar thumb pressed: スクロールバーのつまみの押下時
+        Dropdown item hover text: ドロップダウン項目のホバーテキスト
+        Dropdown item hover background: ドロップダウン項目のホバー背景
+        Navigation and panel background: ナビゲーションとパネルの背景
+        Neutral item hover and focus background: 通常項目のホバー・フォーカス背景
+        Neutral item hover and focus text and icons: 通常項目のホバー・フォーカス時のテキストとアイコン
+        Neutral item pressed background: 通常項目の押下時の背景
+        Neutral item pressed text and icons: 通常項目の押下時のテキストとアイコン
+        Header button hover and focus background: ヘッダーボタンのホバー・フォーカス背景
+        Header button hover and focus text and icons: ヘッダーボタンのホバー・フォーカス時のテキストとアイコン
+        Header button pressed background: ヘッダーボタンの押下時の背景
+        Header button pressed text and icons: ヘッダーボタンの押下時のテキストとアイコン
+        Colored header button hover and focus background: カラーヘッダーボタンのホバー・フォーカス背景
+        Colored header button hover and focus text and icons: カラーヘッダーボタンのホバー・フォーカス時のテキストとアイコン
+        Colored header button pressed background: カラーヘッダーボタンの押下時の背景
+        Colored header button pressed text and icons: カラーヘッダーボタンの押下時のテキストとアイコン
+        Search and dropdown background: 検索とドロップダウンの背景
+        Settings search background: 設定検索の背景
+        Instance menu: インスタンスメニュー
+        Input background: 入力欄の背景
+        Shadow color: 影の色
+        Primary controls and highlights: メイン操作と強調表示
+        Primary control hover and focus: メイン操作のホバー・フォーカス時
+        Primary control pressed: メイン操作の押下時
+        Text and icons on primary controls: メイン操作上のテキストとアイコン
+        Secondary controls and highlights: サブ操作と強調表示
+        Secondary control hover and focus: サブ操作のホバー・フォーカス時
+        Secondary control pressed: サブ操作の押下時
+        Light secondary color: 明るいサブカラー
+        Visited accent: 訪問済みのアクセント
+        Text and icons on secondary controls: サブ操作上のテキストとアイコン
+        Links: リンク
+        Visited links: 訪問済みリンク
+        Destructive action: 破壊的な操作
+        Destructive hover and focus: 破壊的な操作のホバー・フォーカス時
+        Destructive pressed: 破壊的な操作の押下時
+        Text and icons on destructive actions: 破壊的な操作上のテキストとアイコン
+  Player Settings:
+    Automatically Open Chapters: チャプターを自動的に開く
+    Caption Appearance:
+      Caption Appearance: 字幕の外観
+      Captions: 字幕
+      Preferred Language: 優先する字幕言語
+      Application Language: アプリの表示言語
+      Enable Translations: 字幕の翻訳を有効化
+      Text Color: 文字色
+      Background Color: 背景色
+      Background Opacity: 背景の不透明度
+      Font Size: フォントサイズ
+      Vertical Position: 垂直位置
+      Edge Color: 縁取りの色
+      Anchor:
+        Anchor: 配置基準
+        Top Left: 左上
+        Top Center: 上中央
+        Top Right: 右上
+        Bottom Left: 左下
+        Bottom Center: 下中央
+        Bottom Right: 右下
+      Edge Style:
+        Edge Style: 縁取りのスタイル
+        None: なし
+        Outline: 輪郭線
+        Drop Shadow: ドロップシャドウ
+      Reset: 字幕の外観をリセット
+    Auto Picture in Picture:
+      Auto Picture in Picture: 自動的にピクチャーインピクチャーに切り替える
+      On Tab Change: タブを切り替えたとき
+      On Window Minimize: ウィンドウを最小化したとき
+      On Window Hide: ウィンドウがフォーカスを失うか、別のウィンドウに切り替えたとき
+      Wayland Minimize Unsupported: Waylandはウィンドウの最小化をアプリに通知しないため、この条件は利用できません。最小化も対象になる「ウィンドウがフォーカスを失うか、別のウィンドウに切り替えたとき」を使用してください。
+    Scroll Mini Player:
+      Scroll Mini Player: スクロール時のミニプレーヤー
+      When Scrolling Down: 下へスクロールしたときもミニプレーヤーを画面に表示
+      On All Tabs: タブを切り替えてもミニプレーヤーを画面に表示
+    Multiply Seek Interval by Playback Rate: シーク間隔を再生速度に合わせる
+    Show Playback Rate Adjusted Timestamp: 再生速度を反映した時刻を表示
+    Use YouTube-style Shorts: YouTube形式のショート動画を使用
+    Loop Shorts: ショート動画をループ再生
+    Remember Volume: 音量を記憶
+    Skip Silence: 無音部分をスキップ
+    Show Skip Silence Toggle: 無音スキップの切り替えを表示
+    Enable Skip Silence by Default: 無音スキップを既定で有効化
+    Enable Video Zoom: 動画のズームを有効化
+    Voice-over Translation:
+      Title: 吹き替え翻訳
+      Attribution: （Yandex提供）
+      Enable: 吹き替え翻訳を有効化
+      Prepare in Background: バックグラウンドで吹き替え翻訳の準備を開始
+      Background Preparation Tooltip: 対応動画が読み込まれると、その動画のID、長さ、選択した言語を翻訳サービスに送信します。
+      Language: 吹き替え翻訳の言語
+      Supported Source Languages: '対応する原文言語: ロシア語、英語、中国語、韓国語、リトアニア語、ラトビア語、アラビア語、フランス語、イタリア語、スペイン語、ドイツ語、日本語。'
+      Voice Volume: 翻訳音声の音量
+      Original Volume: 元の音声の音量
+      Russian: ロシア語
+      English: 英語
+      Kazakh: カザフ語
+    Hold to Double Playback Speed: 長押しで2倍速再生
+    Use Quick Playback Speed Bar: クイック再生速度バーを使用
+    Customize Quick Playback Speed Bar: クイック再生速度バーをカスタマイズ
+    Quick Playback Speed Bar Manager: クイック再生速度バー
+    Add Playback Speed: 再生速度を追加
+    Reset Quick Playback Speed Bar: 既定値に戻す
+    Playback Speed Name: 名前
+    Edit Playback Speed Name: 再生速度の名前を編集
+    Use Automatic Playback Speed Name: 自動生成した再生速度名を使用
+    Reorder Playback Speed: ドラッグして再生速度を並べ替え
+    Playback Speed: 再生速度
+    Parallel Segment Loading: セグメントを並列読み込み
+  Channel Settings:
+    Channel Settings: チャンネル設定
+    Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。
+    Enable Playback Speed: 再生速度を有効化
+    Enable Video Quality: 動画品質を有効化
+    Enable Subtitles State: 字幕の状態を有効化
+    Enable Volume: 音量を有効化
+    Auto Update: プレーヤーのオプションで変更したときに自動更新
+    Auto Update Subtitles: 字幕を切り替えたときに自動更新
+    Auto Update Volume: 音量を変更したときに自動更新
+    Manage Saved Channels: 保存済みチャンネルを管理（{channelCount}件）
+    Saved Channels: 保存済みのチャンネル設定
+    Enable Saved Channel Settings Sync: 保存済みのチャンネル設定を同期
+    Disable Saved Channel Settings Sync: 保存済みのチャンネル設定の同期を停止
+    Search Channels: チャンネルを検索
+    No Saved Channels: チャンネル固有の設定はまだ保存されていません
+    No Matching Channels: 検索に一致するチャンネルはありません
+    Forget Channel: このチャンネルの設定をすべて削除
+    Forget Value: この設定を削除
+    Add Setting: このチャンネルで別の設定を記憶
+    Video Quality: 動画品質
+    Subtitles Enabled: 字幕を有効化
+    Volume: 音量
+  Download Settings:
+    Download Settings: ダウンロード
+    Enable Downloads: ダウンロードを有効化
+    Managed Tools Download Started Template: '必要な外部ソフトウェアが見つかりません: {tools}。管理対象のコピーをダウンロード中…'
+    Managed Tools Download Finished Template: '{tools}のダウンロードが完了しました'
+    Managed Tools Update Started Template: '{tools}の更新が見つかりました。ダウンロード中…'
+    Managed Tools Update Finished Template: '{tools}の更新が完了しました'
+    Managed Tools Update Available Template: '{tools}の更新を利用できます。'
+    Update Managed Tools: 更新
+    Managed Tools Download Error Template: '管理対象ツールをダウンロードできませんでした: {errors}'
+    Download Folder: ダウンロードフォルダー
+    Global Additional yt-dlp Arguments: 共通の追加yt-dlp引数
+    Concurrent Downloads: 同時ダウンロード数
+    Bandwidth Limit: 帯域幅の上限（KiB/秒、0で無制限）
+    Choose Download Folder: ダウンロードフォルダーを選択
+    Download Templates: ダウンロードテンプレート
+    Manage Download Templates: ダウンロードテンプレートを管理（{templateCount}件）
+    New Template: 新しいテンプレート
+    Template Source: 編集またはベースとして使用するテンプレート
+    Built-in Template: '{name}（内蔵）'
+    Custom Template Name: '{name}（カスタム）'
+    Create Template Copy: コピーを作成
+    Template Copy Name: '{name}のコピー'
+    Automatic Downloads: 自動ダウンロード
+    Manage Automatic Downloads: 自動ダウンロードを管理（{channelCount}件）
+    Automatic Downloads Description: 登録チャンネルごとにダウンロードテンプレートとフィルターを選択します。フィードの更新時に、条件に一致する動画をバックグラウンドでダウンロードします。
+    Automatic Downloads New Only: チャンネルを有効にすると、次に公開される新しい動画から対象になります。既存の動画や過去の動画はダウンロードされません。
+    Automatic Downloads No Channels: 自動ダウンロードを設定する前にチャンネルを登録してください。
+    No Matching Automatic Download Channels: 検索に一致するチャンネルはありません。
+    Automatic Downloads Livestreams: ライブ配信
+    Minimum Duration Seconds: 最短時間（秒）
+    Maximum Duration Seconds: 最長時間（秒）
+    Minimum File Size MB: 最小ファイルサイズ（MB）
+    Maximum File Size MB: 最大ファイルサイズ（MB）
+    Maximum Age Days: 最大経過日数
+    Title Includes: タイトルに含む
+    Title Excludes: タイトルから除外
+    Title Filter Hint: 複数のタイトル条件はコンマで区切ってください。含める条件のいずれかに一致し、除外条件には一つも一致しない動画が対象になります。
+  External Software Settings:
+    External Software Settings: 外部ソフトウェア
+    yt-dlp Source: yt-dlpの入手元
+    yt-dlp Channel: yt-dlpのチャンネル
+    Sources:
+      System: システム（PATHまたはカスタムパス）
+      Managed: OpenTubeXで管理
+    Detected Version Template: '検出したyt-dlpのバージョン: {version}'
+    Managed Not Downloaded: yt-dlpはまだダウンロードされていません。下のボタンをクリックしてダウンロードしてください。
+    System yt-dlp Missing Warning: システムにyt-dlpが見つかりません。インストールするか、下でカスタムパスを指定するか、入手元を「OpenTubeXで管理」に変更してください。
+    Download yt-dlp: yt-dlpをダウンロード
+    Update yt-dlp: yt-dlpを更新
+    Checking yt-dlp: yt-dlpを確認中…
+    Downloading yt-dlp: yt-dlpをダウンロード中…
+    yt-dlp Downloaded Template: yt-dlp {version}をダウンロードしました
+    yt-dlp Download Error Template: 'yt-dlpのダウンロードに失敗しました: {error}'
+    FFmpeg Source: FFmpegの入手元
+    Detected FFmpeg Version Template: '検出したFFmpegのバージョン: {version}'
+    FFmpeg Managed Not Downloaded: FFmpegはまだダウンロードされていません。下のボタンをクリックしてダウンロードしてください。
+    System FFmpeg Missing Warning: システムにFFmpegが見つかりません。動画と音声の結合や音声変換に必要です。インストールするか、下でカスタムパスを指定するか、入手元を「OpenTubeXで管理」に変更してください。
+    Download FFmpeg: FFmpegをダウンロード
+    Update FFmpeg: FFmpegを更新
+    Checking FFmpeg: FFmpegを確認中…
+    Downloading FFmpeg: FFmpegをダウンロード中…
+    FFmpeg Downloaded Template: FFmpeg {version}をダウンロードしました
+    FFmpeg Download Error Template: 'FFmpegのダウンロードに失敗しました: {error}'
+    Detected FFprobe Version Template: '検出したFFprobeのバージョン: {version}'
+    FFprobe Managed Not Downloaded: FFprobeはまだダウンロードされていません。下のボタンからFFmpegと一緒にダウンロードしてください。
+    System FFprobe Missing Warning: システムにFFprobeが見つかりません。後処理でメディアを検査するために必要です。FFmpegと同じ場所にインストールするか、入手元を「OpenTubeXで管理」に変更してください。
+    Checking FFprobe: FFprobeを確認中…
+    Download FFmpeg and FFprobe: FFmpegとFFprobeをダウンロード
+    Update FFmpeg and FFprobe: FFmpegとFFprobeを更新
+    Downloading FFmpeg and FFprobe: FFmpegとFFprobeをダウンロード中…
+    FFmpeg and FFprobe Downloaded Template: FFmpegとFFprobe {version}をダウンロードしました
+    FFmpeg and FFprobe Download Error Template: 'FFmpegとFFprobeのダウンロードに失敗しました: {error}'
+    Managed Tool Already Current Template: '{tool} {version}は最新です'
+    Managed Tool Updates: 管理対象ツールの更新
+    Update Modes:
+      Automatic: 自動的に更新
+      Ask: 更新前に確認
+      Manual: 手動でのみ更新
+    yt-dlp Executable Path: yt-dlp実行ファイルのパス
+    FFmpeg Executable Path: FFmpeg実行ファイルのパス
+    Restricted Playback Authentication: yt-dlpの再生用Cookie
+    Cookie Source: Cookieの取得元
+    Cookie Sources:
+      None: なし
+      File: ファイル
+      Browser: ブラウザー
+    Cookie File: Cookieファイル
+    Browser for Cookies: Cookieを取得するブラウザー
+    Browser Profile: ブラウザープロフィール（任意）
+    Browser Profile Placeholder: プロフィール名またはパス
+    Select Browser: ブラウザーを選択
+    Always Use Cookies: 常にCookieを使用
+    Restricted Playback Authentication Hint: 既定では、年齢制限またはメンバー限定の動画で「設定済みのCookieを使用して再試行」を選んだ後にのみ、これらのCookieをyt-dlpへ渡します。
+    Restricted Playback Authentication Warning: Googleアカウントでyt-dlpを使用すると、アカウントが一時的または永久に制限される場合があります。
+  Privacy Settings:
+    Automatic History Retention: 履歴の自動保持期間（日）
+    Automatic History Retention Placeholder: 無期限に保持する場合は空欄
+    Automatic History Retention Tooltip: 履歴を無期限に保持する場合は空欄にしてください。日数を保存すると、それより古い履歴を今すぐ削除し、アプリの起動中も自動的に削除します。
+    History Retention Saved: 履歴の保持期間を保存しました
+    Invalid History Retention Days: 0より大きい整数の日数を入力してください
+    Enable Watch Statistics: 視聴統計を有効化
+    Week Starts On: 週の開始曜日
+    Cache Video Metadata: メタデータの履歴
+    Cache Video Metadata Tooltip: 閲覧した動画について、対応している動画メタデータの各バージョンを保存します。対象にはタイトル、サムネイル、説明が含まれます。ディスク使用量が増えるため、既定では無効です。
+    Watched Percentage Threshold: 視聴済みとする割合
+    Watched Percentage Threshold Tooltip: 選択した割合に達し、残り時間が2分以下になると視聴済みになります。0%では再生開始時、100%では再生終了時に視聴済みになります。
+    Clear Video Metadata Cache: 動画メタデータのキャッシュを消去
+    Are you sure you want to clear the video metadata cache?: キャッシュした動画のタイトル、サムネイル、説明を消去してもよろしいですか？
+    Failed to clear video metadata cache: 動画メタデータのキャッシュを消去できませんでした
+    Video metadata cache has been cleared: 動画メタデータのキャッシュを消去しました
+    Video Metadata Cache Size: '動画メタデータのキャッシュ: {size}'
+  Storage Settings:
+    Storage: ストレージ
+    Downloaded Media: 追跡中のダウンロード済みメディア
+    Storage Breakdown: ストレージの内訳
+    Shown Total: 表示項目の合計
+    Calculating: 計算中…
+    Not Available: 正確なサイズを取得できません
+    At Least: '{size}以上'
+    Failed To Read Storage: 一部のストレージサイズを読み取れませんでした
+    Downloaded Media Description: ダウンロード履歴で追跡している動画、音声、字幕ファイルです。
+    Selected Download Folders: ユーザーが選択したダウンロードフォルダー
+    Download History Records: ダウンロード履歴の記録
+    Download History Records Description: '完了したダウンロードの記録は{count}件です。状態とファイルの場所を記録していますが、ダウンロードしたメディア自体は含まれません。'
+    Clear Download History Records: ダウンロード履歴の記録を消去
+    Clear Download History Confirmation: 完了したダウンロードの記録をすべて消去しますか？
+    Download Files Stay On Disk: ダウンロード済みファイルはディスクに残りますが、「ダウンロード」ページには表示されなくなります。
+    Clear Records: 記録を消去
+    Replaceable Caches: 再作成可能なキャッシュ
+    Application Caches: アプリのキャッシュ
+    Browser Caches: ブラウザーのキャッシュ
+    Browser Caches Hint: ChromiumのHTTP、GPU、コード、シェーダー、Service Worker、辞書の各キャッシュです。
+    Stored App Data: 保存済みのアプリデータ
+    Browser Runtime Data: ブラウザーの実行時データ
+    Browser Runtime Data Hint: Chromiumのセッション、ローカルストレージ、Cookie、プライバシーとネットワークの状態、クラッシュファイルです。
+    Subscription Feed Cache: 登録チャンネルとフィードのキャッシュ
+    Subscription Feed Cache Description: 取得した登録チャンネルの動画、ショート動画、ライブ配信、投稿を保存します。次回フィードを更新するとOpenTubeXが再作成します。
+    Clear Subscription Feed Cache: 登録チャンネルとフィードのキャッシュを消去
+    Clear Subscription Feed Cache Confirmation: 登録チャンネルとフィードのキャッシュを消去しますか？
+    Subscription Feed Cache Effect: 更新されるまで登録チャンネルのフィードが空になる場合があります。登録チャンネルとプロフィールは変更されません。
+    Session Search Cache: セッションの検索キャッシュ
+    In Memory: メモリ内
+    Session Search Cache Description: '戻る操作を速くするため、{count}件の検索結果をメモリにキャッシュしています。このキャッシュはOpenTubeXを終了すると破棄されます。'
+    Clear Session Search Cache: セッションの検索キャッシュを消去
+    Clear Session Search Cache Confirmation: セッションの検索キャッシュを消去しますか？
+    Session Search Cache Effect: キャッシュした検索結果ページは破棄されます。保存済みの検索履歴は変更されません。
+    HTTP Cache: HTTPキャッシュ
+    HTTP Cache Description: Electronはネットワーク応答をディスクに保存し、同じデータを再ダウンロードせずに読み込めるようにします。このキャッシュは必要に応じてOpenTubeXが再作成します。
+    Managed By Electron: Electronが管理
+    Clear HTTP Cache: HTTPキャッシュを消去
+    Clear HTTP Cache Confirmation: ElectronのHTTPキャッシュを消去しますか？
+    HTTP Cache Effect: キャッシュが再作成されるまで、画像などのネットワークリソースの初回読み込みが遅くなる場合があります。
+    Tab Image Cache: タブのサムネイルとチャンネルのアバター
+    Tab Image Cache Description: 開いているタブと復元したタブのプレビュー画像やチャンネルのアバターを保存します。タブの使用中にOpenTubeXが再作成します。
+    Clear Tab Image Cache: タブ画像のキャッシュを消去
+    Clear Tab Image Cache Confirmation: タブのサムネイルとチャンネルのアバターを消去しますか？
+    Tab Image Cache Effect: タブ画像が一時的に消える場合があります。各タブを使用すると再作成されます。
+    Playback Caches: 再生キャッシュ
+    Playback Caches Description: yt-dlpのストリームURLとYouTubeプレーヤーファイルをアプリのセッションをまたいで保存します。URLキャッシュはyt-dlpで取得したストリームにのみ適用されます。
+    Playback URL Cache Entry Size: yt-dlpストリームURLのキャッシュ上限
+    Playback URL Cache Entry Size Tooltip: キャッシュするyt-dlpストリーム1件あたりの最大サイズを設定します。0 MBにすると、yt-dlpストリームの永続キャッシュを無効にします。
+    Clear Playback Caches: 再生キャッシュを消去
+    Clear Playback Caches Confirmation: yt-dlpとプレーヤーのキャッシュを消去しますか？
+    Playback Caches Effect: ストリームとプレーヤーのデータを再取得するため、次回のローカル再生に時間がかかる場合があります。
+    Clear Cache: キャッシュを消去
+    History Data: 保存済みの履歴
+    Video Metadata Description: 対応動画の過去のタイトル、サムネイル、説明を保存します。削除した古い版は再作成できません。
+    Video Metadata Effect: 保存済みのメタデータの版が完全に削除されます。現在の動画情報は再取得できます。
+    Watch History: 視聴履歴と統計
+    Watch History Description: 視聴履歴には、視聴した動画と再生位置が記録されます。視聴統計には日ごとの合計視聴時間が保存されます。保持期間は視聴履歴にのみ適用されます。
+    Clear Watch Statistics: 視聴統計を消去
+    Watch History Effect: 視聴済み動画の記録と保存した再生位置が削除されます。視聴統計は残ります。
+    Clear Watch Statistics Confirmation: すべての視聴統計を削除しますか？
+    Watch Statistics Effect: 日ごとの合計視聴時間が削除されます。視聴履歴は残ります。
+    Search History: 検索履歴
+    Search History Description: 記憶するよう指定した検索内容を保存します。
+    Delete Search History: 検索履歴を削除
+    Delete Search History Confirmation: 保存済みの検索履歴をすべて削除しますか？
+    Search History Effect: 過去の検索から保存された検索候補が表示されなくなります。現在のセッションキャッシュは残ります。
+    Other User Data: その他のユーザーデータ
+    Other Profile Files: その他のプロフィールファイル
+    Other Profile Files Hint: バックアップ、一時ファイル、OpenTubeXがまだ認識できないプロフィール項目です。
+    Subscriptions And Profiles: 登録チャンネルとプロフィール
+    Subscriptions And Profiles Description: 登録チャンネル、プロフィール名、プロフィールの所属情報を保存します。
+    Subscriptions And Profiles Effect: すべての登録チャンネルと追加プロフィールが完全に削除されます。フィードのキャッシュデータも消去されます。
+    Playlists Description: プレイリスト名、説明、保存済み動画を保存します。
+    Playlists Effect: すべてのプレイリストと保存済み動画の一覧が完全に削除されます。ダウンロード済みのメディアファイルは残ります。
+    Settings And Sessions: 設定、タブセッション、リマインダー
+    Settings And Sessions Description: アプリの設定、復元可能なタブ、ライブ配信のリマインダーを保存します。内容の確認やバックアップはプロフィールディレクトリを開いて行ってください。このページからは削除できません。
+    Cleanup Complete: ストレージのクリーンアップが完了しました
+    Cleanup Failed: ストレージのクリーンアップに失敗しました
+  Subscription Settings:
+    Fetch Feed on Startup: 起動時にフィードを取得
+    Show New Content Feed: 新着コンテンツのフィードを表示
+    Show New Content Indicators: 新着コンテンツのマークを表示
+    Show Scheduled Live Streams / Premieres First: 予定されているライブ配信とプレミア公開を先頭に表示
+    Auto Refresh Interval: 自動更新の間隔
+    Videos Auto Refresh Interval: 動画の自動更新間隔
+    Shorts Auto Refresh Interval: ショート動画の自動更新間隔
+    Live Auto Refresh Interval: ライブ配信の自動更新間隔
+    Posts Auto Refresh Interval: 投稿の自動更新間隔
+  Distraction Free Settings:
+    Sections:
+      Visible While Paused: 全ウィンドウ表示・全画面表示で一時停止中に表示
+    Hide Channel Avatars: チャンネルのアバターを非表示
+    Shorten View Counts: 視聴回数とコメントの高評価数を省略表示
+    Hide Comment Translation Buttons: コメントの翻訳ボタンを非表示
+    Hide Live Chat Replay: ライブチャットのリプレイを非表示
+    Hide End-Screen Annotations: 終了画面のアノテーションを非表示
+    Hide Paid Promotion Badge: 有料プロモーションのバッジを非表示
+    Show Player Controls: プレーヤーの操作ボタンを表示
+    Show Video Title: 動画タイトルを表示
+    Show Bottom Right Actions Dock: 右下の操作ドックを表示
+    Paused Interface Hide Delay: 一時停止中のインターフェースを隠すまでの時間
+  Data Settings:
+    Data And Storage: データとストレージ
+    Profile Directory: プロフィールディレクトリ
+    Open Profile Directory: プロフィールディレクトリを開く
+    Invalid JSON row, skipping item: '{row}行目のJSONが無効なため、この項目をスキップします'
+    Import subscriptions formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.csv、.json、.opml）、NewPipe（.json）、LibreTubeバックアップまたはFreeTubeエクスポート（.json）'
+    Import history formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.json）、LibreTubeバックアップ（.json）'
+    Import playlists formats: '対応形式: OpenTubeX / FreeTube（.db）'
+    Import search history formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.json）'
+  Sync Settings:
+    Sync Settings: 同期
+    Enable Sync: 同期を有効化
+    Privacy Passphrase: プライバシーパスフレーズ
+    Privacy Passphrase Hint: アカウントのパスワードとは別のパスフレーズを使用してください。このデバイスの外へ送信されず、すべてのデバイスで必要です。紛失すると暗号化された同期データを復元できません。
+    Privacy Policy: このサーバーのプライバシーポリシー
+    Enhanced Privacy Enabled: 強化プライバシーが有効です。サーバーには暗号化された同期データのみ保存されます。
+    Enhanced Privacy Unsupported: '警告: このサーバーは強化プライバシーに対応していません。同期データはサーバーの運営者が閲覧できます。'
+    Description: 登録チャンネル、プロフィール、プレイリスト、視聴履歴、設定、開いているタブをOpenTubeXまたはLibreTubeの同期サーバーと同期します。LibreTubeサーバーでは一部の同期機能を利用できない場合があります。
+    Server URL: サーバーURL
+    Checking Server: 同期サーバーを確認中…
+    Server Unavailable: この同期サーバーに接続できません。URLを確認して再試行してください。
+    Username: ユーザー名
+    Log In: ログイン
+    Register: 登録
+    Pair Another Device: 別のデバイスをペアリング
+    Pair With Existing Device: 既存のデバイスとペアリング
+    Device Name: デバイス名
+    This Device: このデバイス
+    Device Name Required: このデバイスの名前を入力してください。
+    Pairing Device Name Hint: この要求を承認するデバイスで見分けられる名前を付けてください。
+    Create Pairing Code: ペアリングコードを作成
+    Creating Pairing Code: 安全なペアリングコードを作成中…
+    Pairing QR Alt: '{device}のペアリング用QRコード'
+    Scan Pairing Code: 接続済みのデバイスで「別のデバイスをペアリング」を開き、このコードをスキャンしてください。
+    Pairing Code: ペアリングコード
+    Use Text Pairing Code: 代わりにテキストコードを使用
+    Show QR Code: QRコードを表示
+    Text Pairing Code Hint: このコードを既存のデバイスにコピーしてください。ペアリング用の秘密情報が含まれるため、完了後はクリップボード履歴から消去してください。
+    Pairing QR Warning: この要求を承認する、信頼済みで接続済みのデバイスにのみこのコードを表示してください。コードは2分後に期限切れになります。
+    Pairing Expires: ペアリングコードの有効期限は{time}です。
+    Verifying Pairing: 転送されたプライバシーキーを確認中…
+    Completing Pairing: デバイスのペアリングを完了中…
+    Compare Pairing Codes: ペアリングコードを比較
+    Pairing Code Match Hint: 既存のデバイスに表示されたコードと一致する場合のみ確認してください。
+    Pairing Codes Match: コードが一致する
+    Pairing Approval Code Hint: このウィンドウを開いたまま、新しいデバイスのコードと比較してください。コードが異なる場合、新しいデバイスでは続行しないでください。
+    Pairing Scan Hint: 追加するデバイスに表示されたペアリングコードをスキャンしてください。
+    Enter Pairing Code: コードを手動入力
+    Pairing Code Entry Hint: 追加するデバイスに表示されたペアリングコードを貼り付けてください。
+    Check Pairing Code: コードを確認
+    Scan QR Code: QRコードをスキャン
+    Waiting For Pairing Code: ペアリングコードを待機中…
+    Checking Pairing Request: ペアリング要求を確認中…
+    Approving Pairing Request: プライバシーキーを暗号化して送信中…
+    Pairing Approval Warning: 追加するデバイスにこの要求が表示されている場合のみ承認してください。ペアリングするとアカウントへのアクセスが許可され、プライバシーキーが転送されます。
+    Approve Pairing: ペアリングを承認
+    Try Again: 再試行
+    Scan Again: 再スキャン
+    Camera Unavailable: OpenTubeXがカメラにアクセスできませんでした。カメラの権限を確認するか、ペアリングコードを手動で入力してください。
+    Pairing Unsupported: この同期サーバーは安全なデバイスペアリングに対応していません。
+    Pairing Failed: デバイスのペアリングに失敗しました。新しいコードで再試行してください。
+    Pairing Request Changed: ペアリング要求が変更されたか、期限切れになったか、すでに使用されています。新しいコードを作成してください。
+    Pairing Server Mismatch: このコードは別の同期サーバー用です。
+    Pairing Verification Unavailable: 転送されたキーを確認できる暗号化済みの同期コレクションがありません。既存のデバイスを同期してから再試行してください。
+    Pairing Completed: デバイスのペアリングが完了しました
+    Pairing Approved: デバイスのペアリングを承認しました
+    Disconnect: 切断
+    Delete Account: 同期アカウントを削除
+    Delete Account Confirmation: 同期アカウントを削除しますか？
+    Delete Account Warning: 同期アカウントと、このサーバーに保存されているすべてのデータが完全に削除されます。OpenTubeXのローカルデータは削除されません。
+    Confirm Delete Account: アカウントを削除
+    Password Required: パスワードが必要です
+    Account Deleted: 同期アカウントを削除しました
+    Connected as: '{username}として接続中'
+    Automatic Sync: 変更後および5分ごとに自動同期
+    Profiles: プロフィール
+    Open Tabs: 開いているタブとセッション
+    Disable Setting Sync: この設定の同期を停止
+    Enable Setting Sync: この設定を同期
+    Sync Now: 今すぐ同期
+    Downloading encrypted data: 暗号化された同期データをダウンロード中…
+    Syncing subscriptions: 登録チャンネルを同期中…
+    Syncing playlists: プレイリストを同期中…
+    Syncing history: 視聴履歴を同期中…
+    Syncing profiles: プロフィールを同期中…
+    Syncing open tabs: 開いているタブとセッションを同期中…
+    Syncing settings: 設定を同期中…
+    Uploading encrypted data: 暗号化された同期データをアップロード中…
+    Finishing sync: 同期を完了中…
+    Sync progress percentage: '{percentage}%'
+    Last synced: '最終同期: {date}'
+    History not supported: このバージョンのサーバーは視聴履歴の同期に対応していません。
+    Settings not supported: このバージョンのサーバーは設定の同期に対応していません。
+    Sync completed: 同期が完了しました
+    Data Loss Confirmation: データを削除する同期を確認しますか？
+    Data Loss Warning: サーバーの状態に合わせると、以前に同期した{collection}の{previous}件中{deleted}件が削除されます。サーバーの移行失敗やリセットが原因の可能性があります。意図した削除であり、バックアップがある場合のみ続行してください。
+    Confirm Data Loss: 削除して続行
+  Proxy Settings:
+    IP Block Recovery Script Path: IPブロック復旧スクリプトのパス
+    Select IP Block Recovery Script File: IPブロック復旧スクリプトを選択
+    Running IP block recovery script: IPブロック復旧スクリプトを実行中
+    IP block recovery script failed: 'IPブロック復旧スクリプトに失敗しました（終了コード: {exitCode}）'
+    IP block recovery script finished: IPブロック復旧スクリプトが完了しました
+    Reloading video after IP block recovery: IPブロックの復旧後に動画を再読み込み中
+    Failed to select IP block recovery script: IPブロック復旧スクリプトを選択できませんでした
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: SponsorBlockへの送信を有効化
+    SponsorBlock Private User ID (optional): SponsorBlockの非公開ユーザーID（任意）
+    SponsorBlock Private User ID Tooltip: ブラウザー拡張機能の非公開SponsorBlockユーザーIDを貼り付けてください。空欄にすると、アプリが生成したIDを使用します。
+    Generated SponsorBlock User ID: 生成されたSponsorBlockユーザーID
+    Generated SponsorBlock User ID Tooltip: アプリが生成したSponsorBlockユーザーIDです。ブラウザー拡張機能や、別のコンピューターでアプリを使用するときにも利用できます。
+    Export Generated User ID: 生成されたユーザーIDをエクスポート
+    Generated SponsorBlock User ID Copy Button: 生成されたSponsorBlockユーザーIDをコピー
+    Generated SponsorBlock User ID Copied: 生成されたSponsorBlockユーザーIDをクリップボードにコピーしました
+    Skip notification timeout: スキップ通知の表示時間
+    Custom Color: カスタムカラー
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Return YouTube Dislikeを有効化
+    Return YouTube Dislike Url: Return YouTube Dislike APIのURL（既定値はhttps://ryd-proxy.kavin.rocks）
+  Password Dialog:
+    Incorrect Password: パスワードが正しくありません
+    Unlock: ロック解除
+    Unlocking: ロックを解除中…
+  Search Settings: 設定を検索
+  No Settings Found: 設定が見つかりません
+Tutorial:
+  Skip: スキップ
+  Next: 次へ
+  Finish: 完了
+  Got It: 確認
+  Welcome:
+    Title: OpenTubeXへようこそ
+    Description: 最初に覚えておきたい操作を紹介します。
+  Navigation:
+    Title: ライブラリへすぐにアクセス
+    Description: ナビゲーションから登録チャンネル、プレイリスト、履歴などを開けます。
+  Search:
+    Title: 検索またはリンクを貼り付け
+    Description: 動画やチャンネルを検索できます。対応する動画URLを検索欄に直接貼り付けることもできます。
+  Tabs:
+    Title: ページをタブで開いたままに
+    Description: 現在の位置を失わずに複数のページを同時に開けます。レイアウトに合うタブの配置を選んでください。
+  Quick Settings:
+    Title: 好みに合わせて設定
+    Description: テーマと既定の動画品質を選択します。これらの設定はいつでもプロフィールメニューから変更できます。プロフィールを右クリックすると切り替えられます。
+  Import Data:
+    Title: データを引き継ぐ
+    Description: 対応する別のアプリやバックアップから、登録チャンネル、履歴、プレイリスト、検索履歴、設定を必要に応じてインポートできます。
+    Action: データをインポート
+    Not Now: 後で
+  Settings Moved:
+    Title: 設定の場所が変わりました
+    Description: 右上のプロフィールを選ぶとクイック設定が開きます。右クリックするとプロフィール選択へ直接移動できます。メニュー内の歯車からすべての設定を開けます。「OpenTubeXについて」と「ダウンロード」もこのメニューに移動しました。
+About:
+  Commit: コミット
+  Fluxer: Fluxerコミュニティに参加
+  Matrix: Matrix
+  Email: メール
+Profile:
+  Profile Icon: プロフィールアイコン
+  Choose an Emoji: 絵文字を選択
+  Custom Emoji: カスタム絵文字
+  Emoji: 絵文字
+  Choose Image: 画像を選択
+  Crop Image: 画像を切り抜く
+  Zoom: ズーム
+  Apply Crop: 切り抜きを適用
+  Transparent: 透明
+  Use Initial: イニシャルを使用
+  The selected image could not be loaded: 選択した画像を読み込めませんでした
+  Theme Color: テーマカラー
+Channel:
+  Channel Name Unavailable: チャンネル名を取得できません
+  Search Result Types: 検索結果の種類
+  All Results: すべて
+Video:
+  Includes paid promotion: 有料プロモーションを含みます
+  Age Restricted Badge: 年齢制限あり
+  Queue: キュー
+  Play Next: 次に再生
+  Add to Queue: キューに追加
+  Added to Play Next: この動画を次に再生します
+  Added to Queue: 動画をキューに追加しました
+  Clear Queue: キューを消去
+  Queue Video Count: '{count}本の動画'
+  Remove from Queue: '{title}をキューから削除'
+  Drag to Reorder Queue: '{title}をドラッグしてキュー内で並べ替え'
+  Reorder Queue Item: '{title}を並べ替え'
+  Reorder Queue Item Instructions: 上下の矢印キーでこの動画をキュー内で移動します。
+  Queue Item Moved: '{title}を{total}件中{position}番目に移動しました。'
+  Queue Item Cannot Move Up: '{title}を上へ移動できません。すでに{total}件中1番目です。'
+  Queue Item Cannot Move Down: '{title}を下へ移動できません。すでに{total}件中{total}番目です。'
+  Metadata: 動画情報
+  Close Metadata: 動画情報を閉じる
+  Metadata Cache:
+    Title History: タイトルの履歴
+    Thumbnail History: サムネイルの履歴
+    Description History: 説明の履歴
+    Previous Version: '{number}個前'
+    Empty: （空）
+  Fetching Streams: yt-dlpでストリームを取得中…
+  Transcript:
+    Title: 文字起こし
+    Search: 文字起こしを検索
+    Language: 文字起こしの言語
+    Save: 保存
+    Show: 文字起こしを表示
+    Hide: 文字起こしを非表示
+    Close: 文字起こしを閉じる
+    Copied: 文字起こしをクリップボードにコピーしました
+    Saved: 文字起こしを保存しました
+    Save Error: 文字起こしを保存できませんでした
+    Text File: テキストファイル
+    Unavailable: この動画には文字起こしがありません。
+    Load Error: 文字起こしを読み込めませんでした。
+    Empty: この文字起こしにはテキストがありません。
+    No Results: 検索に一致する文字起こしの区間はありません。
+  Retry With Built-in Extraction: 内蔵の抽出方式で再試行
+  Retry With yt-dlp Extraction: yt-dlpの抽出方式で再試行
+  Reloading video after streaming URL error: ストリーミングURLのエラー後に動画を再読み込み中
+  Configure Restricted Playback Cookies Hint: 「設定」→「外部ソフトウェア」→「yt-dlpの再生用Cookie」でCookieを設定してください。
+  Try With Configured Cookies: 設定済みのCookieを使用して再試行
+  Restricted Playback Authentication Failed Template: '設定したCookieではyt-dlpがこの動画にアクセスできませんでした: {error}'
+  Unmark As Watched: 視聴済みを解除
+  Video has been unmarked as watched: 動画の視聴済みを解除しました
+  Save Channel Playback Speed: チャンネルの再生速度を保存
+  Channel Playback Speed Saved: チャンネルの再生速度を保存しました
+  Save Channel Video Quality: チャンネルの動画品質を保存
+  Channel Video Quality Saved: チャンネルの動画品質を保存しました
+  Save Channel Subtitles State: チャンネルの字幕状態を保存
+  Channel Subtitles State Saved: チャンネルの字幕状態を保存しました
+  Save Channel Volume: チャンネルの音量を保存
+  Channel Volume Saved: チャンネルの音量を保存しました
+  Save Channel Setting: チャンネル設定を保存…
+  Channel Setting Already Set: '{setting}はすでに{value}に設定されています'
+  Video has been saved to {playlistName}: 動画を{playlistName}に保存しました
+  Video has been removed from {playlistName}: 動画を{playlistName}から削除しました
+  There was a problem saving the video to {playlistName}: 動画を{playlistName}に保存できませんでした
+  There was a problem removing the video from {playlistName}: 動画を{playlistName}から削除できませんでした
+  Failed to load collaborators: コラボレーターを読み込めませんでした
+  Notify me: 通知する
+  Notification on: 通知オン
+  Notification enabled: この動画が開始すると通知します
+  Notification cancelled: 開始通知をキャンセルしました
+  Notification unavailable: システム通知を利用できません
+  Scheduled video starting: 予定された動画が開始します
+  Live notification body: '{videoTitle}がまもなく開始します'
+  Premiere: プレミア公開
+  AI: AI
+  AI-generated content: AI生成コンテンツ
+  Collaborators: コラボレーター
+  Live Chat Replay: ライブチャットのリプレイ
+  Show Live Chat: ライブチャットを表示
+  Show Live Chat Replay: ライブチャットのリプレイを表示
+  Close Live Chat: ライブチャットを閉じる
+  Close Live Chat Replay: ライブチャットのリプレイを閉じる
+  Live Chat Settings: ライブチャットの設定
+  Show Live Chat Timestamps: 時刻を表示
+  Chat Filter: チャットフィルター
+  Top Chat: 上位のチャット
+  All Messages: すべてのメッセージ
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: ライブチャットのリプレイが有効です。動画の再生に合わせてチャットメッセージがここに表示されます。
+  Premiere started: プレミア公開中です。{timeAgo}に開始しました
+  Player:
+    Voice-over Translation:
+      Start: 翻訳
+      Cancel: キャンセル
+      Progress: 吹き替え翻訳を準備中…
+      Retry: 再試行
+      Error: 吹き替え翻訳に失敗しました。しばらくしてから再試行してください。
+      Duration Error: 吹き替え翻訳は4時間以内の動画でのみ利用できます。
+    Caption Appearance:
+      Options: オプション
+      Sample: 字幕はこのように表示されます
+    Auto-translate: 自動翻訳
+    Sleep Timer:
+      Sleep Timer: スリープタイマー
+      'Off': 'オフ'
+      Minutes: '{minutes}分'
+      End of video: 動画の終了時
+      Remaining: '残り{time}'
+      Cancel timer: タイマーをキャンセル
+      Timer ended: スリープタイマーが終了しました
+    Zoom:
+      Zoom: ズーム
+      'Off': 'オフ'
+    Auto-generated Caption Template: '{language}（自動生成）'
+    Up next in {seconds}: '{seconds}秒後に次の動画'
+    Resize dock: ドックのサイズを変更
+    Play now: 今すぐ再生
+    MusicPlaybackRateOverride: ミュージックビデオを検出したため、1倍速で再生します
+    Normal: 標準
+    Set Default: 既定値に設定
+    Hide Annotations: アノテーションを非表示
+    Show Annotations: アノテーションを表示
+    Hide: 非表示
+    Show: 表示
+    Scroll Mini Player:
+      Back to Top: 先頭へ戻る
+      Return to Video Tab: 動画タブに戻る
+      Play: 再生
+      Pause: 一時停止
+      Drag Handle: ミニプレーヤーを移動
+    SponsorBlock:
+      CancelCurrentSegment: 区間の作成をキャンセル
+      ClearSegments: 区間を消去
+      ClearSegmentsPrompt: この動画で下書き中のSponsorBlock区間をすべて消去してもよろしいですか？
+      CompleteSegmentsBeforeSubmitting: 送信前に下書き中の区間をすべて完成させてください。
+      CategoryLabel: カテゴリー
+      ActionTypeLabel: 区間の種類
+      DuplicateSegments: 同じ下書き区間は作成できません。
+      EndAction: （終了）
+      EndActionLabel: 終了
+      EndTimeAfterStart: 区間の終了時刻は開始時刻より後にしてください。
+      EndTimeBeforeVideoEnd: 区間の終了時刻は動画の長さ以内にしてください。
+      EndTimeLabel: 区間の終了時刻
+      DisableAutoSkipTemporarily: SponsorBlockの自動スキップを一時的に無効化
+      EnableAutoSkipTemporarily: SponsorBlockの自動スキップを再度有効化
+      Guidelines: ガイドライン
+      InspectSegment: 確認
+      InvalidStartTime: 有効な区間の開始時刻を入力してください。
+      NoSegmentsToSubmit: 送信する前に、完成した区間を1件以上作成してください。
+      NowAction: （現在）
+      CloseInfoPanel: SponsorBlock情報を閉じる
+      OpenInfoPanel: SponsorBlock情報を開く
+      OpenSubmissionMenu: 送信メニューを開く
+      PreviewRequired: 送信前にすべての区間をプレビューしてください。
+      PreviewSegment: プレビュー
+      SaveSegment: 保存
+      SetSegmentEndNow: 現在位置で区間を終了
+      StartAction: （開始）
+      StartSegmentNow: 現在位置で区間を開始
+      SubmissionBadRequest: SponsorBlockが送信要求を拒否しました。
+      SubmissionDuplicate: これはすでに送信されています。
+      SubmissionFailed: SponsorBlock区間を送信できませんでした。
+      SubmissionForbidden: SponsorBlockが送信を拒否しました。
+      SubmissionRateLimited: SponsorBlockにより送信回数が制限されました。
+      SubmissionSuccess: SponsorBlock区間を送信しました。
+      SubmitSegment: 区間を送信
+      SubmitSegments: 送信
+      StartTimeLabel: 区間の開始時刻
+      TimeDivider: ～
+      SkipPrompt: '{segmentCategory}をスキップしますか？'
+      SkipPromptAction: スキップ
+      SkipToHighlight: ハイライトまでスキップしますか？
+      SkippedToHighlight: ハイライトまでスキップしました
+      SkipToastUnskip: スキップを取り消す
+      SkipToastReskip: 再度スキップ
+      MutedSegment: '{segmentCategory}をミュートしました'
+      MuteToastUnmute: ミュート解除
+      InfoPanelLoading: 区間を読み込み中…
+      InfoPanelHasSegments: この動画にはデータベースに登録された区間があります
+      InfoPanelNoSegments: 区間が見つかりません
+      RefreshSegments: 区間を更新
+      RefreshInfo: SponsorBlock情報を更新
+      ContributionStatsTitle: 自分の貢献
+      ContributionStatsLoading: 貢献の統計を読み込み中…
+      ContributionStatsError: 貢献の統計を取得できません。更新してください。
+      ContributionStatsNoUserId: 区間を送信するか、SponsorBlockユーザーIDをインポートすると貢献の統計を表示できます。
+      Submissions: 送信数
+      Segments: 区間数
+      TimeSaved: 節約した時間
+      AutoSkipEnabled: 区間を自動的にスキップ
+      AutoSkipOn: 'オン'
+      AutoSkipOff: 'オフ'
+      WhitelistChannel: チャンネルを許可リストに追加
+      ChannelWhitelisted: 許可リストに追加済み
+      RemoveChannelFromWhitelist: チャンネルを許可リストから削除
+      MuteSegment: 区間をミュート
+      SkipSegment: 区間をスキップ
+      CloseSegmentActions: 区間の操作を閉じる
+      FullVideo: 動画全体
+      FullVideoLabel: '{segmentCategory} · 動画全体'
+      MuteActionType: ミュート
+      MutePrompt: '{segmentCategory}をミュートしますか？'
+      SkipActionType: スキップ
+      LockedSegment: ロックされた区間
+      UpvoteSegment: 高評価
+      DownvoteSegment: 低評価
+      VoteFailed: SponsorBlockの評価を送信できませんでした。
+Playlist:
+  Close Playlist: プレイリストを閉じる
+Change Format:
+  Local Video File: ローカル動画ファイル
+  Local Audio File: ローカル音声ファイル
+  Online Video: オンライン動画
+  Stream Source: ストリームの取得元
+  Stream Extraction Method: ストリーム抽出方式
+  Playback Engine: 再生エンジン
+  Streaming Protocol: ストリーミングプロトコル
+  Not Available For This Video: この動画では利用できません
+  Protocols:
+    Progressive: プログレッシブ
+  Descriptions:
+    Local File: このデバイスにダウンロードしたファイルを直接再生します
+    Online Video: 設定したオンラインの取得元からストリーミング形式を読み込みます
+    Dash: 品質の自動調整、複数の音声トラック、最高解像度に対応します
+    Legacy: 動画と音声を一つにまとめたファイルです。低い解像度に制限されます
+    Audio: 音声のみです。帯域幅の節約やバックグラウンド再生に適しています
+  yt-dlp Fallback Template: 'yt-dlpでストリームを取得できないため、代わりに内蔵エンジンを使用します: {error}'
+  yt-dlp Default Clients Fallback: 優先するyt-dlpクライアントで再生可能なストリームを取得できないため、yt-dlpの既定のクライアントを試します
+  Built-in Fallback Template: '内蔵エンジンでストリームを再生できないため、代わりにyt-dlpを試します: {error}'
+Share:
+  Timestamp Link Copied: 再生時刻付きリンクをクリップボードにコピーしました
+Context Menu:
+  Context Menu: コンテキストメニュー
+  Select All: すべて選択
+  Save Image As…: 名前を付けて画像を保存…
+  Copy Image: 画像をコピー
+  Copy Image Address: 画像のアドレスをコピー
+  Cancel Refresh: 更新をキャンセル
+  Reload Videos: 動画を再読み込み
+  Reload Shorts: ショート動画を再読み込み
+  Reload Live: ライブ配信を再読み込み
+  Reload Posts: 投稿を再読み込み
+  Reload All Feeds: すべてのフィードを再読み込み
+  Close Multiple Tabs: '{count}個のタブを閉じる'
+  Duplicate Tab: タブを複製
+  Duplicate Multiple Tabs: '{count}個のタブを複製'
+  Move Tab: タブを移動
+  Move Tabs: タブを移動
+  Move Tab to Group: タブをグループに移動
+  Collapse Group: グループを折りたたむ
+  Move Tabs to Group: タブをグループに移動
+  Manage Tab Groups…: タブグループを管理…
+  To Beginning: 先頭へ
+  To End: 末尾へ
+  Close Tabs: タブを閉じる
+  To the Top: 上へ
+  To the Left: 左へ
+  To the Bottom: 下へ
+  To the Right: 右へ
+  Other Tabs: その他のタブ
+  Copy YouTube Link: YouTubeリンクをコピー
+  Copy YouTube Links: YouTubeリンクをコピー
+  Pin Tab: タブを固定
+  Pin Tabs: タブを固定
+  Unpin Tab: タブの固定を解除
+  Unpin Tabs: タブの固定を解除
+  Tab Color: タブの色
+  Default: 既定
+  Purple: 紫
+  Reopen Closed Tab: 閉じたタブを開き直す
+  Reload Tab: タブを再読み込み
+  Reload Tabs: タブを再読み込み
+  Load Tab: タブを読み込む
+  Load Tabs: タブを読み込む
+  Unload Tab: タブを解放
+  Unload Tabs: タブを解放
+  Move Tab to Window: タブをウィンドウに移動
+  Move Tabs to Window: タブをウィンドウに移動
+  Open in a New Tab: 新しいタブで開く
+  Open in a New Window: 新しいウィンドウで開く
+  Copy Link: リンクをコピー
+  Copy Invidious Link: Invidiousリンクをコピー
+  Search Selection in New Tab: 「{selection}」を新しいタブで検索
+  Search Selection in New Window: 「{selection}」を新しいウィンドウで検索
+  Search With: '{engine}で検索'
+  Search With Multiple: 検索サービスを選択…
+  Selection Too Long: 選択範囲が検索には長すぎます（{count}文字超）
+Tab Organizer:
+  Title: タブ整理
+  Open Tab Count: '開いているタブ: {count}個'
+  Search Label: タブを検索
+  Selected Count: '{count}個のタブを選択中'
+  Tab Count: '{count}個のタブ'
+  Select All: すべて選択
+  Select None: 選択をすべて解除
+  Move To Group: 選択したタブをグループに移動
+  Choose Group: グループを選択
+  Ungrouped: グループなし
+  Pin: 固定
+  Unpin: 固定を解除
+  Load: 読み込む
+  Unload: 解放
+  Unload All: すべて解放
+  Close All: すべて閉じる
+  Ungroup: グループから外す
+  Group Name: グループ名
+  Color: 色
+  No Color: 色なし
+  Create Group: グループを作成
+  Expand Group: グループを展開
+  Collapse Group: グループを折りたたむ
+  Expand Group Label: '{name}を展開、{count}個のタブ'
+  Rename Group: '{name}の名前を変更'
+  Change Group Color: '{name}の色を変更'
+  Move To Window: ウィンドウに移動
+  Choose Window: ウィンドウを選択
+  Select Tab: '{title}を選択'
+  Active: アクティブ
+  Pinned: 固定済み
+  Unloaded: 解放済み
+  Playing: 再生中
+  Close Tab: '{title}を閉じる'
+  No Open Results: 検索に一致する開いているタブはありません。
+  Recently Closed: 最近閉じたタブ
+  Clear: 消去
+  No Closed Results: 検索に一致する最近閉じたタブはありません。
+  Drag Tab: ドラッグしてグループに移動
+Chapters:
+  Open Chapters: チャプターを開く
+  Close Chapters: チャプターを閉じる
+  Copy Timestamp Link: '{timestamp}のリンクをコピー'
+Comments:
+  Comment Count: '{count}件のコメント'
+  Show Comments: コメントを表示
+  Getting comment replies, please wait: コメントへの返信を取得中です。しばらくお待ちください
+  Reload Comments: コメントを再読み込み
+  Reply Count: '{replyCount}件の返信'
+  Comments are turned off: コメントは無効です
+  YouTube did not provide advertised replies: YouTubeではこのコメントに返信があると表示されていますが、返信を取得できませんでした。削除または非表示になっている可能性があるため、返信ボタンを削除しました。
+  Pinned by you: 自分が固定
+  A reply is pinned: 返信が固定されています
+  Filter loaded comments: 読み込み済みのコメントを絞り込む
+  Comment filters: コメントフィルター
+  From creator: 作成者から
+  Contains timestamps: 再生時刻を含む
+  Pin comment by author: '{author}のコメントを固定'
+  Unpin comment by author: '{author}のコメントの固定を解除'
+  Edited: （編集済み）
+  Highlighted comment: 強調表示されたコメント
+  Highlighted reply: 強調表示された返信
+  Search loaded comments: 読み込み済みのコメントを検索
+  Loaded comment search result count: '読み込み済みコメント{total}件中{count}件'
+  No loaded comments match your filters: フィルターに一致する読み込み済みコメントはありません
+  YouTube comment link copied to clipboard: YouTubeコメントのリンクをクリップボードにコピーしました
+  Translate to {language}: '{language}に翻訳'
+  Show original: 原文を表示
+  Translating comment, please wait: コメントを翻訳中です。しばらくお待ちください
+  Comment translation failed: コメントの翻訳に失敗しました
+Description:
+  Copy Description: 説明をコピー
+  Description Copied: 説明をクリップボードにコピーしました
+  Video Category: '動画カテゴリー:'
+  Video Tags: 動画タグ
+  Games: ゲーム
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: 人手による翻訳の不足部分をAI生成テキストで補います。人手による翻訳が常に優先されます。
+    Update Relative Timestamps: ページを開いている間、アプリ内の相対日時を更新します。無効にすると、ページを再読み込みするか開き直したときにのみ更新されます。
+    Stream Extraction Method: |
+      OpenTubeXが動画ストリームを取得する方法を選択します。yt-dlpを選択するには、yt-dlpが利用可能である必要があります。
+      yt-dlpを使用すると、動画の再生開始に時間がかかる場合があります。
+      内蔵方式では、ライブ配信とプレミア公開のシークに対応していません。
+    Avoid translation: |
+      YouTubeによる動画のタイトル、説明、チャプターの自動翻訳を無効にします。
+      一覧にある動画のタイトルをまとめて取得するなど、要求が多すぎると、
+      アプリが一時的に不安定になる場合があります。
+    Show Thumbnail Previews: 動画のサムネイルにポインターを合わせたときにアニメーションプレビューを表示します。
+    Startup Behavior: |
+      OpenTubeXの起動時の動作を選択します。
+      「すべてのタブを読み込む」は保存済みのタブをすぐにすべて復元しますが、バックグラウンドのタブでは動画を自動再生しません。
+      「前回読み込まれていたタブを読み込む」は、OpenTubeXの終了時に読み込まれていたタブを再読み込みし、それ以外は解放したままにします。
+      「最後に使用したタブを読み込む」は、ほかのタブを開いた状態でメモリから解放して前回のセッションを復元します。クリックすると読み込まれます。
+      「空のセッションで開始」は保存済みのタブを復元せず、新しいウィンドウを開きます。
+    Remember Tab Navigation History: 各タブの「戻る」と「進む」の履歴を保存し、OpenTubeXの再起動時に復元します。
+  Proxy Settings:
+    IP Block Recovery Script Path: IPブロックを検出したときに実行するスクリプトファイルのパスです。OpenTubeXは処理の完了を待ってから動画を再読み込みします。フォールバックが有効な場合は、フォールバックにも失敗したときだけ実行します。
+  Player Settings:
+    Enable Caption Translations: 有効にすると、指定した字幕言語の原文トラックが動画にない場合、字幕ボタンとCキーのショートカットで自動翻訳トラックを優先します。
+    Use Quick Playback Speed Bar: プレーヤー右側の操作欄にクイック再生速度バーを表示します。チャンネルごとの再生速度を手動保存する設定が有効な場合は、現在のチャンネルに速度を保存するボタンも表示されます。
+    Multiply Seek Interval by Playback Rate: 有効にすると、シーク間隔（矢印キーとJ/Lキー）に現在の再生速度を掛けます。無効にすると、再生速度に関係なくシーク間隔は一定です。
+    Show Playback Rate Adjusted Timestamp: 有効で再生速度が1倍以外の場合、通常の時刻表示の後に、再生速度を反映した時刻を括弧内に表示します。
+    Use YouTube-style Shorts: 登録チャンネルとチャンネルのページでショート動画を縦長のグリッドに表示し、YouTube形式のショート動画プレーヤーを使用します。
+    Loop Shorts: 有効にするとショート動画を自動的に最初から再生します。無効にすると最後で停止し、再生ボタンを表示します。
+    Show Skip Silence Toggle: プレーヤーの設定メニューに、無音スキップのオンとオフを切り替える項目を表示します。
+    Enable Skip Silence by Default: 新しいタブで無音スキップを有効にします。あるタブで変更しても、ほかのタブには影響しません。
+    Enable Video Zoom: プレーヤーの設定メニューにズーム操作を表示し、キーボードショートカットとパン操作を有効にします。
+    Voice-over Translation: 翻訳を要求すると、動画ID、長さ、選択した言語を非公式のYandex吹き替え翻訳サービスへ送信します。既定では無効です。
+    Hold to Double Playback Speed: プレーヤー上でスペースキーまたはマウスの左ボタンを長押しすると、一時的に現在の2倍の速度で再生します。
+    Ambient Mode: 動画の色をプレーヤー周辺の領域になじませます。
+    Default Volume: 「音量を記憶」が有効な間は使用できません。動画ごとに起動時の音量を固定するには、「音量を記憶」をオフにしてください。
+    Parallel Segment Loading: |
+      再生に先立って同時に読み込む動画と音声のセグメント数です。
+      値を大きくすると、低速または不安定な接続では改善する場合がありますが、帯域幅とメモリの使用量が増えます。
+      また、「自動」が接続速度を実際より低く見積もり、低い品質を選ぶ場合があります。
+      一度に1件の要求しか行えないストリームでは、この設定は無視されます。
+  Download Settings:
+    Download Folder: 動画をこのフォルダーに保存します。空欄にすると、システムのダウンロードフォルダーを使用します。
+    Global Additional yt-dlp Arguments: 'すべてのダウンロードでyt-dlpに渡す追加のコマンドライン引数です。例: --cookies-from-browser firefox'
+    Concurrent Downloads: 同時に実行できるyt-dlpジョブの最大数です。
+    Bandwidth Limit: この上限を同時実行中のジョブで分け、キュー全体の転送速度を制限します。無制限にするには0を入力してください。
+  External Software Settings:
+    yt-dlp Source: システムにインストールされているyt-dlpを使用するか、OpenTubeXが独自にダウンロードして管理するyt-dlpを使用します。管理対象のコピーはユーザーデータディレクトリに保存されます。
+    yt-dlp Channel: OpenTubeXがダウンロードして管理するyt-dlpのリリースチャンネルを選択します。ほとんどの場合はStableを推奨します。
+    FFmpeg Source: システムにインストールされているFFmpegとFFprobeを使用するか、OpenTubeXが静的ビルドをダウンロードして管理します。管理対象のビルドはユーザーデータディレクトリに保存されます。
+    Managed Tool Updates: 管理対象ツールを自動更新するか、更新前に確認するか、手動ボタンからのみ更新するかを選択します。不足しているツールは必要になったときにダウンロードされます。
+    yt-dlp Executable Path: 既定では、PATH環境変数からyt-dlpが見つかるものとみなします。必要に応じて、ここでカスタムパスを指定できます。
+    Cookie Source: 認証が必要な再生で、yt-dlpがNetscape形式のCookieファイルとインストール済みブラウザーのCookieのどちらを読み取るか選択します。
+    Cookie File: 認証が必要な再生に使用するNetscape形式のCookieファイルを選択します。
+    Browser for Cookies: 選択したyt-dlp実行ファイルからブラウザーの対応状況を取得します。認証が必要な再生を要求すると、OpenTubeXはyt-dlpにこのブラウザーのCookieを読み取るよう指示します。
+    Browser Profile: ブラウザーのプロフィール名またはフォルダーを必要に応じて指定します。空欄にすると、最近使用したプロフィールを使います。
+    Always Use Cookies: yt-dlpがストリームを抽出するたびに、設定したCookieを使用します。ストリーム抽出方式がyt-dlpに切り替わるわけではありません。yt-dlpを選択している場合は、アカウントに権限があればYouTube Premiumの高ビットレートなど、アカウント限定の形式を利用できる場合があります。
+    FFmpeg Executable Path: FFmpegは、分離された動画と音声ストリームの結合や音声変換に必要です。既定では、PATH環境変数からFFmpegが見つかるものとみなします。必要に応じて、ここでカスタムパスを指定できます。
+  Distraction Free Settings:
+    Shorten View Counts: YouTubeですでに丸められた視聴回数とコメントの高評価数を、14,000ではなく14Kのように省略表示します。正確な数値は常に省略せず表示します。
+  Subscription Settings:
+    Fetch Feed on Startup: 有効にすると、OpenTubeXの起動時と新しいウィンドウを開いたときに登録チャンネルのフィードを自動取得します。
+    Show New Content Feed: 前回の取得時にはなかった登録チャンネルのフィード項目を「新着」タブに表示します。
+    Show New Content Indicators: 前回の取得時にはなかった登録チャンネルのフィード項目の横に小さな点を表示します。
+    Show Scheduled Live Streams / Premieres First: 予定されているライブ配信とプレミア公開を登録チャンネルのフィード上部に表示します。無効にすると、開始するまで告知時の位置に表示されます。無効にした後、一度フィードを更新すると、既存の予定項目の告知日を取得できます。
+    Auto Refresh Interval: アプリの起動中にOpenTubeXが登録チャンネルのフィードを自動更新する間隔です。
+  Theme Settings:
+    Show Progress as Notification: 登録チャンネルの更新や管理対象ツールのダウンロードなど、バックグラウンド処理の進行状況を共通の進行状況バーではなく、常に表示される通知で示します。
+    Always Show Scrollbars: スクロールバーを常に表示します。無効にすると、マウスを止めてから少し後に消え、再び動かすとすぐに表示されます。
+    Use Fixed Tab Width: 横型タブバーの各タブを、タイトルに合わせた幅ではなく同じ幅にします。
+    Use Grid Player Menu: 動画プレーヤーの設定メニューを行の一覧ではなく、タイル状のグリッドに配置します。
+The playlist is at the beginning. Enable loop to continue playing: プレイリストの先頭です。続けて再生するにはループを有効にしてください
+External link opening has been disabled in Settings → Privacy: 「設定」→「プライバシー」で外部リンクを開く機能が無効になっています
+KeyboardShortcutPrompt:
+  Edit Hint: ショートカットを選択し、新しいキーの組み合わせを押してください。割り当てを解除するにはBackspaceまたはDeleteを押します。
+  Change Shortcut: '{action}のショートカットを変更'
+  Press Shortcut: ショートカットを押してください…
+  Unassigned: 未割り当て
+  Reset Shortcut: '{action}のショートカットをリセット'
+  Reset to Defaults: 既定値に戻す
+  Shortcut Already Assigned: ショートカットはすでに割り当てられています
+  Shortcut Conflict: '{shortcut}はすでに{actions}に割り当てられています。割り当て直しますか？'
+  Reserved Shortcut Conflict: '{shortcut}は{actions}用に予約されているため、割り当て直せません。'
+  Reassign: 割り当て直す
+  Sections:
+    App:
+      Tabs: "アプリ:\_タブ"
+      Search and Page: "アプリ:\_検索とページ"
+      Window and View: "アプリ:\_ウィンドウと表示"
+  New Tab: 新しいタブを作成
+  Close Tab: 現在のタブを閉じる
+  Reload Tab: 現在のタブを再読み込み
+  Reopen Closed Tab: 最後に閉じたタブを開き直す
+  Next Tab: 次のタブに切り替え
+  Previous Tab: 前のタブに切り替え
+  Switch to Tab: タブ1～9に切り替え
+  Toggle Tab Orientation: タブの配置を切り替え
+  Find in Page: 現在のページでテキストを検索
+  Find Next Match: 次の一致箇所へ移動
+  Find Previous Match: 前の一致箇所へ移動
+  Toggle Normal Playback Speed: 1倍速と前の再生速度を切り替え
+  Toggle Skip Silence: 無音スキップを切り替え
+  Video Zoom In: 動画を拡大
+  Video Zoom Out: 動画を縮小
+  Tab Switcher: タブ切り替え
+CommandPalette:
+  Title: コマンドパレット
+  Open: コマンドパレットを開く
+  Search Label: コマンドを検索
+  Search Placeholder: コマンドと設定を検索…
+  Results: コマンド
+  No Results: 一致するコマンドはありません
+  Result Count: '{count}件のコマンドが見つかりました'
+  Move: 移動
+  Run: 実行
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'タブに切り替え: {title}'
+  Switch Profile: 'プロフィールを切り替え: {name}'
+  Open Playlist: 'プレイリストを開く: {name}'
+  Cancel Download: 'ダウンロードをキャンセル: {title}'
+  Groups:
+    App: アプリ
+    Navigation: ナビゲーション
+    Tabs: タブ
+  Unavailable:
+    Current Page: 現在このページを表示しています
+    No History: この方向にはページ履歴がありません
+    Desktop: デスクトップアプリでのみ利用できます
+    Build: このビルドでは利用できません
+    One Tab: 先に別のタブを開いてください
+    Active Tab: 現在のタブです
+    Active Profile: 現在のプロフィールです
+    Download Finished: このダウンロードはすでに終了しています
+    Video: 先に動画を開いてください
+Downloads:
+  Download: ダウンロード
+  Download Video: 動画をダウンロード
+  Download Playlist: プレイリストをダウンロード
+  Downloading: ダウンロード中
+  Queue: キュー
+  Downloaded: ダウンロード済み
+  Canceled: キャンセル済み
+  Open Downloads: ダウンロードを開く
+  No Downloads: ダウンロードはまだありません
+  No Downloads Description: 開始したダウンロードがここに表示されます。
+  Clear Failed Canceled Skipped And Missing: 失敗、キャンセル、スキップ、不明の項目を消去
+  Clear From List: 一覧から消去
+  Show in Folder: フォルダーで表示
+  Play Download: ダウンロードしたファイルを再生
+  Retry Download: ダウンロードを再試行
+  Pause Download: ダウンロードを一時停止
+  Resume Download: ダウンロードを再開
+  Move Earlier: 前へ移動
+  Move Later: 後ろへ移動
+  Pause All: すべて一時停止
+  Resume All: すべて再開
+  Retry All: 失敗したダウンロードをすべて再試行
+  Total Size: '合計サイズ: {size}'
+  Local File: ローカルファイル
+  Available Offline: オフラインで利用可能
+  Remove File: ファイルを削除
+  Remove File Confirmation: ダウンロード済みファイルを削除しますか？
+  Remove File Warning: 「{title}」をデバイスのごみ箱へ移動します。
+  File Not Found: ダウンロード済みファイルが見つかりませんでした。
+  Download Missing: ダウンロードを利用できません
+  Files Missing: ダウンロード済みファイルはファイルシステム上にありません。
+  Files Available: 'ダウンロード済みファイル{total}件中{available}件を利用できます。'
+  More Files: 'ほか{count}件のファイル'
+  Template Used: 'テンプレート: {name}'
+  Download Type: ダウンロードの種類
+  Template: テンプレート
+  Unsaved: 未保存
+  Media Type: メディアの種類
+  Video: 動画
+  Audio: 音声
+  Maximum Resolution: 最大解像度
+  Best Available: 利用可能な最高品質
+  Automatic: 自動
+  Container: コンテナ
+  Video Codec: 動画コーデック
+  Audio Codec: 音声コーデック
+  File Name Template: ファイル名テンプレート
+  File Name Template Help: '利用可能なフィールド: {title}、{author}、{upload_date}、{id}、{playlist}、{playlist_index}、{ext}'
+  Time Range and Chapters: 時間範囲とチャプター
+  Start Time: 開始時刻（HH:MM:SS）
+  End Time: 終了時刻（HH:MM:SS）
+  Split by Chapters: チャプターごとに別のファイルへ分割
+  Remove Segments: 区間を削除
+  Subtitles and Metadata: 字幕とメタデータ
+  Include Subtitles: 字幕を含める
+  Embed Subtitles: メディアファイルに字幕を埋め込む
+  Subtitle Format: 字幕形式
+  Subtitle Languages: 字幕言語
+  Subtitle Languages Help: 'コンマ区切りのyt-dlp言語セレクター。例: en.*,de.*'
+  Embed Cover Art: サムネイルをカバーアートとして埋め込む
+  Embed Metadata: タイトル、作成者、説明、チャプターを埋め込む
+  Additional yt-dlp Arguments: 追加のyt-dlp引数
+  Custom yt-dlp Arguments: カスタムyt-dlp引数
+  Template Name: テンプレート名
+  Save Template: テンプレートを保存
+  Delete Template: テンプレートを削除
+  Template Saved: ダウンロードテンプレート「{name}」を保存しました
+  Template Name Exists: 「{name}」という名前のダウンロードテンプレートはすでに存在します。
+  Choose Folder: 変更
+  Select Folder: フォルダーを選択
+  Folder Required: ダウンロードを有効にするにはダウンロードフォルダーを選択してください。
+  System Downloads Folder: システムのダウンロードフォルダー
+  Processing: 処理中…
+  Queued: 待機中
+  Queued Position: 待機中、{position}番目
+  Paused: 一時停止中
+  Pausing: 現在のジョブが完了した後、キューを一時停止します
+  Download Complete: ダウンロード完了
+  Download Cancelled: ダウンロードをキャンセルしました
+  Download Failed: ダウンロードに失敗しました
+  File Name Shortened: 動画タイトルが長すぎるため、ファイル名を短縮しました。
+  Insufficient Disk Space: ディスクの空き容量が不足しています。約{required}必要ですが、利用可能な容量は{available}です。
+  Unknown Download Size: ダウンロードサイズは不明です。保存先のファイルシステムでは{available}利用できます。
+  Disk Space Check Unavailable: ダウンロード開始前にディスクの空き容量を確認できませんでした。
+  Download Failure Hint: '{issuesLink}を確認してから、「設定」→「詳細設定」→「外部ソフトウェア」でyt-dlpチャンネルをNightlyまたはMasterに変更してみてください。'
+  yt-dlp YouTube Issues: YouTubeに関する最近のyt-dlpの問題
+  Automatic Download Started: 自動ダウンロードを開始しました
+  Automatic Download Started Body: '{channel}の「{title}」をバックグラウンドでダウンロード中です。'
+  Automatic Download Complete: 自動ダウンロードが完了しました
+  Automatic Download Failed: 自動ダウンロードに失敗しました
+  Automatic Download Could Not Start: 「{title}」の自動ダウンロードを開始できませんでした。
+  Automatic Download Skipped: 自動ダウンロードのフィルターによりスキップしました
+  Cancel Download: ダウンロードをキャンセル
+  yt-dlp Not Found: yt-dlpが見つかりません。インストールするか、「設定」→「詳細設定」→「外部ソフトウェア」でパスを指定してください。
+  Download Complete Template: 「{title}」のダウンロードが完了しました
+  Download Failed Template: 「{title}」のダウンロードに失敗しました
+  Templates:
+    Video Best: 動画 - 最高品質
+    Video Resolution: 動画 - {resolution}
+    Audio Best: 音声 - 最高品質
+    Audio Format: 音声 - {format}
+    Subtitles Format: 字幕 - {format}

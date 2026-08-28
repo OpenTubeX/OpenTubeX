@@ -204,6 +204,15 @@
         :is-locale-selector="true"
         @change="updateCurrentLocale"
       />
+      <FtToggleSwitch
+        v-if="mode === 'general'"
+        :label="t('Settings.General Settings.Use AI Translation Completions')"
+        :default-value="useAITranslationCompletions"
+        setting-key="useAITranslationCompletions"
+        :compact="true"
+        :tooltip="t('Tooltips.General Settings.Use AI Translation Completions')"
+        @change="updateUseAITranslationCompletions"
+      />
       <FtSelect
         v-if="mode === 'general'"
         :placeholder="t('Settings.General Settings.Reduced Motion.Reduced Motion')"
@@ -746,11 +755,19 @@ const localeNames = computed(() => [
 /** @type {import('vue').ComputedRef<string>} */
 const currentLocale = computed(() => store.getters.getCurrentLocale)
 
+/** @type {import('vue').ComputedRef<boolean>} */
+const useAITranslationCompletions = computed(() => store.getters.getUseAITranslationCompletions)
+
 /**
  * @param {string} value
  */
 function updateCurrentLocale(value) {
   store.dispatch('updateCurrentLocale', value)
+}
+
+/** @param {boolean} value */
+function updateUseAITranslationCompletions(value) {
+  store.dispatch('updateUseAITranslationCompletions', value)
 }
 
 const REDUCED_MOTION_VALUES = ['system', 'on', 'off']

@@ -1,0 +1,1483 @@
+# Optional AI-generated translations for keys missing from ../ar.yaml.
+Color Picker:
+  Hue: 'درجة اللون'
+  Opacity: العتامة
+  Backdrop Blur: طمس الخلفية
+  Hex Color: اللون السداسي
+  Apply Color: 'تطبيق'
+  Reset Color: إعادة ضبط
+  Copy Color: 'نسخ'
+  Copy From Another Color: نسخ من لون آخر
+  Color Copied: اللون منسوخ
+  Invalid Color: أدخل لونًا سداسيًا صالحًا
+  Clipboard Unavailable: الحافظة غير متاحة
+  Saturation and Brightness: التشبع والسطوع
+New Tab: علامة تبويب جديدة
+Maximize: 'تكبير'
+Restore: 'استعادة'
+Close Tab: إغلاق علامة التبويب
+Close Confirmation:
+  Title: هل تريد إنهاء برنامج OpenTubeX؟
+  Message: هل أنت متأكد أنك تريد إنهاء OpenTubeX؟
+  Quit: 'إنهاء'
+  Never Ask Again: لا تسأل مرة أخرى
+Close Window Confirmation:
+  Title: إغلاق النافذة؟
+  Message: 'تحتوي هذه النافذة على علامتي تبويب ({count}). هل تريد إغلاقها؟ | تحتوي هذه النافذة على {count} علامات تبويب. هل تريد إغلاقها؟ | تحتوي هذه النافذة على {count} علامة تبويب. هل تريد إغلاقها؟ | تحتوي هذه النافذة على {count} علامة تبويب. هل تريد إغلاقها؟'
+  Close Window: إغلاق النافذة
+Confirmations:
+  Never Ask Again: لا تسأل مرة أخرى
+  Settings Hint: يمكنك إعادة تمكين هذا التأكيد في الإعدادات → عام → التأكيد قبل...
+Close Multiple Tabs Confirmation:
+  Title: هل تريد إغلاق علامات تبويب متعددة؟
+  Message: 'سيؤدي هذا إلى إغلاق علامتي تبويب ({count}). | سيؤدي هذا إلى إغلاق {count} علامات تبويب. | سيؤدي هذا إلى إغلاق {count} علامة تبويب. | سيؤدي هذا إلى إغلاق {count} علامة تبويب.'
+  Close Tabs: 'إغلاق علامتي تبويب ({count}) | إغلاق {count} علامات تبويب | إغلاق {count} علامة تبويب | إغلاق {count} علامة تبويب'
+Load Multiple Tabs Confirmation:
+  Title: هل تريد تحميل علامات تبويب متعددة؟
+  Message: 'سيؤدي هذا إلى تحميل علامتي تبويب ({count}). | سيؤدي هذا إلى تحميل {count} علامات تبويب. | سيؤدي هذا إلى تحميل {count} علامة تبويب. | سيؤدي هذا إلى تحميل {count} علامة تبويب.'
+  Load Tabs: 'تحميل علامتي تبويب ({count}) | تحميل {count} علامات تبويب | تحميل {count} علامة تبويب | تحميل {count} علامة تبويب'
+Unload Multiple Tabs Confirmation:
+  Title: هل تريد إلغاء تحميل علامات تبويب متعددة؟
+  Message: 'سيؤدي هذا إلى تفريغ علامتي تبويب ({count}). | سيؤدي هذا إلى تفريغ {count} علامات تبويب. | سيؤدي هذا إلى تفريغ {count} علامة تبويب. | سيؤدي هذا إلى تفريغ {count} علامة تبويب.'
+  Unload Tabs: 'تفريغ علامتي تبويب ({count}) | تفريغ {count} علامات تبويب | تفريغ {count} علامة تبويب | تفريغ {count} علامة تبويب'
+Use Vertical Tabs: استخدم علامات التبويب العمودية
+Use Horizontal Tabs: استخدم علامات التبويب الأفقية
+Resize Tab Bar: تغيير حجم شريط علامات التبويب
+Find in page: البحث في الصفحة
+Previous match: 'النتيجة السابقة'
+Next match: 'النتيجة التالية'
+Close find bar: إغلاق شريط البحث
+No matches: 'لا توجد نتائج'
+Version {versionNumber} is now available.: الإصدار {versionNumber} متاح الآن.
+See changes and update: انظر التغييرات والتحديث
+Dismiss: 'تجاهل'
+Update to {version}: التحديث إلى {version}
+Global:
+  Ambient Mode: الوضع المحيط
+  Loading More: جارٍ تحميل المزيد
+  New: جديد
+Search Listing:
+  Label:
+    Members Only: الأعضاء فقط
+Stats:
+  Stats: احصائيات
+  Watch time summary: مشاهدة ملخص الوقت
+  Today: اليوم
+  This week: هذا الاسبوع
+  Total watch time: إجمالي وقت المشاهدة
+  Daily average: المتوسط ​​اليومي
+  So far today: حتى الآن اليوم
+  Since: منذ {day}
+  All recorded time: كل الوقت المسجل
+  Per calendar day: لكل يوم تقويمي
+  Day by day: يوما بعد يوم
+  Highest: 'الأعلى: {duration}'
+  Week by week: أسبوع بعد أسبوع
+  Last 14 days: آخر 14 يومًا
+  Last 8 weeks: آخر 8 أسابيع
+  Daily chart aria: وقت المشاهدة اليومي لآخر 14 يومًا
+  Weekly chart aria: وقت المشاهدة الأسبوعي لآخر 8 أسابيع
+  No data: سيظهر وقت المشاهدة هنا أثناء مشاهدة مقاطع الفيديو.
+  Estimate note: يتم تقدير وقت المشاهدة قبل هذا التحديث من خلال تقدم التشغيل المحفوظ.
+  Adjust imported watch time: ضبط وقت المشاهدة المستورد
+  Imported watch time: وقت المشاهدة المستوردة
+  Imported watch time explanation: اختر سرعة التشغيل التي تستخدمها عادةً. سيتم تقسيم مدة الفيديو المستوردة على هذه السرعة لتقدير الوقت الفعلي الذي قضيته في المشاهدة.
+  Playback speed: سرعة التشغيل
+  Channel speed note: يتم استخدام سرعات تشغيل القناة المحفوظة بدلاً من ذلك عند توفرها.
+  Apply playback speed: تطبيق سرعة التشغيل
+  Imported watch time adjusted: تم تعديل وقت المشاهدة المستورد
+  Reset statistics: إعادة تعيين الإحصائيات
+  Reset: إعادة ضبط
+  Reset confirmation: هل أنت متأكد أنك تريد إعادة تعيين جميع إحصائيات المشاهدة؟ لا يمكن التراجع عن هذا.
+  Reset success: تمت إعادة ضبط إحصائيات المشاهدة
+  Less than a minute: < 1 دقيقة
+  Minutes: '{minutes} دقيقة'
+  Hours: '{hours} ساعة'
+  Hours and minutes: '{hours} ساعة {minutes} دقيقة'
+Subscriptions:
+  Refreshing Subscription Videos: تحديث مقاطع الفيديو الخاصة بالاشتراك
+  Refreshing Subscription Shorts: 'تحديث الفيديوهات القصيرة للاشتراكات'
+  Refreshing Subscription Live Streams: تحديث البث المباشر للاشتراك
+  Refreshing Subscription Posts: تحديث مشاركات الاشتراك
+  New Content: محتوى جديد
+  New Feed Refresh Warning Title: هل تريد تحديث كافة خلاصات الاشتراك؟
+  New Feed Refresh Warning: 'قد يستغرق تحديث جميع أنواع المحتوى بدون RSS لـ {count} اشتراك وقتًا طويلاً. هل تريد المتابعة؟ | قد يستغرق تحديث جميع أنواع المحتوى بدون RSS لاشتراك واحد وقتًا طويلاً. هل تريد المتابعة؟ | قد يستغرق تحديث جميع أنواع المحتوى بدون RSS لاشتراكين ({count}) وقتًا طويلاً. هل تريد المتابعة؟ | قد يستغرق تحديث جميع أنواع المحتوى بدون RSS لـ {count} اشتراكات وقتًا طويلاً. هل تريد المتابعة؟ | قد يستغرق تحديث جميع أنواع المحتوى بدون RSS لـ {count} اشتراكًا وقتًا طويلاً. هل تريد المتابعة؟ | قد يستغرق تحديث جميع أنواع المحتوى بدون RSS لـ {count} اشتراك وقتًا طويلاً. هل تريد المتابعة؟'
+  New Since Last Refresh: جديد منذ آخر تحديث
+  Mark as Seen: وضع علامة كما رأينا
+  Mark All as Seen: وضع علامة على الكل كما رأينا
+  No New Content: لا يوجد محتوى جديد.
+  New Content Tabs: علامات تبويب المحتوى الجديدة
+  Show Tabbed View: إظهار العرض المبوب
+  Show Combined View: عرض العرض المدمج
+  Newest First: الأحدث أولاً
+  Oldest First: الأقدم أولاً
+Trending:
+  Load Error: تعذر تحميل العناصر الشائعة.
+  Unsupported Backend: يتطلب الاتجاه واجهة برمجة التطبيقات المحلية. حدد واجهة برمجة التطبيقات المحلية أو قم بتمكين الخلفية الاحتياطية.
+Most Popular Feed Empty: الموجز الأكثر شهرة لهذا المثيل Invidious فارغ.
+Feed:
+  Cancel Refresh: إلغاء التحديث
+  Next Auto Refresh: 'التحديث التلقائي التالي: {date}'
+User Playlists:
+  Load More Playlists: تحميل المزيد من قوائم التشغيل
+  Save to: حفظ إلى...
+  Move Video to the Top: نقل الفيديو إلى الأعلى
+  Move Video to the Bottom: نقل الفيديو إلى الأسفل
+  Quick Bookmark Icon: رمز الإشارة المرجعية السريعة
+  Custom Emoji: الرموز التعبيرية المخصصة
+  Choose Image: اختر الصورة
+  Use Bookmark Icon: استخدم رمز الإشارة المرجعية
+  SinglePlaylistView:
+    Retry: أعد المحاولة
+    This playlist could not be loaded.: لا يمكن تحميل قائمة التشغيل هذه.
+    More videos could not be loaded.: لا يمكن تحميل المزيد من مقاطع الفيديو.
+History:
+  Mark All As Watched: وضع علامة على الكل كما تمت مشاهدته
+  Mark All As Watched Confirmation: هل أنت متأكد أنك تريد وضع علامة على جميع مقاطع الفيديو في سجلك كمشاهدة؟
+  All History Marked as Watched: تم وضع علامة على جميع مقاطع الفيديو في سجلك على أنها تمت مشاهدتها
+  Delete Old History: 'حذف السجل القديم'
+  Select History Age: حدد العمر الذي يجب أن يكون عليه الإدخال قبل حذفه.
+  Delete Entries Older Than: حذف الإدخالات الأقدم من
+  Number of Days: عدد الأيام
+  History Cleanup Warning: يؤدي هذا إلى حذف إدخالات سجل المشاهدة المطابقة نهائيًا.
+  1 Day: يوم واحد
+  1 Week: 1 أسبوع
+  1 Month: شهر واحد
+  3 Months: 3 أشهر
+  1 Year: 1 سنة
+  Custom: مخصص
+  History Older Than Days Removed: 'تمت إزالة سجل المشاهدة الأقدم من {days} يوم | تمت إزالة سجل المشاهدة الأقدم من يوم واحد | تمت إزالة سجل المشاهدة الأقدم من يومين ({days}) | تمت إزالة سجل المشاهدة الأقدم من {days} أيام | تمت إزالة سجل المشاهدة الأقدم من {days} يومًا | تمت إزالة سجل المشاهدة الأقدم من {days} يوم'
+Settings:
+  Quick Settings:
+    Quick Settings: إعدادات سريعة
+    Appearance: مظهر
+    Playback: التشغيل
+    Content: محتوى
+    Language and Region: اللغة والمنطقة
+    All Settings: جميع الإعدادات
+    Profile Selector Hint: يمكنك أيضًا النقر بزر الماوس الأيمن فوق رمز الملف الشخصي لتبديل الملفات الشخصية
+  Categories:
+    General Description: اللغة وبدء التشغيل وعلامات التبويب وسلوك التطبيق
+    Appearance: مظهر
+    Appearance Description: الموضوع والتخطيط والصور المصغرة
+    Content appearance: قوائم الفيديو والصور المصغرة
+    Layout: تَخطِيط
+    Playback Description: المشغل والتسميات التوضيحية وتفضيلات القناة
+    Subscriptions Description: 'تحديث الخلاصات وخيارات العرض'
+    Downloads Description: المجلدات والقوالب والقواعد التلقائية
+    Distraction Free Description: إخفاء المحتوى وتعيين حدود العرض
+    Add-ons: الإضافات
+    Add-ons Description: SponsorBlock، وDeArrow، وعدم الإعجاب، والترجمة الصوتية
+    Privacy Description: عرض الخصوصية وعناصر التحكم في الوصول
+    Online activity: 'النشاط على الإنترنت'
+    Data And Storage Description: الاستيراد والتصدير واستخدام القرص والتنظيف
+    Sync Description: حافظ على مزامنة الإعدادات والبيانات عبر الأجهزة
+    Advanced: متقدم
+    Advanced Description: مقدمو الخدمة والتطبيقات الخارجية والشبكة
+    Alternative providers: موفري الفيديو والبيانات الوصفية
+  Highlight Changed Settings: تم تغيير إعدادات التمييز عن الإعدادات الافتراضية
+  Reset Setting to Default: قم بإعادة ضبط هذا الإعداد إلى وضعه الافتراضي
+  Performance Impact:
+    Show Performance Impact: إظهار مؤشرات تأثير الأداء
+    Moderate: تأثير معتدل
+    High: تأثير عالي
+    Description: يمكن أن يؤدي هذا الإعداد إلى زيادة استخدام {resources}
+    Resources:
+      CPU: وحدة المعالجة المركزية
+      GPU: GPU
+      Memory: ذاكرة
+      Network: شبكة
+      Disk: القرص
+  General Settings:
+    Update Relative Timestamps: حافظ على تحديث الطوابع الزمنية النسبية
+    Stream Extraction Method:
+      Stream Extraction Method: طريقة استخراج الدفق
+      yt-dlp: yt-dlp
+      Built-in: مدمج
+    Confirm Before: تأكيد قبل…
+    Confirmation Options:
+      Closing App: إغلاق برنامج OpenTubeX
+      Closing Window: إغلاق نافذة بعلامات تبويب متعددة
+      Closing Tabs: إغلاق علامات تبويب متعددة
+      Loading Tabs: تحميل علامات تبويب متعددة
+      Unloading Tabs: تفريغ علامات تبويب متعددة
+    Remember Tab Navigation History: تذكر تاريخ التنقل في علامة التبويب
+    New Tab Position:
+      New Tab Position: موضع علامة التبويب الجديدة
+      At the end: في نهايةالمطاف
+      After current tab: بعد علامة التبويب الحالية
+      After current tab in opened order: بعد علامة التبويب الحالية، بالترتيب المفتوح
+    Tab Close Focus:
+      Tab Close Focus: بعد إغلاق علامة التبويب
+      Previous tab: حدد علامة التبويب السابقة
+      Next tab: حدد علامة التبويب التالية
+    Startup Behavior:
+      Startup Behavior: عند بدء التشغيل
+      Load all tabs: تحميل كافة علامات التبويب
+      Load previously loaded tabs: تحميل علامات التبويب المحملة مسبقًا
+      Load last active tab: تحميل آخر علامة تبويب نشطة
+      Start with an empty session: ابدأ بجلسة فارغة
+    Use AI Translation Completions: استخدم عمليات إكمال الترجمة التي تم إنشاؤها بواسطة الذكاء الاصطناعي
+    Reduced Motion:
+      Reduced Motion: تقليل الحركة
+      System: النظام
+      Force On: تشغيل دائم
+      Force Off: إيقاف دائم
+    Comment Translation:
+      Title: ترجمات التعليق
+      Enable: تمكين ترجمات التعليق
+      Never Translate: لا تترجم التعليقات مطلقًا
+      Choose Language: اختر لغة
+      Description: التعليقات في لغة التطبيق مستبعدة بالفعل. أضف أي لغات أخرى يمكنك قراءتها.
+      Remove Language: السماح بترجمة التعليقات باللغة {language} مرة أخرى
+    Avoid translation:
+      Avoid translation: تفضل نص الفيديو غير المترجم
+      Disabled: معطّل
+      Watch Only: واجهة مستخدم الفيديو فقط
+      Entire App: التطبيق بأكمله
+    Playlist View Type:
+      Playlist View Type: نوع عرض قائمة التشغيل
+    Show Thumbnail Previews: عرض معاينات الصور المصغرة
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: زر إجراء إضافي للصورة المصغرة
+      None: لا شيء
+      Mark as Watched: وضع علامة "تمت مشاهدته".
+      Copy YouTube Link: انسخ رابط اليوتيوب
+      Open in YouTube: افتح في يوتيوب
+  Context Menu Search Settings:
+    Context Menu Search Settings: البحث في قائمة السياق
+    Description: اختر محركات البحث التي تظهر عند النقر بزر الماوس الأيمن فوق النص المحدد. عمليات البحث مفتوحة في المتصفح الافتراضي الخاص بك.
+    Icon Hint: تمكين المحرك من الاتصال بموقعه على الويب لتحميل الرمز المفضل.
+    Engine Name: اسم المحرك
+    Search URL: عنوان URL للبحث
+    URL Hint: استخدم %s حيث يجب أن يحتوي عنوان URL على النص المحدد المشفر.
+    Add Custom Engine: إضافة محرك مخصص
+    Add Engine: أضف المحرك
+    Remove Engine: إزالة {engine}
+    Invalid Engine: أدخل اسمًا وعنوان URL صالحًا للبحث HTTP أو HTTPS يحتوي على %s.
+    Engine Limit: يمكنك إضافة ما يصل إلى {count} محرك بحث مخصص.
+  Theme Settings:
+    Move Downloads to App Header: انقل التنزيلات إلى رأس التطبيق
+    Move Settings to App Header: انقل الإعدادات إلى رأس التطبيق
+    Hide Side Bar on Watch Pages: إخفاء الشريط الجانبي في صفحات المشاهدة
+    UI Roundness: استدارة واجهة المستخدم
+    Scrollbar Width: عرض شريط التمرير
+    Animation Speed: سرعة الرسوم المتحركة
+    Thumbnail Size: حجم الصورة المصغرة
+    Show Tab Icons: إظهار أيقونات علامات التبويب
+    Load Missing Tab Icons: تحميل أيقونات علامة التبويب المفقودة
+    Loading Missing Tab Icons: جارٍ تحميل أيقونات علامات التبويب المفقودة...
+    No Missing Tab Icons: تم بالفعل تحميل جميع أيقونات علامات التبويب المدعومة
+    Loaded Tab Icons: 'لم تُحمّل أيقونات علامات تبويب مفقودة: {count} | حُمّلت أيقونة علامة تبويب مفقودة واحدة: {count} | حُمّلت أيقونتا علامتي تبويب مفقودتان: {count} | حُمّلت {count} أيقونات لعلامات تبويب مفقودة | حُمّلت {count} أيقونة لعلامة تبويب مفقودة | حُمّلت {count} أيقونة لعلامة تبويب مفقودة'
+    Loaded Tab Icons With Failures: تم تحميل {loaded} أيقونات علامة التبويب؛ تعذر تحميل {failed}
+    Show Tab Previews: إظهار معاينات علامة التبويب
+    Use Fixed Tab Width: استخدم عرض علامة التبويب الثابت في الوضع الأفقي
+    Tab Width: عرض علامة التبويب
+    Tab Layout:
+      Tab Layout: تخطيط علامة التبويب
+      Horizontal Top: أفقي في الأعلى
+      Horizontal Bottom: أفقي في الأسفل
+      Vertical Left: عمودي على اليسار
+      Vertical Right: عمودي على اليمين
+    Show Toast Timeout Indicator: إظهار مؤشر مهلة الإشعار
+    Use Grid Player Menu: استخدم قائمة مشغل الشبكة
+    Show Progress as Notification: إظهار التقدم كإخطار
+    Operation in Progress: العملية قيد التقدم
+    Toast Position:
+      Toast Position: موضع الإشعار
+      Bottom Left: أسفل اليسار
+      Bottom Center: المركز السفلي
+      Bottom Right: أسفل اليمين
+      Top Left: أعلى اليسار
+      Top Center: المركز العلوي
+      Top Right: أعلى اليمين
+    Icon Pack:
+      Icon Pack: حزمة الأيقونات
+      Material Symbols: رموز المواد
+      Remix Icon: أيقونة ريمكس
+    Font:
+      App Font: خط التطبيق
+      System Default: الافتراضي للنظام
+      Unable to Load: غير قادر على تحميل خطوط النظام المثبتة
+    Always Show Scrollbars: إظهار أشرطة التمرير دائمًا
+    Base Theme:
+      Custom: مخصص
+    Light Theme: سمة فاتحة
+    Dark Theme: سمة داكنة
+    Custom Theme:
+      Create Custom Theme: إنشاء موضوع مخصص
+      Edit Custom Theme: تحرير الموضوع المخصص
+      Custom Theme Creator: منشئ موضوع مخصص
+      Theme Name: اسم الموضوع
+      Based On: مرتكز على
+      Import Theme: استيراد الموضوع
+      Export Theme: تصدير السمة
+      Share Theme: مشاركة الموضوع
+      Share Description Heading: وصف
+      Share Description Prompt: قم بوصف الموضوع وأي شيء يجب أن يعرفه الأشخاص قبل استخدامه.
+      Share Screenshots Heading: لقطات الشاشة
+      Share Screenshots Prompt: قم بسحب وإسقاط لقطة شاشة واحدة أو أكثر هنا.
+      Share Code Summary: رمز JSON للسمة
+      Delete Theme: حذف الموضوع
+      Delete Theme Confirmation: هل تريد حذف "{name}"؟ لا يمكن التراجع عن هذا.
+      Save and Apply: حفظ وتطبيق
+      Discard Changes: تجاهل التغييرات
+      Reset Colors: إعادة التعيين إلى الموضوع الأساسي
+      Theme File: ملف موضوع OpenTubeX
+      Theme Saved: تم حفظ السمة المخصصة وتطبيقها
+      Theme Imported: تم استيراد الموضوع إلى المحرر
+      Theme Exported: تم تصدير الموضوع
+      Theme Deleted: تم حذف المظهر المخصص
+      Unable to Load: غير قادر على تحميل السمة المخصصة
+      Unable to Save: غير قادر على حفظ السمة المخصصة
+      Unable to Export: غير قادر على تصدير السمة المخصصة
+      Unable to Share: غير قادر على مشاركة المظهر المخصص
+      Unable to Delete: غير قادر على حذف السمة المخصصة
+      Invalid Theme File: ملف السمة المخصصة غير صالح
+      Colors:
+        Main text: النص الرئيسي
+        Secondary text: النص الثانوي
+        Subtle text: نص دقيق
+        Borders and dividers: الحدود والفواصل
+        Subtle surfaces and indicators: الأسطح الدقيقة والمؤشرات
+        Title text: نص العنوان
+        Selected text background: خلفية النص المحدد
+        Selected text: النص المحدد
+        Logo icon: رمز الشعار
+        Logo text: نص الشعار
+        Logo hover: تحوم الشعار
+        Logo pressed: تم الضغط على الشعار
+        Page background: خلفية الصفحة
+        Card background: خلفية البطاقة
+        Secondary card background: خلفية البطاقة الثانوية
+        Favorite icon: الرمز المفضل
+        Error color: لون الخطأ
+        Scrollbar thumb: إبهام شريط التمرير
+        Scrollbar thumb hover: حرك الإبهام في شريط التمرير
+        Scrollbar thumb pressed: تم الضغط على إبهام شريط التمرير
+        Dropdown item hover text: نص تحويم العنصر في القائمة المنسدلة
+        Dropdown item hover background: خلفية تحوم العنصر في القائمة المنسدلة
+        Navigation and panel background: الملاحة وخلفية اللوحة
+        Neutral item hover and focus background: تحوم العنصر المحايد وتركيز الخلفية
+        Neutral item hover and focus text and icons: قم بتحريك العنصر المحايد والتركيز على النص والأيقونات
+        Neutral item pressed background: عنصر محايد تم الضغط عليه في الخلفية
+        Neutral item pressed text and icons: ضغط العنصر المحايد على النص والأيقونات
+        Header button hover and focus background: قم بالتمرير على زر الرأس والتركيز على الخلفية
+        Header button hover and focus text and icons: قم بتمرير زر الرأس والتركيز على النص والأيقونات
+        Header button pressed background: تم الضغط على زر الرأس في الخلفية
+        Header button pressed text and icons: ضغط زر الرأس على النص والأيقونات
+        Colored header button hover and focus background: زر رأس ملون يحوم ويركز على الخلفية
+        Colored header button hover and focus text and icons: زر الرأس الملون يحوم ويركز على النص والأيقونات
+        Colored header button pressed background: ضغط زر الرأس الملون على الخلفية
+        Colored header button pressed text and icons: ضغط زر الرأس الملون على النص والأيقونات
+        Search and dropdown background: البحث والخلفية المنسدلة
+        Settings search background: إعدادات خلفية البحث
+        Instance menu: قائمة المثيل
+        Input background: خلفية الإدخال
+        Shadow color: لون الظل
+        Primary controls and highlights: الضوابط الأساسية ويسلط الضوء
+        Primary control hover and focus: تحوم السيطرة الأساسية والتركيز
+        Primary control pressed: تم الضغط على التحكم الأساسي
+        Text and icons on primary controls: النص والأيقونات على عناصر التحكم الأساسية
+        Secondary controls and highlights: الضوابط الثانوية ويسلط الضوء
+        Secondary control hover and focus: التحكم الثانوي تحوم والتركيز
+        Secondary control pressed: تم الضغط على التحكم الثانوي
+        Light secondary color: لون ثانوي فاتح
+        Visited accent: لهجة تمت زيارتها
+        Text and icons on secondary controls: النص والأيقونات في عناصر التحكم الثانوية
+        Links: روابط
+        Visited links: الروابط التي تمت زيارتها
+        Destructive action: العمل المدمر
+        Destructive hover and focus: تحوم المدمرة والتركيز
+        Destructive pressed: الضغط المدمر
+        Text and icons on destructive actions: النص والأيقونات على الإجراءات المدمرة
+  Player Settings:
+    Automatically Open Chapters: فتح الفصول تلقائيا
+    Caption Appearance:
+      Caption Appearance: مظهر التسمية التوضيحية
+      Captions: التسميات التوضيحية
+      Preferred Language: لغة التسمية التوضيحية المفضلة
+      Application Language: لغة التطبيق
+      Enable Translations: تمكين ترجمات التسميات التوضيحية
+      Text Color: لون النص
+      Background Color: لون الخلفية
+      Background Opacity: عتامة الخلفية
+      Font Size: حجم الخط
+      Vertical Position: الوضع العمودي
+      Edge Color: لون الحافة
+      Anchor:
+        Anchor: مِرسَاة
+        Top Left: أعلى اليسار
+        Top Center: أعلى المركز
+        Top Right: أعلى اليمين
+        Bottom Left: أسفل اليسار
+        Bottom Center: مركز القاع
+        Bottom Right: أسفل اليمين
+      Edge Style:
+        Edge Style: نمط الحافة
+        None: لا شيء
+        Outline: الخطوط العريضة
+        Drop Shadow: إسقاط الظل
+      Reset: إعادة تعيين مظهر التسمية التوضيحية
+    Default Viewing Mode:
+      Full Window (Always On): نافذة كاملة (مشغلة دائمًا)
+      Full Screen (Always On): ملء الشاشة (تشغيل دائمًا)
+      Tooltip: يتم تطبيق معظم أوضاع العرض الافتراضية فقط في بداية كل جلسة مشاهدة. تستمر التغييرات التي تم إجراؤها أثناء الجلسة حتى تنتهي. يتم تطبيق أوضاع العرض التي يتم تشغيلها دائمًا عندما تقوم بالتبديل إلى مقطع فيديو جديد، بغض النظر عن أي تغييرات في وضع العرض يتم إجراؤها عند مشاهدة الفيديو السابق.
+    Auto Picture in Picture:
+      Auto Picture in Picture: أدخل صورة داخل صورة تلقائيًا
+      On Tab Change: عند تبديل علامات التبويب
+      On Window Minimize: عند تصغير النافذة
+      On Window Hide: عندما تفقد النافذة التركيز أو يتم تبديلها
+      Wayland Minimize Unsupported: لا يُبلغ Wayland عن تصغير النافذة للتطبيقات، لذا فإن هذا المشغل غير متاح. استخدم "عندما تفقد النافذة التركيز أو يتم تبديلها" بدلاً من ذلك، والتي تغطي أيضًا عملية التصغير.
+    Scroll Mini Player:
+      Scroll Mini Player: إبقاء المشغل المصغّر عند التمرير
+      When Scrolling Down: احتفظ بمشغل صغير على الشاشة عند التمرير لأسفل
+      On All Tabs: احتفظ بمشغل صغير على الشاشة عند التبديل بين علامات التبويب
+    Multiply Seek Interval by Playback Rate: اضرب الفاصل الزمني للبحث بمعدل التشغيل
+    Show Playback Rate Adjusted Timestamp: عرض الطابع الزمني المعدل لمعدل التشغيل
+    Use YouTube-style Shorts: استخدم فيديوهات قصيرة بأسلوب YouTube
+    Loop Shorts: 'تكرار الفيديوهات القصيرة'
+    Remember Volume: تذكر مستوى الصوت
+    Skip Silence: تخطي الصمت
+    Show Skip Silence Toggle: إظهار تخطي تبديل الصمت
+    Enable Skip Silence by Default: تمكين تخطي الصمت بشكل افتراضي
+    Enable Video Zoom: تمكين تكبير الفيديو
+    Voice-over Translation:
+      Title: الترجمة الصوتية
+      Attribution: (مدعوم من ياندكس)
+      Enable: تمكين الترجمة الصوتية
+      Prepare in Background: ابدأ في إعداد ترجمات التعليق الصوتي في الخلفية
+      Background Preparation Tooltip: يرسل معرف الفيديو الحالي ومدته واللغة المحددة إلى خدمة الترجمة بمجرد تحميل الفيديو المدعوم.
+      Language: لغة الترجمة الصوتية
+      Supported Source Languages: 'اللغات المصدر المدعومة: الروسية والإنجليزية والصينية والكورية والليتوانية واللاتفية والعربية والفرنسية والإيطالية والإسبانية والألمانية واليابانية.'
+      Voice Volume: حجم الصوت المترجم
+      Original Volume: حجم الصوت الأصلي
+      Russian: الروسية
+      English: إنجليزي
+      Kazakh: الكازاخستانية
+    Hold to Double Playback Speed: استمر في مضاعفة سرعة التشغيل
+    Use Quick Playback Speed Bar: استخدم شريط سرعة التشغيل السريع
+    Customize Quick Playback Speed Bar: تخصيص شريط سرعة التشغيل السريع
+    Quick Playback Speed Bar Manager: شريط سرعة التشغيل السريع
+    Add Playback Speed: أضف سرعة التشغيل
+    Reset Quick Playback Speed Bar: إعادة التعيين إلى الإعدادات الافتراضية
+    Playback Speed Name: اسم
+    Edit Playback Speed Name: تحرير اسم سرعة التشغيل
+    Use Automatic Playback Speed Name: استخدم اسم سرعة التشغيل التلقائي
+    Reorder Playback Speed: اسحب لإعادة ترتيب سرعة التشغيل
+    Playback Speed: سرعة التشغيل
+    Parallel Segment Loading: تحميل القطاع الموازي
+  Channel Settings:
+    Channel Settings: إعدادات القناة
+    Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.
+    Enable Playback Speed: تمكين سرعة التشغيل
+    Enable Video Quality: تمكين جودة الفيديو
+    Enable Subtitles State: تمكين حالة الترجمة
+    Enable Volume: تمكين مستوى الصوت
+    Auto Update: يتم التحديث تلقائيًا عند التغيير عبر خيارات المشغل
+    Auto Update Subtitles: التحديث تلقائيًا عند التبديل
+    Auto Update Volume: يتم التحديث تلقائيًا كلما قمت بتغيير مستوى الصوت
+    Manage Saved Channels: إدارة القنوات المحفوظة ({channelCount})
+    Saved Channels: إعدادات القناة المحفوظة
+    Enable Saved Channel Settings Sync: مزامنة إعدادات القناة المحفوظة
+    Disable Saved Channel Settings Sync: إيقاف مزامنة إعدادات القناة المحفوظة
+    Search Channels: البحث في القنوات
+    No Saved Channels: لم يتم حفظ أي إعدادات خاصة بالقناة حتى الآن
+    No Matching Channels: لا توجد قنوات تطابق بحثك
+    Forget Channel: نسيان جميع إعدادات هذه القناة
+    Forget Value: نسيان هذا الإعداد
+    Add Setting: تذكر إعدادًا آخر لهذه القناة
+    Video Quality: جودة الفيديو
+    Subtitles Enabled: تم تمكين الترجمات
+    Volume: مستوى الصوت
+  Download Settings:
+    Download Settings: التنزيلات
+    Enable Downloads: تمكين التنزيلات
+    Managed Tools Download Started Template: 'لم يتم العثور على البرنامج الخارجي المطلوب: {tools}. جارٍ تنزيل النسخ المُدارة...'
+    Managed Tools Download Finished Template: اكتمل تنزيل {tools}
+    Managed Tools Update Started Template: تم العثور على تحديث لـ {tools}. جارٍ التنزيل...
+    Managed Tools Update Finished Template: اكتمل تحديث {tools}
+    Managed Tools Update Available Template: يتوفر تحديث لـ {tools}.
+    Update Managed Tools: تحديث
+    Managed Tools Download Error Template: 'تعذر تنزيل الأدوات المُدارة: {errors}'
+    Download Folder: مجلد التنزيل
+    Global Additional yt-dlp Arguments: وسيطات yt-dlp الإضافية العامة
+    Concurrent Downloads: التنزيلات المتزامنة
+    Bandwidth Limit: حد النطاق الترددي (كيلو بايت/ثانية، 0 لعدد غير محدود)
+    Choose Download Folder: اختر مجلد التنزيل
+    Download Templates: قوالب التنزيل
+    Manage Download Templates: إدارة تنزيل القوالب ({templateCount})
+    New Template: قالب جديد
+    Template Source: قالب للتحرير أو استخدامه كقاعدة
+    Built-in Template: '{name} (مدمج)'
+    Custom Template Name: '{name} (مخصص)'
+    Create Template Copy: إنشاء نسخة
+    Template Copy Name: '{name} نسخة'
+    Automatic Downloads: التنزيلات التلقائية
+    Manage Automatic Downloads: إدارة التنزيلات التلقائية ({channelCount})
+    Automatic Downloads Description: حدد قالب التنزيل والمرشحات لكل قناة مشتركة. يتم تنزيل مقاطع الفيديو المطابقة في الخلفية عند تحديث خلاصات الاشتراك.
+    Automatic Downloads New Only: يبدأ تمكين القناة بالتحميل الجديد التالي. لا يتم تنزيل مقاطع الفيديو الموجودة وتراكم القنوات.
+    Automatic Downloads No Channels: اشترك في قناة قبل تكوين التنزيلات التلقائية.
+    No Matching Automatic Download Channels: لا توجد قنوات تطابق بحثك.
+    Automatic Downloads Livestreams: البث المباشر
+    Minimum Duration Seconds: الحد الأدنى للمدة (ثواني)
+    Maximum Duration Seconds: المدة القصوى (ثواني)
+    Minimum File Size MB: الحد الأدنى لحجم الملف (ميجابايت)
+    Maximum File Size MB: الحد الأقصى لحجم الملف (ميجابايت)
+    Maximum Age Days: الحد الأقصى للعمر (بالأيام)
+    Title Includes: يتضمن العنوان
+    Title Excludes: العنوان يستبعد
+    Title Filter Hint: افصل بين مصطلحات العناوين المتعددة بفواصل. يجب أن يتطابق الفيديو مع مصطلح واحد مدرج على الأقل ولا يتطابق مع أي مصطلحات مستبعدة.
+  External Software Settings:
+    External Software Settings: البرامج الخارجية
+    yt-dlp Source: yt-dlp المصدر
+    yt-dlp Channel: قناة yt-dlp
+    Sources:
+      System: النظام (PATH أو المسار المخصص)
+      Managed: تتم إدارته بواسطة OpenTubeX
+    Detected Version Template: 'تم اكتشاف إصدار yt-dlp: {version}'
+    Managed Not Downloaded: لم يتم تنزيل yt-dlp بعد. انقر على الزر أدناه لتنزيله.
+    System yt-dlp Missing Warning: لم يتم العثور على yt-dlp على نظامك. قم بتثبيته، أو قم بتعيين مسار مخصص أدناه، أو قم بتبديل المصدر إلى "Managed by OpenTubeX".
+    Download yt-dlp: تحميل yt-dlp
+    Update yt-dlp: تحديث yt-dlp
+    Checking yt-dlp: جارٍ التحقق من yt-dlp...
+    Downloading yt-dlp: جارٍ تنزيل yt-dlp…
+    yt-dlp Downloaded Template: تم تنزيل yt-dlp {version}
+    yt-dlp Download Error Template: 'فشل تنزيل yt-dlp: {error}'
+    FFmpeg Source: مصدر إف إف إم بي إي جي
+    Detected FFmpeg Version Template: 'تم اكتشاف إصدار FFmpeg: {version}'
+    FFmpeg Managed Not Downloaded: لم يتم تنزيل FFmpeg بعد. انقر على الزر أدناه لتنزيله.
+    System FFmpeg Missing Warning: لم يتم العثور على FFmpeg على نظامك. مطلوب لدمج الفيديو والصوت وتحويل الصوت. قم بتثبيته، أو قم بتعيين مسار مخصص أدناه، أو قم بتبديل المصدر إلى "Managed by OpenTubeX".
+    Download FFmpeg: تحميل برنامج FFmpeg
+    Update FFmpeg: تحديث إف إف إم بي إي جي
+    Checking FFmpeg: جارٍ التحقق من FFmpeg...
+    Downloading FFmpeg: جارٍ تنزيل FFmpeg...
+    FFmpeg Downloaded Template: تم تنزيل FFmpeg {version}
+    FFmpeg Download Error Template: 'فشل تنزيل FFmpeg: {error}'
+    Detected FFprobe Version Template: 'تم اكتشاف إصدار FFprobe: {version}'
+    FFprobe Managed Not Downloaded: لم يتم تنزيل FFprobe بعد. انقر فوق الزر أدناه لتنزيله باستخدام FFmpeg.
+    System FFprobe Missing Warning: لم يتم العثور على FFprobe على نظامك. وهو مطلوب لفحص الوسائط أثناء مرحلة ما بعد المعالجة. قم بتثبيته بجوار FFmpeg، أو قم بتبديل المصدر إلى "Managed by OpenTubeX".
+    Checking FFprobe: جارٍ التحقق من FFprobe...
+    Download FFmpeg and FFprobe: قم بتنزيل FFmpeg وFFprobe
+    Update FFmpeg and FFprobe: تحديث FFmpeg وFFprobe
+    Downloading FFmpeg and FFprobe: جارٍ تنزيل FFmpeg وFFprobe...
+    FFmpeg and FFprobe Downloaded Template: تم تنزيل FFmpeg وFFprobe {version}
+    FFmpeg and FFprobe Download Error Template: 'فشل تنزيل FFmpeg وFFprobe: {error}'
+    Managed Tool Already Current Template: '{tool} {version} محدث بالفعل'
+    Managed Tool Updates: تحديثات الأداة المُدارة
+    Update Modes:
+      Automatic: التحديث تلقائيا
+      Ask: اسأل قبل التحديث
+      Manual: قم بالتحديث يدويًا فقط
+    yt-dlp Executable Path: yt-dlp المسار القابل للتنفيذ
+    FFmpeg Executable Path: المسار القابل للتنفيذ FFmpeg
+    Restricted Playback Authentication: ملفات تعريف الارتباط الخاصة بتشغيل yt-dlp
+    Cookie Source: مصدر ملفات تعريف الارتباط
+    Cookie Sources:
+      None: لا شيء
+      File: ملف
+      Browser: المتصفح
+    Cookie File: ملف تعريف الارتباط
+    Browser for Cookies: متصفح لملفات تعريف الارتباط
+    Browser Profile: ملف تعريف المتصفح (اختياري)
+    Browser Profile Placeholder: اسم الملف الشخصي أو المسار
+    Select Browser: حدد متصفحًا
+    Always Use Cookies: استخدم ملفات تعريف الارتباط دائمًا
+    Restricted Playback Authentication Hint: افتراضيًا، يقوم OpenTubeX بتمرير ملفات تعريف الارتباط هذه إلى yt-dlp فقط بعد اختيار "تجربة باستخدام ملفات تعريف الارتباط التي تم تكوينها" في مقطع فيديو مقيد بالفئة العمرية أو للأعضاء فقط.
+    Restricted Playback Authentication Warning: يمكن أن يؤدي استخدام yt-dlp مع حساب Google إلى فرض قيود مؤقتة أو دائمة على الحساب.
+  Privacy Settings:
+    Automatic History Retention: الاحتفاظ التلقائي بالسجل (أيام)
+    Automatic History Retention Placeholder: اتركه فارغًا للاحتفاظ به إلى الأبد
+    Automatic History Retention Tooltip: اتركه فارغا للحفاظ على التاريخ إلى الأبد. يؤدي حفظ الرقم إلى إزالة الإدخالات القديمة الآن وبشكل تلقائي أثناء فتح التطبيق.
+    History Retention Saved: تم حفظ الاحتفاظ بالتاريخ
+    Invalid History Retention Days: أدخل عددًا صحيحًا من الأيام أكبر من الصفر
+    Enable Watch Statistics: تمكين إحصائيات المشاهدة
+    Week Starts On: يبدأ الأسبوع في
+    Cache Video Metadata: تخزين بيانات الفيديو الوصفية مؤقتًا
+    Cache Video Metadata Tooltip: يحتفظ بكل إصدار من البيانات الوصفية للفيديو المدعومة لمقاطع الفيديو التي تزورها، بما في ذلك العناوين والصور المصغرة والأوصاف. يتم تعطيله افتراضيًا لأن تخزين سجل بيانات التعريف يزيد من استخدام القرص.
+    Watched Percentage Threshold: عتبة النسبة المئوية المشاهدة
+    Watched Percentage Threshold Tooltip: يتم وضع علامة على مقاطع الفيديو على أنها تمت مشاهدتها بعد الوصول إلى النسبة المئوية المحددة وعدم ترك أكثر من دقيقتين. عند 0%، يتم وضع علامة عليها عند بدء التشغيل. عند 100%، يتم وضع علامة عليها عند انتهاء التشغيل.
+    Clear Video Metadata Cache: مسح ذاكرة التخزين المؤقت لبيانات تعريف الفيديو
+    Are you sure you want to clear the video metadata cache?: هل أنت متأكد أنك تريد مسح عناوين الفيديو والصور المصغرة والأوصاف المخزنة مؤقتًا؟
+    Failed to clear video metadata cache: فشل في مسح ذاكرة التخزين المؤقت للبيانات التعريفية للفيديو
+    Video metadata cache has been cleared: تم مسح ذاكرة التخزين المؤقت للبيانات الوصفية للفيديو
+    Video Metadata Cache Size: 'ذاكرة التخزين المؤقت للبيانات الوصفية للفيديو: {size}'
+  Storage Settings:
+    Storage: تخزين
+    Downloaded Media: تتبع الوسائط التي تم تنزيلها
+    Storage Breakdown: تفاصيل استخدام التخزين
+    Shown Total: الإجمالي المعروض
+    Calculating: جارٍ الحساب…
+    Not Available: الحجم الدقيق غير متوفر
+    At Least: على الأقل {size}
+    Failed To Read Storage: لا يمكن قراءة بعض أحجام التخزين
+    Downloaded Media Description: لا تزال ملفات الفيديو والصوت والترجمة التي يتم تنزيلها يتم تتبعها.
+    Selected Download Folders: مجلدات التنزيل التي حددها المستخدم
+    Download History Records: سجلات التنزيل
+    Download History Records Description: 'لا توجد سجلات تنزيل مكتملة ({count}). تتتبع هذه السجلات الحالة ومواقع الملفات، لكنها لا تحتوي على الوسائط المنزّلة. | يوجد سجل تنزيل مكتمل واحد ({count}). يتتبع هذا السجل الحالة ومواقع الملفات، لكنه لا يحتوي على الوسائط المنزّلة. | يوجد سجلا تنزيل مكتملان ({count}). يتتبع هذان السجلان الحالة ومواقع الملفات، لكنهما لا يحتويان على الوسائط المنزّلة. | توجد {count} سجلات تنزيل مكتملة. تتتبع هذه السجلات الحالة ومواقع الملفات، لكنها لا تحتوي على الوسائط المنزّلة. | يوجد {count} سجل تنزيل مكتملًا. تتتبع هذه السجلات الحالة ومواقع الملفات، لكنها لا تحتوي على الوسائط المنزّلة. | يوجد {count} سجل تنزيل مكتمل. تتتبع هذه السجلات الحالة ومواقع الملفات، لكنها لا تحتوي على الوسائط المنزّلة.'
+    Clear Download History Records: مسح سجلات محفوظات التنزيل
+    Clear Download History Confirmation: هل تريد مسح جميع سجلات التنزيل النهائية؟
+    Download Files Stay On Disk: ستبقى الملفات التي تم تنزيلها على القرص، لكنها لن تظهر بعد ذلك على صفحة التنزيلات.
+    Clear Records: مسح السجلات
+    Replaceable Caches: ذاكرات تخزين مؤقت قابلة للاستبدال
+    Application Caches: ذاكرات التخزين المؤقت للتطبيق
+    Browser Caches: ذاكرات التخزين المؤقت للمتصفح
+    Browser Caches Hint: ذاكرات التخزين المؤقت لـ HTTP وGPU والرمز والتظليل وعامل الخدمة والقاموس في Chromium.
+    Stored App Data: بيانات التطبيق المخزنة
+    Browser Runtime Data: بيانات وقت تشغيل المتصفح
+    Browser Runtime Data Hint: جلسة Chromium والتخزين المحلي وملفات تعريف الارتباط والخصوصية وحالة الشبكة وملفات الأعطال.
+    Subscription Feed Cache: الاشتراك وذاكرة التخزين المؤقت للتغذية
+    Subscription Feed Cache Description: تخزّن مقاطع الفيديو والفيديوهات القصيرة وأحداث البث المباشر والمنشورات التي جُلبت من الاشتراكات. يعيد OpenTubeX إنشاءها عند تحديث الخلاصة التالية.
+    Clear Subscription Feed Cache: مسح الاشتراك وذاكرة التخزين المؤقت للخلاصة
+    Clear Subscription Feed Cache Confirmation: هل تريد مسح الاشتراك وذاكرة التخزين المؤقت للخلاصة؟
+    Subscription Feed Cache Effect: قد تظهر خلاصات الاشتراك فارغة حتى يتم تحديثها. لن يتم تغيير اشتراكاتك وملفاتك الشخصية.
+    Session Search Cache: ذاكرة التخزين المؤقت للبحث عن الجلسة
+    In Memory: في الذاكرة
+    Session Search Cache Description: 'لا توجد عمليات بحث مخزنة مؤقتًا في الذاكرة ({count}). تُحذف ذاكرة التخزين المؤقت عند إغلاق OpenTubeX. | توجد عملية بحث واحدة مخزنة مؤقتًا في الذاكرة ({count}) لتسريع الرجوع. تُحذف ذاكرة التخزين المؤقت عند إغلاق OpenTubeX. | توجد عمليتا بحث مخزنتان مؤقتًا في الذاكرة ({count}) لتسريع الرجوع. تُحذف ذاكرة التخزين المؤقت عند إغلاق OpenTubeX. | توجد {count} عمليات بحث مخزنة مؤقتًا في الذاكرة لتسريع الرجوع. تُحذف ذاكرة التخزين المؤقت عند إغلاق OpenTubeX. | توجد {count} عملية بحث مخزنة مؤقتًا في الذاكرة لتسريع الرجوع. تُحذف ذاكرة التخزين المؤقت عند إغلاق OpenTubeX. | توجد {count} عملية بحث مخزنة مؤقتًا في الذاكرة لتسريع الرجوع. تُحذف ذاكرة التخزين المؤقت عند إغلاق OpenTubeX.'
+    Clear Session Search Cache: مسح ذاكرة التخزين المؤقت للبحث عن الجلسة
+    Clear Session Search Cache Confirmation: هل تريد مسح ذاكرة التخزين المؤقت للبحث في الجلسة؟
+    Session Search Cache Effect: سيتم تجاهل صفحات النتائج المخزنة مؤقتًا. لن يتم تغيير سجل البحث المحفوظ.
+    HTTP Cache: ذاكرة التخزين المؤقت HTTP
+    HTTP Cache Description: يقوم Electron بتخزين استجابات الشبكة على القرص بحيث يمكن تحميل الطلبات المتكررة دون تنزيل نفس البيانات مرة أخرى. يقوم OpenTubeX بإعادة إنشاء ذاكرة التخزين المؤقت هذه حسب الحاجة.
+    Managed By Electron: تدار بواسطة الإلكترون
+    Clear HTTP Cache: امسح ذاكرة التخزين المؤقت لـ HTTP
+    Clear HTTP Cache Confirmation: مسح ذاكرة التخزين المؤقت HTTP الخاصة بـ Electron؟
+    HTTP Cache Effect: قد يتم تحميل الصور وموارد الشبكة الأخرى بشكل أبطأ مرة واحدة أثناء إعادة إنشاء ذاكرة التخزين المؤقت.
+    Tab Image Cache: الصور المصغرة للصور والصور الرمزية للقناة
+    Tab Image Cache Description: يقوم بتخزين معاينة الصور والصور الرمزية للقناة لعلامات التبويب المفتوحة والمستعادة. يقوم OpenTubeX بإعادة إنشائها أثناء استخدام علامات التبويب.
+    Clear Tab Image Cache: مسح ذاكرة التخزين المؤقت لصورة علامة التبويب
+    Clear Tab Image Cache Confirmation: هل تريد مسح الصور المصغرة لعلامات التبويب والصور الرمزية للقناة؟
+    Tab Image Cache Effect: قد تختفي صور علامات التبويب لفترة وجيزة وسيتم إعادة إنشائها عند استخدام علامات التبويب الخاصة بها.
+    Playback Caches: ذاكرات التخزين المؤقت للتشغيل
+    Playback Caches Description: يخزن عناوين URL لدفق yt-dlp بين جلسات التطبيق، بالإضافة إلى ملفات مشغل YouTube. تنطبق ذاكرة التخزين المؤقت لعنوان URL فقط على التدفقات التي تم جلبها باستخدام yt-dlp.
+    Playback URL Cache Entry Size: الحد الأقصى لذاكرة التخزين المؤقت لعنوان URL لدفق yt-dlp
+    Playback URL Cache Entry Size Tooltip: يضبط الحد الأقصى لحجم كل إدخال دفق yt-dlp مخبأ. اضبطه على 0 ميغابايت لتعطيل التخزين المؤقت المستمر لتدفقات yt-dlp.
+    Clear Playback Caches: مسح ذاكرة التخزين المؤقت للتشغيل
+    Clear Playback Caches Confirmation: هل تريد مسح yt-dlp وذاكرة التخزين المؤقت للمشغل؟
+    Playback Caches Effect: قد يستغرق طلب التشغيل المحلي التالي وقتًا أطول أثناء جلب بيانات البث والمشغل مرة أخرى.
+    Clear Cache: مسح ذاكرة التخزين المؤقت
+    History Data: بيانات السجل المخزنة
+    Video Metadata Description: يخزن العناوين والصور المصغرة والأوصاف السابقة لمقاطع الفيديو المدعومة. لا يمكن إعادة إنشاء المراجعات القديمة بعد الحذف.
+    Video Metadata Effect: سيتم حذف مراجعات البيانات التعريفية المحفوظة نهائيًا. لا يزال من الممكن جلب تفاصيل الفيديو الحالية مرة أخرى.
+    Watch History: سجل المشاهدة والإحصائيات
+    Watch History Description: سجل المشاهدة يسجل مقاطع الفيديو التي تم مشاهدتها والتقدم. مشاهدة الإحصائيات تخزن إجماليات المشاهدة اليومية. ينطبق الاحتفاظ فقط على سجل المشاهدة.
+    Clear Watch Statistics: مسح إحصائيات المشاهدة
+    Watch History Effect: سيتم حذف سجلات الفيديو التي تم مشاهدتها والتقدم المحفوظ. ستبقى إحصائيات المشاهدة.
+    Clear Watch Statistics Confirmation: هل تريد حذف جميع إحصائيات المشاهدة؟
+    Watch Statistics Effect: سيتم حذف إجماليات المشاهدة اليومية. سيبقى سجل المشاهدة.
+    Search History: سجل البحث
+    Search History Description: يخزّن عمليات البحث التي اخترت تذكرها.
+    Delete Search History: حذف سجل البحث
+    Delete Search History Confirmation: هل تريد حذف سجل البحث المحفوظ بالكامل؟
+    Search History Effect: ستختفي اقتراحات البحث المحفوظة من عمليات البحث السابقة. ستبقى ذاكرة التخزين المؤقت للجلسة الحالية.
+    Other User Data: بيانات المستخدم الأخرى
+    Other Profile Files: ملفات التعريف الأخرى
+    Other Profile Files Hint: النسخ الاحتياطية والملفات المؤقتة وإدخالات الملف الشخصي لم يتعرف عليها OpenTubeX بعد.
+    Subscriptions And Profiles: الاشتراكات والملفات الشخصية
+    Subscriptions And Profiles Description: يخزن القنوات المشتركة وأسماء الملفات الشخصية وعضوية الملف الشخصي.
+    Subscriptions And Profiles Effect: سيتم حذف جميع الاشتراكات والملفات الشخصية الإضافية نهائيًا. سيتم أيضًا مسح بيانات ذاكرة التخزين المؤقت للخلاصة.
+    Playlists Description: يخزن أسماء قوائم التشغيل والأوصاف ومقاطع الفيديو المحفوظة.
+    Playlists Effect: سيتم حذف كل قائمة تشغيل وقائمة مقاطع الفيديو المحفوظة الخاصة بها نهائيًا. ستبقى ملفات الوسائط التي تم تنزيلها.
+    Settings And Sessions: الإعدادات وجلسات علامات التبويب والتذكيرات
+    Settings And Sessions Description: يخزن تفضيلات التطبيق وعلامات التبويب القابلة للاستعادة وتذكيرات البث المباشر. افتح دليل ملف التعريف لفحص هذه الملفات أو عمل نسخة احتياطية منها؛ هذه الصفحة لا تحذفهم.
+    Cleanup Complete: تم الانتهاء من تنظيف وحدة التخزين
+    Cleanup Failed: فشل تنظيف التخزين
+  Subscription Settings:
+    Fetch Feed on Startup: جلب التغذية عند بدء التشغيل
+    Show New Content Feed: إظهار خلاصة المحتوى الجديد
+    Show New Content Indicators: إظهار مؤشرات المحتوى الجديدة
+    Show Scheduled Live Streams / Premieres First: عرض مجموعات البث المباشر / العروض الأولى المجدولة أولاً
+    Auto Refresh Interval: الفاصل الزمني للتحديث التلقائي
+    Videos Auto Refresh Interval: مقاطع الفيديو الفاصل الزمني للتحديث التلقائي
+    Shorts Auto Refresh Interval: الفاصل الزمني للتحديث التلقائي للشورتات
+    Live Auto Refresh Interval: الفاصل الزمني للتحديث التلقائي المباشر
+    Posts Auto Refresh Interval: المشاركات الفاصل الزمني للتحديث التلقائي
+  Distraction Free Settings:
+    Sections:
+      Visible While Paused: مرئي أثناء الإيقاف المؤقت في نافذة كاملة/شاشة كاملة
+    Hide Channel Avatars: إخفاء الصور الرمزية للقناة
+    Shorten View Counts: تقصير مرات المشاهدة والتعليق على عدد الإعجابات
+    Hide Comment Translation Buttons: إخفاء أزرار ترجمة التعليق
+    Hide Live Chat Replay: إخفاء إعادة تشغيل الدردشة المباشرة
+    Hide End-Screen Annotations: إخفاء التعليقات التوضيحية على شاشة النهاية
+    Hide Paid Promotion Badge: إخفاء شارة الترويج المدفوعة
+    Show Player Controls: إظهار عناصر التحكم في المشغل
+    Show Video Title: إظهار عنوان الفيديو
+    Show Bottom Right Actions Dock: إظهار إرساء الإجراءات اليمنى السفلية
+    Paused Interface Hide Delay: واجهة متوقفة مؤقتًا إخفاء التأخير
+  Data Settings:
+    Data And Storage: البيانات والتخزين
+    Profile Directory: دليل الملف الشخصي
+    Open Profile Directory: افتح دليل الملف الشخصي
+    Settings File: ملف الإعدادات
+    Import Settings: إعدادات الاستيراد
+    Export Settings: إعدادات التصدير
+    Settings Tooltip: لا يمكن تصدير أو استيراد الإعدادات الخاصة بنظام التشغيل/المستخدم أو التجريبية (على سبيل المثال، الوكيل، المشغل الخارجي، مجلد لقطة الشاشة...)
+    Invalid JSON row, skipping item: JSON غير صالح في الصف {row}، تخطي العنصر
+    All settings have been successfully imported: تم استيراد كافة الإعدادات بنجاح
+    All settings have been successfully exported: تم تصدير كافة الإعدادات بنجاح
+    Setting object has insufficient data, skipping item: لا يحتوي كائن الإعداد على بيانات كافية، مما يؤدي إلى تخطي العنصر
+    Unknown setting key: 'مفتاح الإعداد غير معروف: {key}'
+    Non-transferable setting key: 'مفتاح الإعداد غير القابل للتحويل: {key}'
+    Import subscriptions formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، أو YouTube Takeout (.csv، .json، .opml)، NewPipe (.json)، النسخ الاحتياطي LibreTube أو تصدير FreeTube (.json)'
+    Import history formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، وYouTube Takeout (.json)، والنسخ الاحتياطي LibreTube (.json)'
+    Import playlists formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
+  Sync Settings:
+    Sync Settings: مزامنة
+    Enable Sync: تمكين المزامنة
+    Privacy Passphrase: عبارة مرور الخصوصية
+    Privacy Passphrase Hint: استخدم عبارة مرور منفصلة عن كلمة مرور حسابك. لا يغادر هذا الجهاز أبدًا وهو مطلوب في كل جهاز؛ وفقدانها يجعل بيانات المزامنة المشفرة غير قابلة للاسترداد.
+    Privacy Policy: سياسة الخصوصية لهذا الخادم
+    Enhanced Privacy Enabled: تم تمكين الخصوصية المحسنة. يقوم الخادم بتخزين بيانات المزامنة المشفرة فقط.
+    Enhanced Privacy Unsupported: تحذير — هذا الخادم لا يدعم الخصوصية المحسنة. البيانات المتزامنة مرئية لمشغلها.
+    Description: قم بمزامنة الاشتراكات والملفات الشخصية وقوائم التشغيل وسجل المشاهدة والإعدادات وعلامات التبويب المفتوحة باستخدام خادم مزامنة OpenTubeX أو LibreTube. قد لا تدعم خوادم LibreTube كل ميزات المزامنة.
+    Server URL: عنوان URL للخادم
+    Checking Server: جارٍ التحقق من خادم المزامنة…
+    Server Unavailable: غير قادر على الاتصال بخادم المزامنة هذا. تحقق من عنوان URL وحاول مرة أخرى.
+    Username: اسم المستخدم
+    Log In: تسجيل الدخول
+    Register: إنشاء حساب
+    Pair Another Device: قم بإقران جهاز آخر
+    Pair With Existing Device: إقران مع جهاز موجود
+    Device Name: اسم الجهاز
+    This Device: هذا الجهاز
+    Device Name Required: أدخل اسمًا لهذا الجهاز.
+    Pairing Device Name Hint: اختر اسمًا ستتعرف عليه على الجهاز الذي يوافق على هذا الطلب.
+    Create Pairing Code: إنشاء رمز الاقتران
+    Creating Pairing Code: جارٍ إنشاء رمز اقتران آمن...
+    Pairing QR Alt: إقران رمز الاستجابة السريعة لـ {device}
+    Scan Pairing Code: على جهاز متصل بالفعل، افتح "إقران جهاز آخر" وقم بمسح هذا الرمز ضوئيًا.
+    Pairing Code: رمز الاقتران
+    Use Text Pairing Code: استخدم رمز النص بدلا من ذلك
+    Show QR Code: إظهار رمز الاستجابة السريعة
+    Text Pairing Code Hint: انسخ هذا الرمز إلى الجهاز الموجود. يحتوي على سر الاقتران، لذا قم بمسحه من سجل الحافظة بعد الاقتران.
+    Pairing QR Warning: أظهر هذا الرمز فقط للجهاز الموثوق به والمتصل بالفعل والذي سيوافق على هذا الطلب. وتنتهي بعد دقيقتين.
+    Pairing Expires: تنتهي صلاحية رمز الاقتران في {time}.
+    Verifying Pairing: جارٍ التحقق من مفتاح الخصوصية المنقول...
+    Completing Pairing: جارٍ إكمال إقران الجهاز…
+    Compare Pairing Codes: قارن رموز الاقتران
+    Pairing Code Match Hint: قم بالتأكيد فقط إذا كان هذا الرمز يطابق الرمز الموجود على جهازك الحالي.
+    Pairing Codes Match: تطابق الرموز
+    Pairing Approval Code Hint: اترك هذه النافذة مفتوحة وقارن هذا الرمز بالجهاز الجديد. يجب ألا يستمر الجهاز الجديد في حالة اختلاف الرموز.
+    Pairing Scan Hint: قم بمسح رمز الاقتران الظاهر على الجهاز الذي تقوم بإضافته.
+    Enter Pairing Code: أدخل الرمز يدويًا
+    Pairing Code Entry Hint: الصق رمز الاقتران الموضح على الجهاز الذي تقوم بإضافته.
+    Check Pairing Code: تحقق من الرمز
+    Scan QR Code: مسح رمز الاستجابة السريعة
+    Waiting For Pairing Code: في انتظار رمز الاقتران…
+    Checking Pairing Request: جارٍ التحقق من طلب الاقتران…
+    Approving Pairing Request: جارٍ تشفير وإرسال مفتاح الخصوصية...
+    Pairing Approval Warning: لا توافق إلا إذا كان بإمكانك رؤية هذا الطلب على الجهاز الذي تضيفه. يمنح الاقتران حق الوصول إلى الحساب وينقل مفتاح الخصوصية.
+    Approve Pairing: الموافقة على الاقتران
+    Try Again: حاول ثانية
+    Scan Again: مسح مرة أخرى
+    Camera Unavailable: تعذر على OpenTubeX الوصول إلى الكاميرا. تحقق من إذن الكاميرا أو أدخل رمز الاقتران يدويًا.
+    Pairing Unsupported: لا يدعم خادم المزامنة هذا الاقتران الآمن للأجهزة.
+    Pairing Failed: فشل إقران الجهاز. حاول مرة أخرى باستخدام رمز جديد.
+    Pairing Request Changed: تم تغيير طلب الاقتران أو انتهت صلاحيته أو تم استخدامه بالفعل. إنشاء رمز جديد.
+    Pairing Server Mismatch: ينتمي هذا الرمز إلى خادم مزامنة مختلف.
+    Pairing Verification Unavailable: لا تتوفر مجموعة مزامنة مشفرة للتحقق من المفتاح المنقول. قم بمزامنة الجهاز الموجود، ثم حاول مرة أخرى.
+    Pairing Completed: اكتمل اقتران الجهاز
+    Pairing Approved: تمت الموافقة على اقتران الجهاز
+    Disconnect: قطع الاتصال
+    Delete Account: حذف حساب المزامنة
+    Delete Account Confirmation: هل تريد حذف حساب المزامنة؟
+    Delete Account Warning: يؤدي هذا إلى حذف حساب المزامنة الخاص بك وجميع البيانات المخزنة على هذا الخادم نهائيًا. لن يتم حذف بيانات OpenTubeX المحلية الخاصة بك.
+    Confirm Delete Account: حذف الحساب
+    Password Required: كلمة المرور مطلوبة
+    Account Deleted: تم حذف حساب المزامنة
+    Connected as: متصل كـ {username}
+    Automatic Sync: المزامنة تلقائيًا بعد التغييرات وكل خمس دقائق
+    Profiles: الملفات الشخصية
+    Open Tabs: فتح علامات التبويب والجلسة
+    Disable Setting Sync: توقف عن مزامنة هذا الإعداد
+    Enable Setting Sync: مزامنة هذا الإعداد
+    Sync Now: مزامنة الآن
+    Downloading encrypted data: جارٍ تنزيل بيانات المزامنة المشفرة…
+    Syncing subscriptions: جارٍ مزامنة الاشتراكات…
+    Syncing playlists: جارٍ مزامنة قوائم التشغيل…
+    Syncing history: جارٍ مزامنة سجل المشاهدة…
+    Syncing profiles: جارٍ مزامنة الملفات الشخصية…
+    Syncing open tabs: جارٍ مزامنة علامات التبويب المفتوحة والجلسة...
+    Syncing settings: جارٍ مزامنة الإعدادات…
+    Uploading encrypted data: جارٍ تحميل بيانات المزامنة المشفرة…
+    Finishing sync: جارٍ إنهاء المزامنة…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'آخر مزامنة: {date}'
+    History not supported: لا يدعم إصدار الخادم هذا مزامنة سجل المشاهدة.
+    Settings not supported: إصدار الخادم هذا لا يدعم مزامنة الإعدادات.
+    Sync completed: اكتملت المزامنة
+    Data Loss Confirmation: هل تريد تأكيد المزامنة المدمرة؟
+    Data Loss Warning: ستحذف حالة الخادم {deleted} من {previous} عنصرًا تمت مزامنته مسبقًا {collection}. يمكن أن يشير هذا إلى فشل عملية ترحيل الخادم أو إعادة تعيينه. استمر فقط إذا كان هذا الحذف مقصودًا ولديك نسخة احتياطية.
+    Confirm Data Loss: حذف والمتابعة
+  Proxy Settings:
+    IP Block Recovery Script Path: مسار البرنامج النصي لاسترداد كتلة IP
+    Select IP Block Recovery Script File: حدد ملف البرنامج النصي لاسترداد حظر IP
+    Running IP block recovery script: تشغيل البرنامج النصي لاسترداد كتلة IP
+    IP block recovery script failed: 'فشل البرنامج النصي لاسترداد حظر IP (رمز الخروج: {exitCode})'
+    IP block recovery script finished: تم الانتهاء من البرنامج النصي لاستعادة كتلة IP
+    Reloading video after IP block recovery: إعادة تحميل الفيديو بعد استرداد حظر IP
+    Failed to select IP block recovery script: فشل في تحديد البرنامج النصي لاسترداد حظر IP
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: تمكين تقديم SponsorBlock
+    SponsorBlock Private User ID (optional): معرف المستخدم الخاص لـ SponsorBlock (اختياري)
+    SponsorBlock Private User ID Tooltip: الصق معرف مستخدم SponsorBlock الخاص من ملحق المتصفح. اترك هذا الحقل فارغًا لاستخدام المعرف الذي أنشأه التطبيق.
+    Generated SponsorBlock User ID: تم إنشاء معرف مستخدم SponsorBlock
+    Generated SponsorBlock User ID Tooltip: يمكن استخدام معرف مستخدم SponsorBlock الذي تم إنشاؤه بواسطة التطبيق في ملحق المتصفح أو إذا كنت تستخدم التطبيق على جهاز كمبيوتر آخر.
+    Export Generated User ID: تصدير معرف المستخدم الذي تم إنشاؤه
+    Generated SponsorBlock User ID Copy Button: انسخ معرف مستخدم SponsorBlock الذي تم إنشاؤه
+    Generated SponsorBlock User ID Copied: تم نسخ معرف مستخدم SponsorBlock الذي تم إنشاؤه إلى الحافظة
+    Skip notification timeout: تخطي مهلة الإخطار
+    Custom Color: لون مخصص
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: إرجاع عدم الإعجاب على YouTube
+    Enable Return YouTube Dislike: تمكين إرجاع عدم الإعجاب على YouTube
+    Return YouTube Dislike Url: قم بإرجاع عنوان URL لواجهة برمجة تطبيقات YouTube Dislike (الافتراضي هو https://ryd-proxy.kavin.rocks)
+  Parental Control Settings:
+    Disable Channel Links: تعطيل روابط القنوات
+  Password Dialog:
+    Incorrect Password: كلمة مرور غير صحيحة
+    Unlock: فتح
+    Unlocking: فتح…
+  Search Settings: إعدادات البحث
+  No Settings Found: لم يتم العثور على إعدادات
+Tutorial:
+  Skip: تخطي
+  Next: التالي
+  Finish: إنهاء
+  Got It: فهمتها
+  Welcome:
+    Title: مرحبًا بك في OpenTubeX
+    Description: فيما يلي بعض الضوابط القليلة التي ستساعدك على الشعور وكأنك في بيتك.
+  Navigation:
+    Title: مكتبتك دائما في مكان قريب
+    Description: استخدم التنقل للوصول إلى الاشتراكات وقوائم التشغيل والسجل والمزيد.
+  Search:
+    Title: ابحث عن رابط أو الصقه
+    Description: ابحث عن مقاطع الفيديو والقنوات، أو الصق عنوان URL للفيديو المدعوم مباشرةً في حقل البحث.
+  Tabs:
+    Title: إبقاء الصفحات مفتوحة في علامات التبويب
+    Description: افتح عدة صفحات مرة واحدة دون أن تفقد مكانك. اختر المكان الذي تناسب فيه علامات التبويب بشكل أفضل في تخطيطك.
+  Quick Settings:
+    Title: اجعلها لك
+    Description: اختر موضوعًا وجودة الفيديو الافتراضية. قم بتغيير هذه التفضيلات وغيرها من قائمة ملف التعريف الخاص بك في أي وقت، أو انقر بزر الماوس الأيمن عليها لتبديل الملفات الشخصية.
+  Import Data:
+    Title: أحضر بياناتك معك
+    Description: يمكنك اختياريًا استيراد الاشتراكات أو السجل أو قوائم التشغيل أو سجل البحث أو الإعدادات من تطبيق آخر مدعوم أو نسخة احتياطية.
+    Action: استيراد البيانات
+    Not Now: ليس الآن
+  Settings Moved:
+    Title: تم نقل الإعدادات
+    Description: حدد ملف التعريف الخاص بك في الجزء العلوي الأيسر للتحكم السريع. انقر بزر الماوس الأيمن عليه للانتقال مباشرة إلى اختيار الملف الشخصي. يفتح الترس الموجود في تلك القائمة كافة الإعدادات، ويتم نقل "حول" و"التنزيلات" إلى هذه القائمة أيضًا.
+About:
+  Commit: يقترف
+  Fluxer: انضم إلى مجتمع Fluxer الخاص بنا
+  Matrix: مصفوفة
+  Email: بريد إلكتروني
+Profile:
+  Profile Icon: أيقونة الملف الشخصي
+  Choose an Emoji: اختر رمزًا تعبيريًا
+  Custom Emoji: رموز تعبيرية مخصصة
+  Emoji: الرموز التعبيرية
+  Choose Image: اختر الصورة
+  Crop Image: صورة المحاصيل
+  Zoom: تكبير
+  Apply Crop: تطبيق المحاصيل
+  Transparent: شفاف
+  Use Initial: استخدم الأولي
+  The selected image could not be loaded: لا يمكن تحميل الصورة المحددة
+  Theme Color: لون الموضوع
+Channel:
+  Channel Name Unavailable: اسم القناة غير متاح
+  Search Result Types: أنواع نتائج البحث
+  All Results: الجميع
+  View All: عرض الكل
+Video:
+  Includes paid promotion: يشمل الترويج المدفوع
+  Age Restricted Badge: العمر مقيد
+  Queue: طابور
+  Play Next: العب التالي
+  Add to Queue: إضافة إلى قائمة الانتظار
+  Added to Play Next: سيتم تشغيل الفيديو بعد ذلك
+  Added to Queue: تمت إضافة الفيديو إلى قائمة الانتظار
+  Clear Queue: مسح قائمة الانتظار
+  Queue Video Count: 'لا توجد فيديوهات ({count}) | فيديو واحد ({count}) | فيديوهان ({count}) | {count} فيديوهات | {count} فيديو | {count} فيديو'
+  Remove from Queue: قم بإزالة {title} من قائمة الانتظار
+  Drag to Reorder Queue: اسحب {title} لإعادة ترتيب قائمة الانتظار
+  Reorder Queue Item: إعادة الطلب {title}
+  Reorder Queue Item Instructions: استخدم مفاتيح الأسهم لأعلى ولأسفل لنقل هذا الفيديو في قائمة الانتظار.
+  Queue Item Moved: تم نقل {title} إلى الموضع {position} من {total}.
+  Queue Item Cannot Move Up: لا يمكن نقل {title} لأعلى. إنه بالفعل في الموضع 1 من {total}.
+  Queue Item Cannot Move Down: لا يمكن نقل {title} إلى الأسفل. إنه موجود بالفعل في الموضع {total} من {total}.
+  Metadata: معلومات الفيديو
+  Close Metadata: إغلاق معلومات الفيديو
+  Metadata Cache:
+    Title History: تاريخ العنوان
+    Thumbnail History: تاريخ الصورة المصغرة
+    Description History: تاريخ الوصف
+    Previous Version: السابق {number}
+    Empty: (فارغ)
+  Fetching Streams: جارٍ جلب مجموعات البث باستخدام yt-dlp…
+  Transcript:
+    Title: نص
+    Search: نص البحث
+    Language: لغة النص
+    Save: يحفظ
+    Show: إظهار النص
+    Hide: إخفاء النص
+    Close: إغلاق النص
+    Copied: تم نسخ النص إلى الحافظة
+    Saved: تم حفظ النص
+    Save Error: غير قادر على حفظ النص
+    Text File: ملف نصي
+    Unavailable: النص غير متوفر لهذا الفيديو.
+    Load Error: لا يمكن تحميل النص.
+    Empty: هذا النص لا يحتوي على أي نص.
+    No Results: لا توجد مقاطع نصية تتطابق مع بحثك.
+  Retry With Built-in Extraction: أعد المحاولة باستخدام الاستخراج المدمج
+  Retry With yt-dlp Extraction: أعد المحاولة باستخدام استخراج yt-dlp
+  Reloading video after streaming URL error: إعادة تحميل الفيديو بعد حدوث خطأ في عنوان URL
+  Configure Restricted Playback Cookies Hint: قم بتكوين ملفات تعريف الارتباط في الإعدادات → البرامج الخارجية → ملفات تعريف الارتباط الخاصة بتشغيل yt-dlp.
+  Try With Configured Cookies: حاول باستخدام ملفات تعريف الارتباط التي تم تكوينها
+  Restricted Playback Authentication Failed Template: 'تعذر على yt-dlp الوصول إلى هذا الفيديو باستخدام ملفات تعريف الارتباط التي تم تكوينها: {error}'
+  Private: لا يمكن مشاهدة مقاطع الفيديو الخاصة في OpenTubeX لأنها تتطلب تسجيل الدخول إلى Google وملكية الفيديو.
+  Unmark As Watched: قم بإلغاء تحديد "كما تمت مشاهدته".
+  Video has been unmarked as watched: تمت إزالة علامة "تم مشاهدة" الفيديو
+  Save Channel Playback Speed: حفظ سرعة تشغيل القناة
+  Channel Playback Speed Saved: تم حفظ سرعة تشغيل القناة
+  Save Channel Video Quality: حفظ جودة فيديو القناة
+  Channel Video Quality Saved: تم حفظ جودة فيديو القناة
+  Save Channel Subtitles State: حفظ حالة ترجمة القناة
+  Channel Subtitles State Saved: تم حفظ حالة ترجمات القناة
+  Save Channel Volume: حفظ حجم القناة
+  Channel Volume Saved: تم حفظ حجم القناة
+  Save Channel Setting: حفظ إعداد القناة...
+  Channel Setting Already Set: تم ضبط {setting} بالفعل على {value}
+  Video has been saved to {playlistName}: تم حفظ الفيديو في {playlistName}
+  Video has been removed from {playlistName}: تمت إزالة الفيديو من {playlistName}
+  There was a problem saving the video to {playlistName}: حدثت مشكلة أثناء حفظ الفيديو على الرقم {playlistName}
+  There was a problem removing the video from {playlistName}: حدثت مشكلة أثناء إزالة الفيديو من {playlistName}
+  Failed to load collaborators: فشل تحميل المتعاونين
+  Notify me: أعلمني
+  Notification on: تم تفعيل الإشعارات
+  Notification enabled: سيتم إعلامك عند بدء هذا الفيديو
+  Notification cancelled: تم إلغاء إشعار البدء
+  Notification unavailable: إشعارات النظام غير متوفرة
+  Scheduled video starting: بدء تشغيل الفيديو المجدول
+  Live notification body: '{videoTitle} يبدأ الآن'
+  Premiere: العرض الأول
+  AI: منظمة العفو الدولية
+  AI-generated content: المحتوى الذي تم إنشاؤه بواسطة الذكاء الاصطناعي
+  Collaborators: المتعاونون
+  Live Chat Replay: إعادة تشغيل الدردشة المباشرة
+  Show Live Chat: عرض الدردشة الحية
+  Show Live Chat Replay: عرض إعادة تشغيل الدردشة المباشرة
+  Close Live Chat: إغلاق الدردشة المباشرة
+  Close Live Chat Replay: إغلاق إعادة تشغيل الدردشة المباشرة
+  Live Chat Settings: إعدادات الدردشة المباشرة
+  Show Live Chat Timestamps: إظهار الطوابع الزمنية
+  Chat Filter: مرشح الدردشة
+  Top Chat: أعلى الدردشة
+  All Messages: جميع الرسائل
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: تم تمكين إعادة تشغيل الدردشة المباشرة.  ستظهر رسائل الدردشة هنا أثناء تشغيل الفيديو.
+  Premiere started: العرض الأول قيد التقدم. بدأ {timeAgo}
+  Player:
+    Voice-over Translation:
+      Start: يترجم
+      Cancel: يلغي
+      Progress: جارٍ إعداد الترجمة الصوتية…
+      Retry: أعد المحاولة
+      Error: فشلت الترجمة الصوتية. يرجى المحاولة مرة أخرى في وقت لاحق.
+      Duration Error: الترجمة الصوتية متاحة فقط لمقاطع الفيديو التي تصل مدتها إلى أربع ساعات.
+    Caption Appearance:
+      Options: خيارات
+      Sample: التسميات التوضيحية تبدو مثل هذا
+    Auto-translate: الترجمة التلقائية
+    Sleep Timer:
+      Sleep Timer: توقيت النوم
+      Off: عن
+      Minutes: '{minutes} دقيقة'
+      End of video: نهاية الفيديو
+      Remaining: '{time} المتبقي'
+      Cancel timer: إلغاء الموقت
+      Timer ended: انتهى مؤقت النوم
+    Zoom:
+      Zoom: تكبير
+      Off: عن
+    Auto-generated Caption Template: '{language} (تم إنشاؤه تلقائيًا)'
+    Up next in {seconds}: التالي في {seconds}
+    Resize dock: تغيير حجم قفص الاتهام
+    Play now: العب الآن
+    MusicPlaybackRateOverride: تم اكتشاف فيديو موسيقي، يتم تشغيله بمعدل 1x
+    Normal: طبيعي
+    Set Default: تعيين الافتراضي
+    Hide Annotations: إخفاء التعليقات التوضيحية
+    Show Annotations: إظهار التعليقات التوضيحية
+    Hide: يخفي
+    Show: يعرض
+    Scroll Mini Player:
+      Back to Top: العودة إلى الأعلى
+      Return to Video Tab: العودة إلى علامة التبويب الفيديو
+      Play: يلعب
+      Pause: يوقف
+      Drag Handle: نقل لاعب صغير
+    SponsorBlock:
+      CancelCurrentSegment: إلغاء إنشاء المقطع
+      ClearSegments: مسح القطاعات
+      ClearSegmentsPrompt: هل أنت متأكد أنك تريد مسح جميع مقاطع SponsorBlock التي تمت صياغتها لهذا الفيديو؟
+      CompleteSegmentsBeforeSubmitting: أكمل كل جزء تمت صياغته قبل الإرسال.
+      CategoryLabel: فئة
+      ActionTypeLabel: نوع القطعة
+      DuplicateSegments: لا يُسمح بالأجزاء المصاغة المكررة.
+      EndAction: (نهاية)
+      EndActionLabel: نهاية
+      EndTimeAfterStart: يجب أن يكون وقت انتهاء المقطع بعد وقت البدء.
+      EndTimeBeforeVideoEnd: يجب أن يكون وقت انتهاء المقطع ضمن مدة الفيديو.
+      EndTimeLabel: وقت انتهاء المقطع
+      DisableAutoSkipTemporarily: قم بتعطيل التخطي التلقائي لـ SponsorBlock مؤقتًا
+      EnableAutoSkipTemporarily: أعد تمكين التخطي التلقائي لـ SponsorBlock
+      Guidelines: المبادئ التوجيهية
+      InspectSegment: فحص
+      InvalidStartTime: أدخل وقت بدء المقطع صالحًا.
+      NoSegmentsToSubmit: قم بإنشاء شريحة كاملة واحدة على الأقل قبل الإرسال.
+      NowAction: (الآن)
+      CloseInfoPanel: إغلاق معلومات SponsorBlock
+      OpenInfoPanel: افتح معلومات SponsorBlock
+      OpenSubmissionMenu: افتح قائمة التقديم
+      PreviewRequired: يرجى معاينة كل شريحة قبل الإرسال.
+      PreviewSegment: معاينة
+      SaveSegment: يحفظ
+      SetSegmentEndNow: إنهاء الجزء الآن
+      StartAction: (يبدأ)
+      StartSegmentNow: ابدأ المقطع الآن
+      SubmissionBadRequest: رفض SponsorBlock طلب التقديم.
+      SubmissionDuplicate: وقد تم بالفعل تقديم هذا من قبل.
+      SubmissionFailed: فشل إرسال شرائح SponsorBlock.
+      SubmissionForbidden: رفض SponsorBlock التقديم.
+      SubmissionRateLimited: حد معدل SponsorBlock من هذا الإرسال.
+      SubmissionSuccess: تم إرسال شرائح SponsorBlock.
+      SubmitSegment: إرسال الجزء
+      SubmitSegments: يُقدِّم
+      StartTimeLabel: وقت بداية القطاع
+      TimeDivider: ل
+      SkipPrompt: تخطي {segmentCategory}؟
+      SkipPromptAction: يتخطى
+      SkipToHighlight: انتقل إلى التمييز؟
+      SkippedToHighlight: تم التخطي إلى التمييز
+      SkipToastUnskip: إلغاء التخطي
+      SkipToastReskip: ريسكيب
+      MutedSegment: '{segmentCategory} كتم الصوت'
+      MuteToastUnmute: إلغاء كتم الصوت
+      InfoPanelLoading: لا يزال يتم تحميل المقاطع...
+      InfoPanelHasSegments: يحتوي هذا الفيديو على مقاطع في قاعدة البيانات!
+      InfoPanelNoSegments: لم يتم العثور على أي شرائح
+      RefreshSegments: تحديث المقاطع
+      RefreshInfo: قم بتحديث معلومات SponsorBlock
+      ContributionStatsTitle: مساهماتك
+      ContributionStatsLoading: جارٍ تحميل إحصاءات المساهمة...
+      ContributionStatsError: إحصائيات المساهمة غير متوفرة. حاول التحديث.
+      ContributionStatsNoUserId: قم بإرسال شريحة أو قم باستيراد معرف مستخدم SponsorBlock الخاص بك لرؤية إحصائيات المساهمة.
+      Submissions: التقديمات
+      Segments: شرائح
+      TimeSaved: تم حفظ الوقت
+      AutoSkipEnabled: تخطي المقاطع تلقائيًا
+      AutoSkipOn: على
+      AutoSkipOff: عن
+      WhitelistChannel: قناة القائمة البيضاء
+      ChannelWhitelisted: تم إدراجه في القائمة البيضاء
+      RemoveChannelFromWhitelist: إزالة القناة من القائمة البيضاء
+      MuteSegment: شريحة كتم الصوت
+      SkipSegment: تخطي المقطع
+      CloseSegmentActions: إغلاق إجراءات القطاع
+      FullVideo: فيديو كامل
+      FullVideoLabel: '{segmentCategory} · الفيديو كاملاً'
+      MuteActionType: صامت
+      MutePrompt: كتم الصوت {segmentCategory}؟
+      SkipActionType: يتخطى
+      LockedSegment: مقطع مغلق
+      UpvoteSegment: التصويت لصالح
+      DownvoteSegment: التصويت السلبي
+      VoteFailed: فشل إرسال تصويت SponsorBlock.
+Playlist:
+  Close Playlist: إغلاق قائمة التشغيل
+Change Format:
+  Local Video File: ملف فيديو محلي
+  Local Audio File: ملف صوتي محلي
+  Online Video: فيديو على الانترنت
+  Stream Source: مصدر الدفق
+  Stream Extraction Method: طريقة استخراج الدفق
+  Playback Engine: محرك التشغيل
+  Streaming Protocol: بروتوكول الدفق
+  Not Available For This Video: غير متوفر لهذا الفيديو
+  Protocols:
+    Progressive: تقدمية
+  Descriptions:
+    Local File: يتم تشغيلها مباشرة من الملف الذي تم تنزيله على هذا الجهاز
+    Online Video: قم بتحميل تنسيقات البث من المصدر عبر الإنترنت الذي تم تكوينه
+    Dash: جودة متكيفة ومسارات صوتية متعددة وأعلى دقة
+    Legacy: ملف واحد يحتوي على فيديو وصوت مدمجين، ويقتصر على دقة أقل
+    Audio: الصوت فقط، مفيد لحفظ النطاق الترددي أو الاستماع في الخلفية
+  yt-dlp Fallback Template: 'تعذر على yt-dlp توفير التدفقات، باستخدام المحرك المدمج بدلاً من ذلك: {error}'
+  yt-dlp Default Clients Fallback: لم يتمكن عملاء yt-dlp المفضلين من توفير تدفقات قابلة للتشغيل، وجربوا عملاء yt-dlp الافتراضيين بدلاً من ذلك
+  Built-in Fallback Template: 'لم يتمكن المحرك المدمج من تشغيل البث، جرب yt-dlp بدلاً من ذلك: {error}'
+Share:
+  Timestamp Link Copied: تم نسخ رابط الطابع الزمني إلى الحافظة
+Context Menu:
+  Context Menu: قائمة السياق
+  Select All: حدد الكل
+  Save Image As…: حفظ الصورة باسم...
+  Copy Image: نسخ الصورة
+  Copy Image Address: نسخ عنوان الصورة
+  Cancel Refresh: إلغاء التحديث
+  Reload Videos: إعادة تحميل مقاطع الفيديو
+  Reload Shorts: إعادة تحميل السراويل القصيرة
+  Reload Live: إعادة تحميل لايف
+  Reload Posts: إعادة تحميل المشاركات
+  Reload All Feeds: إعادة تحميل كافة الخلاصات
+  Close Multiple Tabs: 'إغلاق علامتي تبويب ({count}) | إغلاق {count} علامات تبويب | إغلاق {count} علامة تبويب | إغلاق {count} علامة تبويب'
+  Duplicate Tab: علامة تبويب مكررة
+  Duplicate Multiple Tabs: 'تكرار علامتي تبويب ({count}) | تكرار {count} علامات تبويب | تكرار {count} علامة تبويب | تكرار {count} علامة تبويب'
+  Move Tab: نقل علامة التبويب
+  Move Tabs: نقل علامات التبويب
+  Move Tab to Group: انقل علامة التبويب إلى المجموعة
+  Collapse Group: طي المجموعة
+  Move Tabs to Group: نقل علامات التبويب إلى المجموعة
+  Manage Tab Groups…: إدارة مجموعات علامات التبويب...
+  To Beginning: إلى البداية
+  To End: إلى النهاية
+  Close Tabs: إغلاق علامات التبويب
+  To the Top: إلى الأعلى
+  To the Left: إلى اليسار
+  To the Bottom: إلى الأسفل
+  To the Right: إلى اليمين
+  Other Tabs: علامات تبويب أخرى
+  Copy YouTube Link: انسخ رابط اليوتيوب
+  Copy YouTube Links: انسخ روابط اليوتيوب
+  Pin Tab: دبوس علامة التبويب
+  Pin Tabs: تثبيت علامات التبويب
+  Unpin Tab: إزالة تثبيت علامة التبويب
+  Unpin Tabs: إلغاء تثبيت علامات التبويب
+  Tab Color: لون علامة التبويب
+  Default: تقصير
+  Purple: أرجواني
+  Reopen Closed Tab: إعادة فتح علامة التبويب المغلقة
+  Reload Tab: إعادة تحميل علامة التبويب
+  Reload Tabs: إعادة تحميل علامات التبويب
+  Load Tab: تحميل علامة التبويب
+  Load Tabs: تحميل علامات التبويب
+  Unload Tab: تفريغ علامة التبويب
+  Unload Tabs: تفريغ علامات التبويب
+  Move Tab to Window: نقل علامة التبويب إلى النافذة
+  Move Tabs to Window: نقل علامات التبويب إلى النافذة
+  Open in a New Tab: افتح في علامة تبويب جديدة
+  Open in a New Window: افتح في نافذة جديدة
+  Copy Link: نسخ الوصلة
+  Copy Invidious Link: 'نسخ رابط Invidious'
+  Search Selection in New Tab: ابحث عن "{selection}" في علامة تبويب جديدة
+  Search Selection in New Window: ابحث عن "{selection}" في نافذة جديدة
+  Search With: البحث مع {engine}
+  Search With Multiple: ابحث مع...
+  Selection Too Long: التحديد طويل جدًا للبحث (> {count} حرفًا)
+Tab Organizer:
+  Title: منظم علامات التبويب
+  Open Tab Count: 'لا توجد علامات تبويب مفتوحة ({count}) | علامة تبويب مفتوحة واحدة ({count}) | علامتا تبويب مفتوحتان ({count}) | {count} علامات تبويب مفتوحة | {count} علامة تبويب مفتوحة | {count} علامة تبويب مفتوحة'
+  Search Label: علامات تبويب البحث
+  Selected Count: 'لم تُحدّد أي علامة تبويب ({count}) | حُدّدت علامة تبويب واحدة ({count}) | حُدّدت علامتا تبويب ({count}) | حُدّدت {count} علامات تبويب | حُدّدت {count} علامة تبويب | حُدّدت {count} علامة تبويب'
+  Tab Count: 'لا توجد علامات تبويب ({count}) | علامة تبويب واحدة ({count}) | علامتا تبويب ({count}) | {count} علامات تبويب | {count} علامة تبويب | {count} علامة تبويب'
+  Select All: حدد الكل
+  Select None: حدد لا شيء
+  Move To Group: نقل علامات التبويب المحددة إلى المجموعة
+  Choose Group: اختر مجموعة
+  Ungrouped: غير مجمعة
+  Pin: دبوس
+  Unpin: إزالة التثبيت
+  Load: حمولة
+  Unload: تفريغ
+  Unload All: تفريغ الكل
+  Close All: إغلاق الكل
+  Ungroup: فك التجميع
+  Group Name: اسم المجموعة
+  Color: لون
+  No Color: لا لون
+  Create Group: إنشاء مجموعة
+  Expand Group: قم بتوسيع المجموعة
+  Collapse Group: طي المجموعة
+  Expand Group Label: 'توسيع {name}، لا توجد علامات تبويب ({count}) | توسيع {name}، علامة تبويب واحدة ({count}) | توسيع {name}، علامتا تبويب ({count}) | توسيع {name}، {count} علامات تبويب | توسيع {name}، {count} علامة تبويب | توسيع {name}، {count} علامة تبويب'
+  Rename Group: إعادة تسمية {name}
+  Change Group Color: تغيير اللون لـ {name}
+  Move To Window: الانتقال إلى النافذة
+  Choose Window: اختر نافذة
+  Select Tab: اختر {title}
+  Active: نشيط
+  Pinned: مثبت
+  Unloaded: تفريغ
+  Playing: اللعب
+  Close Tab: إغلاق {title}
+  No Open Results: لا توجد علامات تبويب مفتوحة تطابق هذا البحث.
+  Recently Closed: مغلق مؤخرا
+  Clear: واضح
+  No Closed Results: لا توجد علامات تبويب مغلقة مؤخرًا تتطابق مع هذا البحث.
+  Drag Tab: اسحب للانتقال إلى مجموعة
+Chapters:
+  Open Chapters: فتح الفصول
+  Close Chapters: إغلاق الفصول
+  Copy Timestamp Link: انسخ الرابط على {timestamp}
+Comments:
+  Comment Count: 'لا توجد تعليقات ({count}) | تعليق واحد | تعليقان ({count}) | {count} تعليقات | {count} تعليقًا | {count} تعليق'
+  Show Comments: عرض التعليقات
+  Getting comment replies, please wait: جارٍ الحصول على ردود التعليقات، يرجى الانتظار
+  Reload Comments: إعادة تحميل التعليقات
+  Reply Count: 'لا توجد ردود ({replyCount}) | رد واحد | ردّان ({replyCount}) | {replyCount} ردود | {replyCount} ردًا | {replyCount} رد'
+  Comments are turned off: تم إيقاف التعليقات
+  YouTube did not provide advertised replies: وأظهر يوتيوب أن هذا التعليق به ردود، لكنه لم يقدمها. ربما تم حذفها أو إخفاؤها، لذلك تمت إزالة زر الرد.
+  Pinned by you: مثبت بواسطتك
+  A reply is pinned: تم تثبيت الرد
+  Filter loaded comments: تصفية التعليقات المحملة
+  Comment filters: مرشحات التعليق
+  From creator: من الخالق
+  Contains timestamps: يحتوي على الطوابع الزمنية
+  Pin comment by author: قم بتثبيت التعليق بواسطة {author}
+  Unpin comment by author: قم بإلغاء تثبيت التعليق بواسطة {author}
+  Edited: (تحرير)
+  Highlighted comment: تعليق مميز
+  Highlighted reply: الرد المميز
+  Search loaded comments: البحث في التعليقات المحملة
+  Loaded comment search result count: 'لم يُحمّل أي تعليق ({count}) من أصل {total} | حُمّل تعليق واحد من أصل {total} | حُمّل تعليقان ({count}) من أصل {total} | حُمّلت {count} تعليقات من أصل {total} | حُمّل {count} تعليقًا من أصل {total} | حُمّل {count} تعليق من أصل {total}'
+  No loaded comments match your filters: لا توجد تعليقات محملة تتطابق مع عوامل التصفية الخاصة بك
+  YouTube comment link copied to clipboard: تم نسخ رابط تعليق YouTube إلى الحافظة
+  Translate to {language}: ترجمة إلى {language}
+  Show original: عرض الأصلي
+  Translating comment, please wait: ترجمة التعليق، يرجى الانتظار
+  Comment translation failed: فشلت ترجمة التعليق
+Description:
+  Copy Description: نسخ الوصف
+  Description Copied: تم نسخ الوصف إلى الحافظة
+  Video Category: 'فئة الفيديو:'
+  Video Tags: علامات الفيديو
+  Games: ألعاب
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: املأ الفجوات في الترجمات البشرية بنصوص تم إنشاؤها بواسطة الذكاء الاصطناعي. الترجمات البشرية لها الأولوية دائمًا.
+    Update Relative Timestamps: يقوم بتحديث الطوابع الزمنية النسبية في جميع أنحاء التطبيق بينما تظل الصفحة مفتوحة. عند تعطيلها، يتم تحديثها فقط بعد إعادة تحميل الصفحة أو إعادة زيارتها.
+    Stream Extraction Method: "اختر كيفية حصول OpenTubeX على تدفقات الفيديو. يجب أن يكون yt-dlp متاحًا عند تحديده.\nقد يستغرق تشغيل مقاطع الفيديو وقتًا أطول عند استخدام yt-dlp.\nالمدمج في لا يدعم البحث عن البث المباشر والعروض الأولى."
+    Avoid translation: "قم بتعطيل الترجمة التلقائية على YouTube لعنوان الفيديو ووصفه وفصوله.\nقد يتم مؤقتًا تقديم عدد كبير جدًا من الطلبات، مثل جلب عناوين الفيديو عبر القوائم\nتأثير موثوقية التطبيق."
+    Show Thumbnail Previews: عرض معاينات متحركة عند المرور فوق الصور المصغرة للفيديو.
+    Startup Behavior: "اختر ما يفعله OpenTubeX عند بدء تشغيله.\nيؤدي تحميل جميع علامات التبويب إلى استعادة كل علامة تبويب محفوظة على الفور، لكن علامات تبويب الخلفية لن تقوم بتشغيل مقاطع الفيديو تلقائيًا.\nيؤدي تحميل علامات التبويب المحملة مسبقًا إلى إعادة تحميل علامات التبويب التي تم تحميلها عند إغلاق OpenTubeX ويحافظ على إلغاء تحميل علامات التبويب الأخرى.\nيؤدي تحميل آخر علامة تبويب نشطة إلى استعادة الجلسة السابقة مع فتح علامات التبويب الأخرى ولكن بدون تحميلها؛ يتم تحميلها عند النقر فوقها.\nالبدء بجلسة فارغة يتخطى علامات التبويب المحفوظة ويفتح نافذة جديدة."
+    Remember Tab Navigation History: يتم حفظ سجل التنقل ذهابًا وإيابًا لكل علامة تبويب واستعادته عند إعادة تشغيل OpenTubeX.
+  Proxy Settings:
+    IP Block Recovery Script Path: مسار ملف البرنامج النصي الذي سيتم تشغيله عند اكتشاف حظر IP. ينتظر OpenTubeX انتهاء الفيديو، ثم يعيد تحميله. إذا تم تمكين الإجراء الاحتياطي، فسيتم تشغيله فقط عند فشل الإجراء الاحتياطي أيضًا.
+  Player Settings:
+    Enable Caption Translations: عند التمكين، يفضل زر التسميات التوضيحية واختصار C المسار المترجم تلقائيًا بلغة التسميات التوضيحية المفضلة عندما لا يوفر الفيديو مسارًا أصليًا مطابقًا.
+    Use Quick Playback Speed Bar: يُظهر شريط سرعة التشغيل السريع في عناصر تحكم المشغل على الجانب الأيمن. إذا تم تمكين توفير سرعة التشغيل اليدوي لكل قناة، فسيتضمن الشريط أيضًا زرًا لحفظ السرعة للقناة الحالية.
+    Multiply Seek Interval by Playback Rate: عند التمكين، يتم ضرب الفواصل الزمنية للبحث (مفاتيح الأسهم وJ/L) بمعدل التشغيل الحالي. عند التعطيل، تظل فترات البحث ثابتة بغض النظر عن معدل التشغيل.
+    Show Playback Rate Adjusted Timestamp: عند التمكين وتختلف سرعة التشغيل عن 1x، يعرض المشغل الطوابع الزمنية المعدلة حسب معدل التشغيل بين قوسين بعد عرض الطابع الزمني العادي.
+    Use YouTube-style Shorts: يعرض فيديوهات Shorts في شبكة عمودية على صفحات الاشتراك والقناة ويستخدم مشغّل Shorts على غرار YouTube.
+    Loop Shorts: عند التفعيل، تتم إعادة تشغيل Shorts تلقائيًا. عند إيقاف ميزة Shorts، تتوقف عند النهاية وتعرض زر إعادة التشغيل.
+    Show Skip Silence Toggle: يعرض مفتاح تشغيل/إيقاف لتخطي الصمت في قائمة إعدادات المشغل.
+    Enable Skip Silence by Default: تمكن الصمت تخطي علامات التبويب الجديدة. ولا يؤثر تغييره في علامة تبويب واحدة على علامات التبويب الأخرى.
+    Enable Video Zoom: يعرض عنصر التحكم في التكبير/التصغير في قائمة إعدادات المشغل ويمكّن اختصارات لوحة المفاتيح وعناصر التحكم في التحريك.
+    Voice-over Translation: يرسل معرف الفيديو ومدته واللغة المحددة إلى خدمة الترجمة الصوتية غير الرسمية لـ Yandex عندما تطلب ترجمة. معطل افتراضيا.
+    Hold to Double Playback Speed: اضغط باستمرار على مفتاح المسافة أو زر الماوس الأيسر فوق المشغل لمضاعفة سرعة التشغيل الحالية بشكل مؤقت.
+    Ambient Mode: يمزج ألوان الفيديو في المنطقة المحيطة بالمشغل.
+    Default Volume: تم تعطيله أثناء تمكين تذكر مستوى الصوت. قم بإيقاف تشغيل تذكر مستوى الصوت لتعيين مستوى صوت ثابت لبدء التشغيل لكل فيديو.
+    Parallel Segment Loading: "عدد مقاطع الفيديو والصوت التي سيتم تحميلها مرة واحدة قبل التشغيل.\nقد تساعد القيم الأعلى في الاتصالات البطيئة أو غير المستقرة، ولكنها تستخدم المزيد من النطاق الترددي والذاكرة.\nوقد يجعلون أيضًا Auto يقلل من سرعة الاتصال ويحدد جودة أقل.\nتتجاهل التدفقات التي تقتصر على طلب واحد في كل مرة هذا الإعداد."
+  Download Settings:
+    Download Folder: يتم حفظ مقاطع الفيديو في هذا المجلد. اتركه فارغًا لاستخدام مجلد التنزيلات الخاص بنظامك.
+    Global Additional yt-dlp Arguments: يتم تمرير وسيطات سطر الأوامر الإضافية إلى yt-dlp لكل عملية تنزيل، على سبيل المثال --cookies-from-browser Firefox.
+    Concurrent Downloads: الحد الأقصى لعدد مهام yt-dlp التي يمكن تشغيلها مرة واحدة.
+    Bandwidth Limit: يحدد معدل النقل المدمج لقائمة الانتظار عن طريق تقسيم هذا الحد بين المهام المتزامنة. أدخل 0 بلا حدود.
+  External Software Settings:
+    yt-dlp Source: يمكن لـ OpenTubeX إما استخدام yt-dlp المثبت على نظامك أو تنزيل نسخته الخاصة من yt-dlp وإدارتها، والمخزنة في دليل بيانات المستخدم.
+    yt-dlp Channel: حدد قناة إصدار yt-dlp التي يقوم OpenTubeX بتنزيلها وإدارتها. يوصى بالاستقرار لمعظم المستخدمين.
+    FFmpeg Source: يمكن لـ OpenTubeX إما استخدام FFmpeg وFFprobe المثبتين على نظامك أو تنزيل وإدارة إصداراته الثابتة، والتي يتم تخزينها في دليل بيانات المستخدم.
+    Managed Tool Updates: اختر ما إذا كنت تريد تحديث الأدوات المُدارة تلقائيًا، أو السؤال قبل التحديث، أو التحديث فقط من خلال الأزرار اليدوية. لا يزال يتم تنزيل الأدوات المفقودة عند الحاجة.
+    yt-dlp Executable Path: افتراضيًا، سيفترض OpenTubeX أنه يمكن العثور على yt-dlp عبر متغير البيئة PATH. إذا لزم الأمر، يمكن تعيين مسار مخصص هنا.
+    Cookie Source: اختر ما إذا كان يجب على yt-dlp قراءة ملف تعريف الارتباط Netscape أو ملفات تعريف الارتباط من متصفح مثبت للتشغيل المعتمد.
+    Cookie File: حدد ملف تعريف الارتباط بتنسيق Netscape للتشغيل المعتمد.
+    Browser for Cookies: تتم قراءة دعم المتصفح من الملف القابل للتنفيذ yt-dlp المحدد. يطلب OpenTubeX من yt-dlp قراءة هذا المتصفح عند طلب التشغيل المعتمد.
+    Browser Profile: اسم أو مجلد ملف تعريف المتصفح الاختياري. اتركه فارغًا لاستخدام أحدث ملف تعريف تم الوصول إليه.
+    Always Use Cookies: استخدم ملفات تعريف الارتباط التي تم تكوينها عندما يقوم yt-dlp باستخراج التدفقات. لا يؤدي هذا إلى تبديل طريقة استخراج الدفق إلى yt-dlp. عند تحديد yt-dlp، قد تصبح التنسيقات المخصصة للحساب فقط متاحة، بما في ذلك معدل البت المحسّن لـ YouTube Premium عندما يكون للحساب حق الوصول.
+    FFmpeg Executable Path: مطلوب FFmpeg لدمج تدفقات الفيديو والصوت المنفصلة ولتحويل الصوت. افتراضيًا، سيفترض OpenTubeX أنه يمكن العثور على FFmpeg عبر متغير البيئة PATH. إذا لزم الأمر، يمكن تعيين مسار مخصص هنا.
+  Distraction Free Settings:
+    Shorten View Counts: يعرض عدد المشاهدات والتعليقات التي قام YouTube بتقريبها بالفعل في شكل مختصر، على سبيل المثال. 14 الف بدلاً من 14000. يتم عرض الأعداد الدقيقة دائمًا بالكامل.
+  Subscription Settings:
+    Fetch Feed on Startup: عند تمكينه، سيقوم OpenTubeX تلقائيًا بجلب موجز اشتراكك عند بدء التشغيل وعند فتح نافذة جديدة.
+    Show New Content Feed: تعرض علامة تبويب جديدة تحتوي على عناصر موجز الاشتراك التي لم تكن موجودة أثناء عملية الجلب السابقة.
+    Show New Content Indicators: يُظهر نقطة صغيرة بجوار عناصر موجز الاشتراك التي لم تكن موجودة أثناء عملية الجلب السابقة.
+    Show Scheduled Live Streams / Premieres First: يحتفظ بأحداث البث المباشر والعروض الأولى القادمة في الجزء العلوي من خلاصة الاشتراك. عند تعطيلها، تظل في موضع الإعلان الخاص بها حتى تبدأ. قم بتحديث موجز الاشتراك مرة واحدة بعد التعطيل لاسترداد تواريخ الإعلان للإدخالات المجدولة الموجودة.
+    Auto Refresh Interval: عدد المرات التي يقوم فيها OpenTubeX بتحديث موجز اشتراكك تلقائيًا أثناء فتح التطبيق.
+  Theme Settings:
+    Show Progress as Notification: يعرض إشعارًا مستمرًا بالتقدم المباشر لعمليات الخلفية، مثل تحديثات الاشتراك وتنزيلات الأدوات المُدارة، بدلاً من استخدام شريط التقدم العام.
+    Always Show Scrollbars: يبقي أشرطة التمرير مرئية في جميع الأوقات. عند تعطيلها، فإنها تتلاشى بعد وقت قصير من التوقف عن تحريك الماوس وتعاود الظهور بمجرد تحريكه مرة أخرى.
+    Use Fixed Tab Width: يمنح كل علامة تبويب في شريط علامات التبويب الأفقي نفس العرض بدلاً من تغيير حجمها حسب عنوانها.
+    Use Grid Player Menu: يقوم بترتيب قائمة إعدادات مشغل الفيديو كشبكة من المربعات بدلاً من قائمة الصفوف.
+The playlist is at the beginning. Enable loop to continue playing: قائمة التشغيل في البداية. تمكين الحلقة لمواصلة اللعب
+External link opening has been disabled in Settings → Privacy: تم تعطيل فتح الرابط الخارجي في الإعدادات → الخصوصية
+KeyboardShortcutPrompt:
+  Edit Hint: حدد اختصارًا، ثم اضغط على مجموعة مفاتيح جديدة. اضغط على Backspace أو حذف لإلغاء تعيينه.
+  Change Shortcut: تغيير الاختصار لـ {action}
+  Press Shortcut: اضغط على الاختصار...
+  Unassigned: غير معين
+  Reset Shortcut: إعادة تعيين الاختصار لـ {action}
+  Reset to Defaults: إعادة التعيين إلى الإعدادات الافتراضية
+  Shortcut Already Assigned: تم تعيين الاختصار بالفعل
+  Shortcut Conflict: تم تعيين {shortcut} بالفعل إلى {actions}. هل تريد إعادة تعيينه؟
+  Reserved Shortcut Conflict: '{shortcut} محجوز لـ {actions} ولا يمكن إعادة تعيينه.'
+  Reassign: إعادة التعيين
+  Sections:
+    App:
+      Tabs: 'التطبيق: علامات التبويب'
+      Search and Page: 'التطبيق: البحث والصفحة'
+      Window and View: 'التطبيق: النافذة والعرض'
+  New Tab: أنشئ علامة تبويب جديدة
+  Close Tab: أغلق علامة التبويب الحالية
+  Reload Tab: أعد تحميل علامة التبويب الحالية
+  Reopen Closed Tab: أعد فتح علامة التبويب الأخيرة المغلقة
+  Next Tab: قم بالتبديل إلى علامة التبويب التالية
+  Previous Tab: قم بالتبديل إلى علامة التبويب السابقة
+  Switch to Tab: قم بالتبديل إلى علامة التبويب 1-9
+  Toggle Tab Orientation: التبديل بين تخطيطات علامات التبويب
+  Find in Page: ابحث عن نص في الصفحة الحالية
+  Find Next Match: 'الانتقال إلى النتيجة التالية'
+  Find Previous Match: 'الانتقال إلى النتيجة السابقة'
+  Toggle Normal Playback Speed: قم بالتبديل بين سرعة 1x وسرعة التشغيل السابقة
+  Toggle Skip Silence: تبديل تخطي الصمت
+  Video Zoom In: تكبير الفيديو
+  Video Zoom Out: تصغير الفيديو
+  Tab Switcher: مبدل علامات التبويب
+CommandPalette:
+  Title: لوحة الأوامر
+  Open: افتح لوحة الأوامر
+  Search Label: أوامر البحث
+  Search Placeholder: أوامر البحث والإعدادات...
+  Results: الأوامر
+  No Results: لا توجد أوامر مطابقة
+  Result Count: 'لم يُعثر على أي أمر ({count}) | عُثر على أمر واحد | عُثر على أمرين ({count}) | عُثر على {count} أوامر | عُثر على {count} أمرًا | عُثر على {count} أمر'
+  Move: يتحرك
+  Run: يجري
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: خروج
+  Switch to Tab: 'التبديل إلى علامة التبويب: {title}'
+  Switch Profile: 'تبديل الملف الشخصي: {name}'
+  Open Playlist: 'فتح قائمة التشغيل: {name}'
+  Cancel Download: 'إلغاء التنزيل: {title}'
+  Groups:
+    App: برنامج
+    Navigation: ملاحة
+    Tabs: علامات التبويب
+  Unavailable:
+    Current Page: بالفعل على هذه الصفحة
+    No History: لا توجد صفحة في هذا الاتجاه
+    Desktop: متوفر فقط في تطبيق سطح المكتب
+    Build: غير متوفر في هذا البناء
+    One Tab: افتح علامة تبويب أخرى أولاً
+    Active Tab: هذه هي علامة التبويب النشطة
+    Active Profile: هذا هو الملف الشخصي النشط
+    Download Finished: لم يعد هذا التنزيل قيد التشغيل
+    Video: افتح الفيديو أولاً
+Downloads:
+  Download: تحميل
+  Download Video: تحميل فيديو
+  Download Playlist: تحميل قائمة التشغيل
+  Downloading: جارٍ التنزيل
+  Queue: طابور
+  Downloaded: تم التنزيل
+  Canceled: تم الإلغاء
+  Open Downloads: افتح التنزيلات
+  No Downloads: لا التنزيلات بعد
+  No Downloads Description: ستظهر هنا التنزيلات التي بدأتها.
+  Clear Failed Canceled Skipped And Missing: مسح الفشل والإلغاء والتخطي والمفقود
+  Clear From List: مسح من القائمة
+  Show in Folder: عرض في المجلد
+  Play Download: لعب التحميل
+  Retry Download: أعد محاولة التنزيل
+  Pause Download: وقفة التحميل
+  Resume Download: استئناف التنزيل
+  Move Earlier: التحرك في وقت سابق
+  Move Later: التحرك في وقت لاحق
+  Pause All: وقفة الكل
+  Resume All: استئناف الكل
+  Retry All: أعد محاولة كافة التنزيلات الفاشلة
+  Total Size: 'الحجم الإجمالي: {size}'
+  Local File: الملف المحلي
+  Available Offline: متاح حاليا
+  Remove File: إزالة الملف
+  Remove File Confirmation: هل تريد إزالة الملف الذي تم تنزيله؟
+  Remove File Warning: سيؤدي هذا إلى نقل "{title}" إلى سلة المهملات بجهازك.
+  File Not Found: لا يمكن العثور على الملف الذي تم تنزيله.
+  Download Missing: التنزيل غير متاح
+  Files Missing: 'لا توجد ملفات منزّلة مفقودة من نظام الملفات. | لم يعد الملف المنزّل متاحًا على نظام الملفات. | لم يعد الملفان المنزّلان متاحين على نظام الملفات. | لم تعد الملفات المنزّلة متاحة على نظام الملفات. | لم تعد الملفات المنزّلة متاحة على نظام الملفات. | لم يعد الملف المنزّل متاحًا على نظام الملفات.'
+  Files Available: '{available} من {total} الملفات التي تم تنزيلها متاحة.'
+  More Files: 'لا توجد ملفات أخرى ({count}) | ملف آخر واحد | ملفان آخران ({count}) | {count} ملفات أخرى | {count} ملفًا آخر | {count} ملف آخر'
+  Template Used: 'القالب: {name}'
+  Download Type: نوع التنزيل
+  Template: نموذج
+  Unsaved: غير محفوظ
+  Media Type: نوع الوسائط
+  Video: فيديو
+  Audio: صوتي
+  Maximum Resolution: الحد الأقصى للقرار
+  Best Available: أفضل ما هو متاح
+  Automatic: تلقائي
+  Container: حاوية
+  Video Codec: ترميز الفيديو
+  Audio Codec: ترميز الصوت
+  File Name Template: قالب اسم الملف
+  File Name Template Help: 'الحقول المتاحة: {title}، {author}، {upload_date}، {id}، {playlist}، {playlist_index}، {ext}'
+  Time Range and Chapters: النطاق الزمني والفصول
+  Start Time: 'وقت البدء (س س: د د: ث س)'
+  End Time: 'وقت الانتهاء (س س: د د: ث س)'
+  Split by Chapters: تقسيم إلى ملفات منفصلة حسب الفصل
+  Remove Segments: إزالة القطاعات
+  Subtitles and Metadata: الترجمة والبيانات الوصفية
+  Include Subtitles: تضمين ترجمات
+  Embed Subtitles: تضمين ترجمات في ملف الوسائط
+  Subtitle Format: تنسيق الترجمة
+  Subtitle Languages: لغات الترجمة
+  Subtitle Languages Help: 'محددات لغة yt-dlp مفصولة بفواصل، على سبيل المثال: en.*,de.*'
+  Embed Cover Art: تضمين الصورة المصغرة كغلاف فني
+  Embed Metadata: تضمين العنوان والمؤلف والوصف والفصول
+  Additional yt-dlp Arguments: وسيطات yt-dlp الإضافية
+  Custom yt-dlp Arguments: وسيطات yt-dlp المخصصة
+  Template Name: اسم القالب
+  Save Template: حفظ القالب
+  Delete Template: حذف القالب
+  Template Saved: قالب التنزيل المحفوظ "{name}"
+  Template Name Exists: يوجد بالفعل قالب تنزيل باسم "{name}".
+  Choose Folder: يتغير
+  Select Folder: اختر المجلد
+  Folder Required: اختر مجلد التنزيل لتمكين التنزيلات.
+  System Downloads Folder: مجلد تنزيلات النظام
+  Processing: يعالج…
+  Queued: في قائمة الانتظار
+  Queued Position: في قائمة الانتظار، موقف {position}
+  Paused: متوقف مؤقتًا
+  Pausing: ستنتهي المهمة الحالية، ثم ستتوقف قائمة الانتظار مؤقتًا
+  Download Complete: اكتمل التنزيل
+  Download Cancelled: تم إلغاء التنزيل
+  Download Failed: فشل التنزيل
+  File Name Shortened: تم اختصار اسم الملف لأن عنوان الفيديو طويل جدًا.
+  Insufficient Disk Space: لا توجد مساحة كافية على القرص. هناك حاجة إلى حوالي {required} و{available} متاح.
+  Unknown Download Size: حجم التنزيل غير معروف. {available} متاح في نظام الملفات الوجهة.
+  Disk Space Check Unavailable: تعذر التحقق من مساحة القرص المتوفرة قبل بدء هذا التنزيل.
+  Download Failure Hint: تحقق من {issuesLink}، ثم حاول تبديل قناة yt-dlp إلى Nightly أو Master في الإعدادات → Advanced → External Software.
+  yt-dlp YouTube Issues: أحدث مشكلات yt-dlp لموقع YouTube
+  Automatic Download Started: بدأ التنزيل التلقائي
+  Automatic Download Started Body: تنزيل "{title}" من {channel} في الخلفية.
+  Automatic Download Complete: اكتمل التنزيل التلقائي
+  Automatic Download Failed: فشل التنزيل التلقائي
+  Automatic Download Could Not Start: تعذر بدء التنزيل التلقائي لـ "{title}".
+  Automatic Download Skipped: تم تخطيه بواسطة مرشحات التنزيل التلقائية
+  Cancel Download: إلغاء التنزيل
+  yt-dlp Not Found: لم يتم العثور على yt-dlp. قم بتثبيته أو تحديد مساره في الإعدادات → خيارات متقدمة → البرامج الخارجية.
+  Download Complete Template: انتهى تنزيل "{title}".
+  Download Failed Template: فشل تنزيل "{title}".
+  Templates:
+    Video Best: فيديو - أفضل جودة
+    Video Resolution: فيديو - {resolution}
+    Audio Best: الصوت - أفضل جودة
+    Audio Format: الصوت - {format}
+    Subtitles Format: ترجمات - {format}

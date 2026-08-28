@@ -1,0 +1,1479 @@
+# Optional AI-generated translations for keys missing from ../bg.yaml.
+Color Picker:
+  Hue: Нюанс
+  Opacity: Непрозрачност
+  Backdrop Blur: Размазване на фона
+  Hex Color: Цвят в шестнадесетичен формат
+  Apply Color: Приложи
+  Reset Color: Нулирай
+  Copy Color: Копирай
+  Copy From Another Color: Копирай от друг цвят
+  Color Copied: Цветът е копиран
+  Invalid Color: Въведете валиден цвят в шестнадесетичен формат
+  Clipboard Unavailable: Системният буфер не е достъпен
+  Saturation and Brightness: Наситеност и яркост
+New Tab: Нов раздел
+Maximize: Максимизиране
+Restore: Възстановяване
+Close Tab: Затваряне на раздела
+Close Confirmation:
+  Title: Изход от OpenTubeX?
+  Message: Наистина ли искате да излезете от OpenTubeX?
+  Quit: Изход
+  Never Ask Again: Да не се пита отново
+Close Window Confirmation:
+  Title: Затваряне на прозореца?
+  Message: Този прозорец съдържа {count} раздела. Наистина ли искате да го затворите?
+  Close Window: Затвори прозореца
+Confirmations:
+  Never Ask Again: Да не се пита отново
+  Settings Hint: Можете отново да включите това потвърждение от Настройки → Общи → Потвърждаване преди…
+Close Multiple Tabs Confirmation:
+  Title: Затваряне на няколко раздела?
+  Message: Това ще затвори {count} раздела.
+  Close Tabs: Затвори {count} раздела
+Load Multiple Tabs Confirmation:
+  Title: Зареждане на няколко раздела?
+  Message: Това ще зареди {count} раздела.
+  Load Tabs: Зареди {count} раздела
+Unload Multiple Tabs Confirmation:
+  Title: Освобождаване на няколко раздела?
+  Message: Това ще освободи {count} раздела от паметта.
+  Unload Tabs: Освободи {count} раздела
+Use Vertical Tabs: Използвай вертикални раздели
+Use Horizontal Tabs: Използвай хоризонтални раздели
+Resize Tab Bar: Преоразмеряване на лентата с раздели
+Find in page: Търсене в страницата
+Previous match: Предишно съвпадение
+Next match: Следващо съвпадение
+Close find bar: Затвори лентата за търсене
+No matches: Няма съвпадения
+Version {versionNumber} is now available.: Вече е налична версия {versionNumber}.
+See changes and update: Виж промените и актуализирай
+Dismiss: Отхвърли
+Update to {version}: Актуализирай до {version}
+Global:
+  Ambient Mode: Амбиентен режим
+  Loading More: Зареждат се още
+  New: Ново
+Search Listing:
+  Label:
+    Members Only: Само за членове
+Stats:
+  Stats: Статистика
+  Watch time summary: Обобщение на времето за гледане
+  Today: Днес
+  This week: Тази седмица
+  Total watch time: Общо време за гледане
+  Daily average: Средно на ден
+  So far today: Досега днес
+  Since: От {day}
+  All recorded time: Цялото отчетено време
+  Per calendar day: На календарен ден
+  Day by day: По дни
+  Highest: 'Най-много: {duration}'
+  Week by week: По седмици
+  Last 14 days: Последните 14 дни
+  Last 8 weeks: Последните 8 седмици
+  Daily chart aria: Дневно време за гледане през последните 14 дни
+  Weekly chart aria: Седмично време за гледане през последните 8 седмици
+  No data: Времето за гледане ще се показва тук, докато гледате видеоклипове.
+  Estimate note: Времето за гледане преди тази актуализация е изчислено приблизително от запазения напредък на възпроизвеждането.
+  Adjust imported watch time: Коригиране на импортираното време за гледане
+  Imported watch time: Импортирано време за гледане
+  Imported watch time explanation: Изберете скоростта на възпроизвеждане, която обикновено сте използвали. Продължителността на импортираните видеоклипове ще бъде разделена на тази скорост, за да се изчисли приблизително действителното време, което сте прекарали в гледане.
+  Playback speed: Скорост на възпроизвеждане
+  Channel speed note: Когато са налични, вместо това се използват запазените скорости на възпроизвеждане за каналите.
+  Apply playback speed: Приложи скоростта на възпроизвеждане
+  Imported watch time adjusted: Импортираното време за гледане е коригирано
+  Reset statistics: Нулиране на статистиката
+  Reset: Нулирай
+  Reset confirmation: Наистина ли искате да нулирате цялата статистика за гледане? Това действие не може да бъде отменено.
+  Reset success: Статистиката за гледане е нулирана
+  Less than a minute: < 1 мин
+  Minutes: '{minutes} мин'
+  Hours: '{hours} ч'
+  Hours and minutes: '{hours} ч {minutes} мин'
+Subscriptions:
+  Refreshing Subscription Videos: Обновяват се видеоклиповете от абонаментите
+  Refreshing Subscription Shorts: Обновяват се кратките видеоклипове от абонаментите
+  Refreshing Subscription Live Streams: Обновяват се предаванията на живо от абонаментите
+  Refreshing Subscription Posts: Обновяват се публикациите от абонаментите
+  New Content: Ново съдържание
+  New Feed Refresh Warning Title: Обновяване на всички емисии с абонаменти?
+  New Feed Refresh Warning: Обновяването на всички видове съдържание без RSS за 1 абонамент може да отнеме много време. Искате ли да продължите? | Обновяването на всички видове съдържание без RSS за {count} абонамента може да отнеме много време. Искате ли да продължите?
+  New Since Last Refresh: Ново от последното обновяване
+  Mark as Seen: Отбележи като видяно
+  Mark All as Seen: Отбележи всичко като видяно
+  No New Content: Няма ново съдържание.
+  New Content Tabs: Раздели с ново съдържание
+  Show Tabbed View: Покажи изглед с раздели
+  Show Combined View: Покажи обединен изглед
+  Newest First: Първо най-новите
+  Oldest First: Първо най-старите
+Trending:
+  Load Error: Съдържанието „Набиращи популярност“ не можа да бъде заредено.
+  Unsupported Backend: За „Набиращи популярност“ е необходим Local API. Изберете Local API или включете резервния доставчик.
+Most Popular Feed Empty: Емисията „Най-популярни“ на тази инстанция на Invidious е празна.
+Feed:
+  Cancel Refresh: Отмени обновяването
+  Next Auto Refresh: 'Следващо автоматично обновяване: {date}'
+User Playlists:
+  Load More Playlists: Зареди още плейлисти
+  Save to: Запази в…
+  Quick Bookmark Icon: Икона за бърза отметка
+  Custom Emoji: Персонализирано емоджи
+  Choose Image: Избери изображение
+  Use Bookmark Icon: Използвай икона за отметка
+  SinglePlaylistView:
+    Retry: Опитай отново
+    This playlist could not be loaded.: Този плейлист не можа да бъде зареден.
+    More videos could not be loaded.: Не можаха да бъдат заредени още видеоклипове.
+History:
+  Mark All As Watched: Отбележи всички като гледани
+  Mark All As Watched Confirmation: Наистина ли искате да отбележите като гледани всички видеоклипове в историята си?
+  All History Marked as Watched: Всички видеоклипове в историята ви са отбелязани като гледани
+  Delete Old History: Изтриване на старата история
+  Select History Age: Изберете след колко време да се изтриват записите.
+  Delete Entries Older Than: Изтрий записите, по-стари от
+  Number of Days: Брой дни
+  History Cleanup Warning: Това изтрива завинаги съответстващите записи от историята на гледане.
+  1 Day: 1 ден
+  1 Week: 1 седмица
+  1 Month: 1 месец
+  3 Months: 3 месеца
+  1 Year: 1 година
+  Custom: По избор
+  History Older Than Days Removed: Историята на гледане отпреди повече от 1 ден е премахната | Историята на гледане отпреди повече от {days} дни е премахната
+Settings:
+  Quick Settings:
+    Quick Settings: Бързи настройки
+    Appearance: Външен вид
+    Playback: Възпроизвеждане
+    Content: Съдържание
+    Language and Region: Език и регион
+    All Settings: Всички настройки
+    Profile Selector Hint: Можете също да щракнете с десния бутон върху иконата на профила, за да смените профила
+  Categories:
+    General Description: Език, стартиране, раздели и поведение на приложението
+    Appearance: Външен вид
+    Appearance Description: Тема, оформление и миниатюри
+    Content appearance: Списъци с видеоклипове и миниатюри
+    Layout: Оформление
+    Playback Description: Плейър, субтитри и предпочитания за каналите
+    Subscriptions Description: Обновяване на емисиите и опции за показване
+    Downloads Description: Папки, шаблони и автоматични правила
+    Distraction Free Description: Скриване на съдържание и задаване на ограничения за гледане
+    Add-ons: Добавки
+    Add-ons Description: SponsorBlock, DeArrow, оценки „Не ми харесва“ и гласов превод
+    Privacy Description: Поверителност при гледане и управление на достъпа
+    Online activity: Дейност онлайн
+    Data And Storage Description: Импортиране, експортиране, използване на диска и почистване
+    Sync Description: Синхронизиране на настройките и данните между устройствата
+    Advanced: Разширени
+    Advanced Description: Доставчици, външни приложения и мрежа
+    Alternative providers: Доставчици на видеоклипове и метаданни
+  Highlight Changed Settings: Откроявай настройките, променени спрямо стандартните
+  Reset Setting to Default: Възстанови стандартната стойност на тази настройка
+  Performance Impact:
+    Show Performance Impact: Показвай индикатори за влияние върху производителността
+    Moderate: Умерено влияние
+    High: Силно влияние
+    Description: Тази настройка може да увеличи използването на {resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: паметта
+      Network: мрежата
+      Disk: диска
+  General Settings:
+    Update Relative Timestamps: Поддържай относителните времеви обозначения актуални
+    Stream Extraction Method:
+      Stream Extraction Method: Метод за извличане на потока
+      yt-dlp: yt-dlp
+      Built-in: Вграден
+    Confirm Before: Потвърждаване преди…
+    Confirmation Options:
+      Closing App: Затваряне на OpenTubeX
+      Closing Window: Затваряне на прозорец с няколко раздела
+      Closing Tabs: Затваряне на няколко раздела
+      Loading Tabs: Зареждане на няколко раздела
+      Unloading Tabs: Освобождаване на няколко раздела
+    Remember Tab Navigation History: Запомняй историята на навигацията в разделите
+    New Tab Position:
+      New Tab Position: Позиция на новия раздел
+      At the end: В края
+      After current tab: След текущия раздел
+      After current tab in opened order: След текущия раздел, по реда на отваряне
+    Tab Close Focus:
+      Tab Close Focus: След затваряне на раздел
+      Previous tab: Избери предишния раздел
+      Next tab: Избери следващия раздел
+    Startup Behavior:
+      Startup Behavior: При стартиране
+      Load all tabs: Зареди всички раздели
+      Load previously loaded tabs: Зареди по-рано заредените раздели
+      Load last active tab: Зареди последния активен раздел
+      Start with an empty session: Започни с празна сесия
+    Use AI Translation Completions: Попълвай липсващите преводи с текст, генериран от ИИ
+    Reduced Motion:
+      Reduced Motion: Намалено движение
+      System: Според системата
+      Force On: Винаги включено
+      Force Off: Винаги изключено
+    Comment Translation:
+      Title: Превод на коментарите
+      Enable: Включи превода на коментарите
+      Never Translate: Не превеждай коментари на следните езици
+      Choose Language: Изберете език
+      Description: Коментарите на езика на приложението и без това не се превеждат. Добавете другите езици, които разбирате.
+      Remove Language: Превеждай отново коментарите на {language}
+    Avoid translation:
+      Avoid translation: Предпочитай оригиналния текст на видеоклиповете
+      Disabled: Изключено
+      Watch Only: Само в интерфейса за гледане
+      Entire App: В цялото приложение
+    Playlist View Type:
+      Playlist View Type: Изглед на плейлиста
+    Show Thumbnail Previews: Показвай предварителен преглед на миниатюрите
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Допълнителен бутон за действие върху миниатюрата
+      None: Няма
+      Mark as Watched: Отбележи като гледано
+      Copy YouTube Link: Копирай връзката към YouTube
+      Open in YouTube: Отвори в YouTube
+  Context Menu Search Settings:
+    Context Menu Search Settings: Търсене от контекстното меню
+    Description: Изберете кои търсачки да се показват при щракване с десния бутон върху избран текст. Търсенията се отварят в стандартния ви браузър.
+    Icon Hint: Включването на търсачка установява връзка с уебсайта ѝ, за да зареди иконата му.
+    Engine Name: Име на търсачката
+    Search URL: URL адрес за търсене
+    URL Hint: Използвайте %s на мястото в URL адреса, където трябва да се постави кодираният избран текст.
+    Add Custom Engine: Добави персонализирана търсачка
+    Add Engine: Добави търсачка
+    Remove Engine: Премахни {engine}
+    Invalid Engine: Въведете име и валиден HTTP или HTTPS URL адрес за търсене, който съдържа %s.
+    Engine Limit: Можете да добавите до {count} персонализирани търсачки.
+  Theme Settings:
+    Move Downloads to App Header: Премести изтеглянията в заглавната лента на приложението
+    Move Settings to App Header: Премести настройките в заглавната лента на приложението
+    Hide Side Bar on Watch Pages: Скривай страничната лента на страниците за гледане
+    UI Roundness: Заобленост на интерфейса
+    Scrollbar Width: Ширина на лентата за превъртане
+    Animation Speed: Скорост на анимациите
+    Thumbnail Size: Размер на миниатюрите
+    Show Tab Icons: Показвай иконите на разделите
+    Load Missing Tab Icons: Зареди липсващите икони на разделите
+    Loading Missing Tab Icons: Зареждат се липсващите икони на разделите…
+    No Missing Tab Icons: Всички поддържани икони на раздели вече са заредени
+    Loaded Tab Icons: 'Заредена липсваща икона на раздел: {count} | Заредени липсващи икони на раздели: {count}'
+    Loaded Tab Icons With Failures: 'Заредени икони на раздели: {loaded}; незаредени: {failed}'
+    Show Tab Previews: Показвай предварителен преглед на разделите
+    Use Fixed Tab Width: Използвай фиксирана ширина на разделите в хоризонтален режим
+    Tab Width: Ширина на разделите
+    Tab Layout:
+      Tab Layout: Оформление на разделите
+      Horizontal Top: Хоризонтално отгоре
+      Horizontal Bottom: Хоризонтално отдолу
+      Vertical Left: Вертикално отляво
+      Vertical Right: Вертикално отдясно
+    Show Toast Timeout Indicator: Показвай индикатор за оставащото време на изскачащите известия
+    Use Grid Player Menu: Използвай решетка за менюто на плейъра
+    Show Progress as Notification: Показвай напредъка като известие
+    Operation in Progress: Извършва се операция
+    Toast Position:
+      Toast Position: Позиция на изскачащите известия
+      Bottom Left: Долу вляво
+      Bottom Center: Долу в средата
+      Bottom Right: Долу вдясно
+      Top Left: Горе вляво
+      Top Center: Горе в средата
+      Top Right: Горе вдясно
+    Icon Pack:
+      Icon Pack: Пакет с икони
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Шрифт на приложението
+      System Default: Стандартният за системата
+      Unable to Load: Инсталираните системни шрифтове не могат да бъдат заредени
+    Always Show Scrollbars: Винаги показвай лентите за превъртане
+    Base Theme:
+      Custom: Персонализирана
+    Light Theme: Светла тема
+    Dark Theme: Тъмна тема
+    Custom Theme:
+      Create Custom Theme: Създаване на персонализирана тема
+      Edit Custom Theme: Редактиране на персонализираната тема
+      Custom Theme Creator: Редактор на персонализирана тема
+      Theme Name: Име на темата
+      Based On: Базирана на
+      Import Theme: Импортиране на тема
+      Export Theme: Експортиране на тема
+      Share Theme: Споделяне на тема
+      Share Description Heading: Описание
+      Share Description Prompt: Опишете темата и всичко, което хората трябва да знаят, преди да я използват.
+      Share Screenshots Heading: Екранни снимки
+      Share Screenshots Prompt: Плъзнете и пуснете тук една или повече екранни снимки.
+      Share Code Summary: JSON на темата
+      Delete Theme: Изтриване на тема
+      Delete Theme Confirmation: Да се изтрие ли „{name}“? Това действие не може да бъде отменено.
+      Save and Apply: Запазване и прилагане
+      Discard Changes: Отхвърляне на промените
+      Reset Colors: Връщане към цветовете на базовата тема
+      Theme File: Файл с тема за OpenTubeX
+      Theme Saved: Персонализираната тема е запазена и приложена
+      Theme Imported: Темата е импортирана в редактора
+      Theme Exported: Темата е експортирана
+      Theme Deleted: Персонализираната тема е изтрита
+      Unable to Load: Персонализираната тема не може да бъде заредена
+      Unable to Save: Персонализираната тема не може да бъде запазена
+      Unable to Export: Персонализираната тема не може да бъде експортирана
+      Unable to Share: Персонализираната тема не може да бъде споделена
+      Unable to Delete: Персонализираната тема не може да бъде изтрита
+      Invalid Theme File: Невалиден файл с персонализирана тема
+      Colors:
+        Main text: Основен текст
+        Secondary text: Вторичен текст
+        Subtle text: Приглушен текст
+        Borders and dividers: Рамки и разделители
+        Subtle surfaces and indicators: Приглушени повърхности и индикатори
+        Title text: Текст на заглавията
+        Selected text background: Фон на избрания текст
+        Selected text: Избран текст
+        Logo icon: Икона на логото
+        Logo text: Текст на логото
+        Logo hover: Лого при посочване
+        Logo pressed: Лого при натискане
+        Page background: Фон на страницата
+        Card background: Фон на картите
+        Secondary card background: Фон на вторичните карти
+        Favorite icon: Икона за любими
+        Error color: Цвят за грешки
+        Scrollbar thumb: Плъзгач на лентата за превъртане
+        Scrollbar thumb hover: Плъзгач на лентата за превъртане при посочване
+        Scrollbar thumb pressed: Плъзгач на лентата за превъртане при натискане
+        Dropdown item hover text: Текст на елемент от падащ списък при посочване
+        Dropdown item hover background: Фон на елемент от падащ списък при посочване
+        Navigation and panel background: Фон на навигацията и панелите
+        Neutral item hover and focus background: Фон на неутрален елемент при посочване и фокусиране
+        Neutral item hover and focus text and icons: Текст и икони на неутрален елемент при посочване и фокусиране
+        Neutral item pressed background: Фон на неутрален елемент при натискане
+        Neutral item pressed text and icons: Текст и икони на неутрален елемент при натискане
+        Header button hover and focus background: Фон на бутон в заглавната лента при посочване и фокусиране
+        Header button hover and focus text and icons: Текст и икони на бутон в заглавната лента при посочване и фокусиране
+        Header button pressed background: Фон на бутон в заглавната лента при натискане
+        Header button pressed text and icons: Текст и икони на бутон в заглавната лента при натискане
+        Colored header button hover and focus background: Фон на цветен бутон в заглавната лента при посочване и фокусиране
+        Colored header button hover and focus text and icons: Текст и икони на цветен бутон в заглавната лента при посочване и фокусиране
+        Colored header button pressed background: Фон на цветен бутон в заглавната лента при натискане
+        Colored header button pressed text and icons: Текст и икони на цветен бутон в заглавната лента при натискане
+        Search and dropdown background: Фон на търсенето и падащите списъци
+        Settings search background: Фон на търсенето в настройките
+        Instance menu: Меню за инстанция
+        Input background: Фон на полетата за въвеждане
+        Shadow color: Цвят на сенките
+        Primary controls and highlights: Основни контроли и акценти
+        Primary control hover and focus: Основна контрола при посочване и фокусиране
+        Primary control pressed: Основна контрола при натискане
+        Text and icons on primary controls: Текст и икони върху основните контроли
+        Secondary controls and highlights: Вторични контроли и акценти
+        Secondary control hover and focus: Вторична контрола при посочване и фокусиране
+        Secondary control pressed: Вторична контрола при натискане
+        Light secondary color: Светъл вторичен цвят
+        Visited accent: Акцент за посетени елементи
+        Text and icons on secondary controls: Текст и икони върху вторичните контроли
+        Links: Връзки
+        Visited links: Посетени връзки
+        Destructive action: Опасно действие
+        Destructive hover and focus: Опасно действие при посочване и фокусиране
+        Destructive pressed: Опасно действие при натискане
+        Text and icons on destructive actions: Текст и икони върху опасните действия
+  Player Settings:
+    Automatically Open Chapters: Автоматично отваряне на главите
+    Caption Appearance:
+      Caption Appearance: Изглед на субтитрите
+      Captions: Субтитри
+      Preferred Language: Предпочитан език на субтитрите
+      Application Language: Език на приложението
+      Enable Translations: Включване на превода на субтитри
+      Text Color: Цвят на текста
+      Background Color: Цвят на фона
+      Background Opacity: Непрозрачност на фона
+      Font Size: Размер на шрифта
+      Vertical Position: Вертикално положение
+      Edge Color: Цвят на ръба
+      Anchor:
+        Anchor: Закотвяне
+        Top Left: Горе вляво
+        Top Center: Горе в средата
+        Top Right: Горе вдясно
+        Bottom Left: Долу вляво
+        Bottom Center: Долу в средата
+        Bottom Right: Долу вдясно
+      Edge Style:
+        Edge Style: Стил на ръба
+        None: Без
+        Outline: Контур
+        Drop Shadow: Падаща сянка
+      Reset: Нулиране на изгледа на субтитрите
+    Auto Picture in Picture:
+      Auto Picture in Picture: Автоматично включване на Picture-in-Picture
+      On Tab Change: При превключване между раздели
+      On Window Minimize: При минимизиране на прозореца
+      On Window Hide: Когато прозорецът загуби фокус или преминете към друг прозорец
+      Wayland Minimize Unsupported: Wayland не съобщава на приложенията, когато прозорец бъде минимизиран, затова това условие не е достъпно. Вместо него използвайте „Когато прозорецът загуби фокус или преминете към друг прозорец“, което важи и при минимизиране.
+    Scroll Mini Player:
+      Scroll Mini Player: Миниплейър при превъртане
+      When Scrolling Down: Показване на миниплейър при превъртане надолу
+      On All Tabs: Показване на миниплейър при превключване между раздели
+    Multiply Seek Interval by Playback Rate: Умножаване на интервала за превъртане по скоростта на възпроизвеждане
+    Show Playback Rate Adjusted Timestamp: Показване на времето, коригирано спрямо скоростта на възпроизвеждане
+    Use YouTube-style Shorts: Използване на кратки видеоклипове в стила на YouTube Shorts
+    Loop Shorts: Повтаряне на Shorts
+    Remember Volume: Запомняне на силата на звука
+    Skip Silence: Пропускане на тишината
+    Show Skip Silence Toggle: Показване на превключвателя за пропускане на тишината
+    Enable Skip Silence by Default: Включване на пропускането на тишината по подразбиране
+    Enable Video Zoom: Включване на мащабирането на видеоклипа
+    Voice-over Translation:
+      Title: Гласов превод
+      Attribution: (осъществено чрез Yandex)
+      Enable: Включване на гласовия превод
+      Prepare in Background: Подготовка на гласовите преводи във фонов режим
+      Background Preparation Tooltip: Изпраща идентификатора, продължителността и избрания език на текущия видеоклип до услугата за превод веднага щом бъде зареден поддържан видеоклип.
+      Language: Език на гласовия превод
+      Supported Source Languages: 'Поддържани изходни езици: руски, английски, китайски, корейски, литовски, латвийски, арабски, френски, италиански, испански, немски и японски.'
+      Voice Volume: Сила на звука на преведения глас
+      Original Volume: Сила на звука на оригиналното аудио
+      Russian: Руски
+      English: Английски
+      Kazakh: Казахски
+    Hold to Double Playback Speed: Задържане за двойна скорост на възпроизвеждане
+    Use Quick Playback Speed Bar: Използване на лента за бърз избор на скоростта
+    Customize Quick Playback Speed Bar: Персонализиране на лентата за бърз избор на скоростта
+    Quick Playback Speed Bar Manager: Лента за бърз избор на скоростта
+    Add Playback Speed: Добавяне на скорост на възпроизвеждане
+    Reset Quick Playback Speed Bar: Връщане на стандартните настройки
+    Playback Speed Name: Име
+    Edit Playback Speed Name: Редактиране на името на скоростта
+    Use Automatic Playback Speed Name: Използване на автоматично име за скоростта
+    Reorder Playback Speed: Плъзнете, за да промените реда на скоростта
+    Playback Speed: Скорост на възпроизвеждане
+    Parallel Segment Loading: Паралелно зареждане на сегменти
+  Channel Settings:
+    Channel Settings: Настройки за каналите
+    Channel Settings Description: Запомняне на избраните при гледане настройки поотделно за всеки канал, за да бъдат приложени отново следващия път, когато гледате негов видеоклип.
+    Enable Playback Speed: Включване на скоростта на възпроизвеждане
+    Enable Video Quality: Включване на качеството на видеоклипа
+    Enable Subtitles State: Включване на състоянието на субтитрите
+    Enable Volume: Включване на силата на звука
+    Auto Update: Автоматично обновяване при промяна чрез настройките на плейъра
+    Auto Update Subtitles: Автоматично обновяване при включване или изключване
+    Auto Update Volume: Автоматично обновяване при всяка промяна на силата на звука
+    Manage Saved Channels: Управление на запазените канали ({channelCount})
+    Saved Channels: Запазени настройки за канали
+    Enable Saved Channel Settings Sync: Синхронизиране на запазените настройки за канали
+    Disable Saved Channel Settings Sync: Спиране на синхронизирането на запазените настройки за канали
+    Search Channels: Търсене на канали
+    No Saved Channels: Все още няма запазени настройки за отделни канали
+    No Matching Channels: Няма канали, съответстващи на търсенето
+    Forget Channel: Забравяне на всички настройки за този канал
+    Forget Value: Забравяне на тази настройка
+    Add Setting: Запомняне на още една настройка за този канал
+    Video Quality: Качество на видеоклипа
+    Subtitles Enabled: Включени субтитри
+    Volume: Сила на звука
+  Download Settings:
+    Download Settings: Изтегляния
+    Enable Downloads: Включване на изтеглянията
+    Managed Tools Download Started Template: 'Необходимият външен софтуер не е намерен: {tools}. Изтеглят се управлявани копия…'
+    Managed Tools Download Finished Template: Изтеглянето на {tools} завърши
+    Managed Tools Update Started Template: Намерена е актуализация за {tools}. Изтегля се…
+    Managed Tools Update Finished Template: Обновяването на {tools} завърши
+    Managed Tools Update Available Template: Налична е актуализация за {tools}.
+    Update Managed Tools: Обновяване
+    Managed Tools Download Error Template: 'Управляваните инструменти не можаха да бъдат изтеглени: {errors}'
+    Download Folder: Папка за изтегляния
+    Global Additional yt-dlp Arguments: Общи допълнителни аргументи за yt-dlp
+    Concurrent Downloads: Едновременни изтегляния
+    Bandwidth Limit: Ограничение на пропускателната способност (KiB/s, 0 за неограничена)
+    Choose Download Folder: Избор на папка за изтегляния
+    Download Templates: Шаблони за изтегляне
+    Manage Download Templates: Управление на шаблоните за изтегляне ({templateCount})
+    New Template: Нов шаблон
+    Template Source: Шаблон за редактиране или използване като основа
+    Built-in Template: '{name} (вграден)'
+    Custom Template Name: '{name} (персонализиран)'
+    Create Template Copy: Създаване на копие
+    Template Copy Name: '{name} — копие'
+    Automatic Downloads: Автоматични изтегляния
+    Manage Automatic Downloads: Управление на автоматичните изтегляния ({channelCount})
+    Automatic Downloads Description: Изберете шаблон за изтегляне и филтри за всеки канал, за който сте абонирани. Съответстващите видеоклипове се изтеглят във фонов режим при обновяване на емисиите с абонаменти.
+    Automatic Downloads New Only: Включването за даден канал започва със следващия нов видеоклип. Съществуващите видеоклипове и архивът на канала не се изтеглят.
+    Automatic Downloads No Channels: Абонирайте се за канал, преди да настроите автоматичните изтегляния.
+    No Matching Automatic Download Channels: Няма канали, съответстващи на търсенето.
+    Automatic Downloads Livestreams: Излъчвания на живо
+    Minimum Duration Seconds: Минимална продължителност (секунди)
+    Maximum Duration Seconds: Максимална продължителност (секунди)
+    Minimum File Size MB: Минимален размер на файла (MB)
+    Maximum File Size MB: Максимален размер на файла (MB)
+    Maximum Age Days: Максимална възраст (дни)
+    Title Includes: Заглавието съдържа
+    Title Excludes: Заглавието не съдържа
+    Title Filter Hint: Разделете с запетаи отделните изрази за заглавие. Видеоклипът трябва да съответства на поне един от включените изрази и на нито един от изключените.
+  External Software Settings:
+    External Software Settings: Външен софтуер
+    yt-dlp Source: Източник на yt-dlp
+    yt-dlp Channel: Канал на yt-dlp
+    Sources:
+      System: Системен (от PATH или друг път)
+      Managed: Управляван от OpenTubeX
+    Detected Version Template: 'Открита версия на yt-dlp: {version}'
+    Managed Not Downloaded: yt-dlp все още не е изтеглен. Натиснете бутона по-долу, за да го изтеглите.
+    System yt-dlp Missing Warning: yt-dlp не е намерен в системата. Инсталирайте го, задайте друг път по-долу или сменете източника на „Управляван от OpenTubeX“.
+    Download yt-dlp: Изтегляне на yt-dlp
+    Update yt-dlp: Обновяване на yt-dlp
+    Checking yt-dlp: Проверява се yt-dlp…
+    Downloading yt-dlp: Изтегля се yt-dlp…
+    yt-dlp Downloaded Template: yt-dlp {version} е изтеглен
+    yt-dlp Download Error Template: 'Изтеглянето на yt-dlp беше неуспешно: {error}'
+    FFmpeg Source: Източник на FFmpeg
+    Detected FFmpeg Version Template: 'Открита версия на FFmpeg: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg все още не е изтеглен. Натиснете бутона по-долу, за да го изтеглите.
+    System FFmpeg Missing Warning: FFmpeg не е намерен в системата. Той е необходим за обединяване на видео и аудио и за преобразуване на аудио. Инсталирайте го, задайте друг път по-долу или сменете източника на „Управляван от OpenTubeX“.
+    Download FFmpeg: Изтегляне на FFmpeg
+    Update FFmpeg: Обновяване на FFmpeg
+    Checking FFmpeg: Проверява се FFmpeg…
+    Downloading FFmpeg: Изтегля се FFmpeg…
+    FFmpeg Downloaded Template: FFmpeg {version} е изтеглен
+    FFmpeg Download Error Template: 'Изтеглянето на FFmpeg беше неуспешно: {error}'
+    Detected FFprobe Version Template: 'Открита версия на FFprobe: {version}'
+    FFprobe Managed Not Downloaded: FFprobe все още не е изтеглен. Натиснете бутона по-долу, за да го изтеглите заедно с FFmpeg.
+    System FFprobe Missing Warning: FFprobe не е намерен в системата. Той е необходим за проверка на медийните файлове при последваща обработка. Инсталирайте го до FFmpeg или сменете източника на „Управляван от OpenTubeX“.
+    Checking FFprobe: Проверява се FFprobe…
+    Download FFmpeg and FFprobe: Изтегляне на FFmpeg и FFprobe
+    Update FFmpeg and FFprobe: Обновяване на FFmpeg и FFprobe
+    Downloading FFmpeg and FFprobe: Изтеглят се FFmpeg и FFprobe…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg и FFprobe {version} са изтеглени
+    FFmpeg and FFprobe Download Error Template: 'Изтеглянето на FFmpeg и FFprobe беше неуспешно: {error}'
+    Managed Tool Already Current Template: '{tool} {version} вече е актуален'
+    Managed Tool Updates: Актуализации на управляваните инструменти
+    Update Modes:
+      Automatic: Автоматично обновяване
+      Ask: Питане преди обновяване
+      Manual: Само ръчно обновяване
+    yt-dlp Executable Path: Път до изпълнимия файл на yt-dlp
+    FFmpeg Executable Path: Път до изпълнимия файл на FFmpeg
+    Restricted Playback Authentication: Бисквитки на yt-dlp за възпроизвеждане
+    Cookie Source: Източник на бисквитките
+    Cookie Sources:
+      None: Без
+      File: Файл
+      Browser: Браузър
+    Cookie File: Файл с бисквитки
+    Browser for Cookies: Браузър за бисквитките
+    Browser Profile: Профил на браузъра (незадължително)
+    Browser Profile Placeholder: Име или път до профила
+    Select Browser: Избор на браузър
+    Always Use Cookies: Винаги да се използват бисквитки
+    Restricted Playback Authentication Hint: По подразбиране OpenTubeX предава тези бисквитки на yt-dlp едва след като изберете „Опит с настроените бисквитки“ за видеоклип с възрастово ограничение или само за членове.
+    Restricted Playback Authentication Warning: Използването на yt-dlp с профил в Google може да доведе до временно или постоянно ограничаване на профила.
+  Privacy Settings:
+    Automatic History Retention: Автоматично съхраняване на историята (дни)
+    Automatic History Retention Placeholder: Оставете празно за безсрочно съхраняване
+    Automatic History Retention Tooltip: Оставете полето празно, за да пазите историята безсрочно. Ако въведете число, по-старите записи ще бъдат премахнати веднага, а занапред ще се премахват автоматично, докато приложението е отворено.
+    History Retention Saved: Срокът за съхраняване на историята е запазен
+    Invalid History Retention Days: Въведете цяло число дни, по-голямо от нула
+    Enable Watch Statistics: Включване на статистиката за гледане
+    Week Starts On: Начало на седмицата
+    Cache Video Metadata: История на метаданните
+    Cache Video Metadata Tooltip: Съхранява всяка версия на поддържаните метаданни за посетените видеоклипове, включително заглавия, миниатюри и описания. По подразбиране е изключено, тъй като съхраняването на историята на метаданните заема повече дисково пространство.
+    Watched Percentage Threshold: Праг за отбелязване като гледан
+    Watched Percentage Threshold Tooltip: Видеоклиповете се отбелязват като гледани, след като достигнат избрания процент и до края им остават не повече от 2 минути. При 0% се отбелязват при започване на възпроизвеждането. При 100% се отбелязват в края му.
+    Clear Video Metadata Cache: Изчистване на кеша с метаданни за видеоклипове
+    Are you sure you want to clear the video metadata cache?: Сигурни ли сте, че искате да изчистите кешираните заглавия, миниатюри и описания на видеоклиповете?
+    Failed to clear video metadata cache: Кешът с метаданни за видеоклипове не можа да бъде изчистен
+    Video metadata cache has been cleared: Кешът с метаданни за видеоклипове е изчистен
+    Video Metadata Cache Size: 'Кеш с метаданни за видеоклипове: {size}'
+  Storage Settings:
+    Storage: Съхранение
+    Downloaded Media: Проследявани изтеглени файлове
+    Storage Breakdown: Разпределение на хранилището
+    Shown Total: Показано общо
+    Calculating: Изчисляване…
+    Not Available: Точният размер не е наличен
+    At Least: Поне {size}
+    Failed To Read Storage: Размерът на някои данни в хранилището не можа да бъде прочетен
+    Downloaded Media Description: Файлове с видеоклипове, аудио и субтитри, които все още се проследяват в хронологията на изтеглянията.
+    Selected Download Folders: Избрани от потребителя папки за изтегляне
+    Download History Records: Записи в хронологията на изтеглянията
+    Download History Records Description: '{count} запис за завършено изтегляне. Този запис проследява състоянието и местоположенията на файловете, но не съдържа изтеглените файлове. | {count} записа за завършени изтегляния. Тези записи проследяват състоянието и местоположенията на файловете, но не съдържат изтеглените файлове.'
+    Clear Download History Records: Изчистване на записите в хронологията на изтеглянията
+    Clear Download History Confirmation: Да се изчистят ли всички записи за завършени изтегляния?
+    Download Files Stay On Disk: Изтеглените файлове ще останат на диска, но повече няма да се показват на страницата „Изтегляния“.
+    Clear Records: Изчистване на записите
+    Replaceable Caches: Възстановими кешове
+    Application Caches: Кешове на приложението
+    Browser Caches: Кешове на браузъра
+    Browser Caches Hint: Кешовете на Chromium за HTTP, GPU, код, шейдъри, service-worker и речници.
+    Stored App Data: Съхранени данни на приложението
+    Browser Runtime Data: Данни от работата на браузъра
+    Browser Runtime Data Hint: Сесийното и локалното хранилище, бисквитките, състоянието на поверителността и мрежата и файловете от сривове на Chromium.
+    Subscription Feed Cache: Кеш на абонаментите и емисията
+    Subscription Feed Cache Description: Съхранява заредените видеоклипове от абонаменти, Shorts, предавания на живо и публикации. OpenTubeX го създава отново при следващото опресняване на емисията.
+    Clear Subscription Feed Cache: Изчистване на кеша на абонаментите и емисията
+    Clear Subscription Feed Cache Confirmation: Да се изчисти ли кешът на абонаментите и емисията?
+    Subscription Feed Cache Effect: Емисиите с абонаменти може да изглеждат празни, докато се опреснят. Абонаментите и профилите ви няма да бъдат променени.
+    Session Search Cache: Сесиен кеш за търсене
+    In Memory: В паметта
+    Session Search Cache Description: '{count} търсене е кеширано в паметта за по-бързо връщане назад. Този кеш се изтрива при затваряне на OpenTubeX. | {count} търсения са кеширани в паметта за по-бързо връщане назад. Този кеш се изтрива при затваряне на OpenTubeX.'
+    Clear Session Search Cache: Изчистване на сесийния кеш за търсене
+    Clear Session Search Cache Confirmation: Да се изчисти ли сесийният кеш за търсене?
+    Session Search Cache Effect: Кешираните страници с резултати ще бъдат премахнати. Запазената хронология на търсенията няма да бъде променена.
+    HTTP Cache: HTTP кеш
+    HTTP Cache Description: Electron съхранява мрежовите отговори на диска, за да може повторните заявки да се зареждат, без същите данни да се изтеглят отново. OpenTubeX създава този кеш отново при нужда.
+    Managed By Electron: Управлява се от Electron
+    Clear HTTP Cache: Изчистване на HTTP кеша
+    Clear HTTP Cache Confirmation: Да се изчисти ли HTTP кешът на Electron?
+    HTTP Cache Effect: Изображенията и другите мрежови ресурси може еднократно да се заредят по-бавно, докато кешът се създаде отново.
+    Tab Image Cache: Миниатюри на разделите и аватари на каналите
+    Tab Image Cache Description: Съхранява изображенията за предварителен преглед и аватарите на каналите за отворени и възстановени раздели. OpenTubeX ги създава отново при използване на разделите.
+    Clear Tab Image Cache: Изчистване на кеша с изображения на разделите
+    Clear Tab Image Cache Confirmation: Да се изчистят ли миниатюрите на разделите и аватарите на каналите?
+    Tab Image Cache Effect: Изображенията на разделите може да изчезнат за кратко и ще бъдат създадени отново при използване на съответните раздели.
+    Playback Caches: Кешове за възпроизвеждане
+    Playback Caches Description: Съхранява URL адресите на потоците от yt-dlp между сесиите на приложението, както и файловете на плейъра на YouTube. Кешът за URL адреси се отнася само за потоци, заредени чрез yt-dlp.
+    Playback URL Cache Entry Size: Ограничение за кеша на URL адресите на потоци от yt-dlp
+    Playback URL Cache Entry Size Tooltip: Задава максималния размер на всеки кеширан запис за поток от yt-dlp. Задайте 0 MB, за да изключите постоянното кеширане на потоците от yt-dlp.
+    Clear Playback Caches: Изчистване на кешовете за възпроизвеждане
+    Clear Playback Caches Confirmation: Да се изчистят ли кешовете на yt-dlp и плейъра?
+    Playback Caches Effect: Следващата заявка за локално възпроизвеждане може да отнеме повече време, докато данните за потока и плейъра се заредят отново.
+    Clear Cache: Изчистване на кеша
+    History Data: Съхранени хронологии
+    Video Metadata Description: Съхранява предишни заглавия, миниатюри и описания за поддържаните видеоклипове. Старите версии не могат да бъдат възстановени след изтриване.
+    Video Metadata Effect: Запазените версии на метаданните ще бъдат изтрити завинаги. Текущите подробности за видеоклипа могат да бъдат заредени отново.
+    Watch History: Хронология и статистика на гледанията
+    Watch History Description: Хронологията на гледанията записва гледаните видеоклипове и напредъка. Статистиката на гледанията съхранява дневните общи стойности. Периодът на съхранение важи само за хронологията на гледанията.
+    Clear Watch Statistics: Изчистване на статистиката на гледанията
+    Watch History Effect: Записите за гледани видеоклипове и запазеният напредък ще бъдат изтрити. Статистиката на гледанията ще остане.
+    Clear Watch Statistics Confirmation: Да се изтрие ли цялата статистика на гледанията?
+    Watch Statistics Effect: Дневните общи стойности за гледанията ще бъдат изтрити. Хронологията на гледанията ще остане.
+    Search History: Хронология на търсенията
+    Search History Description: Съхранява търсенията, които сте избрали да бъдат запомнени.
+    Delete Search History: Изтриване на хронологията на търсенията
+    Delete Search History Confirmation: Да се изтрие ли цялата запазена хронология на търсенията?
+    Search History Effect: Запазените предложения от предишните ви търсения ще изчезнат. Кешът на текущата сесия ще остане.
+    Other User Data: Други потребителски данни
+    Other Profile Files: Други файлове на профила
+    Other Profile Files Hint: Резервни копия, временни файлове и записи в профила, които OpenTubeX все още не разпознава.
+    Subscriptions And Profiles: Абонаменти и профили
+    Subscriptions And Profiles Description: Съхранява абонираните канали, имената на профилите и принадлежността към профили.
+    Subscriptions And Profiles Effect: Всички абонаменти и допълнителни профили ще бъдат изтрити завинаги. Данните в кеша на емисията също ще бъдат изчистени.
+    Playlists Description: Съхранява имената и описанията на плейлистите и запазените видеоклипове.
+    Playlists Effect: Всеки плейлист и списъкът му със запазени видеоклипове ще бъдат изтрити завинаги. Изтеглените файлове ще останат.
+    Settings And Sessions: Настройки, сесии с раздели и напомняния
+    Settings And Sessions Description: Съхранява предпочитанията на приложението, разделите, които могат да бъдат възстановени, и напомнянията за предавания на живо. Отворете папката на профила, за да прегледате или архивирате тези файлове. Тази страница не ги изтрива.
+    Cleanup Complete: Почистването на хранилището завърши
+    Cleanup Failed: Почистването на хранилището е неуспешно
+  Subscription Settings:
+    Fetch Feed on Startup: Зареждане на емисията при стартиране
+    Show New Content Feed: Показване на емисията с ново съдържание
+    Show New Content Indicators: Показване на индикаторите за ново съдържание
+    Show Scheduled Live Streams / Premieres First: Показване първо на насрочените предавания на живо / премиери
+    Auto Refresh Interval: Интервал за автоматично опресняване
+    Videos Auto Refresh Interval: Интервал за автоматично опресняване на видеоклиповете
+    Shorts Auto Refresh Interval: Интервал за автоматично опресняване на Shorts
+    Live Auto Refresh Interval: Интервал за автоматично опресняване на предаванията на живо
+    Posts Auto Refresh Interval: Интервал за автоматично опресняване на публикациите
+  Distraction Free Settings:
+    Sections:
+      Visible While Paused: Видими при поставяне на пауза в режим на цял прозорец / цял екран
+    Hide Channel Avatars: Скриване на аватарите на каналите
+    Shorten View Counts: Съкращаване на броя гледания и харесвания на коментари
+    Hide Comment Translation Buttons: Скриване на бутоните за превод на коментари
+    Hide Live Chat Replay: Скриване на повторението на чата на живо
+    Hide End-Screen Annotations: Скриване на поясненията в крайния екран
+    Hide Paid Promotion Badge: Скриване на значката за платена реклама
+    Show Player Controls: Показване на контролите на плейъра
+    Show Video Title: Показване на заглавието на видеоклипа
+    Show Bottom Right Actions Dock: Показване на панела с действия долу вдясно
+    Paused Interface Hide Delay: Закъснение преди скриване на интерфейса при пауза
+  Data Settings:
+    Data And Storage: Данни и хранилище
+    Profile Directory: Папка на профила
+    Open Profile Directory: Отваряне на папката на профила
+    Invalid JSON row, skipping item: Невалиден JSON на ред {row}, елементът се пропуска
+    Import subscriptions formats: 'Поддържани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), резервно копие на LibreTube или експортирани данни от FreeTube (.json)'
+    Import history formats: 'Поддържани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), резервно копие на LibreTube (.json)'
+    Import playlists formats: 'Поддържани формати: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'Поддържани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+  Sync Settings:
+    Sync Settings: Синхронизиране
+    Enable Sync: Включване на синхронизирането
+    Privacy Passphrase: Паролна фраза за поверителност
+    Privacy Passphrase Hint: Използвайте паролна фраза, различна от паролата за акаунта ви. Тя никога не напуска това устройство и е необходима на всяко устройство. Ако я загубите, шифрованите синхронизирани данни не могат да бъдат възстановени.
+    Privacy Policy: Политика за поверителност на този сървър
+    Enhanced Privacy Enabled: Подобрената поверителност е включена. Сървърът съхранява само шифровани синхронизирани данни.
+    Enhanced Privacy Unsupported: Предупреждение — този сървър не поддържа подобрена поверителност. Операторът му има достъп до синхронизираните данни.
+    Description: Синхронизирайте абонаментите, профилите, плейлистите, хронологията на гледанията, настройките и отворените раздели чрез сървър за синхронизиране на OpenTubeX или LibreTube. Сървърите на LibreTube може да не поддържат всички функции за синхронизиране.
+    Server URL: URL адрес на сървъра
+    Checking Server: Проверка на сървъра за синхронизиране…
+    Server Unavailable: Няма връзка с този сървър за синхронизиране. Проверете URL адреса и опитайте отново.
+    Username: Потребителско име
+    Log In: Вход
+    Register: Регистрация
+    Pair Another Device: Сдвояване на друго устройство
+    Pair With Existing Device: Сдвояване със съществуващо устройство
+    Device Name: Име на устройството
+    This Device: Това устройство
+    Device Name Required: Въведете име за това устройство.
+    Pairing Device Name Hint: Изберете име, което ще разпознаете на устройството, одобряващо тази заявка.
+    Create Pairing Code: Създаване на код за сдвояване
+    Creating Pairing Code: Създаване на защитен код за сдвояване…
+    Pairing QR Alt: QR код за сдвояване на {device}
+    Scan Pairing Code: На вече свързано устройство отворете „Сдвояване на друго устройство“ и сканирайте този код.
+    Pairing Code: Код за сдвояване
+    Use Text Pairing Code: Използване на текстов код
+    Show QR Code: Показване на QR кода
+    Text Pairing Code Hint: Копирайте този код на съществуващото устройство. Той съдържа тайната за сдвояване, затова след сдвояването го изчистете от хронологията на системния буфер.
+    Pairing QR Warning: Показвайте този код само на довереното, вече свързано устройство, което ще одобри заявката. Кодът изтича след две минути.
+    Pairing Expires: Кодът за сдвояване изтича в {time}.
+    Verifying Pairing: Проверка на прехвърления ключ за поверителност…
+    Completing Pairing: Завършване на сдвояването на устройството…
+    Compare Pairing Codes: Сравняване на кодовете за сдвояване
+    Pairing Code Match Hint: Потвърдете само ако този код съвпада с кода на съществуващото ви устройство.
+    Pairing Codes Match: Кодовете съвпадат
+    Pairing Approval Code Hint: Оставете този прозорец отворен и сравнете кода с този на новото устройство. Ако кодовете се различават, не продължавайте на новото устройство.
+    Pairing Scan Hint: Сканирайте кода за сдвояване, показан на устройството, което добавяте.
+    Enter Pairing Code: Ръчно въвеждане на код
+    Pairing Code Entry Hint: Поставете кода за сдвояване, показан на устройството, което добавяте.
+    Check Pairing Code: Проверка на кода
+    Scan QR Code: Сканиране на QR код
+    Waiting For Pairing Code: Изчакване на код за сдвояване…
+    Checking Pairing Request: Проверка на заявката за сдвояване…
+    Approving Pairing Request: Шифроване и изпращане на ключа за поверителност…
+    Pairing Approval Warning: Одобрете само ако виждате тази заявка на устройството, което добавяте. Сдвояването предоставя достъп до акаунта и прехвърля ключа за поверителност.
+    Approve Pairing: Одобряване на сдвояването
+    Try Again: Нов опит
+    Scan Again: Повторно сканиране
+    Camera Unavailable: OpenTubeX не можа да получи достъп до камера. Проверете разрешението за камерата или въведете ръчно кода за сдвояване.
+    Pairing Unsupported: Този сървър за синхронизиране не поддържа защитено сдвояване на устройства.
+    Pairing Failed: Сдвояването на устройството е неуспешно. Опитайте отново с нов код.
+    Pairing Request Changed: Заявката за сдвояване е променена, изтекла или вече използвана. Създайте нов код.
+    Pairing Server Mismatch: Този код принадлежи на друг сървър за синхронизиране.
+    Pairing Verification Unavailable: Няма шифрована колекция със синхронизирани данни за проверка на прехвърления ключ. Синхронизирайте съществуващото устройство и опитайте отново.
+    Pairing Completed: Сдвояването на устройството завърши
+    Pairing Approved: Сдвояването на устройството е одобрено
+    Disconnect: Прекъсване на връзката
+    Delete Account: Изтриване на акаунта за синхронизиране
+    Delete Account Confirmation: Да се изтрие ли акаунтът за синхронизиране?
+    Delete Account Warning: Това ще изтрие завинаги акаунта ви за синхронизиране и всички данни, съхранени на този сървър. Локалните ви данни в OpenTubeX няма да бъдат изтрити.
+    Confirm Delete Account: Изтриване на акаунта
+    Password Required: Изисква се парола
+    Account Deleted: Акаунтът за синхронизиране е изтрит
+    Connected as: Свързани сте като {username}
+    Automatic Sync: Автоматично синхронизиране след промени и на всеки пет минути
+    Profiles: Профили
+    Open Tabs: Отворени раздели и сесия
+    Disable Setting Sync: Спиране на синхронизирането на тази настройка
+    Enable Setting Sync: Синхронизиране на тази настройка
+    Sync Now: Синхронизиране сега
+    Downloading encrypted data: Изтегляне на шифрованите синхронизирани данни…
+    Syncing subscriptions: Синхронизиране на абонаментите…
+    Syncing playlists: Синхронизиране на плейлистите…
+    Syncing history: Синхронизиране на хронологията на гледанията…
+    Syncing profiles: Синхронизиране на профилите…
+    Syncing open tabs: Синхронизиране на отворените раздели и сесията…
+    Syncing settings: Синхронизиране на настройките…
+    Uploading encrypted data: Качване на шифрованите синхронизирани данни…
+    Finishing sync: Завършване на синхронизирането…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Последно синхронизиране: {date}'
+    History not supported: Тази версия на сървъра не поддържа синхронизиране на хронологията на гледанията.
+    Settings not supported: Тази версия на сървъра не поддържа синхронизиране на настройките.
+    Sync completed: Синхронизирането завърши
+    Data Loss Confirmation: Да се потвърди ли синхронизирането с изтриване на данни?
+    Data Loss Warning: Състоянието на сървъра ще изтрие {deleted} от {previous} синхронизирани по-рано елемента в {collection}. Това може да означава неуспешна миграция или нулиране на сървъра. Продължете само ако изтриването е умишлено и имате резервно копие.
+    Confirm Data Loss: Изтриване и продължаване
+  Proxy Settings:
+    IP Block Recovery Script Path: Път до скрипта за възстановяване след блокиране на IP адреса
+    Select IP Block Recovery Script File: Избор на файл със скрипт за възстановяване след блокиране на IP адреса
+    Running IP block recovery script: Изпълнение на скрипта за възстановяване след блокиране на IP адреса
+    IP block recovery script failed: 'Скриптът за възстановяване след блокиране на IP адреса е неуспешен (код за изход: {exitCode})'
+    IP block recovery script finished: Скриптът за възстановяване след блокиране на IP адреса завърши
+    Reloading video after IP block recovery: Презареждане на видеоклипа след възстановяване от блокиране на IP адреса
+    Failed to select IP block recovery script: Скриптът за възстановяване след блокиране на IP адреса не можа да бъде избран
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: Включване на изпращането към SponsorBlock
+    SponsorBlock Private User ID (optional): Частен потребителски идентификатор на SponsorBlock (по избор)
+    SponsorBlock Private User ID Tooltip: Поставете частния потребителски идентификатор на SponsorBlock от разширението за браузъра. Оставете полето празно, за да се използва идентификатор, създаден от приложението.
+    Generated SponsorBlock User ID: Създаден потребителски идентификатор на SponsorBlock
+    Generated SponsorBlock User ID Tooltip: Този създаден от приложението потребителски идентификатор на SponsorBlock може да се използва в разширението за браузъра или при използване на приложението на друг компютър.
+    Export Generated User ID: Експортиране на създадения потребителски идентификатор
+    Generated SponsorBlock User ID Copy Button: Копиране на създадения потребителски идентификатор на SponsorBlock
+    Generated SponsorBlock User ID Copied: Създаденият потребителски идентификатор на SponsorBlock е копиран в системния буфер
+    Skip notification timeout: Продължителност на известието за пропускане
+    Custom Color: Цвят по избор
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Включване на Return YouTube Dislike
+    Return YouTube Dislike Url: URL адрес на API на Return YouTube Dislike (по подразбиране https://ryd-proxy.kavin.rocks)
+  Password Dialog:
+    Incorrect Password: Неправилна парола
+    Unlock: Отключване
+    Unlocking: Отключване…
+  Search Settings: Настройки за търсене
+  No Settings Found: Няма намерени настройки
+Tutorial:
+  Skip: Пропускане
+  Next: Напред
+  Finish: Завършване
+  Got It: Разбрах
+  Welcome:
+    Title: Добре дошли в OpenTubeX
+    Description: Ето няколко контроли, които ще ви помогнат да се ориентирате.
+  Navigation:
+    Title: Библиотеката ви е винаги наблизо
+    Description: Чрез навигацията стигате до абонаментите, плейлистите, хронологията и още много.
+  Search:
+    Title: Търсене или поставяне на връзка
+    Description: Намерете видеоклипове и канали или поставете URL адрес на поддържан видеоклип директно в полето за търсене.
+  Tabs:
+    Title: Дръжте страниците отворени в раздели
+    Description: Отворете няколко страници едновременно, без да губите мястото си. Изберете разположението на разделите, което е най-удобно за вас.
+  Quick Settings:
+    Title: Направете го по свой вкус
+    Description: Изберете тема и стандартно качество на видеоклиповете. Можете да промените тези и други предпочитания по всяко време от менюто на профила си или да щракнете върху него с десния бутон, за да смените профила.
+  Import Data:
+    Title: Вземете данните си със себе си
+    Description: По желание импортирайте абонаменти, хронология, плейлисти, хронология на търсенията или настройки от друго поддържано приложение или резервно копие.
+    Action: Импортиране на данни
+    Not Now: Не сега
+  Settings Moved:
+    Title: Настройките са преместени
+    Description: Изберете профила си горе вдясно за достъп до бързите контроли. Щракнете върху него с десния бутон, за да отворите директно избора на профил. Зъбното колело в това меню отваря всички настройки, а „Относно“ и „Изтегляния“ също са преместени тук.
+About:
+  Commit: Комит
+  Fluxer: Присъединете се към общността ни във Fluxer
+  Matrix: Matrix
+  Email: Имейл
+Profile:
+  Profile Icon: Икона на профила
+  Choose an Emoji: Избор на емоджи
+  Custom Emoji: Емоджи по избор
+  Emoji: Емоджи
+  Choose Image: Избор на изображение
+  Crop Image: Изрязване на изображението
+  Zoom: Мащаб
+  Apply Crop: Прилагане на изрязването
+  Transparent: Прозрачен
+  Use Initial: Използване на инициал
+  The selected image could not be loaded: Избраното изображение не можа да бъде заредено
+  Theme Color: Цвят на темата
+Channel:
+  Channel Name Unavailable: Името на канала не е налично
+  Search Result Types: Видове резултати от търсенето
+  All Results: Всички
+Video:
+  Includes paid promotion: Съдържа платена реклама
+  Age Restricted Badge: Възрастово ограничение
+  Queue: Опашка
+  Play Next: Възпроизвеждане след текущото
+  Add to Queue: Добавяне към опашката
+  Added to Play Next: Видеоклипът ще се възпроизведе следващ
+  Added to Queue: Видеоклипът е добавен към опашката
+  Clear Queue: Изчистване на опашката
+  Queue Video Count: '{count} видеоклип | {count} видеоклипа'
+  Remove from Queue: Премахване на {title} от опашката
+  Drag to Reorder Queue: Плъзнете {title}, за да пренаредите опашката
+  Reorder Queue Item: Пренареждане на {title}
+  Reorder Queue Item Instructions: Използвайте клавишите със стрелка нагоре и надолу, за да преместите този видеоклип в опашката.
+  Queue Item Moved: Видеоклипът {title} е преместен на позиция {position} от {total}.
+  Queue Item Cannot Move Up: Видеоклипът {title} не може да бъде преместен нагоре. Вече е на позиция 1 от {total}.
+  Queue Item Cannot Move Down: Видеоклипът {title} не може да бъде преместен надолу. Вече е на позиция {total} от {total}.
+  Metadata: Информация за видеоклипа
+  Close Metadata: Затваряне на информацията за видеоклипа
+  Metadata Cache:
+    Title History: Хронология на заглавието
+    Thumbnail History: Хронология на миниатюрата
+    Description History: Хронология на описанието
+    Previous Version: Предишна версия {number}
+    Empty: (празно)
+  Fetching Streams: Извличане на потоци с yt-dlp…
+  Transcript:
+    Title: Транскрипция
+    Search: Търсене в транскрипцията
+    Language: Език на транскрипцията
+    Save: Запазване
+    Show: Показване на транскрипцията
+    Hide: Скриване на транскрипцията
+    Close: Затваряне на транскрипцията
+    Copied: Транскрипцията е копирана в системния буфер
+    Saved: Транскрипцията е запазена
+    Save Error: Транскрипцията не може да бъде запазена
+    Text File: Текстов файл
+    Unavailable: За този видеоклип няма налична транскрипция.
+    Load Error: Транскрипцията не можа да бъде заредена.
+    Empty: Тази транскрипция не съдържа текст.
+    No Results: Няма части от транскрипцията, които съответстват на търсенето ви.
+  Retry With Built-in Extraction: Нов опит с вграденото извличане
+  Retry With yt-dlp Extraction: Нов опит с извличане чрез yt-dlp
+  Reloading video after streaming URL error: Презареждане на видеоклипа след грешка в URL адреса на потока
+  Configure Restricted Playback Cookies Hint: Настройте бисквитките в Настройки → Външен софтуер → Бисквитки за възпроизвеждане чрез yt-dlp.
+  Try With Configured Cookies: Опит с настроените бисквитки
+  Restricted Playback Authentication Failed Template: 'yt-dlp не можа да получи достъп до този видеоклип с настроените бисквитки: {error}'
+  Unmark As Watched: Премахване на отметката „Гледан“
+  Video has been unmarked as watched: Отметката „Гледан“ е премахната от видеоклипа
+  Save Channel Playback Speed: Запазване на скоростта на възпроизвеждане за канала
+  Channel Playback Speed Saved: Скоростта на възпроизвеждане за канала е запазена
+  Save Channel Video Quality: Запазване на качеството на видеото за канала
+  Channel Video Quality Saved: Качеството на видеото за канала е запазено
+  Save Channel Subtitles State: Запазване на състоянието на субтитрите за канала
+  Channel Subtitles State Saved: Състоянието на субтитрите за канала е запазено
+  Save Channel Volume: Запазване на силата на звука за канала
+  Channel Volume Saved: Силата на звука за канала е запазена
+  Save Channel Setting: Запазване на настройката за канала…
+  Channel Setting Already Set: '{setting} вече е зададена на {value}'
+  Video has been saved to {playlistName}: Видеоклипът е запазен в {playlistName}
+  Video has been removed from {playlistName}: Видеоклипът е премахнат от {playlistName}
+  There was a problem saving the video to {playlistName}: Възникна проблем при запазването на видеоклипа в {playlistName}
+  There was a problem removing the video from {playlistName}: Възникна проблем при премахването на видеоклипа от {playlistName}
+  Failed to load collaborators: Сътрудниците не можаха да бъдат заредени
+  Notify me: Известяване
+  Notification on: Известяването е включено
+  Notification enabled: Ще получите известие, когато този видеоклип започне
+  Notification cancelled: Известието за започване е отменено
+  Notification unavailable: Системните известия не са налични
+  Scheduled video starting: Насроченият видеоклип започва
+  Live notification body: '{videoTitle} започва сега'
+  Premiere: Премиера
+  AI: ИИ
+  AI-generated content: Съдържание, генерирано от ИИ
+  Collaborators: Сътрудници
+  Live Chat Replay: Повторение на чата на живо
+  Show Live Chat: Показване на чата на живо
+  Show Live Chat Replay: Показване на повторението на чата на живо
+  Close Live Chat: Затваряне на чата на живо
+  Close Live Chat Replay: Затваряне на повторението на чата на живо
+  Live Chat Settings: Настройки на чата на живо
+  Show Live Chat Timestamps: Показване на времевите маркери
+  Chat Filter: Филтър за чата
+  Top Chat: Водещи съобщения
+  All Messages: Всички съобщения
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Повторението на чата на живо е включено. Съобщенията от чата ще се показват тук при възпроизвеждането на видеоклипа.
+  Premiere started: Премиерата е в ход. Започна {timeAgo}
+  Player:
+    Voice-over Translation:
+      Start: Превод
+      Cancel: Отказ
+      Progress: Подготовка на гласовия превод…
+      Retry: Нов опит
+      Error: Гласовият превод е неуспешен. Опитайте отново по-късно.
+      Duration Error: Гласовият превод е наличен само за видеоклипове с дължина до четири часа.
+    Caption Appearance:
+      Options: Опции
+      Sample: Така изглеждат субтитрите
+    Auto-translate: Автоматичен превод
+    Sleep Timer:
+      Sleep Timer: Таймер за заспиване
+      'Off': 'Изключен'
+      Minutes: '{minutes} минути'
+      End of video: Край на видеоклипа
+      Remaining: 'Остават {time}'
+      Cancel timer: Отмяна на таймера
+      Timer ended: Таймерът за заспиване изтече
+    Zoom:
+      Zoom: Мащабиране
+      'Off': 'Изключено'
+    Auto-generated Caption Template: '{language} (автоматично генерирани)'
+    Up next in {seconds}: Следва след {seconds}
+    Resize dock: Преоразмеряване на панела
+    Play now: Възпроизвеждане сега
+    MusicPlaybackRateOverride: Открит е музикален видеоклип, възпроизвежда се със скорост 1x
+    Normal: Нормално
+    Set Default: Задаване по подразбиране
+    Hide Annotations: Скриване на поясненията
+    Show Annotations: Показване на поясненията
+    Hide: Скриване
+    Show: Показване
+    Scroll Mini Player:
+      Back to Top: Обратно в началото
+      Return to Video Tab: Връщане в раздела с видеоклипа
+      Play: Възпроизвеждане
+      Pause: Пауза
+      Drag Handle: Преместване на миниплейъра
+    SponsorBlock:
+      CancelCurrentSegment: Отмяна на създаването на сегмент
+      ClearSegments: Изчистване на сегментите
+      ClearSegmentsPrompt: Наистина ли искате да изчистите всички чернови на сегменти в SponsorBlock за този видеоклип?
+      CompleteSegmentsBeforeSubmitting: Завършете всяка чернова на сегмент преди изпращане.
+      CategoryLabel: Категория
+      ActionTypeLabel: Тип на сегмента
+      DuplicateSegments: Не се допускат повтарящи се чернови на сегменти.
+      EndAction: (Край)
+      EndActionLabel: Край
+      EndTimeAfterStart: Крайният час на сегмента трябва да бъде след началния.
+      EndTimeBeforeVideoEnd: Крайният час на сегмента трябва да бъде в рамките на времетраенето на видеоклипа.
+      EndTimeLabel: Краен час на сегмента
+      DisableAutoSkipTemporarily: Временно изключване на автоматичното пропускане от SponsorBlock
+      EnableAutoSkipTemporarily: Повторно включване на автоматичното пропускане от SponsorBlock
+      Guidelines: Указания
+      InspectSegment: Преглед
+      InvalidStartTime: Въведете валиден начален час на сегмента.
+      NoSegmentsToSubmit: Създайте поне един завършен сегмент преди изпращане.
+      NowAction: (Сега)
+      CloseInfoPanel: Затваряне на информацията за SponsorBlock
+      OpenInfoPanel: Отваряне на информацията за SponsorBlock
+      OpenSubmissionMenu: Отваряне на менюто за изпращане
+      PreviewRequired: Прегледайте всеки сегмент преди изпращане.
+      PreviewSegment: Преглед
+      SaveSegment: Запазване
+      SetSegmentEndNow: Край на сегмента сега
+      StartAction: (Начало)
+      StartSegmentNow: Начало на сегмента сега
+      SubmissionBadRequest: SponsorBlock отхвърли заявката за изпращане.
+      SubmissionDuplicate: Това вече е било изпратено.
+      SubmissionFailed: Сегментите в SponsorBlock не можаха да бъдат изпратени.
+      SubmissionForbidden: SponsorBlock отхвърли изпратеното.
+      SubmissionRateLimited: SponsorBlock ограничи честотата на изпращане.
+      SubmissionSuccess: Сегментите в SponsorBlock са изпратени.
+      SubmitSegment: Изпращане на сегмента
+      SubmitSegments: Изпращане
+      StartTimeLabel: Начален час на сегмента
+      TimeDivider: до
+      SkipPrompt: Пропускане на {segmentCategory}?
+      SkipPromptAction: Пропускане
+      SkipToHighlight: Преминаване към акцента?
+      SkippedToHighlight: Преминахте към акцента
+      SkipToastUnskip: Отмяна на пропускането
+      SkipToastReskip: Повторно пропускане
+      MutedSegment: 'Звукът на {segmentCategory} е изключен'
+      MuteToastUnmute: Включване на звука
+      InfoPanelLoading: Сегментите още се зареждат...
+      InfoPanelHasSegments: За този видеоклип има сегменти в базата данни!
+      InfoPanelNoSegments: Не са намерени сегменти
+      RefreshSegments: Обновяване на сегментите
+      RefreshInfo: Обновяване на информацията от SponsorBlock
+      ContributionStatsTitle: Вашият принос
+      ContributionStatsLoading: Зареждане на статистиката за приноса...
+      ContributionStatsError: Статистиката за приноса не е налична. Опитайте да я обновите.
+      ContributionStatsNoUserId: Изпратете сегмент или импортирайте своя потребителски идентификатор за SponsorBlock, за да видите статистиката за приноса.
+      Submissions: Изпращания
+      Segments: Сегменти
+      TimeSaved: Спестено време
+      AutoSkipEnabled: Автоматично пропускане на сегментите
+      AutoSkipOn: 'Включено'
+      AutoSkipOff: 'Изключено'
+      WhitelistChannel: Добавяне на канала в списъка с разрешени
+      ChannelWhitelisted: В списъка с разрешени
+      RemoveChannelFromWhitelist: Премахване на канала от списъка с разрешени
+      MuteSegment: Изключване на звука на сегмента
+      SkipSegment: Пропускане на сегмента
+      CloseSegmentActions: Затваряне на действията за сегмента
+      FullVideo: Целият видеоклип
+      FullVideoLabel: '{segmentCategory} · Целият видеоклип'
+      MuteActionType: Изключване на звука
+      MutePrompt: Изключване на звука на {segmentCategory}?
+      SkipActionType: Пропускане
+      LockedSegment: Заключен сегмент
+      UpvoteSegment: Гласуване „за“
+      DownvoteSegment: Гласуване „против“
+      VoteFailed: Гласът в SponsorBlock не можа да бъде изпратен.
+Playlist:
+  Close Playlist: Затваряне на плейлиста
+Change Format:
+  Local Video File: Локален видеофайл
+  Local Audio File: Локален аудиофайл
+  Online Video: Онлайн видеоклип
+  Stream Source: Източник на потока
+  Stream Extraction Method: Метод за извличане на потока
+  Playback Engine: Модул за възпроизвеждане
+  Streaming Protocol: Протокол за поточно предаване
+  Not Available For This Video: Не е налично за този видеоклип
+  Protocols:
+    Progressive: Прогресивен
+  Descriptions:
+    Local File: Възпроизвежда се директно от изтегления файл на това устройство
+    Online Video: Зарежда формати за поточно предаване от настроения онлайн източник
+    Dash: Адаптивно качество, няколко аудиозаписа и най-високите разделителни способности
+    Legacy: Един файл с обединени видео и аудио, ограничен до по-ниски разделителни способности
+    Audio: Само аудио, подходящо за пестене на трафик или слушане във фонов режим
+  yt-dlp Fallback Template: 'yt-dlp не можа да предостави потоците, затова се използва вграденият модул: {error}'
+  yt-dlp Default Clients Fallback: Предпочитаните клиенти на yt-dlp не можаха да предоставят потоци за възпроизвеждане, затова се прави опит с клиентите по подразбиране на yt-dlp
+  Built-in Fallback Template: 'Вграденият модул не можа да възпроизведе потока, затова се прави опит с yt-dlp: {error}'
+Share:
+  Timestamp Link Copied: Връзката към времевия маркер е копирана в системния буфер
+Context Menu:
+  Context Menu: Контекстно меню
+  Select All: Избиране на всичко
+  Save Image As…: Запазване на изображението като…
+  Copy Image: Копиране на изображението
+  Copy Image Address: Копиране на адреса на изображението
+  Cancel Refresh: Отмяна на обновяването
+  Reload Videos: Презареждане на видеоклиповете
+  Reload Shorts: Презареждане на Shorts
+  Reload Live: Презареждане на предаванията на живо
+  Reload Posts: Презареждане на публикациите
+  Reload All Feeds: Презареждане на всички емисии
+  Close Multiple Tabs: Затваряне на {count} раздела
+  Duplicate Tab: Дублиране на раздела
+  Duplicate Multiple Tabs: Дублиране на {count} раздела
+  Move Tab: Преместване на раздела
+  Move Tabs: Преместване на разделите
+  Move Tab to Group: Преместване на раздела в група
+  Collapse Group: Свиване на групата
+  Move Tabs to Group: Преместване на разделите в група
+  Manage Tab Groups…: Управление на групите с раздели…
+  To Beginning: В началото
+  To End: В края
+  Close Tabs: Затваряне на разделите
+  To the Top: Най-горе
+  To the Left: Най-вляво
+  To the Bottom: Най-долу
+  To the Right: Най-вдясно
+  Other Tabs: Други раздели
+  Copy YouTube Link: Копиране на връзката към YouTube
+  Copy YouTube Links: Копиране на връзките към YouTube
+  Pin Tab: Закачане на раздела
+  Pin Tabs: Закачане на разделите
+  Unpin Tab: Откачане на раздела
+  Unpin Tabs: Откачане на разделите
+  Tab Color: Цвят на раздела
+  Default: По подразбиране
+  Purple: Лилаво
+  Reopen Closed Tab: Повторно отваряне на затворения раздел
+  Reload Tab: Презареждане на раздела
+  Reload Tabs: Презареждане на разделите
+  Load Tab: Зареждане на раздела
+  Load Tabs: Зареждане на разделите
+  Unload Tab: Освобождаване на раздела
+  Unload Tabs: Освобождаване на разделите
+  Move Tab to Window: Преместване на раздела в прозорец
+  Move Tabs to Window: Преместване на разделите в прозорец
+  Open in a New Tab: Отваряне в нов раздел
+  Open in a New Window: Отваряне в нов прозорец
+  Copy Link: Копиране на връзката
+  Copy Invidious Link: Копиране на връзката към Invidious
+  Search Selection in New Tab: Търсене на „{selection}“ в нов раздел
+  Search Selection in New Window: Търсене на „{selection}“ в нов прозорец
+  Search With: Търсене с {engine}
+  Search With Multiple: Търсене с...
+  Selection Too Long: Избраният текст е твърде дълъг за търсене (> {count} знака)
+Tab Organizer:
+  Title: Организатор на раздели
+  Open Tab Count: '{count} отворен раздел | {count} отворени раздела'
+  Search Label: Търсене в разделите
+  Selected Count: 'Избран е {count} раздел | Избрани са {count} раздела'
+  Tab Count: '{count} раздел | {count} раздела'
+  Select All: Избиране на всичко
+  Select None: Премахване на избора
+  Move To Group: Преместване на избраните раздели в група
+  Choose Group: Изберете група
+  Ungrouped: Без група
+  Pin: Закачане
+  Unpin: Откачане
+  Load: Зареждане
+  Unload: Освобождаване
+  Unload All: Освобождаване на всички
+  Close All: Затваряне на всички
+  Ungroup: Премахване от групата
+  Group Name: Име на групата
+  Color: Цвят
+  No Color: Без цвят
+  Create Group: Създаване на група
+  Expand Group: Разгъване на групата
+  Collapse Group: Свиване на групата
+  Expand Group Label: Разгъване на {name}, {count} раздел | Разгъване на {name}, {count} раздела
+  Rename Group: Преименуване на {name}
+  Change Group Color: Промяна на цвета на {name}
+  Move To Window: Преместване в прозорец
+  Choose Window: Изберете прозорец
+  Select Tab: Избиране на {title}
+  Active: Активен
+  Pinned: Закачен
+  Unloaded: Освободен
+  Playing: Възпроизвежда се
+  Close Tab: Затваряне на {title}
+  No Open Results: Няма отворени раздели, които съответстват на това търсене.
+  Recently Closed: Наскоро затворени
+  Clear: Изчистване
+  No Closed Results: Няма наскоро затворени раздели, които отговарят на това търсене.
+  Drag Tab: Плъзнете, за да преместите в група
+Chapters:
+  Open Chapters: Отваряне на главите
+  Close Chapters: Затваряне на главите
+  Copy Timestamp Link: Копиране на връзката при {timestamp}
+Comments:
+  Comment Count: 1 коментар | {count} коментара
+  Show Comments: Показване на коментарите
+  Getting comment replies, please wait: Получаване на отговорите към коментара, моля, изчакайте
+  Reload Comments: Презареждане на коментарите
+  Reply Count: 1 отговор | {replyCount} отговора
+  Comments are turned off: Коментарите са изключени
+  YouTube did not provide advertised replies: YouTube посочи, че този коментар има отговори, но не ги предостави. Възможно е да са изтрити или скрити, затова бутонът за отговор беше премахнат.
+  Pinned by you: Закачено от вас
+  A reply is pinned: Има закачен отговор
+  Filter loaded comments: Филтриране на заредените коментари
+  Comment filters: Филтри за коментари
+  From creator: От създателя
+  Contains timestamps: Съдържа времеви отметки
+  Pin comment by author: Закачане на коментара от {author}
+  Unpin comment by author: Откачане на коментара от {author}
+  Edited: (редактирано)
+  Highlighted comment: Откроен коментар
+  Highlighted reply: Откроен отговор
+  Search loaded comments: Търсене в заредените коментари
+  Loaded comment search result count: 1 от общо {total} заредени коментара | {count} от общо {total} заредени коментара
+  No loaded comments match your filters: Няма заредени коментари, които отговарят на филтрите ви
+  YouTube comment link copied to clipboard: Връзката към коментара в YouTube е копирана в системния буфер
+  Translate to {language}: Превод на {language}
+  Show original: Показване на оригинала
+  Translating comment, please wait: Коментарът се превежда. Моля, изчакайте…
+  Comment translation failed: Преводът на коментара е неуспешен
+Description:
+  Copy Description: Копиране на описанието
+  Description Copied: Описанието е копирано в системния буфер
+  Video Category: 'Категория на видеоклипа:'
+  Video Tags: Етикети на видеоклипа
+  Games: Игри
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: Попълва липсващите части в човешките преводи с текст, създаден от ИИ. Човешките преводи винаги са с предимство.
+    Update Relative Timestamps: Обновява относителните времеви отметки в цялото приложение, докато страницата е отворена. Когато е изключено, те се обновяват само след презареждане или повторно отваряне на страницата.
+    Stream Extraction Method: |
+      Изберете как OpenTubeX да получава потоците с видеоклипове. При избор на yt-dlp той трябва да е наличен.
+      При използване на yt-dlp стартирането на видеоклиповете може да отнема повече време.
+      Вграденият метод не поддържа превъртане при предавания на живо и премиери.
+    Avoid translation: |
+      Изключва автоматичния превод от YouTube на заглавието, описанието и главите на видеоклипа.
+      Твърде многото заявки, например за извличане на заглавията на видеоклипове в списъци, могат временно
+      да нарушат надеждността на приложението.
+    Show Thumbnail Previews: Показва анимирани визуализации при посочване на миниатюрите на видеоклиповете.
+    Startup Behavior: |
+      Изберете какво да прави OpenTubeX при стартиране.
+      Зареждане на всички раздели възстановява веднага всеки запазен раздел, но видеоклиповете във фоновите раздели няма да се пускат автоматично.
+      Зареждане на предишно заредените раздели презарежда разделите, които са били заредени при затварянето на OpenTubeX, а останалите остават незаредени.
+      Зареждане на последния активен раздел възстановява предишната сесия, като другите раздели са отворени, но незаредени. Те се зареждат, когато щракнете върху тях.
+      Стартиране с празна сесия пропуска запазените раздели и отваря нов прозорец.
+    Remember Tab Navigation History: Историята за придвижване назад и напред във всеки раздел се запазва и възстановява при рестартиране на OpenTubeX.
+  Proxy Settings:
+    IP Block Recovery Script Path: Път до скрипта, който да се изпълни при установено блокиране на IP адреса. OpenTubeX изчаква завършването му и след това презарежда видеоклипа. Ако резервният метод е включен, скриптът се изпълнява само когато и той е неуспешен.
+  Player Settings:
+    Enable Caption Translations: Когато е включено и видеоклипът няма оригинални субтитри на съответния език, бутонът за субтитри и клавишът C избират с предимство автоматичния превод на предпочитания език.
+    Use Quick Playback Speed Bar: Показва лента за бърз избор на скоростта на възпроизвеждане вдясно при контролите на плейъра. Ако е включено ръчното запазване на скоростта по канали, лентата съдържа и бутон за запазване на скоростта за текущия канал.
+    Multiply Seek Interval by Playback Rate: Когато е включено, интервалите за превъртане (клавишите със стрелки и J/L) се умножават по текущата скорост на възпроизвеждане. Когато е изключено, интервалите остават постоянни независимо от скоростта.
+    Show Playback Rate Adjusted Timestamp: Когато е включено и скоростта на възпроизвеждане е различна от 1x, плейърът показва след обичайната времева отметка и времето, съобразено със скоростта, оградено в скоби.
+    Use YouTube-style Shorts: Показва Shorts във вертикална решетка на страниците с абонаменти и канали и използва плейъра за Shorts в стила на YouTube.
+    Loop Shorts: Когато е включено, Shorts се стартират отначало автоматично. Когато е изключено, те спират в края и показват бутон за повторно пускане.
+    Show Skip Silence Toggle: Показва превключвател за пропускане на тишината в менюто с настройки на плейъра.
+    Enable Skip Silence by Default: Включва пропускането на тишината за новите раздели. Промяната в един раздел не засяга останалите.
+    Enable Video Zoom: Показва контролата за мащабиране в менюто с настройки на плейъра и включва клавишните комбинации и контролите за придвижване на картината.
+    Voice-over Translation: При заявка за превод изпраща идентификатора и продължителността на видеоклипа и избрания език до неофициалната услуга за гласов превод на Yandex. По подразбиране е изключено.
+    Hold to Double Playback Speed: Задръжте клавиша за интервал или левия бутон на мишката върху плейъра, за да удвоите временно текущата скорост на възпроизвеждане.
+    Ambient Mode: Прелива цветовете на видеоклипа в областта около плейъра.
+    Default Volume: Не е достъпно, докато е включено запомнянето на силата на звука. Изключете го, за да зададете една и съща начална сила на звука за всеки видеоклип.
+    Parallel Segment Loading: |
+      Броят сегменти с видео и звук, които да се зареждат наведнъж предварително.
+      По-високите стойности може да помогнат при бавна или нестабилна връзка, но използват повече трафик и памет.
+      Те може също да накарат автоматичния режим да подцени скоростта на връзката и да избере по-ниско качество.
+      Потоците, ограничени до една заявка наведнъж, пренебрегват тази настройка.
+  Download Settings:
+    Download Folder: Видеоклиповете се запазват в тази папка. Оставете празно, за да използвате системната папка за изтегляния.
+    Global Additional yt-dlp Arguments: Допълнителни аргументи от командния ред, подавани на yt-dlp при всяко изтегляне, например --cookies-from-browser firefox.
+    Concurrent Downloads: Максималният брой задачи на yt-dlp, които могат да се изпълняват едновременно.
+    Bandwidth Limit: Ограничава общата скорост на прехвърляне на опашката, като разпределя ограничението между едновременните задачи. Въведете 0 за неограничена скорост.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX може да използва инсталирания в системата yt-dlp или да изтегля и управлява собствено копие, което се съхранява в папката с потребителски данни.
+    yt-dlp Channel: Изберете кой канал за издания на yt-dlp да изтегля и управлява OpenTubeX. Стабилният канал се препоръчва за повечето потребители.
+    FFmpeg Source: OpenTubeX може да използва инсталираните в системата FFmpeg и FFprobe или да изтегля и управлява собствени статични версии, които се съхраняват в папката с потребителски данни.
+    Managed Tool Updates: Изберете дали управляваните инструменти да се обновяват автоматично, да питат преди обновяване или да се обновяват само чрез бутоните за ръчно действие. Липсващите инструменти продължават да се изтеглят при нужда.
+    yt-dlp Executable Path: По подразбиране OpenTubeX приема, че yt-dlp може да бъде намерен чрез променливата на средата PATH. При нужда тук може да зададете друг път.
+    Cookie Source: Изберете дали yt-dlp да чете файл с бисквитки във формат Netscape или бисквитки от инсталиран браузър за удостоверено възпроизвеждане.
+    Cookie File: Изберете файл с бисквитки във формат Netscape за удостоверено възпроизвеждане.
+    Browser for Cookies: Списъкът с поддържани браузъри се получава от избрания изпълним файл на yt-dlp. При заявка за удостоверено възпроизвеждане OpenTubeX кара yt-dlp да прочете бисквитките от този браузър.
+    Browser Profile: Незадължително име или папка на браузърен профил. Оставете празно, за да използвате последния използван профил.
+    Always Use Cookies: Използва настроените бисквитки при всяко извличане на потоци чрез yt-dlp. Това не превключва метода за извличане на потоци към yt-dlp. Когато е избран yt-dlp, може да станат достъпни формати само за потребители с профил, включително повишената побитова скорост на YouTube Premium, ако профилът има достъп.
+    FFmpeg Executable Path: FFmpeg е необходим за сливането на отделни потоци с видео и звук и за преобразуването на звук. По подразбиране OpenTubeX приема, че FFmpeg може да бъде намерен чрез променливата на средата PATH. При нужда тук може да зададете друг път.
+  Distraction Free Settings:
+    Shorten View Counts: Показва съкратения брой гледания и харесвания на коментарите, вече закръглен от YouTube, например 14 хил. вместо 14 000. Точните стойности винаги се показват изцяло.
+  Subscription Settings:
+    Fetch Feed on Startup: Когато е включено, OpenTubeX автоматично извлича емисията ви с абонаменти при стартиране и при отваряне на нов прозорец.
+    Show New Content Feed: Показва раздел „Нови“ с елементи от емисията с абонаменти, които не са присъствали при предишното извличане.
+    Show New Content Indicators: Показва малка точка до елементите от емисията с абонаменти, които не са присъствали при предишното извличане.
+    Show Scheduled Live Streams / Premieres First: Задържа предстоящите предавания на живо и премиери най-отгоре в емисията с абонаменти. Когато е изключено, те остават на позицията от обявяването си, докато започнат. След изключване обновете веднъж емисията с абонаменти, за да получите датите на обявяване за съществуващите насрочени елементи.
+    Auto Refresh Interval: Колко често OpenTubeX автоматично обновява емисията ви с абонаменти, докато приложението е отворено.
+  Theme Settings:
+    Show Progress as Notification: Показва постоянно известие с текущия напредък на фоновите операции, като обновяване на абонаментите и изтегляне на управлявани инструменти, вместо общата лента за напредък.
+    Always Show Scrollbars: Лентите за превъртане остават видими през цялото време. Когато е изключено, те избледняват малко след като спрете да движите мишката и се появяват отново веднага щом я раздвижите.
+    Use Fixed Tab Width: Задава еднаква ширина на всеки раздел в хоризонталната лента вместо ширина според заглавието му.
+    Use Grid Player Menu: Подрежда менюто с настройки на плейъра като решетка от плочки вместо списък с редове.
+The playlist is at the beginning. Enable loop to continue playing: Плейлистът е в началото. Включете повтарянето, за да продължите възпроизвеждането
+External link opening has been disabled in Settings → Privacy: Отварянето на външни връзки е изключено в Настройки → Поверителност
+KeyboardShortcutPrompt:
+  Edit Hint: Изберете клавишна комбинация, след което натиснете нова комбинация. Натиснете Backspace или Delete, за да премахнете зададената комбинация.
+  Change Shortcut: Промяна на клавишната комбинация за {action}
+  Press Shortcut: Натиснете клавишна комбинация…
+  Unassigned: Не е зададена
+  Reset Shortcut: Нулиране на клавишната комбинация за {action}
+  Reset to Defaults: Възстановяване на стандартните настройки
+  Shortcut Already Assigned: Клавишната комбинация вече е зададена
+  Shortcut Conflict: '{shortcut} вече е зададена за {actions}. Искате ли да я преназначите?'
+  Reserved Shortcut Conflict: '{shortcut} е запазена за {actions} и не може да бъде преназначена.'
+  Reassign: Преназначаване
+  Sections:
+    App:
+      Tabs: "Приложение:\_Раздели"
+      Search and Page: "Приложение:\_Търсене и страница"
+      Window and View: "Приложение:\_Прозорец и изглед"
+  New Tab: Създаване на нов раздел
+  Close Tab: Затваряне на текущия раздел
+  Reload Tab: Презареждане на текущия раздел
+  Reopen Closed Tab: Повторно отваряне на последния затворен раздел
+  Next Tab: Преминаване към следващия раздел
+  Previous Tab: Преминаване към предишния раздел
+  Switch to Tab: Преминаване към раздел 1–9
+  Toggle Tab Orientation: Превключване между оформленията на разделите
+  Find in Page: Търсене на текст в текущата страница
+  Find Next Match: Преминаване към следващото съвпадение
+  Find Previous Match: Преминаване към предишното съвпадение
+  Toggle Normal Playback Speed: Превключване между скорост 1x и предишната скорост на възпроизвеждане
+  Toggle Skip Silence: Превключване на пропускането на тишината
+  Video Zoom In: Увеличаване на видеоклипа
+  Video Zoom Out: Намаляване на видеоклипа
+  Tab Switcher: Превключвател на разделите
+CommandPalette:
+  Title: Палитра с команди
+  Open: Отваряне на палитрата с команди
+  Search Label: Търсене на команди
+  Search Placeholder: Търсене в командите и настройките…
+  Results: Команди
+  No Results: Няма съответстващи команди
+  Result Count: Намерена е 1 команда | Намерени са {count} команди
+  Move: Преместване
+  Run: Изпълняване
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Преминаване към раздел: {title}'
+  Switch Profile: 'Смяна на профила: {name}'
+  Open Playlist: 'Отваряне на плейлиста: {name}'
+  Cancel Download: 'Отказване на изтеглянето: {title}'
+  Groups:
+    App: Приложение
+    Navigation: Навигация
+    Tabs: Раздели
+  Unavailable:
+    Current Page: Вече сте на тази страница
+    No History: Няма страница в тази посока
+    Desktop: Достъпно е само в настолното приложение
+    Build: Не е достъпно в тази версия
+    One Tab: Първо отворете друг раздел
+    Active Tab: Това е активният раздел
+    Active Profile: Това е активният профил
+    Download Finished: Това изтегляне вече не се изпълнява
+    Video: Първо отворете видеоклип
+Downloads:
+  Download: Изтегляне
+  Download Video: Изтегляне на видеоклип
+  Download Playlist: Изтегляне на плейлист
+  Downloading: Изтегляне
+  Queue: Опашка
+  Downloaded: Изтеглено
+  Canceled: Отказано
+  Open Downloads: Отваряне на изтеглянията
+  No Downloads: Все още няма изтегляния
+  No Downloads Description: Започнатите изтегляния ще се показват тук.
+  Clear Failed Canceled Skipped And Missing: Изчистване на неуспешните, отказаните, пропуснатите и липсващите
+  Clear From List: Премахване от списъка
+  Show in Folder: Показване в папката
+  Play Download: Възпроизвеждане на изтегления файл
+  Retry Download: Повторен опит за изтегляне
+  Pause Download: Поставяне на изтеглянето на пауза
+  Resume Download: Продължаване на изтеглянето
+  Move Earlier: Преместване напред
+  Move Later: Преместване назад
+  Pause All: Поставяне на всички на пауза
+  Resume All: Продължаване на всички
+  Retry All: Повторен опит за всички неуспешни изтегляния
+  Total Size: 'Общ размер: {size}'
+  Local File: Локален файл
+  Available Offline: Достъпно офлайн
+  Remove File: Премахване на файла
+  Remove File Confirmation: Да се премахне ли изтегленият файл?
+  Remove File Warning: Това ще премести „{title}“ в кошчето на устройството ви.
+  File Not Found: Изтегленият файл не бе намерен.
+  Download Missing: Изтеглянето не е достъпно
+  Files Missing: Изтегленият файл вече не е наличен във файловата система. | Изтеглените файлове вече не са налични във файловата система.
+  Files Available: 'Налични изтеглени файлове: {available} от общо {total}.'
+  More Files: Още 1 файл | Още {count} файла
+  Template Used: 'Шаблон: {name}'
+  Download Type: Вид на изтеглянето
+  Template: Шаблон
+  Unsaved: Незапазено
+  Media Type: Вид медия
+  Video: Видеоклип
+  Audio: Звук
+  Maximum Resolution: Максимална разделителна способност
+  Best Available: Най-доброто налично
+  Automatic: Автоматично
+  Container: Контейнер
+  Video Codec: Видеокодек
+  Audio Codec: Аудиокодек
+  File Name Template: Шаблон за име на файла
+  File Name Template Help: 'Налични полета: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Времеви диапазон и глави
+  Start Time: Начален час (HH:MM:SS)
+  End Time: Краен час (HH:MM:SS)
+  Split by Chapters: Разделяне в отделни файлове по глави
+  Remove Segments: Премахване на сегменти
+  Subtitles and Metadata: Субтитри и метаданни
+  Include Subtitles: Включване на субтитри
+  Embed Subtitles: Вграждане на субтитрите в медийния файл
+  Subtitle Format: Формат на субтитрите
+  Subtitle Languages: Езици на субтитрите
+  Subtitle Languages Help: 'Разделени със запетаи селектори за езици на yt-dlp, например: en.*,de.*'
+  Embed Cover Art: Вграждане на миниатюрата като обложка
+  Embed Metadata: Вграждане на заглавието, автора, описанието и главите
+  Additional yt-dlp Arguments: Допълнителни аргументи за yt-dlp
+  Custom yt-dlp Arguments: Персонализирани аргументи за yt-dlp
+  Template Name: Име на шаблона
+  Save Template: Запазване на шаблона
+  Delete Template: Изтриване на шаблона
+  Template Saved: Шаблонът за изтегляне „{name}“ е запазен
+  Template Name Exists: Вече съществува шаблон за изтегляне с име „{name}“.
+  Choose Folder: Промяна
+  Select Folder: Избиране на папка
+  Folder Required: Изберете папка за изтегляния, за да включите изтеглянето.
+  System Downloads Folder: Системна папка за изтегляния
+  Processing: Обработване…
+  Queued: В опашката
+  Queued Position: В опашката, позиция {position}
+  Paused: На пауза
+  Pausing: Текущата задача ще завърши, след което опашката ще бъде поставена на пауза
+  Download Complete: Изтеглянето завърши
+  Download Cancelled: Изтеглянето е отказано
+  Download Failed: Изтеглянето бе неуспешно
+  File Name Shortened: Името на файла беше съкратено, защото заглавието на видеоклипа е твърде дълго.
+  Insufficient Disk Space: Няма достатъчно място на диска. Необходими са около {required}, а са налични {available}.
+  Unknown Download Size: Размерът на изтеглянето е неизвестен. В целевата файлова система са налични {available}.
+  Disk Space Check Unavailable: Наличното място на диска не можа да бъде проверено преди започване на изтеглянето.
+  Download Failure Hint: Проверете {issuesLink}, след което опитайте да смените канала на yt-dlp на Nightly или Master в Настройки → Разширени → Външен софтуер.
+  yt-dlp YouTube Issues: скорошни проблеми на yt-dlp с YouTube
+  Automatic Download Started: Автоматичното изтегляне започна
+  Automatic Download Started Body: „{title}“ от {channel} се изтегля във фонов режим.
+  Automatic Download Complete: Автоматичното изтегляне завърши
+  Automatic Download Failed: Автоматичното изтегляне бе неуспешно
+  Automatic Download Could Not Start: Автоматичното изтегляне на „{title}“ не можа да започне.
+  Automatic Download Skipped: Пропуснато от филтрите за автоматично изтегляне
+  Cancel Download: Отказване на изтеглянето
+  yt-dlp Not Found: yt-dlp не бе намерен. Инсталирайте го или задайте пътя му в Настройки → Разширени → Външен софтуер.
+  Download Complete Template: Изтеглянето на „{title}“ завърши
+  Download Failed Template: Изтеглянето на „{title}“ бе неуспешно
+  Templates:
+    Video Best: Видеоклип - най-добро качество
+    Video Resolution: Видеоклип - {resolution}
+    Audio Best: Звук - най-добро качество
+    Audio Format: Звук - {format}
+    Subtitles Format: Субтитри - {format}

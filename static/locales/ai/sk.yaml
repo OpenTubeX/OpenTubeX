@@ -1,0 +1,1479 @@
+# Voliteľné preklady vytvorené umelou inteligenciou pre kľúče, ktoré chýbajú v ../sk.yaml.
+Color Picker:
+  Hue: Odtieň
+  Opacity: Nepriehľadnosť
+  Backdrop Blur: Rozmazanie pozadia
+  Hex Color: Hexadecimálna farba
+  Apply Color: Použiť
+  Reset Color: Obnoviť
+  Copy Color: Kopírovať
+  Copy From Another Color: Kopírovať z inej farby
+  Color Copied: Farba bola skopírovaná
+  Invalid Color: Zadajte platnú hexadecimálnu farbu
+  Clipboard Unavailable: Schránka nie je dostupná
+  Saturation and Brightness: Sýtosť a jas
+New Tab: Nová karta
+Maximize: Maximalizovať
+Restore: Obnoviť
+Close Tab: Zavrieť kartu
+Close Confirmation:
+  Title: Ukončiť OpenTubeX?
+  Message: Naozaj chcete ukončiť OpenTubeX?
+  Quit: Ukončiť
+  Never Ask Again: Nabudúce sa nepýtať
+Close Window Confirmation:
+  Title: Zavrieť okno?
+  Message: Toto okno obsahuje {count} kartu. Naozaj ho chcete zavrieť? | Toto okno obsahuje {count} kariet. Naozaj ho chcete zavrieť?
+  Close Window: Zavrieť okno
+Confirmations:
+  Never Ask Again: Nabudúce sa nepýtať
+  Settings Hint: Toto potvrdenie môžete znova zapnúť v časti Nastavenia → Všeobecné → Potvrdiť pred…
+Close Multiple Tabs Confirmation:
+  Title: Zavrieť viacero kariet?
+  Message: Zavrie sa {count} karta. | Zavrie sa {count} kariet.
+  Close Tabs: Zavrieť {count} kartu | Zavrieť {count} kariet
+Load Multiple Tabs Confirmation:
+  Title: Načítať viacero kariet?
+  Message: Načíta sa {count} karta. | Načíta sa {count} kariet.
+  Load Tabs: Načítať {count} kartu | Načítať {count} kariet
+Unload Multiple Tabs Confirmation:
+  Title: Uvoľniť viacero kariet?
+  Message: Uvoľní sa {count} karta. | Uvoľní sa {count} kariet.
+  Unload Tabs: Uvoľniť {count} kartu | Uvoľniť {count} kariet
+Use Vertical Tabs: Použiť zvislé karty
+Use Horizontal Tabs: Použiť vodorovné karty
+Resize Tab Bar: Zmeniť veľkosť panela kariet
+Find in page: Hľadať na stránke
+Previous match: Predchádzajúca zhoda
+Next match: Nasledujúca zhoda
+Close find bar: Zavrieť panel hľadania
+No matches: Žiadne zhody
+Version {versionNumber} is now available.: Je dostupná verzia {versionNumber}.
+See changes and update: Zobraziť zmeny a aktualizovať
+Dismiss: Zavrieť
+Update to {version}: Aktualizovať na verziu {version}
+Global:
+  Ambient Mode: Ambientný režim
+  Loading More: Načítava sa ďalší obsah
+  New: Nové
+Search Listing:
+  Label:
+    Members Only: Len pre členov
+Stats:
+  Stats: Štatistiky
+  Watch time summary: Súhrn času sledovania
+  Today: Dnes
+  This week: Tento týždeň
+  Total watch time: Celkový čas sledovania
+  Daily average: Denný priemer
+  So far today: Dnes zatiaľ
+  Since: Od {day}
+  All recorded time: Celý zaznamenaný čas
+  Per calendar day: Za kalendárny deň
+  Day by day: Po dňoch
+  Highest: 'Najviac: {duration}'
+  Week by week: Po týždňoch
+  Last 14 days: Posledných 14 dní
+  Last 8 weeks: Posledných 8 týždňov
+  Daily chart aria: Denný čas sledovania za posledných 14 dní
+  Weekly chart aria: Týždenný čas sledovania za posledných 8 týždňov
+  No data: Čas sledovania sa tu zobrazí po prehratí videí.
+  Estimate note: Čas sledovania pred touto aktualizáciou je odhadnutý z uloženého priebehu prehrávania.
+  Adjust imported watch time: Upraviť importovaný čas sledovania
+  Imported watch time: Importovaný čas sledovania
+  Imported watch time explanation: Vyberte rýchlosť prehrávania, ktorú ste zvyčajne používali. Trvanie importovaných videí sa vydelí touto rýchlosťou, aby sa odhadol čas, ktorý ste skutočne strávili sledovaním.
+  Playback speed: Rýchlosť prehrávania
+  Channel speed note: Ak sú k dispozícii uložené rýchlosti prehrávania kanálov, použijú sa namiesto tejto hodnoty.
+  Apply playback speed: Použiť rýchlosť prehrávania
+  Imported watch time adjusted: Importovaný čas sledovania bol upravený
+  Reset statistics: Vynulovať štatistiky
+  Reset: Vynulovať
+  Reset confirmation: Naozaj chcete vynulovať všetky štatistiky sledovania? Túto akciu nemožno vrátiť späť.
+  Reset success: Štatistiky sledovania boli vynulované
+  Less than a minute: < 1 min
+  Minutes: '{minutes} min'
+  Hours: '{hours} h'
+  Hours and minutes: '{hours} h {minutes} min'
+Subscriptions:
+  Refreshing Subscription Videos: Obnovujú sa videá z odberov
+  Refreshing Subscription Shorts: Obnovujú sa krátke videá z odberov
+  Refreshing Subscription Live Streams: Obnovujú sa živé prenosy z odberov
+  Refreshing Subscription Posts: Obnovujú sa príspevky z odberov
+  New Content: Nový obsah
+  New Feed Refresh Warning Title: Obnoviť všetky kanály odberov?
+  New Feed Refresh Warning: Obnovenie všetkých typov obsahu bez RSS pre 1 odber môže trvať dlho. Chcete pokračovať? | Obnovenie všetkých typov obsahu bez RSS pre {count} odbery môže trvať dlho. Chcete pokračovať? | Obnovenie všetkých typov obsahu bez RSS pre {count} odberov môže trvať dlho. Chcete pokračovať?
+  New Since Last Refresh: Nové od posledného obnovenia
+  Mark as Seen: Označiť ako zobrazené
+  Mark All as Seen: Označiť všetko ako zobrazené
+  No New Content: Žiadny nový obsah.
+  New Content Tabs: Karty nového obsahu
+  Show Tabbed View: Zobraziť na kartách
+  Show Combined View: Zobraziť spolu
+  Newest First: Najnovšie ako prvé
+  Oldest First: Najstaršie ako prvé
+Trending:
+  Load Error: Trendy sa nepodarilo načítať.
+  Unsupported Backend: Trendy vyžadujú miestne API. Vyberte miestne API alebo zapnite použitie záložného backendu.
+Most Popular Feed Empty: Sekcia Najpopulárnejšie tejto inštancie Invidious je prázdna.
+Feed:
+  Cancel Refresh: Zrušiť obnovenie
+  Next Auto Refresh: 'Ďalšie automatické obnovenie: {date}'
+User Playlists:
+  Load More Playlists: Načítať ďalšie zoznamy videí
+  Save to: Uložiť do…
+  Quick Bookmark Icon: Ikona rýchlej záložky
+  Custom Emoji: Vlastné emoji
+  Choose Image: Vybrať obrázok
+  Use Bookmark Icon: Použiť ikonu záložky
+  SinglePlaylistView:
+    Retry: Skúsiť znova
+    This playlist could not be loaded.: Tento zoznam videí sa nepodarilo načítať.
+    More videos could not be loaded.: Ďalšie videá sa nepodarilo načítať.
+History:
+  Mark All As Watched: Označiť všetko ako pozreté
+  Mark All As Watched Confirmation: Naozaj chcete označiť všetky videá v histórii ako pozreté?
+  All History Marked as Watched: Všetky videá v histórii boli označené ako pozreté
+  Delete Old History: Odstrániť starú históriu
+  Select History Age: Vyberte, aký starý musí byť záznam, aby sa odstránil.
+  Delete Entries Older Than: Odstrániť záznamy staršie ako
+  Number of Days: Počet dní
+  History Cleanup Warning: Zodpovedajúce záznamy histórie sledovania sa natrvalo odstránia.
+  1 Day: 1 deň
+  1 Week: 1 týždeň
+  1 Month: 1 mesiac
+  3 Months: 3 mesiace
+  1 Year: 1 rok
+  Custom: Vlastné
+  History Older Than Days Removed: História sledovania staršia ako 1 deň bola odstránená | História sledovania staršia ako {days} dni bola odstránená | História sledovania staršia ako {days} dní bola odstránená
+Settings:
+  Quick Settings:
+    Quick Settings: Rýchle nastavenia
+    Appearance: Vzhľad
+    Playback: Prehrávanie
+    Content: Obsah
+    Language and Region: Jazyk a oblasť
+    All Settings: Všetky nastavenia
+    Profile Selector Hint: Profil môžete prepnúť aj kliknutím pravým tlačidlom na ikonu profilu
+  Categories:
+    General Description: Jazyk, spustenie, karty a správanie aplikácie
+    Appearance: Vzhľad
+    Appearance Description: Motív, rozloženie a miniatúry
+    Content appearance: Zoznamy videí a miniatúry
+    Layout: Rozloženie
+    Playback Description: Prehrávač, titulky a nastavenia kanálov
+    Subscriptions Description: Obnovenie kanála a možnosti zobrazenia
+    Downloads Description: Priečinky, šablóny a automatické pravidlá
+    Distraction Free Description: Skrytie obsahu a nastavenie limitov sledovania
+    Add-ons: Doplnky
+    Add-ons Description: SponsorBlock, DeArrow, hodnotenie Nepáči sa mi to a preklad hlasového komentára
+    Privacy Description: Súkromie pri sledovaní a riadenie prístupu
+    Online activity: Aktivita online
+    Data And Storage Description: Import, export, využitie disku a čistenie
+    Sync Description: Synchronizácia nastavení a údajov medzi zariadeniami
+    Advanced: Rozšírené
+    Advanced Description: Poskytovatelia, externé aplikácie a sieť
+    Alternative providers: Poskytovatelia videí a metaúdajov
+  Highlight Changed Settings: Zvýrazniť nastavenia odlišné od predvolených
+  Reset Setting to Default: Obnoviť predvolenú hodnotu tohto nastavenia
+  Performance Impact:
+    Show Performance Impact: Zobraziť ukazovatele vplyvu na výkon
+    Moderate: Stredný vplyv
+    High: Vysoký vplyv
+    Description: 'Toto nastavenie môže zvýšiť využitie týchto prostriedkov: {resources}'
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: pamäť
+      Network: sieť
+      Disk: disk
+  General Settings:
+    Update Relative Timestamps: Priebežne aktualizovať relatívne časové údaje
+    Stream Extraction Method:
+      Stream Extraction Method: Spôsob získavania streamov
+      yt-dlp: yt-dlp
+      Built-in: Vstavaný
+    Confirm Before: Potvrdiť pred…
+    Confirmation Options:
+      Closing App: Ukončením OpenTubeX
+      Closing Window: Zavretím okna s viacerými kartami
+      Closing Tabs: Zavretím viacerých kariet
+      Loading Tabs: Načítaním viacerých kariet
+      Unloading Tabs: Uvoľnením viacerých kariet
+    Remember Tab Navigation History: Zapamätať si históriu prechádzania kariet
+    New Tab Position:
+      New Tab Position: Umiestnenie novej karty
+      At the end: Na konci
+      After current tab: Za aktuálnou kartou
+      After current tab in opened order: Za aktuálnou kartou v poradí otvorenia
+    Tab Close Focus:
+      Tab Close Focus: Po zavretí karty
+      Previous tab: Vybrať predchádzajúcu kartu
+      Next tab: Vybrať nasledujúcu kartu
+    Startup Behavior:
+      Startup Behavior: Pri spustení
+      Load all tabs: Načítať všetky karty
+      Load previously loaded tabs: Načítať predtým načítané karty
+      Load last active tab: Načítať naposledy aktívnu kartu
+      Start with an empty session: Začať s prázdnou reláciou
+    Use AI Translation Completions: Doplniť chýbajúce preklady textom vytvoreným umelou inteligenciou
+    Reduced Motion:
+      Reduced Motion: Obmedzenie pohybu
+      System: Podľa systému
+      Force On: Vždy zapnuté
+      Force Off: Vždy vypnuté
+    Comment Translation:
+      Title: Preklady komentárov
+      Enable: Zapnúť preklady komentárov
+      Never Translate: Nikdy neprekladať komentáre v jazyku
+      Choose Language: Vyberte jazyk
+      Description: Komentáre v jazyku aplikácie sú už vynechané. Pridajte ďalšie jazyky, ktorým rozumiete.
+      Remove Language: Znova prekladať komentáre v jazyku {language}
+    Avoid translation:
+      Avoid translation: Uprednostniť nepreložený text videí
+      Disabled: Vypnuté
+      Watch Only: Len rozhranie videa
+      Entire App: Celá aplikácia
+    Playlist View Type:
+      Playlist View Type: Spôsob zobrazenia zoznamov videí
+    Show Thumbnail Previews: Zobraziť náhľady miniatúr
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Ďalšie tlačidlo akcie na miniatúre
+      None: Žiadne
+      Mark as Watched: Označiť ako pozreté
+      Copy YouTube Link: Kopírovať odkaz na YouTube
+      Open in YouTube: Otvoriť na YouTube
+  Context Menu Search Settings:
+    Context Menu Search Settings: Hľadanie v kontextovej ponuke
+    Description: Vyberte vyhľadávače, ktoré sa zobrazia po kliknutí pravým tlačidlom na označený text. Výsledky hľadania sa otvoria v predvolenom prehliadači.
+    Icon Hint: Po zapnutí vyhľadávača aplikácia kontaktuje jeho webovú lokalitu, aby načítala jej ikonu.
+    Engine Name: Názov vyhľadávača
+    Search URL: Adresa URL vyhľadávania
+    URL Hint: Na miesto, kde má adresa URL obsahovať zakódovaný označený text, zadajte %s.
+    Add Custom Engine: Pridať vlastný vyhľadávač
+    Add Engine: Pridať vyhľadávač
+    Remove Engine: Odstrániť {engine}
+    Invalid Engine: Zadajte názov a platnú adresu URL vyhľadávania cez HTTP alebo HTTPS, ktorá obsahuje %s.
+    Engine Limit: Môžete pridať najviac {count} vlastných vyhľadávačov.
+  Theme Settings:
+    Move Downloads to App Header: Presunúť stiahnuté súbory do hlavičky aplikácie
+    Move Settings to App Header: Presunúť nastavenia do hlavičky aplikácie
+    Hide Side Bar on Watch Pages: Skryť bočný panel na stránkach sledovania
+    UI Roundness: Zaoblenie rozhrania
+    Scrollbar Width: Šírka posúvača
+    Animation Speed: Rýchlosť animácií
+    Thumbnail Size: Veľkosť miniatúr
+    Show Tab Icons: Zobraziť ikony kariet
+    Load Missing Tab Icons: Načítať chýbajúce ikony kariet
+    Loading Missing Tab Icons: Načítavajú sa chýbajúce ikony kariet…
+    No Missing Tab Icons: Všetky podporované ikony kariet sú už načítané
+    Loaded Tab Icons: 'Načítala sa {count} chýbajúca ikona karty | Načítali sa {count} chýbajúce ikony kariet | Načítalo sa {count} chýbajúcich ikon kariet'
+    Loaded Tab Icons With Failures: 'Načítané ikony kariet: {loaded}; nepodarilo sa načítať: {failed}'
+    Show Tab Previews: Zobraziť náhľady kariet
+    Use Fixed Tab Width: Použiť pevnú šírku kariet vo vodorovnom režime
+    Tab Width: Šírka kariet
+    Tab Layout:
+      Tab Layout: Rozloženie kariet
+      Horizontal Top: Vodorovne hore
+      Horizontal Bottom: Vodorovne dole
+      Vertical Left: Zvislo vľavo
+      Vertical Right: Zvislo vpravo
+    Show Toast Timeout Indicator: Zobraziť ukazovateľ času oznámenia
+    Use Grid Player Menu: Použiť mriežkovú ponuku prehrávača
+    Show Progress as Notification: Zobraziť priebeh ako oznámenie
+    Operation in Progress: Prebieha operácia
+    Toast Position:
+      Toast Position: Umiestnenie oznámení
+      Bottom Left: Vľavo dole
+      Bottom Center: V strede dole
+      Bottom Right: Vpravo dole
+      Top Left: Vľavo hore
+      Top Center: V strede hore
+      Top Right: Vpravo hore
+    Icon Pack:
+      Icon Pack: Balík ikon
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Písmo aplikácie
+      System Default: Predvolené systémové
+      Unable to Load: Nainštalované systémové písma sa nepodarilo načítať
+    Always Show Scrollbars: Vždy zobrazovať posúvače
+    Base Theme:
+      Custom: Vlastný
+    Light Theme: Svetlý motív
+    Dark Theme: Tmavý motív
+    Custom Theme:
+      Create Custom Theme: Vytvoriť vlastný motív
+      Edit Custom Theme: Upraviť vlastný motív
+      Custom Theme Creator: Tvorba vlastného motívu
+      Theme Name: Názov motívu
+      Based On: Založený na
+      Import Theme: Importovať motív
+      Export Theme: Exportovať motív
+      Share Theme: Zdieľať motív
+      Share Description Heading: Opis
+      Share Description Prompt: Opíšte motív a uveďte všetko, čo by používatelia mali vedieť pred jeho použitím.
+      Share Screenshots Heading: Snímky obrazovky
+      Share Screenshots Prompt: Presuňte sem jednu alebo viac snímok obrazovky.
+      Share Code Summary: JSON motívu
+      Delete Theme: Odstrániť motív
+      Delete Theme Confirmation: Odstrániť motív „{name}“? Túto akciu nemožno vrátiť späť.
+      Save and Apply: Uložiť a použiť
+      Discard Changes: Zahodiť zmeny
+      Reset Colors: Obnoviť farby základného motívu
+      Theme File: Súbor motívu OpenTubeX
+      Theme Saved: Vlastný motív bol uložený a použitý
+      Theme Imported: Motív bol importovaný do editora
+      Theme Exported: Motív bol exportovaný
+      Theme Deleted: Vlastný motív bol odstránený
+      Unable to Load: Vlastný motív sa nepodarilo načítať
+      Unable to Save: Vlastný motív sa nepodarilo uložiť
+      Unable to Export: Vlastný motív sa nepodarilo exportovať
+      Unable to Share: Vlastný motív sa nepodarilo zdieľať
+      Unable to Delete: Vlastný motív sa nepodarilo odstrániť
+      Invalid Theme File: Neplatný súbor vlastného motívu
+      Colors:
+        Main text: Hlavný text
+        Secondary text: Vedľajší text
+        Subtle text: Tlmený text
+        Borders and dividers: Okraje a oddeľovače
+        Subtle surfaces and indicators: Tlmené plochy a ukazovatele
+        Title text: Text názvu
+        Selected text background: Pozadie označeného textu
+        Selected text: Označený text
+        Logo icon: Ikona loga
+        Logo text: Text loga
+        Logo hover: Logo po umiestnení kurzora
+        Logo pressed: Logo pri stlačení
+        Page background: Pozadie stránky
+        Card background: Pozadie karty
+        Secondary card background: Vedľajšie pozadie karty
+        Favorite icon: Ikona obľúbených
+        Error color: Farba chyby
+        Scrollbar thumb: Jazdec posúvača
+        Scrollbar thumb hover: Jazdec posúvača po umiestnení kurzora
+        Scrollbar thumb pressed: Jazdec posúvača pri stlačení
+        Dropdown item hover text: Text položky rozbaľovacej ponuky po umiestnení kurzora
+        Dropdown item hover background: Pozadie položky rozbaľovacej ponuky po umiestnení kurzora
+        Navigation and panel background: Pozadie navigácie a panelov
+        Neutral item hover and focus background: Pozadie neutrálnej položky po umiestnení kurzora alebo zameraní
+        Neutral item hover and focus text and icons: Text a ikony neutrálnej položky po umiestnení kurzora alebo zameraní
+        Neutral item pressed background: Pozadie neutrálnej položky pri stlačení
+        Neutral item pressed text and icons: Text a ikony neutrálnej položky pri stlačení
+        Header button hover and focus background: Pozadie tlačidla hlavičky po umiestnení kurzora alebo zameraní
+        Header button hover and focus text and icons: Text a ikony tlačidla hlavičky po umiestnení kurzora alebo zameraní
+        Header button pressed background: Pozadie tlačidla hlavičky pri stlačení
+        Header button pressed text and icons: Text a ikony tlačidla hlavičky pri stlačení
+        Colored header button hover and focus background: Pozadie farebného tlačidla hlavičky po umiestnení kurzora alebo zameraní
+        Colored header button hover and focus text and icons: Text a ikony farebného tlačidla hlavičky po umiestnení kurzora alebo zameraní
+        Colored header button pressed background: Pozadie farebného tlačidla hlavičky pri stlačení
+        Colored header button pressed text and icons: Text a ikony farebného tlačidla hlavičky pri stlačení
+        Search and dropdown background: Pozadie hľadania a rozbaľovacej ponuky
+        Settings search background: Pozadie hľadania v nastaveniach
+        Instance menu: Ponuka inštancie
+        Input background: Pozadie vstupného poľa
+        Shadow color: Farba tieňa
+        Primary controls and highlights: Hlavné ovládacie prvky a zvýraznenia
+        Primary control hover and focus: Hlavný ovládací prvok po umiestnení kurzora alebo zameraní
+        Primary control pressed: Hlavný ovládací prvok pri stlačení
+        Text and icons on primary controls: Text a ikony hlavných ovládacích prvkov
+        Secondary controls and highlights: Vedľajšie ovládacie prvky a zvýraznenia
+        Secondary control hover and focus: Vedľajší ovládací prvok po umiestnení kurzora alebo zameraní
+        Secondary control pressed: Vedľajší ovládací prvok pri stlačení
+        Light secondary color: Svetlá vedľajšia farba
+        Visited accent: Farba navštívených položiek
+        Text and icons on secondary controls: Text a ikony vedľajších ovládacích prvkov
+        Links: Odkazy
+        Visited links: Navštívené odkazy
+        Destructive action: Deštruktívna akcia
+        Destructive hover and focus: Deštruktívna akcia po umiestnení kurzora alebo zameraní
+        Destructive pressed: Deštruktívna akcia pri stlačení
+        Text and icons on destructive actions: Text a ikony deštruktívnych akcií
+  Player Settings:
+    Automatically Open Chapters: Automaticky otvárať kapitoly
+    Caption Appearance:
+      Caption Appearance: Vzhľad titulkov
+      Captions: Titulky
+      Preferred Language: Uprednostnený jazyk titulkov
+      Application Language: Jazyk aplikácie
+      Enable Translations: Zapnúť preklady titulkov
+      Text Color: Farba textu
+      Background Color: Farba pozadia
+      Background Opacity: Nepriehľadnosť pozadia
+      Font Size: Veľkosť písma
+      Vertical Position: Zvislá poloha
+      Edge Color: Farba okraja
+      Anchor:
+        Anchor: Ukotvenie
+        Top Left: Vľavo hore
+        Top Center: V strede hore
+        Top Right: Vpravo hore
+        Bottom Left: Vľavo dole
+        Bottom Center: V strede dole
+        Bottom Right: Vpravo dole
+      Edge Style:
+        Edge Style: Štýl okraja
+        None: Žiadny
+        Outline: Obrys
+        Drop Shadow: Vrhaný tieň
+      Reset: Obnoviť vzhľad titulkov
+    Auto Picture in Picture:
+      Auto Picture in Picture: Automaticky prejsť do režimu obrazu v obraze
+      On Tab Change: Pri prepnutí karty
+      On Window Minimize: Pri minimalizovaní okna
+      On Window Hide: Keď okno stratí zameranie alebo sa prepnete inam
+      Wayland Minimize Unsupported: Wayland neoznamuje aplikáciám minimalizovanie okna, preto táto možnosť nie je dostupná. Použite možnosť „Keď okno stratí zameranie alebo sa prepnete inam“, ktorá zahŕňa aj minimalizovanie.
+    Scroll Mini Player:
+      Scroll Mini Player: Miniatúrny prehrávač pri posúvaní
+      When Scrolling Down: Pri posúvaní nadol ponechať miniatúrny prehrávač na obrazovke
+      On All Tabs: Pri prepínaní kariet ponechať miniatúrny prehrávač na obrazovke
+    Multiply Seek Interval by Playback Rate: Násobiť interval posunu rýchlosťou prehrávania
+    Show Playback Rate Adjusted Timestamp: Zobraziť čas upravený podľa rýchlosti prehrávania
+    Use YouTube-style Shorts: Použiť krátke videá v štýle YouTube Shorts
+    Loop Shorts: Opakovať krátke videá
+    Remember Volume: Zapamätať si hlasitosť
+    Skip Silence: Preskakovať ticho
+    Show Skip Silence Toggle: Zobraziť prepínač preskakovania ticha
+    Enable Skip Silence by Default: Predvolene zapnúť preskakovanie ticha
+    Enable Video Zoom: Zapnúť priblíženie videa
+    Voice-over Translation:
+      Title: Preklad hlasového komentára
+      Attribution: (technológiu poskytuje Yandex)
+      Enable: Zapnúť preklad hlasového komentára
+      Prepare in Background: Začať pripravovať preklady hlasového komentára na pozadí
+      Background Preparation Tooltip: Hneď po načítaní podporovaného videa odošle prekladateľskej službe jeho ID, trvanie a vybraný jazyk.
+      Language: Jazyk prekladu hlasového komentára
+      Supported Source Languages: 'Podporované zdrojové jazyky: ruština, angličtina, čínština, kórejčina, litovčina, lotyština, arabčina, francúzština, taliančina, španielčina, nemčina a japončina.'
+      Voice Volume: Hlasitosť preloženého hlasu
+      Original Volume: Hlasitosť pôvodného zvuku
+      Russian: Ruština
+      English: Angličtina
+      Kazakh: Kazaština
+    Hold to Double Playback Speed: Podržaním zdvojnásobiť rýchlosť prehrávania
+    Use Quick Playback Speed Bar: Použiť panel rýchlej zmeny rýchlosti prehrávania
+    Customize Quick Playback Speed Bar: Prispôsobiť panel rýchlej zmeny rýchlosti prehrávania
+    Quick Playback Speed Bar Manager: Panel rýchlej zmeny rýchlosti prehrávania
+    Add Playback Speed: Pridať rýchlosť prehrávania
+    Reset Quick Playback Speed Bar: Obnoviť predvolené hodnoty
+    Playback Speed Name: Názov
+    Edit Playback Speed Name: Upraviť názov rýchlosti prehrávania
+    Use Automatic Playback Speed Name: Použiť automatický názov rýchlosti prehrávania
+    Reorder Playback Speed: Potiahnutím zmeniť poradie rýchlosti prehrávania
+    Playback Speed: Rýchlosť prehrávania
+    Parallel Segment Loading: Súbežné načítavanie segmentov
+  Channel Settings:
+    Channel Settings: Nastavenia kanálov
+    Channel Settings Description: Nastavenia, ktoré vyberiete pri sledovaní, sa zapamätajú pre každý kanál samostatne a znova sa použijú pri ďalšom sledovaní jeho videa.
+    Enable Playback Speed: Zapnúť rýchlosť prehrávania
+    Enable Video Quality: Zapnúť kvalitu videa
+    Enable Subtitles State: Zapnúť stav titulkov
+    Enable Volume: Zapnúť hlasitosť
+    Auto Update: Automaticky aktualizovať pri zmene v možnostiach prehrávača
+    Auto Update Subtitles: Automaticky aktualizovať pri prepnutí
+    Auto Update Volume: Automaticky aktualizovať pri každej zmene hlasitosti
+    Manage Saved Channels: Spravovať uložené kanály ({channelCount})
+    Saved Channels: Uložené nastavenia kanálov
+    Enable Saved Channel Settings Sync: Synchronizovať uložené nastavenia kanálov
+    Disable Saved Channel Settings Sync: Zastaviť synchronizáciu uložených nastavení kanálov
+    Search Channels: Hľadať kanály
+    No Saved Channels: Zatiaľ neboli uložené žiadne nastavenia pre konkrétne kanály
+    No Matching Channels: Hľadaniu nezodpovedajú žiadne kanály
+    Forget Channel: Zabudnúť všetky nastavenia tohto kanála
+    Forget Value: Zabudnúť toto nastavenie
+    Add Setting: Zapamätať si ďalšie nastavenie tohto kanála
+    Video Quality: Kvalita videa
+    Subtitles Enabled: Titulky zapnuté
+    Volume: Hlasitosť
+  Download Settings:
+    Download Settings: Sťahovanie
+    Enable Downloads: Zapnúť sťahovanie
+    Managed Tools Download Started Template: 'Nenašiel sa požadovaný externý softvér: {tools}. Sťahujú sa spravované kópie…'
+    Managed Tools Download Finished Template: Sťahovanie nástrojov {tools} bolo dokončené
+    Managed Tools Update Started Template: Pre nástroje {tools} sa našla aktualizácia. Sťahuje sa…
+    Managed Tools Update Finished Template: Aktualizácia nástrojov {tools} bola dokončená
+    Managed Tools Update Available Template: Pre nástroje {tools} je dostupná aktualizácia.
+    Update Managed Tools: Aktualizovať
+    Managed Tools Download Error Template: 'Spravované nástroje sa nepodarilo stiahnuť: {errors}'
+    Download Folder: Priečinok sťahovania
+    Global Additional yt-dlp Arguments: Globálne dodatočné argumenty yt-dlp
+    Concurrent Downloads: Súbežné sťahovania
+    Bandwidth Limit: Limit šírky pásma (KiB/s, 0 znamená bez obmedzenia)
+    Choose Download Folder: Vybrať priečinok sťahovania
+    Download Templates: Šablóny sťahovania
+    Manage Download Templates: Spravovať šablóny sťahovania ({templateCount})
+    New Template: Nová šablóna
+    Template Source: Šablóna na úpravu alebo použitie ako základ
+    Built-in Template: '{name} (vstavaná)'
+    Custom Template Name: '{name} (vlastná)'
+    Create Template Copy: Vytvoriť kópiu
+    Template Copy Name: 'Kópia šablóny {name}'
+    Automatic Downloads: Automatické sťahovanie
+    Manage Automatic Downloads: Spravovať automatické sťahovanie ({channelCount})
+    Automatic Downloads Description: Pre každý odoberaný kanál vyberte šablónu sťahovania a filtre. Zodpovedajúce videá sa stiahnu na pozadí pri obnovení kanálov odberov.
+    Automatic Downloads New Only: Po zapnutí pre kanál sa začne sťahovať až jeho ďalšie nové video. Existujúce videá ani starší obsah kanála sa nestiahnu.
+    Automatic Downloads No Channels: Pred nastavením automatického sťahovania začnite odoberať kanál.
+    No Matching Automatic Download Channels: Hľadaniu nezodpovedajú žiadne kanály.
+    Automatic Downloads Livestreams: Živé prenosy
+    Minimum Duration Seconds: Minimálne trvanie (sekundy)
+    Maximum Duration Seconds: Maximálne trvanie (sekundy)
+    Minimum File Size MB: Minimálna veľkosť súboru (MB)
+    Maximum File Size MB: Maximálna veľkosť súboru (MB)
+    Maximum Age Days: Maximálny vek (dni)
+    Title Includes: Názov obsahuje
+    Title Excludes: Názov neobsahuje
+    Title Filter Hint: Viaceré výrazy v názve oddeľte čiarkami. Video musí obsahovať aspoň jeden zahrnutý výraz a nesmie obsahovať žiadny vylúčený výraz.
+  External Software Settings:
+    External Software Settings: Externý softvér
+    yt-dlp Source: Zdroj yt-dlp
+    yt-dlp Channel: Kanál yt-dlp
+    Sources:
+      System: Systém (PATH alebo vlastná cesta)
+      Managed: Spravované aplikáciou OpenTubeX
+    Detected Version Template: 'Zistená verzia yt-dlp: {version}'
+    Managed Not Downloaded: yt-dlp ešte nebol stiahnutý. Stiahnite ho tlačidlom nižšie.
+    System yt-dlp Missing Warning: yt-dlp sa v systéme nenašiel. Nainštalujte ho, nastavte vlastnú cestu nižšie alebo zmeňte zdroj na „Spravované aplikáciou OpenTubeX“.
+    Download yt-dlp: Stiahnuť yt-dlp
+    Update yt-dlp: Aktualizovať yt-dlp
+    Checking yt-dlp: Kontroluje sa yt-dlp…
+    Downloading yt-dlp: Sťahuje sa yt-dlp…
+    yt-dlp Downloaded Template: yt-dlp {version} bol stiahnutý
+    yt-dlp Download Error Template: 'yt-dlp sa nepodarilo stiahnuť: {error}'
+    FFmpeg Source: Zdroj FFmpeg
+    Detected FFmpeg Version Template: 'Zistená verzia FFmpeg: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg ešte nebol stiahnutý. Stiahnite ho tlačidlom nižšie.
+    System FFmpeg Missing Warning: FFmpeg sa v systéme nenašiel. Je potrebný na spájanie obrazu so zvukom a na prevod zvuku. Nainštalujte ho, nastavte vlastnú cestu nižšie alebo zmeňte zdroj na „Spravované aplikáciou OpenTubeX“.
+    Download FFmpeg: Stiahnuť FFmpeg
+    Update FFmpeg: Aktualizovať FFmpeg
+    Checking FFmpeg: Kontroluje sa FFmpeg…
+    Downloading FFmpeg: Sťahuje sa FFmpeg…
+    FFmpeg Downloaded Template: FFmpeg {version} bol stiahnutý
+    FFmpeg Download Error Template: 'FFmpeg sa nepodarilo stiahnuť: {error}'
+    Detected FFprobe Version Template: 'Zistená verzia FFprobe: {version}'
+    FFprobe Managed Not Downloaded: FFprobe ešte nebol stiahnutý. Stiahnite ho spolu s FFmpeg tlačidlom nižšie.
+    System FFprobe Missing Warning: FFprobe sa v systéme nenašiel. Je potrebný na kontrolu médií pri následnom spracovaní. Nainštalujte ho vedľa FFmpeg alebo zmeňte zdroj na „Spravované aplikáciou OpenTubeX“.
+    Checking FFprobe: Kontroluje sa FFprobe…
+    Download FFmpeg and FFprobe: Stiahnuť FFmpeg a FFprobe
+    Update FFmpeg and FFprobe: Aktualizovať FFmpeg a FFprobe
+    Downloading FFmpeg and FFprobe: Sťahujú sa FFmpeg a FFprobe…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg a FFprobe {version} boli stiahnuté
+    FFmpeg and FFprobe Download Error Template: 'FFmpeg a FFprobe sa nepodarilo stiahnuť: {error}'
+    Managed Tool Already Current Template: '{tool} {version} je už aktuálny'
+    Managed Tool Updates: Aktualizácie spravovaných nástrojov
+    Update Modes:
+      Automatic: Aktualizovať automaticky
+      Ask: Pred aktualizáciou sa opýtať
+      Manual: Aktualizovať len ručne
+    yt-dlp Executable Path: Cesta k spustiteľnému súboru yt-dlp
+    FFmpeg Executable Path: Cesta k spustiteľnému súboru FFmpeg
+    Restricted Playback Authentication: Súbory cookie prehrávania pre yt-dlp
+    Cookie Source: Zdroj súborov cookie
+    Cookie Sources:
+      None: Žiadny
+      File: Súbor
+      Browser: Prehliadač
+    Cookie File: Súbor cookie
+    Browser for Cookies: Prehliadač pre súbory cookie
+    Browser Profile: Profil prehliadača (voliteľné)
+    Browser Profile Placeholder: Názov profilu alebo cesta
+    Select Browser: Vyberte prehliadač
+    Always Use Cookies: Vždy používať súbory cookie
+    Restricted Playback Authentication Hint: OpenTubeX predvolene odovzdá tieto súbory cookie nástroju yt-dlp až po výbere možnosti „Skúsiť s nastavenými súbormi cookie“ pri videu s vekovým obmedzením alebo videu len pre členov.
+    Restricted Playback Authentication Warning: Používanie yt-dlp s účtom Google môže viesť k dočasnému alebo trvalému obmedzeniu účtu.
+  Privacy Settings:
+    Automatic History Retention: Automatické uchovávanie histórie (dni)
+    Automatic History Retention Placeholder: Prázdna hodnota uchová históriu navždy
+    Automatic History Retention Tooltip: Ak chcete históriu uchovať navždy, ponechajte pole prázdne. Po zadaní a uložení počtu dní sa staršie záznamy odstránia ihneď aj automaticky počas spustenia aplikácie.
+    History Retention Saved: Uchovávanie histórie bolo uložené
+    Invalid History Retention Days: Zadajte celé číslo dní väčšie ako nula
+    Enable Watch Statistics: Zapnúť štatistiky sledovania
+    Week Starts On: Začiatok týždňa
+    Cache Video Metadata: História metaúdajov
+    Cache Video Metadata Tooltip: Uchováva všetky verzie podporovaných metaúdajov navštívených videí vrátane názvov, miniatúr a opisov. Predvolene je vypnutá, pretože história metaúdajov zaberá miesto na disku.
+    Watched Percentage Threshold: Percentuálna hranica pozretia
+    Watched Percentage Threshold Tooltip: Videá sa označia ako pozreté po dosiahnutí vybraného percenta, ak do konca zostávajú najviac 2 minúty. Pri hodnote 0 % sa označia pri začatí prehrávania. Pri hodnote 100 % sa označia po skončení prehrávania.
+    Clear Video Metadata Cache: Vymazať vyrovnávaciu pamäť metaúdajov videí
+    Are you sure you want to clear the video metadata cache?: Naozaj chcete vymazať uložené názvy, miniatúry a opisy videí?
+    Failed to clear video metadata cache: Vyrovnávaciu pamäť metaúdajov videí sa nepodarilo vymazať
+    Video metadata cache has been cleared: Vyrovnávacia pamäť metaúdajov videí bola vymazaná
+    Video Metadata Cache Size: 'Vyrovnávacia pamäť metaúdajov videí: {size}'
+  Storage Settings:
+    Storage: Úložisko
+    Downloaded Media: Evidované stiahnuté médiá
+    Storage Breakdown: Rozdelenie úložiska
+    Shown Total: Zobrazený súčet
+    Calculating: Počíta sa…
+    Not Available: Presná veľkosť nie je dostupná
+    At Least: Najmenej {size}
+    Failed To Read Storage: Niektoré veľkosti úložiska sa nepodarilo načítať
+    Downloaded Media Description: Súbory videí, zvuku a titulkov, ktoré stále eviduje história sťahovania.
+    Selected Download Folders: Používateľom vybrané priečinky sťahovania
+    Download History Records: Záznamy histórie sťahovania
+    Download History Records Description: '{count} dokončený záznam sťahovania. Tento záznam uchováva stav a umiestnenie súborov, ale neobsahuje stiahnuté médiá. | {count} dokončené záznamy sťahovania. Tieto záznamy uchovávajú stav a umiestnenie súborov, ale neobsahujú stiahnuté médiá. | {count} dokončených záznamov sťahovania. Tieto záznamy uchovávajú stav a umiestnenie súborov, ale neobsahujú stiahnuté médiá.'
+    Clear Download History Records: Vymazať záznamy histórie sťahovania
+    Clear Download History Confirmation: Vymazať všetky záznamy dokončených sťahovaní?
+    Download Files Stay On Disk: Stiahnuté súbory zostanú na disku, ale už sa nebudú zobrazovať na stránke Sťahovanie.
+    Clear Records: Vymazať záznamy
+    Replaceable Caches: Obnoviteľné vyrovnávacie pamäte
+    Application Caches: Vyrovnávacie pamäte aplikácie
+    Browser Caches: Vyrovnávacie pamäte prehliadača
+    Browser Caches Hint: Vyrovnávacie pamäte HTTP, GPU, kódu, shaderov, service workerov a slovníkov prehliadača Chromium.
+    Stored App Data: Uložené údaje aplikácie
+    Browser Runtime Data: Prevádzkové údaje prehliadača
+    Browser Runtime Data Hint: Úložisko relácie a miestne úložisko, súbory cookie, stav súkromia a siete a súbory zlyhaní prehliadača Chromium.
+    Subscription Feed Cache: Vyrovnávacia pamäť odberov a kanálov
+    Subscription Feed Cache Description: Uchováva načítané videá, krátke videá, živé prenosy a príspevky z odberov. OpenTubeX ju znova vytvorí pri ďalšom obnovení kanálov.
+    Clear Subscription Feed Cache: Vymazať vyrovnávaciu pamäť odberov a kanálov
+    Clear Subscription Feed Cache Confirmation: Vymazať vyrovnávaciu pamäť odberov a kanálov?
+    Subscription Feed Cache Effect: Kanály odberov môžu byť do obnovenia prázdne. Vaše odbery ani profily sa nezmenia.
+    Session Search Cache: Vyrovnávacia pamäť hľadania v relácii
+    In Memory: V pamäti
+    Session Search Cache Description: '{count} hľadanie je uložené v pamäti na rýchlejší návrat. Táto vyrovnávacia pamäť sa po ukončení OpenTubeX zahodí. | {count} hľadania sú uložené v pamäti na rýchlejší návrat. Táto vyrovnávacia pamäť sa po ukončení OpenTubeX zahodí. | {count} hľadaní je uložených v pamäti na rýchlejší návrat. Táto vyrovnávacia pamäť sa po ukončení OpenTubeX zahodí.'
+    Clear Session Search Cache: Vymazať vyrovnávaciu pamäť hľadania v relácii
+    Clear Session Search Cache Confirmation: Vymazať vyrovnávaciu pamäť hľadania v relácii?
+    Session Search Cache Effect: Uložené stránky výsledkov sa zahodia. Uložená história hľadania sa nezmení.
+    HTTP Cache: Vyrovnávacia pamäť HTTP
+    HTTP Cache Description: Electron ukladá sieťové odpovede na disk, aby sa pri opakovaných požiadavkách nemuseli znova sťahovať rovnaké údaje. OpenTubeX túto vyrovnávaciu pamäť podľa potreby znova vytvorí.
+    Managed By Electron: Spravované aplikáciou Electron
+    Clear HTTP Cache: Vymazať vyrovnávaciu pamäť HTTP
+    Clear HTTP Cache Confirmation: Vymazať vyrovnávaciu pamäť HTTP aplikácie Electron?
+    HTTP Cache Effect: Pri opätovnom vytváraní vyrovnávacej pamäte sa obrázky a ďalšie sieťové prostriedky môžu prvýkrát načítať pomalšie.
+    Tab Image Cache: Miniatúry kariet a avatary kanálov
+    Tab Image Cache Description: Uchováva náhľady a avatary kanálov otvorených a obnovených kariet. OpenTubeX ich pri používaní kariet znova vytvorí.
+    Clear Tab Image Cache: Vymazať vyrovnávaciu pamäť obrázkov kariet
+    Clear Tab Image Cache Confirmation: Vymazať miniatúry kariet a avatary kanálov?
+    Tab Image Cache Effect: Obrázky kariet môžu nakrátko zmiznúť. Pri používaní kariet sa znova vytvoria.
+    Playback Caches: Vyrovnávacie pamäte prehrávania
+    Playback Caches Description: Medzi reláciami aplikácie uchováva adresy URL streamov získané cez yt-dlp a súbory prehrávača YouTube. Vyrovnávacia pamäť adries URL sa používa len pre streamy získané cez yt-dlp.
+    Playback URL Cache Entry Size: Limit vyrovnávacej pamäte adries URL streamov yt-dlp
+    Playback URL Cache Entry Size Tooltip: Nastaví maximálnu veľkosť každej uloženej položky streamu yt-dlp. Hodnota 0 MB vypne trvalé ukladanie streamov yt-dlp do vyrovnávacej pamäte.
+    Clear Playback Caches: Vymazať vyrovnávacie pamäte prehrávania
+    Clear Playback Caches Confirmation: Vymazať vyrovnávacie pamäte yt-dlp a prehrávača?
+    Playback Caches Effect: Ďalšia požiadavka na miestne prehrávanie môže trvať dlhšie, kým sa znova načítajú údaje streamu a prehrávača.
+    Clear Cache: Vymazať vyrovnávaciu pamäť
+    History Data: Uložené histórie
+    Video Metadata Description: Uchováva predchádzajúce názvy, miniatúry a opisy podporovaných videí. Staré revízie sa po odstránení nedajú znova vytvoriť.
+    Video Metadata Effect: Uložené revízie metaúdajov sa natrvalo odstránia. Aktuálne údaje videa možno znova načítať.
+    Watch History: História a štatistiky sledovania
+    Watch History Description: História sledovania zaznamenáva pozreté videá a priebeh. Štatistiky sledovania uchovávajú denné súčty. Doba uchovávania sa týka len histórie sledovania.
+    Clear Watch Statistics: Vymazať štatistiky sledovania
+    Watch History Effect: Záznamy pozretých videí a uložený priebeh sa odstránia. Štatistiky sledovania zostanú zachované.
+    Clear Watch Statistics Confirmation: Odstrániť všetky štatistiky sledovania?
+    Watch Statistics Effect: Denné súčty sledovania sa odstránia. História sledovania zostane zachovaná.
+    Search History: História hľadania
+    Search History Description: Uchováva hľadania, ktoré ste sa rozhodli zapamätať.
+    Delete Search History: Odstrániť históriu hľadania
+    Delete Search History Confirmation: Odstrániť celú uloženú históriu hľadania?
+    Search History Effect: Uložené návrhy z predchádzajúcich hľadaní zmiznú. Vyrovnávacia pamäť aktuálnej relácie zostane zachovaná.
+    Other User Data: Ďalšie používateľské údaje
+    Other Profile Files: Ďalšie súbory profilu
+    Other Profile Files Hint: Zálohy, dočasné súbory a položky profilu, ktoré OpenTubeX zatiaľ nerozpoznáva.
+    Subscriptions And Profiles: Odbery a profily
+    Subscriptions And Profiles Description: Uchováva odoberané kanály, názvy profilov a členstvo v profiloch.
+    Subscriptions And Profiles Effect: Všetky odbery a ďalšie profily sa natrvalo odstránia. Vymažú sa aj údaje vo vyrovnávacej pamäti kanálov.
+    Playlists Description: Uchováva názvy a opisy zoznamov videí a uložené videá.
+    Playlists Effect: Každý zoznam videí aj jeho uložené videá sa natrvalo odstránia. Stiahnuté mediálne súbory zostanú zachované.
+    Settings And Sessions: Nastavenia, relácie kariet a pripomienky
+    Settings And Sessions Description: Uchováva nastavenia aplikácie, obnoviteľné karty a pripomienky živých prenosov. Ak chcete tieto súbory skontrolovať alebo zálohovať, otvorte priečinok profilu. Táto stránka ich neodstraňuje.
+    Cleanup Complete: Čistenie úložiska bolo dokončené
+    Cleanup Failed: Čistenie úložiska zlyhalo
+  Subscription Settings:
+    Fetch Feed on Startup: Načítať kanál pri spustení
+    Show New Content Feed: Zobraziť kanál nového obsahu
+    Show New Content Indicators: Zobraziť ukazovatele nového obsahu
+    Show Scheduled Live Streams / Premieres First: Najprv zobraziť naplánované živé prenosy a premiéry
+    Auto Refresh Interval: Interval automatického obnovenia
+    Videos Auto Refresh Interval: Interval automatického obnovenia videí
+    Shorts Auto Refresh Interval: Interval automatického obnovenia krátkych videí
+    Live Auto Refresh Interval: Interval automatického obnovenia živých prenosov
+    Posts Auto Refresh Interval: Interval automatického obnovenia príspevkov
+  Distraction Free Settings:
+    Sections:
+      Visible While Paused: Viditeľné počas pozastavenia v režime celého okna alebo celej obrazovky
+    Hide Channel Avatars: Skryť avatary kanálov
+    Shorten View Counts: Skrátiť počty pozretí a označení Páči sa mi to pri komentároch
+    Hide Comment Translation Buttons: Skryť tlačidlá prekladu komentárov
+    Hide Live Chat Replay: Skryť záznam živého četu
+    Hide End-Screen Annotations: Skryť poznámky na záverečnej obrazovke
+    Hide Paid Promotion Badge: Skryť označenie platenej propagácie
+    Show Player Controls: Zobraziť ovládacie prvky prehrávača
+    Show Video Title: Zobraziť názov videa
+    Show Bottom Right Actions Dock: Zobraziť panel akcií vpravo dole
+    Paused Interface Hide Delay: Oneskorenie skrytia rozhrania pri pozastavení
+  Data Settings:
+    Data And Storage: Údaje a úložisko
+    Profile Directory: Priečinok profilu
+    Open Profile Directory: Otvoriť priečinok profilu
+    Invalid JSON row, skipping item: Neplatný JSON v riadku {row}, položka sa preskočí
+    Import subscriptions formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), záloha LibreTube alebo export FreeTube (.json)'
+    Import history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), záloha LibreTube (.json)'
+    Import playlists formats: 'Podporované formáty: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+  Sync Settings:
+    Sync Settings: Synchronizácia
+    Enable Sync: Zapnúť synchronizáciu
+    Privacy Passphrase: Prístupová fráza na ochranu súkromia
+    Privacy Passphrase Hint: Použite inú prístupovú frázu než heslo účtu. Táto fráza nikdy neopustí zariadenie a vyžaduje sa na každom zariadení. Ak ju stratíte, zašifrované synchronizované údaje nebude možné obnoviť.
+    Privacy Policy: Zásady ochrany súkromia tohto servera
+    Enhanced Privacy Enabled: Rozšírená ochrana súkromia je zapnutá. Server uchováva len zašifrované synchronizované údaje.
+    Enhanced Privacy Unsupported: 'Upozornenie: tento server nepodporuje rozšírenú ochranu súkromia. Prevádzkovateľ servera môže vidieť synchronizované údaje.'
+    Description: Synchronizujte odbery, profily, zoznamy videí, históriu sledovania, nastavenia a otvorené karty so synchronizačným serverom OpenTubeX alebo LibreTube. Servery LibreTube nemusia podporovať všetky funkcie synchronizácie.
+    Server URL: Adresa URL servera
+    Checking Server: Kontroluje sa synchronizačný server…
+    Server Unavailable: K tomuto synchronizačnému serveru sa nepodarilo pripojiť. Skontrolujte adresu URL a skúste to znova.
+    Username: Používateľské meno
+    Log In: Prihlásiť sa
+    Register: Zaregistrovať sa
+    Pair Another Device: Spárovať ďalšie zariadenie
+    Pair With Existing Device: Spárovať s existujúcim zariadením
+    Device Name: Názov zariadenia
+    This Device: Toto zariadenie
+    Device Name Required: Zadajte názov tohto zariadenia.
+    Pairing Device Name Hint: Vyberte názov, ktorý rozpoznáte na zariadení schvaľujúcom túto žiadosť.
+    Create Pairing Code: Vytvoriť párovací kód
+    Creating Pairing Code: Vytvára sa bezpečný párovací kód…
+    Pairing QR Alt: Párovací QR kód pre zariadenie {device}
+    Scan Pairing Code: Na už pripojenom zariadení otvorte možnosť „Spárovať ďalšie zariadenie“ a naskenujte tento kód.
+    Pairing Code: Párovací kód
+    Use Text Pairing Code: Namiesto toho použiť textový kód
+    Show QR Code: Zobraziť QR kód
+    Text Pairing Code Hint: Skopírujte tento kód do existujúceho zariadenia. Obsahuje tajný kľúč párovania, preto ho po spárovaní vymažte z histórie schránky.
+    Pairing QR Warning: Tento kód zobrazte len dôveryhodnému, už pripojenému zariadeniu, ktoré túto žiadosť schváli. Platnosť kódu uplynie o dve minúty.
+    Pairing Expires: Párovací kód platí do {time}.
+    Verifying Pairing: Overuje sa prenesený kľúč ochrany súkromia…
+    Completing Pairing: Dokončuje sa párovanie zariadenia…
+    Compare Pairing Codes: Porovnajte párovacie kódy
+    Pairing Code Match Hint: Potvrďte, len ak sa tento kód zhoduje s kódom na existujúcom zariadení.
+    Pairing Codes Match: Kódy sa zhodujú
+    Pairing Approval Code Hint: Nechajte toto okno otvorené a porovnajte kód s novým zariadením. Ak sa kódy nezhodujú, na novom zariadení nepokračujte.
+    Pairing Scan Hint: Naskenujte párovací kód zobrazený na pridávanom zariadení.
+    Enter Pairing Code: Zadať kód ručne
+    Pairing Code Entry Hint: Vložte párovací kód zobrazený na pridávanom zariadení.
+    Check Pairing Code: Skontrolovať kód
+    Scan QR Code: Naskenovať QR kód
+    Waiting For Pairing Code: Čaká sa na párovací kód…
+    Checking Pairing Request: Kontroluje sa žiadosť o spárovanie…
+    Approving Pairing Request: Šifruje a odosiela sa kľúč ochrany súkromia…
+    Pairing Approval Warning: Žiadosť schváľte, len ak ju vidíte na pridávanom zariadení. Párovaním sa zariadeniu udelí prístup k účtu a prenesie sa kľúč ochrany súkromia.
+    Approve Pairing: Schváliť párovanie
+    Try Again: Skúsiť znova
+    Scan Again: Naskenovať znova
+    Camera Unavailable: OpenTubeX nemá prístup ku kamere. Skontrolujte povolenie kamery alebo zadajte párovací kód ručne.
+    Pairing Unsupported: Tento synchronizačný server nepodporuje bezpečné párovanie zariadení.
+    Pairing Failed: Párovanie zariadenia zlyhalo. Skúste to znova s novým kódom.
+    Pairing Request Changed: Žiadosť o spárovanie sa zmenila, jej platnosť uplynula alebo už bola použitá. Vytvorte nový kód.
+    Pairing Server Mismatch: Tento kód patrí inému synchronizačnému serveru.
+    Pairing Verification Unavailable: Na overenie preneseného kľúča nie je dostupná žiadna zašifrovaná synchronizovaná kolekcia. Synchronizujte existujúce zariadenie a skúste to znova.
+    Pairing Completed: Párovanie zariadenia bolo dokončené
+    Pairing Approved: Párovanie zariadenia bolo schválené
+    Disconnect: Odpojiť
+    Delete Account: Odstrániť synchronizačný účet
+    Delete Account Confirmation: Odstrániť synchronizačný účet?
+    Delete Account Warning: Natrvalo sa odstráni synchronizačný účet aj všetky údaje uložené na tomto serveri. Miestne údaje OpenTubeX sa neodstránia.
+    Confirm Delete Account: Odstrániť účet
+    Password Required: Vyžaduje sa heslo
+    Account Deleted: Synchronizačný účet bol odstránený
+    Connected as: Pripojené ako {username}
+    Automatic Sync: Synchronizovať automaticky po zmenách a každých päť minút
+    Profiles: Profily
+    Open Tabs: Otvorené karty a relácia
+    Disable Setting Sync: Zastaviť synchronizáciu tohto nastavenia
+    Enable Setting Sync: Synchronizovať toto nastavenie
+    Sync Now: Synchronizovať teraz
+    Downloading encrypted data: Sťahujú sa zašifrované synchronizované údaje…
+    Syncing subscriptions: Synchronizujú sa odbery…
+    Syncing playlists: Synchronizujú sa zoznamy videí…
+    Syncing history: Synchronizuje sa história sledovania…
+    Syncing profiles: Synchronizujú sa profily…
+    Syncing open tabs: Synchronizujú sa otvorené karty a relácia…
+    Syncing settings: Synchronizujú sa nastavenia…
+    Uploading encrypted data: Nahrávajú sa zašifrované synchronizované údaje…
+    Finishing sync: Dokončuje sa synchronizácia…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Posledná synchronizácia: {date}'
+    History not supported: Táto verzia servera nepodporuje synchronizáciu histórie sledovania.
+    Settings not supported: Táto verzia servera nepodporuje synchronizáciu nastavení.
+    Sync completed: Synchronizácia bola dokončená
+    Data Loss Confirmation: Potvrdiť synchronizáciu s odstránením údajov?
+    Data Loss Warning: Stav servera by odstránil {deleted} z {previous} predtým synchronizovaných položiek v kolekcii {collection}. Môže to znamenať neúspešnú migráciu alebo obnovenie servera. Pokračujte, len ak chcete tieto údaje odstrániť a máte zálohu.
+    Confirm Data Loss: Odstrániť a pokračovať
+  Proxy Settings:
+    IP Block Recovery Script Path: Cesta k skriptu na obnovenie po zablokovaní IP adresy
+    Select IP Block Recovery Script File: Vybrať súbor skriptu na obnovenie po zablokovaní IP adresy
+    Running IP block recovery script: Spúšťa sa skript na obnovenie po zablokovaní IP adresy
+    IP block recovery script failed: 'Skript na obnovenie po zablokovaní IP adresy zlyhal (návratový kód: {exitCode})'
+    IP block recovery script finished: Skript na obnovenie po zablokovaní IP adresy bol dokončený
+    Reloading video after IP block recovery: Video sa po obnovení zo zablokovania IP adresy znova načítava
+    Failed to select IP block recovery script: Skript na obnovenie po zablokovaní IP adresy sa nepodarilo vybrať
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: Zapnúť odosielanie do SponsorBlock
+    SponsorBlock Private User ID (optional): Súkromné ID používateľa SponsorBlock (voliteľné)
+    SponsorBlock Private User ID Tooltip: Vložte súkromné ID používateľa SponsorBlock z rozšírenia prehliadača. Ak chcete použiť ID vytvorené aplikáciou, ponechajte pole prázdne.
+    Generated SponsorBlock User ID: Vytvorené ID používateľa SponsorBlock
+    Generated SponsorBlock User ID Tooltip: Toto ID používateľa SponsorBlock vytvorené aplikáciou môžete použiť v rozšírení prehliadača alebo v aplikácii na inom počítači.
+    Export Generated User ID: Exportovať vytvorené ID používateľa
+    Generated SponsorBlock User ID Copy Button: Kopírovať vytvorené ID používateľa SponsorBlock
+    Generated SponsorBlock User ID Copied: Vytvorené ID používateľa SponsorBlock bolo skopírované do schránky
+    Skip notification timeout: Trvanie oznámenia o preskočení
+    Custom Color: Vlastná farba
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Zapnúť Return YouTube Dislike
+    Return YouTube Dislike Url: Adresa URL API Return YouTube Dislike (predvolená je https://ryd-proxy.kavin.rocks)
+  Password Dialog:
+    Incorrect Password: Nesprávne heslo
+    Unlock: Odomknúť
+    Unlocking: Odomyká sa…
+  Search Settings: Hľadať v nastaveniach
+  No Settings Found: Nenašli sa žiadne nastavenia
+Tutorial:
+  Skip: Preskočiť
+  Next: Ďalej
+  Finish: Dokončiť
+  Got It: Rozumiem
+  Welcome:
+    Title: Víta vás OpenTubeX
+    Description: Zoznámte sa so základnými ovládacími prvkami aplikácie.
+  Navigation:
+    Title: Knižnicu máte vždy poruke
+    Description: Cez navigáciu otvoríte odbery, zoznamy videí, históriu a ďalšie časti.
+  Search:
+    Title: Vyhľadajte obsah alebo vložte odkaz
+    Description: Vyhľadajte videá a kanály alebo priamo do vyhľadávacieho poľa vložte podporovanú adresu URL videa.
+  Tabs:
+    Title: Nechajte stránky otvorené na kartách
+    Description: Otvorte viacero stránok naraz bez straty aktuálneho miesta. Vyberte umiestnenie kariet, ktoré vám vyhovuje.
+  Quick Settings:
+    Title: Prispôsobte si aplikáciu
+    Description: Vyberte motív a predvolenú kvalitu videa. Tieto aj ďalšie nastavenia môžete kedykoľvek zmeniť v ponuke profilu. Kliknutím pravým tlačidlom na profil ho môžete prepnúť.
+  Import Data:
+    Title: Importujte svoje údaje
+    Description: Voliteľne importujte odbery, históriu, zoznamy videí, históriu hľadania alebo nastavenia z inej podporovanej aplikácie či zálohy.
+    Action: Importovať údaje
+    Not Now: Teraz nie
+  Settings Moved:
+    Title: Nastavenia boli premiestnené
+    Description: Rýchle ovládacie prvky otvoríte výberom profilu vpravo hore. Kliknutím pravým tlačidlom prejdete priamo na výber profilu. Ozubené koliesko v ponuke otvorí všetky nastavenia. Do tejto ponuky boli presunuté aj časti O aplikácii a Sťahovanie.
+About:
+  Commit: Revízia
+  Fluxer: Pridať sa ku komunite na Fluxeri
+  Matrix: Matrix
+  Email: E-mail
+Profile:
+  Profile Icon: Ikona profilu
+  Choose an Emoji: Vyberte emoji
+  Custom Emoji: Vlastné emoji
+  Emoji: Emoji
+  Choose Image: Vybrať obrázok
+  Crop Image: Orezať obrázok
+  Zoom: Priblíženie
+  Apply Crop: Použiť orezanie
+  Transparent: Priehľadné
+  Use Initial: Použiť iniciálu
+  The selected image could not be loaded: Vybraný obrázok sa nepodarilo načítať
+  Theme Color: Farba motívu
+Channel:
+  Channel Name Unavailable: Názov kanála nie je dostupný
+  Search Result Types: Typy výsledkov hľadania
+  All Results: Všetko
+Video:
+  Includes paid promotion: Obsahuje platenú propagáciu
+  Age Restricted Badge: Vekovo obmedzené
+  Queue: Poradie prehrávania
+  Play Next: Prehrať ako ďalšie
+  Add to Queue: Pridať do poradia
+  Added to Play Next: Video sa prehrá ako ďalšie
+  Added to Queue: Video bolo pridané do poradia
+  Clear Queue: Vymazať poradie
+  Queue Video Count: '{count} video | {count} videá | {count} videí'
+  Remove from Queue: Odstrániť {title} z poradia
+  Drag to Reorder Queue: Potiahnutím položky {title} zmeniť poradie
+  Reorder Queue Item: Zmeniť poradie položky {title}
+  Reorder Queue Item Instructions: Video v poradí presuniete klávesmi so šípkou nahor a nadol.
+  Queue Item Moved: Položka {title} bola presunutá na pozíciu {position} z {total}.
+  Queue Item Cannot Move Up: Položku {title} nemožno presunúť nahor. Už je na pozícii 1 z {total}.
+  Queue Item Cannot Move Down: Položku {title} nemožno presunúť nadol. Už je na pozícii {total} z {total}.
+  Metadata: Informácie o videu
+  Close Metadata: Zavrieť informácie o videu
+  Metadata Cache:
+    Title History: História názvov
+    Thumbnail History: História miniatúr
+    Description History: História opisov
+    Previous Version: Predchádzajúca verzia {number}
+    Empty: (prázdne)
+  Fetching Streams: Streamy sa získavajú cez yt-dlp…
+  Transcript:
+    Title: Prepis
+    Search: Hľadať v prepise
+    Language: Jazyk prepisu
+    Save: Uložiť
+    Show: Zobraziť prepis
+    Hide: Skryť prepis
+    Close: Zavrieť prepis
+    Copied: Prepis bol skopírovaný do schránky
+    Saved: Prepis bol uložený
+    Save Error: Prepis sa nepodarilo uložiť
+    Text File: Textový súbor
+    Unavailable: Prepis tohto videa nie je dostupný.
+    Load Error: Prepis sa nepodarilo načítať.
+    Empty: Tento prepis neobsahuje žiadny text.
+    No Results: Hľadaniu nezodpovedajú žiadne časti prepisu.
+  Retry With Built-in Extraction: Skúsiť znova so vstavaným získavaním
+  Retry With yt-dlp Extraction: Skúsiť znova so získavaním cez yt-dlp
+  Reloading video after streaming URL error: Video sa po chybe adresy URL streamu znova načítava
+  Configure Restricted Playback Cookies Hint: Nastavte súbory cookie v časti Nastavenia → Externý softvér → Súbory cookie prehrávania pre yt-dlp.
+  Try With Configured Cookies: Skúsiť s nastavenými súbormi cookie
+  Restricted Playback Authentication Failed Template: 'yt-dlp nemohol získať prístup k tomuto videu s nastavenými súbormi cookie: {error}'
+  Unmark As Watched: Zrušiť označenie ako pozreté
+  Video has been unmarked as watched: Označenie videa ako pozretého bolo zrušené
+  Save Channel Playback Speed: Uložiť rýchlosť prehrávania kanála
+  Channel Playback Speed Saved: Rýchlosť prehrávania kanála bola uložená
+  Save Channel Video Quality: Uložiť kvalitu videa kanála
+  Channel Video Quality Saved: Kvalita videa kanála bola uložená
+  Save Channel Subtitles State: Uložiť stav titulkov kanála
+  Channel Subtitles State Saved: Stav titulkov kanála bol uložený
+  Save Channel Volume: Uložiť hlasitosť kanála
+  Channel Volume Saved: Hlasitosť kanála bola uložená
+  Save Channel Setting: Uložiť nastavenie kanála…
+  Channel Setting Already Set: '{setting} už je nastavené na {value}'
+  Video has been saved to {playlistName}: Video bolo uložené do zoznamu {playlistName}
+  Video has been removed from {playlistName}: Video bolo odstránené zo zoznamu {playlistName}
+  There was a problem saving the video to {playlistName}: Video sa nepodarilo uložiť do zoznamu {playlistName}
+  There was a problem removing the video from {playlistName}: Video sa nepodarilo odstrániť zo zoznamu {playlistName}
+  Failed to load collaborators: Spolupracovníkov sa nepodarilo načítať
+  Notify me: Upozorniť ma
+  Notification on: Upozornenie zapnuté
+  Notification enabled: Pri začatí videa dostanete upozornenie
+  Notification cancelled: Upozornenie na začatie bolo zrušené
+  Notification unavailable: Systémové oznámenia nie sú dostupné
+  Scheduled video starting: Naplánované video sa začína
+  Live notification body: '{videoTitle} sa práve začína'
+  Premiere: Premiéra
+  AI: AI
+  AI-generated content: Obsah vytvorený umelou inteligenciou
+  Collaborators: Spolupracovníci
+  Live Chat Replay: Záznam živého četu
+  Show Live Chat: Zobraziť živý čet
+  Show Live Chat Replay: Zobraziť záznam živého četu
+  Close Live Chat: Zavrieť živý čet
+  Close Live Chat Replay: Zavrieť záznam živého četu
+  Live Chat Settings: Nastavenia živého četu
+  Show Live Chat Timestamps: Zobraziť časové údaje
+  Chat Filter: Filter četu
+  Top Chat: Hlavný čet
+  All Messages: Všetky správy
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Záznam živého četu je zapnutý. Správy četu sa tu zobrazia počas prehrávania videa.
+  Premiere started: Prebieha premiéra. Začala sa {timeAgo}
+  Player:
+    Voice-over Translation:
+      Start: Preložiť
+      Cancel: Zrušiť
+      Progress: Pripravuje sa preklad hlasového komentára…
+      Retry: Skúsiť znova
+      Error: Preklad hlasového komentára zlyhal. Skúste to znova neskôr.
+      Duration Error: Preklad hlasového komentára je dostupný len pre videá s dĺžkou najviac štyri hodiny.
+    Caption Appearance:
+      Options: Možnosti
+      Sample: Takto vyzerajú titulky
+    Auto-translate: Automatický preklad
+    Sleep Timer:
+      Sleep Timer: Časovač vypnutia
+      'Off': 'Vypnuté'
+      Minutes: '{minutes} minút'
+      End of video: Koniec videa
+      Remaining: 'Zostáva {time}'
+      Cancel timer: Zrušiť časovač
+      Timer ended: Časovač vypnutia skončil
+    Zoom:
+      Zoom: Priblíženie
+      'Off': 'Vypnuté'
+    Auto-generated Caption Template: '{language} (automaticky vytvorené)'
+    Up next in {seconds}: Ďalšie video o {seconds}
+    Resize dock: Zmeniť veľkosť panela
+    Play now: Prehrať teraz
+    MusicPlaybackRateOverride: Zistilo sa hudobné video, prehráva sa rýchlosťou 1×
+    Normal: Normálne
+    Set Default: Nastaviť ako predvolené
+    Hide Annotations: Skryť poznámky
+    Show Annotations: Zobraziť poznámky
+    Hide: Skryť
+    Show: Zobraziť
+    Scroll Mini Player:
+      Back to Top: Späť nahor
+      Return to Video Tab: Vrátiť sa na kartu videa
+      Play: Prehrať
+      Pause: Pozastaviť
+      Drag Handle: Presunúť miniatúrny prehrávač
+    SponsorBlock:
+      CancelCurrentSegment: Zrušiť vytváranie segmentu
+      ClearSegments: Vymazať segmenty
+      ClearSegmentsPrompt: Naozaj chcete vymazať všetky rozpracované segmenty SponsorBlock pre toto video?
+      CompleteSegmentsBeforeSubmitting: Pred odoslaním dokončite všetky rozpracované segmenty.
+      CategoryLabel: Kategória
+      ActionTypeLabel: Typ segmentu
+      DuplicateSegments: Rozpracované segmenty sa nesmú opakovať.
+      EndAction: (Koniec)
+      EndActionLabel: Koniec
+      EndTimeAfterStart: Čas konca segmentu musí byť neskorší ako čas začiatku.
+      EndTimeBeforeVideoEnd: Čas konca segmentu musí byť v rámci trvania videa.
+      EndTimeLabel: Čas konca segmentu
+      DisableAutoSkipTemporarily: Dočasne vypnúť automatické preskakovanie SponsorBlock
+      EnableAutoSkipTemporarily: Znova zapnúť automatické preskakovanie SponsorBlock
+      Guidelines: Pokyny
+      InspectSegment: Skontrolovať
+      InvalidStartTime: Zadajte platný čas začiatku segmentu.
+      NoSegmentsToSubmit: Pred odoslaním vytvorte aspoň jeden úplný segment.
+      NowAction: (Teraz)
+      CloseInfoPanel: Zavrieť informácie SponsorBlock
+      OpenInfoPanel: Otvoriť informácie SponsorBlock
+      OpenSubmissionMenu: Otvoriť ponuku odoslania
+      PreviewRequired: Pred odoslaním si pozrite ukážku každého segmentu.
+      PreviewSegment: Ukážka
+      SaveSegment: Uložiť
+      SetSegmentEndNow: Ukončiť segment teraz
+      StartAction: (Začiatok)
+      StartSegmentNow: Začať segment teraz
+      SubmissionBadRequest: SponsorBlock odmietol požiadavku na odoslanie.
+      SubmissionDuplicate: Toto už bolo odoslané.
+      SubmissionFailed: Segmenty SponsorBlock sa nepodarilo odoslať.
+      SubmissionForbidden: SponsorBlock odmietol odoslanie.
+      SubmissionRateLimited: SponsorBlock obmedzil frekvenciu odosielania.
+      SubmissionSuccess: Segmenty SponsorBlock boli odoslané.
+      SubmitSegment: Odoslať segment
+      SubmitSegments: Odoslať
+      StartTimeLabel: Čas začiatku segmentu
+      TimeDivider: až
+      SkipPrompt: Preskočiť {segmentCategory}?
+      SkipPromptAction: Preskočiť
+      SkipToHighlight: Preskočiť na najzaujímavejšiu časť?
+      SkippedToHighlight: Preskočené na najzaujímavejšiu časť
+      SkipToastUnskip: Vrátiť preskočenie
+      SkipToastReskip: Znova preskočiť
+      MutedSegment: '{segmentCategory} stlmené'
+      MuteToastUnmute: Zapnúť zvuk
+      InfoPanelLoading: Segmenty sa ešte načítavajú…
+      InfoPanelHasSegments: Toto video má segmenty v databáze.
+      InfoPanelNoSegments: Nenašli sa žiadne segmenty
+      RefreshSegments: Obnoviť segmenty
+      RefreshInfo: Obnoviť informácie SponsorBlock
+      ContributionStatsTitle: Vaše príspevky
+      ContributionStatsLoading: Načítavajú sa štatistiky príspevkov…
+      ContributionStatsError: Štatistiky príspevkov nie sú dostupné. Skúste ich obnoviť.
+      ContributionStatsNoUserId: Ak chcete zobraziť štatistiky príspevkov, odošlite segment alebo importujte svoje ID používateľa SponsorBlock.
+      Submissions: Odoslania
+      Segments: Segmenty
+      TimeSaved: Ušetrený čas
+      AutoSkipEnabled: Automaticky preskakovať segmenty
+      AutoSkipOn: 'Zapnuté'
+      AutoSkipOff: 'Vypnuté'
+      WhitelistChannel: Pridať kanál do zoznamu povolených
+      ChannelWhitelisted: V zozname povolených
+      RemoveChannelFromWhitelist: Odstrániť kanál zo zoznamu povolených
+      MuteSegment: Stlmiť segment
+      SkipSegment: Preskočiť segment
+      CloseSegmentActions: Zavrieť akcie segmentu
+      FullVideo: Celé video
+      FullVideoLabel: '{segmentCategory} · celé video'
+      MuteActionType: Stlmiť
+      MutePrompt: Stlmiť {segmentCategory}?
+      SkipActionType: Preskočiť
+      LockedSegment: Zamknutý segment
+      UpvoteSegment: Hlasovať za
+      DownvoteSegment: Hlasovať proti
+      VoteFailed: Hlas SponsorBlock sa nepodarilo odoslať.
+Playlist:
+  Close Playlist: Zavrieť zoznam videí
+Change Format:
+  Local Video File: Miestny súbor videa
+  Local Audio File: Miestny zvukový súbor
+  Online Video: Video online
+  Stream Source: Zdroj streamu
+  Stream Extraction Method: Spôsob získavania streamu
+  Playback Engine: Prehrávací modul
+  Streaming Protocol: Protokol streamovania
+  Not Available For This Video: Pre toto video nie je dostupné
+  Protocols:
+    Progressive: Progresívny
+  Descriptions:
+    Local File: Prehráva sa priamo zo stiahnutého súboru v tomto zariadení
+    Online Video: Načíta formáty streamu z nastaveného zdroja online
+    Dash: Adaptívna kvalita, viacero zvukových stôp a najvyššie rozlíšenia
+    Legacy: Jeden súbor so spojeným obrazom a zvukom, obmedzený na nižšie rozlíšenia
+    Audio: Len zvuk, vhodné na úsporu šírky pásma alebo počúvanie na pozadí
+  yt-dlp Fallback Template: 'yt-dlp neposkytol streamy, preto sa použije vstavaný modul: {error}'
+  yt-dlp Default Clients Fallback: Uprednostnení klienti yt-dlp neposkytli prehrateľné streamy, preto sa skúšajú predvolení klienti yt-dlp
+  Built-in Fallback Template: 'Vstavaný modul nedokázal prehrať stream, preto sa skúša yt-dlp: {error}'
+Share:
+  Timestamp Link Copied: Odkaz s časovým údajom bol skopírovaný do schránky
+Context Menu:
+  Context Menu: Kontextová ponuka
+  Select All: Vybrať všetko
+  Save Image As…: Uložiť obrázok ako…
+  Copy Image: Kopírovať obrázok
+  Copy Image Address: Kopírovať adresu obrázka
+  Cancel Refresh: Zrušiť obnovenie
+  Reload Videos: Znova načítať videá
+  Reload Shorts: Znova načítať krátke videá
+  Reload Live: Znova načítať živé prenosy
+  Reload Posts: Znova načítať príspevky
+  Reload All Feeds: Znova načítať všetky kanály
+  Close Multiple Tabs: Zavrieť {count} kartu | Zavrieť {count} kariet
+  Duplicate Tab: Duplikovať kartu
+  Duplicate Multiple Tabs: Duplikovať {count} kartu | Duplikovať {count} kariet
+  Move Tab: Presunúť kartu
+  Move Tabs: Presunúť karty
+  Move Tab to Group: Presunúť kartu do skupiny
+  Collapse Group: Zbaliť skupinu
+  Move Tabs to Group: Presunúť karty do skupiny
+  Manage Tab Groups…: Spravovať skupiny kariet…
+  To Beginning: Na začiatok
+  To End: Na koniec
+  Close Tabs: Zavrieť karty
+  To the Top: Nahor
+  To the Left: Doľava
+  To the Bottom: Nadol
+  To the Right: Doprava
+  Other Tabs: Ostatné karty
+  Copy YouTube Link: Kopírovať odkaz na YouTube
+  Copy YouTube Links: Kopírovať odkazy na YouTube
+  Pin Tab: Pripnúť kartu
+  Pin Tabs: Pripnúť karty
+  Unpin Tab: Odopnúť kartu
+  Unpin Tabs: Odopnúť karty
+  Tab Color: Farba karty
+  Default: Predvolená
+  Purple: Fialová
+  Reopen Closed Tab: Znova otvoriť zavretú kartu
+  Reload Tab: Znova načítať kartu
+  Reload Tabs: Znova načítať karty
+  Load Tab: Načítať kartu
+  Load Tabs: Načítať karty
+  Unload Tab: Uvoľniť kartu
+  Unload Tabs: Uvoľniť karty
+  Move Tab to Window: Presunúť kartu do okna
+  Move Tabs to Window: Presunúť karty do okna
+  Open in a New Tab: Otvoriť na novej karte
+  Open in a New Window: Otvoriť v novom okne
+  Copy Link: Kopírovať odkaz
+  Copy Invidious Link: Kopírovať odkaz Invidious
+  Search Selection in New Tab: Vyhľadať „{selection}“ na novej karte
+  Search Selection in New Window: Vyhľadať „{selection}“ v novom okne
+  Search With: Vyhľadať cez {engine}
+  Search With Multiple: Vyhľadať cez…
+  Selection Too Long: Označený text je príliš dlhý na vyhľadanie (> {count} znakov)
+Tab Organizer:
+  Title: Usporiadanie kariet
+  Open Tab Count: '{count} otvorená karta | {count} otvorené karty | {count} otvorených kariet'
+  Search Label: Hľadať karty
+  Selected Count: 'Vybraná {count} karta | Vybrané {count} karty | Vybraných {count} kariet'
+  Tab Count: '{count} karta | {count} karty | {count} kariet'
+  Select All: Vybrať všetko
+  Select None: Zrušiť výber
+  Move To Group: Presunúť vybrané karty do skupiny
+  Choose Group: Vyberte skupinu
+  Ungrouped: Bez skupiny
+  Pin: Pripnúť
+  Unpin: Odopnúť
+  Load: Načítať
+  Unload: Uvoľniť
+  Unload All: Uvoľniť všetko
+  Close All: Zavrieť všetko
+  Ungroup: Zrušiť zoskupenie
+  Group Name: Názov skupiny
+  Color: Farba
+  No Color: Bez farby
+  Create Group: Vytvoriť skupinu
+  Expand Group: Rozbaliť skupinu
+  Collapse Group: Zbaliť skupinu
+  Expand Group Label: Rozbaliť {name}, {count} karta | Rozbaliť {name}, {count} karty | Rozbaliť {name}, {count} kariet
+  Rename Group: Premenovať {name}
+  Change Group Color: Zmeniť farbu skupiny {name}
+  Move To Window: Presunúť do okna
+  Choose Window: Vyberte okno
+  Select Tab: Vybrať {title}
+  Active: Aktívna
+  Pinned: Pripnutá
+  Unloaded: Uvoľnená
+  Playing: Prehráva sa
+  Close Tab: Zavrieť {title}
+  No Open Results: Hľadaniu nezodpovedajú žiadne otvorené karty.
+  Recently Closed: Nedávno zavreté
+  Clear: Vymazať
+  No Closed Results: Hľadaniu nezodpovedajú žiadne nedávno zavreté karty.
+  Drag Tab: Potiahnutím presunúť do skupiny
+Chapters:
+  Open Chapters: Otvoriť kapitoly
+  Close Chapters: Zavrieť kapitoly
+  Copy Timestamp Link: Kopírovať odkaz na čas {timestamp}
+Comments:
+  Comment Count: 1 komentár | {count} komentáre | {count} komentárov
+  Show Comments: Zobraziť komentáre
+  Getting comment replies, please wait: Získavajú sa odpovede na komentár, čakajte
+  Reload Comments: Znova načítať komentáre
+  Reply Count: 1 odpoveď | {replyCount} odpovede | {replyCount} odpovedí
+  Comments are turned off: Komentáre sú vypnuté
+  YouTube did not provide advertised replies: YouTube uviedol, že komentár má odpovede, ale neposkytol ich. Mohli byť odstránené alebo skryté, preto bolo tlačidlo odpovedí odstránené.
+  Pinned by you: Vami pripnuté
+  A reply is pinned: Odpoveď je pripnutá
+  Filter loaded comments: Filtrovať načítané komentáre
+  Comment filters: Filtre komentárov
+  From creator: Od autora
+  Contains timestamps: Obsahuje časové údaje
+  Pin comment by author: Pripnúť komentár od autora {author}
+  Unpin comment by author: Odopnúť komentár od autora {author}
+  Edited: (upravené)
+  Highlighted comment: Zvýraznený komentár
+  Highlighted reply: Zvýraznená odpoveď
+  Search loaded comments: Hľadať v načítaných komentároch
+  Loaded comment search result count: 1 z {total} načítaných komentárov | {count} z {total} načítaných komentárov | {count} z {total} načítaných komentárov
+  No loaded comments match your filters: Filtrom nezodpovedajú žiadne načítané komentáre
+  YouTube comment link copied to clipboard: Odkaz na komentár YouTube bol skopírovaný do schránky
+  Translate to {language}: Preložiť do jazyka {language}
+  Show original: Zobraziť pôvodný text
+  Translating comment, please wait: Komentár sa prekladá, čakajte
+  Comment translation failed: Preklad komentára zlyhal
+Description:
+  Copy Description: Kopírovať opis
+  Description Copied: Opis bol skopírovaný do schránky
+  Video Category: 'Kategória videa:'
+  Video Tags: Značky videa
+  Games: Hry
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: Doplní medzery v ľudských prekladoch textom vytvoreným umelou inteligenciou. Ľudské preklady majú vždy prednosť.
+    Update Relative Timestamps: Aktualizuje relatívne časové údaje v celej aplikácii, kým je stránka otvorená. Ak je táto možnosť vypnutá, aktualizujú sa až po opätovnom načítaní alebo otvorení stránky.
+    Stream Extraction Method: |
+      Vyberte spôsob, akým OpenTubeX získava streamy videí. Ak vyberiete yt-dlp, musí byť dostupný.
+      Pri použití yt-dlp môže spustenie videa trvať dlhšie.
+      Vstavaný spôsob nepodporuje posúvanie v živých prenosoch a premiérach.
+    Avoid translation: |
+      Vypne automatický preklad názvu, opisu a kapitol videa službou YouTube.
+      Príliš veľa požiadaviek, napríklad načítavanie názvov videí v zoznamoch, môže dočasne
+      ovplyvniť spoľahlivosť aplikácie.
+    Show Thumbnail Previews: Pri ukázaní na miniatúru videa zobrazí animovaný náhľad.
+    Startup Behavior: |
+      Vyberte, čo OpenTubeX urobí pri spustení.
+      Možnosť Načítať všetky karty okamžite obnoví každú uloženú kartu, ale videá na kartách na pozadí sa automaticky neprehrajú.
+      Možnosť Načítať predtým načítané karty znova načíta karty, ktoré boli načítané pri ukončení OpenTubeX, a ostatné ponechá uvoľnené.
+      Možnosť Načítať naposledy aktívnu kartu obnoví predchádzajúcu reláciu. Ostatné karty otvorí, ale ponechá ich uvoľnené, kým na ne nekliknete.
+      Možnosť Začať s prázdnou reláciou preskočí uložené karty a otvorí nové prázdne okno.
+    Remember Tab Navigation History: História prechádzania späť a dopredu sa pre každú kartu uloží a obnoví po opätovnom spustení OpenTubeX.
+  Proxy Settings:
+    IP Block Recovery Script Path: Cesta k súboru skriptu, ktorý sa spustí po zistení zablokovania IP adresy. OpenTubeX počká na jeho dokončenie a potom znova načíta video. Ak je zapnutý záložný backend, skript sa spustí až po jeho zlyhaní.
+  Player Settings:
+    Enable Caption Translations: Ak video neposkytuje pôvodnú stopu v uprednostnenom jazyku titulkov, tlačidlo titulkov a klávesová skratka C po zapnutí uprednostnia automaticky preloženú stopu v tomto jazyku.
+    Use Quick Playback Speed Bar: V pravej časti ovládacích prvkov prehrávača zobrazí panel rýchlej zmeny rýchlosti prehrávania. Ak je zapnuté ručné ukladanie rýchlosti prehrávania pre jednotlivé kanály, panel obsahuje aj tlačidlo na uloženie rýchlosti aktuálneho kanála.
+    Multiply Seek Interval by Playback Rate: Po zapnutí sa intervaly posunu pomocou klávesov so šípkami a J/L násobia aktuálnou rýchlosťou prehrávania. Po vypnutí zostávajú rovnaké bez ohľadu na rýchlosť prehrávania.
+    Show Playback Rate Adjusted Timestamp: Ak je táto možnosť zapnutá a rýchlosť prehrávania sa líši od 1×, prehrávač za bežným časovým údajom zobrazí v zátvorkách čas upravený podľa rýchlosti prehrávania.
+    Use YouTube-style Shorts: Na stránkach odberov a kanálov zobrazí krátke videá v mriežke na výšku a použije prehrávač v štýle YouTube Shorts.
+    Loop Shorts: Po zapnutí sa krátke videá automaticky spustia odznova. Po vypnutí sa na konci zastavia a zobrazia tlačidlo opätovného prehrania.
+    Show Skip Silence Toggle: V ponuke nastavení prehrávača zobrazí prepínač preskakovania ticha.
+    Enable Skip Silence by Default: Zapne preskakovanie ticha na nových kartách. Zmena na jednej karte neovplyvní ostatné karty.
+    Enable Video Zoom: V ponuke nastavení prehrávača zobrazí ovládací prvok Priblíženie a zapne jeho klávesové skratky a ovládanie posúvania obrazu.
+    Voice-over Translation: Po vyžiadaní prekladu odošle ID videa, jeho trvanie a vybraný jazyk neoficiálnej službe Yandex na preklad hlasového komentára. Predvolene je táto možnosť vypnutá.
+    Hold to Double Playback Speed: Podržaním medzerníka alebo ľavého tlačidla myši nad prehrávačom dočasne zdvojnásobíte aktuálnu rýchlosť prehrávania.
+    Ambient Mode: Rozšíri farby videa do oblasti okolo prehrávača.
+    Default Volume: Táto možnosť je vypnutá, kým je zapnuté zapamätanie hlasitosti. Ak chcete nastaviť pevnú počiatočnú hlasitosť každého videa, vypnite zapamätanie hlasitosti.
+    Parallel Segment Loading: |
+      Počet obrazových a zvukových segmentov, ktoré sa majú naraz načítať vopred.
+      Vyššie hodnoty môžu pomôcť pri pomalom alebo nestabilnom pripojení, ale využívajú väčšiu šírku pásma a viac pamäte.
+      Môžu tiež spôsobiť, že automatický režim podhodnotí rýchlosť pripojenia a vyberie nižšiu kvalitu.
+      Streamy obmedzené na jednu požiadavku naraz toto nastavenie ignorujú.
+  Download Settings:
+    Download Folder: Videá sa ukladajú do tohto priečinka. Ak chcete použiť systémový priečinok Stiahnuté súbory, ponechajte pole prázdne.
+    Global Additional yt-dlp Arguments: Dodatočné argumenty príkazového riadka odovzdané nástroju yt-dlp pri každom sťahovaní, napríklad --cookies-from-browser firefox.
+    Concurrent Downloads: Maximálny počet úloh yt-dlp, ktoré môžu bežať naraz.
+    Bandwidth Limit: Obmedzí spoločnú prenosovú rýchlosť poradia rozdelením limitu medzi súbežné úlohy. Hodnota 0 znamená bez obmedzenia.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX môže použiť yt-dlp nainštalovaný v systéme alebo stiahnuť a spravovať vlastnú kópiu uloženú v priečinku používateľských údajov.
+    yt-dlp Channel: Vyberte kanál vydaní yt-dlp, ktorý bude OpenTubeX sťahovať a spravovať. Pre väčšinu používateľov sa odporúča kanál Stable.
+    FFmpeg Source: OpenTubeX môže použiť FFmpeg a FFprobe nainštalované v systéme alebo stiahnuť a spravovať ich vlastné statické zostavy uložené v priečinku používateľských údajov.
+    Managed Tool Updates: Vyberte, či sa majú spravované nástroje aktualizovať automaticky, či sa má aplikácia pred aktualizáciou opýtať alebo či sa majú aktualizovať len ručnými tlačidlami. Chýbajúce nástroje sa v prípade potreby aj tak stiahnu.
+    yt-dlp Executable Path: OpenTubeX predvolene predpokladá, že yt-dlp možno nájsť cez premennú prostredia PATH. V prípade potreby tu môžete nastaviť vlastnú cestu.
+    Cookie Source: Vyberte, či má yt-dlp pri overenom prehrávaní čítať súbor cookie vo formáte Netscape alebo súbory cookie z nainštalovaného prehliadača.
+    Cookie File: Vyberte súbor cookie vo formáte Netscape na overené prehrávanie.
+    Browser for Cookies: Podpora prehliadačov sa načíta z vybraného spustiteľného súboru yt-dlp. Pri požiadavke na overené prehrávanie OpenTubeX požiada yt-dlp, aby načítal údaje z tohto prehliadača.
+    Browser Profile: Voliteľný názov alebo priečinok profilu prehliadača. Ak chcete použiť naposledy otvorený profil, ponechajte pole prázdne.
+    Always Use Cookies: Nastavené súbory cookie sa použijú pri každom získavaní streamov cez yt-dlp. Spôsob získavania streamov sa tým nezmení na yt-dlp. Ak je vybraný yt-dlp, môžu byť dostupné formáty len pre účet vrátane vyššieho dátového toku YouTube Premium, ak k nemu má účet prístup.
+    FFmpeg Executable Path: FFmpeg je potrebný na spájanie samostatných obrazových a zvukových streamov a na prevod zvuku. OpenTubeX predvolene predpokladá, že FFmpeg možno nájsť cez premennú prostredia PATH. V prípade potreby tu môžete nastaviť vlastnú cestu.
+  Distraction Free Settings:
+    Shorten View Counts: Počty pozretí a označení Páči sa mi to pri komentároch zobrazí v skrátenej podobe, ktorú už zaokrúhlila služba YouTube, napríklad 14 tis. namiesto 14 000. Presné počty sa vždy zobrazia celé.
+  Subscription Settings:
+    Fetch Feed on Startup: Po zapnutí OpenTubeX automaticky načíta kanál odberov pri spustení a otvorení nového okna.
+    Show New Content Feed: Zobrazí kartu Nové s položkami kanála odberov, ktoré pri predchádzajúcom načítaní neboli prítomné.
+    Show New Content Indicators: Vedľa položiek kanála odberov, ktoré pri predchádzajúcom načítaní neboli prítomné, zobrazí malú bodku.
+    Show Scheduled Live Streams / Premieres First: Ponechá nadchádzajúce živé prenosy a premiéry v hornej časti kanála odberov. Po vypnutí zostanú až do začiatku na pozícii podľa oznámenia. Po vypnutí raz obnovte kanál odberov, aby sa načítali dátumy oznámenia existujúcich naplánovaných položiek.
+    Auto Refresh Interval: Určuje, ako často OpenTubeX automaticky obnoví kanál odberov, kým je aplikácia otvorená.
+  Theme Settings:
+    Show Progress as Notification: Namiesto globálneho ukazovateľa priebehu zobrazí trvalé oznámenie s aktuálnym priebehom operácií na pozadí, napríklad obnovovania odberov a sťahovania spravovaných nástrojov.
+    Always Show Scrollbars: Posúvače zostanú stále viditeľné. Po vypnutí krátko po zastavení pohybu myši zmiznú a pri ďalšom pohybe sa znova zobrazia.
+    Use Fixed Tab Width: Všetkým kartám na vodorovnom paneli priradí rovnakú šírku namiesto prispôsobenia podľa ich názvu.
+    Use Grid Player Menu: Usporiada ponuku nastavení prehrávača videa do mriežky dlaždíc namiesto zoznamu riadkov.
+The playlist is at the beginning. Enable loop to continue playing: Zoznam videí je na začiatku. Ak chcete pokračovať v prehrávaní, zapnite opakovanie
+External link opening has been disabled in Settings → Privacy: Otváranie externých odkazov bolo vypnuté v časti Nastavenia → Súkromie
+KeyboardShortcutPrompt:
+  Edit Hint: Vyberte skratku a potom stlačte novú kombináciu klávesov. Priradenie zrušíte klávesom Backspace alebo Delete.
+  Change Shortcut: Zmeniť skratku pre akciu {action}
+  Press Shortcut: Stlačte skratku…
+  Unassigned: Nepriradené
+  Reset Shortcut: Obnoviť skratku akcie {action}
+  Reset to Defaults: Obnoviť predvolené hodnoty
+  Shortcut Already Assigned: Skratka je už priradená
+  Shortcut Conflict: '{shortcut} už je priradená k akciám {actions}. Chcete ju priradiť znova?'
+  Reserved Shortcut Conflict: '{shortcut} je vyhradená pre akcie {actions} a nemožno ju priradiť inak.'
+  Reassign: Priradiť znova
+  Sections:
+    App:
+      Tabs: "Aplikácia:\_Karty"
+      Search and Page: "Aplikácia:\_Hľadanie a stránka"
+      Window and View: "Aplikácia:\_Okno a zobrazenie"
+  New Tab: Vytvoriť novú kartu
+  Close Tab: Zavrieť aktuálnu kartu
+  Reload Tab: Znova načítať aktuálnu kartu
+  Reopen Closed Tab: Znova otvoriť naposledy zavretú kartu
+  Next Tab: Prepnúť na nasledujúcu kartu
+  Previous Tab: Prepnúť na predchádzajúcu kartu
+  Switch to Tab: Prepnúť na kartu 1–9
+  Toggle Tab Orientation: Prepínať medzi rozloženiami kariet
+  Find in Page: Nájsť text na aktuálnej stránke
+  Find Next Match: Prejsť na nasledujúcu zhodu
+  Find Previous Match: Prejsť na predchádzajúcu zhodu
+  Toggle Normal Playback Speed: Prepnúť medzi rýchlosťou 1× a predchádzajúcou rýchlosťou prehrávania
+  Toggle Skip Silence: Prepnúť preskakovanie ticha
+  Video Zoom In: Priblížiť video
+  Video Zoom Out: Oddialiť video
+  Tab Switcher: Prepínač kariet
+CommandPalette:
+  Title: Paleta príkazov
+  Open: Otvoriť paletu príkazov
+  Search Label: Hľadať príkazy
+  Search Placeholder: Hľadať príkazy a nastavenia…
+  Results: Príkazy
+  No Results: Žiadne zodpovedajúce príkazy
+  Result Count: Našiel sa 1 príkaz | Našli sa {count} príkazy | Našlo sa {count} príkazov
+  Move: Presunúť
+  Run: Spustiť
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Prepnúť na kartu: {title}'
+  Switch Profile: 'Prepnúť profil: {name}'
+  Open Playlist: 'Otvoriť zoznam videí: {name}'
+  Cancel Download: 'Zrušiť sťahovanie: {title}'
+  Groups:
+    App: Aplikácia
+    Navigation: Navigácia
+    Tabs: Karty
+  Unavailable:
+    Current Page: Táto stránka je už otvorená
+    No History: V tomto smere nie je žiadna stránka
+    Desktop: Dostupné len v počítačovej aplikácii
+    Build: V tejto zostave nie je dostupné
+    One Tab: Najprv otvorte ďalšiu kartu
+    Active Tab: Toto je aktívna karta
+    Active Profile: Toto je aktívny profil
+    Download Finished: Toto sťahovanie už neprebieha
+    Video: Najprv otvorte video
+Downloads:
+  Download: Stiahnuť
+  Download Video: Stiahnuť video
+  Download Playlist: Stiahnuť zoznam videí
+  Downloading: Sťahuje sa
+  Queue: Poradie
+  Downloaded: Stiahnuté
+  Canceled: Zrušené
+  Open Downloads: Otvoriť sťahovanie
+  No Downloads: Zatiaľ žiadne sťahovania
+  No Downloads Description: Spustené sťahovania sa zobrazia tu.
+  Clear Failed Canceled Skipped And Missing: Vymazať neúspešné, zrušené, preskočené a chýbajúce
+  Clear From List: Odstrániť zo zoznamu
+  Show in Folder: Zobraziť v priečinku
+  Play Download: Prehrať stiahnutý súbor
+  Retry Download: Zopakovať sťahovanie
+  Pause Download: Pozastaviť sťahovanie
+  Resume Download: Pokračovať v sťahovaní
+  Move Earlier: Presunúť skôr
+  Move Later: Presunúť neskôr
+  Pause All: Pozastaviť všetko
+  Resume All: Pokračovať vo všetkých
+  Retry All: Zopakovať všetky neúspešné sťahovania
+  Total Size: 'Celková veľkosť: {size}'
+  Local File: Miestny súbor
+  Available Offline: Dostupné offline
+  Remove File: Odstrániť súbor
+  Remove File Confirmation: Odstrániť stiahnutý súbor?
+  Remove File Warning: Súbor „{title}“ sa presunie do koša zariadenia.
+  File Not Found: Stiahnutý súbor sa nepodarilo nájsť.
+  Download Missing: Stiahnutý súbor nie je dostupný
+  Files Missing: Stiahnutý súbor už nie je dostupný v súborovom systéme. | Stiahnuté súbory už nie sú dostupné v súborovom systéme. | Stiahnuté súbory už nie sú dostupné v súborovom systéme.
+  Files Available: 'Dostupných stiahnutých súborov: {available} z {total}.'
+  More Files: 1 ďalší súbor | {count} ďalšie súbory | {count} ďalších súborov
+  Template Used: 'Šablóna: {name}'
+  Download Type: Typ sťahovania
+  Template: Šablóna
+  Unsaved: Neuložené
+  Media Type: Typ média
+  Video: Video
+  Audio: Zvuk
+  Maximum Resolution: Maximálne rozlíšenie
+  Best Available: Najlepšie dostupné
+  Automatic: Automaticky
+  Container: Kontajner
+  Video Codec: Videokodek
+  Audio Codec: Zvukový kodek
+  File Name Template: Šablóna názvu súboru
+  File Name Template Help: 'Dostupné polia: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Časový rozsah a kapitoly
+  Start Time: Čas začiatku (HH:MM:SS)
+  End Time: Čas konca (HH:MM:SS)
+  Split by Chapters: Rozdeliť kapitoly do samostatných súborov
+  Remove Segments: Odstrániť segmenty
+  Subtitles and Metadata: Titulky a metaúdaje
+  Include Subtitles: Zahrnúť titulky
+  Embed Subtitles: Vložiť titulky do mediálneho súboru
+  Subtitle Format: Formát titulkov
+  Subtitle Languages: Jazyky titulkov
+  Subtitle Languages Help: 'Selektory jazykov yt-dlp oddeľte čiarkami, napríklad: en.*,de.*'
+  Embed Cover Art: Vložiť miniatúru ako obal
+  Embed Metadata: Vložiť názov, autora, opis a kapitoly
+  Additional yt-dlp Arguments: Dodatočné argumenty yt-dlp
+  Custom yt-dlp Arguments: Vlastné argumenty yt-dlp
+  Template Name: Názov šablóny
+  Save Template: Uložiť šablónu
+  Delete Template: Odstrániť šablónu
+  Template Saved: Šablóna sťahovania „{name}“ bola uložená
+  Template Name Exists: Šablóna sťahovania s názvom „{name}“ už existuje.
+  Choose Folder: Zmeniť
+  Select Folder: Vybrať priečinok
+  Folder Required: Ak chcete zapnúť sťahovanie, vyberte priečinok sťahovania.
+  System Downloads Folder: Systémový priečinok Stiahnuté súbory
+  Processing: Spracúva sa…
+  Queued: V poradí
+  Queued Position: V poradí na pozícii {position}
+  Paused: Pozastavené
+  Pausing: Aktuálna úloha sa dokončí a potom sa poradie pozastaví
+  Download Complete: Sťahovanie bolo dokončené
+  Download Cancelled: Sťahovanie bolo zrušené
+  Download Failed: Sťahovanie zlyhalo
+  File Name Shortened: Názov súboru bol skrátený, pretože názov videa bol príliš dlhý.
+  Insufficient Disk Space: Na disku nie je dostatok miesta. Potrebných je približne {required}, dostupných je {available}.
+  Unknown Download Size: Veľkosť sťahovaného súboru nie je známa. V cieľovom súborovom systéme je dostupných {available}.
+  Disk Space Check Unavailable: Pred spustením sťahovania sa nepodarilo skontrolovať dostupné miesto na disku.
+  Download Failure Hint: Skontrolujte {issuesLink} a potom skúste v časti Nastavenia → Rozšírené → Externý softvér zmeniť kanál yt-dlp na Nightly alebo Master.
+  yt-dlp YouTube Issues: nedávne problémy yt-dlp so službou YouTube
+  Automatic Download Started: Automatické sťahovanie sa začalo
+  Automatic Download Started Body: Video „{title}“ z kanála {channel} sa sťahuje na pozadí.
+  Automatic Download Complete: Automatické sťahovanie bolo dokončené
+  Automatic Download Failed: Automatické sťahovanie zlyhalo
+  Automatic Download Could Not Start: Automatické sťahovanie videa „{title}“ sa nepodarilo spustiť.
+  Automatic Download Skipped: Preskočené filtrami automatického sťahovania
+  Cancel Download: Zrušiť sťahovanie
+  yt-dlp Not Found: yt-dlp sa nenašiel. Nainštalujte ho alebo nastavte jeho cestu v časti Nastavenia → Rozšírené → Externý softvér.
+  Download Complete Template: Sťahovanie videa „{title}“ bolo dokončené
+  Download Failed Template: Sťahovanie videa „{title}“ zlyhalo
+  Templates:
+    Video Best: Video – najlepšia kvalita
+    Video Resolution: Video – {resolution}
+    Audio Best: Zvuk – najlepšia kvalita
+    Audio Format: Zvuk – {format}
+    Subtitles Format: Titulky – {format}

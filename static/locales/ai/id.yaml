@@ -1,0 +1,1497 @@
+# Optional AI-generated translations for keys missing from ../id.yaml.
+Color Picker:
+  Hue: Rona
+  Opacity: Opasitas
+  Backdrop Blur: Keburaman latar
+  Hex Color: Warna heksadesimal
+  Apply Color: Terapkan
+  Reset Color: Atur ulang
+  Copy Color: Salin
+  Copy From Another Color: Salin dari warna lain
+  Color Copied: Warna disalin
+  Invalid Color: Masukkan warna heksadesimal yang valid
+  Clipboard Unavailable: Papan klip tidak tersedia
+  Saturation and Brightness: Saturasi dan kecerahan
+New Tab: Tab Baru
+Maximize: Maksimalkan
+Restore: Pulihkan
+Close Tab: Tutup Tab
+Close Confirmation:
+  Title: Keluar dari OpenTubeX?
+  Message: Anda yakin ingin keluar dari OpenTubeX?
+  Quit: Keluar
+  Never Ask Again: Jangan tanyakan lagi
+Close Window Confirmation:
+  Title: Tutup jendela?
+  Message: Jendela ini berisi {count} tab. Anda yakin ingin menutupnya?
+  Close Window: Tutup Jendela
+Confirmations:
+  Never Ask Again: Jangan tanyakan lagi
+  Settings Hint: Anda dapat mengaktifkan kembali konfirmasi ini di Pengaturan → Umum → Konfirmasi sebelum…
+Close Multiple Tabs Confirmation:
+  Title: Tutup beberapa tab?
+  Message: Tindakan ini akan menutup {count} tab.
+  Close Tabs: Tutup {count} Tab
+Load Multiple Tabs Confirmation:
+  Title: Muat beberapa tab?
+  Message: Tindakan ini akan memuat {count} tab.
+  Load Tabs: Muat {count} Tab
+Unload Multiple Tabs Confirmation:
+  Title: Bongkar beberapa tab?
+  Message: Tindakan ini akan membongkar {count} tab dari memori.
+  Unload Tabs: Bongkar {count} Tab
+Use Vertical Tabs: Gunakan Tab Vertikal
+Use Horizontal Tabs: Gunakan Tab Horizontal
+Resize Tab Bar: Ubah Ukuran Bilah Tab
+Find in page: Cari di halaman
+Previous match: Hasil sebelumnya
+Next match: Hasil berikutnya
+Close find bar: Tutup bilah pencarian
+No matches: Tidak ada hasil
+Version {versionNumber} is now available.: Versi {versionNumber} kini tersedia.
+See changes and update: Lihat perubahan dan perbarui
+Dismiss: Abaikan
+Update to {version}: Perbarui ke {version}
+Global:
+  Ambient Mode: Mode Ambien
+  Loading More: Memuat lainnya
+  New: Baru
+Search Listing:
+  Label:
+    Members Only: Khusus anggota
+Stats:
+  Stats: Statistik
+  Watch time summary: Ringkasan waktu tonton
+  Today: Hari ini
+  This week: Minggu ini
+  Total watch time: Total waktu tonton
+  Daily average: Rata-rata harian
+  So far today: Sejauh ini hari ini
+  Since: Sejak {day}
+  All recorded time: Semua waktu yang tercatat
+  Per calendar day: Per hari kalender
+  Day by day: Per hari
+  Highest: 'Tertinggi: {duration}'
+  Week by week: Per minggu
+  Last 14 days: 14 hari terakhir
+  Last 8 weeks: 8 minggu terakhir
+  Daily chart aria: Waktu tonton harian selama 14 hari terakhir
+  Weekly chart aria: Waktu tonton mingguan selama 8 minggu terakhir
+  No data: Waktu tonton akan muncul di sini setelah Anda menonton video.
+  Estimate note: Waktu tonton sebelum pembaruan ini diperkirakan dari progres pemutaran yang tersimpan.
+  Adjust imported watch time: Sesuaikan waktu tonton yang diimpor
+  Imported watch time: Waktu tonton yang diimpor
+  Imported watch time explanation: Pilih kecepatan pemutaran yang biasanya Anda gunakan. Durasi video yang diimpor akan dibagi dengan kecepatan ini untuk memperkirakan waktu menonton sebenarnya.
+  Playback speed: Kecepatan pemutaran
+  Channel speed note: Kecepatan pemutaran saluran yang tersimpan akan digunakan jika tersedia.
+  Apply playback speed: Terapkan kecepatan pemutaran
+  Imported watch time adjusted: Waktu tonton yang diimpor telah disesuaikan
+  Reset statistics: Atur ulang statistik
+  Reset: Atur ulang
+  Reset confirmation: Anda yakin ingin mengatur ulang semua statistik tontonan? Tindakan ini tidak dapat dibatalkan.
+  Reset success: Statistik tontonan telah diatur ulang
+  Less than a minute: < 1 mnt
+  Minutes: '{minutes} mnt'
+  Hours: '{hours} jam'
+  Hours and minutes: '{hours} jam {minutes} mnt'
+Subscriptions:
+  Refreshing Subscription Videos: Memperbarui video langganan
+  Refreshing Subscription Shorts: Memperbarui Shorts langganan
+  Refreshing Subscription Live Streams: Memperbarui siaran langsung langganan
+  Refreshing Subscription Posts: Memperbarui postingan langganan
+  New Content: Konten baru
+  New Feed Refresh Warning Title: Perbarui semua umpan langganan?
+  New Feed Refresh Warning: Memperbarui semua jenis konten tanpa RSS untuk {count} langganan dapat memakan waktu lama. Ingin melanjutkan?
+  New Since Last Refresh: Baru sejak pembaruan terakhir
+  Mark as Seen: Tandai sudah dilihat
+  Mark All as Seen: Tandai semua sudah dilihat
+  No New Content: Tidak ada konten baru.
+  New Content Tabs: Tab konten baru
+  Show Tabbed View: Tampilkan tampilan bertab
+  Show Combined View: Tampilkan tampilan gabungan
+  Newest First: Terbaru dahulu
+  Oldest First: Terlama dahulu
+Trending:
+  Load Error: Trending tidak dapat dimuat.
+  Unsupported Backend: Trending memerlukan Local API. Pilih Local API atau aktifkan backend cadangan.
+Most Popular Feed Empty: Umpan Paling Populer pada instans Invidious ini kosong.
+Feed:
+  Cancel Refresh: Batalkan pembaruan
+  Next Auto Refresh: 'Pembaruan otomatis berikutnya: {date}'
+User Playlists:
+  Load More Playlists: Muat Daftar Putar Lainnya
+  Save to: Simpan ke…
+  Move Video to the Top: Pindahkan Video ke Paling Atas
+  Move Video to the Bottom: Pindahkan Video ke Paling Bawah
+  Quick Bookmark Icon: Ikon markah cepat
+  Custom Emoji: Emoji khusus
+  Choose Image: Pilih gambar
+  Use Bookmark Icon: Gunakan ikon markah
+  SinglePlaylistView:
+    Retry: Coba Lagi
+    This playlist could not be loaded.: Daftar putar ini tidak dapat dimuat.
+    More videos could not be loaded.: Video lainnya tidak dapat dimuat.
+History:
+  Mark All As Watched: Tandai Semua Sudah Ditonton
+  Mark All As Watched Confirmation: Anda yakin ingin menandai semua video dalam riwayat sebagai sudah ditonton?
+  All History Marked as Watched: Semua video dalam riwayat telah ditandai sebagai sudah ditonton
+  Delete Old History: Hapus Riwayat Lama
+  Select History Age: Pilih usia minimum entri sebelum dihapus.
+  Delete Entries Older Than: Hapus entri yang lebih lama dari
+  Number of Days: Jumlah hari
+  History Cleanup Warning: Tindakan ini menghapus permanen entri riwayat tontonan yang sesuai.
+  1 Day: 1 hari
+  1 Week: 1 minggu
+  1 Month: 1 bulan
+  3 Months: 3 bulan
+  1 Year: 1 tahun
+  Custom: Khusus
+  History Older Than Days Removed: Riwayat tontonan yang lebih lama dari {days} hari telah dihapus
+Settings:
+  Quick Settings:
+    Quick Settings: Pengaturan cepat
+    Appearance: Tampilan
+    Playback: Pemutaran
+    Content: Konten
+    Language and Region: Bahasa dan wilayah
+    All Settings: Semua pengaturan
+    Profile Selector Hint: Anda juga dapat mengeklik kanan ikon profil untuk berganti profil
+  Categories:
+    General Description: Bahasa, proses mulai, tab, dan perilaku aplikasi
+    Appearance: Tampilan
+    Appearance Description: Tema, tata letak, dan gambar mini
+    Content appearance: Daftar video dan gambar mini
+    Layout: Tata letak
+    Playback Description: Pemutar, takarir, dan preferensi saluran
+    Subscriptions Description: Opsi pembaruan dan tampilan umpan
+    Downloads Description: Folder, templat, dan aturan otomatis
+    Distraction Free Description: Sembunyikan konten dan tetapkan batas menonton
+    Add-ons: Pengaya
+    Add-ons Description: SponsorBlock, DeArrow, jumlah tidak suka, dan terjemahan sulih suara
+    Privacy Description: Privasi menonton dan kontrol akses
+    Online activity: Aktivitas daring
+    Data And Storage Description: Impor, ekspor, penggunaan disk, dan pembersihan
+    Sync Description: Selaraskan pengaturan dan data antarperangkat
+    Advanced: Lanjutan
+    Advanced Description: Penyedia, aplikasi eksternal, dan jaringan
+    Alternative providers: Penyedia video dan metadata
+  Highlight Changed Settings: Sorot pengaturan yang berbeda dari nilai bawaan
+  Reset Setting to Default: Atur ulang pengaturan ini ke nilai bawaan
+  Performance Impact:
+    Show Performance Impact: Tampilkan indikator dampak performa
+    Moderate: Dampak sedang
+    High: Dampak tinggi
+    Description: Pengaturan ini dapat meningkatkan penggunaan {resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: memori
+      Network: jaringan
+      Disk: disk
+  General Settings:
+    Update Relative Timestamps: Terus perbarui stempel waktu relatif
+    Stream Extraction Method:
+      Stream Extraction Method: Metode ekstraksi stream
+      yt-dlp: yt-dlp
+      Built-in: Bawaan
+    Confirm Before: Konfirmasi sebelum…
+    Confirmation Options:
+      Closing App: Menutup OpenTubeX
+      Closing Window: Menutup jendela dengan beberapa tab
+      Closing Tabs: Menutup beberapa tab
+      Loading Tabs: Memuat beberapa tab
+      Unloading Tabs: Membongkar beberapa tab dari memori
+    Remember Tab Navigation History: Ingat Riwayat Navigasi Tab
+    New Tab Position:
+      New Tab Position: Posisi Tab Baru
+      At the end: Di akhir
+      After current tab: Setelah tab saat ini
+      After current tab in opened order: Setelah tab saat ini, sesuai urutan dibuka
+    Tab Close Focus:
+      Tab Close Focus: Setelah Menutup Tab
+      Previous tab: Pilih tab sebelumnya
+      Next tab: Pilih tab berikutnya
+    Startup Behavior:
+      Startup Behavior: Saat Aplikasi Dimulai
+      Load all tabs: Muat semua tab
+      Load previously loaded tabs: Muat tab yang sebelumnya dimuat
+      Load last active tab: Muat tab yang terakhir aktif
+      Start with an empty session: Mulai dengan sesi kosong
+    Use AI Translation Completions: Isi terjemahan yang hilang dengan teks buatan AI
+    Reduced Motion:
+      Reduced Motion: Kurangi Gerakan
+      System: Sistem
+      Force On: Selalu aktif
+      Force Off: Selalu nonaktif
+    Comment Translation:
+      Title: Terjemahan komentar
+      Enable: Aktifkan terjemahan komentar
+      Never Translate: Jangan terjemahkan komentar berbahasa
+      Choose Language: Pilih bahasa
+      Description: Komentar dalam bahasa aplikasi sudah dikecualikan. Tambahkan bahasa lain yang dapat Anda baca.
+      Remove Language: Terjemahkan kembali komentar berbahasa {language}
+    Avoid translation:
+      Avoid translation: Utamakan teks video tanpa terjemahan
+      Disabled: Nonaktif
+      Watch Only: Hanya Antarmuka Video
+      Entire App: Seluruh Aplikasi
+    Playlist View Type:
+      Playlist View Type: Jenis Tampilan Daftar Putar
+    Show Thumbnail Previews: Tampilkan pratinjau gambar mini
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Tombol Tindakan Tambahan pada Gambar Mini
+      None: Tidak ada
+      Mark as Watched: Tandai Sudah Ditonton
+      Copy YouTube Link: Salin Tautan YouTube
+      Open in YouTube: Buka di YouTube
+  Context Menu Search Settings:
+    Context Menu Search Settings: Pencarian Menu Konteks
+    Description: Pilih mesin pencari yang muncul saat Anda mengeklik kanan teks terpilih. Pencarian dibuka di peramban bawaan.
+    Icon Hint: Mengaktifkan mesin pencari akan menghubungi situsnya untuk memuat favicon.
+    Engine Name: Nama mesin pencari
+    Search URL: URL pencarian
+    URL Hint: Gunakan %s pada posisi teks terpilih yang telah dikodekan di dalam URL.
+    Add Custom Engine: Tambahkan mesin pencari khusus
+    Add Engine: Tambahkan mesin pencari
+    Remove Engine: Hapus {engine}
+    Invalid Engine: Masukkan nama dan URL pencarian HTTP atau HTTPS valid yang berisi %s.
+    Engine Limit: Anda dapat menambahkan hingga {count} mesin pencari khusus.
+  Theme Settings:
+    Move Downloads to App Header: Pindahkan Unduhan ke Header Aplikasi
+    Move Settings to App Header: Pindahkan Pengaturan ke Header Aplikasi
+    Hide Side Bar on Watch Pages: Sembunyikan Bilah Samping di Halaman Tonton
+    UI Roundness: Kebulatan Antarmuka
+    Scrollbar Width: Lebar Bilah Gulir
+    Animation Speed: Kecepatan Animasi
+    Thumbnail Size: Ukuran Gambar Mini
+    Show Tab Icons: Tampilkan Ikon Tab
+    Load Missing Tab Icons: Muat Ikon Tab yang Hilang
+    Loading Missing Tab Icons: Memuat Ikon Tab yang Hilang…
+    No Missing Tab Icons: Semua ikon tab yang didukung sudah dimuat
+    Loaded Tab Icons: 'Ikon tab yang hilang berhasil dimuat: {count}'
+    Loaded Tab Icons With Failures: Berhasil memuat {loaded} ikon tab; {failed} tidak dapat dimuat
+    Show Tab Previews: Tampilkan Pratinjau Tab
+    Use Fixed Tab Width: Gunakan Lebar Tab Tetap dalam Mode Horizontal
+    Tab Width: Lebar Tab
+    Tab Layout:
+      Tab Layout: Tata Letak Tab
+      Horizontal Top: Horizontal di atas
+      Horizontal Bottom: Horizontal di bawah
+      Vertical Left: Vertikal di kiri
+      Vertical Right: Vertikal di kanan
+    Show Toast Timeout Indicator: Tampilkan indikator waktu notifikasi singkat
+    Use Grid Player Menu: Gunakan Menu Pemutar Berbentuk Kisi
+    Show Progress as Notification: Tampilkan progres sebagai notifikasi
+    Operation in Progress: Operasi sedang berlangsung
+    Toast Position:
+      Toast Position: Posisi Notifikasi Singkat
+      Bottom Left: Kiri bawah
+      Bottom Center: Tengah bawah
+      Bottom Right: Kanan bawah
+      Top Left: Kiri atas
+      Top Center: Tengah atas
+      Top Right: Kanan atas
+    Icon Pack:
+      Icon Pack: Paket Ikon
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Font aplikasi
+      System Default: Bawaan sistem
+      Unable to Load: Tidak dapat memuat font sistem yang terpasang
+    Always Show Scrollbars: Selalu Tampilkan Bilah Gulir
+    Base Theme:
+      Custom: Khusus
+    Light Theme: Tema terang
+    Dark Theme: Tema gelap
+    Custom Theme:
+      Create Custom Theme: Buat tema khusus
+      Edit Custom Theme: Edit tema khusus
+      Custom Theme Creator: Pembuat tema khusus
+      Theme Name: Nama tema
+      Based On: Berdasarkan
+      Import Theme: Impor tema
+      Export Theme: Ekspor tema
+      Share Theme: Bagikan tema
+      Share Description Heading: Deskripsi
+      Share Description Prompt: Jelaskan tema dan hal yang perlu diketahui sebelum menggunakannya.
+      Share Screenshots Heading: Tangkapan layar
+      Share Screenshots Prompt: Seret dan lepas satu atau beberapa tangkapan layar di sini.
+      Share Code Summary: JSON tema
+      Delete Theme: Hapus tema
+      Delete Theme Confirmation: Hapus “{name}”? Tindakan ini tidak dapat dibatalkan.
+      Save and Apply: Simpan dan terapkan
+      Discard Changes: Buang perubahan
+      Reset Colors: Atur ulang ke tema dasar
+      Theme File: Berkas tema OpenTubeX
+      Theme Saved: Tema khusus disimpan dan diterapkan
+      Theme Imported: Tema diimpor ke editor
+      Theme Exported: Tema diekspor
+      Theme Deleted: Tema khusus dihapus
+      Unable to Load: Tidak dapat memuat tema khusus
+      Unable to Save: Tidak dapat menyimpan tema khusus
+      Unable to Export: Tidak dapat mengekspor tema khusus
+      Unable to Share: Tidak dapat membagikan tema khusus
+      Unable to Delete: Tidak dapat menghapus tema khusus
+      Invalid Theme File: Berkas tema khusus tidak valid
+      Colors:
+        Main text: Teks utama
+        Secondary text: Teks sekunder
+        Subtle text: Teks samar
+        Borders and dividers: Bingkai dan pemisah
+        Subtle surfaces and indicators: Permukaan dan indikator samar
+        Title text: Teks judul
+        Selected text background: Latar teks terpilih
+        Selected text: Teks terpilih
+        Logo icon: Ikon logo
+        Logo text: Teks logo
+        Logo hover: Logo saat ditunjuk
+        Logo pressed: Logo saat ditekan
+        Page background: Latar halaman
+        Card background: Latar kartu
+        Secondary card background: Latar kartu sekunder
+        Favorite icon: Ikon favorit
+        Error color: Warna galat
+        Scrollbar thumb: Gagang bilah gulir
+        Scrollbar thumb hover: Gagang bilah gulir saat ditunjuk
+        Scrollbar thumb pressed: Gagang bilah gulir saat ditekan
+        Dropdown item hover text: Teks item tarik-turun saat ditunjuk
+        Dropdown item hover background: Latar item tarik-turun saat ditunjuk
+        Navigation and panel background: Latar navigasi dan panel
+        Neutral item hover and focus background: Latar item netral saat ditunjuk dan difokuskan
+        Neutral item hover and focus text and icons: Teks dan ikon item netral saat ditunjuk dan difokuskan
+        Neutral item pressed background: Latar item netral saat ditekan
+        Neutral item pressed text and icons: Teks dan ikon item netral saat ditekan
+        Header button hover and focus background: Latar tombol header saat ditunjuk dan difokuskan
+        Header button hover and focus text and icons: Teks dan ikon tombol header saat ditunjuk dan difokuskan
+        Header button pressed background: Latar tombol header saat ditekan
+        Header button pressed text and icons: Teks dan ikon tombol header saat ditekan
+        Colored header button hover and focus background: Latar tombol header berwarna saat ditunjuk dan difokuskan
+        Colored header button hover and focus text and icons: Teks dan ikon tombol header berwarna saat ditunjuk dan difokuskan
+        Colored header button pressed background: Latar tombol header berwarna saat ditekan
+        Colored header button pressed text and icons: Teks dan ikon tombol header berwarna saat ditekan
+        Search and dropdown background: Latar pencarian dan tarik-turun
+        Settings search background: Latar pencarian pengaturan
+        Instance menu: Menu instans
+        Input background: Latar masukan
+        Shadow color: Warna bayangan
+        Primary controls and highlights: Kontrol dan sorotan utama
+        Primary control hover and focus: Kontrol utama saat ditunjuk dan difokuskan
+        Primary control pressed: Kontrol utama saat ditekan
+        Text and icons on primary controls: Teks dan ikon pada kontrol utama
+        Secondary controls and highlights: Kontrol dan sorotan sekunder
+        Secondary control hover and focus: Kontrol sekunder saat ditunjuk dan difokuskan
+        Secondary control pressed: Kontrol sekunder saat ditekan
+        Light secondary color: Warna sekunder terang
+        Visited accent: Aksen sudah dikunjungi
+        Text and icons on secondary controls: Teks dan ikon pada kontrol sekunder
+        Links: Tautan
+        Visited links: Tautan yang sudah dikunjungi
+        Destructive action: Tindakan destruktif
+        Destructive hover and focus: Tindakan destruktif saat ditunjuk dan difokuskan
+        Destructive pressed: Tindakan destruktif saat ditekan
+        Text and icons on destructive actions: Teks dan ikon pada tindakan destruktif
+  Player Settings:
+    Automatically Open Chapters: Buka Bab Secara Otomatis
+    Caption Appearance:
+      Caption Appearance: Tampilan Takarir
+      Captions: Takarir
+      Preferred Language: Bahasa Takarir Pilihan
+      Application Language: Bahasa Aplikasi
+      Enable Translations: Aktifkan Terjemahan Takarir
+      Text Color: Warna Teks
+      Background Color: Warna Latar
+      Background Opacity: Opasitas Latar
+      Font Size: Ukuran Font
+      Vertical Position: Posisi Vertikal
+      Edge Color: Warna Tepi
+      Anchor:
+        Anchor: Jangkar
+        Top Left: Kiri Atas
+        Top Center: Tengah Atas
+        Top Right: Kanan Atas
+        Bottom Left: Kiri Bawah
+        Bottom Center: Tengah Bawah
+        Bottom Right: Kanan Bawah
+      Edge Style:
+        Edge Style: Gaya Tepi
+        None: Tidak Ada
+        Outline: Garis Tepi
+        Drop Shadow: Bayangan Jatuh
+      Reset: Atur Ulang Tampilan Takarir
+    Default Viewing Mode:
+      Full Window (Always On): Jendela Penuh (Selalu Aktif)
+      Full Screen (Always On): Layar Penuh (Selalu Aktif)
+      Tooltip: Sebagian besar mode tampilan bawaan hanya diterapkan pada awal setiap sesi menonton. Perubahan selama sesi berlaku hingga sesi berakhir. Mode tampilan yang selalu aktif diterapkan setiap kali Anda beralih ke video baru, terlepas dari perubahan mode tampilan saat menonton video sebelumnya.
+    Auto Picture in Picture:
+      Auto Picture in Picture: Masuk ke Gambar-dalam-Gambar secara otomatis
+      On Tab Change: Saat berganti tab
+      On Window Minimize: Saat meminimalkan jendela
+      On Window Hide: Saat jendela kehilangan fokus atau ditinggalkan
+      Wayland Minimize Unsupported: Wayland tidak melaporkan jendela yang diminimalkan kepada aplikasi, jadi pemicu ini tidak tersedia. Gunakan "Saat jendela kehilangan fokus atau ditinggalkan", yang juga mencakup tindakan meminimalkan.
+    Scroll Mini Player:
+      Scroll Mini Player: Pemutar mini saat menggulir
+      When Scrolling Down: Pertahankan pemutar mini di layar saat menggulir ke bawah
+      On All Tabs: Pertahankan pemutar mini di layar saat berganti tab
+    Multiply Seek Interval by Playback Rate: Kalikan Interval Pencarian dengan Kecepatan Pemutaran
+    Show Playback Rate Adjusted Timestamp: Tampilkan Stempel Waktu yang Disesuaikan dengan Kecepatan Pemutaran
+    Use YouTube-style Shorts: Gunakan Shorts Bergaya YouTube
+    Loop Shorts: Putar Ulang Shorts
+    Remember Volume: Ingat Volume
+    Skip Silence: Lewati Bagian Hening
+    Show Skip Silence Toggle: Tampilkan Tombol Lewati Bagian Hening
+    Enable Skip Silence by Default: Aktifkan Lewati Bagian Hening Secara Bawaan
+    Enable Video Zoom: Aktifkan Zoom Video
+    Voice-over Translation:
+      Title: Terjemahan sulih suara
+      Attribution: (didukung oleh Yandex)
+      Enable: Aktifkan terjemahan sulih suara
+      Prepare in Background: Mulai siapkan terjemahan sulih suara di latar belakang
+      Background Preparation Tooltip: Mengirim ID, durasi, dan bahasa yang dipilih dari video saat ini ke layanan terjemahan segera setelah video yang didukung dimuat.
+      Language: Bahasa terjemahan sulih suara
+      Supported Source Languages: 'Bahasa sumber yang didukung: Rusia, Inggris, Tionghoa, Korea, Lituania, Latvia, Arab, Prancis, Italia, Spanyol, Jerman, dan Jepang.'
+      Voice Volume: Volume suara terjemahan
+      Original Volume: Volume audio asli
+      Russian: Rusia
+      English: Inggris
+      Kazakh: Kazakh
+    Hold to Double Playback Speed: Tahan untuk Menggandakan Kecepatan Pemutaran
+    Use Quick Playback Speed Bar: Gunakan Bilah Kecepatan Pemutaran Cepat
+    Customize Quick Playback Speed Bar: Sesuaikan Bilah Kecepatan Pemutaran Cepat
+    Quick Playback Speed Bar Manager: Bilah Kecepatan Pemutaran Cepat
+    Add Playback Speed: Tambahkan Kecepatan Pemutaran
+    Reset Quick Playback Speed Bar: Atur Ulang ke Bawaan
+    Playback Speed Name: Nama
+    Edit Playback Speed Name: Edit nama kecepatan pemutaran
+    Use Automatic Playback Speed Name: Gunakan nama kecepatan pemutaran otomatis
+    Reorder Playback Speed: Seret untuk mengurutkan ulang kecepatan pemutaran
+    Playback Speed: Kecepatan Pemutaran
+    Parallel Segment Loading: Pemuatan Segmen Paralel
+  Channel Settings:
+    Channel Settings: Pengaturan Saluran
+    Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
+    Enable Playback Speed: Aktifkan Kecepatan Pemutaran
+    Enable Video Quality: Aktifkan Kualitas Video
+    Enable Subtitles State: Aktifkan Status Takarir
+    Enable Volume: Aktifkan Volume
+    Auto Update: Perbarui otomatis saat diubah melalui opsi pemutar
+    Auto Update Subtitles: Perbarui otomatis saat diaktifkan atau dinonaktifkan
+    Auto Update Volume: Perbarui otomatis setiap kali Anda mengubah volume
+    Manage Saved Channels: Kelola Saluran Tersimpan ({channelCount})
+    Saved Channels: Pengaturan Saluran Tersimpan
+    Enable Saved Channel Settings Sync: Selaraskan pengaturan saluran tersimpan
+    Disable Saved Channel Settings Sync: Hentikan penyelarasan pengaturan saluran tersimpan
+    Search Channels: Cari saluran
+    No Saved Channels: Belum ada pengaturan khusus saluran yang disimpan
+    No Matching Channels: Tidak ada saluran yang cocok dengan pencarian Anda
+    Forget Channel: Lupakan semua pengaturan untuk saluran ini
+    Forget Value: Lupakan pengaturan ini
+    Add Setting: Ingat pengaturan lain untuk saluran ini
+    Video Quality: Kualitas Video
+    Subtitles Enabled: Takarir Diaktifkan
+    Volume: Volume
+  Download Settings:
+    Download Settings: Unduhan
+    Enable Downloads: Aktifkan Unduhan
+    Managed Tools Download Started Template: 'Perangkat lunak eksternal yang diperlukan tidak ditemukan: {tools}. Mengunduh salinan terkelola…'
+    Managed Tools Download Finished Template: Selesai mengunduh {tools}
+    Managed Tools Update Started Template: Pembaruan untuk {tools} ditemukan. Mengunduh…
+    Managed Tools Update Finished Template: Selesai memperbarui {tools}
+    Managed Tools Update Available Template: Pembaruan tersedia untuk {tools}.
+    Update Managed Tools: Perbarui
+    Managed Tools Download Error Template: 'Tidak dapat mengunduh alat terkelola: {errors}'
+    Download Folder: Folder Unduhan
+    Global Additional yt-dlp Arguments: Argumen Tambahan Global yt-dlp
+    Concurrent Downloads: Unduhan serentak
+    Bandwidth Limit: Batas lebar pita (KiB/dtk, 0 untuk tanpa batas)
+    Choose Download Folder: Pilih Folder Unduhan
+    Download Templates: Templat Unduhan
+    Manage Download Templates: Kelola Templat Unduhan ({templateCount})
+    New Template: Templat Baru
+    Template Source: Templat untuk Diedit atau Digunakan sebagai Dasar
+    Built-in Template: '{name} (Bawaan)'
+    Custom Template Name: '{name} (Khusus)'
+    Create Template Copy: Buat Salinan
+    Template Copy Name: 'Salinan {name}'
+    Automatic Downloads: Unduhan Otomatis
+    Manage Automatic Downloads: Kelola Unduhan Otomatis ({channelCount})
+    Automatic Downloads Description: Pilih templat unduhan dan filter untuk setiap saluran yang dilanggan. Video yang cocok akan diunduh di latar belakang saat umpan langganan diperbarui.
+    Automatic Downloads New Only: Mengaktifkan saluran akan dimulai dari unggahan baru berikutnya. Video yang sudah ada dan arsip saluran tidak akan diunduh.
+    Automatic Downloads No Channels: Langgani saluran sebelum mengatur unduhan otomatis.
+    No Matching Automatic Download Channels: Tidak ada saluran yang cocok dengan pencarian Anda.
+    Automatic Downloads Livestreams: Siaran langsung
+    Minimum Duration Seconds: Durasi minimum (detik)
+    Maximum Duration Seconds: Durasi maksimum (detik)
+    Minimum File Size MB: Ukuran berkas minimum (MB)
+    Maximum File Size MB: Ukuran berkas maksimum (MB)
+    Maximum Age Days: Usia maksimum (hari)
+    Title Includes: Judul memuat
+    Title Excludes: Judul tidak memuat
+    Title Filter Hint: Pisahkan beberapa istilah judul dengan koma. Video harus cocok dengan setidaknya satu istilah yang disertakan dan tidak boleh cocok dengan istilah yang dikecualikan.
+  External Software Settings:
+    External Software Settings: Perangkat Lunak Eksternal
+    yt-dlp Source: Sumber yt-dlp
+    yt-dlp Channel: Kanal yt-dlp
+    Sources:
+      System: Sistem (PATH atau jalur khusus)
+      Managed: Dikelola oleh OpenTubeX
+    Detected Version Template: 'Versi yt-dlp yang terdeteksi: {version}'
+    Managed Not Downloaded: yt-dlp belum diunduh. Klik tombol di bawah untuk mengunduhnya.
+    System yt-dlp Missing Warning: yt-dlp tidak ditemukan di sistem Anda. Pasang yt-dlp, tentukan jalur khusus di bawah, atau ubah sumber ke "Dikelola oleh OpenTubeX".
+    Download yt-dlp: Unduh yt-dlp
+    Update yt-dlp: Perbarui yt-dlp
+    Checking yt-dlp: Memeriksa yt-dlp…
+    Downloading yt-dlp: Mengunduh yt-dlp…
+    yt-dlp Downloaded Template: yt-dlp {version} telah diunduh
+    yt-dlp Download Error Template: 'Gagal mengunduh yt-dlp: {error}'
+    FFmpeg Source: Sumber FFmpeg
+    Detected FFmpeg Version Template: 'Versi FFmpeg yang terdeteksi: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg belum diunduh. Klik tombol di bawah untuk mengunduhnya.
+    System FFmpeg Missing Warning: FFmpeg tidak ditemukan di sistem Anda. FFmpeg diperlukan untuk menggabungkan video dan audio serta mengonversi audio. Pasang FFmpeg, tentukan jalur khusus di bawah, atau ubah sumber ke "Dikelola oleh OpenTubeX".
+    Download FFmpeg: Unduh FFmpeg
+    Update FFmpeg: Perbarui FFmpeg
+    Checking FFmpeg: Memeriksa FFmpeg…
+    Downloading FFmpeg: Mengunduh FFmpeg…
+    FFmpeg Downloaded Template: FFmpeg {version} telah diunduh
+    FFmpeg Download Error Template: 'Gagal mengunduh FFmpeg: {error}'
+    Detected FFprobe Version Template: 'Versi FFprobe yang terdeteksi: {version}'
+    FFprobe Managed Not Downloaded: FFprobe belum diunduh. Klik tombol di bawah untuk mengunduhnya bersama FFmpeg.
+    System FFprobe Missing Warning: FFprobe tidak ditemukan di sistem Anda. FFprobe diperlukan untuk memeriksa media selama pascapemrosesan. Pasang FFprobe di sebelah FFmpeg, atau ubah sumber ke "Dikelola oleh OpenTubeX".
+    Checking FFprobe: Memeriksa FFprobe…
+    Download FFmpeg and FFprobe: Unduh FFmpeg dan FFprobe
+    Update FFmpeg and FFprobe: Perbarui FFmpeg dan FFprobe
+    Downloading FFmpeg and FFprobe: Mengunduh FFmpeg dan FFprobe…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg dan FFprobe {version} telah diunduh
+    FFmpeg and FFprobe Download Error Template: 'Gagal mengunduh FFmpeg dan FFprobe: {error}'
+    Managed Tool Already Current Template: '{tool} {version} sudah versi terbaru'
+    Managed Tool Updates: Pembaruan Alat Terkelola
+    Update Modes:
+      Automatic: Perbarui otomatis
+      Ask: Tanyakan sebelum memperbarui
+      Manual: Hanya perbarui secara manual
+    yt-dlp Executable Path: Jalur Program yt-dlp
+    FFmpeg Executable Path: Jalur Program FFmpeg
+    Restricted Playback Authentication: Kuki Pemutaran yt-dlp
+    Cookie Source: Sumber Kuki
+    Cookie Sources:
+      None: Tidak Ada
+      File: Berkas
+      Browser: Peramban
+    Cookie File: Berkas Kuki
+    Browser for Cookies: Peramban untuk Kuki
+    Browser Profile: Profil Peramban (Opsional)
+    Browser Profile Placeholder: Nama atau jalur profil
+    Select Browser: Pilih peramban
+    Always Use Cookies: Selalu Gunakan Kuki
+    Restricted Playback Authentication Hint: Secara bawaan, OpenTubeX hanya meneruskan kuki ini ke yt-dlp setelah Anda memilih "Coba dengan kuki yang telah dikonfigurasi" pada video dengan batasan usia atau khusus anggota.
+    Restricted Playback Authentication Warning: Menggunakan yt-dlp dengan akun Google dapat menyebabkan pembatasan akun sementara atau permanen.
+  Privacy Settings:
+    Automatic History Retention: Penyimpanan Riwayat Otomatis (Hari)
+    Automatic History Retention Placeholder: Biarkan kosong untuk menyimpan selamanya
+    Automatic History Retention Tooltip: Biarkan kosong untuk menyimpan riwayat selamanya. Menyimpan angka akan segera menghapus entri yang lebih lama dan menghapusnya secara otomatis selama aplikasi terbuka.
+    History Retention Saved: Pengaturan penyimpanan riwayat telah disimpan
+    Invalid History Retention Days: Masukkan bilangan bulat hari yang lebih besar dari nol
+    Enable Watch Statistics: Aktifkan Statistik Tontonan
+    Week Starts On: Awal Minggu
+    Cache Video Metadata: Riwayat metadata
+    Cache Video Metadata Tooltip: Menyimpan setiap versi metadata video yang didukung untuk video yang Anda kunjungi, termasuk judul, gambar mini, dan deskripsi. Fitur ini nonaktif secara bawaan karena menyimpan riwayat metadata akan menambah penggunaan disk.
+    Watched Percentage Threshold: Ambang Persentase Sudah Ditonton
+    Watched Percentage Threshold Tooltip: Video ditandai sudah ditonton setelah mencapai persentase yang dipilih dan menyisakan waktu tidak lebih dari 2 menit. Pada 0%, video ditandai saat pemutaran dimulai. Pada 100%, video ditandai saat pemutaran berakhir.
+    Clear Video Metadata Cache: Bersihkan Cache Metadata Video
+    Are you sure you want to clear the video metadata cache?: Anda yakin ingin menghapus judul, gambar mini, dan deskripsi video yang tersimpan dalam cache?
+    Failed to clear video metadata cache: Gagal membersihkan cache metadata video
+    Video metadata cache has been cleared: Cache metadata video telah dibersihkan
+    Video Metadata Cache Size: 'Cache metadata video: {size}'
+  Storage Settings:
+    Storage: Penyimpanan
+    Downloaded Media: Media unduhan yang dilacak
+    Storage Breakdown: Rincian penyimpanan
+    Shown Total: Total yang ditampilkan
+    Calculating: Menghitung…
+    Not Available: Ukuran persis tidak tersedia
+    At Least: Setidaknya {size}
+    Failed To Read Storage: Beberapa ukuran penyimpanan tidak dapat dibaca
+    Downloaded Media Description: Berkas video, audio, dan takarir yang masih dilacak oleh riwayat unduhan.
+    Selected Download Folders: Folder unduhan yang dipilih pengguna
+    Download History Records: Catatan riwayat unduhan
+    Download History Records Description: '{count} catatan unduhan selesai. Catatan ini melacak status dan lokasi berkas, tetapi tidak berisi media yang diunduh.'
+    Clear Download History Records: Bersihkan catatan riwayat unduhan
+    Clear Download History Confirmation: Bersihkan semua catatan unduhan selesai?
+    Download Files Stay On Disk: Berkas yang diunduh akan tetap berada di disk, tetapi tidak lagi muncul di halaman Unduhan.
+    Clear Records: Bersihkan catatan
+    Replaceable Caches: Cache yang dapat dibuat ulang
+    Application Caches: Cache aplikasi
+    Browser Caches: Cache peramban
+    Browser Caches Hint: Cache HTTP, GPU, kode, shader, service worker, dan kamus Chromium.
+    Stored App Data: Data aplikasi tersimpan
+    Browser Runtime Data: Data waktu jalan peramban
+    Browser Runtime Data Hint: Penyimpanan sesi dan lokal, kuki, status privasi dan jaringan, serta berkas crash Chromium.
+    Subscription Feed Cache: Cache langganan dan umpan
+    Subscription Feed Cache Description: Menyimpan video langganan, Shorts, siaran langsung, dan postingan yang diambil. OpenTubeX membuatnya ulang pada pembaruan umpan berikutnya.
+    Clear Subscription Feed Cache: Bersihkan cache langganan dan umpan
+    Clear Subscription Feed Cache Confirmation: Bersihkan cache langganan dan umpan?
+    Subscription Feed Cache Effect: Umpan langganan mungkin tampak kosong hingga diperbarui. Langganan dan profil Anda tidak akan diubah.
+    Session Search Cache: Cache pencarian sesi
+    In Memory: Dalam memori
+    Session Search Cache Description: '{count} pencarian disimpan dalam cache memori untuk mempercepat navigasi kembali. Cache ini dibuang saat OpenTubeX ditutup.'
+    Clear Session Search Cache: Bersihkan cache pencarian sesi
+    Clear Session Search Cache Confirmation: Bersihkan cache pencarian sesi?
+    Session Search Cache Effect: Halaman hasil dalam cache akan dibuang. Riwayat pencarian tersimpan tidak akan diubah.
+    HTTP Cache: Cache HTTP
+    HTTP Cache Description: Electron menyimpan respons jaringan di disk agar permintaan berulang dapat dimuat tanpa mengunduh data yang sama lagi. OpenTubeX membuat ulang cache ini sesuai kebutuhan.
+    Managed By Electron: Dikelola oleh Electron
+    Clear HTTP Cache: Bersihkan cache HTTP
+    Clear HTTP Cache Confirmation: Bersihkan cache HTTP Electron?
+    HTTP Cache Effect: Gambar dan sumber daya jaringan lainnya mungkin satu kali dimuat lebih lambat saat cache dibuat ulang.
+    Tab Image Cache: Gambar mini tab dan avatar saluran
+    Tab Image Cache Description: Menyimpan gambar pratinjau dan avatar saluran untuk tab yang terbuka dan dipulihkan. OpenTubeX membuatnya ulang saat tab digunakan.
+    Clear Tab Image Cache: Bersihkan cache gambar tab
+    Clear Tab Image Cache Confirmation: Bersihkan gambar mini tab dan avatar saluran?
+    Tab Image Cache Effect: Gambar tab mungkin menghilang sesaat dan akan dibuat ulang saat tab digunakan.
+    Playback Caches: Cache pemutaran
+    Playback Caches Description: Menyimpan URL stream yt-dlp di antara sesi aplikasi beserta berkas pemutar YouTube. Cache URL hanya berlaku untuk stream yang diambil dengan yt-dlp.
+    Playback URL Cache Entry Size: Batas cache URL stream yt-dlp
+    Playback URL Cache Entry Size Tooltip: Menetapkan ukuran maksimum setiap entri stream yt-dlp dalam cache. Atur ke 0 MB untuk menonaktifkan cache persisten bagi stream yt-dlp.
+    Clear Playback Caches: Bersihkan cache pemutaran
+    Clear Playback Caches Confirmation: Bersihkan cache yt-dlp dan pemutar?
+    Playback Caches Effect: Permintaan pemutaran lokal berikutnya mungkin memerlukan waktu lebih lama saat data stream dan pemutar diambil ulang.
+    Clear Cache: Bersihkan cache
+    History Data: Riwayat tersimpan
+    Video Metadata Description: Menyimpan judul, gambar mini, dan deskripsi terdahulu untuk video yang didukung. Revisi lama tidak dapat dibuat ulang setelah dihapus.
+    Video Metadata Effect: Revisi metadata yang tersimpan akan dihapus permanen. Detail video saat ini masih dapat diambil ulang.
+    Watch History: Riwayat dan statistik tontonan
+    Watch History Description: Riwayat tontonan mencatat video yang ditonton dan progresnya. Statistik tontonan menyimpan total tontonan harian. Masa penyimpanan hanya berlaku untuk riwayat tontonan.
+    Clear Watch Statistics: Bersihkan statistik tontonan
+    Watch History Effect: Catatan video yang ditonton dan progres tersimpan akan dihapus. Statistik tontonan akan tetap ada.
+    Clear Watch Statistics Confirmation: Hapus semua statistik tontonan?
+    Watch Statistics Effect: Total tontonan harian akan dihapus. Riwayat tontonan akan tetap ada.
+    Search History: Riwayat pencarian
+    Search History Description: Menyimpan pencarian yang Anda pilih untuk diingat.
+    Delete Search History: Hapus riwayat pencarian
+    Delete Search History Confirmation: Hapus semua riwayat pencarian tersimpan?
+    Search History Effect: Saran pencarian yang tersimpan dari pencarian sebelumnya akan hilang. Cache sesi saat ini akan tetap ada.
+    Other User Data: Data pengguna lainnya
+    Other Profile Files: Berkas profil lainnya
+    Other Profile Files Hint: Cadangan, berkas sementara, dan entri profil yang belum dikenali OpenTubeX.
+    Subscriptions And Profiles: Langganan dan profil
+    Subscriptions And Profiles Description: Menyimpan saluran yang dilanggan, nama profil, dan keanggotaan profil.
+    Subscriptions And Profiles Effect: Semua langganan dan profil tambahan akan dihapus permanen. Data cache umpan juga akan dibersihkan.
+    Playlists Description: Menyimpan nama daftar putar, deskripsi, dan video tersimpan.
+    Playlists Effect: Setiap daftar putar dan daftar video tersimpannya akan dihapus permanen. Berkas media yang diunduh akan tetap ada.
+    Settings And Sessions: Pengaturan, sesi tab, dan pengingat
+    Settings And Sessions Description: Menyimpan preferensi aplikasi, tab yang dapat dipulihkan, dan pengingat siaran langsung. Buka direktori profil untuk memeriksa atau mencadangkan berkas ini. Halaman ini tidak menghapusnya.
+    Cleanup Complete: Pembersihan penyimpanan selesai
+    Cleanup Failed: Pembersihan penyimpanan gagal
+  Subscription Settings:
+    Fetch Feed on Startup: Ambil Umpan Saat Aplikasi Dimulai
+    Show New Content Feed: Tampilkan Umpan Konten Baru
+    Show New Content Indicators: Tampilkan Indikator Konten Baru
+    Show Scheduled Live Streams / Premieres First: Tampilkan Siaran Langsung / Premiere Terjadwal Terlebih Dahulu
+    Auto Refresh Interval: Interval Pembaruan Otomatis
+    Videos Auto Refresh Interval: Interval Pembaruan Otomatis Video
+    Shorts Auto Refresh Interval: Interval Pembaruan Otomatis Shorts
+    Live Auto Refresh Interval: Interval Pembaruan Otomatis Siaran Langsung
+    Posts Auto Refresh Interval: Interval Pembaruan Otomatis Postingan
+  Distraction Free Settings:
+    Sections:
+      Visible While Paused: Terlihat Saat Dijeda dalam Jendela Penuh / Layar Penuh
+    Hide Channel Avatars: Sembunyikan Avatar Saluran
+    Shorten View Counts: Persingkat Jumlah Penayangan dan Suka Komentar
+    Hide Comment Translation Buttons: Sembunyikan Tombol Terjemahan Komentar
+    Hide Live Chat Replay: Sembunyikan Pemutaran Ulang Chat Langsung
+    Hide End-Screen Annotations: Sembunyikan Anotasi Layar Akhir
+    Hide Paid Promotion Badge: Sembunyikan Lencana Promosi Berbayar
+    Show Player Controls: Tampilkan Kontrol Pemutar
+    Show Video Title: Tampilkan Judul Video
+    Show Bottom Right Actions Dock: Tampilkan Dok Tindakan Kanan Bawah
+    Paused Interface Hide Delay: Jeda Sebelum Menyembunyikan Antarmuka yang Dijeda
+  Data Settings:
+    Data And Storage: Data & Penyimpanan
+    Profile Directory: Direktori profil
+    Open Profile Directory: Buka direktori profil
+    Settings File: Berkas Pengaturan
+    Import Settings: Impor Pengaturan
+    Export Settings: Ekspor Pengaturan
+    Settings Tooltip: Pengaturan khusus OS/pengguna atau eksperimental tidak dapat diekspor maupun diimpor (misalnya proksi, pemutar eksternal, folder tangkapan layar...)
+    Invalid JSON row, skipping item: JSON pada baris {row} tidak valid, melewati item
+    All settings have been successfully imported: Semua pengaturan berhasil diimpor
+    All settings have been successfully exported: Semua pengaturan berhasil diekspor
+    Setting object has insufficient data, skipping item: Objek pengaturan tidak memiliki cukup data, melewati item
+    Unknown setting key: 'Kunci pengaturan tidak dikenal: {key}'
+    Non-transferable setting key: 'Kunci pengaturan tidak dapat ditransfer: {key}'
+    Import subscriptions formats: 'Format yang didukung: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), cadangan LibreTube, atau ekspor FreeTube (.json)'
+    Import history formats: 'Format yang didukung: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), cadangan LibreTube (.json)'
+    Import playlists formats: 'Format yang didukung: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'Format yang didukung: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+  Sync Settings:
+    Sync Settings: Sinkronisasi
+    Enable Sync: Aktifkan Sinkronisasi
+    Privacy Passphrase: Frasa sandi privasi
+    Privacy Passphrase Hint: Gunakan frasa sandi yang berbeda dari kata sandi akun. Frasa ini tidak pernah meninggalkan perangkat dan diperlukan di setiap perangkat. Jika hilang, data sinkronisasi terenkripsi tidak dapat dipulihkan.
+    Privacy Policy: Kebijakan privasi server ini
+    Enhanced Privacy Enabled: Privasi tingkat lanjut aktif. Server hanya menyimpan data sinkronisasi terenkripsi.
+    Enhanced Privacy Unsupported: 'Peringatan: server ini tidak mendukung privasi tingkat lanjut. Data yang disinkronkan dapat dilihat oleh operatornya.'
+    Description: Selaraskan langganan, profil, daftar putar, riwayat tontonan, pengaturan, dan tab terbuka dengan server sinkronisasi OpenTubeX atau LibreTube. Server LibreTube mungkin tidak mendukung semua fitur sinkronisasi.
+    Server URL: URL Server
+    Checking Server: Memeriksa server sinkronisasi…
+    Server Unavailable: Tidak dapat terhubung ke server sinkronisasi ini. Periksa URL lalu coba lagi.
+    Username: Nama pengguna
+    Log In: Masuk
+    Register: Daftar
+    Pair Another Device: Pasangkan perangkat lain
+    Pair With Existing Device: Pasangkan dengan perangkat yang sudah ada
+    Device Name: Nama perangkat
+    This Device: Perangkat ini
+    Device Name Required: Masukkan nama untuk perangkat ini.
+    Pairing Device Name Hint: Pilih nama yang dapat Anda kenali pada perangkat yang menyetujui permintaan ini.
+    Create Pairing Code: Buat kode pemasangan
+    Creating Pairing Code: Membuat kode pemasangan yang aman…
+    Pairing QR Alt: Kode QR pemasangan untuk {device}
+    Scan Pairing Code: Pada perangkat yang sudah terhubung, buka "Pasangkan perangkat lain" lalu pindai kode ini.
+    Pairing Code: Kode pemasangan
+    Use Text Pairing Code: Gunakan kode teks
+    Show QR Code: Tampilkan kode QR
+    Text Pairing Code Hint: Salin kode ini ke perangkat yang sudah ada. Kode berisi rahasia pemasangan, jadi hapus dari riwayat papan klip setelah pemasangan.
+    Pairing QR Warning: Tampilkan kode ini hanya kepada perangkat tepercaya yang sudah terhubung dan akan menyetujui permintaan. Kode kedaluwarsa setelah dua menit.
+    Pairing Expires: Kode pemasangan kedaluwarsa pada {time}.
+    Verifying Pairing: Memverifikasi kunci privasi yang ditransfer…
+    Completing Pairing: Menyelesaikan pemasangan perangkat…
+    Compare Pairing Codes: Bandingkan kode pemasangan
+    Pairing Code Match Hint: Konfirmasikan hanya jika kode ini cocok dengan kode pada perangkat Anda yang sudah ada.
+    Pairing Codes Match: Kode cocok
+    Pairing Approval Code Hint: Biarkan jendela ini terbuka dan bandingkan kode dengan perangkat baru. Perangkat baru tidak boleh melanjutkan jika kodenya berbeda.
+    Pairing Scan Hint: Pindai kode pemasangan yang ditampilkan pada perangkat yang sedang Anda tambahkan.
+    Enter Pairing Code: Masukkan kode secara manual
+    Pairing Code Entry Hint: Tempel kode pemasangan yang ditampilkan pada perangkat yang sedang Anda tambahkan.
+    Check Pairing Code: Periksa kode
+    Scan QR Code: Pindai kode QR
+    Waiting For Pairing Code: Menunggu kode pemasangan…
+    Checking Pairing Request: Memeriksa permintaan pemasangan…
+    Approving Pairing Request: Mengenkripsi dan mengirim kunci privasi…
+    Pairing Approval Warning: Setujui hanya jika Anda dapat melihat permintaan ini pada perangkat yang sedang ditambahkan. Pemasangan memberikan akses akun dan mentransfer kunci privasi.
+    Approve Pairing: Setujui pemasangan
+    Try Again: Coba lagi
+    Scan Again: Pindai lagi
+    Camera Unavailable: OpenTubeX tidak dapat mengakses kamera. Periksa izin kamera atau masukkan kode pemasangan secara manual.
+    Pairing Unsupported: Server sinkronisasi ini tidak mendukung pemasangan perangkat yang aman.
+    Pairing Failed: Pemasangan perangkat gagal. Coba lagi dengan kode baru.
+    Pairing Request Changed: Permintaan pemasangan berubah, kedaluwarsa, atau sudah digunakan. Buat kode baru.
+    Pairing Server Mismatch: Kode ini berasal dari server sinkronisasi lain.
+    Pairing Verification Unavailable: Tidak ada koleksi sinkronisasi terenkripsi untuk memverifikasi kunci yang ditransfer. Selaraskan perangkat yang sudah ada, lalu coba lagi.
+    Pairing Completed: Pemasangan perangkat selesai
+    Pairing Approved: Pemasangan perangkat disetujui
+    Disconnect: Putuskan sambungan
+    Delete Account: Hapus akun sinkronisasi
+    Delete Account Confirmation: Hapus akun sinkronisasi?
+    Delete Account Warning: Tindakan ini menghapus permanen akun sinkronisasi dan semua data yang tersimpan di server ini. Data OpenTubeX lokal Anda tidak akan dihapus.
+    Confirm Delete Account: Hapus akun
+    Password Required: Kata sandi diperlukan
+    Account Deleted: Akun sinkronisasi dihapus
+    Connected as: Terhubung sebagai {username}
+    Automatic Sync: Selaraskan otomatis setelah perubahan dan setiap lima menit
+    Profiles: Profil
+    Open Tabs: Tab dan sesi terbuka
+    Disable Setting Sync: Hentikan penyelarasan pengaturan ini
+    Enable Setting Sync: Selaraskan pengaturan ini
+    Sync Now: Selaraskan sekarang
+    Downloading encrypted data: Mengunduh data sinkronisasi terenkripsi…
+    Syncing subscriptions: Menyelaraskan langganan…
+    Syncing playlists: Menyelaraskan daftar putar…
+    Syncing history: Menyelaraskan riwayat tontonan…
+    Syncing profiles: Menyelaraskan profil…
+    Syncing open tabs: Menyelaraskan tab dan sesi terbuka…
+    Syncing settings: Menyelaraskan pengaturan…
+    Uploading encrypted data: Mengunggah data sinkronisasi terenkripsi…
+    Finishing sync: Menyelesaikan sinkronisasi…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Terakhir diselaraskan: {date}'
+    History not supported: Versi server ini tidak mendukung penyelarasan riwayat tontonan.
+    Settings not supported: Versi server ini tidak mendukung penyelarasan pengaturan.
+    Sync completed: Sinkronisasi selesai
+    Data Loss Confirmation: Konfirmasikan sinkronisasi destruktif?
+    Data Loss Warning: Status server akan menghapus {deleted} dari {previous} item {collection} yang sebelumnya disinkronkan. Hal ini dapat menandakan migrasi server gagal atau server diatur ulang. Lanjutkan hanya jika penghapusan ini disengaja dan Anda memiliki cadangan.
+    Confirm Data Loss: Hapus dan lanjutkan
+  Proxy Settings:
+    IP Block Recovery Script Path: Jalur Skrip Pemulihan Blokir IP
+    Select IP Block Recovery Script File: Pilih Berkas Skrip Pemulihan Blokir IP
+    Running IP block recovery script: Menjalankan skrip pemulihan blokir IP
+    IP block recovery script failed: 'Skrip pemulihan blokir IP gagal (kode keluar: {exitCode})'
+    IP block recovery script finished: Skrip pemulihan blokir IP selesai
+    Reloading video after IP block recovery: Memuat ulang video setelah pemulihan blokir IP
+    Failed to select IP block recovery script: Gagal memilih skrip pemulihan blokir IP
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: Aktifkan Pengiriman SponsorBlock
+    SponsorBlock Private User ID (optional): ID Pengguna Pribadi SponsorBlock (opsional)
+    SponsorBlock Private User ID Tooltip: Tempel ID pengguna pribadi SponsorBlock dari ekstensi peramban. Biarkan kosong untuk menggunakan ID yang dibuat aplikasi.
+    Generated SponsorBlock User ID: ID Pengguna SponsorBlock Buatan Aplikasi
+    Generated SponsorBlock User ID Tooltip: ID pengguna SponsorBlock buatan aplikasi ini dapat digunakan di ekstensi peramban atau saat Anda menggunakan aplikasi di komputer lain.
+    Export Generated User ID: Ekspor ID Pengguna Buatan Aplikasi
+    Generated SponsorBlock User ID Copy Button: Salin ID pengguna SponsorBlock buatan aplikasi
+    Generated SponsorBlock User ID Copied: ID pengguna SponsorBlock buatan aplikasi disalin ke papan klip
+    Skip notification timeout: Batas waktu notifikasi lewati
+    Custom Color: Warna khusus
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Aktifkan Return YouTube Dislike
+    Return YouTube Dislike Url: URL API Return YouTube Dislike (Bawaan adalah https://ryd-proxy.kavin.rocks)
+  Password Dialog:
+    Incorrect Password: Kata sandi salah
+    Unlock: Buka kunci
+    Unlocking: Membuka kunci…
+  Search Settings: Cari pengaturan
+  No Settings Found: Pengaturan tidak ditemukan
+Tutorial:
+  Skip: Lewati
+  Next: Berikutnya
+  Finish: Selesai
+  Got It: Mengerti
+  Welcome:
+    Title: Selamat datang di OpenTubeX
+    Description: Berikut beberapa kontrol dasar untuk mulai menggunakan aplikasi.
+  Navigation:
+    Title: Pustaka Anda selalu mudah dijangkau
+    Description: Gunakan navigasi untuk membuka langganan, daftar putar, riwayat, dan lainnya.
+  Search:
+    Title: Cari atau tempel tautan
+    Description: Temukan video dan saluran, atau tempel URL video yang didukung langsung ke kolom pencarian.
+  Tabs:
+    Title: Biarkan halaman terbuka dalam tab
+    Description: Buka beberapa halaman sekaligus tanpa kehilangan posisi. Pilih letak tab yang paling sesuai dengan tata letak Anda.
+  Quick Settings:
+    Title: Sesuaikan dengan kebutuhan Anda
+    Description: Pilih tema dan kualitas video bawaan. Ubah preferensi ini dan lainnya kapan saja melalui menu profil, atau klik kanan untuk berganti profil.
+  Import Data:
+    Title: Bawa data Anda
+    Description: Jika diinginkan, impor langganan, riwayat, daftar putar, riwayat pencarian, atau pengaturan dari aplikasi lain yang didukung atau dari cadangan.
+    Action: Impor data
+    Not Now: Jangan sekarang
+  Settings Moved:
+    Title: Pengaturan telah dipindahkan
+    Description: Pilih profil Anda di kanan atas untuk mengakses kontrol cepat. Klik kanan profil untuk langsung memilih profil. Ikon roda gigi dalam menu tersebut membuka semua pengaturan. Tentang dan Unduhan juga telah dipindahkan ke menu ini.
+About:
+  Commit: Commit
+  Fluxer: Bergabunglah dengan Komunitas Fluxer kami
+  Matrix: Matrix
+  Email: Email
+Profile:
+  Profile Icon: Ikon Profil
+  Choose an Emoji: Pilih Emoji
+  Custom Emoji: Emoji Khusus
+  Emoji: Emoji
+  Choose Image: Pilih Gambar
+  Crop Image: Pangkas Gambar
+  Zoom: Zoom
+  Apply Crop: Terapkan Pemangkasan
+  Transparent: Transparan
+  Use Initial: Gunakan Inisial
+  The selected image could not be loaded: Gambar yang dipilih tidak dapat dimuat
+  Theme Color: Warna Tema
+Channel:
+  Channel Name Unavailable: Nama saluran tidak tersedia
+  Search Result Types: Jenis hasil pencarian
+  All Results: Semua
+  View All: Lihat Semua
+Video:
+  Includes paid promotion: Memuat promosi berbayar
+  Age Restricted Badge: Dibatasi usia
+  Queue: Antrean
+  Play Next: Putar Berikutnya
+  Add to Queue: Tambahkan ke Antrean
+  Added to Play Next: Video akan diputar berikutnya
+  Added to Queue: Video ditambahkan ke antrean
+  Clear Queue: Kosongkan Antrean
+  Queue Video Count: '{count} video'
+  Remove from Queue: Hapus {title} dari antrean
+  Drag to Reorder Queue: Seret {title} untuk mengurutkan ulang antrean
+  Reorder Queue Item: Urutkan ulang {title}
+  Reorder Queue Item Instructions: Gunakan tombol Panah Atas dan Panah Bawah untuk memindahkan video ini dalam antrean.
+  Queue Item Moved: '{title} dipindahkan ke posisi {position} dari {total}.'
+  Queue Item Cannot Move Up: 'Tidak dapat memindahkan {title} ke atas. Video sudah berada di posisi 1 dari {total}.'
+  Queue Item Cannot Move Down: 'Tidak dapat memindahkan {title} ke bawah. Video sudah berada di posisi {total} dari {total}.'
+  Metadata: Informasi video
+  Close Metadata: Tutup informasi video
+  Metadata Cache:
+    Title History: Riwayat judul
+    Thumbnail History: Riwayat gambar mini
+    Description History: Riwayat deskripsi
+    Previous Version: Sebelumnya {number}
+    Empty: (kosong)
+  Fetching Streams: Mengambil stream dengan yt-dlp…
+  Transcript:
+    Title: Transkrip
+    Search: Cari transkrip
+    Language: Bahasa transkrip
+    Save: Simpan
+    Show: Tampilkan transkrip
+    Hide: Sembunyikan transkrip
+    Close: Tutup transkrip
+    Copied: Transkrip disalin ke papan klip
+    Saved: Transkrip disimpan
+    Save Error: Tidak dapat menyimpan transkrip
+    Text File: Berkas teks
+    Unavailable: Transkrip tidak tersedia untuk video ini.
+    Load Error: Transkrip tidak dapat dimuat.
+    Empty: Transkrip ini tidak berisi teks.
+    No Results: Tidak ada segmen transkrip yang cocok dengan pencarian Anda.
+  Retry With Built-in Extraction: Coba lagi dengan ekstraksi bawaan
+  Retry With yt-dlp Extraction: Coba lagi dengan ekstraksi yt-dlp
+  Reloading video after streaming URL error: Memuat ulang video setelah galat URL streaming
+  Configure Restricted Playback Cookies Hint: Atur kuki di Pengaturan → Perangkat Lunak Eksternal → Kuki Pemutaran yt-dlp.
+  Try With Configured Cookies: Coba dengan kuki yang telah dikonfigurasi
+  Restricted Playback Authentication Failed Template: 'yt-dlp tidak dapat mengakses video ini dengan kuki yang telah dikonfigurasi: {error}'
+  Unmark As Watched: Hapus Tanda Sudah Ditonton
+  Video has been unmarked as watched: Tanda sudah ditonton pada video telah dihapus
+  Save Channel Playback Speed: Simpan Kecepatan Pemutaran Saluran
+  Channel Playback Speed Saved: Kecepatan Pemutaran Saluran Disimpan
+  Save Channel Video Quality: Simpan Kualitas Video Saluran
+  Channel Video Quality Saved: Kualitas Video Saluran Disimpan
+  Save Channel Subtitles State: Simpan Status Takarir Saluran
+  Channel Subtitles State Saved: Status Takarir Saluran Disimpan
+  Save Channel Volume: Simpan Volume Saluran
+  Channel Volume Saved: Volume Saluran Disimpan
+  Save Channel Setting: Simpan pengaturan saluran…
+  Channel Setting Already Set: '{setting} sudah diatur ke {value}'
+  Video has been saved to {playlistName}: Video telah disimpan ke {playlistName}
+  Video has been removed from {playlistName}: Video telah dihapus dari {playlistName}
+  There was a problem saving the video to {playlistName}: Terjadi masalah saat menyimpan video ke {playlistName}
+  There was a problem removing the video from {playlistName}: Terjadi masalah saat menghapus video dari {playlistName}
+  Failed to load collaborators: Gagal memuat kolaborator
+  Notify me: Beri tahu saya
+  Notification on: Notifikasi aktif
+  Notification enabled: Anda akan diberi tahu saat video ini dimulai
+  Notification cancelled: Notifikasi mulai dibatalkan
+  Notification unavailable: Notifikasi sistem tidak tersedia
+  Scheduled video starting: Video terjadwal akan dimulai
+  Live notification body: '{videoTitle} dimulai sekarang'
+  Premiere: Premiere
+  AI: AI
+  AI-generated content: Konten buatan AI
+  Collaborators: Kolaborator
+  Live Chat Replay: Pemutaran Ulang Chat Langsung
+  Show Live Chat: Tampilkan Chat Langsung
+  Show Live Chat Replay: Tampilkan Pemutaran Ulang Chat Langsung
+  Close Live Chat: Tutup Chat Langsung
+  Close Live Chat Replay: Tutup Pemutaran Ulang Chat Langsung
+  Live Chat Settings: Pengaturan chat langsung
+  Show Live Chat Timestamps: Tampilkan stempel waktu
+  Chat Filter: Filter chat
+  Top Chat: Chat teratas
+  All Messages: Semua pesan
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Pemutaran ulang chat langsung aktif. Pesan chat akan muncul di sini selama video diputar.
+  Premiere started: Premiere sedang berlangsung. Dimulai {timeAgo}
+  Sponsor Block category:
+    hook: Pembuka/Sapaan
+  Player:
+    Voice-over Translation:
+      Start: Terjemahkan
+      Cancel: Batal
+      Progress: Menyiapkan terjemahan sulih suara…
+      Retry: Coba lagi
+      Error: Terjemahan sulih suara gagal. Coba lagi nanti.
+      Duration Error: Terjemahan sulih suara hanya tersedia untuk video berdurasi hingga empat jam.
+    Caption Appearance:
+      Options: Opsi
+      Sample: Takarir terlihat seperti ini
+    Auto-translate: Terjemahkan otomatis
+    Sleep Timer:
+      Sleep Timer: Pewaktu tidur
+      'Off': 'Nonaktif'
+      Minutes: '{minutes} menit'
+      End of video: Akhir video
+      Remaining: 'Tersisa {time}'
+      Cancel timer: Batalkan pewaktu
+      Timer ended: Pewaktu tidur berakhir
+    Zoom:
+      Zoom: Zoom
+      'Off': 'Nonaktif'
+    Auto-generated Caption Template: '{language} (dibuat otomatis)'
+    Up next in {seconds}: Berikutnya dalam {seconds}
+    Resize dock: Ubah ukuran dok
+    Play now: Putar sekarang
+    MusicPlaybackRateOverride: Video musik terdeteksi, diputar pada kecepatan 1x
+    Normal: Normal
+    Set Default: Jadikan Bawaan
+    Hide Annotations: Sembunyikan anotasi
+    Show Annotations: Tampilkan anotasi
+    Hide: Sembunyikan
+    Show: Tampilkan
+    Scroll Mini Player:
+      Back to Top: Kembali ke atas
+      Return to Video Tab: Kembali ke tab video
+      Play: Putar
+      Pause: Jeda
+      Drag Handle: Pindahkan pemutar mini
+    SponsorBlock:
+      CancelCurrentSegment: Batalkan Pembuatan Segmen
+      ClearSegments: Bersihkan Segmen
+      ClearSegmentsPrompt: Anda yakin ingin membersihkan semua draf segmen SponsorBlock untuk video ini?
+      CompleteSegmentsBeforeSubmitting: Lengkapi setiap draf segmen sebelum mengirimkannya.
+      CategoryLabel: Kategori
+      ActionTypeLabel: Jenis segmen
+      DuplicateSegments: Draf segmen duplikat tidak diizinkan.
+      EndAction: (Akhir)
+      EndActionLabel: Akhir
+      EndTimeAfterStart: Waktu akhir segmen harus setelah waktu mulai.
+      EndTimeBeforeVideoEnd: Waktu akhir segmen harus berada dalam durasi video.
+      EndTimeLabel: Waktu akhir segmen
+      DisableAutoSkipTemporarily: Nonaktifkan sementara lewati otomatis SponsorBlock
+      EnableAutoSkipTemporarily: Aktifkan kembali lewati otomatis SponsorBlock
+      Guidelines: Panduan
+      InspectSegment: Periksa
+      InvalidStartTime: Masukkan waktu mulai segmen yang valid.
+      NoSegmentsToSubmit: Buat setidaknya satu segmen lengkap sebelum mengirim.
+      NowAction: (Sekarang)
+      CloseInfoPanel: Tutup info SponsorBlock
+      OpenInfoPanel: Buka info SponsorBlock
+      OpenSubmissionMenu: Buka Menu Pengiriman
+      PreviewRequired: Pratinjau setiap segmen sebelum mengirim.
+      PreviewSegment: Pratinjau
+      SaveSegment: Simpan
+      SetSegmentEndNow: Akhiri Segmen Sekarang
+      StartAction: (Mulai)
+      StartSegmentNow: Mulai Segmen Sekarang
+      SubmissionBadRequest: SponsorBlock menolak permintaan pengiriman.
+      SubmissionDuplicate: Segmen ini sudah pernah dikirim.
+      SubmissionFailed: Gagal mengirim segmen SponsorBlock.
+      SubmissionForbidden: SponsorBlock menolak pengiriman.
+      SubmissionRateLimited: SponsorBlock membatasi laju pengiriman ini.
+      SubmissionSuccess: Segmen SponsorBlock telah dikirim.
+      SubmitSegment: Kirim Segmen
+      SubmitSegments: Kirim
+      StartTimeLabel: Waktu mulai segmen
+      TimeDivider: hingga
+      SkipPrompt: Lewati {segmentCategory}?
+      SkipPromptAction: Lewati
+      SkipToHighlight: Lewati ke Sorotan?
+      SkippedToHighlight: Dilewati ke Sorotan
+      SkipToastUnskip: Batalkan lewati
+      SkipToastReskip: Lewati lagi
+      MutedSegment: '{segmentCategory} Dibisukan'
+      MuteToastUnmute: Bunyikan
+      InfoPanelLoading: Segmen masih dimuat...
+      InfoPanelHasSegments: Video ini memiliki segmen dalam basis data!
+      InfoPanelNoSegments: Segmen tidak ditemukan
+      RefreshSegments: Perbarui segmen
+      RefreshInfo: Perbarui informasi SponsorBlock
+      ContributionStatsTitle: Kontribusi Anda
+      ContributionStatsLoading: Memuat statistik kontribusi...
+      ContributionStatsError: Statistik kontribusi tidak tersedia. Coba perbarui.
+      ContributionStatsNoUserId: Kirim segmen atau impor ID pengguna SponsorBlock Anda untuk melihat statistik kontribusi.
+      Submissions: Pengiriman
+      Segments: Segmen
+      TimeSaved: Waktu yang dihemat
+      AutoSkipEnabled: Lewati segmen secara otomatis
+      AutoSkipOn: 'Aktif'
+      AutoSkipOff: 'Nonaktif'
+      WhitelistChannel: Masukkan saluran ke daftar izin
+      ChannelWhitelisted: Masuk daftar izin
+      RemoveChannelFromWhitelist: Hapus saluran dari daftar izin
+      MuteSegment: Bisukan segmen
+      SkipSegment: Lewati segmen
+      CloseSegmentActions: Tutup tindakan segmen
+      FullVideo: Video Penuh
+      FullVideoLabel: '{segmentCategory} · Video Penuh'
+      MuteActionType: Bisukan
+      MutePrompt: Bisukan {segmentCategory}?
+      SkipActionType: Lewati
+      LockedSegment: Segmen terkunci
+      UpvoteSegment: Beri suara positif
+      DownvoteSegment: Beri suara negatif
+      VoteFailed: Gagal mengirim suara SponsorBlock.
+Playlist:
+  Close Playlist: Tutup Daftar Putar
+Change Format:
+  Local Video File: Berkas video lokal
+  Local Audio File: Berkas audio lokal
+  Online Video: Video daring
+  Stream Source: Sumber stream
+  Stream Extraction Method: Metode ekstraksi stream
+  Playback Engine: Mesin pemutaran
+  Streaming Protocol: Protokol streaming
+  Not Available For This Video: Tidak tersedia untuk video ini
+  Protocols:
+    Progressive: Progresif
+  Descriptions:
+    Local File: Diputar langsung dari berkas unduhan di perangkat ini
+    Online Video: Muat format streaming dari sumber daring yang dikonfigurasi
+    Dash: Kualitas adaptif, beberapa trek audio, dan resolusi tertinggi
+    Legacy: Satu berkas yang menggabungkan video dan audio, terbatas pada resolusi rendah
+    Audio: Hanya audio, berguna untuk menghemat lebar pita atau mendengarkan di latar belakang
+  yt-dlp Fallback Template: 'yt-dlp tidak dapat menyediakan stream, menggunakan mesin bawaan sebagai gantinya: {error}'
+  yt-dlp Default Clients Fallback: Klien yt-dlp pilihan tidak dapat menyediakan stream yang bisa diputar, mencoba klien bawaan yt-dlp sebagai gantinya
+  Built-in Fallback Template: 'Mesin bawaan tidak dapat memutar stream, mencoba yt-dlp sebagai gantinya: {error}'
+Share:
+  Timestamp Link Copied: Tautan stempel waktu disalin ke papan klip
+Context Menu:
+  Context Menu: Menu konteks
+  Select All: Pilih Semua
+  Save Image As…: Simpan Gambar Sebagai…
+  Copy Image: Salin Gambar
+  Copy Image Address: Salin Alamat Gambar
+  Cancel Refresh: Batalkan Pembaruan
+  Reload Videos: Muat Ulang Video
+  Reload Shorts: Muat Ulang Shorts
+  Reload Live: Muat Ulang Siaran Langsung
+  Reload Posts: Muat Ulang Postingan
+  Reload All Feeds: Muat Ulang Semua Umpan
+  Close Multiple Tabs: Tutup {count} Tab
+  Duplicate Tab: Duplikasikan Tab
+  Duplicate Multiple Tabs: Duplikasikan {count} Tab
+  Move Tab: Pindahkan Tab
+  Move Tabs: Pindahkan Tab
+  Move Tab to Group: Pindahkan Tab ke Grup
+  Collapse Group: Ciutkan Grup
+  Move Tabs to Group: Pindahkan Tab ke Grup
+  Manage Tab Groups…: Kelola Grup Tab…
+  To Beginning: Ke Awal
+  To End: Ke Akhir
+  Close Tabs: Tutup Tab
+  To the Top: Ke Atas
+  To the Left: Ke Kiri
+  To the Bottom: Ke Bawah
+  To the Right: Ke Kanan
+  Other Tabs: Tab Lainnya
+  Copy YouTube Link: Salin Tautan YouTube
+  Copy YouTube Links: Salin Tautan YouTube
+  Pin Tab: Sematkan Tab
+  Pin Tabs: Sematkan Tab
+  Unpin Tab: Lepaskan Sematan Tab
+  Unpin Tabs: Lepaskan Sematan Tab
+  Tab Color: Warna Tab
+  Default: Bawaan
+  Purple: Ungu
+  Reopen Closed Tab: Buka Kembali Tab yang Ditutup
+  Reload Tab: Muat Ulang Tab
+  Reload Tabs: Muat Ulang Tab
+  Load Tab: Muat Tab
+  Load Tabs: Muat Tab
+  Unload Tab: Bongkar Tab dari Memori
+  Unload Tabs: Bongkar Tab dari Memori
+  Move Tab to Window: Pindahkan Tab ke Jendela
+  Move Tabs to Window: Pindahkan Tab ke Jendela
+  Open in a New Tab: Buka di Tab Baru
+  Open in a New Window: Buka di Jendela Baru
+  Copy Link: Salin Tautan
+  Copy Invidious Link: Salin Tautan Invidious
+  Search Selection in New Tab: Cari "{selection}" di Tab Baru
+  Search Selection in New Window: Cari "{selection}" di Jendela Baru
+  Search With: Cari dengan {engine}
+  Search With Multiple: Cari dengan...
+  Selection Too Long: Pilihan terlalu panjang untuk dicari (> {count} karakter)
+Tab Organizer:
+  Title: Pengelola Tab
+  Open Tab Count: '{count} tab terbuka'
+  Search Label: Cari tab
+  Selected Count: '{count} tab dipilih'
+  Tab Count: '{count} tab'
+  Select All: Pilih Semua
+  Select None: Batalkan Semua Pilihan
+  Move To Group: Pindahkan tab terpilih ke grup
+  Choose Group: Pilih grup
+  Ungrouped: Tanpa grup
+  Pin: Sematkan
+  Unpin: Lepaskan sematan
+  Load: Muat
+  Unload: Bongkar dari memori
+  Unload All: Bongkar Semua dari Memori
+  Close All: Tutup Semua
+  Ungroup: Keluarkan dari grup
+  Group Name: Nama grup
+  Color: Warna
+  No Color: Tanpa warna
+  Create Group: Buat Grup
+  Expand Group: Bentangkan grup
+  Collapse Group: Ciutkan grup
+  Expand Group Label: Bentangkan {name}, {count} tab
+  Rename Group: Ubah nama {name}
+  Change Group Color: Ubah warna {name}
+  Move To Window: Pindahkan ke Jendela
+  Choose Window: Pilih jendela
+  Select Tab: Pilih {title}
+  Active: Aktif
+  Pinned: Disematkan
+  Unloaded: Dibongkar dari memori
+  Playing: Sedang diputar
+  Close Tab: Tutup {title}
+  No Open Results: Tidak ada tab terbuka yang cocok dengan pencarian ini.
+  Recently Closed: Baru Saja Ditutup
+  Clear: Bersihkan
+  No Closed Results: Tidak ada tab yang baru ditutup dan cocok dengan pencarian ini.
+  Drag Tab: Seret untuk memindahkan ke grup
+Chapters:
+  Open Chapters: Buka Bab
+  Close Chapters: Tutup Bab
+  Copy Timestamp Link: Salin tautan pada {timestamp}
+Comments:
+  Comment Count: '{count} Komentar'
+  Show Comments: Tampilkan Komentar
+  Getting comment replies, please wait: Mengambil balasan komentar, harap tunggu
+  Reload Comments: Muat Ulang Komentar
+  Reply Count: '{replyCount} balasan'
+  Comments are turned off: Komentar dinonaktifkan
+  YouTube did not provide advertised replies: YouTube menunjukkan bahwa komentar ini memiliki balasan, tetapi tidak menyediakannya. Balasan mungkin telah dihapus atau disembunyikan, jadi tombol balasan dihilangkan.
+  Pinned by you: Disematkan oleh Anda
+  A reply is pinned: Balasan disematkan
+  Filter loaded comments: Filter komentar yang telah dimuat
+  Comment filters: Filter komentar
+  From creator: Dari kreator
+  Contains timestamps: Memuat stempel waktu
+  Pin comment by author: Sematkan komentar dari {author}
+  Unpin comment by author: Lepaskan sematan komentar dari {author}
+  Edited: (diedit)
+  Highlighted comment: Komentar yang disorot
+  Highlighted reply: Balasan yang disorot
+  Search loaded comments: Cari komentar yang telah dimuat
+  Loaded comment search result count: '{count} dari {total} komentar yang telah dimuat'
+  No loaded comments match your filters: Tidak ada komentar yang telah dimuat dan cocok dengan filter Anda
+  YouTube comment link copied to clipboard: Tautan komentar YouTube disalin ke papan klip
+  Translate to {language}: Terjemahkan ke {language}
+  Show original: Tampilkan teks asli
+  Translating comment, please wait: Menerjemahkan komentar, harap tunggu
+  Comment translation failed: Terjemahan komentar gagal
+Description:
+  Copy Description: Salin Deskripsi
+  Description Copied: Deskripsi disalin ke papan klip
+  Video Category: 'Kategori Video:'
+  Video Tags: Tag Video
+  Games: Gim
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: Isi bagian yang belum diterjemahkan manusia dengan teks buatan AI. Terjemahan manusia selalu diutamakan.
+    Update Relative Timestamps: Memperbarui stempel waktu relatif di seluruh aplikasi selama halaman tetap terbuka. Jika dinonaktifkan, stempel waktu hanya diperbarui setelah halaman dimuat ulang atau dikunjungi kembali.
+    Stream Extraction Method: |
+      Pilih cara OpenTubeX memperoleh stream video. yt-dlp harus tersedia jika dipilih.
+      Video mungkin membutuhkan waktu lebih lama untuk dimulai saat menggunakan yt-dlp.
+      Metode bawaan tidak mendukung pencarian posisi pada siaran langsung dan premiere.
+    Avoid translation: |
+      Nonaktifkan terjemahan otomatis YouTube untuk judul, deskripsi, dan bab video.
+      Terlalu banyak permintaan, seperti mengambil judul video dari berbagai daftar, dapat
+      mengurangi keandalan aplikasi untuk sementara.
+    Show Thumbnail Previews: Tampilkan pratinjau animasi saat penunjuk berada di atas gambar mini video.
+    Startup Behavior: |
+      Pilih tindakan OpenTubeX saat dimulai.
+      Muat semua tab langsung memulihkan setiap tab tersimpan, tetapi tab latar belakang tidak memutar video secara otomatis.
+      Muat tab yang sebelumnya dimuat akan memuat ulang tab yang aktif saat OpenTubeX ditutup dan membiarkan tab lain dibongkar dari memori.
+      Muat tab yang terakhir aktif memulihkan sesi sebelumnya dengan tab lain terbuka tetapi dibongkar dari memori. Tab tersebut dimuat saat Anda mengekliknya.
+      Mulai dengan sesi kosong mengabaikan tab tersimpan dan membuka jendela baru.
+    Remember Tab Navigation History: Riwayat navigasi mundur dan maju setiap tab disimpan lalu dipulihkan saat OpenTubeX dimulai ulang.
+  Proxy Settings:
+    IP Block Recovery Script Path: Jalur berkas skrip yang dijalankan saat blokir IP terdeteksi. OpenTubeX menunggu skrip selesai, lalu memuat ulang video. Jika metode cadangan diaktifkan, skrip hanya berjalan ketika metode cadangan juga gagal.
+  Player Settings:
+    Enable Caption Translations: Jika diaktifkan, tombol takarir dan pintasan C akan memilih trek yang diterjemahkan otomatis ke bahasa takarir pilihan jika video tidak menyediakan trek asli yang cocok.
+    Use Quick Playback Speed Bar: Menampilkan bilah kecepatan pemutaran cepat di sisi kanan kontrol pemutar. Jika penyimpanan kecepatan pemutaran manual per saluran diaktifkan, bilah juga memuat tombol untuk menyimpan kecepatan bagi saluran saat ini.
+    Multiply Seek Interval by Playback Rate: Jika diaktifkan, interval pencarian posisi (tombol panah dan J/L) dikalikan dengan kecepatan pemutaran saat ini. Jika dinonaktifkan, interval tetap sama pada kecepatan pemutaran apa pun.
+    Show Playback Rate Adjusted Timestamp: Jika diaktifkan dan kecepatan pemutaran bukan 1x, pemutar menampilkan stempel waktu yang disesuaikan dengan kecepatan pemutaran dalam tanda kurung setelah stempel waktu biasa.
+    Use YouTube-style Shorts: Menampilkan Shorts dalam kisi potret pada halaman langganan dan saluran, serta menggunakan pemutar Shorts bergaya YouTube.
+    Loop Shorts: Jika diaktifkan, Shorts dimulai ulang secara otomatis. Jika dinonaktifkan, Shorts berhenti di akhir dan menampilkan tombol putar ulang.
+    Show Skip Silence Toggle: Menampilkan tombol aktif/nonaktif untuk melewati bagian hening dalam menu pengaturan pemutar.
+    Enable Skip Silence by Default: Mengaktifkan fitur lewati bagian hening untuk tab baru. Mengubahnya di satu tab tidak memengaruhi tab lain.
+    Enable Video Zoom: Menampilkan kontrol Zoom dalam menu pengaturan pemutar dan mengaktifkan pintasan papan ketik serta kontrol gesernya.
+    Voice-over Translation: Mengirim ID video, durasi, dan bahasa yang dipilih ke layanan tidak resmi terjemahan sulih suara Yandex saat Anda meminta terjemahan. Nonaktif secara bawaan.
+    Hold to Double Playback Speed: Tahan tombol Spasi atau tombol kiri tetikus di atas pemutar untuk menggandakan sementara kecepatan pemutaran saat ini.
+    Ambient Mode: Memadukan warna video dengan area di sekitar pemutar.
+    Default Volume: Dinonaktifkan selama Ingat Volume aktif. Nonaktifkan Ingat Volume untuk menetapkan volume awal yang tetap bagi setiap video.
+    Parallel Segment Loading: |
+      Jumlah segmen video dan audio yang dimuat sekaligus sebelum pemutaran.
+      Nilai yang lebih tinggi dapat membantu pada koneksi lambat atau tidak stabil, tetapi menggunakan lebih banyak lebar pita dan memori.
+      Nilai tersebut juga dapat membuat Otomatis memperkirakan kecepatan koneksi terlalu rendah dan memilih kualitas yang lebih rendah.
+      Stream yang dibatasi satu permintaan pada satu waktu mengabaikan pengaturan ini.
+  Download Settings:
+    Download Folder: Video disimpan ke folder ini. Biarkan kosong untuk menggunakan folder Unduhan sistem.
+    Global Additional yt-dlp Arguments: Argumen baris perintah tambahan yang diteruskan ke yt-dlp untuk setiap unduhan, misalnya --cookies-from-browser firefox.
+    Concurrent Downloads: Jumlah maksimum tugas yt-dlp yang dapat berjalan sekaligus.
+    Bandwidth Limit: Membatasi total laju transfer antrean dengan membagi batas ini di antara tugas yang berjalan serentak. Masukkan 0 untuk tanpa batas.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX dapat menggunakan yt-dlp yang terpasang di sistem atau mengunduh dan mengelola salinan yt-dlp sendiri yang disimpan di direktori data pengguna.
+    yt-dlp Channel: Pilih kanal rilis yt-dlp yang akan diunduh dan dikelola OpenTubeX. Stabil disarankan untuk sebagian besar pengguna.
+    FFmpeg Source: OpenTubeX dapat menggunakan FFmpeg dan FFprobe yang terpasang di sistem atau mengunduh dan mengelola build statis sendiri yang disimpan di direktori data pengguna.
+    Managed Tool Updates: Pilih apakah alat terkelola diperbarui secara otomatis, meminta konfirmasi sebelum diperbarui, atau hanya diperbarui melalui tombol manual. Alat yang hilang tetap diunduh saat diperlukan.
+    yt-dlp Executable Path: Secara bawaan, OpenTubeX menganggap yt-dlp dapat ditemukan melalui variabel lingkungan PATH. Jika perlu, tentukan jalur khusus di sini.
+    Cookie Source: Pilih apakah yt-dlp harus membaca berkas kuki Netscape atau kuki dari peramban yang terpasang untuk pemutaran terautentikasi.
+    Cookie File: Pilih berkas kuki berformat Netscape untuk pemutaran terautentikasi.
+    Browser for Cookies: Dukungan peramban dibaca dari program yt-dlp yang dipilih. OpenTubeX meminta yt-dlp membaca peramban ini saat pemutaran terautentikasi diminta.
+    Browser Profile: Nama atau folder profil peramban opsional. Biarkan kosong untuk menggunakan profil yang terakhir diakses.
+    Always Use Cookies: Gunakan kuki yang telah dikonfigurasi setiap kali yt-dlp mengekstrak stream. Opsi ini tidak mengubah metode ekstraksi stream menjadi yt-dlp. Jika yt-dlp dipilih, format khusus akun mungkin tersedia, termasuk laju bit lebih tinggi YouTube Premium jika akun memiliki akses.
+    FFmpeg Executable Path: FFmpeg diperlukan untuk menggabungkan stream video dan audio terpisah serta mengonversi audio. Secara bawaan, OpenTubeX menganggap FFmpeg dapat ditemukan melalui variabel lingkungan PATH. Jika perlu, tentukan jalur khusus di sini.
+  Distraction Free Settings:
+    Shorten View Counts: Menampilkan jumlah penayangan dan suka komentar yang telah dibulatkan YouTube dalam bentuk singkat, misalnya 14 rb, bukan 14.000. Jumlah persis selalu ditampilkan penuh.
+  Subscription Settings:
+    Fetch Feed on Startup: Jika diaktifkan, OpenTubeX otomatis mengambil umpan langganan saat aplikasi dimulai dan ketika jendela baru dibuka.
+    Show New Content Feed: Menampilkan tab Baru yang berisi item umpan langganan yang belum ada saat pengambilan sebelumnya.
+    Show New Content Indicators: Menampilkan titik kecil di sebelah item umpan langganan yang belum ada saat pengambilan sebelumnya.
+    Show Scheduled Live Streams / Premieres First: Mempertahankan siaran langsung dan premiere mendatang di bagian atas umpan langganan. Jika dinonaktifkan, item tetap pada posisi pengumuman hingga dimulai. Perbarui umpan langganan satu kali setelah menonaktifkannya untuk mengambil tanggal pengumuman entri terjadwal yang sudah ada.
+    Auto Refresh Interval: Frekuensi OpenTubeX memperbarui umpan langganan secara otomatis selama aplikasi terbuka.
+  Theme Settings:
+    Show Progress as Notification: Menampilkan notifikasi tetap dengan progres langsung untuk operasi latar belakang, seperti pembaruan langganan dan unduhan alat terkelola, sebagai pengganti bilah progres global.
+    Always Show Scrollbars: Mempertahankan bilah gulir agar selalu terlihat. Jika dinonaktifkan, bilah memudar sesaat setelah Anda berhenti menggerakkan tetikus dan muncul kembali begitu tetikus digerakkan.
+    Use Fixed Tab Width: Memberi setiap tab pada bilah tab horizontal lebar yang sama, bukan menyesuaikan lebar dengan judulnya.
+    Use Grid Player Menu: Menyusun menu pengaturan pemutar video sebagai kisi ubin, bukan daftar baris.
+The playlist is at the beginning. Enable loop to continue playing: Daftar putar berada di awal. Aktifkan pengulangan untuk melanjutkan pemutaran
+External link opening has been disabled in Settings → Privacy: Pembukaan tautan eksternal telah dinonaktifkan di Pengaturan → Privasi
+KeyboardShortcutPrompt:
+  Edit Hint: Pilih pintasan, lalu tekan kombinasi tombol baru. Tekan Backspace atau Delete untuk menghapus penetapannya.
+  Change Shortcut: Ubah pintasan untuk {action}
+  Press Shortcut: Tekan pintasan…
+  Unassigned: Belum ditetapkan
+  Reset Shortcut: Atur ulang pintasan untuk {action}
+  Reset to Defaults: Atur ulang ke bawaan
+  Shortcut Already Assigned: Pintasan sudah ditetapkan
+  Shortcut Conflict: '{shortcut} sudah ditetapkan untuk {actions}. Ingin menetapkannya ulang?'
+  Reserved Shortcut Conflict: '{shortcut} dicadangkan untuk {actions} dan tidak dapat ditetapkan ulang.'
+  Reassign: Tetapkan ulang
+  Sections:
+    App:
+      Tabs: "Aplikasi:\_Tab"
+      Search and Page: "Aplikasi:\_Pencarian & Halaman"
+      Window and View: "Aplikasi:\_Jendela & Tampilan"
+  New Tab: Buat tab baru
+  Close Tab: Tutup tab saat ini
+  Reload Tab: Muat ulang tab saat ini
+  Reopen Closed Tab: Buka kembali tab yang terakhir ditutup
+  Next Tab: Beralih ke tab berikutnya
+  Previous Tab: Beralih ke tab sebelumnya
+  Switch to Tab: Beralih ke tab 1–9
+  Toggle Tab Orientation: Beralih antar-tata letak tab
+  Find in Page: Cari teks di halaman saat ini
+  Find Next Match: Lompat ke hasil berikutnya
+  Find Previous Match: Lompat ke hasil sebelumnya
+  Toggle Normal Playback Speed: Beralih antara kecepatan 1x dan kecepatan pemutaran sebelumnya
+  Toggle Skip Silence: Aktifkan atau nonaktifkan lewati bagian hening
+  Video Zoom In: Perbesar video
+  Video Zoom Out: Perkecil video
+  Tab Switcher: Pengalih tab
+CommandPalette:
+  Title: Palet perintah
+  Open: Buka palet perintah
+  Search Label: Cari perintah
+  Search Placeholder: Cari perintah dan pengaturan…
+  Results: Perintah
+  No Results: Tidak ada perintah yang cocok
+  Result Count: '{count} perintah ditemukan'
+  Move: Pindah
+  Run: Jalankan
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Beralih ke tab: {title}'
+  Switch Profile: 'Ganti profil: {name}'
+  Open Playlist: 'Buka daftar putar: {name}'
+  Cancel Download: 'Batalkan unduhan: {title}'
+  Groups:
+    App: Aplikasi
+    Navigation: Navigasi
+    Tabs: Tab
+  Unavailable:
+    Current Page: Sudah berada di halaman ini
+    No History: Tidak ada halaman ke arah ini
+    Desktop: Hanya tersedia di aplikasi desktop
+    Build: Tidak tersedia dalam build ini
+    One Tab: Buka tab lain terlebih dahulu
+    Active Tab: Ini tab aktif
+    Active Profile: Ini profil aktif
+    Download Finished: Unduhan ini tidak lagi berjalan
+    Video: Buka video terlebih dahulu
+Downloads:
+  Download: Unduh
+  Download Video: Unduh Video
+  Download Playlist: Unduh Daftar Putar
+  Downloading: Mengunduh
+  Queue: Antrean
+  Downloaded: Diunduh
+  Canceled: Dibatalkan
+  Open Downloads: Buka Unduhan
+  No Downloads: Belum ada unduhan
+  No Downloads Description: Unduhan yang Anda mulai akan muncul di sini.
+  Clear Failed Canceled Skipped And Missing: Bersihkan yang gagal, dibatalkan, dilewati, dan hilang
+  Clear From List: Hapus dari Daftar
+  Show in Folder: Tampilkan di Folder
+  Play Download: Putar unduhan
+  Retry Download: Coba lagi unduhan
+  Pause Download: Jeda unduhan
+  Resume Download: Lanjutkan unduhan
+  Move Earlier: Pindahkan lebih awal
+  Move Later: Pindahkan lebih akhir
+  Pause All: Jeda semua
+  Resume All: Lanjutkan semua
+  Retry All: Coba lagi semua unduhan yang gagal
+  Total Size: 'Ukuran total: {size}'
+  Local File: Berkas lokal
+  Available Offline: Tersedia luring
+  Remove File: Hapus Berkas
+  Remove File Confirmation: Hapus berkas yang diunduh?
+  Remove File Warning: Tindakan ini akan memindahkan "{title}" ke tempat sampah perangkat.
+  File Not Found: Berkas yang diunduh tidak dapat ditemukan.
+  Download Missing: Unduhan tidak tersedia
+  Files Missing: Berkas yang diunduh tidak lagi tersedia di sistem berkas.
+  Files Available: '{available} dari {total} berkas unduhan tersedia.'
+  More Files: '{count} berkas lainnya'
+  Template Used: 'Templat: {name}'
+  Download Type: Jenis Unduhan
+  Template: Templat
+  Unsaved: Belum disimpan
+  Media Type: Jenis Media
+  Video: Video
+  Audio: Audio
+  Maximum Resolution: Resolusi Maksimum
+  Best Available: Terbaik yang Tersedia
+  Automatic: Otomatis
+  Container: Container
+  Video Codec: Kodek Video
+  Audio Codec: Kodek Audio
+  File Name Template: Templat Nama Berkas
+  File Name Template Help: 'Kolom yang tersedia: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Rentang Waktu dan Bab
+  Start Time: Waktu Mulai (HH:MM:SS)
+  End Time: Waktu Akhir (HH:MM:SS)
+  Split by Chapters: Pisahkan menjadi berkas tersendiri per bab
+  Remove Segments: Hapus segmen
+  Subtitles and Metadata: Takarir dan Metadata
+  Include Subtitles: Sertakan takarir
+  Embed Subtitles: Sematkan takarir dalam berkas media
+  Subtitle Format: Format Takarir
+  Subtitle Languages: Bahasa Takarir
+  Subtitle Languages Help: 'Pemilih bahasa yt-dlp yang dipisahkan koma, misalnya: en.*,de.*'
+  Embed Cover Art: Sematkan gambar mini sebagai sampul
+  Embed Metadata: Sematkan judul, pembuat, deskripsi, dan bab
+  Additional yt-dlp Arguments: Argumen Tambahan yt-dlp
+  Custom yt-dlp Arguments: Argumen Khusus yt-dlp
+  Template Name: Nama Templat
+  Save Template: Simpan Templat
+  Delete Template: Hapus Templat
+  Template Saved: Templat unduhan "{name}" disimpan
+  Template Name Exists: Templat unduhan bernama "{name}" sudah ada.
+  Choose Folder: Ubah
+  Select Folder: Pilih Folder
+  Folder Required: Pilih folder unduhan untuk mengaktifkan unduhan.
+  System Downloads Folder: Folder Unduhan Sistem
+  Processing: Memproses…
+  Queued: Dalam antrean
+  Queued Position: Dalam antrean, posisi {position}
+  Paused: Dijeda
+  Pausing: Tugas saat ini akan diselesaikan, lalu antrean dijeda
+  Download Complete: Unduhan selesai
+  Download Cancelled: Unduhan dibatalkan
+  Download Failed: Unduhan gagal
+  File Name Shortened: Nama berkas dipersingkat karena judul video terlalu panjang.
+  Insufficient Disk Space: Ruang disk tidak cukup. Diperlukan sekitar {required} dan tersedia {available}.
+  Unknown Download Size: Ukuran unduhan tidak diketahui. Tersedia {available} pada sistem berkas tujuan.
+  Disk Space Check Unavailable: Ruang disk yang tersedia tidak dapat diperiksa sebelum unduhan dimulai.
+  Download Failure Hint: Periksa {issuesLink}, lalu coba ubah kanal yt-dlp ke Nightly atau Master di Pengaturan → Lanjutan → Perangkat Lunak Eksternal.
+  yt-dlp YouTube Issues: masalah terbaru yt-dlp untuk YouTube
+  Automatic Download Started: Unduhan otomatis dimulai
+  Automatic Download Started Body: Mengunduh "{title}" dari {channel} di latar belakang.
+  Automatic Download Complete: Unduhan otomatis selesai
+  Automatic Download Failed: Unduhan otomatis gagal
+  Automatic Download Could Not Start: Tidak dapat memulai unduhan otomatis "{title}".
+  Automatic Download Skipped: Dilewati oleh filter unduhan otomatis
+  Cancel Download: Batalkan Unduhan
+  yt-dlp Not Found: yt-dlp tidak ditemukan. Pasang yt-dlp atau tentukan jalurnya di Pengaturan → Lanjutan → Perangkat Lunak Eksternal.
+  Download Complete Template: Unduhan "{title}" telah selesai
+  Download Failed Template: Unduhan "{title}" gagal
+  Templates:
+    Video Best: Video - Kualitas Terbaik
+    Video Resolution: Video - {resolution}
+    Audio Best: Audio - Kualitas Terbaik
+    Audio Format: Audio - {format}
+    Subtitles Format: Takarir - {format}

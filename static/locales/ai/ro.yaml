@@ -1,0 +1,1507 @@
+# Optional AI-generated translations for keys missing from ../ro.yaml.
+Color Picker:
+  Hue: Nuanță
+  Opacity: Opacitate
+  Backdrop Blur: Estomparea fundalului
+  Hex Color: Culoare hexazecimală
+  Apply Color: Aplică
+  Reset Color: Resetează
+  Copy Color: Copiază
+  Copy From Another Color: Copiază din altă culoare
+  Color Copied: Culoare copiată
+  Invalid Color: Introduceți o culoare hexazecimală validă
+  Clipboard Unavailable: Clipboard indisponibil
+  Saturation and Brightness: Saturație și luminozitate
+New Tab: Filă nouă
+Maximize: Maximizează
+Restore: Restaurează
+Close Tab: Închide fila
+Close Confirmation:
+  Title: Închideți OpenTubeX?
+  Message: Sigur doriți să închideți OpenTubeX?
+  Quit: Închide
+  Never Ask Again: Nu mai întreba
+Close Window Confirmation:
+  Title: Închideți fereastra?
+  Message: Această fereastră conține {count} filă. Sigur doriți să o închideți? | Această fereastră conține {count} file. Sigur doriți să o închideți?
+  Close Window: Închide fereastra
+Confirmations:
+  Never Ask Again: Nu mai întreba
+  Settings Hint: Puteți reactiva această confirmare în Setări → General → Confirmare înainte de…
+Close Multiple Tabs Confirmation:
+  Title: Închideți mai multe file?
+  Message: Se va închide {count} filă. | Se vor închide {count} file.
+  Close Tabs: Închide {count} filă | Închide {count} file
+Load Multiple Tabs Confirmation:
+  Title: Încărcați mai multe file?
+  Message: Se va încărca {count} filă. | Se vor încărca {count} file.
+  Load Tabs: Încarcă {count} filă | Încarcă {count} file
+Unload Multiple Tabs Confirmation:
+  Title: Descărcați mai multe file din memorie?
+  Message: Se va descărca {count} filă din memorie. | Se vor descărca {count} file din memorie.
+  Unload Tabs: Descarcă {count} filă din memorie | Descarcă {count} file din memorie
+Use Vertical Tabs: Folosește file verticale
+Use Horizontal Tabs: Folosește file orizontale
+Resize Tab Bar: Redimensionează bara de file
+Find in page: Caută în pagină
+Previous match: Potrivirea anterioară
+Next match: Potrivirea următoare
+Close find bar: Închide bara de căutare
+No matches: Nicio potrivire
+Version {versionNumber} is now available.: Versiunea {versionNumber} este disponibilă.
+See changes and update: Vedeți modificările și actualizați
+Dismiss: Închide
+Update to {version}: Actualizează la {version}
+Global:
+  Ambient Mode: Mod ambiental
+  Loading More: Se încarcă mai multe
+  New: Nou
+Search Listing:
+  Label:
+    Members Only: Numai pentru membri
+Stats:
+  Stats: Statistici
+  Watch time summary: Rezumatul duratei de vizionare
+  Today: Astăzi
+  This week: Săptămâna aceasta
+  Total watch time: Durată totală de vizionare
+  Daily average: Medie zilnică
+  So far today: Până acum, astăzi
+  Since: Din {day}
+  All recorded time: Întreaga perioadă înregistrată
+  Per calendar day: Pe zi calendaristică
+  Day by day: Pe zile
+  Highest: 'Maxim: {duration}'
+  Week by week: Pe săptămâni
+  Last 14 days: Ultimele 14 zile
+  Last 8 weeks: Ultimele 8 săptămâni
+  Daily chart aria: Durata zilnică de vizionare din ultimele 14 zile
+  Weekly chart aria: Durata săptămânală de vizionare din ultimele 8 săptămâni
+  No data: Durata de vizionare va apărea aici pe măsură ce vizionați videoclipuri.
+  Estimate note: Durata de vizionare anterioară acestei actualizări este estimată pe baza progresului de redare salvat.
+  Adjust imported watch time: Ajustează durata de vizionare importată
+  Imported watch time: Durată de vizionare importată
+  Imported watch time explanation: Alegeți viteza de redare folosită de obicei. Duratele videoclipurilor importate vor fi împărțite la această viteză pentru a estima timpul efectiv petrecut vizionând.
+  Playback speed: Viteză de redare
+  Channel speed note: Când sunt disponibile, se folosesc în schimb vitezele de redare salvate pentru canale.
+  Apply playback speed: Aplică viteza de redare
+  Imported watch time adjusted: Durata de vizionare importată a fost ajustată
+  Reset statistics: Resetează statisticile
+  Reset: Resetează
+  Reset confirmation: Sigur doriți să resetați toate statisticile de vizionare? Această acțiune nu poate fi anulată.
+  Reset success: Statisticile de vizionare au fost resetate
+  Less than a minute: < 1 min
+  Minutes: '{minutes} min'
+  Hours: '{hours} h'
+  Hours and minutes: '{hours} h {minutes} min'
+Subscriptions:
+  Refreshing Subscription Videos: Se reîmprospătează videoclipurile din abonamente
+  Refreshing Subscription Shorts: Se reîmprospătează videoclipurile Shorts din abonamente
+  Refreshing Subscription Live Streams: Se reîmprospătează transmisiunile în direct din abonamente
+  Refreshing Subscription Posts: Se reîmprospătează postările din abonamente
+  New Content: Conținut nou
+  New Feed Refresh Warning Title: Reîmprospătați toate fluxurile de abonamente?
+  New Feed Refresh Warning: Reîmprospătarea fără RSS a tuturor tipurilor de conținut pentru 1 abonament poate dura mult. Doriți să continuați? | Reîmprospătarea fără RSS a tuturor tipurilor de conținut pentru {count} abonamente poate dura mult. Doriți să continuați? | Reîmprospătarea fără RSS a tuturor tipurilor de conținut pentru {count} de abonamente poate dura mult. Doriți să continuați?
+  New Since Last Refresh: Nou de la ultima reîmprospătare
+  Mark as Seen: Marchează ca văzut
+  Mark All as Seen: Marchează totul ca văzut
+  No New Content: Nu există conținut nou.
+  New Content Tabs: File pentru conținut nou
+  Show Tabbed View: Afișează vizualizarea cu file
+  Show Combined View: Afișează vizualizarea combinată
+  Newest First: Cele mai noi primele
+  Oldest First: Cele mai vechi primele
+Trending:
+  Load Error: Tendințele nu au putut fi încărcate.
+  Unsupported Backend: Tendințele necesită API-ul local. Selectați API-ul local sau activați furnizorul de rezervă.
+Most Popular Feed Empty: Fluxul „Cele mai populare” al acestei instanțe Invidious este gol.
+Feed:
+  Cancel Refresh: Anulează reîmprospătarea
+  Next Auto Refresh: 'Următoarea reîmprospătare automată: {date}'
+User Playlists:
+  Load More Playlists: Încarcă mai multe playlisturi
+  Save to: Salvează în…
+  Quick Bookmark Icon: Pictogramă pentru marcaj rapid
+  Custom Emoji: Emoji personalizat
+  Choose Image: Alege imaginea
+  Use Bookmark Icon: Folosește pictograma marcajului
+  SinglePlaylistView:
+    Retry: Reîncearcă
+    This playlist could not be loaded.: Acest playlist nu a putut fi încărcat.
+    More videos could not be loaded.: Nu au putut fi încărcate mai multe videoclipuri.
+History:
+  Mark All As Watched: Marchează totul ca vizionat
+  Mark All As Watched Confirmation: Sigur doriți să marcați ca vizionate toate videoclipurile din istoric?
+  All History Marked as Watched: Toate videoclipurile din istoric au fost marcate ca vizionate
+  Delete Old History: Șterge istoricul vechi
+  Select History Age: Alegeți vechimea minimă a unei înregistrări pentru a fi ștearsă.
+  Delete Entries Older Than: Șterge înregistrările mai vechi de
+  Number of Days: Număr de zile
+  History Cleanup Warning: Această acțiune șterge definitiv înregistrările corespunzătoare din istoricul vizionărilor.
+  1 Day: 1 zi
+  1 Week: 1 săptămână
+  1 Month: 1 lună
+  3 Months: 3 luni
+  1 Year: 1 an
+  Custom: Personalizat
+  History Older Than Days Removed: Istoricul vizionărilor mai vechi de 1 zi a fost șters | Istoricul vizionărilor mai vechi de {days} zile a fost șters | Istoricul vizionărilor mai vechi de {days} de zile a fost șters
+Settings:
+  Quick Settings:
+    Quick Settings: Setări rapide
+    Appearance: Aspect
+    Playback: Redare
+    Content: Conținut
+    Language and Region: Limbă și regiune
+    All Settings: Toate setările
+    Profile Selector Hint: Puteți schimba profilul și făcând clic dreapta pe pictograma profilului
+  Categories:
+    General Description: Limbă, pornire, file și comportamentul aplicației
+    Appearance: Aspect
+    Appearance Description: Temă, aranjament și miniaturi
+    Content appearance: Liste de videoclipuri și miniaturi
+    Layout: Aranjament
+    Playback Description: Player, subtitrări și preferințe pentru canale
+    Subscriptions Description: Opțiuni de reîmprospătare și afișare a fluxului
+    Downloads Description: Foldere, șabloane și reguli automate
+    Distraction Free Description: Ascundeți conținutul și stabiliți limite de vizionare
+    Add-ons: Suplimente
+    Add-ons Description: SponsorBlock, DeArrow, aprecieri negative și traducere vocală
+    Privacy Description: Confidențialitatea vizionării și controlul accesului
+    Online activity: Activitate online
+    Data And Storage Description: Import, export, spațiu pe disc și curățare
+    Sync Description: Sincronizați setările și datele între dispozitive
+    Advanced: Avansat
+    Advanced Description: Furnizori, aplicații externe și rețea
+    Alternative providers: Furnizori de videoclipuri și metadate
+  Highlight Changed Settings: Evidențiază setările diferite de valorile implicite
+  Reset Setting to Default: Resetează această setare la valoarea implicită
+  Performance Impact:
+    Show Performance Impact: Afișează indicatorii impactului asupra performanței
+    Moderate: Impact moderat
+    High: Impact ridicat
+    Description: Această setare poate crește utilizarea resurselor {resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: memorie
+      Network: rețea
+      Disk: disc
+  General Settings:
+    Update Relative Timestamps: Menține actualizate marcajele temporale relative
+    Stream Extraction Method:
+      Stream Extraction Method: Metodă de extragere a fluxului
+      yt-dlp: yt-dlp
+      Built-in: Încorporată
+    Confirm Before: Confirmare înainte de…
+    Confirmation Options:
+      Closing App: Închiderea OpenTubeX
+      Closing Window: Închiderea unei ferestre cu mai multe file
+      Closing Tabs: Închiderea mai multor file
+      Loading Tabs: Încărcarea mai multor file
+      Unloading Tabs: Descărcarea din memorie a mai multor file
+    Remember Tab Navigation History: Reține istoricul de navigare al filelor
+    New Tab Position:
+      New Tab Position: Poziția filei noi
+      At the end: La sfârșit
+      After current tab: După fila curentă
+      After current tab in opened order: După fila curentă, în ordinea deschiderii
+    Tab Close Focus:
+      Tab Close Focus: După închiderea unei file
+      Previous tab: Selectează fila anterioară
+      Next tab: Selectează fila următoare
+    Startup Behavior:
+      Startup Behavior: La pornire
+      Load all tabs: Încarcă toate filele
+      Load previously loaded tabs: Încarcă filele încărcate anterior
+      Load last active tab: Încarcă ultima filă activă
+      Start with an empty session: Pornește cu o sesiune goală
+    Use AI Translation Completions: Folosește completări de traducere generate de IA
+    Reduced Motion:
+      Reduced Motion: Mișcare redusă
+      System: Sistem
+      Force On: Activează forțat
+      Force Off: Dezactivează forțat
+    Comment Translation:
+      Title: Traducerea comentariilor
+      Enable: Activează traducerea comentariilor
+      Never Translate: Nu traduce niciodată comentariile în
+      Choose Language: Alegeți o limbă
+      Description: Comentariile în limba aplicației sunt deja excluse. Adăugați orice alte limbi pe care le puteți citi.
+      Remove Language: Tradu din nou comentariile în {language}
+    Avoid translation:
+      Avoid translation: Preferă textul netradus al videoclipurilor
+      Disabled: Dezactivată
+      Watch Only: Numai interfața videoclipului
+      Entire App: Întreaga aplicație
+    Playlist View Type:
+      Playlist View Type: Tipul vizualizării playlistului
+    Show Thumbnail Previews: Afișează previzualizările miniaturilor
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Buton suplimentar de acțiune pe miniatură
+      None: Niciunul
+      Mark as Watched: Marchează ca vizionat
+      Copy YouTube Link: Copiază linkul YouTube
+      Open in YouTube: Deschide în YouTube
+  Context Menu Search Settings:
+    Context Menu Search Settings: Căutare din meniul contextual
+    Description: Alegeți motoarele de căutare care apar când faceți clic dreapta pe textul selectat. Căutările se deschid în browserul implicit.
+    Icon Hint: Activarea unui motor contactează site-ul acestuia pentru a încărca faviconul.
+    Engine Name: Numele motorului
+    Search URL: Adresa URL de căutare
+    URL Hint: Folosiți %s în locul unde adresa URL trebuie să conțină textul selectat codificat.
+    Add Custom Engine: Adaugă un motor personalizat
+    Add Engine: Adaugă motorul
+    Remove Engine: Elimină {engine}
+    Invalid Engine: Introduceți un nume și o adresă URL de căutare HTTP sau HTTPS validă, care conține %s.
+    Engine Limit: Puteți adăuga până la {count} motoare de căutare personalizate.
+  Theme Settings:
+    Move Downloads to App Header: Mută Descărcări în antetul aplicației
+    Move Settings to App Header: Mută Setări în antetul aplicației
+    Hide Side Bar on Watch Pages: Ascunde bara laterală pe paginile de vizionare
+    UI Roundness: Rotunjirea interfeței
+    Scrollbar Width: Lățimea barei de derulare
+    Animation Speed: Viteza animațiilor
+    Thumbnail Size: Dimensiunea miniaturilor
+    Show Tab Icons: Afișează pictogramele filelor
+    Load Missing Tab Icons: Încarcă pictogramele lipsă ale filelor
+    Loading Missing Tab Icons: Se încarcă pictogramele lipsă ale filelor…
+    No Missing Tab Icons: Toate pictogramele de filă acceptate sunt deja încărcate
+    Loaded Tab Icons: 'S-a încărcat pictograma de filă lipsă: {count} | S-au încărcat pictogramele de filă lipsă: {count} | S-au încărcat pictogramele de filă lipsă: {count}'
+    Loaded Tab Icons With Failures: S-au încărcat {loaded} pictograme de filă; {failed} nu au putut fi încărcate
+    Show Tab Previews: Afișează previzualizările filelor
+    Use Fixed Tab Width: Folosește o lățime fixă a filelor în modul orizontal
+    Tab Width: Lățimea filelor
+    Tab Layout:
+      Tab Layout: Aranjarea filelor
+      Horizontal Top: Orizontal, sus
+      Horizontal Bottom: Orizontal, jos
+      Vertical Left: Vertical, în stânga
+      Vertical Right: Vertical, în dreapta
+    Show Toast Timeout Indicator: Afișează indicatorul duratei notificărilor temporare
+    Use Grid Player Menu: Folosește meniul playerului sub formă de grilă
+    Show Progress as Notification: Afișează progresul ca notificare
+    Operation in Progress: Operațiune în curs
+    Toast Position:
+      Toast Position: Poziția notificărilor temporare
+      Bottom Left: Jos, în stânga
+      Bottom Center: Jos, în centru
+      Bottom Right: Jos, în dreapta
+      Top Left: Sus, în stânga
+      Top Center: Sus, în centru
+      Top Right: Sus, în dreapta
+    Icon Pack:
+      Icon Pack: Pachet de pictograme
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Fontul aplicației
+      System Default: Implicit al sistemului
+      Unable to Load: Fonturile instalate în sistem nu au putut fi încărcate
+    Always Show Scrollbars: Afișează întotdeauna barele de derulare
+    Base Theme:
+      Custom: Personalizată
+    Light Theme: Temă luminoasă
+    Dark Theme: Temă întunecată
+    Custom Theme:
+      Create Custom Theme: Creează o temă personalizată
+      Edit Custom Theme: Editează tema personalizată
+      Custom Theme Creator: Editor de teme personalizate
+      Theme Name: Numele temei
+      Based On: Bazată pe
+      Import Theme: Importă tema
+      Export Theme: Exportă tema
+      Share Theme: Distribuie tema
+      Share Description Heading: Descriere
+      Share Description Prompt: Descrieți tema și orice ar trebui știut înainte de utilizare.
+      Share Screenshots Heading: Capturi de ecran
+      Share Screenshots Prompt: Trageți și plasați aici una sau mai multe capturi de ecran.
+      Share Code Summary: JSON-ul temei
+      Delete Theme: Șterge tema
+      Delete Theme Confirmation: Ștergeți „{name}”? Această acțiune nu poate fi anulată.
+      Save and Apply: Salvează și aplică
+      Discard Changes: Renunță la modificări
+      Reset Colors: Resetează la tema de bază
+      Theme File: Fișier de temă OpenTubeX
+      Theme Saved: Tema personalizată a fost salvată și aplicată
+      Theme Imported: Tema a fost importată în editor
+      Theme Exported: Tema a fost exportată
+      Theme Deleted: Tema personalizată a fost ștearsă
+      Unable to Load: Tema personalizată nu a putut fi încărcată
+      Unable to Save: Tema personalizată nu a putut fi salvată
+      Unable to Export: Tema personalizată nu a putut fi exportată
+      Unable to Share: Tema personalizată nu a putut fi distribuită
+      Unable to Delete: Tema personalizată nu a putut fi ștearsă
+      Invalid Theme File: Fișier de temă personalizată nevalid
+      Colors:
+        Main text: Text principal
+        Secondary text: Text secundar
+        Subtle text: Text discret
+        Borders and dividers: Margini și separatoare
+        Subtle surfaces and indicators: Suprafețe și indicatoare discrete
+        Title text: Textul titlului
+        Selected text background: Fundalul textului selectat
+        Selected text: Text selectat
+        Logo icon: Pictograma siglei
+        Logo text: Textul siglei
+        Logo hover: Siglă la trecerea cursorului
+        Logo pressed: Siglă la apăsare
+        Page background: Fundalul paginii
+        Card background: Fundalul cardului
+        Secondary card background: Fundalul cardului secundar
+        Favorite icon: Pictograma pentru favorite
+        Error color: Culoarea erorilor
+        Scrollbar thumb: Cursorul barei de derulare
+        Scrollbar thumb hover: Cursorul barei de derulare la trecerea indicatorului
+        Scrollbar thumb pressed: Cursorul barei de derulare la apăsare
+        Dropdown item hover text: Textul elementului din lista derulantă la trecerea indicatorului
+        Dropdown item hover background: Fundalul elementului din lista derulantă la trecerea indicatorului
+        Navigation and panel background: Fundalul navigării și al panourilor
+        Neutral item hover and focus background: Fundalul elementelor neutre la trecerea indicatorului și focalizare
+        Neutral item hover and focus text and icons: Textul și pictogramele elementelor neutre la trecerea indicatorului și focalizare
+        Neutral item pressed background: Fundalul elementelor neutre la apăsare
+        Neutral item pressed text and icons: Textul și pictogramele elementelor neutre la apăsare
+        Header button hover and focus background: Fundalul butoanelor din antet la trecerea indicatorului și focalizare
+        Header button hover and focus text and icons: Textul și pictogramele butoanelor din antet la trecerea indicatorului și focalizare
+        Header button pressed background: Fundalul butoanelor din antet la apăsare
+        Header button pressed text and icons: Textul și pictogramele butoanelor din antet la apăsare
+        Colored header button hover and focus background: Fundalul butoanelor colorate din antet la trecerea indicatorului și focalizare
+        Colored header button hover and focus text and icons: Textul și pictogramele butoanelor colorate din antet la trecerea indicatorului și focalizare
+        Colored header button pressed background: Fundalul butoanelor colorate din antet la apăsare
+        Colored header button pressed text and icons: Textul și pictogramele butoanelor colorate din antet la apăsare
+        Search and dropdown background: Fundalul căutării și al listelor derulante
+        Settings search background: Fundalul căutării în setări
+        Instance menu: Meniul instanței
+        Input background: Fundalul câmpurilor de introducere
+        Shadow color: Culoarea umbrei
+        Primary controls and highlights: Comenzi și evidențieri principale
+        Primary control hover and focus: Comenzi principale la trecerea indicatorului și focalizare
+        Primary control pressed: Comenzi principale la apăsare
+        Text and icons on primary controls: Text și pictograme pe comenzile principale
+        Secondary controls and highlights: Comenzi și evidențieri secundare
+        Secondary control hover and focus: Comenzi secundare la trecerea indicatorului și focalizare
+        Secondary control pressed: Comenzi secundare la apăsare
+        Light secondary color: Culoare secundară deschisă
+        Visited accent: Accent pentru elementele vizitate
+        Text and icons on secondary controls: Text și pictograme pe comenzile secundare
+        Links: Linkuri
+        Visited links: Linkuri vizitate
+        Destructive action: Acțiune distructivă
+        Destructive hover and focus: Acțiune distructivă la trecerea indicatorului și focalizare
+        Destructive pressed: Acțiune distructivă la apăsare
+        Text and icons on destructive actions: Text și pictograme pentru acțiunile distructive
+  Player Settings:
+    Automatically Open Chapters: Deschide automat capitolele
+    Caption Appearance:
+      Caption Appearance: Aspectul subtitrărilor
+      Captions: Subtitrări
+      Preferred Language: Limba preferată pentru subtitrări
+      Application Language: Limba aplicației
+      Enable Translations: Activează traducerea subtitrărilor
+      Text Color: Culoarea textului
+      Background Color: Culoarea fundalului
+      Background Opacity: Opacitatea fundalului
+      Font Size: Dimensiunea fontului
+      Vertical Position: Poziția verticală
+      Edge Color: Culoarea conturului
+      Anchor:
+        Anchor: Ancorare
+        Top Left: Sus, în stânga
+        Top Center: Sus, în centru
+        Top Right: Sus, în dreapta
+        Bottom Left: Jos, în stânga
+        Bottom Center: Jos, în centru
+        Bottom Right: Jos, în dreapta
+      Edge Style:
+        Edge Style: Stilul conturului
+        None: Niciunul
+        Outline: Contur
+        Drop Shadow: Umbră
+      Reset: Resetează aspectul subtitrărilor
+    Default Viewing Mode:
+      Tooltip: Majoritatea modurilor de vizionare implicite se aplică numai la începutul fiecărei sesiuni de vizionare. Modificările făcute în timpul sesiunii se păstrează până la încheierea acesteia. Modurile de vizionare permanente se aplică de fiecare dată când treceți la un videoclip nou, indiferent de modificările făcute în timpul vizionării videoclipului anterior.
+    Auto Picture in Picture:
+      Auto Picture in Picture: Intră automat în modul Imagine în imagine
+      On Tab Change: La schimbarea filelor
+      On Window Minimize: La minimizarea ferestrei
+      On Window Hide: Când fereastra pierde focalizarea sau se trece la alta
+      Wayland Minimize Unsupported: Wayland nu raportează aplicațiilor minimizarea ferestrelor, deci acest declanșator nu este disponibil. Folosiți în schimb „Când fereastra pierde focalizarea sau se trece la alta”, opțiune care acoperă și minimizarea.
+    Scroll Mini Player:
+      Scroll Mini Player: Miniplayer la derulare
+      When Scrolling Down: Păstrează un miniplayer pe ecran la derularea în jos
+      On All Tabs: Păstrează un miniplayer pe ecran la schimbarea filelor
+    Multiply Seek Interval by Playback Rate: Înmulțește intervalul de salt cu viteza de redare
+    Show Playback Rate Adjusted Timestamp: Afișează marcajul temporal ajustat la viteza de redare
+    Use YouTube-style Shorts: Folosește videoclipuri Shorts în stil YouTube
+    Loop Shorts: Redă videoclipurile Shorts în buclă
+    Remember Volume: Reține volumul
+    Skip Silence: Omite liniștea
+    Show Skip Silence Toggle: Afișează comutatorul pentru omiterea liniștii
+    Enable Skip Silence by Default: Activează implicit omiterea liniștii
+    Enable Video Zoom: Activează mărirea videoclipului
+    Voice-over Translation:
+      Title: Traducere vocală
+      Attribution: (oferită de Yandex)
+      Enable: Activează traducerea vocală
+      Prepare in Background: Începe pregătirea traducerilor vocale în fundal
+      Background Preparation Tooltip: Trimite serviciului de traducere ID-ul videoclipului curent, durata și limba selectată imediat ce se încarcă un videoclip acceptat.
+      Language: Limba traducerii vocale
+      Supported Source Languages: 'Limbi sursă acceptate: rusă, engleză, chineză, coreeană, lituaniană, letonă, arabă, franceză, italiană, spaniolă, germană și japoneză.'
+      Voice Volume: Volumul vocii traduse
+      Original Volume: Volumul sunetului original
+      Russian: Rusă
+      English: Engleză
+      Kazakh: Kazahă
+    Hold to Double Playback Speed: Menține apăsat pentru a dubla viteza de redare
+    Use Quick Playback Speed Bar: Folosește bara rapidă pentru viteza de redare
+    Customize Quick Playback Speed Bar: Personalizează bara rapidă pentru viteza de redare
+    Quick Playback Speed Bar Manager: Bară rapidă pentru viteza de redare
+    Add Playback Speed: Adaugă o viteză de redare
+    Reset Quick Playback Speed Bar: Resetează la valorile implicite
+    Playback Speed Name: Nume
+    Edit Playback Speed Name: Editează numele vitezei de redare
+    Use Automatic Playback Speed Name: Folosește denumirea automată a vitezei de redare
+    Reorder Playback Speed: Trageți pentru a reordona viteza de redare
+    Playback Speed: Viteză de redare
+    Parallel Segment Loading: Încărcarea paralelă a segmentelor
+  Channel Settings:
+    Channel Settings: Setări pentru canale
+    Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
+    Enable Playback Speed: Activează viteza de redare
+    Enable Video Quality: Activează calitatea videoclipului
+    Enable Subtitles State: Activează starea subtitrărilor
+    Enable Volume: Activează volumul
+    Auto Update: Actualizează automat la modificarea din opțiunile playerului
+    Auto Update Subtitles: Actualizează automat la comutare
+    Auto Update Volume: Actualizează automat la fiecare modificare a volumului
+    Manage Saved Channels: Gestionează canalele salvate ({channelCount})
+    Saved Channels: Setări salvate pentru canale
+    Enable Saved Channel Settings Sync: Sincronizează setările salvate pentru canale
+    Disable Saved Channel Settings Sync: Oprește sincronizarea setărilor salvate pentru canale
+    Search Channels: Caută canale
+    No Saved Channels: Nu a fost salvată încă nicio setare specifică unui canal
+    No Matching Channels: Niciun canal nu corespunde căutării
+    Forget Channel: Uită toate setările acestui canal
+    Forget Value: Uită această setare
+    Add Setting: Reține altă setare pentru acest canal
+    Video Quality: Calitate video
+    Subtitles Enabled: Subtitrări activate
+    Volume: Volum
+  Download Settings:
+    Download Settings: Descărcări
+    Enable Downloads: Activează descărcările
+    Managed Tools Download Started Template: 'Software-ul extern necesar nu a fost găsit: {tools}. Se descarcă copii gestionate…'
+    Managed Tools Download Finished Template: Descărcarea {tools} s-a încheiat
+    Managed Tools Update Started Template: S-a găsit o actualizare pentru {tools}. Se descarcă…
+    Managed Tools Update Finished Template: Actualizarea {tools} s-a încheiat
+    Managed Tools Update Available Template: Este disponibilă o actualizare pentru {tools}.
+    Update Managed Tools: Actualizează
+    Managed Tools Download Error Template: 'Instrumentele gestionate nu au putut fi descărcate: {errors}'
+    Download Folder: Folder pentru descărcări
+    Global Additional yt-dlp Arguments: Argumente yt-dlp suplimentare globale
+    Concurrent Downloads: Descărcări simultane
+    Bandwidth Limit: Limită de lățime de bandă (KiB/s, 0 pentru nelimitat)
+    Choose Download Folder: Alege folderul pentru descărcări
+    Download Templates: Șabloane de descărcare
+    Manage Download Templates: Gestionează șabloanele de descărcare ({templateCount})
+    New Template: Șablon nou
+    Template Source: Șablon de editat sau folosit ca bază
+    Built-in Template: '{name} (încorporat)'
+    Custom Template Name: '{name} (personalizat)'
+    Create Template Copy: Creează o copie
+    Template Copy Name: 'Copie {name}'
+    Automatic Downloads: Descărcări automate
+    Manage Automatic Downloads: Gestionează descărcările automate ({channelCount})
+    Automatic Downloads Description: Selectați un șablon de descărcare și filtre pentru fiecare canal la care sunteți abonat. Videoclipurile corespunzătoare se descarcă în fundal la reîmprospătarea fluxurilor de abonamente.
+    Automatic Downloads New Only: Activarea unui canal începe cu următoarea încărcare nouă. Videoclipurile existente și arhiva canalului nu sunt descărcate.
+    Automatic Downloads No Channels: Abonați-vă la un canal înainte de a configura descărcările automate.
+    No Matching Automatic Download Channels: Niciun canal nu corespunde căutării.
+    Automatic Downloads Livestreams: Transmisiuni în direct
+    Minimum Duration Seconds: Durată minimă (secunde)
+    Maximum Duration Seconds: Durată maximă (secunde)
+    Minimum File Size MB: Dimensiune minimă a fișierului (MB)
+    Maximum File Size MB: Dimensiune maximă a fișierului (MB)
+    Maximum Age Days: Vechime maximă (zile)
+    Title Includes: Titlul include
+    Title Excludes: Titlul exclude
+    Title Filter Hint: Separați prin virgule mai mulți termeni pentru titlu. Un videoclip trebuie să corespundă cel puțin unui termen inclus și niciunui termen exclus.
+  External Software Settings:
+    External Software Settings: Software extern
+    yt-dlp Source: Sursa yt-dlp
+    yt-dlp Channel: Canalul yt-dlp
+    Sources:
+      System: Sistem (PATH sau cale personalizată)
+      Managed: Gestionată de OpenTubeX
+    Detected Version Template: 'Versiune yt-dlp detectată: {version}'
+    Managed Not Downloaded: yt-dlp nu a fost descărcat încă. Apăsați butonul de mai jos pentru a-l descărca.
+    System yt-dlp Missing Warning: yt-dlp nu a fost găsit în sistem. Instalați-l, setați mai jos o cale personalizată sau schimbați sursa la „Gestionată de OpenTubeX”.
+    Download yt-dlp: Descarcă yt-dlp
+    Update yt-dlp: Actualizează yt-dlp
+    Checking yt-dlp: Se verifică yt-dlp…
+    Downloading yt-dlp: Se descarcă yt-dlp…
+    yt-dlp Downloaded Template: yt-dlp {version} a fost descărcat
+    yt-dlp Download Error Template: 'Descărcarea yt-dlp a eșuat: {error}'
+    FFmpeg Source: Sursa FFmpeg
+    Detected FFmpeg Version Template: 'Versiune FFmpeg detectată: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg nu a fost descărcat încă. Apăsați butonul de mai jos pentru a-l descărca.
+    System FFmpeg Missing Warning: FFmpeg nu a fost găsit în sistem. Este necesar pentru îmbinarea imaginii cu sunetul și pentru conversia audio. Instalați-l, setați mai jos o cale personalizată sau schimbați sursa la „Gestionată de OpenTubeX”.
+    Download FFmpeg: Descarcă FFmpeg
+    Update FFmpeg: Actualizează FFmpeg
+    Checking FFmpeg: Se verifică FFmpeg…
+    Downloading FFmpeg: Se descarcă FFmpeg…
+    FFmpeg Downloaded Template: FFmpeg {version} a fost descărcat
+    FFmpeg Download Error Template: 'Descărcarea FFmpeg a eșuat: {error}'
+    Detected FFprobe Version Template: 'Versiune FFprobe detectată: {version}'
+    FFprobe Managed Not Downloaded: FFprobe nu a fost descărcat încă. Apăsați butonul de mai jos pentru a-l descărca împreună cu FFmpeg.
+    System FFprobe Missing Warning: FFprobe nu a fost găsit în sistem. Este necesar pentru inspectarea fișierelor media în timpul postprocesării. Instalați-l lângă FFmpeg sau schimbați sursa la „Gestionată de OpenTubeX”.
+    Checking FFprobe: Se verifică FFprobe…
+    Download FFmpeg and FFprobe: Descarcă FFmpeg și FFprobe
+    Update FFmpeg and FFprobe: Actualizează FFmpeg și FFprobe
+    Downloading FFmpeg and FFprobe: Se descarcă FFmpeg și FFprobe…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg și FFprobe {version} au fost descărcate
+    FFmpeg and FFprobe Download Error Template: 'Descărcarea FFmpeg și FFprobe a eșuat: {error}'
+    Managed Tool Already Current Template: '{tool} {version} este deja actualizat'
+    Managed Tool Updates: Actualizarea instrumentelor gestionate
+    Update Modes:
+      Automatic: Actualizează automat
+      Ask: Întreabă înainte de actualizare
+      Manual: Actualizează numai manual
+    yt-dlp Executable Path: Calea executabilului yt-dlp
+    FFmpeg Executable Path: Calea executabilului FFmpeg
+    Restricted Playback Authentication: Cookie-uri yt-dlp pentru redare
+    Cookie Source: Sursa cookie-urilor
+    Cookie Sources:
+      None: Niciuna
+      File: Fișier
+      Browser: Browser
+    Cookie File: Fișier cookie
+    Browser for Cookies: Browser pentru cookie-uri
+    Browser Profile: Profil de browser (opțional)
+    Browser Profile Placeholder: Numele sau calea profilului
+    Select Browser: Selectați un browser
+    Always Use Cookies: Folosește întotdeauna cookie-urile
+    Restricted Playback Authentication Hint: În mod implicit, OpenTubeX transmite aceste cookie-uri către yt-dlp numai după ce alegeți „Încearcă folosind cookie-urile configurate” pentru un videoclip cu restricție de vârstă sau destinat exclusiv membrilor.
+    Restricted Playback Authentication Warning: Folosirea yt-dlp cu un cont Google poate duce la restricționarea temporară sau permanentă a contului.
+  Privacy Settings:
+    Automatic History Retention: Păstrarea automată a istoricului (zile)
+    Automatic History Retention Placeholder: Lăsați necompletat pentru păstrare permanentă
+    Automatic History Retention Tooltip: Lăsați necompletat pentru a păstra istoricul permanent. Salvarea unui număr elimină înregistrările mai vechi acum și automat cât timp aplicația este deschisă.
+    History Retention Saved: Perioada de păstrare a istoricului a fost salvată
+    Invalid History Retention Days: Introduceți un număr întreg de zile mai mare decât zero
+    Enable Watch Statistics: Activează statisticile de vizionare
+    Week Starts On: Săptămâna începe
+    Cache Video Metadata: Istoricul metadatelor
+    Cache Video Metadata Tooltip: Păstrează toate versiunile metadatelor acceptate pentru videoclipurile vizitate, inclusiv titlurile, miniaturile și descrierile. Este dezactivată implicit deoarece stocarea istoricului metadatelor ocupă mai mult spațiu pe disc.
+    Watched Percentage Threshold: Pragul procentual pentru vizionare
+    Watched Percentage Threshold Tooltip: Videoclipurile sunt marcate ca vizionate după atingerea procentului selectat și când au rămas cel mult 2 minute. La 0%, sunt marcate când începe redarea. La 100%, sunt marcate la încheierea redării.
+    Clear Video Metadata Cache: Golește memoria cache a metadatelor video
+    Are you sure you want to clear the video metadata cache?: Sigur doriți să ștergeți din memoria cache titlurile, miniaturile și descrierile videoclipurilor?
+    Failed to clear video metadata cache: Memoria cache a metadatelor video nu a putut fi golită
+    Video metadata cache has been cleared: Memoria cache a metadatelor video a fost golită
+    Video Metadata Cache Size: 'Memoria cache a metadatelor video: {size}'
+  Storage Settings:
+    Storage: Spațiu de stocare
+    Downloaded Media: Fișiere media descărcate și urmărite
+    Storage Breakdown: Distribuirea spațiului de stocare
+    Shown Total: Total afișat
+    Calculating: Se calculează…
+    Not Available: Dimensiunea exactă nu este disponibilă
+    At Least: Cel puțin {size}
+    Failed To Read Storage: Unele dimensiuni de stocare nu au putut fi citite
+    Downloaded Media Description: Fișiere video, audio și de subtitrare urmărite încă de istoricul descărcărilor.
+    Selected Download Folders: Foldere de descărcare alese de utilizator
+    Download History Records: Înregistrări din istoricul descărcărilor
+    Download History Records Description: '{count} înregistrare de descărcare încheiată. Această înregistrare urmărește starea și locațiile fișierelor, dar nu conține fișierele media descărcate. | {count} înregistrări de descărcări încheiate. Aceste înregistrări urmăresc starea și locațiile fișierelor, dar nu conțin fișierele media descărcate. | {count} de înregistrări de descărcări încheiate. Aceste înregistrări urmăresc starea și locațiile fișierelor, dar nu conțin fișierele media descărcate.'
+    Clear Download History Records: Șterge înregistrările din istoricul descărcărilor
+    Clear Download History Confirmation: Ștergeți toate înregistrările descărcărilor încheiate?
+    Download Files Stay On Disk: Fișierele descărcate vor rămâne pe disc, dar nu vor mai apărea pe pagina Descărcări.
+    Clear Records: Șterge înregistrările
+    Replaceable Caches: Memorii cache care pot fi înlocuite
+    Application Caches: Memorii cache ale aplicației
+    Browser Caches: Memorii cache ale browserului
+    Browser Caches Hint: Memoriile cache Chromium pentru HTTP, GPU, cod, shadere, service worker și dicționare.
+    Stored App Data: Date stocate ale aplicației
+    Browser Runtime Data: Date de rulare ale browserului
+    Browser Runtime Data Hint: Spațiul de stocare local și al sesiunii Chromium, cookie-urile, starea confidențialității și a rețelei și fișierele de avarie.
+    Subscription Feed Cache: Memoria cache pentru abonamente și fluxuri
+    Subscription Feed Cache Description: Stochează videoclipurile, videoclipurile Shorts, transmisiunile în direct și postările preluate din abonamente. OpenTubeX o recreează la următoarea reîmprospătare a fluxului.
+    Clear Subscription Feed Cache: Golește memoria cache pentru abonamente și fluxuri
+    Clear Subscription Feed Cache Confirmation: Goliți memoria cache pentru abonamente și fluxuri?
+    Subscription Feed Cache Effect: Fluxurile de abonamente pot apărea goale până când sunt reîmprospătate. Abonamentele și profilurile nu vor fi modificate.
+    Session Search Cache: Memoria cache a căutărilor din sesiune
+    In Memory: În memorie
+    Session Search Cache Description: '{count} căutare este păstrată în memorie pentru o navigare înapoi mai rapidă. Această memorie cache este eliminată la închiderea OpenTubeX. | {count} căutări sunt păstrate în memorie pentru o navigare înapoi mai rapidă. Această memorie cache este eliminată la închiderea OpenTubeX. | {count} de căutări sunt păstrate în memorie pentru o navigare înapoi mai rapidă. Această memorie cache este eliminată la închiderea OpenTubeX.'
+    Clear Session Search Cache: Golește memoria cache a căutărilor din sesiune
+    Clear Session Search Cache Confirmation: Goliți memoria cache a căutărilor din sesiune?
+    Session Search Cache Effect: Paginile cu rezultate din memoria cache vor fi eliminate. Istoricul căutărilor salvat nu va fi modificat.
+    HTTP Cache: Memorie cache HTTP
+    HTTP Cache Description: Electron stochează răspunsurile de rețea pe disc, astfel încât solicitările repetate să se poată încărca fără a descărca din nou aceleași date. OpenTubeX recreează această memorie cache când este necesar.
+    Managed By Electron: Gestionată de Electron
+    Clear HTTP Cache: Golește memoria cache HTTP
+    Clear HTTP Cache Confirmation: Goliți memoria cache HTTP a Electron?
+    HTTP Cache Effect: Imaginile și alte resurse de rețea se pot încărca mai lent o dată, în timp ce memoria cache este refăcută.
+    Tab Image Cache: Miniaturile filelor și avatarurile canalelor
+    Tab Image Cache Description: Stochează imagini de previzualizare și avataruri de canal pentru filele deschise și restaurate. OpenTubeX le recreează pe măsură ce filele sunt folosite.
+    Clear Tab Image Cache: Golește memoria cache a imaginilor filelor
+    Clear Tab Image Cache Confirmation: Ștergeți miniaturile filelor și avatarurile canalelor?
+    Tab Image Cache Effect: Imaginile filelor pot dispărea pentru scurt timp și vor fi recreate pe măsură ce filele sunt folosite.
+    Playback Caches: Memorii cache pentru redare
+    Playback Caches Description: Stochează adresele URL ale fluxurilor yt-dlp între sesiunile aplicației, împreună cu fișierele playerului YouTube. Memoria cache pentru adrese URL se aplică numai fluxurilor preluate cu yt-dlp.
+    Playback URL Cache Entry Size: Limita memoriei cache pentru adresele URL ale fluxurilor yt-dlp
+    Playback URL Cache Entry Size Tooltip: Stabilește dimensiunea maximă a fiecărei înregistrări de flux yt-dlp din memoria cache. Setați 0 MB pentru a dezactiva stocarea persistentă în cache a fluxurilor yt-dlp.
+    Clear Playback Caches: Golește memoriile cache pentru redare
+    Clear Playback Caches Confirmation: Goliți memoriile cache yt-dlp și ale playerului?
+    Playback Caches Effect: Următoarea solicitare de redare locală poate dura mai mult, deoarece datele fluxului și ale playerului sunt preluate din nou.
+    Clear Cache: Golește memoria cache
+    History Data: Istorice stocate
+    Video Metadata Description: Stochează titluri, miniaturi și descrieri anterioare pentru videoclipurile acceptate. Versiunile vechi nu pot fi recreate după ștergere.
+    Video Metadata Effect: Versiunile salvate ale metadatelor vor fi șterse definitiv. Detaliile actuale ale videoclipului pot fi preluate din nou.
+    Watch History: Istoric și statistici de vizionare
+    Watch History Description: Istoricul vizionărilor înregistrează videoclipurile vizionate și progresul. Statisticile de vizionare stochează totalurile zilnice. Perioada de păstrare se aplică numai istoricului vizionărilor.
+    Clear Watch Statistics: Șterge statisticile de vizionare
+    Watch History Effect: Înregistrările videoclipurilor vizionate și progresul salvat vor fi șterse. Statisticile de vizionare vor rămâne.
+    Clear Watch Statistics Confirmation: Ștergeți toate statisticile de vizionare?
+    Watch Statistics Effect: Totalurile zilnice de vizionare vor fi șterse. Istoricul vizionărilor va rămâne.
+    Search History: Istoricul căutărilor
+    Search History Description: Stochează căutările pe care ați ales să le rețineți.
+    Delete Search History: Șterge istoricul căutărilor
+    Delete Search History Confirmation: Ștergeți întregul istoric al căutărilor salvat?
+    Search History Effect: Sugestiile de căutare salvate din căutările anterioare vor dispărea. Memoria cache a sesiunii curente va rămâne.
+    Other User Data: Alte date ale utilizatorului
+    Other Profile Files: Alte fișiere de profil
+    Other Profile Files Hint: Copii de rezervă, fișiere temporare și înregistrări de profil pe care OpenTubeX nu le recunoaște încă.
+    Subscriptions And Profiles: Abonamente și profiluri
+    Subscriptions And Profiles Description: Stochează canalele abonate, numele profilurilor și apartenența la profiluri.
+    Subscriptions And Profiles Effect: Toate abonamentele și profilurile suplimentare vor fi șterse definitiv. Vor fi șterse și datele din memoria cache a fluxurilor.
+    Playlists Description: Stochează numele și descrierile playlisturilor, precum și videoclipurile salvate.
+    Playlists Effect: Fiecare playlist și lista sa de videoclipuri salvate vor fi șterse definitiv. Fișierele media descărcate vor rămâne.
+    Settings And Sessions: Setări, sesiuni de file și mementouri
+    Settings And Sessions Description: Stochează preferințele aplicației, filele care pot fi restaurate și mementourile pentru transmisiuni în direct. Deschideți directorul profilului pentru a inspecta sau copia de rezervă aceste fișiere; această pagină nu le șterge.
+    Cleanup Complete: Curățarea spațiului de stocare s-a încheiat
+    Cleanup Failed: Curățarea spațiului de stocare a eșuat
+  Subscription Settings:
+    Fetch Feed on Startup: Preia fluxul la pornire
+    Show New Content Feed: Afișează fluxul de conținut nou
+    Show New Content Indicators: Afișează indicatoarele de conținut nou
+    Show Scheduled Live Streams / Premieres First: Afișează primele transmisiunile în direct și premierele programate
+    Auto Refresh Interval: Interval de reîmprospătare automată
+    Videos Auto Refresh Interval: Interval de reîmprospătare automată a videoclipurilor
+    Shorts Auto Refresh Interval: Interval de reîmprospătare automată a videoclipurilor Shorts
+    Live Auto Refresh Interval: Interval de reîmprospătare automată a transmisiunilor în direct
+    Posts Auto Refresh Interval: Interval de reîmprospătare automată a postărilor
+  Distraction Free Settings:
+    Sections:
+      Visible While Paused: Vizibile în pauză în fereastră completă / pe ecran complet
+    Hide Channel Avatars: Ascunde avatarurile canalelor
+    Shorten View Counts: Abreviază numărul de vizionări și aprecieri ale comentariilor
+    Hide Comment Translation Buttons: Ascunde butoanele de traducere a comentariilor
+    Hide Live Chat Replay: Ascunde reluarea chatului în direct
+    Hide End-Screen Annotations: Ascunde adnotările de pe ecranul final
+    Hide Paid Promotion Badge: Ascunde insigna de promovare plătită
+    Show Player Controls: Afișează comenzile playerului
+    Show Video Title: Afișează titlul videoclipului
+    Show Bottom Right Actions Dock: Afișează panoul de acțiuni din dreapta jos
+    Paused Interface Hide Delay: Întârzierea ascunderii interfeței în pauză
+  Data Settings:
+    Data And Storage: Date și spațiu de stocare
+    Profile Directory: Directorul profilului
+    Open Profile Directory: Deschide directorul profilului
+    Invalid JSON row, skipping item: JSON nevalid la rândul {row}, elementul este omis
+    All search history has been successfully imported: Întregul istoric al căutărilor a fost importat
+    All search history has been successfully exported: Întregul istoric al căutărilor a fost exportat
+    All settings have been successfully imported: Toate setările au fost importate
+    All settings have been successfully exported: Toate setările au fost exportate
+    Setting object has insufficient data, skipping item: Obiectul de setare nu conține suficiente date, elementul este omis
+    Unknown setting key: 'Cheie de setare necunoscută: {key}'
+    Non-transferable setting key: 'Cheie de setare netransferabilă: {key}'
+    Import subscriptions formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), copie de rezervă LibreTube sau export FreeTube (.json)'
+    Import history formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copie de rezervă LibreTube (.json)'
+    Import playlists formats: 'Formate acceptate: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+  Sync Settings:
+    Sync Settings: Sincronizare
+    Enable Sync: Activează sincronizarea
+    Privacy Passphrase: Frază secretă pentru confidențialitate
+    Privacy Passphrase Hint: Folosiți o frază secretă diferită de parola contului. Aceasta nu părăsește niciodată dispozitivul și este necesară pe fiecare dispozitiv; dacă o pierdeți, datele de sincronizare criptate nu mai pot fi recuperate.
+    Privacy Policy: Politica de confidențialitate a acestui server
+    Enhanced Privacy Enabled: Confidențialitatea sporită este activată. Serverul stochează numai date de sincronizare criptate.
+    Enhanced Privacy Unsupported: Avertisment — acest server nu acceptă confidențialitatea sporită. Datele sincronizate sunt vizibile operatorului său.
+    Description: Sincronizați abonamentele, profilurile, playlisturile, istoricul vizionărilor, setările și filele deschise cu un server de sincronizare OpenTubeX sau LibreTube. Este posibil ca serverele LibreTube să nu accepte toate funcțiile de sincronizare.
+    Server URL: Adresa URL a serverului
+    Checking Server: Se verifică serverul de sincronizare…
+    Server Unavailable: Conectarea la acest server de sincronizare nu a reușit. Verificați adresa URL și încercați din nou.
+    Username: Nume de utilizator
+    Log In: Autentificare
+    Register: Înregistrare
+    Pair Another Device: Asociază alt dispozitiv
+    Pair With Existing Device: Asociază cu un dispozitiv existent
+    Device Name: Numele dispozitivului
+    This Device: Acest dispozitiv
+    Device Name Required: Introduceți un nume pentru acest dispozitiv.
+    Pairing Device Name Hint: Alegeți un nume pe care îl veți recunoaște pe dispozitivul care aprobă această solicitare.
+    Create Pairing Code: Creează codul de asociere
+    Creating Pairing Code: Se creează un cod de asociere securizat…
+    Pairing QR Alt: Cod QR de asociere pentru {device}
+    Scan Pairing Code: Pe un dispozitiv deja conectat, deschideți „Asociază alt dispozitiv” și scanați acest cod.
+    Pairing Code: Cod de asociere
+    Use Text Pairing Code: Folosește în schimb codul text
+    Show QR Code: Afișează codul QR
+    Text Pairing Code Hint: Copiați acest cod pe dispozitivul existent. Conține secretul de asociere, așa că ștergeți-l din istoricul clipboardului după asociere.
+    Pairing QR Warning: Afișați acest cod numai dispozitivului de încredere, deja conectat, care va aproba solicitarea. Codul expiră după două minute.
+    Pairing Expires: Codul de asociere expiră la {time}.
+    Verifying Pairing: Se verifică cheia de confidențialitate transferată…
+    Completing Pairing: Se finalizează asocierea dispozitivului…
+    Compare Pairing Codes: Compară codurile de asociere
+    Pairing Code Match Hint: Confirmați numai dacă acest cod corespunde celui de pe dispozitivul existent.
+    Pairing Codes Match: Codurile corespund
+    Pairing Approval Code Hint: Păstrați această fereastră deschisă și comparați codul cu cel de pe dispozitivul nou. Dispozitivul nou nu trebuie să continue dacă aceste coduri diferă.
+    Pairing Scan Hint: Scanați codul de asociere afișat pe dispozitivul pe care îl adăugați.
+    Enter Pairing Code: Introduceți manual codul
+    Pairing Code Entry Hint: Lipiți codul de asociere afișat pe dispozitivul pe care îl adăugați.
+    Check Pairing Code: Verifică codul
+    Scan QR Code: Scanează codul QR
+    Waiting For Pairing Code: Se așteaptă un cod de asociere…
+    Checking Pairing Request: Se verifică solicitarea de asociere…
+    Approving Pairing Request: Se criptează și se trimite cheia de confidențialitate…
+    Pairing Approval Warning: Aprobați numai dacă puteți vedea această solicitare pe dispozitivul pe care îl adăugați. Asocierea acordă acces la cont și transferă cheia de confidențialitate.
+    Approve Pairing: Aprobă asocierea
+    Try Again: Încearcă din nou
+    Scan Again: Scanează din nou
+    Camera Unavailable: OpenTubeX nu a putut accesa nicio cameră. Verificați permisiunea pentru cameră sau introduceți manual codul de asociere.
+    Pairing Unsupported: Acest server de sincronizare nu acceptă asocierea securizată a dispozitivelor.
+    Pairing Failed: Asocierea dispozitivului a eșuat. Încercați din nou cu un cod nou.
+    Pairing Request Changed: Solicitarea de asociere s-a schimbat, a expirat sau a fost deja folosită. Creați un cod nou.
+    Pairing Server Mismatch: Acest cod aparține altui server de sincronizare.
+    Pairing Verification Unavailable: Nu este disponibilă nicio colecție de sincronizare criptată pentru verificarea cheii transferate. Sincronizați dispozitivul existent, apoi încercați din nou.
+    Pairing Completed: Asocierea dispozitivului s-a încheiat
+    Pairing Approved: Asocierea dispozitivului a fost aprobată
+    Disconnect: Deconectează
+    Delete Account: Șterge contul de sincronizare
+    Delete Account Confirmation: Ștergeți contul de sincronizare?
+    Delete Account Warning: Această acțiune șterge definitiv contul de sincronizare și toate datele stocate pe acest server. Datele OpenTubeX locale nu vor fi șterse.
+    Confirm Delete Account: Șterge contul
+    Password Required: Parola este obligatorie
+    Account Deleted: Contul de sincronizare a fost șters
+    Connected as: Conectat ca {username}
+    Automatic Sync: Sincronizează automat după modificări și la fiecare cinci minute
+    Profiles: Profiluri
+    Open Tabs: File deschise și sesiune
+    Disable Setting Sync: Oprește sincronizarea acestei setări
+    Enable Setting Sync: Sincronizează această setare
+    Sync Now: Sincronizează acum
+    Downloading encrypted data: Se descarcă datele de sincronizare criptate…
+    Syncing subscriptions: Se sincronizează abonamentele…
+    Syncing playlists: Se sincronizează playlisturile…
+    Syncing history: Se sincronizează istoricul vizionărilor…
+    Syncing profiles: Se sincronizează profilurile…
+    Syncing open tabs: Se sincronizează filele deschise și sesiunea…
+    Syncing settings: Se sincronizează setările…
+    Uploading encrypted data: Se încarcă datele de sincronizare criptate…
+    Finishing sync: Se finalizează sincronizarea…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Ultima sincronizare: {date}'
+    History not supported: Această versiune a serverului nu acceptă sincronizarea istoricului vizionărilor.
+    Settings not supported: Această versiune a serverului nu acceptă sincronizarea setărilor.
+    Sync completed: Sincronizarea s-a încheiat
+    Data Loss Confirmation: Confirmați sincronizarea distructivă?
+    Data Loss Warning: Starea serverului ar șterge {deleted} din cele {previous} elemente {collection} sincronizate anterior. Acest lucru poate indica o migrare sau resetare nereușită a serverului. Continuați numai dacă ștergerea este intenționată și aveți o copie de rezervă.
+    Confirm Data Loss: Șterge și continuă
+  Proxy Settings:
+    Proxy Username: Nume de utilizator pentru proxy
+    Proxy Password: Parolă pentru proxy
+    IP Block Recovery Script Path: Calea scriptului de recuperare după blocarea IP-ului
+    Select IP Block Recovery Script File: Selectați fișierul scriptului de recuperare după blocarea IP-ului
+    Running IP block recovery script: Se rulează scriptul de recuperare după blocarea IP-ului
+    IP block recovery script failed: 'Scriptul de recuperare după blocarea IP-ului a eșuat (cod de ieșire: {exitCode})'
+    IP block recovery script finished: Scriptul de recuperare după blocarea IP-ului s-a încheiat
+    Reloading video after IP block recovery: Se reîncarcă videoclipul după recuperarea în urma blocării IP-ului
+    Failed to select IP block recovery script: Scriptul de recuperare după blocarea IP-ului nu a putut fi selectat
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: Activează trimiterea către SponsorBlock
+    SponsorBlock Private User ID (optional): ID privat de utilizator SponsorBlock (opțional)
+    SponsorBlock Private User ID Tooltip: Lipiți ID-ul privat de utilizator SponsorBlock din extensia de browser. Lăsați câmpul gol pentru a folosi un ID generat de aplicație.
+    Generated SponsorBlock User ID: ID de utilizator SponsorBlock generat
+    Generated SponsorBlock User ID Tooltip: Acest ID de utilizator SponsorBlock generat de aplicație poate fi folosit în extensia de browser sau când folosiți aplicația pe alt computer.
+    Export Generated User ID: Exportă ID-ul de utilizator generat
+    Generated SponsorBlock User ID Copy Button: Copiază ID-ul de utilizator SponsorBlock generat
+    Generated SponsorBlock User ID Copied: ID-ul de utilizator SponsorBlock generat a fost copiat în clipboard
+    Skip notification timeout: Durata notificării de omitere
+    Custom Color: Culoare personalizată
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Activează Return YouTube Dislike
+    Return YouTube Dislike Url: Adresa URL a API-ului Return YouTube Dislike (implicită este https://ryd-proxy.kavin.rocks)
+  Parental Control Settings:
+    Disable Channel Links: Dezactivează linkurile canalelor
+  Password Dialog:
+    Incorrect Password: Parolă incorectă
+    Unlock: Deblochează
+    Unlocking: Se deblochează…
+  Search Settings: Caută în setări
+  No Settings Found: Nu s-au găsit setări
+Tutorial:
+  Skip: Omite
+  Next: Înainte
+  Finish: Finalizează
+  Got It: Am înțeles
+  Welcome:
+    Title: Bun venit la OpenTubeX
+    Description: Iată câteva comenzi care vă vor ajuta să vă familiarizați cu aplicația.
+  Navigation:
+    Title: Biblioteca este mereu la îndemână
+    Description: Folosiți navigarea pentru a accesa abonamentele, playlisturile, istoricul și alte secțiuni.
+  Search:
+    Title: Căutați sau lipiți un link
+    Description: Găsiți videoclipuri și canale sau lipiți direct în câmpul de căutare adresa URL a unui videoclip acceptat.
+  Tabs:
+    Title: Păstrați paginile deschise în file
+    Description: Deschideți mai multe pagini simultan fără să pierdeți locul. Alegeți poziția filelor potrivită aranjamentului.
+  Quick Settings:
+    Title: Personalizați aplicația
+    Description: Alegeți o temă și calitatea video implicită. Puteți modifica oricând aceste preferințe și altele din meniul profilului sau puteți face clic dreapta pe el pentru a schimba profilul.
+  Import Data:
+    Title: Transferați-vă datele
+    Description: Opțional, importați abonamente, istoricul vizionărilor, playlisturi, istoricul căutărilor sau setări din altă aplicație acceptată ori dintr-o copie de rezervă.
+    Action: Importă datele
+    Not Now: Nu acum
+  Settings Moved:
+    Title: Setările au fost mutate
+    Description: Selectați profilul din dreapta sus pentru comenzile rapide. Faceți clic dreapta pe el pentru a ajunge direct la selectarea profilului. Roata dințată din acest meniu deschide toate setările, iar secțiunile Despre și Descărcări au fost mutate tot aici.
+About:
+  Commit: Commit
+  Licensed under the {licenseLink}: Licențiat conform {licenseLink}
+  Fluxer: Alăturați-vă comunității noastre Fluxer
+  Matrix: Matrix
+  Email: E-mail
+  Please read the {roomRulesLink}: Citiți {roomRulesLink}
+  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX este posibil datorită {creditsPageLink}
+Profile:
+  Profile Icon: Pictograma profilului
+  Choose an Emoji: Alegeți un emoji
+  Custom Emoji: Emoji personalizat
+  Emoji: Emoji
+  Choose Image: Alegeți imaginea
+  Crop Image: Decupați imaginea
+  Zoom: Zoom
+  Apply Crop: Aplică decuparea
+  Transparent: Transparent
+  Use Initial: Folosește inițiala
+  The selected image could not be loaded: Imaginea selectată nu a putut fi încărcată
+  Theme Color: Culoarea temei
+Channel:
+  Channel Name Unavailable: Numele canalului nu este disponibil
+  Search Result Types: Tipuri de rezultate ale căutării
+  All Results: Toate
+  View All: Vezi tot
+Video:
+  Includes paid promotion: Include promovare plătită
+  Age Restricted Badge: Restricționat în funcție de vârstă
+  Queue: Coadă
+  Play Next: Redă în continuare
+  Add to Queue: Adaugă în coadă
+  Added to Play Next: Videoclipul va fi redat în continuare
+  Added to Queue: Videoclip adăugat în coadă
+  Clear Queue: Golește coada
+  Queue Video Count: '{count} videoclip | {count} videoclipuri | {count} de videoclipuri'
+  Remove from Queue: Elimină {title} din coadă
+  Drag to Reorder Queue: Trageți {title} pentru a reordona coada
+  Reorder Queue Item: Reordonează {title}
+  Reorder Queue Item Instructions: Folosiți tastele săgeată în sus și în jos pentru a muta acest videoclip în coadă.
+  Queue Item Moved: '{title} a fost mutat pe poziția {position} din {total}.'
+  Queue Item Cannot Move Up: '{title} nu poate fi mutat mai sus. Se află deja pe poziția 1 din {total}.'
+  Queue Item Cannot Move Down: '{title} nu poate fi mutat mai jos. Se află deja pe poziția {total} din {total}.'
+  Metadata: Informații despre videoclip
+  Close Metadata: Închide informațiile despre videoclip
+  Metadata Cache:
+    Title History: Istoricul titlurilor
+    Thumbnail History: Istoricul miniaturilor
+    Description History: Istoricul descrierilor
+    Previous Version: Versiunea anterioară {number}
+    Empty: (gol)
+  Fetching Streams: Se preiau fluxurile cu yt-dlp…
+  Transcript:
+    Title: Transcriere
+    Search: Caută în transcriere
+    Language: Limba transcrierii
+    Save: Salvează
+    Show: Afișează transcrierea
+    Hide: Ascunde transcrierea
+    Close: Închide transcrierea
+    Copied: Transcriere copiată în clipboard
+    Saved: Transcriere salvată
+    Save Error: Transcrierea nu a putut fi salvată
+    Text File: Fișier text
+    Unavailable: Nu este disponibilă nicio transcriere pentru acest videoclip.
+    Load Error: Transcrierea nu a putut fi încărcată.
+    Empty: Această transcriere nu conține text.
+    No Results: Niciun segment din transcriere nu corespunde căutării.
+  Retry With Built-in Extraction: Reîncearcă folosind extragerea încorporată
+  Retry With yt-dlp Extraction: Reîncearcă folosind extragerea yt-dlp
+  Reloading video after streaming URL error: Se reîncarcă videoclipul după o eroare a adresei URL a fluxului
+  Configure Restricted Playback Cookies Hint: Configurați cookie-urile în Setări → Software extern → Cookie-uri yt-dlp pentru redare.
+  Try With Configured Cookies: Încearcă folosind cookie-urile configurate
+  Restricted Playback Authentication Failed Template: 'yt-dlp nu a putut accesa acest videoclip cu cookie-urile configurate: {error}'
+  Private: Videoclipurile private nu pot fi vizionate în OpenTubeX deoarece necesită autentificarea la Google și dreptul de proprietate asupra videoclipului.
+  Unmark As Watched: Anulează marcarea ca vizionat
+  Video has been unmarked as watched: Marcarea videoclipului ca vizionat a fost anulată
+  Save Channel Playback Speed: Salvează viteza de redare pentru canal
+  Channel Playback Speed Saved: Viteza de redare pentru canal a fost salvată
+  Save Channel Video Quality: Salvează calitatea video pentru canal
+  Channel Video Quality Saved: Calitatea video pentru canal a fost salvată
+  Save Channel Subtitles State: Salvează starea subtitrărilor pentru canal
+  Channel Subtitles State Saved: Starea subtitrărilor pentru canal a fost salvată
+  Save Channel Volume: Salvează volumul pentru canal
+  Channel Volume Saved: Volumul pentru canal a fost salvat
+  Save Channel Setting: Salvează setarea pentru canal…
+  Channel Setting Already Set: '{setting} este deja setată la {value}'
+  Video has been saved to {playlistName}: Videoclipul a fost salvat în {playlistName}
+  Video has been removed from {playlistName}: Videoclipul a fost eliminat din {playlistName}
+  There was a problem saving the video to {playlistName}: A apărut o problemă la salvarea videoclipului în {playlistName}
+  There was a problem removing the video from {playlistName}: A apărut o problemă la eliminarea videoclipului din {playlistName}
+  Failed to load collaborators: Colaboratorii nu au putut fi încărcați
+  Notify me: Notifică-mă
+  Notification on: Notificare activată
+  Notification enabled: Veți fi notificat când începe acest videoclip
+  Notification cancelled: Notificarea de începere a fost anulată
+  Notification unavailable: Notificările de sistem nu sunt disponibile
+  Scheduled video starting: Videoclipul programat începe
+  Live notification body: '{videoTitle} începe acum'
+  Premiere: Premieră
+  AI: IA
+  AI-generated content: Conținut generat de IA
+  Collaborators: Colaboratori
+  Live Chat Replay: Reluarea chatului în direct
+  Show Live Chat: Afișează chatul în direct
+  Show Live Chat Replay: Afișează reluarea chatului în direct
+  Close Live Chat: Închide chatul în direct
+  Close Live Chat Replay: Închide reluarea chatului în direct
+  Live Chat Settings: Setările chatului în direct
+  Show Live Chat Timestamps: Afișează marcajele temporale
+  Chat Filter: Filtru pentru chat
+  Top Chat: Mesaje importante
+  All Messages: Toate mesajele
+  Popout Live Chat: Deschide chatul separat
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Reluarea chatului în direct este activată. Mesajele vor apărea aici pe măsură ce se redă videoclipul.
+  Premiere started: Premiera este în curs. A început {timeAgo}
+  Player:
+    Voice-over Translation:
+      Start: Tradu
+      Cancel: Anulează
+      Progress: Se pregătește traducerea vocală…
+      Retry: Reîncearcă
+      Error: Traducerea vocală a eșuat. Încercați din nou mai târziu.
+      Duration Error: Traducerea vocală este disponibilă numai pentru videoclipuri de cel mult patru ore.
+    Caption Appearance:
+      Options: Opțiuni
+      Sample: Așa arată subtitrările
+    Auto-translate: Traducere automată
+    Sleep Timer:
+      Sleep Timer: Temporizator de oprire
+      'Off': 'Dezactivat'
+      Minutes: '{minutes} minute'
+      End of video: La sfârșitul videoclipului
+      Remaining: 'Timp rămas: {time}'
+      Cancel timer: Anulează temporizatorul
+      Timer ended: Temporizatorul de oprire s-a încheiat
+    Zoom:
+      Zoom: Zoom
+      'Off': 'Dezactivat'
+    Auto-generated Caption Template: '{language} (generate automat)'
+    Up next in {seconds}: Urmează în {seconds}
+    Resize dock: Redimensionează panoul
+    Play now: Redă acum
+    MusicPlaybackRateOverride: S-a detectat un videoclip muzical, se redă la viteza 1x
+    Normal: Normal
+    Set Default: Setează ca implicit
+    Hide Annotations: Ascunde adnotările
+    Show Annotations: Afișează adnotările
+    Hide: Ascunde
+    Show: Afișează
+    Scroll Mini Player:
+      Back to Top: Înapoi sus
+      Return to Video Tab: Revino la fila videoclipului
+      Play: Redă
+      Pause: Pauză
+      Drag Handle: Mută miniplayerul
+    SponsorBlock:
+      CancelCurrentSegment: Anulează crearea segmentului
+      ClearSegments: Șterge segmentele
+      ClearSegmentsPrompt: Sigur doriți să ștergeți toate segmentele SponsorBlock schițate pentru acest videoclip?
+      CompleteSegmentsBeforeSubmitting: Completați fiecare segment schițat înainte de trimitere.
+      CategoryLabel: Categorie
+      ActionTypeLabel: Tipul segmentului
+      DuplicateSegments: Nu sunt permise segmente schițate duplicate.
+      EndAction: (Sfârșit)
+      EndActionLabel: Sfârșit
+      EndTimeAfterStart: Momentul de sfârșit al segmentului trebuie să fie după cel de început.
+      EndTimeBeforeVideoEnd: Momentul de sfârșit al segmentului trebuie să se încadreze în durata videoclipului.
+      EndTimeLabel: Momentul de sfârșit al segmentului
+      DisableAutoSkipTemporarily: Dezactivează temporar omiterea automată SponsorBlock
+      EnableAutoSkipTemporarily: Reactivează omiterea automată SponsorBlock
+      Guidelines: Instrucțiuni
+      InspectSegment: Inspectează
+      InvalidStartTime: Introduceți un moment de început valid pentru segment.
+      NoSegmentsToSubmit: Creați cel puțin un segment complet înainte de trimitere.
+      NowAction: (Acum)
+      CloseInfoPanel: Închide informațiile SponsorBlock
+      OpenInfoPanel: Deschide informațiile SponsorBlock
+      OpenSubmissionMenu: Deschide meniul de trimitere
+      PreviewRequired: Previzualizați fiecare segment înainte de trimitere.
+      PreviewSegment: Previzualizează
+      SaveSegment: Salvează
+      SetSegmentEndNow: Încheie segmentul acum
+      StartAction: (Început)
+      StartSegmentNow: Începe segmentul acum
+      SubmissionBadRequest: SponsorBlock a respins solicitarea de trimitere.
+      SubmissionDuplicate: Acest element a mai fost trimis.
+      SubmissionFailed: Segmentele SponsorBlock nu au putut fi trimise.
+      SubmissionForbidden: SponsorBlock a respins trimiterea.
+      SubmissionRateLimited: SponsorBlock a limitat frecvența acestei trimiteri.
+      SubmissionSuccess: Segmentele SponsorBlock au fost trimise.
+      SubmitSegment: Trimite segmentul
+      SubmitSegments: Trimite
+      StartTimeLabel: Momentul de început al segmentului
+      TimeDivider: până la
+      SkipPrompt: Omiteți {segmentCategory}?
+      SkipPromptAction: Omite
+      SkipToHighlight: Treceți la momentul important?
+      SkippedToHighlight: S-a trecut la momentul important
+      SkipToastUnskip: Anulează omiterea
+      SkipToastReskip: Omite din nou
+      MutedSegment: '{segmentCategory} fără sunet'
+      MuteToastUnmute: Reactivează sunetul
+      InfoPanelLoading: Segmentele încă se încarcă...
+      InfoPanelHasSegments: Acest videoclip are segmente în baza de date!
+      InfoPanelNoSegments: Nu s-au găsit segmente
+      RefreshSegments: Reîmprospătează segmentele
+      RefreshInfo: Reîmprospătează informațiile SponsorBlock
+      ContributionStatsTitle: Contribuțiile dvs.
+      ContributionStatsLoading: Se încarcă statisticile contribuțiilor...
+      ContributionStatsError: Statisticile contribuțiilor nu sunt disponibile. Încercați să reîmprospătați.
+      ContributionStatsNoUserId: Trimiteți un segment sau importați ID-ul de utilizator SponsorBlock pentru a vedea statisticile contribuțiilor.
+      Submissions: Trimiteri
+      Segments: Segmente
+      TimeSaved: Timp economisit
+      AutoSkipEnabled: Omite automat segmentele
+      AutoSkipOn: 'Activată'
+      AutoSkipOff: 'Dezactivată'
+      WhitelistChannel: Adaugă canalul pe lista albă
+      ChannelWhitelisted: Pe lista albă
+      RemoveChannelFromWhitelist: Elimină canalul de pe lista albă
+      MuteSegment: Dezactivează sunetul segmentului
+      SkipSegment: Omite segmentul
+      CloseSegmentActions: Închide acțiunile pentru segment
+      FullVideo: Videoclip complet
+      FullVideoLabel: '{segmentCategory} · Videoclip complet'
+      MuteActionType: Dezactivează sunetul
+      MutePrompt: Dezactivați sunetul pentru {segmentCategory}?
+      SkipActionType: Omite
+      LockedSegment: Segment blocat
+      UpvoteSegment: Votează pozitiv
+      DownvoteSegment: Votează negativ
+      VoteFailed: Votul SponsorBlock nu a putut fi trimis.
+  Watch:
+    'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Timp rămas din reclama de început: {remindingTimeSeconds}s'
+    'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Timp rămas din așteptarea SABR: {remindingTimeSeconds}s'
+Playlist:
+  Close Playlist: Închide playlistul
+Change Format:
+  Local Video File: Fișier video local
+  Local Audio File: Fișier audio local
+  Online Video: Videoclip online
+  Stream Source: Sursa fluxului
+  Stream Extraction Method: Metoda de extragere a fluxului
+  Playback Engine: Motorul de redare
+  Streaming Protocol: Protocol de redare în flux
+  Not Available For This Video: Indisponibil pentru acest videoclip
+  Protocols:
+    Progressive: Progresiv
+  Descriptions:
+    Local File: Redat direct din fișierul descărcat pe acest dispozitiv
+    Online Video: Încarcă formatele de redare în flux din sursa online configurată
+    Dash: Calitate adaptivă, mai multe piste audio și cele mai mari rezoluții
+    Legacy: Un singur fișier cu imaginea și sunetul combinate, limitat la rezoluții mai mici
+    Audio: Numai audio, util pentru economisirea lățimii de bandă sau ascultarea în fundal
+  yt-dlp Fallback Template: 'yt-dlp nu a putut furniza fluxurile; se folosește în schimb motorul încorporat: {error}'
+  yt-dlp Default Clients Fallback: Clienții yt-dlp preferați nu au putut furniza fluxuri redabile; se încearcă în schimb clienții impliciți ai yt-dlp
+  Built-in Fallback Template: 'Motorul încorporat nu a putut reda fluxul; se încearcă în schimb yt-dlp: {error}'
+Share:
+  Share Post: Distribuie postarea
+  Timestamp Link Copied: Linkul cu marcaj temporal a fost copiat în clipboard
+Context Menu:
+  Context Menu: Meniu contextual
+  Select All: Selectează tot
+  Save Image As…: Salvează imaginea ca…
+  Copy Image: Copiază imaginea
+  Copy Image Address: Copiază adresa imaginii
+  Cancel Refresh: Anulează reîmprospătarea
+  Reload Videos: Reîncarcă videoclipurile
+  Reload Shorts: Reîncarcă videoclipurile Shorts
+  Reload Live: Reîncarcă transmisiunile în direct
+  Reload Posts: Reîncarcă postările
+  Reload All Feeds: Reîncarcă toate fluxurile
+  Close Multiple Tabs: Închide {count} filă | Închide {count} file
+  Duplicate Tab: Duplică fila
+  Duplicate Multiple Tabs: Duplică {count} filă | Duplică {count} file
+  Move Tab: Mută fila
+  Move Tabs: Mută filele
+  Move Tab to Group: Mută fila în grup
+  Collapse Group: Restrânge grupul
+  Move Tabs to Group: Mută filele în grup
+  Manage Tab Groups…: Gestionează grupurile de file…
+  To Beginning: La început
+  To End: La sfârșit
+  Close Tabs: Închide filele
+  To the Top: Sus
+  To the Left: La stânga
+  To the Bottom: Jos
+  To the Right: La dreapta
+  Other Tabs: Alte file
+  Copy YouTube Link: Copiază linkul YouTube
+  Copy YouTube Links: Copiază linkurile YouTube
+  Pin Tab: Fixează fila
+  Pin Tabs: Fixează filele
+  Unpin Tab: Anulează fixarea filei
+  Unpin Tabs: Anulează fixarea filelor
+  Tab Color: Culoarea filei
+  Default: Implicită
+  Purple: Mov
+  Reopen Closed Tab: Redeschide fila închisă
+  Reload Tab: Reîncarcă fila
+  Reload Tabs: Reîncarcă filele
+  Load Tab: Încarcă fila
+  Load Tabs: Încarcă filele
+  Unload Tab: Descarcă fila din memorie
+  Unload Tabs: Descarcă filele din memorie
+  Move Tab to Window: Mută fila în fereastră
+  Move Tabs to Window: Mută filele în fereastră
+  Open in a New Tab: Deschide într-o filă nouă
+  Open in a New Window: Deschide într-o fereastră nouă
+  Copy Link: Copiază linkul
+  Copy Invidious Link: Copiază linkul Invidious
+  Search Selection in New Tab: Caută „{selection}” într-o filă nouă
+  Search Selection in New Window: Caută „{selection}” într-o fereastră nouă
+  Search With: Caută cu {engine}
+  Search With Multiple: Caută cu...
+  Selection Too Long: Selecția este prea lungă pentru căutare (> {count} caractere)
+Tab Organizer:
+  Title: Organizator de file
+  Open Tab Count: '{count} filă deschisă | {count} file deschise | {count} de file deschise'
+  Search Label: Caută file
+  Selected Count: '{count} filă selectată | {count} file selectate | {count} de file selectate'
+  Tab Count: '{count} filă | {count} file | {count} de file'
+  Select All: Selectează tot
+  Select None: Deselectează tot
+  Move To Group: Mută filele selectate în grup
+  Choose Group: Alegeți un grup
+  Ungrouped: Negrupate
+  Pin: Fixează
+  Unpin: Anulează fixarea
+  Load: Încarcă
+  Unload: Descarcă din memorie
+  Unload All: Descarcă totul din memorie
+  Close All: Închide tot
+  Ungroup: Degrupează
+  Group Name: Numele grupului
+  Color: Culoare
+  No Color: Fără culoare
+  Create Group: Creează grupul
+  Expand Group: Extinde grupul
+  Collapse Group: Restrânge grupul
+  Expand Group Label: Extinde {name}, {count} filă | Extinde {name}, {count} file | Extinde {name}, {count} de file
+  Rename Group: Redenumește {name}
+  Change Group Color: Schimbă culoarea pentru {name}
+  Move To Window: Mută în fereastră
+  Choose Window: Alegeți o fereastră
+  Select Tab: Selectează {title}
+  Active: Activă
+  Pinned: Fixată
+  Unloaded: Descărcată din memorie
+  Playing: În redare
+  Close Tab: Închide {title}
+  No Open Results: Nicio filă deschisă nu corespunde căutării.
+  Recently Closed: Închise recent
+  Clear: Șterge
+  No Closed Results: Nicio filă închisă recent nu corespunde căutării.
+  Drag Tab: Trageți pentru a muta într-un grup
+Chapters:
+  Open Chapters: Deschide capitolele
+  Close Chapters: Închide capitolele
+  Copy Timestamp Link: Copiază linkul la {timestamp}
+Comments:
+  Comment Count: 1 comentariu | {count} comentarii | {count} de comentarii
+  Show Comments: Afișează comentariile
+  Getting comment replies, please wait: Se preiau răspunsurile la comentariu, așteptați
+  Reload Comments: Reîncarcă comentariile
+  Reply Count: 1 răspuns | {replyCount} răspunsuri | {replyCount} de răspunsuri
+  Hide {replyCount} replies: Ascunde 1 răspuns | Ascunde {replyCount} răspunsuri | Ascunde {replyCount} de răspunsuri
+  View 1 reply from {channelName}: Vezi 1 răspuns de la {channelName}
+  View {replyCount} replies from {channelName} and others: Vezi {replyCount} răspunsuri de la {channelName} și alții
+  Comments are turned off: Comentariile sunt dezactivate
+  YouTube did not provide advertised replies: YouTube a indicat că acest comentariu are răspunsuri, dar nu le-a furnizat. Este posibil să fi fost șterse sau ascunse, așa că butonul de răspuns a fost eliminat.
+  Pinned by you: Fixat de dvs.
+  A reply is pinned: Un răspuns este fixat
+  Filter loaded comments: Filtrează comentariile încărcate
+  Comment filters: Filtre pentru comentarii
+  From creator: De la creator
+  Contains timestamps: Conține marcaje temporale
+  Pin comment by author: Fixează comentariul lui {author}
+  Unpin comment by author: Anulează fixarea comentariului lui {author}
+  Edited: (editat)
+  Highlighted comment: Comentariu evidențiat
+  Highlighted reply: Răspuns evidențiat
+  Search loaded comments: Caută în comentariile încărcate
+  Loaded comment search result count: 1 din {total} comentarii încărcate | {count} din {total} comentarii încărcate | {count} din {total} de comentarii încărcate
+  No loaded comments match your filters: Niciun comentariu încărcat nu corespunde filtrelor
+  YouTube comment link copied to clipboard: Linkul comentariului YouTube a fost copiat în clipboard
+  Translate to {language}: Tradu în {language}
+  Show original: Afișează originalul
+  Translating comment, please wait: Se traduce comentariul, așteptați
+  Comment translation failed: Traducerea comentariului a eșuat
+Description:
+  Copy Description: Copiază descrierea
+  Description Copied: Descriere copiată în clipboard
+  Video Category: 'Categoria videoclipului:'
+  Video Tags: Etichete video
+  Games: Jocuri
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: Completează golurile din traducerile umane cu text generat de IA. Traducerile umane au întotdeauna prioritate.
+    Update Relative Timestamps: Actualizează marcajele temporale relative în întreaga aplicație cât timp o pagină rămâne deschisă. Când opțiunea este dezactivată, acestea se actualizează numai după reîncărcarea sau revizitarea paginii.
+    Stream Extraction Method: |
+      Alegeți modul în care OpenTubeX obține fluxurile video. yt-dlp trebuie să fie disponibil când este selectat.
+      Este posibil ca videoclipurile să pornească mai greu când folosiți yt-dlp.
+      Metoda încorporată nu permite saltul în transmisiuni în direct și premiere.
+    Avoid translation: |
+      Dezactivează traducerea automată YouTube a titlului, descrierii și capitolelor unui videoclip.
+      Prea multe solicitări, cum ar fi preluarea titlurilor videoclipurilor din liste, pot afecta
+      temporar fiabilitatea aplicației.
+    Show Thumbnail Previews: Afișează previzualizări animate la trecerea cursorului peste miniaturile videoclipurilor.
+    Startup Behavior: |
+      Alegeți ce face OpenTubeX la pornire.
+      „Încarcă toate filele” restaurează imediat fiecare filă salvată, dar filele din fundal nu vor reda automat videoclipuri.
+      „Încarcă filele încărcate anterior” reîncarcă filele care erau încărcate la închiderea OpenTubeX și le păstrează pe celelalte descărcate din memorie.
+      „Încarcă ultima filă activă” restaurează sesiunea anterioară cu celelalte file deschise, dar descărcate din memorie; acestea se încarcă atunci când faceți clic pe ele.
+      „Pornește cu o sesiune goală” omite filele salvate și deschide o fereastră nouă.
+    Remember Tab Navigation History: Istoricul navigării înapoi și înainte al fiecărei file este salvat și restaurat la repornirea OpenTubeX.
+  Proxy Settings:
+    IP Block Recovery Script Path: Calea fișierului script care se rulează când este detectată blocarea IP-ului. OpenTubeX așteaptă finalizarea acestuia, apoi reîncarcă videoclipul. Dacă este activată sursa de rezervă, scriptul rulează numai când și aceasta eșuează.
+  Player Settings:
+    Enable Caption Translations: Când opțiunea este activată, butonul de subtitrări și comanda rapidă C preferă o pistă tradusă automat în limba preferată dacă videoclipul nu oferă o pistă originală corespunzătoare.
+    Use Quick Playback Speed Bar: Afișează o bară rapidă pentru viteza de redare în partea dreaptă a comenzilor playerului. Dacă este activată salvarea manuală a vitezei de redare pentru fiecare canal, bara include și butonul pentru salvarea vitezei canalului curent.
+    Multiply Seek Interval by Playback Rate: Când opțiunea este activată, intervalele de salt (tastele săgeată și J/L) sunt înmulțite cu viteza de redare curentă. Când este dezactivată, intervalele rămân constante indiferent de viteza de redare.
+    Show Playback Rate Adjusted Timestamp: Când opțiunea este activată și viteza de redare diferă de 1x, playerul afișează între paranteze marcajele temporale ajustate la viteza de redare, după afișajul temporal normal.
+    Use YouTube-style Shorts: Afișează videoclipurile Shorts într-o grilă portret pe paginile de abonamente și canale și folosește playerul Shorts în stil YouTube.
+    Loop Shorts: Când opțiunea este activată, videoclipurile Shorts repornesc automat. Când este dezactivată, acestea se opresc la sfârșit și afișează un buton de reluare.
+    Show Skip Silence Toggle: Afișează un comutator de activare și dezactivare pentru omiterea liniștii în meniul de setări al playerului.
+    Enable Skip Silence by Default: Activează omiterea liniștii pentru filele noi. Modificarea într-o filă nu afectează celelalte file.
+    Enable Video Zoom: Afișează comanda Zoom în meniul de setări al playerului și activează comenzile rapide de la tastatură și comenzile de panoramare.
+    Voice-over Translation: Trimite ID-ul videoclipului, durata și limba selectată serviciului neoficial Yandex de traducere vocală atunci când solicitați o traducere. Opțiunea este dezactivată implicit.
+    Hold to Double Playback Speed: Țineți apăsată bara de spațiu sau butonul stâng al mouse-ului deasupra playerului pentru a dubla temporar viteza de redare curentă.
+    Ambient Mode: Îmbină culorile videoclipului cu zona din jurul playerului.
+    Default Volume: Opțiune dezactivată cât timp „Reține volumul” este activată. Dezactivați „Reține volumul” pentru a seta un volum inițial fix pentru fiecare videoclip.
+    Parallel Segment Loading: |
+      Numărul de segmente video și audio care se încarcă simultan înaintea redării.
+      Valorile mai mari pot fi utile în cazul conexiunilor lente sau instabile, dar folosesc mai multă lățime de bandă și memorie.
+      De asemenea, pot determina modul Automat să subestimeze viteza conexiunii și să selecteze o calitate mai scăzută.
+      Fluxurile limitate la o singură solicitare simultană ignoră această setare.
+  Download Settings:
+    Download Folder: Videoclipurile sunt salvate în acest folder. Lăsați necompletat pentru a folosi folderul Descărcări al sistemului.
+    Global Additional yt-dlp Arguments: Argumente suplimentare de linie de comandă transmise către yt-dlp pentru fiecare descărcare, de exemplu --cookies-from-browser firefox.
+    Concurrent Downloads: Numărul maxim de activități yt-dlp care pot rula simultan.
+    Bandwidth Limit: Limitează rata de transfer combinată a cozii împărțind această limită între activitățile simultane. Introduceți 0 pentru eliminarea limitei.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX poate folosi yt-dlp instalat în sistem sau poate descărca și gestiona propria copie yt-dlp, stocată în directorul cu datele utilizatorului.
+    yt-dlp Channel: Selectați canalul de lansare yt-dlp pe care OpenTubeX îl descarcă și îl gestionează. Canalul stabil este recomandat pentru majoritatea utilizatorilor.
+    FFmpeg Source: OpenTubeX poate folosi FFmpeg și FFprobe instalate în sistem sau poate descărca și gestiona propriile versiuni statice, stocate în directorul cu datele utilizatorului.
+    Managed Tool Updates: Alegeți dacă instrumentele gestionate se actualizează automat, solicită confirmarea înainte de actualizare sau se actualizează numai prin butoanele manuale. Instrumentele lipsă sunt descărcate în continuare atunci când sunt necesare.
+    yt-dlp Executable Path: În mod implicit, OpenTubeX presupune că yt-dlp poate fi găsit prin variabila de mediu PATH. Dacă este necesar, puteți seta aici o cale personalizată.
+    Cookie Source: Alegeți dacă yt-dlp trebuie să citească un fișier cookie Netscape sau cookie-uri dintr-un browser instalat pentru redarea autentificată.
+    Cookie File: Selectați un fișier cookie în format Netscape pentru redarea autentificată.
+    Browser for Cookies: Compatibilitatea cu browserele este citită din executabilul yt-dlp selectat. OpenTubeX solicită ca yt-dlp să citească acest browser atunci când este cerută redarea autentificată.
+    Browser Profile: Numele sau folderul opțional al profilului de browser. Lăsați necompletat pentru a folosi profilul accesat cel mai recent.
+    Always Use Cookies: Folosește cookie-urile configurate ori de câte ori yt-dlp extrage fluxuri. Această opțiune nu schimbă metoda de extragere a fluxului la yt-dlp. Când este selectat yt-dlp, pot deveni disponibile formate destinate exclusiv conturilor, inclusiv rata de biți îmbunătățită YouTube Premium dacă acel cont are acces.
+    FFmpeg Executable Path: FFmpeg este necesar pentru îmbinarea fluxurilor video și audio separate și pentru conversia audio. În mod implicit, OpenTubeX presupune că FFmpeg poate fi găsit prin variabila de mediu PATH. Dacă este necesar, puteți seta aici o cale personalizată.
+  Distraction Free Settings:
+    Shorten View Counts: Afișează în formă abreviată numărul de vizionări și de aprecieri ale comentariilor pe care YouTube le-a rotunjit deja, de exemplu 14 K în loc de 14.000. Valorile exacte sunt afișate întotdeauna integral.
+  Subscription Settings:
+    Fetch Feed on Startup: Când opțiunea este activată, OpenTubeX preia automat fluxul de abonamente la pornire și la deschiderea unei ferestre noi.
+    Show New Content Feed: Afișează o filă Nou cu elementele din fluxul de abonamente care nu existau la preluarea anterioară.
+    Show New Content Indicators: Afișează un punct mic lângă elementele din fluxul de abonamente care nu existau la preluarea anterioară.
+    Show Scheduled Live Streams / Premieres First: Păstrează viitoarele transmisiuni în direct și premiere în partea de sus a fluxului de abonamente. Când opțiunea este dezactivată, acestea rămân la poziția anunțului până când încep. Reîmprospătați o dată fluxul de abonamente după dezactivare pentru a prelua datele anunțurilor înregistrărilor programate existente.
+    Auto Refresh Interval: Frecvența cu care OpenTubeX reîmprospătează automat fluxul de abonamente cât timp aplicația este deschisă.
+  Theme Settings:
+    Show Progress as Notification: Afișează o notificare persistentă cu progresul în timp real pentru operațiunile din fundal, cum ar fi reîmprospătarea abonamentelor și descărcarea instrumentelor gestionate, în locul barei globale de progres.
+    Always Show Scrollbars: Păstrează barele de derulare vizibile permanent. Când opțiunea este dezactivată, acestea dispar treptat la scurt timp după ce opriți mișcarea mouse-ului și reapar imediat ce îl mișcați din nou.
+    Use Fixed Tab Width: Atribuie aceeași lățime fiecărei file din bara de file orizontală, în loc să o dimensioneze după titlu.
+    Use Grid Player Menu: Aranjează meniul de setări al playerului video ca o grilă de dale, în locul unei liste de rânduri.
+The playlist is at the beginning. Enable loop to continue playing: Playlistul este la început. Activați redarea în buclă pentru a continua
+External link opening has been disabled in Settings → Privacy: Deschiderea linkurilor externe a fost dezactivată în Setări → Confidențialitate
+Screenshot Clipboard Success: Captura de ecran a fost salvată în clipboard
+Screenshot Clipboard Error: Copierea capturii de ecran în clipboard a eșuat
+KeyboardShortcutPrompt:
+  Edit Hint: Selectați o comandă rapidă, apoi apăsați o nouă combinație de taste. Apăsați Backspace sau Delete pentru a elimina atribuirea.
+  Change Shortcut: Schimbă comanda rapidă pentru {action}
+  Press Shortcut: Apăsați comanda rapidă…
+  Unassigned: Neatribuită
+  Reset Shortcut: Resetează comanda rapidă pentru {action}
+  Reset to Defaults: Resetează la valorile implicite
+  Shortcut Already Assigned: Comanda rapidă este deja atribuită
+  Shortcut Conflict: '{shortcut} este deja atribuită acțiunilor {actions}. Doriți să o reatribuiți?'
+  Reserved Shortcut Conflict: '{shortcut} este rezervată pentru {actions} și nu poate fi reatribuită.'
+  Reassign: Reatribuie
+  Sections:
+    App:
+      Tabs: "Aplicație:\_File"
+      Search and Page: "Aplicație:\_Căutare și pagină"
+      Window and View: "Aplicație:\_Fereastră și vizualizare"
+  New Tab: Creează o filă nouă
+  Close Tab: Închide fila curentă
+  Reload Tab: Reîncarcă fila curentă
+  Reopen Closed Tab: Redeschide ultima filă închisă
+  Next Tab: Treci la fila următoare
+  Previous Tab: Treci la fila anterioară
+  Switch to Tab: Treci la fila 1–9
+  Toggle Tab Orientation: Comută între aranjamentele filelor
+  Find in Page: Găsește text pe pagina curentă
+  Find Next Match: Treci la potrivirea următoare
+  Find Previous Match: Treci la potrivirea anterioară
+  Toggle Normal Playback Speed: Comută între viteza 1x și viteza de redare anterioară
+  Toggle Skip Silence: Comută omiterea liniștii
+  Video Zoom In: Mărește videoclipul
+  Video Zoom Out: Micșorează videoclipul
+  Tab Switcher: Comutator de file
+CommandPalette:
+  Title: Paletă de comenzi
+  Open: Deschide paleta de comenzi
+  Search Label: Caută comenzi
+  Search Placeholder: Caută comenzi și setări…
+  Results: Comenzi
+  No Results: Nicio comandă corespunzătoare
+  Result Count: 1 comandă găsită | {count} comenzi găsite | {count} de comenzi găsite
+  Move: Mută
+  Run: Rulează
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Treci la fila: {title}'
+  Switch Profile: 'Schimbă profilul: {name}'
+  Open Playlist: 'Deschide playlistul: {name}'
+  Cancel Download: 'Anulează descărcarea: {title}'
+  Groups:
+    App: Aplicație
+    Navigation: Navigare
+    Tabs: File
+  Unavailable:
+    Current Page: Sunteți deja pe această pagină
+    No History: Nicio pagină în această direcție
+    Desktop: Disponibil numai în aplicația desktop
+    Build: Indisponibil în această versiune
+    One Tab: Deschideți mai întâi altă filă
+    Active Tab: Aceasta este fila activă
+    Active Profile: Acesta este profilul activ
+    Download Finished: Această descărcare nu mai rulează
+    Video: Deschideți mai întâi un videoclip
+Downloads:
+  Download: Descarcă
+  Download Video: Descarcă videoclipul
+  Download Playlist: Descarcă playlistul
+  Downloading: Se descarcă
+  Queue: Coadă
+  Downloaded: Descărcat
+  Canceled: Anulat
+  Open Downloads: Deschide Descărcări
+  No Downloads: Nicio descărcare
+  No Downloads Description: Descărcările pornite vor apărea aici.
+  Clear Failed Canceled Skipped And Missing: Șterge descărcările eșuate, anulate, omise și lipsă
+  Clear From List: Elimină din listă
+  Show in Folder: Afișează în folder
+  Play Download: Redă descărcarea
+  Retry Download: Reîncearcă descărcarea
+  Pause Download: Întrerupe descărcarea
+  Resume Download: Reia descărcarea
+  Move Earlier: Mută mai devreme
+  Move Later: Mută mai târziu
+  Pause All: Întrerupe tot
+  Resume All: Reia tot
+  Retry All: Reîncearcă toate descărcările eșuate
+  Total Size: 'Dimensiune totală: {size}'
+  Local File: Fișier local
+  Available Offline: Disponibil offline
+  Remove File: Elimină fișierul
+  Remove File Confirmation: Eliminați fișierul descărcat?
+  Remove File Warning: Această acțiune va muta „{title}” în coșul de gunoi al dispozitivului.
+  File Not Found: Fișierul descărcat nu a putut fi găsit.
+  Download Missing: Descărcare indisponibilă
+  Files Missing: Fișierul descărcat nu mai este disponibil în sistemul de fișiere. | Fișierele descărcate nu mai sunt disponibile în sistemul de fișiere. | Fișierele descărcate nu mai sunt disponibile în sistemul de fișiere.
+  Files Available: '{available} din {total} fișiere descărcate sunt disponibile.'
+  More Files: Încă 1 fișier | Încă {count} fișiere | Încă {count} de fișiere
+  Template Used: 'Șablon: {name}'
+  Download Type: Tipul descărcării
+  Template: Șablon
+  Unsaved: Nesalvat
+  Media Type: Tip media
+  Video: Video
+  Audio: Audio
+  Maximum Resolution: Rezoluție maximă
+  Best Available: Cea mai bună disponibilă
+  Automatic: Automat
+  Container: Container
+  Video Codec: Codec video
+  Audio Codec: Codec audio
+  File Name Template: Șablon pentru numele fișierului
+  File Name Template Help: 'Câmpuri disponibile: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Interval de timp și capitole
+  Start Time: Ora de început (HH:MM:SS)
+  End Time: Ora de sfârșit (HH:MM:SS)
+  Split by Chapters: Împarte în fișiere separate după capitole
+  Remove Segments: Elimină segmentele
+  Subtitles and Metadata: Subtitrări și metadate
+  Include Subtitles: Include subtitrările
+  Embed Subtitles: Încorporează subtitrările în fișierul media
+  Subtitle Format: Formatul subtitrărilor
+  Subtitle Languages: Limbile subtitrărilor
+  Subtitle Languages Help: 'Selectoare de limbă yt-dlp separate prin virgule, de exemplu: en.*,de.*'
+  Embed Cover Art: Încorporează miniatura drept copertă
+  Embed Metadata: Încorporează titlul, autorul, descrierea și capitolele
+  Additional yt-dlp Arguments: Argumente yt-dlp suplimentare
+  Custom yt-dlp Arguments: Argumente yt-dlp personalizate
+  Template Name: Numele șablonului
+  Save Template: Salvează șablonul
+  Delete Template: Șterge șablonul
+  Template Saved: Șablonul de descărcare „{name}” a fost salvat
+  Template Name Exists: Există deja un șablon de descărcare numit „{name}”.
+  Choose Folder: Schimbă
+  Select Folder: Alege folderul
+  Folder Required: Alegeți un folder de descărcare pentru a activa descărcările.
+  System Downloads Folder: Folderul Descărcări al sistemului
+  Processing: Se procesează…
+  Queued: În coadă
+  Queued Position: În coadă, poziția {position}
+  Paused: Întreruptă
+  Pausing: Activitatea curentă se va încheia, apoi coada va fi întreruptă
+  Download Complete: Descărcare încheiată
+  Download Cancelled: Descărcare anulată
+  Download Failed: Descărcare eșuată
+  File Name Shortened: Numele fișierului a fost scurtat deoarece titlul videoclipului era prea lung.
+  Insufficient Disk Space: Spațiu insuficient pe disc. Sunt necesari aproximativ {required}, iar {available} sunt disponibili.
+  Unknown Download Size: Dimensiunea descărcării este necunoscută. În sistemul de fișiere de destinație sunt disponibili {available}.
+  Disk Space Check Unavailable: Spațiul disponibil pe disc nu a putut fi verificat înainte de pornirea descărcării.
+  Download Failure Hint: Consultați {issuesLink}, apoi încercați să schimbați canalul yt-dlp la Nightly sau Master în Setări → Avansat → Software extern.
+  yt-dlp YouTube Issues: probleme recente ale yt-dlp cu YouTube
+  Automatic Download Started: Descărcarea automată a început
+  Automatic Download Started Body: „{title}” de la {channel} se descarcă în fundal.
+  Automatic Download Complete: Descărcare automată încheiată
+  Automatic Download Failed: Descărcarea automată a eșuat
+  Automatic Download Could Not Start: Descărcarea automată a „{title}” nu a putut fi pornită.
+  Automatic Download Skipped: Omis de filtrele descărcării automate
+  Cancel Download: Anulează descărcarea
+  yt-dlp Not Found: yt-dlp nu a fost găsit. Instalați-l sau setați-i calea în Setări → Avansat → Software extern.
+  Download Complete Template: Descărcarea „{title}” s-a încheiat
+  Download Failed Template: Descărcarea „{title}” a eșuat
+  Templates:
+    Video Best: Video - Cea mai bună calitate
+    Video Resolution: Video - {resolution}
+    Audio Best: Audio - Cea mai bună calitate
+    Audio Format: Audio - {format}
+    Subtitles Format: Subtitrări - {format}

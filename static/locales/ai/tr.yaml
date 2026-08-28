@@ -1,0 +1,1479 @@
+# Optional AI-generated translations for keys missing from ../tr.yaml.
+Color Picker:
+  Hue: Renk tonu
+  Opacity: Opaklık
+  Backdrop Blur: Arka plan bulanıklığı
+  Hex Color: Hex renk
+  Apply Color: Uygula
+  Reset Color: Sıfırla
+  Copy Color: Kopyala
+  Copy From Another Color: Başka bir renkten kopyala
+  Color Copied: Renk kopyalandı
+  Invalid Color: Geçerli bir hex renk girin
+  Clipboard Unavailable: Pano kullanılamıyor
+  Saturation and Brightness: Doygunluk ve parlaklık
+New Tab: Yeni Sekme
+Maximize: Büyüt
+Restore: Geri Yükle
+Close Tab: Sekmeyi Kapat
+Close Confirmation:
+  Title: OpenTubeX'ten çıkılsın mı?
+  Message: OpenTubeX'ten çıkmak istediğinizden emin misiniz?
+  Quit: Çık
+  Never Ask Again: Bir daha sorma
+Close Window Confirmation:
+  Title: Pencere kapatılsın mı?
+  Message: Bu pencerede {count} sekme var. Pencereyi kapatmak istediğinizden emin misiniz?
+  Close Window: Pencereyi Kapat
+Confirmations:
+  Never Ask Again: Bir daha sorma
+  Settings Hint: Bu onayı Ayarlar → Genel → Önce onayla… bölümünden yeniden etkinleştirebilirsiniz
+Close Multiple Tabs Confirmation:
+  Title: Birden fazla sekme kapatılsın mı?
+  Message: Bu işlem {count} sekmeyi kapatacak.
+  Close Tabs: '{count} Sekmeyi Kapat'
+Load Multiple Tabs Confirmation:
+  Title: Birden fazla sekme yüklensin mi?
+  Message: Bu işlem {count} sekmeyi yükleyecek.
+  Load Tabs: '{count} Sekmeyi Yükle'
+Unload Multiple Tabs Confirmation:
+  Title: Birden fazla sekme bellekten kaldırılsın mı?
+  Message: Bu işlem {count} sekmeyi bellekten kaldıracak.
+  Unload Tabs: '{count} Sekmeyi Bellekten Kaldır'
+Use Vertical Tabs: Dikey Sekmeleri Kullan
+Use Horizontal Tabs: Yatay Sekmeleri Kullan
+Resize Tab Bar: Sekme Çubuğunu Yeniden Boyutlandır
+Find in page: Sayfada bul
+Previous match: Önceki eşleşme
+Next match: Sonraki eşleşme
+Close find bar: Bulma çubuğunu kapat
+No matches: Eşleşme yok
+Version {versionNumber} is now available.: '{versionNumber} sürümü artık kullanılabilir.'
+See changes and update: Değişiklikleri gör ve güncelle
+Dismiss: Kapat
+Update to {version}: '{version} sürümüne güncelle'
+Global:
+  Ambient Mode: Ambiyans Modu
+  Loading More: Daha fazlası yükleniyor
+  New: Yeni
+Search Listing:
+  Label:
+    Members Only: Yalnızca üyelere özel
+Stats:
+  Stats: İstatistikler
+  Watch time summary: İzleme süresi özeti
+  Today: Bugün
+  This week: Bu hafta
+  Total watch time: Toplam izleme süresi
+  Daily average: Günlük ortalama
+  So far today: Bugün şu ana kadar
+  Since: '{day} tarihinden beri'
+  All recorded time: Kaydedilen tüm zaman
+  Per calendar day: Takvim günü başına
+  Day by day: Günlere göre
+  Highest: 'En yüksek: {duration}'
+  Week by week: Haftalara göre
+  Last 14 days: Son 14 gün
+  Last 8 weeks: Son 8 hafta
+  Daily chart aria: Son 14 günün günlük izleme süresi
+  Weekly chart aria: Son 8 haftanın haftalık izleme süresi
+  No data: Video izledikçe izleme süreniz burada görünecek.
+  Estimate note: Bu güncellemeden önceki izleme süresi, kayıtlı oynatma ilerlemenizden tahmin edilir.
+  Adjust imported watch time: İçe aktarılan izleme süresini ayarla
+  Imported watch time: İçe aktarılan izleme süresi
+  Imported watch time explanation: Genellikle kullandığınız oynatma hızını seçin. Gerçek izleme sürenizi tahmin etmek için içe aktarılan video süreleri bu hıza bölünecek.
+  Playback speed: Oynatma hızı
+  Channel speed note: Varsa bunun yerine kayıtlı kanal oynatma hızları kullanılır.
+  Apply playback speed: Oynatma hızını uygula
+  Imported watch time adjusted: İçe aktarılan izleme süresi ayarlandı
+  Reset statistics: İstatistikleri sıfırla
+  Reset: Sıfırla
+  Reset confirmation: Tüm izleme istatistiklerini sıfırlamak istediğinizden emin misiniz? Bu işlem geri alınamaz.
+  Reset success: İzleme istatistikleri sıfırlandı
+  Less than a minute: < 1 dk
+  Minutes: '{minutes} dk'
+  Hours: '{hours} sa'
+  Hours and minutes: '{hours} sa {minutes} dk'
+Subscriptions:
+  Refreshing Subscription Videos: Abonelik videoları yenileniyor
+  Refreshing Subscription Shorts: Abonelik kısa videoları yenileniyor
+  Refreshing Subscription Live Streams: Abonelik canlı yayınları yenileniyor
+  Refreshing Subscription Posts: Abonelik gönderileri yenileniyor
+  New Content: Yeni içerik
+  New Feed Refresh Warning Title: Tüm abonelik akışları yenilensin mi?
+  New Feed Refresh Warning: RSS kullanmadan 1 aboneliğin tüm içerik türlerini yenilemek uzun sürebilir. Devam etmek istiyor musunuz? | RSS kullanmadan {count} aboneliğin tüm içerik türlerini yenilemek uzun sürebilir. Devam etmek istiyor musunuz?
+  New Since Last Refresh: Son yenilemeden beri yeni
+  Mark as Seen: Görüldü olarak işaretle
+  Mark All as Seen: Tümünü görüldü olarak işaretle
+  No New Content: Yeni içerik yok.
+  New Content Tabs: Yeni içerik sekmeleri
+  Show Tabbed View: Sekmeli görünümü göster
+  Show Combined View: Birleşik görünümü göster
+  Newest First: Önce en yeniler
+  Oldest First: Önce en eskiler
+Trending:
+  Load Error: Öne çıkanlar yüklenemedi.
+  Unsupported Backend: Öne çıkanlar için Yerel API gerekir. Yerel API'yi seçin veya arka uç yedeğini etkinleştirin.
+Most Popular Feed Empty: Bu Invidious örneğinin Popüler Olanlar akışı boş.
+Feed:
+  Cancel Refresh: Yenilemeyi iptal et
+  Next Auto Refresh: 'Sonraki otomatik yenileme: {date}'
+User Playlists:
+  Load More Playlists: Daha Fazla Oynatma Listesi Yükle
+  Save to: Kaydet…
+  Quick Bookmark Icon: Hızlı yer imi simgesi
+  Custom Emoji: Özel emoji
+  Choose Image: Görsel seç
+  Use Bookmark Icon: Yer imi simgesini kullan
+  SinglePlaylistView:
+    Retry: Yeniden Dene
+    This playlist could not be loaded.: Bu oynatma listesi yüklenemedi.
+    More videos could not be loaded.: Daha fazla video yüklenemedi.
+History:
+  Mark All As Watched: Tümünü İzlenmiş Olarak İşaretle
+  Mark All As Watched Confirmation: Geçmişinizdeki tüm videoları izlenmiş olarak işaretlemek istediğinizden emin misiniz?
+  All History Marked as Watched: Geçmişinizdeki tüm videolar izlenmiş olarak işaretlendi
+  Delete Old History: Eski Geçmişi Sil
+  Select History Age: Bir kaydın silinmesi için kaç günlük olması gerektiğini seçin.
+  Delete Entries Older Than: Şundan eski kayıtları sil
+  Number of Days: Gün sayısı
+  History Cleanup Warning: Eşleşen izleme geçmişi kayıtları kalıcı olarak silinir.
+  1 Day: 1 gün
+  1 Week: 1 hafta
+  1 Month: 1 ay
+  3 Months: 3 ay
+  1 Year: 1 yıl
+  Custom: Özel
+  History Older Than Days Removed: 1 günden eski izleme geçmişi kaldırıldı | {days} günden eski izleme geçmişi kaldırıldı
+Settings:
+  Quick Settings:
+    Quick Settings: Hızlı ayarlar
+    Appearance: Görünüm
+    Playback: Oynatma
+    Content: İçerik
+    Language and Region: Dil ve bölge
+    All Settings: Tüm ayarlar
+    Profile Selector Hint: Profil değiştirmek için profil simgesine sağ tıklayabilirsiniz
+  Categories:
+    General Description: Dil, başlangıç, sekmeler ve uygulama davranışı
+    Appearance: Görünüm
+    Appearance Description: Tema, düzen ve küçük resimler
+    Content appearance: Video listeleri ve küçük resimler
+    Layout: Düzen
+    Playback Description: Oynatıcı, alt yazılar ve kanal tercihleri
+    Subscriptions Description: Akış yenileme ve görüntüleme seçenekleri
+    Downloads Description: Klasörler, şablonlar ve otomatik kurallar
+    Distraction Free Description: İçeriği gizleyin ve izleme sınırları belirleyin
+    Add-ons: Eklentiler
+    Add-ons Description: SponsorBlock, DeArrow, beğenmeme sayıları ve seslendirme çevirisi
+    Privacy Description: İzleme gizliliği ve erişim denetimleri
+    Online activity: Çevrim içi etkinlik
+    Data And Storage Description: İçe ve dışa aktarma, disk kullanımı ve temizleme
+    Sync Description: Ayarları ve verileri cihazlar arasında eşitlenmiş tutun
+    Advanced: Gelişmiş
+    Advanced Description: Sağlayıcılar, harici uygulamalar ve ağ
+    Alternative providers: Video ve meta veri sağlayıcıları
+  Highlight Changed Settings: Varsayılanlardan farklı ayarları vurgula
+  Reset Setting to Default: Bu ayarı varsayılanına sıfırla
+  Performance Impact:
+    Show Performance Impact: Performans etkisi göstergelerini göster
+    Moderate: Orta düzey etki
+    High: Yüksek etki
+    Description: Bu ayar {resources} kullanımını artırabilir
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: bellek
+      Network: ağ
+      Disk: disk
+  General Settings:
+    Update Relative Timestamps: Göreli zaman damgalarını güncel tut
+    Stream Extraction Method:
+      Stream Extraction Method: Akış çıkarma yöntemi
+      yt-dlp: yt-dlp
+      Built-in: Yerleşik
+    Confirm Before: Önce onayla…
+    Confirmation Options:
+      Closing App: OpenTubeX'ten çıkma
+      Closing Window: Birden fazla sekmesi olan pencereyi kapatma
+      Closing Tabs: Birden fazla sekmeyi kapatma
+      Loading Tabs: Birden fazla sekmeyi yükleme
+      Unloading Tabs: Birden fazla sekmeyi bellekten kaldırma
+    Remember Tab Navigation History: Sekme Gezinme Geçmişini Hatırla
+    New Tab Position:
+      New Tab Position: Yeni Sekme Konumu
+      At the end: Sonda
+      After current tab: Geçerli sekmeden sonra
+      After current tab in opened order: Açılma sırasına göre geçerli sekmeden sonra
+    Tab Close Focus:
+      Tab Close Focus: Sekme Kapatıldıktan Sonra
+      Previous tab: Önceki sekmeyi seç
+      Next tab: Sonraki sekmeyi seç
+    Startup Behavior:
+      Startup Behavior: Başlangıçta
+      Load all tabs: Tüm sekmeleri yükle
+      Load previously loaded tabs: Daha önce yüklenen sekmeleri yükle
+      Load last active tab: Son etkin sekmeyi yükle
+      Start with an empty session: Boş bir oturumla başla
+    Use AI Translation Completions: Eksik çevirileri yapay zekâ tarafından oluşturulan metinlerle tamamla
+    Reduced Motion:
+      Reduced Motion: Azaltılmış Hareket
+      System: Sistem
+      Force On: Her zaman açık
+      Force Off: Her zaman kapalı
+    Comment Translation:
+      Title: Yorum çevirileri
+      Enable: Yorum çevirilerini etkinleştir
+      Never Translate: Şu dildeki yorumları asla çevirme
+      Choose Language: Bir dil seçin
+      Description: Uygulama dilindeki yorumlar zaten çevrilmez. Okuyabildiğiniz diğer dilleri ekleyin.
+      Remove Language: '{language} dilindeki yorumları yeniden çevir'
+    Avoid translation:
+      Avoid translation: Çevrilmemiş video metnini tercih et
+      Disabled: Devre dışı
+      Watch Only: Yalnızca Video Arayüzü
+      Entire App: Tüm Uygulama
+    Playlist View Type:
+      Playlist View Type: Oynatma Listesi Görünüm Türü
+    Show Thumbnail Previews: Küçük resim önizlemelerini göster
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Ek Küçük Resim İşlem Düğmesi
+      None: Yok
+      Mark as Watched: İzlenmiş Olarak İşaretle
+      Copy YouTube Link: YouTube Bağlantısını Kopyala
+      Open in YouTube: YouTube'da Aç
+  Context Menu Search Settings:
+    Context Menu Search Settings: Bağlam Menüsü Araması
+    Description: Seçili metne sağ tıkladığınızda görünecek arama motorlarını seçin. Aramalar varsayılan tarayıcınızda açılır.
+    Icon Hint: Bir motor etkinleştirildiğinde site simgesini yüklemek için web sitesine bağlanılır.
+    Engine Name: Arama motoru adı
+    Search URL: Arama URL'si
+    URL Hint: URL'de kodlanmış seçili metnin bulunacağı yerde %s kullanın.
+    Add Custom Engine: Özel arama motoru ekle
+    Add Engine: Arama motoru ekle
+    Remove Engine: '{engine} arama motorunu kaldır'
+    Invalid Engine: Bir ad ve %s içeren geçerli bir HTTP veya HTTPS arama URL'si girin.
+    Engine Limit: En fazla {count} özel arama motoru ekleyebilirsiniz.
+  Theme Settings:
+    Move Downloads to App Header: İndirilenleri Uygulama Başlığına Taşı
+    Move Settings to App Header: Ayarları Uygulama Başlığına Taşı
+    Hide Side Bar on Watch Pages: İzleme Sayfalarında Kenar Çubuğunu Gizle
+    UI Roundness: Arayüz Yuvarlaklığı
+    Scrollbar Width: Kaydırma Çubuğu Genişliği
+    Animation Speed: Animasyon Hızı
+    Thumbnail Size: Küçük Resim Boyutu
+    Show Tab Icons: Sekme Simgelerini Göster
+    Load Missing Tab Icons: Eksik Sekme Simgelerini Yükle
+    Loading Missing Tab Icons: Eksik Sekme Simgeleri Yükleniyor…
+    No Missing Tab Icons: Desteklenen tüm sekme simgeleri zaten yüklü
+    Loaded Tab Icons: 'Eksik sekme simgesi yüklendi: {count} | Eksik sekme simgeleri yüklendi: {count}'
+    Loaded Tab Icons With Failures: '{loaded} sekme simgesi yüklendi; {failed} simge yüklenemedi'
+    Show Tab Previews: Sekme Önizlemelerini Göster
+    Use Fixed Tab Width: Yatay Modda Sabit Sekme Genişliği Kullan
+    Tab Width: Sekme Genişliği
+    Tab Layout:
+      Tab Layout: Sekme Düzeni
+      Horizontal Top: Üstte yatay
+      Horizontal Bottom: Altta yatay
+      Vertical Left: Solda dikey
+      Vertical Right: Sağda dikey
+    Show Toast Timeout Indicator: Bildirim süresi göstergesini göster
+    Use Grid Player Menu: Izgara Oynatıcı Menüsünü Kullan
+    Show Progress as Notification: İlerlemeyi bildirim olarak göster
+    Operation in Progress: İşlem sürüyor
+    Toast Position:
+      Toast Position: Bildirim Konumu
+      Bottom Left: Sol alt
+      Bottom Center: Alt orta
+      Bottom Right: Sağ alt
+      Top Left: Sol üst
+      Top Center: Üst orta
+      Top Right: Sağ üst
+    Icon Pack:
+      Icon Pack: Simge Paketi
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Uygulama yazı tipi
+      System Default: Sistem varsayılanı
+      Unable to Load: Yüklü sistem yazı tipleri yüklenemedi
+    Always Show Scrollbars: Kaydırma Çubuklarını Her Zaman Göster
+    Base Theme:
+      Custom: Özel
+    Light Theme: Açık tema
+    Dark Theme: Koyu tema
+    Custom Theme:
+      Create Custom Theme: Özel tema oluştur
+      Edit Custom Theme: Özel temayı düzenle
+      Custom Theme Creator: Özel tema oluşturucu
+      Theme Name: Tema adı
+      Based On: Temel alınan tema
+      Import Theme: Temayı içe aktar
+      Export Theme: Temayı dışa aktar
+      Share Theme: Temayı paylaş
+      Share Description Heading: Açıklama
+      Share Description Prompt: Temayı ve kullanmadan önce bilinmesi gerekenleri açıklayın.
+      Share Screenshots Heading: Ekran görüntüleri
+      Share Screenshots Prompt: Bir veya daha fazla ekran görüntüsünü buraya sürükleyip bırakın.
+      Share Code Summary: Tema JSON'u
+      Delete Theme: Temayı sil
+      Delete Theme Confirmation: '“{name}” silinsin mi? Bu işlem geri alınamaz.'
+      Save and Apply: Kaydet ve uygula
+      Discard Changes: Değişiklikleri at
+      Reset Colors: Temel temaya sıfırla
+      Theme File: OpenTubeX tema dosyası
+      Theme Saved: Özel tema kaydedildi ve uygulandı
+      Theme Imported: Tema düzenleyiciye aktarıldı
+      Theme Exported: Tema dışa aktarıldı
+      Theme Deleted: Özel tema silindi
+      Unable to Load: Özel tema yüklenemedi
+      Unable to Save: Özel tema kaydedilemedi
+      Unable to Export: Özel tema dışa aktarılamadı
+      Unable to Share: Özel tema paylaşılamadı
+      Unable to Delete: Özel tema silinemedi
+      Invalid Theme File: Geçersiz özel tema dosyası
+      Colors:
+        Main text: Ana metin
+        Secondary text: İkincil metin
+        Subtle text: Soluk metin
+        Borders and dividers: Kenarlıklar ve ayırıcılar
+        Subtle surfaces and indicators: Soluk yüzeyler ve göstergeler
+        Title text: Başlık metni
+        Selected text background: Seçili metin arka planı
+        Selected text: Seçili metin
+        Logo icon: Logo simgesi
+        Logo text: Logo metni
+        Logo hover: Logo üzerine gelme
+        Logo pressed: Basılı logo
+        Page background: Sayfa arka planı
+        Card background: Kart arka planı
+        Secondary card background: İkincil kart arka planı
+        Favorite icon: Favori simgesi
+        Error color: Hata rengi
+        Scrollbar thumb: Kaydırma çubuğu tutamacı
+        Scrollbar thumb hover: Kaydırma çubuğu tutamacı üzerine gelme
+        Scrollbar thumb pressed: Basılı kaydırma çubuğu tutamacı
+        Dropdown item hover text: Açılır menü öğesi üzerine gelme metni
+        Dropdown item hover background: Açılır menü öğesi üzerine gelme arka planı
+        Navigation and panel background: Gezinme ve panel arka planı
+        Neutral item hover and focus background: Nötr öğe üzerine gelme ve odak arka planı
+        Neutral item hover and focus text and icons: Nötr öğe üzerine gelme ve odak metni ile simgeleri
+        Neutral item pressed background: Basılı nötr öğe arka planı
+        Neutral item pressed text and icons: Basılı nötr öğe metni ve simgeleri
+        Header button hover and focus background: Başlık düğmesi üzerine gelme ve odak arka planı
+        Header button hover and focus text and icons: Başlık düğmesi üzerine gelme ve odak metni ile simgeleri
+        Header button pressed background: Basılı başlık düğmesi arka planı
+        Header button pressed text and icons: Basılı başlık düğmesi metni ve simgeleri
+        Colored header button hover and focus background: Renkli başlık düğmesi üzerine gelme ve odak arka planı
+        Colored header button hover and focus text and icons: Renkli başlık düğmesi üzerine gelme ve odak metni ile simgeleri
+        Colored header button pressed background: Basılı renkli başlık düğmesi arka planı
+        Colored header button pressed text and icons: Basılı renkli başlık düğmesi metni ve simgeleri
+        Search and dropdown background: Arama ve açılır menü arka planı
+        Settings search background: Ayar arama arka planı
+        Instance menu: Örnek menüsü
+        Input background: Giriş arka planı
+        Shadow color: Gölge rengi
+        Primary controls and highlights: Birincil denetimler ve vurgular
+        Primary control hover and focus: Birincil denetim üzerine gelme ve odak
+        Primary control pressed: Basılı birincil denetim
+        Text and icons on primary controls: Birincil denetimlerdeki metin ve simgeler
+        Secondary controls and highlights: İkincil denetimler ve vurgular
+        Secondary control hover and focus: İkincil denetim üzerine gelme ve odak
+        Secondary control pressed: Basılı ikincil denetim
+        Light secondary color: Açık ikincil renk
+        Visited accent: Ziyaret edilmiş vurgu
+        Text and icons on secondary controls: İkincil denetimlerdeki metin ve simgeler
+        Links: Bağlantılar
+        Visited links: Ziyaret edilen bağlantılar
+        Destructive action: Yıkıcı işlem
+        Destructive hover and focus: Yıkıcı işlem üzerine gelme ve odak
+        Destructive pressed: Basılı yıkıcı işlem
+        Text and icons on destructive actions: Yıkıcı işlemlerdeki metin ve simgeler
+  Player Settings:
+    Automatically Open Chapters: Bölümleri Otomatik Olarak Aç
+    Caption Appearance:
+      Caption Appearance: Alt Yazı Görünümü
+      Captions: Alt Yazılar
+      Preferred Language: Tercih Edilen Alt Yazı Dili
+      Application Language: Uygulama Dili
+      Enable Translations: Alt Yazı Çevirilerini Etkinleştir
+      Text Color: Metin Rengi
+      Background Color: Arka Plan Rengi
+      Background Opacity: Arka Plan Opaklığı
+      Font Size: Yazı Tipi Boyutu
+      Vertical Position: Dikey Konum
+      Edge Color: Kenar Rengi
+      Anchor:
+        Anchor: Hizalama
+        Top Left: Sol Üst
+        Top Center: Üst Orta
+        Top Right: Sağ Üst
+        Bottom Left: Sol Alt
+        Bottom Center: Alt Orta
+        Bottom Right: Sağ Alt
+      Edge Style:
+        Edge Style: Kenar Biçemi
+        None: Yok
+        Outline: Dış Çizgi
+        Drop Shadow: Alt Gölge
+      Reset: Alt Yazı Görünümünü Sıfırla
+    Auto Picture in Picture:
+      Auto Picture in Picture: Otomatik olarak Resim İçinde Resim moduna geç
+      On Tab Change: Sekme değiştirirken
+      On Window Minimize: Pencereyi küçültürken
+      On Window Hide: Pencere odağını kaybettiğinde veya başka pencereye geçildiğinde
+      Wayland Minimize Unsupported: Wayland, pencerenin küçültüldüğünü uygulamalara bildirmediği için bu tetikleyici kullanılamaz. Bunun yerine küçültmeyi de kapsayan "Pencere odağını kaybettiğinde veya başka pencereye geçildiğinde" seçeneğini kullanın.
+    Scroll Mini Player:
+      Scroll Mini Player: Kaydırma mini oynatıcısı
+      When Scrolling Down: Aşağı kaydırırken mini oynatıcıyı ekranda tut
+      On All Tabs: Sekme değiştirirken mini oynatıcıyı ekranda tut
+    Multiply Seek Interval by Playback Rate: Sarma Aralığını Oynatma Hızıyla Çarp
+    Show Playback Rate Adjusted Timestamp: Oynatma Hızına Göre Ayarlanmış Zaman Damgasını Göster
+    Use YouTube-style Shorts: YouTube Tarzı Kısa Videoları Kullan
+    Loop Shorts: Kısa Videoları Döngüye Al
+    Remember Volume: Ses Düzeyini Hatırla
+    Skip Silence: Sessizliği Atla
+    Show Skip Silence Toggle: Sessizliği Atlama Düğmesini Göster
+    Enable Skip Silence by Default: Sessizliği Atlamayı Varsayılan Olarak Etkinleştir
+    Enable Video Zoom: Video Yakınlaştırmayı Etkinleştir
+    Voice-over Translation:
+      Title: Seslendirme çevirisi
+      Attribution: (Yandex tarafından desteklenmektedir)
+      Enable: Seslendirme çevirisini etkinleştir
+      Prepare in Background: Seslendirme çevirilerini arka planda hazırlamaya başla
+      Background Preparation Tooltip: Desteklenen bir video yüklenir yüklenmez geçerli videonun kimliğini, süresini ve seçili dili çeviri hizmetine gönderir.
+      Language: Seslendirme çevirisi dili
+      Supported Source Languages: 'Desteklenen kaynak diller: Rusça, İngilizce, Çince, Korece, Litvanca, Letonca, Arapça, Fransızca, İtalyanca, İspanyolca, Almanca ve Japonca.'
+      Voice Volume: Çevrilmiş ses düzeyi
+      Original Volume: Özgün ses düzeyi
+      Russian: Rusça
+      English: İngilizce
+      Kazakh: Kazakça
+    Hold to Double Playback Speed: Oynatma Hızını İkiye Katlamak İçin Basılı Tut
+    Use Quick Playback Speed Bar: Hızlı Oynatma Hızı Çubuğunu Kullan
+    Customize Quick Playback Speed Bar: Hızlı Oynatma Hızı Çubuğunu Özelleştir
+    Quick Playback Speed Bar Manager: Hızlı Oynatma Hızı Çubuğu
+    Add Playback Speed: Oynatma Hızı Ekle
+    Reset Quick Playback Speed Bar: Varsayılanlara Sıfırla
+    Playback Speed Name: Ad
+    Edit Playback Speed Name: Oynatma hızı adını düzenle
+    Use Automatic Playback Speed Name: Otomatik oynatma hızı adını kullan
+    Reorder Playback Speed: Oynatma hızını yeniden sıralamak için sürükleyin
+    Playback Speed: Oynatma Hızı
+    Parallel Segment Loading: Paralel Bölüm Yükleme
+  Channel Settings:
+    Channel Settings: Kanal Ayarları
+    Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.
+    Enable Playback Speed: Oynatma Hızını Etkinleştir
+    Enable Video Quality: Video Kalitesini Etkinleştir
+    Enable Subtitles State: Alt Yazı Durumunu Etkinleştir
+    Enable Volume: Ses Düzeyini Etkinleştir
+    Auto Update: Oynatıcı seçeneklerinden değiştirildiğinde otomatik güncelle
+    Auto Update Subtitles: Açılıp kapatıldığında otomatik güncelle
+    Auto Update Volume: Ses düzeyini her değiştirdiğinizde otomatik güncelle
+    Manage Saved Channels: 'Kayıtlı Kanalları Yönet ({channelCount})'
+    Saved Channels: Kayıtlı Kanal Ayarları
+    Enable Saved Channel Settings Sync: Kayıtlı kanal ayarlarını eşitle
+    Disable Saved Channel Settings Sync: Kayıtlı kanal ayarlarını eşitlemeyi durdur
+    Search Channels: Kanallarda ara
+    No Saved Channels: Henüz kanala özel bir ayar kaydedilmedi
+    No Matching Channels: Aramanızla eşleşen kanal yok
+    Forget Channel: Bu kanalın tüm ayarlarını unut
+    Forget Value: Bu ayarı unut
+    Add Setting: Bu kanal için başka bir ayarı hatırla
+    Video Quality: Video Kalitesi
+    Subtitles Enabled: Alt Yazılar Etkin
+    Volume: Ses Düzeyi
+  Download Settings:
+    Download Settings: İndirilenler
+    Enable Downloads: İndirmeleri Etkinleştir
+    Managed Tools Download Started Template: 'Gerekli harici yazılım bulunamadı: {tools}. Yönetilen kopyalar indiriliyor…'
+    Managed Tools Download Finished Template: '{tools} indirildi'
+    Managed Tools Update Started Template: '{tools} için güncelleme bulundu. İndiriliyor…'
+    Managed Tools Update Finished Template: '{tools} güncellendi'
+    Managed Tools Update Available Template: '{tools} için bir güncelleme var.'
+    Update Managed Tools: Güncelle
+    Managed Tools Download Error Template: 'Yönetilen araçlar indirilemedi: {errors}'
+    Download Folder: İndirme Klasörü
+    Global Additional yt-dlp Arguments: Genel Ek yt-dlp Argümanları
+    Concurrent Downloads: Eş Zamanlı İndirmeler
+    Bandwidth Limit: Bant genişliği sınırı (KiB/sn, sınırsız için 0)
+    Choose Download Folder: İndirme Klasörü Seç
+    Download Templates: İndirme Şablonları
+    Manage Download Templates: 'İndirme Şablonlarını Yönet ({templateCount})'
+    New Template: Yeni Şablon
+    Template Source: Düzenlenecek veya Temel Alınacak Şablon
+    Built-in Template: '{name} (Yerleşik)'
+    Custom Template Name: '{name} (Özel)'
+    Create Template Copy: Kopya Oluştur
+    Template Copy Name: '{name} Kopyası'
+    Automatic Downloads: Otomatik İndirmeler
+    Manage Automatic Downloads: 'Otomatik İndirmeleri Yönet ({channelCount})'
+    Automatic Downloads Description: Abone olunan her kanal için bir indirme şablonu ve süzgeçler seçin. Eşleşen videolar, abonelik akışları yenilendiğinde arka planda indirilir.
+    Automatic Downloads New Only: Bir kanal etkinleştirildiğinde yalnızca sonraki yeni yüklemeler indirilir. Mevcut videolar ve kanalın eski yüklemeleri indirilmez.
+    Automatic Downloads No Channels: Otomatik indirmeleri yapılandırmadan önce bir kanala abone olun.
+    No Matching Automatic Download Channels: Aramanızla eşleşen kanal yok.
+    Automatic Downloads Livestreams: Canlı yayınlar
+    Minimum Duration Seconds: En kısa süre (saniye)
+    Maximum Duration Seconds: En uzun süre (saniye)
+    Minimum File Size MB: En küçük dosya boyutu (MB)
+    Maximum File Size MB: En büyük dosya boyutu (MB)
+    Maximum Age Days: En fazla yaş (gün)
+    Title Includes: Başlık şunları içerir
+    Title Excludes: Başlık şunları içermez
+    Title Filter Hint: Birden fazla başlık terimini virgülle ayırın. Video, eklenen terimlerden en az biriyle eşleşmeli ve dışlanan terimlerden hiçbiriyle eşleşmemelidir.
+  External Software Settings:
+    External Software Settings: Harici Yazılım
+    yt-dlp Source: yt-dlp Kaynağı
+    yt-dlp Channel: yt-dlp Kanalı
+    Sources:
+      System: Sistem (PATH veya özel yol)
+      Managed: OpenTubeX tarafından yönetilen
+    Detected Version Template: 'Algılanan yt-dlp sürümü: {version}'
+    Managed Not Downloaded: yt-dlp henüz indirilmedi. İndirmek için aşağıdaki düğmeye tıklayın.
+    System yt-dlp Missing Warning: yt-dlp sisteminizde bulunamadı. Yükleyin, aşağıda özel bir yol ayarlayın veya kaynağı "OpenTubeX tarafından yönetilen" olarak değiştirin.
+    Download yt-dlp: yt-dlp'yi İndir
+    Update yt-dlp: yt-dlp'yi Güncelle
+    Checking yt-dlp: yt-dlp Denetleniyor…
+    Downloading yt-dlp: yt-dlp İndiriliyor…
+    yt-dlp Downloaded Template: 'yt-dlp {version} indirildi'
+    yt-dlp Download Error Template: 'yt-dlp indirilemedi: {error}'
+    FFmpeg Source: FFmpeg Kaynağı
+    Detected FFmpeg Version Template: 'Algılanan FFmpeg sürümü: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg henüz indirilmedi. İndirmek için aşağıdaki düğmeye tıklayın.
+    System FFmpeg Missing Warning: FFmpeg sisteminizde bulunamadı. Video ve sesi birleştirmenin yanı sıra ses dönüştürme için de gereklidir. Yükleyin, aşağıda özel bir yol ayarlayın veya kaynağı "OpenTubeX tarafından yönetilen" olarak değiştirin.
+    Download FFmpeg: FFmpeg'i İndir
+    Update FFmpeg: FFmpeg'i Güncelle
+    Checking FFmpeg: FFmpeg Denetleniyor…
+    Downloading FFmpeg: FFmpeg İndiriliyor…
+    FFmpeg Downloaded Template: 'FFmpeg {version} indirildi'
+    FFmpeg Download Error Template: 'FFmpeg indirilemedi: {error}'
+    Detected FFprobe Version Template: 'Algılanan FFprobe sürümü: {version}'
+    FFprobe Managed Not Downloaded: FFprobe henüz indirilmedi. FFmpeg ile birlikte indirmek için aşağıdaki düğmeye tıklayın.
+    System FFprobe Missing Warning: FFprobe sisteminizde bulunamadı. İşlem sonrası medya incelemesi için gereklidir. FFmpeg'in yanına yükleyin veya kaynağı "OpenTubeX tarafından yönetilen" olarak değiştirin.
+    Checking FFprobe: FFprobe Denetleniyor…
+    Download FFmpeg and FFprobe: FFmpeg ve FFprobe'u İndir
+    Update FFmpeg and FFprobe: FFmpeg ve FFprobe'u Güncelle
+    Downloading FFmpeg and FFprobe: FFmpeg ve FFprobe İndiriliyor…
+    FFmpeg and FFprobe Downloaded Template: 'FFmpeg ve FFprobe {version} indirildi'
+    FFmpeg and FFprobe Download Error Template: 'FFmpeg ve FFprobe indirilemedi: {error}'
+    Managed Tool Already Current Template: '{tool} {version} zaten güncel'
+    Managed Tool Updates: Yönetilen Araç Güncellemeleri
+    Update Modes:
+      Automatic: Otomatik güncelle
+      Ask: Güncellemeden önce sor
+      Manual: Yalnızca elle güncelle
+    yt-dlp Executable Path: yt-dlp Yürütülebilir Dosya Yolu
+    FFmpeg Executable Path: FFmpeg Yürütülebilir Dosya Yolu
+    Restricted Playback Authentication: yt-dlp Oynatma Çerezleri
+    Cookie Source: Çerez Kaynağı
+    Cookie Sources:
+      None: Yok
+      File: Dosya
+      Browser: Tarayıcı
+    Cookie File: Çerez Dosyası
+    Browser for Cookies: Çerezlerin Alınacağı Tarayıcı
+    Browser Profile: Tarayıcı Profili (İsteğe Bağlı)
+    Browser Profile Placeholder: Profil adı veya yolu
+    Select Browser: Bir tarayıcı seçin
+    Always Use Cookies: Çerezleri Her Zaman Kullan
+    Restricted Playback Authentication Hint: OpenTubeX varsayılan olarak bu çerezleri yt-dlp'ye yalnızca yaş kısıtlamalı veya üyelere özel bir videoda "Yapılandırılmış çerezlerle dene" seçeneğini seçtikten sonra gönderir.
+    Restricted Playback Authentication Warning: yt-dlp'yi bir Google hesabıyla kullanmak geçici veya kalıcı hesap kısıtlamalarına yol açabilir.
+  Privacy Settings:
+    Automatic History Retention: Otomatik Geçmiş Saklama Süresi (Gün)
+    Automatic History Retention Placeholder: Süresiz saklamak için boş bırakın
+    Automatic History Retention Tooltip: Geçmişi süresiz saklamak için boş bırakın. Bir sayı kaydettiğinizde eski kayıtlar hemen ve uygulama açıkken otomatik olarak kaldırılır.
+    History Retention Saved: Geçmiş saklama süresi kaydedildi
+    Invalid History Retention Days: Sıfırdan büyük bir tam gün sayısı girin
+    Enable Watch Statistics: İzleme İstatistiklerini Etkinleştir
+    Week Starts On: Haftanın Başlangıç Günü
+    Cache Video Metadata: Meta veri geçmişi
+    Cache Video Metadata Tooltip: Ziyaret ettiğiniz desteklenen videoların başlık, küçük resim ve açıklama dâhil tüm meta veri sürümlerini saklar. Meta veri geçmişini saklamak disk kullanımını artırdığı için varsayılan olarak devre dışıdır.
+    Watched Percentage Threshold: İzlenmiş Sayılma Yüzdesi Eşiği
+    Watched Percentage Threshold Tooltip: Videolar seçilen yüzdeye ulaştığında ve en fazla 2 dakika kaldığında izlenmiş olarak işaretlenir. %0'da oynatma başladığında, %100'de ise oynatma bittiğinde işaretlenir.
+    Clear Video Metadata Cache: Video Meta Verisi Önbelleğini Temizle
+    Are you sure you want to clear the video metadata cache?: Önbelleğe alınmış video başlıklarını, küçük resimleri ve açıklamaları temizlemek istediğinizden emin misiniz?
+    Failed to clear video metadata cache: Video meta verisi önbelleği temizlenemedi
+    Video metadata cache has been cleared: Video meta verisi önbelleği temizlendi
+    Video Metadata Cache Size: 'Video meta verisi önbelleği: {size}'
+  Storage Settings:
+    Storage: Depolama
+    Downloaded Media: İzlenen indirilmiş medya
+    Storage Breakdown: Depolama dökümü
+    Shown Total: Gösterilen toplam
+    Calculating: Hesaplanıyor…
+    Not Available: Tam boyut kullanılamıyor
+    At Least: En az {size}
+    Failed To Read Storage: Bazı depolama boyutları okunamadı
+    Downloaded Media Description: İndirme geçmişinin hâlâ izlediği video, ses ve alt yazı dosyaları.
+    Selected Download Folders: Kullanıcının seçtiği indirme klasörleri
+    Download History Records: İndirme geçmişi kayıtları
+    Download History Records Description: '{count} tamamlanmış indirme kaydı var. Bu kayıt durumu ve dosya konumlarını izler ancak indirilen medyayı içermez. | {count} tamamlanmış indirme kaydı var. Bu kayıtlar durumu ve dosya konumlarını izler ancak indirilen medyayı içermez.'
+    Clear Download History Records: İndirme geçmişi kayıtlarını temizle
+    Clear Download History Confirmation: Tüm tamamlanmış indirme kayıtları temizlensin mi?
+    Download Files Stay On Disk: İndirilen dosyalar diskte kalacak ancak artık İndirilenler sayfasında görünmeyecek.
+    Clear Records: Kayıtları temizle
+    Replaceable Caches: Yeniden oluşturulabilir önbellekler
+    Application Caches: Uygulama önbellekleri
+    Browser Caches: Tarayıcı önbellekleri
+    Browser Caches Hint: Chromium'un HTTP, GPU, kod, gölgelendirici, service worker ve sözlük önbellekleri.
+    Stored App Data: Saklanan uygulama verileri
+    Browser Runtime Data: Tarayıcı çalışma zamanı verileri
+    Browser Runtime Data Hint: Chromium'un oturum ve yerel depolama verileri, çerezleri, gizlilik ve ağ durumu ile kilitlenme dosyaları.
+    Subscription Feed Cache: Abonelik ve akış önbelleği
+    Subscription Feed Cache Description: Getirilen abonelik videolarını, Kısa Videoları, canlı yayınları ve gönderileri saklar. OpenTubeX sonraki akış yenilemesinde bunu yeniden oluşturur.
+    Clear Subscription Feed Cache: Abonelik ve akış önbelleğini temizle
+    Clear Subscription Feed Cache Confirmation: Abonelik ve akış önbelleği temizlensin mi?
+    Subscription Feed Cache Effect: Abonelik akışları yenilenene kadar boş görünebilir. Abonelikleriniz ve profilleriniz değişmez.
+    Session Search Cache: Oturum arama önbelleği
+    In Memory: Bellekte
+    Session Search Cache Description: 'Geri gezinmeyi hızlandırmak için {count} arama bellekte önbelleğe alınır. OpenTubeX kapandığında bu önbellek silinir. | Geri gezinmeyi hızlandırmak için {count} arama bellekte önbelleğe alınır. OpenTubeX kapandığında bu önbellek silinir.'
+    Clear Session Search Cache: Oturum arama önbelleğini temizle
+    Clear Session Search Cache Confirmation: Oturum arama önbelleği temizlensin mi?
+    Session Search Cache Effect: Önbelleğe alınmış sonuç sayfaları silinir. Kayıtlı arama geçmişi değişmez.
+    HTTP Cache: HTTP önbelleği
+    HTTP Cache Description: Electron, yinelenen isteklerin aynı verileri yeniden indirmeden yüklenebilmesi için ağ yanıtlarını diskte saklar. OpenTubeX bu önbelleği gerektiğinde yeniden oluşturur.
+    Managed By Electron: Electron tarafından yönetilir
+    Clear HTTP Cache: HTTP önbelleğini temizle
+    Clear HTTP Cache Confirmation: Electron'un HTTP önbelleği temizlensin mi?
+    HTTP Cache Effect: Önbellek yeniden oluşturulurken görseller ve diğer ağ kaynakları bir kez daha yavaş yüklenebilir.
+    Tab Image Cache: Sekme küçük resimleri ve kanal avatarları
+    Tab Image Cache Description: Açık ve geri yüklenen sekmelerin önizleme görsellerini ve kanal avatarlarını saklar. OpenTubeX bunları sekmeler kullanıldıkça yeniden oluşturur.
+    Clear Tab Image Cache: Sekme görseli önbelleğini temizle
+    Clear Tab Image Cache Confirmation: Sekme küçük resimleri ve kanal avatarları temizlensin mi?
+    Tab Image Cache Effect: Sekme görselleri kısa süreliğine kaybolabilir ve sekmeler kullanıldıkça yeniden oluşturulur.
+    Playback Caches: Oynatma önbellekleri
+    Playback Caches Description: Uygulama oturumları arasında yt-dlp akış URL'lerini ve YouTube oynatıcı dosyalarını saklar. URL önbelleği yalnızca yt-dlp ile getirilen akışlar için geçerlidir.
+    Playback URL Cache Entry Size: yt-dlp akış URL'si önbellek sınırı
+    Playback URL Cache Entry Size Tooltip: Önbelleğe alınan her yt-dlp akış kaydının en büyük boyutunu belirler. yt-dlp akışlarında kalıcı önbelleği devre dışı bırakmak için 0 MB olarak ayarlayın.
+    Clear Playback Caches: Oynatma önbelleklerini temizle
+    Clear Playback Caches Confirmation: yt-dlp ve oynatıcı önbellekleri temizlensin mi?
+    Playback Caches Effect: Akış ve oynatıcı verileri yeniden getirilirken sonraki yerel oynatma isteği daha uzun sürebilir.
+    Clear Cache: Önbelleği temizle
+    History Data: Saklanan geçmişler
+    Video Metadata Description: Desteklenen videoların geçmiş başlıklarını, küçük resimlerini ve açıklamalarını saklar. Eski sürümler silindikten sonra yeniden oluşturulamaz.
+    Video Metadata Effect: Kayıtlı meta veri sürümleri kalıcı olarak silinir. Geçerli video ayrıntıları yeniden getirilebilir.
+    Watch History: İzleme geçmişi ve istatistikleri
+    Watch History Description: İzleme geçmişi, izlenen videoları ve ilerlemeyi kaydeder. İzleme istatistikleri günlük izleme toplamlarını saklar. Saklama süresi yalnızca izleme geçmişine uygulanır.
+    Clear Watch Statistics: İzleme istatistiklerini temizle
+    Watch History Effect: İzlenen video kayıtları ve kayıtlı ilerleme silinir. İzleme istatistikleri kalır.
+    Clear Watch Statistics Confirmation: Tüm izleme istatistikleri silinsin mi?
+    Watch Statistics Effect: Günlük izleme toplamları silinir. İzleme geçmişi kalır.
+    Search History: Arama geçmişi
+    Search History Description: Hatırlanmasını seçtiğiniz aramaları saklar.
+    Delete Search History: Arama geçmişini sil
+    Delete Search History Confirmation: Tüm kayıtlı arama geçmişi silinsin mi?
+    Search History Effect: Önceki aramalarınızdan kaydedilen arama önerileri kaybolur. Geçerli oturum önbelleği kalır.
+    Other User Data: Diğer kullanıcı verileri
+    Other Profile Files: Diğer profil dosyaları
+    Other Profile Files Hint: OpenTubeX'in henüz tanımadığı yedekler, geçici dosyalar ve profil kayıtları.
+    Subscriptions And Profiles: Abonelikler ve profiller
+    Subscriptions And Profiles Description: Abone olunan kanalları, profil adlarını ve profil üyeliğini saklar.
+    Subscriptions And Profiles Effect: Tüm abonelikler ve ek profiller kalıcı olarak silinir. Akış önbelleği verileri de temizlenir.
+    Playlists Description: Oynatma listesi adlarını, açıklamalarını ve kayıtlı videoları saklar.
+    Playlists Effect: Tüm oynatma listeleri ve kayıtlı video listeleri kalıcı olarak silinir. İndirilen medya dosyaları kalır.
+    Settings And Sessions: Ayarlar, sekme oturumları ve anımsatıcılar
+    Settings And Sessions Description: Uygulama tercihlerini, geri yüklenebilir sekmeleri ve canlı yayın anımsatıcılarını saklar. Bu dosyaları incelemek veya yedeklemek için profil dizinini açın. Bu sayfa bunları silmez.
+    Cleanup Complete: Depolama temizliği tamamlandı
+    Cleanup Failed: Depolama temizliği başarısız oldu
+  Subscription Settings:
+    Fetch Feed on Startup: Başlangıçta Akışı Getir
+    Show New Content Feed: Yeni İçerik Akışını Göster
+    Show New Content Indicators: Yeni İçerik Göstergelerini Göster
+    Show Scheduled Live Streams / Premieres First: Planlanmış Canlı Yayınları / İlk Gösterimleri Önce Göster
+    Auto Refresh Interval: Otomatik Yenileme Aralığı
+    Videos Auto Refresh Interval: Videoların Otomatik Yenileme Aralığı
+    Shorts Auto Refresh Interval: Kısa Videoların Otomatik Yenileme Aralığı
+    Live Auto Refresh Interval: Canlı Yayınların Otomatik Yenileme Aralığı
+    Posts Auto Refresh Interval: Gönderilerin Otomatik Yenileme Aralığı
+  Distraction Free Settings:
+    Sections:
+      Visible While Paused: Tam Pencere / Tam Ekranda Duraklatıldığında Görünür
+    Hide Channel Avatars: Kanal Avatarlarını Gizle
+    Shorten View Counts: İzlenme ve Yorum Beğeni Sayılarını Kısalt
+    Hide Comment Translation Buttons: Yorum Çevirisi Düğmelerini Gizle
+    Hide Live Chat Replay: Canlı Sohbet Tekrarını Gizle
+    Hide End-Screen Annotations: Bitiş Ekranı Ek Açıklamalarını Gizle
+    Hide Paid Promotion Badge: Ücretli Tanıtım Rozetini Gizle
+    Show Player Controls: Oynatıcı Denetimlerini Göster
+    Show Video Title: Video Başlığını Göster
+    Show Bottom Right Actions Dock: Sağ Alt İşlem Panelini Göster
+    Paused Interface Hide Delay: Duraklatılmış Arayüzü Gizleme Gecikmesi
+  Data Settings:
+    Data And Storage: Veri ve Depolama
+    Profile Directory: Profil dizini
+    Open Profile Directory: Profil dizinini aç
+    Invalid JSON row, skipping item: '{row}. satırdaki JSON geçersiz, öğe atlanıyor'
+    Import subscriptions formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube yedeği veya FreeTube dışa aktarımı (.json)'
+    Import history formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube yedeği (.json)'
+    Import playlists formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+  Sync Settings:
+    Sync Settings: Eşitleme
+    Enable Sync: Eşitlemeyi Etkinleştir
+    Privacy Passphrase: Gizlilik parolası
+    Privacy Passphrase Hint: Hesap parolanızdan farklı bir parola kullanın. Bu parola cihazdan ayrılmaz ve her cihazda gereklidir. Kaybederseniz şifrelenmiş eşitleme verileri kurtarılamaz.
+    Privacy Policy: Bu sunucunun gizlilik politikası
+    Enhanced Privacy Enabled: Gelişmiş gizlilik etkin. Sunucu yalnızca şifrelenmiş eşitleme verilerini saklar.
+    Enhanced Privacy Unsupported: 'Uyarı: Bu sunucu gelişmiş gizliliği desteklemiyor. Eşitlenen veriler sunucu işletmecisi tarafından görülebilir.'
+    Description: Abonelikleri, profilleri, oynatma listelerini, izleme geçmişini, ayarları ve açık sekmeleri bir OpenTubeX veya LibreTube eşitleme sunucusuyla eşitleyin. LibreTube sunucuları tüm eşitleme özelliklerini desteklemeyebilir.
+    Server URL: Sunucu URL'si
+    Checking Server: Eşitleme sunucusu denetleniyor…
+    Server Unavailable: Bu eşitleme sunucusuna bağlanılamadı. URL'yi denetleyip yeniden deneyin.
+    Username: Kullanıcı adı
+    Log In: Oturum aç
+    Register: Kaydol
+    Pair Another Device: Başka bir cihaz eşleştir
+    Pair With Existing Device: Mevcut bir cihazla eşleştir
+    Device Name: Cihaz adı
+    This Device: Bu cihaz
+    Device Name Required: Bu cihaz için bir ad girin.
+    Pairing Device Name Hint: Bu isteği onaylayacak cihazda tanıyabileceğiniz bir ad seçin.
+    Create Pairing Code: Eşleştirme kodu oluştur
+    Creating Pairing Code: Güvenli eşleştirme kodu oluşturuluyor…
+    Pairing QR Alt: '{device} için eşleştirme QR kodu'
+    Scan Pairing Code: Zaten bağlı bir cihazda "Başka bir cihaz eşleştir" seçeneğini açıp bu kodu tarayın.
+    Pairing Code: Eşleştirme kodu
+    Use Text Pairing Code: Bunun yerine metin kodu kullan
+    Show QR Code: QR kodunu göster
+    Text Pairing Code Hint: Bu kodu mevcut cihaza kopyalayın. Eşleştirme gizli anahtarını içerdiği için eşleştirmeden sonra pano geçmişinden temizleyin.
+    Pairing QR Warning: Bu kodu yalnızca isteği onaylayacak, güvenilir ve zaten bağlı cihaza gösterin. Kod iki dakika sonra geçersiz olur.
+    Pairing Expires: 'Eşleştirme kodunun geçerlilik sonu: {time}.'
+    Verifying Pairing: Aktarılan gizlilik anahtarı doğrulanıyor…
+    Completing Pairing: Cihaz eşleştirme tamamlanıyor…
+    Compare Pairing Codes: Eşleştirme kodlarını karşılaştır
+    Pairing Code Match Hint: Yalnızca bu kod mevcut cihazınızdaki kodla eşleşiyorsa onaylayın.
+    Pairing Codes Match: Kodlar eşleşiyor
+    Pairing Approval Code Hint: Bu pencereyi açık tutup kodu yeni cihazdaki kodla karşılaştırın. Kodlar farklıysa yeni cihaz devam etmemelidir.
+    Pairing Scan Hint: Eklediğiniz cihazda gösterilen eşleştirme kodunu tarayın.
+    Enter Pairing Code: Kodu elle gir
+    Pairing Code Entry Hint: Eklediğiniz cihazda gösterilen eşleştirme kodunu yapıştırın.
+    Check Pairing Code: Kodu denetle
+    Scan QR Code: QR kodunu tara
+    Waiting For Pairing Code: Eşleştirme kodu bekleniyor…
+    Checking Pairing Request: Eşleştirme isteği denetleniyor…
+    Approving Pairing Request: Gizlilik anahtarı şifrelenip gönderiliyor…
+    Pairing Approval Warning: Yalnızca eklediğiniz cihazda bu isteği görebiliyorsanız onaylayın. Eşleştirme, hesaba erişim verir ve gizlilik anahtarını aktarır.
+    Approve Pairing: Eşleştirmeyi onayla
+    Try Again: Yeniden dene
+    Scan Again: Yeniden tara
+    Camera Unavailable: OpenTubeX kameraya erişemedi. Kamera iznini denetleyin veya eşleştirme kodunu elle girin.
+    Pairing Unsupported: Bu eşitleme sunucusu güvenli cihaz eşleştirmeyi desteklemiyor.
+    Pairing Failed: Cihaz eşleştirilemedi. Yeni bir kodla yeniden deneyin.
+    Pairing Request Changed: Eşleştirme isteği değişti, süresi doldu veya zaten kullanıldı. Yeni bir kod oluşturun.
+    Pairing Server Mismatch: Bu kod farklı bir eşitleme sunucusuna ait.
+    Pairing Verification Unavailable: Aktarılan anahtarı doğrulayacak şifrelenmiş eşitleme koleksiyonu yok. Mevcut cihazı eşitleyip yeniden deneyin.
+    Pairing Completed: Cihaz eşleştirme tamamlandı
+    Pairing Approved: Cihaz eşleştirme onaylandı
+    Disconnect: Bağlantıyı kes
+    Delete Account: Eşitleme hesabını sil
+    Delete Account Confirmation: Eşitleme hesabı silinsin mi?
+    Delete Account Warning: Bu işlem eşitleme hesabınızı ve bu sunucuda saklanan tüm verileri kalıcı olarak siler. Yerel OpenTubeX verileriniz silinmez.
+    Confirm Delete Account: Hesabı sil
+    Password Required: Parola gereklidir
+    Account Deleted: Eşitleme hesabı silindi
+    Connected as: '{username} olarak bağlandı'
+    Automatic Sync: Değişikliklerden sonra ve beş dakikada bir otomatik eşitle
+    Profiles: Profiller
+    Open Tabs: Açık sekmeler ve oturum
+    Disable Setting Sync: Bu ayarı eşitlemeyi durdur
+    Enable Setting Sync: Bu ayarı eşitle
+    Sync Now: Şimdi eşitle
+    Downloading encrypted data: Şifrelenmiş eşitleme verileri indiriliyor…
+    Syncing subscriptions: Abonelikler eşitleniyor…
+    Syncing playlists: Oynatma listeleri eşitleniyor…
+    Syncing history: İzleme geçmişi eşitleniyor…
+    Syncing profiles: Profiller eşitleniyor…
+    Syncing open tabs: Açık sekmeler ve oturum eşitleniyor…
+    Syncing settings: Ayarlar eşitleniyor…
+    Uploading encrypted data: Şifrelenmiş eşitleme verileri yükleniyor…
+    Finishing sync: Eşitleme tamamlanıyor…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Son eşitleme: {date}'
+    History not supported: Bu sunucu sürümü izleme geçmişi eşitlemesini desteklemiyor.
+    Settings not supported: Bu sunucu sürümü ayar eşitlemesini desteklemiyor.
+    Sync completed: Eşitleme tamamlandı
+    Data Loss Confirmation: Veri silen eşitleme onaylansın mı?
+    Data Loss Warning: Sunucunun durumu, daha önce eşitlenen {previous} {collection} öğesinden {deleted} tanesini silecek. Bu durum, başarısız bir sunucu geçişine veya sıfırlamasına işaret edebilir. Yalnızca silme işlemi bilerek yapılıyorsa ve yedeğiniz varsa devam edin.
+    Confirm Data Loss: Sil ve devam et
+  Proxy Settings:
+    IP Block Recovery Script Path: IP Engeli Kurtarma Betiği Yolu
+    Select IP Block Recovery Script File: IP Engeli Kurtarma Betiği Dosyasını Seç
+    Running IP block recovery script: IP engeli kurtarma betiği çalıştırılıyor
+    IP block recovery script failed: 'IP engeli kurtarma betiği başarısız oldu (çıkış kodu: {exitCode})'
+    IP block recovery script finished: IP engeli kurtarma betiği tamamlandı
+    Reloading video after IP block recovery: IP engeli kurtarıldıktan sonra video yeniden yükleniyor
+    Failed to select IP block recovery script: IP engeli kurtarma betiği seçilemedi
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: SponsorBlock Gönderimini Etkinleştir
+    SponsorBlock Private User ID (optional): SponsorBlock Özel Kullanıcı Kimliği (isteğe bağlı)
+    SponsorBlock Private User ID Tooltip: Tarayıcı uzantısındaki özel SponsorBlock kullanıcı kimliğini yapıştırın. Uygulama tarafından oluşturulan bir kimlik kullanmak için boş bırakın.
+    Generated SponsorBlock User ID: Oluşturulan SponsorBlock Kullanıcı Kimliği
+    Generated SponsorBlock User ID Tooltip: Uygulama tarafından oluşturulan bu SponsorBlock kullanıcı kimliği, tarayıcı uzantısında veya uygulamayı başka bir bilgisayarda kullandığınızda kullanılabilir.
+    Export Generated User ID: Oluşturulan Kullanıcı Kimliğini Dışa Aktar
+    Generated SponsorBlock User ID Copy Button: Oluşturulan SponsorBlock kullanıcı kimliğini kopyala
+    Generated SponsorBlock User ID Copied: Oluşturulan SponsorBlock kullanıcı kimliği panoya kopyalandı
+    Skip notification timeout: Atlama bildirimi süresi
+    Custom Color: Özel renk
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Return YouTube Dislike'ı Etkinleştir
+    Return YouTube Dislike Url: Return YouTube Dislike API URL'si (Varsayılan https://ryd-proxy.kavin.rocks)
+  Password Dialog:
+    Incorrect Password: Parola yanlış
+    Unlock: Kilidi aç
+    Unlocking: Kilit açılıyor…
+  Search Settings: Arama ayarları
+  No Settings Found: Ayar bulunamadı
+Tutorial:
+  Skip: Atla
+  Next: İleri
+  Finish: Bitir
+  Got It: Anladım
+  Welcome:
+    Title: OpenTubeX'e Hoş Geldiniz
+    Description: Uygulamayı kullanmaya başlamanıza yardımcı olacak birkaç denetim burada.
+  Navigation:
+    Title: Kitaplığınız her zaman elinizin altında
+    Description: Aboneliklere, oynatma listelerine, geçmişe ve daha fazlasına ulaşmak için gezinme menüsünü kullanın.
+  Search:
+    Title: Arayın veya bağlantı yapıştırın
+    Description: Video ve kanal bulun ya da desteklenen bir video URL'sini doğrudan arama alanına yapıştırın.
+  Tabs:
+    Title: Sayfaları sekmelerde açık tutun
+    Description: Kaldığınız yeri kaybetmeden birden fazla sayfayı aynı anda açın. Sekmeler için düzeninize en uygun konumu seçin.
+  Quick Settings:
+    Title: Uygulamayı özelleştirin
+    Description: Bir tema ve varsayılan video kalitesi seçin. Bunları ve diğer tercihleri istediğiniz zaman profil menüsünden değiştirebilir, profil değiştirmek için menüye sağ tıklayabilirsiniz.
+  Import Data:
+    Title: Verilerinizi içe aktarın
+    Description: Abonelikleri, geçmişi, oynatma listelerini, arama geçmişini veya ayarları desteklenen başka bir uygulamadan ya da yedekten içe aktarabilirsiniz.
+    Action: Verileri içe aktar
+    Not Now: Şimdi değil
+  Settings Moved:
+    Title: Ayarların yeri değişti
+    Description: Hızlı denetimler için sağ üstten profilinizi seçin. Doğrudan profil seçimine gitmek için sağ tıklayın. Bu menüdeki dişli tüm ayarları açar. Hakkında ve İndirilenler de bu menüye taşındı.
+About:
+  Commit: Commit
+  Fluxer: Fluxer Topluluğumuza Katılın
+  Matrix: Matrix
+  Email: E-posta
+Profile:
+  Profile Icon: Profil Simgesi
+  Choose an Emoji: Bir Emoji Seç
+  Custom Emoji: Özel Emoji
+  Emoji: Emoji
+  Choose Image: Görsel Seç
+  Crop Image: Görseli Kırp
+  Zoom: Yakınlaştır
+  Apply Crop: Kırpmayı Uygula
+  Transparent: Saydam
+  Use Initial: Baş Harfi Kullan
+  The selected image could not be loaded: Seçilen görsel yüklenemedi
+  Theme Color: Tema Rengi
+Channel:
+  Channel Name Unavailable: Kanal adı kullanılamıyor
+  Search Result Types: Arama sonucu türleri
+  All Results: Tümü
+Video:
+  Includes paid promotion: Ücretli tanıtım içeriyor
+  Age Restricted Badge: Yaş kısıtlamalı
+  Queue: Kuyruk
+  Play Next: Sonraki Oynat
+  Add to Queue: Kuyruğa Ekle
+  Added to Play Next: Video sıradaki olarak oynatılacak
+  Added to Queue: Video kuyruğa eklendi
+  Clear Queue: Kuyruğu Temizle
+  Queue Video Count: '{count} video | {count} video'
+  Remove from Queue: '{title} videosunu kuyruktan kaldır'
+  Drag to Reorder Queue: Kuyruğu yeniden sıralamak için {title} videosunu sürükleyin
+  Reorder Queue Item: '{title} videosunu yeniden sırala'
+  Reorder Queue Item Instructions: Bu videoyu kuyrukta taşımak için Yukarı ve Aşağı Ok tuşlarını kullanın.
+  Queue Item Moved: '{title}, {total} konum içinde {position}. konuma taşındı.'
+  Queue Item Cannot Move Up: '{title} yukarı taşınamaz. Zaten {total} konum içinde 1. konumda.'
+  Queue Item Cannot Move Down: '{title} aşağı taşınamaz. Zaten {total} konum içinde {total}. konumda.'
+  Metadata: Video bilgileri
+  Close Metadata: Video bilgilerini kapat
+  Metadata Cache:
+    Title History: Başlık geçmişi
+    Thumbnail History: Küçük resim geçmişi
+    Description History: Açıklama geçmişi
+    Previous Version: 'Önceki {number}'
+    Empty: (boş)
+  Fetching Streams: Akışlar yt-dlp ile getiriliyor…
+  Transcript:
+    Title: Döküm
+    Search: Dökümde ara
+    Language: Döküm dili
+    Save: Kaydet
+    Show: Dökümü göster
+    Hide: Dökümü gizle
+    Close: Dökümü kapat
+    Copied: Döküm panoya kopyalandı
+    Saved: Döküm kaydedildi
+    Save Error: Döküm kaydedilemedi
+    Text File: Metin dosyası
+    Unavailable: Bu video için döküm yok.
+    Load Error: Döküm yüklenemedi.
+    Empty: Bu dökümde metin yok.
+    No Results: Aramanızla eşleşen döküm bölümü yok.
+  Retry With Built-in Extraction: Yerleşik çıkarmayla yeniden dene
+  Retry With yt-dlp Extraction: yt-dlp çıkarmasıyla yeniden dene
+  Reloading video after streaming URL error: Akış URL'si hatasından sonra video yeniden yükleniyor
+  Configure Restricted Playback Cookies Hint: Çerezleri Ayarlar → Harici Yazılım → yt-dlp Oynatma Çerezleri bölümünde yapılandırın.
+  Try With Configured Cookies: Yapılandırılmış çerezlerle dene
+  Restricted Playback Authentication Failed Template: 'yt-dlp bu videoya yapılandırılmış çerezlerle erişemedi: {error}'
+  Unmark As Watched: İzlenmiş İşaretini Kaldır
+  Video has been unmarked as watched: Videonun izlenmiş işareti kaldırıldı
+  Save Channel Playback Speed: Kanal Oynatma Hızını Kaydet
+  Channel Playback Speed Saved: Kanal Oynatma Hızı Kaydedildi
+  Save Channel Video Quality: Kanal Video Kalitesini Kaydet
+  Channel Video Quality Saved: Kanal Video Kalitesi Kaydedildi
+  Save Channel Subtitles State: Kanal Alt Yazı Durumunu Kaydet
+  Channel Subtitles State Saved: Kanal Alt Yazı Durumu Kaydedildi
+  Save Channel Volume: Kanal Ses Düzeyini Kaydet
+  Channel Volume Saved: Kanal Ses Düzeyi Kaydedildi
+  Save Channel Setting: Kanal ayarını kaydet…
+  Channel Setting Already Set: '{setting} zaten {value} olarak ayarlı'
+  Video has been saved to {playlistName}: 'Video {playlistName} oynatma listesine kaydedildi'
+  Video has been removed from {playlistName}: 'Video {playlistName} oynatma listesinden kaldırıldı'
+  There was a problem saving the video to {playlistName}: 'Video {playlistName} oynatma listesine kaydedilirken bir sorun oluştu'
+  There was a problem removing the video from {playlistName}: 'Video {playlistName} oynatma listesinden kaldırılırken bir sorun oluştu'
+  Failed to load collaborators: Katkıda bulunanlar yüklenemedi
+  Notify me: Bana bildir
+  Notification on: Bildirim açık
+  Notification enabled: Bu video başladığında bildirim alacaksınız
+  Notification cancelled: Başlangıç bildirimi iptal edildi
+  Notification unavailable: Sistem bildirimleri kullanılamıyor
+  Scheduled video starting: Planlanmış video başlıyor
+  Live notification body: '{videoTitle} şimdi başlıyor'
+  Premiere: İlk Gösterim
+  AI: AI
+  AI-generated content: Yapay zekâ tarafından oluşturulan içerik
+  Collaborators: Katkıda bulunanlar
+  Live Chat Replay: Canlı Sohbet Tekrarı
+  Show Live Chat: Canlı Sohbeti Göster
+  Show Live Chat Replay: Canlı Sohbet Tekrarını Göster
+  Close Live Chat: Canlı Sohbeti Kapat
+  Close Live Chat Replay: Canlı Sohbet Tekrarını Kapat
+  Live Chat Settings: Canlı sohbet ayarları
+  Show Live Chat Timestamps: Zaman damgalarını göster
+  Chat Filter: Sohbet süzgeci
+  Top Chat: Öne çıkan sohbet
+  All Messages: Tüm mesajlar
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Canlı sohbet tekrarı etkin. Video oynatıldıkça sohbet mesajları burada görünecek.
+  Premiere started: İlk gösterim sürüyor. {timeAgo} başladı
+  Player:
+    Voice-over Translation:
+      Start: Çevir
+      Cancel: İptal
+      Progress: Seslendirme çevirisi hazırlanıyor…
+      Retry: Yeniden Dene
+      Error: Seslendirme çevirisi başarısız oldu. Lütfen daha sonra yeniden deneyin.
+      Duration Error: Seslendirme çevirisi yalnızca dört saate kadar olan videolarda kullanılabilir.
+    Caption Appearance:
+      Options: Seçenekler
+      Sample: Alt yazılar böyle görünür
+    Auto-translate: Otomatik çevir
+    Sleep Timer:
+      Sleep Timer: Uyku zamanlayıcısı
+      'Off': Kapalı
+      Minutes: '{minutes} dakika'
+      End of video: Video sonunda
+      Remaining: '{time} kaldı'
+      Cancel timer: Zamanlayıcıyı iptal et
+      Timer ended: Uyku zamanlayıcısı sona erdi
+    Zoom:
+      Zoom: Yakınlaştırma
+      'Off': Kapalı
+    Auto-generated Caption Template: '{language} (otomatik oluşturuldu)'
+    Up next in {seconds}: '{seconds} saniye sonra sıradaki'
+    Resize dock: Paneli yeniden boyutlandır
+    Play now: Şimdi oynat
+    MusicPlaybackRateOverride: Müzik videosu algılandı, 1x hızında oynatılıyor
+    Normal: Normal
+    Set Default: Varsayılan Yap
+    Hide Annotations: Ek açıklamaları gizle
+    Show Annotations: Ek açıklamaları göster
+    Hide: Gizle
+    Show: Göster
+    Scroll Mini Player:
+      Back to Top: Başa dön
+      Return to Video Tab: Video sekmesine dön
+      Play: Oynat
+      Pause: Duraklat
+      Drag Handle: Mini oynatıcıyı taşı
+    SponsorBlock:
+      CancelCurrentSegment: Bölüm Oluşturmayı İptal Et
+      ClearSegments: Bölümleri Temizle
+      ClearSegmentsPrompt: Bu video için taslak hâlindeki tüm SponsorBlock bölümlerini temizlemek istediğinizden emin misiniz?
+      CompleteSegmentsBeforeSubmitting: Göndermeden önce tüm taslak bölümleri tamamlayın.
+      CategoryLabel: Kategori
+      ActionTypeLabel: Bölüm türü
+      DuplicateSegments: Yinelenen taslak bölümlere izin verilmez.
+      EndAction: (Bitiş)
+      EndActionLabel: Bitiş
+      EndTimeAfterStart: Bölümün bitiş zamanı başlangıç zamanından sonra olmalıdır.
+      EndTimeBeforeVideoEnd: Bölümün bitiş zamanı video süresi içinde olmalıdır.
+      EndTimeLabel: Bölüm bitiş zamanı
+      DisableAutoSkipTemporarily: SponsorBlock otomatik atlamayı geçici olarak devre dışı bırak
+      EnableAutoSkipTemporarily: SponsorBlock otomatik atlamayı yeniden etkinleştir
+      Guidelines: Kurallar
+      InspectSegment: İncele
+      InvalidStartTime: Geçerli bir bölüm başlangıç zamanı girin.
+      NoSegmentsToSubmit: Göndermeden önce en az bir eksiksiz bölüm oluşturun.
+      NowAction: (Şimdi)
+      CloseInfoPanel: SponsorBlock bilgilerini kapat
+      OpenInfoPanel: SponsorBlock bilgilerini aç
+      OpenSubmissionMenu: Gönderim Menüsünü Aç
+      PreviewRequired: Göndermeden önce her bölümün önizlemesini izleyin.
+      PreviewSegment: Önizle
+      SaveSegment: Kaydet
+      SetSegmentEndNow: Bölümü Şimdi Bitir
+      StartAction: (Başlangıç)
+      StartSegmentNow: Bölümü Şimdi Başlat
+      SubmissionBadRequest: SponsorBlock gönderim isteğini reddetti.
+      SubmissionDuplicate: Bu daha önce zaten gönderilmiş.
+      SubmissionFailed: SponsorBlock bölümleri gönderilemedi.
+      SubmissionForbidden: SponsorBlock gönderimi reddetti.
+      SubmissionRateLimited: SponsorBlock bu gönderime hız sınırı uyguladı.
+      SubmissionSuccess: SponsorBlock bölümleri gönderildi.
+      SubmitSegment: Bölümü Gönder
+      SubmitSegments: Gönder
+      StartTimeLabel: Bölüm başlangıç zamanı
+      TimeDivider: ile
+      SkipPrompt: '{segmentCategory} atlansın mı?'
+      SkipPromptAction: Atla
+      SkipToHighlight: Öne Çıkan Bölüme Atlansın mı?
+      SkippedToHighlight: Öne Çıkan Bölüme Atlandı
+      SkipToastUnskip: Atlamayı geri al
+      SkipToastReskip: Yeniden atla
+      MutedSegment: '{segmentCategory} Sessize Alındı'
+      MuteToastUnmute: Sesi aç
+      InfoPanelLoading: Bölümler hâlâ yükleniyor...
+      InfoPanelHasSegments: Bu videonun veri tabanında bölümleri var!
+      InfoPanelNoSegments: Bölüm bulunamadı
+      RefreshSegments: Bölümleri yenile
+      RefreshInfo: SponsorBlock bilgilerini yenile
+      ContributionStatsTitle: Katkılarınız
+      ContributionStatsLoading: Katkı istatistikleri yükleniyor...
+      ContributionStatsError: Katkı istatistikleri kullanılamıyor. Yenilemeyi deneyin.
+      ContributionStatsNoUserId: Katkı istatistiklerini görmek için bir bölüm gönderin veya SponsorBlock kullanıcı kimliğinizi içe aktarın.
+      Submissions: Gönderimler
+      Segments: Bölümler
+      TimeSaved: Kazanılan süre
+      AutoSkipEnabled: Bölümleri otomatik atla
+      AutoSkipOn: Açık
+      AutoSkipOff: Kapalı
+      WhitelistChannel: Kanalı izin verilenlere ekle
+      ChannelWhitelisted: İzin verilenlere eklendi
+      RemoveChannelFromWhitelist: Kanalı izin verilenlerden kaldır
+      MuteSegment: Bölümü sessize al
+      SkipSegment: Bölümü atla
+      CloseSegmentActions: Bölüm işlemlerini kapat
+      FullVideo: Tüm Video
+      FullVideoLabel: '{segmentCategory} · Tüm Video'
+      MuteActionType: Sessize al
+      MutePrompt: '{segmentCategory} sessize alınsın mı?'
+      SkipActionType: Atla
+      LockedSegment: Kilitli bölüm
+      UpvoteSegment: Olumlu oy ver
+      DownvoteSegment: Olumsuz oy ver
+      VoteFailed: SponsorBlock oyu gönderilemedi.
+Playlist:
+  Close Playlist: Oynatma Listesini Kapat
+Change Format:
+  Local Video File: Yerel video dosyası
+  Local Audio File: Yerel ses dosyası
+  Online Video: Çevrim içi video
+  Stream Source: Akış kaynağı
+  Stream Extraction Method: Akış çıkarma yöntemi
+  Playback Engine: Oynatma motoru
+  Streaming Protocol: Akış protokolü
+  Not Available For This Video: Bu video için kullanılamıyor
+  Protocols:
+    Progressive: Aşamalı
+  Descriptions:
+    Local File: Bu cihazdaki indirilmiş dosyadan doğrudan oynatılır
+    Online Video: Akış biçimleri yapılandırılmış çevrim içi kaynaktan yüklenir
+    Dash: Uyarlanabilir kalite, birden fazla ses parçası ve en yüksek çözünürlükler
+    Legacy: Video ve sesin birleştirildiği tek dosya, daha düşük çözünürlüklerle sınırlıdır
+    Audio: Yalnızca ses, bant genişliğinden tasarruf etmek veya arka planda dinlemek için kullanışlıdır
+  yt-dlp Fallback Template: 'yt-dlp akışları sağlayamadı, bunun yerine yerleşik motor kullanılıyor: {error}'
+  yt-dlp Default Clients Fallback: Tercih edilen yt-dlp istemcileri oynatılabilir akış sağlayamadı, bunun yerine yt-dlp'nin varsayılan istemcileri deneniyor
+  Built-in Fallback Template: 'Yerleşik motor akışı oynatamadı, bunun yerine yt-dlp deneniyor: {error}'
+Share:
+  Timestamp Link Copied: Zaman damgası bağlantısı panoya kopyalandı
+Context Menu:
+  Context Menu: Bağlam menüsü
+  Select All: Tümünü Seç
+  Save Image As…: Görseli Farklı Kaydet…
+  Copy Image: Görseli Kopyala
+  Copy Image Address: Görsel Adresini Kopyala
+  Cancel Refresh: Yenilemeyi İptal Et
+  Reload Videos: Videoları Yeniden Yükle
+  Reload Shorts: Kısa Videoları Yeniden Yükle
+  Reload Live: Canlı Yayınları Yeniden Yükle
+  Reload Posts: Gönderileri Yeniden Yükle
+  Reload All Feeds: Tüm Akışları Yeniden Yükle
+  Close Multiple Tabs: '{count} Sekmeyi Kapat'
+  Duplicate Tab: Sekmeyi Çoğalt
+  Duplicate Multiple Tabs: '{count} Sekmeyi Çoğalt'
+  Move Tab: Sekmeyi Taşı
+  Move Tabs: Sekmeleri Taşı
+  Move Tab to Group: Sekmeyi Gruba Taşı
+  Collapse Group: Grubu Daralt
+  Move Tabs to Group: Sekmeleri Gruba Taşı
+  Manage Tab Groups…: Sekme Gruplarını Yönet…
+  To Beginning: Başa
+  To End: Sona
+  Close Tabs: Sekmeleri Kapat
+  To the Top: En Üste
+  To the Left: Sola
+  To the Bottom: En Alta
+  To the Right: Sağa
+  Other Tabs: Diğer Sekmeler
+  Copy YouTube Link: YouTube Bağlantısını Kopyala
+  Copy YouTube Links: YouTube Bağlantılarını Kopyala
+  Pin Tab: Sekmeyi Sabitle
+  Pin Tabs: Sekmeleri Sabitle
+  Unpin Tab: Sekmenin Sabitlemesini Kaldır
+  Unpin Tabs: Sekmelerin Sabitlemesini Kaldır
+  Tab Color: Sekme Rengi
+  Default: Varsayılan
+  Purple: Mor
+  Reopen Closed Tab: Kapatılan Sekmeyi Yeniden Aç
+  Reload Tab: Sekmeyi Yeniden Yükle
+  Reload Tabs: Sekmeleri Yeniden Yükle
+  Load Tab: Sekmeyi Yükle
+  Load Tabs: Sekmeleri Yükle
+  Unload Tab: Sekmeyi Bellekten Kaldır
+  Unload Tabs: Sekmeleri Bellekten Kaldır
+  Move Tab to Window: Sekmeyi Pencereye Taşı
+  Move Tabs to Window: Sekmeleri Pencereye Taşı
+  Open in a New Tab: Yeni Sekmede Aç
+  Open in a New Window: Yeni Pencerede Aç
+  Copy Link: Bağlantıyı Kopyala
+  Copy Invidious Link: Invidious Bağlantısını Kopyala
+  Search Selection in New Tab: '"{selection}" metnini Yeni Sekmede Ara'
+  Search Selection in New Window: '"{selection}" metnini Yeni Pencerede Ara'
+  Search With: '{engine} ile ara'
+  Search With Multiple: Şununla ara...
+  Selection Too Long: Seçim arama için çok uzun (> {count} karakter)
+Tab Organizer:
+  Title: Sekme Düzenleyici
+  Open Tab Count: '{count} açık sekme | {count} açık sekme'
+  Search Label: Sekmelerde ara
+  Selected Count: '{count} sekme seçildi | {count} sekme seçildi'
+  Tab Count: '{count} sekme | {count} sekme'
+  Select All: Tümünü Seç
+  Select None: Hiçbirini Seçme
+  Move To Group: Seçili sekmeleri gruba taşı
+  Choose Group: Bir grup seçin
+  Ungrouped: Gruplanmamış
+  Pin: Sabitle
+  Unpin: Sabitlemeyi Kaldır
+  Load: Yükle
+  Unload: Bellekten Kaldır
+  Unload All: Tümünü Bellekten Kaldır
+  Close All: Tümünü Kapat
+  Ungroup: Gruptan Çıkar
+  Group Name: Grup adı
+  Color: Renk
+  No Color: Renksiz
+  Create Group: Grup Oluştur
+  Expand Group: Grubu genişlet
+  Collapse Group: Grubu daralt
+  Expand Group Label: '{name} grubunu genişlet, {count} sekme | {name} grubunu genişlet, {count} sekme'
+  Rename Group: '{name} grubunu yeniden adlandır'
+  Change Group Color: '{name} grubunun rengini değiştir'
+  Move To Window: Pencereye Taşı
+  Choose Window: Bir pencere seçin
+  Select Tab: '{title} sekmesini seç'
+  Active: Etkin
+  Pinned: Sabitlenmiş
+  Unloaded: Bellekten kaldırılmış
+  Playing: Oynatılıyor
+  Close Tab: '{title} sekmesini kapat'
+  No Open Results: Bu aramayla eşleşen açık sekme yok.
+  Recently Closed: Son Kapatılanlar
+  Clear: Temizle
+  No Closed Results: Bu aramayla eşleşen son kapatılmış sekme yok.
+  Drag Tab: Bir gruba taşımak için sürükleyin
+Chapters:
+  Open Chapters: Bölümleri Aç
+  Close Chapters: Bölümleri Kapat
+  Copy Timestamp Link: '{timestamp} konumundaki bağlantıyı kopyala'
+Comments:
+  Comment Count: 1 Yorum | {count} Yorum
+  Show Comments: Yorumları Göster
+  Getting comment replies, please wait: Yorum yanıtları getiriliyor, lütfen bekleyin
+  Reload Comments: Yorumları Yeniden Yükle
+  Reply Count: 1 yanıt | {replyCount} yanıt
+  Comments are turned off: Yorumlar kapalı
+  YouTube did not provide advertised replies: YouTube bu yorumun yanıtları olduğunu gösterdi ancak yanıtları sağlamadı. Silinmiş veya gizlenmiş olabilecekleri için yanıt düğmesi kaldırıldı.
+  Pinned by you: Sizin tarafınızdan sabitlendi
+  A reply is pinned: Bir yanıt sabitlendi
+  Filter loaded comments: Yüklenen yorumları süz
+  Comment filters: Yorum süzgeçleri
+  From creator: İçerik üreticisinden
+  Contains timestamps: Zaman damgası içeriyor
+  Pin comment by author: '{author} tarafından yazılan yorumu sabitle'
+  Unpin comment by author: '{author} tarafından yazılan yorumun sabitlemesini kaldır'
+  Edited: (düzenlendi)
+  Highlighted comment: Vurgulanan yorum
+  Highlighted reply: Vurgulanan yanıt
+  Search loaded comments: Yüklenen yorumlarda ara
+  Loaded comment search result count: 'Yüklenen {total} yorumdan 1 tanesi | Yüklenen {total} yorumdan {count} tanesi'
+  No loaded comments match your filters: Süzgeçlerinizle eşleşen yüklü yorum yok
+  YouTube comment link copied to clipboard: YouTube yorum bağlantısı panoya kopyalandı
+  Translate to {language}: '{language} diline çevir'
+  Show original: Özgün metni göster
+  Translating comment, please wait: Yorum çevriliyor, lütfen bekleyin
+  Comment translation failed: Yorum çevrilemedi
+Description:
+  Copy Description: Açıklamayı Kopyala
+  Description Copied: Açıklama panoya kopyalandı
+  Video Category: 'Video Kategorisi:'
+  Video Tags: Video Etiketleri
+  Games: Oyunlar
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: İnsan çevirilerindeki eksikleri yapay zekâ tarafından oluşturulan metinlerle tamamlar. İnsan çevirileri her zaman önceliklidir.
+    Update Relative Timestamps: Sayfa açık kaldığı sürece uygulamadaki göreli zaman damgalarını günceller. Devre dışı bırakıldığında yalnızca sayfa yeniden yüklendiğinde veya ziyaret edildiğinde güncellenir.
+    Stream Extraction Method: |
+      OpenTubeX'in video akışlarını nasıl alacağını seçin. yt-dlp seçildiğinde kullanılabilir olmalıdır.
+      yt-dlp kullanıldığında videoların başlaması daha uzun sürebilir.
+      Yerleşik yöntem, canlı yayınlarda ve ilk gösterimlerde sarmayı desteklemez.
+    Avoid translation: |
+      YouTube'un video başlığı, açıklaması ve bölümleri için otomatik çevirisini devre dışı bırakır.
+      Listelerdeki video başlıklarını getirmek gibi çok fazla istek, uygulamanın
+      güvenilirliğini geçici olarak etkileyebilir.
+    Show Thumbnail Previews: Video küçük resimlerinin üzerine gelindiğinde hareketli önizlemeler gösterir.
+    Startup Behavior: |
+      OpenTubeX'in başlatıldığında ne yapacağını seçin.
+      Tüm sekmeleri yükle, kayıtlı tüm sekmeleri hemen geri yükler ancak arka plan sekmeleri videoları otomatik oynatmaz.
+      Daha önce yüklenen sekmeleri yükle, OpenTubeX kapatıldığında yüklü olan sekmeleri yeniden yükler ve diğerlerini bellekten kaldırılmış durumda tutar.
+      Son etkin sekmeyi yükle, önceki oturumu diğer sekmeler açık ama bellekten kaldırılmış hâlde geri yükler. Tıkladığınızda yüklenirler.
+      Boş bir oturumla başla, kayıtlı sekmeleri atlayıp yeni bir pencere açar.
+    Remember Tab Navigation History: Her sekmenin geri ve ileri gezinme geçmişi kaydedilir ve OpenTubeX yeniden başlatıldığında geri yüklenir.
+  Proxy Settings:
+    IP Block Recovery Script Path: IP engeli algılandığında çalıştırılacak betik dosyasının yolu. OpenTubeX betiğin tamamlanmasını bekler ve videoyu yeniden yükler. Yedek arka uç etkinse yalnızca yedek arka uç da başarısız olduğunda çalışır.
+  Player Settings:
+    Enable Caption Translations: Etkinleştirildiğinde ve videoda eşleşen özgün bir parça olmadığında alt yazı düğmesi ile C kısayolu, tercih edilen alt yazı diline otomatik çevrilmiş parçayı seçer.
+    Use Quick Playback Speed Bar: Sağdaki oynatıcı denetimlerinde hızlı oynatma hızı çubuğunu gösterir. Kanal başına oynatma hızını elle kaydetme etkinse çubukta geçerli kanalın hızını kaydetme düğmesi de bulunur.
+    Multiply Seek Interval by Playback Rate: Etkinleştirildiğinde sarma aralıkları (ok tuşları ve J/L) geçerli oynatma hızıyla çarpılır. Devre dışı bırakıldığında sarma aralıkları oynatma hızından bağımsız olarak sabit kalır.
+    Show Playback Rate Adjusted Timestamp: Etkinleştirildiğinde ve oynatma hızı 1x'ten farklı olduğunda oynatıcı, normal zaman damgasından sonra parantez içinde oynatma hızına göre ayarlanmış zaman damgalarını gösterir.
+    Use YouTube-style Shorts: Kısa Videoları abonelik ve kanal sayfalarında dikey bir ızgarada gösterir ve YouTube tarzı Kısa Video oynatıcısını kullanır.
+    Loop Shorts: Etkinleştirildiğinde Kısa Videolar otomatik olarak yeniden başlar. Devre dışı bırakıldığında sonunda durur ve yeniden oynatma düğmesi gösterir.
+    Show Skip Silence Toggle: Oynatıcının ayarlar menüsünde sessizliği atmak için açma ve kapatma düğmesi gösterir.
+    Enable Skip Silence by Default: Yeni sekmelerde sessizliği atlamayı etkinleştirir. Bir sekmede değiştirilmesi diğer sekmeleri etkilemez.
+    Enable Video Zoom: Oynatıcının ayarlar menüsünde Yakınlaştırma denetimini gösterir; klavye kısayollarını ve kaydırma denetimlerini etkinleştirir.
+    Voice-over Translation: Çeviri istediğinizde video kimliğini, süresini ve seçili dili resmî olmayan Yandex seslendirme çevirisi hizmetine gönderir. Varsayılan olarak devre dışıdır.
+    Hold to Double Playback Speed: Geçerli oynatma hızını geçici olarak ikiye katlamak için oynatıcının üzerindeyken Boşluk tuşunu veya sol fare düğmesini basılı tutun.
+    Ambient Mode: Videonun renklerini oynatıcının çevresindeki alana yayar.
+    Default Volume: Ses Düzeyini Hatırla etkinken devre dışıdır. Her video için sabit bir başlangıç ses düzeyi ayarlamak üzere Ses Düzeyini Hatırla'yı kapatın.
+    Parallel Segment Loading: |
+      Oynatmadan önce aynı anda kaç video ve ses bölümünün yükleneceğini belirler.
+      Yüksek değerler yavaş veya kararsız bağlantılarda yardımcı olabilir ancak daha fazla bant genişliği ve bellek kullanır.
+      Otomatik seçeneğinin bağlantı hızını düşük hesaplayıp daha düşük kalite seçmesine de neden olabilir.
+      Aynı anda tek istekle sınırlı akışlar bu ayarı yok sayar.
+  Download Settings:
+    Download Folder: Videolar bu klasöre kaydedilir. Sisteminizin İndirilenler klasörünü kullanmak için boş bırakın.
+    Global Additional yt-dlp Arguments: Her indirmede yt-dlp'ye iletilen ek komut satırı argümanları, örneğin --cookies-from-browser firefox.
+    Concurrent Downloads: Aynı anda çalışabilecek en fazla yt-dlp işi sayısı.
+    Bandwidth Limit: Bu sınırı eş zamanlı işler arasında bölerek kuyruğun toplam aktarım hızını sınırlar. Sınır koymamak için 0 girin.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX sisteminizde yüklü yt-dlp'yi kullanabilir veya kullanıcı verileri dizininde saklanan kendi yt-dlp kopyasını indirip yönetebilir.
+    yt-dlp Channel: OpenTubeX'in indirip yöneteceği yt-dlp yayın kanalını seçin. Çoğu kullanıcı için Kararlı önerilir.
+    FFmpeg Source: OpenTubeX sisteminizde yüklü FFmpeg ve FFprobe'u kullanabilir veya kullanıcı verileri dizininde saklanan kendi statik derlemelerini indirip yönetebilir.
+    Managed Tool Updates: Yönetilen araçların otomatik güncellenmesini, güncellemeden önce sormasını veya yalnızca elle kullanılan düğmelerle güncellenmesini seçin. Eksik araçlar gerektiğinde yine indirilir.
+    yt-dlp Executable Path: OpenTubeX varsayılan olarak yt-dlp'nin PATH ortam değişkeni üzerinden bulunabildiğini varsayar. Gerekirse buradan özel bir yol ayarlayabilirsiniz.
+    Cookie Source: Kimlik doğrulamalı oynatma için yt-dlp'nin Netscape çerez dosyasını mı yoksa yüklü bir tarayıcının çerezlerini mi okuyacağını seçin.
+    Cookie File: Kimlik doğrulamalı oynatma için Netscape biçiminde bir çerez dosyası seçin.
+    Browser for Cookies: Tarayıcı desteği seçili yt-dlp yürütülebilir dosyasından okunur. Kimlik doğrulamalı oynatma istendiğinde OpenTubeX, yt-dlp'den bu tarayıcıyı okumasını ister.
+    Browser Profile: İsteğe bağlı tarayıcı profili adı veya klasörü. Son erişilen profili kullanmak için boş bırakın.
+    Always Use Cookies: yt-dlp akışları her çıkardığında yapılandırılmış çerezleri kullanır. Bu, akış çıkarma yöntemini yt-dlp olarak değiştirmez. yt-dlp seçiliyken ve hesabın erişimi varsa YouTube Premium'un gelişmiş bit hızı dâhil yalnızca hesaba özel biçimler kullanılabilir hâle gelebilir.
+    FFmpeg Executable Path: Ayrı video ve ses akışlarını birleştirmek ve ses dönüştürmek için FFmpeg gereklidir. OpenTubeX varsayılan olarak FFmpeg'in PATH ortam değişkeni üzerinden bulunabildiğini varsayar. Gerekirse buradan özel bir yol ayarlayabilirsiniz.
+  Distraction Free Settings:
+    Shorten View Counts: YouTube'un zaten yuvarlayarak kısalttığı izlenme ve yorum beğeni sayılarını gösterir, örneğin 14.000 yerine 14 B. Kesin sayılar her zaman tam gösterilir.
+  Subscription Settings:
+    Fetch Feed on Startup: Etkinleştirildiğinde OpenTubeX, başlangıçta ve yeni pencere açıldığında abonelik akışınızı otomatik olarak getirir.
+    Show New Content Feed: Önceki getirme sırasında bulunmayan abonelik akışı öğelerini içeren Yeni sekmesini gösterir.
+    Show New Content Indicators: Önceki getirme sırasında bulunmayan abonelik akışı öğelerinin yanında küçük bir nokta gösterir.
+    Show Scheduled Live Streams / Premieres First: Yaklaşan canlı yayınları ve ilk gösterimleri abonelik akışının en üstünde tutar. Devre dışı bırakıldığında başlayana kadar duyuruldukları konumda kalırlar. Mevcut planlanmış kayıtların duyuru tarihlerini almak için devre dışı bıraktıktan sonra abonelik akışını bir kez yenileyin.
+    Auto Refresh Interval: Uygulama açıkken OpenTubeX'in abonelik akışınızı ne sıklıkla otomatik yenileyeceğini belirler.
+  Theme Settings:
+    Show Progress as Notification: Abonelik yenilemeleri ve yönetilen araç indirmeleri gibi arka plan işlemlerinin anlık ilerlemesini genel ilerleme çubuğu yerine kalıcı bir bildirimde gösterir.
+    Always Show Scrollbars: Kaydırma çubuklarını her zaman görünür tutar. Devre dışı bırakıldığında fareyi hareket ettirmeyi bıraktıktan kısa süre sonra kaybolur ve yeniden hareket ettirdiğinizde görünür.
+    Use Fixed Tab Width: Yatay sekme çubuğundaki her sekmeye başlığına göre boyut vermek yerine aynı genişliği verir.
+    Use Grid Player Menu: Video oynatıcısının ayarlar menüsünü satır listesi yerine döşeme ızgarası olarak düzenler.
+The playlist is at the beginning. Enable loop to continue playing: Oynatma listesinin başındasınız. Oynatmaya devam etmek için döngüyü etkinleştirin
+External link opening has been disabled in Settings → Privacy: Harici bağlantıları açma, Ayarlar → Gizlilik bölümünde devre dışı bırakıldı
+KeyboardShortcutPrompt:
+  Edit Hint: Bir kısayol seçip yeni tuş birleşimine basın. Atamayı kaldırmak için Backspace veya Delete tuşuna basın.
+  Change Shortcut: '{action} işleminin kısayolunu değiştir'
+  Press Shortcut: Kısayola basın…
+  Unassigned: Atanmamış
+  Reset Shortcut: '{action} işleminin kısayolunu sıfırla'
+  Reset to Defaults: Varsayılanlara sıfırla
+  Shortcut Already Assigned: Kısayol zaten atanmış
+  Shortcut Conflict: '{shortcut} zaten {actions} için atanmış. Yeniden atamak istiyor musunuz?'
+  Reserved Shortcut Conflict: '{shortcut}, {actions} için ayrılmıştır ve yeniden atanamaz.'
+  Reassign: Yeniden Ata
+  Sections:
+    App:
+      Tabs: "Uygulama:\_Sekmeler"
+      Search and Page: "Uygulama:\_Arama ve Sayfa"
+      Window and View: "Uygulama:\_Pencere ve Görünüm"
+  New Tab: Yeni bir sekme oluştur
+  Close Tab: Geçerli sekmeyi kapat
+  Reload Tab: Geçerli sekmeyi yeniden yükle
+  Reopen Closed Tab: Son kapatılan sekmeyi yeniden aç
+  Next Tab: Sonraki sekmeye geç
+  Previous Tab: Önceki sekmeye geç
+  Switch to Tab: 1–9. sekmeye geç
+  Toggle Tab Orientation: Sekme düzenleri arasında geçiş yap
+  Find in Page: Geçerli sayfada metin bul
+  Find Next Match: Sonraki eşleşmeye git
+  Find Previous Match: Önceki eşleşmeye git
+  Toggle Normal Playback Speed: 1x hız ile önceki oynatma hızı arasında geçiş yap
+  Toggle Skip Silence: Sessizliği atlamayı aç veya kapat
+  Video Zoom In: Videoyu yakınlaştır
+  Video Zoom Out: Videoyu uzaklaştır
+  Tab Switcher: Sekme değiştirici
+CommandPalette:
+  Title: Komut paleti
+  Open: Komut paletini aç
+  Search Label: Komutlarda ara
+  Search Placeholder: Komutlarda ve ayarlarda ara…
+  Results: Komutlar
+  No Results: Eşleşen komut yok
+  Result Count: 1 komut bulundu | {count} komut bulundu
+  Move: Taşı
+  Run: Çalıştır
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Sekmeye geç: {title}'
+  Switch Profile: 'Profili değiştir: {name}'
+  Open Playlist: 'Oynatma listesini aç: {name}'
+  Cancel Download: 'İndirmeyi iptal et: {title}'
+  Groups:
+    App: Uygulama
+    Navigation: Gezinme
+    Tabs: Sekmeler
+  Unavailable:
+    Current Page: Zaten bu sayfadasınız
+    No History: Bu yönde sayfa yok
+    Desktop: Yalnızca masaüstü uygulamasında kullanılabilir
+    Build: Bu derlemede kullanılamıyor
+    One Tab: Önce başka bir sekme açın
+    Active Tab: Bu etkin sekme
+    Active Profile: Bu etkin profil
+    Download Finished: Bu indirme artık çalışmıyor
+    Video: Önce bir video açın
+Downloads:
+  Download: İndir
+  Download Video: Videoyu İndir
+  Download Playlist: Oynatma Listesini İndir
+  Downloading: İndiriliyor
+  Queue: Kuyruk
+  Downloaded: İndirildi
+  Canceled: İptal Edildi
+  Open Downloads: İndirilenleri Aç
+  No Downloads: Henüz indirme yok
+  No Downloads Description: Başlattığınız indirmeler burada görünecek.
+  Clear Failed Canceled Skipped And Missing: Başarısız, iptal edilmiş, atlanmış ve eksik olanları temizle
+  Clear From List: Listeden Temizle
+  Show in Folder: Klasörde Göster
+  Play Download: İndirilen dosyayı oynat
+  Retry Download: İndirmeyi yeniden dene
+  Pause Download: İndirmeyi duraklat
+  Resume Download: İndirmeyi sürdür
+  Move Earlier: Öne taşı
+  Move Later: Arkaya taşı
+  Pause All: Tümünü duraklat
+  Resume All: Tümünü sürdür
+  Retry All: Tüm başarısız indirmeleri yeniden dene
+  Total Size: 'Toplam boyut: {size}'
+  Local File: Yerel dosya
+  Available Offline: Çevrim dışı kullanılabilir
+  Remove File: Dosyayı Kaldır
+  Remove File Confirmation: İndirilen dosya kaldırılsın mı?
+  Remove File Warning: Bu işlem "{title}" dosyasını cihazınızın çöp kutusuna taşıyacak.
+  File Not Found: İndirilen dosya bulunamadı.
+  Download Missing: İndirme kullanılamıyor
+  Files Missing: İndirilen dosya artık dosya sisteminde yok. | İndirilen dosyalar artık dosya sisteminde yok.
+  Files Available: 'İndirilen {total} dosyadan {available} tanesi kullanılabilir.'
+  More Files: 1 dosya daha | {count} dosya daha
+  Template Used: 'Şablon: {name}'
+  Download Type: İndirme Türü
+  Template: Şablon
+  Unsaved: Kaydedilmemiş
+  Media Type: Medya Türü
+  Video: Video
+  Audio: Ses
+  Maximum Resolution: En Yüksek Çözünürlük
+  Best Available: Kullanılabilen En İyi
+  Automatic: Otomatik
+  Container: Kapsayıcı
+  Video Codec: Video Kodeki
+  Audio Codec: Ses Kodeki
+  File Name Template: Dosya Adı Şablonu
+  File Name Template Help: 'Kullanılabilir alanlar: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Zaman Aralığı ve Bölümler
+  Start Time: Başlangıç Zamanı (HH:MM:SS)
+  End Time: Bitiş Zamanı (HH:MM:SS)
+  Split by Chapters: Bölümlere göre ayrı dosyalara ayır
+  Remove Segments: Bölümleri kaldır
+  Subtitles and Metadata: Alt Yazılar ve Meta Veriler
+  Include Subtitles: Alt yazıları dâhil et
+  Embed Subtitles: Alt yazıları medya dosyasına göm
+  Subtitle Format: Alt Yazı Biçimi
+  Subtitle Languages: Alt Yazı Dilleri
+  Subtitle Languages Help: 'Virgülle ayrılmış yt-dlp dil seçicileri, örneğin: en.*,de.*'
+  Embed Cover Art: Küçük resmi kapak görseli olarak göm
+  Embed Metadata: Başlık, yazar, açıklama ve bölümleri göm
+  Additional yt-dlp Arguments: Ek yt-dlp Argümanları
+  Custom yt-dlp Arguments: Özel yt-dlp Argümanları
+  Template Name: Şablon Adı
+  Save Template: Şablonu Kaydet
+  Delete Template: Şablonu Sil
+  Template Saved: '"{name}" indirme şablonu kaydedildi'
+  Template Name Exists: '"{name}" adlı bir indirme şablonu zaten var.'
+  Choose Folder: Değiştir
+  Select Folder: Klasör Seç
+  Folder Required: İndirmeleri etkinleştirmek için bir indirme klasörü seçin.
+  System Downloads Folder: Sistem İndirilenler Klasörü
+  Processing: İşleniyor…
+  Queued: Kuyruğa alındı
+  Queued Position: 'Kuyruğa alındı, konum: {position}'
+  Paused: Duraklatıldı
+  Pausing: Geçerli iş tamamlandıktan sonra kuyruk duraklatılacak
+  Download Complete: İndirme tamamlandı
+  Download Cancelled: İndirme iptal edildi
+  Download Failed: İndirme başarısız oldu
+  File Name Shortened: Video başlığı çok uzun olduğu için dosya adı kısaltıldı.
+  Insufficient Disk Space: Yeterli disk alanı yok. Yaklaşık {required} gerekli, {available} kullanılabilir.
+  Unknown Download Size: İndirme boyutu bilinmiyor. Hedef dosya sisteminde {available} kullanılabilir.
+  Disk Space Check Unavailable: İndirme başlatılmadan önce kullanılabilir disk alanı denetlenemedi.
+  Download Failure Hint: Önce {issuesLink} bağlantısını denetleyin, ardından Ayarlar → Gelişmiş → Harici Yazılım bölümünde yt-dlp kanalını Nightly veya Master olarak değiştirmeyi deneyin.
+  yt-dlp YouTube Issues: YouTube için son yt-dlp sorunları
+  Automatic Download Started: Otomatik indirme başladı
+  Automatic Download Started Body: '"{title}", {channel} kanalından arka planda indiriliyor.'
+  Automatic Download Complete: Otomatik indirme tamamlandı
+  Automatic Download Failed: Otomatik indirme başarısız oldu
+  Automatic Download Could Not Start: '"{title}" için otomatik indirme başlatılamadı.'
+  Automatic Download Skipped: Otomatik indirme süzgeçleri nedeniyle atlandı
+  Cancel Download: İndirmeyi İptal Et
+  yt-dlp Not Found: yt-dlp bulunamadı. Yükleyin veya yolunu Ayarlar → Gelişmiş → Harici Yazılım bölümünde ayarlayın.
+  Download Complete Template: '"{title}" indirmesi tamamlandı'
+  Download Failed Template: '"{title}" indirmesi başarısız oldu'
+  Templates:
+    Video Best: Video - En İyi Kalite
+    Video Resolution: Video - {resolution}
+    Audio Best: Ses - En İyi Kalite
+    Audio Format: Ses - {format}
+    Subtitles Format: Alt Yazılar - {format}

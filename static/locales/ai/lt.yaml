@@ -1,0 +1,1959 @@
+# Optional AI-generated translations for keys missing from ../lt.yaml.
+Color Picker:
+  Hue: Atspalvis
+  Opacity: Nepermatomumas
+  Backdrop Blur: Fono suliejimas
+  Hex Color: HEX spalva
+  Apply Color: Pritaikyti
+  Reset Color: Atkurti
+  Copy Color: Kopijuoti
+  Copy From Another Color: Kopijuoti iš kitos spalvos
+  Color Copied: Spalva nukopijuota
+  Invalid Color: Įveskite tinkamą HEX spalvą
+  Clipboard Unavailable: Iškarpinė nepasiekiama
+  Saturation and Brightness: Sodrumas ir šviesumas
+New Tab: Nauja kortelė
+Maximize: Išdidinti
+Restore: Atkurti
+Close Tab: Užverti kortelę
+Close Confirmation:
+  Title: Išeiti iš OpenTubeX?
+  Message: Ar tikrai norite išeiti iš OpenTubeX?
+  Quit: Išeiti
+  Never Ask Again: Daugiau neklausti
+Close Window Confirmation:
+  Title: Užverti langą?
+  Message: Šiame lange atverta {count} kortelė. Ar tikrai norite jį užverti? | Šiame lange atvertos {count} kortelės. Ar tikrai norite jį užverti? | Šiame lange atverta {count} kortelių. Ar tikrai norite jį užverti?
+  Close Window: Užverti langą
+Confirmations:
+  Never Ask Again: Daugiau neklausti
+  Settings Hint: Šį patvirtinimą galite vėl įjungti skiltyje Nustatymai → Bendrieji → Patvirtinti prieš…
+Close Multiple Tabs Confirmation:
+  Title: Užverti kelias korteles?
+  Message: Bus užverta {count} kortelė. | Bus užvertos {count} kortelės. | Bus užverta {count} kortelių.
+  Close Tabs: Užverti {count} kortelę | Užverti {count} korteles | Užverti {count} kortelių
+Load Multiple Tabs Confirmation:
+  Title: Įkelti kelias korteles?
+  Message: Bus įkelta {count} kortelė. | Bus įkeltos {count} kortelės. | Bus įkelta {count} kortelių.
+  Load Tabs: Įkelti {count} kortelę | Įkelti {count} korteles | Įkelti {count} kortelių
+Unload Multiple Tabs Confirmation:
+  Title: Pašalinti kelias korteles iš atminties?
+  Message: Iš atminties bus pašalinta {count} kortelė. | Iš atminties bus pašalintos {count} kortelės. | Iš atminties bus pašalinta {count} kortelių.
+  Unload Tabs: Pašalinti iš atminties {count} kortelę | Pašalinti iš atminties {count} korteles | Pašalinti iš atminties {count} kortelių
+Use Vertical Tabs: Naudoti vertikalias korteles
+Use Horizontal Tabs: Naudoti horizontalias korteles
+Resize Tab Bar: Keisti kortelių juostos dydį
+Find in page: Rasti puslapyje
+Previous match: Ankstesnis atitikmuo
+Next match: Kitas atitikmuo
+Close find bar: Užverti paieškos juostą
+No matches: Atitikmenų nėra
+Version {versionNumber} is now available.: Jau išleista {versionNumber} versija.
+See changes and update: Peržiūrėti pakeitimus ir atnaujinti
+Dismiss: Atmesti
+Update to {version}: Atnaujinti į {version}
+Global:
+  Ambient Mode: Fono apšvietimo režimas
+  Loading More: Įkeliama daugiau
+  New: Nauja
+Search Listing:
+  Label:
+    VR180: VR180
+    360 Video: 360°
+    Subtitles: Subtitrai
+    New: Nauja
+    Members Only: Tik nariams
+    3D: 3D
+    Closed Captions: Subtitrai kurtiesiems ir neprigirdintiesiems
+Search Filters:
+  Prioritize:
+    Prioritize: Teikti pirmenybę
+    Popularity: Populiarumui
+  Features:
+    Features: Funkcijos
+    HD: HD
+    Subtitles: Subtitrai
+    Creative Commons: Creative Commons
+    3D: 3D
+    Live: Tiesioginė transliacija
+    4K: 4K
+    360 Video: 360° vaizdo įrašas
+    Location: Vieta
+    HDR: HDR
+    VR180: VR180
+Stats:
+  Stats: Statistika
+  Watch time summary: Žiūrėjimo laiko suvestinė
+  Today: Šiandien
+  This week: Šią savaitę
+  Total watch time: Visas žiūrėjimo laikas
+  Daily average: Dienos vidurkis
+  So far today: Šiandien kol kas
+  Since: Nuo {day}
+  All recorded time: Visas užfiksuotas laikas
+  Per calendar day: Pagal kalendorinę dieną
+  Day by day: Pagal dienas
+  Highest: 'Daugiausia: {duration}'
+  Week by week: Pagal savaites
+  Last 14 days: Pastarosios 14 dienų
+  Last 8 weeks: Pastarosios 8 savaitės
+  Daily chart aria: Pastarųjų 14 dienų žiūrėjimo laikas pagal dienas
+  Weekly chart aria: Pastarųjų 8 savaičių žiūrėjimo laikas pagal savaites
+  No data: Žiūrint vaizdo įrašus čia bus rodomas žiūrėjimo laikas.
+  Estimate note: Iki šio naujinimo žiūrėjimo laikas apskaičiuotas pagal išsaugotą atkūrimo eigą.
+  Adjust imported watch time: Koreguoti importuotą žiūrėjimo laiką
+  Imported watch time: Importuotas žiūrėjimo laikas
+  Imported watch time explanation: Pasirinkite dažniausiai naudotą atkūrimo greitį. Importuotų vaizdo įrašų trukmė bus padalyta iš šio greičio, kad būtų apskaičiuotas tikrasis žiūrėjimo laikas.
+  Playback speed: Atkūrimo greitis
+  Channel speed note: Jei yra išsaugotas kanalo atkūrimo greitis, naudojamas jis.
+  Apply playback speed: Pritaikyti atkūrimo greitį
+  Imported watch time adjusted: Importuotas žiūrėjimo laikas pakoreguotas
+  Reset statistics: Išvalyti statistiką
+  Reset: Išvalyti
+  Reset confirmation: Ar tikrai norite išvalyti visą žiūrėjimo statistiką? Šio veiksmo anuliuoti negalima.
+  Reset success: Žiūrėjimo statistika išvalyta
+  Less than a minute: < 1 min.
+  Minutes: '{minutes} min.'
+  Hours: '{hours} val.'
+  Hours and minutes: '{hours} val. {minutes} min.'
+Subscriptions:
+  Load More Posts: Įkelti daugiau įrašų
+  Subscriptions Tabs: Prenumeratų kortelės
+  All Subscription Tabs Hidden: Visos prenumeratų kortelės paslėptos. Kad čia matytumėte turinį, skiltyje „{settingsSection}“ → „{subsection}“ įjunkite norimas korteles.
+  Refreshing Subscription Videos: Atnaujinami prenumeratų vaizdo įrašai
+  Refreshing Subscription Shorts: Atnaujinami prenumeratų „Shorts“ vaizdo įrašai
+  Refreshing Subscription Live Streams: Atnaujinamos prenumeratų tiesioginės transliacijos
+  Refreshing Subscription Posts: Atnaujinami prenumeratų įrašai
+  New Content: Naujas turinys
+  New Feed Refresh Warning Title: Atnaujinti visus prenumeratų kanalus?
+  New Feed Refresh Warning: Visų vienos prenumeratos turinio tipų atnaujinimas be RSS gali užtrukti. Ar norite tęsti? | Visų {count} prenumeratų turinio tipų atnaujinimas be RSS gali užtrukti. Ar norite tęsti? | Visų {count} prenumeratų turinio tipų atnaujinimas be RSS gali užtrukti. Ar norite tęsti?
+  New Since Last Refresh: Nauja nuo paskutinio atnaujinimo
+  Mark as Seen: Pažymėti kaip peržiūrėtą
+  Mark All as Seen: Pažymėti viską kaip peržiūrėta
+  No New Content: Naujo turinio nėra.
+  New Content Tabs: Naujo turinio kortelės
+  Show Tabbed View: Rodyti kortelėmis
+  Show Combined View: Rodyti bendrą rodinį
+  Newest First: Pirmiausia naujausi
+  Oldest First: Pirmiausia seniausi
+Trending:
+  Load Error: Nepavyko įkelti tendencijų.
+  Unsupported Backend: Tendencijoms reikia Local API. Pasirinkite Local API arba įjunkite atsarginę serverio sąsają.
+Most Popular Feed Empty: Šio Invidious serverio „Populiariausių“ kanalas tuščias.
+Feed:
+  Cancel Refresh: Atšaukti atnaujinimą
+  Feed Last Updated: 'Kanalas „{feedName}“ paskutinį kartą atnaujintas: {date}'
+  Next Auto Refresh: 'Kitas automatinis atnaujinimas: {date}'
+  Refresh Feed: Atnaujinti {subscriptionName}
+User Playlists:
+  Load More Playlists: Įkelti daugiau grojaraščių
+  You have no playlists. Click on the create new playlist button to create a new one.: Grojaraščių neturite. Norėdami sukurti, spustelėkite naujo grojaraščio kūrimo mygtuką.
+  Playlists with Matching Videos: Grojaraščiai su atitinkančiais vaizdo įrašais
+  This playlist currently has no videos.: Šiame grojaraštyje vaizdo įrašų nėra.
+  Create New Playlist: Kurti naują grojaraštį
+  Add to Playlist: Pridėti prie grojaraščio
+  Save to: Išsaugoti į…
+  Add to Favorites: Pridėti prie {playlistName}
+  Remove from Favorites: Pašalinti iš {playlistName}
+  Move Video Up: Perkelti vaizdo įrašą aukštyn
+  Move Video Down: Perkelti vaizdo įrašą žemyn
+  Move Video to the Top: Perkelti vaizdo įrašą į viršų
+  Move Video to the Bottom: Perkelti vaizdo įrašą į apačią
+  Remove from Playlist: Pašalinti iš grojaraščio
+  Playlist Name: Grojaraščio pavadinimas
+  Playlist Description: Grojaraščio aprašas
+  Quick Bookmark Icon: Sparčiosios žymės piktograma
+  Custom Emoji: Pasirinktinis jaustukas
+  Choose Image: Pasirinkti paveikslėlį
+  Use Bookmark Icon: Naudoti žymės piktogramą
+  Save Changes: Išsaugoti pakeitimus
+  Cancel: Atšaukti
+  Edit Playlist Info: Redaguoti grojaraščio informaciją
+  Copy Playlist: Kopijuoti grojaraštį
+  Remove Duplicate Videos: Pašalinti pasikartojančius vaizdo įrašus
+  Remove Watched Videos: Pašalinti peržiūrėtus vaizdo įrašus
+  Enable Quick Bookmark With This Playlist: Naudoti šį grojaraštį sparčiosioms žymėms
+  Quick Bookmark Enabled: Sparčiosios žymės įjungtos
+  Export Playlist: Eksportuoti šį grojaraštį
+  Export list of URLs: Eksportuoti URL sąrašą
+  The playlist has been successfully exported: Grojaraštis sėkmingai eksportuotas
+  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: Ar tikrai norite iš šio grojaraščio pašalinti 1 pasikartojantį vaizdo įrašą? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} pasikartojančius vaizdo įrašus? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} pasikartojančių vaizdo įrašų? Šio veiksmo anuliuoti negalima.
+  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: Ar tikrai norite iš šio grojaraščio pašalinti 1 peržiūrėtą vaizdo įrašą? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} peržiūrėtus vaizdo įrašus? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} peržiūrėtų vaizdo įrašų? Šio veiksmo anuliuoti negalima.
+  Delete Playlist: Ištrinti grojaraštį
+  Cannot delete the quick bookmark target playlist.: Negalima ištrinti sparčiosioms žymėms naudojamo grojaraščio.
+  Are you sure you want to delete this playlist? This cannot be undone: Ar tikrai norite ištrinti šį grojaraštį? Šio veiksmo anuliuoti negalima.
+  TotalTimePlaylist: 'Bendra trukmė: {duration}'
+  Sort By:
+    NameAscending: A-Z
+    NameDescending: Z-A
+    LatestCreatedFirst: Sukūrimo data (pirmiausia naujausi)
+    EarliestCreatedFirst: Sukūrimo data (pirmiausia seniausi)
+    LatestUpdatedFirst: Atnaujinimo data (pirmiausia naujausi)
+    EarliestUpdatedFirst: Atnaujinimo data (pirmiausia seniausi)
+    LatestPlayedFirst: Peržiūros data (pirmiausia naujausi)
+    EarliestPlayedFirst: Peržiūros data (pirmiausia seniausi)
+  SinglePlaylistView:
+    Search for Videos: Ieškoti vaizdo įrašų
+    Retry: Bandyti dar kartą
+    This playlist could not be loaded.: Nepavyko įkelti šio grojaraščio.
+    More videos could not be loaded.: Nepavyko įkelti daugiau vaizdo įrašų.
+    Toast:
+      This video cannot be moved up.: Šio vaizdo įrašo negalima perkelti aukštyn.
+      This video cannot be moved down.: Šio vaizdo įrašo negalima perkelti žemyn.
+      Video has been removed: Vaizdo įrašas pašalintas
+      Video has been removed. Click here to undo.: Vaizdo įrašas pašalintas. Spustelėkite čia, kad anuliuotumėte.
+      There was a problem with removing this video: Šalinant šį vaizdo įrašą kilo klaida
+      This playlist is already being used for quick bookmark.: Šis grojaraštis jau naudojamas sparčiosioms žymėms.
+      This playlist is now used for quick bookmark: Šis grojaraštis dabar naudojamas sparčiosioms žymėms
+      This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo: Dabar sparčiosioms žymėms vietoje {oldPlaylistName} naudojamas šis grojaraštis. Spustelėkite čia, kad anuliuotumėte
+      Reverted to use {oldPlaylistName} for quick bookmark: Sparčiosioms žymėms vėl naudojamas {oldPlaylistName}
+      Some videos in the playlist are not loaded yet. Click here to copy anyway.: Kai kurie grojaraščio vaizdo įrašai dar neįkelti. Spustelėkite čia, jei vis tiek norite kopijuoti.
+      Playlist name cannot be empty. Please input a name.: Grojaraščio pavadinimas negali būti tuščias. Įveskite pavadinimą.
+      Playlist has been updated.: Grojaraštis atnaujintas.
+      There was an issue with updating this playlist.: Atnaujinant šį grojaraštį kilo klaida.
+      '{videoCount} video(s) have been removed': Pašalintas 1 vaizdo įrašas | Pašalinti {videoCount} vaizdo įrašai | Pašalinta {videoCount} vaizdo įrašų
+      There were no videos to remove.: Nėra šalintinų vaizdo įrašų.
+      This playlist is protected and cannot be removed.: Šis grojaraštis apsaugotas, todėl jo pašalinti negalima.
+      Playlist {playlistName} has been deleted.: Grojaraštis {playlistName} ištrintas.
+      This playlist does not exist: Šio grojaraščio nėra
+      This playlist has a video with a duration error: Šiame grojaraštyje yra bent vienas vaizdo įrašas, kurio trukmė nenurodyta. Rikiuojant bus laikoma, kad jo trukmė lygi nuliui.
+  AddVideoPrompt:
+    Select a playlist to add your N videos to: Pasirinkite grojaraštį, prie kurio norite pridėti vaizdo įrašą | Pasirinkite grojaraštį, prie kurio norite pridėti {videoCount} vaizdo įrašus | Pasirinkite grojaraštį, prie kurio norite pridėti {videoCount} vaizdo įrašų
+    N playlists selected: 'Pasirinkta: {playlistCount}'
+    Search in Playlists: Ieškoti grojaraščiuose
+    Allow Adding Duplicate Video(s): Leisti pridėti pasikartojančius vaizdo įrašus
+    Save: Išsaugoti
+    Added {count} Times: Jau pridėta | Pridėta {count} kartus | Pridėta {count} kartų
+    '{videoCount}/{totalVideoCount} Videos Will Be Added': 'Bus pridėta vaizdo įrašų: {videoCount}/{totalVideoCount}'
+    '{videoCount}/{totalVideoCount} Videos Already Added': 'Jau pridėta vaizdo įrašų: {videoCount}/{totalVideoCount}'
+    Toast:
+      You haven't selected any playlist yet.: Dar nepasirinkote grojaraščio.
+      Video(s) added to {playlistCount} playlists: Pridėta prie 1 grojaraščio | Pridėta prie {playlistCount} grojaraščių | Pridėta prie {playlistCount} grojaraščių
+  CreatePlaylistPrompt:
+    New Playlist Name: Naujo grojaraščio pavadinimas
+    Create: Kurti
+    Toast:
+      There is already a playlist with this name. Please pick a different name.: Grojaraštis tokiu pavadinimu jau yra. Pasirinkite kitą pavadinimą.
+      Playlist {playlistName} has been successfully created.: Grojaraštis {playlistName} sėkmingai sukurtas.
+      There was an issue with creating the playlist.: Kuriant grojaraštį kilo klaida.
+History:
+  Case Sensitive Search: Skirti didžiąsias ir mažąsias raides
+  Mark All As Watched: Pažymėti visus kaip peržiūrėtus
+  Mark All As Watched Confirmation: Ar tikrai norite visus istorijos vaizdo įrašus pažymėti kaip peržiūrėtus?
+  All History Marked as Watched: Visi istorijos vaizdo įrašai pažymėti kaip peržiūrėti
+  DateOldestHistory: Peržiūros data (pirmiausia seniausi)
+  DateNewestHistory: Peržiūros data (pirmiausia naujausi)
+  Delete Old History: Ištrinti senus istorijos įrašus
+  Select History Age: Pasirinkite, kokio senumo įrašai turi būti ištrinti.
+  Delete Entries Older Than: Ištrinti senesnius įrašus nei
+  Number of Days: Dienų skaičius
+  History Cleanup Warning: Atitinkami žiūrėjimo istorijos įrašai bus ištrinti visam laikui.
+  1 Day: 1 diena
+  1 Week: 1 savaitė
+  1 Month: 1 mėnuo
+  3 Months: 3 mėnesiai
+  1 Year: 1 metai
+  Custom: Pasirinktinai
+  History Older Than Days Removed: Pašalinti senesni nei 1 dienos žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai
+Settings:
+  Quick Settings:
+    Quick Settings: Spartieji nustatymai
+    Appearance: Išvaizda
+    Playback: Atkūrimas
+    Content: Turinys
+    Language and Region: Kalba ir regionas
+    All Settings: Visi nustatymai
+    Profile Selector Hint: Profilį taip pat galite perjungti dešiniuoju pelės mygtuku spustelėję profilio piktogramą
+  Categories:
+    General Description: Kalba, paleidimas, kortelės ir programos veikimas
+    Appearance: Išvaizda
+    Appearance Description: Apipavidalinimas, išdėstymas ir miniatiūros
+    Content appearance: Vaizdo įrašų sąrašai ir miniatiūros
+    Layout: Išdėstymas
+    Playback Description: Leistuvas, subtitrai ir kanalų nuostatos
+    Subscriptions Description: Kanalų atnaujinimo ir rodymo parinktys
+    Downloads Description: Aplankai, šablonai ir automatinės taisyklės
+    Distraction Free Description: Turinio slėpimas ir peržiūros apribojimai
+    Add-ons: Priedai
+    Add-ons Description: SponsorBlock, DeArrow, „Nepatinka“ įvertinimai ir įgarsintas vertimas
+    Privacy Description: Peržiūros privatumas ir prieigos valdymas
+    Online activity: Veikla internete
+    Data And Storage Description: Importavimas, eksportavimas, disko naudojimas ir valymas
+    Sync Description: Nustatymų ir duomenų sinchronizavimas įrenginiuose
+    Advanced: Išplėstiniai
+    Advanced Description: Teikėjai, išorinės programos ir tinklas
+    Alternative providers: Vaizdo įrašų ir metaduomenų teikėjai
+  Highlight Changed Settings: Paryškinti nuo numatytųjų pakeistus nustatymus
+  Reset Setting to Default: Atkurti numatytąją šio nustatymo reikšmę
+  Performance Impact:
+    Show Performance Impact: Rodyti poveikio našumui indikatorius
+    Moderate: Vidutinis poveikis
+    High: Didelis poveikis
+    Description: Šis nustatymas gali padidinti {resources} naudojimą
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: atminties
+      Network: tinklo
+      Disk: disko
+  Return to Settings Menu: Grįžti į nustatymų meniu
+  General Settings:
+    Update Relative Timestamps: Nuolat atnaujinti santykines laiko žymas
+    Stream Extraction Method:
+      Stream Extraction Method: Srauto išgavimo būdas
+      yt-dlp: yt-dlp
+      Built-in: Integruotas
+    Confirm Before: Prašyti patvirtinti prieš…
+    Confirmation Options:
+      Closing App: Užveriant „OpenTubeX“
+      Closing Window: Užveriant langą su keliais skirtukais
+      Closing Tabs: Užveriant kelis skirtukus
+      Loading Tabs: Įkeliant kelis skirtukus
+      Unloading Tabs: Iškeliant kelis skirtukus
+    Open Deep Links In New Window: „OpenTubeX“ perduotus URL atverti naujame lange
+    Minimize to system tray: Sumažinti į sistemos dėklą
+    Remember Tab Navigation History: Įsiminti naršymo skirtukuose istoriją
+    Auto Load Next Page:
+      Label: Automatiškai įkelti kitą puslapį
+      Tooltip: Automatiškai įkelti kitus puslapius ir komentarus.
+    New Tab Position:
+      New Tab Position: Naujo skirtuko vieta
+      At the end: Pabaigoje
+      After current tab: Po dabartinio skirtuko
+      After current tab in opened order: Po dabartinio skirtuko, atidarymo eilės tvarka
+    Tab Close Focus:
+      Tab Close Focus: Užvėrus skirtuką
+      Previous tab: Pasirinkti ankstesnį skirtuką
+      Next tab: Pasirinkti kitą skirtuką
+    Startup Behavior:
+      Startup Behavior: Paleidžiant programą
+      Load all tabs: Įkelti visus skirtukus
+      Load previously loaded tabs: Įkelti anksčiau įkeltus skirtukus
+      Load last active tab: Įkelti paskutinį aktyvų skirtuką
+      Start with an empty session: Pradėti tuščią seansą
+    Use AI Translation Completions: Trūkstamus vertimus užpildyti DI sugeneruotu tekstu
+    Reduced Motion:
+      Reduced Motion: Mažiau animacijos
+      System: Pagal sistemą
+      Force On: Visada įjungta
+      Force Off: Visada išjungta
+    Comment Translation:
+      Title: Komentarų vertimas
+      Enable: Įjungti komentarų vertimą
+      Never Translate: Niekada neversti komentarų šiomis kalbomis
+      Choose Language: Pasirinkti kalbą
+      Description: Komentarai programos kalba jau neverčiami. Pridėkite kitas kalbas, kurias suprantate.
+      Remove Language: Vėl versti komentarus {language} kalba
+    Avoid translation:
+      Avoid translation: Teikti pirmenybę neverstam vaizdo įrašo tekstui
+      Disabled: Išjungta
+      Watch Only: Tik vaizdo įrašo sąsajoje
+      Entire App: Visoje programoje
+    Playlist View Type:
+      Playlist View Type: Grojaraščio rodinys
+    Thumbnail Preference:
+      Hidden: Paslėpti
+      Blur: Sulieti
+    Show Thumbnail Previews: Rodyti miniatiūrų peržiūras
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Papildomas miniatiūros veiksmo mygtukas
+      None: Nėra
+      Mark as Watched: Pažymėti kaip peržiūrėtą
+      Copy YouTube Link: Kopijuoti „YouTube“ nuorodą
+      Open in YouTube: Atverti per „YouTube“
+  Context Menu Search Settings:
+    Context Menu Search Settings: Paieška kontekstiniame meniu
+    Description: Pasirinkite paieškos sistemas, rodomas spustelėjus pažymėtą tekstą dešiniuoju pelės mygtuku. Paieškos rezultatai atveriami numatytojoje naršyklėje.
+    Icon Hint: Įjungus paieškos sistemą, susisiekiama su jos svetaine ir įkeliama svetainės piktograma.
+    Engine Name: Paieškos sistemos pavadinimas
+    Search URL: Paieškos URL
+    URL Hint: Vietoje, kurioje URL turi būti užkoduotas pažymėtas tekstas, įrašykite %s.
+    Add Custom Engine: Pridėti pasirinktinę paieškos sistemą
+    Add Engine: Pridėti paieškos sistemą
+    Remove Engine: Pašalinti {engine}
+    Invalid Engine: Įveskite pavadinimą ir tinkamą HTTP arba HTTPS paieškos URL su %s.
+    Engine Limit: Galite pridėti iki {count} pasirinktinių paieškos sistemų.
+  Theme Settings:
+    Move Downloads to App Header: Atsisiuntimus perkelti į programos antraštę
+    Move Settings to App Header: Nustatymus perkelti į programos antraštę
+    Hide Side Bar on Watch Pages: Vaizdo įrašų puslapiuose slėpti šoninę juostą
+    UI Roundness: Sąsajos kampų apvalumas
+    Scrollbar Width: Slankjuostės plotis
+    Animation Speed: Animacijos greitis
+    Thumbnail Size: Miniatiūros dydis
+    Show Tab Icons: Rodyti skirtukų piktogramas
+    Load Missing Tab Icons: Įkelti trūkstamas skirtukų piktogramas
+    Loading Missing Tab Icons: Įkeliamos trūkstamos skirtukų piktogramos…
+    No Missing Tab Icons: Visos palaikomos skirtukų piktogramos jau įkeltos
+    Loaded Tab Icons: 'Įkelta trūkstama skirtuko piktograma: {count} | Įkeltos trūkstamos skirtukų piktogramos: {count} | Įkelta trūkstamų skirtukų piktogramų: {count}'
+    Loaded Tab Icons With Failures: Įkelta {loaded} skirtukų piktogramų; {failed} įkelti nepavyko
+    Show Tab Previews: Rodyti skirtukų peržiūras
+    Use Fixed Tab Width: Horizontaliuoju režimu naudoti fiksuotą skirtukų plotį
+    Tab Width: Skirtuko plotis
+    Tab Layout:
+      Tab Layout: Skirtukų išdėstymas
+      Horizontal Top: Horizontaliai viršuje
+      Horizontal Bottom: Horizontaliai apačioje
+      Vertical Left: Vertikaliai kairėje
+      Vertical Right: Vertikaliai dešinėje
+    Show Toast Timeout Indicator: Rodyti iškylančiojo pranešimo trukmės indikatorių
+    Use Grid Player Menu: Leistuvo meniu rodyti kaip tinklelį
+    Show Progress as Notification: Eigą rodyti pranešime
+    Operation in Progress: Vykdoma operacija
+    Toast Position:
+      Toast Position: Iškylančiojo pranešimo vieta
+      Bottom Left: Apačioje kairėje
+      Bottom Center: Apačioje per vidurį
+      Bottom Right: Apačioje dešinėje
+      Top Left: Viršuje kairėje
+      Top Center: Viršuje per vidurį
+      Top Right: Viršuje dešinėje
+    Icon Pack:
+      Icon Pack: Piktogramų rinkinys
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Programos šriftas
+      System Default: Sistemos numatytasis
+      Unable to Load: Nepavyko įkelti įdiegtų sistemos šriftų
+    Always Show Scrollbars: Visada rodyti slankjuostes
+    Base Theme:
+      Custom: Pasirinktinė
+      Catppuccin Frappe: Catppuccin Frappe
+      Catppuccin Latte: Catppuccin Latte
+      Pastel Pink: Pastel Pink
+      Hot Pink: Hot Pink
+      Nordic: Nordic
+      Gruvbox Dark: Gruvbox Dark
+      Gruvbox Light: Gruvbox Light
+      Solarized Dark: Solarized Dark
+      Solarized Light: Solarized Light
+      Everforest Dark Hard: Everforest Dark Hard
+      Everforest Dark Medium: Everforest Dark Medium
+      Everforest Dark Low: Everforest Dark Low
+      Everforest Light Hard: Everforest Light Hard
+      Everforest Light Medium: Everforest Light Medium
+      Everforest Light Low: Everforest Light Low
+    Light Theme: Šviesi tema
+    Dark Theme: Tamsi tema
+    Custom Theme:
+      Create Custom Theme: Kurti pasirinktinę temą
+      Edit Custom Theme: Redaguoti pasirinktinę temą
+      Custom Theme Creator: Pasirinktinės temos kūrimo priemonė
+      Theme Name: Temos pavadinimas
+      Based On: Pagrindas
+      Import Theme: Importuoti temą
+      Export Theme: Eksportuoti temą
+      Share Theme: Bendrinti temą
+      Share Description Heading: Aprašas
+      Share Description Prompt: Aprašykite temą ir ką reikėtų žinoti prieš ją naudojant.
+      Share Screenshots Heading: Ekrano kopijos
+      Share Screenshots Prompt: Nuvilkite čia vieną ar daugiau ekrano kopijų.
+      Share Code Summary: Temos JSON
+      Delete Theme: Ištrinti temą
+      Delete Theme Confirmation: Ištrinti „{name}“? Šio veiksmo anuliuoti negalima.
+      Save and Apply: Išsaugoti ir pritaikyti
+      Discard Changes: Atmesti pakeitimus
+      Reset Colors: Atkurti pagrindinės temos spalvas
+      Theme File: „OpenTubeX“ temos failas
+      Theme Saved: Pasirinktinė tema išsaugota ir pritaikyta
+      Theme Imported: Tema importuota į rengyklę
+      Theme Exported: Tema eksportuota
+      Theme Deleted: Pasirinktinė tema ištrinta
+      Unable to Load: Nepavyko įkelti pasirinktinės temos
+      Unable to Save: Nepavyko išsaugoti pasirinktinės temos
+      Unable to Export: Nepavyko eksportuoti pasirinktinės temos
+      Unable to Share: Nepavyko bendrinti pasirinktinės temos
+      Unable to Delete: Nepavyko ištrinti pasirinktinės temos
+      Invalid Theme File: Netinkamas pasirinktinės temos failas
+      Colors:
+        Main text: Pagrindinis tekstas
+        Secondary text: Antrinis tekstas
+        Subtle text: Neryškus tekstas
+        Borders and dividers: Kraštinės ir skiriamosios linijos
+        Subtle surfaces and indicators: Neryškūs fonai ir indikatoriai
+        Title text: Antraštės tekstas
+        Selected text background: Pažymėto teksto fonas
+        Selected text: Pažymėtas tekstas
+        Logo icon: Logotipo piktograma
+        Logo text: Logotipo tekstas
+        Logo hover: Logotipas užvedus žymeklį
+        Logo pressed: Logotipas paspaudus
+        Page background: Puslapio fonas
+        Card background: Kortelės fonas
+        Secondary card background: Antrinis kortelės fonas
+        Favorite icon: Mėgstamiausiųjų piktograma
+        Error color: Klaidos spalva
+        Scrollbar thumb: Slankjuostės slankiklis
+        Scrollbar thumb hover: Slankjuostės slankiklis užvedus žymeklį
+        Scrollbar thumb pressed: Slankjuostės slankiklis paspaudus
+        Dropdown item hover text: Išskleidžiamojo sąrašo elemento tekstas užvedus žymeklį
+        Dropdown item hover background: Išskleidžiamojo sąrašo elemento fonas užvedus žymeklį
+        Navigation and panel background: Naršymo ir skydelio fonas
+        Neutral item hover and focus background: Neutralaus elemento fonas užvedus žymeklį arba sufokusavus
+        Neutral item hover and focus text and icons: Neutralaus elemento tekstas ir piktogramos užvedus žymeklį arba sufokusavus
+        Neutral item pressed background: Neutralaus elemento fonas paspaudus
+        Neutral item pressed text and icons: Neutralaus elemento tekstas ir piktogramos paspaudus
+        Header button hover and focus background: Antraštės mygtuko fonas užvedus žymeklį arba sufokusavus
+        Header button hover and focus text and icons: Antraštės mygtuko tekstas ir piktogramos užvedus žymeklį arba sufokusavus
+        Header button pressed background: Antraštės mygtuko fonas paspaudus
+        Header button pressed text and icons: Antraštės mygtuko tekstas ir piktogramos paspaudus
+        Colored header button hover and focus background: Spalvoto antraštės mygtuko fonas užvedus žymeklį arba sufokusavus
+        Colored header button hover and focus text and icons: Spalvoto antraštės mygtuko tekstas ir piktogramos užvedus žymeklį arba sufokusavus
+        Colored header button pressed background: Spalvoto antraštės mygtuko fonas paspaudus
+        Colored header button pressed text and icons: Spalvoto antraštės mygtuko tekstas ir piktogramos paspaudus
+        Search and dropdown background: Paieškos ir išskleidžiamojo sąrašo fonas
+        Settings search background: Nustatymų paieškos fonas
+        Instance menu: Serverio meniu
+        Input background: Įvesties lauko fonas
+        Shadow color: Šešėlio spalva
+        Primary controls and highlights: Pagrindiniai valdikliai ir paryškinimai
+        Primary control hover and focus: Pagrindinis valdiklis užvedus žymeklį arba sufokusavus
+        Primary control pressed: Pagrindinis valdiklis paspaudus
+        Text and icons on primary controls: Pagrindinių valdiklių tekstas ir piktogramos
+        Secondary controls and highlights: Antriniai valdikliai ir paryškinimai
+        Secondary control hover and focus: Antrinis valdiklis užvedus žymeklį arba sufokusavus
+        Secondary control pressed: Antrinis valdiklis paspaudus
+        Light secondary color: Šviesi antrinė spalva
+        Visited accent: Aplankytų elementų akcentas
+        Text and icons on secondary controls: Antrinių valdiklių tekstas ir piktogramos
+        Links: Nuorodos
+        Visited links: Aplankytos nuorodos
+        Destructive action: Naikinamasis veiksmas
+        Destructive hover and focus: Naikinamasis veiksmas užvedus žymeklį arba sufokusavus
+        Destructive pressed: Naikinamasis veiksmas paspaudus
+        Text and icons on destructive actions: Naikinamųjų veiksmų tekstas ir piktogramos
+    Main Color Theme:
+      Catppuccin Frappe Rosewater: Catppuccin Frappe Rosewater
+      Catppuccin Frappe Flamingo: Catppuccin Frappe Flamingo
+      Catppuccin Frappe Pink: Catppuccin Frappe Pink
+      Catppuccin Frappe Mauve: Catppuccin Frappe Mauve
+      Catppuccin Frappe Red: Catppuccin Frappe Red
+      Catppuccin Frappe Maroon: Catppuccin Frappe Maroon
+      Catppuccin Frappe Peach: Catppuccin Frappe Peach
+      Catppuccin Frappe Yellow: Catppuccin Frappe Yellow
+      Catppuccin Frappe Green: Catppuccin Frappe Green
+      Catppuccin Frappe Teal: Catppuccin Frappe Teal
+      Catppuccin Frappe Sky: Catppuccin Frappe Sky
+      Catppuccin Frappe Sapphire: Catppuccin Frappe Sapphire
+      Catppuccin Frappe Blue: Catppuccin Frappe Blue
+      Catppuccin Frappe Lavender: Catppuccin Frappe Lavender
+      Catppuccin Latte Mauve: Catppuccin Latte Mauve
+      Catppuccin Latte Red: Catppuccin Latte Red
+      Gruvbox Dark Green: Gruvbox Dark Green
+      Gruvbox Dark Yellow: Gruvbox Dark Yellow
+      Gruvbox Dark Blue: Gruvbox Dark Blue
+      Gruvbox Dark Purple: Gruvbox Dark Purple
+      Gruvbox Dark Aqua: Gruvbox Dark Aqua
+      Gruvbox Dark Orange: Gruvbox Dark Orange
+      Gruvbox Light Red: Gruvbox Light Red
+      Gruvbox Light Blue: Gruvbox Light Blue
+      Gruvbox Light Purple: Gruvbox Light Purple
+      Gruvbox Light Orange: Gruvbox Light Orange
+      Solarized Yellow: Solarized Yellow
+      Solarized Orange: Solarized Orange
+      Solarized Red: Solarized Red
+      Solarized Magenta: Solarized Magenta
+      Solarized Violet: Solarized Violet
+      Solarized Blue: Solarized Blue
+      Solarized Cyan: Solarized Cyan
+      Solarized Green: Solarized Green
+      Everforest Dark Red: Everforest Dark Red
+      Everforest Dark Orange: Everforest Dark Orange
+      Everforest Dark Yellow: Everforest Dark Yellow
+      Everforest Dark Green: Everforest Dark Green
+      Everforest Dark Aqua: Everforest Dark Aqua
+      Everforest Dark Blue: Everforest Dark Blue
+      Everforest Dark Purple: Everforest Dark Purple
+      Everforest Light Red: Everforest Light Red
+      Everforest Light Orange: Everforest Light Orange
+      Everforest Light Yellow: Everforest Light Yellow
+      Everforest Light Green: Everforest Light Green
+      Everforest Light Aqua: Everforest Light Aqua
+      Everforest Light Blue: Everforest Light Blue
+      Everforest Light Purple: Everforest Light Purple
+  Player Settings:
+    Automatically Open Chapters: Automatiškai atverti skyrius
+    Caption Appearance:
+      Caption Appearance: Subtitrų išvaizda
+      Captions: Subtitrai
+      Preferred Language: Pageidaujama subtitrų kalba
+      Application Language: Programos kalba
+      Enable Translations: Įjungti subtitrų vertimą
+      Text Color: Teksto spalva
+      Background Color: Fono spalva
+      Background Opacity: Fono nepermatomumas
+      Font Size: Šrifto dydis
+      Vertical Position: Vertikalioji padėtis
+      Edge Color: Apvado spalva
+      Anchor:
+        Anchor: Tvirtinimo vieta
+        Top Left: Viršuje kairėje
+        Top Center: Viršuje per vidurį
+        Top Right: Viršuje dešinėje
+        Bottom Left: Apačioje kairėje
+        Bottom Center: Apačioje per vidurį
+        Bottom Right: Apačioje dešinėje
+      Edge Style:
+        Edge Style: Apvado stilius
+        None: Nėra
+        Outline: Kontūras
+        Drop Shadow: Krintantis šešėlis
+      Reset: Atkurti numatytąją subtitrų išvaizdą
+    Default Viewing Mode:
+      Theater: Kino teatro režimas
+      Default Viewing Mode: Numatytasis peržiūros režimas
+      Full Screen: Visas ekranas
+      Picture in Picture: Vaizdas vaizde
+      External Player: Išorinis leistuvas ({externalPlayerName})
+      Full Window (Always On): Visas langas (visada)
+      Full Screen (Always On): Visas ekranas (visada)
+      Tooltip: Daugelis numatytųjų peržiūros režimų pritaikomi tik kiekvieno žiūrėjimo seanso pradžioje. Seanso metu atlikti pakeitimai galioja iki jo pabaigos. Visada įjungiami peržiūros režimai pritaikomi kaskart perėjus prie naujo vaizdo įrašo, neatsižvelgiant į režimo pakeitimus, atliktus žiūrint ankstesnį vaizdo įrašą.
+    Auto Picture in Picture:
+      Auto Picture in Picture: Automatiškai įjungti vaizdo vaizde režimą
+      On Tab Change: Perjungiant skirtukus
+      On Window Minimize: Sumažinant langą
+      On Window Hide: Langui praradus aktyvumą arba perėjus į kitą langą
+      Wayland Minimize Unsupported: Wayland nepraneša programoms apie lango sumažinimą, todėl šis paleidiklis nepasiekiamas. Vietoj jo naudokite „Langui praradus aktyvumą arba perėjus į kitą langą“, nes tai taip pat apima sumažinimą.
+    Scroll Mini Player:
+      Scroll Mini Player: Mini leistuvas slenkant
+      When Scrolling Down: Slenkant žemyn laikyti mini leistuvą ekrane
+      On All Tabs: Perjungiant skirtukus laikyti mini leistuvą ekrane
+    Multiply Seek Interval by Playback Rate: Dauginti persukimo intervalą iš atkūrimo greičio
+    Show Playback Rate Adjusted Timestamp: Rodyti pagal atkūrimo greitį pakoreguotą laiko žymą
+    Use YouTube-style Shorts: Naudoti „YouTube“ stiliaus „Shorts“
+    Loop Shorts: Kartoti „Shorts“
+    Autoplay Interruption Timer: Automatinio atkūrimo pertraukimo laikmatis
+    Remember Volume: Įsiminti garsumą
+    Skip Silence: Praleisti tylą
+    Show Skip Silence Toggle: Rodyti tylos praleidimo jungiklį
+    Enable Skip Silence by Default: Įjungti tylos praleidimą pagal numatytuosius nustatymus
+    Enable Video Zoom: Leisti didinti vaizdo įrašą
+    Voice-over Translation:
+      Title: Vertimas balsu
+      Attribution: (teikia Yandex)
+      Enable: Įjungti vertimą balsu
+      Prepare in Background: Pradėti ruošti vertimus balsu fone
+      Background Preparation Tooltip: Kai tik įkeliamas palaikomas vaizdo įrašas, vertimo paslaugai išsiunčiamas dabartinio vaizdo įrašo ID, trukmė ir pasirinkta kalba.
+      Language: Vertimo balsu kalba
+      Supported Source Languages: 'Palaikomos originalo kalbos: rusų, anglų, kinų, korėjiečių, lietuvių, latvių, arabų, prancūzų, italų, ispanų, vokiečių ir japonų.'
+      Voice Volume: Išversto balso garsumas
+      Original Volume: Originalaus garso garsumas
+      Russian: Rusų
+      English: Anglų
+      Kazakh: Kazachų
+    Hold to Double Playback Speed: Laikykite, kad atkūrimo greitis padvigubėtų
+    Use Quick Playback Speed Bar: Naudoti sparčiojo atkūrimo greičio juostą
+    Customize Quick Playback Speed Bar: Tinkinti sparčiojo atkūrimo greičio juostą
+    Quick Playback Speed Bar Manager: Sparčiojo atkūrimo greičio juosta
+    Add Playback Speed: Pridėti atkūrimo greitį
+    Reset Quick Playback Speed Bar: Atkurti numatytąsias reikšmes
+    Playback Speed Name: Pavadinimas
+    Edit Playback Speed Name: Redaguoti atkūrimo greičio pavadinimą
+    Use Automatic Playback Speed Name: Naudoti automatinį atkūrimo greičio pavadinimą
+    Reorder Playback Speed: Vilkite, kad pakeistumėte atkūrimo greičių tvarką
+    Playback Speed: Atkūrimo greitis
+    Parallel Segment Loading: Lygiagretus segmentų įkėlimas
+    Screenshot:
+      Mode: Ekrano kopijos režimas
+      Modes:
+        Save To Folder: Išsaugoti aplanke
+        Clipboard: Kopijuoti į iškarpinę
+  Channel Settings:
+    Channel Settings: Kanalo nustatymai
+    Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
+    Enable Playback Speed: Įsiminti atkūrimo greitį
+    Enable Video Quality: Įsiminti vaizdo kokybę
+    Enable Subtitles State: Įsiminti subtitrų būseną
+    Enable Volume: Įsiminti garsumą
+    Auto Update: Automatiškai atnaujinti pakeitus leistuvo parinktyse
+    Auto Update Subtitles: Automatiškai atnaujinti perjungus
+    Auto Update Volume: Automatiškai atnaujinti pakeitus garsumą
+    Manage Saved Channels: Tvarkyti išsaugotus kanalus ({channelCount})
+    Saved Channels: Išsaugoti kanalų nustatymai
+    Enable Saved Channel Settings Sync: Sinchronizuoti išsaugotus kanalų nustatymus
+    Disable Saved Channel Settings Sync: Nebesinchronizuoti išsaugotų kanalų nustatymų
+    Search Channels: Ieškoti kanalų
+    No Saved Channels: Dar neišsaugota nė vieno kanalo atskirų nustatymų
+    No Matching Channels: Nė vienas kanalas neatitinka paieškos
+    Forget Channel: Pamiršti visus šio kanalo nustatymus
+    Forget Value: Pamiršti šį nustatymą
+    Add Setting: Įsiminti kitą šio kanalo nustatymą
+    Video Quality: Vaizdo kokybė
+    Subtitles Enabled: Subtitrai įjungti
+    Volume: Garsumas
+  External Player Settings:
+    Ignore Default Arguments: Nepaisyti numatytųjų argumentų
+  Download Settings:
+    Download Settings: Atsisiuntimai
+    Enable Downloads: Įjungti atsisiuntimus
+    Managed Tools Download Started Template: 'Nerasta reikiama išorinė programinė įranga: {tools}. Atsisiunčiamos valdomos kopijos…'
+    Managed Tools Download Finished Template: Baigta atsisiųsti {tools}
+    Managed Tools Update Started Template: Rastas {tools} naujinys. Atsisiunčiama…
+    Managed Tools Update Finished Template: Baigta atnaujinti {tools}
+    Managed Tools Update Available Template: Galimas {tools} naujinys.
+    Update Managed Tools: Atnaujinti
+    Managed Tools Download Error Template: 'Nepavyko atsisiųsti valdomų įrankių: {errors}'
+    Download Folder: Atsisiuntimų aplankas
+    Global Additional yt-dlp Arguments: Visuotiniai papildomi yt-dlp argumentai
+    Concurrent Downloads: Vienalaikiai atsisiuntimai
+    Bandwidth Limit: Pralaidumo riba (KiB/s, 0 – neribota)
+    Choose Download Folder: Pasirinkti atsisiuntimų aplanką
+    Download Templates: Atsisiuntimo šablonai
+    Manage Download Templates: Tvarkyti atsisiuntimo šablonus ({templateCount})
+    New Template: Naujas šablonas
+    Template Source: Redaguojamas arba kaip pagrindas naudojamas šablonas
+    Built-in Template: '{name} (integruotasis)'
+    Custom Template Name: '{name} (pasirinktinis)'
+    Create Template Copy: Sukurti kopiją
+    Template Copy Name: '{name} kopija'
+    Automatic Downloads: Automatiniai atsisiuntimai
+    Manage Automatic Downloads: Tvarkyti automatinius atsisiuntimus ({channelCount})
+    Automatic Downloads Description: Pasirinkite kiekvieno prenumeruojamo kanalo atsisiuntimo šabloną ir filtrus. Atitinkantys vaizdo įrašai atsisiunčiami fone atnaujinus prenumeratų sklaidos kanalus.
+    Automatic Downloads New Only: Įjungus kanalą pradedama nuo kito naujai įkelto vaizdo įrašo. Esami vaizdo įrašai ir kanalo archyvas neatsisiunčiami.
+    Automatic Downloads No Channels: Prieš konfigūruodami automatinius atsisiuntimus užsiprenumeruokite kanalą.
+    No Matching Automatic Download Channels: Nė vienas kanalas neatitinka paieškos.
+    Automatic Downloads Livestreams: Tiesioginės transliacijos
+    Minimum Duration Seconds: Mažiausia trukmė (sekundėmis)
+    Maximum Duration Seconds: Didžiausia trukmė (sekundėmis)
+    Minimum File Size MB: Mažiausias failo dydis (MB)
+    Maximum File Size MB: Didžiausias failo dydis (MB)
+    Maximum Age Days: Didžiausias amžius (dienomis)
+    Title Includes: Pavadinime yra
+    Title Excludes: Pavadinime nėra
+    Title Filter Hint: Kelis pavadinimo terminus atskirkite kableliais. Vaizdo įrašas turi atitikti bent vieną įtrauktą terminą ir neturėti nė vieno atmesto termino.
+  External Software Settings:
+    External Software Settings: Išorinė programinė įranga
+    yt-dlp Source: yt-dlp šaltinis
+    yt-dlp Channel: yt-dlp kanalas
+    Sources:
+      System: Sistemos (PATH arba pasirinktinis kelias)
+      Managed: Valdo OpenTubeX
+    Detected Version Template: 'Aptikta yt-dlp versija: {version}'
+    Managed Not Downloaded: yt-dlp dar neatsisiųsta. Norėdami atsisiųsti, spustelėkite toliau esantį mygtuką.
+    System yt-dlp Missing Warning: Sistemoje nerasta yt-dlp. Įdiekite ją, toliau nurodykite pasirinktinį kelią arba kaip šaltinį pasirinkite „Valdo OpenTubeX“.
+    Download yt-dlp: Atsisiųsti yt-dlp
+    Update yt-dlp: Atnaujinti yt-dlp
+    Checking yt-dlp: Tikrinama yt-dlp…
+    Downloading yt-dlp: Atsisiunčiama yt-dlp…
+    yt-dlp Downloaded Template: Baigta atsisiųsti yt-dlp {version}
+    yt-dlp Download Error Template: 'Nepavyko atsisiųsti yt-dlp: {error}'
+    FFmpeg Source: FFmpeg šaltinis
+    Detected FFmpeg Version Template: 'Aptikta FFmpeg versija: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg dar neatsisiųsta. Norėdami atsisiųsti, spustelėkite toliau esantį mygtuką.
+    System FFmpeg Missing Warning: Sistemoje nerasta FFmpeg. Ji būtina vaizdo ir garso failams sujungti bei garsui konvertuoti. Įdiekite ją, toliau nurodykite pasirinktinį kelią arba kaip šaltinį pasirinkite „Valdo OpenTubeX“.
+    Download FFmpeg: Atsisiųsti FFmpeg
+    Update FFmpeg: Atnaujinti FFmpeg
+    Checking FFmpeg: Tikrinama FFmpeg…
+    Downloading FFmpeg: Atsisiunčiama FFmpeg…
+    FFmpeg Downloaded Template: Baigta atsisiųsti FFmpeg {version}
+    FFmpeg Download Error Template: 'Nepavyko atsisiųsti FFmpeg: {error}'
+    Detected FFprobe Version Template: 'Aptikta FFprobe versija: {version}'
+    FFprobe Managed Not Downloaded: FFprobe dar neatsisiųsta. Norėdami ją atsisiųsti kartu su FFmpeg, spustelėkite toliau esantį mygtuką.
+    System FFprobe Missing Warning: Sistemoje nerasta FFprobe. Ji būtina medijos failams tikrinti po apdorojimo. Įdiekite ją šalia FFmpeg arba kaip šaltinį pasirinkite „Valdo OpenTubeX“.
+    Checking FFprobe: Tikrinama FFprobe…
+    Download FFmpeg and FFprobe: Atsisiųsti FFmpeg ir FFprobe
+    Update FFmpeg and FFprobe: Atnaujinti FFmpeg ir FFprobe
+    Downloading FFmpeg and FFprobe: Atsisiunčiamos programos FFmpeg ir FFprobe…
+    FFmpeg and FFprobe Downloaded Template: Baigta atsisiųsti FFmpeg ir FFprobe {version}
+    FFmpeg and FFprobe Download Error Template: 'Nepavyko atsisiųsti FFmpeg ir FFprobe: {error}'
+    Managed Tool Already Current Template: '{tool} {version} jau yra naujausios versijos'
+    Managed Tool Updates: Valdomų įrankių naujiniai
+    Update Modes:
+      Automatic: Atnaujinti automatiškai
+      Ask: Klausti prieš atnaujinant
+      Manual: Atnaujinti tik rankiniu būdu
+    yt-dlp Executable Path: Kelias iki yt-dlp vykdomojo failo
+    FFmpeg Executable Path: Kelias iki FFmpeg vykdomojo failo
+    Restricted Playback Authentication: yt-dlp atkūrimo slapukai
+    Cookie Source: Slapukų šaltinis
+    Cookie Sources:
+      None: Nėra
+      File: Failas
+      Browser: Naršyklė
+    Cookie File: Slapukų failas
+    Browser for Cookies: Slapukų naršyklė
+    Browser Profile: Naršyklės profilis (nebūtina)
+    Browser Profile Placeholder: Profilio pavadinimas arba kelias
+    Select Browser: Pasirinkti naršyklę
+    Always Use Cookies: Visada naudoti slapukus
+    Restricted Playback Authentication Hint: Pagal numatytuosius nustatymus OpenTubeX perduoda šiuos slapukus yt-dlp tik tada, kai ribojamo pagal amžių arba tik nariams skirto vaizdo įrašo puslapyje pasirenkate „Bandyti naudojant sukonfigūruotus slapukus“.
+    Restricted Playback Authentication Warning: Naudojant yt-dlp su Google paskyra, paskyra gali būti laikinai arba visam laikui apribota.
+  Privacy Settings:
+    Automatic History Retention: Automatinis istorijos saugojimas (dienomis)
+    Automatic History Retention Placeholder: Palikite tuščią, kad būtų saugoma neribotai
+    Automatic History Retention Tooltip: Palikite tuščią, kad istorija būtų saugoma neribotai. Išsaugojus skaičių, senesni įrašai pašalinami dabar ir automatiškai, kol programa atidaryta.
+    History Retention Saved: Istorijos saugojimo nuostata išsaugota
+    Invalid History Retention Days: Įveskite už nulį didesnį sveikąjį dienų skaičių
+    Enable Watch Statistics: Įjungti žiūrėjimo statistiką
+    Week Starts On: Pirmoji savaitės diena
+    Remember Search History: Įsiminti paieškos istoriją
+    Cache Video Metadata: Metaduomenų istorija
+    Cache Video Metadata Tooltip: Išsaugoma kiekviena aplankytų palaikomų vaizdo įrašų metaduomenų versija, įskaitant pavadinimus, miniatiūras ir aprašus. Pagal numatytuosius nustatymus ši funkcija išjungta, nes metaduomenų istorija užima daugiau vietos diske.
+    Watched Percentage Threshold: Peržiūrėjimo procento slenkstis
+    Watched Percentage Threshold Tooltip: Vaizdo įrašai pažymimi kaip peržiūrėti pasiekus pasirinktą procentą ir likus ne daugiau kaip 2 minutėms. Pasirinkus 0 %, jie pažymimi pradėjus atkūrimą. Pasirinkus 100 %, jie pažymimi atkūrimui pasibaigus.
+    Watched Progress Saving Mode:
+      Modes:
+        Auto: Automatinis
+        Semi-auto: Pusiau automatinis
+        Never: Niekada
+      Tooltip: Automatinis = išsaugoti kas 2 sekundes leidžiant vaizdo įrašą, kaskart išėjus iš vaizdo įrašo puslapio, pristabdžius ar užbaigus vaizdo įrašą ir įvykus klaidai (pvz., viršijus užklausų dažnio ribą arba pasibaigus žiūrėjimo seansui). Pusiau automatinis = kaip automatinis, tačiau neišsaugoma kas 2 sekundes ar išeinant iš vaizdo įrašo puslapio, be to, eigą galima išsaugoti rankiniu būdu po vaizdo leistuvu esančiu mygtuku „Išsaugoti peržiūros eigą“.
+    Clear Search History and Cache: Išvalyti paieškos istoriją ir podėlį
+    Clear Video Metadata Cache: Išvalyti vaizdo įrašų metaduomenų podėlį
+    Are you sure you want to clear the video metadata cache?: Ar tikrai norite išvalyti podėlyje saugomus vaizdo įrašų pavadinimus, miniatiūras ir aprašus?
+    Failed to clear video metadata cache: Nepavyko išvalyti vaizdo įrašų metaduomenų podėlio
+    Video metadata cache has been cleared: Vaizdo įrašų metaduomenų podėlis išvalytas
+    Video Metadata Cache Size: 'Vaizdo įrašų metaduomenų podėlis: {size}'
+    Are you sure you want to clear out your search history and cache?: Ar tikrai norite išvalyti paieškos istoriją ir podėlį?
+    Search history and cache have been cleared: Paieškos istorija ir podėlis išvalyti
+    Remove All Playlists: Pašalinti visus grojaraščius
+    All playlists have been removed: Visi grojaraščiai pašalinti
+    Are you sure you want to remove all your playlists?: Ar tikrai norite pašalinti visus grojaraščius?
+  Storage Settings:
+    Storage: Saugykla
+    Downloaded Media: Atsisiųstų medijos failų apskaita
+    Storage Breakdown: Saugyklos naudojimas
+    Shown Total: Rodoma iš viso
+    Calculating: Skaičiuojama…
+    Not Available: Tikslaus dydžio nustatyti nepavyko
+    At Least: Bent {size}
+    Failed To Read Storage: Kai kurių saugyklos dalių dydžių nepavyko nuskaityti
+    Downloaded Media Description: Vaizdo įrašų, garso ir subtitrų failai, kuriuos vis dar seka atsisiuntimų istorija.
+    Selected Download Folders: Naudotojo pasirinkti atsisiuntimų aplankai
+    Download History Records: Atsisiuntimų istorijos įrašai
+    Download History Records Description: '{count} užbaigto atsisiuntimo įrašas. Šiame įraše saugoma būsena ir failų vietos, bet ne atsisiųsti medijos failai. | {count} užbaigtų atsisiuntimų įrašai. Šiuose įrašuose saugoma būsena ir failų vietos, bet ne atsisiųsti medijos failai. | {count} užbaigtų atsisiuntimų įrašų. Šiuose įrašuose saugoma būsena ir failų vietos, bet ne atsisiųsti medijos failai.'
+    Clear Download History Records: Išvalyti atsisiuntimų istorijos įrašus
+    Clear Download History Confirmation: Išvalyti visus užbaigtų atsisiuntimų įrašus?
+    Download Files Stay On Disk: Atsisiųsti failai liks diske, bet nebebus rodomi atsisiuntimų puslapyje.
+    Clear Records: Išvalyti įrašus
+    Replaceable Caches: Atkuriami podėliai
+    Application Caches: Programos podėliai
+    Browser Caches: Naršyklės podėliai
+    Browser Caches Hint: Chromium HTTP, GPU, kodo, šešėliavimo programų, paslaugų modulio ir žodynų podėliai.
+    Stored App Data: Išsaugoti programos duomenys
+    Browser Runtime Data: Naršyklės vykdymo duomenys
+    Browser Runtime Data Hint: Chromium seanso ir vietinė saugykla, slapukai, privatumo bei tinklo būsena ir strigčių failai.
+    Subscription Feed Cache: Prenumeratų ir sklaidos kanalų podėlis
+    Subscription Feed Cache Description: Jame saugomi gauti prenumeruojamų kanalų vaizdo įrašai, „Shorts“, tiesioginės transliacijos ir įrašai. OpenTubeX jį atkuria kitą kartą atnaujinus kanalus.
+    Clear Subscription Feed Cache: Išvalyti prenumeratų ir sklaidos kanalų podėlį
+    Clear Subscription Feed Cache Confirmation: Išvalyti prenumeratų ir sklaidos kanalų podėlį?
+    Subscription Feed Cache Effect: Kol kanalai nebus atnaujinti, prenumeratų sklaidos kanalai gali būti tušti. Prenumeratos ir profiliai nebus pakeisti.
+    Session Search Cache: Seanso paieškos podėlis
+    In Memory: Atmintyje
+    Session Search Cache Description: '{count} paieška laikoma atmintyje, kad grįžimas atgal būtų spartesnis. Šis podėlis pašalinamas užvėrus OpenTubeX. | {count} paieškos laikomos atmintyje, kad grįžimas atgal būtų spartesnis. Šis podėlis pašalinamas užvėrus OpenTubeX. | {count} paieškų laikoma atmintyje, kad grįžimas atgal būtų spartesnis. Šis podėlis pašalinamas užvėrus OpenTubeX.'
+    Clear Session Search Cache: Išvalyti seanso paieškos podėlį
+    Clear Session Search Cache Confirmation: Išvalyti seanso paieškos podėlį?
+    Session Search Cache Effect: Podėlyje saugomi rezultatų puslapiai bus pašalinti. Išsaugota paieškos istorija nebus pakeista.
+    HTTP Cache: HTTP podėlis
+    HTTP Cache Description: Electron saugo tinklo atsakymus diske, kad kartojamas užklausas būtų galima įkelti iš naujo neatsisiunčiant tų pačių duomenų. OpenTubeX prireikus atkuria šį podėlį.
+    Managed By Electron: Valdo Electron
+    Clear HTTP Cache: Išvalyti HTTP podėlį
+    Clear HTTP Cache Confirmation: Išvalyti Electron HTTP podėlį?
+    HTTP Cache Effect: Kol podėlis bus atkurtas, vaizdai ir kiti tinklo ištekliai vieną kartą gali būti įkeliami lėčiau.
+    Tab Image Cache: Skirtukų miniatiūros ir kanalų pseudoportretai
+    Tab Image Cache Description: Jame saugomi atidarytų ir atkurtų skirtukų peržiūros vaizdai bei kanalų pseudoportretai. OpenTubeX juos atkuria naudojant skirtukus.
+    Clear Tab Image Cache: Išvalyti skirtukų vaizdų podėlį
+    Clear Tab Image Cache Confirmation: Išvalyti skirtukų miniatiūras ir kanalų pseudoportretus?
+    Tab Image Cache Effect: Skirtukų vaizdai gali trumpam dingti ir bus atkurti naudojant atitinkamus skirtukus.
+    Playback Caches: Atkūrimo podėliai
+    Playback Caches Description: Tarp programos seansų jame saugomi yt-dlp srauto URL ir YouTube leistuvo failai. URL podėlis taikomas tik per yt-dlp gautiems srautams.
+    Playback URL Cache Entry Size: yt-dlp srauto URL podėlio riba
+    Playback URL Cache Entry Size Tooltip: Nustatomas didžiausias kiekvieno podėlyje laikomo yt-dlp srauto įrašo dydis. Nustatykite 0 MB, kad išjungtumėte nuolatinį yt-dlp srautų kaupimą podėlyje.
+    Clear Playback Caches: Išvalyti atkūrimo podėlius
+    Clear Playback Caches Confirmation: Išvalyti yt-dlp ir leistuvo podėlius?
+    Playback Caches Effect: Kita vietinio atkūrimo užklausa gali užtrukti ilgiau, kol bus iš naujo gauti srauto ir leistuvo duomenys.
+    Clear Cache: Išvalyti podėlį
+    History Data: Išsaugotos istorijos
+    Video Metadata Description: Jame saugomi ankstesni palaikomų vaizdo įrašų pavadinimai, miniatiūros ir aprašai. Pašalinus senas versijas, jų atkurti nepavyks.
+    Video Metadata Effect: Išsaugotos metaduomenų versijos bus pašalintos visam laikui. Dabartinę vaizdo įrašo informaciją vis tiek bus galima gauti iš naujo.
+    Watch History: Žiūrėjimo istorija ir statistika
+    Watch History Description: Žiūrėjimo istorijoje registruojami peržiūrėti vaizdo įrašai ir eiga. Žiūrėjimo statistikoje saugomos kiekvienos dienos žiūrėjimo suvestinės. Saugojimo laikotarpis taikomas tik žiūrėjimo istorijai.
+    Clear Watch Statistics: Išvalyti žiūrėjimo statistiką
+    Watch History Effect: Peržiūrėtų vaizdo įrašų įrašai ir išsaugota eiga bus pašalinti. Žiūrėjimo statistika liks.
+    Clear Watch Statistics Confirmation: Pašalinti visą žiūrėjimo statistiką?
+    Watch Statistics Effect: Dienos žiūrėjimo suvestinės bus pašalintos. Žiūrėjimo istorija liks.
+    Search History: Paieškos istorija
+    Search History Description: Joje saugomos paieškos, kurias pasirinkote įsiminti.
+    Delete Search History: Pašalinti paieškos istoriją
+    Delete Search History Confirmation: Pašalinti visą išsaugotą paieškos istoriją?
+    Search History Effect: Išsaugoti ankstesnių paieškų pasiūlymai dings. Dabartinio seanso podėlis liks.
+    Other User Data: Kiti naudotojo duomenys
+    Other Profile Files: Kiti profilio failai
+    Other Profile Files Hint: Atsarginės kopijos, laikinieji failai ir profilio įrašai, kurių OpenTubeX dar neatpažįsta.
+    Subscriptions And Profiles: Prenumeratos ir profiliai
+    Subscriptions And Profiles Description: Čia saugomi prenumeruojami kanalai, profilių pavadinimai ir kanalų priskyrimas profiliams.
+    Subscriptions And Profiles Effect: Visos prenumeratos ir papildomi profiliai bus pašalinti visam laikui. Sklaidos kanalų podėlio duomenys taip pat bus išvalyti.
+    Playlists Description: Čia saugomi grojaraščių pavadinimai, aprašai ir išsaugoti vaizdo įrašai.
+    Playlists Effect: Visi grojaraščiai ir juose išsaugotų vaizdo įrašų sąrašai bus pašalinti visam laikui. Atsisiųsti medijos failai liks.
+    Settings And Sessions: Nustatymai, skirtukų seansai ir priminimai
+    Settings And Sessions Description: Čia saugomi programos nustatymai, atkuriami skirtukai ir tiesioginių transliacijų priminimai. Atverkite profilio aplanką, kad galėtumėte patikrinti šiuos failus arba sukurti atsarginę jų kopiją. Šiame puslapyje jie nešalinami.
+    Cleanup Complete: Saugyklos valymas baigtas
+    Cleanup Failed: Saugyklos išvalyti nepavyko
+  Subscription Settings:
+    Fetch Feed on Startup: Paleidžiant gauti sklaidos kanalo duomenis
+    Show New Content Feed: Rodyti naujo turinio sklaidos kanalą
+    Show New Content Indicators: Rodyti naujo turinio indikatorius
+    Show Scheduled Live Streams / Premieres First: Pirmiausia rodyti suplanuotas tiesiogines transliacijas ir premjeras
+    Auto Refresh Interval: Automatinio atnaujinimo intervalas
+    Videos Auto Refresh Interval: Vaizdo įrašų automatinio atnaujinimo intervalas
+    Shorts Auto Refresh Interval: „Shorts“ automatinio atnaujinimo intervalas
+    Live Auto Refresh Interval: Tiesioginių transliacijų automatinio atnaujinimo intervalas
+    Posts Auto Refresh Interval: Įrašų automatinio atnaujinimo intervalas
+    Limit the number of videos displayed for each channel: Riboti kiekvieno kanalo rodomų vaizdo įrašų skaičių
+    To: Iki
+    Confirm Before Unsubscribing: Klausti prieš atsisakant prenumeratos
+  Distraction Free Settings:
+    Sections:
+      Subscriptions Page: Prenumeratų puslapis
+      Visible While Paused: Rodoma pristabdžius viso lango arba viso ekrano režimu
+    Hide Channel Avatars: Slėpti kanalų pseudoportretus
+    Shorten View Counts: Trumpinti peržiūrų ir komentarų patiktukų skaičius
+    Hide Comment Translation Buttons: Slėpti komentarų vertimo mygtukus
+    Hide Live Chat Replay: Slėpti tiesioginio pokalbio įrašą
+    Hide Profile Pictures in Comments: Slėpti profilio nuotraukas komentaruose
+    Hide End-Screen Annotations: Slėpti pabaigos užsklandos anotacijas
+    Hide Paid Promotion Badge: Slėpti mokamos reklamos ženklelį
+    Hide Channels Disabled Message: Kai kurie kanalai buvo užblokuoti pagal ID ir neapdoroti. Kol šie ID atnaujinami, funkcija nepasiekiama
+    Hide Channels Invalid: Nurodytas netinkamas kanalo ID
+    Hide Channels API Error: Gaunant naudotoją pagal nurodytą ID įvyko klaida. Dar kartą patikrinkite, ar ID teisingas.
+    Hide Channels Already Exists: Kanalo ID jau yra
+    Hide Channel Posts: Slėpti kanalo kortelę „Įrašai“
+    Hide Channel Home: Slėpti kanalo kortelę „Pradžia“
+    Hide Channel Podcasts: Slėpti kanalo kortelę „Tinklalaidės“
+    Hide Channel Releases: Slėpti kanalo kortelę „Leidiniai“
+    Hide Channel Courses: Slėpti kanalo kortelę „Kursai“
+    Hide Videos, Playlists and Channels Containing Text: Slėpti vaizdo įrašus, grojaraščius ir kanalus, kuriuose yra nurodyto teksto
+    Hide Videos, Playlists and Channels Containing Text Placeholder: Žodis, žodžio dalis arba frazė
+    Hide Subscriptions Videos: Slėpti prenumeratų vaizdo įrašus
+    Hide Subscriptions Shorts: Slėpti prenumeratų „Shorts“
+    Hide Subscriptions Live: Slėpti prenumeratų tiesiogines transliacijas
+    Hide Subscriptions Posts: Slėpti prenumeratų įrašus
+    Show Added Items: Rodyti pridėtus elementus
+    Show Player Controls: Rodyti leistuvo valdiklius
+    Show Video Title: Rodyti vaizdo įrašo pavadinimą
+    Show Bottom Right Actions Dock: Rodyti veiksmų juostą apačioje dešinėje
+    Paused Interface Hide Delay: Pristabdytos sąsajos slėpimo delsa
+  Data Settings:
+    Data And Storage: Duomenys ir saugykla
+    Profile Directory: Profilio aplankas
+    Open Profile Directory: Atverti profilio aplanką
+    Search history file: Paieškos istorijos failas
+    Settings File: Nustatymų failas
+    Search history: Paieškos istorija
+    Import search history: Importuoti paieškos istoriją
+    Export search history: Eksportuoti paieškos istoriją
+    Import Settings: Importuoti nustatymus
+    Export Settings: Eksportuoti nustatymus
+    Settings Tooltip: Operacinei sistemai ar naudotojui būdingų arba eksperimentinių nustatymų negalima eksportuoti ar importuoti (pvz., įgaliotojo serverio, išorinio leistuvo, ekrano kopijų aplanko...)
+    Invalid JSON row, skipping item: JSON netinkamas {row} eilutėje, elementas praleidžiamas
+    All search history has been successfully imported: Visa paieškos istorija sėkmingai importuota
+    All search history has been successfully exported: Visa paieškos istorija sėkmingai eksportuota
+    All settings have been successfully imported: Visi nustatymai sėkmingai importuoti
+    All settings have been successfully exported: Visi nustatymai sėkmingai eksportuoti
+    Setting object has insufficient data, skipping item: Nustatymo objekte nepakanka duomenų, elementas praleidžiamas
+    Unknown setting key: 'Nežinomas nustatymo raktas: {key}'
+    Non-transferable setting key: 'Neperkeliamas nustatymo raktas: {key}'
+    Import subscriptions formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube atsarginė kopija arba FreeTube eksportas (.json)'
+    Import history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube atsarginė kopija (.json)'
+    Import playlists formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+  Sync Settings:
+    Sync Settings: Sinchronizavimas
+    Enable Sync: Įjungti sinchronizavimą
+    Privacy Passphrase: Privatumo slaptafrazė
+    Privacy Passphrase Hint: Naudokite kitą slaptafrazę nei paskyros slaptažodis. Ji niekada neperduodama iš šio įrenginio ir reikalinga kiekviename įrenginyje; ją praradus, užšifruotų sinchronizavimo duomenų atkurti nepavyks.
+    Privacy Policy: Šio serverio privatumo politika
+    Enhanced Privacy Enabled: Sustiprintas privatumas įjungtas. Serveryje saugomi tik užšifruoti sinchronizavimo duomenys.
+    Enhanced Privacy Unsupported: Įspėjimas — šis serveris nepalaiko sustiprinto privatumo. Sinchronizuojamus duomenis gali matyti jo operatorius.
+    Description: Sinchronizuokite prenumeratas, profilius, grojaraščius, peržiūrų istoriją, nustatymus ir atvertas korteles su OpenTubeX arba LibreTube sinchronizavimo serveriu. LibreTube serveriai gali palaikyti ne visas sinchronizavimo funkcijas.
+    Server URL: Serverio URL
+    Checking Server: Tikrinamas sinchronizavimo serveris…
+    Server Unavailable: Nepavyko prisijungti prie šio sinchronizavimo serverio. Patikrinkite URL ir bandykite dar kartą.
+    Username: Naudotojo vardas
+    Log In: Prisijungti
+    Register: Registruotis
+    Pair Another Device: Susieti kitą įrenginį
+    Pair With Existing Device: Susieti su esamu įrenginiu
+    Device Name: Įrenginio pavadinimas
+    This Device: Šis įrenginys
+    Device Name Required: Įveskite šio įrenginio pavadinimą.
+    Pairing Device Name Hint: Pasirinkite pavadinimą, kurį atpažinsite įrenginyje, kuriuo tvirtinsite šį prašymą.
+    Create Pairing Code: Kurti susiejimo kodą
+    Creating Pairing Code: Kuriamas saugus susiejimo kodas…
+    Pairing QR Alt: Įrenginio {device} susiejimo QR kodas
+    Scan Pairing Code: Jau prijungtame įrenginyje atverkite „Susieti kitą įrenginį“ ir nuskaitykite šį kodą.
+    Pairing Code: Susiejimo kodas
+    Use Text Pairing Code: Vietoj jo naudoti tekstinį kodą
+    Show QR Code: Rodyti QR kodą
+    Text Pairing Code Hint: Nukopijuokite šį kodą į esamą įrenginį. Jame yra susiejimo paslaptis, todėl susieję išvalykite jį iš iškarpinės istorijos.
+    Pairing QR Warning: Šį kodą rodykite tik patikimam, jau prijungtam įrenginiui, kuriuo patvirtinsite šį prašymą. Kodas nustos galioti po dviejų minučių.
+    Pairing Expires: Susiejimo kodas galioja iki {time}.
+    Verifying Pairing: Tikrinamas perduotas privatumo raktas…
+    Completing Pairing: Baigiamas įrenginio susiejimas…
+    Compare Pairing Codes: Palyginti susiejimo kodus
+    Pairing Code Match Hint: Patvirtinkite tik jei šis kodas sutampa su esamame įrenginyje rodomu kodu.
+    Pairing Codes Match: Kodai sutampa
+    Pairing Approval Code Hint: Neužverkite šio lango ir palyginkite šį kodą su naujojo įrenginio kodu. Jei kodai skiriasi, naujajame įrenginyje tęsti negalima.
+    Pairing Scan Hint: Nuskaitykite pridedamame įrenginyje rodomą susiejimo kodą.
+    Enter Pairing Code: Įvesti kodą rankiniu būdu
+    Pairing Code Entry Hint: Įklijuokite pridedamame įrenginyje rodomą susiejimo kodą.
+    Check Pairing Code: Tikrinti kodą
+    Scan QR Code: Nuskaityti QR kodą
+    Waiting For Pairing Code: Laukiama susiejimo kodo…
+    Checking Pairing Request: Tikrinamas susiejimo prašymas…
+    Approving Pairing Request: Šifruojamas ir siunčiamas privatumo raktas…
+    Pairing Approval Warning: Patvirtinkite tik jei šį prašymą matote įrenginyje, kurį pridedate. Susiejus suteikiama prieiga prie paskyros ir perduodamas privatumo raktas.
+    Approve Pairing: Patvirtinti susiejimą
+    Try Again: Bandyti dar kartą
+    Scan Again: Nuskaityti dar kartą
+    Camera Unavailable: OpenTubeX nepavyko pasiekti kameros. Patikrinkite kameros leidimą arba įveskite susiejimo kodą rankiniu būdu.
+    Pairing Unsupported: Šis sinchronizavimo serveris nepalaiko saugaus įrenginių susiejimo.
+    Pairing Failed: Įrenginio susieti nepavyko. Bandykite dar kartą su nauju kodu.
+    Pairing Request Changed: Susiejimo prašymas pasikeitė, nebegalioja arba jau buvo panaudotas. Sukurkite naują kodą.
+    Pairing Server Mismatch: Šis kodas priklauso kitam sinchronizavimo serveriui.
+    Pairing Verification Unavailable: Nėra užšifruotų sinchronizuojamų duomenų rinkinio perduotam raktui patikrinti. Sinchronizuokite esamą įrenginį ir bandykite dar kartą.
+    Pairing Completed: Įrenginys susietas
+    Pairing Approved: Įrenginio susiejimas patvirtintas
+    Disconnect: Atsijungti
+    Delete Account: Ištrinti sinchronizavimo paskyrą
+    Delete Account Confirmation: Ištrinti sinchronizavimo paskyrą?
+    Delete Account Warning: Taip visam laikui ištrinsite sinchronizavimo paskyrą ir visus šiame serveryje saugomus duomenis. Vietiniai OpenTubeX duomenys nebus ištrinti.
+    Confirm Delete Account: Ištrinti paskyrą
+    Password Required: Būtinas slaptažodis
+    Account Deleted: Sinchronizavimo paskyra ištrinta
+    Connected as: Prisijungta kaip {username}
+    Automatic Sync: Sinchronizuoti automatiškai po pakeitimų ir kas penkias minutes
+    Profiles: Profiliai
+    Open Tabs: Atvertos kortelės ir seansas
+    Disable Setting Sync: Nebesinchronizuoti šio nustatymo
+    Enable Setting Sync: Sinchronizuoti šį nustatymą
+    Sync Now: Sinchronizuoti dabar
+    Downloading encrypted data: Atsisiunčiami užšifruoti sinchronizavimo duomenys…
+    Syncing subscriptions: Sinchronizuojamos prenumeratos…
+    Syncing playlists: Sinchronizuojami grojaraščiai…
+    Syncing history: Sinchronizuojama peržiūrų istorija…
+    Syncing profiles: Sinchronizuojami profiliai…
+    Syncing open tabs: Sinchronizuojamos atvertos kortelės ir seansas…
+    Syncing settings: Sinchronizuojami nustatymai…
+    Uploading encrypted data: Įkeliami užšifruoti sinchronizavimo duomenys…
+    Finishing sync: Baigiamas sinchronizavimas…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Paskutinį kartą sinchronizuota: {date}'
+    History not supported: Ši serverio versija nepalaiko peržiūrų istorijos sinchronizavimo.
+    Settings not supported: Ši serverio versija nepalaiko nustatymų sinchronizavimo.
+    Sync completed: Sinchronizavimas baigtas
+    Data Loss Confirmation: Patvirtinti duomenis naikinantį sinchronizavimą?
+    Data Loss Warning: Pagal serverio būseną būtų ištrinta {deleted} iš {previous} anksčiau sinchronizuotų rinkinio „{collection}“ elementų. Tai gali reikšti nepavykusį serverio perkėlimą arba atkūrimą. Tęskite tik jei šiuos duomenis ketinate ištrinti ir turite atsarginę kopiją.
+    Confirm Data Loss: Ištrinti ir tęsti
+  Proxy Settings:
+    Proxy Warning: OpenTubeX neturi integruoto įgaliotojo serverio, tačiau gali prisijungti prie išorinio, pavyzdžiui, šiame kompiuteryje veikiančio Tor arba kai kurių VPN teikiamo SOCKS5 įgaliotojo serverio. Įjungę įsitikinkite, kad įgaliotasis serveris arba Tor tinkamai sukonfigūruotas, kitaip OpenTubeX negalės gauti duomenų.
+    Proxy Username: Įgaliotojo serverio naudotojo vardas
+    Proxy Password: Įgaliotojo serverio slaptažodis
+    IP Block Recovery Script Path: IP blokavimo atkūrimo scenarijaus kelias
+    Select IP Block Recovery Script File: Pasirinkti IP blokavimo atkūrimo scenarijaus failą
+    Running IP block recovery script: Vykdomas IP blokavimo atkūrimo scenarijus
+    IP block recovery script failed: 'IP blokavimo atkūrimo scenarijaus vykdyti nepavyko (išėjimo kodas: {exitCode})'
+    IP block recovery script finished: IP blokavimo atkūrimo scenarijus baigtas
+    Reloading video after IP block recovery: Po IP blokavimo atkūrimo vaizdo įrašas įkeliamas iš naujo
+    Failed to select IP block recovery script: Nepavyko pasirinkti IP blokavimo atkūrimo scenarijaus
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: Leisti teikti duomenis „SponsorBlock“
+    SponsorBlock Private User ID (optional): Privatus „SponsorBlock“ naudotojo ID (nebūtina)
+    SponsorBlock Private User ID Tooltip: Įklijuokite privatų „SponsorBlock“ naudotojo ID iš naršyklės plėtinio. Jei norite naudoti programėlės sugeneruotą ID, palikite tuščią.
+    Generated SponsorBlock User ID: Sugeneruotas „SponsorBlock“ naudotojo ID
+    Generated SponsorBlock User ID Tooltip: Šį programėlės sugeneruotą „SponsorBlock“ naudotojo ID galite naudoti naršyklės plėtinyje arba programėlėje kitame kompiuteryje.
+    Export Generated User ID: Eksportuoti sugeneruotą naudotojo ID
+    Generated SponsorBlock User ID Copy Button: Kopijuoti sugeneruotą „SponsorBlock“ naudotojo ID
+    Generated SponsorBlock User ID Copied: Sugeneruotas „SponsorBlock“ naudotojo ID nukopijuotas į iškarpinę
+    Skip notification timeout: Praleidimo pranešimo rodymo trukmė
+    UseDeArrowTitles: Naudoti „DeArrow“ vaizdo įrašų pavadinimus
+    UseDeArrowThumbnails: Naudoti „DeArrow“ miniatiūroms
+    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): „DeArrow“ miniatiūrų generatoriaus API URL (numatytasis yra https://dearrow-thumb.ajay.app)
+    Custom Color: Pasirinktinė spalva
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Įjungti „Return YouTube Dislike“
+    Return YouTube Dislike Url: „Return YouTube Dislike“ API URL (numatytasis yra https://ryd-proxy.kavin.rocks)
+  Parental Control Settings:
+    Hide Uploader on Watch page: Slėpti įkėlėją žiūrėjimo puslapyje
+    Disable Channel Links: Išjungti kanalų nuorodas
+  Password Dialog:
+    Incorrect Password: Neteisingas slaptažodis
+    Unlock: Atrakinti
+    Unlocking: Atrakinama…
+  Search Settings: Ieškoti nustatymuose
+  No Settings Found: Nustatymų nerasta
+  Password Settings:
+    Password Settings: Slaptažodis
+    Set Password To Prevent Access: Nustatykite slaptažodį, kad apribotumėte prieigą prie nustatymų
+    Set Password: Nustatyti slaptažodį
+    Remove Password: Pašalinti slaptažodį
+Tutorial:
+  Skip: Praleisti
+  Next: Toliau
+  Finish: Baigti
+  Got It: Supratau
+  Welcome:
+    Title: Sveiki prisijungę prie OpenTubeX
+    Description: Susipažinkite su keliais valdikliais, kurie padės greitai apsiprasti.
+  Navigation:
+    Title: Jūsų mediateka visada pasiekiama
+    Description: Naršymo meniu rasite prenumeratas, grojaraščius, istoriją ir daugiau.
+  Search:
+    Title: Ieškokite arba įklijuokite nuorodą
+    Description: Raskite vaizdo įrašų ir kanalų arba tiesiai į paieškos lauką įklijuokite palaikomo vaizdo įrašo URL.
+  Tabs:
+    Title: Palikite puslapius atvertus kortelėse
+    Description: Atverkite kelis puslapius vienu metu ir nepameskite, kur buvote. Pasirinkite, kur jūsų išdėstyme patogiausia rodyti korteles.
+  Quick Settings:
+    Title: Pritaikykite sau
+    Description: Pasirinkite apipavidalinimą ir numatytąją vaizdo įrašų kokybę. Šias ir kitas nuostatas bet kada pakeisite profilio meniu, o spustelėję jį dešiniuoju pelės mygtuku galėsite perjungti profilį.
+  Import Data:
+    Title: Perkelkite savo duomenis
+    Description: Jei norite, importuokite prenumeratas, istoriją, grojaraščius, paieškos istoriją arba nustatymus iš kitos palaikomos programėlės ar atsarginės kopijos.
+    Action: Importuoti duomenis
+    Not Now: Ne dabar
+  Settings Moved:
+    Title: Nustatymai perkelti
+    Description: Viršuje dešinėje pasirinkite profilį, kad pasiektumėte sparčiuosius valdiklius. Spustelėję jį dešiniuoju pelės mygtuku pateksite tiesiai į profilio pasirinkimą. Šio meniu krumpliaračiu atversite visus nustatymus; čia taip pat perkeltos skiltys „Apie“ ir „Atsisiuntimai“.
+About:
+  Commit: Pataisa
+  Licensed under the {licenseLink}: Platinama pagal {licenseLink} licenciją
+  AGPLv3: AGPLv3
+  Discussions: Diskusijos
+  Fluxer: Prisijunkite prie mūsų „Fluxer“ bendruomenės
+  Matrix: Matrix
+  Email: El. paštas
+  Please read the {roomRulesLink}: Susipažinkite su {roomRulesLink}
+  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX sukurti padėjo {creditsPageLink}
+Profile:
+  Toggle Profile List: Rodyti arba slėpti profilių sąrašą
+  Edit Profile Name: Keisti profilio pavadinimą
+  Create Profile Name: Naujo profilio pavadinimas
+  Profile Name: Profilio pavadinimas
+  Profile Icon: Profilio piktograma
+  Choose an Emoji: Pasirinkti jaustuką
+  Custom Emoji: Pasirinktinis jaustukas
+  Emoji: Jaustukas
+  Choose Image: Pasirinkti paveikslėlį
+  Crop Image: Apkirpti paveikslėlį
+  Zoom: Mastelis
+  Apply Crop: Pritaikyti apkirpimą
+  Transparent: Skaidrus
+  Use Initial: Naudoti pirmąją raidę
+  The selected image could not be loaded: Nepavyko įkelti pasirinkto paveikslo
+  Theme Color: Apipavidalinimo spalva
+  Close Profile Dropdown: Užverti profilio išskleidžiamąjį meniu
+  Open Profile Dropdown: Atverti profilio išskleidžiamąjį meniu
+Channel:
+  Channel Name Unavailable: Kanalo pavadinimas nepasiekiamas
+  Search Result Types: Paieškos rezultatų tipai
+  All Results: Visi
+  This channel does not exist: Šio kanalo nėra
+  This channel does not allow searching: Šiame kanale ieškoti neleidžiama
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Šiam kanalui taikomas amžiaus apribojimas, todėl šiuo metu jo negalima peržiūrėti per OpenTubeX.
+  Channel Tabs: Kanalo kortelės
+  View All: Rodyti viską
+  Shorts:
+    This channel does not currently have any shorts: Šiame kanale šiuo metu nėra „Shorts“ vaizdo įrašų
+  Live:
+    Live: Tiesiogiai
+    This channel does not currently have any live streams: Šiame kanale šiuo metu nėra tiesioginių transliacijų
+  Home:
+    Home: Pradžia
+    View Playlist: Rodyti grojaraštį
+  Podcasts:
+    Podcasts: Tinklalaidės
+    This channel does not currently have any podcasts: Šiame kanale šiuo metu nėra tinklalaidžių
+  Releases:
+    Releases: Leidiniai
+    This channel does not currently have any releases: Šiame kanale šiuo metu nėra leidinių
+  Courses:
+    Courses: Kursai
+    This channel does not currently have any courses: Šiame kanale šiuo metu nėra kursų
+  About:
+    Tags:
+      Tags: Kanalo žymos
+      Search for: Ieškoti „{tag}“
+    Details: Išsami informacija
+    Joined: Prisijungė
+    Location: Vieta
+  Posts:
+    This channel currently does not have any posts: Šiame kanale šiuo metu nėra įrašų
+    votes: 1 balsas | {votes} balsai | {votes} balsų
+    View Full Post: Rodyti visą įrašą
+    Reveal Answers: Rodyti atsakymus
+    Hide Answers: Slėpti atsakymus
+    Video hidden by OpenTubeX: Vaizdo įrašą paslėpė OpenTubeX
+Video:
+  Includes paid promotion: Yra mokamos reklamos
+  Age Restricted Badge: Ribojama pagal amžių
+  Queue: Eilė
+  Play Next: Leisti kitą
+  Add to Queue: Pridėti į eilę
+  Added to Play Next: Toliau bus leidžiamas šis vaizdo įrašas
+  Added to Queue: Vaizdo įrašas pridėtas į eilę
+  Clear Queue: Išvalyti eilę
+  Queue Video Count: '{count} vaizdo įrašas | {count} vaizdo įrašai | {count} vaizdo įrašų'
+  Remove from Queue: Pašalinti „{title}“ iš eilės
+  Drag to Reorder Queue: Vilkite „{title}“, kad pakeistumėte vietą eilėje
+  Reorder Queue Item: Keisti „{title}“ vietą eilėje
+  Reorder Queue Item Instructions: Rodyklių aukštyn ir žemyn klavišais perkelkite šį vaizdo įrašą eilėje.
+  Queue Item Moved: „{title}“ perkeltas į {position} vietą iš {total}.
+  Queue Item Cannot Move Up: „{title}“ negalima perkelti aukščiau. Vaizdo įrašas jau yra 1 vietoje iš {total}.
+  Queue Item Cannot Move Down: „{title}“ negalima perkelti žemiau. Vaizdo įrašas jau yra {total} vietoje iš {total}.
+  Metadata: Vaizdo įrašo informacija
+  Close Metadata: Uždaryti vaizdo įrašo informaciją
+  Metadata Cache:
+    Title History: Pavadinimų istorija
+    Thumbnail History: Miniatiūrų istorija
+    Description History: Aprašų istorija
+    Previous Version: Ankstesnė versija {number}
+    Empty: (tuščia)
+  Fetching Streams: Gaunami srautai naudojant yt-dlp…
+  Transcript:
+    Title: Nuorašas
+    Search: Ieškoti nuoraše
+    Language: Nuorašo kalba
+    Save: Išsaugoti
+    Show: Rodyti nuorašą
+    Hide: Slėpti nuorašą
+    Close: Uždaryti nuorašą
+    Copied: Nuorašas nukopijuotas į iškarpinę
+    Saved: Nuorašas išsaugotas
+    Save Error: Nepavyko išsaugoti nuorašo
+    Text File: Teksto failas
+    Unavailable: Šio vaizdo įrašo nuorašas nepasiekiamas.
+    Load Error: Nepavyko įkelti nuorašo.
+    Empty: Šiame nuoraše nėra teksto.
+    No Results: Nė vienas nuorašo fragmentas neatitinka paieškos.
+  IP block: YouTube užblokavo jūsų IP adresą ir neleidžia žiūrėti vaizdo įrašų. Pabandykite prisijungti per kitą VPN arba įgaliotąjį serverį.
+  Retry With Built-in Extraction: Bandyti dar kartą naudojant integruotą išgavimą
+  Retry With yt-dlp Extraction: Bandyti dar kartą naudojant yt-dlp išgavimą
+  Reloading video after streaming URL error: Vaizdo įrašas įkeliamas iš naujo po srauto URL klaidos
+  MembersOnly: Šiam tik nariams skirtam vaizdo įrašui reikia Google paskyros su aktyvia šio kanalo naryste.
+  AgeRestricted: Šiam pagal amžių ribojamam vaizdo įrašui reikia Google paskyros su patvirtintu amžiumi.
+  Configure Restricted Playback Cookies Hint: Nustatykite slapukus skiltyje Nustatymai → Išorinė programinė įranga → yt-dlp atkūrimo slapukai.
+  Try With Configured Cookies: Bandyti su nustatytais slapukais
+  Restricted Playback Authentication Failed Template: 'yt-dlp nepavyko pasiekti šio vaizdo įrašo su nustatytais slapukais: {error}'
+  DRMProtected: DRM apsaugotų vaizdo įrašų negalima leisti naudojant OpenTubeX, nes jiems reikia nuosavybinių uždarojo kodo komponentų. Jei norite peržiūrėti šį vaizdo įrašą, atverkite jį oficialioje YouTube svetainėje, DRM palaikančioje žiniatinklio naršyklėje.
+  Private: Privačių vaizdo įrašų negalima žiūrėti naudojant OpenTubeX, nes reikia prisijungti prie Google paskyros ir būti vaizdo įrašo savininku.
+  More Options: Daugiau parinkčių
+  Unmark As Watched: Atžymėti kaip žiūrėtą
+  Video has been unmarked as watched: Vaizdo įrašas atžymėtas kaip žiūrėtas
+  Save Watched Progress: Išsaugoti peržiūros eigą
+  Watched Progress Saved: Peržiūros eiga išsaugota
+  Save Channel Playback Speed: Išsaugoti kanalo atkūrimo greitį
+  Channel Playback Speed Saved: Kanalo atkūrimo greitis išsaugotas
+  Save Channel Video Quality: Išsaugoti kanalo vaizdo kokybę
+  Channel Video Quality Saved: Kanalo vaizdo kokybė išsaugota
+  Save Channel Subtitles State: Išsaugoti kanalo subtitrų būseną
+  Channel Subtitles State Saved: Kanalo subtitrų būsena išsaugota
+  Save Channel Volume: Išsaugoti kanalo garsumą
+  Channel Volume Saved: Kanalo garsumas išsaugotas
+  Save Channel Setting: Išsaugomas kanalo nustatymas…
+  Channel Setting Already Set: 'Nustatymui {setting} jau priskirta reikšmė {value}'
+  Video has been saved to {playlistName}: Vaizdo įrašas išsaugotas grojaraštyje {playlistName}
+  Video has been removed from {playlistName}: Vaizdo įrašas pašalintas iš grojaraščio {playlistName}
+  There was a problem saving the video to {playlistName}: Išsaugant vaizdo įrašą grojaraštyje {playlistName} kilo problema
+  There was a problem removing the video from {playlistName}: Šalinant vaizdo įrašą iš grojaraščio {playlistName} kilo problema
+  Failed to load collaborators: Nepavyko įkelti bendradarbių
+  Hide Channel: Slėpti kanalą
+  Unhide Channel: Rodyti kanalą
+  Notify me: Pranešti man
+  Notification on: Pranešimas įjungtas
+  Notification enabled: Jums bus pranešta, kai prasidės šis vaizdo įrašas
+  Notification cancelled: Pranešimas apie pradžią atšauktas
+  Notification unavailable: Sistemos pranešimai nepasiekiami
+  Scheduled video starting: Prasideda suplanuotas vaizdo įrašas
+  Live notification body: '„{videoTitle}“ prasideda dabar'
+  Premiere: Premjera
+  Upcoming: Netrukus
+  Unlisted: Neviešas
+  AI: AI
+  AI-generated content: AI sugeneruotas turinys
+  Collaborators: Bendradarbiai
+  Live Chat Replay: Tiesioginio pokalbio pakartojimas
+  Show Live Chat: Rodyti tiesioginį pokalbį
+  Show Live Chat Replay: Rodyti tiesioginio pokalbio pakartojimą
+  Close Live Chat: Uždaryti tiesioginį pokalbį
+  Close Live Chat Replay: Uždaryti tiesioginio pokalbio pakartojimą
+  Live Chat Settings: Tiesioginio pokalbio nustatymai
+  Show Live Chat Timestamps: Rodyti laiko žymas
+  Chat Filter: Pokalbio filtras
+  Top Chat: Populiariausi pokalbiai
+  All Messages: Visi pranešimai
+  Popout Live Chat: Atverti pokalbį atskirame lange
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Tiesioginio pokalbio pakartojimas įjungtas.  Leidžiant vaizdo įrašą čia bus rodomi pokalbio pranešimai.
+  Live Chat is unavailable for this stream. It may have been disabled by the uploader.: Šio srauto tiesioginis pokalbis nepasiekiamas. Jį galėjo išjungti įkėlėjas.
+  Show Super Chat Comment: Rodyti Super Chat komentarą
+  Scroll to Bottom: Slinkti į apačią
+  Premiere started: Vyksta premjera. Prasidėjo {timeAgo}
+  DeArrow:
+    Show Original Details: Rodyti pradinę informaciją
+    Show Modified Details: Rodyti pakeistą informaciją
+  Sponsor Block category:
+    hook: Įžanga / pasisveikinimas
+    highlight: Ryškiausia vieta
+    exclusive access: Išskirtinė prieiga
+  Sponsor Block category short:
+    intro: Pertrauka
+    interaction: Raginimas įsitraukti
+    music offtopic: Ne muzika
+    filler: Nukrypimai
+  Player:
+    Voice-over Translation:
+      Start: Versti
+      Cancel: Atšaukti
+      Progress: Ruošiamas įgarsintas vertimas…
+      Retry: Bandyti dar kartą
+      Error: Nepavyko parengti įgarsinto vertimo. Bandykite dar kartą vėliau.
+      Duration Error: Įgarsintas vertimas galimas tik ne ilgesniems nei keturių valandų vaizdo įrašams.
+    Caption Appearance:
+      Options: Parinktys
+      Sample: Taip atrodo subtitrai
+    Auto-translate: Automatinis vertimas
+    Sleep Timer:
+      Sleep Timer: Miego laikmatis
+      'Off': 'Išjungta'
+      Minutes: '{minutes} min.'
+      End of video: Vaizdo įrašo pabaigoje
+      Remaining: 'Liko {time}'
+      Cancel timer: Atšaukti laikmatį
+      Timer ended: Miego laikmatis baigėsi
+    Zoom:
+      Zoom: Mastelis
+      'Off': 'Išjungta'
+    TranslatedCaptionTemplate: '{language} (išversta iš "{originalLanguage}")'
+    Auto-generated Caption Template: '{language} (sugeneruota automatiškai)'
+    Audio Tracks: Garso takeliai
+    Autoplay is off: Automatinis atkūrimas išjungtas
+    Autoplay is on: Automatinis atkūrimas įjungtas
+    Up next in {seconds}: Kitas įrašas po {seconds} sek.
+    Resize dock: Keisti skydelio dydį
+    Play now: Leisti dabar
+    MusicPlaybackRateOverride: Aptiktas muzikinis vaizdo įrašas, todėl atkuriama 1× greičiu
+    Normal: Įprastas
+    Set Default: Nustatyti kaip numatytąjį
+    Theatre Mode: Teatro režimas
+    Exit Theatre Mode: Išjungti teatro režimą
+    Full Window: Per visą langą
+    Exit Full Window: Išjungti viso lango režimą
+    Take Screenshot: Padaryti ekrano kopiją
+    Show Stats: Rodyti statistiką
+    Hide Stats: Slėpti statistiką
+    Hide Annotations: Slėpti anotacijas
+    Show Annotations: Rodyti anotacijas
+    Hide: Slėpti
+    Show: Rodyti
+    Stats:
+      Stats: Statistika
+      Video ID: 'Vaizdo įrašo ID: {videoId}'
+      Media Formats: 'Medijos formatai: {formats}'
+      Resolution: 'Raiška: {width}x{height}{''@''}{frameRate}'
+      Player Dimensions: 'Leistuvo matmenys: {width}x{height}'
+      Bitrate: 'Bitų sparta: {bitrate} kbps'
+      Volume: 'Garsumas: {volumePercentage}%'
+      Bandwidth: 'Pralaidumas: {bandwidth} kbps'
+      Buffered: 'Buferyje: {bufferedPercentage}%'
+      Dropped Frames / Total Frames: 'Prarasti kadrai: {droppedFrames} / Iš viso kadrų: {totalFrames}'
+      CodecAudio: 'Kodekas: {audioCodec} ({audioItag})'
+      CodecsVideoAudio: 'Kodekai: {videoCodec} ({videoItag}) / {audioCodec} ({audioItag})'
+      CodecsVideoAudioNoItags: 'Kodekai: {videoCodec} / {audioCodec}'
+    You appear to be offline: Panašu, kad neprisijungėte prie interneto.
+    Playback will resume automatically when your connection comes back: Atkūrimas bus tęsiamas automatiškai, kai ryšys bus atkurtas.
+    Scroll Mini Player:
+      Back to Top: Grįžti į viršų
+      Return to Video Tab: Grįžti į vaizdo įrašo kortelę
+      Play: Leisti
+      Pause: Pristabdyti
+      Drag Handle: Perkelti minileistuvą
+    Skipped segment: 'Praleista: {segmentCategory}'
+    SponsorBlock:
+      CancelCurrentSegment: Atšaukti segmento kūrimą
+      ClearSegments: Išvalyti segmentus
+      ClearSegmentsPrompt: Ar tikrai norite išvalyti visus parengtus šio vaizdo įrašo SponsorBlock segmentus?
+      CompleteSegmentsBeforeSubmitting: Prieš pateikdami užbaikite visus parengtus segmentus.
+      CategoryLabel: Kategorija
+      ActionTypeLabel: Segmento tipas
+      DuplicateSegments: Parengti segmentai negali dubliuotis.
+      EndAction: (Pabaiga)
+      EndActionLabel: Pabaiga
+      EndTimeAfterStart: Segmento pabaigos laikas turi būti vėlesnis už pradžios laiką.
+      EndTimeBeforeVideoEnd: Segmento pabaigos laikas negali būti vėlesnis už vaizdo įrašo pabaigą.
+      EndTimeLabel: Segmento pabaigos laikas
+      DisableAutoSkipTemporarily: Laikinai išjungti automatinį SponsorBlock segmentų praleidimą
+      EnableAutoSkipTemporarily: Vėl įjungti automatinį SponsorBlock segmentų praleidimą
+      Guidelines: Gairės
+      InspectSegment: Patikrinti
+      InvalidStartTime: Įveskite tinkamą segmento pradžios laiką.
+      NoSegmentsToSubmit: Prieš pateikdami sukurkite bent vieną užbaigtą segmentą.
+      NowAction: (Dabar)
+      CloseInfoPanel: Uždaryti SponsorBlock informaciją
+      OpenInfoPanel: Atverti SponsorBlock informaciją
+      OpenSubmissionMenu: Atverti pateikimo meniu
+      PreviewRequired: Prieš pateikdami peržiūrėkite kiekvieną segmentą.
+      PreviewSegment: Peržiūrėti
+      SaveSegment: Išsaugoti
+      SetSegmentEndNow: Baigti segmentą dabar
+      StartAction: (Pradžia)
+      StartSegmentNow: Pradėti segmentą dabar
+      SubmissionBadRequest: SponsorBlock atmetė pateikimo užklausą.
+      SubmissionDuplicate: Tai jau buvo pateikta.
+      SubmissionFailed: Nepavyko pateikti SponsorBlock segmentų.
+      SubmissionForbidden: SponsorBlock atmetė pateikimą.
+      SubmissionRateLimited: SponsorBlock atmetė pateikimą, nes viršytas užklausų dažnio limitas.
+      SubmissionSuccess: SponsorBlock segmentai pateikti.
+      SubmitSegment: Pateikti segmentą
+      SubmitSegments: Pateikti
+      StartTimeLabel: Segmento pradžios laikas
+      TimeDivider: iki
+      SkipPrompt: Praleisti „{segmentCategory}“?
+      SkipPromptAction: Praleisti
+      SkipToHighlight: Pereiti prie ryškiausios vietos?
+      SkippedToHighlight: Pereita prie ryškiausios vietos
+      SkipToastUnskip: Atšaukti praleidimą
+      SkipToastReskip: Praleisti dar kartą
+      MutedSegment: 'Nutildyta: {segmentCategory}'
+      MuteToastUnmute: Įjungti garsą
+      InfoPanelLoading: Segmentai vis dar įkeliami...
+      InfoPanelHasSegments: Šio vaizdo įrašo segmentai rasti duomenų bazėje!
+      InfoPanelNoSegments: Segmentų nerasta
+      RefreshSegments: Atnaujinti segmentus
+      RefreshInfo: Atnaujinti SponsorBlock informaciją
+      ContributionStatsTitle: Jūsų indėlis
+      ContributionStatsLoading: Įkeliama indėlio statistika...
+      ContributionStatsError: Indėlio statistika nepasiekiama. Pabandykite atnaujinti.
+      ContributionStatsNoUserId: Pateikite segmentą arba importuokite savo SponsorBlock naudotojo ID, kad matytumėte indėlio statistiką.
+      Submissions: Pateikimai
+      Segments: Segmentai
+      TimeSaved: Sutaupytas laikas
+      AutoSkipEnabled: Automatiškai praleisti segmentus
+      AutoSkipOn: 'Įjungta'
+      AutoSkipOff: 'Išjungta'
+      WhitelistChannel: Įtraukti kanalą į leidžiamų sąrašą
+      ChannelWhitelisted: Leidžiamų sąraše
+      RemoveChannelFromWhitelist: Pašalinti kanalą iš leidžiamų sąrašo
+      MuteSegment: Nutildyti segmentą
+      SkipSegment: Praleisti segmentą
+      CloseSegmentActions: Uždaryti segmento veiksmus
+      FullVideo: Visas vaizdo įrašas
+      FullVideoLabel: '{segmentCategory} · Visas vaizdo įrašas'
+      MuteActionType: Nutildyti
+      MutePrompt: Nutildyti „{segmentCategory}“?
+      SkipActionType: Praleisti
+      LockedSegment: Užrakintas segmentas
+      UpvoteSegment: Balsuoti už
+      DownvoteSegment: Balsuoti prieš
+      VoteFailed: Nepavyko pateikti SponsorBlock balso.
+  Watch:
+    'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Reklamos prieš vaizdo įrašą likęs laikas: {remindingTimeSeconds} s'
+    'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Likęs SABR delsos laikas: {remindingTimeSeconds} s'
+Playlist:
+  Close Playlist: Uždaryti grojaraštį
+  Sort By:
+    DateAddedNewest: Pridėjimo data (naujausi viršuje)
+    DateAddedOldest: Pridėjimo data (seniausi viršuje)
+    PublishedNewest: Paskelbimo data (naujausi viršuje)
+    PublishedOldest: Paskelbimo data (seniausi viršuje)
+    AuthorAscending: Autorius (A–Z)
+    AuthorDescending: Autorius (Z–A)
+    VideoTitleAscending: Pavadinimas (A–Z)
+    VideoTitleDescending: Pavadinimas (Z–A)
+    VideoDurationAscending: Trukmė (trumpiausi viršuje)
+    VideoDurationDescending: Trukmė (ilgiausi viršuje)
+    Custom: Pasirinktinė tvarka
+Change Format:
+  Local Video File: Vietinis vaizdo įrašo failas
+  Local Audio File: Vietinis garso failas
+  Online Video: Internetinis vaizdo įrašas
+  Legacy formats are not available for this video: Senesni formatai šiame vaizdo įraše nepasiekiami
+  Stream Source: Srauto šaltinis
+  Stream Extraction Method: Srauto išgavimo būdas
+  Playback Engine: Atkūrimo modulis
+  Streaming Protocol: Srautinio perdavimo protokolas
+  Not Available For This Video: Šiame vaizdo įraše nepasiekiama
+  Protocols:
+    Progressive: Progresyvusis
+  Descriptions:
+    Local File: Leidžiama tiesiogiai iš šiame įrenginyje atsisiųsto failo
+    Online Video: Srautinio perdavimo formatai įkeliami iš nustatyto internetinio šaltinio
+    Dash: Pritaikoma kokybė, keli garso takeliai ir didžiausia raiška
+    Legacy: Vienas failas su vaizdu ir garsu, galimos tik mažesnės raiškos
+    Audio: Tik garsas, taupomas duomenų srautas ir galima klausytis fone
+  yt-dlp Fallback Template: 'yt-dlp nepateikė srautų, todėl naudojamas integruotas modulis: {error}'
+  yt-dlp Default Clients Fallback: Pageidaujami yt-dlp klientai nepateikė atkuriamų srautų, todėl bandomi numatytieji yt-dlp klientai
+  Built-in Fallback Template: 'Integruotas modulis negalėjo paleisti srauto, todėl bandoma naudoti yt-dlp: {error}'
+Share:
+  Share Post: Bendrinti įrašą
+  Timestamp Link Copied: Nuoroda su laiko žyma nukopijuota į iškarpinę
+Context Menu:
+  Context Menu: Kontekstinis meniu
+  Select All: Pasirinkti viską
+  Save Image As…: Išsaugoti paveikslą kaip…
+  Copy Image: Kopijuoti paveikslą
+  Copy Image Address: Kopijuoti paveikslo adresą
+  Cancel Refresh: Atšaukti atnaujinimą
+  Reload Videos: Įkelti vaizdo įrašus iš naujo
+  Reload Shorts: Įkelti Shorts iš naujo
+  Reload Live: Įkelti tiesiogines transliacijas iš naujo
+  Reload Posts: Įkelti įrašus iš naujo
+  Reload All Feeds: Iš naujo įkelti visus kanalus
+  Close Multiple Tabs: Uždaryti {count} kortelę | Uždaryti {count} korteles | Uždaryti {count} kortelių
+  Duplicate Tab: Dubliuoti kortelę
+  Duplicate Multiple Tabs: Dubliuoti {count} kortelę | Dubliuoti {count} korteles | Dubliuoti {count} kortelių
+  Move Tab: Perkelti kortelę
+  Move Tabs: Perkelti korteles
+  Move Tab to Group: Perkelti kortelę į grupę
+  Collapse Group: Suskleisti grupę
+  Move Tabs to Group: Perkelti korteles į grupę
+  Manage Tab Groups…: Tvarkyti kortelių grupes…
+  To Beginning: Į pradžią
+  To End: Į pabaigą
+  Close Tabs: Uždaryti korteles
+  To the Top: Į viršų
+  To the Left: Į kairę
+  To the Bottom: Į apačią
+  To the Right: Į dešinę
+  Other Tabs: Kitos kortelės
+  Copy YouTube Link: Kopijuoti YouTube nuorodą
+  Copy YouTube Links: Kopijuoti YouTube nuorodas
+  Pin Tab: Prisegti kortelę
+  Pin Tabs: Prisegti korteles
+  Unpin Tab: Atsegti kortelę
+  Unpin Tabs: Atsegti korteles
+  Tab Color: Kortelės spalva
+  Default: Numatytoji
+  Purple: Violetinė
+  Reopen Closed Tab: Vėl atverti uždarytą kortelę
+  Reload Tab: Iš naujo įkelti kortelę
+  Reload Tabs: Iš naujo įkelti korteles
+  Load Tab: Įkelti kortelę
+  Load Tabs: Įkelti korteles
+  Unload Tab: Iškelti kortelę
+  Unload Tabs: Iškelti korteles
+  Move Tab to Window: Perkelti kortelę į langą
+  Move Tabs to Window: Perkelti korteles į langą
+  Open in a New Tab: Atverti naujoje kortelėje
+  Open in a New Window: Atverti naujame lange
+  Copy Link: Kopijuoti nuorodą
+  Copy Invidious Link: Kopijuoti Invidious nuorodą
+  Search Selection in New Tab: Ieškoti „{selection}“ naujoje kortelėje
+  Search Selection in New Window: Ieškoti „{selection}“ naujame lange
+  Search With: Ieškoti naudojant {engine}
+  Search With Multiple: Ieškoti naudojant...
+  Selection Too Long: Pažymėtas tekstas per ilgas paieškai (> {count} simbolių)
+Tab Organizer:
+  Title: Kortelių tvarkytuvė
+  Open Tab Count: '{count} atverta kortelė | {count} atvertos kortelės | {count} atvertų kortelių'
+  Search Label: Ieškoti kortelių
+  Selected Count: 'Pasirinkta {count} kortelė | Pasirinktos {count} kortelės | Pasirinkta {count} kortelių'
+  Tab Count: '{count} kortelė | {count} kortelės | {count} kortelių'
+  Select All: Pasirinkti visas
+  Select None: Nieko nepasirinkti
+  Move To Group: Perkelti pasirinktas korteles į grupę
+  Choose Group: Pasirinkite grupę
+  Ungrouped: Negrupuotos
+  Pin: Prisegti
+  Unpin: Atsegti
+  Load: Įkelti
+  Unload: Iškelti
+  Unload All: Iškelti visas
+  Close All: Uždaryti visas
+  Ungroup: Išgrupuoti
+  Group Name: Grupės pavadinimas
+  Color: Spalva
+  No Color: Be spalvos
+  Create Group: Sukurti grupę
+  Expand Group: Išskleisti grupę
+  Collapse Group: Suskleisti grupę
+  Expand Group Label: Išskleisti {name}, {count} kortelė | Išskleisti {name}, {count} kortelės | Išskleisti {name}, {count} kortelių
+  Rename Group: Pervadinti {name}
+  Change Group Color: Keisti {name} spalvą
+  Move To Window: Perkelti į langą
+  Choose Window: Pasirinkite langą
+  Select Tab: Pasirinkti {title}
+  Active: Aktyvi
+  Pinned: Prisegta
+  Unloaded: Iškelta
+  Playing: Atkuriama
+  Close Tab: Uždaryti {title}
+  No Open Results: Nė viena atverta kortelė neatitinka paieškos.
+  Recently Closed: Neseniai uždarytos
+  Clear: Išvalyti
+  No Closed Results: Nė viena neseniai uždaryta kortelė neatitinka paieškos.
+  Drag Tab: Vilkite, kad perkeltumėte į grupę
+Chapters:
+  Key Moments: Svarbiausios akimirkos
+  Open Chapters: Atverti skyrius
+  Close Chapters: Uždaryti skyrius
+  Copy Timestamp Link: Kopijuoti nuorodą ties {timestamp}
+Comments:
+  Comment Count: 1 komentaras | {count} komentarai | {count} komentarų
+  Show Comments: Rodyti komentarus
+  Getting comment replies, please wait: Gaunami atsakymai į komentarą, palaukite
+  Reload Comments: Iš naujo įkelti komentarus
+  Reply Count: 1 atsakymas | {replyCount} atsakymai | {replyCount} atsakymų
+  View {replyCount} replies: Rodyti 1 atsakymą | Rodyti {replyCount} atsakymus | Rodyti {replyCount} atsakymų
+  Hide {replyCount} replies: Slėpti 1 atsakymą | Slėpti {replyCount} atsakymus | Slėpti {replyCount} atsakymų
+  View 1 reply from {channelName}: Rodyti 1 kanalo {channelName} atsakymą
+  View {replyCount} replies from {channelName} and others: Rodyti {replyCount} kanalo {channelName} ir kitų atsakymus
+  There are no comments available for this post: Šiam įrašui komentarų nėra
+  Comments are turned off: Komentarai išjungti
+  YouTube did not provide advertised replies: YouTube nurodė, kad šis komentaras turi atsakymų, bet jų nepateikė. Jie galėjo būti ištrinti arba paslėpti, todėl atsakymų mygtukas pašalintas.
+  Pinned by you: Prisegta jūsų
+  A reply is pinned: Atsakymas prisegtas
+  Filter loaded comments: Filtruoti įkeltus komentarus
+  Comment filters: Komentarų filtrai
+  From creator: Nuo kūrėjo
+  Contains timestamps: Su laiko žymomis
+  Pin comment by author: Prisegti {author} komentarą
+  Unpin comment by author: Atsegti {author} komentarą
+  Subscribed: Prenumeruojama
+  Edited: (redaguota)
+  Hearted: Pažymėta širdele
+  Highlighted comment: Paryškintas komentaras
+  Highlighted reply: Paryškintas atsakymas
+  Search loaded comments: Ieškoti įkeltuose komentaruose
+  Loaded comment search result count: 1 iš {total} įkeltų komentarų | {count} iš {total} įkeltų komentarų | {count} iš {total} įkeltų komentarų
+  No loaded comments match your filters: Nė vienas įkeltas komentaras neatitinka filtrų
+  YouTube comment link copied to clipboard: YouTube komentaro nuoroda nukopijuota į iškarpinę
+  Translate to {language}: Versti į {language}
+  Show original: Rodyti originalą
+  Translating comment, please wait: Komentaras verčiamas, palaukite
+  Comment translation failed: Nepavyko išversti komentaro
+Description:
+  Expand Description: ...daugiau
+  Collapse Description: Rodyti mažiau
+  Copy Description: Kopijuoti aprašą
+  Description Copied: Aprašas nukopijuotas į iškarpinę
+  Video Category: 'Vaizdo įrašo kategorija:'
+  Video Tags: Vaizdo įrašo žymos
+  Games: Žaidimai
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: Užpildyti žmonių vertimų spragas DI sugeneruotu tekstu. Žmonių vertimams visada teikiama pirmenybė.
+    Update Relative Timestamps: Kol puslapis atvertas, visoje programoje atnaujina santykines laiko žymas. Išjungus jos atnaujinamos tik iš naujo įkėlus puslapį arba į jį sugrįžus.
+    Stream Extraction Method: |
+      Pasirinkite, kaip OpenTubeX gauna vaizdo srautus. Pasirinkus yt-dlp, jis turi būti pasiekiamas.
+      Naudojant yt-dlp vaizdo įrašai gali būti pradedami atkurti lėčiau.
+      Integruotas būdas nepalaiko tiesioginių transliacijų ir premjerų persukimo.
+    Avoid translation: |
+      Išjungti YouTube automatinį vaizdo įrašo pavadinimo, aprašo ir skyrių vertimą.
+      Per daug užklausų, pavyzdžiui, gaunant vaizdo įrašų pavadinimus iš sąrašų, gali laikinai
+      sutrikdyti programos veikimą.
+    Show Thumbnail Previews: Užvedus pelės žymeklį ant vaizdo įrašų miniatiūrų rodyti animuotas peržiūras.
+    Startup Behavior: |
+      Pasirinkite OpenTubeX paleidimo veiksmą.
+      Įkelti visas korteles iš karto atkuria visas išsaugotas korteles, bet foninėse kortelėse vaizdo įrašai automatiškai nepaleidžiami.
+      Įkelti anksčiau įkeltas korteles vėl įkelia korteles, kurios buvo įkeltos uždarant OpenTubeX, o kitas palieka iškeltas.
+      Įkelti paskutinę aktyvią kortelę atkuria ankstesnį seansą, o kitas korteles atveria, bet palieka iškeltas; jos įkeliamos jas spustelėjus.
+      Pradėti tuščią seansą neatkuria išsaugotų kortelių ir atveria naują langą.
+    Open Deep Links In New Window: OpenTubeX perduoti URL, pavyzdžiui, iš naršyklės peradresavimo plėtinių ar komandų eilutės argumentų, atveriami naujame lange.
+    Remember Tab Navigation History: Kiekvienos kortelės naršymo pirmyn ir atgal istorija išsaugoma ir atkuriama iš naujo paleidus OpenTubeX.
+  Proxy Settings:
+    IP Block Recovery Script Path: Scenarijaus failo, paleidžiamo aptikus IP blokavimą, kelias. OpenTubeX laukia, kol jis bus baigtas, tada iš naujo įkelia vaizdo įrašą. Jei įjungtas atsarginis būdas, scenarijus paleidžiamas tik tada, kai nepavyksta ir atsarginis būdas.
+  Player Settings:
+    Enable Caption Translations: Įjungus subtitrų mygtukas ir spartusis klavišas C teikia pirmenybę automatiškai išverstam takeliui pageidaujama subtitrų kalba, jei vaizdo įraše nėra atitinkamo originalaus takelio.
+    Use Quick Playback Speed Bar: Dešinėje leistuvo valdiklių pusėje rodo sparčiojo atkūrimo greičio juostą. Jei įjungtas rankinis atkūrimo greičio išsaugojimas kiekvienam kanalui, juostoje taip pat yra mygtukas dabartinio kanalo greičiui išsaugoti.
+    Skip by Scrolling Over Video Player: Slinkimo ratuku persukti vaizdo įrašą kaip MPV.
+    Multiply Seek Interval by Playback Rate: Įjungus persukimo intervalai (rodyklių klavišai ir J/L) dauginami iš dabartinio atkūrimo greičio. Išjungus persukimo intervalai nekinta, nepaisant atkūrimo greičio.
+    Show Playback Rate Adjusted Timestamp: Įjungus ir atkūrimo greičiui nesant 1x, leistuvas skliaustuose po įprasta laiko žyma rodo pagal atkūrimo greitį pakoreguotą laiko žymą.
+    Use YouTube-style Shorts: Prenumeratų ir kanalų puslapiuose rodo Shorts vertikaliame tinklelyje ir naudoja YouTube stiliaus Shorts leistuvą.
+    Loop Shorts: Įjungus Shorts automatiškai paleidžiami iš naujo. Išjungus Shorts pabaigoje sustoja ir rodomas pakartojimo mygtukas.
+    Show Skip Silence Toggle: Leistuvo nustatymų meniu rodo tylos praleidimo įjungimo ir išjungimo jungiklį.
+    Enable Skip Silence by Default: Naujose kortelėse įjungia tylos praleidimą. Pakeitimas vienoje kortelėje neturi įtakos kitoms kortelėms.
+    Enable Video Zoom: Leistuvo nustatymų meniu rodo mastelio valdiklį ir įjungia jo sparčiuosius klavišus bei slinkimo valdiklius.
+    Voice-over Translation: Paprašius vertimo siunčia vaizdo įrašo ID, trukmę ir pasirinktą kalbą neoficialiai Yandex vertimo užkadriniu balsu paslaugai. Pagal numatymą išjungta.
+    Hold to Double Playback Speed: Laikykite tarpo klavišą arba kairįjį pelės mygtuką virš leistuvo, kad laikinai padvigubintumėte dabartinį atkūrimo greitį.
+    Ambient Mode: Sulieja vaizdo įrašo spalvas su sritimi aplink leistuvą.
+    Default Volume: Nepasiekiama, kol įjungtas garsumo įsiminimas. Išjunkite garsumo įsiminimą, kad nustatytumėte vienodą pradinį kiekvieno vaizdo įrašo garsumą.
+    Parallel Segment Loading: |
+      Kiek vaizdo ir garso segmentų vienu metu iš anksto įkelti prieš atkūrimą.
+      Didesnės reikšmės gali padėti esant lėtam ar nestabiliam ryšiui, bet naudoja daugiau pralaidumo ir atminties.
+      Dėl jų Auto taip pat gali nepakankamai įvertinti ryšio greitį ir pasirinkti prastesnę kokybę.
+      Srautai, apriboti iki vienos užklausos vienu metu, nepaiso šio nustatymo.
+  External Player Settings:
+    Ignore Default Arguments: Išoriniam leistuvui nesiųsti jokių numatytųjų argumentų, išskyrus vaizdo įrašo URL (pvz., atkūrimo greitį, grojaraščio URL ir kt.). Pasirinktiniai argumentai vis tiek bus perduoti.
+  Download Settings:
+    Download Folder: Vaizdo įrašai išsaugomi šiame aplanke. Palikite tuščią, jei norite naudoti sistemos atsisiuntimų aplanką.
+    Global Additional yt-dlp Arguments: Papildomi komandų eilutės argumentai, perduodami yt-dlp kiekvienam atsisiuntimui, pavyzdžiui, --cookies-from-browser firefox.
+    Concurrent Downloads: Didžiausias vienu metu vykdomų yt-dlp užduočių skaičius.
+    Bandwidth Limit: Apriboja bendrą eilės perdavimo spartą, paskirstant šį limitą vienu metu vykdomoms užduotims. Jei apribojimo nereikia, įveskite 0.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX gali naudoti sistemoje įdiegtą yt-dlp arba atsisiųsti ir tvarkyti savo yt-dlp kopiją, saugomą naudotojo duomenų kataloge.
+    yt-dlp Channel: Pasirinkite, kurį yt-dlp leidimų kanalą OpenTubeX atsisiųs ir tvarkys. Daugumai naudotojų rekomenduojamas stabilus kanalas.
+    FFmpeg Source: OpenTubeX gali naudoti sistemoje įdiegtus FFmpeg ir FFprobe arba atsisiųsti ir tvarkyti savo statines versijas, saugomas naudotojo duomenų kataloge.
+    Managed Tool Updates: Pasirinkite, ar programos tvarkomi įrankiai bus atnaujinami automatiškai, prieš atnaujinant bus klausiama, ar jie bus atnaujinami tik rankiniais mygtukais. Trūkstami įrankiai prireikus vis tiek atsisiunčiami.
+    yt-dlp Executable Path: Pagal numatymą OpenTubeX laikys, kad yt-dlp galima rasti naudojant PATH aplinkos kintamąjį. Jei reikia, čia galima nurodyti pasirinktinį kelią.
+    Cookie Source: Pasirinkite, ar autentifikuotam atkūrimui yt-dlp turi skaityti Netscape slapukų failą, ar įdiegtos naršyklės slapukus.
+    Cookie File: Pasirinkite Netscape formato slapukų failą autentifikuotam atkūrimui.
+    Browser for Cookies: Naršyklių palaikymo informacija gaunama iš pasirinkto yt-dlp vykdomojo failo. Paprašius autentifikuoto atkūrimo, OpenTubeX nurodo yt-dlp nuskaityti šią naršyklę.
+    Browser Profile: Pasirinktinis naršyklės profilio pavadinimas arba aplankas. Palikite tuščią, jei norite naudoti paskutinį atvertą profilį.
+    Always Use Cookies: Naudoti sukonfigūruotus slapukus kaskart, kai yt-dlp išgauna srautus. Tai nepakeičia srautų išgavimo būdo į yt-dlp. Pasirinkus yt-dlp gali tapti pasiekiami tik paskyrai skirti formatai, įskaitant didesnę YouTube Premium spartą, jei paskyra turi prieigą.
+    FFmpeg Executable Path: FFmpeg reikalingas atskiriems vaizdo ir garso srautams sujungti bei garsui konvertuoti. Pagal numatymą OpenTubeX laikys, kad FFmpeg galima rasti naudojant PATH aplinkos kintamąjį. Jei reikia, čia galima nurodyti pasirinktinį kelią.
+  Distraction Free Settings:
+    Shorten View Counts: Sutrumpintai rodo peržiūrų ir komentarų teigiamų įvertinimų skaičius, kuriuos YouTube jau suapvalino, pvz., 14 tūkst. vietoje 14 000. Tikslūs skaičiai visada rodomi nesutrumpinti.
+    Hide Channels: Įveskite kanalo ID, kad visi vaizdo įrašai, grojaraščiai ir pats kanalas nebūtų rodomi paieškoje, tarp populiarėjančių, populiariausių ir rekomenduojamų elementų. Įvestas kanalo ID turi tiksliai sutapti, taip pat skiriamos didžiosios ir mažosios raidės.
+    Hide Subscriptions Live: Šį nustatymą pakeičia visai programai taikomas nustatymas „{appWideSetting}“, esantis „{settingsSection}“ skiltyje „{subsection}“
+    Hide Videos, Playlists and Channels Containing Text: Įveskite žodį, žodžio dalį arba frazę (didžiosios ir mažosios raidės neskiriamos), kad visoje OpenTubeX nebūtų rodomi vaizdo įrašai, grojaraščiai ir kanalai, kurių originaliuose pavadinimuose yra šis tekstas. Filtras netaikomas tik istorijai, jūsų grojaraščiams ir grojaraščiuose esantiems vaizdo įrašams.
+    Hide Videos on Watch: Prenumeratų ir kanalų puslapių kortelėse Vaizdo įrašai, Shorts ir Tiesiogiai slepia peržiūrėtus vaizdo įrašus. Tai neturi įtakos kanalų puslapių kortelei Pradžia
+  Subscription Settings:
+    Fetch Feed on Startup: Įjungus OpenTubeX automatiškai gaus prenumeratų sklaidos kanalą paleidžiant programą ir atvėrus naują langą.
+    Show New Content Feed: Rodo kortelę Nauja su prenumeratų sklaidos kanalo elementais, kurių nebuvo gaunant ankstesnį kartą.
+    Show New Content Indicators: Šalia prenumeratų sklaidos kanalo elementų, kurių nebuvo gaunant ankstesnį kartą, rodo mažą tašką.
+    Show Scheduled Live Streams / Premieres First: Būsimas tiesiogines transliacijas ir premjeras rodo prenumeratų sklaidos kanalo viršuje. Išjungus iki pradžios jos lieka ten, kur buvo paskelbtos. Išjungę vieną kartą atnaujinkite prenumeratų sklaidos kanalą, kad gautumėte esamų suplanuotų elementų paskelbimo datas.
+    Auto Refresh Interval: Kaip dažnai OpenTubeX automatiškai atnaujina prenumeratų sklaidos kanalą, kol programa atverta.
+  Theme Settings:
+    Show Progress as Notification: Vietoje bendros eigos juostos rodo nuolatinį pranešimą su tikralaike foninių operacijų, pvz., prenumeratų atnaujinimo ir tvarkomų įrankių atsisiuntimo, eiga.
+    Always Show Scrollbars: Slinkties juostos visada lieka matomos. Išjungus jos netrukus išblėsta nustojus judinti pelę ir vėl pasirodo vos ją pajudinus.
+    Use Fixed Tab Width: Visoms horizontaliosios kortelių juostos kortelėms nustato vienodą plotį, užuot pritaikius jį prie pavadinimo.
+    Use Grid Player Menu: Vaizdo leistuvo nustatymų meniu elementus išdėsto plytelių tinkleliu, o ne eilučių sąrašu.
+  SponsorBlock Settings:
+    UseDeArrowTitles: Vaizdo įrašų pavadinimus pakeisti naudotojų pateiktais DeArrow pavadinimais.
+    UseDeArrowThumbnails: Vaizdo įrašų miniatiūras pakeisti DeArrow miniatiūromis.
+Autoplay Interruption Timer: Automatinis atkūrimas atšauktas dėl {autoplayInterruptionIntervalHours} val. neveiklumo
+The playlist is at the beginning. Enable loop to continue playing: Pasiekta grojaraščio pradžia. Įjunkite kartojimą, kad atkūrimas būtų tęsiamas
+Age Restricted:
+  This channel is age restricted: Šiam kanalui taikomas amžiaus apribojimas
+  This video is age restricted: Šiam vaizdo įrašui taikomas amžiaus apribojimas
+External link opening has been disabled in Settings → Privacy: Išorinių nuorodų atvėrimas išjungtas skiltyje Nustatymai → Privatumas
+Screenshot Clipboard Success: Ekrano kopija išsaugota iškarpinėje
+Screenshot Clipboard Error: Nepavyko nukopijuoti ekrano kopijos į iškarpinę
+Channel Hidden: '{channel} pridėtas prie kanalų filtro'
+Channel Unhidden: '{channel} pašalintas iš kanalų filtro'
+Trimmed input must be at least N characters long: Įvestį be tarpų pradžioje ir pabaigoje turi sudaryti bent 1 simbolis | Įvestį be tarpų pradžioje ir pabaigoje turi sudaryti bent {length} simboliai | Įvestį be tarpų pradžioje ir pabaigoje turi sudaryti bent {length} simbolių
+Tag already exists: 'Žyma „{tagName}“ jau yra'
+Hashtag:
+  Hashtag: Saitažodis
+  This hashtag does not currently have any videos: Šiuo metu vaizdo įrašų su šiuo saitažodžiu nėra
+Moments Ago: prieš kelias akimirkas
+Ok: Gerai
+Yes, Delete: Taip, ištrinti
+Yes, Restart: Taip, paleisti iš naujo
+Yes, Open Link: Taip, atverti nuorodą
+Cancel: Atšaukti
+checkmark: ✓
+Display Label: '{label}: {value}'
+KeyboardShortcutTemplate: '{label} ({shortcut})'
+shortcutJoinOperator: +
+shortcutLabelSeparator: ｜
+Keys:
+  alt: Alt
+  ctrl: Ctrl
+  shift: Lyg2
+  enter: Įvesti
+  plus: Pliusas
+  arrowdown: Rodyklė žemyn
+  arrowleft: Rodyklė kairėn
+  arrowright: Rodyklė dešinėn
+  arrowup: Rodyklė aukštyn
+KeyboardShortcutPrompt:
+  Keyboard Shortcuts: Spartieji klavišai
+  Edit Hint: Pasirinkite spartųjį klavišą, tada paspauskite naują klavišų derinį. Jei norite panaikinti priskyrimą, paspauskite Backspace arba Delete.
+  Change Shortcut: Keisti veiksmo {action} spartųjį klavišą
+  Press Shortcut: Paspauskite spartųjį klavišą…
+  Unassigned: Nepriskirta
+  Reset Shortcut: Atkurti veiksmo {action} spartųjį klavišą
+  Reset to Defaults: Atkurti numatytuosius
+  Shortcut Already Assigned: Spartusis klavišas jau priskirtas
+  Shortcut Conflict: '{shortcut} jau priskirtas veiksmams {actions}. Ar norite jį priskirti iš naujo?'
+  Reserved Shortcut Conflict: '{shortcut} rezervuotas veiksmams {actions}, todėl jo negalima priskirti iš naujo.'
+  Reassign: Priskirti iš naujo
+  Sections:
+    Video:
+      Playback: "Vaizdo įrašas:\_Atkūrimas"
+      General: "Vaizdo įrašas:\_Bendra"
+    App:
+      General: "Programa:\_Bendra"
+      Tabs: "Programa:\_Kortelės"
+      Search and Page: "Programa:\_Paieška ir puslapis"
+      Window and View: "Programa:\_Langas ir rodinys"
+  Show Keyboard Shortcuts: Rodyti sparčiuosius klavišus
+  History Backward: Grįžti vienu puslapiu atgal
+  History Forward: Eiti vienu puslapiu pirmyn
+  New Window: Sukurti naują langą
+  New Tab: Sukurti naują kortelę
+  Close Tab: Uždaryti dabartinę kortelę
+  Reload Tab: Iš naujo įkelti dabartinę kortelę
+  Reopen Closed Tab: Vėl atverti paskutinę uždarytą kortelę
+  Next Tab: Pereiti į kitą kortelę
+  Previous Tab: Pereiti į ankstesnę kortelę
+  Switch to Tab: Pereiti į 1–9 numeriu pažymėtą kortelę
+  Toggle Tab Orientation: Perjungti kortelių išdėstymą
+  Navigate to Settings: Eiti į nustatymų puslapį
+  Navigate to History: Eiti į istorijos puslapį
+  Refresh: Atnaujinti kanalą naujausiu turiniu
+  Find in Page: Rasti tekstą dabartiniame puslapyje
+  Find Next Match: Pereiti prie kito atitikmens
+  Find Previous Match: Pereiti prie ankstesnio atitikmens
+  Captions: Įjungti arba išjungti subtitrus
+  Stats: Rodyti vaizdo įrašo statistiką
+  Picture in Picture: Įjungti arba išjungti „vaizdas vaizde“ režimą
+  Large Rewind: Atsukti 10 sekundžių / atsukti vaizdo įrašą pagal dabartinį atkūrimo greitį
+  Play: Paleisti arba pristabdyti
+  Large Fast Forward: Persukti pirmyn 10 sekundžių / persukti vaizdo įrašą pirmyn pagal dabartinį atkūrimo greitį
+  Mute: Nutildyti arba įjungti garsą
+  Decrease Video Speed: Sumažinti vaizdo įrašo greitį nustatytu atkūrimo greičio intervalu
+  Increase Video Speed: Padidinti vaizdo įrašo greitį nustatytu atkūrimo greičio intervalu
+  Toggle Normal Playback Speed: Perjungti tarp 1x ir ankstesnio atkūrimo greičio
+  Toggle Skip Silence: Įjungti arba išjungti tylos praleidimą
+  Full Window: Perjungti viso lango režimą
+  Theatre Mode: Perjungti kino teatro režimą
+  Take Screenshot: Padaryti ekrano kopiją
+  Video Zoom In: Priartinti vaizdo įrašą
+  Video Zoom Out: Atitolinti vaizdo įrašą
+  Minimize Window: Sumažinti langą
+  Close Window: Uždaryti langą
+  Reset Zoom: Atkurti pradinį priartinimo lygį / sąsajos mastelį
+  Focus Search: Perkelti žymeklį į paieškos juostą
+  Search in New Window: Ieškoti naujame lange
+  Tab Switcher: Kortelių perjungiklis
+  Last Frame: Ankstesnis kadras (pristabdžius)
+  Next Frame: Kitas kadras (pristabdžius)
+  Volume Up: Padidinti garsumą
+  Volume Down: Sumažinti garsumą
+  Small Rewind: Atsukti X sek. atgal pagal atsukimo intervalą ir dabartinį vaizdo įrašo atkūrimo greitį
+  Small Fast Forward: Persukti X sek. pirmyn pagal persukimo pirmyn intervalą ir dabartinį vaizdo įrašo atkūrimo greitį
+  Last Chapter: Paskutinis skyrius
+  Next Chapter: Kitas skyrius
+  Skip by Tenths: Peršokti vaizdo įraše pagal procentinę dalį (paspaudus 3 kartus pereinama į 30 % trukmės vietą)
+  Home: Pereiti į vaizdo įrašo pradžią
+  End: Pereiti į vaizdo įrašo pabaigą
+  Skip to Next Video: Pereiti prie kito vaizdo įrašo grojaraštyje arba prie kito rekomenduojamo vaizdo įrašo
+  Skip to Previous Video: Pereiti prie ankstesnio vaizdo įrašo grojaraštyje
+CommandPalette:
+  Title: Komandų paletė
+  Open: Atverti komandų paletę
+  Search Label: Ieškoti komandų
+  Search Placeholder: Ieškoti komandų ir nustatymų…
+  Results: Komandos
+  No Results: Atitinkančių komandų nėra
+  Result Count: Rasta 1 komanda | Rastos {count} komandos | Rasta {count} komandų
+  Move: Judėti
+  Run: Vykdyti
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Perjungti kortelę: {title}'
+  Switch Profile: 'Perjungti profilį: {name}'
+  Open Playlist: 'Atverti grojaraštį: {name}'
+  Cancel Download: 'Atšaukti atsisiuntimą: {title}'
+  Groups:
+    App: Programa
+    Navigation: Naršymas
+    Tabs: Kortelės
+  Unavailable:
+    Current Page: Šis puslapis jau atvertas
+    No History: Šia kryptimi nėra puslapio
+    Desktop: Pasiekiama tik darbalaukio programoje
+    Build: Šioje versijoje nepasiekiama
+    One Tab: Pirmiausia atverkite kitą kortelę
+    Active Tab: Tai aktyvi kortelė
+    Active Profile: Tai aktyvus profilis
+    Download Finished: Šis atsisiuntimas nebevykdomas
+    Video: Pirmiausia atverkite vaizdo įrašą
+Downloads:
+  Download: Atsisiųsti
+  Download Video: Atsisiųsti vaizdo įrašą
+  Download Playlist: Atsisiųsti grojaraštį
+  Downloading: Atsisiunčiama
+  Queue: Eilė
+  Downloaded: Atsisiųsta
+  Canceled: Atšaukta
+  Open Downloads: Atverti atsisiuntimus
+  No Downloads: Atsisiuntimų dar nėra
+  No Downloads Description: Pradėti atsisiuntimai bus rodomi čia.
+  Clear Failed Canceled Skipped And Missing: Pašalinti nepavykusius, atšauktus, praleistus ir trūkstamus atsisiuntimus
+  Clear From List: Pašalinti iš sąrašo
+  Show in Folder: Rodyti aplanke
+  Play Download: Leisti atsisiųstą failą
+  Retry Download: Bandyti atsisiųsti dar kartą
+  Pause Download: Pristabdyti atsisiuntimą
+  Resume Download: Tęsti atsisiuntimą
+  Move Earlier: Perkelti aukščiau
+  Move Later: Perkelti žemiau
+  Pause All: Pristabdyti visus
+  Resume All: Tęsti visus
+  Retry All: Pakartoti visus nepavykusius atsisiuntimus
+  Total Size: 'Bendras dydis: {size}'
+  Local File: Vietinis failas
+  Available Offline: Pasiekiama neprisijungus
+  Remove File: Pašalinti failą
+  Remove File Confirmation: Pašalinti atsisiųstą failą?
+  Remove File Warning: Šis veiksmas perkels "{title}" į įrenginio šiukšlinę.
+  File Not Found: Atsisiųsto failo rasti nepavyko.
+  Download Missing: Atsisiuntimas nepasiekiamas
+  Files Missing: Failų sistemoje atsisiųsto failo nebėra. | Failų sistemoje atsisiųstų failų nebėra. | Failų sistemoje atsisiųstų failų nebėra.
+  Files Available: 'Pasiekiama {available} iš {total} atsisiųstų failų.'
+  More Files: Dar 1 failas | Dar {count} failai | Dar {count} failų
+  Template Used: 'Šablonas: {name}'
+  Download Type: Atsisiuntimo tipas
+  Template: Šablonas
+  Unsaved: Neišsaugotas
+  Media Type: Medijos tipas
+  Video: Vaizdo įrašas
+  Audio: Garso įrašas
+  Maximum Resolution: Didžiausia raiška
+  Best Available: Geriausia pasiekiama
+  Automatic: Automatiškai
+  Container: Konteineris
+  Video Codec: Vaizdo kodekas
+  Audio Codec: Garso kodekas
+  File Name Template: Failo pavadinimo šablonas
+  File Name Template Help: 'Galimi laukai: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Laiko intervalas ir skyriai
+  Start Time: Pradžios laikas (HH:MM:SS)
+  End Time: Pabaigos laikas (HH:MM:SS)
+  Split by Chapters: Skaidyti į atskirus failus pagal skyrius
+  Remove Segments: Pašalinti segmentus
+  Subtitles and Metadata: Subtitrai ir metaduomenys
+  Include Subtitles: Įtraukti subtitrus
+  Embed Subtitles: Įterpti subtitrus į medijos failą
+  Subtitle Format: Subtitrų formatas
+  Subtitle Languages: Subtitrų kalbos
+  Subtitle Languages Help: 'Kableliais atskirti yt-dlp kalbų parinkikliai, pavyzdžiui: en.*,de.*'
+  Embed Cover Art: Įterpti miniatiūrą kaip viršelį
+  Embed Metadata: Įterpti pavadinimą, autorių, aprašą ir skyrius
+  Additional yt-dlp Arguments: Papildomi yt-dlp argumentai
+  Custom yt-dlp Arguments: Pasirinktiniai yt-dlp argumentai
+  Template Name: Šablono pavadinimas
+  Save Template: Išsaugoti šabloną
+  Delete Template: Ištrinti šabloną
+  Template Saved: Išsaugotas atsisiuntimo šablonas "{name}"
+  Template Name Exists: Atsisiuntimo šablonas pavadinimu "{name}" jau yra.
+  Choose Folder: Keisti
+  Select Folder: Pasirinkti aplanką
+  Folder Required: Pasirinkite atsisiuntimų aplanką, kad įjungtumėte atsisiuntimus.
+  System Downloads Folder: Sistemos atsisiuntimų aplankas
+  Processing: Apdorojama…
+  Queued: Eilėje
+  Queued Position: Eilėje, vieta {position}
+  Paused: Pristabdyta
+  Pausing: Dabartinė užduotis bus baigta, tada eilė bus pristabdyta
+  Download Complete: Atsisiuntimas baigtas
+  Download Cancelled: Atsisiuntimas atšauktas
+  Download Failed: Atsisiųsti nepavyko
+  File Name Shortened: Failo pavadinimas sutrumpintas, nes vaizdo įrašo pavadinimas buvo per ilgas.
+  Insufficient Disk Space: Diske nepakanka vietos. Reikia apie {required}, o yra {available}.
+  Unknown Download Size: Atsisiuntimo dydis nežinomas. Paskirties failų sistemoje yra {available} laisvos vietos.
+  Disk Space Check Unavailable: Prieš pradedant šį atsisiuntimą nepavyko patikrinti laisvos vietos diske.
+  Download Failure Hint: Patikrinkite {issuesLink}, tada pabandykite dalyje Nustatymai → Išplėstiniai → Išorinė programinė įranga pakeisti yt-dlp kanalą į Nightly arba Master.
+  yt-dlp YouTube Issues: naujausias yt-dlp problemas, susijusias su YouTube
+  Automatic Download Started: Pradėtas automatinis atsisiuntimas
+  Automatic Download Started Body: Fone atsisiunčiama "{title}" iš {channel}.
+  Automatic Download Complete: Automatinis atsisiuntimas baigtas
+  Automatic Download Failed: Automatinis atsisiuntimas nepavyko
+  Automatic Download Could Not Start: Nepavyko pradėti automatiškai atsisiųsti "{title}".
+  Automatic Download Skipped: Praleista pagal automatinio atsisiuntimo filtrus
+  Cancel Download: Atšaukti atsisiuntimą
+  yt-dlp Not Found: Programa yt-dlp nerasta. Įdiekite ją arba nurodykite jos kelią dalyje Nustatymai → Išplėstiniai → Išorinė programinė įranga.
+  Download Complete Template: Baigta atsisiųsti "{title}"
+  Download Failed Template: Nepavyko atsisiųsti "{title}"
+  Templates:
+    Video Best: Vaizdo įrašas - geriausia kokybė
+    Video Resolution: Vaizdo įrašas - {resolution}
+    Audio Best: Garso įrašas - geriausia kokybė
+    Audio Format: Garso įrašas - {format}
+    Subtitles Format: Subtitrai - {format}

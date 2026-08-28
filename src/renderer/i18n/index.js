@@ -2,10 +2,20 @@ import { createI18n } from 'vue-i18n'
 import { ref } from 'vue'
 import { createWebURL } from '../helpers/utils'
 import { createPluralRules, expandMultipleOnlyPluralMessages } from './plurals'
+import { composeLocaleMessages } from '../../localeComposition'
 // List of locales approved for use
 import activeLocales from '../../../static/locales/activeLocales.json'
 
 export const localeTranslationPercentages = ref(process.env.LOCALE_TRANSLATION_PERCENTAGES)
+
+const aiLocales = new Set(process.env.AI_LOCALES ?? [])
+const humanMessages = new Map()
+const aiMessages = new Map()
+const humanRequests = new Map()
+const aiRequests = new Map()
+const requestedLocales = new Set()
+let aiTranslationCompletionsEnabled = false
+let compositionRevision = 0
 
 const i18n = createI18n({
   locale: 'en-US',
@@ -27,31 +37,107 @@ const i18n = createI18n({
   pluralRules: createPluralRules(activeLocales)
 })
 
-export async function loadLocale(locale) {
-  // don't need to load it if it's already loaded
-  if (i18n.global.availableLocales.includes(locale) &&
-    Object.keys(i18n.global.messages.value[locale]).length > 0) {
+/**
+ * @param {string} locale
+ * @param {'human' | 'ai'} source
+ */
+async function fetchLocaleMessages(locale, source) {
+  const directory = source === 'ai' ? 'locales/ai' : 'locales'
+  const extension = process.env.IS_ELECTRON && process.env.NODE_ENV !== 'development'
+    ? 'json.br'
+    : 'json'
+  const url = createWebURL(`/static/${directory}/${locale}.${extension}`)
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`Unable to load ${source} locale "${locale}": ${response.status}`)
+  }
+
+  return await response.json()
+}
+
+/** @param {string} locale */
+function loadHumanMessages(locale) {
+  if (humanMessages.has(locale)) return Promise.resolve(humanMessages.get(locale))
+  if (humanRequests.has(locale)) return humanRequests.get(locale)
+
+  const request = fetchLocaleMessages(locale, 'human').then((messages) => {
+    humanMessages.set(locale, messages)
+    return messages
+  })
+  humanRequests.set(locale, request)
+  return request
+}
+
+/** @param {string} locale */
+function loadAIMessages(locale) {
+  if (!aiLocales.has(locale)) return Promise.resolve(null)
+  if (aiMessages.has(locale)) return Promise.resolve(aiMessages.get(locale))
+  if (aiRequests.has(locale)) return aiRequests.get(locale)
+
+  const request = fetchLocaleMessages(locale, 'ai')
+    .then((messages) => {
+      aiMessages.set(locale, messages)
+      return messages
+    })
+    .catch((error) => {
+      console.error(error)
+      return null
+    })
+  aiRequests.set(locale, request)
+  return request
+}
+
+/** @param {string} locale */
+function getBaseLocale(locale) {
+  const baseLocale = locale.split('-')[0]
+  return baseLocale !== locale && activeLocales.includes(baseLocale) ? baseLocale : null
+}
+
+/** @param {string} locale */
+async function recomposeLocale(locale) {
+  while (true) {
+    const revision = compositionRevision
+    const includeAI = aiTranslationCompletionsEnabled
+    const baseLocale = getBaseLocale(locale)
+    const localesToLoad = baseLocale ? [locale, baseLocale] : [locale]
+
+    await Promise.all(localesToLoad.map(loadHumanMessages))
+    if (includeAI) await Promise.all(localesToLoad.map(loadAIMessages))
+
+    if (revision !== compositionRevision) continue
+
+    const messages = composeLocaleMessages({
+      locale,
+      humanMessages,
+      aiMessages,
+      includeAI,
+    })
+    i18n.global.setLocaleMessage(locale, expandMultipleOnlyPluralMessages(locale, messages))
     return
   }
+}
+
+/**
+ * Apply the persisted AI-completion preference to every catalog used by the
+ * current renderer. A revision check prevents a slower, older request from
+ * winning when the setting is toggled quickly.
+ *
+ * @param {boolean} enabled
+ */
+export async function setAITranslationCompletionsEnabled(enabled) {
+  aiTranslationCompletionsEnabled = enabled === true
+  compositionRevision += 1
+  await Promise.all([...requestedLocales].map(recomposeLocale))
+}
+
+export async function loadLocale(locale) {
   if (!activeLocales.includes(locale)) {
     console.error(`Unable to load unknown locale: "${locale}"`)
     return
   }
 
-  let path
-
-  // locales are only compressed in our production Electron builds
-  if (process.env.IS_ELECTRON && process.env.NODE_ENV !== 'development') {
-    path = `/static/locales/${locale}.json.br`
-  } else {
-    path = `/static/locales/${locale}.json`
-  }
-
-  const url = createWebURL(path)
-
-  const response = await fetch(url)
-  const data = await response.json()
-  i18n.global.setLocaleMessage(locale, expandMultipleOnlyPluralMessages(locale, data))
+  requestedLocales.add(locale)
+  await recomposeLocale(locale)
 }
 
 // Set by _scripts/ProcessLocalesPlugin.js
@@ -62,17 +148,18 @@ if (process.env.HOT_RELOAD_LOCALES) {
     const message = JSON.parse(event.data)
 
     if (message.type === 'freetube-locale-update') {
-      localeTranslationPercentages.value = message.data.translationPercentages
+      const source = message.data.source ?? 'human'
+      if (source === 'human' && message.data.translationPercentages) {
+        localeTranslationPercentages.value = message.data.translationPercentages
+      }
 
       for (const [locale, data] of message.data.locales) {
-        // Only update locale data if it was already loaded
-        if (i18n.global.availableLocales.includes(locale) &&
-          Object.keys(i18n.global.messages.value[locale]).length > 0) {
-          const localeData = JSON.parse(data)
-
-          i18n.global.setLocaleMessage(locale, expandMultipleOnlyPluralMessages(locale, localeData))
-        }
+        const target = source === 'ai' ? aiMessages : humanMessages
+        target.set(locale, JSON.parse(data))
       }
+
+      compositionRevision += 1
+      Promise.all([...requestedLocales].map(recomposeLocale)).catch(console.error)
     }
   }
 }

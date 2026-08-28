@@ -1,0 +1,1494 @@
+# Optional AI-generated translations for keys missing from ../pt-PT.yaml.
+Color Picker:
+  Hue: Matiz
+  Opacity: Opacidade
+  Backdrop Blur: Desfocagem do fundo
+  Hex Color: Cor hexadecimal
+  Apply Color: Aplicar
+  Reset Color: Repor
+  Copy Color: Copiar
+  Copy From Another Color: Copiar de outra cor
+  Color Copied: Cor copiada
+  Invalid Color: Introduza uma cor hexadecimal válida
+  Clipboard Unavailable: Área de transferência indisponível
+  Saturation and Brightness: Saturação e luminosidade
+New Tab: Novo separador
+Maximize: Maximizar
+Restore: Restaurar
+Close Tab: Fechar separador
+Close Confirmation:
+  Title: Sair do OpenTubeX?
+  Message: Tem a certeza de que pretende sair do OpenTubeX?
+  Quit: Sair
+  Never Ask Again: Não voltar a perguntar
+Close Window Confirmation:
+  Title: Fechar a janela?
+  Message: Esta janela contém {count} separador. Tem a certeza de que pretende fechá-la? | Esta janela contém {count} separadores. Tem a certeza de que pretende fechá-la?
+  Close Window: Fechar janela
+Confirmations:
+  Never Ask Again: Não voltar a perguntar
+  Settings Hint: Pode reativar esta confirmação em Definições → Geral → Confirmar antes de…
+Close Multiple Tabs Confirmation:
+  Title: Fechar vários separadores?
+  Message: Esta ação fechará {count} separador. | Esta ação fechará {count} separadores.
+  Close Tabs: Fechar {count} separador | Fechar {count} separadores
+Load Multiple Tabs Confirmation:
+  Title: Carregar vários separadores?
+  Message: Esta ação carregará {count} separador. | Esta ação carregará {count} separadores.
+  Load Tabs: Carregar {count} separador | Carregar {count} separadores
+Unload Multiple Tabs Confirmation:
+  Title: Descarregar vários separadores da memória?
+  Message: Esta ação descarregará {count} separador da memória. | Esta ação descarregará {count} separadores da memória.
+  Unload Tabs: Descarregar {count} separador | Descarregar {count} separadores
+Use Vertical Tabs: Usar separadores verticais
+Use Horizontal Tabs: Usar separadores horizontais
+Resize Tab Bar: Redimensionar barra de separadores
+Find in page: Localizar na página
+Previous match: Correspondência anterior
+Next match: Correspondência seguinte
+Close find bar: Fechar barra de pesquisa
+No matches: Sem correspondências
+Version {versionNumber} is now available.: A versão {versionNumber} já está disponível.
+See changes and update: Ver alterações e atualizar
+Dismiss: Ignorar
+Update to {version}: Atualizar para {version}
+Global:
+  Ambient Mode: Modo ambiente
+  Loading More: A carregar mais
+  New: Novo
+Search Listing:
+  Label:
+    Members Only: Apenas para membros
+Stats:
+  Stats: Estatísticas
+  Watch time summary: Resumo do tempo de visualização
+  Today: Hoje
+  This week: Esta semana
+  Total watch time: Tempo total de visualização
+  Daily average: Média diária
+  So far today: Até agora, hoje
+  Since: Desde {day}
+  All recorded time: Todo o tempo registado
+  Per calendar day: Por dia civil
+  Day by day: Dia a dia
+  Highest: 'Máximo: {duration}'
+  Week by week: Semana a semana
+  Last 14 days: Últimos 14 dias
+  Last 8 weeks: Últimas 8 semanas
+  Daily chart aria: Tempo de visualização diário nos últimos 14 dias
+  Weekly chart aria: Tempo de visualização semanal nas últimas 8 semanas
+  No data: O tempo de visualização aparecerá aqui à medida que vê vídeos.
+  Estimate note: O tempo de visualização anterior a esta atualização é estimado a partir do progresso de reprodução guardado.
+  Adjust imported watch time: Ajustar tempo de visualização importado
+  Imported watch time: Tempo de visualização importado
+  Imported watch time explanation: Escolha a velocidade de reprodução que utilizava habitualmente. As durações dos vídeos importados serão divididas por esta velocidade para estimar o tempo que passou efetivamente a vê-los.
+  Playback speed: Velocidade de reprodução
+  Channel speed note: Quando disponíveis, serão utilizadas as velocidades de reprodução guardadas para cada canal.
+  Apply playback speed: Aplicar velocidade de reprodução
+  Imported watch time adjusted: O tempo de visualização importado foi ajustado
+  Reset statistics: Repor estatísticas
+  Reset: Repor
+  Reset confirmation: Tem a certeza de que pretende repor todas as estatísticas de visualização? Esta ação não pode ser anulada.
+  Reset success: As estatísticas de visualização foram repostas
+  Less than a minute: < 1 min
+  Minutes: '{minutes} min'
+  Hours: '{hours} h'
+  Hours and minutes: '{hours} h {minutes} min'
+Subscriptions:
+  Refreshing Subscription Videos: A atualizar os vídeos das subscrições
+  Refreshing Subscription Shorts: A atualizar os Shorts das subscrições
+  Refreshing Subscription Live Streams: A atualizar as transmissões em direto das subscrições
+  Refreshing Subscription Posts: A atualizar as publicações das subscrições
+  New Content: Novo conteúdo
+  New Feed Refresh Warning Title: Atualizar todos os feeds de subscrições?
+  New Feed Refresh Warning: Atualizar todos os tipos de conteúdo sem RSS para 1 subscrição pode demorar bastante tempo. Pretende continuar? | Atualizar todos os tipos de conteúdo sem RSS para {count} subscrições pode demorar bastante tempo. Pretende continuar? | Atualizar todos os tipos de conteúdo sem RSS para {count} subscrições pode demorar bastante tempo. Pretende continuar?
+  New Since Last Refresh: Novidades desde a última atualização
+  Mark as Seen: Marcar como visto
+  Mark All as Seen: Marcar tudo como visto
+  No New Content: Não há conteúdo novo.
+  New Content Tabs: Separadores de conteúdo novo
+  Show Tabbed View: Mostrar vista por separadores
+  Show Combined View: Mostrar vista combinada
+  Newest First: Mais recentes primeiro
+  Oldest First: Mais antigos primeiro
+Trending:
+  Load Error: Não foi possível carregar as tendências.
+  Unsupported Backend: As tendências requerem a API local. Selecione a API local ou ative o sistema de ligação secundário.
+Most Popular Feed Empty: O feed «Mais populares» desta instância Invidious está vazio.
+Feed:
+  Cancel Refresh: Cancelar atualização
+  Next Auto Refresh: 'Próxima atualização automática: {date}'
+User Playlists:
+  Load More Playlists: Carregar mais listas de reprodução
+  Save to: Guardar em…
+  Move Video to the Top: Mover vídeo para o início
+  Move Video to the Bottom: Mover vídeo para o fim
+  Quick Bookmark Icon: Ícone de marcador rápido
+  Custom Emoji: Emoji personalizado
+  Choose Image: Escolher imagem
+  Use Bookmark Icon: Usar ícone de marcador
+  SinglePlaylistView:
+    Retry: Tentar novamente
+    This playlist could not be loaded.: Não foi possível carregar esta lista de reprodução.
+    More videos could not be loaded.: Não foi possível carregar mais vídeos.
+History:
+  Mark All As Watched: Marcar tudo como reproduzido
+  Mark All As Watched Confirmation: Tem a certeza de que pretende marcar como reproduzidos todos os vídeos do histórico?
+  All History Marked as Watched: Todos os vídeos do histórico foram marcados como reproduzidos
+  Delete Old History: Eliminar histórico antigo
+  Select History Age: Selecione a antiguidade mínima das entradas a eliminar.
+  Delete Entries Older Than: Eliminar entradas com mais de
+  Number of Days: Número de dias
+  History Cleanup Warning: Esta ação elimina permanentemente as entradas correspondentes do histórico de reprodução.
+  1 Day: 1 dia
+  1 Week: 1 semana
+  1 Month: 1 mês
+  3 Months: 3 meses
+  1 Year: 1 ano
+  Custom: Personalizado
+  History Older Than Days Removed: Foi removido o histórico de reprodução com mais de 1 dia | Foi removido o histórico de reprodução com mais de {days} dias | Foi removido o histórico de reprodução com mais de {days} dias
+Settings:
+  Quick Settings:
+    Quick Settings: Definições rápidas
+    Appearance: Aspeto
+    Playback: Reprodução
+    Content: Conteúdo
+    Language and Region: Idioma e região
+    All Settings: Todas as definições
+    Profile Selector Hint: Também pode clicar com o botão direito no ícone de perfil para mudar de perfil
+  Categories:
+    General Description: Idioma, arranque, separadores e comportamento da aplicação
+    Appearance: Aspeto
+    Appearance Description: Tema, disposição e miniaturas
+    Content appearance: Listas de vídeos e miniaturas
+    Layout: Disposição
+    Playback Description: Leitor, legendas e preferências dos canais
+    Subscriptions Description: Atualização do feed e opções de apresentação
+    Downloads Description: Pastas, modelos e regras automáticas
+    Distraction Free Description: Ocultar conteúdo e definir limites de visualização
+    Add-ons: Extensões
+    Add-ons Description: SponsorBlock, DeArrow, «não gosto» e tradução de voz
+    Privacy Description: Privacidade de visualização e controlos de acesso
+    Online activity: Atividade online
+    Data And Storage Description: Importação, exportação, utilização do disco e limpeza
+    Sync Description: Manter as definições e os dados sincronizados entre dispositivos
+    Advanced: Avançadas
+    Advanced Description: Fornecedores, aplicações externas e rede
+    Alternative providers: Fornecedores de vídeo e metadados
+  Highlight Changed Settings: Destacar definições diferentes dos valores predefinidos
+  Reset Setting to Default: Repor o valor predefinido desta definição
+  Performance Impact:
+    Show Performance Impact: Mostrar indicadores de impacto no desempenho
+    Moderate: Impacto moderado
+    High: Impacto elevado
+    Description: Esta definição pode aumentar a utilização de {resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: memória
+      Network: rede
+      Disk: disco
+  General Settings:
+    Update Relative Timestamps: Manter as marcas temporais relativas atualizadas
+    Stream Extraction Method:
+      Stream Extraction Method: Método de extração de transmissões
+      yt-dlp: yt-dlp
+      Built-in: Integrado
+    Confirm Before: Confirmar antes de…
+    Confirmation Options:
+      Closing App: Fechar o OpenTubeX
+      Closing Window: Fechar uma janela com vários separadores
+      Closing Tabs: Fechar vários separadores
+      Loading Tabs: Carregar vários separadores
+      Unloading Tabs: Descarregar vários separadores
+    Remember Tab Navigation History: Memorizar o histórico de navegação dos separadores
+    New Tab Position:
+      New Tab Position: Posição do novo separador
+      At the end: No fim
+      After current tab: Depois do separador atual
+      After current tab in opened order: Depois do separador atual, pela ordem de abertura
+    Tab Close Focus:
+      Tab Close Focus: Depois de fechar um separador
+      Previous tab: Selecionar o separador anterior
+      Next tab: Selecionar o separador seguinte
+    Startup Behavior:
+      Startup Behavior: Ao iniciar
+      Load all tabs: Carregar todos os separadores
+      Load previously loaded tabs: Carregar os separadores anteriormente carregados
+      Load last active tab: Carregar o último separador ativo
+      Start with an empty session: Iniciar com uma sessão vazia
+    Use AI Translation Completions: Preencher traduções em falta com texto gerado por IA
+    Reduced Motion:
+      Reduced Motion: Movimento reduzido
+      System: Sistema
+      Force On: Forçar ativação
+      Force Off: Forçar desativação
+    Comment Translation:
+      Title: Tradução de comentários
+      Enable: Ativar tradução de comentários
+      Never Translate: Nunca traduzir comentários em
+      Choose Language: Escolher um idioma
+      Description: Os comentários no idioma da aplicação já estão excluídos. Adicione outros idiomas que consiga ler.
+      Remove Language: Voltar a traduzir comentários em {language}
+    Avoid translation:
+      Avoid translation: Preferir texto de vídeos sem tradução
+      Disabled: Desativado
+      Watch Only: Apenas na interface de vídeo
+      Entire App: Em toda a aplicação
+    Playlist View Type:
+      Playlist View Type: Exibição das listas de reprodução
+    Show Thumbnail Previews: Mostrar pré-visualizações das miniaturas
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Botão de ação adicional nas miniaturas
+      None: Nenhum
+      Mark as Watched: Marcar como reproduzido
+      Copy YouTube Link: Copiar hiperligação do YouTube
+      Open in YouTube: Abrir no YouTube
+  Context Menu Search Settings:
+    Context Menu Search Settings: Pesquisa no menu de contexto
+    Description: Escolha os motores de pesquisa apresentados ao clicar com o botão direito em texto selecionado. As pesquisas são abertas no navegador predefinido.
+    Icon Hint: Ativar um motor estabelece uma ligação ao respetivo site para carregar o favicon.
+    Engine Name: Nome do motor
+    Search URL: URL de pesquisa
+    URL Hint: Use %s no local onde o URL deve conter o texto selecionado codificado.
+    Add Custom Engine: Adicionar um motor personalizado
+    Add Engine: Adicionar motor
+    Remove Engine: Remover {engine}
+    Invalid Engine: Introduza um nome e um URL de pesquisa HTTP ou HTTPS válido que contenha %s.
+    Engine Limit: Pode adicionar até {count} motores de pesquisa personalizados.
+  Theme Settings:
+    Move Downloads to App Header: Mover «Transferências» para o cabeçalho da aplicação
+    Move Settings to App Header: Mover «Definições» para o cabeçalho da aplicação
+    Hide Side Bar on Watch Pages: Ocultar a barra lateral nas páginas de visualização
+    UI Roundness: Arredondamento da interface
+    Scrollbar Width: Largura da barra de deslocamento
+    Animation Speed: Velocidade das animações
+    Thumbnail Size: Tamanho das miniaturas
+    Show Tab Icons: Mostrar ícones nos separadores
+    Load Missing Tab Icons: Carregar ícones de separadores em falta
+    Loading Missing Tab Icons: A carregar ícones de separadores em falta…
+    No Missing Tab Icons: Todos os ícones de separadores suportados já estão carregados
+    Loaded Tab Icons: Foi carregado {count} ícone de separador em falta | Foram carregados {count} ícones de separadores em falta | Foram carregados {count} ícones de separadores em falta
+    Loaded Tab Icons With Failures: Foram carregados {loaded} ícones de separadores; não foi possível carregar {failed}
+    Show Tab Previews: Mostrar pré-visualizações dos separadores
+    Use Fixed Tab Width: Usar largura fixa dos separadores no modo horizontal
+    Tab Width: Largura dos separadores
+    Tab Layout:
+      Tab Layout: Disposição dos separadores
+      Horizontal Top: Horizontal em cima
+      Horizontal Bottom: Horizontal em baixo
+      Vertical Left: Vertical à esquerda
+      Vertical Right: Vertical à direita
+    Show Toast Timeout Indicator: Mostrar indicador de duração das notificações
+    Use Grid Player Menu: Usar grelha no menu do leitor
+    Show Progress as Notification: Mostrar progresso como notificação
+    Operation in Progress: Operação em curso
+    Toast Position:
+      Toast Position: Posição das notificações
+      Bottom Left: Em baixo à esquerda
+      Bottom Center: Em baixo ao centro
+      Bottom Right: Em baixo à direita
+      Top Left: Em cima à esquerda
+      Top Center: Em cima ao centro
+      Top Right: Em cima à direita
+    Icon Pack:
+      Icon Pack: Pacote de ícones
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Tipo de letra da aplicação
+      System Default: Predefinição do sistema
+      Unable to Load: Não foi possível carregar os tipos de letra instalados no sistema
+    Always Show Scrollbars: Mostrar sempre as barras de deslocamento
+    Base Theme:
+      Custom: Personalizado
+    Light Theme: Tema claro
+    Dark Theme: Tema escuro
+    Custom Theme:
+      Create Custom Theme: Criar tema personalizado
+      Edit Custom Theme: Editar tema personalizado
+      Custom Theme Creator: Criador de temas personalizados
+      Theme Name: Nome do tema
+      Based On: Baseado em
+      Import Theme: Importar tema
+      Export Theme: Exportar tema
+      Share Theme: Partilhar tema
+      Share Description Heading: Descrição
+      Share Description Prompt: Descreva o tema e o que for importante saber antes de o utilizar.
+      Share Screenshots Heading: Capturas de ecrã
+      Share Screenshots Prompt: Arraste e largue aqui uma ou mais capturas de ecrã.
+      Share Code Summary: JSON do tema
+      Delete Theme: Eliminar tema
+      Delete Theme Confirmation: Eliminar «{name}»? Esta ação não pode ser anulada.
+      Save and Apply: Guardar e aplicar
+      Discard Changes: Descartar alterações
+      Reset Colors: Repor as cores do tema base
+      Theme File: Ficheiro de tema do OpenTubeX
+      Theme Saved: Tema personalizado guardado e aplicado
+      Theme Imported: Tema importado para o editor
+      Theme Exported: Tema exportado
+      Theme Deleted: Tema personalizado eliminado
+      Unable to Load: Não foi possível carregar o tema personalizado
+      Unable to Save: Não foi possível guardar o tema personalizado
+      Unable to Export: Não foi possível exportar o tema personalizado
+      Unable to Share: Não foi possível partilhar o tema personalizado
+      Unable to Delete: Não foi possível eliminar o tema personalizado
+      Invalid Theme File: Ficheiro de tema personalizado inválido
+      Colors:
+        Main text: Texto principal
+        Secondary text: Texto secundário
+        Subtle text: Texto discreto
+        Borders and dividers: Contornos e divisores
+        Subtle surfaces and indicators: Superfícies e indicadores discretos
+        Title text: Texto dos títulos
+        Selected text background: Fundo do texto selecionado
+        Selected text: Texto selecionado
+        Logo icon: Ícone do logótipo
+        Logo text: Texto do logótipo
+        Logo hover: Logótipo ao passar o cursor
+        Logo pressed: Logótipo ao premir
+        Page background: Fundo da página
+        Card background: Fundo dos cartões
+        Secondary card background: Fundo dos cartões secundários
+        Favorite icon: Ícone de favorito
+        Error color: Cor de erro
+        Scrollbar thumb: Cursor da barra de deslocamento
+        Scrollbar thumb hover: Cursor da barra de deslocamento ao passar o rato
+        Scrollbar thumb pressed: Cursor da barra de deslocamento ao premir
+        Dropdown item hover text: Texto dos itens do menu pendente ao passar o rato
+        Dropdown item hover background: Fundo dos itens do menu pendente ao passar o rato
+        Navigation and panel background: Fundo da navegação e dos painéis
+        Neutral item hover and focus background: Fundo dos itens neutros ao passar o rato ou focar
+        Neutral item hover and focus text and icons: Texto e ícones dos itens neutros ao passar o rato ou focar
+        Neutral item pressed background: Fundo dos itens neutros ao premir
+        Neutral item pressed text and icons: Texto e ícones dos itens neutros ao premir
+        Header button hover and focus background: Fundo dos botões do cabeçalho ao passar o rato ou focar
+        Header button hover and focus text and icons: Texto e ícones dos botões do cabeçalho ao passar o rato ou focar
+        Header button pressed background: Fundo dos botões do cabeçalho ao premir
+        Header button pressed text and icons: Texto e ícones dos botões do cabeçalho ao premir
+        Colored header button hover and focus background: Fundo dos botões coloridos do cabeçalho ao passar o rato ou focar
+        Colored header button hover and focus text and icons: Texto e ícones dos botões coloridos do cabeçalho ao passar o rato ou focar
+        Colored header button pressed background: Fundo dos botões coloridos do cabeçalho ao premir
+        Colored header button pressed text and icons: Texto e ícones dos botões coloridos do cabeçalho ao premir
+        Search and dropdown background: Fundo da pesquisa e dos menus pendentes
+        Settings search background: Fundo da pesquisa nas definições
+        Instance menu: Menu de instâncias
+        Input background: Fundo dos campos de entrada
+        Shadow color: Cor das sombras
+        Primary controls and highlights: Controlos e destaques principais
+        Primary control hover and focus: Controlos principais ao passar o rato ou focar
+        Primary control pressed: Controlos principais ao premir
+        Text and icons on primary controls: Texto e ícones nos controlos principais
+        Secondary controls and highlights: Controlos e destaques secundários
+        Secondary control hover and focus: Controlos secundários ao passar o rato ou focar
+        Secondary control pressed: Controlos secundários ao premir
+        Light secondary color: Cor secundária clara
+        Visited accent: Cor de realce visitada
+        Text and icons on secondary controls: Texto e ícones nos controlos secundários
+        Links: Hiperligações
+        Visited links: Hiperligações visitadas
+        Destructive action: Ação destrutiva
+        Destructive hover and focus: Ação destrutiva ao passar o rato ou focar
+        Destructive pressed: Ação destrutiva ao premir
+        Text and icons on destructive actions: Texto e ícones nas ações destrutivas
+  Player Settings:
+    Automatically Open Chapters: Abrir capítulos automaticamente
+    Caption Appearance:
+      Caption Appearance: Aspeto das legendas
+      Captions: Legendas
+      Preferred Language: Idioma preferencial das legendas
+      Application Language: Idioma da aplicação
+      Enable Translations: Ativar tradução das legendas
+      Text Color: Cor do texto
+      Background Color: Cor de fundo
+      Background Opacity: Opacidade do fundo
+      Font Size: Tamanho do tipo de letra
+      Vertical Position: Posição vertical
+      Edge Color: Cor do contorno
+      Anchor:
+        Anchor: Ancoragem
+        Top Left: Em cima à esquerda
+        Top Center: Em cima ao centro
+        Top Right: Em cima à direita
+        Bottom Left: Em baixo à esquerda
+        Bottom Center: Em baixo ao centro
+        Bottom Right: Em baixo à direita
+      Edge Style:
+        Edge Style: Estilo do contorno
+        None: Nenhum
+        Outline: Contorno
+        Drop Shadow: Sombra projetada
+      Reset: Repor aspeto das legendas
+    Default Viewing Mode:
+      Full Window (Always On): Janela inteira (sempre ativo)
+      Full Screen (Always On): Ecrã inteiro (sempre ativo)
+      Tooltip: A maioria dos modos de visualização predefinidos só é aplicada no início de cada sessão. As alterações efetuadas durante a sessão mantêm-se até esta terminar. Os modos sempre ativos são aplicados sempre que muda para um novo vídeo, independentemente das alterações efetuadas ao visualizar o vídeo anterior.
+    Auto Picture in Picture:
+      Auto Picture in Picture: Entrar automaticamente em imagem na imagem
+      On Tab Change: Ao mudar de separador
+      On Window Minimize: Ao minimizar a janela
+      On Window Hide: Quando a janela perde o foco ou se muda para outra janela
+      Wayland Minimize Unsupported: O Wayland não comunica às aplicações quando uma janela é minimizada, pelo que este acionador não está disponível. Use «Quando a janela perde o foco ou se muda para outra janela», que também abrange a minimização.
+    Scroll Mini Player:
+      Scroll Mini Player: Minileitor ao deslocar
+      When Scrolling Down: Manter um minileitor no ecrã ao deslocar para baixo
+      On All Tabs: Manter um minileitor no ecrã ao mudar de separador
+    Multiply Seek Interval by Playback Rate: Multiplicar o intervalo de avanço pela velocidade de reprodução
+    Show Playback Rate Adjusted Timestamp: Mostrar marca temporal ajustada à velocidade de reprodução
+    Use YouTube-style Shorts: Usar Shorts ao estilo do YouTube
+    Loop Shorts: Repetir Shorts
+    Remember Volume: Memorizar volume
+    Skip Silence: Saltar silêncio
+    Show Skip Silence Toggle: Mostrar botão para saltar silêncio
+    Enable Skip Silence by Default: Ativar «Saltar silêncio» por predefinição
+    Enable Video Zoom: Ativar ampliação do vídeo
+    Voice-over Translation:
+      Title: Tradução de voz
+      Attribution: (fornecida pela Yandex)
+      Enable: Ativar tradução de voz
+      Prepare in Background: Começar a preparar traduções de voz em segundo plano
+      Background Preparation Tooltip: Envia o ID, a duração e o idioma selecionado do vídeo atual para o serviço de tradução assim que é carregado um vídeo suportado.
+      Language: Idioma da tradução de voz
+      Supported Source Languages: 'Idiomas de origem suportados: russo, inglês, chinês, coreano, lituano, letão, árabe, francês, italiano, espanhol, alemão e japonês.'
+      Voice Volume: Volume da voz traduzida
+      Original Volume: Volume do áudio original
+      Russian: Russo
+      English: Inglês
+      Kazakh: Cazaque
+    Hold to Double Playback Speed: Manter premido para duplicar a velocidade de reprodução
+    Use Quick Playback Speed Bar: Usar barra rápida de velocidade de reprodução
+    Customize Quick Playback Speed Bar: Personalizar barra rápida de velocidade de reprodução
+    Quick Playback Speed Bar Manager: Barra rápida de velocidade de reprodução
+    Add Playback Speed: Adicionar velocidade de reprodução
+    Reset Quick Playback Speed Bar: Repor predefinições
+    Playback Speed Name: Nome
+    Edit Playback Speed Name: Editar nome da velocidade de reprodução
+    Use Automatic Playback Speed Name: Usar nome automático da velocidade de reprodução
+    Reorder Playback Speed: Arraste para reordenar a velocidade de reprodução
+    Playback Speed: Velocidade de reprodução
+    Parallel Segment Loading: Carregamento paralelo de segmentos
+  Channel Settings:
+    Channel Settings: Definições dos canais
+    Channel Settings Description: Memorizar individualmente para cada canal as definições escolhidas durante a visualização, para que sejam aplicadas quando voltar a ver um dos seus vídeos.
+    Enable Playback Speed: Ativar velocidade de reprodução
+    Enable Video Quality: Ativar qualidade do vídeo
+    Enable Subtitles State: Ativar estado das legendas
+    Enable Volume: Ativar volume
+    Auto Update: Atualizar automaticamente ao alterar nas opções do leitor
+    Auto Update Subtitles: Atualizar automaticamente ao ativar ou desativar
+    Auto Update Volume: Atualizar automaticamente sempre que alterar o volume
+    Manage Saved Channels: Gerir canais guardados ({channelCount})
+    Saved Channels: Definições de canais guardadas
+    Enable Saved Channel Settings Sync: Sincronizar definições de canais guardadas
+    Disable Saved Channel Settings Sync: Parar de sincronizar definições de canais guardadas
+    Search Channels: Procurar canais
+    No Saved Channels: Ainda não foram guardadas definições específicas de canais
+    No Matching Channels: Nenhum canal corresponde à pesquisa
+    Forget Channel: Esquecer todas as definições deste canal
+    Forget Value: Esquecer esta definição
+    Add Setting: Memorizar outra definição para este canal
+    Video Quality: Qualidade do vídeo
+    Subtitles Enabled: Legendas ativadas
+    Volume: Volume
+  Download Settings:
+    Download Settings: Transferências
+    Enable Downloads: Ativar transferências
+    Managed Tools Download Started Template: 'O software externo necessário não foi encontrado: {tools}. A transferir cópias geridas…'
+    Managed Tools Download Finished Template: Transferência de {tools} concluída
+    Managed Tools Update Started Template: Foi encontrada uma atualização para {tools}. A transferir…
+    Managed Tools Update Finished Template: Atualização de {tools} concluída
+    Managed Tools Update Available Template: Está disponível uma atualização para {tools}.
+    Update Managed Tools: Atualizar
+    Managed Tools Download Error Template: 'Não foi possível transferir as ferramentas geridas: {errors}'
+    Download Folder: Pasta de transferências
+    Global Additional yt-dlp Arguments: Argumentos adicionais globais do yt-dlp
+    Concurrent Downloads: Transferências simultâneas
+    Bandwidth Limit: Limite de largura de banda (KiB/s, 0 para ilimitado)
+    Choose Download Folder: Escolher pasta de transferências
+    Download Templates: Modelos de transferência
+    Manage Download Templates: Gerir modelos de transferência ({templateCount})
+    New Template: Novo modelo
+    Template Source: Modelo a editar ou usar como base
+    Built-in Template: '{name} (integrado)'
+    Custom Template Name: '{name} (personalizado)'
+    Create Template Copy: Criar cópia
+    Template Copy Name: Cópia de {name}
+    Automatic Downloads: Transferências automáticas
+    Manage Automatic Downloads: Gerir transferências automáticas ({channelCount})
+    Automatic Downloads Description: Selecione um modelo de transferência e filtros para cada canal subscrito. Os vídeos correspondentes são transferidos em segundo plano quando os feeds de subscrições são atualizados.
+    Automatic Downloads New Only: Ao ativar um canal, a transferência começa no próximo envio. Os vídeos existentes e o conteúdo anterior do canal não são transferidos.
+    Automatic Downloads No Channels: Subscreva um canal antes de configurar transferências automáticas.
+    No Matching Automatic Download Channels: Nenhum canal corresponde à pesquisa.
+    Automatic Downloads Livestreams: Transmissões em direto
+    Minimum Duration Seconds: Duração mínima (segundos)
+    Maximum Duration Seconds: Duração máxima (segundos)
+    Minimum File Size MB: Tamanho mínimo do ficheiro (MB)
+    Maximum File Size MB: Tamanho máximo do ficheiro (MB)
+    Maximum Age Days: Antiguidade máxima (dias)
+    Title Includes: O título inclui
+    Title Excludes: O título exclui
+    Title Filter Hint: Separe vários termos do título com vírgulas. Um vídeo tem de corresponder a pelo menos um termo incluído e a nenhum termo excluído.
+  External Software Settings:
+    External Software Settings: Software externo
+    yt-dlp Source: Origem do yt-dlp
+    yt-dlp Channel: Canal do yt-dlp
+    Sources:
+      System: Sistema (PATH ou caminho personalizado)
+      Managed: Gerido pelo OpenTubeX
+    Detected Version Template: 'Versão do yt-dlp detetada: {version}'
+    Managed Not Downloaded: O yt-dlp ainda não foi transferido. Clique no botão abaixo para o transferir.
+    System yt-dlp Missing Warning: O yt-dlp não foi encontrado no sistema. Instale-o, defina um caminho personalizado abaixo ou altere a origem para «Gerido pelo OpenTubeX».
+    Download yt-dlp: Transferir yt-dlp
+    Update yt-dlp: Atualizar yt-dlp
+    Checking yt-dlp: A verificar o yt-dlp…
+    Downloading yt-dlp: A transferir o yt-dlp…
+    yt-dlp Downloaded Template: O yt-dlp {version} foi transferido
+    yt-dlp Download Error Template: 'Falha ao transferir o yt-dlp: {error}'
+    FFmpeg Source: Origem do FFmpeg
+    Detected FFmpeg Version Template: 'Versão do FFmpeg detetada: {version}'
+    FFmpeg Managed Not Downloaded: O FFmpeg ainda não foi transferido. Clique no botão abaixo para o transferir.
+    System FFmpeg Missing Warning: O FFmpeg não foi encontrado no sistema. É necessário para combinar vídeo e áudio e para converter áudio. Instale-o, defina um caminho personalizado abaixo ou altere a origem para «Gerido pelo OpenTubeX».
+    Download FFmpeg: Transferir FFmpeg
+    Update FFmpeg: Atualizar FFmpeg
+    Checking FFmpeg: A verificar o FFmpeg…
+    Downloading FFmpeg: A transferir o FFmpeg…
+    FFmpeg Downloaded Template: O FFmpeg {version} foi transferido
+    FFmpeg Download Error Template: 'Falha ao transferir o FFmpeg: {error}'
+    Detected FFprobe Version Template: 'Versão do FFprobe detetada: {version}'
+    FFprobe Managed Not Downloaded: O FFprobe ainda não foi transferido. Clique no botão abaixo para o transferir com o FFmpeg.
+    System FFprobe Missing Warning: O FFprobe não foi encontrado no sistema. É necessário para inspecionar conteúdo multimédia durante o pós-processamento. Instale-o junto do FFmpeg ou altere a origem para «Gerido pelo OpenTubeX».
+    Checking FFprobe: A verificar o FFprobe…
+    Download FFmpeg and FFprobe: Transferir FFmpeg e FFprobe
+    Update FFmpeg and FFprobe: Atualizar FFmpeg e FFprobe
+    Downloading FFmpeg and FFprobe: A transferir o FFmpeg e o FFprobe…
+    FFmpeg and FFprobe Downloaded Template: O FFmpeg e o FFprobe {version} foram transferidos
+    FFmpeg and FFprobe Download Error Template: 'Falha ao transferir o FFmpeg e o FFprobe: {error}'
+    Managed Tool Already Current Template: '{tool} {version} já está atualizado'
+    Managed Tool Updates: Atualizações das ferramentas geridas
+    Update Modes:
+      Automatic: Atualizar automaticamente
+      Ask: Perguntar antes de atualizar
+      Manual: Atualizar apenas manualmente
+    yt-dlp Executable Path: Caminho do executável yt-dlp
+    FFmpeg Executable Path: Caminho do executável FFmpeg
+    Restricted Playback Authentication: Cookies de reprodução do yt-dlp
+    Cookie Source: Origem dos cookies
+    Cookie Sources:
+      None: Nenhuma
+      File: Ficheiro
+      Browser: Navegador
+    Cookie File: Ficheiro de cookies
+    Browser for Cookies: Navegador para cookies
+    Browser Profile: Perfil do navegador (opcional)
+    Browser Profile Placeholder: Nome ou caminho do perfil
+    Select Browser: Selecionar um navegador
+    Always Use Cookies: Usar sempre cookies
+    Restricted Playback Authentication Hint: Por predefinição, o OpenTubeX só transmite estes cookies ao yt-dlp depois de escolher «Tentar com os cookies configurados» num vídeo com restrição de idade ou exclusivo para membros.
+    Restricted Playback Authentication Warning: Usar o yt-dlp com uma conta Google pode causar restrições temporárias ou permanentes à conta.
+  Privacy Settings:
+    Automatic History Retention: Retenção automática do histórico (dias)
+    Automatic History Retention Placeholder: Deixar em branco para manter para sempre
+    Automatic History Retention Tooltip: Deixe em branco para manter o histórico para sempre. Guardar um número remove agora as entradas mais antigas e passa a removê-las automaticamente enquanto a aplicação estiver aberta.
+    History Retention Saved: Retenção do histórico guardada
+    Invalid History Retention Days: Introduza um número inteiro de dias superior a zero
+    Enable Watch Statistics: Ativar estatísticas de visualização
+    Week Starts On: A semana começa em
+    Cache Video Metadata: Histórico de metadados
+    Cache Video Metadata Tooltip: Mantém todas as versões dos metadados suportados dos vídeos visitados, incluindo títulos, miniaturas e descrições. Está desativado por predefinição porque guardar o histórico de metadados aumenta a utilização do disco.
+    Watched Percentage Threshold: Percentagem para marcar como reproduzido
+    Watched Percentage Threshold Tooltip: Os vídeos são marcados como reproduzidos depois de atingirem a percentagem selecionada e quando faltarem, no máximo, 2 minutos. Com 0%, são marcados quando a reprodução começa. Com 100%, são marcados quando a reprodução termina.
+    Clear Video Metadata Cache: Limpar cache de metadados dos vídeos
+    Are you sure you want to clear the video metadata cache?: Tem a certeza de que pretende limpar os títulos, as miniaturas e as descrições dos vídeos em cache?
+    Failed to clear video metadata cache: Falha ao limpar a cache de metadados dos vídeos
+    Video metadata cache has been cleared: A cache de metadados dos vídeos foi limpa
+    Video Metadata Cache Size: 'Cache de metadados dos vídeos: {size}'
+  Storage Settings:
+    Storage: Armazenamento
+    Downloaded Media: Conteúdo multimédia transferido registado
+    Storage Breakdown: Detalhes do armazenamento
+    Shown Total: Total apresentado
+    Calculating: A calcular…
+    Not Available: Tamanho exato indisponível
+    At Least: Pelo menos {size}
+    Failed To Read Storage: Não foi possível ler alguns tamanhos de armazenamento
+    Downloaded Media Description: Ficheiros de vídeo, áudio e legendas ainda registados no histórico de transferências.
+    Selected Download Folders: Pastas de transferências selecionadas pelo utilizador
+    Download History Records: Registos do histórico de transferências
+    Download History Records Description: '{count} registo de transferência concluída. Este registo guarda o estado e a localização dos ficheiros, mas não contém o conteúdo multimédia transferido. | {count} registos de transferências concluídas. Estes registos guardam o estado e a localização dos ficheiros, mas não contêm o conteúdo multimédia transferido. | {count} registos de transferências concluídas. Estes registos guardam o estado e a localização dos ficheiros, mas não contêm o conteúdo multimédia transferido.'
+    Clear Download History Records: Limpar registos do histórico de transferências
+    Clear Download History Confirmation: Limpar todos os registos de transferências concluídas?
+    Download Files Stay On Disk: Os ficheiros transferidos permanecem no disco, mas deixam de aparecer na página «Transferências».
+    Clear Records: Limpar registos
+    Replaceable Caches: Caches substituíveis
+    Application Caches: Caches da aplicação
+    Browser Caches: Caches do navegador
+    Browser Caches Hint: Caches HTTP, de GPU, código, shaders, service workers e dicionários do Chromium.
+    Stored App Data: Dados guardados da aplicação
+    Browser Runtime Data: Dados de execução do navegador
+    Browser Runtime Data Hint: Armazenamento local e de sessão, cookies, estado de privacidade e de rede e ficheiros de falhas do Chromium.
+    Subscription Feed Cache: Cache de subscrições e feeds
+    Subscription Feed Cache Description: Guarda os vídeos, Shorts, transmissões em direto e publicações obtidos das subscrições. O OpenTubeX volta a criá-la na próxima atualização do feed.
+    Clear Subscription Feed Cache: Limpar cache de subscrições e feeds
+    Clear Subscription Feed Cache Confirmation: Limpar a cache de subscrições e feeds?
+    Subscription Feed Cache Effect: Os feeds de subscrições podem aparecer vazios até serem atualizados. As subscrições e os perfis não serão alterados.
+    Session Search Cache: Cache de pesquisas da sessão
+    In Memory: Na memória
+    Session Search Cache Description: '{count} pesquisa está guardada em memória para acelerar a navegação para trás. Esta cache é descartada ao fechar o OpenTubeX. | {count} pesquisas estão guardadas em memória para acelerar a navegação para trás. Esta cache é descartada ao fechar o OpenTubeX. | {count} pesquisas estão guardadas em memória para acelerar a navegação para trás. Esta cache é descartada ao fechar o OpenTubeX.'
+    Clear Session Search Cache: Limpar cache de pesquisas da sessão
+    Clear Session Search Cache Confirmation: Limpar a cache de pesquisas da sessão?
+    Session Search Cache Effect: As páginas de resultados em cache serão descartadas. O histórico de pesquisas guardado não será alterado.
+    HTTP Cache: Cache HTTP
+    HTTP Cache Description: O Electron guarda respostas de rede no disco para que pedidos repetidos possam ser carregados sem voltar a transferir os mesmos dados. O OpenTubeX volta a criar esta cache conforme necessário.
+    Managed By Electron: Gerida pelo Electron
+    Clear HTTP Cache: Limpar cache HTTP
+    Clear HTTP Cache Confirmation: Limpar a cache HTTP do Electron?
+    HTTP Cache Effect: As imagens e outros recursos de rede podem demorar mais a carregar uma vez enquanto a cache é reconstruída.
+    Tab Image Cache: Miniaturas dos separadores e avatares dos canais
+    Tab Image Cache Description: Guarda imagens de pré-visualização e avatares dos canais para separadores abertos e restaurados. O OpenTubeX volta a criá-los à medida que os separadores são utilizados.
+    Clear Tab Image Cache: Limpar cache de imagens dos separadores
+    Clear Tab Image Cache Confirmation: Limpar as miniaturas dos separadores e os avatares dos canais?
+    Tab Image Cache Effect: As imagens dos separadores podem desaparecer brevemente e serão recriadas à medida que os separadores forem utilizados.
+    Playback Caches: Caches de reprodução
+    Playback Caches Description: Guarda URLs de transmissão do yt-dlp entre sessões da aplicação, além de ficheiros do leitor do YouTube. A cache de URLs aplica-se apenas a transmissões obtidas com o yt-dlp.
+    Playback URL Cache Entry Size: Limite da cache de URLs de transmissão do yt-dlp
+    Playback URL Cache Entry Size Tooltip: Define o tamanho máximo de cada entrada de transmissão do yt-dlp em cache. Defina 0 MB para desativar a cache persistente das transmissões do yt-dlp.
+    Clear Playback Caches: Limpar caches de reprodução
+    Clear Playback Caches Confirmation: Limpar as caches do yt-dlp e do leitor?
+    Playback Caches Effect: O próximo pedido de reprodução local pode demorar mais enquanto os dados da transmissão e do leitor são novamente obtidos.
+    Clear Cache: Limpar cache
+    History Data: Históricos guardados
+    Video Metadata Description: Guarda títulos, miniaturas e descrições anteriores dos vídeos suportados. Não é possível recriar versões antigas depois de as eliminar.
+    Video Metadata Effect: As versões de metadados guardadas serão eliminadas permanentemente. Os detalhes atuais dos vídeos podem voltar a ser obtidos.
+    Watch History: Histórico e estatísticas de visualização
+    Watch History Description: O histórico de reprodução regista os vídeos vistos e o progresso. As estatísticas de visualização guardam os totais diários. A retenção só se aplica ao histórico de reprodução.
+    Clear Watch Statistics: Limpar estatísticas de visualização
+    Watch History Effect: Os registos dos vídeos vistos e o progresso guardado serão eliminados. As estatísticas de visualização serão mantidas.
+    Clear Watch Statistics Confirmation: Eliminar todas as estatísticas de visualização?
+    Watch Statistics Effect: Os totais diários de visualização serão eliminados. O histórico de reprodução será mantido.
+    Search History: Histórico de pesquisas
+    Search History Description: Guarda as pesquisas que escolheu memorizar.
+    Delete Search History: Eliminar histórico de pesquisas
+    Delete Search History Confirmation: Eliminar todo o histórico de pesquisas guardado?
+    Search History Effect: As sugestões de pesquisa guardadas das pesquisas anteriores desaparecerão. A cache da sessão atual será mantida.
+    Other User Data: Outros dados do utilizador
+    Other Profile Files: Outros ficheiros do perfil
+    Other Profile Files Hint: Cópias de segurança, ficheiros temporários e entradas do perfil que o OpenTubeX ainda não reconhece.
+    Subscriptions And Profiles: Subscrições e perfis
+    Subscriptions And Profiles Description: Guarda os canais subscritos, os nomes dos perfis e a associação das subscrições aos perfis.
+    Subscriptions And Profiles Effect: Todas as subscrições e perfis adicionais serão eliminados permanentemente. Os dados da cache dos feeds também serão limpos.
+    Playlists Description: Guarda os nomes, as descrições e os vídeos das listas de reprodução.
+    Playlists Effect: Todas as listas de reprodução e os respetivos vídeos guardados serão eliminados permanentemente. Os ficheiros multimédia transferidos serão mantidos.
+    Settings And Sessions: Definições, sessões de separadores e lembretes
+    Settings And Sessions Description: Guarda as preferências da aplicação, os separadores restauráveis e os lembretes de transmissões em direto. Abra a pasta do perfil para inspecionar ou criar cópias de segurança destes ficheiros; esta página não os elimina.
+    Cleanup Complete: Limpeza do armazenamento concluída
+    Cleanup Failed: Falha na limpeza do armazenamento
+  Subscription Settings:
+    Fetch Feed on Startup: Obter o feed ao iniciar
+    Show New Content Feed: Mostrar feed de conteúdo novo
+    Show New Content Indicators: Mostrar indicadores de conteúdo novo
+    Show Scheduled Live Streams / Premieres First: Mostrar primeiro transmissões em direto e estreias agendadas
+    Auto Refresh Interval: Intervalo de atualização automática
+    Videos Auto Refresh Interval: Intervalo de atualização automática dos vídeos
+    Shorts Auto Refresh Interval: Intervalo de atualização automática dos Shorts
+    Live Auto Refresh Interval: Intervalo de atualização automática das transmissões em direto
+    Posts Auto Refresh Interval: Intervalo de atualização automática das publicações
+  Distraction Free Settings:
+    Sections:
+      Visible While Paused: Visível durante a pausa em janela inteira ou ecrã inteiro
+    Hide Channel Avatars: Ocultar avatares dos canais
+    Shorten View Counts: Abreviar contagens de visualizações e de gostos nos comentários
+    Hide Comment Translation Buttons: Ocultar botões de tradução dos comentários
+    Hide Live Chat Replay: Ocultar repetição do chat em direto
+    Hide End-Screen Annotations: Ocultar anotações do ecrã final
+    Hide Paid Promotion Badge: Ocultar emblema de promoção paga
+    Show Player Controls: Mostrar controlos do leitor
+    Show Video Title: Mostrar título do vídeo
+    Show Bottom Right Actions Dock: Mostrar barra de ações no canto inferior direito
+    Paused Interface Hide Delay: Atraso até ocultar a interface durante a pausa
+  Data Settings:
+    Data And Storage: Dados e armazenamento
+    Profile Directory: Pasta do perfil
+    Open Profile Directory: Abrir pasta do perfil
+    Settings File: Ficheiro de definições
+    Import Settings: Importar definições
+    Export Settings: Exportar definições
+    Settings Tooltip: As definições específicas do sistema operativo ou do utilizador e as definições experimentais não podem ser exportadas nem importadas (por exemplo, proxy, leitor externo, pasta de capturas de ecrã...)
+    Invalid JSON row, skipping item: JSON inválido na linha {row}; o item será ignorado
+    All settings have been successfully imported: Todas as definições foram importadas com sucesso
+    All settings have been successfully exported: Todas as definições foram exportadas com sucesso
+    Setting object has insufficient data, skipping item: O objeto de definição não tem dados suficientes; o item será ignorado
+    Unknown setting key: 'Chave de definição desconhecida: {key}'
+    Non-transferable setting key: 'Chave de definição não transferível: {key}'
+    Import subscriptions formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), cópia de segurança do LibreTube ou exportação do FreeTube (.json)'
+    Import history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), cópia de segurança do LibreTube (.json)'
+    Import playlists formats: 'Formatos suportados: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+  Sync Settings:
+    Sync Settings: Sincronização
+    Enable Sync: Ativar sincronização
+    Privacy Passphrase: Frase secreta de privacidade
+    Privacy Passphrase Hint: Use uma frase secreta diferente da palavra-passe da conta. Esta nunca sai do dispositivo e é necessária em todos os dispositivos; se a perder, não será possível recuperar os dados de sincronização encriptados.
+    Privacy Policy: Política de privacidade deste servidor
+    Enhanced Privacy Enabled: A privacidade reforçada está ativada. O servidor guarda apenas dados de sincronização encriptados.
+    Enhanced Privacy Unsupported: 'Aviso: este servidor não suporta privacidade reforçada. Os dados sincronizados estão visíveis para o respetivo operador.'
+    Description: Sincronize subscrições, perfis, listas de reprodução, histórico de reprodução, definições e separadores abertos com um servidor de sincronização do OpenTubeX ou LibreTube. Os servidores LibreTube podem não suportar todas as funcionalidades de sincronização.
+    Server URL: URL do servidor
+    Checking Server: A verificar o servidor de sincronização…
+    Server Unavailable: Não foi possível estabelecer ligação a este servidor de sincronização. Verifique o URL e tente novamente.
+    Username: Nome de utilizador
+    Log In: Iniciar sessão
+    Register: Registar
+    Pair Another Device: Emparelhar outro dispositivo
+    Pair With Existing Device: Emparelhar com um dispositivo existente
+    Device Name: Nome do dispositivo
+    This Device: Este dispositivo
+    Device Name Required: Introduza um nome para este dispositivo.
+    Pairing Device Name Hint: Escolha um nome que reconheça no dispositivo que vai aprovar este pedido.
+    Create Pairing Code: Criar código de emparelhamento
+    Creating Pairing Code: A criar um código de emparelhamento seguro…
+    Pairing QR Alt: Código QR de emparelhamento para {device}
+    Scan Pairing Code: Num dispositivo já ligado, abra «Emparelhar outro dispositivo» e leia este código.
+    Pairing Code: Código de emparelhamento
+    Use Text Pairing Code: Usar código de texto em alternativa
+    Show QR Code: Mostrar código QR
+    Text Pairing Code Hint: Copie este código para o dispositivo existente. Contém o segredo de emparelhamento, por isso apague-o do histórico da área de transferência depois de emparelhar.
+    Pairing QR Warning: Mostre este código apenas ao dispositivo de confiança já ligado que vai aprovar o pedido. Expira ao fim de dois minutos.
+    Pairing Expires: O código de emparelhamento expira às {time}.
+    Verifying Pairing: A verificar a chave de privacidade transferida…
+    Completing Pairing: A concluir o emparelhamento do dispositivo…
+    Compare Pairing Codes: Comparar códigos de emparelhamento
+    Pairing Code Match Hint: Confirme apenas se este código corresponder ao código apresentado no dispositivo existente.
+    Pairing Codes Match: Os códigos correspondem
+    Pairing Approval Code Hint: Mantenha esta janela aberta e compare este código com o do novo dispositivo. O novo dispositivo não deve continuar se os códigos forem diferentes.
+    Pairing Scan Hint: Leia o código de emparelhamento apresentado no dispositivo que está a adicionar.
+    Enter Pairing Code: Introduzir código manualmente
+    Pairing Code Entry Hint: Cole o código de emparelhamento apresentado no dispositivo que está a adicionar.
+    Check Pairing Code: Verificar código
+    Scan QR Code: Ler código QR
+    Waiting For Pairing Code: À espera de um código de emparelhamento…
+    Checking Pairing Request: A verificar o pedido de emparelhamento…
+    Approving Pairing Request: A encriptar e enviar a chave de privacidade…
+    Pairing Approval Warning: Aprove apenas se conseguir ver este pedido no dispositivo que está a adicionar. O emparelhamento concede acesso à conta e transfere a chave de privacidade.
+    Approve Pairing: Aprovar emparelhamento
+    Try Again: Tentar novamente
+    Scan Again: Ler novamente
+    Camera Unavailable: O OpenTubeX não conseguiu aceder a uma câmara. Verifique a permissão da câmara ou introduza o código de emparelhamento manualmente.
+    Pairing Unsupported: Este servidor de sincronização não suporta o emparelhamento seguro de dispositivos.
+    Pairing Failed: Falha ao emparelhar o dispositivo. Tente novamente com um novo código.
+    Pairing Request Changed: O pedido de emparelhamento foi alterado, expirou ou já foi utilizado. Crie um novo código.
+    Pairing Server Mismatch: Este código pertence a outro servidor de sincronização.
+    Pairing Verification Unavailable: Não está disponível nenhuma coleção de sincronização encriptada para verificar a chave transferida. Sincronize o dispositivo existente e tente novamente.
+    Pairing Completed: Emparelhamento do dispositivo concluído
+    Pairing Approved: Emparelhamento do dispositivo aprovado
+    Disconnect: Desligar
+    Delete Account: Eliminar conta de sincronização
+    Delete Account Confirmation: Eliminar a conta de sincronização?
+    Delete Account Warning: Esta ação elimina permanentemente a conta de sincronização e todos os dados guardados neste servidor. Os dados locais do OpenTubeX não serão eliminados.
+    Confirm Delete Account: Eliminar conta
+    Password Required: A palavra-passe é obrigatória
+    Account Deleted: Conta de sincronização eliminada
+    Connected as: Ligado como {username}
+    Automatic Sync: Sincronizar automaticamente após alterações e a cada cinco minutos
+    Profiles: Perfis
+    Open Tabs: Separadores abertos e sessão
+    Disable Setting Sync: Parar de sincronizar esta definição
+    Enable Setting Sync: Sincronizar esta definição
+    Sync Now: Sincronizar agora
+    Downloading encrypted data: A transferir dados de sincronização encriptados…
+    Syncing subscriptions: A sincronizar subscrições…
+    Syncing playlists: A sincronizar listas de reprodução…
+    Syncing history: A sincronizar histórico de reprodução…
+    Syncing profiles: A sincronizar perfis…
+    Syncing open tabs: A sincronizar separadores abertos e sessão…
+    Syncing settings: A sincronizar definições…
+    Uploading encrypted data: A enviar dados de sincronização encriptados…
+    Finishing sync: A concluir a sincronização…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Última sincronização: {date}'
+    History not supported: Esta versão do servidor não suporta a sincronização do histórico de reprodução.
+    Settings not supported: Esta versão do servidor não suporta a sincronização das definições.
+    Sync completed: Sincronização concluída
+    Data Loss Confirmation: Confirmar sincronização destrutiva?
+    Data Loss Warning: O estado do servidor eliminaria {deleted} dos {previous} itens de {collection} sincronizados anteriormente. Isto pode indicar uma falha na migração ou reposição do servidor. Continue apenas se esta eliminação for intencional e tiver uma cópia de segurança.
+    Confirm Data Loss: Eliminar e continuar
+  Proxy Settings:
+    IP Block Recovery Script Path: Caminho do script de recuperação de bloqueio de IP
+    Select IP Block Recovery Script File: Selecionar ficheiro do script de recuperação de bloqueio de IP
+    Running IP block recovery script: A executar o script de recuperação de bloqueio de IP
+    IP block recovery script failed: 'Falha no script de recuperação de bloqueio de IP (código de saída: {exitCode})'
+    IP block recovery script finished: Script de recuperação de bloqueio de IP concluído
+    Reloading video after IP block recovery: A recarregar o vídeo após a recuperação do bloqueio de IP
+    Failed to select IP block recovery script: Falha ao selecionar o script de recuperação de bloqueio de IP
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: Ativar envio para o SponsorBlock
+    SponsorBlock Private User ID (optional): ID de utilizador privado do SponsorBlock (opcional)
+    SponsorBlock Private User ID Tooltip: Cole o ID de utilizador privado do SponsorBlock obtido na extensão do navegador. Deixe este campo vazio para usar um ID gerado pela aplicação.
+    Generated SponsorBlock User ID: ID de utilizador do SponsorBlock gerado
+    Generated SponsorBlock User ID Tooltip: Este ID de utilizador do SponsorBlock gerado pela aplicação pode ser usado na extensão do navegador ou ao utilizar a aplicação noutro computador.
+    Export Generated User ID: Exportar ID de utilizador gerado
+    Generated SponsorBlock User ID Copy Button: Copiar ID de utilizador do SponsorBlock gerado
+    Generated SponsorBlock User ID Copied: ID de utilizador do SponsorBlock gerado copiado para a área de transferência
+    Skip notification timeout: Duração da notificação de salto
+    Custom Color: Cor personalizada
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Ativar Return YouTube Dislike
+    Return YouTube Dislike Url: URL da API Return YouTube Dislike (a predefinição é https://ryd-proxy.kavin.rocks)
+  Password Dialog:
+    Incorrect Password: Palavra-passe incorreta
+    Unlock: Desbloquear
+    Unlocking: A desbloquear…
+  Search Settings: Procurar nas definições
+  No Settings Found: Nenhuma definição encontrada
+Tutorial:
+  Skip: Ignorar
+  Next: Seguinte
+  Finish: Concluir
+  Got It: Percebi
+  Welcome:
+    Title: Bem-vindo ao OpenTubeX
+    Description: Estes são os controlos essenciais para se familiarizar com a aplicação.
+  Navigation:
+    Title: A sua biblioteca está sempre à mão
+    Description: Use a navegação para aceder às subscrições, listas de reprodução, histórico e muito mais.
+  Search:
+    Title: Pesquise ou cole uma hiperligação
+    Description: Encontre vídeos e canais ou cole o URL de um vídeo compatível diretamente no campo de pesquisa.
+  Tabs:
+    Title: Mantenha páginas abertas em separadores
+    Description: Abra várias páginas ao mesmo tempo sem perder o ponto onde estava. Escolha onde os separadores se adaptam melhor à sua disposição.
+  Quick Settings:
+    Title: Personalize a aplicação
+    Description: Escolha um tema e a qualidade de vídeo predefinida. Altere estas e outras preferências a qualquer momento no menu do perfil ou clique nele com o botão direito do rato para mudar de perfil.
+  Import Data:
+    Title: Traga os seus dados consigo
+    Description: Se desejar, importe subscrições, histórico, listas de reprodução, histórico de pesquisa ou definições de outra aplicação compatível ou de uma cópia de segurança.
+    Action: Importar dados
+    Not Now: Agora não
+  Settings Moved:
+    Title: As definições mudaram de lugar
+    Description: Selecione o seu perfil no canto superior direito para aceder aos controlos rápidos. Clique nele com o botão direito do rato para ir diretamente para a seleção de perfil. A roda dentada nesse menu abre todas as definições. As secções Acerca e Descargas também estão agora neste menu.
+About:
+  Commit: Commit
+  Fluxer: Junte-se à nossa comunidade no Fluxer
+  Matrix: Matrix
+Profile:
+  Profile Icon: Ícone do perfil
+  Choose an Emoji: Escolher um emoji
+  Custom Emoji: Emoji personalizado
+  Emoji: Emoji
+  Choose Image: Escolher imagem
+  Crop Image: Recortar imagem
+  Zoom: Ampliação
+  Apply Crop: Aplicar recorte
+  Transparent: Transparente
+  Use Initial: Usar inicial
+  The selected image could not be loaded: Não foi possível carregar a imagem selecionada
+  Theme Color: Cor do tema
+Channel:
+  Channel Name Unavailable: Nome do canal indisponível
+  Search Result Types: Tipos de resultados da pesquisa
+  All Results: Todos
+  View All: Ver tudo
+Video:
+  Includes paid promotion: Inclui promoção paga
+  Age Restricted Badge: Restrição de idade
+  Queue: Fila
+  Play Next: Reproduzir a seguir
+  Add to Queue: Adicionar à fila
+  Added to Play Next: O vídeo será reproduzido a seguir
+  Added to Queue: Vídeo adicionado à fila
+  Clear Queue: Limpar fila
+  Queue Video Count: '{count} vídeo | {count} vídeos | {count} vídeos'
+  Remove from Queue: Remover {title} da fila
+  Drag to Reorder Queue: Arraste {title} para reordenar a fila
+  Reorder Queue Item: Reordenar {title}
+  Reorder Queue Item Instructions: Use as teclas de seta para cima e para baixo para mover este vídeo na fila.
+  Queue Item Moved: '{title} foi movido para a posição {position} de {total}.'
+  Queue Item Cannot Move Up: Não é possível mover {title} para cima. Já está na posição 1 de {total}.
+  Queue Item Cannot Move Down: Não é possível mover {title} para baixo. Já está na posição {total} de {total}.
+  Metadata: Informações do vídeo
+  Close Metadata: Fechar informações do vídeo
+  Metadata Cache:
+    Title History: Histórico de títulos
+    Thumbnail History: Histórico de miniaturas
+    Description History: Histórico de descrições
+    Previous Version: Versão anterior {number}
+    Empty: (vazio)
+  Fetching Streams: A obter transmissões com o yt-dlp…
+  Transcript:
+    Title: Transcrição
+    Search: Pesquisar na transcrição
+    Language: Idioma da transcrição
+    Save: Guardar
+    Show: Mostrar transcrição
+    Hide: Ocultar transcrição
+    Close: Fechar transcrição
+    Copied: Transcrição copiada para a área de transferência
+    Saved: Transcrição guardada
+    Save Error: Não foi possível guardar a transcrição
+    Text File: Ficheiro de texto
+    Unavailable: Não existe uma transcrição disponível para este vídeo.
+    Load Error: Não foi possível carregar a transcrição.
+    Empty: Esta transcrição não contém texto.
+    No Results: Nenhum segmento da transcrição corresponde à sua pesquisa.
+  Retry With Built-in Extraction: Tentar novamente com a extração integrada
+  Retry With yt-dlp Extraction: Tentar novamente com a extração do yt-dlp
+  Reloading video after streaming URL error: A recarregar o vídeo após um erro no URL de transmissão
+  Configure Restricted Playback Cookies Hint: Configure os cookies em Definições → Software externo → Cookies de reprodução do yt-dlp.
+  Try With Configured Cookies: Tentar com os cookies configurados
+  Restricted Playback Authentication Failed Template: 'O yt-dlp não conseguiu aceder a este vídeo com os cookies configurados: {error}'
+  Private: Os vídeos privados não podem ser vistos no OpenTubeX porque exigem um início de sessão Google e que o utilizador seja proprietário do vídeo.
+  Unmark As Watched: Desmarcar como reproduzido
+  Video has been unmarked as watched: O vídeo foi desmarcado como reproduzido
+  Save Channel Playback Speed: Guardar velocidade de reprodução do canal
+  Channel Playback Speed Saved: Velocidade de reprodução do canal guardada
+  Save Channel Video Quality: Guardar qualidade de vídeo do canal
+  Channel Video Quality Saved: Qualidade de vídeo do canal guardada
+  Save Channel Subtitles State: Guardar estado das legendas do canal
+  Channel Subtitles State Saved: Estado das legendas do canal guardado
+  Save Channel Volume: Guardar volume do canal
+  Channel Volume Saved: Volume do canal guardado
+  Save Channel Setting: Guardar definição do canal…
+  Channel Setting Already Set: '{setting} já está definido como {value}'
+  Video has been saved to {playlistName}: O vídeo foi guardado em {playlistName}
+  Video has been removed from {playlistName}: O vídeo foi removido de {playlistName}
+  There was a problem saving the video to {playlistName}: Ocorreu um problema ao guardar o vídeo em {playlistName}
+  There was a problem removing the video from {playlistName}: Ocorreu um problema ao remover o vídeo de {playlistName}
+  Failed to load collaborators: Não foi possível carregar os colaboradores
+  Notify me: Notificar-me
+  Notification on: Notificação ativada
+  Notification enabled: Será notificado quando este vídeo começar
+  Notification cancelled: Notificação de início cancelada
+  Notification unavailable: As notificações do sistema não estão disponíveis
+  Scheduled video starting: O vídeo agendado vai começar
+  Live notification body: '{videoTitle} está a começar agora'
+  Premiere: Estreia
+  AI: AI
+  AI-generated content: Conteúdo gerado por IA
+  Collaborators: Colaboradores
+  Live Chat Replay: Repetição da conversa em direto
+  Show Live Chat: Mostrar conversa em direto
+  Show Live Chat Replay: Mostrar repetição da conversa em direto
+  Close Live Chat: Fechar conversa em direto
+  Close Live Chat Replay: Fechar repetição da conversa em direto
+  Live Chat Settings: Definições da conversa em direto
+  Show Live Chat Timestamps: Mostrar marcas temporais
+  Chat Filter: Filtro da conversa
+  Top Chat: Principais mensagens
+  All Messages: Todas as mensagens
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: A repetição da conversa em direto está ativada. As mensagens aparecem aqui à medida que o vídeo é reproduzido.
+  Premiere started: Estreia em curso. Começou {timeAgo}
+  Player:
+    Voice-over Translation:
+      Start: Traduzir
+      Cancel: Cancelar
+      Progress: A preparar a tradução por voz…
+      Retry: Tentar novamente
+      Error: A tradução por voz falhou. Tente novamente mais tarde.
+      Duration Error: A tradução por voz só está disponível para vídeos com até quatro horas de duração.
+    Caption Appearance:
+      Options: Opções
+      Sample: As legendas têm este aspeto
+    Auto-translate: Tradução automática
+    Sleep Timer:
+      Sleep Timer: Temporizador de suspensão
+      'Off': Desativado
+      Minutes: '{minutes} minutos'
+      End of video: Fim do vídeo
+      Remaining: 'Tempo restante: {time}'
+      Cancel timer: Cancelar temporizador
+      Timer ended: O temporizador de suspensão terminou
+    Zoom:
+      Zoom: Ampliação
+      'Off': Desativada
+    Auto-generated Caption Template: '{language} (geradas automaticamente)'
+    Up next in {seconds}: A seguir dentro de {seconds}
+    Resize dock: Redimensionar painel
+    Play now: Reproduzir agora
+    MusicPlaybackRateOverride: Vídeo de música detetado, a reproduzir à velocidade 1x
+    Normal: Normal
+    Set Default: Predefinir
+    Hide Annotations: Ocultar anotações
+    Show Annotations: Mostrar anotações
+    Hide: Ocultar
+    Show: Mostrar
+    Scroll Mini Player:
+      Back to Top: Voltar ao início
+      Return to Video Tab: Voltar ao separador do vídeo
+      Play: Reproduzir
+      Pause: Pausar
+      Drag Handle: Mover mini-reprodutor
+    SponsorBlock:
+      CancelCurrentSegment: Cancelar criação do segmento
+      ClearSegments: Limpar segmentos
+      ClearSegmentsPrompt: Tem a certeza de que pretende limpar todos os rascunhos de segmentos do SponsorBlock para este vídeo?
+      CompleteSegmentsBeforeSubmitting: Conclua todos os rascunhos de segmentos antes de os enviar.
+      CategoryLabel: Categoria
+      ActionTypeLabel: Tipo de segmento
+      DuplicateSegments: Não são permitidos rascunhos de segmentos duplicados.
+      EndAction: (Fim)
+      EndActionLabel: Fim
+      EndTimeAfterStart: A hora de fim do segmento tem de ser posterior à hora de início.
+      EndTimeBeforeVideoEnd: A hora de fim do segmento tem de estar dentro da duração do vídeo.
+      EndTimeLabel: Hora de fim do segmento
+      DisableAutoSkipTemporarily: Desativar temporariamente o avanço automático do SponsorBlock
+      EnableAutoSkipTemporarily: Reativar o avanço automático do SponsorBlock
+      Guidelines: Diretrizes
+      InspectSegment: Inspecionar
+      InvalidStartTime: Introduza uma hora de início válida para o segmento.
+      NoSegmentsToSubmit: Crie pelo menos um segmento completo antes de enviar.
+      NowAction: (Agora)
+      CloseInfoPanel: Fechar informações do SponsorBlock
+      OpenInfoPanel: Abrir informações do SponsorBlock
+      OpenSubmissionMenu: Abrir menu de envio
+      PreviewRequired: Pré-visualize todos os segmentos antes de os enviar.
+      PreviewSegment: Pré-visualizar
+      SaveSegment: Guardar
+      SetSegmentEndNow: Terminar segmento agora
+      StartAction: (Início)
+      StartSegmentNow: Iniciar segmento agora
+      SubmissionBadRequest: O SponsorBlock rejeitou o pedido de envio.
+      SubmissionDuplicate: Isto já foi enviado anteriormente.
+      SubmissionFailed: Não foi possível enviar os segmentos do SponsorBlock.
+      SubmissionForbidden: O SponsorBlock rejeitou o envio.
+      SubmissionRateLimited: O SponsorBlock limitou a frequência deste envio.
+      SubmissionSuccess: Segmentos enviados para o SponsorBlock.
+      SubmitSegment: Enviar segmento
+      SubmitSegments: Enviar
+      StartTimeLabel: Hora de início do segmento
+      TimeDivider: a
+      SkipPrompt: Avançar {segmentCategory}?
+      SkipPromptAction: Avançar
+      SkipToHighlight: Avançar para o destaque?
+      SkippedToHighlight: Avançou para o destaque
+      SkipToastUnskip: Anular avanço
+      SkipToastReskip: Avançar novamente
+      MutedSegment: '{segmentCategory} silenciado'
+      MuteToastUnmute: Reativar som
+      InfoPanelLoading: Os segmentos ainda estão a carregar...
+      InfoPanelHasSegments: Este vídeo tem segmentos na base de dados!
+      InfoPanelNoSegments: Não foram encontrados segmentos
+      RefreshSegments: Atualizar segmentos
+      RefreshInfo: Atualizar informações do SponsorBlock
+      ContributionStatsTitle: As suas contribuições
+      ContributionStatsLoading: A carregar estatísticas de contribuições...
+      ContributionStatsError: As estatísticas de contribuições não estão disponíveis. Tente atualizar.
+      ContributionStatsNoUserId: Envie um segmento ou importe o seu ID de utilizador do SponsorBlock para ver as estatísticas de contribuições.
+      Submissions: Envios
+      Segments: Segmentos
+      TimeSaved: Tempo poupado
+      AutoSkipEnabled: Avançar segmentos automaticamente
+      AutoSkipOn: Ativado
+      AutoSkipOff: Desativado
+      WhitelistChannel: Adicionar canal à lista de permissões
+      ChannelWhitelisted: Na lista de permissões
+      RemoveChannelFromWhitelist: Remover canal da lista de permissões
+      MuteSegment: Silenciar segmento
+      SkipSegment: Avançar segmento
+      CloseSegmentActions: Fechar ações do segmento
+      FullVideo: Vídeo completo
+      FullVideoLabel: '{segmentCategory} · Vídeo completo'
+      MuteActionType: Silenciar
+      MutePrompt: Silenciar {segmentCategory}?
+      SkipActionType: Avançar
+      LockedSegment: Segmento bloqueado
+      UpvoteSegment: Voto positivo
+      DownvoteSegment: Voto negativo
+      VoteFailed: Não foi possível enviar o voto ao SponsorBlock.
+Playlist:
+  Close Playlist: Fechar lista de reprodução
+Change Format:
+  Local Video File: Ficheiro de vídeo local
+  Local Audio File: Ficheiro de áudio local
+  Online Video: Vídeo online
+  Stream Source: Fonte da transmissão
+  Stream Extraction Method: Método de extração da transmissão
+  Playback Engine: Motor de reprodução
+  Streaming Protocol: Protocolo de transmissão
+  Not Available For This Video: Não disponível para este vídeo
+  Protocols:
+    Progressive: Progressivo
+  Descriptions:
+    Local File: Reproduzido diretamente a partir do ficheiro descarregado neste dispositivo
+    Online Video: Carrega formatos de transmissão a partir da fonte online configurada
+    Dash: Qualidade adaptativa, várias faixas de áudio e as resoluções mais altas
+    Legacy: Um único ficheiro com vídeo e áudio combinados, limitado a resoluções mais baixas
+    Audio: Apenas áudio, útil para poupar largura de banda ou ouvir em segundo plano
+  yt-dlp Fallback Template: 'O yt-dlp não conseguiu fornecer as transmissões. Será utilizado o motor integrado: {error}'
+  yt-dlp Default Clients Fallback: Os clientes preferidos do yt-dlp não conseguiram fornecer transmissões reproduzíveis. Serão utilizados os clientes predefinidos do yt-dlp
+  Built-in Fallback Template: 'O motor integrado não conseguiu reproduzir a transmissão. Será utilizado o yt-dlp: {error}'
+Share:
+  Timestamp Link Copied: Hiperligação com marca temporal copiada para a área de transferência
+Context Menu:
+  Context Menu: Menu de contexto
+  Select All: Selecionar tudo
+  Save Image As…: Guardar imagem como…
+  Copy Image: Copiar imagem
+  Copy Image Address: Copiar endereço da imagem
+  Cancel Refresh: Cancelar atualização
+  Reload Videos: Recarregar vídeos
+  Reload Shorts: Recarregar Shorts
+  Reload Live: Recarregar emissões em direto
+  Reload Posts: Recarregar publicações
+  Reload All Feeds: Recarregar todos os feeds
+  Close Multiple Tabs: Fechar {count} separador | Fechar {count} separadores
+  Duplicate Tab: Duplicar separador
+  Duplicate Multiple Tabs: Duplicar {count} separador | Duplicar {count} separadores
+  Move Tab: Mover separador
+  Move Tabs: Mover separadores
+  Move Tab to Group: Mover separador para o grupo
+  Collapse Group: Recolher grupo
+  Move Tabs to Group: Mover separadores para o grupo
+  Manage Tab Groups…: Gerir grupos de separadores…
+  To Beginning: Para o início
+  To End: Para o fim
+  Close Tabs: Fechar separadores
+  To the Top: Para cima
+  To the Left: Para a esquerda
+  To the Bottom: Para baixo
+  To the Right: Para a direita
+  Other Tabs: Outros separadores
+  Copy YouTube Link: Copiar hiperligação do YouTube
+  Copy YouTube Links: Copiar hiperligações do YouTube
+  Pin Tab: Afixar separador
+  Pin Tabs: Afixar separadores
+  Unpin Tab: Desafixar separador
+  Unpin Tabs: Desafixar separadores
+  Tab Color: Cor do separador
+  Default: Predefinida
+  Purple: Roxo
+  Reopen Closed Tab: Reabrir separador fechado
+  Reload Tab: Recarregar separador
+  Reload Tabs: Recarregar separadores
+  Load Tab: Carregar separador
+  Load Tabs: Carregar separadores
+  Unload Tab: Descarregar separador
+  Unload Tabs: Descarregar separadores
+  Move Tab to Window: Mover separador para a janela
+  Move Tabs to Window: Mover separadores para a janela
+  Open in a New Tab: Abrir num novo separador
+  Open in a New Window: Abrir numa nova janela
+  Copy Link: Copiar hiperligação
+  Copy Invidious Link: Copiar hiperligação do Invidious
+  Search Selection in New Tab: Pesquisar "{selection}" num novo separador
+  Search Selection in New Window: Pesquisar "{selection}" numa nova janela
+  Search With: Pesquisar com {engine}
+  Search With Multiple: Pesquisar com...
+  Selection Too Long: A seleção é demasiado longa para pesquisar (> {count} caracteres)
+Tab Organizer:
+  Title: Organizador de separadores
+  Open Tab Count: '{count} separador aberto | {count} separadores abertos | {count} separadores abertos'
+  Search Label: Pesquisar separadores
+  Selected Count: '{count} separador selecionado | {count} separadores selecionados | {count} separadores selecionados'
+  Tab Count: '{count} separador | {count} separadores | {count} separadores'
+  Select All: Selecionar tudo
+  Select None: Cancelar seleção
+  Move To Group: Mover separadores selecionados para o grupo
+  Choose Group: Escolher um grupo
+  Ungrouped: Sem grupo
+  Pin: Afixar
+  Unpin: Desafixar
+  Load: Carregar
+  Unload: Descarregar
+  Unload All: Descarregar todos
+  Close All: Fechar todos
+  Ungroup: Desagrupar
+  Group Name: Nome do grupo
+  Color: Cor
+  No Color: Sem cor
+  Create Group: Criar grupo
+  Expand Group: Expandir grupo
+  Collapse Group: Recolher grupo
+  Expand Group Label: Expandir {name}, {count} separador | Expandir {name}, {count} separadores | Expandir {name}, {count} separadores
+  Rename Group: Mudar o nome de {name}
+  Change Group Color: Alterar a cor de {name}
+  Move To Window: Mover para a janela
+  Choose Window: Escolher uma janela
+  Select Tab: Selecionar {title}
+  Active: Ativo
+  Pinned: Afixado
+  Unloaded: Descarregado
+  Playing: Em reprodução
+  Close Tab: Fechar {title}
+  No Open Results: Nenhum separador aberto corresponde a esta pesquisa.
+  Recently Closed: Fechados recentemente
+  Clear: Limpar
+  No Closed Results: Nenhum separador fechado recentemente corresponde a esta pesquisa.
+  Drag Tab: Arraste para mover para um grupo
+Chapters:
+  Open Chapters: Abrir capítulos
+  Close Chapters: Fechar capítulos
+  Copy Timestamp Link: Copiar hiperligação em {timestamp}
+Comments:
+  Comment Count: 1 comentário | {count} comentários | {count} comentários
+  Show Comments: Mostrar comentários
+  Reload Comments: Recarregar comentários
+  Reply Count: 1 resposta | {replyCount} respostas | {replyCount} respostas
+  Comments are turned off: Os comentários estão desativados
+  YouTube did not provide advertised replies: O YouTube indicou que este comentário tem respostas, mas não as forneceu. Podem ter sido eliminadas ou ocultadas, pelo que o botão de resposta foi removido.
+  Pinned by you: Afixado por si
+  A reply is pinned: Está afixada uma resposta
+  Filter loaded comments: Filtrar comentários carregados
+  Comment filters: Filtros de comentários
+  From creator: Do autor
+  Contains timestamps: Contém marcas temporais
+  Pin comment by author: Afixar comentário de {author}
+  Unpin comment by author: Desafixar comentário de {author}
+  Edited: (editado)
+  Highlighted comment: Comentário destacado
+  Highlighted reply: Resposta destacada
+  Search loaded comments: Pesquisar nos comentários carregados
+  Loaded comment search result count: 1 de {total} comentários carregados | {count} de {total} comentários carregados | {count} de {total} comentários carregados
+  No loaded comments match your filters: Nenhum comentário carregado corresponde aos seus filtros
+  YouTube comment link copied to clipboard: Hiperligação do comentário do YouTube copiada para a área de transferência
+  Translate to {language}: Traduzir para {language}
+  Show original: Mostrar original
+  Translating comment, please wait: A traduzir comentário. Aguarde
+  Comment translation failed: Falha ao traduzir o comentário
+Description:
+  Copy Description: Copiar descrição
+  Description Copied: Descrição copiada para a área de transferência
+  Video Category: 'Categoria do vídeo:'
+  Video Tags: Etiquetas do vídeo
+  Games: Jogos
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: Preenche as lacunas das traduções humanas com texto gerado por IA. As traduções humanas têm sempre prioridade.
+    Update Relative Timestamps: Atualiza as marcas temporais relativas em toda a aplicação enquanto uma página permanece aberta. Quando esta opção está desativada, só são atualizadas após recarregar ou voltar a visitar a página.
+    Stream Extraction Method: |
+      Escolha como o OpenTubeX obtém as transmissões de vídeo. O yt-dlp tem de estar disponível quando for selecionado.
+      Os vídeos podem demorar mais a começar quando utiliza o yt-dlp.
+      O método integrado não permite avançar ou recuar em emissões em direto e estreias.
+    Avoid translation: |
+      Desativa a tradução automática do título, da descrição e dos capítulos de um vídeo feita pelo YouTube.
+      Um número excessivo de pedidos, como a obtenção de títulos de vídeos em várias listas, pode afetar
+      temporariamente a fiabilidade da aplicação.
+    Show Thumbnail Previews: Mostra pré-visualizações animadas ao passar o cursor sobre as miniaturas dos vídeos.
+    Startup Behavior: |
+      Escolha o que o OpenTubeX faz ao iniciar.
+      Carregar todos os separadores restaura imediatamente todos os separadores guardados, mas os separadores em segundo plano não reproduzem vídeos automaticamente.
+      Carregar separadores anteriormente carregados recarrega os separadores que estavam carregados quando o OpenTubeX foi fechado e mantém os restantes descarregados.
+      Carregar o último separador ativo restaura a sessão anterior com os restantes separadores abertos, mas descarregados. Estes são carregados quando clica neles.
+      Iniciar com uma sessão vazia ignora os separadores guardados e abre uma nova janela.
+    Remember Tab Navigation History: O histórico de navegação para trás e para a frente de cada separador é guardado e restaurado quando o OpenTubeX reinicia.
+  Proxy Settings:
+    IP Block Recovery Script Path: Caminho do ficheiro de script a executar quando é detetado um bloqueio de IP. O OpenTubeX aguarda que termine e depois recarrega o vídeo. Se o método alternativo estiver ativado, o script só é executado quando esse método também falha.
+  Player Settings:
+    Enable Caption Translations: Quando esta opção está ativada e o vídeo não fornece uma faixa original no idioma de legendas preferido, o botão de legendas e o atalho C dão preferência a uma faixa traduzida automaticamente para esse idioma.
+    Use Quick Playback Speed Bar: Mostra uma barra de acesso rápido à velocidade de reprodução nos controlos do lado direito do reprodutor. Se a gravação manual da velocidade por canal estiver ativada, a barra também inclui o botão para guardar a velocidade do canal atual.
+    Multiply Seek Interval by Playback Rate: Quando esta opção está ativada, os intervalos para avançar ou recuar, através das teclas de seta e J/L, são multiplicados pela velocidade de reprodução atual. Quando está desativada, os intervalos permanecem constantes independentemente da velocidade de reprodução.
+    Show Playback Rate Adjusted Timestamp: Quando esta opção está ativada e a velocidade de reprodução é diferente de 1x, o reprodutor mostra entre parênteses as marcas temporais ajustadas à velocidade de reprodução após as marcas temporais normais.
+    Use YouTube-style Shorts: Mostra os Shorts numa grelha vertical nas páginas de subscrições e canais e utiliza o reprodutor de Shorts ao estilo do YouTube.
+    Loop Shorts: Quando esta opção está ativada, os Shorts recomeçam automaticamente. Quando está desativada, param no fim e mostram um botão para os reproduzir novamente.
+    Show Skip Silence Toggle: Mostra no menu de definições do reprodutor um botão para ativar ou desativar o avanço sobre períodos de silêncio.
+    Enable Skip Silence by Default: Ativa o avanço sobre períodos de silêncio nos novos separadores. Alterar esta opção num separador não afeta os restantes.
+    Enable Video Zoom: Mostra o controlo de ampliação no menu de definições do reprodutor e ativa os respetivos atalhos de teclado e controlos de deslocação.
+    Voice-over Translation: Quando solicita uma tradução, envia o ID e a duração do vídeo e o idioma selecionado para o serviço não oficial de tradução por voz da Yandex. Está desativado por predefinição.
+    Hold to Double Playback Speed: Mantenha premida a barra de espaços ou o botão esquerdo do rato sobre o reprodutor para duplicar temporariamente a velocidade de reprodução atual.
+    Ambient Mode: Mistura as cores do vídeo com a área em redor do reprodutor.
+    Default Volume: Esta opção fica desativada enquanto Memorizar volume estiver ativo. Desative Memorizar volume para definir um volume inicial fixo para cada vídeo.
+    Parallel Segment Loading: |
+      O número de segmentos de vídeo e áudio que são carregados simultaneamente antes da reprodução.
+      Valores mais altos podem ajudar em ligações lentas ou instáveis, mas utilizam mais largura de banda e memória.
+      Também podem fazer com que o modo Automático subestime a velocidade da ligação e selecione uma qualidade inferior.
+      As transmissões limitadas a um pedido de cada vez ignoram esta definição.
+  Download Settings:
+    Download Folder: Os vídeos são guardados nesta pasta. Deixe em branco para utilizar a pasta Transferências do sistema.
+    Global Additional yt-dlp Arguments: Argumentos adicionais da linha de comandos passados ao yt-dlp em cada descarga, por exemplo --cookies-from-browser firefox.
+    Concurrent Downloads: O número máximo de tarefas do yt-dlp que podem ser executadas em simultâneo.
+    Bandwidth Limit: Limita a velocidade de transferência combinada da fila ao dividir este limite pelas tarefas simultâneas. Introduza 0 para não aplicar qualquer limite.
+  External Software Settings:
+    yt-dlp Source: O OpenTubeX pode utilizar o yt-dlp instalado no sistema ou descarregar e gerir uma cópia própria, guardada no diretório de dados do utilizador.
+    yt-dlp Channel: Selecione o canal de lançamento do yt-dlp que o OpenTubeX descarrega e gere. O canal Stable é recomendado para a maioria dos utilizadores.
+    FFmpeg Source: O OpenTubeX pode utilizar o FFmpeg e o FFprobe instalados no sistema ou descarregar e gerir compilações estáticas próprias, guardadas no diretório de dados do utilizador.
+    Managed Tool Updates: Escolha se as ferramentas geridas são atualizadas automaticamente, se é pedida confirmação antes de atualizar ou se só são atualizadas através dos botões manuais. As ferramentas em falta continuam a ser descarregadas quando forem necessárias.
+    yt-dlp Executable Path: Por predefinição, o OpenTubeX assume que o yt-dlp pode ser encontrado através da variável de ambiente PATH. Se necessário, pode definir aqui um caminho personalizado.
+    Cookie Source: Escolha se o yt-dlp deve ler um ficheiro de cookies Netscape ou os cookies de um navegador instalado para a reprodução autenticada.
+    Cookie File: Selecione um ficheiro de cookies no formato Netscape para a reprodução autenticada.
+    Browser for Cookies: A compatibilidade com navegadores é obtida a partir do executável do yt-dlp selecionado. Quando é pedida a reprodução autenticada, o OpenTubeX solicita ao yt-dlp que leia os cookies deste navegador.
+    Browser Profile: Nome ou pasta opcional do perfil do navegador. Deixe em branco para utilizar o perfil acedido mais recentemente.
+    Always Use Cookies: Utiliza os cookies configurados sempre que o yt-dlp extrai transmissões. Isto não muda o método de extração da transmissão para o yt-dlp. Com o yt-dlp selecionado, podem ficar disponíveis formatos exclusivos de contas, incluindo a taxa de bits melhorada do YouTube Premium se a conta tiver acesso.
+    FFmpeg Executable Path: O FFmpeg é necessário para combinar transmissões separadas de vídeo e áudio e para converter áudio. Por predefinição, o OpenTubeX assume que o FFmpeg pode ser encontrado através da variável de ambiente PATH. Se necessário, pode definir aqui um caminho personalizado.
+  Distraction Free Settings:
+    Shorten View Counts: Mostra as contagens de visualizações e gostos nos comentários que o YouTube já arredondou num formato abreviado, por exemplo 14K em vez de 14,000. As contagens exatas são sempre mostradas por extenso.
+  Subscription Settings:
+    Fetch Feed on Startup: Quando esta opção está ativada, o OpenTubeX obtém automaticamente o feed de subscrições ao iniciar e ao abrir uma nova janela.
+    Show New Content Feed: Mostra um separador Novos com os elementos do feed de subscrições que não estavam presentes na obtenção anterior.
+    Show New Content Indicators: Mostra um pequeno ponto junto aos elementos do feed de subscrições que não estavam presentes na obtenção anterior.
+    Show Scheduled Live Streams / Premieres First: Mantém as próximas emissões em direto e estreias no início do feed de subscrições. Quando esta opção está desativada, permanecem na posição em que foram anunciadas até começarem. Depois de desativar, atualize uma vez o feed de subscrições para obter as datas de anúncio das entradas agendadas existentes.
+    Auto Refresh Interval: A frequência com que o OpenTubeX atualiza automaticamente o feed de subscrições enquanto a aplicação está aberta.
+  Theme Settings:
+    Show Progress as Notification: Mostra uma notificação persistente com o progresso em tempo real das operações em segundo plano, como a atualização das subscrições e as descargas de ferramentas geridas, em vez de utilizar a barra de progresso global.
+    Always Show Scrollbars: Mantém as barras de deslocamento sempre visíveis. Quando esta opção está desativada, desaparecem pouco depois de parar de mover o rato e reaparecem assim que volta a movê-lo.
+    Use Fixed Tab Width: Atribui a mesma largura a todos os separadores na barra horizontal, em vez de ajustar a largura ao respetivo título.
+    Use Grid Player Menu: Organiza o menu de definições do reprodutor de vídeo numa grelha de mosaicos em vez de uma lista de linhas.
+The playlist is at the beginning. Enable loop to continue playing: A lista de reprodução está no início. Ative a repetição para continuar a reproduzir
+External link opening has been disabled in Settings → Privacy: A abertura de hiperligações externas foi desativada em Definições → Privacidade
+KeyboardShortcutPrompt:
+  Edit Hint: Selecione um atalho e prima uma nova combinação de teclas. Prima Backspace ou Delete para remover a atribuição.
+  Change Shortcut: Alterar atalho de {action}
+  Press Shortcut: Prima o atalho…
+  Unassigned: Não atribuído
+  Reset Shortcut: Repor atalho de {action}
+  Reset to Defaults: Repor predefinições
+  Shortcut Already Assigned: Atalho já atribuído
+  Shortcut Conflict: '{shortcut} já está atribuído a {actions}. Pretende reatribuí-lo?'
+  Reserved Shortcut Conflict: '{shortcut} está reservado para {actions} e não pode ser reatribuído.'
+  Reassign: Reatribuir
+  Sections:
+    App:
+      Tabs: "Aplicação:\_Separadores"
+      Search and Page: "Aplicação:\_Pesquisa e página"
+      Window and View: "Aplicação:\_Janela e vista"
+  New Tab: Criar um novo separador
+  Close Tab: Fechar o separador atual
+  Reload Tab: Recarregar o separador atual
+  Reopen Closed Tab: Reabrir o último separador fechado
+  Next Tab: Mudar para o separador seguinte
+  Previous Tab: Mudar para o separador anterior
+  Switch to Tab: Mudar para o separador 1–9
+  Toggle Tab Orientation: Alternar entre disposições dos separadores
+  Find in Page: Localizar texto na página atual
+  Find Next Match: Ir para a correspondência seguinte
+  Find Previous Match: Ir para a correspondência anterior
+  Toggle Normal Playback Speed: Alternar entre a velocidade 1x e a velocidade de reprodução anterior
+  Toggle Skip Silence: Ativar ou desativar o avanço sobre períodos de silêncio
+  Video Zoom In: Ampliar o vídeo
+  Video Zoom Out: Reduzir o vídeo
+  Tab Switcher: Seletor de separadores
+CommandPalette:
+  Title: Paleta de comandos
+  Open: Abrir paleta de comandos
+  Search Label: Pesquisar comandos
+  Search Placeholder: Pesquisar comandos e definições…
+  Results: Comandos
+  No Results: Nenhum comando correspondente
+  Result Count: 1 comando encontrado | {count} comandos encontrados | {count} comandos encontrados
+  Move: Mover
+  Run: Executar
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Mudar para o separador: {title}'
+  Switch Profile: 'Mudar de perfil: {name}'
+  Open Playlist: 'Abrir lista de reprodução: {name}'
+  Cancel Download: 'Cancelar descarga: {title}'
+  Groups:
+    App: Aplicação
+    Navigation: Navegação
+    Tabs: Separadores
+  Unavailable:
+    Current Page: Já se encontra nesta página
+    No History: Não há nenhuma página nesta direção
+    Desktop: Disponível apenas na aplicação para computador
+    Build: Não disponível nesta compilação
+    One Tab: Abra primeiro outro separador
+    Active Tab: Este é o separador ativo
+    Active Profile: Este é o perfil ativo
+    Download Finished: Esta descarga já não está em curso
+    Video: Abra primeiro um vídeo
+Downloads:
+  Download: Descarregar
+  Download Video: Descarregar vídeo
+  Download Playlist: Descarregar lista de reprodução
+  Downloading: A descarregar
+  Queue: Fila
+  Downloaded: Descarregado
+  Canceled: Cancelado
+  Open Downloads: Abrir descargas
+  No Downloads: Ainda não há descargas
+  No Downloads Description: As descargas que iniciar aparecem aqui.
+  Clear Failed Canceled Skipped And Missing: Limpar falhadas, canceladas, ignoradas e em falta
+  Clear From List: Remover da lista
+  Show in Folder: Mostrar na pasta
+  Play Download: Reproduzir descarga
+  Retry Download: Tentar descarga novamente
+  Pause Download: Pausar descarga
+  Resume Download: Retomar descarga
+  Move Earlier: Mover para antes
+  Move Later: Mover para depois
+  Pause All: Pausar tudo
+  Resume All: Retomar tudo
+  Retry All: Tentar novamente todas as descargas falhadas
+  Total Size: 'Tamanho total: {size}'
+  Local File: Ficheiro local
+  Available Offline: Disponível sem ligação à Internet
+  Remove File: Remover ficheiro
+  Remove File Confirmation: Remover o ficheiro descarregado?
+  Remove File Warning: Esta ação move "{title}" para o Lixo do dispositivo.
+  File Not Found: Não foi possível encontrar o ficheiro descarregado.
+  Download Missing: Descarga indisponível
+  Files Missing: O ficheiro descarregado já não está disponível no sistema de ficheiros. | Os ficheiros descarregados já não estão disponíveis no sistema de ficheiros. | Os ficheiros descarregados já não estão disponíveis no sistema de ficheiros.
+  Files Available: Estão disponíveis {available} de {total} ficheiros descarregados.
+  More Files: Mais 1 ficheiro | Mais {count} ficheiros | Mais {count} ficheiros
+  Template Used: 'Modelo: {name}'
+  Download Type: Tipo de descarga
+  Template: Modelo
+  Unsaved: Não guardado
+  Media Type: Tipo de conteúdo multimédia
+  Video: Vídeo
+  Audio: Áudio
+  Maximum Resolution: Resolução máxima
+  Best Available: Melhor disponível
+  Automatic: Automática
+  Container: Contentor
+  Video Codec: Codec de vídeo
+  Audio Codec: Codec de áudio
+  File Name Template: Modelo de nome do ficheiro
+  File Name Template Help: 'Campos disponíveis: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Intervalo de tempo e capítulos
+  Start Time: Hora de início (HH:MM:SS)
+  End Time: Hora de fim (HH:MM:SS)
+  Split by Chapters: Dividir em ficheiros separados por capítulo
+  Remove Segments: Remover segmentos
+  Subtitles and Metadata: Legendas e metadados
+  Include Subtitles: Incluir legendas
+  Embed Subtitles: Incorporar legendas no ficheiro multimédia
+  Subtitle Format: Formato das legendas
+  Subtitle Languages: Idiomas das legendas
+  Subtitle Languages Help: 'Seletores de idioma do yt-dlp separados por vírgulas, por exemplo: en.*,de.*'
+  Embed Cover Art: Incorporar miniatura como capa
+  Embed Metadata: Incorporar título, autor, descrição e capítulos
+  Additional yt-dlp Arguments: Argumentos adicionais do yt-dlp
+  Custom yt-dlp Arguments: Argumentos personalizados do yt-dlp
+  Template Name: Nome do modelo
+  Save Template: Guardar modelo
+  Delete Template: Eliminar modelo
+  Template Saved: Modelo de descarga "{name}" guardado
+  Template Name Exists: Já existe um modelo de descarga com o nome "{name}".
+  Choose Folder: Alterar
+  Select Folder: Escolher pasta
+  Folder Required: Escolha uma pasta de descargas para ativar as descargas.
+  System Downloads Folder: Pasta Transferências do sistema
+  Processing: A processar…
+  Queued: Na fila
+  Queued Position: Na fila, posição {position}
+  Paused: Em pausa
+  Pausing: A tarefa atual será concluída e depois a fila será pausada
+  Download Complete: Descarga concluída
+  Download Cancelled: Descarga cancelada
+  Download Failed: Descarga falhada
+  File Name Shortened: O nome do ficheiro foi abreviado porque o título do vídeo era demasiado longo.
+  Insufficient Disk Space: Não há espaço suficiente no disco. São necessários cerca de {required} e estão disponíveis {available}.
+  Unknown Download Size: O tamanho da descarga é desconhecido. Estão disponíveis {available} no sistema de ficheiros de destino.
+  Disk Space Check Unavailable: Não foi possível verificar o espaço disponível no disco antes de iniciar esta descarga.
+  Download Failure Hint: Consulte {issuesLink} e tente mudar o canal do yt-dlp para Nightly ou Master em Definições → Avançadas → Software externo.
+  yt-dlp YouTube Issues: problemas recentes do yt-dlp com o YouTube
+  Automatic Download Started: Descarga automática iniciada
+  Automatic Download Started Body: A descarregar "{title}" de {channel} em segundo plano.
+  Automatic Download Complete: Descarga automática concluída
+  Automatic Download Failed: Descarga automática falhada
+  Automatic Download Could Not Start: Não foi possível iniciar a descarga automática de "{title}".
+  Automatic Download Skipped: Ignorada pelos filtros de descarga automática
+  Cancel Download: Cancelar descarga
+  yt-dlp Not Found: O yt-dlp não foi encontrado. Instale-o ou defina o respetivo caminho em Definições → Avançadas → Software externo.
+  Download Complete Template: A descarga de "{title}" foi concluída
+  Download Failed Template: A descarga de "{title}" falhou
+  Templates:
+    Video Best: Vídeo - Melhor qualidade
+    Video Resolution: Vídeo - {resolution}
+    Audio Best: Áudio - Melhor qualidade
+    Audio Format: Áudio - {format}
+    Subtitles Format: Legendas - {format}

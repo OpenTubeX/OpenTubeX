@@ -1,4 +1,4 @@
-import i18n, { loadLocale } from '../../i18n/index'
+import i18n, { loadLocale, setAITranslationCompletionsEnabled } from '../../i18n/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
 import {
   applyKeyboardShortcutOverrides,
@@ -518,6 +518,7 @@ const state = {
   hideToTrayOnMinimize: false,
 
   // The settings below have side effects
+  useAITranslationCompletions: false,
   currentLocale: 'system',
   reducedMotion: 'system',
   defaultInvidiousInstance: '',
@@ -532,6 +533,10 @@ const state = {
 export const DEFAULT_SETTINGS = Object.freeze(structuredClone(state))
 
 const sideEffectHandlers = {
+  useAITranslationCompletions: (_store, value) => {
+    return setAITranslationCompletionsEnabled(value)
+  },
+
   enableCommentTranslations: (_store, value) => {
     if (!value) {
       terminateCommentTranslationLanguageDetector()

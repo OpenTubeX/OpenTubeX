@@ -1,0 +1,1479 @@
+# Optional AI-generated translations for keys missing from ../sv.yaml.
+Color Picker:
+  Hue: Nyans
+  Opacity: Opacitet
+  Backdrop Blur: Bakgrundsoskärpa
+  Hex Color: Hexfärg
+  Apply Color: Tillämpa
+  Reset Color: Återställ
+  Copy Color: Kopiera
+  Copy From Another Color: Kopiera från en annan färg
+  Color Copied: Färgen har kopierats
+  Invalid Color: Ange en giltig hexadecimalkod
+  Clipboard Unavailable: Urklipp är inte tillgängligt
+  Saturation and Brightness: Mättnad och ljusstyrka
+New Tab: Ny flik
+Maximize: Maximera
+Restore: Återställ
+Close Tab: Stäng flik
+Close Confirmation:
+  Title: Avsluta OpenTubeX?
+  Message: Vill du avsluta OpenTubeX?
+  Quit: Avsluta
+  Never Ask Again: Fråga inte igen
+Close Window Confirmation:
+  Title: Stäng fönstret?
+  Message: Det här fönstret innehåller {count} flikar. Vill du stänga det?
+  Close Window: Stäng fönstret
+Confirmations:
+  Never Ask Again: Fråga inte igen
+  Settings Hint: Du kan aktivera bekräftelsen igen under Inställningar → Allmänt → Bekräfta innan…
+Close Multiple Tabs Confirmation:
+  Title: Stäng flera flikar?
+  Message: Detta stänger {count} flikar.
+  Close Tabs: Stäng {count} flikar
+Load Multiple Tabs Confirmation:
+  Title: Läs in flera flikar?
+  Message: Detta läser in {count} flikar.
+  Load Tabs: Läs in {count} flikar
+Unload Multiple Tabs Confirmation:
+  Title: Frigör flera flikar?
+  Message: Detta frigör {count} flikar.
+  Unload Tabs: Frigör {count} flikar
+Use Vertical Tabs: Använd vertikala flikar
+Use Horizontal Tabs: Använd vågräta flikar
+Resize Tab Bar: Ändra storlek på flikfältet
+Find in page: Sök på sidan
+Previous match: Föregående träff
+Next match: Nästa träff
+Close find bar: Stäng sökfältet
+No matches: Inga träffar
+Version {versionNumber} is now available.: Version {versionNumber} är nu tillgänglig.
+See changes and update: Se ändringarna och uppdatera
+Dismiss: Avfärda
+Update to {version}: Uppdatera till {version}
+Global:
+  Ambient Mode: Stämningsbelysning
+  Loading More: Läser in mer
+  New: Nytt
+Search Listing:
+  Label:
+    Members Only: Endast medlemmar
+Stats:
+  Stats: Statistik
+  Watch time summary: Sammanfattning av visningstid
+  Today: I dag
+  This week: Den här veckan
+  Total watch time: Total visningstid
+  Daily average: Genomsnitt per dag
+  So far today: Hittills i dag
+  Since: Sedan {day}
+  All recorded time: All registrerad tid
+  Per calendar day: Per kalenderdag
+  Day by day: Dag för dag
+  Highest: 'Högst: {duration}'
+  Week by week: Vecka för vecka
+  Last 14 days: Senaste 14 dagarna
+  Last 8 weeks: Senaste 8 veckorna
+  Daily chart aria: Daglig visningstid under de senaste 14 dagarna
+  Weekly chart aria: Visningstid per vecka under de senaste 8 veckorna
+  No data: Visningstiden visas här när du tittar på videor.
+  Estimate note: Visningstid från före den här uppdateringen uppskattas utifrån dina sparade uppspelningsförlopp.
+  Adjust imported watch time: Justera importerad visningstid
+  Imported watch time: Importerad visningstid
+  Imported watch time explanation: Välj den uppspelningshastighet du brukade använda. De importerade videolängderna delas med hastigheten för att uppskatta hur länge du faktiskt tittade.
+  Playback speed: Uppspelningshastighet
+  Channel speed note: Sparade uppspelningshastigheter för kanaler används i stället när de finns.
+  Apply playback speed: Tillämpa uppspelningshastighet
+  Imported watch time adjusted: Den importerade visningstiden har justerats
+  Reset statistics: Nollställ statistik
+  Reset: Nollställ
+  Reset confirmation: Vill du nollställa all visningsstatistik? Det går inte att ångra.
+  Reset success: Visningsstatistiken har nollställts
+  Less than a minute: < 1 min
+  Minutes: '{minutes} min'
+  Hours: '{hours} tim'
+  Hours and minutes: '{hours} tim {minutes} min'
+Subscriptions:
+  Refreshing Subscription Videos: Uppdaterar prenumerationsvideor
+  Refreshing Subscription Shorts: Uppdaterar Shorts från prenumerationer
+  Refreshing Subscription Live Streams: Uppdaterar liveströmmar från prenumerationer
+  Refreshing Subscription Posts: Uppdaterar inlägg från prenumerationer
+  New Content: Nytt innehåll
+  New Feed Refresh Warning Title: Uppdatera alla prenumerationsflöden?
+  New Feed Refresh Warning: Det kan ta lång tid att uppdatera alla innehållstyper utan RSS för 1 prenumeration. Vill du fortsätta? | Det kan ta lång tid att uppdatera alla innehållstyper utan RSS för {count} prenumerationer. Vill du fortsätta?
+  New Since Last Refresh: Nytt sedan senaste uppdateringen
+  Mark as Seen: Markera som sett
+  Mark All as Seen: Markera allt som sett
+  No New Content: Det finns inget nytt innehåll.
+  New Content Tabs: Flikar för nytt innehåll
+  Show Tabbed View: Visa flikvy
+  Show Combined View: Visa kombinerad vy
+  Newest First: Nyaste först
+  Oldest First: Äldsta först
+Trending:
+  Load Error: Trendande innehåll kunde inte läsas in.
+  Unsupported Backend: Trendande innehåll kräver lokalt API. Välj lokalt API eller aktivera reservserverdelen.
+Most Popular Feed Empty: Flödet Populärast på den här Invidious-instansen är tomt.
+Feed:
+  Cancel Refresh: Avbryt uppdatering
+  Next Auto Refresh: 'Nästa automatiska uppdatering: {date}'
+User Playlists:
+  Load More Playlists: Läs in fler spellistor
+  Save to: Spara i…
+  Quick Bookmark Icon: Ikon för snabbbokmärke
+  Custom Emoji: Egen emoji
+  Choose Image: Välj bild
+  Use Bookmark Icon: Använd bokmärkesikon
+  SinglePlaylistView:
+    Retry: Försök igen
+    This playlist could not be loaded.: Spellistan kunde inte läsas in.
+    More videos could not be loaded.: Fler videor kunde inte läsas in.
+History:
+  Mark All As Watched: Markera alla som sedda
+  Mark All As Watched Confirmation: Vill du markera alla videor i historiken som sedda?
+  All History Marked as Watched: Alla videor i historiken har markerats som sedda
+  Delete Old History: Ta bort gammal historik
+  Select History Age: Välj hur gammal en post måste vara innan den tas bort.
+  Delete Entries Older Than: Ta bort poster äldre än
+  Number of Days: Antal dagar
+  History Cleanup Warning: Detta tar permanent bort matchande poster i visningshistoriken.
+  1 Day: 1 dag
+  1 Week: 1 vecka
+  1 Month: 1 månad
+  3 Months: 3 månader
+  1 Year: 1 år
+  Custom: Anpassad
+  History Older Than Days Removed: Visningshistorik äldre än 1 dag har tagits bort | Visningshistorik äldre än {days} dagar har tagits bort
+Settings:
+  Quick Settings:
+    Quick Settings: Snabbinställningar
+    Appearance: Utseende
+    Playback: Uppspelning
+    Content: Innehåll
+    Language and Region: Språk och region
+    All Settings: Alla inställningar
+    Profile Selector Hint: Du kan även högerklicka på profilikonen för att byta profil
+  Categories:
+    General Description: Språk, start, flikar och appbeteende
+    Appearance: Utseende
+    Appearance Description: Tema, layout och miniatyrbilder
+    Content appearance: Videolistor och miniatyrbilder
+    Layout: Layout
+    Playback Description: Spelare, undertexter och kanalinställningar
+    Subscriptions Description: Uppdatering och visning av flöden
+    Downloads Description: Mappar, mallar och automatiska regler
+    Distraction Free Description: Dölj innehåll och ange visningsgränser
+    Add-ons: Tillägg
+    Add-ons Description: SponsorBlock, DeArrow, ogillanden och dubbningsöversättning
+    Privacy Description: Integritet vid visning och åtkomstkontroller
+    Online activity: Onlineaktivitet
+    Data And Storage Description: Import, export, diskutrymme och rensning
+    Sync Description: Synkronisera inställningar och data mellan enheter
+    Advanced: Avancerat
+    Advanced Description: Leverantörer, externa appar och nätverk
+    Alternative providers: Leverantörer av video och metadata
+  Highlight Changed Settings: Markera inställningar som skiljer sig från standardvärdena
+  Reset Setting to Default: Återställ inställningen till standardvärdet
+  Performance Impact:
+    Show Performance Impact: Visa indikatorer för prestandapåverkan
+    Moderate: Måttlig påverkan
+    High: Stor påverkan
+    Description: Den här inställningen kan öka användningen av {resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: minne
+      Network: nätverk
+      Disk: diskutrymme
+  General Settings:
+    Update Relative Timestamps: Håll relativa tidsangivelser uppdaterade
+    Stream Extraction Method:
+      Stream Extraction Method: Metod för strömutvinning
+      yt-dlp: yt-dlp
+      Built-in: Inbyggd
+    Confirm Before: Bekräfta innan…
+    Confirmation Options:
+      Closing App: OpenTubeX avslutas
+      Closing Window: Ett fönster med flera flikar stängs
+      Closing Tabs: Flera flikar stängs
+      Loading Tabs: Flera flikar läses in
+      Unloading Tabs: Flera flikar frigörs
+    Remember Tab Navigation History: Kom ihåg navigeringshistoriken för flikar
+    New Tab Position:
+      New Tab Position: Placering av ny flik
+      At the end: Sist
+      After current tab: Efter aktuell flik
+      After current tab in opened order: Efter aktuell flik, i öppningsordning
+    Tab Close Focus:
+      Tab Close Focus: När en flik har stängts
+      Previous tab: Välj föregående flik
+      Next tab: Välj nästa flik
+    Startup Behavior:
+      Startup Behavior: Vid start
+      Load all tabs: Läs in alla flikar
+      Load previously loaded tabs: Läs in tidigare inlästa flikar
+      Load last active tab: Läs in senast aktiva fliken
+      Start with an empty session: Starta med en tom session
+    Use AI Translation Completions: Fyll i saknade översättningar med AI-genererad text
+    Reduced Motion:
+      Reduced Motion: Minskade rörelser
+      System: Systeminställning
+      Force On: Alltid på
+      Force Off: Alltid av
+    Comment Translation:
+      Title: Översättning av kommentarer
+      Enable: Aktivera översättning av kommentarer
+      Never Translate: Översätt aldrig kommentarer på
+      Choose Language: Välj ett språk
+      Description: Kommentarer på appens språk undantas redan. Lägg till andra språk som du kan läsa.
+      Remove Language: Översätt kommentarer på {language} igen
+    Avoid translation:
+      Avoid translation: Föredra oöversatt videotext
+      Disabled: Inaktiverat
+      Watch Only: Endast videogränssnittet
+      Entire App: Hela appen
+    Playlist View Type:
+      Playlist View Type: Visningstyp för spellistor
+    Show Thumbnail Previews: Visa förhandsgranskning av miniatyrbilder
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Extra åtgärdsknapp på miniatyrbilder
+      None: Ingen
+      Mark as Watched: Markera som sedd
+      Copy YouTube Link: Kopiera YouTube-länk
+      Open in YouTube: Öppna på YouTube
+  Context Menu Search Settings:
+    Context Menu Search Settings: Sökning från snabbmenyn
+    Description: Välj vilka sökmotorer som visas när du högerklickar på markerad text. Sökningar öppnas i din standardwebbläsare.
+    Icon Hint: När du aktiverar en sökmotor kontaktas dess webbplats för att läsa in webbplatsikonen.
+    Engine Name: Sökmotorns namn
+    Search URL: Söknings-URL
+    URL Hint: Använd %s där URL:en ska innehålla den kodade markerade texten.
+    Add Custom Engine: Lägg till en egen sökmotor
+    Add Engine: Lägg till sökmotor
+    Remove Engine: Ta bort {engine}
+    Invalid Engine: Ange ett namn och en giltig HTTP- eller HTTPS-söknings-URL som innehåller %s.
+    Engine Limit: Du kan lägga till högst {count} egna sökmotorer.
+  Theme Settings:
+    Move Downloads to App Header: Flytta Nedladdningar till apphuvudet
+    Move Settings to App Header: Flytta Inställningar till apphuvudet
+    Hide Side Bar on Watch Pages: Dölj sidofältet på visningssidor
+    UI Roundness: Gränssnittets rundning
+    Scrollbar Width: Rullningslistens bredd
+    Animation Speed: Animeringshastighet
+    Thumbnail Size: Miniatyrbildsstorlek
+    Show Tab Icons: Visa flikikoner
+    Load Missing Tab Icons: Läs in saknade flikikoner
+    Loading Missing Tab Icons: Läser in saknade flikikoner…
+    No Missing Tab Icons: Alla flikikoner som stöds är redan inlästa
+    Loaded Tab Icons: 'En saknad flikikon lästes in: {count} | Saknade flikikoner lästes in: {count}'
+    Loaded Tab Icons With Failures: Läste in {loaded} flikikoner. {failed} kunde inte läsas in
+    Show Tab Previews: Visa förhandsgranskning av flikar
+    Use Fixed Tab Width: Använd fast flikbredd i vågrätt läge
+    Tab Width: Flikbredd
+    Tab Layout:
+      Tab Layout: Fliklayout
+      Horizontal Top: Vågrätt överst
+      Horizontal Bottom: Vågrätt nederst
+      Vertical Left: Lodrätt till vänster
+      Vertical Right: Lodrätt till höger
+    Show Toast Timeout Indicator: Visa tidsindikator i popupmeddelanden
+    Use Grid Player Menu: Använd rutnätsmeny i spelaren
+    Show Progress as Notification: Visa förlopp som avisering
+    Operation in Progress: Åtgärd pågår
+    Toast Position:
+      Toast Position: Placering av popupmeddelanden
+      Bottom Left: Nederst till vänster
+      Bottom Center: Nederst i mitten
+      Bottom Right: Nederst till höger
+      Top Left: Överst till vänster
+      Top Center: Överst i mitten
+      Top Right: Överst till höger
+    Icon Pack:
+      Icon Pack: Ikonpaket
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Appens typsnitt
+      System Default: Systemstandard
+      Unable to Load: Det gick inte att läsa in installerade systemtypsnitt
+    Always Show Scrollbars: Visa alltid rullningslister
+    Base Theme:
+      Custom: Anpassat
+    Light Theme: Ljust tema
+    Dark Theme: Mörkt tema
+    Custom Theme:
+      Create Custom Theme: Skapa eget tema
+      Edit Custom Theme: Redigera eget tema
+      Custom Theme Creator: Skapa eget tema
+      Theme Name: Temanamn
+      Based On: Baserat på
+      Import Theme: Importera tema
+      Export Theme: Exportera tema
+      Share Theme: Dela tema
+      Share Description Heading: Beskrivning
+      Share Description Prompt: Beskriv temat och vad användare bör känna till innan de använder det.
+      Share Screenshots Heading: Skärmbilder
+      Share Screenshots Prompt: Dra och släpp en eller flera skärmbilder här.
+      Share Code Summary: Tema-JSON
+      Delete Theme: Ta bort tema
+      Delete Theme Confirmation: Ta bort "{name}"? Det går inte att ångra.
+      Save and Apply: Spara och tillämpa
+      Discard Changes: Ignorera ändringar
+      Reset Colors: Återställ till bastemat
+      Theme File: OpenTubeX-temafil
+      Theme Saved: Det egna temat har sparats och tillämpats
+      Theme Imported: Temat har importerats till redigeraren
+      Theme Exported: Temat har exporterats
+      Theme Deleted: Det egna temat har tagits bort
+      Unable to Load: Det gick inte att läsa in det egna temat
+      Unable to Save: Det gick inte att spara det egna temat
+      Unable to Export: Det gick inte att exportera det egna temat
+      Unable to Share: Det gick inte att dela det egna temat
+      Unable to Delete: Det gick inte att ta bort det egna temat
+      Invalid Theme File: Ogiltig fil för eget tema
+      Colors:
+        Main text: Primär text
+        Secondary text: Sekundär text
+        Subtle text: Diskret text
+        Borders and dividers: Kanter och avdelare
+        Subtle surfaces and indicators: Diskreta ytor och indikatorer
+        Title text: Rubriktext
+        Selected text background: Bakgrund för markerad text
+        Selected text: Markerad text
+        Logo icon: Logotypikon
+        Logo text: Logotyptext
+        Logo hover: Logotyp vid hovring
+        Logo pressed: Nedtryckt logotyp
+        Page background: Sidbakgrund
+        Card background: Kortbakgrund
+        Secondary card background: Sekundär kortbakgrund
+        Favorite icon: Favoritikon
+        Error color: Färg för fel
+        Scrollbar thumb: Rullningslistens skjutreglage
+        Scrollbar thumb hover: Rullningslistens skjutreglage vid hovring
+        Scrollbar thumb pressed: Nedtryckt skjutreglage i rullningslisten
+        Dropdown item hover text: Text i listrad vid hovring
+        Dropdown item hover background: Bakgrund för listrad vid hovring
+        Navigation and panel background: Bakgrund för navigering och paneler
+        Neutral item hover and focus background: Bakgrund för neutralt objekt vid hovring och fokus
+        Neutral item hover and focus text and icons: Text och ikoner för neutralt objekt vid hovring och fokus
+        Neutral item pressed background: Bakgrund för nedtryckt neutralt objekt
+        Neutral item pressed text and icons: Text och ikoner för nedtryckt neutralt objekt
+        Header button hover and focus background: Bakgrund för huvudknapp vid hovring och fokus
+        Header button hover and focus text and icons: Text och ikoner för huvudknapp vid hovring och fokus
+        Header button pressed background: Bakgrund för nedtryckt huvudknapp
+        Header button pressed text and icons: Text och ikoner för nedtryckt huvudknapp
+        Colored header button hover and focus background: Bakgrund för färgad huvudknapp vid hovring och fokus
+        Colored header button hover and focus text and icons: Text och ikoner för färgad huvudknapp vid hovring och fokus
+        Colored header button pressed background: Bakgrund för nedtryckt färgad huvudknapp
+        Colored header button pressed text and icons: Text och ikoner för nedtryckt färgad huvudknapp
+        Search and dropdown background: Bakgrund för sökning och listrutor
+        Settings search background: Bakgrund för inställningssökning
+        Instance menu: Instansmeny
+        Input background: Inmatningsbakgrund
+        Shadow color: Skuggfärg
+        Primary controls and highlights: Primära kontroller och markeringar
+        Primary control hover and focus: Primär kontroll vid hovring och fokus
+        Primary control pressed: Nedtryckt primär kontroll
+        Text and icons on primary controls: Text och ikoner på primära kontroller
+        Secondary controls and highlights: Sekundära kontroller och markeringar
+        Secondary control hover and focus: Sekundär kontroll vid hovring och fokus
+        Secondary control pressed: Nedtryckt sekundär kontroll
+        Light secondary color: Ljus sekundärfärg
+        Visited accent: Accent för besökta objekt
+        Text and icons on secondary controls: Text och ikoner på sekundära kontroller
+        Links: Länkar
+        Visited links: Besökta länkar
+        Destructive action: Destruktiv åtgärd
+        Destructive hover and focus: Destruktiv åtgärd vid hovring och fokus
+        Destructive pressed: Nedtryckt destruktiv åtgärd
+        Text and icons on destructive actions: Text och ikoner på destruktiva åtgärder
+  Player Settings:
+    Automatically Open Chapters: Öppna kapitel automatiskt
+    Caption Appearance:
+      Caption Appearance: Undertexternas utseende
+      Captions: Undertexter
+      Preferred Language: Föredraget undertextspråk
+      Application Language: Appens språk
+      Enable Translations: Aktivera översättning av undertexter
+      Text Color: Textfärg
+      Background Color: Bakgrundsfärg
+      Background Opacity: Bakgrundens opacitet
+      Font Size: Teckenstorlek
+      Vertical Position: Lodrät placering
+      Edge Color: Kantfärg
+      Anchor:
+        Anchor: Förankring
+        Top Left: Överst till vänster
+        Top Center: Överst i mitten
+        Top Right: Överst till höger
+        Bottom Left: Nederst till vänster
+        Bottom Center: Nederst i mitten
+        Bottom Right: Nederst till höger
+      Edge Style:
+        Edge Style: Kantstil
+        None: Ingen
+        Outline: Kontur
+        Drop Shadow: Slagskugga
+      Reset: Återställ undertexternas utseende
+    Auto Picture in Picture:
+      Auto Picture in Picture: Aktivera automatiskt bild-i-bild
+      On Tab Change: När du byter flik
+      On Window Minimize: När fönstret minimeras
+      On Window Hide: När fönstret förlorar fokus eller du växlar bort från det
+      Wayland Minimize Unsupported: Wayland rapporterar inte minimerade fönster till appar, så den här utlösaren är inte tillgänglig. Använd i stället "När fönstret förlorar fokus eller du växlar bort från det", vilket även omfattar minimering.
+    Scroll Mini Player:
+      Scroll Mini Player: Minispelare vid rullning
+      When Scrolling Down: Behåll en minispelare på skärmen när du rullar nedåt
+      On All Tabs: Behåll en minispelare på skärmen när du byter flik
+    Multiply Seek Interval by Playback Rate: Multiplicera hoppintervallet med uppspelningshastigheten
+    Show Playback Rate Adjusted Timestamp: Visa tidsangivelse justerad efter uppspelningshastigheten
+    Use YouTube-style Shorts: Använd Shorts i YouTube-stil
+    Loop Shorts: Repetera Shorts
+    Remember Volume: Kom ihåg volymen
+    Skip Silence: Hoppa över tystnad
+    Show Skip Silence Toggle: Visa reglage för att hoppa över tystnad
+    Enable Skip Silence by Default: Hoppa över tystnad som standard
+    Enable Video Zoom: Aktivera videozoom
+    Voice-over Translation:
+      Title: Dubbningsöversättning
+      Attribution: (drivs av Yandex)
+      Enable: Aktivera dubbningsöversättning
+      Prepare in Background: Börja förbereda dubbningsöversättningar i bakgrunden
+      Background Preparation Tooltip: Skickar den aktuella videons ID, längd och valt språk till översättningstjänsten så snart en video som stöds läses in.
+      Language: Språk för dubbningsöversättning
+      Supported Source Languages: 'Källspråk som stöds: ryska, engelska, kinesiska, koreanska, litauiska, lettiska, arabiska, franska, italienska, spanska, tyska och japanska.'
+      Voice Volume: Volym för den översatta rösten
+      Original Volume: Volym för originalljudet
+      Russian: Ryska
+      English: Engelska
+      Kazakh: Kazakiska
+    Hold to Double Playback Speed: Håll ned för dubbel uppspelningshastighet
+    Use Quick Playback Speed Bar: Använd snabbfältet för uppspelningshastighet
+    Customize Quick Playback Speed Bar: Anpassa snabbfältet för uppspelningshastighet
+    Quick Playback Speed Bar Manager: Snabbfält för uppspelningshastighet
+    Add Playback Speed: Lägg till uppspelningshastighet
+    Reset Quick Playback Speed Bar: Återställ standardvärden
+    Playback Speed Name: Namn
+    Edit Playback Speed Name: Redigera namn på uppspelningshastighet
+    Use Automatic Playback Speed Name: Använd automatiskt namn på uppspelningshastighet
+    Reorder Playback Speed: Dra för att ändra ordning på uppspelningshastigheten
+    Playback Speed: Uppspelningshastighet
+    Parallel Segment Loading: Parallell inläsning av segment
+  Channel Settings:
+    Channel Settings: Kanalinställningar
+    Channel Settings Description: Kom ihåg inställningarna du väljer när du tittar för varje enskild kanal och använd dem nästa gång du tittar på en av kanalens videor.
+    Enable Playback Speed: Aktivera uppspelningshastighet
+    Enable Video Quality: Aktivera videokvalitet
+    Enable Subtitles State: Aktivera undertextläge
+    Enable Volume: Aktivera volym
+    Auto Update: Uppdatera automatiskt vid ändringar i spelaralternativen
+    Auto Update Subtitles: Uppdatera automatiskt när undertexter slås på eller av
+    Auto Update Volume: Uppdatera automatiskt när du ändrar volymen
+    Manage Saved Channels: Hantera sparade kanaler ({channelCount})
+    Saved Channels: Sparade kanalinställningar
+    Enable Saved Channel Settings Sync: Synkronisera sparade kanalinställningar
+    Disable Saved Channel Settings Sync: Sluta synkronisera sparade kanalinställningar
+    Search Channels: Sök efter kanaler
+    No Saved Channels: Inga kanalspecifika inställningar har sparats ännu
+    No Matching Channels: Inga kanaler matchar din sökning
+    Forget Channel: Glöm alla inställningar för den här kanalen
+    Forget Value: Glöm den här inställningen
+    Add Setting: Kom ihåg en annan inställning för den här kanalen
+    Video Quality: Videokvalitet
+    Subtitles Enabled: Undertexter aktiverade
+    Volume: Volym
+  Download Settings:
+    Download Settings: Nedladdningar
+    Enable Downloads: Aktivera nedladdningar
+    Managed Tools Download Started Template: 'Nödvändig extern programvara hittades inte: {tools}. Laddar ned hanterade kopior…'
+    Managed Tools Download Finished Template: Nedladdningen av {tools} är klar
+    Managed Tools Update Started Template: En uppdatering hittades för {tools}. Laddar ned…
+    Managed Tools Update Finished Template: Uppdateringen av {tools} är klar
+    Managed Tools Update Available Template: En uppdatering är tillgänglig för {tools}.
+    Update Managed Tools: Uppdatera
+    Managed Tools Download Error Template: 'Det gick inte att ladda ned de hanterade verktygen: {errors}'
+    Download Folder: Nedladdningsmapp
+    Global Additional yt-dlp Arguments: Globala extra argument för yt-dlp
+    Concurrent Downloads: Samtidiga nedladdningar
+    Bandwidth Limit: Bandbreddsgräns (KiB/s, 0 för obegränsat)
+    Choose Download Folder: Välj nedladdningsmapp
+    Download Templates: Nedladdningsmallar
+    Manage Download Templates: Hantera nedladdningsmallar ({templateCount})
+    New Template: Ny mall
+    Template Source: Mall att redigera eller använda som grund
+    Built-in Template: '{name} (inbyggd)'
+    Custom Template Name: '{name} (egen)'
+    Create Template Copy: Skapa kopia
+    Template Copy Name: '{name}, kopia'
+    Automatic Downloads: Automatiska nedladdningar
+    Manage Automatic Downloads: Hantera automatiska nedladdningar ({channelCount})
+    Automatic Downloads Description: Välj en nedladdningsmall och filter för varje kanal du prenumererar på. Matchande videor laddas ned i bakgrunden när prenumerationsflödena uppdateras.
+    Automatic Downloads New Only: När du aktiverar en kanal börjar nedladdningen med nästa nya uppladdning. Befintliga videor och kanalens tidigare uppladdningar laddas inte ned.
+    Automatic Downloads No Channels: Prenumerera på en kanal innan du ställer in automatiska nedladdningar.
+    No Matching Automatic Download Channels: Inga kanaler matchar din sökning.
+    Automatic Downloads Livestreams: Liveströmmar
+    Minimum Duration Seconds: Minsta längd (sekunder)
+    Maximum Duration Seconds: Största längd (sekunder)
+    Minimum File Size MB: Minsta filstorlek (MB)
+    Maximum File Size MB: Största filstorlek (MB)
+    Maximum Age Days: Högsta ålder (dagar)
+    Title Includes: Titeln innehåller
+    Title Excludes: Titeln innehåller inte
+    Title Filter Hint: Avgränsa flera titelord med kommatecken. En video måste matcha minst ett inkluderat ord och får inte matcha något uteslutet ord.
+  External Software Settings:
+    External Software Settings: Extern programvara
+    yt-dlp Source: Källa för yt-dlp
+    yt-dlp Channel: Kanal för yt-dlp
+    Sources:
+      System: System (PATH eller egen sökväg)
+      Managed: Hanteras av OpenTubeX
+    Detected Version Template: 'Identifierad yt-dlp-version: {version}'
+    Managed Not Downloaded: yt-dlp har inte laddats ned ännu. Klicka på knappen nedan för att ladda ned det.
+    System yt-dlp Missing Warning: yt-dlp hittades inte på systemet. Installera det, ange en egen sökväg nedan eller byt källa till "Hanteras av OpenTubeX".
+    Download yt-dlp: Ladda ned yt-dlp
+    Update yt-dlp: Uppdatera yt-dlp
+    Checking yt-dlp: Söker efter yt-dlp…
+    Downloading yt-dlp: Laddar ned yt-dlp…
+    yt-dlp Downloaded Template: yt-dlp {version} har laddats ned
+    yt-dlp Download Error Template: 'Det gick inte att ladda ned yt-dlp: {error}'
+    FFmpeg Source: Källa för FFmpeg
+    Detected FFmpeg Version Template: 'Identifierad FFmpeg-version: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg har inte laddats ned ännu. Klicka på knappen nedan för att ladda ned det.
+    System FFmpeg Missing Warning: FFmpeg hittades inte på systemet. Det krävs för att sammanfoga video och ljud samt för ljudkonvertering. Installera det, ange en egen sökväg nedan eller byt källa till "Hanteras av OpenTubeX".
+    Download FFmpeg: Ladda ned FFmpeg
+    Update FFmpeg: Uppdatera FFmpeg
+    Checking FFmpeg: Söker efter FFmpeg…
+    Downloading FFmpeg: Laddar ned FFmpeg…
+    FFmpeg Downloaded Template: FFmpeg {version} har laddats ned
+    FFmpeg Download Error Template: 'Det gick inte att ladda ned FFmpeg: {error}'
+    Detected FFprobe Version Template: 'Identifierad FFprobe-version: {version}'
+    FFprobe Managed Not Downloaded: FFprobe har inte laddats ned ännu. Klicka på knappen nedan för att ladda ned det tillsammans med FFmpeg.
+    System FFprobe Missing Warning: FFprobe hittades inte på systemet. Det krävs för att granska media under efterbearbetning. Installera det bredvid FFmpeg eller byt källa till "Hanteras av OpenTubeX".
+    Checking FFprobe: Söker efter FFprobe…
+    Download FFmpeg and FFprobe: Ladda ned FFmpeg och FFprobe
+    Update FFmpeg and FFprobe: Uppdatera FFmpeg och FFprobe
+    Downloading FFmpeg and FFprobe: Laddar ned FFmpeg och FFprobe…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg och FFprobe {version} har laddats ned
+    FFmpeg and FFprobe Download Error Template: 'Det gick inte att ladda ned FFmpeg och FFprobe: {error}'
+    Managed Tool Already Current Template: '{tool} {version} är redan uppdaterat'
+    Managed Tool Updates: Uppdateringar av hanterade verktyg
+    Update Modes:
+      Automatic: Uppdatera automatiskt
+      Ask: Fråga före uppdatering
+      Manual: Uppdatera endast manuellt
+    yt-dlp Executable Path: Sökväg till yt-dlp-programfilen
+    FFmpeg Executable Path: Sökväg till FFmpeg-programfilen
+    Restricted Playback Authentication: Uppspelningskakor för yt-dlp
+    Cookie Source: Källa för kakor
+    Cookie Sources:
+      None: Ingen
+      File: Fil
+      Browser: Webbläsare
+    Cookie File: Kakfil
+    Browser for Cookies: Webbläsare för kakor
+    Browser Profile: Webbläsarprofil (valfritt)
+    Browser Profile Placeholder: Profilnamn eller sökväg
+    Select Browser: Välj en webbläsare
+    Always Use Cookies: Använd alltid kakor
+    Restricted Playback Authentication Hint: Som standard skickar OpenTubeX kakorna till yt-dlp först när du väljer "Försök med konfigurerade kakor" för en åldersbegränsad video eller en video endast för medlemmar.
+    Restricted Playback Authentication Warning: Om du använder yt-dlp med ett Google-konto kan kontot begränsas tillfälligt eller permanent.
+  Privacy Settings:
+    Automatic History Retention: Automatisk lagringstid för historik (dagar)
+    Automatic History Retention Placeholder: Lämna tomt för att spara för alltid
+    Automatic History Retention Tooltip: Lämna tomt för att spara historiken för alltid. När du sparar ett antal tas äldre poster bort direkt och därefter automatiskt medan appen är öppen.
+    History Retention Saved: Historikens lagringstid har sparats
+    Invalid History Retention Days: Ange ett helt antal dagar som är större än noll
+    Enable Watch Statistics: Aktivera visningsstatistik
+    Week Starts On: Veckan börjar på
+    Cache Video Metadata: Metadatahistorik
+    Cache Video Metadata Tooltip: Sparar alla versioner av metadata som stöds för videor du besöker, inklusive titlar, miniatyrbilder och beskrivningar. Funktionen är inaktiverad som standard eftersom metadatahistoriken använder mer diskutrymme.
+    Watched Percentage Threshold: Procentgräns för sedd video
+    Watched Percentage Threshold Tooltip: Videor markeras som sedda när den valda procentandelen har nåtts och högst 2 minuter återstår. Vid 0 % markeras de när uppspelningen börjar. Vid 100 % markeras de när uppspelningen slutar.
+    Clear Video Metadata Cache: Rensa cacheminnet för videometadata
+    Are you sure you want to clear the video metadata cache?: Vill du rensa cachade videotitlar, miniatyrbilder och beskrivningar?
+    Failed to clear video metadata cache: Det gick inte att rensa cacheminnet för videometadata
+    Video metadata cache has been cleared: Cacheminnet för videometadata har rensats
+    Video Metadata Cache Size: 'Cacheminne för videometadata: {size}'
+  Storage Settings:
+    Storage: Lagring
+    Downloaded Media: Spårade nedladdade medier
+    Storage Breakdown: Fördelning av lagringsutrymme
+    Shown Total: Visad totalsumma
+    Calculating: Beräknar…
+    Not Available: Exakt storlek är inte tillgänglig
+    At Least: Minst {size}
+    Failed To Read Storage: Vissa lagringsstorlekar kunde inte läsas
+    Downloaded Media Description: Video-, ljud- och undertextfiler som fortfarande spåras av nedladdningshistoriken.
+    Selected Download Folders: Nedladdningsmappar valda av användaren
+    Download History Records: Poster i nedladdningshistoriken
+    Download History Records Description: '{count} slutförd nedladdningspost. Posten spårar status och filplatser men innehåller inte de nedladdade medierna. | {count} slutförda nedladdningsposter. Posterna spårar status och filplatser men innehåller inte de nedladdade medierna.'
+    Clear Download History Records: Rensa poster i nedladdningshistoriken
+    Clear Download History Confirmation: Rensa alla slutförda nedladdningsposter?
+    Download Files Stay On Disk: Nedladdade filer finns kvar på disken, men visas inte längre på sidan Nedladdningar.
+    Clear Records: Rensa poster
+    Replaceable Caches: Återskapningsbara cacheminnen
+    Application Caches: Appens cacheminnen
+    Browser Caches: Webbläsarens cacheminnen
+    Browser Caches Hint: Chromiums cacheminnen för HTTP, GPU, kod, shaders, service workers och ordlistor.
+    Stored App Data: Lagrade appdata
+    Browser Runtime Data: Webbläsarens körningsdata
+    Browser Runtime Data Hint: Chromiums sessionslagring och lokala lagring, kakor, integritets- och nätverksstatus samt kraschfiler.
+    Subscription Feed Cache: Cacheminne för prenumerationer och flöden
+    Subscription Feed Cache Description: Lagrar hämtade prenumerationsvideor, Shorts, liveströmmar och inlägg. OpenTubeX återskapar cacheminnet vid nästa flödesuppdatering.
+    Clear Subscription Feed Cache: Rensa cacheminnet för prenumerationer och flöden
+    Clear Subscription Feed Cache Confirmation: Rensa cacheminnet för prenumerationer och flöden?
+    Subscription Feed Cache Effect: Prenumerationsflöden kan se tomma ut tills de uppdateras. Dina prenumerationer och profiler ändras inte.
+    Session Search Cache: Cacheminne för sessionssökningar
+    In Memory: I minnet
+    Session Search Cache Description: '{count} sökning lagras i minnet för snabbare bakåtnavigering. Cacheminnet tas bort när OpenTubeX stängs. | {count} sökningar lagras i minnet för snabbare bakåtnavigering. Cacheminnet tas bort när OpenTubeX stängs.'
+    Clear Session Search Cache: Rensa cacheminnet för sessionssökningar
+    Clear Session Search Cache Confirmation: Rensa cacheminnet för sessionssökningar?
+    Session Search Cache Effect: Cachade resultatsidor tas bort. Den sparade sökhistoriken ändras inte.
+    HTTP Cache: HTTP-cache
+    HTTP Cache Description: Electron lagrar nätverkssvar på disken så att upprepade förfrågningar kan läsas in utan att samma data hämtas igen. OpenTubeX återskapar cacheminnet vid behov.
+    Managed By Electron: Hanteras av Electron
+    Clear HTTP Cache: Rensa HTTP-cache
+    Clear HTTP Cache Confirmation: Rensa Electrons HTTP-cache?
+    HTTP Cache Effect: Bilder och andra nätverksresurser kan läsas in långsammare en gång medan cacheminnet byggs upp igen.
+    Tab Image Cache: Miniatyrbilder för flikar och kanalavatarer
+    Tab Image Cache Description: Lagrar förhandsvisningsbilder och kanalavatarer för öppna och återställda flikar. OpenTubeX återskapar dem när flikarna används.
+    Clear Tab Image Cache: Rensa cacheminnet för flikbilder
+    Clear Tab Image Cache Confirmation: Rensa miniatyrbilder för flikar och kanalavatarer?
+    Tab Image Cache Effect: Flikbilder kan försvinna en kort stund och återskapas när respektive flik används.
+    Playback Caches: Cacheminnen för uppspelning
+    Playback Caches Description: Lagrar URL:er till yt-dlp-strömmar mellan appsessioner samt filer för YouTube-spelaren. URL-cacheminnet gäller endast strömmar som hämtas med yt-dlp.
+    Playback URL Cache Entry Size: Cachegräns för URL:er till yt-dlp-strömmar
+    Playback URL Cache Entry Size Tooltip: Anger den största storleken för varje cachad yt-dlp-strömpost. Ange 0 MB för att inaktivera beständig cachelagring av yt-dlp-strömmar.
+    Clear Playback Caches: Rensa cacheminnen för uppspelning
+    Clear Playback Caches Confirmation: Rensa cacheminnena för yt-dlp och spelaren?
+    Playback Caches Effect: Nästa lokala uppspelningsbegäran kan ta längre tid när ström- och spelardata hämtas igen.
+    Clear Cache: Rensa cacheminne
+    History Data: Lagrad historik
+    Video Metadata Description: Lagrar tidigare titlar, miniatyrbilder och beskrivningar för videor som stöds. Gamla versioner kan inte återskapas efter att de har tagits bort.
+    Video Metadata Effect: Sparade metadataversioner tas bort permanent. Aktuella videouppgifter kan fortfarande hämtas igen.
+    Watch History: Visningshistorik och statistik
+    Watch History Description: Visningshistoriken registrerar sedda videor och förlopp. Visningsstatistiken lagrar dagliga totalsummor. Lagringstiden gäller endast visningshistoriken.
+    Clear Watch Statistics: Rensa visningsstatistik
+    Watch History Effect: Poster över sedda videor och sparade förlopp tas bort. Visningsstatistiken behålls.
+    Clear Watch Statistics Confirmation: Ta bort all visningsstatistik?
+    Watch Statistics Effect: Dagliga visningstider tas bort. Visningshistoriken behålls.
+    Search History: Sökhistorik
+    Search History Description: Lagrar sökningar som du valt att komma ihåg.
+    Delete Search History: Ta bort sökhistorik
+    Delete Search History Confirmation: Ta bort all sparad sökhistorik?
+    Search History Effect: Sparade sökförslag från dina tidigare sökningar försvinner. Cacheminnet för den aktuella sessionen behålls.
+    Other User Data: Övriga användardata
+    Other Profile Files: Övriga profilfiler
+    Other Profile Files Hint: Säkerhetskopior, tillfälliga filer och profilposter som OpenTubeX ännu inte känner igen.
+    Subscriptions And Profiles: Prenumerationer och profiler
+    Subscriptions And Profiles Description: Lagrar prenumererade kanaler, profilnamn och profiltillhörighet.
+    Subscriptions And Profiles Effect: Alla prenumerationer och extra profiler tas bort permanent. Cachedata för flöden rensas också.
+    Playlists Description: Lagrar spellistenamn, beskrivningar och sparade videor.
+    Playlists Effect: Alla spellistor och deras listor över sparade videor tas bort permanent. Nedladdade mediefiler behålls.
+    Settings And Sessions: Inställningar, fliksessioner och påminnelser
+    Settings And Sessions Description: Lagrar appinställningar, flikar som kan återställas och påminnelser om liveströmmar. Öppna profilmappen för att granska eller säkerhetskopiera filerna. De tas inte bort från den här sidan.
+    Cleanup Complete: Lagringsrensningen är klar
+    Cleanup Failed: Lagringsrensningen misslyckades
+  Subscription Settings:
+    Fetch Feed on Startup: Hämta flöde vid start
+    Show New Content Feed: Visa flöde med nytt innehåll
+    Show New Content Indicators: Visa indikatorer för nytt innehåll
+    Show Scheduled Live Streams / Premieres First: Visa schemalagda liveströmmar och premiärer först
+    Auto Refresh Interval: Intervall för automatisk uppdatering
+    Videos Auto Refresh Interval: Intervall för automatisk uppdatering av videor
+    Shorts Auto Refresh Interval: Intervall för automatisk uppdatering av Shorts
+    Live Auto Refresh Interval: Intervall för automatisk uppdatering av liveströmmar
+    Posts Auto Refresh Interval: Intervall för automatisk uppdatering av inlägg
+  Distraction Free Settings:
+    Sections:
+      Visible While Paused: Synligt under paus i helfönster eller helskärm
+    Hide Channel Avatars: Dölj kanalavatarer
+    Shorten View Counts: Förkorta antal visningar och gilla-markeringar på kommentarer
+    Hide Comment Translation Buttons: Dölj knappar för kommentaröversättning
+    Hide Live Chat Replay: Dölj repriser av livechattar
+    Hide End-Screen Annotations: Dölj slutskärmsnoteringar
+    Hide Paid Promotion Badge: Dölj märket för betald marknadsföring
+    Show Player Controls: Visa spelarkontroller
+    Show Video Title: Visa videotitel
+    Show Bottom Right Actions Dock: Visa åtgärdsfältet längst ned till höger
+    Paused Interface Hide Delay: Fördröjning innan pausgränssnittet döljs
+  Data Settings:
+    Data And Storage: Data och lagring
+    Profile Directory: Profilmapp
+    Open Profile Directory: Öppna profilmappen
+    Invalid JSON row, skipping item: Ogiltig JSON på rad {row}. Objektet hoppas över
+    Import subscriptions formats: 'Format som stöds: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-säkerhetskopia eller FreeTube-export (.json)'
+    Import history formats: 'Format som stöds: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-säkerhetskopia (.json)'
+    Import playlists formats: 'Format som stöds: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'Format som stöds: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+  Sync Settings:
+    Sync Settings: Synkronisering
+    Enable Sync: Aktivera synkronisering
+    Privacy Passphrase: Integritetslösenfras
+    Privacy Passphrase Hint: Använd en annan lösenfras än kontolösenordet. Den lämnar aldrig enheten och krävs på alla enheter. Om du förlorar den går krypterade synkroniseringsdata inte att återställa.
+    Privacy Policy: Integritetspolicy för den här servern
+    Enhanced Privacy Enabled: Förstärkt integritet är aktiverad. Servern lagrar endast krypterade synkroniseringsdata.
+    Enhanced Privacy Unsupported: Varning! Den här servern stöder inte förstärkt integritet. Synkroniserade data är synliga för serveroperatören.
+    Description: Synkronisera prenumerationer, profiler, spellistor, visningshistorik, inställningar och öppna flikar med en synkroniseringsserver för OpenTubeX eller LibreTube. LibreTube-servrar kanske inte stöder alla synkroniseringsfunktioner.
+    Server URL: Server-URL
+    Checking Server: Kontrollerar synkroniseringsservern…
+    Server Unavailable: Det gick inte att ansluta till synkroniseringsservern. Kontrollera URL:en och försök igen.
+    Username: Användarnamn
+    Log In: Logga in
+    Register: Registrera
+    Pair Another Device: Parkoppla en annan enhet
+    Pair With Existing Device: Parkoppla med en befintlig enhet
+    Device Name: Enhetsnamn
+    This Device: Den här enheten
+    Device Name Required: Ange ett namn för den här enheten.
+    Pairing Device Name Hint: Välj ett namn som du känner igen på enheten som ska godkänna begäran.
+    Create Pairing Code: Skapa parkopplingskod
+    Creating Pairing Code: Skapar en säker parkopplingskod…
+    Pairing QR Alt: QR-kod för parkoppling med {device}
+    Scan Pairing Code: Öppna "Parkoppla en annan enhet" på en redan ansluten enhet och skanna koden.
+    Pairing Code: Parkopplingskod
+    Use Text Pairing Code: Använd textkod i stället
+    Show QR Code: Visa QR-kod
+    Text Pairing Code Hint: Kopiera koden till den befintliga enheten. Den innehåller parkopplingshemligheten, så rensa den från urklippshistoriken efter parkopplingen.
+    Pairing QR Warning: Visa endast koden för den betrodda, redan anslutna enhet som ska godkänna begäran. Den upphör att gälla efter två minuter.
+    Pairing Expires: Parkopplingskoden upphör att gälla {time}.
+    Verifying Pairing: Verifierar den överförda integritetsnyckeln…
+    Completing Pairing: Slutför parkoppling av enheten…
+    Compare Pairing Codes: Jämför parkopplingskoder
+    Pairing Code Match Hint: Bekräfta endast om koden matchar koden på din befintliga enhet.
+    Pairing Codes Match: Koderna matchar
+    Pairing Approval Code Hint: Håll fönstret öppet och jämför koden med den nya enheten. Den nya enheten får inte fortsätta om koderna skiljer sig.
+    Pairing Scan Hint: Skanna parkopplingskoden som visas på enheten du lägger till.
+    Enter Pairing Code: Ange koden manuellt
+    Pairing Code Entry Hint: Klistra in parkopplingskoden som visas på enheten du lägger till.
+    Check Pairing Code: Kontrollera koden
+    Scan QR Code: Skanna QR-kod
+    Waiting For Pairing Code: Väntar på en parkopplingskod…
+    Checking Pairing Request: Kontrollerar parkopplingsbegäran…
+    Approving Pairing Request: Krypterar och skickar integritetsnyckeln…
+    Pairing Approval Warning: Godkänn endast om du kan se begäran på enheten du lägger till. Parkopplingen ger åtkomst till kontot och överför integritetsnyckeln.
+    Approve Pairing: Godkänn parkoppling
+    Try Again: Försök igen
+    Scan Again: Skanna igen
+    Camera Unavailable: OpenTubeX kunde inte komma åt en kamera. Kontrollera kamerabehörigheten eller ange parkopplingskoden manuellt.
+    Pairing Unsupported: Synkroniseringsservern stöder inte säker parkoppling av enheter.
+    Pairing Failed: Parkopplingen av enheten misslyckades. Försök igen med en ny kod.
+    Pairing Request Changed: Parkopplingsbegäran har ändrats, löpt ut eller redan använts. Skapa en ny kod.
+    Pairing Server Mismatch: Koden tillhör en annan synkroniseringsserver.
+    Pairing Verification Unavailable: Det finns ingen krypterad synkroniseringssamling som kan verifiera den överförda nyckeln. Synkronisera den befintliga enheten och försök igen.
+    Pairing Completed: Parkopplingen av enheten är klar
+    Pairing Approved: Parkopplingen av enheten har godkänts
+    Disconnect: Koppla från
+    Delete Account: Ta bort synkroniseringskonto
+    Delete Account Confirmation: Ta bort synkroniseringskontot?
+    Delete Account Warning: Detta tar permanent bort ditt synkroniseringskonto och alla data som lagras på servern. Dina lokala OpenTubeX-data tas inte bort.
+    Confirm Delete Account: Ta bort konto
+    Password Required: Lösenord krävs
+    Account Deleted: Synkroniseringskontot har tagits bort
+    Connected as: Ansluten som {username}
+    Automatic Sync: Synkronisera automatiskt efter ändringar och var femte minut
+    Profiles: Profiler
+    Open Tabs: Öppna flikar och session
+    Disable Setting Sync: Sluta synkronisera den här inställningen
+    Enable Setting Sync: Synkronisera den här inställningen
+    Sync Now: Synkronisera nu
+    Downloading encrypted data: Hämtar krypterade synkroniseringsdata…
+    Syncing subscriptions: Synkroniserar prenumerationer…
+    Syncing playlists: Synkroniserar spellistor…
+    Syncing history: Synkroniserar visningshistorik…
+    Syncing profiles: Synkroniserar profiler…
+    Syncing open tabs: Synkroniserar öppna flikar och session…
+    Syncing settings: Synkroniserar inställningar…
+    Uploading encrypted data: Skickar krypterade synkroniseringsdata…
+    Finishing sync: Slutför synkronisering…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Senast synkroniserad: {date}'
+    History not supported: Den här serverversionen stöder inte synkronisering av visningshistorik.
+    Settings not supported: Den här serverversionen stöder inte synkronisering av inställningar.
+    Sync completed: Synkroniseringen är klar
+    Data Loss Confirmation: Bekräfta destruktiv synkronisering?
+    Data Loss Warning: Serverstatusen skulle ta bort {deleted} av {previous} tidigare synkroniserade objekt i {collection}. Det kan tyda på en misslyckad servermigrering eller återställning. Fortsätt endast om borttagningen är avsiktlig och du har en säkerhetskopia.
+    Confirm Data Loss: Ta bort och fortsätt
+  Proxy Settings:
+    IP Block Recovery Script Path: Sökväg till skript för återställning efter IP-blockering
+    Select IP Block Recovery Script File: Välj skriptfil för återställning efter IP-blockering
+    Running IP block recovery script: Kör skript för återställning efter IP-blockering
+    IP block recovery script failed: 'Skriptet för återställning efter IP-blockering misslyckades (slutkod: {exitCode})'
+    IP block recovery script finished: Skriptet för återställning efter IP-blockering är klart
+    Reloading video after IP block recovery: Läser in videon igen efter återställning från IP-blockering
+    Failed to select IP block recovery script: Det gick inte att välja skript för återställning efter IP-blockering
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: Aktivera inskickning till SponsorBlock
+    SponsorBlock Private User ID (optional): Privat användar-ID för SponsorBlock (valfritt)
+    SponsorBlock Private User ID Tooltip: Klistra in ditt privata användar-ID för SponsorBlock från webbläsartillägget. Lämna tomt för att använda ett ID som appen skapar.
+    Generated SponsorBlock User ID: Skapat användar-ID för SponsorBlock
+    Generated SponsorBlock User ID Tooltip: Detta användar-ID för SponsorBlock har skapats av appen och kan användas i webbläsartillägget eller när du använder appen på en annan dator.
+    Export Generated User ID: Exportera skapat användar-ID
+    Generated SponsorBlock User ID Copy Button: Kopiera skapat användar-ID för SponsorBlock
+    Generated SponsorBlock User ID Copied: Det skapade användar-ID:t för SponsorBlock har kopierats till urklipp
+    Skip notification timeout: Tidsgräns för hoppavisering
+    Custom Color: Egen färg
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Aktivera Return YouTube Dislike
+    Return YouTube Dislike Url: API-URL för Return YouTube Dislike (standard är https://ryd-proxy.kavin.rocks)
+  Password Dialog:
+    Incorrect Password: Felaktigt lösenord
+    Unlock: Lås upp
+    Unlocking: Låser upp…
+  Search Settings: Sök i inställningar
+  No Settings Found: Inga inställningar hittades
+Tutorial:
+  Skip: Hoppa över
+  Next: Nästa
+  Finish: Slutför
+  Got It: Jag förstår
+  Welcome:
+    Title: Välkommen till OpenTubeX
+    Description: Här är några kontroller som hjälper dig att komma igång.
+  Navigation:
+    Title: Ditt bibliotek finns alltid nära till hands
+    Description: Använd navigeringen för att öppna prenumerationer, spellistor, historik med mera.
+  Search:
+    Title: Sök eller klistra in en länk
+    Description: Hitta videor och kanaler eller klistra in en video-URL som stöds direkt i sökfältet.
+  Tabs:
+    Title: Håll sidor öppna i flikar
+    Description: Öppna flera sidor samtidigt utan att tappa bort var du var. Välj var flikarna passar bäst i din layout.
+  Quick Settings:
+    Title: Anpassa appen
+    Description: Välj tema och standardkvalitet för video. Du kan när som helst ändra dessa och andra inställningar från profilmenyn eller högerklicka på den för att byta profil.
+  Import Data:
+    Title: Ta med dina data
+    Description: Du kan importera prenumerationer, historik, spellistor, sökhistorik eller inställningar från en annan app eller säkerhetskopia som stöds.
+    Action: Importera data
+    Not Now: Inte nu
+  Settings Moved:
+    Title: Inställningarna har flyttats
+    Description: Välj din profil längst upp till höger för att öppna snabbkontrollerna. Högerklicka på den för att gå direkt till profilvalet. Kugghjulet i menyn öppnar alla inställningar, och Om och Nedladdningar finns nu också där.
+About:
+  Commit: Incheckning
+  Fluxer: Gå med i vår Fluxer-gemenskap
+  Matrix: Matrix
+  Email: E-post
+Profile:
+  Profile Icon: Profilikon
+  Choose an Emoji: Välj en emoji
+  Custom Emoji: Egen emoji
+  Emoji: Emoji
+  Choose Image: Välj bild
+  Crop Image: Beskär bild
+  Zoom: Zoom
+  Apply Crop: Tillämpa beskärning
+  Transparent: Genomskinlig
+  Use Initial: Använd initial
+  The selected image could not be loaded: Den valda bilden kunde inte läsas in
+  Theme Color: Temafärg
+Channel:
+  Channel Name Unavailable: Kanalnamnet är inte tillgängligt
+  Search Result Types: Typer av sökresultat
+  All Results: Alla
+Video:
+  Includes paid promotion: Innehåller betald marknadsföring
+  Age Restricted Badge: Åldersbegränsad
+  Queue: Kö
+  Play Next: Spela härnäst
+  Add to Queue: Lägg till i kön
+  Added to Play Next: Videon spelas härnäst
+  Added to Queue: Videon har lagts till i kön
+  Clear Queue: Rensa kön
+  Queue Video Count: '{count} video | {count} videor'
+  Remove from Queue: Ta bort {title} från kön
+  Drag to Reorder Queue: Dra {title} för att ändra ordning i kön
+  Reorder Queue Item: Flytta {title}
+  Reorder Queue Item Instructions: Använd uppåt- och nedåtpilarna för att flytta videon i kön.
+  Queue Item Moved: '{title} flyttades till plats {position} av {total}.'
+  Queue Item Cannot Move Up: Det går inte att flytta {title} uppåt. Videon är redan på plats 1 av {total}.
+  Queue Item Cannot Move Down: Det går inte att flytta {title} nedåt. Videon är redan på plats {total} av {total}.
+  Metadata: Videoinformation
+  Close Metadata: Stäng videoinformation
+  Metadata Cache:
+    Title History: Titelhistorik
+    Thumbnail History: Miniatyrbildshistorik
+    Description History: Beskrivningshistorik
+    Previous Version: Föregående {number}
+    Empty: (tom)
+  Fetching Streams: Hämtar strömmar med yt-dlp…
+  Transcript:
+    Title: Transkription
+    Search: Sök i transkriptionen
+    Language: Transkriptionsspråk
+    Save: Spara
+    Show: Visa transkription
+    Hide: Dölj transkription
+    Close: Stäng transkription
+    Copied: Transkriptionen har kopierats till urklipp
+    Saved: Transkriptionen har sparats
+    Save Error: Det gick inte att spara transkriptionen
+    Text File: Textfil
+    Unavailable: Det finns ingen transkription för den här videon.
+    Load Error: Transkriptionen kunde inte läsas in.
+    Empty: Transkriptionen innehåller ingen text.
+    No Results: Inga transkriptionsavsnitt matchar din sökning.
+  Retry With Built-in Extraction: Försök igen med inbyggd utvinning
+  Retry With yt-dlp Extraction: Försök igen med yt-dlp-utvinning
+  Reloading video after streaming URL error: Läser in videon igen efter ett fel med strömnings-URL:en
+  Configure Restricted Playback Cookies Hint: Konfigurera kakor under Inställningar → Extern programvara → Uppspelningskakor för yt-dlp.
+  Try With Configured Cookies: Försök med konfigurerade kakor
+  Restricted Playback Authentication Failed Template: 'yt-dlp kunde inte komma åt videon med de konfigurerade kakorna: {error}'
+  Unmark As Watched: Avmarkera som sedd
+  Video has been unmarked as watched: Videon har avmarkerats som sedd
+  Save Channel Playback Speed: Spara uppspelningshastighet för kanalen
+  Channel Playback Speed Saved: Uppspelningshastigheten för kanalen har sparats
+  Save Channel Video Quality: Spara videokvalitet för kanalen
+  Channel Video Quality Saved: Videokvaliteten för kanalen har sparats
+  Save Channel Subtitles State: Spara undertextläge för kanalen
+  Channel Subtitles State Saved: Undertextläget för kanalen har sparats
+  Save Channel Volume: Spara volym för kanalen
+  Channel Volume Saved: Volymen för kanalen har sparats
+  Save Channel Setting: Spara kanalinställning…
+  Channel Setting Already Set: '{setting} är redan inställt på {value}'
+  Video has been saved to {playlistName}: Videon har sparats i {playlistName}
+  Video has been removed from {playlistName}: Videon har tagits bort från {playlistName}
+  There was a problem saving the video to {playlistName}: Ett fel uppstod när videon skulle sparas i {playlistName}
+  There was a problem removing the video from {playlistName}: Ett fel uppstod när videon skulle tas bort från {playlistName}
+  Failed to load collaborators: Det gick inte att läsa in medverkande
+  Notify me: Avisera mig
+  Notification on: Avisering aktiverad
+  Notification enabled: Du får en avisering när videon startar
+  Notification cancelled: Startaviseringen har avbrutits
+  Notification unavailable: Systemaviseringar är inte tillgängliga
+  Scheduled video starting: Schemalagd video startar
+  Live notification body: '{videoTitle} startar nu'
+  Premiere: Premiär
+  AI: AI
+  AI-generated content: AI-genererat innehåll
+  Collaborators: Medverkande
+  Live Chat Replay: Repris av livechatt
+  Show Live Chat: Visa livechatt
+  Show Live Chat Replay: Visa repris av livechatt
+  Close Live Chat: Stäng livechatt
+  Close Live Chat Replay: Stäng repris av livechatt
+  Live Chat Settings: Inställningar för livechatt
+  Show Live Chat Timestamps: Visa tidsstämplar
+  Chat Filter: Chattfilter
+  Top Chat: Toppchatt
+  All Messages: Alla meddelanden
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Repris av livechatten är aktiverad. Chattmeddelanden visas här medan videon spelas upp.
+  Premiere started: Premiären pågår. Startade {timeAgo}
+  Player:
+    Voice-over Translation:
+      Start: Översätt
+      Cancel: Avbryt
+      Progress: Förbereder dubbningsöversättning…
+      Retry: Försök igen
+      Error: Dubbningsöversättningen misslyckades. Försök igen senare.
+      Duration Error: Dubbningsöversättning är endast tillgänglig för videor som är högst fyra timmar långa.
+    Caption Appearance:
+      Options: Alternativ
+      Sample: Så här ser undertexterna ut
+    Auto-translate: Översätt automatiskt
+    Sleep Timer:
+      Sleep Timer: Insomningstimer
+      'Off': 'Av'
+      Minutes: '{minutes} minuter'
+      End of video: När videon är slut
+      Remaining: '{time} återstår'
+      Cancel timer: Avbryt timern
+      Timer ended: Insomningstimern har löpt ut
+    Zoom:
+      Zoom: Zoom
+      'Off': 'Av'
+    Auto-generated Caption Template: '{language} (automatiskt genererade)'
+    Up next in {seconds}: Härnäst om {seconds}
+    Resize dock: Ändra storlek på dockan
+    Play now: Spela nu
+    MusicPlaybackRateOverride: Musikvideo identifierad, spelas upp med 1× hastighet
+    Normal: Normal
+    Set Default: Ange som standard
+    Hide Annotations: Dölj noteringar
+    Show Annotations: Visa noteringar
+    Hide: Dölj
+    Show: Visa
+    Scroll Mini Player:
+      Back to Top: Tillbaka högst upp
+      Return to Video Tab: Gå tillbaka till videofliken
+      Play: Spela upp
+      Pause: Pausa
+      Drag Handle: Flytta minispelaren
+    SponsorBlock:
+      CancelCurrentSegment: Avbryt skapandet av segmentet
+      ClearSegments: Rensa segment
+      ClearSegmentsPrompt: Vill du rensa alla utkast till SponsorBlock-segment för videon?
+      CompleteSegmentsBeforeSubmitting: Slutför alla segmentutkast innan du skickar in dem.
+      CategoryLabel: Kategori
+      ActionTypeLabel: Segmenttyp
+      DuplicateSegments: Segmentutkast får inte vara dubbletter.
+      EndAction: (Slut)
+      EndActionLabel: Slut
+      EndTimeAfterStart: Segmentets sluttid måste vara efter starttiden.
+      EndTimeBeforeVideoEnd: Segmentets sluttid måste ligga inom videons längd.
+      EndTimeLabel: Segmentets sluttid
+      DisableAutoSkipTemporarily: Inaktivera SponsorBlocks automatiska överhoppning tillfälligt
+      EnableAutoSkipTemporarily: Aktivera SponsorBlocks automatiska överhoppning igen
+      Guidelines: Riktlinjer
+      InspectSegment: Granska
+      InvalidStartTime: Ange en giltig starttid för segmentet.
+      NoSegmentsToSubmit: Skapa minst ett fullständigt segment innan du skickar in.
+      NowAction: (Nu)
+      CloseInfoPanel: Stäng SponsorBlock-information
+      OpenInfoPanel: Öppna SponsorBlock-information
+      OpenSubmissionMenu: Öppna inskickningsmenyn
+      PreviewRequired: Förhandsgranska alla segment innan du skickar in dem.
+      PreviewSegment: Förhandsgranska
+      SaveSegment: Spara
+      SetSegmentEndNow: Avsluta segmentet nu
+      StartAction: (Start)
+      StartSegmentNow: Starta segmentet nu
+      SubmissionBadRequest: SponsorBlock avvisade inskickningsbegäran.
+      SubmissionDuplicate: Detta har redan skickats in.
+      SubmissionFailed: Det gick inte att skicka in SponsorBlock-segmenten.
+      SubmissionForbidden: SponsorBlock avvisade inskickningen.
+      SubmissionRateLimited: SponsorBlock begränsade inskickningsfrekvensen.
+      SubmissionSuccess: SponsorBlock-segmenten har skickats in.
+      SubmitSegment: Skicka in segment
+      SubmitSegments: Skicka in
+      StartTimeLabel: Segmentets starttid
+      TimeDivider: till
+      SkipPrompt: Hoppa över {segmentCategory}?
+      SkipPromptAction: Hoppa över
+      SkipToHighlight: Hoppa till höjdpunkten?
+      SkippedToHighlight: Hoppade till höjdpunkten
+      SkipToastUnskip: Ångra överhoppning
+      SkipToastReskip: Hoppa över igen
+      MutedSegment: '{segmentCategory} har tystats'
+      MuteToastUnmute: Slå på ljudet
+      InfoPanelLoading: Segmenten läses fortfarande in…
+      InfoPanelHasSegments: Videon har segment i databasen!
+      InfoPanelNoSegments: Inga segment hittades
+      RefreshSegments: Uppdatera segment
+      RefreshInfo: Uppdatera SponsorBlock-information
+      ContributionStatsTitle: Dina bidrag
+      ContributionStatsLoading: Läser in bidragsstatistik…
+      ContributionStatsError: Bidragsstatistiken är inte tillgänglig. Försök att uppdatera.
+      ContributionStatsNoUserId: Skicka in ett segment eller importera ditt användar-ID för SponsorBlock för att se bidragsstatistik.
+      Submissions: Inskickningar
+      Segments: Segment
+      TimeSaved: Sparad tid
+      AutoSkipEnabled: Hoppa över segment automatiskt
+      AutoSkipOn: 'På'
+      AutoSkipOff: 'Av'
+      WhitelistChannel: Lägg till kanalen i tillåtelselistan
+      ChannelWhitelisted: Finns i tillåtelselistan
+      RemoveChannelFromWhitelist: Ta bort kanalen från tillåtelselistan
+      MuteSegment: Tysta segment
+      SkipSegment: Hoppa över segment
+      CloseSegmentActions: Stäng segmentåtgärder
+      FullVideo: Hela videon
+      FullVideoLabel: '{segmentCategory} · Hela videon'
+      MuteActionType: Tysta
+      MutePrompt: Tysta {segmentCategory}?
+      SkipActionType: Hoppa över
+      LockedSegment: Låst segment
+      UpvoteSegment: Rösta upp
+      DownvoteSegment: Rösta ned
+      VoteFailed: Det gick inte att skicka SponsorBlock-rösten.
+Playlist:
+  Close Playlist: Stäng spellista
+Change Format:
+  Local Video File: Lokal videofil
+  Local Audio File: Lokal ljudfil
+  Online Video: Onlinevideo
+  Stream Source: Strömkälla
+  Stream Extraction Method: Metod för strömutvinning
+  Playback Engine: Uppspelningsmotor
+  Streaming Protocol: Strömningsprotokoll
+  Not Available For This Video: Inte tillgängligt för den här videon
+  Protocols:
+    Progressive: Progressiv
+  Descriptions:
+    Local File: Spelas upp direkt från den nedladdade filen på enheten
+    Online Video: Läs in strömningsformat från den konfigurerade onlinekällan
+    Dash: Anpassningsbar kvalitet, flera ljudspår och de högsta upplösningarna
+    Legacy: En enda fil med kombinerad video och ljud, begränsad till lägre upplösningar
+    Audio: Endast ljud, vilket sparar bandbredd och passar för lyssning i bakgrunden
+  yt-dlp Fallback Template: 'yt-dlp kunde inte tillhandahålla strömmarna. Den inbyggda motorn används i stället: {error}'
+  yt-dlp Default Clients Fallback: De föredragna yt-dlp-klienterna kunde inte tillhandahålla spelbara strömmar. Försöker med yt-dlp:s standardklienter i stället
+  Built-in Fallback Template: 'Den inbyggda motorn kunde inte spela upp strömmen. Försöker med yt-dlp i stället: {error}'
+Share:
+  Timestamp Link Copied: Länken med tidsstämpeln har kopierats till urklipp
+Context Menu:
+  Context Menu: Snabbmeny
+  Select All: Markera allt
+  Save Image As…: Spara bild som…
+  Copy Image: Kopiera bild
+  Copy Image Address: Kopiera bildadress
+  Cancel Refresh: Avbryt uppdatering
+  Reload Videos: Läs in videor igen
+  Reload Shorts: Läs in Shorts igen
+  Reload Live: Läs in liveströmmar igen
+  Reload Posts: Läs in inlägg igen
+  Reload All Feeds: Läs in alla flöden igen
+  Close Multiple Tabs: Stäng {count} flikar
+  Duplicate Tab: Duplicera flik
+  Duplicate Multiple Tabs: Duplicera {count} flikar
+  Move Tab: Flytta flik
+  Move Tabs: Flytta flikar
+  Move Tab to Group: Flytta flik till grupp
+  Collapse Group: Fäll ihop grupp
+  Move Tabs to Group: Flytta flikar till grupp
+  Manage Tab Groups…: Hantera flikgrupper…
+  To Beginning: Till början
+  To End: Till slutet
+  Close Tabs: Stäng flikar
+  To the Top: Högst upp
+  To the Left: Längst till vänster
+  To the Bottom: Längst ned
+  To the Right: Längst till höger
+  Other Tabs: Andra flikar
+  Copy YouTube Link: Kopiera YouTube-länk
+  Copy YouTube Links: Kopiera YouTube-länkar
+  Pin Tab: Fäst flik
+  Pin Tabs: Fäst flikar
+  Unpin Tab: Lossa flik
+  Unpin Tabs: Lossa flikar
+  Tab Color: Flikfärg
+  Default: Standard
+  Purple: Lila
+  Reopen Closed Tab: Öppna stängd flik igen
+  Reload Tab: Läs in flik igen
+  Reload Tabs: Läs in flikar igen
+  Load Tab: Läs in flik
+  Load Tabs: Läs in flikar
+  Unload Tab: Frigör flik
+  Unload Tabs: Frigör flikar
+  Move Tab to Window: Flytta flik till fönster
+  Move Tabs to Window: Flytta flikar till fönster
+  Open in a New Tab: Öppna i ny flik
+  Open in a New Window: Öppna i nytt fönster
+  Copy Link: Kopiera länk
+  Copy Invidious Link: Kopiera Invidious-länk
+  Search Selection in New Tab: Sök efter "{selection}" i en ny flik
+  Search Selection in New Window: Sök efter "{selection}" i ett nytt fönster
+  Search With: Sök med {engine}
+  Search With Multiple: Sök med…
+  Selection Too Long: Markeringen är för lång för en sökning (> {count} tecken)
+Tab Organizer:
+  Title: Flikorganisatör
+  Open Tab Count: '{count} öppen flik | {count} öppna flikar'
+  Search Label: Sök bland flikar
+  Selected Count: '{count} flik markerad | {count} flikar markerade'
+  Tab Count: '{count} flik | {count} flikar'
+  Select All: Markera alla
+  Select None: Avmarkera alla
+  Move To Group: Flytta markerade flikar till grupp
+  Choose Group: Välj en grupp
+  Ungrouped: Ogrupperade
+  Pin: Fäst
+  Unpin: Lossa
+  Load: Läs in
+  Unload: Frigör
+  Unload All: Frigör alla
+  Close All: Stäng alla
+  Ungroup: Ta bort gruppering
+  Group Name: Gruppnamn
+  Color: Färg
+  No Color: Ingen färg
+  Create Group: Skapa grupp
+  Expand Group: Fäll ut grupp
+  Collapse Group: Fäll ihop grupp
+  Expand Group Label: Fäll ut {name}, {count} flik | Fäll ut {name}, {count} flikar
+  Rename Group: Byt namn på {name}
+  Change Group Color: Ändra färg för {name}
+  Move To Window: Flytta till fönster
+  Choose Window: Välj ett fönster
+  Select Tab: Välj {title}
+  Active: Aktiv
+  Pinned: Fäst
+  Unloaded: Frigjord
+  Playing: Spelas upp
+  Close Tab: Stäng {title}
+  No Open Results: Inga öppna flikar matchar sökningen.
+  Recently Closed: Nyligen stängda
+  Clear: Rensa
+  No Closed Results: Inga nyligen stängda flikar matchar sökningen.
+  Drag Tab: Dra för att flytta till en grupp
+Chapters:
+  Open Chapters: Öppna kapitel
+  Close Chapters: Stäng kapitel
+  Copy Timestamp Link: Kopiera länk vid {timestamp}
+Comments:
+  Comment Count: 1 kommentar | {count} kommentarer
+  Show Comments: Visa kommentarer
+  Getting comment replies, please wait: Hämtar svar på kommentaren, vänta
+  Reload Comments: Läs in kommentarer igen
+  Reply Count: 1 svar | {replyCount} svar
+  Comments are turned off: Kommentarer är inaktiverade
+  YouTube did not provide advertised replies: YouTube angav att kommentaren har svar men tillhandahöll dem inte. De kan ha tagits bort eller dolts, så svarsknappen har tagits bort.
+  Pinned by you: Fäst av dig
+  A reply is pinned: Ett svar är fäst
+  Filter loaded comments: Filtrera inlästa kommentarer
+  Comment filters: Kommentarsfilter
+  From creator: Från kreatören
+  Contains timestamps: Innehåller tidsstämplar
+  Pin comment by author: Fäst kommentar av {author}
+  Unpin comment by author: Lossa kommentar av {author}
+  Edited: (redigerad)
+  Highlighted comment: Markerad kommentar
+  Highlighted reply: Markerat svar
+  Search loaded comments: Sök bland inlästa kommentarer
+  Loaded comment search result count: 1 av {total} inlästa kommentarer | {count} av {total} inlästa kommentarer
+  No loaded comments match your filters: Inga inlästa kommentarer matchar dina filter
+  YouTube comment link copied to clipboard: Länken till YouTube-kommentaren har kopierats till urklipp
+  Translate to {language}: Översätt till {language}
+  Show original: Visa original
+  Translating comment, please wait: Översätter kommentaren, vänta
+  Comment translation failed: Kommentaröversättningen misslyckades
+Description:
+  Copy Description: Kopiera beskrivning
+  Description Copied: Beskrivningen har kopierats till urklipp
+  Video Category: 'Videokategori:'
+  Video Tags: Videotaggar
+  Games: Spel
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: Fyll luckor i mänskliga översättningar med AI-genererad text. Mänskliga översättningar har alltid företräde.
+    Update Relative Timestamps: Uppdaterar relativa tidsangivelser i hela appen medan en sida är öppen. När funktionen är inaktiverad uppdateras de först när sidan läses in igen eller besöks på nytt.
+    Stream Extraction Method: |
+      Välj hur OpenTubeX hämtar videoströmmar. yt-dlp måste vara tillgängligt när det väljs.
+      Det kan ta längre tid att starta videor med yt-dlp.
+      Den inbyggda metoden stöder inte hoppning i liveströmmar och premiärer.
+    Avoid translation: |
+      Inaktivera YouTubes automatiska översättning av en videos titel, beskrivning och kapitel.
+      För många förfrågningar, exempelvis när videotitlar hämtas för flera listor, kan tillfälligt
+      göra appen mindre tillförlitlig.
+    Show Thumbnail Previews: Visa animerade förhandsgranskningar när pekaren hålls över videominiatyrer.
+    Startup Behavior: |
+      Välj vad OpenTubeX ska göra vid start.
+      Läs in alla flikar återställer genast alla sparade flikar, men videor spelas inte upp automatiskt i bakgrundsflikar.
+      Läs in tidigare inlästa flikar läser in de flikar som var inlästa när OpenTubeX stängdes och lämnar övriga frigjorda.
+      Läs in senast aktiva fliken återställer föregående session med övriga flikar öppna men frigjorda. De läses in när du klickar på dem.
+      Starta med en tom session hoppar över sparade flikar och öppnar ett nytt tomt fönster.
+    Remember Tab Navigation History: Varje fliks bakåt- och framåthistorik sparas och återställs när OpenTubeX startas om.
+  Proxy Settings:
+    IP Block Recovery Script Path: Sökväg till skriptfilen som ska köras när en IP-blockering identifieras. OpenTubeX väntar tills skriptet är klart och läser sedan in videon igen. Om reservmetoden är aktiverad körs skriptet först när även den misslyckas.
+  Player Settings:
+    Enable Caption Translations: När funktionen är aktiverad föredrar undertextknappen och kortkommandot C ett automatiskt översatt spår på det föredragna undertextspråket om videon saknar ett matchande originalspår.
+    Use Quick Playback Speed Bar: Visar ett snabbfält för uppspelningshastighet bland spelarkontrollerna till höger. Om manuell lagring av uppspelningshastighet per kanal är aktiverad innehåller fältet även knappen som sparar hastigheten för den aktuella kanalen.
+    Multiply Seek Interval by Playback Rate: När funktionen är aktiverad multipliceras hoppintervallen för piltangenterna och J/L med den aktuella uppspelningshastigheten. När den är inaktiverad förblir hoppintervallen oförändrade oavsett uppspelningshastighet.
+    Show Playback Rate Adjusted Timestamp: När funktionen är aktiverad och uppspelningshastigheten skiljer sig från 1× visar spelaren tidsangivelser som justerats efter hastigheten inom parentes efter den vanliga tidsangivelsen.
+    Use YouTube-style Shorts: Visar Shorts i ett stående rutnät på prenumerations- och kanalsidor och använder Shorts-spelaren i YouTube-stil.
+    Loop Shorts: När funktionen är aktiverad startar Shorts om automatiskt. När den är inaktiverad stannar Shorts vid slutet och visar en knapp för att spela upp igen.
+    Show Skip Silence Toggle: Visar ett på/av-reglage för att hoppa över tystnad i spelarens inställningsmeny.
+    Enable Skip Silence by Default: Aktiverar överhoppning av tystnad för nya flikar. En ändring i en flik påverkar inte andra flikar.
+    Enable Video Zoom: Visar zoomkontrollen i spelarens inställningsmeny och aktiverar dess kortkommandon och panoreringskontroller.
+    Voice-over Translation: Skickar videons ID, längd och valt språk till Yandex inofficiella tjänst för dubbningsöversättning när du begär en översättning. Funktionen är inaktiverad som standard.
+    Hold to Double Playback Speed: Håll ned mellanslagstangenten eller vänster musknapp över spelaren för att tillfälligt dubbla den aktuella uppspelningshastigheten.
+    Ambient Mode: Tonar ut videons färger i området runt spelaren.
+    Default Volume: Inaktiverat medan Kom ihåg volymen är aktiverat. Stäng av Kom ihåg volymen för att ange en fast startvolym för varje video.
+    Parallel Segment Loading: |
+      Antal video- och ljudsegment som ska läsas in samtidigt före uppspelningen.
+      Högre värden kan hjälpa vid långsamma eller instabila anslutningar men använder mer bandbredd och minne.
+      De kan även göra att Auto underskattar anslutningshastigheten och väljer en lägre kvalitet.
+      Strömmar som är begränsade till en begäran åt gången ignorerar inställningen.
+  Download Settings:
+    Download Folder: Videor sparas i den här mappen. Lämna tomt för att använda systemets nedladdningsmapp.
+    Global Additional yt-dlp Arguments: Extra kommandoradsargument som skickas till yt-dlp vid varje nedladdning, exempelvis --cookies-from-browser firefox.
+    Concurrent Downloads: Det högsta antalet yt-dlp-jobb som får köras samtidigt.
+    Bandwidth Limit: Begränsar köns sammanlagda överföringshastighet genom att dela gränsen mellan samtidiga jobb. Ange 0 för obegränsad hastighet.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX kan antingen använda yt-dlp som är installerat på systemet eller ladda ned och hantera en egen kopia som lagras i mappen för användardata.
+    yt-dlp Channel: Välj vilken utgivningskanal för yt-dlp som OpenTubeX ska ladda ned och hantera. Stabil rekommenderas för de flesta användare.
+    FFmpeg Source: OpenTubeX kan antingen använda FFmpeg och FFprobe som är installerade på systemet eller ladda ned och hantera egna statiska versioner som lagras i mappen för användardata.
+    Managed Tool Updates: Välj om hanterade verktyg ska uppdateras automatiskt, fråga före uppdatering eller endast uppdateras med de manuella knapparna. Verktyg som saknas laddas fortfarande ned när de behövs.
+    yt-dlp Executable Path: Som standard förutsätter OpenTubeX att yt-dlp kan hittas via miljövariabeln PATH. Vid behov kan du ange en egen sökväg här.
+    Cookie Source: Välj om yt-dlp ska läsa en Netscape-kakfil eller kakor från en installerad webbläsare vid autentiserad uppspelning.
+    Cookie File: Välj en Netscape-formaterad kakfil för autentiserad uppspelning.
+    Browser for Cookies: Stödet för webbläsare läses från den valda yt-dlp-programfilen. OpenTubeX ber yt-dlp att läsa webbläsaren när autentiserad uppspelning begärs.
+    Browser Profile: Valfritt namn på eller mapp för webbläsarprofilen. Lämna tomt för att använda den senast öppnade profilen.
+    Always Use Cookies: Använd de konfigurerade kakorna varje gång yt-dlp utvinner strömmar. Detta byter inte metod för strömutvinning till yt-dlp. När yt-dlp är valt kan format som kräver konto bli tillgängliga, inklusive YouTube Premiums högre bithastighet om kontot har åtkomst.
+    FFmpeg Executable Path: FFmpeg krävs för att sammanfoga separata video- och ljudströmmar samt för ljudkonvertering. Som standard förutsätter OpenTubeX att FFmpeg kan hittas via miljövariabeln PATH. Vid behov kan du ange en egen sökväg här.
+  Distraction Free Settings:
+    Shorten View Counts: Visar antal visningar och gilla-markeringar på kommentarer i den förkortade form som YouTube redan har avrundat, exempelvis 14 tn i stället för 14 000. Exakta antal visas alltid i sin helhet.
+  Subscription Settings:
+    Fetch Feed on Startup: När funktionen är aktiverad hämtar OpenTubeX automatiskt ditt prenumerationsflöde vid start och när ett nytt fönster öppnas.
+    Show New Content Feed: Visar en flik med namnet Nytt som innehåller poster i prenumerationsflödet som inte fanns vid föregående hämtning.
+    Show New Content Indicators: Visar en liten punkt bredvid poster i prenumerationsflödet som inte fanns vid föregående hämtning.
+    Show Scheduled Live Streams / Premieres First: Behåller kommande liveströmmar och premiärer högst upp i prenumerationsflödet. När funktionen är inaktiverad ligger de kvar på platsen för tillkännagivandet tills de startar. Uppdatera prenumerationsflödet en gång efter inaktiveringen för att hämta tillkännagivandedatum för befintliga schemalagda poster.
+    Auto Refresh Interval: Hur ofta OpenTubeX automatiskt uppdaterar prenumerationsflödet medan appen är öppen.
+  Theme Settings:
+    Show Progress as Notification: Visar en beständig avisering med aktuellt förlopp för bakgrundsåtgärder, exempelvis uppdatering av prenumerationer och nedladdning av hanterade verktyg, i stället för det globala förloppsfältet.
+    Always Show Scrollbars: Håller rullningslisterna synliga hela tiden. När funktionen är inaktiverad tonas de bort en kort stund efter att du slutat röra musen och visas igen så snart du rör den.
+    Use Fixed Tab Width: Ger alla flikar i det vågräta flikfältet samma bredd i stället för att anpassa bredden efter titeln.
+    Use Grid Player Menu: Ordnar videospelarens inställningsmeny som ett rutnät med rutor i stället för en lista med rader.
+The playlist is at the beginning. Enable loop to continue playing: Spellistan är vid början. Aktivera upprepning för att fortsätta spela
+External link opening has been disabled in Settings → Privacy: Öppning av externa länkar har inaktiverats under Inställningar → Integritet
+KeyboardShortcutPrompt:
+  Edit Hint: Välj ett kortkommando och tryck sedan på en ny tangentkombination. Tryck på Backsteg eller Delete för att ta bort tilldelningen.
+  Change Shortcut: Ändra kortkommando för {action}
+  Press Shortcut: Tryck på kortkommando…
+  Unassigned: Ej tilldelat
+  Reset Shortcut: Återställ kortkommando för {action}
+  Reset to Defaults: Återställ standardvärden
+  Shortcut Already Assigned: Kortkommandot är redan tilldelat
+  Shortcut Conflict: '{shortcut} är redan tilldelat till {actions}. Vill du tilldela om det?'
+  Reserved Shortcut Conflict: '{shortcut} är reserverat för {actions} och kan inte tilldelas om.'
+  Reassign: Tilldela om
+  Sections:
+    App:
+      Tabs: "App:\_Flikar"
+      Search and Page: "App:\_Sökning och sida"
+      Window and View: "App:\_Fönster och vy"
+  New Tab: Skapa en ny flik
+  Close Tab: Stäng aktuell flik
+  Reload Tab: Läs in aktuell flik igen
+  Reopen Closed Tab: Öppna den senast stängda fliken igen
+  Next Tab: Byt till nästa flik
+  Previous Tab: Byt till föregående flik
+  Switch to Tab: Byt till flik 1–9
+  Toggle Tab Orientation: Växla mellan fliklayouter
+  Find in Page: Sök efter text på aktuell sida
+  Find Next Match: Gå till nästa träff
+  Find Previous Match: Gå till föregående träff
+  Toggle Normal Playback Speed: Växla mellan hastigheten 1× och föregående uppspelningshastighet
+  Toggle Skip Silence: Slå på eller av överhoppning av tystnad
+  Video Zoom In: Zooma in i videon
+  Video Zoom Out: Zooma ut ur videon
+  Tab Switcher: Flikväxlare
+CommandPalette:
+  Title: Kommandopalett
+  Open: Öppna kommandopaletten
+  Search Label: Sök efter kommandon
+  Search Placeholder: Sök bland kommandon och inställningar…
+  Results: Kommandon
+  No Results: Inga matchande kommandon
+  Result Count: 1 kommando hittades | {count} kommandon hittades
+  Move: Flytta
+  Run: Kör
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Byt till flik: {title}'
+  Switch Profile: 'Byt profil: {name}'
+  Open Playlist: 'Öppna spellista: {name}'
+  Cancel Download: 'Avbryt nedladdning: {title}'
+  Groups:
+    App: App
+    Navigation: Navigering
+    Tabs: Flikar
+  Unavailable:
+    Current Page: Du är redan på den här sidan
+    No History: Det finns ingen sida i den riktningen
+    Desktop: Endast tillgängligt i skrivbordsappen
+    Build: Inte tillgängligt i den här versionen
+    One Tab: Öppna en annan flik först
+    Active Tab: Detta är den aktiva fliken
+    Active Profile: Detta är den aktiva profilen
+    Download Finished: Nedladdningen pågår inte längre
+    Video: Öppna en video först
+Downloads:
+  Download: Ladda ned
+  Download Video: Ladda ned video
+  Download Playlist: Ladda ned spellista
+  Downloading: Laddar ned
+  Queue: Kö
+  Downloaded: Nedladdad
+  Canceled: Avbruten
+  Open Downloads: Öppna Nedladdningar
+  No Downloads: Inga nedladdningar ännu
+  No Downloads Description: Nedladdningar som du startar visas här.
+  Clear Failed Canceled Skipped And Missing: Rensa misslyckade, avbrutna, överhoppade och saknade
+  Clear From List: Ta bort från listan
+  Show in Folder: Visa i mapp
+  Play Download: Spela upp nedladdning
+  Retry Download: Försök ladda ned igen
+  Pause Download: Pausa nedladdning
+  Resume Download: Återuppta nedladdning
+  Move Earlier: Flytta tidigare
+  Move Later: Flytta senare
+  Pause All: Pausa alla
+  Resume All: Återuppta alla
+  Retry All: Försök ladda ned alla misslyckade igen
+  Total Size: 'Total storlek: {size}'
+  Local File: Lokal fil
+  Available Offline: Tillgänglig offline
+  Remove File: Ta bort fil
+  Remove File Confirmation: Ta bort den nedladdade filen?
+  Remove File Warning: Detta flyttar "{title}" till enhetens papperskorg.
+  File Not Found: Den nedladdade filen kunde inte hittas.
+  Download Missing: Nedladdningen är inte tillgänglig
+  Files Missing: Den nedladdade filen finns inte längre i filsystemet. | De nedladdade filerna finns inte längre i filsystemet.
+  Files Available: '{available} av {total} nedladdade filer är tillgängliga.'
+  More Files: 1 fil till | {count} filer till
+  Template Used: 'Mall: {name}'
+  Download Type: Nedladdningstyp
+  Template: Mall
+  Unsaved: Inte sparad
+  Media Type: Medietyp
+  Video: Video
+  Audio: Ljud
+  Maximum Resolution: Högsta upplösning
+  Best Available: Bästa tillgängliga
+  Automatic: Automatisk
+  Container: Behållare
+  Video Codec: Videokodek
+  Audio Codec: Ljudkodek
+  File Name Template: Filnamnsmall
+  File Name Template Help: 'Tillgängliga fält: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Tidsintervall och kapitel
+  Start Time: Starttid (HH:MM:SS)
+  End Time: Sluttid (HH:MM:SS)
+  Split by Chapters: Dela upp i separata filer efter kapitel
+  Remove Segments: Ta bort segment
+  Subtitles and Metadata: Undertexter och metadata
+  Include Subtitles: Inkludera undertexter
+  Embed Subtitles: Bädda in undertexter i mediefilen
+  Subtitle Format: Undertextformat
+  Subtitle Languages: Undertextspråk
+  Subtitle Languages Help: 'Kommaseparerade språkväljare för yt-dlp, exempelvis: en.*,de.*'
+  Embed Cover Art: Bädda in miniatyrbilden som omslagsbild
+  Embed Metadata: Bädda in titel, skapare, beskrivning och kapitel
+  Additional yt-dlp Arguments: Extra argument för yt-dlp
+  Custom yt-dlp Arguments: Egna argument för yt-dlp
+  Template Name: Mallnamn
+  Save Template: Spara mall
+  Delete Template: Ta bort mall
+  Template Saved: Nedladdningsmallen "{name}" har sparats
+  Template Name Exists: Det finns redan en nedladdningsmall med namnet "{name}".
+  Choose Folder: Ändra
+  Select Folder: Välj mapp
+  Folder Required: Välj en nedladdningsmapp för att aktivera nedladdningar.
+  System Downloads Folder: Systemets nedladdningsmapp
+  Processing: Bearbetar…
+  Queued: I kö
+  Queued Position: I kö, plats {position}
+  Paused: Pausad
+  Pausing: Det aktuella jobbet slutförs innan kön pausas
+  Download Complete: Nedladdningen är klar
+  Download Cancelled: Nedladdningen har avbrutits
+  Download Failed: Nedladdningen misslyckades
+  File Name Shortened: Filnamnet förkortades eftersom videotiteln var för lång.
+  Insufficient Disk Space: Det finns inte tillräckligt med diskutrymme. Cirka {required} krävs och {available} är tillgängligt.
+  Unknown Download Size: Nedladdningens storlek är okänd. {available} är tillgängligt i målfilsystemet.
+  Disk Space Check Unavailable: Det gick inte att kontrollera tillgängligt diskutrymme innan nedladdningen startades.
+  Download Failure Hint: Kontrollera {issuesLink} och försök sedan byta yt-dlp-kanal till Nightly eller Master under Inställningar → Avancerat → Extern programvara.
+  yt-dlp YouTube Issues: senaste yt-dlp-problemen med YouTube
+  Automatic Download Started: Automatisk nedladdning har startat
+  Automatic Download Started Body: Laddar ned "{title}" från {channel} i bakgrunden.
+  Automatic Download Complete: Den automatiska nedladdningen är klar
+  Automatic Download Failed: Den automatiska nedladdningen misslyckades
+  Automatic Download Could Not Start: Det gick inte att starta den automatiska nedladdningen av "{title}".
+  Automatic Download Skipped: Hoppades över av filtren för automatisk nedladdning
+  Cancel Download: Avbryt nedladdning
+  yt-dlp Not Found: yt-dlp hittades inte. Installera det eller ange dess sökväg under Inställningar → Avancerat → Extern programvara.
+  Download Complete Template: Nedladdningen av "{title}" är klar
+  Download Failed Template: Nedladdningen av "{title}" misslyckades
+  Templates:
+    Video Best: Video – bästa kvalitet
+    Video Resolution: Video - {resolution}
+    Audio Best: Ljud – bästa kvalitet
+    Audio Format: Ljud - {format}
+    Subtitles Format: Undertexter - {format}

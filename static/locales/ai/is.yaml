@@ -1,0 +1,1504 @@
+# Optional AI-generated translations for keys missing from ../is.yaml.
+Color Picker:
+  Hue: Litblær
+  Opacity: Ógagnsæi
+  Backdrop Blur: Bakgrunnsmóða
+  Hex Color: HEX-litur
+  Apply Color: Nota
+  Reset Color: Endurstilla
+  Copy Color: Afrita
+  Copy From Another Color: Afrita úr öðrum lit
+  Color Copied: Liturinn var afritaður
+  Invalid Color: Sláðu inn gildan HEX-lit
+  Clipboard Unavailable: Klemmuspjald er ekki tiltækt
+  Saturation and Brightness: Litmettun og birtustig
+New Tab: Nýr flipi
+Maximize: Hámarka
+Restore: Endurheimta
+Close Tab: Loka flipa
+Close Confirmation:
+  Title: Hætta í OpenTubeX?
+  Message: Viltu örugglega hætta í OpenTubeX?
+  Quit: Hætta
+  Never Ask Again: Ekki spyrja aftur
+Close Window Confirmation:
+  Title: Loka glugga?
+  Message: Í þessum glugga er {count} flipi. Viltu örugglega loka honum? | Í þessum glugga eru {count} flipar. Viltu örugglega loka honum?
+  Close Window: Loka glugga
+Confirmations:
+  Never Ask Again: Ekki spyrja aftur
+  Settings Hint: Þú getur virkjað þessa staðfestingu aftur í Stillingar → Almennt → Staðfesta áður en…
+Close Multiple Tabs Confirmation:
+  Title: Loka mörgum flipum?
+  Message: Þetta lokar {count} flipa. | Þetta lokar {count} flipum.
+  Close Tabs: Loka {count} flipa | Loka {count} flipum
+Load Multiple Tabs Confirmation:
+  Title: Hlaða inn mörgum flipum?
+  Message: Þetta hleður inn {count} flipa. | Þetta hleður inn {count} flipum.
+  Load Tabs: Hlaða inn {count} flipa | Hlaða inn {count} flipum
+Unload Multiple Tabs Confirmation:
+  Title: Losa marga flipa úr minni?
+  Message: Þetta losar {count} flipa úr minni. | Þetta losar {count} flipa úr minni.
+  Unload Tabs: Losa {count} flipa úr minni | Losa {count} flipa úr minni
+Use Vertical Tabs: Nota lóðrétta flipa
+Use Horizontal Tabs: Nota lárétta flipa
+Resize Tab Bar: Breyta stærð flipastiku
+Find in page: Finna á síðu
+Previous match: Fyrri samsvörun
+Next match: Næsta samsvörun
+Close find bar: Loka leitarstiku
+No matches: Engar samsvaranir
+Version {versionNumber} is now available.: Útgáfa {versionNumber} er nú fáanleg.
+See changes and update: Skoða breytingar og uppfæra
+Dismiss: Hunsa
+Update to {version}: Uppfæra í {version}
+Global:
+  Ambient Mode: Umhverfislýsing
+  Loading More: Hleður inn fleiru
+  New: Nýtt
+Search Listing:
+  Label:
+    Members Only: Aðeins fyrir meðlimi
+Stats:
+  Stats: Tölfræði
+  Watch time summary: Yfirlit yfir áhorfstíma
+  Today: Í dag
+  This week: Í þessari viku
+  Total watch time: Heildaráhorfstími
+  Daily average: Daglegt meðaltal
+  So far today: Það sem af er degi
+  Since: Frá {day}
+  All recorded time: Allur skráður tími
+  Per calendar day: Á almanaksdag
+  Day by day: Eftir dögum
+  Highest: 'Mest: {duration}'
+  Week by week: Eftir vikum
+  Last 14 days: Síðustu 14 dagar
+  Last 8 weeks: Síðustu 8 vikur
+  Daily chart aria: Daglegur áhorfstími síðustu 14 daga
+  Weekly chart aria: Vikulegur áhorfstími síðustu 8 vikna
+  No data: Áhorfstími birtist hér þegar þú horfir á myndbönd.
+  Estimate note: Áhorfstími frá því fyrir þessa uppfærslu er áætlaður út frá vistaðri framvindu spilunar.
+  Adjust imported watch time: Leiðrétta innfluttan áhorfstíma
+  Imported watch time: Innfluttur áhorfstími
+  Imported watch time explanation: Veldu spilunarhraðann sem þú notaðir venjulega. Forritið deilir lengd innfluttra myndbanda með þessum hraða til að áætla hversu lengi þú horfðir í raun.
+  Playback speed: Spilunarhraði
+  Channel speed note: Vistaður spilunarhraði rásar er notaður í staðinn þegar hann er tiltækur.
+  Apply playback speed: Nota spilunarhraða
+  Imported watch time adjusted: Innfluttur áhorfstími hefur verið leiðréttur
+  Reset statistics: Endurstilla tölfræði
+  Reset: Endurstilla
+  Reset confirmation: Viltu örugglega endurstilla alla áhorfstölfræði? Ekki er hægt að afturkalla það.
+  Reset success: Áhorfstölfræði hefur verið endurstillt
+  Less than a minute: < 1 mín.
+  Minutes: '{minutes} mín.'
+  Hours: '{hours} klst.'
+  Hours and minutes: '{hours} klst. {minutes} mín.'
+Subscriptions:
+  Refreshing Subscription Videos: Endurnýja myndbönd úr áskriftum
+  Refreshing Subscription Shorts: Endurnýja Shorts-myndbönd úr áskriftum
+  Refreshing Subscription Live Streams: Endurnýja beinar útsendingar úr áskriftum
+  Refreshing Subscription Posts: Endurnýja færslur úr áskriftum
+  New Content: Nýtt efni
+  New Feed Refresh Warning Title: Endurnýja alla áskriftarstrauma?
+  New Feed Refresh Warning: Það getur tekið langan tíma að endurnýja allar efnisgerðir án RSS fyrir 1 áskrift. Viltu halda áfram? | Það getur tekið langan tíma að endurnýja allar efnisgerðir án RSS fyrir {count} áskriftir. Viltu halda áfram?
+  New Since Last Refresh: Nýtt frá síðustu endurnýjun
+  Mark as Seen: Merkja sem séð
+  Mark All as Seen: Merkja allt sem séð
+  No New Content: Ekkert nýtt efni.
+  New Content Tabs: Flipar fyrir nýtt efni
+  Show Tabbed View: Sýna í flipum
+  Show Combined View: Sýna sameinað
+  Newest First: Nýjast fyrst
+  Oldest First: Elst fyrst
+Trending:
+  Load Error: Ekki tókst að hlaða vinsælu efni.
+  Unsupported Backend: Vinsælt efni krefst Local API. Veldu Local API eða virkjaðu varaleið bakenda.
+Most Popular Feed Empty: Straumurinn Vinsælast á þessu Invidious-tilviki er tómur.
+Feed:
+  Cancel Refresh: Hætta við endurnýjun
+  Next Auto Refresh: 'Næsta sjálfvirka endurnýjun: {date}'
+User Playlists:
+  Load More Playlists: Hlaða fleiri spilunarlistum
+  Save to: Vista í…
+  Move Video to the Top: Færa myndband efst
+  Move Video to the Bottom: Færa myndband neðst
+  Quick Bookmark Icon: Tákn flýtibókamerkis
+  Custom Emoji: Sérsniðið tjákn
+  Choose Image: Velja mynd
+  Use Bookmark Icon: Nota bókamerkistákn
+  SinglePlaylistView:
+    Retry: Reyna aftur
+    This playlist could not be loaded.: Ekki tókst að hlaða þessum spilunarlista.
+    More videos could not be loaded.: Ekki tókst að hlaða fleiri myndböndum.
+History:
+  Mark All As Watched: Merkja öll myndbönd sem skoðuð
+  Mark All As Watched Confirmation: Viltu örugglega merkja öll myndbönd í áhorfsferlinum sem skoðuð?
+  All History Marked as Watched: Öll myndbönd í áhorfsferlinum hafa verið merkt sem skoðuð
+  Delete Old History: Eyða gömlum áhorfsferli
+  Select History Age: Veldu hversu gömul færsla þarf að vera áður en henni er eytt.
+  Delete Entries Older Than: Eyða færslum eldri en
+  Number of Days: Fjöldi daga
+  History Cleanup Warning: Þetta eyðir samsvarandi færslum úr áhorfsferlinum fyrir fullt og allt.
+  1 Day: 1 dagur
+  1 Week: 1 vika
+  1 Month: 1 mánuður
+  3 Months: 3 mánuðir
+  1 Year: 1 ár
+  Custom: Sérsniðið
+  History Older Than Days Removed: Áhorfsferli eldri en 1 dags hefur verið eytt | Áhorfsferli eldri en {days} daga hefur verið eytt
+Settings:
+  Quick Settings:
+    Quick Settings: Flýtistillingar
+    Appearance: Útlit
+    Playback: Spilun
+    Content: Efni
+    Language and Region: Tungumál og svæði
+    All Settings: Allar stillingar
+    Profile Selector Hint: Þú getur einnig hægrismellt á tákn notandasniðsins til að skipta um snið
+  Categories:
+    General Description: Tungumál, ræsing, flipar og hegðun forrits
+    Appearance: Útlit
+    Appearance Description: Þema, framsetning og smámyndir
+    Content appearance: Myndbandalistar og smámyndir
+    Layout: Framsetning
+    Playback Description: Spilari, skjátextar og kjörstillingar rása
+    Subscriptions Description: Endurnýjun strauma og birtingarvalkostir
+    Downloads Description: Möppur, sniðmát og sjálfvirkar reglur
+    Distraction Free Description: Fela efni og setja áhorfstakmörk
+    Add-ons: Viðbætur
+    Add-ons Description: SponsorBlock, DeArrow, fjöldi sem líkar ekki við og þýðingar með talsetningu
+    Privacy Description: Persónuvernd við áhorf og aðgangsstýringar
+    Online activity: Virkni á netinu
+    Data And Storage Description: Innflutningur, útflutningur, disknotkun og hreinsun
+    Sync Description: Samstilla stillingar og gögn milli tækja
+    Advanced: Ítarlegt
+    Advanced Description: Veitur, ytri forrit og netkerfi
+    Alternative providers: Veitur myndbanda og lýsigagna
+  Highlight Changed Settings: Auðkenna stillingar sem víkja frá sjálfgefnum gildum
+  Reset Setting to Default: Endurstilla á sjálfgefið gildi
+  Performance Impact:
+    Show Performance Impact: Sýna vísa um áhrif á afköst
+    Moderate: Nokkur áhrif
+    High: Mikil áhrif
+    Description: Þessi stilling getur aukið notkun {resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: minnis
+      Network: nets
+      Disk: disks
+  General Settings:
+    Update Relative Timestamps: Uppfæra afstæða tímastimpla
+    Stream Extraction Method:
+      Stream Extraction Method: Aðferð við öflun streymis
+      yt-dlp: yt-dlp
+      Built-in: Innbyggð
+    Confirm Before: Staðfesta áður en…
+    Confirmation Options:
+      Closing App: Hætta í OpenTubeX
+      Closing Window: Loka glugga með mörgum flipum
+      Closing Tabs: Loka mörgum flipum
+      Loading Tabs: Hlaða inn mörgum flipum
+      Unloading Tabs: Losa marga flipa úr minni
+    Remember Tab Navigation History: Muna leiðarferil flipa
+    New Tab Position:
+      New Tab Position: Staðsetning nýs flipa
+      At the end: Aftast
+      After current tab: Á eftir núverandi flipa
+      After current tab in opened order: Á eftir núverandi flipa, í opnunarröð
+    Tab Close Focus:
+      Tab Close Focus: Eftir að flipa er lokað
+      Previous tab: Velja fyrri flipa
+      Next tab: Velja næsta flipa
+    Startup Behavior:
+      Startup Behavior: Við ræsingu
+      Load all tabs: Hlaða inn öllum flipum
+      Load previously loaded tabs: Hlaða inn flipum sem voru áður hlaðnir inn
+      Load last active tab: Hlaða inn síðasta virka flipa
+      Start with an empty session: Hefja tóma setu
+    Use AI Translation Completions: Fylla inn þýðingar sem vantar með texta sem gervigreind hefur búið til
+    Reduced Motion:
+      Reduced Motion: Minni hreyfing
+      System: Samkvæmt kerfi
+      Force On: Alltaf á
+      Force Off: Alltaf af
+    Comment Translation:
+      Title: Þýðingar ummæla
+      Enable: Virkja þýðingar ummæla
+      Never Translate: Aldrei þýða ummæli á
+      Choose Language: Veldu tungumál
+      Description: Ummæli á tungumáli forritsins eru þegar undanskilin. Bættu við öðrum tungumálum sem þú getur lesið.
+      Remove Language: Þýða ummæli á {language} aftur
+    Avoid translation:
+      Avoid translation: Kjósa óþýddan myndbandstexta
+      Disabled: Óvirkt
+      Watch Only: Aðeins myndbandsviðmót
+      Entire App: Allt forritið
+    Playlist View Type:
+      Playlist View Type: Útlit spilunarlista
+    Show Thumbnail Previews: Sýna forskoðun smámynda
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Aukahnappur á smámynd
+      None: Enginn
+      Mark as Watched: Merkja sem skoðað
+      Copy YouTube Link: Afrita YouTube-tengil
+      Open in YouTube: Opna á YouTube
+  Context Menu Search Settings:
+    Context Menu Search Settings: Leit í samhengisvalmynd
+    Description: Veldu hvaða leitarvélar birtast þegar þú hægrismellir á valinn texta. Leitin opnast í sjálfgefna vafranum þínum.
+    Icon Hint: Þegar þú virkjar leitarvél tengist forritið vefsvæði hennar til að sækja vefsvæðistáknið.
+    Engine Name: Heiti leitarvélar
+    Search URL: Leitarslóð
+    URL Hint: Notaðu %s á þeim stað í slóðinni þar sem kóðaði valdi textinn á að vera.
+    Add Custom Engine: Bæta við sérsniðinni leitarvél
+    Add Engine: Bæta við leitarvél
+    Remove Engine: Fjarlægja {engine}
+    Invalid Engine: Sláðu inn heiti og gilda HTTP- eða HTTPS-leitarslóð sem inniheldur %s.
+    Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.
+  Theme Settings:
+    Move Downloads to App Header: Færa niðurhal í haus forrits
+    Move Settings to App Header: Færa stillingar í haus forrits
+    Hide Side Bar on Watch Pages: Fela hliðarstiku á áhorfssíðum
+    UI Roundness: Rúnnun viðmóts
+    Scrollbar Width: Breidd skrunstiku
+    Animation Speed: Hraði hreyfinga
+    Thumbnail Size: Stærð smámynda
+    Show Tab Icons: Sýna flipatákn
+    Load Missing Tab Icons: Hlaða inn flipatáknum sem vantar
+    Loading Missing Tab Icons: Hleð inn flipatáknum sem vantar…
+    No Missing Tab Icons: Öll studd flipatákn eru þegar innhlaðin
+    Loaded Tab Icons: 'Hlaðið inn flipatákni sem vantaði: {count} | Hlaðið inn flipatáknum sem vantaði: {count}'
+    Loaded Tab Icons With Failures: Hlaðið inn {loaded} flipatáknum; ekki tókst að hlaða inn {failed}
+    Show Tab Previews: Sýna forskoðun flipa
+    Use Fixed Tab Width: Nota fasta flipabreidd í láréttri stöðu
+    Tab Width: Flipabreidd
+    Tab Layout:
+      Tab Layout: Staðsetning flipa
+      Horizontal Top: Láréttir efst
+      Horizontal Bottom: Láréttir neðst
+      Vertical Left: Lóðréttir vinstra megin
+      Vertical Right: Lóðréttir hægra megin
+    Show Toast Timeout Indicator: Sýna tímamæli spretttilkynningar
+    Use Grid Player Menu: Nota reitavalmynd spilara
+    Show Progress as Notification: Sýna framvindu sem tilkynningu
+    Operation in Progress: Aðgerð í gangi
+    Toast Position:
+      Toast Position: Staðsetning spretttilkynninga
+      Bottom Left: Neðst til vinstri
+      Bottom Center: Neðst fyrir miðju
+      Bottom Right: Neðst til hægri
+      Top Left: Efst til vinstri
+      Top Center: Efst fyrir miðju
+      Top Right: Efst til hægri
+    Icon Pack:
+      Icon Pack: Táknpakki
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Leturgerð forrits
+      System Default: Sjálfgefið kerfisletur
+      Unable to Load: Ekki tókst að hlaða uppsettum kerfisleturgerðum
+    Always Show Scrollbars: Sýna alltaf skrunstikur
+    Base Theme:
+      Custom: Sérsniðið
+    Light Theme: Ljóst þema
+    Dark Theme: Dökkt þema
+    Custom Theme:
+      Create Custom Theme: Búa til sérsniðið þema
+      Edit Custom Theme: Breyta sérsniðnu þema
+      Custom Theme Creator: Sérsniðinn þemasmiður
+      Theme Name: Heiti þema
+      Based On: Byggt á
+      Import Theme: Flytja inn þema
+      Export Theme: Flytja út þema
+      Share Theme: Deila þema
+      Share Description Heading: Lýsing
+      Share Description Prompt: Lýstu þemanu og því sem fólk þarf að vita áður en það notar það.
+      Share Screenshots Heading: Skjámyndir
+      Share Screenshots Prompt: Dragðu eina eða fleiri skjámyndir hingað og slepptu þeim.
+      Share Code Summary: JSON-gögn þema
+      Delete Theme: Eyða þema
+      Delete Theme Confirmation: Eyða „{name}“? Ekki er hægt að afturkalla þetta.
+      Save and Apply: Vista og nota
+      Discard Changes: Henda breytingum
+      Reset Colors: Endurstilla á grunnþema
+      Theme File: OpenTubeX-þemaskrá
+      Theme Saved: Sérsniðna þemað var vistað og tekið í notkun
+      Theme Imported: Þemað var flutt inn í ritilinn
+      Theme Exported: Þemað var flutt út
+      Theme Deleted: Sérsniðna þemanu var eytt
+      Unable to Load: Ekki tókst að hlaða sérsniðna þemað
+      Unable to Save: Ekki tókst að vista sérsniðna þemað
+      Unable to Export: Ekki tókst að flytja sérsniðna þemað út
+      Unable to Share: Ekki tókst að deila sérsniðna þemanu
+      Unable to Delete: Ekki tókst að eyða sérsniðna þemanu
+      Invalid Theme File: Ógild sérsniðin þemaskrá
+      Colors:
+        Main text: Aðaltexti
+        Secondary text: Aukatexti
+        Subtle text: Daufur texti
+        Borders and dividers: Rammar og aðgreiningarlínur
+        Subtle surfaces and indicators: Daufir fletir og vísar
+        Title text: Titiltexti
+        Selected text background: Bakgrunnur valins texta
+        Selected text: Valinn texti
+        Logo icon: Tákn merkis
+        Logo text: Texti merkis
+        Logo hover: Merki við yfirsvif
+        Logo pressed: Merki þegar ýtt er
+        Page background: Bakgrunnur síðu
+        Card background: Bakgrunnur spjalds
+        Secondary card background: Bakgrunnur aukaspjalds
+        Favorite icon: Uppáhaldstákn
+        Error color: Villulitur
+        Scrollbar thumb: Skrunhnappur
+        Scrollbar thumb hover: Skrunhnappur við yfirsvif
+        Scrollbar thumb pressed: Skrunhnappur þegar ýtt er
+        Dropdown item hover text: Texti fellilistaatriðis við yfirsvif
+        Dropdown item hover background: Bakgrunnur fellilistaatriðis við yfirsvif
+        Navigation and panel background: Bakgrunnur leiðsagnar og svæðis
+        Neutral item hover and focus background: Bakgrunnur hlutlauss atriðis við yfirsvif og fókus
+        Neutral item hover and focus text and icons: Texti og tákn hlutlauss atriðis við yfirsvif og fókus
+        Neutral item pressed background: Bakgrunnur hlutlauss atriðis þegar ýtt er
+        Neutral item pressed text and icons: Texti og tákn hlutlauss atriðis þegar ýtt er
+        Header button hover and focus background: Bakgrunnur haushnapps við yfirsvif og fókus
+        Header button hover and focus text and icons: Texti og tákn haushnapps við yfirsvif og fókus
+        Header button pressed background: Bakgrunnur haushnapps þegar ýtt er
+        Header button pressed text and icons: Texti og tákn haushnapps þegar ýtt er
+        Colored header button hover and focus background: Bakgrunnur litaðs haushnapps við yfirsvif og fókus
+        Colored header button hover and focus text and icons: Texti og tákn litaðs haushnapps við yfirsvif og fókus
+        Colored header button pressed background: Bakgrunnur litaðs haushnapps þegar ýtt er
+        Colored header button pressed text and icons: Texti og tákn litaðs haushnapps þegar ýtt er
+        Search and dropdown background: Bakgrunnur leitar og fellilista
+        Settings search background: Bakgrunnur leitar í stillingum
+        Instance menu: Tilviksvalmynd
+        Input background: Bakgrunnur innsláttarreits
+        Shadow color: Skuggalitur
+        Primary controls and highlights: Aðalstýringar og áherslur
+        Primary control hover and focus: Aðalstýring við yfirsvif og fókus
+        Primary control pressed: Aðalstýring þegar ýtt er
+        Text and icons on primary controls: Texti og tákn á aðalstýringum
+        Secondary controls and highlights: Aukastýringar og áherslur
+        Secondary control hover and focus: Aukastýring við yfirsvif og fókus
+        Secondary control pressed: Aukastýring þegar ýtt er
+        Light secondary color: Ljós aukalitur
+        Visited accent: Áherslulitur heimsótts atriðis
+        Text and icons on secondary controls: Texti og tákn á aukastýringum
+        Links: Tenglar
+        Visited links: Heimsóttir tenglar
+        Destructive action: Eyðandi aðgerð
+        Destructive hover and focus: Eyðandi aðgerð við yfirsvif og fókus
+        Destructive pressed: Eyðandi aðgerð þegar ýtt er
+        Text and icons on destructive actions: Texti og tákn á eyðandi aðgerðum
+  Player Settings:
+    Automatically Open Chapters: Opna kafla sjálfkrafa
+    Caption Appearance:
+      Caption Appearance: Útlit skjátexta
+      Captions: Skjátextar
+      Preferred Language: Æskilegt tungumál skjátexta
+      Application Language: Tungumál forritsins
+      Enable Translations: Virkja þýðingu skjátexta
+      Text Color: Textalitur
+      Background Color: Bakgrunnslitur
+      Background Opacity: Ógegnsæi bakgrunns
+      Font Size: Leturstærð
+      Vertical Position: Lóðrétt staðsetning
+      Edge Color: Jaðarlitur
+      Anchor:
+        Anchor: Festipunktur
+        Top Left: Efst til vinstri
+        Top Center: Efst fyrir miðju
+        Top Right: Efst til hægri
+        Bottom Left: Neðst til vinstri
+        Bottom Center: Neðst fyrir miðju
+        Bottom Right: Neðst til hægri
+      Edge Style:
+        Edge Style: Jaðarstíll
+        None: Enginn
+        Outline: Útlína
+        Drop Shadow: Fallskuggi
+      Reset: Endurstilla útlit skjátexta
+    Default Viewing Mode:
+      Full Window (Always On): Fylla gluggann (alltaf virkt)
+      Full Screen (Always On): Fylla skjáinn (alltaf virkt)
+      Tooltip: Flestar sjálfgefnar skoðunarstillingar eru aðeins notaðar í upphafi hverrar áhorfslotu. Breytingar sem gerðar eru í lotunni haldast þar til henni lýkur. Skoðunarstillingar sem eru alltaf virkar eru notaðar í hvert sinn sem skipt er yfir í nýtt myndband, óháð breytingum á skoðunarstillingu við áhorf á fyrra myndbandið.
+    Auto Picture in Picture:
+      Auto Picture in Picture: Fara sjálfkrafa í mynd-í-mynd
+      On Tab Change: Þegar skipt er um flipa
+      On Window Minimize: Þegar glugginn er lágmarkaður
+      On Window Hide: Þegar glugginn missir fókus eða skipt er frá honum
+      Wayland Minimize Unsupported: Wayland tilkynnir forritum ekki þegar gluggi er lágmarkaður, svo þessi kveikja er ekki tiltæk. Notaðu "Þegar glugginn missir fókus eða skipt er frá honum" í staðinn. Sú stilling nær einnig yfir lágmörkun.
+    Scroll Mini Player:
+      Scroll Mini Player: Smáspilari við skrun
+      When Scrolling Down: Halda smáspilara á skjánum þegar skrunað er niður
+      On All Tabs: Halda smáspilara á skjánum þegar skipt er um flipa
+    Multiply Seek Interval by Playback Rate: Margfalda spólunarskref með spilunarhraða
+    Show Playback Rate Adjusted Timestamp: Sýna tímamerki aðlagað að spilunarhraða
+    Use YouTube-style Shorts: Nota Shorts að hætti YouTube
+    Loop Shorts: Endurtaka Shorts-myndbönd
+    Remember Volume: Muna hljóðstyrk
+    Skip Silence: Sleppa þögn
+    Show Skip Silence Toggle: Sýna rofa fyrir að sleppa þögn
+    Enable Skip Silence by Default: Sleppa þögn sjálfgefið
+    Enable Video Zoom: Virkja aðdrátt í myndbandi
+    Voice-over Translation:
+      Title: Talsetningarþýðing
+      Attribution: (með tækni frá Yandex)
+      Enable: Virkja talsetningarþýðingu
+      Prepare in Background: Hefja undirbúning talsetningarþýðinga í bakgrunni
+      Background Preparation Tooltip: Sendir auðkenni og lengd núverandi myndbands ásamt völdu tungumáli til þýðingarþjónustunnar um leið og myndband sem þjónustan styður hleðst.
+      Language: Tungumál talsetningarþýðingar
+      Supported Source Languages: 'Studd upprunatungumál: rússneska, enska, kínverska, kóreska, litháíska, lettneska, arabíska, franska, ítalska, spænska, þýska og japanska.'
+      Voice Volume: Hljóðstyrkur þýddrar raddar
+      Original Volume: Hljóðstyrkur upprunalegs hljóðs
+      Russian: Rússneska
+      English: Enska
+      Kazakh: Kasakska
+    Hold to Double Playback Speed: Halda inni til að tvöfalda spilunarhraða
+    Use Quick Playback Speed Bar: Nota flýtistiku fyrir spilunarhraða
+    Customize Quick Playback Speed Bar: Sérsníða flýtistiku fyrir spilunarhraða
+    Quick Playback Speed Bar Manager: Flýtistika fyrir spilunarhraða
+    Add Playback Speed: Bæta við spilunarhraða
+    Reset Quick Playback Speed Bar: Endurstilla á sjálfgefin gildi
+    Playback Speed Name: Heiti
+    Edit Playback Speed Name: Breyta heiti spilunarhraða
+    Use Automatic Playback Speed Name: Nota sjálfvirkt heiti spilunarhraða
+    Reorder Playback Speed: Dragðu til að breyta röð spilunarhraða
+    Playback Speed: Spilunarhraði
+    Parallel Segment Loading: Samhliða hleðsla búta
+  Channel Settings:
+    Channel Settings: Rásarstillingar
+    Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
+    Enable Playback Speed: Muna spilunarhraða
+    Enable Video Quality: Muna myndgæði
+    Enable Subtitles State: Muna stöðu skjátexta
+    Enable Volume: Muna hljóðstyrk
+    Auto Update: Uppfæra sjálfkrafa þegar breytt er í valkostum spilarans
+    Auto Update Subtitles: Uppfæra sjálfkrafa þegar kveikt eða slökkt er
+    Auto Update Volume: Uppfæra sjálfkrafa í hvert sinn sem hljóðstyrk er breytt
+    Manage Saved Channels: Stjórna vistuðum rásum ({channelCount})
+    Saved Channels: Vistaðar rásarstillingar
+    Enable Saved Channel Settings Sync: Samstilla vistaðar rásarstillingar
+    Disable Saved Channel Settings Sync: Hætta að samstilla vistaðar rásarstillingar
+    Search Channels: Leita að rásum
+    No Saved Channels: Engar stillingar fyrir einstakar rásir hafa verið vistaðar enn
+    No Matching Channels: Engar rásir passa við leitina
+    Forget Channel: Gleyma öllum stillingum þessarar rásar
+    Forget Value: Gleyma þessari stillingu
+    Add Setting: Muna aðra stillingu fyrir þessa rás
+    Video Quality: Myndgæði
+    Subtitles Enabled: Skjátextar virkir
+    Volume: Hljóðstyrkur
+  Download Settings:
+    Download Settings: Niðurhal
+    Enable Downloads: Virkja niðurhal
+    Managed Tools Download Started Template: 'Nauðsynlegur utanaðkomandi hugbúnaður fannst ekki: {tools}. Hleð niður eintökum í umsjón OpenTubeX…'
+    Managed Tools Download Finished Template: Niðurhali á {tools} lokið
+    Managed Tools Update Started Template: Uppfærsla fannst fyrir {tools}. Hleð niður…
+    Managed Tools Update Finished Template: Uppfærslu á {tools} lokið
+    Managed Tools Update Available Template: Uppfærsla er tiltæk fyrir {tools}.
+    Update Managed Tools: Uppfæra
+    Managed Tools Download Error Template: 'Ekki tókst að hlaða niður verkfærunum í umsjón OpenTubeX: {errors}'
+    Download Folder: Niðurhalsmappa
+    Global Additional yt-dlp Arguments: Almenn viðbótarviðföng fyrir yt-dlp
+    Concurrent Downloads: Samtímis niðurhöl
+    Bandwidth Limit: Bandbreiddarmörk (KiB/s, 0 merkir ótakmarkað)
+    Choose Download Folder: Velja niðurhalsmöppu
+    Download Templates: Niðurhalssniðmát
+    Manage Download Templates: Stjórna niðurhalssniðmátum ({templateCount})
+    New Template: Nýtt sniðmát
+    Template Source: Sniðmát sem á að breyta eða nota sem grunn
+    Built-in Template: '{name} (innbyggt)'
+    Custom Template Name: '{name} (sérsniðið)'
+    Create Template Copy: Búa til afrit
+    Template Copy Name: 'Afrit af {name}'
+    Automatic Downloads: Sjálfvirk niðurhöl
+    Manage Automatic Downloads: Stjórna sjálfvirkum niðurhölum ({channelCount})
+    Automatic Downloads Description: Veldu niðurhalssniðmát og síur fyrir hverja áskriftarrás. Myndböndum sem passa er hlaðið niður í bakgrunni þegar áskriftarstreymi eru endurnýjuð.
+    Automatic Downloads New Only: Þegar rás er virkjuð hefst niðurhal með næsta nýja myndbandi hennar. Myndböndum sem þegar hafa verið birt er ekki hlaðið niður.
+    Automatic Downloads No Channels: Gerðu áskrift að rás áður en þú stillir sjálfvirkt niðurhal.
+    No Matching Automatic Download Channels: Engar rásir passa við leitina.
+    Automatic Downloads Livestreams: Beinar útsendingar
+    Minimum Duration Seconds: Lágmarkslengd (sekúndur)
+    Maximum Duration Seconds: Hámarkslengd (sekúndur)
+    Minimum File Size MB: Lágmarksskráarstærð (MB)
+    Maximum File Size MB: Hámarksskráarstærð (MB)
+    Maximum Age Days: Hámarksaldur (dagar)
+    Title Includes: Titill inniheldur
+    Title Excludes: Titill inniheldur ekki
+    Title Filter Hint: Aðgreindu fleiri en eitt leitarorð fyrir titil með kommum. Myndband verður að passa við minnst eitt leitarorð sem á að taka með en ekkert þeirra sem á að útiloka.
+  External Software Settings:
+    External Software Settings: Utanaðkomandi hugbúnaður
+    yt-dlp Source: Uppruni yt-dlp
+    yt-dlp Channel: Útgáfurás yt-dlp
+    Sources:
+      System: Kerfið (PATH eða sérsniðin slóð)
+      Managed: Umsjón OpenTubeX
+    Detected Version Template: 'Útgáfa yt-dlp fannst: {version}'
+    Managed Not Downloaded: yt-dlp hefur ekki verið hlaðið niður enn. Smelltu á hnappinn fyrir neðan til að hlaða því niður.
+    System yt-dlp Missing Warning: yt-dlp fannst ekki í kerfinu. Settu það upp, tilgreindu sérsniðna slóð fyrir neðan eða veldu "Umsjón OpenTubeX" sem uppruna.
+    Download yt-dlp: Hlaða niður yt-dlp
+    Update yt-dlp: Uppfæra yt-dlp
+    Checking yt-dlp: Athuga yt-dlp…
+    Downloading yt-dlp: Hleð niður yt-dlp…
+    yt-dlp Downloaded Template: yt-dlp {version} hefur verið hlaðið niður
+    yt-dlp Download Error Template: 'Ekki tókst að hlaða niður yt-dlp: {error}'
+    FFmpeg Source: Uppruni FFmpeg
+    Detected FFmpeg Version Template: 'Útgáfa FFmpeg fannst: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg hefur ekki verið hlaðið niður enn. Smelltu á hnappinn fyrir neðan til að hlaða því niður.
+    System FFmpeg Missing Warning: FFmpeg fannst ekki í kerfinu. Það er nauðsynlegt til að sameina mynd og hljóð og til að umbreyta hljóði. Settu það upp, tilgreindu sérsniðna slóð fyrir neðan eða veldu "Umsjón OpenTubeX" sem uppruna.
+    Download FFmpeg: Hlaða niður FFmpeg
+    Update FFmpeg: Uppfæra FFmpeg
+    Checking FFmpeg: Athuga FFmpeg…
+    Downloading FFmpeg: Hleð niður FFmpeg…
+    FFmpeg Downloaded Template: FFmpeg {version} hefur verið hlaðið niður
+    FFmpeg Download Error Template: 'Ekki tókst að hlaða niður FFmpeg: {error}'
+    Detected FFprobe Version Template: 'Útgáfa FFprobe fannst: {version}'
+    FFprobe Managed Not Downloaded: FFprobe hefur ekki verið hlaðið niður enn. Smelltu á hnappinn fyrir neðan til að hlaða því niður með FFmpeg.
+    System FFprobe Missing Warning: FFprobe fannst ekki í kerfinu. Það er nauðsynlegt til að skoða margmiðlunarefni í eftirvinnslu. Settu það upp við hlið FFmpeg eða veldu "Umsjón OpenTubeX" sem uppruna.
+    Checking FFprobe: Athuga FFprobe…
+    Download FFmpeg and FFprobe: Hlaða niður FFmpeg og FFprobe
+    Update FFmpeg and FFprobe: Uppfæra FFmpeg og FFprobe
+    Downloading FFmpeg and FFprobe: Hleð niður FFmpeg og FFprobe…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg og FFprobe {version} hafa verið hlaðin niður
+    FFmpeg and FFprobe Download Error Template: 'Ekki tókst að hlaða niður FFmpeg og FFprobe: {error}'
+    Managed Tool Already Current Template: '{tool} {version} er þegar í nýjustu útgáfu'
+    Managed Tool Updates: Uppfærslur verkfæra í umsjón OpenTubeX
+    Update Modes:
+      Automatic: Uppfæra sjálfkrafa
+      Ask: Spyrja áður en uppfært er
+      Manual: Aðeins uppfæra handvirkt
+    yt-dlp Executable Path: Slóð að keyrsluskrá yt-dlp
+    FFmpeg Executable Path: Slóð að keyrsluskrá FFmpeg
+    Restricted Playback Authentication: Vafrakökur fyrir spilun með yt-dlp
+    Cookie Source: Uppruni vafrakaka
+    Cookie Sources:
+      None: Engar
+      File: Skrá
+      Browser: Vafri
+    Cookie File: Vafrakökuskrá
+    Browser for Cookies: Vafri fyrir vafrakökur
+    Browser Profile: Notandasnið vafra (valfrjálst)
+    Browser Profile Placeholder: Heiti eða slóð notandasniðs
+    Select Browser: Velja vafra
+    Always Use Cookies: Nota alltaf vafrakökur
+    Restricted Playback Authentication Hint: Sjálfgefið sendir OpenTubeX þessar vafrakökur aðeins til yt-dlp eftir að þú velur "Reyna með stilltum vafrakökum" fyrir aldurstakmarkað myndband eða myndband sem aðeins er fyrir meðlimi.
+    Restricted Playback Authentication Warning: Notkun yt-dlp með Google-reikningi getur leitt til tímabundinna eða varanlegra takmarkana á reikningnum.
+  Privacy Settings:
+    Automatic History Retention: Sjálfvirk varðveisla ferils (dagar)
+    Automatic History Retention Placeholder: Skildu eftir autt til að geyma að eilífu
+    Automatic History Retention Tooltip: Skildu eftir autt til að geyma ferilinn að eilífu. Þegar tala er vistuð eru eldri færslur fjarlægðar strax og síðan sjálfkrafa meðan forritið er opið.
+    History Retention Saved: Varðveisla ferils hefur verið vistuð
+    Invalid History Retention Days: Sláðu inn heilan dagafjölda sem er meiri en núll
+    Enable Watch Statistics: Virkja áhorfstölfræði
+    Week Starts On: Vikan hefst á
+    Cache Video Metadata: Lýsigagnaferill
+    Cache Video Metadata Tooltip: Geymir allar útgáfur af studdum lýsigögnum um myndbönd sem þú opnar, þar á meðal titla, smámyndir og lýsingar. Þetta er sjálfgefið óvirkt þar sem geymsla ferils lýsigagna eykur disknotkun.
+    Watched Percentage Threshold: Prósentumörk fyrir áhorf
+    Watched Percentage Threshold Tooltip: Myndbönd eru merkt sem áhorfð þegar valinni prósentu er náð og ekki meira en 2 mínútur eru eftir. Við 0% eru þau merkt þegar spilun hefst. Við 100% eru þau merkt þegar spilun lýkur.
+    Clear Video Metadata Cache: Hreinsa skyndiminni myndbandalýsigagna
+    Are you sure you want to clear the video metadata cache?: Viltu örugglega hreinsa vistuð heiti, smámyndir og lýsingar myndbanda úr skyndiminni?
+    Failed to clear video metadata cache: Ekki tókst að hreinsa skyndiminni lýsigagna myndbanda
+    Video metadata cache has been cleared: Skyndiminni lýsigagna myndbanda hefur verið hreinsað
+    Video Metadata Cache Size: 'Skyndiminni lýsigagna myndbanda: {size}'
+  Storage Settings:
+    Storage: Geymsla
+    Downloaded Media: Skráðir niðurhalaðir miðlar
+    Storage Breakdown: Sundurliðun geymslu
+    Shown Total: Sýnd heildarstærð
+    Calculating: Reikna út…
+    Not Available: Nákvæm stærð er ekki tiltæk
+    At Least: Að minnsta kosti {size}
+    Failed To Read Storage: Ekki tókst að lesa sumar geymslustærðir
+    Downloaded Media Description: Myndbands-, hljóð- og skjátextaskrár sem niðurhalsferillinn skráir enn.
+    Selected Download Folders: Niðurhalsmöppur sem notandi valdi
+    Download History Records: Færslur í niðurhalsferli
+    Download History Records Description: '{count} færsla um lokið niðurhal. Færslan skráir stöðu og staðsetningu skráa en inniheldur ekki niðurhalaða miðilinn. | {count} færslur um lokið niðurhal. Færslurnar skrá stöðu og staðsetningu skráa en innihalda ekki niðurhalaða miðla.'
+    Clear Download History Records: Hreinsa færslur í niðurhalsferli
+    Clear Download History Confirmation: Hreinsa allar færslur um lokið niðurhal?
+    Download Files Stay On Disk: Niðurhalaðar skrár verða áfram á diskinum en birtast ekki lengur á síðunni Niðurhal.
+    Clear Records: Hreinsa færslur
+    Replaceable Caches: Endurnýjanleg skyndiminni
+    Application Caches: Skyndiminni forritsins
+    Browser Caches: Skyndiminni vafrans
+    Browser Caches Hint: HTTP-, GPU-, kóða-, skyggingar-, þjónustuvinnu- og orðabókarskyndiminni Chromium.
+    Stored App Data: Geymd forritsgögn
+    Browser Runtime Data: Keyrslugögn vafrans
+    Browser Runtime Data Hint: Setugeymsla og staðbundin geymsla Chromium, vefkökur, persónuverndar- og netkerfisstaða og hrunskrár.
+    Subscription Feed Cache: Skyndiminni áskrifta og efnisstraums
+    Subscription Feed Cache Description: Geymir sótt myndbönd úr áskriftum, Shorts-myndbönd, beinar útsendingar og færslur. OpenTubeX endurgerir skyndiminnið næst þegar efnisstraumurinn er uppfærður.
+    Clear Subscription Feed Cache: Hreinsa skyndiminni áskrifta og efnisstraums
+    Clear Subscription Feed Cache Confirmation: Hreinsa skyndiminni áskrifta og efnisstraums?
+    Subscription Feed Cache Effect: Efnisstraumar áskrifta kunna að virðast auðir þar til þeir eru uppfærðir. Áskriftum og notandasniðum verður ekki breytt.
+    Session Search Cache: Leitarskyndiminni setunnar
+    In Memory: Í minni
+    Session Search Cache Description: '{count} leit er geymd í minni svo fljótlegra sé að fara til baka. Skyndiminninu er eytt þegar OpenTubeX er lokað. | {count} leitir eru geymdar í minni svo fljótlegra sé að fara til baka. Skyndiminninu er eytt þegar OpenTubeX er lokað.'
+    Clear Session Search Cache: Hreinsa leitarskyndiminni setunnar
+    Clear Session Search Cache Confirmation: Hreinsa leitarskyndiminni setunnar?
+    Session Search Cache Effect: Vistuðum niðurstöðusíðum verður eytt. Vistuðum leitarferli verður ekki breytt.
+    HTTP Cache: HTTP-skyndiminni
+    HTTP Cache Description: Electron geymir netsvör á diski svo hægt sé að afgreiða endurteknar beiðnir án þess að sækja sömu gögn aftur. OpenTubeX endurgerir skyndiminnið eftir þörfum.
+    Managed By Electron: Umsjón Electron
+    Clear HTTP Cache: Hreinsa HTTP-skyndiminni
+    Clear HTTP Cache Confirmation: Hreinsa HTTP-skyndiminni Electron?
+    HTTP Cache Effect: Myndir og önnur tilföng af netinu kunna að hlaðast hægar í eitt skipti á meðan skyndiminnið er endurgert.
+    Tab Image Cache: Smámyndir flipa og auðkennismyndir rása
+    Tab Image Cache Description: Geymir forskoðunarmyndir og auðkennismyndir rása fyrir opna og endurheimta flipa. OpenTubeX endurgerir þær þegar fliparnir eru notaðir.
+    Clear Tab Image Cache: Hreinsa myndaskyndiminni flipa
+    Clear Tab Image Cache Confirmation: Hreinsa smámyndir flipa og auðkennismyndir rása?
+    Tab Image Cache Effect: Myndir flipa kunna að hverfa um stund og verða endurgerðar þegar fliparnir eru notaðir.
+    Playback Caches: Spilunarskyndiminni
+    Playback Caches Description: Geymir vefslóðir yt-dlp-strauma milli forritsseta ásamt skrám YouTube-spilarans. Vefslóðaskyndiminnið á aðeins við um strauma sem eru sóttir með yt-dlp.
+    Playback URL Cache Entry Size: Stærðartakmörk vefslóðafærslna yt-dlp-strauma
+    Playback URL Cache Entry Size Tooltip: Stillir hámarksstærð hverrar færslu yt-dlp-straums í skyndiminni. Stilltu á 0 MB til að slökkva á varanlegri skyndivistun yt-dlp-strauma.
+    Clear Playback Caches: Hreinsa spilunarskyndiminni
+    Clear Playback Caches Confirmation: Hreinsa skyndiminni yt-dlp og spilarans?
+    Playback Caches Effect: Næsta beiðni um staðbundna spilun kann að taka lengri tíma á meðan gögn straumsins og spilarans eru sótt aftur.
+    Clear Cache: Hreinsa skyndiminni
+    History Data: Geymdir ferlar
+    Video Metadata Description: Geymir eldri heiti, smámyndir og lýsingar studdra myndbanda. Ekki er hægt að endurgera eldri útgáfur eftir eyðingu.
+    Video Metadata Effect: Vistuðum útgáfum lýsigagna verður eytt varanlega. Enn er hægt að sækja núverandi upplýsingar um myndbandið aftur.
+    Watch History: Áhorfsferill og tölfræði
+    Watch History Description: Áhorfsferill skráir áhorf á myndbönd og framvindu. Áhorfstölfræði geymir daglegar heildartölur áhorfa. Geymslutími á aðeins við um áhorfsferil.
+    Clear Watch Statistics: Hreinsa áhorfstölfræði
+    Watch History Effect: Færslum um áhorf á myndbönd og vistaðri framvindu verður eytt. Áhorfstölfræði verður áfram til staðar.
+    Clear Watch Statistics Confirmation: Eyða allri áhorfstölfræði?
+    Watch Statistics Effect: Daglegum heildartölum áhorfa verður eytt. Áhorfsferill verður áfram til staðar.
+    Search History: Leitarferill
+    Search History Description: Geymir leitir sem þú valdir að vista.
+    Delete Search History: Eyða leitarferli
+    Delete Search History Confirmation: Eyða öllum vistaða leitarferlinum?
+    Search History Effect: Vistaðar leitartillögur úr fyrri leitum hverfa. Skyndiminni núverandi setu verður áfram til staðar.
+    Other User Data: Önnur notandagögn
+    Other Profile Files: Aðrar skrár notandasniðs
+    Other Profile Files Hint: Öryggisafrit, tímabundnar skrár og færslur notandasniðs sem OpenTubeX þekkir ekki enn.
+    Subscriptions And Profiles: Áskriftir og notandasnið
+    Subscriptions And Profiles Description: Geymir rásir í áskrift, heiti notandasniða og upplýsingar um aðild að notandasniðum.
+    Subscriptions And Profiles Effect: Öllum áskriftum og viðbótarnotandasniðum verður eytt varanlega. Gögn efnisstraumsskyndiminnis verða einnig hreinsuð.
+    Playlists Description: Geymir heiti spilunarlista, lýsingar og vistuð myndbönd.
+    Playlists Effect: Öllum spilunarlistum og listum þeirra yfir vistuð myndbönd verður eytt varanlega. Niðurhalaðar miðlaskrár verða áfram til staðar.
+    Settings And Sessions: Stillingar, flipasetur og áminningar
+    Settings And Sessions Description: Geymir kjörstillingar forritsins, flipa sem hægt er að endurheimta og áminningar um beinar útsendingar. Opnaðu möppu notandasniðsins til að skoða þessar skrár eða taka öryggisafrit af þeim. Ekki er hægt að eyða þeim á þessari síðu.
+    Cleanup Complete: Hreinsun geymslu lokið
+    Cleanup Failed: Hreinsun geymslu mistókst
+  Subscription Settings:
+    Fetch Feed on Startup: Sækja efnisstraum við ræsingu
+    Show New Content Feed: Sýna straum með nýju efni
+    Show New Content Indicators: Sýna merki um nýtt efni
+    Show Scheduled Live Streams / Premieres First: Sýna tímasettar beinar útsendingar og frumsýningar fyrst
+    Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna
+    Videos Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna myndbanda
+    Shorts Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna Shorts-myndbanda
+    Live Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna beinna útsendinga
+    Posts Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna færslna
+  Distraction Free Settings:
+    Sections:
+      Visible While Paused: Sýnilegt þegar gert er hlé í heilum glugga eða á öllum skjánum
+    Hide Channel Avatars: Fela auðkennismyndir rása
+    Shorten View Counts: Stytta tölur yfir áhorf og líkar við athugasemdir
+    Hide Comment Translation Buttons: Fela þýðingarhnappa athugasemda
+    Hide Live Chat Replay: Fela endurspilun beinspjalls
+    Hide End-Screen Annotations: Fela skýringar á lokaskjá
+    Hide Paid Promotion Badge: Fela merki um greidda kynningu
+    Show Player Controls: Sýna stýringar spilarans
+    Show Video Title: Sýna heiti myndbands
+    Show Bottom Right Actions Dock: Sýna aðgerðastiku neðst til hægri
+    Paused Interface Hide Delay: Töf áður en viðmót er falið í hléi
+  Data Settings:
+    Data And Storage: Gögn og geymsla
+    Profile Directory: Mappa notandasniðs
+    Open Profile Directory: Opna möppu notandasniðs
+    Settings File: Stillingaskrá
+    Import Settings: Flytja inn stillingar
+    Export Settings: Flytja út stillingar
+    Settings Tooltip: Ekki er hægt að flytja út eða inn stillingar sem eru sértækar fyrir stýrikerfi eða notanda eða eru á tilraunastigi, svo sem milliþjón, ytri spilara og möppu skjámynda.
+    Invalid JSON row, skipping item: Ógilt JSON í línu {row}, sleppi atriði
+    All settings have been successfully imported: Tókst að flytja inn allar stillingar
+    All settings have been successfully exported: Tókst að flytja út allar stillingar
+    Setting object has insufficient data, skipping item: Stillingahlutur inniheldur ekki næg gögn, sleppi atriði
+    Unknown setting key: 'Óþekktur stillingarlykill: {key}'
+    Non-transferable setting key: 'Stillingarlykill sem ekki er hægt að flytja: {key}'
+    Import subscriptions formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), öryggisafrit LibreTube eða útflutningur úr FreeTube (.json)'
+    Import history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), öryggisafrit LibreTube (.json)'
+    Import playlists formats: 'Studd snið: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+  Sync Settings:
+    Sync Settings: Samstilling
+    Enable Sync: Virkja samstilling
+    Privacy Passphrase: Persónuverndarleyndasetning
+    Privacy Passphrase Hint: Notaðu aðra leynisetningu en aðgangsorð reikningsins. Hún fer aldrei úr þessu tæki og þarf að slá hana inn í öllum tækjum. Ef hún glatast er ekki hægt að endurheimta dulkóðuð samstillingargögn.
+    Privacy Policy: Persónuverndarstefna þessa þjóns
+    Enhanced Privacy Enabled: Aukin persónuvernd er virk. Þjónninn geymir aðeins dulkóðuð samstillingargögn.
+    Enhanced Privacy Unsupported: Viðvörun. Þessi þjónn styður ekki aukna persónuvernd. Rekstraraðili hans getur séð samstillt gögn.
+    Description: Samstilltu áskriftir, notandasnið, spilunarlista, áhorfsferil, stillingar og opna flipa við OpenTubeX- eða LibreTube-samstillingarþjón. LibreTube-þjónar styðja ef til vill ekki alla eiginleika samstillingar.
+    Server URL: Vefslóð þjóns
+    Checking Server: Athuga samstillingarþjón…
+    Server Unavailable: Ekki tókst að tengjast þessum samstillingarþjóni. Athugaðu vefslóðina og reyndu aftur.
+    Username: Notandanafn
+    Log In: Skrá inn
+    Register: Nýskrá
+    Pair Another Device: Para annað tæki
+    Pair With Existing Device: Para við tæki sem er þegar tengt
+    Device Name: Heiti tækis
+    This Device: Þetta tæki
+    Device Name Required: Sláðu inn heiti fyrir þetta tæki.
+    Pairing Device Name Hint: Veldu heiti sem þú kannast við þegar það birtist í tækinu sem samþykkir beiðnina.
+    Create Pairing Code: Búa til pörunarkóða
+    Creating Pairing Code: Bý til öruggan pörunarkóða…
+    Pairing QR Alt: QR-pörunarkóði fyrir {device}
+    Scan Pairing Code: Opnaðu „Para annað tæki“ í tæki sem er þegar tengt og skannaðu þennan kóða.
+    Pairing Code: Pörunarkóði
+    Use Text Pairing Code: Nota textakóða í staðinn
+    Show QR Code: Sýna QR-kóða
+    Text Pairing Code Hint: Afritaðu kóðann í tengda tækið. Hann inniheldur pörunarleyndarmálið, svo þú skalt hreinsa hann úr ferli klippiborðs eftir pörun.
+    Pairing QR Warning: Deildu þessum kóða aðeins með traustu tæki sem er þegar tengt og á að samþykkja beiðnina. Hann rennur út eftir tvær mínútur.
+    Pairing Expires: Pörunarkóðinn rennur út kl. {time}.
+    Verifying Pairing: Staðfesti flutta persónuverndarlykilinn…
+    Completing Pairing: Lýk pörun tækis…
+    Compare Pairing Codes: Bera saman pörunarkóða
+    Pairing Code Match Hint: Staðfestu aðeins ef þessi kóði samsvarar kóðanum í tengda tækinu.
+    Pairing Codes Match: Kóðarnir samsvara
+    Pairing Approval Code Hint: Hafðu þennan glugga opinn og berðu kóðann saman við kóðann í nýja tækinu. Nýja tækið má ekki halda áfram ef kóðarnir eru ólíkir.
+    Pairing Scan Hint: Skannaðu pörunarkóðann sem birtist í tækinu sem þú ert að bæta við.
+    Enter Pairing Code: Slá inn kóða handvirkt
+    Pairing Code Entry Hint: Límdu pörunarkóðann sem birtist í tækinu sem þú ert að bæta við.
+    Check Pairing Code: Athuga kóða
+    Scan QR Code: Skanna QR-kóða
+    Waiting For Pairing Code: Bíð eftir pörunarkóða…
+    Checking Pairing Request: Athuga pörunarbeiðnina…
+    Approving Pairing Request: Dulkóða og sendi persónuverndarlykilinn…
+    Pairing Approval Warning: Samþykktu aðeins ef þú sérð þessa beiðni í tækinu sem þú ert að bæta við. Pörun veitir aðgang að reikningnum og flytur persónuverndarlykilinn.
+    Approve Pairing: Samþykkja pörun
+    Try Again: Reyna aftur
+    Scan Again: Skanna aftur
+    Camera Unavailable: OpenTubeX fékk ekki aðgang að myndavél. Athugaðu heimild myndavélarinnar eða sláðu pörunarkóðann inn handvirkt.
+    Pairing Unsupported: Þessi samstillingarþjónn styður ekki örugga pörun tækja.
+    Pairing Failed: Pörun tækis mistókst. Reyndu aftur með nýjum kóða.
+    Pairing Request Changed: Pörunarbeiðnin breyttist, rann út eða hafði þegar verið notuð. Búðu til nýjan kóða.
+    Pairing Server Mismatch: Þessi kóði tilheyrir öðrum samstillingarþjóni.
+    Pairing Verification Unavailable: Ekkert dulkóðað samstillingarsafn er tiltækt til að staðfesta flutta lykilinn. Samstilltu tengda tækið og reyndu síðan aftur.
+    Pairing Completed: Pörun tækis lokið
+    Pairing Approved: Pörun tækis samþykkt
+    Disconnect: Aftengja
+    Delete Account: Eyða samstillingarreikningi
+    Delete Account Confirmation: Eyða samstillingarreikningi?
+    Delete Account Warning: Þetta eyðir samstillingarreikningnum þínum og öllum gögnum sem eru geymd á þessum þjóni varanlega. Staðbundnum OpenTubeX-gögnum þínum verður ekki eytt.
+    Confirm Delete Account: Eyða reikningi
+    Password Required: Aðgangsorð vantar
+    Account Deleted: Samstillingarreikningi eytt
+    Connected as: Tengt sem {username}
+    Automatic Sync: Samstilla sjálfkrafa eftir breytingar og á fimm mínútna fresti
+    Profiles: Notandasnið
+    Open Tabs: Opnir flipar og seta
+    Disable Setting Sync: Hætta að samstilla þessa stillingu
+    Enable Setting Sync: Samstilla þessa stillingu
+    Sync Now: Samstilla núna
+    Downloading encrypted data: Sæki dulkóðuð samstillingargögn…
+    Syncing subscriptions: Samstilli áskriftir…
+    Syncing playlists: Samstilli spilunarlista…
+    Syncing history: Samstilli áhorfsferil…
+    Syncing profiles: Samstilli notandasnið…
+    Syncing open tabs: Samstilli opna flipa og setu…
+    Syncing settings: Samstilli stillingar…
+    Uploading encrypted data: Sendi dulkóðuð samstillingargögn…
+    Finishing sync: Lýk samstillingu…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Síðast samstillt: {date}'
+    History not supported: Þessi útgáfa þjónsins styður ekki samstillingu áhorfsferils.
+    Settings not supported: Þessi útgáfa þjónsins styður ekki samstillingu stillinga.
+    Sync completed: Samstillingu lokið
+    Data Loss Confirmation: Staðfesta samstillingu sem eyðir gögnum?
+    Data Loss Warning: Staða þjónsins myndi eyða {deleted} af {previous} atriðum í {collection} sem áður voru samstillt. Þetta getur bent til þess að gagnaflutningur þjónsins hafi mistekist eða hann hafi verið endurstilltur. Haltu aðeins áfram ef eyðingin er fyrirhuguð og þú átt öryggisafrit.
+    Confirm Data Loss: Eyða og halda áfram
+  Proxy Settings:
+    IP Block Recovery Script Path: Slóð að endurheimtarskriftu fyrir IP-lokun
+    Select IP Block Recovery Script File: Velja skrá með endurheimtarskriftu fyrir IP-lokun
+    Running IP block recovery script: Keyri endurheimtarskriftu fyrir IP-lokun
+    IP block recovery script failed: 'Endurheimtarskrifta fyrir IP-lokun mistókst (lokakóði: {exitCode})'
+    IP block recovery script finished: Keyrslu endurheimtarskriftu fyrir IP-lokun lokið
+    Reloading video after IP block recovery: Endurhleð myndbandi eftir endurheimt úr IP-lokun
+    Failed to select IP block recovery script: Ekki tókst að velja endurheimtarskriftu fyrir IP-lokun
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: Virkja innsendingar til SponsorBlock
+    SponsorBlock Private User ID (optional): Einkaauðkenni SponsorBlock-notanda (valfrjálst)
+    SponsorBlock Private User ID Tooltip: Límdu einkaauðkenni SponsorBlock-notandans úr vafraviðbótinni. Skildu reitinn eftir auðan til að nota auðkenni sem forritið býr til.
+    Generated SponsorBlock User ID: SponsorBlock-notandaauðkenni sem forritið bjó til
+    Generated SponsorBlock User ID Tooltip: Hægt er að nota SponsorBlock-notandaauðkennið sem forritið bjó til í vafraviðbótinni eða þegar forritið er notað á annarri tölvu.
+    Export Generated User ID: Flytja út notandaauðkenni sem forritið bjó til
+    Generated SponsorBlock User ID Copy Button: Afrita SponsorBlock-notandaauðkenni sem forritið bjó til
+    Generated SponsorBlock User ID Copied: SponsorBlock-notandaauðkennið sem forritið bjó til var afritað á klippiborð
+    Skip notification timeout: Birtingartími tilkynningar um sleppingu
+    Custom Color: Sérsniðinn litur
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Virkja Return YouTube Dislike
+    Return YouTube Dislike Url: Vefslóð Return YouTube Dislike API (sjálfgefið er https://ryd-proxy.kavin.rocks)
+  Password Dialog:
+    Incorrect Password: Rangt aðgangsorð
+    Unlock: Aflæsa
+    Unlocking: Aflæsi…
+  Search Settings: Leitarstillingar
+  No Settings Found: Engar stillingar fundust
+Tutorial:
+  Skip: Sleppa
+  Next: Næsta
+  Finish: Ljúka
+  Got It: Allt í lagi
+  Welcome:
+    Title: Velkomin í OpenTubeX
+    Description: Hér eru nokkrar stýringar sem hjálpa þér að komast fljótt af stað.
+  Navigation:
+    Title: Safnið þitt er alltaf innan seilingar
+    Description: Notaðu yfirlitsstikuna til að opna áskriftir, spilunarlista, feril og fleira.
+  Search:
+    Title: Leitaðu eða límdu inn tengil
+    Description: Finndu myndbönd og rásir eða límdu studda vefslóð myndbands beint í leitarreitinn.
+  Tabs:
+    Title: Hafðu síður opnar í flipum
+    Description: Opnaðu margar síður í einu án þess að missa hvar þú varst. Veldu þann stað fyrir flipana sem hentar uppsetningunni þinni best.
+  Quick Settings:
+    Title: Stilltu að þínum þörfum
+    Description: Veldu þema og sjálfgefin myndgæði. Þú getur breytt þessu og öðrum kjörstillingum hvenær sem er í valmynd notandasniðsins eða hægrismellt á það til að skipta um notandasnið.
+  Import Data:
+    Title: Flyttu gögnin þín með þér
+    Description: Þú getur flutt inn áskriftir, áhorfsferil, spilunarlista, leitarferil eða stillingar úr öðru studdu forriti eða öryggisafriti.
+    Action: Flytja inn gögn
+    Not Now: Ekki núna
+  Settings Moved:
+    Title: Stillingarnar hafa verið færðar
+    Description: Veldu notandasniðið þitt efst til hægri til að opna flýtistýringar. Hægrismelltu á það til að fara beint í val notandasniðs. Tannhjólstáknið í valmyndinni opnar allar stillingar. Um forritið og Niðurhal eru nú einnig í þessari valmynd.
+About:
+  Commit: Git-vistun
+  Fluxer: Vertu með í Fluxer-samfélaginu okkar
+  Matrix: Matrix
+  Email: Netfang
+Profile:
+  Profile Icon: Tákn notandasniðs
+  Choose an Emoji: Velja tjákn
+  Custom Emoji: Sérsniðið tjákn
+  Emoji: Tjákn
+  Choose Image: Velja mynd
+  Crop Image: Skera mynd
+  Zoom: Aðdráttur
+  Apply Crop: Staðfesta skurð
+  Transparent: Gegnsætt
+  Use Initial: Nota upphafsstaf
+  The selected image could not be loaded: Ekki tókst að hlaða völdu myndinni
+  Theme Color: Þemalitur
+Channel:
+  Channel Name Unavailable: Heiti rásar er ekki tiltækt
+  Search Result Types: Tegundir leitarniðurstaðna
+  All Results: Allt
+  View All: Skoða allt
+Video:
+  Includes paid promotion: Inniheldur greidda kynningu
+  Age Restricted Badge: Aldurstakmark
+  Queue: Biðröð
+  Play Next: Spila næst
+  Add to Queue: Bæta í biðröð
+  Added to Play Next: Myndbandið verður spilað næst
+  Added to Queue: Myndbandi bætt í biðröð
+  Clear Queue: Hreinsa biðröð
+  Queue Video Count: '{count} myndband | {count} myndbönd'
+  Remove from Queue: Fjarlægja {title} úr biðröð
+  Drag to Reorder Queue: Dragðu {title} til að breyta röðinni
+  Reorder Queue Item: Færa {title}
+  Reorder Queue Item Instructions: Notaðu upp- og niðurörvarnar til að færa þetta myndband í biðröðinni.
+  Queue Item Moved: '{title} fært í sæti {position} af {total}.'
+  Queue Item Cannot Move Up: Ekki er hægt að færa {title} ofar. Það er nú þegar í sæti 1 af {total}.
+  Queue Item Cannot Move Down: Ekki er hægt að færa {title} neðar. Það er nú þegar í sæti {total} af {total}.
+  Metadata: Upplýsingar um myndband
+  Close Metadata: Loka upplýsingum um myndband
+  Metadata Cache:
+    Title History: Ferill titils
+    Thumbnail History: Ferill smámyndar
+    Description History: Ferill lýsingar
+    Previous Version: Fyrri útgáfa {number}
+    Empty: (autt)
+  Fetching Streams: Sæki streymi með yt-dlp…
+  Transcript:
+    Title: Textauppskrift
+    Search: Leita í textauppskrift
+    Language: Tungumál textauppskriftar
+    Save: Vista
+    Show: Sýna textauppskrift
+    Hide: Fela textauppskrift
+    Close: Loka textauppskrift
+    Copied: Textauppskrift afrituð á klippispjald
+    Saved: Textauppskrift vistuð
+    Save Error: Ekki tókst að vista textauppskrift
+    Text File: Textaskrá
+    Unavailable: Engin textauppskrift er tiltæk fyrir þetta myndband.
+    Load Error: Ekki tókst að hlaða textauppskriftina.
+    Empty: Textauppskriftin inniheldur engan texta.
+    No Results: Enginn hluti textauppskriftarinnar samsvarar leitinni.
+  Retry With Built-in Extraction: Reyna aftur með innbyggðri útdráttaraðferð
+  Retry With yt-dlp Extraction: Reyna aftur með yt-dlp-útdrætti
+  Reloading video after streaming URL error: Endurhleð myndband eftir villu í streymisslóð
+  Configure Restricted Playback Cookies Hint: Stilltu vefkökur í Stillingar → Ytri hugbúnaður → Spilunarvefkökur yt-dlp.
+  Try With Configured Cookies: Reyna með stilltum vefkökum
+  Restricted Playback Authentication Failed Template: 'yt-dlp gat ekki opnað myndbandið með stilltu vefkökunum: {error}'
+  Unmark As Watched: Merkja sem óskoðað
+  Video has been unmarked as watched: Myndbandið hefur verið merkt sem óskoðað
+  Save Channel Playback Speed: Vista spilunarhraða rásar
+  Channel Playback Speed Saved: Spilunarhraði rásar vistaður
+  Save Channel Video Quality: Vista myndgæði rásar
+  Channel Video Quality Saved: Myndgæði rásar vistuð
+  Save Channel Subtitles State: Vista stöðu skjátexta fyrir rás
+  Channel Subtitles State Saved: Staða skjátexta fyrir rás vistuð
+  Save Channel Volume: Vista hljóðstyrk rásar
+  Channel Volume Saved: Hljóðstyrkur rásar vistaður
+  Save Channel Setting: Vista stillingu rásar…
+  Channel Setting Already Set: '{setting} er þegar stillt á {value}'
+  Video has been saved to {playlistName}: Myndbandið hefur verið vistað á spilunarlistann {playlistName}
+  Video has been removed from {playlistName}: Myndbandið hefur verið fjarlægt af spilunarlistanum {playlistName}
+  There was a problem saving the video to {playlistName}: Villa kom upp við að vista myndbandið á spilunarlistann {playlistName}
+  There was a problem removing the video from {playlistName}: Villa kom upp við að fjarlægja myndbandið af spilunarlistanum {playlistName}
+  Failed to load collaborators: Ekki tókst að sækja samstarfsaðila
+  Notify me: Láta mig vita
+  Notification on: Tilkynning virk
+  Notification enabled: Þú færð tilkynningu þegar myndbandið hefst
+  Notification cancelled: Tilkynning um upphaf afturkölluð
+  Notification unavailable: Kerfistilkynningar eru ekki tiltækar
+  Scheduled video starting: Tímasett myndband er að hefjast
+  Live notification body: '{videoTitle} hefst núna'
+  Premiere: Frumsýning
+  AI: Gervigreind
+  AI-generated content: Efni búið til með gervigreind
+  Collaborators: Samstarfsaðilar
+  Live Chat Replay: Endurspilun beins spjalls
+  Show Live Chat: Sýna beint spjall
+  Show Live Chat Replay: Sýna endurspilun beins spjalls
+  Close Live Chat: Loka beinu spjalli
+  Close Live Chat Replay: Loka endurspilun beins spjalls
+  Live Chat Settings: Stillingar beins spjalls
+  Show Live Chat Timestamps: Sýna tímamerki
+  Chat Filter: Spjallsía
+  Top Chat: Helstu skilaboð
+  All Messages: Öll skilaboð
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Endurspilun beins spjalls er virk.  Spjallskilaboð birtast hér meðan myndbandið er spilað.
+  Premiere started: Frumsýning stendur yfir. Hófst {timeAgo}
+  Sponsor Block category:
+    hook: Athyglisvaki/kveðja
+    highlight: Hápunktur
+    exclusive access: Einkaaðgangur
+  Sponsor Block category short:
+    intro: Hlé
+    interaction: Áminning um þátttöku
+    music offtopic: Ekki tónlist
+    filler: Útúrdúrar
+  Player:
+    Voice-over Translation:
+      Start: Þýða
+      Cancel: Hætta við
+      Progress: Undirbý raddþýðingu…
+      Retry: Reyna aftur
+      Error: Raddþýðing mistókst. Reyndu aftur síðar.
+      Duration Error: Raddþýðing er aðeins tiltæk fyrir myndbönd sem eru í mesta lagi fjögurra klukkustunda löng.
+    Caption Appearance:
+      Options: Valkostir
+      Sample: Skjátexti lítur svona út
+    Auto-translate: Sjálfvirk þýðing
+    Sleep Timer:
+      Sleep Timer: Svefntímastillir
+      'Off': 'Slökkt'
+      Minutes: '{minutes} mínútur'
+      End of video: Við lok myndbands
+      Remaining: '{time} eftir'
+      Cancel timer: Hætta við tímastillingu
+      Timer ended: Svefntímastillingu lokið
+    Zoom:
+      Zoom: Aðdráttur
+      'Off': 'Slökkt'
+    Auto-generated Caption Template: '{language} (útbúið sjálfkrafa)'
+    Up next in {seconds}: Næst eftir {seconds}
+    Resize dock: Breyta stærð spjalds
+    Play now: Spila núna
+    MusicPlaybackRateOverride: Tónlistarmyndband greint, spila á 1x hraða
+    Normal: Venjulegt
+    Set Default: Stilla sem sjálfgefið
+    Hide Annotations: Fela skýringar
+    Show Annotations: Sýna skýringar
+    Hide: Fela
+    Show: Sýna
+    Scroll Mini Player:
+      Back to Top: Efst á síðu
+      Return to Video Tab: Til baka á myndbandsflipa
+      Play: Spila
+      Pause: Gera hlé
+      Drag Handle: Færa smáspilarann
+    SponsorBlock:
+      CancelCurrentSegment: Hætta við að búa til kafla
+      ClearSegments: Hreinsa kafla
+      ClearSegmentsPrompt: Viltu örugglega hreinsa alla drög að SponsorBlock-köflum fyrir þetta myndband?
+      CompleteSegmentsBeforeSubmitting: Ljúktu við öll kafladrög áður en þau eru send inn.
+      CategoryLabel: Flokkur
+      ActionTypeLabel: Gerð kafla
+      DuplicateSegments: Kafladrög mega ekki vera eins.
+      EndAction: (Endir)
+      EndActionLabel: Endir
+      EndTimeAfterStart: Lokatími kaflans verður að vera á eftir upphafstímanum.
+      EndTimeBeforeVideoEnd: Lokatími kaflans verður að vera innan lengdar myndbandsins.
+      EndTimeLabel: Lokatími kafla
+      DisableAutoSkipTemporarily: Slökkva tímabundið á sjálfvirkri yfirhoppun SponsorBlock
+      EnableAutoSkipTemporarily: Kveikja aftur á sjálfvirkri yfirhoppun SponsorBlock
+      Guidelines: Leiðbeiningar
+      InspectSegment: Skoða
+      InvalidStartTime: Sláðu inn gildan upphafstíma kafla.
+      NoSegmentsToSubmit: Búðu til að minnsta kosti einn fullgerðan kafla áður en þú sendir inn.
+      NowAction: (Núna)
+      CloseInfoPanel: Loka upplýsingum um SponsorBlock
+      OpenInfoPanel: Opna upplýsingar um SponsorBlock
+      OpenSubmissionMenu: Opna innsendingarvalmynd
+      PreviewRequired: Forskoðaðu alla kafla áður en þeir eru sendir inn.
+      PreviewSegment: Forskoða
+      SaveSegment: Vista
+      SetSegmentEndNow: Ljúka kafla núna
+      StartAction: (Upphaf)
+      StartSegmentNow: Hefja kafla núna
+      SubmissionBadRequest: SponsorBlock hafnaði innsendingarbeiðninni.
+      SubmissionDuplicate: Þetta hefur þegar verið sent inn.
+      SubmissionFailed: Ekki tókst að senda SponsorBlock-kaflana inn.
+      SubmissionForbidden: SponsorBlock hafnaði innsendingunni.
+      SubmissionRateLimited: SponsorBlock takmarkaði tíðni þessarar innsendingar.
+      SubmissionSuccess: SponsorBlock-kaflar sendir inn.
+      SubmitSegment: Senda kafla inn
+      SubmitSegments: Senda inn
+      StartTimeLabel: Upphafstími kafla
+      TimeDivider: til
+      SkipPrompt: Hoppa yfir {segmentCategory}?
+      SkipPromptAction: Hoppa yfir
+      SkipToHighlight: Hoppa að hápunkti?
+      SkippedToHighlight: Hoppað að hápunkti
+      SkipToastUnskip: Afturkalla yfirhoppun
+      SkipToastReskip: Hoppa aftur yfir
+      MutedSegment: 'Slökkt á hljóði fyrir {segmentCategory}'
+      MuteToastUnmute: Kveikja á hljóði
+      InfoPanelLoading: Kaflar eru enn að hlaðast...
+      InfoPanelHasSegments: Myndbandið er með kafla í gagnagrunninum!
+      InfoPanelNoSegments: Engir kaflar fundust
+      RefreshSegments: Endurnýja kafla
+      RefreshInfo: Endurnýja upplýsingar um SponsorBlock
+      ContributionStatsTitle: Framlögin þín
+      ContributionStatsLoading: Hleð tölfræði um framlög...
+      ContributionStatsError: Tölfræði um framlög er ekki tiltæk. Reyndu að endurnýja.
+      ContributionStatsNoUserId: Sendu inn kafla eða flyttu inn SponsorBlock-notandakennið þitt til að sjá tölfræði um framlög.
+      Submissions: Innsendingar
+      Segments: Kaflar
+      TimeSaved: Sparaður tími
+      AutoSkipEnabled: Hoppa sjálfkrafa yfir kafla
+      AutoSkipOn: 'Kveikt'
+      AutoSkipOff: 'Slökkt'
+      WhitelistChannel: Bæta rás á undanþágulista
+      ChannelWhitelisted: Á undanþágulista
+      RemoveChannelFromWhitelist: Fjarlægja rás af undanþágulista
+      MuteSegment: Slökkva á hljóði kafla
+      SkipSegment: Hoppa yfir kafla
+      CloseSegmentActions: Loka aðgerðum kafla
+      FullVideo: Allt myndbandið
+      FullVideoLabel: '{segmentCategory} · Allt myndbandið'
+      MuteActionType: Slökkva á hljóði
+      MutePrompt: Slökkva á hljóði fyrir {segmentCategory}?
+      SkipActionType: Hoppa yfir
+      LockedSegment: Læstur kafli
+      UpvoteSegment: Gefa jákvætt atkvæði
+      DownvoteSegment: Gefa neikvætt atkvæði
+      VoteFailed: Ekki tókst að senda SponsorBlock-atkvæði.
+Playlist:
+  Close Playlist: Loka spilunarlista
+Change Format:
+  Local Video File: Staðbundin myndbandsskrá
+  Local Audio File: Staðbundin hljóðskrá
+  Online Video: Myndband á netinu
+  Stream Source: Uppruni streymis
+  Stream Extraction Method: Útdráttaraðferð streymis
+  Playback Engine: Spilunarvél
+  Streaming Protocol: Streymissamskiptamáti
+  Not Available For This Video: Ekki tiltækt fyrir þetta myndband
+  Protocols:
+    Progressive: Stigvaxandi
+  Descriptions:
+    Local File: Spilað beint úr niðurhalaðri skrá á þessu tæki
+    Online Video: Hleður streymissniðum frá stilltum netuppruna
+    Dash: Aðlaganleg gæði, margar hljóðrásir og hæstu upplausnirnar
+    Legacy: Ein skrá með mynd og hljóði, takmörkuð við lægri upplausn
+    Audio: Aðeins hljóð, hentugt til að spara bandbreidd eða hlusta í bakgrunni
+  yt-dlp Fallback Template: 'yt-dlp gat ekki útvegað streymi, nota innbyggðu vélina í staðinn: {error}'
+  yt-dlp Default Clients Fallback: Valdir yt-dlp-biðlarar gátu ekki útvegað spilanlegt streymi, reyni sjálfgefna yt-dlp-biðlara í staðinn
+  Built-in Fallback Template: 'Innbyggða vélin gat ekki spilað streymið, reyni yt-dlp í staðinn: {error}'
+Share:
+  Timestamp Link Copied: Tengill með tímamerki afritaður á klippispjald
+Context Menu:
+  Context Menu: Samhengisvalmynd
+  Select All: Velja allt
+  Save Image As…: Vista mynd sem…
+  Copy Image: Afrita mynd
+  Copy Image Address: Afrita myndslóð
+  Cancel Refresh: Hætta við endurnýjun
+  Reload Videos: Endurhlaða myndbönd
+  Reload Shorts: Endurhlaða stuttmyndbönd
+  Reload Live: Endurhlaða beinar útsendingar
+  Reload Posts: Endurhlaða færslur
+  Reload All Feeds: Endurhlaða allar veitur
+  Close Multiple Tabs: Loka {count} flipa | Loka {count} flipum
+  Duplicate Tab: Tvítaka flipa
+  Duplicate Multiple Tabs: Tvítaka {count} flipa | Tvítaka {count} flipa
+  Move Tab: Færa flipa
+  Move Tabs: Færa flipa
+  Move Tab to Group: Færa flipa í hóp
+  Collapse Group: Fella hóp saman
+  Move Tabs to Group: Færa flipa í hóp
+  Manage Tab Groups…: Umsjón með flipahópum…
+  To Beginning: Fremst
+  To End: Aftast
+  Close Tabs: Loka flipum
+  To the Top: Efst
+  To the Left: Til vinstri
+  To the Bottom: Neðst
+  To the Right: Til hægri
+  Other Tabs: Aðrir flipar
+  Copy YouTube Link: Afrita YouTube-tengil
+  Copy YouTube Links: Afrita YouTube-tengla
+  Pin Tab: Festa flipa
+  Pin Tabs: Festa flipa
+  Unpin Tab: Losa flipa
+  Unpin Tabs: Losa flipa
+  Tab Color: Litur flipa
+  Default: Sjálfgefið
+  Purple: Fjólublár
+  Reopen Closed Tab: Opna lokaðan flipa aftur
+  Reload Tab: Endurhlaða flipa
+  Reload Tabs: Endurhlaða flipa
+  Load Tab: Hlaða flipa
+  Load Tabs: Hlaða flipa
+  Unload Tab: Losa flipa úr minni
+  Unload Tabs: Losa flipa úr minni
+  Move Tab to Window: Færa flipa í glugga
+  Move Tabs to Window: Færa flipa í glugga
+  Open in a New Tab: Opna í nýjum flipa
+  Open in a New Window: Opna í nýjum glugga
+  Copy Link: Afrita tengil
+  Copy Invidious Link: Afrita Invidious-tengil
+  Search Selection in New Tab: Leita að "{selection}" í nýjum flipa
+  Search Selection in New Window: Leita að "{selection}" í nýjum glugga
+  Search With: Leita með {engine}
+  Search With Multiple: Leita með...
+  Selection Too Long: Valið er of langt fyrir leit (> {count} stafir)
+Tab Organizer:
+  Title: Flipaskipuleggjari
+  Open Tab Count: '{count} opinn flipi | {count} opnir flipar'
+  Search Label: Leita í flipum
+  Selected Count: '{count} flipi valinn | {count} flipar valdir'
+  Tab Count: '{count} flipi | {count} flipar'
+  Select All: Velja allt
+  Select None: Velja ekkert
+  Move To Group: Færa valda flipa í hóp
+  Choose Group: Velja hóp
+  Ungrouped: Óflokkað
+  Pin: Festa
+  Unpin: Losa
+  Load: Hlaða inn
+  Unload: Fjarlægja úr minni
+  Unload All: Fjarlægja alla úr minni
+  Close All: Loka öllum
+  Ungroup: Taka úr hópi
+  Group Name: Heiti hóps
+  Color: Litur
+  No Color: Enginn litur
+  Create Group: Stofna hóp
+  Expand Group: Fletta hópi út
+  Collapse Group: Fella hóp saman
+  Expand Group Label: Fletta {name} út, {count} flipi | Fletta {name} út, {count} flipar
+  Rename Group: Endurnefna {name}
+  Change Group Color: Breyta lit á {name}
+  Move To Window: Færa í glugga
+  Choose Window: Veldu glugga
+  Select Tab: Velja {title}
+  Active: Virkur
+  Pinned: Festur
+  Unloaded: Ekki í minni
+  Playing: Í spilun
+  Close Tab: Loka {title}
+  No Open Results: Engir opnir flipar passa við þessa leit.
+  Recently Closed: Nýlega lokað
+  Clear: Hreinsa
+  No Closed Results: Engir nýlega lokaðir flipar passa við þessa leit.
+  Drag Tab: Dragðu til að færa í hóp
+Chapters:
+  Open Chapters: Opna kafla
+  Close Chapters: Loka köflum
+  Copy Timestamp Link: Afrita tengil við {timestamp}
+Comments:
+  Comment Count: 1 athugasemd | {count} athugasemdir
+  Show Comments: Sýna athugasemdir
+  Getting comment replies, please wait: Sæki svör við athugasemd. Bíddu aðeins
+  Reload Comments: Endurhlaða athugasemdum
+  Reply Count: 1 svar | {replyCount} svör
+  Comments are turned off: Slökkt er á athugasemdum
+  YouTube did not provide advertised replies: YouTube sýndi að svör væru við þessa athugasemd en lét þau ekki fylgja. Þeim kann að hafa verið eytt eða þau falin og því var svarhnappurinn fjarlægður.
+  Pinned by you: Fest af þér
+  A reply is pinned: Svar er fest
+  Filter loaded comments: Sía sóttar athugasemdir
+  Comment filters: Síur fyrir athugasemdir
+  From creator: Frá höfundi
+  Contains timestamps: Inniheldur tímamerki
+  Pin comment by author: Festa athugasemd frá {author}
+  Unpin comment by author: Losa athugasemd frá {author}
+  Edited: (breytt)
+  Highlighted comment: Auðkennd athugasemd
+  Highlighted reply: Auðkennt svar
+  Search loaded comments: Leita í sóttum athugasemdum
+  Loaded comment search result count: 1 af {total} sóttum athugasemdum | {count} af {total} sóttum athugasemdum
+  No loaded comments match your filters: Engar sóttar athugasemdir passa við síurnar
+  YouTube comment link copied to clipboard: Tengill á YouTube-athugasemd afritaður á klippispjaldið
+  Translate to {language}: Þýða á {language}
+  Show original: Sýna frumtexta
+  Translating comment, please wait: Þýði athugasemd, bíddu aðeins
+  Comment translation failed: Ekki tókst að þýða athugasemd
+Description:
+  Copy Description: Afrita lýsingu
+  Description Copied: Lýsing afrituð á klippispjaldið
+  Video Category: 'Flokkur myndbands:'
+  Video Tags: Merki myndbands
+  Games: Leikir
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: Fylla í eyður í þýðingum fólks með texta sem gerður er með gervigreind. Þýðingar fólks ganga alltaf fyrir.
+    Update Relative Timestamps: Uppfærir afstæð tímamerki í forritinu meðan síða er opin. Ef slökkt er á þessu uppfærast þau aðeins þegar síðan er endurhlaðin eða opnuð aftur.
+    Stream Extraction Method: |
+      Veldu hvernig OpenTubeX sækir myndbandsstreymi. yt-dlp þarf að vera tiltækt þegar sú aðferð er valin.
+      Myndbönd geta verið lengur að hefja spilun þegar yt-dlp er notað.
+      Innbyggða aðferðin styður ekki leit í beinum útsendingum og frumsýningum.
+    Avoid translation: |
+      Slekkur á sjálfvirkri þýðingu YouTube á titli, lýsingu og köflum myndbandsins.
+      Of margar beiðnir, til dæmis þegar titlar myndbanda eru sóttir í mörgum listum, geta tímabundið
+      dregið úr áreiðanleika forritsins.
+    Show Thumbnail Previews: Sýna hreyfimyndaforskoðun þegar bendillinn er yfir smámynd myndbands.
+    Startup Behavior: |
+      Veldu hvað OpenTubeX gerir við ræsingu.
+      Valkosturinn Hlaða inn öllum flipum endurheimtir alla vistaða flipa samstundis en myndbönd spilast ekki sjálfkrafa í bakgrunnsflipum.
+      Valkosturinn Hlaða inn áður innhlöðnum flipum hleður aftur inn flipunum sem voru í minni þegar OpenTubeX var lokað en hleður hinum ekki inn.
+      Valkosturinn Hlaða inn síðasta virka flipa endurheimtir fyrri setu með hina flipana opna en ekki í minni. Þeir hlaðast inn þegar smellt er á þá.
+      Valkosturinn Hefja tóma setu sleppir vistuðum flipum og opnar nýjan glugga.
+    Remember Tab Navigation History: Ferill fyrir aftur- og áframflakk hvers flipa er vistaður og endurheimtur þegar OpenTubeX er endurræst.
+  Proxy Settings:
+    IP Block Recovery Script Path: Slóð að skriftuskrá sem keyra skal þegar vart verður við að IP-tölu hafi verið lokað. OpenTubeX bíður eftir að keyrslu ljúki og endurhleður síðan myndbandinu. Ef varaleið er virk er skriftan aðeins keyrð þegar varaleiðin bregst einnig.
+  Player Settings:
+    Enable Caption Translations: Þegar þetta er virkt velja skjátextahnappurinn og flýtileiðin C sjálfkrafa þýddan texta á völdu tungumáli ef myndbandið býður ekki upp á samsvarandi frumtexta.
+    Use Quick Playback Speed Bar: Sýnir stiku til að breyta spilunarhraða hratt hægra megin í stjórntækjum spilarans. Ef kveikt er á handvirkri vistun spilunarhraða fyrir hverja rás birtist þar einnig hnappur til að vista hraðann fyrir núverandi rás.
+    Multiply Seek Interval by Playback Rate: Þegar þetta er virkt margfaldast leitarskrefin (örvatakkar og J/L) með núverandi spilunarhraða. Ef slökkt er á þessu haldast leitarskrefin óbreytt óháð spilunarhraða.
+    Show Playback Rate Adjusted Timestamp: Þegar þetta er virkt og spilunarhraðinn er ekki 1x sýnir spilarinn tímamerki leiðrétt eftir spilunarhraða í sviga á eftir venjulega tímamerkinu.
+    Use YouTube-style Shorts: Sýnir Shorts í reitaneti með lóðréttum smámyndum á áskriftar- og rásarsíðum og notar Shorts-spilara að hætti YouTube.
+    Loop Shorts: Þegar þetta er virkt hefjast Shorts sjálfkrafa aftur. Ef slökkt er á þessu stöðvast þau í lokin og hnappur til að spila aftur birtist.
+    Show Skip Silence Toggle: Sýnir rofa til að sleppa þögnum í stillingavalmynd spilarans.
+    Enable Skip Silence by Default: Sleppir þögnum sjálfgefið í nýjum flipum. Breyting í einum flipa hefur ekki áhrif á aðra flipa.
+    Enable Video Zoom: Sýnir aðdráttarstillingu í stillingavalmynd spilarans og virkjar flýtilykla og hliðrunarstjórnun fyrir hana.
+    Voice-over Translation: Sendir auðkenni og lengd myndbandsins ásamt völdu tungumáli til óopinberrar talsetningarþjónustu Yandex þegar beðið er um þýðingu. Sjálfgefið er slökkt á þessu.
+    Hold to Double Playback Speed: Haltu bilstönginni eða vinstri músarhnappi niðri yfir spilaranum til að tvöfalda núverandi spilunarhraða tímabundið.
+    Ambient Mode: Blandar litum myndbandsins inn í svæðið umhverfis spilarann.
+    Default Volume: Óvirkt meðan Muna hljóðstyrk er virkt. Slökktu á Muna hljóðstyrk til að velja fastan upphafshljóðstyrk fyrir hvert myndband.
+    Parallel Segment Loading: |
+      Hversu marga mynd- og hljóðhluta á að hlaða samtímis á undan spilun.
+      Hærri gildi geta hjálpað á hægum eða óstöðugum tengingum en nota meiri bandbreidd og minni.
+      Þau geta einnig valdið því að Sjálfvirkt vanmeti tengingarhraðann og velji minni gæði.
+      Streymi sem er takmarkað við eina beiðni í einu hunsar þessa stillingu.
+  Download Settings:
+    Download Folder: Myndbönd vistast í þessa möppu. Skildu reitinn eftir auðan til að nota niðurhalsmöppu kerfisins.
+    Global Additional yt-dlp Arguments: Viðbótarviðföng skipanalínu sem eru send til yt-dlp við hvert niðurhal, til dæmis --cookies-from-browser firefox.
+    Concurrent Downloads: Hámarksfjöldi yt-dlp-verka sem mega keyra samtímis.
+    Bandwidth Limit: Takmarkar samanlagðan flutningshraða biðraðarinnar með því að skipta þessum mörkum milli verka sem keyra samtímis. Sláðu inn 0 fyrir engin mörk.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX getur annaðhvort notað yt-dlp sem er uppsett á kerfinu eða sótt eigið eintak af yt-dlp, haldið því við og geymt það í notandagagnamöppunni.
+    yt-dlp Channel: Veldu hvaða útgáfurás yt-dlp OpenTubeX notar við niðurhal og viðhald. Stöðug útgáfa hentar flestum notendum.
+    FFmpeg Source: OpenTubeX getur annaðhvort notað FFmpeg og FFprobe sem eru uppsett á kerfinu eða sótt eigin kyrrstæðar útgáfur, haldið þeim við og geymt þær í notandagagnamöppunni.
+    Managed Tool Updates: Veldu hvort tól sem forritið sér um eigi að uppfærast sjálfkrafa, biðja um staðfestingu fyrir uppfærslu eða aðeins uppfærast með handvirku hnöppunum. Tól sem vantar eru samt sótt þegar þeirra er þörf.
+    yt-dlp Executable Path: Sjálfgefið gerir OpenTubeX ráð fyrir að yt-dlp finnist með PATH-umhverfisbreytunni. Hér má velja sérsniðna slóð ef þess þarf.
+    Cookie Source: Veldu hvort yt-dlp eigi að lesa Netscape-vefkökur úr skrá eða vefkökur úr uppsettum vafra til auðkenndrar spilunar.
+    Cookie File: Veldu vefkökuskrá á Netscape-sniði fyrir auðkennda spilun.
+    Browser for Cookies: Valda yt-dlp-keyrsluskráin ræður hvaða vafrar eru studdir. OpenTubeX biður yt-dlp um að lesa vefkökur úr þessum vafra þegar beðið er um auðkennda spilun.
+    Browser Profile: Valfrjálst heiti eða mappa vafrasniðs. Skildu reitinn eftir auðan til að nota síðast opnaða sniðið.
+    Always Use Cookies: Notar stilltar vefkökur í hvert sinn sem yt-dlp dregur út streymi. Þetta breytir ekki aðferðinni við að draga út streymi í yt-dlp. Þegar yt-dlp er valið kunna snið sem krefjast reiknings að verða tiltæk, þar á meðal aukinn bitahraði YouTube Premium ef reikningurinn hefur aðgang að honum.
+    FFmpeg Executable Path: FFmpeg er nauðsynlegt til að sameina aðskilið mynd- og hljóðstreymi og til að umbreyta hljóði. Sjálfgefið gerir OpenTubeX ráð fyrir að FFmpeg finnist með PATH-umhverfisbreytunni. Hér má velja sérsniðna slóð ef þess þarf.
+  Distraction Free Settings:
+    Shorten View Counts: Sýnir fjölda áhorfa og fjölda þeirra sem líka við athugasemdir á styttu formi ef YouTube hefur þegar námundað tölurnar, t.d. 14 þ. í stað 14.000. Nákvæmur fjöldi er alltaf sýndur fullskrifaður.
+  Subscription Settings:
+    Fetch Feed on Startup: Þegar þetta er virkt sækir OpenTubeX áskriftarstreymið sjálfkrafa við ræsingu og þegar nýr gluggi er opnaður.
+    Show New Content Feed: Sýnir flipann Nýtt með færslum í áskriftarstreymi sem voru ekki til staðar þegar það var síðast sótt.
+    Show New Content Indicators: Sýnir lítinn punkt við færslur í áskriftarstreymi sem voru ekki til staðar þegar það var síðast sótt.
+    Show Scheduled Live Streams / Premieres First: Heldur væntanlegum beinum útsendingum og frumsýningum efst í áskriftarstreymi. Ef slökkt er á þessu haldast þær á upprunalegum stað í röðinni þar til þær hefjast. Endurnýjaðu áskriftarstreymið einu sinni eftir að slökkt er á þessu til að sækja tilkynningardagsetningar fyrir fyrirliggjandi tímasettar færslur.
+    Auto Refresh Interval: Hversu oft OpenTubeX endurnýjar áskriftarstreymið sjálfkrafa meðan forritið er opið.
+  Theme Settings:
+    Show Progress as Notification: Sýnir tilkynningu með framvindu bakgrunnsaðgerða í rauntíma sem hverfur ekki, svo sem við endurnýjun áskriftarstreymis og niðurhal tóla sem forritið sér um, í stað almennu framvindustikunnar.
+    Always Show Scrollbars: Heldur skrunstikum alltaf sýnilegum. Ef slökkt er á þessu dofna þær stuttu eftir að músin hættir að hreyfast og birtast aftur um leið og hún er hreyfð.
+    Use Fixed Tab Width: Gefur öllum flipum á láréttu flipastikunni sömu breidd í stað þess að laga breidd þeirra að titlinum.
+    Use Grid Player Menu: Raðar stillingavalmynd myndbandsspilarans í reitanet í stað raðalista.
+The playlist is at the beginning. Enable loop to continue playing: Þú ert við upphaf spilunarlistans. Kveiktu á endurtekningu til að halda spilun áfram
+External link opening has been disabled in Settings → Privacy: Slökkt hefur verið á opnun ytri tengla undir Stillingar → Persónuvernd
+KeyboardShortcutPrompt:
+  Edit Hint: Veldu flýtilykil og ýttu síðan á nýja lyklasamsetningu. Ýttu á Backspace eða Delete til að fjarlægja úthlutunina.
+  Change Shortcut: Breyta flýtilykli fyrir {action}
+  Press Shortcut: Ýttu á flýtilykil…
+  Unassigned: Óúthlutað
+  Reset Shortcut: Endurstilla flýtilykil fyrir {action}
+  Reset to Defaults: Endurheimta sjálfgefnar stillingar
+  Shortcut Already Assigned: Flýtilykli hefur þegar verið úthlutað
+  Shortcut Conflict: '{shortcut} er þegar notaður fyrir {actions}. Viltu úthluta honum upp á nýtt?'
+  Reserved Shortcut Conflict: '{shortcut} er frátekinn fyrir {actions} og ekki er hægt að úthluta honum upp á nýtt.'
+  Reassign: Úthluta upp á nýtt
+  Sections:
+    App:
+      Tabs: "Forrit:\_Flipar"
+      Search and Page: "Forrit:\_Leit og síða"
+      Window and View: "Forrit:\_Gluggi og sýn"
+  New Tab: Stofna nýjan flipa
+  Close Tab: Loka núverandi flipa
+  Reload Tab: Endurhlaða núverandi flipa
+  Reopen Closed Tab: Opna aftur flipann sem var síðast lokaður
+  Next Tab: Skipta yfir á næsta flipa
+  Previous Tab: Skipta yfir á fyrri flipa
+  Switch to Tab: Skipta yfir á flipa 1–9
+  Toggle Tab Orientation: Skipta á milli flipauppsetninga
+  Find in Page: Finna texta á núverandi síðu
+  Find Next Match: Fara í næstu samsvörun
+  Find Previous Match: Fara í fyrri samsvörun
+  Toggle Normal Playback Speed: Skipta milli 1x hraða og fyrri spilunarhraða
+  Toggle Skip Silence: Kveikja eða slökkva á að sleppa þögnum
+  Video Zoom In: Auka aðdrátt á myndbandi
+  Video Zoom Out: Minnka aðdrátt á myndbandi
+  Tab Switcher: Flipaskiptir
+CommandPalette:
+  Title: Skipanaspjald
+  Open: Opna skipanaspjald
+  Search Label: Leita að skipunum
+  Search Placeholder: Leita í skipunum og stillingum…
+  Results: Skipanir
+  No Results: Engar samsvarandi skipanir
+  Result Count: 1 skipun fannst | {count} skipanir fundust
+  Move: Færa
+  Run: Keyra
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Skipta yfir á flipa: {title}'
+  Switch Profile: 'Skipta um snið: {name}'
+  Open Playlist: 'Opna spilunarlista: {name}'
+  Cancel Download: 'Hætta við niðurhal: {title}'
+  Groups:
+    App: Forrit
+    Navigation: Flakk
+    Tabs: Flipar
+  Unavailable:
+    Current Page: Þú ert þegar á þessari síðu
+    No History: Engin síða í þessa átt
+    Desktop: Aðeins tiltækt í skjáborðsforritinu
+    Build: Ekki tiltækt í þessari útgáfu
+    One Tab: Opnaðu annan flipa fyrst
+    Active Tab: Þetta er virki flipinn
+    Active Profile: Þetta er virka sniðið
+    Download Finished: Þetta niðurhal er ekki lengur í gangi
+    Video: Opnaðu myndband fyrst
+Downloads:
+  Download: Niðurhal
+  Download Video: Sækja myndband
+  Download Playlist: Sækja spilunarlista
+  Downloading: Sæki
+  Queue: Biðröð
+  Downloaded: Sótt
+  Canceled: Hætt við
+  Open Downloads: Opna niðurhal
+  No Downloads: Engin niðurhöl enn
+  No Downloads Description: Niðurhal sem þú byrjar á birtist hér.
+  Clear Failed Canceled Skipped And Missing: Hreinsa misheppnuð niðurhöl, niðurhöl sem hætt var við eða var sleppt og skrár sem vantar
+  Clear From List: Fjarlægja af lista
+  Show in Folder: Sýna í möppu
+  Play Download: Spila niðurhal
+  Retry Download: Reyna niðurhal aftur
+  Pause Download: Gera hlé á niðurhali
+  Resume Download: Halda niðurhali áfram
+  Move Earlier: Færa framar
+  Move Later: Færa aftar
+  Pause All: Gera hlé á öllu
+  Resume All: Halda öllu áfram
+  Retry All: Reyna aftur öll misheppnuð niðurhöl
+  Total Size: 'Heildarstærð: {size}'
+  Local File: Staðbundin skrá
+  Available Offline: Tiltækt án nettengingar
+  Remove File: Fjarlægja skrá
+  Remove File Confirmation: Fjarlægja sótta skrá?
+  Remove File Warning: Þetta færir "{title}" í ruslakörfu tækisins.
+  File Not Found: Sótta skráin fannst ekki.
+  Download Missing: Niðurhal ekki tiltækt
+  Files Missing: Sótta skráin er ekki lengur tiltæk í skráakerfinu. | Sóttu skrárnar eru ekki lengur tiltækar í skráakerfinu.
+  Files Available: 'Tiltækar skrár: {available} af {total} sóttum skrám.'
+  More Files: 1 skrá í viðbót | {count} skrár í viðbót
+  Template Used: 'Sniðmát: {name}'
+  Download Type: Tegund niðurhals
+  Template: Sniðmát
+  Unsaved: Óvistað
+  Media Type: Tegund miðils
+  Video: Myndband
+  Audio: Hljóð
+  Maximum Resolution: Hámarksupplausn
+  Best Available: Bestu tiltæku gæði
+  Automatic: Sjálfvirkt
+  Container: Gámasnið
+  Video Codec: Myndkóðun
+  Audio Codec: Hljóðkóðun
+  File Name Template: Sniðmát skráarheitis
+  File Name Template Help: 'Tiltækir reitir: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Tímamörk og kaflar
+  Start Time: Upphafstími (HH:MM:SS)
+  End Time: Lokatími (HH:MM:SS)
+  Split by Chapters: Skipta í aðskildar skrár eftir köflum
+  Remove Segments: Fjarlægja hluta
+  Subtitles and Metadata: Skjátextar og lýsigögn
+  Include Subtitles: Hafa skjátexta með
+  Embed Subtitles: Fella inn skjátexta í miðlaskrána
+  Subtitle Format: Snið skjátexta
+  Subtitle Languages: Tungumál skjátexta
+  Subtitle Languages Help: 'Tungumálsveljarar yt-dlp aðskildir með kommum, til dæmis: en.*,de.*'
+  Embed Cover Art: Fella smámynd inn sem umslagsmynd
+  Embed Metadata: Fella inn titil, höfund, lýsingu og kafla
+  Additional yt-dlp Arguments: Viðbótarviðföng yt-dlp
+  Custom yt-dlp Arguments: Sérsniðin viðföng yt-dlp
+  Template Name: Heiti sniðmáts
+  Save Template: Vista sniðmát
+  Delete Template: Eyða sniðmáti
+  Template Saved: Niðurhalssniðmátið "{name}" vistað
+  Template Name Exists: Niðurhalssniðmát með heitinu "{name}" er þegar til.
+  Choose Folder: Breyta
+  Select Folder: Velja möppu
+  Folder Required: Veldu niðurhalsmöppu til að virkja niðurhal.
+  System Downloads Folder: Niðurhalsmappa kerfisins
+  Processing: Vinn úr…
+  Queued: Í biðröð
+  Queued Position: Í biðröð, staða {position}
+  Paused: Í hléi
+  Pausing: Núverandi verk klárast og síðan verður gert hlé á biðröðinni
+  Download Complete: Niðurhali er lokið
+  Download Cancelled: Hætt við niðurhal
+  Download Failed: Niðurhal mistókst
+  File Name Shortened: Skráarheitið var stytt vegna þess að titill myndbandsins var of langur.
+  Insufficient Disk Space: Ekki er nóg diskpláss. Niðurhalið þarf um {required}, en aðeins {available} er laust.
+  Unknown Download Size: Stærð niðurhalsins er óþekkt. {available} er laust á skráakerfi áfangastaðarins.
+  Disk Space Check Unavailable: Ekki tókst að kanna laust diskpláss áður en þetta niðurhal hófst.
+  Download Failure Hint: Skoðaðu {issuesLink} og prófaðu síðan að skipta um yt-dlp-rás í Nightly eða Master í Stillingar → Ítarlegt → Ytri hugbúnaður.
+  yt-dlp YouTube Issues: nýleg vandamál yt-dlp með YouTube
+  Automatic Download Started: Sjálfvirkt niðurhal hafið
+  Automatic Download Started Body: Sæki "{title}" frá {channel} í bakgrunni.
+  Automatic Download Complete: Sjálfvirku niðurhali er lokið
+  Automatic Download Failed: Sjálfvirkt niðurhal mistókst
+  Automatic Download Could Not Start: Ekki tókst að hefja sjálfvirkt niðurhal á "{title}".
+  Automatic Download Skipped: Sleppt vegna sía fyrir sjálfvirkt niðurhal
+  Cancel Download: Hætta við niðurhal
+  yt-dlp Not Found: yt-dlp fannst ekki. Settu það upp eða veldu slóð þess í Stillingar → Ítarlegt → Ytri hugbúnaður.
+  Download Complete Template: Niðurhali á "{title}" er lokið
+  Download Failed Template: Niðurhal á "{title}" mistókst
+  Templates:
+    Video Best: Myndband - bestu gæði
+    Video Resolution: Myndband – {resolution}
+    Audio Best: Hljóð – bestu gæði
+    Audio Format: Hljóð – {format}
+    Subtitles Format: Skjátextar – {format}

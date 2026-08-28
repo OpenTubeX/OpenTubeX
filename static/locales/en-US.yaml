@@ -511,6 +511,7 @@ Settings:
       Load last active tab: Load last active tab
       Start with an empty session: Start with an empty session
     Locale Preference: Locale Preference
+    Use AI Translation Completions: Fill missing translations with AI-generated text
     Reduced Motion:
       Reduced Motion: Reduced Motion
       System: System
@@ -2312,6 +2313,7 @@ Description:
 #Tooltips
 Tooltips:
   General Settings:
+    Use AI Translation Completions: Fill gaps in human translations with AI-generated text. Human translations always take priority.
     Update Relative Timestamps: Updates relative timestamps throughout the app while a page remains open. When disabled, they update only after reloading or revisiting the page.
     Stream Extraction Method: |
       Choose how OpenTubeX obtains video streams. yt-dlp must be available when selected.

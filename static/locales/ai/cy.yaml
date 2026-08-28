@@ -1,0 +1,1488 @@
+# Cyfieithiadau dewisol a gynhyrchwyd gan AI ar gyfer allweddi sydd ar goll o ../cy.yaml.
+Color Picker:
+  Hue: Arlliw
+  Opacity: Didreiddedd
+  Backdrop Blur: Pylu'r cefndir
+  Hex Color: Lliw hecs
+  Apply Color: Gosod
+  Reset Color: Ailosod
+  Copy Color: Copïo
+  Copy From Another Color: Copïo o liw arall
+  Color Copied: Wedi copïo'r lliw
+  Invalid Color: Rhowch liw hecs dilys
+  Clipboard Unavailable: Nid yw'r clipfwrdd ar gael
+  Saturation and Brightness: Dirlawnder a disgleirdeb
+New Tab: Tab newydd
+Maximize: Ehangu
+Restore: Adfer
+Close Tab: Cau'r tab
+Close Confirmation:
+  Title: Gadael OpenTubeX?
+  Message: Ydych chi'n siŵr eich bod am adael OpenTubeX?
+  Quit: Gadael
+  Never Ask Again: Peidio â gofyn eto
+Close Window Confirmation:
+  Title: Cau'r ffenestr?
+  Message: Mae'r ffenestr hon yn cynnwys {count} o dabiau. Ydych chi'n siŵr eich bod am ei chau? | Mae'r ffenestr hon yn cynnwys {count} tab. Ydych chi'n siŵr eich bod am ei chau? | Mae'r ffenestr hon yn cynnwys {count} dab. Ydych chi'n siŵr eich bod am ei chau? | Mae'r ffenestr hon yn cynnwys {count} thab. Ydych chi'n siŵr eich bod am ei chau?
+  Close Window: Cau'r ffenestr
+Confirmations:
+  Never Ask Again: Peidio â gofyn eto
+  Settings Hint: Gallwch ailalluogi'r cadarnhad hwn yn Gosodiadau → Cyffredinol → Cadarnhau cyn…
+Close Multiple Tabs Confirmation:
+  Title: Cau mwy nag un tab?
+  Message: Bydd hyn yn cau {count} o dabiau. | Bydd hyn yn cau {count} tab. | Bydd hyn yn cau {count} dab. | Bydd hyn yn cau {count} thab.
+  Close Tabs: Cau {count} o dabiau | Cau {count} tab | Cau {count} dab | Cau {count} thab
+Load Multiple Tabs Confirmation:
+  Title: Llwytho mwy nag un tab?
+  Message: Bydd hyn yn llwytho {count} o dabiau. | Bydd hyn yn llwytho {count} tab. | Bydd hyn yn llwytho {count} dab. | Bydd hyn yn llwytho {count} thab.
+  Load Tabs: Llwytho {count} o dabiau | Llwytho {count} tab | Llwytho {count} dab | Llwytho {count} thab
+Unload Multiple Tabs Confirmation:
+  Title: Dadlwytho mwy nag un tab?
+  Message: Bydd hyn yn dadlwytho {count} o dabiau. | Bydd hyn yn dadlwytho {count} tab. | Bydd hyn yn dadlwytho {count} dab. | Bydd hyn yn dadlwytho {count} thab.
+  Unload Tabs: Dadlwytho {count} o dabiau | Dadlwytho {count} tab | Dadlwytho {count} dab | Dadlwytho {count} thab
+Use Vertical Tabs: Defnyddio tabiau fertigol
+Use Horizontal Tabs: Defnyddio tabiau llorweddol
+Resize Tab Bar: Newid maint y bar tabiau
+Find in page: Canfod ar y dudalen
+Previous match: Cydweddiad blaenorol
+Next match: Cydweddiad nesaf
+Close find bar: Cau'r bar canfod
+No matches: Dim cydweddiadau
+Version {versionNumber} is now available.: Mae fersiwn {versionNumber} ar gael nawr.
+See changes and update: Gweld y newidiadau a diweddaru
+Dismiss: Cau
+Update to {version}: Diweddaru i {version}
+Global:
+  Ambient Mode: Modd amgylchynol
+  Loading More: Wrthi'n llwytho rhagor
+  New: Newydd
+Search Listing:
+  Label:
+    Members Only: Aelodau yn unig
+Stats:
+  Stats: Ystadegau
+  Watch time summary: Crynodeb o'r amser gwylio
+  Today: Heddiw
+  This week: Yr wythnos hon
+  Total watch time: Cyfanswm yr amser gwylio
+  Daily average: Cyfartaledd dyddiol
+  So far today: Hyd yma heddiw
+  Since: Ers {day}
+  All recorded time: Yr holl amser a gofnodwyd
+  Per calendar day: Y diwrnod calendr
+  Day by day: Fesul diwrnod
+  Highest: 'Uchaf: {duration}'
+  Week by week: Fesul wythnos
+  Last 14 days: Y 14 diwrnod diwethaf
+  Last 8 weeks: Yr 8 wythnos diwethaf
+  Daily chart aria: Amser gwylio dyddiol dros y 14 diwrnod diwethaf
+  Weekly chart aria: Amser gwylio wythnosol dros yr 8 wythnos diwethaf
+  No data: Bydd eich amser gwylio yn ymddangos yma wrth i chi wylio fideos.
+  Estimate note: Amcangyfrifwyd yr amser gwylio cyn y diweddariad hwn o'ch cynnydd chwarae a gadwyd.
+  Adjust imported watch time: Addasu'r amser gwylio a fewnforiwyd
+  Imported watch time: Amser gwylio a fewnforiwyd
+  Imported watch time explanation: Dewiswch y cyflymder chwarae roeddech yn ei ddefnyddio fel arfer. Rhennir hyd y fideos a fewnforiwyd â'r cyflymder hwn i amcangyfrif faint o amser y buoch yn gwylio mewn gwirionedd.
+  Playback speed: Cyflymder chwarae
+  Channel speed note: Defnyddir cyflymderau chwarae sianeli a gadwyd pan fyddant ar gael.
+  Apply playback speed: Gosod y cyflymder chwarae
+  Imported watch time adjusted: Mae'r amser gwylio a fewnforiwyd wedi'i addasu
+  Reset statistics: Ailosod yr ystadegau
+  Reset: Ailosod
+  Reset confirmation: Ydych chi'n siŵr eich bod am ailosod yr holl ystadegau gwylio? Nid oes modd dadwneud hyn.
+  Reset success: Mae'r ystadegau gwylio wedi'u hailosod
+  Less than a minute: < 1 mun
+  Minutes: '{minutes} mun'
+  Hours: '{hours} awr'
+  Hours and minutes: '{hours} awr {minutes} mun'
+Subscriptions:
+  Refreshing Subscription Videos: Wrthi'n adnewyddu fideos tanysgrifiadau
+  Refreshing Subscription Shorts: Wrthi'n adnewyddu Byrion tanysgrifiadau
+  Refreshing Subscription Live Streams: Wrthi'n adnewyddu ffrydiau byw tanysgrifiadau
+  Refreshing Subscription Posts: Wrthi'n adnewyddu postiadau tanysgrifiadau
+  New Content: Cynnwys newydd
+  New Feed Refresh Warning Title: Adnewyddu pob ffrwd tanysgrifiadau?
+  New Feed Refresh Warning: Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} o danysgrifiadau gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer 1 tanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} danysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} thanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} thanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} o danysgrifiadau gymryd amser hir. Ydych chi am barhau?
+  New Since Last Refresh: Newydd ers yr adnewyddiad diwethaf
+  Mark as Seen: Marcio fel wedi'i weld
+  Mark All as Seen: Marcio'r cyfan fel wedi'u gweld
+  No New Content: Nid oes unrhyw gynnwys newydd.
+  New Content Tabs: Tabiau cynnwys newydd
+  Show Tabbed View: Dangos yr olwg â thabiau
+  Show Combined View: Dangos yr olwg gyfun
+  Newest First: Mwyaf newydd yn gyntaf
+  Oldest First: Hynaf yn gyntaf
+Trending:
+  Load Error: Nid oedd modd llwytho Trendio.
+  Unsupported Backend: Mae angen yr API Lleol ar Trendio. Dewiswch yr API Lleol neu alluogi'r darparwr wrth gefn.
+Most Popular Feed Empty: Mae ffrwd Mwyaf Poblogaidd yr enghraifft Invidious hon yn wag.
+Feed:
+  Cancel Refresh: Canslo'r adnewyddiad
+  Next Auto Refresh: 'Adnewyddiad awtomatig nesaf: {date}'
+User Playlists:
+  Load More Playlists: Llwytho rhagor o restrau chwarae
+  Save to: Cadw i…
+  Quick Bookmark Icon: Eicon nod tudalen cyflym
+  Custom Emoji: Emoji personol
+  Choose Image: Dewis delwedd
+  Use Bookmark Icon: Defnyddio eicon nod tudalen
+  SinglePlaylistView:
+    Retry: Rhoi cynnig arall arni
+    This playlist could not be loaded.: Nid oedd modd llwytho'r rhestr chwarae hon.
+    More videos could not be loaded.: Nid oedd modd llwytho rhagor o fideos.
+History:
+  Mark All As Watched: Marcio'r cyfan fel wedi'u gwylio
+  Mark All As Watched Confirmation: Ydych chi'n siŵr eich bod am farcio pob fideo yn eich hanes fel wedi'i wylio?
+  All History Marked as Watched: Mae pob fideo yn eich hanes wedi'i farcio fel wedi'i wylio
+  Delete Old History: Dileu hen hanes
+  Select History Age: Dewiswch pa mor hen y mae'n rhaid i gofnod fod cyn iddo gael ei ddileu.
+  Delete Entries Older Than: Dileu cofnodion sy'n hŷn na
+  Number of Days: Nifer y diwrnodau
+  History Cleanup Warning: Mae hyn yn dileu cofnodion hanes gwylio cyfatebol yn barhaol.
+  1 Day: 1 diwrnod
+  1 Week: 1 wythnos
+  1 Month: 1 mis
+  3 Months: 3 mis
+  1 Year: 1 flwyddyn
+  Custom: Personol
+  History Older Than Days Removed: Mae hanes gwylio sy'n hŷn na {days} o ddiwrnodau wedi'i ddileu | Mae hanes gwylio sy'n hŷn nag 1 diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} ddiwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} o ddiwrnodau wedi'i ddileu
+Settings:
+  Quick Settings:
+    Quick Settings: Gosodiadau cyflym
+    Appearance: Golwg
+    Playback: Chwarae
+    Content: Cynnwys
+    Language and Region: Iaith a rhanbarth
+    All Settings: Pob gosodiad
+    Profile Selector Hint: Gallwch hefyd dde-glicio eicon y proffil i newid proffil
+  Categories:
+    General Description: Iaith, cychwyn, tabiau ac ymddygiad yr ap
+    Appearance: Golwg
+    Appearance Description: Thema, cynllun a mân-luniau
+    Content appearance: Rhestrau fideos a mân-luniau
+    Layout: Cynllun
+    Playback Description: Chwaraewr, capsiynau a dewisiadau sianeli
+    Subscriptions Description: Dewisiadau adnewyddu a dangos ffrydiau
+    Downloads Description: Ffolderi, templedi a rheolau awtomatig
+    Distraction Free Description: Cuddio cynnwys a gosod terfynau gwylio
+    Add-ons: Ychwanegion
+    Add-ons Description: SponsorBlock, DeArrow, casbwyntiau a chyfieithu troslais
+    Privacy Description: Preifatrwydd gwylio a rheolaethau mynediad
+    Online activity: Gweithgarwch ar-lein
+    Data And Storage Description: Mewnforio, allforio, defnydd disg a glanhau
+    Sync Description: Cadw gosodiadau a data wedi'u cysoni ar draws dyfeisiau
+    Advanced: Uwch
+    Advanced Description: Darparwyr, apiau allanol a rhwydwaith
+    Alternative providers: Darparwyr fideo a metadata
+  Highlight Changed Settings: Amlygu gosodiadau sydd wedi newid o'r rhagosodiadau
+  Reset Setting to Default: Ailosod y gosodiad hwn i'w ragosodiad
+  Performance Impact:
+    Show Performance Impact: Dangos dangosyddion effaith ar berfformiad
+    Moderate: Effaith gymedrol
+    High: Effaith fawr
+    Description: Gall y gosodiad hwn gynyddu'r defnydd o {resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: cof
+      Network: rhwydwaith
+      Disk: disg
+  General Settings:
+    Update Relative Timestamps: Diweddaru stampiau amser cymharol
+    Stream Extraction Method:
+      Stream Extraction Method: Dull echdynnu ffrydiau
+      yt-dlp: yt-dlp
+      Built-in: Mewnol
+    Confirm Before: Cadarnhau cyn…
+    Confirmation Options:
+      Closing App: Cau OpenTubeX
+      Closing Window: Cau ffenestr sydd â mwy nag un tab
+      Closing Tabs: Cau mwy nag un tab
+      Loading Tabs: Llwytho mwy nag un tab
+      Unloading Tabs: Dadlwytho mwy nag un tab
+    Remember Tab Navigation History: Cofio hanes llywio tabiau
+    New Tab Position:
+      New Tab Position: Safle tab newydd
+      At the end: Ar y diwedd
+      After current tab: Ar ôl y tab presennol
+      After current tab in opened order: Ar ôl y tab presennol, yn nhrefn agor
+    Tab Close Focus:
+      Tab Close Focus: Ar ôl cau tab
+      Previous tab: Dewis y tab blaenorol
+      Next tab: Dewis y tab nesaf
+    Startup Behavior:
+      Startup Behavior: Wrth gychwyn
+      Load all tabs: Llwytho pob tab
+      Load previously loaded tabs: Llwytho tabiau a lwythwyd o'r blaen
+      Load last active tab: Llwytho'r tab a oedd yn weithredol ddiwethaf
+      Start with an empty session: Cychwyn â sesiwn wag
+    Use AI Translation Completions: Llenwi cyfieithiadau coll â thestun a gynhyrchwyd gan AI
+    Reduced Motion:
+      Reduced Motion: Llai o symudiad
+      System: System
+      Force On: Gorfodi ymlaen
+      Force Off: Gorfodi i ffwrdd
+    Comment Translation:
+      Title: Cyfieithiadau sylwadau
+      Enable: Galluogi cyfieithiadau sylwadau
+      Never Translate: Peidio byth â chyfieithu sylwadau yn
+      Choose Language: Dewis iaith
+      Description: Mae sylwadau yn iaith yr ap eisoes wedi'u hepgor. Ychwanegwch unrhyw ieithoedd eraill rydych yn gallu eu darllen.
+      Remove Language: Cyfieithu sylwadau {language} eto
+    Avoid translation:
+      Avoid translation: Rhoi blaenoriaeth i destun fideo heb ei gyfieithu
+      Disabled: Analluog
+      Watch Only: Rhyngwyneb y fideo yn unig
+      Entire App: Yr ap cyfan
+    Playlist View Type:
+      Playlist View Type: Math o olwg rhestr chwarae
+    Show Thumbnail Previews: Dangos rhagolygon mân-luniau
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Botwm gweithredu ychwanegol ar fân-lun
+      None: Dim
+      Mark as Watched: Marcio fel wedi'i wylio
+      Copy YouTube Link: Copïo dolen YouTube
+      Open in YouTube: Agor yn YouTube
+  Context Menu Search Settings:
+    Context Menu Search Settings: Chwilio o'r ddewislen cyd-destun
+    Description: Dewiswch pa beiriannau chwilio sy'n ymddangos pan fyddwch yn de-glicio testun a ddewiswyd. Mae chwiliadau'n agor yn eich porwr rhagosodedig.
+    Icon Hint: Mae galluogi peiriant yn cysylltu â'i wefan i lwytho'r favicon.
+    Engine Name: Enw'r peiriant
+    Search URL: URL chwilio
+    URL Hint: Defnyddiwch %s yn y man lle dylai'r URL gynnwys y testun a ddewiswyd wedi'i amgodio.
+    Add Custom Engine: Ychwanegu peiriant personol
+    Add Engine: Ychwanegu peiriant
+    Remove Engine: Tynnu {engine}
+    Invalid Engine: Rhowch enw ac URL chwilio HTTP neu HTTPS dilys sy'n cynnwys %s.
+    Engine Limit: Gallwch ychwanegu hyd at {count} o beiriannau chwilio personol.
+  Theme Settings:
+    Move Downloads to App Header: Symud Lawrlwythiadau i bennyn yr ap
+    Move Settings to App Header: Symud Gosodiadau i bennyn yr ap
+    Hide Side Bar on Watch Pages: Cuddio'r bar ochr ar dudalennau gwylio
+    UI Roundness: Crynder y rhyngwyneb
+    Scrollbar Width: Lled y bar sgrolio
+    Animation Speed: Cyflymder animeiddio
+    Thumbnail Size: Maint mân-luniau
+    Show Tab Icons: Dangos eiconau tabiau
+    Load Missing Tab Icons: Llwytho eiconau tabiau coll
+    Loading Missing Tab Icons: Wrthi'n llwytho eiconau tabiau coll…
+    No Missing Tab Icons: Mae pob eicon tab a gynhelir eisoes wedi'i lwytho
+    Loaded Tab Icons: 'Wedi llwytho {count} o eiconau tabiau coll | Wedi llwytho {count} eicon tab coll | Wedi llwytho {count} eicon tab coll | Wedi llwytho {count} eicon tab coll | Wedi llwytho {count} eicon tab coll | Wedi llwytho {count} o eiconau tabiau coll'
+    Loaded Tab Icons With Failures: Wedi llwytho {loaded} o eiconau tabiau; nid oedd modd llwytho {failed}
+    Show Tab Previews: Dangos rhagolygon tabiau
+    Use Fixed Tab Width: Defnyddio lled tab sefydlog yn y modd llorweddol
+    Tab Width: Lled tabiau
+    Tab Layout:
+      Tab Layout: Cynllun tabiau
+      Horizontal Top: Llorweddol ar y brig
+      Horizontal Bottom: Llorweddol ar y gwaelod
+      Vertical Left: Fertigol ar y chwith
+      Vertical Right: Fertigol ar y dde
+    Show Toast Timeout Indicator: Dangos dangosydd terfyn amser hysbysiadau
+    Use Grid Player Menu: Defnyddio dewislen chwaraewr ar ffurf grid
+    Show Progress as Notification: Dangos cynnydd fel hysbysiad
+    Operation in Progress: Gweithred ar y gweill
+    Toast Position:
+      Toast Position: Safle hysbysiadau
+      Bottom Left: Gwaelod chwith
+      Bottom Center: Canol y gwaelod
+      Bottom Right: Gwaelod dde
+      Top Left: Brig chwith
+      Top Center: Canol y brig
+      Top Right: Brig dde
+    Icon Pack:
+      Icon Pack: Pecyn eiconau
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Ffont yr ap
+      System Default: Rhagosodiad y system
+      Unable to Load: Nid oedd modd llwytho ffontiau'r system sydd wedi'u gosod
+    Always Show Scrollbars: Dangos bariau sgrolio bob amser
+    Base Theme:
+      Custom: Personol
+    Light Theme: Thema olau
+    Dark Theme: Thema dywyll
+    Custom Theme:
+      Create Custom Theme: Creu thema bersonol
+      Edit Custom Theme: Golygu thema bersonol
+      Custom Theme Creator: Crëwr themâu personol
+      Theme Name: Enw'r thema
+      Based On: Yn seiliedig ar
+      Import Theme: Mewnforio thema
+      Export Theme: Allforio thema
+      Share Theme: Rhannu thema
+      Share Description Heading: Disgrifiad
+      Share Description Prompt: Disgrifiwch y thema ac unrhyw beth y dylai pobl ei wybod cyn ei defnyddio.
+      Share Screenshots Heading: Lluniau sgrin
+      Share Screenshots Prompt: Llusgwch a gollwng un neu ragor o luniau sgrin yma.
+      Share Code Summary: JSON y thema
+      Delete Theme: Dileu thema
+      Delete Theme Confirmation: 'Dileu "{name}"? Nid oes modd dadwneud hyn.'
+      Save and Apply: Cadw a gosod
+      Discard Changes: Gwaredu'r newidiadau
+      Reset Colors: Ailosod i'r thema sylfaenol
+      Theme File: Ffeil thema OpenTubeX
+      Theme Saved: Mae'r thema bersonol wedi'i chadw a'i gosod
+      Theme Imported: Mae'r thema wedi'i mewnforio i'r golygydd
+      Theme Exported: Mae'r thema wedi'i hallforio
+      Theme Deleted: Mae'r thema bersonol wedi'i dileu
+      Unable to Load: Nid oedd modd llwytho'r thema bersonol
+      Unable to Save: Nid oedd modd cadw'r thema bersonol
+      Unable to Export: Nid oedd modd allforio'r thema bersonol
+      Unable to Share: Nid oedd modd rhannu'r thema bersonol
+      Unable to Delete: Nid oedd modd dileu'r thema bersonol
+      Invalid Theme File: Ffeil thema bersonol annilys
+      Colors:
+        Main text: Prif destun
+        Secondary text: Testun eilaidd
+        Subtle text: Testun cynnil
+        Borders and dividers: Borderi a rhanwyr
+        Subtle surfaces and indicators: Arwynebau a dangosyddion cynnil
+        Title text: Testun teitl
+        Selected text background: Cefndir testun a ddewiswyd
+        Selected text: Testun a ddewiswyd
+        Logo icon: Eicon y logo
+        Logo text: Testun y logo
+        Logo hover: Logo wrth hofran
+        Logo pressed: Logo wedi'i wasgu
+        Page background: Cefndir tudalen
+        Card background: Cefndir cerdyn
+        Secondary card background: Cefndir cerdyn eilaidd
+        Favorite icon: Eicon ffefryn
+        Error color: Lliw gwall
+        Scrollbar thumb: Bawd y bar sgrolio
+        Scrollbar thumb hover: Bawd y bar sgrolio wrth hofran
+        Scrollbar thumb pressed: Bawd y bar sgrolio wedi'i wasgu
+        Dropdown item hover text: Testun eitem gwymplen wrth hofran
+        Dropdown item hover background: Cefndir eitem gwymplen wrth hofran
+        Navigation and panel background: Cefndir llywio a phaneli
+        Neutral item hover and focus background: Cefndir eitem niwtral wrth hofran a chanolbwyntio
+        Neutral item hover and focus text and icons: Testun ac eiconau eitem niwtral wrth hofran a chanolbwyntio
+        Neutral item pressed background: Cefndir eitem niwtral wedi'i gwasgu
+        Neutral item pressed text and icons: Testun ac eiconau eitem niwtral wedi'i gwasgu
+        Header button hover and focus background: Cefndir botwm pennyn wrth hofran a chanolbwyntio
+        Header button hover and focus text and icons: Testun ac eiconau botwm pennyn wrth hofran a chanolbwyntio
+        Header button pressed background: Cefndir botwm pennyn wedi'i wasgu
+        Header button pressed text and icons: Testun ac eiconau botwm pennyn wedi'i wasgu
+        Colored header button hover and focus background: Cefndir botwm pennyn lliw wrth hofran a chanolbwyntio
+        Colored header button hover and focus text and icons: Testun ac eiconau botwm pennyn lliw wrth hofran a chanolbwyntio
+        Colored header button pressed background: Cefndir botwm pennyn lliw wedi'i wasgu
+        Colored header button pressed text and icons: Testun ac eiconau botwm pennyn lliw wedi'i wasgu
+        Search and dropdown background: Cefndir chwilio a gwymplenni
+        Settings search background: Cefndir chwilio'r gosodiadau
+        Instance menu: Dewislen enghreifftiau
+        Input background: Cefndir mewnbwn
+        Shadow color: Lliw cysgod
+        Primary controls and highlights: Prif reolyddion ac amlygiadau
+        Primary control hover and focus: Prif reolydd wrth hofran a chanolbwyntio
+        Primary control pressed: Prif reolydd wedi'i wasgu
+        Text and icons on primary controls: Testun ac eiconau ar brif reolyddion
+        Secondary controls and highlights: Rheolyddion ac amlygiadau eilaidd
+        Secondary control hover and focus: Rheolydd eilaidd wrth hofran a chanolbwyntio
+        Secondary control pressed: Rheolydd eilaidd wedi'i wasgu
+        Light secondary color: Lliw eilaidd golau
+        Visited accent: Acen wedi ymweld â hi
+        Text and icons on secondary controls: Testun ac eiconau ar reolyddion eilaidd
+        Links: Dolenni
+        Visited links: Dolenni yr ymwelwyd â nhw
+        Destructive action: Gweithred ddinistriol
+        Destructive hover and focus: Gweithred ddinistriol wrth hofran a chanolbwyntio
+        Destructive pressed: Gweithred ddinistriol wedi'i gwasgu
+        Text and icons on destructive actions: Testun ac eiconau ar weithredoedd dinistriol
+  Player Settings:
+    Automatically Open Chapters: Agor penodau'n awtomatig
+    Caption Appearance:
+      Caption Appearance: Golwg capsiynau
+      Captions: Capsiynau
+      Preferred Language: Iaith capsiynau ddewisol
+      Application Language: Iaith yr ap
+      Enable Translations: Galluogi cyfieithiadau capsiynau
+      Text Color: Lliw testun
+      Background Color: Lliw cefndir
+      Background Opacity: Didreiddedd y cefndir
+      Font Size: Maint y ffont
+      Vertical Position: Safle fertigol
+      Edge Color: Lliw ymyl
+      Anchor:
+        Anchor: Angor
+        Top Left: Brig chwith
+        Top Center: Canol y brig
+        Top Right: Brig dde
+        Bottom Left: Gwaelod chwith
+        Bottom Center: Canol y gwaelod
+        Bottom Right: Gwaelod dde
+      Edge Style:
+        Edge Style: Arddull ymyl
+        None: Dim
+        Outline: Amlinell
+        Drop Shadow: Cysgod
+      Reset: Ailosod golwg capsiynau
+    Auto Picture in Picture:
+      Auto Picture in Picture: Mynd i'r modd Llun-mewn-Llun yn awtomatig
+      On Tab Change: Wrth newid tab
+      On Window Minimize: Wrth leihau'r ffenestr
+      On Window Hide: Pan fydd y ffenestr yn colli ffocws neu pan newidir i ffwrdd ohoni
+      Wayland Minimize Unsupported: Nid yw Wayland yn rhoi gwybod i apiau pan gaiff ffenestr ei lleihau, felly nid yw'r sbardun hwn ar gael. Defnyddiwch "Pan fydd y ffenestr yn colli ffocws neu pan newidir i ffwrdd ohoni" yn ei le; mae hynny hefyd yn cynnwys lleihau.
+    Scroll Mini Player:
+      Scroll Mini Player: Chwaraewr bach wrth sgrolio
+      When Scrolling Down: Cadw chwaraewr bach ar y sgrin wrth sgrolio i lawr
+      On All Tabs: Cadw chwaraewr bach ar y sgrin wrth newid tab
+    Multiply Seek Interval by Playback Rate: Lluosi'r cyfwng neidio â'r gyfradd chwarae
+    Show Playback Rate Adjusted Timestamp: Dangos stamp amser wedi'i addasu yn ôl y gyfradd chwarae
+    Use YouTube-style Shorts: Defnyddio Byrion yn arddull YouTube
+    Loop Shorts: Ailadrodd Byrion
+    Remember Volume: Cofio lefel y sain
+    Skip Silence: Hepgor distawrwydd
+    Show Skip Silence Toggle: Dangos y togl hepgor distawrwydd
+    Enable Skip Silence by Default: Galluogi hepgor distawrwydd yn ddiofyn
+    Enable Video Zoom: Galluogi chwyddo fideo
+    Voice-over Translation:
+      Title: Cyfieithu troslais
+      Attribution: (wedi'i bweru gan Yandex)
+      Enable: Galluogi cyfieithu troslais
+      Prepare in Background: Dechrau paratoi cyfieithiadau troslais yn y cefndir
+      Background Preparation Tooltip: Yn anfon ID, hyd ac iaith ddewisol y fideo presennol i'r gwasanaeth cyfieithu cyn gynted ag y bydd fideo a gynhelir yn llwytho.
+      Language: Iaith cyfieithu'r troslais
+      Supported Source Languages: 'Ieithoedd ffynhonnell a gynhelir: Rwsieg, Saesneg, Tsieinëeg, Corëeg, Lithwaneg, Latfieg, Arabeg, Ffrangeg, Eidaleg, Sbaeneg, Almaeneg a Japaneeg.'
+      Voice Volume: Lefel sain y llais wedi'i gyfieithu
+      Original Volume: Lefel y sain wreiddiol
+      Russian: Rwsieg
+      English: Saesneg
+      Kazakh: Casacheg
+    Hold to Double Playback Speed: Dal i ddyblu'r cyflymder chwarae
+    Use Quick Playback Speed Bar: Defnyddio'r bar cyflymder chwarae cyflym
+    Customize Quick Playback Speed Bar: Addasu'r bar cyflymder chwarae cyflym
+    Quick Playback Speed Bar Manager: Bar cyflymder chwarae cyflym
+    Add Playback Speed: Ychwanegu cyflymder chwarae
+    Reset Quick Playback Speed Bar: Ailosod i'r rhagosodiadau
+    Playback Speed Name: Enw
+    Edit Playback Speed Name: Golygu enw'r cyflymder chwarae
+    Use Automatic Playback Speed Name: Defnyddio enw cyflymder chwarae awtomatig
+    Reorder Playback Speed: Llusgo i aildrefnu'r cyflymder chwarae
+    Playback Speed: Cyflymder chwarae
+    Parallel Segment Loading: Llwytho segmentau ochr yn ochr
+  Channel Settings:
+    Channel Settings: Gosodiadau sianeli
+    Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
+    Enable Playback Speed: Galluogi cyflymder chwarae
+    Enable Video Quality: Galluogi ansawdd fideo
+    Enable Subtitles State: Galluogi cyflwr isdeitlau
+    Enable Volume: Galluogi lefel y sain
+    Auto Update: Diweddaru'n awtomatig wrth newid drwy ddewisiadau'r chwaraewr
+    Auto Update Subtitles: Diweddaru'n awtomatig wrth doglo
+    Auto Update Volume: Diweddaru'n awtomatig pryd bynnag y byddwch yn newid lefel y sain
+    Manage Saved Channels: Rheoli sianeli a gadwyd ({channelCount})
+    Saved Channels: Gosodiadau sianeli a gadwyd
+    Enable Saved Channel Settings Sync: Cysoni gosodiadau sianeli a gadwyd
+    Disable Saved Channel Settings Sync: Rhoi'r gorau i gysoni gosodiadau sianeli a gadwyd
+    Search Channels: Chwilio sianeli
+    No Saved Channels: Nid oes unrhyw osodiadau penodol i sianel wedi'u cadw eto
+    No Matching Channels: Nid oes unrhyw sianeli yn cyfateb i'ch chwiliad
+    Forget Channel: Anghofio pob gosodiad ar gyfer y sianel hon
+    Forget Value: Anghofio'r gosodiad hwn
+    Add Setting: Cofio gosodiad arall ar gyfer y sianel hon
+    Video Quality: Ansawdd fideo
+    Subtitles Enabled: Isdeitlau wedi'u galluogi
+    Volume: Lefel y sain
+  Download Settings:
+    Download Settings: Lawrlwythiadau
+    Enable Downloads: Galluogi lawrlwythiadau
+    Managed Tools Download Started Template: 'Ni chanfuwyd y meddalwedd allanol gofynnol: {tools}. Wrthi''n lawrlwytho copïau a reolir…'
+    Managed Tools Download Finished Template: Wedi gorffen lawrlwytho {tools}
+    Managed Tools Update Started Template: Canfuwyd diweddariad ar gyfer {tools}. Wrthi'n lawrlwytho…
+    Managed Tools Update Finished Template: Wedi gorffen diweddaru {tools}
+    Managed Tools Update Available Template: Mae diweddariad ar gael ar gyfer {tools}.
+    Update Managed Tools: Diweddaru
+    Managed Tools Download Error Template: 'Nid oedd modd lawrlwytho''r offer a reolir: {errors}'
+    Download Folder: Ffolder lawrlwytho
+    Global Additional yt-dlp Arguments: Ymresymiadau yt-dlp ychwanegol byd-eang
+    Concurrent Downloads: Lawrlwythiadau cydamserol
+    Bandwidth Limit: Terfyn lled band (KiB/s, 0 am ddiderfyn)
+    Choose Download Folder: Dewis ffolder lawrlwytho
+    Download Templates: Templedi lawrlwytho
+    Manage Download Templates: Rheoli templedi lawrlwytho ({templateCount})
+    New Template: Templed newydd
+    Template Source: Templed i'w olygu neu ei ddefnyddio'n sail
+    Built-in Template: '{name} (Mewnol)'
+    Custom Template Name: '{name} (Personol)'
+    Create Template Copy: Creu copi
+    Template Copy Name: 'Copi o {name}'
+    Automatic Downloads: Lawrlwythiadau awtomatig
+    Manage Automatic Downloads: Rheoli lawrlwythiadau awtomatig ({channelCount})
+    Automatic Downloads Description: Dewiswch dempled lawrlwytho a hidlyddion ar gyfer pob sianel rydych wedi tanysgrifio iddi. Bydd fideos cyfatebol yn lawrlwytho yn y cefndir pan fydd ffrydiau tanysgrifiadau'n adnewyddu.
+    Automatic Downloads New Only: Mae galluogi sianel yn dechrau gyda'i huwchlwythiad newydd nesaf. Ni fydd fideos presennol na'r ôl-groniad o'r sianel yn cael eu lawrlwytho.
+    Automatic Downloads No Channels: Tanysgrifiwch i sianel cyn ffurfweddu lawrlwythiadau awtomatig.
+    No Matching Automatic Download Channels: Nid oes unrhyw sianeli yn cyfateb i'ch chwiliad.
+    Automatic Downloads Livestreams: Ffrydiau byw
+    Minimum Duration Seconds: Isafswm hyd (eiliadau)
+    Maximum Duration Seconds: Uchafswm hyd (eiliadau)
+    Minimum File Size MB: Isafswm maint ffeil (MB)
+    Maximum File Size MB: Uchafswm maint ffeil (MB)
+    Maximum Age Days: Uchafswm oedran (diwrnodau)
+    Title Includes: Mae'r teitl yn cynnwys
+    Title Excludes: Nid yw'r teitl yn cynnwys
+    Title Filter Hint: Gwahanwch nifer o dermau teitl â choma. Rhaid i fideo gyfateb i o leiaf un term i'w gynnwys a dim un term i'w eithrio.
+  External Software Settings:
+    External Software Settings: Meddalwedd allanol
+    yt-dlp Source: Ffynhonnell yt-dlp
+    yt-dlp Channel: Sianel yt-dlp
+    Sources:
+      System: System (PATH neu lwybr personol)
+      Managed: Rheolir gan OpenTubeX
+    Detected Version Template: 'Fersiwn yt-dlp a ganfuwyd: {version}'
+    Managed Not Downloaded: Nid yw yt-dlp wedi'i lawrlwytho eto. Cliciwch y botwm isod i'w lawrlwytho.
+    System yt-dlp Missing Warning: Ni chanfuwyd yt-dlp ar eich system. Gosodwch ef, gosodwch lwybr personol isod, neu newidiwch y ffynhonnell i "Rheolir gan OpenTubeX".
+    Download yt-dlp: Lawrlwytho yt-dlp
+    Update yt-dlp: Diweddaru yt-dlp
+    Checking yt-dlp: Wrthi'n gwirio yt-dlp…
+    Downloading yt-dlp: Wrthi'n lawrlwytho yt-dlp…
+    yt-dlp Downloaded Template: Mae yt-dlp {version} wedi'i lawrlwytho
+    yt-dlp Download Error Template: 'Methodd lawrlwytho yt-dlp: {error}'
+    FFmpeg Source: Ffynhonnell FFmpeg
+    Detected FFmpeg Version Template: 'Fersiwn FFmpeg a ganfuwyd: {version}'
+    FFmpeg Managed Not Downloaded: Nid yw FFmpeg wedi'i lawrlwytho eto. Cliciwch y botwm isod i'w lawrlwytho.
+    System FFmpeg Missing Warning: Ni chanfuwyd FFmpeg ar eich system. Mae ei angen i uno fideo a sain ac i drosi sain. Gosodwch ef, gosodwch lwybr personol isod, neu newidiwch y ffynhonnell i "Rheolir gan OpenTubeX".
+    Download FFmpeg: Lawrlwytho FFmpeg
+    Update FFmpeg: Diweddaru FFmpeg
+    Checking FFmpeg: Wrthi'n gwirio FFmpeg…
+    Downloading FFmpeg: Wrthi'n lawrlwytho FFmpeg…
+    FFmpeg Downloaded Template: Mae FFmpeg {version} wedi'i lawrlwytho
+    FFmpeg Download Error Template: 'Methodd lawrlwytho FFmpeg: {error}'
+    Detected FFprobe Version Template: 'Fersiwn FFprobe a ganfuwyd: {version}'
+    FFprobe Managed Not Downloaded: Nid yw FFprobe wedi'i lawrlwytho eto. Cliciwch y botwm isod i'w lawrlwytho gyda FFmpeg.
+    System FFprobe Missing Warning: Ni chanfuwyd FFprobe ar eich system. Mae ei angen i archwilio cyfryngau wrth ôl-brosesu. Gosodwch ef wrth ymyl FFmpeg, neu newidiwch y ffynhonnell i "Rheolir gan OpenTubeX".
+    Checking FFprobe: Wrthi'n gwirio FFprobe…
+    Download FFmpeg and FFprobe: Lawrlwytho FFmpeg a FFprobe
+    Update FFmpeg and FFprobe: Diweddaru FFmpeg a FFprobe
+    Downloading FFmpeg and FFprobe: Wrthi'n lawrlwytho FFmpeg a FFprobe…
+    FFmpeg and FFprobe Downloaded Template: Mae FFmpeg a FFprobe {version} wedi'u lawrlwytho
+    FFmpeg and FFprobe Download Error Template: 'Methodd lawrlwytho FFmpeg a FFprobe: {error}'
+    Managed Tool Already Current Template: 'Mae {tool} {version} eisoes yn gyfredol'
+    Managed Tool Updates: Diweddariadau offer a reolir
+    Update Modes:
+      Automatic: Diweddaru'n awtomatig
+      Ask: Gofyn cyn diweddaru
+      Manual: Diweddaru â llaw yn unig
+    yt-dlp Executable Path: Llwybr gweithredadwy yt-dlp
+    FFmpeg Executable Path: Llwybr gweithredadwy FFmpeg
+    Restricted Playback Authentication: Cwcis chwarae yt-dlp
+    Cookie Source: Ffynhonnell cwcis
+    Cookie Sources:
+      None: Dim
+      File: Ffeil
+      Browser: Porwr
+    Cookie File: Ffeil cwcis
+    Browser for Cookies: Porwr ar gyfer cwcis
+    Browser Profile: Proffil porwr (dewisol)
+    Browser Profile Placeholder: Enw neu lwybr proffil
+    Select Browser: Dewis porwr
+    Always Use Cookies: Defnyddio cwcis bob amser
+    Restricted Playback Authentication Hint: Yn ddiofyn, dim ond ar ôl i chi ddewis "Rhoi cynnig arni gyda'r cwcis sydd wedi'u ffurfweddu" ar fideo sydd â chyfyngiad oedran neu sydd i aelodau yn unig y bydd OpenTubeX yn trosglwyddo'r cwcis hyn i yt-dlp.
+    Restricted Playback Authentication Warning: Gall defnyddio yt-dlp gyda chyfrif Google arwain at gyfyngiadau dros dro neu barhaol ar y cyfrif.
+  Privacy Settings:
+    Automatic History Retention: Cadw hanes yn awtomatig (diwrnodau)
+    Automatic History Retention Placeholder: Gadewch yn wag i'w gadw am byth
+    Automatic History Retention Tooltip: Gadewch yn wag i gadw'r hanes am byth. Bydd cadw rhif yn dileu cofnodion hŷn nawr ac yn awtomatig tra bo'r ap ar agor.
+    History Retention Saved: Mae'r cyfnod cadw hanes wedi'i gadw
+    Invalid History Retention Days: Rhowch nifer cyfan o ddiwrnodau sy'n fwy na sero
+    Enable Watch Statistics: Galluogi ystadegau gwylio
+    Week Starts On: Mae'r wythnos yn dechrau ar
+    Cache Video Metadata: Hanes metadata
+    Cache Video Metadata Tooltip: Mae'n cadw pob fersiwn o fetadata fideo a gynhelir ar gyfer fideos rydych yn ymweld â nhw, gan gynnwys teitlau, mân-luniau a disgrifiadau. Mae wedi'i analluogi yn ddiofyn oherwydd bod cadw hanes metadata yn defnyddio rhagor o le ar y ddisg.
+    Watched Percentage Threshold: Trothwy canran gwylio
+    Watched Percentage Threshold Tooltip: Caiff fideos eu marcio fel wedi'u gwylio ar ôl cyrraedd y ganran a ddewiswyd a phan nad oes mwy na 2 funud ar ôl. Ar 0%, cânt eu marcio pan fydd chwarae'n dechrau. Ar 100%, cânt eu marcio pan fydd chwarae'n gorffen.
+    Clear Video Metadata Cache: Clirio storfa metadata fideo
+    Are you sure you want to clear the video metadata cache?: Ydych chi'n siŵr eich bod am glirio'r teitlau, y mân-luniau a'r disgrifiadau fideo sydd yn y storfa?
+    Failed to clear video metadata cache: Methodd clirio storfa metadata fideo
+    Video metadata cache has been cleared: Mae storfa metadata fideo wedi'i chlirio
+    Video Metadata Cache Size: 'Storfa metadata fideo: {size}'
+  Storage Settings:
+    Storage: Storfa
+    Downloaded Media: Cyfryngau wedi'u lawrlwytho sy'n cael eu holrhain
+    Storage Breakdown: Dadansoddiad o'r storfa
+    Shown Total: Cyfanswm a ddangosir
+    Calculating: Wrthi'n cyfrifo…
+    Not Available: Nid yw'r union faint ar gael
+    At Least: O leiaf {size}
+    Failed To Read Storage: Nid oedd modd darllen rhai meintiau storio
+    Downloaded Media Description: Ffeiliau fideo, sain ac isdeitlau y mae'r hanes lawrlwytho yn dal i'w holrhain.
+    Selected Download Folders: Ffolderi lawrlwytho a ddewiswyd gan y defnyddiwr
+    Download History Records: Cofnodion hanes lawrlwytho
+    Download History Records Description: 'Mae {count} o gofnodion lawrlwytho gorffenedig. Mae''r cofnodion hyn yn olrhain statws a lleoliadau ffeiliau ond nid ydynt yn cynnwys y cyfryngau a lawrlwythwyd. | Mae {count} cofnod lawrlwytho gorffenedig. Mae''r cofnod hwn yn olrhain statws a lleoliadau ffeiliau ond nid yw''n cynnwys y cyfryngau a lawrlwythwyd. | Mae {count} gofnod lawrlwytho gorffenedig. Mae''r cofnodion hyn yn olrhain statws a lleoliadau ffeiliau ond nid ydynt yn cynnwys y cyfryngau a lawrlwythwyd. | Mae {count} chofnod lawrlwytho gorffenedig. Mae''r cofnodion hyn yn olrhain statws a lleoliadau ffeiliau ond nid ydynt yn cynnwys y cyfryngau a lawrlwythwyd. | Mae {count} chofnod lawrlwytho gorffenedig. Mae''r cofnodion hyn yn olrhain statws a lleoliadau ffeiliau ond nid ydynt yn cynnwys y cyfryngau a lawrlwythwyd. | Mae {count} o gofnodion lawrlwytho gorffenedig. Mae''r cofnodion hyn yn olrhain statws a lleoliadau ffeiliau ond nid ydynt yn cynnwys y cyfryngau a lawrlwythwyd.'
+    Clear Download History Records: Clirio cofnodion hanes lawrlwytho
+    Clear Download History Confirmation: Clirio pob cofnod lawrlwytho gorffenedig?
+    Download Files Stay On Disk: Bydd y ffeiliau a lawrlwythwyd yn aros ar y ddisg, ond ni fyddant yn ymddangos ar y dudalen Lawrlwythiadau mwyach.
+    Clear Records: Clirio cofnodion
+    Replaceable Caches: Storfeydd y gellir eu hail-greu
+    Application Caches: Storfeydd yr ap
+    Browser Caches: Storfeydd y porwr
+    Browser Caches Hint: Storfeydd HTTP, GPU, cod, arlliwiwr, gweithiwr gwasanaeth a geiriadur Chromium.
+    Stored App Data: Data ap sydd wedi'u storio
+    Browser Runtime Data: Data amser rhedeg y porwr
+    Browser Runtime Data Hint: Storfa sesiwn a lleol, cwcis, cyflwr preifatrwydd a rhwydwaith, a ffeiliau chwalu Chromium.
+    Subscription Feed Cache: Storfa tanysgrifiadau a ffrydiau
+    Subscription Feed Cache Description: Mae'n storio fideos tanysgrifiadau, Byrion, ffrydiau byw a phostiadau sydd wedi'u cyrchu. Bydd OpenTubeX yn ei hail-greu y tro nesaf y caiff y ffrydiau eu hadnewyddu.
+    Clear Subscription Feed Cache: Clirio storfa tanysgrifiadau a ffrydiau
+    Clear Subscription Feed Cache Confirmation: Clirio storfa tanysgrifiadau a ffrydiau?
+    Subscription Feed Cache Effect: Gall ffrydiau tanysgrifiadau ymddangos yn wag nes iddynt adnewyddu. Ni fydd eich tanysgrifiadau na'ch proffiliau'n newid.
+    Session Search Cache: Storfa chwilio'r sesiwn
+    In Memory: Yn y cof
+    Session Search Cache Description: 'Mae {count} o chwiliadau wedi''u storio yn y cof er mwyn llywio''n ôl yn gyflymach. Caiff y storfa hon ei gwaredu pan fydd OpenTubeX yn cau. | Mae {count} chwiliad wedi''i storio yn y cof er mwyn llywio''n ôl yn gyflymach. Caiff y storfa hon ei gwaredu pan fydd OpenTubeX yn cau. | Mae {count} chwiliad wedi''u storio yn y cof er mwyn llywio''n ôl yn gyflymach. Caiff y storfa hon ei gwaredu pan fydd OpenTubeX yn cau. | Mae {count} chwiliad wedi''u storio yn y cof er mwyn llywio''n ôl yn gyflymach. Caiff y storfa hon ei gwaredu pan fydd OpenTubeX yn cau. | Mae {count} chwiliad wedi''u storio yn y cof er mwyn llywio''n ôl yn gyflymach. Caiff y storfa hon ei gwaredu pan fydd OpenTubeX yn cau. | Mae {count} o chwiliadau wedi''u storio yn y cof er mwyn llywio''n ôl yn gyflymach. Caiff y storfa hon ei gwaredu pan fydd OpenTubeX yn cau.'
+    Clear Session Search Cache: Clirio storfa chwilio'r sesiwn
+    Clear Session Search Cache Confirmation: Clirio storfa chwilio'r sesiwn?
+    Session Search Cache Effect: Caiff tudalennau canlyniadau yn y storfa eu gwaredu. Ni fydd yr hanes chwilio sydd wedi'i gadw yn newid.
+    HTTP Cache: Storfa HTTP
+    HTTP Cache Description: Mae Electron yn storio ymatebion rhwydwaith ar y ddisg fel y gall ceisiadau ailadroddus lwytho heb lawrlwytho'r un data eto. Bydd OpenTubeX yn ail-greu'r storfa hon yn ôl yr angen.
+    Managed By Electron: Rheolir gan Electron
+    Clear HTTP Cache: Clirio storfa HTTP
+    Clear HTTP Cache Confirmation: Clirio storfa HTTP Electron?
+    HTTP Cache Effect: Gall delweddau ac adnoddau rhwydwaith eraill lwytho'n arafach unwaith wrth i'r storfa gael ei hailadeiladu.
+    Tab Image Cache: Mân-luniau tabiau ac afatarau sianeli
+    Tab Image Cache Description: Mae'n storio delweddau rhagolwg ac afatarau sianeli ar gyfer tabiau sydd ar agor neu wedi'u hadfer. Bydd OpenTubeX yn eu hail-greu wrth i'r tabiau gael eu defnyddio.
+    Clear Tab Image Cache: Clirio storfa delweddau tabiau
+    Clear Tab Image Cache Confirmation: Clirio mân-luniau tabiau ac afatarau sianeli?
+    Tab Image Cache Effect: Gall delweddau tabiau ddiflannu am ychydig a chânt eu hail-greu wrth i'w tabiau gael eu defnyddio.
+    Playback Caches: Storfeydd chwarae
+    Playback Caches Description: Mae'n storio URLau ffrydiau yt-dlp rhwng sesiynau'r ap, ynghyd â ffeiliau chwaraewr YouTube. Dim ond i ffrydiau a gyrchir gydag yt-dlp y mae'r storfa URL yn berthnasol.
+    Playback URL Cache Entry Size: Terfyn storfa URL ffrwd yt-dlp
+    Playback URL Cache Entry Size Tooltip: Mae'n gosod maint mwyaf pob cofnod ffrwd yt-dlp yn y storfa. Gosodwch 0 MB i analluogi storio parhaol ar gyfer ffrydiau yt-dlp.
+    Clear Playback Caches: Clirio storfeydd chwarae
+    Clear Playback Caches Confirmation: Clirio storfeydd yt-dlp a'r chwaraewr?
+    Playback Caches Effect: Gall y cais chwarae lleol nesaf gymryd mwy o amser tra bo data'r ffrwd a'r chwaraewr yn cael eu cyrchu eto.
+    Clear Cache: Clirio'r storfa
+    History Data: Hanesion sydd wedi'u storio
+    Video Metadata Description: Mae'n storio teitlau, mân-luniau a disgrifiadau blaenorol ar gyfer fideos a gynhelir. Ni ellir ail-greu hen ddiwygiadau ar ôl eu dileu.
+    Video Metadata Effect: Caiff diwygiadau metadata sydd wedi'u cadw eu dileu'n barhaol. Gellir dal i gyrchu manylion presennol y fideo eto.
+    Watch History: Hanes gwylio ac ystadegau
+    Watch History Description: Mae hanes gwylio yn cofnodi fideos a wyliwyd a'r cynnydd. Mae ystadegau gwylio yn storio cyfansymiau gwylio dyddiol. Dim ond i hanes gwylio y mae'r cyfnod cadw yn berthnasol.
+    Clear Watch Statistics: Clirio ystadegau gwylio
+    Watch History Effect: Caiff cofnodion fideos a wyliwyd a chynnydd a gadwyd eu dileu. Bydd yr ystadegau gwylio'n aros.
+    Clear Watch Statistics Confirmation: Dileu'r holl ystadegau gwylio?
+    Watch Statistics Effect: Caiff cyfansymiau gwylio dyddiol eu dileu. Bydd yr hanes gwylio'n aros.
+    Search History: Hanes chwilio
+    Search History Description: Mae'n storio'r chwiliadau y dewisoch eu cofio.
+    Delete Search History: Dileu hanes chwilio
+    Delete Search History Confirmation: Dileu'r holl hanes chwilio sydd wedi'i gadw?
+    Search History Effect: Bydd awgrymiadau chwilio sydd wedi'u cadw o'ch chwiliadau blaenorol yn diflannu. Bydd storfa'r sesiwn bresennol yn aros.
+    Other User Data: Data defnyddiwr eraill
+    Other Profile Files: Ffeiliau proffil eraill
+    Other Profile Files Hint: Copïau wrth gefn, ffeiliau dros dro a chofnodion proffil nad yw OpenTubeX yn eu hadnabod eto.
+    Subscriptions And Profiles: Tanysgrifiadau a phroffiliau
+    Subscriptions And Profiles Description: Mae'n storio sianeli rydych wedi tanysgrifio iddynt, enwau proffiliau ac aelodaeth proffiliau.
+    Subscriptions And Profiles Effect: Caiff pob tanysgrifiad a phroffil ychwanegol eu dileu'n barhaol. Caiff data storfa'r ffrydiau eu clirio hefyd.
+    Playlists Description: Mae'n storio enwau a disgrifiadau rhestrau chwarae, a fideos sydd wedi'u cadw.
+    Playlists Effect: Caiff pob rhestr chwarae a'i rhestr o fideos sydd wedi'u cadw eu dileu'n barhaol. Bydd ffeiliau cyfryngau a lawrlwythwyd yn aros.
+    Settings And Sessions: Gosodiadau, sesiynau tabiau ac atgoffwyr
+    Settings And Sessions Description: Mae'n storio dewisiadau'r ap, tabiau y gellir eu hadfer ac atgoffwyr ffrydiau byw. Agorwch gyfeiriadur y proffil i archwilio'r ffeiliau hyn neu wneud copi wrth gefn ohonynt; nid yw'r dudalen hon yn eu dileu.
+    Cleanup Complete: Wedi gorffen glanhau'r storfa
+    Cleanup Failed: Methodd glanhau'r storfa
+  Subscription Settings:
+    Fetch Feed on Startup: Cyrchu'r ffrwd wrth gychwyn
+    Show New Content Feed: Dangos y ffrwd cynnwys newydd
+    Show New Content Indicators: Dangos dangosyddion cynnwys newydd
+    Show Scheduled Live Streams / Premieres First: Dangos ffrydiau byw wedi'u hamserlennu / premières yn gyntaf
+    Auto Refresh Interval: Cyfwng adnewyddu awtomatig
+    Videos Auto Refresh Interval: Cyfwng adnewyddu fideos yn awtomatig
+    Shorts Auto Refresh Interval: Cyfwng adnewyddu Byrion yn awtomatig
+    Live Auto Refresh Interval: Cyfwng adnewyddu ffrydiau byw yn awtomatig
+    Posts Auto Refresh Interval: Cyfwng adnewyddu postiadau yn awtomatig
+  Distraction Free Settings:
+    Sections:
+      Visible While Paused: Yn weladwy wrth oedi mewn ffenestr lawn / sgrin lawn
+    Hide Channel Avatars: Cuddio afatarau sianeli
+    Shorten View Counts: Byrhau cyfrif gwylwyr a hoffiadau sylwadau
+    Hide Comment Translation Buttons: Cuddio botymau cyfieithu sylwadau
+    Hide Live Chat Replay: Cuddio ailchwarae sgwrs fyw
+    Hide End-Screen Annotations: Cuddio anodiadau'r sgrin ddiwedd
+    Hide Paid Promotion Badge: Cuddio bathodyn hyrwyddiad taledig
+    Show Player Controls: Dangos rheolyddion y chwaraewr
+    Show Video Title: Dangos teitl y fideo
+    Show Bottom Right Actions Dock: Dangos doc gweithredoedd y gwaelod ar y dde
+    Paused Interface Hide Delay: Oedi cyn cuddio'r rhyngwyneb wrth oedi
+  Data Settings:
+    Data And Storage: Data a storfa
+    Profile Directory: Cyfeiriadur y proffil
+    Open Profile Directory: Agor cyfeiriadur y proffil
+    Invalid JSON row, skipping item: JSON annilys yn rhes {row}; yn hepgor yr eitem
+    Import subscriptions formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), copi wrth gefn LibreTube neu allforyn FreeTube (.json)'
+    Import history formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copi wrth gefn LibreTube (.json)'
+    Import playlists formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+  Sync Settings:
+    Sync Settings: Cysoni
+    Enable Sync: Galluogi cysoni
+    Privacy Passphrase: Cyfrinymadrodd preifatrwydd
+    Privacy Passphrase Hint: Defnyddiwch gyfrinymadrodd ar wahân i gyfrinair eich cyfrif. Nid yw byth yn gadael y ddyfais hon ac mae ei angen ar bob dyfais; os collwch ef, ni ellir adfer y data cysoni wedi'u hamgryptio.
+    Privacy Policy: Polisi preifatrwydd y gweinydd hwn
+    Enhanced Privacy Enabled: Mae preifatrwydd estynedig wedi'i alluogi. Dim ond data cysoni wedi'u hamgryptio y mae'r gweinydd yn eu storio.
+    Enhanced Privacy Unsupported: 'Rhybudd: nid yw''r gweinydd hwn yn cynnal preifatrwydd estynedig. Gall ei weithredwr weld y data sydd wedi''u cysoni.'
+    Description: Cysonwch danysgrifiadau, proffiliau, rhestrau chwarae, hanes gwylio, gosodiadau a thabiau agored â gweinydd cysoni OpenTubeX neu LibreTube. Efallai na fydd gweinyddion LibreTube yn cynnal pob nodwedd gysoni.
+    Server URL: URL y gweinydd
+    Checking Server: Wrthi'n gwirio'r gweinydd cysoni…
+    Server Unavailable: Nid oedd modd cysylltu â'r gweinydd cysoni hwn. Gwiriwch yr URL a rhowch gynnig arall arni.
+    Username: Enw defnyddiwr
+    Log In: Mewngofnodi
+    Register: Cofrestru
+    Pair Another Device: Paru dyfais arall
+    Pair With Existing Device: Paru â dyfais bresennol
+    Device Name: Enw'r ddyfais
+    This Device: Y ddyfais hon
+    Device Name Required: Rhowch enw ar gyfer y ddyfais hon.
+    Pairing Device Name Hint: Dewiswch enw y byddwch yn ei adnabod ar y ddyfais sy'n cymeradwyo'r cais hwn.
+    Create Pairing Code: Creu cod paru
+    Creating Pairing Code: Wrthi'n creu cod paru diogel…
+    Pairing QR Alt: Cod QR paru ar gyfer {device}
+    Scan Pairing Code: Ar ddyfais sydd eisoes wedi'i chysylltu, agorwch "Paru dyfais arall" a sganiwch y cod hwn.
+    Pairing Code: Cod paru
+    Use Text Pairing Code: Defnyddio cod testun yn lle hynny
+    Show QR Code: Dangos cod QR
+    Text Pairing Code Hint: Copïwch y cod hwn i'r ddyfais bresennol. Mae'n cynnwys y gyfrinach baru, felly cliriwch ef o hanes y clipfwrdd ar ôl paru.
+    Pairing QR Warning: Dangoswch y cod hwn i'r ddyfais ddibynadwy sydd eisoes wedi'i chysylltu ac a fydd yn cymeradwyo'r cais hwn yn unig. Daw i ben ar ôl dau funud.
+    Pairing Expires: Daw'r cod paru i ben am {time}.
+    Verifying Pairing: Wrthi'n dilysu'r allwedd breifatrwydd a drosglwyddwyd…
+    Completing Pairing: Wrthi'n cwblhau paru'r ddyfais…
+    Compare Pairing Codes: Cymharu codau paru
+    Pairing Code Match Hint: Cadarnhewch dim ond os yw'r cod hwn yn cyfateb i'r cod ar eich dyfais bresennol.
+    Pairing Codes Match: Mae'r codau'n cyfateb
+    Pairing Approval Code Hint: Cadwch y ffenestr hon ar agor a chymharwch y cod hwn â'r ddyfais newydd. Ni ddylai'r ddyfais newydd barhau os yw'r codau'n wahanol.
+    Pairing Scan Hint: Sganiwch y cod paru a ddangosir ar y ddyfais rydych yn ei hychwanegu.
+    Enter Pairing Code: Rhoi'r cod â llaw
+    Pairing Code Entry Hint: Gludwch y cod paru a ddangosir ar y ddyfais rydych yn ei hychwanegu.
+    Check Pairing Code: Gwirio'r cod
+    Scan QR Code: Sganio cod QR
+    Waiting For Pairing Code: Wrthi'n aros am god paru…
+    Checking Pairing Request: Wrthi'n gwirio'r cais paru…
+    Approving Pairing Request: Wrthi'n amgryptio ac anfon yr allwedd breifatrwydd…
+    Pairing Approval Warning: Cymeradwywch dim ond os gallwch weld y cais hwn ar y ddyfais rydych yn ei hychwanegu. Mae paru'n rhoi mynediad i'r cyfrif ac yn trosglwyddo'r allwedd breifatrwydd.
+    Approve Pairing: Cymeradwyo paru
+    Try Again: Rhoi cynnig arall arni
+    Scan Again: Sganio eto
+    Camera Unavailable: Nid oedd OpenTubeX yn gallu cael mynediad at gamera. Gwiriwch ganiatâd y camera neu rhowch y cod paru â llaw.
+    Pairing Unsupported: Nid yw'r gweinydd cysoni hwn yn cynnal paru dyfeisiau'n ddiogel.
+    Pairing Failed: Methodd paru'r ddyfais. Rhowch gynnig arall arni gyda chod newydd.
+    Pairing Request Changed: Mae'r cais paru wedi newid, wedi dod i ben, neu eisoes wedi'i ddefnyddio. Crëwch god newydd.
+    Pairing Server Mismatch: Mae'r cod hwn yn perthyn i weinydd cysoni gwahanol.
+    Pairing Verification Unavailable: Nid oes casgliad cysoni wedi'i amgryptio ar gael i ddilysu'r allwedd a drosglwyddwyd. Cysonwch y ddyfais bresennol, yna rhowch gynnig arall arni.
+    Pairing Completed: Wedi cwblhau paru'r ddyfais
+    Pairing Approved: Wedi cymeradwyo paru'r ddyfais
+    Disconnect: Datgysylltu
+    Delete Account: Dileu'r cyfrif cysoni
+    Delete Account Confirmation: Dileu'r cyfrif cysoni?
+    Delete Account Warning: Mae hyn yn dileu eich cyfrif cysoni a'r holl ddata sydd wedi'u storio ar y gweinydd hwn yn barhaol. Ni chaiff eich data OpenTubeX lleol eu dileu.
+    Confirm Delete Account: Dileu'r cyfrif
+    Password Required: Mae angen cyfrinair
+    Account Deleted: Mae'r cyfrif cysoni wedi'i ddileu
+    Connected as: Wedi cysylltu fel {username}
+    Automatic Sync: Cysoni'n awtomatig ar ôl newidiadau a phob pum munud
+    Profiles: Proffiliau
+    Open Tabs: Tabiau agored a sesiwn
+    Disable Setting Sync: Rhoi'r gorau i gysoni'r gosodiad hwn
+    Enable Setting Sync: Cysoni'r gosodiad hwn
+    Sync Now: Cysoni nawr
+    Downloading encrypted data: Wrthi'n lawrlwytho data cysoni wedi'u hamgryptio…
+    Syncing subscriptions: Wrthi'n cysoni tanysgrifiadau…
+    Syncing playlists: Wrthi'n cysoni rhestrau chwarae…
+    Syncing history: Wrthi'n cysoni hanes gwylio…
+    Syncing profiles: Wrthi'n cysoni proffiliau…
+    Syncing open tabs: Wrthi'n cysoni tabiau agored a'r sesiwn…
+    Syncing settings: Wrthi'n cysoni gosodiadau…
+    Uploading encrypted data: Wrthi'n uwchlwytho data cysoni wedi'u hamgryptio…
+    Finishing sync: Wrthi'n gorffen cysoni…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Cysonwyd ddiwethaf: {date}'
+    History not supported: Nid yw'r fersiwn hwn o'r gweinydd yn cynnal cysoni hanes gwylio.
+    Settings not supported: Nid yw'r fersiwn hwn o'r gweinydd yn cynnal cysoni gosodiadau.
+    Sync completed: Wedi cwblhau cysoni
+    Data Loss Confirmation: Cadarnhau cysoni dinistriol?
+    Data Loss Warning: Byddai cyflwr y gweinydd yn dileu {deleted} o'r {previous} eitem {collection} a gysonwyd o'r blaen. Gall hyn ddangos bod mudo neu ailosod y gweinydd wedi methu. Parhewch dim ond os ydych am ddileu'r eitemau hyn a bod gennych gopi wrth gefn.
+    Confirm Data Loss: Dileu a pharhau
+  Proxy Settings:
+    IP Block Recovery Script Path: Llwybr sgript adfer ar ôl rhwystr IP
+    Select IP Block Recovery Script File: Dewis ffeil sgript adfer ar ôl rhwystr IP
+    Running IP block recovery script: Wrthi'n rhedeg y sgript adfer ar ôl rhwystr IP
+    IP block recovery script failed: 'Methodd y sgript adfer ar ôl rhwystr IP (cod gadael: {exitCode})'
+    IP block recovery script finished: Mae'r sgript adfer ar ôl rhwystr IP wedi gorffen
+    Reloading video after IP block recovery: Wrthi'n ail-lwytho'r fideo ar ôl adfer o rwystr IP
+    Failed to select IP block recovery script: Methodd dewis y sgript adfer ar ôl rhwystr IP
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: Galluogi cyflwyno i SponsorBlock
+    SponsorBlock Private User ID (optional): ID defnyddiwr preifat SponsorBlock (dewisol)
+    SponsorBlock Private User ID Tooltip: Gludwch yr ID defnyddiwr preifat SponsorBlock o estyniad y porwr. Gadewch hwn yn wag i ddefnyddio ID a gynhyrchir gan yr ap.
+    Generated SponsorBlock User ID: ID defnyddiwr SponsorBlock a gynhyrchwyd
+    Generated SponsorBlock User ID Tooltip: Gellir defnyddio'r ID defnyddiwr SponsorBlock hwn a gynhyrchwyd gan yr ap yn estyniad y porwr neu os ydych yn defnyddio'r ap ar gyfrifiadur arall.
+    Export Generated User ID: Allforio'r ID defnyddiwr a gynhyrchwyd
+    Generated SponsorBlock User ID Copy Button: Copïo'r ID defnyddiwr SponsorBlock a gynhyrchwyd
+    Generated SponsorBlock User ID Copied: Wedi copïo'r ID defnyddiwr SponsorBlock a gynhyrchwyd i'r clipfwrdd
+    Skip notification timeout: Terfyn amser yr hysbysiad hepgor
+    Custom Color: Lliw personol
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Galluogi Return YouTube Dislike
+    Return YouTube Dislike Url: URL API Return YouTube Dislike (y rhagosodiad yw https://ryd-proxy.kavin.rocks)
+  Password Dialog:
+    Incorrect Password: Cyfrinair anghywir
+    Unlock: Datgloi
+    Unlocking: Wrthi'n datgloi…
+  Search Settings: Gosodiadau chwilio
+  No Settings Found: Ni chanfuwyd unrhyw osodiadau
+Tutorial:
+  Skip: Hepgor
+  Next: Nesaf
+  Finish: Gorffen
+  Got It: Iawn
+  Welcome:
+    Title: Croeso i OpenTubeX
+    Description: Dyma'r rheolyddion a fydd yn eich helpu i ddechrau arni.
+  Navigation:
+    Title: Mae eich llyfrgell wrth law bob amser
+    Description: Defnyddiwch y llywio i gyrraedd tanysgrifiadau, rhestrau chwarae, hanes a rhagor.
+  Search:
+    Title: Chwilio neu ludo dolen
+    Description: Dewch o hyd i fideos a sianeli, neu gludwch URL fideo a gynhelir yn uniongyrchol i'r maes chwilio.
+  Tabs:
+    Title: Cadw tudalennau ar agor mewn tabiau
+    Description: Agorwch sawl tudalen ar unwaith heb golli eich lle. Dewiswch ble mae tabiau'n gweddu orau i'ch cynllun.
+  Quick Settings:
+    Title: Addasu OpenTubeX
+    Description: Dewiswch thema ac ansawdd fideo rhagosodedig. Gallwch newid y dewisiadau hyn a rhai eraill o ddewislen eich proffil unrhyw bryd, neu dde-glicio'r ddewislen i newid proffil.
+  Import Data:
+    Title: Mewnforio eich data
+    Description: Gallwch fewnforio tanysgrifiadau, hanes, rhestrau chwarae, hanes chwilio neu osodiadau o ap arall a gynhelir neu o gopi wrth gefn.
+    Action: Mewnforio data
+    Not Now: Nid nawr
+  Settings Moved:
+    Title: Mae'r gosodiadau wedi symud
+    Description: Dewiswch eich proffil ar y brig ar y dde i weld rheolyddion cyflym. De-gliciwch ef i fynd yn syth at ddewis proffil. Mae'r olwyn gocos yn y ddewislen hon yn agor pob gosodiad, ac mae Ynghylch a Lawrlwythiadau wedi symud i'r ddewislen hon hefyd.
+About:
+  Commit: Cyflwyniad
+  Fluxer: Ymunwch â'n cymuned Fluxer
+  Matrix: Matrix
+  Email: E-bost
+Profile:
+  Profile Icon: Eicon proffil
+  Choose an Emoji: Dewis emoji
+  Custom Emoji: Emoji personol
+  Emoji: Emoji
+  Choose Image: Dewis delwedd
+  Crop Image: Tocio'r ddelwedd
+  Zoom: Chwyddo
+  Apply Crop: Gosod y tocio
+  Transparent: Tryloyw
+  Use Initial: Defnyddio llythyren gyntaf
+  The selected image could not be loaded: Nid oedd modd llwytho'r ddelwedd a ddewiswyd
+  Theme Color: Lliw'r thema
+Channel:
+  Channel Name Unavailable: Nid yw enw'r sianel ar gael
+  Search Result Types: Mathau o ganlyniadau chwilio
+  All Results: Pob un
+Video:
+  Includes paid promotion: Yn cynnwys hyrwyddiad taledig
+  Age Restricted Badge: Cyfyngiad oedran
+  Queue: Ciw
+  Play Next: Chwarae nesaf
+  Add to Queue: Ychwanegu at y ciw
+  Added to Play Next: Bydd y fideo'n chwarae nesaf
+  Added to Queue: Wedi ychwanegu'r fideo at y ciw
+  Clear Queue: Clirio'r ciw
+  Queue Video Count: '{count} o fideos | {count} fideo | {count} fideo | {count} fideo | {count} fideo | {count} o fideos'
+  Remove from Queue: Tynnu {title} o'r ciw
+  Drag to Reorder Queue: Llusgo {title} i aildrefnu'r ciw
+  Reorder Queue Item: Aildrefnu {title}
+  Reorder Queue Item Instructions: Defnyddiwch y bysellau Saeth i Fyny a Saeth i Lawr i symud y fideo hwn yn y ciw.
+  Queue Item Moved: Wedi symud {title} i safle {position} o {total}.
+  Queue Item Cannot Move Up: Methu symud {title} i fyny. Mae eisoes yn safle 1 o {total}.
+  Queue Item Cannot Move Down: Methu symud {title} i lawr. Mae eisoes yn safle {total} o {total}.
+  Metadata: Gwybodaeth am y fideo
+  Close Metadata: Cau gwybodaeth am y fideo
+  Metadata Cache:
+    Title History: Hanes teitlau
+    Thumbnail History: Hanes mân-luniau
+    Description History: Hanes disgrifiadau
+    Previous Version: Blaenorol {number}
+    Empty: (gwag)
+  Fetching Streams: Wrthi'n cyrchu ffrydiau gydag yt-dlp…
+  Transcript:
+    Title: Trawsgrifiad
+    Search: Chwilio'r trawsgrifiad
+    Language: Iaith y trawsgrifiad
+    Save: Cadw
+    Show: Dangos y trawsgrifiad
+    Hide: Cuddio'r trawsgrifiad
+    Close: Cau'r trawsgrifiad
+    Copied: Wedi copïo'r trawsgrifiad i'r clipfwrdd
+    Saved: Mae'r trawsgrifiad wedi'i gadw
+    Save Error: Nid oedd modd cadw'r trawsgrifiad
+    Text File: Ffeil destun
+    Unavailable: Nid oes trawsgrifiad ar gael ar gyfer y fideo hwn.
+    Load Error: Nid oedd modd llwytho'r trawsgrifiad.
+    Empty: Nid yw'r trawsgrifiad hwn yn cynnwys unrhyw destun.
+    No Results: Nid oes unrhyw segmentau o'r trawsgrifiad yn cyfateb i'ch chwiliad.
+  Retry With Built-in Extraction: Rhoi cynnig arall arni gydag echdynnu mewnol
+  Retry With yt-dlp Extraction: Rhoi cynnig arall arni gydag echdynnu yt-dlp
+  Reloading video after streaming URL error: Wrthi'n ail-lwytho'r fideo ar ôl gwall URL ffrydio
+  Configure Restricted Playback Cookies Hint: Ffurfweddwch gwcis yn Gosodiadau → Meddalwedd allanol → Cwcis chwarae yt-dlp.
+  Try With Configured Cookies: Rhoi cynnig arni gyda'r cwcis sydd wedi'u ffurfweddu
+  Restricted Playback Authentication Failed Template: 'Nid oedd yt-dlp yn gallu cyrchu''r fideo hwn gyda''r cwcis sydd wedi''u ffurfweddu: {error}'
+  Unmark As Watched: Dadfarcio fel wedi'i wylio
+  Video has been unmarked as watched: Mae'r fideo wedi'i ddadfarcio fel wedi'i wylio
+  Save Channel Playback Speed: Cadw cyflymder chwarae'r sianel
+  Channel Playback Speed Saved: Mae cyflymder chwarae'r sianel wedi'i gadw
+  Save Channel Video Quality: Cadw ansawdd fideo'r sianel
+  Channel Video Quality Saved: Mae ansawdd fideo'r sianel wedi'i gadw
+  Save Channel Subtitles State: Cadw cyflwr isdeitlau'r sianel
+  Channel Subtitles State Saved: Mae cyflwr isdeitlau'r sianel wedi'i gadw
+  Save Channel Volume: Cadw lefel sain y sianel
+  Channel Volume Saved: Mae lefel sain y sianel wedi'i chadw
+  Save Channel Setting: Cadw gosodiad y sianel…
+  Channel Setting Already Set: 'Mae {setting} eisoes wedi''i osod i {value}'
+  Video has been saved to {playlistName}: Mae'r fideo wedi'i gadw i {playlistName}
+  Video has been removed from {playlistName}: Mae'r fideo wedi'i dynnu o {playlistName}
+  There was a problem saving the video to {playlistName}: Bu problem wrth gadw'r fideo i {playlistName}
+  There was a problem removing the video from {playlistName}: Bu problem wrth dynnu'r fideo o {playlistName}
+  Failed to load collaborators: Methodd llwytho'r cydweithredwyr
+  Notify me: Rhoi gwybod i mi
+  Notification on: Hysbysiad ymlaen
+  Notification enabled: Cewch wybod pan fydd y fideo hwn yn dechrau
+  Notification cancelled: Mae'r hysbysiad dechrau wedi'i ganslo
+  Notification unavailable: Nid yw hysbysiadau'r system ar gael
+  Scheduled video starting: Mae'r fideo wedi'i amserlennu'n dechrau
+  Live notification body: 'Mae {videoTitle} yn dechrau nawr'
+  Premiere: Première
+  AI: AI
+  AI-generated content: Cynnwys a gynhyrchwyd gan AI
+  Collaborators: Cydweithredwyr
+  Live Chat Replay: Ailchwarae sgwrs fyw
+  Show Live Chat: Dangos sgwrs fyw
+  Show Live Chat Replay: Dangos ailchwarae sgwrs fyw
+  Close Live Chat: Cau sgwrs fyw
+  Close Live Chat Replay: Cau ailchwarae sgwrs fyw
+  Live Chat Settings: Gosodiadau sgwrs fyw
+  Show Live Chat Timestamps: Dangos stampiau amser
+  Chat Filter: Hidlydd sgwrs
+  Top Chat: Prif sgwrs
+  All Messages: Pob neges
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Mae ailchwarae sgwrs fyw wedi'i alluogi. Bydd negeseuon sgwrs yn ymddangos yma wrth i'r fideo chwarae.
+  Premiere started: Mae'r première ar y gweill. Dechreuodd {timeAgo}
+  Sponsor Block category:
+    hook: Bachyn/Cyfarchion
+    highlight: Uchafbwynt
+    exclusive access: Mynediad unigryw
+  Sponsor Block category short:
+    intro: Egwyl
+    interaction: Nodyn atgoffa rhyngweithio
+    music offtopic: Heb fod yn gerddoriaeth
+    filler: Gwyriadau
+  Player:
+    Voice-over Translation:
+      Start: Cyfieithu
+      Cancel: Canslo
+      Progress: Wrthi'n paratoi cyfieithiad troslais…
+      Retry: Rhoi cynnig arall arni
+      Error: Methodd cyfieithu'r troslais. Rhowch gynnig arall arni yn nes ymlaen.
+      Duration Error: Dim ond ar gyfer fideos hyd at bedair awr o hyd y mae cyfieithu troslais ar gael.
+    Caption Appearance:
+      Options: Dewisiadau
+      Sample: Dyma olwg y capsiynau
+    Auto-translate: Cyfieithu'n awtomatig
+    Sleep Timer:
+      Sleep Timer: Amserydd cysgu
+      'Off': 'I ffwrdd'
+      Minutes: '{minutes} munud'
+      End of video: Diwedd y fideo
+      Remaining: '{time} ar ôl'
+      Cancel timer: Canslo'r amserydd
+      Timer ended: Mae'r amserydd cysgu wedi dod i ben
+    Zoom:
+      Zoom: Chwyddo
+      'Off': 'I ffwrdd'
+    Auto-generated Caption Template: '{language} (wedi''i gynhyrchu''n awtomatig)'
+    Up next in {seconds}: Nesaf ymhen {seconds}
+    Resize dock: Newid maint y doc
+    Play now: Chwarae nawr
+    MusicPlaybackRateOverride: Wedi canfod fideo cerddoriaeth; yn chwarae ar 1x
+    Normal: Arferol
+    Set Default: Gosod yn rhagosodiad
+    Hide Annotations: Cuddio anodiadau
+    Show Annotations: Dangos anodiadau
+    Hide: Cuddio
+    Show: Dangos
+    Scroll Mini Player:
+      Back to Top: Yn ôl i'r brig
+      Return to Video Tab: Dychwelyd i dab y fideo
+      Play: Chwarae
+      Pause: Oedi
+      Drag Handle: Symud y chwaraewr bach
+    SponsorBlock:
+      CancelCurrentSegment: Canslo creu'r segment
+      ClearSegments: Clirio segmentau
+      ClearSegmentsPrompt: Ydych chi'n siŵr eich bod am glirio pob segment SponsorBlock drafft ar gyfer y fideo hwn?
+      CompleteSegmentsBeforeSubmitting: Cwblhewch bob segment drafft cyn cyflwyno.
+      CategoryLabel: Categori
+      ActionTypeLabel: Math o segment
+      DuplicateSegments: Ni chaniateir segmentau drafft dyblyg.
+      EndAction: (Diwedd)
+      EndActionLabel: Diwedd
+      EndTimeAfterStart: Rhaid i amser gorffen y segment fod ar ôl yr amser dechrau.
+      EndTimeBeforeVideoEnd: Rhaid i amser gorffen y segment fod o fewn hyd y fideo.
+      EndTimeLabel: Amser gorffen y segment
+      DisableAutoSkipTemporarily: Analluogi hepgor awtomatig SponsorBlock dros dro
+      EnableAutoSkipTemporarily: Ailalluogi hepgor awtomatig SponsorBlock
+      Guidelines: Canllawiau
+      InspectSegment: Archwilio
+      InvalidStartTime: Rhowch amser dechrau dilys ar gyfer y segment.
+      NoSegmentsToSubmit: Crëwch o leiaf un segment cyflawn cyn cyflwyno.
+      NowAction: (Nawr)
+      CloseInfoPanel: Cau gwybodaeth SponsorBlock
+      OpenInfoPanel: Agor gwybodaeth SponsorBlock
+      OpenSubmissionMenu: Agor y ddewislen gyflwyno
+      PreviewRequired: Rhagwelwch bob segment cyn cyflwyno.
+      PreviewSegment: Rhagolwg
+      SaveSegment: Cadw
+      SetSegmentEndNow: Gorffen y segment nawr
+      StartAction: (Dechrau)
+      StartSegmentNow: Dechrau'r segment nawr
+      SubmissionBadRequest: Gwrthododd SponsorBlock y cais cyflwyno.
+      SubmissionDuplicate: Mae hwn eisoes wedi'i gyflwyno.
+      SubmissionFailed: Methodd cyflwyno segmentau SponsorBlock.
+      SubmissionForbidden: Gwrthododd SponsorBlock y cyflwyniad.
+      SubmissionRateLimited: Cyfyngodd SponsorBlock ar gyfradd y cyflwyniad hwn.
+      SubmissionSuccess: Mae segmentau SponsorBlock wedi'u cyflwyno.
+      SubmitSegment: Cyflwyno'r segment
+      SubmitSegments: Cyflwyno
+      StartTimeLabel: Amser dechrau'r segment
+      TimeDivider: i
+      SkipPrompt: Hepgor {segmentCategory}?
+      SkipPromptAction: Hepgor
+      SkipToHighlight: Neidio i'r uchafbwynt?
+      SkippedToHighlight: Wedi neidio i'r uchafbwynt
+      SkipToastUnskip: Dad-hepgor
+      SkipToastReskip: Ail-hepgor
+      MutedSegment: 'Wedi tewi {segmentCategory}'
+      MuteToastUnmute: Dad-dewi
+      InfoPanelLoading: Mae'r segmentau'n dal i lwytho...
+      InfoPanelHasSegments: Mae gan y fideo hwn segmentau yn y gronfa ddata!
+      InfoPanelNoSegments: Ni chanfuwyd unrhyw segmentau
+      RefreshSegments: Adnewyddu segmentau
+      RefreshInfo: Adnewyddu gwybodaeth SponsorBlock
+      ContributionStatsTitle: Eich cyfraniadau
+      ContributionStatsLoading: Wrthi'n llwytho ystadegau cyfraniadau...
+      ContributionStatsError: Nid yw ystadegau cyfraniadau ar gael. Rhowch gynnig ar adnewyddu.
+      ContributionStatsNoUserId: Cyflwynwch segment neu fewnforiwch eich ID defnyddiwr SponsorBlock i weld ystadegau cyfraniadau.
+      Submissions: Cyflwyniadau
+      Segments: Segmentau
+      TimeSaved: Amser a arbedwyd
+      AutoSkipEnabled: Hepgor segmentau'n awtomatig
+      AutoSkipOn: 'Ymlaen'
+      AutoSkipOff: 'I ffwrdd'
+      WhitelistChannel: Ychwanegu'r sianel at y rhestr caniatáu
+      ChannelWhitelisted: Ar y rhestr caniatáu
+      RemoveChannelFromWhitelist: Tynnu'r sianel o'r rhestr caniatáu
+      MuteSegment: Tewi'r segment
+      SkipSegment: Hepgor y segment
+      CloseSegmentActions: Cau gweithredoedd y segment
+      FullVideo: Fideo cyfan
+      FullVideoLabel: '{segmentCategory} · Fideo cyfan'
+      MuteActionType: Tewi
+      MutePrompt: Tewi {segmentCategory}?
+      SkipActionType: Hepgor
+      LockedSegment: Segment wedi'i gloi
+      UpvoteSegment: Pleidleisio o blaid
+      DownvoteSegment: Pleidleisio yn erbyn
+      VoteFailed: Methodd cyflwyno pleidlais SponsorBlock.
+Playlist:
+  Close Playlist: Cau'r rhestr chwarae
+Change Format:
+  Local Video File: Ffeil fideo leol
+  Local Audio File: Ffeil sain leol
+  Online Video: Fideo ar-lein
+  Stream Source: Ffynhonnell ffrwd
+  Stream Extraction Method: Dull echdynnu ffrydiau
+  Playback Engine: Peiriant chwarae
+  Streaming Protocol: Protocol ffrydio
+  Not Available For This Video: Ddim ar gael ar gyfer y fideo hwn
+  Protocols:
+    Progressive: Cynyddol
+  Descriptions:
+    Local File: Chwarae'n uniongyrchol o'r ffeil a lawrlwythwyd ar y ddyfais hon
+    Online Video: Llwytho fformatau ffrydio o'r ffynhonnell ar-lein sydd wedi'i ffurfweddu
+    Dash: Ansawdd ymaddasol, sawl trac sain a'r cydraniadau uchaf
+    Legacy: Un ffeil sy'n cyfuno fideo a sain, wedi'i chyfyngu i gydraniadau is
+    Audio: Sain yn unig, sy'n ddefnyddiol i arbed lled band neu wrando yn y cefndir
+  yt-dlp Fallback Template: 'Nid oedd yt-dlp yn gallu darparu''r ffrydiau, felly defnyddir y peiriant mewnol yn ei le: {error}'
+  yt-dlp Default Clients Fallback: Nid oedd y cleientiaid yt-dlp dewisol yn gallu darparu ffrydiau y gellir eu chwarae; wrthi'n rhoi cynnig ar gleientiaid rhagosodedig yt-dlp yn eu lle
+  Built-in Fallback Template: 'Nid oedd y peiriant mewnol yn gallu chwarae''r ffrwd; wrthi''n rhoi cynnig ar yt-dlp yn ei le: {error}'
+Share:
+  Timestamp Link Copied: Wedi copïo dolen y stamp amser i'r clipfwrdd
+Context Menu:
+  Context Menu: Dewislen cyd-destun
+  Select All: Dewis y cyfan
+  Save Image As…: Cadw'r ddelwedd fel…
+  Copy Image: Copïo'r ddelwedd
+  Copy Image Address: Copïo cyfeiriad y ddelwedd
+  Cancel Refresh: Canslo'r adnewyddiad
+  Reload Videos: Ail-lwytho fideos
+  Reload Shorts: Ail-lwytho Byrion
+  Reload Live: Ail-lwytho ffrydiau byw
+  Reload Posts: Ail-lwytho postiadau
+  Reload All Feeds: Ail-lwytho pob ffrwd
+  Close Multiple Tabs: Cau {count} o dabiau | Cau {count} tab | Cau {count} dab | Cau {count} thab
+  Duplicate Tab: Dyblygu'r tab
+  Duplicate Multiple Tabs: Dyblygu {count} o dabiau | Dyblygu {count} tab | Dyblygu {count} dab | Dyblygu {count} thab
+  Move Tab: Symud y tab
+  Move Tabs: Symud tabiau
+  Move Tab to Group: Symud y tab i grŵp
+  Collapse Group: Crebachu'r grŵp
+  Move Tabs to Group: Symud tabiau i grŵp
+  Manage Tab Groups…: Rheoli grwpiau tabiau…
+  To Beginning: I'r dechrau
+  To End: I'r diwedd
+  Close Tabs: Cau tabiau
+  To the Top: I'r brig
+  To the Left: I'r chwith
+  To the Bottom: I'r gwaelod
+  To the Right: I'r dde
+  Other Tabs: Tabiau eraill
+  Copy YouTube Link: Copïo dolen YouTube
+  Copy YouTube Links: Copïo dolenni YouTube
+  Pin Tab: Pinio'r tab
+  Pin Tabs: Pinio tabiau
+  Unpin Tab: Dadbinio'r tab
+  Unpin Tabs: Dadbinio tabiau
+  Tab Color: Lliw'r tab
+  Default: Rhagosodedig
+  Purple: Porffor
+  Reopen Closed Tab: Ailagor tab a gaewyd
+  Reload Tab: Ail-lwytho'r tab
+  Reload Tabs: Ail-lwytho tabiau
+  Load Tab: Llwytho'r tab
+  Load Tabs: Llwytho tabiau
+  Unload Tab: Dadlwytho'r tab
+  Unload Tabs: Dadlwytho tabiau
+  Move Tab to Window: Symud y tab i ffenestr
+  Move Tabs to Window: Symud tabiau i ffenestr
+  Open in a New Tab: Agor mewn tab newydd
+  Open in a New Window: Agor mewn ffenestr newydd
+  Copy Link: Copïo'r ddolen
+  Copy Invidious Link: Copïo dolen Invidious
+  Search Selection in New Tab: Chwilio am "{selection}" mewn tab newydd
+  Search Selection in New Window: Chwilio am "{selection}" mewn ffenestr newydd
+  Search With: Chwilio gyda {engine}
+  Search With Multiple: Chwilio gyda...
+  Selection Too Long: Mae'r dewis yn rhy hir i'w chwilio (> {count} nod)
+Tab Organizer:
+  Title: Trefnydd tabiau
+  Open Tab Count: '{count} o dabiau agored | {count} tab agored | {count} dab agored | {count} thab agored | {count} thab agored | {count} o dabiau agored'
+  Search Label: Chwilio tabiau
+  Selected Count: '{count} o dabiau wedi''u dewis | {count} tab wedi''i ddewis | {count} dab wedi''u dewis | {count} thab wedi''u dewis | {count} thab wedi''u dewis | {count} o dabiau wedi''u dewis'
+  Tab Count: '{count} o dabiau | {count} tab | {count} dab | {count} thab | {count} thab | {count} o dabiau'
+  Select All: Dewis y cyfan
+  Select None: Dewis dim
+  Move To Group: Symud y tabiau a ddewiswyd i grŵp
+  Choose Group: Dewis grŵp
+  Ungrouped: Heb grŵp
+  Pin: Pinio
+  Unpin: Dadbinio
+  Load: Llwytho
+  Unload: Dadlwytho
+  Unload All: Dadlwytho'r cyfan
+  Close All: Cau'r cyfan
+  Ungroup: Tynnu o'r grŵp
+  Group Name: Enw'r grŵp
+  Color: Lliw
+  No Color: Dim lliw
+  Create Group: Creu grŵp
+  Expand Group: Ehangu'r grŵp
+  Collapse Group: Crebachu'r grŵp
+  Expand Group Label: Ehangu {name}, {count} o dabiau | Ehangu {name}, {count} tab | Ehangu {name}, {count} dab | Ehangu {name}, {count} thab | Ehangu {name}, {count} thab | Ehangu {name}, {count} o dabiau
+  Rename Group: Ailenwi {name}
+  Change Group Color: Newid lliw {name}
+  Move To Window: Symud i ffenestr
+  Choose Window: Dewis ffenestr
+  Select Tab: Dewis {title}
+  Active: Gweithredol
+  Pinned: Wedi'i binio
+  Unloaded: Wedi'i ddadlwytho
+  Playing: Wrthi'n chwarae
+  Close Tab: Cau {title}
+  No Open Results: Nid oes unrhyw dabiau agored yn cyfateb i'r chwiliad hwn.
+  Recently Closed: Wedi'u cau'n ddiweddar
+  Clear: Clirio
+  No Closed Results: Nid oes unrhyw dabiau a gaewyd yn ddiweddar yn cyfateb i'r chwiliad hwn.
+  Drag Tab: Llusgo i symud i grŵp
+Chapters:
+  Open Chapters: Agor penodau
+  Close Chapters: Cau penodau
+  Copy Timestamp Link: Copïo'r ddolen ar {timestamp}
+Comments:
+  Comment Count: '{count} o sylwadau | 1 sylw | {count} sylw | {count} sylw | {count} sylw | {count} o sylwadau'
+  Show Comments: Dangos sylwadau
+  Getting comment replies, please wait: Wrthi'n cyrchu ymatebion i sylwadau; arhoswch
+  Reload Comments: Ail-lwytho sylwadau
+  Reply Count: '{replyCount} o ymatebion | 1 ymateb | {replyCount} ymateb | {replyCount} ymateb | {replyCount} ymateb | {replyCount} o ymatebion'
+  Comments are turned off: Mae sylwadau wedi'u diffodd
+  YouTube did not provide advertised replies: Dangosodd YouTube fod ymatebion i'r sylw hwn, ond ni ddarparodd mohonynt. Efallai eu bod wedi'u dileu neu eu cuddio, felly tynnwyd y botwm ymateb.
+  Pinned by you: Wedi'i binio gennych
+  A reply is pinned: Mae ymateb wedi'i binio
+  Filter loaded comments: Hidlo sylwadau wedi'u llwytho
+  Comment filters: Hidlyddion sylwadau
+  From creator: Gan y crëwr
+  Contains timestamps: Yn cynnwys stampiau amser
+  Pin comment by author: Pinio sylw gan {author}
+  Unpin comment by author: Dadbinio sylw gan {author}
+  Edited: (golygwyd)
+  Highlighted comment: Sylw wedi'i amlygu
+  Highlighted reply: Ymateb wedi'i amlygu
+  Search loaded comments: Chwilio sylwadau wedi'u llwytho
+  Loaded comment search result count: '{count} o {total} o sylwadau wedi''u llwytho | 1 o {total} o sylwadau wedi''u llwytho | {count} o {total} o sylwadau wedi''u llwytho | {count} o {total} o sylwadau wedi''u llwytho | {count} o {total} o sylwadau wedi''u llwytho | {count} o {total} o sylwadau wedi''u llwytho'
+  No loaded comments match your filters: Nid oes unrhyw sylwadau wedi'u llwytho yn cyfateb i'ch hidlyddion
+  YouTube comment link copied to clipboard: Wedi copïo dolen sylw YouTube i'r clipfwrdd
+  Translate to {language}: Cyfieithu i {language}
+  Show original: Dangos y gwreiddiol
+  Translating comment, please wait: Wrthi'n cyfieithu'r sylw; arhoswch
+  Comment translation failed: Methodd cyfieithu'r sylw
+Description:
+  Copy Description: Copïo'r disgrifiad
+  Description Copied: Wedi copïo'r disgrifiad i'r clipfwrdd
+  Video Category: 'Categori fideo:'
+  Video Tags: Tagiau fideo
+  Games: Gemau
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: Llenwi bylchau mewn cyfieithiadau dynol â thestun a gynhyrchwyd gan AI. Mae cyfieithiadau dynol bob amser yn cael blaenoriaeth.
+    Update Relative Timestamps: Mae'n diweddaru stampiau amser cymharol drwy'r ap tra bo tudalen ar agor. Pan fydd wedi'i analluogi, dim ond ar ôl ail-lwytho neu ailagor y dudalen y cânt eu diweddaru.
+    Stream Extraction Method: |
+      Dewiswch sut mae OpenTubeX yn cael ffrydiau fideo. Rhaid i yt-dlp fod ar gael pan gaiff ei ddewis.
+      Gall fideos gymryd mwy o amser i ddechrau wrth ddefnyddio yt-dlp.
+      Nid yw'r dull mewnol yn cynnal neidio mewn ffrydiau byw a premières.
+    Avoid translation: |
+      Analluogi cyfieithu awtomatig YouTube ar deitl, disgrifiad a phenodau fideo.
+      Gall gormod o geisiadau, megis cyrchu teitlau fideos ar draws rhestrau, effeithio dros dro
+      ar ddibynadwyedd yr ap.
+    Show Thumbnail Previews: Dangos rhagolygon wedi'u hanimeiddio wrth hofran dros fân-luniau fideos.
+    Startup Behavior: |
+      Dewiswch beth mae OpenTubeX yn ei wneud wrth gychwyn.
+      Mae Llwytho pob tab yn adfer pob tab a gadwyd ar unwaith, ond ni fydd tabiau cefndir yn chwarae fideos yn awtomatig.
+      Mae Llwytho tabiau a lwythwyd o'r blaen yn ail-lwytho'r tabiau a oedd wedi'u llwytho pan gaeodd OpenTubeX ac yn cadw'r lleill wedi'u dadlwytho.
+      Mae Llwytho'r tab a oedd yn weithredol ddiwethaf yn adfer y sesiwn flaenorol gyda'r tabiau eraill ar agor ond wedi'u dadlwytho; byddant yn llwytho pan fyddwch yn clicio arnynt.
+      Mae Cychwyn â sesiwn wag yn hepgor y tabiau a gadwyd ac yn agor ffenestr newydd.
+    Remember Tab Navigation History: Caiff hanes llywio yn ôl ac ymlaen pob tab ei gadw a'i adfer pan fydd OpenTubeX yn ailgychwyn.
+  Proxy Settings:
+    IP Block Recovery Script Path: Llwybr y ffeil sgript i'w rhedeg pan ganfyddir rhwystr IP. Mae OpenTubeX yn aros iddi orffen, yna'n ail-lwytho'r fideo. Os yw'r darparwr wrth gefn wedi'i alluogi, dim ond pan fydd y darparwr hwnnw hefyd yn methu y bydd y sgript yn rhedeg.
+  Player Settings:
+    Enable Caption Translations: Pan fydd wedi'i alluogi ac nad yw'r fideo'n darparu trac gwreiddiol cyfatebol, bydd y botwm capsiynau a'r llwybr byr C yn rhoi blaenoriaeth i drac sydd wedi'i gyfieithu'n awtomatig yn yr iaith capsiynau ddewisol.
+    Use Quick Playback Speed Bar: Mae'n dangos bar cyflymder chwarae cyflym yn rheolyddion y chwaraewr ar y dde. Os yw cadw cyflymder chwarae â llaw fesul sianel wedi'i alluogi, mae'r bar hefyd yn cynnwys y botwm i gadw'r cyflymder ar gyfer y sianel bresennol.
+    Multiply Seek Interval by Playback Rate: Pan fydd wedi'i alluogi, caiff cyfyngau neidio, gan gynnwys y bysellau saeth a J/L, eu lluosi â'r gyfradd chwarae bresennol. Pan fydd wedi'i analluogi, mae'r cyfyngau'n aros yn gyson beth bynnag fo'r gyfradd chwarae.
+    Show Playback Rate Adjusted Timestamp: Pan fydd wedi'i alluogi a bod y cyflymder chwarae'n wahanol i 1x, mae'r chwaraewr yn dangos stampiau amser wedi'u haddasu yn ôl y gyfradd chwarae mewn cromfachau ar ôl y stamp amser arferol.
+    Use YouTube-style Shorts: Mae'n dangos Byrion mewn grid portread ar dudalennau tanysgrifiadau a sianeli ac yn defnyddio'r chwaraewr Byrion yn arddull YouTube.
+    Loop Shorts: Pan fydd wedi'i alluogi, mae Byrion yn ailgychwyn yn awtomatig. Pan fydd wedi'i analluogi, mae Byrion yn stopio ar y diwedd ac yn dangos botwm ailchwarae.
+    Show Skip Silence Toggle: Mae'n dangos togl ymlaen/i ffwrdd ar gyfer hepgor distawrwydd yn newislen gosodiadau'r chwaraewr.
+    Enable Skip Silence by Default: Mae'n galluogi hepgor distawrwydd ar gyfer tabiau newydd. Nid yw ei newid mewn un tab yn effeithio ar dabiau eraill.
+    Enable Video Zoom: Mae'n dangos y rheolydd Chwyddo yn newislen gosodiadau'r chwaraewr ac yn galluogi ei lwybrau byr bysellfwrdd a'i reolyddion padellu.
+    Voice-over Translation: Mae'n anfon ID, hyd ac iaith ddewisol y fideo i wasanaeth cyfieithu troslais answyddogol Yandex pan fyddwch yn gofyn am gyfieithiad. Mae wedi'i analluogi yn ddiofyn.
+    Hold to Double Playback Speed: Daliwch y bylchwr neu fotwm chwith y llygoden dros y chwaraewr i ddyblu'r cyflymder chwarae presennol dros dro.
+    Ambient Mode: Mae'n cyfuno lliwiau'r fideo â'r ardal o amgylch y chwaraewr.
+    Default Volume: Mae wedi'i analluogi tra bo Cofio lefel y sain wedi'i alluogi. Diffoddwch Cofio lefel y sain i osod lefel sain gychwyn sefydlog ar gyfer pob fideo.
+    Parallel Segment Loading: |
+      Sawl segment fideo a sain i'w llwytho ar unwaith cyn chwarae.
+      Gall gwerthoedd uwch helpu ar gysylltiadau araf neu ansefydlog, ond maent yn defnyddio rhagor o led band a chof.
+      Gallant hefyd beri i Awtomatig danamcangyfrif cyflymder y cysylltiad a dewis ansawdd is.
+      Mae ffrydiau sydd wedi'u cyfyngu i un cais ar y tro yn anwybyddu'r gosodiad hwn.
+  Download Settings:
+    Download Folder: Caiff fideos eu cadw yn y ffolder hon. Gadewch yn wag i ddefnyddio ffolder Lawrlwythiadau eich system.
+    Global Additional yt-dlp Arguments: Ymresymiadau llinell orchymyn ychwanegol a drosglwyddir i yt-dlp ar gyfer pob lawrlwythiad, er enghraifft --cookies-from-browser firefox.
+    Concurrent Downloads: Uchafswm nifer y tasgau yt-dlp a all redeg ar unwaith.
+    Bandwidth Limit: Mae'n cyfyngu cyfradd drosglwyddo gyfun y ciw drwy rannu'r terfyn hwn rhwng tasgau cydamserol. Rhowch 0 am ddim terfyn.
+  External Software Settings:
+    yt-dlp Source: Gall OpenTubeX ddefnyddio'r yt-dlp sydd wedi'i osod ar eich system neu lawrlwytho a rheoli ei gopi ei hun o yt-dlp, a gaiff ei storio yng nghyfeiriadur data'r defnyddiwr.
+    yt-dlp Channel: Dewiswch pa sianel ryddhau yt-dlp y mae OpenTubeX yn ei lawrlwytho a'i rheoli. Argymhellir Sefydlog ar gyfer y rhan fwyaf o ddefnyddwyr.
+    FFmpeg Source: Gall OpenTubeX ddefnyddio FFmpeg a FFprobe sydd wedi'u gosod ar eich system neu lawrlwytho a rheoli ei adeiladau sefydlog ei hun, a gaiff eu storio yng nghyfeiriadur data'r defnyddiwr.
+    Managed Tool Updates: Dewiswch a yw offer a reolir yn diweddaru'n awtomatig, yn gofyn cyn diweddaru, neu'n diweddaru drwy'r botymau â llaw yn unig. Caiff offer coll eu lawrlwytho pan fydd eu hangen o hyd.
+    yt-dlp Executable Path: Yn ddiofyn, bydd OpenTubeX yn tybio bod modd canfod yt-dlp drwy'r newidyn amgylchedd PATH. Os oes angen, gallwch osod llwybr personol yma.
+    Cookie Source: Dewiswch a ddylai yt-dlp ddarllen ffeil cwcis Netscape neu gwcis o borwr sydd wedi'i osod ar gyfer chwarae wedi'i ddilysu.
+    Cookie File: Dewiswch ffeil cwcis wedi'i fformatio ar gyfer Netscape er mwyn chwarae wedi'i ddilysu.
+    Browser for Cookies: Darllenir cynhaliaeth porwyr o'r ffeil weithredadwy yt-dlp a ddewiswyd. Mae OpenTubeX yn gofyn i yt-dlp ddarllen y porwr hwn pan ofynnir am chwarae wedi'i ddilysu.
+    Browser Profile: Enw neu ffolder proffil porwr dewisol. Gadewch yn wag i ddefnyddio'r proffil y cyrchwyd ato ddiwethaf.
+    Always Use Cookies: Defnyddio'r cwcis sydd wedi'u ffurfweddu pryd bynnag y bydd yt-dlp yn echdynnu ffrydiau. Nid yw hyn yn newid y dull echdynnu ffrydiau i yt-dlp. Pan fydd yt-dlp wedi'i ddewis, gall fformatau i gyfrifon yn unig ddod ar gael, gan gynnwys cyfradd didau well YouTube Premium pan fydd gan y cyfrif fynediad ati.
+    FFmpeg Executable Path: Mae angen FFmpeg i uno ffrydiau fideo a sain ar wahân ac i drosi sain. Yn ddiofyn, bydd OpenTubeX yn tybio bod modd canfod FFmpeg drwy'r newidyn amgylchedd PATH. Os oes angen, gallwch osod llwybr personol yma.
+  Distraction Free Settings:
+    Shorten View Counts: Mae'n dangos cyfrif gwylwyr a hoffiadau sylwadau y mae YouTube eisoes wedi'u talgrynnu ar ffurf fer, e.e. 14K yn lle 14,000. Dangosir yr union gyfrifon yn llawn bob amser.
+  Subscription Settings:
+    Fetch Feed on Startup: Pan fydd wedi'i alluogi, bydd OpenTubeX yn cyrchu eich ffrwd tanysgrifiadau'n awtomatig wrth gychwyn a phan agorir ffenestr newydd.
+    Show New Content Feed: Mae'n dangos tab Newydd sy'n cynnwys eitemau o'r ffrwd tanysgrifiadau nad oeddent yn bresennol yn ystod y cyrchiad blaenorol.
+    Show New Content Indicators: Mae'n dangos dot bach wrth ymyl eitemau o'r ffrwd tanysgrifiadau nad oeddent yn bresennol yn ystod y cyrchiad blaenorol.
+    Show Scheduled Live Streams / Premieres First: Mae'n cadw ffrydiau byw a premières sydd ar ddod ar frig y ffrwd tanysgrifiadau. Pan fydd wedi'i analluogi, maent yn aros yn safle eu cyhoeddiad nes iddynt ddechrau. Adnewyddwch y ffrwd tanysgrifiadau unwaith ar ôl analluogi'r dewis i gyrchu dyddiadau cyhoeddi cofnodion sydd eisoes wedi'u hamserlennu.
+    Auto Refresh Interval: Pa mor aml y mae OpenTubeX yn adnewyddu eich ffrwd tanysgrifiadau'n awtomatig tra bo'r ap ar agor.
+  Theme Settings:
+    Show Progress as Notification: Mae'n dangos hysbysiad parhaol â chynnydd byw ar gyfer gweithredoedd cefndir, megis adnewyddu tanysgrifiadau a lawrlwytho offer a reolir, yn lle defnyddio'r bar cynnydd byd-eang.
+    Always Show Scrollbars: Mae'n cadw'r bariau sgrolio'n weladwy bob amser. Pan fydd wedi'i analluogi, maent yn pylu ychydig ar ôl i chi roi'r gorau i symud y llygoden ac yn ailymddangos cyn gynted ag y byddwch yn ei symud eto.
+    Use Fixed Tab Width: Mae'n rhoi'r un lled i bob tab yn y bar tabiau llorweddol yn lle eu meintio yn ôl eu teitl.
+    Use Grid Player Menu: Mae'n trefnu dewislen gosodiadau'r chwaraewr fideo fel grid o deils yn lle rhestr o resi.
+The playlist is at the beginning. Enable loop to continue playing: Mae'r rhestr chwarae ar y dechrau. Galluogwch ailadrodd i barhau i chwarae
+External link opening has been disabled in Settings → Privacy: Mae agor dolenni allanol wedi'i analluogi yn Gosodiadau → Preifatrwydd
+KeyboardShortcutPrompt:
+  Edit Hint: Dewiswch lwybr byr, yna pwyswch gyfuniad newydd o fysellau. Pwyswch Backspace neu Delete i dynnu ei aseiniad.
+  Change Shortcut: Newid y llwybr byr ar gyfer {action}
+  Press Shortcut: Pwyswch lwybr byr…
+  Unassigned: Heb ei aseinio
+  Reset Shortcut: Ailosod y llwybr byr ar gyfer {action}
+  Reset to Defaults: Ailosod i'r rhagosodiadau
+  Shortcut Already Assigned: Mae'r llwybr byr eisoes wedi'i aseinio
+  Shortcut Conflict: 'Mae {shortcut} eisoes wedi''i aseinio i {actions}. Ydych chi am ei ailaseinio?'
+  Reserved Shortcut Conflict: 'Mae {shortcut} wedi''i gadw ar gyfer {actions} ac ni ellir ei ailaseinio.'
+  Reassign: Ailaseinio
+  Sections:
+    App:
+      Tabs: "Ap:\_Tabiau"
+      Search and Page: "Ap:\_Chwilio a thudalen"
+      Window and View: "Ap:\_Ffenestr a golwg"
+  New Tab: Creu tab newydd
+  Close Tab: Cau'r tab presennol
+  Reload Tab: Ail-lwytho'r tab presennol
+  Reopen Closed Tab: Ailagor y tab a gaewyd ddiwethaf
+  Next Tab: Newid i'r tab nesaf
+  Previous Tab: Newid i'r tab blaenorol
+  Switch to Tab: Newid i dab 1–9
+  Toggle Tab Orientation: Newid rhwng cynlluniau tabiau
+  Find in Page: Canfod testun ar y dudalen bresennol
+  Find Next Match: Neidio i'r cydweddiad nesaf
+  Find Previous Match: Neidio i'r cydweddiad blaenorol
+  Toggle Normal Playback Speed: Toglo rhwng cyflymder 1x a'r cyflymder chwarae blaenorol
+  Toggle Skip Silence: Toglo hepgor distawrwydd
+  Video Zoom In: Chwyddo i mewn i'r fideo
+  Video Zoom Out: Chwyddo allan o'r fideo
+  Tab Switcher: Newidiwr tabiau
+CommandPalette:
+  Title: Palet gorchmynion
+  Open: Agor y palet gorchmynion
+  Search Label: Chwilio gorchmynion
+  Search Placeholder: Chwilio gorchmynion a gosodiadau…
+  Results: Gorchmynion
+  No Results: Dim gorchmynion cyfatebol
+  Result Count: 'Wedi canfod {count} o orchmynion | Wedi canfod 1 gorchymyn | Wedi canfod {count} orchymyn | Wedi canfod {count} gorchymyn | Wedi canfod {count} gorchymyn | Wedi canfod {count} o orchmynion'
+  Move: Symud
+  Run: Rhedeg
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Newid i dab: {title}'
+  Switch Profile: 'Newid proffil: {name}'
+  Open Playlist: 'Agor rhestr chwarae: {name}'
+  Cancel Download: 'Canslo lawrlwythiad: {title}'
+  Groups:
+    App: Ap
+    Navigation: Llywio
+    Tabs: Tabiau
+  Unavailable:
+    Current Page: Ar y dudalen hon eisoes
+    No History: Dim tudalen i'r cyfeiriad hwn
+    Desktop: Dim ond yn yr ap bwrdd gwaith y mae ar gael
+    Build: Ddim ar gael yn yr adeilad hwn
+    One Tab: Agorwch dab arall yn gyntaf
+    Active Tab: Dyma'r tab gweithredol
+    Active Profile: Dyma'r proffil gweithredol
+    Download Finished: Nid yw'r lawrlwythiad hwn yn rhedeg mwyach
+    Video: Agorwch fideo yn gyntaf
+Downloads:
+  Download: Lawrlwytho
+  Download Video: Lawrlwytho fideo
+  Download Playlist: Lawrlwytho rhestr chwarae
+  Downloading: Wrthi'n lawrlwytho
+  Queue: Ciw
+  Downloaded: Wedi'i lawrlwytho
+  Canceled: Wedi'i ganslo
+  Open Downloads: Agor Lawrlwythiadau
+  No Downloads: Dim lawrlwythiadau eto
+  No Downloads Description: Bydd lawrlwythiadau rydych yn eu dechrau yn ymddangos yma.
+  Clear Failed Canceled Skipped And Missing: Clirio rhai sydd wedi methu, wedi'u canslo, wedi'u hepgor neu ar goll
+  Clear From List: Clirio o'r rhestr
+  Show in Folder: Dangos yn y ffolder
+  Play Download: Chwarae'r lawrlwythiad
+  Retry Download: Rhoi cynnig arall ar y lawrlwythiad
+  Pause Download: Oedi'r lawrlwythiad
+  Resume Download: Ailafael yn y lawrlwythiad
+  Move Earlier: Symud yn gynharach
+  Move Later: Symud yn ddiweddarach
+  Pause All: Oedi'r cyfan
+  Resume All: Ailafael yn y cyfan
+  Retry All: Rhoi cynnig arall ar bob lawrlwythiad a fethodd
+  Total Size: 'Cyfanswm maint: {size}'
+  Local File: Ffeil leol
+  Available Offline: Ar gael all-lein
+  Remove File: Tynnu'r ffeil
+  Remove File Confirmation: Tynnu'r ffeil a lawrlwythwyd?
+  Remove File Warning: Bydd hyn yn symud "{title}" i fin sbwriel eich dyfais.
+  File Not Found: Nid oedd modd canfod y ffeil a lawrlwythwyd.
+  Download Missing: Nid yw'r lawrlwythiad ar gael
+  Files Missing: Nid yw'r ffeiliau a lawrlwythwyd ar gael ar y system ffeiliau mwyach. | Nid yw'r ffeil a lawrlwythwyd ar gael ar y system ffeiliau mwyach. | Nid yw'r ffeiliau a lawrlwythwyd ar gael ar y system ffeiliau mwyach. | Nid yw'r ffeiliau a lawrlwythwyd ar gael ar y system ffeiliau mwyach. | Nid yw'r ffeiliau a lawrlwythwyd ar gael ar y system ffeiliau mwyach. | Nid yw'r ffeiliau a lawrlwythwyd ar gael ar y system ffeiliau mwyach.
+  Files Available: 'Mae {available} o {total} o ffeiliau a lawrlwythwyd ar gael.'
+  More Files: '{count} o ffeiliau eraill | 1 ffeil arall | {count} ffeil arall | {count} ffeil arall | {count} ffeil arall | {count} o ffeiliau eraill'
+  Template Used: 'Templed: {name}'
+  Download Type: Math o lawrlwythiad
+  Template: Templed
+  Unsaved: Heb ei gadw
+  Media Type: Math o gyfrwng
+  Video: Fideo
+  Audio: Sain
+  Maximum Resolution: Cydraniad mwyaf
+  Best Available: Y gorau sydd ar gael
+  Automatic: Awtomatig
+  Container: Cynhwysydd
+  Video Codec: Codeg fideo
+  Audio Codec: Codeg sain
+  File Name Template: Templed enw ffeil
+  File Name Template Help: 'Meysydd sydd ar gael: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Ystod amser a phenodau
+  Start Time: Amser dechrau (HH:MM:SS)
+  End Time: Amser gorffen (HH:MM:SS)
+  Split by Chapters: Rhannu'n ffeiliau ar wahân fesul pennod
+  Remove Segments: Tynnu segmentau
+  Subtitles and Metadata: Isdeitlau a metadata
+  Include Subtitles: Cynnwys isdeitlau
+  Embed Subtitles: Mewnblannu isdeitlau yn y ffeil gyfryngau
+  Subtitle Format: Fformat isdeitlau
+  Subtitle Languages: Ieithoedd isdeitlau
+  Subtitle Languages Help: 'Dewisyddion iaith yt-dlp wedi''u gwahanu â choma, er enghraifft: en.*,de.*'
+  Embed Cover Art: Mewnblannu'r mân-lun fel clawr
+  Embed Metadata: Mewnblannu'r teitl, yr awdur, y disgrifiad a'r penodau
+  Additional yt-dlp Arguments: Ymresymiadau yt-dlp ychwanegol
+  Custom yt-dlp Arguments: Ymresymiadau yt-dlp personol
+  Template Name: Enw'r templed
+  Save Template: Cadw'r templed
+  Delete Template: Dileu'r templed
+  Template Saved: Wedi cadw'r templed lawrlwytho "{name}"
+  Template Name Exists: Mae templed lawrlwytho o'r enw "{name}" eisoes yn bodoli.
+  Choose Folder: Newid
+  Select Folder: Dewis ffolder
+  Folder Required: Dewiswch ffolder lawrlwytho i alluogi lawrlwythiadau.
+  System Downloads Folder: Ffolder Lawrlwythiadau'r system
+  Processing: Wrthi'n prosesu…
+  Queued: Yn y ciw
+  Queued Position: Yn y ciw, safle {position}
+  Paused: Wedi'i oedi
+  Pausing: Bydd y dasg bresennol yn gorffen, yna bydd y ciw'n oedi
+  Download Complete: Lawrlwythiad wedi'i gwblhau
+  Download Cancelled: Lawrlwythiad wedi'i ganslo
+  Download Failed: Methodd y lawrlwythiad
+  File Name Shortened: Byrhawyd enw'r ffeil oherwydd bod teitl y fideo'n rhy hir.
+  Insufficient Disk Space: Dim digon o le ar y ddisg. Mae angen tua {required} ac mae {available} ar gael.
+  Unknown Download Size: Nid yw maint y lawrlwythiad yn hysbys. Mae {available} ar gael ar y system ffeiliau darged.
+  Disk Space Check Unavailable: Nid oedd modd gwirio'r lle oedd ar gael ar y ddisg cyn dechrau'r lawrlwythiad hwn.
+  Download Failure Hint: Gwiriwch {issuesLink}, yna rhowch gynnig ar newid sianel yt-dlp i Nightly neu Master yn Gosodiadau → Uwch → Meddalwedd allanol.
+  yt-dlp YouTube Issues: problemau yt-dlp diweddar ar gyfer YouTube
+  Automatic Download Started: Mae lawrlwythiad awtomatig wedi dechrau
+  Automatic Download Started Body: Wrthi'n lawrlwytho "{title}" o {channel} yn y cefndir.
+  Automatic Download Complete: Lawrlwythiad awtomatig wedi'i gwblhau
+  Automatic Download Failed: Methodd y lawrlwythiad awtomatig
+  Automatic Download Could Not Start: Nid oedd modd dechrau lawrlwytho "{title}" yn awtomatig.
+  Automatic Download Skipped: Wedi'i hepgor gan hidlyddion lawrlwytho awtomatig
+  Cancel Download: Canslo'r lawrlwythiad
+  yt-dlp Not Found: Ni chanfuwyd yt-dlp. Gosodwch ef neu gosodwch ei lwybr yn Gosodiadau → Uwch → Meddalwedd allanol.
+  Download Complete Template: Mae lawrlwythiad "{title}" wedi gorffen
+  Download Failed Template: Mae lawrlwythiad "{title}" wedi methu
+  Templates:
+    Video Best: Fideo - Ansawdd gorau
+    Video Resolution: Fideo - {resolution}
+    Audio Best: Sain - Ansawdd gorau
+    Audio Format: Sain - {format}
+    Subtitles Format: Isdeitlau - {format}

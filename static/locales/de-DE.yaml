@@ -314,6 +314,7 @@ Settings:
 
       Load previously loaded tabs: Zuvor geladene Tabs laden
     Locale Preference: Sprache
+    Use AI Translation Completions: Fehlende Übersetzungen mit KI ergänzen
     Preferred API Backend:
       Preferred API Backend: Bevorzugtes API-Backend
       Local API: Lokale API
@@ -2059,6 +2060,7 @@ See changes and update: Änderungen ansehen und aktualisieren
 Dismiss: Ausblenden
 Tooltips:
   General Settings:
+    Use AI Translation Completions: Füllt Lücken in den von Menschen erstellten Übersetzungen mit KI-generiertem Text. Menschliche Übersetzungen haben immer Vorrang.
     Playback Engine: Legt fest, welche Engine die Videostreams ermittelt. yt-dlp muss verfügbar sein, wenn es ausgewählt ist.
     Thumbnail Preference: Alle Vorschaubilder in OpenTubeX werden verpixelt, versteckt oder durch ein Einzelbild aus dem Video ersetzt, anstatt das Standard-Vorschaubild anzuzeigen.
     Show Thumbnail Previews: Zeigt animierte Vorschaubilder, wenn du den Mauszeiger über ein Videovorschaubild bewegst.
