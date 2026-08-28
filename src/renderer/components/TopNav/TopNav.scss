@@ -214,6 +214,7 @@
 
   &.profiles {
     justify-content: flex-end;
+    margin-inline-end: calc(var(--scrollbar-track-width) + 6px);
   }
 
   .navSearchButton {

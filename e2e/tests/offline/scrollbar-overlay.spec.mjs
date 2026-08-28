@@ -63,6 +63,33 @@ test.describe('overlay scrollbars', () => {
     expect(Math.abs(scrollbarBox.x + scrollbarBox.width - innerWidth)).toBeLessThanOrEqual(1)
   })
 
+  test('keeps the quick settings avatar clear of a wide page scrollbar', async ({ page }) => {
+    await addPageOverflow(page)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setScrollbarThumbWidth', 20)
+    })
+
+    for (const zoomFactor of [1, 1.25]) {
+      await page.evaluate((factor) => window.ftElectron.setZoomFactor(factor), zoomFactor)
+      await expect.poll(async () => {
+        const [avatarBox, scrollbarBox] = await Promise.all([
+          page.locator('.topNav .profileTrigger').boundingBox(),
+          page.locator(PAGE_SCROLLBAR).boundingBox()
+        ])
+        return scrollbarBox.x - (avatarBox.x + avatarBox.width)
+      }).toBeGreaterThanOrEqual(5)
+    }
+
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+    await page.setViewportSize({ width: 400, height: 720 })
+    await page.locator('.topNav .profileTrigger').click()
+    const menuBox = await page.locator('.quickSettingsMenu').boundingBox()
+
+    expect(menuBox.x).toBeGreaterThanOrEqual(0)
+    expect(menuBox.x + menuBox.width).toBeLessThanOrEqual(400)
+  })
+
   test('the scrollbar hides once the pointer rests and follows it back', async ({ page }) => {
     await addPageOverflow(page)
     const scrollbar = page.locator(PAGE_SCROLLBAR)

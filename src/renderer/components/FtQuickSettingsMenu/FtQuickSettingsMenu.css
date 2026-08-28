@@ -169,7 +169,7 @@
   inset-inline-end: 0;
   margin: 0;
   max-block-size: calc(100vh - 76px - var(--quick-settings-viewport-offset, calc(0 * 1px)));
-  inline-size: min(440px, calc(100vw - 20px));
+  inline-size: min(440px, calc(100vw - var(--scrollbar-track-width) - 20px));
   line-height: normal;
   overscroll-behavior: contain;
   overflow: hidden;
