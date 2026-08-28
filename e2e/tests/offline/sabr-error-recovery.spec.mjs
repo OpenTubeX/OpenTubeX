@@ -578,6 +578,59 @@ test('a SABR reload preserves the tab title while adding its resume timestamp', 
   await expect(page).toHaveTitle(`${titles.titleBeforeReload} - OpenTubeX`)
 })
 
+test('pausing keeps a SABR replacement paused when autoplay is enabled', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  const watchView = await watchViewHandle(page)
+
+  await watchView.evaluate(view => {
+    view.$store.commit('setAutoplayVideos', true)
+    view.getTimestamp = () => 0
+
+    const reloadView = view.reloadView.bind(view)
+    let releaseReload
+    const reloadGate = new Promise(resolve => {
+      releaseReload = resolve
+    })
+
+    view.reloadView = async options => {
+      await reloadGate
+      return reloadView(options)
+    }
+    window.__releaseSabrReload = releaseReload
+    window.__sabrReloadFinished = view.performSabrReload(
+      { wasPlaying: true },
+      'Synthetic SABR reload'
+    )
+  })
+
+  await expect.poll(() => watchView.evaluate(view => view.resumePlaybackAfterSabrReload)).toBe(true)
+  await video.evaluate(element => element.pause())
+  await expect.poll(() => watchView.evaluate(view => view.resumePlaybackAfterSabrReload)).toBe(false)
+  await page.evaluate(() => {
+    window.__sabrReplacementPlayEvents = []
+    document.addEventListener('play', event => {
+      if (event.target instanceof HTMLVideoElement) {
+        window.__sabrReplacementPlayEvents.push(event.target.currentTime)
+      }
+    }, true)
+  })
+
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].emit('blur')
+  })
+  await page.evaluate(() => window.__releaseSabrReload())
+  await page.evaluate(() => window.__sabrReloadFinished)
+
+  const replacementVideo = page.locator('.tabContent[aria-hidden="false"] video')
+  await expect(replacementVideo).toHaveCount(1, { timeout: 30_000 })
+  await expect.poll(() => replacementVideo.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
+  await page.waitForTimeout(1000)
+
+  expect(await page.evaluate(() => window.__sabrReplacementPlayEvents)).toEqual([])
+  expect(await replacementVideo.evaluate(element => element.paused)).toBe(true)
+})
+
 test('a second SABR failure after successful playback refetches instead of dropping to legacy', async ({ app, page }) => {
   await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')

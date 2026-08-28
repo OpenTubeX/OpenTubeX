@@ -187,9 +187,63 @@ test('does not restore a consumed link timestamp after an app restart', async ({
   const video = await waitForPlayback(page)
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(2)
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw$/)
+  await expect(page.locator('.tab.active .tabTitleText')).toHaveText('Me at the zoo')
+  await expect(page).toHaveTitle('Me at the zoo - OpenTubeX')
 
   ;({ page } = await app.relaunch())
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw$/)
+  await expect(page.locator('.tab.active .tabTitleText')).toHaveText('Me at the zoo')
+  await expect(page).toHaveTitle('Me at the zoo - OpenTubeX')
+})
+
+test('a timestamped video stays paused when the window loses focus', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw&t=2')
+  await page.locator(sel.searchInput).press('Enter')
+
+  const video = await waitForPlayback(page)
+  await video.evaluate(element => element.pause())
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].emit('blur')
+  })
+  await page.waitForTimeout(2000)
+
+  expect(await video.evaluate(element => element.paused)).toBe(true)
+})
+
+test('a Short opened in a background tab never starts playback', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(() => {
+    window.__backgroundShortPlaybackEvents = []
+    for (const type of ['play', 'playing']) {
+      document.addEventListener(type, (event) => {
+        const tabContent = event.target.closest('.tabContent')
+        if (tabContent?.getAttribute('aria-hidden') === 'true') {
+          window.__backgroundShortPlaybackEvents.push(type)
+        }
+      }, true)
+    }
+  })
+
+  const backgroundTab = await page.evaluate(() => window.ftElectron.tabs.create({
+    route: '/watch/background-short?short=true',
+    title: 'Background Short',
+    makeActive: false,
+    preloadInBackground: true
+  }))
+  const backgroundVideo = page.locator(`.tabContent[data-tab-id="${backgroundTab.id}"] video`)
+
+  await expect(backgroundVideo).toHaveCount(1, { timeout: 30_000 })
+  await expect.poll(() => backgroundVideo.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
+  await page.waitForTimeout(1000)
+
+  expect(await page.evaluate(() => window.__backgroundShortPlaybackEvents)).toEqual([])
+  expect(await backgroundVideo.evaluate(element => ({
+    paused: element.paused,
+    currentTime: element.currentTime
+  }))).toEqual({ paused: true, currentTime: 0 })
 })
 
 test('hides configured paused interface elements until pointer activity', async ({ app, page }) => {
