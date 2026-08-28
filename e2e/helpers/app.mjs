@@ -208,7 +208,7 @@ export async function waitForAppReady(page) {
 export async function openNewWindowFromTabBar(app, page) {
   const newWindowPromise = app.electronApp.waitForEvent('window')
   await page.locator(sel.newTabButton).click({ button: 'right' })
-  await page.getByRole('menuitem', { name: 'New Window', exact: true }).click()
+  await page.getByRole('menuitem', { name: /^New [Ww]indow$/ }).click()
   return newWindowPromise
 }
 
