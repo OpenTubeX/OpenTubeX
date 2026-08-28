@@ -1,5 +1,6 @@
 .card {
   --subscriptions-header-gap: 8px;
+  --subscriptions-header-padding-block-end: 12px;
   --subscriptions-top-bar-block-size: 60px;
 
   box-sizing: border-box;
@@ -19,7 +20,7 @@
   inset-block-start: var(--subscriptions-top-bar-block-size);
   z-index: 3;
   margin-inline: -16px;
-  padding-block: calc(3px + var(--subscriptions-header-gap)) 12px;
+  padding-block: calc(3px + var(--subscriptions-header-gap)) var(--subscriptions-header-padding-block-end);
   padding-inline: 16px;
   border-start-start-radius: calc(8px * var(--ui-roundness));
   border-start-end-radius: calc(8px * var(--ui-roundness));
@@ -51,7 +52,7 @@
 
 .subscriptionsHeader.tabbedNewFeed .headerRow {
   margin-inline: -16px;
-  padding-block-end: 8px;
+  padding-block-end: var(--subscriptions-header-padding-block-end);
   padding-inline: 16px;
   border-block-end: 1px solid var(--primary-shadow-color);
 }
@@ -339,11 +340,9 @@
 
 @media only screen and (width <= 680px) {
   .card {
-    inline-size: 100%;
-  }
+    --subscriptions-header-padding-block-end: 10px;
 
-  .subscriptionsHeader {
-    padding-block-end: 10px;
+    inline-size: 100%;
   }
 
   .headerRow {

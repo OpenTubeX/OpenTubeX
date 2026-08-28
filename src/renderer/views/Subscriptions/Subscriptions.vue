@@ -203,7 +203,7 @@
                 :title="newFeedView === 'tabbed'
                   ? $t('Subscriptions.Show Combined View')
                   : $t('Subscriptions.Show Tabbed View')"
-                :icon="newFeedView === 'tabbed' ? ['fas', 'layer-group'] : ['fas', 'clone']"
+                :icon="newFeedView === 'tabbed' ? ['fas', 'layer-group'] : ['fac', 'horizontal-tabs']"
                 :aria-pressed="newFeedView === 'tabbed'"
                 :use-shadow="false"
                 :padding="8"

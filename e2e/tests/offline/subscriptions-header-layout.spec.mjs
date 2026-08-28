@@ -134,7 +134,14 @@ test.describe('subscriptions header layout', () => {
   test('separates the main feed tabs from the centered New feed tabs', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
-    await page.getByRole('button', { name: 'Show tabbed view' }).click()
+
+    const combinedSeparatorTopMargin = () => page.evaluate(() => {
+      const header = document.querySelector('.subscriptionsHeader')
+      const mainTabs = [...header.querySelectorAll('[data-subscription-feed-tab]')]
+
+      return header.getBoundingClientRect().bottom -
+        Math.max(...mainTabs.map(tab => tab.getBoundingClientRect().bottom))
+    })
 
     const separatorLayout = () => page.evaluate(() => {
       const header = document.querySelector('.subscriptionsHeader')
@@ -149,18 +156,28 @@ test.describe('subscriptions header layout', () => {
         headerShadow: headerStyle.boxShadow,
         separatorWidth: Number.parseFloat(headerRowStyle.borderBottomWidth),
         separatorY: headerRowRect.bottom,
+        separatorTopMargin: headerRowRect.bottom -
+          Number.parseFloat(headerRowStyle.borderBottomWidth) -
+          Math.max(...mainTabs.map(tab => tab.getBoundingClientRect().bottom)),
         mainTabsBottom: Math.max(...mainTabs.map(tab => tab.getBoundingClientRect().bottom)),
         newFeedTabsTop: Math.min(...newFeedTabs.map(tab => tab.getBoundingClientRect().top))
       }
     })
 
-    for (const width of [1400, 700]) {
+    for (const width of [1400, 700, 375]) {
       await setWindowWidth(app, page, width)
+      if (await page.getByRole('button', { name: 'Show combined view' }).isVisible()) {
+        await page.getByRole('button', { name: 'Show combined view' }).click()
+      }
+      const combinedTopMargin = await combinedSeparatorTopMargin()
+
+      await page.getByRole('button', { name: 'Show tabbed view' }).click()
       const layout = await separatorLayout()
 
       expect(layout.headerShadow).toBe('none')
       expect(layout.separatorWidth).toBeGreaterThan(0)
       expect(layout.separatorWidth).toBeLessThanOrEqual(1.1)
+      expect(Math.abs(layout.separatorTopMargin - combinedTopMargin)).toBeLessThanOrEqual(1)
       expect(layout.separatorY).toBeGreaterThanOrEqual(layout.mainTabsBottom)
       expect(layout.newFeedTabsTop).toBeGreaterThanOrEqual(layout.separatorY)
     }
