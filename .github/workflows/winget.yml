@@ -175,25 +175,26 @@ jobs:
 
         echo "directory=$manifest_dir" >> "$GITHUB_OUTPUT"
 
-    - name: Validate winget credentials
+    - name: Validate package submission credentials
       if: steps.duplicate.outputs.needed == 'true'
       env:
-        WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+        # Keep the old secret as a fallback because GitHub cannot rename or copy secrets.
+        PACKAGE_SUBMISSION_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN || secrets.WINGET_TOKEN }}
       shell: bash
       run: |
         set -euo pipefail
 
-        if [[ -z "$WINGET_TOKEN" ]]; then
-          echo '::error::The WINGET_TOKEN repository secret is missing.'
+        if [[ -z "$PACKAGE_SUBMISSION_TOKEN" ]]; then
+          echo '::error::The PACKAGE_SUBMISSION_TOKEN repository secret is missing.'
           exit 1
         fi
 
-        echo "::add-mask::${WINGET_TOKEN}"
+        echo "::add-mask::${PACKAGE_SUBMISSION_TOKEN}"
 
     - name: Create or synchronize the organization fork
       if: steps.duplicate.outputs.needed == 'true'
       env:
-        GH_TOKEN: ${{ secrets.WINGET_TOKEN }}
+        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN || secrets.WINGET_TOKEN }}
       shell: bash
       run: |
         set -euo pipefail
@@ -239,7 +240,7 @@ jobs:
       if: steps.duplicate.outputs.needed == 'true'
       env:
         BRANCH: OpenTubeX.OpenTubeX-${{ steps.release.outputs.version }}
-        GH_TOKEN: ${{ secrets.WINGET_TOKEN }}
+        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN || secrets.WINGET_TOKEN }}
         MANIFEST_DIR: ${{ steps.manifest.outputs.directory }}
         VERSION: ${{ steps.release.outputs.version }}
       shell: bash
@@ -318,7 +319,7 @@ jobs:
       if: steps.duplicate.outputs.needed == 'true'
       env:
         BRANCH: OpenTubeX.OpenTubeX-${{ steps.release.outputs.version }}
-        GH_TOKEN: ${{ secrets.WINGET_TOKEN }}
+        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN || secrets.WINGET_TOKEN }}
         VERSION: ${{ steps.release.outputs.version }}
       shell: bash
       run: |
