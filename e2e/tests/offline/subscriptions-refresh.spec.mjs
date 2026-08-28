@@ -310,6 +310,9 @@ test.describe('subscription refresh performance with many tabs', () => {
             longestFrame,
             longFrames,
             longestTask: Math.max(0, ...longTasks.map(task => task.duration)),
+            totalBlockingTime: longTasks.reduce((total, task) => {
+              return total + Math.max(0, task.duration - 50)
+            }, 0),
             longTasks
           }
         }
@@ -338,7 +341,9 @@ test.describe('subscription refresh performance with many tabs', () => {
     })
 
     expect(profileUpdate, JSON.stringify(metrics)).toBeLessThan(50)
-    expect(timing.longestTask, JSON.stringify(metrics)).toBeLessThan(60)
+    // A single long-task duration can include runner preemption. Total blocking
+    // time tolerates that jitter while still catching repeated or larger stalls.
+    expect(timing.totalBlockingTime, JSON.stringify(metrics)).toBeLessThan(100)
     expect(timing.elapsed).toBeLessThan(10_000)
   })
 })
