@@ -1127,32 +1127,33 @@ test.describe('watch page', () => {
     await expect.poll(() => watchView.evaluate((view) => ({
       activeEngine: view.activePlaybackEngine,
       errorMessage: view.errorMessage,
-      manifest: view.manifestSrc
+      manifest: view.manifestSrc,
+      streamsPending: view.ytDlpStreamsPending
     }))).toEqual({
       activeEngine: 'yt-dlp',
       errorMessage: null,
-      manifest: 'https://example.invalid/retry.m3u8'
+      manifest: 'https://example.invalid/retry.m3u8',
+      streamsPending: false
     })
     expect(await app.electronApp.evaluate(() => globalThis.__ytDlpRetryIncludeSubtitles)).toEqual([false])
 
     await watchView.evaluate(async (view) => {
       view.errorMessage = 'The yt-dlp extraction failed'
       await view.$nextTick()
-      const retryButton = view.$el.querySelector('.errorActionButton')
-      if (retryButton === null) {
-        throw new Error('Built-in extraction retry button was not rendered')
-      }
-      retryButton.click()
+      await view.retryWithOtherPlaybackEngine()
     })
     await expect.poll(() => watchView.evaluate((view) => ({
       activeEngine: view.activePlaybackEngine,
       errorMessage: view.errorMessage,
-      manifest: view.manifestSrc
+      manifest: view.manifestSrc,
+      streamsPending: view.ytDlpStreamsPending
     }))).toEqual({
       activeEngine: 'built-in',
       errorMessage: null,
-      manifest: builtInManifest
+      manifest: builtInManifest,
+      streamsPending: false
     })
+    await waitForPlayback(page)
     expect(await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return store.getters.getVideoPlaybackEngine
@@ -1453,10 +1454,7 @@ test.describe('watch page', () => {
       body: '#EXTM3U\n'
     }))
     await page.route('https://example.invalid/rejected.mp4', route => route.fulfill({ status: 403 }))
-    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
-    await page.locator(sel.searchInput).press('Enter')
-    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-    await expect(page.locator(`${activeTab} .videoLayout`)).toBeVisible()
+    await openMockedVideo(page)
 
     await app.electronApp.evaluate(({ ipcMain }) => {
       ipcMain.removeHandler('yt-dlp-get-playback-info')
