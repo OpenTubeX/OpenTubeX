@@ -45,7 +45,7 @@
   display: flex;
   flex: 1 1 auto;
   flex-wrap: wrap;
-  gap: 8px 20px;
+  gap: 12px 20px;
   min-inline-size: 0;
 }
 
@@ -175,28 +175,31 @@
   gap: 4px 10px;
   margin-block: 0;
   position: relative;
+  overflow-inline: clip;
   color: var(--tertiary-text-color);
 }
 
-/* Two line layout: the grouped tabs and controls move below the title together.
-   Giving the tabs a zero basis lets their own flex container wrap before the
-   controls are pushed onto another line. */
+/* Two line layout: the grouped tabs and controls move below the title together. */
 .subscriptionsHeader:not(.singleRow) .feedTabsControlsRow {
   flex-basis: 100%;
 }
 
 .subscriptionsHeader:not(.singleRow) .tabsRow {
-  flex: 1 1 0;
+  /* Keep the tabs at their natural width so the controls wrap first. The tabs
+     only wrap once they have the full row and still do not fit. */
+  flex: 1 0 max-content;
+  max-inline-size: 100%;
   min-inline-size: 0;
 }
 
 .subscriptionsHeader:not(.singleRow) .tabs {
+  flex: 0 0 max-content;
+  max-inline-size: 100%;
   min-inline-size: 0;
 }
 
 .subscriptionsHeader:not(.singleRow) .headerActions {
   flex: 0 1 auto;
-  margin-inline-start: auto;
 }
 
 .subscriptionsHeader.singleRow .headerRow {
@@ -296,6 +299,7 @@
   gap: 4px 10px;
   margin-block: 8px -3px;
   position: relative;
+  overflow-inline: clip;
   color: var(--tertiary-text-color);
 }
 
@@ -359,16 +363,11 @@
   }
 
   .feedTabsControlsRow {
-    gap: 8px;
+    gap: 12px 8px;
   }
 
   .headerActions {
     gap: 6px;
-  }
-
-  .headerActions .headerSortSelect {
-    flex-basis: 128px;
-    inline-size: 128px;
   }
 
   .headerSortSelect :deep(.select-text) {

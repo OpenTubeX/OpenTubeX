@@ -250,6 +250,10 @@ const isLoading = computed(() => {
 })
 
 const hasNewContent = computed(() => {
+  if (!showCombinedView.value) {
+    return displayedEntries.value.length > 0
+  }
+
   return newVideos.value.length > 0 || hasAdditionalContent.value
 })
 

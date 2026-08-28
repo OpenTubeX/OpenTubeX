@@ -231,6 +231,36 @@ test.describe('new subscriptions feed', () => {
     await expect(relaunched.page.getByRole('heading', { name: 'Posts', exact: true })).toBeVisible()
   })
 
+  test('marks only the active category as seen in the tabbed New feed', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await page.getByRole('button', { name: 'Show tabbed view' }).click()
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      window.__markSeenMutations = []
+      window.__unsubscribeMarkSeen = store.subscribe((mutation) => {
+        if (mutation.type === 'markSubscriptionEntriesAsSeenInCache') {
+          window.__markSeenMutations.push(mutation.payload)
+        }
+      })
+    })
+
+    await page.getByRole('button', { name: 'Mark all as seen' }).click()
+
+    await expect(page.getByText('New video', { exact: true })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Mark all as seen' })).toHaveCount(0)
+    await page.locator('[data-new-feed-tab="shorts"]').click()
+    await expect(page.getByText('New short', { exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeVisible()
+    expect(await page.evaluate(() => {
+      window.__unsubscribeMarkSeen()
+      return window.__markSeenMutations
+    })).toEqual([[
+      { tab: 'videos', channelId: CHANNEL_ID }
+    ]])
+  })
+
   test('shows Shorts as portrait cards with their duration and upload time', async ({ page }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
