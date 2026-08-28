@@ -218,8 +218,7 @@ jobs:
 
     - name: Validate package submission credentials
       env:
-        # Keep the old secret as a fallback because GitHub cannot rename or copy secrets.
-        PACKAGE_SUBMISSION_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN || secrets.WINGET_TOKEN }}
+        PACKAGE_SUBMISSION_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN }}
       shell: bash
       run: |
         set -euo pipefail
@@ -233,7 +232,7 @@ jobs:
 
     - name: Create or synchronize the organization fork
       env:
-        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN || secrets.WINGET_TOKEN }}
+        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN }}
       shell: bash
       run: |
         set -euo pipefail
@@ -278,7 +277,7 @@ jobs:
     - name: Create the signed update commit
       env:
         BRANCH: org.opentubex.OpenTubeX-${{ needs.prepare.outputs.version }}
-        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN || secrets.WINGET_TOKEN }}
+        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN }}
         VERSION: ${{ needs.prepare.outputs.version }}
       shell: bash
       run: |
@@ -362,7 +361,7 @@ jobs:
     - name: Open FlatPark pull request
       env:
         BRANCH: org.opentubex.OpenTubeX-${{ needs.prepare.outputs.version }}
-        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN || secrets.WINGET_TOKEN }}
+        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN }}
         RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
         VERSION: ${{ needs.prepare.outputs.version }}
       shell: bash

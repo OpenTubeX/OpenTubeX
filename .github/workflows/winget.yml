@@ -178,8 +178,7 @@ jobs:
     - name: Validate package submission credentials
       if: steps.duplicate.outputs.needed == 'true'
       env:
-        # Keep the old secret as a fallback because GitHub cannot rename or copy secrets.
-        PACKAGE_SUBMISSION_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN || secrets.WINGET_TOKEN }}
+        PACKAGE_SUBMISSION_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN }}
       shell: bash
       run: |
         set -euo pipefail
@@ -194,7 +193,7 @@ jobs:
     - name: Create or synchronize the organization fork
       if: steps.duplicate.outputs.needed == 'true'
       env:
-        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN || secrets.WINGET_TOKEN }}
+        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN }}
       shell: bash
       run: |
         set -euo pipefail
@@ -240,7 +239,7 @@ jobs:
       if: steps.duplicate.outputs.needed == 'true'
       env:
         BRANCH: OpenTubeX.OpenTubeX-${{ steps.release.outputs.version }}
-        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN || secrets.WINGET_TOKEN }}
+        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN }}
         MANIFEST_DIR: ${{ steps.manifest.outputs.directory }}
         VERSION: ${{ steps.release.outputs.version }}
       shell: bash
@@ -319,7 +318,7 @@ jobs:
       if: steps.duplicate.outputs.needed == 'true'
       env:
         BRANCH: OpenTubeX.OpenTubeX-${{ steps.release.outputs.version }}
-        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN || secrets.WINGET_TOKEN }}
+        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN }}
         VERSION: ${{ steps.release.outputs.version }}
       shell: bash
       run: |
