@@ -5418,6 +5418,7 @@ export default defineComponent({
     }
     const {
       deactivateScrollMiniPlayer,
+      dismissCrossTabMiniPlayer,
       handleFullscreenButtonClick,
       handleScrollMiniControlsPointerMove,
       handleScrollMiniDragPointerDown,
@@ -5441,6 +5442,7 @@ export default defineComponent({
       scrollMiniPlayerActive,
       scrollMiniPlayerAnimating,
       scrollMiniPlayerDetached,
+      scrollMiniPlayerDismissed,
       scrollMiniPlayerStyle,
       scrollMiniPlayPauseVisible,
       scrollMiniResizeCorner,
@@ -10120,6 +10122,7 @@ export default defineComponent({
       scrollMiniPlayerActive,
       scrollMiniPlayerAnimating,
       scrollMiniPlayerDetached,
+      scrollMiniPlayerDismissed,
       scrollMiniPlaceholderHeight,
       scrollMiniPlayerStyle,
       scrollMiniIsPaused,
@@ -10139,6 +10142,7 @@ export default defineComponent({
       handleScrollMiniPlayPauseMouseEnter,
       handleScrollMiniControlsPointerMove,
       suppressScrollMiniPlayPausePointerReveal,
+      dismissCrossTabMiniPlayer,
       scrollMiniTogglePlayPause,
       scrollMiniScrollToTop,
       updateScrollMiniVolume,
