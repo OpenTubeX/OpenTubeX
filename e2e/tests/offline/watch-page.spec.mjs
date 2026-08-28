@@ -152,7 +152,7 @@ test('repeats an A-B range and manages it from the player menu', async ({ app, p
   await player.getByRole('button', { name: 'More settings' }).click({ force: true })
   await player.getByRole('button', { name: /^Set repeat start/ }).click()
 
-  await expect(player.locator('.ab-repeat-strip')).toHaveCount(0)
+  await expect(player.locator('.abRepeatRange')).toHaveCount(0)
   const abRepeatPopup = player.locator('.valueChangePopup')
   await expect(abRepeatPopup.locator('.valueChangeCustomIcon')).toBeVisible()
   await expect(abRepeatPopup).toHaveCSS('white-space', 'nowrap')

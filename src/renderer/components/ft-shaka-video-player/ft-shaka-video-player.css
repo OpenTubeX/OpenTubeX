@@ -2151,6 +2151,7 @@
 }
 
 :deep(.abRepeatMarkerB::after) {
+  color: var(--text-with-main-color);
   background: var(--primary-color);
 }
 
