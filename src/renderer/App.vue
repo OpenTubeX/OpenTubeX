@@ -1127,6 +1127,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  document.documentElement.classList.remove('hideOutlines')
   removeGamepadNavigation()
   removeCustomThemeListener()
   cancelUtilityRoutePreload()
@@ -2146,6 +2147,10 @@ function openDownloadsPage() {
 /** @type {import('vue').ComputedRef<boolean>} */
 const outlinesHidden = computed(() => store.getters.getOutlinesHidden)
 
+watch(outlinesHidden, hidden => {
+  document.documentElement.classList.toggle('hideOutlines', hidden)
+}, { flush: 'sync', immediate: true })
+
 const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
   t,
   tm,
@@ -2313,6 +2318,7 @@ function handleKeyboardShortcuts(event) {
 
   if (matchesKeyboardShortcut(event, shortcuts.FIND_IN_PAGE)) {
     event.preventDefault()
+    store.dispatch('showOutlines')
     openFindbar()
     return
   }

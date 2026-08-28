@@ -377,6 +377,32 @@ test.describe('custom theme editor', () => {
     await expect(trigger).toBeFocused()
   })
 
+  test('shows keyboard focus feedback inside the teleported color picker', async ({ page }) => {
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+
+    const trigger = page.getByRole('button', { name: 'Page background', exact: true })
+    await trigger.focus()
+    await page.keyboard.press('Tab')
+    await page.keyboard.press('Shift+Tab')
+    await expect(trigger).toBeFocused()
+    await page.keyboard.press('Enter')
+
+    const picker = page.getByRole('dialog', { name: 'Page background' })
+    const hexInput = picker.getByRole('textbox', { name: 'Hex color' })
+    await hexInput.focus()
+
+    await expect(page.locator('.app')).not.toHaveClass(/hideOutlines/)
+    await expect(page.locator('.app').getByRole('dialog', { name: 'Page background' })).toHaveCount(0)
+    await expect(hexInput).toHaveCSS('outline-style', 'solid')
+    await expect(hexInput).not.toHaveCSS('box-shadow', 'none')
+
+    await hexInput.click()
+    await expect(page.locator('.app')).toHaveClass(/hideOutlines/)
+    await expect(hexInput).toHaveCSS('outline-style', 'none')
+    await expect(hexInput).toHaveCSS('box-shadow', 'none')
+  })
+
   test('keeps the hue when dragging outside the saturation and brightness area', async ({ page }) => {
     await goToSettingsSection(page, 'theme')
     await page.getByRole('button', { name: 'Create custom theme' }).click()

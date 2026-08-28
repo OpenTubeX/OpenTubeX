@@ -198,7 +198,7 @@
   outline: none;
 }
 
-.findbarInput:focus {
+:global(:root:not(.hideOutlines)) .findbarInput:focus {
   border-color: var(--primary-text-color);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-text-color) 18%, transparent);
 }
