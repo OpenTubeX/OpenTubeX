@@ -518,7 +518,7 @@ const state = {
   hideToTrayOnMinimize: false,
 
   // The settings below have side effects
-  useAITranslationCompletions: false,
+  useAITranslationCompletions: true,
   currentLocale: 'system',
   reducedMotion: 'system',
   defaultInvidiousInstance: '',

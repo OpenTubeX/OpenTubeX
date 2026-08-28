@@ -85,6 +85,16 @@
           :tooltip="t('Settings.General Settings.Auto Load Next Page.Tooltip')"
           @change="updateGeneralAutoLoadMorePaginatedItemsEnabled"
         />
+        <FtToggleSwitch
+          v-if="mode === 'general'"
+          :label="t('Settings.General Settings.Use AI Translation Completions')"
+          :default-value="useAITranslationCompletions"
+          setting-key="useAITranslationCompletions"
+          :compact="true"
+          :disabled="aiTranslationCompletionsDisabled"
+          :tooltip="t('Tooltips.General Settings.Use AI Translation Completions')"
+          @change="updateUseAITranslationCompletions"
+        />
       </div>
     </div>
     <div class="switchGrid generalSelectGrid">
@@ -203,15 +213,6 @@
         :icon="['fas', 'language']"
         :is-locale-selector="true"
         @change="updateCurrentLocale"
-      />
-      <FtToggleSwitch
-        v-if="mode === 'general'"
-        :label="t('Settings.General Settings.Use AI Translation Completions')"
-        :default-value="useAITranslationCompletions"
-        setting-key="useAITranslationCompletions"
-        :compact="true"
-        :tooltip="t('Tooltips.General Settings.Use AI Translation Completions')"
-        @change="updateUseAITranslationCompletions"
       />
       <FtSelect
         v-if="mode === 'general'"
@@ -336,7 +337,7 @@ const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
 const IS_MAC = process.platform === 'darwin'
 const PLAYBACK_ENGINE_VALUES = ['yt-dlp', 'built-in']
 
-const { t } = useI18n()
+const { locale, t } = useI18n()
 const router = useRouter()
 
 const props = defineProps({
@@ -757,6 +758,12 @@ const currentLocale = computed(() => store.getters.getCurrentLocale)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const useAITranslationCompletions = computed(() => store.getters.getUseAITranslationCompletions)
+
+const aiTranslationCompletionsDisabled = computed(() => {
+  const selectedLocale = currentLocale.value === 'system' ? locale.value : currentLocale.value
+  const localeIndex = allLocales.indexOf(selectedLocale)
+  return localeTranslationPercentages.value[localeIndex] === 100
+})
 
 /**
  * @param {string} value

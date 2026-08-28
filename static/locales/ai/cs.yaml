@@ -23,23 +23,23 @@ Close Confirmation:
   Never Ask Again: Příště se neptat
 Close Window Confirmation:
   Title: Zavřít okno?
-  Message: Toto okno obsahuje {count} kartu. Opravdu chcete okno zavřít? | Toto okno obsahuje {count} karet. Opravdu chcete okno zavřít?
+  Message: Toto okno obsahuje {count} kartu. Opravdu chcete okno zavřít? | Toto okno obsahuje {count} karty. Opravdu chcete okno zavřít? | Toto okno obsahuje {count} karet. Opravdu chcete okno zavřít?
   Close Window: Zavřít okno
 Confirmations:
   Never Ask Again: Příště se neptat
   Settings Hint: Toto potvrzení můžete znovu zapnout v Nastavení → Obecné → Požadovat potvrzení před…
 Close Multiple Tabs Confirmation:
   Title: Zavřít více karet?
-  Message: Tímto zavřete {count} kartu. | Tímto zavřete {count} karet.
-  Close Tabs: Zavřít {count} kartu | Zavřít {count} karet
+  Message: Tímto zavřete {count} kartu. | Tímto zavřete {count} karty. | Tímto zavřete {count} karet.
+  Close Tabs: Zavřít {count} kartu | Zavřít {count} karty | Zavřít {count} karet
 Load Multiple Tabs Confirmation:
   Title: Načíst více karet?
-  Message: Tímto načtete {count} kartu. | Tímto načtete {count} karet.
-  Load Tabs: Načíst {count} kartu | Načíst {count} karet
+  Message: Tímto načtete {count} kartu. | Tímto načtete {count} karty. | Tímto načtete {count} karet.
+  Load Tabs: Načíst {count} kartu | Načíst {count} karty | Načíst {count} karet
 Unload Multiple Tabs Confirmation:
   Title: Uvolnit více karet?
-  Message: Tímto uvolníte {count} kartu. | Tímto uvolníte {count} karet.
-  Unload Tabs: Uvolnit {count} kartu | Uvolnit {count} karet
+  Message: Tímto uvolníte {count} kartu. | Tímto uvolníte {count} karty. | Tímto uvolníte {count} karet.
+  Unload Tabs: Uvolnit {count} kartu | Uvolnit {count} karty | Uvolnit {count} karet
 Use Vertical Tabs: Používat svislé karty
 Use Horizontal Tabs: Používat vodorovné karty
 Resize Tab Bar: Změnit velikost panelu karet
@@ -1116,9 +1116,9 @@ Context Menu:
   Reload Live: Znovu načíst živé přenosy
   Reload Posts: Znovu načíst příspěvky
   Reload All Feeds: Znovu načíst všechny kanály
-  Close Multiple Tabs: Zavřít {count} kartu | Zavřít {count} karet
+  Close Multiple Tabs: Zavřít {count} kartu | Zavřít {count} karty | Zavřít {count} karet
   Duplicate Tab: Duplikovat kartu
-  Duplicate Multiple Tabs: Duplikovat {count} kartu | Duplikovat {count} karet
+  Duplicate Multiple Tabs: Duplikovat {count} kartu | Duplikovat {count} karty | Duplikovat {count} karet
   Move Tab: Přesunout kartu
   Move Tabs: Přesunout karty
   Move Tab to Group: Přesunout kartu do skupiny

@@ -200,7 +200,7 @@ test.describe('AI translation completions', () => {
   const generatedLabel = 'ترجمة اختبار بالذكاء الاصطناعي'
 
   test.use({
-    seed: { settings: { currentLocale: 'ar' } },
+    seed: { settings: { currentLocale: 'ar', useAITranslationCompletions: false } },
     localeOverrides: {
       ar: {},
       'ai/ar': {
@@ -224,7 +224,15 @@ test.describe('AI translation completions', () => {
     await expect(translatedToggle).toBeChecked()
     await general.locator('label.switch-label').filter({ hasText: generatedLabel }).click()
 
-    await expect(general.getByRole('checkbox', { name: englishLabel })).not.toBeChecked()
+    const humanFallbackToggle = general.getByRole('checkbox', { name: englishLabel })
+    await expect(humanFallbackToggle).not.toBeChecked()
+
+    const localeSelect = general.getByRole('combobox', {
+      name: /Language preference|Locale Preference/
+    })
+    await localeSelect.click()
+    await page.getByRole('option', { name: 'English (US) (100%)', exact: true }).click()
+    await expect(humanFallbackToggle).toBeDisabled()
   })
 })
 

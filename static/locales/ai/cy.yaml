@@ -23,23 +23,23 @@ Close Confirmation:
   Never Ask Again: Peidio â gofyn eto
 Close Window Confirmation:
   Title: Cau'r ffenestr?
-  Message: Mae'r ffenestr hon yn cynnwys {count} o dabiau. Ydych chi'n siŵr eich bod am ei chau? | Mae'r ffenestr hon yn cynnwys {count} tab. Ydych chi'n siŵr eich bod am ei chau? | Mae'r ffenestr hon yn cynnwys {count} dab. Ydych chi'n siŵr eich bod am ei chau? | Mae'r ffenestr hon yn cynnwys {count} thab. Ydych chi'n siŵr eich bod am ei chau?
+  Message: Mae'r ffenestr hon yn cynnwys {count} o dabiau. Ydych chi'n siŵr eich bod am ei chau? | Mae'r ffenestr hon yn cynnwys {count} tab. Ydych chi'n siŵr eich bod am ei chau? | Mae'r ffenestr hon yn cynnwys {count} dab. Ydych chi'n siŵr eich bod am ei chau? | Mae'r ffenestr hon yn cynnwys {count} thab. Ydych chi'n siŵr eich bod am ei chau? | Mae'r ffenestr hon yn cynnwys {count} thab. Ydych chi'n siŵr eich bod am ei chau? | Mae'r ffenestr hon yn cynnwys {count} tab. Ydych chi'n siŵr eich bod am ei chau?
   Close Window: Cau'r ffenestr
 Confirmations:
   Never Ask Again: Peidio â gofyn eto
   Settings Hint: Gallwch ailalluogi'r cadarnhad hwn yn Gosodiadau → Cyffredinol → Cadarnhau cyn…
 Close Multiple Tabs Confirmation:
   Title: Cau mwy nag un tab?
-  Message: Bydd hyn yn cau {count} o dabiau. | Bydd hyn yn cau {count} tab. | Bydd hyn yn cau {count} dab. | Bydd hyn yn cau {count} thab.
-  Close Tabs: Cau {count} o dabiau | Cau {count} tab | Cau {count} dab | Cau {count} thab
+  Message: Bydd hyn yn cau {count} o dabiau. | Bydd hyn yn cau {count} tab. | Bydd hyn yn cau {count} dab. | Bydd hyn yn cau {count} thab. | Bydd hyn yn cau {count} thab. | Bydd hyn yn cau {count} tab.
+  Close Tabs: Cau {count} o dabiau | Cau {count} tab | Cau {count} dab | Cau {count} thab | Cau {count} thab | Cau {count} tab
 Load Multiple Tabs Confirmation:
   Title: Llwytho mwy nag un tab?
-  Message: Bydd hyn yn llwytho {count} o dabiau. | Bydd hyn yn llwytho {count} tab. | Bydd hyn yn llwytho {count} dab. | Bydd hyn yn llwytho {count} thab.
-  Load Tabs: Llwytho {count} o dabiau | Llwytho {count} tab | Llwytho {count} dab | Llwytho {count} thab
+  Message: Bydd hyn yn llwytho {count} o dabiau. | Bydd hyn yn llwytho {count} tab. | Bydd hyn yn llwytho {count} dab. | Bydd hyn yn llwytho {count} thab. | Bydd hyn yn llwytho {count} thab. | Bydd hyn yn llwytho {count} tab.
+  Load Tabs: Llwytho {count} o dabiau | Llwytho {count} tab | Llwytho {count} dab | Llwytho {count} thab | Llwytho {count} thab | Llwytho {count} tab
 Unload Multiple Tabs Confirmation:
   Title: Dadlwytho mwy nag un tab?
-  Message: Bydd hyn yn dadlwytho {count} o dabiau. | Bydd hyn yn dadlwytho {count} tab. | Bydd hyn yn dadlwytho {count} dab. | Bydd hyn yn dadlwytho {count} thab.
-  Unload Tabs: Dadlwytho {count} o dabiau | Dadlwytho {count} tab | Dadlwytho {count} dab | Dadlwytho {count} thab
+  Message: Bydd hyn yn dadlwytho {count} o dabiau. | Bydd hyn yn dadlwytho {count} tab. | Bydd hyn yn dadlwytho {count} dab. | Bydd hyn yn dadlwytho {count} thab. | Bydd hyn yn dadlwytho {count} thab. | Bydd hyn yn dadlwytho {count} tab.
+  Unload Tabs: Dadlwytho {count} o dabiau | Dadlwytho {count} tab | Dadlwytho {count} dab | Dadlwytho {count} thab | Dadlwytho {count} thab | Dadlwytho {count} tab
 Use Vertical Tabs: Defnyddio tabiau fertigol
 Use Horizontal Tabs: Defnyddio tabiau llorweddol
 Resize Tab Bar: Newid maint y bar tabiau
@@ -1125,9 +1125,9 @@ Context Menu:
   Reload Live: Ail-lwytho ffrydiau byw
   Reload Posts: Ail-lwytho postiadau
   Reload All Feeds: Ail-lwytho pob ffrwd
-  Close Multiple Tabs: Cau {count} o dabiau | Cau {count} tab | Cau {count} dab | Cau {count} thab
+  Close Multiple Tabs: Cau {count} o dabiau | Cau {count} tab | Cau {count} dab | Cau {count} thab | Cau {count} thab | Cau {count} tab
   Duplicate Tab: Dyblygu'r tab
-  Duplicate Multiple Tabs: Dyblygu {count} o dabiau | Dyblygu {count} tab | Dyblygu {count} dab | Dyblygu {count} thab
+  Duplicate Multiple Tabs: Dyblygu {count} o dabiau | Dyblygu {count} tab | Dyblygu {count} dab | Dyblygu {count} thab | Dyblygu {count} thab | Dyblygu {count} tab
   Move Tab: Symud y tab
   Move Tabs: Symud tabiau
   Move Tab to Group: Symud y tab i grŵp

@@ -60,10 +60,22 @@ function loadHumanMessages(locale) {
   if (humanMessages.has(locale)) return Promise.resolve(humanMessages.get(locale))
   if (humanRequests.has(locale)) return humanRequests.get(locale)
 
-  const request = fetchLocaleMessages(locale, 'human').then((messages) => {
-    humanMessages.set(locale, messages)
-    return messages
-  })
+  const request = fetchLocaleMessages(locale, 'human')
+    .then((messages) => {
+      if (humanRequests.get(locale) !== request) return humanMessages.get(locale) ?? messages
+
+      humanRequests.delete(locale)
+      humanMessages.set(locale, messages)
+      return messages
+    })
+    .catch((error) => {
+      if (humanRequests.get(locale) !== request) {
+        return humanMessages.get(locale) ?? Promise.reject(error)
+      }
+
+      humanRequests.delete(locale)
+      throw error
+    })
   humanRequests.set(locale, request)
   return request
 }
@@ -76,10 +88,16 @@ function loadAIMessages(locale) {
 
   const request = fetchLocaleMessages(locale, 'ai')
     .then((messages) => {
+      if (aiRequests.get(locale) !== request) return aiMessages.get(locale) ?? messages
+
+      aiRequests.delete(locale)
       aiMessages.set(locale, messages)
       return messages
     })
     .catch((error) => {
+      if (aiRequests.get(locale) !== request) return aiMessages.get(locale) ?? null
+
+      aiRequests.delete(locale)
       console.error(error)
       return null
     })
@@ -155,6 +173,8 @@ if (process.env.HOT_RELOAD_LOCALES) {
 
       for (const [locale, data] of message.data.locales) {
         const target = source === 'ai' ? aiMessages : humanMessages
+        const requests = source === 'ai' ? aiRequests : humanRequests
+        requests.delete(locale)
         target.set(locale, JSON.parse(data))
       }
 

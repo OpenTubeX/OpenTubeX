@@ -114,7 +114,7 @@ Subscriptions:
 Trending:
   Load Error: No se pudo cargar Tendencias.
   Unsupported Backend: Tendencias requiere la API local. Selecciona la API local o activa la fuente alternativa del backend.
-Most Popular Feed Empty: El canal de contenido más popular de esta instancia de Invidious está vacío.
+Most Popular Feed Empty: La fuente «Más populares» de esta instancia de Invidious está vacía.
 Feed:
   Cancel Refresh: Cancelar actualización
   Next Auto Refresh: 'Próxima actualización automática: {date}'
@@ -1258,7 +1258,7 @@ Tooltips:
     Stream Extraction Method: |
       Elige cómo obtiene OpenTubeX las emisiones de vídeo. yt-dlp debe estar disponible cuando se seleccione.
       Los vídeos pueden tardar más en empezar al usar yt-dlp.
-      El método integrado no permite desplazarse por emisiones en directo ni estrenos.
+      El método integrado no permite avanzar ni retroceder en emisiones en directo ni estrenos.
     Avoid translation: |
       Desactiva la traducción automática de YouTube del título, la descripción y los capítulos de un vídeo.
       Demasiadas solicitudes, como obtener títulos de vídeos en varias listas, pueden afectar

@@ -522,7 +522,10 @@ function runApp() {
   async function createMainTranslator() {
     const fallbackLocale = 'en-US'
     const storedLocale = (await baseHandlers.settings._findOne('currentLocale'))?.value
-    const useAITranslationCompletions = (await baseHandlers.settings._findOne('useAITranslationCompletions'))?.value === true
+    const storedAITranslationPreference = (await baseHandlers.settings._findOne('useAITranslationCompletions'))?.value
+    const useAITranslationCompletions = storedAITranslationPreference == null
+      ? true
+      : storedAITranslationPreference === true
     const currentLocale = typeof storedLocale === 'string' && storedLocale !== 'system'
       ? storedLocale
       : app.getLocale().replace('_', '-')

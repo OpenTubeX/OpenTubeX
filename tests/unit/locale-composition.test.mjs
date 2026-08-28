@@ -112,3 +112,45 @@ test('AI locale processing emits separate assets without changing human percenta
     await rm(fixtureDirectory, { recursive: true, force: true })
   }
 })
+
+test('AI locale processing watches overlays created after startup', async () => {
+  const fixtureDirectory = await mkdtemp(path.join(tmpdir(), 'opentubex-locales-'))
+  const overlayPath = path.join(fixtureDirectory, 'es.yaml')
+  try {
+    const plugin = new ProcessLocalesPlugin({
+      activeLocales: ['es'],
+      allowMissing: true,
+      collectMetadata: false,
+      inputDir: fixtureDirectory,
+      localeSource: 'ai',
+      outputDir: 'static/locales/ai',
+    })
+
+    assert.deepEqual([...plugin.locales.keys()], [])
+    assert.deepEqual(plugin.filePaths, [overlayPath])
+
+    const initialDependencies = {
+      fileDependencies: new Set(),
+      missingDependencies: new Set(),
+    }
+    plugin.registerLocaleDependencies(initialDependencies)
+    assert.deepEqual([...initialDependencies.fileDependencies], [])
+    assert.deepEqual([...initialDependencies.missingDependencies], [overlayPath])
+
+    await writeFile(overlayPath, 'Two: dos\n')
+    plugin.loadCreatedLocales()
+
+    const createdDependencies = {
+      fileDependencies: new Set(),
+      missingDependencies: new Set(),
+    }
+    plugin.registerLocaleDependencies(createdDependencies)
+
+    assert.deepEqual([...plugin.locales.keys()], ['es'])
+    assert.deepEqual(plugin.localeTranslationKeys.get('es'), new Set(['Two']))
+    assert.deepEqual([...createdDependencies.fileDependencies], [overlayPath])
+    assert.deepEqual([...createdDependencies.missingDependencies], [])
+  } finally {
+    await rm(fixtureDirectory, { recursive: true, force: true })
+  }
+})

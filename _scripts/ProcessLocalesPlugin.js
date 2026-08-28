@@ -73,6 +73,8 @@ class ProcessLocalesPlugin {
           console.warn('ProcessLocalesPlugin: Unable to live reload locales as `notifyLocaleChange` is not set.')
         }
 
+        this.loadCreatedLocales()
+
         const promises = []
         for (const [locale, data] of this.locales) {
           promises.push(this.processLocale(locale, data, updatedLocales, compiler, compilation))
@@ -97,9 +99,19 @@ class ProcessLocalesPlugin {
     compiler.hooks.afterCompile.tap(this.pluginName, (compilation) => {
       if (compiler.watching) {
         // watch locale files for changes
-        compilation.fileDependencies.addAll(this.filePaths)
+        this.registerLocaleDependencies(compilation)
       }
     })
+  }
+
+  /** @param {import('webpack').Compilation} compilation */
+  registerLocaleDependencies(compilation) {
+    for (const filePath of this.filePaths) {
+      const dependencies = existsSync(filePath)
+        ? compilation.fileDependencies
+        : compilation.missingDependencies
+      dependencies.add(filePath)
+    }
   }
 
   /**
@@ -120,7 +132,7 @@ class ProcessLocalesPlugin {
 
         const contents = await readFile(filePath, 'utf-8')
         data = loadYaml(contents)
-      } else {
+      } else if (this.cache.has(locale)) {
         const { filename, source } = this.cache.get(locale)
         compilation.emitAsset(filename, source, { minimized: true })
         return
@@ -162,13 +174,12 @@ class ProcessLocalesPlugin {
 
     for (const locale of this.activeLocales) {
       const filePath = join(this.inputDir, `${locale}.yaml`)
+      this.filePaths.push(filePath)
 
       if (!existsSync(filePath)) {
         if (this.allowMissing) continue
         throw new Error(`ProcessLocalesPlugin: locale file does not exist: ${filePath}`)
       }
-
-      this.filePaths.push(filePath)
 
       const contents = readFileSync(filePath, 'utf-8')
       const data = loadYaml(contents)
@@ -179,6 +190,21 @@ class ProcessLocalesPlugin {
     }
 
     if (this.collectMetadata) this.updateTranslationPercentages()
+  }
+
+  loadCreatedLocales() {
+    if (!this.allowMissing) return
+
+    for (const locale of this.activeLocales) {
+      if (this.locales.has(locale)) continue
+
+      const filePath = join(this.inputDir, `${locale}.yaml`)
+      if (!existsSync(filePath)) continue
+
+      const data = loadYaml(readFileSync(filePath, 'utf-8'))
+      this.locales.set(locale, data)
+      this.localeTranslationKeys.set(locale, this.getTranslationKeys(data))
+    }
   }
 
   /**

@@ -1204,7 +1204,7 @@ Tab Organizer:
   Drag Tab: Lohista rühma teisaldamiseks
 Chapters:
   Open Chapters: Ava peatükid
-  Close Chapters: Sule peatükid
+  Close Chapters: Sulge peatükid
   Copy Timestamp Link: Kopeeri link ajahetkele {timestamp}
 Comments:
   Comment Count: 1 kommentaar | {count} kommentaari
@@ -1329,7 +1329,7 @@ KeyboardShortcutPrompt:
       Search and Page: "Rakendus:\_Otsing ja leht"
       Window and View: "Rakendus:\_Aken ja vaade"
   New Tab: Loo uus vaheleht
-  Close Tab: Sule aktiivne vaheleht
+  Close Tab: Sulge aktiivne vaheleht
   Reload Tab: Laadi aktiivne vaheleht uuesti
   Reopen Closed Tab: Ava viimati suletud vaheleht uuesti
   Next Tab: Aktiveeri järgmine vaheleht
