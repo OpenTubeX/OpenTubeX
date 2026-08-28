@@ -20,6 +20,22 @@ const GAMEPAD_BUTTON_INDEX = Object.freeze({
 
 test.use({ seed: { settings: PLAYER_SEED } })
 
+test('only shows focus feedback during keyboard or gamepad navigation', async ({ page }) => {
+  const searchInput = page.locator('.topNav .searchInput input.ft-input')
+
+  await searchInput.click()
+  await expect(page.locator('.app')).toHaveClass(/hideOutlines/)
+  await expect(searchInput).toHaveCSS('outline-style', 'none')
+  await expect(searchInput).toHaveCSS('box-shadow', 'none')
+
+  await page.keyboard.press('Shift+Tab')
+  await page.keyboard.press('Tab')
+  await expect(searchInput).toBeFocused()
+  await expect(page.locator('.app')).not.toHaveClass(/hideOutlines/)
+  await expect(searchInput).toHaveCSS('outline-style', 'solid')
+  await expect(searchInput).not.toHaveCSS('box-shadow', 'none')
+})
+
 async function connectMockGamepad(page) {
   await page.evaluate(() => {
     const buttons = Array.from({ length: 17 }, () => ({ pressed: false, value: 0 }))

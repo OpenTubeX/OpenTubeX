@@ -66,7 +66,7 @@ body {
   background-color: var(--selection-background-color);
 }
 
-:focus-visible {
+:where(:root:not(.hideOutlines)) :focus:not(:disabled) {
   outline: 2px solid var(--primary-color);
   outline-offset: -3px;
   border-radius: calc(4px * var(--ui-roundness));
