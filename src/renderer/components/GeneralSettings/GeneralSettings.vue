@@ -2,7 +2,10 @@
   <FtSettingsSection
     :title="sectionTitle"
   >
-    <div class="switchColumnGrid">
+    <div
+      class="switchColumnGrid"
+      :class="{ appearanceSwitchGrid: mode === 'appearance' }"
+    >
       <div class="switchColumn">
         <FtToggleSwitch
           v-if="mode === 'appearance'"
@@ -51,7 +54,10 @@
           @change="updateHideToTrayOnMinimize"
         />
       </div>
-      <div class="switchColumn">
+      <div
+        v-if="mode !== 'appearance'"
+        class="switchColumn"
+      >
         <FtToggleSwitch
           v-if="mode === 'providers'"
           :label="t('Settings.Player Settings.Proxy Videos Through Invidious')"

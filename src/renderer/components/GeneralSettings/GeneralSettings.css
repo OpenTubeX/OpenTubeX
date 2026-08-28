@@ -25,6 +25,14 @@
   --general-select-indicator-space: 70px;
 }
 
+.generalSelectGrid :deep(.select.containsTooltip:has(
+  .syncedSettingIndicator
+):has(
+  .changedSettingIndicator
+)) {
+  --general-select-indicator-space: 80px;
+}
+
 .generalSelectGrid :deep(.select.containsTooltip .select-text),
 .generalSelectGrid :deep(.select.containsTooltip .nativeSelect),
 .generalSelectGrid :deep(.select.containsTooltip .select-bar) {
@@ -46,6 +54,11 @@
 .switchGrid {
   gap: 10px;
   margin-block-end: 12px;
+}
+
+.appearanceSwitchGrid.appearanceSwitchGrid {
+  grid-template-columns: auto;
+  justify-content: center;
 }
 
 @container settings-content (width <= 680px) {

@@ -526,9 +526,26 @@ test.describe('settings', () => {
     })
     const cookieSource = authentication.locator('.restrictedPlaybackAuthSource select')
     const alwaysUseCookies = authentication.getByLabel('Always Use Cookies')
+    const authenticationHint = authentication.locator('.restrictedPlaybackAuthHint')
+    const accountRestrictionWarning = authentication.locator(
+      '.restrictedPlaybackAuthHint strong'
+    )
 
     await expect(cookieSource.locator('option')).toHaveText(['None', 'File', 'Browser'])
     await expect(alwaysUseCookies).not.toBeChecked()
+    await expect(authenticationHint).toHaveText(
+      'By default, OpenTubeX only passes these cookies to yt-dlp after you choose "Try with configured cookies" on an age-restricted or members-only video. Using yt-dlp with a Google account can lead to temporary or permanent account restrictions.'
+    )
+    await expect(accountRestrictionWarning).toHaveText(
+      'Using yt-dlp with a Google account can lead to temporary or permanent account restrictions.'
+    )
+
+    await alwaysUseCookies.locator('..')
+      .locator('.selectTooltip button')
+      .focus()
+    await expect(page.locator('body > [role="tooltip"]:visible')).toHaveText(
+      "Use the configured cookies whenever yt-dlp extracts streams. This does not switch the stream extraction method to yt-dlp. With yt-dlp selected, account-only formats may become available, including YouTube Premium's enhanced bitrate when the account has access."
+    )
     await cookieSource.selectOption('browser')
 
     const browser = authentication.locator('.restrictedPlaybackAuthDetail select')
@@ -2915,6 +2932,23 @@ test.describe('settings', () => {
     const appearance = await goToSettingsSection(page, 'appearance')
     const toggle = appearance.getByRole('checkbox', { name: 'Show thumbnail previews' })
 
+    const getCenterOffset = () => toggle.locator('..').evaluate(element => {
+      const setting = element.getBoundingClientRect()
+      const content = element.closest('.sectionBody').getBoundingClientRect()
+      return Math.abs(
+        setting.left + setting.width / 2 -
+        (content.left + content.width / 2)
+      )
+    })
+    expect(await getCenterOffset()).toBeLessThanOrEqual(1)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUiScale', 95)
+    })
+    await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(0.95, 2)
+    expect(await getCenterOffset()).toBeLessThanOrEqual(1)
+
     await expect(toggle).toBeChecked()
     await appearance.locator('label.switch-label')
       .filter({ hasText: 'Show thumbnail previews' })
@@ -4311,6 +4345,7 @@ test.describe('synced setting indicators', () => {
   test.use({
     seed: {
       settings: {
+        highlightChangedSettings: true,
         reducedMotion: 'on',
         syncServerEnabled: true,
         syncServerAutoSync: false,
@@ -4345,6 +4380,34 @@ test.describe('synced setting indicators', () => {
 
   test('spaces setting sync and help icons', async ({ page }) => {
     await goTo(page, 'settings')
+
+    const startup = page.locator('.generalSelectGrid .select')
+      .filter({ hasText: 'On Startup' })
+    await startup.locator('select').selectOption('restoreTabLoadState')
+    const getStartupIconGap = async () => {
+      const [selectBox, helpBox] = await Promise.all([
+        startup.locator('.select-text').boundingBox(),
+        startup.locator('.selectTooltip').boundingBox()
+      ])
+      expect(selectBox).not.toBeNull()
+      expect(helpBox).not.toBeNull()
+      return helpBox.x - selectBox.x - selectBox.width
+    }
+    expect(await getStartupIconGap()).toBeGreaterThanOrEqual(8)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUiScale', 95)
+    })
+    await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(0.95, 2)
+    expect(await getStartupIconGap()).toBeGreaterThanOrEqual(8)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUiScale', 100)
+    })
+    await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(1, 2)
+
     await page.locator('.settingsMenu [data-section="privacy"]').click()
 
     const slider = page.locator('label.pure-material-slider')

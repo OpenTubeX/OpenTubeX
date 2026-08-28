@@ -6,7 +6,7 @@ import { openNewWindowFromTabBar, test, expect, waitForAppReady } from '../../he
 test('new windows move from the app header to the tab bar context menu', async ({ app, page }) => {
   await expect(page.locator('.topNav .navNewWindowButton')).toHaveCount(0)
 
-  const newWindowMenuItem = page.getByRole('menuitem', { name: 'New Window', exact: true })
+  const newWindowMenuItem = page.getByRole('menuitem', { name: /^New [Ww]indow$/ })
   await page.locator('.newTabButton').click({ button: 'right' })
   await expect(newWindowMenuItem).toBeVisible()
   await page.keyboard.press('Escape')
