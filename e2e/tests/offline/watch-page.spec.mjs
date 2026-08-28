@@ -2414,6 +2414,41 @@ test.describe('watch page', () => {
     await watchComponent.dispose()
   })
 
+  test('keeps the Shorts comment filter menu above creator hearts', async ({ app, page, attachScreenshot }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw\?short=true/)
+    await waitForPlayback(page)
+
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async (component) => {
+      component.proxy.toggleShortsComments()
+      await component.proxy.$nextTick()
+    })
+
+    const commentsPanel = page.locator('.shortsCommentsPanel')
+    const heart = commentsPanel.locator('.commentHeartBadgeRed').first()
+    await expect(heart).toBeVisible({ timeout: 30_000 })
+    await commentsPanel.getByRole('button', { name: 'Filter loaded comments' }).click()
+
+    const menu = commentsPanel.getByRole('dialog', { name: 'Comment filters' })
+    await expect(menu).toBeVisible()
+    await attachScreenshot('Shorts comment filter above creator heart')
+    const menuCoversHeart = await menu.evaluate((element, heartElement) => {
+      const menuBounds = element.getBoundingClientRect()
+      const heartBounds = heartElement.getBoundingClientRect()
+      const x = Math.max(menuBounds.left, heartBounds.left) + 1
+      const y = Math.max(menuBounds.top, heartBounds.top) + 1
+      const overlaps = x < Math.min(menuBounds.right, heartBounds.right) &&
+        y < Math.min(menuBounds.bottom, heartBounds.bottom)
+      return overlaps && document.elementFromPoint(x, y)?.closest('.commentFilterMenu') === element
+    }, await heart.elementHandle())
+
+    expect(menuCoversHeart).toBe(true)
+    await watchComponent.dispose()
+  })
+
   test('sidebar chapters and SponsorBlock honor roundness while closing beside the description', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -3643,7 +3678,7 @@ test.describe('manual comment loading', () => {
     await expect(translationButtons).toHaveCount(0)
   })
 
-  test('identifies collapsed replies from the video uploader', async ({ app, page, attachScreenshot }) => {
+  test('identifies and filters collapsed replies from the video uploader', async ({ app, page, attachScreenshot }) => {
     await mockPlayableWatchPage(app, page, { ownerReply: true })
     await openMockedVideo(page)
 
@@ -3661,8 +3696,21 @@ test.describe('manual comment loading', () => {
     await expect(ownerReplyToggle.locator('.commentReplyOwnerSeparator')).toHaveText('•')
     await expect(ownerReplyToggle.locator('.commentReplyToggleText')).toHaveText(/\d+ replies/)
     await expect(ownerReplyToggle).not.toContainText('from')
+    const ownerReplyThread = page.locator('.commentThread').filter({ has: ownerReplyToggle })
+    const ownerReplyThreadElement = await ownerReplyThread.elementHandle()
+    expect(ownerReplyThreadElement).not.toBeNull()
+    await expect(ownerReplyThread.locator('.commentReplyContent')).toHaveCount(0)
     await ownerReplyToggle.scrollIntoViewIfNeeded()
     await attachScreenshot('uploader reply indicator')
+
+    await page.getByRole('button', { name: 'Filter loaded comments' }).click()
+    await page.getByRole('checkbox', { name: 'From creator' }).click()
+    await expect.poll(() => ownerReplyThreadElement.evaluate(element => ({
+      isConnected: element.isConnected,
+      isVisible: element.getClientRects().length > 0,
+      loadedReplyCount: element.querySelectorAll('.commentReplyContent').length
+    }))).toEqual({ isConnected: true, isVisible: true, loadedReplyCount: 0 })
+    await ownerReplyThreadElement.dispose()
   })
 
   test('searches the comments loaded for the current video', async ({ app, page }) => {
@@ -4046,7 +4094,7 @@ test.describe('manual comment loading', () => {
       await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
     })
 
-    test('clamps fullscreen comment scrolling after filtering', async ({ app, page }) => {
+    test('clamps fullscreen comment scrolling after creator and search filtering', async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       await openMockedVideo(page)
 
@@ -4072,6 +4120,21 @@ test.describe('manual comment loading', () => {
       await expect.poll(() => scroller.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
       await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
 
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+      await dock.getByRole('button', { name: 'Filter loaded comments' }).click()
+      const creatorFilter = dock.getByRole('checkbox', { name: 'From creator' })
+      await creatorFilter.click()
+
+      await expect(dock.locator('.commentThread')).toHaveCount(1)
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+      await creatorFilter.click()
+      await expect.poll(() => scroller.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+      await dock.getByRole('button', { name: 'Filter loaded comments' }).click()
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 

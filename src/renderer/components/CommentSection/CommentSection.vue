@@ -769,7 +769,7 @@ const hasActiveCommentFilters = computed(() => {
 })
 
 function commentMatchesActiveFilters(comment) {
-  if (creatorCommentsOnly.value && !comment.isOwner) {
+  if (creatorCommentsOnly.value && !comment.isOwner && !comment.hasOwnerReplied) {
     return false
   }
 

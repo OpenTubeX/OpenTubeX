@@ -606,6 +606,7 @@
 .commentHeartBadge {
   display: inline-block;
   position: relative;
+  isolation: isolate;
   inline-size: 25px;
   block-size: 20px;
   margin-inline-start: 10px;
