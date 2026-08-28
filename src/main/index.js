@@ -3277,6 +3277,13 @@ function runApp() {
     return liveReminderManager.get(videoId)
   })
 
+  ipcMain.handle(IpcChannels.LIVE_REMINDER_LIST, (event) => {
+    if (!isValidLiveReminderSender(event) || !Notification.isSupported()) {
+      return []
+    }
+    return liveReminderManager.list()
+  })
+
   ipcMain.handle(IpcChannels.LIVE_REMINDER_SCHEDULE, (event, reminder) => {
     if (
       !isValidLiveReminderSender(event) ||
@@ -4461,6 +4468,7 @@ function runApp() {
               backendPreference = data.value
               await setMenu()
               break
+            case 'hideHome':
             case 'hideTrendingVideos':
             case 'hidePopularVideos':
             case 'hidePlaylists':
@@ -5299,6 +5307,7 @@ function runApp() {
     const sidenavSettings = baseHandlers.settings._findSidenavSettings()
     const keyboardShortcutsSetting = await baseHandlers.settings._findOne('keyboardShortcuts')
     const keyboardShortcuts = getConfiguredKeyboardShortcuts(keyboardShortcutsSetting?.value)
+    const hideHome = (await sidenavSettings.hideHome)?.value
     const hideTrendingVideos = (await sidenavSettings.hideTrendingVideos)?.value
     const hidePopularVideos = (await sidenavSettings.hidePopularVideos)?.value
     const hidePlaylists = (await sidenavSettings.hidePlaylists)?.value
@@ -5499,6 +5508,13 @@ function runApp() {
       {
         label: 'Navigate',
         submenu: [
+          !hideHome && {
+            label: 'Home',
+            click: (_menuItem, browserWindow, _event) => {
+              navigateTo('/home', browserWindow)
+            },
+            type: 'normal'
+          },
           {
             label: 'Subscriptions',
             click: (_menuItem, browserWindow, _event) => {

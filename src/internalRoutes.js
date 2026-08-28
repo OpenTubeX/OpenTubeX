@@ -1,4 +1,5 @@
 const FIXED_INTERNAL_ROUTE_TITLES = Object.freeze({
+  '/home': 'Home',
   '/subscriptions': 'Subscriptions',
   '/subscribedchannels': 'Channel List',
   '/trending': 'Trending',

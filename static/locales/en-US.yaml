@@ -208,6 +208,31 @@ Stats:
   Hours: '{hours} hr'
   Hours and minutes: '{hours} hr {minutes} min'
 
+Home Page:
+  Home: Home
+  Description: Pick up where you left off and see recent activity.
+  Customize: Customize Home
+  Done: Done
+  Customize description: Choose which sections appear and arrange them in the order you want.
+  Continue watching: Continue watching
+  New since last visit: New since last visit
+  Watch queue: Watch queue
+  Recent playlists: Recent playlists
+  Recent downloads: Recent downloads
+  Upcoming reminders: Upcoming reminders
+  Watch statistics: Watch statistics
+  View all: View all
+  Previous shelf page: Previous {section} page
+  Next shelf page: Next {section} page
+  Shelf page status: '{section}, page {page} of {total}.'
+  Move section up: Move {section} up
+  Move section down: Move {section} down
+  Section moved: '{section} moved to position {position} of {total}.'
+  Nothing here yet: Nothing here yet
+  Empty description: Videos you start, playlists you use, downloads, and reminders will appear here.
+  All sections hidden: All sections are hidden
+  All sections hidden description: Customize Home to show a section again.
+
 Subscriptions:
     # On Subscriptions Page
   Subscriptions: Subscriptions
@@ -1226,6 +1251,7 @@ Settings:
     Hide Comment Likes: Hide Comment Likes
     Hide Comment Translation Buttons: Hide Comment Translation Buttons
     Hide Recommended Videos: Hide Recommended Videos
+    Hide Home: Hide Home
     Hide Trending Videos: Hide Trending Videos
     Hide Popular Videos: Hide Popular Videos
     Hide Playlists: Hide Playlists

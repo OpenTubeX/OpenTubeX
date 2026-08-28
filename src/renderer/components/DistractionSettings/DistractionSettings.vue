@@ -165,6 +165,13 @@
     <div class="switchColumnGrid">
       <div class="switchColumn">
         <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Hide Home')"
+          :compact="true"
+          :default-value="hideHome"
+          setting-key="hideHome"
+          @change="updateHideHome"
+        />
+        <FtToggleSwitch
           v-if="SUPPORTS_LOCAL_API"
           :label="t('Settings.Distraction Free Settings.Hide Trending Videos')"
           :compact="true"
@@ -419,6 +426,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
@@ -430,8 +438,11 @@ import store from '../../store/index'
 
 import { showToast } from '../../helpers/utils'
 import { checkYoutubeChannelId, findChannelTagInfo } from '../../helpers/channels'
+import { getTabNavigationService } from '../../tabs/TabNavigationService'
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 
 const SUPPORTS_LOCAL_API = process.env.SUPPORTS_LOCAL_API
 
@@ -541,6 +552,27 @@ const disableHideTrendingVideos = computed(() => backendPreference.value !== 'lo
  */
 function updateHideTrendingVideos(value) {
   store.dispatch('updateHideTrendingVideos', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideHome = computed(() => store.getters.getHideHome)
+
+/**
+ * @param {boolean} value
+ */
+async function updateHideHome(value) {
+  await store.dispatch('updateHideHome', value)
+
+  if (!value) { return }
+
+  const landingRoute = { path: `/${store.getters.getLandingPage}` }
+  if (process.env.IS_ELECTRON) {
+    const homeTabs = store.getters.getTabs.filter(tab => tab.route.path === '/home')
+    const navigation = getTabNavigationService()
+    await Promise.all(homeTabs.map(tab => navigation.replace(tab.id, landingRoute)))
+  } else if (route.path === '/home') {
+    await router.replace(landingRoute)
+  }
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

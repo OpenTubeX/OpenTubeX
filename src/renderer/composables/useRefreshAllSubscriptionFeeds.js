@@ -9,6 +9,7 @@ import {
   refreshSubscriptionShortsFromRemote,
   refreshSubscriptionVideosFromRemote
 } from '../helpers/subscriptions'
+import { getEnabledSubscriptionFeedSources } from '../helpers/newSubscriptionFeed'
 
 const LARGE_SUBSCRIPTION_COUNT = 125
 
@@ -24,42 +25,17 @@ export function useRefreshAllSubscriptionFeeds() {
   })
 
   const enabledFeeds = computed(() => {
-    const feeds = []
-
-    if (!store.getters.getHideSubscriptionsVideos) {
-      feeds.push({
-        category: 'videos',
-        cache: store.getters.getVideoCache,
-        entriesKey: 'videos',
-        refresh: refreshSubscriptionVideosFromRemote
-      })
-    }
-    if (!store.getters.getHideSubscriptionsShorts) {
-      feeds.push({
-        category: 'shorts',
-        cache: store.getters.getShortsCache,
-        entriesKey: 'videos',
-        refresh: refreshSubscriptionShortsFromRemote
-      })
-    }
-    if (!store.getters.getHideLiveStreams && !store.getters.getHideSubscriptionsLive) {
-      feeds.push({
-        category: 'live',
-        cache: store.getters.getLiveCache,
-        entriesKey: 'videos',
-        refresh: refreshSubscriptionLiveFromRemote
-      })
-    }
-    if (!store.getters.getHideSubscriptionsCommunity && !store.getters.getUseRssFeeds) {
-      feeds.push({
-        category: 'posts',
-        cache: store.getters.getPostsCache,
-        entriesKey: 'posts',
-        refresh: refreshSubscriptionPostsFromRemote
-      })
+    const refreshByCategory = {
+      videos: refreshSubscriptionVideosFromRemote,
+      shorts: refreshSubscriptionShortsFromRemote,
+      live: refreshSubscriptionLiveFromRemote,
+      posts: refreshSubscriptionPostsFromRemote
     }
 
-    return feeds
+    return getEnabledSubscriptionFeedSources(store.getters).map(feed => ({
+      ...feed,
+      refresh: refreshByCategory[feed.category]
+    }))
   })
 
   function refresh() {

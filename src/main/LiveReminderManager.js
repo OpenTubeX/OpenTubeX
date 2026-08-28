@@ -44,6 +44,11 @@ export class LiveReminderManager {
     return this.reminders.get(videoId) ?? null
   }
 
+  async list() {
+    await this.pendingOperation
+    return [...this.reminders.values()].sort((a, b) => a.startTimestamp - b.startTimestamp)
+  }
+
   schedule(reminder) {
     return this.enqueue(async () => {
       if (reminder.startTimestamp <= this.now()) {

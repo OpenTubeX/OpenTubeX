@@ -517,12 +517,16 @@ function updateBackendPreference(value) {
 const hidePlaylists = computed(() => store.getters.getHidePlaylists)
 
 /** @type {import('vue').ComputedRef<boolean>} */
+const hideHome = computed(() => store.getters.getHideHome)
+
+/** @type {import('vue').ComputedRef<boolean>} */
 const hidePopularVideos = computed(() => store.getters.getHidePopularVideos)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideTrendingVideos = computed(() => store.getters.getHideTrendingVideos)
 
 const INCLUDED_DEFAULT_PAGE_NAMES = [
+  'home',
   'subscriptions',
   'subscribedChannels',
   'popular',
@@ -533,6 +537,10 @@ const INCLUDED_DEFAULT_PAGE_NAMES = [
 
 const defaultPages = computed(() => {
   let includedPageNames = INCLUDED_DEFAULT_PAGE_NAMES
+
+  if (hideHome.value) {
+    includedPageNames = includedPageNames.filter((pageName) => pageName !== 'home')
+  }
 
   if (hideTrendingVideos.value || !backendFallback.value || backendPreference.value !== 'local') {
     includedPageNames = includedPageNames.filter((pageName) => pageName !== 'trending')
@@ -556,11 +564,11 @@ const defaultPageValues = computed(() => {
   return defaultPages.value.map((route) => route.path.slice(1))
 })
 
-/** @type {import('vue').ComputedRef<'subscriptions' | 'subscribedChannels' | 'popular' | 'userPlaylists' | 'history' | 'trending'>} */
+/** @type {import('vue').ComputedRef<'home' | 'subscriptions' | 'subscribedChannels' | 'popular' | 'userPlaylists' | 'history' | 'trending'>} */
 const landingPage = computed(() => store.getters.getLandingPage)
 
 /**
- * @param {'subscriptions' | 'subscribedChannels' | 'popular' | 'userPlaylists' | 'history' | 'trending'} value
+ * @param {'home' | 'subscriptions' | 'subscribedChannels' | 'popular' | 'userPlaylists' | 'history' | 'trending'} value
  */
 function updateLandingPage(value) {
   store.dispatch('updateLandingPage', value)

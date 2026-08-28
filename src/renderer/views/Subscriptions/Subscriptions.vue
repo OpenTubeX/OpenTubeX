@@ -337,6 +337,7 @@
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
@@ -372,6 +373,8 @@ const hasHorizontalTabBar = computed(() => isElectron && store.getters.getTabBar
 
 const { tabId, isTabPresented } = useTabContext()
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const {
   activeSubscriptionIds: allFeedsActiveSubscriptionIds,
   handleRefreshWarning: handleAllFeedsRefreshWarning,
@@ -678,15 +681,23 @@ if (visibleTabs.value.length === 0) {
   selectedTab.value = null
   currentTab.value = null
 } else {
-  // Restore currentTab
+  const requestedTabId = typeof route.query.tab === 'string' ? route.query.tab : null
   const lastCurrentTabId = localStorage.getItem(currentTabStorageKey)
-  if (lastCurrentTabId !== null) {
+  if (requestedTabId !== null && visibleTabs.value.includes(requestedTabId)) {
+    changeTab(requestedTabId)
+  } else if (lastCurrentTabId !== null) {
     changeTab(lastCurrentTabId)
   } else if (!visibleTabs.value.includes(currentTab.value)) {
     selectedTab.value = visibleTabs.value[0]
     currentTab.value = visibleTabs.value[0]
   }
 }
+
+watch(() => route.query.tab, value => {
+  if (typeof value === 'string' && visibleTabs.value.includes(value)) {
+    changeTab(value)
+  }
+})
 
 /**
  * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} tab
@@ -696,6 +707,10 @@ function changeTab(tab) {
   const target = visibleTabs.value.includes(tab)
     ? tab
     : (visibleTabs.value.length > 0 ? visibleTabs.value[0] : null)
+
+  if (route.query.tab !== undefined && route.query.tab !== target) {
+    router.replace({ query: { ...route.query, tab: target } })
+  }
 
   if (target === selectedTab.value) {
     return

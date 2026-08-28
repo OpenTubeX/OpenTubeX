@@ -1043,6 +1043,9 @@ onMounted(async () => {
       lastUsedVersion,
       tutorialState.tutorialAudience
     )
+    if (tutorialState.landingPageToInitialize !== null) {
+      await store.dispatch('updateLandingPage', tutorialState.landingPageToInitialize)
+    }
     if (hasExistingInstallation !== null || lastUsedVersion !== null) {
       await setLastUsedVersion(packageDetails.version)
     }

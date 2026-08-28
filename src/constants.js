@@ -27,6 +27,7 @@ const IpcChannels = {
   CHANGE_VIEW: 'change-view',
   SHOW_TOAST: 'show-toast',
   LIVE_REMINDER_GET: 'live-reminder-get',
+  LIVE_REMINDER_LIST: 'live-reminder-list',
   LIVE_REMINDER_SCHEDULE: 'live-reminder-schedule',
   LIVE_REMINDER_CANCEL: 'live-reminder-cancel',
   LIVE_REMINDER_UPDATED: 'live-reminder-updated',
@@ -618,6 +619,16 @@ const UnsupportedPlayerActions = /** @type {const} */({
 
 // Utils
 const MAIN_PROFILE_ID = 'allChannels'
+const DEFAULT_LANDING_PAGE = 'home'
+const LEGACY_DEFAULT_LANDING_PAGE = 'subscriptions'
+
+function resolveLandingPage(landingPage, hideHome = false) {
+  if (hideHome && landingPage === DEFAULT_LANDING_PAGE) {
+    return LEGACY_DEFAULT_LANDING_PAGE
+  }
+
+  return landingPage
+}
 
 // Profile colors that follow the selected theme color instead of a fixed value
 const THEME_BG_COLOR = 'var(--primary-color)'
@@ -712,6 +723,9 @@ export {
   ZOOM_IN_ICON_VIEWBOX,
   UnsupportedPlayerActions,
   MAIN_PROFILE_ID,
+  DEFAULT_LANDING_PAGE,
+  LEGACY_DEFAULT_LANDING_PAGE,
+  resolveLandingPage,
   THEME_BG_COLOR,
   THEME_TEXT_COLOR,
   MOBILE_WIDTH_THRESHOLD,
