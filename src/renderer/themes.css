@@ -8,6 +8,7 @@ body {
   --app-font-family: 'Roboto', system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --ui-roundness: 1;
   --scrollbar-thumb-width: 6px;
+  --scrollbar-track-width: calc(var(--scrollbar-thumb-width) + 4px);
   --border-color: var(--tertiary-text-color);
   --divider-color: color-mix(in srgb, var(--border-color) 45%, transparent);
   --subtle-surface-color: var(--tertiary-text-color);
@@ -2290,7 +2291,7 @@ body .os-scrollbar {
 
   /* The padding is subtracted from the track, so the handle ends up exactly as
      wide as the configured thumb width. */
-  --os-size: calc(var(--scrollbar-thumb-width) + 4px);
+  --os-size: var(--scrollbar-track-width);
   --os-padding-perpendicular: 2px;
   --os-padding-axis: 2px;
   --os-handle-interactive-area-offset: 4px;
