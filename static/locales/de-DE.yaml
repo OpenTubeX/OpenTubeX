@@ -1384,6 +1384,7 @@ Settings:
     History not supported: Diese Serverversion unterstützt die Synchronisierung des Wiedergabeverlaufs nicht.
     Settings not supported: Diese Serverversion unterstützt die Synchronisierung der Einstellungen nicht.
     Sync completed: Synchronisierung abgeschlossen
+    Sync failed: 'Synchronisierung fehlgeschlagen: {error}'
     Data Loss Confirmation: Destruktive Synchronisierung bestätigen?
     Data Loss Warning: >-
       Der Serverstatus würde {deleted} von {previous} zuvor synchronisierten Elementen der Kategorie „{collection}“

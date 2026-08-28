@@ -1422,6 +1422,7 @@ Settings:
     History not supported: This server version does not support watch history syncing.
     Settings not supported: This server version does not support settings syncing.
     Sync completed: Sync completed
+    Sync failed: 'Sync failed: {error}'
     Data Loss Confirmation: Confirm destructive sync?
     Data Loss Warning: 'The server state would delete {deleted} of {previous} previously synced {collection} items. This can indicate a failed server migration or reset. Continue only if this deletion is intentional and you have a backup.'
     Confirm Data Loss: Delete and continue
