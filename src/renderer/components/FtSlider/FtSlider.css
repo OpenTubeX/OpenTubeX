@@ -55,6 +55,12 @@
   opacity: 0.38;
 }
 
+.pure-material-slider:has(> .input[data-gamepad-active='true']) {
+  border-radius: calc(4px * var(--ui-roundness));
+  background-color: var(--accent-color-opacity2);
+  box-shadow: inset 0 0 0 2px var(--primary-color);
+}
+
 .input::-webkit-slider-runnable-track {
   margin-block: 17px;
   margin-inline: 0;

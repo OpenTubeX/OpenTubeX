@@ -198,6 +198,15 @@ test.describe('skip silence settings search', () => {
 test.describe('settings search highlights', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 
+  test('does not draw a separate focus frame inside the search field', async ({ page }) => {
+    await goTo(page, 'settings')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+
+    await expect(search).toBeFocused()
+    await expect(search).toHaveCSS('outline-style', 'none')
+    await expect(search).toHaveCSS('box-shadow', 'none')
+  })
+
   test('finds and highlights specific subscription refresh interval selects', async ({ page }) => {
     await expectSubscriptionRefreshIntervalSelectHighlight(page)
   })
