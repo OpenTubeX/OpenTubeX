@@ -207,7 +207,8 @@ export default defineComponent({
       applyDefaultTheatreModeAfterLoad: false,
       theatreLayoutAvailable: window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH,
       videoPlayerLoaded: false,
-      isFamilyFriendly: false,
+      /** @type {boolean|null} */
+      isFamilyFriendly: null,
       commentsDisabled: false,
       isLive: false,
       isPremiere: false,
@@ -1839,7 +1840,7 @@ export default defineComponent({
       this.playlistScrollPositions.sidebar = null
       this.playlistScrollPositions.fullscreen = null
       this.isLoading = true
-      this.isFamilyFriendly = false
+      this.isFamilyFriendly = null
       this.commentsDisabled = false
       this.isLive = false
       this.isPremiere = false
@@ -2693,7 +2694,7 @@ export default defineComponent({
           })
         }
 
-        if (this.showFamilyFriendlyOnly && !this.isFamilyFriendly) {
+        if (this.showFamilyFriendlyOnly && this.isFamilyFriendly === false) {
           this.isLoading = false
           this.handleVideoEnded()
           return

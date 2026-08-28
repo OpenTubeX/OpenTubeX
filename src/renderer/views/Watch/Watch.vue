@@ -627,7 +627,7 @@
             :metadata-history="videoMetadataHistory"
             :in-user-playlist="!!selectedUserPlaylist"
             :is-unlisted="isUnlisted"
-            :is-age-restricted="!isFamilyFriendly"
+            :is-age-restricted="isFamilyFriendly === false"
             :has-ai-generated-content="hasAiGeneratedContent"
             :sponsor-block-full-video-category="sponsorBlockFullVideoCategory"
             :active-format="activeFormat"
@@ -717,7 +717,7 @@
       </div>
     </div>
     <ft-age-restricted
-      v-if="(!isLoading && !isFamilyFriendly && showFamilyFriendlyOnly)"
+      v-if="(!isLoading && isFamilyFriendly === false && showFamilyFriendlyOnly)"
       class="ageRestricted"
     />
     <div
@@ -765,7 +765,7 @@
           :metadata-history="videoMetadataHistory"
           :in-user-playlist="!!selectedUserPlaylist"
           :is-unlisted="isUnlisted"
-          :is-age-restricted="!isFamilyFriendly"
+          :is-age-restricted="isFamilyFriendly === false"
           :has-ai-generated-content="hasAiGeneratedContent"
           :sponsor-block-full-video-category="sponsorBlockFullVideoCategory"
           :active-format="activeFormat"

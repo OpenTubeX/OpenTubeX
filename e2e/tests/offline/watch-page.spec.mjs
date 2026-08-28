@@ -55,6 +55,23 @@ async function expectPlayerMenuScrollState(menu, atEnd = true) {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+test('does not show an age-restricted badge when metadata loading fails', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    ipcMain.removeHandler('generate-po-token')
+    ipcMain.handle('generate-po-token', () => {
+      throw new Error('VM operation timed out')
+    })
+  })
+
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=4FEzLc7iBY0')
+  await page.locator(sel.searchInput).press('Enter')
+
+  await expect(page).toHaveURL(/#\/watch\/4FEzLc7iBY0/)
+  await expect(page.locator('.errorMessage')).toContainText('VM operation timed out')
+  await expect(page.locator('.infoArea .ageRestrictedBadge')).toHaveCount(0)
+})
+
 test('offers a YouTube link action in the watch tab context menu', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
