@@ -149,6 +149,7 @@
           :paid-promotion="showPaidPromotion"
           :paid-promotion-duration-ms="paidPromotionDurationMs"
           :resume-playback-after-sabr-reload="resumePlaybackAfterSabrReload"
+          :suppress-autoplay-after-sabr-reload="suppressAutoplayAfterSabrReload"
           :sabr-reload-caption-index="sabrReloadCaptionIndex"
           :sabr-reload-playback-rate="sabrReloadPlaybackRate"
           :shorts-player="customShortsPlayerActive"

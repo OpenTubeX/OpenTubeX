@@ -419,6 +419,9 @@ export default defineComponent({
 
       // When true, the new player after a SABR reload should start playback (was playing before reload)
       resumePlaybackAfterSabrReload: false,
+      // When true, the new player after a SABR reload must ignore the normal autoplay setting.
+      suppressAutoplayAfterSabrReload: false,
+      playerTeardownInProgress: false,
       /** @type {number|null} */
       sabrReloadCaptionIndex: null,
       /** @type {number|null} */
@@ -1924,6 +1927,8 @@ export default defineComponent({
       this.currentSubtitlesState = null
       this.currentVolume = null
       if (!preserveTitle) {
+        this.resumePlaybackAfterSabrReload = false
+        this.suppressAutoplayAfterSabrReload = false
         this.sabrReloadCaptionIndex = null
         this.sabrReloadPlaybackRate = null
         this.sabrReloadVideoQuality = null
@@ -3906,6 +3911,18 @@ export default defineComponent({
       this._saveWatchProgress()
     },
     handleVideoPause() {
+      // A reload remembers whether the outgoing player was playing, but the
+      // user can still pause it before the replacement starts loading. Do not
+      // let that stale snapshot restart the replacement player. Ignore pauses
+      // emitted while the outgoing player is being torn down.
+      if (
+        !this.isLoading &&
+        !this.playerTeardownInProgress &&
+        this.resumePlaybackAfterSabrReload
+      ) {
+        this.resumePlaybackAfterSabrReload = false
+        this.suppressAutoplayAfterSabrReload = true
+      }
       this.watchTimeLastTick = null
       this.flushWatchTime()
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
@@ -4158,7 +4175,11 @@ export default defineComponent({
       await this.tabRouter.replace({
         path: this.tabRoute.path,
         query,
-        hash: this.tabRoute.hash
+        hash: this.tabRoute.hash,
+        state: {
+          skipTabRouteLoading: true,
+          tabTitle: this.videoTitle,
+        },
       })
       this.timestamp = null
     },
@@ -5693,15 +5714,20 @@ export default defineComponent({
     },
 
     destroyPlayer: async function() {
-      const uiState = await this.$refs.player.destroyPlayer()
-      this.startNextVideoInFullscreen = uiState.startNextVideoInFullscreen
-      this.startNextVideoInFullwindow = uiState.startNextVideoInFullwindow
-      this.startNextVideoInPip = uiState.startNextVideoInPip
-      this.startNextVideoWithChapters = uiState.startNextVideoWithChapters
-      this.startNextVideoWithFullscreenMetadata = uiState.startNextVideoWithFullscreenMetadata
-      this.startNextVideoWithFullscreenComments = uiState.startNextVideoWithFullscreenComments
-      this.startNextVideoWithFullscreenLiveChat = uiState.startNextVideoWithFullscreenLiveChat
-      this.startNextVideoWithFullscreenPlaylist = uiState.startNextVideoWithFullscreenPlaylist
+      this.playerTeardownInProgress = true
+      try {
+        const uiState = await this.$refs.player.destroyPlayer()
+        this.startNextVideoInFullscreen = uiState.startNextVideoInFullscreen
+        this.startNextVideoInFullwindow = uiState.startNextVideoInFullwindow
+        this.startNextVideoInPip = uiState.startNextVideoInPip
+        this.startNextVideoWithChapters = uiState.startNextVideoWithChapters
+        this.startNextVideoWithFullscreenMetadata = uiState.startNextVideoWithFullscreenMetadata
+        this.startNextVideoWithFullscreenComments = uiState.startNextVideoWithFullscreenComments
+        this.startNextVideoWithFullscreenLiveChat = uiState.startNextVideoWithFullscreenLiveChat
+        this.startNextVideoWithFullscreenPlaylist = uiState.startNextVideoWithFullscreenPlaylist
+      } finally {
+        this.playerTeardownInProgress = false
+      }
     },
 
     isSabrVideoStream() {
@@ -5755,7 +5781,9 @@ export default defineComponent({
     },
 
     async performSabrReload(payload, toastMessage) {
-      this.resumePlaybackAfterSabrReload = payload?.wasPlaying === true
+      const wasPlaying = payload?.wasPlaying === true
+      this.resumePlaybackAfterSabrReload = wasPlaying
+      this.suppressAutoplayAfterSabrReload = !wasPlaying
       this.sabrReloadCaptionIndex = Number.isInteger(payload?.captionIndex) ? payload.captionIndex : null
       const playbackRate = Number(payload?.playbackRate)
       this.sabrReloadPlaybackRate = Number.isFinite(playbackRate) && playbackRate > 0.07
@@ -5793,6 +5821,7 @@ export default defineComponent({
 
     onResumePlaybackAfterSabrReloadDone() {
       this.resumePlaybackAfterSabrReload = false
+      this.suppressAutoplayAfterSabrReload = false
     },
 
     ...mapActions([

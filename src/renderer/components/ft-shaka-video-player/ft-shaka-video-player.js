@@ -486,6 +486,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    suppressAutoplayAfterSabrReload: {
+      type: Boolean,
+      default: false
+    },
     sabrReloadCaptionIndex: {
       type: Number,
       default: null
@@ -1215,9 +1219,14 @@ export default defineComponent({
       isTabPresented,
     })
 
+    // Capture the replacement player's initial state. The parent clears its
+    // pending SABR state after this player loads, but that must not add autoplay
+    // to the same media element afterward.
+    const suppressInitialAutoplay = props.suppressAutoplayAfterSabrReload
+
     /** @type {import('vue').ComputedRef<boolean>} */
     const autoplayVideos = computed(() => {
-      return store.getters.getAutoplayVideos && isActiveTab.value
+      return !suppressInitialAutoplay && store.getters.getAutoplayVideos && isActiveTab.value
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -9926,6 +9935,8 @@ export default defineComponent({
 
       if (props.resumePlaybackAfterSabrReload) {
         video.value?.play()
+      }
+      if (props.resumePlaybackAfterSabrReload || suppressInitialAutoplay) {
         emit('resume-playback-after-sabr-reload-done')
       }
     }
@@ -10576,6 +10587,7 @@ export default defineComponent({
       annotationVideoFit,
 
       autoplayVideos,
+      suppressInitialAutoplay,
       loopShorts,
       sponsorBlockShowSkippedToast,
       sponsorBlockDraftEditValues,

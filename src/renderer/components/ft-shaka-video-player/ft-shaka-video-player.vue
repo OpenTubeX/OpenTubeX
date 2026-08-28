@@ -114,7 +114,7 @@
         preload="auto"
         crossorigin="anonymous"
         playsinline
-        :autoplay="autoplayVideos || shortsPlayer ? true : null"
+        :autoplay="autoplayVideos || (!suppressInitialAutoplay && shortsPlayer && isActiveTab) ? true : null"
         :loop="shortsPlayer && loopShorts"
         :poster="format === 'audio' || showPoster ? thumbnail : null"
         @play="handlePlay"
