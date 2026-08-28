@@ -85,6 +85,7 @@ body:
         - .deb
         - APT repository
         - Flatpak
+        - Flatpark
         - .dmg
         - .exe
         - WinGet
@@ -114,8 +115,8 @@ body:
       description: Which stream extraction method is selected in General Settings?
       multiple: false
       options:
-        - yt-dlp
         - Built-in
+        - yt-dlp
     validations:
       required: true
   - type: input
