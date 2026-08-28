@@ -279,6 +279,7 @@ const state = {
   ytDlpDownloadTemplates: '[]',
   ytDlpSelectedTemplate: 'video:best',
   ytDlpAutomaticDownloadRules: '{}',
+  disableAbRepeat: false,
   expandSideBar: false,
   hideActiveSubscriptions: false,
   hideChannelAvatars: false,

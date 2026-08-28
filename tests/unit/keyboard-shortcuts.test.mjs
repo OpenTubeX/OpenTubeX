@@ -49,3 +49,19 @@ test('keeps contextual app shortcuts fixed', () => {
 test('opens downloads with Ctrl or Command+J by default', () => {
   assert.equal(getConfiguredKeyboardShortcuts().APP.GENERAL.NAVIGATE_TO_DOWNLOADS, 'ctrl+J')
 })
+
+test('allows A-B repeat shortcuts to be configured', () => {
+  const shortcuts = getConfiguredKeyboardShortcuts({
+    VIDEO_PLAYER: {
+      PLAYBACK: {
+        SET_AB_REPEAT_START: 'alt+a',
+        SET_AB_REPEAT_END: 'alt+b',
+        CLEAR_AB_REPEAT: '',
+      }
+    }
+  })
+
+  assert.equal(shortcuts.VIDEO_PLAYER.PLAYBACK.SET_AB_REPEAT_START, 'alt+a')
+  assert.equal(shortcuts.VIDEO_PLAYER.PLAYBACK.SET_AB_REPEAT_END, 'alt+b')
+  assert.equal(shortcuts.VIDEO_PLAYER.PLAYBACK.CLEAR_AB_REPEAT, '')
+})

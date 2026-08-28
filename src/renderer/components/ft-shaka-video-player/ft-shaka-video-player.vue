@@ -120,10 +120,12 @@
         @pause="handlePause"
         @ended="handleEnded"
         @seeking="handleSeeking"
+        @seeked="handleAbRepeatSeeked"
         @canplay="handleCanPlay"
         @volumechange="updateVolume"
         @timeupdate="handleTimeupdate"
-        @loadedmetadata="updateVideoElementGeometry"
+        @loadedmetadata="handleAbRepeatDurationChange"
+        @durationchange="handleAbRepeatDurationChange"
         @enterpictureinpicture="handleEnterPictureInPicture"
         @leavepictureinpicture="handleLeavePictureInPicture"
       />
@@ -795,11 +797,24 @@
             v-if="showTemporaryPlaybackRateIndicator || valueChangeIcons.length > 0"
             class="valueChangeIcons"
           >
-            <ft-icon
+            <template
               v-for="icon in showTemporaryPlaybackRateIndicator ? ['forward'] : valueChangeIcons"
-              :key="icon"
-              :icon="['fas', icon]"
-            />
+              :key="typeof icon === 'string' ? icon : icon.path"
+            >
+              <svg
+                v-if="typeof icon === 'object'"
+                class="valueChangeCustomIcon"
+                :viewBox="icon.viewBox"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path :d="icon.path" />
+              </svg>
+              <ft-icon
+                v-else
+                :icon="['fas', icon]"
+              />
+            </template>
           </span>
           <span>{{
             showTemporaryPlaybackRateIndicator

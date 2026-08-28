@@ -995,6 +995,7 @@ Settings:
     Hide Sharing Actions: Aktionen zum Teilen ausblenden
     Hide Videos on Watch: Bereits angesehene Videos ausblenden
     Hide Chapters: Kapitel ausblenden
+    Disable A-B Repeat: A-B-Wiederholung deaktivieren
     Hide Upcoming Premieres: Anstehende Premieren ausblenden
     Hide Channels: Videos aus Kanälen ausblenden
     Hide Channels Placeholder: Kanal-ID
@@ -1602,6 +1603,21 @@ Video:
       Remaining: Noch {time}
       Cancel timer: Timer abbrechen
       Timer ended: Einschlaftimer abgelaufen
+    A-B Repeat:
+      A-B Repeat: A-B-Wiederholung
+      On: An
+      Off: Aus
+      Point A: Punkt A
+      Point B: Punkt B
+      Set Repeat Start: Wiederholungsanfang setzen
+      Set Repeat End: Wiederholungsende setzen
+      Pause Repeat: A-B-Wiederholung pausieren
+      Resume Repeat: A-B-Wiederholung fortsetzen
+      Adjust Point: 'Punkt {point} anpassen, aktuell {timestamp}'
+      Clear Range: A-B-Wiederholungsbereich löschen
+      End Before Start: Punkt B muss nach Punkt A liegen.
+      Outside Duration: Der Zeitstempel muss innerhalb des Videos liegen.
+      Cleared: A-B-Wiederholung gelöscht
     Audio Tracks: Audiospuren
     Up next in {seconds}: Als Nächstes in {seconds}
     Play now: Jetzt abspielen
@@ -2280,6 +2296,9 @@ KeyboardShortcutPrompt:
   Next Frame: Nächstes Bild (bei pausierter Wiedergabe)
   Small Rewind: X Sekunden zurückspulen, basierend auf dem Rückspulintervall und der aktuellen Wiedergabegeschwindigkeit
   Toggle Skip Silence: Überspringen von Stille umschalten
+  Set A-B Repeat Point A: Punkt A der A-B-Wiederholung setzen
+  Set A-B Repeat Point B: Punkt B der A-B-Wiederholung setzen
+  Clear A-B Repeat: A-B-Wiederholung löschen
   End: Zum Ende des Videos springen
   Home: Zum Anfang des Videos springen
   Skip to Next Video: Zum nächsten Video in der Playlist bzw. nächsten empfohlenen Video springen

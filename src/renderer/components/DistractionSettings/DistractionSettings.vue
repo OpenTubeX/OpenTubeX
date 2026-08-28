@@ -329,6 +329,13 @@
           @change="updateHideChapters"
         />
         <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Disable A-B Repeat')"
+          :compact="true"
+          :default-value="disableAbRepeat"
+          setting-key="disableAbRepeat"
+          @change="updateDisableAbRepeat"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide End-Screen Annotations')"
           :compact="true"
           :default-value="hideEndScreenAnnotations"
@@ -656,6 +663,16 @@ const hideChapters = computed(() => store.getters.getHideChapters)
  */
 function updateHideChapters(value) {
   store.dispatch('updateHideChapters', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const disableAbRepeat = computed(() => store.getters.getDisableAbRepeat)
+
+/**
+ * @param {boolean} value
+ */
+function updateDisableAbRepeat(value) {
+  store.dispatch('updateDisableAbRepeat', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

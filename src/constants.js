@@ -363,6 +363,9 @@ const DefaultKeyboardShortcuts = {
       INCREASE_VIDEO_SPEED_ALT: '>',
       TOGGLE_NORMAL_PLAYBACK_SPEED: 'g',
       TOGGLE_SKIP_SILENCE: '',
+      SET_AB_REPEAT_START: 'shift+a',
+      SET_AB_REPEAT_END: 'shift+b',
+      CLEAR_AB_REPEAT: 'shift+x',
       SKIP_N_TENTHS: '0..9',
       LAST_CHAPTER: 'ctrl+arrowleft',
       NEXT_CHAPTER: 'ctrl+arrowright',
@@ -552,7 +555,7 @@ function getElectronAccelerator(shortcut) {
 }
 
 /**
- * Material Design Symbols used by FreeTube's custom player components
+ * Material Design Symbols and custom glyphs used by player components
  *
  * This only has the value of the `d` attribute from the `<path>` element, the rest of the SVG is generated at runtime.
  *
