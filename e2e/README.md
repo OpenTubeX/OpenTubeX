@@ -73,9 +73,13 @@ unexpected player failures still fail normally.
 
 ## Screenshots
 
-Failures always attach a screenshot. Tests that assert something visual
-should also attach screenshots of the states they check, so the HTML report
-can be reviewed by eye:
+Failures always attach a screenshot. Passing tests do not need to attach
+screenshots, including tests with visual assertions.
+
+Use `attachScreenshot` when a capture is useful for preparing a release-note
+image for a pull request. Follow the instructions under "Release note images"
+in `.github/PULL_REQUEST_TEMPLATE.md`; screenshots are optional test artifacts,
+not part of the assertions:
 
 ```js
 test('...', async ({ page, attachScreenshot }) => {
