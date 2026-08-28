@@ -15,6 +15,7 @@
       <FtCard
         ref="cardRef"
         class="tutorialCard"
+        :class="{ tutorialImportCard: step.showImportAction }"
         :style="cardStyle"
         role="dialog"
         aria-modal="true"
@@ -91,7 +92,10 @@
                 @change="updateDefaultQuality"
               />
             </div>
-            <div class="tutorialActions">
+            <div
+              class="tutorialActions"
+              :class="{ tutorialImportActions: step.showImportAction }"
+            >
               <FtButton
                 v-if="steps.length > 1 && stepIndex === 0"
                 :label="t('Tutorial.Skip')"
@@ -101,26 +105,44 @@
               />
               <FtButton
                 v-if="steps.length > 1 && stepIndex > 0"
-                :label="t('Back')"
-                :icon="['fas', 'arrow-left']"
+                class="tutorialCompactAction"
+                :aria-label="t('Back')"
                 :text-color="null"
                 :background-color="null"
                 @click="retreatTutorial"
-              />
+              >
+                <FtIcon
+                  :icon="['fas', 'arrow-left']"
+                  aria-hidden="true"
+                />
+                <span class="tutorialActionText">{{ t('Back') }}</span>
+              </FtButton>
               <FtButton
                 v-if="step.showImportAction"
-                :label="t('Tutorial.Import Data.Not Now')"
-                :icon="['fas', 'xmark']"
+                class="tutorialCompactAction"
+                :aria-label="t('Tutorial.Import Data.Not Now')"
                 :text-color="null"
                 :background-color="null"
                 @click="finishTutorial"
-              />
+              >
+                <FtIcon
+                  :icon="['fas', 'xmark']"
+                  aria-hidden="true"
+                />
+                <span class="tutorialActionText">{{ t('Tutorial.Import Data.Not Now') }}</span>
+              </FtButton>
               <FtButton
                 v-if="step.showImportAction"
-                :label="t('Tutorial.Import Data.Action')"
-                :icon="['fas', 'database']"
+                class="tutorialPrimaryAction"
+                :aria-label="t('Tutorial.Import Data.Action')"
                 @click="openDataImport"
-              />
+              >
+                <FtIcon
+                  :icon="['fas', 'database']"
+                  aria-hidden="true"
+                />
+                <span class="tutorialActionText">{{ t('Tutorial.Import Data.Action') }}</span>
+              </FtButton>
               <FtButton
                 v-else
                 ref="primaryButtonRef"
@@ -138,7 +160,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
@@ -291,6 +313,8 @@ const defaultQuality = computed(() => {
   const value = store.getters.getDefaultQuality
   return value === 'auto' && !autoQualityAvailable.value ? AUTO_QUALITY_FALLBACK : value
 })
+
+watch(tabBarPosition, schedulePositionUpdate, { flush: 'post' })
 
 const highlightStyle = computed(() => {
   if (targetRect.value === null) return {}
@@ -459,7 +483,6 @@ function handleKeydown(event) {
 
 async function updateTabBarPosition(value) {
   await store.dispatch('updateTabBarPosition', value)
-  schedulePositionUpdate()
 }
 
 function updateBaseTheme(value) {

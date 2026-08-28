@@ -102,33 +102,82 @@ test('keeps the tutorial actions reachable in a short window', async ({ app, pag
   })).toBe(true)
 })
 
-test('keeps every import action reachable in a narrow window', async ({ app, page }) => {
-  await app.electronApp.evaluate(({ BrowserWindow }) => {
-    BrowserWindow.getAllWindows()[0].setSize(340, 600)
-  })
-  await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
-  await page.reload()
+test.describe('translated import actions', () => {
+  test.use({ seed: { settings: { currentLocale: 'de-DE' } } })
 
-  const tutorial = page.locator('.tutorialCard')
-  for (let step = 0; step < 5; step++) {
-    await tutorial.getByRole('button', { name: 'Next' }).click()
-  }
-  await expect(tutorial).toHaveAccessibleName('Bring your data with you')
-
-  const actions = ['Back', 'Not now', 'Import data'].map(name => {
-    return tutorial.getByRole('button', { name })
-  })
-  await Promise.all(actions.map(action => expect(action).toBeVisible()))
-  await expect.poll(async () => {
-    const [cardBounds, ...actionBounds] = await Promise.all([
-      tutorial.evaluate(element => element.getBoundingClientRect().toJSON()),
-      ...actions.map(action => action.evaluate(element => element.getBoundingClientRect().toJSON()))
-    ])
-    return actionBounds.every(bounds => {
-      return bounds.left >= cardBounds.left && bounds.right <= cardBounds.right &&
-        bounds.top >= cardBounds.top && bounds.bottom <= cardBounds.bottom
+  test('keep their labels when they fit on one row', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0].setSize(500, 600)
     })
-  }).toBe(true)
+    await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
+    await page.reload()
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.05))
+
+    const tutorial = page.locator('.tutorialCard')
+    for (let step = 0; step < 5; step++) {
+      await tutorial.getByRole('button', { name: 'Weiter' }).click()
+    }
+
+    const actions = ['Zurück', 'Nicht jetzt', 'Daten importieren'].map(name => {
+      return tutorial.getByRole('button', { name })
+    })
+    await Promise.all(actions.map(action => expect(action.locator('.tutorialActionText')).toBeVisible()))
+    const actionTops = await Promise.all(actions.map(action => {
+      return action.evaluate(element => Math.round(element.getBoundingClientRect().top))
+    }))
+    expect(new Set(actionTops).size).toBe(1)
+  })
+
+  test('stay on one row in a narrow window', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0].setSize(340, 600)
+    })
+    await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
+    await page.reload()
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.05))
+
+    const tutorial = page.locator('.tutorialCard')
+    for (let step = 0; step < 5; step++) {
+      await tutorial.getByRole('button', { name: 'Weiter' }).click()
+    }
+    await expect(tutorial).toHaveAccessibleName('Nimm deine Daten mit')
+
+    const actions = ['Zurück', 'Nicht jetzt', 'Daten importieren'].map(name => {
+      return tutorial.getByRole('button', { name })
+    })
+    await Promise.all(actions.map(action => expect(action).toBeVisible()))
+    await expect.poll(async () => {
+      const [cardBounds, ...actionBounds] = await Promise.all([
+        tutorial.evaluate(element => element.getBoundingClientRect().toJSON()),
+        ...actions.map(action => action.evaluate(element => element.getBoundingClientRect().toJSON()))
+      ])
+      return actionBounds.every(bounds => {
+        return bounds.left >= cardBounds.left && bounds.right <= cardBounds.right &&
+          bounds.top >= cardBounds.top && bounds.bottom <= cardBounds.bottom
+      })
+    }).toBe(true)
+    await expect.poll(async () => {
+      const actionBounds = await Promise.all(actions.map(action => {
+        return action.evaluate(element => element.getBoundingClientRect().toJSON())
+      }))
+      return new Set(actionBounds.map(bounds => Math.round(bounds.top))).size
+    }).toBe(1)
+    const actionWidths = await Promise.all(actions.map(action => {
+      return action.evaluate(element => {
+        const contentRange = document.createRange()
+        contentRange.selectNodeContents(element)
+        const styles = getComputedStyle(element)
+        return {
+          availableWidth: element.clientWidth - Number.parseFloat(styles.paddingLeft) - Number.parseFloat(styles.paddingRight),
+          contentWidth: contentRange.getBoundingClientRect().width
+        }
+      })
+    }))
+    expect(
+      actionWidths.every(({ availableWidth, contentWidth }) => contentWidth <= availableWidth),
+      JSON.stringify(actionWidths)
+    ).toBe(true)
+  })
 })
 
 test('resets the managed content viewport after a shorter step replaces it', async ({ app, page }) => {
@@ -264,6 +313,30 @@ test('walks new users through the essential controls', async ({ page }) => {
 
   await page.reload()
   await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
+})
+
+test('repositions the tab highlight when the layout is reset', async ({ page }) => {
+  await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
+  await page.reload()
+  await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+
+  const tutorial = page.locator('.tutorialCard')
+  for (let step = 0; step < 3; step++) {
+    await tutorial.getByRole('button', { name: 'Next' }).click()
+  }
+  await expect(tutorial).toHaveAccessibleName('Keep pages open in tabs')
+
+  const layout = tutorial.getByRole('combobox', { name: 'Tab Layout' })
+  await layout.click()
+  await page.locator(`#${await layout.getAttribute('aria-controls')}`)
+    .getByRole('option', { name: 'Vertical on right', exact: true }).click()
+  await expect(page.locator('.tabBar.position-right')).toBeVisible()
+  await expectHighlightCenteredOn(page, '[data-tutorial="tabs"]')
+
+  await tutorial.getByRole('button', { name: 'Reset this setting to its default' }).click()
+  await expect(page.locator('.tabBar.position-top')).toBeVisible()
+  await expect(layout).toHaveText('Horizontal at top')
+  await expectHighlightCenteredOn(page, '[data-tutorial="tabs"]')
 })
 
 test.describe('fresh profile relaunch', () => {

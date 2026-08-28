@@ -49,6 +49,7 @@
           :value="draft.mainColor"
           :select-names="themeColorNames"
           :select-values="COLOR_VALUES"
+          :option-colors="COLOR_SWATCHES"
           :icon="['fas', 'palette']"
           icon-color="var(--primary-color)"
           @change="copyMainColor"
@@ -58,6 +59,7 @@
           :value="draft.secondaryColor"
           :select-names="themeColorNames"
           :select-values="COLOR_VALUES"
+          :option-colors="COLOR_SWATCHES"
           :icon="['fas', 'palette']"
           icon-color="var(--accent-color)"
           @change="copySecondaryColor"
@@ -220,6 +222,7 @@ const baseThemeNames = computed(() => {
   return BASE_THEME_TRANSLATION_KEYS.map(key => translations[key] ?? key)
 })
 const COLOR_VALUES = colors.map(color => color.name)
+const COLOR_SWATCHES = colors.map(color => color.value)
 const themeColorNames = useColorTranslations()
 const colorNames = computed(() => tm('Settings.Theme Settings.Custom Theme.Colors'))
 const isSavedTheme = computed(() => store.getters.getCustomThemes.some(({ id }) => id === draft.id))
