@@ -1774,8 +1774,6 @@ Video:
   Restricted Playback Authentication Failed Template: 'yt-dlp could not access this video with the configured cookies: {error}'
   DRMProtected: DRM protected videos cannot be played in OpenTubeX, as they require proprietary, closed source components. If you want to watch this video please watch it on the official YouTube website in a DRM enabled web browser.
   Private: Private videos cannot be watched in OpenTubeX as they require Google login and ownership of the video.
-  Collapse Playlist: Collapse Playlist
-  Expand Playlist: Expand Playlist
   More Options: More Options
   Mark As Watched: Mark As Watched
   Unmark As Watched: Unmark As Watched

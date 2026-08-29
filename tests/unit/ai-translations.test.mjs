@@ -47,6 +47,24 @@ test('AI translation cleanup leaves files byte-for-byte unchanged without overla
   assert.deepEqual(result, { output: overlay, removedPaths: [] })
 })
 
+test('AI translation cleanup does not reflow or normalize retained scalars', () => {
+  const overlay = `# heading
+Keep:
+  Long: "This deliberately long line stays on one line even after a sibling entry is removed from the same mapping."
+  Escaped: "Arload:\\_Ivinelloù"
+  Remove: generated
+`
+  const human = { Keep: { Remove: 'human' } }
+
+  const result = cleanupOverlayText('example', overlay, human)
+
+  assert.equal(result.output, `# heading
+Keep:
+  Long: "This deliberately long line stays on one line even after a sibling entry is removed from the same mapping."
+  Escaped: "Arload:\\_Ivinelloù"
+`)
+})
+
 test('AI translation validation rejects keys already covered by human translations', () => {
   const errors = validateOverlayMessages(
     'fr-FR',

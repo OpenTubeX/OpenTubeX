@@ -109,8 +109,8 @@ function serializeOverlay(locale, strings) {
 
 /**
  * Remove AI entries that now have a non-empty human translation. The YAML
- * document API keeps comments, quotes, and block scalar formatting intact for
- * every entry that remains.
+ * document ranges let us remove complete mapping lines without serializing or
+ * otherwise changing any entry that remains.
  *
  * @param {string} locale
  * @param {string} overlayText
@@ -136,19 +136,41 @@ export function cleanupOverlayText(locale, overlayText, humanMessages) {
     }
   }
 
-  for (const flatPath of removedPaths) {
-    const path = flatPath.split('\0')
-    document.deleteIn(path)
+  const pathsToRemove = new Set(removedPaths)
 
-    while (path.length > 1) {
-      path.pop()
-      const parent = document.getIn(path, true)
-      if (!isMap(parent) || parent.items.length > 0) break
-      document.deleteIn(path)
-    }
+  function pairRange(pair) {
+    const start = overlayText.lastIndexOf('\n', pair.key.range[0] - 1) + 1
+    const end = pair.value?.range?.[2] ?? pair.key.range[2]
+    return { start, end }
   }
 
-  return { output: document.toString(), removedPaths }
+  function removalRanges(mapping, path = []) {
+    const ranges = []
+    let allRemoved = mapping.items.length > 0
+
+    for (const pair of mapping.items) {
+      const pairPath = [...path, String(pair.key.value)]
+      if (isMap(pair.value)) {
+        const child = removalRanges(pair.value, pairPath)
+        if (child.allRemoved) ranges.push(pairRange(pair))
+        else ranges.push(...child.ranges)
+        allRemoved &&= child.allRemoved
+      } else {
+        const remove = pathsToRemove.has(pairPath.join('\0'))
+        if (remove) ranges.push(pairRange(pair))
+        allRemoved &&= remove
+      }
+    }
+
+    return { ranges, allRemoved }
+  }
+
+  const { ranges } = removalRanges(document.contents)
+  const output = ranges
+    .sort((left, right) => right.start - left.start)
+    .reduce((text, range) => text.slice(0, range.start) + text.slice(range.end), overlayText)
+
+  return { output, removedPaths }
 }
 
 function assertEligibleLocale(locale) {

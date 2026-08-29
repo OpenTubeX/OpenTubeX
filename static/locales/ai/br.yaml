@@ -145,8 +145,6 @@ Feed:
 User Playlists:
   Load More Playlists: "Kargañ muioc'h a rolloù-videoioù"
   Save to: "Enrollañ e…"
-  Move Video to the Top: "Kas ar video e penn ar roll"
-  Move Video to the Bottom: "Kas ar video e dibenn ar roll"
   Quick Bookmark Icon: "Arlun ar sined prim"
   Custom Emoji: "Emoji personelaet"
   Choose Image: "Dibab ur skeudenn"
@@ -444,10 +442,6 @@ Settings:
         Outline: "Trolinenn"
         Drop Shadow: "Skeud taolet"
       Reset: "Adderaouekaat neuz an istitloù"
-    Default Viewing Mode:
-      Full Window (Always On): "Prenestr leun (bepred)"
-      Full Screen (Always On): "Skramm leun (bepred)"
-      Tooltip: "Arloet e vez an darn vrasañ eus ar modoù sellout dre ziouer e deroù pep estez sellout hepken. Padout a ra ar c'hemmoù graet e-pad an estez betek ma echu. Arloet e vez ar modoù sellout bepred pa dremenit d'ur video nevez, forzh peseurt kemmoù a oa bet graet en ur sellout ouzh ar video kent."
     Auto Picture in Picture:
       Auto Picture in Picture: "Tremen er mod Skeudenn e-barzh skeudenn ent emgefreek"
       On Tab Change: "Pa vez cheñchet ivinell"
@@ -492,11 +486,6 @@ Settings:
     Reorder Playback Speed: "Riklañ evit adurzhiañ an tizh lenn"
     Playback Speed: "Tizh lenn"
     Parallel Segment Loading: "Kargañ ar rannoù a-stroll"
-    Screenshot:
-      Mode: "Mod pakad skramm"
-      Modes:
-        Save To Folder: "Enrollañ en un teuliad"
-        Clipboard: "Eilañ er golver"
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
@@ -741,16 +730,7 @@ Settings:
     Data And Storage: "Roadennoù ha kadaviñ"
     Profile Directory: "Teuliad ar profil"
     Open Profile Directory: "Digeriñ teuliad ar profil"
-    Settings File: "Restr arventennoù"
-    Import Settings: "Enporzhiañ arventennoù"
-    Export Settings: "Ezporzhiañ arventennoù"
-    Settings Tooltip: "Ne c'hall ket an arventennoù arbennik d'ar reizhiad korvoiñ pe d'an implijer, nag ar re arnodel, bezañ ezporzhiet pe enporzhiet. Da skouer: proksi, lenner diavaez, teuliad pakadoù skramm…"
     Invalid JSON row, skipping item: "JSON didalvoudek war al linenn {row}; lezet eo an elfenn a-gostez"
-    All settings have been successfully imported: "Enporzhiet eo bet an holl arventennoù"
-    All settings have been successfully exported: "Ezporzhiet eo bet an holl arventennoù"
-    Setting object has insufficient data, skipping item: "N'eus ket trawalc'h a roadennoù en ergorenn arventenn; lezet eo an elfenn a-gostez"
-    Unknown setting key: "Alc'hwez arventenn dianav: {key}"
-    Non-transferable setting key: "Alc'hwez arventenn na c'hall ket bezañ treuzkaset: {key}"
     Import subscriptions formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), gwaredadenn LibreTube pe ezporzhadenn FreeTube (.json)"
     Import history formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), gwaredadenn LibreTube (.json)"
     Import playlists formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db)"
@@ -867,8 +847,6 @@ Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: "Gweredekaat Return YouTube Dislike"
     Return YouTube Dislike Url: "URL API Return YouTube Dislike (https://ryd-proxy.kavin.rocks dre ziouer)"
-  Parental Control Settings:
-    Disable Channel Links: "Diweredekaat liammoù ar chadennoù"
   Password Dialog:
     Incorrect Password: "Ger-tremen direizh"
     Unlock: "Dibrennañ"
@@ -925,7 +903,6 @@ Channel:
   Channel Name Unavailable: "N'eo ket hegerz anv ar chadenn"
   Search Result Types: "Doareoù disoc'hoù enklask"
   All Results: "Pep tra"
-  View All: "Gwelet pep tra"
 Video:
   Includes paid promotion: "Enderc'hel a ra bruderezh paeet"
   Age Restricted Badge: "Bevennet diouzh an oad"
@@ -974,7 +951,6 @@ Video:
   Configure Restricted Playback Cookies Hint: "Kefluniit an toupinoù en Arventennoù → Meziantoù diavaez → Toupinoù lenn yt-dlp."
   Try With Configured Cookies: "Klask gant an toupinoù kefluniet"
   Restricted Playback Authentication Failed Template: "N'eus ket bet gallet da yt-dlp haeziñ ar video-mañ gant an toupinoù kefluniet: {error}"
-  Private: "Ne c'hall ket ar videoioù prevez bezañ sellet e OpenTubeX rak ezhomm zo da gennaskañ ouzh Google ha da vezañ perc'henn war ar video."
   Unmark As Watched: "Tennañ ar merk sellet"
   Video has been unmarked as watched: "Tennet eo bet ar merk sellet diwar ar video"
   Save Channel Playback Speed: "Enrollañ tizh lenn ar chadenn"
@@ -1388,8 +1364,6 @@ Tooltips:
     Use Grid Player Menu: "Aozadur lañser arventennoù al lenner video evel ur gael karrelloù e-lec'h ur roll linennoù."
 The playlist is at the beginning. Enable loop to continue playing: "Ar roll-videoioù zo en e zerou. Gweredekait al lenn en ur voul evit kenderc'hel da lenn"
 External link opening has been disabled in Settings → Privacy: "Diweredekaet eo bet digeriñ al liammoù diavaez en Arventennoù → Prevezded"
-Screenshot Clipboard Success: "Enrollet eo bet ar pakad skramm er golver"
-Screenshot Clipboard Error: "C'hwitet eo eilañ ar pakad skramm er golver"
 KeyboardShortcutPrompt:
   Edit Hint: "Diuzit ur verradenn, ha pouezit war ur c'hediad stokelloù nevez. Pouezit war Kilennañ pe Dilemel evit distagañ anezhi."
   Change Shortcut: "Kemmañ ar verradenn evit {action}"
