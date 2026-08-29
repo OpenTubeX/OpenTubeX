@@ -196,10 +196,11 @@
           v-for="({ comment, index, replyNodes }) in visibleCommentEntries"
           :id="index === null ? `comment-pinned-${comment.id}` : 'comment' + index"
           :key="comment.id"
+          v-filtered-comment-thread-line="hasActiveCommentFilters"
           class="comment commentThread"
           :class="{
             commentThreadExpanded: shouldShowCommentReplies(comment, replyNodes),
-            commentThreadCollapsed: !hasActiveCommentFilters && comment.numReplies > 0 && !comment.showReplies,
+            commentThreadCollapsed: shouldShowCommentReplyToggle(comment, replyNodes),
             highlightedComment: comment.id === highlightedCommentId
           }"
         >
@@ -369,7 +370,7 @@
             </span>
           </p>
           <div
-            v-if="index !== null && !hasActiveCommentFilters && comment.numReplies > 0 && !comment.showReplies"
+            v-if="index !== null && shouldShowCommentReplyToggle(comment, replyNodes)"
             class="commentReplyContinuation commentReplyRootToggle"
           >
             <button
@@ -443,7 +444,7 @@
               @translation-unavailable="restoreCommentTranslation"
             />
             <div
-              v-if="index !== null && !hasActiveCommentFilters && (isReplyLoading(comment.id) || comment.hasReplyToken)"
+              v-if="index !== null && shouldShowCommentReplyContinuation(comment, replyNodes)"
               class="commentReplyContinuation"
             >
               <button
@@ -762,6 +763,61 @@ const normalizedCommentSearchQuery = computed(() => {
   return commentSearchQuery.value.trim().toLocaleLowerCase()
 })
 
+const filteredCommentThreadLineObservers = new WeakMap()
+
+function updateFilteredCommentThreadLine(element, filtering) {
+  if (!filtering) {
+    element.style.removeProperty('--filtered-comment-thread-line-inset-block-end')
+    return
+  }
+
+  const connectors = element.querySelectorAll(
+    ':scope > .commentReplies > .commentReplyBranchRoot > .commentReplyConnector'
+  )
+  const lastConnector = connectors.item(connectors.length - 1)
+  if (!lastConnector) {
+    element.style.removeProperty('--filtered-comment-thread-line-inset-block-end')
+    return
+  }
+
+  const inset = element.getBoundingClientRect().bottom - lastConnector.getBoundingClientRect().bottom
+  element.style.setProperty('--filtered-comment-thread-line-inset-block-end', `${inset}px`)
+}
+
+function observeFilteredCommentThreadLine(element, filtering) {
+  const state = filteredCommentThreadLineObservers.get(element)
+  if (!state) return
+
+  if (!filtering) {
+    state.observer?.disconnect()
+    state.observer = null
+    updateFilteredCommentThreadLine(element, false)
+    return
+  }
+
+  if (!state.observer) {
+    state.observer = new ResizeObserver(() => {
+      updateFilteredCommentThreadLine(element, true)
+    })
+    state.observer.observe(element)
+  }
+  updateFilteredCommentThreadLine(element, true)
+}
+
+const vFilteredCommentThreadLine = {
+  mounted(element, binding) {
+    filteredCommentThreadLineObservers.set(element, { observer: null })
+    observeFilteredCommentThreadLine(element, binding.value)
+  },
+  updated(element, binding) {
+    observeFilteredCommentThreadLine(element, binding.value)
+  },
+  unmounted(element) {
+    filteredCommentThreadLineObservers.get(element)?.observer?.disconnect()
+    filteredCommentThreadLineObservers.delete(element)
+  }
+}
+
 const hasActiveCommentFilters = computed(() => {
   return normalizedCommentSearchQuery.value !== '' ||
     creatorCommentsOnly.value ||
@@ -862,8 +918,30 @@ const matchingCommentCount = computed(() => {
   return commentEntries.value.reduce((count, { comment }) => count + countMatchingComments(comment), 0)
 })
 
+function shouldLoadFilteredCreatorReplies(comment, replyNodes) {
+  return creatorCommentsOnly.value &&
+    comment.hasOwnerReplied &&
+    replyNodes.length === 0
+}
+
+function shouldShowCommentReplyToggle(comment, replyNodes) {
+  if (comment.numReplies <= 0 || comment.showReplies) {
+    return false
+  }
+
+  return !hasActiveCommentFilters.value || shouldLoadFilteredCreatorReplies(comment, replyNodes)
+}
+
+function shouldShowCommentReplyContinuation(comment, replyNodes) {
+  const canLoadMore = isReplyLoading(comment.id) || comment.hasReplyToken
+  return canLoadMore && (
+    !hasActiveCommentFilters.value || shouldLoadFilteredCreatorReplies(comment, replyNodes)
+  )
+}
+
 function shouldShowCommentReplies(comment, replyNodes) {
-  return replyNodes.length > 0 && (comment.showReplies || hasActiveCommentFilters.value)
+  return (replyNodes.length > 0 && (comment.showReplies || hasActiveCommentFilters.value)) ||
+    (comment.showReplies && shouldShowCommentReplyContinuation(comment, replyNodes))
 }
 
 function getCommentAuthorSearchSegments(author) {
