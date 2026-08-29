@@ -237,16 +237,28 @@
 
               <section class="menuSection">
                 <h3>{{ t('Settings.Quick Settings.Content') }}</h3>
-                <FtSelect
-                  class="quickSelect"
-                  :placeholder="t('Settings.General Settings.Video View Type.Video View Type')"
-                  :value="listType"
-                  setting-key="listType"
-                  :select-names="viewTypeNames"
-                  :select-values="VIEW_TYPE_VALUES"
-                  :icon="listType === 'grid' ? ['fas', 'grip'] : ['fas', 'list']"
-                  @change="updateSetting('ListType', $event)"
-                />
+                <div class="selectPair">
+                  <FtSelect
+                    class="quickSelect"
+                    :placeholder="t('Settings.General Settings.Video View Type.Video View Type')"
+                    :value="listType"
+                    setting-key="listType"
+                    :select-names="viewTypeNames"
+                    :select-values="VIEW_TYPE_VALUES"
+                    :icon="listType === 'grid' ? ['fas', 'grip'] : ['fas', 'list']"
+                    @change="updateSetting('ListType', $event)"
+                  />
+                  <FtSelect
+                    class="quickSelect"
+                    :placeholder="t('Settings.General Settings.Playlist View Type.Playlist View Type')"
+                    :value="playlistViewType"
+                    setting-key="playlistViewType"
+                    :select-names="viewTypeNames"
+                    :select-values="VIEW_TYPE_VALUES"
+                    :icon="playlistViewType === 'grid' ? ['fas', 'grip'] : ['fas', 'list']"
+                    @change="updateSetting('PlaylistViewType', $event)"
+                  />
+                </div>
                 <FtToggleSwitch
                   :label="t('Settings.Distraction Free Settings.Hide Recommended Videos')"
                   :default-value="hideRecommendedVideos"
@@ -455,6 +467,7 @@ const thumbnailSize = computed(() => store.getters.getThumbnailSize)
 const playNextVideo = computed(() => store.getters.getPlayNextVideo)
 const enableSubtitlesByDefault = computed(() => store.getters.getEnableSubtitlesByDefault)
 const listType = computed(() => store.getters.getListType)
+const playlistViewType = computed(() => store.getters.getPlaylistViewType)
 const hideRecommendedVideos = computed(() => store.getters.getHideRecommendedVideos)
 const hideComments = computed(() => store.getters.getHideComments)
 const currentLocale = computed(() => store.getters.getCurrentLocale)
