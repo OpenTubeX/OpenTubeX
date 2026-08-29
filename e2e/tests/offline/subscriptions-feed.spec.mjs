@@ -328,6 +328,19 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
     await expect(page.getByRole('option', { name: 'Add to Queue' })).toBeVisible()
   })
 
+  test('uses the main text color for an upcoming premiere title', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
+    const title = upcomingPremiere.getByText('Upcoming premiere video', { exact: true })
+    await expect(title).toBeVisible()
+    await page.locator('body').evaluate(element => {
+      element.style.setProperty('--primary-text-color', '#123456')
+      element.style.setProperty('--tertiary-text-color', '#654321')
+    })
+    await expect(title).toHaveCSS('color', 'rgb(18, 52, 86)')
+  })
+
   test('toggles a reminder from the rightmost thumbnail action', async ({ app }) => {
     await app.electronApp.evaluate(({ Notification }) => {
       Notification.isSupported = () => true

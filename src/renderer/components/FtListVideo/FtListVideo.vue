@@ -6,7 +6,7 @@
       grid: !effectiveListTypeIsList,
       [appearance]: true,
       watched: addWatchedStyle,
-      premiereVideo: isPremiere || isUpcoming
+      premiereVideo: isPremiere && !isUpcoming
     }"
   >
     <div
