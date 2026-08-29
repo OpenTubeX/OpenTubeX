@@ -7,6 +7,29 @@ async function historyLinkLabel(page) {
   return page.locator(`${sel.sideNavLink('history')}:visible`).first().locator('.navLabel')
 }
 
+test.describe('YouTube links', () => {
+  test.use({
+    seed: {
+      settings: { externalLinkHandling: 'openLinkAfterPrompt' }
+    }
+  })
+
+  test('opens mobile video links in the app', async ({ page }) => {
+    const link = page.locator('body').getByRole('link', { name: 'Mobile YouTube video' })
+    await page.locator('body').evaluate((body) => {
+      body.insertAdjacentHTML(
+        'beforeend',
+        '<a href="https://m.youtube.com/watch?v=jNQXAC9IVRw">Mobile YouTube video</a>'
+      )
+    })
+
+    await link.click()
+
+    await expect(page.getByText('Are you sure you want to open this link?')).not.toBeVisible()
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  })
+})
+
 test('middle-clicking an internal link opens it in a background tab', async ({ page }) => {
   const linkLabel = await historyLinkLabel(page)
 
