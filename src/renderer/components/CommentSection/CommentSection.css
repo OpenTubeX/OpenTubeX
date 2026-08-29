@@ -410,7 +410,7 @@
   content: '';
   position: absolute;
   z-index: 0;
-  inset-block: 75px 71px;
+  inset-block: 75px var(--filtered-comment-thread-line-inset-block-end, 71px);
   inset-inline-start: 45px;
   border-inline-start: 1px solid var(--comment-thread-line-color);
   pointer-events: none;

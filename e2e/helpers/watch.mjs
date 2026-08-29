@@ -46,67 +46,72 @@ async function fixture(dir, name) {
   }
 }
 
-function addOwnerReplyMarker(body) {
+function mutateFirstObject(body, mutate, errorMessage) {
   const response = JSON.parse(body)
   const pending = [response]
+  let nextIndex = 0
 
-  while (pending.length > 0) {
-    const value = pending.pop()
+  while (nextIndex < pending.length) {
+    const value = pending[nextIndex++]
     if (!value || typeof value !== 'object') continue
 
-    const replies = value.commentThreadRenderer?.replies?.commentRepliesRenderer
-    if (replies) {
-      replies.viewRepliesCreatorThumbnail = {
-        thumbnails: [{ url: 'https://images.test/channel-owner.png' }]
-      }
+    if (mutate(value)) {
       return Buffer.from(JSON.stringify(response))
     }
 
     pending.push(...Object.values(value))
   }
 
-  throw new Error('Unable to add an owner-reply marker to the comment fixture')
+  throw new Error(errorMessage)
+}
+
+function addOwnerReplyMarker(body) {
+  return mutateFirstObject(body, value => {
+    const replies = value.commentThreadRenderer?.replies?.commentRepliesRenderer
+    if (!replies) return false
+
+    replies.viewRepliesCreatorThumbnail = {
+      thumbnails: [{ url: 'https://images.test/channel-owner.png' }]
+    }
+    return true
+  }, 'Unable to add an owner-reply marker to the comment fixture')
+}
+
+function markFirstReplyAsCreator(body) {
+  return mutateFirstObject(body, value => {
+    const payload = value.commentEntityPayload
+    if (payload?.properties?.replyLevel > 0 && payload.author) {
+      payload.author.isCreator = true
+      return true
+    }
+
+    return false
+  }, 'Unable to mark a reply as the video creator in the comment fixture')
 }
 
 function addCommentTimestamp(body) {
-  const response = JSON.parse(body)
-  const pending = [response]
-
-  while (pending.length > 0) {
-    const value = pending.pop()
-    if (!value || typeof value !== 'object') continue
-
+  return mutateFirstObject(body, value => {
     const payload = value.commentEntityPayload
     if (payload?.properties?.replyLevel === 0 && payload.properties.content?.content) {
       payload.properties.content.content += ' Start at 0:05.'
-      return Buffer.from(JSON.stringify(response))
+      return true
     }
 
-    pending.push(...Object.values(value))
-  }
-
-  throw new Error('Unable to add a timestamp to the comment fixture')
+    return false
+  }, 'Unable to add a timestamp to the comment fixture')
 }
 
 function blankCommentLikeCount(body) {
-  const response = JSON.parse(body)
-  const pending = [response]
-
-  while (pending.length > 0) {
-    const value = pending.pop()
-    if (!value || typeof value !== 'object') continue
-
+  return mutateFirstObject(body, value => {
     const payload = value.commentEntityPayload
     if (payload?.properties?.content?.content === "We're so honored that the first ever YouTube video was filmed here!") {
       payload.toolbar.likeCountNotliked = ' '
       payload.toolbar.likeCountA11y = '0 likes'
-      return Buffer.from(JSON.stringify(response))
+      return true
     }
 
-    pending.push(...Object.values(value))
-  }
-
-  throw new Error('Unable to blank the comment like count in the fixture')
+    return false
+  }, 'Unable to blank the comment like count in the fixture')
 }
 
 /**
@@ -127,6 +132,7 @@ function blankCommentLikeCount(body) {
  * @param {string} [options.captionCueSettings] append WebVTT settings to the test caption cue
  * @param {string[]|null} [options.captionVideoIds] limit captions to these video IDs
  * @param {boolean} [options.ownerReply] mark the first reply thread as containing a video-owner reply
+ * @param {boolean} [options.creatorReply] mark the first loaded reply as written by the video creator
  * @param {boolean} [options.commentTimestamp] add a timestamp to one top-level comment
  * @param {boolean} [options.blankCommentLikes] replace one comment's zero-like count with YouTube's whitespace representation
  */
@@ -136,6 +142,7 @@ export async function mockWatchPage(app, page, {
   captionCueSettings = '',
   captionVideoIds = null,
   ownerReply = false,
+  creatorReply = false,
   commentTimestamp = false,
   blankCommentLikes = false
 } = {}) {
@@ -258,8 +265,11 @@ export async function mockWatchPage(app, page, {
       }
 
       if (body) {
-        if (ownerReply && body.includes('commentThreadRenderer')) {
+        if (ownerReply && body.includes('"replyLevel":0')) {
           body = addOwnerReplyMarker(body)
+        }
+        if (creatorReply && body.includes('"replyLevel":1')) {
+          body = markFirstReplyAsCreator(body)
         }
         if (commentTimestamp && body.includes('commentEntityPayload')) {
           body = addCommentTimestamp(body)

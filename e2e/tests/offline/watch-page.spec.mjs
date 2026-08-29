@@ -3945,8 +3945,8 @@ test.describe('manual comment loading', () => {
     await expect(translationButtons).toHaveCount(0)
   })
 
-  test('identifies and filters collapsed replies from the video uploader', async ({ app, page, attachScreenshot }) => {
-    await mockPlayableWatchPage(app, page, { ownerReply: true })
+  test('loads collapsed replies from the video uploader while filtering', async ({ app, page, attachScreenshot }) => {
+    await mockPlayableWatchPage(app, page, { creatorReply: true, ownerReply: true })
     await openMockedVideo(page)
 
     const loadComments = page.locator('.getCommentsTitle')
@@ -3963,7 +3963,8 @@ test.describe('manual comment loading', () => {
     await expect(ownerReplyToggle.locator('.commentReplyOwnerSeparator')).toHaveText('•')
     await expect(ownerReplyToggle.locator('.commentReplyToggleText')).toHaveText(/\d+ replies/)
     await expect(ownerReplyToggle).not.toContainText('from')
-    const ownerReplyThread = page.locator('.commentThread').filter({ has: ownerReplyToggle })
+    const ownerReplyThreadWithToggle = page.locator('.commentThread').filter({ has: ownerReplyToggle })
+    const ownerReplyThread = page.locator(`#${await ownerReplyThreadWithToggle.getAttribute('id')}`)
     const ownerReplyThreadElement = await ownerReplyThread.elementHandle()
     expect(ownerReplyThreadElement).not.toBeNull()
     await expect(ownerReplyThread.locator('.commentReplyContent')).toHaveCount(0)
@@ -3977,6 +3978,12 @@ test.describe('manual comment loading', () => {
       isVisible: element.getClientRects().length > 0,
       loadedReplyCount: element.querySelectorAll('.commentReplyContent').length
     }))).toEqual({ isConnected: true, isVisible: true, loadedReplyCount: 0 })
+    await expect(ownerReplyToggle).toBeVisible()
+    await ownerReplyToggle.click()
+    await expect.poll(() => ownerReplyThread.evaluate(element => {
+      const replies = [...element.querySelectorAll('.commentReplyContent')]
+      return replies.length > 0 && replies.every(reply => reply.querySelector('.commentOwner'))
+    })).toBe(true)
     await ownerReplyThreadElement.dispose()
   })
 
@@ -4063,6 +4070,46 @@ test.describe('manual comment loading', () => {
     await expect(page.locator('.commentThread')).toHaveCount(1)
     await expect(page.locator('.commentReplyContent')).toHaveCount(1)
     await expect(page.locator('.commentReplyContent .commentAuthor mark')).toHaveText(replyAuthor)
+  })
+
+  test('ends filtered thread lines at the last reply from the creator', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, { creatorReply: true })
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const thread = page.locator('.commentThread').first()
+    await thread.locator('.commentReplyRootToggle button').click()
+    await expect(thread.locator('.commentReplyContent').first()).toBeVisible({ timeout: 30_000 })
+
+    await page.getByRole('button', { name: 'Filter loaded comments' }).click()
+    await page.getByRole('checkbox', { name: 'From creator' }).click()
+
+    const filteredReplyThread = page.locator('.commentThread').filter({
+      has: page.locator('.commentReplyContent')
+    })
+    await expect(filteredReplyThread).toHaveCount(1)
+    await expect(filteredReplyThread.locator('.commentReplyContent')).toHaveCount(1)
+
+    const expectLineToEndAtLastConnector = () => expect.poll(() => filteredReplyThread.evaluate(element => {
+      const lineStyle = getComputedStyle(element, '::before')
+      const lineEnd = element.getBoundingClientRect().bottom - Number.parseFloat(lineStyle.insetBlockEnd)
+      const connectors = element.querySelectorAll(
+        ':scope > .commentReplies > .commentReplyBranchRoot > .commentReplyConnector'
+      )
+      const connectorEnd = connectors.item(connectors.length - 1).getBoundingClientRect().bottom
+      return Math.abs(lineEnd - connectorEnd)
+    })).toBeLessThanOrEqual(0.5)
+
+    await expectLineToEndAtLastConnector()
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('updateUiScale', 125)
+    })
+    await expectLineToEndAtLastConnector()
   })
 
   test('filters comments with timestamps and keeps highlighted timestamps clickable', async ({ app, page }) => {
