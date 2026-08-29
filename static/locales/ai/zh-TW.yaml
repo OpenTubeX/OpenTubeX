@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} 分鐘'
   Hours: '{hours} 小時'
   Hours and minutes: '{hours} 小時 {minutes} 分鐘'
+Home Page:
+  Home: 首頁
+  Description: 從上次中斷的位置繼續，並查看最近的活動。
+  Customize: 自訂首頁
+  Done: 完成
+  Customize description: 選擇要顯示的區塊，並依所需順序排列。
+  Continue watching: 繼續觀看
+  New since last visit: 上次造訪後的新內容
+  Watch queue: 觀看佇列
+  Recent playlists: 最近的播放清單
+  Recent downloads: 最近的下載項目
+  Upcoming reminders: 即將到來的提醒
+  Watch statistics: 觀看統計資料
+  View all: 查看全部
+  Previous shelf page: 上一頁：{section}
+  Next shelf page: 下一頁：{section}
+  Shelf page status: '{section}，第 {page} 頁，共 {total} 頁。'
+  Move section up: 將{section}上移
+  Move section down: 將{section}下移
+  Section moved: '{section}已移至第 {position} 位，共 {total} 位。'
+  Nothing here yet: 這裡還沒有內容
+  Empty description: 您開始觀看的影片、使用的播放清單、下載項目和提醒會顯示在這裡。
+  All sections hidden: 所有區塊均已隱藏
+  All sections hidden description: 自訂首頁以重新顯示區塊。
 Subscriptions:
   Refreshing Subscription Videos: 正在重新整理訂閱影片
   Refreshing Subscription Shorts: 正在重新整理訂閱的 Shorts 短片
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: 顯示合併檢視
   Newest First: 最新優先
   Oldest First: 最舊優先
+  Posts:
+    RSS Message: YouTube 不提供貼文的 RSS 摘要。停用「{rssSetting}」設定以查看貼文，或啟用「{hideSetting}」設定以隱藏此分頁。
 Trending:
   Load Error: 無法載入熱門趨勢。
   Unsupported Backend: 熱門趨勢需要 Local API。請選擇 Local API 或啟用後端備援。
@@ -260,6 +286,7 @@ Settings:
     Hide Side Bar on Watch Pages: 在觀看頁面隱藏側邊欄
     UI Roundness: 介面圓角程度
     Scrollbar Width: 捲軸寬度
+    Scroll Speed: 捲動速度
     Animation Speed: 動畫速度
     Thumbnail Size: 縮圖大小
     Show Tab Icons: 顯示頁籤圖示
@@ -692,7 +719,9 @@ Settings:
     Hide Channel Avatars: 隱藏頻道頭像
     Shorten View Counts: 縮寫觀看次數和留言按讚數
     Hide Comment Translation Buttons: 隱藏留言翻譯按鈕
+    Hide Home: 隱藏首頁
     Hide Live Chat Replay: 隱藏即時聊天室重播
+    Disable A-B Repeat: 停用 A-B 循環
     Hide End-Screen Annotations: 隱藏結束畫面註解
     Hide Paid Promotion Badge: 隱藏付費宣傳標章
     Show Player Controls: 顯示播放器控制項
@@ -793,6 +822,7 @@ Settings:
     History not supported: 此伺服器版本不支援同步觀看紀錄。
     Settings not supported: 此伺服器版本不支援同步設定。
     Sync completed: 同步完成
+    Sync failed: '同步失敗：{error}'
     Data Loss Confirmation: 要確認執行會刪除資料的同步嗎？
     Data Loss Warning: 伺服器目前的狀態會刪除先前同步的 {previous} 個 {collection} 項目中的 {deleted} 個。這可能表示伺服器移轉或重設失敗。只有在您確定要刪除且已有備份時才可繼續。
     Confirm Data Loss: 刪除並繼續
@@ -894,6 +924,8 @@ Video:
   Queue Item Cannot Move Down: 無法將 {title} 下移。此影片已位於第 {total} 位，共 {total} 部影片。
   Metadata: 影片資訊
   Close Metadata: 關閉影片資訊
+  Collapse Playlist: 收合播放清單
+  Expand Playlist: 展開播放清單
   Metadata Cache:
     Title History: 標題紀錄
     Thumbnail History: 縮圖紀錄
@@ -985,6 +1017,21 @@ Video:
       Remaining: '剩餘 {time}'
       Cancel timer: 取消計時器
       Timer ended: 睡眠計時器已結束
+    A-B Repeat:
+      A-B Repeat: A-B 循環
+      On: 開啟
+      Off: 關閉
+      Point A: 點 A
+      Point B: 點 B
+      Set Repeat Start: 設定循環起點
+      Set Repeat End: 設定循環終點
+      Pause Repeat: 暫停 A-B 循環
+      Resume Repeat: 繼續 A-B 循環
+      Adjust Point: '調整點 {point}，目前為 {timestamp}'
+      Clear Range: 清除 A-B 循環範圍
+      End Before Start: 點 B 必須位於點 A 之後。
+      Outside Duration: 時間戳記必須在影片時長範圍內。
+      Cleared: 已清除 A-B 循環
     Zoom:
       Zoom: 縮放
       'Off': '關閉'
@@ -1002,6 +1049,7 @@ Video:
     Scroll Mini Player:
       Back to Top: 返回頂端
       Return to Video Tab: 返回影片分頁
+      Hide: 隱藏迷你播放器
       Play: 播放
       Pause: 暫停
       Drag Handle: 移動迷你播放器
@@ -1308,6 +1356,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: 以持續顯示的通知呈現背景作業的即時進度（例如重新整理訂閱與下載受管理工具），而不使用全域進度列。
     Always Show Scrollbars: 讓捲動軸隨時保持顯示。停用後，停止移動滑鼠不久便會淡出，再次移動滑鼠時則會立即顯示。
+    Scroll Speed: 變更滑鼠滾輪和觸控板滾輪手勢的捲動距離。
     Use Fixed Tab Width: 水平分頁列中的每個分頁使用相同寬度，而不依標題調整寬度。
     Use Grid Player Menu: 將影片播放器的設定選單排列成格狀方塊，而非逐列清單。
 The playlist is at the beginning. Enable loop to continue playing: 播放清單已在開頭。啟用循環播放即可繼續播放
@@ -1341,6 +1390,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: 跳至上一個相符項目
   Toggle Normal Playback Speed: 在 1x 與先前的播放速度之間切換
   Toggle Skip Silence: 切換略過靜音
+  Set A-B Repeat Point A: 設定 A-B 循環點 A
+  Set A-B Repeat Point B: 設定 A-B 循環點 B
+  Clear A-B Repeat: 清除 A-B 循環
   Video Zoom In: 放大影片
   Video Zoom Out: 縮小影片
   Tab Switcher: 分頁切換器

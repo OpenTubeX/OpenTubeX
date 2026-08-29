@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} t'
   Hours and minutes: '{hours} t {minutes} min'
+Home Page:
+  Home: Avaleht
+  Description: Jätka sealt, kus pooleli jäid, ja vaata hiljutisi tegevusi.
+  Customize: Kohanda avalehte
+  Done: Valmis
+  Customize description: Vali kuvatavad jaotised ja järjesta need soovitud viisil.
+  Continue watching: Jätka vaatamist
+  New since last visit: Uus pärast viimast külastust
+  Watch queue: Vaatamisjärjekord
+  Recent playlists: Hiljutised esitusloendid
+  Recent downloads: Hiljutised allalaadimised
+  Upcoming reminders: Tulevased meeldetuletused
+  Watch statistics: Vaatamisstatistika
+  View all: Kuva kõik
+  Previous shelf page: Eelmine jaotise {section} leht
+  Next shelf page: Järgmine jaotise {section} leht
+  Shelf page status: '{section}, leht {page}/{total}.'
+  Move section up: Liiguta {section} üles
+  Move section down: Liiguta {section} alla
+  Section moved: '{section} liigutati kohale {position}/{total}.'
+  Nothing here yet: Siin pole veel midagi
+  Empty description: Siin kuvatakse videod, mille vaatamist alustad, kasutatud esitusloendid, allalaadimised ja meeldetuletused.
+  All sections hidden: Kõik jaotised on peidetud
+  All sections hidden description: Kohanda avalehte, et mõni jaotis uuesti kuvada.
 Subscriptions:
   Refreshing Subscription Videos: Tellimuste videote värskendamine
   Refreshing Subscription Shorts: Tellimuste Shorts-videote värskendamine
@@ -260,6 +284,7 @@ Settings:
     Hide Side Bar on Watch Pages: Peida vaatamislehtedel külgriba
     UI Roundness: Kasutajaliidese nurkade ümardus
     Scrollbar Width: Kerimisriba laius
+    Scroll Speed: Kerimiskiirus
     Animation Speed: Animatsiooni kiirus
     Thumbnail Size: Pisipildi suurus
     Show Tab Icons: Kuva vahekaartide ikoonid
@@ -693,6 +718,8 @@ Settings:
     Shorten View Counts: Lühenda vaatamiste ja kommentaaride meeldimiste arvu
     Hide Comment Translation Buttons: Peida kommentaaride tõlkimise nupud
     Hide Live Chat Replay: Peida otsevestluse kordus
+    Hide Home: Peida avaleht
+    Disable A-B Repeat: Lülita A-B-kordus välja
     Hide End-Screen Annotations: Peida lõpuekraani märkused
     Hide Paid Promotion Badge: Peida tasulise reklaami märk
     Show Player Controls: Kuva mängija juhtnupud
@@ -793,6 +820,7 @@ Settings:
     History not supported: See serveriversioon ei toeta vaatamisajaloo sünkroonimist.
     Settings not supported: See serveriversioon ei toeta seadete sünkroonimist.
     Sync completed: Sünkroonimine on lõpetatud
+    Sync failed: 'Sünkroonimine nurjus: {error}'
     Data Loss Confirmation: Kas kinnitada andmeid kustutav sünkroonimine?
     Data Loss Warning: Serveri olek kustutaks varem sünkroonitud kogu {collection} üksustest {deleted}/{previous}. See võib viidata serveri nurjunud migreerimisele või lähtestamisele. Jätkake ainult siis, kui kustutamine on tahtlik ja teil on varukoopia.
     Confirm Data Loss: Kustuta ja jätka
@@ -985,6 +1013,21 @@ Video:
       Remaining: 'Jäänud {time}'
       Cancel timer: Tühista taimer
       Timer ended: Unetaimeri aeg sai täis
+    A-B Repeat:
+      A-B Repeat: A-B-kordus
+      'On': Sees
+      'Off': Väljas
+      Point A: Punkt A
+      Point B: Punkt B
+      Set Repeat Start: Määra korduse algus
+      Set Repeat End: Määra korduse lõpp
+      Pause Repeat: Peata A-B-kordus
+      Resume Repeat: Jätka A-B-kordust
+      Adjust Point: 'Kohanda punkti {point}, praegu {timestamp}'
+      Clear Range: Tühjenda A-B-korduse vahemik
+      End Before Start: Punkt B peab olema pärast punkti A.
+      Outside Duration: Ajatempel peab jääma video kestuse piiresse.
+      Cleared: A-B-kordus tühjendatud
     Zoom:
       Zoom: Suurendus
       'Off': 'Väljas'
@@ -1002,6 +1045,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Tagasi üles
       Return to Video Tab: Naase video vahekaardile
+      Hide: Peida minipleier
       Play: Esita
       Pause: Peata
       Drag Handle: Liiguta minipleierit
@@ -1308,6 +1352,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Kuvab üldise edenemisriba asemel taustatoimingute, näiteks tellimuste värskendamise ja hallatavate tööriistade allalaadimise, reaalajas edenemisega püsiva teavituse.
     Always Show Scrollbars: Hoiab kerimisribad alati nähtaval. Kui see on välja lülitatud, kaovad need veidi pärast hiire liigutamise lõpetamist ja ilmuvad uuesti kohe, kui hiirt taas liigutad.
+    Scroll Speed: Muudab hiireratta ja puuteplaadi kerimisliigutuste vahemaad.
     Use Fixed Tab Width: Annab horisontaalsel vaheleheribal igale vahelehele pealkirjast sõltumata sama laiuse.
     Use Grid Player Menu: Paigutab videopleieri seadete menüü ridade loendi asemel paanide ruudustikuna.
 The playlist is at the beginning. Enable loop to continue playing: Esitusloend on alguses. Esitamise jätkamiseks luba kordus
@@ -1341,6 +1386,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Liigu eelmisele vastele
   Toggle Normal Playback Speed: Vaheta 1x kiiruse ja eelmise esituskiiruse vahel
   Toggle Skip Silence: Lülita vaikuse vahelejätmine sisse või välja
+  Set A-B Repeat Point A: Määra A-B-korduse punkt A
+  Set A-B Repeat Point B: Määra A-B-korduse punkt B
+  Clear A-B Repeat: Tühjenda A-B-kordus
   Video Zoom In: Suurenda videot
   Video Zoom Out: Vähenda videot
   Tab Switcher: Vahelehtede vahetaja

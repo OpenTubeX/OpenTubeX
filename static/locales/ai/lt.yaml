@@ -116,6 +116,30 @@ Stats:
   Minutes: '{minutes} min.'
   Hours: '{hours} val.'
   Hours and minutes: '{hours} val. {minutes} min.'
+Home Page:
+  Home: Pradžia
+  Description: Tęskite nuo ten, kur baigėte, ir peržiūrėkite naujausią veiklą.
+  Customize: Tinkinti pradžios puslapį
+  Done: Baigta
+  Customize description: Pasirinkite, kuriuos skyrius rodyti, ir išdėstykite juos norima tvarka.
+  Continue watching: Tęsti žiūrėjimą
+  New since last visit: Nauja nuo paskutinio apsilankymo
+  Watch queue: Žiūrėjimo eilė
+  Recent playlists: Naujausi grojaraščiai
+  Recent downloads: Naujausi atsisiuntimai
+  Upcoming reminders: Artėjantys priminimai
+  Watch statistics: Žiūrėjimo statistika
+  View all: Rodyti viską
+  Previous shelf page: Ankstesnis skyriaus „{section}“ puslapis
+  Next shelf page: Kitas skyriaus „{section}“ puslapis
+  Shelf page status: "{section}, {page} psl. iš {total}."
+  Move section up: Perkelti {section} aukštyn
+  Move section down: Perkelti {section} žemyn
+  Section moved: „{section}“ perkelta į {position} vietą iš {total}.
+  Nothing here yet: Čia dar nieko nėra
+  Empty description: Čia bus rodomi pradėti vaizdo įrašai, naudoti grojaraščiai, atsisiuntimai ir priminimai.
+  All sections hidden: Visi skyriai paslėpti
+  All sections hidden description: Tinkinkite pradžios puslapį, kad vėl būtų rodomas skyrius.
 Subscriptions:
   Load More Posts: Įkelti daugiau įrašų
   Subscriptions Tabs: Prenumeratų kortelės
@@ -136,6 +160,8 @@ Subscriptions:
   Show Combined View: Rodyti bendrą rodinį
   Newest First: Pirmiausia naujausi
   Oldest First: Pirmiausia seniausi
+  Posts:
+    RSS Message: YouTube neteikia įrašų RSS kanalų. Išjunkite nustatymą „{rssSetting}“, kad matytumėte įrašus, arba įjunkite nustatymą „{hideSetting}“, kad paslėptumėte šį skirtuką.
 Trending:
   Load Error: Nepavyko įkelti tendencijų.
   Unsupported Backend: Tendencijoms reikia Local API. Pasirinkite Local API arba įjunkite atsarginę serverio sąsają.
@@ -379,6 +405,7 @@ Settings:
     Hide Side Bar on Watch Pages: Vaizdo įrašų puslapiuose slėpti šoninę juostą
     UI Roundness: Sąsajos kampų apvalumas
     Scrollbar Width: Slankjuostės plotis
+    Scroll Speed: Slinkimo greitis
     Animation Speed: Animacijos greitis
     Thumbnail Size: Miniatiūros dydis
     Show Tab Icons: Rodyti skirtukų piktogramas
@@ -909,8 +936,10 @@ Settings:
     Hide Channel Avatars: Slėpti kanalų pseudoportretus
     Shorten View Counts: Trumpinti peržiūrų ir komentarų patiktukų skaičius
     Hide Comment Translation Buttons: Slėpti komentarų vertimo mygtukus
+    Hide Home: Slėpti pradžios puslapį
     Hide Live Chat Replay: Slėpti tiesioginio pokalbio įrašą
     Hide Profile Pictures in Comments: Slėpti profilio nuotraukas komentaruose
+    Disable A-B Repeat: Išjungti A–B kartojimą
     Hide End-Screen Annotations: Slėpti pabaigos užsklandos anotacijas
     Hide Paid Promotion Badge: Slėpti mokamos reklamos ženklelį
     Hide Channels Disabled Message: Kai kurie kanalai buvo užblokuoti pagal ID ir neapdoroti. Kol šie ID atnaujinami, funkcija nepasiekiama
@@ -1042,6 +1071,7 @@ Settings:
     History not supported: Ši serverio versija nepalaiko peržiūrų istorijos sinchronizavimo.
     Settings not supported: Ši serverio versija nepalaiko nustatymų sinchronizavimo.
     Sync completed: Sinchronizavimas baigtas
+    Sync failed: "Sinchronizuoti nepavyko: {error}"
     Data Loss Confirmation: Patvirtinti duomenis naikinantį sinchronizavimą?
     Data Loss Warning: Pagal serverio būseną būtų ištrinta {deleted} iš {previous} anksčiau sinchronizuotų rinkinio „{collection}“ elementų. Tai gali reikšti nepavykusį serverio perkėlimą arba atkūrimą. Tęskite tik jei šiuos duomenis ketinate ištrinti ir turite atsarginę kopiją.
     Confirm Data Loss: Ištrinti ir tęsti
@@ -1238,6 +1268,8 @@ Video:
   Restricted Playback Authentication Failed Template: 'yt-dlp nepavyko pasiekti šio vaizdo įrašo su nustatytais slapukais: {error}'
   DRMProtected: DRM apsaugotų vaizdo įrašų negalima leisti naudojant OpenTubeX, nes jiems reikia nuosavybinių uždarojo kodo komponentų. Jei norite peržiūrėti šį vaizdo įrašą, atverkite jį oficialioje YouTube svetainėje, DRM palaikančioje žiniatinklio naršyklėje.
   Private: Privačių vaizdo įrašų negalima žiūrėti naudojant OpenTubeX, nes reikia prisijungti prie Google paskyros ir būti vaizdo įrašo savininku.
+  Collapse Playlist: Suskleisti grojaraštį
+  Expand Playlist: Išskleisti grojaraštį
   More Options: Daugiau parinkčių
   Unmark As Watched: Atžymėti kaip žiūrėtą
   Video has been unmarked as watched: Vaizdo įrašas atžymėtas kaip žiūrėtas
@@ -1321,6 +1353,21 @@ Video:
       Remaining: 'Liko {time}'
       Cancel timer: Atšaukti laikmatį
       Timer ended: Miego laikmatis baigėsi
+    A-B Repeat:
+      A-B Repeat: A–B kartojimas
+      On: Įjungta
+      Off: Išjungta
+      Point A: Taškas A
+      Point B: Taškas B
+      Set Repeat Start: Nustatyti kartojimo pradžią
+      Set Repeat End: Nustatyti kartojimo pabaigą
+      Pause Repeat: Pristabdyti A–B kartojimą
+      Resume Repeat: Tęsti A–B kartojimą
+      Adjust Point: Koreguoti tašką {point}, dabar {timestamp}
+      Clear Range: Išvalyti A–B kartojimo intervalą
+      End Before Start: Taškas B turi būti po taško A.
+      Outside Duration: Laiko žyma turi būti vaizdo įrašo ribose.
+      Cleared: A–B kartojimas išvalytas
     Zoom:
       Zoom: Mastelis
       'Off': 'Išjungta'
@@ -1365,6 +1412,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Grįžti į viršų
       Return to Video Tab: Grįžti į vaizdo įrašo kortelę
+      Hide: Slėpti mini leistuvą
       Play: Leisti
       Pause: Pristabdyti
       Drag Handle: Perkelti minileistuvą
@@ -1707,6 +1755,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Vietoje bendros eigos juostos rodo nuolatinį pranešimą su tikralaike foninių operacijų, pvz., prenumeratų atnaujinimo ir tvarkomų įrankių atsisiuntimo, eiga.
     Always Show Scrollbars: Slinkties juostos visada lieka matomos. Išjungus jos netrukus išblėsta nustojus judinti pelę ir vėl pasirodo vos ją pajudinus.
+    Scroll Speed: Keičia, kiek paslenka pelės ratuko ir jutiklinio kilimėlio slinkimo gestai.
     Use Fixed Tab Width: Visoms horizontaliosios kortelių juostos kortelėms nustato vienodą plotį, užuot pritaikius jį prie pavadinimo.
     Use Grid Player Menu: Vaizdo leistuvo nustatymų meniu elementus išdėsto plytelių tinkleliu, o ne eilučių sąrašu.
   SponsorBlock Settings:
@@ -1798,6 +1847,9 @@ KeyboardShortcutPrompt:
   Increase Video Speed: Padidinti vaizdo įrašo greitį nustatytu atkūrimo greičio intervalu
   Toggle Normal Playback Speed: Perjungti tarp 1x ir ankstesnio atkūrimo greičio
   Toggle Skip Silence: Įjungti arba išjungti tylos praleidimą
+  Set A-B Repeat Point A: Nustatyti A–B kartojimo tašką A
+  Set A-B Repeat Point B: Nustatyti A–B kartojimo tašką B
+  Clear A-B Repeat: Išvalyti A–B kartojimą
   Full Window: Perjungti viso lango režimą
   Theatre Mode: Perjungti kino teatro režimą
   Take Screenshot: Padaryti ekrano kopiją

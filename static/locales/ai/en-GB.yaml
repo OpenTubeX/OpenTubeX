@@ -93,6 +93,30 @@ Stats:
   Minutes: "{minutes} min"
   Hours: "{hours} hr"
   Hours and minutes: "{hours} hr {minutes} min"
+Home Page:
+  Home: Home
+  Description: Pick up where you left off and see recent activity.
+  Customize: Customise Home
+  Done: Done
+  Customize description: Choose which sections appear and arrange them in the order you want.
+  Continue watching: Continue watching
+  New since last visit: New since last visit
+  Watch queue: Watch queue
+  Recent playlists: Recent playlists
+  Recent downloads: Recent downloads
+  Upcoming reminders: Upcoming reminders
+  Watch statistics: Watch statistics
+  View all: View all
+  Previous shelf page: Previous {section} page
+  Next shelf page: Next {section} page
+  Shelf page status: '{section}, page {page} of {total}.'
+  Move section up: Move {section} up
+  Move section down: Move {section} down
+  Section moved: '{section} moved to position {position} of {total}.'
+  Nothing here yet: Nothing here yet
+  Empty description: Videos you start, playlists you use, downloads, and reminders will appear here.
+  All sections hidden: All sections are hidden
+  All sections hidden description: Customise Home to show a section again.
 Subscriptions:
   Refreshing Subscription Videos: Refreshing subscription videos
   Refreshing Subscription Shorts: Refreshing subscription shorts
@@ -110,6 +134,8 @@ Subscriptions:
   Show Combined View: Show combined view
   Newest First: Newest first
   Oldest First: Oldest first
+  Posts:
+    RSS Message: YouTube does not provide RSS feeds for posts. Disable the "{rssSetting}" setting to view posts or enable the "{hideSetting}" setting to hide this tab.
 Trending:
   Load Error: Trending could not be loaded.
   Unsupported Backend: Trending requires the Local API. Select the Local API or enable backend fallback.
@@ -245,6 +271,7 @@ Settings:
     Move Settings to App Header: Move Settings to App Header
     Hide Side Bar on Watch Pages: Hide Side Bar on Watch Pages
     Scrollbar Width: Scrollbar Width
+    Scroll Speed: Scroll Speed
     Animation Speed: Animation Speed
     Thumbnail Size: Thumbnail Size
     Show Tab Icons: Show Tab Icons
@@ -674,7 +701,9 @@ Settings:
     Hide Channel Avatars: Hide Channel Avatars
     Shorten View Counts: Shorten View and Comment Like Counts
     Hide Comment Translation Buttons: Hide Comment Translation Buttons
+    Hide Home: Hide Home
     Hide Live Chat Replay: Hide Live Chat Replay
+    Disable A-B Repeat: Disable A-B Repeat
     Hide End-Screen Annotations: Hide End-Screen Annotations
     Hide Paid Promotion Badge: Hide Paid Promotion Badge
   Data Settings:
@@ -770,6 +799,7 @@ Settings:
     History not supported: This server version does not support watch history syncing.
     Settings not supported: This server version does not support settings syncing.
     Sync completed: Sync completed
+    Sync failed: 'Sync failed: {error}'
     Data Loss Confirmation: Confirm destructive sync?
     Data Loss Warning: The server state would delete {deleted} of {previous} previously synced {collection} items. This can indicate a failed server migration or reset. Continue only if this deletion is intentional and you have a backup.
     Confirm Data Loss: Delete and continue
@@ -870,6 +900,8 @@ Video:
   Queue Item Cannot Move Down: Cannot move {title} down. It is already at position {total} of {total}.
   Metadata: Video information
   Close Metadata: Close video information
+  Collapse Playlist: Collapse Playlist
+  Expand Playlist: Expand Playlist
   Metadata Cache:
     Title History: Title history
     Thumbnail History: Thumbnail history
@@ -950,6 +982,21 @@ Video:
       Remaining: "{time} remaining"
       Cancel timer: Cancel timer
       Timer ended: Sleep timer ended
+    A-B Repeat:
+      A-B Repeat: A-B repeat
+      On: 'On'
+      Off: 'Off'
+      Point A: Point A
+      Point B: Point B
+      Set Repeat Start: Set repeat start
+      Set Repeat End: Set repeat end
+      Pause Repeat: Pause A-B repeat
+      Resume Repeat: Resume A-B repeat
+      Adjust Point: 'Adjust point {point}, currently {timestamp}'
+      Clear Range: Clear A-B repeat range
+      End Before Start: Point B must be after point A.
+      Outside Duration: The timestamp must be within the video.
+      Cleared: A-B repeat cleared
     Zoom:
       Zoom: Zoom
       'Off': 'Off'
@@ -967,6 +1014,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Back to top
       Return to Video Tab: Return to video tab
+      Hide: Hide mini player
       Play: Play
       Pause: Pause
       Drag Handle: Move mini player
@@ -1272,6 +1320,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Shows a persistent notification with live progress for background operations, such as subscription refreshes and managed tool downloads, instead of using the global progress bar.
     Always Show Scrollbars: Keeps the scrollbars visible at all times. When disabled, they fade out shortly after you stop moving the mouse and reappear as soon as you move it again.
+    Scroll Speed: Changes how far mouse-wheel and touchpad wheel gestures scroll.
     Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
     Use Grid Player Menu: Arranges the video player's settings menu as a grid of tiles instead of a list of rows.
 The playlist is at the beginning. Enable loop to continue playing: The playlist is at the beginning. Enable loop to continue playing
@@ -1305,6 +1354,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Jump to the previous match
   Toggle Normal Playback Speed: Toggle between 1x speed and the previous playback speed
   Toggle Skip Silence: Toggle skip silence
+  Set A-B Repeat Point A: Set A-B repeat point A
+  Set A-B Repeat Point B: Set A-B repeat point B
+  Clear A-B Repeat: Clear A-B repeat
   Video Zoom In: Zoom into the video
   Video Zoom Out: Zoom out of the video
   Tab Switcher: Tab switcher

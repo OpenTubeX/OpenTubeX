@@ -121,6 +121,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} h'
   Hours and minutes: '{hours} h {minutes} min'
+Home Page:
+  Home: Domov
+  Description: Nadaljujte, kjer ste končali, in si oglejte nedavno dejavnost.
+  Customize: Prilagodi domačo stran
+  Done: Končano
+  Customize description: Izberite prikazane razdelke in jih razporedite v želenem vrstnem redu.
+  Continue watching: Nadaljuj ogled
+  New since last visit: Novo od zadnjega obiska
+  Watch queue: Čakalna vrsta za ogled
+  Recent playlists: Nedavni seznami predvajanja
+  Recent downloads: Nedavni prenosi
+  Upcoming reminders: Prihajajoči opomniki
+  Watch statistics: Statistika ogledov
+  View all: Prikaži vse
+  Previous shelf page: Prejšnja stran razdelka {section}
+  Next shelf page: Naslednja stran razdelka {section}
+  Shelf page status: "{section}, stran {page} od {total}."
+  Move section up: Premakni {section} navzgor
+  Move section down: Premakni {section} navzdol
+  Section moved: Razdelek {section} je premaknjen na mesto {position} od {total}.
+  Nothing here yet: Tu za zdaj ni ničesar
+  Empty description: Tukaj se bodo prikazali videoposnetki, ki jih začnete gledati, uporabljeni seznami predvajanja, prenosi in opomniki.
+  All sections hidden: Vsi razdelki so skriti
+  All sections hidden description: Prilagodite domačo stran, da znova prikažete razdelek.
 Subscriptions:
   Empty Posts: Kanali, na katere ste naročeni, trenutno nimajo objav.
   Load More Posts: Naloži več objav
@@ -142,6 +166,8 @@ Subscriptions:
   Show Combined View: Prikaži združeni pogled
   Newest First: Najnovejše najprej
   Oldest First: Najstarejše najprej
+  Posts:
+    RSS Message: YouTube ne zagotavlja virov RSS za objave. Izklopite nastavitev »{rssSetting}«, če želite videti objave, ali vklopite nastavitev »{hideSetting}«, če želite skriti ta zavihek.
 Trending:
   Trending Tabs: Zavihki priljubljene vsebine
   Load Error: Priljubljene vsebine ni bilo mogoče naložiti.
@@ -386,6 +412,7 @@ Settings:
     Hide Side Bar on Watch Pages: Skrij stransko vrstico na straneh za ogled
     UI Roundness: Zaobljenost uporabniškega vmesnika
     Scrollbar Width: Širina drsnega traku
+    Scroll Speed: Hitrost pomikanja
     Animation Speed: Hitrost animacij
     Thumbnail Size: Velikost sličic
     Show Tab Icons: Prikaži ikone zavihkov
@@ -927,10 +954,12 @@ Settings:
     Hide Channel Avatars: Skrij slike kanalov
     Shorten View Counts: Skrajšaj število ogledov in všečkov komentarjev
     Hide Comment Translation Buttons: Skrij gumbe za prevajanje komentarjev
+    Hide Home: Skrij domačo stran
     Hide Live Chat Replay: Skrij ponovitev klepeta v živo
     Hide Profile Pictures in Comments: Skrij profilne slike v komentarjih
     Display Titles Without Excessive Capitalisation: Prikaži naslove brez pretirane uporabe velikih črk in ločil
     Hide Sharing Actions: Skrij dejanja za deljenje
+    Disable A-B Repeat: Onemogoči ponavljanje A-B
     Hide End-Screen Annotations: Skrij pripise na končnem zaslonu
     Hide Paid Promotion Badge: Skrij oznako plačane promocije
     Hide Channels Disabled Message: Nekateri kanali so bili blokirani z ID-jem in niso bili obdelani. Funkcija ni na voljo, dokler poteka posodabljanje teh ID-jev
@@ -1073,6 +1102,7 @@ Settings:
     History not supported: Ta različica strežnika ne podpira sinhronizacije zgodovine ogledov.
     Settings not supported: Ta različica strežnika ne podpira sinhronizacije nastavitev.
     Sync completed: Sinhronizacija je končana
+    Sync failed: "Sinhronizacija ni uspela: {error}"
     Data Loss Confirmation: Želite potrditi sinhronizacijo z brisanjem podatkov?
     Data Loss Warning: Stanje strežnika bi izbrisalo {deleted} od {previous} prej sinhroniziranih elementov zbirke {collection}. To lahko pomeni, da selitev ali ponastavitev strežnika ni uspela. Nadaljujte samo, če je ta izbris nameren in imate varnostno kopijo.
     Confirm Data Loss: Izbriši in nadaljuj
@@ -1289,6 +1319,8 @@ Video:
   Restricted Playback Authentication Failed Template: 'yt-dlp s temi piškotki ni mogel dostopati do videoposnetka: {error}'
   DRMProtected: Videoposnetkov z zaščito DRM ni mogoče predvajati v OpenTubeX, saj zahtevajo lastniške zaprtokodne komponente. Za ogled tega videoposnetka obiščite uradno spletno mesto YouTube v brskalniku, ki podpira DRM.
   Private: Zasebnih videoposnetkov si ni mogoče ogledati v OpenTubeX, saj zahtevajo prijavo v Google in lastništvo videoposnetka.
+  Collapse Playlist: Strni seznam predvajanja
+  Expand Playlist: Razširi seznam predvajanja
   More Options: Več možnosti
   Unmark As Watched: Označi kot neogledano
   Video has been unmarked as watched: Videoposnetek je označen kot neogledan
@@ -1395,6 +1427,21 @@ Video:
       Remaining: 'Preostane {time}'
       Cancel timer: Prekliči časovnik
       Timer ended: Časovnik za spanje se je iztekel
+    A-B Repeat:
+      A-B Repeat: Ponavljanje A-B
+      On: Vklopljeno
+      Off: Izklopljeno
+      Point A: Točka A
+      Point B: Točka B
+      Set Repeat Start: Nastavi začetek ponavljanja
+      Set Repeat End: Nastavi konec ponavljanja
+      Pause Repeat: Začasno ustavi ponavljanje A-B
+      Resume Repeat: Nadaljuj ponavljanje A-B
+      Adjust Point: Prilagodi točko {point}, trenutno {timestamp}
+      Clear Range: Počisti obseg ponavljanja A-B
+      End Before Start: Točka B mora biti za točko A.
+      Outside Duration: Časovni žig mora biti znotraj videoposnetka.
+      Cleared: Ponavljanje A-B je počiščeno
     Zoom:
       Zoom: Povečava
       'Off': 'Izklopljeno'
@@ -1439,6 +1486,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Nazaj na vrh
       Return to Video Tab: Nazaj na zavihek videoposnetka
+      Hide: Skrij mini predvajalnik
       Play: Predvajaj
       Pause: Začasno ustavi
       Drag Handle: Premakni mali predvajalnik
@@ -1799,6 +1847,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Namesto splošne vrstice napredka prikaže trajno obvestilo s sprotnim napredkom opravil v ozadju, kot sta osveževanje naročnin in prenos upravljanih orodij.
     Always Show Scrollbars: Drsniki so vedno vidni. Če je ta možnost onemogočena, izginejo kmalu po tem, ko nehate premikati miško, in se znova prikažejo, ko jo premaknete.
+    Scroll Speed: Spremeni razdaljo pomikanja z gibi kolesca miške in sledilne ploščice.
     Use Fixed Tab Width: Vsi zavihki v vodoravni vrstici imajo enako širino, namesto da bi se prilagajali naslovu.
     Use Grid Player Menu: Meni z nastavitvami predvajalnika videoposnetkov je razporejen v mrežo ploščic namesto v seznam vrstic.
   Experimental Settings:
@@ -1897,6 +1946,9 @@ KeyboardShortcutPrompt:
   Increase Video Speed: Povečaj hitrost videoposnetka za interval hitrosti predvajanja
   Toggle Normal Playback Speed: Preklopi med hitrostjo 1x in prejšnjo hitrostjo predvajanja
   Toggle Skip Silence: Vklopi ali izklopi preskakovanje tišine
+  Set A-B Repeat Point A: Nastavi točko A ponavljanja A-B
+  Set A-B Repeat Point B: Nastavi točko B ponavljanja A-B
+  Clear A-B Repeat: Počisti ponavljanje A-B
   Full Window: Vklopi ali izklopi prikaz v celotnem oknu
   Theatre Mode: Vklopi ali izklopi gledališki način
   Take Screenshot: Zajemi posnetek zaslona

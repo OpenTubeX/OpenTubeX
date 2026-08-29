@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} uur'
   Hours and minutes: '{hours} uur {minutes} min'
+Home Page:
+  Home: Start
+  Description: Ga verder waar je gebleven was en bekijk recente activiteit.
+  Customize: Startpagina aanpassen
+  Done: Gereed
+  Customize description: Kies welke secties worden weergegeven en zet ze in de gewenste volgorde.
+  Continue watching: Verder kijken
+  New since last visit: Nieuw sinds het laatste bezoek
+  Watch queue: Wachtrij
+  Recent playlists: Recente afspeellijsten
+  Recent downloads: Recente downloads
+  Upcoming reminders: Aankomende herinneringen
+  Watch statistics: Kijkstatistieken
+  View all: Alles bekijken
+  Previous shelf page: Vorige pagina van {section}
+  Next shelf page: Volgende pagina van {section}
+  Shelf page status: "{section}, pagina {page} van {total}."
+  Move section up: Verplaats {section} omhoog
+  Move section down: Verplaats {section} omlaag
+  Section moved: "{section} verplaatst naar positie {position} van {total}."
+  Nothing here yet: Nog niets te zien
+  Empty description: Video's die je start, afspeellijsten die je gebruikt, downloads en herinneringen verschijnen hier.
+  All sections hidden: Alle secties zijn verborgen
+  All sections hidden description: Pas de startpagina aan om weer een sectie te tonen.
 Subscriptions:
   Refreshing Subscription Videos: Abonnementsvideo's vernieuwen
   Refreshing Subscription Shorts: Shorts van abonnementen vernieuwen
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Gecombineerde weergave tonen
   Newest First: Nieuwste eerst
   Oldest First: Oudste eerst
+  Posts:
+    RSS Message: YouTube biedt geen RSS-feeds voor berichten. Schakel de instelling "{rssSetting}" uit om berichten te bekijken of schakel de instelling "{hideSetting}" in om dit tabblad te verbergen.
 Trending:
   Load Error: Trending kan niet worden geladen.
   Unsupported Backend: Voor Trending is de Local API vereist. Selecteer de Local API of schakel terugvallen op een andere backend in.
@@ -262,6 +288,7 @@ Settings:
     Hide Side Bar on Watch Pages: Zijbalk op kijkpagina's verbergen
     UI Roundness: Afronding van interface
     Scrollbar Width: Breedte van schuifbalk
+    Scroll Speed: Scrollsnelheid
     Animation Speed: Animatiesnelheid
     Thumbnail Size: Grootte van miniaturen
     Show Tab Icons: Tabbladpictogrammen tonen
@@ -703,7 +730,9 @@ Settings:
     Hide Channel Avatars: Kanaalavatars verbergen
     Shorten View Counts: Aantallen weergaven en vind-ik-leuks bij reacties inkorten
     Hide Comment Translation Buttons: Knoppen voor het vertalen van reacties verbergen
+    Hide Home: Startpagina verbergen
     Hide Live Chat Replay: Herhaling van livechat verbergen
+    Disable A-B Repeat: A-B-herhaling uitschakelen
     Hide End-Screen Annotations: Eindschermannotaties verbergen
     Hide Paid Promotion Badge: Label voor betaalde promotie verbergen
     Show Player Controls: Spelerbediening tonen
@@ -813,6 +842,7 @@ Settings:
     History not supported: Deze serverversie ondersteunt het synchroniseren van kijkgeschiedenis niet.
     Settings not supported: Deze serverversie ondersteunt het synchroniseren van instellingen niet.
     Sync completed: Synchronisatie voltooid
+    Sync failed: "Synchronisatie mislukt: {error}"
     Data Loss Confirmation: Synchronisatie met gegevensverlies bevestigen?
     Data Loss Warning: De serverstatus zou {deleted} van de {previous} eerder gesynchroniseerde items uit {collection} verwijderen. Dit kan wijzen op een mislukte servermigratie of reset. Ga alleen door als deze verwijdering de bedoeling is en je een back-up hebt.
     Confirm Data Loss: Verwijderen en doorgaan
@@ -950,6 +980,8 @@ Video:
   Try With Configured Cookies: Proberen met ingestelde cookies
   Restricted Playback Authentication Failed Template: 'yt-dlp heeft met de ingestelde cookies geen toegang tot deze video: {error}'
   Private: Privévideo's kunnen niet in OpenTubeX worden bekeken, omdat hiervoor aanmelden bij Google en eigendom van de video vereist zijn.
+  Collapse Playlist: Afspeellijst invouwen
+  Expand Playlist: Afspeellijst uitvouwen
   Unmark As Watched: Markering als bekeken verwijderen
   Video has been unmarked as watched: Markering van video als bekeken is verwijderd
   Save Channel Playback Speed: Afspeelsnelheid voor kanaal opslaan
@@ -1015,6 +1047,21 @@ Video:
       Remaining: '{time} resterend'
       Cancel timer: Timer annuleren
       Timer ended: Slaaptimer afgelopen
+    A-B Repeat:
+      A-B Repeat: A-B-herhaling
+      On: Aan
+      Off: Uit
+      Point A: Punt A
+      Point B: Punt B
+      Set Repeat Start: Begin van herhaling instellen
+      Set Repeat End: Einde van herhaling instellen
+      Pause Repeat: A-B-herhaling pauzeren
+      Resume Repeat: A-B-herhaling hervatten
+      Adjust Point: Punt {point} aanpassen, momenteel {timestamp}
+      Clear Range: Bereik van A-B-herhaling wissen
+      End Before Start: Punt B moet na punt A liggen.
+      Outside Duration: Het tijdstip moet binnen de duur van de video liggen.
+      Cleared: A-B-herhaling gewist
     Zoom:
       Zoom: Zoom
       'Off': Uit
@@ -1032,6 +1079,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Terug naar boven
       Return to Video Tab: Terug naar videotabblad
+      Hide: Minispeler verbergen
       Play: Afspelen
       Pause: Pauzeren
       Drag Handle: Minispeler verplaatsen
@@ -1341,6 +1389,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Toont een blijvende melding met actuele voortgang voor achtergrondbewerkingen, zoals het vernieuwen van abonnementen en downloaden van beheerde hulpprogramma's, in plaats van de algemene voortgangsbalk.
     Always Show Scrollbars: Houdt de schuifbalken altijd zichtbaar. Als dit is uitgeschakeld, verdwijnen ze kort nadat je stopt met het bewegen van de muis en verschijnen ze weer zodra je de muis beweegt.
+    Scroll Speed: Wijzigt hoe ver muiswiel- en touchpadbewegingen scrollen.
     Use Fixed Tab Width: Geeft elk tabblad in de horizontale tabbladbalk dezelfde breedte in plaats van de breedte aan de titel aan te passen.
     Use Grid Player Menu: Rangschikt het instellingenmenu van de videospeler als een raster met tegels in plaats van een lijst met rijen.
 The playlist is at the beginning. Enable loop to continue playing: De afspeellijst staat aan het begin. Schakel herhalen in om door te gaan met afspelen
@@ -1376,6 +1425,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Naar de vorige overeenkomst gaan
   Toggle Normal Playback Speed: Wisselen tussen snelheid 1x en de vorige afspeelsnelheid
   Toggle Skip Silence: Stiltes overslaan in- of uitschakelen
+  Set A-B Repeat Point A: Punt A van A-B-herhaling instellen
+  Set A-B Repeat Point B: Punt B van A-B-herhaling instellen
+  Clear A-B Repeat: A-B-herhaling wissen
   Video Zoom In: Inzoomen op de video
   Video Zoom Out: Uitzoomen op de video
   Tab Switcher: Tabbladwisselaar

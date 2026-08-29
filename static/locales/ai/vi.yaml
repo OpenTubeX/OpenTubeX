@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} phút'
   Hours: '{hours} giờ'
   Hours and minutes: '{hours} giờ {minutes} phút'
+Home Page:
+  Home: Trang chủ
+  Description: Tiếp tục từ nơi bạn dừng lại và xem hoạt động gần đây.
+  Customize: Tùy chỉnh Trang chủ
+  Done: Xong
+  Customize description: Chọn các mục sẽ xuất hiện và sắp xếp chúng theo thứ tự bạn muốn.
+  Continue watching: Tiếp tục xem
+  New since last visit: Mới từ lần truy cập trước
+  Watch queue: Hàng đợi xem
+  Recent playlists: Danh sách phát gần đây
+  Recent downloads: Tệp tải xuống gần đây
+  Upcoming reminders: Lời nhắc sắp tới
+  Watch statistics: Thống kê xem
+  View all: Xem tất cả
+  Previous shelf page: Trang trước của {section}
+  Next shelf page: Trang tiếp theo của {section}
+  Shelf page status: '{section}, trang {page} trên {total}.'
+  Move section up: Di chuyển {section} lên
+  Move section down: Di chuyển {section} xuống
+  Section moved: '{section} đã được chuyển đến vị trí {position} trên {total}.'
+  Nothing here yet: Chưa có gì ở đây
+  Empty description: Video bạn bắt đầu xem, danh sách phát bạn dùng, tệp tải xuống và lời nhắc sẽ xuất hiện tại đây.
+  All sections hidden: Tất cả các mục đều bị ẩn
+  All sections hidden description: Tùy chỉnh Trang chủ để hiển thị lại một mục.
 Subscriptions:
   Refreshing Subscription Videos: Đang làm mới video từ kênh đăng ký
   Refreshing Subscription Shorts: Đang làm mới video ngắn từ kênh đăng ký
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Hiện dạng kết hợp
   Newest First: Mới nhất trước
   Oldest First: Cũ nhất trước
+  Posts:
+    RSS Message: YouTube không cung cấp nguồn cấp RSS cho bài đăng. Tắt cài đặt "{rssSetting}" để xem bài đăng hoặc bật cài đặt "{hideSetting}" để ẩn thẻ này.
 Trending:
   Load Error: Không thể tải nội dung thịnh hành.
   Unsupported Backend: Nội dung thịnh hành cần Local API. Hãy chọn Local API hoặc bật phương án dự phòng cho dịch vụ nền.
@@ -262,6 +288,7 @@ Settings:
     Hide Side Bar on Watch Pages: Ẩn thanh bên trên trang xem
     UI Roundness: Độ bo tròn giao diện
     Scrollbar Width: Chiều rộng thanh cuộn
+    Scroll Speed: Tốc độ cuộn
     Animation Speed: Tốc độ hiệu ứng
     Thumbnail Size: Kích thước hình thu nhỏ
     Show Tab Icons: Hiện biểu tượng thẻ
@@ -698,7 +725,9 @@ Settings:
     Hide Channel Avatars: Ẩn ảnh đại diện kênh
     Shorten View Counts: Rút gọn số lượt xem và lượt thích bình luận
     Hide Comment Translation Buttons: Ẩn nút dịch bình luận
+    Hide Home: Ẩn Trang chủ
     Hide Live Chat Replay: Ẩn bản phát lại trò chuyện trực tiếp
+    Disable A-B Repeat: Tắt lặp A-B
     Hide End-Screen Annotations: Ẩn chú thích ở màn hình kết thúc
     Hide Paid Promotion Badge: Ẩn huy hiệu quảng cáo trả phí
     Show Player Controls: Hiện điều khiển trình phát
@@ -808,6 +837,7 @@ Settings:
     History not supported: Phiên bản máy chủ này không hỗ trợ đồng bộ lịch sử xem.
     Settings not supported: Phiên bản máy chủ này không hỗ trợ đồng bộ cài đặt.
     Sync completed: Đã đồng bộ
+    Sync failed: 'Đồng bộ thất bại: {error}'
     Data Loss Confirmation: Xác nhận đồng bộ có xóa dữ liệu?
     Data Loss Warning: Trạng thái máy chủ sẽ xóa {deleted} trong số {previous} mục {collection} đã đồng bộ trước đó. Điều này có thể cho thấy quá trình di chuyển hoặc đặt lại máy chủ đã lỗi. Chỉ tiếp tục nếu bạn chủ ý xóa và đã có bản sao lưu.
     Confirm Data Loss: Xóa và tiếp tục
@@ -910,6 +940,8 @@ Video:
   Queue Item Cannot Move Down: Không thể chuyển {title} xuống. Video đã ở vị trí {total} trong tổng số {total}.
   Metadata: Thông tin video
   Close Metadata: Đóng thông tin video
+  Collapse Playlist: Thu gọn danh sách phát
+  Expand Playlist: Mở rộng danh sách phát
   Metadata Cache:
     Title History: Lịch sử tiêu đề
     Thumbnail History: Lịch sử hình thu nhỏ
@@ -999,6 +1031,21 @@ Video:
       Remaining: 'Còn {time}'
       Cancel timer: Hủy hẹn giờ
       Timer ended: Đã hết giờ ngủ
+    A-B Repeat:
+      A-B Repeat: Lặp A-B
+      On: Bật
+      Off: Tắt
+      Point A: Điểm A
+      Point B: Điểm B
+      Set Repeat Start: Đặt điểm bắt đầu lặp
+      Set Repeat End: Đặt điểm kết thúc lặp
+      Pause Repeat: Tạm dừng lặp A-B
+      Resume Repeat: Tiếp tục lặp A-B
+      Adjust Point: 'Điều chỉnh điểm {point}, hiện tại là {timestamp}'
+      Clear Range: Xóa phạm vi lặp A-B
+      End Before Start: Điểm B phải nằm sau điểm A.
+      Outside Duration: Dấu thời gian phải nằm trong thời lượng video.
+      Cleared: Đã xóa lặp A-B
     Zoom:
       Zoom: Thu phóng
       'Off': 'Tắt'
@@ -1016,6 +1063,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Về đầu trang
       Return to Video Tab: Quay lại thẻ video
+      Hide: Ẩn trình phát thu nhỏ
       Play: Phát
       Pause: Tạm dừng
       Drag Handle: Di chuyển trình phát thu nhỏ
@@ -1322,6 +1370,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Hiện thông báo cố định với tiến trình trực tiếp cho các thao tác nền, chẳng hạn làm mới đăng ký và tải công cụ được quản lý, thay cho thanh tiến trình chung.
     Always Show Scrollbars: Luôn giữ thanh cuộn hiển thị. Khi tắt, thanh cuộn mờ dần ngay sau khi bạn ngừng di chuyển chuột và xuất hiện lại khi bạn di chuyển chuột.
+    Scroll Speed: Thay đổi khoảng cách cuộn của cử chỉ con lăn chuột và con lăn bàn di chuột.
     Use Fixed Tab Width: Đặt cùng chiều rộng cho mọi thẻ trên thanh thẻ ngang thay vì điều chỉnh theo tiêu đề.
     Use Grid Player Menu: Sắp xếp menu cài đặt của trình phát video thành lưới ô thay vì danh sách hàng.
 The playlist is at the beginning. Enable loop to continue playing: Danh sách phát đang ở đầu. Hãy bật lặp lại để tiếp tục phát
@@ -1355,6 +1404,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Chuyển đến kết quả trước
   Toggle Normal Playback Speed: Chuyển đổi giữa tốc độ 1x và tốc độ phát trước đó
   Toggle Skip Silence: Bật/tắt bỏ qua đoạn im lặng
+  Set A-B Repeat Point A: Đặt điểm A của lặp A-B
+  Set A-B Repeat Point B: Đặt điểm B của lặp A-B
+  Clear A-B Repeat: Xóa lặp A-B
   Video Zoom In: Phóng to video
   Video Zoom Out: Thu nhỏ video
   Tab Switcher: Trình chuyển thẻ

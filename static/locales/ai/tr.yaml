@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} dk'
   Hours: '{hours} sa'
   Hours and minutes: '{hours} sa {minutes} dk'
+Home Page:
+  Home: Ana Sayfa
+  Description: Kaldığınız yerden devam edin ve son etkinlikleri görün.
+  Customize: Ana Sayfayı Özelleştir
+  Done: Bitti
+  Customize description: Hangi bölümlerin görüneceğini seçin ve istediğiniz sıraya dizin.
+  Continue watching: İzlemeye devam et
+  New since last visit: Son ziyaretinizden beri yeni
+  Watch queue: İzleme kuyruğu
+  Recent playlists: Son oynatma listeleri
+  Recent downloads: Son indirmeler
+  Upcoming reminders: Yaklaşan hatırlatıcılar
+  Watch statistics: İzleme istatistikleri
+  View all: Tümünü görüntüle
+  Previous shelf page: Önceki {section} sayfası
+  Next shelf page: Sonraki {section} sayfası
+  Shelf page status: '{section}, sayfa {page}/{total}.'
+  Move section up: '{section} bölümünü yukarı taşı'
+  Move section down: '{section} bölümünü aşağı taşı'
+  Section moved: '{section}, {total} içinde {position}. konuma taşındı.'
+  Nothing here yet: Burada henüz hiçbir şey yok
+  Empty description: Başlattığınız videolar, kullandığınız oynatma listeleri, indirmeler ve hatırlatıcılar burada görünür.
+  All sections hidden: Tüm bölümler gizli
+  All sections hidden description: Bir bölümü yeniden göstermek için Ana Sayfayı özelleştirin.
 Subscriptions:
   Refreshing Subscription Videos: Abonelik videoları yenileniyor
   Refreshing Subscription Shorts: Abonelik kısa videoları yenileniyor
@@ -260,6 +284,7 @@ Settings:
     Hide Side Bar on Watch Pages: İzleme Sayfalarında Kenar Çubuğunu Gizle
     UI Roundness: Arayüz Yuvarlaklığı
     Scrollbar Width: Kaydırma Çubuğu Genişliği
+    Scroll Speed: Kaydırma Hızı
     Animation Speed: Animasyon Hızı
     Thumbnail Size: Küçük Resim Boyutu
     Show Tab Icons: Sekme Simgelerini Göster
@@ -693,6 +718,8 @@ Settings:
     Shorten View Counts: İzlenme ve Yorum Beğeni Sayılarını Kısalt
     Hide Comment Translation Buttons: Yorum Çevirisi Düğmelerini Gizle
     Hide Live Chat Replay: Canlı Sohbet Tekrarını Gizle
+    Hide Home: Ana Sayfayı Gizle
+    Disable A-B Repeat: A-B Tekrarını Devre Dışı Bırak
     Hide End-Screen Annotations: Bitiş Ekranı Ek Açıklamalarını Gizle
     Hide Paid Promotion Badge: Ücretli Tanıtım Rozetini Gizle
     Show Player Controls: Oynatıcı Denetimlerini Göster
@@ -793,6 +820,7 @@ Settings:
     History not supported: Bu sunucu sürümü izleme geçmişi eşitlemesini desteklemiyor.
     Settings not supported: Bu sunucu sürümü ayar eşitlemesini desteklemiyor.
     Sync completed: Eşitleme tamamlandı
+    Sync failed: 'Eşitleme başarısız: {error}'
     Data Loss Confirmation: Veri silen eşitleme onaylansın mı?
     Data Loss Warning: Sunucunun durumu, daha önce eşitlenen {previous} {collection} öğesinden {deleted} tanesini silecek. Bu durum, başarısız bir sunucu geçişine veya sıfırlamasına işaret edebilir. Yalnızca silme işlemi bilerek yapılıyorsa ve yedeğiniz varsa devam edin.
     Confirm Data Loss: Sil ve devam et
@@ -983,6 +1011,21 @@ Video:
       Remaining: '{time} kaldı'
       Cancel timer: Zamanlayıcıyı iptal et
       Timer ended: Uyku zamanlayıcısı sona erdi
+    A-B Repeat:
+      A-B Repeat: A-B Tekrarı
+      'On': Açık
+      'Off': Kapalı
+      Point A: A Noktası
+      Point B: B Noktası
+      Set Repeat Start: Tekrar başlangıcını ayarla
+      Set Repeat End: Tekrar sonunu ayarla
+      Pause Repeat: A-B tekrarını duraklat
+      Resume Repeat: A-B tekrarını sürdür
+      Adjust Point: 'Şu anda {timestamp} olan {point} noktasını ayarla'
+      Clear Range: A-B tekrar aralığını temizle
+      End Before Start: B noktası A noktasından sonra olmalıdır.
+      Outside Duration: Zaman damgası video içinde olmalıdır.
+      Cleared: A-B tekrarı temizlendi
     Zoom:
       Zoom: Yakınlaştırma
       'Off': Kapalı
@@ -1000,6 +1043,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Başa dön
       Return to Video Tab: Video sekmesine dön
+      Hide: Mini oynatıcıyı gizle
       Play: Oynat
       Pause: Duraklat
       Drag Handle: Mini oynatıcıyı taşı
@@ -1306,6 +1350,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Abonelik yenilemeleri ve yönetilen araç indirmeleri gibi arka plan işlemlerinin anlık ilerlemesini genel ilerleme çubuğu yerine kalıcı bir bildirimde gösterir.
     Always Show Scrollbars: Kaydırma çubuklarını her zaman görünür tutar. Devre dışı bırakıldığında fareyi hareket ettirmeyi bıraktıktan kısa süre sonra kaybolur ve yeniden hareket ettirdiğinizde görünür.
+    Scroll Speed: Fare tekerleği ve dokunmatik yüzey kaydırma hareketlerinin ne kadar uzağa kaydıracağını değiştirir.
     Use Fixed Tab Width: Yatay sekme çubuğundaki her sekmeye başlığına göre boyut vermek yerine aynı genişliği verir.
     Use Grid Player Menu: Video oynatıcısının ayarlar menüsünü satır listesi yerine döşeme ızgarası olarak düzenler.
 The playlist is at the beginning. Enable loop to continue playing: Oynatma listesinin başındasınız. Oynatmaya devam etmek için döngüyü etkinleştirin
@@ -1339,6 +1384,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Önceki eşleşmeye git
   Toggle Normal Playback Speed: 1x hız ile önceki oynatma hızı arasında geçiş yap
   Toggle Skip Silence: Sessizliği atlamayı aç veya kapat
+  Set A-B Repeat Point A: A-B tekrarının A noktasını ayarla
+  Set A-B Repeat Point B: A-B tekrarının B noktasını ayarla
+  Clear A-B Repeat: A-B tekrarını temizle
   Video Zoom In: Videoyu yakınlaştır
   Video Zoom Out: Videoyu uzaklaştır
   Tab Switcher: Sekme değiştirici

@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} דק׳'
   Hours: '{hours} שע׳'
   Hours and minutes: '{hours} שע׳ {minutes} דק׳'
+Home Page:
+  Home: דף הבית
+  Description: המשיכו מהמקום שבו הפסקתם וצפו בפעילות האחרונה.
+  Customize: התאמה אישית של דף הבית
+  Done: סיום
+  Customize description: בחרו אילו מקטעים יוצגו וסדרו אותם בסדר הרצוי.
+  Continue watching: המשך צפייה
+  New since last visit: חדש מאז הביקור האחרון
+  Watch queue: תור צפייה
+  Recent playlists: רשימות השמעה אחרונות
+  Recent downloads: הורדות אחרונות
+  Upcoming reminders: תזכורות קרובות
+  Watch statistics: סטטיסטיקת צפייה
+  View all: הצגת הכול
+  Previous shelf page: העמוד הקודם של {section}
+  Next shelf page: העמוד הבא של {section}
+  Shelf page status: '{section}, עמוד {page} מתוך {total}.'
+  Move section up: העברת {section} למעלה
+  Move section down: העברת {section} למטה
+  Section moved: '{section} הועבר למיקום {position} מתוך {total}.'
+  Nothing here yet: אין כאן כלום עדיין
+  Empty description: סרטונים שתתחילו, רשימות השמעה שתשתמשו בהן, הורדות ותזכורות יופיעו כאן.
+  All sections hidden: כל המקטעים מוסתרים
+  All sections hidden description: התאימו אישית את דף הבית כדי להציג שוב מקטע.
 Subscriptions:
   Refreshing Subscription Videos: סרטוני המינויים מתרעננים
   Refreshing Subscription Shorts: הסרטונים הקצרים מהמינויים מתרעננים
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: הצגת תצוגה משולבת
   Newest First: החדשים תחילה
   Oldest First: הישנים תחילה
+  Posts:
+    RSS Message: 'YouTube לא מספק עדכוני RSS לפוסטים. השביתו את ההגדרה "{rssSetting}" כדי לראות פוסטים, או הפעילו את ההגדרה "{hideSetting}" כדי להסתיר את הכרטיסייה הזאת.'
 Trending:
   Load Error: לא ניתן לטעון את התוכן החם.
   Unsupported Backend: לתוכן החם דרוש Local API. יש לבחור ב־Local API או להפעיל מעבר לספק חלופי.
@@ -262,6 +288,7 @@ Settings:
     Hide Side Bar on Watch Pages: הסתרת סרגל הצד בדפי צפייה
     UI Roundness: עיגול פינות הממשק
     Scrollbar Width: רוחב פס הגלילה
+    Scroll Speed: מהירות גלילה
     Animation Speed: מהירות ההנפשות
     Thumbnail Size: גודל התמונות הממוזערות
     Show Tab Icons: הצגת סמלי כרטיסיות
@@ -704,6 +731,8 @@ Settings:
     Shorten View Counts: קיצור מספרי צפיות ולייקים לתגובות
     Hide Comment Translation Buttons: הסתרת כפתורי תרגום תגובות
     Hide Live Chat Replay: הסתרת ההפעלה החוזרת של הצ'אט החי
+    Hide Home: הסתרת דף הבית
+    Disable A-B Repeat: השבתת חזרה A-B
     Hide End-Screen Annotations: הסתרת הערות במסך הסיום
     Hide Paid Promotion Badge: הסתרת תגית קידום ממומן
     Show Player Controls: הצגת פקדי הנגן
@@ -813,6 +842,7 @@ Settings:
     History not supported: גרסת השרת הזו אינה תומכת בסנכרון היסטוריית הצפייה.
     Settings not supported: גרסת השרת הזו אינה תומכת בסנכרון הגדרות.
     Sync completed: הסנכרון הושלם
+    Sync failed: 'הסנכרון נכשל: {error}'
     Data Loss Confirmation: לאשר סנכרון שימחק נתונים?
     Data Loss Warning: מצב השרת ימחק {deleted} מתוך {previous} פריטי {collection} שסונכרנו בעבר. הדבר עשוי להעיד שהעברת השרת או האיפוס נכשלו. המשיכו רק אם המחיקה מכוונת ויש לכם גיבוי.
     Confirm Data Loss: מחיקה והמשך
@@ -947,6 +977,8 @@ Video:
   Try With Configured Cookies: ניסיון עם קובצי ה-Cookie שהוגדרו
   Restricted Playback Authentication Failed Template: 'ל-yt-dlp לא הייתה גישה לסרטון באמצעות קובצי ה-Cookie שהוגדרו: {error}'
   Private: אי אפשר לצפות בסרטונים פרטיים ב-OpenTubeX כי הם דורשים התחברות ל-Google ובעלות על הסרטון.
+  Collapse Playlist: כיווץ רשימת ההשמעה
+  Expand Playlist: הרחבת רשימת ההשמעה
   Unmark As Watched: ביטול הסימון כנצפה
   Video has been unmarked as watched: הסימון של הסרטון כנצפה בוטל
   Save Channel Playback Speed: שמירת מהירות ההפעלה לערוץ
@@ -1009,6 +1041,21 @@ Video:
       Remaining: 'נותרו {time}'
       Cancel timer: ביטול הטיימר
       Timer ended: טיימר השינה הסתיים
+    A-B Repeat:
+      A-B Repeat: חזרה A-B
+      'On': מופעלת
+      'Off': מושבתת
+      Point A: נקודה A
+      Point B: נקודה B
+      Set Repeat Start: הגדרת תחילת החזרה
+      Set Repeat End: הגדרת סוף החזרה
+      Pause Repeat: השהיית החזרה A-B
+      Resume Repeat: המשך החזרה A-B
+      Adjust Point: 'שינוי הנקודה {point}, כרגע {timestamp}'
+      Clear Range: ניקוי טווח החזרה A-B
+      End Before Start: נקודה B חייבת להיות אחרי נקודה A.
+      Outside Duration: חותמת הזמן חייבת להיות בתוך הסרטון.
+      Cleared: החזרה A-B נוקתה
     Zoom:
       Zoom: תקריב
       'Off': 'כבוי'
@@ -1026,6 +1073,7 @@ Video:
     Scroll Mini Player:
       Back to Top: חזרה למעלה
       Return to Video Tab: חזרה לכרטיסיית הסרטון
+      Hide: הסתרת הנגן הממוזער
       Play: הפעלה
       Pause: השהיה
       Drag Handle: הזזת הנגן הממוזער
@@ -1332,6 +1380,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: מציג התראה קבועה עם התקדמות בזמן אמת של פעולות רקע, כגון רענון מינויים והורדת כלים מנוהלים, במקום סרגל ההתקדמות הכללי.
     Always Show Scrollbars: משאיר את פסי הגלילה גלויים תמיד. כשהאפשרות מושבתת, הם נעלמים זמן קצר לאחר הפסקת תנועת העכבר ומופיעים שוב מיד כשמזיזים אותו.
+    Scroll Speed: שינוי מרחק הגלילה של מחוות גלגלת העכבר ומשטח המגע.
     Use Fixed Tab Width: מקצה רוחב זהה לכל לשונית בסרגל הלשוניות האופקי, במקום להתאים את הרוחב לכותרת.
     Use Grid Player Menu: מסדר את תפריט ההגדרות של נגן הווידאו כרשת אריחים במקום כרשימת שורות.
 The playlist is at the beginning. Enable loop to continue playing: רשימת ההשמעה בתחילתה. הפעילו לולאה כדי להמשיך לנגן
@@ -1367,6 +1416,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: מעבר להתאמה הקודמת
   Toggle Normal Playback Speed: החלפה בין מהירות 1x למהירות ההפעלה הקודמת
   Toggle Skip Silence: הפעלה או השבתה של דילוג על שקט
+  Set A-B Repeat Point A: הגדרת נקודה A לחזרה A-B
+  Set A-B Repeat Point B: הגדרת נקודה B לחזרה A-B
+  Clear A-B Repeat: ניקוי חזרה A-B
   Video Zoom In: התקרבות בווידאו
   Video Zoom Out: התרחקות מהווידאו
   Tab Switcher: בורר לשוניות

@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} t'
   Hours and minutes: '{hours} t {minutes} min'
+Home Page:
+  Home: Hjem
+  Description: Fortsett der du slapp, og se nylig aktivitet.
+  Customize: Tilpass startsiden
+  Done: Ferdig
+  Customize description: Velg hvilke deler som skal vises, og ordne dem i ønsket rekkefølge.
+  Continue watching: Fortsett å se
+  New since last visit: Nytt siden forrige besøk
+  Watch queue: Avspillingskø
+  Recent playlists: Nylige spillelister
+  Recent downloads: Nylige nedlastinger
+  Upcoming reminders: Kommende påminnelser
+  Watch statistics: Seerstatistikk
+  View all: Vis alle
+  Previous shelf page: Forrige side i {section}
+  Next shelf page: Neste side i {section}
+  Shelf page status: "{section}, side {page} av {total}."
+  Move section up: Flytt {section} opp
+  Move section down: Flytt {section} ned
+  Section moved: "{section} flyttet til posisjon {position} av {total}."
+  Nothing here yet: Ingenting her ennå
+  Empty description: Videoer du starter, spillelister du bruker, nedlastinger og påminnelser vises her.
+  All sections hidden: Alle deler er skjult
+  All sections hidden description: Tilpass startsiden for å vise en del igjen.
 Subscriptions:
   Refreshing Subscription Videos: Oppdaterer abonnementsvideoer
   Refreshing Subscription Shorts: Oppdaterer Shorts fra abonnementer
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Vis samlet visning
   Newest First: Nyeste først
   Oldest First: Eldste først
+  Posts:
+    RSS Message: YouTube tilbyr ikke RSS-strømmer for innlegg. Deaktiver innstillingen "{rssSetting}" for å se innlegg, eller aktiver innstillingen "{hideSetting}" for å skjule denne fanen.
 Trending:
   Load Error: Populært innhold kunne ikke lastes inn.
   Unsupported Backend: Populært innhold krever Local API. Velg Local API, eller slå på bruk av reserveleverandør.
@@ -260,6 +286,7 @@ Settings:
     Hide Side Bar on Watch Pages: Skjul sidefeltet på visningssider
     UI Roundness: Avrunding i grensesnittet
     Scrollbar Width: Bredde på rullefelt
+    Scroll Speed: Rullehastighet
     Animation Speed: Animasjonshastighet
     Thumbnail Size: Størrelse på miniatyrbilder
     Show Tab Icons: Vis faneikoner
@@ -698,7 +725,9 @@ Settings:
     Hide Channel Avatars: Skjul kanalavatarer
     Shorten View Counts: Forkort antall visninger og likerklikk på kommentarer
     Hide Comment Translation Buttons: Skjul oversettelsesknapper for kommentarer
+    Hide Home: Skjul startsiden
     Hide Live Chat Replay: Skjul reprise av direktechat
+    Disable A-B Repeat: Deaktiver A-B-gjentakelse
     Hide End-Screen Annotations: Skjul merknader på sluttskjermen
     Hide Paid Promotion Badge: Skjul merket for betalt promotering
     Show Player Controls: Vis spillerkontroller
@@ -808,6 +837,7 @@ Settings:
     History not supported: Denne serverversjonen støtter ikke synkronisering av seerhistorikk.
     Settings not supported: Denne serverversjonen støtter ikke synkronisering av innstillinger.
     Sync completed: Synkroniseringen er fullført
+    Sync failed: "Synkronisering mislyktes: {error}"
     Data Loss Confirmation: Vil du bekrefte synkronisering som sletter data?
     Data Loss Warning: Tilstanden på serveren vil slette {deleted} av {previous} tidligere synkroniserte elementer i {collection}. Dette kan tyde på en mislykket servermigrering eller tilbakestilling. Fortsett bare hvis slettingen er tilsiktet og du har en sikkerhetskopi.
     Confirm Data Loss: Slett og fortsett
@@ -942,6 +972,8 @@ Video:
   Try With Configured Cookies: Prøv med de konfigurerte informasjonskapslene
   Restricted Playback Authentication Failed Template: 'yt-dlp fikk ikke tilgang til denne videoen med de konfigurerte informasjonskapslene: {error}'
   Private: Private videoer kan ikke ses i OpenTubeX fordi de krever Google-innlogging og at du eier videoen.
+  Collapse Playlist: Minimer spillelisten
+  Expand Playlist: Utvid spillelisten
   Unmark As Watched: Merk som ikke sett
   Video has been unmarked as watched: Videoen er merket som ikke sett
   Save Channel Playback Speed: Lagre avspillingshastighet for kanalen
@@ -1006,6 +1038,21 @@ Video:
       Remaining: '{time} igjen'
       Cancel timer: Avbryt innsovningstimeren
       Timer ended: Innsovningstimeren er utløpt
+    A-B Repeat:
+      A-B Repeat: A-B-gjentakelse
+      On: På
+      Off: Av
+      Point A: Punkt A
+      Point B: Punkt B
+      Set Repeat Start: Angi start for gjentakelse
+      Set Repeat End: Angi slutt for gjentakelse
+      Pause Repeat: Sett A-B-gjentakelse på pause
+      Resume Repeat: Gjenoppta A-B-gjentakelse
+      Adjust Point: Juster punkt {point}, nå {timestamp}
+      Clear Range: Fjern området for A-B-gjentakelse
+      End Before Start: Punkt B må være etter punkt A.
+      Outside Duration: Tidsstempelet må være innenfor videoen.
+      Cleared: A-B-gjentakelsen er fjernet
     Zoom:
       Zoom: Forstørring
       'Off': 'Av'
@@ -1023,6 +1070,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Tilbake til toppen
       Return to Video Tab: Gå tilbake til videofanen
+      Hide: Skjul minispilleren
       Play: Spill av
       Pause: Sett på pause
       Drag Handle: Flytt minispilleren
@@ -1329,6 +1377,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Viser et varig varsel med løpende fremdrift for bakgrunnsoperasjoner, for eksempel oppdatering av abonnementer og nedlasting av administrerte verktøy, i stedet for den globale fremdriftslinjen.
     Always Show Scrollbars: Holder rullefeltene synlige hele tiden. Når dette er slått av, tones de ut kort tid etter at du slutter å bevege musen, og vises igjen så snart du beveger den.
+    Scroll Speed: Endrer hvor langt musehjul- og styreflatebevegelser ruller.
     Use Fixed Tab Width: Gir alle faner i det vannrette fanefeltet samme bredde i stedet for å tilpasse bredden etter tittelen.
     Use Grid Player Menu: Ordner innstillingsmenyen til videospilleren som et rutenett med fliser i stedet for en liste med rader.
 The playlist is at the beginning. Enable loop to continue playing: Spillelisten er ved begynnelsen. Slå på gjentakelse for å fortsette avspillingen
@@ -1364,6 +1413,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Gå til forrige treff
   Toggle Normal Playback Speed: Bytt mellom 1x hastighet og forrige avspillingshastighet
   Toggle Skip Silence: Slå av eller på funksjonen for å hoppe over stillhet
+  Set A-B Repeat Point A: Angi punkt A for A-B-gjentakelse
+  Set A-B Repeat Point B: Angi punkt B for A-B-gjentakelse
+  Clear A-B Repeat: Fjern A-B-gjentakelse
   Video Zoom In: Zoom inn i videoen
   Video Zoom Out: Zoom ut av videoen
   Tab Switcher: Fanebytter

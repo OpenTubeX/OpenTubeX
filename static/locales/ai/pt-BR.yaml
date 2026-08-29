@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} h'
   Hours and minutes: '{hours} h {minutes} min'
+Home Page:
+  Home: Página inicial
+  Description: Continue de onde parou e veja a atividade recente.
+  Customize: Personalizar página inicial
+  Done: Concluído
+  Customize description: Escolha quais seções serão exibidas e organize-as na ordem desejada.
+  Continue watching: Continuar assistindo
+  New since last visit: Novidades desde a última visita
+  Watch queue: Fila de reprodução
+  Recent playlists: Playlists recentes
+  Recent downloads: Downloads recentes
+  Upcoming reminders: Próximos lembretes
+  Watch statistics: Estatísticas de exibição
+  View all: Ver tudo
+  Previous shelf page: Página anterior de {section}
+  Next shelf page: Próxima página de {section}
+  Shelf page status: "{section}, página {page} de {total}."
+  Move section up: Mover {section} para cima
+  Move section down: Mover {section} para baixo
+  Section moved: "{section} movida para a posição {position} de {total}."
+  Nothing here yet: Nada por aqui ainda
+  Empty description: Os vídeos que você começar, as playlists que usar, os downloads e os lembretes aparecerão aqui.
+  All sections hidden: Todas as seções estão ocultas
+  All sections hidden description: Personalize a página inicial para mostrar uma seção novamente.
 Subscriptions:
   Refreshing Subscription Videos: Atualizando os vídeos das inscrições
   Refreshing Subscription Shorts: Atualizando os Shorts das inscrições
@@ -260,6 +284,7 @@ Settings:
     Hide Side Bar on Watch Pages: Ocultar a barra lateral nas páginas de visualização
     UI Roundness: Arredondamento da interface
     Scrollbar Width: Largura da barra de deslocamento
+    Scroll Speed: Velocidade de rolagem
     Animation Speed: Velocidade das animações
     Thumbnail Size: Tamanho das miniaturas
     Show Tab Icons: Mostrar ícones nas guias
@@ -692,7 +717,9 @@ Settings:
     Hide Channel Avatars: Ocultar avatares dos canais
     Shorten View Counts: Abreviar contagens de visualizações e de gostos nos comentários
     Hide Comment Translation Buttons: Ocultar botões de tradução dos comentários
+    Hide Home: Ocultar página inicial
     Hide Live Chat Replay: Ocultar repetição do chat ao vivo
+    Disable A-B Repeat: Desativar repetição A-B
     Hide End-Screen Annotations: Ocultar anotações da tela final
     Hide Paid Promotion Badge: Ocultar emblema de promoção paga
     Show Player Controls: Mostrar controlos do leitor
@@ -793,6 +820,7 @@ Settings:
     History not supported: Esta versão do servidor não suporta a sincronização do histórico de reprodução.
     Settings not supported: Esta versão do servidor não suporta a sincronização das configurações.
     Sync completed: Sincronização concluída
+    Sync failed: "Falha na sincronização: {error}"
     Data Loss Confirmation: Confirmar sincronização destrutiva?
     Data Loss Warning: O estado do servidor excluiria {deleted} dos {previous} itens de {collection} sincronizados anteriormente. Isto pode indicar uma falha na migração ou reposição do servidor. Continue apenas se esta excluição for intencional e tiver uma backup.
     Confirm Data Loss: Excluir e continuar
@@ -983,6 +1011,21 @@ Video:
       Remaining: 'Tempo restante: {time}'
       Cancel timer: Cancelar temporizador
       Timer ended: O temporizador de suspensão terminou
+    A-B Repeat:
+      A-B Repeat: Repetição A-B
+      On: Ativada
+      Off: Desativada
+      Point A: Ponto A
+      Point B: Ponto B
+      Set Repeat Start: Definir início da repetição
+      Set Repeat End: Definir fim da repetição
+      Pause Repeat: Pausar repetição A-B
+      Resume Repeat: Retomar repetição A-B
+      Adjust Point: Ajustar ponto {point}, atualmente {timestamp}
+      Clear Range: Limpar intervalo da repetição A-B
+      End Before Start: O ponto B deve estar depois do ponto A.
+      Outside Duration: O momento deve estar dentro da duração do vídeo.
+      Cleared: Repetição A-B limpa
     Zoom:
       Zoom: Ampliação
       'Off': Desativada
@@ -1000,6 +1043,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Voltar ao início
       Return to Video Tab: Voltar à guia do vídeo
+      Hide: Ocultar miniplayer
       Play: Reproduzir
       Pause: Pausar
       Drag Handle: Mover mini-reprodutor
@@ -1306,6 +1350,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Mostra uma notificação persistente com o progresso em tempo real das operações em segundo plano, como a atualização das inscrições e as downloads de ferramentas gerenciadas, em vez de usar a barra de progresso global.
     Always Show Scrollbars: Mantém as barras de deslocamento sempre visíveis. Quando esta opção está desativada, desaparecem pouco depois de parar de mover o mouse e reaparecem assim que volta a movê-lo.
+    Scroll Speed: Altera a distância de rolagem dos gestos da roda do mouse e do touchpad.
     Use Fixed Tab Width: Atribui a mesma largura a todas as guias na barra horizontal, em vez de ajustar a largura ao respectivo título.
     Use Grid Player Menu: Organiza o menu de configurações do reprodutor de vídeo numa grelha de mosaicos em vez de uma lista de linhas.
 The playlist is at the beginning. Enable loop to continue playing: A lista de reprodução está no início. Ative a repetição para continuar reproduzindo
@@ -1339,6 +1384,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Ir para a correspondência anterior
   Toggle Normal Playback Speed: Alternar entre a velocidade 1x e a velocidade de reprodução anterior
   Toggle Skip Silence: Ativar ou desativar o avanço sobre períodos de silêncio
+  Set A-B Repeat Point A: Definir ponto A da repetição A-B
+  Set A-B Repeat Point B: Definir ponto B da repetição A-B
+  Clear A-B Repeat: Limpar repetição A-B
   Video Zoom In: Ampliar o vídeo
   Video Zoom Out: Reduzir o vídeo
   Tab Switcher: Seletor de guias

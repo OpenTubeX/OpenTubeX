@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} h'
   Hours and minutes: '{hours} h {minutes} min'
+Home Page:
+  Home: Home
+  Description: Riprendi da dove avevi interrotto e visualizza le attività recenti.
+  Customize: Personalizza Home
+  Done: Fatto
+  Customize description: Scegli quali sezioni mostrare e disponile nell'ordine desiderato.
+  Continue watching: Continua a guardare
+  New since last visit: Novità dall'ultima visita
+  Watch queue: Coda di riproduzione
+  Recent playlists: Playlist recenti
+  Recent downloads: Download recenti
+  Upcoming reminders: Promemoria imminenti
+  Watch statistics: Statistiche di visione
+  View all: Vedi tutto
+  Previous shelf page: Pagina precedente di {section}
+  Next shelf page: Pagina successiva di {section}
+  Shelf page status: "{section}, pagina {page} di {total}."
+  Move section up: Sposta {section} in alto
+  Move section down: Sposta {section} in basso
+  Section moved: "{section} spostata alla posizione {position} di {total}."
+  Nothing here yet: Ancora niente qui
+  Empty description: I video che inizi, le playlist che usi, i download e i promemoria appariranno qui.
+  All sections hidden: Tutte le sezioni sono nascoste
+  All sections hidden description: Personalizza Home per mostrare di nuovo una sezione.
 Subscriptions:
   Refreshing Subscription Videos: Aggiornamento dei video delle iscrizioni
   Refreshing Subscription Shorts: Aggiornamento degli Shorts delle iscrizioni
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Mostra vista combinata
   Newest First: Prima i più recenti
   Oldest First: Prima i meno recenti
+  Posts:
+    RSS Message: YouTube non fornisce feed RSS per i post. Disattiva l'impostazione "{rssSetting}" per visualizzare i post oppure attiva l'impostazione "{hideSetting}" per nascondere questa scheda.
 Trending:
   Load Error: Impossibile caricare le tendenze.
   Unsupported Backend: Le tendenze richiedono l'API locale. Seleziona l'API locale oppure abilita il backend di riserva.
@@ -260,6 +286,7 @@ Settings:
     Hide Side Bar on Watch Pages: Nascondi barra laterale nelle pagine di visione
     UI Roundness: Arrotondamento dell'interfaccia
     Scrollbar Width: Larghezza della barra di scorrimento
+    Scroll Speed: Velocità di scorrimento
     Animation Speed: Velocità delle animazioni
     Thumbnail Size: Dimensione delle miniature
     Show Tab Icons: Mostra icone delle schede
@@ -692,7 +719,9 @@ Settings:
     Hide Channel Avatars: Nascondi avatar dei canali
     Shorten View Counts: Abbrevia conteggi delle visualizzazioni e dei Mi piace ai commenti
     Hide Comment Translation Buttons: Nascondi pulsanti di traduzione dei commenti
+    Hide Home: Nascondi Home
     Hide Live Chat Replay: Nascondi replica della chat dal vivo
+    Disable A-B Repeat: Disattiva ripetizione A-B
     Hide End-Screen Annotations: Nascondi annotazioni della schermata finale
     Hide Paid Promotion Badge: Nascondi badge delle promozioni a pagamento
     Show Player Controls: Mostra controlli del lettore
@@ -793,6 +822,7 @@ Settings:
     History not supported: Questa versione del server non supporta la sincronizzazione della cronologia di visione.
     Settings not supported: Questa versione del server non supporta la sincronizzazione delle impostazioni.
     Sync completed: Sincronizzazione completata
+    Sync failed: "Sincronizzazione non riuscita: {error}"
     Data Loss Confirmation: Confermare la sincronizzazione distruttiva?
     Data Loss Warning: Lo stato del server eliminerebbe {deleted} dei {previous} elementi di {collection} sincronizzati in precedenza. Potrebbe indicare una migrazione o un ripristino del server non riuscito. Continua solo se l'eliminazione è intenzionale e disponi di un backup.
     Confirm Data Loss: Elimina e continua
@@ -983,6 +1013,21 @@ Video:
       Remaining: '{time} rimanenti'
       Cancel timer: Annulla timer
       Timer ended: Timer di spegnimento terminato
+    A-B Repeat:
+      A-B Repeat: Ripetizione A-B
+      On: Attiva
+      Off: Disattiva
+      Point A: Punto A
+      Point B: Punto B
+      Set Repeat Start: Imposta inizio ripetizione
+      Set Repeat End: Imposta fine ripetizione
+      Pause Repeat: Metti in pausa la ripetizione A-B
+      Resume Repeat: Riprendi la ripetizione A-B
+      Adjust Point: Regola il punto {point}, attualmente {timestamp}
+      Clear Range: Cancella intervallo di ripetizione A-B
+      End Before Start: Il punto B deve essere successivo al punto A.
+      Outside Duration: Il timestamp deve essere compreso nella durata del video.
+      Cleared: Ripetizione A-B cancellata
     Zoom:
       Zoom: Zoom
       'Off': 'Disattivato'
@@ -1000,6 +1045,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Torna in alto
       Return to Video Tab: Torna alla scheda del video
+      Hide: Nascondi mini player
       Play: Riproduci
       Pause: Pausa
       Drag Handle: Sposta mini lettore
@@ -1306,6 +1352,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Mostra una notifica persistente con l'avanzamento in tempo reale delle operazioni in background, come l'aggiornamento delle iscrizioni e il download degli strumenti gestiti, al posto della barra di avanzamento globale.
     Always Show Scrollbars: Mantiene le barre di scorrimento sempre visibili. Se disabilitato, scompaiono poco dopo che smetti di muovere il mouse e riappaiono non appena lo muovi di nuovo.
+    Scroll Speed: Modifica la distanza di scorrimento dei gesti della rotellina del mouse e del touchpad.
     Use Fixed Tab Width: Assegna la stessa larghezza a tutte le schede nella barra orizzontale, invece di adattarle al titolo.
     Use Grid Player Menu: Dispone il menu delle impostazioni del lettore video come una griglia di riquadri invece di un elenco di righe.
 The playlist is at the beginning. Enable loop to continue playing: La playlist è all'inizio. Abilita la ripetizione per continuare la riproduzione
@@ -1339,6 +1386,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Vai alla corrispondenza precedente
   Toggle Normal Playback Speed: Passa dalla velocità 1x alla velocità di riproduzione precedente e viceversa
   Toggle Skip Silence: Attiva o disattiva Salta silenzi
+  Set A-B Repeat Point A: Imposta il punto A della ripetizione A-B
+  Set A-B Repeat Point B: Imposta il punto B della ripetizione A-B
+  Clear A-B Repeat: Cancella ripetizione A-B
   Video Zoom In: Ingrandisci il video
   Video Zoom Out: Riduci il video
   Tab Switcher: Selettore delle schede

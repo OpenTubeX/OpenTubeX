@@ -97,6 +97,30 @@ Stats:
   Minutes: '{minutes} நிமி.'
   Hours: '{hours} மணி'
   Hours and minutes: '{hours} மணி {minutes} நிமி.'
+Home Page:
+  Home: முகப்பு
+  Description: நீங்கள் நிறுத்திய இடத்திலிருந்து தொடர்ந்து, அண்மைய செயல்பாடுகளைப் பாருங்கள்.
+  Customize: முகப்பைத் தனிப்பயனாக்கு
+  Done: முடிந்தது
+  Customize description: எந்தப் பிரிவுகள் தோன்ற வேண்டும் என்பதைத் தேர்ந்தெடுத்து, விரும்பிய வரிசையில் அமைக்கவும்.
+  Continue watching: தொடர்ந்து பார்க்கவும்
+  New since last visit: கடைசி வருகைக்குப் பிறகு புதியவை
+  Watch queue: பார்க்கும் வரிசை
+  Recent playlists: அண்மைய இயக்கப்பட்டியல்கள்
+  Recent downloads: அண்மைய பதிவிறக்கங்கள்
+  Upcoming reminders: வரவிருக்கும் நினைவூட்டல்கள்
+  Watch statistics: பார்வைப் புள்ளிவிவரங்கள்
+  View all: அனைத்தையும் பார்
+  Previous shelf page: '{section} இன் முந்தைய பக்கம்'
+  Next shelf page: '{section} இன் அடுத்த பக்கம்'
+  Shelf page status: '{section}, பக்கம் {page} / {total}.'
+  Move section up: '{section} ஐ மேலே நகர்த்து'
+  Move section down: '{section} ஐ கீழே நகர்த்து'
+  Section moved: '{section} {total} இல் {position} ஆம் இடத்திற்கு நகர்த்தப்பட்டது.'
+  Nothing here yet: இங்கு இன்னும் எதுவுமில்லை
+  Empty description: நீங்கள் பார்க்கத் தொடங்கும் காணொளிகள், பயன்படுத்தும் இயக்கப்பட்டியல்கள், பதிவிறக்கங்கள் மற்றும் நினைவூட்டல்கள் இங்கு தோன்றும்.
+  All sections hidden: அனைத்துப் பிரிவுகளும் மறைக்கப்பட்டுள்ளன
+  All sections hidden description: ஒரு பிரிவை மீண்டும் காட்ட முகப்பைத் தனிப்பயனாக்கவும்.
 Subscriptions:
   Refreshing Subscription Videos: சந்தாக்களின் காணொளிகள் புதுப்பிக்கப்படுகின்றன
   Refreshing Subscription Shorts: சந்தாக்களின் Shorts புதுப்பிக்கப்படுகின்றன
@@ -114,6 +138,8 @@ Subscriptions:
   Show Combined View: ஒருங்கிணைந்த காட்சியைக் காட்டு
   Newest First: புதியவை முதலில்
   Oldest First: பழையவை முதலில்
+  Posts:
+    RSS Message: 'பதிவுகளுக்கு YouTube RSS ஊட்டங்களை வழங்குவதில்லை. பதிவுகளைக் காண "{rssSetting}" அமைப்பை முடக்கவும் அல்லது இந்தத் தாவலை மறைக்க "{hideSetting}" அமைப்பை இயக்கவும்.'
 Trending:
   Load Error: பிரபலமானவற்றை ஏற்ற முடியவில்லை.
   Unsupported Backend: பிரபலமானவற்றுக்கு Local API தேவை. Local API-ஐத் தேர்ந்தெடுக்கவும் அல்லது பின்தள மாற்றுவழியை இயக்கவும்.
@@ -263,6 +289,7 @@ Settings:
     Hide Side Bar on Watch Pages: காணொளிப் பக்கங்களில் பக்கப் பட்டையை மறை
     UI Roundness: இடைமுக வளைவு
     Scrollbar Width: உருள் பட்டை அகலம்
+    Scroll Speed: உருள் வேகம்
     Animation Speed: அசைவூட்ட வேகம்
     Thumbnail Size: சிறுபட அளவு
     Show Tab Icons: தாவல் படவுருக்களைக் காட்டு
@@ -703,6 +730,8 @@ Settings:
     Shorten View Counts: பார்வை மற்றும் கருத்து விருப்ப எண்ணிக்கைகளைச் சுருக்கு
     Hide Comment Translation Buttons: கருத்து மொழிபெயர்ப்புப் பொத்தான்களை மறை
     Hide Live Chat Replay: நேரலை அரட்டை மறுஇயக்கத்தை மறை
+    Hide Home: முகப்பை மறை
+    Disable A-B Repeat: A-B மீளியக்கத்தை முடக்கு
     Hide End-Screen Annotations: இறுதித் திரைக் குறிப்புகளை மறை
     Hide Paid Promotion Badge: கட்டண விளம்பர அடையாளத்தை மறை
     Show Player Controls: இயக்கிக் கட்டுப்பாடுகளைக் காட்டு
@@ -812,6 +841,7 @@ Settings:
     History not supported: இந்தச் சேவையகப் பதிப்பு பார்வை வரலாற்று ஒத்திசைவை ஆதரிக்காது.
     Settings not supported: இந்தச் சேவையகப் பதிப்பு அமைப்பு ஒத்திசைவை ஆதரிக்காது.
     Sync completed: ஒத்திசைவு முடிந்தது
+    Sync failed: 'ஒத்திசைவு தோல்வியடைந்தது: {error}'
     Data Loss Confirmation: தரவை அழிக்கும் ஒத்திசைவை உறுதிப்படுத்தவா?
     Data Loss Warning: சேவையக நிலை, முன்பு ஒத்திசைத்த {previous} {collection} உருப்படிகளில் {deleted} உருப்படிகளை நீக்கும். சேவையக இடமாற்றம் அல்லது மீட்டமைப்பு தோல்வியடைந்ததை இது குறிக்கலாம். இந்த நீக்கம் வேண்டுமென்றே செய்யப்படுவதோடு உங்களிடம் காப்புநகல் இருந்தால் மட்டும் தொடரவும்.
     Confirm Data Loss: நீக்கித் தொடர்
@@ -946,6 +976,8 @@ Video:
   Try With Configured Cookies: அமைத்த குக்கீகளுடன் முயல்
   Restricted Playback Authentication Failed Template: 'அமைத்த குக்கீகளுடன் yt-dlp-ஆல் இந்தக் காணொளியை அணுக முடியவில்லை: {error}'
   Private: தனிப்பட்ட காணொளிகளுக்கு Google உள்நுழைவும் காணொளியின் உரிமையும் தேவைப்படுவதால் அவற்றை OpenTubeX-இல் பார்க்க முடியாது.
+  Collapse Playlist: இயக்கப்பட்டியலைச் சுருக்கு
+  Expand Playlist: இயக்கப்பட்டியலை விரி
   Unmark As Watched: பார்த்த குறியை நீக்கு
   Video has been unmarked as watched: காணொளியின் பார்த்த குறி நீக்கப்பட்டது
   Save Channel Playback Speed: சேனல் இயக்க வேகத்தைச் சேமி
@@ -1010,6 +1042,21 @@ Video:
       Remaining: '{time} மீதம்'
       Cancel timer: நேரக்கருவியை ரத்துசெய்
       Timer ended: உறக்க நேரக்கருவி முடிந்தது
+    A-B Repeat:
+      A-B Repeat: A-B மீளியக்கம்
+      'On': இயக்கு
+      'Off': முடக்கு
+      Point A: A புள்ளி
+      Point B: B புள்ளி
+      Set Repeat Start: மீளியக்கத் தொடக்கத்தை அமை
+      Set Repeat End: மீளியக்க முடிவை அமை
+      Pause Repeat: A-B மீளியக்கத்தை இடைநிறுத்து
+      Resume Repeat: A-B மீளியக்கத்தைத் தொடர்
+      Adjust Point: 'தற்போது {timestamp} இல் உள்ள {point} புள்ளியைச் சரிசெய்'
+      Clear Range: A-B மீளியக்க வரம்பை அழி
+      End Before Start: B புள்ளி A புள்ளிக்குப் பிறகு இருக்க வேண்டும்.
+      Outside Duration: நேர முத்திரை காணொளிக்குள் இருக்க வேண்டும்.
+      Cleared: A-B மீளியக்கம் அழிக்கப்பட்டது
     Zoom:
       Zoom: பெரிதாக்கம்
       'Off': முடக்கம்
@@ -1027,6 +1074,7 @@ Video:
     Scroll Mini Player:
       Back to Top: மேலே செல்
       Return to Video Tab: காணொளித் தாவலுக்குத் திரும்பு
+      Hide: சிறு இயக்கியை மறை
       Play: இயக்கு
       Pause: இடைநிறுத்து
       Drag Handle: சிறிய இயக்கியை நகர்த்து
@@ -1335,6 +1383,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: பொதுவான முன்னேற்றப் பட்டையைப் பயன்படுத்தாமல், சந்தா புதுப்பிப்புகள் மற்றும் நிர்வகிக்கப்பட்ட கருவிப் பதிவிறக்கங்கள் போன்ற பின்னணிச் செயல்களின் நேரடி முன்னேற்றத்துடன் நிலையான அறிவிப்பைக் காட்டும்.
     Always Show Scrollbars: உருள் பட்டைகளை எப்போதும் தெரியும்படி வைத்திருக்கும். முடக்கப்பட்டால் சுட்டியை நகர்த்துவதை நிறுத்திய சிறிது நேரத்தில் அவை மறைந்து, மீண்டும் நகர்த்தியவுடன் தோன்றும்.
+    Scroll Speed: சுட்டிச் சக்கரம் மற்றும் தொடுதள உருள் சைகைகள் எவ்வளவு தூரம் உருளும் என்பதை மாற்றும்.
     Use Fixed Tab Width: கிடைமட்டத் தாவல் பட்டையில் ஒவ்வொரு தாவலுக்கும் அதன் தலைப்புக்கேற்ப அளவிடாமல் ஒரே அகலத்தை வழங்கும்.
     Use Grid Player Menu: காணொளி இயக்கியின் அமைப்பு மெனுவை வரிசைப் பட்டியலுக்குப் பதிலாக ஓடுகளின் கட்டமாக அமைக்கும்.
 The playlist is at the beginning. Enable loop to continue playing: பிளேலிஸ்ட் தொடக்கத்தில் உள்ளது. தொடர்ந்து இயக்கச் சுழற்சியை இயக்கு
@@ -1370,6 +1419,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: முந்தைய பொருத்தத்திற்குச் செல்
   Toggle Normal Playback Speed: 1x வேகத்திற்கும் முந்தைய இயக்க வேகத்திற்கும் இடையே மாறு
   Toggle Skip Silence: அமைதியைத் தவிர்ப்பதை நிலைமாற்று
+  Set A-B Repeat Point A: A-B மீளியக்க A புள்ளியை அமை
+  Set A-B Repeat Point B: A-B மீளியக்க B புள்ளியை அமை
+  Clear A-B Repeat: A-B மீளியக்கத்தை அழி
   Video Zoom In: காணொளியைப் பெரிதாக்கு
   Video Zoom Out: காணொளியைச் சிறிதாக்கு
   Tab Switcher: தாவல் மாற்றி

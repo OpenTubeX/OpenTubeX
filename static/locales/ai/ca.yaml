@@ -122,6 +122,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} h'
   Hours and minutes: '{hours} h {minutes} min'
+Home Page:
+  Home: Inici
+  Description: Continueu des d'on ho vau quedar i consulteu l'activitat recent.
+  Customize: Personalitza l'inici
+  Done: Fet
+  Customize description: Trieu quines seccions es mostren i ordeneu-les com vulgueu.
+  Continue watching: Continua mirant
+  New since last visit: Novetats des de l'última visita
+  Watch queue: Cua de visualització
+  Recent playlists: Llistes de reproducció recents
+  Recent downloads: Baixades recents
+  Upcoming reminders: Recordatoris propers
+  Watch statistics: Estadístiques de visualització
+  View all: Mostra-ho tot
+  Previous shelf page: Pàgina anterior de {section}
+  Next shelf page: Pàgina següent de {section}
+  Shelf page status: '{section}, pàgina {page} de {total}.'
+  Move section up: Mou {section} amunt
+  Move section down: Mou {section} avall
+  Section moved: 'S''ha mogut {section} a la posició {position} de {total}.'
+  Nothing here yet: Encara no hi ha res
+  Empty description: Aquí apareixeran els vídeos que comenceu, les llistes de reproducció que utilitzeu, les baixades i els recordatoris.
+  All sections hidden: Totes les seccions estan ocultes
+  All sections hidden description: Personalitzeu l'inici per tornar a mostrar una secció.
 Subscriptions:
   Disabled Automatic Fetching: Heu desactivat l'obtenció automàtica de subscripcions. Actualitzeu-les per veure-les aquí.
   Empty Channels: Els canals als quals us heu subscrit no tenen cap vídeo ara mateix.
@@ -145,6 +169,8 @@ Subscriptions:
   Show Combined View: Mostra la vista combinada
   Newest First: Més nous primer
   Oldest First: Més antics primer
+  Posts:
+    RSS Message: YouTube no proporciona canals RSS per a les publicacions. Desactiveu l'opció "{rssSetting}" per veure les publicacions o activeu l'opció "{hideSetting}" per ocultar aquesta pestanya.
 Channels:
   Count: S'ha trobat 1 canal. | S'han trobat {number} canals. | S'han trobat {number} canals.
   Empty: La llista de canals està buida.
@@ -393,6 +419,7 @@ Settings:
     Hide Side Bar on Watch Pages: Oculta la barra lateral a les pàgines de reproducció
     UI Roundness: Arrodoniment de la interfície
     Scrollbar Width: Amplada de la barra de desplaçament
+    Scroll Speed: Velocitat de desplaçament
     Animation Speed: Velocitat de les animacions
     Thumbnail Size: Mida de les miniatures
     Show Tab Icons: Mostra les icones de les pestanyes
@@ -960,6 +987,7 @@ Settings:
     Hide Channel Avatars: Oculta els avatars dels canals
     Shorten View Counts: Abreuja els recomptes de visualitzacions i de m'agrades dels comentaris
     Hide Comment Translation Buttons: Oculta els botons de traducció dels comentaris
+    Hide Home: Oculta l'inici
     Hide Live Chat Replay: Oculta la repetició del xat en directe
     Hide Video Description: Oculta la descripció del vídeo
     Hide Comments: Oculta els comentaris
@@ -969,6 +997,7 @@ Settings:
     Hide Upcoming Premieres: Oculta les properes estrenes
     Hide Sharing Actions: Oculta les accions per compartir
     Hide Chapters: Oculta els capítols
+    Disable A-B Repeat: Desactiva la repetició A-B
     Hide End-Screen Annotations: Oculta les anotacions de la pantalla final
     Hide Paid Promotion Badge: Oculta la insígnia de promoció de pagament
     Hide Channels: Oculta els vídeos de canals
@@ -1108,6 +1137,7 @@ Settings:
     History not supported: Aquesta versió del servidor no admet la sincronització de l'historial de reproducció.
     Settings not supported: Aquesta versió del servidor no admet la sincronització de la configuració.
     Sync completed: S'ha completat la sincronització
+    Sync failed: 'Ha fallat la sincronització: {error}'
     Data Loss Confirmation: Voleu confirmar la sincronització destructiva?
     Data Loss Warning: L'estat del servidor suprimiria {deleted} dels {previous} elements de {collection} sincronitzats anteriorment. Això pot indicar una migració o un restabliment fallits del servidor. Continueu només si voleu fer aquesta supressió i teniu una còpia de seguretat.
     Confirm Data Loss: Suprimeix i continua
@@ -1287,6 +1317,8 @@ Video:
   Queue Item Cannot Move Down: No es pot moure {title} avall. Ja és a la posició {total} de {total}.
   Metadata: Informació del vídeo
   Close Metadata: Tanca la informació del vídeo
+  Collapse Playlist: Redueix la llista de reproducció
+  Expand Playlist: Amplia la llista de reproducció
   Metadata Cache:
     Title History: Historial del títol
     Thumbnail History: Historial de la miniatura
@@ -1416,6 +1448,21 @@ Video:
       Remaining: 'Temps restant: {time}'
       Cancel timer: Cancel·la el temporitzador
       Timer ended: Ha acabat el temporitzador de desconnexió
+    A-B Repeat:
+      A-B Repeat: Repetició A-B
+      On: Activada
+      Off: Desactivada
+      Point A: Punt A
+      Point B: Punt B
+      Set Repeat Start: Defineix l'inici de la repetició
+      Set Repeat End: Defineix el final de la repetició
+      Pause Repeat: Posa en pausa la repetició A-B
+      Resume Repeat: Reprèn la repetició A-B
+      Adjust Point: 'Ajusta el punt {point}, actualment a {timestamp}'
+      Clear Range: Esborra l'interval de repetició A-B
+      End Before Start: El punt B ha de ser posterior al punt A.
+      Outside Duration: La marca de temps ha d'estar dins del vídeo.
+      Cleared: S'ha esborrat la repetició A-B
     Zoom:
       Zoom: Zoom
       'Off': Desactivat
@@ -1460,6 +1507,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Torna a dalt
       Return to Video Tab: Torna a la pestanya del vídeo
+      Hide: Oculta el reproductor mini
       Play: Reprodueix
       Pause: Pausa
       Drag Handle: Mou el minireproductor
@@ -1839,6 +1887,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Mostra una notificació persistent amb el progrés en directe de les operacions en segon pla, com ara actualitzar les subscripcions i baixar eines gestionades, en lloc d'utilitzar la barra de progrés general.
     Always Show Scrollbars: Manté les barres de desplaçament sempre visibles. Si es desactiva, s'esvaeixen poc després que deixeu de moure el ratolí i reapareixen quan el torneu a moure.
+    Scroll Speed: Canvia la distància de desplaçament dels gestos de roda del ratolí i del ratolí tàctil.
     Use Fixed Tab Width: Dóna la mateixa amplada a totes les pestanyes de la barra horitzontal en lloc d'ajustar-les al títol.
     Use Grid Player Menu: Organitza el menú de configuració del reproductor de vídeo com una quadrícula de rajoles en lloc d'una llista de files.
   Experimental Settings:
@@ -1948,6 +1997,9 @@ KeyboardShortcutPrompt:
   Increase Video Speed: Augmenta la velocitat del vídeo segons l'interval de velocitat de reproducció
   Toggle Normal Playback Speed: Commuta entre la velocitat 1x i la velocitat de reproducció anterior
   Toggle Skip Silence: Commuta l'omissió de silencis
+  Set A-B Repeat Point A: Defineix el punt A de la repetició A-B
+  Set A-B Repeat Point B: Defineix el punt B de la repetició A-B
+  Clear A-B Repeat: Esborra la repetició A-B
   Full Window: Commuta la finestra completa
   Theatre Mode: Commuta el mode de cinema
   Take Screenshot: Fes una captura de pantalla

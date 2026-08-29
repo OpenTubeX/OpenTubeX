@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} мин'
   Hours: '{hours} ч'
   Hours and minutes: '{hours} ч {minutes} мин'
+Home Page:
+  Home: Начало
+  Description: Продължете оттам, докъдето сте стигнали, и вижте скорошната активност.
+  Customize: Персонализиране на началната страница
+  Done: Готово
+  Customize description: Изберете кои раздели да се показват и ги подредете в желания ред.
+  Continue watching: Продължаване на гледането
+  New since last visit: Ново от последното посещение
+  Watch queue: Опашка за гледане
+  Recent playlists: Скорошни плейлисти
+  Recent downloads: Скорошни изтегляния
+  Upcoming reminders: Предстоящи напомняния
+  Watch statistics: Статистика за гледането
+  View all: Преглед на всички
+  Previous shelf page: Предишна страница на {section}
+  Next shelf page: Следваща страница на {section}
+  Shelf page status: '{section}, страница {page} от {total}.'
+  Move section up: Преместване на {section} нагоре
+  Move section down: Преместване на {section} надолу
+  Section moved: '{section} е преместен на позиция {position} от {total}.'
+  Nothing here yet: Тук все още няма нищо
+  Empty description: Тук ще се показват започнатите видеоклипове, използваните плейлисти, изтеглянията и напомнянията.
+  All sections hidden: Всички раздели са скрити
+  All sections hidden description: Персонализирайте началната страница, за да покажете отново раздел.
 Subscriptions:
   Refreshing Subscription Videos: Обновяват се видеоклиповете от абонаментите
   Refreshing Subscription Shorts: Обновяват се кратките видеоклипове от абонаментите
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Покажи обединен изглед
   Newest First: Първо най-новите
   Oldest First: Първо най-старите
+  Posts:
+    RSS Message: YouTube не предоставя RSS емисии за публикации. Изключете настройката "{rssSetting}", за да преглеждате публикации, или включете настройката "{hideSetting}", за да скриете този раздел.
 Trending:
   Load Error: Съдържанието „Набиращи популярност“ не можа да бъде заредено.
   Unsupported Backend: За „Набиращи популярност“ е необходим Local API. Изберете Local API или включете резервния доставчик.
@@ -260,6 +286,7 @@ Settings:
     Hide Side Bar on Watch Pages: Скривай страничната лента на страниците за гледане
     UI Roundness: Заобленост на интерфейса
     Scrollbar Width: Ширина на лентата за превъртане
+    Scroll Speed: Скорост на превъртане
     Animation Speed: Скорост на анимациите
     Thumbnail Size: Размер на миниатюрите
     Show Tab Icons: Показвай иконите на разделите
@@ -692,7 +719,9 @@ Settings:
     Hide Channel Avatars: Скриване на аватарите на каналите
     Shorten View Counts: Съкращаване на броя гледания и харесвания на коментари
     Hide Comment Translation Buttons: Скриване на бутоните за превод на коментари
+    Hide Home: Скриване на началната страница
     Hide Live Chat Replay: Скриване на повторението на чата на живо
+    Disable A-B Repeat: Изключване на повторението A-B
     Hide End-Screen Annotations: Скриване на поясненията в крайния екран
     Hide Paid Promotion Badge: Скриване на значката за платена реклама
     Show Player Controls: Показване на контролите на плейъра
@@ -793,6 +822,7 @@ Settings:
     History not supported: Тази версия на сървъра не поддържа синхронизиране на хронологията на гледанията.
     Settings not supported: Тази версия на сървъра не поддържа синхронизиране на настройките.
     Sync completed: Синхронизирането завърши
+    Sync failed: 'Синхронизирането е неуспешно: {error}'
     Data Loss Confirmation: Да се потвърди ли синхронизирането с изтриване на данни?
     Data Loss Warning: Състоянието на сървъра ще изтрие {deleted} от {previous} синхронизирани по-рано елемента в {collection}. Това може да означава неуспешна миграция или нулиране на сървъра. Продължете само ако изтриването е умишлено и имате резервно копие.
     Confirm Data Loss: Изтриване и продължаване
@@ -894,6 +924,8 @@ Video:
   Queue Item Cannot Move Down: Видеоклипът {title} не може да бъде преместен надолу. Вече е на позиция {total} от {total}.
   Metadata: Информация за видеоклипа
   Close Metadata: Затваряне на информацията за видеоклипа
+  Collapse Playlist: Свиване на плейлиста
+  Expand Playlist: Разгъване на плейлиста
   Metadata Cache:
     Title History: Хронология на заглавието
     Thumbnail History: Хронология на миниатюрата
@@ -983,6 +1015,21 @@ Video:
       Remaining: 'Остават {time}'
       Cancel timer: Отмяна на таймера
       Timer ended: Таймерът за заспиване изтече
+    A-B Repeat:
+      A-B Repeat: Повторение A-B
+      On: Вкл.
+      Off: Изкл.
+      Point A: Точка A
+      Point B: Точка B
+      Set Repeat Start: Задаване на начало на повторението
+      Set Repeat End: Задаване на край на повторението
+      Pause Repeat: Пауза на повторението A-B
+      Resume Repeat: Продължаване на повторението A-B
+      Adjust Point: 'Коригиране на точка {point}, в момента {timestamp}'
+      Clear Range: Изчистване на диапазона за повторение A-B
+      End Before Start: Точка B трябва да бъде след точка A.
+      Outside Duration: Времевият маркер трябва да е в рамките на видеоклипа.
+      Cleared: Повторението A-B е изчистено
     Zoom:
       Zoom: Мащабиране
       'Off': 'Изключено'
@@ -1000,6 +1047,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Обратно в началото
       Return to Video Tab: Връщане в раздела с видеоклипа
+      Hide: Скриване на миниплейъра
       Play: Възпроизвеждане
       Pause: Пауза
       Drag Handle: Преместване на миниплейъра
@@ -1306,6 +1354,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Показва постоянно известие с текущия напредък на фоновите операции, като обновяване на абонаментите и изтегляне на управлявани инструменти, вместо общата лента за напредък.
     Always Show Scrollbars: Лентите за превъртане остават видими през цялото време. Когато е изключено, те избледняват малко след като спрете да движите мишката и се появяват отново веднага щом я раздвижите.
+    Scroll Speed: Променя разстоянието за превъртане с колелцето на мишката и жестовете с колелце на тъчпада.
     Use Fixed Tab Width: Задава еднаква ширина на всеки раздел в хоризонталната лента вместо ширина според заглавието му.
     Use Grid Player Menu: Подрежда менюто с настройки на плейъра като решетка от плочки вместо списък с редове.
 The playlist is at the beginning. Enable loop to continue playing: Плейлистът е в началото. Включете повтарянето, за да продължите възпроизвеждането
@@ -1339,6 +1388,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Преминаване към предишното съвпадение
   Toggle Normal Playback Speed: Превключване между скорост 1x и предишната скорост на възпроизвеждане
   Toggle Skip Silence: Превключване на пропускането на тишината
+  Set A-B Repeat Point A: Задаване на точка A за повторение A-B
+  Set A-B Repeat Point B: Задаване на точка B за повторение A-B
+  Clear A-B Repeat: Изчистване на повторението A-B
   Video Zoom In: Увеличаване на видеоклипа
   Video Zoom Out: Намаляване на видеоклипа
   Tab Switcher: Превключвател на разделите

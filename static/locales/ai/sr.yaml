@@ -96,6 +96,30 @@ Stats:
   Minutes: '{minutes} мин'
   Hours: '{hours} ч'
   Hours and minutes: '{hours} ч {minutes} мин'
+Home Page:
+  Home: Почетна
+  Description: Наставите тамо где сте стали и погледајте недавне активности.
+  Customize: Прилагоди почетну страницу
+  Done: Готово
+  Customize description: Изаберите одељке који ће се приказивати и распоредите их жељеним редоследом.
+  Continue watching: Настави гледање
+  New since last visit: Ново од последње посете
+  Watch queue: Ред за гледање
+  Recent playlists: Недавне листе за репродукцију
+  Recent downloads: Недавна преузимања
+  Upcoming reminders: Предстојећи подсетници
+  Watch statistics: Статистика гледања
+  View all: Прикажи све
+  Previous shelf page: Претходна страница одељка {section}
+  Next shelf page: Следећа страница одељка {section}
+  Shelf page status: "{section}, страница {page} од {total}."
+  Move section up: Помери {section} нагоре
+  Move section down: Помери {section} надоле
+  Section moved: Одељак {section} је премештен на место {position} од {total}.
+  Nothing here yet: Овде још нема ничега
+  Empty description: Видео-снимци које започнете, листе за репродукцију које користите, преузимања и подсетници појавиће се овде.
+  All sections hidden: Сви одељци су сакривени
+  All sections hidden description: Прилагодите почетну страницу да бисте поново приказали одељак.
 Subscriptions:
   Refreshing Subscription Videos: Освежавају се видео-снимци из претплата
   Refreshing Subscription Shorts: Освежавају се кратки видео-снимци из претплата
@@ -113,6 +137,8 @@ Subscriptions:
   Show Combined View: Прикажи обједињени приказ
   Newest First: Прво најновије
   Oldest First: Прво најстарије
+  Posts:
+    RSS Message: YouTube не пружа RSS изворе за објаве. Искључите подешавање „{rssSetting}“ да бисте видели објаве или укључите подешавање „{hideSetting}“ да бисте сакрили ову картицу.
 Trending:
   Load Error: Садржај у тренду није могао да се учита.
   Unsupported Backend: За садржај у тренду потребан је Local API. Изаберите Local API или укључите резервни начин рада.
@@ -268,6 +294,7 @@ Settings:
     Hide Side Bar on Watch Pages: Сакриј бочну траку на страницама за гледање
     UI Roundness: Заобљеност интерфејса
     Scrollbar Width: Ширина траке за померање
+    Scroll Speed: Брзина померања
     Animation Speed: Брзина анимације
     Thumbnail Size: Величина сличице
     Show Tab Icons: Прикажи иконе картица
@@ -713,7 +740,9 @@ Settings:
     Hide Channel Avatars: Сакриј аватаре канала
     Shorten View Counts: Скрати број прегледа и свиђања коментара
     Hide Comment Translation Buttons: Сакриј дугмад за превод коментара
+    Hide Home: Сакриј почетну страницу
     Hide Live Chat Replay: Сакриј снимак ћаскања уживо
+    Disable A-B Repeat: Онемогући A-B понављање
     Hide End-Screen Annotations: Сакриј напомене на завршном екрану
     Hide Paid Promotion Badge: Сакриј ознаку плаћене промоције
     Show Player Controls: Прикажи контроле плејера
@@ -829,6 +858,7 @@ Settings:
     History not supported: Ова верзија сервера не подржава синхронизацију историје гледања.
     Settings not supported: Ова верзија сервера не подржава синхронизацију подешавања.
     Sync completed: Синхронизација је завршена
+    Sync failed: "Синхронизација није успела: {error}"
     Data Loss Confirmation: Желите ли да потврдите синхронизацију која брише податке?
     Data Loss Warning: Стање на серверу би обрисало {deleted} од {previous} раније синхронизованих ставки из колекције {collection}. То може да указује на неуспелу миграцију или ресетовање сервера. Наставите само ако намерно бришете податке и имате резервну копију.
     Confirm Data Loss: Обриши и настави
@@ -968,6 +998,8 @@ Video:
   Try With Configured Cookies: Покушај са подешеним колачићима
   Restricted Playback Authentication Failed Template: 'yt-dlp није могао да приступи овом видео-снимку помоћу подешених колачића: {error}'
   Private: Приватни видео-снимци не могу да се гледају у програму OpenTubeX јер захтевају пријаву на Google налог и власништво над видео-снимком.
+  Collapse Playlist: Скупи листу за репродукцију
+  Expand Playlist: Прошири листу за репродукцију
   Unmark As Watched: Означи као негледано
   Video has been unmarked as watched: Видео-снимак је означен као негледан
   Save Channel Playback Speed: Сачувај брзину репродукције за канал
@@ -1029,6 +1061,21 @@ Video:
       Remaining: 'Преостало: {time}'
       Cancel timer: Откажи тајмер
       Timer ended: Тајмер за спавање је истекао
+    A-B Repeat:
+      A-B Repeat: A-B понављање
+      On: Укључено
+      Off: Искључено
+      Point A: Тачка A
+      Point B: Тачка B
+      Set Repeat Start: Постави почетак понављања
+      Set Repeat End: Постави крај понављања
+      Pause Repeat: Паузирај A-B понављање
+      Resume Repeat: Настави A-B понављање
+      Adjust Point: Подеси тачку {point}, тренутно {timestamp}
+      Clear Range: Обриши опсег A-B понављања
+      End Before Start: Тачка B мора бити после тачке A.
+      Outside Duration: Временска ознака мора бити унутар трајања видео-снимка.
+      Cleared: A-B понављање је обрисано
     Zoom:
       Zoom: Увећање
       'Off': 'Искључено'
@@ -1046,6 +1093,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Назад на врх
       Return to Video Tab: Назад на картицу видео-снимка
+      Hide: Сакриј мини-плејер
       Play: Репродукуј
       Pause: Паузирај
       Drag Handle: Помери мини-плејер
@@ -1359,6 +1407,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Приказује трајно обавештење са тренутним напретком позадинских радњи, као што су освежавање претплата и преузимање алатки којима апликација управља, уместо опште траке напретка.
     Always Show Scrollbars: Траке за померање су увек видљиве. Када је искључено, нестају убрзо пошто престанете да померате миш и поново се појављују чим га померите.
+    Scroll Speed: Мења растојање померања покретима точкића миша и додирне табле.
     Use Fixed Tab Width: Даје свакој картици на водоравној траци картица исту ширину уместо да је прилагођава наслову.
     Use Grid Player Menu: Распоређује мени подешавања плејера као мрежу плочица уместо као листу редова.
 The playlist is at the beginning. Enable loop to continue playing: Листа за репродукцију је на почетку. Укључите понављање да бисте наставили репродукцију
@@ -1394,6 +1443,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Пређи на претходно подударање
   Toggle Normal Playback Speed: Пребаци између брзине 1x и претходне брзине репродукције
   Toggle Skip Silence: Укључи или искључи прескакање тишине
+  Set A-B Repeat Point A: Постави тачку A за A-B понављање
+  Set A-B Repeat Point B: Постави тачку B за A-B понављање
+  Clear A-B Repeat: Обриши A-B понављање
   Video Zoom In: Увећај видео-снимак
   Video Zoom Out: Умањи видео-снимак
   Tab Switcher: Мењач картица

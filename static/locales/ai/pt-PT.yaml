@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} h'
   Hours and minutes: '{hours} h {minutes} min'
+Home Page:
+  Home: Página inicial
+  Description: Continue de onde parou e veja a atividade recente.
+  Customize: Personalizar página inicial
+  Done: Concluído
+  Customize description: Escolha as secções a apresentar e organize-as pela ordem pretendida.
+  Continue watching: Continuar a ver
+  New since last visit: Novidades desde a última visita
+  Watch queue: Fila de reprodução
+  Recent playlists: Listas de reprodução recentes
+  Recent downloads: Transferências recentes
+  Upcoming reminders: Lembretes futuros
+  Watch statistics: Estatísticas de visualização
+  View all: Ver tudo
+  Previous shelf page: Página anterior de {section}
+  Next shelf page: Página seguinte de {section}
+  Shelf page status: "{section}, página {page} de {total}."
+  Move section up: Mover {section} para cima
+  Move section down: Mover {section} para baixo
+  Section moved: "{section} movida para a posição {position} de {total}."
+  Nothing here yet: Ainda não há nada aqui
+  Empty description: Os vídeos que começar, as listas de reprodução que utilizar, as transferências e os lembretes aparecerão aqui.
+  All sections hidden: Todas as secções estão ocultas
+  All sections hidden description: Personalize a página inicial para voltar a mostrar uma secção.
 Subscriptions:
   Refreshing Subscription Videos: A atualizar os vídeos das subscrições
   Refreshing Subscription Shorts: A atualizar os Shorts das subscrições
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Mostrar vista combinada
   Newest First: Mais recentes primeiro
   Oldest First: Mais antigos primeiro
+  Posts:
+    RSS Message: O YouTube não fornece feeds RSS para publicações. Desative a definição "{rssSetting}" para ver publicações ou ative a definição "{hideSetting}" para ocultar este separador.
 Trending:
   Load Error: Não foi possível carregar as tendências.
   Unsupported Backend: As tendências requerem a API local. Selecione a API local ou ative o sistema de ligação secundário.
@@ -262,6 +288,7 @@ Settings:
     Hide Side Bar on Watch Pages: Ocultar a barra lateral nas páginas de visualização
     UI Roundness: Arredondamento da interface
     Scrollbar Width: Largura da barra de deslocamento
+    Scroll Speed: Velocidade de deslocamento
     Animation Speed: Velocidade das animações
     Thumbnail Size: Tamanho das miniaturas
     Show Tab Icons: Mostrar ícones nos separadores
@@ -698,7 +725,9 @@ Settings:
     Hide Channel Avatars: Ocultar avatares dos canais
     Shorten View Counts: Abreviar contagens de visualizações e de gostos nos comentários
     Hide Comment Translation Buttons: Ocultar botões de tradução dos comentários
+    Hide Home: Ocultar página inicial
     Hide Live Chat Replay: Ocultar repetição do chat em direto
+    Disable A-B Repeat: Desativar repetição A-B
     Hide End-Screen Annotations: Ocultar anotações do ecrã final
     Hide Paid Promotion Badge: Ocultar emblema de promoção paga
     Show Player Controls: Mostrar controlos do leitor
@@ -808,6 +837,7 @@ Settings:
     History not supported: Esta versão do servidor não suporta a sincronização do histórico de reprodução.
     Settings not supported: Esta versão do servidor não suporta a sincronização das definições.
     Sync completed: Sincronização concluída
+    Sync failed: "Falha na sincronização: {error}"
     Data Loss Confirmation: Confirmar sincronização destrutiva?
     Data Loss Warning: O estado do servidor eliminaria {deleted} dos {previous} itens de {collection} sincronizados anteriormente. Isto pode indicar uma falha na migração ou reposição do servidor. Continue apenas se esta eliminação for intencional e tiver uma cópia de segurança.
     Confirm Data Loss: Eliminar e continuar
@@ -939,6 +969,8 @@ Video:
   Try With Configured Cookies: Tentar com os cookies configurados
   Restricted Playback Authentication Failed Template: 'O yt-dlp não conseguiu aceder a este vídeo com os cookies configurados: {error}'
   Private: Os vídeos privados não podem ser vistos no OpenTubeX porque exigem um início de sessão Google e que o utilizador seja proprietário do vídeo.
+  Collapse Playlist: Recolher lista de reprodução
+  Expand Playlist: Expandir lista de reprodução
   Unmark As Watched: Desmarcar como reproduzido
   Video has been unmarked as watched: O vídeo foi desmarcado como reproduzido
   Save Channel Playback Speed: Guardar velocidade de reprodução do canal
@@ -999,6 +1031,21 @@ Video:
       Remaining: 'Tempo restante: {time}'
       Cancel timer: Cancelar temporizador
       Timer ended: O temporizador de suspensão terminou
+    A-B Repeat:
+      A-B Repeat: Repetição A-B
+      On: Ativada
+      Off: Desativada
+      Point A: Ponto A
+      Point B: Ponto B
+      Set Repeat Start: Definir início da repetição
+      Set Repeat End: Definir fim da repetição
+      Pause Repeat: Pausar repetição A-B
+      Resume Repeat: Retomar repetição A-B
+      Adjust Point: Ajustar ponto {point}, atualmente {timestamp}
+      Clear Range: Limpar intervalo da repetição A-B
+      End Before Start: O ponto B tem de estar depois do ponto A.
+      Outside Duration: A marca temporal tem de estar dentro da duração do vídeo.
+      Cleared: Repetição A-B limpa
     Zoom:
       Zoom: Ampliação
       'Off': Desativada
@@ -1016,6 +1063,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Voltar ao início
       Return to Video Tab: Voltar ao separador do vídeo
+      Hide: Ocultar minirreprodutor
       Play: Reproduzir
       Pause: Pausar
       Drag Handle: Mover mini-reprodutor
@@ -1321,6 +1369,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Mostra uma notificação persistente com o progresso em tempo real das operações em segundo plano, como a atualização das subscrições e as descargas de ferramentas geridas, em vez de utilizar a barra de progresso global.
     Always Show Scrollbars: Mantém as barras de deslocamento sempre visíveis. Quando esta opção está desativada, desaparecem pouco depois de parar de mover o rato e reaparecem assim que volta a movê-lo.
+    Scroll Speed: Altera a distância percorrida pelos gestos da roda do rato e do painel tátil.
     Use Fixed Tab Width: Atribui a mesma largura a todos os separadores na barra horizontal, em vez de ajustar a largura ao respetivo título.
     Use Grid Player Menu: Organiza o menu de definições do reprodutor de vídeo numa grelha de mosaicos em vez de uma lista de linhas.
 The playlist is at the beginning. Enable loop to continue playing: A lista de reprodução está no início. Ative a repetição para continuar a reproduzir
@@ -1354,6 +1403,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Ir para a correspondência anterior
   Toggle Normal Playback Speed: Alternar entre a velocidade 1x e a velocidade de reprodução anterior
   Toggle Skip Silence: Ativar ou desativar o avanço sobre períodos de silêncio
+  Set A-B Repeat Point A: Definir ponto A da repetição A-B
+  Set A-B Repeat Point B: Definir ponto B da repetição A-B
+  Clear A-B Repeat: Limpar repetição A-B
   Video Zoom In: Ampliar o vídeo
   Video Zoom Out: Reduzir o vídeo
   Tab Switcher: Seletor de separadores

@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} h'
   Hours and minutes: '{hours} h {minutes} min'
+Home Page:
+  Home: Accueil
+  Description: Reprenez là où vous vous étiez arrêté et consultez l’activité récente.
+  Customize: Personnaliser l’accueil
+  Done: Terminé
+  Customize description: Choisissez les sections à afficher et organisez-les dans l’ordre souhaité.
+  Continue watching: Continuer à regarder
+  New since last visit: Nouveautés depuis votre dernière visite
+  Watch queue: File d’attente
+  Recent playlists: Playlists récentes
+  Recent downloads: Téléchargements récents
+  Upcoming reminders: Rappels à venir
+  Watch statistics: Statistiques de visionnage
+  View all: Tout afficher
+  Previous shelf page: Page précédente de {section}
+  Next shelf page: Page suivante de {section}
+  Shelf page status: '{section}, page {page} sur {total}.'
+  Move section up: Déplacer {section} vers le haut
+  Move section down: Déplacer {section} vers le bas
+  Section moved: '{section} déplacé à la position {position} sur {total}.'
+  Nothing here yet: Rien ici pour le moment
+  Empty description: Les vidéos que vous commencez, les playlists que vous utilisez, les téléchargements et les rappels apparaîtront ici.
+  All sections hidden: Toutes les sections sont masquées
+  All sections hidden description: Personnalisez l’accueil pour afficher à nouveau une section.
 Subscriptions:
   Refreshing Subscription Videos: Actualisation des vidéos des abonnements
   Refreshing Subscription Shorts: Actualisation des Shorts des abonnements
@@ -260,6 +284,7 @@ Settings:
     Hide Side Bar on Watch Pages: Masquer la barre latérale sur les pages de visionnage
     UI Roundness: Arrondi de l’interface
     Scrollbar Width: Largeur de la barre de défilement
+    Scroll Speed: Vitesse de défilement
     Animation Speed: Vitesse des animations
     Thumbnail Size: Taille des miniatures
     Show Tab Icons: Afficher les icônes des onglets
@@ -693,6 +718,8 @@ Settings:
     Shorten View Counts: Abréger le nombre de vues et de mentions J’aime sur les commentaires
     Hide Comment Translation Buttons: Masquer les boutons de traduction des commentaires
     Hide Live Chat Replay: Masquer la rediffusion du chat en direct
+    Hide Home: Masquer l’accueil
+    Disable A-B Repeat: Désactiver la répétition A-B
     Hide End-Screen Annotations: Masquer les annotations de fin de vidéo
     Hide Paid Promotion Badge: Masquer le badge de promotion rémunérée
     Show Player Controls: Afficher les commandes du lecteur
@@ -793,6 +820,7 @@ Settings:
     History not supported: Cette version du serveur ne prend pas en charge la synchronisation de l’historique de visionnage.
     Settings not supported: Cette version du serveur ne prend pas en charge la synchronisation des paramètres.
     Sync completed: Synchronisation terminée
+    Sync failed: 'Échec de la synchronisation : {error}'
     Data Loss Confirmation: Confirmer la synchronisation destructive ?
     Data Loss Warning: L’état du serveur supprimerait {deleted} éléments sur {previous} de la collection {collection} précédemment synchronisés. Cela peut indiquer l’échec d’une migration ou la réinitialisation du serveur. Ne continuez que si cette suppression est volontaire et si vous disposez d’une sauvegarde.
     Confirm Data Loss: Supprimer et continuer
@@ -982,6 +1010,21 @@ Video:
       Remaining: '{time} restantes'
       Cancel timer: Annuler le minuteur
       Timer ended: Minuteur de mise en veille terminé
+    A-B Repeat:
+      A-B Repeat: Répétition A-B
+      'On': Activée
+      'Off': Désactivée
+      Point A: Point A
+      Point B: Point B
+      Set Repeat Start: Définir le début de la répétition
+      Set Repeat End: Définir la fin de la répétition
+      Pause Repeat: Suspendre la répétition A-B
+      Resume Repeat: Reprendre la répétition A-B
+      Adjust Point: 'Ajuster le point {point}, actuellement à {timestamp}'
+      Clear Range: Effacer la plage de répétition A-B
+      End Before Start: Le point B doit se trouver après le point A.
+      Outside Duration: L’horodatage doit se trouver dans la vidéo.
+      Cleared: Répétition A-B effacée
     Zoom:
       Zoom: Zoom
       'Off': 'Désactivé'
@@ -999,6 +1042,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Retour en haut
       Return to Video Tab: Revenir à l’onglet de la vidéo
+      Hide: Masquer le mini-lecteur
       Play: Lire
       Pause: Mettre en pause
       Drag Handle: Déplacer le mini-lecteur
@@ -1304,6 +1348,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Affiche une notification persistante indiquant en temps réel la progression des opérations en arrière-plan, comme l’actualisation des abonnements et le téléchargement des outils gérés, au lieu d’utiliser la barre de progression globale.
     Always Show Scrollbars: Maintient les barres de défilement visibles en permanence. Lorsque cette option est désactivée, elles disparaissent peu après l’arrêt du mouvement de la souris et réapparaissent dès que vous la déplacez.
+    Scroll Speed: Modifie la distance de défilement des gestes de la molette de la souris et du pavé tactile.
     Use Fixed Tab Width: Attribue la même largeur à tous les onglets de la barre horizontale au lieu d’adapter leur taille à leur titre.
     Use Grid Player Menu: Organise le menu des paramètres du lecteur vidéo sous forme de grille de vignettes au lieu d’une liste de lignes.
 The playlist is at the beginning. Enable loop to continue playing: La playlist est au début. Activez la lecture en boucle pour continuer
@@ -1337,6 +1382,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Aller au résultat précédent
   Toggle Normal Playback Speed: Basculer entre la vitesse 1x et la vitesse de lecture précédente
   Toggle Skip Silence: Activer ou désactiver les silences ignorés
+  Set A-B Repeat Point A: Définir le point A de la répétition A-B
+  Set A-B Repeat Point B: Définir le point B de la répétition A-B
+  Clear A-B Repeat: Effacer la répétition A-B
   Video Zoom In: Zoomer dans la vidéo
   Video Zoom Out: Dézoomer dans la vidéo
   Tab Switcher: Sélecteur d’onglets

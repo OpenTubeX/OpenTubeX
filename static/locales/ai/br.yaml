@@ -94,6 +94,30 @@ Stats:
   Minutes: "{minutes} min"
   Hours: "{hours} e"
   Hours and minutes: "{hours} e {minutes} min"
+Home Page:
+  Home: Degemer
+  Description: "Kenderc'hel adalek al lec'h ma oa bet paouezet ha gwelet an obererezh nevez."
+  Customize: Personelaat ar bajenn degemer
+  Done: Graet
+  Customize description: "Dibabit ar rannoù da ziskouez hag urzhiit anezho evel ma fell deoc'h."
+  Continue watching: "Kenderc'hel da sellet"
+  New since last visit: Nevez abaoe ho kweladenn ziwezhañ
+  Watch queue: Lost sellet
+  Recent playlists: Rolloù-lenn nevez
+  Recent downloads: Pellgargadurioù nevez
+  Upcoming reminders: "Kounadurioù da zont"
+  Watch statistics: Stadegoù sellet
+  View all: Gwelet pep tra
+  Previous shelf page: Pajenn gent {section}
+  Next shelf page: Pajenn da-heul {section}
+  Shelf page status: '{section}, pajenn {page} diwar {total}.'
+  Move section up: "Dilec'hiañ {section} d'ar c'hrec'h"
+  Move section down: "Dilec'hiañ {section} d'an traoñ"
+  Section moved: "Dilec'hiet eo bet {section} d'al lec'h {position} diwar {total}."
+  Nothing here yet: Netra amañ evit poent
+  Empty description: "Amañ e vo diskouezet ar videoioù krog ganeoc'h, ar rolloù-lenn implijet, ar pellgargadurioù hag ar c'hounadurioù."
+  All sections hidden: Kuzhet eo an holl rannoù
+  All sections hidden description: Personelait ar bajenn degemer evit diskouez ur rann en-dro.
 Subscriptions:
   Refreshing Subscription Videos: "Oc'h adkargañ videoioù ar c'houmanantoù"
   Refreshing Subscription Shorts: "Oc'h adkargañ videoioù berr (Shorts) ar c'houmanantoù"
@@ -262,6 +286,7 @@ Settings:
     Hide Side Bar on Watch Pages: "Kuzhat ar varrenn gostez war ar pajennoù sellout"
     UI Roundness: "Ronded an etrefas"
     Scrollbar Width: "Ledander ar varrenn dibunañ"
+    Scroll Speed: "Tizh dibunañ"
     Animation Speed: "Tizh ar bliverezhioù"
     Thumbnail Size: "Ment ar skeudennigoù"
     Show Tab Icons: "Diskouez arlunioù an ivinelloù"
@@ -703,7 +728,9 @@ Settings:
     Hide Channel Avatars: "Kuzhat skeudennoù ar chadennoù"
     Shorten View Counts: "Berraat niver ar selladennoù ha plijadennoù an evezhiadennoù"
     Hide Comment Translation Buttons: "Kuzhat boutonoù treiñ an evezhiadennoù"
+    Hide Home: "Kuzhat ar bajenn degemer"
     Hide Live Chat Replay: "Kuzhat adlenn ar flapañ war-eeun"
+    Disable A-B Repeat: "Diweredekaat an adlenn A-B"
     Hide End-Screen Annotations: "Kuzhat notennoù ar skramm echuiñ"
     Hide Paid Promotion Badge: "Kuzhat ar badj bruderezh paeet"
     Show Player Controls: "Diskouez reolerezhioù al lenner"
@@ -813,6 +840,7 @@ Settings:
     History not supported: "Stumm ar servijer-mañ ne skor ket goubredañ an istor sellout."
     Settings not supported: "Stumm ar servijer-mañ ne skor ket goubredañ an arventennoù."
     Sync completed: "Echu eo ar goubredañ"
+    Sync failed: "C'hwitet eo ar goubredañ: {error}"
     Data Loss Confirmation: "Kadarnaat ar goubredañ distrujus?"
     Data Loss Warning: "Stad ar servijer a zilamfe {deleted} diwar {previous} elfenn {collection} bet goubredet a-raok. Gallout a ra talvezout eo c'hwitet un treuzkas pe un adderaouekaat ar servijer. Kendalc'hit hepken ma fell deoc'h dilemel anezho hag ez eus un eiladenn-gwarediñ ganeoc'h."
     Confirm Data Loss: "Dilemel ha kenderc'hel"
@@ -1016,6 +1044,21 @@ Video:
       Remaining: "{time} a chom"
       Cancel timer: "Nullañ ar munuter"
       Timer ended: "Echu eo ar munuter kousket"
+    A-B Repeat:
+      A-B Repeat: "Adlenn A-B"
+      On: "Gweredekaet"
+      Off: "Diweredekaet"
+      Point A: "Poent A"
+      Point B: "Poent B"
+      Set Repeat Start: "Lakaat deroù an adlenn"
+      Set Repeat End: "Lakaat dibenn an adlenn"
+      Pause Repeat: "Ehanañ an adlenn A-B"
+      Resume Repeat: "Adkregiñ gant an adlenn A-B"
+      Adjust Point: "Kempenn ar poent {point}, bremañ {timestamp}"
+      Clear Range: "Skarzhañ tachenn an adlenn A-B"
+      End Before Start: "Ret eo d'ar poent B bezañ goude ar poent A."
+      Outside Duration: "Ret eo d'ar merk-amzer bezañ e-barzh ar video."
+      Cleared: "Skarzhet eo bet an adlenn A-B"
     Zoom:
       Zoom: "Zoum"
       'Off': "Lazhet"
@@ -1033,6 +1076,7 @@ Video:
     Scroll Mini Player:
       Back to Top: "Distreiñ e penn ar bajenn"
       Return to Video Tab: "Distreiñ da ivinell ar video"
+      Hide: "Kuzhat al lenner bihan"
       Play: "Lenn"
       Pause: "Ehan"
       Drag Handle: "Dilec'hiañ al lenner bihan"
@@ -1339,6 +1383,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: "Diskouez ur rebuad padus gant araokadur diouzhtu evit an oberoù en drekleur, evel adkargañ ar c'houmanantoù ha pellgargañ ostilhoù meret, e-lec'h implijout ar varrenn araokadur hollek."
     Always Show Scrollbars: "Derc'hel ar barrennoù dibunañ gwelus bepred. Pa vez diweredekaet e steuziont nebeut goude ma paouezit da zilec'hiañ al logodenn hag e tistroont kerkent ha ma tilec'hiit anezhi en-dro."
+    Scroll Speed: "Kemmañ ar pellder dibunañ gant rod al logodenn ha jestroù rod ar c'horreenn-stok."
     Use Fixed Tab Width: "Reiñ ar memes ledander da bep ivinell er varrenn ivinelloù a-blaen e-lec'h azasaat anezho diouzh o zitl."
     Use Grid Player Menu: "Aozadur lañser arventennoù al lenner video evel ur gael karrelloù e-lec'h ur roll linennoù."
 The playlist is at the beginning. Enable loop to continue playing: "Ar roll-videoioù zo en e zerou. Gweredekait al lenn en ur voul evit kenderc'hel da lenn"
@@ -1374,6 +1419,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: "Mont d'ar genglotadenn gent"
   Toggle Normal Playback Speed: "Cheñch etre an tizh 1x hag an tizh lenn kent"
   Toggle Skip Silence: "Gweredekaat pe ziweredekaat al lamm dre ar sioulder"
+  Set A-B Repeat Point A: "Lakaat poent A an adlenn A-B"
+  Set A-B Repeat Point B: "Lakaat poent B an adlenn A-B"
+  Clear A-B Repeat: "Skarzhañ an adlenn A-B"
   Video Zoom In: "Brasaat ar video"
   Video Zoom Out: "Bihanaat ar video"
   Tab Switcher: "Cheñcher ivinelloù"

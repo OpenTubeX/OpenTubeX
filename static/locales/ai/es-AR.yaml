@@ -102,6 +102,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} h'
   Hours and minutes: '{hours} h {minutes} min'
+Home Page:
+  Home: Inicio
+  Description: Retomá donde dejaste y mirá la actividad reciente.
+  Customize: Personalizar Inicio
+  Done: Listo
+  Customize description: Elegí qué secciones aparecen y ordenalas como quieras.
+  Continue watching: Seguir mirando
+  New since last visit: Novedades desde la última visita
+  Watch queue: Cola de reproducción
+  Recent playlists: Listas de reproducción recientes
+  Recent downloads: Descargas recientes
+  Upcoming reminders: Próximos recordatorios
+  Watch statistics: Estadísticas de visualización
+  View all: Ver todo
+  Previous shelf page: Página anterior de {section}
+  Next shelf page: Página siguiente de {section}
+  Shelf page status: '{section}, página {page} de {total}.'
+  Move section up: Subir {section}
+  Move section down: Bajar {section}
+  Section moved: '{section} se movió a la posición {position} de {total}.'
+  Nothing here yet: Todavía no hay nada acá
+  Empty description: Acá aparecerán los videos que empieces a mirar, las listas de reproducción que uses, las descargas y los recordatorios.
+  All sections hidden: Todas las secciones están ocultas
+  All sections hidden description: Personalizá Inicio para volver a mostrar una sección.
 Subscriptions:
   Refreshing Subscription Videos: Actualizando videos de las suscripciones
   Refreshing Subscription Shorts: Actualizando Shorts de las suscripciones
@@ -119,6 +143,8 @@ Subscriptions:
   Show Combined View: Mostrar vista combinada
   Newest First: Más reciente primero
   Oldest First: Más antiguo primero
+  Posts:
+    RSS Message: YouTube no proporciona fuentes RSS para las publicaciones. Desactivá el ajuste "{rssSetting}" para ver las publicaciones o activá el ajuste "{hideSetting}" para ocultar esta pestaña.
 Trending:
   Load Error: No se pudo cargar Tendencias.
   Unsupported Backend: Tendencias requiere la API local. Seleccioná la API local o activá la fuente alternativa del backend.
@@ -279,6 +305,7 @@ Settings:
     Hide Side Bar on Watch Pages: Ocultar la barra lateral en las páginas de visualización
     UI Roundness: Redondez de la interfaz
     Scrollbar Width: Ancho de la barra de desplazamiento
+    Scroll Speed: Velocidad de desplazamiento
     Animation Speed: Velocidad de las animaciones
     Thumbnail Size: Tamaño de las miniaturas
     Show Tab Icons: Mostrar iconos de pestañas
@@ -774,7 +801,9 @@ Settings:
     Hide Channel Avatars: Ocultar avatares de canales
     Shorten View Counts: Abreviar recuentos de visualizaciones y «Me gusta» en comentarios
     Hide Comment Translation Buttons: Ocultar botones de traducción de comentarios
+    Hide Home: Ocultar Inicio
     Hide Live Chat Replay: Ocultar repetición del chat en directo
+    Disable A-B Repeat: Desactivar repetición A-B
     Hide End-Screen Annotations: Ocultar anotaciones de la pantalla final
     Hide Paid Promotion Badge: Ocultar distintivo de promoción pagada
     Hide Channel Posts: Ocultar pestaña "Publicaciones" del canal
@@ -892,6 +921,7 @@ Settings:
     History not supported: Esta versión del servidor no admite la sincronización del historial de reproducción.
     Settings not supported: Esta versión del servidor no admite la sincronización de ajustes.
     Sync completed: Sincronización completada
+    Sync failed: 'Error de sincronización: {error}'
     Data Loss Confirmation: ¿Confirmar sincronización destructiva?
     Data Loss Warning: El estado del servidor eliminaría {deleted} de {previous} elementos de {collection} sincronizados anteriormente. Esto puede indicar que una migración o un restablecimiento del servidor ha fallado. Continuá solo si querés eliminar esos datos y tenés una copia de seguridad.
     Confirm Data Loss: Eliminar y continuar
@@ -1131,6 +1161,8 @@ Video:
   Queue Item Cannot Move Down: No se puede bajar {title}. Ya está en la posición {total} de {total}.
   Metadata: Información del video
   Close Metadata: Cerrar información del video
+  Collapse Playlist: Contraer lista de reproducción
+  Expand Playlist: Expandir lista de reproducción
   Metadata Cache:
     Title History: Historial de títulos
     Thumbnail History: Historial de miniaturas
@@ -1309,6 +1341,21 @@ Video:
       Remaining: Quedan {time}
       Cancel timer: Cancelar temporizador
       Timer ended: El temporizador de suspensión ha terminado
+    A-B Repeat:
+      A-B Repeat: Repetición A-B
+      On: Activada
+      Off: Desactivada
+      Point A: Punto A
+      Point B: Punto B
+      Set Repeat Start: Establecer inicio de repetición
+      Set Repeat End: Establecer fin de repetición
+      Pause Repeat: Pausar repetición A-B
+      Resume Repeat: Reanudar repetición A-B
+      Adjust Point: 'Ajustar punto {point}, actualmente {timestamp}'
+      Clear Range: Borrar intervalo de repetición A-B
+      End Before Start: El punto B debe estar después del punto A.
+      Outside Duration: La marca de tiempo debe estar dentro del video.
+      Cleared: Repetición A-B borrada
     Zoom:
       Zoom: Zoom
       'Off': Desactivado
@@ -1353,6 +1400,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Volver arriba
       Return to Video Tab: Volver a la pestaña del video
+      Hide: Ocultar minirreproductor
       Play: Reproducir
       Pause: Pausar
       Drag Handle: Mover minirreproductor
@@ -1751,6 +1799,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Muestra una notificación persistente con el progreso en tiempo real de las operaciones en segundo plano, como la actualización de suscripciones y la descarga de herramientas gestionadas, en lugar de usar la barra de progreso global.
     Always Show Scrollbars: Mantiene las barras de desplazamiento visibles en todo momento. Si se desactiva, desaparecen poco después de dejar de mover el mouse y reaparecen en cuanto vuelves a moverlo.
+    Scroll Speed: Cambia la distancia de desplazamiento de los gestos de rueda del mouse y del panel táctil.
     Use Fixed Tab Width: Asigna el mismo ancho a todas las pestañas de la barra horizontal en lugar de adaptarlo a su título.
     Use Grid Player Menu: Organiza el menú de ajustes del reproductor de video como una cuadrícula de mosaicos en lugar de una lista de filas.
   Experimental Settings:
@@ -1863,6 +1912,9 @@ KeyboardShortcutPrompt:
   Increase Video Speed: Aumentar velocidad de video según el intervalo de tasa de reproducción
   Toggle Normal Playback Speed: Alternar entre la velocidad 1x y la velocidad de reproducción anterior
   Toggle Skip Silence: Activar o desactivar la omisión de silencios
+  Set A-B Repeat Point A: Establecer punto A de repetición A-B
+  Set A-B Repeat Point B: Establecer punto B de repetición A-B
+  Clear A-B Repeat: Borrar repetición A-B
   Full Window: Activar/desactivar ventana completa
   Theatre Mode: Activar/desactivar modo de cine
   Take Screenshot: Tomar captura de pantalla

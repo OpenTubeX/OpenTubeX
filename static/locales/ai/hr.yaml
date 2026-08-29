@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} h'
   Hours and minutes: '{hours} h {minutes} min'
+Home Page:
+  Home: Početna
+  Description: Nastavite gdje ste stali i pogledajte nedavnu aktivnost.
+  Customize: Prilagodi početnu
+  Done: Gotovo
+  Customize description: Odaberite koji će se odjeljci prikazivati i rasporedite ih željenim redoslijedom.
+  Continue watching: Nastavi gledati
+  New since last visit: Novo od posljednjeg posjeta
+  Watch queue: Red čekanja za gledanje
+  Recent playlists: Nedavni popisi za reprodukciju
+  Recent downloads: Nedavna preuzimanja
+  Upcoming reminders: Predstojeći podsjetnici
+  Watch statistics: Statistika gledanja
+  View all: Prikaži sve
+  Previous shelf page: Prethodna stranica odjeljka {section}
+  Next shelf page: Sljedeća stranica odjeljka {section}
+  Shelf page status: '{section}, stranica {page} od {total}.'
+  Move section up: Pomakni {section} gore
+  Move section down: Pomakni {section} dolje
+  Section moved: '{section} je premješten na položaj {position} od {total}.'
+  Nothing here yet: Ovdje još nema ničega
+  Empty description: Videozapisi koje pokrenete, popisi za reprodukciju koje koristite, preuzimanja i podsjetnici pojavit će se ovdje.
+  All sections hidden: Svi su odjeljci skriveni
+  All sections hidden description: Prilagodite početnu stranicu kako biste ponovno prikazali odjeljak.
 Subscriptions:
   Refreshing Subscription Videos: Osvježavanje videozapisa iz pretplata
   Refreshing Subscription Shorts: Osvježavanje sadržaja Shorts iz pretplata
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Prikaži objedinjeni prikaz
   Newest First: Najnovije prvo
   Oldest First: Najstarije prvo
+  Posts:
+    RSS Message: 'YouTube ne pruža RSS izvore za objave. Isključite postavku "{rssSetting}" za prikaz objava ili uključite postavku "{hideSetting}" kako biste sakrili ovu karticu.'
 Trending:
   Load Error: Popularni sadržaj nije moguće učitati.
   Unsupported Backend: Popularni sadržaj zahtijeva Local API. Odaberite Local API ili omogućite pričuvni pozadinski sustav.
@@ -260,6 +286,7 @@ Settings:
     Hide Side Bar on Watch Pages: Sakrij bočnu traku na stranicama za gledanje
     UI Roundness: Zaobljenost sučelja
     Scrollbar Width: Širina klizne trake
+    Scroll Speed: Brzina pomicanja
     Animation Speed: Brzina animacije
     Thumbnail Size: Veličina minijature
     Show Tab Icons: Prikaži ikone kartica
@@ -693,6 +720,8 @@ Settings:
     Shorten View Counts: Skrati prikaz broja pregleda i oznaka „sviđa mi se” na komentarima
     Hide Comment Translation Buttons: Sakrij gumbe za prijevod komentara
     Hide Live Chat Replay: Sakrij ponovnu reprodukciju razgovora uživo
+    Hide Home: Sakrij početnu
+    Disable A-B Repeat: Onemogući A-B ponavljanje
     Hide End-Screen Annotations: Sakrij napomene na završnom zaslonu
     Hide Paid Promotion Badge: Sakrij oznaku plaćene promocije
     Show Player Controls: Prikaži kontrole reproduktora
@@ -793,6 +822,7 @@ Settings:
     History not supported: Ova inačica poslužitelja ne podržava sinkronizaciju povijesti gledanja.
     Settings not supported: Ova inačica poslužitelja ne podržava sinkronizaciju postavki.
     Sync completed: Sinkronizacija dovršena
+    Sync failed: 'Sinkronizacija nije uspjela: {error}'
     Data Loss Confirmation: Potvrditi sinkronizaciju koja briše podatke?
     Data Loss Warning: Stanje poslužitelja izbrisalo bi {deleted} od {previous} prethodno sinkroniziranih stavki zbirke {collection}. To može upućivati na neuspjelu migraciju ili ponovno postavljanje poslužitelja. Nastavite samo ako namjerno želite izbrisati te podatke i imate sigurnosnu kopiju.
     Confirm Data Loss: Izbriši i nastavi
@@ -923,6 +953,8 @@ Video:
   Configure Restricted Playback Cookies Hint: Konfigurirajte kolačiće u Postavke → Vanjski softver → Kolačići za reprodukciju putem yt-dlp-a.
   Try With Configured Cookies: Pokušaj s konfiguriranim kolačićima
   Restricted Playback Authentication Failed Template: 'yt-dlp nije mogao pristupiti ovom videozapisu s konfiguriranim kolačićima: {error}'
+  Collapse Playlist: Sažmi popis za reprodukciju
+  Expand Playlist: Proširi popis za reprodukciju
   Unmark As Watched: Označi kao neodgledano
   Video has been unmarked as watched: Videozapis je označen kao neodgledan
   Save Channel Playback Speed: Spremi brzinu reprodukcije kanala
@@ -987,6 +1019,21 @@ Video:
       Remaining: 'Preostalo: {time}'
       Cancel timer: Otkaži mjerač vremena
       Timer ended: Mjerač vremena za isključivanje je istekao
+    A-B Repeat:
+      A-B Repeat: A-B ponavljanje
+      'On': Uključeno
+      'Off': Isključeno
+      Point A: Točka A
+      Point B: Točka B
+      Set Repeat Start: Postavi početak ponavljanja
+      Set Repeat End: Postavi kraj ponavljanja
+      Pause Repeat: Pauziraj A-B ponavljanje
+      Resume Repeat: Nastavi A-B ponavljanje
+      Adjust Point: 'Prilagodi točku {point}, trenutačno {timestamp}'
+      Clear Range: Očisti raspon A-B ponavljanja
+      End Before Start: Točka B mora biti nakon točke A.
+      Outside Duration: Vremenska oznaka mora biti unutar videozapisa.
+      Cleared: A-B ponavljanje je očišćeno
     Zoom:
       Zoom: Zumiranje
       'Off': 'Isključeno'
@@ -1004,6 +1051,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Povratak na vrh
       Return to Video Tab: Povratak na karticu videozapisa
+      Hide: Sakrij mini reproduktor
       Play: Reproduciraj
       Pause: Pauziraj
       Drag Handle: Premjesti minireproduktor
@@ -1310,6 +1358,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Umjesto opće trake napretka prikazuje trajnu obavijest s trenutačnim napretkom pozadinskih postupaka, poput osvježavanja pretplata i preuzimanja alata kojima se upravlja.
     Always Show Scrollbars: Drži klizne trake uvijek vidljivima. Kada je isključeno, nestaju ubrzo nakon što prestanete pomicati miš i ponovno se pojavljuju čim ga pomaknete.
+    Scroll Speed: Mijenja udaljenost pomicanja gestama kotačića miša i dodirne pločice.
     Use Fixed Tab Width: Daje svim karticama na vodoravnoj traci kartica jednaku širinu umjesto da se širina prilagođava njihovim naslovima.
     Use Grid Player Menu: Raspoređuje izbornik postavki reproduktora videozapisa kao mrežu pločica umjesto popisa redaka.
 The playlist is at the beginning. Enable loop to continue playing: Popis za reprodukciju je na početku. Omogućite ponavljanje za nastavak reprodukcije
@@ -1343,6 +1392,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Prijeđi na prethodno podudaranje
   Toggle Normal Playback Speed: Prebacuj između brzine 1x i prethodne brzine reprodukcije
   Toggle Skip Silence: Uključi ili isključi preskakanje tišine
+  Set A-B Repeat Point A: Postavi točku A A-B ponavljanja
+  Set A-B Repeat Point B: Postavi točku B A-B ponavljanja
+  Clear A-B Repeat: Očisti A-B ponavljanje
   Video Zoom In: Povećaj videozapis
   Video Zoom Out: Smanji videozapis
   Tab Switcher: Prebacivanje kartica

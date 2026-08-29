@@ -96,6 +96,30 @@ Stats:
   Minutes: '{minutes} min.'
   Hours: '{hours} t.'
   Hours and minutes: '{hours} t. {minutes} min.'
+Home Page:
+  Home: Startside
+  Description: Fortsæt, hvor du slap, og se den seneste aktivitet.
+  Customize: Tilpas startsiden
+  Done: Færdig
+  Customize description: Vælg, hvilke sektioner der vises, og arranger dem i den ønskede rækkefølge.
+  Continue watching: Fortsæt med at se
+  New since last visit: Nyt siden sidste besøg
+  Watch queue: Afspilningskø
+  Recent playlists: Seneste playlister
+  Recent downloads: Seneste downloads
+  Upcoming reminders: Kommende påmindelser
+  Watch statistics: Seerstatistik
+  View all: Vis alle
+  Previous shelf page: Forrige side for {section}
+  Next shelf page: Næste side for {section}
+  Shelf page status: '{section}, side {page} af {total}.'
+  Move section up: Flyt {section} op
+  Move section down: Flyt {section} ned
+  Section moved: '{section} er flyttet til placering {position} af {total}.'
+  Nothing here yet: Der er ikke noget her endnu
+  Empty description: Videoer, du starter, playlister, du bruger, downloads og påmindelser vises her.
+  All sections hidden: Alle sektioner er skjult
+  All sections hidden description: Tilpas startsiden for at vise en sektion igen.
 Subscriptions:
   Refreshing Subscription Videos: Opdaterer videoer fra abonnementer
   Refreshing Subscription Shorts: Opdaterer Shorts fra abonnementer
@@ -113,6 +137,8 @@ Subscriptions:
   Show Combined View: Vis samlet
   Newest First: Nyeste først
   Oldest First: Ældste først
+  Posts:
+    RSS Message: YouTube tilbyder ikke RSS-feeds til opslag. Deaktivér indstillingen "{rssSetting}" for at se opslag, eller aktivér indstillingen "{hideSetting}" for at skjule denne fane.
 Trending:
   Load Error: Populært indhold kunne ikke indlæses.
   Unsupported Backend: Populært indhold kræver Local API. Vælg Local API, eller slå reservebackend til.
@@ -270,6 +296,7 @@ Settings:
     Hide Side Bar on Watch Pages: Skjul sidepanelet på visningssider
     UI Roundness: Afrunding af brugerfladen
     Scrollbar Width: Rullebjælkens bredde
+    Scroll Speed: Rullehastighed
     Animation Speed: Animationshastighed
     Thumbnail Size: Størrelse på miniaturebilleder
     Show Tab Icons: Vis faneikoner
@@ -716,7 +743,9 @@ Settings:
     Hide Channel Avatars: Skjul kanalavatarer
     Shorten View Counts: Forkort antal visninger og likes på kommentarer
     Hide Comment Translation Buttons: Skjul knapper til oversættelse af kommentarer
+    Hide Home: Skjul startsiden
     Hide Live Chat Replay: Skjul genafspilning af livechat
+    Disable A-B Repeat: Deaktivér A-B-gentagelse
     Hide End-Screen Annotations: Skjul annoteringer på slutskærmen
     Hide Paid Promotion Badge: Skjul mærkat for betalt promovering
     Show Player Controls: Vis afspillerknapper
@@ -832,6 +861,7 @@ Settings:
     History not supported: Denne serverversion understøtter ikke synkronisering af visningshistorik.
     Settings not supported: Denne serverversion understøtter ikke synkronisering af indstillinger.
     Sync completed: Synkroniseringen er fuldført
+    Sync failed: 'Synkroniseringen mislykkedes: {error}'
     Data Loss Confirmation: Bekræft destruktiv synkronisering?
     Data Loss Warning: Serverens tilstand vil slette {deleted} af {previous} tidligere synkroniserede elementer i {collection}. Det kan skyldes en mislykket servermigrering eller nulstilling. Fortsæt kun, hvis sletningen er tilsigtet, og du har en sikkerhedskopi.
     Confirm Data Loss: Slet og fortsæt
@@ -942,6 +972,8 @@ Video:
   Queue Item Cannot Move Down: '{title} kan ikke flyttes ned. Videoen er allerede på placering {total} af {total}.'
   Metadata: Videooplysninger
   Close Metadata: Luk videooplysninger
+  Collapse Playlist: Fold playlisten sammen
+  Expand Playlist: Fold playlisten ud
   Metadata Cache:
     Title History: Titelhistorik
     Thumbnail History: Historik over miniaturebilleder
@@ -1035,6 +1067,21 @@ Video:
       Remaining: '{time} tilbage'
       Cancel timer: Annuller timer
       Timer ended: Sovetimeren er udløbet
+    A-B Repeat:
+      A-B Repeat: A-B-gentagelse
+      On: Til
+      Off: Fra
+      Point A: Punkt A
+      Point B: Punkt B
+      Set Repeat Start: Angiv starten på gentagelsen
+      Set Repeat End: Angiv slutningen på gentagelsen
+      Pause Repeat: Sæt A-B-gentagelse på pause
+      Resume Repeat: Fortsæt A-B-gentagelse
+      Adjust Point: 'Juster punkt {point}, aktuelt {timestamp}'
+      Clear Range: Ryd området for A-B-gentagelse
+      End Before Start: Punkt B skal være efter punkt A.
+      Outside Duration: Tidsstemplet skal ligge inden for videoen.
+      Cleared: A-B-gentagelsen er ryddet
     Zoom:
       Zoom: Zoom
       'Off': 'Fra'
@@ -1052,6 +1099,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Tilbage til toppen
       Return to Video Tab: Gå tilbage til videofanen
+      Hide: Skjul miniafspilleren
       Play: Afspil
       Pause: Sæt på pause
       Drag Handle: Flyt miniafspiller
@@ -1366,6 +1414,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Viser en vedvarende meddelelse med aktuel status for baggrundshandlinger, f.eks. opdatering af abonnementer og download af administrerede værktøjer, i stedet for den globale statuslinje.
     Always Show Scrollbars: Holder rullebjælkerne synlige hele tiden. Når funktionen er slået fra, toner de ud, kort efter at du holder op med at bevæge musen, og vises igen, så snart du bevæger den.
+    Scroll Speed: Ændrer, hvor langt musehjulets og pegefeltets hjulbevægelser ruller.
     Use Fixed Tab Width: Giver alle faner i den vandrette fanelinje samme bredde i stedet for at tilpasse dem efter titlen.
     Use Grid Player Menu: Arrangerer videoafspillerens indstillingsmenu som et gitter af felter i stedet for en liste med rækker.
 The playlist is at the beginning. Enable loop to continue playing: Playlistens begyndelse er nået. Slå gentagelse til for at fortsætte afspilningen
@@ -1401,6 +1450,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Gå til det forrige resultat
   Toggle Normal Playback Speed: Skift mellem hastigheden 1× og den forrige afspilningshastighed
   Toggle Skip Silence: Slå overspringning af stilhed til eller fra
+  Set A-B Repeat Point A: Angiv punkt A for A-B-gentagelse
+  Set A-B Repeat Point B: Angiv punkt B for A-B-gentagelse
+  Clear A-B Repeat: Ryd A-B-gentagelse
   Video Zoom In: Zoom ind på videoen
   Video Zoom Out: Zoom ud fra videoen
   Tab Switcher: Faneskifter

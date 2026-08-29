@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} mnt'
   Hours: '{hours} jam'
   Hours and minutes: '{hours} jam {minutes} mnt'
+Home Page:
+  Home: Beranda
+  Description: Lanjutkan dari bagian terakhir dan lihat aktivitas terbaru.
+  Customize: Sesuaikan Beranda
+  Done: Selesai
+  Customize description: Pilih bagian yang ditampilkan dan atur sesuai urutan yang Anda inginkan.
+  Continue watching: Lanjutkan menonton
+  New since last visit: Baru sejak kunjungan terakhir
+  Watch queue: Antrean tontonan
+  Recent playlists: Daftar putar terbaru
+  Recent downloads: Unduhan terbaru
+  Upcoming reminders: Pengingat mendatang
+  Watch statistics: Statistik tontonan
+  View all: Lihat semua
+  Previous shelf page: Halaman {section} sebelumnya
+  Next shelf page: Halaman {section} berikutnya
+  Shelf page status: '{section}, halaman {page} dari {total}.'
+  Move section up: Pindahkan {section} ke atas
+  Move section down: Pindahkan {section} ke bawah
+  Section moved: '{section} dipindahkan ke posisi {position} dari {total}.'
+  Nothing here yet: Belum ada apa pun di sini
+  Empty description: Video yang mulai Anda tonton, daftar putar yang Anda gunakan, unduhan, dan pengingat akan muncul di sini.
+  All sections hidden: Semua bagian disembunyikan
+  All sections hidden description: Sesuaikan Beranda untuk menampilkan kembali bagian.
 Subscriptions:
   Refreshing Subscription Videos: Memperbarui video langganan
   Refreshing Subscription Shorts: Memperbarui Shorts langganan
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Tampilkan tampilan gabungan
   Newest First: Terbaru dahulu
   Oldest First: Terlama dahulu
+  Posts:
+    RSS Message: 'YouTube tidak menyediakan umpan RSS untuk postingan. Nonaktifkan pengaturan "{rssSetting}" untuk melihat postingan atau aktifkan pengaturan "{hideSetting}" untuk menyembunyikan tab ini.'
 Trending:
   Load Error: Trending tidak dapat dimuat.
   Unsupported Backend: Trending memerlukan Local API. Pilih Local API atau aktifkan backend cadangan.
@@ -262,6 +288,7 @@ Settings:
     Hide Side Bar on Watch Pages: Sembunyikan Bilah Samping di Halaman Tonton
     UI Roundness: Kebulatan Antarmuka
     Scrollbar Width: Lebar Bilah Gulir
+    Scroll Speed: Kecepatan Gulir
     Animation Speed: Kecepatan Animasi
     Thumbnail Size: Ukuran Gambar Mini
     Show Tab Icons: Tampilkan Ikon Tab
@@ -699,6 +726,8 @@ Settings:
     Shorten View Counts: Persingkat Jumlah Penayangan dan Suka Komentar
     Hide Comment Translation Buttons: Sembunyikan Tombol Terjemahan Komentar
     Hide Live Chat Replay: Sembunyikan Pemutaran Ulang Chat Langsung
+    Hide Home: Sembunyikan Beranda
+    Disable A-B Repeat: Nonaktifkan Pengulangan A-B
     Hide End-Screen Annotations: Sembunyikan Anotasi Layar Akhir
     Hide Paid Promotion Badge: Sembunyikan Lencana Promosi Berbayar
     Show Player Controls: Tampilkan Kontrol Pemutar
@@ -808,6 +837,7 @@ Settings:
     History not supported: Versi server ini tidak mendukung penyelarasan riwayat tontonan.
     Settings not supported: Versi server ini tidak mendukung penyelarasan pengaturan.
     Sync completed: Sinkronisasi selesai
+    Sync failed: 'Sinkronisasi gagal: {error}'
     Data Loss Confirmation: Konfirmasikan sinkronisasi destruktif?
     Data Loss Warning: Status server akan menghapus {deleted} dari {previous} item {collection} yang sebelumnya disinkronkan. Hal ini dapat menandakan migrasi server gagal atau server diatur ulang. Lanjutkan hanya jika penghapusan ini disengaja dan Anda memiliki cadangan.
     Confirm Data Loss: Hapus dan lanjutkan
@@ -939,6 +969,8 @@ Video:
   Configure Restricted Playback Cookies Hint: Atur kuki di Pengaturan → Perangkat Lunak Eksternal → Kuki Pemutaran yt-dlp.
   Try With Configured Cookies: Coba dengan kuki yang telah dikonfigurasi
   Restricted Playback Authentication Failed Template: 'yt-dlp tidak dapat mengakses video ini dengan kuki yang telah dikonfigurasi: {error}'
+  Collapse Playlist: Ciutkan Daftar Putar
+  Expand Playlist: Perluas Daftar Putar
   Unmark As Watched: Hapus Tanda Sudah Ditonton
   Video has been unmarked as watched: Tanda sudah ditonton pada video telah dihapus
   Save Channel Playback Speed: Simpan Kecepatan Pemutaran Saluran
@@ -1001,6 +1033,21 @@ Video:
       Remaining: 'Tersisa {time}'
       Cancel timer: Batalkan pewaktu
       Timer ended: Pewaktu tidur berakhir
+    A-B Repeat:
+      A-B Repeat: Pengulangan A-B
+      'On': Aktif
+      'Off': Nonaktif
+      Point A: Titik A
+      Point B: Titik B
+      Set Repeat Start: Atur awal pengulangan
+      Set Repeat End: Atur akhir pengulangan
+      Pause Repeat: Jeda pengulangan A-B
+      Resume Repeat: Lanjutkan pengulangan A-B
+      Adjust Point: 'Sesuaikan titik {point}, saat ini {timestamp}'
+      Clear Range: Hapus rentang pengulangan A-B
+      End Before Start: Titik B harus setelah titik A.
+      Outside Duration: Stempel waktu harus berada dalam durasi video.
+      Cleared: Pengulangan A-B dihapus
     Zoom:
       Zoom: Zoom
       'Off': 'Nonaktif'
@@ -1018,6 +1065,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Kembali ke atas
       Return to Video Tab: Kembali ke tab video
+      Hide: Sembunyikan pemutar mini
       Play: Putar
       Pause: Jeda
       Drag Handle: Pindahkan pemutar mini
@@ -1324,6 +1372,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Menampilkan notifikasi tetap dengan progres langsung untuk operasi latar belakang, seperti pembaruan langganan dan unduhan alat terkelola, sebagai pengganti bilah progres global.
     Always Show Scrollbars: Mempertahankan bilah gulir agar selalu terlihat. Jika dinonaktifkan, bilah memudar sesaat setelah Anda berhenti menggerakkan tetikus dan muncul kembali begitu tetikus digerakkan.
+    Scroll Speed: Mengubah jarak gulir gestur roda tetikus dan panel sentuh.
     Use Fixed Tab Width: Memberi setiap tab pada bilah tab horizontal lebar yang sama, bukan menyesuaikan lebar dengan judulnya.
     Use Grid Player Menu: Menyusun menu pengaturan pemutar video sebagai kisi ubin, bukan daftar baris.
 The playlist is at the beginning. Enable loop to continue playing: Daftar putar berada di awal. Aktifkan pengulangan untuk melanjutkan pemutaran
@@ -1357,6 +1406,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Lompat ke hasil sebelumnya
   Toggle Normal Playback Speed: Beralih antara kecepatan 1x dan kecepatan pemutaran sebelumnya
   Toggle Skip Silence: Aktifkan atau nonaktifkan lewati bagian hening
+  Set A-B Repeat Point A: Atur titik A pengulangan A-B
+  Set A-B Repeat Point B: Atur titik B pengulangan A-B
+  Clear A-B Repeat: Hapus pengulangan A-B
   Video Zoom In: Perbesar video
   Video Zoom Out: Perkecil video
   Tab Switcher: Pengalih tab

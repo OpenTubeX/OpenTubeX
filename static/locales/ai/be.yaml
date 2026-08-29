@@ -100,6 +100,30 @@ Stats:
   Minutes: '{minutes} хв'
   Hours: '{hours} гад'
   Hours and minutes: '{hours} гад {minutes} хв'
+Home Page:
+  Home: Галоўная
+  Description: Працягвайце з месца, дзе спыніліся, і праглядайце апошнія дзеянні.
+  Customize: Наладзіць галоўную
+  Done: Гатова
+  Customize description: Выберыце раздзелы, якія будуць паказвацца, і размясціце іх у патрэбным парадку.
+  Continue watching: Працягнуць прагляд
+  New since last visit: Новае з апошняга наведвання
+  Watch queue: Чарга прагляду
+  Recent playlists: Нядаўнія плэйлісты
+  Recent downloads: Нядаўнія спампоўванні
+  Upcoming reminders: Будучыя напаміны
+  Watch statistics: Статыстыка прагляду
+  View all: Паказаць усё
+  Previous shelf page: Папярэдняя старонка раздзела {section}
+  Next shelf page: Наступная старонка раздзела {section}
+  Shelf page status: '{section}, старонка {page} з {total}.'
+  Move section up: Перамясціць {section} вышэй
+  Move section down: Перамясціць {section} ніжэй
+  Section moved: 'Раздзел {section} перамешчаны на пазіцыю {position} з {total}.'
+  Nothing here yet: Тут пакуль нічога няма
+  Empty description: "Тут з'явяцца відэа, якія вы пачалі глядзець, выкарыстаныя плэйлісты, спампоўванні і напаміны."
+  All sections hidden: Усе раздзелы схаваны
+  All sections hidden description: Наладзьце галоўную, каб зноў паказаць раздзел.
 Subscriptions:
   Refreshing Subscription Videos: Абнаўляюцца відэа з падпісак
   Refreshing Subscription Shorts: Абнаўляюцца кароткія відэа з падпісак
@@ -117,6 +141,8 @@ Subscriptions:
   Show Combined View: Паказаць разам
   Newest First: Спачатку навейшыя
   Oldest First: Спачатку старэйшыя
+  Posts:
+    RSS Message: YouTube не дае RSS-стужак для допісаў. Адключыце наладу "{rssSetting}", каб праглядаць допісы, або ўключыце наладу "{hideSetting}", каб схаваць гэту ўкладку.
 Trending:
   Load Error: Не ўдалося загрузіць папулярнае.
   Unsupported Backend: Для папулярнага патрэбны Local API. Выберыце Local API або ўключыце рэзервовы серверны механізм.
@@ -275,6 +301,7 @@ Settings:
     Hide Side Bar on Watch Pages: Хаваць бакавую панэль на старонках прагляду
     UI Roundness: Закругленне інтэрфейсу
     Scrollbar Width: Шырыня паласы пракруткі
+    Scroll Speed: Хуткасць пракруткі
     Animation Speed: Хуткасць анімацыі
     Thumbnail Size: Памер мініяцюр
     Show Tab Icons: Паказваць значкі ўкладак
@@ -720,7 +747,9 @@ Settings:
     Hide Channel Avatars: Хаваць аватары каналаў
     Shorten View Counts: Скарачаць колькасць праглядаў і ўпадабанняў каментарыяў
     Hide Comment Translation Buttons: Хаваць кнопкі перакладу каментарыяў
+    Hide Home: Хаваць галоўную
     Hide Live Chat Replay: Хаваць паўтор жывога чата
+    Disable A-B Repeat: Адключыць паўтор A-B
     Hide End-Screen Annotations: Хаваць анатацыі на канцавой застаўцы
     Hide Paid Promotion Badge: Хаваць пазнаку платнай рэкламы
     Show Player Controls: Паказваць элементы кіравання прайгравальнікам
@@ -836,6 +865,7 @@ Settings:
     History not supported: Гэта версія сервера не падтрымлівае сінхранізацыю гісторыі праглядаў.
     Settings not supported: Гэта версія сервера не падтрымлівае сінхранізацыю налад.
     Sync completed: Сінхранізацыя завершана
+    Sync failed: 'Памылка сінхранізацыі: {error}'
     Data Loss Confirmation: Пацвердзіць сінхранізацыю з выдаленнем даных?
     Data Loss Warning: Стан сервера прывядзе да выдалення {deleted} з {previous} раней сінхранізаваных элементаў {collection}. Гэта можа сведчыць пра няўдалую міграцыю або скід сервера. Працягвайце, толькі калі вы наўмысна выдаляеце гэтыя даныя і маеце рэзервовую копію.
     Confirm Data Loss: Выдаліць і працягнуць
@@ -946,6 +976,8 @@ Video:
   Queue Item Cannot Move Down: Немагчыма перамясціць {title} ніжэй. Яно ўжо на пазіцыі {total} з {total}.
   Metadata: Звесткі пра відэа
   Close Metadata: Закрыць звесткі пра відэа
+  Collapse Playlist: Згарнуць плэйліст
+  Expand Playlist: Разгарнуць плэйліст
   Metadata Cache:
     Title History: Гісторыя назваў
     Thumbnail History: Гісторыя мініяцюр
@@ -1046,6 +1078,21 @@ Video:
       Remaining: 'Засталося {time}'
       Cancel timer: Скасаваць таймер
       Timer ended: Таймер сну спрацаваў
+    A-B Repeat:
+      A-B Repeat: Паўтор A-B
+      On: Укл.
+      Off: Выкл.
+      Point A: Пункт A
+      Point B: Пункт B
+      Set Repeat Start: Вызначыць пачатак паўтору
+      Set Repeat End: Вызначыць канец паўтору
+      Pause Repeat: Прыпыніць паўтор A-B
+      Resume Repeat: Узнавіць паўтор A-B
+      Adjust Point: 'Змяніць пункт {point}, зараз {timestamp}'
+      Clear Range: Ачысціць дыяпазон паўтору A-B
+      End Before Start: Пункт B павінен быць пасля пункта A.
+      Outside Duration: Часавая адзнака павінна быць у межах відэа.
+      Cleared: Паўтор A-B ачышчаны
     Zoom:
       Zoom: Маштаб
       'Off': 'Выкл.'
@@ -1063,6 +1110,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Вярнуцца ўверх
       Return to Video Tab: Вярнуцца на ўкладку відэа
+      Hide: Схаваць міні-прайгравальнік
       Play: Прайграць
       Pause: Паўза
       Drag Handle: Перамясціць міні-плэер
@@ -1377,6 +1425,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Замест агульнай панэлі ходу паказвае пастаяннае апавяшчэнне з бягучым ходам фонавых аперацый, напрыклад абнаўлення стужкі падпісак і спампоўвання кіраваных інструментаў.
     Always Show Scrollbars: Заўсёды пакідае палосы пракруткі бачнымі. Калі адключана, яны знікаюць неўзабаве пасля спынення руху мышы і зноў з'яўляюцца, як толькі вы яе паварушыце.
+    Scroll Speed: Змяняе адлегласць пракруткі колам мышы і жэстамі кола сэнсарнай панэлі.
     Use Fixed Tab Width: Задае ўсім укладкам на гарызантальнай панэлі аднолькавую шырыню замест падбору шырыні паводле назвы.
     Use Grid Player Menu: Размяшчае меню налад відэапрайгравальніка ў выглядзе сеткі плітак замест спіса радкоў.
 The playlist is at the beginning. Enable loop to continue playing: Гэта пачатак спіса прайгравання. Уключыце паўтор, каб працягнуць прайграванне
@@ -1412,6 +1461,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Перайсці да папярэдняга супадзення
   Toggle Normal Playback Speed: Пераключыць паміж хуткасцю 1x і папярэдняй хуткасцю прайгравання
   Toggle Skip Silence: Пераключыць пропуск цішыні
+  Set A-B Repeat Point A: Вызначыць пункт A паўтору A-B
+  Set A-B Repeat Point B: Вызначыць пункт B паўтору A-B
+  Clear A-B Repeat: Ачысціць паўтор A-B
   Video Zoom In: Павялічыць відэа
   Video Zoom Out: Паменшыць відэа
   Tab Switcher: Пераключальнік укладак

@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} perc'
   Hours: '{hours} óra'
   Hours and minutes: '{hours} óra {minutes} perc'
+Home Page:
+  Home: Kezdőlap
+  Description: Folytassa onnan, ahol abbahagyta, és tekintse meg a legutóbbi tevékenységeket.
+  Customize: Kezdőlap testreszabása
+  Done: Kész
+  Customize description: Válassza ki a megjelenő szakaszokat, és rendezze őket a kívánt sorrendbe.
+  Continue watching: Megtekintés folytatása
+  New since last visit: Újdonságok a legutóbbi látogatás óta
+  Watch queue: Lejátszási sor
+  Recent playlists: Legutóbbi lejátszási listák
+  Recent downloads: Legutóbbi letöltések
+  Upcoming reminders: Közelgő emlékeztetők
+  Watch statistics: Megtekintési statisztikák
+  View all: Összes megtekintése
+  Previous shelf page: '{section} előző oldala'
+  Next shelf page: '{section} következő oldala'
+  Shelf page status: '{section}, {page}. oldal / {total}.'
+  Move section up: '{section} feljebb mozgatása'
+  Move section down: '{section} lejjebb mozgatása'
+  Section moved: '{section} áthelyezve a(z) {position}. helyre, összesen {total} közül.'
+  Nothing here yet: Itt még nincs semmi
+  Empty description: Az elindított videók, a használt lejátszási listák, a letöltések és az emlékeztetők itt jelennek meg.
+  All sections hidden: Minden szakasz el van rejtve
+  All sections hidden description: Szabja testre a kezdőlapot egy szakasz újbóli megjelenítéséhez.
 Subscriptions:
   Refreshing Subscription Videos: Feliratkozások videóinak frissítése
   Refreshing Subscription Shorts: Feliratkozások rövid videóinak frissítése
@@ -260,6 +284,7 @@ Settings:
     Hide Side Bar on Watch Pages: Oldalsáv elrejtése a videóoldalakon
     UI Roundness: Kezelőfelület lekerekítése
     Scrollbar Width: Görgetősáv szélessége
+    Scroll Speed: Görgetési sebesség
     Animation Speed: Animáció sebessége
     Thumbnail Size: Bélyegkép mérete
     Show Tab Icons: Lapikonok megjelenítése
@@ -693,6 +718,8 @@ Settings:
     Shorten View Counts: Megtekintések és hozzászóláskedvelések számának rövidítése
     Hide Comment Translation Buttons: Hozzászólásfordító gombok elrejtése
     Hide Live Chat Replay: Élő csevegés visszajátszásának elrejtése
+    Hide Home: Kezdőlap elrejtése
+    Disable A-B Repeat: A-B ismétlés letiltása
     Hide End-Screen Annotations: Záróképernyő elemeinek elrejtése
     Hide Paid Promotion Badge: Fizetett promóció jelvényének elrejtése
     Show Player Controls: Lejátszó vezérlőinek megjelenítése
@@ -793,6 +820,7 @@ Settings:
     History not supported: Ez a kiszolgálóverzió nem támogatja a megtekintési előzmények szinkronizálását.
     Settings not supported: Ez a kiszolgálóverzió nem támogatja a beállítások szinkronizálását.
     Sync completed: Szinkronizálás befejezve
+    Sync failed: 'A szinkronizálás sikertelen: {error}'
     Data Loss Confirmation: Jóváhagyja az adatvesztéssel járó szinkronizálást?
     Data Loss Warning: A kiszolgáló állapota {deleted} elemet törölne a korábban szinkronizált {previous} {collection} elemből. Ez sikertelen kiszolgáló-migrációra vagy alaphelyzetbe állításra utalhat. Csak akkor folytassa, ha a törlés szándékos, és rendelkezik biztonsági másolattal.
     Confirm Data Loss: Törlés és folytatás
@@ -983,6 +1011,21 @@ Video:
       Remaining: '{time} van hátra'
       Cancel timer: Időzítő törlése
       Timer ended: Az elalvásidőzítő lejárt
+    A-B Repeat:
+      A-B Repeat: A-B ismétlés
+      'On': Be
+      'Off': Ki
+      Point A: A pont
+      Point B: B pont
+      Set Repeat Start: Ismétlés kezdetének beállítása
+      Set Repeat End: Ismétlés végének beállítása
+      Pause Repeat: A-B ismétlés szüneteltetése
+      Resume Repeat: A-B ismétlés folytatása
+      Adjust Point: 'A(z) {point} pont módosítása, jelenleg {timestamp}'
+      Clear Range: A-B ismétlési tartomány törlése
+      End Before Start: A B pontnak az A pont után kell lennie.
+      Outside Duration: Az időbélyegnek a videón belül kell lennie.
+      Cleared: A-B ismétlés törölve
     Zoom:
       Zoom: Nagyítás
       'Off': 'Ki'
@@ -1000,6 +1043,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Vissza a tetejére
       Return to Video Tab: Vissza a videó lapjára
+      Hide: Mini lejátszó elrejtése
       Play: Lejátszás
       Pause: Szünet
       Drag Handle: Minilejátszó áthelyezése
@@ -1306,6 +1350,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Állandó értesítés megjelenítése a háttérműveletek, például a feliratkozások frissítése és a kezelt eszközök letöltése valós idejű állapotával a globális folyamatjelző helyett.
     Always Show Scrollbars: A görgetősávok állandó megjelenítése. Kikapcsolva röviddel az egér mozgatásának befejezése után elhalványulnak, és az egér újbóli megmozdításakor ismét megjelennek.
+    Scroll Speed: Megváltoztatja, hogy az egérgörgő és az érintőpad kézmozdulatai milyen messzire görgessenek.
     Use Fixed Tab Width: Minden lap azonos szélességű lesz a vízszintes lapsávon, a címükhöz igazodó méretezés helyett.
     Use Grid Player Menu: A videólejátszó beállítási menüjének elrendezése csempékből álló rácsként, sorok listája helyett.
 The playlist is at the beginning. Enable loop to continue playing: A lejátszási lista elején jár. Kapcsolja be az ismétlést a lejátszás folytatásához
@@ -1339,6 +1384,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Ugrás az előző találatra
   Toggle Normal Playback Speed: Váltás az 1x-es és az előző lejátszási sebesség között
   Toggle Skip Silence: Csend átugrásának be- vagy kikapcsolása
+  Set A-B Repeat Point A: A-B ismétlés A pontjának beállítása
+  Set A-B Repeat Point B: A-B ismétlés B pontjának beállítása
+  Clear A-B Repeat: A-B ismétlés törlése
   Video Zoom In: Videó nagyítása
   Video Zoom Out: Videó kicsinyítése
   Tab Switcher: Lapváltó

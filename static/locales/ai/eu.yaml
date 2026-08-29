@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} h'
   Hours and minutes: '{hours} h {minutes} min'
+Home Page:
+  Home: Hasiera
+  Description: Jarraitu utzitako lekutik eta ikusi azken jarduera.
+  Customize: Pertsonalizatu hasiera
+  Done: Eginda
+  Customize description: Aukeratu zer atal agertuko diren eta antolatu nahi duzun hurrenkeran.
+  Continue watching: Jarraitu ikusten
+  New since last visit: Azken bisitatik berria
+  Watch queue: Erreprodukzio-ilara
+  Recent playlists: Azken erreprodukzio-zerrendak
+  Recent downloads: Azken deskargak
+  Upcoming reminders: Hurrengo gogorarazpenak
+  Watch statistics: Ikustaldien estatistikak
+  View all: Ikusi dena
+  Previous shelf page: '{section} atalaren aurreko orria'
+  Next shelf page: '{section} atalaren hurrengo orria'
+  Shelf page status: '{section}, {page}. orria {total}(e)tik.'
+  Move section up: Eraman {section} gora
+  Move section down: Eraman {section} behera
+  Section moved: '{section} {position}. posiziora eraman da, {total} posiziotatik.'
+  Nothing here yet: Oraindik ez dago ezer hemen
+  Empty description: Hasten dituzun bideoak, erabiltzen dituzun erreprodukzio-zerrendak, deskargak eta gogorarazpenak hemen agertuko dira.
+  All sections hidden: Atal guztiak ezkutatuta daude
+  All sections hidden description: Pertsonalizatu hasiera atal bat berriro erakusteko.
 Subscriptions:
   Refreshing Subscription Videos: Harpidetzetako bideoak freskatzen
   Refreshing Subscription Shorts: Harpidetzetako bideo laburrak freskatzen
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Erakutsi ikuspegi bateratua
   Newest First: Berrienak lehenik
   Oldest First: Zaharrenak lehenik
+  Posts:
+    RSS Message: 'YouTube-k ez du RSS jariorik eskaintzen argitalpenetarako. Desgaitu "{rssSetting}" ezarpena argitalpenak ikusteko, edo gaitu "{hideSetting}" ezarpena fitxa hau ezkutatzeko.'
 Trending:
   Load Error: Ezin izan dira joerak kargatu.
   Unsupported Backend: Joerek API lokala behar dute. Hautatu API lokala edo gaitu ordezko motorra.
@@ -260,6 +286,7 @@ Settings:
     Hide Side Bar on Watch Pages: Ezkutatu alboko barra bideoen orrietan
     UI Roundness: Interfazearen biribiltasuna
     Scrollbar Width: Korritze-barraren zabalera
+    Scroll Speed: Korritze-abiadura
     Animation Speed: Animazioen abiadura
     Thumbnail Size: Koadro txikien tamaina
     Show Tab Icons: Erakutsi fitxen ikonoak
@@ -693,6 +720,8 @@ Settings:
     Shorten View Counts: Laburtu ikustaldien eta iruzkinetako atsegiteen kopuruak
     Hide Comment Translation Buttons: Ezkutatu iruzkinak itzultzeko botoiak
     Hide Live Chat Replay: Ezkutatu zuzeneko txataren errepikapena
+    Hide Home: Ezkutatu hasiera
+    Disable A-B Repeat: Desgaitu A-B errepikapena
     Hide End-Screen Annotations: Ezkutatu amaierako pantailako oharpenak
     Hide Paid Promotion Badge: Ezkutatu ordainpeko sustapenaren bereizgarria
     Show Player Controls: Erakutsi erreproduzigailuaren kontrolak
@@ -793,6 +822,7 @@ Settings:
     History not supported: Zerbitzariaren bertsio honek ez du ikustaldi-historia sinkronizatzea onartzen.
     Settings not supported: Zerbitzariaren bertsio honek ez du ezarpenak sinkronizatzea onartzen.
     Sync completed: Sinkronizazioa osatu da
+    Sync failed: 'Sinkronizazioak huts egin du: {error}'
     Data Loss Confirmation: Datuak ezabatuko dituen sinkronizazioa berretsi?
     Data Loss Warning: Zerbitzariaren egoerak aurretik sinkronizatutako {previous} {collection} elementuetatik {deleted} ezabatuko lituzke. Baliteke zerbitzariaren migrazio edo berrezarpen batek huts egin izana. Jarraitu ezabaketa nahita egiten ari bazara eta babeskopia bat baduzu soilik.
     Confirm Data Loss: Ezabatu eta jarraitu
@@ -923,6 +953,8 @@ Video:
   Configure Restricted Playback Cookies Hint: Konfiguratu cookieak Ezarpenak → Kanpoko softwarea → Erreprodukziorako yt-dlp cookieak atalean.
   Try With Configured Cookies: Saiatu konfiguratutako cookieekin
   Restricted Playback Authentication Failed Template: 'yt-dlp-k ezin izan du bideo hau atzitu konfiguratutako cookieekin: {error}'
+  Collapse Playlist: Tolestu erreprodukzio-zerrenda
+  Expand Playlist: Zabaldu erreprodukzio-zerrenda
   Unmark As Watched: Kendu ikusita marka
   Video has been unmarked as watched: Bideoari ikusita marka kendu zaio
   Save Channel Playback Speed: Gorde kanalaren erreprodukzio-abiadura
@@ -992,6 +1024,21 @@ Video:
       Remaining: '{time} geratzen dira'
       Cancel timer: Utzi tenporizadorea
       Timer ended: Lo-tenporizadorea amaitu da
+    A-B Repeat:
+      A-B Repeat: A-B errepikapena
+      'On': Aktibatuta
+      'Off': Desaktibatuta
+      Point A: A puntua
+      Point B: B puntua
+      Set Repeat Start: Ezarri errepikapenaren hasiera
+      Set Repeat End: Ezarri errepikapenaren amaiera
+      Pause Repeat: Pausatu A-B errepikapena
+      Resume Repeat: Berrekin A-B errepikapenari
+      Adjust Point: 'Doitu {point} puntua; une honetan {timestamp}'
+      Clear Range: Garbitu A-B errepikapenaren tartea
+      End Before Start: B puntuak A puntuaren ondoren egon behar du.
+      Outside Duration: Denbora-markak bideoaren barruan egon behar du.
+      Cleared: A-B errepikapena garbitu da
     Zoom:
       Zoom: Zooma
       'Off': 'Desaktibatuta'
@@ -1009,6 +1056,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Itzuli goialdera
       Return to Video Tab: Itzuli bideoaren fitxara
+      Hide: Ezkutatu minierreproduzigailua
       Play: Erreproduzitu
       Pause: Pausatu
       Drag Handle: Mugitu minierreproduzigailua
@@ -1315,6 +1363,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Jakinarazpen iraunkor batean erakusten du atzeko planoko eragiketen uneko aurrerapena, hala nola harpidetzen freskatzea eta kudeatutako tresnen deskargak, aurrerapen-barra globala erabili beharrean.
     Always Show Scrollbars: Korritze-barrak ikusgai mantentzen ditu beti. Desgaituta dagoenean, sagua mugitzeari utzi eta handik gutxira desagertzen dira, eta berriro mugitu bezain laster agertzen.
+    Scroll Speed: Saguaren gurpileko eta ukipen-paneleko keinuek zenbat korritzen duten aldatzen du.
     Use Fixed Tab Width: Fitxa horizontalen barrako fitxa guztiei zabalera bera ematen die, izenburuaren arabera tamainatu beharrean.
     Use Grid Player Menu: Erreproduzigailuaren ezarpen-menua lauzaz osatutako sareta batean antolatzen du, errenkada-zerrenda baten ordez.
 The playlist is at the beginning. Enable loop to continue playing: Erreprodukzio-zerrenda hasieran dago. Gaitu begizta erreproduzitzen jarraitzeko
@@ -1348,6 +1397,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Joan aurreko bat-etortzera
   Toggle Normal Playback Speed: Aldatu 1x abiaduraren eta aurreko erreprodukzio-abiaduraren artean
   Toggle Skip Silence: Aktibatu edo desaktibatu isiluneak saltatzea
+  Set A-B Repeat Point A: Ezarri A-B errepikapenaren A puntua
+  Set A-B Repeat Point B: Ezarri A-B errepikapenaren B puntua
+  Clear A-B Repeat: Garbitu A-B errepikapena
   Video Zoom In: Handiagotu bideoa
   Video Zoom Out: Txikiagotu bideoa
   Tab Switcher: Fitxa-aldatzailea

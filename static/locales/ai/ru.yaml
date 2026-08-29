@@ -69,6 +69,30 @@ Stats:
   Minutes: '{minutes} мин'
   Hours: '{hours} ч'
   Hours and minutes: '{hours} ч {minutes} мин'
+Home Page:
+  Home: Главная
+  Description: Продолжайте с того места, где остановились, и просматривайте недавние действия.
+  Customize: Настроить главную
+  Done: Готово
+  Customize description: Выберите разделы для отображения и расположите их в нужном порядке.
+  Continue watching: Продолжить просмотр
+  New since last visit: Новое с последнего посещения
+  Watch queue: Очередь просмотра
+  Recent playlists: Недавние плейлисты
+  Recent downloads: Недавние загрузки
+  Upcoming reminders: Предстоящие напоминания
+  Watch statistics: Статистика просмотра
+  View all: Показать всё
+  Previous shelf page: "{section}: предыдущая страница"
+  Next shelf page: "{section}: следующая страница"
+  Shelf page status: "{section}, страница {page} из {total}."
+  Move section up: "{section}: переместить вверх"
+  Move section down: "{section}: переместить вниз"
+  Section moved: Раздел «{section}» перемещён на позицию {position} из {total}.
+  Nothing here yet: Здесь пока ничего нет
+  Empty description: Здесь появятся начатые видео, использованные плейлисты, загрузки и напоминания.
+  All sections hidden: Все разделы скрыты
+  All sections hidden description: Настройте главную, чтобы снова показать раздел.
 Subscriptions:
   Refreshing Subscription Videos: Обновление видео из подписок
   Refreshing Subscription Shorts: Обновление Shorts из подписок
@@ -86,6 +110,8 @@ Subscriptions:
   Show Combined View: Показывать общим списком
   Newest First: Сначала новые
   Oldest First: Сначала старые
+  Posts:
+    RSS Message: YouTube не предоставляет RSS-ленты для публикаций. Отключите настройку «{rssSetting}», чтобы просматривать публикации, или включите настройку «{hideSetting}», чтобы скрыть эту вкладку.
 Trending:
   Load Error: Не удалось загрузить популярные видео.
   Unsupported Backend: Для просмотра популярных видео требуется Local API. Выберите Local API или разрешите использовать резервный бэкенд.
@@ -237,6 +263,7 @@ Settings:
     Hide Side Bar on Watch Pages: Скрывать боковую панель на страницах просмотра
     UI Roundness: Скругление интерфейса
     Scrollbar Width: Ширина полосы прокрутки
+    Scroll Speed: Скорость прокрутки
     Animation Speed: Скорость анимации
     Thumbnail Size: Размер миниатюр
     Show Tab Icons: Показывать значки вкладок
@@ -675,7 +702,9 @@ Settings:
     Hide Channel Avatars: Скрывать аватары каналов
     Shorten View Counts: Сокращать числа просмотров и отметок «Нравится» у комментариев
     Hide Comment Translation Buttons: Скрывать кнопки перевода комментариев
+    Hide Home: Скрыть главную
     Hide Live Chat Replay: Скрывать запись чата трансляции
+    Disable A-B Repeat: Отключить повтор A-B
     Hide End-Screen Annotations: Скрывать элементы конечной заставки
     Hide Paid Promotion Badge: Скрывать метку платной рекламы
     Show Player Controls: Показывать элементы управления проигрывателем
@@ -785,6 +814,7 @@ Settings:
     History not supported: Эта версия сервера не поддерживает синхронизацию истории просмотров.
     Settings not supported: Эта версия сервера не поддерживает синхронизацию настроек.
     Sync completed: Синхронизация завершена
+    Sync failed: "Сбой синхронизации: {error}"
     Data Loss Confirmation: Подтвердить синхронизацию с удалением данных?
     Data Loss Warning: Состояние сервера приведёт к удалению {deleted} из {previous} ранее синхронизированных элементов коллекции {collection}. Это может указывать на сбой миграции или сброс сервера. Продолжайте, только если это удаление намеренное и у вас есть резервная копия.
     Confirm Data Loss: Удалить и продолжить
@@ -919,6 +949,8 @@ Video:
   Try With Configured Cookies: Попробовать с настроенными файлами cookie
   Restricted Playback Authentication Failed Template: 'yt-dlp не удалось получить доступ к этому видео с настроенными файлами cookie: {error}'
   Private: Приватные видео нельзя смотреть в OpenTubeX, поскольку для этого нужно войти в Google и быть владельцем видео.
+  Collapse Playlist: Свернуть плейлист
+  Expand Playlist: Развернуть плейлист
   Unmark As Watched: Отметить как непросмотренное
   Video has been unmarked as watched: Видео отмечено как непросмотренное
   Save Channel Playback Speed: Сохранить скорость воспроизведения для канала
@@ -979,6 +1011,21 @@ Video:
       Remaining: 'Осталось: {time}'
       Cancel timer: Отменить таймер
       Timer ended: Таймер сна сработал
+    A-B Repeat:
+      A-B Repeat: Повтор A-B
+      On: Вкл.
+      Off: Выкл.
+      Point A: Точка A
+      Point B: Точка B
+      Set Repeat Start: Задать начало повтора
+      Set Repeat End: Задать конец повтора
+      Pause Repeat: Приостановить повтор A-B
+      Resume Repeat: Возобновить повтор A-B
+      Adjust Point: Изменить точку {point}, сейчас {timestamp}
+      Clear Range: Очистить диапазон повтора A-B
+      End Before Start: Точка B должна быть после точки A.
+      Outside Duration: Отметка времени должна находиться в пределах видео.
+      Cleared: Повтор A-B очищен
     Zoom:
       Zoom: Масштаб
       'Off': 'Выкл.'
@@ -996,6 +1043,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Наверх
       Return to Video Tab: Вернуться на вкладку с видео
+      Hide: Скрыть мини-плеер
       Play: Воспроизвести
       Pause: Пауза
       Drag Handle: Переместить мини-плеер
@@ -1302,6 +1350,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Показывает постоянное уведомление с текущим ходом фоновых операций, например обновления подписок и загрузки управляемых инструментов, вместо общей полосы выполнения.
     Always Show Scrollbars: Всегда показывает полосы прокрутки. Если отключено, они исчезают вскоре после того, как вы перестанете двигать мышь, и появляются при следующем движении.
+    Scroll Speed: Изменяет расстояние прокрутки жестами колеса мыши и сенсорной панели.
     Use Fixed Tab Width: Устанавливает одинаковую ширину всех вкладок на горизонтальной панели вместо подгонки под заголовок.
     Use Grid Player Menu: Располагает меню настроек проигрывателя видео в виде сетки плиток вместо списка строк.
 The playlist is at the beginning. Enable loop to continue playing: Достигнуто начало плейлиста. Включите повтор, чтобы продолжить воспроизведение
@@ -1337,6 +1386,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Перейти к предыдущему совпадению
   Toggle Normal Playback Speed: Переключить между скоростью 1x и предыдущей скоростью воспроизведения
   Toggle Skip Silence: Переключить пропуск тишины
+  Set A-B Repeat Point A: Задать точку A повтора A-B
+  Set A-B Repeat Point B: Задать точку B повтора A-B
+  Clear A-B Repeat: Очистить повтор A-B
   Video Zoom In: Увеличить видео
   Video Zoom Out: Уменьшить видео
   Tab Switcher: Переключатель вкладок

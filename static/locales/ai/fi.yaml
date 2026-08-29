@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} t'
   Hours and minutes: '{hours} t {minutes} min'
+Home Page:
+  Home: Etusivu
+  Description: Jatka siitä, mihin jäit, ja katso viimeaikaiset tapahtumat.
+  Customize: Mukauta etusivua
+  Done: Valmis
+  Customize description: Valitse näytettävät osiot ja järjestä ne haluamaasi järjestykseen.
+  Continue watching: Jatka katselua
+  New since last visit: Uutta edellisen käynnin jälkeen
+  Watch queue: Katselujono
+  Recent playlists: Viimeisimmät soittolistat
+  Recent downloads: Viimeisimmät lataukset
+  Upcoming reminders: Tulevat muistutukset
+  Watch statistics: Katselutilastot
+  View all: Näytä kaikki
+  Previous shelf page: Edellinen {section}-osion sivu
+  Next shelf page: Seuraava {section}-osion sivu
+  Shelf page status: '{section}, sivu {page}/{total}.'
+  Move section up: Siirrä {section} ylöspäin
+  Move section down: Siirrä {section} alaspäin
+  Section moved: '{section} siirrettiin sijalle {position}/{total}.'
+  Nothing here yet: Täällä ei ole vielä mitään
+  Empty description: Aloittamasi videot, käyttämäsi soittolistat, lataukset ja muistutukset näkyvät täällä.
+  All sections hidden: Kaikki osiot on piilotettu
+  All sections hidden description: Mukauta etusivua, jotta voit näyttää osion uudelleen.
 Subscriptions:
   Refreshing Subscription Videos: Päivitetään tilausten videoita
   Refreshing Subscription Shorts: Päivitetään tilausten Shorts-videoita
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Näytä yhdistettynä
   Newest First: Uusimmat ensin
   Oldest First: Vanhimmat ensin
+  Posts:
+    RSS Message: 'YouTube ei tarjoa julkaisuille RSS-syötteitä. Poista "{rssSetting}" käytöstä nähdäksesi julkaisut tai ota "{hideSetting}" käyttöön piilottaaksesi tämän välilehden.'
 Trending:
   Load Error: Nousussa olevia videoita ei voitu ladata.
   Unsupported Backend: Nousussa olevat videot edellyttävät paikallista APIa. Valitse paikallinen API tai ota käyttöön varajärjestelmä.
@@ -262,6 +288,7 @@ Settings:
     Hide Side Bar on Watch Pages: Piilota sivupalkki katselusivuilla
     UI Roundness: Käyttöliittymän pyöristys
     Scrollbar Width: Vierityspalkin leveys
+    Scroll Speed: Vieritysnopeus
     Animation Speed: Animaatioiden nopeus
     Thumbnail Size: Pikkukuvan koko
     Show Tab Icons: Näytä välilehtien kuvakkeet
@@ -704,6 +731,8 @@ Settings:
     Shorten View Counts: Lyhennä katselukertojen ja kommenttien tykkäysten määrät
     Hide Comment Translation Buttons: Piilota kommenttien käännöspainikkeet
     Hide Live Chat Replay: Piilota livekeskustelun tallenne
+    Hide Home: Piilota etusivu
+    Disable A-B Repeat: Poista A-B-toisto käytöstä
     Hide End-Screen Annotations: Piilota loppuruudun merkinnät
     Hide Paid Promotion Badge: Piilota maksetun mainonnan tunnus
     Show Player Controls: Näytä soittimen säätimet
@@ -813,6 +842,7 @@ Settings:
     History not supported: Tämä palvelinversio ei tue katseluhistorian synkronointia.
     Settings not supported: Tämä palvelinversio ei tue asetusten synkronointia.
     Sync completed: Synkronointi valmistui
+    Sync failed: 'Synkronointi epäonnistui: {error}'
     Data Loss Confirmation: Vahvistetaanko tietoja poistava synkronointi?
     Data Loss Warning: Palvelimen tila poistaisi {deleted}/{previous} aiemmin synkronoitua {collection}-kohdetta. Tämä voi johtua epäonnistuneesta palvelimen siirrosta tai nollauksesta. Jatka vain, jos poisto on tarkoituksellinen ja sinulla on varmuuskopio.
     Confirm Data Loss: Poista ja jatka
@@ -947,6 +977,8 @@ Video:
   Try With Configured Cookies: Yritä määritetyillä evästeillä
   Restricted Playback Authentication Failed Template: 'yt-dlp ei voinut avata tätä videota määritetyillä evästeillä: {error}'
   Private: Yksityisiä videoita ei voi katsoa OpenTubeXissä, koska ne edellyttävät Google-kirjautumista ja videon omistajuutta.
+  Collapse Playlist: Kutista soittolista
+  Expand Playlist: Laajenna soittolista
   Unmark As Watched: Merkitse katsomattomaksi
   Video has been unmarked as watched: Video merkittiin katsomattomaksi
   Save Channel Playback Speed: Tallenna kanavan toistonopeus
@@ -1007,6 +1039,21 @@ Video:
       Remaining: '{time} jäljellä'
       Cancel timer: Peruuta ajastin
       Timer ended: Uniajastin päättyi
+    A-B Repeat:
+      A-B Repeat: A-B-toisto
+      'On': Käytössä
+      'Off': Pois käytöstä
+      Point A: Piste A
+      Point B: Piste B
+      Set Repeat Start: Aseta toiston alku
+      Set Repeat End: Aseta toiston loppu
+      Pause Repeat: Keskeytä A-B-toisto
+      Resume Repeat: Jatka A-B-toistoa
+      Adjust Point: 'Säädä pistettä {point}, nykyinen aika {timestamp}'
+      Clear Range: Tyhjennä A-B-toistoalue
+      End Before Start: Pisteen B on oltava pisteen A jälkeen.
+      Outside Duration: Aikaleiman on oltava videon sisällä.
+      Cleared: A-B-toisto tyhjennetty
     Zoom:
       Zoom: Zoomaus
       'Off': 'Pois käytöstä'
@@ -1024,6 +1071,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Takaisin ylös
       Return to Video Tab: Palaa videovälilehteen
+      Hide: Piilota pienoissoitin
       Play: Toista
       Pause: Keskeytä
       Drag Handle: Siirrä minisoitinta
@@ -1330,6 +1378,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Näyttää taustatoimintojen, kuten tilausten päivityksen ja ylläpidettyjen työkalujen latausten, etenemisen jatkuvassa ilmoituksessa yleisen edistymispalkin sijaan.
     Always Show Scrollbars: Pitää vierityspalkit aina näkyvissä. Kun asetus on poistettu käytöstä, ne häipyvät pian hiiren liikkeen pysähdyttyä ja tulevat uudelleen näkyviin heti, kun hiirtä liikutetaan.
+    Scroll Speed: Muuttaa hiiren rullan ja kosketuslevyn vierityseleiden vieritysmatkaa.
     Use Fixed Tab Width: Tekee vaakasuuntaisen välilehtipalkin kaikista välilehdistä yhtä leveitä sen sijaan, että leveys määräytyisi nimen mukaan.
     Use Grid Player Menu: Järjestää videosoittimen asetusvalikon ruudukoksi riviluettelon sijaan.
 The playlist is at the beginning. Enable loop to continue playing: Soittolista on alussa. Jatka toistoa ottamalla jatkuva toisto käyttöön
@@ -1365,6 +1414,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Siirry edelliseen osumaan
   Toggle Normal Playback Speed: Vaihda nopeuden 1x ja edellisen toistonopeuden välillä
   Toggle Skip Silence: Ota hiljaisuuden ohittaminen käyttöön tai poista se käytöstä
+  Set A-B Repeat Point A: Aseta A-B-toiston piste A
+  Set A-B Repeat Point B: Aseta A-B-toiston piste B
+  Clear A-B Repeat: Tyhjennä A-B-toisto
   Video Zoom In: Lähennä videota
   Video Zoom Out: Loitonna videota
   Tab Switcher: Välilehtivalitsin

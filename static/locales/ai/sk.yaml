@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} h'
   Hours and minutes: '{hours} h {minutes} min'
+Home Page:
+  Home: Domov
+  Description: Pokračujte tam, kde ste prestali, a pozrite si nedávnu aktivitu.
+  Customize: Prispôsobiť domovskú stránku
+  Done: Hotovo
+  Customize description: Vyberte sekcie, ktoré sa majú zobrazovať, a usporiadajte ich v požadovanom poradí.
+  Continue watching: Pokračovať v sledovaní
+  New since last visit: Nové od poslednej návštevy
+  Watch queue: Front prehrávania
+  Recent playlists: Nedávne zoznamy videí
+  Recent downloads: Nedávne stiahnuté súbory
+  Upcoming reminders: Nadchádzajúce pripomienky
+  Watch statistics: Štatistiky sledovania
+  View all: Zobraziť všetko
+  Previous shelf page: Predchádzajúca stránka sekcie {section}
+  Next shelf page: Nasledujúca stránka sekcie {section}
+  Shelf page status: "{section}, strana {page} z {total}."
+  Move section up: Posunúť sekciu {section} nahor
+  Move section down: Posunúť sekciu {section} nadol
+  Section moved: Sekcia {section} bola presunutá na pozíciu {position} z {total}.
+  Nothing here yet: Zatiaľ tu nič nie je
+  Empty description: Tu sa zobrazia videá, ktoré začnete sledovať, používané zoznamy videí, stiahnuté súbory a pripomienky.
+  All sections hidden: Všetky sekcie sú skryté
+  All sections hidden description: Prispôsobte domovskú stránku a znova zobrazte sekciu.
 Subscriptions:
   Refreshing Subscription Videos: Obnovujú sa videá z odberov
   Refreshing Subscription Shorts: Obnovujú sa krátke videá z odberov
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Zobraziť spolu
   Newest First: Najnovšie ako prvé
   Oldest First: Najstaršie ako prvé
+  Posts:
+    RSS Message: YouTube neposkytuje kanály RSS pre príspevky. Ak chcete zobraziť príspevky, vypnite nastavenie „{rssSetting}“, alebo zapnite nastavenie „{hideSetting}“, ak chcete túto kartu skryť.
 Trending:
   Load Error: Trendy sa nepodarilo načítať.
   Unsupported Backend: Trendy vyžadujú miestne API. Vyberte miestne API alebo zapnite použitie záložného backendu.
@@ -260,6 +286,7 @@ Settings:
     Hide Side Bar on Watch Pages: Skryť bočný panel na stránkach sledovania
     UI Roundness: Zaoblenie rozhrania
     Scrollbar Width: Šírka posúvača
+    Scroll Speed: Rýchlosť posúvania
     Animation Speed: Rýchlosť animácií
     Thumbnail Size: Veľkosť miniatúr
     Show Tab Icons: Zobraziť ikony kariet
@@ -692,7 +719,9 @@ Settings:
     Hide Channel Avatars: Skryť avatary kanálov
     Shorten View Counts: Skrátiť počty pozretí a označení Páči sa mi to pri komentároch
     Hide Comment Translation Buttons: Skryť tlačidlá prekladu komentárov
+    Hide Home: Skryť domovskú stránku
     Hide Live Chat Replay: Skryť záznam živého četu
+    Disable A-B Repeat: Vypnúť opakovanie A-B
     Hide End-Screen Annotations: Skryť poznámky na záverečnej obrazovke
     Hide Paid Promotion Badge: Skryť označenie platenej propagácie
     Show Player Controls: Zobraziť ovládacie prvky prehrávača
@@ -793,6 +822,7 @@ Settings:
     History not supported: Táto verzia servera nepodporuje synchronizáciu histórie sledovania.
     Settings not supported: Táto verzia servera nepodporuje synchronizáciu nastavení.
     Sync completed: Synchronizácia bola dokončená
+    Sync failed: "Synchronizácia zlyhala: {error}"
     Data Loss Confirmation: Potvrdiť synchronizáciu s odstránením údajov?
     Data Loss Warning: Stav servera by odstránil {deleted} z {previous} predtým synchronizovaných položiek v kolekcii {collection}. Môže to znamenať neúspešnú migráciu alebo obnovenie servera. Pokračujte, len ak chcete tieto údaje odstrániť a máte zálohu.
     Confirm Data Loss: Odstrániť a pokračovať
@@ -923,6 +953,8 @@ Video:
   Configure Restricted Playback Cookies Hint: Nastavte súbory cookie v časti Nastavenia → Externý softvér → Súbory cookie prehrávania pre yt-dlp.
   Try With Configured Cookies: Skúsiť s nastavenými súbormi cookie
   Restricted Playback Authentication Failed Template: 'yt-dlp nemohol získať prístup k tomuto videu s nastavenými súbormi cookie: {error}'
+  Collapse Playlist: Zbaliť zoznam videí
+  Expand Playlist: Rozbaliť zoznam videí
   Unmark As Watched: Zrušiť označenie ako pozreté
   Video has been unmarked as watched: Označenie videa ako pozretého bolo zrušené
   Save Channel Playback Speed: Uložiť rýchlosť prehrávania kanála
@@ -983,6 +1015,21 @@ Video:
       Remaining: 'Zostáva {time}'
       Cancel timer: Zrušiť časovač
       Timer ended: Časovač vypnutia skončil
+    A-B Repeat:
+      A-B Repeat: Opakovanie A-B
+      On: Zapnuté
+      Off: Vypnuté
+      Point A: Bod A
+      Point B: Bod B
+      Set Repeat Start: Nastaviť začiatok opakovania
+      Set Repeat End: Nastaviť koniec opakovania
+      Pause Repeat: Pozastaviť opakovanie A-B
+      Resume Repeat: Obnoviť opakovanie A-B
+      Adjust Point: Upraviť bod {point}, aktuálne {timestamp}
+      Clear Range: Vymazať rozsah opakovania A-B
+      End Before Start: Bod B musí byť za bodom A.
+      Outside Duration: Časová značka musí byť v rámci videa.
+      Cleared: Opakovanie A-B bolo vymazané
     Zoom:
       Zoom: Priblíženie
       'Off': 'Vypnuté'
@@ -1000,6 +1047,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Späť nahor
       Return to Video Tab: Vrátiť sa na kartu videa
+      Hide: Skryť miniatúrny prehrávač
       Play: Prehrať
       Pause: Pozastaviť
       Drag Handle: Presunúť miniatúrny prehrávač
@@ -1306,6 +1354,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Namiesto globálneho ukazovateľa priebehu zobrazí trvalé oznámenie s aktuálnym priebehom operácií na pozadí, napríklad obnovovania odberov a sťahovania spravovaných nástrojov.
     Always Show Scrollbars: Posúvače zostanú stále viditeľné. Po vypnutí krátko po zastavení pohybu myši zmiznú a pri ďalšom pohybe sa znova zobrazia.
+    Scroll Speed: Mení vzdialenosť posúvania gestami kolieska myši a touchpadu.
     Use Fixed Tab Width: Všetkým kartám na vodorovnom paneli priradí rovnakú šírku namiesto prispôsobenia podľa ich názvu.
     Use Grid Player Menu: Usporiada ponuku nastavení prehrávača videa do mriežky dlaždíc namiesto zoznamu riadkov.
 The playlist is at the beginning. Enable loop to continue playing: Zoznam videí je na začiatku. Ak chcete pokračovať v prehrávaní, zapnite opakovanie
@@ -1339,6 +1388,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Prejsť na predchádzajúcu zhodu
   Toggle Normal Playback Speed: Prepnúť medzi rýchlosťou 1× a predchádzajúcou rýchlosťou prehrávania
   Toggle Skip Silence: Prepnúť preskakovanie ticha
+  Set A-B Repeat Point A: Nastaviť bod A opakovania A-B
+  Set A-B Repeat Point B: Nastaviť bod B opakovania A-B
+  Clear A-B Repeat: Vymazať opakovanie A-B
   Video Zoom In: Priblížiť video
   Video Zoom Out: Oddialiť video
   Tab Switcher: Prepínač kariet

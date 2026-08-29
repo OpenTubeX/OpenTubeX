@@ -127,6 +127,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} t'
   Hours and minutes: '{hours} t {minutes} min'
+Home Page:
+  Home: Heim
+  Description: Hald fram der du slapp, og sjå nyleg aktivitet.
+  Customize: Tilpass heimesida
+  Done: Ferdig
+  Customize description: Vel kva delar som skal visast, og ordne dei i den rekkjefølgja du ønskjer.
+  Continue watching: Hald fram med å sjå
+  New since last visit: Nytt sidan sist besøk
+  Watch queue: Avspelingskø
+  Recent playlists: Nylege spelelister
+  Recent downloads: Nylege nedlastingar
+  Upcoming reminders: Komande påminningar
+  Watch statistics: Sjåestatistikk
+  View all: Vis alle
+  Previous shelf page: Førre side i {section}
+  Next shelf page: Neste side i {section}
+  Shelf page status: "{section}, side {page} av {total}."
+  Move section up: Flytt {section} opp
+  Move section down: Flytt {section} ned
+  Section moved: "{section} flytta til posisjon {position} av {total}."
+  Nothing here yet: Ingenting her enno
+  Empty description: Videoar du startar, spelelister du brukar, nedlastingar og påminningar blir viste her.
+  All sections hidden: Alle delar er gøymde
+  All sections hidden description: Tilpass heimesida for å vise ein del igjen.
 Subscriptions:
   Empty Posts: Kanalane du abonnerer på, har ingen innlegg enno.
   Load More Posts: Last inn fleire innlegg
@@ -148,6 +172,8 @@ Subscriptions:
   Show Combined View: Vis samla
   Newest First: Nyaste først
   Oldest First: Eldste først
+  Posts:
+    RSS Message: YouTube tilbyr ikkje RSS-straumar for innlegg. Slå av innstillinga "{rssSetting}" for å sjå innlegg, eller slå på innstillinga "{hideSetting}" for å gøyme denne fana.
 Trending:
   Load Error: Klarte ikkje å laste inn populært innhald.
   Unsupported Backend: Populært innhald krev Local API. Vel Local API eller slå på ein reserveleverandør.
@@ -391,6 +417,7 @@ Settings:
     Hide Side Bar on Watch Pages: Gøym sidepanelet på videosider
     UI Roundness: Avrunding i grensesnittet
     Scrollbar Width: Breidd på rullefelt
+    Scroll Speed: Rullefart
     Animation Speed: Animasjonsfart
     Thumbnail Size: Storleik på miniatyrbilete
     Show Tab Icons: Vis faneikon
@@ -926,8 +953,10 @@ Settings:
     Hide Channel Avatars: Gøym kanalavatarar
     Shorten View Counts: Forkort talet på visingar og likerklikk på kommentarar
     Hide Comment Translation Buttons: Gøym omsetjingsknappar for kommentarar
+    Hide Home: Gøym heimesida
     Hide Live Chat Replay: Gøym opptak av direktepraten
     Hide Profile Pictures in Comments: Gøym profilbilete i kommentarar
+    Disable A-B Repeat: Slå av A-B-gjentaking
     Hide End-Screen Annotations: Gøym merknader på sluttskjermen
     Hide Paid Promotion Badge: Gøym merket for betalt marknadsføring
     Hide Channels Disabled Message: Nokre kanalar vart blokkerte med ID og ikkje handsama. Funksjonen er blokkert medan desse ID-ane blir oppdaterte
@@ -1062,6 +1091,7 @@ Settings:
     History not supported: Denne tenarversjonen støttar ikkje synkronisering av sjåarhistorikk.
     Settings not supported: Denne tenarversjonen støttar ikkje synkronisering av innstillingar.
     Sync completed: Synkroniseringa er fullført
+    Sync failed: "Synkronisering mislukkast: {error}"
     Data Loss Confirmation: Vil du stadfesta synkronisering med sletting?
     Data Loss Warning: Tilstanden på tenaren vil sletta {deleted} av {previous} tidlegare synkroniserte element i {collection}. Dette kan tyda på at ei tenarflytting eller nullstilling mislykkast. Hald berre fram dersom slettinga er tilsikta og du har ein tryggleikskopi.
     Confirm Data Loss: Slett og hald fram
@@ -1253,6 +1283,8 @@ Video:
   Restricted Playback Authentication Failed Template: 'yt-dlp fekk ikkje tilgang til videoen med dei oppsette infokapslane: {error}'
   DRMProtected: DRM-verna videoar kan ikkje spelast av i OpenTubeX fordi dei krev proprietære komponentar med lukka kjeldekode. Sjå videoen på den offisielle YouTube-nettstaden i ein nettlesar med DRM-støtte.
   Private: Private videoar kan ikkje sjåast i OpenTubeX fordi dei krev Google-innlogging og at du eig videoen.
+  Collapse Playlist: Slå saman spelelista
+  Expand Playlist: Utvid spelelista
   More Options: Fleire val
   Unmark As Watched: Merk som ikkje sett
   Video has been unmarked as watched: Videoen er merkt som ikkje sett
@@ -1328,6 +1360,21 @@ Video:
       Remaining: '{time} står att'
       Cancel timer: Avbryt tidtakaren
       Timer ended: Innsovningstidtakaren er ferdig
+    A-B Repeat:
+      A-B Repeat: A-B-gjentaking
+      On: På
+      Off: Av
+      Point A: Punkt A
+      Point B: Punkt B
+      Set Repeat Start: Set start for gjentaking
+      Set Repeat End: Set slutt for gjentaking
+      Pause Repeat: Set A-B-gjentaking på pause
+      Resume Repeat: Ta opp att A-B-gjentaking
+      Adjust Point: Juster punkt {point}, no {timestamp}
+      Clear Range: Fjern området for A-B-gjentaking
+      End Before Start: Punkt B må vere etter punkt A.
+      Outside Duration: Tidsstempelet må vere innanfor videoen.
+      Cleared: A-B-gjentakinga er fjerna
     Zoom:
       Zoom: Forstørring
       'Off': 'Av'
@@ -1372,6 +1419,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Til toppen
       Return to Video Tab: Tilbake til videofana
+      Hide: Gøym minispelaren
       Play: Spel av
       Pause: Pause
       Drag Handle: Flytt minispelaren
@@ -1710,6 +1758,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Viser eit vedvarande varsel med framdrift i sanntid for bakgrunnsoperasjonar, til dømes oppdatering av abonnementsstraumen og nedlasting av administrerte verktøy, i staden for den globale framdriftslinja.
     Always Show Scrollbars: Held rullefelta synlege heile tida. Når dette er slått av, tonar dei ut kort tid etter at du sluttar å flytte musa, og kjem fram att så snart du flyttar henne.
+    Scroll Speed: Endrar kor langt musehjul- og styreflaterørsler rullar.
     Use Fixed Tab Width: Gjev alle fanene i den vassrette fanelinja same breidd i staden for å tilpasse breidda til tittelen.
     Use Grid Player Menu: Ordnar innstillingsmenyen til videospelaren som eit rutenett med felt i staden for ei liste med rader.
   SponsorBlock Settings:
@@ -1800,6 +1849,9 @@ KeyboardShortcutPrompt:
   Increase Video Speed: Auk videofarten med intervallet for avspelingsfart
   Toggle Normal Playback Speed: Byt mellom 1x-fart og den førre avspelingsfarten
   Toggle Skip Silence: Slå overhopping av stille parti av eller på
+  Set A-B Repeat Point A: Set punkt A for A-B-gjentaking
+  Set A-B Repeat Point B: Set punkt B for A-B-gjentaking
+  Clear A-B Repeat: Fjern A-B-gjentaking
   Full Window: Vis i heile vindauget eller gå tilbake til normal vising
   Theatre Mode: Slå kinomodus av eller på
   Take Screenshot: Ta skjermbilete

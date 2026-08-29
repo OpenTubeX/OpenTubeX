@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} tim'
   Hours and minutes: '{hours} tim {minutes} min'
+Home Page:
+  Home: Startsida
+  Description: Fortsätt där du slutade och se den senaste aktiviteten.
+  Customize: Anpassa startsidan
+  Done: Klar
+  Customize description: Välj vilka avsnitt som ska visas och ordna dem i önskad ordning.
+  Continue watching: Fortsätt titta
+  New since last visit: Nytt sedan ditt senaste besök
+  Watch queue: Visningskö
+  Recent playlists: Senaste spellistor
+  Recent downloads: Senaste nedladdningar
+  Upcoming reminders: Kommande påminnelser
+  Watch statistics: Visningsstatistik
+  View all: Visa alla
+  Previous shelf page: Föregående sida för {section}
+  Next shelf page: Nästa sida för {section}
+  Shelf page status: '{section}, sida {page} av {total}.'
+  Move section up: Flytta {section} uppåt
+  Move section down: Flytta {section} nedåt
+  Section moved: '{section} flyttades till position {position} av {total}.'
+  Nothing here yet: Inget här ännu
+  Empty description: Videor du börjar titta på, spellistor du använder, nedladdningar och påminnelser visas här.
+  All sections hidden: Alla avsnitt är dolda
+  All sections hidden description: Anpassa startsidan för att visa ett avsnitt igen.
 Subscriptions:
   Refreshing Subscription Videos: Uppdaterar prenumerationsvideor
   Refreshing Subscription Shorts: Uppdaterar Shorts från prenumerationer
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Visa kombinerad vy
   Newest First: Nyaste först
   Oldest First: Äldsta först
+  Posts:
+    RSS Message: 'YouTube tillhandahåller inte RSS-flöden för inlägg. Inaktivera inställningen "{rssSetting}" för att visa inlägg eller aktivera inställningen "{hideSetting}" för att dölja den här fliken.'
 Trending:
   Load Error: Trendande innehåll kunde inte läsas in.
   Unsupported Backend: Trendande innehåll kräver lokalt API. Välj lokalt API eller aktivera reservserverdelen.
@@ -260,6 +286,7 @@ Settings:
     Hide Side Bar on Watch Pages: Dölj sidofältet på visningssidor
     UI Roundness: Gränssnittets rundning
     Scrollbar Width: Rullningslistens bredd
+    Scroll Speed: Rullningshastighet
     Animation Speed: Animeringshastighet
     Thumbnail Size: Miniatyrbildsstorlek
     Show Tab Icons: Visa flikikoner
@@ -693,6 +720,8 @@ Settings:
     Shorten View Counts: Förkorta antal visningar och gilla-markeringar på kommentarer
     Hide Comment Translation Buttons: Dölj knappar för kommentaröversättning
     Hide Live Chat Replay: Dölj repriser av livechattar
+    Hide Home: Dölj startsidan
+    Disable A-B Repeat: Inaktivera A-B-upprepning
     Hide End-Screen Annotations: Dölj slutskärmsnoteringar
     Hide Paid Promotion Badge: Dölj märket för betald marknadsföring
     Show Player Controls: Visa spelarkontroller
@@ -793,6 +822,7 @@ Settings:
     History not supported: Den här serverversionen stöder inte synkronisering av visningshistorik.
     Settings not supported: Den här serverversionen stöder inte synkronisering av inställningar.
     Sync completed: Synkroniseringen är klar
+    Sync failed: 'Synkroniseringen misslyckades: {error}'
     Data Loss Confirmation: Bekräfta destruktiv synkronisering?
     Data Loss Warning: Serverstatusen skulle ta bort {deleted} av {previous} tidigare synkroniserade objekt i {collection}. Det kan tyda på en misslyckad servermigrering eller återställning. Fortsätt endast om borttagningen är avsiktlig och du har en säkerhetskopia.
     Confirm Data Loss: Ta bort och fortsätt
@@ -923,6 +953,8 @@ Video:
   Configure Restricted Playback Cookies Hint: Konfigurera kakor under Inställningar → Extern programvara → Uppspelningskakor för yt-dlp.
   Try With Configured Cookies: Försök med konfigurerade kakor
   Restricted Playback Authentication Failed Template: 'yt-dlp kunde inte komma åt videon med de konfigurerade kakorna: {error}'
+  Collapse Playlist: Fäll ihop spellista
+  Expand Playlist: Fäll ut spellista
   Unmark As Watched: Avmarkera som sedd
   Video has been unmarked as watched: Videon har avmarkerats som sedd
   Save Channel Playback Speed: Spara uppspelningshastighet för kanalen
@@ -983,6 +1015,21 @@ Video:
       Remaining: '{time} återstår'
       Cancel timer: Avbryt timern
       Timer ended: Insomningstimern har löpt ut
+    A-B Repeat:
+      A-B Repeat: A-B-upprepning
+      'On': På
+      'Off': Av
+      Point A: Punkt A
+      Point B: Punkt B
+      Set Repeat Start: Ange upprepningens start
+      Set Repeat End: Ange upprepningens slut
+      Pause Repeat: Pausa A-B-upprepning
+      Resume Repeat: Återuppta A-B-upprepning
+      Adjust Point: 'Justera punkt {point}, för närvarande {timestamp}'
+      Clear Range: Rensa intervall för A-B-upprepning
+      End Before Start: Punkt B måste vara efter punkt A.
+      Outside Duration: Tidsstämpeln måste vara inom videon.
+      Cleared: A-B-upprepningen rensades
     Zoom:
       Zoom: Zoom
       'Off': 'Av'
@@ -1000,6 +1047,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Tillbaka högst upp
       Return to Video Tab: Gå tillbaka till videofliken
+      Hide: Dölj minispelare
       Play: Spela upp
       Pause: Pausa
       Drag Handle: Flytta minispelaren
@@ -1306,6 +1354,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Visar en beständig avisering med aktuellt förlopp för bakgrundsåtgärder, exempelvis uppdatering av prenumerationer och nedladdning av hanterade verktyg, i stället för det globala förloppsfältet.
     Always Show Scrollbars: Håller rullningslisterna synliga hela tiden. När funktionen är inaktiverad tonas de bort en kort stund efter att du slutat röra musen och visas igen så snart du rör den.
+    Scroll Speed: Ändrar hur långt mushjulets och pekplattans rullgester rullar.
     Use Fixed Tab Width: Ger alla flikar i det vågräta flikfältet samma bredd i stället för att anpassa bredden efter titeln.
     Use Grid Player Menu: Ordnar videospelarens inställningsmeny som ett rutnät med rutor i stället för en lista med rader.
 The playlist is at the beginning. Enable loop to continue playing: Spellistan är vid början. Aktivera upprepning för att fortsätta spela
@@ -1339,6 +1388,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Gå till föregående träff
   Toggle Normal Playback Speed: Växla mellan hastigheten 1× och föregående uppspelningshastighet
   Toggle Skip Silence: Slå på eller av överhoppning av tystnad
+  Set A-B Repeat Point A: Ange punkt A för A-B-upprepning
+  Set A-B Repeat Point B: Ange punkt B för A-B-upprepning
+  Clear A-B Repeat: Rensa A-B-upprepning
   Video Zoom In: Zooma in i videon
   Video Zoom Out: Zooma ut ur videon
   Tab Switcher: Flikväxlare

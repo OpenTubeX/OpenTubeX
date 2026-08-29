@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} دقيقة'
   Hours: '{hours} ساعة'
   Hours and minutes: '{hours} ساعة {minutes} دقيقة'
+Home Page:
+  Home: الرئيسية
+  Description: تابع من حيث توقفت واطّلع على النشاط الأخير.
+  Customize: تخصيص الصفحة الرئيسية
+  Done: تم
+  Customize description: اختر الأقسام التي تظهر ورتّبها بالترتيب الذي تريده.
+  Continue watching: متابعة المشاهدة
+  New since last visit: جديد منذ زيارتك الأخيرة
+  Watch queue: قائمة انتظار المشاهدة
+  Recent playlists: قوائم التشغيل الأخيرة
+  Recent downloads: التنزيلات الأخيرة
+  Upcoming reminders: التذكيرات القادمة
+  Watch statistics: إحصاءات المشاهدة
+  View all: عرض الكل
+  Previous shelf page: صفحة {section} السابقة
+  Next shelf page: صفحة {section} التالية
+  Shelf page status: '{section}، الصفحة {page} من {total}.'
+  Move section up: نقل {section} لأعلى
+  Move section down: نقل {section} لأسفل
+  Section moved: 'تم نقل {section} إلى الموضع {position} من {total}.'
+  Nothing here yet: لا يوجد شيء هنا بعد
+  Empty description: ستظهر هنا مقاطع الفيديو التي تبدأ مشاهدتها وقوائم التشغيل التي تستخدمها والتنزيلات والتذكيرات.
+  All sections hidden: جميع الأقسام مخفية
+  All sections hidden description: خصّص الصفحة الرئيسية لإظهار قسم من جديد.
 Subscriptions:
   Refreshing Subscription Videos: تحديث مقاطع الفيديو الخاصة بالاشتراك
   Refreshing Subscription Shorts: 'تحديث الفيديوهات القصيرة للاشتراكات'
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: عرض العرض المدمج
   Newest First: الأحدث أولاً
   Oldest First: الأقدم أولاً
+  Posts:
+    RSS Message: لا يوفّر YouTube خلاصات RSS للمنشورات. عطّل إعداد "{rssSetting}" لعرض المنشورات أو فعّل إعداد "{hideSetting}" لإخفاء علامة التبويب هذه.
 Trending:
   Load Error: تعذر تحميل العناصر الشائعة.
   Unsupported Backend: يتطلب الاتجاه واجهة برمجة التطبيقات المحلية. حدد واجهة برمجة التطبيقات المحلية أو قم بتمكين الخلفية الاحتياطية.
@@ -262,6 +288,7 @@ Settings:
     Hide Side Bar on Watch Pages: إخفاء الشريط الجانبي في صفحات المشاهدة
     UI Roundness: استدارة واجهة المستخدم
     Scrollbar Width: عرض شريط التمرير
+    Scroll Speed: سرعة التمرير
     Animation Speed: سرعة الرسوم المتحركة
     Thumbnail Size: حجم الصورة المصغرة
     Show Tab Icons: إظهار أيقونات علامات التبويب
@@ -698,7 +725,9 @@ Settings:
     Hide Channel Avatars: إخفاء الصور الرمزية للقناة
     Shorten View Counts: تقصير مرات المشاهدة والتعليق على عدد الإعجابات
     Hide Comment Translation Buttons: إخفاء أزرار ترجمة التعليق
+    Hide Home: إخفاء الصفحة الرئيسية
     Hide Live Chat Replay: إخفاء إعادة تشغيل الدردشة المباشرة
+    Disable A-B Repeat: تعطيل تكرار A-B
     Hide End-Screen Annotations: إخفاء التعليقات التوضيحية على شاشة النهاية
     Hide Paid Promotion Badge: إخفاء شارة الترويج المدفوعة
     Show Player Controls: إظهار عناصر التحكم في المشغل
@@ -808,6 +837,7 @@ Settings:
     History not supported: لا يدعم إصدار الخادم هذا مزامنة سجل المشاهدة.
     Settings not supported: إصدار الخادم هذا لا يدعم مزامنة الإعدادات.
     Sync completed: اكتملت المزامنة
+    Sync failed: 'فشلت المزامنة: {error}'
     Data Loss Confirmation: هل تريد تأكيد المزامنة المدمرة؟
     Data Loss Warning: ستحذف حالة الخادم {deleted} من {previous} عنصرًا تمت مزامنته مسبقًا {collection}. يمكن أن يشير هذا إلى فشل عملية ترحيل الخادم أو إعادة تعيينه. استمر فقط إذا كان هذا الحذف مقصودًا ولديك نسخة احتياطية.
     Confirm Data Loss: حذف والمتابعة
@@ -912,6 +942,8 @@ Video:
   Queue Item Cannot Move Down: لا يمكن نقل {title} إلى الأسفل. إنه موجود بالفعل في الموضع {total} من {total}.
   Metadata: معلومات الفيديو
   Close Metadata: إغلاق معلومات الفيديو
+  Collapse Playlist: طي قائمة التشغيل
+  Expand Playlist: توسيع قائمة التشغيل
   Metadata Cache:
     Title History: تاريخ العنوان
     Thumbnail History: تاريخ الصورة المصغرة
@@ -1002,6 +1034,21 @@ Video:
       Remaining: '{time} المتبقي'
       Cancel timer: إلغاء الموقت
       Timer ended: انتهى مؤقت النوم
+    A-B Repeat:
+      A-B Repeat: تكرار A-B
+      On: تشغيل
+      Off: إيقاف
+      Point A: النقطة A
+      Point B: النقطة B
+      Set Repeat Start: تعيين بداية التكرار
+      Set Repeat End: تعيين نهاية التكرار
+      Pause Repeat: إيقاف تكرار A-B مؤقتًا
+      Resume Repeat: استئناف تكرار A-B
+      Adjust Point: 'ضبط النقطة {point}، الوقت الحالي {timestamp}'
+      Clear Range: مسح نطاق تكرار A-B
+      End Before Start: يجب أن تكون النقطة B بعد النقطة A.
+      Outside Duration: يجب أن يكون الطابع الزمني ضمن مدة الفيديو.
+      Cleared: تم مسح تكرار A-B
     Zoom:
       Zoom: تكبير
       Off: عن
@@ -1019,6 +1066,7 @@ Video:
     Scroll Mini Player:
       Back to Top: العودة إلى الأعلى
       Return to Video Tab: العودة إلى علامة التبويب الفيديو
+      Hide: إخفاء المشغل المصغّر
       Play: يلعب
       Pause: يوقف
       Drag Handle: نقل لاعب صغير
@@ -1310,6 +1358,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: يعرض إشعارًا مستمرًا بالتقدم المباشر لعمليات الخلفية، مثل تحديثات الاشتراك وتنزيلات الأدوات المُدارة، بدلاً من استخدام شريط التقدم العام.
     Always Show Scrollbars: يبقي أشرطة التمرير مرئية في جميع الأوقات. عند تعطيلها، فإنها تتلاشى بعد وقت قصير من التوقف عن تحريك الماوس وتعاود الظهور بمجرد تحريكه مرة أخرى.
+    Scroll Speed: يغيّر مسافة التمرير بإيماءات عجلة الفأرة ولوحة اللمس.
     Use Fixed Tab Width: يمنح كل علامة تبويب في شريط علامات التبويب الأفقي نفس العرض بدلاً من تغيير حجمها حسب عنوانها.
     Use Grid Player Menu: يقوم بترتيب قائمة إعدادات مشغل الفيديو كشبكة من المربعات بدلاً من قائمة الصفوف.
 The playlist is at the beginning. Enable loop to continue playing: قائمة التشغيل في البداية. تمكين الحلقة لمواصلة اللعب
@@ -1343,6 +1392,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: 'الانتقال إلى النتيجة السابقة'
   Toggle Normal Playback Speed: قم بالتبديل بين سرعة 1x وسرعة التشغيل السابقة
   Toggle Skip Silence: تبديل تخطي الصمت
+  Set A-B Repeat Point A: تعيين النقطة A لتكرار A-B
+  Set A-B Repeat Point B: تعيين النقطة B لتكرار A-B
+  Clear A-B Repeat: مسح تكرار A-B
   Video Zoom In: تكبير الفيديو
   Video Zoom Out: تصغير الفيديو
   Tab Switcher: مبدل علامات التبويب

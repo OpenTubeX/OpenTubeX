@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} h'
   Hours and minutes: '{hours} h {minutes} min'
+Home Page:
+  Home: Domů
+  Description: Pokračujte tam, kde jste skončili, a prohlédněte si nedávnou aktivitu.
+  Customize: Přizpůsobit domovskou stránku
+  Done: Hotovo
+  Customize description: Vyberte zobrazené sekce a uspořádejte je v požadovaném pořadí.
+  Continue watching: Pokračovat ve sledování
+  New since last visit: Novinky od poslední návštěvy
+  Watch queue: Fronta ke zhlédnutí
+  Recent playlists: Nedávné playlisty
+  Recent downloads: Nedávná stahování
+  Upcoming reminders: Nadcházející připomenutí
+  Watch statistics: Statistiky sledování
+  View all: Zobrazit vše
+  Previous shelf page: Předchozí stránka sekce {section}
+  Next shelf page: Další stránka sekce {section}
+  Shelf page status: '{section}, stránka {page} z {total}.'
+  Move section up: Přesunout {section} nahoru
+  Move section down: Přesunout {section} dolů
+  Section moved: 'Sekce {section} přesunuta na pozici {position} z {total}.'
+  Nothing here yet: Zatím tu nic není
+  Empty description: Zde se zobrazí videa, která začnete sledovat, používané playlisty, stažené soubory a připomenutí.
+  All sections hidden: Všechny sekce jsou skryté
+  All sections hidden description: Přizpůsobte domovskou stránku a některou sekci znovu zobrazte.
 Subscriptions:
   Refreshing Subscription Videos: Obnovování videí z odběrů
   Refreshing Subscription Shorts: Obnovování krátkých videí z odběrů
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Zobrazit společně
   Newest First: Od nejnovějších
   Oldest First: Od nejstarších
+  Posts:
+    RSS Message: YouTube neposkytuje pro příspěvky kanály RSS. Chcete-li příspěvky zobrazit, vypněte nastavení „{rssSetting}“. Chcete-li tuto kartu skrýt, zapněte nastavení „{hideSetting}“.
 Trending:
   Load Error: Trendy se nepodařilo načíst.
   Unsupported Backend: Trendy vyžadují místní API. Vyberte místní API nebo povolte záložního poskytovatele.
@@ -260,6 +286,7 @@ Settings:
     Hide Side Bar on Watch Pages: Skrýt postranní panel na stránkách sledování
     UI Roundness: Zaoblení rozhraní
     Scrollbar Width: Šířka posuvníku
+    Scroll Speed: Rychlost posouvání
     Animation Speed: Rychlost animací
     Thumbnail Size: Velikost miniatur
     Show Tab Icons: Zobrazovat ikony karet
@@ -692,7 +719,9 @@ Settings:
     Hide Channel Avatars: Skrýt avatary kanálů
     Shorten View Counts: Zkracovat počty zhlédnutí a hodnocení komentářů
     Hide Comment Translation Buttons: Skrýt tlačítka pro překlad komentářů
+    Hide Home: Skrýt domovskou stránku
     Hide Live Chat Replay: Skrýt záznam živého chatu
+    Disable A-B Repeat: Vypnout opakování A-B
     Hide End-Screen Annotations: Skrýt poznámky na závěrečné obrazovce
     Hide Paid Promotion Badge: Skrýt označení placené propagace
     Show Player Controls: Zobrazovat ovládací prvky přehrávače
@@ -793,6 +822,7 @@ Settings:
     History not supported: Tato verze serveru nepodporuje synchronizaci historie sledování.
     Settings not supported: Tato verze serveru nepodporuje synchronizaci nastavení.
     Sync completed: Synchronizace dokončena
+    Sync failed: 'Synchronizace se nezdařila: {error}'
     Data Loss Confirmation: Potvrdit synchronizaci s mazáním dat?
     Data Loss Warning: Stav serveru by smazal {deleted} z {previous} dříve synchronizovaných položek kolekce {collection}. Může to znamenat, že se nezdařil převod nebo obnovení serveru. Pokračujte jen v případě, že je smazání záměrné a máte zálohu.
     Confirm Data Loss: Smazat a pokračovat
@@ -894,6 +924,8 @@ Video:
   Queue Item Cannot Move Down: Video {title} nelze přesunout níž. Už je na pozici {total} z {total}.
   Metadata: Informace o videu
   Close Metadata: Zavřít informace o videu
+  Collapse Playlist: Sbalit playlist
+  Expand Playlist: Rozbalit playlist
   Metadata Cache:
     Title History: Historie názvu
     Thumbnail History: Historie miniatur
@@ -983,6 +1015,21 @@ Video:
       Remaining: 'Zbývá {time}'
       Cancel timer: Zrušit časovač
       Timer ended: Časovač vypnutí skončil
+    A-B Repeat:
+      A-B Repeat: Opakování A-B
+      On: Zapnuto
+      Off: Vypnuto
+      Point A: Bod A
+      Point B: Bod B
+      Set Repeat Start: Nastavit začátek opakování
+      Set Repeat End: Nastavit konec opakování
+      Pause Repeat: Pozastavit opakování A-B
+      Resume Repeat: Pokračovat v opakování A-B
+      Adjust Point: 'Upravit bod {point}, nyní {timestamp}'
+      Clear Range: Vymazat rozsah opakování A-B
+      End Before Start: Bod B musí být za bodem A.
+      Outside Duration: Časová značka musí být v rámci videa.
+      Cleared: Opakování A-B bylo vymazáno
     Zoom:
       Zoom: Přiblížení
       'Off': 'Vypnuto'
@@ -1000,6 +1047,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Zpět nahoru
       Return to Video Tab: Zpět na kartu videa
+      Hide: Skrýt minipřehrávač
       Play: Přehrát
       Pause: Pozastavit
       Drag Handle: Přesunout minipřehrávač
@@ -1306,6 +1354,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Místo celkového ukazatele průběhu zobrazí trvalé oznámení s aktuálním průběhem operací na pozadí, například obnovování odběrů a stahování spravovaných nástrojů.
     Always Show Scrollbars: Ponechá posuvníky stále viditelné. Pokud je funkce vypnutá, krátce po zastavení pohybu myši zmizí a při dalším pohybu se znovu zobrazí.
+    Scroll Speed: Mění vzdálenost posunu kolečkem myši a gesty kolečka touchpadu.
     Use Fixed Tab Width: Nastaví všem kartám na vodorovném panelu stejnou šířku místo šířky podle názvu.
     Use Grid Player Menu: Uspořádá nabídku nastavení přehrávače videa do mřížky dlaždic místo seznamu řádků.
 The playlist is at the beginning. Enable loop to continue playing: Playlist je na začátku. Chcete-li pokračovat v přehrávání, zapněte opakování
@@ -1339,6 +1388,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Přejít na předchozí výskyt
   Toggle Normal Playback Speed: Přepnout mezi rychlostí 1× a předchozí rychlostí přehrávání
   Toggle Skip Silence: Přepnout přeskakování ticha
+  Set A-B Repeat Point A: Nastavit bod A opakování A-B
+  Set A-B Repeat Point B: Nastavit bod B opakování A-B
+  Clear A-B Repeat: Vymazat opakování A-B
   Video Zoom In: Přiblížit video
   Video Zoom Out: Oddálit video
   Tab Switcher: Přepínač karet

@@ -104,6 +104,30 @@ Stats:
   Minutes: '{minutes} دقیقه'
   Hours: '{hours} ساعت'
   Hours and minutes: '{hours} ساعت و {minutes} دقیقه'
+Home Page:
+  Home: صفحهٔ اصلی
+  Description: از جایی که متوقف شدید ادامه دهید و فعالیت‌های اخیر را ببینید.
+  Customize: سفارشی‌سازی صفحهٔ اصلی
+  Done: انجام شد
+  Customize description: انتخاب کنید کدام بخش‌ها نمایش داده شوند و آن‌ها را به ترتیب دلخواه بچینید.
+  Continue watching: ادامهٔ تماشا
+  New since last visit: جدید از آخرین بازدید
+  Watch queue: صف تماشا
+  Recent playlists: فهرست‌های پخش اخیر
+  Recent downloads: بارگیری‌های اخیر
+  Upcoming reminders: یادآوری‌های پیش رو
+  Watch statistics: آمار تماشا
+  View all: مشاهدهٔ همه
+  Previous shelf page: صفحهٔ قبلی {section}
+  Next shelf page: صفحهٔ بعدی {section}
+  Shelf page status: '{section}، صفحهٔ {page} از {total}.'
+  Move section up: انتقال {section} به بالا
+  Move section down: انتقال {section} به پایین
+  Section moved: '{section} به جایگاه {position} از {total} منتقل شد.'
+  Nothing here yet: هنوز چیزی اینجا نیست
+  Empty description: ویدیوهایی که شروع می‌کنید، فهرست‌های پخشی که استفاده می‌کنید، بارگیری‌ها و یادآوری‌ها اینجا نمایش داده می‌شوند.
+  All sections hidden: همهٔ بخش‌ها پنهان هستند
+  All sections hidden description: صفحهٔ اصلی را سفارشی کنید تا بخشی دوباره نمایش داده شود.
 Subscriptions:
   Refreshing Subscription Videos: در حال تازه‌سازی ویدیوهای اشتراک‌ها
   Refreshing Subscription Shorts: در حال تازه‌سازی ویدیوهای کوتاه اشتراک‌ها
@@ -121,6 +145,8 @@ Subscriptions:
   Show Combined View: نمایش یکپارچه
   Newest First: جدیدترین ابتدا
   Oldest First: قدیمی‌ترین ابتدا
+  Posts:
+    RSS Message: 'یوتیوب برای پست‌ها خوراک RSS ارائه نمی‌کند. برای دیدن پست‌ها تنظیم "{rssSetting}" را غیرفعال کنید یا برای پنهان‌کردن این زبانه تنظیم "{hideSetting}" را فعال کنید.'
 Trending:
   Load Error: موارد پرطرف‌دار بارگذاری نشدند.
   Unsupported Backend: نمایش موارد پرطرف‌دار به Local API نیاز دارد. Local API را انتخاب کنید یا بازگشت به بک‌اند را فعال کنید.
@@ -275,6 +301,7 @@ Settings:
     Hide Side Bar on Watch Pages: پنهان‌کردن نوار کناری در صفحه‌های پخش
     UI Roundness: گردی رابط کاربری
     Scrollbar Width: پهنای نوار پیمایش
+    Scroll Speed: سرعت پیمایش
     Animation Speed: سرعت پویانمایی
     Thumbnail Size: اندازهٔ تصویر بندانگشتی
     Show Tab Icons: نمایش نماد برگه‌ها
@@ -721,6 +748,8 @@ Settings:
     Shorten View Counts: کوتاه‌کردن شمار بازدید و پسند دیدگاه‌ها
     Hide Comment Translation Buttons: پنهان‌کردن دکمه‌های ترجمهٔ دیدگاه
     Hide Live Chat Replay: پنهان‌کردن بازپخش گفت‌وگوی زنده
+    Hide Home: پنهان‌کردن صفحهٔ اصلی
+    Disable A-B Repeat: غیرفعال‌کردن تکرار A-B
     Hide End-Screen Annotations: پنهان‌کردن حاشیه‌نویسی‌های صفحهٔ پایانی
     Hide Paid Promotion Badge: پنهان‌کردن نشان تبلیغ پولی
     Show Player Controls: نمایش کنترل‌های پخش‌کننده
@@ -836,6 +865,7 @@ Settings:
     History not supported: این نسخهٔ سرور از همگام‌سازی سابقهٔ تماشا پشتیبانی نمی‌کند.
     Settings not supported: این نسخهٔ سرور از همگام‌سازی تنظیمات پشتیبانی نمی‌کند.
     Sync completed: همگام‌سازی کامل شد
+    Sync failed: 'همگام‌سازی ناموفق بود: {error}'
     Data Loss Confirmation: همگام‌سازی مخرب تأیید شود؟
     Data Loss Warning: وضعیت سرور باعث حذف {deleted} مورد از {previous} مورد {collection} می‌شود که قبلاً همگام شده‌اند. این وضعیت می‌تواند نشانهٔ شکست انتقال یا بازنشانی سرور باشد. فقط در صورتی ادامه دهید که این حذف عمدی است و نسخهٔ پشتیبان دارید.
     Confirm Data Loss: حذف و ادامه
@@ -973,6 +1003,8 @@ Video:
   Try With Configured Cookies: تلاش با کوکی‌های پیکربندی‌شده
   Restricted Playback Authentication Failed Template: 'yt-dlp با کوکی‌های پیکربندی‌شده نتوانست به این ویدیو دسترسی پیدا کند: {error}'
   Private: ویدیوهای خصوصی در OpenTubeX قابل تماشا نیستند، زیرا به ورود به Google و مالکیت ویدیو نیاز دارند.
+  Collapse Playlist: جمع‌کردن فهرست پخش
+  Expand Playlist: بازکردن فهرست پخش
   Unmark As Watched: برداشتن علامت تماشاشده
   Video has been unmarked as watched: علامت تماشاشده از ویدیو برداشته شد
   Save Channel Playback Speed: ذخیرهٔ سرعت پخش کانال
@@ -1040,6 +1072,21 @@ Video:
       Remaining: '{time} باقی‌مانده'
       Cancel timer: لغو تایمر
       Timer ended: تایمر خواب پایان یافت
+    A-B Repeat:
+      A-B Repeat: تکرار A-B
+      'On': روشن
+      'Off': خاموش
+      Point A: نقطهٔ A
+      Point B: نقطهٔ B
+      Set Repeat Start: تنظیم آغاز تکرار
+      Set Repeat End: تنظیم پایان تکرار
+      Pause Repeat: مکث تکرار A-B
+      Resume Repeat: ادامهٔ تکرار A-B
+      Adjust Point: 'تنظیم نقطهٔ {point}، اکنون {timestamp}'
+      Clear Range: پاک‌کردن محدودهٔ تکرار A-B
+      End Before Start: نقطهٔ B باید پس از نقطهٔ A باشد.
+      Outside Duration: برچسب زمانی باید در محدودهٔ ویدیو باشد.
+      Cleared: تکرار A-B پاک شد
     Zoom:
       Zoom: بزرگ‌نمایی
       'Off': 'خاموش'
@@ -1057,6 +1104,7 @@ Video:
     Scroll Mini Player:
       Back to Top: بازگشت به بالا
       Return to Video Tab: بازگشت به زبانهٔ ویدیو
+      Hide: پنهان‌کردن پخش‌کنندهٔ کوچک
       Play: پخش
       Pause: مکث
       Drag Handle: جابه‌جایی پخش‌کنندهٔ کوچک
@@ -1370,6 +1418,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: به‌جای نوار پیشرفت سراسری، اعلان پایداری با پیشرفت زنده عملیات پس‌زمینه مانند تازه‌سازی اشتراک‌ها و بارگیری ابزارهای مدیریت‌شده نشان می‌دهد.
     Always Show Scrollbars: نوارهای پیمایش را همیشه نمایان نگه می‌دارد. در صورت غیرفعال بودن، کمی پس از توقف حرکت ماوس محو می‌شوند و با حرکت دوباره آن فوراً ظاهر می‌شوند.
+    Scroll Speed: فاصلهٔ پیمایش با حرکت چرخ ماوس و صفحهٔ لمسی را تغییر می‌دهد.
     Use Fixed Tab Width: به‌جای تنظیم اندازه زبانه‌ها بر اساس عنوانشان، به همه زبانه‌های نوار افقی عرضی یکسان می‌دهد.
     Use Grid Player Menu: منوی تنظیمات پخش‌کننده ویدیو را به‌جای فهرستی از ردیف‌ها، به‌صورت شبکه‌ای از کاشی‌ها می‌چیند.
 The playlist is at the beginning. Enable loop to continue playing: فهرست پخش در ابتداست. برای ادامه پخش، تکرار را فعال کنید
@@ -1405,6 +1454,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: رفتن به تطابق قبلی
   Toggle Normal Playback Speed: جابه‌جایی میان سرعت 1x و سرعت پخش قبلی
   Toggle Skip Silence: روشن یا خاموش‌کردن ردکردن سکوت
+  Set A-B Repeat Point A: تنظیم نقطهٔ A تکرار A-B
+  Set A-B Repeat Point B: تنظیم نقطهٔ B تکرار A-B
+  Clear A-B Repeat: پاک‌کردن تکرار A-B
   Video Zoom In: بزرگ‌نمایی ویدیو
   Video Zoom Out: کوچک‌نمایی ویدیو
   Tab Switcher: تعویض‌کننده زبانه

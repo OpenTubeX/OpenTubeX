@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes}分'
   Hours: '{hours}時間'
   Hours and minutes: '{hours}時間{minutes}分'
+Home Page:
+  Home: ホーム
+  Description: 前回の続きから再開し、最近のアクティビティを確認できます。
+  Customize: ホームをカスタマイズ
+  Done: 完了
+  Customize description: 表示するセクションを選び、好きな順序に並べ替えます。
+  Continue watching: 視聴を続ける
+  New since last visit: 前回の訪問以降の新着
+  Watch queue: 再生キュー
+  Recent playlists: 最近のプレイリスト
+  Recent downloads: 最近のダウンロード
+  Upcoming reminders: 予定されているリマインダー
+  Watch statistics: 視聴統計
+  View all: すべて表示
+  Previous shelf page: "{section}の前のページ"
+  Next shelf page: "{section}の次のページ"
+  Shelf page status: "{section}、{total}ページ中{page}ページ。"
+  Move section up: "{section}を上へ移動"
+  Move section down: "{section}を下へ移動"
+  Section moved: "{section}を{total}件中{position}番目に移動しました。"
+  Nothing here yet: まだ何もありません
+  Empty description: 視聴を始めた動画、使用したプレイリスト、ダウンロード、リマインダーがここに表示されます。
+  All sections hidden: すべてのセクションが非表示です
+  All sections hidden description: ホームをカスタマイズして、セクションを再表示してください。
 Subscriptions:
   Refreshing Subscription Videos: 登録チャンネルの動画を更新中
   Refreshing Subscription Shorts: 登録チャンネルのショート動画を更新中
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: まとめて表示
   Newest First: 新しい順
   Oldest First: 古い順
+  Posts:
+    RSS Message: YouTubeは投稿用のRSSフィードを提供していません。投稿を表示するには「{rssSetting}」設定を無効にするか、このタブを非表示にするには「{hideSetting}」設定を有効にしてください。
 Trending:
   Load Error: トレンドを読み込めませんでした。
   Unsupported Backend: トレンドにはLocal APIが必要です。Local APIを選択するか、バックエンドのフォールバックを有効にしてください。
@@ -260,6 +286,7 @@ Settings:
     Hide Side Bar on Watch Pages: 動画再生ページでサイドバーを非表示
     UI Roundness: UIの丸み
     Scrollbar Width: スクロールバーの幅
+    Scroll Speed: スクロール速度
     Animation Speed: アニメーション速度
     Thumbnail Size: サムネイルのサイズ
     Show Tab Icons: タブのアイコンを表示
@@ -692,7 +719,9 @@ Settings:
     Hide Channel Avatars: チャンネルのアバターを非表示
     Shorten View Counts: 視聴回数とコメントの高評価数を省略表示
     Hide Comment Translation Buttons: コメントの翻訳ボタンを非表示
+    Hide Home: ホームを非表示
     Hide Live Chat Replay: ライブチャットのリプレイを非表示
+    Disable A-B Repeat: A-Bリピートを無効化
     Hide End-Screen Annotations: 終了画面のアノテーションを非表示
     Hide Paid Promotion Badge: 有料プロモーションのバッジを非表示
     Show Player Controls: プレーヤーの操作ボタンを表示
@@ -793,6 +822,7 @@ Settings:
     History not supported: このバージョンのサーバーは視聴履歴の同期に対応していません。
     Settings not supported: このバージョンのサーバーは設定の同期に対応していません。
     Sync completed: 同期が完了しました
+    Sync failed: "同期に失敗しました: {error}"
     Data Loss Confirmation: データを削除する同期を確認しますか？
     Data Loss Warning: サーバーの状態に合わせると、以前に同期した{collection}の{previous}件中{deleted}件が削除されます。サーバーの移行失敗やリセットが原因の可能性があります。意図した削除であり、バックアップがある場合のみ続行してください。
     Confirm Data Loss: 削除して続行
@@ -923,6 +953,8 @@ Video:
   Configure Restricted Playback Cookies Hint: 「設定」→「外部ソフトウェア」→「yt-dlpの再生用Cookie」でCookieを設定してください。
   Try With Configured Cookies: 設定済みのCookieを使用して再試行
   Restricted Playback Authentication Failed Template: '設定したCookieではyt-dlpがこの動画にアクセスできませんでした: {error}'
+  Collapse Playlist: プレイリストを折りたたむ
+  Expand Playlist: プレイリストを展開
   Unmark As Watched: 視聴済みを解除
   Video has been unmarked as watched: 動画の視聴済みを解除しました
   Save Channel Playback Speed: チャンネルの再生速度を保存
@@ -983,6 +1015,21 @@ Video:
       Remaining: '残り{time}'
       Cancel timer: タイマーをキャンセル
       Timer ended: スリープタイマーが終了しました
+    A-B Repeat:
+      A-B Repeat: A-Bリピート
+      On: オン
+      Off: オフ
+      Point A: ポイントA
+      Point B: ポイントB
+      Set Repeat Start: リピート開始位置を設定
+      Set Repeat End: リピート終了位置を設定
+      Pause Repeat: A-Bリピートを一時停止
+      Resume Repeat: A-Bリピートを再開
+      Adjust Point: "{point}を調整（現在: {timestamp}）"
+      Clear Range: A-Bリピート範囲を消去
+      End Before Start: ポイントBはポイントAより後に設定してください。
+      Outside Duration: タイムスタンプは動画の再生時間内に設定してください。
+      Cleared: A-Bリピートを消去しました
     Zoom:
       Zoom: ズーム
       'Off': 'オフ'
@@ -1000,6 +1047,7 @@ Video:
     Scroll Mini Player:
       Back to Top: 先頭へ戻る
       Return to Video Tab: 動画タブに戻る
+      Hide: ミニプレーヤーを非表示
       Play: 再生
       Pause: 一時停止
       Drag Handle: ミニプレーヤーを移動
@@ -1306,6 +1354,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: 登録チャンネルの更新や管理対象ツールのダウンロードなど、バックグラウンド処理の進行状況を共通の進行状況バーではなく、常に表示される通知で示します。
     Always Show Scrollbars: スクロールバーを常に表示します。無効にすると、マウスを止めてから少し後に消え、再び動かすとすぐに表示されます。
+    Scroll Speed: マウスホイールとタッチパッドのホイール操作によるスクロール距離を変更します。
     Use Fixed Tab Width: 横型タブバーの各タブを、タイトルに合わせた幅ではなく同じ幅にします。
     Use Grid Player Menu: 動画プレーヤーの設定メニューを行の一覧ではなく、タイル状のグリッドに配置します。
 The playlist is at the beginning. Enable loop to continue playing: プレイリストの先頭です。続けて再生するにはループを有効にしてください
@@ -1339,6 +1388,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: 前の一致箇所へ移動
   Toggle Normal Playback Speed: 1倍速と前の再生速度を切り替え
   Toggle Skip Silence: 無音スキップを切り替え
+  Set A-B Repeat Point A: A-BリピートのポイントAを設定
+  Set A-B Repeat Point B: A-BリピートのポイントBを設定
+  Clear A-B Repeat: A-Bリピートを消去
   Video Zoom In: 動画を拡大
   Video Zoom Out: 動画を縮小
   Tab Switcher: タブ切り替え

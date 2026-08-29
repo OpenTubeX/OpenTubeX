@@ -7,10 +7,36 @@ Global:
 Search Listing:
   Label:
     Members Only: Tylko dla wspierających
+Home Page:
+  Home: Strona główna
+  Description: Kontynuuj od miejsca, w którym przerwano, i zobacz ostatnią aktywność.
+  Customize: Dostosuj stronę główną
+  Done: Gotowe
+  Customize description: Wybierz wyświetlane sekcje i ustaw je w wybranej kolejności.
+  Continue watching: Kontynuuj oglądanie
+  New since last visit: Nowości od ostatniej wizyty
+  Watch queue: Kolejka oglądania
+  Recent playlists: Ostatnie playlisty
+  Recent downloads: Ostatnio pobrane
+  Upcoming reminders: Nadchodzące przypomnienia
+  Watch statistics: Statystyki oglądania
+  View all: Zobacz wszystko
+  Previous shelf page: Poprzednia strona sekcji {section}
+  Next shelf page: Następna strona sekcji {section}
+  Shelf page status: "{section}, strona {page} z {total}."
+  Move section up: Przenieś sekcję {section} w górę
+  Move section down: Przenieś sekcję {section} w dół
+  Section moved: Sekcja {section} została przeniesiona na pozycję {position} z {total}.
+  Nothing here yet: Jeszcze nic tu nie ma
+  Empty description: Tutaj pojawią się rozpoczęte filmy, używane playlisty, pobrane pliki i przypomnienia.
+  All sections hidden: Wszystkie sekcje są ukryte
+  All sections hidden description: Dostosuj stronę główną, aby ponownie wyświetlić sekcję.
 Subscriptions:
   New Content Tabs: Karty nowych treści
   Show Tabbed View: Pokaż widok kart
   Show Combined View: Pokaż widok łączny
+  Posts:
+    RSS Message: YouTube nie udostępnia kanałów RSS dla postów. Wyłącz ustawienie „{rssSetting}”, aby wyświetlić posty, lub włącz ustawienie „{hideSetting}”, aby ukryć tę kartę.
 Trending:
   Load Error: Nie udało się wczytać popularnych treści.
   Unsupported Backend: Popularne treści wymagają lokalnego API. Wybierz lokalne API lub włącz zapasowy backend.
@@ -54,6 +80,7 @@ Settings:
       Playlist View Type: Sposób wyświetlania playlisty
     Show Thumbnail Previews: Pokazuj podgląd miniatur
   Theme Settings:
+    Scroll Speed: Szybkość przewijania
     Custom Theme:
       Share Theme: Udostępnij motyw
       Share Description Heading: Opis
@@ -238,7 +265,9 @@ Settings:
     Hide Channel Avatars: Ukrywaj awatary kanałów
     Shorten View Counts: Skracaj liczbę wyświetleń i polubień komentarzy
     Hide Comment Translation Buttons: Ukrywaj przyciski tłumaczenia komentarzy
+    Hide Home: Ukryj stronę główną
     Hide Live Chat Replay: Ukrywaj powtórkę czatu na żywo
+    Disable A-B Repeat: Wyłącz powtarzanie A-B
     Hide Paid Promotion Badge: Ukrywaj oznaczenie płatnej promocji
     Show Player Controls: Pokazuj elementy sterujące odtwarzacza
     Show Video Title: Pokazuj tytuł filmu
@@ -293,6 +322,7 @@ Settings:
     Pairing Verification Unavailable: Brak zaszyfrowanej kolekcji synchronizacji potrzebnej do sprawdzenia przesłanego klucza. Zsynchronizuj połączone urządzenie i spróbuj ponownie.
     Pairing Completed: Urządzenia zostały sparowane
     Pairing Approved: Sparowanie urządzeń zostało zatwierdzone
+    Sync failed: "Synchronizacja nie powiodła się: {error}"
   SponsorBlock Settings:
     Custom Color: Własny kolor
   Password Dialog:
@@ -371,6 +401,8 @@ Video:
   Configure Restricted Playback Cookies Hint: Skonfiguruj ciasteczka w sekcji Ustawienia → Oprogramowanie zewnętrzne → Ciasteczka odtwarzania dla yt-dlp.
   Try With Configured Cookies: Spróbuj ze skonfigurowanymi ciasteczkami
   Restricted Playback Authentication Failed Template: 'yt-dlp nie uzyskał dostępu do tego filmu za pomocą skonfigurowanych ciasteczek: {error}'
+  Collapse Playlist: Zwiń playlistę
+  Expand Playlist: Rozwiń playlistę
   Save Channel Subtitles State: Zapisz ustawienie napisów dla kanału
   Channel Subtitles State Saved: Zapisano ustawienie napisów dla kanału
   Save Channel Volume: Zapisz głośność dla kanału
@@ -404,12 +436,28 @@ Video:
       Error: Tłumaczenie lektorskie nie powiodło się. Spróbuj ponownie później.
       Duration Error: Tłumaczenie lektorskie jest dostępne tylko dla filmów trwających do czterech godzin.
     Auto-translate: Tłumaczenie automatyczne
+    A-B Repeat:
+      A-B Repeat: Powtarzanie A-B
+      On: Włączone
+      Off: Wyłączone
+      Point A: Punkt A
+      Point B: Punkt B
+      Set Repeat Start: Ustaw początek powtarzania
+      Set Repeat End: Ustaw koniec powtarzania
+      Pause Repeat: Wstrzymaj powtarzanie A-B
+      Resume Repeat: Wznów powtarzanie A-B
+      Adjust Point: Dostosuj punkt {point}, obecnie {timestamp}
+      Clear Range: Wyczyść zakres powtarzania A-B
+      End Before Start: Punkt B musi znajdować się po punkcie A.
+      Outside Duration: Znacznik czasu musi mieścić się w czasie trwania filmu.
+      Cleared: Wyczyszczono powtarzanie A-B
     Zoom:
       Zoom: Powiększenie
       'Off': 'Wyłączone'
     Auto-generated Caption Template: '{language} (wygenerowane automatycznie)'
     Scroll Mini Player:
       Return to Video Tab: Wróć do karty filmu
+      Hide: Ukryj miniodtwarzacz
     SponsorBlock:
       ActionTypeLabel: Typ segmentu
       MutedSegment: 'Wyciszono: {segmentCategory}'
@@ -559,11 +607,15 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Umieszcza nadchodzące transmisje na żywo i premiery na górze kanału subskrypcji. Po wyłączeniu pozostają na pozycji zgodnej z datą ogłoszenia aż do rozpoczęcia. Po wyłączeniu odśwież kanał subskrypcji, aby pobrać daty ogłoszenia istniejących zaplanowanych pozycji.
   Theme Settings:
     Show Progress as Notification: Zamiast ogólnego paska postępu wyświetla stałe powiadomienie z bieżącym postępem operacji w tle, takich jak odświeżanie subskrypcji i pobieranie zarządzanych narzędzi.
+    Scroll Speed: Zmienia odległość przewijania gestami kółka myszy i panelu dotykowego.
     Use Fixed Tab Width: Nadaje wszystkim kartom na poziomym pasku jednakową szerokość zamiast dopasowywać ją do tytułu.
     Use Grid Player Menu: Układa menu ustawień odtwarzacza filmu w siatkę kafelków zamiast listy wierszy.
 The playlist is at the beginning. Enable loop to continue playing: Playlista jest na początku. Włącz zapętlanie, aby kontynuować odtwarzanie
 External link opening has been disabled in Settings → Privacy: Otwieranie zewnętrznych odnośników wyłączono w sekcji Ustawienia → Prywatność
 KeyboardShortcutPrompt:
+  Set A-B Repeat Point A: Ustaw punkt A powtarzania A-B
+  Set A-B Repeat Point B: Ustaw punkt B powtarzania A-B
+  Clear A-B Repeat: Wyczyść powtarzanie A-B
   Video Zoom In: Powiększ film
   Video Zoom Out: Pomniejsz film
 CommandPalette:

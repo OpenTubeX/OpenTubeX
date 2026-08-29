@@ -101,6 +101,30 @@ Stats:
   Minutes: '{minutes}분'
   Hours: '{hours}시간'
   Hours and minutes: '{hours}시간 {minutes}분'
+Home Page:
+  Home: 홈
+  Description: 중단한 부분부터 이어서 보고 최근 활동을 확인하세요.
+  Customize: 홈 맞춤 설정
+  Done: 완료
+  Customize description: 표시할 섹션을 선택하고 원하는 순서로 정렬하세요.
+  Continue watching: 이어서 시청하기
+  New since last visit: 마지막 방문 이후 새로운 항목
+  Watch queue: 시청 대기열
+  Recent playlists: 최근 재생목록
+  Recent downloads: 최근 다운로드
+  Upcoming reminders: 예정된 알림
+  Watch statistics: 시청 통계
+  View all: 모두 보기
+  Previous shelf page: "{section} 이전 페이지"
+  Next shelf page: "{section} 다음 페이지"
+  Shelf page status: "{section}, {total}페이지 중 {page}페이지."
+  Move section up: "{section} 위로 이동"
+  Move section down: "{section} 아래로 이동"
+  Section moved: "{section}: {total}개 중 {position}번째 위치로 이동했습니다."
+  Nothing here yet: 아직 아무것도 없습니다
+  Empty description: 시청을 시작한 동영상, 사용한 재생목록, 다운로드 및 알림이 여기에 표시됩니다.
+  All sections hidden: 모든 섹션이 숨겨져 있습니다
+  All sections hidden description: 홈을 맞춤 설정하여 섹션을 다시 표시하세요.
 Subscriptions:
   Refreshing Subscription Videos: 구독 동영상 새로 고치는 중
   Refreshing Subscription Shorts: 구독 Shorts 새로 고치는 중
@@ -118,6 +142,8 @@ Subscriptions:
   Show Combined View: 통합 보기 표시
   Newest First: 최신순
   Oldest First: 오래된순
+  Posts:
+    RSS Message: YouTube는 게시물용 RSS 피드를 제공하지 않습니다. 게시물을 보려면 "{rssSetting}" 설정을 끄거나 이 탭을 숨기려면 "{hideSetting}" 설정을 켜세요.
 Trending:
   Load Error: 인기 급상승 콘텐츠를 불러올 수 없습니다.
   Unsupported Backend: 인기 급상승 콘텐츠에는 로컬 API가 필요합니다. 로컬 API를 선택하거나 백엔드 대체 사용을 활성화하세요.
@@ -354,6 +380,7 @@ Settings:
     Hide Side Bar on Watch Pages: 시청 페이지에서 사이드바 숨기기
     UI Roundness: UI 둥근 정도
     Scrollbar Width: 스크롤바 너비
+    Scroll Speed: 스크롤 속도
     Animation Speed: 애니메이션 속도
     Thumbnail Size: 썸네일 크기
     Show Tab Icons: 탭 아이콘 표시
@@ -889,8 +916,10 @@ Settings:
     Hide Channel Avatars: 채널 아바타 숨기기
     Shorten View Counts: 조회수 및 댓글 좋아요 수 줄여 표시
     Hide Comment Translation Buttons: 댓글 번역 버튼 숨기기
+    Hide Home: 홈 숨기기
     Hide Live Chat Replay: 실시간 채팅 다시보기 숨기기
     Hide Profile Pictures in Comments: 댓글의 프로필 사진 숨기기
+    Disable A-B Repeat: A-B 반복 사용 안 함
     Hide End-Screen Annotations: 최종 화면 특수효과 숨기기
     Hide Paid Promotion Badge: 유료 프로모션 배지 숨기기
     Hide Channels Disabled Message: 일부 채널이 ID로 차단되어 처리되지 않았습니다. 해당 ID를 업데이트하는 동안 이 기능을 사용할 수 없습니다
@@ -1025,6 +1054,7 @@ Settings:
     History not supported: 이 서버 버전은 시청 기록 동기화를 지원하지 않습니다.
     Settings not supported: 이 서버 버전은 설정 동기화를 지원하지 않습니다.
     Sync completed: 동기화를 완료했습니다
+    Sync failed: "동기화 실패: {error}"
     Data Loss Confirmation: 데이터가 삭제되는 동기화를 확인하시겠습니까?
     Data Loss Warning: 서버 상태에 따라 이전에 동기화된 {collection} 항목 {previous}개 중 {deleted}개가 삭제됩니다. 서버 이전이나 초기화에 실패한 경우일 수 있습니다. 의도한 삭제이며 백업이 있는 경우에만 계속하세요.
     Confirm Data Loss: 삭제하고 계속
@@ -1215,6 +1245,8 @@ Video:
   Restricted Playback Authentication Failed Template: 'yt-dlp에서 설정된 쿠키로 이 동영상에 접근할 수 없습니다: {error}'
   DRMProtected: DRM 보호 동영상에는 독점 비공개 소스 구성 요소가 필요하므로 OpenTubeX에서 재생할 수 없습니다. 이 동영상을 보려면 DRM을 지원하는 웹 브라우저에서 공식 YouTube 웹사이트를 이용하세요.
   Private: 비공개 동영상은 Google 로그인과 동영상 소유권이 필요하므로 OpenTubeX에서 볼 수 없습니다.
+  Collapse Playlist: 재생목록 접기
+  Expand Playlist: 재생목록 펼치기
   More Options: 옵션 더 보기
   Unmark As Watched: 시청함 표시 해제
   Video has been unmarked as watched: 동영상의 시청함 표시를 해제했습니다
@@ -1286,6 +1318,21 @@ Video:
       Remaining: '{time} 남음'
       Cancel timer: 타이머 취소
       Timer ended: 취침 타이머가 끝났습니다
+    A-B Repeat:
+      A-B Repeat: A-B 반복
+      On: 켜기
+      Off: 끄기
+      Point A: 지점 A
+      Point B: 지점 B
+      Set Repeat Start: 반복 시작 설정
+      Set Repeat End: 반복 종료 설정
+      Pause Repeat: A-B 반복 일시중지
+      Resume Repeat: A-B 반복 재개
+      Adjust Point: "{point} 지점 조정, 현재 {timestamp}"
+      Clear Range: A-B 반복 범위 지우기
+      End Before Start: B 지점은 A 지점 뒤에 있어야 합니다.
+      Outside Duration: 타임스탬프는 동영상 재생 시간 내에 있어야 합니다.
+      Cleared: A-B 반복을 지웠습니다
     Zoom:
       Zoom: 확대/축소
       'Off': 끄기
@@ -1330,6 +1377,7 @@ Video:
     Scroll Mini Player:
       Back to Top: 맨 위로
       Return to Video Tab: 동영상 탭으로 돌아가기
+      Hide: 미니 플레이어 숨기기
       Play: 재생
       Pause: 일시 정지
       Drag Handle: 미니 플레이어 이동
@@ -1668,6 +1716,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: 전체 진행률 표시줄 대신 구독 새로 고침 및 관리되는 도구 다운로드 같은 백그라운드 작업의 실시간 진행률을 지속 알림으로 표시합니다.
     Always Show Scrollbars: 스크롤바를 항상 표시합니다. 비활성화하면 마우스 움직임을 멈춘 직후 서서히 사라지고 다시 움직이면 즉시 나타납니다.
+    Scroll Speed: 마우스 휠 및 터치패드 휠 동작의 스크롤 거리를 변경합니다.
     Use Fixed Tab Width: 가로 탭 표시줄의 각 탭 너비를 제목에 맞추는 대신 모두 같은 너비로 설정합니다.
     Use Grid Player Menu: 동영상 플레이어의 설정 메뉴를 행 목록 대신 타일 격자로 배치합니다.
   Experimental Settings:
@@ -1761,6 +1810,9 @@ KeyboardShortcutPrompt:
   Increase Video Speed: 동영상 재생 속도 간격만큼 재생 속도 높이기
   Toggle Normal Playback Speed: 1배속과 이전 재생 속도 간 전환
   Toggle Skip Silence: 무음 구간 건너뛰기 전환
+  Set A-B Repeat Point A: A-B 반복 지점 A 설정
+  Set A-B Repeat Point B: A-B 반복 지점 B 설정
+  Clear A-B Repeat: A-B 반복 지우기
   Full Window: 전체 창 전환
   Theatre Mode: 영화관 모드 전환
   Take Screenshot: 스크린샷 찍기

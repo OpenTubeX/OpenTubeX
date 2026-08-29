@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} h'
   Hours and minutes: '{hours} h {minutes} min'
+Home Page:
+  Home: Acasă
+  Description: Continuă de unde ai rămas și vezi activitatea recentă.
+  Customize: Personalizează pagina principală
+  Done: Gata
+  Customize description: Alege secțiunile afișate și aranjează-le în ordinea dorită.
+  Continue watching: Continuă vizionarea
+  New since last visit: Noutăți de la ultima vizită
+  Watch queue: Coadă de vizionare
+  Recent playlists: Liste de redare recente
+  Recent downloads: Descărcări recente
+  Upcoming reminders: Mementouri viitoare
+  Watch statistics: Statistici de vizionare
+  View all: Vezi tot
+  Previous shelf page: Pagina anterioară pentru {section}
+  Next shelf page: Pagina următoare pentru {section}
+  Shelf page status: "{section}, pagina {page} din {total}."
+  Move section up: Mută {section} în sus
+  Move section down: Mută {section} în jos
+  Section moved: "{section} a fost mutată pe poziția {position} din {total}."
+  Nothing here yet: Nimic aici deocamdată
+  Empty description: Videoclipurile pe care le începi, listele de redare pe care le folosești, descărcările și mementourile vor apărea aici.
+  All sections hidden: Toate secțiunile sunt ascunse
+  All sections hidden description: Personalizează pagina principală pentru a afișa din nou o secțiune.
 Subscriptions:
   Refreshing Subscription Videos: Se reîmprospătează videoclipurile din abonamente
   Refreshing Subscription Shorts: Se reîmprospătează videoclipurile Shorts din abonamente
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Afișează vizualizarea combinată
   Newest First: Cele mai noi primele
   Oldest First: Cele mai vechi primele
+  Posts:
+    RSS Message: YouTube nu oferă fluxuri RSS pentru postări. Dezactivează setarea „{rssSetting}” pentru a vedea postările sau activează setarea „{hideSetting}” pentru a ascunde această filă.
 Trending:
   Load Error: Tendințele nu au putut fi încărcate.
   Unsupported Backend: Tendințele necesită API-ul local. Selectați API-ul local sau activați furnizorul de rezervă.
@@ -260,6 +286,7 @@ Settings:
     Hide Side Bar on Watch Pages: Ascunde bara laterală pe paginile de vizionare
     UI Roundness: Rotunjirea interfeței
     Scrollbar Width: Lățimea barei de derulare
+    Scroll Speed: Viteza de derulare
     Animation Speed: Viteza animațiilor
     Thumbnail Size: Dimensiunea miniaturilor
     Show Tab Icons: Afișează pictogramele filelor
@@ -694,7 +721,9 @@ Settings:
     Hide Channel Avatars: Ascunde avatarurile canalelor
     Shorten View Counts: Abreviază numărul de vizionări și aprecieri ale comentariilor
     Hide Comment Translation Buttons: Ascunde butoanele de traducere a comentariilor
+    Hide Home: Ascunde pagina principală
     Hide Live Chat Replay: Ascunde reluarea chatului în direct
+    Disable A-B Repeat: Dezactivează repetarea A-B
     Hide End-Screen Annotations: Ascunde adnotările de pe ecranul final
     Hide Paid Promotion Badge: Ascunde insigna de promovare plătită
     Show Player Controls: Afișează comenzile playerului
@@ -802,6 +831,7 @@ Settings:
     History not supported: Această versiune a serverului nu acceptă sincronizarea istoricului vizionărilor.
     Settings not supported: Această versiune a serverului nu acceptă sincronizarea setărilor.
     Sync completed: Sincronizarea s-a încheiat
+    Sync failed: "Sincronizarea a eșuat: {error}"
     Data Loss Confirmation: Confirmați sincronizarea distructivă?
     Data Loss Warning: Starea serverului ar șterge {deleted} din cele {previous} elemente {collection} sincronizate anterior. Acest lucru poate indica o migrare sau resetare nereușită a serverului. Continuați numai dacă ștergerea este intenționată și aveți o copie de rezervă.
     Confirm Data Loss: Șterge și continuă
@@ -941,6 +971,8 @@ Video:
   Try With Configured Cookies: Încearcă folosind cookie-urile configurate
   Restricted Playback Authentication Failed Template: 'yt-dlp nu a putut accesa acest videoclip cu cookie-urile configurate: {error}'
   Private: Videoclipurile private nu pot fi vizionate în OpenTubeX deoarece necesită autentificarea la Google și dreptul de proprietate asupra videoclipului.
+  Collapse Playlist: Restrânge lista de redare
+  Expand Playlist: Extinde lista de redare
   Unmark As Watched: Anulează marcarea ca vizionat
   Video has been unmarked as watched: Marcarea videoclipului ca vizionat a fost anulată
   Save Channel Playback Speed: Salvează viteza de redare pentru canal
@@ -1002,6 +1034,21 @@ Video:
       Remaining: 'Timp rămas: {time}'
       Cancel timer: Anulează temporizatorul
       Timer ended: Temporizatorul de oprire s-a încheiat
+    A-B Repeat:
+      A-B Repeat: Repetare A-B
+      On: Activată
+      Off: Dezactivată
+      Point A: Punctul A
+      Point B: Punctul B
+      Set Repeat Start: Setează începutul repetării
+      Set Repeat End: Setează sfârșitul repetării
+      Pause Repeat: Întrerupe repetarea A-B
+      Resume Repeat: Continuă repetarea A-B
+      Adjust Point: Ajustează punctul {point}, acum {timestamp}
+      Clear Range: Șterge intervalul repetării A-B
+      End Before Start: Punctul B trebuie să fie după punctul A.
+      Outside Duration: Momentul trebuie să se încadreze în durata videoclipului.
+      Cleared: Repetarea A-B a fost ștearsă
     Zoom:
       Zoom: Zoom
       'Off': 'Dezactivat'
@@ -1019,6 +1066,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Înapoi sus
       Return to Video Tab: Revino la fila videoclipului
+      Hide: Ascunde miniplayerul
       Play: Redă
       Pause: Pauză
       Drag Handle: Mută miniplayerul
@@ -1332,6 +1380,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Afișează o notificare persistentă cu progresul în timp real pentru operațiunile din fundal, cum ar fi reîmprospătarea abonamentelor și descărcarea instrumentelor gestionate, în locul barei globale de progres.
     Always Show Scrollbars: Păstrează barele de derulare vizibile permanent. Când opțiunea este dezactivată, acestea dispar treptat la scurt timp după ce opriți mișcarea mouse-ului și reapar imediat ce îl mișcați din nou.
+    Scroll Speed: Modifică distanța de derulare a gesturilor rotiței mouse-ului și ale touchpadului.
     Use Fixed Tab Width: Atribuie aceeași lățime fiecărei file din bara de file orizontală, în loc să o dimensioneze după titlu.
     Use Grid Player Menu: Aranjează meniul de setări al playerului video ca o grilă de dale, în locul unei liste de rânduri.
 The playlist is at the beginning. Enable loop to continue playing: Playlistul este la început. Activați redarea în buclă pentru a continua
@@ -1367,6 +1416,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Treci la potrivirea anterioară
   Toggle Normal Playback Speed: Comută între viteza 1x și viteza de redare anterioară
   Toggle Skip Silence: Comută omiterea liniștii
+  Set A-B Repeat Point A: Setează punctul A al repetării A-B
+  Set A-B Repeat Point B: Setează punctul B al repetării A-B
+  Clear A-B Repeat: Șterge repetarea A-B
   Video Zoom In: Mărește videoclipul
   Video Zoom Out: Micșorează videoclipul
   Tab Switcher: Comutator de file

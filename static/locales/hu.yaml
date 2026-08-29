@@ -892,6 +892,8 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Hátralévő SABR várakozási idő: {remindingTimeSeconds} mp'
   Popout Live Chat: Felugró csevegés
   Private: A privát videók nem tekinthetők meg a OpenTubeX-on, mivel a megtekintésükhöz Google-bejelentkezés és a videó tulajdonjoga szükséges.
+  Collapse Playlist: Lejátszási lista összecsukása
+  Expand Playlist: Lejátszási lista kibontása
 Playlist:
   #& About
   View Full Playlist: 'Teljes lejátszási lista megtekintése'

@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} λεπτά'
   Hours: '{hours} ώρες'
   Hours and minutes: '{hours} ώρες {minutes} λεπτά'
+Home Page:
+  Home: Αρχική
+  Description: Συνεχίστε από εκεί που σταματήσατε και δείτε την πρόσφατη δραστηριότητα.
+  Customize: Προσαρμογή αρχικής
+  Done: Τέλος
+  Customize description: Επιλέξτε ποιες ενότητες θα εμφανίζονται και τακτοποιήστε τις με τη σειρά που θέλετε.
+  Continue watching: Συνέχεια παρακολούθησης
+  New since last visit: Νέα από την τελευταία επίσκεψη
+  Watch queue: Ουρά παρακολούθησης
+  Recent playlists: Πρόσφατες λίστες αναπαραγωγής
+  Recent downloads: Πρόσφατες λήψεις
+  Upcoming reminders: Προσεχείς υπενθυμίσεις
+  Watch statistics: Στατιστικά παρακολούθησης
+  View all: Προβολή όλων
+  Previous shelf page: Προηγούμενη σελίδα για {section}
+  Next shelf page: Επόμενη σελίδα για {section}
+  Shelf page status: '{section}, σελίδα {page} από {total}.'
+  Move section up: Μετακίνηση του {section} επάνω
+  Move section down: Μετακίνηση του {section} κάτω
+  Section moved: 'Το {section} μετακινήθηκε στη θέση {position} από {total}.'
+  Nothing here yet: Δεν υπάρχει τίποτα εδώ ακόμη
+  Empty description: Τα βίντεο που αρχίζετε, οι λίστες αναπαραγωγής που χρησιμοποιείτε, οι λήψεις και οι υπενθυμίσεις θα εμφανίζονται εδώ.
+  All sections hidden: Όλες οι ενότητες είναι κρυφές
+  All sections hidden description: Προσαρμόστε την αρχική για να εμφανίσετε ξανά μια ενότητα.
 Subscriptions:
   Refreshing Subscription Videos: Ανανέωση βίντεο συνδρομών
   Refreshing Subscription Shorts: Ανανέωση σύντομων βίντεο συνδρομών
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Ενιαία προβολή
   Newest First: Νεότερα πρώτα
   Oldest First: Παλαιότερα πρώτα
+  Posts:
+    RSS Message: Το YouTube δεν παρέχει ροές RSS για αναρτήσεις. Απενεργοποιήστε τη ρύθμιση "{rssSetting}" για να βλέπετε αναρτήσεις ή ενεργοποιήστε τη ρύθμιση "{hideSetting}" για να αποκρύψετε αυτήν την καρτέλα.
 Trending:
   Load Error: Δεν ήταν δυνατή η φόρτωση των τάσεων.
   Unsupported Backend: Οι τάσεις απαιτούν το Τοπικό API. Επιλέξτε το Τοπικό API ή ενεργοποιήστε την εφεδρική χρήση συστήματος υποστήριξης.
@@ -262,6 +288,7 @@ Settings:
     Hide Side Bar on Watch Pages: Απόκρυψη πλευρικής γραμμής στις σελίδες παρακολούθησης
     UI Roundness: Στρογγυλότητα περιβάλλοντος χρήστη
     Scrollbar Width: Πλάτος γραμμής κύλισης
+    Scroll Speed: Ταχύτητα κύλισης
     Animation Speed: Ταχύτητα κινήσεων
     Thumbnail Size: Μέγεθος μικρογραφιών
     Show Tab Icons: Εμφάνιση εικονιδίων καρτελών
@@ -703,7 +730,9 @@ Settings:
     Hide Channel Avatars: Απόκρυψη εικόνων προφίλ καναλιών
     Shorten View Counts: Συντόμευση πλήθους προβολών και θετικών ψήφων σχολίων
     Hide Comment Translation Buttons: Απόκρυψη κουμπιών μετάφρασης σχολίων
+    Hide Home: Απόκρυψη αρχικής
     Hide Live Chat Replay: Απόκρυψη επανάληψης ζωντανής συνομιλίας
+    Disable A-B Repeat: Απενεργοποίηση επανάληψης A-B
     Hide End-Screen Annotations: Απόκρυψη σχολίων τέλους βίντεο
     Hide Paid Promotion Badge: Απόκρυψη σήματος πληρωμένης προώθησης
     Show Player Controls: Εμφάνιση στοιχείων ελέγχου προγράμματος αναπαραγωγής
@@ -813,6 +842,7 @@ Settings:
     History not supported: Αυτή η έκδοση διακομιστή δεν υποστηρίζει συγχρονισμό ιστορικού παρακολούθησης.
     Settings not supported: Αυτή η έκδοση διακομιστή δεν υποστηρίζει συγχρονισμό ρυθμίσεων.
     Sync completed: Ο συγχρονισμός ολοκληρώθηκε
+    Sync failed: 'Ο συγχρονισμός απέτυχε: {error}'
     Data Loss Confirmation: Επιβεβαίωση συγχρονισμού με διαγραφή δεδομένων;
     Data Loss Warning: Η κατάσταση του διακομιστή θα διέγραφε {deleted} από τα {previous} ήδη συγχρονισμένα στοιχεία {collection}. Αυτό μπορεί να υποδεικνύει αποτυχημένη μετεγκατάσταση ή επαναφορά του διακομιστή. Συνεχίστε μόνο αν αυτή η διαγραφή είναι σκόπιμη και διαθέτετε αντίγραφο ασφαλείας.
     Confirm Data Loss: Διαγραφή και συνέχεια
@@ -917,6 +947,8 @@ Video:
   Queue Item Cannot Move Down: Δεν είναι δυνατή η μετακίνηση του {title} προς τα κάτω. Βρίσκεται ήδη στη θέση {total} από {total}.
   Metadata: Πληροφορίες βίντεο
   Close Metadata: Κλείσιμο πληροφοριών βίντεο
+  Collapse Playlist: Σύμπτυξη λίστας αναπαραγωγής
+  Expand Playlist: Ανάπτυξη λίστας αναπαραγωγής
   Metadata Cache:
     Title History: Ιστορικό τίτλων
     Thumbnail History: Ιστορικό μικρογραφιών
@@ -1007,6 +1039,21 @@ Video:
       Remaining: 'Απομένουν {time}'
       Cancel timer: Ακύρωση χρονοδιακόπτη
       Timer ended: Ο χρονοδιακόπτης ύπνου έληξε
+    A-B Repeat:
+      A-B Repeat: Επανάληψη A-B
+      On: Ενεργή
+      Off: Ανενεργή
+      Point A: Σημείο A
+      Point B: Σημείο B
+      Set Repeat Start: Ορισμός αρχής επανάληψης
+      Set Repeat End: Ορισμός τέλους επανάληψης
+      Pause Repeat: Παύση επανάληψης A-B
+      Resume Repeat: Συνέχιση επανάληψης A-B
+      Adjust Point: 'Προσαρμογή σημείου {point}, τώρα {timestamp}'
+      Clear Range: Εκκαθάριση εύρους επανάληψης A-B
+      End Before Start: Το σημείο B πρέπει να βρίσκεται μετά το σημείο A.
+      Outside Duration: Η χρονική σήμανση πρέπει να βρίσκεται εντός του βίντεο.
+      Cleared: Η επανάληψη A-B εκκαθαρίστηκε
     Zoom:
       Zoom: Μεγέθυνση
       'Off': 'Ανενεργή'
@@ -1024,6 +1071,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Επιστροφή στην κορυφή
       Return to Video Tab: Επιστροφή στην καρτέλα βίντεο
+      Hide: Απόκρυψη μίνι προγράμματος αναπαραγωγής
       Play: Αναπαραγωγή
       Pause: Παύση
       Drag Handle: Μετακίνηση μικρού προγράμματος αναπαραγωγής
@@ -1330,6 +1378,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Εμφανίζει μια μόνιμη ειδοποίηση με ζωντανή πρόοδο για λειτουργίες παρασκηνίου, όπως ανανεώσεις συνδρομών και λήψεις διαχειριζόμενων εργαλείων, αντί για την καθολική γραμμή προόδου.
     Always Show Scrollbars: Διατηρεί τις γραμμές κύλισης πάντα ορατές. Όταν είναι απενεργοποιημένο, εξαφανίζονται λίγο αφού σταματήσετε να κινείτε το ποντίκι και επανεμφανίζονται μόλις το κινήσετε ξανά.
+    Scroll Speed: Αλλάζει την απόσταση κύλισης με τη ροδέλα του ποντικιού και τις χειρονομίες ροδέλας της επιφάνειας αφής.
     Use Fixed Tab Width: Δίνει σε κάθε καρτέλα της οριζόντιας γραμμής καρτελών το ίδιο πλάτος, αντί να προσαρμόζει το μέγεθός της στον τίτλο.
     Use Grid Player Menu: Διατάσσει το μενού ρυθμίσεων του προγράμματος αναπαραγωγής βίντεο ως πλέγμα πλακιδίων αντί για λίστα γραμμών.
 The playlist is at the beginning. Enable loop to continue playing: Η λίστα αναπαραγωγής βρίσκεται στην αρχή. Ενεργοποιήστε την επανάληψη για να συνεχιστεί η αναπαραγωγή
@@ -1365,6 +1414,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Μετάβαση στην προηγούμενη αντιστοιχία
   Toggle Normal Playback Speed: Εναλλαγή μεταξύ ταχύτητας 1x και της προηγούμενης ταχύτητας αναπαραγωγής
   Toggle Skip Silence: Εναλλαγή παράλειψης σιωπής
+  Set A-B Repeat Point A: Ορισμός σημείου A επανάληψης A-B
+  Set A-B Repeat Point B: Ορισμός σημείου B επανάληψης A-B
+  Clear A-B Repeat: Εκκαθάριση επανάληψης A-B
   Video Zoom In: Μεγέθυνση βίντεο
   Video Zoom Out: Σμίκρυνση βίντεο
   Tab Switcher: Εναλλαγή καρτελών

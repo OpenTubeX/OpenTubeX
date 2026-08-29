@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} mun'
   Hours: '{hours} awr'
   Hours and minutes: '{hours} awr {minutes} mun'
+Home Page:
+  Home: Hafan
+  Description: Parhewch o'r man lle gwnaethoch chi stopio a gweld gweithgarwch diweddar.
+  Customize: Addasu'r hafan
+  Done: Wedi gorffen
+  Customize description: Dewiswch pa adrannau sy'n ymddangos a'u trefnu yn y drefn rydych chi ei heisiau.
+  Continue watching: Parhau i wylio
+  New since last visit: Newydd ers yr ymweliad diwethaf
+  Watch queue: Ciw gwylio
+  Recent playlists: Rhestrau chwarae diweddar
+  Recent downloads: Lawrlwythiadau diweddar
+  Upcoming reminders: Nodyn atgoffa sydd ar ddod
+  Watch statistics: Ystadegau gwylio
+  View all: Gweld y cyfan
+  Previous shelf page: Tudalen flaenorol {section}
+  Next shelf page: Tudalen nesaf {section}
+  Shelf page status: '{section}, tudalen {page} o {total}.'
+  Move section up: Symud {section} i fyny
+  Move section down: Symud {section} i lawr
+  Section moved: 'Wedi symud {section} i safle {position} o {total}.'
+  Nothing here yet: Dim byd yma eto
+  Empty description: Bydd fideos rydych chi'n eu dechrau, rhestrau chwarae rydych chi'n eu defnyddio, lawrlwythiadau a nodiadau atgoffa yn ymddangos yma.
+  All sections hidden: Mae pob adran wedi'i chuddio
+  All sections hidden description: Addaswch yr hafan i ddangos adran eto.
 Subscriptions:
   Refreshing Subscription Videos: Wrthi'n adnewyddu fideos tanysgrifiadau
   Refreshing Subscription Shorts: Wrthi'n adnewyddu Byrion tanysgrifiadau
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Dangos yr olwg gyfun
   Newest First: Mwyaf newydd yn gyntaf
   Oldest First: Hynaf yn gyntaf
+  Posts:
+    RSS Message: Nid yw YouTube yn darparu ffrydiau RSS ar gyfer postiadau. Analluogwch y gosodiad "{rssSetting}" i weld postiadau neu alluogi'r gosodiad "{hideSetting}" i guddio'r tab hwn.
 Trending:
   Load Error: Nid oedd modd llwytho Trendio.
   Unsupported Backend: Mae angen yr API Lleol ar Trendio. Dewiswch yr API Lleol neu alluogi'r darparwr wrth gefn.
@@ -260,6 +286,7 @@ Settings:
     Hide Side Bar on Watch Pages: Cuddio'r bar ochr ar dudalennau gwylio
     UI Roundness: Crynder y rhyngwyneb
     Scrollbar Width: Lled y bar sgrolio
+    Scroll Speed: Cyflymder sgrolio
     Animation Speed: Cyflymder animeiddio
     Thumbnail Size: Maint mân-luniau
     Show Tab Icons: Dangos eiconau tabiau
@@ -692,7 +719,9 @@ Settings:
     Hide Channel Avatars: Cuddio afatarau sianeli
     Shorten View Counts: Byrhau cyfrif gwylwyr a hoffiadau sylwadau
     Hide Comment Translation Buttons: Cuddio botymau cyfieithu sylwadau
+    Hide Home: Cuddio'r hafan
     Hide Live Chat Replay: Cuddio ailchwarae sgwrs fyw
+    Disable A-B Repeat: Analluogi ailadrodd A-B
     Hide End-Screen Annotations: Cuddio anodiadau'r sgrin ddiwedd
     Hide Paid Promotion Badge: Cuddio bathodyn hyrwyddiad taledig
     Show Player Controls: Dangos rheolyddion y chwaraewr
@@ -793,6 +822,7 @@ Settings:
     History not supported: Nid yw'r fersiwn hwn o'r gweinydd yn cynnal cysoni hanes gwylio.
     Settings not supported: Nid yw'r fersiwn hwn o'r gweinydd yn cynnal cysoni gosodiadau.
     Sync completed: Wedi cwblhau cysoni
+    Sync failed: 'Methodd cysoni: {error}'
     Data Loss Confirmation: Cadarnhau cysoni dinistriol?
     Data Loss Warning: Byddai cyflwr y gweinydd yn dileu {deleted} o'r {previous} eitem {collection} a gysonwyd o'r blaen. Gall hyn ddangos bod mudo neu ailosod y gweinydd wedi methu. Parhewch dim ond os ydych am ddileu'r eitemau hyn a bod gennych gopi wrth gefn.
     Confirm Data Loss: Dileu a pharhau
@@ -894,6 +924,8 @@ Video:
   Queue Item Cannot Move Down: Methu symud {title} i lawr. Mae eisoes yn safle {total} o {total}.
   Metadata: Gwybodaeth am y fideo
   Close Metadata: Cau gwybodaeth am y fideo
+  Collapse Playlist: Cwympo'r rhestr chwarae
+  Expand Playlist: Ehangu'r rhestr chwarae
   Metadata Cache:
     Title History: Hanes teitlau
     Thumbnail History: Hanes mân-luniau
@@ -992,6 +1024,21 @@ Video:
       Remaining: '{time} ar ôl'
       Cancel timer: Canslo'r amserydd
       Timer ended: Mae'r amserydd cysgu wedi dod i ben
+    A-B Repeat:
+      A-B Repeat: Ailadrodd A-B
+      On: Ymlaen
+      Off: I ffwrdd
+      Point A: Pwynt A
+      Point B: Pwynt B
+      Set Repeat Start: Gosod dechrau'r ailadroddiad
+      Set Repeat End: Gosod diwedd yr ailadroddiad
+      Pause Repeat: Oedi ailadrodd A-B
+      Resume Repeat: Ailafael yn ailadrodd A-B
+      Adjust Point: 'Addasu pwynt {point}, {timestamp} ar hyn o bryd'
+      Clear Range: Clirio ystod ailadrodd A-B
+      End Before Start: Rhaid i bwynt B fod ar ôl pwynt A.
+      Outside Duration: Rhaid i'r stamp amser fod o fewn y fideo.
+      Cleared: Wedi clirio ailadrodd A-B
     Zoom:
       Zoom: Chwyddo
       'Off': 'I ffwrdd'
@@ -1009,6 +1056,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Yn ôl i'r brig
       Return to Video Tab: Dychwelyd i dab y fideo
+      Hide: Cuddio'r chwaraewr bach
       Play: Chwarae
       Pause: Oedi
       Drag Handle: Symud y chwaraewr bach
@@ -1315,6 +1363,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Mae'n dangos hysbysiad parhaol â chynnydd byw ar gyfer gweithredoedd cefndir, megis adnewyddu tanysgrifiadau a lawrlwytho offer a reolir, yn lle defnyddio'r bar cynnydd byd-eang.
     Always Show Scrollbars: Mae'n cadw'r bariau sgrolio'n weladwy bob amser. Pan fydd wedi'i analluogi, maent yn pylu ychydig ar ôl i chi roi'r gorau i symud y llygoden ac yn ailymddangos cyn gynted ag y byddwch yn ei symud eto.
+    Scroll Speed: Newid pa mor bell mae ystumiau olwyn llygoden ac olwyn pad cyffwrdd yn sgrolio.
     Use Fixed Tab Width: Mae'n rhoi'r un lled i bob tab yn y bar tabiau llorweddol yn lle eu meintio yn ôl eu teitl.
     Use Grid Player Menu: Mae'n trefnu dewislen gosodiadau'r chwaraewr fideo fel grid o deils yn lle rhestr o resi.
 The playlist is at the beginning. Enable loop to continue playing: Mae'r rhestr chwarae ar y dechrau. Galluogwch ailadrodd i barhau i chwarae
@@ -1348,6 +1397,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Neidio i'r cydweddiad blaenorol
   Toggle Normal Playback Speed: Toglo rhwng cyflymder 1x a'r cyflymder chwarae blaenorol
   Toggle Skip Silence: Toglo hepgor distawrwydd
+  Set A-B Repeat Point A: Gosod pwynt A ailadrodd A-B
+  Set A-B Repeat Point B: Gosod pwynt B ailadrodd A-B
+  Clear A-B Repeat: Clirio ailadrodd A-B
   Video Zoom In: Chwyddo i mewn i'r fideo
   Video Zoom Out: Chwyddo allan o'r fideo
   Tab Switcher: Newidiwr tabiau

@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} mín.'
   Hours: '{hours} klst.'
   Hours and minutes: '{hours} klst. {minutes} mín.'
+Home Page:
+  Home: Heim
+  Description: Haltu áfram þar sem frá var horfið og skoðaðu nýlegar aðgerðir.
+  Customize: Sérsníða heimasíðu
+  Done: Lokið
+  Customize description: Veldu hvaða hlutar birtast og raðaðu þeim í þá röð sem þú vilt.
+  Continue watching: Halda áfram að horfa
+  New since last visit: Nýtt frá síðustu heimsókn
+  Watch queue: Áhorfsbiðröð
+  Recent playlists: Nýlegir spilunarlistar
+  Recent downloads: Nýleg niðurhöl
+  Upcoming reminders: Væntanlegar áminningar
+  Watch statistics: Áhorfstölfræði
+  View all: Skoða allt
+  Previous shelf page: Fyrri síða fyrir {section}
+  Next shelf page: Næsta síða fyrir {section}
+  Shelf page status: '{section}, síða {page} af {total}.'
+  Move section up: Færa {section} upp
+  Move section down: Færa {section} niður
+  Section moved: '{section} var fært í sæti {position} af {total}.'
+  Nothing here yet: Ekkert hér enn
+  Empty description: Myndbönd sem þú byrjar á, spilunarlistar sem þú notar, niðurhöl og áminningar birtast hér.
+  All sections hidden: Allir hlutar eru faldir
+  All sections hidden description: Sérsníddu heimasíðuna til að sýna hluta aftur.
 Subscriptions:
   Refreshing Subscription Videos: Endurnýja myndbönd úr áskriftum
   Refreshing Subscription Shorts: Endurnýja Shorts-myndbönd úr áskriftum
@@ -111,6 +135,8 @@ Subscriptions:
   Show Combined View: Sýna sameinað
   Newest First: Nýjast fyrst
   Oldest First: Elst fyrst
+  Posts:
+    RSS Message: 'YouTube býður ekki upp á RSS-strauma fyrir færslur. Slökktu á stillingunni "{rssSetting}" til að skoða færslur eða kveiktu á stillingunni "{hideSetting}" til að fela þennan flipa.'
 Trending:
   Load Error: Ekki tókst að hlaða vinsælu efni.
   Unsupported Backend: Vinsælt efni krefst Local API. Veldu Local API eða virkjaðu varaleið bakenda.
@@ -262,6 +288,7 @@ Settings:
     Hide Side Bar on Watch Pages: Fela hliðarstiku á áhorfssíðum
     UI Roundness: Rúnnun viðmóts
     Scrollbar Width: Breidd skrunstiku
+    Scroll Speed: Skrunhraði
     Animation Speed: Hraði hreyfinga
     Thumbnail Size: Stærð smámynda
     Show Tab Icons: Sýna flipatákn
@@ -699,6 +726,8 @@ Settings:
     Shorten View Counts: Stytta tölur yfir áhorf og líkar við athugasemdir
     Hide Comment Translation Buttons: Fela þýðingarhnappa athugasemda
     Hide Live Chat Replay: Fela endurspilun beinspjalls
+    Hide Home: Fela heimasíðu
+    Disable A-B Repeat: Slökkva á A-B-endurtekningu
     Hide End-Screen Annotations: Fela skýringar á lokaskjá
     Hide Paid Promotion Badge: Fela merki um greidda kynningu
     Show Player Controls: Sýna stýringar spilarans
@@ -808,6 +837,7 @@ Settings:
     History not supported: Þessi útgáfa þjónsins styður ekki samstillingu áhorfsferils.
     Settings not supported: Þessi útgáfa þjónsins styður ekki samstillingu stillinga.
     Sync completed: Samstillingu lokið
+    Sync failed: 'Samstilling mistókst: {error}'
     Data Loss Confirmation: Staðfesta samstillingu sem eyðir gögnum?
     Data Loss Warning: Staða þjónsins myndi eyða {deleted} af {previous} atriðum í {collection} sem áður voru samstillt. Þetta getur bent til þess að gagnaflutningur þjónsins hafi mistekist eða hann hafi verið endurstilltur. Haltu aðeins áfram ef eyðingin er fyrirhuguð og þú átt öryggisafrit.
     Confirm Data Loss: Eyða og halda áfram
@@ -939,6 +969,8 @@ Video:
   Configure Restricted Playback Cookies Hint: Stilltu vefkökur í Stillingar → Ytri hugbúnaður → Spilunarvefkökur yt-dlp.
   Try With Configured Cookies: Reyna með stilltum vefkökum
   Restricted Playback Authentication Failed Template: 'yt-dlp gat ekki opnað myndbandið með stilltu vefkökunum: {error}'
+  Collapse Playlist: Draga saman spilunarlista
+  Expand Playlist: Stækka spilunarlista
   Unmark As Watched: Merkja sem óskoðað
   Video has been unmarked as watched: Myndbandið hefur verið merkt sem óskoðað
   Save Channel Playback Speed: Vista spilunarhraða rásar
@@ -1008,6 +1040,21 @@ Video:
       Remaining: '{time} eftir'
       Cancel timer: Hætta við tímastillingu
       Timer ended: Svefntímastillingu lokið
+    A-B Repeat:
+      A-B Repeat: A-B-endurtekning
+      'On': Kveikt
+      'Off': Slökkt
+      Point A: Punktur A
+      Point B: Punktur B
+      Set Repeat Start: Stilla upphaf endurtekningar
+      Set Repeat End: Stilla lok endurtekningar
+      Pause Repeat: Gera hlé á A-B-endurtekningu
+      Resume Repeat: Halda A-B-endurtekningu áfram
+      Adjust Point: 'Stilla punkt {point}, nú {timestamp}'
+      Clear Range: Hreinsa svið A-B-endurtekningar
+      End Before Start: Punktur B verður að vera á eftir punkti A.
+      Outside Duration: Tímamerkið verður að vera innan myndbandsins.
+      Cleared: A-B-endurtekning hreinsuð
     Zoom:
       Zoom: Aðdráttur
       'Off': 'Slökkt'
@@ -1025,6 +1072,7 @@ Video:
     Scroll Mini Player:
       Back to Top: Efst á síðu
       Return to Video Tab: Til baka á myndbandsflipa
+      Hide: Fela smáspilara
       Play: Spila
       Pause: Gera hlé
       Drag Handle: Færa smáspilarann
@@ -1331,6 +1379,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: Sýnir tilkynningu með framvindu bakgrunnsaðgerða í rauntíma sem hverfur ekki, svo sem við endurnýjun áskriftarstreymis og niðurhal tóla sem forritið sér um, í stað almennu framvindustikunnar.
     Always Show Scrollbars: Heldur skrunstikum alltaf sýnilegum. Ef slökkt er á þessu dofna þær stuttu eftir að músin hættir að hreyfast og birtast aftur um leið og hún er hreyfð.
+    Scroll Speed: Breytir hversu langt er skrunað með músarhjóli og snertifleti.
     Use Fixed Tab Width: Gefur öllum flipum á láréttu flipastikunni sömu breidd í stað þess að laga breidd þeirra að titlinum.
     Use Grid Player Menu: Raðar stillingavalmynd myndbandsspilarans í reitanet í stað raðalista.
 The playlist is at the beginning. Enable loop to continue playing: Þú ert við upphaf spilunarlistans. Kveiktu á endurtekningu til að halda spilun áfram
@@ -1364,6 +1413,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: Fara í fyrri samsvörun
   Toggle Normal Playback Speed: Skipta milli 1x hraða og fyrri spilunarhraða
   Toggle Skip Silence: Kveikja eða slökkva á að sleppa þögnum
+  Set A-B Repeat Point A: Stilla punkt A fyrir A-B-endurtekningu
+  Set A-B Repeat Point B: Stilla punkt B fyrir A-B-endurtekningu
+  Clear A-B Repeat: Hreinsa A-B-endurtekningu
   Video Zoom In: Auka aðdrátt á myndbandi
   Video Zoom Out: Minnka aðdrátt á myndbandi
   Tab Switcher: Flipaskiptir

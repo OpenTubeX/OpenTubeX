@@ -94,6 +94,30 @@ Stats:
   Minutes: '{minutes} 分钟'
   Hours: '{hours} 小时'
   Hours and minutes: '{hours} 小时 {minutes} 分钟'
+Home Page:
+  Home: 首页
+  Description: 从上次停止的位置继续，并查看最近的活动。
+  Customize: 自定义首页
+  Done: 完成
+  Customize description: 选择要显示的版块，并按所需顺序排列。
+  Continue watching: 继续观看
+  New since last visit: 上次访问后的新内容
+  Watch queue: 观看队列
+  Recent playlists: 最近的播放列表
+  Recent downloads: 最近的下载
+  Upcoming reminders: 即将到来的提醒
+  Watch statistics: 观看统计
+  View all: 查看全部
+  Previous shelf page: 上一页：{section}
+  Next shelf page: 下一页：{section}
+  Shelf page status: '{section}，第 {page} 页，共 {total} 页。'
+  Move section up: 将{section}上移
+  Move section down: 将{section}下移
+  Section moved: '{section}已移至第 {position} 位，共 {total} 位。'
+  Nothing here yet: 这里还没有内容
+  Empty description: 您开始观看的视频、使用的播放列表、下载和提醒会显示在这里。
+  All sections hidden: 所有版块均已隐藏
+  All sections hidden description: 自定义首页以重新显示版块。
 Subscriptions:
   Refreshing Subscription Videos: 正在刷新订阅视频
   Refreshing Subscription Shorts: 正在刷新订阅短视频
@@ -260,6 +284,7 @@ Settings:
     Hide Side Bar on Watch Pages: 在视频播放页面隐藏侧边栏
     UI Roundness: 界面圆角程度
     Scrollbar Width: 滚动条宽度
+    Scroll Speed: 滚动速度
     Animation Speed: 动画速度
     Thumbnail Size: 缩略图大小
     Show Tab Icons: 显示标签页图标
@@ -692,7 +717,9 @@ Settings:
     Hide Channel Avatars: 隐藏频道头像
     Shorten View Counts: 简写观看次数和评论点赞数
     Hide Comment Translation Buttons: 隐藏评论翻译按钮
+    Hide Home: 隐藏首页
     Hide Live Chat Replay: 隐藏直播聊天回放
+    Disable A-B Repeat: 禁用 A-B 循环
     Hide End-Screen Annotations: 隐藏片尾画面注释
     Hide Paid Promotion Badge: 隐藏付费推广徽章
     Show Player Controls: 显示播放器控件
@@ -793,6 +820,7 @@ Settings:
     History not supported: 此服务器版本不支持同步观看历史记录。
     Settings not supported: 此服务器版本不支持同步设置。
     Sync completed: 同步完成
+    Sync failed: '同步失败：{error}'
     Data Loss Confirmation: 要执行会删除数据的同步吗？
     Data Loss Warning: 服务器状态会删除之前同步的 {previous} 个 {collection} 项目中的 {deleted} 个。这可能表示服务器迁移失败或服务器已重置。仅当您有备份且确实要删除这些项目时才继续。
     Confirm Data Loss: 删除并继续
@@ -983,6 +1011,21 @@ Video:
       Remaining: '剩余 {time}'
       Cancel timer: 取消定时器
       Timer ended: 睡眠定时器已结束
+    A-B Repeat:
+      A-B Repeat: A-B 循环
+      On: 开
+      Off: 关
+      Point A: 点 A
+      Point B: 点 B
+      Set Repeat Start: 设置循环起点
+      Set Repeat End: 设置循环终点
+      Pause Repeat: 暂停 A-B 循环
+      Resume Repeat: 继续 A-B 循环
+      Adjust Point: '调整点 {point}，当前为 {timestamp}'
+      Clear Range: 清除 A-B 循环范围
+      End Before Start: 点 B 必须位于点 A 之后。
+      Outside Duration: 时间戳必须在视频时长范围内。
+      Cleared: 已清除 A-B 循环
     Zoom:
       Zoom: 缩放
       'Off': '关闭'
@@ -1000,6 +1043,7 @@ Video:
     Scroll Mini Player:
       Back to Top: 返回顶部
       Return to Video Tab: 返回“视频”标签页
+      Hide: 隐藏迷你播放器
       Play: 播放
       Pause: 暂停
       Drag Handle: 移动迷你播放器
@@ -1306,6 +1350,7 @@ Tooltips:
   Theme Settings:
     Show Progress as Notification: 以持续通知实时显示后台操作的进度（例如刷新订阅动态和下载托管工具），而不使用全局进度条。
     Always Show Scrollbars: 始终显示滚动条。禁用后，停止移动鼠标不久，滚动条便会淡出；再次移动鼠标时会立即重新出现。
+    Scroll Speed: 更改鼠标滚轮和触控板滚轮手势的滚动距离。
     Use Fixed Tab Width: 让水平标签栏中的所有标签页宽度相同，而不是根据标题调整宽度。
     Use Grid Player Menu: 将视频播放器的设置菜单排列为磁贴网格，而不是行列表。
 The playlist is at the beginning. Enable loop to continue playing: 播放列表已到开头。启用循环可继续播放
@@ -1339,6 +1384,9 @@ KeyboardShortcutPrompt:
   Find Previous Match: 跳转到上一个匹配项
   Toggle Normal Playback Speed: 在 1x 速度和上次播放速度之间切换
   Toggle Skip Silence: 切换“跳过静音”状态
+  Set A-B Repeat Point A: 设置 A-B 循环点 A
+  Set A-B Repeat Point B: 设置 A-B 循环点 B
+  Clear A-B Repeat: 清除 A-B 循环
   Video Zoom In: 放大视频
   Video Zoom Out: 缩小视频
   Tab Switcher: 标签页切换器
