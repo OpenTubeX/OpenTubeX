@@ -294,6 +294,22 @@ test('activates an existing video tab from Continue watching', async ({ page }) 
         { id: videoTab.id, route: { fullPath: '/watch/homevideo01' } }
       ]
     })
+
+  await page.evaluate(tabId => window.ftElectron.tabs.close(tabId), videoTab.id)
+  await expect(page.locator('.tab')).toHaveCount(1)
+  await expect(page).toHaveURL(/#\/home$/)
+
+  await page.locator('[data-home-section="continueWatching"]')
+    .getByRole('link', { name: /Partly watched video/ })
+    .click()
+
+  await expect(page).toHaveURL(/#\/watch\/homevideo01$/)
+  await expect(page.locator('.tab')).toHaveCount(1)
+  await expect.poll(async () => page.evaluate(() => window.ftElectron.tabs.getState()))
+    .toMatchObject({
+      activeTabId: homeTabId,
+      tabs: [{ id: homeTabId, route: { fullPath: '/watch/homevideo01' } }]
+    })
 })
 
 test('shows recent active and completed downloads', async ({ page }) => {

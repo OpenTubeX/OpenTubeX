@@ -615,7 +615,9 @@ function activateExistingContinueWatchingTab(event, videoId) {
     return
   }
 
-  const videoTab = store.getters.getTabs.find(tab => tab.route.path === `/watch/${videoId}`)
+  const videoTab = store.getters.getTabs.find(tab => (
+    tab.isActivatable && tab.route.path === `/watch/${videoId}`
+  ))
   if (videoTab == null) { return }
 
   event.preventDefault()
