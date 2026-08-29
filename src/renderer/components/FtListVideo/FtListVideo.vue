@@ -6,7 +6,7 @@
       grid: !effectiveListTypeIsList,
       [appearance]: true,
       watched: addWatchedStyle,
-      premiereVideo: isPremiere && !isUpcoming
+      premiereVideo: isPremiere && !isUpcomingForCurrentTime
     }"
   >
     <div
@@ -599,6 +599,10 @@ const isWatched = computed(() => isHistoryEntryWatched(historyEntry.value))
 
 const premiereTimestamp = computed(() => getUpcomingPremiereTimestamp(props.data))
 const premiereNow = ref(Date.now())
+const isUpcomingForCurrentTime = computed(() => (
+  isUpcoming.value &&
+  (premiereTimestamp.value == null || premiereTimestamp.value > premiereNow.value)
+))
 const MAX_TIMEOUT_DELAY = 2_147_483_647
 let premiereStartTimer = null
 
