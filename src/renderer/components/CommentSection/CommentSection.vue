@@ -1196,11 +1196,9 @@ const backendFallback = computed(() => {
   return store.getters.getBackendFallback
 })
 
-const translationEnabled = computed(() => {
-  return process.env.SUPPORTS_LOCAL_API &&
-    store.getters.getEnableCommentTranslations &&
-    !store.getters.getHideCommentTranslationButtons
-})
+const translationEnabled = computed(() => (
+  process.env.SUPPORTS_LOCAL_API && store.getters.getEnableCommentTranslations
+))
 
 const translationLanguage = computed(() => {
   return normalizeYouTubeCaptionLanguageCode(locale.value)

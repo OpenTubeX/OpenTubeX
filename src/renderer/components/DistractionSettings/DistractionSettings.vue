@@ -364,15 +364,6 @@
           setting-key="hideCommentLikes"
           @change="updateHideCommentLikes"
         />
-        <FtToggleSwitch
-          v-if="SUPPORTS_LOCAL_API"
-          :label="t('Settings.Distraction Free Settings.Hide Comment Translation Buttons')"
-          :compact="true"
-          :disabled="hideComments"
-          :default-value="hideCommentTranslationButtons"
-          setting-key="hideCommentTranslationButtons"
-          @change="updateHideCommentTranslationButtons"
-        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -516,16 +507,6 @@ const hideCommentLikes = computed(() => store.getters.getHideCommentLikes)
  */
 function updateHideCommentLikes(value) {
   store.dispatch('updateHideCommentLikes', value)
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideCommentTranslationButtons = computed(() => store.getters.getHideCommentTranslationButtons)
-
-/**
- * @param {boolean} value
- */
-function updateHideCommentTranslationButtons(value) {
-  store.dispatch('updateHideCommentTranslationButtons', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

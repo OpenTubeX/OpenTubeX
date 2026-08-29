@@ -3920,31 +3920,6 @@ test.describe('manual comment loading', () => {
     await expect(translationButtons.first()).toBeVisible()
   })
 
-  test('hides comment translation buttons through the distraction-free setting', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-
-    await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      await store.dispatch('updateCurrentLocale', 'de-DE')
-    })
-
-    await openMockedVideo(page)
-
-    const loadComments = page.locator('.getCommentsTitle')
-    await loadComments.scrollIntoViewIfNeeded()
-    await loadComments.click()
-    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
-
-    const translationButtons = page.locator('.commentTranslationButton')
-    await expect(translationButtons.first()).toBeVisible()
-
-    await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      await store.dispatch('updateHideCommentTranslationButtons', true)
-    })
-    await expect(translationButtons).toHaveCount(0)
-  })
-
   test('loads collapsed replies from the video uploader while filtering', async ({ app, page, attachScreenshot }) => {
     await mockPlayableWatchPage(app, page, { creatorReply: true, ownerReply: true })
     await openMockedVideo(page)

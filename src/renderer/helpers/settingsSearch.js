@@ -271,7 +271,6 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
         store.getters.getForbiddenTitlesParsed.length > 0
     }
     if (group === 'Hide Trending Videos') return supportsLocalApi
-    if (group === 'Hide Comment Translation Buttons') return supportsLocalApi
   }
 
   if (sectionType === 'theme') {

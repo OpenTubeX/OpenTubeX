@@ -299,7 +299,6 @@ const state = {
   hideChannelSubscriptions: false,
   hideCommentLikes: false,
   hideCommentPhotos: false,
-  hideCommentTranslationButtons: false,
   hideComments: false,
   hideEndScreenAnnotations: false,
   hidePaidPromotion: false,
