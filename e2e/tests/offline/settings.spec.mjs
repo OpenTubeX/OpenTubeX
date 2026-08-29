@@ -4045,6 +4045,31 @@ test.describe('sync settings', () => {
     await expect(username).toHaveValue('paired-user')
   })
 
+  test('shows session expiration and other sync failures outside Sync settings', async ({ page }) => {
+    let response = { status: 500, body: 'Background sync failed' }
+    await page.route('https://sync.d3sox.me/**', async (route) => {
+      await route.fulfill(response)
+    })
+
+    const sync = () => page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('syncWithSyncServer').catch(() => {})
+    })
+
+    await sync()
+    const toast = page.locator('.toast', {
+      hasText: 'Sync failed: Background sync failed'
+    })
+    await expect(toast).toBeVisible()
+    await expect(toast.locator('.icon[data-icon="circle-exclamation"]')).toBeVisible()
+
+    response = { status: 401, body: 'Invalid or missing authentication token' }
+    await sync()
+    await expect(page.locator('.toast', {
+      hasText: 'Sync failed: Sync server session expired. Sign in again to resume syncing.'
+    })).toBeVisible()
+  })
+
   test('clears a sync error and enables credentials after disconnecting', async ({ page }) => {
     let finishServerCheck
     let serverCheckStarted
@@ -4069,6 +4094,8 @@ test.describe('sync settings', () => {
     const syncSection = page.locator('[data-section="sync"]')
     await syncSection.getByRole('button', { name: 'Sync now' }).click()
     await expect(syncSection.locator('.error')).toHaveText('Sync failed')
+    await page.waitForTimeout(250)
+    await expect(page.locator('.toast', { hasText: 'Sync failed: Sync failed' })).toHaveCount(0)
 
     await expect(syncSection.getByLabel('Server URL')).toBeDisabled()
     await expect(syncSection.getByLabel('Username')).toBeDisabled()

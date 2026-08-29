@@ -614,6 +614,21 @@ let removeGamepadNavigation = () => {}
 let utilityRoutePreloadId = null
 let utilityRoutePreloadUsesIdleCallback = false
 
+function isSyncSettingsVisible() {
+  return settingsWindowOpen.value && document.querySelector(
+    '.settingsWindow .settingsContent > [data-section="sync"]'
+  ) !== null
+}
+
+watch([dataReady, () => store.getters.getSyncServerError], ([ready, error]) => {
+  if (!ready || error === '' || isSyncSettingsVisible()) return
+
+  showToast({
+    message: t('Settings.Sync Settings.Sync failed', { error }),
+    icon: ['fas', 'circle-exclamation'],
+  })
+}, { flush: 'post' })
+
 function scheduleUtilityRoutePreload() {
   if (utilityRoutePreloadId !== null) {
     return
