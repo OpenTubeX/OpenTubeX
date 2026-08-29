@@ -438,7 +438,6 @@ import store from '../../store/index'
 
 import { showToast } from '../../helpers/utils'
 import { checkYoutubeChannelId, findChannelTagInfo } from '../../helpers/channels'
-import { getTabNavigationService } from '../../tabs/TabNavigationService'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -567,9 +566,7 @@ async function updateHideHome(value) {
 
   const landingRoute = { path: `/${store.getters.getLandingPage}` }
   if (process.env.IS_ELECTRON) {
-    const homeTabs = store.getters.getTabs.filter(tab => tab.route.path === '/home')
-    const navigation = getTabNavigationService()
-    await Promise.all(homeTabs.map(tab => navigation.replace(tab.id, landingRoute)))
+    await store.dispatch('redirectHomeTabsToLandingPage')
   } else if (route.path === '/home') {
     await router.replace(landingRoute)
   }

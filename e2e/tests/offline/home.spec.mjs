@@ -1,6 +1,14 @@
 import { readFile } from 'node:fs/promises'
 
-import { test, expect, goTo, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import {
+  test,
+  expect,
+  goTo,
+  goToSettingsSection,
+  openNewWindowFromTabBar,
+  setWindowSize,
+  waitForAppReady,
+} from '../../helpers/app.mjs'
 import { DBActions } from '../../../src/constants.js'
 import { expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
@@ -371,6 +379,11 @@ test.describe('hidden Home page', () => {
   test('removes Home from navigation and falls back for new tabs', async ({ app, page }) => {
     await expect(page.locator('.sideNav a[href="#/home"]')).toBeVisible()
 
+    const otherWindow = await openNewWindowFromTabBar(app, page)
+    await waitForAppReady(otherWindow)
+    await expect(otherWindow).toHaveURL(/#\/home$/)
+    await expect(otherWindow.getByRole('heading', { name: 'Home', exact: true })).toBeVisible()
+
     const backgroundHomeTab = await page.evaluate(() => window.ftElectron.tabs.create({
       route: '/home',
       makeActive: false,
@@ -381,6 +394,7 @@ test.describe('hidden Home page', () => {
     await distractionSettings.locator('label.switch-label').filter({ hasText: 'Hide Home' }).click()
     await expect(page.locator('.sideNav a[href="#/home"]')).toHaveCount(0)
     await expect(page).toHaveURL(/#\/subscriptions$/)
+    await expect(otherWindow).toHaveURL(/#\/subscriptions$/)
     await expect.poll(() => page.evaluate((tabId) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return store.getters.getTabById(tabId)?.route.fullPath

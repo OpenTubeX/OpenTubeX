@@ -1125,6 +1125,15 @@ const customActions = {
     }
   },
 
+  redirectHomeTabsToLandingPage: async ({ getters }) => {
+    if (!process.env.IS_ELECTRON) { return }
+
+    const landingRoute = { path: `/${getters.getLandingPage}` }
+    const homeTabs = getters.getTabs.filter(tab => tab.route.path === '/home')
+    const navigation = getTabNavigationService()
+    await Promise.all(homeTabs.map(tab => navigation.replace(tab.id, landingRoute)))
+  },
+
   // Should be a root action, but we'll tolerate
   setupListenersToSyncWindows: ({ commit, dispatch }) => {
     if (process.env.IS_ELECTRON) {
@@ -1136,6 +1145,11 @@ const customActions = {
             }
 
             commit(defaultMutationId(data._id), data.value)
+            if (data._id === 'hideHome' && data.value === true) {
+              dispatch('redirectHomeTabsToLandingPage').catch(error => {
+                console.error('Failed to redirect Home tabs after syncing Hide Home', error)
+              })
+            }
             if (data._id === 'syncServerEnabled') {
               dispatch('applySyncServerEnabled', data.value, { root: true })
             }

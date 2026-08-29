@@ -1006,6 +1006,9 @@ onMounted(async () => {
     tabsReady,
   ])
   const lastUsedVersion = getLastUsedVersion(tutorialState.lastUsedVersion)
+  if (tutorialState.landingPageToInitialize !== null) {
+    await store.dispatch('updateLandingPage', tutorialState.landingPageToInitialize)
+  }
 
   try {
     store.commit('setCustomThemes', themes)
@@ -1043,9 +1046,6 @@ onMounted(async () => {
       lastUsedVersion,
       tutorialState.tutorialAudience
     )
-    if (tutorialState.landingPageToInitialize !== null) {
-      await store.dispatch('updateLandingPage', tutorialState.landingPageToInitialize)
-    }
     if (hasExistingInstallation !== null || lastUsedVersion !== null) {
       await setLastUsedVersion(packageDetails.version)
     }
