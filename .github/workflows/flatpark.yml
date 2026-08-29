@@ -1,0 +1,419 @@
+name: Submit FlatPark update
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      releaseTag:
+        description: Published release tag to retry, for example v0.32.1-beta
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: flatpark-${{ github.event.release.tag_name || inputs.releaseTag }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    outputs:
+      needed: ${{ steps.duplicate.outputs.needed }}
+      tag: ${{ steps.release.outputs.tag }}
+      version: ${{ steps.release.outputs.version }}
+
+    steps:
+    - name: Resolve release
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_TAG: ${{ github.event.release.tag_name || inputs.releaseTag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if [[ ! "$RELEASE_TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+-beta)$ ]]; then
+          echo "Ignoring unrelated release tag: $RELEASE_TAG"
+          echo 'eligible=false' >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        version="${BASH_REMATCH[1]}"
+        release_json="${RUNNER_TEMP}/flatpark-release.json"
+        gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" > "$release_json"
+
+        if [[ "$(jq --raw-output .draft "$release_json")" != false ||
+          "$(jq --raw-output .published_at "$release_json")" == null ]]; then
+          echo "::error::${RELEASE_TAG} is not a published release."
+          exit 1
+        fi
+
+        latest_beta_tag="$({
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/releases?per_page=100"
+        } | jq --raw-output --slurp '
+          [
+            .[][]
+            | select(.draft == false and .published_at != null)
+            | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+-beta$"))
+          ]
+          | max_by(.published_at).tag_name // empty
+        ')"
+
+        if [[ -z "$latest_beta_tag" ]]; then
+          echo '::error::The repository has no published beta release.'
+          exit 1
+        fi
+
+        if [[ "$latest_beta_tag" != "$RELEASE_TAG" ]]; then
+          echo "::error::FlatPark can only be updated to the latest beta (${latest_beta_tag}), not ${RELEASE_TAG}."
+          exit 1
+        fi
+
+        for architecture in x64 arm64; do
+          asset="opentubex-${version}-linux-${architecture}-portable.zip"
+          count="$(jq --arg asset "$asset" '[.assets[] | select(.name == $asset)] | length' "$release_json")"
+
+          if [[ "$count" != 1 ]]; then
+            echo "::error::Expected one release asset named ${asset}, found ${count}."
+            exit 1
+          fi
+        done
+
+        {
+          echo 'eligible=true'
+          echo "version=$version"
+          echo "tag=$RELEASE_TAG"
+          echo "release_json=$release_json"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Check for an accepted update or open pull request
+      if: steps.release.outputs.eligible == 'true'
+      id: duplicate
+      env:
+        GH_TOKEN: ${{ github.token }}
+        VERSION: ${{ steps.release.outputs.version }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        manifest="${RUNNER_TEMP}/flatpark-metainfo.xml"
+        gh api \
+          repos/flatpark/flatpark/contents/registry/org.opentubex.OpenTubeX/org.opentubex.OpenTubeX.metainfo.xml \
+          --jq .content \
+          | base64 --decode > "$manifest"
+
+        if grep --fixed-strings --quiet "<release version=\"${VERSION}\"" "$manifest"; then
+          echo "FlatPark already contains org.opentubex.OpenTubeX ${VERSION}."
+          echo 'needed=false' >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        existing_pr="$({
+          gh pr list \
+            --repo flatpark/flatpark \
+            --state open \
+            --search '"org.opentubex.OpenTubeX" in:title' \
+            --json title,url \
+            --limit 100
+        } | jq --arg version "$VERSION" \
+          'first(.[] | select(.title | contains($version))) // empty')"
+
+        if [[ -n "$existing_pr" ]]; then
+          echo "An open pull request already updates org.opentubex.OpenTubeX ${VERSION}:"
+          jq --raw-output .url <<< "$existing_pr"
+          echo 'needed=false' >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        echo 'needed=true' >> "$GITHUB_OUTPUT"
+
+    - name: Check out FlatPark
+      if: steps.duplicate.outputs.needed == 'true'
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        repository: flatpark/flatpark
+        path: flatpark
+        persist-credentials: false
+
+    - name: Prepare FlatPark pins
+      if: steps.duplicate.outputs.needed == 'true'
+      env:
+        RELEASE_JSON: ${{ steps.release.outputs.release_json }}
+        RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        VERSION: ${{ steps.release.outputs.version }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        app_dir='flatpark/registry/org.opentubex.OpenTubeX'
+        manifest="${app_dir}/org.opentubex.OpenTubeX.yml"
+        metainfo="${app_dir}/org.opentubex.OpenTubeX.metainfo.xml"
+        resolver_json="${RUNNER_TEMP}/flatpark-resolver.json"
+        release_url="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}"
+
+        jq \
+          --arg version "$VERSION" \
+          --arg release_url "$release_url" \
+          --arg x64 "opentubex-${VERSION}-linux-x64-portable.zip" \
+          --arg arm64 "opentubex-${VERSION}-linux-arm64-portable.zip" \
+          '{
+            version: $version,
+            releaseDate: (.published_at | split("T")[0]),
+            releaseUrl: $release_url,
+            sources: [
+              {
+                filename: "opentubex-x86_64.zip",
+                url: (first(.assets[] | select(.name == $x64)) | .browser_download_url)
+              },
+              {
+                filename: "opentubex-aarch64.zip",
+                url: (first(.assets[] | select(.name == $arm64)) | .browser_download_url)
+              }
+            ]
+          }' "$RELEASE_JSON" > "$resolver_json"
+
+        node flatpark/scripts/update-pins.mjs "$manifest" "$metainfo" < "$resolver_json"
+
+        expected_changes="$(printf '%s\n' \
+          'registry/org.opentubex.OpenTubeX/org.opentubex.OpenTubeX.metainfo.xml' \
+          'registry/org.opentubex.OpenTubeX/org.opentubex.OpenTubeX.yml')"
+        actual_changes="$(git -C flatpark diff --name-only | sort)"
+
+        if [[ "$actual_changes" != "$expected_changes" ]]; then
+          echo '::error::The FlatPark pin updater changed unexpected files.'
+          git -C flatpark status --short
+          exit 1
+        fi
+
+        git -C flatpark diff --check
+        grep --fixed-strings --quiet \
+          "releases/download/${RELEASE_TAG}/opentubex-${VERSION}-linux-x64-portable.zip" \
+          "$manifest"
+        grep --fixed-strings --quiet \
+          "releases/download/${RELEASE_TAG}/opentubex-${VERSION}-linux-arm64-portable.zip" \
+          "$manifest"
+
+        latest_version="$(sed -n 's/.*<release version="\([^"]*\)".*/\1/p' "$metainfo" | sed -n '1p')"
+        if [[ "$latest_version" != "$VERSION" ]]; then
+          echo "::error::Expected the latest AppStream release to be ${VERSION}, found ${latest_version}."
+          exit 1
+        fi
+
+        install -Dm644 "$manifest" submission/manifest.yml
+        install -Dm644 "$metainfo" submission/metainfo.xml
+        git -C flatpark rev-parse HEAD > submission/base-sha
+
+    - name: Store the prepared update
+      if: steps.duplicate.outputs.needed == 'true'
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: flatpark-update-${{ github.run_id }}
+        path: submission/
+        if-no-files-found: error
+        retention-days: 1
+
+  submit:
+    needs: prepare
+    if: needs.prepare.outputs.needed == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+    - name: Download the prepared update
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      with:
+        name: flatpark-update-${{ github.run_id }}
+        path: submission
+
+    - name: Validate package submission credentials
+      env:
+        PACKAGE_SUBMISSION_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if [[ -z "$PACKAGE_SUBMISSION_TOKEN" ]]; then
+          echo '::error::The PACKAGE_SUBMISSION_TOKEN repository secret is missing.'
+          exit 1
+        fi
+
+        echo "::add-mask::${PACKAGE_SUBMISSION_TOKEN}"
+
+    - name: Create or synchronize the organization fork
+      env:
+        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if ! gh api repos/OpenTubeX/flatpark-registry >/dev/null 2>&1; then
+          echo 'Creating OpenTubeX/flatpark-registry.'
+          gh api \
+            --method POST \
+            repos/flatpark/flatpark/forks \
+            -f organization=OpenTubeX \
+            -f name=flatpark-registry \
+            -F default_branch_only=true \
+            >/dev/null
+
+          for attempt in {1..30}; do
+            if gh api repos/OpenTubeX/flatpark-registry >/dev/null 2>&1; then
+              break
+            fi
+
+            if (( attempt == 30 )); then
+              echo '::error::OpenTubeX/flatpark-registry was not ready after 60 seconds.'
+              exit 1
+            fi
+
+            sleep 2
+          done
+        fi
+
+        parent="$(gh api repos/OpenTubeX/flatpark-registry --jq '.parent.full_name // ""')"
+
+        if [[ "$parent" != flatpark/flatpark ]]; then
+          echo '::error::OpenTubeX/flatpark-registry is not a fork of flatpark/flatpark.'
+          exit 1
+        fi
+
+        gh api \
+          --method POST \
+          repos/OpenTubeX/flatpark-registry/merge-upstream \
+          -f branch=main \
+          >/dev/null
+
+    - name: Create the signed update commit
+      env:
+        BRANCH: org.opentubex.OpenTubeX-${{ needs.prepare.outputs.version }}
+        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN }}
+        VERSION: ${{ needs.prepare.outputs.version }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        base_sha="$(< submission/base-sha)"
+        if [[ ! "$base_sha" =~ ^[0-9a-f]{40}$ ]]; then
+          echo '::error::The prepared FlatPark base commit is invalid.'
+          exit 1
+        fi
+
+        if ! gh api "repos/flatpark/flatpark/commits/${base_sha}" >/dev/null; then
+          echo '::error::The prepared FlatPark base commit no longer exists.'
+          exit 1
+        fi
+
+        if gh api "repos/OpenTubeX/flatpark-registry/git/ref/heads/${BRANCH}" >/dev/null 2>&1; then
+          gh api \
+            --method PATCH \
+            "repos/OpenTubeX/flatpark-registry/git/refs/heads/${BRANCH}" \
+            -f sha="$base_sha" \
+            -F force=true \
+            >/dev/null
+        else
+          gh api \
+            --method POST \
+            repos/OpenTubeX/flatpark-registry/git/refs \
+            -f ref="refs/heads/${BRANCH}" \
+            -f sha="$base_sha" \
+            >/dev/null
+        fi
+
+        branch_id="$(gh api "repos/OpenTubeX/flatpark-registry/git/ref/heads/${BRANCH}" --jq .node_id)"
+        mutation="${RUNNER_TEMP}/flatpark-commit.json"
+        response="${RUNNER_TEMP}/flatpark-commit-response.json"
+
+        jq --null-input \
+          --arg query 'mutation($input: CreateCommitOnBranchInput!) { createCommitOnBranch(input: $input) { commit { oid url } } }' \
+          --arg branch_id "$branch_id" \
+          --arg expected_head_oid "$base_sha" \
+          --arg headline "chore(update): org.opentubex.OpenTubeX ${VERSION} (upstream release)" \
+          --arg manifest_contents "$(base64 --wrap=0 submission/manifest.yml)" \
+          --arg metainfo_contents "$(base64 --wrap=0 submission/metainfo.xml)" \
+          '{
+            query: $query,
+            variables: {
+              input: {
+                branch: { id: $branch_id },
+                expectedHeadOid: $expected_head_oid,
+                fileChanges: {
+                  additions: [
+                    {
+                      path: "registry/org.opentubex.OpenTubeX/org.opentubex.OpenTubeX.yml",
+                      contents: $manifest_contents
+                    },
+                    {
+                      path: "registry/org.opentubex.OpenTubeX/org.opentubex.OpenTubeX.metainfo.xml",
+                      contents: $metainfo_contents
+                    }
+                  ]
+                },
+                message: { headline: $headline }
+              }
+            }
+          }' > "$mutation"
+
+        gh api graphql --input "$mutation" > "$response"
+        commit_sha="$(jq --raw-output '.data.createCommitOnBranch.commit.oid // empty' "$response")"
+
+        if [[ -z "$commit_sha" ]]; then
+          jq .errors "$response" >&2
+          echo '::error::GitHub did not create the FlatPark update commit.'
+          exit 1
+        fi
+
+        if [[ "$(gh api "repos/OpenTubeX/flatpark-registry/commits/${commit_sha}" --jq .commit.verification.verified)" != true ]]; then
+          echo '::error::GitHub did not report the FlatPark update commit as signed.'
+          exit 1
+        fi
+
+    - name: Open FlatPark pull request
+      env:
+        BRANCH: org.opentubex.OpenTubeX-${{ needs.prepare.outputs.version }}
+        GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN }}
+        RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+        VERSION: ${{ needs.prepare.outputs.version }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        existing_pr="$(gh pr list \
+          --repo flatpark/flatpark \
+          --state open \
+          --search '"org.opentubex.OpenTubeX" in:title' \
+          --json title,url \
+          --limit 100 \
+          | jq --arg version "$VERSION" \
+            'first(.[] | select(.title | contains($version))) // empty')"
+
+        if [[ -n "$existing_pr" ]]; then
+          echo "An open pull request appeared while this workflow was running:"
+          jq --raw-output .url <<< "$existing_pr"
+          exit 0
+        fi
+
+        body="${RUNNER_TEMP}/flatpark-pr-body.md"
+        cat > "$body" <<EOF
+        OpenTubeX published [${RELEASE_TAG}](https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}). This updates the pinned x86_64 and ARM64 portable archives and adds the AppStream release entry.
+
+        FlatPark's current pin updater downloaded both release assets and calculated their SHA-256 hashes and sizes before the organization fork was updated.
+        EOF
+
+        pr_url="$(gh pr create \
+          --repo flatpark/flatpark \
+          --base main \
+          --head "OpenTubeX:${BRANCH}" \
+          --title "chore(opentubex): update to ${VERSION}" \
+          --body-file "$body")"
+
+        {
+          echo '## FlatPark submission'
+          echo
+          echo "Created ready-for-review pull request: ${pr_url}"
+        } >> "$GITHUB_STEP_SUMMARY"
