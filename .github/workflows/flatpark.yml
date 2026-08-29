@@ -54,9 +54,24 @@ jobs:
           exit 1
         fi
 
-        latest_tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq .tag_name)"
-        if [[ "$latest_tag" != "$RELEASE_TAG" ]]; then
-          echo "::error::FlatPark can only be updated to the latest release (${latest_tag}), not ${RELEASE_TAG}."
+        latest_beta_tag="$({
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/releases?per_page=100"
+        } | jq --raw-output --slurp '
+          [
+            .[][]
+            | select(.draft == false and .published_at != null)
+            | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+-beta$"))
+          ]
+          | max_by(.published_at).tag_name // empty
+        ')"
+
+        if [[ -z "$latest_beta_tag" ]]; then
+          echo '::error::The repository has no published beta release.'
+          exit 1
+        fi
+
+        if [[ "$latest_beta_tag" != "$RELEASE_TAG" ]]; then
+          echo "::error::FlatPark can only be updated to the latest beta (${latest_beta_tag}), not ${RELEASE_TAG}."
           exit 1
         fi
 
