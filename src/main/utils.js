@@ -103,6 +103,17 @@ export function buildProxyUrl({ protocol, hostname, port, username, password }) 
 }
 
 /**
+ * @param {string | undefined} cookie
+ * @param {string | undefined} timeZone
+ * @returns {string}
+ */
+export function appendYouTubeTimeZonePreference(cookie, timeZone) {
+  if (!cookie || !timeZone) return cookie ?? ''
+
+  return `${cookie};PREF=tz=${timeZone.replace('/', '.')}`
+}
+
+/**
  * @param {string | URL} url
  */
 export function isOpenTubeXUrl(url) {
