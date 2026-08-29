@@ -26,6 +26,16 @@ export function normalizeScrollSpeed(value) {
  * @returns {() => void} removes the listener
  */
 export function addScrollSpeedHandler(element, getScrollSpeed) {
+  // Repeated smooth relative scrolls use the element's current position,
+  // which loses wheel deltas that arrive before the animation advances. Keep
+  // the destination separately so every delta extends the same animation.
+  const smoothTargets = { x: null, y: null }
+
+  const clearSmoothTargets = () => {
+    smoothTargets.x = null
+    smoothTargets.y = null
+  }
+
   const handleWheel = (event) => {
     if (event.defaultPrevented || event.ctrlKey || event.metaKey) {
       return
@@ -41,7 +51,13 @@ export function addScrollSpeedHandler(element, getScrollSpeed) {
       return
     }
 
-    if (!canScroll(element, wheel.axis, wheel.delta)) {
+    const position = wheel.axis === 'x' ? element.scrollLeft : element.scrollTop
+    const maximum = wheel.axis === 'x'
+      ? element.scrollWidth - element.clientWidth
+      : element.scrollHeight - element.clientHeight
+    const target = smoothTargets[wheel.axis] ?? position
+
+    if (!canMoveScrollTarget(target, maximum, wheel.delta)) {
       if (hasContainedOverscroll(element, wheel.axis)) {
         // The default scroll is canceled at a contained boundary. Parent
         // handlers see defaultPrevented and leave the page in place.
@@ -53,13 +69,23 @@ export function addScrollSpeedHandler(element, getScrollSpeed) {
     event.preventDefault()
     const distance = wheelDeltaInPixels(event, element, wheel.axis, wheel.delta) *
       speed / DEFAULT_SCROLL_SPEED
-    element.scrollBy(wheel.axis === 'x'
-      ? { left: distance }
-      : { top: distance })
+    smoothTargets[wheel.axis] = Math.min(
+      Math.max(target + distance, 0),
+      maximum
+    )
+    element.scrollTo({
+      behavior: 'smooth',
+      left: smoothTargets.x ?? element.scrollLeft,
+      top: smoothTargets.y ?? element.scrollTop
+    })
   }
 
   element.addEventListener('wheel', handleWheel, { passive: false })
-  return () => element.removeEventListener('wheel', handleWheel)
+  element.addEventListener('scrollend', clearSmoothTargets)
+  return () => {
+    element.removeEventListener('wheel', handleWheel)
+    element.removeEventListener('scrollend', clearSmoothTargets)
+  }
 }
 
 /**
@@ -91,16 +117,12 @@ function hasContainedOverscroll(element, axis) {
 }
 
 /**
- * @param {HTMLElement} element
- * @param {'x' | 'y'} axis
+ * @param {number} target
+ * @param {number} maximum
  * @param {number} delta
  */
-function canScroll(element, axis, delta) {
-  const position = axis === 'x' ? element.scrollLeft : element.scrollTop
-  const maximum = axis === 'x'
-    ? element.scrollWidth - element.clientWidth
-    : element.scrollHeight - element.clientHeight
-  return maximum > 0 && (delta < 0 ? position > 0 : position < maximum)
+function canMoveScrollTarget(target, maximum, delta) {
+  return maximum > 0 && (delta < 0 ? target > 0 : target < maximum)
 }
 
 /**

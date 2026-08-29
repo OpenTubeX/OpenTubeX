@@ -18,6 +18,46 @@ async function addPageOverflow(page) {
   await expect.poll(() => pageOverflows(page)).toBe(true)
 }
 
+async function recordCustomSpeedPageScroll(page) {
+  await addPageOverflow(page)
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setScrollSpeed', 200)
+    window.__scrollSpeedAnimationPositions = []
+    document.addEventListener('scroll', () => {
+      window.__scrollSpeedAnimationPositions.push(window.scrollY)
+    })
+  })
+}
+
+async function addNestedCustomSpeedScroller(page, attribute, scrollTop) {
+  await page.evaluate(({ attribute, scrollTop }) => {
+    const viewport = document.createElement('div')
+    viewport.setAttribute(attribute, '')
+    Object.assign(viewport.style, {
+      height: '100px',
+      left: '100px',
+      overflowY: 'auto',
+      position: 'fixed',
+      top: '100px',
+      width: '200px',
+      zIndex: '9999',
+    })
+    const content = document.createElement('div')
+    content.style.height = '300px'
+    viewport.append(content)
+    document.body.append(viewport)
+
+    const app = document.querySelector('#app').__vue_app__
+    const store = app.config.globalProperties.$store
+    app._context.directives['overlay-scrollbars'].mounted(viewport, { value: true })
+    store.commit('setScrollSpeed', 200)
+    viewport.scrollTop = scrollTop
+  }, { attribute, scrollTop })
+
+  return page.locator(`[${attribute}]`)
+}
+
 test.describe('overlay scrollbars', () => {
   test('the main scroll container reserves no layout space for its scrollbar', async ({ page }) => {
     await addPageOverflow(page)
@@ -49,6 +89,54 @@ test.describe('overlay scrollbars', () => {
       window.__scrollSpeedTestDelta > 0 &&
       window.scrollY === window.__scrollSpeedTestDelta * 2
     ))).toBe(true)
+  })
+
+  test('animates wheel scrolling at a custom speed', async ({ page }) => {
+    await recordCustomSpeedPageScroll(page)
+
+    await page.mouse.move(800, 400)
+    await page.mouse.wheel(0, 120)
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(240)
+
+    const positions = await page.evaluate(() => window.__scrollSpeedAnimationPositions)
+    expect(new Set(positions).size).toBeGreaterThan(2)
+  })
+
+  test('preserves a burst of wheel deltas while custom scrolling is animated', async ({ page }) => {
+    await addPageOverflow(page)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setScrollSpeed', 200)
+
+      for (let index = 0; index < 3; index++) {
+        document.body.dispatchEvent(new WheelEvent('wheel', {
+          bubbles: true,
+          cancelable: true,
+          deltaY: 120,
+        }))
+      }
+    })
+
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(720)
+  })
+
+  test('reverses a pending custom-speed scroll at the current boundary', async ({ page }) => {
+    await addPageOverflow(page)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setScrollSpeed', 200)
+
+      for (const deltaY of [120, -120]) {
+        document.body.dispatchEvent(new WheelEvent('wheel', {
+          bubbles: true,
+          cancelable: true,
+          deltaY,
+        }))
+      }
+    })
+
+    await page.waitForTimeout(300)
+    expect(await page.evaluate(() => window.scrollY)).toBe(0)
   })
 
   test('the page scrollbar stays on the content side of right vertical tabs', async ({ page }) => {
@@ -270,35 +358,18 @@ test.describe('overlay scrollbars', () => {
 
     test('bubbles scaled wheel input from a nested boundary to the page', async ({ page }) => {
       await addPageOverflow(page)
+      const viewport = await addNestedCustomSpeedScroller(
+        page,
+        'data-scroll-speed-bubble-test',
+        200
+      )
       await page.evaluate(() => {
-        const viewport = document.createElement('div')
-        viewport.dataset.scrollSpeedBubbleTest = ''
-        Object.assign(viewport.style, {
-          height: '100px',
-          left: '100px',
-          overflowY: 'auto',
-          position: 'fixed',
-          top: '100px',
-          width: '200px',
-          zIndex: '9999',
-        })
-        const content = document.createElement('div')
-        content.style.height = '300px'
-        viewport.append(content)
-        document.body.append(viewport)
-
-        const app = document.querySelector('#app').__vue_app__
-        const store = app.config.globalProperties.$store
-        app._context.directives['overlay-scrollbars'].mounted(viewport, { value: true })
-        store.commit('setScrollSpeed', 200)
-        viewport.scrollTop = viewport.scrollHeight
         window.scrollTo(0, 0)
         document.addEventListener('wheel', (event) => {
           window.__scrollSpeedBubbleTestDelta = event.deltaY
         }, { capture: true, once: true })
       })
 
-      const viewport = page.locator('[data-scroll-speed-bubble-test]')
       await viewport.hover()
       await page.mouse.wheel(0, 120)
 
@@ -306,6 +377,31 @@ test.describe('overlay scrollbars', () => {
         window.__scrollSpeedBubbleTestDelta > 0 &&
         window.scrollY === window.__scrollSpeedBubbleTestDelta * 2
       ))).toBe(true)
+    })
+
+    test('hands a wheel burst to the page at a pending nested boundary', async ({ page }) => {
+      await addPageOverflow(page)
+      const viewport = await addNestedCustomSpeedScroller(
+        page,
+        'data-scroll-speed-burst-boundary-test',
+        150
+      )
+      await viewport.evaluate((element) => {
+        window.scrollTo(0, 0)
+
+        for (let index = 0; index < 2; index++) {
+          element.dispatchEvent(new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            deltaY: 50,
+          }))
+        }
+      })
+
+      await expect.poll(async () => ({
+        page: await page.evaluate(() => window.scrollY),
+        viewport: await viewport.evaluate((element) => element.scrollTop),
+      }), { timeout: 2000 }).toEqual({ page: 100, viewport: 200 })
     })
 
     test('reconciles an end position after the viewport grows', async ({ page }) => {
@@ -396,5 +492,20 @@ test.describe('overlay scrollbars', () => {
     // Roughly, not exactly: flipping the switch also reflows the settings page
     // a little by revealing the "changed setting" indicator.
     expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(250)
+  })
+})
+
+test.describe('overlay scrollbars with smooth scrolling disabled', () => {
+  test.use({ seed: { settings: { disableSmoothScrolling: true } } })
+
+  test('keeps custom-speed wheel scrolling immediate', async ({ page }) => {
+    await recordCustomSpeedPageScroll(page)
+
+    await page.mouse.move(800, 400)
+    await page.mouse.wheel(0, 120)
+
+    await expect.poll(() => page.evaluate(
+      () => window.__scrollSpeedAnimationPositions
+    )).toEqual([240])
   })
 })
