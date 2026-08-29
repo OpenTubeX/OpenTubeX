@@ -106,7 +106,7 @@ test('replays hand their actions over without pacing them', async () => {
     continuation_contents: fakeContinuation({
       continuation: `AFTER_${callIndex}`,
       header: callIndex === 0 ? {} : null,
-      actions: [fakeReplayAction('60000'), fakeReplayAction('61000')],
+      actions: callIndex === 0 ? [] : [fakeReplayAction('60000'), fakeReplayAction('61000')],
     }),
   }))
 
@@ -117,6 +117,36 @@ test('replays hand their actions over without pacing them', async () => {
   // The smoothed queue would have spread these out over the next few seconds,
   // which is the wrong pacing for messages that carry their own player offsets.
   assert.deepEqual(updates, [fakeReplayAction('60000'), fakeReplayAction('61000')])
+})
+
+test('replays emit actions from responses that also contain headers', async () => {
+  const actions = [fakeReplayAction('1000'), fakeReplayAction('2000')]
+  const { liveChat, updates } = createReplay(() => ({
+    continuation_contents: fakeContinuation({ header: {}, actions }),
+  }))
+
+  liveChat.start()
+  await flush()
+
+  assert.deepEqual(updates, actions)
+})
+
+test('replays stop emitting a batch when a listener seeks', async () => {
+  const actions = [fakeReplayAction('60000'), fakeReplayAction('61000')]
+  const { liveChat, updates } = createReplay((args, callIndex) => ({
+    continuation_contents: fakeContinuation({
+      continuation: `AFTER_${callIndex}`,
+      header: callIndex === 0 ? {} : null,
+      actions: callIndex === 0 ? [] : actions,
+    }),
+  }))
+
+  liveChat.on('chat-update', () => liveChat.seekTo(120_000))
+  liveChat.start()
+  await flush()
+  await liveChat.pollNext()
+
+  assert.deepEqual(updates, actions.slice(0, 1))
 })
 
 test('seeking re-anchors the replay to the given player position', async () => {
@@ -292,6 +322,50 @@ test('concurrent polls share a transient failure retry sequence', async () => {
   assert.equal(requests[1].args.continuation, 'AFTER_0')
   assert.equal(requests[2].args.continuation, 'AFTER_0')
   assert.deepEqual(updates, [fakeReplayAction('5000')])
+})
+
+test('a new polling generation gets a fresh retry budget', async (t) => {
+  t.mock.method(globalThis, 'setTimeout', (callback) => {
+    queueMicrotask(callback)
+    return 0
+  })
+
+  const deliveredAction = fakeReplayAction('5000')
+  const { liveChat, requests, updates } = createReplay((args, callIndex) => {
+    if (callIndex > 0 && callIndex <= 11) {
+      throw new Error('temporary failure')
+    }
+
+    return {
+      continuation_contents: fakeContinuation({
+        continuation: `AFTER_${callIndex}`,
+        header: callIndex === 0 ? {} : null,
+        actions: callIndex === 12 ? [deliveredAction] : [],
+      }),
+    }
+  })
+
+  let ended = false
+  let invalidatedFailures = 0
+  liveChat.on('end', () => { ended = true })
+  liveChat.on('error', (error) => {
+    if (error.message === 'temporary failure' && invalidatedFailures < 10) {
+      invalidatedFailures++
+      liveChat.seekTo(invalidatedFailures * 1000)
+    }
+  })
+
+  liveChat.start()
+  await flush()
+
+  for (let generation = 0; generation < 10; generation++) {
+    await liveChat.pollNext()
+  }
+  await liveChat.pollNext()
+
+  assert.equal(ended, false)
+  assert.equal(requests.length, 13)
+  assert.deepEqual(updates, [deliveredAction])
 })
 
 test('switching views moves the chat onto the other continuation', async () => {
