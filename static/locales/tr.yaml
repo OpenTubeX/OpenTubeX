@@ -889,6 +889,8 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Kalan SABR bekleme süresi: {remindingTimeSeconds}s'
   Popout Live Chat: Açılır Sohbet
   Private: Özel videolar, Google ile oturum açma ve videonun sahibi olma gerekliliği nedeniyle OpenTubeX'da izlenemez.
+  Collapse Playlist: Oynatma Listesini Daralt
+  Expand Playlist: Oynatma Listesini Genişlet
 Playlist:
   #& About
   View Full Playlist: 'Tüm oynatma listesini görüntüle'

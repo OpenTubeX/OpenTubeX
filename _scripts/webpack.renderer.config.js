@@ -35,6 +35,17 @@ const processLocalesPlugin = new ProcessLocalesPlugin({
   outputDir: 'static/locales',
 })
 
+const processAILocalesPlugin = new ProcessLocalesPlugin({
+  activeLocales: processLocalesPlugin.activeLocales,
+  allowMissing: true,
+  collectMetadata: false,
+  compress: !isDevMode,
+  hotReload: isDevMode,
+  inputDir: path.join(__dirname, '../static/locales/ai'),
+  localeSource: 'ai',
+  outputDir: 'static/locales/ai',
+})
+
 /** @type {import('webpack').Configuration} */
 const config = {
   name: 'renderer',
@@ -151,6 +162,7 @@ const config = {
   },
   plugins: [
     processLocalesPlugin,
+    processAILocalesPlugin,
     new webpack.DefinePlugin({
       // build.mjs packages for the host OS, so reject mismatched target hints
       // above instead of compiling renderer behavior for a different platform.
@@ -167,6 +179,7 @@ const config = {
       __INTLIFY_PROD_DEVTOOLS__: 'false',
       'process.env.LOCALE_NAMES': JSON.stringify(processLocalesPlugin.localeNames),
       'process.env.LOCALE_TRANSLATION_PERCENTAGES': JSON.stringify(processLocalesPlugin.localeTranslationPercentages),
+      'process.env.AI_LOCALES': JSON.stringify([...processAILocalesPlugin.locales.keys()]),
       'process.env.GEOLOCATION_NAMES': JSON.stringify(readdirSync(path.join(__dirname, '..', 'static', 'geolocations')).map(filename => filename.replace('.json', ''))),
       'process.env.SWIPER_VERSION': `'${swiperVersion}'`,
       'process.env.SHAKA_LOCALE_MAPPINGS': JSON.stringify(SHAKA_LOCALE_MAPPINGS),

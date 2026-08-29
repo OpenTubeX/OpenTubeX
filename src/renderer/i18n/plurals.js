@@ -55,7 +55,7 @@ const PLURAL_CATEGORY_SAMPLES = (() => {
  * @param {number} [minimum]
  * @returns {string[]}
  */
-function getPluralCategories(locale, minimum = 0) {
+export function getPluralCategories(locale, minimum = 0) {
   const pluralRules = new Intl.PluralRules(locale)
   const categories = new Set(PLURAL_CATEGORY_SAMPLES
     .filter(count => count >= minimum)

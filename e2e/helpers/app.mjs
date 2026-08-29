@@ -1,7 +1,8 @@
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { cp, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { brotliCompressSync } from 'node:zlib'
 
 import { test as base, expect, _electron as electron } from '@playwright/test'
 
@@ -17,6 +18,7 @@ const BASE_SETTINGS = {
   externalLinkHandling: 'doNothing',
   confirmCloseApp: false,
   confirmCloseWindowWithMultipleTabs: false,
+  useAITranslationCompletions: false,
   // Desktop-sized window so the responsive layout doesn't collapse into
   // its mobile variant (which hides the search bar, among other things).
   bounds: { x: 0, y: 0, width: 1600, height: 900, maximized: false }
@@ -290,15 +292,39 @@ export async function setPlayerFullscreen(page, fullscreen) {
  *
  * Customize seeding per test file with:
  *   test.use({ seed: { settings: { ... }, history: [ ... ] } })
+ * Use `localeOverrides` to replace packaged locale messages without changing
+ * the shared dist-e2e output.
  */
 export const test = base.extend({
   seed: [{}, { option: true }],
   launchArgs: [[], { option: true }],
   showTutorial: [false, { option: true }],
+  localeOverrides: [{}, { option: true }],
 
-  app: async ({ seed, launchArgs, showTutorial }, use, testInfo) => {
+  app: async ({ seed, launchArgs, showTutorial, localeOverrides }, use, testInfo) => {
     const userDataDir = await createUserDataDir(seed)
-    const { electronApp, page } = await launchApp(userDataDir, launchArgs)
+    const hasLocaleOverrides = Object.keys(localeOverrides).length > 0
+    const appRoot = hasLocaleOverrides
+      ? await mkdtemp(path.join(tmpdir(), 'opentubex-e2e-app-'))
+      : repoRoot
+
+    if (hasLocaleOverrides) {
+      await cp(path.join(repoRoot, 'dist-e2e'), path.join(appRoot, 'dist-e2e'), {
+        recursive: true
+      })
+      for (const [localePath, messages] of Object.entries(localeOverrides)) {
+        const outputPath = path.join(
+          appRoot,
+          'dist-e2e',
+          'static',
+          'locales',
+          `${localePath}.json.br`
+        )
+        await writeFile(outputPath, brotliCompressSync(JSON.stringify(messages)))
+      }
+    }
+
+    const { electronApp, page } = await launchApp(userDataDir, launchArgs, { appRoot })
 
     if (!showTutorial) {
       const tutorial = page.locator('.tutorialOverlay')
@@ -315,7 +341,7 @@ export const test = base.extend({
       const exited = new Promise((resolve) => oldProcess.once('exit', resolve))
       await appHandle.electronApp.close()
       await exited
-      const next = await launchApp(userDataDir, launchArgs)
+      const next = await launchApp(userDataDir, launchArgs, { appRoot })
       appHandle.electronApp = next.electronApp
       appHandle.page = next.page
       return next
@@ -331,6 +357,9 @@ export const test = base.extend({
       }
       await appHandle.electronApp.close().catch(() => {})
       await rm(userDataDir, { recursive: true, force: true })
+      if (hasLocaleOverrides) {
+        await rm(appRoot, { recursive: true, force: true })
+      }
     }
   },
 

@@ -106,7 +106,7 @@ test('only offers skipping to playlist videos that exist', async ({ page, attach
   await attachScreenshot('first playlist video')
 
   // Loop wraps the playlist around in both directions
-  const loopButton = page.locator('.watchVideoPlaylist .playlistButton').first()
+  const loopButton = page.locator('.watchVideoPlaylist').getByRole('button', { name: 'Loop Playlist' })
   await loopButton.click()
   await expect.poll(() => readSkipAvailability(page)).toEqual({
     canPlayNext: true,

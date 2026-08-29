@@ -260,7 +260,7 @@ function startRenderer(callback) {
           ignored: [
             /(dashFiles|storyboards)\/*/,
             '**/.DS_Store',
-            '**/static/locales/*'
+            '**/static/locales/**'
           ]
         },
         publicPath: '/static'
@@ -316,7 +316,7 @@ function startWeb () {
         ignored: [
           /(dashFiles|storyboards)\/*/,
           '**/.DS_Store',
-          '**/static/locales/*'
+          '**/static/locales/**'
         ]
       }
     },

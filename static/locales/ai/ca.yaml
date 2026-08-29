@@ -1,0 +1,2161 @@
+# Optional AI-generated translations for keys missing from ../ca.yaml.
+Color Picker:
+  Hue: Matís
+  Opacity: Opacitat
+  Backdrop Blur: Difuminació del fons
+  Hex Color: Color hexadecimal
+  Apply Color: Aplica
+  Reset Color: Restableix
+  Copy Color: Copia
+  Copy From Another Color: Copia d'un altre color
+  Color Copied: S'ha copiat el color
+  Invalid Color: Introduïu un color hexadecimal vàlid
+  Clipboard Unavailable: El porta-retalls no està disponible
+  Saturation and Brightness: Saturació i lluminositat
+New Tab: Pestanya nova
+Maximize: Maximitza
+Restore: Restaura
+Close Tab: Tanca la pestanya
+Close Confirmation:
+  Title: Voleu sortir de l'OpenTubeX?
+  Message: Segur que voleu sortir de l'OpenTubeX?
+  Quit: Surt
+  Never Ask Again: No ho tornis a preguntar
+Close Window Confirmation:
+  Title: Voleu tancar la finestra?
+  Message: Aquesta finestra conté {count} pestanya. Segur que la voleu tancar? | Aquesta finestra conté {count} pestanyes. Segur que la voleu tancar?
+  Close Window: Tanca la finestra
+Confirmations:
+  Never Ask Again: No ho tornis a preguntar
+  Settings Hint: Podeu tornar a activar aquesta confirmació a Configuració → General → Confirma abans de…
+Close Multiple Tabs Confirmation:
+  Title: Voleu tancar diverses pestanyes?
+  Message: Es tancarà {count} pestanya. | Es tancaran {count} pestanyes.
+  Close Tabs: Tanca {count} pestanya | Tanca {count} pestanyes
+Load Multiple Tabs Confirmation:
+  Title: Voleu carregar diverses pestanyes?
+  Message: Es carregarà {count} pestanya. | Es carregaran {count} pestanyes.
+  Load Tabs: Carrega {count} pestanya | Carrega {count} pestanyes
+Unload Multiple Tabs Confirmation:
+  Title: Voleu descarregar diverses pestanyes?
+  Message: Es descarregarà {count} pestanya. | Es descarregaran {count} pestanyes.
+  Unload Tabs: Descarrega {count} pestanya | Descarrega {count} pestanyes
+Use Vertical Tabs: Utilitza pestanyes verticals
+Use Horizontal Tabs: Utilitza pestanyes horitzontals
+Resize Tab Bar: Redimensiona la barra de pestanyes
+Find in page: Cerca a la pàgina
+Previous match: Coincidència anterior
+Next match: Coincidència següent
+Close find bar: Tanca la barra de cerca
+No matches: Cap coincidència
+Version {versionNumber} is now available.: Ja està disponible la versió {versionNumber}.
+See changes and update: Mostra els canvis i actualitza
+Dismiss: Descarta
+Update to {version}: Actualitza a la versió {version}
+Global:
+  Ambient Mode: Mode ambiental
+  Loading More: S'està carregant més contingut
+  New: Nou
+  Counts:
+    Like Count: 1 m'agrada | {count} m'agrades | {count} m'agrades
+    Comment Count: 1 comentari | {count} comentaris | {count} comentaris
+    Watching Count: 1 espectador | {count} espectadors | {count} espectadors
+Search Bar:
+  Remove: Suprimeix
+Search character limit: La consulta supera el límit de {searchCharacterLimit} caràcters
+Search Listing:
+  Label:
+    VR180: VR180
+    360 Video: 360°
+    New: Nou
+    Members Only: Només per a membres
+    3D: 3D
+    Closed Captions: Subtítols
+Search Filters:
+  Prioritize:
+    Prioritize: Prioritza
+    Popularity: Popularitat
+  Features:
+    Features: Funcions
+    HD: HD
+    Creative Commons: Creative Commons
+    3D: 3D
+    Live: En directe
+    4K: 4K
+    360 Video: Vídeo de 360°
+    Location: Ubicació
+    HDR: HDR
+    VR180: VR180
+  Clear Filters: Neteja els filtres
+Stats:
+  Stats: Estadístiques
+  Watch time summary: Resum del temps de reproducció
+  Today: Avui
+  This week: Aquesta setmana
+  Total watch time: Temps total de reproducció
+  Daily average: Mitjana diària
+  So far today: Avui fins ara
+  Since: Des de {day}
+  All recorded time: Tot el temps registrat
+  Per calendar day: Per dia natural
+  Day by day: Dia a dia
+  Highest: 'Màxim: {duration}'
+  Week by week: Setmana a setmana
+  Last 14 days: Darrers 14 dies
+  Last 8 weeks: Darreres 8 setmanes
+  Daily chart aria: Temps de reproducció diari dels darrers 14 dies
+  Weekly chart aria: Temps de reproducció setmanal de les darreres 8 setmanes
+  No data: El temps de reproducció apareixerà aquí a mesura que mireu vídeos.
+  Estimate note: El temps de reproducció anterior a aquesta actualització s'estima a partir del progrés de reproducció desat.
+  Adjust imported watch time: Ajusta el temps de reproducció importat
+  Imported watch time: Temps de reproducció importat
+  Imported watch time explanation: Trieu la velocitat de reproducció que utilitzàveu habitualment. La durada dels vídeos importats es dividirà per aquesta velocitat per estimar el temps real que vau passar mirant-los.
+  Playback speed: Velocitat de reproducció
+  Channel speed note: Quan n'hi hagi, s'utilitzaran les velocitats de reproducció desades dels canals.
+  Apply playback speed: Aplica la velocitat de reproducció
+  Imported watch time adjusted: S'ha ajustat el temps de reproducció importat
+  Reset statistics: Restableix les estadístiques
+  Reset: Restableix
+  Reset confirmation: Segur que voleu restablir totes les estadístiques de reproducció? Aquesta acció no es pot desfer.
+  Reset success: S'han restablert les estadístiques de reproducció
+  Less than a minute: < 1 min
+  Minutes: '{minutes} min'
+  Hours: '{hours} h'
+  Hours and minutes: '{hours} h {minutes} min'
+Home Page:
+  Home: Inici
+  Description: Continueu des d'on ho vau quedar i consulteu l'activitat recent.
+  Customize: Personalitza l'inici
+  Done: Fet
+  Customize description: Trieu quines seccions es mostren i ordeneu-les com vulgueu.
+  Continue watching: Continua mirant
+  New since last visit: Novetats des de l'última visita
+  Watch queue: Cua de visualització
+  Recent playlists: Llistes de reproducció recents
+  Recent downloads: Baixades recents
+  Upcoming reminders: Recordatoris propers
+  Watch statistics: Estadístiques de visualització
+  View all: Mostra-ho tot
+  Previous shelf page: Pàgina anterior de {section}
+  Next shelf page: Pàgina següent de {section}
+  Shelf page status: '{section}, pàgina {page} de {total}.'
+  Move section up: Mou {section} amunt
+  Move section down: Mou {section} avall
+  Section moved: 'S''ha mogut {section} a la posició {position} de {total}.'
+  Nothing here yet: Encara no hi ha res
+  Empty description: Aquí apareixeran els vídeos que comenceu, les llistes de reproducció que utilitzeu, les baixades i els recordatoris.
+  All sections hidden: Totes les seccions estan ocultes
+  All sections hidden description: Personalitzeu l'inici per tornar a mostrar una secció.
+Subscriptions:
+  Disabled Automatic Fetching: Heu desactivat l'obtenció automàtica de subscripcions. Actualitzeu-les per veure-les aquí.
+  Empty Channels: Els canals als quals us heu subscrit no tenen cap vídeo ara mateix.
+  Empty Posts: Els canals als quals us heu subscrit no tenen cap publicació ara mateix.
+  Load More Posts: Carrega més publicacions
+  Subscriptions Tabs: Pestanyes de subscripcions
+  All Subscription Tabs Hidden: Totes les pestanyes de subscripcions estan ocultes. Per veure contingut aquí, feu visible alguna pestanya de la secció "{subsection}" a "{settingsSection}".
+  Refreshing Subscription Videos: S'estan actualitzant els vídeos de les subscripcions
+  Refreshing Subscription Shorts: S'estan actualitzant els vídeos curts de les subscripcions
+  Refreshing Subscription Live Streams: S'estan actualitzant les emissions en directe de les subscripcions
+  Refreshing Subscription Posts: S'estan actualitzant les publicacions de les subscripcions
+  New Content: Contingut nou
+  New Feed Refresh Warning Title: Voleu actualitzar tots els canals de subscripcions?
+  New Feed Refresh Warning: Actualitzar tots els tipus de contingut sense RSS d'1 subscripció pot trigar molt. Voleu continuar? | Actualitzar tots els tipus de contingut sense RSS de {count} subscripcions pot trigar molt. Voleu continuar? | Actualitzar tots els tipus de contingut sense RSS de {count} subscripcions pot trigar molt. Voleu continuar?
+  New Since Last Refresh: Nou des de la darrera actualització
+  Mark as Seen: Marca com a vist
+  Mark All as Seen: Marca-ho tot com a vist
+  No New Content: No hi ha contingut nou.
+  New Content Tabs: Pestanyes de contingut nou
+  Show Tabbed View: Mostra la vista amb pestanyes
+  Show Combined View: Mostra la vista combinada
+  Newest First: Més nous primer
+  Oldest First: Més antics primer
+  Posts:
+    RSS Message: YouTube no proporciona canals RSS per a les publicacions. Desactiveu l'opció "{rssSetting}" per veure les publicacions o activeu l'opció "{hideSetting}" per ocultar aquesta pestanya.
+Channels:
+  Count: S'ha trobat 1 canal. | S'han trobat {number} canals. | S'han trobat {number} canals.
+  Empty: La llista de canals està buida.
+  Unsubscribe Prompt: Segur que us voleu donar de baixa de "{channelName}"?
+Trending:
+  Sports: Esports
+  Load Error: No s'han pogut carregar les tendències.
+  Unsupported Backend: Les tendències requereixen l'API local. Seleccioneu l'API local o activeu el motor alternatiu.
+Most Popular Feed Empty: El canal Més popular d'aquesta instància d'Invidious és buit.
+Feed:
+  Cancel Refresh: Cancel·la l'actualització
+  Feed Last Updated: 'Darrera actualització del canal {feedName}: {date}'
+  Next Auto Refresh: 'Propera actualització automàtica: {date}'
+  Refresh Feed: Actualitza {subscriptionName}
+User Playlists:
+  Load More Playlists: Carrega més llistes de reproducció
+  You have no playlists. Click on the create new playlist button to create a new one.: No teniu cap llista de reproducció. Feu clic al botó per crear-ne una de nova.
+  Playlists with Matching Videos: Llistes de reproducció amb vídeos coincidents
+  This playlist currently has no videos.: Aquesta llista de reproducció no té cap vídeo ara mateix.
+  Create New Playlist: Crea una llista de reproducció
+  Add to Playlist: Afegeix a una llista de reproducció
+  Save to: Desa a…
+  Add to Favorites: Afegeix a {playlistName}
+  Remove from Favorites: Suprimeix de {playlistName}
+  Move Video Up: Mou el vídeo amunt
+  Move Video Down: Mou el vídeo avall
+  Move Video to the Top: Mou el vídeo al principi
+  Move Video to the Bottom: Mou el vídeo al final
+  Remove from Playlist: Suprimeix de la llista de reproducció
+  Playlist Name: Nom de la llista de reproducció
+  Playlist Description: Descripció de la llista de reproducció
+  Quick Bookmark Icon: Icona d'adreça d'interès ràpida
+  Custom Emoji: Emoji personalitzat
+  Choose Image: Tria una imatge
+  Use Bookmark Icon: Utilitza la icona d'adreça d'interès
+  Save Changes: Desa els canvis
+  Cancel: Cancel·la
+  Edit Playlist Info: Edita la informació de la llista
+  Copy Playlist: Copia la llista de reproducció
+  Remove Duplicate Videos: Suprimeix els vídeos duplicats
+  Remove Watched Videos: Suprimeix els vídeos vistos
+  Enable Quick Bookmark With This Playlist: Activa l'adreça d'interès ràpida amb aquesta llista
+  Quick Bookmark Enabled: Adreça d'interès ràpida activada
+  Export Playlist: Exporta aquesta llista de reproducció
+  Export list of URLs: Exporta la llista d'URL
+  The playlist has been successfully exported: La llista de reproducció s'ha exportat correctament
+  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: Segur que voleu suprimir 1 vídeo duplicat d'aquesta llista de reproducció? Aquesta acció no es pot desfer. | Segur que voleu suprimir {playlistItemCount} vídeos duplicats d'aquesta llista de reproducció? Aquesta acció no es pot desfer. | Segur que voleu suprimir {playlistItemCount} vídeos duplicats d'aquesta llista de reproducció? Aquesta acció no es pot desfer.
+  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: Segur que voleu suprimir 1 vídeo vist d'aquesta llista de reproducció? Aquesta acció no es pot desfer. | Segur que voleu suprimir {playlistItemCount} vídeos vistos d'aquesta llista de reproducció? Aquesta acció no es pot desfer. | Segur que voleu suprimir {playlistItemCount} vídeos vistos d'aquesta llista de reproducció? Aquesta acció no es pot desfer.
+  Delete Playlist: Suprimeix la llista de reproducció
+  Cannot delete the quick bookmark target playlist.: No es pot suprimir la llista de reproducció de l'adreça d'interès ràpida.
+  Are you sure you want to delete this playlist? This cannot be undone: Segur que voleu suprimir aquesta llista de reproducció? Aquesta acció no es pot desfer.
+  TotalTimePlaylist: 'Temps total: {duration}'
+  Sort By:
+    NameAscending: A-Z
+    NameDescending: Z-A
+    LatestCreatedFirst: Data de creació (més nova)
+    EarliestCreatedFirst: Data de creació (més antiga)
+    LatestUpdatedFirst: Data d'actualització (més nova)
+    EarliestUpdatedFirst: Data d'actualització (més antiga)
+    LatestPlayedFirst: Data de reproducció (més nova)
+    EarliestPlayedFirst: Data de reproducció (més antiga)
+  SinglePlaylistView:
+    Search for Videos: Cerca vídeos
+    Retry: Torna-ho a provar
+    This playlist could not be loaded.: No s'ha pogut carregar aquesta llista de reproducció.
+    More videos could not be loaded.: No s'han pogut carregar més vídeos.
+    Toast:
+      This video cannot be moved up.: Aquest vídeo no es pot moure amunt.
+      This video cannot be moved down.: Aquest vídeo no es pot moure avall.
+      Video has been removed: S'ha suprimit el vídeo
+      Video has been removed. Click here to undo.: S'ha suprimit el vídeo. Feu clic aquí per desfer-ho.
+      There was a problem with removing this video: Hi ha hagut un problema en suprimir aquest vídeo
+      This playlist is already being used for quick bookmark.: Aquesta llista de reproducció ja s'utilitza per a l'adreça d'interès ràpida.
+      This playlist is now used for quick bookmark: Ara aquesta llista de reproducció s'utilitza per a l'adreça d'interès ràpida
+      This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo: Ara s'utilitza aquesta llista de reproducció per a l'adreça d'interès ràpida en lloc de {oldPlaylistName}. Feu clic aquí per desfer-ho
+      Reverted to use {oldPlaylistName} for quick bookmark: S'ha tornat a utilitzar {oldPlaylistName} per a l'adreça d'interès ràpida
+      Some videos in the playlist are not loaded yet. Click here to copy anyway.: Encara no s'han carregat alguns vídeos de la llista. Feu clic aquí per copiar-la igualment.
+      Playlist name cannot be empty. Please input a name.: El nom de la llista de reproducció no pot estar buit. Introduïu-ne un.
+      Playlist has been updated.: S'ha actualitzat la llista de reproducció.
+      There was an issue with updating this playlist.: Hi ha hagut un problema en actualitzar la llista de reproducció.
+      '{videoCount} video(s) have been removed': S'ha suprimit 1 vídeo | S'han suprimit {videoCount} vídeos | S'han suprimit {videoCount} vídeos
+      There were no videos to remove.: No hi havia cap vídeo per suprimir.
+      This playlist is protected and cannot be removed.: Aquesta llista de reproducció està protegida i no es pot suprimir.
+      Playlist {playlistName} has been deleted.: S'ha suprimit la llista de reproducció {playlistName}.
+      This playlist does not exist: Aquesta llista de reproducció no existeix
+      This playlist has a video with a duration error: Aquesta llista de reproducció conté com a mínim un vídeo sense durada. S'ordenarà com si durés zero.
+  AddVideoPrompt:
+    Select a playlist to add your N videos to: Seleccioneu una llista on afegir el vídeo | Seleccioneu una llista on afegir els {videoCount} vídeos | Seleccioneu una llista on afegir els {videoCount} vídeos
+    N playlists selected: '{playlistCount} seleccionades'
+    Search in Playlists: Cerca a les llistes de reproducció
+    Allow Adding Duplicate Video(s): Permet afegir vídeos duplicats
+    Save: Desa
+    Added {count} Times: Ja s'ha afegit | S'ha afegit {count} vegades | S'ha afegit {count} vegades
+    '{videoCount}/{totalVideoCount} Videos Will Be Added': S'afegiran {videoCount}/{totalVideoCount} vídeos
+    '{videoCount}/{totalVideoCount} Videos Already Added': Ja s'han afegit {videoCount}/{totalVideoCount} vídeos
+    Toast:
+      You haven't selected any playlist yet.: Encara no heu seleccionat cap llista de reproducció.
+      Video(s) added to {playlistCount} playlists: S'han afegit els vídeos a 1 llista de reproducció | S'han afegit els vídeos a {playlistCount} llistes de reproducció | S'han afegit els vídeos a {playlistCount} llistes de reproducció
+  CreatePlaylistPrompt:
+    New Playlist Name: Nom de la llista de reproducció nova
+    Create: Crea
+    Toast:
+      There is already a playlist with this name. Please pick a different name.: Ja hi ha una llista de reproducció amb aquest nom. Trieu-ne un altre.
+      Playlist {playlistName} has been successfully created.: S'ha creat correctament la llista de reproducció {playlistName}.
+      There was an issue with creating the playlist.: Hi ha hagut un problema en crear la llista de reproducció.
+History:
+  Case Sensitive Search: Cerca amb distinció entre majúscules i minúscules
+  Mark All As Watched: Marca-ho tot com a vist
+  Mark All As Watched Confirmation: Segur que voleu marcar com a vistos tots els vídeos de l'historial?
+  All History Marked as Watched: S'han marcat com a vistos tots els vídeos de l'historial
+  DateOldestHistory: Data de visualització (més antiga)
+  DateNewestHistory: Data de visualització (més nova)
+  Delete Old History: Suprimeix l'historial antic
+  Select History Age: Seleccioneu l'antiguitat que ha de tenir una entrada per poder-la suprimir.
+  Delete Entries Older Than: Suprimeix les entrades anteriors a
+  Number of Days: Nombre de dies
+  History Cleanup Warning: Se suprimiran permanentment les entrades coincidents de l'historial de reproducció.
+  1 Day: 1 dia
+  1 Week: 1 setmana
+  1 Month: 1 mes
+  3 Months: 3 mesos
+  1 Year: 1 any
+  Custom: Personalitzat
+  History Older Than Days Removed: S'ha suprimit l'historial de reproducció anterior a 1 dia | S'ha suprimit l'historial de reproducció anterior a {days} dies | S'ha suprimit l'historial de reproducció anterior a {days} dies
+Settings:
+  Quick Settings:
+    Quick Settings: Configuració ràpida
+    Appearance: Aparança
+    Playback: Reproducció
+    Content: Contingut
+    Language and Region: Llengua i regió
+    All Settings: Tota la configuració
+    Profile Selector Hint: També podeu fer clic dret a la icona del perfil per canviar de perfil
+  Categories:
+    General Description: Llengua, inici, pestanyes i comportament de l'aplicació
+    Appearance: Aparança
+    Appearance Description: Tema, disposició i miniatures
+    Content appearance: Llistes de vídeos i miniatures
+    Layout: Disposició
+    Playback Description: Reproductor, subtítols i preferències dels canals
+    Subscriptions Description: Opcions d'actualització i visualització dels canals
+    Downloads Description: Carpetes, plantilles i regles automàtiques
+    Distraction Free Description: Ocultació de contingut i límits de visualització
+    Add-ons: Complements
+    Add-ons Description: SponsorBlock, DeArrow, no m'agrada i traducció de veu en off
+    Privacy Description: Privadesa de visualització i controls d'accés
+    Online activity: Activitat en línia
+    Data And Storage Description: Importació, exportació, ús del disc i neteja
+    Sync Description: Manté la configuració i les dades sincronitzades entre dispositius
+    Advanced: Avançat
+    Advanced Description: Proveïdors, aplicacions externes i xarxa
+    Alternative providers: Proveïdors de vídeo i metadades
+  Highlight Changed Settings: Ressalta la configuració diferent dels valors predeterminats
+  Reset Setting to Default: Restableix el valor predeterminat d'aquesta opció
+  Performance Impact:
+    Show Performance Impact: Mostra els indicadors d'impacte en el rendiment
+    Moderate: Impacte moderat
+    High: Impacte alt
+    Description: Aquesta opció pot augmentar l'ús de {resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: memòria
+      Network: xarxa
+      Disk: disc
+  Return to Settings Menu: Torna al menú de configuració
+  General Settings:
+    Update Relative Timestamps: Manté actualitzades les marques horàries relatives
+    Stream Extraction Method:
+      Stream Extraction Method: Mètode d'extracció dels fluxos
+      yt-dlp: yt-dlp
+      Built-in: Integrat
+    Confirm Before: Confirma abans de…
+    Confirmation Options:
+      Closing App: Tancar l'OpenTubeX
+      Closing Window: Tancar una finestra amb diverses pestanyes
+      Closing Tabs: Tancar diverses pestanyes
+      Loading Tabs: Carregar diverses pestanyes
+      Unloading Tabs: Descarregar diverses pestanyes
+    Open Deep Links In New Window: Obre en una finestra nova els URL passats a l'OpenTubeX
+    Minimize to system tray: Minimitza a la safata del sistema
+    Remember Tab Navigation History: Recorda l'historial de navegació de les pestanyes
+    Auto Load Next Page:
+      Label: Carrega automàticament la pàgina següent
+      Tooltip: Carrega automàticament més pàgines i comentaris.
+    New Tab Position:
+      New Tab Position: Posició de les pestanyes noves
+      At the end: Al final
+      After current tab: Després de la pestanya actual
+      After current tab in opened order: Després de la pestanya actual, en l'ordre d'obertura
+    Tab Close Focus:
+      Tab Close Focus: Després de tancar una pestanya
+      Previous tab: Selecciona la pestanya anterior
+      Next tab: Selecciona la pestanya següent
+    Startup Behavior:
+      Startup Behavior: En iniciar
+      Load all tabs: Carrega totes les pestanyes
+      Load previously loaded tabs: Carrega les pestanyes carregades anteriorment
+      Load last active tab: Carrega la darrera pestanya activa
+      Start with an empty session: Inicia una sessió buida
+    Use AI Translation Completions: Completa les traduccions que falten amb text generat per IA
+    Reduced Motion:
+      Reduced Motion: Moviment reduït
+      System: Sistema
+      Force On: Força l'activació
+      Force Off: Força la desactivació
+    Comment Translation:
+      Title: Traducció dels comentaris
+      Enable: Activa la traducció dels comentaris
+      Never Translate: No tradueixis mai els comentaris en
+      Choose Language: Trieu una llengua
+      Description: Els comentaris en la llengua de l'aplicació ja s'exclouen. Afegiu-hi altres llengües que entengueu.
+      Remove Language: Torna a traduir els comentaris en {language}
+    Avoid translation:
+      Avoid translation: Prefereix el text dels vídeos sense traduir
+      Disabled: Desactivat
+      Watch Only: Només la interfície de vídeo
+      Entire App: Tota l'aplicació
+    Playlist View Type:
+      Playlist View Type: Tipus de vista de la llista de reproducció
+    Thumbnail Preference:
+      Hidden: Oculta
+      Blur: Difuminada
+    Show Thumbnail Previews: Mostra les previsualitzacions de les miniatures
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Botó d'acció addicional a la miniatura
+      None: Cap
+      Mark as Watched: Marca com a vist
+      Copy YouTube Link: Copia l'enllaç de YouTube
+      Open in YouTube: Obre a YouTube
+  Context Menu Search Settings:
+    Context Menu Search Settings: Cerca al menú contextual
+    Description: Trieu quins motors de cerca apareixen en fer clic dret al text seleccionat. Les cerques s'obren al navegador predeterminat.
+    Icon Hint: En activar un motor, es contacta amb el seu lloc web per carregar-ne la icona de preferits.
+    Engine Name: Nom del motor
+    Search URL: URL de cerca
+    URL Hint: Utilitzeu %s on l'URL hagi de contenir el text seleccionat codificat.
+    Add Custom Engine: Afegeix un motor personalitzat
+    Add Engine: Afegeix el motor
+    Remove Engine: Suprimeix {engine}
+    Invalid Engine: Introduïu un nom i un URL de cerca HTTP o HTTPS vàlid que contingui %s.
+    Engine Limit: Podeu afegir fins a {count} motors de cerca personalitzats.
+  Theme Settings:
+    Move Downloads to App Header: Mou les baixades a la capçalera de l'aplicació
+    Move Settings to App Header: Mou la configuració a la capçalera de l'aplicació
+    Hide Side Bar on Watch Pages: Oculta la barra lateral a les pàgines de reproducció
+    UI Roundness: Arrodoniment de la interfície
+    Scrollbar Width: Amplada de la barra de desplaçament
+    Scroll Speed: Velocitat de desplaçament
+    Animation Speed: Velocitat de les animacions
+    Thumbnail Size: Mida de les miniatures
+    Show Tab Icons: Mostra les icones de les pestanyes
+    Load Missing Tab Icons: Carrega les icones de pestanya que falten
+    Loading Missing Tab Icons: S'estan carregant les icones de pestanya que falten…
+    No Missing Tab Icons: Ja s'han carregat totes les icones de pestanya admeses
+    Loaded Tab Icons: "S'ha carregat la icona de pestanya que faltava: {count} | S'han carregat les icones de pestanya que faltaven: {count} | S'han carregat les icones de pestanya que faltaven: {count}"
+    Loaded Tab Icons With Failures: S'han carregat {loaded} icones de pestanya; no se n'han pogut carregar {failed}
+    Show Tab Previews: Mostra les previsualitzacions de les pestanyes
+    Use Fixed Tab Width: Utilitza una amplada fixa de pestanya en el mode horitzontal
+    Tab Width: Amplada de les pestanyes
+    Tab Layout:
+      Tab Layout: Disposició de les pestanyes
+      Horizontal Top: Horitzontals a dalt
+      Horizontal Bottom: Horitzontals a baix
+      Vertical Left: Verticals a l'esquerra
+      Vertical Right: Verticals a la dreta
+    Show Toast Timeout Indicator: Mostra l'indicador de temps de les notificacions emergents
+    Use Grid Player Menu: Utilitza una quadrícula al menú del reproductor
+    Show Progress as Notification: Mostra el progrés com a notificació
+    Operation in Progress: Operació en curs
+    Toast Position:
+      Toast Position: Posició de les notificacions emergents
+      Bottom Left: A baix a l'esquerra
+      Bottom Center: A baix al centre
+      Bottom Right: A baix a la dreta
+      Top Left: A dalt a l'esquerra
+      Top Center: A dalt al centre
+      Top Right: A dalt a la dreta
+    Icon Pack:
+      Icon Pack: Paquet d'icones
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Tipus de lletra de l'aplicació
+      System Default: Predeterminat del sistema
+      Unable to Load: No s'han pogut carregar els tipus de lletra instal·lats al sistema
+    Always Show Scrollbars: Mostra sempre les barres de desplaçament
+    Hide OpenTubeX Header Logo: Oculta el logotip de l'OpenTubeX de la capçalera
+    Base Theme:
+      Custom: Personalitzat
+      Catppuccin Frappe: Catppuccin Frappe
+      Catppuccin Latte: Catppuccin Latte
+      Catppuccin Mocha: Catppuccin Mocha
+      Pastel Pink: Rosa pastel
+      Hot Pink: Rosa intens
+      Nordic: Nordic
+      Gruvbox Dark: Gruvbox Dark
+      Gruvbox Light: Gruvbox Light
+      Solarized Dark: Solarized Dark
+      Solarized Light: Solarized Light
+      Everforest Dark Hard: Everforest Dark Hard
+      Everforest Dark Medium: Everforest Dark Medium
+      Everforest Dark Low: Everforest Dark Low
+      Everforest Light Hard: Everforest Light Hard
+      Everforest Light Medium: Everforest Light Medium
+      Everforest Light Low: Everforest Light Low
+    Light Theme: Tema clar
+    Dark Theme: Tema fosc
+    Custom Theme:
+      Create Custom Theme: Crea un tema personalitzat
+      Edit Custom Theme: Edita el tema personalitzat
+      Custom Theme Creator: Creador de temes personalitzats
+      Theme Name: Nom del tema
+      Based On: Basat en
+      Import Theme: Importa un tema
+      Export Theme: Exporta el tema
+      Share Theme: Comparteix el tema
+      Share Description Heading: Descripció
+      Share Description Prompt: Descriviu el tema i tot allò que calgui saber abans d'utilitzar-lo.
+      Share Screenshots Heading: Captures de pantalla
+      Share Screenshots Prompt: Arrossegueu i deixeu anar aquí una o més captures de pantalla.
+      Share Code Summary: JSON del tema
+      Delete Theme: Suprimeix el tema
+      Delete Theme Confirmation: Voleu suprimir «{name}»? Aquesta acció no es pot desfer.
+      Save and Apply: Desa i aplica
+      Discard Changes: Descarta els canvis
+      Reset Colors: Restableix el tema base
+      Theme File: Fitxer de tema de l'OpenTubeX
+      Theme Saved: S'ha desat i aplicat el tema personalitzat
+      Theme Imported: S'ha importat el tema a l'editor
+      Theme Exported: S'ha exportat el tema
+      Theme Deleted: S'ha suprimit el tema personalitzat
+      Unable to Load: No s'ha pogut carregar el tema personalitzat
+      Unable to Save: No s'ha pogut desar el tema personalitzat
+      Unable to Export: No s'ha pogut exportar el tema personalitzat
+      Unable to Share: No s'ha pogut compartir el tema personalitzat
+      Unable to Delete: No s'ha pogut suprimir el tema personalitzat
+      Invalid Theme File: El fitxer de tema personalitzat no és vàlid
+      Colors:
+        Main text: Text principal
+        Secondary text: Text secundari
+        Subtle text: Text discret
+        Borders and dividers: Vores i separadors
+        Subtle surfaces and indicators: Superfícies i indicadors discrets
+        Title text: Text dels títols
+        Selected text background: Fons del text seleccionat
+        Selected text: Text seleccionat
+        Logo icon: Icona del logotip
+        Logo text: Text del logotip
+        Logo hover: Logotip en passar-hi per sobre
+        Logo pressed: Logotip en prémer
+        Page background: Fons de la pàgina
+        Card background: Fons de les targetes
+        Secondary card background: Fons de les targetes secundàries
+        Favorite icon: Icona de preferits
+        Error color: Color dels errors
+        Scrollbar thumb: Lliscador de la barra de desplaçament
+        Scrollbar thumb hover: Lliscador en passar-hi per sobre
+        Scrollbar thumb pressed: Lliscador en prémer
+        Dropdown item hover text: Text d'un element desplegable en passar-hi per sobre
+        Dropdown item hover background: Fons d'un element desplegable en passar-hi per sobre
+        Navigation and panel background: Fons de la navegació i dels plafons
+        Neutral item hover and focus background: Fons d'un element neutre en passar-hi per sobre o enfocar-lo
+        Neutral item hover and focus text and icons: Text i icones d'un element neutre en passar-hi per sobre o enfocar-lo
+        Neutral item pressed background: Fons d'un element neutre en prémer
+        Neutral item pressed text and icons: Text i icones d'un element neutre en prémer
+        Header button hover and focus background: Fons d'un botó de capçalera en passar-hi per sobre o enfocar-lo
+        Header button hover and focus text and icons: Text i icones d'un botó de capçalera en passar-hi per sobre o enfocar-lo
+        Header button pressed background: Fons d'un botó de capçalera en prémer
+        Header button pressed text and icons: Text i icones d'un botó de capçalera en prémer
+        Colored header button hover and focus background: Fons d'un botó de capçalera acolorit en passar-hi per sobre o enfocar-lo
+        Colored header button hover and focus text and icons: Text i icones d'un botó de capçalera acolorit en passar-hi per sobre o enfocar-lo
+        Colored header button pressed background: Fons d'un botó de capçalera acolorit en prémer
+        Colored header button pressed text and icons: Text i icones d'un botó de capçalera acolorit en prémer
+        Search and dropdown background: Fons de la cerca i dels desplegables
+        Settings search background: Fons de la cerca de configuració
+        Instance menu: Menú d'instàncies
+        Input background: Fons dels camps d'entrada
+        Shadow color: Color de l'ombra
+        Primary controls and highlights: Controls i ressaltats principals
+        Primary control hover and focus: Control principal en passar-hi per sobre o enfocar-lo
+        Primary control pressed: Control principal en prémer
+        Text and icons on primary controls: Text i icones dels controls principals
+        Secondary controls and highlights: Controls i ressaltats secundaris
+        Secondary control hover and focus: Control secundari en passar-hi per sobre o enfocar-lo
+        Secondary control pressed: Control secundari en prémer
+        Light secondary color: Color secundari clar
+        Visited accent: Accent dels elements visitats
+        Text and icons on secondary controls: Text i icones dels controls secundaris
+        Links: Enllaços
+        Visited links: Enllaços visitats
+        Destructive action: Acció destructiva
+        Destructive hover and focus: Acció destructiva en passar-hi per sobre o enfocar-la
+        Destructive pressed: Acció destructiva en prémer
+        Text and icons on destructive actions: Text i icones de les accions destructives
+    Main Color Theme:
+      Catppuccin Frappe Rosewater: Catppuccin Frappe Rosewater
+      Catppuccin Frappe Flamingo: Catppuccin Frappe Flamingo
+      Catppuccin Frappe Pink: Catppuccin Frappe Pink
+      Catppuccin Frappe Mauve: Catppuccin Frappe Mauve
+      Catppuccin Frappe Red: Catppuccin Frappe Red
+      Catppuccin Frappe Maroon: Catppuccin Frappe Maroon
+      Catppuccin Frappe Peach: Catppuccin Frappe Peach
+      Catppuccin Frappe Yellow: Catppuccin Frappe Yellow
+      Catppuccin Frappe Green: Catppuccin Frappe Green
+      Catppuccin Frappe Teal: Catppuccin Frappe Teal
+      Catppuccin Frappe Sky: Catppuccin Frappe Sky
+      Catppuccin Frappe Sapphire: Catppuccin Frappe Sapphire
+      Catppuccin Frappe Blue: Catppuccin Frappe Blue
+      Catppuccin Frappe Lavender: Catppuccin Frappe Lavender
+      Catppuccin Latte Mauve: Catppuccin Latte Mauve
+      Catppuccin Latte Red: Catppuccin Latte Red
+      Catppuccin Mocha Rosewater: Catppuccin Mocha Rosewater
+      Catppuccin Mocha Flamingo: Catppuccin Mocha Flamingo
+      Catppuccin Mocha Pink: Catppuccin Mocha Pink
+      Catppuccin Mocha Mauve: Catppuccin Mocha Mauve
+      Catppuccin Mocha Red: Catppuccin Mocha Red
+      Catppuccin Mocha Maroon: Catppuccin Mocha Maroon
+      Catppuccin Mocha Peach: Catppuccin Mocha Peach
+      Catppuccin Mocha Yellow: Catppuccin Mocha Yellow
+      Catppuccin Mocha Green: Catppuccin Mocha Green
+      Catppuccin Mocha Teal: Catppuccin Mocha Teal
+      Catppuccin Mocha Sky: Catppuccin Mocha Sky
+      Catppuccin Mocha Sapphire: Catppuccin Mocha Sapphire
+      Catppuccin Mocha Blue: Catppuccin Mocha Blue
+      Catppuccin Mocha Lavender: Catppuccin Mocha Lavender
+      Gruvbox Dark Green: Gruvbox Dark Green
+      Gruvbox Dark Yellow: Gruvbox Dark Yellow
+      Gruvbox Dark Blue: Gruvbox Dark Blue
+      Gruvbox Dark Purple: Gruvbox Dark Purple
+      Gruvbox Dark Aqua: Gruvbox Dark Aqua
+      Gruvbox Dark Orange: Gruvbox Dark Orange
+      Gruvbox Light Red: Gruvbox Light Red
+      Gruvbox Light Blue: Gruvbox Light Blue
+      Gruvbox Light Purple: Gruvbox Light Purple
+      Gruvbox Light Orange: Gruvbox Light Orange
+      Solarized Yellow: Solarized Yellow
+      Solarized Orange: Solarized Orange
+      Solarized Red: Solarized Red
+      Solarized Magenta: Solarized Magenta
+      Solarized Violet: Solarized Violet
+      Solarized Blue: Solarized Blue
+      Solarized Cyan: Solarized Cyan
+      Solarized Green: Solarized Green
+      Everforest Dark Red: Everforest Dark Red
+      Everforest Dark Orange: Everforest Dark Orange
+      Everforest Dark Yellow: Everforest Dark Yellow
+      Everforest Dark Green: Everforest Dark Green
+      Everforest Dark Aqua: Everforest Dark Aqua
+      Everforest Dark Blue: Everforest Dark Blue
+      Everforest Dark Purple: Everforest Dark Purple
+      Everforest Light Red: Everforest Light Red
+      Everforest Light Orange: Everforest Light Orange
+      Everforest Light Yellow: Everforest Light Yellow
+      Everforest Light Green: Everforest Light Green
+      Everforest Light Aqua: Everforest Light Aqua
+      Everforest Light Blue: Everforest Light Blue
+      Everforest Light Purple: Everforest Light Purple
+  Player Settings:
+    Automatically Open Chapters: Obre els capítols automàticament
+    Caption Appearance:
+      Caption Appearance: Aparança dels subtítols
+      Captions: Subtítols
+      Preferred Language: Llengua preferida dels subtítols
+      Application Language: Llengua de l'aplicació
+      Enable Translations: Activa la traducció dels subtítols
+      Text Color: Color del text
+      Background Color: Color del fons
+      Background Opacity: Opacitat del fons
+      Font Size: Mida de la lletra
+      Vertical Position: Posició vertical
+      Edge Color: Color de la vora
+      Anchor:
+        Anchor: Ancoratge
+        Top Left: A dalt a l'esquerra
+        Top Center: A dalt al centre
+        Top Right: A dalt a la dreta
+        Bottom Left: A baix a l'esquerra
+        Bottom Center: A baix al centre
+        Bottom Right: A baix a la dreta
+      Edge Style:
+        Edge Style: Estil de la vora
+        None: Cap
+        Outline: Contorn
+        Drop Shadow: Ombra paral·lela
+      Reset: Restableix l'aparança dels subtítols
+    Default Viewing Mode:
+      Theater: Cinema
+      Default Viewing Mode: Mode de visualització predeterminat
+      Full Screen: Pantalla completa
+      Picture in Picture: Imatge sobre imatge
+      External Player: Reproductor extern ({externalPlayerName})
+      Full Window (Always On): Finestra completa (sempre)
+      Full Screen (Always On): Pantalla completa (sempre)
+      Tooltip: La majoria de modes de visualització predeterminats només s'apliquen a l'inici de cada sessió de reproducció. Els canvis fets durant la sessió es mantenen fins que acaba. Els modes permanents s'apliquen cada vegada que canvieu de vídeo, independentment dels canvis fets mentre miràveu l'anterior.
+    Auto Picture in Picture:
+      Auto Picture in Picture: Entra automàticament en el mode d'imatge sobre imatge
+      On Tab Change: En canviar de pestanya
+      On Window Minimize: En minimitzar la finestra
+      On Window Hide: Quan la finestra perd el focus o se'n canvia a una altra
+      Wayland Minimize Unsupported: Wayland no informa les aplicacions quan es minimitza una finestra, per tant aquest activador no està disponible. Utilitzeu "Quan la finestra perd el focus o se'n canvia a una altra", que també inclou la minimització.
+    Scroll Mini Player:
+      Scroll Mini Player: Minireproductor en desplaçar-se
+      When Scrolling Down: Manté un minireproductor a la pantalla en desplaçar-se avall
+      On All Tabs: Manté un minireproductor a la pantalla en canviar de pestanya
+    Skip by Scrolling Over Video Player: Salta desplaçant la roda sobre el reproductor de vídeo
+    Multiply Seek Interval by Playback Rate: Multiplica l'interval de salt per la velocitat de reproducció
+    Enter Fullscreen on Display Rotate: Entra a pantalla completa en girar la pantalla
+    Show Playback Rate Adjusted Timestamp: Mostra la marca de temps ajustada a la velocitat de reproducció
+    Use YouTube-style Shorts: Utilitza vídeos curts a l'estil de YouTube
+    Loop Shorts: Reprodueix els vídeos curts en bucle
+    Autoplay Interruption Timer: Temporitzador d'interrupció de la reproducció automàtica
+    Remember Volume: Recorda el volum
+    Skip Silence: Omet els silencis
+    Show Skip Silence Toggle: Mostra el commutador per ometre silencis
+    Enable Skip Silence by Default: Omet els silencis de manera predeterminada
+    Enable Video Zoom: Activa el zoom del vídeo
+    Voice-over Translation:
+      Title: Traducció de veu en off
+      Attribution: (amb tecnologia de Yandex)
+      Enable: Activa la traducció de veu en off
+      Prepare in Background: Comença a preparar les traduccions de veu en off en segon pla
+      Background Preparation Tooltip: Envia l'ID, la durada i la llengua seleccionada del vídeo actual al servei de traducció tan bon punt es carrega un vídeo compatible.
+      Language: Llengua de la traducció de veu en off
+      Supported Source Languages: "Llengües d'origen admeses: rus, anglès, xinès, coreà, lituà, letó, àrab, francès, italià, castellà, alemany i japonès."
+      Voice Volume: Volum de la veu traduïda
+      Original Volume: Volum de l'àudio original
+      Russian: Rus
+      English: Anglès
+      Kazakh: Kazakh
+    Hold to Double Playback Speed: Manteniu premut per duplicar la velocitat de reproducció
+    Use Quick Playback Speed Bar: Utilitza la barra ràpida de velocitat de reproducció
+    Customize Quick Playback Speed Bar: Personalitza la barra ràpida de velocitat de reproducció
+    Quick Playback Speed Bar Manager: Barra ràpida de velocitat de reproducció
+    Add Playback Speed: Afegeix una velocitat de reproducció
+    Reset Quick Playback Speed Bar: Restableix els valors predeterminats
+    Playback Speed Name: Nom
+    Edit Playback Speed Name: Edita el nom de la velocitat de reproducció
+    Use Automatic Playback Speed Name: Utilitza un nom automàtic per a la velocitat de reproducció
+    Reorder Playback Speed: Arrossegueu per reordenar la velocitat de reproducció
+    Playback Speed: Velocitat de reproducció
+    Parallel Segment Loading: Càrrega paral·lela de segments
+    Screenshot:
+      Enable: Activa les captures de pantalla
+      Mode: Mode de captura de pantalla
+      Modes:
+        Ask Path: Demana la carpeta on desar
+        Save To Folder: Desa a una carpeta
+        Clipboard: Copia al porta-retalls
+      Format Label: Format de la captura
+      Quality Label: Qualitat de la captura
+      Folder Label: Carpeta de les captures
+      Folder Button: Selecciona una carpeta
+      File Name Label: Patró del nom de fitxer
+      File Name Tooltip: Podeu utilitzar les variables següents. %Y Any de 4 dígits. %M Mes de 2 dígits. %D Dia de 2 dígits. %H Hora de 2 dígits. %N Minut de 2 dígits. %S Segon de 2 dígits. %T Mil·lisegon de 3 dígits. %s Segon del vídeo. %t Mil·lisegon del vídeo de 3 dígits. %i ID del vídeo.
+      Error:
+        Forbidden Characters: Caràcters prohibits
+        Empty File Name: Nom de fitxer buit
+  Channel Settings:
+    Channel Settings: Configuració dels canals
+    Channel Settings Description: Recorda per separat la configuració que trieu mentre mireu cada canal, per tornar-la a aplicar la propera vegada que mireu un dels seus vídeos.
+    Enable Playback Speed: Activa la velocitat de reproducció
+    Enable Video Quality: Activa la qualitat del vídeo
+    Enable Subtitles State: Activa l'estat dels subtítols
+    Enable Volume: Activa el volum
+    Auto Update: Actualitza automàticament en canviar-ho des de les opcions del reproductor
+    Auto Update Subtitles: Actualitza automàticament en commutar-los
+    Auto Update Volume: Actualitza automàticament cada vegada que canvieu el volum
+    Manage Saved Channels: Gestiona els canals desats ({channelCount})
+    Saved Channels: Configuració desada dels canals
+    Enable Saved Channel Settings Sync: Sincronitza la configuració desada dels canals
+    Disable Saved Channel Settings Sync: Atura la sincronització de la configuració desada dels canals
+    Search Channels: Cerca canals
+    No Saved Channels: Encara no s'ha desat cap configuració específica de canal
+    No Matching Channels: Cap canal coincideix amb la cerca
+    Forget Channel: Oblida tota la configuració d'aquest canal
+    Forget Value: Oblida aquesta opció
+    Add Setting: Recorda una altra opció per a aquest canal
+    Video Quality: Qualitat del vídeo
+    Subtitles Enabled: Subtítols activats
+    Volume: Volum
+  External Player Settings:
+    Ignore Default Arguments: Ignora els arguments predeterminats
+    Players:
+      None:
+        Name: Cap
+  Download Settings:
+    Download Settings: Baixades
+    Enable Downloads: Activa les baixades
+    Managed Tools Download Started Template: 'No s''ha trobat el programari extern necessari: {tools}. S''estan baixant còpies gestionades…'
+    Managed Tools Download Finished Template: Ha acabat la baixada de {tools}
+    Managed Tools Update Started Template: S'ha trobat una actualització per a {tools}. S'està baixant…
+    Managed Tools Update Finished Template: Ha acabat l'actualització de {tools}
+    Managed Tools Update Available Template: Hi ha una actualització disponible per a {tools}.
+    Update Managed Tools: Actualitza
+    Managed Tools Download Error Template: 'No s''han pogut baixar les eines gestionades: {errors}'
+    Download Folder: Carpeta de baixades
+    Global Additional yt-dlp Arguments: Arguments addicionals globals de yt-dlp
+    Concurrent Downloads: Baixades simultànies
+    Bandwidth Limit: Límit d'amplada de banda (KiB/s, 0 perquè sigui il·limitat)
+    Choose Download Folder: Tria la carpeta de baixades
+    Download Templates: Plantilles de baixada
+    Manage Download Templates: Gestiona les plantilles de baixada ({templateCount})
+    New Template: Plantilla nova
+    Template Source: Plantilla que voleu editar o utilitzar com a base
+    Built-in Template: '{name} (integrada)'
+    Custom Template Name: '{name} (personalitzada)'
+    Create Template Copy: Crea una còpia
+    Template Copy Name: 'Còpia de {name}'
+    Automatic Downloads: Baixades automàtiques
+    Manage Automatic Downloads: Gestiona les baixades automàtiques ({channelCount})
+    Automatic Downloads Description: Seleccioneu una plantilla de baixada i filtres per a cada canal subscrit. Els vídeos coincidents es baixaran en segon pla en actualitzar els canals de subscripcions.
+    Automatic Downloads New Only: En activar un canal, es comença amb la propera pujada nova. No es baixen els vídeos existents ni els pendents del canal.
+    Automatic Downloads No Channels: Subscriviu-vos a un canal abans de configurar les baixades automàtiques.
+    No Matching Automatic Download Channels: Cap canal coincideix amb la cerca.
+    Automatic Downloads Livestreams: Emissions en directe
+    Minimum Duration Seconds: Durada mínima (segons)
+    Maximum Duration Seconds: Durada màxima (segons)
+    Minimum File Size MB: Mida mínima del fitxer (MB)
+    Maximum File Size MB: Mida màxima del fitxer (MB)
+    Maximum Age Days: Antiguitat màxima (dies)
+    Title Includes: El títol inclou
+    Title Excludes: El títol exclou
+    Title Filter Hint: Separeu amb comes els diversos termes del títol. Un vídeo ha de coincidir amb almenys un terme inclòs i amb cap d'exclòs.
+  External Software Settings:
+    External Software Settings: Programari extern
+    yt-dlp Source: Origen de yt-dlp
+    yt-dlp Channel: Canal de yt-dlp
+    Sources:
+      System: Sistema (PATH o camí personalitzat)
+      Managed: Gestionat per l'OpenTubeX
+    Detected Version Template: 'Versió de yt-dlp detectada: {version}'
+    Managed Not Downloaded: Encara no s'ha baixat yt-dlp. Feu clic al botó de sota per baixar-lo.
+    System yt-dlp Missing Warning: No s'ha trobat yt-dlp al sistema. Instal·leu-lo, definiu un camí personalitzat a sota o canvieu l'origen a "Gestionat per l'OpenTubeX".
+    Download yt-dlp: Baixa yt-dlp
+    Update yt-dlp: Actualitza yt-dlp
+    Checking yt-dlp: S'està comprovant yt-dlp…
+    Downloading yt-dlp: S'està baixant yt-dlp…
+    yt-dlp Downloaded Template: S'ha baixat yt-dlp {version}
+    yt-dlp Download Error Template: 'Ha fallat la baixada de yt-dlp: {error}'
+    FFmpeg Source: Origen de FFmpeg
+    Detected FFmpeg Version Template: 'Versió de FFmpeg detectada: {version}'
+    FFmpeg Managed Not Downloaded: Encara no s'ha baixat FFmpeg. Feu clic al botó de sota per baixar-lo.
+    System FFmpeg Missing Warning: No s'ha trobat FFmpeg al sistema. És necessari per combinar vídeo i àudio i per convertir àudio. Instal·leu-lo, definiu un camí personalitzat a sota o canvieu l'origen a "Gestionat per l'OpenTubeX".
+    Download FFmpeg: Baixa FFmpeg
+    Update FFmpeg: Actualitza FFmpeg
+    Checking FFmpeg: S'està comprovant FFmpeg…
+    Downloading FFmpeg: S'està baixant FFmpeg…
+    FFmpeg Downloaded Template: S'ha baixat FFmpeg {version}
+    FFmpeg Download Error Template: 'Ha fallat la baixada de FFmpeg: {error}'
+    Detected FFprobe Version Template: 'Versió de FFprobe detectada: {version}'
+    FFprobe Managed Not Downloaded: Encara no s'ha baixat FFprobe. Feu clic al botó de sota per baixar-lo amb FFmpeg.
+    System FFprobe Missing Warning: No s'ha trobat FFprobe al sistema. És necessari per inspeccionar els fitxers multimèdia durant el postprocessament. Instal·leu-lo al costat de FFmpeg o canvieu l'origen a "Gestionat per l'OpenTubeX".
+    Checking FFprobe: S'està comprovant FFprobe…
+    Download FFmpeg and FFprobe: Baixa FFmpeg i FFprobe
+    Update FFmpeg and FFprobe: Actualitza FFmpeg i FFprobe
+    Downloading FFmpeg and FFprobe: S'estan baixant FFmpeg i FFprobe…
+    FFmpeg and FFprobe Downloaded Template: S'han baixat FFmpeg i FFprobe {version}
+    FFmpeg and FFprobe Download Error Template: 'Ha fallat la baixada de FFmpeg i FFprobe: {error}'
+    Managed Tool Already Current Template: '{tool} {version} ja està actualitzat'
+    Managed Tool Updates: Actualitzacions de les eines gestionades
+    Update Modes:
+      Automatic: Actualitza automàticament
+      Ask: Pregunta abans d'actualitzar
+      Manual: Actualitza només manualment
+    yt-dlp Executable Path: Camí de l'executable yt-dlp
+    FFmpeg Executable Path: Camí de l'executable FFmpeg
+    Restricted Playback Authentication: Galetes de reproducció de yt-dlp
+    Cookie Source: Origen de les galetes
+    Cookie Sources:
+      None: Cap
+      File: Fitxer
+      Browser: Navegador
+    Cookie File: Fitxer de galetes
+    Browser for Cookies: Navegador de les galetes
+    Browser Profile: Perfil del navegador (opcional)
+    Browser Profile Placeholder: Nom o camí del perfil
+    Select Browser: Seleccioneu un navegador
+    Always Use Cookies: Utilitza sempre les galetes
+    Restricted Playback Authentication Hint: De manera predeterminada, l'OpenTubeX només passa aquestes galetes a yt-dlp després que trieu "Prova-ho amb les galetes configurades" en un vídeo restringit per edat o només per a membres.
+    Restricted Playback Authentication Warning: Utilitzar yt-dlp amb un compte de Google pot comportar restriccions temporals o permanents del compte.
+  Privacy Settings:
+    Automatic History Retention: Conservació automàtica de l'historial (dies)
+    Automatic History Retention Placeholder: Deixeu-ho en blanc per conservar-lo per sempre
+    Automatic History Retention Tooltip: Deixeu-ho en blanc per conservar l'historial per sempre. En desar un nombre, se suprimeixen ara les entrades més antigues i també automàticament mentre l'aplicació estigui oberta.
+    History Retention Saved: S'ha desat la conservació de l'historial
+    Invalid History Retention Days: Introduïu un nombre enter de dies superior a zero
+    Enable Watch Statistics: Activa les estadístiques de reproducció
+    Week Starts On: La setmana comença en
+    Remember Search History: Recorda l'historial de cerques
+    Cache Video Metadata: Historial de metadades
+    Cache Video Metadata Tooltip: Conserva totes les versions admeses de les metadades dels vídeos que visiteu, inclosos els títols, les miniatures i les descripcions. Està desactivat de manera predeterminada perquè desar l'historial de metadades augmenta l'ús del disc.
+    Watched Percentage Threshold: Llindar de percentatge vist
+    Watched Percentage Threshold Tooltip: Els vídeos es marquen com a vistos després d'arribar al percentatge seleccionat i quan no els queden més de 2 minuts. Amb el 0%, es marquen en començar la reproducció. Amb el 100%, es marquen quan acaba.
+    Watched Progress Saving Mode:
+      Modes:
+        Auto: Automàtic
+        Semi-auto: Semiautomàtic
+        Never: Mai
+      Tooltip: Automàtic = desa cada 2 segons mentre es reprodueix un vídeo, en sortir de qualsevol pàgina de vídeo, quan el vídeo es posa en pausa o acaba i quan es produeix un error (p. ex., s'ha limitat la freqüència o ha caducat la sessió de reproducció). Semiautomàtic = igual que Automàtic, però no desa cada 2 segons ni en sortir de la pàgina del vídeo. També permet desar el progrés manualment amb el botó Desa el progrés de reproducció, situat sota el reproductor.
+    Save Watched Videos With Last Viewed Playlist: Desa els vídeos vistos amb la darrera llista de reproducció consultada
+    Clear Search History and Cache: Neteja l'historial de cerques i la memòria cau
+    Clear Video Metadata Cache: Neteja la memòria cau de metadades dels vídeos
+    Are you sure you want to clear the video metadata cache?: Segur que voleu netejar de la memòria cau els títols, les miniatures i les descripcions dels vídeos?
+    Failed to clear video metadata cache: No s'ha pogut netejar la memòria cau de metadades dels vídeos
+    Video metadata cache has been cleared: S'ha netejat la memòria cau de metadades dels vídeos
+    Video Metadata Cache Size: 'Memòria cau de metadades dels vídeos: {size}'
+    Are you sure you want to clear out your search history and cache?: Segur que voleu netejar l'historial de cerques i la memòria cau?
+    Search history and cache have been cleared: S'han netejat l'historial de cerques i la memòria cau
+    Remove All Playlists: Suprimeix totes les llistes de reproducció
+    All playlists have been removed: S'han suprimit totes les llistes de reproducció
+    Are you sure you want to remove all your playlists?: Segur que voleu suprimir totes les llistes de reproducció?
+  Storage Settings:
+    Storage: Emmagatzematge
+    Downloaded Media: Fitxers multimèdia baixats amb seguiment
+    Storage Breakdown: Desglossament de l'emmagatzematge
+    Shown Total: Total mostrat
+    Calculating: S'està calculant…
+    Not Available: La mida exacta no està disponible
+    At Least: Com a mínim {size}
+    Failed To Read Storage: No s'han pogut llegir algunes mides d'emmagatzematge
+    Downloaded Media Description: Fitxers de vídeo, àudio i subtítols dels quals l'historial de baixades encara fa un seguiment.
+    Selected Download Folders: Carpetes de baixada seleccionades per l'usuari
+    Download History Records: Registres de l'historial de baixades
+    Download History Records Description: '{count} registre de baixada acabada. Aquest registre en conserva l''estat i la ubicació dels fitxers, però no conté els fitxers multimèdia baixats. | {count} registres de baixades acabades. Aquests registres en conserven l''estat i la ubicació dels fitxers, però no contenen els fitxers multimèdia baixats. | {count} registres de baixades acabades. Aquests registres en conserven l''estat i la ubicació dels fitxers, però no contenen els fitxers multimèdia baixats.'
+    Clear Download History Records: Neteja els registres de l'historial de baixades
+    Clear Download History Confirmation: Voleu netejar tots els registres de baixades acabades?
+    Download Files Stay On Disk: Els fitxers baixats romandran al disc, però ja no apareixeran a la pàgina Baixades.
+    Clear Records: Neteja els registres
+    Replaceable Caches: Memòries cau reemplaçables
+    Application Caches: Memòries cau de l'aplicació
+    Browser Caches: Memòries cau del navegador
+    Browser Caches Hint: Memòries cau HTTP, de GPU, de codi, d'ombrejadors, de treballadors de servei i de diccionaris de Chromium.
+    Stored App Data: Dades desades de l'aplicació
+    Browser Runtime Data: Dades d'execució del navegador
+    Browser Runtime Data Hint: Emmagatzematge de sessió i local, galetes, estat de privadesa i xarxa i fitxers de fallada de Chromium.
+    Subscription Feed Cache: Memòria cau de subscripcions i canals
+    Subscription Feed Cache Description: Desa els vídeos, els vídeos curts, les emissions en directe i les publicacions obtinguts de les subscripcions. L'OpenTubeX la torna a crear en la propera actualització dels canals.
+    Clear Subscription Feed Cache: Neteja la memòria cau de subscripcions i canals
+    Clear Subscription Feed Cache Confirmation: Voleu netejar la memòria cau de subscripcions i canals?
+    Subscription Feed Cache Effect: Els canals de subscripcions poden aparèixer buits fins que s'actualitzin. Les subscripcions i els perfils no canviaran.
+    Session Search Cache: Memòria cau de cerques de la sessió
+    In Memory: A la memòria
+    Session Search Cache Description: '{count} cerca està desada a la memòria cau per tornar enrere més ràpidament. Aquesta memòria cau es descarta quan es tanca l''OpenTubeX. | {count} cerques estan desades a la memòria cau per tornar enrere més ràpidament. Aquesta memòria cau es descarta quan es tanca l''OpenTubeX. | {count} cerques estan desades a la memòria cau per tornar enrere més ràpidament. Aquesta memòria cau es descarta quan es tanca l''OpenTubeX.'
+    Clear Session Search Cache: Neteja la memòria cau de cerques de la sessió
+    Clear Session Search Cache Confirmation: Voleu netejar la memòria cau de cerques de la sessió?
+    Session Search Cache Effect: Es descartaran les pàgines de resultats desades a la memòria cau. L'historial de cerques desat no canviarà.
+    HTTP Cache: Memòria cau HTTP
+    HTTP Cache Description: Electron desa les respostes de xarxa al disc perquè les sol·licituds repetides es puguin carregar sense tornar a baixar les mateixes dades. L'OpenTubeX torna a crear aquesta memòria cau quan cal.
+    Managed By Electron: Gestionada per Electron
+    Clear HTTP Cache: Neteja la memòria cau HTTP
+    Clear HTTP Cache Confirmation: Voleu netejar la memòria cau HTTP d'Electron?
+    HTTP Cache Effect: Les imatges i altres recursos de xarxa poden trigar més a carregar-se una vegada mentre es reconstrueix la memòria cau.
+    Tab Image Cache: Miniatures de pestanya i avatars dels canals
+    Tab Image Cache Description: Desa imatges de previsualització i avatars dels canals per a les pestanyes obertes i restaurades. L'OpenTubeX els torna a crear mentre s'utilitzen les pestanyes.
+    Clear Tab Image Cache: Neteja la memòria cau d'imatges de les pestanyes
+    Clear Tab Image Cache Confirmation: Voleu netejar les miniatures de pestanya i els avatars dels canals?
+    Tab Image Cache Effect: Les imatges de les pestanyes poden desaparèixer breument i es tornaran a crear a mesura que s'utilitzin.
+    Playback Caches: Memòries cau de reproducció
+    Playback Caches Description: Desa els URL dels fluxos de yt-dlp entre sessions de l'aplicació, a més dels fitxers del reproductor de YouTube. La memòria cau d'URL només s'aplica als fluxos obtinguts amb yt-dlp.
+    Playback URL Cache Entry Size: Límit de la memòria cau d'URL de fluxos de yt-dlp
+    Playback URL Cache Entry Size Tooltip: Defineix la mida màxima de cada entrada de flux de yt-dlp desada a la memòria cau. Establiu-la en 0 MB per desactivar la memòria cau persistent dels fluxos de yt-dlp.
+    Clear Playback Caches: Neteja les memòries cau de reproducció
+    Clear Playback Caches Confirmation: Voleu netejar les memòries cau de yt-dlp i del reproductor?
+    Playback Caches Effect: La propera sol·licitud de reproducció local pot trigar més mentre es tornen a obtenir les dades del flux i del reproductor.
+    Clear Cache: Neteja la memòria cau
+    History Data: Historials desats
+    Video Metadata Description: Desa títols, miniatures i descripcions anteriors dels vídeos admesos. Les revisions antigues no es poden tornar a crear després de suprimir-les.
+    Video Metadata Effect: Les revisions de metadades desades se suprimiran permanentment. Les dades actuals dels vídeos encara es podran tornar a obtenir.
+    Watch History: Historial i estadístiques de reproducció
+    Watch History Description: L'historial de reproducció registra els vídeos vistos i el progrés. Les estadístiques de reproducció desen els totals diaris. La conservació només s'aplica a l'historial.
+    Clear Watch Statistics: Neteja les estadístiques de reproducció
+    Watch History Effect: Se suprimiran els registres dels vídeos vistos i el progrés desat. Les estadístiques de reproducció es conservaran.
+    Clear Watch Statistics Confirmation: Voleu suprimir totes les estadístiques de reproducció?
+    Watch Statistics Effect: Se suprimiran els totals diaris de reproducció. L'historial de reproducció es conservarà.
+    Search History: Historial de cerques
+    Search History Description: Desa les cerques que heu triat recordar.
+    Delete Search History: Suprimeix l'historial de cerques
+    Delete Search History Confirmation: Voleu suprimir tot l'historial de cerques desat?
+    Search History Effect: Desapareixeran els suggeriments desats de les cerques anteriors. La memòria cau de la sessió actual es conservarà.
+    Other User Data: Altres dades d'usuari
+    Other Profile Files: Altres fitxers de perfil
+    Other Profile Files Hint: Còpies de seguretat, fitxers temporals i entrades de perfil que l'OpenTubeX encara no reconeix.
+    Subscriptions And Profiles: Subscripcions i perfils
+    Subscriptions And Profiles Description: Desa els canals subscrits, els noms dels perfils i la pertinença als perfils.
+    Subscriptions And Profiles Effect: Se suprimiran permanentment totes les subscripcions i els perfils addicionals. També es netejaran les dades de la memòria cau dels canals.
+    Playlists Description: Desa els noms, les descripcions i els vídeos desats de les llistes de reproducció.
+    Playlists Effect: Se suprimiran permanentment totes les llistes de reproducció i les seves llistes de vídeos desats. Els fitxers multimèdia baixats es conservaran.
+    Settings And Sessions: Configuració, sessions de pestanyes i recordatoris
+    Settings And Sessions Description: Desa les preferències de l'aplicació, les pestanyes restaurables i els recordatoris d'emissions en directe. Obriu el directori del perfil per inspeccionar aquests fitxers o fer-ne una còpia de seguretat; aquesta pàgina no els suprimeix.
+    Cleanup Complete: Ha acabat la neteja de l'emmagatzematge
+    Cleanup Failed: Ha fallat la neteja de l'emmagatzematge
+  Subscription Settings:
+    Fetch Feed on Startup: Obtén el canal en iniciar
+    Show New Content Feed: Mostra el canal de contingut nou
+    Show New Content Indicators: Mostra els indicadors de contingut nou
+    Show Scheduled Live Streams / Premieres First: Mostra primer les emissions en directe i les estrenes programades
+    Auto Refresh Interval: Interval d'actualització automàtica
+    Videos Auto Refresh Interval: Interval d'actualització automàtica dels vídeos
+    Shorts Auto Refresh Interval: Interval d'actualització automàtica dels vídeos curts
+    Live Auto Refresh Interval: Interval d'actualització automàtica dels directes
+    Posts Auto Refresh Interval: Interval d'actualització automàtica de les publicacions
+    Limit the number of videos displayed for each channel: Limita el nombre de vídeos mostrats per canal
+    To: A
+    Confirm Before Unsubscribing: Confirma abans de donar-se de baixa
+  Distraction Free Settings:
+    Sections:
+      Side Bar: Barra lateral
+      Subscriptions Page: Pàgina de subscripcions
+      Channel Page: Pàgina del canal
+      Watch Page: Pàgina de reproducció
+      General: General
+      Visible While Paused: Visible durant la pausa a finestra completa o pantalla completa
+    Hide Channel Avatars: Oculta els avatars dels canals
+    Shorten View Counts: Abreuja els recomptes de visualitzacions i de m'agrades dels comentaris
+    Hide Comment Translation Buttons: Oculta els botons de traducció dels comentaris
+    Hide Home: Oculta l'inici
+    Hide Live Chat Replay: Oculta la repetició del xat en directe
+    Hide Video Description: Oculta la descripció del vídeo
+    Hide Comments: Oculta els comentaris
+    Hide Profile Pictures in Comments: Oculta les imatges de perfil als comentaris
+    Display Titles Without Excessive Capitalisation: Mostra els títols sense majúscules ni puntuació excessives
+    Hide Live Streams: Oculta les emissions en directe
+    Hide Upcoming Premieres: Oculta les properes estrenes
+    Hide Sharing Actions: Oculta les accions per compartir
+    Hide Chapters: Oculta els capítols
+    Disable A-B Repeat: Desactiva la repetició A-B
+    Hide End-Screen Annotations: Oculta les anotacions de la pantalla final
+    Hide Paid Promotion Badge: Oculta la insígnia de promoció de pagament
+    Hide Channels: Oculta els vídeos de canals
+    Hide Channels Disabled Message: Alguns canals s'han blocat mitjançant l'ID i no s'han processat. La funció està blocada mentre s'actualitzen aquests ID
+    Hide Channels Placeholder: ID del canal
+    Hide Channels Invalid: L'ID del canal proporcionat no és vàlid
+    Hide Channels API Error: S'ha produït un error en obtenir l'usuari amb l'ID proporcionat. Torneu a comprovar que l'ID sigui correcte.
+    Hide Channels Already Exists: L'ID del canal ja existeix
+    Hide Featured Channels: Oculta els canals destacats
+    Hide Channel Playlists: Oculta la pestanya "Llistes de reproducció" del canal
+    Hide Channel Posts: Oculta la pestanya "Publicacions" del canal
+    Hide Channel Home: Oculta la pestanya "Inici" del canal
+    Hide Channel Shorts: Oculta la pestanya "Vídeos curts" del canal
+    Hide Channel Podcasts: Oculta la pestanya "Pòdcasts" del canal
+    Hide Channel Releases: Oculta la pestanya "Llançaments" del canal
+    Hide Channel Courses: Oculta la pestanya "Cursos" del canal
+    Hide Videos, Playlists and Channels Containing Text: Oculta els vídeos, les llistes de reproducció i els canals que continguin text
+    Hide Videos, Playlists and Channels Containing Text Placeholder: Paraula, fragment de paraula o frase
+    Hide Subscriptions Videos: Oculta els vídeos de les subscripcions
+    Hide Subscriptions Shorts: Oculta els vídeos curts de les subscripcions
+    Hide Subscriptions Live: Oculta els directes de les subscripcions
+    Hide Subscriptions Posts: Oculta les publicacions de les subscripcions
+    Show Added Items: Mostra els elements afegits
+    Show Player Controls: Mostra els controls del reproductor
+    Show Video Title: Mostra el títol del vídeo
+    Show Bottom Right Actions Dock: Mostra el plafó d'accions inferior dret
+    Paused Interface Hide Delay: Retard per ocultar la interfície en pausa
+  Data Settings:
+    Data And Storage: Dades i emmagatzematge
+    Profile Directory: Directori del perfil
+    Open Profile Directory: Obre el directori del perfil
+    Subscription File: Fitxer de subscripcions
+    History File: Fitxer de l'historial
+    Playlist File: Fitxer de llistes de reproducció
+    Search history file: Fitxer de l'historial de cerques
+    Settings File: Fitxer de configuració
+    Search history: Historial de cerques
+    Import search history: Importa l'historial de cerques
+    Export search history: Exporta l'historial de cerques
+    Import Settings: Importa la configuració
+    Export Settings: Exporta la configuració
+    Settings Tooltip: La configuració específica del sistema operatiu o de l'usuari i l'experimental no es pot exportar ni importar (p. ex., servidor intermediari, reproductor extern, carpeta de captures…)
+    Invalid JSON row, skipping item: JSON no vàlid a la fila {row}; s'omet l'element
+    All search history has been successfully imported: S'ha importat correctament tot l'historial de cerques
+    All search history has been successfully exported: S'ha exportat correctament tot l'historial de cerques
+    All settings have been successfully imported: S'ha importat correctament tota la configuració
+    All settings have been successfully exported: S'ha exportat correctament tota la configuració
+    Setting object has insufficient data, skipping item: L'objecte de configuració no té prou dades; s'omet l'element
+    Unknown setting key: 'Clau de configuració desconeguda: {key}'
+    Non-transferable setting key: 'Clau de configuració no transferible: {key}'
+    Import subscriptions formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), còpia de seguretat de LibreTube o exportació de FreeTube (.json)'
+    Import history formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), còpia de seguretat de LibreTube (.json)'
+    Import playlists formats: 'Formats admesos: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+  Sync Settings:
+    Sync Settings: Sincronització
+    Enable Sync: Activa la sincronització
+    Privacy Passphrase: Frase de contrasenya de privadesa
+    Privacy Passphrase Hint: Utilitzeu una frase de contrasenya diferent de la contrasenya del compte. No surt mai d'aquest dispositiu i és necessària a tots els dispositius; si la perdeu, no podreu recuperar les dades de sincronització xifrades.
+    Privacy Policy: Política de privadesa d'aquest servidor
+    Enhanced Privacy Enabled: La privadesa millorada està activada. El servidor només desa dades de sincronització xifrades.
+    Enhanced Privacy Unsupported: 'Avís: aquest servidor no admet la privadesa millorada. L''operador pot veure les dades sincronitzades.'
+    Description: Sincronitzeu les subscripcions, els perfils, les llistes de reproducció, l'historial, la configuració i les pestanyes obertes amb un servidor de sincronització de l'OpenTubeX o LibreTube. És possible que els servidors de LibreTube no admetin totes les funcions de sincronització.
+    Server URL: URL del servidor
+    Checking Server: S'està comprovant el servidor de sincronització…
+    Server Unavailable: No s'ha pogut connectar a aquest servidor de sincronització. Comproveu l'URL i torneu-ho a provar.
+    Username: Nom d'usuari
+    Log In: Inicia la sessió
+    Register: Registra't
+    Pair Another Device: Vincula un altre dispositiu
+    Pair With Existing Device: Vincula amb un dispositiu existent
+    Device Name: Nom del dispositiu
+    This Device: Aquest dispositiu
+    Device Name Required: Introduïu un nom per a aquest dispositiu.
+    Pairing Device Name Hint: Trieu un nom que reconegueu al dispositiu que aprovarà aquesta sol·licitud.
+    Create Pairing Code: Crea un codi de vinculació
+    Creating Pairing Code: S'està creant un codi de vinculació segur…
+    Pairing QR Alt: Codi QR de vinculació per a {device}
+    Scan Pairing Code: En un dispositiu ja connectat, obriu "Vincula un altre dispositiu" i escanegeu aquest codi.
+    Pairing Code: Codi de vinculació
+    Use Text Pairing Code: Utilitza el codi de text
+    Show QR Code: Mostra el codi QR
+    Text Pairing Code Hint: Copieu aquest codi al dispositiu existent. Conté el secret de vinculació; esborreu-lo de l'historial del porta-retalls després de vincular-lo.
+    Pairing QR Warning: Mostreu aquest codi només al dispositiu de confiança que ja està connectat i que aprovarà la sol·licitud. Caduca al cap de dos minuts.
+    Pairing Expires: El codi de vinculació caduca a les {time}.
+    Verifying Pairing: S'està verificant la clau de privadesa transferida…
+    Completing Pairing: S'està completant la vinculació del dispositiu…
+    Compare Pairing Codes: Compareu els codis de vinculació
+    Pairing Code Match Hint: Confirmeu-ho només si aquest codi coincideix amb el del dispositiu existent.
+    Pairing Codes Match: Els codis coincideixen
+    Pairing Approval Code Hint: Manteniu oberta aquesta finestra i compareu el codi amb el dispositiu nou. El dispositiu nou no ha de continuar si els codis són diferents.
+    Pairing Scan Hint: Escanegeu el codi de vinculació que es mostra al dispositiu que afegiu.
+    Enter Pairing Code: Introduïu el codi manualment
+    Pairing Code Entry Hint: Enganxeu el codi de vinculació que es mostra al dispositiu que afegiu.
+    Check Pairing Code: Comprova el codi
+    Scan QR Code: Escaneja el codi QR
+    Waiting For Pairing Code: S'està esperant un codi de vinculació…
+    Checking Pairing Request: S'està comprovant la sol·licitud de vinculació…
+    Approving Pairing Request: S'està xifrant i enviant la clau de privadesa…
+    Pairing Approval Warning: Aproveu-ho només si podeu veure aquesta sol·licitud al dispositiu que afegiu. La vinculació concedeix accés al compte i transfereix la clau de privadesa.
+    Approve Pairing: Aprova la vinculació
+    Try Again: Torna-ho a provar
+    Scan Again: Torna a escanejar
+    Camera Unavailable: L'OpenTubeX no ha pogut accedir a cap càmera. Comproveu el permís de la càmera o introduïu manualment el codi de vinculació.
+    Pairing Unsupported: Aquest servidor de sincronització no admet la vinculació segura de dispositius.
+    Pairing Failed: Ha fallat la vinculació del dispositiu. Torneu-ho a provar amb un codi nou.
+    Pairing Request Changed: La sol·licitud de vinculació ha canviat, ha caducat o ja s'ha utilitzat. Creeu un codi nou.
+    Pairing Server Mismatch: Aquest codi pertany a un altre servidor de sincronització.
+    Pairing Verification Unavailable: No hi ha cap col·lecció de sincronització xifrada disponible per verificar la clau transferida. Sincronitzeu el dispositiu existent i torneu-ho a provar.
+    Pairing Completed: S'ha completat la vinculació del dispositiu
+    Pairing Approved: S'ha aprovat la vinculació del dispositiu
+    Disconnect: Desconnecta
+    Delete Account: Suprimeix el compte de sincronització
+    Delete Account Confirmation: Voleu suprimir el compte de sincronització?
+    Delete Account Warning: Se suprimiran permanentment el compte de sincronització i totes les dades desades en aquest servidor. Les dades locals de l'OpenTubeX no se suprimiran.
+    Confirm Delete Account: Suprimeix el compte
+    Password Required: Cal la contrasenya
+    Account Deleted: S'ha suprimit el compte de sincronització
+    Connected as: Connectat com a {username}
+    Automatic Sync: Sincronitza automàticament després dels canvis i cada cinc minuts
+    Profiles: Perfils
+    Open Tabs: Pestanyes obertes i sessió
+    Disable Setting Sync: Deixa de sincronitzar aquesta opció
+    Enable Setting Sync: Sincronitza aquesta opció
+    Sync Now: Sincronitza ara
+    Downloading encrypted data: S'estan baixant les dades de sincronització xifrades…
+    Syncing subscriptions: S'estan sincronitzant les subscripcions…
+    Syncing playlists: S'estan sincronitzant les llistes de reproducció…
+    Syncing history: S'està sincronitzant l'historial de reproducció…
+    Syncing profiles: S'estan sincronitzant els perfils…
+    Syncing open tabs: S'estan sincronitzant les pestanyes obertes i la sessió…
+    Syncing settings: S'està sincronitzant la configuració…
+    Uploading encrypted data: S'estan pujant les dades de sincronització xifrades…
+    Finishing sync: S'està acabant la sincronització…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Darrera sincronització: {date}'
+    History not supported: Aquesta versió del servidor no admet la sincronització de l'historial de reproducció.
+    Settings not supported: Aquesta versió del servidor no admet la sincronització de la configuració.
+    Sync completed: S'ha completat la sincronització
+    Sync failed: 'Ha fallat la sincronització: {error}'
+    Data Loss Confirmation: Voleu confirmar la sincronització destructiva?
+    Data Loss Warning: L'estat del servidor suprimiria {deleted} dels {previous} elements de {collection} sincronitzats anteriorment. Això pot indicar una migració o un restabliment fallits del servidor. Continueu només si voleu fer aquesta supressió i teniu una còpia de seguretat.
+    Confirm Data Loss: Suprimeix i continua
+  Proxy Settings:
+    Proxy Warning: L'OpenTubeX no té cap servidor intermediari integrat, però es pot connectar a un d'extern, com ara Tor executant-se al vostre ordinador o un servidor intermediari SOCKS5 proporcionat per algunes VPN. Si l'activeu, assegureu-vos que el servidor intermediari o Tor estigui ben configurat; altrament, l'OpenTubeX no podrà obtenir dades.
+    Proxy Username: Nom d'usuari del servidor intermediari
+    Proxy Password: Contrasenya del servidor intermediari
+    IP Block Recovery Script Path: Camí de l'script de recuperació del bloqueig d'IP
+    Select IP Block Recovery Script File: Seleccioneu el fitxer de l'script de recuperació del bloqueig d'IP
+    Running IP block recovery script: S'està executant l'script de recuperació del bloqueig d'IP
+    IP block recovery script failed: 'Ha fallat l''script de recuperació del bloqueig d''IP (codi de sortida: {exitCode})'
+    IP block recovery script finished: Ha acabat l'script de recuperació del bloqueig d'IP
+    Reloading video after IP block recovery: S'està tornant a carregar el vídeo després de recuperar-se del bloqueig d'IP
+    Failed to select IP block recovery script: No s'ha pogut seleccionar l'script de recuperació del bloqueig d'IP
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: Activa l'enviament a SponsorBlock
+    SponsorBlock Private User ID (optional): ID d'usuari privat de SponsorBlock (opcional)
+    SponsorBlock Private User ID Tooltip: Enganxeu l'ID d'usuari privat de SponsorBlock de l'extensió del navegador. Deixeu-ho buit per utilitzar un ID generat per l'aplicació.
+    Generated SponsorBlock User ID: ID d'usuari de SponsorBlock generat
+    Generated SponsorBlock User ID Tooltip: Aquest ID d'usuari de SponsorBlock generat per l'aplicació es pot utilitzar a l'extensió del navegador o en un altre ordinador on utilitzeu l'aplicació.
+    Export Generated User ID: Exporta l'ID d'usuari generat
+    Generated SponsorBlock User ID Copy Button: Copia l'ID d'usuari de SponsorBlock generat
+    Generated SponsorBlock User ID Copied: S'ha copiat al porta-retalls l'ID d'usuari de SponsorBlock generat
+    Skip notification timeout: Temps d'espera de la notificació d'omissió
+    UseDeArrowTitles: Utilitza els títols de vídeo de DeArrow
+    UseDeArrowThumbnails: Utilitza DeArrow per a les miniatures
+    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): URL de l'API del generador de miniatures de DeArrow (el predeterminat és https://dearrow-thumb.ajay.app)
+    Skip Options:
+      Skip Option: Opció d'omissió
+      Auto Skip: Omet automàticament
+      Show In Seek Bar: Mostra a la barra de cerca
+      Prompt To Skip: Pregunta abans d'ometre
+      Do Nothing: No facis res
+    Category Color: Color de la categoria
+    Custom Color: Color personalitzat
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Activa Return YouTube Dislike
+    Return YouTube Dislike Url: URL de l'API de Return YouTube Dislike (el predeterminat és https://ryd-proxy.kavin.rocks)
+  Parental Control Settings:
+    Parental Control Settings: Control parental
+    Hide Unsubscribe Button: Oculta el botó de baixa
+    Hide Uploader on Watch page: Oculta l'autor a la pàgina de reproducció
+    Show Family Friendly Only: Mostra només contingut apte per a famílies
+    Hide Search Bar: Oculta la barra de cerca
+    Disable Channel Links: Desactiva els enllaços dels canals
+  Experimental Settings:
+    Experimental Settings: Experimental
+    Warning: Aquesta configuració és experimental i pot provocar fallades mentre estigui activada. Es recomana molt fer còpies de seguretat. Utilitzeu-la sota la vostra responsabilitat.
+    Replace HTTP Cache: Substitueix la memòria cau HTTP
+  Password Dialog:
+    Password: Contrasenya
+    Enter Password To Unlock: Introduïu la contrasenya per desbloquejar la configuració
+    Incorrect Password: La contrasenya és incorrecta
+    Unlock: Desbloqueja
+    Unlocking: S'està desbloquejant…
+  Search Settings: Cerca a la configuració
+  No Settings Found: No s'ha trobat cap opció
+  Password Settings:
+    Password Settings: Contrasenya
+    Set Password To Prevent Access: Definiu una contrasenya per impedir l'accés a la configuració
+    Set Password: Defineix la contrasenya
+    Remove Password: Suprimeix la contrasenya
+Tutorial:
+  Skip: Omet
+  Next: Següent
+  Finish: Acaba
+  Got It: Entesos
+  Welcome:
+    Title: Us donem la benvinguda a l'OpenTubeX
+    Description: Aquests són els controls bàsics per començar.
+  Navigation:
+    Title: La biblioteca sempre és a prop
+    Description: Utilitzeu la navegació per accedir a les subscripcions, les llistes de reproducció, l'historial i altres seccions.
+  Search:
+    Title: Cerqueu o enganxeu un enllaç
+    Description: Cerqueu vídeos i canals o enganxeu directament al camp de cerca l'URL d'un vídeo admès.
+  Tabs:
+    Title: Manteniu pàgines obertes en pestanyes
+    Description: Obriu diverses pàgines alhora sense perdre el punt on éreu. Trieu on encaixen millor les pestanyes a la disposició.
+  Quick Settings:
+    Title: Personalitzeu-ho
+    Description: Trieu un tema i la qualitat de vídeo predeterminada. Podeu canviar aquestes preferències i d'altres en qualsevol moment des del menú del perfil, o fer-hi clic dret per canviar de perfil.
+  Import Data:
+    Title: Importeu les vostres dades
+    Description: Si voleu, importeu subscripcions, historial, llistes de reproducció, historial de cerques o configuració d'una altra aplicació admesa o d'una còpia de seguretat.
+    Action: Importa dades
+    Not Now: Ara no
+  Settings Moved:
+    Title: La configuració ha canviat de lloc
+    Description: Seleccioneu el perfil a la part superior dreta per accedir als controls ràpids. Feu-hi clic dret per anar directament a la selecció de perfils. La roda dentada d'aquest menú obre tota la configuració; Quant a i Baixades també s'hi han traslladat.
+About:
+  Commit: Commit
+  Licensed under the {licenseLink}: Amb llicència {licenseLink}
+  AGPLv3: AGPLv3
+  Discussions: Debats
+  Fluxer: Uniu-vos a la comunitat de Fluxer
+  Matrix: Matrix
+  Email: Correu electrònic
+  Please read the {roomRulesLink}: Llegiu les {roomRulesLink}
+  OpenTubeX is made possible by {creditsPageLink}: L'OpenTubeX és possible gràcies a {creditsPageLink}
+Profile:
+  Toggle Profile List: Commuta la llista de perfils
+  Edit Profile Name: Edita el nom del perfil
+  Create Profile Name: Crea un nom de perfil
+  Profile Name: Nom del perfil
+  Profile Icon: Icona del perfil
+  Choose an Emoji: Trieu un emoji
+  Custom Emoji: Emoji personalitzat
+  Emoji: Emoji
+  Choose Image: Tria una imatge
+  Crop Image: Retalla la imatge
+  Zoom: Zoom
+  Apply Crop: Aplica el retall
+  Transparent: Transparent
+  Use Initial: Utilitza la inicial
+  The selected image could not be loaded: No s'ha pogut carregar la imatge seleccionada
+  Theme Color: Color del tema
+  Close Profile Dropdown: Tanca el desplegable del perfil
+  Open Profile Dropdown: Obre el desplegable del perfil
+Channel:
+  Channel Name Unavailable: El nom del canal no està disponible
+  Search Result Types: Tipus de resultats de cerca
+  All Results: Tot
+  This channel does not exist: Aquest canal no existeix
+  This channel does not allow searching: Aquest canal no permet fer cerques
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Aquest canal té una restricció d'edat i ara mateix no es pot veure a l'OpenTubeX.
+  Channel Tabs: Pestanyes del canal
+  View All: Mostra-ho tot
+  Shorts:
+    This channel does not currently have any shorts: Aquest canal no té cap vídeo curt ara mateix
+  Live:
+    Live: En directe
+    This channel does not currently have any live streams: Aquest canal no té cap emissió en directe ara mateix
+  Home:
+    Home: Inici
+    View Playlist: Mostra la llista de reproducció
+  Podcasts:
+    Podcasts: Pòdcasts
+    This channel does not currently have any podcasts: Aquest canal no té cap pòdcast ara mateix
+  Releases:
+    Releases: Llançaments
+    This channel does not currently have any releases: Aquest canal no té cap llançament ara mateix
+  Courses:
+    Courses: Cursos
+    This channel does not currently have any courses: Aquest canal no té cap curs ara mateix
+  About:
+    Tags:
+      Tags: Etiquetes del canal
+      Search for: Cerca "{tag}"
+    Details: Detalls
+    Joined: Data d'alta
+    Location: Ubicació
+  Posts:
+    This channel currently does not have any posts: Aquest canal no té cap publicació ara mateix
+    votes: 1 vot | {votes} vots | {votes} vots
+    View Full Post: Mostra la publicació completa
+    Reveal Answers: Mostra les respostes
+    Hide Answers: Oculta les respostes
+    Video hidden by OpenTubeX: Vídeo ocult per l'OpenTubeX
+Video:
+  Includes paid promotion: Inclou promoció de pagament
+  Age Restricted Badge: Restricció d'edat
+  Queue: Cua
+  Play Next: Reprodueix a continuació
+  Add to Queue: Afegeix a la cua
+  Added to Play Next: El vídeo es reproduirà a continuació
+  Added to Queue: S'ha afegit el vídeo a la cua
+  Clear Queue: Neteja la cua
+  Queue Video Count: '{count} vídeo | {count} vídeos | {count} vídeos'
+  Remove from Queue: Suprimeix {title} de la cua
+  Drag to Reorder Queue: Arrossegueu {title} per reordenar la cua
+  Reorder Queue Item: Reordena {title}
+  Reorder Queue Item Instructions: Utilitzeu les tecles de fletxa amunt i avall per moure aquest vídeo a la cua.
+  Queue Item Moved: S'ha mogut {title} a la posició {position} de {total}.
+  Queue Item Cannot Move Up: No es pot moure {title} amunt. Ja és a la posició 1 de {total}.
+  Queue Item Cannot Move Down: No es pot moure {title} avall. Ja és a la posició {total} de {total}.
+  Metadata: Informació del vídeo
+  Close Metadata: Tanca la informació del vídeo
+  Collapse Playlist: Redueix la llista de reproducció
+  Expand Playlist: Amplia la llista de reproducció
+  Metadata Cache:
+    Title History: Historial del títol
+    Thumbnail History: Historial de la miniatura
+    Description History: Historial de la descripció
+    Previous Version: Anterior {number}
+    Empty: (buit)
+  Fetching Streams: S'estan obtenint els fluxos amb yt-dlp…
+  Transcript:
+    Title: Transcripció
+    Search: Cerca a la transcripció
+    Language: Llengua de la transcripció
+    Save: Desa
+    Show: Mostra la transcripció
+    Hide: Oculta la transcripció
+    Close: Tanca la transcripció
+    Copied: S'ha copiat la transcripció al porta-retalls
+    Saved: S'ha desat la transcripció
+    Save Error: No s'ha pogut desar la transcripció
+    Text File: Fitxer de text
+    Unavailable: No hi ha cap transcripció disponible per a aquest vídeo.
+    Load Error: No s'ha pogut carregar la transcripció.
+    Empty: Aquesta transcripció no conté text.
+    No Results: Cap segment de la transcripció coincideix amb la cerca.
+  IP block: YouTube ha blocat la vostra adreça IP i no podeu mirar vídeos. Proveu de canviar a una altra VPN o un altre servidor intermediari.
+  Retry With Built-in Extraction: Torna-ho a provar amb l'extracció integrada
+  Retry With yt-dlp Extraction: Torna-ho a provar amb l'extracció de yt-dlp
+  Reloading video after streaming URL error: S'està tornant a carregar el vídeo després d'un error de l'URL del flux
+  MembersOnly: Aquest vídeo només per a membres requereix un compte de Google amb una subscripció activa al canal.
+  AgeRestricted: Aquest vídeo amb restricció d'edat requereix un compte de Google amb l'edat verificada.
+  Configure Restricted Playback Cookies Hint: Configureu les galetes a Configuració → Programari extern → Galetes de reproducció de yt-dlp.
+  Try With Configured Cookies: Prova-ho amb les galetes configurades
+  Restricted Playback Authentication Failed Template: 'yt-dlp no ha pogut accedir a aquest vídeo amb les galetes configurades: {error}'
+  DRMProtected: Els vídeos protegits amb DRM no es poden reproduir a l'OpenTubeX perquè requereixen components propietaris de codi tancat. Per mirar aquest vídeo, obriu el lloc web oficial de YouTube en un navegador amb DRM activat.
+  Private: Els vídeos privats no es poden mirar a l'OpenTubeX perquè requereixen iniciar la sessió a Google i ser-ne el propietari.
+  More Options: Més opcions
+  Unmark As Watched: Desmarca com a vist
+  Video has been unmarked as watched: S'ha desmarcat el vídeo com a vist
+  Save Watched Progress: Desa el progrés de reproducció
+  Watched Progress Saved: S'ha desat el progrés de reproducció
+  Save Channel Playback Speed: Desa la velocitat de reproducció del canal
+  Channel Playback Speed Saved: S'ha desat la velocitat de reproducció del canal
+  Save Channel Video Quality: Desa la qualitat de vídeo del canal
+  Channel Video Quality Saved: S'ha desat la qualitat de vídeo del canal
+  Save Channel Subtitles State: Desa l'estat dels subtítols del canal
+  Channel Subtitles State Saved: S'ha desat l'estat dels subtítols del canal
+  Save Channel Volume: Desa el volum del canal
+  Channel Volume Saved: S'ha desat el volum del canal
+  Save Channel Setting: Desa una opció del canal…
+  Channel Setting Already Set: '{setting} ja té el valor {value}'
+  Video has been saved to {playlistName}: S'ha desat el vídeo a {playlistName}
+  Video has been removed from {playlistName}: S'ha suprimit el vídeo de {playlistName}
+  There was a problem saving the video to {playlistName}: Hi ha hagut un problema en desar el vídeo a {playlistName}
+  There was a problem removing the video from {playlistName}: Hi ha hagut un problema en suprimir el vídeo de {playlistName}
+  Failed to load collaborators: No s'han pogut carregar els col·laboradors
+  Hide Channel: Oculta el canal
+  Unhide Channel: Mostra el canal
+  Notify me: Notifica-m'ho
+  Notification on: Notificació activada
+  Notification enabled: Rebreu una notificació quan comenci el vídeo
+  Notification cancelled: S'ha cancel·lat la notificació d'inici
+  Notification unavailable: Les notificacions del sistema no estan disponibles
+  Scheduled video starting: Comença el vídeo programat
+  Live notification body: '{videoTitle} comença ara'
+  Premiere: Estrena
+  Premieres: Estrenes
+  Upcoming: Properament
+  Unlisted: Ocult
+  AI: IA
+  AI-generated content: Contingut generat per IA
+  Collaborators: Col·laboradors
+  Live Chat Replay: Repetició del xat en directe
+  Show Live Chat: Mostra el xat en directe
+  Show Live Chat Replay: Mostra la repetició del xat en directe
+  Close Live Chat: Tanca el xat en directe
+  Close Live Chat Replay: Tanca la repetició del xat en directe
+  Live Chat Settings: Configuració del xat en directe
+  Show Live Chat Timestamps: Mostra les marques horàries
+  Chat Filter: Filtre del xat
+  Top Chat: Xat destacat
+  All Messages: Tots els missatges
+  Popout Live Chat: Obre el xat en una finestra
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: La repetició del xat en directe està activada. Els missatges del xat apareixeran aquí mentre es reprodueixi el vídeo.
+  Live Chat is unavailable for this stream. It may have been disabled by the uploader.: El xat en directe no està disponible per a aquesta emissió. És possible que l'autor l'hagi desactivat.
+  Show Super Chat Comment: Mostra el comentari de Super Chat
+  Scroll to Bottom: Desplaça't fins al final
+  Published:
+    In less than a minute: Fa menys d'un minut
+  Premiere started: Estrena en curs. Ha començat {timeAgo}
+  DeArrow:
+    Show Original Details: Mostra les dades originals
+    Show Modified Details: Mostra les dades modificades
+  Sponsor Block category:
+    recap: Avanç/Resum
+    hook: Ganxo/Salutacions
+    filler: Digressions/Acudits
+    highlight: Moment destacat
+    exclusive access: Accés exclusiu
+  Sponsor Block category short:
+    intro: Intermedi
+    interaction: Recordatori d'interacció
+    music offtopic: Contingut no musical
+    filler: Digressions
+  External Player:
+    Unsupported Actions:
+      opening playlists: obrir llistes de reproducció
+      opening specific video in a playlist (falling back to opening the video): obrir un vídeo concret d'una llista de reproducció (com a alternativa, s'obre el vídeo)
+      reversing playlists: invertir llistes de reproducció
+      shuffling playlists: barrejar llistes de reproducció
+      looping playlists: reproduir llistes de reproducció en bucle
+  Player:
+    Voice-over Translation:
+      Start: Tradueix
+      Cancel: Cancel·la
+      Progress: S'està preparant la traducció de veu en off…
+      Retry: Torna-ho a provar
+      Error: Ha fallat la traducció de veu en off. Torneu-ho a provar més tard.
+      Duration Error: La traducció de veu en off només està disponible per a vídeos de fins a quatre hores.
+    Caption Appearance:
+      Options: Opcions
+      Sample: Els subtítols tenen aquest aspecte
+    Auto-translate: Traducció automàtica
+    Sleep Timer:
+      Sleep Timer: Temporitzador de desconnexió
+      'Off': Desactivat
+      Minutes: '{minutes} minuts'
+      End of video: Final del vídeo
+      Remaining: 'Temps restant: {time}'
+      Cancel timer: Cancel·la el temporitzador
+      Timer ended: Ha acabat el temporitzador de desconnexió
+    A-B Repeat:
+      A-B Repeat: Repetició A-B
+      On: Activada
+      Off: Desactivada
+      Point A: Punt A
+      Point B: Punt B
+      Set Repeat Start: Defineix l'inici de la repetició
+      Set Repeat End: Defineix el final de la repetició
+      Pause Repeat: Posa en pausa la repetició A-B
+      Resume Repeat: Reprèn la repetició A-B
+      Adjust Point: 'Ajusta el punt {point}, actualment a {timestamp}'
+      Clear Range: Esborra l'interval de repetició A-B
+      End Before Start: El punt B ha de ser posterior al punt A.
+      Outside Duration: La marca de temps ha d'estar dins del vídeo.
+      Cleared: S'ha esborrat la repetició A-B
+    Zoom:
+      Zoom: Zoom
+      'Off': Desactivat
+    TranslatedCaptionTemplate: '{language} (traduït de "{originalLanguage}")'
+    Auto-generated Caption Template: '{language} (generats automàticament)'
+    Audio Tracks: Pistes d'àudio
+    Autoplay is off: La reproducció automàtica està desactivada
+    Autoplay is on: La reproducció automàtica està activada
+    Up next in {seconds}: A continuació d'aquí a {seconds}
+    Resize dock: Redimensiona el plafó
+    Play now: Reprodueix ara
+    MusicPlaybackRateOverride: S'ha detectat un vídeo musical; es reprodueix a 1x
+    Normal: Normal
+    Set Default: Defineix com a predeterminat
+    Theatre Mode: Mode de cinema
+    Exit Theatre Mode: Surt del mode de cinema
+    Full Window: Finestra completa
+    Exit Full Window: Surt de la finestra completa
+    Take Screenshot: Fes una captura de pantalla
+    Show Stats: Mostra les estadístiques
+    Hide Stats: Oculta les estadístiques
+    Hide Annotations: Oculta les anotacions
+    Show Annotations: Mostra les anotacions
+    Hide: Oculta
+    Show: Mostra
+    Stats:
+      Stats: Estadístiques
+      Video ID: 'ID del vídeo: {videoId}'
+      Media Formats: 'Formats multimèdia: {formats}'
+      Resolution: 'Resolució: {width}x{height}{''@''}{frameRate}'
+      Player Dimensions: 'Dimensions del reproductor: {width}x{height}'
+      Bitrate: 'Taxa de bits: {bitrate} kbps'
+      Volume: 'Volum: {volumePercentage}%'
+      Bandwidth: 'Amplada de banda: {bandwidth} kbps'
+      Buffered: 'A la memòria intermèdia: {bufferedPercentage}%'
+      Dropped Frames / Total Frames: 'Fotogrames perduts: {droppedFrames} / Fotogrames totals: {totalFrames}'
+      CodecAudio: 'Còdec: {audioCodec} ({audioItag})'
+      CodecsVideoAudio: 'Còdecs: {videoCodec} ({videoItag}) / {audioCodec} ({audioItag})'
+      CodecsVideoAudioNoItags: 'Còdecs: {videoCodec} / {audioCodec}'
+    You appear to be offline: Sembla que no teniu connexió.
+    Playback will resume automatically when your connection comes back: La reproducció es reprendrà automàticament quan torni la connexió.
+    Scroll Mini Player:
+      Back to Top: Torna a dalt
+      Return to Video Tab: Torna a la pestanya del vídeo
+      Hide: Oculta el reproductor mini
+      Play: Reprodueix
+      Pause: Pausa
+      Drag Handle: Mou el minireproductor
+    Skipped segment: 'S''ha omès: {segmentCategory}'
+    SponsorBlock:
+      CancelCurrentSegment: Cancel·la la creació del segment
+      ClearSegments: Neteja els segments
+      ClearSegmentsPrompt: Segur que voleu netejar tots els esborranys de segments de SponsorBlock d'aquest vídeo?
+      CompleteSegmentsBeforeSubmitting: Completeu tots els esborranys de segments abans d'enviar-los.
+      CategoryLabel: Categoria
+      ActionTypeLabel: Tipus de segment
+      DuplicateSegments: No es permeten esborranys de segments duplicats.
+      EndAction: (Final)
+      EndActionLabel: Final
+      EndTimeAfterStart: L'hora final del segment ha de ser posterior a l'hora inicial.
+      EndTimeBeforeVideoEnd: L'hora final del segment ha d'estar dins la durada del vídeo.
+      EndTimeLabel: Hora final del segment
+      DisableAutoSkipTemporarily: Desactiva temporalment l'omissió automàtica de SponsorBlock
+      EnableAutoSkipTemporarily: Torna a activar l'omissió automàtica de SponsorBlock
+      Guidelines: Directrius
+      InspectSegment: Inspecciona
+      InvalidStartTime: Introduïu una hora inicial de segment vàlida.
+      NoSegmentsToSubmit: Creeu com a mínim un segment complet abans d'enviar-lo.
+      NowAction: (Ara)
+      CloseInfoPanel: Tanca la informació de SponsorBlock
+      OpenInfoPanel: Obre la informació de SponsorBlock
+      OpenSubmissionMenu: Obre el menú d'enviament
+      PreviewRequired: Previsualitzeu tots els segments abans d'enviar-los.
+      PreviewSegment: Previsualitza
+      SaveSegment: Desa
+      SetSegmentEndNow: Acaba el segment ara
+      StartAction: (Inici)
+      StartSegmentNow: Inicia el segment ara
+      SubmissionBadRequest: SponsorBlock ha rebutjat la sol·licitud d'enviament.
+      SubmissionDuplicate: Això ja s'havia enviat.
+      SubmissionFailed: No s'han pogut enviar els segments de SponsorBlock.
+      SubmissionForbidden: SponsorBlock ha rebutjat l'enviament.
+      SubmissionRateLimited: SponsorBlock ha limitat la freqüència d'aquest enviament.
+      SubmissionSuccess: S'han enviat els segments de SponsorBlock.
+      SubmitSegment: Envia el segment
+      SubmitSegments: Envia
+      StartTimeLabel: Hora inicial del segment
+      TimeDivider: a
+      SkipPrompt: Voleu ometre {segmentCategory}?
+      SkipPromptAction: Omet
+      SkipToHighlight: Voleu saltar al moment destacat?
+      SkippedToHighlight: S'ha saltat al moment destacat
+      SkipToastUnskip: No ometis
+      SkipToastReskip: Torna a ometre
+      MutedSegment: 'S''ha silenciat: {segmentCategory}'
+      MuteToastUnmute: Activa el so
+      InfoPanelLoading: Encara s'estan carregant els segments…
+      InfoPanelHasSegments: Aquest vídeo té segments a la base de dades.
+      InfoPanelNoSegments: No s'ha trobat cap segment
+      RefreshSegments: Actualitza els segments
+      RefreshInfo: Actualitza la informació de SponsorBlock
+      ContributionStatsTitle: Les vostres contribucions
+      ContributionStatsLoading: S'estan carregant les estadístiques de contribucions…
+      ContributionStatsError: Les estadístiques de contribucions no estan disponibles. Proveu d'actualitzar-les.
+      ContributionStatsNoUserId: Envieu un segment o importeu l'ID d'usuari de SponsorBlock per veure les estadístiques de contribucions.
+      Submissions: Enviaments
+      Segments: Segments
+      TimeSaved: Temps estalviat
+      AutoSkipEnabled: Omet automàticament els segments
+      AutoSkipOn: Activat
+      AutoSkipOff: Desactivat
+      WhitelistChannel: Afegeix el canal a la llista de permesos
+      ChannelWhitelisted: A la llista de permesos
+      RemoveChannelFromWhitelist: Suprimeix el canal de la llista de permesos
+      MuteSegment: Silencia el segment
+      SkipSegment: Omet el segment
+      CloseSegmentActions: Tanca les accions del segment
+      FullVideo: Vídeo complet
+      FullVideoLabel: '{segmentCategory} · Vídeo complet'
+      MuteActionType: Silencia
+      MutePrompt: Voleu silenciar {segmentCategory}?
+      SkipActionType: Omet
+      LockedSegment: Segment blocat
+      UpvoteSegment: Vot positiu
+      DownvoteSegment: Vot negatiu
+      VoteFailed: No s'ha pogut enviar el vot a SponsorBlock.
+  Watch:
+    'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Temps restant de l''anunci previ: {remindingTimeSeconds}s'
+    'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Temps d''espera de SABR restant: {remindingTimeSeconds}s'
+Playlist:
+  Playlist: Llista de reproducció
+  Close Playlist: Tanca la llista de reproducció
+  Sort By:
+    DateAddedNewest: Data d'addició (més nova)
+    DateAddedOldest: Data d'addició (més antiga)
+    PublishedNewest: Data de publicació (més nova)
+    PublishedOldest: Data de publicació (més antiga)
+    AuthorAscending: Autor (A-Z)
+    AuthorDescending: Autor (Z-A)
+    VideoTitleAscending: Títol (A-Z)
+    VideoTitleDescending: Títol (Z-A)
+    VideoDurationAscending: Durada (més curta)
+    VideoDurationDescending: Durada (més llarga)
+    Custom: Personalitzat
+Change Format:
+  Local Video File: Fitxer de vídeo local
+  Local Audio File: Fitxer d'àudio local
+  Online Video: Vídeo en línia
+  Legacy formats are not available for this video: Els formats antics no estan disponibles per a aquest vídeo
+  Stream Source: Origen del flux
+  Stream Extraction Method: Mètode d'extracció del flux
+  Playback Engine: Motor de reproducció
+  Streaming Protocol: Protocol de transmissió
+  Not Available For This Video: No està disponible per a aquest vídeo
+  Protocols:
+    Progressive: Progressiu
+  Descriptions:
+    Local File: Es reprodueix directament des del fitxer baixat en aquest dispositiu
+    Online Video: Carrega els formats de transmissió des de l'origen en línia configurat
+    Dash: Qualitat adaptativa, diverses pistes d'àudio i les resolucions més altes
+    Legacy: Un sol fitxer amb vídeo i àudio combinats, limitat a resolucions més baixes
+    Audio: Només àudio, útil per estalviar amplada de banda o escoltar en segon pla
+  yt-dlp Fallback Template: 'yt-dlp no ha pogut proporcionar els fluxos; s''utilitza el motor integrat: {error}'
+  yt-dlp Default Clients Fallback: Els clients preferits de yt-dlp no han pogut proporcionar fluxos reproduïbles; es proven els clients predeterminats de yt-dlp
+  Built-in Fallback Template: 'El motor integrat no ha pogut reproduir el flux; es prova yt-dlp: {error}'
+Share:
+  Share Post: Comparteix la publicació
+  Share Channel: Comparteix el canal
+  YouTube Channel URL copied to clipboard: S'ha copiat al porta-retalls l'URL del canal de YouTube
+  Timestamp Link Copied: S'ha copiat al porta-retalls l'enllaç amb la marca de temps
+Clipboard:
+  Copy failed: No s'ha pogut copiar al porta-retalls
+  Cannot access clipboard without a secure connection: No es pot accedir al porta-retalls sense una connexió segura
+Context Menu:
+  Context Menu: Menú contextual
+  Select All: Selecciona-ho tot
+  Save Image As…: Desa la imatge com a…
+  Copy Image: Copia la imatge
+  Copy Image Address: Copia l'adreça de la imatge
+  Cancel Refresh: Cancel·la l'actualització
+  Reload Videos: Torna a carregar els vídeos
+  Reload Shorts: Torna a carregar els vídeos curts
+  Reload Live: Torna a carregar els directes
+  Reload Posts: Torna a carregar les publicacions
+  Reload All Feeds: Torna a carregar tots els canals
+  Close Multiple Tabs: Tanca {count} pestanya | Tanca {count} pestanyes
+  Duplicate Tab: Duplica la pestanya
+  Duplicate Multiple Tabs: Duplica {count} pestanya | Duplica {count} pestanyes
+  Move Tab: Mou la pestanya
+  Move Tabs: Mou les pestanyes
+  Move Tab to Group: Mou la pestanya al grup
+  Collapse Group: Redueix el grup
+  Move Tabs to Group: Mou les pestanyes al grup
+  Manage Tab Groups…: Gestiona els grups de pestanyes…
+  To Beginning: Al principi
+  To End: Al final
+  Close Tabs: Tanca les pestanyes
+  To the Top: A dalt
+  To the Left: A l'esquerra
+  To the Bottom: A baix
+  To the Right: A la dreta
+  Other Tabs: Altres pestanyes
+  Copy YouTube Link: Copia l'enllaç de YouTube
+  Copy YouTube Links: Copia els enllaços de YouTube
+  Pin Tab: Fixa la pestanya
+  Pin Tabs: Fixa les pestanyes
+  Unpin Tab: Deixa de fixar la pestanya
+  Unpin Tabs: Deixa de fixar les pestanyes
+  Tab Color: Color de la pestanya
+  Default: Predeterminat
+  Purple: Porpra
+  Reopen Closed Tab: Torna a obrir la pestanya tancada
+  Reload Tab: Torna a carregar la pestanya
+  Reload Tabs: Torna a carregar les pestanyes
+  Load Tab: Carrega la pestanya
+  Load Tabs: Carrega les pestanyes
+  Unload Tab: Descarrega la pestanya
+  Unload Tabs: Descarrega les pestanyes
+  Move Tab to Window: Mou la pestanya a una finestra
+  Move Tabs to Window: Mou les pestanyes a una finestra
+  Open in a New Tab: Obre en una pestanya nova
+  Open in a New Window: Obre en una finestra nova
+  Copy Link: Copia l'enllaç
+  Copy Invidious Link: Copia l'enllaç d'Invidious
+  Search Selection in New Tab: Cerca "{selection}" en una pestanya nova
+  Search Selection in New Window: Cerca "{selection}" en una finestra nova
+  Search With: Cerca amb {engine}
+  Search With Multiple: Cerca amb…
+  Selection Too Long: La selecció és massa llarga per cercar-la (> {count} caràcters)
+Tab Organizer:
+  Title: Organitzador de pestanyes
+  Open Tab Count: '{count} pestanya oberta | {count} pestanyes obertes | {count} pestanyes obertes'
+  Search Label: Cerca pestanyes
+  Selected Count: '{count} pestanya seleccionada | {count} pestanyes seleccionades | {count} pestanyes seleccionades'
+  Tab Count: '{count} pestanya | {count} pestanyes | {count} pestanyes'
+  Select All: Selecciona-ho tot
+  Select None: No en seleccionis cap
+  Move To Group: Mou les pestanyes seleccionades al grup
+  Choose Group: Trieu un grup
+  Ungrouped: Sense grup
+  Pin: Fixa
+  Unpin: Deixa de fixar
+  Load: Carrega
+  Unload: Descarrega
+  Unload All: Descarrega-ho tot
+  Close All: Tanca-ho tot
+  Ungroup: Desagrupa
+  Group Name: Nom del grup
+  Color: Color
+  No Color: Sense color
+  Create Group: Crea un grup
+  Expand Group: Amplia el grup
+  Collapse Group: Redueix el grup
+  Expand Group Label: Amplia {name}, {count} pestanya | Amplia {name}, {count} pestanyes | Amplia {name}, {count} pestanyes
+  Rename Group: Canvia el nom de {name}
+  Change Group Color: Canvia el color de {name}
+  Move To Window: Mou a una finestra
+  Choose Window: Trieu una finestra
+  Select Tab: Selecciona {title}
+  Active: Activa
+  Pinned: Fixada
+  Unloaded: Descarregada
+  Playing: En reproducció
+  Close Tab: Tanca {title}
+  No Open Results: Cap pestanya oberta coincideix amb la cerca.
+  Recently Closed: Tancades recentment
+  Clear: Neteja
+  No Closed Results: Cap pestanya tancada recentment coincideix amb la cerca.
+  Drag Tab: Arrossegueu per moure-la a un grup
+Chapters:
+  Chapters: Capítols
+  Key Moments: Moments clau
+  Open Chapters: Obre els capítols
+  Close Chapters: Tanca els capítols
+  Copy Timestamp Link: Copia l'enllaç a {timestamp}
+Mini Player: Minireproductor
+Comments:
+  Comments: Comentaris
+  Comment Count: 1 comentari | {count} comentaris | {count} comentaris
+  Show Comments: Mostra els comentaris
+  Click to View Comments: Feu clic per veure els comentaris
+  Getting comment replies, please wait: S'estan obtenint les respostes al comentari; espereu
+  There are no more comments for this video: No hi ha més comentaris per a aquest vídeo
+  Hide Comments: Oculta els comentaris
+  Reload Comments: Torna a carregar els comentaris
+  Top comments: Comentaris destacats
+  Newest first: Més nous primer
+  Reply Count: 1 resposta | {replyCount} respostes | {replyCount} respostes
+  View {replyCount} replies: Mostra 1 resposta | Mostra {replyCount} respostes | Mostra {replyCount} respostes
+  Hide {replyCount} replies: Oculta 1 resposta | Oculta {replyCount} respostes | Oculta {replyCount} respostes
+  View 1 reply from {channelName}: Mostra 1 resposta de {channelName}
+  View {replyCount} replies from {channelName} and others: Mostra {replyCount} respostes de {channelName} i altres
+  Show More Replies: Mostra més respostes
+  There are no comments available for this video: No hi ha comentaris disponibles per a aquest vídeo
+  There are no comments available for this post: No hi ha comentaris disponibles per a aquesta publicació
+  Comments are turned off: Els comentaris estan desactivats
+  YouTube did not provide advertised replies: YouTube indicava que aquest comentari tenia respostes, però no les ha proporcionat. És possible que s'hagin suprimit o ocultat, per tant s'ha tret el botó de resposta.
+  Load More Comments: Carrega més comentaris
+  Pinned by: Fixat per
+  Pinned by you: Fixat per vós
+  A reply is pinned: Hi ha una resposta fixada
+  Filter loaded comments: Filtra els comentaris carregats
+  Comment filters: Filtres de comentaris
+  From creator: Del creador
+  Contains timestamps: Conté marques de temps
+  Pin comment by author: Fixa el comentari de {author}
+  Unpin comment by author: Deixa de fixar el comentari de {author}
+  Member: Membre
+  Subscribed: Subscrit
+  Edited: (editat)
+  Hearted: Amb cor
+  Highlighted comment: Comentari destacat
+  Highlighted reply: Resposta destacada
+  Search loaded comments: Cerca als comentaris carregats
+  Loaded comment search result count: 1 de {total} comentaris carregats | {count} de {total} comentaris carregats | {count} de {total} comentaris carregats
+  No loaded comments match your filters: Cap comentari carregat coincideix amb els filtres
+  YouTube comment link copied to clipboard: S'ha copiat al porta-retalls l'enllaç del comentari de YouTube
+  Translate to {language}: Tradueix a {language}
+  Show original: Mostra l'original
+  Translating comment, please wait: S'està traduint el comentari; espereu
+  Comment translation failed: Ha fallat la traducció del comentari
+Up Next: A continuació
+Description:
+  Expand Description: ...més
+  Collapse Description: Mostra'n menys
+  Copy Description: Copia la descripció
+  Description Copied: S'ha copiat la descripció al porta-retalls
+  Video Category: 'Categoria del vídeo:'
+  Video Tags: Etiquetes del vídeo
+  Games: Jocs
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: Omple els buits de les traduccions humanes amb text generat per IA. Les traduccions humanes sempre tenen prioritat.
+    Update Relative Timestamps: Actualitza les marques horàries relatives de tota l'aplicació mentre la pàgina estigui oberta. Si es desactiva, només s'actualitzen en tornar a carregar o visitar la pàgina.
+    Stream Extraction Method: |
+      Trieu com obté l'OpenTubeX els fluxos de vídeo. Si seleccioneu yt-dlp, ha d'estar disponible.
+      Els vídeos poden trigar més a començar quan s'utilitza yt-dlp.
+      El motor integrat no permet fer salts a les emissions en directe ni a les estrenes.
+    Avoid translation: |
+      Desactiva la traducció automàtica de YouTube del títol, la descripció i els capítols dels vídeos.
+      Massa sol·licituds, com ara obtenir els títols dels vídeos de les llistes, poden afectar
+      temporalment la fiabilitat de l'aplicació.
+    Preferred API Backend: Trieu el motor que l'OpenTubeX utilitza per obtenir dades. L'API local és un extractor integrat. L'API d'Invidious requereix un servidor d'Invidious al qual connectar-se.
+    Fallback to Non-Preferred Backend on Failure: Si l'API preferida té un problema i aquesta opció està activada, l'OpenTubeX intentarà utilitzar automàticament l'API no preferida com a alternativa.
+    Thumbnail Preference: Totes les miniatures de l'OpenTubeX se substituiran per un fotograma del vídeo, es difuminaran o s'ocultaran en lloc de mostrar la miniatura predeterminada.
+    Show Thumbnail Previews: Mostra previsualitzacions animades en passar per sobre de les miniatures dels vídeos.
+    Startup Behavior: |
+      Trieu què fa l'OpenTubeX quan s'inicia.
+      Carrega totes les pestanyes restaura immediatament totes les pestanyes desades, però les del segon pla no reproduiran vídeos automàticament.
+      Carrega les pestanyes carregades anteriorment torna a carregar les pestanyes que estaven carregades en tancar l'OpenTubeX i manté les altres descarregades.
+      Carrega la darrera pestanya activa restaura la sessió anterior amb les altres pestanyes obertes però descarregades; es carreguen quan hi feu clic.
+      Inicia una sessió buida omet les pestanyes desades i obre una finestra nova.
+    Invidious Instance: La instància d'Invidious a la qual es connectarà l'OpenTubeX per fer crides a l'API. Els canvis d'aquesta opció només s'apliquen a la finestra actual, tret que definiu la instància com a predeterminada.
+    Region for Trending: La regió de tendències us permet triar de quin país voleu veure els vídeos en tendència.
+    External Link Handling: |
+      Trieu el comportament predeterminat en fer clic en un enllaç que no es pot obrir a l'OpenTubeX.
+      De manera predeterminada, l'OpenTubeX obrirà l'enllaç al navegador predeterminat.
+    Open Deep Links In New Window: Els URL passats a l'OpenTubeX, per exemple mitjançant extensions de redirecció del navegador o arguments de la línia d'ordres, s'obren en una finestra nova.
+    Remember Tab Navigation History: L'historial de navegació enrere i endavant de cada pestanya es desa i es restaura en reiniciar l'OpenTubeX.
+  Proxy Settings:
+    IP Block Recovery Script Path: Camí de l'script que s'executa quan es detecta un bloqueig d'IP. L'OpenTubeX espera que acabi i després torna a carregar el vídeo. Si l'alternativa està activada, només s'executa quan també falla.
+  Player Settings:
+    Enable Caption Translations: Si s'activa i el vídeo no proporciona cap pista original coincident, el botó de subtítols i la drecera C prefereixen una pista traduïda automàticament a la llengua de subtítols preferida.
+    Proxy Videos Through Invidious: Es connecta a Invidious per servir els vídeos en lloc de connectar-se directament a YouTube.
+    Default Video Format: Defineix els formats utilitzats en reproduir un vídeo. Els formats DASH poden reproduir qualitats més altes. Els formats antics estan limitats a 360p com a màxim, però utilitzen menys amplada de banda. Els formats d'àudio només contenen fluxos d'àudio.
+    Use Quick Playback Speed Bar: Mostra una barra ràpida de velocitat de reproducció als controls de la dreta del reproductor. Si està activat el desament manual de la velocitat per canal, la barra també inclou el botó per desar la velocitat del canal actual.
+    Scroll Playback Rate Over Video Player: Amb el cursor sobre el vídeo, manteniu premuda la tecla Control (Ordre al Mac) i gireu la roda del ratolí endavant o enrere per controlar la velocitat de reproducció. Manteniu premuda la tecla Control (Ordre al Mac) i feu clic amb el botó esquerre per tornar ràpidament a la velocitat predeterminada (1x, tret que s'hagi canviat a la configuració).
+    Skip by Scrolling Over Video Player: Utilitzeu la roda de desplaçament per saltar pel vídeo, a l'estil de MPV.
+    Multiply Seek Interval by Playback Rate: Si s'activa, els intervals de salt (tecles de fletxa i J/L) es multipliquen per la velocitat de reproducció actual. Si es desactiva, els intervals es mantenen constants independentment de la velocitat.
+    Show Playback Rate Adjusted Timestamp: Si s'activa i la velocitat de reproducció és diferent d'1x, el reproductor mostra entre parèntesis les marques de temps ajustades a la velocitat després de les normals.
+    Use YouTube-style Shorts: Mostra els vídeos curts en una quadrícula vertical a les pàgines de subscripcions i canals i utilitza el reproductor de vídeos curts a l'estil de YouTube.
+    Loop Shorts: Si s'activa, els vídeos curts es reinicien automàticament. Si es desactiva, s'aturen al final i mostren un botó per tornar-los a reproduir.
+    Show Skip Silence Toggle: Mostra un commutador per ometre silencis al menú de configuració del reproductor.
+    Enable Skip Silence by Default: Activa l'omissió de silencis a les pestanyes noves. Canviar-ho en una pestanya no afecta les altres.
+    Enable Video Zoom: Mostra el control de zoom al menú de configuració del reproductor i n'activa les dreceres de teclat i els controls de panoràmica.
+    Voice-over Translation: Envia l'ID, la durada i la llengua seleccionada del vídeo al servei no oficial de traducció de veu en off de Yandex quan sol·liciteu una traducció. Està desactivat de manera predeterminada.
+    Hold to Double Playback Speed: Manteniu premuda la barra espaiadora o el botó esquerre del ratolí sobre el reproductor per duplicar temporalment la velocitat de reproducció actual.
+    Ambient Mode: Barreja els colors del vídeo amb l'àrea que envolta el reproductor.
+    Default Volume: Està desactivat mentre Recorda el volum estigui activat. Desactiveu Recorda el volum per definir un volum inicial fix per a cada vídeo.
+    Parallel Segment Loading: |
+      Nombre de segments de vídeo i àudio que es carreguen alhora per avançat.
+      Els valors més alts poden ajudar amb connexions lentes o inestables, però utilitzen més amplada de banda i memòria.
+      També poden fer que Automàtic subestimi la velocitat de connexió i seleccioni una qualitat inferior.
+      Els fluxos limitats a una sol·licitud alhora ignoren aquesta opció.
+  External Player Settings:
+    External Player: En triar un reproductor extern, es mostrarà a la miniatura una icona per obrir-hi el vídeo o, si s'admet, la llista de reproducció. La configuració d'Invidious no afecta els reproductors externs.
+    Custom External Player Executable: De manera predeterminada, l'OpenTubeX suposa que el reproductor extern triat es pot trobar mitjançant la variable d'entorn PATH. Si cal, podeu definir aquí un camí personalitzat.
+    Ignore Warnings: Suprimeix els avisos quan el reproductor extern actual no admet l'acció actual, com ara invertir llistes de reproducció.
+    Ignore Default Arguments: No envia cap argument predeterminat al reproductor extern tret de l'URL del vídeo, com ara la velocitat de reproducció o l'URL de la llista. Els arguments personalitzats se seguiran passant.
+    Custom External Player Arguments: Arguments personalitzats de la línia d'ordres que voleu passar al reproductor extern.
+    DefaultCustomArgumentsTemplate: '(Predeterminat: ''{defaultCustomArguments}'')'
+  Download Settings:
+    Download Folder: Els vídeos es desen en aquesta carpeta. Deixeu-ho en blanc per utilitzar la carpeta Baixades del sistema.
+    Global Additional yt-dlp Arguments: Arguments addicionals de la línia d'ordres que es passen a yt-dlp per a cada baixada, per exemple --cookies-from-browser firefox.
+    Concurrent Downloads: Nombre màxim de tasques de yt-dlp que es poden executar alhora.
+    Bandwidth Limit: Limita la velocitat de transferència combinada de la cua dividint aquest límit entre les tasques simultànies. Introduïu 0 per no limitar-la.
+  External Software Settings:
+    yt-dlp Source: L'OpenTubeX pot utilitzar el yt-dlp instal·lat al sistema o baixar i gestionar-ne una còpia pròpia, que es desa al directori de dades de l'usuari.
+    yt-dlp Channel: Seleccioneu quin canal de versions de yt-dlp baixa i gestiona l'OpenTubeX. Es recomana Estable per a la majoria d'usuaris.
+    FFmpeg Source: L'OpenTubeX pot utilitzar FFmpeg i FFprobe instal·lats al sistema o baixar i gestionar-ne compilacions estàtiques pròpies, que es desen al directori de dades de l'usuari.
+    Managed Tool Updates: Trieu si les eines gestionades s'actualitzen automàticament, pregunten abans d'actualitzar o només s'actualitzen amb els botons manuals. Les eines que falten es baixen quan són necessàries.
+    yt-dlp Executable Path: De manera predeterminada, l'OpenTubeX suposa que es pot trobar yt-dlp mitjançant la variable d'entorn PATH. Si cal, podeu definir aquí un camí personalitzat.
+    Cookie Source: Trieu si yt-dlp ha de llegir un fitxer de galetes de Netscape o les galetes d'un navegador instal·lat per a la reproducció autenticada.
+    Cookie File: Seleccioneu un fitxer de galetes amb format de Netscape per a la reproducció autenticada.
+    Browser for Cookies: La compatibilitat amb navegadors es consulta a l'executable yt-dlp seleccionat. L'OpenTubeX demana a yt-dlp que llegeixi aquest navegador quan se sol·licita una reproducció autenticada.
+    Browser Profile: Nom o carpeta opcional del perfil del navegador. Deixeu-ho en blanc per utilitzar el perfil al qual s'ha accedit més recentment.
+    Always Use Cookies: Utilitza les galetes configurades sempre que yt-dlp extregui fluxos. Això no canvia a yt-dlp el mètode d'extracció dels fluxos. Amb yt-dlp seleccionat, poden estar disponibles formats exclusius del compte, inclosa la taxa de bits millorada de YouTube Premium quan el compte hi tingui accés.
+    FFmpeg Executable Path: FFmpeg és necessari per combinar fluxos de vídeo i àudio separats i per convertir àudio. De manera predeterminada, l'OpenTubeX suposa que es pot trobar FFmpeg mitjançant la variable d'entorn PATH. Si cal, podeu definir aquí un camí personalitzat.
+  Distraction Free Settings:
+    Shorten View Counts: Mostra en format abreujat els recomptes de visualitzacions i de m'agrades dels comentaris que YouTube ja ha arrodonit, p. ex. 14K en lloc de 14.000. Els recomptes exactes sempre es mostren sencers.
+    Hide Channels: Introduïu un ID de canal per ocultar tots els seus vídeos i llistes de reproducció, així com el canal mateix, de la cerca, les tendències, els més populars i les recomanacions. L'ID introduït ha de coincidir completament i distingeix entre majúscules i minúscules.
+    Hide Subscriptions Live: L'opció general "{appWideSetting}", de la secció "{subsection}" de "{settingsSection}", substitueix aquesta opció
+    Hide Videos, Playlists and Channels Containing Text: Introduïu una paraula, un fragment de paraula o una frase, sense distinció entre majúscules i minúscules, per ocultar a tot l'OpenTubeX els vídeos, les llistes de reproducció i els canals que la continguin al títol original. Només s'exclouen Historial, Les vostres llistes de reproducció i els vídeos dins de llistes.
+    Hide Videos on Watch: Oculta els vídeos vistos de les pestanyes Vídeos, Vídeos curts i En directe de les pàgines de subscripcions i canals. No afecta la pestanya Inici de les pàgines dels canals
+  Subscription Settings:
+    Fetch Feeds from RSS: Si s'activa, l'OpenTubeX utilitza RSS en lloc del mètode predeterminat per obtenir el canal de subscripcions. RSS és més ràpid i evita els bloqueigs d'IP, però no proporciona algunes dades, com ara la durada dels vídeos, l'estat en directe o les publicacions
+    Fetch Feed on Startup: Si s'activa, l'OpenTubeX obté automàticament el canal de subscripcions en iniciar-se i en obrir una finestra nova.
+    Show New Content Feed: Mostra una pestanya Nou amb els elements del canal de subscripcions que no hi eren en l'obtenció anterior.
+    Show New Content Indicators: Mostra un punt petit al costat dels elements del canal de subscripcions que no hi eren en l'obtenció anterior.
+    Show Scheduled Live Streams / Premieres First: Manté les properes emissions en directe i estrenes a dalt del canal de subscripcions. Si es desactiva, romanen a la posició de l'anunci fins que comencen. Després de desactivar-ho, actualitzeu el canal una vegada per obtenir les dates d'anunci de les entrades programades existents.
+    Auto Refresh Interval: Freqüència amb què l'OpenTubeX actualitza automàticament el canal de subscripcions mentre l'aplicació està oberta.
+  Theme Settings:
+    Show Progress as Notification: Mostra una notificació persistent amb el progrés en directe de les operacions en segon pla, com ara actualitzar les subscripcions i baixar eines gestionades, en lloc d'utilitzar la barra de progrés general.
+    Always Show Scrollbars: Manté les barres de desplaçament sempre visibles. Si es desactiva, s'esvaeixen poc després que deixeu de moure el ratolí i reapareixen quan el torneu a moure.
+    Scroll Speed: Canvia la distància de desplaçament dels gestos de roda del ratolí i del ratolí tàctil.
+    Use Fixed Tab Width: Dóna la mateixa amplada a totes les pestanyes de la barra horitzontal en lloc d'ajustar-les al títol.
+    Use Grid Player Menu: Organitza el menú de configuració del reproductor de vídeo com una quadrícula de rajoles en lloc d'una llista de files.
+  Experimental Settings:
+    Replace HTTP Cache: Desactiva la memòria cau HTTP al disc d'Electron i activa una memòria cau d'imatges personalitzada a la memòria. Augmentarà l'ús de RAM.
+  SponsorBlock Settings:
+    UseDeArrowTitles: Substitueix els títols dels vídeos pels títols enviats pels usuaris de DeArrow.
+    UseDeArrowThumbnails: Substitueix les miniatures dels vídeos per miniatures de DeArrow.
+Local API Error (Click to copy): Error de l'API local (feu clic per copiar-lo)
+Falling back to Local API: S'està utilitzant l'API local com a alternativa
+This video is unavailable because of missing formats. This can happen due to country unavailability.: Aquest vídeo no està disponible perquè falten formats. Pot ser que no estigui disponible al país.
+Unknown YouTube url type, cannot be opened in app: El tipus d'URL de YouTube és desconegut i no es pot obrir a l'aplicació
+Loop is now disabled: S'ha desactivat el bucle
+Loop is now enabled: S'ha activat el bucle
+Shuffle is now disabled: S'ha desactivat la reproducció aleatòria
+Shuffle is now enabled: S'ha activat la reproducció aleatòria
+The playlist has been reversed: S'ha invertit la llista de reproducció
+Playing Next Video: S'està reproduint el vídeo següent
+Playing Previous Video: S'està reproduint el vídeo anterior
+Canceled next video autoplay: S'ha cancel·lat la reproducció automàtica del vídeo següent
+Autoplay Interruption Timer: S'ha cancel·lat la reproducció automàtica després de {autoplayInterruptionIntervalHours} hores d'inactivitat
+Default Invidious instance has been set to {instance}: S'ha definit {instance} com a instància predeterminada d'Invidious
+Default Invidious instance has been cleared: S'ha esborrat la instància predeterminada d'Invidious
+The playlist has ended. Enable loop to continue playing: La llista de reproducció ha acabat. Activeu el bucle per continuar reproduint
+The playlist is at the beginning. Enable loop to continue playing: La llista de reproducció és al principi. Activeu el bucle per continuar reproduint
+Age Restricted:
+  This channel is age restricted: Aquest canal té una restricció d'edat
+  This video is age restricted: Aquest vídeo té una restricció d'edat
+External link opening has been disabled in Settings → Privacy: L'obertura d'enllaços externs s'ha desactivat a Configuració → Privadesa
+Screenshot Success: S'ha desat la captura de pantalla
+Screenshot Clipboard Success: S'ha desat la captura de pantalla al porta-retalls
+Screenshot Error: Ha fallat la captura de pantalla. {error}
+Screenshot Clipboard Error: No s'ha pogut copiar la captura de pantalla al porta-retalls
+Channel Hidden: 'S''ha afegit {channel} al filtre de canals'
+Channel Unhidden: 'S''ha suprimit {channel} del filtre de canals'
+Trimmed input must be at least N characters long: L'entrada retallada ha de tenir com a mínim 1 caràcter | L'entrada retallada ha de tenir com a mínim {length} caràcters | L'entrada retallada ha de tenir com a mínim {length} caràcters
+Tag already exists: 'L''etiqueta "{tagName}" ja existeix'
+Hashtag:
+  Hashtag: Etiqueta
+  This hashtag does not currently have any videos: Aquesta etiqueta no té cap vídeo ara mateix
+Ok: D'acord
+Yes, Delete: Sí, suprimeix
+Yes, Restart: Sí, reinicia
+Yes, Open Link: Sí, obre l'enllaç
+Cancel: Cancel·la
+checkmark: ✓
+Display Label: '{label}: {value}'
+KeyboardShortcutTemplate: '{label} ({shortcut})'
+shortcutJoinOperator: +
+shortcutLabelSeparator: ｜
+Keys:
+  alt: Alt
+  ctrl: Ctrl
+  shift: Shift
+  enter: Retorn
+  plus: Més
+  arrowdown: Fletxa avall
+  arrowleft: Fletxa esquerra
+  arrowright: Fletxa dreta
+  arrowup: Fletxa amunt
+KeyboardShortcutPrompt:
+  Keyboard Shortcuts: Dreceres de teclat
+  Edit Hint: Seleccioneu una drecera i premeu una combinació de tecles nova. Premeu Retrocés o Supr per treure'n l'assignació.
+  Change Shortcut: Canvia la drecera de {action}
+  Press Shortcut: Premeu la drecera…
+  Unassigned: Sense assignar
+  Reset Shortcut: Restableix la drecera de {action}
+  Reset to Defaults: Restableix els valors predeterminats
+  Shortcut Already Assigned: La drecera ja està assignada
+  Shortcut Conflict: '{shortcut} ja està assignada a {actions}. Voleu tornar-la a assignar?'
+  Reserved Shortcut Conflict: '{shortcut} està reservada per a {actions} i no es pot tornar a assignar.'
+  Reassign: Torna a assignar
+  Sections:
+    Video:
+      Playback: "Vídeo:\_Reproducció"
+      General: "Vídeo:\_General"
+    App:
+      General: "Aplicació:\_General"
+      Tabs: "Aplicació:\_Pestanyes"
+      Search and Page: "Aplicació:\_Cerca i pàgina"
+      Window and View: "Aplicació:\_Finestra i vista"
+  Show Keyboard Shortcuts: Mostra les dreceres de teclat
+  History Backward: Torna una pàgina enrere
+  History Forward: Avança una pàgina
+  New Window: Crea una finestra nova
+  New Tab: Crea una pestanya nova
+  Close Tab: Tanca la pestanya actual
+  Reload Tab: Torna a carregar la pestanya actual
+  Reopen Closed Tab: Torna a obrir la darrera pestanya tancada
+  Next Tab: Canvia a la pestanya següent
+  Previous Tab: Canvia a la pestanya anterior
+  Switch to Tab: Canvia a la pestanya 1–9
+  Toggle Tab Orientation: Canvia entre disposicions de pestanyes
+  Navigate to Settings: Ves a la pàgina Configuració
+  Navigate to History: Ves a la pàgina Historial
+  Refresh: Actualitza el canal amb el contingut més recent
+  Find in Page: Cerca text a la pàgina actual
+  Find Next Match: Salta a la coincidència següent
+  Find Previous Match: Salta a la coincidència anterior
+  Captions: Activa o desactiva els subtítols
+  Stats: Mostra les estadístiques del vídeo
+  Picture in Picture: Commuta el mode d'imatge sobre imatge
+  Large Rewind: Retrocedeix 10 segons / Retrocedeix segons la velocitat de reproducció actual
+  Play: Commuta entre reproducció i pausa
+  Large Fast Forward: Avança 10 segons / Avança segons la velocitat de reproducció actual
+  Mute: Commuta el silenci
+  Decrease Video Speed: Redueix la velocitat del vídeo segons l'interval de velocitat de reproducció
+  Increase Video Speed: Augmenta la velocitat del vídeo segons l'interval de velocitat de reproducció
+  Toggle Normal Playback Speed: Commuta entre la velocitat 1x i la velocitat de reproducció anterior
+  Toggle Skip Silence: Commuta l'omissió de silencis
+  Set A-B Repeat Point A: Defineix el punt A de la repetició A-B
+  Set A-B Repeat Point B: Defineix el punt B de la repetició A-B
+  Clear A-B Repeat: Esborra la repetició A-B
+  Full Window: Commuta la finestra completa
+  Theatre Mode: Commuta el mode de cinema
+  Take Screenshot: Fes una captura de pantalla
+  Video Zoom In: Apropa el vídeo
+  Video Zoom Out: Allunya el vídeo
+  Minimize Window: Minimitza la finestra
+  Close Window: Tanca la finestra
+  Reset Zoom: Restableix el nivell de zoom o l'escala de la interfície
+  Focus Search: Enfoca la barra de cerca
+  Search in New Window: Cerca en una finestra nova
+  Tab Switcher: Selector de pestanyes
+  Last Frame: Fotograma anterior (durant la pausa)
+  Next Frame: Fotograma següent (durant la pausa)
+  Volume Up: Augmenta el volum
+  Volume Down: Redueix el volum
+  Small Rewind: Retrocedeix X segons segons l'interval de retrocés i la velocitat de reproducció actual
+  Small Fast Forward: Avança X segons segons l'interval d'avançament i la velocitat de reproducció actual
+  Last Chapter: Capítol anterior
+  Next Chapter: Capítol següent
+  Skip by Tenths: Salta pel vídeo per percentatge (3 salts arriben al 30% de la durada)
+  Home: Salta al principi del vídeo
+  End: Salta al final del vídeo
+  Skip to Next Video: Salta al vídeo següent d'una llista de reproducció o al vídeo recomanat següent
+  Skip to Previous Video: Salta al vídeo anterior d'una llista de reproducció
+CommandPalette:
+  Title: Paleta d'ordres
+  Open: Obre la paleta d'ordres
+  Search Label: Cerca ordres
+  Search Placeholder: Cerca ordres i configuració…
+  Results: Ordres
+  No Results: Cap ordre coincideix amb la cerca
+  Result Count: S'ha trobat 1 ordre | S'han trobat {count} ordres | S'han trobat {count} ordres
+  Move: Mou
+  Run: Executa
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Canvia a la pestanya: {title}'
+  Switch Profile: 'Canvia de perfil: {name}'
+  Open Playlist: 'Obre la llista de reproducció: {name}'
+  Cancel Download: 'Cancel·la la baixada: {title}'
+  Groups:
+    App: Aplicació
+    Navigation: Navegació
+    Tabs: Pestanyes
+  Unavailable:
+    Current Page: Ja sou en aquesta pàgina
+    No History: No hi ha cap pàgina en aquesta direcció
+    Desktop: Només està disponible a l'aplicació d'escriptori
+    Build: No està disponible en aquesta compilació
+    One Tab: Obriu primer una altra pestanya
+    Active Tab: Aquesta és la pestanya activa
+    Active Profile: Aquest és el perfil actiu
+    Download Finished: Aquesta baixada ja no s'està executant
+    Video: Obriu primer un vídeo
+Downloads:
+  Download: Baixa
+  Download Video: Baixa el vídeo
+  Download Playlist: Baixa la llista de reproducció
+  Downloading: S'està baixant
+  Queue: Cua
+  Downloaded: Baixat
+  Canceled: Cancel·lat
+  Open Downloads: Obre les baixades
+  No Downloads: Encara no hi ha baixades
+  No Downloads Description: Les baixades que inicieu apareixeran aquí.
+  Clear Failed Canceled Skipped And Missing: Neteja les fallides, cancel·lades, omeses i absents
+  Clear From List: Treu de la llista
+  Show in Folder: Mostra a la carpeta
+  Play Download: Reprodueix la baixada
+  Retry Download: Torna a provar la baixada
+  Pause Download: Posa la baixada en pausa
+  Resume Download: Reprèn la baixada
+  Move Earlier: Mou abans
+  Move Later: Mou després
+  Pause All: Posa-ho tot en pausa
+  Resume All: Reprèn-ho tot
+  Retry All: Torna a provar totes les baixades fallides
+  Total Size: 'Mida total: {size}'
+  Local File: Fitxer local
+  Available Offline: Disponible sense connexió
+  Remove File: Suprimeix el fitxer
+  Remove File Confirmation: Voleu suprimir el fitxer baixat?
+  Remove File Warning: Es mourà "{title}" a la paperera del dispositiu.
+  File Not Found: No s'ha pogut trobar el fitxer baixat.
+  Download Missing: La baixada no està disponible
+  Files Missing: El fitxer baixat ja no està disponible al sistema de fitxers. | Els fitxers baixats ja no estan disponibles al sistema de fitxers. | Els fitxers baixats ja no estan disponibles al sistema de fitxers.
+  Files Available: 'Hi ha disponibles {available} de {total} fitxers baixats.'
+  More Files: 1 fitxer més | {count} fitxers més | {count} fitxers més
+  Template Used: 'Plantilla: {name}'
+  Download Type: Tipus de baixada
+  Template: Plantilla
+  Unsaved: Sense desar
+  Media Type: Tipus de fitxer multimèdia
+  Video: Vídeo
+  Audio: Àudio
+  Maximum Resolution: Resolució màxima
+  Best Available: La millor disponible
+  Automatic: Automàtica
+  Container: Contenidor
+  Video Codec: Còdec de vídeo
+  Audio Codec: Còdec d'àudio
+  File Name Template: Plantilla del nom de fitxer
+  File Name Template Help: 'Camps disponibles: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Interval de temps i capítols
+  Start Time: Hora inicial (HH:MM:SS)
+  End Time: Hora final (HH:MM:SS)
+  Split by Chapters: Divideix en fitxers separats per capítol
+  Remove Segments: Suprimeix segments
+  Subtitles and Metadata: Subtítols i metadades
+  Include Subtitles: Inclou els subtítols
+  Embed Subtitles: Incrusta els subtítols al fitxer multimèdia
+  Subtitle Format: Format dels subtítols
+  Subtitle Languages: Llengües dels subtítols
+  Subtitle Languages Help: 'Selectors de llengua de yt-dlp separats per comes, per exemple: en.*,de.*'
+  Embed Cover Art: Incrusta la miniatura com a portada
+  Embed Metadata: Incrusta el títol, l'autor, la descripció i els capítols
+  Additional yt-dlp Arguments: Arguments addicionals de yt-dlp
+  Custom yt-dlp Arguments: Arguments personalitzats de yt-dlp
+  Template Name: Nom de la plantilla
+  Save Template: Desa la plantilla
+  Delete Template: Suprimeix la plantilla
+  Template Saved: S'ha desat la plantilla de baixada "{name}"
+  Template Name Exists: Ja existeix una plantilla de baixada anomenada "{name}".
+  Choose Folder: Canvia
+  Select Folder: Tria una carpeta
+  Folder Required: Trieu una carpeta de baixades per activar-les.
+  System Downloads Folder: Carpeta Baixades del sistema
+  Processing: S'està processant…
+  Queued: A la cua
+  Queued Position: A la cua, posició {position}
+  Paused: En pausa
+  Pausing: La tasca actual acabarà i després la cua es posarà en pausa
+  Download Complete: Baixada acabada
+  Download Cancelled: Baixada cancel·lada
+  Download Failed: Ha fallat la baixada
+  File Name Shortened: S'ha abreujat el nom del fitxer perquè el títol del vídeo era massa llarg.
+  Insufficient Disk Space: No hi ha prou espai al disc. Se'n necessiten uns {required} i n'hi ha {available} disponibles.
+  Unknown Download Size: Es desconeix la mida de la baixada. Hi ha {available} disponibles al sistema de fitxers de destinació.
+  Disk Space Check Unavailable: No s'ha pogut comprovar l'espai disponible al disc abans d'iniciar la baixada.
+  Download Failure Hint: Consulteu {issuesLink} i proveu de canviar el canal de yt-dlp a Nightly o Master a Configuració → Avançat → Programari extern.
+  yt-dlp YouTube Issues: problemes recents de yt-dlp amb YouTube
+  Automatic Download Started: S'ha iniciat la baixada automàtica
+  Automatic Download Started Body: S'està baixant "{title}" de {channel} en segon pla.
+  Automatic Download Complete: Ha acabat la baixada automàtica
+  Automatic Download Failed: Ha fallat la baixada automàtica
+  Automatic Download Could Not Start: No s'ha pogut iniciar la baixada automàtica de "{title}".
+  Automatic Download Skipped: Omesa pels filtres de baixada automàtica
+  Cancel Download: Cancel·la la baixada
+  yt-dlp Not Found: No s'ha trobat yt-dlp. Instal·leu-lo o definiu-ne el camí a Configuració → Avançat → Programari extern.
+  Download Complete Template: Ha acabat la baixada de "{title}"
+  Download Failed Template: Ha fallat la baixada de "{title}"
+  Templates:
+    Video Best: Vídeo - Millor qualitat
+    Video Resolution: Vídeo - {resolution}
+    Audio Best: Àudio - Millor qualitat
+    Audio Format: Àudio - {format}
+    Subtitles Format: Subtítols - {format}

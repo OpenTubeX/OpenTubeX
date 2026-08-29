@@ -146,6 +146,8 @@ Subscriptions:
   Mark as Seen: Als gesehen markieren
   Newest First: Neueste zuerst
   Oldest First: Älteste zuerst
+  Posts:
+    RSS Message: YouTube stellt keine RSS-Feeds für Beiträge bereit. Deaktiviere die Einstellung „{rssSetting}“, um Beiträge anzuzeigen, oder aktiviere die Einstellung „{hideSetting}“, um diesen Tab auszublenden.
 Trending:
   Trending: Trends
   Trending Tabs: Trends-Tabs
@@ -314,6 +316,7 @@ Settings:
 
       Load previously loaded tabs: Zuvor geladene Tabs laden
     Locale Preference: Sprache
+    Use AI Translation Completions: Fehlende Übersetzungen mit KI ergänzen
     Preferred API Backend:
       Preferred API Backend: Bevorzugtes API-Backend
       Local API: Lokale API
@@ -527,6 +530,7 @@ Settings:
     Move Settings to App Header: Einstellungen in die App-Kopfzeile verschieben
     UI Roundness: Rundung der Benutzeroberfläche
     Scrollbar Width: Scrollbar-Breite
+    Scroll Speed: Scrollgeschwindigkeit
     Animation Speed: Animationsgeschwindigkeit
     Show Tab Icons: Tab-Symbole anzeigen
     Load Missing Tab Icons: Fehlende Tab-Symbole laden
@@ -1806,6 +1810,8 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Verbleibende SABR-Wartezeit: {remindingTimeSeconds}s'
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Verbleibende Werbezeit: {remindingTimeSeconds}s'
   Private: Private Videos können in OpenTubeX nicht angesehen werden, da sie Google-Anmeldung und den Besitz des Videos erfordern.
+  Collapse Playlist: Wiedergabeliste ausblenden
+  Expand Playlist: Wiedergabeliste einblenden
   Failed to load collaborators: Fehler beim Laden der Collab-Partner
   Collaborators: Collab-Partner
   Includes paid promotion: Enthält bezahlte Werbung
@@ -2059,6 +2065,7 @@ See changes and update: Änderungen ansehen und aktualisieren
 Dismiss: Ausblenden
 Tooltips:
   General Settings:
+    Use AI Translation Completions: Füllt Lücken in den von Menschen erstellten Übersetzungen mit KI-generiertem Text. Menschliche Übersetzungen haben immer Vorrang.
     Playback Engine: Legt fest, welche Engine die Videostreams ermittelt. yt-dlp muss verfügbar sein, wenn es ausgewählt ist.
     Thumbnail Preference: Alle Vorschaubilder in OpenTubeX werden verpixelt, versteckt oder durch ein Einzelbild aus dem Video ersetzt, anstatt das Standard-Vorschaubild anzuzeigen.
     Show Thumbnail Previews: Zeigt animierte Vorschaubilder, wenn du den Mauszeiger über ein Videovorschaubild bewegst.
@@ -2171,6 +2178,7 @@ Tooltips:
     Always Show Scrollbars: >-
       Hält die Scrollbars immer sichtbar. Wenn deaktiviert, werden sie kurz nach dem Ende der Mausbewegung
       ausgeblendet und bei der nächsten Bewegung wieder eingeblendet.
+    Scroll Speed: Ändert die Scrollweite von Mausrad- und Touchpad-Gesten.
     Use Fixed Tab Width: Gibt jedem Tab in der horizontalen Tableiste dieselbe Breite, statt sie an den Titel anzupassen.
     Use Grid Player Menu: Ordnet das Einstellungsmenü des Videoplayers als Kachelraster statt als Liste an.
 Playing Next Video Interval: Nächstes Video wird sofort abgespielt. Zum Abbrechen klicken. | Nächstes Video wird in {nextVideoInterval} Sekunden abgespielt. Zum Abbrechen klicken. | Nächstes Video wird in {nextVideoInterval} Sekunden abgespielt. Zum Abbrechen klicken.

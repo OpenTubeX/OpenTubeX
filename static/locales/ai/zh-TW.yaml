@@ -1,0 +1,1533 @@
+# Optional AI-generated translations for keys missing from ../zh-TW.yaml.
+Color Picker:
+  Hue: 色相
+  Opacity: 不透明度
+  Backdrop Blur: 背景模糊
+  Hex Color: 十六進位色彩
+  Apply Color: 套用
+  Reset Color: 重設
+  Copy Color: 複製
+  Copy From Another Color: 從其他色彩複製
+  Color Copied: 已複製色彩
+  Invalid Color: 請輸入有效的十六進位色彩
+  Clipboard Unavailable: 無法使用剪貼簿
+  Saturation and Brightness: 飽和度與亮度
+New Tab: 新分頁
+Maximize: 最大化
+Restore: 還原
+Close Tab: 關閉分頁
+Close Confirmation:
+  Title: 要結束 OpenTubeX 嗎？
+  Message: 確定要結束 OpenTubeX 嗎？
+  Quit: 結束
+  Never Ask Again: 不再詢問
+Close Window Confirmation:
+  Title: 要關閉視窗嗎？
+  Message: 此視窗包含 {count} 個分頁。確定要關閉嗎？
+  Close Window: 關閉視窗
+Confirmations:
+  Never Ask Again: 不再詢問
+  Settings Hint: 您可以在「設定」→「一般」→「執行前確認…」中重新啟用此確認提示
+Close Multiple Tabs Confirmation:
+  Title: 要關閉多個分頁嗎？
+  Message: 這會關閉 {count} 個分頁。
+  Close Tabs: 關閉 {count} 個分頁
+Load Multiple Tabs Confirmation:
+  Title: 要載入多個分頁嗎？
+  Message: 這會載入 {count} 個分頁。
+  Load Tabs: 載入 {count} 個分頁
+Unload Multiple Tabs Confirmation:
+  Title: 要卸載多個分頁嗎？
+  Message: 這會卸載 {count} 個分頁。
+  Unload Tabs: 卸載 {count} 個分頁
+Use Vertical Tabs: 使用垂直分頁
+Use Horizontal Tabs: 使用水平分頁
+Resize Tab Bar: 調整分頁列大小
+Find in page: 在頁面中尋找
+Previous match: 上一個相符項目
+Next match: 下一個相符項目
+Close find bar: 關閉尋找列
+No matches: 找不到相符項目
+Version {versionNumber} is now available.: 版本 {versionNumber} 現已推出。
+See changes and update: 查看變更並更新
+Dismiss: 關閉
+Update to {version}: 更新至 {version}
+Global:
+  Ambient Mode: 微光模式
+  Loading More: 正在載入更多內容
+  New: 新
+Search Listing:
+  Label:
+    Members Only: 會員專屬
+Stats:
+  Stats: 統計資料
+  Watch time summary: 觀看時間摘要
+  Today: 今天
+  This week: 本週
+  Total watch time: 總觀看時間
+  Daily average: 每日平均
+  So far today: 今天目前為止
+  Since: 自 {day} 起
+  All recorded time: 所有已記錄的時間
+  Per calendar day: 每個日曆日
+  Day by day: 每日
+  Highest: '最高：{duration}'
+  Week by week: 每週
+  Last 14 days: 最近 14 天
+  Last 8 weeks: 最近 8 週
+  Daily chart aria: 最近 14 天的每日觀看時間
+  Weekly chart aria: 最近 8 週的每週觀看時間
+  No data: 觀看影片後，觀看時間會顯示在這裡。
+  Estimate note: 此次更新前的觀看時間會根據儲存的播放進度估算。
+  Adjust imported watch time: 調整匯入的觀看時間
+  Imported watch time: 匯入的觀看時間
+  Imported watch time explanation: 選擇您平常使用的播放速度。系統會將匯入的影片長度除以此速度，以估算您的實際觀看時間。
+  Playback speed: 播放速度
+  Channel speed note: 若有已儲存的頻道播放速度，則會優先使用。
+  Apply playback speed: 套用播放速度
+  Imported watch time adjusted: 已調整匯入的觀看時間
+  Reset statistics: 重設統計資料
+  Reset: 重設
+  Reset confirmation: 確定要重設所有觀看統計資料嗎？此操作無法復原。
+  Reset success: 已重設觀看統計資料
+  Less than a minute: < 1 分鐘
+  Minutes: '{minutes} 分鐘'
+  Hours: '{hours} 小時'
+  Hours and minutes: '{hours} 小時 {minutes} 分鐘'
+Home Page:
+  Home: 首頁
+  Description: 從上次中斷的位置繼續，並查看最近的活動。
+  Customize: 自訂首頁
+  Done: 完成
+  Customize description: 選擇要顯示的區塊，並依所需順序排列。
+  Continue watching: 繼續觀看
+  New since last visit: 上次造訪後的新內容
+  Watch queue: 觀看佇列
+  Recent playlists: 最近的播放清單
+  Recent downloads: 最近的下載項目
+  Upcoming reminders: 即將到來的提醒
+  Watch statistics: 觀看統計資料
+  View all: 查看全部
+  Previous shelf page: 上一頁：{section}
+  Next shelf page: 下一頁：{section}
+  Shelf page status: '{section}，第 {page} 頁，共 {total} 頁。'
+  Move section up: 將{section}上移
+  Move section down: 將{section}下移
+  Section moved: '{section}已移至第 {position} 位，共 {total} 位。'
+  Nothing here yet: 這裡還沒有內容
+  Empty description: 您開始觀看的影片、使用的播放清單、下載項目和提醒會顯示在這裡。
+  All sections hidden: 所有區塊均已隱藏
+  All sections hidden description: 自訂首頁以重新顯示區塊。
+Subscriptions:
+  Refreshing Subscription Videos: 正在重新整理訂閱影片
+  Refreshing Subscription Shorts: 正在重新整理訂閱的 Shorts 短片
+  Refreshing Subscription Live Streams: 正在重新整理訂閱直播
+  Refreshing Subscription Posts: 正在重新整理訂閱貼文
+  New Content: 新內容
+  New Feed Refresh Warning Title: 要重新整理所有訂閱動態消息嗎？
+  New Feed Refresh Warning: 為 {count} 個訂閱重新整理所有未使用 RSS 的內容類型可能需要很長時間。要繼續嗎？
+  New Since Last Refresh: 上次重新整理後的新內容
+  Mark as Seen: 標示為已看過
+  Mark All as Seen: 全部標示為已看過
+  No New Content: 沒有新內容。
+  New Content Tabs: 新內容分頁
+  Show Tabbed View: 顯示分頁檢視
+  Show Combined View: 顯示合併檢視
+  Newest First: 最新優先
+  Oldest First: 最舊優先
+  Posts:
+    RSS Message: YouTube 不提供貼文的 RSS 摘要。停用「{rssSetting}」設定以查看貼文，或啟用「{hideSetting}」設定以隱藏此分頁。
+Trending:
+  Load Error: 無法載入熱門趨勢。
+  Unsupported Backend: 熱門趨勢需要 Local API。請選擇 Local API 或啟用後端備援。
+Most Popular Feed Empty: 此 Invidious 伺服器的「最熱門」動態消息沒有內容。
+Feed:
+  Cancel Refresh: 取消重新整理
+  Next Auto Refresh: '下次自動重新整理：{date}'
+User Playlists:
+  Load More Playlists: 載入更多播放清單
+  Save to: 儲存至…
+  Quick Bookmark Icon: 快速加入書籤圖示
+  Custom Emoji: 自訂表情符號
+  Choose Image: 選擇圖片
+  Use Bookmark Icon: 使用書籤圖示
+  SinglePlaylistView:
+    Retry: 重試
+    This playlist could not be loaded.: 無法載入此播放清單。
+    More videos could not be loaded.: 無法載入更多影片。
+History:
+  Mark All As Watched: 全部標示為已觀看
+  Mark All As Watched Confirmation: 確定要將觀看記錄中的所有影片標示為已觀看嗎？
+  All History Marked as Watched: 已將觀看記錄中的所有影片標示為已觀看
+  Delete Old History: 刪除舊的觀看記錄
+  Select History Age: 選擇項目保留多久後刪除。
+  Delete Entries Older Than: 刪除早於以下時間的項目
+  Number of Days: 天數
+  History Cleanup Warning: 這會永久刪除符合條件的觀看記錄項目。
+  1 Day: 1 天
+  1 Week: 1 週
+  1 Month: 1 個月
+  3 Months: 3 個月
+  1 Year: 1 年
+  Custom: 自訂
+  History Older Than Days Removed: 已移除超過 {days} 天的觀看記錄
+Settings:
+  Quick Settings:
+    Quick Settings: 快速設定
+    Appearance: 外觀
+    Playback: 播放
+    Content: 內容
+    Language and Region: 語言與地區
+    All Settings: 所有設定
+    Profile Selector Hint: 您也可以在個人檔案圖示上按一下滑鼠右鍵來切換個人檔案
+  Categories:
+    General Description: 語言、啟動、分頁與應用程式行為
+    Appearance: 外觀
+    Appearance Description: 佈景主題、版面配置與縮圖
+    Content appearance: 影片清單與縮圖
+    Layout: 版面配置
+    Playback Description: 播放器、字幕與頻道偏好設定
+    Subscriptions Description: 動態消息重新整理與顯示選項
+    Downloads Description: 資料夾、範本與自動化規則
+    Distraction Free Description: 隱藏內容並設定觀看限制
+    Add-ons: 附加元件
+    Add-ons Description: SponsorBlock、DeArrow、倒讚數與配音翻譯
+    Privacy Description: 觀看隱私與存取控制
+    Online activity: 線上活動
+    Data And Storage Description: 匯入、匯出、磁碟使用量與清理
+    Sync Description: 讓設定與資料在各裝置間保持同步
+    Advanced: 進階
+    Advanced Description: 提供者、外部應用程式與網路
+    Alternative providers: 影片與中繼資料提供者
+  Highlight Changed Settings: 標示與預設值不同的設定
+  Reset Setting to Default: 將此設定重設為預設值
+  Performance Impact:
+    Show Performance Impact: 顯示效能影響指標
+    Moderate: 中度影響
+    High: 高度影響
+    Description: 此設定可能會增加 {resources} 使用量
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: 記憶體
+      Network: 網路
+      Disk: 磁碟
+  General Settings:
+    Update Relative Timestamps: 持續更新相對時間
+    Stream Extraction Method:
+      Stream Extraction Method: 串流擷取方式
+      yt-dlp: yt-dlp
+      Built-in: 內建
+    Confirm Before: 執行前確認…
+    Confirmation Options:
+      Closing App: 結束 OpenTubeX
+      Closing Window: 關閉含有多個分頁的視窗
+      Closing Tabs: 關閉多個分頁
+      Loading Tabs: 載入多個分頁
+      Unloading Tabs: 卸載多個分頁
+    Remember Tab Navigation History: 記住分頁瀏覽記錄
+    New Tab Position:
+      New Tab Position: 新分頁位置
+      At the end: 最後
+      After current tab: 目前分頁之後
+      After current tab in opened order: 目前分頁之後，並依開啟順序排列
+    Tab Close Focus:
+      Tab Close Focus: 關閉分頁後
+      Previous tab: 選取上一個分頁
+      Next tab: 選取下一個分頁
+    Startup Behavior:
+      Startup Behavior: 啟動時
+      Load all tabs: 載入所有分頁
+      Load previously loaded tabs: 載入先前已載入的分頁
+      Load last active tab: 載入上次使用的分頁
+      Start with an empty session: 以空白工作階段啟動
+    Use AI Translation Completions: 使用 AI 產生的文字補上缺少的翻譯
+    Reduced Motion:
+      Reduced Motion: 減少動態效果
+      System: 跟隨系統
+      Force On: 強制開啟
+      Force Off: 強制關閉
+    Comment Translation:
+      Title: 留言翻譯
+      Enable: 啟用留言翻譯
+      Never Translate: 一律不翻譯以下語言的留言
+      Choose Language: 選擇語言
+      Description: 系統已排除使用應用程式語言的留言。請加入其他您看得懂的語言。
+      Remove Language: 恢復翻譯 {language} 的留言
+    Avoid translation:
+      Avoid translation: 優先顯示未翻譯的影片文字
+      Disabled: 停用
+      Watch Only: 僅影片介面
+      Entire App: 整個應用程式
+    Playlist View Type:
+      Playlist View Type: 播放清單檢視類型
+    Show Thumbnail Previews: 顯示縮圖預覽
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: 縮圖額外操作按鈕
+      None: 無
+      Mark as Watched: 標示為已觀看
+      Copy YouTube Link: 複製 YouTube 連結
+      Open in YouTube: 在 YouTube 中開啟
+  Context Menu Search Settings:
+    Context Menu Search Settings: 內容選單搜尋
+    Description: 選擇在已選取文字上按一下滑鼠右鍵時顯示的搜尋引擎。搜尋結果會在預設瀏覽器中開啟。
+    Icon Hint: 啟用搜尋引擎後，會連線至其網站以載入 favicon。
+    Engine Name: 搜尋引擎名稱
+    Search URL: 搜尋 URL
+    URL Hint: 請在 URL 中使用 %s 代表應插入經編碼所選文字的位置。
+    Add Custom Engine: 新增自訂搜尋引擎
+    Add Engine: 新增搜尋引擎
+    Remove Engine: 移除 {engine}
+    Invalid Engine: 請輸入名稱，以及包含 %s 的有效 HTTP 或 HTTPS 搜尋 URL。
+    Engine Limit: 最多可新增 {count} 個自訂搜尋引擎。
+  Theme Settings:
+    Move Downloads to App Header: 將下載移至應用程式標頭
+    Move Settings to App Header: 將設定移至應用程式標頭
+    Hide Side Bar on Watch Pages: 在觀看頁面隱藏側邊欄
+    UI Roundness: 介面圓角程度
+    Scrollbar Width: 捲軸寬度
+    Scroll Speed: 捲動速度
+    Animation Speed: 動畫速度
+    Thumbnail Size: 縮圖大小
+    Show Tab Icons: 顯示頁籤圖示
+    Load Missing Tab Icons: 載入缺少的頁籤圖示
+    Loading Missing Tab Icons: 正在載入缺少的頁籤圖示…
+    No Missing Tab Icons: 已載入所有支援的頁籤圖示
+    Loaded Tab Icons: '已載入 {count} 個缺少的頁籤圖示'
+    Loaded Tab Icons With Failures: 已載入 {loaded} 個頁籤圖示；有 {failed} 個無法載入
+    Show Tab Previews: 顯示頁籤預覽
+    Use Fixed Tab Width: 在水平模式中使用固定頁籤寬度
+    Tab Width: 頁籤寬度
+    Tab Layout:
+      Tab Layout: 頁籤排列方式
+      Horizontal Top: 水平排列於頂端
+      Horizontal Bottom: 水平排列於底端
+      Vertical Left: 垂直排列於左側
+      Vertical Right: 垂直排列於右側
+    Show Toast Timeout Indicator: 顯示快顯通知逾時指示器
+    Use Grid Player Menu: 使用格狀播放器選單
+    Show Progress as Notification: 以通知顯示進度
+    Operation in Progress: 作業進行中
+    Toast Position:
+      Toast Position: 快顯通知位置
+      Bottom Left: 左下
+      Bottom Center: 中下
+      Bottom Right: 右下
+      Top Left: 左上
+      Top Center: 中上
+      Top Right: 右上
+    Icon Pack:
+      Icon Pack: 圖示套件
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: 應用程式字型
+      System Default: 系統預設
+      Unable to Load: 無法載入已安裝的系統字型
+    Always Show Scrollbars: 永遠顯示捲軸
+    Base Theme:
+      Custom: 自訂
+    Light Theme: 淺色主題
+    Dark Theme: 深色主題
+    Custom Theme:
+      Create Custom Theme: 建立自訂主題
+      Edit Custom Theme: 編輯自訂主題
+      Custom Theme Creator: 自訂主題建立工具
+      Theme Name: 主題名稱
+      Based On: 基礎主題
+      Import Theme: 匯入主題
+      Export Theme: 匯出主題
+      Share Theme: 分享主題
+      Share Description Heading: 說明
+      Share Description Prompt: 請說明此主題，以及使用前應注意的事項。
+      Share Screenshots Heading: 螢幕截圖
+      Share Screenshots Prompt: 將一張或多張螢幕截圖拖放到這裡。
+      Share Code Summary: 主題 JSON
+      Delete Theme: 刪除主題
+      Delete Theme Confirmation: 要刪除「{name}」嗎？此動作無法復原。
+      Save and Apply: 儲存並套用
+      Discard Changes: 捨棄變更
+      Reset Colors: 重設為基礎主題
+      Theme File: OpenTubeX 主題檔案
+      Theme Saved: 已儲存並套用自訂主題
+      Theme Imported: 已將主題匯入編輯器
+      Theme Exported: 已匯出主題
+      Theme Deleted: 已刪除自訂主題
+      Unable to Load: 無法載入自訂主題
+      Unable to Save: 無法儲存自訂主題
+      Unable to Export: 無法匯出自訂主題
+      Unable to Share: 無法分享自訂主題
+      Unable to Delete: 無法刪除自訂主題
+      Invalid Theme File: 無效的自訂主題檔案
+      Colors:
+        Main text: 主要文字
+        Secondary text: 次要文字
+        Subtle text: 低對比文字
+        Borders and dividers: 邊框與分隔線
+        Subtle surfaces and indicators: 低對比表面與指示器
+        Title text: 標題文字
+        Selected text background: 所選文字背景
+        Selected text: 所選文字
+        Logo icon: 標誌圖示
+        Logo text: 標誌文字
+        Logo hover: 游標停留於標誌
+        Logo pressed: 按下標誌
+        Page background: 頁面背景
+        Card background: 卡片背景
+        Secondary card background: 次要卡片背景
+        Favorite icon: 收藏圖示
+        Error color: 錯誤色彩
+        Scrollbar thumb: 捲軸滑塊
+        Scrollbar thumb hover: 游標停留於捲軸滑塊
+        Scrollbar thumb pressed: 按下捲軸滑塊
+        Dropdown item hover text: 游標停留於下拉式選單項目時的文字
+        Dropdown item hover background: 游標停留於下拉式選單項目時的背景
+        Navigation and panel background: 導覽與面板背景
+        Neutral item hover and focus background: 一般項目在游標停留與取得焦點時的背景
+        Neutral item hover and focus text and icons: 一般項目在游標停留與取得焦點時的文字與圖示
+        Neutral item pressed background: 按下一般項目時的背景
+        Neutral item pressed text and icons: 按下一般項目時的文字與圖示
+        Header button hover and focus background: 標頭按鈕在游標停留與取得焦點時的背景
+        Header button hover and focus text and icons: 標頭按鈕在游標停留與取得焦點時的文字與圖示
+        Header button pressed background: 按下標頭按鈕時的背景
+        Header button pressed text and icons: 按下標頭按鈕時的文字與圖示
+        Colored header button hover and focus background: 彩色標頭按鈕在游標停留與取得焦點時的背景
+        Colored header button hover and focus text and icons: 彩色標頭按鈕在游標停留與取得焦點時的文字與圖示
+        Colored header button pressed background: 按下彩色標頭按鈕時的背景
+        Colored header button pressed text and icons: 按下彩色標頭按鈕時的文字與圖示
+        Search and dropdown background: 搜尋與下拉式選單背景
+        Settings search background: 設定搜尋背景
+        Instance menu: 執行個體選單
+        Input background: 輸入欄背景
+        Shadow color: 陰影色彩
+        Primary controls and highlights: 主要控制項與醒目提示
+        Primary control hover and focus: 主要控制項的游標停留與焦點狀態
+        Primary control pressed: 主要控制項的按下狀態
+        Text and icons on primary controls: 主要控制項上的文字與圖示
+        Secondary controls and highlights: 次要控制項與醒目提示
+        Secondary control hover and focus: 次要控制項的游標停留與焦點狀態
+        Secondary control pressed: 次要控制項的按下狀態
+        Light secondary color: 淺次要色彩
+        Visited accent: 已瀏覽項目的強調色
+        Text and icons on secondary controls: 次要控制項上的文字與圖示
+        Links: 連結
+        Visited links: 已瀏覽的連結
+        Destructive action: 危險操作
+        Destructive hover and focus: 危險操作的游標停留與焦點狀態
+        Destructive pressed: 危險操作的按下狀態
+        Text and icons on destructive actions: 危險操作上的文字與圖示
+  Player Settings:
+    Automatically Open Chapters: 自動開啟章節
+    Caption Appearance:
+      Caption Appearance: 字幕外觀
+      Captions: 字幕
+      Preferred Language: 偏好的字幕語言
+      Application Language: 應用程式語言
+      Enable Translations: 啟用字幕翻譯
+      Text Color: 文字色彩
+      Background Color: 背景色彩
+      Background Opacity: 背景不透明度
+      Font Size: 字型大小
+      Vertical Position: 垂直位置
+      Edge Color: 邊緣色彩
+      Anchor:
+        Anchor: 錨點
+        Top Left: 左上
+        Top Center: 中上
+        Top Right: 右上
+        Bottom Left: 左下
+        Bottom Center: 中下
+        Bottom Right: 右下
+      Edge Style:
+        Edge Style: 邊緣樣式
+        None: 無
+        Outline: 外框
+        Drop Shadow: 投影
+      Reset: 重設字幕外觀
+    Auto Picture in Picture:
+      Auto Picture in Picture: 自動進入子母畫面
+      On Tab Change: 切換頁籤時
+      On Window Minimize: 視窗最小化時
+      On Window Hide: 視窗失去焦點或切換到其他視窗時
+      Wayland Minimize Unsupported: Wayland 不會向應用程式回報視窗最小化，因此無法使用這項觸發條件。請改用「視窗失去焦點或切換到其他視窗時」，這也涵蓋視窗最小化的情況。
+    Scroll Mini Player:
+      Scroll Mini Player: 捲動時顯示迷你播放器
+      When Scrolling Down: 向下捲動時讓迷你播放器留在畫面上
+      On All Tabs: 切換頁籤時讓迷你播放器留在畫面上
+    Multiply Seek Interval by Playback Rate: 依播放速度倍增跳轉間隔
+    Show Playback Rate Adjusted Timestamp: 顯示依播放速度調整後的時間戳記
+    Use YouTube-style Shorts: 使用 YouTube 樣式的 Shorts
+    Loop Shorts: 循環播放 Shorts
+    Remember Volume: 記住音量
+    Skip Silence: 跳過靜音片段
+    Show Skip Silence Toggle: 顯示「跳過靜音片段」切換開關
+    Enable Skip Silence by Default: 預設啟用跳過靜音片段
+    Enable Video Zoom: 啟用影片縮放
+    Voice-over Translation:
+      Title: 配音翻譯
+      Attribution: （由 Yandex 提供技術支援）
+      Enable: 啟用配音翻譯
+      Prepare in Background: 在背景開始準備配音翻譯
+      Background Preparation Tooltip: 支援的影片載入後，立即將目前影片的 ID、片長及所選語言傳送至翻譯服務。
+      Language: 配音翻譯語言
+      Supported Source Languages: '支援的來源語言：俄文、英文、中文、韓文、立陶宛文、拉脫維亞文、阿拉伯文、法文、義大利文、西班牙文、德文及日文。'
+      Voice Volume: 翻譯語音音量
+      Original Volume: 原始音訊音量
+      Russian: 俄文
+      English: 英文
+      Kazakh: 哈薩克文
+    Hold to Double Playback Speed: 按住即以兩倍速播放
+    Use Quick Playback Speed Bar: 使用快速播放速度列
+    Customize Quick Playback Speed Bar: 自訂快速播放速度列
+    Quick Playback Speed Bar Manager: 快速播放速度列
+    Add Playback Speed: 新增播放速度
+    Reset Quick Playback Speed Bar: 重設為預設值
+    Playback Speed Name: 名稱
+    Edit Playback Speed Name: 編輯播放速度名稱
+    Use Automatic Playback Speed Name: 自動命名播放速度
+    Reorder Playback Speed: 拖曳以重新排列播放速度
+    Playback Speed: 播放速度
+    Parallel Segment Loading: 平行載入片段
+  Channel Settings:
+    Channel Settings: 頻道設定
+    Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。
+    Enable Playback Speed: 啟用播放速度
+    Enable Video Quality: 啟用影片畫質
+    Enable Subtitles State: 啟用字幕狀態
+    Enable Volume: 啟用音量
+    Auto Update: 透過播放器選項變更時自動更新
+    Auto Update Subtitles: 切換時自動更新
+    Auto Update Volume: 每次調整音量時自動更新
+    Manage Saved Channels: 管理已儲存的頻道（{channelCount}）
+    Saved Channels: 已儲存的頻道設定
+    Enable Saved Channel Settings Sync: 同步已儲存的頻道設定
+    Disable Saved Channel Settings Sync: 停止同步已儲存的頻道設定
+    Search Channels: 搜尋頻道
+    No Saved Channels: 尚未儲存任何頻道專屬設定
+    No Matching Channels: 沒有符合搜尋條件的頻道
+    Forget Channel: 清除這個頻道的所有設定
+    Forget Value: 清除這項設定
+    Add Setting: 為這個頻道記住另一項設定
+    Video Quality: 影片畫質
+    Subtitles Enabled: 字幕已啟用
+    Volume: 音量
+  Download Settings:
+    Download Settings: 下載
+    Enable Downloads: 啟用下載
+    Managed Tools Download Started Template: '找不到必要的外部軟體：{tools}。正在下載由應用程式管理的副本…'
+    Managed Tools Download Finished Template: 已完成 {tools} 的下載
+    Managed Tools Update Started Template: 發現 {tools} 的更新。正在下載…
+    Managed Tools Update Finished Template: 已完成 {tools} 的更新
+    Managed Tools Update Available Template: 已有適用於 {tools} 的更新。
+    Update Managed Tools: 更新
+    Managed Tools Download Error Template: '無法下載由應用程式管理的工具：{errors}'
+    Download Folder: 下載資料夾
+    Global Additional yt-dlp Arguments: 全域額外 yt-dlp 引數
+    Concurrent Downloads: 同時下載數量
+    Bandwidth Limit: 頻寬限制（KiB/s，0 表示不限速）
+    Choose Download Folder: 選擇下載資料夾
+    Download Templates: 下載範本
+    Manage Download Templates: 管理下載範本（{templateCount}）
+    New Template: 新增範本
+    Template Source: 要編輯或作為基礎的範本
+    Built-in Template: '{name}（內建）'
+    Custom Template Name: '{name}（自訂）'
+    Create Template Copy: 建立副本
+    Template Copy Name: '{name} 副本'
+    Automatic Downloads: 自動下載
+    Manage Automatic Downloads: 管理自動下載（{channelCount}）
+    Automatic Downloads Description: 為每個已訂閱的頻道選擇下載範本和篩選條件。訂閱動態更新時，符合條件的影片會在背景下載。
+    Automatic Downloads New Only: 啟用頻道後，會從下一部新上傳的影片開始下載，不會下載現有影片或頻道中過往累積的影片。
+    Automatic Downloads No Channels: 請先訂閱頻道，再設定自動下載。
+    No Matching Automatic Download Channels: 沒有符合搜尋條件的頻道。
+    Automatic Downloads Livestreams: 直播
+    Minimum Duration Seconds: 最短時長（秒）
+    Maximum Duration Seconds: 最長時長（秒）
+    Minimum File Size MB: 最小檔案大小（MB）
+    Maximum File Size MB: 最大檔案大小（MB）
+    Maximum Age Days: 影片發布天數上限（天）
+    Title Includes: 標題包含
+    Title Excludes: 標題不含
+    Title Filter Hint: 請用逗號分隔多個標題詞彙。影片必須至少符合一個包含詞彙，且不得含有任何排除詞彙。
+  External Software Settings:
+    External Software Settings: 外部軟體
+    yt-dlp Source: yt-dlp 來源
+    yt-dlp Channel: yt-dlp 頻道
+    Sources:
+      System: 系統（PATH 或自訂路徑）
+      Managed: 由 OpenTubeX 管理
+    Detected Version Template: '偵測到的 yt-dlp 版本：{version}'
+    Managed Not Downloaded: 尚未下載 yt-dlp。請按下方按鈕下載。
+    System yt-dlp Missing Warning: 系統中找不到 yt-dlp。請安裝 yt-dlp、在下方設定自訂路徑，或將來源切換為「由 OpenTubeX 管理」。
+    Download yt-dlp: 下載 yt-dlp
+    Update yt-dlp: 更新 yt-dlp
+    Checking yt-dlp: 正在檢查 yt-dlp…
+    Downloading yt-dlp: 正在下載 yt-dlp…
+    yt-dlp Downloaded Template: 已下載 yt-dlp {version}
+    yt-dlp Download Error Template: '下載 yt-dlp 失敗：{error}'
+    FFmpeg Source: FFmpeg 來源
+    Detected FFmpeg Version Template: '偵測到的 FFmpeg 版本：{version}'
+    FFmpeg Managed Not Downloaded: 尚未下載 FFmpeg。請按下方按鈕下載。
+    System FFmpeg Missing Warning: 系統中找不到 FFmpeg。合併影片與音訊及轉換音訊時需要使用 FFmpeg。請安裝 FFmpeg、在下方設定自訂路徑，或將來源切換為「由 OpenTubeX 管理」。
+    Download FFmpeg: 下載 FFmpeg
+    Update FFmpeg: 更新 FFmpeg
+    Checking FFmpeg: 正在檢查 FFmpeg…
+    Downloading FFmpeg: 正在下載 FFmpeg…
+    FFmpeg Downloaded Template: 已下載 FFmpeg {version}
+    FFmpeg Download Error Template: '下載 FFmpeg 失敗：{error}'
+    Detected FFprobe Version Template: '偵測到的 FFprobe 版本：{version}'
+    FFprobe Managed Not Downloaded: 尚未下載 FFprobe。請按下方按鈕一併下載 FFmpeg 與 FFprobe。
+    System FFprobe Missing Warning: 系統中找不到 FFprobe。後製處理時需要使用 FFprobe 檢查媒體。請將它與 FFmpeg 安裝在相同資料夾，或將來源切換為「由 OpenTubeX 管理」。
+    Checking FFprobe: 正在檢查 FFprobe…
+    Download FFmpeg and FFprobe: 下載 FFmpeg 與 FFprobe
+    Update FFmpeg and FFprobe: 更新 FFmpeg 與 FFprobe
+    Downloading FFmpeg and FFprobe: 正在下載 FFmpeg 與 FFprobe…
+    FFmpeg and FFprobe Downloaded Template: 已下載 FFmpeg 與 FFprobe {version}
+    FFmpeg and FFprobe Download Error Template: '下載 FFmpeg 與 FFprobe 失敗：{error}'
+    Managed Tool Already Current Template: '{tool} {version} 已是最新版本'
+    Managed Tool Updates: 受管理工具的更新
+    Update Modes:
+      Automatic: 自動更新
+      Ask: 更新前詢問
+      Manual: 僅手動更新
+    yt-dlp Executable Path: yt-dlp 執行檔路徑
+    FFmpeg Executable Path: FFmpeg 執行檔路徑
+    Restricted Playback Authentication: yt-dlp 播放 Cookie
+    Cookie Source: Cookie 來源
+    Cookie Sources:
+      None: 無
+      File: 檔案
+      Browser: 瀏覽器
+    Cookie File: Cookie 檔案
+    Browser for Cookies: Cookie 來源瀏覽器
+    Browser Profile: 瀏覽器設定檔（選填）
+    Browser Profile Placeholder: 設定檔名稱或路徑
+    Select Browser: 選擇瀏覽器
+    Always Use Cookies: 一律使用 Cookie
+    Restricted Playback Authentication Hint: 根據預設，只有在受年齡限制或會員專屬的影片上選擇「使用已設定的 Cookie 重試」後，OpenTubeX 才會將這些 Cookie 傳給 yt-dlp。
+    Restricted Playback Authentication Warning: 透過 yt-dlp 使用 Google 帳戶可能導致帳戶受到暫時或永久限制。
+  Privacy Settings:
+    Automatic History Retention: 自動保留觀看記錄（天）
+    Automatic History Retention Placeholder: 留空則永久保留
+    Automatic History Retention Tooltip: 留空會永久保留記錄。儲存天數後，系統會立即移除較舊的項目，並在應用程式開啟期間自動清除。
+    History Retention Saved: 已儲存記錄保留設定
+    Invalid History Retention Days: 請輸入大於零的整數天數
+    Enable Watch Statistics: 啟用觀看統計
+    Week Starts On: 每週起始日
+    Cache Video Metadata: 中繼資料歷程
+    Cache Video Metadata Tooltip: 保留您瀏覽過之支援影片的每個中繼資料版本，包括標題、縮圖和說明。由於儲存中繼資料歷程會增加磁碟用量，因此預設停用。
+    Watched Percentage Threshold: 已觀看百分比門檻
+    Watched Percentage Threshold Tooltip: 影片播放到所選百分比且剩餘時間不超過 2 分鐘時，會標示為已觀看。設為 0% 時，影片會在開始播放時標示；設為 100% 時，則會在播放結束時標示。
+    Clear Video Metadata Cache: 清除影片中繼資料快取
+    Are you sure you want to clear the video metadata cache?: 確定要清除快取的影片標題、縮圖和說明嗎？
+    Failed to clear video metadata cache: 無法清除影片中繼資料快取
+    Video metadata cache has been cleared: 已清除影片中繼資料快取
+    Video Metadata Cache Size: '影片中繼資料快取：{size}'
+  Storage Settings:
+    Storage: 儲存空間
+    Downloaded Media: 追蹤中的已下載媒體
+    Storage Breakdown: 儲存空間明細
+    Shown Total: 顯示項目總計
+    Calculating: 正在計算…
+    Not Available: 無法取得確切大小
+    At Least: 至少 {size}
+    Failed To Read Storage: 無法讀取部分儲存空間大小
+    Downloaded Media Description: 下載記錄仍在追蹤的影片、音訊和字幕檔案。
+    Selected Download Folders: 使用者選擇的下載資料夾
+    Download History Records: 下載記錄
+    Download History Records Description: '{count} 筆已完成的下載記錄。這些記錄會追蹤狀態和檔案位置，但不含下載的媒體。'
+    Clear Download History Records: 清除下載記錄
+    Clear Download History Confirmation: 要清除所有已完成的下載記錄嗎？
+    Download Files Stay On Disk: 下載的檔案會保留在磁碟上，但不再顯示於「下載」頁面。
+    Clear Records: 清除記錄
+    Replaceable Caches: 可重新建立的快取
+    Application Caches: 應用程式快取
+    Browser Caches: 瀏覽器快取
+    Browser Caches Hint: Chromium 的 HTTP、GPU、程式碼、著色器、Service Worker 和字典快取。
+    Stored App Data: 已儲存的應用程式資料
+    Browser Runtime Data: 瀏覽器執行階段資料
+    Browser Runtime Data Hint: Chromium 的工作階段儲存空間與本機儲存空間、Cookie、隱私權與網路狀態，以及當機檔案。
+    Subscription Feed Cache: 訂閱與動態快取
+    Subscription Feed Cache Description: 儲存已擷取的訂閱影片、Shorts、直播和貼文。OpenTubeX 會在下次重新整理動態時重建此快取。
+    Clear Subscription Feed Cache: 清除訂閱與動態快取
+    Clear Subscription Feed Cache Confirmation: 要清除訂閱與動態快取嗎？
+    Subscription Feed Cache Effect: 訂閱動態在重新整理前可能顯示為空白。您的訂閱和設定檔不會變更。
+    Session Search Cache: 工作階段搜尋快取
+    In Memory: 記憶體中
+    Session Search Cache Description: '記憶體中快取了 {count} 次搜尋，讓返回上一頁時更快。OpenTubeX 關閉時會清除此快取。'
+    Clear Session Search Cache: 清除工作階段搜尋快取
+    Clear Session Search Cache Confirmation: 要清除工作階段搜尋快取嗎？
+    Session Search Cache Effect: 快取的結果頁面將遭捨棄。已儲存的搜尋記錄不會變更。
+    HTTP Cache: HTTP 快取
+    HTTP Cache Description: Electron 會將網路回應儲存在磁碟上，讓重複的要求不必再次下載相同資料即可載入。OpenTubeX 會視需要重建此快取。
+    Managed By Electron: 由 Electron 管理
+    Clear HTTP Cache: 清除 HTTP 快取
+    Clear HTTP Cache Confirmation: 要清除 Electron 的 HTTP 快取嗎？
+    HTTP Cache Effect: 快取重建期間，圖片和其他網路資源可能會有一次載入較慢的情況。
+    Tab Image Cache: 分頁縮圖和頻道頭像
+    Tab Image Cache Description: 儲存已開啟及還原之分頁的預覽圖片和頻道頭像。使用這些分頁時，OpenTubeX 會重新建立圖片。
+    Clear Tab Image Cache: 清除分頁圖片快取
+    Clear Tab Image Cache Confirmation: 要清除分頁縮圖和頻道頭像嗎？
+    Tab Image Cache Effect: 分頁圖片可能會短暫消失，並在使用相應分頁時重新建立。
+    Playback Caches: 播放快取
+    Playback Caches Description: 在不同應用程式工作階段之間儲存 yt-dlp 串流 URL，以及 YouTube 播放器檔案。URL 快取僅適用於透過 yt-dlp 擷取的串流。
+    Playback URL Cache Entry Size: yt-dlp 串流 URL 快取上限
+    Playback URL Cache Entry Size Tooltip: 設定每筆 yt-dlp 串流快取項目的大小上限。設為 0 MB 可停用 yt-dlp 串流的保留快取。
+    Clear Playback Caches: 清除播放快取
+    Clear Playback Caches Confirmation: 要清除 yt-dlp 和播放器快取嗎？
+    Playback Caches Effect: 重新擷取串流和播放器資料時，下次在本機播放可能需要較長時間。
+    Clear Cache: 清除快取
+    History Data: 已儲存的記錄
+    Video Metadata Description: 儲存支援影片過往的標題、縮圖和說明。刪除後無法重建舊版本。
+    Video Metadata Effect: 已儲存的中繼資料版本將永久刪除。目前的影片詳細資料仍可重新擷取。
+    Watch History: 觀看記錄與統計
+    Watch History Description: 觀看記錄會記下已觀看的影片和播放進度。觀看統計會儲存每日觀看總計。保留期間僅適用於觀看記錄。
+    Clear Watch Statistics: 清除觀看統計
+    Watch History Effect: 已觀看影片的記錄和儲存的進度將遭刪除。觀看統計會保留。
+    Clear Watch Statistics Confirmation: 要刪除所有觀看統計嗎？
+    Watch Statistics Effect: 每日觀看總計將遭刪除。觀看記錄會保留。
+    Search History: 搜尋記錄
+    Search History Description: 儲存您選擇記住的搜尋內容。
+    Delete Search History: 刪除搜尋記錄
+    Delete Search History Confirmation: 要刪除所有已儲存的搜尋記錄嗎？
+    Search History Effect: 先前搜尋所產生的已儲存搜尋建議將會消失。目前工作階段的快取會保留。
+    Other User Data: 其他使用者資料
+    Other Profile Files: 其他設定檔檔案
+    Other Profile Files Hint: OpenTubeX 尚無法辨識的備份、暫存檔案和設定檔項目。
+    Subscriptions And Profiles: 訂閱與設定檔
+    Subscriptions And Profiles Description: 儲存已訂閱的頻道、設定檔名稱和設定檔成員關係。
+    Subscriptions And Profiles Effect: 所有訂閱和其他設定檔都將永久刪除，動態快取資料也會一併清除。
+    Playlists Description: 儲存播放清單名稱、說明和已儲存的影片。
+    Playlists Effect: 每個播放清單及其中儲存的影片清單都將永久刪除。已下載的媒體檔案會保留。
+    Settings And Sessions: 設定、分頁工作階段和提醒
+    Settings And Sessions Description: 儲存應用程式偏好設定、可還原的分頁和直播提醒。請開啟設定檔資料夾以檢查或備份這些檔案；此頁面不會刪除它們。
+    Cleanup Complete: 儲存空間清理完成
+    Cleanup Failed: 儲存空間清理失敗
+  Subscription Settings:
+    Fetch Feed on Startup: 啟動時擷取動態
+    Show New Content Feed: 顯示新內容動態
+    Show New Content Indicators: 顯示新內容指示標記
+    Show Scheduled Live Streams / Premieres First: 優先顯示預定直播／首播
+    Auto Refresh Interval: 自動重新整理間隔
+    Videos Auto Refresh Interval: 影片自動重新整理間隔
+    Shorts Auto Refresh Interval: Shorts 自動重新整理間隔
+    Live Auto Refresh Interval: 直播自動重新整理間隔
+    Posts Auto Refresh Interval: 貼文自動重新整理間隔
+  Distraction Free Settings:
+    Sections:
+      Visible While Paused: 在全視窗／全螢幕模式暫停播放時顯示
+    Hide Channel Avatars: 隱藏頻道頭像
+    Shorten View Counts: 縮寫觀看次數和留言按讚數
+    Hide Comment Translation Buttons: 隱藏留言翻譯按鈕
+    Hide Home: 隱藏首頁
+    Hide Live Chat Replay: 隱藏即時聊天室重播
+    Disable A-B Repeat: 停用 A-B 循環
+    Hide End-Screen Annotations: 隱藏結束畫面註解
+    Hide Paid Promotion Badge: 隱藏付費宣傳標章
+    Show Player Controls: 顯示播放器控制項
+    Show Video Title: 顯示影片標題
+    Show Bottom Right Actions Dock: 顯示右下角操作列
+    Paused Interface Hide Delay: 暫停介面的隱藏延遲
+  Data Settings:
+    Data And Storage: 資料與儲存空間
+    Profile Directory: 設定檔資料夾
+    Open Profile Directory: 開啟設定檔資料夾
+    Invalid JSON row, skipping item: 第 {row} 列的 JSON 無效，略過此項目
+    Import subscriptions formats: '支援的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.csv, .json, .opml)、NewPipe (.json)、LibreTube 備份或 FreeTube 匯出檔 (.json)'
+    Import history formats: '支援的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)、LibreTube 備份 (.json)'
+    Import playlists formats: '支援的格式：OpenTubeX / FreeTube (.db)'
+    Import search history formats: '支援的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)'
+  Sync Settings:
+    Sync Settings: 同步
+    Enable Sync: 啟用同步
+    Privacy Passphrase: 隱私通關密語
+    Privacy Passphrase Hint: 請使用與帳戶密碼不同的通關密語。它不會離開此裝置，而且每台裝置都需要輸入；若遺失，將無法復原加密的同步資料。
+    Privacy Policy: 此伺服器的隱私權政策
+    Enhanced Privacy Enabled: 已啟用加強隱私保護。伺服器只會儲存加密的同步資料。
+    Enhanced Privacy Unsupported: 警告 — 此伺服器不支援加強隱私保護。伺服器營運者可查看同步的資料。
+    Description: 透過 OpenTubeX 或 LibreTube 同步伺服器同步訂閱、設定檔、播放清單、觀看記錄、設定和開啟的分頁。LibreTube 伺服器可能不支援所有同步功能。
+    Server URL: 伺服器 URL
+    Checking Server: 正在檢查同步伺服器…
+    Server Unavailable: 無法連線至此同步伺服器。請檢查 URL 後再試一次。
+    Username: 使用者名稱
+    Log In: 登入
+    Register: 註冊
+    Pair Another Device: 配對其他裝置
+    Pair With Existing Device: 與現有裝置配對
+    Device Name: 裝置名稱
+    This Device: 此裝置
+    Device Name Required: 請輸入此裝置的名稱。
+    Pairing Device Name Hint: 請選擇一個容易在核准此要求的裝置上辨識的名稱。
+    Create Pairing Code: 建立配對碼
+    Creating Pairing Code: 正在建立安全的配對碼…
+    Pairing QR Alt: 裝置 {device} 的配對 QR Code
+    Scan Pairing Code: 請在已連線的裝置上開啟「配對其他裝置」，然後掃描此代碼。
+    Pairing Code: 配對碼
+    Use Text Pairing Code: 改用文字代碼
+    Show QR Code: 顯示 QR Code
+    Text Pairing Code Hint: 將此代碼複製到現有裝置。代碼包含配對密鑰，配對完成後請從剪貼簿記錄中清除。
+    Pairing QR Warning: 此代碼只能顯示給將核准要求且已連線的受信任裝置。代碼會在兩分鐘後失效。
+    Pairing Expires: 配對碼將於 {time} 失效。
+    Verifying Pairing: 正在驗證傳送的隱私金鑰…
+    Completing Pairing: 正在完成裝置配對…
+    Compare Pairing Codes: 比對配對碼
+    Pairing Code Match Hint: 只有在此代碼與現有裝置上的代碼相符時才可確認。
+    Pairing Codes Match: 代碼相符
+    Pairing Approval Code Hint: 請保持此視窗開啟，並將此代碼與新裝置上的代碼比對。若代碼不同，新裝置不得繼續。
+    Pairing Scan Hint: 掃描要新增之裝置上顯示的配對碼。
+    Enter Pairing Code: 手動輸入代碼
+    Pairing Code Entry Hint: 貼上要新增之裝置上顯示的配對碼。
+    Check Pairing Code: 檢查代碼
+    Scan QR Code: 掃描 QR Code
+    Waiting For Pairing Code: 正在等待配對代碼…
+    Checking Pairing Request: 正在檢查配對要求…
+    Approving Pairing Request: 正在加密並傳送隱私金鑰…
+    Pairing Approval Warning: 只有在您要新增的裝置上看得到這項要求時才可核准。配對會授予帳號存取權並傳送隱私金鑰。
+    Approve Pairing: 核准配對
+    Try Again: 再試一次
+    Scan Again: 重新掃描
+    Camera Unavailable: OpenTubeX 無法存取相機。請檢查相機權限，或手動輸入配對代碼。
+    Pairing Unsupported: 此同步伺服器不支援安全裝置配對。
+    Pairing Failed: 裝置配對失敗。請使用新代碼再試一次。
+    Pairing Request Changed: 配對要求已變更、過期或已使用。請建立新代碼。
+    Pairing Server Mismatch: 此代碼屬於其他同步伺服器。
+    Pairing Verification Unavailable: 沒有可用來驗證所傳送金鑰的加密同步資料集合。請先同步現有裝置，再試一次。
+    Pairing Completed: 裝置配對完成
+    Pairing Approved: 已核准裝置配對
+    Disconnect: 中斷連線
+    Delete Account: 刪除同步帳號
+    Delete Account Confirmation: 要刪除同步帳號嗎？
+    Delete Account Warning: 這會永久刪除您的同步帳號，以及儲存在此伺服器上的所有資料。本機 OpenTubeX 資料不會遭到刪除。
+    Confirm Delete Account: 刪除帳號
+    Password Required: 必須輸入密碼
+    Account Deleted: 同步帳號已刪除
+    Connected as: 目前連線的帳號：{username}
+    Automatic Sync: 每次變更後及每五分鐘自動同步
+    Profiles: 個人檔案
+    Open Tabs: 開啟的分頁與工作階段
+    Disable Setting Sync: 停止同步此設定
+    Enable Setting Sync: 同步此設定
+    Sync Now: 立即同步
+    Downloading encrypted data: 正在下載加密的同步資料…
+    Syncing subscriptions: 正在同步訂閱內容…
+    Syncing playlists: 正在同步播放清單…
+    Syncing history: 正在同步觀看紀錄…
+    Syncing profiles: 正在同步個人檔案…
+    Syncing open tabs: 正在同步開啟的分頁與工作階段…
+    Syncing settings: 正在同步設定…
+    Uploading encrypted data: 正在上傳加密的同步資料…
+    Finishing sync: 正在完成同步…
+    Sync progress percentage: '{percentage}%'
+    Last synced: '上次同步：{date}'
+    History not supported: 此伺服器版本不支援同步觀看紀錄。
+    Settings not supported: 此伺服器版本不支援同步設定。
+    Sync completed: 同步完成
+    Sync failed: '同步失敗：{error}'
+    Data Loss Confirmation: 要確認執行會刪除資料的同步嗎？
+    Data Loss Warning: 伺服器目前的狀態會刪除先前同步的 {previous} 個 {collection} 項目中的 {deleted} 個。這可能表示伺服器移轉或重設失敗。只有在您確定要刪除且已有備份時才可繼續。
+    Confirm Data Loss: 刪除並繼續
+  Proxy Settings:
+    IP Block Recovery Script Path: IP 封鎖復原指令碼路徑
+    Select IP Block Recovery Script File: 選取 IP 封鎖復原指令碼檔案
+    Running IP block recovery script: 正在執行 IP 封鎖復原指令碼
+    IP block recovery script failed: 'IP 封鎖復原指令碼執行失敗（結束代碼：{exitCode}）'
+    IP block recovery script finished: IP 封鎖復原指令碼執行完畢
+    Reloading video after IP block recovery: IP 封鎖復原後正在重新載入影片
+    Failed to select IP block recovery script: 無法選取 IP 封鎖復原指令碼
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: 啟用 SponsorBlock 提交功能
+    SponsorBlock Private User ID (optional): SponsorBlock 私人使用者 ID（選填）
+    SponsorBlock Private User ID Tooltip: 貼上瀏覽器擴充功能中的 SponsorBlock 私人使用者 ID。留空即可使用應用程式產生的 ID。
+    Generated SponsorBlock User ID: 產生的 SponsorBlock 使用者 ID
+    Generated SponsorBlock User ID Tooltip: 此應用程式產生的 SponsorBlock 使用者 ID 可用於瀏覽器擴充功能，或在其他電腦上使用本應用程式時使用。
+    Export Generated User ID: 匯出產生的使用者 ID
+    Generated SponsorBlock User ID Copy Button: 複製產生的 SponsorBlock 使用者 ID
+    Generated SponsorBlock User ID Copied: 已將產生的 SponsorBlock 使用者 ID 複製到剪貼簿
+    Skip notification timeout: 略過通知顯示時間
+    Custom Color: 自訂色彩
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: 啟用 Return YouTube Dislike
+    Return YouTube Dislike Url: Return YouTube Dislike API 網址（預設為 https://ryd-proxy.kavin.rocks）
+  Password Dialog:
+    Incorrect Password: 密碼不正確
+    Unlock: 解鎖
+    Unlocking: 正在解鎖…
+  Search Settings: 搜尋設定
+  No Settings Found: 找不到設定
+Tutorial:
+  Skip: 略過
+  Next: 下一步
+  Finish: 完成
+  Got It: 知道了
+  Welcome:
+    Title: 歡迎使用 OpenTubeX
+    Description: 以下幾項控制功能能協助您快速熟悉操作。
+  Navigation:
+    Title: 媒體庫隨手可用
+    Description: 使用導覽列即可前往訂閱內容、播放清單、觀看紀錄等頁面。
+  Search:
+    Title: 搜尋或貼上連結
+    Description: 尋找影片與頻道，或直接在搜尋欄位貼上支援的影片網址。
+  Tabs:
+    Title: 在分頁中保持頁面開啟
+    Description: 同時開啟多個頁面也不會遺失目前位置。您可以選擇最適合版面配置的分頁位置。
+  Quick Settings:
+    Title: 打造個人風格
+    Description: 選擇佈景主題與預設影片畫質。您隨時可以在個人檔案選單中變更這些及其他偏好設定，也可以按滑鼠右鍵切換個人檔案。
+  Import Data:
+    Title: 帶著您的資料一起使用
+    Description: 您可以選擇從其他支援的應用程式或備份匯入訂閱內容、觀看紀錄、播放清單、搜尋紀錄或設定。
+    Action: 匯入資料
+    Not Now: 暫時不要
+  Settings Moved:
+    Title: 設定已移至新位置
+    Description: 選取右上角的個人檔案即可使用快速控制。按滑鼠右鍵可直接前往個人檔案選擇畫面。該選單中的齒輪按鈕會開啟所有設定，「關於」與「下載」也已移至此選單。
+About:
+  Commit: 提交版本
+  Fluxer: 加入我們的 Fluxer 社群
+  Matrix: Matrix
+  Email: 電子郵件
+Profile:
+  Profile Icon: 個人檔案圖示
+  Choose an Emoji: 選擇表情符號
+  Custom Emoji: 自訂表情符號
+  Emoji: 表情符號
+  Choose Image: 選擇圖片
+  Crop Image: 裁剪圖片
+  Zoom: 縮放
+  Apply Crop: 套用裁剪
+  Transparent: 透明
+  Use Initial: 使用首字母
+  The selected image could not be loaded: 無法載入選取的圖片
+  Theme Color: 佈景主題色彩
+Channel:
+  Channel Name Unavailable: 無法取得頻道名稱
+  Search Result Types: 搜尋結果類型
+  All Results: 全部
+Video:
+  Includes paid promotion: 包含付費宣傳內容
+  Age Restricted Badge: 有年齡限制
+  Queue: 佇列
+  Play Next: 接著播放
+  Add to Queue: 加入佇列
+  Added to Play Next: 影片將接著播放
+  Added to Queue: 影片已加入佇列
+  Clear Queue: 清除佇列
+  Queue Video Count: '{count} 部影片'
+  Remove from Queue: 從佇列中移除 {title}
+  Drag to Reorder Queue: 拖曳 {title} 以重新排列佇列
+  Reorder Queue Item: 重新排列 {title}
+  Reorder Queue Item Instructions: 使用向上鍵與向下鍵移動此影片在佇列中的位置。
+  Queue Item Moved: 已將 {title} 移至第 {position} 位，共 {total} 部影片。
+  Queue Item Cannot Move Up: 無法將 {title} 上移。此影片已位於第 1 位，共 {total} 部影片。
+  Queue Item Cannot Move Down: 無法將 {title} 下移。此影片已位於第 {total} 位，共 {total} 部影片。
+  Metadata: 影片資訊
+  Close Metadata: 關閉影片資訊
+  Collapse Playlist: 收合播放清單
+  Expand Playlist: 展開播放清單
+  Metadata Cache:
+    Title History: 標題紀錄
+    Thumbnail History: 縮圖紀錄
+    Description History: 說明紀錄
+    Previous Version: 先前版本 {number}
+    Empty: （空白）
+  Fetching Streams: 正在使用 yt-dlp 擷取串流…
+  Transcript:
+    Title: 逐字稿
+    Search: 搜尋逐字稿
+    Language: 逐字稿語言
+    Save: 儲存
+    Show: 顯示逐字稿
+    Hide: 隱藏逐字稿
+    Close: 關閉逐字稿
+    Copied: 已將逐字稿複製到剪貼簿
+    Saved: 逐字稿已儲存
+    Save Error: 無法儲存逐字稿
+    Text File: 文字檔案
+    Unavailable: 此影片沒有可用的逐字稿。
+    Load Error: 無法載入逐字稿。
+    Empty: 此逐字稿沒有任何文字。
+    No Results: 沒有符合搜尋內容的逐字稿片段。
+  Retry With Built-in Extraction: 使用內建擷取功能重試
+  Retry With yt-dlp Extraction: 使用 yt-dlp 擷取功能重試
+  Reloading video after streaming URL error: 串流網址發生錯誤，正在重新載入影片
+  Configure Restricted Playback Cookies Hint: 請前往「設定 → 外部軟體 → yt-dlp 播放 Cookie」設定 Cookie。
+  Try With Configured Cookies: 使用已設定的 Cookie 重試
+  Restricted Playback Authentication Failed Template: 'yt-dlp 無法使用已設定的 Cookie 存取此影片：{error}'
+  Unmark As Watched: 標示為未觀看
+  Video has been unmarked as watched: 影片已標示為未觀看
+  Save Channel Playback Speed: 儲存頻道播放速度
+  Channel Playback Speed Saved: 頻道播放速度已儲存
+  Save Channel Video Quality: 儲存頻道影片畫質
+  Channel Video Quality Saved: 頻道影片畫質已儲存
+  Save Channel Subtitles State: 儲存頻道字幕狀態
+  Channel Subtitles State Saved: 頻道字幕狀態已儲存
+  Save Channel Volume: 儲存頻道音量
+  Channel Volume Saved: 頻道音量已儲存
+  Save Channel Setting: 正在儲存頻道設定…
+  Channel Setting Already Set: '{setting} 已設為 {value}'
+  Video has been saved to {playlistName}: 影片已儲存至 {playlistName}
+  Video has been removed from {playlistName}: 影片已從 {playlistName} 移除
+  There was a problem saving the video to {playlistName}: 將影片儲存至 {playlistName} 時發生問題
+  There was a problem removing the video from {playlistName}: 從 {playlistName} 移除影片時發生問題
+  Failed to load collaborators: 無法載入協作者
+  Notify me: 通知我
+  Notification on: 通知已開啟
+  Notification enabled: 此影片開始時會通知您
+  Notification cancelled: 已取消開始播放通知
+  Notification unavailable: 無法使用系統通知
+  Scheduled video starting: 排定的影片即將開始
+  Live notification body: '{videoTitle} 現在開始'
+  Premiere: 首映
+  AI: AI
+  AI-generated content: AI 產生的內容
+  Collaborators: 協作者
+  Live Chat Replay: 即時聊天重播
+  Show Live Chat: 顯示即時聊天
+  Show Live Chat Replay: 顯示即時聊天重播
+  Close Live Chat: 關閉即時聊天
+  Close Live Chat Replay: 關閉即時聊天重播
+  Live Chat Settings: 即時聊天設定
+  Show Live Chat Timestamps: 顯示時間戳記
+  Chat Filter: 聊天篩選器
+  Top Chat: 熱門聊天訊息
+  All Messages: 所有訊息
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: 即時聊天重播已啟用。影片播放時，聊天訊息會顯示在這裡。
+  Premiere started: 首映進行中，已於 {timeAgo} 開始
+  Sponsor Block category:
+    hook: 開場／問候
+  Player:
+    Voice-over Translation:
+      Start: 翻譯
+      Cancel: 取消
+      Progress: 正在準備語音翻譯…
+      Retry: 重試
+      Error: 語音翻譯失敗。請稍後再試。
+      Duration Error: 語音翻譯僅適用於片長不超過四小時的影片。
+    Caption Appearance:
+      Options: 選項
+      Sample: 字幕會顯示成這樣
+    Auto-translate: 自動翻譯
+    Sleep Timer:
+      Sleep Timer: 睡眠計時器
+      'Off': '關閉'
+      Minutes: '{minutes} 分鐘'
+      End of video: 影片結束時
+      Remaining: '剩餘 {time}'
+      Cancel timer: 取消計時器
+      Timer ended: 睡眠計時器已結束
+    A-B Repeat:
+      A-B Repeat: A-B 循環
+      On: 開啟
+      Off: 關閉
+      Point A: 點 A
+      Point B: 點 B
+      Set Repeat Start: 設定循環起點
+      Set Repeat End: 設定循環終點
+      Pause Repeat: 暫停 A-B 循環
+      Resume Repeat: 繼續 A-B 循環
+      Adjust Point: '調整點 {point}，目前為 {timestamp}'
+      Clear Range: 清除 A-B 循環範圍
+      End Before Start: 點 B 必須位於點 A 之後。
+      Outside Duration: 時間戳記必須在影片時長範圍內。
+      Cleared: 已清除 A-B 循環
+    Zoom:
+      Zoom: 縮放
+      'Off': '關閉'
+    Auto-generated Caption Template: '{language}（自動產生）'
+    Up next in {seconds}: 將於 {seconds} 秒後接著播放
+    Resize dock: 調整停駐區大小
+    Play now: 立即播放
+    MusicPlaybackRateOverride: 偵測到音樂影片，正以 1 倍速播放
+    Normal: 一般
+    Set Default: 設為預設值
+    Hide Annotations: 隱藏註解
+    Show Annotations: 顯示註解
+    Hide: 隱藏
+    Show: 顯示
+    Scroll Mini Player:
+      Back to Top: 返回頂端
+      Return to Video Tab: 返回影片分頁
+      Hide: 隱藏迷你播放器
+      Play: 播放
+      Pause: 暫停
+      Drag Handle: 移動迷你播放器
+    SponsorBlock:
+      CancelCurrentSegment: 取消建立片段
+      ClearSegments: 清除片段
+      ClearSegmentsPrompt: 確定要清除此影片所有已建立的 SponsorBlock 片段草稿嗎？
+      CompleteSegmentsBeforeSubmitting: 提交前請完成所有片段草稿。
+      CategoryLabel: 類別
+      ActionTypeLabel: 片段類型
+      DuplicateSegments: 片段草稿不可重複。
+      EndAction: （結束）
+      EndActionLabel: 結束
+      EndTimeAfterStart: 片段結束時間必須晚於開始時間。
+      EndTimeBeforeVideoEnd: 片段結束時間不可超過影片長度。
+      EndTimeLabel: 片段結束時間
+      DisableAutoSkipTemporarily: 暫時停用 SponsorBlock 自動略過功能
+      EnableAutoSkipTemporarily: 重新啟用 SponsorBlock 自動略過功能
+      Guidelines: 規範
+      InspectSegment: 檢查
+      InvalidStartTime: 請輸入有效的片段開始時間。
+      NoSegmentsToSubmit: 提交前請至少建立一個完整片段。
+      NowAction: （現在）
+      CloseInfoPanel: 關閉 SponsorBlock 資訊
+      OpenInfoPanel: 開啟 SponsorBlock 資訊
+      OpenSubmissionMenu: 開啟提交選單
+      PreviewRequired: 提交前請預覽每個片段。
+      PreviewSegment: 預覽
+      SaveSegment: 儲存
+      SetSegmentEndNow: 將現在設為片段結束時間
+      StartAction: （開始）
+      StartSegmentNow: 從現在開始片段
+      SubmissionBadRequest: SponsorBlock 拒絕提交要求。
+      SubmissionDuplicate: 此內容先前已提交。
+      SubmissionFailed: 無法提交 SponsorBlock 片段。
+      SubmissionForbidden: SponsorBlock 拒絕了此次提交。
+      SubmissionRateLimited: 提交過於頻繁，SponsorBlock 已限制此次提交。
+      SubmissionSuccess: 已提交 SponsorBlock 片段。
+      SubmitSegment: 提交片段
+      SubmitSegments: 提交
+      StartTimeLabel: 片段開始時間
+      TimeDivider: 到
+      SkipPrompt: 要略過{segmentCategory}嗎？
+      SkipPromptAction: 略過
+      SkipToHighlight: 要跳到精彩片段嗎？
+      SkippedToHighlight: 已跳到精彩片段
+      SkipToastUnskip: 取消略過
+      SkipToastReskip: 再次略過
+      MutedSegment: '已將{segmentCategory}靜音'
+      MuteToastUnmute: 取消靜音
+      InfoPanelLoading: 仍在載入片段...
+      InfoPanelHasSegments: 此影片在資料庫中有片段！
+      InfoPanelNoSegments: 找不到片段
+      RefreshSegments: 重新整理片段
+      RefreshInfo: 重新整理 SponsorBlock 資訊
+      ContributionStatsTitle: 您的貢獻
+      ContributionStatsLoading: 正在載入貢獻統計資料...
+      ContributionStatsError: 無法取得貢獻統計資料。請嘗試重新整理。
+      ContributionStatsNoUserId: 請提交片段或匯入您的 SponsorBlock 使用者 ID，以檢視貢獻統計資料。
+      Submissions: 提交次數
+      Segments: 片段
+      TimeSaved: 節省的時間
+      AutoSkipEnabled: 自動略過片段
+      AutoSkipOn: '開啟'
+      AutoSkipOff: '關閉'
+      WhitelistChannel: 將頻道加入白名單
+      ChannelWhitelisted: 已加入白名單
+      RemoveChannelFromWhitelist: 從白名單移除頻道
+      MuteSegment: 將片段靜音
+      SkipSegment: 略過片段
+      CloseSegmentActions: 關閉片段操作
+      FullVideo: 完整影片
+      FullVideoLabel: '{segmentCategory} · 完整影片'
+      MuteActionType: 靜音
+      MutePrompt: 要將{segmentCategory}靜音嗎？
+      SkipActionType: 略過
+      LockedSegment: 已鎖定的片段
+      UpvoteSegment: 投贊成票
+      DownvoteSegment: 投反對票
+      VoteFailed: 無法提交 SponsorBlock 投票。
+Playlist:
+  Close Playlist: 關閉播放清單
+Change Format:
+  Local Video File: 本機影片檔案
+  Local Audio File: 本機音訊檔案
+  Online Video: 線上影片
+  Stream Source: 串流來源
+  Stream Extraction Method: 串流擷取方式
+  Playback Engine: 播放引擎
+  Streaming Protocol: 串流通訊協定
+  Not Available For This Video: 此影片不支援此選項
+  Protocols:
+    Progressive: 漸進式
+  Descriptions:
+    Local File: 直接播放此裝置上已下載的檔案
+    Online Video: 從設定的線上來源載入串流格式
+    Dash: 可調整畫質、支援多個音軌及最高解析度
+    Legacy: 影片與音訊合併在單一檔案中，僅支援較低解析度
+    Audio: 僅播放音訊，適合節省頻寬或在背景收聽
+  yt-dlp Fallback Template: 'yt-dlp 無法提供串流，改用內建引擎：{error}'
+  yt-dlp Default Clients Fallback: 偏好的 yt-dlp 用戶端無法提供可播放的串流，改用 yt-dlp 的預設用戶端
+  Built-in Fallback Template: '內建引擎無法播放串流，改用 yt-dlp：{error}'
+Share:
+  Timestamp Link Copied: 已將時間戳記連結複製到剪貼簿
+Context Menu:
+  Context Menu: 內容功能表
+  Select All: 全選
+  Save Image As…: 將圖片另存為…
+  Copy Image: 複製圖片
+  Copy Image Address: 複製圖片位址
+  Cancel Refresh: 取消重新整理
+  Reload Videos: 重新載入影片
+  Reload Shorts: 重新載入 Shorts
+  Reload Live: 重新載入直播
+  Reload Posts: 重新載入貼文
+  Reload All Feeds: 重新載入所有動態消息
+  Close Multiple Tabs: 關閉 {count} 個分頁
+  Duplicate Tab: 複製分頁
+  Duplicate Multiple Tabs: 複製 {count} 個分頁
+  Move Tab: 移動分頁
+  Move Tabs: 移動分頁
+  Move Tab to Group: 將分頁移至群組
+  Collapse Group: 收合群組
+  Move Tabs to Group: 將分頁移至群組
+  Manage Tab Groups…: 管理分頁群組…
+  To Beginning: 移至開頭
+  To End: 移至結尾
+  Close Tabs: 關閉分頁
+  To the Top: 移至頂端
+  To the Left: 移至左側
+  To the Bottom: 移至底端
+  To the Right: 移至右側
+  Other Tabs: 其他分頁
+  Copy YouTube Link: 複製 YouTube 連結
+  Copy YouTube Links: 複製 YouTube 連結
+  Pin Tab: 固定分頁
+  Pin Tabs: 固定分頁
+  Unpin Tab: 取消固定分頁
+  Unpin Tabs: 取消固定分頁
+  Tab Color: 分頁顏色
+  Default: 預設
+  Purple: 紫色
+  Reopen Closed Tab: 重新開啟已關閉的分頁
+  Reload Tab: 重新載入分頁
+  Reload Tabs: 重新載入分頁
+  Load Tab: 載入分頁
+  Load Tabs: 載入分頁
+  Unload Tab: 卸載分頁
+  Unload Tabs: 卸載分頁
+  Move Tab to Window: 將分頁移至視窗
+  Move Tabs to Window: 將分頁移至視窗
+  Open in a New Tab: 在新分頁開啟
+  Open in a New Window: 在新視窗開啟
+  Copy Link: 複製連結
+  Copy Invidious Link: 複製 Invidious 連結
+  Search Selection in New Tab: 在新分頁搜尋「{selection}」
+  Search Selection in New Window: 在新視窗搜尋「{selection}」
+  Search With: 使用 {engine} 搜尋
+  Search With Multiple: 搜尋工具...
+  Selection Too Long: 選取內容過長，無法搜尋（> {count} 個字元）
+Tab Organizer:
+  Title: 分頁整理器
+  Open Tab Count: '目前開啟 {count} 個分頁'
+  Search Label: 搜尋分頁
+  Selected Count: '已選取 {count} 個分頁'
+  Tab Count: '{count} 個分頁'
+  Select All: 全選
+  Select None: 全部取消選取
+  Move To Group: 將所選分頁移至群組
+  Choose Group: 選擇群組
+  Ungrouped: 未分組
+  Pin: 固定
+  Unpin: 取消固定
+  Load: 載入
+  Unload: 卸載
+  Unload All: 全部卸載
+  Close All: 全部關閉
+  Ungroup: 取消分組
+  Group Name: 群組名稱
+  Color: 顏色
+  No Color: 無顏色
+  Create Group: 建立群組
+  Expand Group: 展開群組
+  Collapse Group: 收合群組
+  Expand Group Label: 展開 {name}，共 {count} 個分頁
+  Rename Group: 重新命名 {name}
+  Change Group Color: 變更 {name} 的顏色
+  Move To Window: 移至視窗
+  Choose Window: 選擇視窗
+  Select Tab: 選取 {title}
+  Active: 使用中
+  Pinned: 已固定
+  Unloaded: 已卸載
+  Playing: 播放中
+  Close Tab: 關閉 {title}
+  No Open Results: 目前開啟的分頁都不符合搜尋條件。
+  Recently Closed: 最近關閉
+  Clear: 清除
+  No Closed Results: 最近關閉的分頁都不符合搜尋條件。
+  Drag Tab: 拖曳以移至群組
+Chapters:
+  Open Chapters: 開啟章節
+  Close Chapters: 關閉章節
+  Copy Timestamp Link: 複製從 {timestamp} 開始的連結
+Comments:
+  Comment Count: '{count} 則留言'
+  Show Comments: 顯示留言
+  Getting comment replies, please wait: 正在取得留言回覆，請稍候
+  Reload Comments: 重新載入留言
+  Reply Count: '{replyCount} 則回覆'
+  Comments are turned off: 留言功能已關閉
+  YouTube did not provide advertised replies: YouTube 顯示此留言有回覆，但未提供回覆內容。這些回覆可能已遭刪除或隱藏，因此已移除回覆按鈕。
+  Pinned by you: 已由您置頂
+  A reply is pinned: 有一則回覆已置頂
+  Filter loaded comments: 篩選已載入的留言
+  Comment filters: 留言篩選條件
+  From creator: 來自創作者
+  Contains timestamps: 包含時間戳記
+  Pin comment by author: 將 {author} 的留言置頂
+  Unpin comment by author: 取消置頂 {author} 的留言
+  Edited: （已編輯）
+  Highlighted comment: 精選留言
+  Highlighted reply: 精選回覆
+  Search loaded comments: 搜尋已載入的留言
+  Loaded comment search result count: '已載入的留言中有 {count}/{total} 則符合搜尋'
+  No loaded comments match your filters: 已載入的留言中沒有符合篩選條件的內容
+  YouTube comment link copied to clipboard: 已將 YouTube 留言連結複製到剪貼簿
+  Translate to {language}: 翻譯成{language}
+  Show original: 顯示原文
+  Translating comment, please wait: 正在翻譯留言，請稍候
+  Comment translation failed: 留言翻譯失敗
+Description:
+  Copy Description: 複製說明
+  Description Copied: 已將說明複製到剪貼簿
+  Video Category: '影片類別：'
+  Video Tags: 影片標籤
+  Games: 遊戲
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: 使用 AI 產生的文字補齊人工翻譯的缺漏。人工翻譯一律優先採用。
+    Update Relative Timestamps: 頁面開啟期間持續更新應用程式中的相對時間戳記。停用後，只有重新載入或再次開啟頁面時才會更新。
+    Stream Extraction Method: |
+      選擇 OpenTubeX 取得影片串流的方式。選擇 yt-dlp 時，系統必須能使用 yt-dlp。
+      使用 yt-dlp 時，影片可能需要更久才會開始播放。
+      內建方式不支援在直播和首播中跳轉播放位置。
+    Avoid translation: |
+      停用 YouTube 自動翻譯影片標題、說明與章節的功能。
+      提出過多請求（例如擷取多份清單中的影片標題）可能會暫時
+      影響應用程式的穩定性。
+    Show Thumbnail Previews: 將滑鼠游標停在影片縮圖上時顯示動畫預覽。
+    Startup Behavior: |
+      選擇 OpenTubeX 啟動時要執行的動作。
+      載入所有分頁會立即還原每個已儲存的分頁，但背景分頁不會自動播放影片。
+      載入先前載入的分頁會重新載入 OpenTubeX 關閉時已載入的分頁，其他分頁則維持未載入狀態。
+      載入上次使用的分頁會還原前一個工作階段，其他分頁會保持開啟但尚未載入，點選時才會載入。
+      以空白工作階段啟動會略過已儲存的分頁並開啟全新視窗。
+    Remember Tab Navigation History: 儲存每個分頁的上一頁與下一頁瀏覽記錄，並在 OpenTubeX 重新啟動時還原。
+  Proxy Settings:
+    IP Block Recovery Script Path: 偵測到 IP 封鎖時要執行的指令碼檔案路徑。OpenTubeX 會等候指令碼執行完畢，再重新載入影片。若已啟用備援功能，則僅在備援也失敗時執行。
+  Player Settings:
+    Enable Caption Translations: 啟用後，若影片未提供符合偏好字幕語言的原始字幕軌，字幕按鈕與 C 快捷鍵會優先選用自動翻譯的字幕軌。
+    Use Quick Playback Speed Bar: 在播放器右側的控制項中顯示快速播放速度列。若已啟用手動儲存各頻道播放速度，速度列也會顯示用來儲存目前頻道播放速度的按鈕。
+    Multiply Seek Interval by Playback Rate: 啟用後，快轉與倒轉間隔（方向鍵及 J/L）會乘以目前的播放速率。停用後，無論播放速率為何，間隔都保持不變。
+    Show Playback Rate Adjusted Timestamp: 啟用後，若播放速度不是 1x，播放器會在一般時間戳記後以括號顯示依播放速率調整的時間戳記。
+    Use YouTube-style Shorts: 在訂閱與頻道頁面上以直向格狀排列顯示 Shorts，並使用 YouTube 風格的 Shorts 播放器。
+    Loop Shorts: 啟用後，Shorts 會自動重新播放。停用後，Shorts 會在結束時停止並顯示重播按鈕。
+    Show Skip Silence Toggle: 在播放器的設定選單中顯示略過靜音的開關。
+    Enable Skip Silence by Default: 新分頁預設啟用略過靜音。在一個分頁中變更此設定不會影響其他分頁。
+    Enable Video Zoom: 在播放器的設定選單中顯示縮放控制項，並啟用其鍵盤快捷鍵與平移控制項。
+    Voice-over Translation: 當您要求翻譯時，將影片 ID、長度與所選語言傳送至非官方 Yandex 語音翻譯服務。預設為停用。
+    Hold to Double Playback Speed: 在播放器上按住空白鍵或滑鼠左鍵，即可暫時將目前的播放速度加倍。
+    Ambient Mode: 將影片色彩融合至播放器周圍區域。
+    Default Volume: 啟用「記住音量」時無法使用。關閉「記住音量」，即可為每部影片設定固定的起始音量。
+    Parallel Segment Loading: |
+      播放前要同時預先載入的影片與音訊片段數量。
+      較高的值可能有助於改善緩慢或不穩定的連線，但會使用更多頻寬與記憶體。
+      也可能使「自動」低估連線速度並選擇較低的畫質。
+      限制為一次只能提出一項請求的串流會忽略此設定。
+  Download Settings:
+    Download Folder: 影片會儲存至此資料夾。留白可使用系統的「下載」資料夾。
+    Global Additional yt-dlp Arguments: 每次下載時傳遞給 yt-dlp 的額外命令列引數，例如 --cookies-from-browser firefox。
+    Concurrent Downloads: 可同時執行的 yt-dlp 工作數量上限。
+    Bandwidth Limit: 將此上限分配給同時執行的工作，以限制佇列的總傳輸速率。輸入 0 表示不設限。
+  External Software Settings:
+    yt-dlp Source: OpenTubeX 可使用系統中安裝的 yt-dlp，也可下載並管理自己的 yt-dlp 副本。該副本會儲存在使用者資料目錄中。
+    yt-dlp Channel: 選擇 OpenTubeX 要下載及管理的 yt-dlp 發行頻道。建議大多數使用者選用 Stable。
+    FFmpeg Source: OpenTubeX 可使用系統中安裝的 FFmpeg 與 FFprobe，也可下載並管理自己的靜態組建。這些組建會儲存在使用者資料目錄中。
+    Managed Tool Updates: 選擇受管理工具要自動更新、更新前詢問，或只透過手動按鈕更新。需要缺少的工具時仍會下載。
+    yt-dlp Executable Path: OpenTubeX 預設會假設可透過 PATH 環境變數找到 yt-dlp。如有需要，可在此設定自訂路徑。
+    Cookie Source: 選擇 yt-dlp 要讀取 Netscape Cookie 檔案，還是已安裝瀏覽器中的 Cookie，以進行驗證後播放。
+    Cookie File: 選擇 Netscape 格式的 Cookie 檔案，以進行驗證後播放。
+    Browser for Cookies: 瀏覽器支援資訊是從所選的 yt-dlp 執行檔讀取。要求驗證後播放時，OpenTubeX 會要求 yt-dlp 讀取此瀏覽器。
+    Browser Profile: 選填的瀏覽器設定檔名稱或資料夾。留白可使用最近存取的設定檔。
+    Always Use Cookies: 每當 yt-dlp 擷取串流時，都使用已設定的 Cookie。這不會將串流擷取方式切換為 yt-dlp。選用 yt-dlp 後，可能會提供僅限帳戶使用的格式，包括帳戶有權使用時的 YouTube Premium 增強型位元率。
+    FFmpeg Executable Path: 合併分開的影片與音訊串流及轉換音訊時需要 FFmpeg。OpenTubeX 預設會假設可透過 PATH 環境變數找到 FFmpeg。如有需要，可在此設定自訂路徑。
+  Distraction Free Settings:
+    Shorten View Counts: 將 YouTube 已四捨五入的觀看次數與留言按讚數以縮寫顯示，例如以 14K 取代 14,000。精確數字一律完整顯示。
+  Subscription Settings:
+    Fetch Feed on Startup: 啟用後，OpenTubeX 會在啟動及開啟新視窗時自動擷取您的訂閱動態消息。
+    Show New Content Feed: 顯示「新增」分頁，其中包含上次擷取時尚未出現的訂閱動態消息項目。
+    Show New Content Indicators: 在上次擷取時尚未出現的訂閱動態消息項目旁顯示小圓點。
+    Show Scheduled Live Streams / Premieres First: 將即將開始的直播與首播保留在訂閱動態消息頂端。停用後，這些項目會留在公告時的位置，直到開始為止。停用後請重新整理一次訂閱動態消息，以取得現有排程項目的公告日期。
+    Auto Refresh Interval: 應用程式開啟時，OpenTubeX 自動重新整理訂閱動態消息的頻率。
+  Theme Settings:
+    Show Progress as Notification: 以持續顯示的通知呈現背景作業的即時進度（例如重新整理訂閱與下載受管理工具），而不使用全域進度列。
+    Always Show Scrollbars: 讓捲動軸隨時保持顯示。停用後，停止移動滑鼠不久便會淡出，再次移動滑鼠時則會立即顯示。
+    Scroll Speed: 變更滑鼠滾輪和觸控板滾輪手勢的捲動距離。
+    Use Fixed Tab Width: 水平分頁列中的每個分頁使用相同寬度，而不依標題調整寬度。
+    Use Grid Player Menu: 將影片播放器的設定選單排列成格狀方塊，而非逐列清單。
+The playlist is at the beginning. Enable loop to continue playing: 播放清單已在開頭。啟用循環播放即可繼續播放
+External link opening has been disabled in Settings → Privacy: 已在「設定」→「隱私權」中停用開啟外部連結
+KeyboardShortcutPrompt:
+  Edit Hint: 選取快捷鍵，然後按下新的按鍵組合。按 Backspace 或 Delete 可取消指派。
+  Change Shortcut: 變更 {action} 的快捷鍵
+  Press Shortcut: 按下快捷鍵…
+  Unassigned: 未指派
+  Reset Shortcut: 重設 {action} 的快捷鍵
+  Reset to Defaults: 重設為預設值
+  Shortcut Already Assigned: 快捷鍵已指派
+  Shortcut Conflict: '{shortcut} 已指派給 {actions}。要重新指派嗎？'
+  Reserved Shortcut Conflict: '{shortcut} 保留供 {actions} 使用，無法重新指派。'
+  Reassign: 重新指派
+  Sections:
+    App:
+      Tabs: "應用程式:\_分頁"
+      Search and Page: "應用程式:\_搜尋與頁面"
+      Window and View: "應用程式:\_視窗與檢視"
+  New Tab: 建立新分頁
+  Close Tab: 關閉目前的分頁
+  Reload Tab: 重新載入目前的分頁
+  Reopen Closed Tab: 重新開啟上次關閉的分頁
+  Next Tab: 切換至下一個分頁
+  Previous Tab: 切換至上一個分頁
+  Switch to Tab: 切換至分頁 1–9
+  Toggle Tab Orientation: 切換分頁排列方式
+  Find in Page: 尋找目前頁面中的文字
+  Find Next Match: 跳至下一個相符項目
+  Find Previous Match: 跳至上一個相符項目
+  Toggle Normal Playback Speed: 在 1x 與先前的播放速度之間切換
+  Toggle Skip Silence: 切換略過靜音
+  Set A-B Repeat Point A: 設定 A-B 循環點 A
+  Set A-B Repeat Point B: 設定 A-B 循環點 B
+  Clear A-B Repeat: 清除 A-B 循環
+  Video Zoom In: 放大影片
+  Video Zoom Out: 縮小影片
+  Tab Switcher: 分頁切換器
+CommandPalette:
+  Title: 命令選擇區
+  Open: 開啟命令選擇區
+  Search Label: 搜尋命令
+  Search Placeholder: 搜尋命令與設定…
+  Results: 命令
+  No Results: 沒有相符的命令
+  Result Count: '找到 {count} 個命令'
+  Move: 移動
+  Run: 執行
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: '切換至分頁：{title}'
+  Switch Profile: '切換設定檔：{name}'
+  Open Playlist: '開啟播放清單：{name}'
+  Cancel Download: '取消下載：{title}'
+  Groups:
+    App: 應用程式
+    Navigation: 瀏覽
+    Tabs: 分頁
+  Unavailable:
+    Current Page: 已在此頁面
+    No History: 此方向沒有其他頁面
+    Desktop: 僅適用於桌面應用程式
+    Build: 此組建無法使用
+    One Tab: 請先開啟另一個分頁
+    Active Tab: 這是目前使用中的分頁
+    Active Profile: 這是目前使用中的設定檔
+    Download Finished: 此下載已不再執行
+    Video: 請先開啟影片
+Downloads:
+  Download: 下載
+  Download Video: 下載影片
+  Download Playlist: 下載播放清單
+  Downloading: 正在下載
+  Queue: 佇列
+  Downloaded: 已下載
+  Canceled: 已取消
+  Open Downloads: 開啟下載項目
+  No Downloads: 尚無下載項目
+  No Downloads Description: 您開始的下載項目會顯示在這裡。
+  Clear Failed Canceled Skipped And Missing: 清除失敗、已取消、已略過及遺失的項目
+  Clear From List: 從清單中清除
+  Show in Folder: 在資料夾中顯示
+  Play Download: 播放下載項目
+  Retry Download: 重試下載
+  Pause Download: 暫停下載
+  Resume Download: 繼續下載
+  Move Earlier: 向前移動
+  Move Later: 向後移動
+  Pause All: 全部暫停
+  Resume All: 全部繼續
+  Retry All: 重試所有失敗的下載項目
+  Total Size: '總大小：{size}'
+  Local File: 本機檔案
+  Available Offline: 可離線使用
+  Remove File: 移除檔案
+  Remove File Confirmation: 要移除已下載的檔案嗎？
+  Remove File Warning: 這會將「{title}」移至裝置的垃圾桶。
+  File Not Found: 找不到已下載的檔案。
+  Download Missing: 下載項目無法使用
+  Files Missing: 檔案系統中已無法使用已下載的檔案。
+  Files Available: '{total} 個已下載檔案中有 {available} 個可用。'
+  More Files: '另外 {count} 個檔案'
+  Template Used: '範本：{name}'
+  Download Type: 下載類型
+  Template: 範本
+  Unsaved: 未儲存
+  Media Type: 媒體類型
+  Video: 影片
+  Audio: 音訊
+  Maximum Resolution: 最高解析度
+  Best Available: 可用的最佳品質
+  Automatic: 自動
+  Container: 容器格式
+  Video Codec: 影片編碼
+  Audio Codec: 音訊編碼
+  File Name Template: 檔案名稱範本
+  File Name Template Help: '可用欄位：{title}、{author}、{upload_date}、{id}、{playlist}、{playlist_index}、{ext}'
+  Time Range and Chapters: 時間範圍與章節
+  Start Time: 開始時間 (HH:MM:SS)
+  End Time: 結束時間 (HH:MM:SS)
+  Split by Chapters: 依章節分割成個別檔案
+  Remove Segments: 移除片段
+  Subtitles and Metadata: 字幕與中繼資料
+  Include Subtitles: 包含字幕
+  Embed Subtitles: 將字幕嵌入媒體檔案
+  Subtitle Format: 字幕格式
+  Subtitle Languages: 字幕語言
+  Subtitle Languages Help: '以逗號分隔的 yt-dlp 語言選擇器，例如：en.*,de.*'
+  Embed Cover Art: 將縮圖嵌入為封面圖片
+  Embed Metadata: 嵌入標題、作者、說明與章節
+  Additional yt-dlp Arguments: 額外 yt-dlp 引數
+  Custom yt-dlp Arguments: 自訂 yt-dlp 引數
+  Template Name: 範本名稱
+  Save Template: 儲存範本
+  Delete Template: 刪除範本
+  Template Saved: 已儲存下載範本「{name}」
+  Template Name Exists: 已有名為「{name}」的下載範本。
+  Choose Folder: 變更
+  Select Folder: 選擇資料夾
+  Folder Required: 選擇下載資料夾以啟用下載功能。
+  System Downloads Folder: 系統下載資料夾
+  Processing: 處理中…
+  Queued: 已排入佇列
+  Queued Position: 已排入佇列，位置 {position}
+  Paused: 已暫停
+  Pausing: 目前的工作完成後，佇列便會暫停
+  Download Complete: 下載完成
+  Download Cancelled: 下載已取消
+  Download Failed: 下載失敗
+  File Name Shortened: 影片標題過長，因此已縮短檔案名稱。
+  Insufficient Disk Space: 磁碟空間不足。大約需要 {required}，目前可用空間為 {available}。
+  Unknown Download Size: 下載大小不明。目標檔案系統有 {available} 可用空間。
+  Disk Space Check Unavailable: 開始下載前無法檢查可用磁碟空間。
+  Download Failure Hint: 請查看 {issuesLink}，然後嘗試在「設定」→「進階」→「外部軟體」中將 yt-dlp 頻道切換為 Nightly 或 Master。
+  yt-dlp YouTube Issues: 最近與 YouTube 有關的 yt-dlp 問題
+  Automatic Download Started: 已開始自動下載
+  Automatic Download Started Body: 正在背景從 {channel} 下載「{title}」。
+  Automatic Download Complete: 自動下載完成
+  Automatic Download Failed: 自動下載失敗
+  Automatic Download Could Not Start: 無法開始自動下載「{title}」。
+  Automatic Download Skipped: 已被自動下載篩選條件略過
+  Cancel Download: 取消下載
+  yt-dlp Not Found: 找不到 yt-dlp。請安裝 yt-dlp，或在「設定」→「進階」→「外部軟體」中設定其路徑。
+  Download Complete Template: 「{title}」下載完成
+  Download Failed Template: 「{title}」下載失敗
+  Templates:
+    Video Best: 影片 - 最佳畫質
+    Video Resolution: 影片 - {resolution}
+    Audio Best: 音訊 - 最佳品質
+    Audio Format: 音訊 - {format}
+    Subtitles Format: 字幕 - {format}

@@ -1321,11 +1321,6 @@ async function measureSponsorBlockSkipStartTime(app, page, { cpuThrottlingRate }
   await openMockedVideo(page)
   await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
 
-  if (cpuThrottlingRate !== undefined) {
-    const cdpSession = await page.context().newCDPSession(page)
-    await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: cpuThrottlingRate })
-  }
-
   const video = page.locator('.ftVideoPlayer video')
   await video.evaluate(element => {
     element.pause()
@@ -1346,6 +1341,11 @@ async function measureSponsorBlockSkipStartTime(app, page, { cpuThrottlingRate }
     element.addEventListener('timeupdate', event => event.stopImmediatePropagation(), { capture: true })
     return element.play()
   })
+
+  if (cpuThrottlingRate !== undefined) {
+    const cdpSession = await page.context().newCDPSession(page)
+    await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: cpuThrottlingRate })
+  }
 
   await expect.poll(() => page.evaluate(() => window.__sponsorBlockSkipStartedAt ?? null)).not.toBeNull()
   return page.evaluate(() => window.__sponsorBlockSkipStartedAt)

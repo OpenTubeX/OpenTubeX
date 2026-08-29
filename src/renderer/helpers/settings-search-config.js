@@ -17,7 +17,8 @@ const GENERAL_EVERYDAY_KEYS = new Set([
   'Startup Behavior',
   'System Default',
   'Tab Close Focus',
-  'Update Relative Timestamps'
+  'Update Relative Timestamps',
+  'Use AI Translation Completions'
 ])
 
 const GENERAL_APPEARANCE_KEYS = new Set([

@@ -1,0 +1,1559 @@
+# Optional AI-generated translations for keys missing from ../he.yaml.
+Color Picker:
+  Hue: גוון
+  Opacity: אטימות
+  Backdrop Blur: טשטוש הרקע
+  Hex Color: צבע הקסדצימלי
+  Apply Color: החלה
+  Reset Color: איפוס
+  Copy Color: העתקה
+  Copy From Another Color: העתקה מצבע אחר
+  Color Copied: הצבע הועתק
+  Invalid Color: יש להזין צבע הקסדצימלי תקין
+  Clipboard Unavailable: לוח העריכה אינו זמין
+  Saturation and Brightness: רוויה ובהירות
+New Tab: כרטיסייה חדשה
+Maximize: הגדלה
+Restore: שחזור
+Close Tab: סגירת הכרטיסייה
+Close Confirmation:
+  Title: לצאת מ־OpenTubeX?
+  Message: האם ברצונך לצאת מ־OpenTubeX?
+  Quit: יציאה
+  Never Ask Again: לא לשאול שוב
+Close Window Confirmation:
+  Title: לסגור את החלון?
+  Message: בחלון הזה יש {count} כרטיסייה. לסגור אותו? | בחלון הזה יש {count} כרטיסיות. לסגור אותו?
+  Close Window: סגירת החלון
+Confirmations:
+  Never Ask Again: לא לשאול שוב
+  Settings Hint: אפשר להפעיל שוב את האישור דרך הגדרות → כללי → לבקש אישור לפני…
+Close Multiple Tabs Confirmation:
+  Title: לסגור כמה כרטיסיות?
+  Message: פעולה זו תסגור {count} כרטיסייה. | פעולה זו תסגור {count} כרטיסיות.
+  Close Tabs: סגירת {count} כרטיסייה | סגירת {count} כרטיסיות
+Load Multiple Tabs Confirmation:
+  Title: לטעון כמה כרטיסיות?
+  Message: פעולה זו תטען {count} כרטיסייה. | פעולה זו תטען {count} כרטיסיות.
+  Load Tabs: טעינת {count} כרטיסייה | טעינת {count} כרטיסיות
+Unload Multiple Tabs Confirmation:
+  Title: לפרוק כמה כרטיסיות?
+  Message: פעולה זו תפרוק {count} כרטיסייה. | פעולה זו תפרוק {count} כרטיסיות.
+  Unload Tabs: פריקת {count} כרטיסייה | פריקת {count} כרטיסיות
+Use Vertical Tabs: שימוש בכרטיסיות אנכיות
+Use Horizontal Tabs: שימוש בכרטיסיות אופקיות
+Resize Tab Bar: שינוי גודל סרגל הכרטיסיות
+Find in page: חיפוש בדף
+Previous match: התוצאה הקודמת
+Next match: התוצאה הבאה
+Close find bar: סגירת סרגל החיפוש
+No matches: אין תוצאות
+Version {versionNumber} is now available.: גרסה {versionNumber} זמינה כעת.
+See changes and update: הצגת השינויים ועדכון
+Dismiss: דחייה
+Update to {version}: עדכון לגרסה {version}
+Global:
+  Ambient Mode: מצב אווירה
+  Loading More: נטענים פריטים נוספים
+  New: חדש
+Search Listing:
+  Label:
+    Members Only: לחברים בלבד
+Stats:
+  Stats: סטטיסטיקה
+  Watch time summary: סיכום זמן הצפייה
+  Today: היום
+  This week: השבוע
+  Total watch time: זמן צפייה כולל
+  Daily average: ממוצע יומי
+  So far today: עד כה היום
+  Since: מאז {day}
+  All recorded time: כל הזמן שתועד
+  Per calendar day: לפי יום בלוח השנה
+  Day by day: לפי ימים
+  Highest: 'שיא: {duration}'
+  Week by week: לפי שבועות
+  Last 14 days: 14 הימים האחרונים
+  Last 8 weeks: 8 השבועות האחרונים
+  Daily chart aria: זמן הצפייה היומי ב־14 הימים האחרונים
+  Weekly chart aria: זמן הצפייה השבועי ב־8 השבועות האחרונים
+  No data: זמן הצפייה יופיע כאן לאחר צפייה בסרטונים.
+  Estimate note: זמן הצפייה מלפני העדכון נאמד לפי התקדמות הצפייה השמורה.
+  Adjust imported watch time: התאמת זמן הצפייה שיובא
+  Imported watch time: זמן צפייה שיובא
+  Imported watch time explanation: יש לבחור את מהירות ההפעלה הרגילה שלך. משכי הסרטונים שיובאו יחולקו במהירות הזאת כדי לאמוד את זמן הצפייה בפועל.
+  Playback speed: מהירות הפעלה
+  Channel speed note: מהירויות הפעלה שמורות לערוצים ישמשו במקומה כשהן זמינות.
+  Apply playback speed: החלת מהירות ההפעלה
+  Imported watch time adjusted: זמן הצפייה שיובא הותאם
+  Reset statistics: איפוס הסטטיסטיקה
+  Reset: איפוס
+  Reset confirmation: לאפס את כל סטטיסטיקת הצפייה? לא ניתן לבטל את הפעולה.
+  Reset success: סטטיסטיקת הצפייה אופסה
+  Less than a minute: < 1 דק׳
+  Minutes: '{minutes} דק׳'
+  Hours: '{hours} שע׳'
+  Hours and minutes: '{hours} שע׳ {minutes} דק׳'
+Home Page:
+  Home: דף הבית
+  Description: המשיכו מהמקום שבו הפסקתם וצפו בפעילות האחרונה.
+  Customize: התאמה אישית של דף הבית
+  Done: סיום
+  Customize description: בחרו אילו מקטעים יוצגו וסדרו אותם בסדר הרצוי.
+  Continue watching: המשך צפייה
+  New since last visit: חדש מאז הביקור האחרון
+  Watch queue: תור צפייה
+  Recent playlists: רשימות השמעה אחרונות
+  Recent downloads: הורדות אחרונות
+  Upcoming reminders: תזכורות קרובות
+  Watch statistics: סטטיסטיקת צפייה
+  View all: הצגת הכול
+  Previous shelf page: העמוד הקודם של {section}
+  Next shelf page: העמוד הבא של {section}
+  Shelf page status: '{section}, עמוד {page} מתוך {total}.'
+  Move section up: העברת {section} למעלה
+  Move section down: העברת {section} למטה
+  Section moved: '{section} הועבר למיקום {position} מתוך {total}.'
+  Nothing here yet: אין כאן כלום עדיין
+  Empty description: סרטונים שתתחילו, רשימות השמעה שתשתמשו בהן, הורדות ותזכורות יופיעו כאן.
+  All sections hidden: כל המקטעים מוסתרים
+  All sections hidden description: התאימו אישית את דף הבית כדי להציג שוב מקטע.
+Subscriptions:
+  Refreshing Subscription Videos: סרטוני המינויים מתרעננים
+  Refreshing Subscription Shorts: הסרטונים הקצרים מהמינויים מתרעננים
+  Refreshing Subscription Live Streams: השידורים החיים מהמינויים מתרעננים
+  Refreshing Subscription Posts: הפוסטים מהמינויים מתרעננים
+  New Content: תוכן חדש
+  New Feed Refresh Warning Title: לרענן את כל עדכוני המינויים?
+  New Feed Refresh Warning: רענון כל סוגי התוכן ללא RSS ל־1 מינוי עלול להימשך זמן רב. להמשיך? | רענון כל סוגי התוכן ללא RSS ל־{count} מינויים עלול להימשך זמן רב. להמשיך? | רענון כל סוגי התוכן ללא RSS ל־{count} מינויים עלול להימשך זמן רב. להמשיך?
+  New Since Last Refresh: חדש מאז הרענון האחרון
+  Mark as Seen: סימון כנצפה
+  Mark All as Seen: סימון הכול כנצפה
+  No New Content: אין תוכן חדש.
+  New Content Tabs: כרטיסיות תוכן חדש
+  Show Tabbed View: הצגת תצוגת כרטיסיות
+  Show Combined View: הצגת תצוגה משולבת
+  Newest First: החדשים תחילה
+  Oldest First: הישנים תחילה
+  Posts:
+    RSS Message: 'YouTube לא מספק עדכוני RSS לפוסטים. השביתו את ההגדרה "{rssSetting}" כדי לראות פוסטים, או הפעילו את ההגדרה "{hideSetting}" כדי להסתיר את הכרטיסייה הזאת.'
+Trending:
+  Load Error: לא ניתן לטעון את התוכן החם.
+  Unsupported Backend: לתוכן החם דרוש Local API. יש לבחור ב־Local API או להפעיל מעבר לספק חלופי.
+Most Popular Feed Empty: עדכון התוכן הפופולרי ביותר של מופע Invidious זה ריק.
+Feed:
+  Cancel Refresh: ביטול הרענון
+  Next Auto Refresh: 'הרענון האוטומטי הבא: {date}'
+User Playlists:
+  Load More Playlists: טעינת רשימות השמעה נוספות
+  Save to: שמירה ב־…
+  Move Video to the Top: העברת הסרטון לראש הרשימה
+  Move Video to the Bottom: העברת הסרטון לתחתית הרשימה
+  Quick Bookmark Icon: סמל סימנייה מהירה
+  Custom Emoji: אמוג׳י מותאם אישית
+  Choose Image: בחירת תמונה
+  Use Bookmark Icon: שימוש בסמל הסימנייה
+  SinglePlaylistView:
+    Retry: ניסיון חוזר
+    This playlist could not be loaded.: לא ניתן לטעון את רשימת ההשמעה הזאת.
+    More videos could not be loaded.: לא ניתן לטעון סרטונים נוספים.
+History:
+  Mark All As Watched: סימון הכול כנצפה
+  Mark All As Watched Confirmation: לסמן את כל הסרטונים בהיסטוריה שלך כנצפו?
+  All History Marked as Watched: כל הסרטונים בהיסטוריה שלך סומנו כנצפו
+  Delete Old History: מחיקת היסטוריה ישנה
+  Select History Age: יש לבחור כמה זמן יישמר כל פריט לפני מחיקתו.
+  Delete Entries Older Than: מחיקת פריטים שגילם עולה על
+  Number of Days: מספר ימים
+  History Cleanup Warning: פעולה זו מוחקת לצמיתות את רשומות היסטוריית הצפייה המתאימות.
+  1 Day: 1 יום
+  1 Week: 1 שבוע
+  1 Month: 1 חודש
+  3 Months: 3 חודשים
+  1 Year: 1 שנה
+  Custom: בהתאמה אישית
+  History Older Than Days Removed: היסטוריית צפייה מלפני יותר מ־1 יום נמחקה | היסטוריית צפייה מלפני יותר מ־{days} ימים נמחקה | היסטוריית צפייה מלפני יותר מ־{days} ימים נמחקה
+Settings:
+  Quick Settings:
+    Quick Settings: הגדרות מהירות
+    Appearance: מראה
+    Playback: הפעלה
+    Content: תוכן
+    Language and Region: שפה ואזור
+    All Settings: כל ההגדרות
+    Profile Selector Hint: אפשר גם ללחוץ לחיצה ימנית על סמל הפרופיל כדי לעבור בין פרופילים
+  Categories:
+    General Description: שפה, הפעלה, כרטיסיות והתנהגות היישום
+    Appearance: מראה
+    Appearance Description: ערכת נושא, פריסה ותמונות ממוזערות
+    Content appearance: רשימות סרטונים ותמונות ממוזערות
+    Layout: פריסה
+    Playback Description: נגן, כתוביות והעדפות ערוצים
+    Subscriptions Description: אפשרויות רענון ותצוגה של העדכונים
+    Downloads Description: תיקיות, תבניות וכללים אוטומטיים
+    Distraction Free Description: הסתרת תוכן והגדרת מגבלות צפייה
+    Add-ons: תוספים
+    Add-ons Description: SponsorBlock, DeArrow, דירוגים שליליים ותרגום קריינות
+    Privacy Description: פרטיות הצפייה ובקרת הגישה
+    Online activity: פעילות מקוונת
+    Data And Storage Description: ייבוא, ייצוא, ניצול שטח בכונן וניקוי
+    Sync Description: סנכרון ההגדרות והנתונים בין מכשירים
+    Advanced: מתקדם
+    Advanced Description: ספקים, יישומים חיצוניים ורשת
+    Alternative providers: ספקי סרטונים ומטא־נתונים
+  Highlight Changed Settings: הדגשת הגדרות ששונו מברירת המחדל
+  Reset Setting to Default: איפוס ההגדרה לברירת המחדל
+  Performance Impact:
+    Show Performance Impact: הצגת מחווני השפעה על הביצועים
+    Moderate: השפעה בינונית
+    High: השפעה גבוהה
+    Description: הגדרה זו עשויה להגדיל את השימוש ב־{resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: זיכרון
+      Network: רשת
+      Disk: כונן
+  General Settings:
+    Update Relative Timestamps: עדכון רציף של חותמות זמן יחסיות
+    Stream Extraction Method:
+      Stream Extraction Method: שיטת חילוץ הזרם
+      yt-dlp: yt-dlp
+      Built-in: מובנית
+    Confirm Before: לבקש אישור לפני…
+    Confirmation Options:
+      Closing App: סגירת OpenTubeX
+      Closing Window: סגירת חלון עם כמה כרטיסיות
+      Closing Tabs: סגירת כמה כרטיסיות
+      Loading Tabs: טעינת כמה כרטיסיות
+      Unloading Tabs: פריקת כמה כרטיסיות
+    Remember Tab Navigation History: שמירת היסטוריית הניווט בכרטיסיות
+    New Tab Position:
+      New Tab Position: מיקום כרטיסייה חדשה
+      At the end: בסוף
+      After current tab: אחרי הכרטיסייה הנוכחית
+      After current tab in opened order: אחרי הכרטיסייה הנוכחית, לפי סדר הפתיחה
+    Tab Close Focus:
+      Tab Close Focus: אחרי סגירת כרטיסייה
+      Previous tab: מעבר לכרטיסייה הקודמת
+      Next tab: מעבר לכרטיסייה הבאה
+    Startup Behavior:
+      Startup Behavior: בעת ההפעלה
+      Load all tabs: טעינת כל הכרטיסיות
+      Load previously loaded tabs: טעינת הכרטיסיות שנטענו קודם
+      Load last active tab: טעינת הכרטיסייה הפעילה האחרונה
+      Start with an empty session: התחלה בהפעלה ריקה
+    Use AI Translation Completions: שימוש בהשלמות תרגום שיצרה בינה מלאכותית
+    Reduced Motion:
+      Reduced Motion: הפחתת תנועה
+      System: לפי המערכת
+      Force On: תמיד
+      Force Off: לעולם לא
+    Comment Translation:
+      Title: תרגום תגובות
+      Enable: הפעלת תרגום תגובות
+      Never Translate: לא לתרגם תגובות בשפה
+      Choose Language: בחירת שפה
+      Description: תגובות בשפת היישום ממילא אינן מתורגמות. אפשר להוסיף שפות אחרות שביכולתך לקרוא.
+      Remove Language: תרגום חוזר של תגובות ב־{language}
+    Avoid translation:
+      Avoid translation: העדפת טקסט סרטון ללא תרגום
+      Disabled: מושבת
+      Watch Only: בממשק הסרטון בלבד
+      Entire App: בכל היישום
+    Playlist View Type:
+      Playlist View Type: סוג תצוגת רשימת ההשמעה
+    Show Thumbnail Previews: הצגת תצוגה מקדימה בתמונות ממוזערות
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: לחצן פעולה נוסף בתמונה הממוזערת
+      None: ללא
+      Mark as Watched: סימון כנצפה
+      Copy YouTube Link: העתקת הקישור ל־YouTube
+      Open in YouTube: פתיחה ב־YouTube
+  Context Menu Search Settings:
+    Context Menu Search Settings: חיפוש מתפריט ההקשר
+    Description: יש לבחור אילו מנועי חיפוש יופיעו בלחיצה ימנית על טקסט מסומן. החיפושים ייפתחו בדפדפן ברירת המחדל.
+    Icon Hint: הפעלת מנוע פונה לאתר שלו כדי לטעון את סמל האתר.
+    Engine Name: שם מנוע
+    Search URL: כתובת URL לחיפוש
+    URL Hint: יש להציב את %s במקום שבו יופיע הטקסט המסומן והמקודד בכתובת ה־URL.
+    Add Custom Engine: הוספת מנוע מותאם אישית
+    Add Engine: הוספת מנוע
+    Remove Engine: הסרת {engine}
+    Invalid Engine: יש להזין שם וכתובת URL תקינה לחיפוש מסוג HTTP או HTTPS שמכילה את %s.
+    Engine Limit: אפשר להוסיף עד {count} מנועי חיפוש מותאמים אישית.
+  Theme Settings:
+    Move Downloads to App Header: העברת ההורדות לכותרת היישום
+    Move Settings to App Header: העברת ההגדרות לכותרת היישום
+    Hide Side Bar on Watch Pages: הסתרת סרגל הצד בדפי צפייה
+    UI Roundness: עיגול פינות הממשק
+    Scrollbar Width: רוחב פס הגלילה
+    Scroll Speed: מהירות גלילה
+    Animation Speed: מהירות ההנפשות
+    Thumbnail Size: גודל התמונות הממוזערות
+    Show Tab Icons: הצגת סמלי כרטיסיות
+    Load Missing Tab Icons: טעינת סמלי כרטיסיות חסרים
+    Loading Missing Tab Icons: סמלי כרטיסיות חסרים נטענים…
+    No Missing Tab Icons: כל סמלי הכרטיסיות הנתמכים כבר נטענו
+    Loaded Tab Icons: 'נטען סמל כרטיסייה חסר: {count} | נטענו סמלי כרטיסיות חסרים: {count} | נטענו סמלי כרטיסיות חסרים: {count}'
+    Loaded Tab Icons With Failures: נטענו {loaded} סמלי כרטיסיות; לא ניתן היה לטעון {failed}
+    Show Tab Previews: הצגת תצוגה מקדימה של כרטיסיות
+    Use Fixed Tab Width: שימוש ברוחב כרטיסייה קבוע במצב אופקי
+    Tab Width: רוחב הכרטיסייה
+    Tab Layout:
+      Tab Layout: פריסת הכרטיסיות
+      Horizontal Top: אופקית למעלה
+      Horizontal Bottom: אופקית למטה
+      Vertical Left: אנכית משמאל
+      Vertical Right: אנכית מימין
+    Show Toast Timeout Indicator: הצגת מחוון לזמן שנותר להודעה קופצת
+    Use Grid Player Menu: שימוש בתפריט נגן כרשת
+    Show Progress as Notification: הצגת ההתקדמות כהתראה
+    Operation in Progress: הפעולה מתבצעת
+    Toast Position:
+      Toast Position: מיקום ההודעה הקופצת
+      Bottom Left: למטה משמאל
+      Bottom Center: למטה במרכז
+      Bottom Right: למטה מימין
+      Top Left: למעלה משמאל
+      Top Center: למעלה במרכז
+      Top Right: למעלה מימין
+    Icon Pack:
+      Icon Pack: ערכת סמלים
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: גופן היישום
+      System Default: ברירת המחדל של המערכת
+      Unable to Load: לא ניתן לטעון גופני מערכת מותקנים
+    Always Show Scrollbars: הצגת פסי גלילה תמיד
+    Base Theme:
+      Custom: מותאמת אישית
+    Light Theme: ערכת נושא בהירה
+    Dark Theme: ערכת נושא כהה
+    Custom Theme:
+      Create Custom Theme: יצירת ערכת נושא מותאמת אישית
+      Edit Custom Theme: עריכת ערכת נושא מותאמת אישית
+      Custom Theme Creator: יוצר ערכות נושא מותאמות אישית
+      Theme Name: שם ערכת הנושא
+      Based On: מבוססת על
+      Import Theme: ייבוא ערכת נושא
+      Export Theme: ייצוא ערכת נושא
+      Share Theme: שיתוף ערכת נושא
+      Share Description Heading: תיאור
+      Share Description Prompt: תארו את ערכת הנושא וכל מה שכדאי לדעת לפני השימוש בה.
+      Share Screenshots Heading: צילומי מסך
+      Share Screenshots Prompt: גררו לכאן צילום מסך אחד או יותר.
+      Share Code Summary: JSON של ערכת הנושא
+      Delete Theme: מחיקת ערכת נושא
+      Delete Theme Confirmation: למחוק את “{name}”? לא ניתן לבטל פעולה זו.
+      Save and Apply: שמירה והחלה
+      Discard Changes: ביטול השינויים
+      Reset Colors: איפוס לערכת הנושא הבסיסית
+      Theme File: קובץ ערכת נושא של OpenTubeX
+      Theme Saved: ערכת הנושא המותאמת אישית נשמרה והוחלה
+      Theme Imported: ערכת הנושא יובאה לעורך
+      Theme Exported: ערכת הנושא יוצאה
+      Theme Deleted: ערכת הנושא המותאמת אישית נמחקה
+      Unable to Load: לא ניתן לטעון את ערכת הנושא המותאמת אישית
+      Unable to Save: לא ניתן לשמור את ערכת הנושא המותאמת אישית
+      Unable to Export: לא ניתן לייצא את ערכת הנושא המותאמת אישית
+      Unable to Share: לא ניתן לשתף את ערכת הנושא המותאמת אישית
+      Unable to Delete: לא ניתן למחוק את ערכת הנושא המותאמת אישית
+      Invalid Theme File: קובץ ערכת הנושא המותאמת אישית אינו תקין
+      Colors:
+        Main text: טקסט ראשי
+        Secondary text: טקסט משני
+        Subtle text: טקסט מעודן
+        Borders and dividers: גבולות ומפרידים
+        Subtle surfaces and indicators: משטחים ומחוונים מעודנים
+        Title text: טקסט כותרת
+        Selected text background: רקע לטקסט שנבחר
+        Selected text: טקסט שנבחר
+        Logo icon: סמל הלוגו
+        Logo text: טקסט הלוגו
+        Logo hover: לוגו במעבר עכבר
+        Logo pressed: לוגו בלחיצה
+        Page background: רקע הדף
+        Card background: רקע כרטיס
+        Secondary card background: רקע כרטיס משני
+        Favorite icon: סמל מועדפים
+        Error color: צבע שגיאה
+        Scrollbar thumb: ידית פס הגלילה
+        Scrollbar thumb hover: ידית פס הגלילה במעבר עכבר
+        Scrollbar thumb pressed: ידית פס הגלילה בלחיצה
+        Dropdown item hover text: טקסט פריט נפתח במעבר עכבר
+        Dropdown item hover background: רקע פריט נפתח במעבר עכבר
+        Navigation and panel background: רקע הניווט והחלוניות
+        Neutral item hover and focus background: רקע פריט ניטרלי במעבר עכבר ובמיקוד
+        Neutral item hover and focus text and icons: טקסט וסמלים של פריט ניטרלי במעבר עכבר ובמיקוד
+        Neutral item pressed background: רקע פריט ניטרלי בלחיצה
+        Neutral item pressed text and icons: טקסט וסמלים של פריט ניטרלי בלחיצה
+        Header button hover and focus background: רקע כפתור כותרת במעבר עכבר ובמיקוד
+        Header button hover and focus text and icons: טקסט וסמלים של כפתור כותרת במעבר עכבר ובמיקוד
+        Header button pressed background: רקע כפתור כותרת בלחיצה
+        Header button pressed text and icons: טקסט וסמלים של כפתור כותרת בלחיצה
+        Colored header button hover and focus background: רקע כפתור כותרת צבעוני במעבר עכבר ובמיקוד
+        Colored header button hover and focus text and icons: טקסט וסמלים של כפתור כותרת צבעוני במעבר עכבר ובמיקוד
+        Colored header button pressed background: רקע כפתור כותרת צבעוני בלחיצה
+        Colored header button pressed text and icons: טקסט וסמלים של כפתור כותרת צבעוני בלחיצה
+        Search and dropdown background: רקע חיפוש ורשימה נפתחת
+        Settings search background: רקע חיפוש בהגדרות
+        Instance menu: תפריט מופע
+        Input background: רקע שדה קלט
+        Shadow color: צבע צל
+        Primary controls and highlights: פקדים והדגשות ראשיים
+        Primary control hover and focus: פקד ראשי במעבר עכבר ובמיקוד
+        Primary control pressed: פקד ראשי בלחיצה
+        Text and icons on primary controls: טקסט וסמלים בפקדים ראשיים
+        Secondary controls and highlights: פקדים והדגשות משניים
+        Secondary control hover and focus: פקד משני במעבר עכבר ובמיקוד
+        Secondary control pressed: פקד משני בלחיצה
+        Light secondary color: צבע משני בהיר
+        Visited accent: הדגשת פריטים שנצפו
+        Text and icons on secondary controls: טקסט וסמלים בפקדים משניים
+        Links: קישורים
+        Visited links: קישורים שביקרתם בהם
+        Destructive action: פעולה הרסנית
+        Destructive hover and focus: פעולה הרסנית במעבר עכבר ובמיקוד
+        Destructive pressed: פעולה הרסנית בלחיצה
+        Text and icons on destructive actions: טקסט וסמלים בפעולות הרסניות
+  Player Settings:
+    Automatically Open Chapters: פתיחת פרקים אוטומטית
+    Caption Appearance:
+      Caption Appearance: מראה הכתוביות
+      Captions: כתוביות
+      Preferred Language: שפה מועדפת לכתוביות
+      Application Language: שפת היישום
+      Enable Translations: הפעלת תרגום כתוביות
+      Text Color: צבע הטקסט
+      Background Color: צבע הרקע
+      Background Opacity: אטימות הרקע
+      Font Size: גודל הגופן
+      Vertical Position: מיקום אנכי
+      Edge Color: צבע הקצה
+      Anchor:
+        Anchor: עיגון
+        Top Left: למעלה משמאל
+        Top Center: למעלה במרכז
+        Top Right: למעלה מימין
+        Bottom Left: למטה משמאל
+        Bottom Center: למטה במרכז
+        Bottom Right: למטה מימין
+      Edge Style:
+        Edge Style: סגנון הקצה
+        None: ללא
+        Outline: קו מתאר
+        Drop Shadow: הצללה
+      Reset: איפוס מראה הכתוביות
+    Default Viewing Mode:
+      Full Window (Always On): חלון מלא (תמיד פעיל)
+      Full Screen (Always On): מסך מלא (תמיד פעיל)
+      Tooltip: רוב מצבי הצפייה המוגדרים כברירת מחדל חלים רק בתחילת כל צפייה. שינויים במהלך הצפייה נשמרים עד סיומה. מצבים שתמיד פעילים חלים בכל מעבר לסרטון חדש, בלי קשר לשינויים שבוצעו במצב הצפייה בסרטון הקודם.
+    Auto Picture in Picture:
+      Auto Picture in Picture: מעבר אוטומטי לתמונה בתוך תמונה
+      On Tab Change: במעבר בין כרטיסיות
+      On Window Minimize: במזעור החלון
+      On Window Hide: כשהחלון מאבד מיקוד או כשעוברים ממנו
+      Wayland Minimize Unsupported: Wayland אינו מדווח ליישומים על מזעור חלון, ולכן גורם מפעיל זה אינו זמין. השתמשו במקום זאת באפשרות "כשהחלון מאבד מיקוד או כשעוברים ממנו", שחלה גם על מזעור.
+    Scroll Mini Player:
+      Scroll Mini Player: נגן מיני בגלילה
+      When Scrolling Down: השארת נגן מיני על המסך בגלילה מטה
+      On All Tabs: השארת נגן מיני על המסך במעבר בין כרטיסיות
+    Multiply Seek Interval by Playback Rate: הכפלת מרווח הדילוג במהירות ההפעלה
+    Show Playback Rate Adjusted Timestamp: הצגת הזמן המותאם למהירות ההפעלה
+    Use YouTube-style Shorts: שימוש בסרטוני Shorts בסגנון YouTube
+    Loop Shorts: הפעלה חוזרת של סרטוני Shorts
+    Remember Volume: זכירת עוצמת הקול
+    Skip Silence: דילוג על קטעים שקטים
+    Show Skip Silence Toggle: הצגת מתג לדילוג על קטעים שקטים
+    Enable Skip Silence by Default: הפעלת דילוג על קטעים שקטים כברירת מחדל
+    Enable Video Zoom: הפעלת הגדלת וידאו
+    Voice-over Translation:
+      Title: תרגום קולי
+      Attribution: (מופעל על ידי Yandex)
+      Enable: הפעלת תרגום קולי
+      Prepare in Background: הכנת תרגומים קוליים ברקע
+      Background Preparation Tooltip: מזהה הסרטון הנוכחי, משכו והשפה שנבחרה נשלחים לשירות התרגום מיד עם טעינת סרטון נתמך.
+      Language: שפת התרגום הקולי
+      Supported Source Languages: 'שפות מקור נתמכות: רוסית, אנגלית, סינית, קוריאנית, ליטאית, לטבית, ערבית, צרפתית, איטלקית, ספרדית, גרמנית ויפנית.'
+      Voice Volume: עוצמת הקול המתורגם
+      Original Volume: עוצמת השמע המקורי
+      Russian: רוסית
+      English: אנגלית
+      Kazakh: קזחית
+    Hold to Double Playback Speed: לחיצה ממושכת להכפלת מהירות ההפעלה
+    Use Quick Playback Speed Bar: שימוש בסרגל מהירות הפעלה מהיר
+    Customize Quick Playback Speed Bar: התאמה אישית של סרגל מהירות ההפעלה המהיר
+    Quick Playback Speed Bar Manager: סרגל מהירות הפעלה מהיר
+    Add Playback Speed: הוספת מהירות הפעלה
+    Reset Quick Playback Speed Bar: איפוס לברירות המחדל
+    Playback Speed Name: שם
+    Edit Playback Speed Name: עריכת שם מהירות ההפעלה
+    Use Automatic Playback Speed Name: שימוש בשם אוטומטי למהירות ההפעלה
+    Reorder Playback Speed: גרירה לשינוי סדר מהירויות ההפעלה
+    Playback Speed: מהירות הפעלה
+    Parallel Segment Loading: טעינת מקטעים במקביל
+    Screenshot:
+      Mode: מצב צילום מסך
+      Modes:
+        Save To Folder: שמירה בתיקייה
+        Clipboard: העתקה ללוח
+  Channel Settings:
+    Channel Settings: הגדרות ערוץ
+    Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.
+    Enable Playback Speed: הפעלת מהירות הפעלה
+    Enable Video Quality: הפעלת איכות וידאו
+    Enable Subtitles State: הפעלת מצב כתוביות
+    Enable Volume: הפעלת עוצמת קול
+    Auto Update: עדכון אוטומטי בעת שינוי דרך אפשרויות הנגן
+    Auto Update Subtitles: עדכון אוטומטי בעת הפעלה או כיבוי
+    Auto Update Volume: עדכון אוטומטי בכל שינוי בעוצמת הקול
+    Manage Saved Channels: ניהול ערוצים שמורים ({channelCount})
+    Saved Channels: הגדרות ערוצים שמורות
+    Enable Saved Channel Settings Sync: סנכרון הגדרות ערוצים שמורות
+    Disable Saved Channel Settings Sync: הפסקת סנכרון הגדרות ערוצים שמורות
+    Search Channels: חיפוש ערוצים
+    No Saved Channels: טרם נשמרו הגדרות ייחודיות לערוץ
+    No Matching Channels: לא נמצאו ערוצים התואמים לחיפוש
+    Forget Channel: הסרת כל ההגדרות של ערוץ זה
+    Forget Value: הסרת הגדרה זו
+    Add Setting: שמירת הגדרה נוספת לערוץ זה
+    Video Quality: איכות וידאו
+    Subtitles Enabled: הכתוביות מופעלות
+    Volume: עוצמת קול
+  Download Settings:
+    Download Settings: הורדות
+    Enable Downloads: הפעלת הורדות
+    Managed Tools Download Started Template: 'לא נמצאה התוכנה החיצונית הדרושה: {tools}. מתבצעת הורדה של עותקים מנוהלים…'
+    Managed Tools Download Finished Template: הורדת {tools} הסתיימה
+    Managed Tools Update Started Template: נמצא עדכון עבור {tools}. מתבצעת הורדה…
+    Managed Tools Update Finished Template: העדכון של {tools} הסתיים
+    Managed Tools Update Available Template: קיים עדכון עבור {tools}.
+    Update Managed Tools: עדכון
+    Managed Tools Download Error Template: 'לא ניתן להוריד את הכלים המנוהלים: {errors}'
+    Download Folder: תיקיית הורדות
+    Global Additional yt-dlp Arguments: ארגומנטים נוספים כלליים של yt-dlp
+    Concurrent Downloads: הורדות במקביל
+    Bandwidth Limit: מגבלת רוחב פס (KiB/s, 0 ללא הגבלה)
+    Choose Download Folder: בחירת תיקיית הורדות
+    Download Templates: תבניות הורדה
+    Manage Download Templates: ניהול תבניות הורדה ({templateCount})
+    New Template: תבנית חדשה
+    Template Source: תבנית לעריכה או לשימוש כבסיס
+    Built-in Template: '{name} (מובנית)'
+    Custom Template Name: '{name} (מותאמת אישית)'
+    Create Template Copy: יצירת עותק
+    Template Copy Name: 'עותק של {name}'
+    Automatic Downloads: הורדות אוטומטיות
+    Manage Automatic Downloads: ניהול הורדות אוטומטיות ({channelCount})
+    Automatic Downloads Description: בחרו תבנית הורדה ומסננים לכל ערוץ שנרשמתם אליו. סרטונים תואמים יורדו ברקע כשעדכוני המינויים יתרעננו.
+    Automatic Downloads New Only: הפעלת ערוץ מתחילה בהעלאה החדשה הבאה שלו. סרטונים קיימים ותוכן קודם מהערוץ לא יורדו.
+    Automatic Downloads No Channels: הירשמו לערוץ לפני הגדרת הורדות אוטומטיות.
+    No Matching Automatic Download Channels: אין ערוצים שתואמים לחיפוש.
+    Automatic Downloads Livestreams: שידורים חיים
+    Minimum Duration Seconds: משך מינימלי (שניות)
+    Maximum Duration Seconds: משך מרבי (שניות)
+    Minimum File Size MB: גודל קובץ מינימלי (MB)
+    Maximum File Size MB: גודל קובץ מרבי (MB)
+    Maximum Age Days: גיל מרבי (ימים)
+    Title Includes: הכותרת כוללת
+    Title Excludes: הכותרת אינה כוללת
+    Title Filter Hint: הפרידו מונחי כותרת בפסיקים. סרטון חייב להתאים לפחות למונח אחד שנכלל ולא להתאים לאף מונח שהוחרג.
+  External Software Settings:
+    External Software Settings: תוכנות חיצוניות
+    yt-dlp Source: מקור yt-dlp
+    yt-dlp Channel: ערוץ yt-dlp
+    Sources:
+      System: מערכת (PATH או נתיב מותאם אישית)
+      Managed: מנוהל בידי OpenTubeX
+    Detected Version Template: 'גרסת yt-dlp שזוהתה: {version}'
+    Managed Not Downloaded: yt-dlp עדיין לא הורד. לחצו על הכפתור למטה כדי להוריד אותו.
+    System yt-dlp Missing Warning: yt-dlp לא נמצא במערכת. התקינו אותו, הגדירו נתיב מותאם אישית למטה או החליפו את המקור ל"מנוהל בידי OpenTubeX".
+    Download yt-dlp: הורדת yt-dlp
+    Update yt-dlp: עדכון yt-dlp
+    Checking yt-dlp: yt-dlp נבדק…
+    Downloading yt-dlp: yt-dlp בהורדה…
+    yt-dlp Downloaded Template: yt-dlp {version} הורד
+    yt-dlp Download Error Template: 'הורדת yt-dlp נכשלה: {error}'
+    FFmpeg Source: מקור FFmpeg
+    Detected FFmpeg Version Template: 'גרסת FFmpeg שזוהתה: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg עדיין לא הורד. לחצו על הכפתור למטה כדי להוריד אותו.
+    System FFmpeg Missing Warning: FFmpeg לא נמצא במערכת. הוא דרוש למיזוג וידאו ושמע ולהמרת שמע. התקינו אותו, הגדירו נתיב מותאם אישית למטה או החליפו את המקור ל"מנוהל בידי OpenTubeX".
+    Download FFmpeg: הורדת FFmpeg
+    Update FFmpeg: עדכון FFmpeg
+    Checking FFmpeg: FFmpeg נבדק…
+    Downloading FFmpeg: FFmpeg בהורדה…
+    FFmpeg Downloaded Template: FFmpeg {version} הורד
+    FFmpeg Download Error Template: 'הורדת FFmpeg נכשלה: {error}'
+    Detected FFprobe Version Template: 'גרסת FFprobe שזוהתה: {version}'
+    FFprobe Managed Not Downloaded: FFprobe עדיין לא הורד. לחצו על הכפתור למטה כדי להוריד אותו עם FFmpeg.
+    System FFprobe Missing Warning: FFprobe לא נמצא במערכת. הוא דרוש לבדיקת מדיה במהלך עיבוד סופי. התקינו אותו לצד FFmpeg או החליפו את המקור ל"מנוהל בידי OpenTubeX".
+    Checking FFprobe: FFprobe נבדק…
+    Download FFmpeg and FFprobe: הורדת FFmpeg ו-FFprobe
+    Update FFmpeg and FFprobe: עדכון FFmpeg ו-FFprobe
+    Downloading FFmpeg and FFprobe: FFmpeg ו-FFprobe בהורדה…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg ו-FFprobe {version} הורדו
+    FFmpeg and FFprobe Download Error Template: 'הורדת FFmpeg ו-FFprobe נכשלה: {error}'
+    Managed Tool Already Current Template: '{tool} {version} כבר מעודכן'
+    Managed Tool Updates: עדכוני כלים מנוהלים
+    Update Modes:
+      Automatic: עדכון אוטומטי
+      Ask: לשאול לפני עדכון
+      Manual: עדכון ידני בלבד
+    yt-dlp Executable Path: נתיב קובץ ההפעלה של yt-dlp
+    FFmpeg Executable Path: נתיב קובץ ההפעלה של FFmpeg
+    Restricted Playback Authentication: עוגיות הפעלה של yt-dlp
+    Cookie Source: מקור העוגיות
+    Cookie Sources:
+      None: ללא
+      File: קובץ
+      Browser: דפדפן
+    Cookie File: קובץ עוגיות
+    Browser for Cookies: דפדפן לעוגיות
+    Browser Profile: פרופיל דפדפן (לא חובה)
+    Browser Profile Placeholder: שם הפרופיל או הנתיב
+    Select Browser: בחירת דפדפן
+    Always Use Cookies: להשתמש תמיד בעוגיות
+    Restricted Playback Authentication Hint: כברירת מחדל, OpenTubeX מעביר את העוגיות האלה ל-yt-dlp רק לאחר בחירה באפשרות "לנסות עם העוגיות שהוגדרו" בסרטון שמוגבל לפי גיל או לחברים בלבד.
+    Restricted Playback Authentication Warning: שימוש ב-yt-dlp עם חשבון Google עלול להוביל להגבלות זמניות או קבועות על החשבון.
+  Privacy Settings:
+    Automatic History Retention: תקופת שמירה אוטומטית של ההיסטוריה (ימים)
+    Automatic History Retention Placeholder: השאירו ריק כדי לשמור לתמיד
+    Automatic History Retention Tooltip: השאירו ריק כדי לשמור את ההיסטוריה לתמיד. הזנת מספר מוחקת כעת רשומות ישנות יותר וממשיכה למחוק אותן אוטומטית כל עוד היישום פתוח.
+    History Retention Saved: תקופת שמירת ההיסטוריה נשמרה
+    Invalid History Retention Days: הזינו מספר ימים שלם וגדול מאפס
+    Enable Watch Statistics: הפעלת סטטיסטיקות צפייה
+    Week Starts On: היום הראשון בשבוע
+    Cache Video Metadata: היסטוריית מטא-נתונים
+    Cache Video Metadata Tooltip: שומר כל גרסה של מטא-נתוני וידאו נתמכים עבור סרטונים שביקרתם בהם, כולל כותרות, תמונות ממוזערות ותיאורים. מושבת כברירת מחדל כי שמירת ההיסטוריה מגדילה את השימוש בדיסק.
+    Watched Percentage Threshold: סף אחוזי צפייה
+    Watched Percentage Threshold Tooltip: סרטונים יסומנו כנצפו לאחר הגעה לאחוז שנבחר וכשלא נותרו יותר מ-2 דקות. ב-0% הם יסומנו בתחילת ההפעלה. ב-100% הם יסומנו בסופה.
+    Clear Video Metadata Cache: ניקוי מטמון מטא-נתוני הווידאו
+    Are you sure you want to clear the video metadata cache?: האם לנקות את הכותרות, התמונות הממוזערות והתיאורים שנשמרו במטמון?
+    Failed to clear video metadata cache: ניקוי מטמון מטא-נתוני הווידאו נכשל
+    Video metadata cache has been cleared: מטמון מטא-נתוני הווידאו נוקה
+    Video Metadata Cache Size: 'מטמון מטא-נתוני וידאו: {size}'
+  Storage Settings:
+    Storage: אחסון
+    Downloaded Media: מדיה שהורדה ונמצאת במעקב
+    Storage Breakdown: פירוט האחסון
+    Shown Total: סך הכול שמוצג
+    Calculating: בחישוב…
+    Not Available: הגודל המדויק לא זמין
+    At Least: לפחות {size}
+    Failed To Read Storage: לא ניתן לקרוא חלק מנפחי האחסון
+    Downloaded Media Description: קובצי וידאו, שמע וכתוביות שעדיין נמצאים במעקב של היסטוריית ההורדות.
+    Selected Download Folders: תיקיות הורדה שנבחרו
+    Download History Records: רשומות היסטוריית הורדות
+    Download History Records Description: '{count} רשומת הורדה שהושלמה. הרשומה עוקבת אחר המצב ומיקומי הקבצים, אך אינה מכילה את המדיה שהורדה. | {count} רשומות הורדה שהושלמו. הרשומות עוקבות אחר המצב ומיקומי הקבצים, אך אינן מכילות את המדיה שהורדה. | {count} רשומות הורדה שהושלמו. הרשומות עוקבות אחר המצב ומיקומי הקבצים, אך אינן מכילות את המדיה שהורדה.'
+    Clear Download History Records: ניקוי רשומות היסטוריית ההורדות
+    Clear Download History Confirmation: לנקות את כל רשומות ההורדות שהושלמו?
+    Download Files Stay On Disk: הקבצים שהורדו יישארו בדיסק, אך לא יופיעו עוד בדף ההורדות.
+    Clear Records: ניקוי הרשומות
+    Replaceable Caches: מטמונים שניתנים ליצירה מחדש
+    Application Caches: מטמוני היישום
+    Browser Caches: מטמוני הדפדפן
+    Browser Caches Hint: מטמוני HTTP, GPU, קוד, shader, service-worker ומילון של Chromium.
+    Stored App Data: נתוני יישום שמורים
+    Browser Runtime Data: נתוני זמן הריצה של הדפדפן
+    Browser Runtime Data Hint: אחסון הפעלה ואחסון מקומי, עוגיות, מצב פרטיות ורשת וקובצי קריסה של Chromium.
+    Subscription Feed Cache: מטמון מינויים ועדכונים
+    Subscription Feed Cache Description: שומר סרטונים, Shorts, שידורים חיים ופוסטים שהתקבלו מעדכוני המינויים. OpenTubeX ייצור אותו מחדש בריענון הבא.
+    Clear Subscription Feed Cache: ניקוי מטמון המינויים והעדכונים
+    Clear Subscription Feed Cache Confirmation: לנקות את מטמון המינויים והעדכונים?
+    Subscription Feed Cache Effect: עדכוני המינויים עשויים להיראות ריקים עד לריענון. המינויים והפרופילים לא ישתנו.
+    Session Search Cache: מטמון החיפוש להפעלה הנוכחית
+    In Memory: בזיכרון
+    Session Search Cache Description: '{count} חיפוש נשמר בזיכרון לניווט מהיר יותר אחורה. המטמון נמחק בסגירת OpenTubeX. | {count} חיפושים נשמרים בזיכרון לניווט מהיר יותר אחורה. המטמון נמחק בסגירת OpenTubeX. | {count} חיפושים נשמרים בזיכרון לניווט מהיר יותר אחורה. המטמון נמחק בסגירת OpenTubeX.'
+    Clear Session Search Cache: ניקוי מטמון החיפוש להפעלה הנוכחית
+    Clear Session Search Cache Confirmation: לנקות את מטמון החיפוש להפעלה הנוכחית?
+    Session Search Cache Effect: דפי תוצאות שנשמרו במטמון יימחקו. היסטוריית החיפוש השמורה לא תשתנה.
+    HTTP Cache: מטמון HTTP
+    HTTP Cache Description: Electron שומר תגובות רשת בדיסק כדי שבקשות חוזרות ייטענו בלי להוריד שוב את אותם נתונים. OpenTubeX יוצר את המטמון מחדש לפי הצורך.
+    Managed By Electron: מנוהל בידי Electron
+    Clear HTTP Cache: ניקוי מטמון HTTP
+    Clear HTTP Cache Confirmation: לנקות את מטמון ה-HTTP של Electron?
+    HTTP Cache Effect: תמונות ומשאבי רשת אחרים עשויים להיטען לאט יותר פעם אחת בזמן בניית המטמון מחדש.
+    Tab Image Cache: תמונות ממוזערות של כרטיסיות ותמונות ערוצים
+    Tab Image Cache Description: שומר תמונות תצוגה מקדימה ותמונות ערוצים של כרטיסיות פתוחות ומשוחזרות. OpenTubeX יוצר אותן מחדש במהלך השימוש בכרטיסיות.
+    Clear Tab Image Cache: ניקוי מטמון תמונות הכרטיסיות
+    Clear Tab Image Cache Confirmation: לנקות תמונות ממוזערות של כרטיסיות ותמונות ערוצים?
+    Tab Image Cache Effect: תמונות הכרטיסיות עשויות להיעלם לזמן קצר וייווצרו מחדש במהלך השימוש בהן.
+    Playback Caches: מטמוני הפעלה
+    Playback Caches Description: שומר כתובות URL של זרמי yt-dlp בין הפעלות היישום, וגם קובצי נגן של YouTube. מטמון הכתובות חל רק על זרמים שהתקבלו באמצעות yt-dlp.
+    Playback URL Cache Entry Size: מגבלת מטמון כתובות זרמי yt-dlp
+    Playback URL Cache Entry Size Tooltip: מגדיר את הגודל המרבי של כל רשומת זרם yt-dlp במטמון. הגדירו 0 MB כדי להשבית שמירה קבועה במטמון של זרמי yt-dlp.
+    Clear Playback Caches: ניקוי מטמוני ההפעלה
+    Clear Playback Caches Confirmation: לנקות את מטמוני yt-dlp והנגן?
+    Playback Caches Effect: בקשת ההפעלה המקומית הבאה עשויה להימשך זמן רב יותר בזמן הורדת נתוני הזרם והנגן מחדש.
+    Clear Cache: ניקוי המטמון
+    History Data: היסטוריות שמורות
+    Video Metadata Description: שומר כותרות, תמונות ממוזערות ותיאורים קודמים של סרטונים נתמכים. לא ניתן ליצור מחדש גרסאות ישנות לאחר מחיקתן.
+    Video Metadata Effect: גרסאות מטא-נתונים שמורות יימחקו לצמיתות. עדיין ניתן לקבל שוב את פרטי הסרטון הנוכחיים.
+    Watch History: היסטוריית צפייה וסטטיסטיקות
+    Watch History Description: היסטוריית הצפייה מתעדת סרטונים שנצפו ואת ההתקדמות בהם. סטטיסטיקות הצפייה שומרות את סיכומי הצפייה היומיים. תקופת השמירה חלה רק על היסטוריית הצפייה.
+    Clear Watch Statistics: ניקוי סטטיסטיקות הצפייה
+    Watch History Effect: רשומות הסרטונים שנצפו וההתקדמות השמורה יימחקו. סטטיסטיקות הצפייה יישארו.
+    Clear Watch Statistics Confirmation: למחוק את כל סטטיסטיקות הצפייה?
+    Watch Statistics Effect: סיכומי הצפייה היומיים יימחקו. היסטוריית הצפייה תישאר.
+    Search History: היסטוריית חיפוש
+    Search History Description: שומר חיפושים שבחרתם לזכור.
+    Delete Search History: מחיקת היסטוריית החיפוש
+    Delete Search History Confirmation: למחוק את כל היסטוריית החיפוש השמורה?
+    Search History Effect: הצעות חיפוש שמורות מחיפושים קודמים ייעלמו. מטמון ההפעלה הנוכחית יישאר.
+    Other User Data: נתוני משתמש אחרים
+    Other Profile Files: קובצי פרופיל אחרים
+    Other Profile Files Hint: גיבויים, קבצים זמניים ורשומות פרופיל ש-OpenTubeX עדיין לא מזהה.
+    Subscriptions And Profiles: מינויים ופרופילים
+    Subscriptions And Profiles Description: שומר ערוצים שנרשמתם אליהם, שמות פרופילים ושיוך לפרופילים.
+    Subscriptions And Profiles Effect: כל המינויים והפרופילים הנוספים יימחקו לצמיתות. גם מטמון העדכונים ינוקה.
+    Playlists Description: שומר שמות ותיאורים של רשימות השמעה וסרטונים שנשמרו.
+    Playlists Effect: כל רשימת השמעה ורשימת הסרטונים השמורים שלה יימחקו לצמיתות. קובצי המדיה שהורדו יישארו.
+    Settings And Sessions: הגדרות, הפעלות כרטיסיות ותזכורות
+    Settings And Sessions Description: שומר העדפות יישום, כרטיסיות שניתנות לשחזור ותזכורות לשידורים חיים. פתחו את תיקיית הפרופיל כדי לבדוק או לגבות קבצים אלה. דף זה אינו מוחק אותם.
+    Cleanup Complete: ניקוי האחסון הושלם
+    Cleanup Failed: ניקוי האחסון נכשל
+  Subscription Settings:
+    Fetch Feed on Startup: טעינת העדכונים בעת ההפעלה
+    Show New Content Feed: הצגת עדכוני תוכן חדש
+    Show New Content Indicators: הצגת סימונים לתוכן חדש
+    Show Scheduled Live Streams / Premieres First: הצגת שידורים חיים מתוזמנים ובכורות תחילה
+    Auto Refresh Interval: מרווח ריענון אוטומטי
+    Videos Auto Refresh Interval: מרווח ריענון אוטומטי של סרטונים
+    Shorts Auto Refresh Interval: מרווח ריענון אוטומטי של Shorts
+    Live Auto Refresh Interval: מרווח ריענון אוטומטי של שידורים חיים
+    Posts Auto Refresh Interval: מרווח ריענון אוטומטי של פוסטים
+  Distraction Free Settings:
+    Sections:
+      Visible While Paused: מוצג בזמן השהיה בחלון מלא או במסך מלא
+    Hide Channel Avatars: הסתרת תמונות ערוצים
+    Shorten View Counts: קיצור מספרי צפיות ולייקים לתגובות
+    Hide Comment Translation Buttons: הסתרת כפתורי תרגום תגובות
+    Hide Live Chat Replay: הסתרת ההפעלה החוזרת של הצ'אט החי
+    Hide Home: הסתרת דף הבית
+    Disable A-B Repeat: השבתת חזרה A-B
+    Hide End-Screen Annotations: הסתרת הערות במסך הסיום
+    Hide Paid Promotion Badge: הסתרת תגית קידום ממומן
+    Show Player Controls: הצגת פקדי הנגן
+    Show Video Title: הצגת כותרת הסרטון
+    Show Bottom Right Actions Dock: הצגת סרגל הפעולות הימני התחתון
+    Paused Interface Hide Delay: השהיה לפני הסתרת הממשק כשהסרטון מושהה
+  Data Settings:
+    Data And Storage: נתונים ואחסון
+    Profile Directory: תיקיית הפרופיל
+    Open Profile Directory: פתיחת תיקיית הפרופיל
+    Settings File: קובץ הגדרות
+    Import Settings: ייבוא הגדרות
+    Export Settings: ייצוא הגדרות
+    Settings Tooltip: לא ניתן לייצא או לייבא הגדרות ייחודיות למערכת ההפעלה או למשתמש והגדרות ניסיוניות (למשל שרת מתווך, נגן חיצוני, תיקיית צילומי מסך...)
+    Invalid JSON row, skipping item: JSON לא תקין בשורה {row}, הפריט ידולג
+    All settings have been successfully imported: כל ההגדרות יובאו בהצלחה
+    All settings have been successfully exported: כל ההגדרות יוצאו בהצלחה
+    Setting object has insufficient data, skipping item: אין מספיק נתונים באובייקט ההגדרה, הפריט ידולג
+    Unknown setting key: 'מפתח הגדרה לא מוכר: {key}'
+    Non-transferable setting key: 'מפתח הגדרה שאינו ניתן להעברה: {key}'
+    Import subscriptions formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), גיבוי LibreTube או ייצוא FreeTube (.json)'
+    Import history formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), גיבוי LibreTube (.json)'
+    Import playlists formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+  Sync Settings:
+    Sync Settings: סנכרון
+    Enable Sync: הפעלת סנכרון
+    Privacy Passphrase: ביטוי סיסמה לפרטיות
+    Privacy Passphrase Hint: השתמשו בביטוי סיסמה שונה מסיסמת החשבון. הוא לעולם אינו יוצא מהמכשיר הזה ונדרש בכל מכשיר. אם תאבדו אותו, לא יהיה ניתן לשחזר את נתוני הסנכרון המוצפנים.
+    Privacy Policy: מדיניות הפרטיות של השרת
+    Enhanced Privacy Enabled: פרטיות מוגברת מופעלת. השרת שומר רק נתוני סנכרון מוצפנים.
+    Enhanced Privacy Unsupported: אזהרה — השרת הזה אינו תומך בפרטיות מוגברת. מפעיל השרת יכול לראות את הנתונים המסונכרנים.
+    Description: סנכרון מינויים, פרופילים, רשימות השמעה, היסטוריית צפייה, הגדרות וכרטיסיות פתוחות עם שרת סנכרון של OpenTubeX או LibreTube. ייתכן ששרתי LibreTube לא יתמכו בכל תכונות הסנכרון.
+    Server URL: כתובת ה-URL של השרת
+    Checking Server: שרת הסנכרון נבדק…
+    Server Unavailable: לא ניתן להתחבר לשרת הסנכרון. בדקו את כתובת ה-URL ונסו שוב.
+    Username: שם משתמש
+    Log In: כניסה
+    Register: הרשמה
+    Pair Another Device: צימוד מכשיר נוסף
+    Pair With Existing Device: צימוד עם מכשיר קיים
+    Device Name: שם המכשיר
+    This Device: המכשיר הזה
+    Device Name Required: הזינו שם למכשיר הזה.
+    Pairing Device Name Hint: בחרו שם שתזהו במכשיר שמאשר את הבקשה.
+    Create Pairing Code: יצירת קוד צימוד
+    Creating Pairing Code: יצירת קוד צימוד מאובטח…
+    Pairing QR Alt: קוד QR לצימוד עם {device}
+    Scan Pairing Code: במכשיר שכבר מחובר, פתחו את "צימוד מכשיר נוסף" וסרקו את הקוד הזה.
+    Pairing Code: קוד צימוד
+    Use Text Pairing Code: שימוש בקוד טקסט במקום זאת
+    Show QR Code: הצגת קוד QR
+    Text Pairing Code Hint: העתיקו את הקוד למכשיר הקיים. הוא מכיל את סוד הצימוד, לכן מחקו אותו מהיסטוריית הלוח לאחר הצימוד.
+    Pairing QR Warning: הציגו את הקוד רק למכשיר מהימן שכבר מחובר ושיאשר את הבקשה. תוקפו יפוג כעבור שתי דקות.
+    Pairing Expires: תוקף קוד הצימוד יפוג בשעה {time}.
+    Verifying Pairing: אימות מפתח הפרטיות שהועבר…
+    Completing Pairing: השלמת צימוד המכשיר…
+    Compare Pairing Codes: השוואת קודי צימוד
+    Pairing Code Match Hint: אשרו רק אם הקוד תואם לקוד שבמכשיר הקיים.
+    Pairing Codes Match: הקודים תואמים
+    Pairing Approval Code Hint: השאירו את החלון פתוח והשוו את הקוד לקוד שבמכשיר החדש. אסור להמשיך במכשיר החדש אם הקודים שונים.
+    Pairing Scan Hint: סרקו את קוד הצימוד שמוצג במכשיר שאתם מוסיפים.
+    Enter Pairing Code: הזנת הקוד ידנית
+    Pairing Code Entry Hint: הדביקו את קוד הצימוד שמוצג במכשיר שאתם מוסיפים.
+    Check Pairing Code: בדיקת הקוד
+    Scan QR Code: סריקת קוד QR
+    Waiting For Pairing Code: בהמתנה לקוד צימוד…
+    Checking Pairing Request: בדיקת בקשת הצימוד…
+    Approving Pairing Request: הצפנת מפתח הפרטיות ושליחתו…
+    Pairing Approval Warning: אשרו רק אם הבקשה מופיעה במכשיר שאתם מוסיפים. הצימוד מעניק גישה לחשבון ומעביר את מפתח הפרטיות.
+    Approve Pairing: אישור הצימוד
+    Try Again: ניסיון חוזר
+    Scan Again: סריקה מחדש
+    Camera Unavailable: ל-OpenTubeX לא הייתה גישה למצלמה. בדקו את הרשאת המצלמה או הזינו את קוד הצימוד ידנית.
+    Pairing Unsupported: שרת הסנכרון הזה אינו תומך בצימוד מאובטח של מכשירים.
+    Pairing Failed: צימוד המכשיר נכשל. נסו שוב עם קוד חדש.
+    Pairing Request Changed: בקשת הצימוד השתנתה, פג תוקפה או שכבר נעשה בה שימוש. צרו קוד חדש.
+    Pairing Server Mismatch: הקוד הזה שייך לשרת סנכרון אחר.
+    Pairing Verification Unavailable: אין אוסף סנכרון מוצפן שאפשר לאמת באמצעותו את המפתח שהועבר. סנכרנו את המכשיר הקיים ונסו שוב.
+    Pairing Completed: צימוד המכשיר הושלם
+    Pairing Approved: צימוד המכשיר אושר
+    Disconnect: ניתוק
+    Delete Account: מחיקת חשבון הסנכרון
+    Delete Account Confirmation: למחוק את חשבון הסנכרון?
+    Delete Account Warning: פעולה זו תמחק לצמיתות את חשבון הסנכרון ואת כל הנתונים השמורים בשרת הזה. הנתונים המקומיים של OpenTubeX לא יימחקו.
+    Confirm Delete Account: מחיקת החשבון
+    Password Required: נדרשת סיסמה
+    Account Deleted: חשבון הסנכרון נמחק
+    Connected as: מחובר בתור {username}
+    Automatic Sync: סנכרון אוטומטי לאחר שינויים וכל חמש דקות
+    Profiles: פרופילים
+    Open Tabs: כרטיסיות פתוחות וההפעלה הנוכחית
+    Disable Setting Sync: הפסקת הסנכרון של הגדרה זו
+    Enable Setting Sync: סנכרון הגדרה זו
+    Sync Now: סנכרון עכשיו
+    Downloading encrypted data: נתוני הסנכרון המוצפנים מתקבלים…
+    Syncing subscriptions: המינויים מסתנכרנים…
+    Syncing playlists: הפלייליסטים מסתנכרנים…
+    Syncing history: היסטוריית הצפייה מסתנכרנת…
+    Syncing profiles: הפרופילים מסתנכרנים…
+    Syncing open tabs: הכרטיסיות הפתוחות וההפעלה הנוכחית מסתנכרנות…
+    Syncing settings: ההגדרות מסתנכרנות…
+    Uploading encrypted data: נתוני הסנכרון המוצפנים נשלחים…
+    Finishing sync: הסנכרון מסתיים…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'סנכרון אחרון: {date}'
+    History not supported: גרסת השרת הזו אינה תומכת בסנכרון היסטוריית הצפייה.
+    Settings not supported: גרסת השרת הזו אינה תומכת בסנכרון הגדרות.
+    Sync completed: הסנכרון הושלם
+    Sync failed: 'הסנכרון נכשל: {error}'
+    Data Loss Confirmation: לאשר סנכרון שימחק נתונים?
+    Data Loss Warning: מצב השרת ימחק {deleted} מתוך {previous} פריטי {collection} שסונכרנו בעבר. הדבר עשוי להעיד שהעברת השרת או האיפוס נכשלו. המשיכו רק אם המחיקה מכוונת ויש לכם גיבוי.
+    Confirm Data Loss: מחיקה והמשך
+  Proxy Settings:
+    IP Block Recovery Script Path: נתיב לסקריפט התאוששות מחסימת IP
+    Select IP Block Recovery Script File: בחירת קובץ סקריפט התאוששות מחסימת IP
+    Running IP block recovery script: סקריפט ההתאוששות מחסימת IP פועל
+    IP block recovery script failed: 'סקריפט ההתאוששות מחסימת IP נכשל (קוד יציאה: {exitCode})'
+    IP block recovery script finished: סקריפט ההתאוששות מחסימת IP הסתיים
+    Reloading video after IP block recovery: הסרטון נטען מחדש לאחר התאוששות מחסימת IP
+    Failed to select IP block recovery script: בחירת סקריפט ההתאוששות מחסימת IP נכשלה
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: הפעלת שליחה ל-SponsorBlock
+    SponsorBlock Private User ID (optional): מזהה משתמש פרטי של SponsorBlock (לא חובה)
+    SponsorBlock Private User ID Tooltip: הדביקו את מזהה המשתמש הפרטי של SponsorBlock מהרחבת הדפדפן. השאירו שדה זה ריק כדי להשתמש במזהה שיצרה האפליקציה.
+    Generated SponsorBlock User ID: מזהה משתמש של SponsorBlock שיצרה האפליקציה
+    Generated SponsorBlock User ID Tooltip: אפשר להשתמש במזהה המשתמש של SponsorBlock שיצרה האפליקציה בהרחבת הדפדפן או באפליקציה במחשב אחר.
+    Export Generated User ID: ייצוא מזהה המשתמש שנוצר
+    Generated SponsorBlock User ID Copy Button: העתקת מזהה המשתמש של SponsorBlock שנוצר
+    Generated SponsorBlock User ID Copied: מזהה המשתמש של SponsorBlock שנוצר הועתק ללוח
+    Skip notification timeout: משך הצגת הודעת הדילוג
+    Custom Color: צבע מותאם אישית
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: הפעלת Return YouTube Dislike
+    Return YouTube Dislike Url: כתובת ה-API של Return YouTube Dislike (ברירת המחדל היא https://ryd-proxy.kavin.rocks)
+  Parental Control Settings:
+    Disable Channel Links: השבתת קישורים לערוצים
+  Password Dialog:
+    Incorrect Password: סיסמה שגויה
+    Unlock: ביטול נעילה
+    Unlocking: הנעילה מתבטלת…
+  Search Settings: חיפוש בהגדרות
+  No Settings Found: לא נמצאו הגדרות
+Tutorial:
+  Skip: דילוג
+  Next: הבא
+  Finish: סיום
+  Got It: הבנתי
+  Welcome:
+    Title: ברוכים הבאים ל-OpenTubeX
+    Description: הנה כמה פקדים שיעזרו לכם להכיר את האפליקציה.
+  Navigation:
+    Title: הספרייה שלכם תמיד בהישג יד
+    Description: השתמשו בניווט כדי להגיע למינויים, לפלייליסטים, להיסטוריה ועוד.
+  Search:
+    Title: חיפוש או הדבקת קישור
+    Description: חפשו סרטונים וערוצים, או הדביקו כתובת נתמכת של סרטון ישירות בשדה החיפוש.
+  Tabs:
+    Title: השאירו דפים פתוחים בכרטיסיות
+    Description: פתחו כמה דפים בו-זמנית בלי לאבד את המקום שבו הייתם. בחרו היכן למקם את הכרטיסיות בפריסה.
+  Quick Settings:
+    Title: התאימו לטעמכם
+    Description: בחרו ערכת נושא ואיכות וידאו כברירת מחדל. תוכלו לשנות אותן והעדפות אחרות בכל עת מתפריט הפרופיל, או ללחוץ עליו לחיצה ימנית כדי להחליף פרופיל.
+  Import Data:
+    Title: קחו את הנתונים איתכם
+    Description: אפשר לייבא מינויים, היסטוריה, פלייליסטים, היסטוריית חיפוש או הגדרות מאפליקציה נתמכת אחרת או מגיבוי.
+    Action: ייבוא נתונים
+    Not Now: לא עכשיו
+  Settings Moved:
+    Title: ההגדרות עברו מקום
+    Description: בחרו את הפרופיל בפינה הימנית העליונה כדי לפתוח פקדים מהירים. לחצו עליו לחיצה ימנית כדי לעבור ישירות לבחירת פרופיל. גלגל השיניים בתפריט הזה פותח את כל ההגדרות, וגם „אודות” ו„הורדות” עברו אליו.
+About:
+  Commit: קומיט
+  Fluxer: הצטרפו לקהילת Fluxer שלנו
+  Matrix: Matrix
+  Email: דוא״ל
+Profile:
+  Profile Icon: סמל הפרופיל
+  Choose an Emoji: בחירת אמוג׳י
+  Custom Emoji: אמוג׳י מותאם אישית
+  Emoji: אמוג׳י
+  Choose Image: בחירת תמונה
+  Crop Image: חיתוך התמונה
+  Zoom: תקריב
+  Apply Crop: החלת החיתוך
+  Transparent: שקוף
+  Use Initial: שימוש באות הראשונה
+  The selected image could not be loaded: לא ניתן לטעון את התמונה שנבחרה
+  Theme Color: צבע ערכת הנושא
+Channel:
+  Channel Name Unavailable: שם הערוץ אינו זמין
+  Search Result Types: סוגי תוצאות חיפוש
+  All Results: הכול
+  View All: הצגת הכול
+Video:
+  Includes paid promotion: כולל תוכן שיווקי בתשלום
+  Age Restricted Badge: מוגבל לפי גיל
+  Queue: תור
+  Play Next: הפעלה אחרי הסרטון הנוכחי
+  Add to Queue: הוספה לתור
+  Added to Play Next: הסרטון יופעל אחרי הסרטון הנוכחי
+  Added to Queue: הסרטון נוסף לתור
+  Clear Queue: ניקוי התור
+  Queue Video Count: '{count} סרטון | {count} סרטונים | {count} סרטונים'
+  Remove from Queue: הסרת {title} מהתור
+  Drag to Reorder Queue: גררו את {title} כדי לשנות את מיקומו בתור
+  Reorder Queue Item: שינוי המיקום של {title}
+  Reorder Queue Item Instructions: השתמשו במקשי החיצים למעלה ולמטה כדי להזיז את הסרטון בתור.
+  Queue Item Moved: ‏{title} הועבר למיקום {position} מתוך {total}.
+  Queue Item Cannot Move Up: אי אפשר להעביר את {title} למעלה. הוא כבר במיקום 1 מתוך {total}.
+  Queue Item Cannot Move Down: אי אפשר להעביר את {title} למטה. הוא כבר במיקום {total} מתוך {total}.
+  Metadata: פרטי הסרטון
+  Close Metadata: סגירת פרטי הסרטון
+  Metadata Cache:
+    Title History: היסטוריית כותרות
+    Thumbnail History: היסטוריית תמונות ממוזערות
+    Description History: היסטוריית תיאורים
+    Previous Version: הגרסה הקודמת {number}
+    Empty: (ריק)
+  Fetching Streams: הזרמים מתקבלים באמצעות yt-dlp…
+  Transcript:
+    Title: תמלול
+    Search: חיפוש בתמלול
+    Language: שפת התמלול
+    Save: שמירה
+    Show: הצגת התמלול
+    Hide: הסתרת התמלול
+    Close: סגירת התמלול
+    Copied: התמלול הועתק ללוח
+    Saved: התמלול נשמר
+    Save Error: לא ניתן לשמור את התמלול
+    Text File: קובץ טקסט
+    Unavailable: אין תמלול זמין לסרטון הזה.
+    Load Error: לא ניתן לטעון את התמלול.
+    Empty: התמלול הזה אינו מכיל טקסט.
+    No Results: אין בתמלול קטעים שתואמים לחיפוש.
+  Retry With Built-in Extraction: ניסיון חוזר עם החילוץ המובנה
+  Retry With yt-dlp Extraction: ניסיון חוזר עם חילוץ באמצעות yt-dlp
+  Reloading video after streaming URL error: הסרטון נטען מחדש לאחר שגיאה בכתובת ההזרמה
+  Configure Restricted Playback Cookies Hint: הגדירו קובצי Cookie בהגדרות → תוכנות חיצוניות → קובצי Cookie להפעלת yt-dlp.
+  Try With Configured Cookies: ניסיון עם קובצי ה-Cookie שהוגדרו
+  Restricted Playback Authentication Failed Template: 'ל-yt-dlp לא הייתה גישה לסרטון באמצעות קובצי ה-Cookie שהוגדרו: {error}'
+  Private: אי אפשר לצפות בסרטונים פרטיים ב-OpenTubeX כי הם דורשים התחברות ל-Google ובעלות על הסרטון.
+  Collapse Playlist: כיווץ רשימת ההשמעה
+  Expand Playlist: הרחבת רשימת ההשמעה
+  Unmark As Watched: ביטול הסימון כנצפה
+  Video has been unmarked as watched: הסימון של הסרטון כנצפה בוטל
+  Save Channel Playback Speed: שמירת מהירות ההפעלה לערוץ
+  Channel Playback Speed Saved: מהירות ההפעלה לערוץ נשמרה
+  Save Channel Video Quality: שמירת איכות הסרטונים לערוץ
+  Channel Video Quality Saved: איכות הסרטונים לערוץ נשמרה
+  Save Channel Subtitles State: שמירת מצב הכתוביות לערוץ
+  Channel Subtitles State Saved: מצב הכתוביות לערוץ נשמר
+  Save Channel Volume: שמירת עוצמת הקול לערוץ
+  Channel Volume Saved: עוצמת הקול לערוץ נשמרה
+  Save Channel Setting: הגדרת הערוץ נשמרת…
+  Channel Setting Already Set: 'ההגדרה {setting} כבר נקבעה לערך {value}'
+  Video has been saved to {playlistName}: הסרטון נשמר בפלייליסט {playlistName}
+  Video has been removed from {playlistName}: הסרטון הוסר מהפלייליסט {playlistName}
+  There was a problem saving the video to {playlistName}: אירעה בעיה בשמירת הסרטון בפלייליסט {playlistName}
+  There was a problem removing the video from {playlistName}: אירעה בעיה בהסרת הסרטון מהפלייליסט {playlistName}
+  Failed to load collaborators: טעינת המשתתפים נכשלה
+  Notify me: שליחת התראה
+  Notification on: ההתראה פעילה
+  Notification enabled: תישלח אליכם התראה כשהסרטון יתחיל
+  Notification cancelled: ההתראה על תחילת הסרטון בוטלה
+  Notification unavailable: התראות המערכת אינן זמינות
+  Scheduled video starting: הסרטון המתוזמן מתחיל
+  Live notification body: '‏{videoTitle} מתחיל עכשיו'
+  Premiere: בכורה
+  AI: AI
+  AI-generated content: תוכן שנוצר באמצעות AI
+  Collaborators: משתתפים
+  Live Chat Replay: שידור חוזר של הצ׳אט החי
+  Show Live Chat: הצגת הצ׳אט החי
+  Show Live Chat Replay: הצגת השידור החוזר של הצ׳אט החי
+  Close Live Chat: סגירת הצ׳אט החי
+  Close Live Chat Replay: סגירת השידור החוזר של הצ׳אט החי
+  Live Chat Settings: הגדרות הצ׳אט החי
+  Show Live Chat Timestamps: הצגת חותמות זמן
+  Chat Filter: סינון הצ׳אט
+  Top Chat: צ׳אט מוביל
+  All Messages: כל ההודעות
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: השידור החוזר של הצ׳אט החי פעיל. הודעות הצ׳אט יופיעו כאן בזמן הפעלת הסרטון.
+  Premiere started: הבכורה בעיצומה. התחילה {timeAgo}
+  Sponsor Block category:
+    hook: פתיח/ברכות
+  Player:
+    Voice-over Translation:
+      Start: תרגום
+      Cancel: ביטול
+      Progress: התרגום המדובב בהכנה…
+      Retry: ניסיון חוזר
+      Error: התרגום המדובב נכשל. נסו שוב מאוחר יותר.
+      Duration Error: תרגום מדובב זמין רק לסרטונים שאורכם עד ארבע שעות.
+    Caption Appearance:
+      Options: אפשרויות
+      Sample: כך נראות כתוביות
+    Auto-translate: תרגום אוטומטי
+    Sleep Timer:
+      Sleep Timer: טיימר שינה
+      'Off': 'כבוי'
+      Minutes: '{minutes} דקות'
+      End of video: בסוף הסרטון
+      Remaining: 'נותרו {time}'
+      Cancel timer: ביטול הטיימר
+      Timer ended: טיימר השינה הסתיים
+    A-B Repeat:
+      A-B Repeat: חזרה A-B
+      'On': מופעלת
+      'Off': מושבתת
+      Point A: נקודה A
+      Point B: נקודה B
+      Set Repeat Start: הגדרת תחילת החזרה
+      Set Repeat End: הגדרת סוף החזרה
+      Pause Repeat: השהיית החזרה A-B
+      Resume Repeat: המשך החזרה A-B
+      Adjust Point: 'שינוי הנקודה {point}, כרגע {timestamp}'
+      Clear Range: ניקוי טווח החזרה A-B
+      End Before Start: נקודה B חייבת להיות אחרי נקודה A.
+      Outside Duration: חותמת הזמן חייבת להיות בתוך הסרטון.
+      Cleared: החזרה A-B נוקתה
+    Zoom:
+      Zoom: תקריב
+      'Off': 'כבוי'
+    Auto-generated Caption Template: '{language} (נוצרו אוטומטית)'
+    Up next in {seconds}: הסרטון הבא בעוד {seconds}
+    Resize dock: שינוי גודל הלוח
+    Play now: הפעלה עכשיו
+    MusicPlaybackRateOverride: זוהה סרטון מוזיקה, מופעל במהירות 1x
+    Normal: רגיל
+    Set Default: הגדרה כברירת מחדל
+    Hide Annotations: הסתרת הערות
+    Show Annotations: הצגת הערות
+    Hide: הסתרה
+    Show: הצגה
+    Scroll Mini Player:
+      Back to Top: חזרה למעלה
+      Return to Video Tab: חזרה לכרטיסיית הסרטון
+      Hide: הסתרת הנגן הממוזער
+      Play: הפעלה
+      Pause: השהיה
+      Drag Handle: הזזת הנגן הממוזער
+    SponsorBlock:
+      CancelCurrentSegment: ביטול יצירת הקטע
+      ClearSegments: ניקוי הקטעים
+      ClearSegmentsPrompt: לנקות את כל קטעי SponsorBlock שבטיוטה עבור הסרטון הזה?
+      CompleteSegmentsBeforeSubmitting: השלימו כל קטע שבטיוטה לפני השליחה.
+      CategoryLabel: קטגוריה
+      ActionTypeLabel: סוג הקטע
+      DuplicateSegments: אי אפשר ליצור קטעים כפולים בטיוטה.
+      EndAction: (סוף)
+      EndActionLabel: סיום
+      EndTimeAfterStart: זמן סיום הקטע חייב להיות אחרי זמן ההתחלה.
+      EndTimeBeforeVideoEnd: זמן סיום הקטע חייב להיות בתוך משך הסרטון.
+      EndTimeLabel: זמן סיום הקטע
+      DisableAutoSkipTemporarily: השבתת הדילוג האוטומטי של SponsorBlock באופן זמני
+      EnableAutoSkipTemporarily: הפעלה מחדש של הדילוג האוטומטי של SponsorBlock
+      Guidelines: הנחיות
+      InspectSegment: בדיקה
+      InvalidStartTime: יש להזין זמן התחלה תקין לקטע.
+      NoSegmentsToSubmit: יש ליצור לפחות קטע שלם אחד לפני השליחה.
+      NowAction: (עכשיו)
+      CloseInfoPanel: סגירת פרטי SponsorBlock
+      OpenInfoPanel: פתיחת פרטי SponsorBlock
+      OpenSubmissionMenu: פתיחת תפריט השליחה
+      PreviewRequired: יש לצפות בתצוגה המקדימה של כל קטע לפני השליחה.
+      PreviewSegment: תצוגה מקדימה
+      SaveSegment: שמירה
+      SetSegmentEndNow: סיום הקטע עכשיו
+      StartAction: (התחלה)
+      StartSegmentNow: התחלת הקטע עכשיו
+      SubmissionBadRequest: SponsorBlock דחה את בקשת השליחה.
+      SubmissionDuplicate: התוכן כבר נשלח בעבר.
+      SubmissionFailed: שליחת הקטעים אל SponsorBlock נכשלה.
+      SubmissionForbidden: SponsorBlock דחה את השליחה.
+      SubmissionRateLimited: SponsorBlock הגביל את קצב השליחה.
+      SubmissionSuccess: הקטעים נשלחו אל SponsorBlock.
+      SubmitSegment: שליחת הקטע
+      SubmitSegments: שליחה
+      StartTimeLabel: זמן התחלת הקטע
+      TimeDivider: עד
+      SkipPrompt: לדלג על {segmentCategory}?
+      SkipPromptAction: דילוג
+      SkipToHighlight: לדלג לרגע השיא?
+      SkippedToHighlight: דולג לרגע השיא
+      SkipToastUnskip: ביטול הדילוג
+      SkipToastReskip: דילוג שוב
+      MutedSegment: '{segmentCategory} הושתק'
+      MuteToastUnmute: ביטול ההשתקה
+      InfoPanelLoading: הקטעים עדיין נטענים...
+      InfoPanelHasSegments: לסרטון הזה יש קטעים במסד הנתונים!
+      InfoPanelNoSegments: לא נמצאו קטעים
+      RefreshSegments: רענון הקטעים
+      RefreshInfo: רענון פרטי SponsorBlock
+      ContributionStatsTitle: התרומות שלך
+      ContributionStatsLoading: נתוני התרומות נטענים...
+      ContributionStatsError: נתוני התרומות אינם זמינים. כדאי לנסות לרענן.
+      ContributionStatsNoUserId: כדי לראות את נתוני התרומות, יש לשלוח קטע או לייבא את מזהה המשתמש שלך ב-SponsorBlock.
+      Submissions: שליחות
+      Segments: קטעים
+      TimeSaved: זמן שנחסך
+      AutoSkipEnabled: דילוג אוטומטי על קטעים
+      AutoSkipOn: 'פעיל'
+      AutoSkipOff: 'כבוי'
+      WhitelistChannel: הוספת הערוץ לרשימת ההיתרים
+      ChannelWhitelisted: ברשימת ההיתרים
+      RemoveChannelFromWhitelist: הסרת הערוץ מרשימת ההיתרים
+      MuteSegment: השתקת הקטע
+      SkipSegment: דילוג על הקטע
+      CloseSegmentActions: סגירת פעולות הקטע
+      FullVideo: הסרטון המלא
+      FullVideoLabel: '{segmentCategory} · הסרטון המלא'
+      MuteActionType: השתקה
+      MutePrompt: להשתיק את {segmentCategory}?
+      SkipActionType: דילוג
+      LockedSegment: קטע נעול
+      UpvoteSegment: הצבעה בעד
+      DownvoteSegment: הצבעה נגד
+      VoteFailed: שליחת ההצבעה אל SponsorBlock נכשלה.
+Playlist:
+  Close Playlist: סגירת רשימת ההשמעה
+Change Format:
+  Local Video File: קובץ וידאו מקומי
+  Local Audio File: קובץ שמע מקומי
+  Online Video: סרטון מקוון
+  Stream Source: מקור הסטרימינג
+  Stream Extraction Method: שיטת חילוץ הסטרים
+  Playback Engine: מנוע ההפעלה
+  Streaming Protocol: פרוטוקול סטרימינג
+  Not Available For This Video: לא זמין לסרטון הזה
+  Protocols:
+    Progressive: פרוגרסיבי
+  Descriptions:
+    Local File: הפעלה ישירות מהקובץ שהורד למכשיר הזה
+    Online Video: טעינת פורמטים לסטרימינג מהמקור המקוון שהוגדר
+    Dash: איכות משתנה, כמה רצועות שמע והרזולוציות הגבוהות ביותר
+    Legacy: קובץ יחיד המשלב וידאו ושמע, ברזולוציות נמוכות בלבד
+    Audio: שמע בלבד, לחיסכון בתעבורה או להאזנה ברקע
+  yt-dlp Fallback Template: 'yt-dlp לא הצליח לספק את הסטרימים, ולכן נעשה שימוש במנוע המובנה: {error}'
+  yt-dlp Default Clients Fallback: לקוחות yt-dlp המועדפים לא הצליחו לספק סטרימים שניתנים להפעלה, ולכן נעשה ניסיון עם לקוחות ברירת המחדל של yt-dlp
+  Built-in Fallback Template: 'המנוע המובנה לא הצליח להפעיל את הסטרים, ולכן נעשה ניסיון עם yt-dlp: {error}'
+Share:
+  Timestamp Link Copied: הקישור לנקודת הזמן הועתק ללוח
+Context Menu:
+  Context Menu: תפריט ההקשר
+  Select All: בחירת הכול
+  Save Image As…: שמירת התמונה בשם…
+  Copy Image: העתקת התמונה
+  Copy Image Address: העתקת כתובת התמונה
+  Cancel Refresh: ביטול הרענון
+  Reload Videos: טעינה מחדש של הסרטונים
+  Reload Shorts: טעינה מחדש של Shorts
+  Reload Live: טעינה מחדש של השידורים החיים
+  Reload Posts: טעינה מחדש של הפוסטים
+  Reload All Feeds: טעינה מחדש של כל הפידים
+  Close Multiple Tabs: סגירת {count} כרטיסייה | סגירת {count} כרטיסיות
+  Duplicate Tab: שכפול הכרטיסייה
+  Duplicate Multiple Tabs: שכפול {count} כרטיסייה | שכפול {count} כרטיסיות
+  Move Tab: העברת הכרטיסייה
+  Move Tabs: העברת הכרטיסיות
+  Move Tab to Group: העברת הכרטיסייה לקבוצה
+  Collapse Group: כיווץ הקבוצה
+  Move Tabs to Group: העברת הכרטיסיות לקבוצה
+  Manage Tab Groups…: ניהול קבוצות כרטיסיות…
+  To Beginning: להתחלה
+  To End: לסוף
+  Close Tabs: סגירת כרטיסיות
+  To the Top: למעלה
+  To the Left: שמאלה
+  To the Bottom: למטה
+  To the Right: ימינה
+  Other Tabs: כרטיסיות אחרות
+  Copy YouTube Link: העתקת הקישור ל-YouTube
+  Copy YouTube Links: העתקת הקישורים ל-YouTube
+  Pin Tab: הצמדת הכרטיסייה
+  Pin Tabs: הצמדת הכרטיסיות
+  Unpin Tab: ביטול הצמדת הכרטיסייה
+  Unpin Tabs: ביטול הצמדת הכרטיסיות
+  Tab Color: צבע הכרטיסייה
+  Default: ברירת מחדל
+  Purple: סגול
+  Reopen Closed Tab: פתיחה מחדש של כרטיסייה שנסגרה
+  Reload Tab: טעינה מחדש של הכרטיסייה
+  Reload Tabs: טעינה מחדש של הכרטיסיות
+  Load Tab: טעינת הכרטיסייה
+  Load Tabs: טעינת הכרטיסיות
+  Unload Tab: פריקת הכרטיסייה
+  Unload Tabs: פריקת הכרטיסיות
+  Move Tab to Window: העברת הכרטיסייה לחלון
+  Move Tabs to Window: העברת הכרטיסיות לחלון
+  Open in a New Tab: פתיחה בכרטיסייה חדשה
+  Open in a New Window: פתיחה בחלון חדש
+  Copy Link: העתקת הקישור
+  Copy Invidious Link: העתקת הקישור ל-Invidious
+  Search Selection in New Tab: חיפוש "{selection}" בכרטיסייה חדשה
+  Search Selection in New Window: חיפוש "{selection}" בחלון חדש
+  Search With: חיפוש באמצעות {engine}
+  Search With Multiple: חיפוש באמצעות...
+  Selection Too Long: הטקסט שנבחר ארוך מדי לחיפוש (מעל {count} תווים)
+Tab Organizer:
+  Title: ארגון כרטיסיות
+  Open Tab Count: '{count} כרטיסייה פתוחה | {count} כרטיסיות פתוחות | {count} כרטיסיות פתוחות'
+  Search Label: חיפוש בכרטיסיות
+  Selected Count: 'נבחרה {count} כרטיסייה | נבחרו {count} כרטיסיות | נבחרו {count} כרטיסיות'
+  Tab Count: '{count} כרטיסייה | {count} כרטיסיות | {count} כרטיסיות'
+  Select All: בחירת הכול
+  Select None: ביטול הבחירה
+  Move To Group: העברת הכרטיסיות שנבחרו לקבוצה
+  Choose Group: בחירת קבוצה
+  Ungrouped: ללא קבוצה
+  Pin: הצמדה
+  Unpin: ביטול הצמדה
+  Load: טעינה
+  Unload: פריקה
+  Unload All: פריקת הכול
+  Close All: סגירת הכול
+  Ungroup: הוצאה מהקבוצה
+  Group Name: שם הקבוצה
+  Color: צבע
+  No Color: ללא צבע
+  Create Group: יצירת קבוצה
+  Expand Group: הרחבת הקבוצה
+  Collapse Group: כיווץ הקבוצה
+  Expand Group Label: הרחבת {name}, {count} כרטיסייה | הרחבת {name}, {count} כרטיסיות | הרחבת {name}, {count} כרטיסיות
+  Rename Group: שינוי השם של {name}
+  Change Group Color: שינוי הצבע של {name}
+  Move To Window: העברה לחלון
+  Choose Window: בחירת חלון
+  Select Tab: בחירת {title}
+  Active: פעילה
+  Pinned: מוצמדת
+  Unloaded: לא טעונה
+  Playing: מתנגנת
+  Close Tab: סגירת {title}
+  No Open Results: אין כרטיסיות פתוחות שתואמות לחיפוש.
+  Recently Closed: נסגרו לאחרונה
+  Clear: ניקוי
+  No Closed Results: אין כרטיסיות שנסגרו לאחרונה ותואמות לחיפוש.
+  Drag Tab: יש לגרור כדי להעביר לקבוצה
+Chapters:
+  Open Chapters: פתיחת הפרקים
+  Close Chapters: סגירת הפרקים
+  Copy Timestamp Link: העתקת הקישור בנקודת הזמן {timestamp}
+Comments:
+  Comment Count: 1 תגובה | {count} תגובות | {count} תגובות
+  Show Comments: הצגת התגובות
+  Getting comment replies, please wait: התשובות לתגובה נטענות, נא להמתין
+  Reload Comments: טעינה מחדש של התגובות
+  Reply Count: 1 תשובה | {replyCount} תשובות | {replyCount} תשובות
+  Comments are turned off: התגובות מושבתות
+  YouTube did not provide advertised replies: YouTube ציין שיש תשובות לתגובה הזאת, אך לא סיפק אותן. ייתכן שהן נמחקו או הוסתרו, ולכן כפתור התשובות הוסר.
+  Pinned by you: הוצמד על ידך
+  A reply is pinned: תשובה מוצמדת
+  Filter loaded comments: סינון התגובות שנטענו
+  Comment filters: מסנני תגובות
+  From creator: מאת היוצר
+  Contains timestamps: כוללות חותמות זמן
+  Pin comment by author: הצמדת התגובה של {author}
+  Unpin comment by author: ביטול הצמדת התגובה של {author}
+  Edited: (נערכה)
+  Highlighted comment: תגובה מודגשת
+  Highlighted reply: תשובה מודגשת
+  Search loaded comments: חיפוש בתגובות שנטענו
+  Loaded comment search result count: 1 מתוך {total} תגובות שנטענו | {count} מתוך {total} תגובות שנטענו | {count} מתוך {total} תגובות שנטענו
+  No loaded comments match your filters: אין תגובות שנטענו ותואמות למסננים
+  YouTube comment link copied to clipboard: הקישור לתגובה ב-YouTube הועתק ללוח
+  Translate to {language}: תרגום לשפה {language}
+  Show original: הצגת המקור
+  Translating comment, please wait: התגובה מתורגמת, נא להמתין
+  Comment translation failed: תרגום התגובה נכשל
+Description:
+  Copy Description: העתקת התיאור
+  Description Copied: התיאור הועתק ללוח
+  Video Category: 'קטגוריית הסרטון:'
+  Video Tags: תגיות הסרטון
+  Games: משחקים
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: השלמת פערים בתרגומים אנושיים באמצעות טקסט שנוצר בבינה מלאכותית. תרגומים אנושיים תמיד מקבלים עדיפות.
+    Update Relative Timestamps: עדכון חותמות הזמן היחסיות בכל היישום כל עוד הדף פתוח. כשהאפשרות מושבתת, הן מתעדכנות רק לאחר טעינה מחדש או חזרה לדף.
+    Stream Extraction Method: |
+      בחירת הדרך שבה OpenTubeX משיג סטרימים של וידאו. בעת בחירה ב-yt-dlp, הוא חייב להיות זמין.
+      השימוש ב-yt-dlp עשוי לעכב את תחילת הסרטונים.
+      המנוע המובנה אינו תומך בדילוג לזמן אחר בשידורים חיים ובשידורי בכורה.
+    Avoid translation: |
+      השבתת התרגום האוטומטי של YouTube לכותרת, לתיאור ולפרקי הסרטון.
+      ריבוי בקשות, למשל לאחזור כותרות של סרטונים ברשימות, עלול לפגוע באופן זמני
+      באמינות היישום.
+    Show Thumbnail Previews: הצגת תצוגה מקדימה מונפשת בעת ריחוף מעל תמונות ממוזערות של סרטונים.
+    Startup Behavior: |
+      בחירת הפעולה של OpenTubeX בעת ההפעלה.
+      טעינת כל הכרטיסיות משחזרת מיד כל כרטיסייה שנשמרה, אך סרטונים בכרטיסיות רקע לא יופעלו אוטומטית.
+      טעינת הכרטיסיות שנטענו בעבר טוענת מחדש את הכרטיסיות שהיו טעונות כש-OpenTubeX נסגר, ומשאירה את האחרות לא טעונות.
+      טעינת הכרטיסייה הפעילה האחרונה משחזרת את ההפעלה הקודמת כשהכרטיסיות האחרות פתוחות אך לא טעונות; לחיצה עליהן תטען אותן.
+      התחלה בהפעלה ריקה מדלגת על הכרטיסיות השמורות ופותחת חלון חדש.
+    Remember Tab Navigation History: היסטוריית הניווט קדימה ואחורה של כל כרטיסייה נשמרת ומשוחזרת בעת הפעלה מחדש של OpenTubeX.
+  Proxy Settings:
+    IP Block Recovery Script Path: נתיב לקובץ סקריפט שיופעל כשמזוהה חסימה של כתובת IP. OpenTubeX ממתין לסיום הסקריפט ואז טוען מחדש את הסרטון. אם החלופה מופעלת, הסקריפט יופעל רק אם גם החלופה נכשלת.
+  Player Settings:
+    Enable Caption Translations: כשהאפשרות מופעלת והסרטון אינו מספק רצועה מקורית בשפת הכתוביות המועדפת, כפתור הכתוביות והקיצור C יעדיפו רצועת כתוביות שתורגמה אליה אוטומטית.
+    Use Quick Playback Speed Bar: הצגת סרגל מהיר לשליטה במהירות ההפעלה בצד הימני של פקדי הנגן. אם שמירה ידנית של מהירות ההפעלה לכל ערוץ מופעלת, הסרגל כולל גם כפתור לשמירת המהירות לערוץ הנוכחי.
+    Multiply Seek Interval by Playback Rate: כשהאפשרות מופעלת, מרווחי הדילוג בזמן (מקשי החצים ו-J/L) מוכפלים במהירות ההפעלה הנוכחית. כשהיא מושבתת, המרווחים נשארים קבועים בלי קשר למהירות ההפעלה.
+    Show Playback Rate Adjusted Timestamp: כשהאפשרות מופעלת ומהירות ההפעלה שונה מ-1x, הנגן מציג בסוגריים חותמות זמן המותאמות למהירות ההפעלה, אחרי חותמת הזמן הרגילה.
+    Use YouTube-style Shorts: הצגת Shorts ברשת אנכית בדפי המינויים והערוצים ושימוש בנגן Shorts בסגנון YouTube.
+    Loop Shorts: כשהאפשרות מופעלת, סרטוני Shorts מתחילים מחדש אוטומטית. כשהיא מושבתת, הם נעצרים בסוף ומציגים כפתור להפעלה חוזרת.
+    Show Skip Silence Toggle: הצגת מתג להפעלה ולכיבוי של דילוג על שקט בתפריט ההגדרות של הנגן.
+    Enable Skip Silence by Default: הפעלת דילוג על שקט בכרטיסיות חדשות. שינוי האפשרות בכרטיסייה אחת אינו משפיע על האחרות.
+    Enable Video Zoom: הצגת פקד התקריב בתפריט ההגדרות של הנגן והפעלת קיצורי המקלדת ופקדי ההזזה שלו.
+    Voice-over Translation: שליחת מזהה הסרטון, משך הסרטון והשפה שנבחרה לשירות התרגום הקולי הלא רשמי של Yandex בעת בקשת תרגום. האפשרות מושבתת כברירת מחדל.
+    Hold to Double Playback Speed: יש להחזיק את מקש הרווח או את לחצן העכבר השמאלי מעל הנגן כדי להכפיל זמנית את מהירות ההפעלה הנוכחית.
+    Ambient Mode: מיזוג צבעי הסרטון באזור שסביב הנגן.
+    Default Volume: מושבת כשזכירת עוצמת הקול מופעלת. כבו את זכירת עוצמת הקול כדי להגדיר עוצמה קבועה בתחילת כל סרטון.
+    Parallel Segment Loading: |
+      מספר מקטעי הווידאו והשמע שייטענו מראש במקביל.
+      ערכים גבוהים עשויים לעזור בחיבור איטי או לא יציב, אך צורכים יותר רוחב פס וזיכרון.
+      הם גם עלולים לגרום למצב אוטומטי להעריך את מהירות החיבור בחסר ולבחור באיכות נמוכה יותר.
+      זרמים המוגבלים לבקשה אחת בכל פעם מתעלמים מהגדרה זו.
+  Download Settings:
+    Download Folder: הסרטונים נשמרים בתיקייה זו. השאירו ריק כדי להשתמש בתיקיית ההורדות של המערכת.
+    Global Additional yt-dlp Arguments: ארגומנטים נוספים לשורת הפקודה שיועברו אל yt-dlp בכל הורדה, לדוגמה --cookies-from-browser firefox.
+    Concurrent Downloads: המספר המרבי של משימות yt-dlp שיכולות לפעול במקביל.
+    Bandwidth Limit: מגביל את קצב ההעברה הכולל של התור ומחלק את המכסה בין משימות מקבילות. הזינו 0 ללא הגבלה.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX יכולה להשתמש ב-yt-dlp המותקן במערכת, או להוריד ולנהל עותק משלה בתיקיית נתוני המשתמש.
+    yt-dlp Channel: בחרו איזה ערוץ הפצה של yt-dlp יורד וינוהל בידי OpenTubeX. הערוץ היציב מומלץ לרוב המשתמשים.
+    FFmpeg Source: OpenTubeX יכולה להשתמש ב-FFmpeg וב-FFprobe המותקנים במערכת, או להוריד ולנהל גרסאות סטטיות משלה בתיקיית נתוני המשתמש.
+    Managed Tool Updates: בחרו אם הכלים המנוהלים יתעדכנו אוטומטית, יבקשו אישור לפני עדכון, או יתעדכנו רק דרך הכפתורים הידניים. כלים חסרים עדיין יורדו בעת הצורך.
+    yt-dlp Executable Path: כברירת מחדל, OpenTubeX מניחה שאפשר למצוא את yt-dlp דרך משתנה הסביבה PATH. במידת הצורך אפשר להגדיר כאן נתיב מותאם אישית.
+    Cookie Source: בחרו אם yt-dlp יקרא קובץ עוגיות בתבנית Netscape או עוגיות מדפדפן מותקן לצורך הפעלה מאומתת.
+    Cookie File: בחרו קובץ עוגיות בתבנית Netscape לצורך הפעלה מאומתת.
+    Browser for Cookies: רשימת הדפדפנים הנתמכים מתקבלת מקובץ ההפעלה הנבחר של yt-dlp. כשנדרשת הפעלה מאומתת, OpenTubeX מורה ל-yt-dlp לקרוא את העוגיות מדפדפן זה.
+    Browser Profile: שם או תיקייה אופציונליים של פרופיל דפדפן. השאירו ריק כדי להשתמש בפרופיל שנפתח לאחרונה.
+    Always Use Cookies: השתמשו בעוגיות שהוגדרו בכל פעם ש-yt-dlp מחלץ זרמים. אפשרות זו אינה משנה את שיטת חילוץ הזרמים ל-yt-dlp. כש-yt-dlp נבחר, ייתכן שיופיעו פורמטים הזמינים לחשבון בלבד, כולל קצב הסיביות המשופר של YouTube Premium אם החשבון זכאי לכך.
+    FFmpeg Executable Path: FFmpeg נדרש למיזוג זרמי וידאו ושמע נפרדים ולהמרת שמע. כברירת מחדל, OpenTubeX מניחה שאפשר למצוא את FFmpeg דרך משתנה הסביבה PATH. במידת הצורך אפשר להגדיר כאן נתיב מותאם אישית.
+  Distraction Free Settings:
+    Shorten View Counts: מציג ספירות צפיות ולייקים לתגובות ש-YouTube כבר עיגלה בצורה מקוצרת, למשל 14K במקום 14,000. ספירות מדויקות תמיד מוצגות במלואן.
+  Subscription Settings:
+    Fetch Feed on Startup: כשהאפשרות מופעלת, OpenTubeX תטען אוטומטית את פיד המינויים עם ההפעלה ובפתיחת חלון חדש.
+    Show New Content Feed: מציג לשונית בשם חדש ובה פריטים מפיד המינויים שלא היו בטעינה הקודמת.
+    Show New Content Indicators: מציג נקודה קטנה לצד פריטים מפיד המינויים שלא היו בטעינה הקודמת.
+    Show Scheduled Live Streams / Premieres First: משאיר שידורים חיים והקרנות בכורה עתידיים בראש פיד המינויים. כשהאפשרות מושבתת, הם נשארים במיקום ההכרזה עד שיתחילו. לאחר ההשבתה, רעננו את פיד המינויים פעם אחת כדי לאחזר את תאריכי ההכרזה של פריטים מתוזמנים קיימים.
+    Auto Refresh Interval: התדירות שבה OpenTubeX מרעננת אוטומטית את פיד המינויים כשהיישום פתוח.
+  Theme Settings:
+    Show Progress as Notification: מציג התראה קבועה עם התקדמות בזמן אמת של פעולות רקע, כגון רענון מינויים והורדת כלים מנוהלים, במקום סרגל ההתקדמות הכללי.
+    Always Show Scrollbars: משאיר את פסי הגלילה גלויים תמיד. כשהאפשרות מושבתת, הם נעלמים זמן קצר לאחר הפסקת תנועת העכבר ומופיעים שוב מיד כשמזיזים אותו.
+    Scroll Speed: שינוי מרחק הגלילה של מחוות גלגלת העכבר ומשטח המגע.
+    Use Fixed Tab Width: מקצה רוחב זהה לכל לשונית בסרגל הלשוניות האופקי, במקום להתאים את הרוחב לכותרת.
+    Use Grid Player Menu: מסדר את תפריט ההגדרות של נגן הווידאו כרשת אריחים במקום כרשימת שורות.
+The playlist is at the beginning. Enable loop to continue playing: רשימת ההשמעה בתחילתה. הפעילו לולאה כדי להמשיך לנגן
+External link opening has been disabled in Settings → Privacy: פתיחת קישורים חיצוניים הושבתה בהגדרות → פרטיות
+Screenshot Clipboard Success: צילום המסך נשמר בלוח
+Screenshot Clipboard Error: העתקת צילום המסך ללוח נכשלה
+KeyboardShortcutPrompt:
+  Edit Hint: בחרו קיצור דרך ולחצו על צירוף מקשים חדש. לחצו על Backspace או Delete כדי לבטל את ההקצאה.
+  Change Shortcut: שינוי קיצור הדרך עבור {action}
+  Press Shortcut: לחצו על קיצור דרך…
+  Unassigned: לא מוקצה
+  Reset Shortcut: איפוס קיצור הדרך עבור {action}
+  Reset to Defaults: איפוס לברירות המחדל
+  Shortcut Already Assigned: קיצור הדרך כבר מוקצה
+  Shortcut Conflict: '{shortcut} כבר מוקצה עבור {actions}. להקצות אותו מחדש?'
+  Reserved Shortcut Conflict: '{shortcut} שמור עבור {actions} ואי אפשר להקצות אותו מחדש.'
+  Reassign: הקצאה מחדש
+  Sections:
+    App:
+      Tabs: "יישום:\_לשוניות"
+      Search and Page: "יישום:\_חיפוש ודף"
+      Window and View: "יישום:\_חלון ותצוגה"
+  New Tab: יצירת לשונית חדשה
+  Close Tab: סגירת הלשונית הנוכחית
+  Reload Tab: טעינת הלשונית הנוכחית מחדש
+  Reopen Closed Tab: פתיחת הלשונית האחרונה שנסגרה
+  Next Tab: מעבר ללשונית הבאה
+  Previous Tab: מעבר ללשונית הקודמת
+  Switch to Tab: מעבר ללשונית 1–9
+  Toggle Tab Orientation: החלפה בין פריסות לשוניות
+  Find in Page: חיפוש טקסט בדף הנוכחי
+  Find Next Match: מעבר להתאמה הבאה
+  Find Previous Match: מעבר להתאמה הקודמת
+  Toggle Normal Playback Speed: החלפה בין מהירות 1x למהירות ההפעלה הקודמת
+  Toggle Skip Silence: הפעלה או השבתה של דילוג על שקט
+  Set A-B Repeat Point A: הגדרת נקודה A לחזרה A-B
+  Set A-B Repeat Point B: הגדרת נקודה B לחזרה A-B
+  Clear A-B Repeat: ניקוי חזרה A-B
+  Video Zoom In: התקרבות בווידאו
+  Video Zoom Out: התרחקות מהווידאו
+  Tab Switcher: בורר לשוניות
+CommandPalette:
+  Title: לוח הפקודות
+  Open: פתיחת לוח הפקודות
+  Search Label: חיפוש פקודות
+  Search Placeholder: חיפוש פקודות והגדרות…
+  Results: פקודות
+  No Results: לא נמצאו פקודות תואמות
+  Result Count: נמצאה פקודה אחת | נמצאו {count} פקודות | נמצאו {count} פקודות
+  Move: הזזה
+  Run: הפעלה
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'מעבר ללשונית: {title}'
+  Switch Profile: 'מעבר לפרופיל: {name}'
+  Open Playlist: 'פתיחת רשימת השמעה: {name}'
+  Cancel Download: 'ביטול הורדה: {title}'
+  Groups:
+    App: יישום
+    Navigation: ניווט
+    Tabs: לשוניות
+  Unavailable:
+    Current Page: זהו כבר הדף הנוכחי
+    No History: אין דף בכיוון זה
+    Desktop: זמין רק ביישום שולחן העבודה
+    Build: לא זמין בגרסה זו
+    One Tab: יש לפתוח תחילה לשונית נוספת
+    Active Tab: זו הלשונית הפעילה
+    Active Profile: זה הפרופיל הפעיל
+    Download Finished: ההורדה הזו כבר לא פעילה
+    Video: יש לפתוח תחילה סרטון
+Downloads:
+  Download: הורדה
+  Download Video: הורדת סרטון
+  Download Playlist: הורדת רשימת השמעה
+  Downloading: מתבצעת הורדה
+  Queue: תור
+  Downloaded: הורדו
+  Canceled: בוטלו
+  Open Downloads: פתיחת ההורדות
+  No Downloads: אין הורדות עדיין
+  No Downloads Description: הורדות שתתחילו יופיעו כאן.
+  Clear Failed Canceled Skipped And Missing: ניקוי הורדות שנכשלו, בוטלו, דולגו או חסרות
+  Clear From List: הסרה מהרשימה
+  Show in Folder: הצגה בתיקייה
+  Play Download: הפעלת הקובץ
+  Retry Download: ניסיון הורדה נוסף
+  Pause Download: השהיית ההורדה
+  Resume Download: המשך ההורדה
+  Move Earlier: העברה למעלה
+  Move Later: העברה למטה
+  Pause All: השהיית כל ההורדות
+  Resume All: המשך כל ההורדות
+  Retry All: ניסיון נוסף לכל ההורדות שנכשלו
+  Total Size: 'גודל כולל: {size}'
+  Local File: קובץ מקומי
+  Available Offline: זמין במצב לא מקוון
+  Remove File: הסרת קובץ
+  Remove File Confirmation: להסיר את הקובץ שהורד?
+  Remove File Warning: פעולה זו תעביר את "{title}" לאשפה במכשיר.
+  File Not Found: הקובץ שהורד לא נמצא.
+  Download Missing: ההורדה אינה זמינה
+  Files Missing: הקובץ שהורד אינו זמין עוד במערכת הקבצים. | הקבצים שהורדו אינם זמינים עוד במערכת הקבצים. | הקבצים שהורדו אינם זמינים עוד במערכת הקבצים.
+  Files Available: '{available} מתוך {total} קבצים שהורדו זמינים.'
+  More Files: עוד קובץ אחד | עוד {count} קבצים | עוד {count} קבצים
+  Template Used: 'תבנית: {name}'
+  Download Type: סוג הורדה
+  Template: תבנית
+  Unsaved: לא נשמר
+  Media Type: סוג מדיה
+  Video: וידאו
+  Audio: שמע
+  Maximum Resolution: רזולוציה מרבית
+  Best Available: הזמין באיכות הגבוהה ביותר
+  Automatic: אוטומטי
+  Container: פורמט מכל
+  Video Codec: קודק וידאו
+  Audio Codec: קודק שמע
+  File Name Template: תבנית שם קובץ
+  File Name Template Help: 'שדות זמינים: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: טווח זמן ופרקים
+  Start Time: זמן התחלה (HH:MM:SS)
+  End Time: זמן סיום (HH:MM:SS)
+  Split by Chapters: פיצול לקובץ נפרד לכל פרק
+  Remove Segments: הסרת מקטעים
+  Subtitles and Metadata: כתוביות ומטא-נתונים
+  Include Subtitles: הכללת כתוביות
+  Embed Subtitles: הטמעת כתוביות בקובץ המדיה
+  Subtitle Format: תבנית כתוביות
+  Subtitle Languages: שפות כתוביות
+  Subtitle Languages Help: 'בוררי שפה של yt-dlp, מופרדים בפסיקים, לדוגמה: en.*,de.*'
+  Embed Cover Art: הטמעת התמונה הממוזערת כתמונת עטיפה
+  Embed Metadata: הטמעת כותרת, מחבר, תיאור ופרקים
+  Additional yt-dlp Arguments: ארגומנטים נוספים של yt-dlp
+  Custom yt-dlp Arguments: ארגומנטים מותאמים אישית של yt-dlp
+  Template Name: שם התבנית
+  Save Template: שמירת התבנית
+  Delete Template: מחיקת התבנית
+  Template Saved: תבנית ההורדה "{name}" נשמרה
+  Template Name Exists: כבר קיימת תבנית הורדה בשם "{name}".
+  Choose Folder: שינוי
+  Select Folder: בחירת תיקייה
+  Folder Required: בחרו תיקיית הורדה כדי לאפשר הורדות.
+  System Downloads Folder: תיקיית ההורדות של המערכת
+  Processing: מתבצע עיבוד…
+  Queued: בתור
+  Queued Position: בתור, מיקום {position}
+  Paused: מושהה
+  Pausing: המשימה הנוכחית תסתיים ואז התור יושהה
+  Download Complete: ההורדה הושלמה
+  Download Cancelled: ההורדה בוטלה
+  Download Failed: ההורדה נכשלה
+  File Name Shortened: שם הקובץ קוצר כי כותרת הסרטון הייתה ארוכה מדי.
+  Insufficient Disk Space: אין מספיק מקום בכונן. נדרשים כ-{required} וזמינים {available}.
+  Unknown Download Size: גודל ההורדה אינו ידוע. במערכת הקבצים של היעד זמינים {available}.
+  Disk Space Check Unavailable: לא ניתן היה לבדוק את המקום הפנוי בכונן לפני תחילת ההורדה.
+  Download Failure Hint: בדקו את {issuesLink}, ואז נסו לשנות את ערוץ yt-dlp ל-Nightly או ל-Master בהגדרות → מתקדם → תוכנה חיצונית.
+  yt-dlp YouTube Issues: בעיות אחרונות של yt-dlp ב-YouTube
+  Automatic Download Started: ההורדה האוטומטית התחילה
+  Automatic Download Started Body: מתבצעת ברקע הורדת "{title}" מהערוץ {channel}.
+  Automatic Download Complete: ההורדה האוטומטית הושלמה
+  Automatic Download Failed: ההורדה האוטומטית נכשלה
+  Automatic Download Could Not Start: לא ניתן היה להתחיל את ההורדה האוטומטית של "{title}".
+  Automatic Download Skipped: מסנני ההורדה האוטומטית דילגו על ההורדה
+  Cancel Download: ביטול הורדה
+  yt-dlp Not Found: yt-dlp לא נמצא. התקינו אותו או הגדירו את הנתיב שלו בהגדרות → מתקדם → תוכנה חיצונית.
+  Download Complete Template: ההורדה של "{title}" הסתיימה
+  Download Failed Template: ההורדה של "{title}" נכשלה
+  Templates:
+    Video Best: וידאו - האיכות הטובה ביותר
+    Video Resolution: וידאו - {resolution}
+    Audio Best: שמע - האיכות הטובה ביותר
+    Audio Format: שמע - {format}
+    Subtitles Format: כתוביות - {format}

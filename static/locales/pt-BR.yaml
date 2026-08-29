@@ -840,6 +840,8 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Tempo restante de espera do SABR: {remindingTimeSeconds}s'
   Popout Live Chat: Chat flutuante
   Private: Vídeos privados não podem ser assistidos no OpenTubeX, pois exigem login do Google e propriedade do vídeo.
+  Collapse Playlist: Recolher playlist
+  Expand Playlist: Expandir playlist
 Playlist:
   #& About
   View Full Playlist: 'Mostrar playlist completa'

@@ -195,6 +195,47 @@ test.describe('skip silence settings search', () => {
   })
 })
 
+test.describe('AI translation completions', () => {
+  const englishLabel = 'Fill missing translations with AI-generated text'
+  const generatedLabel = 'ترجمة اختبار بالذكاء الاصطناعي'
+
+  test.use({
+    seed: { settings: { currentLocale: 'ar', useAITranslationCompletions: false } },
+    localeOverrides: {
+      ar: {},
+      'ai/ar': {
+        Settings: {
+          'General Settings': {
+            'Use AI Translation Completions': generatedLabel
+          }
+        }
+      }
+    }
+  })
+
+  test('fills missing text immediately and restores the human fallback when disabled', async ({ page }) => {
+    const general = await goToSettingsSection(page, 'general')
+
+    const toggle = general.getByRole('checkbox', { name: englishLabel })
+    await expect(toggle).not.toBeChecked()
+    await general.locator('label.switch-label').filter({ hasText: englishLabel }).click()
+
+    const translatedToggle = general.getByRole('checkbox', { name: generatedLabel })
+    await expect(translatedToggle).toBeChecked()
+    await general.locator('label.switch-label').filter({ hasText: generatedLabel }).click()
+
+    const humanFallbackToggle = general.getByRole('checkbox', { name: englishLabel })
+    await expect(humanFallbackToggle).not.toBeChecked()
+
+    const localeSelect = general.getByRole('combobox', {
+      name: /Language preference|Locale Preference/
+    })
+    await localeSelect.click()
+    await page.getByRole('option', { name: 'English (US) (100%)', exact: true }).click()
+    await expect(humanFallbackToggle).toBeDisabled()
+  })
+})
+
 test.describe('settings search highlights', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 

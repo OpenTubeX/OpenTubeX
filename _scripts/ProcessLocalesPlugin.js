@@ -13,10 +13,14 @@ class ProcessLocalesPlugin {
   constructor(options = {}) {
     this.compress = !!options.compress
     this.hotReload = !!options.hotReload
+    this.localeSource = options.localeSource ?? 'human'
+    this.allowMissing = !!options.allowMissing
+    this.collectMetadata = options.collectMetadata !== false
+    this.pluginName = `${PLUGIN_NAME}:${this.localeSource}`
 
     if (typeof options.inputDir !== 'string') {
       throw new Error('ProcessLocalesPlugin: no input directory `inputDir` specified.')
-    } else if (!existsSync(options.inputDir)) {
+    } else if (!existsSync(options.inputDir) && !this.allowMissing) {
       throw new Error('ProcessLocalesPlugin: the specified input directory does not exist.')
     }
     this.inputDir = options.inputDir
@@ -40,10 +44,10 @@ class ProcessLocalesPlugin {
     this.previousTimestamps = new Map()
     this.startTime = Date.now()
 
-    /** @type {(update: { locales: [string, string][], translationPercentages: number[] }) => void|null} */
+    /** @type {(update: { source: string, locales: [string, string][], translationPercentages?: number[] }) => void|null} */
     this.notifyLocaleChange = null
 
-    this.loadLocales()
+    this.loadLocales(options.activeLocales)
   }
 
   /** @param {import('webpack').Compiler} compiler  */
@@ -54,9 +58,9 @@ class ProcessLocalesPlugin {
       'process.env.HOT_RELOAD_LOCALES': this.hotReload
     }).apply(compiler)
 
-    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
+    compiler.hooks.thisCompilation.tap(this.pluginName, (compilation) => {
       compilation.hooks.processAssets.tapPromise({
-        name: PLUGIN_NAME,
+        name: this.pluginName,
         stage: Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL
       }, async (_assets) => {
         // While running in the webpack dev server, this hook gets called for every incremental build.
@@ -69,6 +73,8 @@ class ProcessLocalesPlugin {
           console.warn('ProcessLocalesPlugin: Unable to live reload locales as `notifyLocaleChange` is not set.')
         }
 
+        this.loadCreatedLocales()
+
         const promises = []
         for (const [locale, data] of this.locales) {
           promises.push(this.processLocale(locale, data, updatedLocales, compiler, compilation))
@@ -77,21 +83,35 @@ class ProcessLocalesPlugin {
         await Promise.all(promises)
 
         if (this.hotReload && this.notifyLocaleChange && updatedLocales.length > 0) {
-          this.updateTranslationPercentages()
-          this.notifyLocaleChange({
+          if (this.collectMetadata) this.updateTranslationPercentages()
+          const update = {
+            source: this.localeSource,
             locales: updatedLocales,
-            translationPercentages: this.localeTranslationPercentages
-          })
+          }
+          if (this.collectMetadata) {
+            update.translationPercentages = this.localeTranslationPercentages
+          }
+          this.notifyLocaleChange(update)
         }
       })
     })
 
-    compiler.hooks.afterCompile.tap(PLUGIN_NAME, (compilation) => {
+    compiler.hooks.afterCompile.tap(this.pluginName, (compilation) => {
       if (compiler.watching) {
         // watch locale files for changes
-        compilation.fileDependencies.addAll(this.filePaths)
+        this.registerLocaleDependencies(compilation)
       }
     })
+  }
+
+  /** @param {import('webpack').Compilation} compilation */
+  registerLocaleDependencies(compilation) {
+    for (const filePath of this.filePaths) {
+      const dependencies = existsSync(filePath)
+        ? compilation.fileDependencies
+        : compilation.missingDependencies
+      dependencies.add(filePath)
+    }
   }
 
   /**
@@ -112,7 +132,7 @@ class ProcessLocalesPlugin {
 
         const contents = await readFile(filePath, 'utf-8')
         data = loadYaml(contents)
-      } else {
+      } else if (this.cache.has(locale)) {
         const { filename, source } = this.cache.get(locale)
         compilation.emitAsset(filename, source, { minimized: true })
         return
@@ -148,23 +168,43 @@ class ProcessLocalesPlugin {
     compilation.emitAsset(filename, source, { minimized: true })
   }
 
-  loadLocales() {
-    this.activeLocales = JSON.parse(readFileSync(`${this.inputDir}/activeLocales.json`))
+  /** @param {string[]|undefined} configuredLocales */
+  loadLocales(configuredLocales) {
+    this.activeLocales = configuredLocales ?? JSON.parse(readFileSync(`${this.inputDir}/activeLocales.json`))
 
     for (const locale of this.activeLocales) {
       const filePath = join(this.inputDir, `${locale}.yaml`)
-
       this.filePaths.push(filePath)
+
+      if (!existsSync(filePath)) {
+        if (this.allowMissing) continue
+        throw new Error(`ProcessLocalesPlugin: locale file does not exist: ${filePath}`)
+      }
 
       const contents = readFileSync(filePath, 'utf-8')
       const data = loadYaml(contents)
       this.locales.set(locale, data)
       this.localeTranslationKeys.set(locale, this.getTranslationKeys(data))
 
-      this.localeNames.push(data['Locale Name'] ?? locale)
+      if (this.collectMetadata) this.localeNames.push(data['Locale Name'] ?? locale)
     }
 
-    this.updateTranslationPercentages()
+    if (this.collectMetadata) this.updateTranslationPercentages()
+  }
+
+  loadCreatedLocales() {
+    if (!this.allowMissing) return
+
+    for (const locale of this.activeLocales) {
+      if (this.locales.has(locale)) continue
+
+      const filePath = join(this.inputDir, `${locale}.yaml`)
+      if (!existsSync(filePath)) continue
+
+      const data = loadYaml(readFileSync(filePath, 'utf-8'))
+      this.locales.set(locale, data)
+      this.localeTranslationKeys.set(locale, this.getTranslationKeys(data))
+    }
   }
 
   /**

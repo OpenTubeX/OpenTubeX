@@ -50,6 +50,7 @@ import { getYtDlpDownloadFile, handleYtDlpCancelDownload, handleYtDlpCheckBinary
 import { applyYtDlpPlaybackCacheSettings, handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
 import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
+import { composeLocaleMessages } from '../localeComposition'
 import { appendYouTubeTimeZonePreference, buildProxyUrl, DEFAULT_PROXY_SETTINGS, isNonPublicNetworkAddress, isOpenTubeXUrl } from './utils'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
 import { TabManager, setupTabsIPC } from './tabs/TabManager'
@@ -496,12 +497,14 @@ function runApp() {
 
   /**
    * @param {string} locale
+   * @param {'human' | 'ai'} source
    * @returns {Promise<Record<string, unknown>>}
    */
-  async function loadLocaleMessages(locale) {
+  async function loadLocaleMessages(locale, source = 'human') {
+    const directory = source === 'ai' ? 'locales/ai' : 'locales'
     const localePath = process.env.NODE_ENV === 'development'
-      ? path.resolve(__dirname, '../../static/locales', `${locale}.yaml`)
-      : path.resolve(__dirname, 'static/locales', `${locale}.json.br`)
+      ? path.resolve(__dirname, `../../static/${directory}`, `${locale}.yaml`)
+      : path.resolve(__dirname, `static/${directory}`, `${locale}.json.br`)
 
     if (process.env.NODE_ENV === 'development') {
       const contents = await asyncFs.readFile(localePath, 'utf8')
@@ -519,26 +522,59 @@ function runApp() {
   async function createMainTranslator() {
     const fallbackLocale = 'en-US'
     const storedLocale = (await baseHandlers.settings._findOne('currentLocale'))?.value
+    const storedAITranslationPreference = (await baseHandlers.settings._findOne('useAITranslationCompletions'))?.value
+    const useAITranslationCompletions = storedAITranslationPreference == null
+      ? true
+      : storedAITranslationPreference === true
     const currentLocale = typeof storedLocale === 'string' && storedLocale !== 'system'
       ? storedLocale
       : app.getLocale().replace('_', '-')
 
-    const messagesByLocale = []
-    for (const locale of [currentLocale, currentLocale.split('-')[0], fallbackLocale]) {
-      if (!locale || messagesByLocale.some(entry => entry.locale === locale)) {
-        continue
-      }
+    const baseLocale = currentLocale.split('-')[0]
+    const candidateLocales = [...new Set([currentLocale, baseLocale, fallbackLocale].filter(Boolean))]
+    const humanMessages = new Map()
+    const aiMessages = new Map()
 
+    for (const locale of candidateLocales) {
       try {
-        messagesByLocale.push({
-          locale,
-          messages: expandMultipleOnlyPluralMessages(locale, await loadLocaleMessages(locale))
-        })
+        humanMessages.set(locale, await loadLocaleMessages(locale))
       } catch (error) {
         if (locale === fallbackLocale) {
           console.error('Failed to load fallback locale for close confirmation dialog:', error)
         }
       }
+    }
+
+    if (useAITranslationCompletions) {
+      for (const locale of [currentLocale, baseLocale]) {
+        if (!locale || aiMessages.has(locale)) continue
+        try {
+          aiMessages.set(locale, await loadLocaleMessages(locale, 'ai'))
+        } catch {
+          // Complete locales do not have an AI overlay.
+        }
+      }
+    }
+
+    const messagesByLocale = []
+    const currentMessages = composeLocaleMessages({
+      locale: currentLocale,
+      humanMessages,
+      aiMessages,
+      includeAI: useAITranslationCompletions,
+    })
+    if (Object.keys(currentMessages).length > 0) {
+      messagesByLocale.push({
+        locale: currentLocale,
+        messages: expandMultipleOnlyPluralMessages(currentLocale, currentMessages),
+      })
+    }
+
+    if (currentLocale !== fallbackLocale && humanMessages.has(fallbackLocale)) {
+      messagesByLocale.push({
+        locale: fallbackLocale,
+        messages: expandMultipleOnlyPluralMessages(fallbackLocale, humanMessages.get(fallbackLocale)),
+      })
     }
 
     return (key, parameters = {}, pluralChoice) => {
@@ -1837,7 +1873,7 @@ function runApp() {
         if (pathname.endsWith('.json.br')) {
           const decompressed = await brotliDecompressAsync(contents)
 
-          return new Response(decompressed.buffer, {
+          return new Response(decompressed, {
             status: 200,
             headers: {
               'Content-Type': 'application/json',

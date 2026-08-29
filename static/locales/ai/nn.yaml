@@ -1,0 +1,2013 @@
+# Optional AI-generated translations for keys missing from ../nn.yaml.
+Color Picker:
+  Hue: Fargetone
+  Opacity: Dekkevne
+  Backdrop Blur: Uskarp bakgrunn
+  Hex Color: Heksfarge
+  Apply Color: Bruk
+  Reset Color: Nullstill
+  Copy Color: Kopier
+  Copy From Another Color: Kopier frå ein annan farge
+  Color Copied: Fargen er kopiert
+  Invalid Color: Skriv inn ein gyldig heksfarge
+  Clipboard Unavailable: Utklippstavla er ikkje tilgjengeleg
+  Saturation and Brightness: Fargemetting og lysstyrke
+New Tab: Ny fane
+Maximize: Maksimer
+Restore: Gjenopprett
+Close Tab: Lukk fana
+Close Confirmation:
+  Title: Vil du avslutte OpenTubeX?
+  Message: Er du sikker på at du vil avslutte OpenTubeX?
+  Quit: Avslutt
+  Never Ask Again: Ikkje spør igjen
+Close Window Confirmation:
+  Title: Vil du lukke vindauget?
+  Message: Dette vindauget har {count} faner. Er du sikker på at du vil lukke det?
+  Close Window: Lukk vindauget
+Confirmations:
+  Never Ask Again: Ikkje spør igjen
+  Settings Hint: Du kan slå på denne stadfestinga igjen under Innstillingar → Generelt → Stadfest før …
+Close Multiple Tabs Confirmation:
+  Title: Vil du lukke fleire faner?
+  Message: Dette lukkar {count} faner.
+  Close Tabs: Lukk {count} faner
+Load Multiple Tabs Confirmation:
+  Title: Vil du laste inn fleire faner?
+  Message: Dette lastar inn {count} faner.
+  Load Tabs: Last inn {count} faner
+Unload Multiple Tabs Confirmation:
+  Title: Vil du laste ut fleire faner?
+  Message: Dette lastar ut {count} faner.
+  Unload Tabs: Last ut {count} faner
+Compact side navigation: Gjer sidenavigasjonen kompakt
+Expand side navigation: Utvid sidenavigasjonen
+Right-click or hold to see history: Høgreklikk eller hald inne for å sjå historikken
+Use Vertical Tabs: Bruk loddrette faner
+Use Horizontal Tabs: Bruk vassrette faner
+Resize Tab Bar: Endre storleik på fanelinja
+Close Banner: Lukk banneret
+Find in page: Finn på sida
+Previous match: Førre treff
+Next match: Neste treff
+Close find bar: Lukk søkjelinja
+No matches: Ingen treff
+Version {versionNumber} is now available.: Versjon {versionNumber} er no tilgjengeleg.
+See changes and update: Sjå endringane og oppdater
+Dismiss: Avvis
+Update to {version}: Oppdater til {version}
+Global:
+  Ambient Mode: Omgjevnadsmodus
+  Loading More: Lastar inn meir
+  New: Ny
+  Counts:
+    Like Count: 1 likerklikk | {count} likerklikk
+    Watching Count: 1 ser på | {count} ser på
+Search Bar:
+  Remove: Fjern
+Search character limit: Søket er lengre enn grensa på {searchCharacterLimit} teikn
+Search Listing:
+  Label:
+    VR180: VR180
+    360 Video: 360°
+    Members Only: Berre for medlemmer
+Search Filters:
+  Prioritize:
+    Prioritize: Prioriter
+    Popularity: Popularitet
+  Type:
+    Movies: Filmar
+  Duration:
+    3 - 20 minutes: 3–20 minutt
+  Features:
+    Features: Funksjonar
+    HD: HD
+    Subtitles: Undertekstar
+    Creative Commons: Creative Commons
+    3D: 3D
+    Live: Direkte
+    4K: 4K
+    360 Video: 360-video
+    Location: Stad
+    HDR: HDR
+    VR180: VR180
+  Clear Filters: Tøm filtera
+Stats:
+  Stats: Statistikk
+  Watch time summary: Samandrag av sjåtid
+  Today: I dag
+  This week: Denne veka
+  Total watch time: Samla sjåtid
+  Daily average: Dagleg gjennomsnitt
+  So far today: Så langt i dag
+  Since: Sidan {day}
+  All recorded time: All registrert tid
+  Per calendar day: Per kalenderdag
+  Day by day: Dag for dag
+  Highest: 'Lengst: {duration}'
+  Week by week: Veke for veke
+  Last 14 days: Siste 14 dagar
+  Last 8 weeks: Siste 8 veker
+  Daily chart aria: Dagleg sjåtid dei siste 14 dagane
+  Weekly chart aria: Sjåtid per veke dei siste 8 vekene
+  No data: Sjåtida blir vist her etter kvart som du ser videoar.
+  Estimate note: Sjåtid frå før denne oppdateringa er rekna ut frå den lagra avspelingsframdrifta di.
+  Adjust imported watch time: Juster importert sjåtid
+  Imported watch time: Importert sjåtid
+  Imported watch time explanation: Vel avspelingsfarten du vanlegvis brukte. Lengda på dei importerte videoane blir delt på denne farten for å rekne ut kor lang tid du faktisk brukte på å sjå dei.
+  Playback speed: Avspelingsfart
+  Channel speed note: Lagra avspelingsfart for kvar kanal blir brukt i staden når han finst.
+  Apply playback speed: Bruk avspelingsfarten
+  Imported watch time adjusted: Den importerte sjåtida er justert
+  Reset statistics: Nullstill statistikken
+  Reset: Nullstill
+  Reset confirmation: Er du sikker på at du vil nullstille all sjåstatistikk? Dette kan ikkje angrast.
+  Reset success: Sjåstatistikken er nullstilt
+  Less than a minute: < 1 min
+  Minutes: '{minutes} min'
+  Hours: '{hours} t'
+  Hours and minutes: '{hours} t {minutes} min'
+Home Page:
+  Home: Heim
+  Description: Hald fram der du slapp, og sjå nyleg aktivitet.
+  Customize: Tilpass heimesida
+  Done: Ferdig
+  Customize description: Vel kva delar som skal visast, og ordne dei i den rekkjefølgja du ønskjer.
+  Continue watching: Hald fram med å sjå
+  New since last visit: Nytt sidan sist besøk
+  Watch queue: Avspelingskø
+  Recent playlists: Nylege spelelister
+  Recent downloads: Nylege nedlastingar
+  Upcoming reminders: Komande påminningar
+  Watch statistics: Sjåestatistikk
+  View all: Vis alle
+  Previous shelf page: Førre side i {section}
+  Next shelf page: Neste side i {section}
+  Shelf page status: "{section}, side {page} av {total}."
+  Move section up: Flytt {section} opp
+  Move section down: Flytt {section} ned
+  Section moved: "{section} flytta til posisjon {position} av {total}."
+  Nothing here yet: Ingenting her enno
+  Empty description: Videoar du startar, spelelister du brukar, nedlastingar og påminningar blir viste her.
+  All sections hidden: Alle delar er gøymde
+  All sections hidden description: Tilpass heimesida for å vise ein del igjen.
+Subscriptions:
+  Empty Posts: Kanalane du abonnerer på, har ingen innlegg enno.
+  Load More Posts: Last inn fleire innlegg
+  Subscriptions Tabs: Abonnementsfaner
+  All Subscription Tabs Hidden: Alle abonnementsfanene er gøymde. Vis nokre faner i delen "{subsection}" under "{settingsSection}" for å sjå innhald her.
+  Refreshing Subscription Videos: Oppdaterer abonnementsvideoar
+  Refreshing Subscription Shorts: Oppdaterer Shorts frå abonnement
+  Refreshing Subscription Live Streams: Oppdaterer direktesendingar frå abonnement
+  Refreshing Subscription Posts: Oppdaterer abonnementsinnlegg
+  New Content: Nytt innhald
+  New Feed Refresh Warning Title: Vil du oppdatere alle abonnementsstraumane?
+  New Feed Refresh Warning: Det kan ta lang tid å oppdatere alle innhaldstypar utan RSS for 1 abonnement. Vil du halde fram? | Det kan ta lang tid å oppdatere alle innhaldstypar utan RSS for {count} abonnement. Vil du halde fram?
+  New Since Last Refresh: Nytt sidan førre oppdatering
+  Mark as Seen: Merk som sett
+  Mark All as Seen: Merk alt som sett
+  No New Content: Det finst ikkje noko nytt innhald.
+  New Content Tabs: Faner for nytt innhald
+  Show Tabbed View: Vis med faner
+  Show Combined View: Vis samla
+  Newest First: Nyaste først
+  Oldest First: Eldste først
+  Posts:
+    RSS Message: YouTube tilbyr ikkje RSS-straumar for innlegg. Slå av innstillinga "{rssSetting}" for å sjå innlegg, eller slå på innstillinga "{hideSetting}" for å gøyme denne fana.
+Trending:
+  Load Error: Klarte ikkje å laste inn populært innhald.
+  Unsupported Backend: Populært innhald krev Local API. Vel Local API eller slå på ein reserveleverandør.
+Most Popular Feed Empty: «Most Popular»-straumen frå denne Invidious-instansen er tom.
+Feed:
+  Cancel Refresh: Avbryt oppdateringa
+  Feed Last Updated: 'Straumen {feedName} vart sist oppdatert: {date}'
+  Next Auto Refresh: 'Neste automatiske oppdatering: {date}'
+  Refresh Feed: Oppdater {subscriptionName}
+User Playlists:
+  Load More Playlists: Last inn fleire spelelister
+  You have no playlists. Click on the create new playlist button to create a new one.: Du har ingen spelelister. Trykk på knappen for å lage ei ny speleliste.
+  Playlists with Matching Videos: Spelelister med videoar som passar
+  This playlist currently has no videos.: Denne spelelista har ingen videoar enno.
+  Create New Playlist: Lag ny speleliste
+  Add to Playlist: Legg til i speleliste
+  Save to: Lagre i …
+  Add to Favorites: Legg til i {playlistName}
+  Remove from Favorites: Fjern frå {playlistName}
+  Move Video Up: Flytt videoen opp
+  Move Video Down: Flytt videoen ned
+  Move Video to the Top: Flytt videoen øvst
+  Move Video to the Bottom: Flytt videoen nedst
+  Remove from Playlist: Fjern frå spelelista
+  Playlist Name: Namn på spelelista
+  Playlist Description: Skildring av spelelista
+  Quick Bookmark Icon: Ikon for snøggbokmerke
+  Custom Emoji: Eigendefinert emoji
+  Choose Image: Vel bilete
+  Use Bookmark Icon: Bruk bokmerkeikon
+  Save Changes: Lagre endringane
+  Cancel: Avbryt
+  Edit Playlist Info: Rediger informasjon om spelelista
+  Copy Playlist: Kopier spelelista
+  Remove Duplicate Videos: Fjern duplikatvideoar
+  Remove Watched Videos: Fjern videoar du har sett
+  Enable Quick Bookmark With This Playlist: Bruk denne spelelista som snøggbokmerke
+  Quick Bookmark Enabled: Snøggbokmerke er slått på
+  Export Playlist: Eksporter denne spelelista
+  Export list of URLs: Eksporter liste over nettadresser
+  The playlist has been successfully exported: Spelelista er eksportert
+  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: Er du sikker på at du vil fjerne 1 duplikatvideo frå denne spelelista? Dette kan ikkje angrast. | Er du sikker på at du vil fjerne {playlistItemCount} duplikatvideoar frå denne spelelista? Dette kan ikkje angrast.
+  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: Er du sikker på at du vil fjerne 1 video du har sett, frå denne spelelista? Dette kan ikkje angrast. | Er du sikker på at du vil fjerne {playlistItemCount} videoar du har sett, frå denne spelelista? Dette kan ikkje angrast.
+  Delete Playlist: Slett spelelista
+  Cannot delete the quick bookmark target playlist.: Du kan ikkje slette spelelista som blir brukt som snøggbokmerke.
+  Are you sure you want to delete this playlist? This cannot be undone: Er du sikker på at du vil slette denne spelelista? Dette kan ikkje angrast.
+  TotalTimePlaylist: 'Samla tid: {duration}'
+  Sort By:
+    NameAscending: A-Z
+    NameDescending: Z-A
+    LatestCreatedFirst: Oppretta (nyaste)
+    EarliestCreatedFirst: Oppretta (eldste)
+    LatestUpdatedFirst: Oppdatert (nyaste)
+    EarliestUpdatedFirst: Oppdatert (eldste)
+    LatestPlayedFirst: Spelt av (nyaste)
+    EarliestPlayedFirst: Spelt av (eldste)
+  SinglePlaylistView:
+    Search for Videos: Søk etter videoar
+    Retry: Prøv igjen
+    This playlist could not be loaded.: Klarte ikkje å laste inn denne spelelista.
+    More videos could not be loaded.: Klarte ikkje å laste inn fleire videoar.
+    Toast:
+      This video cannot be moved up.: Denne videoen kan ikkje flyttast opp.
+      This video cannot be moved down.: Denne videoen kan ikkje flyttast ned.
+      Video has been removed: Videoen er fjerna
+      Video has been removed. Click here to undo.: Videoen er fjerna. Trykk her for å angre.
+      There was a problem with removing this video: Det oppstod eit problem då videoen skulle fjernast
+      This playlist is already being used for quick bookmark.: Denne spelelista blir allereie brukt som snøggbokmerke.
+      This playlist is now used for quick bookmark: Denne spelelista blir no brukt som snøggbokmerke
+      This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo: Denne spelelista blir no brukt som snøggbokmerke i staden for {oldPlaylistName}. Trykk her for å angre
+      Reverted to use {oldPlaylistName} for quick bookmark: '{oldPlaylistName} blir brukt som snøggbokmerke igjen'
+      Some videos in the playlist are not loaded yet. Click here to copy anyway.: Nokre videoar i spelelista er ikkje lasta inn enno. Trykk her for å kopiere likevel.
+      Playlist name cannot be empty. Please input a name.: Spelelista må ha eit namn. Skriv inn eit namn.
+      Playlist has been updated.: Spelelista er oppdatert.
+      There was an issue with updating this playlist.: Det oppstod eit problem under oppdateringa av spelelista.
+      '{videoCount} video(s) have been removed': 1 video er fjerna | {videoCount} videoar er fjerna
+      There were no videos to remove.: Det var ingen videoar å fjerne.
+      This playlist is protected and cannot be removed.: Denne spelelista er verna og kan ikkje fjernast.
+      Playlist {playlistName} has been deleted.: Spelelista {playlistName} er sletta.
+      This playlist does not exist: Denne spelelista finst ikkje
+      This playlist has a video with a duration error: Spelelista inneheld minst éin video utan oppgjeven lengd. Videoen blir sortert som om lengda er null.
+  AddVideoPrompt:
+    Select a playlist to add your N videos to: Vel ei speleliste du vil leggje videoen din til | Vel ei speleliste du vil leggje dei {videoCount} videoane dine til
+    N playlists selected: '{playlistCount} valde'
+    Search in Playlists: Søk i spelelister
+    Allow Adding Duplicate Video(s): Tillat duplikatvideoar
+    Save: Lagre
+    Added {count} Times: Allereie lagd til | Lagd til {count} gonger
+    '{videoCount}/{totalVideoCount} Videos Will Be Added': '{videoCount}/{totalVideoCount} videoar blir lagde til'
+    '{videoCount}/{totalVideoCount} Videos Already Added': '{videoCount}/{totalVideoCount} videoar er allereie lagde til'
+    Toast:
+      You haven't selected any playlist yet.: Du har ikkje valt noka speleliste enno.
+      Video(s) added to {playlistCount} playlists: Video lagd til i 1 speleliste | Videoar lagde til i {playlistCount} spelelister
+  CreatePlaylistPrompt:
+    New Playlist Name: Namn på den nye spelelista
+    Create: Opprett
+    Toast:
+      There is already a playlist with this name. Please pick a different name.: Det finst allereie ei speleliste med dette namnet. Vel eit anna namn.
+      Playlist {playlistName} has been successfully created.: Spelelista {playlistName} er oppretta.
+      There was an issue with creating the playlist.: Det oppstod eit problem då spelelista skulle opprettast.
+History:
+  Case Sensitive Search: Skil mellom store og små bokstavar
+  Mark All As Watched: Merk alle som sette
+  Mark All As Watched Confirmation: Er du sikker på at du vil merke alle videoane i historikken som sette?
+  All History Marked as Watched: Alle videoane i historikken er merkte som sette
+  DateOldestHistory: Sjådato (eldste)
+  DateNewestHistory: Sjådato (nyaste)
+  Delete Old History: Slett gammal historikk
+  Select History Age: Vel kor gammal ei oppføring må vere før ho blir sletta.
+  Delete Entries Older Than: Slett oppføringar eldre enn
+  Number of Days: Tal på dagar
+  History Cleanup Warning: Dette slettar dei samsvarande oppføringane i sjåhistorikken for godt.
+  1 Day: 1 dag
+  1 Week: 1 veke
+  1 Month: 1 månad
+  3 Months: 3 månader
+  1 Year: 1 år
+  Custom: Eigendefinert
+  History Older Than Days Removed: Sjåhistorikk eldre enn 1 dag er fjerna | Sjåhistorikk eldre enn {days} dagar er fjerna
+Settings:
+  Quick Settings:
+    Quick Settings: Snøgginnstillingar
+    Appearance: Utsjånad
+    Playback: Avspeling
+    Content: Innhald
+    Language and Region: Språk og region
+    All Settings: Alle innstillingar
+    Profile Selector Hint: Du kan òg høgreklikke på profilikonet for å byte profil
+  Categories:
+    General Description: Språk, oppstart, faner og appåtferd
+    Appearance: Utsjånad
+    Appearance Description: Tema, oppsett og miniatyrbilete
+    Content appearance: Videolister og miniatyrbilete
+    Layout: Oppsett
+    Playback Description: Avspelar, undertekstar og kanalval
+    Subscriptions Description: Oppdatering og vising av straumar
+    Downloads Description: Mapper, malar og automatiske reglar
+    Distraction Free Description: Gøym innhald og set grenser for sjåtid
+    Add-ons: Tillegg
+    Add-ons Description: SponsorBlock, DeArrow, mislikingar og taleomsetjing
+    Privacy Description: Personvern ved vising og tilgangskontroll
+    Online activity: Nettaktivitet
+    Data And Storage Description: Import, eksport, diskbruk og opprydding
+    Sync Description: Hald innstillingar og data synkroniserte mellom einingar
+    Advanced: Avansert
+    Advanced Description: Tilbydarar, eksterne appar og nettverk
+    Alternative providers: Tilbydarar av video og metadata
+  Highlight Changed Settings: Framhev innstillingar som er endra frå standardverdiane
+  Reset Setting to Default: Still denne innstillinga tilbake til standardverdien
+  Performance Impact:
+    Show Performance Impact: Vis indikatorar for ytingspåverknad
+    Moderate: Moderat påverknad
+    High: Stor påverknad
+    Description: Denne innstillinga kan auke bruken av {resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: minne
+      Network: nettverk
+      Disk: disk
+  Return to Settings Menu: Tilbake til innstillingsmenyen
+  General Settings:
+    Update Relative Timestamps: Hald relative tidsstempel oppdaterte
+    Stream Extraction Method:
+      Stream Extraction Method: Metode for uthenting av straum
+      yt-dlp: yt-dlp
+      Built-in: Innebygd
+    Confirm Before: Stadfest før…
+    Confirmation Options:
+      Closing App: Lukking av OpenTubeX
+      Closing Window: Lukking av eit vindauge med fleire faner
+      Closing Tabs: Lukking av fleire faner
+      Loading Tabs: Innlasting av fleire faner
+      Unloading Tabs: Utlasting av fleire faner
+    Open Deep Links In New Window: Opne nettadresser sende til OpenTubeX i eit nytt vindauge
+    Minimize to system tray: Minimer til systemtrauet
+    Remember Tab Navigation History: Hugs navigasjonshistorikken for faner
+    Auto Load Next Page:
+      Label: Last inn neste side automatisk
+      Tooltip: Last inn fleire sider og kommentarar automatisk.
+    New Tab Position:
+      New Tab Position: Plassering av ny fane
+      At the end: Til slutt
+      After current tab: Etter gjeldande fane
+      After current tab in opened order: Etter gjeldande fane, i opningsrekkjefølgje
+    Tab Close Focus:
+      Tab Close Focus: Etter at ei fane er lukka
+      Previous tab: Vel førre fane
+      Next tab: Vel neste fane
+    Startup Behavior:
+      Startup Behavior: Ved oppstart
+      Load all tabs: Last inn alle faner
+      Load previously loaded tabs: Last inn tidlegare innlasta faner
+      Load last active tab: Last inn den sist aktive fana
+      Start with an empty session: Start med ei tom økt
+    Use AI Translation Completions: Fyll inn manglande omsetjingar med KI-generert tekst
+    Reduced Motion:
+      Reduced Motion: Redusert rørsle
+      System: System
+      Force On: Tving på
+      Force Off: Tving av
+    Comment Translation:
+      Title: Omsetjing av kommentarar
+      Enable: Slå på omsetjing av kommentarar
+      Never Translate: Omset aldri kommentarar på
+      Choose Language: Vel eit språk
+      Description: Kommentarar på appspråket er allereie utelatne. Legg til andre språk du kan lese.
+      Remove Language: Omset kommentarar på {language} igjen
+    Avoid translation:
+      Avoid translation: Føretrekk uomsett videotekst
+      Disabled: Av
+      Watch Only: Berre videogrensesnittet
+      Entire App: Heile appen
+    Playlist View Type:
+      Playlist View Type: Visningstype for speleliste
+    Thumbnail Preference:
+      Hidden: Gøymd
+      Blur: Uskarp
+    Show Thumbnail Previews: Vis førehandsvisingar av miniatyrbilete
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Ekstra handlingsknapp på miniatyrbilete
+      None: Ingen
+      Mark as Watched: Merk som sett
+      Copy YouTube Link: Kopier YouTube-lenkje
+      Open in YouTube: Opne på YouTube
+  Context Menu Search Settings:
+    Context Menu Search Settings: Søk i høgreklikkmenyen
+    Description: Vel kva søkjemotorar som skal visast når du høgreklikkar på merkt tekst. Søka blir opna i standardnettlesaren din.
+    Icon Hint: Når du slår på ein søkjemotor, blir nettstaden kontakta for å laste inn nettstadikonet.
+    Engine Name: Namn på søkjemotor
+    Search URL: Nettadresse for søk
+    URL Hint: Bruk %s der nettadressa skal innehalde den koda merkte teksten.
+    Add Custom Engine: Legg til ein eigen søkjemotor
+    Add Engine: Legg til søkjemotor
+    Remove Engine: Fjern {engine}
+    Invalid Engine: Skriv inn eit namn og ei gyldig HTTP- eller HTTPS-søkjeadresse som inneheld %s.
+    Engine Limit: Du kan leggje til opptil {count} eigne søkjemotorar.
+  Theme Settings:
+    Move Downloads to App Header: Flytt nedlastingar til apphovudet
+    Move Settings to App Header: Flytt innstillingar til apphovudet
+    Hide Side Bar on Watch Pages: Gøym sidepanelet på videosider
+    UI Roundness: Avrunding i grensesnittet
+    Scrollbar Width: Breidd på rullefelt
+    Scroll Speed: Rullefart
+    Animation Speed: Animasjonsfart
+    Thumbnail Size: Storleik på miniatyrbilete
+    Show Tab Icons: Vis faneikon
+    Load Missing Tab Icons: Last inn manglande faneikon
+    Loading Missing Tab Icons: Lastar inn manglande faneikon…
+    No Missing Tab Icons: Alle støtta faneikon er allereie lasta inn
+    Loaded Tab Icons: 'Manglande faneikon lasta inn: {count} | Manglande faneikon lasta inn: {count}'
+    Loaded Tab Icons With Failures: Lasta inn {loaded} faneikon; {failed} kunne ikkje lastast inn
+    Show Tab Previews: Vis førehandsvisingar av faner
+    Use Fixed Tab Width: Bruk fast fanebreidd i vassrett modus
+    Tab Width: Fanebreidd
+    Tab Layout:
+      Tab Layout: Faneoppsett
+      Horizontal Top: Vassrett øvst
+      Horizontal Bottom: Vassrett nedst
+      Vertical Left: Loddrett til venstre
+      Vertical Right: Loddrett til høgre
+    Show Toast Timeout Indicator: Vis tidsindikator på varsel
+    Use Grid Player Menu: Bruk rutenettmeny for avspelaren
+    Show Progress as Notification: Vis framdrift som varsel
+    Operation in Progress: Operasjonen er i gang
+    Toast Position:
+      Toast Position: Plassering av varsel
+      Bottom Left: Nede til venstre
+      Bottom Center: Nede i midten
+      Bottom Right: Nede til høgre
+      Top Left: Oppe til venstre
+      Top Center: Oppe i midten
+      Top Right: Oppe til høgre
+    Icon Pack:
+      Icon Pack: Ikonpakke
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Skrifttype i appen
+      System Default: Systemstandard
+      Unable to Load: Klarte ikkje å laste inn installerte systemskrifter
+    Always Show Scrollbars: Vis alltid rullefelt
+    Base Theme:
+      Custom: Eige
+      Catppuccin Frappe: Catppuccin Frappe
+      Catppuccin Latte: Catppuccin Latte
+      Pastel Pink: Pastel Pink
+      Hot Pink: Hot Pink
+      Nordic: Nordic
+      Gruvbox Dark: Gruvbox Dark
+      Gruvbox Light: Gruvbox Light
+      Solarized Dark: Solarized Dark
+      Solarized Light: Solarized Light
+      Everforest Dark Hard: Everforest Dark Hard
+      Everforest Dark Medium: Everforest Dark Medium
+      Everforest Dark Low: Everforest Dark Low
+      Everforest Light Hard: Everforest Light Hard
+      Everforest Light Medium: Everforest Light Medium
+      Everforest Light Low: Everforest Light Low
+    Light Theme: Lyst tema
+    Dark Theme: Mørkt tema
+    Custom Theme:
+      Create Custom Theme: Lag eit eige tema
+      Edit Custom Theme: Rediger eige tema
+      Custom Theme Creator: Temaverktøy
+      Theme Name: Temanamn
+      Based On: Basert på
+      Import Theme: Importer tema
+      Export Theme: Eksporter tema
+      Share Theme: Del tema
+      Share Description Heading: Skildring
+      Share Description Prompt: Skildra temaet og det folk bør vite før dei tek det i bruk.
+      Share Screenshots Heading: Skjermbilete
+      Share Screenshots Prompt: Dra og slepp eitt eller fleire skjermbilete her.
+      Share Code Summary: Tema-JSON
+      Delete Theme: Slett tema
+      Delete Theme Confirmation: Slett “{name}”? Dette kan ikkje angrast.
+      Save and Apply: Lagre og bruk
+      Discard Changes: Forkast endringane
+      Reset Colors: Tilbakestill til grunntemaet
+      Theme File: OpenTubeX-temafil
+      Theme Saved: Det eigne temaet er lagra og teke i bruk
+      Theme Imported: Temaet er importert til redigeringsprogrammet
+      Theme Exported: Temaet er eksportert
+      Theme Deleted: Det eigne temaet er sletta
+      Unable to Load: Klarte ikkje å laste inn det eigne temaet
+      Unable to Save: Klarte ikkje å lagre det eigne temaet
+      Unable to Export: Klarte ikkje å eksportere det eigne temaet
+      Unable to Share: Klarte ikkje å dele det eigne temaet
+      Unable to Delete: Klarte ikkje å slette det eigne temaet
+      Invalid Theme File: Ugyldig fil for eige tema
+      Colors:
+        Main text: Hovudtekst
+        Secondary text: Sekundærtekst
+        Subtle text: Dempa tekst
+        Borders and dividers: Kantar og skiljelinjer
+        Subtle surfaces and indicators: Dempa flater og indikatorar
+        Title text: Titteltekst
+        Selected text background: Bakgrunn for merkt tekst
+        Selected text: Merkt tekst
+        Logo icon: Logoikon
+        Logo text: Logotekst
+        Logo hover: Logo ved peikarføring
+        Logo pressed: Logo ved trykk
+        Page background: Sidebakgrunn
+        Card background: Kortbakgrunn
+        Secondary card background: Sekundær kortbakgrunn
+        Favorite icon: Favorittikon
+        Error color: Feilfarge
+        Scrollbar thumb: Rullefeltshandtak
+        Scrollbar thumb hover: Rullefeltshandtak ved peikarføring
+        Scrollbar thumb pressed: Rullefeltshandtak ved trykk
+        Dropdown item hover text: Tekst i nedtrekksval ved peikarføring
+        Dropdown item hover background: Bakgrunn i nedtrekksval ved peikarføring
+        Navigation and panel background: Bakgrunn for navigasjon og panel
+        Neutral item hover and focus background: Bakgrunn for nøytrale element ved peikarføring og fokus
+        Neutral item hover and focus text and icons: Tekst og ikon i nøytrale element ved peikarføring og fokus
+        Neutral item pressed background: Bakgrunn for nøytrale element ved trykk
+        Neutral item pressed text and icons: Tekst og ikon i nøytrale element ved trykk
+        Header button hover and focus background: Bakgrunn for hovudknapp ved peikarføring og fokus
+        Header button hover and focus text and icons: Tekst og ikon på hovudknapp ved peikarføring og fokus
+        Header button pressed background: Bakgrunn for hovudknapp ved trykk
+        Header button pressed text and icons: Tekst og ikon på hovudknapp ved trykk
+        Colored header button hover and focus background: Bakgrunn for farga hovudknapp ved peikarføring og fokus
+        Colored header button hover and focus text and icons: Tekst og ikon på farga hovudknapp ved peikarføring og fokus
+        Colored header button pressed background: Bakgrunn for farga hovudknapp ved trykk
+        Colored header button pressed text and icons: Tekst og ikon på farga hovudknapp ved trykk
+        Search and dropdown background: Bakgrunn for søk og nedtrekkslister
+        Settings search background: Bakgrunn for innstillingssøk
+        Instance menu: Instansmeny
+        Input background: Bakgrunn for inndatafelt
+        Shadow color: Skuggefarge
+        Primary controls and highlights: Primære kontrollelement og framhevingar
+        Primary control hover and focus: Primært kontrollelement ved peikarføring og fokus
+        Primary control pressed: Primært kontrollelement ved trykk
+        Text and icons on primary controls: Tekst og ikon på primære kontrollelement
+        Secondary controls and highlights: Sekundære kontrollelement og framhevingar
+        Secondary control hover and focus: Sekundært kontrollelement ved peikarføring og fokus
+        Secondary control pressed: Sekundært kontrollelement ved trykk
+        Light secondary color: Lys sekundærfarge
+        Visited accent: Aksent for vitja element
+        Text and icons on secondary controls: Tekst og ikon på sekundære kontrollelement
+        Links: Lenkjer
+        Visited links: Vitja lenkjer
+        Destructive action: Destruktiv handling
+        Destructive hover and focus: Destruktiv handling ved peikarføring og fokus
+        Destructive pressed: Destruktiv handling ved trykk
+        Text and icons on destructive actions: Tekst og ikon på destruktive handlingar
+    Main Color Theme:
+      Catppuccin Frappe Rosewater: Catppuccin Frappe Rosewater
+      Catppuccin Frappe Flamingo: Catppuccin Frappe Flamingo
+      Catppuccin Frappe Pink: Catppuccin Frappe Pink
+      Catppuccin Frappe Mauve: Catppuccin Frappe Mauve
+      Catppuccin Frappe Red: Catppuccin Frappe Red
+      Catppuccin Frappe Maroon: Catppuccin Frappe Maroon
+      Catppuccin Frappe Peach: Catppuccin Frappe Peach
+      Catppuccin Frappe Yellow: Catppuccin Frappe Yellow
+      Catppuccin Frappe Green: Catppuccin Frappe Green
+      Catppuccin Frappe Teal: Catppuccin Frappe Teal
+      Catppuccin Frappe Sky: Catppuccin Frappe Sky
+      Catppuccin Frappe Sapphire: Catppuccin Frappe Sapphire
+      Catppuccin Frappe Blue: Catppuccin Frappe Blue
+      Catppuccin Frappe Lavender: Catppuccin Frappe Lavender
+      Catppuccin Latte Mauve: Catppuccin Latte Mauve
+      Catppuccin Latte Red: Catppuccin Latte Red
+      Gruvbox Dark Green: Gruvbox Dark Green
+      Gruvbox Dark Yellow: Gruvbox Dark Yellow
+      Gruvbox Dark Blue: Gruvbox Dark Blue
+      Gruvbox Dark Purple: Gruvbox Dark Purple
+      Gruvbox Dark Aqua: Gruvbox Dark Aqua
+      Gruvbox Dark Orange: Gruvbox Dark Orange
+      Gruvbox Light Red: Gruvbox Light Red
+      Gruvbox Light Blue: Gruvbox Light Blue
+      Gruvbox Light Purple: Gruvbox Light Purple
+      Gruvbox Light Orange: Gruvbox Light Orange
+      Solarized Yellow: Solarized Yellow
+      Solarized Orange: Solarized Orange
+      Solarized Red: Solarized Red
+      Solarized Magenta: Solarized Magenta
+      Solarized Violet: Solarized Violet
+      Solarized Blue: Solarized Blue
+      Solarized Cyan: Solarized Cyan
+      Solarized Green: Solarized Green
+      Everforest Dark Red: Everforest Dark Red
+      Everforest Dark Orange: Everforest Dark Orange
+      Everforest Dark Yellow: Everforest Dark Yellow
+      Everforest Dark Green: Everforest Dark Green
+      Everforest Dark Aqua: Everforest Dark Aqua
+      Everforest Dark Blue: Everforest Dark Blue
+      Everforest Dark Purple: Everforest Dark Purple
+      Everforest Light Red: Everforest Light Red
+      Everforest Light Orange: Everforest Light Orange
+      Everforest Light Yellow: Everforest Light Yellow
+      Everforest Light Green: Everforest Light Green
+      Everforest Light Aqua: Everforest Light Aqua
+      Everforest Light Blue: Everforest Light Blue
+      Everforest Light Purple: Everforest Light Purple
+  Player Settings:
+    Automatically Open Chapters: Opne kapittel automatisk
+    Caption Appearance:
+      Caption Appearance: Utsjånad på undertekstar
+      Captions: Undertekstar
+      Preferred Language: Føretrekt språk for undertekstar
+      Application Language: Appspråk
+      Enable Translations: Slå på omsetjing av undertekstar
+      Text Color: Tekstfarge
+      Background Color: Bakgrunnsfarge
+      Background Opacity: Dekkevne for bakgrunnen
+      Font Size: Skriftstorleik
+      Vertical Position: Loddrett plassering
+      Edge Color: Kantfarge
+      Anchor:
+        Anchor: Forankring
+        Top Left: Oppe til venstre
+        Top Center: Oppe i midten
+        Top Right: Oppe til høgre
+        Bottom Left: Nede til venstre
+        Bottom Center: Nede i midten
+        Bottom Right: Nede til høgre
+      Edge Style:
+        Edge Style: Kantstil
+        None: Ingen
+        Outline: Omriss
+        Drop Shadow: Slagskugge
+      Reset: Tilbakestill utsjånaden på undertekstane
+    Default Viewing Mode:
+      Theater: Kino
+      Default Viewing Mode: Standard visingsmodus
+      Full Screen: Fullskjerm
+      Picture in Picture: Bilete-i-bilete
+      External Player: Ekstern spelar ({externalPlayerName})
+      Full Window (Always On): Heile vindauget (alltid på)
+      Full Screen (Always On): Fullskjerm (alltid på)
+      Tooltip: Dei fleste standardmodusane for vising blir berre brukte når kvar visingsøkt tek til. Endringar du gjer under økta, varer til økta er slutt. Visingsmodusar som alltid er på, blir brukte kvar gong du byter til ein ny video, uavhengig av endringar du gjorde i visingsmodusen for den førre videoen.
+    Auto Picture in Picture:
+      Auto Picture in Picture: Gå automatisk til bilete-i-bilete
+      On Tab Change: Når du byter fane
+      On Window Minimize: Når vindauget blir minimert
+      On Window Hide: Når vindauget mistar fokus eller du byter frå det
+      Wayland Minimize Unsupported: Wayland melder ikkje frå til appar når vindauge blir minimerte, så denne utløysaren er ikkje tilgjengeleg. Bruk "Når vindauget mistar fokus eller du byter frå det" i staden. Det omfattar òg minimering.
+    Scroll Mini Player:
+      Scroll Mini Player: Minispelar ved rulling
+      When Scrolling Down: Vis ein minispelar på skjermen når du rullar ned
+      On All Tabs: Vis ein minispelar på skjermen når du byter fane
+    Multiply Seek Interval by Playback Rate: Gang spoleintervallet med avspelingsfarten
+    Show Playback Rate Adjusted Timestamp: Vis tidsstempel justert for avspelingsfarten
+    Use YouTube-style Shorts: Bruk Shorts i YouTube-stil
+    Loop Shorts: Spel Shorts om att
+    Autoplay Interruption Timer: Tidsur for avbrot i automatisk avspeling
+    Remember Volume: Hugs lydstyrken
+    Skip Silence: Hopp over stille parti
+    Show Skip Silence Toggle: Vis brytar for å hoppe over stille parti
+    Enable Skip Silence by Default: Hopp over stille parti som standard
+    Enable Video Zoom: Slå på videozoom
+    Voice-over Translation:
+      Title: Taleomsetjing
+      Attribution: (levert av Yandex)
+      Enable: Slå på taleomsetjing
+      Prepare in Background: Klargjer taleomsetjingar i bakgrunnen
+      Background Preparation Tooltip: Sender ID-en, lengda og det valde språket for den gjeldande videoen til omsetjingstenesta så snart ein støtta video er lasta inn.
+      Language: Språk for taleomsetjing
+      Supported Source Languages: 'Støtta kjeldespråk: russisk, engelsk, kinesisk, koreansk, litauisk, latvisk, arabisk, fransk, italiensk, spansk, tysk og japansk.'
+      Voice Volume: Lydstyrke for omsett tale
+      Original Volume: Lydstyrke for originallyden
+      Russian: Russisk
+      English: Engelsk
+      Kazakh: Kasakhisk
+    Hold to Double Playback Speed: Hald inne for dobbel avspelingsfart
+    Use Quick Playback Speed Bar: Bruk hurtiglinje for avspelingsfart
+    Customize Quick Playback Speed Bar: Tilpass hurtiglinja for avspelingsfart
+    Quick Playback Speed Bar Manager: Hurtiglinje for avspelingsfart
+    Add Playback Speed: Legg til avspelingsfart
+    Reset Quick Playback Speed Bar: Tilbakestill til standardverdiane
+    Playback Speed Name: Namn
+    Edit Playback Speed Name: Rediger namnet på avspelingsfarten
+    Use Automatic Playback Speed Name: Bruk automatisk namn på avspelingsfarten
+    Reorder Playback Speed: Dra for å endre rekkjefølgja på avspelingsfartane
+    Playback Speed: Avspelingsfart
+    Parallel Segment Loading: Parallell innlasting av segment
+    Screenshot:
+      Mode: Skjermbiletmodus
+      Modes:
+        Save To Folder: Lagre i mappe
+        Clipboard: Kopier til utklippstavla
+  Channel Settings:
+    Channel Settings: Kanalinnstillingar
+    Channel Settings Description: Hugs innstillingane du vel medan du ser på kvar einskild kanal, slik at dei blir brukte att neste gong du ser ein av videoane til kanalen.
+    Enable Playback Speed: Slå på avspelingsfart
+    Enable Video Quality: Slå på videokvalitet
+    Enable Subtitles State: Slå på undertekststatus
+    Enable Volume: Slå på lydstyrke
+    Auto Update: Oppdater automatisk ved endringar i spelarvala
+    Auto Update Subtitles: Oppdater automatisk når brytaren blir brukt
+    Auto Update Volume: Oppdater automatisk kvar gong du endrar lydstyrken
+    Manage Saved Channels: Handsam lagra kanalar ({channelCount})
+    Saved Channels: Lagra kanalinnstillingar
+    Enable Saved Channel Settings Sync: Synkroniser lagra kanalinnstillingar
+    Disable Saved Channel Settings Sync: Stopp synkronisering av lagra kanalinnstillingar
+    Search Channels: Søk etter kanalar
+    No Saved Channels: Ingen kanalspesifikke innstillingar er lagra enno
+    No Matching Channels: Ingen kanalar samsvarar med søket
+    Forget Channel: Gløym alle innstillingane for denne kanalen
+    Forget Value: Gløym denne innstillinga
+    Add Setting: Hugs ei innstilling til for denne kanalen
+    Video Quality: Videokvalitet
+    Subtitles Enabled: Undertekstar på
+    Volume: Lydstyrke
+  External Player Settings:
+    Ignore Default Arguments: Ignorer standardargument
+  Download Settings:
+    Download Settings: Nedlastingar
+    Enable Downloads: Slå på nedlastingar
+    Managed Tools Download Started Template: 'Fann ikkje den nødvendige eksterne programvara: {tools}. Lastar ned kopiar som OpenTubeX forvaltar…'
+    Managed Tools Download Finished Template: Lasta ned {tools}
+    Managed Tools Update Started Template: Fann ei oppdatering for {tools}. Lastar ned…
+    Managed Tools Update Finished Template: Oppdaterte {tools}
+    Managed Tools Update Available Template: Ei oppdatering er tilgjengeleg for {tools}.
+    Update Managed Tools: Oppdater
+    Managed Tools Download Error Template: 'Klarte ikkje å laste ned dei forvalta verktøya: {errors}'
+    Download Folder: Nedlastingsmappe
+    Global Additional yt-dlp Arguments: Globale tilleggsargument for yt-dlp
+    Concurrent Downloads: Samstundes nedlastingar
+    Bandwidth Limit: Bandbreiddegrense (KiB/s, 0 for inga grense)
+    Choose Download Folder: Vel nedlastingsmappe
+    Download Templates: Nedlastingsmalar
+    Manage Download Templates: Handsam nedlastingsmalar ({templateCount})
+    New Template: Ny mal
+    Template Source: Mal som skal redigerast eller brukast som grunnlag
+    Built-in Template: '{name} (innebygd)'
+    Custom Template Name: '{name} (tilpassa)'
+    Create Template Copy: Lag kopi
+    Template Copy Name: '{name} – kopi'
+    Automatic Downloads: Automatiske nedlastingar
+    Manage Automatic Downloads: Handsam automatiske nedlastingar ({channelCount})
+    Automatic Downloads Description: Vel ein nedlastingsmal og filter for kvar kanal du abonnerer på. Videoar som samsvarar, blir lasta ned i bakgrunnen når abonnementsstraumane blir oppdaterte.
+    Automatic Downloads New Only: Når du slår på ein kanal, byrjar nedlastinga med den neste nye opplastinga. Eksisterande videoar og tidlegare videoar frå kanalen blir ikkje lasta ned.
+    Automatic Downloads No Channels: Abonner på ein kanal før du set opp automatiske nedlastingar.
+    No Matching Automatic Download Channels: Ingen kanalar samsvarar med søket.
+    Automatic Downloads Livestreams: Direktesendingar
+    Minimum Duration Seconds: Minste lengd (sekund)
+    Maximum Duration Seconds: Største lengd (sekund)
+    Minimum File Size MB: Minste filstorleik (MB)
+    Maximum File Size MB: Største filstorleik (MB)
+    Maximum Age Days: Høgste alder (dagar)
+    Title Includes: Tittelen inneheld
+    Title Excludes: Tittelen inneheld ikkje
+    Title Filter Hint: Skil fleire tittelord med komma. Ein video må samsvare med minst eitt inkludert ord og ingen ekskluderte ord.
+  External Software Settings:
+    External Software Settings: Ekstern programvare
+    yt-dlp Source: yt-dlp-kjelde
+    yt-dlp Channel: yt-dlp-kanal
+    Sources:
+      System: Systemet (PATH eller tilpassa stig)
+      Managed: Forvalta av OpenTubeX
+    Detected Version Template: 'Oppdaga yt-dlp-versjon: {version}'
+    Managed Not Downloaded: yt-dlp er ikkje lasta ned enno. Trykk på knappen nedanfor for å laste det ned.
+    System yt-dlp Missing Warning: Fann ikkje yt-dlp på systemet. Installer det, vel ein tilpassa stig nedanfor eller byt kjelde til "Forvalta av OpenTubeX".
+    Download yt-dlp: Last ned yt-dlp
+    Update yt-dlp: Oppdater yt-dlp
+    Checking yt-dlp: Ser etter yt-dlp…
+    Downloading yt-dlp: Lastar ned yt-dlp…
+    yt-dlp Downloaded Template: yt-dlp {version} er lasta ned
+    yt-dlp Download Error Template: 'Klarte ikkje å laste ned yt-dlp: {error}'
+    FFmpeg Source: FFmpeg-kjelde
+    Detected FFmpeg Version Template: 'Oppdaga FFmpeg-versjon: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg er ikkje lasta ned enno. Trykk på knappen nedanfor for å laste det ned.
+    System FFmpeg Missing Warning: Fann ikkje FFmpeg på systemet. Det trengst for å slå saman video og lyd og for å konvertere lyd. Installer det, vel ein tilpassa stig nedanfor eller byt kjelde til "Forvalta av OpenTubeX".
+    Download FFmpeg: Last ned FFmpeg
+    Update FFmpeg: Oppdater FFmpeg
+    Checking FFmpeg: Ser etter FFmpeg…
+    Downloading FFmpeg: Lastar ned FFmpeg…
+    FFmpeg Downloaded Template: FFmpeg {version} er lasta ned
+    FFmpeg Download Error Template: 'Klarte ikkje å laste ned FFmpeg: {error}'
+    Detected FFprobe Version Template: 'Oppdaga FFprobe-versjon: {version}'
+    FFprobe Managed Not Downloaded: FFprobe er ikkje lasta ned enno. Trykk på knappen nedanfor for å laste det ned saman med FFmpeg.
+    System FFprobe Missing Warning: Fann ikkje FFprobe på systemet. Det trengst for å kontrollere medium under etterhandsaming. Installer det ved sida av FFmpeg, eller byt kjelde til "Forvalta av OpenTubeX".
+    Checking FFprobe: Ser etter FFprobe…
+    Download FFmpeg and FFprobe: Last ned FFmpeg og FFprobe
+    Update FFmpeg and FFprobe: Oppdater FFmpeg og FFprobe
+    Downloading FFmpeg and FFprobe: Lastar ned FFmpeg og FFprobe…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg og FFprobe {version} er lasta ned
+    FFmpeg and FFprobe Download Error Template: 'Klarte ikkje å laste ned FFmpeg og FFprobe: {error}'
+    Managed Tool Already Current Template: '{tool} {version} er allereie oppdatert'
+    Managed Tool Updates: Oppdateringar for forvalta verktøy
+    Update Modes:
+      Automatic: Oppdater automatisk
+      Ask: Spør før oppdatering
+      Manual: Oppdater berre manuelt
+    yt-dlp Executable Path: Stig til den køyrbare yt-dlp-fila
+    FFmpeg Executable Path: Stig til den køyrbare FFmpeg-fila
+    Restricted Playback Authentication: Informasjonskapslar for avspeling med yt-dlp
+    Cookie Source: Kjelde for informasjonskapslar
+    Cookie Sources:
+      None: Ingen
+      File: Fil
+      Browser: Nettlesar
+    Cookie File: Fil med informasjonskapslar
+    Browser for Cookies: Nettlesar for informasjonskapslar
+    Browser Profile: Nettlesarprofil (valfritt)
+    Browser Profile Placeholder: Profilnamn eller stig
+    Select Browser: Vel ein nettlesar
+    Always Use Cookies: Bruk alltid informasjonskapslar
+    Restricted Playback Authentication Hint: Som standard sender OpenTubeX berre desse informasjonskapslane til yt-dlp etter at du har valt "Prøv med dei valde informasjonskapslane" på ein aldersavgrensa video eller ein video berre for medlemer.
+    Restricted Playback Authentication Warning: Bruk av yt-dlp med ein Google-konto kan føre til mellombelse eller varige avgrensingar på kontoen.
+  Privacy Settings:
+    Automatic History Retention: Automatisk oppbevaring av historikk (dagar)
+    Automatic History Retention Placeholder: La stå tomt for å ta vare på historikken for alltid
+    Automatic History Retention Tooltip: La stå tomt for å ta vare på historikken for alltid. Når du lagrar eit tal, blir eldre oppføringar fjerna no og automatisk medan appen er open.
+    History Retention Saved: Oppbevaringstida for historikken er lagra
+    Invalid History Retention Days: Skriv inn eit heilt tal dagar som er større enn null
+    Enable Watch Statistics: Slå på visingsstatistikk
+    Week Starts On: Veka byrjar på
+    Remember Search History: Hugs søkjehistorikken
+    Cache Video Metadata: Metadatahistorikk
+    Cache Video Metadata Tooltip: Tek vare på alle versjonar av støtta videometadata for videoar du opnar, mellom anna titlar, miniatyrbilete og skildringar. Dette er slått av som standard fordi lagring av metadatahistorikk bruker meir diskplass.
+    Watched Percentage Threshold: Grense for når videoar blir merkte som sette
+    Watched Percentage Threshold Tooltip: Videoar blir merkte som sette når dei har nådd den valde prosentdelen og det står att høgst 2 minutt. Ved 0 % blir dei merkte når avspelinga tek til. Ved 100 % blir dei merkte når avspelinga er ferdig.
+    Watched Progress Saving Mode:
+      Modes:
+        Auto: Automatisk
+        Semi-auto: Halvautomatisk
+        Never: Aldri
+      Tooltip: Automatisk = Lagrar annakvart sekund medan ein video blir spela, kvar gong du går ut av ei videoside, når videoen blir sett på pause eller sluttar, og når det oppstår ein feil (til dømes ved avgrensing av førespurnader eller når visingsøkta er utgått). Halvautomatisk = Som Automatisk, men lagrar ikkje annakvart sekund eller når du går ut av videosida. Du kan òg lagre framdrifta manuelt med knappen Lagre visingsframdrift under videospelaren.
+    Save Watched Videos With Last Viewed Playlist: Lagre sette videoar med den sist viste spelelista
+    Clear Search History and Cache: Tøm søkjehistorikken og mellomlageret
+    Clear Video Metadata Cache: Tøm mellomlageret for videometadata
+    Are you sure you want to clear the video metadata cache?: Er du sikker på at du vil tømme mellomlageret for videotitlar, miniatyrbilete og skildringar?
+    Failed to clear video metadata cache: Klarte ikkje å tømme mellomlageret for videometadata
+    Video metadata cache has been cleared: Mellomlageret for videometadata er tømt
+    Video Metadata Cache Size: 'Mellomlager for videometadata: {size}'
+    Are you sure you want to clear out your search history and cache?: Er du sikker på at du vil tømme søkjehistorikken og mellomlageret?
+    Search history and cache have been cleared: Søkjehistorikken og mellomlageret er tømde
+    Remove All Playlists: Fjern alle spelelister
+    All playlists have been removed: Alle spelelistene er fjerna
+    Are you sure you want to remove all your playlists?: Er du sikker på at du vil fjerne alle spelelistene dine?
+  Storage Settings:
+    Storage: Lagring
+    Downloaded Media: Nedlasta medium som blir spora
+    Storage Breakdown: Fordeling av lagringsplass
+    Shown Total: Vist totalt
+    Calculating: Reknar ut…
+    Not Available: Nøyaktig storleik er ikkje tilgjengeleg
+    At Least: Minst {size}
+    Failed To Read Storage: Nokre lagringsstorleikar kunne ikkje lesast
+    Downloaded Media Description: Video-, lyd- og undertekstfiler som nedlastingshistorikken framleis sporar.
+    Selected Download Folders: Nedlastingsmapper valde av brukaren
+    Download History Records: Oppføringar i nedlastingshistorikken
+    Download History Records Description: '{count} fullført nedlastingsoppføring. Denne oppføringa sporar status og filplasseringar, men inneheld ikkje det nedlasta mediet. | {count} fullførte nedlastingsoppføringar. Desse oppføringane sporar status og filplasseringar, men inneheld ikkje dei nedlasta media.'
+    Clear Download History Records: Tøm nedlastingshistorikken
+    Clear Download History Confirmation: Tømme alle oppføringar om fullførte nedlastingar?
+    Download Files Stay On Disk: Nedlasta filer blir verande på disken, men blir ikkje lenger viste på sida Nedlastingar.
+    Clear Records: Tøm oppføringar
+    Replaceable Caches: Mellomlager som kan byggjast opp att
+    Application Caches: Appmellomlager
+    Browser Caches: Nettlesarmellomlager
+    Browser Caches Hint: HTTP-, GPU-, kode-, shader-, service-worker- og ordbokmellomlagera til Chromium.
+    Stored App Data: Lagra appdata
+    Browser Runtime Data: Køyretidsdata for nettlesaren
+    Browser Runtime Data Hint: Økt- og lokallagring, informasjonskapslar, personvern- og nettverkstilstand og krasjfiler frå Chromium.
+    Subscription Feed Cache: Mellomlager for abonnement og straumar
+    Subscription Feed Cache Description: Lagrar henta abonnementsvideoar, Shorts, direktesendingar og innlegg. OpenTubeX byggjer det opp att ved neste oppdatering av straumen.
+    Clear Subscription Feed Cache: Tøm mellomlageret for abonnement og straumar
+    Clear Subscription Feed Cache Confirmation: Tømme mellomlageret for abonnement og straumar?
+    Subscription Feed Cache Effect: Abonnementsstraumane kan sjå tomme ut til dei blir oppdaterte. Abonnementa og profilane dine blir ikkje endra.
+    Session Search Cache: Søkjemellomlager for økta
+    In Memory: I minnet
+    Session Search Cache Description: '{count} søk er mellomlagra i minnet for raskare navigering tilbake. Dette mellomlageret blir forkasta når OpenTubeX blir lukka. | {count} søk er mellomlagra i minnet for raskare navigering tilbake. Dette mellomlageret blir forkasta når OpenTubeX blir lukka.'
+    Clear Session Search Cache: Tøm søkjemellomlageret for økta
+    Clear Session Search Cache Confirmation: Tømme søkjemellomlageret for økta?
+    Session Search Cache Effect: Mellomlagra resultatsider blir forkasta. Den lagra søkjehistorikken blir ikkje endra.
+    HTTP Cache: HTTP-mellomlager
+    HTTP Cache Description: Electron lagrar nettverkssvar på disken, slik at gjentekne førespurnader kan lastast utan å laste ned dei same dataa på nytt. OpenTubeX byggjer opp att mellomlageret ved behov.
+    Managed By Electron: Handsama av Electron
+    Clear HTTP Cache: Tøm HTTP-mellomlageret
+    Clear HTTP Cache Confirmation: Tømme HTTP-mellomlageret til Electron?
+    HTTP Cache Effect: Bilete og andre nettverksressursar kan bli lasta saktare éin gong medan mellomlageret blir bygd opp att.
+    Tab Image Cache: Faneminiatyrar og kanalavatarar
+    Tab Image Cache Description: Lagrar førehandsvisingsbilete og kanalavatarar for opne og gjenoppretta faner. OpenTubeX byggjer dei opp att når fanene blir brukte.
+    Clear Tab Image Cache: Tøm biletmellomlageret for faner
+    Clear Tab Image Cache Confirmation: Tømme faneminiatyrar og kanalavatarar?
+    Tab Image Cache Effect: Fanebileta kan forsvinne ei kort stund og blir oppretta på nytt når fanene blir brukte.
+    Playback Caches: Avspelingsmellomlager
+    Playback Caches Description: Lagrar straum-URL-ar frå yt-dlp mellom appøkter, i tillegg til spelarfiler frå YouTube. URL-mellomlageret gjeld berre straumar som er henta med yt-dlp.
+    Playback URL Cache Entry Size: Grense for straum-URL-ar frå yt-dlp i mellomlageret
+    Playback URL Cache Entry Size Tooltip: Vel den største storleiken for kvar mellomlagra straumoppføring frå yt-dlp. Vel 0 MB for å slå av varig mellomlagring av straumar frå yt-dlp.
+    Clear Playback Caches: Tøm avspelingsmellomlagera
+    Clear Playback Caches Confirmation: Tømme mellomlagera for yt-dlp og spelaren?
+    Playback Caches Effect: Den neste lokale avspelingsførespurnaden kan ta lengre tid medan straum- og spelardata blir henta på nytt.
+    Clear Cache: Tøm mellomlager
+    History Data: Lagra historikk
+    Video Metadata Description: Lagrar tidlegare titlar, miniatyrbilete og skildringar for støtta videoar. Gamle versjonar kan ikkje opprettast på nytt etter sletting.
+    Video Metadata Effect: Lagra metadataversjonar blir sletta for godt. Gjeldande videoopplysningar kan framleis hentast på nytt.
+    Watch History: Visingshistorikk og statistikk
+    Watch History Description: Visingshistorikken registrerer viste videoar og framdrift. Visingsstatistikken lagrar daglege visingstal. Oppbevaringstida gjeld berre visingshistorikken.
+    Clear Watch Statistics: Tøm visingsstatistikken
+    Watch History Effect: Oppføringar om viste videoar og lagra framdrift blir sletta. Visingsstatistikken blir verande.
+    Clear Watch Statistics Confirmation: Slette all visingsstatistikk?
+    Watch Statistics Effect: Daglege visingstal blir sletta. Visingshistorikken blir verande.
+    Search History: Søkjehistorikk
+    Search History Description: Lagrar søk du har valt å hugse.
+    Delete Search History: Slett søkjehistorikken
+    Delete Search History Confirmation: Slette heile den lagra søkjehistorikken?
+    Search History Effect: Lagra søkjeforslag frå tidlegare søk forsvinn. Mellomlageret for den gjeldande økta blir verande.
+    Other User Data: Andre brukardata
+    Other Profile Files: Andre profilfiler
+    Other Profile Files Hint: Tryggleikskopiar, mellombelse filer og profiloppføringar som OpenTubeX ikkje kjenner att enno.
+    Subscriptions And Profiles: Abonnement og profilar
+    Subscriptions And Profiles Description: Lagrar kanalar du abonnerer på, profilnamn og profilmedlemskap.
+    Subscriptions And Profiles Effect: Alle abonnement og ekstraprofilar blir sletta for godt. Mellomlagra straumdata blir òg tømde.
+    Playlists Description: Lagrar namn og skildringar på spelelister og lagra videoar.
+    Playlists Effect: Alle spelelister og listene deira over lagra videoar blir sletta for godt. Nedlasta mediefiler blir verande.
+    Settings And Sessions: Innstillingar, faneøkter og påminningar
+    Settings And Sessions Description: Lagrar appinnstillingar, faner som kan gjenopprettast, og påminningar om direktesendingar. Opna profilmappa for å sjå gjennom eller tryggleikskopiera desse filene. Denne sida slettar dei ikkje.
+    Cleanup Complete: Lagringsoppryddinga er fullført
+    Cleanup Failed: Lagringsoppryddinga mislykkast
+  Subscription Settings:
+    Fetch Feed on Startup: Hent straumen ved oppstart
+    Show New Content Feed: Vis straumen med nytt innhald
+    Show New Content Indicators: Vis merke for nytt innhald
+    Show Scheduled Live Streams / Premieres First: Vis planlagde direktesendingar og premièrar først
+    Auto Refresh Interval: Intervall for automatisk oppdatering
+    Videos Auto Refresh Interval: Intervall for automatisk oppdatering av videoar
+    Shorts Auto Refresh Interval: Intervall for automatisk oppdatering av kortvideoar
+    Live Auto Refresh Interval: Intervall for automatisk oppdatering av direktesendingar
+    Posts Auto Refresh Interval: Intervall for automatisk oppdatering av innlegg
+    Limit the number of videos displayed for each channel: Avgrens talet på videoar som blir viste for kvar kanal
+    To: til
+    Confirm Before Unsubscribing: Stadfest før du avsluttar abonnement
+  Distraction Free Settings:
+    Sections:
+      Side Bar: Sidestolpe
+      Subscriptions Page: Abonnementsside
+      Channel Page: Kanalside
+      Watch Page: Avspelingsside
+      General: Generelt
+      Visible While Paused: Synleg ved pause i fullt vindauge eller på fullskjerm
+    Hide Channel Avatars: Gøym kanalavatarar
+    Shorten View Counts: Forkort talet på visingar og likerklikk på kommentarar
+    Hide Comment Translation Buttons: Gøym omsetjingsknappar for kommentarar
+    Hide Home: Gøym heimesida
+    Hide Live Chat Replay: Gøym opptak av direktepraten
+    Hide Profile Pictures in Comments: Gøym profilbilete i kommentarar
+    Disable A-B Repeat: Slå av A-B-gjentaking
+    Hide End-Screen Annotations: Gøym merknader på sluttskjermen
+    Hide Paid Promotion Badge: Gøym merket for betalt marknadsføring
+    Hide Channels Disabled Message: Nokre kanalar vart blokkerte med ID og ikkje handsama. Funksjonen er blokkert medan desse ID-ane blir oppdaterte
+    Hide Channels Invalid: Den oppgjevne kanal-ID-en var ugyldig
+    Hide Channels API Error: Klarte ikkje å henta brukaren med den oppgjevne ID-en. Kontroller at ID-en er rett.
+    Hide Channels Already Exists: Kanal-ID-en finst frå før
+    Hide Featured Channels: Gøym framheva kanalar
+    Hide Channel Playlists: Gøym fana "Spelelister" på kanalen
+    Hide Channel Posts: Gøym fana "Innlegg" på kanalen
+    Hide Channel Home: Gøym fana "Heim" på kanalen
+    Hide Channel Shorts: Gøym fana "Kortvideoar" på kanalen
+    Hide Channel Podcasts: Gøym fana "Podkastar" på kanalen
+    Hide Channel Releases: Gøym fana "Utgjevingar" på kanalen
+    Hide Channel Courses: Gøym fana "Kurs" på kanalen
+    Hide Videos, Playlists and Channels Containing Text: Gøym videoar, spelelister og kanalar som inneheld tekst
+    Hide Videos, Playlists and Channels Containing Text Placeholder: Ord, del av ord eller frase
+    Hide Subscriptions Videos: Gøym videoar frå abonnement
+    Hide Subscriptions Shorts: Gøym kortvideoar frå abonnement
+    Hide Subscriptions Live: Gøym direktesendingar frå abonnement
+    Hide Subscriptions Posts: Gøym innlegg frå abonnement
+    Show Added Items: Vis element som er lagde til
+    Show Player Controls: Vis avspelarkontrollar
+    Show Video Title: Vis videotittel
+    Show Bottom Right Actions Dock: Vis handlingsfeltet nede til høgre
+    Paused Interface Hide Delay: Forseinking før grensesnittet blir gøymt ved pause
+  Data Settings:
+    Data And Storage: Data og lagring
+    Profile Directory: Profilmappe
+    Open Profile Directory: Opna profilmappa
+    Search history file: Fil med søkjehistorikk
+    Settings File: Innstillingsfil
+    Search history: Søkjehistorikk
+    Import search history: Importer søkjehistorikk
+    Export search history: Eksporter søkjehistorikk
+    Import Settings: Importer innstillingar
+    Export Settings: Eksporter innstillingar
+    Settings Tooltip: Innstillingar som er spesifikke for operativsystemet eller brukaren, eller som er eksperimentelle, kan ikkje eksporterast eller importerast (til dømes mellomtenar, ekstern avspelar og skjermbiletmappe ...)
+    Invalid JSON row, skipping item: Ugyldig JSON på rad {row}, hoppar over elementet
+    All search history has been successfully imported: Heile søkjehistorikken er importert
+    All search history has been successfully exported: Heile søkjehistorikken er eksportert
+    All settings have been successfully imported: Alle innstillingane er importerte
+    All settings have been successfully exported: Alle innstillingane er eksporterte
+    Setting object has insufficient data, skipping item: Innstillingsobjektet har ikkje nok data, hoppar over elementet
+    Unknown setting key: 'Ukjend innstillingsnøkkel: {key}'
+    Non-transferable setting key: 'Innstillingsnøkkelen kan ikkje overførast: {key}'
+    Import subscriptions formats: 'Støtta format: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-tryggleikskopi eller FreeTube-eksport (.json)'
+    Import history formats: 'Støtta format: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-tryggleikskopi (.json)'
+    Import playlists formats: 'Støtta format: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'Støtta format: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+  Sync Settings:
+    Sync Settings: Synkronisering
+    Enable Sync: Slå på synkronisering
+    Privacy Passphrase: Passfrase for personvern
+    Privacy Passphrase Hint: Bruk ei anna passfrase enn kontopassordet. Ho forlèt aldri denne eininga og må brukast på alle einingar. Dersom du mistar henne, kan ikkje dei krypterte synkroniseringsdataa gjenopprettast.
+    Privacy Policy: Personvernerklæring for denne tenaren
+    Enhanced Privacy Enabled: Styrkt personvern er slått på. Tenaren lagrar berre krypterte synkroniseringsdata.
+    Enhanced Privacy Unsupported: Åtvaring — denne tenaren støttar ikkje styrkt personvern. Den som driv tenaren, kan sjå dei synkroniserte dataa.
+    Description: Synkroniser abonnement, profilar, spelelister, sjåarhistorikk, innstillingar og opne faner med ein synkroniseringstenar for OpenTubeX eller LibreTube. LibreTube-tenarar støttar kanskje ikkje alle synkroniseringsfunksjonane.
+    Server URL: Tenaradresse
+    Checking Server: Kontrollerer synkroniseringstenaren …
+    Server Unavailable: Klarte ikkje å kopla til denne synkroniseringstenaren. Kontroller adressa og prøv på nytt.
+    Username: Brukarnamn
+    Log In: Logg inn
+    Register: Registrer deg
+    Pair Another Device: Para ei anna eining
+    Pair With Existing Device: Para med ei eksisterande eining
+    Device Name: Einingsnamn
+    This Device: Denne eininga
+    Device Name Required: Skriv inn eit namn på denne eininga.
+    Pairing Device Name Hint: Vel eit namn du kjenner att på eininga som skal godkjenna førespurnaden.
+    Create Pairing Code: Lag paringskode
+    Creating Pairing Code: Lagar ein sikker paringskode …
+    Pairing QR Alt: QR-paringskode for {device}
+    Scan Pairing Code: Opna "Para ei anna eining" på ei eining som alt er tilkopla, og skann denne koden.
+    Pairing Code: Paringskode
+    Use Text Pairing Code: Bruk tekstkode i staden
+    Show QR Code: Vis QR-kode
+    Text Pairing Code Hint: Kopier denne koden til den eksisterande eininga. Han inneheld paringsløyndomen, så fjern han frå utklippstavlehistoria etter paringa.
+    Pairing QR Warning: Vis denne koden berre til den tiltrudde eininga som alt er tilkopla og skal godkjenna førespurnaden. Koden går ut etter to minutt.
+    Pairing Expires: Paringskoden går ut kl. {time}.
+    Verifying Pairing: Kontrollerer den overførte personvernnøkkelen …
+    Completing Pairing: Fullfører paringa av eininga …
+    Compare Pairing Codes: Samanlikna paringskodar
+    Pairing Code Match Hint: Stadfest berre dersom denne koden er lik koden på den eksisterande eininga.
+    Pairing Codes Match: Kodane er like
+    Pairing Approval Code Hint: Hald dette vindauget ope, og samanlikn koden med den på den nye eininga. Den nye eininga må ikkje halda fram dersom kodane er ulike.
+    Pairing Scan Hint: Skann paringskoden som blir vist på eininga du legg til.
+    Enter Pairing Code: Skriv inn koden manuelt
+    Pairing Code Entry Hint: Lim inn paringskoden som blir vist på eininga du legg til.
+    Check Pairing Code: Kontroller koden
+    Scan QR Code: Skann QR-kode
+    Waiting For Pairing Code: Ventar på ein paringskode …
+    Checking Pairing Request: Kontrollerer paringsførespurnaden …
+    Approving Pairing Request: Krypterer og sender personvernnøkkelen …
+    Pairing Approval Warning: Godkjenn berre dersom du kan sjå denne førespurnaden på eininga du legg til. Paring gjev tilgang til kontoen og overfører personvernnøkkelen.
+    Approve Pairing: Godkjenn paringa
+    Try Again: Prøv på nytt
+    Scan Again: Skann på nytt
+    Camera Unavailable: OpenTubeX fekk ikkje tilgang til kameraet. Kontroller kameraløyvet, eller skriv inn paringskoden manuelt.
+    Pairing Unsupported: Denne synkroniseringstenaren støttar ikkje sikker paring av einingar.
+    Pairing Failed: Paringa av eininga mislykkast. Prøv på nytt med ein ny kode.
+    Pairing Request Changed: Paringsførespurnaden er endra, har gått ut eller er alt brukt. Lag ein ny kode.
+    Pairing Server Mismatch: Denne koden høyrer til ein annan synkroniseringstenar.
+    Pairing Verification Unavailable: Det finst inga kryptert synkroniseringssamling som kan kontrollera den overførte nøkkelen. Synkroniser den eksisterande eininga, og prøv på nytt.
+    Pairing Completed: Paringa av eininga er fullført
+    Pairing Approved: Paringa av eininga er godkjend
+    Disconnect: Kopla frå
+    Delete Account: Slett synkroniseringskontoen
+    Delete Account Confirmation: Vil du sletta synkroniseringskontoen?
+    Delete Account Warning: Dette slettar synkroniseringskontoen og alle data som er lagra på denne tenaren, for godt. Lokale OpenTubeX-data blir ikkje sletta.
+    Confirm Delete Account: Slett kontoen
+    Password Required: Passordet er påkravd
+    Account Deleted: Synkroniseringskontoen er sletta
+    Connected as: Tilkopla som {username}
+    Automatic Sync: Synkroniser automatisk etter endringar og kvart femte minutt
+    Profiles: Profilar
+    Open Tabs: Opne faner og den gjeldande økta
+    Disable Setting Sync: Stopp synkroniseringa av denne innstillinga
+    Enable Setting Sync: Synkroniser denne innstillinga
+    Sync Now: Synkroniser no
+    Downloading encrypted data: Lastar ned krypterte synkroniseringsdata …
+    Syncing subscriptions: Synkroniserer abonnement …
+    Syncing playlists: Synkroniserer spelelister …
+    Syncing history: Synkroniserer sjåarhistorikk …
+    Syncing profiles: Synkroniserer profilar …
+    Syncing open tabs: Synkroniserer opne faner og økta …
+    Syncing settings: Synkroniserer innstillingar …
+    Uploading encrypted data: Lastar opp krypterte synkroniseringsdata …
+    Finishing sync: Fullfører synkroniseringa …
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Sist synkronisert: {date}'
+    History not supported: Denne tenarversjonen støttar ikkje synkronisering av sjåarhistorikk.
+    Settings not supported: Denne tenarversjonen støttar ikkje synkronisering av innstillingar.
+    Sync completed: Synkroniseringa er fullført
+    Sync failed: "Synkronisering mislukkast: {error}"
+    Data Loss Confirmation: Vil du stadfesta synkronisering med sletting?
+    Data Loss Warning: Tilstanden på tenaren vil sletta {deleted} av {previous} tidlegare synkroniserte element i {collection}. Dette kan tyda på at ei tenarflytting eller nullstilling mislykkast. Hald berre fram dersom slettinga er tilsikta og du har ein tryggleikskopi.
+    Confirm Data Loss: Slett og hald fram
+  Proxy Settings:
+    Proxy Warning: OpenTubeX har ingen innebygd mellomtenar, men kan kopla til ein ekstern mellomtenar, til dømes Tor som køyrer på maskina di, eller ein SOCKS5-mellomtenar frå enkelte VPN-tenester. Dersom du slår på dette, må du kontrollera at mellomtenaren eller Tor er rett sett opp. Elles kan ikkje OpenTubeX henta data.
+    Proxy Username: Brukarnamn for mellomtenar
+    Proxy Password: Passord for mellomtenar
+    IP Block Recovery Script Path: Sti til skript for gjenoppretting etter IP-blokkering
+    Select IP Block Recovery Script File: Vel skriptfil for gjenoppretting etter IP-blokkering
+    Running IP block recovery script: Køyrer skriptet for gjenoppretting etter IP-blokkering
+    IP block recovery script failed: 'Skriptet for gjenoppretting etter IP-blokkering mislykkast (avsluttingskode: {exitCode})'
+    IP block recovery script finished: Skriptet for gjenoppretting etter IP-blokkering er ferdig
+    Reloading video after IP block recovery: Lastar videoen på nytt etter gjenoppretting frå IP-blokkering
+    Failed to select IP block recovery script: Klarte ikkje å velja skriptet for gjenoppretting etter IP-blokkering
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: Slå på innsending til SponsorBlock
+    SponsorBlock Private User ID (optional): Privat SponsorBlock-brukar-ID (valfritt)
+    SponsorBlock Private User ID Tooltip: Lim inn den private SponsorBlock-brukar-ID-en frå nettlesarutvidinga. La feltet stå tomt for å bruka ein ID som appen har laga.
+    Generated SponsorBlock User ID: SponsorBlock-brukar-ID laga av appen
+    Generated SponsorBlock User ID Tooltip: Denne SponsorBlock-brukar-ID-en er laga av appen og kan brukast i nettlesarutvidinga eller når du brukar appen på ei anna datamaskin.
+    Export Generated User ID: Eksporter den genererte brukar-ID-en
+    Generated SponsorBlock User ID Copy Button: Kopier den genererte SponsorBlock-brukar-ID-en
+    Generated SponsorBlock User ID Copied: Den genererte SponsorBlock-brukar-ID-en er kopiert til utklippstavla
+    Skip notification timeout: Tidsgrense for hoppvarsel
+    UseDeArrowTitles: Bruk videotitlar frå DeArrow
+    UseDeArrowThumbnails: Bruk DeArrow for miniatyrbilete
+    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): API-adresse til miniatyrbiletgeneratoren i DeArrow (standard er https://dearrow-thumb.ajay.app)
+    Custom Color: Tilpassa farge
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Slå på Return YouTube Dislike
+    Return YouTube Dislike Url: API-adresse til Return YouTube Dislike (standard er https://ryd-proxy.kavin.rocks)
+  Parental Control Settings:
+    Hide Uploader on Watch page: Gøym opplastaren på avspelingssida
+    Disable Channel Links: Slå av kanallenkjer
+  Password Dialog:
+    Incorrect Password: Feil passord
+    Unlock: Lås opp
+    Unlocking: Låser opp …
+  Search Settings: Innstillingar for søk
+  No Settings Found: Fann ingen innstillingar
+Tutorial:
+  Skip: Hopp over
+  Next: Neste
+  Finish: Fullfør
+  Got It: Skjønar
+  Welcome:
+    Title: Velkomen til OpenTubeX
+    Description: Her er nokre få kontrollar som hjelper deg i gang.
+  Navigation:
+    Title: Biblioteket er alltid i nærleiken
+    Description: Bruk navigeringa for å opna abonnement, spelelister, historikk og meir.
+  Search:
+    Title: Søk eller lim inn ei lenkje
+    Description: Finn videoar og kanalar, eller lim inn ei støtta videoadresse direkte i søkjefeltet.
+  Tabs:
+    Title: Hald sider opne i faner
+    Description: Opna fleire sider samstundes utan å mista plassen din. Vel kvar fanene passar best i oppsettet.
+  Quick Settings:
+    Title: Gjer OpenTubeX til din eigen
+    Description: Vel eit tema og standard videokvalitet. Du kan når som helst endra desse og andre innstillingar i profilmenyen, eller høgreklikka på han for å byta profil.
+  Import Data:
+    Title: Ta med deg dataa dine
+    Description: Du kan importera abonnement, historikk, spelelister, søkjehistorikk eller innstillingar frå ein annan støtta app eller ei tryggleikskopi.
+    Action: Importer data
+    Not Now: Ikkje no
+  Settings Moved:
+    Title: Innstillingane er flytta
+    Description: Vel profilen din øvst til høgre for å sjå hurtigkontrollane. Høgreklikk på han for å gå rett til profilvalet. Tannhjulet i menyen opnar alle innstillingane. Om og Nedlastingar er òg flytta til denne menyen.
+About:
+  Commit: Git-innsending
+  Licensed under the {licenseLink}: Lisensiert under {licenseLink}
+  AGPLv3: AGPLv3
+  Discussions: Diskusjonar
+  Fluxer: Bli med i Fluxer-fellesskapet vårt
+  Matrix: Matrix
+  Email: E-post
+  Please read the {roomRulesLink}: Les {roomRulesLink}
+  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX er gjort mogleg av {creditsPageLink}
+Profile:
+  Toggle Profile List: Vis eller gøym profillista
+  Edit Profile Name: Rediger profilnamnet
+  Create Profile Name: Lag profilnamn
+  Profile Name: Profilnamn
+  Profile Icon: Profilikon
+  Choose an Emoji: Vel ein emoji
+  Custom Emoji: Tilpassa emoji
+  Emoji: Emoji
+  Choose Image: Vel bilete
+  Crop Image: Skjer til biletet
+  Zoom: Forstørring
+  Apply Crop: Bruk utsnittet
+  Transparent: Gjennomsiktig
+  Use Initial: Bruk forbokstav
+  The selected image could not be loaded: Klarte ikkje å lasta det valde biletet
+  Theme Color: Temafarge
+  Close Profile Dropdown: Lukk profilmenyen
+  Open Profile Dropdown: Opna profilmenyen
+Channel:
+  Channel Name Unavailable: Kanalnamnet er ikkje tilgjengeleg
+  Search Result Types: Typar søkjeresultat
+  All Results: Alle
+  This channel does not exist: Denne kanalen finst ikkje
+  This channel does not allow searching: Denne kanalen tillèt ikkje søk
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Denne kanalen har aldersgrense og kan førebels ikkje visast i OpenTubeX.
+  Channel Tabs: Kanalfaner
+  View All: Vis alle
+  Shorts:
+    This channel does not currently have any shorts: Denne kanalen har ingen kortvideoar enno
+  Live:
+    Live: Direkte
+    This channel does not currently have any live streams: Denne kanalen har ingen direktesendingar enno
+  Home:
+    Home: Heim
+    View Playlist: Vis spelelista
+  Podcasts:
+    Podcasts: Podkastar
+    This channel does not currently have any podcasts: Denne kanalen har ingen podkastar enno
+  Releases:
+    Releases: Utgjevingar
+    This channel does not currently have any releases: Denne kanalen har ingen utgjevingar enno
+  Courses:
+    Courses: Kurs
+    This channel does not currently have any courses: Denne kanalen har ingen kurs enno
+  About:
+    Tags:
+      Tags: Kanalmerkelappar
+      Search for: Søk etter "{tag}"
+    Details: Detaljar
+    Joined: Vart med
+    Location: Stad
+  Posts:
+    This channel currently does not have any posts: Denne kanalen har ingen innlegg enno
+    votes: 1 røyst | {votes} røyster
+    View Full Post: Vis heile innlegget
+    Reveal Answers: Vis svara
+    Hide Answers: Gøym svar
+    Video hidden by OpenTubeX: Videoen er gøymd av OpenTubeX
+Video:
+  Includes paid promotion: Inneheld betalt marknadsføring
+  Age Restricted Badge: Aldersgrense
+  Queue: Kø
+  Play Next: Spel av som neste
+  Add to Queue: Legg til i køen
+  Added to Play Next: Videoen blir spela av som neste
+  Added to Queue: Videoen er lagd til i køen
+  Clear Queue: Tøm køen
+  Queue Video Count: '{count} video | {count} videoar'
+  Remove from Queue: Fjern {title} frå køen
+  Drag to Reorder Queue: Dra {title} for å endre rekkjefølgja i køen
+  Reorder Queue Item: Flytt {title}
+  Reorder Queue Item Instructions: Bruk pil opp og pil ned for å flytte denne videoen i køen.
+  Queue Item Moved: Flytta {title} til plass {position} av {total}.
+  Queue Item Cannot Move Up: Kan ikkje flytte {title} opp. Videoen er allereie på plass 1 av {total}.
+  Queue Item Cannot Move Down: Kan ikkje flytte {title} ned. Videoen er allereie på plass {total} av {total}.
+  Metadata: Videoinformasjon
+  Close Metadata: Lukk videoinformasjonen
+  Metadata Cache:
+    Title History: Tittelhistorikk
+    Thumbnail History: Miniatyrbilethistorikk
+    Description History: Skildringshistorikk
+    Previous Version: Tidlegare {number}
+    Empty: (tom)
+  Fetching Streams: Hentar straumar med yt-dlp…
+  Transcript:
+    Title: Transkripsjon
+    Search: Søk i transkripsjonen
+    Language: Språk i transkripsjonen
+    Save: Lagre
+    Show: Vis transkripsjonen
+    Hide: Gøym transkripsjonen
+    Close: Lukk transkripsjonen
+    Copied: Transkripsjonen er kopiert til utklippstavla
+    Saved: Transkripsjonen er lagra
+    Save Error: Klarte ikkje å lagre transkripsjonen
+    Text File: Tekstfil
+    Unavailable: Denne videoen har inga transkripsjon.
+    Load Error: Klarte ikkje å laste inn transkripsjonen.
+    Empty: Denne transkripsjonen inneheld ingen tekst.
+    No Results: Ingen delar av transkripsjonen samsvarar med søket.
+  IP block: YouTube har blokkert IP-adressa di frå å sjå videoar. Prøv å byte til ein annan VPN eller mellomtenar.
+  Retry With Built-in Extraction: Prøv igjen med innebygd uthenting
+  Retry With yt-dlp Extraction: Prøv igjen med uthenting via yt-dlp
+  Reloading video after streaming URL error: Lastar inn videoen på nytt etter ein feil med straumadressa
+  MembersOnly: Denne videoen er berre for medlemer og krev ein Google-konto med aktivt medlemskap i kanalen.
+  AgeRestricted: Denne aldersavgrensa videoen krev ein aldersstadfesta Google-konto.
+  Configure Restricted Playback Cookies Hint: Set opp infokapslar under Innstillingar → Ekstern programvare → Infokapslar for avspeling med yt-dlp.
+  Try With Configured Cookies: Prøv med dei oppsette infokapslane
+  Restricted Playback Authentication Failed Template: 'yt-dlp fekk ikkje tilgang til videoen med dei oppsette infokapslane: {error}'
+  DRMProtected: DRM-verna videoar kan ikkje spelast av i OpenTubeX fordi dei krev proprietære komponentar med lukka kjeldekode. Sjå videoen på den offisielle YouTube-nettstaden i ein nettlesar med DRM-støtte.
+  Private: Private videoar kan ikkje sjåast i OpenTubeX fordi dei krev Google-innlogging og at du eig videoen.
+  Collapse Playlist: Slå saman spelelista
+  Expand Playlist: Utvid spelelista
+  More Options: Fleire val
+  Unmark As Watched: Merk som ikkje sett
+  Video has been unmarked as watched: Videoen er merkt som ikkje sett
+  Save Watched Progress: Lagre kor langt du har sett
+  Watched Progress Saved: Framdrifta er lagra
+  Save Channel Playback Speed: Lagre avspelingsfart for kanalen
+  Channel Playback Speed Saved: Avspelingsfarta for kanalen er lagra
+  Save Channel Video Quality: Lagre videokvalitet for kanalen
+  Channel Video Quality Saved: Videokvaliteten for kanalen er lagra
+  Save Channel Subtitles State: Lagre tekstingsstatus for kanalen
+  Channel Subtitles State Saved: Tekstingsstatusen for kanalen er lagra
+  Save Channel Volume: Lagre lydstyrke for kanalen
+  Channel Volume Saved: Lydstyrken for kanalen er lagra
+  Save Channel Setting: Lagrar kanalinnstillinga…
+  Channel Setting Already Set: '{setting} er allereie sett til {value}'
+  Video has been saved to {playlistName}: Videoen er lagra i {playlistName}
+  Video has been removed from {playlistName}: Videoen er fjerna frå {playlistName}
+  There was a problem saving the video to {playlistName}: Klarte ikkje å lagre videoen i {playlistName}
+  There was a problem removing the video from {playlistName}: Klarte ikkje å fjerne videoen frå {playlistName}
+  Failed to load collaborators: Klarte ikkje å laste inn samarbeidspartnarar
+  Hide Channel: Gøym kanalen
+  Unhide Channel: Vis kanalen
+  Notify me: Varsle meg
+  Notification on: Varsling er på
+  Notification enabled: Du får eit varsel når denne videoen startar
+  Notification cancelled: Startvarselet er avbrote
+  Notification unavailable: Systemvarslingar er ikkje tilgjengelege
+  Scheduled video starting: Den planlagde videoen startar
+  Live notification body: '{videoTitle} startar no'
+  Premiere: Premiere
+  Unlisted: Ikkje oppført
+  AI: KI
+  AI-generated content: KI-generert innhald
+  Collaborators: Samarbeidspartnarar
+  Live Chat Replay: Opptak av direkteprat
+  Show Live Chat: Vis direktepraten
+  Show Live Chat Replay: Vis opptaket av direktepraten
+  Close Live Chat: Lukk direktepraten
+  Close Live Chat Replay: Lukk opptaket av direktepraten
+  Live Chat Settings: Innstillingar for direkteprat
+  Show Live Chat Timestamps: Vis tidsstempel
+  Chat Filter: Pratfilter
+  Top Chat: Utvalde meldingar
+  All Messages: Alle meldingar
+  Popout Live Chat: Opne praten i eige vindauge
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Opptak av direktepraten er slått på.  Meldingane blir viste her medan videoen blir spela av.
+  Live Chat is unavailable for this stream. It may have been disabled by the uploader.: Direktepraten er ikkje tilgjengeleg for denne straumen. Opplastaren kan ha slått han av.
+  Premiere started: Premieren er i gang. Starta {timeAgo}
+  DeArrow:
+    Show Original Details: Vis opphavlege detaljar
+    Show Modified Details: Vis endra detaljar
+  Sponsor Block category:
+    hook: Innleiing/helsingar
+  Sponsor Block category short:
+    filler: Avsporingar
+  Player:
+    Voice-over Translation:
+      Start: Omset
+      Cancel: Avbryt
+      Progress: Gjer klar taleomsetjinga…
+      Retry: Prøv igjen
+      Error: Taleomsetjinga mislukkast. Prøv igjen seinare.
+      Duration Error: Taleomsetjing er berre tilgjengeleg for videoar som varer i opptil fire timar.
+    Caption Appearance:
+      Options: Val
+      Sample: Slik ser tekstinga ut
+    Auto-translate: Omset automatisk
+    Sleep Timer:
+      Sleep Timer: Innsovningstidtakar
+      'Off': 'Av'
+      Minutes: '{minutes} minutt'
+      End of video: Når videoen er slutt
+      Remaining: '{time} står att'
+      Cancel timer: Avbryt tidtakaren
+      Timer ended: Innsovningstidtakaren er ferdig
+    A-B Repeat:
+      A-B Repeat: A-B-gjentaking
+      On: På
+      Off: Av
+      Point A: Punkt A
+      Point B: Punkt B
+      Set Repeat Start: Set start for gjentaking
+      Set Repeat End: Set slutt for gjentaking
+      Pause Repeat: Set A-B-gjentaking på pause
+      Resume Repeat: Ta opp att A-B-gjentaking
+      Adjust Point: Juster punkt {point}, no {timestamp}
+      Clear Range: Fjern området for A-B-gjentaking
+      End Before Start: Punkt B må vere etter punkt A.
+      Outside Duration: Tidsstempelet må vere innanfor videoen.
+      Cleared: A-B-gjentakinga er fjerna
+    Zoom:
+      Zoom: Forstørring
+      'Off': 'Av'
+    TranslatedCaptionTemplate: '{language} (omsett frå "{originalLanguage}")'
+    Auto-generated Caption Template: '{language} (automatisk generert)'
+    Audio Tracks: Lydspor
+    Autoplay is off: Automatisk avspeling er av
+    Autoplay is on: Automatisk avspeling er på
+    Up next in {seconds}: Neste om {seconds}
+    Resize dock: Endre storleiken på panelet
+    Play now: Spel av no
+    MusicPlaybackRateOverride: Oppdaga musikkvideo, spelar av i 1x fart
+    Normal: Normal
+    Set Default: Bruk som standard
+    Theatre Mode: Kinomodus
+    Exit Theatre Mode: Avslutt kinomodus
+    Full Window: Fullvindaugemodus
+    Exit Full Window: Avslutt fullvindaugemodus
+    Take Screenshot: Ta skjermbilete
+    Show Stats: Vis statistikk
+    Hide Stats: Gøym statistikk
+    Hide Annotations: Gøym merknader
+    Show Annotations: Vis merknader
+    Hide: Gøym
+    Show: Vis
+    Stats:
+      Stats: Statistikk
+      Video ID: 'Video-ID: {videoId}'
+      Media Formats: 'Medieformat: {formats}'
+      Resolution: 'Oppløysing: {width}x{height}{''@''}{frameRate}'
+      Player Dimensions: 'Spelarstorleik: {width}x{height}'
+      Bitrate: 'Bithastigheit: {bitrate} kbps'
+      Volume: 'Lydstyrke: {volumePercentage}%'
+      Bandwidth: 'Bandbreidd: {bandwidth} kbps'
+      Buffered: 'Mellomlagra: {bufferedPercentage}%'
+      Dropped Frames / Total Frames: 'Tapte bilete: {droppedFrames} / Bilete totalt: {totalFrames}'
+      CodecAudio: 'Kodek: {audioCodec} ({audioItag})'
+      CodecsVideoAudio: 'Kodekar: {videoCodec} ({videoItag}) / {audioCodec} ({audioItag})'
+      CodecsVideoAudioNoItags: 'Kodekar: {videoCodec} / {audioCodec}'
+    You appear to be offline: Det ser ut til at du er fråkopla.
+    Playback will resume automatically when your connection comes back: Avspelinga held automatisk fram når sambandet er tilbake.
+    Scroll Mini Player:
+      Back to Top: Til toppen
+      Return to Video Tab: Tilbake til videofana
+      Hide: Gøym minispelaren
+      Play: Spel av
+      Pause: Pause
+      Drag Handle: Flytt minispelaren
+    Skipped segment: 'Hoppa over {segmentCategory}'
+    SponsorBlock:
+      CancelCurrentSegment: Avbryt opprettinga av segmentet
+      ClearSegments: Fjern segmenta
+      ClearSegmentsPrompt: Er du sikker på at du vil fjerne alle SponsorBlock-segmentutkasta for denne videoen?
+      CompleteSegmentsBeforeSubmitting: Fullfør alle segmentutkasta før du sender dei inn.
+      CategoryLabel: Kategori
+      ActionTypeLabel: Segmenttype
+      DuplicateSegments: Segmentutkasta kan ikkje vere identiske.
+      EndAction: (Slutt)
+      EndActionLabel: Slutt
+      EndTimeAfterStart: Sluttida for segmentet må vere etter starttida.
+      EndTimeBeforeVideoEnd: Sluttida for segmentet må vere innanfor lengda på videoen.
+      EndTimeLabel: Sluttid for segmentet
+      DisableAutoSkipTemporarily: Stopp SponsorBlock frå å hoppe over segment mellombels
+      EnableAutoSkipTemporarily: La SponsorBlock hoppe over segment automatisk igjen
+      Guidelines: Retningslinjer
+      InspectSegment: Sjå nærare på
+      InvalidStartTime: Skriv inn ei gyldig starttid for segmentet.
+      NoSegmentsToSubmit: Opprett minst eitt fullført segment før du sender inn.
+      NowAction: (No)
+      CloseInfoPanel: Lukk SponsorBlock-informasjonen
+      OpenInfoPanel: Opne SponsorBlock-informasjonen
+      OpenSubmissionMenu: Opne innsendingsmenyen
+      PreviewRequired: Førehandsvis alle segmenta før du sender dei inn.
+      PreviewSegment: Førehandsvis
+      SaveSegment: Lagre
+      SetSegmentEndNow: Avslutt segmentet no
+      StartAction: (Start)
+      StartSegmentNow: Start segmentet no
+      SubmissionBadRequest: SponsorBlock avviste førespurnaden om innsending.
+      SubmissionDuplicate: Dette er allereie sendt inn.
+      SubmissionFailed: Klarte ikkje å sende inn SponsorBlock-segmenta.
+      SubmissionForbidden: SponsorBlock avviste innsendinga.
+      SubmissionRateLimited: SponsorBlock har avgrensa kor ofte du kan sende inn.
+      SubmissionSuccess: SponsorBlock-segmenta er sende inn.
+      SubmitSegment: Send inn segmentet
+      SubmitSegments: Send inn
+      StartTimeLabel: Starttid for segmentet
+      TimeDivider: til
+      SkipPrompt: Vil du hoppe over {segmentCategory}?
+      SkipPromptAction: Hopp over
+      SkipToHighlight: Vil du hoppe til høgdepunktet?
+      SkippedToHighlight: Hoppa til høgdepunktet
+      SkipToastUnskip: Angre
+      SkipToastReskip: Hopp over igjen
+      MutedSegment: 'Dempa {segmentCategory}'
+      MuteToastUnmute: Slå på lyden
+      InfoPanelLoading: Lastar framleis inn segment…
+      InfoPanelHasSegments: Denne videoen har segment i databasen!
+      InfoPanelNoSegments: Fann ingen segment
+      RefreshSegments: Oppdater segmenta
+      RefreshInfo: Oppdater SponsorBlock-informasjonen
+      ContributionStatsTitle: Bidraga dine
+      ContributionStatsLoading: Lastar inn bidragsstatistikk…
+      ContributionStatsError: Bidragsstatistikken er ikkje tilgjengeleg. Prøv å oppdatere.
+      ContributionStatsNoUserId: Send inn eit segment eller importer SponsorBlock-brukar-ID-en din for å sjå bidragsstatistikk.
+      Submissions: Innsendingar
+      Segments: Segment
+      TimeSaved: Spart tid
+      AutoSkipEnabled: Hopp automatisk over segment
+      AutoSkipOn: 'På'
+      AutoSkipOff: 'Av'
+      WhitelistChannel: Legg kanalen til i tillatlista
+      ChannelWhitelisted: I tillatlista
+      RemoveChannelFromWhitelist: Fjern kanalen frå tillatlista
+      MuteSegment: Demp segmentet
+      SkipSegment: Hopp over segmentet
+      CloseSegmentActions: Lukk segmenthandlingane
+      FullVideo: Heile videoen
+      FullVideoLabel: '{segmentCategory} · Heile videoen'
+      MuteActionType: Demp
+      MutePrompt: Vil du dempe {segmentCategory}?
+      SkipActionType: Hopp over
+      LockedSegment: Låst segment
+      UpvoteSegment: Røyst opp
+      DownvoteSegment: Røyst ned
+      VoteFailed: Klarte ikkje å sende inn røysta til SponsorBlock.
+  Watch:
+    'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Attverande tid for førehandsannonsen: {remindingTimeSeconds}s'
+    'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Attverande ventetid for SABR: {remindingTimeSeconds}s'
+Playlist:
+  Close Playlist: Lukk spelelista
+  Sort By:
+    DateAddedNewest: Dato lagd til (nyaste)
+    DateAddedOldest: Dato lagd til (eldste)
+    PublishedNewest: Publiseringsdato (nyaste)
+    PublishedOldest: Publiseringsdato (eldste)
+    AuthorAscending: Opphavsperson (A–Å)
+    AuthorDescending: Opphavsperson (Å–A)
+    VideoTitleAscending: Tittel (A–Å)
+    VideoTitleDescending: Tittel (Å–A)
+    VideoDurationAscending: Lengd (kortaste)
+    VideoDurationDescending: Lengd (lengste)
+    Custom: Eigendefinert
+Change Format:
+  Local Video File: Lokal videofil
+  Local Audio File: Lokal lydfil
+  Online Video: Nettvideo
+  Legacy formats are not available for this video: Eldre format er ikkje tilgjengelege for denne videoen
+  Stream Source: Straumkjelde
+  Stream Extraction Method: Metode for straumuthenting
+  Playback Engine: Avspelingsmotor
+  Streaming Protocol: Straumprotokoll
+  Not Available For This Video: Ikkje tilgjengeleg for denne videoen
+  Protocols:
+    Progressive: Progressiv
+  Descriptions:
+    Local File: Blir spela av direkte frå den nedlasta fila på denne eininga
+    Online Video: Lastar inn straumformat frå den oppsette nettkjelda
+    Dash: Tilpassa kvalitet, fleire lydspor og dei høgaste oppløysingane
+    Legacy: Éi fil med video og lyd, avgrensa til lågare oppløysingar
+    Audio: Berre lyd, nyttig for å spare bandbreidd eller lytte i bakgrunnen
+  yt-dlp Fallback Template: 'yt-dlp kunne ikkje levere straumane, så den innebygde motoren blir brukt i staden: {error}'
+  yt-dlp Default Clients Fallback: Dei føretrekte yt-dlp-klientane kunne ikkje levere spelbare straumar. Prøver standardklientane til yt-dlp i staden
+  Built-in Fallback Template: 'Den innebygde motoren kunne ikkje spele av straumen. Prøver yt-dlp i staden: {error}'
+Share:
+  Share Post: Del innlegget
+  Timestamp Link Copied: Lenkja med tidsstempel er kopiert til utklippstavla
+Context Menu:
+  Context Menu: Samanhengsmeny
+  Select All: Vel alt
+  Save Image As…: Lagre biletet som…
+  Copy Image: Kopier bilete
+  Copy Image Address: Kopier biletadressa
+  Cancel Refresh: Avbryt oppdateringa
+  Reload Videos: Last inn videoar på nytt
+  Reload Shorts: Last inn Shorts på nytt
+  Reload Live: Last inn direktesendingar på nytt
+  Reload Posts: Last inn innlegg på nytt
+  Reload All Feeds: Last inn alle straumane på nytt
+  Close Multiple Tabs: Lukk {count} faner
+  Duplicate Tab: Dupliser fana
+  Duplicate Multiple Tabs: Dupliser {count} faner
+  Move Tab: Flytt fana
+  Move Tabs: Flytt fanene
+  Move Tab to Group: Flytt fana til ei gruppe
+  Collapse Group: Fald saman gruppa
+  Move Tabs to Group: Flytt fanene til ei gruppe
+  Manage Tab Groups…: Handsam fanegrupper…
+  To Beginning: Til byrjinga
+  To End: Til slutten
+  Close Tabs: Lukk fanene
+  To the Top: Øvst
+  To the Left: Til venstre
+  To the Bottom: Nedst
+  To the Right: Til høgre
+  Other Tabs: Andre faner
+  Copy YouTube Link: Kopier YouTube-lenkja
+  Copy YouTube Links: Kopier YouTube-lenkjene
+  Pin Tab: Fest fana
+  Pin Tabs: Fest fanene
+  Unpin Tab: Løys fana
+  Unpin Tabs: Løys fanene
+  Tab Color: Fanefarge
+  Default: Standard
+  Purple: Lilla
+  Reopen Closed Tab: Opna den lukka fana på nytt
+  Reload Tab: Last inn fana på nytt
+  Reload Tabs: Last inn fanene på nytt
+  Load Tab: Last inn fana
+  Load Tabs: Last inn fanene
+  Unload Tab: Last ut fana
+  Unload Tabs: Last ut fanene
+  Move Tab to Window: Flytt fana til eit vindauge
+  Move Tabs to Window: Flytt fanene til eit vindauge
+  Open in a New Tab: Opna i ei ny fane
+  Open in a New Window: Opna i eit nytt vindauge
+  Copy Link: Kopier lenkja
+  Copy Invidious Link: Kopier Invidious-lenkja
+  Search Selection in New Tab: Søk etter "{selection}" i ei ny fane
+  Search Selection in New Window: Søk etter "{selection}" i eit nytt vindauge
+  Search With: Søk med {engine}
+  Search With Multiple: Søk med …
+  Selection Too Long: Utvalet er for langt til å søkje etter (> {count} teikn)
+Tab Organizer:
+  Title: Organiser faner
+  Open Tab Count: '{count} open fane | {count} opne faner'
+  Search Label: Søk i faner
+  Selected Count: '{count} fane vald | {count} faner valde'
+  Tab Count: '{count} fane | {count} faner'
+  Select All: Vel alle
+  Select None: Vel ingen
+  Move To Group: Flytt valde faner til ei gruppe
+  Choose Group: Vel ei gruppe
+  Ungrouped: Utan gruppe
+  Pin: Fest
+  Unpin: Løys
+  Load: Last inn
+  Unload: Last ut
+  Unload All: Last ut alle
+  Close All: Lukk alle
+  Ungroup: Løys opp gruppa
+  Group Name: Gruppenamn
+  Color: Farge
+  No Color: Ingen farge
+  Create Group: Opprett gruppe
+  Expand Group: Utvid gruppa
+  Collapse Group: Fald saman gruppa
+  Expand Group Label: Utvid {name}, {count} fane | Utvid {name}, {count} faner
+  Rename Group: Gje {name} nytt namn
+  Change Group Color: Endra fargen på {name}
+  Move To Window: Flytt til vindauge
+  Choose Window: Vel eit vindauge
+  Select Tab: Vel {title}
+  Active: Aktiv
+  Pinned: Festa
+  Unloaded: Utlasta
+  Playing: Spelar
+  Close Tab: Lukk {title}
+  No Open Results: Ingen opne faner samsvarar med søket.
+  Recently Closed: Nyleg lukka
+  Clear: Tøm
+  No Closed Results: Ingen nyleg lukka faner samsvarar med søket.
+  Drag Tab: Dra fana for å flytte henne til ei gruppe
+Chapters:
+  Key Moments: Viktige augeblikk
+  Open Chapters: Opna kapittel
+  Close Chapters: Lukk kapittel
+  Copy Timestamp Link: Kopier lenkja ved {timestamp}
+Comments:
+  Comment Count: 1 kommentar | {count} kommentarar
+  Show Comments: Vis kommentarar
+  Getting comment replies, please wait: Hentar svar på kommentarar, vent litt
+  Reload Comments: Last inn kommentarar på nytt
+  Reply Count: 1 svar | {replyCount} svar
+  Hide {replyCount} replies: Gøym 1 svar | Gøym {replyCount} svar
+  View 1 reply from {channelName}: Vis 1 svar frå {channelName}
+  View {replyCount} replies from {channelName} and others: Vis {replyCount} svar frå {channelName} og andre
+  There are no comments available for this post: Det finst ingen kommentarar til dette innlegget
+  Comments are turned off: Kommentarar er slått av
+  YouTube did not provide advertised replies: YouTube viste at denne kommentaren har svar, men gjorde dei ikkje tilgjengelege. Dei kan vere sletta eller gøymde, så svarknappen vart fjerna.
+  Pinned by you: Festa av deg
+  A reply is pinned: Eit svar er festa
+  Filter loaded comments: Filtrer innlastne kommentarar
+  Comment filters: Kommentarfilter
+  From creator: Frå skaparen
+  Contains timestamps: Inneheld tidsstempel
+  Pin comment by author: Fest kommentaren frå {author}
+  Unpin comment by author: Løys kommentaren frå {author}
+  Subscribed: Abonnert
+  Edited: (redigert)
+  Highlighted comment: Framheva kommentar
+  Highlighted reply: Framheva svar
+  Search loaded comments: Søk i innlastne kommentarar
+  Loaded comment search result count: 1 av {total} innlastne kommentarar | {count} av {total} innlastne kommentarar
+  No loaded comments match your filters: Ingen innlastne kommentarar samsvarar med filtera
+  YouTube comment link copied to clipboard: YouTube-lenkja til kommentaren er kopiert til utklippstavla
+  Translate to {language}: Omset til {language}
+  Show original: Vis originalen
+  Translating comment, please wait: Omset kommentaren, vent litt
+  Comment translation failed: Klarte ikkje å omsetje kommentaren
+Description:
+  Expand Description: ...meir
+  Collapse Description: Vis mindre
+  Copy Description: Kopier skildringa
+  Description Copied: Skildringa er kopiert til utklippstavla
+  Video Category: 'Videokategori:'
+  Video Tags: Videoemneord
+  Games: Spel
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: Fyll ut det som manglar i menneskelagde omsetjingar med KI-generert tekst. Menneskelagde omsetjingar vert alltid brukte fyrst.
+    Update Relative Timestamps: Oppdaterer relative tidsstempel i heile appen medan ei side er open. Når dette er slått av, vert dei berre oppdaterte når sida vert lasta inn på nytt eller opna att.
+    Stream Extraction Method: |
+      Vel korleis OpenTubeX hentar videostraumar. yt-dlp må vere tilgjengeleg når det er valt.
+      Videoar kan bruke lengre tid på å starte med yt-dlp.
+      Den innebygde metoden støttar ikkje spoling i direktesendingar og premierar.
+    Avoid translation: |
+      Slå av den automatiske YouTube-omsetjinga av tittel, skildring og kapittel i ein video.
+      For mange førespurnader, til dømes ved henting av videotitlar frå fleire lister, kan mellombels
+      gjere appen mindre påliteleg.
+    Show Thumbnail Previews: Vis animerte førehandsvisingar når peikaren er over videominiatyrar.
+    Startup Behavior: |
+      Vel kva OpenTubeX skal gjere ved oppstart.
+      Last inn alle fanene gjenopprettar alle lagra faner med ein gong, men videoar vert ikkje spela av automatisk i bakgrunnsfaner.
+      Last inn tidlegare innlastne faner lastar inn att fanene som var innlastne då OpenTubeX vart lukka, og lèt dei andre vere utlasta.
+      Last inn den sist aktive fana gjenopprettar den førre økta med dei andre fanene opne, men utlasta. Dei vert lasta inn når du klikkar på dei.
+      Start med ei tom økt hoppar over dei lagra fanene og opnar eit nytt vindauge.
+    Open Deep Links In New Window: URL-ar som vert sende til OpenTubeX, til dømes frå nettlesarutvidingar for vidaresending eller kommandolinjeargument, vert opna i eit nytt vindauge.
+    Remember Tab Navigation History: Historikken for fram- og tilbakenavigering i kvar fane vert lagra og gjenoppretta når OpenTubeX startar på nytt.
+  Proxy Settings:
+    IP Block Recovery Script Path: Filstien til skriptet som skal køyrast når ei IP-sperre vert oppdaga. OpenTubeX ventar til det er ferdig og lastar deretter inn videoen på nytt. Dersom reserveløysinga er slått på, køyrer skriptet berre når ho òg slår feil.
+  Player Settings:
+    Enable Caption Translations: Når dette er slått på, føretrekkjer teksteknappen og C-hurtigtasten eit automatisk omsett spor på det føretrekte tekstespråket dersom videoen ikkje har eit samsvarande originalspor.
+    Use Quick Playback Speed Bar: Viser ei snøgglinje for avspelingsfart til høgre i spelarkontrollane. Dersom manuell lagring av avspelingsfart for kvar kanal er slått på, har linja òg ein knapp for å lagre farten for den gjeldande kanalen.
+    Multiply Seek Interval by Playback Rate: Når dette er slått på, vert hoppeintervalla med piltastane og J/L multipliserte med den gjeldande avspelingsfarten. Når det er slått av, er hoppeintervalla dei same uavhengig av avspelingsfarten.
+    Show Playback Rate Adjusted Timestamp: Når dette er slått på og avspelingsfarten ikkje er 1x, viser spelaren tidsstempel justerte etter avspelingsfarten i parentes etter den vanlege tidsvisinga.
+    Use YouTube-style Shorts: Viser Shorts i eit ståande rutenett på abonnements- og kanalsider og brukar Shorts-spelaren i YouTube-stil.
+    Loop Shorts: Når dette er slått på, startar Shorts automatisk på nytt. Når det er slått av, stoppar Shorts på slutten og viser ein knapp for ny avspeling.
+    Show Skip Silence Toggle: Viser ein av/på-brytar for å hoppe over stille parti i innstillingsmenyen til spelaren.
+    Enable Skip Silence by Default: Hoppar som standard over stille parti i nye faner. Endringar i éi fane påverkar ikkje andre faner.
+    Enable Video Zoom: Viser zoomkontrollen i innstillingsmenyen til spelaren og slår på hurtigtastane og panoreringskontrollane.
+    Voice-over Translation: Sender video-ID-en, lengda og det valde språket til den uoffisielle Yandex-tenesta for stemmeomsetjing når du ber om ei omsetjing. Av som standard.
+    Hold to Double Playback Speed: Hald inne mellomromstasten eller venstre museknapp over spelaren for å doble den gjeldande avspelingsfarten mellombels.
+    Ambient Mode: Tonar videofargane inn i området rundt spelaren.
+    Default Volume: Er slått av medan Hugs lydstyrke er slått på. Slå av Hugs lydstyrke for å velje ei fast lydstyrke ved starten av kvar video.
+    Parallel Segment Loading: |
+      Kor mange video- og lydsegment som skal lastast inn samstundes før avspeling.
+      Høgare verdiar kan hjelpe på treige eller ustabile samband, men brukar meir bandbreidd og minne.
+      Dei kan òg få Automatisk til å undervurdere tilkoplingsfarten og velje lågare kvalitet.
+      Straumar som er avgrensa til éin førespurnad om gongen, ser bort frå denne innstillinga.
+  External Player Settings:
+    Ignore Default Arguments: Ikkje send andre standardargument enn URL-en til videoen til den eksterne spelaren, til dømes avspelingsfart eller URL til spelelista. Eigne argument vert framleis sende vidare.
+  Download Settings:
+    Download Folder: Videoar vert lagra i denne mappa. La feltet stå tomt for å bruke Nedlastingar-mappa på systemet.
+    Global Additional yt-dlp Arguments: Ekstra kommandolinjeargument som vert sende til yt-dlp for kvar nedlasting, til dømes --cookies-from-browser firefox.
+    Concurrent Downloads: Det høgaste talet på yt-dlp-jobbar som kan køyre samstundes.
+    Bandwidth Limit: Avgrensar den samla overføringsfarten til køen ved å dele grensa mellom jobbar som køyrer samstundes. Skriv inn 0 for inga grense.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX kan anten bruke yt-dlp som er installert på systemet, eller laste ned og vedlikehalde sin eigen kopi av yt-dlp, som vert lagra i brukardatamappa.
+    yt-dlp Channel: Vel kva utgjevingskanal for yt-dlp OpenTubeX skal laste ned og vedlikehalde. Stabil er tilrådd for dei fleste.
+    FFmpeg Source: OpenTubeX kan anten bruke FFmpeg og FFprobe som er installerte på systemet, eller laste ned og vedlikehalde sine eigne statiske utgåver, som vert lagra i brukardatamappa.
+    Managed Tool Updates: Vel om administrerte verktøy skal oppdaterast automatisk, spørje før oppdatering eller berre oppdaterast med dei manuelle knappane. Manglande verktøy vert framleis lasta ned når dei trengst.
+    yt-dlp Executable Path: OpenTubeX går som standard ut frå at yt-dlp kan finnast gjennom miljøvariabelen PATH. Du kan velje ein eigen sti her dersom det trengst.
+    Cookie Source: Vel om yt-dlp skal lese ei infokapselfil i Netscape-format eller infokapslar frå ein installert nettlesar ved autentisert avspeling.
+    Cookie File: Vel ei infokapselfil i Netscape-format for autentisert avspeling.
+    Browser for Cookies: Nettlesarstøtta vert lesen frå den valde yt-dlp-programfila. OpenTubeX ber yt-dlp om å lese frå denne nettlesaren ved autentisert avspeling.
+    Browser Profile: Valfritt namn på eller mappe til ein nettlesarprofil. La feltet stå tomt for å bruke profilen som sist vart opna.
+    Always Use Cookies: Bruk dei oppsette infokapslane kvar gong yt-dlp hentar ut straumar. Dette byter ikkje metoden for straumuthenting til yt-dlp. Når yt-dlp er valt, kan format som krev konto, verte tilgjengelege. Det omfattar den utvida bithastigheita til YouTube Premium når kontoen har tilgang.
+    FFmpeg Executable Path: FFmpeg trengst for å slå saman åtskilde video- og lydstraumar og for lydkonvertering. OpenTubeX går som standard ut frå at FFmpeg kan finnast gjennom miljøvariabelen PATH. Du kan velje ein eigen sti her dersom det trengst.
+  Distraction Free Settings:
+    Shorten View Counts: Viser visingstal og tal på likarklikk for kommentarar i den avrunda kortforma frå YouTube, til dømes 14K i staden for 14,000. Nøyaktige tal vert alltid viste i full lengd.
+    Hide Subscriptions Live: Denne innstillinga vert overstyrt av innstillinga "{appWideSetting}" for heile appen i underdelen "{subsection}" under "{settingsSection}"
+    Hide Videos, Playlists and Channels Containing Text: Skriv inn eit ord, ein del av eit ord eller ei setning, utan skilnad på store og små bokstavar, for å gøyme alle videoar, spelelister og kanalar med ein originaltittel som inneheld teksten. Dette gjeld i heile OpenTubeX, bortsett frå Historikk, Dine spelelister og videoar i spelelister.
+    Hide Videos on Watch: Gøymer videoar du har sett, frå fanene Videoar, Shorts og Direkte på abonnements- og kanalsidene. Dette påverkar ikkje Heim-fana på kanalsider
+  Subscription Settings:
+    Fetch Feed on Startup: Når dette er slått på, hentar OpenTubeX automatisk abonnementsstraumen ved oppstart og når eit nytt vindauge vert opna.
+    Show New Content Feed: Viser fana Ny med element frå abonnementsstraumen som ikkje fanst ved førre henting.
+    Show New Content Indicators: Viser ein liten prikk ved element i abonnementsstraumen som ikkje fanst ved førre henting.
+    Show Scheduled Live Streams / Premieres First: Held komande direktesendingar og premierar øvst i abonnementsstraumen. Når dette er slått av, vert dei ståande der dei vart kunngjorde, fram til dei startar. Oppdater abonnementsstraumen éin gong etter at du slår av innstillinga, for å hente kunngjeringsdatoane til eksisterande planlagde element.
+    Auto Refresh Interval: Kor ofte OpenTubeX automatisk oppdaterer abonnementsstraumen medan appen er open.
+  Theme Settings:
+    Show Progress as Notification: Viser eit vedvarande varsel med framdrift i sanntid for bakgrunnsoperasjonar, til dømes oppdatering av abonnementsstraumen og nedlasting av administrerte verktøy, i staden for den globale framdriftslinja.
+    Always Show Scrollbars: Held rullefelta synlege heile tida. Når dette er slått av, tonar dei ut kort tid etter at du sluttar å flytte musa, og kjem fram att så snart du flyttar henne.
+    Scroll Speed: Endrar kor langt musehjul- og styreflaterørsler rullar.
+    Use Fixed Tab Width: Gjev alle fanene i den vassrette fanelinja same breidd i staden for å tilpasse breidda til tittelen.
+    Use Grid Player Menu: Ordnar innstillingsmenyen til videospelaren som eit rutenett med felt i staden for ei liste med rader.
+  SponsorBlock Settings:
+    UseDeArrowTitles: Byt ut videotitlar med titlar som brukarar har sendt inn til DeArrow.
+    UseDeArrowThumbnails: Byt ut videominiatyrar med miniatyrar frå DeArrow.
+Autoplay Interruption Timer: Automatisk avspeling vart avbroten etter {autoplayInterruptionIntervalHours} timar utan aktivitet
+The playlist is at the beginning. Enable loop to continue playing: Spelelista er på byrjinga. Slå på gjentaking for å spele vidare
+Age Restricted:
+  This channel is age restricted: Denne kanalen har aldersgrense
+  This video is age restricted: Denne videoen har aldersgrense
+External link opening has been disabled in Settings → Privacy: Opning av eksterne lenkjer er slått av under Innstillingar → Personvern
+Screenshot Clipboard Success: Skjermbiletet er lagra på utklippstavla
+Screenshot Clipboard Error: Klarte ikkje å kopiere skjermbiletet til utklippstavla
+Channel Hidden: '{channel} er lagd til i kanalfilteret'
+Channel Unhidden: '{channel} er fjerna frå kanalfilteret'
+Trimmed input must be at least N characters long: Inndata utan innleiande og avsluttande mellomrom må vere minst 1 teikn lang | Inndata utan innleiande og avsluttande mellomrom må vere minst {length} teikn lang
+Tag already exists: 'Emneordet "{tagName}" finst frå før'
+Hashtag:
+  Hashtag: Emneknagg
+  This hashtag does not currently have any videos: Denne emneknaggen har ingen videoar enno
+Moments Ago: nett no
+Yes, Delete: Ja, slett
+Yes, Restart: Ja, start på nytt
+Yes, Open Link: Ja, opna lenkja
+Cancel: Avbryt
+checkmark: ✓
+Display Label: '{label}: {value}'
+KeyboardShortcutTemplate: '{label} ({shortcut})'
+shortcutJoinOperator: +
+shortcutLabelSeparator: ｜
+Keys:
+  alt: Alt
+  ctrl: Ctrl
+  shift: Skift
+  enter: Enter
+  plus: Pluss
+  arrowdown: Pil ned
+  arrowleft: Pil venstre
+  arrowright: Pil høgre
+  arrowup: Pil opp
+KeyboardShortcutPrompt:
+  Keyboard Shortcuts: Hurtigtastar
+  Edit Hint: Vel ein hurtigtast, og trykk deretter ein ny tastekombinasjon. Trykk Backspace eller Delete for å fjerne tilordninga.
+  Change Shortcut: Endra hurtigtasten for {action}
+  Press Shortcut: Trykk ein hurtigtast…
+  Unassigned: Ikkje tilordna
+  Reset Shortcut: Nullstill hurtigtasten for {action}
+  Reset to Defaults: Nullstill til standardverdiane
+  Shortcut Already Assigned: Hurtigtasten er allereie tilordna
+  Shortcut Conflict: '{shortcut} er allereie tilordna {actions}. Vil du tilordne han på nytt?'
+  Reserved Shortcut Conflict: '{shortcut} er reservert for {actions} og kan ikkje tilordnast på nytt.'
+  Reassign: Tilordne på nytt
+  Sections:
+    Video:
+      Playback: "Video:\_Avspeling"
+      General: "Video:\_Generelt"
+    App:
+      General: "App:\_Generelt"
+      Tabs: "App:\_Faner"
+      Search and Page: "App:\_Søk og side"
+      Window and View: "App:\_Vindauge og vising"
+  Show Keyboard Shortcuts: Vis hurtigtastar
+  History Backward: Gå éi side tilbake
+  History Forward: Gå éi side fram
+  New Window: Opprett eit nytt vindauge
+  New Tab: Opprett ei ny fane
+  Close Tab: Lukk den gjeldande fana
+  Reload Tab: Last inn den gjeldande fana på nytt
+  Reopen Closed Tab: Opna den sist lukka fana på nytt
+  Next Tab: Byt til neste fane
+  Previous Tab: Byt til førre fane
+  Switch to Tab: Byt til fane 1–9
+  Toggle Tab Orientation: Byt mellom faneoppsett
+  Navigate to Settings: Gå til sida Innstillingar
+  Navigate to History: Gå til sida Historikk
+  Refresh: Oppdater straumen med det nyaste innhaldet
+  Find in Page: Finn tekst på den gjeldande sida
+  Find Next Match: Gå til neste treff
+  Find Previous Match: Gå til førre treff
+  Captions: Slå teksting PÅ/AV
+  Stats: Vis videostatistikk
+  Picture in Picture: Slå bilete-i-bilete-modus av eller på
+  Large Rewind: Spol 10 sekund tilbake / Spol videoen tilbake ut frå den gjeldande avspelingsfarten
+  Play: Byt mellom avspeling og pause
+  Large Fast Forward: Spol 10 sekund fram / Spol videoen fram ut frå den gjeldande avspelingsfarten
+  Mute: Slå lyden av eller på
+  Decrease Video Speed: Senk videofarten med intervallet for avspelingsfart
+  Increase Video Speed: Auk videofarten med intervallet for avspelingsfart
+  Toggle Normal Playback Speed: Byt mellom 1x-fart og den førre avspelingsfarten
+  Toggle Skip Silence: Slå overhopping av stille parti av eller på
+  Set A-B Repeat Point A: Set punkt A for A-B-gjentaking
+  Set A-B Repeat Point B: Set punkt B for A-B-gjentaking
+  Clear A-B Repeat: Fjern A-B-gjentaking
+  Full Window: Vis i heile vindauget eller gå tilbake til normal vising
+  Theatre Mode: Slå kinomodus av eller på
+  Take Screenshot: Ta skjermbilete
+  Video Zoom In: Zoom inn på videoen
+  Video Zoom Out: Zoom ut frå videoen
+  Minimize Window: Minimer vindauget
+  Close Window: Lukk vindauget
+  Reset Zoom: Tilbakestill zoomnivået / storleiken på brukargrensesnittet
+  Focus Search: Flytt fokus til søkjefeltet
+  Search in New Window: Søk i eit nytt vindauge
+  Tab Switcher: Fanebytar
+  Last Frame: Førre biletrute (ved pause)
+  Next Frame: Neste biletrute (ved pause)
+  Volume Up: Auk lydstyrken
+  Volume Down: Senk lydstyrken
+  Small Rewind: Spol tilbake X sekund ut frå tilbakespolingsintervallet og den gjeldande avspelingsfarten
+  Small Fast Forward: Spol fram X sekund ut frå framoverspolingsintervallet og den gjeldande avspelingsfarten
+  Last Chapter: Førre kapittel
+  Next Chapter: Neste kapittel
+  Skip by Tenths: Hopp prosentvis gjennom videoen (3 hopp går til 30 % av lengda)
+  Home: Gå til starten av videoen
+  End: Gå til slutten av videoen
+  Skip to Next Video: Hopp til neste video i ei speleliste eller den neste tilrådde videoen
+  Skip to Previous Video: Hopp til førre video i ei speleliste
+CommandPalette:
+  Title: Kommandopalett
+  Open: Opne kommandopaletten
+  Search Label: Søk etter kommandoar
+  Search Placeholder: Søk i kommandoar og innstillingar…
+  Results: Kommandoar
+  No Results: Ingen kommandoar samsvarar
+  Result Count: 1 kommando funnen | {count} kommandoar funne
+  Move: Flytt
+  Run: Køyr
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Byt til fane: {title}'
+  Switch Profile: 'Byt profil: {name}'
+  Open Playlist: 'Opne speleliste: {name}'
+  Cancel Download: 'Avbryt nedlasting: {title}'
+  Groups:
+    App: Program
+    Navigation: Navigasjon
+    Tabs: Faner
+  Unavailable:
+    Current Page: Du er allereie på denne sida
+    No History: Inga side i denne retninga
+    Desktop: Berre tilgjengeleg i skrivebordsprogrammet
+    Build: Ikkje tilgjengeleg i denne utgåva
+    One Tab: Opne ei anna fane først
+    Active Tab: Dette er den aktive fana
+    Active Profile: Dette er den aktive profilen
+    Download Finished: Denne nedlastinga er ikkje lenger aktiv
+    Video: Opne ein video først
+Downloads:
+  Download: Last ned
+  Download Video: Last ned video
+  Download Playlist: Last ned speleliste
+  Downloading: Lastar ned
+  Queue: Kø
+  Downloaded: Lasta ned
+  Canceled: Avbroten
+  Open Downloads: Opne nedlastingar
+  No Downloads: Ingen nedlastingar enno
+  No Downloads Description: Nedlastingar du startar, blir viste her.
+  Clear Failed Canceled Skipped And Missing: Fjern mislukka, avbrotne, hoppa over og manglande
+  Clear From List: Fjern frå lista
+  Show in Folder: Vis i mappe
+  Play Download: Spel av nedlastinga
+  Retry Download: Prøv nedlastinga på nytt
+  Pause Download: Set nedlastinga på pause
+  Resume Download: Hald fram nedlastinga
+  Move Earlier: Flytt opp
+  Move Later: Flytt ned
+  Pause All: Set alle på pause
+  Resume All: Hald fram alle
+  Retry All: Prøv alle mislukka nedlastingar på nytt
+  Total Size: 'Samla storleik: {size}'
+  Local File: Lokal fil
+  Available Offline: Tilgjengeleg utan nettilgang
+  Remove File: Fjern fila
+  Remove File Confirmation: Vil du fjerne den nedlasta fila?
+  Remove File Warning: Dette flyttar "{title}" til papirkorga på eininga di.
+  File Not Found: Fann ikkje den nedlasta fila.
+  Download Missing: Nedlastinga er utilgjengeleg
+  Files Missing: Den nedlasta fila er ikkje lenger tilgjengeleg i filsystemet. | Dei nedlasta filene er ikkje lenger tilgjengelege i filsystemet.
+  Files Available: '{available} av {total} nedlasta filer er tilgjengelege.'
+  More Files: Éi fil til | {count} filer til
+  Template Used: 'Mal: {name}'
+  Download Type: Nedlastingstype
+  Template: Mal
+  Unsaved: Ikkje lagra
+  Media Type: Medietype
+  Video: Video
+  Audio: Lyd
+  Maximum Resolution: Høgaste oppløysing
+  Best Available: Beste tilgjengelege
+  Automatic: Automatisk
+  Container: Behaldar
+  Video Codec: Videokodek
+  Audio Codec: Lydkodek
+  File Name Template: Filnamnmal
+  File Name Template Help: 'Tilgjengelege felt: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Tidsrom og kapittel
+  Start Time: Starttid (HH:MM:SS)
+  End Time: Sluttid (HH:MM:SS)
+  Split by Chapters: Del i separate filer etter kapittel
+  Remove Segments: Fjern segment
+  Subtitles and Metadata: Undertekstar og metadata
+  Include Subtitles: Ta med undertekstar
+  Embed Subtitles: Bygg undertekstane inn i mediefila
+  Subtitle Format: Undertekstformat
+  Subtitle Languages: Undertekstspråk
+  Subtitle Languages Help: 'Kommaskilde språkveljarar for yt-dlp, til dømes: en.*,de.*'
+  Embed Cover Art: Bygg inn miniatyrbiletet som omslagsbilete
+  Embed Metadata: Bygg inn tittel, opphavsperson, skildring og kapittel
+  Additional yt-dlp Arguments: Fleire argument for yt-dlp
+  Custom yt-dlp Arguments: Eigendefinerte argument for yt-dlp
+  Template Name: Malnamn
+  Save Template: Lagre malen
+  Delete Template: Slett malen
+  Template Saved: Lagra nedlastingsmalen "{name}"
+  Template Name Exists: Det finst allereie ein nedlastingsmal med namnet "{name}".
+  Choose Folder: Endre
+  Select Folder: Vel mappe
+  Folder Required: Vel ei nedlastingsmappe for å kunne laste ned.
+  System Downloads Folder: Systemmappa for nedlastingar
+  Processing: Handsamar…
+  Queued: I kø
+  Queued Position: I kø som nummer {position}
+  Paused: På pause
+  Pausing: Den noverande jobben blir fullført før køen blir sett på pause
+  Download Complete: Nedlastinga er fullført
+  Download Cancelled: Nedlastinga er avbroten
+  Download Failed: Nedlastinga feila
+  File Name Shortened: Filnamnet vart korta ned fordi videotittelen var for lang.
+  Insufficient Disk Space: Ikkje nok diskplass. Det trengst om lag {required}, og {available} er tilgjengeleg.
+  Unknown Download Size: Storleiken på nedlastinga er ukjend. {available} er tilgjengeleg i målfilsystemet.
+  Disk Space Check Unavailable: Klarte ikkje å kontrollere tilgjengeleg diskplass før nedlastinga starta.
+  Download Failure Hint: Kontroller {issuesLink}, og prøv deretter å byte yt-dlp-kanal til Nightly eller Master under Innstillingar → Avansert → Ekstern programvare.
+  yt-dlp YouTube Issues: nylege yt-dlp-problem med YouTube
+  Automatic Download Started: Automatisk nedlasting har starta
+  Automatic Download Started Body: Lastar ned "{title}" frå {channel} i bakgrunnen.
+  Automatic Download Complete: Automatisk nedlasting er fullført
+  Automatic Download Failed: Den automatiske nedlastinga feila
+  Automatic Download Could Not Start: Klarte ikkje å starte den automatiske nedlastinga av "{title}".
+  Automatic Download Skipped: Hoppa over av filtera for automatisk nedlasting
+  Cancel Download: Avbryt nedlastinga
+  yt-dlp Not Found: Fann ikkje yt-dlp. Installer det, eller vel plasseringa under Innstillingar → Avansert → Ekstern programvare.
+  Download Complete Template: Nedlastinga av "{title}" er fullført
+  Download Failed Template: Nedlastinga av "{title}" feila
+  Templates:
+    Video Best: Video - beste kvalitet
+    Video Resolution: Video - {resolution}
+    Audio Best: Lyd - beste kvalitet
+    Audio Format: Lyd - {format}
+    Subtitles Format: Undertekstar - {format}

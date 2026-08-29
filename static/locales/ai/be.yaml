@@ -1,0 +1,1606 @@
+# Optional AI-generated translations for keys missing from ../be.yaml.
+Color Picker:
+  Hue: Адценне
+  Opacity: Непразрыстасць
+  Backdrop Blur: Размыццё фону
+  Hex Color: Шаснаццатковы колер
+  Apply Color: Ужыць
+  Reset Color: Скінуць
+  Copy Color: Скапіяваць
+  Copy From Another Color: Скапіяваць з іншага колеру
+  Color Copied: Колер скапіяваны
+  Invalid Color: Увядзіце дапушчальны шаснаццатковы колер
+  Clipboard Unavailable: Буфер абмену недаступны
+  Saturation and Brightness: Насычанасць і яркасць
+New Tab: Новая ўкладка
+Maximize: Разгарнуць
+Restore: Аднавіць
+Close Tab: Закрыць укладку
+Close Confirmation:
+  Title: Выйсці з OpenTubeX?
+  Message: Сапраўды выйсці з OpenTubeX?
+  Quit: Выйсці
+  Never Ask Again: Больш не пытацца
+Close Window Confirmation:
+  Title: Закрыць акно?
+  Message: У гэтым акне {count} укладка. Сапраўды закрыць яго? | У гэтым акне {count} укладкі. Сапраўды закрыць яго? | У гэтым акне {count} укладак. Сапраўды закрыць яго?
+  Close Window: Закрыць акно
+Confirmations:
+  Never Ask Again: Больш не пытацца
+  Settings Hint: Гэтае пацвярджэнне можна зноў уключыць у раздзеле Налады → Агульныя → Пацвярджаць перад…
+Close Multiple Tabs Confirmation:
+  Title: Закрыць некалькі ўкладак?
+  Message: Будзе закрыта {count} укладка. | Будуць закрытыя {count} укладкі. | Будзе закрыта {count} укладак.
+  Close Tabs: Закрыць {count} укладку | Закрыць {count} укладкі | Закрыць {count} укладак
+Load Multiple Tabs Confirmation:
+  Title: Загрузіць некалькі ўкладак?
+  Message: Будзе загружана {count} укладка. | Будуць загружаныя {count} укладкі. | Будзе загружана {count} укладак.
+  Load Tabs: Загрузіць {count} укладку | Загрузіць {count} укладкі | Загрузіць {count} укладак
+Unload Multiple Tabs Confirmation:
+  Title: Выгрузіць некалькі ўкладак?
+  Message: Будзе выгружана {count} укладка. | Будуць выгружаныя {count} укладкі. | Будзе выгружана {count} укладак.
+  Unload Tabs: Выгрузіць {count} укладку | Выгрузіць {count} укладкі | Выгрузіць {count} укладак
+Compact side navigation: Згарнуць бакавую навігацыю
+Expand side navigation: Разгарнуць бакавую навігацыю
+Use Vertical Tabs: Выкарыстоўваць вертыкальныя ўкладкі
+Use Horizontal Tabs: Выкарыстоўваць гарызантальныя ўкладкі
+Resize Tab Bar: Змяніць памер панэлі ўкладак
+Find in page: Знайсці на старонцы
+Previous match: Папярэдняе супадзенне
+Next match: Наступнае супадзенне
+Close find bar: Закрыць панэль пошуку
+No matches: Супадзенняў няма
+Version {versionNumber} is now available.: Даступная версія {versionNumber}.
+See changes and update: Паглядзець змены і абнавіць
+Dismiss: Адхіліць
+Update to {version}: Абнавіць да версіі {version}
+Global:
+  Ambient Mode: Фонавая падсветка
+  Loading More: Загружаецца яшчэ
+  New: Новае
+Search Listing:
+  Label:
+    Members Only: Толькі для ўдзельнікаў
+Search Filters:
+  Prioritize:
+    Prioritize: Аддаваць перавагу
+    Popularity: Папулярнасць
+Stats:
+  Stats: Статыстыка
+  Watch time summary: Зводка часу прагляду
+  Today: Сёння
+  This week: На гэтым тыдні
+  Total watch time: Агульны час прагляду
+  Daily average: У сярэднім за дзень
+  So far today: За сёння
+  Since: Ад {day}
+  All recorded time: За ўвесь улічаны час
+  Per calendar day: За каляндарны дзень
+  Day by day: Па днях
+  Highest: 'Найбольш: {duration}'
+  Week by week: Па тыднях
+  Last 14 days: Апошнія 14 дзён
+  Last 8 weeks: Апошнія 8 тыдняў
+  Daily chart aria: Час прагляду па днях за апошнія 14 дзён
+  Weekly chart aria: Час прагляду па тыднях за апошнія 8 тыдняў
+  No data: Час прагляду з'явіцца тут пасля прагляду відэа.
+  Estimate note: Час да гэтага абнаўлення разлічаны прыблізна паводле захаванага ходу прайгравання.
+  Adjust imported watch time: Скарэктаваць імпартаваны час прагляду
+  Imported watch time: Імпартаваны час прагляду
+  Imported watch time explanation: Выберыце хуткасць прайгравання, якой вы звычайна карысталіся. Каб прыблізна вызначыць фактычны час прагляду, працягласць імпартаваных відэа будзе падзелена на гэтую хуткасць.
+  Playback speed: Хуткасць прайгравання
+  Channel speed note: Калі для канала захавана хуткасць прайгравання, будзе выкарыстана яна.
+  Apply playback speed: Ужыць хуткасць прайгравання
+  Imported watch time adjusted: Імпартаваны час прагляду скарэктаваны
+  Reset statistics: Скінуць статыстыку
+  Reset: Скінуць
+  Reset confirmation: Сапраўды скінуць усю статыстыку прагляду? Гэта нельга будзе адмяніць.
+  Reset success: Статыстыка прагляду скінутая
+  Less than a minute: < 1 хв
+  Minutes: '{minutes} хв'
+  Hours: '{hours} гад'
+  Hours and minutes: '{hours} гад {minutes} хв'
+Home Page:
+  Home: Галоўная
+  Description: Працягвайце з месца, дзе спыніліся, і праглядайце апошнія дзеянні.
+  Customize: Наладзіць галоўную
+  Done: Гатова
+  Customize description: Выберыце раздзелы, якія будуць паказвацца, і размясціце іх у патрэбным парадку.
+  Continue watching: Працягнуць прагляд
+  New since last visit: Новае з апошняга наведвання
+  Watch queue: Чарга прагляду
+  Recent playlists: Нядаўнія плэйлісты
+  Recent downloads: Нядаўнія спампоўванні
+  Upcoming reminders: Будучыя напаміны
+  Watch statistics: Статыстыка прагляду
+  View all: Паказаць усё
+  Previous shelf page: Папярэдняя старонка раздзела {section}
+  Next shelf page: Наступная старонка раздзела {section}
+  Shelf page status: '{section}, старонка {page} з {total}.'
+  Move section up: Перамясціць {section} вышэй
+  Move section down: Перамясціць {section} ніжэй
+  Section moved: 'Раздзел {section} перамешчаны на пазіцыю {position} з {total}.'
+  Nothing here yet: Тут пакуль нічога няма
+  Empty description: "Тут з'явяцца відэа, якія вы пачалі глядзець, выкарыстаныя плэйлісты, спампоўванні і напаміны."
+  All sections hidden: Усе раздзелы схаваны
+  All sections hidden description: Наладзьце галоўную, каб зноў паказаць раздзел.
+Subscriptions:
+  Refreshing Subscription Videos: Абнаўляюцца відэа з падпісак
+  Refreshing Subscription Shorts: Абнаўляюцца кароткія відэа з падпісак
+  Refreshing Subscription Live Streams: Абнаўляюцца жывыя трансляцыі з падпісак
+  Refreshing Subscription Posts: Абнаўляюцца допісы з падпісак
+  New Content: Новае змесціва
+  New Feed Refresh Warning Title: Абнавіць усе стужкі падпісак?
+  New Feed Refresh Warning: Абнаўленне ўсіх тыпаў змесціва без RSS для 1 падпіскі можа заняць шмат часу. Працягнуць? | Абнаўленне ўсіх тыпаў змесціва без RSS для {count} падпісак можа заняць шмат часу. Працягнуць? | Абнаўленне ўсіх тыпаў змесціва без RSS для {count} падпісак можа заняць шмат часу. Працягнуць?
+  New Since Last Refresh: Новае з часу апошняга абнаўлення
+  Mark as Seen: Пазначыць прагледжаным
+  Mark All as Seen: Пазначыць усё прагледжаным
+  No New Content: Новага змесціва няма.
+  New Content Tabs: Укладкі новага змесціва
+  Show Tabbed View: Паказаць ва ўкладках
+  Show Combined View: Паказаць разам
+  Newest First: Спачатку навейшыя
+  Oldest First: Спачатку старэйшыя
+  Posts:
+    RSS Message: YouTube не дае RSS-стужак для допісаў. Адключыце наладу "{rssSetting}", каб праглядаць допісы, або ўключыце наладу "{hideSetting}", каб схаваць гэту ўкладку.
+Trending:
+  Load Error: Не ўдалося загрузіць папулярнае.
+  Unsupported Backend: Для папулярнага патрэбны Local API. Выберыце Local API або ўключыце рэзервовы серверны механізм.
+Most Popular Feed Empty: Стужка «Самае папулярнае» гэтага асобніка Invidious пустая.
+Feed:
+  Cancel Refresh: Скасаваць абнаўленне
+  Next Auto Refresh: 'Наступнае аўтаабнаўленне: {date}'
+User Playlists:
+  Load More Playlists: Загрузіць яшчэ спісы прайгравання
+  Save to: Захаваць у…
+  Move Video to the Top: Перамясціць відэа ў пачатак
+  Move Video to the Bottom: Перамясціць відэа ў канец
+  Quick Bookmark Icon: Значок хуткай закладкі
+  Custom Emoji: Уласны эмодзі
+  Choose Image: Выбраць выяву
+  Use Bookmark Icon: Выкарыстоўваць значок закладкі
+  Export list of URLs: Экспартаваць спіс URL
+  SinglePlaylistView:
+    Retry: Паўтарыць
+    This playlist could not be loaded.: Не ўдалося загрузіць гэты спіс прайгравання.
+    More videos could not be loaded.: Не ўдалося загрузіць іншыя відэа.
+  AddVideoPrompt:
+    Toast:
+      Video(s) added to {playlistCount} playlists: Відэа дададзена ў 1 спіс прайгравання | Відэа дададзена ў {playlistCount} спісы прайгравання | Відэа дададзена ў {playlistCount} спісаў прайгравання
+History:
+  Mark All As Watched: Пазначыць усё прагледжаным
+  Mark All As Watched Confirmation: Сапраўды пазначыць усе відэа ў гісторыі прагледжанымі?
+  All History Marked as Watched: Усе відэа ў гісторыі пазначаныя прагледжанымі
+  DateOldestHistory: Дата прагляду (спачатку даўнейшыя)
+  DateNewestHistory: Дата прагляду (спачатку навейшыя)
+  Delete Old History: Выдаліць старую гісторыю
+  Select History Age: Выберыце, колькі часу мусіць мінуць, каб запіс быў выдалены.
+  Delete Entries Older Than: Выдаліць запісы, старэйшыя за
+  Number of Days: Колькасць дзён
+  History Cleanup Warning: Адпаведныя запісы гісторыі прагляду будуць выдаленыя назаўсёды.
+  1 Day: 1 дзень
+  1 Week: 1 тыдзень
+  1 Month: 1 месяц
+  3 Months: 3 месяцы
+  1 Year: 1 год
+  Custom: Уласны перыяд
+  History Older Than Days Removed: Гісторыя прагляду, старэйшая за 1 дзень, выдаленая | Гісторыя прагляду, старэйшая за {days} дні, выдаленая | Гісторыя прагляду, старэйшая за {days} дзён, выдаленая
+Settings:
+  Quick Settings:
+    Quick Settings: Хуткія налады
+    Appearance: Выгляд
+    Playback: Прайграванне
+    Content: Змесціва
+    Language and Region: Мова і рэгіён
+    All Settings: Усе налады
+    Profile Selector Hint: Пераключыць профіль можна таксама правай кнопкай мышы па значку профілю
+  Categories:
+    General Description: Мова, запуск, укладкі і паводзіны праграмы
+    Appearance: Выгляд
+    Appearance Description: Тэма, кампаноўка і мініяцюры
+    Content appearance: Спісы відэа і мініяцюры
+    Layout: Кампаноўка
+    Playback Description: Прайгравальнік, субцітры і налады каналаў
+    Subscriptions Description: Абнаўленне стужкі і параметры паказу
+    Downloads Description: Папкі, шаблоны і аўтаматычныя правілы
+    Distraction Free Description: Схаванне змесціва і абмежаванні прагляду
+    Add-ons: Дадаткі
+    Add-ons Description: SponsorBlock, DeArrow, адзнакі «Не падабаецца» і закадравы пераклад
+    Privacy Description: Прыватнасць прагляду і кіраванне доступам
+    Online activity: Сеткавая актыўнасць
+    Data And Storage Description: Імпарт, экспарт, выкарыстанне дыска і ачыстка
+    Sync Description: Сінхранізацыя налад і даных паміж прыладамі
+    Advanced: Пашыраныя
+    Advanced Description: Пастаўшчыкі, вонкавыя праграмы і сетка
+    Alternative providers: Пастаўшчыкі відэа і метаданых
+  Highlight Changed Settings: Вылучаць налады, змененыя адносна прадвызначаных
+  Reset Setting to Default: Вярнуць прадвызначанае значэнне гэтай налады
+  Performance Impact:
+    Show Performance Impact: Паказваць індыкатары ўплыву на прадукцыйнасць
+    Moderate: Умераны ўплыў
+    High: Значны ўплыў
+    Description: Гэтая налада можа павялічыць выкарыстанне рэсурсу «{resources}»
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: памяць
+      Network: сетка
+      Disk: дыск
+  General Settings:
+    Update Relative Timestamps: Абнаўляць адносныя пазнакі часу
+    Stream Extraction Method:
+      Stream Extraction Method: Спосаб атрымання медыяструменя
+      yt-dlp: yt-dlp
+      Built-in: Убудаваны
+    Confirm Before: Пацвярджаць перад…
+    Confirmation Options:
+      Closing App: Выхадам з OpenTubeX
+      Closing Window: Закрыццём акна з некалькімі ўкладкамі
+      Closing Tabs: Закрыццём некалькіх укладак
+      Loading Tabs: Загрузкай некалькіх укладак
+      Unloading Tabs: Выгрузкай некалькіх укладак
+    Minimize to system tray: Згортваць у сістэмны латок
+    Remember Tab Navigation History: Захоўваць гісторыю навігацыі па ўкладках
+    New Tab Position:
+      New Tab Position: Размяшчэнне новай укладкі
+      At the end: У канцы
+      After current tab: Пасля бягучай укладкі
+      After current tab in opened order: Пасля бягучай укладкі паводле чаргі адкрыцця
+    Tab Close Focus:
+      Tab Close Focus: Пасля закрыцця ўкладкі
+      Previous tab: Выбраць папярэднюю ўкладку
+      Next tab: Выбраць наступную ўкладку
+    Startup Behavior:
+      Startup Behavior: Пры запуску
+      Load all tabs: Загрузіць усе ўкладкі
+      Load previously loaded tabs: Загрузіць раней загружаныя ўкладкі
+      Load last active tab: Загрузіць апошнюю актыўную ўкладку
+      Start with an empty session: Пачаць з пустога сеанса
+    Use AI Translation Completions: Запаўняць адсутныя пераклады тэкстам, створаным ШІ
+    Reduced Motion:
+      Reduced Motion: Менш анімацыі
+      System: Як у сістэме
+      Force On: Заўсёды ўключана
+      Force Off: Заўсёды выключана
+    Comment Translation:
+      Title: Пераклад каментароў
+      Enable: Уключыць пераклад каментароў
+      Never Translate: Не перакладаць каментары на мове
+      Choose Language: Выбраць мову
+      Description: Каментары на мове праграмы ўжо выключаныя з перакладу. Дадайце іншыя мовы, якія вы разумееце.
+      Remove Language: Зноў перакладаць каментары на мове {language}
+    Avoid translation:
+      Avoid translation: Аддаваць перавагу неперакладзенаму тэксту відэа
+      Disabled: Выключана
+      Watch Only: Толькі інтэрфейс відэа
+      Entire App: Уся праграма
+    Playlist View Type:
+      Playlist View Type: Выгляд спіса прайгравання
+    Show Thumbnail Previews: Паказваць папярэдні прагляд мініяцюр
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Дадатковая кнопка дзеяння на мініяцюры
+      None: Няма
+      Mark as Watched: Пазначыць прагледжаным
+      Copy YouTube Link: Скапіяваць спасылку YouTube
+      Open in YouTube: Адкрыць у YouTube
+  Context Menu Search Settings:
+    Context Menu Search Settings: Пошук з кантэкстнага меню
+    Description: Выберыце пошукавыя сістэмы, якія будуць паказвацца пасля націскання правай кнопкай мышы на вылучаным тэксце. Вынікі адкрываюцца ў прадвызначаным браўзеры.
+    Icon Hint: Пры ўключэнні пошукавай сістэмы праграма звяртаецца да яе сайта, каб загрузіць favicon.
+    Engine Name: Назва пошукавай сістэмы
+    Search URL: URL пошуку
+    URL Hint: Устаўце %s у тое месца URL, дзе мусіць быць закадаваны вылучаны тэкст.
+    Add Custom Engine: Дадаць уласную пошукавую сістэму
+    Add Engine: Дадаць пошукавую сістэму
+    Remove Engine: Выдаліць {engine}
+    Invalid Engine: Увядзіце назву і дапушчальны URL пошуку HTTP або HTTPS, які змяшчае %s.
+    Engine Limit: Можна дадаць не больш за {count} уласных пошукавых сістэм.
+  Theme Settings:
+    Move Downloads to App Header: Перамясціць спампоўванні ў загаловак праграмы
+    Move Settings to App Header: Перамясціць налады ў загаловак праграмы
+    Hide Side Bar on Watch Pages: Хаваць бакавую панэль на старонках прагляду
+    UI Roundness: Закругленне інтэрфейсу
+    Scrollbar Width: Шырыня паласы пракруткі
+    Scroll Speed: Хуткасць пракруткі
+    Animation Speed: Хуткасць анімацыі
+    Thumbnail Size: Памер мініяцюр
+    Show Tab Icons: Паказваць значкі ўкладак
+    Load Missing Tab Icons: Загрузіць адсутныя значкі ўкладак
+    Loading Missing Tab Icons: Загружаюцца адсутныя значкі ўкладак…
+    No Missing Tab Icons: Усе значкі ўкладак, якія падтрымліваюцца, ужо загружаныя
+    Loaded Tab Icons: 'Загружаны {count} адсутны значок укладкі | Загружаныя {count} адсутныя значкі ўкладак | Загружана {count} адсутных значкоў укладак'
+    Loaded Tab Icons With Failures: 'Загружана значкоў укладак: {loaded}; не ўдалося загрузіць: {failed}'
+    Show Tab Previews: Паказваць папярэдні прагляд укладак
+    Use Fixed Tab Width: Выкарыстоўваць фіксаваную шырыню ўкладак у гарызантальным рэжыме
+    Tab Width: Шырыня ўкладкі
+    Tab Layout:
+      Tab Layout: Размяшчэнне ўкладак
+      Horizontal Top: Гарызантальна ўверсе
+      Horizontal Bottom: Гарызантальна ўнізе
+      Vertical Left: Вертыкальна злева
+      Vertical Right: Вертыкальна справа
+    Show Toast Timeout Indicator: Паказваць індыкатар часу да знікнення апавяшчэння
+    Use Grid Player Menu: Паказваць меню прайгравальніка ў выглядзе сеткі
+    Show Progress as Notification: Паказваць ход выканання як апавяшчэнне
+    Operation in Progress: Аперацыя выконваецца
+    Toast Position:
+      Toast Position: Размяшчэнне апавяшчэнняў
+      Bottom Left: Знізу злева
+      Bottom Center: Знізу па цэнтры
+      Bottom Right: Знізу справа
+      Top Left: Зверху злева
+      Top Center: Зверху па цэнтры
+      Top Right: Зверху справа
+    Icon Pack:
+      Icon Pack: Набор значкоў
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Шрыфт праграмы
+      System Default: Сістэмны прадвызначаны
+      Unable to Load: Не ўдалося загрузіць усталяваныя сістэмныя шрыфты
+    Always Show Scrollbars: Заўсёды паказваць палосы пракруткі
+    Base Theme:
+      Custom: Карыстальніцкая
+      Catppuccin Latte: Catppuccin Latte
+    Light Theme: Светлая тэма
+    Dark Theme: Цёмная тэма
+    Custom Theme:
+      Create Custom Theme: Стварыць карыстальніцкую тэму
+      Edit Custom Theme: Рэдагаваць карыстальніцкую тэму
+      Custom Theme Creator: Рэдактар карыстальніцкіх тэм
+      Theme Name: Назва тэмы
+      Based On: На аснове
+      Import Theme: Імпартаваць тэму
+      Export Theme: Экспартаваць тэму
+      Share Theme: Падзяліцца тэмай
+      Share Description Heading: Апісанне
+      Share Description Prompt: Апішыце тэму і ўсё, што варта ведаць перад яе выкарыстаннем.
+      Share Screenshots Heading: Здымкі экрана
+      Share Screenshots Prompt: Перацягніце сюды адзін або некалькі здымкаў экрана.
+      Share Code Summary: JSON тэмы
+      Delete Theme: Выдаліць тэму
+      Delete Theme Confirmation: Выдаліць «{name}»? Гэта дзеянне нельга скасаваць.
+      Save and Apply: Захаваць і ўжыць
+      Discard Changes: Адкінуць змены
+      Reset Colors: Скінуць да базавай тэмы
+      Theme File: Файл тэмы OpenTubeX
+      Theme Saved: Карыстальніцкая тэма захавана і ўжыта
+      Theme Imported: Тэма імпартавана ў рэдактар
+      Theme Exported: Тэма экспартавана
+      Theme Deleted: Карыстальніцкая тэма выдалена
+      Unable to Load: Не ўдалося загрузіць карыстальніцкую тэму
+      Unable to Save: Не ўдалося захаваць карыстальніцкую тэму
+      Unable to Export: Не ўдалося экспартаваць карыстальніцкую тэму
+      Unable to Share: Не ўдалося падзяліцца карыстальніцкай тэмай
+      Unable to Delete: Не ўдалося выдаліць карыстальніцкую тэму
+      Invalid Theme File: Няправільны файл карыстальніцкай тэмы
+      Colors:
+        Main text: Асноўны тэкст
+        Secondary text: Другасны тэкст
+        Subtle text: Прыглушаны тэкст
+        Borders and dividers: Межы і раздзяляльнікі
+        Subtle surfaces and indicators: Прыглушаныя паверхні і індыкатары
+        Title text: Тэкст загалоўкаў
+        Selected text background: Фон вылучанага тэксту
+        Selected text: Вылучаны тэкст
+        Logo icon: Значок лагатыпа
+        Logo text: Тэкст лагатыпа
+        Logo hover: Лагатып пры навядзенні
+        Logo pressed: Лагатып пры націсканні
+        Page background: Фон старонкі
+        Card background: Фон карткі
+        Secondary card background: Фон другаснай карткі
+        Favorite icon: Значок абранага
+        Error color: Колер памылкі
+        Scrollbar thumb: Паўзунок паласы пракруткі
+        Scrollbar thumb hover: Паўзунок паласы пракруткі пры навядзенні
+        Scrollbar thumb pressed: Паўзунок паласы пракруткі пры націсканні
+        Dropdown item hover text: Тэкст пункта выпаднога спіса пры навядзенні
+        Dropdown item hover background: Фон пункта выпаднога спіса пры навядзенні
+        Navigation and panel background: Фон навігацыі і панэляў
+        Neutral item hover and focus background: Фон нейтральнага элемента пры навядзенні і ў фокусе
+        Neutral item hover and focus text and icons: Тэкст і значкі нейтральнага элемента пры навядзенні і ў фокусе
+        Neutral item pressed background: Фон нейтральнага элемента пры націсканні
+        Neutral item pressed text and icons: Тэкст і значкі нейтральнага элемента пры націсканні
+        Header button hover and focus background: Фон кнопкі загалоўка пры навядзенні і ў фокусе
+        Header button hover and focus text and icons: Тэкст і значкі кнопкі загалоўка пры навядзенні і ў фокусе
+        Header button pressed background: Фон кнопкі загалоўка пры націсканні
+        Header button pressed text and icons: Тэкст і значкі кнопкі загалоўка пры націсканні
+        Colored header button hover and focus background: Фон каляровай кнопкі загалоўка пры навядзенні і ў фокусе
+        Colored header button hover and focus text and icons: Тэкст і значкі каляровай кнопкі загалоўка пры навядзенні і ў фокусе
+        Colored header button pressed background: Фон каляровай кнопкі загалоўка пры націсканні
+        Colored header button pressed text and icons: Тэкст і значкі каляровай кнопкі загалоўка пры націсканні
+        Search and dropdown background: Фон пошуку і выпаднога спіса
+        Settings search background: Фон пошуку ў наладах
+        Instance menu: Меню асобніка
+        Input background: Фон поля ўводу
+        Shadow color: Колер ценю
+        Primary controls and highlights: Асноўныя элементы кіравання і вылучэнні
+        Primary control hover and focus: Асноўны элемент кіравання пры навядзенні і ў фокусе
+        Primary control pressed: Асноўны элемент кіравання пры націсканні
+        Text and icons on primary controls: Тэкст і значкі на асноўных элементах кіравання
+        Secondary controls and highlights: Другасныя элементы кіравання і вылучэнні
+        Secondary control hover and focus: Другасны элемент кіравання пры навядзенні і ў фокусе
+        Secondary control pressed: Другасны элемент кіравання пры націсканні
+        Light secondary color: Светлы другасны колер
+        Visited accent: Акцэнт наведаных элементаў
+        Text and icons on secondary controls: Тэкст і значкі на другасных элементах кіравання
+        Links: Спасылкі
+        Visited links: Наведаныя спасылкі
+        Destructive action: Незваротнае дзеянне
+        Destructive hover and focus: Незваротнае дзеянне пры навядзенні і ў фокусе
+        Destructive pressed: Незваротнае дзеянне пры націсканні
+        Text and icons on destructive actions: Тэкст і значкі незваротных дзеянняў
+    Main Color Theme:
+      Catppuccin Latte Mauve: Catppuccin Latte Mauve
+      Catppuccin Latte Red: Catppuccin Latte Red
+  Player Settings:
+    Automatically Open Chapters: Аўтаматычна адкрываць раздзелы
+    Caption Appearance:
+      Caption Appearance: Выгляд субцітраў
+      Captions: Субцітры
+      Preferred Language: Пажаданая мова субцітраў
+      Application Language: Мова праграмы
+      Enable Translations: Уключыць пераклад субцітраў
+      Text Color: Колер тэксту
+      Background Color: Колер фону
+      Background Opacity: Непразрыстасць фону
+      Font Size: Памер шрыфту
+      Vertical Position: Вертыкальнае становішча
+      Edge Color: Колер контуру
+      Anchor:
+        Anchor: Прывязка
+        Top Left: Зверху злева
+        Top Center: Зверху па цэнтры
+        Top Right: Зверху справа
+        Bottom Left: Знізу злева
+        Bottom Center: Знізу па цэнтры
+        Bottom Right: Знізу справа
+      Edge Style:
+        Edge Style: Стыль контуру
+        None: Няма
+        Outline: Абводка
+        Drop Shadow: Адкінуты цень
+      Reset: Скінуць выгляд субцітраў
+    Default Viewing Mode:
+      Full Window (Always On): На ўсё акно (заўсёды)
+      Full Screen (Always On): На ўвесь экран (заўсёды)
+      Tooltip: Большасць прадвызначаных рэжымаў прагляду ўжываюцца толькі ў пачатку кожнага сеанса. Змены, зробленыя падчас сеанса, захоўваюцца да яго завяршэння. Заўсёды ўключаныя рэжымы прагляду ўжываюцца пры кожным пераходзе да новага відэа незалежна ад змен рэжыму падчас прагляду папярэдняга відэа.
+    Auto Picture in Picture:
+      Auto Picture in Picture: Аўтаматычна пераходзіць у рэжым «Карцінка ў карцінцы»
+      On Tab Change: Пры пераключэнні ўкладак
+      On Window Minimize: Пры згортванні акна
+      On Window Hide: Калі акно страчвае фокус або вы пераключаецеся з яго
+      Wayland Minimize Unsupported: Wayland не паведамляе праграмам пра згортванне акна, таму гэты трыгер недаступны. Замест яго выберыце «Калі акно страчвае фокус або вы пераключаецеся з яго». Гэты варыянт таксама спрацоўвае пры згортванні.
+    Scroll Mini Player:
+      Scroll Mini Player: Міні-прайгравальнік пры пракрутцы
+      When Scrolling Down: Пакідаць міні-прайгравальнік на экране пры пракрутцы ўніз
+      On All Tabs: Пакідаць міні-прайгравальнік на экране пры пераключэнні ўкладак
+    Multiply Seek Interval by Playback Rate: Памнажаць інтэрвал перамотвання на хуткасць прайгравання
+    Show Playback Rate Adjusted Timestamp: Паказваць час з улікам хуткасці прайгравання
+    Use YouTube-style Shorts: Выкарыстоўваць Shorts у стылі YouTube
+    Loop Shorts: Паўтараць Shorts
+    Remember Volume: Запамінаць гучнасць
+    Skip Silence: Прапускаць цішыню
+    Show Skip Silence Toggle: Паказваць пераключальнік пропуску цішыні
+    Enable Skip Silence by Default: Прадвызначана прапускаць цішыню
+    Enable Video Zoom: Уключыць маштабаванне відэа
+    Voice-over Translation:
+      Title: Закадравы пераклад
+      Attribution: (працуе на аснове Yandex)
+      Enable: Уключыць закадравы пераклад
+      Prepare in Background: Пачынаць падрыхтоўку закадравага перакладу ў фоне
+      Background Preparation Tooltip: Адпраўляе сэрвісу перакладу ідэнтыфікатар, працягласць і абраную мову бягучага відэа адразу пасля загрузкі відэа, якое падтрымліваецца.
+      Language: Мова закадравага перакладу
+      Supported Source Languages: 'Мовы арыгінала, якія падтрымліваюцца: руская, англійская, кітайская, карэйская, літоўская, латышская, арабская, французская, італьянская, іспанская, нямецкая і японская.'
+      Voice Volume: Гучнасць перакладзенага голасу
+      Original Volume: Гучнасць арыгінальнага гуку
+      Russian: Руская
+      English: Англійская
+      Kazakh: Казахская
+    Hold to Double Playback Speed: Утрымліваць для падваення хуткасці прайгравання
+    Use Quick Playback Speed Bar: Выкарыстоўваць панэль хуткага выбару хуткасці
+    Customize Quick Playback Speed Bar: Наладзіць панэль хуткага выбару хуткасці
+    Quick Playback Speed Bar Manager: Панэль хуткага выбару хуткасці
+    Add Playback Speed: Дадаць хуткасць прайгравання
+    Reset Quick Playback Speed Bar: Скінуць да прадвызначаных
+    Playback Speed Name: Назва
+    Edit Playback Speed Name: Змяніць назву хуткасці прайгравання
+    Use Automatic Playback Speed Name: Ствараць назву хуткасці прайгравання аўтаматычна
+    Reorder Playback Speed: Перацягніце, каб змяніць парадак хуткасцей
+    Playback Speed: Хуткасць прайгравання
+    Parallel Segment Loading: Паралельная загрузка сегментаў
+    Screenshot:
+      Mode: Рэжым здымка экрана
+      Modes:
+        Save To Folder: Захаваць у папку
+        Clipboard: Скапіраваць у буфер абмену
+  Channel Settings:
+    Channel Settings: Налады каналаў
+    Channel Settings Description: Запамінаць асобныя налады, абраныя падчас прагляду кожнага канала, і ўжываць іх пры наступным праглядзе відэа з гэтага канала.
+    Enable Playback Speed: Запамінаць хуткасць прайгравання
+    Enable Video Quality: Запамінаць якасць відэа
+    Enable Subtitles State: Запамінаць стан субцітраў
+    Enable Volume: Запамінаць гучнасць
+    Auto Update: Аўтаматычна абнаўляць пасля змены ў параметрах прайгравальніка
+    Auto Update Subtitles: Аўтаматычна абнаўляць пры пераключэнні
+    Auto Update Volume: Аўтаматычна абнаўляць пры кожнай змене гучнасці
+    Manage Saved Channels: Кіраванне захаванымі каналамі ({channelCount})
+    Saved Channels: Захаваныя налады каналаў
+    Enable Saved Channel Settings Sync: Сінхранізаваць захаваныя налады каналаў
+    Disable Saved Channel Settings Sync: Спыніць сінхранізацыю захаваных налад каналаў
+    Search Channels: Шукаць каналы
+    No Saved Channels: Асобныя налады каналаў яшчэ не захоўваліся
+    No Matching Channels: Няма каналаў, якія адпавядаюць пошуку
+    Forget Channel: Забыць усе налады гэтага канала
+    Forget Value: Забыць гэту наладу
+    Add Setting: Запомніць яшчэ адну наладу для гэтага канала
+    Video Quality: Якасць відэа
+    Subtitles Enabled: Субцітры ўключаныя
+    Volume: Гучнасць
+  Download Settings:
+    Download Settings: Спампоўванні
+    Enable Downloads: Уключыць спампоўванне
+    Managed Tools Download Started Template: 'Не знойдзена неабходнае вонкавае праграмнае забеспячэнне: {tools}. Спампоўваюцца кіраваныя копіі…'
+    Managed Tools Download Finished Template: Спампоўванне {tools} завершана
+    Managed Tools Update Started Template: Знойдзена абнаўленне для {tools}. Спампоўванне…
+    Managed Tools Update Finished Template: Абнаўленне {tools} завершана
+    Managed Tools Update Available Template: Для {tools} даступна абнаўленне.
+    Update Managed Tools: Абнавіць
+    Managed Tools Download Error Template: 'Не ўдалося спампаваць кіраваныя інструменты: {errors}'
+    Download Folder: Папка спампоўванняў
+    Global Additional yt-dlp Arguments: Глабальныя дадатковыя аргументы yt-dlp
+    Concurrent Downloads: Адначасовыя спампоўванні
+    Bandwidth Limit: Абмежаванне прапускной здольнасці (КіБ/с, 0 — без абмежавання)
+    Choose Download Folder: Выбраць папку спампоўванняў
+    Download Templates: Шаблоны спампоўвання
+    Manage Download Templates: Кіраванне шаблонамі спампоўвання ({templateCount})
+    New Template: Новы шаблон
+    Template Source: Шаблон для рэдагавання або выкарыстання як асновы
+    Built-in Template: '{name} (убудаваны)'
+    Custom Template Name: '{name} (карыстальніцкі)'
+    Create Template Copy: Стварыць копію
+    Template Copy Name: 'Копія {name}'
+    Automatic Downloads: Аўтаматычныя спампоўванні
+    Manage Automatic Downloads: Кіраванне аўтаматычнымі спампоўваннямі ({channelCount})
+    Automatic Downloads Description: Выберыце шаблон спампоўвання і фільтры для кожнага канала, на які вы падпісаны. Адпаведныя відэа спампоўваюцца ў фоне пры абнаўленні стужак падпісак.
+    Automatic Downloads New Only: Пасля ўключэння канала спампоўванне пачнецца з наступнага новага відэа. Апублікаваныя раней відэа і архіў канала спампоўвацца не будуць.
+    Automatic Downloads No Channels: Падпішыцеся на канал, перш чым наладжваць аўтаматычныя спампоўванні.
+    No Matching Automatic Download Channels: Няма каналаў, якія адпавядаюць пошуку.
+    Automatic Downloads Livestreams: Прамыя трансляцыі
+    Minimum Duration Seconds: Мінімальная працягласць (секунды)
+    Maximum Duration Seconds: Максімальная працягласць (секунды)
+    Minimum File Size MB: Мінімальны памер файла (МБ)
+    Maximum File Size MB: Максімальны памер файла (МБ)
+    Maximum Age Days: Максімальны ўзрост (дні)
+    Title Includes: Загаловак змяшчае
+    Title Excludes: Загаловак не змяшчае
+    Title Filter Hint: Раздзяляйце некалькі фрагментаў загалоўка коскамі. Відэа павінна змяшчаць прынамсі адзін дададзены фрагмент і не змяшчаць ніводнага выключанага.
+  External Software Settings:
+    External Software Settings: Вонкавае праграмнае забеспячэнне
+    yt-dlp Source: Крыніца yt-dlp
+    yt-dlp Channel: Канал yt-dlp
+    Sources:
+      System: Сістэмная (PATH або карыстальніцкі шлях)
+      Managed: Пад кіраваннем OpenTubeX
+    Detected Version Template: 'Выяўленая версія yt-dlp: {version}'
+    Managed Not Downloaded: yt-dlp яшчэ не спампаваны. Каб спампаваць яго, націсніце кнопку ніжэй.
+    System yt-dlp Missing Warning: yt-dlp не знойдзены ў сістэме. Усталюйце яго, задайце карыстальніцкі шлях ніжэй або выберыце крыніцу «Пад кіраваннем OpenTubeX».
+    Download yt-dlp: Спампаваць yt-dlp
+    Update yt-dlp: Абнавіць yt-dlp
+    Checking yt-dlp: Праверка yt-dlp…
+    Downloading yt-dlp: Спампоўванне yt-dlp…
+    yt-dlp Downloaded Template: yt-dlp {version} спампаваны
+    yt-dlp Download Error Template: 'Не ўдалося спампаваць yt-dlp: {error}'
+    FFmpeg Source: Крыніца FFmpeg
+    Detected FFmpeg Version Template: 'Выяўленая версія FFmpeg: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg яшчэ не спампаваны. Каб спампаваць яго, націсніце кнопку ніжэй.
+    System FFmpeg Missing Warning: FFmpeg не знойдзены ў сістэме. Ён патрэбны для аб’яднання відэа і гуку, а таксама для пераўтварэння гуку. Усталюйце яго, задайце карыстальніцкі шлях ніжэй або выберыце крыніцу «Пад кіраваннем OpenTubeX».
+    Download FFmpeg: Спампаваць FFmpeg
+    Update FFmpeg: Абнавіць FFmpeg
+    Checking FFmpeg: Праверка FFmpeg…
+    Downloading FFmpeg: Спампоўванне FFmpeg…
+    FFmpeg Downloaded Template: FFmpeg {version} спампаваны
+    FFmpeg Download Error Template: 'Не ўдалося спампаваць FFmpeg: {error}'
+    Detected FFprobe Version Template: 'Выяўленая версія FFprobe: {version}'
+    FFprobe Managed Not Downloaded: FFprobe яшчэ не спампаваны. Каб спампаваць яго разам з FFmpeg, націсніце кнопку ніжэй.
+    System FFprobe Missing Warning: FFprobe не знойдзены ў сістэме. Ён патрэбны для праверкі медыяфайлаў падчас апрацоўкі. Усталюйце яго побач з FFmpeg або выберыце крыніцу «Пад кіраваннем OpenTubeX».
+    Checking FFprobe: Праверка FFprobe…
+    Download FFmpeg and FFprobe: Спампаваць FFmpeg і FFprobe
+    Update FFmpeg and FFprobe: Абнавіць FFmpeg і FFprobe
+    Downloading FFmpeg and FFprobe: Спампоўванне FFmpeg і FFprobe…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg і FFprobe {version} спампаваныя
+    FFmpeg and FFprobe Download Error Template: 'Не ўдалося спампаваць FFmpeg і FFprobe: {error}'
+    Managed Tool Already Current Template: '{tool} {version} ужо абноўлены да апошняй версіі'
+    Managed Tool Updates: Абнаўленні кіраваных інструментаў
+    Update Modes:
+      Automatic: Абнаўляць аўтаматычна
+      Ask: Пытацца перад абнаўленнем
+      Manual: Абнаўляць толькі ўручную
+    yt-dlp Executable Path: Шлях да выканальнага файла yt-dlp
+    FFmpeg Executable Path: Шлях да выканальнага файла FFmpeg
+    Restricted Playback Authentication: Файлы cookie для прайгравання праз yt-dlp
+    Cookie Source: Крыніца файлаў cookie
+    Cookie Sources:
+      None: Няма
+      File: Файл
+      Browser: Браўзер
+    Cookie File: Файл cookie
+    Browser for Cookies: Браўзер для cookie
+    Browser Profile: Профіль браўзера (неабавязкова)
+    Browser Profile Placeholder: Назва профілю або шлях
+    Select Browser: Выберыце браўзер
+    Always Use Cookies: Заўсёды выкарыстоўваць cookie
+    Restricted Playback Authentication Hint: Прадвызначана OpenTubeX перадае гэтыя cookie у yt-dlp толькі пасля таго, як вы выбераце «Паспрабаваць з наладжанымі cookie» для відэа з абмежаваннем паводле ўзросту або толькі для ўдзельнікаў.
+    Restricted Playback Authentication Warning: Выкарыстанне yt-dlp з уліковым запісам Google можа прывесці да часовых або пастаянных абмежаванняў уліковага запісу.
+  Privacy Settings:
+    Automatic History Retention: Аўтаматычны тэрмін захоўвання гісторыі (у днях)
+    Automatic History Retention Placeholder: Пакіньце пустым, каб захоўваць заўсёды
+    Automatic History Retention Tooltip: Пакіньце пустым, каб захоўваць гісторыю заўсёды. Калі захаваць лік, старыя запісы будуць выдалены цяпер і надалей будуць выдаляцца аўтаматычна, пакуль праграма адкрыта.
+    History Retention Saved: Тэрмін захоўвання гісторыі захаваны
+    Invalid History Retention Days: Увядзіце цэлы лік дзён, большы за нуль
+    Enable Watch Statistics: Уключыць статыстыку праглядаў
+    Week Starts On: Першы дзень тыдня
+    Cache Video Metadata: Гісторыя метаданых
+    Cache Video Metadata Tooltip: Захоўвае ўсе версіі метаданых наведаных вамі відэа, якія падтрымліваюцца, у тым ліку назвы, мініяцюры і апісанні. Прадвызначана адключана, бо захоўванне гісторыі метаданых займае больш месца на дыску.
+    Watched Percentage Threshold: Парог прагледжанага ў працэнтах
+    Watched Percentage Threshold Tooltip: Відэа пазначаюцца прагледжанымі, калі дасягнуты выбраны працэнт і застаецца не больш за 2 хвіліны. Пры 0% яны пазначаюцца на пачатку прайгравання. Пры 100% яны пазначаюцца ў канцы прайгравання.
+    Clear Video Metadata Cache: Ачысціць кэш метаданых відэа
+    Are you sure you want to clear the video metadata cache?: Ачысціць кэшаваныя назвы, мініяцюры і апісанні відэа?
+    Failed to clear video metadata cache: Не ўдалося ачысціць кэш метаданых відэа
+    Video metadata cache has been cleared: Кэш метаданых відэа ачышчаны
+    Video Metadata Cache Size: 'Кэш метаданых відэа: {size}'
+  Storage Settings:
+    Storage: Сховішча
+    Downloaded Media: Улічаныя спампаваныя медыяфайлы
+    Storage Breakdown: Размеркаванне сховішча
+    Shown Total: Паказаная сума
+    Calculating: Вылічэнне…
+    Not Available: Дакладны памер недаступны
+    At Least: Не менш за {size}
+    Failed To Read Storage: Не ўдалося прачытаць памер некаторых даных у сховішчы
+    Downloaded Media Description: Файлы відэа, аўдыя і субцітраў, якія ўсё яшчэ ўлічваюцца ў гісторыі спампоўванняў.
+    Selected Download Folders: Выбраныя карыстальнікам папкі для спампоўванняў
+    Download History Records: Запісы гісторыі спампоўванняў
+    Download History Records Description: '{count} завершаны запіс спампоўвання. Гэты запіс змяшчае стан і размяшчэнне файлаў, але не самі спампаваныя медыяфайлы. | {count} завершаныя запісы спампоўванняў. Гэтыя запісы змяшчаюць стан і размяшчэнне файлаў, але не самі спампаваныя медыяфайлы. | {count} завершаных запісаў спампоўванняў. Гэтыя запісы змяшчаюць стан і размяшчэнне файлаў, але не самі спампаваныя медыяфайлы.'
+    Clear Download History Records: Ачысціць запісы гісторыі спампоўванняў
+    Clear Download History Confirmation: Ачысціць усе запісы завершаных спампоўванняў?
+    Download Files Stay On Disk: Спампаваныя файлы застануцца на дыску, але больш не будуць паказвацца на старонцы «Спампоўванні».
+    Clear Records: Ачысціць запісы
+    Replaceable Caches: Кэшы, якія можна аднавіць
+    Application Caches: Кэшы праграмы
+    Browser Caches: Кэшы браўзера
+    Browser Caches Hint: Кэшы HTTP, GPU, кода, шэйдараў, сэрвіс-воркераў і слоўнікаў Chromium.
+    Stored App Data: Захаваныя даныя праграмы
+    Browser Runtime Data: Працоўныя даныя браўзера
+    Browser Runtime Data Hint: Сеансавыя і лакальныя сховішчы Chromium, cookie, стан прыватнасці і сеткі, а таксама файлы збояў.
+    Subscription Feed Cache: Кэш падпісак і стужкі
+    Subscription Feed Cache Description: Захоўвае атрыманыя відэа з падпісак, Shorts, жывыя трансляцыі і допісы. OpenTubeX створыць яго нанова пры наступным абнаўленні стужкі.
+    Clear Subscription Feed Cache: Ачысціць кэш падпісак і стужкі
+    Clear Subscription Feed Cache Confirmation: Ачысціць кэш падпісак і стужкі?
+    Subscription Feed Cache Effect: Стужкі падпісак могуць быць пустымі да абнаўлення. Вашы падпіскі і профілі не зменяцца.
+    Session Search Cache: Сеансавы кэш пошуку
+    In Memory: У памяці
+    Session Search Cache Description: '{count} пошукавы запыт кэшаваны ў памяці для хутчэйшага вяртання назад. Гэты кэш выдаляецца пры закрыцці OpenTubeX. | {count} пошукавыя запыты кэшаваны ў памяці для хутчэйшага вяртання назад. Гэты кэш выдаляецца пры закрыцці OpenTubeX. | {count} пошукавых запытаў кэшавана ў памяці для хутчэйшага вяртання назад. Гэты кэш выдаляецца пры закрыцці OpenTubeX.'
+    Clear Session Search Cache: Ачысціць сеансавы кэш пошуку
+    Clear Session Search Cache Confirmation: Ачысціць сеансавы кэш пошуку?
+    Session Search Cache Effect: Кэшаваныя старонкі вынікаў будуць выдалены. Захаваная гісторыя пошуку не зменіцца.
+    HTTP Cache: Кэш HTTP
+    HTTP Cache Description: Electron захоўвае сеткавыя адказы на дыску, каб паўторныя запыты маглі загружацца без новага спампоўвання тых самых даных. OpenTubeX пры патрэбе стварае гэты кэш нанова.
+    Managed By Electron: Кіруецца Electron
+    Clear HTTP Cache: Ачысціць кэш HTTP
+    Clear HTTP Cache Confirmation: Ачысціць кэш HTTP Electron?
+    HTTP Cache Effect: Падчас паўторнага стварэння кэша выявы і іншыя сеткавыя рэсурсы могуць адзін раз загрузіцца павольней.
+    Tab Image Cache: Мініяцюры ўкладак і аватары каналаў
+    Tab Image Cache Description: Захоўвае выявы перадпрагляду і аватары каналаў для адкрытых і адноўленых укладак. OpenTubeX стварае іх нанова падчас выкарыстання ўкладак.
+    Clear Tab Image Cache: Ачысціць кэш выяў укладак
+    Clear Tab Image Cache Confirmation: Ачысціць мініяцюры ўкладак і аватары каналаў?
+    Tab Image Cache Effect: Выявы ва ўкладках могуць ненадоўга знікнуць і будуць створаны нанова падчас выкарыстання гэтых укладак.
+    Playback Caches: Кэшы прайгравання
+    Playback Caches Description: Захоўвае URL патокаў yt-dlp паміж сеансамі праграмы, а таксама файлы прайгравальніка YouTube. Кэш URL дзейнічае толькі для патокаў, атрыманых праз yt-dlp.
+    Playback URL Cache Entry Size: Абмежаванне кэша URL патокаў yt-dlp
+    Playback URL Cache Entry Size Tooltip: Вызначае найбольшы памер кожнага кэшаванага запісу патоку yt-dlp. Задайце 0 МБ, каб адключыць пастаяннае кэшаванне патокаў yt-dlp.
+    Clear Playback Caches: Ачысціць кэшы прайгравання
+    Clear Playback Caches Confirmation: Ачысціць кэшы yt-dlp і прайгравальніка?
+    Playback Caches Effect: Наступны запыт на лакальнае прайграванне можа заняць больш часу, пакуль даныя патоку і прайгравальніка будуць атрыманы нанова.
+    Clear Cache: Ачысціць кэш
+    History Data: Захаваныя гісторыі
+    Video Metadata Description: Захоўвае ранейшыя назвы, мініяцюры і апісанні відэа, якія падтрымліваюцца. Пасля выдалення старыя версіі немагчыма аднавіць.
+    Video Metadata Effect: Захаваныя версіі метаданых будуць выдалены назаўсёды. Бягучыя звесткі пра відэа можна будзе атрымаць паўторна.
+    Watch History: Гісторыя і статыстыка праглядаў
+    Watch History Description: Гісторыя праглядаў захоўвае прагледжаныя відэа і ход прагляду. Статыстыка праглядаў захоўвае штодзённыя вынікі. Тэрмін захоўвання дзейнічае толькі для гісторыі праглядаў.
+    Clear Watch Statistics: Ачысціць статыстыку праглядаў
+    Watch History Effect: Запісы прагледжаных відэа і захаваны ход прагляду будуць выдалены. Статыстыка праглядаў застанецца.
+    Clear Watch Statistics Confirmation: Выдаліць усю статыстыку праглядаў?
+    Watch Statistics Effect: Штодзённыя вынікі праглядаў будуць выдалены. Гісторыя праглядаў застанецца.
+    Search History: Гісторыя пошуку
+    Search History Description: Захоўвае пошукавыя запыты, якія вы вырашылі запомніць.
+    Delete Search History: Выдаліць гісторыю пошуку
+    Delete Search History Confirmation: Выдаліць усю захаваную гісторыю пошуку?
+    Search History Effect: Захаваныя прапановы з вашых папярэдніх пошукаў знікнуць. Кэш бягучага сеанса застанецца.
+    Other User Data: Іншыя даныя карыстальніка
+    Other Profile Files: Іншыя файлы профілю
+    Other Profile Files Hint: Рэзервовыя копіі, часовыя файлы і элементы профілю, якія OpenTubeX пакуль не распазнае.
+    Subscriptions And Profiles: Падпіскі і профілі
+    Subscriptions And Profiles Description: Захоўвае падпіскі на каналы, назвы профіляў і прыналежнасць да профіляў.
+    Subscriptions And Profiles Effect: Усе падпіскі і дадатковыя профілі будуць выдалены назаўсёды. Даныя кэша стужкі таксама будуць ачышчаны.
+    Playlists Description: Захоўвае назвы і апісанні спісаў прайгравання, а таксама захаваныя відэа.
+    Playlists Effect: Кожны спіс прайгравання і пералік захаваных у ім відэа будуць выдалены назаўсёды. Спампаваныя медыяфайлы застануцца.
+    Settings And Sessions: Налады, сеансы ўкладак і напаміны
+    Settings And Sessions Description: Захоўвае налады праграмы, укладкі, якія можна аднавіць, і напаміны пра жывыя трансляцыі. Адкрыйце папку профілю, каб праглядзець гэтыя файлы або зрабіць іх рэзервовую копію; гэтая старонка іх не выдаляе.
+    Cleanup Complete: Ачыстка сховішча завершана
+    Cleanup Failed: Не ўдалося ачысціць сховішча
+  Subscription Settings:
+    Fetch Feed on Startup: Атрымліваць стужку пры запуску
+    Show New Content Feed: Паказваць стужку новага змесціва
+    Show New Content Indicators: Паказваць індыкатары новага змесціва
+    Show Scheduled Live Streams / Premieres First: Спачатку паказваць запланаваныя жывыя трансляцыі і прэм'еры
+    Auto Refresh Interval: Інтэрвал аўтаматычнага абнаўлення
+    Videos Auto Refresh Interval: Інтэрвал аўтаматычнага абнаўлення відэа
+    Shorts Auto Refresh Interval: Інтэрвал аўтаматычнага абнаўлення Shorts
+    Live Auto Refresh Interval: Інтэрвал аўтаматычнага абнаўлення жывых трансляцый
+    Posts Auto Refresh Interval: Інтэрвал аўтаматычнага абнаўлення допісаў
+  Distraction Free Settings:
+    Sections:
+      Visible While Paused: Бачныя падчас паўзы ў поўным акне або поўнаэкранным рэжыме
+    Hide Channel Avatars: Хаваць аватары каналаў
+    Shorten View Counts: Скарачаць колькасць праглядаў і ўпадабанняў каментарыяў
+    Hide Comment Translation Buttons: Хаваць кнопкі перакладу каментарыяў
+    Hide Home: Хаваць галоўную
+    Hide Live Chat Replay: Хаваць паўтор жывога чата
+    Disable A-B Repeat: Адключыць паўтор A-B
+    Hide End-Screen Annotations: Хаваць анатацыі на канцавой застаўцы
+    Hide Paid Promotion Badge: Хаваць пазнаку платнай рэкламы
+    Show Player Controls: Паказваць элементы кіравання прайгравальнікам
+    Show Video Title: Паказваць назву відэа
+    Show Bottom Right Actions Dock: Паказваць панэль дзеянняў унізе справа
+    Paused Interface Hide Delay: Затрымка схавання інтэрфейсу падчас паўзы
+  Data Settings:
+    Data And Storage: Даныя і сховішча
+    Profile Directory: Папка профілю
+    Open Profile Directory: Адкрыць папку профілю
+    Search history file: Файл гісторыі пошуку
+    Settings File: Файл налад
+    Search history: Гісторыя пошуку
+    Import search history: Імпартаваць гісторыю пошуку
+    Export search history: Экспартаваць гісторыю пошуку
+    Import Settings: Імпартаваць налады
+    Export Settings: Экспартаваць налады
+    Settings Tooltip: Налады, якія залежаць ад аперацыйнай сістэмы або карыстальніка ці з'яўляюцца эксперыментальнымі, нельга экспартаваць або імпартаваць (напрыклад, проксі, вонкавы прайгравальнік, папку здымкаў экрана...)
+    Invalid JSON row, skipping item: Няправільны JSON у радку {row}, элемент прапушчаны
+    All search history has been successfully imported: Уся гісторыя пошуку паспяхова імпартавана
+    All search history has been successfully exported: Уся гісторыя пошуку паспяхова экспартавана
+    All settings have been successfully imported: Усе налады паспяхова імпартаваны
+    All settings have been successfully exported: Усе налады паспяхова экспартаваны
+    Setting object has insufficient data, skipping item: Аб'ект налады змяшчае недастаткова даных, элемент прапушчаны
+    Unknown setting key: 'Невядомы ключ налады: {key}'
+    Non-transferable setting key: 'Ключ налады нельга перанесці: {key}'
+    Import subscriptions formats: 'Фарматы, якія падтрымліваюцца: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), рэзервовая копія LibreTube або экспарт FreeTube (.json)'
+    Import history formats: 'Фарматы, якія падтрымліваюцца: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), рэзервовая копія LibreTube (.json)'
+    Import playlists formats: 'Фарматы, якія падтрымліваюцца: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'Фарматы, якія падтрымліваюцца: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+  Sync Settings:
+    Sync Settings: Сінхранізацыя
+    Enable Sync: Уключыць сінхранізацыю
+    Privacy Passphrase: Кодавая фраза прыватнасці
+    Privacy Passphrase Hint: Выкарыстоўвайце кодавую фразу, адрозную ад пароля ўліковага запісу. Яна ніколі не пакідае гэтую прыладу і патрэбна на кожнай прыладзе; калі яе страціць, зашыфраваныя даныя сінхранізацыі немагчыма будзе аднавіць.
+    Privacy Policy: Палітыка прыватнасці гэтага сервера
+    Enhanced Privacy Enabled: Палепшаная прыватнасць уключана. Сервер захоўвае толькі зашыфраваныя даныя сінхранізацыі.
+    Enhanced Privacy Unsupported: Увага — гэты сервер не падтрымлівае палепшаную прыватнасць. Аператар сервера можа бачыць сінхранізаваныя даныя.
+    Description: Сінхранізуйце падпіскі, профілі, спісы прайгравання, гісторыю праглядаў, налады і адкрытыя ўкладкі з серверам сінхранізацыі OpenTubeX або LibreTube. Серверы LibreTube могуць падтрымліваць не ўсе магчымасці сінхранізацыі.
+    Server URL: URL сервера
+    Checking Server: Праверка сервера сінхранізацыі…
+    Server Unavailable: Не ўдалося злучыцца з гэтым серверам сінхранізацыі. Праверце URL і паўтарыце спробу.
+    Username: Імя карыстальніка
+    Log In: Увайсці
+    Register: Зарэгістравацца
+    Pair Another Device: Спалучыць іншую прыладу
+    Pair With Existing Device: Спалучыць з наяўнай прыладай
+    Device Name: Назва прылады
+    This Device: Гэта прылада
+    Device Name Required: Увядзіце назву гэтай прылады.
+    Pairing Device Name Hint: Выберыце назву, якую вы пазнаеце на прыладзе, дзе будзе пацверджаны гэты запыт.
+    Create Pairing Code: Стварыць код спалучэння
+    Creating Pairing Code: Стварэнне бяспечнага кода спалучэння…
+    Pairing QR Alt: QR-код спалучэння для {device}
+    Scan Pairing Code: На ўжо злучанай прыладзе адкрыйце «Спалучыць іншую прыладу» і адскануйце гэты код.
+    Pairing Code: Код спалучэння
+    Use Text Pairing Code: Выкарыстаць тэкставы код
+    Show QR Code: Паказаць QR-код
+    Text Pairing Code Hint: Скапіруйце гэты код на наяўную прыладу. Ён змяшчае сакрэт спалучэння, таму пасля спалучэння ачысціце яго з гісторыі буфера абмену.
+    Pairing QR Warning: Паказвайце гэты код толькі даверанай, ужо злучанай прыладзе, з якой будзе пацверджаны запыт. Тэрмін дзеяння кода скончыцца праз дзве хвіліны.
+    Pairing Expires: Тэрмін дзеяння кода спалучэння скончыцца ў {time}.
+    Verifying Pairing: Праверка перададзенага ключа прыватнасці…
+    Completing Pairing: Завяршэнне спалучэння прылады…
+    Compare Pairing Codes: Параўнайце коды спалучэння
+    Pairing Code Match Hint: Пацвярджайце, толькі калі гэты код супадае з кодам на вашай наяўнай прыладзе.
+    Pairing Codes Match: Коды супадаюць
+    Pairing Approval Code Hint: Не закрывайце гэта акно і параўнайце гэты код з кодам на новай прыладзе. Калі коды адрозніваюцца, не працягвайце на новай прыладзе.
+    Pairing Scan Hint: Адскануйце код спалучэння, паказаны на прыладзе, якую вы дадаяце.
+    Enter Pairing Code: Увесці код уручную
+    Pairing Code Entry Hint: Устаўце код спалучэння, паказаны на прыладзе, якую вы дадаяце.
+    Check Pairing Code: Праверыць код
+    Scan QR Code: Адсканіраваць QR-код
+    Waiting For Pairing Code: Чаканне кода спалучэння…
+    Checking Pairing Request: Праверка запыту на спалучэнне…
+    Approving Pairing Request: Шыфраванне і адпраўленне ключа прыватнасці…
+    Pairing Approval Warning: Пацвярджайце, толькі калі бачыце гэты запыт на прыладзе, якую дадаяце. Спалучэнне дае доступ да ўліковага запісу і перадае ключ прыватнасці.
+    Approve Pairing: Пацвердзіць спалучэнне
+    Try Again: Паўтарыць спробу
+    Scan Again: Адсканіраваць яшчэ раз
+    Camera Unavailable: OpenTubeX не ўдалося атрымаць доступ да камеры. Праверце дазвол на выкарыстанне камеры або ўвядзіце код спалучэння ўручную.
+    Pairing Unsupported: Гэты сервер сінхранізацыі не падтрымлівае бяспечнае спалучэнне прылад.
+    Pairing Failed: Не ўдалося спалучыць прыладу. Паўтарыце спробу з новым кодам.
+    Pairing Request Changed: Запыт на спалучэнне змяніўся, яго тэрмін скончыўся або ён ужо быў выкарыстаны. Стварыце новы код.
+    Pairing Server Mismatch: Гэты код належыць іншаму серверу сінхранізацыі.
+    Pairing Verification Unavailable: Няма зашыфраванай калекцыі сінхранізацыі, каб праверыць перададзены ключ. Сінхранізуйце наяўную прыладу і паўтарыце спробу.
+    Pairing Completed: Спалучэнне прылады завершана
+    Pairing Approved: Спалучэнне прылады пацверджана
+    Disconnect: Адлучыць
+    Delete Account: Выдаліць уліковы запіс сінхранізацыі
+    Delete Account Confirmation: Выдаліць уліковы запіс сінхранізацыі?
+    Delete Account Warning: Ваш уліковы запіс сінхранізацыі і ўсе даныя, захаваныя на гэтым серверы, будуць выдалены назаўсёды. Лакальныя даныя OpenTubeX не будуць выдалены.
+    Confirm Delete Account: Выдаліць уліковы запіс
+    Password Required: Патрабуецца пароль
+    Account Deleted: Уліковы запіс сінхранізацыі выдалены
+    Connected as: Злучана як {username}
+    Automatic Sync: Аўтаматычна сінхранізаваць пасля змен і кожныя пяць хвілін
+    Profiles: Профілі
+    Open Tabs: Адкрытыя ўкладкі і сеанс
+    Disable Setting Sync: Спыніць сінхранізацыю гэтай налады
+    Enable Setting Sync: Сінхранізаваць гэтую наладу
+    Sync Now: Сінхранізаваць цяпер
+    Downloading encrypted data: Спампоўванне зашыфраваных даных сінхранізацыі…
+    Syncing subscriptions: Сінхранізацыя падпісак…
+    Syncing playlists: Сінхранізацыя спісаў прайгравання…
+    Syncing history: Сінхранізацыя гісторыі праглядаў…
+    Syncing profiles: Сінхранізацыя профіляў…
+    Syncing open tabs: Сінхранізацыя адкрытых укладак і сеанса…
+    Syncing settings: Сінхранізацыя налад…
+    Uploading encrypted data: Запампоўванне зашыфраваных даных сінхранізацыі…
+    Finishing sync: Завяршэнне сінхранізацыі…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Апошняя сінхранізацыя: {date}'
+    History not supported: Гэта версія сервера не падтрымлівае сінхранізацыю гісторыі праглядаў.
+    Settings not supported: Гэта версія сервера не падтрымлівае сінхранізацыю налад.
+    Sync completed: Сінхранізацыя завершана
+    Sync failed: 'Памылка сінхранізацыі: {error}'
+    Data Loss Confirmation: Пацвердзіць сінхранізацыю з выдаленнем даных?
+    Data Loss Warning: Стан сервера прывядзе да выдалення {deleted} з {previous} раней сінхранізаваных элементаў {collection}. Гэта можа сведчыць пра няўдалую міграцыю або скід сервера. Працягвайце, толькі калі вы наўмысна выдаляеце гэтыя даныя і маеце рэзервовую копію.
+    Confirm Data Loss: Выдаліць і працягнуць
+  Proxy Settings:
+    Proxy Username: Імя карыстальніка проксі
+    Proxy Password: Пароль проксі
+    IP Block Recovery Script Path: Шлях да сцэнарыя аднаўлення пасля блакавання IP
+    Select IP Block Recovery Script File: Выберыце файл сцэнарыя аднаўлення пасля блакавання IP
+    Running IP block recovery script: Выконваецца сцэнарый аднаўлення пасля блакавання IP
+    IP block recovery script failed: 'Памылка сцэнарыя аднаўлення пасля блакавання IP (код выхаду: {exitCode})'
+    IP block recovery script finished: Сцэнарый аднаўлення пасля блакавання IP завершаны
+    Reloading video after IP block recovery: Перазагрузка відэа пасля аднаўлення ад блакавання IP
+    Failed to select IP block recovery script: Не ўдалося выбраць сцэнарый аднаўлення пасля блакавання IP
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: Уключыць адпраўленне даных у SponsorBlock
+    SponsorBlock Private User ID (optional): Прыватны ідэнтыфікатар карыстальніка SponsorBlock (неабавязкова)
+    SponsorBlock Private User ID Tooltip: Устаўце прыватны ідэнтыфікатар карыстальніка SponsorBlock з пашырэння браўзера. Пакіньце поле пустым, каб выкарыстоўваць ідэнтыфікатар, створаны праграмай.
+    Generated SponsorBlock User ID: Створаны ідэнтыфікатар карыстальніка SponsorBlock
+    Generated SponsorBlock User ID Tooltip: Гэты створаны праграмай ідэнтыфікатар карыстальніка SponsorBlock можна выкарыстоўваць у пашырэнні браўзера або ў праграме на іншым камп'ютары.
+    Export Generated User ID: Экспартаваць створаны ідэнтыфікатар карыстальніка
+    Generated SponsorBlock User ID Copy Button: Скапіяваць створаны ідэнтыфікатар карыстальніка SponsorBlock
+    Generated SponsorBlock User ID Copied: Створаны ідэнтыфікатар карыстальніка SponsorBlock скапіраваны ў буфер абмену
+    Skip notification timeout: Час паказу апавяшчэння пра пропуск
+    Custom Color: Уласны колер
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Уключыць Return YouTube Dislike
+    Return YouTube Dislike Url: URL API Return YouTube Dislike (прадвызначана https://ryd-proxy.kavin.rocks)
+  Parental Control Settings:
+    Hide Uploader on Watch page: Хаваць аўтара на старонцы прагляду
+    Disable Channel Links: Адключыць спасылкі на каналы
+  Password Dialog:
+    Incorrect Password: Няправільны пароль
+    Unlock: Разблакіраваць
+    Unlocking: Разблакіраванне…
+  Search Settings: Налады пошуку
+  No Settings Found: Налады не знойдзены
+Tutorial:
+  Skip: Прапусціць
+  Next: Далей
+  Finish: Завяршыць
+  Got It: Зразумела
+  Welcome:
+    Title: Вітаем у OpenTubeX
+    Description: Вось некалькі элементаў кіравання, якія дапамогуць вам асвоіцца.
+  Navigation:
+    Title: Ваша бібліятэка заўсёды побач
+    Description: Пераходзьце з дапамогай навігацыі да падпісак, спісаў прайгравання, гісторыі і іншых раздзелаў.
+  Search:
+    Title: Знайдзіце або ўстаўце спасылку
+    Description: Знайдзіце відэа і каналы або ўстаўце URL відэа, якое падтрымліваецца, непасрэдна ў поле пошуку.
+  Tabs:
+    Title: Пакідайце старонкі адкрытымі ва ўкладках
+    Description: Адкрывайце некалькі старонак адначасова і не губляйце патрэбнае месца. Выберыце размяшчэнне ўкладак, якое вам пасуе.
+  Quick Settings:
+    Title: Наладзьце пад сябе
+    Description: Выберыце тэму і прадвызначаную якасць відэа. Гэтыя і іншыя налады можна ў любы час змяніць у меню профілю, а каб пераключыць профіль, пстрыкніце меню правай кнопкай мышы.
+  Import Data:
+    Title: Перанясіце свае даныя
+    Description: Пры жаданні імпартуйце падпіскі, гісторыю, спісы прайгравання, гісторыю пошуку або налады з іншай праграмы, якая падтрымліваецца, ці з рэзервовай копіі.
+    Action: Імпартаваць даныя
+    Not Now: Не цяпер
+  Settings Moved:
+    Title: Налады перамешчаны
+    Description: Каб адкрыць панэль хуткага кіравання, выберыце свой профіль уверсе справа. Каб адразу перайсці да выбару профілю, пстрыкніце яго правай кнопкай мышы. Значок шасцярэнькі ў гэтым меню адкрывае ўсе налады. Раздзелы «Пра праграму» і «Спампоўванні» таксама перамешчаны сюды.
+About:
+  Commit: Каміт
+  Licensed under the {licenseLink}: Ліцэнзія — {licenseLink}
+  Fluxer: Далучыцца да нашай супольнасці ў Fluxer
+  Matrix: Matrix
+  Email: Электронная пошта
+  Please read the {roomRulesLink}: Азнаёмцеся з {roomRulesLink}
+  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX створаны дзякуючы {creditsPageLink}
+Profile:
+  Profile Icon: Значок профілю
+  Choose an Emoji: Выбраць эмодзі
+  Custom Emoji: Уласны эмодзі
+  Emoji: Эмодзі
+  Choose Image: Выбраць выяву
+  Crop Image: Абрэзаць выяву
+  Zoom: Маштаб
+  Apply Crop: Ужыць абразанне
+  Transparent: Празрысты
+  Use Initial: Выкарыстоўваць ініцыял
+  The selected image could not be loaded: Не ўдалося загрузіць выбраную выяву
+  Theme Color: Колер тэмы
+Channel:
+  Channel Name Unavailable: Назва канала недаступная
+  Search Result Types: Тыпы вынікаў пошуку
+  All Results: Усе
+  View All: Паказаць усе
+Video:
+  Includes paid promotion: Ёсць платная рэклама
+  Age Restricted Badge: Узроставыя абмежаванні
+  Queue: Чарга
+  Play Next: Прайграць наступным
+  Add to Queue: Дадаць у чаргу
+  Added to Play Next: Відэа прайграецца наступным
+  Added to Queue: Відэа дададзена ў чаргу
+  Clear Queue: Ачысціць чаргу
+  Queue Video Count: '{count} відэа | {count} відэа | {count} відэа'
+  Remove from Queue: Выдаліць {title} з чаргі
+  Drag to Reorder Queue: Перацягніце {title}, каб змяніць парадак у чарзе
+  Reorder Queue Item: Змяніць пазіцыю {title}
+  Reorder Queue Item Instructions: Каб перамясціць гэта відэа ў чарзе, націскайце клавішы са стрэлкамі ўверх і ўніз.
+  Queue Item Moved: Відэа {title} перамешчана на пазіцыю {position} з {total}.
+  Queue Item Cannot Move Up: Немагчыма перамясціць {title} вышэй. Яно ўжо на пазіцыі 1 з {total}.
+  Queue Item Cannot Move Down: Немагчыма перамясціць {title} ніжэй. Яно ўжо на пазіцыі {total} з {total}.
+  Metadata: Звесткі пра відэа
+  Close Metadata: Закрыць звесткі пра відэа
+  Collapse Playlist: Згарнуць плэйліст
+  Expand Playlist: Разгарнуць плэйліст
+  Metadata Cache:
+    Title History: Гісторыя назваў
+    Thumbnail History: Гісторыя мініяцюр
+    Description History: Гісторыя апісанняў
+    Previous Version: Папярэдняя версія {number}
+    Empty: (пуста)
+  Fetching Streams: Атрыманне патокаў праз yt-dlp…
+  Transcript:
+    Title: Расшыфроўка
+    Search: Шукаць у расшыфроўцы
+    Language: Мова расшыфроўкі
+    Save: Захаваць
+    Show: Паказаць расшыфроўку
+    Hide: Схаваць расшыфроўку
+    Close: Закрыць расшыфроўку
+    Copied: Расшыфроўка скапіявана ў буфер абмену
+    Saved: Расшыфроўка захавана
+    Save Error: Не ўдалося захаваць расшыфроўку
+    Text File: Тэкставы файл
+    Unavailable: Для гэтага відэа няма расшыфроўкі.
+    Load Error: Не ўдалося загрузіць расшыфроўку.
+    Empty: У гэтай расшыфроўцы няма тэксту.
+    No Results: Ніводны фрагмент расшыфроўкі не адпавядае пошукаваму запыту.
+  Retry With Built-in Extraction: Паўтарыць з убудаваным сродкам вымання
+  Retry With yt-dlp Extraction: Паўтарыць з выманнем праз yt-dlp
+  Reloading video after streaming URL error: Перазагрузка відэа пасля памылкі URL патоку
+  Configure Restricted Playback Cookies Hint: Наладзьце кукі ў раздзеле «Налады → Вонкавае праграмнае забеспячэнне → Кукі прайгравання yt-dlp».
+  Try With Configured Cookies: Паспрабаваць з наладжанымі кукі
+  Restricted Playback Authentication Failed Template: 'yt-dlp не змог атрымаць доступ да гэтага відэа з наладжанымі кукі: {error}'
+  Private: Прыватныя відэа нельга глядзець у OpenTubeX, бо для гэтага трэба ўвайсці ў Google з уліковага запісу ўладальніка відэа.
+  Unmark As Watched: Пазначыць як непрагледжанае
+  Video has been unmarked as watched: Відэа пазначана як непрагледжанае
+  Save Channel Playback Speed: Захаваць хуткасць прайгравання для канала
+  Channel Playback Speed Saved: Хуткасць прайгравання для канала захавана
+  Save Channel Video Quality: Захаваць якасць відэа для канала
+  Channel Video Quality Saved: Якасць відэа для канала захавана
+  Save Channel Subtitles State: Захаваць стан субцітраў для канала
+  Channel Subtitles State Saved: Стан субцітраў для канала захаваны
+  Save Channel Volume: Захаваць гучнасць для канала
+  Channel Volume Saved: Гучнасць для канала захавана
+  Save Channel Setting: Захаванне налады канала…
+  Channel Setting Already Set: 'Для налады {setting} ужо зададзена значэнне {value}'
+  Video has been saved to {playlistName}: Відэа захавана ў спісе прайгравання {playlistName}
+  Video has been removed from {playlistName}: Відэа выдалена са спіса прайгравання {playlistName}
+  There was a problem saving the video to {playlistName}: Не ўдалося захаваць відэа ў спісе прайгравання {playlistName}
+  There was a problem removing the video from {playlistName}: Не ўдалося выдаліць відэа са спіса прайгравання {playlistName}
+  Failed to load collaborators: Не ўдалося загрузіць спіс суаўтараў
+  Notify me: Паведаміць мне
+  Notification on: Апавяшчэнне ўключана
+  Notification enabled: Вы атрымаеце апавяшчэнне, калі пачнецца гэта відэа
+  Notification cancelled: Апавяшчэнне пра пачатак скасавана
+  Notification unavailable: Сістэмныя апавяшчэнні недаступныя
+  Scheduled video starting: Запланаванае відэа пачынаецца
+  Live notification body: '{videoTitle} пачынаецца зараз'
+  Premiere: Прэм’ера
+  AI: ШІ
+  AI-generated content: Змесціва, створанае ШІ
+  Collaborators: Суаўтары
+  Live Chat Replay: Паўтор жывога чата
+  Show Live Chat: Паказаць жывы чат
+  Show Live Chat Replay: Паказаць паўтор жывога чата
+  Close Live Chat: Закрыць жывы чат
+  Close Live Chat Replay: Закрыць паўтор жывога чата
+  Live Chat Settings: Налады жывога чата
+  Show Live Chat Timestamps: Паказваць час паведамленняў
+  Chat Filter: Фільтр чата
+  Top Chat: Папулярныя паведамленні
+  All Messages: Усе паведамленні
+  Popout Live Chat: Адкрыць чат у асобным акне
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Паўтор жывога чата ўключаны.  Падчас прайгравання відэа тут будуць з’яўляцца паведамленні чата.
+  Premiere started: Ідзе прэм’ера. Пачалася {timeAgo}
+  Sponsor Block category:
+    hook: Зачэпка/вітанне
+    highlight: Найлепшы момант
+    exclusive access: Эксклюзіўны доступ
+  Sponsor Block category short:
+    intro: Перапынак
+    interaction: Напамін пра ўзаемадзеянне
+    music offtopic: Не музыка
+    filler: Адступленні
+  Player:
+    Voice-over Translation:
+      Start: Перакласці
+      Cancel: Скасаваць
+      Progress: Падрыхтоўка закадравага перакладу…
+      Retry: Паўтарыць
+      Error: Не ўдалося выканаць закадравы пераклад. Паўтарыце спробу пазней.
+      Duration Error: Закадравы пераклад даступны толькі для відэа працягласцю да чатырох гадзін.
+    Caption Appearance:
+      Options: Параметры
+      Sample: Так выглядаюць субцітры
+    Auto-translate: Аўтапераклад
+    Sleep Timer:
+      Sleep Timer: Таймер сну
+      'Off': 'Выкл.'
+      Minutes: '{minutes} хвіл.'
+      End of video: Да канца відэа
+      Remaining: 'Засталося {time}'
+      Cancel timer: Скасаваць таймер
+      Timer ended: Таймер сну спрацаваў
+    A-B Repeat:
+      A-B Repeat: Паўтор A-B
+      On: Укл.
+      Off: Выкл.
+      Point A: Пункт A
+      Point B: Пункт B
+      Set Repeat Start: Вызначыць пачатак паўтору
+      Set Repeat End: Вызначыць канец паўтору
+      Pause Repeat: Прыпыніць паўтор A-B
+      Resume Repeat: Узнавіць паўтор A-B
+      Adjust Point: 'Змяніць пункт {point}, зараз {timestamp}'
+      Clear Range: Ачысціць дыяпазон паўтору A-B
+      End Before Start: Пункт B павінен быць пасля пункта A.
+      Outside Duration: Часавая адзнака павінна быць у межах відэа.
+      Cleared: Паўтор A-B ачышчаны
+    Zoom:
+      Zoom: Маштаб
+      'Off': 'Выкл.'
+    Auto-generated Caption Template: '{language} (створана аўтаматычна)'
+    Up next in {seconds}: Наступнае праз {seconds}
+    Resize dock: Змяніць памер панэлі
+    Play now: Прайграць зараз
+    MusicPlaybackRateOverride: Выяўлена музычнае відэа, хуткасць прайгравання — 1×
+    Normal: Звычайная
+    Set Default: Зрабіць прадвызначанай
+    Hide Annotations: Схаваць анатацыі
+    Show Annotations: Паказаць анатацыі
+    Hide: Схаваць
+    Show: Паказаць
+    Scroll Mini Player:
+      Back to Top: Вярнуцца ўверх
+      Return to Video Tab: Вярнуцца на ўкладку відэа
+      Hide: Схаваць міні-прайгравальнік
+      Play: Прайграць
+      Pause: Паўза
+      Drag Handle: Перамясціць міні-плэер
+    SponsorBlock:
+      CancelCurrentSegment: Скасаваць стварэнне сегмента
+      ClearSegments: Ачысціць сегменты
+      ClearSegmentsPrompt: Сапраўды ачысціць усе чарнавыя сегменты SponsorBlock для гэтага відэа?
+      CompleteSegmentsBeforeSubmitting: Запоўніце кожны чарнавы сегмент перад адпраўленнем.
+      CategoryLabel: Катэгорыя
+      ActionTypeLabel: Тып сегмента
+      DuplicateSegments: Чарнавыя сегменты не могуць паўтарацца.
+      EndAction: (Канец)
+      EndActionLabel: Канец
+      EndTimeAfterStart: Час заканчэння сегмента мусіць быць пазнейшым за час пачатку.
+      EndTimeBeforeVideoEnd: Час заканчэння сегмента мусіць быць у межах працягласці відэа.
+      EndTimeLabel: Час заканчэння сегмента
+      DisableAutoSkipTemporarily: Часова адключыць аўтаматычны пропуск SponsorBlock
+      EnableAutoSkipTemporarily: Зноў уключыць аўтаматычны пропуск SponsorBlock
+      Guidelines: Правілы
+      InspectSegment: Праверыць
+      InvalidStartTime: Увядзіце сапраўдны час пачатку сегмента.
+      NoSegmentsToSubmit: Перад адпраўленнем стварыце прынамсі адзін завершаны сегмент.
+      NowAction: (Зараз)
+      CloseInfoPanel: Закрыць звесткі SponsorBlock
+      OpenInfoPanel: Адкрыць звесткі SponsorBlock
+      OpenSubmissionMenu: Адкрыць меню адпраўлення
+      PreviewRequired: Праглядзіце кожны сегмент перад адпраўленнем.
+      PreviewSegment: Папярэдні прагляд
+      SaveSegment: Захаваць
+      SetSegmentEndNow: Закончыць сегмент зараз
+      StartAction: (Пачатак)
+      StartSegmentNow: Пачаць сегмент зараз
+      SubmissionBadRequest: SponsorBlock адхіліў запыт на адпраўленне.
+      SubmissionDuplicate: Гэта ўжо было адпраўлена.
+      SubmissionFailed: Не ўдалося адправіць сегменты SponsorBlock.
+      SubmissionForbidden: SponsorBlock адхіліў адпраўленне.
+      SubmissionRateLimited: SponsorBlock часова абмежаваў колькасць адпраўленняў.
+      SubmissionSuccess: Сегменты SponsorBlock адпраўлены.
+      SubmitSegment: Адправіць сегмент
+      SubmitSegments: Адправіць
+      StartTimeLabel: Час пачатку сегмента
+      TimeDivider: да
+      SkipPrompt: Прапусціць {segmentCategory}?
+      SkipPromptAction: Прапусціць
+      SkipToHighlight: Перайсці да найлепшага моманту?
+      SkippedToHighlight: Пераход да найлепшага моманту выкананы
+      SkipToastUnskip: Вярнуць сегмент
+      SkipToastReskip: Зноў прапусціць
+      MutedSegment: 'Гук для {segmentCategory} выключаны'
+      MuteToastUnmute: Уключыць гук
+      InfoPanelLoading: Сегменты яшчэ загружаюцца...
+      InfoPanelHasSegments: Для гэтага відэа ў базе даных ёсць сегменты!
+      InfoPanelNoSegments: Сегментаў не знойдзена
+      RefreshSegments: Абнавіць сегменты
+      RefreshInfo: Абнавіць звесткі SponsorBlock
+      ContributionStatsTitle: Ваш унёсак
+      ContributionStatsLoading: Загрузка статыстыкі ўнёску...
+      ContributionStatsError: Статыстыка ўнёску недаступная. Паспрабуйце абнавіць.
+      ContributionStatsNoUserId: Каб убачыць статыстыку ўнёску, адпраўце сегмент або імпартуйце свой ідэнтыфікатар карыстальніка SponsorBlock.
+      Submissions: Адпраўленні
+      Segments: Сегменты
+      TimeSaved: Зэканомлены час
+      AutoSkipEnabled: Аўтаматычна прапускаць сегменты
+      AutoSkipOn: 'Укл.'
+      AutoSkipOff: 'Выкл.'
+      WhitelistChannel: Дадаць канал у спіс дазволеных
+      ChannelWhitelisted: У спісе дазволеных
+      RemoveChannelFromWhitelist: Выдаліць канал са спіса дазволеных
+      MuteSegment: Выключыць гук сегмента
+      SkipSegment: Прапусціць сегмент
+      CloseSegmentActions: Закрыць дзеянні з сегментам
+      FullVideo: Усё відэа
+      FullVideoLabel: '{segmentCategory} · усё відэа'
+      MuteActionType: Выключыць гук
+      MutePrompt: Выключыць гук для {segmentCategory}?
+      SkipActionType: Прапусціць
+      LockedSegment: Заблакіраваны сегмент
+      UpvoteSegment: Прагаласаваць за
+      DownvoteSegment: Прагаласаваць супраць
+      VoteFailed: Не ўдалося адправіць голас у SponsorBlock.
+  Watch:
+    'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Да канца рэкламы перад відэа: {remindingTimeSeconds} с'
+    'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Да паўторнай спробы SABR: {remindingTimeSeconds} с'
+Playlist:
+  Close Playlist: Закрыць спіс прайгравання
+Change Format:
+  Local Video File: Лакальны відэафайл
+  Local Audio File: Лакальны аўдыяфайл
+  Online Video: Анлайн-відэа
+  Stream Source: Крыніца патоку
+  Stream Extraction Method: Спосаб вымання патоку
+  Playback Engine: Рухавік прайгравання
+  Streaming Protocol: Пратакол струменевай перадачы
+  Not Available For This Video: Недаступна для гэтага відэа
+  Protocols:
+    Progressive: Паслядоўная перадача
+  Descriptions:
+    Local File: Прайграецца непасрэдна са спампаванага файла на гэтай прыладзе
+    Online Video: Загружае фарматы струменевай перадачы з наладжанай анлайн-крыніцы
+    Dash: Адаптыўная якасць, некалькі аўдыядарожак і найвышэйшыя раздзяляльнасці
+    Legacy: Адзін файл з відэа і аўдыя, даступны толькі ў ніжэйшых раздзяляльнасцях
+    Audio: Толькі аўдыя, каб ашчаджаць трафік або слухаць у фонавым рэжыме
+  yt-dlp Fallback Template: 'yt-dlp не змог атрымаць патокі, таму выкарыстоўваецца ўбудаваны рухавік: {error}'
+  yt-dlp Default Clients Fallback: Выбраныя кліенты yt-dlp не змаглі атрымаць патокі для прайгравання, таму выкарыстоўваюцца прадвызначаныя кліенты yt-dlp
+  Built-in Fallback Template: 'Убудаваны рухавік не змог прайграць паток, таму выкарыстоўваецца yt-dlp: {error}'
+Share:
+  Share Post: Абагуліць допіс
+  Timestamp Link Copied: Спасылка на гэты момант скапіявана ў буфер абмену
+Context Menu:
+  Context Menu: Кантэкстнае меню
+  Select All: Выбраць усё
+  Save Image As…: Захаваць выяву як…
+  Copy Image: Скапіяваць выяву
+  Copy Image Address: Скапіяваць адрас выявы
+  Cancel Refresh: Скасаваць абнаўленне
+  Reload Videos: Перазагрузіць відэа
+  Reload Shorts: Перазагрузіць Shorts
+  Reload Live: Перазагрузіць жывыя трансляцыі
+  Reload Posts: Перазагрузіць допісы
+  Reload All Feeds: Перазагрузіць усе стужкі
+  Close Multiple Tabs: Закрыць {count} укладку | Закрыць {count} укладкі | Закрыць {count} укладак
+  Duplicate Tab: Дубляваць укладку
+  Duplicate Multiple Tabs: Дубляваць {count} укладку | Дубляваць {count} укладкі | Дубляваць {count} укладак
+  Move Tab: Перамясціць укладку
+  Move Tabs: Перамясціць укладкі
+  Move Tab to Group: Перамясціць укладку ў групу
+  Collapse Group: Згарнуць групу
+  Move Tabs to Group: Перамясціць укладкі ў групу
+  Manage Tab Groups…: Кіраваць групамі ўкладак…
+  To Beginning: У пачатак
+  To End: У канец
+  Close Tabs: Закрыць укладкі
+  To the Top: Уверх
+  To the Left: Улева
+  To the Bottom: Уніз
+  To the Right: Направа
+  Other Tabs: Іншыя ўкладкі
+  Copy YouTube Link: Скапіяваць спасылку YouTube
+  Copy YouTube Links: Скапіяваць спасылкі YouTube
+  Pin Tab: Замацаваць укладку
+  Pin Tabs: Замацаваць укладкі
+  Unpin Tab: Адмацаваць укладку
+  Unpin Tabs: Адмацаваць укладкі
+  Tab Color: Колер укладкі
+  Default: Прадвызначаны
+  Purple: Фіялетавы
+  Reopen Closed Tab: Зноў адкрыць закрытую ўкладку
+  Reload Tab: Перазагрузіць укладку
+  Reload Tabs: Перазагрузіць укладкі
+  Load Tab: Загрузіць укладку
+  Load Tabs: Загрузіць укладкі
+  Unload Tab: Выгрузіць укладку
+  Unload Tabs: Выгрузіць укладкі
+  Move Tab to Window: Перамясціць укладку ў акно
+  Move Tabs to Window: Перамясціць укладкі ў акно
+  Open in a New Tab: Адкрыць у новай укладцы
+  Open in a New Window: Адкрыць у новым акне
+  Copy Link: Скапіяваць спасылку
+  Copy Invidious Link: Скапіяваць спасылку Invidious
+  Search Selection in New Tab: Шукаць "{selection}" у новай укладцы
+  Search Selection in New Window: Шукаць "{selection}" у новым акне
+  Search With: Шукаць праз {engine}
+  Search With Multiple: Шукаць праз...
+  Selection Too Long: Вылучаны тэкст задоўгі для пошуку (> {count} знакаў)
+Tab Organizer:
+  Title: Арганізатар укладак
+  Open Tab Count: '{count} адкрытая ўкладка | {count} адкрытыя ўкладкі | {count} адкрытых укладак'
+  Search Label: Шукаць укладкі
+  Selected Count: 'Вылучана {count} укладка | Вылучана {count} укладкі | Вылучана {count} укладак'
+  Tab Count: '{count} укладка | {count} укладкі | {count} укладак'
+  Select All: Вылучыць усе
+  Select None: Зняць вылучэнне
+  Move To Group: Перамясціць вылучаныя ўкладкі ў групу
+  Choose Group: Выберыце групу
+  Ungrouped: Без групы
+  Pin: Замацаваць
+  Unpin: Адмацаваць
+  Load: Загрузіць
+  Unload: Выгрузіць
+  Unload All: Выгрузіць усе
+  Close All: Закрыць усе
+  Ungroup: Выдаліць з групы
+  Group Name: Назва групы
+  Color: Колер
+  No Color: Без колеру
+  Create Group: Стварыць групу
+  Expand Group: Разгарнуць групу
+  Collapse Group: Згарнуць групу
+  Expand Group Label: Разгарнуць {name}, {count} укладка | Разгарнуць {name}, {count} укладкі | Разгарнуць {name}, {count} укладак
+  Rename Group: Перайменаваць {name}
+  Change Group Color: Змяніць колер групы {name}
+  Move To Window: Перамясціць у акно
+  Choose Window: Выберыце акно
+  Select Tab: Вылучыць {title}
+  Active: Актыўная
+  Pinned: Замацаваная
+  Unloaded: Выгружаная
+  Playing: Прайграецца
+  Close Tab: Закрыць {title}
+  No Open Results: Ніводная адкрытая ўкладка не адпавядае гэтаму пошуку.
+  Recently Closed: Нядаўна закрытыя
+  Clear: Ачысціць
+  No Closed Results: Ніводная нядаўна закрытая ўкладка не адпавядае гэтаму пошуку.
+  Drag Tab: Перацягніце, каб перамясціць у групу
+Chapters:
+  Open Chapters: Адкрыць раздзелы
+  Close Chapters: Закрыць раздзелы
+  Copy Timestamp Link: Скапіяваць спасылку на {timestamp}
+Comments:
+  Comment Count: 1 каментарый | {count} каментары | {count} каментарыяў
+  Show Comments: Паказаць каментары
+  Getting comment replies, please wait: Атрыманне адказаў на каментарый, пачакайце
+  Reload Comments: Перазагрузіць каментары
+  Reply Count: 1 адказ | {replyCount} адказы | {replyCount} адказаў
+  Hide {replyCount} replies: Схаваць 1 адказ | Схаваць {replyCount} адказы | Схаваць {replyCount} адказаў
+  View 1 reply from {channelName}: Паказаць 1 адказ ад {channelName}
+  View {replyCount} replies from {channelName} and others: Паказаць адказы ({replyCount}) ад {channelName} і іншых
+  Comments are turned off: Каментары адключаныя
+  YouTube did not provide advertised replies: YouTube пазначыў, што гэты каментарый мае адказы, але не перадаў іх. Магчыма, іх выдалілі або схавалі, таму кнопка адказаў была прыбраная.
+  Pinned by you: Замацавана вамі
+  A reply is pinned: Адказ замацаваны
+  Filter loaded comments: Фільтраваць загружаныя каментары
+  Comment filters: Фільтры каментароў
+  From creator: Ад аўтара
+  Contains timestamps: Змяшчае пазнакі часу
+  Pin comment by author: Замацаваць каментарый ад {author}
+  Unpin comment by author: Адмацаваць каментарый ад {author}
+  Edited: (зменена)
+  Highlighted comment: Вылучаны каментарый
+  Highlighted reply: Вылучаны адказ
+  Search loaded comments: Шукаць у загружаных каментарах
+  Loaded comment search result count: 1 з {total} загружаных каментароў | {count} з {total} загружаных каментароў | {count} з {total} загружаных каментароў
+  No loaded comments match your filters: Ніводзін загружаны каментарый не адпавядае вашым фільтрам
+  YouTube comment link copied to clipboard: Спасылка на каментарый YouTube скапіяваная ў буфер абмену
+  Translate to {language}: Перакласці на {language}
+  Show original: Паказаць арыгінал
+  Translating comment, please wait: Пераклад каментарыя, пачакайце
+  Comment translation failed: Не ўдалося перакласці каментарый
+Description:
+  Copy Description: Скапіяваць апісанне
+  Description Copied: Апісанне скапіяванае ў буфер абмену
+  Video Category: 'Катэгорыя відэа:'
+  Video Tags: Тэгі відэа
+  Games: Гульні
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: Запаўняе прагалы ў перакладах, зробленых людзьмі, тэкстам, створаным ШІ. Пераклады людзей заўсёды маюць перавагу.
+    Update Relative Timestamps: Абнаўляе адносныя пазнакі часу ва ўсёй праграме, пакуль старонка адкрытая. Калі адключана, яны абнаўляюцца толькі пасля перазагрузкі або паўторнага адкрыцця старонкі.
+    Stream Extraction Method: |
+      Выберыце, як OpenTubeX атрымлівае плыні відэа. Каб выбраць yt-dlp, ён мусіць быць даступны.
+      Пры выкарыстанні yt-dlp відэа можа запускацца даўжэй.
+      Убудаваны метад не падтрымлівае перамотванне жывых трансляцый і прэм'ер.
+    Avoid translation: |
+      Адключае аўтаматычны пераклад назвы, апісання і раздзелаў відэа з боку YouTube.
+      Занадта шмат запытаў, напрыклад атрыманне назваў відэа ва ўсіх спісах, можа часова
+      пагоршыць надзейнасць праграмы.
+    Show Thumbnail Previews: Паказвае анімаваны перадпрагляд пры навядзенні на мініяцюры відэа.
+    Startup Behavior: |
+      Выберыце, што робіць OpenTubeX пры запуску.
+      «Загрузіць усе ўкладкі» адразу аднаўляе ўсе захаваныя ўкладкі, але відэа ў фонавых укладках не запускаецца аўтаматычна.
+      «Загрузіць раней загружаныя ўкладкі» паўторна загружае ўкладкі, якія былі загружаныя пры закрыцці OpenTubeX, а астатнія пакідае выгружанымі.
+      «Загрузіць апошнюю актыўную ўкладку» аднаўляе папярэдні сеанс, адкрываючы астатнія ўкладкі выгружанымі; яны загрузяцца, калі вы на іх націснеце.
+      «Пачаць з пустога сеанса» прапускае захаваныя ўкладкі і адкрывае новае акно.
+    Remember Tab Navigation History: Гісторыя пераходаў назад і наперад у кожнай укладцы захоўваецца і аднаўляецца пасля перазапуску OpenTubeX.
+  Proxy Settings:
+    IP Block Recovery Script Path: Шлях да файла сцэнарыя, які запускаецца пры выяўленні блакавання IP. OpenTubeX чакае яго завяршэння, а потым перазагружае відэа. Калі ўключаны рэзервовы метад, сцэнарый запускаецца толькі тады, калі гэты метад таксама не спрацаваў.
+  Player Settings:
+    Enable Caption Translations: Калі ўключана і відэа не мае адпаведнай арыгінальнай дарожкі, кнопка субцітраў і спалучэнне C аддаюць перавагу аўтаматычна перакладзенай дарожцы на пажаданай мове субцітраў.
+    Use Quick Playback Speed Bar: Паказвае справа сярод элементаў кіравання прайгравальнікам панэль хуткай змены хуткасці прайгравання. Калі ўключана ручное захаванне хуткасці прайгравання для асобных каналаў, на панэлі таксама ёсць кнопка захавання хуткасці для бягучага канала.
+    Multiply Seek Interval by Playback Rate: Калі ўключана, інтэрвалы перамотвання (клавішы са стрэлкамі і J/L) памнажаюцца на бягучую хуткасць прайгравання. Калі адключана, інтэрвалы застаюцца нязменнымі незалежна ад хуткасці прайгравання.
+    Show Playback Rate Adjusted Timestamp: Калі ўключана і хуткасць прайгравання адрозніваецца ад 1x, прайгравальнік паказвае пасля звычайнай пазнакі часу ў дужках пазнаку з улікам хуткасці.
+    Use YouTube-style Shorts: Паказвае Shorts у вертыкальнай сетцы на старонках падпісак і каналаў ды выкарыстоўвае прайгравальнік Shorts у стылі YouTube.
+    Loop Shorts: Калі ўключана, Shorts аўтаматычна запускаюцца спачатку. Калі адключана, Shorts спыняюцца ў канцы і паказваюць кнопку паўторнага прайгравання.
+    Show Skip Silence Toggle: Паказвае пераключальнік пропуску цішыні ў меню налад прайгравальніка.
+    Enable Skip Silence by Default: Уключае пропуск цішыні для новых укладак. Змена ў адной укладцы не ўплывае на іншыя.
+    Enable Video Zoom: Паказвае элемент кіравання маштабам у меню налад прайгравальніка і ўключае адпаведныя спалучэнні клавіш і элементы панарамавання.
+    Voice-over Translation: Пасля запыту перакладу адпраўляе ідэнтыфікатар відэа, працягласць і выбраную мову неафіцыйнаму сэрвісу закадравага перакладу Yandex. Прадвызначана адключана.
+    Hold to Double Playback Speed: Утрымлівайце прабел або левую кнопку мышы над прайгравальнікам, каб часова падвоіць бягучую хуткасць прайгравання.
+    Ambient Mode: Пашырае колеры відэа на прастору вакол прайгравальніка.
+    Default Volume: Недаступна, пакуль уключана «Запамінаць гучнасць». Адключыце «Запамінаць гучнасць», каб задаць фіксаваную пачатковую гучнасць для кожнага відэа.
+    Parallel Segment Loading: |
+      Колькі сегментаў відэа і аўдыя загадзя загружаць адначасова.
+      Большыя значэнні могуць дапамагчы пры павольным або нестабільным злучэнні, але патрабуюць больш прапускной здольнасці і памяці.
+      Таксама праз іх аўтаматычная ацэнка можа занізіць хуткасць злучэння і выбраць ніжэйшую якасць.
+      Плыні з абмежаваннем у адзін адначасовы запыт не ўлічваюць гэтую наладу.
+  Download Settings:
+    Download Folder: Відэа захоўваюцца ў гэтай папцы. Пакіньце поле пустым, каб выкарыстоўваць сістэмную папку «Спампоўванні».
+    Global Additional yt-dlp Arguments: Дадатковыя аргументы каманднага радка, якія перадаюцца yt-dlp пры кожным спампоўванні, напрыклад --cookies-from-browser firefox.
+    Concurrent Downloads: Найбольшая колькасць заданняў yt-dlp, якія могуць выконвацца адначасова.
+    Bandwidth Limit: Абмяжоўвае агульную хуткасць перадачы чаргі, размяркоўваючы гэтае значэнне паміж адначасовымі заданнямі. Увядзіце 0, каб зняць абмежаванне.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX можа выкарыстоўваць усталяваны ў сістэме yt-dlp або спампаваць уласную копію yt-dlp, захоўваць яе ў папцы даных карыстальніка і кіраваць ёю.
+    yt-dlp Channel: Выберыце канал выпускаў yt-dlp, які OpenTubeX будзе спампоўваць і якім будзе кіраваць. Для большасці карыстальнікаў рэкамендуецца Stable.
+    FFmpeg Source: OpenTubeX можа выкарыстоўваць усталяваныя ў сістэме FFmpeg і FFprobe або спампоўваць уласныя статычныя зборкі, захоўваць іх у папцы даных карыстальніка і кіраваць імі.
+    Managed Tool Updates: Выберыце, ці абнаўляць кіраваныя інструменты аўтаматычна, запытваць дазвол перад абнаўленнем або абнаўляць іх толькі ўручную адпаведнымі кнопкамі. Адсутныя інструменты ўсё роўна спампоўваюцца пры неабходнасці.
+    yt-dlp Executable Path: Прадвызначана OpenTubeX мяркуе, што yt-dlp можна знайсці праз зменную асяроддзя PATH. Пры неабходнасці тут можна задаць іншы шлях.
+    Cookie Source: Выберыце, ці мусіць yt-dlp для аўтэнтыфікаванага прайгравання чытаць файл cookie Netscape або файлы cookie з усталяванага браўзера.
+    Cookie File: Выберыце файл cookie ў фармаце Netscape для аўтэнтыфікаванага прайгравання.
+    Browser for Cookies: Падтрымка браўзераў вызначаецца з выбранага выканальнага файла yt-dlp. Пры запыце аўтэнтыфікаванага прайгравання OpenTubeX загадвае yt-dlp прачытаць файлы cookie з гэтага браўзера.
+    Browser Profile: Неабавязковая назва або папка профілю браўзера. Пакіньце поле пустым, каб выкарыстоўваць апошні адкрыты профіль.
+    Always Use Cookies: Выкарыстоўвае наладжаныя файлы cookie кожны раз, калі yt-dlp здабывае плыні. Гэта не пераключае метад здабывання плыняў на yt-dlp. Калі выбраны yt-dlp, могуць стаць даступнымі фарматы толькі для ўліковага запісу, у тым ліку палепшаны бітрэйт YouTube Premium, калі ўліковы запіс мае да яго доступ.
+    FFmpeg Executable Path: FFmpeg патрэбны для аб'яднання асобных плыняў відэа і аўдыя ды пераўтварэння аўдыя. Прадвызначана OpenTubeX мяркуе, што FFmpeg можна знайсці праз зменную асяроддзя PATH. Пры неабходнасці тут можна задаць іншы шлях.
+  Distraction Free Settings:
+    Shorten View Counts: Паказвае колькасць праглядаў і ўпадабанняў каментароў у скарочаным выглядзе, ужо акругленым YouTube, напрыклад 14 тыс. замест 14 000. Дакладная колькасць заўсёды паказваецца цалкам.
+    Hide Videos on Watch: Хавае прагледжаныя відэа ва ўкладках «Відэа», Shorts і «Ужывую» на старонках падпісак і каналаў. Гэта не ўплывае на ўкладку «Галоўная» на старонках каналаў
+  Subscription Settings:
+    Fetch Feed on Startup: Калі ўключана, OpenTubeX аўтаматычна атрымлівае стужку падпісак пры запуску і адкрыцці новага акна.
+    Show New Content Feed: Паказвае ўкладку «Новае» з элементамі стужкі падпісак, якіх не было падчас папярэдняга атрымання.
+    Show New Content Indicators: Паказвае маленькую кропку побач з элементамі стужкі падпісак, якіх не было падчас папярэдняга атрымання.
+    Show Scheduled Live Streams / Premieres First: Трымае запланаваныя жывыя трансляцыі і прэм'еры ўверсе стужкі падпісак. Калі адключана, яны застаюцца на месцы абвяшчэння да пачатку. Пасля адключэння адзін раз абнавіце стужку падпісак, каб атрымаць даты абвяшчэння для наяўных запланаваных элементаў.
+    Auto Refresh Interval: Як часта OpenTubeX аўтаматычна абнаўляе стужку падпісак, пакуль праграма адкрытая.
+  Theme Settings:
+    Show Progress as Notification: Замест агульнай панэлі ходу паказвае пастаяннае апавяшчэнне з бягучым ходам фонавых аперацый, напрыклад абнаўлення стужкі падпісак і спампоўвання кіраваных інструментаў.
+    Always Show Scrollbars: Заўсёды пакідае палосы пракруткі бачнымі. Калі адключана, яны знікаюць неўзабаве пасля спынення руху мышы і зноў з'яўляюцца, як толькі вы яе паварушыце.
+    Scroll Speed: Змяняе адлегласць пракруткі колам мышы і жэстамі кола сэнсарнай панэлі.
+    Use Fixed Tab Width: Задае ўсім укладкам на гарызантальнай панэлі аднолькавую шырыню замест падбору шырыні паводле назвы.
+    Use Grid Player Menu: Размяшчае меню налад відэапрайгравальніка ў выглядзе сеткі плітак замест спіса радкоў.
+The playlist is at the beginning. Enable loop to continue playing: Гэта пачатак спіса прайгравання. Уключыце паўтор, каб працягнуць прайграванне
+External link opening has been disabled in Settings → Privacy: Адкрыццё вонкавых спасылак адключана ў раздзеле «Налады» → «Прыватнасць»
+Screenshot Clipboard Success: Здымак экрана захаваны ў буферы абмену
+Screenshot Clipboard Error: Не ўдалося скапіяваць здымак экрана ў буфер абмену
+KeyboardShortcutPrompt:
+  Edit Hint: Выберыце спалучэнне клавіш, а потым націсніце новую камбінацыю. Каб выдаліць прызначэнне, націсніце Backspace або Delete.
+  Change Shortcut: Змяніць спалучэнне клавіш для дзеяння «{action}»
+  Press Shortcut: Націсніце спалучэнне клавіш…
+  Unassigned: Не прызначана
+  Reset Shortcut: Скінуць спалучэнне клавіш для дзеяння «{action}»
+  Reset to Defaults: Вярнуць прадвызначаныя налады
+  Shortcut Already Assigned: Спалучэнне клавіш ужо прызначана
+  Shortcut Conflict: '{shortcut} ужо прызначана для дзеянняў: {actions}. Прызначыць яго нанова?'
+  Reserved Shortcut Conflict: '{shortcut} зарэзервавана для дзеянняў: {actions}, таму яго нельга перапрызначыць.'
+  Reassign: Перапрызначыць
+  Sections:
+    App:
+      Tabs: "Праграма:\_Укладкі"
+      Search and Page: "Праграма:\_Пошук і старонка"
+      Window and View: "Праграма:\_Акно і выгляд"
+  New Tab: Стварыць новую ўкладку
+  Close Tab: Закрыць бягучую ўкладку
+  Reload Tab: Перазагрузіць бягучую ўкладку
+  Reopen Closed Tab: Зноў адкрыць апошнюю закрытую ўкладку
+  Next Tab: Перайсці да наступнай укладкі
+  Previous Tab: Перайсці да папярэдняй укладкі
+  Switch to Tab: Перайсці да ўкладкі 1–9
+  Toggle Tab Orientation: Пераключыць размяшчэнне ўкладак
+  Find in Page: Знайсці тэкст на бягучай старонцы
+  Find Next Match: Перайсці да наступнага супадзення
+  Find Previous Match: Перайсці да папярэдняга супадзення
+  Toggle Normal Playback Speed: Пераключыць паміж хуткасцю 1x і папярэдняй хуткасцю прайгравання
+  Toggle Skip Silence: Пераключыць пропуск цішыні
+  Set A-B Repeat Point A: Вызначыць пункт A паўтору A-B
+  Set A-B Repeat Point B: Вызначыць пункт B паўтору A-B
+  Clear A-B Repeat: Ачысціць паўтор A-B
+  Video Zoom In: Павялічыць відэа
+  Video Zoom Out: Паменшыць відэа
+  Tab Switcher: Пераключальнік укладак
+  Skip to Next Video: Перайсці да наступнага відэа ў спісе прайгравання або да наступнага рэкамендаванага відэа
+  Skip to Previous Video: Перайсці да папярэдняга відэа ў спісе прайгравання
+CommandPalette:
+  Title: Палітра каманд
+  Open: Адкрыць палітру каманд
+  Search Label: Шукаць каманды
+  Search Placeholder: Шукаць каманды і налады…
+  Results: Каманды
+  No Results: Адпаведных каманд няма
+  Result Count: Знойдзена 1 каманда | Знойдзены {count} каманды | Знойдзена {count} каманд
+  Move: Перамясціць
+  Run: Выканаць
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Перайсці да ўкладкі: {title}'
+  Switch Profile: 'Пераключыць профіль: {name}'
+  Open Playlist: 'Адкрыць спіс прайгравання: {name}'
+  Cancel Download: 'Скасаваць спампоўванне: {title}'
+  Groups:
+    App: Праграма
+    Navigation: Навігацыя
+    Tabs: Укладкі
+  Unavailable:
+    Current Page: Вы ўжо на гэтай старонцы
+    No History: У гэтым кірунку няма старонкі
+    Desktop: Даступна толькі ў праграме для настольнага камп'ютара
+    Build: Недаступна ў гэтай зборцы
+    One Tab: Спачатку адкрыйце яшчэ адну ўкладку
+    Active Tab: Гэта актыўная ўкладка
+    Active Profile: Гэта актыўны профіль
+    Download Finished: Гэтае спампоўванне больш не выконваецца
+    Video: Спачатку адкрыйце відэа
+Downloads:
+  Download: Спампаваць
+  Download Video: Спампаваць відэа
+  Download Playlist: Спампаваць спіс прайгравання
+  Downloading: Спампоўваецца
+  Queue: Чарга
+  Downloaded: Спампавана
+  Canceled: Скасавана
+  Open Downloads: Адкрыць спампоўванні
+  No Downloads: Спампоўванняў пакуль няма
+  No Downloads Description: Пачатыя вамі спампоўванні з'явяцца тут.
+  Clear Failed Canceled Skipped And Missing: Прыбраць няўдалыя, скасаваныя, прапушчаныя і адсутныя
+  Clear From List: Прыбраць са спіса
+  Show in Folder: Паказаць у папцы
+  Play Download: Прайграць спампаванае
+  Retry Download: Паўтарыць спампоўванне
+  Pause Download: Прыпыніць спампоўванне
+  Resume Download: Працягнуць спампоўванне
+  Move Earlier: Перамясціць вышэй
+  Move Later: Перамясціць ніжэй
+  Pause All: Прыпыніць усе
+  Resume All: Працягнуць усе
+  Retry All: Паўтарыць усе няўдалыя спампоўванні
+  Total Size: 'Агульны памер: {size}'
+  Local File: Мясцовы файл
+  Available Offline: Даступна па-за сеткай
+  Remove File: Выдаліць файл
+  Remove File Confirmation: Выдаліць спампаваны файл?
+  Remove File Warning: Файл «{title}» будзе перамешчаны ў сметніцу вашай прылады.
+  File Not Found: Не ўдалося знайсці спампаваны файл.
+  Download Missing: Спампоўванне недаступнае
+  Files Missing: Спампаваны файл больш не даступны ў файлавай сістэме. | Спампаваныя файлы больш не даступныя ў файлавай сістэме. | Спампаваныя файлы больш не даступныя ў файлавай сістэме.
+  Files Available: 'Даступна {available} з {total} спампаваных файлаў.'
+  More Files: Яшчэ 1 файл | Яшчэ {count} файлы | Яшчэ {count} файлаў
+  Template Used: 'Шаблон: {name}'
+  Download Type: Тып спампоўвання
+  Template: Шаблон
+  Unsaved: Не захавана
+  Media Type: Тып медыя
+  Video: Відэа
+  Audio: Аўдыя
+  Maximum Resolution: Найвышэйшая раздзяляльнасць
+  Best Available: Найлепшае даступнае
+  Automatic: Аўтаматычна
+  Container: Кантэйнер
+  Video Codec: Відэакодэк
+  Audio Codec: Аўдыякодэк
+  File Name Template: Шаблон назвы файла
+  File Name Template Help: 'Даступныя палі: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Дыяпазон часу і раздзелы
+  Start Time: Час пачатку (HH:MM:SS)
+  End Time: Час заканчэння (HH:MM:SS)
+  Split by Chapters: Раздзяліць кожны раздзел у асобны файл
+  Remove Segments: Выдаліць фрагменты
+  Subtitles and Metadata: Субцітры і метаданыя
+  Include Subtitles: Дадаць субцітры
+  Embed Subtitles: Убудаваць субцітры ў медыяфайл
+  Subtitle Format: Фармат субцітраў
+  Subtitle Languages: Мовы субцітраў
+  Subtitle Languages Help: 'Раздзеленыя коскамі селектары моў yt-dlp, напрыклад: en.*,de.*'
+  Embed Cover Art: Убудаваць мініяцюру як вокладку
+  Embed Metadata: Убудаваць назву, аўтара, апісанне і раздзелы
+  Additional yt-dlp Arguments: Дадатковыя аргументы yt-dlp
+  Custom yt-dlp Arguments: Карыстальніцкія аргументы yt-dlp
+  Template Name: Назва шаблону
+  Save Template: Захаваць шаблон
+  Delete Template: Выдаліць шаблон
+  Template Saved: Шаблон спампоўвання "{name}" захаваны
+  Template Name Exists: Шаблон спампоўвання з назвай "{name}" ужо існуе.
+  Choose Folder: Змяніць
+  Select Folder: Выбраць папку
+  Folder Required: Выберыце папку спампоўванняў, каб дазволіць спампоўванні.
+  System Downloads Folder: Сістэмная папка спампоўванняў
+  Processing: Апрацоўка…
+  Queued: У чарзе
+  Queued Position: У чарзе, пазіцыя {position}
+  Paused: Прыпынена
+  Pausing: Бягучае заданне завершыцца, пасля чаго чарга будзе прыпынена
+  Download Complete: Спампоўванне завершана
+  Download Cancelled: Спампоўванне скасавана
+  Download Failed: Памылка спампоўвання
+  File Name Shortened: Назву файла скарочана, бо назва відэа была занадта доўгай.
+  Insufficient Disk Space: Недастаткова месца на дыску. Патрабуецца каля {required}, даступна {available}.
+  Unknown Download Size: Памер спампоўвання невядомы. У мэтавай файлавай сістэме даступна {available}.
+  Disk Space Check Unavailable: Не ўдалося праверыць даступнае месца на дыску перад пачаткам гэтага спампоўвання.
+  Download Failure Hint: Праверце {issuesLink}, а затым паспрабуйце пераключыць канал yt-dlp на Nightly або Master у раздзеле «Налады» → «Пашыраныя» → «Знешняе праграмнае забеспячэнне».
+  yt-dlp YouTube Issues: нядаўнія праблемы yt-dlp з YouTube
+  Automatic Download Started: Аўтаматычнае спампоўванне пачалося
+  Automatic Download Started Body: У фонавым рэжыме спампоўваецца "{title}" з {channel}.
+  Automatic Download Complete: Аўтаматычнае спампоўванне завершана
+  Automatic Download Failed: Памылка аўтаматычнага спампоўвання
+  Automatic Download Could Not Start: Не ўдалося пачаць аўтаматычнае спампоўванне "{title}".
+  Automatic Download Skipped: Прапушчана фільтрамі аўтаматычнага спампоўвання
+  Cancel Download: Скасаваць спампоўванне
+  yt-dlp Not Found: Не ўдалося знайсці yt-dlp. Усталюйце яго або задайце шлях да яго ў раздзеле «Налады» → «Пашыраныя» → «Знешняе праграмнае забеспячэнне».
+  Download Complete Template: Спампоўванне "{title}" завершана
+  Download Failed Template: Памылка спампоўвання "{title}"
+  Templates:
+    Video Best: Відэа — найлепшая якасць
+    Video Resolution: Відэа — {resolution}
+    Audio Best: Аўдыя — найлепшая якасць
+    Audio Format: Аўдыя — {format}
+    Subtitles Format: Субцітры — {format}

@@ -1,0 +1,731 @@
+# Optional AI-generated translations for keys missing from ../pl.yaml.
+Version {versionNumber} is now available.: Dostępna jest już wersja {versionNumber}.
+See changes and update: Zobacz zmiany i zaktualizuj
+Dismiss: Odrzuć
+Global:
+  Loading More: Wczytywanie kolejnych elementów
+Search Listing:
+  Label:
+    Members Only: Tylko dla wspierających
+Home Page:
+  Home: Strona główna
+  Description: Kontynuuj od miejsca, w którym przerwano, i zobacz ostatnią aktywność.
+  Customize: Dostosuj stronę główną
+  Done: Gotowe
+  Customize description: Wybierz wyświetlane sekcje i ustaw je w wybranej kolejności.
+  Continue watching: Kontynuuj oglądanie
+  New since last visit: Nowości od ostatniej wizyty
+  Watch queue: Kolejka oglądania
+  Recent playlists: Ostatnie playlisty
+  Recent downloads: Ostatnio pobrane
+  Upcoming reminders: Nadchodzące przypomnienia
+  Watch statistics: Statystyki oglądania
+  View all: Zobacz wszystko
+  Previous shelf page: Poprzednia strona sekcji {section}
+  Next shelf page: Następna strona sekcji {section}
+  Shelf page status: "{section}, strona {page} z {total}."
+  Move section up: Przenieś sekcję {section} w górę
+  Move section down: Przenieś sekcję {section} w dół
+  Section moved: Sekcja {section} została przeniesiona na pozycję {position} z {total}.
+  Nothing here yet: Jeszcze nic tu nie ma
+  Empty description: Tutaj pojawią się rozpoczęte filmy, używane playlisty, pobrane pliki i przypomnienia.
+  All sections hidden: Wszystkie sekcje są ukryte
+  All sections hidden description: Dostosuj stronę główną, aby ponownie wyświetlić sekcję.
+Subscriptions:
+  New Content Tabs: Karty nowych treści
+  Show Tabbed View: Pokaż widok kart
+  Show Combined View: Pokaż widok łączny
+  Posts:
+    RSS Message: YouTube nie udostępnia kanałów RSS dla postów. Wyłącz ustawienie „{rssSetting}”, aby wyświetlić posty, lub włącz ustawienie „{hideSetting}”, aby ukryć tę kartę.
+Trending:
+  Load Error: Nie udało się wczytać popularnych treści.
+  Unsupported Backend: Popularne treści wymagają lokalnego API. Wybierz lokalne API lub włącz zapasowy backend.
+Most Popular Feed Empty: Kanał „Najpopularniejsze” tej instancji Invidious jest pusty.
+User Playlists:
+  Load More Playlists: Wczytaj więcej playlist
+  SinglePlaylistView:
+    Retry: Spróbuj ponownie
+    This playlist could not be loaded.: Nie udało się wczytać tej playlisty.
+    More videos could not be loaded.: Nie udało się wczytać kolejnych filmów.
+Settings:
+  Categories:
+    General Description: Język, uruchamianie, karty i działanie aplikacji
+    Appearance: Wygląd
+    Appearance Description: Motyw, układ i miniatury
+    Content appearance: Wygląd list filmów i miniatur
+    Layout: Układ
+    Playback Description: Odtwarzacz, napisy i ustawienia kanałów
+    Subscriptions Description: Odświeżanie i wyświetlanie kanału subskrypcji
+    Downloads Description: Foldery, szablony i reguły automatyczne
+    Distraction Free Description: Ukrywanie treści i limity oglądania
+    Add-ons: Dodatki
+    Add-ons Description: SponsorBlock, DeArrow, oceny negatywne i tłumaczenie lektorskie
+    Privacy Description: Prywatność oglądania i kontrola dostępu
+    Online activity: Aktywność online
+    Data And Storage Description: Import, eksport, użycie dysku i czyszczenie
+    Sync Description: Synchronizacja ustawień i danych między urządzeniami
+    Advanced: Zaawansowane
+    Advanced Description: Dostawcy, aplikacje zewnętrzne i sieć
+    Alternative providers: Dostawcy filmów i metadanych
+  General Settings:
+    Use AI Translation Completions: Uzupełniaj brakujące tłumaczenia tekstem wygenerowanym przez AI
+    Comment Translation:
+      Title: Tłumaczenie komentarzy
+      Enable: Włącz tłumaczenie komentarzy
+      Never Translate: Nigdy nie tłumacz komentarzy w języku
+      Choose Language: Wybierz język
+      Description: Komentarze w języku aplikacji są już pomijane. Dodaj pozostałe języki, które rozumiesz.
+      Remove Language: Ponownie tłumacz komentarze w języku {language}
+    Playlist View Type:
+      Playlist View Type: Sposób wyświetlania playlisty
+    Show Thumbnail Previews: Pokazuj podgląd miniatur
+  Theme Settings:
+    Scroll Speed: Szybkość przewijania
+    Custom Theme:
+      Share Theme: Udostępnij motyw
+      Share Description Heading: Opis
+      Share Description Prompt: Opisz motyw i wszystko, co warto wiedzieć przed jego użyciem.
+      Share Screenshots Heading: Zrzuty ekranu
+      Share Screenshots Prompt: Przeciągnij tutaj co najmniej jeden zrzut ekranu.
+      Share Code Summary: Kod JSON motywu
+      Unable to Share: Nie udało się udostępnić własnego motywu
+      Colors:
+        Logo hover: Logo po najechaniu
+        Logo pressed: Logo po naciśnięciu
+        Page background: Tło strony
+        Card background: Tło karty
+        Secondary card background: Tło karty dodatkowej
+        Favorite icon: Ikona ulubionych
+        Error color: Kolor błędu
+        Scrollbar thumb: Suwak paska przewijania
+        Scrollbar thumb hover: Suwak paska przewijania po najechaniu
+        Scrollbar thumb pressed: Suwak paska przewijania po naciśnięciu
+        Dropdown item hover text: Tekst pozycji listy po najechaniu
+        Dropdown item hover background: Tło pozycji listy po najechaniu
+        Navigation and panel background: Tło nawigacji i paneli
+        Neutral item hover and focus background: Tło neutralnego elementu po najechaniu lub zaznaczeniu
+        Neutral item hover and focus text and icons: Tekst i ikony neutralnego elementu po najechaniu lub zaznaczeniu
+        Neutral item pressed background: Tło neutralnego elementu po naciśnięciu
+        Neutral item pressed text and icons: Tekst i ikony neutralnego elementu po naciśnięciu
+        Header button hover and focus background: Tło przycisku nagłówka po najechaniu lub zaznaczeniu
+        Header button hover and focus text and icons: Tekst i ikony przycisku nagłówka po najechaniu lub zaznaczeniu
+        Header button pressed background: Tło przycisku nagłówka po naciśnięciu
+        Header button pressed text and icons: Tekst i ikony przycisku nagłówka po naciśnięciu
+        Colored header button hover and focus background: Tło kolorowego przycisku nagłówka po najechaniu lub zaznaczeniu
+        Colored header button hover and focus text and icons: Tekst i ikony kolorowego przycisku nagłówka po najechaniu lub zaznaczeniu
+        Colored header button pressed background: Tło kolorowego przycisku nagłówka po naciśnięciu
+        Colored header button pressed text and icons: Tekst i ikony kolorowego przycisku nagłówka po naciśnięciu
+        Search and dropdown background: Tło wyszukiwania i list rozwijanych
+        Settings search background: Tło wyszukiwania ustawień
+        Instance menu: Menu instancji
+        Input background: Tło pola wprowadzania
+        Shadow color: Kolor cienia
+        Primary controls and highlights: Główne elementy sterujące i wyróżnienia
+        Primary control hover and focus: Główny element sterujący po najechaniu lub zaznaczeniu
+        Primary control pressed: Główny element sterujący po naciśnięciu
+        Text and icons on primary controls: Tekst i ikony głównych elementów sterujących
+        Secondary controls and highlights: Dodatkowe elementy sterujące i wyróżnienia
+        Secondary control hover and focus: Dodatkowy element sterujący po najechaniu lub zaznaczeniu
+        Secondary control pressed: Dodatkowy element sterujący po naciśnięciu
+        Light secondary color: Jasny kolor dodatkowy
+        Visited accent: Akcent odwiedzonych elementów
+        Text and icons on secondary controls: Tekst i ikony dodatkowych elementów sterujących
+        Links: Odnośniki
+        Visited links: Odwiedzone odnośniki
+        Destructive action: Działanie usuwające dane
+        Destructive hover and focus: Działanie usuwające dane po najechaniu lub zaznaczeniu
+        Destructive pressed: Działanie usuwające dane po naciśnięciu
+  Player Settings:
+    Scroll Mini Player:
+      On All Tabs: Nie ukrywaj miniodtwarzacza podczas przełączania kart
+    Enable Skip Silence by Default: Domyślnie włącz pomijanie ciszy
+    Voice-over Translation:
+      Attribution: (obsługiwane przez Yandex)
+  Download Settings:
+    Concurrent Downloads: Jednoczesne pobieranie
+    Bandwidth Limit: Limit przepustowości (KiB/s, 0 oznacza brak limitu)
+  External Software Settings:
+    Download FFmpeg and FFprobe: Pobierz FFmpeg i FFprobe
+    Update FFmpeg and FFprobe: Zaktualizuj FFmpeg i FFprobe
+    Downloading FFmpeg and FFprobe: Pobieranie FFmpeg i FFprobe…
+    FFmpeg and FFprobe Downloaded Template: Pobrano FFmpeg i FFprobe w wersji {version}
+    FFmpeg and FFprobe Download Error Template: 'Nie udało się pobrać FFmpeg i FFprobe: {error}'
+    Managed Tool Updates: Aktualizacje zarządzanych narzędzi
+    Update Modes:
+      Automatic: Aktualizuj automatycznie
+      Ask: Pytaj przed aktualizacją
+      Manual: Aktualizuj tylko ręcznie
+    Restricted Playback Authentication: Ciasteczka odtwarzania dla yt-dlp
+    Cookie Source: Źródło ciasteczek
+    Cookie Sources:
+      None: Brak
+      File: Plik
+      Browser: Przeglądarka
+    Cookie File: Plik ciasteczek
+    Browser for Cookies: Przeglądarka z ciasteczkami
+    Browser Profile: Profil przeglądarki (opcjonalnie)
+    Browser Profile Placeholder: Nazwa profilu lub ścieżka
+    Select Browser: Wybierz przeglądarkę
+    Always Use Cookies: Zawsze używaj ciasteczek
+    Restricted Playback Authentication Hint: Domyślnie OpenTubeX przekazuje te ciasteczka do yt-dlp dopiero po wybraniu opcji „Spróbuj ze skonfigurowanymi ciasteczkami” dla filmu z ograniczeniem wiekowym lub dostępnego tylko dla wspierających.
+    Restricted Playback Authentication Warning: Używanie yt-dlp z kontem Google może spowodować jego tymczasowe lub trwałe ograniczenie.
+  Privacy Settings:
+    Cache Video Metadata: Historia metadanych
+    Cache Video Metadata Tooltip: Zachowuje wszystkie obsługiwane wersje metadanych odwiedzonych filmów, w tym tytuły, miniatury i opisy. Funkcja jest domyślnie wyłączona, ponieważ historia metadanych zajmuje dodatkowe miejsce na dysku.
+    Clear Video Metadata Cache: Wyczyść pamięć podręczną metadanych filmów
+    Are you sure you want to clear the video metadata cache?: Czy na pewno wyczyścić zapisane tytuły, miniatury i opisy filmów?
+    Failed to clear video metadata cache: Nie udało się wyczyścić pamięci podręcznej metadanych filmów
+    Video metadata cache has been cleared: Wyczyszczono pamięć podręczną metadanych filmów
+    Video Metadata Cache Size: 'Pamięć podręczna metadanych filmów: {size}'
+  Storage Settings:
+    Storage: Pamięć
+    Downloaded Media: Śledzone pobrane multimedia
+    Storage Breakdown: Podział zajętego miejsca
+    Shown Total: Wyświetlana suma
+    Calculating: Obliczanie…
+    Not Available: Dokładny rozmiar jest niedostępny
+    At Least: Co najmniej {size}
+    Failed To Read Storage: Nie udało się odczytać rozmiaru części danych
+    Downloaded Media Description: Pliki filmów, dźwięku i napisów nadal uwzględnione w historii pobierania.
+    Selected Download Folders: Foldery pobierania wybrane przez użytkownika
+    Download History Records: Wpisy historii pobierania
+    Download History Records Description: '{count} ukończony wpis historii pobierania. Wpis przechowuje stan i położenie plików, ale nie zawiera pobranych multimediów. | {count} ukończone wpisy historii pobierania. Wpisy przechowują stan i położenie plików, ale nie zawierają pobranych multimediów. | {count} ukończonych wpisów historii pobierania. Wpisy przechowują stan i położenie plików, ale nie zawierają pobranych multimediów.'
+    Clear Download History Records: Wyczyść wpisy historii pobierania
+    Clear Download History Confirmation: Wyczyścić wszystkie wpisy ukończonych pobrań?
+    Download Files Stay On Disk: Pobrane pliki pozostaną na dysku, ale znikną ze strony „Pobrane”.
+    Clear Records: Wyczyść wpisy
+    Replaceable Caches: Pamięci podręczne do odtworzenia
+    Application Caches: Pamięci podręczne aplikacji
+    Browser Caches: Pamięci podręczne przeglądarki
+    Browser Caches Hint: Pamięci podręczne HTTP, GPU, kodu, modułów cieniujących, skryptów service worker i słowników Chromium.
+    Stored App Data: Zapisane dane aplikacji
+    Browser Runtime Data: Dane środowiska przeglądarki
+    Browser Runtime Data Hint: Dane sesji i pamięci lokalnej Chromium, ciasteczka, stan prywatności i sieci oraz pliki awarii.
+    Subscription Feed Cache: Pamięć podręczna subskrypcji i kanału
+    Subscription Feed Cache Description: Przechowuje pobrane filmy z subskrypcji, Shorts, transmisje na żywo i posty. OpenTubeX utworzy ją ponownie przy następnym odświeżeniu kanału.
+    Clear Subscription Feed Cache: Wyczyść pamięć podręczną subskrypcji i kanału
+    Clear Subscription Feed Cache Confirmation: Wyczyścić pamięć podręczną subskrypcji i kanału?
+    Subscription Feed Cache Effect: Do czasu odświeżenia kanały subskrypcji mogą być puste. Subskrypcje i profile nie zostaną zmienione.
+    Session Search Cache: Pamięć podręczna wyszukiwania w sesji
+    In Memory: W pamięci operacyjnej
+    Session Search Cache Description: '{count} wyszukiwanie zapisano w pamięci, aby przyspieszyć powrót do poprzedniej strony. Pamięć zostanie wyczyszczona po zamknięciu OpenTubeX. | {count} wyszukiwania zapisano w pamięci, aby przyspieszyć powrót do poprzedniej strony. Pamięć zostanie wyczyszczona po zamknięciu OpenTubeX. | {count} wyszukiwań zapisano w pamięci, aby przyspieszyć powrót do poprzedniej strony. Pamięć zostanie wyczyszczona po zamknięciu OpenTubeX.'
+    Clear Session Search Cache: Wyczyść pamięć podręczną wyszukiwania w sesji
+    Clear Session Search Cache Confirmation: Wyczyścić pamięć podręczną wyszukiwania w sesji?
+    Session Search Cache Effect: Zapisane strony wyników zostaną usunięte. Historia wyszukiwania nie zostanie zmieniona.
+    HTTP Cache: Pamięć podręczna HTTP
+    HTTP Cache Description: Electron zapisuje odpowiedzi sieciowe na dysku, aby kolejne żądania nie wymagały ponownego pobierania tych samych danych. OpenTubeX odtworzy tę pamięć w razie potrzeby.
+    Managed By Electron: Zarządzane przez Electron
+    Clear HTTP Cache: Wyczyść pamięć podręczną HTTP
+    Clear HTTP Cache Confirmation: Wyczyścić pamięć podręczną HTTP programu Electron?
+    HTTP Cache Effect: Podczas jej odtwarzania obrazy i inne zasoby sieciowe mogą raz wczytać się wolniej.
+    Tab Image Cache: Miniatury kart i awatary kanałów
+    Tab Image Cache Description: Przechowuje obrazy podglądu i awatary kanałów dla otwartych i przywróconych kart. OpenTubeX odtworzy je podczas korzystania z kart.
+    Clear Tab Image Cache: Wyczyść pamięć podręczną obrazów kart
+    Clear Tab Image Cache Confirmation: Wyczyścić miniatury kart i awatary kanałów?
+    Tab Image Cache Effect: Obrazy kart mogą na chwilę zniknąć. Zostaną odtworzone podczas korzystania z kart.
+    Playback Caches: Pamięci podręczne odtwarzania
+    Playback Caches Description: Przechowuje między sesjami adresy URL strumieni z yt-dlp oraz pliki odtwarzacza YouTube. Pamięć adresów URL dotyczy tylko strumieni pobieranych za pomocą yt-dlp.
+    Playback URL Cache Entry Size: Limit pamięci adresów URL strumieni z yt-dlp
+    Playback URL Cache Entry Size Tooltip: Określa maksymalny rozmiar każdego zapisanego wpisu strumienia z yt-dlp. Ustaw 0 MB, aby wyłączyć zapisywanie strumieni z yt-dlp między sesjami.
+    Clear Playback Caches: Wyczyść pamięci podręczne odtwarzania
+    Clear Playback Caches Confirmation: Wyczyścić pamięci podręczne yt-dlp i odtwarzacza?
+    Playback Caches Effect: Następne lokalne odtwarzanie może potrwać dłużej, ponieważ dane strumienia i odtwarzacza trzeba będzie pobrać ponownie.
+    Clear Cache: Wyczyść pamięć podręczną
+    History Data: Zapisane historie
+    Video Metadata Description: Przechowuje poprzednie tytuły, miniatury i opisy obsługiwanych filmów. Po usunięciu nie będzie można odtworzyć starszych wersji.
+    Video Metadata Effect: Zapisane wersje metadanych zostaną trwale usunięte. Bieżące informacje o filmie nadal będzie można pobrać ponownie.
+    Watch History: Historia i statystyki oglądania
+    Watch History Description: Historia oglądania zapisuje obejrzane filmy i postęp. Statystyki zawierają dzienny czas oglądania. Okres przechowywania dotyczy tylko historii oglądania.
+    Clear Watch Statistics: Wyczyść statystyki oglądania
+    Watch History Effect: Wpisy obejrzanych filmów i zapisany postęp zostaną usunięte. Statystyki oglądania pozostaną bez zmian.
+    Clear Watch Statistics Confirmation: Usunąć wszystkie statystyki oglądania?
+    Watch Statistics Effect: Dzienny czas oglądania zostanie usunięty. Historia oglądania pozostanie bez zmian.
+    Search History: Historia wyszukiwania
+    Search History Description: Przechowuje wyszukiwania wybrane do zapamiętania.
+    Delete Search History: Usuń historię wyszukiwania
+    Delete Search History Confirmation: Usunąć całą zapisaną historię wyszukiwania?
+    Search History Effect: Znikną zapisane podpowiedzi z poprzednich wyszukiwań. Pamięć podręczna bieżącej sesji pozostanie bez zmian.
+    Other User Data: Pozostałe dane użytkownika
+    Other Profile Files: Pozostałe pliki profilu
+    Other Profile Files Hint: Kopie zapasowe, pliki tymczasowe i wpisy profilu, których OpenTubeX jeszcze nie rozpoznaje.
+    Subscriptions And Profiles: Subskrypcje i profile
+    Subscriptions And Profiles Description: Przechowuje subskrybowane kanały, nazwy profili i ich zawartość.
+    Subscriptions And Profiles Effect: Wszystkie subskrypcje i dodatkowe profile zostaną trwale usunięte. Pamięć podręczna kanału również zostanie wyczyszczona.
+    Playlists Description: Przechowuje nazwy i opisy playlist oraz zapisane filmy.
+    Playlists Effect: Każda playlista wraz z listą zapisanych filmów zostanie trwale usunięta. Pobrane pliki multimedialne pozostaną na dysku.
+    Settings And Sessions: Ustawienia, sesje kart i przypomnienia
+    Settings And Sessions Description: Przechowuje ustawienia aplikacji, karty możliwe do przywrócenia i przypomnienia o transmisjach na żywo. Otwórz katalog profilu, aby przejrzeć te pliki lub utworzyć ich kopię zapasową. Ta strona ich nie usuwa.
+    Cleanup Complete: Czyszczenie pamięci zakończone
+    Cleanup Failed: Czyszczenie pamięci nie powiodło się
+  Subscription Settings:
+    Show Scheduled Live Streams / Premieres First: Najpierw pokazuj zaplanowane transmisje na żywo i premiery
+  Distraction Free Settings:
+    Sections:
+      Visible While Paused: Widoczne po wstrzymaniu w trybie pełnego okna lub pełnego ekranu
+    Hide Channel Avatars: Ukrywaj awatary kanałów
+    Shorten View Counts: Skracaj liczbę wyświetleń i polubień komentarzy
+    Hide Comment Translation Buttons: Ukrywaj przyciski tłumaczenia komentarzy
+    Hide Home: Ukryj stronę główną
+    Hide Live Chat Replay: Ukrywaj powtórkę czatu na żywo
+    Disable A-B Repeat: Wyłącz powtarzanie A-B
+    Hide Paid Promotion Badge: Ukrywaj oznaczenie płatnej promocji
+    Show Player Controls: Pokazuj elementy sterujące odtwarzacza
+    Show Video Title: Pokazuj tytuł filmu
+    Show Bottom Right Actions Dock: Pokazuj panel działań w prawym dolnym rogu
+    Paused Interface Hide Delay: Opóźnienie ukrywania interfejsu po wstrzymaniu
+  Data Settings:
+    Data And Storage: Dane i pamięć
+    Profile Directory: Katalog profilu
+    Open Profile Directory: Otwórz katalog profilu
+    Invalid JSON row, skipping item: Nieprawidłowy JSON w wierszu {row}. Element zostanie pominięty
+  Sync Settings:
+    Enable Sync: Włącz synchronizację
+    Pair Another Device: Sparuj kolejne urządzenie
+    Pair With Existing Device: Sparuj z połączonym urządzeniem
+    Device Name: Nazwa urządzenia
+    This Device: To urządzenie
+    Device Name Required: Wpisz nazwę tego urządzenia.
+    Pairing Device Name Hint: Wybierz nazwę, którą rozpoznasz na urządzeniu zatwierdzającym tę prośbę.
+    Create Pairing Code: Utwórz kod parowania
+    Creating Pairing Code: Tworzenie bezpiecznego kodu parowania…
+    Pairing QR Alt: Kod QR do sparowania urządzenia {device}
+    Scan Pairing Code: Na połączonym już urządzeniu otwórz „Sparuj kolejne urządzenie” i zeskanuj ten kod.
+    Pairing Code: Kod parowania
+    Use Text Pairing Code: Zamiast tego użyj kodu tekstowego
+    Show QR Code: Pokaż kod QR
+    Text Pairing Code Hint: Skopiuj ten kod na połączone urządzenie. Zawiera sekret parowania, dlatego po zakończeniu usuń go z historii schowka.
+    Pairing QR Warning: Pokaż ten kod tylko zaufanemu, połączonemu już urządzeniu, które zatwierdzi tę prośbę. Kod wygasa po dwóch minutach.
+    Pairing Expires: Kod parowania wygaśnie o {time}.
+    Verifying Pairing: Sprawdzanie przesłanego klucza prywatności…
+    Completing Pairing: Kończenie parowania urządzeń…
+    Compare Pairing Codes: Porównaj kody parowania
+    Pairing Code Match Hint: Potwierdź tylko wtedy, gdy ten kod jest zgodny z kodem na połączonym urządzeniu.
+    Pairing Codes Match: Kody są zgodne
+    Pairing Approval Code Hint: Nie zamykaj tego okna i porównaj kod z kodem na nowym urządzeniu. Jeśli kody są różne, nie kontynuuj na nowym urządzeniu.
+    Pairing Scan Hint: Zeskanuj kod parowania wyświetlony na dodawanym urządzeniu.
+    Enter Pairing Code: Wpisz kod ręcznie
+    Pairing Code Entry Hint: Wklej kod parowania wyświetlony na dodawanym urządzeniu.
+    Check Pairing Code: Sprawdź kod
+    Scan QR Code: Zeskanuj kod QR
+    Waiting For Pairing Code: Oczekiwanie na kod parowania…
+    Checking Pairing Request: Sprawdzanie prośby o sparowanie…
+    Approving Pairing Request: Szyfrowanie i wysyłanie klucza prywatności…
+    Pairing Approval Warning: Zatwierdź tylko wtedy, gdy widzisz tę prośbę na dodawanym urządzeniu. Sparowanie daje dostęp do konta i przesyła klucz prywatności.
+    Approve Pairing: Zatwierdź sparowanie
+    Try Again: Spróbuj ponownie
+    Scan Again: Zeskanuj ponownie
+    Camera Unavailable: OpenTubeX nie ma dostępu do kamery. Sprawdź uprawnienia kamery lub wpisz kod parowania ręcznie.
+    Pairing Unsupported: Ten serwer synchronizacji nie obsługuje bezpiecznego parowania urządzeń.
+    Pairing Failed: Nie udało się sparować urządzeń. Spróbuj ponownie z nowym kodem.
+    Pairing Request Changed: Prośba o sparowanie zmieniła się, wygasła lub została już wykorzystana. Utwórz nowy kod.
+    Pairing Server Mismatch: Ten kod należy do innego serwera synchronizacji.
+    Pairing Verification Unavailable: Brak zaszyfrowanej kolekcji synchronizacji potrzebnej do sprawdzenia przesłanego klucza. Zsynchronizuj połączone urządzenie i spróbuj ponownie.
+    Pairing Completed: Urządzenia zostały sparowane
+    Pairing Approved: Sparowanie urządzeń zostało zatwierdzone
+    Sync failed: "Synchronizacja nie powiodła się: {error}"
+  SponsorBlock Settings:
+    Custom Color: Własny kolor
+  Password Dialog:
+    Incorrect Password: Nieprawidłowe hasło
+    Unlock: Odblokuj
+    Unlocking: Odblokowywanie…
+  Search Settings: Przeszukaj ustawienia
+  No Settings Found: Nie znaleziono ustawień
+Tutorial:
+  Skip: Pomiń
+  Next: Dalej
+  Finish: Zakończ
+  Got It: Rozumiem
+  Welcome:
+    Title: Witamy w OpenTubeX
+    Description: Poznaj kilka elementów sterujących, które ułatwią rozpoczęcie pracy.
+  Navigation:
+    Title: Biblioteka zawsze pod ręką
+    Description: Za pomocą nawigacji otworzysz subskrypcje, playlisty, historię i inne sekcje.
+  Search:
+    Title: Wyszukaj lub wklej odnośnik
+    Description: Znajdź filmy i kanały albo wklej obsługiwany adres URL filmu bezpośrednio w polu wyszukiwania.
+  Tabs:
+    Title: Zachowuj otwarte strony na kartach
+    Description: Otwieraj kilka stron jednocześnie, nie tracąc bieżącego miejsca. Wybierz położenie kart najlepiej pasujące do układu.
+  Quick Settings:
+    Title: Dostosuj aplikację
+    Description: Wybierz motyw i domyślną jakość filmu. Te i inne ustawienia możesz później zmienić w menu profilu. Kliknij je prawym przyciskiem, aby przełączyć profil.
+  Import Data:
+    Title: Przenieś swoje dane
+    Description: Możesz zaimportować subskrypcje, historię, playlisty, historię wyszukiwania lub ustawienia z innej obsługiwanej aplikacji albo kopii zapasowej.
+    Action: Importuj dane
+    Not Now: Nie teraz
+  Settings Moved:
+    Title: Ustawienia zostały przeniesione
+    Description: Wybierz swój profil w prawym górnym rogu, aby otworzyć podręczne elementy sterujące. Kliknij go prawym przyciskiem, aby przejść bezpośrednio do wyboru profilu. Koło zębate w tym menu otwiera wszystkie ustawienia. Znajdziesz tam teraz również sekcje „O programie” i „Pobrane”.
+About:
+  Commit: Commit
+  Fluxer: Dołącz do naszej społeczności na Fluxerze
+  Matrix: Matrix
+Profile:
+  Profile Icon: Ikona profilu
+  Choose an Emoji: Wybierz emoji
+  Custom Emoji: Własne emoji
+  Emoji: Emoji
+  Choose Image: Wybierz obraz
+  Crop Image: Przytnij obraz
+  Zoom: Powiększenie
+  Apply Crop: Zastosuj przycięcie
+  Transparent: Przezroczyste
+  Use Initial: Użyj inicjału
+  The selected image could not be loaded: Nie udało się wczytać wybranego obrazu
+  Theme Color: Kolor motywu
+Channel:
+  Channel Name Unavailable: Nazwa kanału jest niedostępna
+  Search Result Types: Typy wyników wyszukiwania
+  All Results: Wszystkie
+Video:
+  Includes paid promotion: Zawiera płatną promocję
+  Age Restricted Badge: Ograniczenie wiekowe
+  Reorder Queue Item: Zmień położenie {title}
+  Reorder Queue Item Instructions: Użyj strzałek w górę i w dół, aby przenieść ten film w kolejce.
+  Queue Item Moved: Film {title} przeniesiono na pozycję {position} z {total}.
+  Queue Item Cannot Move Up: Nie można przenieść filmu {title} wyżej. Zajmuje już pozycję 1 z {total}.
+  Queue Item Cannot Move Down: Nie można przenieść filmu {title} niżej. Zajmuje już pozycję {total} z {total}.
+  Metadata Cache:
+    Title History: Historia tytułów
+    Thumbnail History: Historia miniatur
+    Description History: Historia opisów
+    Previous Version: Poprzednia wersja {number}
+    Empty: (puste)
+  Fetching Streams: Pobieranie strumieni za pomocą yt-dlp…
+  Retry With Built-in Extraction: Spróbuj ponownie za pomocą wbudowanego mechanizmu
+  Retry With yt-dlp Extraction: Spróbuj ponownie za pomocą yt-dlp
+  Reloading video after streaming URL error: Ponowne wczytywanie filmu po błędzie adresu URL strumienia
+  Configure Restricted Playback Cookies Hint: Skonfiguruj ciasteczka w sekcji Ustawienia → Oprogramowanie zewnętrzne → Ciasteczka odtwarzania dla yt-dlp.
+  Try With Configured Cookies: Spróbuj ze skonfigurowanymi ciasteczkami
+  Restricted Playback Authentication Failed Template: 'yt-dlp nie uzyskał dostępu do tego filmu za pomocą skonfigurowanych ciasteczek: {error}'
+  Collapse Playlist: Zwiń playlistę
+  Expand Playlist: Rozwiń playlistę
+  Save Channel Subtitles State: Zapisz ustawienie napisów dla kanału
+  Channel Subtitles State Saved: Zapisano ustawienie napisów dla kanału
+  Save Channel Volume: Zapisz głośność dla kanału
+  Channel Volume Saved: Zapisano głośność dla kanału
+  Save Channel Setting: Zapisywanie ustawienia kanału…
+  Channel Setting Already Set: 'Ustawienie {setting} ma już wartość {value}'
+  Notify me: Powiadom mnie
+  Notification on: Powiadomienie włączone
+  Notification enabled: Otrzymasz powiadomienie, gdy rozpocznie się ten film
+  Notification cancelled: Powiadomienie o rozpoczęciu wyłączone
+  Notification unavailable: Powiadomienia systemowe są niedostępne
+  Scheduled video starting: Rozpoczyna się zaplanowany film
+  Live notification body: '{videoTitle} rozpoczyna się teraz'
+  Live Chat Replay: Powtórka czatu na żywo
+  Show Live Chat: Pokaż czat na żywo
+  Show Live Chat Replay: Pokaż powtórkę czatu na żywo
+  Close Live Chat: Zamknij czat na żywo
+  Close Live Chat Replay: Zamknij powtórkę czatu na żywo
+  Live Chat Settings: Ustawienia czatu na żywo
+  Show Live Chat Timestamps: Pokazuj znaczniki czasu
+  Chat Filter: Filtr czatu
+  Top Chat: Najpopularniejsze wiadomości
+  All Messages: Wszystkie wiadomości
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Powtórka czatu na żywo jest włączona. Wiadomości będą pojawiać się tutaj podczas odtwarzania filmu.
+  Player:
+    Voice-over Translation:
+      Start: Tłumacz
+      Cancel: Anuluj
+      Progress: Przygotowywanie tłumaczenia lektorskiego…
+      Retry: Spróbuj ponownie
+      Error: Tłumaczenie lektorskie nie powiodło się. Spróbuj ponownie później.
+      Duration Error: Tłumaczenie lektorskie jest dostępne tylko dla filmów trwających do czterech godzin.
+    Auto-translate: Tłumaczenie automatyczne
+    A-B Repeat:
+      A-B Repeat: Powtarzanie A-B
+      On: Włączone
+      Off: Wyłączone
+      Point A: Punkt A
+      Point B: Punkt B
+      Set Repeat Start: Ustaw początek powtarzania
+      Set Repeat End: Ustaw koniec powtarzania
+      Pause Repeat: Wstrzymaj powtarzanie A-B
+      Resume Repeat: Wznów powtarzanie A-B
+      Adjust Point: Dostosuj punkt {point}, obecnie {timestamp}
+      Clear Range: Wyczyść zakres powtarzania A-B
+      End Before Start: Punkt B musi znajdować się po punkcie A.
+      Outside Duration: Znacznik czasu musi mieścić się w czasie trwania filmu.
+      Cleared: Wyczyszczono powtarzanie A-B
+    Zoom:
+      Zoom: Powiększenie
+      'Off': 'Wyłączone'
+    Auto-generated Caption Template: '{language} (wygenerowane automatycznie)'
+    Scroll Mini Player:
+      Return to Video Tab: Wróć do karty filmu
+      Hide: Ukryj miniodtwarzacz
+    SponsorBlock:
+      ActionTypeLabel: Typ segmentu
+      MutedSegment: 'Wyciszono: {segmentCategory}'
+      MuteToastUnmute: Wyłącz wyciszenie
+      RefreshInfo: Odśwież informacje SponsorBlock
+      ContributionStatsTitle: Twój wkład
+      ContributionStatsLoading: Wczytywanie statystyk wkładu...
+      ContributionStatsError: Statystyki wkładu są niedostępne. Spróbuj je odświeżyć.
+      ContributionStatsNoUserId: Prześlij segment lub zaimportuj swój identyfikator użytkownika SponsorBlock, aby wyświetlić statystyki wkładu.
+      Submissions: Zgłoszenia
+      Segments: Segmenty
+      TimeSaved: Zaoszczędzony czas
+      MuteSegment: Wycisz segment
+      FullVideoLabel: '{segmentCategory} · Cały film'
+      MuteActionType: Wycisz
+      MutePrompt: Wyciszyć segment „{segmentCategory}”?
+      SkipActionType: Pomiń
+Change Format:
+  Local Video File: Lokalny plik filmu
+  Local Audio File: Lokalny plik dźwiękowy
+  Online Video: Film online
+  Stream Source: Źródło strumienia
+  Stream Extraction Method: Metoda pobierania strumienia
+  Playback Engine: Mechanizm odtwarzania
+  Streaming Protocol: Protokół strumieniowania
+  Not Available For This Video: Niedostępne dla tego filmu
+  Protocols:
+    Progressive: Progresywny
+  Descriptions:
+    Local File: Odtwarzanie bezpośrednio z pliku pobranego na to urządzenie
+    Online Video: Wczytywanie formatów strumienia ze skonfigurowanego źródła online
+    Dash: Jakość adaptacyjna, wiele ścieżek dźwiękowych i najwyższe rozdzielczości
+    Legacy: Jeden plik zawierający obraz i dźwięk, dostępny tylko w niższych rozdzielczościach
+    Audio: Tylko dźwięk, przydatne do ograniczenia transferu lub słuchania w tle
+  yt-dlp Fallback Template: 'yt-dlp nie dostarczył strumieni. Zostanie użyty wbudowany mechanizm: {error}'
+  yt-dlp Default Clients Fallback: Preferowani klienci yt-dlp nie dostarczyli strumieni możliwych do odtworzenia. Zostaną użyci domyślni klienci yt-dlp
+  Built-in Fallback Template: 'Wbudowany mechanizm nie odtworzył strumienia. Zostanie użyty yt-dlp: {error}'
+Context Menu:
+  Move Tab to Group: Przenieś kartę do grupy
+  Collapse Group: Zwiń grupę
+  Move Tabs to Group: Przenieś karty do grupy
+  Manage Tab Groups…: Zarządzaj grupami kart…
+  Search With: Wyszukaj za pomocą {engine}
+  Search With Multiple: Wyszukaj za pomocą...
+Tab Organizer:
+  Title: Organizator kart
+  Open Tab Count: '{count} otwarta karta | {count} otwarte karty | {count} otwartych kart'
+  Search Label: Wyszukaj karty
+  Selected Count: 'Wybrano {count} kartę | Wybrano {count} karty | Wybrano {count} kart'
+  Tab Count: '{count} karta | {count} karty | {count} kart'
+  Select All: Zaznacz wszystkie
+  Select None: Odznacz wszystkie
+  Move To Group: Przenieś wybrane karty do grupy
+  Choose Group: Wybierz grupę
+  Ungrouped: Bez grupy
+  Pin: Przypnij
+  Unpin: Odepnij
+  Load: Wczytaj
+  Unload: Usuń z pamięci
+  Unload All: Usuń wszystkie z pamięci
+  Close All: Zamknij wszystkie
+  Ungroup: Usuń z grupy
+  Group Name: Nazwa grupy
+  Color: Kolor
+  No Color: Bez koloru
+  Create Group: Utwórz grupę
+  Expand Group: Rozwiń grupę
+  Collapse Group: Zwiń grupę
+  Expand Group Label: 'Rozwiń grupę {name}, {count} karta | Rozwiń grupę {name}, {count} karty | Rozwiń grupę {name}, {count} kart'
+  Rename Group: Zmień nazwę grupy {name}
+  Change Group Color: Zmień kolor grupy {name}
+  Move To Window: Przenieś do okna
+  Choose Window: Wybierz okno
+  Select Tab: Wybierz kartę {title}
+  Active: Aktywna
+  Pinned: Przypięta
+  Unloaded: Usunięta z pamięci
+  Playing: Odtwarza
+  Close Tab: Zamknij kartę {title}
+  No Open Results: Żadna otwarta karta nie pasuje do wyszukiwania.
+  Recently Closed: Ostatnio zamknięte
+  Clear: Wyczyść
+  No Closed Results: Żadna z ostatnio zamkniętych kart nie pasuje do wyszukiwania.
+  Drag Tab: Przeciągnij, aby przenieść do grupy
+Comments:
+  Comment Count: '1 komentarz | {count} komentarze | {count} komentarzy'
+  Show Comments: Pokaż komentarze
+  Reply Count: '1 odpowiedź | {replyCount} odpowiedzi | {replyCount} odpowiedzi'
+  Comments are turned off: Komentarze są wyłączone
+  YouTube did not provide advertised replies: YouTube wskazał, że ten komentarz ma odpowiedzi, ale ich nie udostępnił. Mogły zostać usunięte lub ukryte, dlatego przycisk odpowiedzi został usunięty.
+  Pinned by you: Przypięte przez ciebie
+  A reply is pinned: Odpowiedź jest przypięta
+  Filter loaded comments: Filtruj wczytane komentarze
+  Comment filters: Filtry komentarzy
+  From creator: Od twórcy
+  Contains timestamps: Zawiera znaczniki czasu
+  Pin comment by author: Przypnij komentarz użytkownika {author}
+  Unpin comment by author: Odepnij komentarz użytkownika {author}
+  Highlighted comment: Wyróżniony komentarz
+  Highlighted reply: Wyróżniona odpowiedź
+  Search loaded comments: Przeszukaj wczytane komentarze
+  Loaded comment search result count: '1 z {total} wczytanych komentarzy | {count} z {total} wczytanych komentarzy | {count} z {total} wczytanych komentarzy'
+  No loaded comments match your filters: Żaden wczytany komentarz nie pasuje do filtrów
+  Translate to {language}: Przetłumacz na język {language}
+  Show original: Pokaż oryginał
+  Translating comment, please wait: Tłumaczenie komentarza, zaczekaj
+  Comment translation failed: Nie udało się przetłumaczyć komentarza
+Description:
+  Copy Description: Kopiuj opis
+  Description Copied: Opis skopiowano do schowka
+  Video Tags: Tagi filmu
+  Games: Gry
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: Uzupełnia luki w tłumaczeniach tekstem wygenerowanym przez AI. Tłumaczenia wykonane przez ludzi zawsze mają pierwszeństwo.
+    Update Relative Timestamps: Aktualizuje względne znaczniki czasu w całej aplikacji, dopóki strona pozostaje otwarta. Po wyłączeniu są aktualizowane dopiero po ponownym wczytaniu lub otwarciu strony.
+    Stream Extraction Method: |
+      Wybierz sposób pobierania strumieni filmów przez OpenTubeX. Po wybraniu yt-dlp musi być dostępny.
+      Uruchamianie filmów za pomocą yt-dlp może trwać dłużej.
+      Wbudowany mechanizm nie obsługuje przewijania transmisji na żywo ani premier.
+    Show Thumbnail Previews: Pokazuje animowany podgląd po najechaniu na miniaturę filmu.
+  Player Settings:
+    Use YouTube-style Shorts: Wyświetla Shorts w pionowej siatce na stronach subskrypcji i kanałów oraz używa odtwarzacza Shorts w stylu YouTube.
+    Loop Shorts: Po włączeniu Shorts są automatycznie odtwarzane od początku. Po wyłączeniu zatrzymują się na końcu i wyświetlają przycisk ponownego odtwarzania.
+    Enable Skip Silence by Default: Włącza pomijanie ciszy na nowych kartach. Zmiana na jednej karcie nie wpływa na pozostałe.
+    Enable Video Zoom: Wyświetla opcję powiększenia w menu ustawień odtwarzacza oraz włącza jej skróty klawiszowe i sterowanie przesuwaniem obrazu.
+    Voice-over Translation: Po wybraniu tłumaczenia wysyła identyfikator i czas trwania filmu oraz wybrany język do nieoficjalnej usługi tłumaczenia lektorskiego Yandex. Funkcja jest domyślnie wyłączona.
+    Parallel Segment Loading: |
+      Liczba segmentów obrazu i dźwięku wczytywanych jednocześnie przed odtwarzaniem.
+      Wyższe wartości mogą pomóc przy wolnym lub niestabilnym połączeniu, ale zwiększają użycie transferu i pamięci.
+      Mogą też sprawić, że tryb Auto zaniży prędkość połączenia i wybierze niższą jakość.
+      To ustawienie nie wpływa na strumienie ograniczone do jednego żądania naraz.
+  Download Settings:
+    Global Additional yt-dlp Arguments: Dodatkowe argumenty wiersza poleceń przekazywane do yt-dlp przy każdym pobieraniu, na przykład --cookies-from-browser firefox.
+    Concurrent Downloads: Maksymalna liczba zadań yt-dlp wykonywanych jednocześnie.
+    Bandwidth Limit: Ogranicza łączną szybkość transferu kolejki, dzieląc limit między równoczesne zadania. Wpisz 0, aby wyłączyć limit.
+  External Software Settings:
+    Managed Tool Updates: Wybierz, czy zarządzane narzędzia mają aktualizować się automatycznie, pytać przed aktualizacją czy korzystać tylko z przycisków aktualizacji ręcznej. Brakujące narzędzia nadal będą pobierane, gdy okażą się potrzebne.
+    Cookie Source: Wybierz, czy yt-dlp ma odczytywać plik ciasteczek w formacie Netscape, czy ciasteczka z zainstalowanej przeglądarki na potrzeby uwierzytelnionego odtwarzania.
+    Cookie File: Wybierz plik ciasteczek w formacie Netscape na potrzeby uwierzytelnionego odtwarzania.
+    Browser for Cookies: Obsługiwane przeglądarki są odczytywane z wybranego pliku wykonywalnego yt-dlp. Gdy potrzebne jest uwierzytelnione odtwarzanie, OpenTubeX zleca yt-dlp odczytanie ciasteczek z tej przeglądarki.
+    Browser Profile: Opcjonalna nazwa lub folder profilu przeglądarki. Pozostaw puste pole, aby użyć ostatnio otwieranego profilu.
+    Always Use Cookies: Używa skonfigurowanych ciasteczek przy każdym pobieraniu strumieni przez yt-dlp. Nie zmienia to metody pobierania strumienia na yt-dlp. Po wybraniu yt-dlp mogą być dostępne formaty przeznaczone tylko dla kont, w tym wyższa szybkość transmisji bitów YouTube Premium, jeśli konto ma do niej dostęp.
+  Distraction Free Settings:
+    Shorten View Counts: Pokazuje liczbę wyświetleń i polubień komentarzy w skróconej postaci zaokrąglonej przez YouTube, na przykład 14 tys. zamiast 14 000. Dokładne wartości są zawsze wyświetlane w całości.
+  Subscription Settings:
+    Show Scheduled Live Streams / Premieres First: Umieszcza nadchodzące transmisje na żywo i premiery na górze kanału subskrypcji. Po wyłączeniu pozostają na pozycji zgodnej z datą ogłoszenia aż do rozpoczęcia. Po wyłączeniu odśwież kanał subskrypcji, aby pobrać daty ogłoszenia istniejących zaplanowanych pozycji.
+  Theme Settings:
+    Show Progress as Notification: Zamiast ogólnego paska postępu wyświetla stałe powiadomienie z bieżącym postępem operacji w tle, takich jak odświeżanie subskrypcji i pobieranie zarządzanych narzędzi.
+    Scroll Speed: Zmienia odległość przewijania gestami kółka myszy i panelu dotykowego.
+    Use Fixed Tab Width: Nadaje wszystkim kartom na poziomym pasku jednakową szerokość zamiast dopasowywać ją do tytułu.
+    Use Grid Player Menu: Układa menu ustawień odtwarzacza filmu w siatkę kafelków zamiast listy wierszy.
+The playlist is at the beginning. Enable loop to continue playing: Playlista jest na początku. Włącz zapętlanie, aby kontynuować odtwarzanie
+External link opening has been disabled in Settings → Privacy: Otwieranie zewnętrznych odnośników wyłączono w sekcji Ustawienia → Prywatność
+KeyboardShortcutPrompt:
+  Set A-B Repeat Point A: Ustaw punkt A powtarzania A-B
+  Set A-B Repeat Point B: Ustaw punkt B powtarzania A-B
+  Clear A-B Repeat: Wyczyść powtarzanie A-B
+  Video Zoom In: Powiększ film
+  Video Zoom Out: Pomniejsz film
+CommandPalette:
+  Title: Paleta poleceń
+  Open: Otwórz paletę poleceń
+  Search Label: Wyszukaj polecenia
+  Search Placeholder: Wyszukaj polecenia i ustawienia…
+  Results: Polecenia
+  No Results: Brak pasujących poleceń
+  Result Count: 'Znaleziono 1 polecenie | Znaleziono {count} polecenia | Znaleziono {count} poleceń'
+  Move: Przenieś
+  Run: Uruchom
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Przełącz na kartę: {title}'
+  Switch Profile: 'Przełącz profil: {name}'
+  Open Playlist: 'Otwórz playlistę: {name}'
+  Cancel Download: 'Anuluj pobieranie: {title}'
+  Groups:
+    App: Aplikacja
+    Navigation: Nawigacja
+    Tabs: Karty
+  Unavailable:
+    Current Page: Ta strona jest już otwarta
+    No History: Brak strony w tym kierunku
+    Desktop: Dostępne tylko w aplikacji komputerowej
+    Build: Niedostępne w tej kompilacji
+    One Tab: Najpierw otwórz kolejną kartę
+    Active Tab: To jest aktywna karta
+    Active Profile: To jest aktywny profil
+    Download Finished: To pobieranie nie jest już uruchomione
+    Video: Najpierw otwórz film
+Downloads:
+  Download Playlist: Pobierz playlistę
+  Downloading: Pobieranie
+  Queue: Kolejka
+  Downloaded: Pobrano
+  Canceled: Anulowano
+  Open Downloads: Otwórz pobrane
+  No Downloads: Brak pobrań
+  No Downloads Description: Rozpoczęte pobieranie pojawi się tutaj.
+  Clear Failed Canceled Skipped And Missing: Wyczyść nieudane, anulowane, pominięte i brakujące
+  Clear From List: Usuń z listy
+  Show in Folder: Pokaż w folderze
+  Play Download: Odtwórz pobrany plik
+  Retry Download: Ponów pobieranie
+  Pause Download: Wstrzymaj pobieranie
+  Resume Download: Wznów pobieranie
+  Move Earlier: Przenieś wcześniej
+  Move Later: Przenieś później
+  Pause All: Wstrzymaj wszystkie
+  Resume All: Wznów wszystkie
+  Retry All: Ponów wszystkie nieudane pobrania
+  Total Size: 'Łączny rozmiar: {size}'
+  Local File: Plik lokalny
+  Available Offline: Dostępne offline
+  Remove File: Usuń plik
+  Remove File Confirmation: Usunąć pobrany plik?
+  Remove File Warning: Plik „{title}” zostanie przeniesiony do kosza na tym urządzeniu.
+  File Not Found: Nie znaleziono pobranego pliku.
+  Download Missing: Pobrany plik jest niedostępny
+  Files Missing: Pobrany plik nie jest już dostępny w systemie plików. | Pobrane pliki nie są już dostępne w systemie plików. | Pobrane pliki nie są już dostępne w systemie plików.
+  Files Available: 'Dostępnych pobranych plików: {available} z {total}.'
+  More Files: 'Jeszcze 1 plik | Jeszcze {count} pliki | Jeszcze {count} plików'
+  Template Used: 'Szablon: {name}'
+  Template: Szablon
+  Unsaved: Niezapisane
+  Media Type: Typ multimediów
+  Video: Film
+  Audio: Dźwięk
+  Maximum Resolution: Maksymalna rozdzielczość
+  Best Available: Najlepsza dostępna
+  Automatic: Automatycznie
+  Container: Kontener
+  Video Codec: Kodek obrazu
+  Audio Codec: Kodek dźwięku
+  File Name Template: Szablon nazwy pliku
+  File Name Template Help: 'Dostępne pola: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Zakres czasu i rozdziały
+  Start Time: Czas rozpoczęcia (HH:MM:SS)
+  End Time: Czas zakończenia (HH:MM:SS)
+  Split by Chapters: Podziel rozdziały na osobne pliki
+  Remove Segments: Usuń segmenty
+  Subtitles and Metadata: Napisy i metadane
+  Include Subtitles: Dołącz napisy
+  Embed Subtitles: Osadź napisy w pliku multimedialnym
+  Subtitle Format: Format napisów
+  Subtitle Languages: Języki napisów
+  Subtitle Languages Help: 'Selektory języków yt-dlp rozdzielone przecinkami, na przykład: en.*,de.*'
+  Embed Cover Art: Osadź miniaturę jako okładkę
+  Embed Metadata: Osadź tytuł, autora, opis i rozdziały
+  Additional yt-dlp Arguments: Dodatkowe argumenty yt-dlp
+  Template Name Exists: Szablon pobierania o nazwie „{name}” już istnieje.
+  Queued: W kolejce
+  Queued Position: W kolejce, pozycja {position}
+  Paused: Wstrzymano
+  Pausing: Po zakończeniu bieżącego zadania kolejka zostanie wstrzymana
+  File Name Shortened: Nazwa pliku została skrócona, ponieważ tytuł filmu był za długi.
+  Insufficient Disk Space: Za mało miejsca na dysku. Potrzeba około {required}, a dostępne jest {available}.
+  Unknown Download Size: Rozmiar pobierania jest nieznany. W docelowym systemie plików dostępne jest {available}.
+  Disk Space Check Unavailable: Przed rozpoczęciem pobierania nie udało się sprawdzić dostępnego miejsca na dysku.
+  Download Failure Hint: Sprawdź {issuesLink}, a następnie spróbuj zmienić kanał yt-dlp na Nightly lub Master w sekcji Ustawienia → Zaawansowane → Oprogramowanie zewnętrzne.
+  yt-dlp YouTube Issues: ostatnie problemy yt-dlp z YouTube
+  Automatic Download Started: Rozpoczęto automatyczne pobieranie
+  Automatic Download Started Body: Pobieranie filmu „{title}” z kanału {channel} w tle.
+  Automatic Download Complete: Automatyczne pobieranie zakończone
+  Automatic Download Failed: Automatyczne pobieranie nie powiodło się
+  Automatic Download Could Not Start: Nie udało się rozpocząć automatycznego pobierania filmu „{title}”.
+  Automatic Download Skipped: Pominięte przez filtry automatycznego pobierania
+  Templates:
+    Subtitles Format: Napisy - {format}

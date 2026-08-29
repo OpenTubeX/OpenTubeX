@@ -200,11 +200,24 @@ const processLocalesPlugin = new ProcessLocalesPlugin({
   outputDir: 'static/locales',
 })
 
+const processAILocalesPlugin = new ProcessLocalesPlugin({
+  activeLocales: processLocalesPlugin.activeLocales,
+  allowMissing: true,
+  collectMetadata: false,
+  compress: false,
+  hotReload: isDevMode,
+  inputDir: path.join(__dirname, '../static/locales/ai'),
+  localeSource: 'ai',
+  outputDir: 'static/locales/ai',
+})
+
 config.plugins.push(
   processLocalesPlugin,
+  processAILocalesPlugin,
   new webpack.DefinePlugin({
     'process.env.LOCALE_NAMES': JSON.stringify(processLocalesPlugin.localeNames),
     'process.env.LOCALE_TRANSLATION_PERCENTAGES': JSON.stringify(processLocalesPlugin.localeTranslationPercentages),
+    'process.env.AI_LOCALES': JSON.stringify([...processAILocalesPlugin.locales.keys()]),
     'process.env.GEOLOCATION_NAMES': JSON.stringify(fs.readdirSync(path.join(__dirname, '..', 'static', 'geolocations')).map(filename => filename.replace('.json', ''))),
     'process.env.SHAKA_LOCALE_MAPPINGS': JSON.stringify(SHAKA_LOCALE_MAPPINGS),
     'process.env.SHAKA_LOCALES_PREBUNDLED': JSON.stringify(SHAKA_LOCALES_PREBUNDLED)
