@@ -1,7 +1,7 @@
 <template>
   <FtCard
     class="relative"
-    :class="{ fullscreenPlaylist: fullscreenOverlay }"
+    :class="{ fullscreenPlaylist: fullscreenOverlay, isCollapsed: playlistCollapsed }"
   >
     <FtLoader
       v-if="isLoading"
@@ -49,9 +49,21 @@
                 {{ playlistTitle }}
               </RouterLink>
             </h3>
+            <button
+              class="playlistButton playlistCollapseButton"
+              :aria-label="playlistCollapsed ? t('Video.Expand Playlist') : t('Video.Collapse Playlist')"
+              :aria-expanded="!playlistCollapsed"
+              :title="playlistCollapsed ? t('Video.Expand Playlist') : t('Video.Collapse Playlist')"
+              @click="toggleCollapse"
+            >
+              <FtIcon
+                class="playlistIcon"
+                :icon="['fas', playlistCollapsed ? 'angle-down' : 'angle-up']"
+              />
+            </button>
           </div>
           <template
-            v-if="channelName !== ''"
+            v-if="!playlistCollapsed && channelName !== ''"
           >
             <RouterLink
               v-if="channelId"
@@ -70,6 +82,7 @@
           </template>
           <span
             class="playlistIndex"
+            :class="{ isCollapsed: playlistCollapsed }"
           >
             <label for="playlistProgressBar">
               {{ currentVideoIndexOneBased }} / {{ playlistVideoCount }}
@@ -77,7 +90,7 @@
 
             <!-- eslint-disable vuejs-accessibility/mouse-events-have-key-events, vuejs-accessibility/click-events-have-key-events -->
             <div
-              v-if="!shuffleEnabled && !reversePlaylist"
+              v-if="!playlistCollapsed && !shuffleEnabled && !reversePlaylist"
               class="playlistProgressBarContainer"
               @mouseenter="showProgressBarPreview = true"
               @mouseleave="showProgressBarPreview = false"
@@ -118,7 +131,10 @@
               </div>
             </div>
           </span>
-          <div class="playlistButtons">
+          <div
+            v-show="!playlistCollapsed"
+            class="playlistButtons"
+          >
             <button
               class="playlistButton"
               :class="{ playlistButtonActive: loopEnabled }"
@@ -175,6 +191,7 @@
         <component
           :is="playlistItemsWrapperComponent"
           v-if="!isLoading"
+          v-show="!playlistCollapsed"
           ref="playlistItemsWrapper"
           v-overlay-scrollbars
           :name="animatePlaylistItems ? 'playlistItem' : undefined"
@@ -298,6 +315,10 @@ const playlistCacheTabId = tabId ?? 'web'
 const needsInitialCenter = ref(false)
 
 const isLoading = ref(false)
+const isCollapsed = ref(false)
+const playlistCollapsed = computed(() => isCollapsed.value && !props.fullscreenOverlay)
+let savedScrollTop = 0
+let lastScrolledVideoId = null
 const shuffleEnabled = ref(false)
 const loopEnabled = ref(false)
 const reversePlaylist = ref(false)
@@ -618,6 +639,31 @@ function getPlaylistInfoWithDelay() {
   }
 }
 
+function saveScrollState() {
+  savedScrollTop = getScrollTop()
+  lastScrolledVideoId = props.videoId
+}
+
+function restoreScrollState() {
+  if (lastScrolledVideoId !== props.videoId) {
+    centerCurrentVideo()
+  } else {
+    restoreScrollTop(savedScrollTop)
+  }
+}
+
+watch(isCollapsed, (collapsed) => {
+  if (collapsed) {
+    saveScrollState()
+  } else {
+    restoreScrollState()
+  }
+})
+
+function toggleCollapse() {
+  isCollapsed.value = !isCollapsed.value
+}
+
 function toggleLoop() {
   if (loopEnabled.value) {
     loopEnabled.value = false
@@ -759,9 +805,9 @@ async function handleRemoveWatchedVideosPromptAnswer(option) {
   if (option !== 'delete' || selectedUserPlaylist.value == null) { return }
 
   const historyCacheById = store.getters.getHistoryCacheById
-  const playlistItemIds = selectedUserPlaylist.value.videos
+  const watchedVideos = selectedUserPlaylist.value.videos
     .filter((video) => isHistoryEntryWatched(historyCacheById[video.videoId]))
-    .map((video) => video.playlistItemId)
+  const playlistItemIds = watchedVideos.map((video) => video.playlistItemId)
 
   if (playlistItemIds.length === 0) {
     showToast({
@@ -775,6 +821,7 @@ async function handleRemoveWatchedVideosPromptAnswer(option) {
     await store.dispatch('removeVideos', {
       _id: props.playlistId,
       playlistItemIds,
+      videoIds: watchedVideos.map((video) => video.videoId),
     })
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
@@ -938,7 +985,6 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
 
     playlistItems.value = applyReversePlaylistState(videos)
   }
-
   isLoading.value = false
 }
 

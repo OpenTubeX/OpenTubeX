@@ -350,7 +350,7 @@ import SubscriptionsNew from '../../components/SubscriptionsNew.vue'
 import SubscriptionsVideos from '../../components/SubscriptionsVideos.vue'
 import SubscriptionsLive from '../../components/SubscriptionsLive.vue'
 import SubscriptionsShorts from '../../components/SubscriptionsShorts.vue'
-import SubscriptionsPosts from '../../components/SubscriptionsPosts.vue'
+import SubscriptionsPosts from '../../components/SubscriptionPosts/SubscriptionsPosts.vue'
 
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { getIconForSortPreference } from '../../helpers/utils'
@@ -440,11 +440,6 @@ async function toggleNewFeedView() {
 
 const activeSubscriptionList = computed(() => {
   return store.getters.getActiveProfile.subscriptions
-})
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const useRssFeeds = computed(() => {
-  return store.getters.getUseRssFeeds
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -624,8 +619,7 @@ const visibleTabs = computed(() => {
     tabs.push('live')
   }
 
-  // community does not support rss
-  if (!hideSubscriptionsCommunity.value && !useRssFeeds.value) {
+  if (!hideSubscriptionsCommunity.value) {
     tabs.push('community')
   }
 

@@ -3535,12 +3535,13 @@ test.describe('fullscreen playlist dock', () => {
     await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 
-    await page.evaluate(async ({ playlistId, playlistItemIds }) => {
+    await page.evaluate(async ({ playlistId, playlistItemIds, videoIds }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      await store.dispatch('removeVideos', { _id: playlistId, playlistItemIds })
+      await store.dispatch('removeVideos', { _id: playlistId, playlistItemIds, videoIds })
     }, {
       playlistId: FULLSCREEN_PLAYLIST_ID,
-      playlistItemIds: FULLSCREEN_PLAYLIST.videos.slice(4).map(video => video.playlistItemId)
+      playlistItemIds: FULLSCREEN_PLAYLIST.videos.slice(4).map(video => video.playlistItemId),
+      videoIds: FULLSCREEN_PLAYLIST.videos.slice(4).map(video => video.videoId)
     })
     await expect(items).toHaveCount(4)
     await page.waitForTimeout(250)

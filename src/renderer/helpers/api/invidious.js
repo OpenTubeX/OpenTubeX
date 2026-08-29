@@ -333,6 +333,36 @@ export async function invidiousGetPlaylistInfo(playlistId, page) {
 }
 
 /**
+ * @param {string} playlistId
+ * @param {number} initialOffset
+ * @returns {{
+ *    title: string,
+ *    videoId: string,
+ *    author: string,
+ *    authorId: string,
+ *    authorUrl: string,
+ *    videoThumbnails: InvidiousThumbnailObject[],
+ *    index: number,
+ *    lengthSeconds: number
+ *  }[]}
+ */
+export async function fetchAllInvidiousPlaylistVideos(playlistId, initialOffset = 0) {
+  let offset = initialOffset
+  const videos = []
+
+  while (true) {
+    const playlist = await invidiousGetPlaylistInfo(playlistId, offset)
+    if (playlist.videos.length === 0) {
+      break
+    }
+    videos.push(...playlist.videos)
+    offset += playlist.videos.length
+  }
+
+  return videos
+}
+
+/**
  * @param {string} videoId
  * @returns {Promise<{
  *  error: string,

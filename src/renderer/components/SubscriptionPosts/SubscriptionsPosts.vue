@@ -1,4 +1,15 @@
 <template>
+  <p
+    v-if="useRssFeeds"
+    class="message"
+  >
+    {{
+      t('Subscriptions.Posts.RSS Message', {
+        rssSetting: t('Settings.Subscription Settings.Fetch Feeds from RSS'),
+        hideSetting: t('Settings.Distraction Free Settings.Hide Subscriptions Posts')
+      })
+    }}
+  </p>
   <SubscriptionsTabUi
     ref="tabUi"
     :is-loading="isLoading"
@@ -16,15 +27,15 @@
 import { computed, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
+import SubscriptionsTabUi from '../SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
-import store from '../store/index'
+import store from '../../store/index'
 
-import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
-import { useRelativeTimeClock } from '../composables/useRelativeTimeClock'
-import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
-import { getCachedRelativeTimeFormat, getCachedShortDateTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
-import { refreshSubscriptionPostsFromRemote } from '../helpers/subscriptions'
+import { useKeepAliveEffectScope } from '../../composables/useKeepAliveEffectScope'
+import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
+import { useSubscriptionChannelUpdates } from '../../composables/useSubscriptionChannelUpdates'
+import { getCachedRelativeTimeFormat, getCachedShortDateTimeFormat, getRelativeTimeFromDate } from '../../helpers/utils'
+import { refreshSubscriptionPostsFromRemote } from '../../helpers/subscriptions'
 
 const { locale, t } = useI18n()
 const tabUi = useTemplateRef('tabUi')
@@ -46,6 +57,9 @@ const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCache
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSubscriptionsAutomatically)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const useRssFeeds = computed(() => store.getters.getUseRssFeeds)
 
 const activeSubscriptionList = computed(() => store.getters.getActiveProfile.subscriptions)
 
@@ -175,9 +189,11 @@ if (!subscriptionCacheReady.value) {
   })
 }
 
-onMounted(() => {
-  loadPostsFromRemoteFirstPerWindowSometimes()
-})
+if (!useRssFeeds.value) {
+  onMounted(() => {
+    loadPostsFromRemoteFirstPerWindowSometimes()
+  })
+}
 
 function loadPostsFromRemoteFirstPerWindowSometimes() {
   if (
@@ -273,3 +289,5 @@ defineExpose({
   hasNewContent
 })
 </script>
+
+<style scoped src="./SubscriptionPosts.css" />

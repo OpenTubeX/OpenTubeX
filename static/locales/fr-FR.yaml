@@ -95,8 +95,10 @@ Subscriptions:
   Empty Channels: Les chaînes auxquelles vous êtes abonné(e) ne contiennent actuellement aucune vidéo.
   Subscriptions Tabs: Onglets Abonnements
   All Subscription Tabs Hidden: Tous les onglets d’abonnement sont cachés. Pour voir le contenu ici, veuillez désactiver certains onglets dans la section « {subsection} » dans « {settingsSection} ».
-  Load More Posts: Charger plus de billets
-  Empty Posts: Les chaînes auxquelles vous êtes abonné(e) ne contiennent actuellement aucun billet.
+  Load More Posts: Charger plus de posts
+  Empty Posts: Les chaînes auxquelles vous êtes abonné(e) ne contiennent actuellement aucun post.
+  Posts:
+    RSS Message: YouTube ne fournit pas de flux RSS pour les posts. Désactiver le paramètre "{rssSetting}" pour afficher les posts ou activer le paramètre "{hideSetting}" pour masquer cet onglet.
 Trending:
   Trending: 'Tendance'
   Trending Tabs: Onglets des Tendances
@@ -691,7 +693,7 @@ Channel:
   This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Cette chaîne est limitée par l'âge et ne peut actuellement pas être visionnée dans OpenTubeX.
   Channel Tabs: Onglets des chaînes
   Posts:
-    This channel currently does not have any posts: Cette chaîne n'a actuellement aucune publication
+    This channel currently does not have any posts: Cette chaîne n'a actuellement aucun post
     votes: '{votes} votes'
     Reveal Answers: Afficher les réponses
     Hide Answers: Masquer les réponses
@@ -886,7 +888,7 @@ Share:
   YouTube Channel URL copied to clipboard: L'URL YouTube de la chaîne est copiée dans le presse-papiers
   Invidious Channel URL copied to clipboard: L'URL Invidious de la chaîne est copiée dans le presse-papiers
   Share Channel: Partager la chaîne
-  Share Post: Partager la publication
+  Share Post: Partager le post
 Mini Player: 'Mini-lecteur'
 Comments:
   Comments: 'Commentaires'

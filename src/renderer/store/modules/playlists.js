@@ -445,8 +445,11 @@ const actions = {
     }
   },
 
-  async removeAllPlaylists({ commit }) {
+  async removeAllPlaylists({ commit, dispatch, getters }) {
     try {
+      const playlistIds = getters.getAllPlaylists.map(playlist => playlist._id)
+      await dispatch('unsetLastViewedPlaylists', playlistIds)
+
       await DBPlaylistHandlers.deleteAll()
       commit('removeAllPlaylists')
       return true
@@ -456,8 +459,10 @@ const actions = {
     }
   },
 
-  async removeAllVideos({ commit }, _id) {
+  async removeAllVideos({ commit, dispatch }, _id) {
     try {
+      await dispatch('unsetLastViewedPlaylists', [_id])
+
       await DBPlaylistHandlers.deleteAllVideosByPlaylistId(_id)
       commit('removeAllVideos', _id)
     } catch (errMessage) {
@@ -465,8 +470,10 @@ const actions = {
     }
   },
 
-  async removePlaylist({ commit }, playlistId) {
+  async removePlaylist({ commit, dispatch }, playlistId) {
     try {
+      await dispatch('unsetLastViewedPlaylists', [playlistId])
+
       await DBPlaylistHandlers.delete(playlistId)
       commit('removePlaylist', playlistId)
     } catch (errMessage) {
@@ -474,8 +481,10 @@ const actions = {
     }
   },
 
-  async removePlaylists({ commit }, playlistIds) {
+  async removePlaylists({ commit, dispatch }, playlistIds) {
     try {
+      await dispatch('unsetLastViewedPlaylists', playlistIds)
+
       await DBPlaylistHandlers.deleteMultiple(playlistIds)
       commit('removePlaylists', playlistIds)
     } catch (errMessage) {
@@ -483,9 +492,11 @@ const actions = {
     }
   },
 
-  async removeVideo({ commit }, payload) {
+  async removeVideo({ commit, dispatch }, payload) {
     try {
       const { _id, videoId, playlistItemId } = payload
+
+      await dispatch('unsetLastViewedPlaylistForVideos', { videoIds: [videoId], lastViewedPlaylistId: _id })
 
       const lastUpdatedAt = Date.now()
 
@@ -503,8 +514,10 @@ const actions = {
     }
   },
 
-  async removeVideos({ commit }, payload) {
-    const { _id, playlistItemIds } = payload
+  async removeVideos({ commit, dispatch }, payload) {
+    const { _id, playlistItemIds, videoIds } = payload
+
+    await dispatch('unsetLastViewedPlaylistForVideos', { videoIds, lastViewedPlaylistId: _id })
 
     const lastUpdatedAt = Date.now()
 
