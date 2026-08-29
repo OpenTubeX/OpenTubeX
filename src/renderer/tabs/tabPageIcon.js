@@ -1,5 +1,5 @@
 const PAGE_ICONS = [
-  [/^\/home(?:\/|$)/, ['fas', 'gauge']],
+  [/^\/home(?:\/|$)/, ['fas', 'house']],
   [/^\/$|^\/subscriptions(?:\/|$)/, ['fas', 'rss']],
   [/^\/subscribedchannels(?:\/|$)/, ['fas', 'user-check']],
   [/^\/trending(?:\/|$)/, ['fas', 'fire']],

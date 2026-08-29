@@ -287,6 +287,10 @@
     "ri": "history-line",
     "material": "history-rounded"
   },
+  "house": {
+    "ri": "home-5-line",
+    "material": "home-outline"
+  },
   "images": {
     "ri": "image-line",
     "material": "photo-library-outline"

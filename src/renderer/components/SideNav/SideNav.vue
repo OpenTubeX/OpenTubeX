@@ -26,7 +26,7 @@
       >
         <div class="thumbnailContainer">
           <FtIcon
-            :icon="['fas', 'gauge']"
+            :icon="['fas', 'house']"
             class="navIcon"
             :class="applyNavIconExpand"
           />

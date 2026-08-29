@@ -5,7 +5,7 @@
         <div>
           <h1>
             <FtIcon
-              :icon="['fas', 'gauge']"
+              :icon="['fas', 'house']"
               class="headingIcon"
             />
             {{ t('Home Page.Home') }}
