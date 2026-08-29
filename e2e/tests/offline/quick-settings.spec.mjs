@@ -63,7 +63,7 @@ test.describe('quick settings menu', () => {
     await page.locator('.profileTrigger').click()
     const menu = page.locator('.quickSettingsMenu')
     const pairs = menu.locator('.selectPair')
-    await expect(pairs).toHaveCount(2)
+    await expect(pairs).toHaveCount(3)
 
     for (const pair of await pairs.all()) {
       const selects = pair.locator('.quickSelect')
@@ -78,6 +78,22 @@ test.describe('quick settings menu', () => {
 
     await menu.getByRole('combobox', { name: 'Language preference' }).click()
     await expect(page.locator('.selectDropdown')).toContainText('English (US) (100%)')
+  })
+
+  test('updates the playlist view type independently', async ({ page }) => {
+    await page.locator('.profileTrigger').click()
+    const menu = page.getByRole('dialog', { name: 'Quick settings' })
+    const videoViewType = menu.getByRole('combobox', { name: 'Video View Type' })
+    const playlistViewType = menu.getByRole('combobox', { name: 'Playlist View Type' })
+
+    await expect(videoViewType).toContainText('Grid')
+    await expect(playlistViewType).toContainText('Grid')
+    await playlistViewType.click()
+    await page.getByRole('option', { name: 'List', exact: true }).click()
+
+    await expect(playlistViewType).toContainText('List')
+    await expect(videoViewType).toContainText('Grid')
+    await expect(menu).toBeVisible()
   })
 
   test('shows color swatches in the color-theme selector', async ({ page }) => {
