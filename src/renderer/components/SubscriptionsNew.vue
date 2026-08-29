@@ -83,8 +83,7 @@ import store from '../store/index'
 
 import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
 import { useRefreshAllSubscriptionFeeds } from '../composables/useRefreshAllSubscriptionFeeds'
-import { isHistoryEntryWatched } from '../helpers/history'
-import { isVideoHiddenByPreferences } from '../helpers/subscriptions'
+import { getNewSubscriptionFeedEntries } from '../helpers/newSubscriptionFeed'
 
 const props = defineProps({
   activeCategory: {
@@ -107,125 +106,27 @@ const {
   showRefreshWarning
 } = useRefreshAllSubscriptionFeeds()
 
-const newContentByCategory = computed(() => {
-  const entries = {
-    videos: [],
-    shorts: [],
-    live: [],
-    posts: []
-  }
-  const seenIds = new Set()
-
-  enabledFeeds.value.forEach(({ category, cache, entriesKey }) => {
-    Object.entries(cache).forEach(([channelId, cacheEntry]) => {
-      if (!activeSubscriptionIds.value.has(channelId)) {
-        return
-      }
-
-      cacheEntry?.[entriesKey]?.forEach(entry => {
-        if (entry.isNewInSubscriptionFeed !== true) {
-          return
-        }
-
-        if (entry.videoId != null && isHistoryEntryWatched(store.getters.getHistoryCacheById[entry.videoId])) {
-          return
-        }
-
-        const id = entry.videoId ?? entry.postId
-        if (id == null || seenIds.has(id)) {
-          return
-        }
-
-        seenIds.add(id)
-        entries[category].push({
-          ...entry,
-          hideNewSubscriptionFeedIndicator: true,
-          isInNewSubscriptionFeed: true
-        })
-      })
-    })
-  })
-
-  Object.values(entries).forEach(categoryEntries => {
-    categoryEntries.sort((a, b) => {
-      return (b.published ?? b.publishedTime ?? 0) - (a.published ?? a.publishedTime ?? 0)
-    })
-  })
-
-  return entries
-})
-
 const forbiddenTitles = computed(() => store.getters.getForbiddenTitlesParsed)
 const sortBy = computed(() => {
   return store.getters.getNewSubscriptionFeedSortBy === 'oldest' ? 'oldest' : 'newest'
 })
 
-function applySortPreference(entries) {
-  return sortBy.value === 'oldest' ? entries.toReversed() : entries
-}
+const newContentByCategory = computed(() => getNewSubscriptionFeedEntries({
+  feeds: enabledFeeds.value,
+  activeSubscriptionIds: activeSubscriptionIds.value,
+  historyCacheById: store.getters.getHistoryCacheById,
+  hideLiveStreams: store.getters.getHideLiveStreams,
+  hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
+  forbiddenTitles: forbiddenTitles.value,
+  onlyShowLatestFromChannel: store.getters.getOnlyShowLatestFromChannel,
+  onlyShowLatestFromChannelNumber: store.getters.getOnlyShowLatestFromChannelNumber,
+  sortBy: sortBy.value
+}))
 
-const newMediaByCategory = computed(() => {
-  let mediaEntries = ['videos', 'shorts', 'live'].flatMap(category => {
-    return newContentByCategory.value[category].map(entry => ({ category, entry }))
-  })
-
-  mediaEntries = mediaEntries.filter(({ entry }) => !isVideoHiddenByPreferences(entry, {
-    hideLiveStreams: store.getters.getHideLiveStreams,
-    hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
-    forbiddenTitles: forbiddenTitles.value
-  }))
-
-  mediaEntries.sort((a, b) => {
-    return (b.entry.published ?? b.entry.publishedTime ?? 0) -
-      (a.entry.published ?? a.entry.publishedTime ?? 0)
-  })
-
-  if (store.getters.getOnlyShowLatestFromChannel) {
-    const authorCounts = new Map()
-    const limit = store.getters.getOnlyShowLatestFromChannelNumber
-
-    mediaEntries = mediaEntries.filter(({ entry }) => {
-      if (!entry.videoId || !entry.authorId) {
-        return true
-      }
-
-      const count = authorCounts.get(entry.authorId) ?? 0
-      if (count >= limit) {
-        return false
-      }
-
-      authorCounts.set(entry.authorId, count + 1)
-      return true
-    })
-  }
-
-  const entriesByCategory = mediaEntries.reduce((entries, { category, entry }) => {
-    entries[category].push(entry)
-    return entries
-  }, {
-    videos: [],
-    shorts: [],
-    live: []
-  })
-
-  Object.keys(entriesByCategory).forEach(category => {
-    entriesByCategory[category] = applySortPreference(entriesByCategory[category])
-  })
-
-  return entriesByCategory
-})
-
-const newVideos = computed(() => newMediaByCategory.value.videos)
-const newShorts = computed(() => newMediaByCategory.value.shorts)
-const newLive = computed(() => newMediaByCategory.value.live)
-const newPosts = computed(() => applySortPreference(
-  newContentByCategory.value.posts.filter(entry => {
-    const lowerCaseAuthor = entry.author?.toLowerCase()
-
-    return entry.postId != null &&
-      !forbiddenTitles.value.some(text => lowerCaseAuthor?.includes(text))
-  })
-))
+const newVideos = computed(() => newContentByCategory.value.videos)
+const newShorts = computed(() => newContentByCategory.value.shorts)
+const newLive = computed(() => newContentByCategory.value.live)
+const newPosts = computed(() => newContentByCategory.value.posts)
 const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
 const showCombinedView = computed(() => props.activeCategory === null)
 const displayedEntries = computed(() => {

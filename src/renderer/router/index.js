@@ -27,6 +27,7 @@ function createAsyncRoute(loader) {
 }
 
 const Subscriptions = createAsyncRoute(() => import('../views/Subscriptions/Subscriptions.vue'))
+const Home = createAsyncRoute(() => import('../views/Home/Home.vue'))
 const SubscribedChannels = createAsyncRoute(() => import('../views/SubscribedChannels/SubscribedChannels.vue'))
 const Trending = createAsyncRoute(() => import('../views/Trending/Trending.vue'))
 const Popular = createAsyncRoute(() => import('../views/Popular/Popular.vue'))
@@ -73,6 +74,15 @@ export function preloadUtilityRoutes() {
 }
 
 export const routes = [
+  {
+    path: '/home',
+    name: 'home',
+    meta: {
+      title: getFixedInternalRouteTitle('/home'),
+      hasResizableThumbnails: true
+    },
+    component: Home
+  },
   {
     path: '/',
     name: 'default',

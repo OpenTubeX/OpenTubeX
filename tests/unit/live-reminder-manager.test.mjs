@@ -74,6 +74,16 @@ test('loads future reminders and removes expired reminders', async () => {
   assert.deepEqual(await harness.manager.get(VIDEO_ID), future)
 })
 
+test('lists reminders in start-time order', async () => {
+  const later = reminder(8_000)
+  const sooner = reminder(5_000, 'sooner12345')
+  const harness = createHarness([later, sooner])
+
+  await harness.manager.initialize()
+
+  assert.deepEqual(await harness.manager.list(), [sooner, later])
+})
+
 test('rescheduling replaces the timer and persisted timestamp', async () => {
   const harness = createHarness()
 

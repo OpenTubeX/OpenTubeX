@@ -1,6 +1,7 @@
 import i18n from '../i18n/index'
 
 const WINDOW_TITLE_TRANSLATION_KEYS = {
+  Home: 'Home Page.Home',
   Subscriptions: 'Subscriptions.Subscriptions',
   'Channel List': 'Channels.Title',
   Trending: 'Trending.Trending',

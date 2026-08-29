@@ -18,7 +18,25 @@
         aria-hidden="true"
       />
       <router-link
-        class="navOption topNavOption mobileShow "
+        v-if="!hideHome"
+        class="navOption topNavOption mobileShow"
+        role="button"
+        to="/home"
+        :title="$t('Home Page.Home')"
+      >
+        <div class="thumbnailContainer">
+          <FtIcon
+            :icon="['fas', 'gauge']"
+            class="navIcon"
+            :class="applyNavIconExpand"
+          />
+        </div>
+        <p class="navLabel">
+          {{ $t('Home Page.Home') }}
+        </p>
+      </router-link>
+      <router-link
+        class="navOption mobileShow"
         role="button"
         to="/subscriptions"
         :title="$t('Subscriptions.Subscriptions')"
@@ -335,6 +353,11 @@ const hidePopularVideos = computed(() => {
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
+const hideHome = computed(() => {
+  return store.getters.getHideHome
+})
+
+/** @type {import('vue').ComputedRef<boolean>} */
 const hidePlaylists = computed(() => {
   return store.getters.getHidePlaylists
 })
@@ -389,6 +412,7 @@ const innerRef = useTemplateRef('innerRef')
 const indicatorStyle = ref(null)
 
 let remeasureTimeoutId = null
+let navMutationObserver = null
 
 function updateIndicator() {
   const inner = innerRef.value
@@ -433,11 +457,14 @@ watch([isOpen, hideText, displayedActiveSubscriptions], () => {
 
 onMounted(() => {
   updateIndicator()
+  navMutationObserver = new MutationObserver(() => nextTick(updateIndicator))
+  navMutationObserver.observe(innerRef.value, { childList: true, subtree: true })
   window.addEventListener('resize', updateIndicatorAfterResize)
 })
 
 onBeforeUnmount(() => {
   clearTimeout(remeasureTimeoutId)
+  navMutationObserver?.disconnect()
   window.removeEventListener('resize', updateIndicatorAfterResize)
 })
 

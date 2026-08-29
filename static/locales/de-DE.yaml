@@ -92,6 +92,31 @@ Search Filters:
     Creative Commons: Creative-Commons
     Location: Region
   Clear Filters: Suchfilter zurücksetzen
+Home Page:
+  Home: Startseite
+  Description: Setze dort fort, wo du aufgehört hast, und sieh dir deine letzten Aktivitäten an.
+  Customize: Startseite anpassen
+  Done: Fertig
+  Customize description: Wähle aus, welche Bereiche angezeigt werden, und lege ihre Reihenfolge fest.
+  Continue watching: Weiterschauen
+  New since last visit: Neu seit deinem letzten Besuch
+  Watch queue: Wiedergabewarteschlange
+  Recent playlists: Kürzlich verwendete Playlists
+  Recent downloads: Kürzliche Downloads
+  Upcoming reminders: Anstehende Erinnerungen
+  Watch statistics: Wiedergabestatistik
+  View all: Alle anzeigen
+  Previous shelf page: Vorherige Seite für {section}
+  Next shelf page: Nächste Seite für {section}
+  Shelf page status: '{section}, Seite {page} von {total}.'
+  Move section up: '{section} nach oben verschieben'
+  Move section down: '{section} nach unten verschieben'
+  Section moved: '{section} wurde an Position {position} von {total} verschoben.'
+  Nothing here yet: Hier ist noch nichts
+  Empty description: Begonnene Videos, verwendete Playlists, Downloads und Erinnerungen erscheinen hier.
+  All sections hidden: Alle Bereiche sind ausgeblendet
+  All sections hidden description: Passe die Startseite an, um wieder einen Bereich anzuzeigen.
+
 Subscriptions:
     # On Subscriptions Page
   Subscriptions: Abos
@@ -980,6 +1005,7 @@ Settings:
     Hide Popular Videos: Beliebte Videos ausblenden
     Hide Trending Videos: Trending-Videos ausblenden
     Hide Recommended Videos: Empfohlene Videos ausblenden
+    Hide Home: Startseite ausblenden
     Hide Channel Subscribers: Abozahl für Kanäle ausblenden
     Hide Comment Likes: Likes bei Kommentaren ausblenden
     Hide Comment Translation Buttons: Schaltflächen zum Übersetzen von Kommentaren ausblenden

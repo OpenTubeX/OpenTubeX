@@ -2,13 +2,16 @@ import i18n, { loadLocale } from '../../i18n/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
 import {
   applyKeyboardShortcutOverrides,
+  DEFAULT_LANDING_PAGE,
   DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS,
   DEFAULT_WATCHED_PERCENTAGE_THRESHOLD,
+  LEGACY_DEFAULT_LANDING_PAGE,
   MAIN_PROFILE_ID,
+  resolveLandingPage,
   sanitizeKeyboardShortcutOverrides,
   SyncEvents,
 } from '../../../constants'
-import { DBSettingHandlers } from '../../../datastores/handlers/index'
+import { DBProfileHandlers, DBSettingHandlers } from '../../../datastores/handlers/index'
 import { hashPassword } from '../../helpers/passwords'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { getSystemLocale, showToast } from '../../helpers/utils'
@@ -31,6 +34,7 @@ import {
 } from '../../helpers/tutorialState.js'
 import { DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB } from '../../../ytDlpPlaybackCacheSettings.js'
 import { terminateCommentTranslationLanguageDetector } from '../../helpers/comment-translations'
+import { DEFAULT_HOME_SECTION_LAYOUT } from '../../helpers/homeSections.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
 const TUTORIAL_STATE_SETTING_IDS = new Set([
@@ -307,6 +311,7 @@ const state = {
   hideLiveChatReplay: false,
   hideLiveStreams: false,
   hideHeaderLogo: false,
+  hideHome: false,
   hidePlaylists: false,
   hidePopularVideos: false,
   hideRecommendedVideos: false,
@@ -328,6 +333,7 @@ const state = {
   unsubscriptionPopupStatus: false,
   hideLabelsSideBar: false,
   hideChapters: false,
+  homeSectionLayout: DEFAULT_HOME_SECTION_LAYOUT.map(section => ({ ...section })),
   showDistractionFreeTitles: false,
   showPlayerControlsWhenPaused: true,
   showVideoTitleWhenPaused: true,
@@ -335,7 +341,7 @@ const state = {
   pausedInterfaceHideDelay: 2.5,
   showLiveChatTimestamps: false,
   liveChatFilter: 'TOP_CHAT',
-  landingPage: 'subscriptions',
+  landingPage: DEFAULT_LANDING_PAGE,
   newTabPosition: 'afterCurrentInOrder',
   tabCloseFocus: 'previousTab',
   startupBehavior: 'loadLastActiveTab',
@@ -771,6 +777,8 @@ const customState = {
 }
 
 const customGetters = {
+  getLandingPage: (state) => resolveLandingPage(state.landingPage, state.hideHome),
+
   // These parsed variants are cached by Vuex,
   // so that list items don't each have to parse the JSON strings themselves
 
@@ -924,6 +932,7 @@ const customActions = {
   grabUserSettings: async ({ commit, dispatch, state }) => {
     try {
       const userSettings = await DBSettingHandlers.find()
+      let landingPageToInitialize = null
 
       const mutationIds = Object.keys(mutations)
 
@@ -969,6 +978,19 @@ const customActions = {
 
       if (state.landingPage === 'settings') {
         await dispatch('updateLandingPage', 'subscriptions')
+      }
+
+      const hasLandingPage = userSettings.some(entry => entry._id === 'landingPage')
+      if (!hasLandingPage) {
+        const profiles = await DBProfileHandlers.find()
+        const isFreshInstallation = userSettings.length === 0 && profiles.length === 0
+        const resolvedLandingPage = isFreshInstallation
+          ? DEFAULT_LANDING_PAGE
+          : LEGACY_DEFAULT_LANDING_PAGE
+        commit('setLandingPage', resolvedLandingPage)
+        landingPageToInitialize = isFreshInstallation
+          ? resolvedLandingPage
+          : null
       }
 
       const keyboardShortcutsEntry = userSettings.find(entry => entry._id === 'keyboardShortcuts')
@@ -1082,6 +1104,7 @@ const customActions = {
       await Promise.allSettled(sideEffectPromises)
       return {
         hasExistingSettings: userSettings.some(({ _id }) => !TUTORIAL_STATE_SETTING_IDS.has(_id)),
+        landingPageToInitialize,
         tutorialAudience: userSettings.find(({ _id }) => _id === TUTORIAL_AUDIENCE_SETTING_ID)?.value ?? null,
         lastUsedVersion: userSettings.find(({ _id }) => _id === LAST_USED_VERSION_SETTING_ID)?.value ?? null,
       }
@@ -1095,10 +1118,20 @@ const customActions = {
         .catch(console.error)
       return {
         hasExistingSettings: null,
+        landingPageToInitialize: null,
         tutorialAudience: null,
         lastUsedVersion: null,
       }
     }
+  },
+
+  redirectHomeTabsToLandingPage: async ({ getters }) => {
+    if (!process.env.IS_ELECTRON) { return }
+
+    const landingRoute = { path: `/${getters.getLandingPage}` }
+    const homeTabs = getters.getTabs.filter(tab => tab.route.path === '/home')
+    const navigation = getTabNavigationService()
+    await Promise.all(homeTabs.map(tab => navigation.replace(tab.id, landingRoute)))
   },
 
   // Should be a root action, but we'll tolerate
@@ -1112,6 +1145,11 @@ const customActions = {
             }
 
             commit(defaultMutationId(data._id), data.value)
+            if (data._id === 'hideHome' && data.value === true) {
+              dispatch('redirectHomeTabsToLandingPage').catch(error => {
+                console.error('Failed to redirect Home tabs after syncing Hide Home', error)
+              })
+            }
             if (data._id === 'syncServerEnabled') {
               dispatch('applySyncServerEnabled', data.value, { root: true })
             }

@@ -653,6 +653,8 @@ export default {
   },
 
   liveReminder: {
+    list: () => ipcRenderer.invoke(IpcChannels.LIVE_REMINDER_LIST),
+
     /**
      * @param {string} videoId
      */

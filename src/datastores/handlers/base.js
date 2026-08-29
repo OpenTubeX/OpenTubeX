@@ -97,6 +97,7 @@ class Settings {
 
   static _findSidenavSettings() {
     return {
+      hideHome: db.settings.findOneAsync({ _id: 'hideHome' }),
       hideTrendingVideos: db.settings.findOneAsync({ _id: 'hideTrendingVideos' }),
       hidePopularVideos: db.settings.findOneAsync({ _id: 'hidePopularVideos' }),
       hidePlaylists: db.settings.findOneAsync({ _id: 'hidePlaylists' }),

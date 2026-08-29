@@ -2,7 +2,12 @@ import { BrowserWindow, ipcMain, app, nativeImage, shell } from 'electron'
 import { randomUUID } from 'crypto'
 import { mkdir, readdir, readFile, rename, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
-import { IpcChannels } from '../../constants.js'
+import {
+  DEFAULT_LANDING_PAGE,
+  IpcChannels,
+  LEGACY_DEFAULT_LANDING_PAGE,
+  resolveLandingPage,
+} from '../../constants.js'
 import * as baseHandlers from '../../datastores/handlers/base.js'
 import { getFixedInternalRouteTitle } from '../../internalRoutes.js'
 import {
@@ -306,11 +311,26 @@ export class TabManager {
    */
   static async getStoredLandingRoute() {
     try {
-      const value = (await baseHandlers.settings._findOne('landingPage'))?.value
-      return normalizeRoutePath(typeof value === 'string' && value.length > 0 ? value : 'subscriptions')
+      const [landingPageSetting, hideHomeSetting] = await Promise.all([
+        baseHandlers.settings._findOne('landingPage'),
+        baseHandlers.settings._findOne('hideHome'),
+      ])
+
+      let landingPage = landingPageSetting?.value
+      if (typeof landingPage !== 'string' || landingPage.length === 0) {
+        const [settings, profiles] = await Promise.all([
+          baseHandlers.settings.find(),
+          baseHandlers.profiles.find(),
+        ])
+        landingPage = settings.length > 0 || profiles.length > 0
+          ? LEGACY_DEFAULT_LANDING_PAGE
+          : DEFAULT_LANDING_PAGE
+      }
+
+      return normalizeRoutePath(resolveLandingPage(landingPage, hideHomeSetting?.value === true))
     } catch (error) {
       console.error('Failed to load landing page preference:', error)
-      return '/subscriptions'
+      return `/${LEGACY_DEFAULT_LANDING_PAGE}`
     }
   }
 

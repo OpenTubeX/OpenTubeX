@@ -1006,6 +1006,9 @@ onMounted(async () => {
     tabsReady,
   ])
   const lastUsedVersion = getLastUsedVersion(tutorialState.lastUsedVersion)
+  if (tutorialState.landingPageToInitialize !== null) {
+    await store.dispatch('updateLandingPage', tutorialState.landingPageToInitialize)
+  }
 
   try {
     store.commit('setCustomThemes', themes)
