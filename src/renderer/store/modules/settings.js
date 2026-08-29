@@ -21,6 +21,7 @@ import { normalizeTabBarPosition } from '../../constants/tabBarPosition'
 import { DEFAULT_SCROLLBAR_THUMB_WIDTH } from '../../constants/scrollbar'
 import { setReducedMotionPreference } from '../../helpers/reducedMotion'
 import { setAnimationSpeed } from '../../helpers/animationSpeed'
+import { DEFAULT_SCROLL_SPEED } from '../../helpers/scrollSpeed'
 import { DEFAULT_SEARCH_ENGINES_SETTING } from '../../../searchEngines'
 import { DEFAULT_SEGMENT_PREFETCH_LIMIT } from '../../helpers/player/segmentPrefetch'
 import { normalizeYouTubeCaptionLanguageCode } from '../../helpers/player/youtubeCaptionLanguages'
@@ -206,6 +207,7 @@ const state = {
   scrollMiniPlayerOnAllTabs: false,
   scrollMiniPlayerSavedRect: '',
   scrollbarThumbWidth: DEFAULT_SCROLLBAR_THUMB_WIDTH,
+  scrollSpeed: DEFAULT_SCROLL_SPEED,
   avoidTranslation: 'disabled',
   backendFallback: false,
   backendPreference: !process.env.SUPPORTS_LOCAL_API ? 'invidious' : 'local',

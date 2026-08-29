@@ -313,6 +313,17 @@
         @change="updateScrollbarThumbWidth"
       />
       <FtSlider
+        :label="t('Settings.Theme Settings.Scroll Speed')"
+        :tooltip="t('Tooltips.Theme Settings.Scroll Speed')"
+        :default-value="scrollSpeed"
+        setting-key="scrollSpeed"
+        :min-value="MIN_SCROLL_SPEED"
+        :max-value="MAX_SCROLL_SPEED"
+        :step="SCROLL_SPEED_STEP"
+        value-extension="%"
+        @change="updateScrollSpeed"
+      />
+      <FtSlider
         :label="t('Settings.Theme Settings.Animation Speed')"
         :default-value="animationSpeed"
         setting-key="animationSpeed"
@@ -377,6 +388,12 @@ import {
 } from '../constants/scrollbar'
 import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../constants/toastPosition'
 import { setAnimationSpeed } from '../helpers/animationSpeed'
+import {
+  MAX_SCROLL_SPEED,
+  MIN_SCROLL_SPEED,
+  normalizeScrollSpeed,
+  SCROLL_SPEED_STEP
+} from '../helpers/scrollSpeed'
 import { getMissingTabAvatarTabs, loadMissingTabAvatars } from '../helpers/loadTabAvatars'
 import { showToast } from '../helpers/utils'
 import { ICON_PACKS } from '../icons/iconPackState'
@@ -825,6 +842,7 @@ const uiRoundness = computed(() => store.getters.getUiRoundness)
 const scrollbarThumbWidth = computed(
   () => normalizeScrollbarThumbWidth(store.getters.getScrollbarThumbWidth)
 )
+const scrollSpeed = computed(() => normalizeScrollSpeed(store.getters.getScrollSpeed))
 const animationSpeed = computed(() => store.getters.getAnimationSpeed)
 
 const systemReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -886,6 +904,13 @@ function previewScrollbarThumbWidth(value) {
  */
 function updateScrollbarThumbWidth(value) {
   store.dispatch('updateScrollbarThumbWidth', value)
+}
+
+/**
+ * @param {number} value
+ */
+function updateScrollSpeed(value) {
+  store.dispatch('updateScrollSpeed', value)
 }
 
 /**
