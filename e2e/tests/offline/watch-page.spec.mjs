@@ -55,13 +55,17 @@ async function expectPlayerMenuScrollState(menu, atEnd = true) {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
-test('does not show an age-restricted badge when metadata loading fails', async ({ app, page }) => {
+test('keeps metadata errors visible in family-friendly-only mode', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await app.electronApp.evaluate(({ ipcMain }) => {
     ipcMain.removeHandler('generate-po-token')
     ipcMain.handle('generate-po-token', () => {
       throw new Error('VM operation timed out')
     })
+  })
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateShowFamilyFriendlyOnly', true)
   })
 
   await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=4FEzLc7iBY0')

@@ -13,7 +13,7 @@
     }"
   >
     <div
-      v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
+      v-if="(isFamilyFriendly !== false || !showFamilyFriendlyOnly)"
       class="videoArea"
       :style="customShortsPlayerActive
         ? {
@@ -721,7 +721,7 @@
       class="ageRestricted"
     />
     <div
-      v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
+      v-if="(isFamilyFriendly !== false || !showFamilyFriendlyOnly)"
       class="infoArea"
     >
       <div
@@ -824,7 +824,7 @@
       </Teleport>
     </div>
     <div
-      v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
+      v-if="(isFamilyFriendly !== false || !showFamilyFriendlyOnly)"
       class="sidebarArea"
     >
       <div
@@ -1029,7 +1029,7 @@
       />
     </div>
     <div
-      v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
+      v-if="(isFamilyFriendly !== false || !showFamilyFriendlyOnly)"
       class="commentsArea"
     >
       <Teleport
