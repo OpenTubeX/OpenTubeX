@@ -3609,10 +3609,18 @@
 }
 
 /* added to the body element */
+:global(html:has(body.playerFullWindow)) {
+  overflow: hidden;
+}
+
 :global(.playerFullWindow) {
   overflow: hidden;
   margin: 0;
   padding: 0;
+}
+
+:global(body.playerFullWindow > .os-scrollbar) {
+  display: none;
 }
 
 @media only screen and (width <=400px) {

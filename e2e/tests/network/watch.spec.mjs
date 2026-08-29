@@ -1174,6 +1174,38 @@ test.describe('watch page', () => {
     await expect(title).toHaveAttribute('aria-expanded', 'false')
   })
 
+  test('full-window mode locks the page scroll position', async ({ page }) => {
+    await openVideo(page)
+    await expect(page.locator('.videoLayout')).toBeVisible()
+
+    const scrollMetrics = await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateAlwaysShowScrollbars', true)
+      await store.dispatch('updateUiScale', 95)
+      const maxScrollTop = document.documentElement.scrollHeight - window.innerHeight
+      const scrollTarget = Math.max(1, Math.min(300, Math.floor(maxScrollTop / 2)))
+      window.scrollTo(0, scrollTarget)
+      return { maxScrollTop, scrollTop: window.scrollY }
+    })
+    const { maxScrollTop, scrollTop } = scrollMetrics
+    expect(scrollTop).toBeGreaterThan(0)
+    expect(scrollTop).toBeLessThan(maxScrollTop)
+
+    const bodyScrollbar = page.locator('body > .os-scrollbar-vertical')
+    await expect(bodyScrollbar).toBeVisible()
+    await page.keyboard.press('s')
+    await expect(page.locator('.ftVideoPlayer')).toHaveClass(/fullWindow/)
+    await expect(bodyScrollbar).toBeHidden()
+
+    await page.mouse.wheel(0, 600)
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(scrollTop)
+
+    await page.keyboard.press('s')
+    await expect(page.locator('.ftVideoPlayer')).not.toHaveClass(/fullWindow/)
+    await expect(bodyScrollbar).toBeVisible()
+    expect(await page.evaluate(() => window.scrollY)).toBe(scrollTop)
+  })
+
   test('fullscreen player overlays appear above the action pill', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
