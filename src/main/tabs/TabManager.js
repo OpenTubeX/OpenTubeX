@@ -33,6 +33,7 @@ import {
   TAB_PREVIEW_JPEG_QUALITY,
   tabPreviewBufferToDataUrl
 } from './tabPreviewCache.js'
+import { isTabActivatable } from './tabAvailability.js'
 import {
   cropTabPreviewToContent,
   getTabPreviewTargetSize,
@@ -1228,18 +1229,23 @@ export class TabManager {
   }
 
   /**
+   * @param {TabInfo | undefined} tab
+   * @returns {boolean}
+   */
+  _isTabActivatable(tab) {
+    return isTabActivatable(
+      tab,
+      this._deferredCloseTabIds,
+      this._deferredUnloadTabIds
+    )
+  }
+
+  /**
    * @param {string} tabId
    */
   activateTab(tabId) {
     const tab = this.tabs.get(tabId)
-    if (
-      !tab ||
-      tab.isTransferStaged === true ||
-      this._deferredCloseTabIds.has(tabId) ||
-      this._deferredUnloadTabIds.has(tabId)
-    ) {
-      return
-    }
+    if (!this._isTabActivatable(tab)) return
 
     const previousActiveId = this.activeTabId
     if (
@@ -2923,6 +2929,7 @@ export class TabManager {
         title: tab.title,
         avatarUrl: tab.avatarDataUrl,
         isActive: tab.id === this.activeTabId,
+        isActivatable: this._isTabActivatable(tab),
         isUnloaded: tab.loadState === 'unloaded',
         isLoading: this._getTabLoadingState(tab),
         isPlaying: tab.isPlaying || false,

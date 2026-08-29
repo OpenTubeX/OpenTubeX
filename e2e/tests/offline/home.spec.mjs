@@ -270,6 +270,48 @@ test('opens the subscriptions New feed from its Home summary', async ({ page }) 
   await expect(page).toHaveURL(/#\/subscriptions\?tab=videos$/)
 })
 
+test('activates an existing video tab from Continue watching', async ({ page }) => {
+  await goTo(page, 'home')
+
+  const homeTabId = await page.locator('.tab.active').getAttribute('data-tab-id')
+  const videoTab = await page.evaluate(() => window.ftElectron.tabs.create({
+    route: '/watch/homevideo01',
+    title: 'Partly watched video',
+    makeActive: false,
+    lazyLoad: true
+  }))
+  await expect(page.locator('.tab')).toHaveCount(2)
+
+  await page.locator('[data-home-section="continueWatching"]')
+    .getByRole('link', { name: /Partly watched video/ })
+    .click()
+
+  await expect.poll(async () => page.evaluate(() => window.ftElectron.tabs.getState()))
+    .toMatchObject({
+      activeTabId: videoTab.id,
+      tabs: [
+        { id: homeTabId, route: { fullPath: '/home' } },
+        { id: videoTab.id, route: { fullPath: '/watch/homevideo01' } }
+      ]
+    })
+
+  await page.evaluate(tabId => window.ftElectron.tabs.close(tabId), videoTab.id)
+  await expect(page.locator('.tab')).toHaveCount(1)
+  await expect(page).toHaveURL(/#\/home$/)
+
+  await page.locator('[data-home-section="continueWatching"]')
+    .getByRole('link', { name: /Partly watched video/ })
+    .click()
+
+  await expect(page).toHaveURL(/#\/watch\/homevideo01$/)
+  await expect(page.locator('.tab')).toHaveCount(1)
+  await expect.poll(async () => page.evaluate(() => window.ftElectron.tabs.getState()))
+    .toMatchObject({
+      activeTabId: homeTabId,
+      tabs: [{ id: homeTabId, route: { fullPath: '/watch/homevideo01' } }]
+    })
+})
+
 test('shows recent active and completed downloads', async ({ page }) => {
   await goTo(page, 'home')
   await page.evaluate(() => {
