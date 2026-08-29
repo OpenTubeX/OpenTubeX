@@ -3,6 +3,8 @@ import path from 'node:path'
 
 import { test, expect, sel, goTo, goToSettingsSection } from '../../helpers/app.mjs'
 
+const seededPremiereStart = Date.now() + 86_400_000
+
 test.describe('playlist creation', () => {
   test('a playlist can be created through the UI', async ({ page }) => {
     await goTo(page, 'userplaylists')
@@ -58,8 +60,10 @@ test.describe('seeded playlists', () => {
               author: 'Test Channel',
               authorId: 'UC-test-channel-id',
               lengthSeconds: 120,
-              published: Date.now() + 86_400_000,
-              premiereDate: new Date(Date.now() + 86_400_000).toISOString(),
+              published: seededPremiereStart,
+              isUpcoming: true,
+              isPremiere: true,
+              premiereDate: new Date(seededPremiereStart).toISOString(),
               timeAdded: Date.now(),
               playlistItemId: 'e2e-item-2',
               type: 'video'
@@ -81,6 +85,24 @@ test.describe('seeded playlists', () => {
     await expect(page.getByText('Seeded video one')).toBeVisible()
     // Local playlists intentionally ignore the global hide-upcoming setting.
     await expect(page.getByText('Upcoming seeded premiere')).toBeVisible()
+  })
+
+  test('restores running premiere styling when the scheduled time arrives', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.clock.install({ time: seededPremiereStart - 86_400_000 })
+    await page.getByText('My seeded playlist').click()
+
+    const card = page.locator('.ft-list-video').filter({ hasText: 'Upcoming seeded premiere' })
+    const title = card.getByText('Upcoming seeded premiere', { exact: true })
+    await page.locator('body').evaluate(element => {
+      element.style.setProperty('--primary-text-color', '#123456')
+      element.style.setProperty('--tertiary-text-color', '#654321')
+    })
+    await expect(title).toHaveCSS('color', 'rgb(18, 52, 86)')
+
+    await page.clock.fastForward(86_400_001)
+
+    await expect(title).toHaveCSS('color', 'rgb(101, 67, 33)')
   })
 
   test('playlist artwork keeps its native aspect ratio', async ({ page }) => {
