@@ -902,6 +902,33 @@ test.describe('settings', () => {
     await attachScreenshot('compact General setting selects')
   })
 
+  test('places an incomplete General toggle row at the inline start', async ({ page }) => {
+    const general = await goToSettingsSection(page, 'general')
+    const minimizeToTray = general.getByRole('checkbox', {
+      name: /Minimi[sz]e to system tray/
+    }).locator('..')
+    await expect(minimizeToTray).toBeVisible()
+    await minimizeToTray.evaluate(element => { element.style.display = 'none' })
+
+    const aiTranslations = general.getByRole('checkbox', {
+      name: 'Fill missing translations with AI-generated text'
+    }).locator('..')
+    const grid = general.locator('.switchColumnGrid').first()
+
+    for (const direction of ['ltr', 'rtl']) {
+      await page.evaluate(value => { document.documentElement.dir = value }, direction)
+      const inlineOffset = await grid.evaluate((element, aiTranslationElement) => {
+        const gridBounds = element.getBoundingClientRect()
+        const settingBounds = aiTranslationElement.getBoundingClientRect()
+        const physicalOffset = settingBounds.left + settingBounds.width / 2 -
+          (gridBounds.left + gridBounds.width / 2)
+        return getComputedStyle(element).direction === 'rtl' ? -physicalOffset : physicalOffset
+      }, await aiTranslations.elementHandle())
+
+      expect(inlineOffset, direction).toBeLessThan(0)
+    }
+  })
+
   test('keeps General selects compact in the one-column layout', async ({ page }) => {
     await page.evaluate(() => {
       localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
@@ -946,7 +973,7 @@ test.describe('settings', () => {
     })
     await goTo(page, 'settings')
 
-    for (const sectionType of ['subscriptions', 'focus', 'privacy']) {
+    for (const sectionType of ['general', 'subscriptions', 'focus', 'privacy']) {
       await page.locator(`.settingsMenu [data-section="${sectionType}"]`).click()
       const grids = page.locator(
         `.settingsContent > [data-section="${sectionType}"] .switchColumnGrid`
@@ -956,12 +983,13 @@ test.describe('settings', () => {
       const centerOffsets = await grids.evaluateAll(elements => elements.flatMap(grid => {
         const gridBounds = grid.getBoundingClientRect()
         const gridCenter = gridBounds.left + gridBounds.width / 2
-        return Array.from(grid.querySelectorAll(':scope > .switchColumn')).flatMap(column => {
-          return Array.from(column.children)
-            .map(child => child.getBoundingClientRect())
-            .filter(bounds => bounds.width > 0 && bounds.height > 0)
-            .map(bounds => Math.abs(bounds.left + bounds.width / 2 - gridCenter))
-        })
+        const columnControls = Array.from(grid.querySelectorAll(':scope > .switchColumn'))
+          .flatMap(column => Array.from(column.children))
+        const flowControls = Array.from(grid.querySelectorAll(':scope > .switch-ctn'))
+        return [...columnControls, ...flowControls]
+          .map(child => child.getBoundingClientRect())
+          .filter(bounds => bounds.width > 0 && bounds.height > 0)
+          .map(bounds => Math.abs(bounds.left + bounds.width / 2 - gridCenter))
       }))
 
       expect(Math.max(...centerOffsets), sectionType).toBeLessThanOrEqual(1)

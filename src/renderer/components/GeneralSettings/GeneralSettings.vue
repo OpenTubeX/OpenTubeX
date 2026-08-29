@@ -3,99 +3,89 @@
     :title="sectionTitle"
   >
     <div
-      class="switchColumnGrid"
+      class="switchColumnGrid switchFlowGrid"
       :class="{ appearanceSwitchGrid: mode === 'appearance' }"
     >
-      <div class="switchColumn">
-        <FtToggleSwitch
-          v-if="mode === 'appearance'"
-          :label="t('Settings.General Settings.Show Thumbnail Previews')"
-          :default-value="showThumbnailPreviews"
-          setting-key="showThumbnailPreviews"
-          :compact="true"
-          :tooltip="t('Tooltips.General Settings.Show Thumbnail Previews')"
-          @change="updateShowThumbnailPreviews"
-        />
-        <FtToggleSwitch
-          v-if="mode === 'general'"
-          :label="t('Settings.General Settings.Check for Updates')"
-          :default-value="checkForUpdates"
-          setting-key="checkForUpdates"
-          :compact="true"
-          @change="updateCheckForUpdates"
-        />
-        <FtToggleSwitch
-          v-if="mode === 'providers' && SUPPORTS_LOCAL_API"
-          :label="t('Settings.General Settings.Fallback to Non-Preferred Backend on Failure')"
-          :default-value="backendFallback"
-          setting-key="backendFallback"
-          :compact="true"
-          :tooltip="t('Tooltips.General Settings.Fallback to Non-Preferred Backend on Failure')"
-          @change="updateBackendFallback"
-        />
-        <FtToggleSwitch
-          v-if="mode === 'general'"
-          :label="t('Settings.General Settings.Update Relative Timestamps')"
-          :tooltip="t('Tooltips.General Settings.Update Relative Timestamps')"
-          :default-value="updateRelativeTimestamps"
-          setting-key="updateRelativeTimestamps"
-          :compact="true"
-          @change="updateRelativeTimestampsSetting"
-        />
-        <!-- Last in this column on purpose: it is the only one of these that
-             some platforms hide, so the columns stay even where it is missing
-             and this one stays the longer of the two where it is not. -->
-        <FtToggleSwitch
-          v-if="mode === 'general' && !IS_MAC && !isLinuxWayland && USING_ELECTRON"
-          :label="t('Settings.General Settings.Minimize to system tray')"
-          :default-value="hideToTrayOnMinimize"
-          setting-key="hideToTrayOnMinimize"
-          :compact="true"
-          @change="updateHideToTrayOnMinimize"
-        />
-      </div>
-      <div
-        v-if="mode !== 'appearance'"
-        class="switchColumn"
-      >
-        <FtToggleSwitch
-          v-if="mode === 'providers'"
-          :label="t('Settings.Player Settings.Proxy Videos Through Invidious')"
-          :compact="true"
-          :default-value="showProxyVideosAsDisabled ? false : proxyVideos"
-          :disabled="showProxyVideosAsDisabled"
-          :tooltip="t('Tooltips.Player Settings.Proxy Videos Through Invidious')"
-          @change="updateProxyVideos"
-        />
-        <FtToggleSwitch
-          v-if="mode === 'general' && USING_ELECTRON"
-          :label="t('Settings.General Settings.Open Deep Links In New Window')"
-          :default-value="openDeepLinksInNewWindow"
-          setting-key="openDeepLinksInNewWindow"
-          :compact="true"
-          :tooltip="t('Tooltips.General Settings.Open Deep Links In New Window')"
-          @change="updateOpenDeepLinksInNewWindow"
-        />
-        <FtToggleSwitch
-          v-if="mode === 'general'"
-          :label="t('Settings.General Settings.Auto Load Next Page.Label')"
-          :default-value="generalAutoLoadMorePaginatedItemsEnabled"
-          setting-key="generalAutoLoadMorePaginatedItemsEnabled"
-          :compact="true"
-          :tooltip="t('Settings.General Settings.Auto Load Next Page.Tooltip')"
-          @change="updateGeneralAutoLoadMorePaginatedItemsEnabled"
-        />
-        <FtToggleSwitch
-          v-if="mode === 'general'"
-          :label="t('Settings.General Settings.Use AI Translation Completions')"
-          :default-value="useAITranslationCompletions"
-          setting-key="useAITranslationCompletions"
-          :compact="true"
-          :disabled="aiTranslationCompletionsDisabled"
-          :tooltip="t('Tooltips.General Settings.Use AI Translation Completions')"
-          @change="updateUseAITranslationCompletions"
-        />
-      </div>
+      <FtToggleSwitch
+        v-if="mode === 'appearance'"
+        :label="t('Settings.General Settings.Show Thumbnail Previews')"
+        :default-value="showThumbnailPreviews"
+        setting-key="showThumbnailPreviews"
+        :compact="true"
+        :tooltip="t('Tooltips.General Settings.Show Thumbnail Previews')"
+        @change="updateShowThumbnailPreviews"
+      />
+      <FtToggleSwitch
+        v-if="mode === 'general'"
+        :label="t('Settings.General Settings.Check for Updates')"
+        :default-value="checkForUpdates"
+        setting-key="checkForUpdates"
+        :compact="true"
+        @change="updateCheckForUpdates"
+      />
+      <FtToggleSwitch
+        v-if="mode === 'general' && USING_ELECTRON"
+        :label="t('Settings.General Settings.Open Deep Links In New Window')"
+        :default-value="openDeepLinksInNewWindow"
+        setting-key="openDeepLinksInNewWindow"
+        :compact="true"
+        :tooltip="t('Tooltips.General Settings.Open Deep Links In New Window')"
+        @change="updateOpenDeepLinksInNewWindow"
+      />
+      <FtToggleSwitch
+        v-if="mode === 'providers' && SUPPORTS_LOCAL_API"
+        :label="t('Settings.General Settings.Fallback to Non-Preferred Backend on Failure')"
+        :default-value="backendFallback"
+        setting-key="backendFallback"
+        :compact="true"
+        :tooltip="t('Tooltips.General Settings.Fallback to Non-Preferred Backend on Failure')"
+        @change="updateBackendFallback"
+      />
+      <FtToggleSwitch
+        v-if="mode === 'providers'"
+        :label="t('Settings.Player Settings.Proxy Videos Through Invidious')"
+        :compact="true"
+        :default-value="showProxyVideosAsDisabled ? false : proxyVideos"
+        :disabled="showProxyVideosAsDisabled"
+        :tooltip="t('Tooltips.Player Settings.Proxy Videos Through Invidious')"
+        @change="updateProxyVideos"
+      />
+      <FtToggleSwitch
+        v-if="mode === 'general'"
+        :label="t('Settings.General Settings.Update Relative Timestamps')"
+        :tooltip="t('Tooltips.General Settings.Update Relative Timestamps')"
+        :default-value="updateRelativeTimestamps"
+        setting-key="updateRelativeTimestamps"
+        :compact="true"
+        @change="updateRelativeTimestampsSetting"
+      />
+      <FtToggleSwitch
+        v-if="mode === 'general'"
+        :label="t('Settings.General Settings.Auto Load Next Page.Label')"
+        :default-value="generalAutoLoadMorePaginatedItemsEnabled"
+        setting-key="generalAutoLoadMorePaginatedItemsEnabled"
+        :compact="true"
+        :tooltip="t('Settings.General Settings.Auto Load Next Page.Tooltip')"
+        @change="updateGeneralAutoLoadMorePaginatedItemsEnabled"
+      />
+      <FtToggleSwitch
+        v-if="mode === 'general' && !IS_MAC && !isLinuxWayland && USING_ELECTRON"
+        :label="t('Settings.General Settings.Minimize to system tray')"
+        :default-value="hideToTrayOnMinimize"
+        setting-key="hideToTrayOnMinimize"
+        :compact="true"
+        @change="updateHideToTrayOnMinimize"
+      />
+      <FtToggleSwitch
+        v-if="mode === 'general'"
+        :label="t('Settings.General Settings.Use AI Translation Completions')"
+        :default-value="useAITranslationCompletions"
+        setting-key="useAITranslationCompletions"
+        :compact="true"
+        :disabled="aiTranslationCompletionsDisabled"
+        :tooltip="t('Tooltips.General Settings.Use AI Translation Completions')"
+        @change="updateUseAITranslationCompletions"
+      />
     </div>
     <div class="switchGrid generalSelectGrid">
       <FtSelect

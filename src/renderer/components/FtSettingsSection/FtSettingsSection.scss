@@ -127,13 +127,15 @@
       padding-inline: 10px;
     }
 
-    :deep(.switchColumn .switch-label > .tooltip) {
+    :deep(.switchColumn .switch-label > .tooltip),
+    :deep(.switchFlowGrid .switch-label > .tooltip) {
       position: static;
       inset: auto;
       vertical-align: middle;
     }
 
-    :deep(.switchColumn .switch-ctn.containsTooltip .switch-label) {
+    :deep(.switchColumn .switch-ctn.containsTooltip .switch-label),
+    :deep(.switchFlowGrid .switch-ctn.containsTooltip .switch-label) {
       align-items: center;
       display: inline-flex;
     }
