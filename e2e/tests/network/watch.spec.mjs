@@ -1191,10 +1191,12 @@ test.describe('watch page', () => {
     expect(scrollTop).toBeGreaterThan(0)
     expect(scrollTop).toBeLessThan(maxScrollTop)
 
+    const body = page.locator('body')
     const bodyScrollbar = page.locator('body > .os-scrollbar-vertical')
     await expect(bodyScrollbar).toBeVisible()
     await page.keyboard.press('s')
     await expect(page.locator('.ftVideoPlayer')).toHaveClass(/fullWindow/)
+    await expect(body).toHaveClass(/playerFullWindow/)
     await expect(bodyScrollbar).toBeHidden()
 
     await page.mouse.wheel(0, 600)
@@ -1202,7 +1204,10 @@ test.describe('watch page', () => {
 
     await page.keyboard.press('s')
     await expect(page.locator('.ftVideoPlayer')).not.toHaveClass(/fullWindow/)
-    await expect(bodyScrollbar).toBeVisible()
+    await expect(body).not.toHaveClass(/playerFullWindow/)
+    await expect.poll(async () => (
+      bodyScrollbar.evaluate((element) => getComputedStyle(element).display)
+    )).not.toBe('none')
     expect(await page.evaluate(() => window.scrollY)).toBe(scrollTop)
   })
 
