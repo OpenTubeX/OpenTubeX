@@ -71,6 +71,7 @@
         setting-key="mainColor"
         :select-names="colorNames"
         :select-values="COLOR_VALUES"
+        :option-colors="COLOR_SWATCHES"
         :disabled="!areColorThemesEnabled"
         :icon="['fas', 'palette']"
         icon-color="var(--primary-color)"
@@ -82,6 +83,7 @@
         setting-key="secColor"
         :select-names="colorNames"
         :select-values="COLOR_VALUES"
+        :option-colors="COLOR_SWATCHES"
         :disabled="!areColorThemesEnabled"
         :icon="['fas', 'palette']"
         icon-color="var(--accent-color)"
@@ -474,6 +476,7 @@ function updateTabBarPosition(value) {
 }
 
 const COLOR_VALUES = colors.map(color => color.name)
+const COLOR_SWATCHES = colors.map(color => color.value)
 const colorNames = useColorTranslations()
 const showCustomThemeEditor = ref(false)
 const editingCustomThemeId = ref(null)

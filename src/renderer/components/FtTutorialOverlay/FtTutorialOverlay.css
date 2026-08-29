@@ -43,6 +43,10 @@
   position: relative;
 }
 
+.tutorialImportCard {
+  inline-size: min(440px, calc(100vw - 24px));
+}
+
 .tutorialProgress {
   display: flex;
   justify-content: center;
@@ -123,9 +127,45 @@
   margin: 0;
 }
 
+.tutorialImportActions {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+}
+
+.tutorialImportActions :deep(.btn) {
+  min-inline-size: 0;
+  padding-inline: 12px;
+}
+
 @media only screen and (width <= 500px) {
   .tutorialCard {
     padding: 20px;
+  }
+
+  .tutorialImportCard {
+    padding-inline: 16px;
+  }
+}
+
+@media only screen and (width <= 400px) {
+  .tutorialImportActions :deep(.tutorialCompactAction) {
+    padding-inline: 2px;
+  }
+
+  .tutorialImportActions {
+    grid-template-columns: 40px 40px minmax(0, 1fr);
+  }
+
+  .tutorialImportActions :deep(.tutorialCompactAction .tutorialActionText) {
+    display: none;
+  }
+
+  .tutorialImportActions :deep(.tutorialPrimaryAction) {
+    padding-inline: 4px;
+  }
+
+  .tutorialImportActions :deep(.tutorialPrimaryAction .ft-icon) {
+    display: none;
   }
 }
 

@@ -2655,12 +2655,12 @@ Tutorial:
     Description: Suche Videos und Kanäle oder füge eine unterstützte Video-URL direkt in das Suchfeld ein.
   Tabs:
     Title: Seiten in Tabs geöffnet halten
-    Description: Öffne mehrere Seiten gleichzeitig und wechsle zwischen ihnen, ohne deine Position zu verlieren.
+    Description: Öffne mehrere Seiten gleichzeitig und wechsle zwischen ihnen, ohne deine Position zu verlieren. Wähle, wo die Tabs in deinem Layout angezeigt werden sollen.
   Quick Settings:
     Title: Passe alles an dich an
     Description: >-
-      Wähle oben rechts dein Profil aus, um das Profil zu wechseln, häufige Einstellungen zu ändern oder alle
-      Einstellungen zu öffnen. Mit einem Rechtsklick gelangst du direkt zur Profilauswahl.
+      Wähle ein Farbschema und die Standardqualität für Videos. Diese und weitere Einstellungen kannst du jederzeit
+      über dein Profilmenü ändern. Mit einem Rechtsklick auf dein Profil gelangst du direkt zur Profilauswahl.
   Import Data:
     Title: Nimm deine Daten mit
     Description: Importiere bei Bedarf Abos, Verlauf, Playlists, Suchverlauf oder Einstellungen aus einer anderen unterstützten Anwendung oder Sicherung.

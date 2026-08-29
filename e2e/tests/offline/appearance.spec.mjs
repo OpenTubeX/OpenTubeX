@@ -183,6 +183,27 @@ test.describe('default appearance', () => {
     }
   })
 
+  test('shows color swatches in every color-theme selector', async ({ page }) => {
+    const themeSection = await goToSettingsSection(page, 'theme')
+    const mainColor = themeSection.getByRole('combobox', { name: /Main colou?r theme/i })
+    const secondaryColor = themeSection.getByRole('combobox', { name: /Secondary colou?r theme/i })
+
+    await expect(mainColor.locator('.optionColorDot')).toHaveCSS('background-color', 'rgb(213, 0, 0)')
+    await expect(secondaryColor.locator('.optionColorDot')).toHaveCSS('background-color', 'rgb(41, 98, 255)')
+    await mainColor.click()
+    const options = page.locator(`#${await mainColor.getAttribute('aria-controls')}`)
+    await expect(options.getByRole('option', { name: 'Blue', exact: true }).locator('.optionColorDot'))
+      .toHaveCSS('background-color', 'rgb(41, 98, 255)')
+    await page.keyboard.press('Escape')
+
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    const editor = page.locator('.customThemeEditor')
+    await expect(editor.getByRole('combobox', { name: /Main colou?r theme/i }).locator('.optionColorDot'))
+      .toBeVisible()
+    await expect(editor.getByRole('combobox', { name: /Secondary colou?r theme/i }).locator('.optionColorDot'))
+      .toBeVisible()
+  })
+
   test('maps system light and dark modes to chosen themes', async ({ app, page }) => {
     await page.emulateMedia({ colorScheme: 'light' })
     await goToSettingsSection(page, 'theme')

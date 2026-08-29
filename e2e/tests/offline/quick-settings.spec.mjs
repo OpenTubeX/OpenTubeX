@@ -80,6 +80,20 @@ test.describe('quick settings menu', () => {
     await expect(page.locator('.selectDropdown')).toContainText('English (US) (100%)')
   })
 
+  test('shows color swatches in the color-theme selector', async ({ page }) => {
+    await page.locator('.profileTrigger').click()
+    const colorTheme = page.getByRole('dialog', { name: 'Quick settings' })
+      .getByRole('combobox', { name: /Main colou?r theme/i })
+
+    await expect(colorTheme.locator('.optionColorDot')).toHaveCSS('background-color', 'rgb(213, 0, 0)')
+    await colorTheme.click()
+
+    const options = page.locator('.selectDropdown').getByRole('option')
+    await expect(options.first().locator('.optionColorDot')).toHaveCSS('background-color', 'rgb(213, 0, 0)')
+    await expect(page.getByRole('option', { name: 'Blue', exact: true }).locator('.optionColorDot'))
+      .toHaveCSS('background-color', 'rgb(41, 98, 255)')
+  })
+
   test('hides the unavailable main color selector', async ({ page }) => {
     await page.setViewportSize({ width: 480, height: 420 })
     await page.locator('.profileTrigger').click()

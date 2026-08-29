@@ -174,6 +174,7 @@
                     setting-key="mainColor"
                     :select-names="colorNames"
                     :select-values="COLOR_VALUES"
+                    :option-colors="COLOR_SWATCHES"
                     :icon="['fas', 'palette']"
                     icon-color="var(--primary-color)"
                     @change="updateSetting('MainColor', $event)"
@@ -423,6 +424,7 @@ const baseThemeNames = computed(() => [
 ])
 
 const COLOR_VALUES = colors.map(color => color.name)
+const COLOR_SWATCHES = colors.map(color => color.value)
 const colorNames = useColorTranslations()
 const VIEW_TYPE_VALUES = ['grid', 'list']
 const viewTypeNames = computed(() => [
