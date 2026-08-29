@@ -107,7 +107,10 @@
                 v-for="video in items"
                 :key="video.videoId"
               >
-                <RouterLink :to="`/watch/${video.videoId}`">
+                <RouterLink
+                  :to="`/watch/${video.videoId}`"
+                  @click.capture="activateExistingContinueWatchingTab($event, video.videoId)"
+                >
                   <span class="mediaThumbnail">
                     <FtRetryImage
                       :src="videoThumbnail(video)"
@@ -598,6 +601,25 @@ function watchProgressPercent(video) {
   }
 
   return `${Math.min(100, Math.max(0, progress / duration * 100))}%`
+}
+
+function activateExistingContinueWatchingTab(event, videoId) {
+  if (
+    !IS_ELECTRON ||
+    event.button !== 0 ||
+    event.ctrlKey ||
+    event.metaKey ||
+    event.shiftKey ||
+    event.altKey
+  ) {
+    return
+  }
+
+  const videoTab = store.getters.getTabs.find(tab => tab.route.path === `/watch/${videoId}`)
+  if (videoTab == null) { return }
+
+  event.preventDefault()
+  store.dispatch('activateTab', videoTab.id)
 }
 
 function setSectionVisibility(sectionId, visible) {
