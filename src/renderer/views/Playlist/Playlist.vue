@@ -248,7 +248,7 @@ import {
 import { invidiousGetPlaylistInfo, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../../helpers/api/invidious-playlists'
 import { runRetryablePlaylistRequest } from '../../helpers/playlist-pagination'
-import { createPlaylistBookmark } from '../../helpers/playlist-bookmarks'
+import { canonicalPlaylistThumbnailUrl, createPlaylistBookmark } from '../../helpers/playlist-bookmarks'
 import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
@@ -387,6 +387,25 @@ const isUserPlaylistRequested = computed(() => route.query.playlistType === 'use
 const isPlaylistBookmarked = computed(() => {
   return !isUserPlaylistRequested.value && store.getters.getPlaylistBookmark(playlistId.value) != null
 })
+
+async function refreshPlaylistBookmarkThumbnail() {
+  const bookmark = store.getters.getPlaylistBookmark(playlistId.value)
+  if (bookmark == null) return
+
+  const thumbnailUrl = playlistThumbnail.value || (firstVideoId.value
+    ? `https://i.ytimg.com/vi/${firstVideoId.value}/mqdefault.jpg`
+    : null)
+  const canonicalThumbnailUrl = canonicalPlaylistThumbnailUrl(thumbnailUrl)
+  if (bookmark.playlist.thumbnail_url === canonicalThumbnailUrl) return
+
+  await store.dispatch('savePlaylistBookmark', {
+    ...bookmark,
+    playlist: {
+      ...bookmark.playlist,
+      thumbnail_url: canonicalThumbnailUrl,
+    },
+  })
+}
 
 async function togglePlaylistBookmark() {
   if (playlistBookmarkPending.value || isUserPlaylistRequested.value) return
@@ -632,6 +651,8 @@ async function getPlaylistLocal() {
 
     playlistItems.value = playlistItems_
 
+    await refreshPlaylistBookmarkThumbnail()
+
     let shouldGetNextPage = false
     if (result.has_continuation) {
       continuationData.value = result
@@ -685,6 +706,7 @@ async function getPlaylistInvidious() {
     lastUpdated.value = dateString.toLocaleDateString(locale.value, { year: 'numeric', month: 'short', day: 'numeric' })
 
     playlistItems.value = result.videos
+    await refreshPlaylistBookmarkThumbnail()
     const hasMorePages = hasMoreInvidiousPlaylistPages(
       result.videoCount,
       1,

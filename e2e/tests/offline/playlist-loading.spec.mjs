@@ -184,6 +184,46 @@ test('keeps the search result thumbnail when saving a playlist', async ({ page }
     .toHaveAttribute('src', expectedThumbnail)
 })
 
+test('refreshes a saved playlist thumbnail after opening the playlist again', async ({ app, page }) => {
+  const playlistId = 'dynamic-saved-playlist'
+  let firstVideoId = 'original-first-video'
+
+  await page.route(new RegExp(`/api/v1/playlists/${playlistId}\\?`), route => route.fulfill({
+    json: {
+      ...playlistResponse([playlistVideo(0, firstVideoId)], 1),
+      title: 'Dynamic saved playlist',
+      playlistId,
+    },
+  }))
+
+  await openPlaylistTab(page, `/playlist/${playlistId}`)
+  await page.getByTitle('Save Playlist').click()
+  await goTo(page, 'userplaylists')
+
+  const savedPlaylistCard = page.getByRole('link', { name: 'Dynamic saved playlist' })
+    .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
+  const savedPlaylistThumbnail = savedPlaylistCard.locator('img.thumbnailImage')
+  await expect(savedPlaylistThumbnail).toHaveAttribute(
+    'src',
+    'https://invidious.test/vi/original-first-video/mqdefault.jpg'
+  )
+
+  firstVideoId = 'updated-first-video'
+  await page.getByRole('link', { name: 'Dynamic saved playlist' }).click()
+  await expect(page.getByText('Playlist video 1', { exact: true })).toBeVisible()
+  await goTo(page, 'userplaylists')
+
+  const updatedThumbnailUrl = 'https://invidious.test/vi/updated-first-video/mqdefault.jpg'
+  await expect(savedPlaylistThumbnail).toHaveAttribute('src', updatedThumbnailUrl)
+
+  ;({ page } = await app.relaunch())
+  await goTo(page, 'userplaylists')
+  const persistedPlaylistCard = page.getByRole('link', { name: 'Dynamic saved playlist' })
+    .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
+  await expect(persistedPlaylistCard.locator('img.thumbnailImage'))
+    .toHaveAttribute('src', updatedThumbnailUrl)
+})
+
 test('retries the failed Invidious page and merges its overlapping videos once', async ({ page }) => {
   const requestedPages = []
   await page.route(/\/api\/v1\/playlists\/pagination-test\?/, async (route) => {
