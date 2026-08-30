@@ -186,6 +186,8 @@ Feed:
   Next Auto Refresh: 'Propera actualització automàtica: {date}'
   Refresh Feed: Actualitza {subscriptionName}
 User Playlists:
+  Save Playlist: "Desa la llista de reproducció"
+  Remove Saved Playlist: "Elimina la llista de reproducció desada"
   Load More Playlists: Carrega més llistes de reproducció
   You have no playlists. Click on the create new playlist button to create a new one.: No teniu cap llista de reproducció. Feu clic al botó per crear-ne una de nova.
   Playlists with Matching Videos: Llistes de reproducció amb vídeos coincidents

@@ -145,6 +145,8 @@ Feed:
   Cancel Refresh: Peruuta päivitys
   Next Auto Refresh: 'Seuraava automaattinen päivitys: {date}'
 User Playlists:
+  Save Playlist: "Tallenna soittolista"
+  Remove Saved Playlist: "Poista tallennettu soittolista"
   Load More Playlists: Lataa lisää soittolistoja
   Save to: Tallenna kohteeseen…
   Move Video to the Top: Siirrä video ylimmäksi

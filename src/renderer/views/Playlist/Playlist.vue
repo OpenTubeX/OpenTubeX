@@ -55,6 +55,8 @@
         :is-duration-approximate="isDurationApproximate"
         :info-source="infoSource"
         :more-video-data-available="moreVideoDataAvailable"
+        :is-playlist-bookmarked="isPlaylistBookmarked"
+        :playlist-bookmark-pending="playlistBookmarkPending"
         :search-video-mode-allowed="isUserPlaylistRequested && shownVideoCount > 1"
         :search-query-text="searchQueryTextRequested"
         :theme="listType === 'list' ? 'base' : 'top-bar'"
@@ -65,6 +67,7 @@
         @search-video-query-change="handleVideoSearchQueryChange"
         @prompt-open="promptOpen = true"
         @prompt-close="promptOpen = false"
+        @toggle-playlist-bookmark="togglePlaylistBookmark"
       />
     </div>
 
@@ -245,6 +248,7 @@ import {
 import { invidiousGetPlaylistInfo, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../../helpers/api/invidious-playlists'
 import { runRetryablePlaylistRequest } from '../../helpers/playlist-pagination'
+import { createPlaylistBookmark } from '../../helpers/playlist-bookmarks'
 import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
@@ -300,6 +304,7 @@ const toBeDeletedPlaylistItemIds = ref([])
 /** @type {import('vue').Ref<string[]>} */
 const videosWithPlaylistToUnset = ref([])
 const pendingDeletionRemovalInProgress = ref(false)
+const playlistBookmarkPending = ref(false)
 /** @type {AbortController | null} */
 let undoToastAbortController = null
 let removePendingVideosAfterDrag = false
@@ -321,6 +326,12 @@ const userPlaylistSortOrder = computed(() => store.getters.getUserPlaylistSortOr
 const sortOrder = computed(() => isUserPlaylistRequested.value ? userPlaylistSortOrder.value : SORT_BY_VALUES.Custom)
 
 const playlistId = computed(() => route.params.id)
+
+const linkedPlaylistThumbnail = computed(() => {
+  return typeof route.query.playlistThumbnail === 'string'
+    ? route.query.playlistThumbnail
+    : ''
+})
 
 /** @type {import('vue').ComputedRef<'grid' | 'list'>} */
 const listType = computed(() => !forceListView.value ? store.getters.getPlaylistViewType : 'list')
@@ -372,6 +383,41 @@ const searchQueryTextPresent = computed(() => {
 })
 
 const isUserPlaylistRequested = computed(() => route.query.playlistType === 'user')
+
+const isPlaylistBookmarked = computed(() => {
+  return !isUserPlaylistRequested.value && store.getters.getPlaylistBookmark(playlistId.value) != null
+})
+
+async function togglePlaylistBookmark() {
+  if (playlistBookmarkPending.value || isUserPlaylistRequested.value) return
+
+  playlistBookmarkPending.value = true
+  try {
+    const saved = isPlaylistBookmarked.value
+      ? await store.dispatch('removePlaylistBookmark', playlistId.value)
+      : await store.dispatch('savePlaylistBookmark', createPlaylistBookmark({
+          id: playlistId.value,
+          title: playlistTitle.value,
+          description: playlistDescription.value,
+          thumbnailUrl: linkedPlaylistThumbnail.value || playlistThumbnail.value || (firstVideoId.value
+            ? `https://i.ytimg.com/vi/${firstVideoId.value}/mqdefault.jpg`
+            : null),
+          videoCount: videoCount.value,
+          uploaderId: channelId.value || playlistId.value,
+          uploaderName: channelName.value || playlistTitle.value,
+          uploaderAvatar: channelThumbnail.value,
+        }))
+
+    if (!saved) {
+      showTabToast({
+        message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+        icon: ['fas', 'circle-exclamation'],
+      })
+    }
+  } finally {
+    playlistBookmarkPending.value = false
+  }
+}
 
 /** @type {import('vue').ComputedRef<string | undefined>} */
 const quickBookmarkPlaylistId = computed(() => store.getters.getQuickBookmarkTargetPlaylistId)

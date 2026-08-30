@@ -7,6 +7,7 @@ import {
   isSessionExpiredError,
   normalizeSyncServerUrl,
   syncHistory,
+  syncPlaylistBookmarks,
   syncPlaylists,
   syncProfiles,
   syncSessions,
@@ -23,6 +24,7 @@ import {
   migrateLegacyPlaybackSpeedsToSettings,
   preparePrivacyKey,
 } from '../../helpers/sync-server-privacy'
+import { mergePlaylistBookmarkConflict } from '../../helpers/playlist-bookmarks'
 import {
   AUTO_SYNC_INTERVAL_MS,
   isRecentSync,
@@ -115,6 +117,7 @@ async function runSync(context, { allowDataLoss = false } = {}) {
     ...(settings.syncServerPrivacyMode === 'enhanced' ? ['download'] : []),
     ...(settings.syncServerSyncSubscriptions ? ['subscriptions'] : []),
     ...(settings.syncServerSyncPlaylists ? ['playlists'] : []),
+    ...(settings.syncServerSyncPlaylists ? ['playlistBookmarks'] : []),
     ...(settings.syncServerSyncHistory ? ['history'] : []),
     ...(settings.syncServerSyncProfiles ? ['profiles'] : []),
     ...(process.env.IS_ELECTRON &&
@@ -173,6 +176,15 @@ async function runSync(context, { allowDataLoss = false } = {}) {
           { allowDataLoss }
         )
         result.playlists = Object.keys(next.playlists).length
+        break
+      case 'playlistBookmarks':
+        next.playlistBookmarks = await syncPlaylistBookmarks(
+          targetClient,
+          store,
+          previous.playlistBookmarks,
+          { allowDataLoss }
+        )
+        result.playlistBookmarks = next.playlistBookmarks.length
         break
       case 'history': {
         const history = await syncHistory(
@@ -326,10 +338,12 @@ async function runSync(context, { allowDataLoss = false } = {}) {
                 settings.syncServerPrivacyKey
               )
               if (collection === 'playlistBookmarks') {
-                const bookmarks = new Map(remoteData.map(entry => [entry.playlist.id, entry]))
-                for (const entry of data) bookmarks.set(entry.playlist.id, entry)
                 revision = remote.revision
-                data = Array.from(bookmarks.values())
+                data = mergePlaylistBookmarkConflict({
+                  original: encryptedCollections.original.playlistBookmarks,
+                  local: data,
+                  remote: remoteData,
+                })
                 continue
               }
               retryDocument[collection] = remoteData

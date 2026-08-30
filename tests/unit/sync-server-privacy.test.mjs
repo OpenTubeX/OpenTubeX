@@ -2,8 +2,10 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  createEmptySyncDocument,
   decryptLegacySyncDocument,
   decryptSyncDocument,
+  EncryptedSyncAdapter,
   migrateLegacyPlaybackSpeedsToSettings,
   preparePrivacyKey,
 } from '../../src/renderer/helpers/sync-server-privacy.js'
@@ -104,4 +106,18 @@ test('keeps the current settings collection instead of legacy playback speeds', 
 
   assert.equal(migrateLegacyPlaybackSpeedsToSettings(document, '{}', 789), false)
   assert.deepEqual(document.settings, [current])
+})
+
+test('stores playlist bookmarks in the encrypted sync document', async () => {
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  const bookmark = {
+    playlist: { id: 'saved-playlist', title: 'Saved playlist' },
+    uploader: { id: 'saved-channel', name: 'Saved channel' },
+  }
+
+  await adapter.createPlaylistBookmark(bookmark)
+  assert.deepEqual(await adapter.getPlaylistBookmarks(), [bookmark])
+
+  await adapter.deletePlaylistBookmark('saved-playlist')
+  assert.deepEqual(await adapter.getPlaylistBookmarks(), [])
 })

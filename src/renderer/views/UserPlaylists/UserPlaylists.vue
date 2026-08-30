@@ -113,6 +113,7 @@ import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
 
 import { ctrlFHandler, debounce, getIconForSortPreference } from '../../helpers/utils'
+import { isValidPlaylistBookmark, playlistBookmarkToListData } from '../../helpers/playlist-bookmarks'
 import { useTabContext } from '../../tabs/TabContext'
 
 const { locale, t } = useI18n()
@@ -180,7 +181,12 @@ const cachedCollator = computed(() => new Intl.Collator([locale.value, 'en'], { 
 /** @type {import('vue').ComputedRef<any[]>} */
 const allPlaylists = computed(() => {
   /** @type {any[]} */
-  const playlists = store.getters.getAllPlaylists
+  const playlists = [
+    ...store.getters.getAllPlaylists,
+    ...store.getters.getPlaylistBookmarks
+      .filter(isValidPlaylistBookmark)
+      .map(playlistBookmarkToListData),
+  ]
 
   const sortBy_ = sortBy.value
 

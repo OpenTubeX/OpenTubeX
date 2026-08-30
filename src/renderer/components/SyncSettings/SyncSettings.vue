@@ -416,6 +416,7 @@ const syncProgressLabel = computed(() => {
     download: t('Settings.Sync Settings.Downloading encrypted data'),
     subscriptions: t('Settings.Sync Settings.Syncing subscriptions'),
     playlists: t('Settings.Sync Settings.Syncing playlists'),
+    playlistBookmarks: t('Settings.Sync Settings.Syncing playlists'),
     history: t('Settings.Sync Settings.Syncing history'),
     profiles: t('Settings.Sync Settings.Syncing profiles'),
     sessions: t('Settings.Sync Settings.Syncing open tabs'),

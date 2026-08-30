@@ -42,6 +42,8 @@ Trending:
   Unsupported Backend: Popularne treści wymagają lokalnego API. Wybierz lokalne API lub włącz zapasowy backend.
 Most Popular Feed Empty: Kanał „Najpopularniejsze” tej instancji Invidious jest pusty.
 User Playlists:
+  Save Playlist: "Zapisz playlistę"
+  Remove Saved Playlist: "Usuń zapisaną playlistę"
   Load More Playlists: Wczytaj więcej playlist
   SinglePlaylistView:
     Retry: Spróbuj ponownie

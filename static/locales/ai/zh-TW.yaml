@@ -145,6 +145,8 @@ Feed:
   Cancel Refresh: 取消重新整理
   Next Auto Refresh: '下次自動重新整理：{date}'
 User Playlists:
+  Save Playlist: "儲存播放清單"
+  Remove Saved Playlist: "移除已儲存的播放清單"
   Load More Playlists: 載入更多播放清單
   Save to: 儲存至…
   Quick Bookmark Icon: 快速加入書籤圖示

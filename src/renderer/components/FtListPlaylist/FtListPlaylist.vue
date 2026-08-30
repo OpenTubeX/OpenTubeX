@@ -98,6 +98,15 @@
           @disabled-click="handleQuickBookmarkEnabledDisabledClick"
           @click="enableQuickBookmarkForThisPlaylist"
         />
+        <FtIconButton
+          v-if="isPlaylistBookmark"
+          :title="t('User Playlists.Remove Saved Playlist')"
+          :icon="['fas', 'bookmark']"
+          :aria-pressed="true"
+          theme="secondary"
+          :size="16"
+          @click="removePlaylistBookmark"
+        />
       </div>
     </div>
     <WatchVideoDownloadPrompt
@@ -187,15 +196,26 @@ const thumbnailForDisplay = computed(() => {
 })
 
 const isUserPlaylist = computed(() => props.data._id != null)
+const isPlaylistBookmark = computed(() => props.data.isPlaylistBookmark === true)
 
 // For `router-link` attribute `to`
-const playlistPageLinkTo = computed(() => ({
-  path: `/playlist/${playlistId}`,
-  query: {
+const playlistPageLinkTo = computed(() => {
+  const query = {
     playlistType: isUserPlaylist.value ? 'user' : '',
     searchQueryText: props.searchQueryText,
-  },
-}))
+  }
+  const playlistThumbnail = props.data.dataSource === 'local'
+    ? props.data.thumbnail
+    : props.data.playlistThumbnail
+  if (!isUserPlaylist.value && typeof playlistThumbnail === 'string' && playlistThumbnail !== '') {
+    query.playlistThumbnail = playlistThumbnail
+  }
+
+  return {
+    path: `/playlist/${playlistId}`,
+    query,
+  }
+})
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
@@ -214,9 +234,12 @@ if (isUserPlaylist.value) {
 function parseInvidiousData() {
   title = props.data.title
 
-  thumbnail = props.data.playlistThumbnail
-    .replace('https://i.ytimg.com', currentInvidiousInstanceUrl.value)
-    .replace('hqdefault', 'mqdefault')
+  if (typeof props.data.playlistThumbnail === 'string' && props.data.playlistThumbnail !== '') {
+    thumbnail = props.data.playlistThumbnail.replace('hqdefault', 'mqdefault')
+    if (!isPlaylistBookmark.value || backendPreference.value === 'invidious') {
+      thumbnail = thumbnail.replace('https://i.ytimg.com', currentInvidiousInstanceUrl.value)
+    }
+  }
 
   channelName.value = props.data.author
   channelId.value = props.data.authorId
@@ -316,6 +339,16 @@ async function enableQuickBookmarkForThisPlaylist() {
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast.This playlist is now used for quick bookmark'),
       icon: ['fas', 'bookmark'],
+    })
+  }
+}
+
+async function removePlaylistBookmark() {
+  const removed = await store.dispatch('removePlaylistBookmark', playlistId)
+  if (!removed) {
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
     })
   }
 }

@@ -1,4 +1,4 @@
-import { test, expect, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 
 test.use({
   seed: {
@@ -83,6 +83,105 @@ test('shows a persistent initial error and retries without navigation', async ({
 
   await expect(playlistPage.getByText('Playlist video 1', { exact: true })).toBeVisible()
   expect(requestCount).toBe(2)
+})
+
+test('saves a YouTube playlist as a read-only link and persists it', async ({ app, page }) => {
+  const playlistId = 'saved-playlist'
+  const response = {
+    ...playlistResponse([playlistVideo(0)], 1),
+    title: 'Saved YouTube playlist',
+    playlistId,
+  }
+  const mockPlaylist = currentPage => currentPage.route(
+    new RegExp(`/api/v1/playlists/${playlistId}\\?`),
+    route => route.fulfill({ json: response })
+  )
+
+  await mockPlaylist(page)
+  await page.route('https://invidious.test/vi/video-00000/mqdefault.jpg', route => route.fulfill({
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="9"/>',
+  }))
+  await openPlaylistTab(page, `/playlist/${playlistId}`)
+
+  const saveButton = page.getByTitle('Save Playlist')
+  await expect(saveButton).toHaveAttribute('aria-pressed', 'false')
+  await saveButton.click()
+  await expect(page.getByTitle('Remove Saved Playlist')).toHaveAttribute('aria-pressed', 'true')
+
+  await goTo(page, 'userplaylists')
+  const savedPlaylistLink = page.getByRole('link', { name: 'Saved YouTube playlist' })
+  await expect(savedPlaylistLink).toBeVisible()
+  const savedPlaylistCard = savedPlaylistLink
+    .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
+  const savedPlaylistThumbnail = savedPlaylistCard.locator('img.thumbnailImage')
+  await expect(savedPlaylistThumbnail).toHaveAttribute(
+    'src',
+    'https://invidious.test/vi/video-00000/mqdefault.jpg'
+  )
+  await expect.poll(() => savedPlaylistThumbnail.evaluate(image => image.naturalWidth))
+    .toBeGreaterThan(0)
+
+  ;({ page } = await app.relaunch())
+  await goTo(page, 'userplaylists')
+  await expect(page.getByRole('link', { name: 'Saved YouTube playlist' })).toBeVisible()
+
+  await mockPlaylist(page)
+  await page.getByRole('link', { name: 'Saved YouTube playlist' }).click()
+  await expect(page).toHaveURL(new RegExp(`#/playlist/${playlistId}(?:\\?|$)`))
+  await expect(page.getByTitle('Edit Playlist Info')).toHaveCount(0)
+
+  await page.getByTitle('Remove Saved Playlist').click()
+  await goTo(page, 'userplaylists')
+  await expect(page.getByRole('link', { name: 'Saved YouTube playlist' })).toHaveCount(0)
+})
+
+test('keeps the search result thumbnail when saving a playlist', async ({ page }) => {
+  const playlistId = 'search-thumbnail-playlist'
+  const searchThumbnailVideoId = 'search-thumbnail-video'
+  const firstPlaylistVideoId = 'first-playlist-video'
+
+  await page.route('https://invidious.test/api/v1/search/**', route => route.fulfill({
+    json: [{
+      type: 'playlist',
+      title: 'Playlist with search thumbnail',
+      playlistId,
+      playlistThumbnail: `https://i.ytimg.com/vi/${searchThumbnailVideoId}/hqdefault.jpg`,
+      author: 'Playlist channel',
+      authorId: 'UCplaylistchannel',
+      authorUrl: '/channel/UCplaylistchannel',
+      authorVerified: false,
+      videoCount: 1,
+      videos: [],
+    }],
+  }))
+  await page.route(new RegExp(`/api/v1/playlists/${playlistId}\\?`), route => route.fulfill({
+    json: {
+      ...playlistResponse([playlistVideo(0, firstPlaylistVideoId)], 1),
+      title: 'Playlist with search thumbnail',
+      playlistId,
+    },
+  }))
+
+  await page.locator(sel.searchInput).fill('playlist thumbnail')
+  await page.locator(sel.searchInput).press('Enter')
+
+  const searchResultLink = page.getByRole('link', { name: 'Playlist with search thumbnail' }).last()
+  const searchResultCard = searchResultLink
+    .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
+  const searchResultThumbnail = searchResultCard.locator('img.thumbnailImage')
+  const expectedThumbnail = `https://invidious.test/vi/${searchThumbnailVideoId}/mqdefault.jpg`
+  await expect(searchResultThumbnail).toHaveAttribute('src', expectedThumbnail)
+
+  await searchResultLink.click()
+  await page.getByTitle('Save Playlist').click()
+  await goTo(page, 'userplaylists')
+
+  const savedPlaylistLink = page.getByRole('link', { name: 'Playlist with search thumbnail' }).last()
+  const savedPlaylistCard = savedPlaylistLink
+    .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
+  await expect(savedPlaylistCard.locator('img.thumbnailImage'))
+    .toHaveAttribute('src', expectedThumbnail)
 })
 
 test('retries the failed Invidious page and merges its overlapping videos once', async ({ page }) => {
@@ -181,4 +280,50 @@ test('ignores an Invidious continuation that finishes after playlist navigation'
   await continuationFinished
   await page.waitForTimeout(100)
   await expect(page.locator('.playlistPage').getByText('Playlist video 100', { exact: true })).toHaveCount(0)
+})
+
+test.describe('saved playlist thumbnails', () => {
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'local',
+        defaultInvidiousInstance: 'https://invidious.test',
+        playlistBookmarks: [{
+          playlist: {
+            id: 'saved-local-playlist',
+            title: 'Saved local playlist',
+            description: '',
+            thumbnail_url: 'https://i.ytimg.com/vi/saved-video/mqdefault.jpg',
+            video_count: 1,
+          },
+          uploader: {
+            id: 'saved-channel',
+            name: 'Saved channel',
+            avatar: null,
+            verified: false,
+          },
+          savedAt: 1_700_000_000_000,
+        }],
+      },
+    },
+  })
+
+  test('loads a saved playlist thumbnail through the active local backend', async ({ page }) => {
+    await page.route('https://i.ytimg.com/vi/saved-video/mqdefault.jpg', route => route.fulfill({
+      contentType: 'image/svg+xml',
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="9"/>',
+    }))
+    await page.route('https://invidious.test/vi/saved-video/mqdefault.jpg', route => route.abort())
+
+    await goTo(page, 'userplaylists')
+
+    const playlistCard = page.getByRole('link', { name: 'Saved local playlist' })
+      .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
+    const thumbnail = playlistCard.locator('img.thumbnailImage')
+    await expect(thumbnail).toHaveAttribute(
+      'src',
+      'https://i.ytimg.com/vi/saved-video/mqdefault.jpg'
+    )
+    await expect.poll(() => thumbnail.evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
+  })
 })

@@ -145,6 +145,8 @@ Feed:
   Cancel Refresh: Cancelar actualización
   Next Auto Refresh: 'Próxima actualización automática: {date}'
 User Playlists:
+  Save Playlist: "Guardar lista de reproducción"
+  Remove Saved Playlist: "Eliminar lista de reproducción guardada"
   Load More Playlists: Cargar más listas de reproducción
   Save to: Guardar en…
   Quick Bookmark Icon: Icono de marcador rápido

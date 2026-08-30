@@ -454,6 +454,7 @@ const state = {
   syncServerSettingsExcluded: [],
   syncServerLastSyncAt: 0,
   syncServerSnapshot: '{}',
+  playlistBookmarks: [],
   useProxy: false,
   userPlaylistSortOrder: 'date_added_descending',
   useRssFeeds: false,
@@ -755,6 +756,8 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
 
 export const NON_SYNCABLE_SETTINGS = new Set([
   ...NON_TRANSFERABLE_SETTINGS,
+  // Playlist bookmarks sync with playlists as their own collection.
+  'playlistBookmarks',
   // Updating is tied to the installed application and operating system.
   'checkForUpdates',
   // Window coordinates are only valid for the display they were saved on.
@@ -784,6 +787,15 @@ const customState = {
 
 const customGetters = {
   getLandingPage: (state) => resolveLandingPage(state.landingPage, state.hideHome),
+
+  getPlaylistBookmarks: (state) => {
+    return Array.isArray(state.playlistBookmarks) ? state.playlistBookmarks : []
+  },
+
+  getPlaylistBookmark: (state) => (playlistId) => {
+    if (!Array.isArray(state.playlistBookmarks)) return undefined
+    return state.playlistBookmarks.find(bookmark => bookmark?.playlist?.id === playlistId)
+  },
 
   // These parsed variants are cached by Vuex,
   // so that list items don't each have to parse the JSON strings themselves
@@ -837,7 +849,37 @@ async function updateValidatedSetting(commit, settingId, value) {
   }
 }
 
+async function persistPlaylistBookmarks(commit, bookmarks) {
+  try {
+    await DBSettingHandlers.upsert('playlistBookmarks', bookmarks)
+    commit('setPlaylistBookmarks', bookmarks)
+    return true
+  } catch (error) {
+    console.error(error)
+    return false
+  }
+}
+
 const customActions = {
+  savePlaylistBookmark: async ({ commit, getters }, bookmark) => {
+    const bookmarks = getters.getPlaylistBookmarks
+      .filter(entry => entry?.playlist?.id !== bookmark.playlist.id)
+    bookmarks.push(bookmark)
+
+    return persistPlaylistBookmarks(commit, bookmarks)
+  },
+
+  removePlaylistBookmark: async ({ commit, getters }, playlistId) => {
+    const bookmarks = getters.getPlaylistBookmarks
+      .filter(bookmark => bookmark?.playlist?.id !== playlistId)
+
+    return persistPlaylistBookmarks(commit, bookmarks)
+  },
+
+  replacePlaylistBookmarks: async ({ commit }, bookmarks) => {
+    return persistPlaylistBookmarks(commit, bookmarks)
+  },
+
   updatePreferredCaptionLocale: ({ commit }, value) => updateValidatedSetting(
     commit,
     'preferredCaptionLocale',

@@ -152,6 +152,8 @@ Feed:
   Cancel Refresh: 새로 고침 취소
   Next Auto Refresh: '다음 자동 새로 고침: {date}'
 User Playlists:
+  Save Playlist: "재생목록 저장"
+  Remove Saved Playlist: "저장한 재생목록 삭제"
   Load More Playlists: 재생목록 더 불러오기
   Save to: 저장 위치…
   Add to Favorites: '{playlistName}에 추가'

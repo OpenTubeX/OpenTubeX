@@ -24,6 +24,7 @@ import {
   getSyncProfileTextColor
 } from './profile-sync.js'
 import { createSyncServerRequestHeaders } from './sync-server-request'
+import { isValidPlaylistBookmark, playlistBookmarkForSync } from './playlist-bookmarks'
 
 const LEGACY_HISTORY_PAGE_SIZE = 50
 const BULK_SYNC_CHUNK_SIZE = 100
@@ -343,6 +344,17 @@ export class SyncServerClient {
     return this.apiRequest('/playlist_bookmarks/')
   }
 
+  createPlaylistBookmark(bookmark) {
+    return this.apiRequest('/playlist_bookmarks/', { method: 'POST', body: bookmark })
+  }
+
+  deletePlaylistBookmark(playlistId) {
+    return this.apiRequest(
+      `/playlist_bookmarks/${encodeURIComponent(playlistId)}`,
+      { method: 'DELETE' }
+    )
+  }
+
   getPlaylist(playlistId) {
     return this.apiRequest(`/playlists/${encodeURIComponent(playlistId)}`)
   }
@@ -648,6 +660,42 @@ export async function syncSubscriptions(client, store, previousIds = [], options
     if (!metadataEquals(profile.subscriptions, updatedProfile.subscriptions)) {
       await store.dispatch('updateProfile', updatedProfile)
     }
+  }
+
+  return Array.from(mergedIds)
+}
+
+export async function syncPlaylistBookmarks(client, store, previousIds = [], options = {}) {
+  const localBookmarks = (Array.isArray(store.state.settings.playlistBookmarks)
+    ? store.state.settings.playlistBookmarks
+    : []).filter(isValidPlaylistBookmark)
+  const localById = mapBy(localBookmarks, bookmark => bookmark.playlist.id)
+  const remoteBookmarks = (await client.getPlaylistBookmarks()).filter(isValidPlaylistBookmark)
+  const remoteById = mapBy(remoteBookmarks, bookmark => bookmark.playlist.id)
+  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), previousIds, {
+    ...options,
+    collection: 'saved playlists',
+  })
+
+  for (const id of remoteById.keys()) {
+    if (!mergedIds.has(id)) {
+      await client.deletePlaylistBookmark(id)
+    }
+  }
+
+  for (const id of localById.keys()) {
+    if (!remoteById.has(id) && mergedIds.has(id)) {
+      await client.createPlaylistBookmark(playlistBookmarkForSync(localById.get(id)))
+    }
+  }
+
+  const mergedBookmarks = Array.from(mergedIds).map(id => {
+    return localById.get(id) ?? { ...remoteById.get(id), savedAt: Date.now() }
+  })
+
+  if (!metadataEquals(localBookmarks, mergedBookmarks)) {
+    const saved = await store.dispatch('replacePlaylistBookmarks', mergedBookmarks)
+    if (!saved) throw new Error('Could not save synced playlist bookmarks')
   }
 
   return Array.from(mergedIds)

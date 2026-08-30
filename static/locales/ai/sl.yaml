@@ -179,6 +179,8 @@ Feed:
   Next Auto Refresh: 'Naslednja samodejna osvežitev: {date}'
   Refresh Feed: Osveži {subscriptionName}
 User Playlists:
+  Save Playlist: "Shrani seznam predvajanja"
+  Remove Saved Playlist: "Odstrani shranjeni seznam predvajanja"
   Load More Playlists: Naloži več seznamov predvajanja
   You have no playlists. Click on the create new playlist button to create a new one.: Nimate seznamov predvajanja. Če želite ustvariti novega, kliknite gumb za ustvarjanje novega seznama predvajanja.
   Playlists with Matching Videos: Seznami predvajanja z ujemajočimi se videoposnetki

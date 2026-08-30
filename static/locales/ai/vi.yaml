@@ -145,6 +145,8 @@ Feed:
   Cancel Refresh: Hủy làm mới
   Next Auto Refresh: 'Lần tự động làm mới tiếp theo: {date}'
 User Playlists:
+  Save Playlist: "Lưu danh sách phát"
+  Remove Saved Playlist: "Xóa danh sách phát đã lưu"
   Load More Playlists: Tải thêm danh sách phát
   Save to: Lưu vào…
   Move Video to the Top: Chuyển video lên đầu

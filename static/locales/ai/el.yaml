@@ -145,6 +145,8 @@ Feed:
   Cancel Refresh: Ακύρωση ανανέωσης
   Next Auto Refresh: 'Επόμενη αυτόματη ανανέωση: {date}'
 User Playlists:
+  Save Playlist: "Αποθήκευση λίστας αναπαραγωγής"
+  Remove Saved Playlist: "Αφαίρεση αποθηκευμένης λίστας αναπαραγωγής"
   Load More Playlists: Φόρτωση περισσότερων λιστών αναπαραγωγής
   Save to: Αποθήκευση σε…
   Move Video to the Top: Μετακίνηση βίντεο στην κορυφή

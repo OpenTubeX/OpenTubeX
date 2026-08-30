@@ -145,6 +145,8 @@ Feed:
   Cancel Refresh: Zrušit obnovení
   Next Auto Refresh: 'Další automatické obnovení: {date}'
 User Playlists:
+  Save Playlist: "Uložit playlist"
+  Remove Saved Playlist: "Odebrat uložený playlist"
   Load More Playlists: Načíst další playlisty
   Save to: Uložit do…
   Quick Bookmark Icon: Ikona rychlé záložky

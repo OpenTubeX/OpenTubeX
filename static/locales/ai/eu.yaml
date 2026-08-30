@@ -145,6 +145,8 @@ Feed:
   Cancel Refresh: Utzi freskatzeari
   Next Auto Refresh: 'Hurrengo freskatze automatikoa: {date}'
 User Playlists:
+  Save Playlist: "Gorde erreprodukzio-zerrenda"
+  Remove Saved Playlist: "Kendu gordetako erreprodukzio-zerrenda"
   Load More Playlists: Kargatu erreprodukzio-zerrenda gehiago
   Save to: Gorde hemen…
   Quick Bookmark Icon: Laster-marka azkarraren ikonoa
