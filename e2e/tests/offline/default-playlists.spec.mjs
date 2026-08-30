@@ -12,6 +12,7 @@ test('default playlists are created on a fresh profile', async ({ app, page }) =
   const db = await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')
   expect(db).toContain('"_id":"favorites"')
   expect(db).toContain('"_id":"watchLater"')
+  expect(db).toContain('"quickBookmarkIcon":"clock"')
 
   // Defaults must survive a restart without being duplicated
   await app.relaunch()
