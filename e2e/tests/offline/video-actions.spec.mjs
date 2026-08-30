@@ -388,7 +388,7 @@ test.describe('video downloads', () => {
     await writeFile(executable, [
       '#!/bin/sh',
       `printf '%s\\n' "$@" > "${capturedArgs}"`,
-      'printf \'%s\\n\' \'{"title":"Playback title","requested_subtitles":{"en":{"ext":"vtt","url":"https://example.invalid/subtitles.vtt?lang=en","name":"English"},"de":{"ext":"vtt","url":"https://example.invalid/subtitles.vtt?lang=en&tlang=de","name":"German from English"}},"formats":[{"format_id":"140","available_at":123}]}\''
+      'printf \'%s\\n\' \'{"title":"Playback title","requested_subtitles":{"en":{"ext":"vtt","url":"https://example.invalid/subtitles.vtt?lang=en","name":"English"},"de":{"ext":"vtt","url":"https://example.invalid/subtitles.vtt?lang=en&tlang=de","name":"German from English"}},"formats":[{"format_id":"140","available_at":123,"target_duration":5,"fragments":[{"url":"first"},{"url":"second"}]}]}\''
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
@@ -417,6 +417,8 @@ test.describe('video downloads', () => {
     expect(passedArguments).not.toContain('--extractor-args')
     expect(info.title).toBe('Playback title')
     expect(info.formats[0].availableAt).toBe(123)
+    expect(info.formats[0].targetDuration).toBe(5)
+    expect(info.formats[0].fragmentCount).toBe(2)
     expect(info.captions).toEqual([{
       url: 'https://example.invalid/subtitles.vtt?lang=en',
       language: 'en',

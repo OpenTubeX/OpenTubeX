@@ -1388,6 +1388,8 @@ export async function handleYtDlpDownloadBinary(event, binary) {
  * @property {string | null} formatNote
  * @property {string | null} dynamicRange
  * @property {number | null} availableAt Unix timestamp after which the format can be requested
+ * @property {number | null} targetDuration segment duration in seconds
+ * @property {number | null} fragmentCount
  */
 
 /**
@@ -1508,7 +1510,9 @@ function mapPlaybackFormat(format) {
     language: toNonEmptyString(format.language),
     formatNote: toNonEmptyString(format.format_note),
     dynamicRange: toNonEmptyString(format.dynamic_range),
-    availableAt: toFiniteNumber(format.available_at)
+    availableAt: toFiniteNumber(format.available_at),
+    targetDuration: toFiniteNumber(format.target_duration),
+    fragmentCount: Array.isArray(format.fragments) ? format.fragments.length : null
   }
 }
 

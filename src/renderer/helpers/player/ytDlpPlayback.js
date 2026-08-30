@@ -161,7 +161,7 @@ function getApproxDurationMs(url) {
 
 /**
  * @param {YtDlpPlaybackFormat} format
- * @param {import('./streamByteRanges').StreamByteRanges} byteRanges
+ * @param {import('./streamByteRanges').StreamByteRanges | null} byteRanges null for segmented Post-Live-DVR formats
  * @param {number | null} fallbackDuration the video duration in seconds
  * @returns {import('youtubei.js').Misc.Format}
  */
@@ -174,8 +174,9 @@ function convertYtDlpToLocalFormat(format, byteRanges, fallbackDuration) {
     mimeType: buildMimeType(format),
     bitrate: format.bitrate ?? 0,
     ...(format.width !== null && format.height !== null ? { width: format.width, height: format.height } : {}),
-    initRange: byteRanges.initRange,
-    indexRange: byteRanges.indexRange,
+    ...(byteRanges === null
+      ? { targetDurationSec: format.targetDuration }
+      : { initRange: byteRanges.initRange, indexRange: byteRanges.indexRange }),
     url: format.url,
     approxDurationMs: getApproxDurationMs(url) ??
       (fallbackDuration === null ? undefined : Math.round(fallbackDuration * 1000)),
@@ -215,6 +216,21 @@ function convertYtDlpToLocalFormat(format, byteRanges, fallbackDuration) {
   }
 
   return localFormat
+}
+
+/**
+ * @param {YtDlpPlaybackFormat} format
+ */
+function isPostLiveDvrSegmentedFormat(format) {
+  return format.protocol === 'http_dash_segments' &&
+    format.url !== null &&
+    isVideoFormat(format) !== isAudioFormat(format) &&
+    format.targetDuration !== null &&
+    Number.isFinite(format.targetDuration) &&
+    format.targetDuration > 0 &&
+    format.fragmentCount !== null &&
+    Number.isInteger(format.fragmentCount) &&
+    format.fragmentCount > 0
 }
 
 /**
@@ -300,7 +316,29 @@ async function convertAdaptiveFormats(formats, duration) {
     }
   }))
 
-  const localFormats = results.filter(format => format !== null)
+  return addAudioTrackFields(results.filter(format => format !== null))
+}
+
+/**
+ * Converts Post-Live-DVR formats without probing byte ranges. Each `sq` fragment
+ * is a self-initializing MP4 segment, and yt-dlp provides its duration and count.
+ * @param {YtDlpPlaybackFormat[]} formats
+ * @param {number} duration
+ */
+async function convertPostLiveDvrFormats(formats, duration) {
+  const results = await Promise.all(formats.map(async format => {
+    return await waitForYtDlpFormatAvailability(format)
+      ? convertYtDlpToLocalFormat(format, null, duration)
+      : null
+  }))
+
+  return addAudioTrackFields(results.filter(format => format !== null))
+}
+
+/**
+ * @param {import('youtubei.js').Misc.Format[]} localFormats
+ */
+function addAudioTrackFields(localFormats) {
   const audioFormats = localFormats.filter(format => format.has_audio)
 
   // YouTube only labels the audio tracks when there is more than one to choose from
@@ -314,6 +352,27 @@ async function convertAdaptiveFormats(formats, duration) {
   }
 
   return localFormats
+}
+
+/**
+ * Supplies the metadata youtubei.js normally reads from a HEAD request when it
+ * generates a Post-Live-DVR DASH timeline.
+ * @param {number} duration seconds
+ * @param {number} fragmentCount
+ */
+function createPostLiveDvrActions(duration, fragmentCount) {
+  const headers = new Headers({
+    'X-Head-Time-Millis': String(Math.round(duration * 1000)),
+    'X-Head-Seqnum': String(fragmentCount - 1)
+  })
+
+  return {
+    session: {
+      http: {
+        fetch_function: async () => ({ headers })
+      }
+    }
+  }
 }
 
 /**
@@ -406,6 +465,49 @@ export async function getYtDlpPlaybackSource(
     }
 
     const isLive = info.isLive || info.liveStatus === 'is_live'
+    const postLiveDvrFormats = info.liveStatus === 'post_live'
+      ? info.formats.filter(isPostLiveDvrSegmentedFormat)
+      : []
+
+    if (postLiveDvrFormats.length > 0) {
+      const fragmentCount = Math.max(...postLiveDvrFormats.map(format => format.fragmentCount))
+      const duration = info.duration !== null && info.duration > 0
+        ? info.duration
+        : Math.max(...postLiveDvrFormats.map(format => format.targetDuration * format.fragmentCount))
+      const localFormats = await convertPostLiveDvrFormats(postLiveDvrFormats, duration)
+
+      if (localFormats.some(format => format.has_video) && localFormats.some(format => format.has_audio)) {
+        const manifest = await FormatUtils.toDash(
+          { adaptive_formats: localFormats },
+          true,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          createPostLiveDvrActions(duration, fragmentCount)
+        )
+        const source = {
+          manifestSrc: `data:${MANIFEST_TYPE_DASH};charset=UTF-8,${encodeURIComponent(manifest)}`,
+          manifestMimeType: MANIFEST_TYPE_DASH,
+          legacyFormats: [],
+          expiryDate: getEarliestYtDlpFormatExpiry(postLiveDvrFormats),
+          title: info.title,
+          isLive: false,
+          duration,
+          storyboardSrc: info.storyboardVtt === null
+            ? null
+            : `data:text/vtt;charset=utf-8,${encodeURIComponent(info.storyboardVtt)}`,
+          captions: info.captions ?? [],
+          captionTranslations: info.captionTranslations ?? [],
+          subtitlesIncluded: includeSubtitles,
+          version: info.version
+        }
+
+        await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
+        return source
+      }
+    }
+
     const httpFormats = info.formats.filter(format => format.protocol === 'https' && format.url !== null)
     const legacyHttpFormats = httpFormats.filter(format => isVideoFormat(format) && isAudioFormat(format))
     const legacyFormatsPromise = convertLegacyFormats(legacyHttpFormats)
