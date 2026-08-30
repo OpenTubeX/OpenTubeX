@@ -96,26 +96,6 @@
         </p>
       </router-link>
       <router-link
-        class="navOption"
-        :title="$t('About.About')"
-        :aria-label="hideLabelsSideBar ? $t('About.About') : null"
-        to="/about"
-        @click="closeMenu"
-      >
-        <FtIcon
-          :icon="['fas', 'info-circle']"
-          class="navIcon"
-          :class="applyNavIconExpand"
-        />
-        <p
-          v-if="!hideLabelsSideBar"
-          id="aboutNavLabel"
-          class="navLabel"
-        >
-          {{ $t("About.About") }}
-        </p>
-      </router-link>
-      <router-link
         v-if="showWatchStats"
         class="navOption"
         :title="$t('Stats.Stats')"
@@ -152,25 +132,6 @@
         class="navLabel"
       >
         {{ $t("History.History") }}
-      </p>
-    </router-link>
-    <hr>
-    <router-link
-      class="navOption mobileHidden"
-      :title="$t('About.About')"
-      to="/about"
-      :aria-label="hideLabelsSideBar ? $t('About.About') : null"
-    >
-      <FtIcon
-        :icon="['fas', 'info-circle']"
-        class="navIcon"
-        :class="applyNavIconExpand"
-      />
-      <p
-        v-if="!hideLabelsSideBar"
-        class="navLabel"
-      >
-        {{ $t("About.About") }}
       </p>
     </router-link>
   </div>
