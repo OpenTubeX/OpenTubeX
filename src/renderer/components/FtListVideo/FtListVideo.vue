@@ -240,21 +240,20 @@
           />
           <span class="channelNameText">{{ channelName }}</span>
         </bdi>
-        <span
-          v-if="!isLive && !isUpcoming && !isPremium && !hideViews && viewCount != null"
-          class="viewCount"
-        >
-          <template v-if="channelId !== null || channelName !== null"> • </template>
-          {{ t('Global.Counts.View Count', { count: parsedViewCount }, viewCount) }}
+        <span class="videoInfo">
+          <span
+            v-if="!isLive && !isUpcoming && !isPremium && !hideViews && viewCount != null"
+            class="viewCount"
+          >{{ t('Global.Counts.View Count', { count: parsedViewCount }, viewCount) }}</span>
+          <span
+            v-if="displayedUploadedTime !== '' && !isLive"
+            class="uploadedTime"
+          >{{ displayedUploadedTime }}</span>
+          <span
+            v-if="isLive && !hideViews"
+            class="viewCount"
+          >{{ t('Global.Counts.Watching Count', { count: parsedViewCount }, viewCount) }}</span>
         </span>
-        <span
-          v-if="displayedUploadedTime !== '' && !isLive"
-          class="uploadedTime"
-        > • {{ displayedUploadedTime }}</span>
-        <span
-          v-if="isLive && !hideViews"
-          class="viewCount"
-        > • {{ t('Global.Counts.Watching Count', { count: parsedViewCount }, viewCount) }}</span>
       </div>
       <FtCollaboratorsPrompt
         v-if="showCollaboratorsPrompt"

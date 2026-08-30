@@ -66,7 +66,7 @@ test.describe('Invidious search video avatars', () => {
     }
   })
 
-  test('loads shared avatars and vertically aligns result metadata', async ({ page }) => {
+  test('loads shared avatars and lays out result metadata responsively', async ({ page }) => {
     let channelRequests = 0
 
     await page.route(`${instanceUrl}/api/v1/search/**`, route => route.fulfill({
@@ -106,17 +106,68 @@ test.describe('Invidious search video avatars', () => {
     const infoLine = page.locator('.ft-list-video').filter({
       has: page.getByRole('heading', { name: 'First avatar search result' })
     }).locator('.infoLine')
-    await expect.poll(() => infoLine.evaluate(element => {
-      const channelRect = element.querySelector('.channelName').getBoundingClientRect()
-      const channelCenter = (channelRect.top + channelRect.bottom) / 2
+    expect(await infoLine.evaluate(element => {
+      const textBounds = (selector) => {
+        const range = document.createRange()
+        range.selectNodeContents(element.querySelector(selector))
+        return range.getBoundingClientRect()
+      }
+      const channelBounds = textBounds('.channelNameText')
+      const channelCenter = (channelBounds.top + channelBounds.bottom) / 2
+      const details = element.querySelector('.videoInfo')
+      const detailBounds = details.getBoundingClientRect()
+      const separator = getComputedStyle(details, '::before')
+      const separatorCenter = detailBounds.top + Number.parseFloat(separator.insetBlockStart)
 
-      return Math.max(...['.viewCount', '.uploadedTime'].map(selector => {
-        const detailRect = element.querySelector(selector).getBoundingClientRect()
-        const detailCenter = (detailRect.top + detailRect.bottom) / 2
-        return Math.abs(channelCenter - detailCenter)
-      }))
-    })).toBeLessThanOrEqual(0.5)
+      return {
+        metadataAligned: Math.max(...['.viewCount', '.uploadedTime'].map(selector => {
+          const bounds = textBounds(selector)
+          return Math.abs(channelCenter - (bounds.top + bounds.bottom) / 2)
+        })) <= 0.5,
+        separatorIsVisible: separator.content === '""' &&
+          getComputedStyle(details).overflowX === 'visible' &&
+          detailBounds.left + Number.parseFloat(separator.insetInlineStart) >
+            element.querySelector('.channelName').getBoundingClientRect().right,
+        separatorAligned: Math.abs(channelCenter - separatorCenter) <= 0.5
+      }
+    })).toEqual({
+      metadataAligned: true,
+      separatorAligned: true,
+      separatorIsVisible: true,
+    })
     expect(channelRequests).toBe(1)
+
+    await infoLine.evaluate(element => {
+      const channelWidth = element.querySelector('.channelName').getBoundingClientRect().width
+      const detailsWidth = element.querySelector('.videoInfo').getBoundingClientRect().width
+      element.style.flex = 'none'
+      element.style.inlineSize = `${Math.ceil(Math.max(channelWidth, detailsWidth))}px`
+    })
+    await expect.poll(() => infoLine.evaluate(element => {
+      const channelTop = element.querySelector('.channelName').getBoundingClientRect().top
+      const viewTop = element.querySelector('.viewCount').getBoundingClientRect().top
+      const uploadedTop = element.querySelector('.uploadedTime').getBoundingClientRect().top
+
+      return {
+        detailsShareRow: Math.abs(viewTop - uploadedTop) <= 0.5,
+        detailsStartNewRow: viewTop > channelTop + 0.5
+      }
+    })).toEqual({
+      detailsShareRow: true,
+      detailsStartNewRow: true
+    })
+    expect(await infoLine.locator('.viewCount').textContent()).not.toMatch(/^\s*•/)
+    expect(await infoLine.evaluate(element => {
+      const details = element.querySelector('.videoInfo')
+      const lineBounds = element.getBoundingClientRect()
+      const detailBounds = details.getBoundingClientRect()
+      const separator = getComputedStyle(details, '::before')
+
+      return separator.content === '""' &&
+        separator.backgroundColor === getComputedStyle(details).color &&
+        getComputedStyle(element).overflowX === 'clip' &&
+        detailBounds.left + Number.parseFloat(separator.insetInlineStart) < lineBounds.left
+    })).toBe(true)
   })
 
   test('hides video and playlist avatars without fetching channel data', async ({ page }) => {

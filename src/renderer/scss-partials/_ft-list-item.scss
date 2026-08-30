@@ -321,9 +321,15 @@ $watched-transition-duration: 0.5s;
     }
 
     .infoLine {
+      align-items: center;
+      column-gap: 0.75em;
+      display: flex;
+      flex-wrap: wrap;
       font-size: 14px;
       grid-area: infoLine;
       margin-block-start: 5px;
+      overflow-clip-margin: 2px;
+      overflow-x: clip;
       overflow-wrap: anywhere;
       text-align: start;
 
@@ -334,7 +340,53 @@ $watched-transition-duration: 0.5s;
       }
 
       .channelName {
+        flex: 0 0 auto;
+
         @include low-contrast-when-watched(var(--secondary-text-color));
+      }
+
+      .videoInfo {
+        column-gap: 0.75em;
+        display: flex;
+        flex: 0 0 auto;
+        flex-wrap: wrap;
+        inline-size: max-content;
+        max-inline-size: 100%;
+        position: relative;
+      }
+
+      .videoInfo:empty {
+        display: none;
+      }
+
+      .videoInfo::before,
+      .videoInfo > span + span::before {
+        background-color: currentcolor;
+        block-size: 0.25em;
+        border-radius: 50%;
+        content: '';
+        inline-size: 0.25em;
+        inset-inline-start: -0.5em;
+        position: absolute;
+        transform: translateY(-50%);
+      }
+
+      .videoInfo::before {
+        content: none;
+        inset-block-start: 0.5lh;
+      }
+
+      .channelName + .videoInfo::before {
+        content: '';
+      }
+
+      .videoInfo > span {
+        position: relative;
+        white-space: nowrap;
+      }
+
+      .videoInfo > span + span::before {
+        inset-block-start: 50%;
       }
     }
 
