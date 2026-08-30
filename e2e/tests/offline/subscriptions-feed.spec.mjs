@@ -226,11 +226,11 @@ test.describe('subscriptions feed from cache', () => {
     await goTo(page, 'subscriptions')
 
     const newestVideo = page.locator('.ft-list-video').filter({ hasText: 'Video B newest' })
-    await expect(newestVideo.locator('.uploadedTime')).toHaveText('• 30 minutes ago')
+    await expect(newestVideo.locator('.uploadedTime')).toHaveText('30 minutes ago')
 
     await page.clock.fastForward(31 * 60_000)
 
-    await expect(newestVideo.locator('.uploadedTime')).toHaveText('• 1 hour ago')
+    await expect(newestVideo.locator('.uploadedTime')).toHaveText('1 hour ago')
   })
 })
 
