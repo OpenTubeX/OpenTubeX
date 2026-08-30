@@ -84,7 +84,7 @@ Download From Site: ດາວໂຫຼດຈາກເວັບໄຊທ໌
 Are you sure you want to open this link?: ເຈົ້າມັ້ນໃຈບໍ່ວ່າຕ້ອງການເປີດລິ້ງນີ້?
 Global:
   Ambient Mode: ໂໝດແສງສະທ້ອນ (Ambient)
-  Loading More: ກຳລັງໂຫຼດເພີ່ມ...
+  Loading More: ກຳລັງໂຫຼດເພີ່ມ
   Videos: ວິດີໂອ
   Shorts: ວິດີໂອສັ້ນ (Shorts)
   Live: ໄລຟ໌ສົດ
@@ -1407,7 +1407,7 @@ Settings:
     Clicking on Test Proxy will send a request to: ການກົດ 'ທົດສອບພຣັອກຊີ' ຈະສົ່ງຄຳຮ້ອງຂໍໄປທີ່
     Test Proxy: ທົດສອບພຣັອກຊີ
     Your Info: ຂໍ້ມູນຂອງທ່ານ
-    Ip: IP
+    Ip: Ip
     Country: ປະເທດ
     Region: ພາກພື້ນ
     City: ເມືອງ
@@ -1455,7 +1455,7 @@ Settings:
     Disable Channel Links: ປິດການໃຊ້ງານລີ້ງຂອງຊ່ອງ
   Experimental Settings:
     Experimental Settings: ແບບທົດລອງ
-    Warning: ການຕັ້ງຄ່າເຫຼົ່ານີ້ແມ່ນຢູ່ໃນຂັ້ນທົດລອງ, ພວກມັນອາດເຮັດໃຫ້ແອັບຂັດຂ້ອງໄດ້. ແນະນຳໃຫ້ສຳຮອງຂໍ້ມູນໄວ້ກ່ອນ.
+    Warning: ການຕັ້ງຄ່າເຫຼົ່ານີ້ແມ່ນຢູ່ໃນຂັ້ນທົດລອງ, ພວກມັນອາດຈະເຮັດໃຫ້ເກີດການຂັດຂ້ອງໃນຂະນະທີ່ເປີດໃຊ້ງານ. ຂໍແນະນຳຢ່າງຍິ່ງໃຫ້ມີການສຳຮອງຂໍ້ມູນໄວ້. ນຳໃຊ້ດ້ວຍຄວາມສ່ຽງຂອງທ່ານເອງ!
     Replace HTTP Cache: ປ່ຽນແທນແຄຊ໌ HTTP
   Password Dialog:
     Password: ລະຫັດຜ່ານ
@@ -2291,7 +2291,7 @@ Tooltips:
     Hide Channels: ໃສ່ ID ຂອງຊ່ອງເພື່ອເຊື່ອງຊ່ອງນັ້ນຈາກທົ່ວທັງແອັບ.
     Hide Subscriptions Live: ການຕັ້ງຄ່ານີ້ຖືກແທນທີ່ໂດຍການຕັ້ງຄ່າ "{appWideSetting}" ທີ່ນຳໃຊ້ໃນທົ່ວແອັບ, ຢູ່ໃນພາກສ່ວນ "{subsection}" ຂອງ "{settingsSection}"
     Hide Videos, Playlists and Channels Containing Text: ໃສ່ຄຳສັບ ຫຼື ປະໂຫຍກເພື່ອເຊື່ອງວິດີໂອ ຫຼື ຊ່ອງທີ່ມີຄຳນັ້ນໃນຊື່.
-    Hide Videos on Watch: ເຊື່ອງວິດີໂອທີ່ເບິ່ງແລ້ວຈາກແທັບຕ່າງໆ.
+    Hide Videos on Watch: ເຊື່ອງວິດີໂອທີ່ເບິ່ງແລ້ວຈາກແທັບ ວິດີໂອ, Shorts, ແລະ Live ໃນໜ້າການຕິດຕາມ ແລະ ໜ້າຊ່ອງ. ສິ່ງນີ້ຈະບໍ່ມີຜົນກະທົບຕໍ່ແທັບ ໜ້າຫຼັກ ໃນໜ້າຊ່ອງ
   Subscription Settings:
     Fetch Feeds from RSS: ໃຊ້ RSS ເພື່ອດຶງຂໍ້ມູນຟີດການຕິດຕາມ ເຊິ່ງໄວຂຶ້ນ ແລະ ຫຼຸດບັນຫາການບລັອກ IP.
     Fetch Feed on Startup: ດຶງຂໍ້ມູນຟີດການຕິດຕາມໂດຍອັດຕະໂນມັດເມື່ອເລີ່ມຕົ້ນແອັບ.
@@ -2315,7 +2315,7 @@ Invidious API Error (Click to copy): Invidious API ມີຂໍ້ຜິດພ�
 Falling back to Invidious API: ກຳລັງສະຫຼັບໄປໃຊ້ Invidious API
 Falling back to Local API: ກຳລັງສະຫຼັບໄປໃຊ້ Local API
 This video is unavailable because of missing formats. This can happen due to country unavailability.: ວິດີໂອນີ້ບໍ່ສາມາດເບິ່ງໄດ້ເນື່ອງຈາກຂາດຮູບແບບໄຟລ໌. ອາດເກີດຈາກການຈຳກັດໃນບາງປະເທດ.
-Unknown YouTube url type, cannot be opened in app: ບໍ່ຮູ້ຈັກປະເພດ URL ຂອງ YouTube, ບໍ່ສາມາດເປີດໃນແອັບໄດ້
+Unknown YouTube url type, cannot be opened in app: ບໍ່ຮູ້ຈັກປະເພດ url ຂອງ YouTube, ບໍ່ສາມາດເປີດໃນແອັບໄດ້
 Loop is now disabled: ປິດການຫຼິ້ນວົນຊ້ຳແລ້ວ
 Loop is now enabled: ເປີດການຫຼິ້ນວົນຊ້ຳແລ້ວ
 Shuffle is now disabled: ປິດການສຸ່ມລຳດັບແລ້ວ
