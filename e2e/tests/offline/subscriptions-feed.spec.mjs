@@ -226,11 +226,11 @@ test.describe('subscriptions feed from cache', () => {
     await goTo(page, 'subscriptions')
 
     const newestVideo = page.locator('.ft-list-video').filter({ hasText: 'Video B newest' })
-    await expect(newestVideo.locator('.uploadedTime')).toHaveText('• 30 minutes ago')
+    await expect(newestVideo.locator('.uploadedTime')).toHaveText('30 minutes ago')
 
     await page.clock.fastForward(31 * 60_000)
 
-    await expect(newestVideo.locator('.uploadedTime')).toHaveText('• 1 hour ago')
+    await expect(newestVideo.locator('.uploadedTime')).toHaveText('1 hour ago')
   })
 })
 
@@ -268,14 +268,14 @@ test.describe('relative timestamp updates disabled', () => {
     await goTo(page, 'subscriptions')
 
     const newestVideo = page.locator('.ft-list-video').filter({ hasText: 'Video B newest' })
-    await expect(newestVideo.locator('.uploadedTime')).toHaveText('• 30 minutes ago')
+    await expect(newestVideo.locator('.uploadedTime')).toHaveText('30 minutes ago')
 
     await page.clock.fastForward(31 * 60_000)
-    await expect(newestVideo.locator('.uploadedTime')).toHaveText('• 30 minutes ago')
+    await expect(newestVideo.locator('.uploadedTime')).toHaveText('30 minutes ago')
 
     await goTo(page, 'trending')
     await goTo(page, 'subscriptions')
-    await expect(newestVideo.locator('.uploadedTime')).toHaveText('• 1 hour ago')
+    await expect(newestVideo.locator('.uploadedTime')).toHaveText('1 hour ago')
   })
 
   test('uses the current time when a reused card receives new data', async ({ page }) => {
@@ -303,7 +303,7 @@ test.describe('relative timestamp updates disabled', () => {
     }, { channelId: CHANNEL_B, published: now + 1.5 * HOUR })
 
     await expect(page.locator('[data-reuse-marker="relative-time"]')).toBeVisible()
-    await expect(newestVideo.locator('.uploadedTime')).toHaveText('• 30 minutes ago')
+    await expect(newestVideo.locator('.uploadedTime')).toHaveText('30 minutes ago')
   })
 })
 
