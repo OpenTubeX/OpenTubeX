@@ -1,3 +1,68 @@
+diff --git a/dist/src/parser/classes/VideoTitleHeaderView.d.ts b/dist/src/parser/classes/VideoTitleHeaderView.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..eb9bb89142dcc70d0c84ee8bb68d90794f60677b
+--- /dev/null
++++ b/dist/src/parser/classes/VideoTitleHeaderView.d.ts
+@@ -0,0 +1,12 @@
++import { YTNode } from '../helpers.js';
++import { type RawNode } from '../index.js';
++import Text from './misc/Text.js';
++import RendererContext from './misc/RendererContext.js';
++import ButtonView from './ButtonView.js';
++export default class VideoTitleHeaderView extends YTNode {
++    static type: string;
++    video_title: Text;
++    header_button: ButtonView | null;
++    renderer_context?: RendererContext;
++    constructor(data: RawNode);
++}
+diff --git a/dist/src/parser/classes/VideoTitleHeaderView.js b/dist/src/parser/classes/VideoTitleHeaderView.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..7f5b5872e1a87cda497e7b4c14444fa43b525316
+--- /dev/null
++++ b/dist/src/parser/classes/VideoTitleHeaderView.js
+@@ -0,0 +1,19 @@
++import { YTNode } from '../helpers.js';
++import { Parser } from '../index.js';
++import Text from './misc/Text.js';
++import RendererContext from './misc/RendererContext.js';
++import ButtonView from './ButtonView.js';
++export default class VideoTitleHeaderView extends YTNode {
++    static type = 'VideoTitleHeaderView';
++    video_title;
++    header_button;
++    renderer_context;
++    constructor(data) {
++        super();
++        this.video_title = Text.fromAttributed(data.videoTitle);
++        this.header_button = Parser.parseItem(data.headerButton, ButtonView);
++        if ('rendererContext' in data) {
++            this.renderer_context = new RendererContext(data.rendererContext);
++        }
++    }
++}
+diff --git a/dist/src/parser/nodes.d.ts b/dist/src/parser/nodes.d.ts
+index 270a1d15489deec9645e790215b544b42b372307..7837992e5fb0e1a723f7c2636103761dc5ea24a6 100644
+--- a/dist/src/parser/nodes.d.ts
++++ b/dist/src/parser/nodes.d.ts
+@@ -542,5 +542,6 @@ export { default as VideoSecondaryInfo } from './classes/VideoSecondaryInfo.js';
+ export { default as VideoSummaryContentView } from './classes/VideoSummaryContentView.js';
+ export { default as VideoSummaryParagraphView } from './classes/VideoSummaryParagraphView.js';
++export { default as VideoTitleHeaderView } from './classes/VideoTitleHeaderView.js';
+ export { default as VideoViewCount } from './classes/VideoViewCount.js';
+ export { default as ViewCountFactoid } from './classes/ViewCountFactoid.js';
+ export { default as WatchCardCompactVideo } from './classes/WatchCardCompactVideo.js';
+diff --git a/dist/src/parser/nodes.js b/dist/src/parser/nodes.js
+index 3511b11a22302980a4c1b57bbc897a307e1e51bd..240195d26d731f5e347d5192e96d57e5b0af71ce 100644
+--- a/dist/src/parser/nodes.js
++++ b/dist/src/parser/nodes.js
+@@ -544,5 +544,6 @@ export { default as VideoSecondaryInfo } from './classes/VideoSecondaryInfo.js';
+ export { default as VideoSummaryContentView } from './classes/VideoSummaryContentView.js';
+ export { default as VideoSummaryParagraphView } from './classes/VideoSummaryParagraphView.js';
++export { default as VideoTitleHeaderView } from './classes/VideoTitleHeaderView.js';
+ export { default as VideoViewCount } from './classes/VideoViewCount.js';
+ export { default as ViewCountFactoid } from './classes/ViewCountFactoid.js';
+ export { default as WatchCardCompactVideo } from './classes/WatchCardCompactVideo.js';
 diff --git a/dist/src/parser/classes/misc/Text.js b/dist/src/parser/classes/misc/Text.js
 index 54f783de192662508fc358134e73ff8002051cf8..e11ebe9b762b543a2555010b1aab510c769a265c 100644
 --- a/dist/src/parser/classes/misc/Text.js
