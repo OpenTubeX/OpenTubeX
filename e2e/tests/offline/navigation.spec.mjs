@@ -16,6 +16,22 @@ test.describe('side nav navigation', () => {
     })
   }
 
+  test('omits About from the mobile navigation', async ({ page }) => {
+    const sideNav = page.locator('.sideNav')
+    const moreButton = sideNav.getByRole('button', { name: 'More', exact: true })
+
+    for (const viewport of [
+      { width: 375, height: 667 },
+      { width: 667, height: 375 }
+    ]) {
+      await page.setViewportSize(viewport)
+      await moreButton.click()
+      await expect(sideNav.locator('.moreOptionContainer')).toBeVisible()
+      await expect(sideNav.getByRole('link', { name: 'About', exact: true })).toHaveCount(0)
+      await moreButton.click()
+    }
+  })
+
   test('navigation history back and forward work', async ({ page }) => {
     await goTo(page, 'history')
     await goTo(page, 'userplaylists')
