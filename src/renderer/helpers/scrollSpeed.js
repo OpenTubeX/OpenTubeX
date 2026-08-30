@@ -55,7 +55,10 @@ export function addScrollSpeedHandler(element, getScrollSpeed) {
     const maximum = wheel.axis === 'x'
       ? element.scrollWidth - element.clientWidth
       : element.scrollHeight - element.clientHeight
-    const target = smoothTargets[wheel.axis] ?? position
+    const target = Math.min(
+      Math.max(smoothTargets[wheel.axis] ?? position, 0),
+      maximum
+    )
 
     if (!canMoveScrollTarget(target, maximum, wheel.delta)) {
       if (hasContainedOverscroll(element, wheel.axis)) {

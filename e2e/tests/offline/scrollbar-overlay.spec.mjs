@@ -404,6 +404,31 @@ test.describe('overlay scrollbars', () => {
       }), { timeout: 2000 }).toEqual({ page: 100, viewport: 200 })
     })
 
+    test('reverses a pending scroll after the content shrinks', async ({ page }) => {
+      const viewport = await addNestedCustomSpeedScroller(
+        page,
+        'data-scroll-speed-shrink-test',
+        100
+      )
+      await viewport.evaluate((element) => {
+        element.dispatchEvent(new WheelEvent('wheel', {
+          bubbles: true,
+          cancelable: true,
+          deltaY: 50,
+        }))
+        element.firstElementChild.style.height = '200px'
+        element.dispatchEvent(new WheelEvent('wheel', {
+          bubbles: true,
+          cancelable: true,
+          deltaY: -25,
+        }))
+      })
+
+      await expect.poll(() => viewport.evaluate(
+        (element) => element.scrollTop
+      )).toBe(50)
+    })
+
     test('reconciles an end position after the viewport grows', async ({ page }) => {
       await page.evaluate(() => {
         const viewport = document.createElement('div')
