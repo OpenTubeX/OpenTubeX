@@ -387,6 +387,7 @@ test.describe('video downloads', () => {
     const capturedArgs = path.join(app.userDataDir, 'captured-yt-dlp-playback-args.txt')
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       `printf '%s\\n' "$@" > "${capturedArgs}"`,
       'printf \'%s\\n\' \'{"title":"Playback title","requested_subtitles":{"en":{"ext":"vtt","url":"https://example.invalid/subtitles.vtt?lang=en","name":"English"},"de":{"ext":"vtt","url":"https://example.invalid/subtitles.vtt?lang=en&tlang=de","name":"German from English"}},"formats":[{"format_id":"140","available_at":123,"target_duration":5,"fragments":[{"url":"first"},{"url":"second"}]}]}\''
     ].join('\n'))
@@ -437,11 +438,69 @@ test.describe('video downloads', () => {
     }])
   })
 
+  test('projects large yt-dlp metadata from segmented streams', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'large-yt-dlp-playback-response.sh')
+    const capturedArgs = path.join(app.userDataDir, 'large-yt-dlp-playback-args.txt')
+    const projectedInfo = JSON.stringify({
+      title: 'Large playback response',
+      duration: 10,
+      formats: [{ format_id: '140', 'fragments.0.fragment_count': 1212 }],
+      storyboard: {
+        protocol: 'mhtml',
+        width: 320,
+        height: 180,
+        fps: 1,
+        rows: 2,
+        columns: 2,
+        fragments: [{ url: 'https://example.invalid/storyboard.jpg', duration: 10 }]
+      }
+    })
+    await writeFile(executable, [
+      '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then',
+      '  printf \'%s\\n\' \'2026.08.19\'',
+      '  exit',
+      'fi',
+      `printf '%s\\n' "$@" > "${capturedArgs}"`,
+      'for argument in "$@"; do',
+      '  if [ "$argument" = "--dump-single-json" ]; then',
+      '    printf \'{"title":"Large playback response","padding":"\'',
+      '    head -c 34603008 /dev/zero | tr \'\\000\' x',
+      '    printf \'","formats":[]}\\n\'',
+      '    exit',
+      '  fi',
+      'done',
+      `printf '%s\\n' '${projectedInfo}'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const info = await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee'))
+
+    expect(info.title).toBe('Large playback response')
+    expect(info.version).toBe('2026.08.19')
+    expect(info.formats[0].fragmentCount).toBe(1212)
+    expect(info.storyboardVtt).toContain('https://example.invalid/storyboard.jpg#xywh=0,0,320,180')
+    const passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
+    expect(passedArguments).not.toContain('--dump-single-json')
+    const formatIndex = passedArguments.indexOf('--format')
+    expect(passedArguments.slice(formatIndex, formatIndex + 2)).toEqual(['--format', 'sb0/sb1/sb2/sb3'])
+    const printIndex = passedArguments.indexOf('--print')
+    expect(passedArguments[printIndex + 1]).toContain('fragments.0.fragment_count')
+    expect(passedArguments[printIndex + 1]).toContain(
+      '"storyboard":%(.{protocol,width,height,fps,rows,columns,fragments})j'
+    )
+  })
+
   test('passes configured cookies only for explicit restricted playback retries', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'capture-yt-dlp-cookie-args.sh')
     const capturedArgs = path.join(app.userDataDir, 'captured-yt-dlp-cookie-args.txt')
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       `printf '%s\\n' "$@" > "${capturedArgs}"`,
       'printf \'%s\\n\' \'{"formats":[{"format_id":"140"}]}\''
     ].join('\n'))

@@ -1432,10 +1432,46 @@ export async function handleYtDlpDownloadBinary(event, binary) {
  * @property {number} [published]
  */
 
-// yt-dlp's JSON dump for a single video is a few hundred kilobytes at most,
-// but videos with lots of formats and long descriptions can exceed the default 1 MB
+// Keep a bound on metadata returned by custom or older yt-dlp executables. The
+// output template below excludes repeated media-fragment URLs, which can make a
+// Post-Live-DVR info dump hundreds of megabytes for long broadcasts.
 const PLAYBACK_INFO_MAX_BUFFER = 32 * 1024 * 1024
 const PLAYBACK_INFO_TIMEOUT = 60_000
+const PLAYBACK_FORMAT_OUTPUT_FIELDS = [
+  'format_id',
+  'url',
+  'manifest_url',
+  'protocol',
+  'ext',
+  'container',
+  'vcodec',
+  'acodec',
+  'width',
+  'height',
+  'fps',
+  'tbr',
+  'asr',
+  'audio_channels',
+  'language',
+  'format_note',
+  'dynamic_range',
+  'available_at',
+  'target_duration',
+  // Every Post-Live-DVR fragment carries the total count, so one is enough.
+  'fragments.0.fragment_count'
+].join(',')
+const PLAYBACK_INFO_OUTPUT_TEMPLATE = [
+  '{"title":%(title|null)j',
+  ',"is_live":%(is_live|null)j',
+  ',"live_status":%(live_status|null)j',
+  ',"duration":%(duration|null)j',
+  ',"manifest_url":%(manifest_url|null)j',
+  ',"requested_subtitles":%(requested_subtitles|null)j',
+  `,"formats":%(formats.:.{${PLAYBACK_FORMAT_OUTPUT_FIELDS}})j`,
+  // Selecting sb0 keeps the complete high-resolution storyboard without
+  // retaining the much larger media-fragment arrays from every format.
+  ',"storyboard":%(.{protocol,width,height,fps,rows,columns,fragments})j}'
+].join('')
 
 /**
  * @param {unknown} value
@@ -1512,7 +1548,8 @@ function mapPlaybackFormat(format) {
     dynamicRange: toNonEmptyString(format.dynamic_range),
     availableAt: toFiniteNumber(format.available_at),
     targetDuration: toFiniteNumber(format.target_duration),
-    fragmentCount: Array.isArray(format.fragments) ? format.fragments.length : null
+    fragmentCount: toFiniteNumber(format['fragments.0.fragment_count']) ??
+      (Array.isArray(format.fragments) ? format.fragments.length : null)
   }
 }
 
@@ -1628,12 +1665,16 @@ export async function handleYtDlpGetPlaybackInfo(
   }
 
   const args = [
-    '--dump-single-json',
     '--no-playlist',
     '--no-warnings',
     '--no-progress',
     '--socket-timeout',
-    '15'
+    '15',
+    '--ignore-no-formats-error',
+    '--format',
+    'sb0/sb1/sb2/sb3',
+    '--print',
+    PLAYBACK_INFO_OUTPUT_TEMPLATE
   ]
 
   if (includeSubtitles) {
@@ -1671,15 +1712,28 @@ export async function handleYtDlpGetPlaybackInfo(
   args.push(`https://www.youtube.com/watch?v=${videoId}`)
 
   let stdout
+  let version
   try {
-    ({ stdout } = await execFileAsync(executable, args, {
-      timeout: PLAYBACK_INFO_TIMEOUT,
-      maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
-      windowsHide: true
-    }))
+    // Unlike --dump-single-json, yt-dlp's projected output does not expose its
+    // own version in the template context. Resolve it alongside extraction so
+    // a slow version probe does not add another timeout to playback.
+    const [playbackInfo, resolvedVersion] = await Promise.all([
+      execFileAsync(executable, args, {
+        timeout: PLAYBACK_INFO_TIMEOUT,
+        maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
+        windowsHide: true
+      }),
+      getYtDlpVersion(executable)
+    ])
+    stdout = playbackInfo.stdout
+    version = resolvedVersion
   } catch (error) {
     if (error.code === 'ENOENT') {
       return { error: 'ENOENT' }
+    }
+
+    if (error.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER') {
+      return { error: 'yt-dlp returned too much playback metadata' }
     }
 
     // yt-dlp writes the reason for a failed extraction to stderr
@@ -1698,7 +1752,7 @@ export async function handleYtDlpGetPlaybackInfo(
   const { captions, captionTranslations } = mapPlaybackCaptions(info.requested_subtitles)
 
   return {
-    version: toNonEmptyString(info._version?.version),
+    version,
     title: toNonEmptyString(info.title),
     isLive: !!info.is_live,
     liveStatus: toNonEmptyString(info.live_status),
@@ -1706,7 +1760,7 @@ export async function handleYtDlpGetPlaybackInfo(
     hlsManifestUrl: toNonEmptyString(info.manifest_url) ??
       formats.find(format => format.protocol === 'm3u8_native' && format.manifest_url)?.manifest_url ??
       null,
-    storyboardVtt: buildYtDlpStoryboardVtt(formats, toFiniteNumber(info.duration)),
+    storyboardVtt: buildYtDlpStoryboardVtt([info.storyboard], toFiniteNumber(info.duration)),
     captions,
     captionTranslations,
     formats: formats.filter(format => format.protocol !== 'mhtml').map(mapPlaybackFormat)
