@@ -248,7 +248,7 @@ import {
 import { invidiousGetPlaylistInfo, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../../helpers/api/invidious-playlists'
 import { runRetryablePlaylistRequest } from '../../helpers/playlist-pagination'
-import { createPlaylistBookmark } from '../../helpers/playlist-bookmarks'
+import { canonicalPlaylistThumbnailUrl, createPlaylistBookmark } from '../../helpers/playlist-bookmarks'
 import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
@@ -387,6 +387,25 @@ const isUserPlaylistRequested = computed(() => route.query.playlistType === 'use
 const isPlaylistBookmarked = computed(() => {
   return !isUserPlaylistRequested.value && store.getters.getPlaylistBookmark(playlistId.value) != null
 })
+
+async function refreshPlaylistBookmarkThumbnail() {
+  const bookmark = store.getters.getPlaylistBookmark(playlistId.value)
+  if (bookmark == null) return
+
+  const thumbnailUrl = playlistThumbnail.value || (firstVideoId.value
+    ? `https://i.ytimg.com/vi/${firstVideoId.value}/mqdefault.jpg`
+    : null)
+  const canonicalThumbnailUrl = canonicalPlaylistThumbnailUrl(thumbnailUrl)
+  if (bookmark.playlist.thumbnail_url === canonicalThumbnailUrl) return
+
+  await store.dispatch('savePlaylistBookmark', {
+    ...bookmark,
+    playlist: {
+      ...bookmark.playlist,
+      thumbnail_url: canonicalThumbnailUrl,
+    },
+  })
+}
 
 async function togglePlaylistBookmark() {
   if (playlistBookmarkPending.value || isUserPlaylistRequested.value) return
@@ -592,8 +611,13 @@ function resetState() {
 }
 
 async function getPlaylistLocal() {
+  const requestGeneration = playlistRequestGeneration
+  const requestedPlaylistId = playlistId.value
+  const requestIsCurrent = () => requestGeneration === playlistRequestGeneration && requestedPlaylistId === playlistId.value
+
   try {
-    const result = await getLocalPlaylist(playlistId.value)
+    const result = await getLocalPlaylist(requestedPlaylistId)
+    if (!requestIsCurrent()) return
 
     let channelName_
 
@@ -632,6 +656,9 @@ async function getPlaylistLocal() {
 
     playlistItems.value = playlistItems_
 
+    await refreshPlaylistBookmarkThumbnail()
+    if (!requestIsCurrent()) return
+
     let shouldGetNextPage = false
     if (result.has_continuation) {
       continuationData.value = result
@@ -647,6 +674,8 @@ async function getPlaylistLocal() {
 
     isLoading.value = false
   } catch (err) {
+    if (!requestIsCurrent()) return
+
     console.error(err)
 
     if (backendPreference.value === 'local' && backendFallback.value) {
@@ -661,8 +690,13 @@ async function getPlaylistLocal() {
 }
 
 async function getPlaylistInvidious() {
+  const requestGeneration = playlistRequestGeneration
+  const requestedPlaylistId = playlistId.value
+  const requestIsCurrent = () => requestGeneration === playlistRequestGeneration && requestedPlaylistId === playlistId.value
+
   try {
-    const result = await invidiousGetPlaylistInfo(playlistId.value)
+    const result = await invidiousGetPlaylistInfo(requestedPlaylistId)
+    if (!requestIsCurrent()) return
 
     playlistTitle.value = result.title
     playlistDescription.value = result.description
@@ -685,6 +719,8 @@ async function getPlaylistInvidious() {
     lastUpdated.value = dateString.toLocaleDateString(locale.value, { year: 'numeric', month: 'short', day: 'numeric' })
 
     playlistItems.value = result.videos
+    await refreshPlaylistBookmarkThumbnail()
+    if (!requestIsCurrent()) return
     const hasMorePages = hasMoreInvidiousPlaylistPages(
       result.videoCount,
       1,
@@ -699,6 +735,8 @@ async function getPlaylistInvidious() {
 
     isLoading.value = false
   } catch (err) {
+    if (!requestIsCurrent()) return
+
     console.error(err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
