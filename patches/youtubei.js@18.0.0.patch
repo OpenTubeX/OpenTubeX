@@ -1,3 +1,23 @@
+diff --git a/dist/src/parser/classes/misc/Text.js b/dist/src/parser/classes/misc/Text.js
+index 54f783de192662508fc358134e73ff8002051cf8..e11ebe9b762b543a2555010b1aab510c769a265c 100644
+--- a/dist/src/parser/classes/misc/Text.js
++++ b/dist/src/parser/classes/misc/Text.js
+@@ -95,8 +95,13 @@ export default class Text {
+             this.processStyleRuns(runs, style_runs, data);
+         if (command_runs?.length)
+             this.processCommandRuns(runs, command_runs, data);
+-        if (attachment_runs?.length)
+-            this.processAttachmentRuns(runs, attachment_runs, data);
++        const normalized_attachment_runs = attachment_runs?.map((run) => ({
++            ...run,
++            startIndex: run.startIndex ?? 0,
++            length: run.length ?? 0
++        }));
++        if (normalized_attachment_runs?.length)
++            this.processAttachmentRuns(runs, normalized_attachment_runs, data);
+         return new Text({ runs });
+     }
+     static processStyleRuns(runs, style_runs, data) {
 diff --git a/dist/src/parser/classes/VideoAttributeView.d.ts b/dist/src/parser/classes/VideoAttributeView.d.ts
 index fe90c6fe53ec4428d9a55c60902da64771541c60..f02b34a6727688b0dc21c800d96277b8151e9272 100644
 --- a/dist/src/parser/classes/VideoAttributeView.d.ts
