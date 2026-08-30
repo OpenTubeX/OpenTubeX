@@ -90,3 +90,24 @@ export function playlistBookmarkForSync(bookmark) {
     uploader: bookmark.uploader,
   }
 }
+
+export function mergePlaylistBookmarkConflict({ original, local, remote }) {
+  const originalById = new Map(original.map(entry => [entry.playlist.id, entry]))
+  const localById = new Map(local.map(entry => [entry.playlist.id, entry]))
+  const remoteById = new Map(remote.map(entry => [entry.playlist.id, entry]))
+  const ids = new Set([...remoteById.keys(), ...localById.keys(), ...originalById.keys()])
+
+  return Array.from(ids).flatMap(id => {
+    const originalEntry = originalById.get(id)
+    const localEntry = localById.get(id)
+    const remoteEntry = remoteById.get(id)
+
+    if (originalEntry && (!localEntry || !remoteEntry)) return []
+    if (!localEntry) return remoteEntry ? [remoteEntry] : []
+    if (!remoteEntry || !originalEntry) return [localEntry]
+
+    const localChanged = JSON.stringify(localEntry) !== JSON.stringify(originalEntry)
+    const remoteChanged = JSON.stringify(remoteEntry) !== JSON.stringify(originalEntry)
+    return [remoteChanged && !localChanged ? remoteEntry : localEntry]
+  })
+}

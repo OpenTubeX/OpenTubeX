@@ -24,6 +24,7 @@ import {
   migrateLegacyPlaybackSpeedsToSettings,
   preparePrivacyKey,
 } from '../../helpers/sync-server-privacy'
+import { mergePlaylistBookmarkConflict } from '../../helpers/playlist-bookmarks'
 import {
   AUTO_SYNC_INTERVAL_MS,
   isRecentSync,
@@ -337,10 +338,12 @@ async function runSync(context, { allowDataLoss = false } = {}) {
                 settings.syncServerPrivacyKey
               )
               if (collection === 'playlistBookmarks') {
-                const bookmarks = new Map(remoteData.map(entry => [entry.playlist.id, entry]))
-                for (const entry of data) bookmarks.set(entry.playlist.id, entry)
                 revision = remote.revision
-                data = Array.from(bookmarks.values())
+                data = mergePlaylistBookmarkConflict({
+                  original: encryptedCollections.original.playlistBookmarks,
+                  local: data,
+                  remote: remoteData,
+                })
                 continue
               }
               retryDocument[collection] = remoteData

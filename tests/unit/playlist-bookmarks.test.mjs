@@ -3,10 +3,12 @@ import test from 'node:test'
 
 import {
   createPlaylistBookmark,
+  mergePlaylistBookmarkConflict,
+  playlistBookmarkForSync,
   playlistBookmarkToListData,
 } from '../../src/renderer/helpers/playlist-bookmarks.js'
 
-function bookmark(id, savedAt = 123) {
+function bookmark (id, savedAt = 123) {
   return createPlaylistBookmark({
     id,
     title: `Playlist ${id}`,
@@ -42,4 +44,20 @@ test('creates portable bookmark metadata and read-only playlist list data', () =
     lastUpdatedAt: 123,
     videos: [],
   })
+})
+
+test('preserves playlist bookmark deletions during an encrypted sync conflict retry', () => {
+  const deleted = playlistBookmarkForSync(bookmark('deleted'))
+  const unchanged = playlistBookmarkForSync(bookmark('unchanged'))
+  const remoteChanged = {
+    ...unchanged,
+    playlist: { ...unchanged.playlist, title: 'Changed remotely' },
+  }
+  const remoteAdded = playlistBookmarkForSync(bookmark('remote-added'))
+
+  assert.deepEqual(mergePlaylistBookmarkConflict({
+    original: [deleted, unchanged],
+    local: [unchanged],
+    remote: [deleted, remoteChanged, remoteAdded],
+  }), [remoteChanged, remoteAdded])
 })
