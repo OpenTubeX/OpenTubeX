@@ -120,6 +120,8 @@ Feed:
   Cancel Refresh: Отменить обновление
   Next Auto Refresh: 'Следующее автоматическое обновление: {date}'
 User Playlists:
+  Save Playlist: "Сохранить плейлист"
+  Remove Saved Playlist: "Удалить сохранённый плейлист"
   Load More Playlists: Загрузить ещё плейлисты
   Save to: Сохранить в…
   Move Video to the Top: Переместить видео в начало

@@ -147,6 +147,8 @@ Feed:
   Cancel Refresh: Откажи освежавање
   Next Auto Refresh: 'Следеће аутоматско освежавање: {date}'
 User Playlists:
+  Save Playlist: "Сачувај плејлисту"
+  Remove Saved Playlist: "Уклони сачувану плејлисту"
   Load More Playlists: Учитај још листа за репродукцију
   Save to: Сачувај у…
   Move Video to the Top: Премести видео-снимак на врх

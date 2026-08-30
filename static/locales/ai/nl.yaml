@@ -145,6 +145,8 @@ Feed:
   Cancel Refresh: Vernieuwen annuleren
   Next Auto Refresh: 'Volgende automatische vernieuwing: {date}'
 User Playlists:
+  Save Playlist: "Afspeellijst opslaan"
+  Remove Saved Playlist: "Opgeslagen afspeellijst verwijderen"
   Load More Playlists: Meer afspeellijsten laden
   Save to: Opslaan in…
   Move Video to the Top: Video bovenaan zetten

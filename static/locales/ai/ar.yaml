@@ -145,6 +145,8 @@ Feed:
   Cancel Refresh: إلغاء التحديث
   Next Auto Refresh: 'التحديث التلقائي التالي: {date}'
 User Playlists:
+  Save Playlist: "حفظ قائمة التشغيل"
+  Remove Saved Playlist: "إزالة قائمة التشغيل المحفوظة"
   Load More Playlists: تحميل المزيد من قوائم التشغيل
   Save to: حفظ إلى...
   Move Video to the Top: نقل الفيديو إلى الأعلى

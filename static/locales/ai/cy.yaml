@@ -145,6 +145,8 @@ Feed:
   Cancel Refresh: Canslo'r adnewyddiad
   Next Auto Refresh: 'Adnewyddiad awtomatig nesaf: {date}'
 User Playlists:
+  Save Playlist: "Cadw'r rhestr chwarae"
+  Remove Saved Playlist: "Dileu'r rhestr chwarae sydd wedi'i chadw"
   Load More Playlists: Llwytho rhagor o restrau chwarae
   Save to: Cadw i…
   Quick Bookmark Icon: Eicon nod tudalen cyflym

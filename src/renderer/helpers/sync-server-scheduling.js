@@ -16,6 +16,7 @@ export const SYNC_ACTION_REASONS = new Map([
   ['removeFromHistory', 'history'],
   ['removeHistoryOlderThan', 'history'],
   ['removePlaylist', 'playlists'],
+  ['removePlaylistBookmark', 'playlists'],
   ['removePlaylists', 'playlists'],
   ['removeProfile', 'profiles'],
   ['removeVideo', 'playlists'],
@@ -23,6 +24,7 @@ export const SYNC_ACTION_REASONS = new Map([
   ['updateHistory', 'history'],
   ['updateCustomThemes', 'settings'],
   ['updatePlaylist', 'playlists'],
+  ['savePlaylistBookmark', 'playlists'],
   ['updateProfile', 'profilesOrSubscriptions'],
   ['updateWatchProgress', 'history'],
 ])
@@ -44,6 +46,7 @@ export const SYNC_MUTATION_REASONS = new Map([
   ['removePlaylists', 'playlists'],
   ['removeVideo', 'playlists'],
   ['removeVideos', 'playlists'],
+  ['setPlaylistBookmarks', 'playlists'],
   ['upsertPlaylistToList', 'playlists'],
   ['upsertToHistoryCache', 'history'],
   ['setHistoryCacheSorted', 'history'],

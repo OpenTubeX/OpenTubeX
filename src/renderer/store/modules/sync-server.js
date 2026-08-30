@@ -7,6 +7,7 @@ import {
   isSessionExpiredError,
   normalizeSyncServerUrl,
   syncHistory,
+  syncPlaylistBookmarks,
   syncPlaylists,
   syncProfiles,
   syncSessions,
@@ -115,6 +116,7 @@ async function runSync(context, { allowDataLoss = false } = {}) {
     ...(settings.syncServerPrivacyMode === 'enhanced' ? ['download'] : []),
     ...(settings.syncServerSyncSubscriptions ? ['subscriptions'] : []),
     ...(settings.syncServerSyncPlaylists ? ['playlists'] : []),
+    ...(settings.syncServerSyncPlaylists ? ['playlistBookmarks'] : []),
     ...(settings.syncServerSyncHistory ? ['history'] : []),
     ...(settings.syncServerSyncProfiles ? ['profiles'] : []),
     ...(process.env.IS_ELECTRON &&
@@ -173,6 +175,15 @@ async function runSync(context, { allowDataLoss = false } = {}) {
           { allowDataLoss }
         )
         result.playlists = Object.keys(next.playlists).length
+        break
+      case 'playlistBookmarks':
+        next.playlistBookmarks = await syncPlaylistBookmarks(
+          targetClient,
+          store,
+          previous.playlistBookmarks,
+          { allowDataLoss }
+        )
+        result.playlistBookmarks = next.playlistBookmarks.length
         break
       case 'history': {
         const history = await syncHistory(

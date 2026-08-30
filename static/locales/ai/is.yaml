@@ -145,6 +145,8 @@ Feed:
   Cancel Refresh: Hætta við endurnýjun
   Next Auto Refresh: 'Næsta sjálfvirka endurnýjun: {date}'
 User Playlists:
+  Save Playlist: "Vista spilunarlista"
+  Remove Saved Playlist: "Fjarlægja vistaðan spilunarlista"
   Load More Playlists: Hlaða fleiri spilunarlistum
   Save to: Vista í…
   Move Video to the Top: Færa myndband efst

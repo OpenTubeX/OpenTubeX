@@ -147,6 +147,8 @@ Feed:
   Cancel Refresh: Annuller opdatering
   Next Auto Refresh: 'Næste automatiske opdatering: {date}'
 User Playlists:
+  Save Playlist: "Gem playliste"
+  Remove Saved Playlist: "Fjern gemt playliste"
   Load More Playlists: Indlæs flere playlister
   Save to: Gem på…
   Move Video to the Top: Flyt video øverst

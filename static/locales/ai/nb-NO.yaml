@@ -145,6 +145,8 @@ Feed:
   Cancel Refresh: Avbryt oppdatering
   Next Auto Refresh: 'Neste automatiske oppdatering: {date}'
 User Playlists:
+  Save Playlist: "Lagre spilleliste"
+  Remove Saved Playlist: "Fjern lagret spilleliste"
   Load More Playlists: Last inn flere spillelister
   Save to: Lagre i…
   Quick Bookmark Icon: Hurtigbokmerkeikon

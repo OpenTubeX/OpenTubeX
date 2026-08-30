@@ -143,6 +143,8 @@ Feed:
   Cancel Refresh: "Nullañ an adkargañ"
   Next Auto Refresh: "Adkargañ emgefreek da-heul: {date}"
 User Playlists:
+  Save Playlist: "Enrollañ ar roll-lenn"
+  Remove Saved Playlist: "Lemel ar roll-lenn enrollet"
   Load More Playlists: "Kargañ muioc'h a rolloù-videoioù"
   Save to: "Enrollañ e…"
   Quick Bookmark Icon: "Arlun ar sined prim"

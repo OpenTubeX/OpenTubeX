@@ -145,6 +145,8 @@ Feed:
   Cancel Refresh: Cancelar a actualización
   Next Auto Refresh: 'Seguinte actualización automática: {date}'
 User Playlists:
+  Save Playlist: "Gardar lista de reprodución"
+  Remove Saved Playlist: "Eliminar a lista de reprodución gardada"
   Load More Playlists: Cargar máis listas de reprodución
   Save to: Gardar en…
   Move Video to the Top: Mover o vídeo ao principio

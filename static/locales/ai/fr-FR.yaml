@@ -143,6 +143,8 @@ Feed:
   Cancel Refresh: Annuler l’actualisation
   Next Auto Refresh: 'Prochaine actualisation automatique : {date}'
 User Playlists:
+  Save Playlist: "Enregistrer la playlist"
+  Remove Saved Playlist: "Supprimer la playlist enregistrée"
   Load More Playlists: Charger davantage de playlists
   Save to: Enregistrer dans…
   Quick Bookmark Icon: Icône de favori rapide

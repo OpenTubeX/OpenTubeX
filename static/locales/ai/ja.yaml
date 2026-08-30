@@ -145,6 +145,8 @@ Feed:
   Cancel Refresh: 更新をキャンセル
   Next Auto Refresh: '次回の自動更新: {date}'
 User Playlists:
+  Save Playlist: "再生リストを保存"
+  Remove Saved Playlist: "保存した再生リストを削除"
   Load More Playlists: プレイリストをさらに読み込む
   Save to: 保存先…
   Quick Bookmark Icon: クイックブックマークのアイコン

@@ -278,6 +278,7 @@ export class EncryptedSyncAdapter {
     this.document.profiles ??= []
     this.document.settings ??= []
     this.document.sessions ??= []
+    this.document.playlistBookmarks ??= []
   }
 
   async getSubscriptions() { return structuredClone(this.document.subscriptions) }
@@ -294,6 +295,19 @@ export class EncryptedSyncAdapter {
 
   async getPlaylist(id) {
     return structuredClone(this.document.playlists.find(entry => entry.playlist.id === id))
+  }
+
+  async getPlaylistBookmarks() {
+    return structuredClone(this.document.playlistBookmarks)
+  }
+
+  async createPlaylistBookmark(bookmark) {
+    this.document.playlistBookmarks.push(structuredClone(bookmark))
+  }
+
+  async deletePlaylistBookmark(id) {
+    this.document.playlistBookmarks = this.document.playlistBookmarks
+      .filter(entry => entry.playlist.id !== id)
   }
 
   async createPlaylist(playlist) {

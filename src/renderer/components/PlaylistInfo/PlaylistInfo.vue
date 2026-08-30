@@ -167,6 +167,15 @@
             @click="enterEditMode"
           />
           <FtIconButton
+            v-if="!editMode && !isUserPlaylist && showPlaylists"
+            :title="isPlaylistBookmarked ? $t('User Playlists.Remove Saved Playlist') : $t('User Playlists.Save Playlist')"
+            :icon="isPlaylistBookmarked ? ['fas', 'bookmark'] : ['far', 'bookmark']"
+            :aria-pressed="isPlaylistBookmarked"
+            :disabled="playlistBookmarkPending"
+            :theme="isPlaylistBookmarked ? 'secondary' : 'base-no-default'"
+            @click="emit('toggle-playlist-bookmark')"
+          />
+          <FtIconButton
             v-if="videoCount > 0 && showPlaylists && !editMode"
             :title="$t('User Playlists.Copy Playlist')"
             :icon="['fas', 'copy']"
@@ -398,9 +407,17 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  isPlaylistBookmarked: {
+    type: Boolean,
+    required: true,
+  },
+  playlistBookmarkPending: {
+    type: Boolean,
+    required: true,
+  },
 })
 
-const emit = defineEmits(['enter-edit-mode', 'exit-edit-mode', 'search-video-query-change', 'prompt-open', 'prompt-close'])
+const emit = defineEmits(['enter-edit-mode', 'exit-edit-mode', 'search-video-query-change', 'prompt-open', 'prompt-close', 'toggle-playlist-bookmark'])
 
 const { locale, t } = useI18n()
 const IS_ELECTRON = process.env.IS_ELECTRON

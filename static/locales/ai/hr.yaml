@@ -145,6 +145,8 @@ Feed:
   Cancel Refresh: Otkaži osvježavanje
   Next Auto Refresh: 'Sljedeće automatsko osvježavanje: {date}'
 User Playlists:
+  Save Playlist: "Spremi popis za reprodukciju"
+  Remove Saved Playlist: "Ukloni spremljeni popis za reprodukciju"
   Load More Playlists: Učitaj još popisa za reprodukciju
   Save to: Spremi u…
   Quick Bookmark Icon: Ikona brze oznake

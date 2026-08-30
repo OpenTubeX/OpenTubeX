@@ -155,6 +155,8 @@ Feed:
   Cancel Refresh: لغو تازه‌سازی
   Next Auto Refresh: 'تازه‌سازی خودکار بعدی: {date}'
 User Playlists:
+  Save Playlist: "ذخیره فهرست پخش"
+  Remove Saved Playlist: "حذف فهرست پخش ذخیره‌شده"
   Load More Playlists: بارگذاری فهرست‌های پخش بیشتر
   Save to: ذخیره در…
   Move Video to the Top: انتقال ویدیو به ابتدا

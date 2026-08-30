@@ -145,6 +145,8 @@ Feed:
   Cancel Refresh: Скасувати оновлення
   Next Auto Refresh: 'Наступне автоматичне оновлення: {date}'
 User Playlists:
+  Save Playlist: "Зберегти плейліст"
+  Remove Saved Playlist: "Видалити збережений плейліст"
   Load More Playlists: Завантажити більше списків відтворення
   Save to: Зберегти до…
   Move Video to the Top: Перемістити відео на початок

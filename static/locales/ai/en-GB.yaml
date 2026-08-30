@@ -144,6 +144,8 @@ Feed:
   Cancel Refresh: Cancel refresh
   Next Auto Refresh: 'Next auto refresh: {date}'
 User Playlists:
+  Save Playlist: "Save Playlist"
+  Remove Saved Playlist: "Remove Saved Playlist"
   Load More Playlists: Load More Playlists
   Save to: Save to…
   Quick Bookmark Icon: Quick bookmark icon
