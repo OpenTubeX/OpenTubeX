@@ -720,19 +720,12 @@ test.describe('settings', () => {
     ])
   })
 
-  test('disables the comment translation button setting when comments are hidden', async ({ page }) => {
+  test('keeps comment translation controls out of Distraction Free settings', async ({ page }) => {
     const focus = await goToSettingsSection(page, 'focus')
-    const hideTranslationButtons = focus.getByRole('checkbox', {
-      name: /^Hide Comment Translation Buttons/
-    })
-    const hideComments = focus.getByRole('checkbox', { name: /^Hide comments/ })
 
-    await expect(hideTranslationButtons).toBeEnabled()
-    await hideTranslationButtons.locator('..').locator('label.switch-label').click()
-    await expect(hideTranslationButtons).toBeChecked()
-    await hideComments.locator('..').locator('label.switch-label').click()
-    await expect(hideComments).toBeChecked()
-    await expect(hideTranslationButtons).toBeDisabled()
+    await expect(focus.getByRole('checkbox', {
+      name: 'Hide Comment Translation Buttons'
+    })).toHaveCount(0)
   })
 
   test('disables A-B repeat from Distraction Free settings', async ({ page }) => {
