@@ -256,9 +256,7 @@ jobs:
         git -C "$work_dir" fetch --depth=1 --filter=blob:none upstream master
         upstream_sha="$(git -C "$work_dir" rev-parse FETCH_HEAD)"
 
-        remote_sha="$(gh api "repos/OpenTubeX/winget-pkgs/git/ref/heads/${BRANCH}" --jq .object.sha 2>/dev/null || true)"
-
-        if [[ -n "$remote_sha" ]]; then
+        if remote_sha="$(gh api "repos/OpenTubeX/winget-pkgs/git/ref/heads/${BRANCH}" --jq .object.sha 2>/dev/null)"; then
           git -C "$work_dir" push origin "${upstream_sha}:refs/heads/${BRANCH}" \
             --force-with-lease="refs/heads/${BRANCH}:${remote_sha}"
         else
