@@ -128,6 +128,7 @@ const state = {
       playlistName: 'Watch Later',
       protected: false,
       description: 'Videos to watch later',
+      quickBookmarkIcon: 'clock',
       videos: [],
       _id: 'watchLater',
     },
