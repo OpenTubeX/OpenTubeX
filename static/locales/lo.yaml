@@ -1,1 +1,2582 @@
-{}
+Locale Name: ພາສາລາວ
+Color Picker:
+  Hue: ລະດັບສີ
+  Opacity: ຄວາມໂປ່ງໃສ
+  Backdrop Blur: ຄວາມມົວຂອງພື້ນຫຼັງ
+  Hex Color: ລະຫັດສີ Hex
+  Apply Color: ນຳໃຊ້
+  Reset Color: ຕັ້ງຄ່າໃໝ່
+  Copy Color: ຄັດລອກ
+  Copy From Another Color: ຄັດລອກຈາກສີອື່ນ
+  Color Copied: ຄັດລອກສີແລ້ວ
+  Invalid Color: ປ້ອນລະຫັດສີ hex ທີ່ຖືກຕ້ອງ
+  Clipboard Unavailable: ຄລິບບອດບໍ່ວ່າງ
+  Saturation and Brightness: ຄວາມອີ່ມຕົວ ແລະ ຄວາມສະຫວ່າງ
+File: ໄຟລ໌
+New Window: ປ່ອງຢ້ຽມໃໝ່
+New Tab: ແທັບໃໝ່
+Preferences: ການຕັ້ງຄ່າ
+Quit: ປິດໂປຣແກຣມ
+Edit: ແກ້ໄຂ
+Undo: ຍົກເລີກການເຮັດ
+Redo: ເຮັດຄືນ
+Cut: ຕັດ
+Copy: ຄັດລອກ
+Paste: ວາງ
+Delete: ລຶບ
+Select all: ເລືອກທັງໝົດ
+Toggle Developer Tools: ເປີດ/ປິດ ເຄື່ອງມືນັກພັດທະນາ
+Actual size: ຂະໜາດຈິງ
+Zoom in: ຊູມເຂົ້າ
+Zoom out: ຊູມອອກ
+Toggle fullscreen: ເປີດ/ປິດ ເຕັມຈໍ
+Window: ປ່ອງຢ້ຽມ
+Minimize: ຫຍໍ້ລົງ
+Close: ປິດ
+Maximize: ຂະຫຍາຍໃຫຍ່ສຸດ
+Restore: ຄືນຄ່າ
+Close Tab: ປິດແທັບ
+Close Confirmation:
+  Title: ປິດ OpenTubeX ບໍ່?
+  Message: ເຈົ້າມັ້ນໃຈບໍ່ວ່າຕ້ອງການປິດ OpenTubeX?
+  Quit: ປິດ
+  Never Ask Again: ບໍ່ຕ້ອງຖາມອີກ
+Close Window Confirmation:
+  Title: ປິດປ່ອງຢ້ຽມບໍ່?
+  Message: ປ່ອງຢ້ຽມນີ້ມີ {count} ແທັບ. ເຈົ້າມັ້ນໃຈບໍ່ວ່າຕ້ອງການປິດມັນ?
+  Close Window: ປິດປ່ອງຢ້ຽມ
+Confirmations:
+  Never Ask Again: ບໍ່ຕ້ອງຖາມອີກ
+  Settings Hint: ເຈົ້າສາມາດເປີດການຢືນຢັນນີ້ຄືນໃໝ່ໄດ້ໃນ ການຕັ້ງຄ່າ → ທົ່ວໄປ → ຢືນຢັນກ່ອນ…
+Close Multiple Tabs Confirmation:
+  Title: ປິດຫຼາຍແທັບບໍ່?
+  Message: ສິ່ງນີ້ຈະປິດ {count} ແທັບ.
+  Close Tabs: ປິດ {count} ແທັບ
+Load Multiple Tabs Confirmation:
+  Title: ໂຫຼດຫຼາຍແທັບບໍ່?
+  Message: ສິ່ງນີ້ຈະໂຫຼດ {count} ແທັບ.
+  Load Tabs: ໂຫຼດ {count} ແທັບ
+Unload Multiple Tabs Confirmation:
+  Title: ຖອນການໂຫຼດຫຼາຍແທັບບໍ່?
+  Message: ສິ່ງນີ້ຈະຖອນການໂຫຼດ {count} ແທັບ.
+  Unload Tabs: ຖອນການໂຫຼດ {count} ແທັບ
+Compact side navigation: ຫຍໍ້ແຖບນຳທາງຂ້າງ
+Expand side navigation: ຂະຫຍາຍແຖບນຳທາງຂ້າງ
+Back: ກັບຄືນ
+Forward: ໄປໜ້າ
+Right-click or hold to see history: ຄລິກຂວາ ຫຼື ກົດຄ້າງໄວ້ເພື່ອເບິ່ງປະຫວັດ
+Open New Window: ເປີດປ່ອງຢ້ຽມໃໝ່
+Use Vertical Tabs: ໃຊ້ແທັບແນວຕັ້ງ
+Use Horizontal Tabs: ໃຊ້ແທັບແນວນອນ
+Resize Tab Bar: ປັບຂະໜາດແຖບແທັບ
+Go to page: ໄປທີ່ໜ້າ {page}
+Close Banner: ປິດປ້າຍໂຄສະນາ
+Find in page: ຄົ້ນຫາໃນໜ້ານີ້
+Previous match: ຜົນການຄົ້ນຫາກ່ອນໜ້າ
+Next match: ຜົນການຄົ້ນຫາຖັດໄປ
+Close find bar: ປິດແຖບຄົ້ນຫາ
+No matches: ບໍ່ພົບຂໍ້ມູນ
+Version {versionNumber} is now available.: ເວີຊັນ {versionNumber} ພ້ອມໃຫ້ໃຊ້ງານແລ້ວ.
+See changes and update: ເບິ່ງການປ່ຽນແປງ ແລະ ອັບເດດ
+Dismiss: ລະເລີກ
+Update to {version}: ອັບເດດເປັນ {version}
+Download From Site: ດາວໂຫຼດຈາກເວັບໄຊທ໌
+Are you sure you want to open this link?: ເຈົ້າມັ້ນໃຈບໍ່ວ່າຕ້ອງການເປີດລິ້ງນີ້?
+Global:
+  Ambient Mode: ໂໝດແສງສະທ້ອນ (Ambient)
+  Loading More: ກຳລັງໂຫຼດເພີ່ມ...
+  Videos: ວິດີໂອ
+  Shorts: ວິດີໂອສັ້ນ (Shorts)
+  Live: ໄລຟ໌ສົດ
+  Posts: ໂພສ
+  New: ໃໝ່
+  Sort By: ຈັດລຽງຕາມ
+  Counts:
+    Video Count: 1 ວິດີໂອ | {count} ວິດີໂອ
+    Channel Count: 1 ຊ່ອງ | {count} ຊ່ອງ
+    Subscriber Count: ຜູ້ຕິດຕາມ 1 ຄົນ | ຜູ້ຕິດຕາມ {count} ຄົນ
+    View Count: ເບິ່ງ 1 ຄັ້ງ | ເບິ່ງ {count} ຄັ້ງ
+    Like Count: ຖືກໃຈ 1 ຄັ້ງ | ຖືກໃຈ {count} ຄັ້ງ
+    Comment Count: 1 ຄວາມຄິດເຫັນ | {count} ຄວາມຄິດເຫັນ
+    Watching Count: ກຳລັງເບິ່ງ 1 ຄົນ | ກຳລັງເບິ່ງ {count} ຄົນ
+Search / Go to URL: ຄົ້ນຫາ / ໄປທີ່ URL
+Search Bar:
+  Clear Input: ລ້າງຂໍ້ມູນທີ່ປ້ອນ
+  Remove: ລຶບອອກ
+Search character limit: ຄຳຄົ້ນຫາເກີນຂີດຈຳກັດ {searchCharacterLimit} ຕົວອັກສອນ
+Search Listing:
+  Label:
+    4K: 4K
+    8K: 8K
+    VR180: VR180
+    360 Video: 360°
+    Subtitles: ຄຳບັນຍາຍ
+    New: ໃໝ່
+    Members Only: ສະເພາະສະມາຊິກ
+    3D: 3D
+    Closed Captions: ຄຳບັນຍາຍ (CC)
+Search Filters:
+  Search Filters: ຕົວຕອງການຄົ້ນຫາ
+  Prioritize:
+    Prioritize: ລຳດັບຄວາມສຳຄັນ
+    Most Relevant: ກ່ຽວຂ້ອງທີ່ສຸດ
+    Popularity: ຍອດນິຍົມ
+  Time:
+    Time: ເວລາ
+    Any Time: ທຸກເວລາ
+    Today: ມື້ນີ້
+    This Week: ອາທິດນີ້
+    This Month: ເດືອນນີ້
+    This Year: ປີນີ້
+  Type:
+    Type: ປະເພດ
+    All Types: ທຸກປະເພດ
+    Videos: ວິດີໂອ
+    Channels: ຊ່ອງ
+    Movies: ຮູບເງົາ
+  Duration:
+    Duration: ຄວາມຍາວ
+    All Durations: ທຸກຄວາມຍາວ
+    '< 3 minutes': < 3 ນາທີ
+    '3 - 20 minutes': 3 - 20 ນາທີ
+    '> 20 minutes': '> 20 ນາທີ'
+  Features:
+    Features: ຄຸນສົມບັດ
+    HD: HD
+    Subtitles: ຄຳບັນຍາຍ
+    Creative Commons: Creative Commons
+    3D: 3D
+    Live: ໄລຟ໌ສົດ
+    4K: 4K
+    360 Video: ວິດີໂອ 360
+    Location: ສະຖານທີ່
+    HDR: HDR
+    VR180: VR180
+  Search Results: ຜົນການຄົ້ນຫາ
+  Fetching results. Please wait: ກຳລັງດຶງຂໍ້ມູນຜົນການຄົ້ນຫາ. ກະລຸນາລໍຖ້າ
+  Fetch more results: ດຶງຂໍ້ມູນຜົນການຄົ້ນຫາເພີ່ມເຕີມ
+  There are no more results for this search: ບໍ່ມີຜົນການຄົ້ນຫາເພີ່ມເຕີມແລ້ວ
+  Clear Filters: ລ້າງຕົວຕອງ
+Stats:
+  Stats: ສະຖິຕິ
+  Watch time summary: ສະຫຼຸບເວລາເບິ່ງ
+  Today: ມື້ນີ້
+  This week: ອາທິດນີ້
+  Total watch time: ເວລາເບິ່ງທັງໝົດ
+  Daily average: ສະເລ່ຍຕໍ່ມື້
+  So far today: ມື້ນີ້ມາຮອດປັດຈຸບັນ
+  Since: ຕັ້ງແຕ່ {day}
+  All recorded time: ເວລາທັງໝົດທີ່ບັນທຶກໄວ້
+  Per calendar day: ຕາມວັນທີໃນປະຕິທິນ
+  Day by day: ແຕ່ລະມື້
+  Highest: 'ສູງສຸດ: {duration}'
+  Week by week: ແຕ່ລະອາທິດ
+  Last 14 days: 14 ມື້ຜ່ານມາ
+  Last 8 weeks: 8 ອາທິດຜ່ານມາ
+  Daily chart aria: ເວລາເບິ່ງແຕ່ລະມື້ສຳລັບ 14 ມື້ຜ່ານມາ
+  Weekly chart aria: ເວລາເບິ່ງແຕ່ລະອາທິດສຳລັບ 8 ອາທິດຜ່ານມາ
+  No data: ເວລາເບິ່ງຈະສະແດງຢູ່ບ່ອນນີ້ເມື່ອເຈົ້າເບິ່ງວິດີໂອ.
+  Estimate note: ເວລາເບິ່ງກ່ອນການອັບເດດນີ້ ແມ່ນປະມານຈາກຄວາມຄືບໜ້າການເບິ່ງທີ່ບັນທຶກໄວ້.
+  Adjust imported watch time: ປັບເວລາເບິ່ງທີ່ນຳເຂົ້າ
+  Imported watch time: ເວລາເບິ່ງທີ່ນຳເຂົ້າ
+  Imported watch time explanation: ເລືອກຄວາມໄວການຫຼິ້ນທີ່ເຈົ້າໃຊ້ເປັນປະຈຳ. ຄວາມຍາວວິດີໂອທີ່ນຳເຂົ້າຈະຖືກຫານດ້ວຍຄວາມໄວນີ້ເພື່ອປະມານເວລາທີ່ເຈົ້າເບິ່ງຕົວຈິງ.
+  Playback speed: ຄວາມໄວການຫຼິ້ນ
+  Channel speed note: ຈະໃຊ້ຄວາມໄວການຫຼິ້ນຂອງຊ່ອງທີ່ບັນທຶກໄວ້ແທນຖ້າມີ.
+  Apply playback speed: ນຳໃຊ້ຄວາມໄວການຫຼິ້ນ
+  Imported watch time adjusted: ປັບປຸງເວລາເບິ່ງທີ່ນຳເຂົ້າແລ້ວ
+  Reset statistics: ລ້າງສະຖິຕິໃໝ່
+  Reset: ຕັ້ງຄ່າໃໝ່
+  Reset confirmation: ເຈົ້າມັ້ນໃຈບໍ່ວ່າຕ້ອງການລ້າງສະຖິຕິການເບິ່ງທັງໝົດ? ບໍ່ສາມາດຍົກເລີກການກະທຳນີ້ໄດ້.
+  Reset success: ລ້າງສະຖິຕິການເບິ່ງແລ້ວ
+  Less than a minute: < 1 ນາທີ
+  Minutes: '{minutes} ນາທີ'
+  Hours: '{hours} ຊົ່ວໂມງ'
+  Hours and minutes: '{hours} ຊມ {minutes} ນາທີ'
+Home Page:
+  Home: ໜ້າຫຼັກ
+  Description: ເບິ່ງຕໍ່ຈາກບ່ອນທີ່ເຈົ້າຄ້າງໄວ້ ແລະ ເບິ່ງກິດຈະກຳຫຼ້າສຸດ.
+  Customize: ປັບແຕ່ງໜ້າຫຼັກ
+  Done: ສຳເລັດ
+  Customize description: ເລືອກສ່ວນທີ່ຈະໃຫ້ສະແດງ ແລະ ຈັດລຽງຕາມລຳດັບທີ່ເຈົ້າຕ້ອງການ.
+  Continue watching: ເບິ່ງຕໍ່
+  New since last visit: ໃໝ່ຕັ້ງແຕ່ການເຂົ້າເບິ່ງຄັ້ງຫຼ້າສຸດ
+  Watch queue: ຄິວທີ່ຈະເບິ່ງ
+  Recent playlists: ເພລລິສຫຼ້າສຸດ
+  Recent downloads: ການດາວໂຫຼດຫຼ້າສຸດ
+  Upcoming reminders: ການແຈ້ງເຕືອນທີ່ຈະມາເຖິງ
+  Watch statistics: ສະຖິຕິການເບິ່ງ
+  View all: ເບິ່ງທັງໝົດ
+  Previous shelf page: ໜ້າ {section} ກ່ອນໜ້າ
+  Next shelf page: ໜ້າ {section} ຖັດໄປ
+  Shelf page status: '{section}, ໜ້າ {page} ຈາກທັງໝົດ {total}.'
+  Move section up: ຍ້າຍ {section} ຂຶ້ນ
+  Move section down: ຍ້າຍ {section} ລົງ
+  Section moved: '{section} ຖືກຍ້າຍໄປຕຳແໜ່ງທີ່ {position} ຈາກທັງໝົດ {total}.'
+  Nothing here yet: ຍັງບໍ່ມີຫຍັງຢູ່ບ່ອນນີ້
+  Empty description: ວິດີໂອທີ່ເຈົ້າເລີ່ມເບິ່ງ, ເພລລິສທີ່ເຈົ້າໃຊ້, ການດາວໂຫຼດ ແລະ ການແຈ້ງເຕືອນຈະສະແດງຢູ່ບ່ອນນີ້.
+  All sections hidden: ທຸກພາກສ່ວນຖືກເຊື່ອງໄວ້
+  All sections hidden description: ປັບແຕ່ງໜ້າຫຼັກເພື່ອໃຫ້ສະແດງພາກສ່ວນຄືນໃໝ່.
+Subscriptions:
+  Subscriptions: ການຕິດຕາມ
+  Error Channels: ຊ່ອງທີ່ມີຂໍ້ຜິດພາດ
+  'This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting': ໂປຣໄຟລ໌ນີ້ມີການຕິດຕາມເປັນຈຳນວນຫຼາຍ. ກຳລັງບັງຄັບໃຊ້ RSS ເພື່ອຫຼີກລ່ຽງການຈຳກັດຄວາມໄວ
+  'Your Subscription list is currently empty. Start adding subscriptions to see them here.': ລາຍການຕິດຕາມຂອງເຈົ້າຫວ່າງເປົ່າ. ເພື່ອນຳເຂົ້າການຕິດຕາມ, ໃຫ້ເປີດ ການຕັ້ງຄ່າ → ຂໍ້ມູນ ແລະ ເລືອກ ນຳເຂົ້າການຕິດຕາມ. ເຈົ້າຍັງສາມາດຄົ້ນຫາຊ່ອງ ແລະ ກົດຕິດຕາມໄດ້.
+  Disabled Automatic Fetching: ເຈົ້າໄດ້ປິດການດຶງຂໍ້ມູນການຕິດຕາມອັດຕະໂນມັດ. ກະລຸນາໂຫຼດຂໍ້ມູນການຕິດຕາມໃໝ່ເພື່ອເບິ່ງຢູ່ບ່ອນນີ້.
+  Empty Channels: ຊ່ອງທີ່ເຈົ້າຕິດຕາມຍັງບໍ່ມີວິດີໂອໃດໆໃນຕອນນີ້.
+  Empty Posts: ຊ່ອງທີ່ເຈົ້າຕິດຕາມຍັງບໍ່ມີໂພສໃດໆໃນຕອນນີ້.
+  Load More Videos: ໂຫຼດວິດີໂອເພີ່ມເຕີມ
+  Load More Posts: ໂຫຼດໂພສເພີ່ມເຕີມ
+  Subscriptions Tabs: ແທັບການຕິດຕາມ
+  All Subscription Tabs Hidden: ແທັບການຕິດຕາມທັງໝົດຖືກເຊື່ອງໄວ້. ເພື່ອເບິ່ງເນື້ອຫາ, ກະລຸນາສະແດງບາງແທັບໃນພາກສ່ວນ "{subsection}" ໃນ "{settingsSection}".
+  Refreshing Subscription Videos: ກຳລັງໂຫຼດວິດີໂອການຕິດຕາມໃໝ່
+  Refreshing Subscription Shorts: ກຳລັງໂຫຼດວິດີໂອສັ້ນການຕິດຕາມໃໝ່
+  Refreshing Subscription Live Streams: ກຳລັງໂຫຼດໄລຟ໌ສົດການຕິດຕາມໃໝ່
+  Refreshing Subscription Posts: ກຳລັງໂຫຼດໂພສການຕິດຕາມໃໝ່
+  New Content: ເນື້ອຫາໃໝ່
+  New Feed Refresh Warning Title: ໂຫຼດຟີດການຕິດຕາມທັງໝົດໃໝ່ບໍ່?
+  New Feed Refresh Warning: ການໂຫຼດທຸກປະເພດເນື້ອຫາໃໝ່ໂດຍບໍ່ໃຊ້ RSS ສຳລັບການຕິດຕາມອາດໃຊ້ເວລາດົນ. ເຈົ້າຕ້ອງການສືບຕໍ່ບໍ່? | ການໂຫຼດທຸກປະເພດເນື້ອຫາໃໝ່ໂດຍບໍ່ໃຊ້ RSS ສຳລັບ {count} ການຕິດຕາມອາດໃຊ້ເວລາດົນ. ເຈົ້າຕ້ອງການສືບຕໍ່ບໍ່?
+  New Since Last Refresh: ໃໝ່ຕັ້ງແຕ່ການໂຫຼດຄັ້ງຫຼ້າສຸດ
+  Mark as Seen: ໝາຍວ່າເບິ່ງແລ້ວ
+  Mark All as Seen: ໝາຍທັງໝົດວ່າເບິ່ງແລ້ວ
+  No New Content: ບໍ່ມີເນື້ອຫາໃໝ່.
+  New Content Tabs: ແທັບເນື້ອຫາໃໝ່
+  Show Tabbed View: ສະແດງແບບແທັບ
+  Show Combined View: ສະແດງແບບລວມ
+  Newest First: ໃໝ່ສຸດກ່ອນ
+  Oldest First: ເກົ່າສຸດກ່ອນ
+  Posts:
+    RSS Message: YouTube ບໍ່ມີຟີດ RSS ສຳລັບໂພສ. ໃຫ້ປິດການຕັ້ງຄ່າ "{rssSetting}" ເພື່ອເບິ່ງໂພສ ຫຼື ເປີດການຕັ້ງຄ່າ "{hideSetting}" ເພື່ອເຊື່ອງແທັບນີ້.
+More: ເພີ່ມເຕີມ
+Channels:
+  Channels: ຊ່ອງ
+  Title: ລາຍຊື່ຊ່ອງ
+  Search bar placeholder: ຄົ້ນຫາຊ່ອງ
+  Count: ພົບ 1 ຊ່ອງ. | ພົບ {number} ຊ່ອງ.
+  Empty: ລາຍຊື່ຊ່ອງຂອງເຈົ້າຫວ່າງເປົ່າ.
+  Unsubscribe Prompt: ເຈົ້າມັ້ນໃຈບໍ່ວ່າຕ້ອງການເລີກຕິດຕາມ "{channelName}"?
+Trending:
+  Trending: ມາແຮງ
+  Gaming: ເກມ
+  Sports: ກິລາ
+  Trending Tabs: ແທັບມາແຮງ
+  Load Error: ບໍ່ສາມາດໂຫຼດລາຍການມາແຮງໄດ້.
+  Unsupported Backend: ລາຍການມາແຮງຕ້ອງໃຊ້ Local API. ກະລຸນາເລືອກ Local API ຫຼື ເປີດໃຊ້ backend fallback.
+Most Popular: ຍອດນິຍົມທີ່ສຸດ
+Most Popular Feed Empty: ຟີດຍອດນິຍົມທີ່ສຸດຂອງ Invidious ນີ້ຫວ່າງເປົ່າ.
+Feed:
+  Cancel Refresh: ຍົກເລີກການໂຫຼດໃໝ່
+  Feed Last Updated: 'ຟີດ {feedName} ອັບເດດຫຼ້າສຸດເມື່ອ: {date}'
+  Next Auto Refresh: 'ຈະອັບເດດອັດຕະໂນມັດຄັ້ງຖັດໄປ: {date}'
+  Refresh Feed: ໂຫຼດ {subscriptionName} ໃໝ່
+Playlists: ເພລລິສ
+User Playlists:
+  Your Playlists: ເພລລິສຂອງເຈົ້າ
+  Load More Playlists: ໂຫຼດເພລລິສເພີ່ມເຕີມ
+  You have no playlists. Click on the create new playlist button to create a new one.: ເຈົ້າຍັງບໍ່ມີເພລລິສ. ຄລິກປຸ່ມສ້າງເພລລິສໃໝ່ເພື່ອເລີ່ມຕົ້ນ.
+  Empty Search Message: ບໍ່ມີວິດີໂອໃນເພລລິສນີ້ທີ່ກົງກັບການຄົ້ນຫາຂອງເຈົ້າ
+  Search bar placeholder: ຄົ້ນຫາເພລລິສ
+  Playlists with Matching Videos: ເພລລິສທີ່ມີວິດີໂອທີ່ກົງກັນ
+  This playlist currently has no videos.: ເພລລິສນີ້ຍັງບໍ່ມີວິດີໂອໃດໆ.
+  Create New Playlist: ສ້າງເພລລິສໃໝ່
+  Add to Playlist: ເພີ່ມເຂົ້າເພລລິສ
+  Save to: ບັນທຶກໄວ້ທີ່…
+  Add to Favorites: ເພີ່ມເຂົ້າ {playlistName}
+  Remove from Favorites: ລຶບອອກຈາກ {playlistName}
+  Move Video Up: ຍ້າຍວິດີໂອຂຶ້ນ
+  Move Video Down: ຍ້າຍວິດີໂອລົງ
+  Move Video to the Top: ຍ້າຍວິດີໂອໄປເທິງສຸດ
+  Move Video to the Bottom: ຍ້າຍວິດີໂອໄປລຸ່ມສຸດ
+  Remove from Playlist: ລຶບອອກຈາກເພລລິສ
+  Playlist Name: ຊື່ເພລລິສ
+  Playlist Description: ຄຳອະທິບາຍເພລລິສ
+  Quick Bookmark Icon: ໄອຄອນບຸກມາກດ່ວນ
+  Custom Emoji: ອີໂມຈິທີ່ກຳນົດເອງ
+  Choose Image: ເລືອກຮູບພາບ
+  Use Bookmark Icon: ໃຊ້ໄອຄອນບຸກມາກ
+  Save Changes: ບັນທຶກການປ່ຽນແປງ
+  Save Playlist: ບັນທຶກເພລລິສ
+  Remove Saved Playlist: ລຶບເພລລິສທີ່ບັນທຶກໄວ້
+  Cancel: ຍົກເລີກ
+  Edit Playlist Info: ແກ້ໄຂຂໍ້ມູນເພລລິສ
+  Copy Playlist: ຄັດລອກເພລລິສ
+  Remove Duplicate Videos: ລຶບວິດີໂອທີ່ຊ້ຳກັນ
+  Remove Watched Videos: ລຶບວິດີໂອທີ່ເບິ່ງແລ້ວ
+  Enable Quick Bookmark With This Playlist: ເປີດໃຊ້ບຸກມາກດ່ວນດ້ວຍເພລລິສນີ້
+  Quick Bookmark Enabled: ເປີດໃຊ້ບຸກມາກດ່ວນແລ້ວ
+  Export Playlist: ສົ່ງອອກເພລລິສນີ້
+  Export list of URLs: ສົ່ງອອກລາຍການ URL
+  The playlist has been successfully exported: ສົ່ງອອກເພລລິສສຳເລັດແລ້ວ
+  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: ເຈົ້າມັ້ນໃຈບໍ່ວ່າຕ້ອງການລຶບວິດີໂອທີ່ຊ້ຳກັນ 1 ລາຍການ? ບໍ່ສາມາດຍົກເລີກໄດ້. | ເຈົ້າມັ້ນໃຈບໍ່ວ່າຕ້ອງການລຶບວິດີໂອທີ່ຊ້ຳກັນ {playlistItemCount} ລາຍການ? ບໍ່ສາມາດຍົກເລີກໄດ້.
+  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: ເຈົ້າມັ້ນໃຈບໍ່ວ່າຕ້ອງການລຶບວິດີໂອທີ່ເບິ່ງແລ້ວ 1 ລາຍການ? ບໍ່ສາມາດຍົກເລີກໄດ້. | ເຈົ້າມັ້ນໃຈບໍ່ວ່າຕ້ອງການລຶບວິດີໂອທີ່ເບິ່ງແລ້ວ {playlistItemCount} ລາຍການ? ບໍ່ສາມາດຍົກເລີກໄດ້.
+  Delete Playlist: ລຶບເພລລິສ
+  Cannot delete the quick bookmark target playlist.: ບໍ່ສາມາດລຶບເພລລິສທີ່ເປັນເປົ້າໝາຍຂອງບຸກມາກດ່ວນໄດ້.
+  Are you sure you want to delete this playlist? This cannot be undone: ເຈົ້າມັ້ນໃຈບໍ່ວ່າຕ້ອງການລຶບເພລລິສນີ້? ບໍ່ສາມາດຍົກເລີກໄດ້.
+  TotalTimePlaylist: 'ເວລາທັງໝົດ: {duration}'
+  Sort By:
+    NameAscending: ກ-ຮ
+    NameDescending: ຮ-ກ
+    LatestCreatedFirst: ວັນທີສ້າງ (ໃໝ່ສຸດ)
+    EarliestCreatedFirst: ວັນທີສ້າງ (ເກົ່າສຸດ)
+    LatestUpdatedFirst: ວັນທີອັບເດດ (ໃໝ່ສຸດ)
+    EarliestUpdatedFirst: ວັນທີອັບເດດ (ເກົ່າສຸດ)
+    LatestPlayedFirst: ວັນທີຫຼິ້ນ (ໃໝ່ສຸດ)
+    EarliestPlayedFirst: ວັນທີຫຼິ້ນ (ເກົ່າສຸດ)
+  SinglePlaylistView:
+    Search for Videos: ຄົ້ນຫາວິດີໂອ
+    Retry: ລອງໃໝ່
+    This playlist could not be loaded.: ບໍ່ສາມາດໂຫຼດເພລລິສນີ້ໄດ້.
+    More videos could not be loaded.: ບໍ່ສາມາດໂຫຼດວິດີໂອເພີ່ມເຕີມໄດ້.
+    Toast:
+      This video cannot be moved up.: ບໍ່ສາມາດຍ້າຍວິດີໂອນີ້ຂຶ້ນໄດ້.
+      This video cannot be moved down.: ບໍ່ສາມາດຍ້າຍວິດີໂອນີ້ລົງໄດ້.
+      Video has been removed: ລຶບວິດີໂອອອກແລ້ວ
+      Video has been removed. Click here to undo.: ລຶບວິດີໂອອອກແລ້ວ. ຄລິກທີ່ນີ້ເພື່ອຍົກເລີກ.
+      There was a problem with removing this video: ເກີດບັນຫາໃນການລຶບວິດີໂອນີ້
+      This playlist is already being used for quick bookmark.: ເພລລິສນີ້ຖືກໃຊ້ສຳລັບບຸກມາກດ່ວນແລ້ວ.
+      This playlist is now used for quick bookmark: ເພລລິສນີ້ຖືກໃຊ້ສຳລັບບຸກມາກດ່ວນແລ້ວໃນຕອນນີ້
+      This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo: ເພລລິສນີ້ຖືກໃຊ້ສຳລັບບຸກມາກດ່ວນແທນ {oldPlaylistName}. ຄລິກທີ່ນີ້ເພື່ອຍົກເລີກ
+      Reverted to use {oldPlaylistName} for quick bookmark: ກັບມາໃຊ້ {oldPlaylistName} ສຳລັບບຸກມາກດ່ວນແລ້ວ
+      Some videos in the playlist are not loaded yet. Click here to copy anyway.: ບາງວິດີໂອໃນເພລລິສຍັງບໍ່ທັນຖືກໂຫຼດ. ຄລິກທີ່ນີ້ເພື່ອຄັດລອກຕໍ່ໄປ.
+      Playlist name cannot be empty. Please input a name.: ຊື່ເພລລິສຫວ່າງບໍ່ໄດ້. ກະລຸນາປ້ອນຊື່.
+      Playlist has been updated.: ອັບເດດເພລລິສແລ້ວ.
+      There was an issue with updating this playlist.: ເກີດບັນຫາໃນການອັບເດດເພລລິສນີ້.
+      "{videoCount} video(s) have been removed": ລຶບ 1 ວິດີໂອແລ້ວ | ລຶບ {videoCount} ວິດີໂອແລ້ວ
+      There were no videos to remove.: ບໍ່ມີວິດີໂອທີ່ຈະລຶບ.
+      This playlist is protected and cannot be removed.: ເພລລິສນີ້ຖືກປ້ອງກັນໄວ້ ແລະ ບໍ່ສາມາດລຶບອອກໄດ້.
+      Playlist {playlistName} has been deleted.: ລຶບເພລລິສ {playlistName} ແລ້ວ.
+      This playlist does not exist: ບໍ່ມີເພລລິສນີ້
+      This playlist has a video with a duration error: ເພລລິສນີ້ມີຢ່າງໜ້ອຍໜຶ່ງວິດີໂອທີ່ບໍ່ມີຂໍ້ມູນຄວາມຍາວ, ມັນຈະຖືກຈັດລຽງຄືກັບວ່າມີຄວາມຍາວເປັນສູນ.
+  AddVideoPrompt:
+    Select a playlist to add your N videos to: ເລືອກເພລລິສເພື່ອເພີ່ມວິດີໂອຂອງທ່ານ | ເລືອກເພລລິສເພື່ອເພີ່ມ {videoCount} ວິດີໂອຂອງທ່ານ
+    N playlists selected: ເລືອກແລ້ວ {playlistCount} ເພລລິສ
+    Search in Playlists: ຄົ້ນຫາໃນເພລລິສ
+    Allow Adding Duplicate Video(s): ອະນຸຍາດໃຫ້ເພີ່ມວິດີໂອຊ້ຳ
+    Save: ບັນທຶກ
+    Added {count} Times: ເພີ່ມແລ້ວ | ເພີ່ມແລ້ວ {count} ຄັ້ງ
+    "{videoCount}/{totalVideoCount} Videos Will Be Added": ຈະເພີ່ມ {videoCount}/{totalVideoCount} ວິດີໂອ
+    "{videoCount}/{totalVideoCount} Videos Already Added": '{videoCount}/{totalVideoCount} ວິດີໂອຖືກເພີ່ມແລ້ວ'
+    Toast:
+      You haven't selected any playlist yet.: ເຈົ້າຍັງບໍ່ໄດ້ເລືອກເພລລິສໃດເລີຍ.
+      "Video(s) added to {playlistCount} playlists": ເພີ່ມວິດີໂອເຂົ້າ 1 ເພລລິສແລ້ວ | ເພີ່ມວິດີໂອເຂົ້າ {playlistCount} ເພລລິສແລ້ວ
+  CreatePlaylistPrompt:
+    New Playlist Name: ຊື່ເພລລິສໃໝ່
+    Create: ສ້າງ
+    Toast:
+      There is already a playlist with this name. Please pick a different name.: ມີເພລລິສຊື່ນີ້ຢູ່ແລ້ວ. ກະລຸນາເລືອກຊື່ອື່ນ.
+      Playlist {playlistName} has been successfully created.: ສ້າງເພລລິສ {playlistName} ສຳເລັດແລ້ວ.
+      There was an issue with creating the playlist.: ເກີດບັນຫາໃນການສ້າງເພລລິສ.
+History:
+  History: ປະຫວັດ
+  Watch History: ປະຫວັດການເບິ່ງ
+  Your history list is currently empty.: ປະຫວັດການເບິ່ງຂອງເຈົ້າຫວ່າງເປົ່າ.
+  Empty Search Message: ບໍ່ມີວິດີໂອໃນປະຫວັດທີ່ກົງກັບການຄົ້ນຫາຂອງເຈົ້າ
+  Search bar placeholder: ຄົ້ນຫາໃນປະຫວັດ
+  Case Sensitive Search: ຄົ້ນຫາແບບກົງຕາມຕົວອັກສອນໃຫຍ່-ນ້ອຍ
+  Mark All As Watched: ໝາຍທັງໝົດວ່າເບິ່ງແລ້ວ
+  Mark All As Watched Confirmation: ເຈົ້າມັ້ນໃຈບໍ່ວ່າຕ້ອງການໝາຍວິດີໂອທັງໝົດໃນປະຫວັດວ່າເບິ່ງແລ້ວ?
+  All History Marked as Watched: ວິດີໂອທັງໝົດໃນປະຫວັດຖືກໝາຍວ່າເບິ່ງແລ້ວ
+  DateOldestHistory: ວັນທີເບິ່ງ (ເກົ່າສຸດ)
+  DateNewestHistory: ວັນທີເບິ່ງ (ໃໝ່ສຸດ)
+  Delete Old History: ລຶບປະຫວັດເກົ່າ
+  Select History Age: ເລືອກອາຍຸຂອງປະຫວັດທີ່ຕ້ອງການໃຫ້ລຶບ.
+  Delete Entries Older Than: ລຶບລາຍການທີ່ເກົ່າກວ່າ
+  Number of Days: ຈຳນວນມື້
+  History Cleanup Warning: ສິ່ງນີ້ຈະລຶບລາຍການປະຫວັດການເບິ່ງທີ່ກົງກັນແບບຖາວອນ.
+  1 Day: 1 ມື້
+  1 Week: 1 ອາທິດ
+  1 Month: 1 ເດືອນ
+  3 Months: 3 ເດືອນ
+  1 Year: 1 ປີ
+  Custom: ກຳນົດເອງ
+  History Older Than Days Removed: ລຶບປະຫວັດການເບິ່ງທີ່ເກົ່າກວ່າ 1 ມື້ແລ້ວ | ລຶບປະຫວັດການເບິ່ງທີ່ເກົ່າກວ່າ {days} ມື້ແລ້ວ
+Settings:
+  Settings: ການຕັ້ງຄ່າ
+  Quick Settings:
+    Quick Settings: ການຕັ້ງຄ່າດ່ວນ
+    Appearance: ຮູບລັກສະນະ
+    Playback: ການຫຼິ້ນ
+    Content: ເນື້ອຫາ
+    Language and Region: ພາສາ ແລະ ພາກພື້ນ
+    All Settings: ການຕັ້ງຄ່າທັງໝົດ
+    Profile Selector Hint: ເຈົ້າສາມາດຄລິກຂວາທີ່ໄອຄອນໂປຣໄຟລ໌ເພື່ອປ່ຽນໂປຣໄຟລ໌
+  Categories:
+    General Description: ພາສາ, ການເລີ່ມຕົ້ນ, ແທັບ ແລະ ພຶດຕິກຳຂອງແອັບ
+    Appearance: ຮູບລັກສະນະ
+    Appearance Description: ທີມ, ເຄົ້າໂຄງ ແລະ ຮູບຕົວຢ່າງ
+    Content appearance: ລາຍການວິດີໂອ ແລະ ຮູບຕົວຢ່າງ
+    Layout: ເຄົ້າໂຄງ
+    Playback Description: ຕົວຫຼິ້ນ, ຄຳບັນຍາຍ ແລະ ຄວາມມັກຂອງຊ່ອງ
+    Subscriptions Description: ການໂຫຼດຟີດໃໝ່ ແລະ ຕົວເລືອກການສະແດງຜົນ
+    Downloads Description: ໂຟນເດີ, ເທັມເພລດ ແລະ ກົດເກນອັດຕະໂນມັດ
+    Distraction Free Description: ເຊື່ອງເນື້ອຫາ ແລະ ຕັ້ງຂີດຈຳກັດການເບິ່ງ
+    Add-ons: ສ່ວນເສີມ
+    Add-ons Description: SponsorBlock, DeArrow, ຍອດບໍ່ຖືກໃຈ ແລະ ການແປສຽງບັນຍາຍ
+    Privacy Description: ຄວາມເປັນສ່ວນຕົວໃນການເບິ່ງ ແລະ ການຄວບຄຸມການເຂົ້າເຖິງ
+    Online activity: ກິດຈະກຳອອນລາຍ
+    Data And Storage Description: ນຳເຂົ້າ, ສົ່ງອອກ, ການໃຊ້ພື້ນທີ່ຈັດເກັບ ແລະ ການລ້າງຂໍ້ມູນ
+    Sync Description: ຮັກສາການຕັ້ງຄ່າ ແລະ ຂໍ້ມູນໃຫ້ກົງກັນໃນທຸກອຸປະກອນ
+    Advanced: ຂັ້ນສູງ
+    Advanced Description: ຜູ້ໃຫ້ບໍລິການ, ແອັບພາຍນອກ ແລະ ເຄືອຂ່າຍ
+    Alternative providers: ຜູ້ໃຫ້ບໍລິການວິດີໂອ ແລະ ຂໍ້ມູນເມຕາ
+  Highlight Changed Settings: ເນັ້ນການຕັ້ງຄ່າທີ່ປ່ຽນແປງຈາກຄ່າເລີ່ມຕົ້ນ
+  Reset Setting to Default: ຄືນຄ່າການຕັ້ງຄ່ານີ້ເປັນຄ່າເລີ່ມຕົ້ນ
+  Performance Impact:
+    Show Performance Impact: ສະແດງຕົວບົ່ງຊີ້ຜົນກະທົບຕໍ່ປະສິດທິພາບ
+    Moderate: ຜົນກະທົບປານກາງ
+    High: ຜົນກະທົບສູງ
+    Description: ການຕັ້ງຄ່ານີ້ອາດເພີ່ມການໃຊ້ {resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: ໜ່ວຍຄວາມຈຳ
+      Network: ເຄືອຂ່າຍ
+      Disk: ດິສກ໌
+  Return to Settings Menu: ກັບຄືນສູ່ເມນູການຕັ້ງຄ່າ
+  The app needs to restart for changes to take effect. Restart and apply change?: ແອັບຕ້ອງເລີ່ມໃໝ່ເພື່ອໃຫ້ການປ່ຽນແປງມີຜົນ. ເລີ່ມໃໝ່ ແລະ ນຳໃຊ້ການປ່ຽນແປງບໍ່?
+  General Settings:
+    General Settings: ທົ່ວໄປ
+    Update Relative Timestamps: ອັບເດດເວລາແບບສຳພັນໃຫ້ເປັນປັດຈຸບັນ
+    Stream Extraction Method:
+      Stream Extraction Method: ວິທີການດຶງຂໍ້ມູນສະຕຣີມ
+      yt-dlp: yt-dlp
+      Built-in: ພາຍໃນຕົວ (Built-in)
+    Check for Updates: ກວດສອບການອັບເດດ
+    Confirm Before: ຢືນຢັນກ່ອນ…
+    Confirmation Options:
+      Closing App: ປິດ OpenTubeX
+      Closing Window: ປິດປ່ອງຢ້ຽມທີ່ມີຫຼາຍແທັບ
+      Closing Tabs: ປິດຫຼາຍແທັບ
+      Loading Tabs: ໂຫຼດຫຼາຍແທັບ
+      Unloading Tabs: ຖອນການໂຫຼດຫຼາຍແທັບ
+    Fallback to Non-Preferred Backend on Failure: ໃຊ້ backend ສຳຮອງຫາກເກີດຂໍ້ຜິດພາດ
+    Enable Search Suggestions: ເປີດໃຊ້ຄຳແນະນຳການຄົ້ນຫາ
+    Open Deep Links In New Window: ເປີດ URL ທີ່ສົ່ງໃຫ້ OpenTubeX ໃນປ່ອງຢ້ຽມໃໝ່
+    Minimize to system tray: ຫຍໍ້ລົງໄປທີ່ຖາດລະບົບ
+    Remember Tab Navigation History: ຈື່ປະຫວັດການນຳທາງຂອງແທັບ
+    Auto Load Next Page:
+      Label: ໂຫຼດໜ້າຖັດໄປອັດຕະໂນມັດ
+      Tooltip: ໂຫຼດໜ້າເພີ່ມເຕີມ ແລະ ຄວາມຄິດເຫັນອັດຕະໂນມັດ.
+    Default Landing Page: ໜ້າເລີ່ມຕົ້ນ
+    New Tab Position:
+      New Tab Position: ຕຳແໜ່ງແທັບໃໝ່
+      At the end: ຢູ່ທ້າຍສຸດ
+      After current tab: ຫຼັງຈາກແທັບປັດຈຸບັນ
+      After current tab in opened order: ຫຼັງຈາກແທັບປັດຈຸບັນ, ຕາມລຳດັບການເປີດ
+    Tab Close Focus:
+      Tab Close Focus: ຫຼັງຈາກປິດແທັບ
+      Previous tab: ເລືອກແທັບກ່ອນໜ້າ
+      Next tab: ເລືອກແທັບຖັດໄປ
+    Startup Behavior:
+      Startup Behavior: ເມື່ອເລີ່ມຕົ້ນ
+      Load all tabs: ໂຫຼດແທັບທັງໝົດ
+      Load previously loaded tabs: ໂຫຼດແທັບທີ່ເຄີຍໂຫຼດກ່ອນໜ້ານີ້
+      Load last active tab: ໂຫຼດແທັບຫຼ້າສຸດທີ່ໃຊ້ງານ
+      Start with an empty session: ເລີ່ມຕົ້ນດ້ວຍເຊດຊັນຫວ່າງເປົ່າ
+    Locale Preference: ການຕັ້ງຄ່າທ້ອງຖິ່ນ
+    Use AI Translation Completions: ຕື່ມການແປທີ່ຂາດຫາຍດ້ວຍຂໍ້ຄວາມທີ່ສ້າງໂດຍ AI
+    Reduced Motion:
+      Reduced Motion: ຫຼຸດການເຄື່ອນໄຫວ
+      System: ຕາມລະບົບ
+      Force On: ບັງຄັບເປີດ
+      Force Off: ບັງຄັບປິດ
+    System Default: ຄ່າເລີ່ມຕົ້ນຂອງລະບົບ
+    Comment Translation:
+      Title: ການແປຄວາມຄິດເຫັນ
+      Enable: ເປີດໃຊ້ການແປຄວາມຄິດເຫັນ
+      Never Translate: ບໍ່ຕ້ອງແປຄວາມຄິດເຫັນໃນພາສາ
+      Choose Language: ເລືອກພາສາ
+      Description: ຄວາມຄິດເຫັນໃນພາສາຂອງແອັບຖືກຍົກເວັ້ນຢູ່ແລ້ວ. ເພີ່ມພາສາອື່ນໆທີ່ເຈົ້າສາມາດອ່ານໄດ້.
+      Remove Language: ແປຄວາມຄິດເຫັນພາສາ {language} ອີກຄັ້ງ
+    Avoid translation:
+      Avoid translation: ບຸລິມະສິດຂໍ້ຄວາມວິດີໂອທີ່ບໍ່ໄດ້ແປ
+      Disabled: ປິດໃຊ້ງານ
+      Watch Only: ສະເພາະ UI ວິດີໂອ
+      Entire App: ທັງໝົດແອັບ
+    Preferred API Backend:
+      Preferred API Backend: Backend API ທີ່ຕ້ອງການ
+      Local API: Local API
+      Invidious API: Invidious API
+    Video View Type:
+      Video View Type: ຮູບແບບການສະແດງວິດີໂອ
+      Grid: ຕາຕະລາງ
+      List: ລາຍການ
+    Playlist View Type:
+      Playlist View Type: ຮູບແບບການສະແດງເພລລິສ
+    Thumbnail Preference:
+      Thumbnail Preference: ການຕັ້ງຄ່າຮູບຕົວຢ່າງ
+      Default: ຄ່າເລີ່ມຕົ້ນ
+      Beginning: ຕອນເລີ່ມຕົ້ນ
+      Middle: ຕອນກາງ
+      End: ຕອນທ້າຍ
+      Hidden: ເຊື່ອງໄວ້
+      Blur: ມົວ
+    Show Thumbnail Previews: ສະແດງຕົວຢ່າງຮູບຕົວຢ່າງ
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: ປຸ່ມຄຳສັ່ງເສີມໃນຮູບຕົວຢ່າງ
+      None: ບໍ່ມີ
+      Mark as Watched: ໝາຍວ່າເບິ່ງແລ້ວ
+      Copy YouTube Link: ຄັດລອກລິ້ງ YouTube
+      Open in YouTube: ເປີດໃນ YouTube
+    Current Invidious Instance: ຕົວຢ່າງ Invidious ທີ່ໃຊ້ຢູ່
+    The currently set default instance is {instance}: ຕົວຢ່າງເລີ່ມຕົ້ນທີ່ຕັ້ງໄວ້ແມ່ນ {instance}
+    No default instance has been set: ຍັງບໍ່ໄດ້ຕັ້ງຕົວຢ່າງເລີ່ມຕົ້ນ
+    Current instance will be randomized on startup: ຕົວຢ່າງທີ່ໃຊ້ຢູ່ຈະຖືກສຸ່ມເມື່ອເລີ່ມລະບົບ
+    Set Current Instance as Default: ຕັ້ງຕົວຢ່າງທີ່ໃຊ້ຢູ່ນີ້ໃຫ້ເປັນຄ່າເລີ່ມຕົ້ນ
+    Clear Default Instance: ລຶບຕົວຢ່າງເລີ່ມຕົ້ນ
+    View all Invidious instance information: ເບິ່ງຂໍ້ມູນຕົວຢ່າງ Invidious ທັງໝົດ
+    Region for Trending: ພາກພື້ນສຳລັບວິດີໂອກຳລັງມາແຮງ
+    External Link Handling:
+      External Link Handling: ການຈັດການລິ້ງພາຍນອກ
+      Open Link: ເປີດລິ້ງ
+      Ask Before Opening Link: ຖາມກ່ອນເປີດລິ້ງ
+      No Action: ບໍ່ມີການດຳເນີນການ
+  Context Menu Search Settings:
+    Context Menu Search Settings: ການຄົ້ນຫາຜ່ານເມນູຄລິກຂວາ
+    Description: ເລືອກເຄື່ອງມືຄົ້ນຫາທີ່ຈະໃຫ້ສະແດງຂຶ້ນເມື່ອທ່ານຄລິກຂວາໃສ່ຂໍ້ຄວາມທີ່ເລືອກ. ການຄົ້ນຫາຈະຖືກເປີດໃນບຣາວເຊີເລີ່ມຕົ້ນຂອງທ່ານ.
+    Icon Hint: ການເປີດໃຊ້ເຄື່ອງມືຄົ້ນຫາຈະມີການເຊື່ອມຕໍ່ກັບເວັບໄຊນັ້ນເພື່ອໂຫຼດໄອຄອນເວັບໄຊ.
+    Engine Name: ຊື່ເຄື່ອງມືຄົ້ນຫາ
+    Search URL: URL ສຳລັບຄົ້ນຫາ
+    URL Hint: ໃຊ້ %s ໃນຕຳແໜ່ງທີ່ URL ຄວນມີຂໍ້ຄວາມທີ່ເລືອກໄວ້.
+    Add Custom Engine: ເພີ່ມເຄື່ອງມືຄົ້ນຫາດ້ວຍຕົນເອງ
+    Add Engine: ເພີ່ມເຄື່ອງມືຄົ້ນຫາ
+    Remove Engine: ລຶບ {engine} ອອກ
+    Invalid Engine: ກະລຸນາໃສ່ຊື່ ແລະ URL ສຳລັບຄົ້ນຫາ (HTTP ຫຼື HTTPS) ທີ່ຖືກຕ້ອງ ໂດຍຕ້ອງມີ %s.
+    Engine Limit: ທ່ານສາມາດເພີ່ມເຄື່ອງມືຄົ້ນຫາໄດ້ສູງສຸດ {count} ອັນ.
+  Theme Settings:
+    Theme Settings: ຮູບແບບ (Theme)
+    Match Top Bar with Main Color: ປັບແຖບດ້ານເທິງໃຫ້ເຂົ້າກັບສີຫຼັກ
+    Expand Side Bar by Default: ຂະຫຍາຍແຖບດ້ານຂ້າງເປັນຄ່າເລີ່ມຕົ້ນ
+    Move Downloads to App Header: ຍ້າຍລາຍການດາວໂຫຼດໄປໄວ້ທີ່ສ່ວນຫົວຂອງແອັບ
+    Move Settings to App Header: ຍ້າຍການຕັ້ງຄ່າໄປໄວ້ທີ່ສ່ວນຫົວຂອງແອັບ
+    Hide Side Bar on Watch Pages: ເຊື່ອງແຖບດ້ານຂ້າງໃນໜ້າເບິ່ງວິດີໂອ
+    Disable Smooth Scrolling: ປິດການເລື່ອນໜ້າຈໍແບບນຸ້ມນວນ
+    UI Scale: ມາດຕາສ່ວນ UI
+    UI Roundness: ຄວາມມົນຂອງ UI
+    Scrollbar Width: ຄວາມກວ້າງຂອງແຖບເລື່ອນ
+    Scroll Speed: ຄວາມໄວໃນການເລື່ອນ
+    Animation Speed: ຄວາມໄວຂອງແອນິເມຊັນ
+    Thumbnail Size: ຂະໜາດຮູບຕົວຢ່າງ
+    Show Tab Icons: ສະແດງໄອຄອນເທິງແທັບ
+    Load Missing Tab Icons: ໂຫຼດໄອຄອນແທັບທີ່ຫາຍໄປ
+    Loading Missing Tab Icons: ກຳລັງໂຫຼດໄອຄອນແທັບທີ່ຫາຍໄປ…
+    No Missing Tab Icons: ໂຫຼດໄອຄອນແທັບທີ່ຮອງຮັບທັງໝົດແລ້ວ
+    Loaded Tab Icons: 'ໂຫຼດໄອຄອນແທັບທີ່ຫາຍໄປແລ້ວ: {count}'
+    Loaded Tab Icons With Failures: ໂຫຼດໄອຄອນແທັບແລ້ວ {loaded} ອັນ; ບໍ່ສາມາດໂຫຼດໄດ້ {failed} ອັນ
+    Show Tab Previews: ສະແດງຕົວຢ່າງແທັບ
+    Use Fixed Tab Width: ໃຊ້ຄວາມກວ້າງແທັບແບບຄົງທີ່ໃນໂໝດແນວນອນ
+    Tab Width: ຄວາມກວ້າງຂອງແທັບ
+    Tab Layout:
+      Tab Layout: ຮູບແບບແທັບ
+      Horizontal Top: ແນວນອນທາງດ້ານເທິງ
+      Horizontal Bottom: ແນວນອນທາງດ້ານລຸ່ມ
+      Vertical Left: ແນວຕັ້ງທາງດ້ານຊ້າຍ
+      Vertical Right: ແນວຕັ້ງທາງດ້ານຂວາ
+    Show Toast Timeout Indicator: ສະແດງຕົວບົ່ງບອກເວລາໝົດອາຍຸຂອງການແຈ້ງເຕືອນ
+    Use Grid Player Menu: ໃຊ້ເມນູເຄື່ອງຫຼິ້ນແບບຕາຕະລາງ
+    Show Progress as Notification: ສະແດງຄວາມຄືບໜ້າເປັນການແຈ້ງເຕືອນ
+    Operation in Progress: ກຳລັງດຳເນີນການ
+    Toast Position:
+      Toast Position: ຕຳແໜ່ງການແຈ້ງເຕືອນ (Toast)
+      Bottom Left: ລຸ່ມຊ້າຍ
+      Bottom Center: ລຸ່ມກາງ
+      Bottom Right: ລຸ່ມຂວາ
+      Top Left: ເທິງຊ້າຍ
+      Top Center: ເທິງກາງ
+      Top Right: ເທິງຂວາ
+    Icon Pack:
+      Icon Pack: ຊຸດໄອຄອນ
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: ຟອນຂອງແອັບ
+      System Default: ຄ່າເລີ່ມຕົ້ນຂອງລະບົບ
+      Unable to Load: ບໍ່ສາມາດໂຫຼດຟອນທີ່ຕິດຕັ້ງໃນລະບົບໄດ້
+    Always Show Scrollbars: ສະແດງແຖບເລື່ອນຕະຫຼອດເວລາ
+    Hide Side Bar Labels: ເຊື່ອງປ້າຍຊື່ໃນແຖບດ້ານຂ້າງ
+    Hide OpenTubeX Header Logo: ເຊື່ອງໂລໂກ້ OpenTubeX ຢູ່ສ່ວນຫົວ
+    Base Theme:
+      Base Theme: ຮູບແບບພື້ນຖານ
+      Black: ສີດຳ
+      Custom: ກຳນົດເອງ
+      Dark: ສີເຂັ້ມ
+      System Default: ຄ່າເລີ່ມຕົ້ນລະບົບ
+      Light: ສີສະຫວ່າງ
+      Dracula: Dracula
+      Catppuccin Frappe: Catppuccin Frappe
+      Catppuccin Latte: Catppuccin Latte
+      Catppuccin Mocha: Catppuccin Mocha
+      Pastel Pink: ສີຊົມພູພາດເທວ
+      Hot Pink: ສີຊົມພູເຂັ້ມ
+      Nordic: Nordic
+      Gruvbox Dark: Gruvbox Dark
+      Gruvbox Light: Gruvbox Light
+      Solarized Dark: Solarized Dark
+      Solarized Light: Solarized Light
+      Everforest Dark Hard: Everforest Dark Hard
+      Everforest Dark Medium: Everforest Dark Medium
+      Everforest Dark Low: Everforest Dark Low
+      Everforest Light Hard: Everforest Light Hard
+      Everforest Light Medium: Everforest Light Medium
+      Everforest Light Low: Everforest Light Low
+    Light Theme: ຮູບແບບສີສະຫວ່າງ
+    Dark Theme: ຮູບແບບສີເຂັ້ມ
+    Custom Theme:
+      Create Custom Theme: ສ້າງຮູບແບບກຳນົດເອງ
+      Edit Custom Theme: ແກ້ໄຂຮູບແບບກຳນົດເອງ
+      Custom Theme Creator: ເຄື່ອງມືສ້າງຮູບແບບກຳນົດເອງ
+      Theme Name: ຊື່ຮູບແບບ
+      Based On: ອີງຕາມ
+      Import Theme: ນຳເຂົ້າຮູບແບບ
+      Export Theme: ສົ່ງອອກຮູບແບບ
+      Share Theme: ແບ່ງປັນຮູບແບບ
+      Share Description Heading: ຄຳອະທິບາຍ
+      Share Description Prompt: ອະທິບາຍກ່ຽວກັບຮູບແບບນີ້ ແລະ ສິ່ງທີ່ຄົນອື່ນຄວນຮູ້ກ່ອນການໃຊ້ງານ.
+      Share Screenshots Heading: ພາບໜ້າຈໍ
+      Share Screenshots Prompt: ລາກ ແລະ ວາງ ພາບໜ້າຈໍໜຶ່ງ ຫຼື ຫຼາຍພາບຢູ່ນີ້.
+      Share Code Summary: JSON ຂອງຮູບແບບ
+      Delete Theme: ລຶບຮູບແບບ
+      Delete Theme Confirmation: ລຶບ “{name}” ຫຼື ບໍ່? ທ່ານບໍ່ສາມາດຍົກເລີກການລຶບນີ້ໄດ້.
+      Save and Apply: ບັນທຶກ ແລະ ນຳໃຊ້
+      Discard Changes: ຖິ້ມການປ່ຽນແປງ
+      Reset Colors: ຄືນຄ່າເປັນຮູບແບບພື້ນຖານ
+      Theme File: ໄຟລ໌ຮູບແບບ OpenTubeX
+      Theme Saved: ບັນທຶກ ແລະ ນຳໃຊ້ຮູບແບບກຳນົດເອງແລ້ວ
+      Theme Imported: ນຳເຂົ້າຮູບແບບໃສ່ເຄື່ອງມືແກ້ໄຂແລ້ວ
+      Theme Exported: ສົ່ງອອກຮູບແບບແລ້ວ
+      Theme Deleted: ລຶບຮູບແບບກຳນົດເອງແລ້ວ
+      Unable to Load: ບໍ່ສາມາດໂຫຼດຮູບແບບກຳນົດເອງໄດ້
+      Unable to Save: ບໍ່ສາມາດບັນທຶກຮູບແບບກຳນົດເອງໄດ້
+      Unable to Export: ບໍ່ສາມາດສົ່ງອອກຮູບແບບກຳນົດເອງໄດ້
+      Unable to Share: ບໍ່ສາມາດແບ່ງປັນຮູບແບບກຳນົດເອງໄດ້
+      Unable to Delete: ບໍ່ສາມາດລຶບຮູບແບບກຳນົດເອງໄດ້
+      Invalid Theme File: ໄຟລ໌ຮູບແບບກຳນົດເອງບໍ່ຖືກຕ້ອງ
+      Colors:
+        Main text: ຂໍ້ຄວາມຫຼັກ
+        Secondary text: ຂໍ້ຄວາມຮອງ
+        Subtle text: ຂໍ້ຄວາມທີ່ເນັ້ນເບົາໆ
+        Borders and dividers: ເສັ້ນຂອບ ແລະ ເສັ້ນແບ່ງ
+        Subtle surfaces and indicators: ພື້ນຜິວ ແລະ ຕົວບົ່ງຊີ້ແບບເບົາບາງ
+        Title text: ຂໍ້ຄວາມຫົວຂໍ້
+        Selected text background: ພື້ນຫຼັງຂໍ້ຄວາມທີ່ເລືອກ
+        Selected text: ຂໍ້ຄວາມທີ່ເລືອກ
+        Logo icon: ໄອຄອນໂລໂກ້
+        Logo text: ຂໍ້ຄວາມໂລໂກ້
+        Logo hover: ໂລໂກ້ເມື່ອວາງເມົາໃສ່
+        Logo pressed: ໂລໂກ້ເມື່ອຖືກກົດ
+        Page background: ພື້ນຫຼັງໜ້າ
+        Card background: ພື້ນຫຼັງກາດ (Card)
+        Secondary card background: ພື້ນຫຼັງກາດຮອງ
+        Favorite icon: ໄອຄອນລາຍການທີ່ມັກ
+        Error color: ສີຂໍ້ຜິດພາດ
+        Scrollbar thumb: ຕົວເລື່ອນຂອງແຖບເລື່ອນ
+        Scrollbar thumb hover: ຕົວເລື່ອນເມື່ອວາງເມົາໃສ່
+        Scrollbar thumb pressed: ຕົວເລື່ອນເມື່ອຖືກກົດ
+        Dropdown item hover text: ຂໍ້ຄວາມລາຍການດອບດາວເມື່ອວາງເມົາໃສ່
+        Dropdown item hover background: ພື້ນຫຼັງລາຍການດອບດາວເມື່ອວາງເມົາໃສ່
+        Navigation and panel background: ພື້ນຫຼັງແຖບນຳທາງ ແລະ ແຜງຄວບຄຸມ
+        Neutral item hover and focus background: ພື້ນຫຼັງລາຍການທົ່ວໄປເມື່ອວາງເມົາໃສ່ ແລະ ໂຟກັດ
+        Neutral item hover and focus text and icons: ຂໍ້ຄວາມ ແລະ ໄອຄອນທົ່ວໄປເມື່ອວາງເມົາໃສ່ ແລະ ໂຟກັດ
+        Neutral item pressed background: ພື້ນຫຼັງລາຍການທົ່ວໄປເມື່ອຖືກກົດ
+        Neutral item pressed text and icons: ຂໍ້ຄວາມ ແລະ ໄອຄອນທົ່ວໄປເມື່ອຖືກກົດ
+        Header button hover and focus background: ພື້ນຫຼັງປຸ່ມສ່ວນຫົວເມື່ອວາງເມົາໃສ່ ແລະ ໂຟກັດ
+        Header button hover and focus text and icons: ຂໍ້ຄວາມ ແລະ ໄອຄອນປຸ່ມສ່ວນຫົວເມື່ອວາງເມົາໃສ່ ແລະ ໂຟກັດ
+        Header button pressed background: ພື້ນຫຼັງປຸ່ມສ່ວນຫົວເມື່ອຖືກກົດ
+        Header button pressed text and icons: ຂໍ້ຄວາມ ແລະ ໄອຄອນປຸ່ມສ່ວນຫົວເມື່ອຖືກກົດ
+        Colored header button hover and focus background: ພື້ນຫຼັງປຸ່ມສ່ວນຫົວແບບມີສີເມື່ອວາງເມົາໃສ່ ແລະ ໂຟກັດ
+        Colored header button hover and focus text and icons: ຂໍ້ຄວາມ ແລະ ໄອຄອນປຸ່ມສ່ວນຫົວແບບມີສີເມື່ອວາງເມົາໃສ່ ແລະ ໂຟກັດ
+        Colored header button pressed background: ພື້ນຫຼັງປຸ່ມສ່ວນຫົວແບບມີສີເມື່ອຖືກກົດ
+        Colored header button pressed text and icons: ຂໍ້ຄວາມ ແລະ ໄອຄອນປຸ່ມສ່ວນຫົວແບບມີສີເມື່ອຖືກກົດ
+        Search and dropdown background: ພື້ນຫຼັງຊ່ອງຄົ້ນຫາ ແລະ ດອບດາວ
+        Settings search background: ພື້ນຫຼັງຊ່ອງຄົ້ນຫາການຕັ້ງຄ່າ
+        Instance menu: ເມນູຕົວຢ່າງເຊີເວີ
+        Input background: ພື້ນຫຼັງຊ່ອງປ້ອນຂໍ້ມູນ
+        Shadow color: ສີເງົາ
+        Primary controls and highlights: ການຄວບຄຸມ ແລະ ຈຸດເນັ້ນຫຼັກ
+        Primary control hover and focus: ການຄວບຄຸມຫຼັກເມື່ອວາງເມົາໃສ່ ແລະ ໂຟກັດ
+        Primary control pressed: ການຄວບຄຸມຫຼັກເມື່ອຖືກກົດ
+        Text and icons on primary controls: ຂໍ້ຄວາມ ແລະ ໄອຄອນເທິງການຄວບຄຸມຫຼັກ
+        Secondary controls and highlights: ການຄວບຄຸມ ແລະ ຈຸດເນັ້ນຮອງ
+        Secondary control hover and focus: ການຄວບຄຸມຮອງເມື່ອວາງເມົາໃສ່ ແລະ ໂຟກັດ
+        Secondary control pressed: ການຄວບຄຸມຮອງເມື່ອຖືກກົດ
+        Light secondary color: ສີຮອງແບບອ່ອນ
+        Visited accent: ສີເນັ້ນສຳລັບລິ້ງທີ່ເຂົ້າເບິ່ງແລ້ວ
+        Text and icons on secondary controls: ຂໍ້ຄວາມ ແລະ ໄອຄອນເທິງການຄວບຄຸມຮອງ
+        Links: ລິ້ງ
+        Visited links: ລິ້ງທີ່ເຂົ້າເບິ່ງແລ້ວ
+        Destructive action: ການດຳເນີນການທີ່ອາດເປັນອັນຕະລາຍ (ເຊັ່ນ ການລຶບ)
+        Destructive hover and focus: ການດຳເນີນການອັນຕະລາຍເມື່ອວາງເມົາໃສ່ ແລະ ໂຟກັດ
+        Destructive pressed: ການດຳເນີນການອັນຕະລາຍເມື່ອຖືກກົດ
+        Text and icons on destructive actions: ຂໍ້ຄວາມ ແລະ ໄອຄອນເທິງການດຳເນີນການອັນຕະລາຍ
+    Main Color Theme:
+      Main Color Theme: ຮູບແບບສີຫຼັກ
+      Red: ສີແດງ
+      Pink: ສີຊົມພູ
+      Purple: ສີມ່ວງ
+      Deep Purple: ສີມ່ວງເຂັ້ມ
+      Indigo: ສີຄາມ
+      Blue: ສີຟ້າ
+      Light Blue: ສີຟ້າອ່ອນ
+      Cyan: ສີຟ້າຂຽວ (Cyan)
+      Teal: ສີຂຽວນົກເປັດນ້ຳ (Teal)
+      Green: ສີຂຽວ
+      Light Green: ສີຂຽວອ່ອນ
+      Lime: ສີຂຽວໝາກນາວ
+      Yellow: ສີເຫຼືອງ
+      Amber: ສີເຫຼືອງອຳພັນ
+      Orange: ສີສົ້ມ
+      Deep Orange: ສີສົ້ມເຂັ້ມ
+      Dracula Cyan: Dracula Cyan
+      Dracula Green: Dracula Green
+      Dracula Orange: Dracula Orange
+      Dracula Pink: Dracula Pink
+      Dracula Purple: Dracula Purple
+      Dracula Red: Dracula Red
+      Dracula Yellow: Dracula Yellow
+      Catppuccin Frappe Rosewater: Catppuccin Frappe Rosewater
+      Catppuccin Frappe Flamingo: Catppuccin Frappe Flamingo
+      Catppuccin Frappe Pink: Catppuccin Frappe Pink
+      Catppuccin Frappe Mauve: Catppuccin Frappe Mauve
+      Catppuccin Frappe Red: Catppuccin Frappe Red
+      Catppuccin Frappe Maroon: Catppuccin Frappe Maroon
+      Catppuccin Frappe Peach: Catppuccin Frappe Peach
+      Catppuccin Frappe Yellow: Catppuccin Frappe Yellow
+      Catppuccin Frappe Green: Catppuccin Frappe Green
+      Catppuccin Frappe Teal: Catppuccin Frappe Teal
+      Catppuccin Frappe Sky: Catppuccin Frappe Sky
+      Catppuccin Frappe Sapphire: Catppuccin Frappe Sapphire
+      Catppuccin Frappe Blue: Catppuccin Frappe Blue
+      Catppuccin Frappe Lavender: Catppuccin Frappe Lavender
+      Catppuccin Latte Mauve: Catppuccin Latte Mauve
+      Catppuccin Latte Red: Catppuccin Latte Red
+      Catppuccin Mocha Rosewater: Catppuccin Mocha Rosewater
+      Catppuccin Mocha Flamingo: Catppuccin Mocha Flamingo
+      Catppuccin Mocha Pink: Catppuccin Mocha Pink
+      Catppuccin Mocha Mauve: Catppuccin Mocha Mauve
+      Catppuccin Mocha Red: Catppuccin Mocha Red
+      Catppuccin Mocha Maroon: Catppuccin Mocha Maroon
+      Catppuccin Mocha Peach: Catppuccin Mocha Peach
+      Catppuccin Mocha Yellow: Catppuccin Mocha Yellow
+      Catppuccin Mocha Green: Catppuccin Mocha Green
+      Catppuccin Mocha Teal: Catppuccin Mocha Teal
+      Catppuccin Mocha Sky: Catppuccin Mocha Sky
+      Catppuccin Mocha Sapphire: Catppuccin Mocha Sapphire
+      Catppuccin Mocha Blue: Catppuccin Mocha Blue
+      Catppuccin Mocha Lavender: Catppuccin Mocha Lavender
+      Gruvbox Dark Green: Gruvbox Dark Green
+      Gruvbox Dark Yellow: Gruvbox Dark Yellow
+      Gruvbox Dark Blue: Gruvbox Dark Blue
+      Gruvbox Dark Purple: Gruvbox Dark Purple
+      Gruvbox Dark Aqua: Gruvbox Dark Aqua
+      Gruvbox Dark Orange: Gruvbox Dark Orange
+      Gruvbox Light Red: Gruvbox Light Red
+      Gruvbox Light Blue: Gruvbox Light Blue
+      Gruvbox Light Purple: Gruvbox Light Purple
+      Gruvbox Light Orange: Gruvbox Light Orange
+      Solarized Yellow: Solarized Yellow
+      Solarized Orange: Solarized Orange
+      Solarized Red: Solarized Red
+      Solarized Magenta: Solarized Magenta
+      Solarized Violet: Solarized Violet
+      Solarized Blue: Solarized Blue
+      Solarized Cyan: Solarized Cyan
+      Solarized Green: Solarized Green
+      Everforest Dark Red: Everforest Dark Red
+      Everforest Dark Orange: Everforest Dark Orange
+      Everforest Dark Yellow: Everforest Dark Yellow
+      Everforest Dark Green: Everforest Dark Green
+      Everforest Dark Aqua: Everforest Dark Aqua
+      Everforest Dark Blue: Everforest Dark Blue
+      Everforest Dark Purple: Everforest Dark Purple
+      Everforest Light Red: Everforest Light Red
+      Everforest Light Orange: Everforest Light Orange
+      Everforest Light Yellow: Everforest Light Yellow
+      Everforest Light Green: Everforest Light Green
+      Everforest Light Aqua: Everforest Light Aqua
+      Everforest Light Blue: Everforest Light Blue
+      Everforest Light Purple: Everforest Light Purple
+    Secondary Color Theme: ຮູບແບບສີຮອງ
+  Player Settings:
+    Player Settings: ເຄື່ອງຫຼິ້ນວິດີໂອ
+    Play Next Video: ຫຼິ້ນວິດີໂອທີ່ແນະນຳໂດຍອັດຕະໂນມັດ
+    Autoplay Playlists: ຫຼິ້ນວິດີໂອໃນເພລລິສໂດຍອັດຕະໂນມັດ
+    Autoplay Videos: ເລີ່ມຫຼິ້ນວິດີໂອໂດຍອັດຕະໂນມັດ
+    Automatically Open Chapters: ເປີດລາຍການບົດ (Chapters) ໂດຍອັດຕະໂນມັດ
+    Turn on Subtitles by Default: ເປີດໃຊ້ຄຳບັນຍາຍເປັນຄ່າເລີ່ມຕົ້ນ
+    Caption Appearance:
+      Caption Appearance: ຮູບລັກສະນະຂອງຄຳບັນຍາຍ
+      Captions: ຄຳບັນຍາຍ
+      Preferred Language: ພາສາຂອງຄຳບັນຍາຍທີ່ຕ້ອງການ
+      Application Language: ພາສາຂອງແອັບພລິເຄຊັນ
+      Enable Translations: ເປີດໃຊ້ການແປຄຳບັນຍາຍ
+      Text Color: ສີຂໍ້ຄວາມ
+      Background Color: ສີພື້ນຫຼັງ
+      Background Opacity: ຄວາມໂປ່ງໃສຂອງພື້ນຫຼັງ
+      Font Size: ຂະໜາດຟອນ
+      Vertical Position: ຕຳແໜ່ງແນວຕັ້ງ
+      Edge Color: ສີເສັ້ນຂອບ
+      Anchor:
+        Anchor: ຈຸດຢຶດ
+        Top Left: ເທິງຊ້າຍ
+        Top Center: ເທິງກາງ
+        Top Right: ເທິງຂວາ
+        Bottom Left: ລຸ່ມຊ້າຍ
+        Bottom Center: ລຸ່ມກາງ
+        Bottom Right: ລຸ່ມຂວາ
+      Edge Style:
+        Edge Style: ຮູບແບບເສັ້ນຂອບ
+        None: ບໍ່ມີ
+        Outline: ເສັ້ນຂອບ
+        Drop Shadow: ເງົາ
+      Reset: ຄືນຄ່າຮູບລັກສະນະຂອງຄຳບັນຍາຍ
+    Proxy Videos Through Invidious: ຫຼິ້ນວິດີໂອຜ່ານພຣັອກຊີ Invidious
+    Default Viewing Mode:
+      Theater: ໂໝດໂຮງໜັງ
+      Default Viewing Mode: ໂໝດການເບິ່ງເລີ່ມຕົ້ນ
+      Full Screen: ເຕັມຈໍ
+      Picture in Picture: ພາບຊ້ອນພາບ (PiP)
+      External Player: ເຄື່ອງຫຼິ້ນພາຍນອກ ({externalPlayerName})
+      Full Window (Always On): ເຕັມໜ້າຕ່າງ (ເປີດຕະຫຼອດ)
+      Full Screen (Always On): ເຕັມຈໍ (ເປີດຕະຫຼອດ)
+      Tooltip: ໂໝດການເບິ່ງເລີ່ມຕົ້ນສ່ວນຫຼາຍຈະຖືກໃຊ້ເມື່ອເລີ່ມຕົ້ນການເບິ່ງແຕ່ລະຄັ້ງເທົ່ານັ້ນ. ການປ່ຽນແປງລະຫວ່າງການເບິ່ງຈະຄົງຢູ່ຈົນກວ່າຈະຈົບ. ສ່ວນໂໝດ "ເປີດຕະຫຼອດ" ຈະຖືກໃຊ້ທຸກຄັ້ງທີ່ທ່ານປ່ຽນວິດີໂອໃໝ່ ໂດຍບໍ່ສົນວ່າທ່ານຈະປ່ຽນໂໝດໃນວິດີໂອກ່ອນໜ້ານີ້ແນວໃດ.
+    Auto Picture in Picture:
+      Auto Picture in Picture: ເຂົ້າສູ່ໂໝດພາບຊ້ອນພາບໂດຍອັດຕະໂນມັດ
+      On Tab Change: ເມື່ອປ່ຽນແທັບ
+      On Window Minimize: ເມື່ອຫຍໍ້ໜ້າຕ່າງລົງ
+      On Window Hide: ເມື່ອໜ້າຕ່າງບໍ່ໄດ້ຖືກໃຊ້ງານ ຫຼື ຖືກສະຫຼັບໄປບ່ອນອື່ນ
+      Wayland Minimize Unsupported: Wayland ບໍ່ແຈ້ງການຫຍໍ້ໜ້າຕ່າງໃຫ້ແອັບຮູ້, ດັ່ງນັ້ນຕົວເລືອກນີ້ຈຶ່ງໃຊ້ບໍ່ໄດ້. ກະລຸນາໃຊ້ "ເມື່ອໜ້າຕ່າງບໍ່ໄດ້ຖືກໃຊ້ງານ ຫຼື ຖືກສະຫຼັບໄປບ່ອນອື່ນ" ແທນ ຊຶ່ງລວມເຖິງການຫຍໍ້ໜ້າຕ່າງຄືກັນ.
+    Scroll Mini Player:
+      Scroll Mini Player: ເຄື່ອງຫຼິ້ນຂະໜາດນ້ອຍແບບເລື່ອນໄດ້
+      When Scrolling Down: ສະແດງເຄື່ອງຫຼິ້ນຂະໜາດນ້ອຍຄ້າງໄວ້ເມື່ອເລື່ອນລົງ
+      On All Tabs: ສະແດງເຄື່ອງຫຼິ້ນຂະໜາດນ້ອຍຄ້າງໄວ້ເມື່ອສະຫຼັບແທັບ
+    Scroll Volume Over Video Player: ເລື່ອນເພື່ອປັບລະດັບສຽງເທິງເຄື່ອງຫຼິ້ນວິດີໂອ
+    Scroll Playback Rate Over Video Player: ເລື່ອນເພື່ອປັບຄວາມໄວໃນການຫຼິ້ນເທິງເຄື່ອງຫຼິ້ນວິດີໂອ
+    Skip by Scrolling Over Video Player: ເລື່ອນເພື່ອຂ້າມວິດີໂອເທິງເຄື່ອງຫຼິ້ນວິດີໂອ
+    Multiply Seek Interval by Playback Rate: ຄູນໄລຍະເວລາການຂ້າມດ້ວຍຄວາມໄວໃນການຫຼິ້ນ
+    Display Play Button In Video Player: ສະແດງປຸ່ມຫຼິ້ນໃນເຄື່ອງຫຼິ້ນວິດີໂອ
+    Enter Fullscreen on Display Rotate: ເຂົ້າສູ່ໂໝດເຕັມຈໍເມື່ອໝູນໜ້າຈໍ
+    Show Playback Rate Adjusted Timestamp: ສະແດງເວລາທີ່ປັບຕາມຄວາມໄວໃນການຫຼິ້ນ
+    Use YouTube-style Shorts: ໃຊ້ຮູບແບບ Shorts ຄືກັບ YouTube
+    Loop Shorts: ຫຼິ້ນ Shorts ວົນຊ້ຳ
+    Next Video Interval: ເວລາຖອຍຫຼັງກ່ອນຫຼິ້ນວິດີໂອຖັດໄປ
+    Autoplay Interruption Timer: ເວລາຢຸດການຫຼິ້ນອັດຕະໂນມັດຊົ່ວຄາວ
+    Fast-Forward / Rewind Interval: ໄລຍະເວລາການກໍໄປໜ້າ / ຖອຍຫຼັງ
+    Default Volume: ລະດັບສຽງເລີ່ມຕົ້ນ
+    Remember Volume: ຈື່ລະດັບສຽງ
+    Skip Silence: ຂ້າມຊ່ວງທີ່ບໍ່ມີສຽງ
+    Show Skip Silence Toggle: ສະແດງປຸ່ມເປີດ-ປິດການຂ້າມຊ່ວງບໍ່ມີສຽງ
+    Enable Skip Silence by Default: ເປີດໃຊ້ການຂ້າມຊ່ວງບໍ່ມີສຽງເປັນຄ່າເລີ່ມຕົ້ນ
+    Enable Video Zoom: ເປີດໃຊ້ການຊູມວິດີໂອ
+    Voice-over Translation:
+      Title: ການແປສຽງພາກ
+      Attribution: (ສະໜັບສະໜູນໂດຍ Yandex)
+      Enable: ເປີດໃຊ້ການແປສຽງພາກ
+      Prepare in Background: ເລີ່ມກຽມການແປສຽງພາກໄວ້ໃນພື້ນຫຼັງ
+      Background Preparation Tooltip: ສົ່ງ ID ວິດີໂອ, ຄວາມຍາວ ແລະ ພາສາທີ່ເລືອກໄປຫາບໍລິການແປພາສາທັນທີທີ່ວິດີໂອທີ່ຮອງຮັບຖືກໂຫຼດ.
+      Language: ພາສາສຳລັບການແປສຽງພາກ
+      Supported Source Languages: 'ພາສາຕົ້ນທາງທີ່ຮອງຮັບ: ຣັດເຊຍ, ອັງກິດ, ຈີນ, ເກົາຫຼີ, ລິດຕົວເນຍ, ລັດເວຍ, ອາຣັບ, ຝຣັ່ງ, ອີຕາລີ, ສະເປນ, ເຢຍລະມັນ ແລະ ຍີ່ປຸ່ນ.'
+      Voice Volume: ລະດັບສຽງທີ່ແປແລ້ວ
+      Original Volume: ລະດັບສຽງຕົ້ນສະບັບ
+      Russian: ຣັດເຊຍ
+      English: ອັງກິດ
+      Kazakh: ຄາຊັກສະຖານ
+    Hold to Double Playback Speed: ກົດຄ້າງໄວ້ເພື່ອເພີ່ມຄວາມໄວເປັນ 2 ເທົ່າ
+    Default Playback Rate: ຄວາມໄວໃນການຫຼິ້ນເລີ່ມຕົ້ນ
+    Use Quick Playback Speed Bar: ໃຊ້ແຖບປັບຄວາມໄວແບບດ່ວນ
+    Customize Quick Playback Speed Bar: ປັບແຕ່ງແຖບປັບຄວາມໄວແບບດ່ວນ
+    Quick Playback Speed Bar Manager: ແຖບປັບຄວາມໄວແບບດ່ວນ
+    Add Playback Speed: ເພີ່ມຄວາມໄວໃນການຫຼິ້ນ
+    Reset Quick Playback Speed Bar: ຄືນຄ່າເລີ່ມຕົ້ນ
+    Playback Speed Name: ຊື່
+    Edit Playback Speed Name: ແກ້ໄຂຊື່ຄວາມໄວໃນການຫຼິ້ນ
+    Use Automatic Playback Speed Name: ໃຊ້ຊື່ຄວາມໄວໃນການຫຼິ້ນແບບອັດຕະໂນມັດ
+    Reorder Playback Speed: ລາກເພື່ອຈັດລຳດັບຄວາມໄວໃນການຫຼິ້ນໃໝ່
+    Playback Speed: ຄວາມໄວໃນການຫຼິ້ນ
+    Max Video Playback Rate: ຄວາມໄວໃນການຫຼິ້ນສູງສຸດ
+    Parallel Segment Loading: ການໂຫຼດສ່ວນຂອງວິດີໂອແບບຂະໜານ
+    Video Playback Rate Interval: ໄລຍະຫ່າງການປັບຄວາມໄວວິດີໂອ
+    Default Video Format:
+      Default Video Format: ຮູບແບບວິດີໂອເລີ່ມຕົ້ນ
+      Dash Formats: ຮູບແບບ DASH
+      Legacy Formats: ຮູບແບບເກົ່າ (Legacy)
+      Audio Formats: ຮູບແບບສຽງ
+    Default Quality:
+      Default Quality: ຄວາມລະອຽດເລີ່ມຕົ້ນ
+      Auto: ອັດຕະໂນມັດ
+      144p: 144p
+      240p: 240p
+      360p: 360p
+      480p: 480p
+      720p: 720p
+      1080p: 1080p
+      1440p: 1440p
+      4k: 4k
+      8k: 8k
+    Screenshot:
+      Enable: ເປີດໃຊ້ການຖ່າຍພາບໜ້າຈໍ
+      Mode: ໂໝດການຖ່າຍພາບໜ້າຈໍ
+      Modes:
+        Ask Path: ຖາມບ່ອນຈັດເກັບທຸກຄັ້ງ
+        Save To Folder: ບັນທຶກລົງໂຟນເດີ
+        Clipboard: ຄັດລອກໃສ່ຄລິບບອດ
+      Format Label: ຮູບແບບໄຟລ໌ພາບໜ້າຈໍ
+      Quality Label: ຄຸນນະພາບຂອງພາບໜ້າຈໍ
+      Folder Label: ໂຟນເດີຈັດເກັບພາບໜ້າຈໍ
+      Folder Button: ເລືອກໂຟນເດີ
+      File Name Label: ຮູບແບບການຕັ້ງຊື່ໄຟລ໌
+      File Name Tooltip: 'ທ່ານສາມາດໃຊ້ຕົວປ່ຽນລຸ່ມນີ້ໄດ້: %Y ປີ (4 ຫຼັກ), %M ເດືອນ (2 ຫຼັກ), %D ວັນ (2 ຫຼັກ), %H ຊົ່ວໂມງ (2 ຫຼັກ), %N ນາທີ (2 ຫຼັກ), %S ວິນາທີ (2 ຫຼັກ), %T ມິນລິວິນາທີ (3 ຫຼັກ), %s ວິນາທີຂອງວິດີໂອ, %t ມິນລິວິນາທີຂອງວິດີໂອ, %i ID ຂອງວິດີໂອ.'
+      Error:
+        Forbidden Characters: ມີຕົວອັກສອນທີ່ບໍ່ອະນຸຍາດ
+        Empty File Name: ຊື່ໄຟລ໌ວ່າງເປົ່າ
+  Channel Settings:
+    Channel Settings: ການຕັ້ງຄ່າຊ່ອງ
+    Channel Settings Description: ຈົດຈຳການຕັ້ງຄ່າທີ່ທ່ານເລືອກໃນຂະນະທີ່ເບິ່ງແຕ່ລະຊ່ອງແຍກກັນ ເພື່ອໃຫ້ມີຜົນໃນຄັ້ງຖັດໄປທີ່ທ່ານເບິ່ງວິດີໂອຈາກຊ່ອງນັ້ນ.
+    Enable Playback Speed: ເປີດໃຊ້ຄວາມໄວໃນການຫຼິ້ນ
+    Enable Video Quality: ເປີດໃຊ້ຄຸນນະພາບວິດີໂອ
+    Enable Subtitles State: ເປີດໃຊ້ສະຖານະຄຳບັນຍາຍ
+    Enable Volume: ເປີດໃຊ້ລະດັບສຽງ
+    Auto Update: ອັບເດດອັດຕະໂນມັດເມື່ອມີການປ່ຽນແປງຜ່ານຕົວເລືອກເຄື່ອງຫຼິ້ນ
+    Auto Update Subtitles: ອັບເດດອັດຕະໂນມັດເມື່ອມີການເປີດ-ປິດ
+    Auto Update Volume: ອັບເດດອັດຕະໂນມັດທຸກຄັ້ງທີ່ທ່ານປ່ຽນລະດັບສຽງ
+    Manage Saved Channels: ຈັດການຊ່ອງທີ່ບັນທຶກໄວ້ ({channelCount})
+    Saved Channels: ການຕັ້ງຄ່າຊ່ອງທີ່ບັນທຶກໄວ້
+    Enable Saved Channel Settings Sync: ຊິງຄ໌ການຕັ້ງຄ່າຊ່ອງທີ່ບັນທຶກໄວ້
+    Disable Saved Channel Settings Sync: ຢຸດຊິງຄ໌ການຕັ້ງຄ່າຊ່ອງທີ່ບັນທຶກໄວ້
+    Search Channels: ຄົ້ນຫາຊ່ອງ
+    No Saved Channels: ຍັງບໍ່ທັນມີການບັນທຶກການຕັ້ງຄ່າສະເພາະຊ່ອງເທື່ອ
+    No Matching Channels: ບໍ່ພົບຊ່ອງທີ່ກົງກັບການຄົ້ນຫາຂອງທ່ານ
+    Forget Channel: ລຶບການຕັ້ງຄ່າທັງໝົດຂອງຊ່ອງນີ້
+    Forget Value: ລຶບການຕັ້ງຄ່ານີ້
+    Add Setting: ຈົດຈຳການຕັ້ງຄ່າອື່ນສຳລັບຊ່ອງນີ້
+    Video Quality: ຄຸນນະພາບວິດີໂອ
+    Subtitles Enabled: ເປີດໃຊ້ຄຳບັນຍາຍແລ້ວ
+    Volume: ລະດັບສຽງ
+  External Player Settings:
+    External Player Settings: ເຄື່ອງຫຼິ້ນພາຍນອກ
+    External Player: ເຄື່ອງຫຼິ້ນພາຍນອກ
+    Ignore Unsupported Action Warnings: ລະເລີຍຄຳເຕືອນການດຳເນີນການທີ່ບໍ່ຮອງຮັບ
+    Ignore Default Arguments: ລະເລີຍອາກິວເມນ (Arguments) ເລີ່ມຕົ້ນ
+    Custom External Player Executable: ໄຟລ໌ໂປຣແກຣມເຄື່ອງຫຼິ້ນພາຍນອກທີ່ກຳນົດເອງ
+    Custom External Player Arguments: ອາກິວເມນເຄື່ອງຫຼິ້ນພາຍນອກທີ່ກຳນົດເອງ
+    Players:
+      None:
+        Name: ບໍ່ມີ
+  Download Settings:
+    Download Settings: ການດາວໂຫຼດ
+    Enable Downloads: ເປີດໃຊ້ການດາວໂຫຼດ
+    Managed Tools Download Started Template: 'ບໍ່ພົບຊອບແວພາຍນອກທີ່ຈຳເປັນ: {tools}. ກຳລັງດາວໂຫຼດສະບັບທີ່ຈັດການໂດຍແອັບ…'
+    Managed Tools Download Finished Template: ດາວໂຫຼດ {tools} ສຳເລັດແລ້ວ
+    Managed Tools Update Started Template: ພົບລຸ້ນໃໝ່ສຳລັບ {tools}. ກຳລັງດາວໂຫຼດ…
+    Managed Tools Update Finished Template: ອັບເດດ {tools} ສຳເລັດແລ້ວ
+    Managed Tools Update Available Template: ມີລຸ້ນໃໝ່ສຳລັບ {tools}.
+    Update Managed Tools: ອັບເດດ
+    Managed Tools Download Error Template: 'ບໍ່ສາມາດດາວໂຫຼດເຄື່ອງມືທີ່ຈັດການໄດ້: {errors}'
+    Download Folder: ໂຟນເດີດາວໂຫຼດ
+    Global Additional yt-dlp Arguments: ອາກິວເມນ yt-dlp ເພີ່ມເຕີມທົ່ວໄປ
+    Concurrent Downloads: ຈຳນວນການດາວໂຫຼດພ້ອມກັນ
+    Bandwidth Limit: ຈຳກັດແບນວິດ (KiB/s, 0 ຄືບໍ່ຈຳກັດ)
+    Choose Download Folder: ເລືອກໂຟນເດີດາວໂຫຼດ
+    Download Templates: ຮູບແບບການດາວໂຫຼດ
+    Manage Download Templates: ຈັດການຮູບແບບການດາວໂຫຼດ ({templateCount})
+    New Template: ສ້າງຮູບແບບໃໝ່
+    Template Source: ຮູບແບບທີ່ຈະແກ້ໄຂ ຫຼື ໃຊ້ເປັນພື້ນຖານ
+    Built-in Template: '{name} (ທີ່ມີມາໃຫ້)'
+    Custom Template Name: '{name} (ກຳນົດເອງ)'
+    Create Template Copy: ສ້າງສຳເນົາ
+    Template Copy Name: ສຳເນົາຂອງ {name}
+    Automatic Downloads: ດາວໂຫຼດອັດຕະໂນມັດ
+    Manage Automatic Downloads: ຈັດການການດາວໂຫຼດອັດຕະໂນມັດ ({channelCount})
+    Automatic Downloads Description: ເລືອກຮູບແບບການດາວໂຫຼດ ແລະ ຕົວຕອງສຳລັບແຕ່ລະຊ່ອງທີ່ທ່ານຕິດຕາມ. ວິດີໂອທີ່ກົງກັບເງື່ອນໄຂຈະຖືກດາວໂຫຼດໄວ້ໃນພື້ນຫຼັງເມື່ອມີການອັບເດດ.
+    Automatic Downloads New Only: ການເປີດໃຊ້ງານຈະເລີ່ມຈາກວິດີໂອທີ່ອັບໂຫຼດໃໝ່ຖັດໄປ. ວິດີໂອທີ່ມີຢູ່ແລ້ວ ແລະ ວິດີໂອເກົ່າຈະບໍ່ຖືກດາວໂຫຼດ.
+    Automatic Downloads No Channels: ກະລຸນາຕິດຕາມຊ່ອງກ່ອນທີ່ຈະຕັ້ງຄ່າການດາວໂຫຼດອັດຕະໂນມັດ.
+    No Matching Automatic Download Channels: ບໍ່ພົບຊ່ອງທີ່ກົງກັບການຄົ້ນຫາຂອງທ່ານ.
+    Automatic Downloads Livestreams: ໄລ້ສົດ (Livestreams)
+    Minimum Duration Seconds: ຄວາມຍາວຕ່ຳສຸດ (ວິນາທີ)
+    Maximum Duration Seconds: ຄວາມຍາວສູງສຸດ (ວິນາທີ)
+    Minimum File Size MB: ຂະໜາດໄຟລ໌ຕ່ຳສຸດ (MB)
+    Maximum File Size MB: ຂະໜາດໄຟລ໌ສູງສຸດ (MB)
+    Maximum Age Days: ອາຍຸວິດີໂອສູງສຸດ (ວັນ)
+    Title Includes: ຊື່ເລື່ອງລວມມີ
+    Title Excludes: ຊື່ເລື່ອງບໍ່ລວມມີ
+    Title Filter Hint: ແຍກຄຳຄົ້ນຫາຫຼາຍຄຳດ້ວຍເຄື່ອງໝາຍຈຸດ. ວິດີໂອຕ້ອງກົງກັບຄຳທີ່ລະບຸໄວ້ຢ່າງໜ້ອຍໜຶ່ງຄຳ ແລະ ຕ້ອງບໍ່ມີຄຳທີ່ຖືກຍົກເວັ້ນ.
+  External Software Settings:
+    External Software Settings: ຊອບແວພາຍນອກ
+    yt-dlp Source: ແຫຼ່ງທີ່ມາຂອງ yt-dlp
+    yt-dlp Channel: ຊ່ອງທາງອັບເດດ yt-dlp
+    Sources:
+      System: ລະບົບ (PATH ຫຼື ເສັ້ນທາງກຳນົດເອງ)
+      Managed: ຈັດການໂດຍ OpenTubeX
+    Detected Version Template: 'ເວີຊັນ yt-dlp ທີ່ກວດພົບ: {version}'
+    Managed Not Downloaded: ຍັງບໍ່ໄດ້ດາວໂຫຼດ yt-dlp ເທື່ອ. ກະລຸນາກົດປຸ່ມລຸ່ມນີ້ເພື່ອດາວໂຫຼດ.
+    System yt-dlp Missing Warning: ບໍ່ພົບ yt-dlp ໃນລະບົບຂອງທ່ານ. ກະລຸນາຕິດຕັ້ງ, ຕັ້ງເສັ້ນທາງກຳນົດເອງ ຫຼື ປ່ຽນແຫຼ່ງທີ່ມາເປັນ "ຈັດການໂດຍ OpenTubeX".
+    Download yt-dlp: ດາວໂຫຼດ yt-dlp
+    Update yt-dlp: ອັບເດດ yt-dlp
+    Checking yt-dlp: ກຳລັງກວດສອບ yt-dlp…
+    Downloading yt-dlp: ກຳລັງດາວໂຫຼດ yt-dlp…
+    yt-dlp Downloaded Template: ດາວໂຫຼດ yt-dlp {version} ແລ້ວ
+    yt-dlp Download Error Template: 'ດາວໂຫຼດ yt-dlp ບໍ່ສຳເລັດ: {error}'
+    FFmpeg Source: ແຫຼ່ງທີ່ມາຂອງ FFmpeg
+    Detected FFmpeg Version Template: 'ເວີຊັນ FFmpeg ທີ່ກວດພົບ: {version}'
+    FFmpeg Managed Not Downloaded: ຍັງບໍ່ໄດ້ດາວໂຫຼດ FFmpeg ເທື່ອ. ກະລຸນາກົດປຸ່ມລຸ່ມນີ້ເພື່ອດາວໂຫຼດ.
+    System FFmpeg Missing Warning: ບໍ່ພົບ FFmpeg ໃນລະບົບຂອງທ່ານ. FFmpeg ຈຳເປັນສຳລັບການລວມວິດີໂອກັບສຽງ ແລະ ການແປງໄຟລ໌ສຽງ. ກະລຸນາຕິດຕັ້ງ, ຕັ້ງເສັ້ນທາງກຳນົດເອງ ຫຼື ປ່ຽນແຫຼ່ງທີ່ມາເປັນ "ຈັດການໂດຍ OpenTubeX".
+    Download FFmpeg: ດາວໂຫຼດ FFmpeg
+    Update FFmpeg: ອັບເດດ FFmpeg
+    Checking FFmpeg: ກຳລັງກວດສອບ FFmpeg…
+    Downloading FFmpeg: ກຳລັງດາວໂຫຼດ FFmpeg…
+    FFmpeg Downloaded Template: ດາວໂຫຼດ FFmpeg {version} ສຳເລັດແລ້ວ
+    FFmpeg Download Error Template: 'ການດາວໂຫຼດ FFmpeg ລົ້ມເຫຼວ: {error}'
+    Detected FFprobe Version Template: 'ກວດພົບເວີຊັນ FFprobe: {version}'
+    FFprobe Managed Not Downloaded: ຍັງບໍ່ທັນໄດ້ດາວໂຫຼດ FFprobe ເທື່ອ. ກົດປຸ່ມລຸ່ມນີ້ເພື່ອດາວໂຫຼດພ້ອມກັບ FFmpeg.
+    System FFprobe Missing Warning: ບໍ່ພົບ FFprobe ໃນລະບົບຂອງທ່ານ. ມັນຈຳເປັນສຳລັບການກວດສອບສື່ໃນລະຫວ່າງການປະມວນຜົນ. ກະລຸນາຕິດຕັ້ງມັນໄວ້ໃກ້ກັບ FFmpeg ຫຼື ປ່ຽນແຫຼ່ງຂໍ້ມູນເປັນ "ຈັດການໂດຍ OpenTubeX".
+    Checking FFprobe: ກຳລັງກວດສອບ FFprobe…
+    Download FFmpeg and FFprobe: ດາວໂຫຼດ FFmpeg ແລະ FFprobe
+    Update FFmpeg and FFprobe: ອັບເດດ FFmpeg ແລະ FFprobe
+    Downloading FFmpeg and FFprobe: ກຳລັງດາວໂຫຼດ FFmpeg ແລະ FFprobe…
+    FFmpeg and FFprobe Downloaded Template: ດາວໂຫຼດ FFmpeg ແລະ FFprobe {version} ສຳເລັດແລ້ວ
+    FFmpeg and FFprobe Download Error Template: 'ການດາວໂຫຼດ FFmpeg ແລະ FFprobe ລົ້ມເຫຼວ: {error}'
+    Managed Tool Already Current Template: '{tool} {version} ເປັນເວີຊັນຫຼ້າສຸດແລ້ວ'
+    Managed Tool Updates: ການອັບເດດເຄື່ອງມືທີ່ຈັດການ
+    Update Modes:
+      Automatic: ອັບເດດໂດຍອັດຕະໂນມັດ
+      Ask: ຖາມກ່ອນອັບເດດ
+      Manual: ອັບເດດດ້ວຍຕົນເອງເທົ່ານັ້ນ
+    yt-dlp Executable Path: ເສັ້ນທາງໄຟລ໌ yt-dlp
+    FFmpeg Executable Path: ເສັ້ນທາງໄຟລ໌ FFmpeg
+    Restricted Playback Authentication: ຄຸກກີ້ການຫຼິ້ນຂອງ yt-dlp
+    Cookie Source: ແຫຼ່ງທີ່ມາຂອງຄຸກກີ້
+    Cookie Sources:
+      None: ບໍ່ມີ
+      File: ໄຟລ໌
+      Browser: ບຣາວເຊີ
+    Cookie File: ໄຟລ໌ຄຸກກີ້
+    Browser for Cookies: ບຣາວເຊີສຳລັບຄຸກກີ້
+    Browser Profile: ໂປຣໄຟລ໌ບຣາວເຊີ (ທາງເລືອກ)
+    Browser Profile Placeholder: ຊື່ໂປຣໄຟລ໌ ຫຼື ເສັ້ນທາງ
+    Select Browser: ເລືອກບຣາວເຊີ
+    Always Use Cookies: ໃຊ້ຄຸກກີ້ສະເໝີ
+    Restricted Playback Authentication Hint: ໂດຍປົກກະຕິແລ້ວ, OpenTubeX ຈະສົ່ງຄຸກກີ້ເຫຼົ່ານີ້ໄປໃຫ້ yt-dlp ຫຼັງຈາກທີ່ທ່ານເລືອກ "ລອງໃຊ້ຄຸກກີ້ທີ່ຕັ້ງຄ່າໄວ້" ໃນວິດີໂອທີ່ຈຳກັດອາຍຸ ຫຼື ວິດີໂອສະເພາະສະມາຊິກ.
+    Restricted Playback Authentication Warning: ການໃຊ້ yt-dlp ກັບບັນຊີ Google ອາດເຮັດໃຫ້ບັນຊີຖືກຈຳກັດຊົ່ວຄາວ ຫຼື ຖາວອນ.
+  Privacy Settings:
+    Privacy Settings: ຄວາມເປັນສ່ວນຕົວ
+    Remember History: ຈື່ປະຫວັດການເບິ່ງ
+    Automatic History Retention: ໄລຍະເວລາເກັບປະຫວັດອັດຕະໂນມັດ (ມື້)
+    Automatic History Retention Placeholder: ປະຫວ່າງໄວ້ເພື່ອເກັບໄວ້ຕະຫຼອດໄປ
+    Automatic History Retention Tooltip: ປະຫວ່າງໄວ້ເພື່ອເກັບປະຫວັດໄວ້ຕະຫຼອດໄປ. ການໃສ່ຕົວເລກຈະລຶບຂໍ້ມູນເກົ່າອອກໃນຕອນນີ້ ແລະ ຈະລຶບໂດຍອັດຕະໂນມັດໃນຂະນະທີ່ເປີດແອັບ.
+    History Retention Saved: ບັນທຶກການຕັ້ງຄ່າການເກັບປະຫວັດແລ້ວ
+    Invalid History Retention Days: ໃສ່ຕົວເລກຈຳນວນມື້ທີ່ຫຼາຍກວ່າສູນ
+    Enable Watch Statistics: ເປີດໃຊ້ສະຖິຕິການເບິ່ງ
+    Week Starts On: ເລີ່ມຕົ້ນອາທິດໃນມື້
+    Remember Search History: ຈື່ປະຫວັດການຄົ້ນຫາ
+    Cache Video Metadata: ປະຫວັດຂໍ້ມູນເສີມ
+    Cache Video Metadata Tooltip: ເກັບຮັກສາຂໍ້ມູນເສີມທຸກເວີຊັນຂອງວິດີໂອທີ່ທ່ານເຂົ້າເບິ່ງ, ລວມທັງຊື່, ຮູບຕົວຢ່າງ ແລະ ຄຳອະທິບາຍ. ປິດການໃຊ້ງານໄວ້ໂດຍເລີ່ມຕົ້ນ ເພາະການເກັບປະຫວັດຂໍ້ມູນເສີມຈະໃຊ້ເນື້ອທີ່ຈັດເກັບຂໍ້ມູນຫຼາຍຂຶ້ນ.
+    Save Watched Progress: ບັນທຶກຄວາມຄືບໜ້າການເບິ່ງ
+    Watched Percentage Threshold: ເກນເປີເຊັນການເບິ່ງ
+    Watched Percentage Threshold Tooltip: ວິດີໂອຈະຖືກໝາຍວ່າເບິ່ງແລ້ວຫຼັງຈາກເບິ່ງຮອດເປີເຊັນທີ່ເລືອກ ແລະ ເຫຼືອເວລາບໍ່ເກີນ 2 ນາທີ. ທີ່ 0% ຈະຖືກໝາຍເມື່ອເລີ່ມຫຼິ້ນ, ທີ່ 100% ຈະຖືກໝາຍເມື່ອຫຼິ້ນຈົບ.
+    Watched Progress Saving Mode:
+      Modes:
+        Auto: ອັດຕະໂນມັດ
+        Semi-auto: ເຄິ່ງອັດຕະໂນມັດ
+        Never: ບໍ່ຕ້ອງ
+      Tooltip: ອັດຕະໂນມັດ = ບັນທຶກທຸກໆ 2 ວິນາທີໃນຂະນະທີ່ຫຼິ້ນ, ເມື່ອອອກຈາກໜ້າວິດີໂອ, ເມື່ອຢຸດ ຫຼື ວິດີໂອຈົບ. ເຄິ່ງອັດຕະໂນມັດ = ຈະບໍ່ບັນທຶກທຸກໆ 2 ວິນາທີ ຫຼື ເມື່ອອອກຈາກໜ້າ, ແຕ່ສາມາດບັນທຶກດ້ວຍຕົນເອງຜ່ານປຸ່ມ 'ບັນທຶກຄວາມຄືບໜ້າການເບິ່ງ' ທີ່ຢູ່ລຸ່ມຕົວຫຼິ້ນ.
+    Save Watched Videos With Last Viewed Playlist: ບັນທຶກວິດີໂອທີ່ເບິ່ງແລ້ວພ້ອມກັບເພລລິສທີ່ເບິ່ງຫຼ້າສຸດ
+    Clear Search History and Cache: ລຶບປະຫວັດການຄົ້ນຫາ ແລະ ແຄຊ໌
+    Clear Video Metadata Cache: ລຶບແຄຊ໌ຂໍ້ມູນເສີມຂອງວິດີໂອ
+    Are you sure you want to clear the video metadata cache?: ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບແຄຊ໌ຊື່ວິດີໂອ, ຮູບຕົວຢ່າງ ແລະ ຄຳອະທິບາຍ?
+    Failed to clear video metadata cache: ລຶບແຄຊ໌ຂໍ້ມູນເສີມຂອງວິດີໂອບໍ່ສຳເລັດ
+    Video metadata cache has been cleared: ລຶບແຄຊ໌ຂໍ້ມູນເສີມຂອງວິດີໂອສຳເລັດແລ້ວ
+    Video Metadata Cache Size: 'ແຄຊ໌ຂໍ້ມູນເສີມຂອງວິດີໂອ: {size}'
+    Are you sure you want to clear out your search history and cache?: ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບປະຫວັດການຄົ້ນຫາ ແລະ ແຄຊ໌ຂອງທ່ານ?
+    Search history and cache have been cleared: ລຶບປະຫວັດການຄົ້ນຫາ ແລະ ແຄຊ໌ສຳເລັດແລ້ວ
+    Remove Watch History: ລຶບປະຫວັດການເບິ່ງ
+    Are you sure you want to remove your entire watch history?: ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບປະຫວັດການເບິ່ງທັງໝົດຂອງທ່ານ?
+    Watch history has been cleared: ລຶບປະຫວັດການເບິ່ງສຳເລັດແລ້ວ
+    Remove All Subscriptions / Profiles: ລຶບການຕິດຕາມ ແລະ ໂປຣໄຟລ໌ທັງໝົດ
+    Are you sure you want to remove all subscriptions and profiles?  This cannot be undone.: ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບການຕິດຕາມ ແລະ ໂປຣໄຟລ໌ທັງໝົດ? ການກະທຳນີ້ບໍ່ສາມາດກັບຄືນໄດ້.
+    Remove All Playlists: ລຶບເພລລິສທັງໝົດ
+    All playlists have been removed: ລຶບເພລລິສທັງໝົດສຳເລັດແລ້ວ
+    Are you sure you want to remove all your playlists?: ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບເພລລິສທັງໝົດຂອງທ່ານ?
+  Storage Settings:
+    Storage: ບ່ອນຈັດເກັບຂໍ້ມູນ
+    Downloaded Media: ສື່ທີ່ດາວໂຫຼດ ແລະ ຕິດຕາມຢູ່
+    Storage Breakdown: ລາຍລະອຽດການໃຊ້ພື້ນທີ່
+    Shown Total: ຍອດລວມທີ່ສະແດງ
+    Calculating: ກຳລັງຄຳນວນ…
+    Not Available: ບໍ່ສາມາດລະບຸຂະໜາດທີ່ແນ່ນອນໄດ້
+    At Least: ຢ່າງໜ້ອຍ {size}
+    Failed To Read Storage: ບໍ່ສາມາດອ່ານຂະໜາດບ່ອນຈັດເກັບຂໍ້ມູນບາງສ່ວນໄດ້
+    Downloaded Media Description: ໄຟລ໌ວິດີໂອ, ສຽງ ແລະ ຄຳບັນຍາຍທີ່ຍັງມີຢູ່ໃນປະຫວັດການດາວໂຫຼດ.
+    Selected Download Folders: ໂຟນເດີດາວໂຫຼດທີ່ຜູ້ໃຊ້ເລືອກ
+    Download History Records: ບັນທຶກປະຫວັດການດາວໂຫຼດ
+    Download History Records Description: ມີ {count} ບັນທຶກການດາວໂຫຼດທີ່ສຳເລັດ. ບັນທຶກນີ້ຈະຕິດຕາມສະຖານະ ແລະ ທີ່ຢູ່ໄຟລ໌ ແຕ່ບໍ່ມີໄຟລ໌ສື່ທີ່ດາວໂຫຼດ.
+    Clear Download History Records: ລຶບບັນທຶກປະຫວັດການດາວໂຫຼດ
+    Clear Download History Confirmation: ລຶບທຸກບັນທຶກການດາວໂຫຼດທີ່ສຳເລັດບໍ່?
+    Download Files Stay On Disk: ໄຟລ໌ທີ່ດາວໂຫຼດແລ້ວຈະຍັງຄົງຢູ່ໃນເຄື່ອງ, ແຕ່ຈະບໍ່ສະແດງໃນໜ້າດາວໂຫຼດອີກຕໍ່ໄປ.
+    Clear Records: ລຶບບັນທຶກ
+    Replaceable Caches: ແຄຊ໌ທີ່ປ່ຽນແທນໄດ້
+    Application Caches: ແຄຊ໌ຂອງແອັບພລິເຄຊັນ
+    Browser Caches: ແຄຊ໌ຂອງບຣາວເຊີ
+    Browser Caches Hint: ແຄຊ໌ HTTP, GPU, ໂຄ້ດ, shader, service-worker ແລະ ວັດຈະນານຸກົມຂອງ Chromium.
+    Stored App Data: ຂໍ້ມູນແອັບທີ່ບັນທຶກໄວ້
+    Browser Runtime Data: ຂໍ້ມູນການເຮັດວຽກຂອງບຣາວເຊີ
+    Browser Runtime Data Hint: ຂໍ້ມູນເຊດຊັນ ແລະ ບ່ອນຈັດເກັບຂໍ້ມູນທ້ອງຖິ່ນ, ຄຸກກີ້, ສະຖານະຄວາມເປັນສ່ວນຕົວ ແລະ ເຄືອຂ່າຍ ຂອງ Chromium.
+    Subscription Feed Cache: ແຄຊ໌ການຕິດຕາມ ແລະ ຟີດ
+    Subscription Feed Cache Description: ເກັບຂໍ້ມູນວິດີໂອການຕິດຕາມ, Shorts, ໄລຟ໌ສົດ ແລະ ໂພສທີ່ດຶງມາ. OpenTubeX ຈະສ້າງມັນໃໝ່ເມື່ອມີການໂຫຼດຟີດຄັ້ງຕໍ່ໄປ.
+    Clear Subscription Feed Cache: ລຶບແຄຊ໌ການຕິດຕາມ ແລະ ຟີດ
+    Clear Subscription Feed Cache Confirmation: ລຶບແຄຊ໌ການຕິດຕາມ ແລະ ຟີດບໍ່?
+    Subscription Feed Cache Effect: ຟີດການຕິດຕາມອາດຈະເບິ່ງຄືວ່າວ່າງເປົ່າຈົນກວ່າຈະມີການໂຫຼດໃໝ່. ການຕິດຕາມ ແລະ ໂປຣໄຟລ໌ຂອງທ່ານຈະບໍ່ມີການປ່ຽນແປງ.
+    Session Search Cache: ແຄຊ໌ການຄົ້ນຫາໃນເຊດຊັນ
+    In Memory: ໃນໜ່ວຍຄວາມຈຳ
+    Session Search Cache Description: ມີ {count} ການຄົ້ນຫາທີ່ຖືກເກັບໄວ້ໃນໜ່ວຍຄວາມຈຳເພື່ອໃຫ້ກັບຄືນໜ້າເກົ່າໄດ້ໄວຂຶ້ນ. ແຄຊ໌ນີ້ຈະຖືກລຶບເມື່ອປິດ OpenTubeX.
+    Clear Session Search Cache: ລຶບແຄຊ໌ການຄົ້ນຫາໃນເຊດຊັນ
+    Clear Session Search Cache Confirmation: ລຶບແຄຊ໌ການຄົ້ນຫາໃນເຊດຊັນບໍ່?
+    Session Search Cache Effect: ໜ້າຜົນການຄົ້ນຫາໃນແຄຊ໌ຈະຖືກລຶບອອກ. ປະຫວັດການຄົ້ນຫາທີ່ບັນທຶກໄວ້ຈະບໍ່ມີການປ່ຽນແປງ.
+    HTTP Cache: ແຄຊ໌ HTTP
+    HTTP Cache Description: Electron ບັນທຶກການຕອບສະໜອງຈາກເຄືອຂ່າຍໄວ້ໃນເຄື່ອງ ເພື່ອໃຫ້ການຮ້ອງຂໍຄັ້ງຕໍ່ໄປໂຫຼດໄດ້ໄວຂຶ້ນໂດຍບໍ່ຕ້ອງດາວໂຫຼດຊ້ຳ.
+    Managed By Electron: ຈັດການໂດຍ Electron
+    Clear HTTP Cache: ລຶບແຄຊ໌ HTTP
+    Clear HTTP Cache Confirmation: ລຶບແຄຊ໌ HTTP ຂອງ Electron ບໍ່?
+    HTTP Cache Effect: ຮູບພາບ ແລະ ຊັບພະຍາກອນເຄືອຂ່າຍອື່ນໆ ອາດຈະໂຫຼດຊ້າລົງຊົ່ວຄາວໃນຂະນະທີ່ກຳລັງສ້າງແຄຊ໌ຄືນໃໝ່.
+    Tab Image Cache: ຮູບຕົວຢ່າງແທັບ ແລະ ຮູບຕົວແທນຊ່ອງ
+    Tab Image Cache Description: ເກັບຮູບຕົວຢ່າງ ແລະ ຮູບຕົວແທນຊ່ອງສຳລັບແທັບທີ່ເປີດຢູ່. OpenTubeX ຈະສ້າງພວກມັນໃໝ່ໃນຂະນະທີ່ໃຊ້ແທັບ.
+    Clear Tab Image Cache: ລຶບແຄຊ໌ຮູບພາບແທັບ
+    Clear Tab Image Cache Confirmation: ລຶບຮູບຕົວຢ່າງແທັບ ແລະ ຮູບຕົວແທນຊ່ອງບໍ່?
+    Tab Image Cache Effect: ຮູບພາບແທັບອາດຈະຫາຍໄປຊົ່ວຄາວ ແລະ ຈະຖືກສ້າງຂຶ້ນໃໝ່ເມື່ອມີການໃຊ້ແທັບນັ້ນ.
+    Playback Caches: ແຄຊ໌ການຫຼິ້ນ
+    Playback Caches Description: ເກັບ URL ສະຕຣີມຂອງ yt-dlp ລະຫວ່າງເຊດຊັນຂອງແອັບ, ລວມທັງໄຟລ໌ຕົວຫຼິ້ນ YouTube.
+    Playback URL Cache Entry Size: ຂີດຈຳກັດແຄຊ໌ URL ສະຕຣີມຂອງ yt-dlp
+    Playback URL Cache Entry Size Tooltip: ຕັ້ງຄ່າຂະໜາດສູງສຸດຂອງແຕ່ລະລາຍການແຄຊ໌ສະຕຣີມ yt-dlp. ຕັ້ງເປັນ 0 MB ເພື່ອປິດການໃຊ້ງານແຄຊ໌ຖາວອນ.
+    Clear Playback Caches: ລຶບແຄຊ໌ການຫຼິ້ນ
+    Clear Playback Caches Confirmation: ລຶບແຄຊ໌ yt-dlp ແລະ ຕົວຫຼິ້ນບໍ່?
+    Playback Caches Effect: ການຮ້ອງຂໍຫຼິ້ນຄັ້ງຕໍ່ໄປອາດຈະໃຊ້ເວລາດົນຂຶ້ນໃນຂະນະທີ່ກຳລັງດຶງຂໍ້ມູນສະຕຣີມໃໝ່.
+    Clear Cache: ລຶບແຄຊ໌
+    History Data: ປະຫວັດທີ່ບັນທຶກໄວ້
+    Video Metadata Description: ເກັບຊື່, ຮູບຕົວຢ່າງ ແລະ ຄຳອະທິບາຍໃນອະດີດສຳລັບວິດີໂອ. ຂໍ້ມູນເກົ່າບໍ່ສາມາດສ້າງຄືນໃໝ່ໄດ້ຫຼັງຈາກລຶບແລ້ວ.
+    Video Metadata Effect: ຂໍ້ມູນເສີມທີ່ບັນທຶກໄວ້ຈະຖືກລຶບຖາວອນ. ສ່ວນລາຍລະອຽດວິດີໂອປັດຈຸບັນຍັງສາມາດດຶງມາໃໝ່ໄດ້.
+    Watch History: ປະຫວັດການເບິ່ງ ແລະ ສະຖິຕິ
+    Watch History Description: ປະຫວັດການເບິ່ງຈະບັນທຶກວິດີໂອທີ່ເບິ່ງແລ້ວ ແລະ ຄວາມຄືບໜ້າ. ສະຖິຕິຈະເກັບຍອດລວມການເບິ່ງແຕ່ລະມື້.
+    Clear Watch Statistics: ລຶບສະຖິຕິການເບິ່ງ
+    Watch History Effect: ບັນທຶກວິດີໂອທີ່ເບິ່ງແລ້ວ ແລະ ຄວາມຄືບໜ້າຈະຖືກລຶບ. ສະຖິຕິການເບິ່ງຈະຍັງຄົງຢູ່.
+    Clear Watch Statistics Confirmation: ລຶບສະຖິຕິການເບິ່ງທັງໝົດບໍ່?
+    Watch Statistics Effect: ຍອດລວມການເບິ່ງແຕ່ລະມື້ຈະຖືກລຶບ. ປະຫວັດການເບິ່ງຈະຍັງຄົງຢູ່.
+    Search History: ປະຫວັດການຄົ້ນຫາ
+    Search History Description: ເກັບຂໍ້ມູນການຄົ້ນຫາທີ່ທ່ານເລືອກໃຫ້ຈື່ໄວ້.
+    Delete Search History: ລຶບປະຫວັດການຄົ້ນຫາ
+    Delete Search History Confirmation: ລຶບປະຫວັດການຄົ້ນຫາທີ່ບັນທຶກໄວ້ທັງໝົດບໍ່?
+    Search History Effect: ຄຳແນະນຳການຄົ້ນຫາທີ່ບັນທຶກໄວ້ຈະຫາຍໄປ. ແຄຊ໌ຂອງເຊດຊັນປັດຈຸບັນຈະຍັງຄົງຢູ່.
+    Other User Data: ຂໍ້ມູນຜູ້ໃຊ້ອື່ນໆ
+    Other Profile Files: ໄຟລ໌ໂປຣໄຟລ໌ອື່ນໆ
+    Other Profile Files Hint: ໄຟລ໌ສຳຮອງ, ໄຟລ໌ຊົ່ວຄາວ ແລະ ລາຍການໂປຣໄຟລ໌ທີ່ OpenTubeX ຍັງບໍ່ທັນຮູ້ຈັກ.
+    Subscriptions And Profiles: ການຕິດຕາມ ແລະ ໂປຣໄຟລ໌
+    Subscriptions And Profiles Description: ເກັບຂໍ້ມູນຊ່ອງທີ່ຕິດຕາມ, ຊື່ໂປຣໄຟລ໌ ແລະ ສະມາຊິກໂປຣໄຟລ໌.
+    Subscriptions And Profiles Effect: ການຕິດຕາມ ແລະ ໂປຣໄຟລ໌ເສີມທັງໝົດຈະຖືກລຶບຖາວອນ. ຂໍ້ມູນແຄຊ໌ຟີດກໍຈະຖືກລຶບນຳ.
+    Playlists Description: ເກັບຊື່ເພລລິສ, ຄຳອະທິບາຍ ແລະ ວິດີໂອທີ່ບັນທຶກໄວ້.
+    Playlists Effect: ທຸກໆເພລລິສຈະຖືກລຶບຖາວອນ. ໄຟລ໌ສື່ທີ່ດາວໂຫຼດໄວ້ຈະຍັງຄົງຢູ່.
+    Settings And Sessions: ການຕັ້ງຄ່າ, ເຊດຊັນແທັບ ແລະ ການແຈ້ງເຕືອນ
+    Settings And Sessions Description: ເກັບການຕັ້ງຄ່າແອັບ, ແທັບທີ່ກູ້ຄືນໄດ້ ແລະ ການແຈ້ງເຕືອນໄລຟ໌ສົດ. ທ່ານສາມາດໄປສຳຮອງໄຟລ໌ເຫຼົ່ານີ້ໄດ້ທີ່ໄດເຣັກທໍຣີໂປຣໄຟລ໌.
+    Cleanup Complete: ການເຮັດຄວາມສະອາດບ່ອນຈັດເກັບຂໍ້ມູນສຳເລັດແລ້ວ
+    Cleanup Failed: ການເຮັດຄວາມສະອາດບ່ອນຈັດເກັບຂໍ້ມູນລົ້ມເຫຼວ
+  Subscription Settings:
+    Subscription Settings: ການຕິດຕາມ
+    Fetch Feeds from RSS: ດຶງຟີດຈາກ RSS
+    Fetch Feed on Startup: ດຶງຟີດເມື່ອເລີ່ມແອັບ
+    Show New Content Feed: ສະແດງຟີດເນື້ອຫາໃໝ່
+    Show New Content Indicators: ສະແດງສັນຍະລັກເນື້ອຫາໃໝ່
+    Show Scheduled Live Streams / Premieres First: ສະແດງໄລຟ໌ສົດ/ວິດີໂອພຣີເມຍທີ່ຕັ້ງເວລາໄວ້ກ່ອນ
+    Auto Refresh Interval: ໄລຍະເວລາໂຫຼດໃໝ່ອັດຕະໂນມັດ
+    Videos Auto Refresh Interval: ໄລຍະເວລາໂຫຼດວິດີໂອໃໝ່ອັດຕະໂນມັດ
+    Shorts Auto Refresh Interval: ໄລຍະເວລາໂຫຼດ Shorts ໃໝ່ອັດຕະໂນມັດ
+    Live Auto Refresh Interval: ໄລຍະເວລາໂຫຼດໄລຟ໌ສົດໃໝ່ອັດຕະໂນມັດ
+    Posts Auto Refresh Interval: ໄລຍະເວລາໂຫຼດໂພສໃໝ່ອັດຕະໂນມັດ
+    'Limit the number of videos displayed for each channel': ຈຳກັດຈຳນວນວິດີໂອທີ່ສະແດງສຳລັບແຕ່ລະຊ່ອງ
+    To: ຮອດ
+    Confirm Before Unsubscribing: ຢືນຢັນກ່ອນຍົກເລີກການຕິດຕາມ
+  Distraction Free Settings:
+    Distraction Free Settings: ເນັ້ນເນື້ອຫາ (ບໍ່ໃຫ້ລົບກວນ)
+    Sections:
+      Side Bar: ແຖບຂ້າງ
+      Subscriptions Page: ໜ້າການຕິດຕາມ
+      Channel Page: ໜ້າຊ່ອງ
+      Watch Page: ໜ້າເບິ່ງວິດີໂອ
+      General: ທົ່ວໄປ
+      Visible While Paused: ສະແດງໃນຂະນະທີ່ຢຸດຊົ່ວຄາວເມື່ອເປີດເຕັມໜ້າຕ່າງ / ເຕັມຈໍ
+    Hide Video Views: ເຊື່ອງຍອດວິວວິດີໂອ
+    Hide Channel Avatars: ເຊື່ອງຮູບຕົວແທນຊ່ອງ
+    Shorten View Counts: ຫຍໍ້ຕົວເລກຍອດວິວ ແລະ ຍອດໄລຄ໌ຄຳຄິດເຫັນ
+    Hide Video Likes And Dislikes: ເຊື່ອງຍອດໄລຄ໌ ແລະ ດິສໄລຄ໌ວິດີໂອ
+    Hide Channel Subscribers: ເຊື່ອງຍອດຜູ້ຕິດຕາມຊ່ອງ
+    Hide Comment Likes: ເຊື່ອງຍອດໄລຄ໌ຄຳຄິດເຫັນ
+    Hide Recommended Videos: ເຊື່ອງວິດີໂອແນະນຳ
+    Hide Home: ເຊື່ອງໜ້າຫຼັກ
+    Hide Trending Videos: ເຊື່ອງວິດີໂອມາແຮງ
+    Hide Popular Videos: ເຊື່ອງວິດີໂອຍອດນິຍົມ
+    Hide Playlists: ເຊື່ອງເພລລິສ
+    Hide Live Chat: ເຊື່ອງແຊັດສົດ
+    Hide Live Chat Replay: ເຊື່ອງການຫຼິ້ນແຊັດສົດຄືນ
+    Hide Active Subscriptions: ເຊື່ອງການຕິດຕາມທີ່ເຄື່ອນໄຫວຢູ່
+    Hide Video Description: ເຊື່ອງຄຳອະທິບາຍວິດີໂອ
+    Hide Comments: ເຊື່ອງຄຳຄິດເຫັນ
+    Hide Profile Pictures in Comments: ເຊື່ອງຮູບໂປຣໄຟລ໌ໃນຄຳຄິດເຫັນ
+    Display Titles Without Excessive Capitalisation: ສະແດງຊື່ໂດຍບໍ່ໃຊ້ຕົວພິມໃຫຍ່ ແລະ ເຄື່ອງໝາຍວັກຕອນທີ່ເກີນຄວາມຈຳເປັນ
+    Hide Live Streams: ເຊື່ອງໄລຟ໌ສົດ
+    Hide Upcoming Premieres: ເຊື່ອງວິດີໂອພຣີເມຍທີ່ກຳລັງຈະມາ
+    Hide Sharing Actions: ເຊື່ອງປຸ່ມການແຊຣ໌
+    Hide Videos on Watch: ເຊື່ອງວິດີໂອໃນໜ້າເບິ່ງ
+    Hide Chapters: ເຊື່ອງຊ່ວງວິດີໂອ
+    Disable A-B Repeat: ປິດການໃຊ້ງານການຫຼິ້ນຊ້ຳ A-B
+    Hide End-Screen Annotations: ເຊື່ອງຄຳບັນຍາຍທ້າຍວິດີໂອ
+    Hide Paid Promotion Badge: ເຊື່ອງປ້າຍການໂຄສະນາທີ່ມີການຈ່າຍເງິນ
+    Hide Channels: ເຊື່ອງວິດີໂອຈາກຊ່ອງ
+    Hide Channels Disabled Message: ບາງຊ່ອງຖືກບລັອກໂດຍໃຊ້ ID ແລະ ບໍ່ໄດ້ຖືກປະມວນຜົນ. ຟີເຈີນີ້ຖືກບລັອກໃນຂະນະທີ່ ID ເຫຼົ່ານັ້ນກຳລັງອັບເດດ
+    Hide Channels Placeholder: ID ຂອງຊ່ອງ
+    Hide Channels Invalid: ID ຂອງຊ່ອງທີ່ລະບຸບໍ່ຖືກຕ້ອງ
+    Hide Channels API Error: ເກີດຂໍ້ຜິດພາດໃນການດຶງຂໍ້ມູນຜູ້ໃຊ້ດ້ວຍ ID ທີ່ລະບຸ. ກະລຸນາກວດສອບຄືນວ່າ ID ຖືກຕ້ອງຫຼືບໍ່.
+    Hide Channels Already Exists: ມີ ID ຂອງຊ່ອງນີ້ຢູ່ແລ້ວ
+    Hide Featured Channels: ເຊື່ອງຊ່ອງທີ່ແນະນຳ
+    Hide Channel Playlists: ເຊື່ອງແທັບ "ເພລລິສ" ຂອງຊ່ອງ
+    Hide Channel Posts: ເຊື່ອງແທັບ "ໂພສ" ຂອງຊ່ອງ
+    Hide Channel Home: ເຊື່ອງແທັບ "ໜ້າຫຼັກ" ຂອງຊ່ອງ
+    Hide Channel Shorts: ເຊື່ອງແທັບ "Shorts" ຂອງຊ່ອງ
+    Hide Channel Podcasts: ເຊື່ອງແທັບ "ພອດແຄສ" ຂອງຊ່ອງ
+    Hide Channel Releases: ເຊື່ອງແທັບ "ຜົນງານໃໝ່" ຂອງຊ່ອງ
+    Hide Channel Courses: ເຊື່ອງແທັບ "ຄອສຮຽນ" ຂອງຊ່ອງ
+    Hide Videos, Playlists and Channels Containing Text: ເຊື່ອງວິດີໂອ, ເພລລິສ ແລະ ຊ່ອງທີ່ມີຂໍ້ຄວາມນີ້
+    Hide Videos, Playlists and Channels Containing Text Placeholder: ຄຳສັບ, ສ່ວນຂອງຄຳ ຫຼື ວະລີ
+    Hide Subscriptions Videos: ເຊື່ອງວິດີໂອຈາກການຕິດຕາມ
+    Hide Subscriptions Shorts: ເຊື່ອງ Shorts ຈາກການຕິດຕາມ
+    Hide Subscriptions Live: ເຊື່ອງໄລຟ໌ສົດຈາກການຕິດຕາມ
+    Hide Subscriptions Posts: ເຊື່ອງໂພສຈາກການຕິດຕາມ
+    Show Added Items: ສະແດງລາຍການທີ່ເພີ່ມແລ້ວ
+    Show Player Controls: ສະແດງປຸ່ມຄວບຄຸມຕົວຫຼິ້ນ
+    Show Video Title: ສະແດງຊື່ວິດີໂອ
+    Show Bottom Right Actions Dock: ສະແດງແຖບປຸ່ມຄຳສັ່ງລຸ່ມຂວາ
+    Paused Interface Hide Delay: ໄລຍະເວລາລໍຖ້າກ່ອນເຊື່ອງໜ້າຕ່າງໃນຂະນະທີ່ຢຸດ
+  Data Settings:
+    Data Settings: ຂໍ້ມູນ
+    Data And Storage: ຂໍ້ມູນ ແລະ ບ່ອນຈັດເກັບຂໍ້ມູນ
+    Profile Directory: ໄດເຣັກທໍຣີໂປຣໄຟລ໌
+    Open Profile Directory: ເປີດໄດເຣັກທໍຣີໂປຣໄຟລ໌
+    Select Export Type: ເລືອກປະເພດການສົ່ງອອກ
+    Import Subscriptions: ນຳເຂົ້າການຕິດຕາມ
+    Subscription File: ໄຟລ໌ການຕິດຕາມ
+    History File: ໄຟລ໌ປະຫວັດ
+    Playlist File: ໄຟລ໌ເພລລິສ
+    Search history file: ໄຟລ໌ປະຫວັດການຄົ້ນຫາ
+    Settings File: ໄຟລ໌ການຕັ້ງຄ່າ
+    Export Subscriptions: ສົ່ງອອກການຕິດຕາມ
+    Export OpenTubeX: ສົ່ງອອກ OpenTubeX
+    Export YouTube: ສົ່ງອອກ YouTube
+    Export NewPipe: ສົ່ງອອກ NewPipe
+    Import History: ນຳເຂົ້າປະຫວັດ
+    Export History: ສົ່ງອອກປະຫວັດ
+    Import Playlists: ນຳເຂົ້າເພລລິສ
+    Export Playlists: ສົ່ງອອກເພລລິສ
+    Search history: ປະຫວັດການຄົ້ນຫາ
+    Import search history: ນຳເຂົ້າປະຫວັດການຄົ້ນຫາ
+    Export search history: ສົ່ງອອກປະຫວັດການຄົ້ນຫາ
+    Import Settings: ນຳເຂົ້າການຕັ້ງຄ່າ
+    Export Settings: ສົ່ງອອກການຕັ້ງຄ່າ
+    Settings Tooltip: 'ການຕັ້ງຄ່າທີ່ສະເພາະເຈາະຈົງກັບລະບົບ ຫຼື ແບບທົດລອງ ບໍ່ສາມາດສົ່ງອອກ ຫຼື ນຳເຂົ້າໄດ້ (ເຊັ່ນ: ພຣັອກຊີ, ຕົວຫຼິ້ນພາຍນອກ...)'
+    Profile object has insufficient data, skipping item: ຂໍ້ມູນວັດຖຸໂປຣໄຟລ໌ບໍ່ພຽງພໍ, ກຳລັງຂ້າມລາຍການນີ້
+    All subscriptions and profiles have been successfully imported: ນຳເຂົ້າການຕິດຕາມ ແລະ ໂປຣໄຟລ໌ທັງໝົດສຳເລັດແລ້ວ
+    All subscriptions have been successfully imported: ນຳເຂົ້າການຕິດຕາມທັງໝົດສຳເລັດແລ້ວ
+    Invalid subscriptions file: ໄຟລ໌ການຕິດຕາມບໍ່ຖືກຕ້ອງ
+    Invalid history file: ໄຟລ໌ປະຫວັດບໍ່ຖືກຕ້ອງ
+    Invalid JSON row, skipping item: JSON ທີ່ແຖວ {row} ບໍ່ຖືກຕ້ອງ, ກຳລັງຂ້າມລາຍການນີ້
+    Subscriptions have been successfully exported: ສົ່ງອອກການຕິດຕາມສຳເລັດແລ້ວ
+    History object has insufficient data, skipping item: ຂໍ້ມູນວັດຖຸປະຫວັດບໍ່ພຽງພໍ, ກຳລັງຂ້າມລາຍການນີ້
+    All watched history has been successfully imported: ນຳເຂົ້າປະຫວັດການເບິ່ງທັງໝົດສຳເລັດແລ້ວ
+    All watched history has been successfully exported: ສົ່ງອອກປະຫວັດການເບິ່ງທັງໝົດສຳເລັດແລ້ວ
+    Playlist insufficient data: ຂໍ້ມູນສຳລັບເພລລິສ "{playlist}" ບໍ່ພຽງພໍ, ກຳລັງຂ້າມລາຍການນີ້
+    All playlists has been successfully imported: ນຳເຂົ້າເພລລິສທັງໝົດສຳເລັດແລ້ວ
+    All playlists has been successfully exported: ສົ່ງອອກເພລລິສທັງໝົດສຳເລັດແລ້ວ
+    All search history has been successfully imported: ນຳເຂົ້າປະຫວັດການຄົ້ນຫາທັງໝົດສຳເລັດແລ້ວ
+    All search history has been successfully exported: ສົ່ງອອກປະຫວັດການຄົ້ນຫາທັງໝົດສຳເລັດແລ້ວ
+    All settings have been successfully imported: ນຳເຂົ້າການຕັ້ງຄ່າທັງໝົດສຳເລັດແລ້ວ
+    All settings have been successfully exported: ສົ່ງອອກການຕັ້ງຄ່າທັງໝົດສຳເລັດແລ້ວ
+    Unable to read file: ບໍ່ສາມາດອ່ານໄຟລ໌ໄດ້
+    Unable to write file: ບໍ່ສາມາດຂຽນໄຟລ໌ໄດ້
+    Unknown data key: ບໍ່ຮູ້ຈັກຄີຂໍ້ມູນ (Data Key)
+    Setting object has insufficient data, skipping item: ຂໍ້ມູນວັດຖຸການຕັ້ງຄ່າບໍ່ພຽງພໍ, ກຳລັງຂ້າມລາຍການນີ້
+    Unknown setting key: 'ບໍ່ຮູ້ຈັກຄີການຕັ້ງຄ່າ: {key}'
+    Non-transferable setting key: 'ຄີການຕັ້ງຄ່າທີ່ບໍ່ສາມາດໂອນຍ້າຍໄດ້: {key}'
+    How do I import my subscriptions?: ຂ້ອຍຈະນຳເຂົ້າການຕິດຕາມຂອງຂ້ອຍໄດ້ແນວໃດ?
+    Import subscriptions formats: 'ຮູບແບບທີ່ຮອງຮັບ: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube/FreeTube (.json)'
+    Import history formats: 'ຮູບແບບທີ່ຮອງຮັບ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube backup (.json)'
+    Import playlists formats: 'ຮູບແບບທີ່ຮອງຮັບ: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'ຮູບແບບທີ່ຮອງຮັບ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Manage Subscriptions: ຈັດການການຕິດຕາມ
+  Sync Settings:
+    Sync Settings: ຊິງຄ໌
+    Enable Sync: ເປີດໃຊ້ການຊິງຄ໌
+    Privacy Passphrase: ລະຫັດຜ່ານຄວາມເປັນສ່ວນຕົວ
+    Privacy Passphrase Hint: ໃຊ້ລະຫັດຜ່ານທີ່ແຍກຈາກລະຫັດຜ່ານບັນຊີຂອງທ່ານ. ມັນຈະບໍ່ອອກຈາກອຸປະກອນນີ້; ຫາກເຮັດມັນເສຍ ຈະບໍ່ສາມາດກູ້ຄືນຂໍ້ມູນການຊິງຄ໌ໄດ້.
+    Privacy Policy: ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວສຳລັບເຊີບເວີນີ້
+    Enhanced Privacy Enabled: ເປີດໃຊ້ຄວາມເປັນສ່ວນຕົວຂັ້ນສູງແລ້ວ. ເຊີບເວີຈະເກັບສະເພາະຂໍ້ມູນການຊິງຄ໌ທີ່ຖືກເຂົ້າລະຫັດເທົ່ານັ້ນ.
+    Enhanced Privacy Unsupported: ຄຳເຕືອນ — ເຊີບເວີນີ້ບໍ່ຮອງຮັບຄວາມເປັນສ່ວນຕົວຂັ້ນສູງ. ຂໍ້ມູນທີ່ຊິງຄ໌ອາດຈະຖືກເບິ່ງເຫັນໂດຍຜູ້ດູແລລະບົບ.
+    Description: ຊິງຄ໌ຂໍ້ມູນການຕິດຕາມ, ໂປຣໄຟລ໌, ເພລລິສ, ປະຫວັດ, ການຕັ້ງຄ່າ ແລະ ແທັບທີ່ເປີດຢູ່ກັບເຊີບເວີຊິງຄ໌.
+    Server URL: URL ຂອງເຊີບເວີ
+    Checking Server: ກຳລັງກວດສອບເຊີບເວີຊິງຄ໌…
+    Server Unavailable: ບໍ່ສາມາດເຊື່ອມຕໍ່ກັບເຊີບເວີຊິງຄ໌ນີ້ໄດ້. ກະລຸນາກວດສອບ URL ແລະ ລອງໃໝ່ອີກຄັ້ງ.
+    Username: ຊື່ຜູ້ໃຊ້
+    Log In: ເຂົ້າສູ່ລະບົບ
+    Register: ລົງທະບຽນ
+    Pair Another Device: ຈັບຄູ່ກັບອຸປະກອນອື່ນ
+    Pair With Existing Device: ຈັບຄູ່ກັບອຸປະກອນທີ່ມີຢູ່ແລ້ວ
+    Device Name: ຊື່ອຸປະກອນ
+    This Device: ອຸປະກອນນີ້
+    Device Name Required: ໃສ່ຊື່ສຳລັບອຸປະກອນນີ້.
+    Pairing Device Name Hint: ເລືອກຊື່ທີ່ທ່ານຈະຈື່ໄດ້ໃນອຸປະກອນທີ່ຈະອະນຸມັດຄຳຮ້ອງຂໍນີ້.
+    Create Pairing Code: ສ້າງລະຫັດການຈັບຄູ່
+    Creating Pairing Code: ກຳລັງສ້າງລະຫັດການຈັບຄູ່ທີ່ປອດໄພ…
+    Pairing QR Alt: ລະຫັດ QR ການຈັບຄູ່ສຳລັບ {device}
+    Scan Pairing Code: ໃນອຸປະກອນທີ່ເຊື່ອມຕໍ່ແລ້ວ, ໃຫ້ເປີດ "ຈັບຄູ່ກັບອຸປະກອນອື່ນ" ແລະ ສະແກນລະຫັດນີ້.
+    Pairing Code: ລະຫັດການຈັບຄູ່
+    Use Text Pairing Code: ໃຊ້ລະຫັດຂໍ້ຄວາມແທນ
+    Show QR Code: ສະແດງລະຫັດ QR
+    Text Pairing Code Hint: ກັອບປີ້ລະຫັດນີ້ໄປໃສ່ໃນອຸປະກອນທີ່ມີຢູ່. ມັນມີລະຫັດລັບການຈັບຄູ່ຢູ່, ຄວນລຶບມັນອອກຈາກຄລິບບອດຫຼັງຈາກຈັບຄູ່.
+    Pairing QR Warning: ສະແດງລະຫັດນີ້ໃຫ້ສະເພາະອຸປະກອນທີ່ເຊື່ອຖືໄດ້ທີ່ຈະອະນຸມັດຄຳຮ້ອງຂໍນີ້ເທົ່ານັ້ນ. ລະຫັດຈະໝົດອາຍຸໃນ 2 ນາທີ.
+    Pairing Expires: ລະຫັດການຈັບຄູ່ຈະໝົດອາຍຸໃນເວລາ {time}.
+    Verifying Pairing: ກຳລັງກວດສອບຄີຄວາມເປັນສ່ວນຕົວທີ່ຖືກໂອນຍ້າຍ…
+    Completing Pairing: ກຳລັງສຳເລັດການຈັບຄູ່ອຸປະກອນ…
+    Compare Pairing Codes: ປຽບທຽບລະຫັດການຈັບຄູ່
+    Pairing Code Match Hint: ຢືນຢັນສະເພາະຫາກລະຫັດນີ້ກົງກັບລະຫັດໃນອຸປະກອນທີ່ມີຢູ່ຂອງທ່ານ.
+    Pairing Codes Match: ລະຫັດກົງກັນ
+    Pairing Approval Code Hint: ເປີດໜ້າຕ່າງນີ້ຄ້າງໄວ້ ແລະ ປຽບທຽບລະຫັດນີ້ກັບອຸປະກອນໃໝ່. ຫາກລະຫັດຕ່າງກັນ ຫ້າມດຳເນີນການຕໍ່.
+    Pairing Scan Hint: ສະແກນລະຫັດການຈັບຄູ່ທີ່ສະແດງໃນອຸປະກອນທີ່ທ່ານກຳລັງເພີ່ມ.
+    Enter Pairing Code: ໃສ່ລະຫັດດ້ວຍຕົນເອງ
+    Pairing Code Entry Hint: ວາງລະຫັດການຈັບຄູ່ທີ່ສະແດງໃນອຸປະກອນທີ່ທ່ານກຳລັງເພີ່ມ.
+    Check Pairing Code: ກວດສອບລະຫັດ
+    Scan QR Code: ສະແກນລະຫັດ QR
+    Waiting For Pairing Code: ກຳລັງລໍຖ້າລະຫັດການຈັບຄູ່…
+    Checking Pairing Request: ກຳລັງກວດສອບຄຳຮ້ອງຂໍການຈັບຄູ່…
+    Approving Pairing Request: ກຳລັງເຂົ້າລະຫັດ ແລະ ສົ່ງຄີຄວາມເປັນສ່ວນຕົວ…
+    Pairing Approval Warning: ອະນຸມັດສະເພາະຫາກທ່ານເຫັນຄຳຮ້ອງຂໍນີ້ໃນອຸປະກອນໃໝ່. ການຈັບຄູ່ຈະໃຫ້ສິດເຂົ້າເຖິງບັນຊີ ແລະ ໂອນຍ້າຍຄີ.
+    Approve Pairing: ອະນຸມັດການຈັບຄູ່
+    Try Again: ລອງໃໝ່
+    Scan Again: ສະແກນໃໝ່
+    Camera Unavailable: ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບໄດ້. ກະລຸນາກວດສອບສິດການເຂົ້າເຖິງ ຫຼື ໃສ່ລະຫັດດ້ວຍຕົນເອງ.
+    Pairing Unsupported: ເຊີບເວີຊິງຄ໌ນີ້ບໍ່ຮອງຮັບການຈັບຄູ່ອຸປະກອນແບບປອດໄພ.
+    Pairing Failed: ການຈັບຄູ່ອຸປະກອນລົ້ມເຫຼວ. ກະລຸນາລອງໃໝ່ດ້ວຍລະຫັດໃໝ່.
+    Pairing Request Changed: ຄຳຮ້ອງຂໍການຈັບຄູ່ໝົດອາຍຸ ຫຼື ຖືກໃຊ້ໄປແລ້ວ. ກະລຸນາສ້າງລະຫັດໃໝ່.
+    Pairing Server Mismatch: ລະຫັດນີ້ເປັນຂອງເຊີບເວີຊິງຄ໌ອື່ນ.
+    Pairing Verification Unavailable: ບໍ່ມີຂໍ້ມູນການຊິງຄ໌ເພື່ອໃຊ້ກວດສອບຄີ. ໃຫ້ຊິງຄ໌ອຸປະກອນທີ່ມີຢູ່ກ່ອນ, ແລ້ວລອງໃໝ່ອີກຄັ້ງ.
+    Pairing Completed: ການຈັບຄູ່ອຸປະກອນສຳເລັດແລ້ວ
+    Pairing Approved: ອະນຸມັດການຈັບຄູ່ອຸປະກອນແລ້ວ
+    Disconnect: ຕັດການເຊື່ອມຕໍ່
+    Delete Account: ລຶບບັນຊີຊິງຄ໌
+    Delete Account Confirmation: ລຶບບັນຊີຊິງຄ໌ບໍ່?
+    Delete Account Warning: ການກະທຳນີ້ຈະລຶບບັນຊີຊິງຄ໌ ແລະ ຂໍ້ມູນໃນເຊີບເວີນີ້ແບບຖາວອນ. ຂໍ້ມູນໃນເຄື່ອງຂອງທ່ານຈະບໍ່ຖືກລຶບ.
+    Confirm Delete Account: ລຶບບັນຊີ
+    Password Required: ຈຳເປັນຕ້ອງມີລະຫັດຜ່ານ
+    Account Deleted: ລຶບບັນຊີຊິງຄ໌ສຳເລັດແລ້ວ
+    Connected as: ເຊື່ອມຕໍ່ໃນນາມ {username}
+    Automatic Sync: ຊິງຄ໌ອັດຕະໂນມັດຫຼັງຈາກມີການປ່ຽນແປງ ແລະ ທຸກໆຫ້ານາທີ
+    Profiles: ໂປຣໄຟລ໌
+    Open Tabs: ແທັບທີ່ເປີດຢູ່ ແລະ ເຊດຊັນ
+    Disable Setting Sync: ຢຸດຊິງຄ໌ການຕັ້ງຄ່ານີ້
+    Enable Setting Sync: ຊິງຄ໌ການຕັ້ງຄ່ານີ້
+    Sync Now: ຊິງຄ໌ດຽວນີ້
+    Downloading encrypted data: ກຳລັງດາວໂຫຼດຂໍ້ມູນການຊິງຄ໌ທີ່ຖືກເຂົ້າລະຫັດ…
+    Syncing subscriptions: ກຳລັງຊິງຄ໌ການຕິດຕາມ…
+    Syncing playlists: ກຳລັງຊິງຄ໌ເພລລິສ…
+    Syncing history: ກຳລັງຊິງຄ໌ປະຫວັດການເບິ່ງ…
+    Syncing profiles: ກຳລັງຊິງຄ໌ໂປຣໄຟລ໌…
+    Syncing open tabs: ກຳລັງຊິງຄ໌ແທັບທີ່ເປີດຢູ່ ແລະ ເຊດຊັນ…
+    Syncing settings: ກຳລັງຊິງຄ໌ການຕັ້ງຄ່າ…
+    Uploading encrypted data: ກຳລັງອັບໂຫຼດຂໍ້ມູນການຊິງຄ໌ທີ່ຖືກເຂົ້າລະຫັດ…
+    Finishing sync: ກຳລັງສຳເລັດການຊິງຄ໌…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'ຊິງຄ໌ຫຼ້າສຸດ: {date}'
+    History not supported: ເວີຊັນຂອງເຊີບເວີນີ້ບໍ່ຮອງຮັບການຊິງຄ໌ປະຫວັດການເບິ່ງ.
+    Settings not supported: ເວີຊັນຂອງເຊີບເວີນີ້ບໍ່ຮອງຮັບການຊິງຄ໌ການຕັ້ງຄ່າ.
+    Sync completed: ຊິງຄ໌ສຳເລັດແລ້ວ
+    Sync failed: 'ການຊິງຄ໌ລົ້ມເຫຼວ: {error}'
+    Data Loss Confirmation: ຢືນຢັນການຊິງຄ໌ທີ່ຈະມີການລຶບຂໍ້ມູນບໍ່?
+    Data Loss Warning: ສະຖານະຂອງເຊີເວີຈະລຶບ {deleted} ຈາກ {previous} ລາຍການ {collection} ທີ່ໄດ້ຊິງຄ໌ກ່ອນໜ້ານີ້. ນີ້ອາດບົ່ງບອກເຖິງການຍ້າຍຂໍ້ມູນເຊີເວີ ຫຼື ການຕັ້ງຄ່າໃໝ່ທີ່ຫຼົ້ມເຫຼວ. ສືບຕໍ່ກໍຕໍ່ເມື່ອການລຶບນີ້ແມ່ນຄວາມຕັ້ງໃຈ ແລະ ທ່ານມີຂໍ້ມູນສຳຮອງແລ້ວເທົ່ານັ້ນ.
+    Confirm Data Loss: ລຶບ ແລະ ດຳເນີນການຕໍ່
+  Proxy Settings:
+    Proxy Settings: ພຣັອກຊີ
+    Proxy Warning: 'OpenTubeX ບໍ່ມີພຣັອກຊີໃນຕົວ ແຕ່ສາມາດເຊື່ອມຕໍ່ກັບພຣັອກຊີພາຍນອກໄດ້ ເຊັ່ນ: Tor ຫຼື SOCKS5 ຈາກ VPN. ຫາກເປີດໃຊ້, ກະລຸນາແນ່ໃຈວ່າໄດ້ຕັ້ງຄ່າຢ່າງຖືກຕ້ອງ ບໍ່ດັ່ງນັ້ນຈະບໍ່ສາມາດດຶງຂໍ້ມູນໄດ້.'
+    Enable Tor / Proxy: ເປີດໃຊ້ Tor / ພຣັອກຊີ
+    Proxy Protocol: ໂປຣໂຕຄໍພຣັອກຊີ
+    Proxy Host: ໂຮສພຣັອກຊີ
+    Proxy Port Number: ໝາຍເລກພອດພຣັອກຊີ
+    Proxy Username: ຊື່ຜູ້ໃຊ້ພຣັອກຊີ
+    Proxy Password: ລະຫັດຜ່ານພຣັອກຊີ
+    IP Block Recovery Script Path: ເສັ້ນທາງສະຄຣິບແກ້ໄຂການຖືກບລັອກ IP
+    Select IP Block Recovery Script File: ເລືອກໄຟລ໌ສະຄຣິບແກ້ໄຂການຖືກບລັອກ IP
+    Clicking on Test Proxy will send a request to: ການກົດ 'ທົດສອບພຣັອກຊີ' ຈະສົ່ງຄຳຮ້ອງຂໍໄປທີ່
+    Test Proxy: ທົດສອບພຣັອກຊີ
+    Your Info: ຂໍ້ມູນຂອງທ່ານ
+    Ip: IP
+    Country: ປະເທດ
+    Region: ພາກພື້ນ
+    City: ເມືອງ
+    Error getting network information. Is your proxy configured properly?: ເກີດຂໍ້ຜິດພາດໃນການດຶງຂໍ້ມູນເຄືອຂ່າຍ. ທ່ານໄດ້ຕັ້ງຄ່າພຣັອກຊີຢ່າງຖືກຕ້ອງແລ້ວບໍ່?
+    Running IP block recovery script: ກຳລັງເຮັດວຽກສະຄຣິບແກ້ໄຂການຖືກບລັອກ IP
+    IP block recovery script failed: 'ສະຄຣິບແກ້ໄຂການຖືກບລັອກ IP ລົ້ມເຫຼວ (ລະຫັດຂໍ້ຜິດພາດ: {exitCode})'
+    IP block recovery script finished: ສະຄຣິບແກ້ໄຂການຖືກບລັອກ IP ສຳເລັດແລ້ວ
+    Reloading video after IP block recovery: ກຳລັງໂຫຼດວິດີໂອໃໝ່ຫຼັງຈາກແກ້ໄຂການຖືກບລັອກ IP
+    Failed to select IP block recovery script: ເລືອກສະຄຣິບແກ້ໄຂການຖືກບລັອກ IP ບໍ່ສຳເລັດ
+  SponsorBlock Settings:
+    SponsorBlock Settings: SponsorBlock
+    Enable SponsorBlock: ເປີດໃຊ້ SponsorBlock
+    Enable SponsorBlock Submission: ເປີດໃຊ້ການສົ່ງຂໍ້ມູນ SponsorBlock
+    'SponsorBlock API Url (Default is https://sponsor.ajay.app)': URL API ຂອງ SponsorBlock (ຄ່າເລີ່ມຕົ້ນແມ່ນ https://sponsor.ajay.app)
+    SponsorBlock Private User ID (optional): ID ຜູ້ໃຊ້ສ່ວນຕົວຂອງ SponsorBlock (ທາງເລືອກ)
+    SponsorBlock Private User ID Tooltip: ວາງ ID ຜູ້ໃຊ້ສ່ວນຕົວຂອງ SponsorBlock ຈາກສ່ວນຂະຫຍາຍບຣາວເຊີ ຫຼື ປະຫວ່າງໄວ້ເພື່ອໃຊ້ ID ທີ່ແອັບສ້າງໃຫ້.
+    Generated SponsorBlock User ID: ID ຜູ້ໃຊ້ SponsorBlock ທີ່ສ້າງຂຶ້ນ
+    Generated SponsorBlock User ID Tooltip: ID ຜູ້ໃຊ້ທີ່ສ້າງຂຶ້ນນີ້ ສາມາດໃຊ້ໃນສ່ວນຂະຫຍາຍບຣາວເຊີ ຫຼື ເມື່ອທ່ານໃຊ້ແອັບໃນຄອມພິວເຕີເຄື່ອງອື່ນ.
+    Export Generated User ID: ສົ່ງອອກ ID ຜູ້ໃຊ້ທີ່ສ້າງຂຶ້ນ
+    Generated SponsorBlock User ID Copy Button: ກັອບປີ້ ID ຜູ້ໃຊ້ SponsorBlock ທີ່ສ້າງຂຶ້ນ
+    Generated SponsorBlock User ID Copied: ກັອບປີ້ ID ຜູ້ໃຊ້ SponsorBlock ທີ່ສ້າງຂຶ້ນໄປທີ່ຄລິບບອດແລ້ວ
+    Notify when sponsor segment is skipped: ສະແດງການແຈ້ງເຕືອນຫຼັງຈາກຂ້າມຊ່ວງວິດີໂອ
+    Skip notification timeout: ໄລຍະເວລາສະແດງການແຈ້ງເຕືອນການຂ້າມ
+    UseDeArrowTitles: ໃຊ້ຊື່ວິດີໂອຈາກ DeArrow
+    UseDeArrowThumbnails: ໃຊ້ຮູບຕົວຢ່າງຈາກ DeArrow
+    'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': URL API ຕົວສ້າງຮູບຕົວຢ່າງ DeArrow (ຄ່າເລີ່ມຕົ້ນແມ່ນ https://dearrow-thumb.ajay.app)
+    Skip Options:
+      Skip Option: ທາງເລືອກການຂ້າມ
+      Auto Skip: ຂ້າມອັດຕະໂນມັດ
+      Show In Seek Bar: ສະແດງໃນແຖບຄົ້ນຫາ (Seek Bar)
+      Prompt To Skip: ຖາມກ່ອນຂ້າມ
+      Do Nothing: ບໍ່ຕ້ອງເຮັດຫຍັງ
+    Category Color: ສີໝວດໝູ່
+    Custom Color: ສີທີ່ກຳນົດເອງ
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: ເປີດໃຊ້ Return YouTube Dislike
+    Return YouTube Dislike Url: URL API ຂອງ Return YouTube Dislike (ຄ່າເລີ່ມຕົ້ນແມ່ນ https://ryd-proxy.kavin.rocks)
+  Parental Control Settings:
+    Parental Control Settings: ການຄວບຄຸມໂດຍຜູ້ປົກຄອງ
+    Hide Unsubscribe Button: ເຊື່ອງປຸ່ມຍົກເລີກການຕິດຕາມ
+    Hide Uploader on Watch page: ເຊື່ອງຜູ້ອັບໂຫຼດໃນໜ້າເບິ່ງວິດີໂອ
+    Show Family Friendly Only: ສະແດງສະເພາະເນື້ອຫາທີ່ເໝາະສົມກັບຄອບຄົວ
+    Hide Search Bar: ເຊື່ອງແຖບຄົ້ນຫາ
+    Disable Channel Links: ປິດການໃຊ້ງານລີ້ງຂອງຊ່ອງ
+  Experimental Settings:
+    Experimental Settings: ແບບທົດລອງ
+    Warning: ການຕັ້ງຄ່າເຫຼົ່ານີ້ແມ່ນຢູ່ໃນຂັ້ນທົດລອງ, ພວກມັນອາດເຮັດໃຫ້ແອັບຂັດຂ້ອງໄດ້. ແນະນຳໃຫ້ສຳຮອງຂໍ້ມູນໄວ້ກ່ອນ.
+    Replace HTTP Cache: ປ່ຽນແທນແຄຊ໌ HTTP
+  Password Dialog:
+    Password: ລະຫັດຜ່ານ
+    Enter Password To Unlock: ໃສ່ລະຫັດຜ່ານເພື່ອປົດລັອກການຕັ້ງຄ່າ
+    Incorrect Password: ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ
+    Unlock: ປົດລັອກ
+    Unlocking: ກຳລັງປົດລັອກ…
+  Search Settings: ຄົ້ນຫາການຕັ້ງຄ່າ
+  No Settings Found: ບໍ່ພົບການຕັ້ງຄ່າ
+  Password Settings:
+    Password Settings: ລະຫັດຜ່ານ
+    Set Password To Prevent Access: ຕັ້ງລະຫັດຜ່ານເພື່ອປ້ອງກັນການເຂົ້າເຖິງການຕັ້ງຄ່າ
+    Set Password: ຕັ້ງລະຫັດຜ່ານ
+    Remove Password: ລຶບລະຫັດຜ່ານ
+Tutorial:
+  Skip: ຂ້າມ
+  Next: ຕໍ່ໄປ
+  Finish: ສຳເລັດ
+  Got It: ເຂົ້າໃຈແລ້ວ
+  Welcome:
+    Title: ຍິນດີຕ້ອນຮັບສູ່ OpenTubeX
+    Description: ນີ້ຄືປຸ່ມຄວບຄຸມບາງຢ່າງທີ່ຈະຊ່ວຍໃຫ້ທ່ານຄຸ້ນເຄີຍກັບການໃຊ້ງານ.
+  Navigation:
+    Title: ຄັງສະສົມຂອງທ່ານຢູ່ໃກ້ຕົວສະເໝີ
+    Description: ໃຊ້ການນຳທາງເພື່ອໄປຫາການຕິດຕາມ, ເພລລິສ, ປະຫວັດ ແລະ ອື່ນໆ.
+  Search:
+    Title: ຄົ້ນຫາ ຫຼື ວາງລີ້ງ
+    Description: ຄົ້ນຫາວິດີໂອ ແລະ ຊ່ອງ, ຫຼື ວາງ URL ວິດີໂອທີ່ຮອງຮັບລົງໃນຊ່ອງຄົ້ນຫາໂດຍກົງ.
+  Tabs:
+    Title: ເປີດໜ້າຕ່າງໆໄວ້ໃນແທັບ
+    Description: ເປີດຫຼາຍໜ້າພ້ອມກັນໄດ້ໂດຍບໍ່ເສຍຕຳແໜ່ງທີ່ທ່ານເບິ່ງຢູ່. ເລືອກບ່ອນຈັດວາງແທັບທີ່ເໝາະສົມກັບຮູບແບບຂອງທ່ານ.
+  Quick Settings:
+    Title: ປັບແຕ່ງໃນແບບຂອງທ່ານ
+    Description: ເລືອກທີມ (Theme) ແລະ ຄຸນນະພາບວິດີໂອເລີ່ມຕົ້ນ. ທ່ານສາມາດປ່ຽນການຕັ້ງຄ່າໄດ້ຈາກເມນູໂປຣໄຟລ໌ ຫຼື ຄລິກຂວາເພື່ອສະຫຼັບໂປຣໄຟລ໌.
+  Import Data:
+    Title: ນຳຂໍ້ມູນຂອງທ່ານຕິດຕົວໄປນຳ
+    Description: ສາມາດເລືອກນຳເຂົ້າການຕິດຕາມ, ປະຫວັດ, ເພລລິສ ຈາກແອັບອື່ນທີ່ຮອງຮັບ ຫຼື ຈາກໄຟລ໌ສຳຮອງ.
+    Action: ນຳເຂົ້າຂໍ້ມູນ
+    Not Now: ຍັງບໍ່ແມ່ນຕອນນີ້
+  Settings Moved:
+    Title: ການຕັ້ງຄ່າຖືກຍ້າຍແລ້ວ
+    Description: ເລືອກໂປຣໄຟລ໌ຂອງທ່ານຢູ່ມຸມຂວາເທິງເພື່ອການຄວບຄຸມທີ່ວ່ອງໄວ. ຄລິກຂວາໃສ່ເພື່ອໄປຫາໜ້າການເລືອກໂປຣໄຟລ໌ໂດຍກົງ. ໄອຄອນຟັນເຟືອນໃນເມນູນັ້ນຈະເປີດການຕັ້ງຄ່າທັງໝົດ, ສ່ວນໜ້າ 'ກ່ຽວກັບ' ແລະ 'ການດາວໂຫຼດ' ກໍໄດ້ຍ້າຍມາຢູ່ໃນເມນູນີ້ຄືກັນ.
+About:
+  About: ກ່ຽວກັບ
+  Beta: ເບຕ້າ
+  Commit: ຄອມມິດ
+  Source code: ຊອສໂຄດ
+  Licensed under the {licenseLink}: ໄດ້ຮັບອະນຸຍາດພາຍໃຕ້ {licenseLink}
+  AGPLv3: AGPLv3
+  Downloads / Changelog: ການດາວໂຫຼດ / ບັນທຶກການປ່ຽນແປງ
+  GitHub releases: ລຸ້ນທີ່ປ່ອຍໃນ GitHub
+  Help: ຊ່ວຍເຫຼືອ
+  OpenTubeX Wiki: OpenTubeX Wiki
+  FAQ: ຄຳຖາມທີ່ພົບເລື້ອຍ
+  Discussions: ການສົນທະນາ
+  Fluxer: ເຂົ້າຮ່ວມຊຸມຊົນ Fluxer ຂອງພວກເຮົາ
+  Matrix: Matrix
+  Report a problem: ລາຍງານບັນຫາ
+  GitHub issues: GitHub issues
+  Please check for duplicates before posting: ກະລຸນາກວດສອບບັນຫາທີ່ຊໍ້າກັນກ່ອນຈະສົ່ງ
+  Website: ເວັບໄຊ
+  Email: ອີເມວ
+  Mastodon: Mastodon
+  Chat on Matrix: ສົນທະນາຜ່ານ Matrix
+  Please read the {roomRulesLink}: ກະລຸນາອ່ານ {roomRulesLink}
+  room rules: ກົດລະບຽບຂອງຫ້ອງ
+  Translate: ແປພາສາ
+  Credits: ລາຍຊື່ຜູ້ມີສ່ວນຮ່ວມ
+  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX ສໍາເລັດໄດ້ຍ້ອນ {creditsPageLink}
+  these people and projects: ບຸກຄົນ ແລະ ໂຄງການເຫຼົ່ານີ້
+  Donate: ບໍລິຈາກ
+Profile:
+  Profile Settings: ໂປຣໄຟລ໌
+  Toggle Profile List: ເປີດ/ປິດ ລາຍການໂປຣໄຟລ໌
+  Profile Select: ເລືອກໂປຣໄຟລ໌
+  Profile Filter: ຕົວກັ່ນຕອງໂປຣໄຟລ໌
+  All Channels: ທຸກຊ່ອງ
+  Profile Manager: ຕົວຈັດການໂປຣໄຟລ໌
+  Create New Profile: ສ້າງໂປຣໄຟລ໌ໃໝ່
+  Edit Profile: ແກ້ໄຂໂປຣໄຟລ໌
+  Edit Profile Name: ແກ້ໄຂຊື່ໂປຣໄຟລ໌
+  Create Profile Name: ສ້າງຊື່ໂປຣໄຟລ໌
+  Profile Name: ຊື່ໂປຣໄຟລ໌
+  Profile Icon: ໄອຄອນໂປຣໄຟລ໌
+  Choose an Emoji: ເລືອກອີໂມຈິ
+  Custom Emoji: ອີໂມຈິທີ່ກຳນົດເອງ
+  Emoji: ອີໂມຈິ
+  Choose Image: ເລືອກຮູບພາບ
+  Crop Image: ຕັດຮູບພາບ
+  Zoom: ຊູມ
+  Apply Crop: ນຳໃຊ້ການຕັດຮູບ
+  Transparent: ໂປ່ງໃສ
+  Use Initial: ໃຊ້ຕົວອັກສອນທຳອິດ
+  The selected image could not be loaded: ບໍ່ສາມາດໂຫຼດຮູບພາບທີ່ເລືອກໄດ້
+  Color Picker: ຕົວເລືອກສີ
+  Custom Color: ສີທີ່ກຳນົດເອງ
+  Theme Color: ສີທີມ
+  Profile Preview: ຕົວຢ່າງໂປຣໄຟລ໌
+  Create Profile: ສ້າງໂປຣໄຟລ໌
+  Update Profile: ອັບເດດໂປຣໄຟລ໌
+  Make Default Profile: ຕັ້ງເປັນໂປຣໄຟລ໌ເລີ່ມຕົ້ນ
+  Delete Profile: ລຶບໂປຣໄຟລ໌
+  Are you sure you want to delete this profile?: ທ່ານແນ່ໃຈຫຼືບໍ່ວ່າຕ້ອງການລຶບໂປຣໄຟລ໌ນີ້?
+  All subscriptions will also be deleted.: ການຕິດຕາມທັງໝົດຈະຖືກລຶບອອກໄປນຳ.
+  Your profile name cannot be empty: ຊື່ໂປຣໄຟລ໌ຂອງທ່ານບໍ່ສາມາດຫວ່າງໄດ້
+  Profile has been created: ສ້າງໂປຣໄຟລ໌ສຳເລັດແລ້ວ
+  Profile has been updated: ອັບເດດໂປຣໄຟລ໌ສຳເລັດແລ້ວ
+  Your default profile has been set to {profile}: ໂປຣໄຟລ໌ເລີ່ມຕົ້ນຂອງທ່ານຖືກຕັ້ງເປັນ {profile}
+  Removed {profile} from your profiles: ລຶບ {profile} ອອກຈາກລາຍການໂປຣໄຟລ໌ແລ້ວ
+  Your default profile has been changed to your primary profile: ໂປຣໄຟລ໌ເລີ່ມຕົ້ນຂອງທ່ານຖືກປ່ຽນເປັນໂປຣໄຟລ໌ຫຼັກແລ້ວ
+  '{profile} is now the active profile': ຕອນນີ້ກຳລັງໃຊ້ໂປຣໄຟລ໌ {profile}
+  Subscription List: ລາຍການຕິດຕາມ
+  Other Channels: ຊ່ອງອື່ນໆ
+  '{number} selected': ເລືອກແລ້ວ {number}
+  Select All: ເລືອກທັງໝົດ
+  Select None: ບໍ່ເລືອກເລີຍ
+  Delete Selected: ລຶບອັນທີ່ເລືອກ
+  Add Selected To Profile: ເພີ່ມອັນທີ່ເລືອກໃສ່ໂປຣໄຟລ໌
+  No channel(s) have been selected: ຍັງບໍ່ໄດ້ເລືອກຊ່ອງໃດເລີຍ
+  ? This is your primary profile.  Are you sure you want to delete the selected channels?  The same channels will be deleted in any profile they are found in.
+  : ນີ້ແມ່ນໂປຣໄຟລ໌ຫຼັກຂອງທ່ານ. ທ່ານແນ່ໃຈຫຼືບໍ່ວ່າຕ້ອງການລຶບຊ່ອງທີ່ເລືອກ? ຊ່ອງເຫຼົ່ານີ້ຈະຖືກລຶບອອກຈາກທຸກໆໂປຣໄຟລ໌ທີ່ມີຊ່ອງນີ້ຢູ່.
+  Are you sure you want to delete the selected channels?  This will not delete the channel from any other profile.: ທ່ານແນ່ໃຈຫຼືບໍ່ວ່າຕ້ອງການລຶບຊ່ອງທີ່ເລືອກ? ການເຮັດແບບນີ້ຈະບໍ່ລຶບຊ່ອງນີ້ອອກຈາກໂປຣໄຟລ໌ອື່ນ.
+  Close Profile Dropdown: ປິດເມນູລົງຂອງໂປຣໄຟລ໌
+  Open Profile Dropdown: ເປີດເມນູລົງຂອງໂປຣໄຟລ໌
+Channel:
+  Subscribe: ຕິດຕາມ
+  Unsubscribe: ຍົກເລີກການຕິດຕາມ
+  Channel Name Unavailable: ບໍ່ມີຊື່ຊ່ອງ
+  Channel has been removed from your subscriptions: ລຶບຊ່ອງອອກຈາກການຕິດຕາມແລ້ວ
+  Removed subscription from {count} other channel(s): ຍົກເລີກການຕິດຕາມຈາກອີກ 1 ຊ່ອງ | ຍົກເລີກການຕິດຕາມຈາກອີກ {count} ຊ່ອງ
+  Added channel to your subscriptions: ເພີ່ມຊ່ອງໃສ່ການຕິດຕາມແລ້ວ
+  Search Channel: ຄົ້ນຫາຊ່ອງ
+  Search Result Types: ປະເພດຜົນການຄົ້ນຫາ
+  All Results: ທັງໝົດ
+  Your search results have returned 0 results: ບໍ່ພົບຜົນການຄົ້ນຫາ
+  This channel does not exist: ບໍ່ມີຊ່ອງນີ້ຢູ່
+  This channel does not allow searching: ຊ່ອງນີ້ບໍ່ອະນຸຍາດໃຫ້ຄົ້ນຫາ
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: ຊ່ອງນີ້ມີການຈຳກັດອາຍຸ ແລະ ບໍ່ສາມາດເບິ່ງໄດ້ໃນ OpenTubeX ໃນຕອນນີ້.
+  Channel Tabs: ແຖບຂອງຊ່ອງ
+  View All: ເບິ່ງທັງໝົດ
+  Videos:
+    Videos: ວິດີໂອ
+    This channel does not currently have any videos: ຊ່ອງນີ້ຍັງບໍ່ມີວິດີໂອເທື່ອ
+    Sort Types:
+      Newest: ໃໝ່ສຸດ
+      Oldest: ເກົ່າສຸດ
+      Most Popular: ຍອດນິຍົມທີ່ສຸດ
+  Shorts:
+    This channel does not currently have any shorts: ຊ່ອງນີ້ຍັງບໍ່ມີ Shorts ເທື່ອ
+  Live:
+    Live: ໄລຟ໌ສົດ
+    This channel does not currently have any live streams: ຊ່ອງນີ້ຍັງບໍ່ມີການໄລຟ໌ສົດເທື່ອ
+  Playlists:
+    Playlists: ລາຍການຫຼິ້ນ
+    This channel does not currently have any playlists: ຊ່ອງນີ້ຍັງບໍ່ມີລາຍການຫຼິ້ນເທື່ອ
+    Sort Types:
+      Last Video Added: ວິດີໂອທີ່ເພີ່ມລົງຫຼ້າສຸດ
+      Newest: ໃໝ່ສຸດ
+      Oldest: ເກົ່າສຸດ
+  Home:
+    Home: ໜ້າຫຼັກ
+    View Playlist: ເບິ່ງລາຍການຫຼິ້ນ
+  Podcasts:
+    Podcasts: ພອດແຄສ
+    This channel does not currently have any podcasts: ຊ່ອງນີ້ຍັງບໍ່ມີພອດແຄສເທື່ອ
+  Releases:
+    Releases: ຜົນງານທີ່ປ່ອຍອອກມາ
+    This channel does not currently have any releases: ຊ່ອງນີ້ຍັງບໍ່ມີຜົນງານທີ່ປ່ອຍອອກມາເທື່ອ
+  Courses:
+    Courses: ຄໍສຮຽນ
+    This channel does not currently have any courses: ຊ່ອງນີ້ຍັງບໍ່ມີຄໍສຮຽນເທື່ອ
+  About:
+    About: ກ່ຽວກັບ
+    Channel Description: ລາຍລະອຽດຂອງຊ່ອງ
+    Tags:
+      Tags: ແທັກຂອງຊ່ອງ
+      Search for: ຄົ້ນຫາສຳລັບ "{tag}"
+    Details: ລາຍລະອຽດ
+    Joined: ເຂົ້າຮ່ວມເມື່ອ
+    Location: ສະຖານທີ່
+    Featured Channels: ຊ່ອງທີ່ແນະນຳ
+  Posts:
+    This channel currently does not have any posts: ຊ່ອງນີ້ຍັງບໍ່ມີໂພສເທື່ອ
+    votes: 1 ຄະແນນສຽງ | {votes} ຄະແນນສຽງ
+    View Full Post: ເບິ່ງໂພສເຕັມ
+    Reveal Answers: ສະແດງຄຳຕອບ
+    Hide Answers: ເຊື່ອງຄຳຕອບ
+    Video hidden by OpenTubeX: ວິດີໂອຖືກເຊື່ອງໂດຍ OpenTubeX
+Video:
+  Includes paid promotion: ມີການໂຄສະນາແບບເສຍເງິນ
+  Age Restricted Badge: ຈຳກັດອາຍຸ
+  Queue: ຄິວ
+  Play Next: ຫຼິ້ນເປັນອັນຖັດໄປ
+  Add to Queue: ເພີ່ມເຂົ້າໃນຄິວ
+  Added to Play Next: ວິດີໂອຈະຫຼິ້ນເປັນອັນຖັດໄປ
+  Added to Queue: ເພີ່ມວິດີໂອເຂົ້າໃນຄິວແລ້ວ
+  Clear Queue: ລ້າງຄິວ
+  Queue Video Count: '{count} ວິດີໂອ | {count} ວິດີໂອ'
+  Remove from Queue: ລຶບ {title} ອອກຈາກຄິວ
+  Drag to Reorder Queue: ລາກ {title} ເພື່ອຈັດລຽງຄິວໃໝ່
+  Reorder Queue Item: ຈັດລຽງ {title} ໃໝ່
+  Reorder Queue Item Instructions: ໃຊ້ປຸ່ມລູກສອນ ຂຶ້ນ ແລະ ລົງ ເພື່ອຍ້າຍວິດີໂອນີ້ໃນຄິວ.
+  Queue Item Moved: ຍ້າຍ {title} ໄປຫາຕຳແໜ່ງທີ່ {position} ຈາກທັງໝົດ {total}.
+  Queue Item Cannot Move Up: ບໍ່ສາມາດຍ້າຍ {title} ຂຶ້ນໄດ້. ມັນຢູ່ໃນຕຳແໜ່ງ 1 ຈາກ {total} ແລ້ວ.
+  Queue Item Cannot Move Down: ບໍ່ສາມາດຍ້າຍ {title} ລົງໄດ້. ມັນຢູ່ໃນຕຳແໜ່ງ {total} ຈາກ {total} ແລ້ວ.
+  Metadata: ຂໍ້ມູນວິດີໂອ
+  Close Metadata: ປິດຂໍ້ມູນວິດີໂອ
+  Metadata Cache:
+    Title History: ປະຫວັດການປ່ຽນຊື່
+    Thumbnail History: ປະຫວັດຮູບຕົວຢ່າງ
+    Description History: ປະຫວັດຄຳອະທິບາຍ
+    Previous Version: ເວີຊັນກ່ອນໜ້າ {number}
+    Empty: (ຫວ່າງເປົ່າ)
+  Fetching Streams: ກຳລັງດຶງຂໍ້ມູນສະຕຣີມດ້ວຍ yt-dlp…
+  Transcript:
+    Title: ບົດບັນຍາຍ
+    Search: ຄົ້ນຫາໃນບົດບັນຍາຍ
+    Language: ພາສາຂອງບົດບັນຍາຍ
+    Save: ບັນທຶກ
+    Show: ສະແດງບົດບັນຍາຍ
+    Hide: ເຊື່ອງບົດບັນຍາຍ
+    Close: ປິດບົດບັນຍາຍ
+    Copied: ຄັດລອກບົດບັນຍາຍໄປຫາຄລິບບອດແລ້ວ
+    Saved: ບັນທຶກບົດບັນຍາຍແລ້ວ
+    Save Error: ບໍ່ສາມາດບັນທຶກບົດບັນຍາຍໄດ້
+    Text File: ໄຟລ໌ຂໍ້ຄວາມ
+    Unavailable: ບໍ່ມີບົດບັນຍາຍສຳລັບວິດີໂອນີ້.
+    Load Error: ບໍ່ສາມາດໂຫຼດບົດບັນຍາຍໄດ້.
+    Empty: ບົດບັນຍາຍນີ້ບໍ່ມີຂໍ້ຄວາມໃດໆ.
+    No Results: ບໍ່ພົບຂໍ້ຄວາມໃນບົດບັນຍາຍທີ່ກົງກັບການຄົ້ນຫາ.
+  IP block: YouTube ໄດ້ບລັອກທີ່ຢູ່ IP ຂອງທ່ານ. ກະລຸນາລອງປ່ຽນ VPN ຫຼື proxy ໃໝ່.
+  Retry With Built-in Extraction: ລອງໃໝ່ດ້ວຍລະບົບດຶງຂໍ້ມູນໃນຕົວ
+  Retry With yt-dlp Extraction: ລອງໃໝ່ດ້ວຍການດຶງຂໍ້ມູນແບບ yt-dlp
+  Reloading video after streaming URL error: ກຳລັງໂຫຼດວິດີໂອໃໝ່ຫຼັງຈາກເກີດຂໍ້ຜິດພາດຂອງ URL ສະຕຣີມມິງ
+  MembersOnly: ວິດີໂອນີ້ສຳລັບສະມາຊິກເທົ່ານັ້ນ, ທ່ານຕ້ອງມີບັນຊີ Google ທີ່ເປັນສະມາຊິກຂອງຊ່ອງນີ້.
+  AgeRestricted: ວິດີໂອນີ້ມີການຈຳກັດອາຍຸ, ທ່ານຕ້ອງໃຊ້ບັນຊີ Google ທີ່ຢືນຢັນອາຍຸແລ້ວ.
+  Configure Restricted Playback Cookies Hint: ຕັ້ງຄ່າຄຸກກີ້ໄດ້ທີ່ ການຕັ້ງຄ່າ → ຊອບແວພາຍນອກ → yt-dlp Playback Cookies.
+  Try With Configured Cookies: ລອງໃໝ່ດ້ວຍຄຸກກີ້ທີ່ຕັ້ງຄ່າໄວ້
+  Restricted Playback Authentication Failed Template: 'yt-dlp ບໍ່ສາມາດເຂົ້າເຖິງວິດີໂອນີ້ດ້ວຍຄຸກກີ້ທີ່ຕັ້ງໄວ້: {error}'
+  DRMProtected: ວິດີໂອທີ່ຖືກປ້ອງກັນດ້ວຍ DRM ບໍ່ສາມາດຫຼິ້ນໃນ OpenTubeX ໄດ້. ກະລຸນາເບິ່ງຜ່ານເວັບໄຊ YouTube ໂດຍກົງໃນບຣາວເຊີທີ່ຮອງຮັບ DRM.
+  Private: ວິດີໂອສ່ວນຕົວບໍ່ສາມາດເບິ່ງໃນ OpenTubeX ໄດ້ ເພາະຕ້ອງມີການເຂົ້າສູ່ລະບົບ Google ຂອງເຈົ້າຂອງວິດີໂອ.
+  More Options: ຕົວເລືອກເພີ່ມເຕີມ
+  Mark As Watched: ໝາຍວ່າເບິ່ງແລ້ວ
+  Unmark As Watched: ຍົກເລີກໝາຍວ່າເບິ່ງແລ້ວ
+  Remove From History: ລຶບອອກຈາກປະຫວັດ
+  Video has been marked as watched: ໝາຍວ່າເບິ່ງວິດີໂອນີ້ແລ້ວ
+  Video has been unmarked as watched: ຍົກເລີກການໝາຍວ່າເບິ່ງວິດີໂອນີ້ແລ້ວ
+  Video has been removed from your history: ລຶບວິດີໂອອອກຈາກປະຫວັດຂອງທ່ານແລ້ວ
+  Save Watched Progress: ບັນທຶກໄລຍະເວລາທີ່ເບິ່ງຄ້າງໄວ້
+  Watched Progress Saved: ບັນທຶກໄລຍະເວລາທີ່ເບິ່ງແລ້ວ
+  Save Channel Playback Speed: ບັນທຶກຄວາມໄວການຫຼິ້ນຂອງຊ່ອງນີ້
+  Channel Playback Speed Saved: ບັນທຶກຄວາມໄວການຫຼິ້ນຂອງຊ່ອງແລ້ວ
+  Save Channel Video Quality: ບັນທຶກຄຸນນະພາບວິດີໂອຂອງຊ່ອງນີ້
+  Channel Video Quality Saved: ບັນທຶກຄຸນນະພາບວິດີໂອຂອງຊ່ອງແລ້ວ
+  Save Channel Subtitles State: ບັນທຶກການຕັ້ງຄ່າຄຳບັນຍາຍຂອງຊ່ອງນີ້
+  Channel Subtitles State Saved: ບັນທຶກການຕັ້ງຄ່າຄຳບັນຍາຍຂອງຊ່ອງແລ້ວ
+  Save Channel Volume: ບັນທຶກລະດັບສຽງຂອງຊ່ອງນີ້
+  Channel Volume Saved: ບັນທຶກລະດັບສຽງຂອງຊ່ອງແລ້ວ
+  Save Channel Setting: ກຳລັງບັນທຶກການຕັ້ງຄ່າຊ່ອງ…
+  Channel Setting Already Set: '{setting} ຖືກຕັ້ງເປັນ {value} ຢູ່ແລ້ວ'
+  Save Video: ບັນທຶກວິດີໂອ
+  Video has been saved: ບັນທຶກວິດີໂອແລ້ວ
+  Video has been saved to {playlistName}: ບັນທຶກວິດີໂອລົງໃນ {playlistName} ແລ້ວ
+  Video has been removed from your saved list: ລຶບວິດີໂອອອກຈາກລາຍການທີ່ບັນທຶກໄວ້ແລ້ວ
+  Video has been removed from {playlistName}: ລຶບວິດີໂອອອກຈາກ {playlistName} ແລ້ວ
+  There was a problem saving the video to {playlistName}: ເກີດບັນຫາໃນການບັນທຶກວິດີໂອລົງໃນ {playlistName}
+  There was a problem removing the video from {playlistName}: ເກີດບັນຫາໃນການລຶບວິດີໂອອອກຈາກ {playlistName}
+  Failed to load collaborators: ໂຫຼດລາຍຊື່ຜູ້ຮ່ວມງານບໍ່ສຳເລັດ
+  Open in YouTube: ເປີດໃນ YouTube
+  Copy YouTube Link: ຄັດລອກລິ້ງ YouTube
+  Open YouTube Embedded Player: ເປີດເຄື່ອງຫຼິ້ນຝັງຕົວຂອງ YouTube
+  Copy YouTube Embedded Player Link: ຄັດລອກລິ້ງເຄື່ອງຫຼິ້ນຝັງຕົວຂອງ YouTube
+  Open in Invidious: ເປີດໃນ Invidious
+  Copy Invidious Link: ຄັດລອກລິ້ງ Invidious
+  Open Channel in YouTube: ເປີດຊ່ອງໃນ YouTube
+  Copy YouTube Channel Link: ຄັດລອກລິ້ງຊ່ອງ YouTube
+  Open Channel in Invidious: ເປີດຊ່ອງໃນ Invidious
+  Copy Invidious Channel Link: ຄັດລອກລິ້ງຊ່ອງ Invidious
+  Hide Channel: ເຊື່ອງຊ່ອງ
+  Unhide Channel: ສະແດງຊ່ອງ
+  Views: ຍອດເຂົ້າເບິ່ງ
+  Loop Playlist: ຫຼິ້ນລາຍການຫຼິ້ນວົນຄືນ
+  Shuffle Playlist: ສຸ່ມລາຍການຫຼິ້ນ
+  Reverse Playlist: ຫຼິ້ນລາຍການຫຼິ້ນແບບຖອຍຫຼັງ
+  Collapse Playlist: ຫຍໍ້ລາຍການຫຼິ້ນ
+  Expand Playlist: ຂະຫຍາຍລາຍການຫຼິ້ນ
+  Previous: ກ່ອນໜ້າ
+  Next: ຖັດໄປ
+  Watched: ເບິ່ງແລ້ວ
+  Autoplay: ຫຼິ້ນອັດຕະໂນມັດ
+  Starting soon, please refresh the page to check again: ກຳລັງຈະເລີ່ມໃນໄວໆນີ້, ກະລຸນາໂຫຼດໜ້າໃໝ່ເພື່ອຊອກຫາອີກຄັ້ງ
+  Notify me: ແຈ້ງເຕືອນຂ້ອຍ
+  Notification on: ເປີດການແຈ້ງເຕືອນ
+  Notification enabled: ທ່ານຈະໄດ້ຮັບການແຈ້ງເຕືອນເມື່ອວິດີໂອນີ້ເລີ່ມຕົ້ນ
+  Notification cancelled: ຍົກເລີກການແຈ້ງເຕືອນການເລີ່ມຕົ້ນແລ້ວ
+  Notification unavailable: ການແຈ້ງເຕືອນຂອງລະບົບບໍ່ພ້ອມໃຊ້ງານ
+  Scheduled video starting: ວິດີໂອທີ່ຕັ້ງເວລາໄວ້ກຳລັງເລີ່ມ
+  Live notification body: '{videoTitle} ກຳລັງເລີ່ມໃນຕອນນີ້'
+  Premiere: ພຣີເມຍ
+  Premieres: ພຣີເມຍ
+  Upcoming: ກຳລັງຈະມາເຖິງ
+  Unlisted: ບໍ່ຢູ່ໃນລາຍການສາທາລະນະ
+  AI: AI
+  AI-generated content: ເນື້ອຫາທີ່ສ້າງໂດຍ AI
+  Collaborators: ຜູ້ຮ່ວມງານ
+  Live: ໄລຟ໌
+  Live Now: ກຳລັງໄລຟ໌ສົດ
+  Live Chat: ແຊັດສົດ
+  Live Chat Replay: ເບິ່ງແຊັດສົດຍ້ອນຫຼັງ
+  Show Live Chat: ສະແດງແຊັດສົດ
+  Show Live Chat Replay: ສະແດງແຊັດສົດຍ້ອນຫຼັງ
+  Close Live Chat: ປິດແຊັດສົດ
+  Close Live Chat Replay: ປິດແຊັດສົດຍ້ອນຫຼັງ
+  Live Chat Settings: ການຕັ້ງຄ່າແຊັດສົດ
+  Show Live Chat Timestamps: ສະແດງເວລາ
+  Chat Filter: ຕົວກັ່ນຕອງແຊັດ
+  Top Chat: ແຊັດຍອດນິຍົມ
+  All Messages: ຂໍ້ຄວາມທັງໝົດ
+  Enable Live Chat: ເປີດໃຊ້ແຊັດສົດ
+  Popout Live Chat: ແຍກໜ້າຕ່າງແຊັດ
+  Live Chat is currently not supported in this build.: ແຊັດສົດຍັງບໍ່ຮອງຮັບໃນລຸ້ນ (build) ນີ້.
+  Live chat is enabled. Chat messages will appear here once sent.: ເປີດໃຊ້ແຊັດສົດແລ້ວ. ຂໍ້ຄວາມຈະສະແດງຢູ່ນີ້ເມື່ອມີການສົ່ງ.
+  'Live chat replay is enabled. Chat messages will appear here as the video plays.': ເປີດໃຊ້ການເບິ່ງແຊັດຍ້ອນຫຼັງແລ້ວ. ຂໍ້ຄວາມຈະສະແດງຂຶ້ນຕາມເວລາຂອງວິດີໂອ.
+  'Live Chat is currently not supported with the Invidious API. A direct connection to YouTube is required.': ແຊັດສົດຍັງບໍ່ຮອງຮັບຜ່ານ Invidious API. ຕ້ອງເຊື່ອມຕໍ່ໂດຍກົງກັບ YouTube.
+  'Live Chat is unavailable for this stream. It may have been disabled by the uploader.': ແຊັດສົດບໍ່ພ້ອມໃຊ້ງານສຳລັບສະຕຣີມນີ້. ອາດຖືກປິດໂດຍເຈົ້າຂອງວິດີໂອ.
+  Show Super Chat Comment: ສະແດງຄຳຄິດເຫັນ Super Chat
+  Scroll to Bottom: ເລື່ອນລົງລຸ່ມສຸດ
+  Published:
+    In less than a minute: ບໍ່ຮອດໜຶ່ງນາທີກ່ອນ
+  Published on: ເຜີຍແຜ່ເມື່ອ
+  Premiere started: ກຳລັງພຣີເມຍ. ເລີ່ມເມື່ອ {timeAgo}
+  Streamed on: ສະຕຣີມເມື່ອ
+  Started streaming on: ເລີ່ມສະຕຣີມເມື່ອ
+  DeArrow:
+    Show Original Details: ສະແດງລາຍລະອຽດດັ້ງເດີມ
+    Show Modified Details: ສະແດງລາຍລະອຽດທີ່ປັບແຕ່ງແລ້ວ
+  Sponsor Block category:
+    sponsor: ສະປອນເຊີ
+    intro: ຊ່ວງພັກ/ແອນິເມຊັນເປີດຕົວ
+    outro: ສ່ວນທ້າຍ/ລາຍຊື່ຜູ້ຮ່ວມງານ
+    self-promotion: ການໂປຣໂມດຕົວເອງ
+    interaction: ການເຕືອນໃຫ້ມີປະຕິສຳພັນ (ກົດຕິດຕາມ)
+    music offtopic: 'ເພງ: ສ່ວນທີ່ບໍ່ແມ່ນເພງ'
+    recap: ຕົວຢ່າງ/ສະຫຼຸບເນື້ອຫາ
+    hook: ສ່ວນດຶງດູດ/ການທັກທາຍ
+    filler: ເນື້ອຫາເສີມ/ມຸກຕະຫຼົກ
+    highlight: ໄຮໄລ້
+    exclusive access: ສິດເຂົ້າເຖິງພິເສດ
+  Sponsor Block category short:
+    intro: ຊ່ວງພັກ
+    interaction: ເຕືອນປະຕິສຳພັນ
+    music offtopic: ບໍ່ແມ່ນເພງ
+    filler: ເລື່ອງຕະຫຼົກ/ນອກເລື່ອງ
+  External Player:
+    OpenInTemplate: ເປີດໃນ {externalPlayer}
+    video: ວິດີໂອ
+    playlist: ລາຍການຫຼິ້ນ
+    OpeningTemplate: ກຳລັງເປີດ {videoOrPlaylist} ໃນ {externalPlayer}...
+    UnsupportedActionTemplate: '{externalPlayer} ບໍ່ຮອງຮັບ: {action}'
+    Unsupported Actions:
+      starting video at offset: ການເລີ່ມວິດີໂອຕາມເວລາທີ່ກຳນົດ
+      setting a playback rate: ການຕັ້ງຄ່າຄວາມໄວການຫຼິ້ນ
+      opening playlists: ການເປີດລາຍການຫຼິ້ນ
+      opening specific video in a playlist (falling back to opening the video): ການເປີດວິດີໂອສະເພາະໃນລາຍການຫຼິ້ນ (ກຳລັງປ່ຽນເປັນການເປີດວິດີໂອແທນ)
+      reversing playlists: ການຫຼິ້ນລາຍການຫຼິ້ນແບບຖອຍຫຼັງ
+      shuffling playlists: ການສຸ່ມລາຍການຫຼິ້ນ
+      looping playlists: ການຫຼິ້ນລາຍການຫຼິ້ນວົນຄືນ
+  Player:
+    Voice-over Translation:
+      Start: ແປພາສາ
+      Cancel: ຍົກເລີກ
+      Progress: ກຳລັງກຽມການແປສຽງບັນຍາຍ…
+      Retry: ລອງໃໝ່
+      Error: ການແປສຽງບັນຍາຍລົ້ມເຫຼວ. ກະລຸນາລອງໃໝ່ພາຍຫຼັງ.
+      Duration Error: ການແປສຽງບັນຍາຍຮອງຮັບສະເພາະວິດີໂອທີ່ມີຄວາມຍາວບໍ່ເກີນ 4 ຊົ່ວໂມງ.
+    Caption Appearance:
+      Options: ຕົວເລືອກ
+      Sample: ຄຳບັນຍາຍຈະມີລັກສະນະແບບນີ້
+    Auto-translate: ແປອັດຕະໂນມັດ
+    Sleep Timer:
+      Sleep Timer: ຕົວຕັ້ງເວລາປິດ
+      Off: ປິດ
+      Minutes: '{minutes} ນາທີ'
+      End of video: ເມື່ອຈົບວິດີໂອ
+      Remaining: ເຫຼືອເວລາ {time}
+      Cancel timer: ຍົກເລີກຕົວຕັ້ງເວລາ
+      Timer ended: ໝົດເວລາປິດແລ້ວ
+    A-B Repeat:
+      A-B Repeat: ຫຼິ້ນຊໍ້າ A-B
+      On: ເປີດ
+      Off: ປິດ
+      Point A: ຈຸດ A
+      Point B: ຈຸດ B
+      Set Repeat Start: ຕັ້ງຈຸດເລີ່ມຊໍ້າ
+      Set Repeat End: ຕັ້ງຈຸດສິ້ນສຸດຊໍ້າ
+      Pause Repeat: ຢຸດການຫຼິ້ນຊໍ້າ A-B ຊົ່ວຄາວ
+      Resume Repeat: ຫຼິ້ນຊໍ້າ A-B ຕໍ່
+      Adjust Point: ປັບຈຸດ {point}, ຕອນນີ້ແມ່ນ {timestamp}
+      Clear Range: ລ້າງໄລຍະການຫຼິ້ນຊໍ້າ A-B
+      End Before Start: ຈຸດ B ຕ້ອງຢູ່ຫຼັງຈຸດ A.
+      Outside Duration: ເວລາຕ້ອງຢູ່ພາຍໃນຄວາມຍາວຂອງວິດີໂອ.
+      Cleared: ລ້າງການຫຼິ້ນຊໍ້າ A-B ແລ້ວ
+    Zoom:
+      Zoom: ຊູມ
+      Off: ປິດ
+    TranslatedCaptionTemplate: '{language} (ແປມາຈາກ "{originalLanguage}")'
+    Auto-generated Caption Template: '{language} (ສ້າງອັດຕະໂນມັດ)'
+    Audio Tracks: ແທຣັກສຽງ
+    Autoplay is off: ປິດການຫຼິ້ນອັດຕະໂນມັດ
+    Autoplay is on: ເປີດການຫຼິ້ນອັດຕະໂນມັດ
+    Up next in {seconds}: ວິດີໂອຖັດໄປໃນ {seconds}
+    Resize dock: ປັບຂະໜາດແຖບວາງ
+    Play now: ຫຼິ້ນຕອນນີ້
+    MusicPlaybackRateOverride: ພົບວິດີໂອເພງ, ກຳລັງຫຼິ້ນທີ່ຄວາມໄວ 1x
+    Normal: ປົກກະຕິ
+    Set Default: ຕັ້ງເປັນຄ່າເລີ່ມຕົ້ນ
+    Theatre Mode: ໂໝດໂຮງຮູບເງົາ
+    Exit Theatre Mode: ອອກຈາກໂໝດໂຮງຮູບເງົາ
+    Full Window: ເຕັມໜ້າຕ່າງ
+    Exit Full Window: ອອກຈາກໂໝດເຕັມໜ້າຕ່າງ
+    Take Screenshot: ຖ່າຍພາບໜ້າຈໍ
+    Show Stats: ສະແດງສະຖິຕິ
+    Hide Stats: ເຊື່ອງສະຖິຕິ
+    Hide Annotations: ເຊື່ອງຄຳອະທິບາຍປະກອບ
+    Show Annotations: ສະແດງຄຳອະທິບາຍປະກອບ
+    Hide: ເຊື່ອງ
+    Show: ສະແດງ
+    Stats:
+      Stats: ສະຖິຕິ
+      Video ID: 'ໄອດີວິດີໂອ: {videoId}'
+      Media Formats: 'ຮູບແບບສື່: {formats}'
+      Resolution: "ຄວາມລະອຽດ: {width}x{height}{'@'}{frameRate}"
+      Player Dimensions: 'ຂະໜາດເຄື່ອງຫຼິ້ນ: {width}x{height}'
+      Bitrate: 'ບິດເຣດ: {bitrate} kbps'
+      Volume: 'ລະດັບສຽງ: {volumePercentage}%'
+      Bandwidth: 'ແບນວິດ: {bandwidth} kbps'
+      Buffered: 'ບັບເຟີແລ້ວ: {bufferedPercentage}%'
+      Dropped Frames / Total Frames: 'ເຟຣມທີ່ຫຼຸດ: {droppedFrames} / ເຟຣມທັງໝົດ: {totalFrames}'
+      CodecAudio: 'ຕົວຖອດລະຫັດສຽງ: {audioCodec} ({audioItag})'
+      CodecsVideoAudio: 'ຕົວຖອດລະຫັດ: {videoCodec} ({videoItag}) / {audioCodec} ({audioItag})'
+      CodecsVideoAudioNoItags: 'ຕົວຖອດລະຫັດ: {videoCodec} / {audioCodec}'
+    You appear to be offline: ເບິ່ງຄືວ່າທ່ານກຳລັງອອບລາຍ.
+    Playback will resume automatically when your connection comes back: ການຫຼິ້ນຈະເລີ່ມຄືນໃໝ່ໂດຍອັດຕະໂນມັດເມື່ອການເຊື່ອມຕໍ່ກັບມາ.
+    Scroll Mini Player:
+      Back to Top: ກັບຂຶ້ນເທິງ
+      Return to Video Tab: ກັບໄປທີ່ແຖບວິດີໂອ
+      Hide: ເຊື່ອງເຄື່ອງຫຼິ້ນຂະໜາດນ້ອຍ
+      Play: ຫຼິ້ນ
+      Pause: ຢຸດຊົ່ວຄາວ
+      Drag Handle: ຍ້າຍເຄື່ອງຫຼິ້ນຂະໜາດນ້ອຍ
+    Skipped segment: ຂ້າມ {segmentCategory} ແລ້ວ
+    SponsorBlock:
+      CancelCurrentSegment: ຍົກເລີກການສ້າງຊ່ວງ
+      ClearSegments: ລ້າງຊ່ວງທັງໝົດ
+      ClearSegmentsPrompt: ທ່ານແນ່ໃຈຫຼືບໍ່ວ່າຕ້ອງການລ້າງຊ່ວງ SponsorBlock ທີ່ຮ່າງໄວ້ທັງໝົດສຳລັບວິດີໂອນີ້?
+      CompleteSegmentsBeforeSubmitting: ກະລຸນາຕື່ມຂໍ້ມູນແຕ່ລະຊ່ວງໃຫ້ຄົບຖ້ວນກ່ອນການສົ່ງ.
+      CategoryLabel: ໝວດໝູ່
+      ActionTypeLabel: ປະເພດຊ່ວງ
+      DuplicateSegments: ບໍ່ອະນຸຍາດໃຫ້ມີຊ່ວງທີ່ຊໍ້າກັນ.
+      EndAction: (ຈົບ)
+      EndActionLabel: ຈົບ
+      EndTimeAfterStart: ເວລາສິ້ນສຸດຊ່ວງຕ້ອງຢູ່ຫຼັງເວລາເລີ່ມຕົ້ນ.
+      EndTimeBeforeVideoEnd: ເວລາສິ້ນສຸດຊ່ວງຕ້ອງບໍ່ເກີນຄວາມຍາວຂອງວິດີໂອ.
+      EndTimeLabel: ເວລາສິ້ນສຸດຊ່ວງ
+      DisableAutoSkipTemporarily: ປິດການຂ້າມອັດຕະໂນມັດຂອງ SponsorBlock ຊົ່ວຄາວ
+      EnableAutoSkipTemporarily: ເປີດໃຊ້ການຂ້າມອັດຕະໂນມັດຂອງ SponsorBlock ອີກຄັ້ງ
+      Guidelines: ແນວທາງການໃຊ້ງານ
+      InspectSegment: ກວດສອບ
+      InvalidStartTime: ກະລຸນາໃສ່ເວລາເລີ່ມຕົ້ນຊ່ວງໃຫ້ຖືກຕ້ອງ.
+      NoSegmentsToSubmit: ກະລຸນາສ້າງຢ່າງໜ້ອຍໜຶ່ງຊ່ວງໃຫ້ສຳເລັດກ່ອນສົ່ງ.
+      NowAction: (ດຽວນີ້)
+      CloseInfoPanel: ປິດຂໍ້ມູນ SponsorBlock
+      OpenInfoPanel: ເປີດຂໍ້ມູນ SponsorBlock
+      OpenSubmissionMenu: ເປີດເມນູການສົ່ງຂໍ້ມູນ
+      PreviewRequired: ກະລຸນາເບິ່ງຕົວຢ່າງແຕ່ລະຊ່ວງກ່ອນການສົ່ງ.
+      PreviewSegment: ຕົວຢ່າງ
+      SaveSegment: ບັນທຶກ
+      SetSegmentEndNow: ຕັ້ງໃຫ້ຈົບຊ່ວງຕອນນີ້
+      StartAction: (ເລີ່ມ)
+      StartSegmentNow: ຕັ້ງໃຫ້ເລີ່ມຊ່ວງຕອນນີ້
+      SubmissionBadRequest: SponsorBlock ປະຕິເສດຄຳຮ້ອງຂໍສົ່ງຂໍ້ມູນ.
+      SubmissionDuplicate: ຂໍ້ມູນນີ້ຖືກສົ່ງໄປແລ້ວກ່ອນໜ້ານີ້.
+      SubmissionFailed: ສົ່ງຂໍ້ມູນຊ່ວງ SponsorBlock ບໍ່ສຳເລັດ.
+      SubmissionForbidden: SponsorBlock ປະຕິເສດການສົ່ງຂໍ້ມູນ.
+      SubmissionRateLimited: SponsorBlock ຈຳກັດຄວາມຖີ່ໃນການສົ່ງຂໍ້ມູນ.
+      SubmissionSuccess: ສົ່ງຂໍ້ມູນຊ່ວງ SponsorBlock ສຳເລັດແລ້ວ.
+      SubmitSegment: ສົ່ງຂໍ້ມູນຊ່ວງ
+      SubmitSegments: ສົ່ງ
+      StartTimeLabel: ເວລາເລີ່ມຕົ້ນຊ່ວງ
+      TimeDivider: ຫາ
+      SkipPrompt: ຂ້າມ {segmentCategory} ບໍ່?
+      SkipPromptAction: ຂ້າມ
+      SkipToHighlight: ຂ້າມໄປຫາໄຮໄລ້ບໍ່?
+      SkippedToHighlight: ຂ້າມໄປຫາໄຮໄລ້ແລ້ວ
+      SkipToastUnskip: ຍົກເລີກການຂ້າມ
+      SkipToastReskip: ຂ້າມອີກຄັ້ງ
+      MutedSegment: ປິດສຽງ {segmentCategory} ແລ້ວ
+      MuteToastUnmute: ເປີດສຽງ
+      InfoPanelLoading: ກຳລັງໂຫຼດຂໍ້ມູນຊ່ວງ...
+      InfoPanelHasSegments: ວິດີໂອນີ້ມີຂໍ້ມູນຊ່ວງຢູ່ໃນຖານຂໍ້ມູນ!
+      InfoPanelNoSegments: ບໍ່ພົບຂໍ້ມູນຊ່ວງ
+      RefreshSegments: ໂຫຼດຂໍ້ມູນຊ່ວງໃໝ່
+      RefreshInfo: ໂຫຼດຂໍ້ມູນ SponsorBlock ໃໝ່
+      ContributionStatsTitle: ການປະກອບສ່ວນຂອງທ່ານ
+      ContributionStatsLoading: ກຳລັງໂຫຼດສະຖິຕິການປະກອບສ່ວນ...
+      ContributionStatsError: ສະຖິຕິການປະກອບສ່ວນບໍ່ພ້ອມໃຊ້ງານ. ກະລຸນາລອງໂຫຼດໃໝ່.
+      ContributionStatsNoUserId: ສົ່ງຂໍ້ມູນຊ່ວງ ຫຼື ນຳເຂົ້າໄອດີຜູ້ໃຊ້ SponsorBlock ເພື່ອເບິ່ງສະຖິຕິ.
+      Submissions: ການສົ່ງຂໍ້ມູນ
+      Segments: ຊ່ວງ
+      TimeSaved: ເວລາທີ່ປະຢັດໄດ້
+      AutoSkipEnabled: ຂ້າມຊ່ວງໂດຍອັດຕະໂນມັດ
+      AutoSkipOn: ເປີດ
+      AutoSkipOff: ປິດ
+      WhitelistChannel: ເພີ່ມຊ່ອງເຂົ້າໃນລາຍການອະນຸຍາດ
+      ChannelWhitelisted: ຢູ່ໃນລາຍການອະນຸຍາດແລ້ວ
+      RemoveChannelFromWhitelist: ລຶບຊ່ອງອອກຈາກລາຍການອະນຸຍາດ
+      MuteSegment: ປິດສຽງຊ່ວງນີ້
+      SkipSegment: ຂ້າມຊ່ວງນີ້
+      CloseSegmentActions: ປິດການຈັດການຊ່ວງ
+      FullVideo: ວິດີໂອເຕັມ
+      FullVideoLabel: '{segmentCategory} · ວິດີໂອເຕັມ'
+      MuteActionType: ປິດສຽງ
+      MutePrompt: ປິດສຽງ {segmentCategory} ບໍ່?
+      SkipActionType: ຂ້າມ
+      LockedSegment: ຊ່ວງຖືກລັອກ
+      UpvoteSegment: ໂຫວດຂຶ້ນ
+      DownvoteSegment: ໂຫວດລົງ
+      VoteFailed: ສົ່ງຄະແນນໂຫວດ SponsorBlock ບໍ່ສຳເລັດ.
+  Watch:
+    'Remaining preroll-ad time: {remindingTimeSeconds}s': 'ເວລາໂຄສະນາກ່ອນເລີ່ມທີ່ເຫຼືອ: {remindingTimeSeconds} ວິນາທີ'
+    'Remaining SABR backoff time: {remindingTimeSeconds}s': 'ເວລາພັກ SABR ທີ່ເຫຼືອ: {remindingTimeSeconds} ວິນາທີ'
+Playlist:
+  Playlist: ລາຍການຫຼິ້ນ
+  Close Playlist: ປິດລາຍການຫຼິ້ນ
+  View Full Playlist: ເບິ່ງລາຍການຫຼິ້ນທັງໝົດ
+  Last Updated On: ອັບເດດຫຼ້າສຸດເມື່ອ
+  Sort By:
+    DateAddedNewest: ວັນທີເພີ່ມ (ໃໝ່ສຸດ)
+    DateAddedOldest: ວັນທີເພີ່ມ (ເກົ່າສຸດ)
+    PublishedNewest: ວັນທີເຜີຍແຜ່ (ໃໝ່ສຸດ)
+    PublishedOldest: ວັນທີເຜີຍແຜ່ (ເກົ່າສຸດ)
+    AuthorAscending: ຊື່ຜູ້ສ້າງ (ກ-ຮ)
+    AuthorDescending: ຊື່ຜູ້ສ້າງ (ຮ-ກ)
+    VideoTitleAscending: ຊື່ເລື່ອງ (ກ-ຮ)
+    VideoTitleDescending: ຊື່ເລື່ອງ (ຮ-ກ)
+    VideoDurationAscending: ຄວາມຍາວ (ສັ້ນສຸດ)
+    VideoDurationDescending: ຄວາມຍາວ (ຍາວສຸດ)
+    Custom: ກຳນົດເອງ
+Change Format:
+  Change Media Formats: ປ່ຽນຮູບແບບສື່
+  Use Dash Formats: ໃຊ້ຮູບແບບ DASH
+  Use Legacy Formats: ໃຊ້ຮູບແບບແບບເກົ່າ
+  Use Audio Formats: ໃຊ້ຮູບແບບສຽງ
+  Local Video File: ໄຟລ໌ວິດີໂອໃນເຄື່ອງ
+  Local Audio File: ໄຟລ໌ສຽງໃນເຄື່ອງ
+  Online Video: ວິດີໂອອອນລາຍ
+  Dash formats are not available for this video: ຮູບແບບ DASH ບໍ່ພ້ອມໃຊ້ງານສຳລັບວິດີໂອນີ້
+  Audio formats are not available for this video: ຮູບແບບສຽງບໍ່ພ້ອມໃຊ້ງານສຳລັບວິດີໂອນີ້
+  Legacy formats are not available for this video: ຮູບແບບແບບເກົ່າບໍ່ພ້ອມໃຊ້ງານສຳລັບວິດີໂອນີ້
+  Stream Source: ແຫຼ່ງທີ່ມາຂອງສະຕຣີມ
+  Stream Extraction Method: ວິທີການດຶງຂໍ້ມູນສະຕຣີມ
+  Playback Engine: ລະບົບການຫຼິ້ນ
+  Streaming Protocol: ໂປຣໂຕຄໍສະຕຣີມມິງ
+  Not Available For This Video: ບໍ່ພ້ອມໃຊ້ງານສຳລັບວິດີໂອນີ້
+  Protocols:
+    Progressive: Progressive
+  Descriptions:
+    Local File: ຫຼິ້ນໂດຍກົງຈາກໄຟລ໌ທີ່ດາວໂຫຼດໄວ້ໃນອຸປະກອນນີ້
+    Online Video: ໂຫຼດຮູບແບບການສະຕຣີມຈາກແຫຼ່ງຂໍ້ມູນອອນລາຍທີ່ໄດ້ຕັ້ງຄ່າໄວ້
+    Dash: ຄຸນນະພາບແບບປັບປ່ຽນໄດ້, ມີຫຼາຍແທຣັກສຽງ ແລະ ຄວາມລະອຽດສູງສຸດ
+    Legacy: ໄຟລ໌ດຽວທີ່ມີທັງວິດີໂອ ແລະ ສຽງລວມກັນ, ຈຳກັດສະເພາະຄວາມລະອຽດຕ່ຳ
+    Audio: ສຽງຢ່າງດຽວ, ມີປະໂຫຍດສຳລັບການປະຢັດແບນວິດ ຫຼື ຟັງຢູ່ພື້ນຫຼັງ
+  yt-dlp Fallback Template: 'yt-dlp ບໍ່ສາມາດສະໜອງການສະຕຣີມໄດ້, ກຳລັງໃຊ້ລະບົບພາຍໃນແທນ: {error}'
+  yt-dlp Default Clients Fallback: ຕົວຫຼິ້ນ yt-dlp ທີ່ເລືອກໄວ້ບໍ່ສາມາດສະໜອງການສະຕຣີມທີ່ຫຼິ້ນໄດ້, ກຳລັງລອງໃຊ້ຕົວຫຼິ້ນເລີ່ມຕົ້ນຂອງ yt-dlp ແທນ
+  Built-in Fallback Template: 'ລະບົບພາຍໃນບໍ່ສາມາດຫຼິ້ນການສະຕຣີມໄດ້, ກຳລັງລອງໃຊ້ yt-dlp ແທນ: {error}'
+Share:
+  Share Video: ແບ່ງປັນວິດີໂອ
+  Share Post: ແບ່ງປັນໂພສ
+  Share Channel: ແບ່ງປັນຊ່ອງ
+  Share Playlist: ແບ່ງປັນເພລລິສ
+  Include Timestamp: ລວມຕຳແໜ່ງເວລາ
+  Copy Link: ຄັດລອກລິ້ງ
+  Open Link: ເປີດລິ້ງ
+  Copy Embed: ຄັດລອກໂຄ້ດຝັງ
+  Open Embed: ເປີດການຝັງ
+  Invidious URL copied to clipboard: ຄັດລອກ Invidious URL ໄປທີ່ຄລິບບອດແລ້ວ
+  Invidious Embed URL copied to clipboard: ຄັດລອກ Invidious Embed URL ໄປທີ່ຄລິບບອດແລ້ວ
+  Invidious Channel URL copied to clipboard: ຄັດລອກ Invidious Channel URL ໄປທີ່ຄລິບບອດແລ້ວ
+  YouTube URL copied to clipboard: ຄັດລອກ YouTube URL ໄປທີ່ຄລິບບອດແລ້ວ
+  YouTube Embed URL copied to clipboard: ຄັດລອກ YouTube Embed URL ໄປທີ່ຄລິບບອດແລ້ວ
+  YouTube Channel URL copied to clipboard: ຄັດລອກ YouTube Channel URL ໄປທີ່ຄລິບບອດແລ້ວ
+  Timestamp Link Copied: ຄັດລອກລິ້ງຕຳແໜ່ງເວລາໄປທີ່ຄລິບບອດແລ້ວ
+Clipboard:
+  Copy failed: ການຄັດລອກໄປທີ່ຄລິບບອດລົ້ມເຫຼວ
+  Cannot access clipboard without a secure connection: ບໍ່ສາມາດເຂົ້າເຖິງຄລິບບອດໄດ້ໂດຍບໍ່ມີການເຊື່ອມຕໍ່ທີ່ປອດໄພ
+Context Menu:
+  Context Menu: ເມນູບໍລິບົດ
+  Select All: ເລືອກທັງໝົດ
+  Save Image As…: ບັນທຶກຮູບພາບເປັນ…
+  Copy Image: ຄັດລອກຮູບພາບ
+  Copy Image Address: ຄັດລອກທີ່ຢູ່ຮູບພາບ
+  Cancel Refresh: ຍົກເລີກການໂຫຼດໃໝ່
+  Reload Videos: ໂຫຼດວິດີໂອໃໝ່
+  Reload Shorts: ໂຫຼດ Shorts ໃໝ່
+  Reload Live: ໂຫຼດໄລຟ໌ໃໝ່
+  Reload Posts: ໂຫຼດໂພສໃໝ່
+  Reload All Feeds: ໂຫຼດຟີດທັງໝົດໃໝ່
+  Close Multiple Tabs: ປິດ {count} ແທັບ
+  Duplicate Tab: ເຮັດຊ້ຳແທັບ
+  Duplicate Multiple Tabs: ເຮັດຊ້ຳ {count} ແທັບ
+  Move Tab: ຍ້າຍແທັບ
+  Move Tabs: ຍ້າຍຫຼາຍແທັບ
+  Move Tab to Group: ຍ້າຍແທັບໄປທີ່ກຸ່ມ
+  Collapse Group: ຫຍໍ້ກຸ່ມ
+  Move Tabs to Group: ຍ້າຍຫຼາຍແທັບໄປທີ່ກຸ່ມ
+  Manage Tab Groups…: ຈັດການກຸ່ມແທັບ…
+  To Beginning: ໄປທີ່ເລີ່ມຕົ້ນ
+  To End: ໄປທີ່ຕອນທ້າຍ
+  Close Tabs: ປິດແທັບ
+  To the Top: ໄປທີ່ດ້ານເທິງ
+  To the Left: ໄປທາງຊ້າຍ
+  To the Bottom: ໄປທີ່ດ້ານລຸ່ມ
+  To the Right: ໄປທາງຂວາ
+  Other Tabs: ແທັບອື່ນໆ
+  Copy YouTube Link: ຄັດລອກລິ້ງ YouTube
+  Copy YouTube Links: ຄັດລອກລິ້ງ YouTube ທັງໝົດ
+  Pin Tab: ປັກໝຸດແທັບ
+  Pin Tabs: ປັກໝຸດຫຼາຍແທັບ
+  Unpin Tab: ຖອນການປັກໝຸດແທັບ
+  Unpin Tabs: ຖອນການປັກໝຸດຫຼາຍແທັບ
+  Tab Color: ສີແທັບ
+  Default: ເລີ່ມຕົ້ນ
+  Purple: ສີມ່ວງ
+  Reopen Closed Tab: ເປີດແທັບທີ່ປິດໄປຄືນໃໝ່
+  Reload Tab: ໂຫຼດແທັບໃໝ່
+  Reload Tabs: ໂຫຼດຫຼາຍແທັບໃໝ່
+  Load Tab: ໂຫຼດແທັບ
+  Load Tabs: ໂຫຼດຫຼາຍແທັບ
+  Unload Tab: ຖອນການໂຫຼດແທັບ
+  Unload Tabs: ຖອນການໂຫຼດຫຼາຍແທັບ
+  Move Tab to Window: ຍ້າຍແທັບໄປໜ້າຕ່າງໃໝ່
+  Move Tabs to Window: ຍ້າຍຫຼາຍແທັບໄປໜ້າຕ່າງໃໝ່
+  Open in a New Tab: ເປີດໃນແທັບໃໝ່
+  Open in a New Window: ເປີດໃນໜ້າຕ່າງໃໝ່
+  Copy Link: ຄັດລອກລິ້ງ
+  Copy Invidious Link: ຄັດລອກລິ້ງ Invidious
+  Search Selection in New Tab: ຄົ້ນຫາ "{selection}" ໃນແທັບໃໝ່
+  Search Selection in New Window: ຄົ້ນຫາ "{selection}" ໃນໜ້າຕ່າງໃໝ່
+  Search With: ຄົ້ນຫາດ້ວຍ {engine}
+  Search With Multiple: ຄົ້ນຫາດ້ວຍ...
+  Selection Too Long: ຂໍ້ຄວາມທີ່ເລືອກຍາວເກີນໄປສຳລັບການຄົ້ນຫາ (> {count} ຕົວອັກສອນ)
+Tab Organizer:
+  Title: ຕົວຈັດການແທັບ
+  Open Tab Count: '{count} ແທັບທີ່ເປີດຢູ່ | {count} ແທັບທີ່ເປີດຢູ່'
+  Search Label: ຄົ້ນຫາແທັບ
+  Selected Count: ເລືອກແລ້ວ {count} ແທັບ | ເລືອກແລ້ວ {count} ແທັບ
+  Tab Count: '{count} ແທັບ | {count} ແທັບ'
+  Select All: ເລືອກທັງໝົດ
+  Select None: ບໍ່ເລືອກເລີຍ
+  Move To Group: ຍ້າຍແທັບທີ່ເລືອກໄປທີ່ກຸ່ມ
+  Choose Group: ເລືອກກຸ່ມ
+  Ungrouped: ບໍ່ໄດ້ຈັດກຸ່ມ
+  Pin: ປັກໝຸດ
+  Unpin: ຖອນການປັກໝຸດ
+  Load: ໂຫຼດ
+  Unload: ຖອນການໂຫຼດ
+  Unload All: ຖອນການໂຫຼດທັງໝົດ
+  Close All: ປິດທັງໝົດ
+  Ungroup: ຍົກເລີກການຈັດກຸ່ມ
+  Group Name: ຊື່ກຸ່ມ
+  Color: ສີ
+  No Color: ບໍ່ມີສີ
+  Create Group: ສ້າງກຸ່ມ
+  Expand Group: ຂະຫຍາຍກຸ່ມ
+  Collapse Group: ຫຍໍ້ກຸ່ມ
+  Expand Group Label: ຂະຫຍາຍ {name}, {count} ແທັບ | ຂະຫຍາຍ {name}, {count} ແທັບ
+  Rename Group: ປ່ຽນຊື່ {name}
+  Change Group Color: ປ່ຽນສີສຳລັບ {name}
+  Move To Window: ຍ້າຍໄປທີ່ໜ້າຕ່າງ
+  Choose Window: ເລືອກໜ້າຕ່າງ
+  Select Tab: ເລືອກ {title}
+  Active: ກຳລັງໃຊ້ງານ
+  Pinned: ປັກໝຸດແລ້ວ
+  Unloaded: ຖອນການໂຫຼດແລ້ວ
+  Playing: ກຳລັງຫຼິ້ນ
+  Close Tab: ປິດ {title}
+  No Open Results: ບໍ່ມີແທັບທີ່ເປີດຢູ່ຕົງກັບການຄົ້ນຫານີ້.
+  Recently Closed: ປິດໄປຫວ່າງມໍ່ໆນີ້
+  Clear: ລຶບລ້າງ
+  No Closed Results: ບໍ່ມີແທັບທີ່ຫາປິດໄປຕົງກັບການຄົ້ນຫານີ້.
+  Drag Tab: ລາກເພື່ອຍ້າຍໄປທີ່ກຸ່ມ
+Chapters:
+  Chapters: ບົດ
+  Key Moments: ຊ່ວງເວລາທີ່ສຳຄັນ
+  Open Chapters: ເປີດລາຍການບົດ
+  Close Chapters: ປິດລາຍການບົດ
+  Copy Timestamp Link: ຄັດລອກລິ້ງທີ່ເວລາ {timestamp}
+Mini Player: ຕົວຫຼິ້ນຂະໜາດນ້ອຍ
+Comments:
+  Comments: ຄວາມຄິດເຫັນ
+  Comment Count: 1 ຄວາມຄິດເຫັນ | {count} ຄວາມຄິດເຫັນ
+  Show Comments: ສະແດງຄວາມຄິດເຫັນ
+  Click to View Comments: ຄລິກເພື່ອເບິ່ງຄວາມຄິດເຫັນ
+  Getting comment replies, please wait: ກຳລັງດຶງຂໍ້ມູນການຕອບກັບ, ກະລຸນາລໍຖ້າ
+  There are no more comments for this video: ບໍ່ມີຄວາມຄິດເຫັນເພີ່ມເຕີມສຳລັບວິດີໂອນີ້
+  Hide Comments: ເຊື່ອງຄວາມຄິດເຫັນ
+  Reload Comments: ໂຫຼດຄວາມຄິດເຫັນໃໝ່
+  Top comments: ຄວາມຄິດເຫັນຍອດນິຍົມ
+  Newest first: ໃໝ່ລ່າສຸດກ່ອນ
+  Reply Count: 1 ການຕອບກັບ | {replyCount} ການຕອບກັບ
+  View {replyCount} replies: ເບິ່ງ 1 ການຕອບກັບ | ເບິ່ງ {replyCount} ການຕອບກັບ
+  Hide {replyCount} replies: ເຊື່ອງ 1 ການຕອບກັບ | ເຊື່ອງ {replyCount} ການຕອບກັບ
+  View 1 reply from {channelName}: ເບິ່ງ 1 ການຕອບກັບຈາກ {channelName}
+  View {replyCount} replies from {channelName} and others: ເບິ່ງ {replyCount} ການຕອບກັບຈາກ {channelName} ແລະ ຄົນອື່ນໆ
+  Show More Replies: ສະແດງການຕອບກັບເພີ່ມເຕີມ
+  There are no comments available for this video: ບໍ່ມີຄວາມຄິດເຫັນສຳລັບວິດີໂອນີ້
+  There are no comments available for this post: ບໍ່ມີຄວາມຄິດເຫັນສຳລັບໂພສນີ້
+  Comments are turned off: ຄວາມຄິດເຫັນຖືກປິດໄວ້
+  YouTube did not provide advertised replies: YouTube ສະແດງວ່າຄວາມຄິດເຫັນນີ້ມີການຕອບກັບ, ແຕ່ບໍ່ໄດ້ສົ່ງຂໍ້ມູນມາໃຫ້. ພວກມັນອາດຈະຖືກລຶບ ຫຼື ເຊື່ອງໄວ້, ປຸ່ມຕອບກັບຈຶ່ງຖືກຍ້າຍອອກ.
+  Load More Comments: ໂຫຼດຄວາມຄິດເຫັນເພີ່ມເຕີມ
+  Pinned by: ປັກໝຸດໂດຍ
+  Pinned by you: ປັກໝຸດໂດຍເຈົ້າ
+  A reply is pinned: ການຕອບກັບຖືກປັກໝຸດໄວ້
+  Filter loaded comments: ກັ່ນຕອງຄວາມຄິດເຫັນທີ່ໂຫຼດແລ້ວ
+  Comment filters: ຕົວບັນຈຸການກັ່ນຕອງຄວາມຄິດເຫັນ
+  From creator: ຈາກຜູ້ສ້າງ
+  Contains timestamps: ມີຕຳແໜ່ງເວລາ
+  Pin comment by author: ປັກໝຸດຄວາມຄິດເຫັນໂດຍ {author}
+  Unpin comment by author: ຖອນການປັກໝຸດຄວາມຄິດເຫັນໂດຍ {author}
+  Member: ສະມາຊິກ
+  Subscribed: ຕິດຕາມແລ້ວ
+  Edited: (ແກ້ໄຂແລ້ວ)
+  Hearted: ໄດ້ຮັບຫົວໃຈ
+  Highlighted comment: ຄວາມຄິດເຫັນທີ່ເນັ້ນ
+  Highlighted reply: ການຕອບກັບທີ່ເນັ້ນ
+  Search loaded comments: ຄົ້ນຫາຄວາມຄິດເຫັນທີ່ໂຫຼດແລ້ວ
+  Loaded comment search result count: 1 ຈາກ {total} ຄວາມຄິດເຫັນທີ່ໂຫຼດແລ້ວ | {count} ຈາກ {total} ຄວາມຄິດເຫັນທີ່ໂຫຼດແລ້ວ
+  No loaded comments match your filters: ບໍ່ມີຄວາມຄິດເຫັນທີ່ໂຫຼດແລ້ວຕົງກັບຕົວແກ້ໄຂຂອງທ່ານ
+  YouTube comment link copied to clipboard: ຄັດລອກລິ້ງຄວາມຄິດເຫັນ YouTube ໄປທີ່ຄລິບບອດແລ້ວ
+  Translate to {language}: ແປເປັນ {language}
+  Show original: ສະແດງຕົ້ນສະບັບ
+  Translating comment, please wait: ກຳລັງແປຄວາມຄິດເຫັນ, ກະລຸນາລໍຖ້າ
+  Comment translation failed: ການແປຄວາມຄິດເຫັນລົ້ມເຫຼວ
+Up Next: ຕໍ່ໄປ
+Description:
+  Expand Description: '...ເພີ່ມເຕີມ'
+  Collapse Description: ສະແດງໜ້ອຍລົງ
+  Copy Description: ຄັດລອກຄຳອະທິບາຍ
+  Description Copied: ຄັດລອກຄຳອະທິບາຍໄປທີ່ຄລິບບອດແລ້ວ
+  Video Category: 'ໝວດໝູ່ວິດີໂອ:'
+  Video Tags: ແທັກວິດີໂອ
+  Games: ເກມ
+Tooltips:
+  General Settings:
+    Use AI Translation Completions: ຕື່ມຂໍ້ມູນສ່ວນທີ່ຂາດຫາຍໃນການແປໂດຍມະນຸດດ້ວຍຂໍ້ຄວາມທີ່ສ້າງໂດຍ AI. ການແປໂດຍມະນຸດຈະມີລຳດັບຄວາມສຳຄັນສູງສຸດສະເໝີ.
+    Update Relative Timestamps: ອັບເດດຕຳແໜ່ງເວລາສຳພັນທົ່ວແອັບໃນຂະນະທີ່ເປີດໜ້າໄວ້. ຖ້າປິດ, ພວກມັນຈະອັບເດດຫຼັງຈາກໂຫຼດໜ້າໃໝ່ ຫຼື ເຂົ້າໄປເບິ່ງໜ້ານັ້ນອີກຄັ້ງເທົ່ານັ້ນ.
+    Stream Extraction Method: |
+      ເລືອກວິທີທີ່ OpenTubeX ໃຊ້ດຶງຂໍ້ມູນການສະຕຣີມວິດີໂອ. ຕ້ອງມີ yt-dlp ຫາກເລືອກໃຊ້ມັນ.
+      ວິດີໂອອາດໃຊ້ເວລາເລີ່ມຕົ້ນດົນຂຶ້ນເມື່ອໃຊ້ yt-dlp.
+      ລະບົບພາຍໃນບໍ່ຮອງຮັບການເລື່ອນເວລາສຳລັບໄລຟ໌ ແລະ ວິດີໂອພຣີເມຍ.
+    Avoid translation: |
+      ປິດການແປອັດຕະໂນມັດຂອງ YouTube ສຳລັບຊື່, ຄຳອະທິບາຍ ແລະ ບົດຂອງວິດີໂອ.
+      ການຮ້ອງຂໍຂໍ້ມູນຫຼາຍເກີນໄປ ອາດສົ່ງຜົນກະທົບຕໍ່ຄວາມສະຖຽນຂອງແອັບຊົ່ວຄາວ.
+    Preferred API Backend: ເລືອກ Backend ທີ່ OpenTubeX ໃຊ້ເພື່ອດຶງຂໍ້ມູນ. Local API ແມ່ນຕົວດຶງຂໍ້ມູນພາຍໃນ. Invidious API ຕ້ອງມີການເຊື່ອມຕໍ່ກັບເຊີບເວີ Invidious.
+    Fallback to Non-Preferred Backend on Failure: ເມື່ອ API ທີ່ທ່ານເລືອກມີບັນຫາ, OpenTubeX ຈະພະຍາຍາມໃຊ້ API ອື່ນເປັນຕົວສຳຮອງໂດຍອັດຕະໂນມັດ ຫາກເປີດໃຊ້ງານນີ້ໄວ້.
+    Thumbnail Preference: ຮູບຕົວຢ່າງທັງໝົດໃນ OpenTubeX ຈະຖືກແທນທີ່ດ້ວຍເຟຣມຂອງວິດີໂອ, ເຮັດໃຫ້ມົວ ຫຼື ເຊື່ອງໄວ້ ແທນທີ່ຈະໃຊ້ຮູບຕົວຢ່າງເລີ່ມຕົ້ນ.
+    Show Thumbnail Previews: ສະແດງພາບຕົວຢ່າງທີ່ເຄື່ອນໄຫວໄດ້ເມື່ອວາງເມົາສ໌ເທິງຮູບຕົວຢ່າງວິດີໂອ.
+    Startup Behavior: |
+      ເລືອກສິ່ງທີ່ OpenTubeX ຈະເຮັດເມື່ອເລີ່ມຕົ້ນ.
+      ໂຫຼດແທັບທັງໝົດ: ກູ້ຄືນທຸກແທັບທັນທີ, ແຕ່ແທັບພື້ນຫຼັງຈະບໍ່ຫຼິ້ນວິດີໂອອັດຕະໂນມັດ.
+      ໂຫຼດແທັບທີ່ເຄີຍໂຫຼດ: ໂຫຼດສະເພາະແທັບທີ່ເຄີຍຖືກໂຫຼດກ່ອນປິດແອັບ.
+      ໂຫຼດແທັບທີ່ໃຊ້ງານລ່າສຸດ: ກູ້ຄືນເຊດຊັນກ່ອນໜ້າໂດຍເປີດແທັບອື່ນໄວ້ແຕ່ຍັງບໍ່ໂຫຼດ; ພວກມັນຈະໂຫຼດເມື່ອທ່ານຄລິກ.
+      ເລີ່ມຕົ້ນເຊດຊັນຫວ່າງເປົ່າ: ຂ້າມແທັບທີ່ບັນທຶກໄວ້ ແລະ ເປີດໜ້າຕ່າງໃໝ່.
+    Invidious Instance: Invidious instance ທີ່ OpenTubeX ຈະເຊື່ອມຕໍ່ເພື່ອຮ້ອງຂໍ API. ການປ່ຽນແປງນີ້ຈະມີຜົນສະເພາະໜ້າຕ່າງປັດຈຸບັນ ເວັ້ນເສຍແຕ່ທ່ານຈະຕັ້ງຄ່າໃຫ້ມັນເປັນຄ່າເລີ່ມຕົ້ນ.
+    Region for Trending: ພາກພື້ນສຳລັບມາແຮງ ຊ່ວຍໃຫ້ທ່ານເລືອກວິດີໂອມາແຮງຈາກປະເທດທີ່ຕ້ອງການສະແດງ.
+    External Link Handling: |
+      ເລືອກການເຮັດວຽກເລີ່ມຕົ້ນເມື່ອຄລິກລິ້ງທີ່ບໍ່ສາມາດເປີດໃນ OpenTubeX ໄດ້.
+      ໂດຍປົກກະຕິ OpenTubeX ຈະເປີດລິ້ງນັ້ນໃນບຣາວເຊີເລີ່ມຕົ້ນຂອງທ່ານ.
+    Open Deep Links In New Window: URL ທີ່ສົ່ງມາໃຫ້ OpenTubeX (ເຊັ່ນຈາກສ່ວນເສີມບຣາວເຊີ) ຈະຖືກເປີດໃນໜ້າຕ່າງໃໝ່.
+    Remember Tab Navigation History: ປະຫວັດການເຂົ້າເບິ່ງໄປໜ້າ ແລະ ຖອຍຫຼັງຂອງແຕ່ລະແທັບຈະຖືກບັນທຶກ ແລະ ກູ້ຄືນເມື່ອ OpenTubeX ເລີ່ມໃໝ່.
+  Proxy Settings:
+    IP Block Recovery Script Path: ທີ່ຢູ່ຂອງໄຟລ໌ສະຄຣິບທີ່ຈະໃຫ້ເຮັດວຽກເມື່ອຖືກບລັອກ IP. OpenTubeX ຈະລໍຖ້າໃຫ້ມັນສຳເລັດ ແລ້ວຈຶ່ງໂຫຼດວິດີໂອໃໝ່.
+  Player Settings:
+    Enable Caption Translations: ເມື່ອເປີດໃຊ້, ປຸ່ມຄຳບັນຍາຍ ແລະ ຄີລັດ C ຈະເລືອກໃຊ້ຄຳບັນຍາຍທີ່ແປອັດຕະໂນມັດ ຫາກວິດີໂອບໍ່ມີພາສາຕົ້ນສະບັບທີ່ກົງກັບຄວາມຕ້ອງການ.
+    Proxy Videos Through Invidious: ຈະເຊື່ອມຕໍ່ຜ່ານ Invidious ເພື່ອສະແດງວິດີໂອ ແທນການເຊື່ອມຕໍ່ໂດຍກົງຫາ YouTube.
+    Default Video Format: ຕັ້ງຄ່າຮູບແບບທີ່ໃຊ້ເມື່ອຫຼິ້ນວິດີໂອ. DASH ສາມາດຫຼິ້ນຄວາມລະອຽດສູງໄດ້. Legacy ຈຳກັດທີ່ 360p ແຕ່ປະຢັດແບນວິດ. Audio ແມ່ນສຽງຢ່າງດຽວ.
+    Use Quick Playback Speed Bar: ສະແດງແຖບປັບຄວາມໄວໃນການຫຼິ້ນຢູ່ດ້ານຂວາຂອງຕົວຫຼິ້ນ.
+    Scroll Playback Rate Over Video Player: ໃນຂະນະທີ່ເມົາສ໌ຢູ່ເທິງວິດີໂອ, ກົດປຸ່ມ Control ຄ້າງໄວ້ແລ້ວເລື່ອນເມົາສ໌ເພື່ອປັບຄວາມໄວ.
+    Skip by Scrolling Over Video Player: ໃຊ້ລໍ້ເມົາສ໌ເພື່ອເລື່ອນເວລາວິດີໂອ ແບບສະໄຕລ໌ MPV.
+    Multiply Seek Interval by Playback Rate: ຫາກເປີດໃຊ້, ຊ່ວງເວລາການເລື່ອນ (ປຸ່ມລູກສອນ ແລະ J/L) ຈະຖືກຄູນດ້ວຍຄວາມໄວໃນການຫຼິ້ນປັດຈຸບັນ.
+    Show Playback Rate Adjusted Timestamp: ຫາກເປີດໃຊ້ ແລະ ຄວາມໄວໃນການຫຼິ້ນບໍ່ແມ່ນ 1x, ຕົວຫຼິ້ນຈະສະແດງເວລາທີ່ປັບຕາມຄວາມໄວໃນວົງເລັບ.
+    Use YouTube-style Shorts: ສະແດງ Shorts ໃນຮູບແບບຕາຕະລາງແນວຕັ້ງ ແລະ ໃຊ້ຕົວຫຼິ້ນ Shorts ແບບ YouTube.
+    Loop Shorts: ຫາກເປີດໃຊ້, Shorts ຈະເລີ່ມໃໝ່ອັດຕະໂນມັດ. ຫາກປິດ, ມັນຈະຢຸດເມື່ອຈົບ.
+    Show Skip Silence Toggle: ສະແດງປຸ່ມເປີດ/ປິດ ສຳລັບການຂ້າມຊ່ວງທີ່ງຽບໃນເມນູການຕັ້ງຄ່າຂອງຕົວຫຼິ້ນ.
+    Enable Skip Silence by Default: ເປີດໃຊ້ການຂ້າມຊ່ວງທີ່ງຽບສຳລັບແທັບໃໝ່ເປັນຄ່າເລີ່ມຕົ້ນ.
+    Enable Video Zoom: ສະແດງຕົວຄວບຄຸມການຊູມໃນເມນູການຕັ້ງຄ່າຂອງຕົວຫຼິ້ນ.
+    Voice-over Translation: ສົ່ງຂໍ້ມູນວິດີໂອໄປຍັງບໍລິການແປສຽງ Yandex ເມື່ອທ່ານຕ້ອງການແປສຽງ. ປິດໄວ້ເປັນຄ່າເລີ່ມຕົ້ນ.
+    Hold to Double Playback Speed: ກົດ Spacebar ຫຼື ປຸ່ມເມົາສ໌ຊ້າຍຄ້າງໄວ້ເທິງຕົວຫຼິ້ນເພື່ອເພີ່ມຄວາມໄວເປັນ 2 ເທົ່າຊົ່ວຄາວ.
+    Ambient Mode: ປະສົມສີຂອງວິດີໂອເຂົ້າກັບພື້ນທີ່ອ້ອມຮອບຕົວຫຼິ້ນ.
+    Default Volume: ຈະຖືກປິດໄວ້ຫາກເປີດ 'ຈົດຈຳລະດັບສຽງ'. ປິດ 'ຈົດຈຳລະດັບສຽງ' ເພື່ອຕັ້ງຄ່າສຽງເລີ່ມຕົ້ນຄົງທີ່.
+    Parallel Segment Loading: |
+      ຈຳນວນສ່ວນຂອງວິດີໂອ ແລະ ສຽງທີ່ຈະໂຫຼດໄວ້ລ່ວງໜ້າພ້ອມກັນ.
+      ຄ່າທີ່ສູງຂຶ້ນອາດຊ່ວຍໃນການເຊື່ອມຕໍ່ທີ່ຊ້າ, ແຕ່ໃຊ້ແບນວິດ ແລະ ໜ່ວຍຄວາມຈຳຫຼາຍຂຶ້ນ.
+  External Player Settings:
+    External Player: ການເລືອກຕົວຫຼິ້ນພາຍນອກຈະສະແດງໄອຄອນຢູ່ເທິງຮູບຕົວຢ່າງ.
+    Custom External Player Executable: ໂດຍປົກກະຕິ OpenTubeX ຈະຄົ້ນຫາຕົວຫຼິ້ນຈາກ PATH. ທ່ານສາມາດຕັ້ງຄ່າທີ່ຢູ່ໄຟລ໌ເອງໄດ້ທີ່ນີ້.
+    Ignore Warnings: ປິດການແຈ້ງເຕືອນເມື່ອຕົວຫຼິ້ນພາຍນອກບໍ່ຮອງຮັບບາງຄຳສັ່ງ.
+    Ignore Default Arguments: ບໍ່ສົ່ງອາກິວເມັນເລີ່ມຕົ້ນໃດໆ ໃຫ້ຕົວຫຼິ້ນພາຍນອກ ນອກຈາກ URL ຂອງວິດີໂອ.
+    Custom External Player Arguments: ອາກິວເມັນຄຳສັ່ງເພີ່ມເຕີມທີ່ທ່ານຕ້ອງການສົ່ງໃຫ້ຕົວຫຼິ້ນພາຍນອກ.
+    DefaultCustomArgumentsTemplate: "(ເລີ່ມຕົ້ນ: '{defaultCustomArguments}')"
+  Download Settings:
+    Download Folder: ວິດີໂອຈະຖືກບັນທຶກໄວ້ໃນໂຟນເດີນີ້. ປະຫວ່າງໄວ້ເພື່ອໃຊ້ໂຟນເດີ 'ດາວໂຫຼດ' ຂອງລະບົບ.
+    Global Additional yt-dlp Arguments: ອາກິວເມັນເພີ່ມເຕີມສຳລັບ yt-dlp ທີ່ໃຊ້ກັບທຸກການດາວໂຫຼດ.
+    Concurrent Downloads: ຈຳນວນການດາວໂຫຼດສູງສຸດທີ່ສາມາດເຮັດວຽກພ້ອມກັນໄດ້.
+    Bandwidth Limit: ຈຳກັດຄວາມໄວໃນການດາວໂຫຼດລວມ. ໃສ່ 0 ເພື່ອບໍ່ຈຳກັດ.
+  External Software Settings:
+    yt-dlp Source: ເລືອກວ່າຈະໃຊ້ yt-dlp ໃນເຄື່ອງ ຫຼື ໃຫ້ OpenTubeX ຈັດການເອງ.
+    yt-dlp Channel: ເລືອກຊ່ອງທາງການອັບເດດຂອງ yt-dlp. ແນະນຳໃຫ້ໃຊ້ 'Stable'.
+    FFmpeg Source: ເລືອກວ່າຈະໃຊ້ FFmpeg ໃນເຄື່ອງ ຫຼື ໃຫ້ OpenTubeX ຈັດການເອງ.
+    Managed Tool Updates: ເລືອກວິທີການອັບເດດເຄື່ອງມືຕ່າງໆ.
+    yt-dlp Executable Path: ຕັ້ງຄ່າທີ່ຢູ່ຂອງໄຟລ໌ yt-dlp ທີ່ນີ້ຫາກຕ້ອງການ.
+    Cookie Source: ເລືອກແຫຼ່ງຂໍ້ມູນຄຸກກີ້ເພື່ອໃຊ້ໃນການຫຼິ້ນວິດີໂອທີ່ຕ້ອງເຂົ້າສູ່ລະບົບ.
+    Cookie File: ເລືອກໄຟລ໌ຄຸກກີ້ຮູບແບບ Netscape.
+    Browser for Cookies: ເລືອກບຣາວເຊີທີ່ຈະໃຫ້ yt-dlp ອ່ານຄຸກກີ້.
+    Browser Profile: ຊື່ໂປຣໄຟລ໌ ຫຼື ໂຟນເດີຂອງບຣາວເຊີ (ລະບຸຫຼືບໍ່ກໍໄດ້).
+    Always Use Cookies: ໃຊ້ຄຸກກີ້ທຸກຄັ້ງເມື່ອ yt-dlp ດຶງຂໍ້ມູນການສະຕຣີມ.
+    FFmpeg Executable Path: ຕັ້ງຄ່າທີ່ຢູ່ໄຟລ໌ FFmpeg ທີ່ນີ້ຫາກຕ້ອງການ.
+  Distraction Free Settings:
+    Shorten View Counts: ສະແດງຕົວເລກຍອດເບິ່ງແບບຫຍໍ້ ເຊັ່ນ 14K ແທນທີ່ຈະເປັນ 14,000.
+    Hide Channels: ໃສ່ ID ຂອງຊ່ອງເພື່ອເຊື່ອງຊ່ອງນັ້ນຈາກທົ່ວທັງແອັບ.
+    Hide Subscriptions Live: ການຕັ້ງຄ່ານີ້ຖືກແທນທີ່ໂດຍການຕັ້ງຄ່າ "{appWideSetting}" ທີ່ນຳໃຊ້ໃນທົ່ວແອັບ, ຢູ່ໃນພາກສ່ວນ "{subsection}" ຂອງ "{settingsSection}"
+    Hide Videos, Playlists and Channels Containing Text: ໃສ່ຄຳສັບ ຫຼື ປະໂຫຍກເພື່ອເຊື່ອງວິດີໂອ ຫຼື ຊ່ອງທີ່ມີຄຳນັ້ນໃນຊື່.
+    Hide Videos on Watch: ເຊື່ອງວິດີໂອທີ່ເບິ່ງແລ້ວຈາກແທັບຕ່າງໆ.
+  Subscription Settings:
+    Fetch Feeds from RSS: ໃຊ້ RSS ເພື່ອດຶງຂໍ້ມູນຟີດການຕິດຕາມ ເຊິ່ງໄວຂຶ້ນ ແລະ ຫຼຸດບັນຫາການບລັອກ IP.
+    Fetch Feed on Startup: ດຶງຂໍ້ມູນຟີດການຕິດຕາມໂດຍອັດຕະໂນມັດເມື່ອເລີ່ມຕົ້ນແອັບ.
+    Show New Content Feed: ສະແດງແທັບ 'ໃໝ່' ສຳລັບເນື້ອຫາທີ່ເພີ່ມເຂົ້າມາໃໝ່.
+    Show New Content Indicators: ສະແດງຈຸດນ້ອຍໆ ຂ້າງລາຍການທີ່ມີເນື້ອຫາໃໝ່.
+    Show Scheduled Live Streams / Premieres First: ໃຫ້ໄລຟ໌ ແລະ ພຣີເມຍທີ່ຕັ້ງເວລາໄວ້ຢູ່ເທິງສຸດຂອງຟີດ.
+    Auto Refresh Interval: ກຳນົດໄລຍະເວລາການອັບເດດຟີດການຕິດຕາມອັດຕະໂນມັດ.
+  Theme Settings:
+    Show Progress as Notification: ສະແດງຄວາມຄືບໜ້າຂອງວຽກພື້ນຫຼັງໃນຮູບແບບການແຈ້ງເຕືອນ.
+    Always Show Scrollbars: ສະແດງແຖບເລື່ອນໄວ້ຕະຫຼອດເວລາ.
+    Scroll Speed: ປັບຄວາມໄວ ແລະ ໄລຍະການເລື່ອນຂອງເມົາສ໌.
+    Use Fixed Tab Width: ໃຫ້ທຸກແທັບມີຄວາມກວ້າງເທົ່າກັນ.
+    Use Grid Player Menu: ຈັດວາງເມນູການຕັ້ງຄ່າຕົວຫຼິ້ນເປັນແບບຕາຕະລາງ.
+  Experimental Settings:
+    Replace HTTP Cache: ປ່ຽນລະບົບການເກັບແຄຊ໌ໄປໄວ້ໃນ RAM ແທນ (ໃຊ້ RAM ຫຼາຍຂຶ້ນ).
+  SponsorBlock Settings:
+    UseDeArrowTitles: ແທືນທີ່ຊື່ວິດີໂອດ້ວຍຊື່ຈາກ DeArrow.
+    UseDeArrowThumbnails: ແທນທີ່ຮູບຕົວຢ່າງວິດີໂອດ້ວຍຮູບຈາກ DeArrow.
+Local API Error (Click to copy): Local API ມີຂໍ້ຜິດພາດ (ຄລິກເພື່ອຄັດລອກ)
+Invidious API Error (Click to copy): Invidious API ມີຂໍ້ຜິດພາດ (ຄລິກເພື່ອຄັດລອກ)
+Falling back to Invidious API: ກຳລັງສະຫຼັບໄປໃຊ້ Invidious API
+Falling back to Local API: ກຳລັງສະຫຼັບໄປໃຊ້ Local API
+This video is unavailable because of missing formats. This can happen due to country unavailability.: ວິດີໂອນີ້ບໍ່ສາມາດເບິ່ງໄດ້ເນື່ອງຈາກຂາດຮູບແບບໄຟລ໌. ອາດເກີດຈາກການຈຳກັດໃນບາງປະເທດ.
+Unknown YouTube url type, cannot be opened in app: ບໍ່ຮູ້ຈັກປະເພດ URL ຂອງ YouTube, ບໍ່ສາມາດເປີດໃນແອັບໄດ້
+Loop is now disabled: ປິດການຫຼິ້ນວົນຊ້ຳແລ້ວ
+Loop is now enabled: ເປີດການຫຼິ້ນວົນຊ້ຳແລ້ວ
+Shuffle is now disabled: ປິດການສຸ່ມລຳດັບແລ້ວ
+Shuffle is now enabled: ເປີດການສຸ່ມລຳດັບແລ້ວ
+The playlist has been reversed: ປີ້ນລຳດັບເພລລິສແລ້ວ
+Playing Next Video: ກຳລັງຫຼິ້ນວິດີໂອຖັດໄປ
+Playing Previous Video: ກຳລັງຫຼິ້ນວິດີໂອກ່ອນໜ້າ
+Canceled next video autoplay: ຍົກເລີກການຫຼິ້ນອັດຕະໂນມັດຖັດໄປແລ້ວ
+Autoplay Interruption Timer: ຍົກເລີກການຫຼິ້ນອັດຕະໂນມັດເນື່ອງຈາກບໍ່ມີການເຄື່ອນໄຫວເປັນເວລາ {autoplayInterruptionIntervalHours} ຊົ່ວໂມງ
+Default Invidious instance has been set to {instance}: ຕັ້ງຄ່າ Invidious instance ເລີ່ມຕົ້ນເປັນ {instance} ແລ້ວ
+Default Invidious instance has been cleared: ລຶບລ້າງ Invidious instance ເລີ່ມຕົ້ນແລ້ວ
+'The playlist has ended. Enable loop to continue playing': ເພລລິສຈົບແລ້ວ. ເປີດການຫຼິ້ນວົນຊ້ຳເພື່ອຫຼິ້ນຕໍ່
+'The playlist is at the beginning. Enable loop to continue playing': ເພລລິສຢູ່ຈຸດເລີ່ມຕົ້ນ. ເປີດການຫຼິ້ນວົນຊ້ຳເພື່ອຫຼິ້ນຕໍ່
+Age Restricted:
+  This channel is age restricted: ຊ່ອງນີ້ມີການຈຳກັດອາຍຸ
+  This video is age restricted: ວິດີໂອນີ້ມີການຈຳກັດອາຍຸ
+External link opening has been disabled in Settings → Privacy: ການເປີດລິ້ງພາຍນອກຖືກປິດໄວ້ໃນ ການຕັ້ງຄ່າ → ຄວາມເປັນສ່ວນຕົວ
+Screenshot Success: ບັນທຶກພາບໜ້າຈໍແລ້ວ
+Screenshot Clipboard Success: ບັນທຶກພາບໜ້າຈໍໄປທີ່ຄລິບບອດແລ້ວ
+Screenshot Error: ການຖ່າຍພາບໜ້າຈໍລົ້ມເຫຼວ. {error}
+Screenshot Clipboard Error: ການຄັດລອກພາບໜ້າຈໍໄປທີ່ຄລິບບອດລົ້ມເຫຼວ
+Channel Hidden: ເພີ່ມ {channel} ເຂົ້າໃນຕົວບັນຈຸການກັ່ນຕອງຊ່ອງແລ້ວ
+Channel Unhidden: ຍ້າຍ {channel} ອອກຈາກຕົວບັນຈຸການກັ່ນຕອງຊ່ອງແລ້ວ
+Trimmed input must be at least N characters long: ຂໍ້ຄວາມຕ້ອງມີຢ່າງໜ້ອຍ 1 ຕົວອັກສອນ | ຂໍ້ຄວາມຕ້ອງມີຢ່າງໜ້ອຍ {length} ຕົວອັກສອນ
+Tag already exists: ມີແທັກ "{tagName}" ຢູ່ແລ້ວ
+Hashtag:
+  Hashtag: ແຮຊແທັກ
+  This hashtag does not currently have any videos: ແຮຊແທັກນີ້ຍັງບໍ່ມີວິດີໂອໃດໆ ໃນຕອນນີ້
+Moments Ago: ຫວ່າງມໍ່ໆນີ້
+Yes: ແມ່ນ
+No: ບໍ່
+Ok: ຕົກລົງ
+Yes, Delete: ແມ່ນ, ລຶບເລີຍ
+Yes, Restart: ແມ່ນ, ເລີ່ມໃໝ່
+Yes, Open Link: ແມ່ນ, ເປີດລິ້ງ
+Cancel: ຍົກເລີກ
+checkmark: ✓
+Display Label: '{label}: {value}'
+KeyboardShortcutTemplate: '{label} ({shortcut})'
+shortcutJoinOperator: +
+shortcutLabelSeparator: ｜
+Keys:
+  alt: Alt
+  ctrl: Ctrl
+  shift: Shift
+  enter: Enter
+  plus: ບວກ
+  arrowdown: ລູກສອນລົງ
+  arrowleft: ລູກສອນຊ້າຍ
+  arrowright: ລູກສອນຂວາ
+  arrowup: ລູກສອນຂຶ້ນ
+KeyboardShortcutPrompt:
+  Keyboard Shortcuts: ຄີລັດຄີບອດ
+  Edit Hint: ເລືອກຄີລັດ, ແລ້ວກົດປຸ່ມປະສົມໃໝ່. ກົດ Backspace ຫຼື Delete ເພື່ອຍົກເລີກ.
+  Change Shortcut: ປ່ຽນຄີລັດສຳລັບ {action}
+  Press Shortcut: ກົດຄີລັດ…
+  Unassigned: ຍັງບໍ່ໄດ້ກຳນົດ
+  Reset Shortcut: ຕັ້ງຄ່າຄີລັດຄືນໃໝ່ສຳລັບ {action}
+  Reset to Defaults: ຄືນຄ່າເລີ່ມຕົ້ນ
+  Shortcut Already Assigned: ຄີລັດນີ້ຖືກໃຊ້ງານແລ້ວ
+  Shortcut Conflict: '{shortcut} ຖືກໃຊ້ງານສຳລັບ {actions} ແລ້ວ. ທ່ານຕ້ອງການກຳນົດໃໝ່ຫຼືບໍ່?'
+  Reserved Shortcut Conflict: '{shortcut} ຖືກຈອງໄວ້ສຳລັບ {actions} ແລະ ບໍ່ສາມາດກຳນົດໃໝ່ໄດ້.'
+  Reassign: ກຳນົດໃໝ່
+  Sections:
+    Video:
+      Playback: 'ວິດີໂອ: ການຫຼິ້ນ'
+      General: 'ວິດີໂອ: ທົ່ວໄປ'
+    App:
+      General: 'ແອັບ: ທົ່ວໄປ'
+      Tabs: 'ແອັບ: ແທັບ'
+      Search and Page: 'ແອັບ: ການຄົ້ນຫາ ແລະ ໜ້າ'
+      Window and View: 'ແອັບ: ໜ້າຕ່າງ ແລະ ການເບິ່ງ'
+  Show Keyboard Shortcuts: ສະແດງຄີລັດຄີບອດ
+  History Backward: ຖອຍຫຼັງໜຶ່ງໜ້າ
+  History Forward: ໄປໜ້າໜຶ່ງໜ້າ
+  New Window: ສ້າງໜ້າຕ່າງໃໝ່
+  New Tab: ສ້າງແທັບໃໝ່
+  Close Tab: ປິດແທັບປັດຈຸບັນ
+  Reload Tab: ໂຫຼດແທັບປັດຈຸບັນໃໝ່
+  Reopen Closed Tab: ເປີດແທັບທີ່ຫາປິດໄປຄືນໃໝ່
+  Next Tab: ສະຫຼັບໄປແທັບຖັດໄປ
+  Previous Tab: ສະຫຼັບໄປແທັບກ່ອນໜ້າ
+  Switch to Tab: ສະຫຼັບໄປແທັບ 1–9
+  Toggle Tab Orientation: ສະຫຼັບຮູບແບບການຈັດວາງແທັບ
+  Navigate to Settings: ໄປທີ່ໜ້າການຕັ້ງຄ່າ
+  Navigate to History: ໄປທີ່ໜ້າປະຫວັດ
+  Refresh: ໂຫຼດຟີດໃໝ່ດ້ວຍເນື້ອຫາລ່າສຸດ
+  Find in Page: ຄົ້ນຫາຂໍ້ຄວາມໃນໜ້າປັດຈຸບັນ
+  Find Next Match: ໄປຫາຈຸດທີ່ຕົງກັນຖັດໄປ
+  Find Previous Match: ໄປຫາຈຸດທີ່ຕົງກັນກ່ອນໜ້າ
+  Captions: ເປີດ/ປິດ ຄຳບັນຍາຍ
+  Stats: ສະແດງສະຖິຕິວິດີໂອ
+  Fullscreen: ເປີດ/ປິດ ເຕັມຈໍ
+  Picture in Picture: ເປີດ/ປິດ ໂໝດພາບຊ້ອນພາບ
+  Large Rewind: ຖອຍຫຼັງ 10 ວິນາທີ / ຖອຍຫຼັງຕາມຄວາມໄວການຫຼິ້ນ
+  Play: ຫຼິ້ນ/ຢຸດ
+  Large Fast Forward: ໄປໜ້າ 10 ວິນາທີ / ໄປໜ້າຕາມຄວາມໄວການຫຼິ້ນ
+  Mute: ປິດ/ເປີດ ສຽງ
+  Decrease Video Speed: ຫຼຸດຄວາມໄວວິດີໂອ
+  Increase Video Speed: ເພີ່ມຄວາມໄວວິດີໂອ
+  Toggle Normal Playback Speed: ສະຫຼັບລະຫວ່າງຄວາມໄວ 1x ແລະ ຄວາມໄວກ່ອນໜ້າ
+  Toggle Skip Silence: ເປີດ/ປິດ ການຂ້າມຊ່ວງງຽບ
+  Set A-B Repeat Point A: ກຳນົດຈຸດຫຼິ້ນຊ້ຳ A-B (ຈຸດ A)
+  Set A-B Repeat Point B: ກຳນົດຈຸດຫຼິ້ນຊ້ຳ A-B (ຈຸດ B)
+  Clear A-B Repeat: ຍົກເລີກການຫຼິ້ນຊ້ຳ A-B
+  Full Window: ເປີດ/ປິດ ເຕັມໜ້າຕ່າງ
+  Theatre Mode: ເປີດ/ປິດ ໂໝດໂຮງຮູບເງົາ
+  Take Screenshot: ຖ່າຍພາບໜ້າຈໍ
+  Video Zoom In: ຊູມເຂົ້າວິດີໂອ
+  Video Zoom Out: ຊູມອອກວິດີໂອ
+  Minimize Window: ຫຍໍ້ໜ້າຕ່າງ
+  Close Window: ປິດໜ້າຕ່າງ
+  Toggle Developer Tools: ເປີດ/ປິດ ເຄື່ອງມືນັກພັດທະນາ
+  Reset Zoom: ຄືນຄ່າລະດັບການຊູມ
+  Zoom In: ຊູມເຂົ້າ
+  Zoom Out: ຊູມອອກ
+  Focus Search: ໄປທີ່ແຖບຄົ້ນຫາ
+  Search in New Window: ຄົ້ນຫາໃນໜ້າຕ່າງໃໝ່
+  Tab Switcher: ຕົວສະຫຼັບແທັບ
+  Last Frame: ເຟຣມກ່ອນໜ້າ (ຂະນະຢຸດ)
+  Next Frame: ເຟຣມຖັດໄປ (ຂະນະຢຸດ)
+  Volume Up: ເພີ່ມສຽງ
+  Volume Down: ຫຼຸດສຽງ
+  Small Rewind: ຖອຍຫຼັງ X ວິນາທີ
+  Small Fast Forward: ໄປໜ້າ X ວິນາທີ
+  Last Chapter: ບົດກ່ອນໜ້າ
+  Next Chapter: ບົດຖັດໄປ
+  Skip by Tenths: ຂ້າມວິດີໂອຕາມເປີເຊັນ (ກົດ 3 ເພື່ອຂ້າມໄປ 30%)
+  Home: ກັບໄປຈຸດເລີ່ມຕົ້ນຂອງວິດີໂອ
+  End: ໄປທີ່ຕອນທ້າຍຂອງວິດີໂອ
+  Skip to Next Video: ຂ້າມໄປວິດີໂອຖັດໄປ
+  Skip to Previous Video: ກັບໄປວິດີໂອກ່ອນໜ້າ
+CommandPalette:
+  Title: ຖາດຄຳສັ່ງ
+  Open: ເປີດຖາດຄຳສັ່ງ
+  Search Label: ຄົ້ນຫາຄຳສັ່ງ
+  Search Placeholder: ຄົ້ນຫາຄຳສັ່ງ ແລະ ການຕັ້ງຄ່າ…
+  Results: ຄຳສັ່ງ
+  No Results: ບໍ່ມີຄຳສັ່ງທີ່ຕົງກັນ
+  Result Count: ພົບ 1 ຄຳສັ່ງ | ພົບ {count} ຄຳສັ່ງ
+  Move: ຍ້າຍ
+  Run: ເຮັດວຽກ
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'ສະຫຼັບໄປແທັບ: {title}'
+  Switch Profile: 'ສະຫຼັບໂປຣໄຟລ໌: {name}'
+  Open Playlist: 'ເປີດເພລລິສ: {name}'
+  Cancel Download: 'ຍົກເລີກການດາວໂຫຼດ: {title}'
+  Groups:
+    App: ແອັບ
+    Navigation: ການນຳທາງ
+    Tabs: ແທັບ
+  Unavailable:
+    Current Page: ຢູ່ໃນໜ້ານີ້ຢູ່ແລ້ວ
+    No History: ບໍ່ມີໜ້າໃນທິດທາງນີ້
+    Desktop: ໃຊ້ໄດ້ສະເພາະໃນແອັບເດັສທັອບເທົ່ານັ້ນ
+    Build: ບໍ່ມີໃຫ້ໃຊ້ໃນເວີຊັນນີ້
+    One Tab: ກະລຸນາເປີດແທັບອື່ນກ່ອນ
+    Active Tab: ນີ້ແມ່ນແທັບທີ່ກຳລັງໃຊ້ງານ
+    Active Profile: ນີ້ແມ່ນໂປຣໄຟລ໌ທີ່ກຳລັງໃຊ້ງານ
+    Download Finished: ການດາວໂຫຼດນີ້ບໍ່ໄດ້ເຮັດວຽກຢູ່ແລ້ວ
+    Video: ກະລຸນາເປີດວິດີໂອກ່ອນ
+Downloads:
+  Download: ດາວໂຫຼດ
+  Download Video: ດາວໂຫຼດວິດີໂອ
+  Download Playlist: ດາວໂຫຼດເພລລິສ
+  Downloading: ກຳລັງດາວໂຫຼດ
+  Queue: ຄິວ
+  Downloaded: ດາວໂຫຼດແລ້ວ
+  Canceled: ຍົກເລີກແລ້ວ
+  Open Downloads: ເປີດລາຍການດາວໂຫຼດ
+  No Downloads: ຍັງບໍ່ມີການດາວໂຫຼດ
+  No Downloads Description: ລາຍການທີ່ທ່ານດາວໂຫຼດຈະສະແດງຢູ່ນີ້.
+  Clear Failed Canceled Skipped And Missing: ລຶບລາຍການທີ່ລົ້ມເຫຼວ, ຖືກຍົກເລີກ, ຖືກຂ້າມ ແລະ ຫາຍໄປ
+  Clear From List: ລຶບອອກຈາກລາຍການ
+  Show in Folder: ສະແດງໃນໂຟນເດີ
+  Play Download: ຫຼິ້ນໄຟລ໌ທີ່ດາວໂຫຼດ
+  Retry Download: ລອງດາວໂຫຼດໃໝ່
+  Pause Download: ພັກການດາວໂຫຼດ
+  Resume Download: ດາວໂຫຼດຕໍ່
+  Move Earlier: ຍ້າຍຂຶ້ນ
+  Move Later: ຍ້າຍລົງ
+  Pause All: ພັກທັງໝົດ
+  Resume All: ດາວໂຫຼດຕໍ່ທັງໝົດ
+  Retry All: ລອງໃໝ່ທຸກລາຍການທີ່ລົ້ມເຫຼວ
+  Total Size: 'ຂະໜາດທັງໝົດ: {size}'
+  Local File: ໄຟລ໌ໃນເຄື່ອງ
+  Available Offline: ໃຊ້ງານແບບອອບລາຍໄດ້
+  Remove File: ລຶບໄຟລ໌
+  Remove File Confirmation: ຕ້ອງການລຶບໄຟລ໌ທີ່ດາວໂຫຼດແລ້ວບໍ່?
+  Remove File Warning: ສິ່ງນີ້ຈະຍ້າຍ "{title}" ໄປທີ່ຖັງຂີ້ເຫຍື້ອຂອງເຄື່ອງ.
+  File Not Found: ບໍ່ພົບໄຟລ໌ທີ່ດາວໂຫຼດ.
+  Download Missing: ການດາວໂຫຼດບໍ່ພ້ອມໃຊ້ງານ
+  Files Missing: ໄຟລ໌ທີ່ດາວໂຫຼດບໍ່ມີຢູ່ໃນລະບົບໄຟລ໌ແລ້ວ.
+  Files Available: ມີ {available} ຈາກ {total} ໄຟລ໌ທີ່ດາວໂຫຼດພ້ອມໃຊ້ງານ.
+  More Files: ອີກ 1 ໄຟລ໌ | ອີກ {count} ໄຟລ໌
+  Template Used: 'ແມ່ແບບ: {name}'
+  Download Type: ປະເພດການດາວໂຫຼດ
+  Template: ແມ່ແບບ
+  Unsaved: ຍັງບໍ່ໄດ້ບັນທຶກ
+  Media Type: ປະເພດສື່
+  Video: ວິດີໂອ
+  Audio: ສຽງ
+  Maximum Resolution: ຄວາມລະອຽດສູງສຸດ
+  Best Available: ດີທີ່ສຸດທີ່ມີ
+  Automatic: ອັດຕະໂນມັດ
+  Container: ຄອນເທນເນີ
+  Video Codec: ວິດີໂອໂຄເດັກ
+  Audio Codec: ສຽງໂຄເດັກ
+  File Name Template: ແມ່ແບບຊື່ໄຟລ໌
+  File Name Template Help: 'ຟີວທີ່ມີໃຫ້: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: ຊ່ວງເວລາ ແລະ ບົດ
+  Start Time: ເວລາເລີ່ມຕົ້ນ (ຊມ:ນທ:ວນ)
+  End Time: ເວລາສິ້ນສຸດ (ຊມ:ນທ:ວນ)
+  Split by Chapters: ແຍກເປັນໄຟລ໌ຕາມບົດ
+  Remove Segments: ຍ້າຍບາງສ່ວນອອກ
+  Subtitles and Metadata: ຄຳບັນຍາຍ ແລະ ເມຕາເດຕາ
+  Include Subtitles: ລວມຄຳບັນຍາຍ
+  Embed Subtitles: ຝັງຄຳບັນຍາຍໃນໄຟລ໌ສື່
+  Subtitle Format: ຮູບແບບຄຳບັນຍາຍ
+  Subtitle Languages: ພາສາຄຳບັນຍາຍ
+  Subtitle Languages Help: 'ລະບຸລະຫັດພາສາຂັ້ນດ້ວຍຈຸດ ເຊັ່ນ: lo.*,en.*'
+  Embed Cover Art: ຝັງຮູບຕົວຢ່າງເປັນຮູບປົກ
+  Embed Metadata: ຝັງຊື່, ຜູ້ສ້າງ, ຄຳອະທິບາຍ ແລະ ບົດ
+  Additional yt-dlp Arguments: ອາກິວເມັນ yt-dlp ເພີ່ມເຕີມ
+  Custom yt-dlp Arguments: ອາກິວເມັນ yt-dlp ກຳນົດເອງ
+  Template Name: ຊື່ແມ່ແບບ
+  Save Template: ບັນທຶກແມ່ແບບ
+  Delete Template: ລຶບແມ່ແບບ
+  Template Saved: ບັນທຶກແມ່ແບບການດາວໂຫຼດ "{name}" ແລ້ວ
+  Template Name Exists: ມີແມ່ແບບການດາວໂຫຼດຊື່ "{name}" ຢູ່ແລ້ວ.
+  Choose Folder: ປ່ຽນ
+  Select Folder: ເລືອກໂຟນເດີ
+  Folder Required: ເລືອກໂຟນເດີດາວໂຫຼດເພື່ອເປີດໃຊ້ການດາວໂຫຼດ.
+  System Downloads Folder: ໂຟນເດີດາວໂຫຼດຂອງລະບົບ
+  Processing: ກຳລັງປະມວນຜົນ…
+  Queued: ຢູ່ໃນຄິວ
+  Queued Position: ຢູ່ໃນຄິວ, ລຳດັບທີ {position}
+  Paused: ພັກໄວ້
+  Pausing: ວຽກປັດຈຸບັນຈະເຮັດໃຫ້ສຳເລັດ, ຈາກນັ້ນຄິວຈະຢຸດພັກ
+  Download Complete: ດາວໂຫຼດສຳເລັດ
+  Download Cancelled: ຍົກເລີກການດາວໂຫຼດແລ້ວ
+  Download Failed: ການດາວໂຫຼດລົ້ມເຫຼວ
+  File Name Shortened: ຊື່ໄຟລ໌ຖືກຕັດໃຫ້ສັ້ນລົງຍ້ອນຊື່ວິດີໂອຍາວເກີນໄປ.
+  Insufficient Disk Space: ພື້ນທີ່ວ່າງບໍ່ພໍ. ຕ້ອງການປະມານ {required} ແຕ່ມີພຽງ {available}.
+  Unknown Download Size: ບໍ່ຮູ້ຂະໜາດດາວໂຫຼດ. ມີພື້ນທີ່ {available} ໃນລະບົບໄຟລ໌ປາຍທາງ.
+  Disk Space Check Unavailable: ບໍ່ສາມາດກວດສອບພື້ນທີ່ວ່າງໄດ້ກ່ອນເລີ່ມດາວໂຫຼດ.
+  Download Failure Hint: ກວດສອບ {issuesLink}, ແລ້ວລອງສະຫຼັບຊ່ອງ yt-dlp ເປັນ Nightly ຫຼື Master.
+  yt-dlp YouTube Issues: ບັນຫາ yt-dlp ລ່າສຸດສຳລັບ YouTube
+  Automatic Download Started: ເລີ່ມການດາວໂຫຼດອັດຕະໂນມັດແລ້ວ
+  Automatic Download Started Body: ກຳລັງດາວໂຫຼດ "{title}" ຈາກ {channel} ຢູ່ພື້ນຫຼັງ.
+  Automatic Download Complete: ດາວໂຫຼດອັດຕະໂນມັດສຳເລັດ
+  Automatic Download Failed: ການດາວໂຫຼດອັດຕະໂນມັດລົ້ມເຫຼວ
+  Automatic Download Could Not Start: ບໍ່ສາມາດເລີ່ມການດາວໂຫຼດອັດຕະໂນມັດຂອງ "{title}" ໄດ້.
+  Automatic Download Skipped: ຖືກຂ້າມໂດຍຕົວບັນຈຸການກັ່ນຕອງການດາວໂຫຼດອັດຕະໂນມັດ
+  Cancel Download: ຍົກເລີກການດາວໂຫຼດ
+  yt-dlp Not Found: ບໍ່ພົບ yt-dlp. ກະລຸນາຕິດຕັ້ງ ຫຼື ຕັ້ງຄ່າທີ່ຢູ່ໄຟລ໌ໃນ ການຕັ້ງຄ່າ → ຂັ້ນສູງ.
+  Download Complete Template: ການດາວໂຫຼດ "{title}" ສຳເລັດແລ້ວ
+  Download Failed Template: ການດາວໂຫຼດ "{title}" ລົ້ມເຫຼວ
+  Templates:
+    Video Best: ວິດີໂອ - ຄຸນນະພາບດີທີ່ສຸດ
+    Video Resolution: ວິດີໂອ - {resolution}
+    Audio Best: ສຽງ - ຄຸນນະພາບດີທີ່ສຸດ
+    Audio Format: ສຽງ - {format}
+    Subtitles Format: ຄຳບັນຍາຍ - {format}
