@@ -611,8 +611,13 @@ function resetState() {
 }
 
 async function getPlaylistLocal() {
+  const requestGeneration = playlistRequestGeneration
+  const requestedPlaylistId = playlistId.value
+  const requestIsCurrent = () => requestGeneration === playlistRequestGeneration && requestedPlaylistId === playlistId.value
+
   try {
-    const result = await getLocalPlaylist(playlistId.value)
+    const result = await getLocalPlaylist(requestedPlaylistId)
+    if (!requestIsCurrent()) return
 
     let channelName_
 
@@ -652,6 +657,7 @@ async function getPlaylistLocal() {
     playlistItems.value = playlistItems_
 
     await refreshPlaylistBookmarkThumbnail()
+    if (!requestIsCurrent()) return
 
     let shouldGetNextPage = false
     if (result.has_continuation) {
@@ -668,6 +674,8 @@ async function getPlaylistLocal() {
 
     isLoading.value = false
   } catch (err) {
+    if (!requestIsCurrent()) return
+
     console.error(err)
 
     if (backendPreference.value === 'local' && backendFallback.value) {
@@ -682,8 +690,13 @@ async function getPlaylistLocal() {
 }
 
 async function getPlaylistInvidious() {
+  const requestGeneration = playlistRequestGeneration
+  const requestedPlaylistId = playlistId.value
+  const requestIsCurrent = () => requestGeneration === playlistRequestGeneration && requestedPlaylistId === playlistId.value
+
   try {
-    const result = await invidiousGetPlaylistInfo(playlistId.value)
+    const result = await invidiousGetPlaylistInfo(requestedPlaylistId)
+    if (!requestIsCurrent()) return
 
     playlistTitle.value = result.title
     playlistDescription.value = result.description
@@ -707,6 +720,7 @@ async function getPlaylistInvidious() {
 
     playlistItems.value = result.videos
     await refreshPlaylistBookmarkThumbnail()
+    if (!requestIsCurrent()) return
     const hasMorePages = hasMoreInvidiousPlaylistPages(
       result.videoCount,
       1,
@@ -721,6 +735,8 @@ async function getPlaylistInvidious() {
 
     isLoading.value = false
   } catch (err) {
+    if (!requestIsCurrent()) return
+
     console.error(err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
