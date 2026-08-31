@@ -109,6 +109,8 @@
           :chapters-kind="videoChaptersKind"
           :chapters-src="chaptersSrc"
           :title="videoTitle"
+          :artist="channelName"
+          :music-media-type="musicMediaType"
           :theatre-possible="theatreTogglePossible"
           :use-theatre-mode="useTheatreMode"
           :autoplay-possible="autoplayPossible"

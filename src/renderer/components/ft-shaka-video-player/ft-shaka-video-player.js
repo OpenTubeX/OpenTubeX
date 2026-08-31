@@ -22,6 +22,7 @@ import { CopyVideoUrlButton, setCopyVideoUrlContext } from './player-components/
 import { FullWindowButton } from './player-components/FullWindowButton'
 import { LegacyQualitySelection } from './player-components/LegacyQualitySelection'
 import { LoopButton, setLoopButtonContext } from './player-components/LoopButton'
+import { MusicVisualizerButton } from './player-components/MusicVisualizerButton'
 import { QuickPlaybackRateBar, setQuickPlaybackRateBarContext } from './player-components/QuickPlaybackRateBar'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { SkipSilenceButton } from './player-components/SkipSilenceButton'
@@ -69,6 +70,7 @@ import { addOverlayScrollbars, removeOverlayScrollbars } from '../../helpers/ove
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
+import { MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
 import { resolveSegmentPrefetchLimit } from '../../helpers/player/segmentPrefetch'
 import { AUTO_QUALITY_FALLBACK, streamsSupportAutoQuality } from '../../helpers/player/autoQuality'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
@@ -104,6 +106,7 @@ import {
 } from '../../helpers/player/caption-settings'
 import { useAmbientMode } from './opentubex/useAmbientMode'
 import { useAutoPictureInPicture } from './opentubex/useAutoPictureInPicture'
+import { useMusicVisualizer } from './opentubex/useMusicVisualizer'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
 import { useSilenceSkipping } from './opentubex/useSilenceSkipping'
 import { useSleepTimer } from './opentubex/useSleepTimer'
@@ -309,6 +312,15 @@ export default defineComponent({
     title: {
       type: String,
       default: ''
+    },
+    artist: {
+      type: String,
+      default: ''
+    },
+    musicMediaType: {
+      type: String,
+      default: MUSIC_MEDIA_TYPE.UNKNOWN,
+      validator: value => Object.values(MUSIC_MEDIA_TYPE).includes(value)
     },
     thumbnail: {
       type: String,
@@ -1265,6 +1277,28 @@ export default defineComponent({
       return store.getters.getAmbientMode
     })
 
+    const musicAudioTrack = computed(() => {
+      return props.musicMediaType === MUSIC_MEDIA_TYPE.AUDIO_TRACK
+    })
+
+    const audioPlayerMode = computed(() => {
+      return props.format === 'audio' || musicAudioTrack.value
+    })
+
+    const musicVisualizer = computed(() => {
+      return store.getters.getMusicVisualizer
+    })
+
+    const musicVisualizerEnabled = computed(() => {
+      return audioPlayerMode.value && musicVisualizer.value
+    })
+
+    function hideBrokenMusicImage(event) {
+      if (event.currentTarget instanceof HTMLImageElement) {
+        event.currentTarget.hidden = true
+      }
+    }
+
     const skipSilence = computed(() => {
       return store.getters.getTabSkipSilence(mediaTabId)
     })
@@ -1351,6 +1385,11 @@ export default defineComponent({
     /** @param {boolean} value */
     function updateAmbientMode(value) {
       store.dispatch('updateAmbientMode', value)
+    }
+
+    /** @param {boolean} value */
+    function updateMusicVisualizer(value) {
+      store.dispatch('updateMusicVisualizer', value)
     }
 
     /** @param {boolean} value */
@@ -4055,6 +4094,7 @@ export default defineComponent({
           ...(props.chapters.length > 0 ? ['ft_chapters'] : []),
           'ft_skip_silence',
           'ft_voice_over_translation',
+          'ft_music_visualizer',
           'ft_ambient_mode',
           'ft_video_zoom',
           'ft_loop',
@@ -4103,6 +4143,7 @@ export default defineComponent({
           'ft_sleep_timer',
           'ft_skip_silence',
           'ft_voice_over_translation',
+          'ft_music_visualizer',
           'ft_ambient_mode',
           'ft_video_zoom',
           'ft_loop',
@@ -4133,6 +4174,10 @@ export default defineComponent({
 
       if (props.format === 'audio' || useVrMode.value) {
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_ambient_mode')
+      }
+
+      if (!audioPlayerMode.value) {
+        removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_music_visualizer')
       }
 
       if (!videoZoomPossible.value) {
@@ -5907,6 +5952,19 @@ export default defineComponent({
         !scrollMiniPlayerActive.value
     })
 
+    const musicVisualizerActive = computed(() => {
+      return musicVisualizerEnabled.value &&
+        isActiveTab.value &&
+        !scrollMiniPlayerActive.value &&
+        !playerPaused.value
+    })
+
+    const { musicVisualizerCanvas } = useMusicVisualizer({
+      active: musicVisualizerActive,
+      video,
+      sourceKey: () => `${props.videoId}:${props.playbackSourceKey}`,
+    })
+
     const fullscreenAmbientBarsVisible = computed(() => {
       const contentAspectRatio = annotationVideoAspectRatio.value
       const elementWidth = videoElementWidth.value
@@ -7579,6 +7637,27 @@ export default defineComponent({
       }
 
       registerOwnElement(shakaOverflowMenu, 'ft_ambient_mode', new AmbientModeButtonFactory())
+    }
+
+    function registerMusicVisualizerButton() {
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class MusicVisualizerButtonFactory {
+        create(rootElement, controls) {
+          return new MusicVisualizerButton(
+            musicVisualizer,
+            updateMusicVisualizer,
+            events,
+            rootElement,
+            controls
+          )
+        }
+      }
+
+      registerOwnElement(
+        shakaOverflowMenu,
+        'ft_music_visualizer',
+        new MusicVisualizerButtonFactory()
+      )
     }
 
     function registerVideoZoomSelection() {
@@ -9570,6 +9649,7 @@ export default defineComponent({
       registerChapterOverlayButton()
       registerAutoplayToggle()
       registerAmbientModeButton()
+      registerMusicVisualizerButton()
       registerVideoZoomSelection()
       registerSkipSilenceButton()
       registerVoiceOverTranslationButton()
@@ -10502,6 +10582,11 @@ export default defineComponent({
       ambientFullscreenCanvas,
       ambientLayoutCanvas,
       ambientModeVisible,
+      audioPlayerMode,
+      musicAudioTrack,
+      hideBrokenMusicImage,
+      musicVisualizerCanvas,
+      musicVisualizerEnabled,
       fullscreenAmbientBarsVisible,
       captionCssVariables,
       captionPlayerVariables,

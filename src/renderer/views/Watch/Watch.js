@@ -76,6 +76,7 @@ import {
   MANIFEST_TYPE_HLS
 } from '../../helpers/player/utils'
 import { getYtDlpPlaybackSource, invalidateYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
+import { MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
 import {
   buildSubscriptionShortsFeed,
@@ -407,6 +408,8 @@ export default defineComponent({
       /** @type {'private' | 'drm' | null} */
       nonRetryablePlaybackError: null,
       videoGenreIsMusic: false,
+      /** @type {(typeof MUSIC_MEDIA_TYPE)[keyof typeof MUSIC_MEDIA_TYPE]} */
+      musicMediaType: MUSIC_MEDIA_TYPE.UNKNOWN,
       /** @type {Date|null} */
       streamingDataExpiryDate: null,
       currentPlaybackRate: null,
@@ -1951,6 +1954,7 @@ export default defineComponent({
       this.restrictedPlaybackError = null
       this.nonRetryablePlaybackError = null
       this.videoGenreIsMusic = false
+      this.musicMediaType = MUSIC_MEDIA_TYPE.UNKNOWN
       this.streamingDataExpiryDate = null
       this.ipBlockDetectedInCurrentChain = false
       // Cleared until the new player reports its ready state; otherwise the
@@ -2650,7 +2654,18 @@ export default defineComponent({
         const videoInfo = await getLocalVideoInfo(videoId)
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
-        const { info: result, poToken, clientInfo, adEndTimeUnixMs, paidPromotionDurationMs, isPremiere, watchPageIpBlocked } = videoInfo
+        const {
+          info: result,
+          poToken,
+          clientInfo,
+          adEndTimeUnixMs,
+          paidPromotionDurationMs,
+          isPremiere,
+          watchPageIpBlocked,
+          musicMediaType,
+        } = videoInfo
+
+        this.musicMediaType = musicMediaType
 
         if (watchPageIpBlocked) {
           this.ipBlockDetectedInCurrentChain = true
@@ -3292,6 +3307,7 @@ export default defineComponent({
           this.videoCategory = result.genre ?? ''
           this.videoTags = result.keywords ?? []
           this.videoGenreIsMusic = this.videoCategory === 'Music'
+          this.musicMediaType = result.musicMediaType
 
           this.channelId = result.authorId
           this.channelName = result.author

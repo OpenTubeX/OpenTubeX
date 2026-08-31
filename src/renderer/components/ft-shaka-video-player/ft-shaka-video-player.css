@@ -37,18 +37,155 @@
     transform 200ms ease-out;
 }
 
-.audioPoster {
+.player.audioOnly,
+.player.musicAudioTrack {
+  opacity: 0;
+}
+
+.musicAudioSurface {
   position: absolute;
   z-index: 0;
   inset: 0;
-  inline-size: 100%;
-  block-size: 100%;
-  object-fit: contain;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: #fff;
+  background: #080808;
   pointer-events: none;
 }
 
-.player.audioOnly {
-  opacity: 0;
+.musicAudioBackdrop,
+.musicAudioShade,
+.musicVisualizerCanvas {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.musicAudioBackdrop {
+  object-fit: cover;
+  opacity: 0.42;
+  filter: blur(30px) saturate(1.15);
+  transform: scale(1.14);
+}
+
+.musicAudioShade {
+  background:
+    radial-gradient(circle at 50% 35%, transparent 0, rgb(0 0 0 / 24%) 55%, rgb(0 0 0 / 70%) 100%),
+    linear-gradient(to bottom, rgb(0 0 0 / 12%), rgb(0 0 0 / 62%));
+}
+
+.musicVisualizerCanvas {
+  inset-block: auto 11%;
+  block-size: 42%;
+  opacity: 0.48;
+  mask-image: linear-gradient(to bottom, transparent, #000 28%, #000);
+}
+
+.musicAudioContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 4vi, 56px);
+  box-sizing: border-box;
+  inline-size: min(82%, 980px);
+  max-block-size: 68%;
+  margin-block-end: clamp(42px, 8%, 88px);
+}
+
+.musicAudioArtwork {
+  flex: none;
+  inline-size: clamp(120px, 28vi, 340px);
+  max-inline-size: 46%;
+  max-block-size: min(48vb, 340px);
+  aspect-ratio: 1;
+  border-radius: calc(12px * var(--ui-roundness));
+  object-fit: contain;
+  background: rgb(0 0 0 / 32%);
+  box-shadow: 0 18px 48px rgb(0 0 0 / 38%);
+}
+
+.musicAudioMetadata {
+  min-inline-size: 0;
+  text-shadow: 0 2px 12px rgb(0 0 0 / 85%);
+}
+
+.musicAudioTitle {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: clamp(20px, 3.1vi, 42px);
+  font-weight: 650;
+  line-height: 1.14;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.musicAudioArtist {
+  overflow: hidden;
+  margin-block-start: clamp(8px, 1.3vi, 16px);
+  color: rgb(255 255 255 / 78%);
+  font-size: clamp(14px, 1.8vi, 23px);
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ftVideoPlayer.scrollMiniPlayer .musicAudioContent {
+  justify-content: center;
+  inline-size: 100%;
+  max-block-size: 76%;
+  margin-block-end: 0;
+}
+
+.ftVideoPlayer.scrollMiniPlayer .musicAudioArtwork {
+  inline-size: auto;
+  block-size: 74%;
+  max-inline-size: 74%;
+  max-block-size: 74%;
+}
+
+html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
+  display: none !important;
+}
+
+.ftVideoPlayer.scrollMiniPlayer .musicAudioMetadata,
+.ftVideoPlayer.scrollMiniPlayer .musicVisualizerCanvas {
+  display: none;
+}
+
+.ftVideoPlayer.musicAudioPlayer :deep(.shaka-player-ui-thumbnail-image-container) {
+  display: none;
+}
+
+@media (width <= 560px) {
+  .musicAudioContent {
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+    inline-size: 82%;
+    max-block-size: 76%;
+    margin-block-end: 48px;
+    text-align: center;
+  }
+
+  .musicAudioArtwork {
+    inline-size: auto;
+    block-size: min(42vi, 42vb);
+    max-inline-size: 60%;
+    max-block-size: 56%;
+  }
+
+  .musicAudioTitle {
+    font-size: clamp(16px, 5vi, 24px);
+    -webkit-line-clamp: 2;
+  }
+
+  .musicAudioArtist {
+    margin-block-start: 4px;
+    font-size: clamp(13px, 3.8vi, 18px);
+  }
 }
 
 /*

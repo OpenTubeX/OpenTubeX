@@ -964,7 +964,7 @@ test.describe('video downloads', () => {
     await expect(formatPrompt.getByRole('button', { name: /Local audio file/ })).toBeVisible()
     await formatPrompt.getByRole('button', { name: /Local audio file/ }).click()
     await expect(page).toHaveURL(new RegExp(`downloadId=${audioResult.id}`))
-    await expect(page.locator('.audioPoster')).toBeVisible()
+    await expect(page.locator('.musicAudioPlayer .musicAudioSurface')).toBeVisible()
     await page.getByRole('button', { name: 'Change Media Formats' }).click()
     await expect(formatPrompt.getByRole('button', { name: /Local audio file/ })).toHaveAttribute('aria-pressed', 'true')
     await formatPrompt.getByRole('button', { name: /Online video/ }).click()

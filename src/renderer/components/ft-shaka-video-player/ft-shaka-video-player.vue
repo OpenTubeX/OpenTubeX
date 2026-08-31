@@ -54,7 +54,8 @@
         fullWindow: fullWindowEnabled,
         shortsPlayer,
         shortsPaused: shortsPaused && hasLoaded,
-        sixteenByNine: (format === 'audio' || forceAspectRatio) && !fullWindowEnabled && !scrollMiniPlayerActive,
+        sixteenByNine: (audioPlayerMode || forceAspectRatio) && !fullWindowEnabled && !scrollMiniPlayerActive,
+        musicAudioPlayer: audioPlayerMode,
         scrollMiniPlayer: scrollMiniPlayerActive,
         scrollMiniPlayerAnimating,
         scrollMiniPlayerDismissed,
@@ -109,14 +110,14 @@
       <video
         ref="video"
         class="player"
-        :class="{ audioOnly: format === 'audio' }"
+        :class="{ audioOnly: format === 'audio', musicAudioTrack }"
         :style="videoZoomStyle"
         preload="auto"
         crossorigin="anonymous"
         playsinline
         :autoplay="autoplayVideos || (!suppressInitialAutoplay && shortsPlayer && isActiveTab) ? true : null"
         :loop="shortsPlayer && loopShorts"
-        :poster="format === 'audio' || showPoster ? thumbnail : null"
+        :poster="!audioPlayerMode && showPoster ? thumbnail : null"
         @play="handlePlay"
         @playing="handlePlaying"
         @waiting="handleWaiting"
@@ -132,13 +133,51 @@
         @enterpictureinpicture="handleEnterPictureInPicture"
         @leavepictureinpicture="handleLeavePictureInPicture"
       />
-      <img
-        v-if="format === 'audio' && thumbnail"
-        class="audioPoster"
-        :src="thumbnail"
-        alt=""
+      <div
+        v-if="audioPlayerMode"
+        class="musicAudioSurface"
         aria-hidden="true"
       >
+        <img
+          v-if="thumbnail"
+          class="musicAudioBackdrop"
+          :src="thumbnail"
+          alt=""
+          @error="hideBrokenMusicImage"
+        >
+        <div class="musicAudioShade" />
+        <canvas
+          v-show="musicVisualizerEnabled && !scrollMiniPlayerActive"
+          ref="musicVisualizerCanvas"
+          class="musicVisualizerCanvas"
+        />
+        <div class="musicAudioContent">
+          <img
+            v-if="thumbnail"
+            class="musicAudioArtwork"
+            :src="thumbnail"
+            alt=""
+            @error="hideBrokenMusicImage"
+          >
+          <div
+            v-if="title || artist"
+            class="musicAudioMetadata"
+          >
+            <div
+              v-if="title"
+              class="musicAudioTitle"
+            >
+              {{ title }}
+            </div>
+            <div
+              v-if="artist"
+              class="musicAudioArtist"
+            >
+              {{ artist }}
+            </div>
+          </div>
+        </div>
+      </div>
       <div
         v-if="voiceOverTranslationState === 'loading'"
         class="voiceOverTranslationProgress shaka-no-propagation"

@@ -93,6 +93,13 @@
           :tooltip="t('Tooltips.Player Settings.Ambient Mode')"
           @change="updateAmbientMode"
         />
+        <FtToggleSwitch
+          :label="t('Settings.Player Settings.Music Visualizer')"
+          :compact="true"
+          :default-value="musicVisualizer"
+          setting-key="musicVisualizer"
+          @change="updateMusicVisualizer"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -750,6 +757,16 @@ const ambientMode = computed(() => store.getters.getAmbientMode)
  */
 function updateAmbientMode(value) {
   store.dispatch('updateAmbientMode', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const musicVisualizer = computed(() => store.getters.getMusicVisualizer)
+
+/**
+ * @param {boolean} value
+ */
+function updateMusicVisualizer(value) {
+  store.dispatch('updateMusicVisualizer', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
