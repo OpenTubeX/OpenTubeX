@@ -320,6 +320,20 @@ test('marks entries published since the previous fetch as new', () => {
   assert.deepEqual(reconciled.map(entry => entry.isNewInSubscriptionFeed), [true, false])
 })
 
+test('marks a seen members-only video as new when it becomes public', () => {
+  const reconciled = reconcileFetchedSubscriptionEntries(
+    [video('members-first', now - HOUR, { isMembersOnly: false })],
+    [video('members-first', now - HOUR, {
+      isMembersOnly: true,
+      isNewInSubscriptionFeed: false
+    })],
+    'videoId',
+    now - 2 * HOUR
+  )
+
+  assert.equal(reconciled[0].isNewInSubscriptionFeed, true)
+})
+
 test('keeps entries that were already marked as new', () => {
   const previousEntries = [video('a', now - 2 * HOUR, { isNewInSubscriptionFeed: true })]
   const entries = [video('a', now - 2 * HOUR)]

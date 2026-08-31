@@ -242,13 +242,16 @@ export function reconcileFetchedSubscriptionEntries(
     const isWatched = idKey === 'videoId' && isHistoryEntryWatched(historyById?.[entry[idKey]])
     const previousEntry = previousEntriesById?.get(entry[idKey])
     const wasPreviouslyNew = previousEntry?.isNewInSubscriptionFeed === true
+    const becamePublic = idKey === 'videoId' &&
+      previousEntry?.isMembersOnly === true &&
+      entry.isMembersOnly !== true
     const isNewlyFetched = firstPreviouslyFetchedIndex > 0 &&
       index < firstPreviouslyFetchedIndex &&
       isPlausiblyRecent
 
     const reconciledEntry = {
       ...entry,
-      isNewInSubscriptionFeed: !isWatched && (wasPreviouslyNew || isNewlyFetched)
+      isNewInSubscriptionFeed: !isWatched && (wasPreviouslyNew || becamePublic || isNewlyFetched)
     }
 
     if (entry.isUpcoming === true || entry.premiere === true) {
