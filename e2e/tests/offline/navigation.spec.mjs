@@ -57,6 +57,62 @@ test.describe('side nav navigation', () => {
   })
 })
 
+test.describe('side nav channel names', () => {
+  test.use({
+    seed: {
+      settings: {
+        alwaysShowScrollbars: true,
+        currentLocale: 'en-US',
+        expandSideBar: true,
+        uiScale: 125
+      },
+      profiles: [{
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: [
+          {
+            id: 'UCarabicchannelname00000',
+            name: 'قناة عربية',
+            thumbnail: ''
+          },
+          ...Array.from({ length: 24 }, (_, index) => ({
+            id: `UC${index.toString().padStart(22, '0')}`,
+            name: `Channel ${index.toString().padStart(2, '0')}`,
+            thumbnail: ''
+          }))
+        ]
+      }]
+    }
+  })
+
+  test('keeps RTL channel names clear of the scrollbar in an LTR app', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+
+    const sideNav = page.locator('.sideNav.expanded')
+    const arabicChannel = sideNav.locator('.navChannel', { hasText: 'قناة عربية' })
+    await expect(arabicChannel).toBeVisible()
+
+    const metrics = await arabicChannel.evaluate((channel) => {
+      const label = channel.querySelector('.navLabel')
+      const scrollbar = channel.closest('.inner').querySelector('.os-scrollbar-vertical')
+      const labelBounds = label.getBoundingClientRect()
+      const scrollbarBounds = scrollbar.getBoundingClientRect()
+
+      return {
+        appDirection: getComputedStyle(channel).direction,
+        labelDirection: getComputedStyle(label).direction,
+        scrollbarClearance: scrollbarBounds.left - labelBounds.right
+      }
+    })
+
+    expect(metrics.appDirection).toBe('ltr')
+    expect(metrics.labelDirection).toBe('rtl')
+    expect(metrics.scrollbarClearance).toBeGreaterThanOrEqual(4)
+  })
+})
+
 for (const uiScale of [90, 100, 125]) {
   test.describe(`side nav without labels at ${uiScale}% UI scale`, () => {
     test.use({

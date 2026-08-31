@@ -241,6 +241,10 @@
     align-items: center;
   }
 
+  .expanded .navChannel {
+    padding-inline-end: calc(var(--scrollbar-track-width) + 5px);
+  }
+
   .expanded .navChannel .navLabel {
     font-size: 12px;
     flex-grow: 1;
