@@ -4260,7 +4260,6 @@ export default defineComponent({
     handlePlaybackEngineChange: async function (playbackEngine) {
       if (
         !process.env.IS_ELECTRON ||
-        this.isPostLiveDvr ||
         playbackEngine === this.playbackEngineSelection
       ) {
         return
@@ -4821,8 +4820,7 @@ export default defineComponent({
       if (
         !process.env.IS_ELECTRON ||
         this.playbackEngineFallbackAttemptedForCurrentVideo ||
-        this.isUpcoming ||
-        this.isPostLiveDvr
+        this.isUpcoming
       ) {
         return false
       }
@@ -5013,13 +5011,6 @@ export default defineComponent({
           !builtInLiveSourceMissing
         )
       ) {
-        return
-      }
-
-      // Post-Live-DVR videos are served as segmented OTF streams, which yt-dlp doesn't
-      // expose the segment durations for. They don't use SABR anyway, so the built-in
-      // engine already handles them without the errors we want to avoid here.
-      if (this.isPostLiveDvr) {
         return
       }
 

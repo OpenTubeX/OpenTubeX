@@ -15,6 +15,11 @@ export const DEMO_MEDIA_DURATION_SECONDS = 30
 /** Real streams always declare their size, and players rely on it. */
 export const DEMO_MEDIA_LENGTH = statSync(DEMO_MEDIA_PATH).size
 
+const POST_LIVE_VIDEO_PATH = path.join(repoRoot, 'e2e', 'fixtures', 'media', 'post-live-video.mp4.b64')
+const POST_LIVE_AUDIO_PATH = path.join(repoRoot, 'e2e', 'fixtures', 'media', 'post-live-audio.m4a.b64')
+export const POST_LIVE_VIDEO_URL = 'https://post-live-video.test/videoplayback?expire=4102444800'
+export const POST_LIVE_AUDIO_URL = 'https://post-live-audio.test/videoplayback?expire=4102444800'
+
 /**
  * Looks like a real progressive stream URL, so the app treats it the same way
  * and the route below can recognize it.
@@ -23,10 +28,37 @@ export const DEMO_MEDIA_URL =
   'https://rr1---sn-opentubex-e2e.googlevideo.com/videoplayback?id=opentubex-e2e-demo&itag=43&mime=video%2Fwebm'
 
 let demoMedia
+let postLiveVideo
+let postLiveAudio
 
 function readDemoMedia() {
   demoMedia ??= readFile(DEMO_MEDIA_PATH)
   return demoMedia
+}
+
+function readPostLiveMedia(file) {
+  return readFile(file, 'utf8').then(base64 => Buffer.from(base64.replaceAll('\n', ''), 'base64'))
+}
+
+/**
+ * Serves one self-contained audio and video fragment for a mocked yt-dlp
+ * Post-Live-DVR response. YouTube uses the same self-initializing fragmented
+ * MP4 shape for every `sq` URL in these streams.
+ * @param {import('@playwright/test').Page} page
+ */
+export async function routePostLiveMedia(page) {
+  await page.route(/^https:\/\/post-live-(?:audio|video)\.test\/videoplayback/, async route => {
+    const isVideo = route.request().url().startsWith('https://post-live-video.test/')
+    const body = isVideo
+      ? (postLiveVideo ??= readPostLiveMedia(POST_LIVE_VIDEO_PATH))
+      : (postLiveAudio ??= readPostLiveMedia(POST_LIVE_AUDIO_PATH))
+
+    return route.fulfill({
+      status: 200,
+      contentType: isVideo ? 'video/mp4' : 'audio/mp4',
+      body: await body
+    })
+  })
 }
 
 /**

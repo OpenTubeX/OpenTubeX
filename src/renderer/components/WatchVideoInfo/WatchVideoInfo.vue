@@ -290,7 +290,7 @@
       :audio-available="audioAvailable"
       :local-file-playback="localFilePlayback"
       :local-playback-downloads="localPlaybackDownloads"
-      :can-change-playback-engine="USING_ELECTRON && !isPostLiveDvr"
+      :can-change-playback-engine="USING_ELECTRON"
       @change-format="changeFormat"
       @change-playback-engine="changePlaybackEngine"
       @use-local-source="emit('use-local-source', $event)"
@@ -512,10 +512,6 @@ const props = defineProps({
   localPlaybackDownloads: {
     type: Array,
     default: () => []
-  },
-  isPostLiveDvr: {
-    type: Boolean,
-    default: false
   },
   canSaveWatchedProgress: {
     type: Boolean,
