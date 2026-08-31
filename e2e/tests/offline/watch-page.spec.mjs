@@ -4180,7 +4180,7 @@ test.describe('manual comment loading', () => {
     await expect(page.locator('.commentReplyContent .commentAuthor mark')).toHaveText(replyAuthor)
   })
 
-  test('ends filtered thread lines at the last reply from the creator', async ({ app, page }) => {
+  test('keeps creator-filtered thread lines connected without dangling stems', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page, { creatorReply: true })
     await openMockedVideo(page)
 
@@ -4191,7 +4191,30 @@ test.describe('manual comment loading', () => {
 
     const thread = page.locator('.commentThread').first()
     await thread.locator('.commentReplyRootToggle button').click()
-    await expect(thread.locator('.commentReplyContent').first()).toBeVisible({ timeout: 30_000 })
+    const firstReply = thread.locator('.commentReplyContent').first()
+    await expect(firstReply).toBeVisible({ timeout: 30_000 })
+    await firstReply.evaluate(element => {
+      const branch = element.closest('.commentReplyBranch')
+      const app = document.querySelector('#app')?.__vue_app__
+      const find = vnode => {
+        if (vnode?.component?.subTree?.el === branch) return vnode.component
+        if (vnode?.component?.subTree) {
+          const match = find(vnode.component.subTree)
+          if (match) return match
+        }
+        if (Array.isArray(vnode?.children)) {
+          for (const child of vnode.children) {
+            const match = find(child)
+            if (match) return match
+          }
+        }
+        return null
+      }
+      const replyComponent = find(app?._container?._vnode)
+      if (!replyComponent) throw new Error('Unable to access the comment reply')
+      replyComponent.props.node.reply.hasReplyToken = true
+    })
+    await expect(firstReply.locator(':scope > .commentReplyChildStem')).toHaveCount(1)
 
     await page.getByRole('button', { name: 'Filter loaded comments' }).click()
     await page.getByRole('checkbox', { name: 'From creator' }).click()
@@ -4201,23 +4224,24 @@ test.describe('manual comment loading', () => {
     })
     await expect(filteredReplyThread).toHaveCount(1)
     await expect(filteredReplyThread.locator('.commentReplyContent')).toHaveCount(1)
+    await expect(filteredReplyThread.locator('.commentReplyChildStem')).toHaveCount(0)
 
-    const expectLineToEndAtLastConnector = () => expect.poll(() => filteredReplyThread.evaluate(element => {
+    const expectLineToEndAtLastConnectorStart = () => expect.poll(() => filteredReplyThread.evaluate(element => {
       const lineStyle = getComputedStyle(element, '::before')
       const lineEnd = element.getBoundingClientRect().bottom - Number.parseFloat(lineStyle.insetBlockEnd)
       const connectors = element.querySelectorAll(
         ':scope > .commentReplies > .commentReplyBranchRoot > .commentReplyConnector'
       )
-      const connectorEnd = connectors.item(connectors.length - 1).getBoundingClientRect().bottom
-      return Math.abs(lineEnd - connectorEnd)
+      const connectorStart = connectors.item(connectors.length - 1).getBoundingClientRect().top
+      return Math.abs(lineEnd - connectorStart)
     })).toBeLessThanOrEqual(0.5)
 
-    await expectLineToEndAtLastConnector()
+    await expectLineToEndAtLastConnectorStart()
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return store.dispatch('updateUiScale', 125)
     })
-    await expectLineToEndAtLastConnector()
+    await expectLineToEndAtLastConnectorStart()
   })
 
   test('filters comments with timestamps and keeps highlighted timestamps clickable', async ({ app, page }) => {

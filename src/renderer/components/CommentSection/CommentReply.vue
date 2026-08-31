@@ -22,7 +22,7 @@
         {{ $t('Comments.Highlighted reply') }}
       </p>
       <span
-        v-if="node.children.length > 0 || (reply.dataType === 'local' && reply.hasReplyToken) || loadingReplyIds.has(reply.id)"
+        v-if="showReplyChildren"
         class="commentReplyChildStem"
         aria-hidden="true"
       />
@@ -160,7 +160,7 @@
       </p>
     </div>
     <div
-      v-if="node.children.length > 0 || (!filtering && ((reply.dataType === 'local' && reply.hasReplyToken) || loadingReplyIds.has(reply.id)))"
+      v-if="showReplyChildren"
       class="commentReplyChildren"
     >
       <CommentReply
@@ -323,6 +323,13 @@ function formatCommentTime(comment) {
 }
 
 const reply = props.node.reply
+const showReplyChildren = computed(() => {
+  return props.node.children.length > 0 ||
+    (!props.filtering && (
+      (reply.dataType === 'local' && reply.hasReplyToken) ||
+      props.loadingReplyIds.has(reply.id)
+    ))
+})
 const isPersonallyPinned = computed(() => props.personalPinnedCommentIds.has(reply.id))
 const personalPinActionLabel = computed(() => {
   return isPersonallyPinned.value
