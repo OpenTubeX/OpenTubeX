@@ -492,6 +492,20 @@ class Profiles {
     }
   }
 
+  static updateChannelSettings(channel, profileIds) {
+    return db.profiles.updateAsync(
+      {
+        _id: { $in: profileIds },
+        subscriptions: { $elemMatch: { id: channel.id } }
+      },
+      {
+        $pull: { subscriptions: { id: channel.id } },
+        $push: { subscriptions: channel }
+      },
+      { multi: true }
+    )
+  }
+
   static delete(id) {
     return db.profiles.removeAsync({ _id: id })
   }

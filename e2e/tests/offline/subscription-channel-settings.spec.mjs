@@ -185,7 +185,7 @@ test('reports subscription setting write failures from the channel popover', asy
 
   await page.evaluate(() => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    store._actions.updateProfile = [() => Promise.resolve(false)]
+    store._actions.updateChannelSettings = [() => Promise.resolve(false)]
   })
   await shorts.click()
 
@@ -204,7 +204,7 @@ test('reports subscription setting write failures from the settings manager', as
 
   await page.evaluate(() => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    store._actions.updateProfile = [() => Promise.resolve(false)]
+    store._actions.updateChannelSettings = [() => Promise.resolve(false)]
   })
   await shorts.click()
 

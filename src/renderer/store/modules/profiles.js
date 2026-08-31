@@ -171,40 +171,42 @@ const actions = {
     }
   },
 
-  async updateChannelSettings({ dispatch, state }, { channelId, settings }) {
-    // updateProfile replaces and sorts the live list, so iterate over a stable snapshot.
-    let saved = true
-    for (const profile of [...state.profileList]) {
-      const subscriptionIndex = profile.subscriptions.findIndex(channel => channel.id === channelId)
-      if (subscriptionIndex === -1) {
-        continue
-      }
+  async updateChannelSettings({ commit, state }, { channelId, settings }) {
+    const primarySubscription = state.profileList[0].subscriptions
+      .find(channel => channel.id === channelId)
+    if (primarySubscription === undefined) return false
 
-      const updatedProfile = deepCopy(profile)
-      const subscription = updatedProfile.subscriptions[subscriptionIndex]
-      if (Array.isArray(settings.feedTypes)) {
-        subscription.feedTypes = [...settings.feedTypes]
+    const channel = deepCopy(primarySubscription)
+    if (Array.isArray(settings.feedTypes)) {
+      channel.feedTypes = [...settings.feedTypes]
+    }
+    if (Object.hasOwn(settings, 'dailyVideoLimit')) {
+      if (settings.dailyVideoLimit === undefined) {
+        delete channel.dailyVideoLimit
+      } else {
+        channel.dailyVideoLimit = settings.dailyVideoLimit
       }
-      if (Object.hasOwn(settings, 'dailyVideoLimit')) {
-        if (settings.dailyVideoLimit === undefined) {
-          delete subscription.dailyVideoLimit
-        } else {
-          subscription.dailyVideoLimit = settings.dailyVideoLimit
-        }
-      }
-      if (Object.hasOwn(settings, 'showMembersOnly')) {
-        if (typeof settings.showMembersOnly === 'boolean') {
-          subscription.showMembersOnly = settings.showMembersOnly
-        } else {
-          delete subscription.showMembersOnly
-        }
-      }
-      if (!await dispatch('updateProfile', updatedProfile)) {
-        saved = false
+    }
+    if (Object.hasOwn(settings, 'showMembersOnly')) {
+      if (typeof settings.showMembersOnly === 'boolean') {
+        channel.showMembersOnly = settings.showMembersOnly
+      } else {
+        delete channel.showMembersOnly
       }
     }
 
-    return saved
+    const profileIds = state.profileList
+      .filter(profile => profile.subscriptions.some(subscription => subscription.id === channelId))
+      .map(profile => profile._id)
+
+    try {
+      await DBProfileHandlers.updateChannelSettings(channel, profileIds)
+      commit('updateChannelSettings', { channel, profileIds })
+      return true
+    } catch (error) {
+      console.error(error)
+      return false
+    }
   },
 
   async createProfile({ commit }, profile) {
@@ -325,6 +327,17 @@ const mutations = {
       // use filter instead of splice in case the subscription appears multiple times
       // https://github.com/FreeTubeApp/FreeTube/pull/3468#discussion_r1179290877
       profile.subscriptions = profile.subscriptions.filter(channel => channel.id !== channelId)
+    }
+  },
+
+  updateChannelSettings(state, { channel, profileIds }) {
+    for (const id of profileIds) {
+      const profile = state.profileList.find(profile => profile._id === id)
+      if (!profile) continue
+
+      profile.subscriptions = profile.subscriptions
+        .filter(subscription => subscription.id !== channel.id)
+      profile.subscriptions.push(deepCopy(channel))
     }
   },
 
