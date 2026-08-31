@@ -334,6 +334,20 @@ test('marks a seen members-only video as new when it becomes public', () => {
   assert.equal(reconciled[0].isNewInSubscriptionFeed, true)
 })
 
+test('keeps a seen members-only video seen when its membership state is unknown', () => {
+  const reconciled = reconcileFetchedSubscriptionEntries(
+    [video('members-first', now - HOUR)],
+    [video('members-first', now - HOUR, {
+      isMembersOnly: true,
+      isNewInSubscriptionFeed: false
+    })],
+    'videoId',
+    now - 2 * HOUR
+  )
+
+  assert.equal(reconciled[0].isNewInSubscriptionFeed, false)
+})
+
 test('keeps entries that were already marked as new', () => {
   const previousEntries = [video('a', now - 2 * HOUR, { isNewInSubscriptionFeed: true })]
   const entries = [video('a', now - 2 * HOUR)]

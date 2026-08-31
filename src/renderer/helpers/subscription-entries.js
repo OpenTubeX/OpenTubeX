@@ -244,7 +244,7 @@ export function reconcileFetchedSubscriptionEntries(
     const wasPreviouslyNew = previousEntry?.isNewInSubscriptionFeed === true
     const becamePublic = idKey === 'videoId' &&
       previousEntry?.isMembersOnly === true &&
-      entry.isMembersOnly !== true
+      entry.isMembersOnly === false
     const isNewlyFetched = firstPreviouslyFetchedIndex > 0 &&
       index < firstPreviouslyFetchedIndex &&
       isPlausiblyRecent
