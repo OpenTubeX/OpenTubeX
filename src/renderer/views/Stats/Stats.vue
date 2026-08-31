@@ -268,6 +268,7 @@ import FtPrompt from '../../components/FtPrompt/FtPrompt.vue'
 import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import store from '../../store'
 import { showToast } from '../../helpers/utils'
+import { formatDate } from '../../helpers/dateFormat'
 
 const { locale, t } = useI18n()
 const router = useRouter()
@@ -284,6 +285,7 @@ const channelPlaybackSpeeds = computed(() => store.getters.getChannelPlaybackSpe
 const playbackSpeedInterval = computed(() => store.getters.getVideoPlaybackRateInterval)
 const maximumPlaybackSpeed = computed(() => store.getters.getMaxVideoPlaybackRate)
 const statsWeekStartsOn = computed(() => Number(store.getters.getStatsWeekStartsOn))
+const dateFormat = computed(() => store.getters.getDateFormat)
 const watchStatsVisible = computed(() => {
   return store.getters.getRememberHistory && store.getters.getEnableWatchStats
 })
@@ -462,7 +464,6 @@ const summaries = computed(() => [
 
 const dailyData = computed(() => {
   const formatter = new Intl.DateTimeFormat(locale.value, { weekday: 'short' })
-  const fullFormatter = new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' })
   const today = startOfDay(new Date())
 
   return Array.from({ length: 14 }, (_, index) => {
@@ -473,7 +474,7 @@ const dailyData = computed(() => {
     return {
       date: dateKey,
       label: formatter.format(date).slice(0, 2),
-      fullLabel: fullFormatter.format(date),
+      fullLabel: formatDate(date, locale.value, dateFormat.value, { dateStyle: 'medium' }),
       seconds: watchSecondsByDate.value[dateKey] ?? 0,
     }
   })
@@ -496,7 +497,6 @@ const dailyChart = computed(() => {
 
 const weeklyTotals = computed(() => {
   const labelFormatter = new Intl.DateTimeFormat(locale.value, { month: 'short', day: 'numeric' })
-  const fullFormatter = new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' })
   const currentWeek = startOfWeek(new Date())
   const weeks = Array.from({ length: 8 }, (_, index) => {
     const date = new Date(currentWeek)
@@ -504,7 +504,7 @@ const weeklyTotals = computed(() => {
     return {
       date: toDateKey(date),
       label: labelFormatter.format(date),
-      fullLabel: fullFormatter.format(date),
+      fullLabel: formatDate(date, locale.value, dateFormat.value, { dateStyle: 'medium' }),
       seconds: 0,
     }
   })

@@ -333,6 +333,9 @@ Settings:
       Disk: disk
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
+    Date Format: Oblika datuma
+    Time Format: Oblika časa
+    Language Default: Privzeto za jezik
     Update Relative Timestamps: Posodabljaj relativne časovne oznake
     Stream Extraction Method:
       Stream Extraction Method: Način pridobivanja tokov

@@ -128,8 +128,10 @@ import store from '../../store/index'
 import { useTabContext } from '../../tabs/TabContext'
 
 import { formatNumber } from '../../helpers/utils'
+import { formatDate } from '../../helpers/dateFormat'
 
 const { locale } = useI18n()
+const dateFormat = computed(() => store.getters.getDateFormat)
 const { tabId: injectedTabId } = useTabContext()
 const tabId = injectedTabId ?? 'web'
 
@@ -180,7 +182,7 @@ const searchSettings = computed(() => {
 })
 
 const formattedJoined = computed(() => {
-  return new Intl.DateTimeFormat([locale.value, 'en'], { dateStyle: 'long' }).format(props.joined)
+  return formatDate(props.joined, locale.value, dateFormat.value, { dateStyle: 'long' })
 })
 
 const formattedViews = computed(() => formatNumber(props.views))

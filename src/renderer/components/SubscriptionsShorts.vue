@@ -26,7 +26,8 @@ import {
   refreshSubscriptionShortsFromRemote,
   updateVideoListAfterProcessing
 } from '../helpers/subscriptions'
-import { getCachedRelativeTimeFormat, getCachedShortDateTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
+import { getCachedRelativeTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
+import { formatShortDateTime } from '../helpers/dateFormat'
 
 const { locale, t } = useI18n()
 const tabUi = useTemplateRef('tabUi')
@@ -40,6 +41,8 @@ const attemptedFetch = ref(false)
 const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
 /** @type {import('vue').Ref<number | null>} */
 const lastRemoteRefreshSuccessTimestamp = ref(null)
+const dateFormat = computed(() => store.getters.getDateFormat)
+const timeFormat = computed(() => store.getters.getTimeFormat)
 
 let alreadyLoadedRemotely = false
 
@@ -117,7 +120,7 @@ const nextAutoRefreshTimestamp = computed(() => {
     return ''
   }
 
-  return getCachedShortDateTimeFormat(locale.value).format(timestamp)
+  return formatShortDateTime(timestamp, locale.value, dateFormat.value, timeFormat.value)
 })
 
 const nextAutoRefreshTooltip = computed(() => {

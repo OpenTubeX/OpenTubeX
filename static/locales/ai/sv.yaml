@@ -215,6 +215,9 @@ Settings:
       Network: nätverk
       Disk: diskutrymme
   General Settings:
+    Date Format: Datumformat
+    Time Format: Tidsformat
+    Language Default: Språkstandard
     Update Relative Timestamps: Håll relativa tidsangivelser uppdaterade
     Stream Extraction Method:
       Stream Extraction Method: Metod för strömutvinning

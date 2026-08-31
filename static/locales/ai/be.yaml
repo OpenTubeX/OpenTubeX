@@ -229,6 +229,9 @@ Settings:
       Network: сетка
       Disk: дыск
   General Settings:
+    Date Format: Фармат даты
+    Time Format: Фармат часу
+    Language Default: Паводле мовы
     Update Relative Timestamps: Абнаўляць адносныя пазнакі часу
     Stream Extraction Method:
       Stream Extraction Method: Спосаб атрымання медыяструменя

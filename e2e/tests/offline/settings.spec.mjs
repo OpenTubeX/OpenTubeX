@@ -236,6 +236,27 @@ test.describe('AI translation completions', () => {
   })
 })
 
+test.describe('date and time format preferences', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  test('defaults to the app language and offers explicit date and clock formats', async ({ page }) => {
+    const general = await goToSettingsSection(page, 'general')
+    const dateFormat = general.getByRole('combobox', { name: 'Date Format' })
+
+    await expect(dateFormat).toContainText(/^Language default \(/)
+    await dateFormat.click()
+    await expect(page.getByRole('option', { name: 'DD.MM.YYYY', exact: true })).toBeVisible()
+    await page.getByRole('option', { name: 'DD.MM.YYYY', exact: true }).click()
+    await expect(dateFormat).toHaveText('DD.MM.YYYY')
+
+    const timeFormat = general.getByRole('combobox', { name: 'Time Format' })
+    await expect(timeFormat).toContainText(/^Language default \(/)
+    await timeFormat.click()
+    await page.getByRole('option', { name: /^24h \(/ }).click()
+    await expect(timeFormat).toContainText(/^24h \(/)
+  })
+})
+
 test.describe('settings search highlights', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 
@@ -4844,11 +4865,19 @@ test.describe('synced setting indicators', () => {
     const neighboringIndicators = page.locator('.select')
       .filter({ hasText: 'Prefer untranslated video text' })
       .locator('.selectIndicators')
-    const [tooltipBox, indicatorsBox] = await Promise.all([
-      tooltipText.boundingBox(),
-      neighboringIndicators.boundingBox()
-    ])
+    const tooltipBox = await tooltipText.boundingBox()
     expect(tooltipBox).not.toBeNull()
+    await neighboringIndicators.evaluate((element, { x, y }) => {
+      element.style.position = 'fixed'
+      element.style.inset = 'auto'
+      element.style.left = `${x}px`
+      element.style.top = `${y}px`
+      element.style.transform = 'none'
+    }, {
+      x: tooltipBox.x + 10,
+      y: tooltipBox.y + 10
+    })
+    const indicatorsBox = await neighboringIndicators.boundingBox()
     expect(indicatorsBox).not.toBeNull()
 
     const overlapLeft = Math.max(tooltipBox.x, indicatorsBox.x)

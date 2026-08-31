@@ -515,6 +515,9 @@ Settings:
       Load last active tab: Load last active tab
       Start with an empty session: Start with an empty session
     Locale Preference: Locale Preference
+    Date Format: Date Format
+    Time Format: Time Format
+    Language Default: Language default
     Use AI Translation Completions: Fill missing translations with AI-generated text
     Reduced Motion:
       Reduced Motion: Reduced Motion

@@ -215,6 +215,9 @@ Settings:
       Network: rhwydwaith
       Disk: disg
   General Settings:
+    Date Format: Fformat dyddiad
+    Time Format: Fformat amser
+    Language Default: Rhagosodiad yr iaith
     Update Relative Timestamps: Diweddaru stampiau amser cymharol
     Stream Extraction Method:
       Stream Extraction Method: Dull echdynnu ffrydiau

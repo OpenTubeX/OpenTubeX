@@ -217,6 +217,9 @@ Settings:
       Network: jaringan
       Disk: disk
   General Settings:
+    Date Format: Format tanggal
+    Time Format: Format waktu
+    Language Default: Default bahasa
     Update Relative Timestamps: Terus perbarui stempel waktu relatif
     Stream Extraction Method:
       Stream Extraction Method: Metode ekstraksi stream

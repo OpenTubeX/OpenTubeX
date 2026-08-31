@@ -92,6 +92,7 @@ import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { useTabToast } from '../../composables/useTabToast'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { areCommentsAvailable } from './watchComments'
+import { formatDateTime } from '../../helpers/dateFormat'
 
 /**
  * @typedef {{
@@ -446,6 +447,12 @@ export default defineComponent({
     }
   },
   computed: {
+    dateFormatPreference: function () {
+      return this.$store.getters.getDateFormat
+    },
+    timeFormatPreference: function () {
+      return this.$store.getters.getTimeFormat
+    },
     localPlaybackDownloads: function () {
       const downloads = Object.values(this.$store.getters.getYtDlpDownloads)
         .filter(download => download.status === 'completed' && ['video', 'audio'].includes(download.mode))
@@ -1077,6 +1084,9 @@ export default defineComponent({
     }
   },
   watch: {
+    currentLocale: 'updateUpcomingTimestamp',
+    dateFormatPreference: 'updateUpcomingTimestamp',
+    timeFormatPreference: 'updateUpcomingTimestamp',
     isLoading(loading) {
       if (!loading) {
         this.updateVideoMetadataCache()
@@ -1228,6 +1238,26 @@ export default defineComponent({
     }
   },
   methods: {
+    updateUpcomingTimestamp: function () {
+      if (!(this.premiereDate instanceof Date)) return
+
+      const dateOptions = {
+        month: 'long',
+        day: 'numeric',
+      }
+      if (new Date().getFullYear() < this.premiereDate.getFullYear()) {
+        dateOptions.year = 'numeric'
+      }
+
+      this.upcomingTimestamp = formatDateTime(
+        this.premiereDate,
+        this.currentLocale,
+        this.dateFormatPreference,
+        dateOptions,
+        { hour: 'numeric', minute: '2-digit' },
+        this.timeFormatPreference
+      )
+    },
     async updateVideoMetadataCache() {
       if (
         !this.enableVideoMetadataCache ||
@@ -2971,19 +3001,9 @@ export default defineComponent({
           const upcomingTimestamp = result.basic_info.start_timestamp
 
           if (upcomingTimestamp) {
-            const timestampOptions = {
-              month: 'long',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: '2-digit'
-            }
             const now = new Date()
-            if (now.getFullYear() < upcomingTimestamp.getFullYear()) {
-              Object.defineProperty(timestampOptions, 'year', {
-                value: 'numeric'
-              })
-            }
-            this.upcomingTimestamp = Intl.DateTimeFormat(this.currentLocale, timestampOptions).format(upcomingTimestamp)
+            this.premiereDate = upcomingTimestamp
+            this.updateUpcomingTimestamp()
 
             let upcomingTimeLeft = upcomingTimestamp - now
 
@@ -3015,7 +3035,6 @@ export default defineComponent({
               this.upcomingTimeLeft = new Intl.RelativeTimeFormat(this.currentLocale).format(upcomingTimeLeft, timeUnit)
             }
 
-            this.premiereDate = upcomingTimestamp
             this.scheduleLiveReminderStartInvalidation()
             this.syncLiveReminder(loadGeneration, videoId).catch(error => {
               console.error('Failed to load live stream reminder', error)

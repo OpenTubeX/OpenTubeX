@@ -213,6 +213,9 @@ Settings:
       Network: ağ
       Disk: disk
   General Settings:
+    Date Format: Tarih biçimi
+    Time Format: Saat biçimi
+    Language Default: Dil varsayılanı
     Update Relative Timestamps: Göreli zaman damgalarını güncel tut
     Stream Extraction Method:
       Stream Extraction Method: Akış çıkarma yöntemi

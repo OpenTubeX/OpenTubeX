@@ -218,6 +218,9 @@ Settings:
       Network: பிணையம்
       Disk: வட்டு
   General Settings:
+    Date Format: தேதி வடிவம்
+    Time Format: நேர வடிவம்
+    Language Default: மொழி இயல்புநிலை
     Update Relative Timestamps: சார்புநேரக் குறிப்புகளைப் புதுப்பித்தபடி வைத்திரு
     Stream Extraction Method:
       Stream Extraction Method: ஸ்ட்ரீம் பிரித்தெடுக்கும் முறை

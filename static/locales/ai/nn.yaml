@@ -338,6 +338,9 @@ Settings:
       Disk: disk
   Return to Settings Menu: Tilbake til innstillingsmenyen
   General Settings:
+    Date Format: Datoformat
+    Time Format: Tidsformat
+    Language Default: Språkstandard
     Update Relative Timestamps: Hald relative tidsstempel oppdaterte
     Stream Extraction Method:
       Stream Extraction Method: Metode for uthenting av straum

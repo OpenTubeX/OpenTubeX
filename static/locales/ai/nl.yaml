@@ -217,6 +217,9 @@ Settings:
       Network: netwerk
       Disk: schijf
   General Settings:
+    Date Format: Datumnotatie
+    Time Format: Tijdnotatie
+    Language Default: Standaard voor taal
     Update Relative Timestamps: Relatieve tijdsaanduidingen blijven bijwerken
     Stream Extraction Method:
       Stream Extraction Method: Methode voor stream-extractie

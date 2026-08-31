@@ -301,6 +301,9 @@ Settings:
       Disk: 디스크
   Return to Settings Menu: 설정 메뉴로 돌아가기
   General Settings:
+    Date Format: 날짜 형식
+    Time Format: 시간 형식
+    Language Default: 언어 기본값
     Update Relative Timestamps: 상대 시간 표시 계속 업데이트
     Stream Extraction Method:
       Stream Extraction Method: 스트림 추출 방법

@@ -340,6 +340,9 @@ Settings:
       Disk: disc
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
+    Date Format: Format de data
+    Time Format: Format d'hora
+    Language Default: Predeterminat de l'idioma
     Update Relative Timestamps: Manté actualitzades les marques horàries relatives
     Stream Extraction Method:
       Stream Extraction Method: Mètode d'extracció dels fluxos

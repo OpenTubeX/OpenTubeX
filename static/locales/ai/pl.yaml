@@ -70,6 +70,9 @@ Settings:
     Advanced Description: Dostawcy, aplikacje zewnętrzne i sieć
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Date Format: Format daty
+    Time Format: Format czasu
+    Language Default: Domyślny dla języka
     Use AI Translation Completions: Uzupełniaj brakujące tłumaczenia tekstem wygenerowanym przez AI
     Comment Translation:
       Title: Tłumaczenie komentarzy

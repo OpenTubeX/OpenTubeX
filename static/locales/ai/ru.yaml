@@ -192,6 +192,9 @@ Settings:
       Network: сеть
       Disk: диск
   General Settings:
+    Date Format: Формат даты
+    Time Format: Формат времени
+    Language Default: По умолчанию для языка
     Update Relative Timestamps: Обновлять относительные отметки времени
     Stream Extraction Method:
       Stream Extraction Method: Способ извлечения потоков

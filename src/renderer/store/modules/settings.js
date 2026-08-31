@@ -518,6 +518,8 @@ const state = {
   quickBookmarkTargetPlaylistId: 'favorites',
   generalAutoLoadMorePaginatedItemsEnabled: true,
   hideToTrayOnMinimize: false,
+  dateFormat: 'locale',
+  timeFormat: 'locale',
 
   // The settings below have side effects
   useAITranslationCompletions: true,

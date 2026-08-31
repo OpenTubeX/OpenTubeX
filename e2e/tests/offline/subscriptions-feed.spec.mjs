@@ -328,6 +328,45 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
     await expect(page.getByRole('option', { name: 'Add to Queue' })).toBeVisible()
   })
 
+  test.describe('with date and time formats independent of the app language', () => {
+    test.use({
+      seed: {
+        ...seed,
+        settings: {
+          ...seed.settings,
+          currentLocale: 'en-US',
+          dateFormat: 'DD.MM.YYYY',
+          timeFormat: '24-hour',
+          hideUpcomingPremieres: false,
+        },
+      },
+    })
+
+    test('formats an upcoming premiere with the selected date and clock formats', async ({ page }) => {
+      await goTo(page, 'subscriptions')
+
+      const premiereDate = new Date(now + 30 * 24 * HOUR)
+      const numericParts = Object.fromEntries(
+        new Intl.DateTimeFormat('en-US', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        }).formatToParts(premiereDate).map(part => [part.type, part.value])
+      )
+      const time = new Intl.DateTimeFormat('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        hourCycle: 'h23',
+      }).format(premiereDate)
+      const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
+
+      await expect(upcomingPremiere.locator('.uploadedTime')).toHaveText(
+        `${numericParts.day}.${numericParts.month}.${numericParts.year}, ${time}`
+      )
+    })
+  })
+
   test('uses the main text color for an upcoming premiere title', async ({ page }) => {
     await goTo(page, 'subscriptions')
 

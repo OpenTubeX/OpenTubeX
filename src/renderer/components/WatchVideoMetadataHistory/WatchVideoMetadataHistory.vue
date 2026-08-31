@@ -103,6 +103,8 @@ import { computed, nextTick, onBeforeUnmount, onMounted, useTemplateRef } from '
 import { useI18n } from 'vue-i18n'
 
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { formatDateTime } from '../../helpers/dateFormat'
+import store from '../../store'
 import FtButton from '../FtButton/FtButton.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
@@ -117,6 +119,8 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 const { locale, t } = useI18n()
 const descriptionScrollers = useTemplateRef('descriptionScrollers')
+const dateFormat = computed(() => store.getters.getDateFormat)
+const timeFormat = computed(() => store.getters.getTimeFormat)
 
 let descriptionResizeObserver = null
 
@@ -144,11 +148,6 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => descriptionResizeObserver?.disconnect())
-
-const dateFormatter = computed(() => new Intl.DateTimeFormat(locale.value, {
-  dateStyle: 'medium',
-  timeStyle: 'short'
-}))
 
 const materializedRevisions = computed(() => {
   let thumbnail = null
@@ -188,7 +187,14 @@ function versionLabel(index) {
 }
 
 function formatDate(cachedAt) {
-  return dateFormatter.value.format(cachedAt)
+  return formatDateTime(
+    cachedAt,
+    locale.value,
+    dateFormat.value,
+    { dateStyle: 'medium' },
+    { timeStyle: 'short' },
+    timeFormat.value
+  )
 }
 
 function dateTime(cachedAt) {

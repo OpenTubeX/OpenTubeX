@@ -976,24 +976,6 @@ export function getCachedRelativeTimeFormat(locale, numeric = 'always') {
   return formatter
 }
 
-/** @type {Map<string, Intl.DateTimeFormat>} */
-const shortDateTimeFormatCache = new Map()
-
-/**
- * @param {string} locale
- * @returns {Intl.DateTimeFormat}
- */
-export function getCachedShortDateTimeFormat(locale) {
-  let formatter = shortDateTimeFormatCache.get(locale)
-
-  if (!formatter) {
-    formatter = new Intl.DateTimeFormat([locale, 'en'], { dateStyle: 'short', timeStyle: 'short' })
-    shortDateTimeFormatCache.set(locale, formatter)
-  }
-
-  return formatter
-}
-
 /**
  *
  * @param {number} date

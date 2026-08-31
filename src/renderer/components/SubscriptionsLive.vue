@@ -21,7 +21,8 @@ import store from '../store/index'
 import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
 import { useRelativeTimeClock } from '../composables/useRelativeTimeClock'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
-import { getCachedRelativeTimeFormat, getCachedShortDateTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
+import { getCachedRelativeTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
+import { formatShortDateTime } from '../helpers/dateFormat'
 import {
   refreshSubscriptionLiveFromRemote,
   updateVideoListAfterProcessing
@@ -37,6 +38,8 @@ const errorChannels = ref([])
 const attemptedFetch = ref(false)
 /** @type {import('vue').Ref<number | null>} */
 const lastRemoteRefreshSuccessTimestamp = ref(null)
+const dateFormat = computed(() => store.getters.getDateFormat)
+const timeFormat = computed(() => store.getters.getTimeFormat)
 
 let alreadyLoadedRemotely = false
 
@@ -115,7 +118,7 @@ const nextAutoRefreshTimestamp = computed(() => {
     return ''
   }
 
-  return getCachedShortDateTimeFormat(locale.value).format(timestamp)
+  return formatShortDateTime(timestamp, locale.value, dateFormat.value, timeFormat.value)
 })
 
 const nextAutoRefreshTooltip = computed(() => {

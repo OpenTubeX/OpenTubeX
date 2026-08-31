@@ -248,6 +248,7 @@ import {
 import { invidiousGetPlaylistInfo, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../../helpers/api/invidious-playlists'
 import { runRetryablePlaylistRequest } from '../../helpers/playlist-pagination'
+import { formatDate } from '../../helpers/dateFormat'
 import { canonicalPlaylistThumbnailUrl, createPlaylistBookmark } from '../../helpers/playlist-bookmarks'
 import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
@@ -274,6 +275,20 @@ const viewCount = ref(0)
 const videoCount = ref(0)
 /** @type {import('vue').Ref<string | undefined>} */
 const lastUpdated = ref(undefined)
+const lastUpdatedDate = ref(null)
+const dateFormat = computed(() => store.getters.getDateFormat)
+
+function updateLastUpdatedDate() {
+  if (lastUpdatedDate.value === null) return
+
+  lastUpdated.value = formatDate(lastUpdatedDate.value, locale.value, dateFormat.value, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+watch([locale, dateFormat], updateLastUpdatedDate)
 const channelName = ref('')
 const channelThumbnail = ref('')
 const channelId = ref('')
@@ -596,6 +611,7 @@ function resetState() {
   viewCount.value = 0
   videoCount.value = 0
   lastUpdated.value = undefined
+  lastUpdatedDate.value = null
   channelName.value = ''
   channelThumbnail.value = ''
   channelId.value = ''
@@ -643,6 +659,7 @@ async function getPlaylistLocal() {
     viewCount.value = result.info.views.toLowerCase() === 'no views' ? 0 : extractNumberFromString(result.info.views)
     videoCount.value = extractNumberFromString(result.info.total_items)
     lastUpdated.value = result.info.last_updated ?? ''
+    lastUpdatedDate.value = null
     channelName.value = channelName_ ?? ''
     channelThumbnail.value = result.info.author?.best_thumbnail?.url ?? ''
     channelId.value = result.info.author?.id
@@ -715,8 +732,8 @@ async function getPlaylistInvidious() {
       channelId: channelId.value
     })
 
-    const dateString = new Date(result.updated * 1000)
-    lastUpdated.value = dateString.toLocaleDateString(locale.value, { year: 'numeric', month: 'short', day: 'numeric' })
+    lastUpdatedDate.value = new Date(result.updated * 1000)
+    updateLastUpdatedDate()
 
     playlistItems.value = result.videos
     await refreshPlaylistBookmarkThumbnail()
@@ -762,8 +779,8 @@ function parseUserPlaylist(playlist) {
     firstVideoPlaylistItemId.value = ''
   }
 
-  const dateString = new Date(playlist.lastUpdatedAt)
-  lastUpdated.value = dateString.toLocaleDateString(locale.value, { year: 'numeric', month: 'short', day: 'numeric' })
+  lastUpdatedDate.value = new Date(playlist.lastUpdatedAt)
+  updateLastUpdatedDate()
   viewCount.value = 0
   channelName.value = ''
   channelThumbnail.value = ''

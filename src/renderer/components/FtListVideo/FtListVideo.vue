@@ -427,6 +427,7 @@ import {
 import { setCollaboratorsLoading } from './collaboratorsLoading.js'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock.js'
 import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar.js'
+import { formatDate, formatDateTime } from '../../helpers/dateFormat.js'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -523,6 +524,8 @@ const emit = defineEmits([
 
 const { locale, t } = useI18n()
 const route = useRoute()
+const dateFormat = computed(() => store.getters.getDateFormat)
+const timeFormat = computed(() => store.getters.getTimeFormat)
 
 const id = ref('')
 const title = ref('')
@@ -1752,12 +1755,59 @@ function handleExtraThumbnailAction() {
   handleOptionsClick(extraThumbnailAction.value)
 }
 
-function parseVideoData() {
-  relativeTimeDataLoadedAt.value = Date.now()
-  relativeTimeClockAtLoad.value = relativeTimeNow.value
+function updateUploadedTime() {
   uploadedTime.value = ''
   uploadedTimeIsRelative.value = false
   published.value = undefined
+
+  if (props.data.premiereDate !== undefined) {
+    let premiereDate = props.data.premiereDate
+
+    // premiereDate will be a string when the subscriptions are restored from the cache
+    if (typeof premiereDate === 'string') {
+      premiereDate = new Date(premiereDate)
+    }
+    uploadedTime.value = formatDateTime(
+      premiereDate,
+      locale.value,
+      dateFormat.value,
+      { year: 'numeric', month: 'numeric', day: 'numeric' },
+      { hour: 'numeric', minute: '2-digit', second: '2-digit' },
+      timeFormat.value
+    )
+    published.value = premiereDate.getTime()
+  } else if (props.data.premiereTimestamp > 0) {
+    const premiereDate = new Date(props.data.premiereTimestamp * 1000)
+    uploadedTime.value = formatDateTime(
+      premiereDate,
+      locale.value,
+      dateFormat.value,
+      { year: 'numeric', month: 'numeric', day: 'numeric' },
+      { hour: 'numeric', minute: '2-digit', second: '2-digit' },
+      timeFormat.value
+    )
+    published.value = props.data.premiereTimestamp * 1000
+  } else if (typeof props.data.published === 'number' && !isLive.value) {
+    published.value = props.data.published
+
+    if (inHistory.value) {
+      uploadedTime.value = formatDate(
+        props.data.published,
+        locale.value,
+        dateFormat.value,
+        { year: 'numeric', month: 'numeric', day: 'numeric' }
+      )
+    } else {
+      // Use 30 days per month, just like calculatePublishedDate
+      uploadedTime.value = getRelativeTimeFromDate(props.data.published, false)
+      uploadedTimeIsRelative.value = true
+    }
+  }
+}
+
+function parseVideoData() {
+  relativeTimeDataLoadedAt.value = Date.now()
+  relativeTimeClockAtLoad.value = relativeTimeNow.value
   id.value = props.data.videoId
   title.value = props.data.title
 
@@ -1801,30 +1851,7 @@ function parseVideoData() {
   isMembersOnly.value = props.data.isMembersOnly === true
   isPremium.value = props.data.premium || false
   viewCount.value = props.data.viewCount
-
-  if (props.data.premiereDate !== undefined) {
-    let premiereDate = props.data.premiereDate
-
-    // premiereDate will be a string when the subscriptions are restored from the cache
-    if (typeof premiereDate === 'string') {
-      premiereDate = new Date(premiereDate)
-    }
-    uploadedTime.value = premiereDate.toLocaleString([locale.value, 'en'])
-    published.value = premiereDate.getTime()
-  } else if (props.data.premiereTimestamp > 0) {
-    uploadedTime.value = new Date(props.data.premiereTimestamp * 1000).toLocaleString([locale.value, 'en'])
-    published.value = props.data.premiereTimestamp * 1000
-  } else if (typeof props.data.published === 'number' && !isLive.value) {
-    published.value = props.data.published
-
-    if (inHistory.value) {
-      uploadedTime.value = new Date(props.data.published).toLocaleDateString([locale.value, 'en'])
-    } else {
-      // Use 30 days per month, just like calculatePublishedDate
-      uploadedTime.value = getRelativeTimeFromDate(props.data.published, false)
-      uploadedTimeIsRelative.value = true
-    }
-  }
+  updateUploadedTime()
 
   hideViews.value = hideVideoViews.value ||
     (props.data.viewCount == null && props.data.viewCountText === undefined)
@@ -2023,6 +2050,7 @@ function onDragStart(event) {
 }
 
 watch(() => props.data, parseVideoData, { immediate: true })
+watch([locale, dateFormat, timeFormat], updateUploadedTime)
 
 showDeArrowTitle.value = useDeArrowTitles.value
 showDeArrowThumbnail.value = useDeArrowThumbnails.value

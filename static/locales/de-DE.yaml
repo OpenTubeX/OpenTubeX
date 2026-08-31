@@ -318,6 +318,9 @@ Settings:
 
       Load previously loaded tabs: Zuvor geladene Tabs laden
     Locale Preference: Sprache
+    Date Format: Datumsformat
+    Time Format: Zeitformat
+    Language Default: Sprachvorgabe
     Use AI Translation Completions: Fehlende Übersetzungen mit KI ergänzen
     Preferred API Backend:
       Preferred API Backend: Bevorzugtes API-Backend

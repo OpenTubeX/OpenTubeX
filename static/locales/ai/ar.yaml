@@ -217,6 +217,9 @@ Settings:
       Network: شبكة
       Disk: القرص
   General Settings:
+    Date Format: تنسيق التاريخ
+    Time Format: تنسيق الوقت
+    Language Default: الإعداد الافتراضي للغة
     Update Relative Timestamps: حافظ على تحديث الطوابع الزمنية النسبية
     Stream Extraction Method:
       Stream Extraction Method: طريقة استخراج الدفق
