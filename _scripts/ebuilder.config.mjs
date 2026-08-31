@@ -1,4 +1,5 @@
 import packageDetails from '../package.json' with { type: 'json' }
+import { patchLinuxMprisName } from './patchLinuxMprisName.mjs'
 
 /** @type {import('electron-builder').Configuration} */
 export default {
@@ -30,6 +31,7 @@ export default {
   // electron-builder will however still spend time scanning the `node_modules` folder and building up a list of dependencies,
   // returning `false` from the `beforeBuild` hook skips that.
   beforeBuild: () => Promise.resolve(false),
+  afterPack: patchLinuxMprisName,
   dmg: {
     contents: [
       {
