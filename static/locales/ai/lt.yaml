@@ -326,6 +326,9 @@ Settings:
       Disk: disko
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
+    Date Format: Datos formatas
+    Time Format: Laiko formatas
+    Language Default: Kalbos numatytasis
     Update Relative Timestamps: Nuolat atnaujinti santykines laiko žymas
     Stream Extraction Method:
       Stream Extraction Method: Srauto išgavimo būdas

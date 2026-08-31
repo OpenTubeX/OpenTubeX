@@ -217,6 +217,9 @@ Settings:
       Network: רשת
       Disk: כונן
   General Settings:
+    Date Format: תבנית תאריך
+    Time Format: תבנית שעה
+    Language Default: ברירת המחדל של השפה
     Update Relative Timestamps: עדכון רציף של חותמות זמן יחסיות
     Stream Extraction Method:
       Stream Extraction Method: שיטת חילוץ הזרם

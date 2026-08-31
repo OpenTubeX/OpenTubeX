@@ -213,6 +213,9 @@ Settings:
       Network: "ar rouedad"
       Disk: "ar bladenn"
   General Settings:
+    Date Format: Mentrezh an deiziad
+    Time Format: Mentrezh an eur
+    Language Default: Dre ziouer ar yezh
     Update Relative Timestamps: "Hizivaat an deiziadoù hag eurioù keñverel"
     Stream Extraction Method:
       Stream Extraction Method: "Doare eztennañ ar gwazh"

@@ -217,6 +217,9 @@ Settings:
       Network: mạng
       Disk: ổ đĩa
   General Settings:
+    Date Format: Định dạng ngày
+    Time Format: Định dạng thời gian
+    Language Default: Mặc định theo ngôn ngữ
     Update Relative Timestamps: Luôn cập nhật mốc thời gian tương đối
     Stream Extraction Method:
       Stream Extraction Method: Phương thức trích xuất luồng

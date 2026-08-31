@@ -212,6 +212,9 @@ Settings:
       Network: network
       Disk: disk
   General Settings:
+    Date Format: Date format
+    Time Format: Time format
+    Language Default: Language default
     Use AI Translation Completions: Fill missing translations with AI-generated text
     Update Relative Timestamps: Keep relative timestamps updated
     Stream Extraction Method:

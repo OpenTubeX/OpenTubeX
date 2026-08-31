@@ -338,8 +338,10 @@ import { parseChannelPreferences } from '../../helpers/channel-preferences'
 import { useTabContext } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
+import { formatDate } from '../../helpers/dateFormat'
 
 const { tabId } = useTabContext()
+const dateFormat = computed(() => store.getters.getDateFormat)
 
 const props = defineProps({
   id: {
@@ -695,8 +697,12 @@ const validPublishedDate = computed(() => {
 const dateString = computed(() => {
   if (!validPublishedDate.value) return ''
 
-  const formatter = new Intl.DateTimeFormat([locale.value, 'en'], { dateStyle: 'medium' })
-  const localeDateString = formatter.format(validPublishedDate.value)
+  const localeDateString = formatDate(
+    validPublishedDate.value,
+    locale.value,
+    dateFormat.value,
+    { dateStyle: 'medium' }
+  )
   // replace spaces with no break spaces to make the date act as a single entity while wrapping
   return localeDateString.replaceAll(' ', '\u00A0')
 })

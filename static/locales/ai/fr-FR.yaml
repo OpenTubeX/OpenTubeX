@@ -213,6 +213,9 @@ Settings:
       Network: le réseau
       Disk: le disque
   General Settings:
+    Date Format: Format de date
+    Time Format: Format de l'heure
+    Language Default: Valeur par défaut de la langue
     Update Relative Timestamps: Actualiser les horodatages relatifs
     Stream Extraction Method:
       Stream Extraction Method: Méthode d’extraction des flux

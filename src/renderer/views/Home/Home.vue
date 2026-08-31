@@ -420,12 +420,15 @@ import {
   getNewSubscriptionFeedEntries,
 } from '../../helpers/newSubscriptionFeed'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
+import { formatDateTime } from '../../helpers/dateFormat'
 
 const { locale, t } = useI18n()
 const IS_ELECTRON = process.env.IS_ELECTRON
 const customizing = ref(false)
 const reorderStatus = ref('')
 const reminders = ref([])
+const dateFormat = computed(() => store.getters.getDateFormat)
+const timeFormat = computed(() => store.getters.getTimeFormat)
 let removeReminderListener = null
 let reminderLoadGeneration = 0
 
@@ -713,10 +716,14 @@ function openDownloads() {
 }
 
 function formatReminderTime(timestamp) {
-  return new Intl.DateTimeFormat(locale.value, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(timestamp))
+  return formatDateTime(
+    timestamp,
+    locale.value,
+    dateFormat.value,
+    { dateStyle: 'medium' },
+    { timeStyle: 'short' },
+    timeFormat.value
+  )
 }
 
 async function loadReminders() {

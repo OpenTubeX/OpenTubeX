@@ -206,6 +206,26 @@
       />
       <FtSelect
         v-if="mode === 'general'"
+        :placeholder="t('Settings.General Settings.Date Format')"
+        :value="dateFormat"
+        setting-key="dateFormat"
+        :select-names="dateFormatNames"
+        :select-values="DATE_FORMAT_OPTIONS"
+        :icon="['fas', 'calendar-days']"
+        @change="updateDateFormat"
+      />
+      <FtSelect
+        v-if="mode === 'general'"
+        :placeholder="t('Settings.General Settings.Time Format')"
+        :value="timeFormat"
+        setting-key="timeFormat"
+        :select-names="timeFormatNames"
+        :select-values="TIME_FORMAT_OPTIONS"
+        :icon="['fas', 'clock']"
+        @change="updateTimeFormat"
+      />
+      <FtSelect
+        v-if="mode === 'general'"
         :placeholder="t('Settings.General Settings.Reduced Motion.Reduced Motion')"
         :value="reducedMotion"
         setting-key="reducedMotion"
@@ -321,6 +341,14 @@ import allLocales from '../../../../static/locales/activeLocales.json'
 import { debounce, randomArrayItem, showToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 import { initializePlatformInfo, isLinuxWayland } from '../../helpers/platform'
+import {
+  DATE_FORMAT_OPTIONS,
+  TIME_FORMAT_OPTIONS,
+  formatDate,
+  formatTime,
+  normalizeDateFormat,
+  normalizeTimeFormat,
+} from '../../helpers/dateFormat'
 
 const USING_ELECTRON = !!process.env.IS_ELECTRON
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
@@ -760,6 +788,38 @@ const aiTranslationCompletionsDisabled = computed(() => {
  */
 function updateCurrentLocale(value) {
   store.dispatch('updateCurrentLocale', value)
+}
+
+/** @type {import('vue').ComputedRef<string>} */
+const dateFormat = computed(() => normalizeDateFormat(store.getters.getDateFormat))
+
+const dateFormatNames = computed(() => [
+  `${t('Settings.General Settings.Language Default')} (${formatDate(new Date(), locale.value, 'locale')})`,
+  ...DATE_FORMAT_OPTIONS.slice(1),
+])
+
+/** @param {string} value */
+function updateDateFormat(value) {
+  store.dispatch('updateDateFormat', value)
+}
+
+/** @type {import('vue').ComputedRef<string>} */
+const timeFormat = computed(() => normalizeTimeFormat(store.getters.getTimeFormat))
+
+const timeFormatNames = computed(() => {
+  const example = new Date()
+  const options = { hour: 'numeric', minute: '2-digit' }
+
+  return [
+    `${t('Settings.General Settings.Language Default')} (${formatTime(example, locale.value, 'locale', options)})`,
+    `12h (${formatTime(example, locale.value, '12-hour', options)})`,
+    `24h (${formatTime(example, locale.value, '24-hour', options)})`,
+  ]
+})
+
+/** @param {string} value */
+function updateTimeFormat(value) {
+  store.dispatch('updateTimeFormat', value)
 }
 
 /** @param {boolean} value */

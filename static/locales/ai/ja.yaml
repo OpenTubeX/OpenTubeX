@@ -215,6 +215,9 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Date Format: 日付形式
+    Time Format: 時刻形式
+    Language Default: 言語の既定値
     Update Relative Timestamps: 相対日時を自動更新
     Stream Extraction Method:
       Stream Extraction Method: ストリーム抽出方式

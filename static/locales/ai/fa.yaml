@@ -230,6 +230,9 @@ Settings:
       Network: شبکه
       Disk: دیسک
   General Settings:
+    Date Format: قالب تاریخ
+    Time Format: قالب زمان
+    Language Default: پیش‌فرض زبان
     Update Relative Timestamps: زمان‌های نسبی را به‌روز نگه دارید
     Stream Extraction Method:
       Stream Extraction Method: روش استخراج جریان

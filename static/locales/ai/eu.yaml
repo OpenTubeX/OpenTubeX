@@ -215,6 +215,9 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Date Format: Data-formatua
+    Time Format: Ordu-formatua
+    Language Default: Hizkuntzaren lehenetsia
     Update Relative Timestamps: Mantendu denbora-marka erlatiboak eguneratuta
     Stream Extraction Method:
       Stream Extraction Method: Korronteak erauzteko metodoa

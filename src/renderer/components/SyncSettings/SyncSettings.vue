@@ -354,8 +354,11 @@ import {
   normalizeSyncServerUrl,
 } from '../../helpers/sync-server'
 import { showToast } from '../../helpers/utils'
+import { formatDateTime } from '../../helpers/dateFormat'
 
 const { locale, t } = useI18n()
+const dateFormat = computed(() => store.getters.getDateFormat)
+const timeFormat = computed(() => store.getters.getTimeFormat)
 
 const OPENTUBEX_SYNC_SERVER_URL = 'https://sync.d3sox.me'
 const OPENTUBEX_SYNC_SERVER_PRIVACY_POLICY_URL =
@@ -454,10 +457,14 @@ const sessionsSupported = computed(() => (
 const lastSyncLabel = computed(() => {
   const timestamp = store.getters.getSyncServerLastSyncAt
   if (!timestamp) return ''
-  return new Intl.DateTimeFormat(locale.value, {
-    dateStyle: 'medium',
-    timeStyle: 'medium',
-  }).format(timestamp)
+  return formatDateTime(
+    timestamp,
+    locale.value,
+    dateFormat.value,
+    { dateStyle: 'medium' },
+    { timeStyle: 'medium' },
+    timeFormat.value
+  )
 })
 
 let serverCheckTimer = null

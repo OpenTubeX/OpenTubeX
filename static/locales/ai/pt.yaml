@@ -217,6 +217,9 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Date Format: Formato da data
+    Time Format: Formato da hora
+    Language Default: Predefinição do idioma
     Update Relative Timestamps: Manter as marcas temporais relativas atualizadas
     Stream Extraction Method:
       Stream Extraction Method: Método de extração de transmissões

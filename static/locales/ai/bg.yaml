@@ -215,6 +215,9 @@ Settings:
       Network: мрежата
       Disk: диска
   General Settings:
+    Date Format: Формат на датата
+    Time Format: Формат на часа
+    Language Default: По подразбиране за езика
     Update Relative Timestamps: Поддържай относителните времеви обозначения актуални
     Stream Extraction Method:
       Stream Extraction Method: Метод за извличане на потока

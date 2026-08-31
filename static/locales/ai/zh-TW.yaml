@@ -215,6 +215,9 @@ Settings:
       Network: 網路
       Disk: 磁碟
   General Settings:
+    Date Format: 日期格式
+    Time Format: 時間格式
+    Language Default: 語言預設
     Update Relative Timestamps: 持續更新相對時間
     Stream Extraction Method:
       Stream Extraction Method: 串流擷取方式

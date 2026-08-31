@@ -213,6 +213,9 @@ Settings:
       Network: 网络
       Disk: 磁盘
   General Settings:
+    Date Format: 日期格式
+    Time Format: 时间格式
+    Language Default: 语言默认
     Update Relative Timestamps: 持续更新相对时间戳
     Stream Extraction Method:
       Stream Extraction Method: 流提取方式

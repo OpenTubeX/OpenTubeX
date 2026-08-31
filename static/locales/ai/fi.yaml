@@ -217,6 +217,9 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Date Format: Päivämäärän muoto
+    Time Format: Ajan muoto
+    Language Default: Kielen oletus
     Update Relative Timestamps: Pidä suhteelliset aikaleimat ajan tasalla
     Stream Extraction Method:
       Stream Extraction Method: Suoratoiston poimintatapa

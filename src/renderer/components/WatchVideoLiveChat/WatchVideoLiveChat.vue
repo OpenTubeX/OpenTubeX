@@ -430,6 +430,7 @@ import { vSaferHtml } from '../../directives/vSaferHtml.js'
 import store from '../../store/index'
 
 import { formatNumber } from '../../helpers/utils'
+import { formatTime } from '../../helpers/dateFormat'
 import { getRandomColorClass } from '../../helpers/colors'
 import { getLocalVideoInfo, parseLocalTextRuns } from '../../helpers/api/local'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
@@ -467,6 +468,7 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const { locale, t } = useI18n()
+const timeFormat = computed(() => store.getters.getTimeFormat)
 
 /** @type {import('youtubei.js').YT.LiveChat|null} */
 let liveChatInstance = null
@@ -1169,7 +1171,7 @@ function formatLiveChatTimestamp(comment) {
   }
 
   if (Number.isFinite(comment.timestamp)) {
-    return new Intl.DateTimeFormat([locale.value, 'en'], { timeStyle: 'short' }).format(comment.timestamp)
+    return formatTime(comment.timestamp, locale.value, timeFormat.value, { timeStyle: 'short' })
   }
 
   return ''

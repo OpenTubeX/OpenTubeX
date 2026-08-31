@@ -309,6 +309,7 @@ import {
   decryptSyncDocument,
 } from '../../helpers/sync-server-privacy'
 import { SyncServerClient, normalizeSyncServerUrl } from '../../helpers/sync-server'
+import { formatTime } from '../../helpers/dateFormat'
 import store from '../../store/index'
 
 const props = defineProps({
@@ -335,6 +336,7 @@ const props = defineProps({
 
 const emit = defineEmits(['paired'])
 const { locale, t } = useI18n()
+const timeFormat = computed(() => store.getters.getTimeFormat)
 
 const receivePromptOpen = ref(false)
 const receiveStage = ref('name')
@@ -355,9 +357,12 @@ const approvalVerificationCode = ref('')
 const scannerVideo = useTemplateRef('scannerVideo')
 const manualPairingCodeInput = useTemplateRef('manualPairingCodeInput')
 
-const receiveExpiryLabel = computed(() => new Intl.DateTimeFormat(locale.value, {
-  timeStyle: 'medium',
-}).format(receiveExpiresAt.value))
+const receiveExpiryLabel = computed(() => formatTime(
+  receiveExpiresAt.value,
+  locale.value,
+  timeFormat.value,
+  { timeStyle: 'medium' }
+))
 
 let receiver = null
 let pollTimer = null

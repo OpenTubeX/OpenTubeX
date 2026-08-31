@@ -36,7 +36,8 @@ import {
   ensureUpcomingSubscriptionFeedPublished,
   getUpcomingPremiereTimestamp
 } from '../helpers/subscription-entries'
-import { getCachedRelativeTimeFormat, getCachedShortDateTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
+import { getCachedRelativeTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
+import { formatShortDateTime } from '../helpers/dateFormat'
 import {
   refreshSubscriptionVideosFromRemote,
   updateVideoListAfterProcessing
@@ -52,6 +53,8 @@ const errorChannels = ref([])
 const attemptedFetch = ref(false)
 /** @type {import('vue').Ref<number | null>} */
 const lastRemoteRefreshSuccessTimestamp = ref(null)
+const dateFormat = computed(() => store.getters.getDateFormat)
+const timeFormat = computed(() => store.getters.getTimeFormat)
 const now = useRelativeTimeClock()
 const premiereUpdateNow = ref(Date.now())
 const MAX_TIMEOUT_MS = 2 ** 31 - 1
@@ -193,7 +196,7 @@ const nextVideoAutoRefreshTimestamp = computed(() => {
     return ''
   }
 
-  return getCachedShortDateTimeFormat(locale.value).format(timestamp)
+  return formatShortDateTime(timestamp, locale.value, dateFormat.value, timeFormat.value)
 })
 
 const nextVideoAutoRefreshTooltip = computed(() => {

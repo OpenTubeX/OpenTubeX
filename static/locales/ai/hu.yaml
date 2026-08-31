@@ -213,6 +213,9 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Date Format: Dátumformátum
+    Time Format: Időformátum
+    Language Default: Nyelvi alapértelmezés
     Update Relative Timestamps: Relatív időbélyegek folyamatos frissítése
     Stream Extraction Method:
       Stream Extraction Method: Adatfolyam-kinyerési mód

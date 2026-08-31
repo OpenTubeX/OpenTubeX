@@ -215,6 +215,9 @@ Settings:
       Network: rețea
       Disk: disc
   General Settings:
+    Date Format: Formatul datei
+    Time Format: Formatul orei
+    Language Default: Valoarea implicită a limbii
     Update Relative Timestamps: Menține actualizate marcajele temporale relative
     Stream Extraction Method:
       Stream Extraction Method: Metodă de extragere a fluxului

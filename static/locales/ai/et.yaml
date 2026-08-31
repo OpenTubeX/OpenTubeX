@@ -213,6 +213,9 @@ Settings:
       Network: võrgu
       Disk: ketta
   General Settings:
+    Date Format: Kuupäevavorming
+    Time Format: Kellaajavorming
+    Language Default: Keele vaikeseade
     Update Relative Timestamps: Hoia suhtelised ajatemplid ajakohasena
     Stream Extraction Method:
       Stream Extraction Method: Voo eraldamise meetod

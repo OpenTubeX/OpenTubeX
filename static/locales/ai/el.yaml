@@ -217,6 +217,9 @@ Settings:
       Network: δικτύου
       Disk: δίσκου
   General Settings:
+    Date Format: Μορφή ημερομηνίας
+    Time Format: Μορφή ώρας
+    Language Default: Προεπιλογή γλώσσας
     Update Relative Timestamps: Συνεχής ενημέρωση σχετικών χρονικών ενδείξεων
     Stream Extraction Method:
       Stream Extraction Method: Μέθοδος εξαγωγής ροής

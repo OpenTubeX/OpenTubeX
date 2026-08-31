@@ -217,6 +217,9 @@ Settings:
       Network: nets
       Disk: disks
   General Settings:
+    Date Format: Dagsetningarsnið
+    Time Format: Tímasnið
+    Language Default: Sjálfgefið fyrir tungumál
     Update Relative Timestamps: Uppfæra afstæða tímastimpla
     Stream Extraction Method:
       Stream Extraction Method: Aðferð við öflun streymis

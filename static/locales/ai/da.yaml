@@ -224,6 +224,9 @@ Settings:
       Network: netværk
       Disk: diskplads
   General Settings:
+    Date Format: Datoformat
+    Time Format: Tidsformat
+    Language Default: Sprogstandard
     Update Relative Timestamps: Hold relative tidsangivelser opdateret
     Stream Extraction Method:
       Stream Extraction Method: Metode til udtræk af streams

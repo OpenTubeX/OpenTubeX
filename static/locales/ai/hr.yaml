@@ -215,6 +215,9 @@ Settings:
       Network: mreže
       Disk: diska
   General Settings:
+    Date Format: Format datuma
+    Time Format: Format vremena
+    Language Default: Zadano za jezik
     Update Relative Timestamps: Ažuriraj relativne vremenske oznake
     Stream Extraction Method:
       Stream Extraction Method: Način izdvajanja medijskog toka
