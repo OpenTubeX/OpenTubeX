@@ -93,7 +93,7 @@
     "@babel/preset-env": "^8.0.2",
     "@double-great/stylelint-a11y": "^3.5.2",
     "@eslint/js": "^10.0.1",
-    "@iconify-json/material-symbols": "^1.2.87",
+    "@iconify-json/material-symbols": "^1.2.90",
     "@iconify-json/ri": "^1.2.10",
     "@iconify-json/simple-icons": "^1.2.92",
     "@iconify/utils": "^3.1.4",
