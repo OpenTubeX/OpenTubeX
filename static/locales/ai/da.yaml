@@ -226,7 +226,7 @@ Settings:
   General Settings:
     Date Format: Datoformat
     Time Format: Tidsformat
-    Language Default: Sprogstandard
+    Language Default: Baseret på sprog
     Update Relative Timestamps: Hold relative tidsangivelser opdateret
     Stream Extraction Method:
       Stream Extraction Method: Metode til udtræk af streams
