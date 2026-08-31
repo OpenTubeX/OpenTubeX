@@ -930,6 +930,7 @@ Profile:
   Theme Color: Teemaväri
 Channel:
   Subscription settings: Tilausasetukset
+  Failed to save subscription settings: Tilausasetusten tallentaminen epäonnistui
   Videos per day: Videoita päivässä
   Use global setting: Käytä yleistä asetusta
   Unlimited: Rajoittamaton

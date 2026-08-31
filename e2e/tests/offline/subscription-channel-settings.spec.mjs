@@ -175,6 +175,45 @@ test('only offers members-only controls when yt-dlp playback cookies are configu
     .getByRole('checkbox', { name: 'Members only' })).toHaveCount(0)
 })
 
+test('reports subscription setting write failures from the channel popover', async ({ page }) => {
+  await goTo(page, 'subscribedchannels')
+  const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+  await alpha.getByRole('button', { name: 'Subscription settings' }).click()
+  const popover = page.locator('.profileDropdown')
+  const shorts = popover.getByRole('checkbox', { name: 'Shorts' })
+  await expect(shorts).toHaveAttribute('aria-checked', 'false')
+
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store._actions.updateProfile = [() => Promise.resolve(false)]
+  })
+  await shorts.click()
+
+  await expect(page.locator('.toast', {
+    hasText: 'Failed to save subscription settings'
+  })).toBeVisible()
+  await expect(shorts).toHaveAttribute('aria-checked', 'false')
+})
+
+test('reports subscription setting write failures from the settings manager', async ({ page }) => {
+  const subscriptionSettings = await goToSettingsSection(page, 'subscription')
+  await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+  const alphaSettings = page.getByRole('group', { name: 'Alpha Channel' })
+  const shorts = alphaSettings.getByRole('checkbox', { name: 'Shorts' })
+  await expect(shorts).toHaveAttribute('aria-checked', 'false')
+
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store._actions.updateProfile = [() => Promise.resolve(false)]
+  })
+  await shorts.click()
+
+  await expect(page.locator('.toast', {
+    hasText: 'Failed to save subscription settings'
+  })).toBeVisible()
+  await expect(shorts).toHaveAttribute('aria-checked', 'false')
+})
+
 test('clamps the channel list after searching', async ({ page }) => {
   const subscriptionSettings = await goToSettingsSection(page, 'subscription')
   await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()

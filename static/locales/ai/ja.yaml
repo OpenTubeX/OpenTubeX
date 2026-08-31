@@ -906,6 +906,7 @@ Profile:
   Theme Color: テーマカラー
 Channel:
   Subscription settings: 登録設定
+  Failed to save subscription settings: 登録設定を保存できませんでした
   Videos per day: 1日あたりの動画数
   Use global setting: 全体設定を使用
   Unlimited: 無制限

@@ -908,6 +908,7 @@ Profile:
   Theme Color: Цвят на темата
 Channel:
   Subscription settings: Настройки на абонамента
+  Failed to save subscription settings: Настройките за абонамента не можаха да бъдат запазени
   Videos per day: Видеоклипове на ден
   Use global setting: Използване на глобалната настройка
   Unlimited: Без ограничение

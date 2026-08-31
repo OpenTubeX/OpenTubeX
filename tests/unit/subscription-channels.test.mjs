@@ -123,6 +123,26 @@ test('only shows opted-in members-only videos when restricted playback is config
   ), [publicVideo])
 })
 
+test('reuses an unchanged list when there are no members-only videos', () => {
+  const videos = [{ videoId: 'public', authorId: 'channel-1' }]
+
+  assert.equal(filterMembersOnlySubscriptionVideos(
+    videos,
+    [{ id: 'channel-1', showMembersOnly: true }],
+    true
+  ), videos)
+})
+
+test('reuses an unchanged list when no video limit is active', () => {
+  const videos = [{ videoId: 'public', authorId: 'channel-1' }]
+
+  assert.equal(applySubscriptionVideoLimit(
+    videos,
+    [{ id: 'channel-1' }],
+    null
+  ), videos)
+})
+
 test('uses the global total limit when a channel has no override', () => {
   const videos = [
     { videoId: 'newest', authorId: 'channel-1', published: new Date(2026, 7, 31, 12).getTime() },

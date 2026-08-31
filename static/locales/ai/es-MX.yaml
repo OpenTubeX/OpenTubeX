@@ -1120,6 +1120,7 @@ Profile:
   Open Profile Dropdown: Abrir el desplegable del Perfil
 Channel:
   Subscription settings: Configuración de la suscripción
+  Failed to save subscription settings: No se pudo guardar la configuración de la suscripción
   Videos per day: Videos por día
   Use global setting: Usar configuración global
   Unlimited: Sin límite

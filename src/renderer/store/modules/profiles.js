@@ -173,6 +173,7 @@ const actions = {
 
   async updateChannelSettings({ dispatch, state }, { channelId, settings }) {
     // updateProfile replaces and sorts the live list, so iterate over a stable snapshot.
+    let saved = true
     for (const profile of [...state.profileList]) {
       const subscriptionIndex = profile.subscriptions.findIndex(channel => channel.id === channelId)
       if (subscriptionIndex === -1) {
@@ -198,8 +199,12 @@ const actions = {
           delete subscription.showMembersOnly
         }
       }
-      await dispatch('updateProfile', updatedProfile)
+      if (!await dispatch('updateProfile', updatedProfile)) {
+        saved = false
+      }
     }
+
+    return saved
   },
 
   async createProfile({ commit }, profile) {

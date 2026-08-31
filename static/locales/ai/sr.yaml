@@ -951,6 +951,7 @@ Profile:
   Theme Color: Боја теме
 Channel:
   Subscription settings: Подешавања претплате
+  Failed to save subscription settings: Није могуће сачувати подешавања претплате
   Videos per day: Видео-снимака дневно
   Use global setting: Користи глобално подешавање
   Unlimited: Неограничено

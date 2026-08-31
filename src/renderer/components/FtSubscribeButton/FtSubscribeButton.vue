@@ -340,32 +340,15 @@ let profileDropdownPositionMutationObserver = null
 let profileDropdownPositionResizeObserver = null
 let profileDropdownPositionFrame = null
 
-watch([isProfileDropdownOpen, isProfileDropdownEnabled], async ([open, enabled]) => {
+watch(isProfileDropdownOpen, async (open) => {
   const generation = ++profileListObservationGeneration
   stopObservingProfileList()
-  if (!open || !enabled) return
-
-  await nextTick()
-  if (generation !== profileListObservationGeneration ||
-    !isProfileDropdownOpen.value || !isProfileDropdownEnabled.value) return
-
-  const scroller = profileDropdownScroller.value
-  const content = profileListContent.value
-  if (!scroller || !content) return
-
-  const clampScroll = () => clampOverlayScrollTop(scroller, content)
-  profileListResizeObserver = new ResizeObserver(clampScroll)
-  profileListResizeObserver.observe(scroller)
-  profileListResizeObserver.observe(content)
-  clampScroll()
-})
-
-watch(isProfileDropdownOpen, async (open) => {
   removeProfileDropdownPositionTracking()
   if (!open) return
 
   await nextTick()
-  if (!isProfileDropdownOpen.value || profileDropdown.value === null) return
+  if (generation !== profileListObservationGeneration ||
+    !isProfileDropdownOpen.value || profileDropdown.value === null) return
 
   positionProfileDropdown()
   profileDropdownPositionResizeObserver = new ResizeObserver(scheduleProfileDropdownPositionUpdate)
@@ -389,6 +372,16 @@ watch(isProfileDropdownOpen, async (open) => {
   })
   window.addEventListener('resize', scheduleProfileDropdownPositionUpdate)
   window.addEventListener('scroll', scheduleProfileDropdownPositionUpdate, { capture: true, passive: true })
+
+  const scroller = profileDropdownScroller.value
+  const content = profileListContent.value
+  if (!isProfileDropdownEnabled.value || !scroller || !content) return
+
+  const clampScroll = () => clampOverlayScrollTop(scroller, content)
+  profileListResizeObserver = new ResizeObserver(clampScroll)
+  profileListResizeObserver.observe(scroller)
+  profileListResizeObserver.observe(content)
+  clampScroll()
 })
 
 const isSubscribed = computed(() => isProfileSubscribed(activeProfile.value))
@@ -672,8 +665,9 @@ function persistChannelSettings(patch) {
   if (!isSubscribed.value) return
 
   channelSettingsUpdateQueue = channelSettingsUpdateQueue.then(async () => {
+    let saved = false
     try {
-      await store.dispatch('updateChannelSettings', {
+      saved = await store.dispatch('updateChannelSettings', {
         channelId: props.channelId,
         settings
       })
@@ -682,6 +676,12 @@ function persistChannelSettings(patch) {
     } finally {
       if (updateSequence === channelSettingsUpdateSequence) {
         optimisticChannelSettings.value = null
+        if (!saved) {
+          showToast({
+            message: t('Channel.Failed to save subscription settings'),
+            icon: ['fas', 'circle-exclamation']
+          })
+        }
       }
     }
   })

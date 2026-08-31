@@ -138,6 +138,8 @@ export function filterMembersOnlySubscriptionVideos(
   subscriptions,
   restrictedPlaybackConfigured
 ) {
+  if (!videos.some(video => video?.isMembersOnly === true)) return videos
+
   const subscriptionsById = new Map(
     getValidSubscriptionChannels(subscriptions).map(channel => [channel.id, channel])
   )
@@ -167,9 +169,12 @@ export function applySubscriptionVideoLimit(
   globalLimit,
   currentVideoId = ''
 ) {
-  const subscriptionsById = new Map(
-    getValidSubscriptionChannels(subscriptions).map(channel => [channel.id, channel])
-  )
+  const validSubscriptions = getValidSubscriptionChannels(subscriptions)
+  if (globalLimit === null && !validSubscriptions.some(subscription => (
+    Number.isInteger(subscription.dailyVideoLimit) && subscription.dailyVideoLimit > 0
+  ))) return videos
+
+  const subscriptionsById = new Map(validSubscriptions.map(channel => [channel.id, channel]))
   const counts = new Map()
   const firstKeptIndexByGroup = new Map()
   const hiddenCountsByKeptIndex = new Map()
@@ -214,6 +219,8 @@ export function applySubscriptionVideoLimit(
       )
     }
   }
+
+  if (hiddenCountsByKeptIndex.size === 0) return keptVideos
 
   return keptVideos.map((video, index) => {
     const hiddenCount = hiddenCountsByKeptIndex.get(index)

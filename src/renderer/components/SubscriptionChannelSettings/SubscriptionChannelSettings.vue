@@ -151,6 +151,7 @@ import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
+import { showToast } from '../../helpers/utils'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import {
@@ -309,8 +310,9 @@ function persistChannelSettings(channel, patch) {
     .set(channel.id, settings)
 
   channelSettingsUpdateQueue = channelSettingsUpdateQueue.then(async () => {
+    let saved = false
     try {
-      await store.dispatch('updateChannelSettings', {
+      saved = await store.dispatch('updateChannelSettings', {
         channelId: channel.id,
         settings: patch
       })
@@ -322,6 +324,12 @@ function persistChannelSettings(channel, patch) {
         nextSettings.delete(channel.id)
         optimisticChannelSettings.value = nextSettings
         latestUpdateByChannel.delete(channel.id)
+        if (!saved) {
+          showToast({
+            message: t('Channel.Failed to save subscription settings'),
+            icon: ['fas', 'circle-exclamation']
+          })
+        }
       }
     }
   })

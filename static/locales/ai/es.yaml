@@ -921,6 +921,7 @@ Profile:
   Theme Color: Color del tema
 Channel:
   Subscription settings: Configuración de la suscripción
+  Failed to save subscription settings: No se pudo guardar la configuración de la suscripción
   Videos per day: Vídeos por día
   Use global setting: Usar configuración global
   Unlimited: Sin límite
