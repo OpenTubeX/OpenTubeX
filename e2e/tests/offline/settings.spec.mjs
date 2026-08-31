@@ -4865,11 +4865,19 @@ test.describe('synced setting indicators', () => {
     const neighboringIndicators = page.locator('.select')
       .filter({ hasText: 'Prefer untranslated video text' })
       .locator('.selectIndicators')
-    const [tooltipBox, indicatorsBox] = await Promise.all([
-      tooltipText.boundingBox(),
-      neighboringIndicators.boundingBox()
-    ])
+    const tooltipBox = await tooltipText.boundingBox()
     expect(tooltipBox).not.toBeNull()
+    await neighboringIndicators.evaluate((element, { x, y }) => {
+      element.style.position = 'fixed'
+      element.style.inset = 'auto'
+      element.style.left = `${x}px`
+      element.style.top = `${y}px`
+      element.style.transform = 'none'
+    }, {
+      x: tooltipBox.x + 10,
+      y: tooltipBox.y + 10
+    })
+    const indicatorsBox = await neighboringIndicators.boundingBox()
     expect(indicatorsBox).not.toBeNull()
 
     const overlapLeft = Math.max(tooltipBox.x, indicatorsBox.x)
