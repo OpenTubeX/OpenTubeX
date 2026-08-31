@@ -46,10 +46,15 @@
         />
       </FtButton>
     </div>
-    <Teleport to="body">
-      <Transition name="profile-dropdown">
+    <Teleport
+      v-if="isProfileDropdownOpen"
+      to="body"
+    >
+      <Transition
+        name="profile-dropdown"
+        appear
+      >
         <div
-          v-if="isProfileDropdownOpen"
           ref="profileDropdown"
           tabindex="-1"
           class="profileDropdown"
