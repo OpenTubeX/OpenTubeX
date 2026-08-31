@@ -133,6 +133,21 @@ jobs:
 
         echo 'needed=true' >> "$GITHUB_OUTPUT"
 
+    - name: Check out OpenTubeX release automation
+      if: steps.duplicate.outputs.needed == 'true'
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        path: opentubex
+        persist-credentials: false
+
+    - name: Check out official Flatpak packaging
+      if: steps.duplicate.outputs.needed == 'true'
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        repository: OpenTubeX/flatpak
+        path: official-flatpak
+        persist-credentials: false
+
     - name: Check out FlatPark
       if: steps.duplicate.outputs.needed == 'true'
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -179,6 +194,9 @@ jobs:
           }' "$RELEASE_JSON" > "$resolver_json"
 
         node flatpark/scripts/update-pins.mjs "$manifest" "$metainfo" < "$resolver_json"
+        node opentubex/_scripts/syncFlatpakFinishArgs.mjs \
+          official-flatpak/org.opentubex.OpenTubeX.yml \
+          "$manifest"
 
         expected_changes="$(printf '%s\n' \
           'registry/org.opentubex.OpenTubeX/org.opentubex.OpenTubeX.metainfo.xml' \
@@ -208,6 +226,7 @@ jobs:
         install -Dm644 "$manifest" submission/manifest.yml
         install -Dm644 "$metainfo" submission/metainfo.xml
         git -C flatpark rev-parse HEAD > submission/base-sha
+        git -C official-flatpak rev-parse HEAD > submission/official-flatpak-sha
 
     - name: Store the prepared update
       if: steps.duplicate.outputs.needed == 'true'
@@ -399,10 +418,13 @@ jobs:
         fi
 
         body="${RUNNER_TEMP}/flatpark-pr-body.md"
+        official_flatpak_sha="$(< submission/official-flatpak-sha)"
         cat > "$body" <<EOF
         OpenTubeX published [${RELEASE_TAG}](https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}). This updates the pinned x86_64 and ARM64 portable archives and adds the AppStream release entry.
 
         FlatPark's current pin updater downloaded both release assets and calculated their SHA-256 hashes and sizes before the organization fork was updated.
+
+        The sandbox permissions were copied from OpenTubeX's [official Flatpak manifest](https://github.com/OpenTubeX/flatpak/blob/${official_flatpak_sha}/org.opentubex.OpenTubeX.yml) so both packages use the same release permissions.
         EOF
 
         pr_url="$(gh pr create \
