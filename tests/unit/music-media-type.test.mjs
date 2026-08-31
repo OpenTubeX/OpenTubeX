@@ -4,6 +4,7 @@ import test from 'node:test'
 import {
   classifyInvidiousMusicMediaType,
   classifyMusicMediaType,
+  getMusicTrackArtist,
   MUSIC_MEDIA_TYPE,
 } from '../../src/renderer/helpers/player/musicMediaType.js'
 
@@ -25,6 +26,11 @@ test('classifies Invidious music from artist topic channels as audio tracks', ()
     author: 'Example Artist - Topic',
     genre: 'Music',
   }), MUSIC_MEDIA_TYPE.AUDIO_TRACK)
+})
+
+test('removes the topic-channel suffix from music track artists', () => {
+  assert.equal(getMusicTrackArtist('Example Artist - Topic'), 'Example Artist')
+  assert.equal(getMusicTrackArtist('Example Artist'), 'Example Artist')
 })
 
 test('keeps ambiguous Invidious music and non-music topic videos unknown', () => {

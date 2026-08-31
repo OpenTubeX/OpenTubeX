@@ -245,6 +245,17 @@ test('shows the audio-track player and custom visualizer for YouTube Music track
   await expect(video).toHaveCSS('opacity', '0')
   await expect(canvas).toBeVisible()
 
+  const artwork = surface.locator('.musicAudioArtwork')
+  const artworkSrc = await artwork.getAttribute('src')
+  await artwork.dispatchEvent('error')
+  await expect(artwork).toBeHidden()
+  await artwork.evaluate((element) => {
+    element.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/%3E'
+  })
+  await expect(artwork).toBeVisible()
+  await artwork.evaluate((element, src) => { element.src = src }, artworkSrc)
+  await expect.poll(() => artwork.evaluate(element => element.naturalWidth)).toBeGreaterThan(0)
+
   await player.getByRole('button', { name: 'More settings' }).click({ force: true })
   const visualizerToggle = player.getByRole('button', { name: 'Music visualizer', exact: true })
   await expect(visualizerToggle).toBeVisible()
@@ -290,6 +301,9 @@ test('shows the audio-track player and custom visualizer for YouTube Music track
   const capturedStreamCount = await page.evaluate(() => (
     window.__musicVisualizerTestCapturedStreams.length
   ))
+  await expect.poll(() => page.evaluate(() => (
+    window.__musicVisualizerTestCapturedStreams.at(-1).getAudioTracks().length
+  ))).toBeGreaterThan(0)
   await page.evaluate(() => {
     const track = window.__musicVisualizerTestCapturedStreams.at(-1).getAudioTracks()[0]
     track.stop()

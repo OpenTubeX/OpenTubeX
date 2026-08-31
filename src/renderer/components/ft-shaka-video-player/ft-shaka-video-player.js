@@ -1299,6 +1299,12 @@ export default defineComponent({
       }
     }
 
+    function showMusicImage(event) {
+      if (event.currentTarget instanceof HTMLImageElement) {
+        event.currentTarget.hidden = false
+      }
+    }
+
     const skipSilence = computed(() => {
       return store.getters.getTabSkipSilence(mediaTabId)
     })
@@ -8151,6 +8157,7 @@ export default defineComponent({
       shakaContextMenu.registerElement('ft_loop', null)
       shakaContextMenu.registerElement('ft_stats', null)
       shakaOverflowMenu.registerElement('ft_ambient_mode', null)
+      shakaOverflowMenu.registerElement('ft_music_visualizer', null)
       shakaOverflowMenu.registerElement('ft_video_zoom', null)
       shakaOverflowMenu.registerElement('ft_skip_silence', null)
       shakaOverflowMenu.registerElement('ft_voice_over_translation', null)
@@ -10585,6 +10592,7 @@ export default defineComponent({
       audioPlayerMode,
       musicAudioTrack,
       hideBrokenMusicImage,
+      showMusicImage,
       musicVisualizerCanvas,
       musicVisualizerEnabled,
       fullscreenAmbientBarsVisible,

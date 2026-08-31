@@ -143,6 +143,7 @@
           class="musicAudioBackdrop"
           :src="thumbnail"
           alt=""
+          @load="showMusicImage"
           @error="hideBrokenMusicImage"
         >
         <div class="musicAudioShade" />
@@ -157,6 +158,7 @@
             class="musicAudioArtwork"
             :src="thumbnail"
             alt=""
+            @load="showMusicImage"
             @error="hideBrokenMusicImage"
           >
           <div

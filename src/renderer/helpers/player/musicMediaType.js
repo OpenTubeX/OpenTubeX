@@ -15,6 +15,8 @@ const YOUTUBE_MUSIC_VIDEO_TYPES = Object.freeze({
   MUSIC_VIDEO_TYPE_UGC: MUSIC_MEDIA_TYPE.USER_VIDEO,
 })
 
+const ARTIST_TOPIC_SUFFIX = ' - Topic'
+
 /**
  * Converts YouTube's player-response value into a stable app classification.
  * Unknown values deliberately stay unknown so normal videos never receive the
@@ -42,7 +44,18 @@ export function classifyMusicMediaType(musicVideoType) {
 export function classifyInvidiousMusicMediaType(video) {
   return video.genre === 'Music' &&
     typeof video.author === 'string' &&
-    video.author.endsWith(' - Topic')
+    video.author.endsWith(ARTIST_TOPIC_SUFFIX)
     ? MUSIC_MEDIA_TYPE.AUDIO_TRACK
     : MUSIC_MEDIA_TYPE.UNKNOWN
+}
+
+/**
+ * Removes Invidious' artist topic-channel suffix from the player label.
+ * @param {string} author
+ * @returns {string}
+ */
+export function getMusicTrackArtist(author) {
+  return author.endsWith(ARTIST_TOPIC_SUFFIX)
+    ? author.slice(0, -ARTIST_TOPIC_SUFFIX.length)
+    : author
 }

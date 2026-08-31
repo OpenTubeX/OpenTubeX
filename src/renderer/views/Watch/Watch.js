@@ -76,7 +76,7 @@ import {
   MANIFEST_TYPE_HLS
 } from '../../helpers/player/utils'
 import { getYtDlpPlaybackSource, invalidateYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
-import { MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
+import { getMusicTrackArtist, MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
 import {
   buildSubscriptionShortsFeed,
@@ -450,6 +450,11 @@ export default defineComponent({
     }
   },
   computed: {
+    musicPlayerArtist: function () {
+      return this.musicMediaType === MUSIC_MEDIA_TYPE.AUDIO_TRACK
+        ? getMusicTrackArtist(this.channelName)
+        : this.channelName
+    },
     dateFormatPreference: function () {
       return this.$store.getters.getDateFormat
     },
