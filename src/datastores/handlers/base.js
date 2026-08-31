@@ -492,8 +492,8 @@ class Profiles {
     }
   }
 
-  static updateChannelSettings(channel, profileIds) {
-    return db.profiles.updateAsync(
+  static async updateChannelSettings(channel, profileIds) {
+    const { affectedDocuments } = await db.profiles.updateAsync(
       {
         _id: { $in: profileIds },
         subscriptions: { $elemMatch: { id: channel.id } }
@@ -502,8 +502,10 @@ class Profiles {
         $pull: { subscriptions: { id: channel.id } },
         $push: { subscriptions: channel }
       },
-      { multi: true }
+      { multi: true, returnUpdatedDocs: true }
     )
+
+    return affectedDocuments.map(profile => profile._id)
   }
 
   static delete(id) {

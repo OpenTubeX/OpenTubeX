@@ -214,6 +214,47 @@ test('reports subscription setting write failures from the settings manager', as
   await expect(shorts).toHaveAttribute('aria-checked', 'false')
 })
 
+test('reports a partial write when a requested profile no longer exists', async ({ page }) => {
+  const result = await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.state.profiles.profileList.push({
+      _id: 'removed-profile',
+      name: 'Removed profile',
+      bgColor: '#000000',
+      textColor: '#FFFFFF',
+      subscriptions: [{
+        id: 'UC0000000000000000000000',
+        name: 'Alpha Channel',
+        thumbnail: '',
+        feedTypes: ['videos']
+      }]
+    })
+
+    const saved = await store.dispatch('updateChannelSettings', {
+      channelId: 'UC0000000000000000000000',
+      settings: { feedTypes: ['shorts'] }
+    })
+
+    return {
+      saved,
+      feedTypesByProfile: Object.fromEntries(store.getters.getProfileList.map(profile => [
+        profile._id,
+        profile.subscriptions.find(channel => channel.id === 'UC0000000000000000000000')
+          ?.feedTypes
+      ]))
+    }
+  })
+
+  expect(result).toEqual({
+    saved: false,
+    feedTypesByProfile: {
+      allChannels: ['shorts'],
+      'profile-1': ['shorts'],
+      'removed-profile': ['videos']
+    }
+  })
+})
+
 test('clamps the channel list after searching', async ({ page }) => {
   const subscriptionSettings = await goToSettingsSection(page, 'subscription')
   await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()

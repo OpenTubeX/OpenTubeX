@@ -200,9 +200,13 @@ const actions = {
       .map(profile => profile._id)
 
     try {
-      await DBProfileHandlers.updateChannelSettings(channel, profileIds)
-      commit('updateChannelSettings', { channel, profileIds })
-      return true
+      const updatedProfileIds = await DBProfileHandlers.updateChannelSettings(channel, profileIds)
+      if (!Array.isArray(updatedProfileIds)) return false
+
+      if (updatedProfileIds.length > 0) {
+        commit('updateChannelSettings', { channel, profileIds: updatedProfileIds })
+      }
+      return updatedProfileIds.length === profileIds.length
     } catch (error) {
       console.error(error)
       return false

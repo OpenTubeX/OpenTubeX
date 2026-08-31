@@ -4796,14 +4796,21 @@ function runApp() {
           )
           return null
 
-        case DBActions.PROFILES.UPDATE_CHANNEL_SETTINGS:
-          await baseHandlers.profiles.updateChannelSettings(data.channel, data.profileIds)
-          syncOtherWindows(
-            IpcChannels.SYNC_PROFILES,
-            event,
-            { event: SyncEvents.PROFILES.UPDATE_CHANNEL_SETTINGS, data }
-          )
-          return null
+        case DBActions.PROFILES.UPDATE_CHANNEL_SETTINGS: {
+          const profileIds = await baseHandlers.profiles
+            .updateChannelSettings(data.channel, data.profileIds)
+          if (profileIds.length > 0) {
+            syncOtherWindows(
+              IpcChannels.SYNC_PROFILES,
+              event,
+              {
+                event: SyncEvents.PROFILES.UPDATE_CHANNEL_SETTINGS,
+                data: { channel: data.channel, profileIds }
+              }
+            )
+          }
+          return profileIds
+        }
 
         case DBActions.GENERAL.DELETE:
           await baseHandlers.profiles.delete(data)
