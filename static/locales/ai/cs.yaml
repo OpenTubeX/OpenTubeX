@@ -135,8 +135,6 @@ Subscriptions:
   Show Combined View: Zobrazit společně
   Newest First: Od nejnovějších
   Oldest First: Od nejstarších
-  Posts:
-    RSS Message: YouTube neposkytuje pro příspěvky kanály RSS. Chcete-li příspěvky zobrazit, vypněte nastavení „{rssSetting}“. Chcete-li tuto kartu skrýt, zapněte nastavení „{hideSetting}“.
 Trending:
   Load Error: Trendy se nepodařilo načíst.
   Unsupported Backend: Trendy vyžadují místní API. Vyberte místní API nebo povolte záložního poskytovatele.
@@ -928,8 +926,6 @@ Video:
   Queue Item Cannot Move Down: Video {title} nelze přesunout níž. Už je na pozici {total} z {total}.
   Metadata: Informace o videu
   Close Metadata: Zavřít informace o videu
-  Collapse Playlist: Sbalit playlist
-  Expand Playlist: Rozbalit playlist
   Metadata Cache:
     Title History: Historie názvu
     Thumbnail History: Historie miniatur

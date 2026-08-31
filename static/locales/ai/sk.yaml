@@ -135,8 +135,6 @@ Subscriptions:
   Show Combined View: Zobraziť spolu
   Newest First: Najnovšie ako prvé
   Oldest First: Najstaršie ako prvé
-  Posts:
-    RSS Message: YouTube neposkytuje kanály RSS pre príspevky. Ak chcete zobraziť príspevky, vypnite nastavenie „{rssSetting}“, alebo zapnite nastavenie „{hideSetting}“, ak chcete túto kartu skryť.
 Trending:
   Load Error: Trendy sa nepodarilo načítať.
   Unsupported Backend: Trendy vyžadujú miestne API. Vyberte miestne API alebo zapnite použitie záložného backendu.
@@ -957,8 +955,6 @@ Video:
   Configure Restricted Playback Cookies Hint: Nastavte súbory cookie v časti Nastavenia → Externý softvér → Súbory cookie prehrávania pre yt-dlp.
   Try With Configured Cookies: Skúsiť s nastavenými súbormi cookie
   Restricted Playback Authentication Failed Template: 'yt-dlp nemohol získať prístup k tomuto videu s nastavenými súbormi cookie: {error}'
-  Collapse Playlist: Zbaliť zoznam videí
-  Expand Playlist: Rozbaliť zoznam videí
   Unmark As Watched: Zrušiť označenie ako pozreté
   Video has been unmarked as watched: Označenie videa ako pozretého bolo zrušené
   Save Channel Playback Speed: Uložiť rýchlosť prehrávania kanála

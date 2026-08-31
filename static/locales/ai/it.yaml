@@ -135,8 +135,6 @@ Subscriptions:
   Show Combined View: Mostra vista combinata
   Newest First: Prima i più recenti
   Oldest First: Prima i meno recenti
-  Posts:
-    RSS Message: YouTube non fornisce feed RSS per i post. Disattiva l'impostazione "{rssSetting}" per visualizzare i post oppure attiva l'impostazione "{hideSetting}" per nascondere questa scheda.
 Trending:
   Load Error: Impossibile caricare le tendenze.
   Unsupported Backend: Le tendenze richiedono l'API locale. Seleziona l'API locale oppure abilita il backend di riserva.

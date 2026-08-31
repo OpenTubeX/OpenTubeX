@@ -135,8 +135,6 @@ Subscriptions:
   Show Combined View: まとめて表示
   Newest First: 新しい順
   Oldest First: 古い順
-  Posts:
-    RSS Message: YouTubeは投稿用のRSSフィードを提供していません。投稿を表示するには「{rssSetting}」設定を無効にするか、このタブを非表示にするには「{hideSetting}」設定を有効にしてください。
 Trending:
   Load Error: トレンドを読み込めませんでした。
   Unsupported Backend: トレンドにはLocal APIが必要です。Local APIを選択するか、バックエンドのフォールバックを有効にしてください。
@@ -957,8 +955,6 @@ Video:
   Configure Restricted Playback Cookies Hint: 「設定」→「外部ソフトウェア」→「yt-dlpの再生用Cookie」でCookieを設定してください。
   Try With Configured Cookies: 設定済みのCookieを使用して再試行
   Restricted Playback Authentication Failed Template: '設定したCookieではyt-dlpがこの動画にアクセスできませんでした: {error}'
-  Collapse Playlist: プレイリストを折りたたむ
-  Expand Playlist: プレイリストを展開
   Unmark As Watched: 視聴済みを解除
   Video has been unmarked as watched: 動画の視聴済みを解除しました
   Save Channel Playback Speed: チャンネルの再生速度を保存
