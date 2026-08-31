@@ -42,6 +42,7 @@ import {
   refreshSubscriptionVideosFromRemote,
   updateVideoListAfterProcessing
 } from '../helpers/subscriptions'
+import { getSubscriptionsForFeed } from '../helpers/subscription-channels'
 
 const { locale, t } = useI18n()
 const tabUi = useTemplateRef('tabUi')
@@ -71,7 +72,9 @@ const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSub
 
 const showScheduledLiveStreamsFirst = computed(() => store.getters.getShowScheduledLiveStreamsFirst)
 
-const activeSubscriptionList = computed(() => store.getters.getActiveProfile.subscriptions)
+const activeSubscriptionList = computed(() => (
+  getSubscriptionsForFeed(store.getters.getActiveProfile.subscriptions, 'videos')
+))
 
 const cacheEntriesForAllActiveProfileChannels = computed(() => {
   const videoCache = store.getters.getVideoCache

@@ -1658,8 +1658,14 @@ Profile:
   Open Profile Dropdown: Open Profile Dropdown
 #On Channel Page
 Channel:
+  Subscription settings: Subscription settings
+  Videos per day: Videos per day
+  Use global setting: Use global setting
+  Unlimited: Unlimited
+  More videos hidden: '+{count} more'
   Subscribe: Subscribe
   Unsubscribe: Unsubscribe
+  Show in subscription feed: Show in subscription feed
   Channel Name Unavailable: Channel name unavailable
   Channel has been removed from your subscriptions: Channel has been removed from
     your subscriptions

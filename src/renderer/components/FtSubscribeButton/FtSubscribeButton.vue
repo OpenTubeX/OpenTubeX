@@ -5,6 +5,7 @@
     @focusout="handleProfileDropdownFocusOut"
   >
     <div
+      ref="buttonList"
       class="buttonList"
     >
       <FtButton
@@ -13,7 +14,7 @@
         :icon="isSubscribed ? ['fas', 'check'] : null"
         class="subscribeButton"
         :class="{
-          hasProfileDropdownToggle: isProfileDropdownEnabled,
+          hasProfileDropdownToggle: isSubscriptionOptionsEnabled,
           dropdownOpened: isProfileDropdownOpen,
           justToggled: justToggled
         }"
@@ -30,9 +31,9 @@
         @click="handleUnsubscribeConfirmation"
       />
       <FtButton
-        v-if="isProfileDropdownEnabled"
+        v-if="isSubscriptionOptionsEnabled"
         :no-border="true"
-        :title="isProfileDropdownOpen ? $t('Profile.Close Profile Dropdown') : $t('Profile.Open Profile Dropdown')"
+        :title="subscriptionOptionsTitle"
         class="profileDropdownToggle"
         :class="{ dropdownOpened: isProfileDropdownOpen}"
         background-color="var(--primary-color)"
@@ -45,77 +46,183 @@
         />
       </FtButton>
     </div>
-    <Transition name="profile-dropdown">
-      <div
-        v-if="isProfileDropdownOpen"
-        v-overlay-scrollbars
-        tabindex="-1"
-        class="profileDropdown"
-      >
-        <ul
-          class="profileList"
+    <Teleport to="body">
+      <Transition name="profile-dropdown">
+        <div
+          v-if="isProfileDropdownOpen"
+          ref="profileDropdown"
+          tabindex="-1"
+          class="profileDropdown"
+          :class="{
+            profileDropdownAnchoredLeftEdge,
+            profileDropdownPositioned: isProfileDropdownPositioned,
+            profileDropdownOpensAbove: profileDropdownOpensAbove
+          }"
+          :style="profileDropdownStyle"
+          @focusout="handleProfileDropdownFocusOut"
         >
-          <li
-            v-for="(profile, index) in profileDisplayList"
-            :key="index"
-            class="profile"
-            :class="{
-              subscribed: isProfileSubscribed(profile)
-            }"
-            :aria-labelledby="id + '-' + index"
-            :aria-selected="isActiveProfile(profile)"
-            :aria-checked="isProfileSubscribed(profile)"
-            tabindex="0"
-            role="checkbox"
-            @click.stop.prevent="handleSubscription(profile)"
-            @keydown.space.stop.prevent="handleSubscription(profile)"
-          >
+          <div class="feedTypePreferences">
             <div
-              v-if="isProfileSubscribed(profile)"
-              class="colorOption"
-              :style="{ background: profile.bgColor, color: profile.textColor }"
+              role="group"
+              class="feedTypePreferenceGroup"
+              :aria-labelledby="`${id}-feed-types`"
             >
-              <div
-                class="initial"
-                dir="auto"
+              <p
+                :id="`${id}-feed-types`"
+                class="feedTypePreferencesLabel"
               >
-                {{ $t('checkmark') }}
+                {{ $t('Channel.Show in subscription feed') }}
+              </p>
+              <div class="feedTypePreferenceGrid">
+                <button
+                  v-for="feedType in feedTypes"
+                  :key="feedType.id"
+                  type="button"
+                  class="feedTypePreference"
+                  role="checkbox"
+                  :aria-checked="enabledFeedTypes.has(feedType.id)"
+                  @click="updateFeedType(feedType.id, !enabledFeedTypes.has(feedType.id))"
+                >
+                  <span
+                    class="feedTypePreferenceIcon"
+                    aria-hidden="true"
+                  >
+                    <FtIcon :icon="feedType.icon" />
+                  </span>
+                  <span>{{ feedType.label }}</span>
+                  <span
+                    class="feedTypePreferenceCheck"
+                    aria-hidden="true"
+                  >
+                    <FtIcon
+                      v-if="enabledFeedTypes.has(feedType.id)"
+                      :icon="['fas', 'check']"
+                    />
+                  </span>
+                </button>
               </div>
             </div>
-            <FtProfileIcon
-              v-else
-              class="colorOption"
-              :profile="profile"
-              :fallback="profileInitials[profile._id]"
-            />
-            <p
-              :id="id + '-' + index"
-              class="profileName"
-              dir="auto"
+            <div class="secondaryPreferences">
+              <div
+                v-if="restrictedPlaybackConfigured"
+                class="membersOnlyPreference"
+              >
+                <button
+                  type="button"
+                  class="feedTypePreference"
+                  role="checkbox"
+                  :aria-checked="activeChannelSettings.showMembersOnly"
+                  @click="updateShowMembersOnly(!activeChannelSettings.showMembersOnly)"
+                >
+                  <span
+                    class="feedTypePreferenceIcon"
+                    aria-hidden="true"
+                  >
+                    <FtIcon :icon="['fas', 'users']" />
+                  </span>
+                  <span>{{ $t('Search Listing.Label.Members Only') }}</span>
+                  <span
+                    class="feedTypePreferenceCheck"
+                    aria-hidden="true"
+                  >
+                    <FtIcon
+                      v-if="activeChannelSettings.showMembersOnly"
+                      :icon="['fas', 'check']"
+                    />
+                  </span>
+                </button>
+              </div>
+              <div class="dailyVideoLimitPreference">
+                <FtSelect
+                  class="dailyVideoLimitSelect"
+                  :value="dailyVideoLimitValue"
+                  :placeholder="$t('Channel.Videos per day')"
+                  :select-names="dailyVideoLimitNames"
+                  :select-values="dailyVideoLimitValues"
+                  :icon="['fas', 'clock']"
+                  :dropdown-z-index="1002"
+                  @change="updateDailyVideoLimit"
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            v-if="isProfileDropdownEnabled"
+            ref="profileDropdownScroller"
+            v-overlay-scrollbars
+            class="profileDropdownScroller"
+          >
+            <ul
+              ref="profileListContent"
+              class="profileList"
             >
-              {{ profile.name }}
-            </p>
-          </li>
-        </ul>
-      </div>
-    </Transition>
+              <li
+                v-for="(profile, index) in profileDisplayList"
+                :key="index"
+                class="profile"
+                :aria-labelledby="id + '-' + index"
+                :aria-selected="isActiveProfile(profile)"
+                :aria-checked="isProfileSubscribed(profile)"
+                tabindex="0"
+                role="checkbox"
+                @click.stop.prevent="handleSubscription(profile)"
+                @keydown.space.stop.prevent="handleSubscription(profile)"
+              >
+                <FtProfileIcon
+                  class="colorOption"
+                  :profile="profile"
+                  :fallback="profileInitials[profile._id]"
+                />
+                <p
+                  :id="id + '-' + index"
+                  class="profileName"
+                  dir="auto"
+                >
+                  {{ profile.name }}
+                </p>
+                <span
+                  class="profileCheck"
+                  aria-hidden="true"
+                >
+                  <FtIcon
+                    v-if="isProfileSubscribed(profile)"
+                    :icon="['fas', 'check']"
+                  />
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
+import FtSelect from '../FtSelect/FtSelect.vue'
 
 import store from '../../store/index'
 
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { showToast } from '../../helpers/utils'
 import { getFirstCharacter } from '../../helpers/strings'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
+import {
+  formatSubscriptionDailyVideoLimit,
+  getSubscriptionDailyVideoLimitOptions,
+  getSubscriptionFeedTypeOptions,
+  getUpdatedSubscriptionFeedTypes,
+  normalizeSubscriptionChannelSettings,
+  parseSubscriptionDailyVideoLimit
+} from '../../helpers/subscription-channels'
 
 const { locale, t } = useI18n()
 
@@ -160,6 +267,9 @@ const id = useId()
  * @property {string} subscriptions[].id
  * @property {string|undefined} subscriptions[].name
  * @property {string|undefined} subscriptions[].thumbnail
+ * @property {string[]|undefined} subscriptions[].feedTypes
+ * @property {number|null|undefined} subscriptions[].dailyVideoLimit
+ * @property {boolean|undefined} subscriptions[].showMembersOnly
  */
 
 /** @type {import('vue').ComputedRef<Profile[]>} */
@@ -208,26 +318,253 @@ const isProfileDropdownEnabled = computed(() => {
   return !props.hideProfileDropdownToggle && profileList.value.length > 1
 })
 
+const isSubscriptionOptionsEnabled = computed(() => {
+  return !props.hideProfileDropdownToggle
+})
+
 const isProfileDropdownOpen = ref(false)
+const buttonList = useTemplateRef('buttonList')
+const profileDropdown = useTemplateRef('profileDropdown')
+const profileDropdownScroller = useTemplateRef('profileDropdownScroller')
+const profileListContent = useTemplateRef('profileListContent')
+const profileDropdownStyle = ref({ left: '8px', top: '8px' })
+const profileDropdownAnchoredLeftEdge = ref(false)
+const isProfileDropdownPositioned = ref(false)
+const profileDropdownOpensAbove = ref(false)
 /** @type {import('vue').ShallowRef<Profile | null>} */
 const showUnsubscribePopupForProfile = shallowRef(null)
 
+let profileListResizeObserver = null
+let profileListObservationGeneration = 0
+let profileDropdownPositionMutationObserver = null
+let profileDropdownPositionResizeObserver = null
+let profileDropdownPositionFrame = null
+
+watch([isProfileDropdownOpen, isProfileDropdownEnabled], async ([open, enabled]) => {
+  const generation = ++profileListObservationGeneration
+  stopObservingProfileList()
+  if (!open || !enabled) return
+
+  await nextTick()
+  if (generation !== profileListObservationGeneration ||
+    !isProfileDropdownOpen.value || !isProfileDropdownEnabled.value) return
+
+  const scroller = profileDropdownScroller.value
+  const content = profileListContent.value
+  if (!scroller || !content) return
+
+  const clampScroll = () => clampOverlayScrollTop(scroller, content)
+  profileListResizeObserver = new ResizeObserver(clampScroll)
+  profileListResizeObserver.observe(scroller)
+  profileListResizeObserver.observe(content)
+  clampScroll()
+})
+
+watch(isProfileDropdownOpen, async (open) => {
+  removeProfileDropdownPositionTracking()
+  if (!open) return
+
+  await nextTick()
+  if (!isProfileDropdownOpen.value || profileDropdown.value === null) return
+
+  positionProfileDropdown()
+  profileDropdownPositionResizeObserver = new ResizeObserver(scheduleProfileDropdownPositionUpdate)
+  profileDropdownPositionResizeObserver.observe(profileDropdown.value)
+  if (buttonList.value !== null) {
+    profileDropdownPositionResizeObserver.observe(buttonList.value)
+  }
+  profileDropdownPositionMutationObserver = new MutationObserver((records) => {
+    const dropdown = profileDropdown.value
+    if (dropdown !== null && records.every(({ target }) => (
+      target === dropdown || dropdown.contains(target)
+    ))) return
+
+    scheduleProfileDropdownPositionUpdate()
+  })
+  profileDropdownPositionMutationObserver.observe(document.body, {
+    attributes: true,
+    attributeFilter: ['class', 'hidden', 'style'],
+    childList: true,
+    subtree: true
+  })
+  window.addEventListener('resize', scheduleProfileDropdownPositionUpdate)
+  window.addEventListener('scroll', scheduleProfileDropdownPositionUpdate, { capture: true, passive: true })
+})
+
 const isSubscribed = computed(() => isProfileSubscribed(activeProfile.value))
+const restrictedPlaybackConfigured = computed(() => (
+  hasConfiguredRestrictedPlaybackAuthentication(store.getters)
+))
+
+const feedTypes = computed(() => getSubscriptionFeedTypeOptions(t))
+
+const storedChannelSettings = computed(() => {
+  const subscription = profileList.value[0].subscriptions.find(channel => channel.id === props.channelId)
+  return normalizeSubscriptionChannelSettings(subscription)
+})
+
+/** @type {import('vue').Ref<{feedTypes: string[], dailyVideoLimit: number|null|undefined, showMembersOnly: boolean} | null>} */
+const optimisticChannelSettings = ref(null)
+const activeChannelSettings = computed(() => (
+  optimisticChannelSettings.value ?? storedChannelSettings.value
+))
+const enabledFeedTypes = computed(() => new Set(activeChannelSettings.value.feedTypes))
+const dailyVideoLimitValue = computed(() => (
+  formatSubscriptionDailyVideoLimit(activeChannelSettings.value.dailyVideoLimit)
+))
+const dailyVideoLimitOptions = computed(() => getSubscriptionDailyVideoLimitOptions(t))
+const dailyVideoLimitNames = computed(() => dailyVideoLimitOptions.value.map(option => option.label))
+const dailyVideoLimitValues = computed(() => dailyVideoLimitOptions.value.map(option => option.value))
+let channelSettingsUpdateSequence = 0
+let channelSettingsUpdateQueue = Promise.resolve()
+
+const subscriptionOptionsTitle = computed(() => t('Channel.Subscription settings'))
 
 const justToggled = ref(false)
 let justToggledTimeoutId = null
 
-watch(isSubscribed, () => {
+watch(isSubscribed, (subscribed) => {
   clearTimeout(justToggledTimeoutId)
   justToggled.value = true
   justToggledTimeoutId = setTimeout(() => {
     justToggled.value = false
   }, 400)
+
+  if (subscribed) optimisticChannelSettings.value = null
 })
 
 onBeforeUnmount(() => {
   clearTimeout(justToggledTimeoutId)
+  profileListObservationGeneration += 1
+  stopObservingProfileList()
+  removeProfileDropdownPositionTracking()
 })
+
+function stopObservingProfileList() {
+  profileListResizeObserver?.disconnect()
+  profileListResizeObserver = null
+}
+
+function positionProfileDropdown() {
+  const dropdown = profileDropdown.value
+  const trigger = buttonList.value
+  if (dropdown === null || trigger === null) return
+
+  const viewportMargin = 8
+  const gap = 4
+  const triggerRect = trigger.getBoundingClientRect()
+  const dropdownWidth = dropdown.offsetWidth
+  const dropdownHeight = dropdown.offsetHeight
+  const horizontalPosition = getProfileDropdownHorizontalPosition(
+    trigger,
+    triggerRect,
+    dropdownWidth,
+    viewportMargin
+  )
+  const below = triggerRect.bottom + gap
+  const above = triggerRect.top - dropdownHeight - gap
+  const maximumTop = Math.max(viewportMargin, window.innerHeight - dropdownHeight - viewportMargin)
+  const opensAbove = below + dropdownHeight > window.innerHeight - viewportMargin &&
+    above >= viewportMargin
+  const preferredTop = opensAbove ? above : below
+  const top = Math.max(viewportMargin, Math.min(preferredTop, maximumTop))
+
+  profileDropdownStyle.value = {
+    left: `${snapToDevicePixels(horizontalPosition.left)}px`,
+    top: `${snapToDevicePixels(top)}px`
+  }
+  profileDropdownAnchoredLeftEdge.value = horizontalPosition.anchoredLeftEdge
+  profileDropdownOpensAbove.value = opensAbove
+  isProfileDropdownPositioned.value = true
+}
+
+function prepareProfileDropdownPosition() {
+  const trigger = buttonList.value
+  if (trigger === null) return
+
+  const viewportMargin = 8
+  const dropdownWidth = Math.min(240, window.innerWidth - 2 * viewportMargin)
+  const triggerRect = trigger.getBoundingClientRect()
+  const horizontalPosition = getProfileDropdownHorizontalPosition(
+    trigger,
+    triggerRect,
+    dropdownWidth,
+    viewportMargin
+  )
+
+  profileDropdownStyle.value = {
+    left: `${snapToDevicePixels(horizontalPosition.left)}px`,
+    top: `${snapToDevicePixels(Math.max(viewportMargin, triggerRect.bottom + 4))}px`
+  }
+  profileDropdownAnchoredLeftEdge.value = horizontalPosition.anchoredLeftEdge
+  profileDropdownOpensAbove.value = false
+  isProfileDropdownPositioned.value = false
+}
+
+/**
+ * @param {HTMLElement} trigger
+ * @param {DOMRect} triggerRect
+ * @param {number} dropdownWidth
+ * @param {number} viewportMargin
+ */
+function getProfileDropdownHorizontalPosition(trigger, triggerRect, dropdownWidth, viewportMargin) {
+  const anchoredLeftEdge = getComputedStyle(trigger).direction === 'rtl'
+  const preferredLeft = anchoredLeftEdge
+    ? triggerRect.left
+    : triggerRect.right - dropdownWidth
+  const maximumLeft = Math.max(viewportMargin, window.innerWidth - dropdownWidth - viewportMargin)
+
+  return {
+    anchoredLeftEdge,
+    left: Math.max(viewportMargin, Math.min(preferredLeft, maximumLeft))
+  }
+}
+
+/**
+ * @param {number} value
+ */
+function snapToDevicePixels(value) {
+  const ratio = window.devicePixelRatio || 1
+  return Math.round(value * ratio) / ratio
+}
+
+function scheduleProfileDropdownPositionUpdate() {
+  if (profileDropdownPositionFrame !== null) {
+    cancelAnimationFrame(profileDropdownPositionFrame)
+  }
+
+  profileDropdownPositionFrame = requestAnimationFrame(() => {
+    profileDropdownPositionFrame = null
+    positionProfileDropdown()
+  })
+}
+
+function removeProfileDropdownPositionTracking() {
+  window.removeEventListener('resize', scheduleProfileDropdownPositionUpdate)
+  window.removeEventListener('scroll', scheduleProfileDropdownPositionUpdate, true)
+  profileDropdownPositionMutationObserver?.disconnect()
+  profileDropdownPositionMutationObserver = null
+  profileDropdownPositionResizeObserver?.disconnect()
+  profileDropdownPositionResizeObserver = null
+
+  if (profileDropdownPositionFrame !== null) {
+    cancelAnimationFrame(profileDropdownPositionFrame)
+    profileDropdownPositionFrame = null
+  }
+}
+
+/**
+ * @param {FocusEvent} event
+ */
+function handleProfileDropdownFocusOut(event) {
+  const nextTarget = event.relatedTarget
+  const focusStaysInControl = nextTarget instanceof Node && (
+    subscribeButton.value?.contains(nextTarget) ||
+    profileDropdown.value?.contains(nextTarget)
+  )
+
+  if (!focusStaysInControl) isProfileDropdownOpen.value = false
+}
 
 /**
  * @param {Profile} profile
@@ -256,12 +593,19 @@ function handleSubscription(profile) {
       }
     }
 
+    const channel = {
+      id: props.channelId,
+      name: props.channelName,
+      thumbnail: props.channelThumbnail,
+      feedTypes: [...activeChannelSettings.value.feedTypes],
+      showMembersOnly: activeChannelSettings.value.showMembersOnly
+    }
+    if (activeChannelSettings.value.dailyVideoLimit !== undefined) {
+      channel.dailyVideoLimit = activeChannelSettings.value.dailyVideoLimit
+    }
+
     store.dispatch('addChannelToProfiles', {
-      channel: {
-        id: props.channelId,
-        name: props.channelName,
-        thumbnail: props.channelThumbnail
-      },
+      channel,
       profileIds
     })
 
@@ -276,14 +620,71 @@ function handleSubscription(profile) {
 
 const subscribeButton = useTemplateRef('subscribeButton')
 
-function handleProfileDropdownFocusOut() {
-  if (subscribeButton.value && !subscribeButton.value.matches(':focus-within')) {
+function toggleProfileDropdown() {
+  if (isProfileDropdownOpen.value) {
     isProfileDropdownOpen.value = false
+  } else {
+    prepareProfileDropdownPosition()
+    isProfileDropdownOpen.value = true
   }
 }
 
-function toggleProfileDropdown() {
-  isProfileDropdownOpen.value = !isProfileDropdownOpen.value
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
+ * @param {boolean} enabled
+ */
+function updateFeedType(feedType, enabled) {
+  persistChannelSettings({
+    feedTypes: getUpdatedSubscriptionFeedTypes(
+      activeChannelSettings.value.feedTypes,
+      feedType,
+      enabled
+    )
+  })
+}
+
+/**
+ * @param {string} value
+ */
+function updateDailyVideoLimit(value) {
+  persistChannelSettings({
+    dailyVideoLimit: parseSubscriptionDailyVideoLimit(value)
+  })
+}
+
+/**
+ * @param {boolean} value
+ */
+function updateShowMembersOnly(value) {
+  persistChannelSettings({ showMembersOnly: value })
+}
+
+/**
+ * @param {{feedTypes?: string[], dailyVideoLimit?: number|null|undefined, showMembersOnly?: boolean}} patch
+ */
+function persistChannelSettings(patch) {
+  const settings = {
+    ...activeChannelSettings.value,
+    ...patch
+  }
+  const updateSequence = ++channelSettingsUpdateSequence
+  optimisticChannelSettings.value = settings
+  if (!isSubscribed.value) return
+
+  channelSettingsUpdateQueue = channelSettingsUpdateQueue.then(async () => {
+    try {
+      await store.dispatch('updateChannelSettings', {
+        channelId: props.channelId,
+        settings
+      })
+    } catch (error) {
+      console.error(error)
+    } finally {
+      if (updateSequence === channelSettingsUpdateSequence) {
+        optimisticChannelSettings.value = null
+      }
+    }
+  })
 }
 
 /**

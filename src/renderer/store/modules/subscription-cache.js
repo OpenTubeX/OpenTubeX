@@ -212,8 +212,12 @@ const actions = {
     }
   },
 
-  async markSubscriptionEntriesAsSeen({ commit, state }, { tab, tabs = [tab], channelIds }) {
-    const channelIdSet = new Set(channelIds)
+  async markSubscriptionEntriesAsSeen({ commit, state }, {
+    tab,
+    tabs = [tab],
+    channelIds = [],
+    channelIdsByTab = {}
+  }) {
     const cacheConfigs = {
       videos: {
         cache: state.videoCache,
@@ -240,6 +244,7 @@ const actions = {
     const writes = []
 
     for (const feedTab of tabs) {
+      const channelIdSet = new Set(channelIdsByTab[feedTab] ?? channelIds)
       const config = cacheConfigs[feedTab]
       if (config == null) {
         continue

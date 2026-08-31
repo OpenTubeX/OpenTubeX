@@ -929,6 +929,12 @@ Profile:
   The selected image could not be loaded: לא ניתן לטעון את התמונה שנבחרה
   Theme Color: צבע ערכת הנושא
 Channel:
+  Subscription settings: הגדרות מינוי
+  Videos per day: סרטונים ביום
+  Use global setting: שימוש בהגדרה הכללית
+  Unlimited: ללא הגבלה
+  More videos hidden: '+{count} נוספים'
+  Show in subscription feed: הצגה בפיד המינויים
   Channel Name Unavailable: שם הערוץ אינו זמין
   Search Result Types: סוגי תוצאות חיפוש
   All Results: הכול

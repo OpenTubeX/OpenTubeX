@@ -1,4 +1,10 @@
 import { isHistoryEntryWatched } from './history'
+import {
+  applySubscriptionVideoLimit,
+  getValidSubscriptionChannels,
+  isMembersOnlySubscriptionVideoVisible,
+  isSubscriptionFeedTypeEnabled
+} from './subscription-channels'
 import { isVideoHiddenByPreferences } from './subscriptions'
 
 /**
@@ -32,24 +38,26 @@ export function getEnabledSubscriptionFeedSources(getters) {
  *
  * @param {object} options
  * @param {{ category: string, cache: object, entriesKey: string }[]} options.feeds
- * @param {Set<string>} options.activeSubscriptionIds
+ * @param {unknown} options.activeSubscriptions
  * @param {Record<string, object>} options.historyCacheById
  * @param {boolean} options.hideLiveStreams
  * @param {boolean} options.hideUpcomingPremieres
  * @param {string[]} options.forbiddenTitles
  * @param {boolean} options.onlyShowLatestFromChannel
  * @param {number} options.onlyShowLatestFromChannelNumber
+ * @param {boolean} options.restrictedPlaybackConfigured
  * @param {'newest' | 'oldest'} options.sortBy
  */
 export function getNewSubscriptionFeedEntries({
   feeds,
-  activeSubscriptionIds,
+  activeSubscriptions,
   historyCacheById,
   hideLiveStreams,
   hideUpcomingPremieres,
   forbiddenTitles,
   onlyShowLatestFromChannel,
   onlyShowLatestFromChannelNumber,
+  restrictedPlaybackConfigured,
   sortBy,
 }) {
   const entries = {
@@ -59,14 +67,26 @@ export function getNewSubscriptionFeedEntries({
     posts: [],
   }
   const seenIds = new Set()
+  const subscriptionsById = new Map(
+    getValidSubscriptionChannels(activeSubscriptions).map(channel => [channel.id, channel])
+  )
 
   feeds.forEach(({ category, cache, entriesKey }) => {
     Object.entries(cache).forEach(([channelId, cacheEntry]) => {
-      if (!activeSubscriptionIds.has(channelId)) {
+      const subscription = subscriptionsById.get(channelId)
+      if (subscription == null || !isSubscriptionFeedTypeEnabled(subscription, category)) {
         return
       }
 
       cacheEntry?.[entriesKey]?.forEach(entry => {
+        if (!isMembersOnlySubscriptionVideoVisible(
+          entry,
+          subscription,
+          restrictedPlaybackConfigured
+        )) {
+          return
+        }
+
         if (entry.isNewInSubscriptionFeed !== true) {
           return
         }
@@ -102,23 +122,17 @@ export function getNewSubscriptionFeedEntries({
 
   mediaEntries.sort((a, b) => entryTimestamp(b.entry) - entryTimestamp(a.entry))
 
-  if (onlyShowLatestFromChannel) {
-    const authorCounts = new Map()
-
-    mediaEntries = mediaEntries.filter(({ entry }) => {
-      if (!entry.videoId || !entry.authorId) {
-        return true
-      }
-
-      const count = authorCounts.get(entry.authorId) ?? 0
-      if (count >= onlyShowLatestFromChannelNumber) {
-        return false
-      }
-
-      authorCounts.set(entry.authorId, count + 1)
-      return true
-    })
-  }
+  const categoriesByVideoId = new Map(
+    mediaEntries.map(({ category, entry }) => [entry.videoId, category])
+  )
+  mediaEntries = applySubscriptionVideoLimit(
+    mediaEntries.map(({ entry }) => entry),
+    activeSubscriptions,
+    onlyShowLatestFromChannel ? onlyShowLatestFromChannelNumber : null
+  ).map(entry => ({
+    category: categoriesByVideoId.get(entry.videoId),
+    entry
+  }))
 
   const mediaByCategory = mediaEntries.reduce((result, { category, entry }) => {
     result[category].push(entry)

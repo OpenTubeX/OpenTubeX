@@ -250,6 +250,10 @@
             class="uploadedTime"
           >{{ displayedUploadedTime }}</span>
           <span
+            v-if="subscriptionHiddenVideoCount > 0"
+            class="subscriptionHiddenVideoCount"
+          >{{ t('Channel.More videos hidden', { count: subscriptionHiddenVideoCount }) }}</span>
+          <span
             v-if="isLive && !hideViews"
             class="viewCount"
           >{{ t('Global.Counts.Watching Count', { count: parsedViewCount }, viewCount) }}</span>
@@ -526,6 +530,12 @@ const { locale, t } = useI18n()
 const route = useRoute()
 const dateFormat = computed(() => store.getters.getDateFormat)
 const timeFormat = computed(() => store.getters.getTimeFormat)
+
+const subscriptionHiddenVideoCount = computed(() => (
+  Number.isInteger(props.data.subscriptionHiddenVideoCount)
+    ? props.data.subscriptionHiddenVideoCount
+    : 0
+))
 
 const id = ref('')
 const title = ref('')

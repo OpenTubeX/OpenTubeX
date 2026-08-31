@@ -236,6 +236,10 @@ const props = defineProps({
   isChanged: {
     type: Boolean,
     default: null
+  },
+  dropdownZIndex: {
+    type: [Number, String],
+    default: null
   }
 })
 
@@ -249,7 +253,7 @@ const options = useTemplateRef('options')
 
 const dropdownShown = ref(false)
 const activeIndex = ref(0)
-const dropdownStyle = ref({})
+const dropdownStyle = ref({ zIndex: props.dropdownZIndex })
 const dropdownTarget = shallowRef(document.fullscreenElement ?? document.body)
 const dropdownPlacement = ref('below')
 let typeahead = ''
@@ -371,7 +375,8 @@ function updateDropdownPosition() {
     inlineSize: `${menuWidth}px`,
     left: `${snapToDevicePixels(left)}px`,
     top: `${snapToDevicePixels(top)}px`,
-    maxBlockSize: naturalHeight > menuHeight ? `${menuHeight}px` : null
+    maxBlockSize: naturalHeight > menuHeight ? `${menuHeight}px` : null,
+    zIndex: props.dropdownZIndex
   }
 }
 

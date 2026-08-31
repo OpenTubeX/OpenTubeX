@@ -713,6 +713,7 @@ export default defineComponent({
             this.$store.getters.getHistoryCacheById[video.videoId]
           ),
           hideWatched: this.$store.getters.getHideWatchedSubs,
+          restrictedPlaybackConfigured: hasConfiguredRestrictedPlaybackAuthentication(this.$store.getters),
           maxPerChannel,
           currentVideoId: this.videoId,
         })

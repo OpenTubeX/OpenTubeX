@@ -924,6 +924,12 @@ Profile:
   The selected image could not be loaded: Non se puido cargar a imaxe seleccionada
   Theme Color: Cor do tema
 Channel:
+  Subscription settings: Configuración da subscrición
+  Videos per day: Vídeos ao día
+  Use global setting: Usar a configuración global
+  Unlimited: Sen límite
+  More videos hidden: '+{count} máis'
+  Show in subscription feed: Mostrar na fonte de subscricións
   Channel Name Unavailable: O nome da canle non está dispoñible
   Search Result Types: Tipos de resultados da busca
   All Results: Todos

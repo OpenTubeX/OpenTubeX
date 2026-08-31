@@ -419,6 +419,7 @@ import {
   getEnabledSubscriptionFeedSources,
   getNewSubscriptionFeedEntries,
 } from '../../helpers/newSubscriptionFeed'
+import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 import { formatDateTime } from '../../helpers/dateFormat'
 
@@ -456,19 +457,18 @@ const recentPlaylists = computed(() => store.getters.getAllPlaylists
     return bTimestamp - aTimestamp
   }))
 const recentDownloads = computed(() => getRecentDownloads(store.getters.getYtDlpDownloads))
-const activeSubscriptionIds = computed(() => new Set(
-  store.getters.getActiveProfile.subscriptions.map(channel => channel.id)
-))
+const activeSubscriptions = computed(() => store.getters.getActiveProfile.subscriptions)
 const enabledSubscriptionFeeds = computed(() => getEnabledSubscriptionFeedSources(store.getters))
 const newSubscriptionContent = computed(() => getNewSubscriptionFeedEntries({
   feeds: enabledSubscriptionFeeds.value,
-  activeSubscriptionIds: activeSubscriptionIds.value,
+  activeSubscriptions: activeSubscriptions.value,
   historyCacheById: store.getters.getHistoryCacheById,
   hideLiveStreams: store.getters.getHideLiveStreams,
   hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
   forbiddenTitles: store.getters.getForbiddenTitlesParsed,
   onlyShowLatestFromChannel: store.getters.getOnlyShowLatestFromChannel,
   onlyShowLatestFromChannelNumber: store.getters.getOnlyShowLatestFromChannelNumber,
+  restrictedPlaybackConfigured: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
   sortBy: store.getters.getNewSubscriptionFeedSortBy === 'oldest' ? 'oldest' : 'newest',
 }))
 const newSubscriptionEntries = computed(() => (

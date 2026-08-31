@@ -907,6 +907,12 @@ Profile:
   The selected image could not be loaded: Odabranu sliku nije moguće učitati
   Theme Color: Boja teme
 Channel:
+  Subscription settings: Postavke pretplate
+  Videos per day: Videozapisa dnevno
+  Use global setting: Koristi globalnu postavku
+  Unlimited: Neograničeno
+  More videos hidden: '+{count} više'
+  Show in subscription feed: Prikaži u sažetku pretplata
   Channel Name Unavailable: Naziv kanala nije dostupan
   Search Result Types: Vrste rezultata pretraživanja
   All Results: Sve

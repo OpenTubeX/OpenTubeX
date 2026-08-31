@@ -73,6 +73,9 @@
             @change="updateOnlyShowLatestFromChannelNumber"
           />
         </div>
+        <div class="subscriptionChannelSettingsManager">
+          <SubscriptionChannelSettings />
+        </div>
         <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Fetch Feeds from RSS')"
           :default-value="useRssFeeds"
@@ -125,6 +128,7 @@ import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSlider from '../FtSlider/FtSlider.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import SubscriptionChannelSettings from '../SubscriptionChannelSettings/SubscriptionChannelSettings.vue'
 
 import store from '../../store/index'
 

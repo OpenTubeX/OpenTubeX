@@ -1461,8 +1461,14 @@ About:
   Fluxer: Tritt unserer Fluxer-Community bei
   Matrix: Matrix
 Channel:
+  Subscription settings: Abo-Einstellungen
+  Videos per day: Videos pro Tag
+  Use global setting: Globale Einstellung verwenden
+  Unlimited: Unbegrenzt
+  More videos hidden: '+{count} weitere'
   Subscribe: Abonnieren
   Unsubscribe: Deabonnieren
+  Show in subscription feed: Im Abo-Feed anzeigen
   Search Channel: Kanal durchsuchen
   Your search results have returned 0 results: Deine Suche hat 0 Ergebnisse geliefert
   Videos:

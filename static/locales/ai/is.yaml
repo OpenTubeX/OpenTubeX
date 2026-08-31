@@ -922,6 +922,12 @@ Profile:
   The selected image could not be loaded: Ekki tókst að hlaða völdu myndinni
   Theme Color: Þemalitur
 Channel:
+  Subscription settings: Áskriftarstillingar
+  Videos per day: Myndskeið á dag
+  Use global setting: Nota almenna stillingu
+  Unlimited: Ótakmarkað
+  More videos hidden: '+{count} til viðbótar'
+  Show in subscription feed: Sýna í áskriftarstraumi
   Channel Name Unavailable: Heiti rásar er ekki tiltækt
   Search Result Types: Tegundir leitarniðurstaðna
   All Results: Allt

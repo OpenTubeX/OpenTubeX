@@ -905,6 +905,12 @@ Profile:
   The selected image could not be loaded: 无法加载所选图片
   Theme Color: 主题颜色
 Channel:
+  Subscription settings: 订阅设置
+  Videos per day: 每日视频数
+  Use global setting: 使用全局设置
+  Unlimited: 不限
+  More videos hidden: '另有 {count} 个'
+  Show in subscription feed: 在订阅动态中显示
   Channel Name Unavailable: 频道名称不可用
   Search Result Types: 搜索结果类型
   All Results: 全部

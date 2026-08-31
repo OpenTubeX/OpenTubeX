@@ -2,3 +2,7 @@
   inline-size: calc(100% - 44px);
   padding-inline-start: 44px;
 }
+
+.subscriptionChannelSettingsManager {
+  padding-inline-start: 44px;
+}

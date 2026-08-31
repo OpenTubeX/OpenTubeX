@@ -27,6 +27,7 @@ import {
   refreshSubscriptionLiveFromRemote,
   updateVideoListAfterProcessing
 } from '../helpers/subscriptions'
+import { getSubscriptionsForFeed } from '../helpers/subscription-channels'
 
 const { locale, t } = useI18n()
 const tabUi = useTemplateRef('tabUi')
@@ -51,7 +52,9 @@ const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCache
 /** @type {import('vue').ComputedRef<boolean>} */
 const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSubscriptionsAutomatically)
 
-const activeSubscriptionList = computed(() => store.getters.getActiveProfile.subscriptions)
+const activeSubscriptionList = computed(() => (
+  getSubscriptionsForFeed(store.getters.getActiveProfile.subscriptions, 'live')
+))
 
 const cacheEntriesForAllActiveProfileChannels = computed(() => {
   const liveCache = store.getters.getLiveCache

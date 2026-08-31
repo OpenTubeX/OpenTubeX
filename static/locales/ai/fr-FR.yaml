@@ -904,6 +904,12 @@ Profile:
   The selected image could not be loaded: L’image sélectionnée n’a pas pu être chargée
   Theme Color: Couleur du thème
 Channel:
+  Subscription settings: Paramètres d'abonnement
+  Videos per day: Vidéos par jour
+  Use global setting: Utiliser le paramètre général
+  Unlimited: Illimité
+  More videos hidden: '+{count} de plus'
+  Show in subscription feed: Afficher dans le flux des abonnements
   Channel Name Unavailable: Nom de la chaîne indisponible
   Search Result Types: Types de résultats de recherche
   All Results: Tous

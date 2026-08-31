@@ -408,6 +408,41 @@ for (const uiScale of [100, 125]) {
   })
 }
 
+test.describe('per-channel subscription feed filters', () => {
+  test.use({
+    seed: {
+      settings: commonSettings,
+      profiles: [profile([{
+        id: CHANNEL_ID,
+        name: 'Channel A',
+        thumbnail: '',
+        feedTypes: ['videos']
+      }])],
+      subscriptionCache: populatedCache
+    }
+  })
+
+  test('hides every disabled cached feed type', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+
+    await expect(page.getByText('New video', { exact: true })).toBeVisible()
+    await expect(page.getByText('New community post', { exact: true })).toHaveCount(0)
+    await expect(page.getByText('New short', { exact: true })).toHaveCount(0)
+    await expect(page.getByText('New live stream', { exact: true })).toHaveCount(0)
+
+    await page.locator('[data-subscription-feed-tab="shorts"]').click()
+    await expect(page.getByText('New short', { exact: true })).toHaveCount(0)
+
+    await page.locator('[data-subscription-feed-tab="live"]').click()
+    await expect(page.getByText('New live stream', { exact: true })).toHaveCount(0)
+
+    await page.locator('[data-subscription-feed-tab="posts"]').click()
+    await expect(page.getByText('New community post', { exact: true })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /Refresh Posts/ })).toBeDisabled()
+  })
+})
+
 test.describe('new subscriptions feed sorting', () => {
   const newestVideo = video('sort-newest-video', 'Newest video', now - HOUR, {
     isNewInSubscriptionFeed: true
@@ -787,6 +822,44 @@ test.describe('new feed latest-per-channel limit', () => {
     await expect(page.getByText('New live stream', { exact: true })).toHaveCount(0)
     await expect(page.getByRole('heading', { name: 'Videos', exact: true })).toHaveCount(0)
     await expect(page.getByRole('heading', { name: 'Live', exact: true })).toHaveCount(0)
+  })
+})
+
+test.describe('new feed per-channel daily limit', () => {
+  const day = new Date(2026, 7, 31, 12).getTime()
+  const dailyLimitCache = [{
+    ...populatedCache[0],
+    videos: [
+      video('daily-newest', 'Newest video today', day, { isNewInSubscriptionFeed: true }),
+      video('daily-hidden', 'Hidden video today', day - HOUR, { isNewInSubscriptionFeed: true }),
+      video('daily-previous', 'Video from yesterday', day - 24 * HOUR, { isNewInSubscriptionFeed: true })
+    ],
+    shorts: [],
+    liveStreams: [],
+    communityPosts: []
+  }]
+
+  test.use({
+    seed: {
+      settings: commonSettings,
+      profiles: [profile([{
+        id: CHANNEL_ID,
+        name: 'Channel A',
+        thumbnail: '',
+        dailyVideoLimit: 1
+      }])],
+      subscriptionCache: dailyLimitCache
+    }
+  })
+
+  test('keeps the newest video from each day and reports hidden entries', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+
+    await expect(page.getByText('Newest video today', { exact: true })).toBeVisible()
+    await expect(page.getByText('Hidden video today', { exact: true })).toHaveCount(0)
+    await expect(page.getByText('Video from yesterday', { exact: true })).toBeVisible()
+    await expect(page.getByText('+1 more', { exact: true })).toBeVisible()
   })
 })
 

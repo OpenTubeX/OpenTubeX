@@ -905,6 +905,12 @@ Profile:
   The selected image could not be loaded: "N'eus ket bet gallet kargañ ar skeudenn diuzet"
   Theme Color: "Liv an neuz"
 Channel:
+  Subscription settings: Arventennoù ar c'houmanant
+  Videos per day: Videoioù dre zevezh
+  Use global setting: Ober gant an arventenn hollek
+  Unlimited: Didermen
+  More videos hidden: '+{count} ouzhpenn'
+  Show in subscription feed: Diskouez el lanv koumanantoù
   Channel Name Unavailable: "N'eo ket hegerz anv ar chadenn"
   Search Result Types: "Doareoù disoc'hoù enklask"
   All Results: "Pep tra"

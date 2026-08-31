@@ -158,7 +158,11 @@ test('extracts a linked full video from Reel metadata', () => {
 
 test('builds a newest-first, filtered subscription Shorts feed', () => {
   const feed = buildSubscriptionShortsFeed({
-    subscriptions: [{ id: 'channel-a' }, { id: 'channel-b' }],
+    subscriptions: [
+      { id: 'channel-a' },
+      { id: 'channel-b' },
+      { id: 'channel-c', feedTypes: ['videos'] }
+    ],
     cache: {
       'channel-a': {
         videos: [
@@ -170,6 +174,11 @@ test('builds a newest-first, filtered subscription Shorts feed', () => {
         videos: [
           { videoId: 'hidden', authorId: 'channel-b', published: 40 },
           { videoId: 'b', authorId: 'channel-b', published: 20 },
+        ]
+      },
+      'channel-c': {
+        videos: [
+          { videoId: 'disabled-short', authorId: 'channel-c', published: 50 }
         ]
       }
     },

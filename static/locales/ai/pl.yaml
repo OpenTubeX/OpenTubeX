@@ -382,6 +382,12 @@ Profile:
   The selected image could not be loaded: Nie udało się wczytać wybranego obrazu
   Theme Color: Kolor motywu
 Channel:
+  Subscription settings: Ustawienia subskrypcji
+  Videos per day: Filmy dziennie
+  Use global setting: Użyj ustawienia globalnego
+  Unlimited: Bez ograniczeń
+  More videos hidden: '+{count} więcej'
+  Show in subscription feed: Pokaż w kanale subskrypcji
   Channel Name Unavailable: Nazwa kanału jest niedostępna
   Search Result Types: Typy wyników wyszukiwania
   All Results: Wszystkie

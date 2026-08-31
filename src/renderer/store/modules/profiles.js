@@ -171,6 +171,37 @@ const actions = {
     }
   },
 
+  async updateChannelSettings({ dispatch, state }, { channelId, settings }) {
+    // updateProfile replaces and sorts the live list, so iterate over a stable snapshot.
+    for (const profile of [...state.profileList]) {
+      const subscriptionIndex = profile.subscriptions.findIndex(channel => channel.id === channelId)
+      if (subscriptionIndex === -1) {
+        continue
+      }
+
+      const updatedProfile = deepCopy(profile)
+      const subscription = updatedProfile.subscriptions[subscriptionIndex]
+      if (Array.isArray(settings.feedTypes)) {
+        subscription.feedTypes = [...settings.feedTypes]
+      }
+      if (Object.hasOwn(settings, 'dailyVideoLimit')) {
+        if (settings.dailyVideoLimit === undefined) {
+          delete subscription.dailyVideoLimit
+        } else {
+          subscription.dailyVideoLimit = settings.dailyVideoLimit
+        }
+      }
+      if (Object.hasOwn(settings, 'showMembersOnly')) {
+        if (typeof settings.showMembersOnly === 'boolean') {
+          subscription.showMembersOnly = settings.showMembersOnly
+        } else {
+          delete subscription.showMembersOnly
+        }
+      }
+      await dispatch('updateProfile', updatedProfile)
+    }
+  },
+
   async createProfile({ commit }, profile) {
     try {
       const newProfile = await DBProfileHandlers.create(profile)

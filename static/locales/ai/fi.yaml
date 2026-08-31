@@ -929,6 +929,12 @@ Profile:
   The selected image could not be loaded: Valittua kuvaa ei voitu ladata
   Theme Color: Teemaväri
 Channel:
+  Subscription settings: Tilausasetukset
+  Videos per day: Videoita päivässä
+  Use global setting: Käytä yleistä asetusta
+  Unlimited: Rajoittamaton
+  More videos hidden: '+{count} lisää'
+  Show in subscription feed: Näytä tilaussyötteessä
   Channel Name Unavailable: Kanavan nimeä ei ole saatavilla
   Search Result Types: Hakutulosten tyypit
   All Results: Kaikki

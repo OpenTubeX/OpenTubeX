@@ -923,6 +923,12 @@ Profile:
   The selected image could not be loaded: Imaginea selectată nu a putut fi încărcată
   Theme Color: Culoarea temei
 Channel:
+  Subscription settings: Setări abonament
+  Videos per day: Videoclipuri pe zi
+  Use global setting: Folosește setarea globală
+  Unlimited: Nelimitat
+  More videos hidden: '+{count} în plus'
+  Show in subscription feed: Afișează în fluxul de abonamente
   Channel Name Unavailable: Numele canalului nu este disponibil
   Search Result Types: Tipuri de rezultate ale căutării
   All Results: Toate

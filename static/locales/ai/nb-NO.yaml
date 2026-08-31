@@ -924,6 +924,12 @@ Profile:
   The selected image could not be loaded: Det valgte bildet kunne ikke lastes inn
   Theme Color: Temafarge
 Channel:
+  Subscription settings: Abonnementsinnstillinger
+  Videos per day: Videoer per dag
+  Use global setting: Bruk global innstilling
+  Unlimited: Ubegrenset
+  More videos hidden: '+{count} til'
+  Show in subscription feed: Vis i abonnementsfeeden
   Channel Name Unavailable: Kanalnavnet er ikke tilgjengelig
   Search Result Types: Typer søkeresultater
   All Results: Alle

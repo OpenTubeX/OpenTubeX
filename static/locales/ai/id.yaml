@@ -922,6 +922,12 @@ Profile:
   The selected image could not be loaded: Gambar yang dipilih tidak dapat dimuat
   Theme Color: Warna Tema
 Channel:
+  Subscription settings: Pengaturan langganan
+  Videos per day: Video per hari
+  Use global setting: Gunakan pengaturan global
+  Unlimited: Tanpa batas
+  More videos hidden: '+{count} lainnya'
+  Show in subscription feed: Tampilkan di feed langganan
   Channel Name Unavailable: Nama saluran tidak tersedia
   Search Result Types: Jenis hasil pencarian
   All Results: Semua

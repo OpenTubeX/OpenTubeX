@@ -1086,6 +1086,12 @@ Profile:
   Close Profile Dropdown: Cerrar el desplegable del Perfil
   Open Profile Dropdown: Abrir el desplegable del Perfil
 Channel:
+  Subscription settings: Configuración de la suscripción
+  Videos per day: Videos por día
+  Use global setting: Usar configuración global
+  Unlimited: Sin límite
+  More videos hidden: '+{count} más'
+  Show in subscription feed: Mostrar en el feed de suscripciones
   Subscribe: Suscribirse
   Unsubscribe: Anular suscripción
   Channel Name Unavailable: Nombre del canal no disponible

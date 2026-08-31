@@ -19,7 +19,7 @@ import {
   showToast,
   showToastOnAllTabs,
 } from './utils'
-import { getValidSubscriptionChannels } from './subscription-channels'
+import { getSubscriptionsForFeed } from './subscription-channels'
 import {
   applyRssPremiereVerdict,
   collectResolvedNonPremiereVideoIds,
@@ -616,7 +616,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
   showStartToast = false,
   errorChannels = []
 }, activeProfile) {
-  const activeSubscriptionList = getValidSubscriptionChannels(activeProfile.subscriptions)
+  const activeSubscriptionList = getSubscriptionsForFeed(activeProfile.subscriptions, 'videos')
   const subscriptionList = includeAutomaticDownloadChannels(activeSubscriptionList, 'videos')
   if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('videos', activeProfile._id)
@@ -722,7 +722,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
   showStartToast = false,
   errorChannels = []
 }, activeProfile) {
-  const activeSubscriptionList = getValidSubscriptionChannels(activeProfile.subscriptions)
+  const activeSubscriptionList = getSubscriptionsForFeed(activeProfile.subscriptions, 'shorts')
   const subscriptionList = includeAutomaticDownloadChannels(activeSubscriptionList, 'shorts')
   if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('shorts', activeProfile._id)
@@ -812,7 +812,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
   showStartToast = false,
   errorChannels = []
 }, activeProfile) {
-  const activeSubscriptionList = getValidSubscriptionChannels(activeProfile.subscriptions)
+  const activeSubscriptionList = getSubscriptionsForFeed(activeProfile.subscriptions, 'live')
   const subscriptionList = includeAutomaticDownloadChannels(activeSubscriptionList, 'live')
   if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('live', activeProfile._id)
@@ -918,7 +918,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
   showStartToast = false,
   errorChannels = []
 }, activeProfile) {
-  const activeSubscriptionList = getValidSubscriptionChannels(activeProfile.subscriptions)
+  const activeSubscriptionList = getSubscriptionsForFeed(activeProfile.subscriptions, 'posts')
   if (activeSubscriptionList.length === 0) {
     completeSubscriptionRefresh('posts', activeProfile._id)
     return []
