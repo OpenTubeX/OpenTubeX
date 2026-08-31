@@ -4,11 +4,12 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
 
-import {
-  chromiumMprisServiceName,
-  opentubexMprisServiceName,
-  patchLinuxMprisName,
-} from '../../_scripts/patchLinuxMprisName.mjs'
+import { patchLinuxMprisName } from '../../_scripts/patchLinuxMprisName.mjs'
+
+const chromiumMprisServiceName =
+  'org.mpris.MediaPlayer2.chromium.instance%i'
+const opentubexMprisServiceName =
+  'org.mpris.MediaPlayer2.opentubex.instanc%i'
 
 const createContext = (appOutDir, electronPlatformName = 'linux') => ({
   appOutDir,

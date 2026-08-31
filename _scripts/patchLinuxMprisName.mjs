@@ -3,6 +3,8 @@ import { join } from 'node:path'
 
 export const chromiumMprisServiceName =
   'org.mpris.MediaPlayer2.chromium.instance%i'
+// "instance" is shortened because "opentubex" is one byte longer than
+// "chromium" and the replacement must preserve the executable's byte layout.
 export const opentubexMprisServiceName =
   'org.mpris.MediaPlayer2.opentubex.instanc%i'
 
