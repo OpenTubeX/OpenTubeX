@@ -21,7 +21,7 @@ jobs:
   prepare:
     if: github.repository == 'OpenTubeX/OpenTubeX'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 45
 
     outputs:
       needed: ${{ steps.duplicate.outputs.needed }}
@@ -140,11 +140,40 @@ jobs:
         path: opentubex
         persist-credentials: false
 
+    - name: Resolve official Flatpak packaging revision
+      if: steps.duplicate.outputs.needed == 'true'
+      id: flatpak
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_TAG: ${{ steps.release.outputs.tag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        for attempt in {1..120}; do
+          sha="$(gh api \
+            "repos/OpenTubeX/flatpak/commits/${RELEASE_TAG}" \
+            --jq .sha 2>/dev/null || true)"
+
+          if [[ "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "sha=$sha" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if (( attempt < 120 )); then
+            sleep 15
+          fi
+        done
+
+        echo "::error::The official Flatpak release ${RELEASE_TAG} was not published within 30 minutes."
+        exit 1
+
     - name: Check out official Flatpak packaging
       if: steps.duplicate.outputs.needed == 'true'
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         repository: OpenTubeX/flatpak
+        ref: ${{ steps.flatpak.outputs.sha }}
         path: official-flatpak
         persist-credentials: false
 
