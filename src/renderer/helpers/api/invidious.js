@@ -4,6 +4,7 @@ import { isNullOrEmpty } from '../strings'
 import { enrichFallbackInvidiousPublicationDates } from './invidious-channel-videos'
 import { getInvidiousCommentAuthorThumbnail } from './invidious-comments'
 import { filterUnavailableInvidiousPlaylistVideos } from './invidious-playlists'
+import { classifyInvidiousMusicMediaType } from '../player/musicMediaType'
 import autolinker from 'autolinker'
 import { FormatUtils, Misc, Player } from 'youtubei.js'
 
@@ -458,14 +459,17 @@ export async function fetchAllInvidiousPlaylistVideos(playlistId, initialOffset 
  *    album: string,
  *    license: string
  *  }[]?,
+ *  musicMediaType: import('../player/musicMediaType').MusicMediaType,
  *  recommendedVideos: InvidiousVideoType[]
  * }>}
  */
 export async function invidiousGetVideoInformation(videoId) {
-  return await invidiousAPICall({
+  const video = await invidiousAPICall({
     resource: 'videos',
     id: videoId,
   })
+  video.musicMediaType = classifyInvidiousMusicMediaType(video)
+  return video
 }
 
 /**

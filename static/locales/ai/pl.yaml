@@ -141,6 +141,7 @@ Settings:
         Destructive hover and focus: Działanie usuwające dane po najechaniu lub zaznaczeniu
         Destructive pressed: Działanie usuwające dane po naciśnięciu
   Player Settings:
+    Music Visualizer: Wizualizator muzyki
     Scroll Mini Player:
       On All Tabs: Nie ukrywaj miniodtwarzacza podczas przełączania kart
     Enable Skip Silence by Default: Domyślnie włącz pomijanie ciszy

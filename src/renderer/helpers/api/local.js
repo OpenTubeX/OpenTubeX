@@ -12,6 +12,7 @@ import {
 } from '../comment-translations'
 import { parseLocalShortLinkedVideo } from '../player/shorts'
 import { getPaidPromotionDurationMs } from '../player/paidPromotion'
+import { classifyMusicMediaType, MUSIC_MEDIA_TYPE } from '../player/musicMediaType'
 import { getLocalPremiereState } from '../premiere'
 import { shouldHideMembersOnlyContent } from '../restricted-playback'
 import { getThumbnailPreviewUrl } from '../thumbnailPreview'
@@ -594,6 +595,28 @@ function buildSessionFromYtConfig(ytConfig, fetchFunc) {
   )
 }
 
+async function resolveMusicMediaType(playerResponse, actions, videoId) {
+  const directType = classifyMusicMediaType(playerResponse.data?.videoDetails?.musicVideoType)
+  const category = playerResponse.data?.microformat?.playerMicroformatRenderer?.category
+
+  if (directType !== MUSIC_MEDIA_TYPE.UNKNOWN || category !== 'Music') {
+    return directType
+  }
+
+  try {
+    const musicPlayerResponse = await actions.execute('/player', {
+      videoId,
+      client: 'YTMUSIC',
+      parse: false,
+      racyCheckOk: true,
+      contentCheckOk: true,
+    })
+    return classifyMusicMediaType(musicPlayerResponse.data?.videoDetails?.musicVideoType)
+  } catch {
+    return directType
+  }
+}
+
 /**
  * @param {string} id
  * @returns {Promise<{
@@ -608,7 +631,8 @@ function buildSessionFromYtConfig(ytConfig, fetchFunc) {
  *   adEndTimeUnixMs: number,
  *   paidPromotionDurationMs: number | null,
  *   isPremiere: boolean | undefined,
- *   watchPageIpBlocked: boolean
+ *   watchPageIpBlocked: boolean,
+ *   musicMediaType: import('../player/musicMediaType').MusicMediaType
  * }>}
  */
 export async function getLocalVideoInfo(id) {
@@ -734,6 +758,12 @@ export async function getLocalVideoInfo(id) {
     })
   }
 
+  const musicMediaTypeRequest = resolveMusicMediaType(
+    playerResponse,
+    htmlExtracts.session.actions,
+    id
+  )
+
   if (htmlExtracts.nextResponse) {
     nextResponse = { data: htmlExtracts.nextResponse }
   } else {
@@ -747,6 +777,7 @@ export async function getLocalVideoInfo(id) {
   const cpn = Utils.generateRandomString(16)
 
   const info = new YT.VideoInfo([playerResponse, nextResponse], htmlExtracts.session.actions, cpn)
+  const musicMediaType = await musicMediaTypeRequest
   await paidPromotionRequest
   const totalAdTimeMilliseconds = extractTotalAdTimeMilliseconds(playerResponse.data)
 
@@ -802,7 +833,7 @@ export async function getLocalVideoInfo(id) {
 
   if ((info.playability_status.status === 'UNPLAYABLE' && (!hasTrailer || trailerIsAgeRestricted)) ||
     info.playability_status.status === 'LOGIN_REQUIRED') {
-    return { info, poToken: undefined, clientInfo, paidPromotionDurationMs, isPremiere, watchPageIpBlocked }
+    return { info, poToken: undefined, clientInfo, paidPromotionDurationMs, isPremiere, watchPageIpBlocked, musicMediaType }
   }
 
   if (hasTrailer && info.playability_status.status !== 'OK') {
@@ -870,6 +901,7 @@ export async function getLocalVideoInfo(id) {
     paidPromotionDurationMs,
     isPremiere,
     watchPageIpBlocked,
+    musicMediaType,
   }
 }
 

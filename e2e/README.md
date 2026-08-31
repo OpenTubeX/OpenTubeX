@@ -1,8 +1,8 @@
 # End-to-end tests
 
 Playwright drives the packed Electron app (`dist/main.js`) against an isolated,
-per-test userData directory. The local API (youtubei.js) is always used —
-Invidious is never exercised.
+per-test userData directory. Playback tests use the local API (youtubei.js).
+Offline metadata tests may use Invidious when they mock every request.
 
 ## Running locally
 

@@ -248,6 +248,7 @@ const state = {
   disableChannelLinks: false,
   displayVideoPlayButton: false,
   ambientMode: false,
+  musicVisualizer: true,
   enableVideoMetadataCache: false,
   enableWatchStats: true,
   statsWeekStartsOn: '1',

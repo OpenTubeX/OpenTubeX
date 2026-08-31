@@ -9,6 +9,7 @@ import {
   demoPlayerResponse,
   routePostLiveMedia
 } from '../../helpers/media.mjs'
+import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 
 // These used to live in the network suite, gated on the live API. They all use
 // "Me at the zoo", whose page and comment pages are recorded, so they run
@@ -142,6 +143,295 @@ test('shows age-restricted and unlisted badges below the video title', async ({ 
   expect(badgeBounds).not.toBeNull()
   expect(titleBounds).not.toBeNull()
   expect(badgeBounds.y).toBeGreaterThanOrEqual(titleBounds.y + titleBounds.height)
+})
+
+async function mockMusicMediaType(app, page, musicVideoType) {
+  await mockPlayableWatchPage(app, page)
+  await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+  await page.route(/\/youtubei\/v1\/player/, (route, request) => {
+    const requestBody = JSON.parse(request.postData() ?? '{}')
+    const videoId = requestBody.videoId ?? 'jNQXAC9IVRw'
+    const response = demoPlayerResponse(videoId)
+    response.microformat.playerMicroformatRenderer.category = 'Music'
+    if (requestBody.context?.client?.clientName === 'WEB_REMIX' && musicVideoType !== undefined) {
+      response.videoDetails.musicVideoType = musicVideoType
+    }
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(response)
+    })
+  })
+}
+
+async function countDistinctVisualizerFrames(canvas) {
+  return canvas.evaluate(async (element) => {
+    const signatures = new Set()
+    for (let sample = 0; sample < 5; sample++) {
+      await new Promise(resolve => setTimeout(resolve, 80))
+      const data = element.getContext('2d').getImageData(0, 0, element.width, element.height).data
+      let signature = 0
+      for (let index = 3; index < data.length; index += 4) {
+        signature = (signature + data[index] * index) >>> 0
+      }
+      signatures.add(signature)
+    }
+    return signatures.size
+  })
+}
+
+test('shows the audio-track player and custom visualizer for YouTube Music tracks', async ({ app, page, attachScreenshot }) => {
+  await mockMusicMediaType(app, page, 'MUSIC_VIDEO_TYPE_ATV')
+  await page.evaluate(async () => {
+    const NativeAudioContext = window.AudioContext
+    window.__musicVisualizerTestAudioContexts = []
+    window.__musicVisualizerTestCapturedStreams = []
+    window.AudioContext = new Proxy(NativeAudioContext, {
+      construct(Target, args) {
+        const context = Reflect.construct(Target, args)
+        const createAnalyser = context.createAnalyser.bind(context)
+        context.createAnalyser = (...analyserArgs) => {
+          const analyser = createAnalyser(...analyserArgs)
+          const readFrequencyData = analyser.getByteFrequencyData.bind(analyser)
+          let frame = 0
+          analyser.getByteFrequencyData = (data) => {
+            readFrequencyData(data)
+            if (context.state === 'running') {
+              data.fill(32 + (frame++ * 37) % 192)
+            }
+          }
+          return analyser
+        }
+        window.__musicVisualizerTestAudioContexts.push(context)
+        return context
+      }
+    })
+
+    const captureStream = HTMLMediaElement.prototype.captureStream
+    HTMLMediaElement.prototype.captureStream = function (...args) {
+      const sourceStream = captureStream.apply(this, args)
+      let capturedStream = sourceStream
+      if (window.__musicVisualizerTestCapturedStreams.length === 0) {
+        window.__musicVisualizerTestReplacementTrack = sourceStream.getAudioTracks()[0].clone()
+      } else {
+        capturedStream = new MediaStream(sourceStream.getVideoTracks())
+        setTimeout(() => {
+          const track = window.__musicVisualizerTestReplacementTrack
+          capturedStream.addTrack(track)
+          capturedStream.dispatchEvent(new MediaStreamTrackEvent('addtrack', { track }))
+        }, 100)
+      }
+      window.__musicVisualizerTestCapturedStreams.push(capturedStream)
+      return capturedStream
+    }
+
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await Promise.all([
+      store.dispatch('updateReducedMotion', 'off'),
+      store.dispatch('updateUiScale', 125),
+    ])
+  })
+
+  const video = await openMockedVideo(page)
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const surface = player.locator('.musicAudioSurface')
+  const canvas = surface.locator('.musicVisualizerCanvas')
+
+  await expect(player).toHaveClass(/musicAudioPlayer/)
+  await expect(surface).toBeVisible()
+  await expect(surface.locator('.musicAudioArtwork')).toBeVisible()
+  await expect(surface.locator('.musicAudioTitle')).toHaveText(/\S/)
+  await expect(surface.locator('.musicAudioArtist')).toHaveText(/\S/)
+  await expect(video).toHaveCSS('opacity', '0')
+  await expect(canvas).toBeVisible()
+
+  const artwork = surface.locator('.musicAudioArtwork')
+  const artworkSrc = await artwork.getAttribute('src')
+  await artwork.dispatchEvent('error')
+  await expect(artwork).toBeHidden()
+  await artwork.evaluate((element) => {
+    element.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/%3E'
+  })
+  await expect(artwork).toBeVisible()
+  await artwork.evaluate((element, src) => { element.src = src }, artworkSrc)
+  await expect.poll(() => artwork.evaluate(element => element.naturalWidth)).toBeGreaterThan(0)
+
+  await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+  const visualizerToggle = player.getByRole('button', { name: 'Music visualizer', exact: true })
+  await expect(visualizerToggle).toBeVisible()
+  await expect(visualizerToggle).toHaveAttribute('aria-pressed', 'true')
+  await visualizerToggle.click()
+  await expect(visualizerToggle).toHaveAttribute('aria-pressed', 'false')
+  await expect(canvas).toBeHidden()
+  await visualizerToggle.click()
+  await expect(visualizerToggle).toHaveAttribute('aria-pressed', 'true')
+  await expect(canvas).toBeVisible()
+  await page.keyboard.press('Escape')
+
+  const seekBar = player.locator('.shaka-seek-bar-container')
+  await player.hover()
+  await seekBar.hover({ position: { x: 120, y: 4 } })
+  await expect(player.locator('.shaka-player-ui-thumbnail-image-container')).toBeHidden()
+  await expect(player.locator('.shaka-player-ui-thumbnail-time-container')).toBeVisible()
+
+  await expect.poll(() => canvas.evaluate((element) => {
+    const context = element.getContext('2d')
+    return context && context.getImageData(0, 0, element.width, element.height)
+      .data.some((channel, index) => index % 4 === 3 && channel > 0)
+  }), { timeout: 10_000 }).toBe(true)
+  await expect.poll(() => countDistinctVisualizerFrames(canvas)).toBeGreaterThan(1)
+
+  const playbackTimeBeforeSuspension = await video.evaluate(element => element.currentTime)
+  await page.evaluate(async () => {
+    await window.__musicVisualizerTestAudioContexts.at(-1).suspend()
+  })
+  await expect.poll(() => page.evaluate(() => (
+    window.__musicVisualizerTestAudioContexts.at(-1).state
+  )), {
+    timeout: 5_000,
+    message: 'visualizer should recover when its audio context is suspended while media keeps playing'
+  }).toBe('running')
+  await expect.poll(() => video.evaluate(element => element.currentTime))
+    .toBeGreaterThan(playbackTimeBeforeSuspension)
+  await expect.poll(() => countDistinctVisualizerFrames(canvas)).toBeGreaterThan(1)
+
+  const audioContextCount = await page.evaluate(() => (
+    window.__musicVisualizerTestAudioContexts.length
+  ))
+  const capturedStreamCount = await page.evaluate(() => (
+    window.__musicVisualizerTestCapturedStreams.length
+  ))
+  await expect.poll(() => page.evaluate(() => (
+    window.__musicVisualizerTestCapturedStreams.at(-1).getAudioTracks().length
+  ))).toBeGreaterThan(0)
+  await page.evaluate(() => {
+    const track = window.__musicVisualizerTestCapturedStreams.at(-1).getAudioTracks()[0]
+    track.stop()
+    track.dispatchEvent(new Event('ended'))
+  })
+  await expect.poll(() => page.evaluate(() => (
+    window.__musicVisualizerTestCapturedStreams.length
+  )), {
+    message: 'visualizer should capture the media element again after its audio track ends'
+  }).toBeGreaterThan(capturedStreamCount)
+  await expect.poll(() => page.evaluate(() => (
+    window.__musicVisualizerTestAudioContexts.length
+  )), {
+    message: 'visualizer should rebuild after its captured audio track ends'
+  }).toBeGreaterThan(audioContextCount)
+  await expect.poll(() => countDistinctVisualizerFrames(canvas)).toBeGreaterThan(1)
+
+  await attachScreenshot('YouTube Music audio-track player')
+
+  const [playerBounds, artworkBounds] = await Promise.all([
+    player.boundingBox(),
+    surface.locator('.musicAudioArtwork').boundingBox(),
+  ])
+  expect(playerBounds).not.toBeNull()
+  expect(artworkBounds).not.toBeNull()
+  expect(artworkBounds.x).toBeGreaterThanOrEqual(playerBounds.x)
+  expect(artworkBounds.y).toBeGreaterThanOrEqual(playerBounds.y)
+  expect(artworkBounds.x + artworkBounds.width)
+    .toBeLessThanOrEqual(playerBounds.x + playerBounds.width)
+  expect(artworkBounds.y + artworkBounds.height)
+    .toBeLessThanOrEqual(playerBounds.y + playerBounds.height)
+
+  await video.evaluate(element => element.pause())
+  await expect.poll(() => canvas.evaluate((element) => {
+    const context = element.getContext('2d')
+    return context && context.getImageData(0, 0, element.width, element.height)
+      .data.some((channel, index) => index % 4 === 3 && channel > 0)
+  })).toBe(false)
+
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateReducedMotion', 'on')
+  })
+  await video.evaluate(element => element.play())
+  await expect(canvas).toBeHidden()
+})
+
+for (const { label, musicVideoType } of [
+  { label: 'official music videos', musicVideoType: 'MUSIC_VIDEO_TYPE_OMV' },
+  { label: 'Music category videos without a YouTube Music type', musicVideoType: undefined },
+]) {
+  test(`keeps ${label} in the video player`, async ({ app, page }) => {
+    await mockMusicMediaType(app, page, musicVideoType)
+    const video = await openMockedVideo(page)
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+
+    await expect(player).not.toHaveClass(/musicAudioPlayer/)
+    await expect(player.locator('.musicAudioSurface')).toHaveCount(0)
+    await expect(video).toHaveCSS('opacity', '1')
+  })
+}
+
+test('detects Invidious audio tracks from artist topic channels', async ({ page }) => {
+  const instanceUrl = 'https://invidious.test'
+  await page.route(/^https?:\/\//, route => route.abort())
+  await page.route(`${instanceUrl}/api/v1/videos/**`, route => route.fulfill({
+    json: {
+      title: 'Invidious audio track',
+      viewCount: 1,
+      paid: false,
+      subCountText: '1',
+      likeCount: 1,
+      dislikeCount: 0,
+      genre: 'Music',
+      keywords: [],
+      author: 'Example Artist - Topic',
+      authorId: 'UC-example-artist-topic',
+      authorThumbnails: [],
+      description: '',
+      descriptionHtml: '',
+      published: 1_700_000_000,
+      recommendedVideos: [],
+      liveNow: false,
+      premiereTimestamp: 0,
+      isFamilyFriendly: true,
+      isPostLiveDvr: false,
+      isListed: true,
+      captions: [],
+      videoThumbnails: [{ url: '/vi/jNQXAC9IVRw/hqdefault.jpg', width: 480, height: 360 }],
+    }
+  }))
+  await page.evaluate(async (url) => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await Promise.all([
+      store.dispatch('updateBackendPreference', 'invidious'),
+      store.dispatch('updateDefaultInvidiousInstance', url),
+      store.dispatch('updateHideChapters', true),
+    ])
+  }, instanceUrl)
+
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.infoArea .videoTitle')).toHaveText('Invidious audio track')
+  const watchView = await watchViewHandle(page)
+  await expect.poll(() => watchView.evaluate(view => view.musicMediaType)).toBe('audioTrack')
+  await watchView.dispose()
+})
+
+test('updates boolean settings from the player options', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateShowSkipSilenceButton', true)
+  })
+  await openMockedVideo(page)
+
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+  const ambientMode = player.getByRole('button', { name: 'Ambient Mode', exact: true })
+  const skipSilence = player.getByRole('button', { name: 'Skip Silence', exact: true })
+
+  await expect(ambientMode).toHaveAttribute('aria-pressed', 'false')
+  await ambientMode.click()
+  await expect(ambientMode).toHaveAttribute('aria-pressed', 'true')
+  await expect(skipSilence).toHaveAttribute('aria-pressed', 'false')
+  await skipSilence.click()
+  await expect(skipSilence).toHaveAttribute('aria-pressed', 'true')
 })
 
 for (const { name, options, expectedCount } of [
