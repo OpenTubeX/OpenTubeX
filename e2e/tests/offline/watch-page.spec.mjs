@@ -1421,6 +1421,11 @@ test.describe('watch page', () => {
     await openMockedVideo(page)
 
     const watchView = await watchViewHandle(page)
+    await watchView.evaluate((view) => {
+      // This test exercises manual extraction retries. The empty HLS fixture is
+      // not playable, so ignore its player error instead of racing the manual switch.
+      view.handlePlayerError = () => {}
+    })
     const builtInManifest = await watchView.evaluate((view) => view.manifestSrc)
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
