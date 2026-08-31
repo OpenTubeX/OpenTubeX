@@ -20,7 +20,37 @@ on:
 permissions: {}
 
 jobs:
+  resolve-target:
+    name: Resolve release target
+    runs-on: ubuntu-latest
+
+    outputs:
+      sha: ${{ steps.target.outputs.sha }}
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+        ref: ${{ inputs.target }}
+
+    - name: Resolve target commit
+      id: target
+      run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  full-e2e:
+    name: Full E2E test run
+    needs: resolve-target
+    permissions:
+      contents: read
+    uses: ./.github/workflows/e2e.yml
+    with:
+      checkoutRef: ${{ needs.resolve-target.outputs.sha }}
+
   create:
+    needs: [ resolve-target, full-e2e ]
     runs-on: ubuntu-latest
 
     permissions:
@@ -33,7 +63,7 @@ jobs:
       with:
         fetch-depth: 0
         persist-credentials: true
-        ref: ${{ inputs.target }}
+        ref: ${{ needs.resolve-target.outputs.sha }}
         token: ${{ secrets.PUSH_TOKEN }}
 
     - name: Resolve previous release tag

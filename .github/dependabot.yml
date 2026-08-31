@@ -8,40 +8,22 @@ updates:
       - "PR: waiting for review"
       - "PR: dependencies"
     open-pull-requests-limit: 15
-    groups:
-      babel:
-        patterns:
-          - "@babel/*"
-          - "babel-*"
-      eslint:
-        patterns:
-          - "eslint"
-          - "eslint-*"
-          - "@eslint/*"
-          - "vue-eslint-parser"
-          - "neostandard"
-          - "@intlify/eslint-plugin-vue-i18n"
-          - "@stylistic/eslint-plugin"
-          - "globals"
-      stylelint:
-        patterns:
-          - "stylelint"
-          - "stylelint-*"
-          - "postcss"
-          - "postcss-*"
-          - "@double-great/stylelint-a11y"
-      fortawesome:
-        patterns:
-          - "@fortawesome/*"
-      webpack:
-        patterns:
-          - "css-loader"
-          - "mini-css-extract-plugin"
-          - "sass"
-          - "sass-loader"
-          - "webpack"
-          - "webpack-*"
-          - "*-webpack-plugin"
+    allow:
+      - dependency-name: "@hpke/core"
+      - dependency-name: "@iconify-json/material-symbols"
+      - dependency-name: "@iconify-json/ri"
+      - dependency-name: "@iconify-json/simple-icons"
+      - dependency-name: "@iconify/utils"
+      - dependency-name: "@iconify/vue"
+      - dependency-name: "@playwright/test"
+      - dependency-name: "@vot.js/core"
+      - dependency-name: "eld"
+      - dependency-name: "font-list"
+      - dependency-name: "overlayscrollbars"
+      - dependency-name: "qr-scanner"
+      - dependency-name: "qrcode"
+      - dependency-name: "vue-sonner"
+      - dependency-name: "yaml"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
