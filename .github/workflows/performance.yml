@@ -13,7 +13,9 @@ concurrency:
 jobs:
   performance:
     name: Compare performance with base
-    if: ${{ github.head_ref != 'weblate-translations' }}
+    if: >-
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      github.head_ref != 'weblate-translations'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
 

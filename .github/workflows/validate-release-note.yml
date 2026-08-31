@@ -15,6 +15,7 @@ jobs:
     name: Release Note
     if: >-
       ${{
+        github.event.pull_request.user.login != 'dependabot[bot]' &&
         github.head_ref != 'weblate-translations' &&
         !(
           github.event.pull_request.user.login == 'pull[bot]' &&
