@@ -1856,7 +1856,11 @@ test.describe('watch page', () => {
         body: JSON.stringify(response)
       })
     })
-    await page.route('https://example.invalid/rejected-post-live.mpd', route => route.fulfill({ status: 403 }))
+    let rejectedManifestRequests = 0
+    await page.route(/^https:\/\/example\.invalid\/api\/manifest\/dash\//, route => {
+      rejectedManifestRequests++
+      return route.fulfill({ status: 403 })
+    })
 
     await app.electronApp.evaluate(({ ipcMain }, urls) => {
       globalThis.__ytDlpPostLiveCalls = 0
@@ -1921,7 +1925,7 @@ test.describe('watch page', () => {
     }, { audio: POST_LIVE_AUDIO_URL, video: POST_LIVE_VIDEO_URL })
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      await store.dispatch('updateVideoPlaybackEngine', 'yt-dlp')
+      await store.dispatch('updateVideoPlaybackEngine', 'built-in')
     })
 
     await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
@@ -1942,6 +1946,7 @@ test.describe('watch page', () => {
       streamsPending: false
     })
 
+    expect(rejectedManifestRequests).toBeGreaterThan(0)
     expect(await app.electronApp.evaluate(() => globalThis.__ytDlpPostLiveCalls)).toBe(1)
     await waitForPlayback(page)
 
