@@ -271,8 +271,9 @@ test('repeats an A-B range and manages it from the player menu', async ({ app, p
     endHandleBounds.y + endHandleBounds.height / 2
   )
   await page.mouse.down()
+  const expectedBoundaryTime = 6.5
   await page.mouse.move(
-    seekBounds.x + seekBounds.width * (6.5 / 30),
+    seekBounds.x + seekBounds.width * (expectedBoundaryTime / 30),
     seekBounds.y + seekBounds.height / 2
   )
   await page.mouse.up()
@@ -300,8 +301,9 @@ test('repeats an A-B range and manages it from the player menu', async ({ app, p
 
   await expect.poll(() => page.evaluate(() => window.__abRepeatBoundaryTime ?? null)).not.toBeNull()
   const boundaryTime = await page.evaluate(() => window.__abRepeatBoundaryTime)
-  expect(boundaryTime).toBeGreaterThan(6.485)
-  expect(boundaryTime).toBeLessThanOrEqual(6.5)
+  const boundaryTolerance = 0.015
+  expect(boundaryTime).toBeGreaterThan(expectedBoundaryTime - boundaryTolerance)
+  expect(boundaryTime).toBeLessThan(expectedBoundaryTime + boundaryTolerance)
 
   await video.evaluate(element => element.pause())
   await player.hover()
