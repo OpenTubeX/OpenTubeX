@@ -95,7 +95,7 @@
     "@eslint/js": "^10.0.1",
     "@iconify-json/material-symbols": "^1.2.87",
     "@iconify-json/ri": "^1.2.10",
-    "@iconify-json/simple-icons": "^1.2.92",
+    "@iconify-json/simple-icons": "^1.2.93",
     "@iconify/utils": "^3.1.4",
     "@intlify/eslint-plugin-vue-i18n": "^4.5.1",
     "@magda/tree-kill": "1.2.3",
