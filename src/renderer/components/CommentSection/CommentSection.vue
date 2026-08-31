@@ -780,7 +780,7 @@ function updateFilteredCommentThreadLine(element, filtering) {
     return
   }
 
-  const inset = element.getBoundingClientRect().bottom - lastConnector.getBoundingClientRect().bottom
+  const inset = element.getBoundingClientRect().bottom - lastConnector.getBoundingClientRect().top
   element.style.setProperty('--filtered-comment-thread-line-inset-block-end', `${inset}px`)
 }
 
