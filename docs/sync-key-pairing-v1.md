@@ -19,8 +19,8 @@ The protocol uses HPKE from RFC 9180 in PSK mode:
 2. It anonymously sends the session metadata and SHA-256 hash of the recipient token to `POST /v1/pairing`. The raw token, QR secret, and recipient private key remain only in runtime memory and pairing requests. They do not enter persistent app state.
 3. It renders the QR payload below. The user can display the same payload as selectable text. The recipient token is not part of either form.
 4. An already connected device scans or pastes the code. Before any server request, it checks the origin against its configured server and shows the server, current account name, and requested device name.
-5. After explicit approval, that device authenticates to `POST /v1/pairing/{id}/claim`. The server atomically binds the pending session to its account and returns a fresh JWT for the new device.
-6. The approving device generates a six-digit verification code and a pairing-scoped device ID. It HPKE-seals the account name, fresh JWT, AES-256 privacy key, 16-byte privacy salt, privacy format version, and verification code, then uploads the ciphertext through authenticated `PUT /v1/pairing/{id}`.
+5. After explicit approval, that device encrypts the requested display name with the account privacy key and authenticates to `POST /v1/pairing/{id}/claim`. The server atomically binds the pending pairing session to its account, creates an account session for the receiving device, and returns its JWT.
+6. The approving device generates a six-digit verification code and uses its persistent device ID. It HPKE-seals the account name, fresh JWT, AES-256 privacy key, 16-byte privacy salt, privacy format version, and verification code, then uploads the ciphertext through authenticated `PUT /v1/pairing/{id}`.
 7. The receiver polls and atomically consumes the ciphertext with its raw recipient token in the `X-Pairing-Token` header. It decrypts the transfer and verifies the privacy key by opening an existing encrypted sync collection with the transferred JWT.
 8. Both devices display the six-digit verification code. The receiver saves the account token and privacy key only after the users confirm that the codes match.
 
@@ -44,7 +44,7 @@ The QR and text code contain `opentubex-pairing:` followed by the unpadded base6
 }
 ```
 
-The anonymous create request also sends `recipient_token_hash`, the unpadded base64url SHA-256 digest of the raw 32-byte recipient token. Poll, consume, and cancel requests send the raw token only in the `X-Pairing-Token` header.
+The anonymous create request also sends `recipient_token_hash`, the unpadded base64url SHA-256 digest of the raw 32-byte recipient token. The authenticated claim repeats the four public recipient fields and adds `encrypted_device_info`, an opaque AES-GCM envelope containing the device name and system details under the account privacy key. Poll, consume, and cancel requests send the raw recipient token only in the `X-Pairing-Token` header.
 
 The HPKE additional authenticated data is the UTF-8 encoding of this compact JSON object:
 
@@ -85,7 +85,7 @@ relay payload: AXrwPfFZ4tdXUcGojrWp6HmI8Tjc51luvaOtfwuwSoc02gY_WD6GVfCyLGKwYSukn
 
 ## Threat model
 
-The sync server sees the account ID after claim, session ID, public key, token hash, pairing-scoped device IDs, display name, expiry, ciphertext size, and request timing. It receives the raw recipient token in poll, consume, and cancel request headers but stores only its hash. It also creates the fresh JWT carried in the ciphertext. It cannot decrypt or replace the transfer because the QR secret never reaches it. It can drop, delay, reorder, replay, or delete requests. Replacing any bound context or ciphertext fails HPKE authentication.
+The sync server sees the account ID after claim, session ID, public key, token hash, device IDs, display name, expiry, ciphertext size, and request timing. It also stores the encrypted device name with the resulting account session. It receives the raw recipient token in poll, consume, and cancel request headers but stores only its hash. It also creates the fresh JWT carried in the ciphertext. It cannot decrypt or replace the transfer because the QR secret never reaches it. It can drop, delay, reorder, replay, or delete requests. Replacing any bound context or ciphertext fails HPKE authentication.
 
 A person who copies the QR learns its metadata and HPKE secret. They do not learn the recipient token or private key, so they cannot poll, consume, or cancel the session. They can race the intended approving device and claim the session with another account. The verification code exposes that substitution before the receiver saves credentials or uploads local data. Users must compare the codes through a channel they trust, normally by viewing both devices together.
 

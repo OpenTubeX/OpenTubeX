@@ -209,11 +209,12 @@
           <SyncPairing
             :connected="connected"
             :supported="pairingSupported"
-            :disabled="busy || privacyMode !== 'enhanced' || !privacyKey || !privacySalt"
+            :disabled="busy || privacyMode !== 'enhanced' || !privacyKey || !privacySalt || !currentDeviceId"
             :server-url="serverUrl"
             :username="savedUsername"
             :privacy-key="privacyKey"
             :privacy-salt="privacySalt"
+            :device-id="currentDeviceId"
             @paired="pairingCompleted"
           />
           <FtButton
@@ -225,17 +226,35 @@
           <FtButton
             :label="t('Settings.Sync Settings.Disconnect')"
             :icon="['fas', 'right-from-bracket']"
-            :disabled="busy"
+            :disabled="busy || accountActionBusy"
             @click="disconnect"
+          />
+          <FtButton
+            v-if="passwordLogin"
+            :label="t('Settings.Sync Settings.Change Password')"
+            :icon="['fas', 'key']"
+            :disabled="busy || accountActionBusy"
+            @click="openPasswordPrompt"
           />
           <FtButton
             :label="t('Settings.Sync Settings.Delete Account')"
             theme="destructive"
             :icon="['fas', 'trash']"
-            :disabled="busy"
+            :disabled="busy || accountActionBusy"
             @click="showDeleteAccountPrompt = true"
           />
         </FtFlexBox>
+        <SyncAccountManagement
+          v-if="accountSessionsSupported"
+          ref="accountManagement"
+          :server-url="serverUrl"
+          :token="syncServerToken"
+          :privacy-key="privacyKey"
+          :device-id="currentDeviceId"
+          :device-name="currentDeviceName"
+          @current-revoked="disconnect"
+          @password-login-changed="passwordLogin = $event"
+        />
       </template>
       <FtFlexBox
         v-else-if="!busy"
@@ -285,7 +304,67 @@
             />
             <FtButton
               :label="t('Cancel')"
+              :icon="['fas', 'xmark']"
               @click="dataLossWarning = null"
+            />
+          </FtFlexBox>
+        </div>
+      </FtPrompt>
+      <FtPrompt
+        v-if="showPasswordPrompt"
+        :label="t('Settings.Sync Settings.Change Password')"
+        theme="readable-width"
+        @click="closePasswordPrompt"
+      >
+        <div class="deleteAccountContent passwordForm">
+          <p>{{ t('Settings.Sync Settings.Change Password Warning') }}</p>
+          <FtInput
+            :placeholder="t('Settings.Sync Settings.Current Password')"
+            :show-action-button="false"
+            :value="currentPassword"
+            :disabled="accountActionBusy"
+            input-type="password"
+            show-label
+            @input="currentPassword = $event"
+          />
+          <FtInput
+            :placeholder="t('Settings.Sync Settings.New Password')"
+            :show-action-button="false"
+            :value="newPassword"
+            :disabled="accountActionBusy"
+            input-type="password"
+            show-label
+            @input="newPassword = $event"
+          />
+          <FtInput
+            :placeholder="t('Settings.Sync Settings.Confirm New Password')"
+            :show-action-button="false"
+            :value="confirmedPassword"
+            :disabled="accountActionBusy"
+            input-type="password"
+            show-label
+            @input="confirmedPassword = $event"
+            @keydown.enter="changePassword"
+          />
+          <p
+            v-if="passwordPromptError"
+            class="error"
+            role="alert"
+          >
+            {{ passwordPromptError }}
+          </p>
+          <FtFlexBox class="actions">
+            <FtButton
+              :label="t('Settings.Sync Settings.Save New Password')"
+              :icon="['fas', 'floppy-disk']"
+              :disabled="accountActionBusy"
+              @click="changePassword"
+            />
+            <FtButton
+              :label="t('Cancel')"
+              :icon="['fas', 'xmark']"
+              :disabled="accountActionBusy"
+              @click="closePasswordPrompt"
             />
           </FtFlexBox>
         </div>
@@ -325,6 +404,7 @@
             />
             <FtButton
               :label="t('Cancel')"
+              :icon="['fas', 'xmark']"
               @click="closeDeleteAccountPrompt"
             />
           </FtFlexBox>
@@ -335,7 +415,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
@@ -346,15 +426,23 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import SyncPairing from './SyncPairing.vue'
+import SyncAccountManagement from './SyncAccountManagement.vue'
 
 import store from '../../store/index'
 import {
   SyncServerClient,
   SyncServerDataLossError,
+  isSessionExpiredError,
   normalizeSyncServerUrl,
 } from '../../helpers/sync-server'
 import { showToast } from '../../helpers/utils'
 import { formatDateTime } from '../../helpers/dateFormat'
+import {
+  getCurrentSyncServerSystemInfo,
+  isValidSyncServerDeviceId,
+  isValidSyncServerDeviceName,
+  randomSyncServerDeviceId,
+} from '../../helpers/sync-server-sessions'
 
 const { locale, t } = useI18n()
 const dateFormat = computed(() => store.getters.getDateFormat)
@@ -374,6 +462,7 @@ const password = ref('')
 const privacyPassphrase = ref('')
 const serverPrivacySupported = ref(null)
 const serverPairingSupported = ref(false)
+const serverAccountSessionsSupported = ref(false)
 const serverCheckStatus = ref('idle')
 const serverCheckError = ref('')
 const localError = ref('')
@@ -381,11 +470,22 @@ const authenticating = ref(false)
 const showDeleteAccountPrompt = ref(false)
 const deleteAccountPassword = ref('')
 const deleteAccountError = ref('')
+const accountActionBusy = ref(false)
+const passwordLogin = ref(false)
+const showPasswordPrompt = ref(false)
+const currentPassword = ref('')
+const newPassword = ref('')
+const confirmedPassword = ref('')
+const passwordPromptError = ref('')
+const accountManagement = useTemplateRef('accountManagement')
 const dataLossWarning = ref(null)
 
 const savedUsername = computed(() => store.getters.getSyncServerUsername)
 const syncEnabled = computed(() => store.getters.getSyncServerEnabled)
 const connected = computed(() => store.getters.getSyncServerToken !== '')
+const syncServerToken = computed(() => store.getters.getSyncServerToken)
+const currentDeviceId = computed(() => store.getters.getSyncServerDeviceId)
+const currentDeviceName = computed(() => store.getters.getSyncServerDeviceName)
 const privacyPolicyUrl = computed(() => {
   try {
     return normalizeSyncServerUrl(serverUrl.value) === OPENTUBEX_SYNC_SERVER_URL
@@ -450,6 +550,11 @@ const pairingSupported = computed(() => {
     return false
   }
 })
+const accountSessionsSupported = computed(() => (
+  serverAccountSessionsSupported.value &&
+  privacyMode.value === 'enhanced' &&
+  privacyKey.value !== ''
+))
 const settingsSupported = computed(() => privacyMode.value === 'enhanced')
 const sessionsSupported = computed(() => (
   process.env.IS_ELECTRON && privacyMode.value === 'enhanced'
@@ -479,9 +584,11 @@ watch([serverUrl, connected, syncEnabled], ([value, isConnected, isEnabled], [pr
   const disconnected = wasConnected && !isConnected && value === previousValue
   serverPrivacySupported.value = null
   serverPairingSupported.value = false
+  serverAccountSessionsSupported.value = false
   serverCheckStatus.value = disconnected ? 'valid' : 'idle'
   serverCheckError.value = ''
   if (!isEnabled || !value.trim()) return
+  ensureDeviceIdentity().catch(() => {})
 
   serverCheckTimer = setTimeout(async () => {
     if (!disconnected && !isConnected) serverCheckStatus.value = 'checking'
@@ -495,6 +602,7 @@ watch([serverUrl, connected, syncEnabled], ([value, isConnected, isEnabled], [pr
       if (sequence !== serverCheckSequence) return
       serverPrivacySupported.value = capabilities.encrypted_sync === 1
       serverPairingSupported.value = capabilities.key_pairing === 1
+      serverAccountSessionsSupported.value = capabilities.account_sessions === 1
       serverCheckStatus.value = 'valid'
     } catch {
       if (sequence !== serverCheckSequence) return
@@ -530,12 +638,16 @@ async function authenticate(mode) {
   localError.value = ''
   authenticating.value = true
   try {
+    const identity = await ensureDeviceIdentity()
     await store.dispatch('authenticateSyncServer', {
       mode,
       serverUrl: serverUrl.value,
       username: username.value,
       password: password.value,
       privacyPassphrase: privacyPassphrase.value,
+      deviceId: identity.id,
+      deviceName: identity.name,
+      deviceSystemInfo: identity.systemInfo,
     })
     serverUrl.value = store.getters.getSyncServerUrl
     username.value = store.getters.getSyncServerUsername
@@ -547,6 +659,28 @@ async function authenticate(mode) {
   } finally {
     authenticating.value = false
   }
+}
+
+async function ensureDeviceIdentity() {
+  let id = store.getters.getSyncServerDeviceId
+  if (!isValidSyncServerDeviceId(id)) {
+    id = randomSyncServerDeviceId()
+    await store.dispatch('updateSyncServerDeviceId', id)
+  }
+
+  let name = store.getters.getSyncServerDeviceName?.trim()
+  if (!isValidSyncServerDeviceName(name)) {
+    try {
+      const systemName = await window.ftElectron?.getDeviceName?.()
+      const trimmedName = systemName?.trim()
+      if (isValidSyncServerDeviceName(trimmedName)) name = trimmedName
+    } catch {}
+  }
+  if (!isValidSyncServerDeviceName(name)) name = t('Settings.Sync Settings.This Device')
+  if (name !== store.getters.getSyncServerDeviceName) {
+    await store.dispatch('updateSyncServerDeviceName', name)
+  }
+  return { id, name, systemInfo: await getCurrentSyncServerSystemInfo() }
 }
 
 async function syncNow() {
@@ -595,7 +729,7 @@ async function confirmDataLossSync() {
 }
 
 async function disconnect() {
-  if (busy.value) return
+  if (busy.value || accountActionBusy.value) return
   localError.value = ''
   await store.dispatch('disconnectSyncServer')
 }
@@ -610,14 +744,14 @@ function setSyncEnabled(enabled) {
 }
 
 function closeDeleteAccountPrompt() {
-  if (busy.value) return
+  if (busy.value || accountActionBusy.value) return
   showDeleteAccountPrompt.value = false
   deleteAccountPassword.value = ''
   deleteAccountError.value = ''
 }
 
 async function deleteAccount() {
-  if (busy.value) return
+  if (busy.value || accountActionBusy.value) return
   deleteAccountError.value = ''
   if (!deleteAccountPassword.value) {
     deleteAccountError.value = t('Settings.Sync Settings.Password Required')
@@ -630,6 +764,64 @@ async function deleteAccount() {
     showToast({ message: t('Settings.Sync Settings.Account Deleted'), icon: ['fas', 'trash'] })
   } catch (error) {
     deleteAccountError.value = error.message
+  }
+}
+
+function openPasswordPrompt() {
+  passwordPromptError.value = ''
+  showPasswordPrompt.value = true
+}
+
+function closePasswordPrompt() {
+  if (accountActionBusy.value) return
+  resetPasswordPrompt()
+}
+
+function resetPasswordPrompt() {
+  showPasswordPrompt.value = false
+  passwordPromptError.value = ''
+  currentPassword.value = ''
+  newPassword.value = ''
+  confirmedPassword.value = ''
+}
+
+async function changePassword() {
+  if (busy.value || accountActionBusy.value) return
+  passwordPromptError.value = ''
+  if (!currentPassword.value || !newPassword.value || !confirmedPassword.value) {
+    passwordPromptError.value = t('Settings.Sync Settings.All Password Fields Required')
+    return
+  }
+  if (newPassword.value.length < 8) {
+    passwordPromptError.value = t('Settings.Sync Settings.New Password Too Short')
+    return
+  }
+  if (newPassword.value !== confirmedPassword.value) {
+    passwordPromptError.value = t('Settings.Sync Settings.New Passwords Do Not Match')
+    return
+  }
+
+  accountActionBusy.value = true
+  const client = new SyncServerClient(serverUrl.value, syncServerToken.value)
+  try {
+    const response = await client.changePassword(currentPassword.value, newPassword.value)
+    if (!response || typeof response.jwt !== 'string' || !response.jwt) throw new Error()
+    await store.dispatch('updateSyncServerToken', response.jwt)
+    resetPasswordPrompt()
+    showToast({
+      message: t('Settings.Sync Settings.Password Changed'),
+      icon: ['fas', 'key'],
+    })
+    await accountManagement.value?.loadSessions()
+  } catch (error) {
+    if (isSessionExpiredError(error)) {
+      await store.dispatch('expireSyncServerSession')
+      return
+    }
+    passwordPromptError.value = error?.message || t('Settings.Sync Settings.Account Management Failed')
+  } finally {
+    client.cancel()
+    accountActionBusy.value = false
   }
 }
 </script>

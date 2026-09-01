@@ -759,6 +759,36 @@ Settings:
     Import playlists formats: 'Format yang didukung: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Format yang didukung: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Perangkat"
+    Devices Hint: "Tinjau perangkat yang dapat mengakses akun sinkronisasi ini."
+    Change Password: "Ubah kata sandi"
+    Refresh Devices: "Segarkan perangkat"
+    Current Device: "Perangkat saat ini"
+    Revoke Session: "Cabut akses"
+    Session Created: "Dibuat"
+    Last Active: "Terakhir aktif"
+    Session Expires: "Kedaluwarsa"
+    Unknown Device: "Perangkat tidak dikenal"
+    Operating System: "Sistem operasi"
+    Rename Device: "Ubah nama perangkat"
+    Save Device Name: "Simpan nama"
+    Device Name Invalid: "Nama perangkat dapat berisi hingga 80 karakter dan tidak boleh berisi karakter kontrol."
+    Device Renamed: "Nama perangkat diubah"
+    Revoke Session Confirmation: "Cabut sesi ini?"
+    Revoke Current Session Warning: "Mencabut sesi ini akan memutuskan perangkat ini dari akun sinkronisasi."
+    Revoke Session Warning: "{device} akan kehilangan akses ke akun sinkronisasi ini."
+    Confirm Revoke Session: "Cabut sesi"
+    Session Revoked: "Sesi dicabut"
+    Change Password Warning: "Mengubah kata sandi akan mengeluarkan semua perangkat lain. Perangkat ini akan tetap terhubung."
+    Current Password: "Kata sandi saat ini"
+    New Password: "Kata sandi baru"
+    Confirm New Password: "Konfirmasi kata sandi baru"
+    Save New Password: "Simpan kata sandi baru"
+    Account Management Failed: "Detail akun sinkronisasi tidak dapat dimuat."
+    All Password Fields Required: "Lengkapi semua kolom kata sandi."
+    New Password Too Short: "Kata sandi baru harus minimal 8 karakter."
+    New Passwords Do Not Match: "Kata sandi baru tidak cocok."
+    Password Changed: "Kata sandi diubah. Perangkat lain telah dikeluarkan."
     Sync Settings: Sinkronisasi
     Enable Sync: Aktifkan Sinkronisasi
     Privacy Passphrase: Frasa sandi privasi

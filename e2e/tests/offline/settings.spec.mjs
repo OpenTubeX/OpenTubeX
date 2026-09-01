@@ -4171,7 +4171,9 @@ test.describe('sync settings', () => {
         username: 'paired-user',
         token: 'paired-token',
         privacyKey: 'paired-privacy-key',
-        privacySalt: 'paired-privacy-salt'
+        privacySalt: 'paired-privacy-salt',
+        deviceId: 'MDEyMzQ1Njc4OTo7PD0-Pw',
+        deviceName: 'Paired device'
       })
     })
 

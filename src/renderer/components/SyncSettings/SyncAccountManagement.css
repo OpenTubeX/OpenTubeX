@@ -1,0 +1,127 @@
+.accountManagement {
+  border-block-start: 1px solid var(--side-nav-color);
+  margin-block-start: 1.25rem;
+  padding-block-start: 1rem;
+}
+
+.managementHeader {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-block-end: 1rem;
+}
+
+.managementHeader h3,
+.managementHeader p,
+.sessionSummary h4,
+.promptContent p {
+  margin: 0;
+}
+
+.managementHeader p {
+  color: var(--secondary-text-color);
+  margin-block-start: 0.25rem;
+}
+
+.sessionActions,
+.promptActions {
+  justify-content: center;
+}
+
+.sessionActions {
+  flex-shrink: 0;
+}
+
+.sessionList {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sessionCard {
+  background-color: var(--side-nav-color);
+  border-radius: calc(0.5rem * var(--ui-roundness));
+  box-sizing: border-box;
+  padding: 1rem;
+}
+
+.sessionSummary {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.sessionSummary h4 {
+  overflow-wrap: anywhere;
+}
+
+.currentBadge {
+  color: var(--primary-color);
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-block-start: 0.25rem;
+}
+
+.sessionDetails {
+  display: grid;
+  gap: 0.5rem;
+  margin-block: 1rem 0;
+}
+
+.sessionDetails div {
+  display: grid;
+  gap: 0.25rem;
+  grid-template-columns: minmax(7rem, 1fr) minmax(0, 1.5fr);
+}
+
+.sessionDetails dt {
+  color: var(--secondary-text-color);
+}
+
+.sessionDetails dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.managementError {
+  color: var(--error-color, #c62828);
+  text-align: center;
+}
+
+.promptContent {
+  box-sizing: border-box;
+  padding-inline: 1rem;
+  text-align: center;
+}
+
+.renameForm {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.renameForm :deep(.ft-input-component) {
+  inline-size: min(100%, 32rem);
+  margin-inline: auto;
+}
+
+@media only screen and (width <= 600px) {
+  .managementHeader,
+  .sessionSummary {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .sessionActions {
+    align-items: stretch;
+  }
+
+  .sessionDetails div {
+    grid-template-columns: 1fr;
+  }
+}

@@ -753,6 +753,36 @@ Settings:
     Import playlists formats: 'Formate acceptate: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Dispozitive"
+    Devices Hint: "Verificați dispozitivele care pot accesa acest cont de sincronizare."
+    Change Password: "Schimbați parola"
+    Refresh Devices: "Reîmprospătați dispozitivele"
+    Current Device: "Dispozitivul curent"
+    Revoke Session: "Revocați accesul"
+    Session Created: "Creată"
+    Last Active: "Ultima activitate"
+    Session Expires: "Expiră"
+    Unknown Device: "Dispozitiv necunoscut"
+    Operating System: "Sistem de operare"
+    Rename Device: "Redenumește dispozitivul"
+    Save Device Name: "Salvează numele"
+    Device Name Invalid: "Numele dispozitivelor pot conține cel mult 80 de caractere și nu pot conține caractere de control."
+    Device Renamed: "Dispozitiv redenumit"
+    Revoke Session Confirmation: "Revocați această sesiune?"
+    Revoke Current Session Warning: "Revocarea acestei sesiuni va deconecta dispozitivul de la contul de sincronizare."
+    Revoke Session Warning: "{device} va pierde accesul la acest cont de sincronizare."
+    Confirm Revoke Session: "Revocați sesiunea"
+    Session Revoked: "Sesiune revocată"
+    Change Password Warning: "Schimbarea parolei va deconecta toate celelalte dispozitive. Acest dispozitiv va rămâne conectat."
+    Current Password: "Parola curentă"
+    New Password: "Parolă nouă"
+    Confirm New Password: "Confirmați parola nouă"
+    Save New Password: "Salvați parola nouă"
+    Account Management Failed: "Detaliile contului de sincronizare nu au putut fi încărcate."
+    All Password Fields Required: "Completați toate câmpurile pentru parolă."
+    New Password Too Short: "Parola nouă trebuie să aibă cel puțin 8 caractere."
+    New Passwords Do Not Match: "Parolele noi nu coincid."
+    Password Changed: "Parola a fost schimbată. Celelalte dispozitive au fost deconectate."
     Sync Settings: Sincronizare
     Enable Sync: Activează sincronizarea
     Privacy Passphrase: Frază secretă pentru confidențialitate

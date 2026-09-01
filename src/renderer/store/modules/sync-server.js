@@ -24,6 +24,7 @@ import {
   migrateLegacyPlaybackSpeedsToSettings,
   preparePrivacyKey,
 } from '../../helpers/sync-server-privacy'
+import { encryptSyncServerDeviceInfo } from '../../helpers/sync-server-sessions'
 import { mergePlaylistBookmarkConflict } from '../../helpers/playlist-bookmarks'
 import {
   AUTO_SYNC_INTERVAL_MS,
@@ -403,19 +404,21 @@ async function runSync(context, { allowDataLoss = false } = {}) {
 const actions = {
   async completeSyncServerPairing(
     { commit, dispatch, rootState },
-    { serverUrl, username, token, privacyKey, privacySalt }
+    { serverUrl, username, token, privacyKey, privacySalt, deviceId, deviceName }
   ) {
     if (!rootState.settings.syncServerEnabled) {
       throw new Error('Enable sync first')
     }
     const normalizedUrl = normalizeSyncServerUrl(serverUrl)
     const trimmedUsername = username.trim()
-    if (!trimmedUsername || !token || !privacyKey || !privacySalt) {
+    if (!trimmedUsername || !token || !privacyKey || !privacySalt || !deviceId || !deviceName) {
       throw new Error('Incomplete pairing result')
     }
 
     await dispatch('updateSyncServerUrl', normalizedUrl, { root: true })
     await dispatch('updateSyncServerUsername', trimmedUsername, { root: true })
+    await dispatch('updateSyncServerDeviceId', deviceId, { root: true })
+    await dispatch('updateSyncServerDeviceName', deviceName, { root: true })
     await dispatch('updateSyncServerSnapshot', '{}', { root: true })
     await dispatch('updateSyncServerLastSyncAt', 0, { root: true })
     await dispatch('updateSyncServerPrivacyMode', 'enhanced', { root: true })
@@ -429,7 +432,7 @@ const actions = {
 
   async authenticateSyncServer(
     { commit, dispatch, rootState, state },
-    { mode, serverUrl, username, password, privacyPassphrase }
+    { mode, serverUrl, username, password, privacyPassphrase, deviceId, deviceName, deviceSystemInfo }
   ) {
     if (mode !== 'login' && mode !== 'register') {
       throw new Error('Invalid authentication mode')
@@ -448,8 +451,8 @@ const actions = {
       serverUrl: normalizedUrl,
       username: trimmedUsername,
     })
-    if (!trimmedUsername || !password) {
-      throw new Error('Username and password are required')
+    if (!trimmedUsername || !password || !deviceId || !deviceName || !deviceSystemInfo) {
+      throw new Error('Username, password, and device information are required')
     }
 
     const client = trackSyncClient(new SyncServerClient(normalizedUrl))
@@ -470,7 +473,7 @@ const actions = {
       if (privacySupported && privacyPassphrase === password) {
         throw new Error('The privacy passphrase must be different from the account password')
       }
-      const token = await client.authenticate(mode, trimmedUsername, password)
+      const token = await client.authenticate(mode, trimmedUsername, password, deviceId)
       let privacyKey = ''
       let privacySalt = ''
 
@@ -487,12 +490,23 @@ const actions = {
         privacySalt = privacy.salt
       }
 
+      if (await client.supportsAccountSessions()) {
+        const encryptedDeviceInfo = await encryptSyncServerDeviceInfo(
+          { name: deviceName, ...deviceSystemInfo },
+          privacyKey,
+          deviceId
+        )
+        await client.updateAccountSession('current', encryptedDeviceInfo)
+      }
+
       assertSyncEnabled(rootState, client)
 
       // Keep writes to the shared settings datastore ordered. In particular,
       // the URL must be committed before the token enables the initial sync.
       await updateWhileEnabled('updateSyncServerUrl', normalizedUrl)
       await updateWhileEnabled('updateSyncServerUsername', trimmedUsername)
+      await updateWhileEnabled('updateSyncServerDeviceId', deviceId)
+      await updateWhileEnabled('updateSyncServerDeviceName', deviceName)
       if (!resumesExpiredSession) {
         await updateWhileEnabled('updateSyncServerSnapshot', '{}')
         await updateWhileEnabled('updateSyncServerLastSyncAt', 0)

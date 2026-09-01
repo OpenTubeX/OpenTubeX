@@ -1024,6 +1024,36 @@ Settings:
     Import playlists formats: 'Podprte oblike: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Podprte oblike: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Naprave"
+    Devices Hint: "Preglejte naprave, ki lahko dostopajo do tega računa za sinhronizacijo."
+    Change Password: "Spremeni geslo"
+    Refresh Devices: "Osveži naprave"
+    Current Device: "Trenutna naprava"
+    Revoke Session: "Prekliči dostop"
+    Session Created: "Ustvarjena"
+    Last Active: "Zadnja dejavnost"
+    Session Expires: "Poteče"
+    Unknown Device: "Neznana naprava"
+    Operating System: "Operacijski sistem"
+    Rename Device: "Preimenuj napravo"
+    Save Device Name: "Shrani ime"
+    Device Name Invalid: "Imena naprav lahko vsebujejo največ 80 znakov in ne smejo vsebovati kontrolnih znakov."
+    Device Renamed: "Naprava je preimenovana"
+    Revoke Session Confirmation: "Prekliči to sejo?"
+    Revoke Current Session Warning: "Če prekličete to sejo, bo ta naprava prekinila povezavo z računom za sinhronizacijo."
+    Revoke Session Warning: "{device} bo izgubil dostop do tega računa za sinhronizacijo."
+    Confirm Revoke Session: "Prekliči sejo"
+    Session Revoked: "Seja preklicana"
+    Change Password Warning: "Če spremenite geslo, bodo vse druge naprave odjavljene. Ta naprava bo ostala povezana."
+    Current Password: "Trenutno geslo"
+    New Password: "Novo geslo"
+    Confirm New Password: "Potrdi novo geslo"
+    Save New Password: "Shrani novo geslo"
+    Account Management Failed: "Podrobnosti računa za sinhronizacijo ni bilo mogoče naložiti."
+    All Password Fields Required: "Izpolnite vsa polja za geslo."
+    New Password Too Short: "Novo geslo mora imeti najmanj 8 znakov."
+    New Passwords Do Not Match: "Novi gesli se ne ujemata."
+    Password Changed: "Geslo spremenjeno. Druge naprave so bile odjavljene."
     Sync Settings: Sinhronizacija
     Enable Sync: Omogoči sinhronizacijo
     Privacy Passphrase: Šifrirno geslo za zasebnost

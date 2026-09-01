@@ -742,6 +742,36 @@ Settings:
     Import playlists formats: 'Podporované formáty: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Zariadenia"
+    Devices Hint: "Skontrolujte zariadenia, ktoré majú prístup k tomuto synchronizačnému účtu."
+    Change Password: "Zmeniť heslo"
+    Refresh Devices: "Obnoviť zariadenia"
+    Current Device: "Aktuálne zariadenie"
+    Revoke Session: "Odobrať prístup"
+    Session Created: "Vytvorené"
+    Last Active: "Posledná aktivita"
+    Session Expires: "Vyprší"
+    Unknown Device: "Neznáme zariadenie"
+    Operating System: "Operačný systém"
+    Rename Device: "Premenovať zariadenie"
+    Save Device Name: "Uložiť názov"
+    Device Name Invalid: "Názov zariadenia môže obsahovať najviac 80 znakov a nesmie obsahovať riadiace znaky."
+    Device Renamed: "Zariadenie premenované"
+    Revoke Session Confirmation: "Odobrať túto reláciu?"
+    Revoke Current Session Warning: "Odstránením tejto relácie odpojíte toto zariadenie od synchronizačného účtu."
+    Revoke Session Warning: "{device} stratí prístup k tomuto synchronizačnému účtu."
+    Confirm Revoke Session: "Odobrať reláciu"
+    Session Revoked: "Relácia odobratá"
+    Change Password Warning: "Zmenou hesla odhlásite všetky ostatné zariadenia. Toto zariadenie zostane pripojené."
+    Current Password: "Aktuálne heslo"
+    New Password: "Nové heslo"
+    Confirm New Password: "Potvrdiť nové heslo"
+    Save New Password: "Uložiť nové heslo"
+    Account Management Failed: "Podrobnosti synchronizačného účtu sa nepodarilo načítať."
+    All Password Fields Required: "Vyplňte všetky polia hesla."
+    New Password Too Short: "Nové heslo musí mať aspoň 8 znakov."
+    New Passwords Do Not Match: "Nové heslá sa nezhodujú."
+    Password Changed: "Heslo bolo zmenené. Ostatné zariadenia boli odhlásené."
     Sync Settings: Synchronizácia
     Enable Sync: Zapnúť synchronizáciu
     Privacy Passphrase: Prístupová fráza na ochranu súkromia

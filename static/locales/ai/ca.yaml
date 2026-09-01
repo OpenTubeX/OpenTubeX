@@ -1059,6 +1059,36 @@ Settings:
     Import playlists formats: 'Formats admesos: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Dispositius"
+    Devices Hint: "Revisa els dispositius que poden accedir a aquest compte de sincronització."
+    Change Password: "Canvia la contrasenya"
+    Refresh Devices: "Actualitza els dispositius"
+    Current Device: "Dispositiu actual"
+    Revoke Session: "Revoca l’accés"
+    Session Created: "Creada"
+    Last Active: "Darrera activitat"
+    Session Expires: "Caduca"
+    Unknown Device: "Dispositiu desconegut"
+    Operating System: "Sistema operatiu"
+    Rename Device: "Canvia el nom del dispositiu"
+    Save Device Name: "Desa el nom"
+    Device Name Invalid: "Els noms dels dispositius poden tenir fins a 80 caràcters i no poden contenir caràcters de control."
+    Device Renamed: "S'ha canviat el nom del dispositiu"
+    Revoke Session Confirmation: "Voleu revocar aquesta sessió?"
+    Revoke Current Session Warning: "Si revoqueu aquesta sessió, aquest dispositiu es desconnectarà del compte de sincronització."
+    Revoke Session Warning: "{device} perdrà l’accés a aquest compte de sincronització."
+    Confirm Revoke Session: "Revoca la sessió"
+    Session Revoked: "Sessió revocada"
+    Change Password Warning: "En canviar la contrasenya es tancarà la sessió a tots els altres dispositius. Aquest dispositiu continuarà connectat."
+    Current Password: "Contrasenya actual"
+    New Password: "Contrasenya nova"
+    Confirm New Password: "Confirma la contrasenya nova"
+    Save New Password: "Desa la contrasenya nova"
+    Account Management Failed: "No s’han pogut carregar els detalls del compte de sincronització."
+    All Password Fields Required: "Empleneu tots els camps de contrasenya."
+    New Password Too Short: "La contrasenya nova ha de tenir almenys 8 caràcters."
+    New Passwords Do Not Match: "Les contrasenyes noves no coincideixen."
+    Password Changed: "S’ha canviat la contrasenya. S’ha tancat la sessió als altres dispositius."
     Sync Settings: Sincronització
     Enable Sync: Activa la sincronització
     Privacy Passphrase: Frase de contrasenya de privadesa

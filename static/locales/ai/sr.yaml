@@ -780,6 +780,36 @@ Settings:
     Import playlists formats: 'Подржани формати: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Подржани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Уређаји"
+    Devices Hint: "Прегледајте уређаје који могу да приступе овом налогу за синхронизацију."
+    Change Password: "Промени лозинку"
+    Refresh Devices: "Освежи уређаје"
+    Current Device: "Тренутни уређај"
+    Revoke Session: "Опозови приступ"
+    Session Created: "Направљена"
+    Last Active: "Последња активност"
+    Session Expires: "Истиче"
+    Unknown Device: "Непознат уређај"
+    Operating System: "Оперативни систем"
+    Rename Device: "Преименуј уређај"
+    Save Device Name: "Сачувај назив"
+    Device Name Invalid: "Назив уређаја може имати највише 80 знакова и не сме садржати контролне знакове."
+    Device Renamed: "Уређај је преименован"
+    Revoke Session Confirmation: "Опозвати ову сесију?"
+    Revoke Current Session Warning: "Опозивање ове сесије ће прекинути везу овог уређаја са налогом за синхронизацију."
+    Revoke Session Warning: "{device} ће изгубити приступ овом налогу за синхронизацију."
+    Confirm Revoke Session: "Опозови сесију"
+    Session Revoked: "Сесија је опозвана"
+    Change Password Warning: "Промена лозинке ће одјавити све остале уређаје. Овај уређај ће остати повезан."
+    Current Password: "Тренутна лозинка"
+    New Password: "Нова лозинка"
+    Confirm New Password: "Потврди нову лозинку"
+    Save New Password: "Сачувај нову лозинку"
+    Account Management Failed: "Није могуће учитати детаље налога за синхронизацију."
+    All Password Fields Required: "Попуните сва поља за лозинку."
+    New Password Too Short: "Нова лозинка мора да има најмање 8 знакова."
+    New Passwords Do Not Match: "Нове лозинке се не подударају."
+    Password Changed: "Лозинка је промењена. Остали уређаји су одјављени."
     Sync Settings: Синхронизација
     Enable Sync: Омогући синхронизацију
     Privacy Passphrase: Тајна фраза за приватност

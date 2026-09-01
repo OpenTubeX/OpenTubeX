@@ -787,6 +787,36 @@ Settings:
     Import playlists formats: 'Фарматы, якія падтрымліваюцца: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Фарматы, якія падтрымліваюцца: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Прылады"
+    Devices Hint: "Праверце прылады, якія маюць доступ да гэтага ўліковага запісу сінхранізацыі."
+    Change Password: "Змяніць пароль"
+    Refresh Devices: "Абнавіць спіс прылад"
+    Current Device: "Бягучая прылада"
+    Revoke Session: "Адклікаць доступ"
+    Session Created: "Створана"
+    Last Active: "Апошняя актыўнасць"
+    Session Expires: "Тэрмін дзеяння"
+    Unknown Device: "Невядомая прылада"
+    Operating System: "Аперацыйная сістэма"
+    Rename Device: "Перайменаваць прыладу"
+    Save Device Name: "Захаваць назву"
+    Device Name Invalid: "Назва прылады можа змяшчаць не больш за 80 сімвалаў і не павінна ўтрымліваць кіравальных сімвалаў."
+    Device Renamed: "Прылада перайменавана"
+    Revoke Session Confirmation: "Адклікаць гэты сеанс?"
+    Revoke Current Session Warning: "Адкліканне гэтага сеанса адключыць гэту прыладу ад уліковага запісу сінхранізацыі."
+    Revoke Session Warning: "{device} страціць доступ да гэтага ўліковага запісу сінхранізацыі."
+    Confirm Revoke Session: "Адклікаць сеанс"
+    Session Revoked: "Сеанс адкліканы"
+    Change Password Warning: "Пасля змены пароля ўсе іншыя прылады выйдуць з уліковага запісу. Гэта прылада застанецца падключанай."
+    Current Password: "Бягучы пароль"
+    New Password: "Новы пароль"
+    Confirm New Password: "Пацвердзіць новы пароль"
+    Save New Password: "Захаваць новы пароль"
+    Account Management Failed: "Не ўдалося загрузіць звесткі ўліковага запісу сінхранізацыі."
+    All Password Fields Required: "Запоўніце ўсе палі пароля."
+    New Password Too Short: "Новы пароль павінен мець не менш за 8 сімвалаў."
+    New Passwords Do Not Match: "Новыя паролі не супадаюць."
+    Password Changed: "Пароль зменены. На іншых прыладах выкананы выхад."
     Sync Settings: Сінхранізацыя
     Enable Sync: Уключыць сінхранізацыю
     Privacy Passphrase: Кодавая фраза прыватнасці

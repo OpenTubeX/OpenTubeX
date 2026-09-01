@@ -764,6 +764,36 @@ Settings:
     Import playlists formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Apparaten"
+    Devices Hint: "Bekijk de apparaten die toegang hebben tot dit synchronisatieaccount."
+    Change Password: "Wachtwoord wijzigen"
+    Refresh Devices: "Apparaten vernieuwen"
+    Current Device: "Huidig apparaat"
+    Revoke Session: "Toegang intrekken"
+    Session Created: "Aangemaakt"
+    Last Active: "Laatst actief"
+    Session Expires: "Verloopt"
+    Unknown Device: "Onbekend apparaat"
+    Operating System: "Besturingssysteem"
+    Rename Device: "Apparaat hernoemen"
+    Save Device Name: "Naam opslaan"
+    Device Name Invalid: "Apparaatnamen mogen maximaal 80 tekens bevatten en geen besturingstekens."
+    Device Renamed: "Apparaat hernoemd"
+    Revoke Session Confirmation: "Deze sessie intrekken?"
+    Revoke Current Session Warning: "Als u deze sessie intrekt, wordt dit apparaat losgekoppeld van het synchronisatieaccount."
+    Revoke Session Warning: "{device} verliest toegang tot dit synchronisatieaccount."
+    Confirm Revoke Session: "Sessie intrekken"
+    Session Revoked: "Sessie ingetrokken"
+    Change Password Warning: "Als u uw wachtwoord wijzigt, worden alle andere apparaten afgemeld. Dit apparaat blijft verbonden."
+    Current Password: "Huidig wachtwoord"
+    New Password: "Nieuw wachtwoord"
+    Confirm New Password: "Nieuw wachtwoord bevestigen"
+    Save New Password: "Nieuw wachtwoord opslaan"
+    Account Management Failed: "De gegevens van het synchronisatieaccount konden niet worden geladen."
+    All Password Fields Required: "Vul alle wachtwoordvelden in."
+    New Password Too Short: "Het nieuwe wachtwoord moet minstens 8 tekens lang zijn."
+    New Passwords Do Not Match: "De nieuwe wachtwoorden komen niet overeen."
+    Password Changed: "Wachtwoord gewijzigd. Andere apparaten zijn afgemeld."
     Sync Settings: Synchronisatie
     Enable Sync: Synchronisatie inschakelen
     Privacy Passphrase: Privacywachtzin

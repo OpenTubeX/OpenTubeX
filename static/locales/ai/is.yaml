@@ -759,6 +759,36 @@ Settings:
     Import playlists formats: 'Studd snið: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Tæki"
+    Devices Hint: "Farðu yfir tækin sem hafa aðgang að þessum samstillingarreikningi."
+    Change Password: "Breyta lykilorði"
+    Refresh Devices: "Endurnýja tæki"
+    Current Device: "Núverandi tæki"
+    Revoke Session: "Afturkalla aðgang"
+    Session Created: "Búin til"
+    Last Active: "Síðast virkt"
+    Session Expires: "Rennur út"
+    Unknown Device: "Óþekkt tæki"
+    Operating System: "Stýrikerfi"
+    Rename Device: "Endurnefna tæki"
+    Save Device Name: "Vista heiti"
+    Device Name Invalid: "Heiti tækis má vera allt að 80 stafir og má ekki innihalda stýristafi."
+    Device Renamed: "Tæki endurnefnt"
+    Revoke Session Confirmation: "Afturkalla þessa setu?"
+    Revoke Current Session Warning: "Ef þessi seta er afturkölluð verður tækið aftengt samstillingarreikningnum."
+    Revoke Session Warning: "{device} missir aðgang að þessum samstillingarreikningi."
+    Confirm Revoke Session: "Afturkalla setu"
+    Session Revoked: "Seta afturkölluð"
+    Change Password Warning: "Ef þú breytir lykilorðinu verður skráð út úr öllum öðrum tækjum. Þetta tæki verður áfram tengt."
+    Current Password: "Núverandi lykilorð"
+    New Password: "Nýtt lykilorð"
+    Confirm New Password: "Staðfesta nýtt lykilorð"
+    Save New Password: "Vista nýtt lykilorð"
+    Account Management Failed: "Ekki tókst að hlaða upplýsingum um samstillingarreikninginn."
+    All Password Fields Required: "Fylltu út alla lykilorðsreiti."
+    New Password Too Short: "Nýja lykilorðið verður að vera að minnsta kosti 8 stafir."
+    New Passwords Do Not Match: "Nýju lykilorðin passa ekki saman."
+    Password Changed: "Lykilorði breytt. Skráð hefur verið út úr öðrum tækjum."
     Sync Settings: Samstilling
     Enable Sync: Virkja samstilling
     Privacy Passphrase: Persónuverndarleyndasetning

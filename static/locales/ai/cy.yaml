@@ -744,6 +744,36 @@ Settings:
     Import playlists formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Dyfeisiau"
+    Devices Hint: "Adolygwch y dyfeisiau sy’n gallu cyrchu’r cyfrif cysoni hwn."
+    Change Password: "Newid cyfrinair"
+    Refresh Devices: "Adnewyddu dyfeisiau"
+    Current Device: "Dyfais gyfredol"
+    Revoke Session: "Dirymu mynediad"
+    Session Created: "Crëwyd"
+    Last Active: "Gweithrediad diwethaf"
+    Session Expires: "Yn dod i ben"
+    Unknown Device: "Dyfais anhysbys"
+    Operating System: "System weithredu"
+    Rename Device: "Ailenwi'r ddyfais"
+    Save Device Name: "Cadw'r enw"
+    Device Name Invalid: "Gall enwau dyfeisiau gynnwys hyd at 80 nod ac ni allant gynnwys nodau rheoli."
+    Device Renamed: "Dyfais wedi'i hailenwi"
+    Revoke Session Confirmation: "Dirymu’r sesiwn hon?"
+    Revoke Current Session Warning: "Bydd dirymu’r sesiwn hon yn datgysylltu’r ddyfais hon o’r cyfrif cysoni."
+    Revoke Session Warning: "Bydd {device} yn colli mynediad at y cyfrif cysoni hwn."
+    Confirm Revoke Session: "Dirymu sesiwn"
+    Session Revoked: "Sesiwn wedi’i dirymu"
+    Change Password Warning: "Bydd newid eich cyfrinair yn allgofnodi pob dyfais arall. Bydd y ddyfais hon yn aros wedi’i chysylltu."
+    Current Password: "Cyfrinair cyfredol"
+    New Password: "Cyfrinair newydd"
+    Confirm New Password: "Cadarnhau’r cyfrinair newydd"
+    Save New Password: "Cadw’r cyfrinair newydd"
+    Account Management Failed: "Doedd dim modd llwytho manylion y cyfrif cysoni."
+    All Password Fields Required: "Cwblhewch bob maes cyfrinair."
+    New Password Too Short: "Rhaid i’r cyfrinair newydd fod yn 8 nod o leiaf."
+    New Passwords Do Not Match: "Nid yw’r cyfrineiriau newydd yn cyfateb."
+    Password Changed: "Cyfrinair wedi’i newid. Mae’r dyfeisiau eraill wedi’u hallgofnodi."
     Sync Settings: Cysoni
     Enable Sync: Galluogi cysoni
     Privacy Passphrase: Cyfrinymadrodd preifatrwydd

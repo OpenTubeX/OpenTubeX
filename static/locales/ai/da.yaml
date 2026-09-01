@@ -783,6 +783,36 @@ Settings:
     Import playlists formats: 'Understøttede formater: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Enheder"
+    Devices Hint: "Gennemse de enheder, der har adgang til denne synkroniseringskonto."
+    Change Password: "Skift adgangskode"
+    Refresh Devices: "Opdater enheder"
+    Current Device: "Nuværende enhed"
+    Revoke Session: "Tilbagekald adgang"
+    Session Created: "Oprettet"
+    Last Active: "Senest aktiv"
+    Session Expires: "Udløber"
+    Unknown Device: "Ukendt enhed"
+    Operating System: "Operativsystem"
+    Rename Device: "Omdøb enhed"
+    Save Device Name: "Gem navn"
+    Device Name Invalid: "Enhedsnavne må højst indeholde 80 tegn og må ikke indeholde kontroltegn."
+    Device Renamed: "Enhed omdøbt"
+    Revoke Session Confirmation: "Tilbagekald denne session?"
+    Revoke Current Session Warning: "Hvis denne session tilbagekaldes, afbrydes enheden fra synkroniseringskontoen."
+    Revoke Session Warning: "{device} mister adgang til denne synkroniseringskonto."
+    Confirm Revoke Session: "Tilbagekald session"
+    Session Revoked: "Session tilbagekaldt"
+    Change Password Warning: "Hvis du ændrer din adgangskode, logges alle andre enheder ud. Denne enhed forbliver tilsluttet."
+    Current Password: "Nuværende adgangskode"
+    New Password: "Ny adgangskode"
+    Confirm New Password: "Bekræft ny adgangskode"
+    Save New Password: "Gem ny adgangskode"
+    Account Management Failed: "Oplysninger om synkroniseringskontoen kunne ikke indlæses."
+    All Password Fields Required: "Udfyld alle adgangskodefelter."
+    New Password Too Short: "Den nye adgangskode skal være på mindst 8 tegn."
+    New Passwords Do Not Match: "De nye adgangskoder er ikke ens."
+    Password Changed: "Adgangskoden er ændret. Andre enheder er blevet logget ud."
     Sync Settings: Synkronisering
     Enable Sync: Slå synkronisering til
     Privacy Passphrase: Adgangssætning til beskyttelse af personlige oplysninger

@@ -300,7 +300,6 @@ import {
   encryptPairingKey,
   pairingSessionMatchesRequest,
   parsePairingQrPayload,
-  randomPairingDeviceId,
   randomPairingVerificationCode,
 } from '../../helpers/sync-server-pairing'
 import {
@@ -309,6 +308,9 @@ import {
   decryptSyncDocument,
 } from '../../helpers/sync-server-privacy'
 import { SyncServerClient, normalizeSyncServerUrl } from '../../helpers/sync-server'
+import {
+  encryptSyncServerDeviceInfo,
+} from '../../helpers/sync-server-sessions'
 import { formatTime } from '../../helpers/dateFormat'
 import store from '../../store/index'
 
@@ -329,6 +331,10 @@ const props = defineProps({
     default: '',
   },
   privacySalt: {
+    type: String,
+    default: '',
+  },
+  deviceId: {
     type: String,
     default: '',
   },
@@ -521,6 +527,8 @@ async function confirmReceiver() {
       token: privacy.token,
       privacyKey: privacy.key,
       privacySalt: privacy.salt,
+      deviceId: active.recipient.recipientDeviceId,
+      deviceName: active.recipient.recipientDeviceName,
     })
     await finishReceiver()
     emit('paired', 'completed')
@@ -680,7 +688,17 @@ async function approvePairing() {
     const client = new SyncServerClient(props.serverUrl, store.getters.getSyncServerToken)
     pairingClient = client
     if (!pairingApproval.value) {
-      const claim = await client.claimPairingSession(pairingRequest.value)
+      const encryptedDeviceInfo = await encryptSyncServerDeviceInfo(
+        {
+          name: pairingRequest.value.recipientDeviceName,
+          platform: '',
+          architecture: '',
+          release: '',
+        },
+        props.privacyKey,
+        pairingRequest.value.recipientDeviceId
+      )
+      const claim = await client.claimPairingSession(pairingRequest.value, encryptedDeviceInfo)
       if (sequence !== approveSequence || !approvePromptOpen.value) return
       const request = bindPairingRequestToAccount(
         pairingRequest.value,
@@ -691,7 +709,7 @@ async function approvePairing() {
       }
       pairingApproval.value = {
         request,
-        approvingDeviceId: randomPairingDeviceId(),
+        approvingDeviceId: props.deviceId,
         verificationCode: randomPairingVerificationCode(),
         token: claim.jwt,
         encryptedPayload: '',

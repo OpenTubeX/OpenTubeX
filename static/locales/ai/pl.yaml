@@ -286,6 +286,36 @@ Settings:
     Open Profile Directory: Otwórz katalog profilu
     Invalid JSON row, skipping item: Nieprawidłowy JSON w wierszu {row}. Element zostanie pominięty
   Sync Settings:
+    Devices: "Urządzenia"
+    Devices Hint: "Sprawdź urządzenia, które mają dostęp do tego konta synchronizacji."
+    Change Password: "Zmień hasło"
+    Refresh Devices: "Odśwież urządzenia"
+    Current Device: "Bieżące urządzenie"
+    Revoke Session: "Cofnij dostęp"
+    Session Created: "Utworzono"
+    Last Active: "Ostatnia aktywność"
+    Session Expires: "Wygasa"
+    Unknown Device: "Nieznane urządzenie"
+    Operating System: "System operacyjny"
+    Rename Device: "Zmień nazwę urządzenia"
+    Save Device Name: "Zapisz nazwę"
+    Device Name Invalid: "Nazwa urządzenia może zawierać maksymalnie 80 znaków i nie może zawierać znaków sterujących."
+    Device Renamed: "Zmieniono nazwę urządzenia"
+    Revoke Session Confirmation: "Cofnąć tę sesję?"
+    Revoke Current Session Warning: "Cofnięcie tej sesji odłączy to urządzenie od konta synchronizacji."
+    Revoke Session Warning: "{device} utraci dostęp do tego konta synchronizacji."
+    Confirm Revoke Session: "Cofnij sesję"
+    Session Revoked: "Sesja cofnięta"
+    Change Password Warning: "Zmiana hasła wyloguje wszystkie pozostałe urządzenia. To urządzenie pozostanie połączone."
+    Current Password: "Bieżące hasło"
+    New Password: "Nowe hasło"
+    Confirm New Password: "Potwierdź nowe hasło"
+    Save New Password: "Zapisz nowe hasło"
+    Account Management Failed: "Nie udało się wczytać szczegółów konta synchronizacji."
+    All Password Fields Required: "Wypełnij wszystkie pola hasła."
+    New Password Too Short: "Nowe hasło musi mieć co najmniej 8 znaków."
+    New Passwords Do Not Match: "Nowe hasła nie są zgodne."
+    Password Changed: "Hasło zostało zmienione. Pozostałe urządzenia zostały wylogowane."
     Enable Sync: Włącz synchronizację
     Pair Another Device: Sparuj kolejne urządzenie
     Pair With Existing Device: Sparuj z połączonym urządzeniem

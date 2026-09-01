@@ -1,3 +1,5 @@
+import { base64ToBytes, bytesToBase64 } from './sync-server-protocol.js'
+
 export const PRIVACY_VERSION = 1
 const PBKDF2_ITERATIONS = 600_000
 const PADDING_BLOCK_BYTES = 64 * 1024
@@ -29,17 +31,6 @@ function decompressBytes(bytes) {
     throw new Error('Compressed encrypted sync data is not supported by this app version')
   }
   return transformBytes(bytes, globalThis.DecompressionStream)
-}
-
-function bytesToBase64(bytes) {
-  let binary = ''
-  for (const byte of bytes) binary += String.fromCharCode(byte)
-  return btoa(binary)
-}
-
-function base64ToBytes(value) {
-  const binary = atob(value)
-  return Uint8Array.from(binary, character => character.charCodeAt(0))
 }
 
 async function importPrivacyKey(value) {

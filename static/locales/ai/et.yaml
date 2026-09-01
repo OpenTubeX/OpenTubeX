@@ -742,6 +742,36 @@ Settings:
     Import playlists formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Seadmed"
+    Devices Hint: "Vaata üle seadmed, millel on juurdepääs sellele sünkroonimiskontole."
+    Change Password: "Muuda parooli"
+    Refresh Devices: "Värskenda seadmeid"
+    Current Device: "Praegune seade"
+    Revoke Session: "Tühista juurdepääs"
+    Session Created: "Loodud"
+    Last Active: "Viimati aktiivne"
+    Session Expires: "Aegub"
+    Unknown Device: "Tundmatu seade"
+    Operating System: "Operatsioonisüsteem"
+    Rename Device: "Nimeta seade ümber"
+    Save Device Name: "Salvesta nimi"
+    Device Name Invalid: "Seadme nimi võib sisaldada kuni 80 märki ega tohi sisaldada juhtmärke."
+    Device Renamed: "Seade on ümber nimetatud"
+    Revoke Session Confirmation: "Kas tühistada see seanss?"
+    Revoke Current Session Warning: "Selle seansi tühistamine katkestab selle seadme ühenduse sünkroonimiskontoga."
+    Revoke Session Warning: "{device} kaotab juurdepääsu sellele sünkroonimiskontole."
+    Confirm Revoke Session: "Tühista seanss"
+    Session Revoked: "Seanss tühistatud"
+    Change Password Warning: "Parooli muutmine logib kõik teised seadmed välja. See seade jääb ühendatuks."
+    Current Password: "Praegune parool"
+    New Password: "Uus parool"
+    Confirm New Password: "Kinnita uus parool"
+    Save New Password: "Salvesta uus parool"
+    Account Management Failed: "Sünkroonimiskonto andmeid ei saanud laadida."
+    All Password Fields Required: "Täida kõik parooliväljad."
+    New Password Too Short: "Uus parool peab olema vähemalt 8 tähemärki pikk."
+    New Passwords Do Not Match: "Uued paroolid ei ühti."
+    Password Changed: "Parool on muudetud. Teised seadmed logiti välja."
     Sync Settings: Sünkroonimine
     Enable Sync: Luba sünkroonimine
     Privacy Passphrase: Privaatsuse salafraas

@@ -742,6 +742,36 @@ Settings:
     Import playlists formats: 'Formati supportati: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formati supportati: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Dispositivi"
+    Devices Hint: "Controlla i dispositivi che possono accedere a questo account di sincronizzazione."
+    Change Password: "Cambia password"
+    Refresh Devices: "Aggiorna dispositivi"
+    Current Device: "Dispositivo attuale"
+    Revoke Session: "Revoca accesso"
+    Session Created: "Creata"
+    Last Active: "Ultima attività"
+    Session Expires: "Scadenza"
+    Unknown Device: "Dispositivo sconosciuto"
+    Operating System: "Sistema operativo"
+    Rename Device: "Rinomina dispositivo"
+    Save Device Name: "Salva nome"
+    Device Name Invalid: "I nomi dei dispositivi possono contenere fino a 80 caratteri e nessun carattere di controllo."
+    Device Renamed: "Dispositivo rinominato"
+    Revoke Session Confirmation: "Revocare questa sessione?"
+    Revoke Current Session Warning: "La revoca di questa sessione disconnetterà il dispositivo dall’account di sincronizzazione."
+    Revoke Session Warning: "{device} perderà l’accesso a questo account di sincronizzazione."
+    Confirm Revoke Session: "Revoca sessione"
+    Session Revoked: "Sessione revocata"
+    Change Password Warning: "La modifica della password disconnetterà tutti gli altri dispositivi. Questo dispositivo rimarrà connesso."
+    Current Password: "Password attuale"
+    New Password: "Nuova password"
+    Confirm New Password: "Conferma nuova password"
+    Save New Password: "Salva nuova password"
+    Account Management Failed: "Impossibile caricare i dettagli dell’account di sincronizzazione."
+    All Password Fields Required: "Compila tutti i campi della password."
+    New Password Too Short: "La nuova password deve contenere almeno 8 caratteri."
+    New Passwords Do Not Match: "Le nuove password non corrispondono."
+    Password Changed: "Password modificata. Gli altri dispositivi sono stati disconnessi."
     Sync Settings: Sincronizzazione
     Enable Sync: Abilita sincronizzazione
     Privacy Passphrase: Frase segreta per la privacy

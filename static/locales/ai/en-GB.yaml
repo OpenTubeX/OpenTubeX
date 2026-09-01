@@ -721,6 +721,36 @@ Settings:
     Import playlists formats: 'Supported formats: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Devices"
+    Devices Hint: "Review the devices that can access this sync account."
+    Change Password: "Change password"
+    Refresh Devices: "Refresh devices"
+    Current Device: "Current device"
+    Revoke Session: "Revoke access"
+    Session Created: "Created"
+    Last Active: "Last active"
+    Session Expires: "Expires"
+    Unknown Device: "Unknown device"
+    Operating System: "Operating system"
+    Rename Device: "Rename device"
+    Save Device Name: "Save name"
+    Device Name Invalid: "Device names can contain up to 80 characters and no control characters."
+    Device Renamed: "Device renamed"
+    Revoke Session Confirmation: "Revoke this session?"
+    Revoke Current Session Warning: "Revoking this session will disconnect this device from the sync account."
+    Revoke Session Warning: "{device} will lose access to this sync account."
+    Confirm Revoke Session: "Revoke session"
+    Session Revoked: "Session revoked"
+    Change Password Warning: "Changing your password will sign out every other device. This device will stay connected."
+    Current Password: "Current password"
+    New Password: "New password"
+    Confirm New Password: "Confirm new password"
+    Save New Password: "Save new password"
+    Account Management Failed: "Sync account details could not be loaded."
+    All Password Fields Required: "Complete all password fields."
+    New Password Too Short: "The new password must be at least 8 characters."
+    New Passwords Do Not Match: "The new passwords do not match."
+    Password Changed: "Password changed. Other devices have been signed out."
     Sync Settings: Sync
     Enable Sync: Enable Sync
     Privacy Passphrase: Privacy passphrase

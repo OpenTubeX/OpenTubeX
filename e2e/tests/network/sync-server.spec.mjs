@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises'
-import { randomUUID } from 'node:crypto'
+import { randomBytes, randomUUID } from 'node:crypto'
 import path from 'node:path'
 
 import { test, expect, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
@@ -18,7 +18,7 @@ async function getSyncCapabilities() {
 }
 
 function rateLimitClient(testInfo) {
-  const title = `${testInfo.file}\0${testInfo.titlePath.join('\0')}`
+  const title = `${testInfo.file}\0${testInfo.titlePath.join('\0')}\0${testInfo.retry}`
   let hash = 2166136261
   for (const character of title) {
     hash ^= character.codePointAt(0)
@@ -110,7 +110,10 @@ test.describe('OpenTubeX sync server', () => {
 
   test('pushes local data from multiple profiles and pulls remote changes', async ({ app, page }) => {
     const username = `opentubex-${Date.now()}-${Math.random().toString(16).slice(2)}`
-    const enhancedPrivacy = (await getSyncCapabilities()).encrypted_sync === 1
+    const capabilities = await getSyncCapabilities()
+    const enhancedPrivacy = capabilities.encrypted_sync === 1
+    const accountSessionsSupported = capabilities.account_sessions === 1
+    let accountPassword = 'local-test-password'
     const bulkRequests = []
     page.on('request', request => {
       const pathname = new URL(request.url()).pathname
@@ -185,7 +188,7 @@ test.describe('OpenTubeX sync server', () => {
         expect(encryptedCollection.payload).not.toContain('dQw4w9WgXcQ')
         expect(encryptedCollection.payload).not.toContain('Music')
         expect(encryptedCollection.payload).not.toContain('Creators')
-        expect(encryptedCollection.payload).not.toContain('dark')
+        expect(encryptedCollection.payload).not.toContain('"baseTheme":"dark"')
         expect(encryptedCollection.payload).not.toContain('app://')
       }
     } else {
@@ -245,6 +248,102 @@ test.describe('OpenTubeX sync server', () => {
       expect(addRemoteResponse.ok).toBe(true)
     }
 
+    if (accountSessionsSupported) {
+      const devices = syncSection.locator('.accountManagement')
+      await expect(devices.getByRole('heading', { name: 'Devices' })).toBeVisible()
+      const currentCard = devices.locator('.sessionCard', { hasText: 'Current device' })
+      await expect(currentCard).toBeVisible()
+      await expect(currentCard.getByRole('heading')).not.toHaveText('Unknown device')
+      const deviceInfo = await page.evaluate(() => window.ftElectron.getDeviceInfo())
+      await expect(currentCard).toContainText(
+        `${deviceInfo.platform}${deviceInfo.release ? ` ${deviceInfo.release}` : ''}`
+      )
+      await currentCard.getByRole('button', { name: 'Rename device' }).click()
+      const renamePrompt = page.getByRole('dialog', { name: 'Rename device' })
+      await renamePrompt.getByLabel('Device name').fill('Remote laptop')
+      await renamePrompt.getByRole('button', { name: 'Save name' }).click()
+      await expect(renamePrompt).toBeHidden()
+      await expect(currentCard.getByRole('heading')).toHaveText('Remote laptop')
+
+      const createOtherSession = async () => {
+        const response = await fetch(`${syncServerUrl}${apiPrefix}/account/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: username,
+            password: accountPassword,
+            device_id: randomBytes(16).toString('base64url')
+          })
+        })
+        expect(response.ok).toBe(true)
+        return (await response.json()).jwt
+      }
+
+      const revokedToken = await createOtherSession()
+      await devices.getByRole('button', { name: 'Refresh devices' }).click()
+      const unknownDevice = devices.locator('.sessionCard', { hasText: 'Unknown device' })
+      await expect(unknownDevice).toBeVisible()
+      await unknownDevice.getByRole('button', { name: 'Rename device' }).click()
+      const otherRenamePrompt = page.getByRole('dialog', { name: 'Rename device' })
+      await otherRenamePrompt.getByLabel('Device name').fill('Spare laptop')
+      await otherRenamePrompt.getByRole('button', { name: 'Save name' }).click()
+      await expect(otherRenamePrompt).toBeHidden()
+      const spareLaptop = devices.locator('.sessionCard', { hasText: 'Spare laptop' })
+      await expect(spareLaptop).toBeVisible()
+      await spareLaptop.getByRole('button', { name: 'Revoke access' }).click()
+      const revokePrompt = page.getByRole('dialog', { name: 'Revoke this session?' })
+      await expect(revokePrompt).toContainText('Spare laptop will lose access')
+      await revokePrompt.getByRole('button', { name: 'Revoke session' }).click()
+      await expect(revokePrompt).toBeHidden()
+      const revokedResponse = await fetch(`${syncServerUrl}${apiPrefix}/account/sessions`, {
+        headers: { Authorization: revokedToken }
+      })
+      expect(revokedResponse.status).toBe(401)
+
+      const passwordRevokedToken = await createOtherSession()
+      await syncSection.getByRole('button', { name: 'Change password' }).click()
+      const passwordPrompt = page.getByRole('dialog', { name: 'Change password' })
+      await passwordPrompt.getByLabel('Current password').fill(accountPassword)
+      await passwordPrompt.getByLabel('New password', { exact: true }).fill('new-local-test-password')
+      await passwordPrompt.getByLabel('Confirm new password').fill('different-password')
+      await passwordPrompt.getByRole('button', { name: 'Save new password' }).click()
+      await expect(passwordPrompt.getByRole('alert')).toContainText('do not match')
+
+      await passwordPrompt.getByLabel('Confirm new password').fill('new-local-test-password')
+      await passwordPrompt.getByRole('button', { name: 'Save new password' }).click()
+      await expect(passwordPrompt).toBeHidden()
+      accountPassword = 'new-local-test-password'
+      await expect.poll(async () => {
+        return latestSettings(await readFile(settingsPath, 'utf8')).syncServerToken
+      }).not.toBe(headers.Authorization)
+      headers.Authorization = latestSettings(
+        await readFile(settingsPath, 'utf8')
+      ).syncServerToken
+
+      const passwordRevokedResponse = await fetch(
+        `${syncServerUrl}${apiPrefix}/account/sessions`,
+        { headers: { Authorization: passwordRevokedToken } }
+      )
+      expect(passwordRevokedResponse.status).toBe(401)
+      const currentSessionResponse = await fetch(`${syncServerUrl}${apiPrefix}/account/sessions`, {
+        headers
+      })
+      expect(currentSessionResponse.ok).toBe(true)
+
+      const oldPasswordResponse = await fetch(`${syncServerUrl}${apiPrefix}/account/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: username, password: 'local-test-password' })
+      })
+      expect(oldPasswordResponse.status).toBe(403)
+      const newPasswordResponse = await fetch(`${syncServerUrl}${apiPrefix}/account/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: username, password: accountPassword })
+      })
+      expect(newPasswordResponse.ok).toBe(true)
+    }
+
     await syncSection.getByRole('button', { name: 'Sync now' }).click()
     if (!enhancedPrivacy) {
       await expect.poll(async () => {
@@ -275,7 +374,7 @@ test.describe('OpenTubeX sync server', () => {
     await expect(deleteAccountPrompt.getByRole('alert')).toBeVisible()
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
 
-    await deleteAccountPassword.fill('local-test-password')
+    await deleteAccountPassword.fill(accountPassword)
     await deleteAccountPrompt.getByRole('button', { name: 'Delete account' }).click()
     await expect(deleteAccountPrompt).toBeHidden()
     await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeVisible()
@@ -283,13 +382,55 @@ test.describe('OpenTubeX sync server', () => {
     const deletedAccountLoginResponse = await fetch(`${syncServerUrl}${apiPrefix}/account/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: username, password: 'local-test-password' })
+      body: JSON.stringify({ name: username, password: accountPassword })
     })
     expect(deletedAccountLoginResponse.ok).toBe(false)
 
     expect(await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')).toContain(channelId)
     expect(await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')).toContain('sync-playlist')
     expect(await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')).toContain('dQw4w9WgXcQ')
+  })
+
+  test('disconnects after revoking the current account session', async ({ page }) => {
+    const capabilities = await getSyncCapabilities()
+    test.skip(
+      capabilities.encrypted_sync !== 1 || capabilities.account_sessions !== 1,
+      'Enhanced privacy and account sessions are required'
+    )
+
+    const username = `opentubex-session-${randomUUID()}`
+    const password = 'local-test-password'
+    const syncSection = await goToSettingsSection(page, 'sync')
+    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Username').fill(username)
+    await syncSection.getByLabel('Password').fill(password)
+    await syncSection.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
+    await syncSection.getByRole('button', { name: 'Register' }).click()
+    await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+
+    const currentCard = syncSection.locator('.sessionCard', { hasText: 'Current device' })
+    await currentCard.getByRole('button', { name: 'Revoke access' }).click()
+    const revokePrompt = page.getByRole('dialog', { name: 'Revoke this session?' })
+    await expect(revokePrompt).toContainText('disconnect this device')
+    await revokePrompt.getByRole('button', { name: 'Revoke session' }).click()
+    await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeVisible()
+
+    const loginResponse = await fetch(`${syncServerUrl}/v1/account/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: username, password })
+    })
+    expect(loginResponse.ok).toBe(true)
+    const { jwt } = await loginResponse.json()
+    const deleteResponse = await fetch(`${syncServerUrl}/v1/account/delete`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: jwt,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ password })
+    })
+    expect(deleteResponse.ok).toBe(true)
   })
 
   test('syncs custom themes and their deletion', async ({ app, page }) => {

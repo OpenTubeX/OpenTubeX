@@ -744,6 +744,36 @@ Settings:
     Import playlists formats: 'Podržani formati: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Podržani formati: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Uređaji"
+    Devices Hint: "Pregledajte uređaje koji mogu pristupiti ovom računu za sinkronizaciju."
+    Change Password: "Promijeni lozinku"
+    Refresh Devices: "Osvježi uređaje"
+    Current Device: "Trenutačni uređaj"
+    Revoke Session: "Opozovi pristup"
+    Session Created: "Stvorena"
+    Last Active: "Posljednja aktivnost"
+    Session Expires: "Istječe"
+    Unknown Device: "Nepoznat uređaj"
+    Operating System: "Operacijski sustav"
+    Rename Device: "Preimenuj uređaj"
+    Save Device Name: "Spremi naziv"
+    Device Name Invalid: "Nazivi uređaja mogu sadržavati najviše 80 znakova i ne smiju sadržavati kontrolne znakove."
+    Device Renamed: "Uređaj je preimenovan"
+    Revoke Session Confirmation: "Opozvati ovu sesiju?"
+    Revoke Current Session Warning: "Opozivanje ove sesije odspojit će ovaj uređaj s računa za sinkronizaciju."
+    Revoke Session Warning: "{device} izgubit će pristup ovom računu za sinkronizaciju."
+    Confirm Revoke Session: "Opozovi sesiju"
+    Session Revoked: "Sesija je opozvana"
+    Change Password Warning: "Promjena lozinke odjavit će sve ostale uređaje. Ovaj će uređaj ostati povezan."
+    Current Password: "Trenutačna lozinka"
+    New Password: "Nova lozinka"
+    Confirm New Password: "Potvrdi novu lozinku"
+    Save New Password: "Spremi novu lozinku"
+    Account Management Failed: "Nije moguće učitati pojedinosti računa za sinkronizaciju."
+    All Password Fields Required: "Ispunite sva polja za lozinku."
+    New Password Too Short: "Nova lozinka mora sadržavati najmanje 8 znakova."
+    New Passwords Do Not Match: "Nove lozinke se ne podudaraju."
+    Password Changed: "Lozinka je promijenjena. Ostali uređaji su odjavljeni."
     Sync Settings: Sinkronizacija
     Enable Sync: Omogući sinkronizaciju
     Privacy Passphrase: Pristupna fraza za privatnost

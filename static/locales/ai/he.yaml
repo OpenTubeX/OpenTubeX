@@ -764,6 +764,36 @@ Settings:
     Import playlists formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'תבניות נתמכות: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "מכשירים"
+    Devices Hint: "בדקו אילו מכשירים יכולים לגשת לחשבון הסנכרון הזה."
+    Change Password: "שינוי סיסמה"
+    Refresh Devices: "רענון מכשירים"
+    Current Device: "המכשיר הנוכחי"
+    Revoke Session: "ביטול גישה"
+    Session Created: "נוצרה"
+    Last Active: "פעילות אחרונה"
+    Session Expires: "תפוגה"
+    Unknown Device: "מכשיר לא ידוע"
+    Operating System: "מערכת הפעלה"
+    Rename Device: "שינוי שם המכשיר"
+    Save Device Name: "שמירת השם"
+    Device Name Invalid: "שמות מכשירים יכולים להכיל עד 80 תווים וללא תווי בקרה."
+    Device Renamed: "שם המכשיר שונה"
+    Revoke Session Confirmation: "לבטל את ההפעלה הזאת?"
+    Revoke Current Session Warning: "ביטול ההפעלה הזאת ינתק את המכשיר הזה מחשבון הסנכרון."
+    Revoke Session Warning: "הגישה של {device} לחשבון הסנכרון הזה תבוטל."
+    Confirm Revoke Session: "ביטול הפעלה"
+    Session Revoked: "ההפעלה בוטלה"
+    Change Password Warning: "שינוי הסיסמה יוציא את כל המכשירים האחרים מהחשבון. המכשיר הזה יישאר מחובר."
+    Current Password: "הסיסמה הנוכחית"
+    New Password: "סיסמה חדשה"
+    Confirm New Password: "אישור הסיסמה החדשה"
+    Save New Password: "שמירת הסיסמה החדשה"
+    Account Management Failed: "לא ניתן לטעון את פרטי חשבון הסנכרון."
+    All Password Fields Required: "יש למלא את כל שדות הסיסמה."
+    New Password Too Short: "הסיסמה החדשה חייבת להכיל לפחות 8 תווים."
+    New Passwords Do Not Match: "הסיסמאות החדשות אינן תואמות."
+    Password Changed: "הסיסמה שונתה. המכשירים האחרים נותקו."
     Sync Settings: סנכרון
     Enable Sync: הפעלת סנכרון
     Privacy Passphrase: ביטוי סיסמה לפרטיות

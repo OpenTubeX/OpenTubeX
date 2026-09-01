@@ -759,6 +759,36 @@ Settings:
     Import playlists formats: 'Підтримувані формати: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Підтримувані формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Пристрої"
+    Devices Hint: "Перегляньте пристрої, які мають доступ до цього облікового запису синхронізації."
+    Change Password: "Змінити пароль"
+    Refresh Devices: "Оновити список пристроїв"
+    Current Device: "Поточний пристрій"
+    Revoke Session: "Відкликати доступ"
+    Session Created: "Створено"
+    Last Active: "Остання активність"
+    Session Expires: "Термін дії"
+    Unknown Device: "Невідомий пристрій"
+    Operating System: "Операційна система"
+    Rename Device: "Перейменувати пристрій"
+    Save Device Name: "Зберегти назву"
+    Device Name Invalid: "Назва пристрою може містити не більше 80 символів і не повинна містити керівних символів."
+    Device Renamed: "Пристрій перейменовано"
+    Revoke Session Confirmation: "Відкликати цей сеанс?"
+    Revoke Current Session Warning: "Відкликання цього сеансу від’єднає пристрій від облікового запису синхронізації."
+    Revoke Session Warning: "{device} втратить доступ до цього облікового запису синхронізації."
+    Confirm Revoke Session: "Відкликати сеанс"
+    Session Revoked: "Сеанс відкликано"
+    Change Password Warning: "Після зміни пароля всі інші пристрої вийдуть з облікового запису. Цей пристрій залишиться підключеним."
+    Current Password: "Поточний пароль"
+    New Password: "Новий пароль"
+    Confirm New Password: "Підтвердьте новий пароль"
+    Save New Password: "Зберегти новий пароль"
+    Account Management Failed: "Не вдалося завантажити відомості про обліковий запис синхронізації."
+    All Password Fields Required: "Заповніть усі поля пароля."
+    New Password Too Short: "Новий пароль має містити щонайменше 8 символів."
+    New Passwords Do Not Match: "Нові паролі не збігаються."
+    Password Changed: "Пароль змінено. На інших пристроях виконано вихід."
     Sync Settings: Синхронізація
     Enable Sync: Увімкнути синхронізацію
     Privacy Passphrase: Парольна фраза для захисту даних
