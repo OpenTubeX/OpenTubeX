@@ -342,11 +342,11 @@ test('yt-dlp playback refreshes once then prefers built-in SABR over legacy', as
 })
 
 test('yt-dlp timeout reload reuses cache while a rejected source is invalidated', async ({ app, page }) => {
-  await mockUnplayableWatchPage(app, page)
+  await mockPlayableWatchPage(app, page)
   await goTo(page, 'history')
   await page.getByText('SABR test video').click()
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+  await expect(page.locator('.ftVideoPlayer')).toBeVisible({ timeout: 30_000 })
 
   const watchView = await watchViewHandle(page)
   const result = await watchView.evaluate(async (view) => {
@@ -382,30 +382,39 @@ test('yt-dlp timeout reload reuses cache while a rejected source is invalidated'
     view.activePlaybackEngineVersion = 'test'
     view.streamErrorReloadAttemptedForCurrentVideo = false
     view.playbackEngineFallbackAttemptedForCurrentVideo = false
-    view.playbackEngineFallbackTarget = null
-    view.ytDlpStreamsPending = true
+    view.playbackEngineFallbackTarget = 'yt-dlp'
     view.manifestSrc = 'data:application/dash+xml,yt-dlp'
     view.manifestMimeType = 'application/dash+xml'
     view.legacyFormats = []
 
-    let refreshes = 0
+    const initialLoadGeneration = view.videoLoadGeneration
     const cacheReuseResults = []
-    view.reloadView = async () => {
-      refreshes++
-      cacheReuseResults.push(await view.extractYtDlpPlaybackSource(
-        view.videoLoadGeneration,
-        view.videoId,
-        view.playbackEngineSwitchGeneration,
+    const extractYtDlpPlaybackSource = view.extractYtDlpPlaybackSource.bind(view)
+    view.extractYtDlpPlaybackSource = async (...args) => {
+      const [loadGeneration, videoId, playbackEngineSwitchGeneration] = args
+      const reused = await extractYtDlpPlaybackSource(
+        loadGeneration,
+        videoId,
+        playbackEngineSwitchGeneration,
         useAuthentication,
         true
-      ))
+      )
+      cacheReuseResults.push(reused)
+      // Keep the synthetic cached manifest from mounting a player between reloads.
+      view.errorMessage = 'Synthetic player hold'
+      return reused
     }
-    let sabrReloads = 0
-    view.performSabrReload = async () => {
-      sabrReloads++
+    const waitForCacheLookup = async (count) => {
+      for (let attempt = 0; attempt < 100; attempt++) {
+        if (cacheReuseResults.length >= count) return
+        await new Promise(resolve => setTimeout(resolve, 10))
+      }
+      throw new Error('Timed out waiting for the yt-dlp cache lookup')
     }
 
     await view.handlePlayerError({ code: TIMEOUT, data: [] })
+    await waitForCacheLookup(1)
+    const activePlaybackEngineAfterTimeout = view.activePlaybackEngine
     const cacheEntryAfterTimeout = await window.ftElectron.ytDlpPlaybackCacheGet(
       view.videoId,
       cacheKey
@@ -421,27 +430,26 @@ test('yt-dlp timeout reload reuses cache while a rejected source is invalidated'
     }
     view.streamErrorReloadAttemptedForCurrentVideo = false
     await view.handlePlayerError({ code: BAD_HTTP_STATUS, data: ['https://example.invalid/video', 403] })
+    await waitForCacheLookup(2)
 
     return {
-      activePlaybackEngine: view.activePlaybackEngine,
+      activePlaybackEngineAfterTimeout,
       cacheEntryAfterRejection: await window.ftElectron.ytDlpPlaybackCacheGet(
         view.videoId,
         cacheKey
       ),
       cachePreservedAfterTimeout: cacheEntryAfterTimeout !== null,
       cacheReuseResults,
-      refreshes,
-      sabrReloads
+      reloads: view.videoLoadGeneration - initialLoadGeneration
     }
   })
 
   expect(result).toEqual({
-    activePlaybackEngine: 'yt-dlp',
+    activePlaybackEngineAfterTimeout: 'yt-dlp',
     cacheEntryAfterRejection: null,
     cachePreservedAfterTimeout: true,
     cacheReuseResults: [true, false],
-    refreshes: 2,
-    sabrReloads: 0
+    reloads: 2
   })
 })
 
