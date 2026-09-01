@@ -60,6 +60,29 @@ async function expectPlayerMenuScrollState(menu, atEnd = true) {
   }, atEnd)).toEqual({ scrollPositionValid: true, scrollbarMatchesOverflow: true })
 }
 
+async function expectSponsorBlockContentClamp(content, previousScrollTop) {
+  await expect.poll(() => content.evaluate((element, previousScrollTop) => {
+    const viewportBounds = element.getBoundingClientRect()
+    const contentEndBounds = element.querySelector('.sponsorBlockFooter').getBoundingClientRect()
+    const maximumScrollTop = Math.max(
+      0,
+      element.scrollTop + contentEndBounds.bottom - viewportBounds.bottom
+    )
+    const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+    const hasVerticalOverflow = maximumScrollTop > 1
+    return {
+      scrollTopReduced: element.scrollTop < previousScrollTop,
+      withinRenderedRange: element.scrollTop <= maximumScrollTop + 1,
+      scrollbarMatchesOverflow:
+        scrollbar?.classList.contains('os-scrollbar-visible') === hasVerticalOverflow
+    }
+  }, previousScrollTop)).toEqual({
+    scrollTopReduced: true,
+    withinRenderedRange: true,
+    scrollbarMatchesOverflow: true
+  })
+}
+
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
 test('keeps metadata errors visible in family-friendly-only mode', async ({ app, page }) => {
@@ -3437,6 +3460,7 @@ test.describe('watch page', () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setUseSponsorBlock', true)
       store.commit('setSponsorBlockGeneratedUserId', 'test-contributor')
+      await store.dispatch('updateSponsorBlockEnableSubmission', true)
       await store.dispatch('updateUiScale', 125)
     })
     await openMockedVideo(page)
@@ -3485,21 +3509,21 @@ test.describe('watch page', () => {
     await panel.evaluate((element) => { element.style.inlineSize = '' })
     await expect.poll(() => panel.evaluate(element => element.getBoundingClientRect().width))
       .toBeGreaterThan(240)
-    await expect.poll(() => content.evaluate((element, previousScrollTop) => {
-      const viewportBounds = element.getBoundingClientRect()
-      const contentEndBounds = element.querySelector('.sponsorBlockFooter').getBoundingClientRect()
-      const maximumScrollTop = Math.max(
-        0,
-        element.scrollTop + contentEndBounds.bottom - viewportBounds.bottom
-      )
-      return {
-        scrollTopReduced: element.scrollTop < previousScrollTop,
-        withinRenderedRange: element.scrollTop <= maximumScrollTop + 1
-      }
-    }, narrowScrollTop)).toEqual({
-      scrollTopReduced: true,
-      withinRenderedRange: true
+    await expectSponsorBlockContentClamp(content, narrowScrollTop)
+
+    await content.evaluate((element) => { element.scrollTop = element.scrollHeight })
+    const enabledScrollTop = await content.evaluate(element => element.scrollTop)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateSponsorBlockEnableSubmission', false)
     })
+    await expect(stats).toHaveCount(0)
+    await expectSponsorBlockContentClamp(content, enabledScrollTop)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateSponsorBlockEnableSubmission', true)
+    })
+    await expect(stats).toBeVisible()
 
     await panel.getByRole('button', { name: 'Close' }).click()
     await page.getByRole('button', { name: 'Open SponsorBlock info' }).click()
@@ -3525,6 +3549,23 @@ test.describe('watch page', () => {
     })
   })
 
+  test('hides SponsorBlock contribution stats when submission is disabled', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseSponsorBlock', true)
+      store.commit('setSponsorBlockGeneratedUserId', 'test-contributor')
+    })
+    await expect.poll(() => page.evaluate(() => {
+      return document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters
+        .getSponsorBlockEnableSubmission
+    })).toBe(false)
+    await openMockedVideo(page)
+    await page.getByRole('button', { name: 'Open SponsorBlock info' }).click()
+
+    await expect(page.locator('.sponsorBlockContributionStats')).toHaveCount(0)
+  })
+
   test('does not create a SponsorBlock user ID to load contribution stats', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
 
@@ -3533,9 +3574,10 @@ test.describe('watch page', () => {
       userInfoRequests++
       return route.abort()
     })
-    await page.evaluate(() => {
+    await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setUseSponsorBlock', true)
+      await store.dispatch('updateSponsorBlockEnableSubmission', true)
     })
     await openMockedVideo(page)
     await page.getByRole('button', { name: 'Open SponsorBlock info' }).click()

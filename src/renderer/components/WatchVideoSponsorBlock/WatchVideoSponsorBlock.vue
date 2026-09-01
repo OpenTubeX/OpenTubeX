@@ -13,14 +13,14 @@
       <div class="sponsorBlockHeaderActions">
         <button
           type="button"
-          :disabled="loading || contributionStatsLoading"
+          :disabled="loading || (submissionEnabled && contributionStatsLoading)"
           :aria-label="$t('Video.Player.SponsorBlock.RefreshInfo')"
           :title="$t('Video.Player.SponsorBlock.RefreshInfo')"
           @click="$emit('refresh')"
         >
           <ft-icon
             :icon="['fas', 'sync']"
-            :spin="loading || contributionStatsLoading"
+            :spin="loading || (submissionEnabled && contributionStatsLoading)"
           />
         </button>
         <button
@@ -48,6 +48,7 @@
             : $t('Video.Player.SponsorBlock.InfoPanelNoSegments') }}
       </div>
       <section
+        v-if="submissionEnabled"
         class="sponsorBlockContributionStats"
         :aria-busy="String(contributionStatsLoading || !contributionStatsLoaded)"
       >
@@ -336,6 +337,7 @@ watch(
     props.contributionStatsError,
     props.contributionStatsLoaded,
     props.contributionStatsLoading,
+    props.submissionEnabled,
     selectedUuid.value,
   ],
   scheduleScrollClamp
