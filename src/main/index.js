@@ -4973,14 +4973,15 @@ function runApp() {
         case DBActions.GENERAL.FIND:
           return await baseHandlers.searchHistory.find()
 
-        case DBActions.GENERAL.UPSERT:
-          await baseHandlers.searchHistory.upsert(data)
+        case DBActions.GENERAL.UPSERT: {
+          const updatedEntry = await baseHandlers.searchHistory.upsert(data)
           syncOtherWindows(
             IpcChannels.SYNC_SEARCH_HISTORY,
             event,
-            { event: SyncEvents.GENERAL.UPSERT, data }
+            { event: SyncEvents.GENERAL.UPSERT, data: updatedEntry }
           )
-          return null
+          return updatedEntry
+        }
 
         case DBActions.GENERAL.OVERWRITE:
           await baseHandlers.searchHistory.overwrite(data)

@@ -1,6 +1,7 @@
 import * as db from '../index'
 import { PlaylistVideoAddResult } from '../../constants'
 import { hasReachedWatchedThreshold, migrateLegacyHistoryRecord } from '../../history'
+import { resolveSearchHistoryEntry } from '../../search-history'
 
 const HISTORY_WATCHED_STATUS_MIGRATION_ID = 'historyWatchedStatusMigrated'
 
@@ -637,8 +638,18 @@ class SearchHistory {
     return db.searchHistory.findAsync({}).sort({ lastUpdatedAt: -1 })
   }
 
-  static upsert(searchHistoryEntry) {
-    return db.searchHistory.updateAsync({ _id: searchHistoryEntry._id }, searchHistoryEntry, { upsert: true })
+  static async upsert(searchHistoryEntry) {
+    const matchingCandidates = await db.searchHistory.findAsync({
+      $or: [
+        { _id: searchHistoryEntry._id },
+        { _id: searchHistoryEntry.query },
+        { query: searchHistoryEntry.query },
+      ],
+    })
+    const resolvedEntry = resolveSearchHistoryEntry(searchHistoryEntry, matchingCandidates)
+
+    await db.searchHistory.updateAsync({ _id: resolvedEntry._id }, resolvedEntry, { upsert: true })
+    return resolvedEntry
   }
 
   static async overwrite(records) {

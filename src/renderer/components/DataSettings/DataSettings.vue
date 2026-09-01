@@ -196,7 +196,7 @@ import {
   DEFAULT_SEARCH_SETTINGS,
   mergeSearchHistoryEntries,
   normalizeSearchHistoryEntry,
-} from '../../helpers/search-history'
+} from '../../../search-history'
 
 const IMPORT_DIRECTORY_ID = 'data-settings-import'
 const START_IN_DIRECTORY = 'downloads'

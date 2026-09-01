@@ -5,8 +5,9 @@ import {
   getSearchHistoryEntryKeyFromEntry,
   mergeSearchHistoryEntries,
   normalizeSearchHistoryEntry,
+  resolveSearchHistoryEntry,
   sortSearchHistoryByLastUpdatedAt,
-} from '../../src/renderer/helpers/search-history.js'
+} from '../../src/search-history.js'
 
 test('sorts overwritten search history by newest update first', () => {
   const older = { _id: 'older search', lastUpdatedAt: 100 }
@@ -97,4 +98,30 @@ test('updates matching query and filter imports without replacing their id', () 
     ...normalizeSearchHistoryEntry(imported),
     _id: 'existing-id',
   }])
+})
+
+test('preserves a matching legacy id when history has not loaded into the store yet', () => {
+  const legacyEntry = {
+    _id: 'trailers',
+    lastUpdatedAt: 100,
+    searchSettings: { features: ['hd', '4k'] },
+  }
+  const submittedEntry = {
+    query: 'trailers',
+    lastUpdatedAt: 200,
+    searchSettings: { features: ['4k', 'hd'] },
+  }
+
+  assert.deepEqual(resolveSearchHistoryEntry(submittedEntry, [legacyEntry]), {
+    _id: 'trailers',
+    query: 'trailers',
+    lastUpdatedAt: 200,
+    searchSettings: {
+      prioritize: 'relevance',
+      time: '',
+      type: 'all',
+      duration: '',
+      features: ['4k', 'hd'],
+    },
+  })
 })

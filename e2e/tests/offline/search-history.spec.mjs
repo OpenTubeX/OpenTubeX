@@ -174,6 +174,38 @@ test.describe('search history suggestions', () => {
     await expect.poll(() => new URLSearchParams(page.url().split('?')[1]).get('time')).toBe('week')
   })
 
+  test('an early search reuses a matching legacy database entry', async ({ app, page }) => {
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const tabId = store.getters.getPresentedTabId ?? 'web'
+      store.commit('setSearchHistoryEntries', [])
+      store.commit('setSearchPrioritize', { tabId, value: 'popularity' })
+      store.commit('setSearchTime', { tabId, value: 'today' })
+      store.commit('setSearchType', { tabId, value: 'video' })
+      store.commit('setSearchDuration', { tabId, value: 'three_to_twenty_mins' })
+      store.commit('setSearchFeatures', { tabId, value: ['subtitles', 'hd'] })
+    })
+
+    await page.locator(sel.searchInput).fill('android tutorial')
+    await page.locator(sel.searchInput).press('Enter')
+
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'search-history.db'), 'utf8')
+      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      return [...new Set(records
+        .filter(entry => !entry.$$deleted && (
+          entry._id === 'android tutorial' || entry.query === 'android tutorial'
+        ))
+        .map(entry => entry._id))]
+    }).toEqual(['android tutorial'])
+
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'search-history.db'), 'utf8')
+      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      return records.filter(entry => entry._id === 'android tutorial').at(-1)?.query
+    }).toBe('android tutorial')
+  })
+
   test('a recent search can be removed and stays removed', async ({ app, page }) => {
     await page.locator(sel.searchInput).click()
     await expect(suggestions(page)).toHaveCount(2)

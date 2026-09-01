@@ -176,7 +176,7 @@ import store from '../../store/index'
 
 import { getConfiguredKeyboardShortcuts, MOBILE_WIDTH_THRESHOLD, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
-import { getSearchHistoryEntryQuery } from '../../helpers/search-history'
+import { getSearchHistoryEntryQuery } from '../../../search-history'
 import { debounce, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 import { clearLocalSearchSuggestionsSession, getLocalSearchSuggestions } from '../../helpers/api/local'

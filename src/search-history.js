@@ -73,6 +73,28 @@ export function getSearchHistoryEntryId(query, searchSettings) {
 }
 
 /**
+ * Preserve an existing ID for a matching query and filter preset.
+ * @param {{ _id?: string, query: string, lastUpdatedAt: number, searchSettings?: object }} entry
+ * @param {{ _id: string, query?: string, lastUpdatedAt: number, searchSettings?: object }[]} existingEntries
+ * @returns {ReturnType<typeof normalizeSearchHistoryEntry>}
+ */
+export function resolveSearchHistoryEntry(entry, existingEntries) {
+  const normalizedEntry = normalizeSearchHistoryEntry(entry)
+  const entryKey = getSearchHistoryEntryKeyFromEntry(normalizedEntry)
+  const existingEntry = existingEntries.find(candidate => {
+    return getSearchHistoryEntryKeyFromEntry(candidate) === entryKey
+  })
+
+  return {
+    ...normalizedEntry,
+    _id: existingEntry?._id ?? normalizedEntry._id ?? getSearchHistoryEntryId(
+      normalizedEntry.query,
+      normalizedEntry.searchSettings
+    ),
+  }
+}
+
+/**
  * @param {{ _id: string, query?: string, lastUpdatedAt: number, searchSettings?: object }} entry
  * @returns {{ _id: string, query: string, lastUpdatedAt: number, searchSettings: ReturnType<typeof normalizeSearchSettings> }}
  */

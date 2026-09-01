@@ -1,12 +1,12 @@
 import { MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT } from '../../../constants'
 import { DBSearchHistoryHandlers } from '../../../datastores/handlers/index'
 import {
-  getSearchHistoryEntryId,
-  getSearchHistoryEntryKeyFromEntry,
   getSearchHistoryEntryQuery,
+  mergeSearchHistoryEntries,
   normalizeSearchHistoryEntry,
+  resolveSearchHistoryEntry,
   sortSearchHistoryByLastUpdatedAt,
-} from '../../helpers/search-history'
+} from '../../../search-history'
 
 const state = {
   searchHistoryEntries: []
@@ -44,7 +44,7 @@ const actions = {
   async grabSearchHistoryEntries({ commit }) {
     try {
       const results = await DBSearchHistoryHandlers.find()
-      commit('setSearchHistoryEntries', results)
+      commit('mergeLoadedSearchHistoryEntries', results)
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -52,18 +52,9 @@ const actions = {
 
   async updateSearchHistoryEntry({ state, commit }, searchHistoryEntry) {
     try {
-      const normalizedEntry = normalizeSearchHistoryEntry(searchHistoryEntry)
-      const entryKey = getSearchHistoryEntryKeyFromEntry(normalizedEntry)
-      const existingEntry = state.searchHistoryEntries.find(entry => {
-        return getSearchHistoryEntryKeyFromEntry(entry) === entryKey
-      })
-      const updatedEntry = {
-        ...normalizedEntry,
-        _id: existingEntry?._id ?? getSearchHistoryEntryId(normalizedEntry.query, normalizedEntry.searchSettings),
-      }
-
-      await DBSearchHistoryHandlers.upsert(updatedEntry)
-      commit('upsertSearchHistoryEntryToList', updatedEntry)
+      const updatedEntry = resolveSearchHistoryEntry(searchHistoryEntry, state.searchHistoryEntries)
+      const persistedEntry = await DBSearchHistoryHandlers.upsert(updatedEntry)
+      commit('upsertSearchHistoryEntryToList', persistedEntry ?? updatedEntry)
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -108,6 +99,11 @@ const actions = {
 }
 
 const mutations = {
+  mergeLoadedSearchHistoryEntries(state, searchHistoryEntries) {
+    state.searchHistoryEntries = mergeSearchHistoryEntries(searchHistoryEntries, state.searchHistoryEntries)
+    sortSearchHistoryByLastUpdatedAt(state.searchHistoryEntries)
+  },
+
   setSearchHistoryEntries(state, searchHistoryEntries) {
     state.searchHistoryEntries = searchHistoryEntries.map(normalizeSearchHistoryEntry)
   },
