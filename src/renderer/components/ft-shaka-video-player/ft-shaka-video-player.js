@@ -2081,14 +2081,15 @@ export default defineComponent({
     }
 
     async function refreshSponsorBlockInfo() {
-      await Promise.all([
-        setupSponsorBlock(),
-        refreshSponsorBlockContributionStats()
-      ])
+      const refreshTasks = [setupSponsorBlock()]
+      if (sponsorBlockEnableSubmission.value) {
+        refreshTasks.push(refreshSponsorBlockContributionStats())
+      }
+      await Promise.all(refreshTasks)
     }
 
     async function refreshSponsorBlockContributionStats() {
-      if (sponsorBlockContributionStatsLoading.value) {
+      if (!sponsorBlockEnableSubmission.value || sponsorBlockContributionStatsLoading.value) {
         return
       }
 
@@ -2134,6 +2135,7 @@ export default defineComponent({
       sponsorBlockInfoOpen.value = !sponsorBlockInfoOpen.value
       if (
         sponsorBlockInfoOpen.value &&
+        sponsorBlockEnableSubmission.value &&
         !sponsorBlockContributionStatsLoaded.value &&
         !sponsorBlockContributionStatsLoading.value
       ) {
@@ -5072,7 +5074,17 @@ export default defineComponent({
 
     watch(sponsorSkips, scheduleSponsorBlockSkip)
 
-    watch(sponsorBlockEnableSubmission, () => emitSponsorBlockInfoState())
+    watch(sponsorBlockEnableSubmission, (enabled) => {
+      if (
+        enabled &&
+        sponsorBlockInfoOpen.value &&
+        !sponsorBlockContributionStatsLoaded.value &&
+        !sponsorBlockContributionStatsLoading.value
+      ) {
+        refreshSponsorBlockContributionStats()
+      }
+      emitSponsorBlockInfoState()
+    })
 
     watch(sponsorBlockDraftSegmentsByVideoId, () => {
       loadSponsorBlockDrafts()
