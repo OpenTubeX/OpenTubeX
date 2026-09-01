@@ -4682,7 +4682,12 @@ export default defineComponent({
       // URL or extraction. Refresh those streams once before changing format or
       // restoring the cached built-in source (which may use SABR).
       if (this.activePlaybackEngine === 'yt-dlp') {
-        invalidateYtDlpPlaybackSource(this.videoId)
+        // A timeout says nothing about whether the cached source is stale. Keep
+        // valid cached streams for that reload so recovery does not needlessly
+        // run yt-dlp again, while other failures retain the existing refresh.
+        if (error.code !== Code.TIMEOUT) {
+          invalidateYtDlpPlaybackSource(this.videoId)
+        }
         const status = error.code === Code.BAD_HTTP_STATUS ? error.data[1] : error.code
         if (await this.reloadAfterStreamErrorOnce(`[PLAYER_ERROR: ${status}]`)) {
           return
