@@ -824,15 +824,17 @@ const toastPositionNames = computed(() => [
 
 /** @type {import('vue').ComputedRef<'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'>} */
 const toastPosition = computed(() => normalizeToastPosition(store.getters.getToastPosition))
+let toastPositionUpdatePromise = Promise.resolve()
 
 /**
  * @param {'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'} value
  */
 function updateToastPosition(value) {
-  store.dispatch('updateToastPosition', value)
+  toastPositionUpdatePromise = store.dispatch('updateToastPosition', value)
 }
 
-function showTestToast() {
+async function showTestToast() {
+  await toastPositionUpdatePromise
   showToast({
     message: t('Settings.Theme Settings.Toast Position.Test Toast'),
     icon: ['fas', 'message']

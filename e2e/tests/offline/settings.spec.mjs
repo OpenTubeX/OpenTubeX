@@ -3357,10 +3357,15 @@ test.describe('settings', () => {
     const themeSection = page.locator('[data-section="appearance"]')
     const toastPositionRow = themeSection.locator('.themeSelectRow')
       .filter({ hasText: 'Toast Position' })
+    const positionSelect = toastPositionRow.locator('.select')
+      .filter({ hasText: 'Toast Position' })
+      .locator('select')
     const holder = page.locator('.toast-holder')
 
+    await positionSelect.selectOption('top-right')
     await toastPositionRow.getByRole('button', { name: 'Test toast' }).click()
 
+    await expect(holder).toHaveClass(/position-top-right/)
     await expect(holder.locator('.toast', { hasText: 'Test toast' })).toBeVisible()
   })
 
