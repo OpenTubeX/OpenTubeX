@@ -910,7 +910,7 @@ Channel:
   Videos per day: Videá za deň
   Use global setting: Použiť globálne nastavenie
   Unlimited: Bez obmedzenia
-  More videos hidden: '+{count} ďalších'
+  More videos hidden: '+{count} ďalších | +{count} ďalších | +{count} ďalších'
   Show in subscription feed: Zobraziť v kanáli odberov
   Channel Name Unavailable: Názov kanála nie je dostupný
   Search Result Types: Typy výsledkov hľadania

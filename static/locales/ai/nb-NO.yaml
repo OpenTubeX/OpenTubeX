@@ -929,7 +929,7 @@ Channel:
   Videos per day: Videoer per dag
   Use global setting: Bruk global innstilling
   Unlimited: Ubegrenset
-  More videos hidden: '+{count} til'
+  More videos hidden: '+{count} til | +{count} til'
   Show in subscription feed: Vis i abonnementsfeeden
   Channel Name Unavailable: Kanalnavnet er ikke tilgjengelig
   Search Result Types: Typer søkeresultater

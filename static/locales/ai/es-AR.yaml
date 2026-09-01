@@ -1091,7 +1091,7 @@ Channel:
   Videos per day: Videos por día
   Use global setting: Usar configuración global
   Unlimited: Sin límite
-  More videos hidden: '+{count} más'
+  More videos hidden: '+{count} más | +{count} más | +{count} más'
   Show in subscription feed: Mostrar en el feed de suscripciones
   Subscribe: Suscribirse
   Unsubscribe: Anular suscripción

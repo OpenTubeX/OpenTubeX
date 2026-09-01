@@ -960,7 +960,7 @@ Channel:
   Videos per day: ویدیو در روز
   Use global setting: استفاده از تنظیم سراسری
   Unlimited: نامحدود
-  More videos hidden: '+{count} ویدیوی دیگر'
+  More videos hidden: '+{count} ویدیوی دیگر | +{count} ویدیوی دیگر'
   Show in subscription feed: نمایش در خوراک اشتراک‌ها
   Channel Name Unavailable: نام کانال در دسترس نیست
   Search Result Types: انواع نتایج جست‌وجو

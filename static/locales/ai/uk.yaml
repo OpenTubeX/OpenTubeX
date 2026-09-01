@@ -929,7 +929,7 @@ Channel:
   Videos per day: Відео на день
   Use global setting: Використовувати загальне налаштування
   Unlimited: Без обмежень
-  More videos hidden: '+{count} ще'
+  More videos hidden: '+{count} ще | +{count} ще | +{count} ще'
   Show in subscription feed: Показувати у стрічці підписок
   Channel Name Unavailable: Назва каналу недоступна
   Search Result Types: Типи результатів пошуку

@@ -910,7 +910,7 @@ Channel:
   Videos per day: Video al giorno
   Use global setting: Usa impostazione globale
   Unlimited: Senza limiti
-  More videos hidden: '+{count} altri'
+  More videos hidden: '+{count} altri | +{count} altri | +{count} altri'
   Show in subscription feed: Mostra nel feed degli abbonamenti
   Channel Name Unavailable: Nome del canale non disponibile
   Search Result Types: Tipi di risultati della ricerca

@@ -934,7 +934,7 @@ Channel:
   Videos per day: Videoita päivässä
   Use global setting: Käytä yleistä asetusta
   Unlimited: Rajoittamaton
-  More videos hidden: '+{count} lisää'
+  More videos hidden: '+{count} lisää | +{count} lisää'
   Show in subscription feed: Näytä tilaussyötteessä
   Channel Name Unavailable: Kanavan nimeä ei ole saatavilla
   Search Result Types: Hakutulosten tyypit

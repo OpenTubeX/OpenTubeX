@@ -252,7 +252,7 @@
           <span
             v-if="subscriptionHiddenVideoCount > 0"
             class="subscriptionHiddenVideoCount"
-          >{{ t('Channel.More videos hidden', { count: subscriptionHiddenVideoCount }) }}</span>
+          >{{ t('Channel.More videos hidden', { count: subscriptionHiddenVideoCount }, subscriptionHiddenVideoCount) }}</span>
           <span
             v-if="isLive && !hideViews"
             class="viewCount"

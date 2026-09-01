@@ -229,6 +229,12 @@ test('plural rules pick the form each language groups the count under', () => {
     counts.map(() => 0)
   )
 
+  // Arabic has distinct zero, singular, dual, few, many and other forms
+  assert.deepEqual(
+    selectForms('ar', 6, [0, 1, 2, 3, 11, 100]),
+    [0, 1, 2, 3, 4, 5]
+  )
+
   // English is unchanged: singular for 1, plural for everything else
   assert.deepEqual(
     selectForms('en-US', 2, [0, ...counts]),

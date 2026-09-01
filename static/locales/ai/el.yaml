@@ -934,7 +934,7 @@ Channel:
   Videos per day: Βίντεο ανά ημέρα
   Use global setting: Χρήση καθολικής ρύθμισης
   Unlimited: Χωρίς όριο
-  More videos hidden: '+{count} ακόμη'
+  More videos hidden: '+{count} ακόμη | +{count} ακόμη'
   Show in subscription feed: Εμφάνιση στη ροή συνδρομών
   Channel Name Unavailable: Το όνομα καναλιού δεν είναι διαθέσιμο
   Search Result Types: Τύποι αποτελεσμάτων αναζήτησης

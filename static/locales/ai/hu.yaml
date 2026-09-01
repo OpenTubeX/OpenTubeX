@@ -910,7 +910,7 @@ Channel:
   Videos per day: Videók naponta
   Use global setting: Globális beállítás használata
   Unlimited: Korlátlan
-  More videos hidden: '+{count} további'
+  More videos hidden: '+{count} további | +{count} további'
   Show in subscription feed: Megjelenítés a feliratkozási hírfolyamban
   Channel Name Unavailable: A csatorna neve nem érhető el
   Search Result Types: Keresési találatok típusai

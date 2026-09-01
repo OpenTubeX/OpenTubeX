@@ -912,7 +912,7 @@ Channel:
   Videos per day: Видеоклипове на ден
   Use global setting: Използване на глобалната настройка
   Unlimited: Без ограничение
-  More videos hidden: '+{count} още'
+  More videos hidden: '+{count} още | +{count} още'
   Show in subscription feed: Показване в емисията с абонаменти
   Channel Name Unavailable: Името на канала не е налично
   Search Result Types: Видове резултати от търсенето

@@ -116,6 +116,22 @@ test.describe('subscribed channels', () => {
     }
   })
 
+  test('focuses the profile dropdown and restores focus after Escape', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+
+    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    const toggle = alpha.getByRole('button', { name: 'Subscription settings' })
+    await toggle.click()
+
+    const dropdown = page.locator('.profileDropdown')
+    await expect(dropdown).toBeFocused()
+
+    await page.keyboard.press('Escape')
+
+    await expect(dropdown).toBeHidden()
+    await expect(toggle).toBeFocused()
+  })
+
   test('keeps the profile dropdown inside the viewport near a window edge', async ({ page }) => {
     await goTo(page, 'subscribedchannels')
     await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))

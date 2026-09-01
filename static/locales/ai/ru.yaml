@@ -906,7 +906,7 @@ Channel:
   Videos per day: Видео в день
   Use global setting: Использовать общую настройку
   Unlimited: Без ограничений
-  More videos hidden: '+{count} ещё'
+  More videos hidden: '+{count} ещё | +{count} ещё | +{count} ещё'
   Show in subscription feed: Показывать в ленте подписок
   Channel Name Unavailable: Название канала недоступно
   Search Result Types: Типы результатов поиска

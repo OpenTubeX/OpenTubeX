@@ -929,7 +929,7 @@ Channel:
   Videos per day: Vídeos ao día
   Use global setting: Usar a configuración global
   Unlimited: Sen límite
-  More videos hidden: '+{count} máis'
+  More videos hidden: '+{count} máis | +{count} máis'
   Show in subscription feed: Mostrar na fonte de subscricións
   Channel Name Unavailable: O nome da canle non está dispoñible
   Search Result Types: Tipos de resultados da busca

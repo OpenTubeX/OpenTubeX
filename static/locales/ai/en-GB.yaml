@@ -888,7 +888,7 @@ Channel:
   Videos per day: Videos per day
   Use global setting: Use global setting
   Unlimited: Unlimited
-  More videos hidden: '+{count} more'
+  More videos hidden: '+{count} more | +{count} more'
   Show in subscription feed: Show in subscription feed
   Channel Name Unavailable: Channel name unavailable
   Search Result Types: Search result types

@@ -910,7 +910,7 @@ Channel:
   Videos per day: Günlük video sayısı
   Use global setting: Genel ayarı kullan
   Unlimited: Sınırsız
-  More videos hidden: '+{count} daha'
+  More videos hidden: '+{count} daha | +{count} daha'
   Show in subscription feed: Abonelik akışında göster
   Channel Name Unavailable: Kanal adı kullanılamıyor
   Search Result Types: Arama sonucu türleri

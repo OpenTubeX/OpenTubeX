@@ -933,7 +933,7 @@ Channel:
   Videos per day: ஒரு நாளுக்கான காணொளிகள்
   Use global setting: பொதுவான அமைப்பைப் பயன்படுத்து
   Unlimited: வரம்பற்றது
-  More videos hidden: '+{count} மேலும்'
+  More videos hidden: '+{count} மேலும் | +{count} மேலும்'
   Show in subscription feed: சந்தா ஊட்டத்தில் காட்டு
   Channel Name Unavailable: சேனல் பெயர் கிடைக்கவில்லை
   Search Result Types: தேடல் முடிவு வகைகள்

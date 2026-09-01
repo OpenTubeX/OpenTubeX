@@ -1201,7 +1201,7 @@ Channel:
   Videos per day: Videoar per dag
   Use global setting: Bruk global innstilling
   Unlimited: Uavgrensa
-  More videos hidden: '+{count} til'
+  More videos hidden: '+{count} til | +{count} til'
   Show in subscription feed: Vis i abonnementsstraumen
   Channel Name Unavailable: Kanalnamnet er ikkje tilgjengeleg
   Search Result Types: Typar søkjeresultat

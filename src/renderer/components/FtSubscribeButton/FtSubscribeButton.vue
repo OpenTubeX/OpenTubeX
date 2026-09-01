@@ -65,6 +65,7 @@
           }"
           :style="profileDropdownStyle"
           @focusout="handleProfileDropdownFocusOut"
+          @keydown.esc.stop.prevent="closeProfileDropdown"
         >
           <div class="feedTypePreferences">
             <div
@@ -356,6 +357,11 @@ watch(isProfileDropdownOpen, async (open) => {
     !isProfileDropdownOpen.value || profileDropdown.value === null) return
 
   positionProfileDropdown()
+  await nextTick()
+  if (generation !== profileListObservationGeneration ||
+    !isProfileDropdownOpen.value || profileDropdown.value === null) return
+
+  profileDropdown.value.focus({ preventScroll: true })
   profileDropdownPositionResizeObserver = new ResizeObserver(scheduleProfileDropdownPositionUpdate)
   profileDropdownPositionResizeObserver.observe(profileDropdown.value)
   if (buttonList.value !== null) {
@@ -625,6 +631,13 @@ function toggleProfileDropdown() {
     prepareProfileDropdownPosition()
     isProfileDropdownOpen.value = true
   }
+}
+
+function closeProfileDropdown() {
+  isProfileDropdownOpen.value = false
+  nextTick(() => {
+    subscribeButton.value?.querySelector('.profileDropdownToggle')?.focus({ preventScroll: true })
+  })
 }
 
 /**

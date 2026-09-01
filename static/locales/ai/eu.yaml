@@ -912,7 +912,7 @@ Channel:
   Videos per day: Eguneko bideoak
   Use global setting: Erabili ezarpen orokorra
   Unlimited: Mugagabea
-  More videos hidden: '+{count} gehiago'
+  More videos hidden: '+{count} gehiago | +{count} gehiago'
   Show in subscription feed: Erakutsi harpidetzen jarioan
   Channel Name Unavailable: Kanalaren izena ez dago erabilgarri
   Search Result Types: Bilaketa-emaitzen motak

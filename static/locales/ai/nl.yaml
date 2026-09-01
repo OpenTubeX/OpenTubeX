@@ -937,7 +937,7 @@ Channel:
   Videos per day: Video's per dag
   Use global setting: Algemene instelling gebruiken
   Unlimited: Onbeperkt
-  More videos hidden: '+{count} meer'
+  More videos hidden: '+{count} meer | +{count} meer'
   Show in subscription feed: Tonen in abonnementenfeed
   Channel Name Unavailable: Kanaalnaam niet beschikbaar
   Search Result Types: Typen zoekresultaten
