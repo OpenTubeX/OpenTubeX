@@ -445,6 +445,7 @@ Settings:
     Show Progress as Notification: Vis framdrift som varsel
     Operation in Progress: Operasjonen er i gang
     Toast Position:
+      Test Toast: Testvarsel
       Toast Position: Plassering av varsel
       Bottom Left: Nede til venstre
       Bottom Center: Nede i midten

@@ -312,6 +312,7 @@ Settings:
     Show Progress as Notification: İlerlemeyi bildirim olarak göster
     Operation in Progress: İşlem sürüyor
     Toast Position:
+      Test Toast: Test bildirimi
       Toast Position: Bildirim Konumu
       Bottom Left: Sol alt
       Bottom Center: Alt orta

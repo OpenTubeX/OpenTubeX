@@ -316,6 +316,7 @@ Settings:
     Show Progress as Notification: Näytä edistyminen ilmoituksena
     Operation in Progress: Toiminto on käynnissä
     Toast Position:
+      Test Toast: Testi-ilmoitus
       Toast Position: Ponnahdusilmoituksen sijainti
       Bottom Left: Alhaalla vasemmalla
       Bottom Center: Alhaalla keskellä

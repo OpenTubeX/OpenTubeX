@@ -317,6 +317,7 @@ Settings:
     Show Progress as Notification: முன்னேற்றத்தை அறிவிப்பாகக் காட்டு
     Operation in Progress: செயல் நடைபெறுகிறது
     Toast Position:
+      Test Toast: சோதனை அறிவிப்பு
       Toast Position: அறிவிப்பு இடம்
       Bottom Left: கீழ் இடது
       Bottom Center: கீழ் நடு

@@ -3350,6 +3350,20 @@ test.describe('settings', () => {
     await expect(toast).toHaveCount(0)
   })
 
+  test('shows a test toast from the toast position setting', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
+
+    const themeSection = page.locator('[data-section="appearance"]')
+    const toastPositionRow = themeSection.locator('.themeSelectRow')
+      .filter({ hasText: 'Toast Position' })
+    const holder = page.locator('.toast-holder')
+
+    await toastPositionRow.getByRole('button', { name: 'Test toast' }).click()
+
+    await expect(holder.locator('.toast', { hasText: 'Test toast' })).toBeVisible()
+  })
+
   test('does not dismiss non-actionable toasts when clicked', async ({ page }) => {
     await page.evaluate(() => {
       window.ftElectron.showToastOnAllTabs('Swipe-only dismissal', 10000)

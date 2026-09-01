@@ -312,6 +312,7 @@ Settings:
     Show Progress as Notification: Mostra avanzamento come notifica
     Operation in Progress: Operazione in corso
     Toast Position:
+      Test Toast: Notifica di prova
       Toast Position: Posizione delle notifiche a comparsa
       Bottom Left: In basso a sinistra
       Bottom Center: In basso al centro

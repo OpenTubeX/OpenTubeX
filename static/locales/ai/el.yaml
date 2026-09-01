@@ -316,6 +316,7 @@ Settings:
     Show Progress as Notification: Εμφάνιση προόδου ως ειδοποίησης
     Operation in Progress: Η λειτουργία βρίσκεται σε εξέλιξη
     Toast Position:
+      Test Toast: Δοκιμαστική ειδοποίηση
       Toast Position: Θέση ειδοποιήσεων
       Bottom Left: Κάτω αριστερά
       Bottom Center: Κάτω στο κέντρο

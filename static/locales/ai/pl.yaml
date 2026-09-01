@@ -85,6 +85,8 @@ Settings:
       Playlist View Type: Sposób wyświetlania playlisty
     Show Thumbnail Previews: Pokazuj podgląd miniatur
   Theme Settings:
+    Toast Position:
+      Test Toast: Powiadomienie testowe
     Scroll Speed: Szybkość przewijania
     Custom Theme:
       Share Theme: Udostępnij motyw

@@ -312,6 +312,7 @@ Settings:
     Show Progress as Notification: Folyamat megjelenítése értesítésként
     Operation in Progress: Művelet folyamatban
     Toast Position:
+      Test Toast: Tesztértesítés
       Toast Position: Értesítés helye
       Bottom Left: Balra lent
       Bottom Center: Középen lent

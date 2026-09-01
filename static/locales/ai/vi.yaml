@@ -316,6 +316,7 @@ Settings:
     Show Progress as Notification: Hiện tiến trình dưới dạng thông báo
     Operation in Progress: Đang thực hiện thao tác
     Toast Position:
+      Test Toast: Thông báo thử
       Toast Position: Vị trí thông báo
       Bottom Left: Dưới cùng bên trái
       Bottom Center: Dưới cùng ở giữa

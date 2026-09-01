@@ -314,6 +314,7 @@ Settings:
     Show Progress as Notification: 以通知顯示進度
     Operation in Progress: 作業進行中
     Toast Position:
+      Test Toast: 測試通知
       Toast Position: 快顯通知位置
       Bottom Left: 左下
       Bottom Center: 中下

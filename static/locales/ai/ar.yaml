@@ -316,6 +316,7 @@ Settings:
     Show Progress as Notification: إظهار التقدم كإخطار
     Operation in Progress: العملية قيد التقدم
     Toast Position:
+      Test Toast: إشعار تجريبي
       Toast Position: موضع الإشعار
       Bottom Left: أسفل اليسار
       Bottom Center: المركز السفلي

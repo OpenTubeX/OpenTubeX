@@ -316,6 +316,7 @@ Settings:
     Show Progress as Notification: Sýna framvindu sem tilkynningu
     Operation in Progress: Aðgerð í gangi
     Toast Position:
+      Test Toast: Prófunartilkynning
       Toast Position: Staðsetning spretttilkynninga
       Bottom Left: Neðst til vinstri
       Bottom Center: Neðst fyrir miðju

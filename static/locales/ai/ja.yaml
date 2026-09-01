@@ -312,6 +312,7 @@ Settings:
     Show Progress as Notification: 進行状況を通知として表示
     Operation in Progress: 処理中
     Toast Position:
+      Test Toast: テスト通知
       Toast Position: トーストの位置
       Bottom Left: 左下
       Bottom Center: 下中央

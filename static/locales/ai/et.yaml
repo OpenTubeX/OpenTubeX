@@ -312,6 +312,7 @@ Settings:
     Show Progress as Notification: Kuva edenemine teavitusena
     Operation in Progress: Toiming on pooleli
     Toast Position:
+      Test Toast: Testteavitus
       Toast Position: Hüpikteate asukoht
       Bottom Left: All vasakul
       Bottom Center: All keskel

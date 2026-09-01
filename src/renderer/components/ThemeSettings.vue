@@ -30,6 +30,12 @@
         :icon="['fas', 'message']"
         @change="updateToastPosition"
       />
+      <FtButton
+        class="testToastButton"
+        :label="t('Settings.Theme Settings.Toast Position.Test Toast')"
+        :icon="['fas', 'message']"
+        @click="showTestToast"
+      />
     </FtFlexBox>
     <FtFlexBox
       v-if="baseTheme === 'system'"
@@ -826,6 +832,13 @@ function updateToastPosition(value) {
   store.dispatch('updateToastPosition', value)
 }
 
+function showTestToast() {
+  showToast({
+    message: t('Settings.Theme Settings.Toast Position.Test Toast'),
+    icon: ['fas', 'message']
+  })
+}
+
 /** @type {import('vue').ComputedRef<number>} */
 const uiScale = computed(() => store.getters.getUiScale)
 
@@ -990,7 +1003,11 @@ function handleSmoothScrolling(value) {
   max-inline-size: 200px;
 }
 
-@container settings-content (width <= 720px) {
+.testToastButton {
+  margin-block-start: 30px;
+}
+
+@container settings-content (width <= 760px) {
   .themeSelectRow {
     align-items: center;
     flex-direction: column;
@@ -999,6 +1016,10 @@ function handleSmoothScrolling(value) {
   .themeSelectRow :deep(.select) {
     flex: 0 0 auto;
     inline-size: min(200px, 100%);
+  }
+
+  .testToastButton {
+    margin-block-start: 5px;
   }
 }
 
