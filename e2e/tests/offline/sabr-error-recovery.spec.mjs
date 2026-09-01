@@ -341,6 +341,110 @@ test('yt-dlp playback refreshes once then prefers built-in SABR over legacy', as
   })
 })
 
+test('yt-dlp timeout reload reuses cache while a rejected source is invalidated', async ({ app, page }) => {
+  await mockUnplayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const watchView = await watchViewHandle(page)
+  const result = await watchView.evaluate(async (view) => {
+    const BAD_HTTP_STATUS = 1001
+    const TIMEOUT = 1003
+    const useAuthentication = view.alwaysUseYtDlpPlaybackCookies
+    const cacheKey = JSON.stringify([view.ytDlpPlaybackCacheKey, useAuthentication])
+    const expiryTime = Date.now() + 60 * 60 * 1000
+    const source = {
+      manifestSrc: 'data:application/dash+xml;charset=UTF-8,cached',
+      manifestMimeType: 'application/dash+xml',
+      legacyFormats: [],
+      title: 'Cached timeout test',
+      isLive: false,
+      subtitlesIncluded: true,
+      version: 'test'
+    }
+    if (!await window.ftElectron.ytDlpPlaybackCacheSet(
+      view.videoId,
+      cacheKey,
+      expiryTime,
+      source
+    )) {
+      throw new Error('Unable to seed the yt-dlp playback cache')
+    }
+
+    view.errorMessage = ''
+    view.isLoading = false
+    view.isLive = false
+    view.isPostLiveDvr = false
+    view.activeFormat = 'dash'
+    view.activePlaybackEngine = 'yt-dlp'
+    view.activePlaybackEngineVersion = 'test'
+    view.streamErrorReloadAttemptedForCurrentVideo = false
+    view.playbackEngineFallbackAttemptedForCurrentVideo = false
+    view.playbackEngineFallbackTarget = null
+    view.ytDlpStreamsPending = true
+    view.manifestSrc = 'data:application/dash+xml,yt-dlp'
+    view.manifestMimeType = 'application/dash+xml'
+    view.legacyFormats = []
+
+    let refreshes = 0
+    const cacheReuseResults = []
+    view.reloadView = async () => {
+      refreshes++
+      cacheReuseResults.push(await view.extractYtDlpPlaybackSource(
+        view.videoLoadGeneration,
+        view.videoId,
+        view.playbackEngineSwitchGeneration,
+        useAuthentication,
+        true
+      ))
+    }
+    let sabrReloads = 0
+    view.performSabrReload = async () => {
+      sabrReloads++
+    }
+
+    await view.handlePlayerError({ code: TIMEOUT, data: [] })
+    const cacheEntryAfterTimeout = await window.ftElectron.ytDlpPlaybackCacheGet(
+      view.videoId,
+      cacheKey
+    )
+
+    if (!await window.ftElectron.ytDlpPlaybackCacheSet(
+      view.videoId,
+      cacheKey,
+      expiryTime,
+      source
+    )) {
+      throw new Error('Unable to restore the yt-dlp playback cache')
+    }
+    view.streamErrorReloadAttemptedForCurrentVideo = false
+    await view.handlePlayerError({ code: BAD_HTTP_STATUS, data: ['https://example.invalid/video', 403] })
+
+    return {
+      activePlaybackEngine: view.activePlaybackEngine,
+      cacheEntryAfterRejection: await window.ftElectron.ytDlpPlaybackCacheGet(
+        view.videoId,
+        cacheKey
+      ),
+      cachePreservedAfterTimeout: cacheEntryAfterTimeout !== null,
+      cacheReuseResults,
+      refreshes,
+      sabrReloads
+    }
+  })
+
+  expect(result).toEqual({
+    activePlaybackEngine: 'yt-dlp',
+    cacheEntryAfterRejection: null,
+    cachePreservedAfterTimeout: true,
+    cacheReuseResults: [true, false],
+    refreshes: 2,
+    sabrReloads: 0
+  })
+})
+
 test('expired built-in playback source is refreshed before yt-dlp falls back', async ({ app, page }) => {
   await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
