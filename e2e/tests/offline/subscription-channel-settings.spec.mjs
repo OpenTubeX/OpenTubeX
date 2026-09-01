@@ -195,6 +195,51 @@ test('reports subscription setting write failures from the channel popover', asy
   await expect(shorts).toHaveAttribute('aria-checked', 'false')
 })
 
+test('does not carry a failed popover edit into a later update', async ({ app, page }) => {
+  await goTo(page, 'subscribedchannels')
+  const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+  await alpha.getByRole('button', { name: 'Subscription settings' }).click()
+  const popover = page.locator('.profileDropdown')
+
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const updateChannelSettings = store._actions.updateChannelSettings[0]
+    let updateCount = 0
+    store._actions.updateChannelSettings = [payload => {
+      updateCount++
+      if (updateCount === 1) {
+        return new Promise(resolve => {
+          window.resolveFirstChannelSettingsWrite = () => resolve(false)
+        })
+      }
+      return updateChannelSettings(payload)
+    }]
+    window.channelSettingsUpdateCount = () => updateCount
+  })
+
+  await popover.getByRole('checkbox', { name: 'Members only' }).click()
+  await expect.poll(() => page.evaluate(() => window.channelSettingsUpdateCount())).toBe(1)
+
+  const limit = popover.getByRole('combobox', { name: 'Videos per day' })
+  await limit.click()
+  await page.getByRole('option', { name: '2', exact: true }).click()
+  await page.evaluate(() => window.resolveFirstChannelSettingsWrite())
+
+  await expect.poll(async () => {
+    const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+    const records = contents.trim().split('\n').map(line => JSON.parse(line))
+    const channel = records.filter(record => record._id === 'allChannels').at(-1).subscriptions
+      .find(subscription => subscription.id === CHANNEL_ID)
+    return {
+      dailyVideoLimit: channel.dailyVideoLimit,
+      showMembersOnly: channel.showMembersOnly ?? false
+    }
+  }).toEqual({ dailyVideoLimit: 2, showMembersOnly: false })
+  await expect(page.locator('.toast', {
+    hasText: 'Failed to save subscription settings'
+  })).toBeVisible()
+})
+
 test('reports subscription setting write failures from the settings manager', async ({ page }) => {
   const subscriptionSettings = await goToSettingsSection(page, 'subscription')
   await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()

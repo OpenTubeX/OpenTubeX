@@ -83,6 +83,40 @@
   box-sizing: content-box;
 }
 
+.profileDropdownToggleButton {
+  background-color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  color: var(--text-with-main-color);
+  cursor: pointer;
+  font: 500 0.9rem var(--app-font-family);
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.profileDropdownToggleButton:is(:hover, :focus-visible) {
+  background-color: var(--primary-color-hover);
+  border-color: var(--primary-color-hover);
+}
+
+.profileDropdownToggleButton:active {
+  background-color: var(--primary-color-active);
+  border-color: var(--primary-color-active);
+}
+
+.profileDropdownToggleButton::before {
+  content: '';
+  inline-size: 7px;
+  block-size: 7px;
+  border-inline-end: 2px solid currentcolor;
+  border-block-end: 2px solid currentcolor;
+  display: inline-block;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 150ms ease;
+}
+
+.profileDropdownToggleButton.dropdownOpened::before {
+  transform: translateY(2px) rotate(225deg);
+}
+
 .subscribeButton.hasProfileDropdownToggle {
   min-inline-size: 100px;
   padding-inline: 5px;

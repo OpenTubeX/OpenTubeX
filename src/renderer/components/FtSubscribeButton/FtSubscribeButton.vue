@@ -30,21 +30,16 @@
         :autosize="true"
         @click="handleUnsubscribeConfirmation"
       />
-      <FtButton
+      <button
         v-if="isSubscriptionOptionsEnabled"
-        :no-border="true"
+        type="button"
         :title="subscriptionOptionsTitle"
-        class="profileDropdownToggle"
+        :aria-label="subscriptionOptionsTitle"
+        class="profileDropdownToggle profileDropdownToggleButton"
         :class="{ dropdownOpened: isProfileDropdownOpen}"
-        background-color="var(--primary-color)"
-        text-color="var(--text-with-main-color)"
         :aria-expanded="isProfileDropdownOpen"
         @click="toggleProfileDropdown"
-      >
-        <FtIcon
-          :icon="isProfileDropdownOpen ? ['fas', 'angle-up'] : ['fas', 'angle-down']"
-        />
-      </FtButton>
+      />
     </div>
     <Teleport
       v-if="isProfileDropdownOpen"
@@ -687,19 +682,19 @@ function persistChannelSettings(patch) {
     try {
       saved = await store.dispatch('updateChannelSettings', {
         channelId: props.channelId,
-        settings
+        settings: patch
       })
     } catch (error) {
       console.error(error)
     } finally {
       if (updateSequence === channelSettingsUpdateSequence) {
         optimisticChannelSettings.value = null
-        if (!saved) {
-          showToast({
-            message: t('Channel.Failed to save subscription settings'),
-            icon: ['fas', 'circle-exclamation']
-          })
-        }
+      }
+      if (!saved) {
+        showToast({
+          message: t('Channel.Failed to save subscription settings'),
+          icon: ['fas', 'circle-exclamation']
+        })
       }
     }
   })
