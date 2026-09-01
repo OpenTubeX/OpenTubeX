@@ -301,26 +301,66 @@ test.describe('OpenTubeX sync server', () => {
       expect(revokedResponse.status).toBe(401)
 
       const passwordRevokedToken = await createOtherSession()
-      await syncSection.getByRole('button', { name: 'Change password' }).click()
-      const passwordPrompt = page.getByRole('dialog', { name: 'Change password' })
-      await passwordPrompt.getByLabel('Current password').fill(accountPassword)
-      await passwordPrompt.getByLabel('New password', { exact: true }).fill('new-local-test-password')
-      await passwordPrompt.getByLabel('Confirm new password').fill('different-password')
-      await passwordPrompt.getByRole('button', { name: 'Save new password' }).click()
-      await expect(passwordPrompt.getByRole('alert')).toContainText('do not match')
+      const tokenBeforePasswordChange = headers.Authorization
+      let finishStaleSessionRequest
+      let staleSessionRequestStarted
+      let staleSessionRequestFinished
+      const staleSessionRequestPending = new Promise(resolve => {
+        finishStaleSessionRequest = resolve
+      })
+      const staleSessionRequestRequested = new Promise(resolve => {
+        staleSessionRequestStarted = resolve
+      })
+      const staleSessionRequestCompleted = new Promise(resolve => {
+        staleSessionRequestFinished = resolve
+      })
+      let holdStaleSessionRequest = true
+      await page.route('**/account/sessions', async route => {
+        const request = route.request()
+        if (!holdStaleSessionRequest || request.method() !== 'GET' ||
+            request.headers().authorization !== tokenBeforePasswordChange) {
+          await route.continue()
+          return
+        }
+        holdStaleSessionRequest = false
+        staleSessionRequestStarted()
+        await staleSessionRequestPending
+        try {
+          const response = await route.fetch()
+          await route.fulfill({ response })
+        } finally {
+          staleSessionRequestFinished()
+        }
+      })
+      await devices.getByRole('button', { name: 'Refresh devices' }).click()
+      await staleSessionRequestRequested
+      try {
+        await syncSection.getByRole('button', { name: 'Change password' }).click()
+        const passwordPrompt = page.getByRole('dialog', { name: 'Change password' })
+        await passwordPrompt.getByLabel('Current password').fill(accountPassword)
+        await passwordPrompt.getByLabel('New password', { exact: true }).fill('new-local-test-password')
+        await passwordPrompt.getByLabel('Confirm new password').fill('different-password')
+        await passwordPrompt.getByRole('button', { name: 'Save new password' }).click()
+        await expect(passwordPrompt.getByRole('alert')).toContainText('do not match')
 
-      await passwordPrompt.getByLabel('Confirm new password').fill('new-local-test-password')
-      await passwordPrompt.getByRole('button', { name: 'Save new password' }).click()
-      await expect(passwordPrompt).toBeHidden()
+        await passwordPrompt.getByLabel('Confirm new password').fill('new-local-test-password')
+        await passwordPrompt.getByRole('button', { name: 'Save new password' }).click()
+        await expect(passwordPrompt).toBeHidden()
+        await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+        await expect(currentCard).toBeVisible()
+        accountPassword = 'new-local-test-password'
+        await expect.poll(async () => {
+          return latestSettings(await readFile(settingsPath, 'utf8')).syncServerToken
+        }).not.toBe(headers.Authorization)
+        headers.Authorization = latestSettings(
+          await readFile(settingsPath, 'utf8')
+        ).syncServerToken
+      } finally {
+        finishStaleSessionRequest()
+      }
+      await staleSessionRequestCompleted
       await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
       await expect(currentCard).toBeVisible()
-      accountPassword = 'new-local-test-password'
-      await expect.poll(async () => {
-        return latestSettings(await readFile(settingsPath, 'utf8')).syncServerToken
-      }).not.toBe(headers.Authorization)
-      headers.Authorization = latestSettings(
-        await readFile(settingsPath, 'utf8')
-      ).syncServerToken
 
       const passwordRevokedResponse = await fetch(
         `${syncServerUrl}${apiPrefix}/account/sessions`,

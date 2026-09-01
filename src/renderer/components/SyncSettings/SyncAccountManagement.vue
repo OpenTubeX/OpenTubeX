@@ -260,8 +260,9 @@ function systemLabel(deviceInfo) {
     .join(' · ')
 }
 
-async function handleRequestError(requestError, target = error) {
+async function handleRequestError(requestError, requestToken, target = error) {
   if (isSessionExpiredError(requestError)) {
+    if (requestToken !== store.getters.getSyncServerToken) return
     await store.dispatch('expireSyncServerSession')
     emit('current-revoked')
     return
@@ -330,7 +331,7 @@ async function loadSessions(token = props.token) {
       return { ...session, deviceInfo }
     }))
   } catch (requestError) {
-    await handleRequestError(requestError)
+    await handleRequestError(requestError, requestClient.token)
   } finally {
     requestClient.cancel()
     loading.value = false
@@ -382,7 +383,7 @@ async function renameDevice() {
     })
     await loadSessions()
   } catch (requestError) {
-    await handleRequestError(requestError, promptError)
+    await handleRequestError(requestError, requestClient.token, promptError)
   } finally {
     requestClient.cancel()
     actionBusy.value = false
@@ -414,7 +415,7 @@ async function revokeSession() {
     }
     await loadSessions()
   } catch (requestError) {
-    await handleRequestError(requestError, promptError)
+    await handleRequestError(requestError, requestClient.token, promptError)
   } finally {
     requestClient.cancel()
     actionBusy.value = false
