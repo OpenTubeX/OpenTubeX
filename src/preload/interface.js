@@ -61,6 +61,13 @@ export default {
   },
 
   /**
+   * @returns {Promise<{platform: string, architecture: string, release: string} | undefined>}
+   */
+  getDeviceInfo: () => {
+    return ipcRenderer.invoke(IpcChannels.GET_DEVICE_INFO)
+  },
+
+  /**
    * @param {string} title
    * @param {string} tabId
    */

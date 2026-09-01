@@ -742,6 +742,36 @@ Settings:
     Import playlists formats: 'Formats pris en charge : OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formats pris en charge : OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Appareils"
+    Devices Hint: "Vérifiez les appareils qui peuvent accéder à ce compte de synchronisation."
+    Change Password: "Modifier le mot de passe"
+    Refresh Devices: "Actualiser les appareils"
+    Current Device: "Appareil actuel"
+    Revoke Session: "Révoquer l’accès"
+    Session Created: "Créée"
+    Last Active: "Dernière activité"
+    Session Expires: "Expiration"
+    Unknown Device: "Appareil inconnu"
+    Operating System: "Système d’exploitation"
+    Rename Device: "Renommer l’appareil"
+    Save Device Name: "Enregistrer le nom"
+    Device Name Invalid: "Le nom d’un appareil peut contenir jusqu’à 80 caractères et aucun caractère de contrôle."
+    Device Renamed: "Appareil renommé"
+    Revoke Session Confirmation: "Révoquer cette session ?"
+    Revoke Current Session Warning: "La révocation de cette session déconnectera cet appareil du compte de synchronisation."
+    Revoke Session Warning: "{device} perdra l’accès à ce compte de synchronisation."
+    Confirm Revoke Session: "Révoquer la session"
+    Session Revoked: "Session révoquée"
+    Change Password Warning: "La modification de votre mot de passe déconnectera tous les autres appareils. Cet appareil restera connecté."
+    Current Password: "Mot de passe actuel"
+    New Password: "Nouveau mot de passe"
+    Confirm New Password: "Confirmer le nouveau mot de passe"
+    Save New Password: "Enregistrer le nouveau mot de passe"
+    Account Management Failed: "Impossible de charger les détails du compte de synchronisation."
+    All Password Fields Required: "Remplissez tous les champs de mot de passe."
+    New Password Too Short: "Le nouveau mot de passe doit contenir au moins 8 caractères."
+    New Passwords Do Not Match: "Les nouveaux mots de passe ne correspondent pas."
+    Password Changed: "Mot de passe modifié. Les autres appareils ont été déconnectés."
     Sync Settings: Synchronisation
     Enable Sync: Activer la synchronisation
     Privacy Passphrase: Phrase secrète de confidentialité

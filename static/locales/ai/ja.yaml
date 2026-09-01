@@ -742,6 +742,36 @@ Settings:
     Import playlists formats: '対応形式: OpenTubeX / FreeTube（.db）'
     Import search history formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.json）'
   Sync Settings:
+    Devices: "デバイス"
+    Devices Hint: "この同期アカウントにアクセスできるデバイスを確認します。"
+    Change Password: "パスワードを変更"
+    Refresh Devices: "デバイスを更新"
+    Current Device: "現在のデバイス"
+    Revoke Session: "アクセスを取り消す"
+    Session Created: "作成日時"
+    Last Active: "最終アクセス"
+    Session Expires: "有効期限"
+    Unknown Device: "不明なデバイス"
+    Operating System: "オペレーティングシステム"
+    Rename Device: "デバイス名を変更"
+    Save Device Name: "名前を保存"
+    Device Name Invalid: "デバイス名は80文字以内で、制御文字を含めることはできません。"
+    Device Renamed: "デバイス名を変更しました"
+    Revoke Session Confirmation: "このセッションを取り消しますか？"
+    Revoke Current Session Warning: "このセッションを取り消すと、このデバイスは同期アカウントから切断されます。"
+    Revoke Session Warning: "{device}はこの同期アカウントにアクセスできなくなります。"
+    Confirm Revoke Session: "セッションを取り消す"
+    Session Revoked: "セッションを取り消しました"
+    Change Password Warning: "パスワードを変更すると、他のすべてのデバイスからログアウトします。このデバイスは接続されたままです。"
+    Current Password: "現在のパスワード"
+    New Password: "新しいパスワード"
+    Confirm New Password: "新しいパスワードを確認"
+    Save New Password: "新しいパスワードを保存"
+    Account Management Failed: "同期アカウントの詳細を読み込めませんでした。"
+    All Password Fields Required: "すべてのパスワード欄に入力してください。"
+    New Password Too Short: "新しいパスワードは8文字以上にしてください。"
+    New Passwords Do Not Match: "新しいパスワードが一致しません。"
+    Password Changed: "パスワードを変更しました。他のデバイスからログアウトしました。"
     Sync Settings: 同期
     Enable Sync: 同期を有効化
     Privacy Passphrase: プライバシーパスフレーズ

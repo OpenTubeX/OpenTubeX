@@ -759,6 +759,36 @@ Settings:
     Import playlists formats: 'Støttede formater: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Støttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Enheter"
+    Devices Hint: "Se gjennom enhetene som har tilgang til denne synkroniseringskontoen."
+    Change Password: "Endre passord"
+    Refresh Devices: "Oppdater enheter"
+    Current Device: "Denne enheten"
+    Revoke Session: "Trekk tilbake tilgang"
+    Session Created: "Opprettet"
+    Last Active: "Sist aktiv"
+    Session Expires: "Utløper"
+    Unknown Device: "Ukjent enhet"
+    Operating System: "Operativsystem"
+    Rename Device: "Gi enheten nytt navn"
+    Save Device Name: "Lagre navn"
+    Device Name Invalid: "Enhetsnavn kan inneholde opptil 80 tegn og ingen kontrolltegn."
+    Device Renamed: "Enheten har fått nytt navn"
+    Revoke Session Confirmation: "Trekke tilbake denne økten?"
+    Revoke Current Session Warning: "Hvis denne økten trekkes tilbake, kobles enheten fra synkroniseringskontoen."
+    Revoke Session Warning: "{device} mister tilgangen til denne synkroniseringskontoen."
+    Confirm Revoke Session: "Trekk tilbake økten"
+    Session Revoked: "Økten er trukket tilbake"
+    Change Password Warning: "Hvis du endrer passordet, logges alle andre enheter av. Denne enheten forblir tilkoblet."
+    Current Password: "Nåværende passord"
+    New Password: "Nytt passord"
+    Confirm New Password: "Bekreft nytt passord"
+    Save New Password: "Lagre nytt passord"
+    Account Management Failed: "Kunne ikke laste inn opplysninger om synkroniseringskontoen."
+    All Password Fields Required: "Fyll ut alle passordfeltene."
+    New Password Too Short: "Det nye passordet må ha minst 8 tegn."
+    New Passwords Do Not Match: "De nye passordene er ikke like."
+    Password Changed: "Passordet er endret. Andre enheter er logget av."
     Sync Settings: Synkronisering
     Enable Sync: Slå på synkronisering
     Privacy Passphrase: Passordfrase for personvern

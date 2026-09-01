@@ -156,3 +156,13 @@
   inline-size: min(100%, 32rem);
   margin-inline: auto;
 }
+
+.passwordForm {
+  display: grid;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.passwordForm p {
+  margin: 0;
+}

@@ -98,6 +98,7 @@ export class SyncServerClient {
     try {
       const response = await fetch(`${this.serverUrl}${path}`, {
         ...options,
+        redirect: 'error',
         headers,
         body: options.body == null ? undefined : JSON.stringify(options.body),
         signal: controller.signal,
@@ -160,6 +161,11 @@ export class SyncServerClient {
     return capabilities.key_pairing === 1
   }
 
+  async supportsAccountSessions() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.account_sessions === 1
+  }
+
   createPairingSession(recipient) {
     return this.request('/v1/pairing', {
       method: 'POST',
@@ -180,7 +186,7 @@ export class SyncServerClient {
     })
   }
 
-  claimPairingSession(request) {
+  claimPairingSession(request, encryptedDeviceInfo) {
     return this.request(`/v1/pairing/${encodeURIComponent(request.sessionId)}/claim`, {
       method: 'POST',
       body: {
@@ -188,6 +194,7 @@ export class SyncServerClient {
         recipient_public_key: request.recipientPublicKey,
         recipient_device_id: request.recipientDeviceId,
         recipient_device_name: request.recipientDeviceName,
+        encrypted_device_info: encryptedDeviceInfo,
       },
     })
   }
@@ -264,10 +271,10 @@ export class SyncServerClient {
     }
   }
 
-  async authenticate(mode, name, password) {
+  async authenticate(mode, name, password, deviceId) {
     const response = await this.apiRequest(`/account/${mode}`, {
       method: 'POST',
-      body: { name, password },
+      body: { name, password, device_id: deviceId },
     })
     this.token = response.jwt
     return response.jwt
@@ -277,6 +284,33 @@ export class SyncServerClient {
     return this.apiRequest('/account/delete', {
       method: 'DELETE',
       body: { password },
+    })
+  }
+
+  getAccountSessions() {
+    return this.apiRequest('/account/sessions')
+  }
+
+  updateAccountSession(sessionId, encryptedDeviceInfo) {
+    return this.apiRequest(`/account/sessions/${encodeURIComponent(sessionId)}`, {
+      method: 'PATCH',
+      body: { encrypted_device_info: encryptedDeviceInfo },
+    })
+  }
+
+  revokeAccountSession(sessionId) {
+    return this.apiRequest(`/account/sessions/${encodeURIComponent(sessionId)}`, {
+      method: 'DELETE',
+    })
+  }
+
+  changePassword(currentPassword, newPassword) {
+    return this.apiRequest('/account/password', {
+      method: 'PUT',
+      body: {
+        current_password: currentPassword,
+        new_password: newPassword,
+      },
     })
   }
 

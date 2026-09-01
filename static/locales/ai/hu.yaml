@@ -742,6 +742,36 @@ Settings:
     Import playlists formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Eszközök"
+    Devices Hint: "Tekintse át azokat az eszközöket, amelyek hozzáférhetnek ehhez a szinkronizálási fiókhoz."
+    Change Password: "Jelszó módosítása"
+    Refresh Devices: "Eszközök frissítése"
+    Current Device: "Jelenlegi eszköz"
+    Revoke Session: "Hozzáférés visszavonása"
+    Session Created: "Létrehozva"
+    Last Active: "Legutóbbi aktivitás"
+    Session Expires: "Lejárat"
+    Unknown Device: "Ismeretlen eszköz"
+    Operating System: "Operációs rendszer"
+    Rename Device: "Eszköz átnevezése"
+    Save Device Name: "Név mentése"
+    Device Name Invalid: "Az eszköznév legfeljebb 80 karakterből állhat, és nem tartalmazhat vezérlőkaraktereket."
+    Device Renamed: "Eszköz átnevezve"
+    Revoke Session Confirmation: "Visszavonja ezt a munkamenetet?"
+    Revoke Current Session Warning: "A munkamenet visszavonása leválasztja ezt az eszközt a szinkronizálási fiókról."
+    Revoke Session Warning: "{device} elveszíti a hozzáférést ehhez a szinkronizálási fiókhoz."
+    Confirm Revoke Session: "Munkamenet visszavonása"
+    Session Revoked: "Munkamenet visszavonva"
+    Change Password Warning: "A jelszó módosítása kijelentkezteti az összes többi eszközt. Ez az eszköz csatlakoztatva marad."
+    Current Password: "Jelenlegi jelszó"
+    New Password: "Új jelszó"
+    Confirm New Password: "Új jelszó megerősítése"
+    Save New Password: "Új jelszó mentése"
+    Account Management Failed: "A szinkronizálási fiók adatai nem tölthetők be."
+    All Password Fields Required: "Töltse ki az összes jelszómezőt."
+    New Password Too Short: "Az új jelszónak legalább 8 karakterből kell állnia."
+    New Passwords Do Not Match: "Az új jelszavak nem egyeznek."
+    Password Changed: "A jelszó megváltozott. A többi eszközt kijelentkeztettük."
     Sync Settings: Szinkronizálás
     Enable Sync: Szinkronizálás engedélyezése
     Privacy Passphrase: Adatvédelmi jelmondat

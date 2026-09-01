@@ -736,6 +736,36 @@ Settings:
     Import playlists formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Устройства"
+    Devices Hint: "Проверьте устройства, у которых есть доступ к этой учётной записи синхронизации."
+    Change Password: "Изменить пароль"
+    Refresh Devices: "Обновить список устройств"
+    Current Device: "Текущее устройство"
+    Revoke Session: "Отозвать доступ"
+    Session Created: "Создана"
+    Last Active: "Последняя активность"
+    Session Expires: "Истекает"
+    Unknown Device: "Неизвестное устройство"
+    Operating System: "Операционная система"
+    Rename Device: "Переименовать устройство"
+    Save Device Name: "Сохранить имя"
+    Device Name Invalid: "Имя устройства может содержать не более 80 символов и не должно содержать управляющих символов."
+    Device Renamed: "Устройство переименовано"
+    Revoke Session Confirmation: "Отозвать этот сеанс?"
+    Revoke Current Session Warning: "После отзыва этого сеанса устройство отключится от учётной записи синхронизации."
+    Revoke Session Warning: "{device} потеряет доступ к этой учётной записи синхронизации."
+    Confirm Revoke Session: "Отозвать сеанс"
+    Session Revoked: "Сеанс отозван"
+    Change Password Warning: "После изменения пароля все остальные устройства выйдут из учётной записи. Это устройство останется подключённым."
+    Current Password: "Текущий пароль"
+    New Password: "Новый пароль"
+    Confirm New Password: "Подтвердите новый пароль"
+    Save New Password: "Сохранить новый пароль"
+    Account Management Failed: "Не удалось загрузить сведения об учётной записи синхронизации."
+    All Password Fields Required: "Заполните все поля пароля."
+    New Password Too Short: "Новый пароль должен содержать не менее 8 символов."
+    New Passwords Do Not Match: "Новые пароли не совпадают."
+    Password Changed: "Пароль изменён. На остальных устройствах выполнен выход."
     Sync Settings: Синхронизация
     Enable Sync: Включить синхронизацию
     Privacy Passphrase: Кодовая фраза конфиденциальности

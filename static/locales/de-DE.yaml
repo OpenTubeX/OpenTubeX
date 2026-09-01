@@ -1399,6 +1399,36 @@ Settings:
     Confirm Delete Account: Konto löschen
     Password Required: Passwort erforderlich
     Account Deleted: Synchronisierungskonto gelöscht
+    Devices: Geräte
+    Devices Hint: Prüfe, welche Geräte auf dieses Synchronisierungskonto zugreifen können.
+    Change Password: Passwort ändern
+    Refresh Devices: Geräte aktualisieren
+    Current Device: Aktuelles Gerät
+    Revoke Session: Zugriff widerrufen
+    Session Created: Erstellt
+    Last Active: Zuletzt aktiv
+    Session Expires: Läuft ab
+    Unknown Device: Unbekanntes Gerät
+    Operating System: Betriebssystem
+    Rename Device: Gerät umbenennen
+    Save Device Name: Namen speichern
+    Device Name Invalid: Gerätenamen dürfen höchstens 80 Zeichen und keine Steuerzeichen enthalten.
+    Device Renamed: Gerät umbenannt
+    Revoke Session Confirmation: Diese Sitzung widerrufen?
+    Revoke Current Session Warning: Wenn du diese Sitzung widerrufst, wird dieses Gerät vom Synchronisierungskonto getrennt.
+    Revoke Session Warning: '{device} verliert den Zugriff auf dieses Synchronisierungskonto.'
+    Confirm Revoke Session: Sitzung widerrufen
+    Session Revoked: Sitzung widerrufen
+    Change Password Warning: Wenn du dein Passwort änderst, werden alle anderen Geräte abgemeldet. Dieses Gerät bleibt verbunden.
+    Current Password: Aktuelles Passwort
+    New Password: Neues Passwort
+    Confirm New Password: Neues Passwort bestätigen
+    Save New Password: Neues Passwort speichern
+    Account Management Failed: Die Daten des Synchronisierungskontos konnten nicht geladen werden.
+    All Password Fields Required: Fülle alle Passwortfelder aus.
+    New Password Too Short: Das neue Passwort muss mindestens 8 Zeichen lang sein.
+    New Passwords Do Not Match: Die neuen Passwörter stimmen nicht überein.
+    Password Changed: Passwort geändert. Andere Geräte wurden abgemeldet.
     Connected as: Verbunden als {username}
     Automatic Sync: Nach Änderungen und alle fünf Minuten automatisch synchronisieren
     Profiles: Profile

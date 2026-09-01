@@ -787,6 +787,36 @@ Settings:
     Import playlists formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "دستگاه‌ها"
+    Devices Hint: "دستگاه‌هایی را که می‌توانند به این حساب همگام‌سازی دسترسی داشته باشند بررسی کنید."
+    Change Password: "تغییر گذرواژه"
+    Refresh Devices: "تازه‌سازی دستگاه‌ها"
+    Current Device: "دستگاه کنونی"
+    Revoke Session: "لغو دسترسی"
+    Session Created: "ایجادشده"
+    Last Active: "آخرین فعالیت"
+    Session Expires: "انقضا"
+    Unknown Device: "دستگاه ناشناس"
+    Operating System: "سیستم‌عامل"
+    Rename Device: "تغییر نام دستگاه"
+    Save Device Name: "ذخیره نام"
+    Device Name Invalid: "نام دستگاه می‌تواند حداکثر ۸۰ نویسه داشته باشد و نباید شامل نویسه‌های کنترلی باشد."
+    Device Renamed: "نام دستگاه تغییر کرد"
+    Revoke Session Confirmation: "این نشست لغو شود؟"
+    Revoke Current Session Warning: "لغو این نشست، این دستگاه را از حساب همگام‌سازی جدا می‌کند."
+    Revoke Session Warning: "دسترسی {device} به این حساب همگام‌سازی قطع خواهد شد."
+    Confirm Revoke Session: "لغو نشست"
+    Session Revoked: "نشست لغو شد"
+    Change Password Warning: "تغییر گذرواژه، همهٔ دستگاه‌های دیگر را خارج می‌کند. این دستگاه متصل می‌ماند."
+    Current Password: "گذرواژهٔ کنونی"
+    New Password: "گذرواژهٔ جدید"
+    Confirm New Password: "تأیید گذرواژهٔ جدید"
+    Save New Password: "ذخیرهٔ گذرواژهٔ جدید"
+    Account Management Failed: "جزئیات حساب همگام‌سازی بارگیری نشد."
+    All Password Fields Required: "همهٔ فیلدهای گذرواژه را کامل کنید."
+    New Password Too Short: "گذرواژهٔ جدید باید دست‌کم ۸ نویسه داشته باشد."
+    New Passwords Do Not Match: "گذرواژه‌های جدید یکسان نیستند."
+    Password Changed: "گذرواژه تغییر کرد. دستگاه‌های دیگر خارج شدند."
     Sync Settings: همگام‌سازی
     Enable Sync: فعال‌کردن همگام‌سازی
     Privacy Passphrase: عبارت عبور حریم خصوصی

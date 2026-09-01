@@ -759,6 +759,36 @@ Settings:
     Import playlists formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "الأجهزة"
+    Devices Hint: "راجع الأجهزة التي يمكنها الوصول إلى حساب المزامنة هذا."
+    Change Password: "تغيير كلمة المرور"
+    Refresh Devices: "تحديث الأجهزة"
+    Current Device: "الجهاز الحالي"
+    Revoke Session: "إلغاء الوصول"
+    Session Created: "أُنشئت"
+    Last Active: "آخر نشاط"
+    Session Expires: "تنتهي في"
+    Unknown Device: "جهاز غير معروف"
+    Operating System: "نظام التشغيل"
+    Rename Device: "إعادة تسمية الجهاز"
+    Save Device Name: "حفظ الاسم"
+    Device Name Invalid: "يمكن أن تحتوي أسماء الأجهزة على 80 حرفًا كحد أقصى ولا يجوز أن تحتوي على أحرف تحكم."
+    Device Renamed: "تمت إعادة تسمية الجهاز"
+    Revoke Session Confirmation: "هل تريد إلغاء هذه الجلسة؟"
+    Revoke Current Session Warning: "سيؤدي إلغاء هذه الجلسة إلى فصل هذا الجهاز عن حساب المزامنة."
+    Revoke Session Warning: "سيفقد {device} الوصول إلى حساب المزامنة هذا."
+    Confirm Revoke Session: "إلغاء الجلسة"
+    Session Revoked: "أُلغيت الجلسة"
+    Change Password Warning: "سيؤدي تغيير كلمة المرور إلى تسجيل خروج جميع الأجهزة الأخرى. سيبقى هذا الجهاز متصلاً."
+    Current Password: "كلمة المرور الحالية"
+    New Password: "كلمة المرور الجديدة"
+    Confirm New Password: "تأكيد كلمة المرور الجديدة"
+    Save New Password: "حفظ كلمة المرور الجديدة"
+    Account Management Failed: "تعذّر تحميل تفاصيل حساب المزامنة."
+    All Password Fields Required: "أكمل جميع حقول كلمة المرور."
+    New Password Too Short: "يجب ألا تقل كلمة المرور الجديدة عن 8 أحرف."
+    New Passwords Do Not Match: "كلمتا المرور الجديدتان غير متطابقتين."
+    Password Changed: "تم تغيير كلمة المرور. تم تسجيل خروج الأجهزة الأخرى."
     Sync Settings: مزامنة
     Enable Sync: تمكين المزامنة
     Privacy Passphrase: عبارة مرور الخصوصية

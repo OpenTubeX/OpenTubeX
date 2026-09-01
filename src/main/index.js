@@ -41,7 +41,7 @@ import { createReadStream } from 'node:fs'
 import asyncFs from 'fs/promises'
 import { promisify } from 'util'
 import { Readable } from 'node:stream'
-import { hostname } from 'node:os'
+import { hostname, release } from 'node:os'
 import { brotliDecompress } from 'zlib'
 
 import packageDetails from '../../package.json'
@@ -68,6 +68,7 @@ import { requestVoiceOverTranslation } from './voiceOverTranslation'
 import { clearVideoMetadataCache, getVideoMetadataCacheSize, updateVideoMetadataCache } from './videoMetadataCache'
 import { shouldAdvanceDockMediaSequence } from './dockMediaSession'
 import { clearStorage, compactStorageDatabases, getStorageUsage } from './storage'
+import { getLinuxDistributionInfo } from './linuxDistribution'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
 if (process.argv.includes('--version')) {
@@ -3731,6 +3732,19 @@ function runApp() {
   ipcMain.handle(IpcChannels.GET_DEVICE_NAME, (event) => {
     if (isOpenTubeXUrl(event.senderFrame.url)) {
       return hostname()
+    }
+  })
+
+  ipcMain.handle(IpcChannels.GET_DEVICE_INFO, async (event) => {
+    if (isOpenTubeXUrl(event.senderFrame.url)) {
+      const linuxDistribution = process.platform === 'linux'
+        ? await getLinuxDistributionInfo()
+        : null
+      return {
+        platform: linuxDistribution?.platform || process.platform,
+        architecture: process.arch,
+        release: linuxDistribution?.release || release(),
+      }
     }
   })
 

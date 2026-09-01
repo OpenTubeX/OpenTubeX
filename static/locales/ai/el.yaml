@@ -764,6 +764,36 @@ Settings:
     Import playlists formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Συσκευές"
+    Devices Hint: "Ελέγξτε τις συσκευές που έχουν πρόσβαση σε αυτόν τον λογαριασμό συγχρονισμού."
+    Change Password: "Αλλαγή κωδικού πρόσβασης"
+    Refresh Devices: "Ανανέωση συσκευών"
+    Current Device: "Τρέχουσα συσκευή"
+    Revoke Session: "Ανάκληση πρόσβασης"
+    Session Created: "Δημιουργήθηκε"
+    Last Active: "Τελευταία δραστηριότητα"
+    Session Expires: "Λήγει"
+    Unknown Device: "Άγνωστη συσκευή"
+    Operating System: "Λειτουργικό σύστημα"
+    Rename Device: "Μετονομασία συσκευής"
+    Save Device Name: "Αποθήκευση ονόματος"
+    Device Name Invalid: "Τα ονόματα συσκευών μπορούν να περιέχουν έως 80 χαρακτήρες και όχι χαρακτήρες ελέγχου."
+    Device Renamed: "Η συσκευή μετονομάστηκε"
+    Revoke Session Confirmation: "Ανάκληση αυτής της συνεδρίας;"
+    Revoke Current Session Warning: "Η ανάκληση αυτής της συνεδρίας θα αποσυνδέσει αυτήν τη συσκευή από τον λογαριασμό συγχρονισμού."
+    Revoke Session Warning: "Η συσκευή {device} θα χάσει την πρόσβαση σε αυτόν τον λογαριασμό συγχρονισμού."
+    Confirm Revoke Session: "Ανάκληση συνεδρίας"
+    Session Revoked: "Η συνεδρία ανακλήθηκε"
+    Change Password Warning: "Η αλλαγή του κωδικού πρόσβασης θα αποσυνδέσει όλες τις άλλες συσκευές. Αυτή η συσκευή θα παραμείνει συνδεδεμένη."
+    Current Password: "Τρέχων κωδικός πρόσβασης"
+    New Password: "Νέος κωδικός πρόσβασης"
+    Confirm New Password: "Επιβεβαίωση νέου κωδικού πρόσβασης"
+    Save New Password: "Αποθήκευση νέου κωδικού πρόσβασης"
+    Account Management Failed: "Δεν ήταν δυνατή η φόρτωση των στοιχείων του λογαριασμού συγχρονισμού."
+    All Password Fields Required: "Συμπληρώστε όλα τα πεδία κωδικού πρόσβασης."
+    New Password Too Short: "Ο νέος κωδικός πρόσβασης πρέπει να έχει τουλάχιστον 8 χαρακτήρες."
+    New Passwords Do Not Match: "Οι νέοι κωδικοί πρόσβασης δεν ταιριάζουν."
+    Password Changed: "Ο κωδικός πρόσβασης άλλαξε. Οι άλλες συσκευές αποσυνδέθηκαν."
     Sync Settings: Συγχρονισμός
     Enable Sync: Ενεργοποίηση συγχρονισμού
     Privacy Passphrase: Συνθηματικό απορρήτου

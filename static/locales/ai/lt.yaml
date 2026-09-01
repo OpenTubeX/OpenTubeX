@@ -993,6 +993,36 @@ Settings:
     Import playlists formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Įrenginiai"
+    Devices Hint: "Peržiūrėkite įrenginius, galinčius pasiekti šią sinchronizavimo paskyrą."
+    Change Password: "Keisti slaptažodį"
+    Refresh Devices: "Atnaujinti įrenginius"
+    Current Device: "Dabartinis įrenginys"
+    Revoke Session: "Atšaukti prieigą"
+    Session Created: "Sukurta"
+    Last Active: "Paskutinė veikla"
+    Session Expires: "Baigia galioti"
+    Unknown Device: "Nežinomas įrenginys"
+    Operating System: "Operacinė sistema"
+    Rename Device: "Pervadinti įrenginį"
+    Save Device Name: "Išsaugoti pavadinimą"
+    Device Name Invalid: "Įrenginio pavadinime gali būti iki 80 simbolių ir negali būti valdymo simbolių."
+    Device Renamed: "Įrenginys pervadintas"
+    Revoke Session Confirmation: "Atšaukti šį seansą?"
+    Revoke Current Session Warning: "Atšaukus šį seansą, šis įrenginys bus atjungtas nuo sinchronizavimo paskyros."
+    Revoke Session Warning: "{device} neteks prieigos prie šios sinchronizavimo paskyros."
+    Confirm Revoke Session: "Atšaukti seansą"
+    Session Revoked: "Seansas atšauktas"
+    Change Password Warning: "Pakeitus slaptažodį bus atsijungta visuose kituose įrenginiuose. Šis įrenginys liks prijungtas."
+    Current Password: "Dabartinis slaptažodis"
+    New Password: "Naujas slaptažodis"
+    Confirm New Password: "Patvirtinti naują slaptažodį"
+    Save New Password: "Išsaugoti naują slaptažodį"
+    Account Management Failed: "Nepavyko įkelti sinchronizavimo paskyros duomenų."
+    All Password Fields Required: "Užpildykite visus slaptažodžio laukus."
+    New Password Too Short: "Naujas slaptažodis turi būti bent 8 simbolių."
+    New Passwords Do Not Match: "Nauji slaptažodžiai nesutampa."
+    Password Changed: "Slaptažodis pakeistas. Kituose įrenginiuose atsijungta."
     Sync Settings: Sinchronizavimas
     Enable Sync: Įjungti sinchronizavimą
     Privacy Passphrase: Privatumo slaptafrazė

@@ -767,6 +767,36 @@ Settings:
     Import playlists formats: 'Formatos suportados: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Dispositivos"
+    Devices Hint: "Reveja os dispositivos que podem aceder a esta conta de sincronização."
+    Change Password: "Alterar palavra-passe"
+    Refresh Devices: "Atualizar dispositivos"
+    Current Device: "Dispositivo atual"
+    Revoke Session: "Revogar acesso"
+    Session Created: "Criada"
+    Last Active: "Última atividade"
+    Session Expires: "Expira"
+    Unknown Device: "Dispositivo desconhecido"
+    Operating System: "Sistema operativo"
+    Rename Device: "Mudar o nome do dispositivo"
+    Save Device Name: "Guardar nome"
+    Device Name Invalid: "Os nomes dos dispositivos podem ter até 80 caracteres e não podem conter caracteres de controlo."
+    Device Renamed: "Nome do dispositivo alterado"
+    Revoke Session Confirmation: "Revogar esta sessão?"
+    Revoke Current Session Warning: "Revogar esta sessão irá desligar este dispositivo da conta de sincronização."
+    Revoke Session Warning: "{device} perderá o acesso a esta conta de sincronização."
+    Confirm Revoke Session: "Revogar sessão"
+    Session Revoked: "Sessão revogada"
+    Change Password Warning: "Alterar a palavra-passe terminará a sessão em todos os outros dispositivos. Este dispositivo continuará ligado."
+    Current Password: "Palavra-passe atual"
+    New Password: "Nova palavra-passe"
+    Confirm New Password: "Confirmar nova palavra-passe"
+    Save New Password: "Guardar nova palavra-passe"
+    Account Management Failed: "Não foi possível carregar os detalhes da conta de sincronização."
+    All Password Fields Required: "Preencha todos os campos da palavra-passe."
+    New Password Too Short: "A nova palavra-passe deve ter pelo menos 8 caracteres."
+    New Passwords Do Not Match: "As novas palavras-passe não coincidem."
+    Password Changed: "Palavra-passe alterada. A sessão foi terminada nos outros dispositivos."
     Sync Settings: Sincronização
     Enable Sync: Ativar sincronização
     Privacy Passphrase: Frase secreta de privacidade

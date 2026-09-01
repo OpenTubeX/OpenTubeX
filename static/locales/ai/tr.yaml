@@ -742,6 +742,36 @@ Settings:
     Import playlists formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Cihazlar"
+    Devices Hint: "Bu eşitleme hesabına erişebilen cihazları inceleyin."
+    Change Password: "Parolayı değiştir"
+    Refresh Devices: "Cihazları yenile"
+    Current Device: "Geçerli cihaz"
+    Revoke Session: "Erişimi iptal et"
+    Session Created: "Oluşturuldu"
+    Last Active: "Son etkinlik"
+    Session Expires: "Sona erme"
+    Unknown Device: "Bilinmeyen cihaz"
+    Operating System: "İşletim sistemi"
+    Rename Device: "Cihazı yeniden adlandır"
+    Save Device Name: "Adı kaydet"
+    Device Name Invalid: "Cihaz adları en fazla 80 karakter içerebilir ve denetim karakterleri içeremez."
+    Device Renamed: "Cihaz yeniden adlandırıldı"
+    Revoke Session Confirmation: "Bu oturum iptal edilsin mi?"
+    Revoke Current Session Warning: "Bu oturumun iptal edilmesi, cihazın eşitleme hesabıyla bağlantısını kesecektir."
+    Revoke Session Warning: "{device} bu eşitleme hesabına erişimini kaybedecek."
+    Confirm Revoke Session: "Oturumu iptal et"
+    Session Revoked: "Oturum iptal edildi"
+    Change Password Warning: "Parolanızı değiştirmek diğer tüm cihazların oturumunu kapatır. Bu cihaz bağlı kalır."
+    Current Password: "Geçerli parola"
+    New Password: "Yeni parola"
+    Confirm New Password: "Yeni parolayı doğrula"
+    Save New Password: "Yeni parolayı kaydet"
+    Account Management Failed: "Eşitleme hesabı ayrıntıları yüklenemedi."
+    All Password Fields Required: "Tüm parola alanlarını doldurun."
+    New Password Too Short: "Yeni parola en az 8 karakter olmalıdır."
+    New Passwords Do Not Match: "Yeni parolalar eşleşmiyor."
+    Password Changed: "Parola değiştirildi. Diğer cihazların oturumu kapatıldı."
     Sync Settings: Eşitleme
     Enable Sync: Eşitlemeyi Etkinleştir
     Privacy Passphrase: Gizlilik parolası

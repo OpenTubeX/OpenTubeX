@@ -759,6 +759,36 @@ Settings:
     Import playlists formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Thiết bị"
+    Devices Hint: "Xem lại các thiết bị có thể truy cập tài khoản đồng bộ này."
+    Change Password: "Đổi mật khẩu"
+    Refresh Devices: "Làm mới thiết bị"
+    Current Device: "Thiết bị hiện tại"
+    Revoke Session: "Thu hồi quyền truy cập"
+    Session Created: "Đã tạo"
+    Last Active: "Hoạt động gần nhất"
+    Session Expires: "Hết hạn"
+    Unknown Device: "Thiết bị không xác định"
+    Operating System: "Hệ điều hành"
+    Rename Device: "Đổi tên thiết bị"
+    Save Device Name: "Lưu tên"
+    Device Name Invalid: "Tên thiết bị có thể chứa tối đa 80 ký tự và không được chứa ký tự điều khiển."
+    Device Renamed: "Đã đổi tên thiết bị"
+    Revoke Session Confirmation: "Thu hồi phiên này?"
+    Revoke Current Session Warning: "Thu hồi phiên này sẽ ngắt kết nối thiết bị này khỏi tài khoản đồng bộ."
+    Revoke Session Warning: "{device} sẽ mất quyền truy cập vào tài khoản đồng bộ này."
+    Confirm Revoke Session: "Thu hồi phiên"
+    Session Revoked: "Đã thu hồi phiên"
+    Change Password Warning: "Đổi mật khẩu sẽ đăng xuất tất cả thiết bị khác. Thiết bị này vẫn được kết nối."
+    Current Password: "Mật khẩu hiện tại"
+    New Password: "Mật khẩu mới"
+    Confirm New Password: "Xác nhận mật khẩu mới"
+    Save New Password: "Lưu mật khẩu mới"
+    Account Management Failed: "Không thể tải thông tin tài khoản đồng bộ."
+    All Password Fields Required: "Hãy điền tất cả các trường mật khẩu."
+    New Password Too Short: "Mật khẩu mới phải có ít nhất 8 ký tự."
+    New Passwords Do Not Match: "Mật khẩu mới không khớp."
+    Password Changed: "Đã đổi mật khẩu. Các thiết bị khác đã được đăng xuất."
     Sync Settings: Đồng bộ
     Enable Sync: Bật đồng bộ
     Privacy Passphrase: Cụm mật khẩu riêng tư

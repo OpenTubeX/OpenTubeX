@@ -759,6 +759,36 @@ Settings:
     Import playlists formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Dispositivos"
+    Devices Hint: "Revisa os dispositivos que poden acceder a esta conta de sincronización."
+    Change Password: "Cambiar o contrasinal"
+    Refresh Devices: "Actualizar os dispositivos"
+    Current Device: "Dispositivo actual"
+    Revoke Session: "Revogar o acceso"
+    Session Created: "Creada"
+    Last Active: "Última actividade"
+    Session Expires: "Caduca"
+    Unknown Device: "Dispositivo descoñecido"
+    Operating System: "Sistema operativo"
+    Rename Device: "Cambiar o nome do dispositivo"
+    Save Device Name: "Gardar o nome"
+    Device Name Invalid: "Os nomes dos dispositivos poden ter ata 80 caracteres e non poden conter caracteres de control."
+    Device Renamed: "Cambiouse o nome do dispositivo"
+    Revoke Session Confirmation: "Revogar esta sesión?"
+    Revoke Current Session Warning: "Ao revogar esta sesión, este dispositivo desconectarase da conta de sincronización."
+    Revoke Session Warning: "{device} perderá o acceso a esta conta de sincronización."
+    Confirm Revoke Session: "Revogar a sesión"
+    Session Revoked: "Sesión revogada"
+    Change Password Warning: "Ao cambiar o contrasinal pecharase a sesión en todos os demais dispositivos. Este dispositivo seguirá conectado."
+    Current Password: "Contrasinal actual"
+    New Password: "Novo contrasinal"
+    Confirm New Password: "Confirmar o novo contrasinal"
+    Save New Password: "Gardar o novo contrasinal"
+    Account Management Failed: "Non se puideron cargar os datos da conta de sincronización."
+    All Password Fields Required: "Completa todos os campos de contrasinal."
+    New Password Too Short: "O novo contrasinal debe ter polo menos 8 caracteres."
+    New Passwords Do Not Match: "Os novos contrasinais non coinciden."
+    Password Changed: "Contrasinal cambiado. Pechouse a sesión nos demais dispositivos."
     Sync Settings: Sincronización
     Enable Sync: Activar a sincronización
     Privacy Passphrase: Frase secreta de privacidade

@@ -744,6 +744,36 @@ Settings:
     Import playlists formats: '支援的格式：OpenTubeX / FreeTube (.db)'
     Import search history formats: '支援的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "裝置"
+    Devices Hint: "檢視可存取此同步帳戶的裝置。"
+    Change Password: "變更密碼"
+    Refresh Devices: "重新整理裝置"
+    Current Device: "目前裝置"
+    Revoke Session: "撤銷存取權"
+    Session Created: "建立時間"
+    Last Active: "上次活動時間"
+    Session Expires: "到期時間"
+    Unknown Device: "未知裝置"
+    Operating System: "作業系統"
+    Rename Device: "重新命名裝置"
+    Save Device Name: "儲存名稱"
+    Device Name Invalid: "裝置名稱最多可包含 80 個字元，且不能包含控制字元。"
+    Device Renamed: "裝置已重新命名"
+    Revoke Session Confirmation: "要撤銷此工作階段嗎？"
+    Revoke Current Session Warning: "撤銷此工作階段會中斷此裝置與同步帳戶的連線。"
+    Revoke Session Warning: "{device} 將無法再存取此同步帳戶。"
+    Confirm Revoke Session: "撤銷工作階段"
+    Session Revoked: "工作階段已撤銷"
+    Change Password Warning: "變更密碼會讓所有其他裝置登出。此裝置將保持連線。"
+    Current Password: "目前密碼"
+    New Password: "新密碼"
+    Confirm New Password: "確認新密碼"
+    Save New Password: "儲存新密碼"
+    Account Management Failed: "無法載入同步帳戶詳細資料。"
+    All Password Fields Required: "請填寫所有密碼欄位。"
+    New Password Too Short: "新密碼必須至少包含 8 個字元。"
+    New Passwords Do Not Match: "兩次輸入的新密碼不相符。"
+    Password Changed: "密碼已變更。其他裝置已登出。"
     Sync Settings: 同步
     Enable Sync: 啟用同步
     Privacy Passphrase: 隱私通關密語

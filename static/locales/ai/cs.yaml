@@ -742,6 +742,36 @@ Settings:
     Import playlists formats: 'Podporované formáty: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Zařízení"
+    Devices Hint: "Zkontrolujte zařízení, která mají přístup k tomuto synchronizačnímu účtu."
+    Change Password: "Změnit heslo"
+    Refresh Devices: "Obnovit zařízení"
+    Current Device: "Aktuální zařízení"
+    Revoke Session: "Odebrat přístup"
+    Session Created: "Vytvořeno"
+    Last Active: "Poslední aktivita"
+    Session Expires: "Vyprší"
+    Unknown Device: "Neznámé zařízení"
+    Operating System: "Operační systém"
+    Rename Device: "Přejmenovat zařízení"
+    Save Device Name: "Uložit název"
+    Device Name Invalid: "Názvy zařízení mohou obsahovat nejvýše 80 znaků a nesmí obsahovat řídicí znaky."
+    Device Renamed: "Zařízení přejmenováno"
+    Revoke Session Confirmation: "Odebrat tuto relaci?"
+    Revoke Current Session Warning: "Odebráním této relace odpojíte toto zařízení od synchronizačního účtu."
+    Revoke Session Warning: "{device} ztratí přístup k tomuto synchronizačnímu účtu."
+    Confirm Revoke Session: "Odebrat relaci"
+    Session Revoked: "Relace odebrána"
+    Change Password Warning: "Změnou hesla odhlásíte všechna ostatní zařízení. Toto zařízení zůstane připojeno."
+    Current Password: "Aktuální heslo"
+    New Password: "Nové heslo"
+    Confirm New Password: "Potvrdit nové heslo"
+    Save New Password: "Uložit nové heslo"
+    Account Management Failed: "Podrobnosti synchronizačního účtu se nepodařilo načíst."
+    All Password Fields Required: "Vyplňte všechna pole hesla."
+    New Password Too Short: "Nové heslo musí mít alespoň 8 znaků."
+    New Passwords Do Not Match: "Nová hesla se neshodují."
+    Password Changed: "Heslo bylo změněno. Ostatní zařízení byla odhlášena."
     Sync Settings: Synchronizace
     Enable Sync: Povolit synchronizaci
     Privacy Passphrase: Přístupová fráze pro ochranu soukromí

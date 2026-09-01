@@ -763,6 +763,36 @@ Settings:
     Import playlists formats: 'ஆதரிக்கப்படும் வடிவங்கள்: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'ஆதரிக்கப்படும் வடிவங்கள்: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "சாதனங்கள்"
+    Devices Hint: "இந்த ஒத்திசைவு கணக்கை அணுகக்கூடிய சாதனங்களை மதிப்பாய்வு செய்யவும்."
+    Change Password: "கடவுச்சொல்லை மாற்று"
+    Refresh Devices: "சாதனங்களைப் புதுப்பி"
+    Current Device: "தற்போதைய சாதனம்"
+    Revoke Session: "அணுகலை ரத்துசெய்"
+    Session Created: "உருவாக்கப்பட்டது"
+    Last Active: "கடைசியாக செயலில் இருந்தது"
+    Session Expires: "காலாவதியாகும்"
+    Unknown Device: "அறியப்படாத சாதனம்"
+    Operating System: "இயக்க முறைமை"
+    Rename Device: "சாதனத்தின் பெயரை மாற்று"
+    Save Device Name: "பெயரைச் சேமி"
+    Device Name Invalid: "சாதனப் பெயர்கள் அதிகபட்சம் 80 எழுத்துகளைக் கொண்டிருக்கலாம்; கட்டுப்பாட்டு எழுத்துகள் அனுமதிக்கப்படாது."
+    Device Renamed: "சாதனத்தின் பெயர் மாற்றப்பட்டது"
+    Revoke Session Confirmation: "இந்த அமர்வை ரத்துசெய்யவா?"
+    Revoke Current Session Warning: "இந்த அமர்வை ரத்துசெய்தால் இந்தச் சாதனம் ஒத்திசைவு கணக்கிலிருந்து துண்டிக்கப்படும்."
+    Revoke Session Warning: "{device} இந்த ஒத்திசைவு கணக்கிற்கான அணுகலை இழக்கும்."
+    Confirm Revoke Session: "அமர்வை ரத்துசெய்"
+    Session Revoked: "அமர்வு ரத்துசெய்யப்பட்டது"
+    Change Password Warning: "கடவுச்சொல்லை மாற்றினால் மற்ற எல்லாச் சாதனங்களிலிருந்தும் வெளியேற்றப்படும். இந்தச் சாதனம் இணைந்தே இருக்கும்."
+    Current Password: "தற்போதைய கடவுச்சொல்"
+    New Password: "புதிய கடவுச்சொல்"
+    Confirm New Password: "புதிய கடவுச்சொல்லை உறுதிப்படுத்து"
+    Save New Password: "புதிய கடவுச்சொல்லைச் சேமி"
+    Account Management Failed: "ஒத்திசைவு கணக்கு விவரங்களை ஏற்ற முடியவில்லை."
+    All Password Fields Required: "அனைத்து கடவுச்சொல் புலங்களையும் நிரப்பவும்."
+    New Password Too Short: "புதிய கடவுச்சொல் குறைந்தது 8 எழுத்துகளைக் கொண்டிருக்க வேண்டும்."
+    New Passwords Do Not Match: "புதிய கடவுச்சொற்கள் பொருந்தவில்லை."
+    Password Changed: "கடவுச்சொல் மாற்றப்பட்டது. மற்ற சாதனங்கள் வெளியேற்றப்பட்டன."
     Sync Settings: ஒத்திசைவு
     Enable Sync: ஒத்திசைவை இயக்கு
     Privacy Passphrase: தனியுரிமைக் கடவுச்சொற்றொடர்

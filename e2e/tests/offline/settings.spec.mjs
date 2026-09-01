@@ -4171,12 +4171,41 @@ test.describe('sync settings', () => {
         username: 'paired-user',
         token: 'paired-token',
         privacyKey: 'paired-privacy-key',
-        privacySalt: 'paired-privacy-salt'
+        privacySalt: 'paired-privacy-salt',
+        deviceId: 'MDEyMzQ1Njc4OTo7PD0-Pw',
+        deviceName: 'Paired device'
       })
     })
 
     await expect(username).toBeDisabled()
     await expect(username).toHaveValue('paired-user')
+  })
+
+  test('does not follow sync-server redirects with credentials', async ({ page }) => {
+    let credentialedRequestStarted
+    const credentialedRequest = new Promise(resolve => {
+      credentialedRequestStarted = resolve
+    })
+    let downgradedRequests = 0
+    await page.route('https://sync.d3sox.me/**', route => {
+      if (route.request().headers().authorization === 'invalid-token') {
+        credentialedRequestStarted()
+      }
+      return route.fulfill({
+        status: 307,
+        headers: { location: 'http://sync.d3sox.me/health' }
+      })
+    })
+    await page.route('http://sync.d3sox.me/**', route => {
+      downgradedRequests++
+      return route.fulfill({ status: 200, body: 'OK' })
+    })
+
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+    await credentialedRequest
+    await page.waitForTimeout(100)
+    expect(downgradedRequests).toBe(0)
   })
 
   test('shows session expiration and other sync failures outside Sync settings', async ({ page }) => {

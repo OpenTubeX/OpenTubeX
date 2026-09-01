@@ -4,6 +4,15 @@ import {
   DhkemX25519HkdfSha256,
   HkdfSha256,
 } from '@hpke/core'
+import {
+  base64UrlToBytes,
+  base64UrlToStandardBase64,
+  bytesToBase64Url,
+  isCanonicalBase64Url,
+  randomBase64Url,
+  standardBase64ToBase64Url,
+  validateSyncServerDeviceName,
+} from './sync-server-protocol.js'
 
 export const PAIRING_PROTOCOL_VERSION = 1
 export const PAIRING_QR_PREFIX = 'opentubex-pairing:'
@@ -15,8 +24,6 @@ const RECIPIENT_TOKEN_BYTES = 32
 const X25519_PUBLIC_KEY_BYTES = 32
 const AES_256_KEY_BYTES = 32
 const PRIVACY_SALT_BYTES = 16
-const MAX_DEVICE_NAME_CHARS = 80
-const MAX_DEVICE_NAME_BYTES = 240
 const MAX_ORIGIN_LENGTH = 512
 const MAX_QR_LENGTH = 2048
 const MAX_USERNAME_BYTES = 512
@@ -62,81 +69,12 @@ const SESSION_FIELDS = [
   'approved',
 ]
 
-function bytesToBase64Url(bytes) {
-  let binary = ''
-  for (const byte of bytes) binary += String.fromCharCode(byte)
-  return btoa(binary)
-    .replaceAll('+', '-')
-    .replaceAll('/', '_')
-    .replace(/=+$/, '')
-}
-
-function base64UrlToBytes(value, expectedLength) {
-  if (typeof value !== 'string' || !/^[\w-]+$/.test(value)) throw new Error()
-  const padding = '='.repeat((4 - value.length % 4) % 4)
-  let binary
-  try {
-    binary = atob(value.replaceAll('-', '+').replaceAll('_', '/') + padding)
-  } catch {
-    throw new Error()
-  }
-  const bytes = Uint8Array.from(binary, character => character.charCodeAt(0))
-  if (expectedLength !== undefined && bytes.length !== expectedLength) throw new Error()
-  if (bytesToBase64Url(bytes) !== value) throw new Error()
-  return bytes
-}
-
-function isCanonicalBase64Url(value, expectedLength) {
-  try {
-    base64UrlToBytes(value, expectedLength)
-    return true
-  } catch {
-    return false
-  }
-}
-
-function standardBase64ToBase64Url(value, expectedLength) {
-  if (typeof value !== 'string' || !/^[A-Za-z0-9+/]+={0,2}$/.test(value)) throw new Error()
-  let binary
-  try {
-    binary = atob(value)
-  } catch {
-    throw new Error()
-  }
-  const bytes = Uint8Array.from(binary, character => character.charCodeAt(0))
-  if (bytes.length !== expectedLength) throw new Error()
-  let canonical = ''
-  for (const byte of bytes) canonical += String.fromCharCode(byte)
-  if (btoa(canonical) !== value) throw new Error()
-  return bytesToBase64Url(bytes)
-}
-
-function base64UrlToStandardBase64(value, expectedLength) {
-  const bytes = base64UrlToBytes(value, expectedLength)
-  let binary = ''
-  for (const byte of bytes) binary += String.fromCharCode(byte)
-  return btoa(binary)
-}
-
-function randomBase64Url(length) {
-  return bytesToBase64Url(crypto.getRandomValues(new Uint8Array(length)))
-}
-
 function hasExactFields(value, fields) {
   return value &&
     typeof value === 'object' &&
     !Array.isArray(value) &&
     Object.keys(value).length === fields.length &&
     fields.every(field => Object.prototype.hasOwnProperty.call(value, field))
-}
-
-function validateDeviceName(name) {
-  if (typeof name !== 'string' || name.trim() !== name || !name) throw new Error()
-  if ([...name].length > MAX_DEVICE_NAME_CHARS || new TextEncoder().encode(name).length > MAX_DEVICE_NAME_BYTES) {
-    throw new Error()
-  }
-  if ([...name].some(character => /\p{Cc}/u.test(character))) throw new Error()
-  return name
 }
 
 function normalizePairingOrigin(origin) {
@@ -175,7 +113,7 @@ function validatePairingRequest(request) {
   base64UrlToBytes(request.sessionId, SESSION_ID_BYTES)
   base64UrlToBytes(request.recipientPublicKey, X25519_PUBLIC_KEY_BYTES)
   base64UrlToBytes(request.recipientDeviceId, DEVICE_ID_BYTES)
-  validateDeviceName(request.recipientDeviceName)
+  validateSyncServerDeviceName(request.recipientDeviceName)
   base64UrlToBytes(request.pairingSecret, PAIRING_SECRET_BYTES)
   return request
 }
@@ -262,7 +200,7 @@ export async function createPairingRecipient(deviceName) {
   return {
     sessionId: randomBase64Url(SESSION_ID_BYTES),
     recipientDeviceId: randomBase64Url(DEVICE_ID_BYTES),
-    recipientDeviceName: validateDeviceName(deviceName),
+    recipientDeviceName: validateSyncServerDeviceName(deviceName),
     recipientPublicKey: bytesToBase64Url(new Uint8Array(recipientPublicKey)),
     pairingSecret: randomBase64Url(PAIRING_SECRET_BYTES),
     recipientToken: bytesToBase64Url(recipientTokenBytes),

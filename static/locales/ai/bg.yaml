@@ -744,6 +744,36 @@ Settings:
     Import playlists formats: 'Поддържани формати: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Поддържани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Устройства"
+    Devices Hint: "Прегледайте устройствата, които имат достъп до този акаунт за синхронизиране."
+    Change Password: "Промяна на паролата"
+    Refresh Devices: "Опресняване на устройствата"
+    Current Device: "Текущо устройство"
+    Revoke Session: "Отнемане на достъпа"
+    Session Created: "Създадена"
+    Last Active: "Последна активност"
+    Session Expires: "Изтича"
+    Unknown Device: "Неизвестно устройство"
+    Operating System: "Операционна система"
+    Rename Device: "Преименуване на устройството"
+    Save Device Name: "Запазване на името"
+    Device Name Invalid: "Имената на устройствата могат да съдържат до 80 знака и не могат да съдържат контролни знаци."
+    Device Renamed: "Устройството е преименувано"
+    Revoke Session Confirmation: "Да се отнеме ли тази сесия?"
+    Revoke Current Session Warning: "Отнемането на тази сесия ще прекъсне връзката на това устройство с акаунта за синхронизиране."
+    Revoke Session Warning: "{device} ще загуби достъп до този акаунт за синхронизиране."
+    Confirm Revoke Session: "Отнемане на сесията"
+    Session Revoked: "Сесията е отнета"
+    Change Password Warning: "При промяна на паролата всички други устройства ще излязат от профила. Това устройство ще остане свързано."
+    Current Password: "Текуща парола"
+    New Password: "Нова парола"
+    Confirm New Password: "Потвърждаване на новата парола"
+    Save New Password: "Запазване на новата парола"
+    Account Management Failed: "Данните за акаунта за синхронизиране не можаха да бъдат заредени."
+    All Password Fields Required: "Попълнете всички полета за парола."
+    New Password Too Short: "Новата парола трябва да е поне 8 знака."
+    New Passwords Do Not Match: "Новите пароли не съвпадат."
+    Password Changed: "Паролата е променена. Другите устройства бяха излезли от профила."
     Sync Settings: Синхронизиране
     Enable Sync: Включване на синхронизирането
     Privacy Passphrase: Паролна фраза за поверителност

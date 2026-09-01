@@ -764,6 +764,36 @@ Settings:
     Import playlists formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Devices: "Laitteet"
+    Devices Hint: "Tarkista laitteet, joilla on tämän synkronointitilin käyttöoikeus."
+    Change Password: "Vaihda salasana"
+    Refresh Devices: "Päivitä laitteet"
+    Current Device: "Nykyinen laite"
+    Revoke Session: "Peruuta käyttöoikeus"
+    Session Created: "Luotu"
+    Last Active: "Viimeksi aktiivinen"
+    Session Expires: "Vanhenee"
+    Unknown Device: "Tuntematon laite"
+    Operating System: "Käyttöjärjestelmä"
+    Rename Device: "Nimeä laite uudelleen"
+    Save Device Name: "Tallenna nimi"
+    Device Name Invalid: "Laitteen nimessä voi olla enintään 80 merkkiä, eikä se saa sisältää ohjausmerkkejä."
+    Device Renamed: "Laite nimetty uudelleen"
+    Revoke Session Confirmation: "Peruutetaanko tämä istunto?"
+    Revoke Current Session Warning: "Tämän istunnon peruuttaminen katkaisee tämän laitteen yhteyden synkronointitiliin."
+    Revoke Session Warning: "{device} menettää tämän synkronointitilin käyttöoikeuden."
+    Confirm Revoke Session: "Peruuta istunto"
+    Session Revoked: "Istunto peruutettu"
+    Change Password Warning: "Salasanan vaihtaminen kirjaa kaikki muut laitteet ulos. Tämä laite pysyy yhdistettynä."
+    Current Password: "Nykyinen salasana"
+    New Password: "Uusi salasana"
+    Confirm New Password: "Vahvista uusi salasana"
+    Save New Password: "Tallenna uusi salasana"
+    Account Management Failed: "Synkronointitilin tietoja ei voitu ladata."
+    All Password Fields Required: "Täytä kaikki salasanakentät."
+    New Password Too Short: "Uudessa salasanassa on oltava vähintään 8 merkkiä."
+    New Passwords Do Not Match: "Uudet salasanat eivät täsmää."
+    Password Changed: "Salasana vaihdettu. Muut laitteet on kirjattu ulos."
     Sync Settings: Synkronointi
     Enable Sync: Ota synkronointi käyttöön
     Privacy Passphrase: Tietosuojan tunnuslause
