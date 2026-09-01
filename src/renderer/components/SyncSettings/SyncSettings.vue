@@ -400,11 +400,13 @@
               :label="t('Settings.Sync Settings.Confirm Delete Account')"
               theme="destructive"
               :icon="['fas', 'trash']"
+              :disabled="accountActionBusy"
               @click="deleteAccount"
             />
             <FtButton
               :label="t('Cancel')"
               :icon="['fas', 'xmark']"
+              :disabled="accountActionBusy"
               @click="closeDeleteAccountPrompt"
             />
           </FtFlexBox>
