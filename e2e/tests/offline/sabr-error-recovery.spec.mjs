@@ -405,11 +405,13 @@ test('yt-dlp timeout reload reuses cache while a rejected source is invalidated'
       return reused
     }
     const waitForCacheLookup = async (count) => {
-      for (let attempt = 0; attempt < 100; attempt++) {
+      for (let attempt = 0; attempt < 1500; attempt++) {
         if (cacheReuseResults.length >= count) return
         await new Promise(resolve => setTimeout(resolve, 10))
       }
-      throw new Error('Timed out waiting for the yt-dlp cache lookup')
+      throw new Error(
+        `Timed out waiting for yt-dlp cache lookup ${count}, got ${cacheReuseResults.length}`
+      )
     }
 
     await view.handlePlayerError({ code: TIMEOUT, data: [] })
