@@ -197,6 +197,8 @@ const cardStyle = ref({})
 let updateFrame = null
 let lastActiveElement = null
 let contentResizeObserver = null
+let targetResizeObserver = null
+let observedTarget = null
 
 const BASE_THEME_VALUES = [
   'system', 'light', 'dark', 'black', 'nordic', 'hotPink', 'pastelPink',
@@ -347,6 +349,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', schedulePositionUpdate, true)
   document.removeEventListener('keydown', handleDocumentKeydown, true)
   contentResizeObserver?.disconnect()
+  targetResizeObserver?.disconnect()
   store.commit('removeOpenPrompt', promptId)
   unlockBodyScroll()
   nextTick(() => lastActiveElement?.focus())
@@ -375,6 +378,18 @@ function observeTutorialContent() {
   clampTutorialScroll()
 }
 
+function observeTarget(target) {
+  if (observedTarget === target) return
+
+  targetResizeObserver?.disconnect()
+  observedTarget = target
+
+  if (target) {
+    targetResizeObserver ??= new ResizeObserver(schedulePositionUpdate)
+    targetResizeObserver.observe(target)
+  }
+}
+
 async function updatePosition() {
   const target = step.value.target === null
     ? null
@@ -382,6 +397,7 @@ async function updatePosition() {
         const rect = element.getBoundingClientRect()
         return rect.width > 0 && rect.height > 0
       })
+  observeTarget(target)
   const rect = target?.getBoundingClientRect()
   targetRect.value = rect && rect.width > 0 && rect.height > 0
     ? {

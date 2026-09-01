@@ -1,4 +1,4 @@
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 
 test.use({ showTutorial: true })
 
@@ -313,6 +313,21 @@ test('walks new users through the essential controls', async ({ page }) => {
 
   await page.reload()
   await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
+})
+
+test('repositions the navigation highlight after crossing the mobile breakpoint', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 600, height: 700 })
+  await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
+  await page.reload()
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1.05))
+
+  const tutorial = page.locator('.tutorialCard')
+  await tutorial.getByRole('button', { name: 'Next' }).click()
+  await expect(tutorial).toHaveAccessibleName('Your library is always nearby')
+  await expectHighlightCenteredOn(page, '[data-tutorial="navigation"]')
+
+  await setWindowSize(app, page, { width: 1000, height: 800 })
+  await expectHighlightCenteredOn(page, '[data-tutorial="navigation"]')
 })
 
 test('repositions the tab highlight when the layout is reset', async ({ page }) => {
