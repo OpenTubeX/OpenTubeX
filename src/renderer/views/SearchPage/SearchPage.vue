@@ -175,7 +175,7 @@ onMounted(() => {
 
 function updateSearchHistoryEntry(searchSettings) {
   const persistentSearchHistoryPayload = {
-    _id: processedQuery.value,
+    query: processedQuery.value,
     lastUpdatedAt: Date.now(),
     searchSettings: {
       prioritize: searchSettings.prioritize,

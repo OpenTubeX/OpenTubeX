@@ -176,6 +176,7 @@ import store from '../../store/index'
 
 import { getConfiguredKeyboardShortcuts, MOBILE_WIDTH_THRESHOLD, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
+import { getSearchHistoryEntryQuery } from '../../helpers/search-history'
 import { debounce, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 import { clearLocalSearchSuggestionsSession, getLocalSearchSuggestions } from '../../helpers/api/local'
@@ -346,13 +347,72 @@ function restoreSettingsWindow() {
 
 const usingOnlySearchHistoryResults = computed(() => lastSuggestionQuery.value.length === 0)
 
-/** @type {import('vue').ComputedRef<string[]>} */
-const latestMatchingSearchHistoryNames = computed(() => {
-  return store.getters.getLatestMatchingSearchHistoryNames(lastSuggestionQuery.value)
+/** @type {import('vue').ComputedRef<object[]>} */
+const latestMatchingSearchHistoryEntries = computed(() => {
+  return store.getters.getLatestMatchingSearchHistoryEntries(lastSuggestionQuery.value)
 })
 
-/** @type {import('vue').ComputedRef<string[]>} */
-const latestSearchHistoryNames = computed(() => store.getters.getLatestSearchHistoryNames)
+/** @type {import('vue').ComputedRef<object[]>} */
+const latestSearchHistoryEntries = computed(() => store.getters.getLatestSearchHistoryEntries)
+
+const activeSearchHistoryEntries = computed(() => usingOnlySearchHistoryResults.value
+  ? latestSearchHistoryEntries.value
+  : latestMatchingSearchHistoryEntries.value)
+
+const searchFilterLabels = computed(() => ({
+  prioritize: {
+    popularity: t('Search Filters.Prioritize.Popularity'),
+  },
+  time: {
+    today: t('Search Filters.Time.Today'),
+    week: t('Search Filters.Time.This Week'),
+    month: t('Search Filters.Time.This Month'),
+    year: t('Search Filters.Time.This Year'),
+  },
+  type: {
+    video: t('Search Filters.Type.Videos'),
+    shorts: t('Global.Shorts'),
+    channel: t('Search Filters.Type.Channels'),
+    playlist: t('Playlists'),
+    movie: t('Search Filters.Type.Movies'),
+  },
+  duration: {
+    under_three_mins: t('Search Filters.Duration.< 3 minutes'),
+    three_to_twenty_mins: t('Search Filters.Duration.3 - 20 minutes'),
+    over_twenty_mins: t('Search Filters.Duration.> 20 minutes'),
+  },
+  features: {
+    live: t('Search Filters.Features.Live'),
+    '4k': t('Search Filters.Features.4K'),
+    hd: t('Search Filters.Features.HD'),
+    subtitles: t('Search Filters.Features.Subtitles'),
+    creative_commons: t('Search Filters.Features.Creative Commons'),
+    360: t('Search Filters.Features.360 Video'),
+    vr180: t('Search Filters.Features.VR180'),
+    '3d': t('Search Filters.Features.3D'),
+    hdr: t('Search Filters.Features.HDR'),
+    location: t('Search Filters.Features.Location'),
+  },
+}))
+
+/**
+ * @param {{ query: string, searchSettings: object }} entry
+ * @returns {string}
+ */
+function getSearchHistoryEntryDisplayText(entry) {
+  const settings = entry.searchSettings
+  const filterLabels = ['prioritize', 'time', 'type', 'duration']
+    .map(group => searchFilterLabels.value[group][settings[group]])
+    .filter(Boolean)
+
+  for (const feature of settings.features) {
+    filterLabels.push(searchFilterLabels.value.features[feature] ?? feature)
+  }
+
+  return filterLabels.length === 0
+    ? entry.query
+    : `${entry.query} (${filterLabels.join(', ')})`
+}
 
 /** @type {import('vue').ComputedRef<string>} */
 const searchFilterTabId = computed(() => process.env.IS_ELECTRON
@@ -365,15 +425,16 @@ const searchSettings = computed(() => store.getters.getSearchSettings(searchFilt
 const activeDataList = computed(() => {
   // show latest search history when the search bar is empty
   if (usingOnlySearchHistoryResults.value) {
-    return latestSearchHistoryNames.value
+    return latestSearchHistoryEntries.value.map(getSearchHistoryEntryQuery)
   }
 
-  const searchResults = [...latestMatchingSearchHistoryNames.value]
+  const searchHistoryNames = latestMatchingSearchHistoryEntries.value.map(getSearchHistoryEntryQuery)
+  const searchResults = [...searchHistoryNames]
 
   if (enableSearchSuggestions.value) {
     for (const searchSuggestion of searchSuggestionsDataList.value) {
       // prevent duplicate results between search history entries and YT search suggestions
-      if (latestMatchingSearchHistoryNames.value.includes(searchSuggestion)) {
+      if (searchHistoryNames.includes(searchSuggestion)) {
         continue
       }
 
@@ -388,21 +449,27 @@ const activeDataList = computed(() => {
   return searchResults
 })
 
-const searchHistoryEntriesCount = computed(() => usingOnlySearchHistoryResults.value
-  ? latestSearchHistoryNames.value.length
-  : latestMatchingSearchHistoryNames.value.length)
+const searchHistoryEntriesCount = computed(() => activeSearchHistoryEntries.value.length)
 
-const searchResultHrefs = shallowRef(new Map())
+const searchResultHrefs = shallowRef([])
 
 const activeDataListProperties = computed(() => {
   const properties = []
 
   for (let i = 0; i < activeDataList.value.length; i++) {
-    const queryText = activeDataList.value[i]
-    const href = searchResultHrefs.value.get(queryText)
+    const href = searchResultHrefs.value[i]
+    const searchHistoryEntry = activeSearchHistoryEntries.value[i]
 
     properties.push(i < searchHistoryEntriesCount.value
-      ? { isLink: true, isRemoveable: true, isSearchHistory: true, iconName: 'clock-rotate-left', href }
+      ? {
+          isLink: true,
+          isRemoveable: true,
+          isSearchHistory: true,
+          iconName: 'clock-rotate-left',
+          href,
+          displayText: getSearchHistoryEntryDisplayText(searchHistoryEntry),
+          ariaLabel: getSearchHistoryEntryDisplayText(searchHistoryEntry),
+        }
       : { isLink: true, isRemoveable: false, isSearchHistory: false, iconName: 'magnifying-glass', href }
     )
   }
@@ -616,18 +683,16 @@ async function getSearchDestination(queryText, selectedSearchSettings = null) {
 }
 
 let searchHrefRequestId = 0
-watch([activeDataList, searchSettings], async ([dataList]) => {
+watch([activeDataList, activeSearchHistoryEntries, searchSettings], async ([dataList, searchHistoryEntries]) => {
   const requestId = ++searchHrefRequestId
-  const hrefEntries = await Promise.all(dataList.map(async (queryText, index) => {
-    const searchHistoryEntry = index < searchHistoryEntriesCount.value
-      ? store.getters.getSearchHistoryEntryWithId(queryText)
-      : null
+  const hrefs = await Promise.all(dataList.map(async (queryText, index) => {
+    const searchHistoryEntry = searchHistoryEntries[index] ?? null
     const destination = await getSearchDestination(queryText, searchHistoryEntry?.searchSettings)
-    return [queryText, router.resolve({ path: destination.path, query: destination.query }).href]
+    return router.resolve({ path: destination.path, query: destination.query }).href
   }))
 
   if (requestId === searchHrefRequestId) {
-    searchResultHrefs.value = new Map(hrefEntries)
+    searchResultHrefs.value = hrefs
   }
 }, { deep: true, immediate: true })
 
@@ -657,7 +722,7 @@ async function goToSearch(queryText, { event, dataListIndex }) {
   clearLocalSearchSuggestionsSession()
 
   const selectedSearchHistoryEntry = activeDataListProperties.value[dataListIndex]?.isSearchHistory
-    ? store.getters.getSearchHistoryEntryWithId(queryText)
+    ? activeSearchHistoryEntries.value[dataListIndex]
     : null
   const selectedSearchSettings = selectedSearchHistoryEntry?.searchSettings
 
@@ -770,10 +835,20 @@ async function getSearchSuggestionsInvidious(query) {
 
 /**
  * @param {string} query
+ * @param {object} options
+ * @param {number} options.dataListIndex
  */
-function removeSearchHistoryEntryInDbAndCache(query) {
-  store.dispatch('removeSearchHistoryEntry', query)
-  store.commit('removeFromSessionSearchHistory', query)
+function removeSearchHistoryEntryInDbAndCache(query, { dataListIndex }) {
+  const searchHistoryEntry = activeSearchHistoryEntries.value[dataListIndex]
+  if (searchHistoryEntry == null) {
+    return
+  }
+
+  store.dispatch('removeSearchHistoryEntry', searchHistoryEntry._id)
+  store.commit('removeFromSessionSearchHistory', {
+    query,
+    searchSettings: searchHistoryEntry.searchSettings,
+  })
 }
 
 function toggleSearchContainer() {

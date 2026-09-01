@@ -1,6 +1,12 @@
 import { MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT } from '../../../constants'
 import { DBSearchHistoryHandlers } from '../../../datastores/handlers/index'
-import { sortSearchHistoryByLastUpdatedAt } from '../../helpers/search-history'
+import {
+  getSearchHistoryEntryId,
+  getSearchHistoryEntryKeyFromEntry,
+  getSearchHistoryEntryQuery,
+  normalizeSearchHistoryEntry,
+  sortSearchHistoryByLastUpdatedAt,
+} from '../../helpers/search-history'
 
 const state = {
   searchHistoryEntries: []
@@ -11,32 +17,27 @@ const getters = {
     return state.searchHistoryEntries
   },
 
-  getLatestSearchHistoryNames: (state) => {
-    return state.searchHistoryEntries.map((entry) => entry._id)
+  getLatestSearchHistoryEntries: (state) => {
+    return state.searchHistoryEntries
   },
 
-  getLatestMatchingSearchHistoryNames: (state) => (id) => {
+  getLatestMatchingSearchHistoryEntries: (state) => (query) => {
     const matches = []
-    let counter = 0
 
     for (const entry of state.searchHistoryEntries) {
-      if (entry._id.startsWith(id)) {
-        matches.push(entry._id)
+      if (getSearchHistoryEntryQuery(entry).startsWith(query)) {
+        matches.push(entry)
 
-        counter++
-
-        if (counter === MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT) {
+        if (matches.length === MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT) {
           break
         }
       }
     }
 
     // prioritize more concise matches
-    return matches.sort((a, b) => a.length - b.length)
-  },
-
-  getSearchHistoryEntryWithId: (state) => (id) => {
-    return state.searchHistoryEntries.find(p => p._id === id)
+    return matches.sort((a, b) => {
+      return getSearchHistoryEntryQuery(a).length - getSearchHistoryEntryQuery(b).length
+    })
   },
 }
 const actions = {
@@ -49,10 +50,20 @@ const actions = {
     }
   },
 
-  async updateSearchHistoryEntry({ commit }, searchHistoryEntry) {
+  async updateSearchHistoryEntry({ state, commit }, searchHistoryEntry) {
     try {
-      await DBSearchHistoryHandlers.upsert(searchHistoryEntry)
-      commit('upsertSearchHistoryEntryToList', searchHistoryEntry)
+      const normalizedEntry = normalizeSearchHistoryEntry(searchHistoryEntry)
+      const entryKey = getSearchHistoryEntryKeyFromEntry(normalizedEntry)
+      const existingEntry = state.searchHistoryEntries.find(entry => {
+        return getSearchHistoryEntryKeyFromEntry(entry) === entryKey
+      })
+      const updatedEntry = {
+        ...normalizedEntry,
+        _id: existingEntry?._id ?? getSearchHistoryEntryId(normalizedEntry.query, normalizedEntry.searchSettings),
+      }
+
+      await DBSearchHistoryHandlers.upsert(updatedEntry)
+      commit('upsertSearchHistoryEntryToList', updatedEntry)
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -98,10 +109,11 @@ const actions = {
 
 const mutations = {
   setSearchHistoryEntries(state, searchHistoryEntries) {
-    state.searchHistoryEntries = searchHistoryEntries
+    state.searchHistoryEntries = searchHistoryEntries.map(normalizeSearchHistoryEntry)
   },
 
   upsertSearchHistoryEntryToList(state, updatedSearchHistoryEntry) {
+    updatedSearchHistoryEntry = normalizeSearchHistoryEntry(updatedSearchHistoryEntry)
     state.searchHistoryEntries = state.searchHistoryEntries.filter((p) => {
       return p._id !== updatedSearchHistoryEntry._id
     })

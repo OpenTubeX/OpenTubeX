@@ -874,8 +874,10 @@ const mutations = {
     cache[videoId] = avatar
   },
 
-  removeFromSessionSearchHistory (state, query) {
-    state.sessionSearchHistory = state.sessionSearchHistory.filter((search) => search.query !== query)
+  removeFromSessionSearchHistory (state, { query, searchSettings }) {
+    state.sessionSearchHistory = state.sessionSearchHistory.filter((search) => {
+      return search.query !== query || !searchFiltersMatch(search.searchSettings, searchSettings)
+    })
   },
 
   addToSessionSearchHistory (state, payload) {
