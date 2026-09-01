@@ -3339,6 +3339,7 @@ test.describe('settings', () => {
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
+    await positionSelect.selectOption('bottom-right')
     await positionSelect.selectOption('top-right')
     await expect(holder).toHaveClass(/position-top-right/)
     toast = await showToast('Top right toast')
