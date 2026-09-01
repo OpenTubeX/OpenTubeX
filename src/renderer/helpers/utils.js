@@ -3,6 +3,7 @@ import i18n from '../i18n/index'
 import router from '../router/index'
 import { getTabNavigationService } from '../tabs/TabNavigationService'
 import { UnsupportedPlayerActions } from '../../constants'
+import { getSearchHistoryEntryKey } from '../../search-history'
 import { getPreferredShortThumbnailUrl } from './player/shorts'
 import { isRoundedNumber } from './viewCounts'
 
@@ -699,11 +700,7 @@ export function formatDurationAsTimestamp(lengthSeconds) {
  * @returns {boolean}
  */
 export function searchFiltersMatch(filtersA, filtersB) {
-  return filtersA?.prioritize === filtersB?.prioritize &&
-    filtersA?.time === filtersB?.time &&
-    filtersA?.type === filtersB?.type &&
-    filtersA?.duration === filtersB?.duration &&
-    filtersA?.features?.length === filtersB?.features?.length && filtersA?.features?.every((val, index) => val === filtersB?.features[index])
+  return getSearchHistoryEntryKey('', filtersA) === getSearchHistoryEntryKey('', filtersB)
 }
 
 /**

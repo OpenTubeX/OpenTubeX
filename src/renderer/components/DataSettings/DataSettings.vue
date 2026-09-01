@@ -196,6 +196,7 @@ import {
   DEFAULT_SEARCH_SETTINGS,
   mergeSearchHistoryEntries,
   normalizeSearchHistoryEntry,
+  normalizeSearchSettings,
 } from '../../../search-history'
 
 const IMPORT_DIRECTORY_ID = 'data-settings-import'
@@ -1705,7 +1706,9 @@ async function importYouTubeSearchHistory(historyData) {
             _id: query,
             query,
             lastUpdatedAt,
-            searchSettings: DEFAULT_SEARCH_SETTINGS,
+            searchSettings: isJsonObject(entry.searchSettings)
+              ? normalizeSearchSettings(entry.searchSettings)
+              : DEFAULT_SEARCH_SETTINGS,
           })
         }
       } catch (error) {
@@ -1770,6 +1773,7 @@ async function exportYouTubeSearchHistory() {
       title: `Searched for ${entry.query}`,
       titleUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(entry.query)}`,
       time: new Date(entry.lastUpdatedAt).toISOString(),
+      searchSettings: normalizeSearchSettings(entry.searchSettings),
       products: [
         'YouTube'
       ],
