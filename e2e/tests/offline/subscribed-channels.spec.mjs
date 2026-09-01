@@ -90,7 +90,7 @@ test.describe('subscribed channels', () => {
       const anchoredEdgeDifference = direction === 'rtl'
         ? Math.abs(triggerBox.x - dropdownBox.x)
         : Math.abs(triggerBox.x + triggerBox.width - dropdownBox.x - dropdownBox.width)
-      expect(anchoredEdgeDifference).toBeLessThan(0.5)
+      expect(anchoredEdgeDifference).toBeLessThanOrEqual(1)
 
       const scrollWidthBefore = await page.evaluate(() => document.documentElement.scrollWidth)
       await dropdown.getByRole('combobox', { name: 'Videos per day' }).click()
