@@ -103,6 +103,8 @@
             :is="getDataListProperty(index)?.isLink ? 'a' : 'div'"
             class="optionWrapper"
             :href="getDataListProperty(index)?.href"
+            :aria-label="getDataListProperty(index)?.ariaLabel"
+            :title="getDataListProperty(index)?.ariaLabel"
             @click.prevent="handleOptionClick(index, $event)"
             @auxclick.middle="handleOptionAuxClick(index, $event)"
           >
@@ -111,7 +113,7 @@
               :icon="['fas', getDataListProperty(index).iconName]"
               class="searchResultIcon"
             />
-            <bdi>{{ entry }}</bdi>
+            <bdi>{{ getDataListProperty(index)?.displayText ?? entry }}</bdi>
           </component>
           <a
             v-if="getDataListProperty(index)?.isRemoveable"
@@ -242,6 +244,7 @@ const searchState = reactive({
   keyboardSelectedOptionIndex: -1
 })
 const visibleDataList = ref(props.dataList)
+const visibleDataListIndexes = ref(props.dataList.map((_, index) => index))
 const removeButtonSelectedIndex = ref(-1)
 const removalMade = ref(false)
 const actionButtonIconName = shallowRef(props.forceActionButtonIconName ?? ['fas', 'search'])
@@ -462,7 +465,7 @@ function handleRemoveClick(index) {
   // keep input in focus even when the to-be-removed "Remove" button was clicked
   inputRef.value.focus()
   removalMade.value = true
-  emit('remove', visibleDataList.value[index])
+  emit('remove', visibleDataList.value[index], { dataListIndex: getDataListIndex(index) })
 }
 
 /**
@@ -470,7 +473,7 @@ function handleRemoveClick(index) {
  * @returns {number}
  */
 function getDataListIndex(visibleIndex) {
-  return props.dataList.indexOf(visibleDataList.value[visibleIndex])
+  return visibleDataListIndexes.value[visibleIndex]
 }
 
 /**
@@ -569,13 +572,15 @@ async function updateVisibleDataList(preserveSelectionAfterRemoval = false) {
 
   if (inputData.value.trim() === '') {
     visibleDataList.value = props.dataList
+    visibleDataListIndexes.value = props.dataList.map((_, index) => index)
   } else {
     // get list of items that match input
     const lowerCaseInputData = inputData.value.toLowerCase()
 
-    visibleDataList.value = props.dataList.filter(x => {
-      return x.toLowerCase().includes(lowerCaseInputData)
-    })
+    visibleDataListIndexes.value = props.dataList
+      .map((_, index) => index)
+      .filter(index => props.dataList[index].toLowerCase().includes(lowerCaseInputData))
+    visibleDataList.value = visibleDataListIndexes.value.map(index => props.dataList[index])
   }
 
   // Keep the same row selected only while the removal is reflected in the

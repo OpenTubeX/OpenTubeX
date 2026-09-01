@@ -192,6 +192,12 @@ import {
   isLibreTubeWatchHistoryBackup,
 } from '../../helpers/libretube'
 import { parseLineDelimitedJson } from '../../helpers/line-delimited-json'
+import {
+  DEFAULT_SEARCH_SETTINGS,
+  mergeSearchHistoryEntries,
+  normalizeSearchHistoryEntry,
+  normalizeSearchSettings,
+} from '../../../search-history'
 
 const IMPORT_DIRECTORY_ID = 'data-settings-import'
 const START_IN_DIRECTORY = 'downloads'
@@ -1635,8 +1641,8 @@ async function importSearchHistory() {
  */
 async function importFreeTubeSearchHistory(searchHistoryRecords) {
   // deep copy so we don't get errors from Electron when we try to pass reactive objects through the IPC channels
-  const historyItems = new Map(deepCopy(searchHistoryEntries.value).map(entry => [entry._id, entry]))
-  let importedCount = 0
+  const currentEntries = deepCopy(searchHistoryEntries.value)
+  const importedEntries = []
 
   searchHistoryRecords.forEach((entry) => {
     if (!isJsonObject(entry) || typeof entry._id !== 'string' || typeof entry.lastUpdatedAt !== 'number') {
@@ -1646,28 +1652,20 @@ async function importFreeTubeSearchHistory(searchHistoryRecords) {
       })
       console.error('Missing keys:', entry)
     } else {
-      importedCount++
-      const existingEntry = historyItems.get(entry._id)
-
-      if (existingEntry == null || entry.lastUpdatedAt > existingEntry.lastUpdatedAt) {
-        let newEntry
-
-        if (Object.keys(entry) === 2) {
-          newEntry = entry
-        } else {
-          newEntry = { _id: entry._id, lastUpdatedAt: entry.lastUpdatedAt }
-        }
-
-        historyItems.set(entry._id, newEntry)
-      }
+      importedEntries.push(normalizeSearchHistoryEntry({
+        _id: entry._id,
+        query: typeof entry.query === 'string' ? entry.query : entry._id,
+        lastUpdatedAt: entry.lastUpdatedAt,
+        searchSettings: isJsonObject(entry.searchSettings) ? entry.searchSettings : undefined,
+      }))
     }
   })
 
-  if (importedCount === 0) {
+  if (importedEntries.length === 0) {
     return
   }
 
-  const newSearchHistoryEntries = Array.from(historyItems.values())
+  const newSearchHistoryEntries = mergeSearchHistoryEntries(currentEntries, importedEntries)
 
   await store.dispatch('overwriteSearchHistory', newSearchHistoryEntries)
 
@@ -1682,7 +1680,8 @@ async function importFreeTubeSearchHistory(searchHistoryRecords) {
  */
 async function importYouTubeSearchHistory(historyData) {
   // deep copy so we don't get errors from Electron when we try to pass reactive objects through the IPC channels
-  const historyItems = new Map(deepCopy(searchHistoryEntries.value).map(entry => [entry._id, entry]))
+  const currentEntries = deepCopy(searchHistoryEntries.value)
+  const importedEntries = []
 
   for (const entry of historyData) {
     if (
@@ -1703,11 +1702,14 @@ async function importYouTubeSearchHistory(historyData) {
           })
           console.error('Missing keys:', entry)
         } else {
-          const existingEntry = historyItems.get(query)
-
-          if (existingEntry == null || lastUpdatedAt > existingEntry.lastUpdatedAt) {
-            historyItems.set(query, { _id: query, lastUpdatedAt })
-          }
+          importedEntries.push({
+            _id: query,
+            query,
+            lastUpdatedAt,
+            searchSettings: isJsonObject(entry.searchSettings)
+              ? normalizeSearchSettings(entry.searchSettings)
+              : DEFAULT_SEARCH_SETTINGS,
+          })
         }
       } catch (error) {
         console.error(error)
@@ -1719,7 +1721,7 @@ async function importYouTubeSearchHistory(historyData) {
     }
   }
 
-  const newSearchHistoryEntries = Array.from(historyItems.values())
+  const newSearchHistoryEntries = mergeSearchHistoryEntries(currentEntries, importedEntries)
 
   await store.dispatch('overwriteSearchHistory', newSearchHistoryEntries)
 
@@ -1768,9 +1770,10 @@ async function exportYouTubeSearchHistory() {
   const historyData = searchHistoryEntries.value.map((entry) => {
     return {
       header: 'YouTube',
-      title: `Searched for ${entry._id}`,
-      titleUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(entry._id)}`,
+      title: `Searched for ${entry.query}`,
+      titleUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(entry.query)}`,
       time: new Date(entry.lastUpdatedAt).toISOString(),
+      searchSettings: normalizeSearchSettings(entry.searchSettings),
       products: [
         'YouTube'
       ],
