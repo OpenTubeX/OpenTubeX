@@ -312,6 +312,8 @@ test.describe('OpenTubeX sync server', () => {
       await passwordPrompt.getByLabel('Confirm new password').fill('new-local-test-password')
       await passwordPrompt.getByRole('button', { name: 'Save new password' }).click()
       await expect(passwordPrompt).toBeHidden()
+      await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+      await expect(currentCard).toBeVisible()
       accountPassword = 'new-local-test-password'
       await expect.poll(async () => {
         return latestSettings(await readFile(settingsPath, 'utf8')).syncServerToken

@@ -223,8 +223,8 @@ const renamedDeviceName = ref('')
 const sessionToRevoke = ref(null)
 const promptError = ref('')
 
-function client() {
-  return new SyncServerClient(props.serverUrl, props.token)
+function client(token = props.token) {
+  return new SyncServerClient(props.serverUrl, token)
 }
 
 function dateLabel(timestamp) {
@@ -269,10 +269,10 @@ async function handleRequestError(requestError, target = error) {
   target.value = requestError?.message || t('Settings.Sync Settings.Account Management Failed')
 }
 
-async function loadSessions() {
+async function loadSessions(token = props.token) {
   loading.value = true
   error.value = ''
-  const requestClient = client()
+  const requestClient = client(token)
   try {
     const response = await requestClient.getAccountSessions()
     if (!response || !Array.isArray(response.sessions)) throw new Error()

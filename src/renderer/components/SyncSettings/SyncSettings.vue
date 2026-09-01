@@ -812,7 +812,7 @@ async function changePassword() {
       message: t('Settings.Sync Settings.Password Changed'),
       icon: ['fas', 'key'],
     })
-    await accountManagement.value?.loadSessions()
+    await accountManagement.value?.loadSessions(response.jwt)
   } catch (error) {
     if (isSessionExpiredError(error)) {
       await store.dispatch('expireSyncServerSession')
