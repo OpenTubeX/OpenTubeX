@@ -883,6 +883,13 @@ Profile:
   The selected image could not be loaded: The selected image could not be loaded
   Theme Color: Theme Colour
 Channel:
+  Subscription settings: Subscription settings
+  Failed to save subscription settings: Failed to save subscription settings
+  Videos per day: Videos per day
+  Use global setting: Use global setting
+  Unlimited: Unlimited
+  More videos hidden: '+{count} more | +{count} more'
+  Show in subscription feed: Show in subscription feed
   Channel Name Unavailable: Channel name unavailable
   Search Result Types: Search result types
   All Results: All

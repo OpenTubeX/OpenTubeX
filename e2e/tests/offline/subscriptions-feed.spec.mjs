@@ -31,7 +31,9 @@ const seed = {
   settings: {
     fetchSubscriptionsAutomatically: false,
     hideUpcomingPremieres: true,
-    thumbnailSize: 180
+    thumbnailSize: 180,
+    ytDlpPlaybackAuthMode: 'browser',
+    ytDlpPlaybackCookiesBrowser: 'firefox'
   },
   profiles: [
     {
@@ -40,7 +42,7 @@ const seed = {
       bgColor: '#000000',
       textColor: '#FFFFFF',
       subscriptions: [
-        { id: CHANNEL_A, name: 'Channel A', thumbnail: '' },
+        { id: CHANNEL_A, name: 'Channel A', thumbnail: '', showMembersOnly: true },
         { id: CHANNEL_B, name: 'Channel B', thumbnail: '' }
       ]
     }
@@ -137,14 +139,39 @@ test.describe('subscriptions feed from cache', () => {
     await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
   })
 
-  test('labels members-only videos', async ({ page }) => {
+  test('only shows opted-in members-only videos with configured playback cookies', async ({ page }) => {
     await goTo(page, 'subscriptions')
 
-    const video = page.locator('.ft-list-video').filter({ hasText: 'Video A newer' })
+    let video = page.locator('.ft-list-video').filter({ hasText: 'Video A newer' })
     const badge = video.locator('.membersOnlyTag')
     await expect(badge).toHaveText('Members only')
     await expect(badge.locator('[data-icon="users"]')).toBeVisible()
     await expect(badge).toHaveCSS('white-space', 'nowrap')
+
+    await page.evaluate(async (channelId) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateChannelSettings', {
+        channelId,
+        settings: { showMembersOnly: false }
+      })
+    }, CHANNEL_A)
+    await expect(video).toHaveCount(0)
+
+    await page.evaluate(async (channelId) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateChannelSettings', {
+        channelId,
+        settings: { showMembersOnly: true }
+      })
+    }, CHANNEL_A)
+    video = page.locator('.ft-list-video').filter({ hasText: 'Video A newer' })
+    await expect(video).toBeVisible()
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPlaybackAuthMode', 'none')
+    })
+    await expect(video).toHaveCount(0)
   })
 
   test('shows a hidden upcoming premiere as a premiere when its scheduled time arrives', async ({ page }) => {

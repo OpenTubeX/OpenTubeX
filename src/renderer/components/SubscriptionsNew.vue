@@ -84,6 +84,7 @@ import store from '../store/index'
 import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
 import { useRefreshAllSubscriptionFeeds } from '../composables/useRefreshAllSubscriptionFeeds'
 import { getNewSubscriptionFeedEntries } from '../helpers/newSubscriptionFeed'
+import { hasConfiguredRestrictedPlaybackAuthentication } from '../helpers/restricted-playback'
 
 const props = defineProps({
   activeCategory: {
@@ -110,16 +111,18 @@ const forbiddenTitles = computed(() => store.getters.getForbiddenTitlesParsed)
 const sortBy = computed(() => {
   return store.getters.getNewSubscriptionFeedSortBy === 'oldest' ? 'oldest' : 'newest'
 })
+const activeSubscriptions = computed(() => store.getters.getActiveProfile.subscriptions)
 
 const newContentByCategory = computed(() => getNewSubscriptionFeedEntries({
   feeds: enabledFeeds.value,
-  activeSubscriptionIds: activeSubscriptionIds.value,
+  activeSubscriptions: activeSubscriptions.value,
   historyCacheById: store.getters.getHistoryCacheById,
   hideLiveStreams: store.getters.getHideLiveStreams,
   hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
   forbiddenTitles: forbiddenTitles.value,
   onlyShowLatestFromChannel: store.getters.getOnlyShowLatestFromChannel,
   onlyShowLatestFromChannelNumber: store.getters.getOnlyShowLatestFromChannelNumber,
+  restrictedPlaybackConfigured: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
   sortBy: sortBy.value
 }))
 

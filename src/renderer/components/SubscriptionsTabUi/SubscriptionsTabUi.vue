@@ -106,7 +106,12 @@ import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
+import {
+  applySubscriptionVideoLimit,
+  filterMembersOnlySubscriptionVideos
+} from '../../helpers/subscription-channels'
 import { useTabContext } from '../../tabs/TabContext'
 
 const { tabId, isTabPresented } = useTabContext()
@@ -222,17 +227,18 @@ const hideWatchedSubs = computed(() => {
   return store.getters.getHideWatchedSubs
 })
 
-const onlyShowLatestFromChannel = computed(() => {
-  return store.getters.getOnlyShowLatestFromChannel
-})
-
-const onlyShowLatestFromChannelNumber = computed(() => {
-  return store.getters.getOnlyShowLatestFromChannelNumber
-})
+const globalVideoLimit = computed(() => (
+  store.getters.getOnlyShowLatestFromChannel
+    ? store.getters.getOnlyShowLatestFromChannelNumber
+    : null
+))
 
 const hideLiveStreams = computed(() => store.getters.getHideLiveStreams)
 const hideUpcomingPremieres = computed(() => store.getters.getHideUpcomingPremieres)
 const forbiddenTitles = computed(() => store.getters.getForbiddenTitlesParsed)
+const restrictedPlaybackConfigured = computed(() => (
+  hasConfiguredRestrictedPlaybackAuthentication(store.getters)
+))
 
 const filteredVideoList = computed(() => {
   // Copy after in-place cache mutations so the rendered page receives fresh
@@ -240,6 +246,14 @@ const filteredVideoList = computed(() => {
   let videoList = subscriptionEntryVersion.value === 0
     ? props.videoList
     : props.videoList.slice()
+
+  if (!props.isCommunity) {
+    videoList = filterMembersOnlySubscriptionVideos(
+      videoList,
+      store.getters.getActiveProfile.subscriptions,
+      restrictedPlaybackConfigured.value
+    )
+  }
 
   // Subscription feeds intentionally ignore the general hidden-channel list.
   videoList = videoList.filter(video => !isVideoHiddenByPreferences(video, {
@@ -261,27 +275,12 @@ const filteredVideoList = computed(() => {
     })
   }
 
-  if (!props.isCommunity && onlyShowLatestFromChannel.value) {
-    const authors = new Map()
-    videoList = videoList.filter((video) => {
-      if (!video.videoId || !video.authorId) {
-        return true
-      }
-
-      if (!authors.has(video.authorId)) {
-        authors.set(video.authorId, 1)
-        return true
-      } else {
-        const currentVideos = authors.get(video.authorId)
-
-        if (currentVideos < onlyShowLatestFromChannelNumber.value) {
-          authors.set(video.authorId, currentVideos + 1)
-          return true
-        }
-      }
-
-      return false
-    })
+  if (!props.isCommunity) {
+    videoList = applySubscriptionVideoLimit(
+      videoList,
+      store.getters.getActiveProfile.subscriptions,
+      globalVideoLimit.value
+    )
   }
 
   return videoList

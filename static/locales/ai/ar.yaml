@@ -924,6 +924,13 @@ Profile:
   The selected image could not be loaded: لا يمكن تحميل الصورة المحددة
   Theme Color: لون الموضوع
 Channel:
+  Subscription settings: إعدادات الاشتراك
+  Failed to save subscription settings: تعذّر حفظ إعدادات الاشتراك
+  Videos per day: مقاطع الفيديو يوميًا
+  Use global setting: استخدام الإعداد العام
+  Unlimited: بلا حدود
+  More videos hidden: '+{count} مقاطع فيديو أخرى | +{count} مقطع فيديو آخر | +{count} مقطعا فيديو آخران | +{count} مقاطع فيديو أخرى | +{count} مقطع فيديو آخر | +{count} مقطع فيديو آخر'
+  Show in subscription feed: إظهار في موجز الاشتراكات
   Channel Name Unavailable: اسم القناة غير متاح
   Search Result Types: أنواع نتائج البحث
   All Results: الجميع

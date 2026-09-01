@@ -958,6 +958,13 @@ Profile:
   The selected image could not be loaded: Не ўдалося загрузіць выбраную выяву
   Theme Color: Колер тэмы
 Channel:
+  Subscription settings: Налады падпіскі
+  Failed to save subscription settings: Не ўдалося захаваць налады падпіскі
+  Videos per day: Відэа за дзень
+  Use global setting: Выкарыстоўваць агульную наладу
+  Unlimited: Без абмежаванняў
+  More videos hidden: '+{count} яшчэ | +{count} яшчэ | +{count} яшчэ'
+  Show in subscription feed: Паказваць у стужцы падпісак
   Channel Name Unavailable: Назва канала недаступная
   Search Result Types: Тыпы вынікаў пошуку
   All Results: Усе

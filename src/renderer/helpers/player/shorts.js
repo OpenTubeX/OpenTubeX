@@ -1,3 +1,9 @@
+import {
+  applySubscriptionVideoLimit,
+  isMembersOnlySubscriptionVideoVisible,
+  isSubscriptionFeedTypeEnabled
+} from '../subscription-channels.js'
+
 const MAX_SHORT_DURATION_SECONDS = 3 * 60
 const MAX_CHANNEL_SHORTS_CONTEXTS = 20
 const SHORTS_COMPLETION_END_MARGIN_SECONDS = 0.5
@@ -201,6 +207,7 @@ export function parseLocalShortLinkedVideo(response) {
  * @param {(video: object) => boolean} [options.isHidden]
  * @param {(video: object) => boolean} [options.isWatched]
  * @param {boolean} [options.hideWatched]
+ * @param {boolean} [options.restrictedPlaybackConfigured]
  * @param {number | null} [options.maxPerChannel]
  * @param {string} [options.currentVideoId]
  * @returns {object[]}
@@ -211,11 +218,15 @@ export function buildSubscriptionShortsFeed({
   isHidden = () => false,
   isWatched = () => false,
   hideWatched = false,
+  restrictedPlaybackConfigured = false,
   maxPerChannel = null,
   currentVideoId = '',
 }) {
   const videos = subscriptions
-    .flatMap(channel => cache[channel.id]?.videos ?? [])
+    .filter(channel => isSubscriptionFeedTypeEnabled(channel, 'shorts'))
+    .flatMap(channel => (cache[channel.id]?.videos ?? []).filter(video => (
+      isMembersOnlySubscriptionVideoVisible(video, channel, restrictedPlaybackConfigured)
+    )))
     .filter(video => video.videoId && !isHidden(video))
     .filter(video =>
       video.videoId === currentVideoId ||
@@ -225,29 +236,20 @@ export function buildSubscriptionShortsFeed({
     .slice()
     .sort((a, b) => Number(b.published ?? 0) - Number(a.published ?? 0))
 
-  const channelCounts = new Map()
   const videoIds = new Set()
 
-  return videos.filter(video => {
+  const uniqueVideos = videos.filter(video => {
     if (videoIds.has(video.videoId)) {
       return false
     }
     videoIds.add(video.videoId)
-
-    if (video.videoId === currentVideoId) {
-      return true
-    }
-
-    if (maxPerChannel === null || !video.authorId) {
-      return true
-    }
-
-    const count = channelCounts.get(video.authorId) ?? 0
-    if (count >= maxPerChannel) {
-      return false
-    }
-
-    channelCounts.set(video.authorId, count + 1)
     return true
   })
+
+  return applySubscriptionVideoLimit(
+    uniqueVideos,
+    subscriptions,
+    maxPerChannel,
+    currentVideoId
+  )
 }

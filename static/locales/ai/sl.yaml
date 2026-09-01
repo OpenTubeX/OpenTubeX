@@ -1233,6 +1233,13 @@ Profile:
   Close Profile Dropdown: Zapri spustni meni profila
   Open Profile Dropdown: Odpri spustni meni profila
 Channel:
+  Subscription settings: Nastavitve naročnine
+  Failed to save subscription settings: Nastavitev naročnine ni bilo mogoče shraniti
+  Videos per day: Videoposnetkov na dan
+  Use global setting: Uporabi splošno nastavitev
+  Unlimited: Neomejeno
+  More videos hidden: '+{count} več | +{count} več | +{count} več | +{count} več'
+  Show in subscription feed: Prikaži v viru naročnin
   Channel Name Unavailable: Ime kanala ni na voljo
   Search Result Types: Vrste rezultatov iskanja
   All Results: Vsi

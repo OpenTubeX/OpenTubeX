@@ -171,6 +171,48 @@ const actions = {
     }
   },
 
+  async updateChannelSettings({ commit, state }, { channelId, settings }) {
+    const primarySubscription = state.profileList[0].subscriptions
+      .find(channel => channel.id === channelId)
+    if (primarySubscription === undefined) return false
+
+    const channel = deepCopy(primarySubscription)
+    if (Array.isArray(settings.feedTypes)) {
+      channel.feedTypes = [...settings.feedTypes]
+    }
+    if (Object.hasOwn(settings, 'dailyVideoLimit')) {
+      if (settings.dailyVideoLimit === undefined) {
+        delete channel.dailyVideoLimit
+      } else {
+        channel.dailyVideoLimit = settings.dailyVideoLimit
+      }
+    }
+    if (Object.hasOwn(settings, 'showMembersOnly')) {
+      if (typeof settings.showMembersOnly === 'boolean') {
+        channel.showMembersOnly = settings.showMembersOnly
+      } else {
+        delete channel.showMembersOnly
+      }
+    }
+
+    const profileIds = state.profileList
+      .filter(profile => profile.subscriptions.some(subscription => subscription.id === channelId))
+      .map(profile => profile._id)
+
+    try {
+      const updatedProfileIds = await DBProfileHandlers.updateChannelSettings(channel, profileIds)
+      if (!Array.isArray(updatedProfileIds)) return false
+
+      if (updatedProfileIds.length > 0) {
+        commit('updateChannelSettings', { channel, profileIds: updatedProfileIds })
+      }
+      return updatedProfileIds.length === profileIds.length
+    } catch (error) {
+      console.error(error)
+      return false
+    }
+  },
+
   async createProfile({ commit }, profile) {
     try {
       const newProfile = await DBProfileHandlers.create(profile)
@@ -289,6 +331,17 @@ const mutations = {
       // use filter instead of splice in case the subscription appears multiple times
       // https://github.com/FreeTubeApp/FreeTube/pull/3468#discussion_r1179290877
       profile.subscriptions = profile.subscriptions.filter(channel => channel.id !== channelId)
+    }
+  },
+
+  updateChannelSettings(state, { channel, profileIds }) {
+    for (const id of profileIds) {
+      const profile = state.profileList.find(profile => profile._id === id)
+      if (!profile) continue
+
+      profile.subscriptions = profile.subscriptions
+        .filter(subscription => subscription.id !== channel.id)
+      profile.subscriptions.push(deepCopy(channel))
     }
   },
 

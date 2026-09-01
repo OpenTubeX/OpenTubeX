@@ -905,6 +905,13 @@ Profile:
   The selected image could not be loaded: A kiválasztott kép nem tölthető be
   Theme Color: Téma színe
 Channel:
+  Subscription settings: Feliratkozási beállítások
+  Failed to save subscription settings: Nem sikerült menteni a feliratkozási beállításokat
+  Videos per day: Videók naponta
+  Use global setting: Globális beállítás használata
+  Unlimited: Korlátlan
+  More videos hidden: '+{count} további | +{count} további'
+  Show in subscription feed: Megjelenítés a feliratkozási hírfolyamban
   Channel Name Unavailable: A csatorna neve nem érhető el
   Search Result Types: Keresési találatok típusai
   All Results: Összes

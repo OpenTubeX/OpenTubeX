@@ -950,6 +950,13 @@ Profile:
   The selected image could not be loaded: Изабрана слика није могла да се учита
   Theme Color: Боја теме
 Channel:
+  Subscription settings: Подешавања претплате
+  Failed to save subscription settings: Није могуће сачувати подешавања претплате
+  Videos per day: Видео-снимака дневно
+  Use global setting: Користи глобално подешавање
+  Unlimited: Неограничено
+  More videos hidden: '+{count} још | +{count} још | +{count} још'
+  Show in subscription feed: Прикажи у фиду претплата
   Channel Name Unavailable: Назив канала није доступан
   Search Result Types: Врсте резултата претраге
   All Results: Све

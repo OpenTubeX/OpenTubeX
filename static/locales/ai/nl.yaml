@@ -932,6 +932,13 @@ Profile:
   The selected image could not be loaded: De geselecteerde afbeelding kan niet worden geladen
   Theme Color: Themakleur
 Channel:
+  Subscription settings: Abonnementsinstellingen
+  Failed to save subscription settings: Kan de abonnementsinstellingen niet opslaan
+  Videos per day: Video's per dag
+  Use global setting: Algemene instelling gebruiken
+  Unlimited: Onbeperkt
+  More videos hidden: '+{count} meer | +{count} meer'
+  Show in subscription feed: Tonen in abonnementenfeed
   Channel Name Unavailable: Kanaalnaam niet beschikbaar
   Search Result Types: Typen zoekresultaten
   All Results: Alles

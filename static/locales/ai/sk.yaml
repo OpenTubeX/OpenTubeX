@@ -905,6 +905,13 @@ Profile:
   The selected image could not be loaded: Vybraný obrázok sa nepodarilo načítať
   Theme Color: Farba motívu
 Channel:
+  Subscription settings: Nastavenia odberu
+  Failed to save subscription settings: Nastavenia odberu sa nepodarilo uložiť
+  Videos per day: Videá za deň
+  Use global setting: Použiť globálne nastavenie
+  Unlimited: Bez obmedzenia
+  More videos hidden: '+{count} ďalších | +{count} ďalších | +{count} ďalších'
+  Show in subscription feed: Zobraziť v kanáli odberov
   Channel Name Unavailable: Názov kanála nie je dostupný
   Search Result Types: Typy výsledkov hľadania
   All Results: Všetko

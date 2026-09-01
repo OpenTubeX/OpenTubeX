@@ -905,6 +905,13 @@ Profile:
   The selected image could not be loaded: Valitud pilti ei õnnestunud laadida
   Theme Color: Kujunduse värv
 Channel:
+  Subscription settings: Tellimuse seaded
+  Failed to save subscription settings: Tellimuse seadeid ei õnnestunud salvestada
+  Videos per day: Videoid päevas
+  Use global setting: Kasuta üldist seadet
+  Unlimited: Piiramata
+  More videos hidden: '+{count} veel | +{count} veel'
+  Show in subscription feed: Kuva tellimuste voos
   Channel Name Unavailable: Kanali nimi pole saadaval
   Search Result Types: Otsingutulemuste tüübid
   All Results: Kõik

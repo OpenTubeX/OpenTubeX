@@ -907,6 +907,13 @@ Profile:
   The selected image could not be loaded: Избраното изображение не можа да бъде заредено
   Theme Color: Цвят на темата
 Channel:
+  Subscription settings: Настройки на абонамента
+  Failed to save subscription settings: Настройките за абонамента не можаха да бъдат запазени
+  Videos per day: Видеоклипове на ден
+  Use global setting: Използване на глобалната настройка
+  Unlimited: Без ограничение
+  More videos hidden: '+{count} още | +{count} още'
+  Show in subscription feed: Показване в емисията с абонаменти
   Channel Name Unavailable: Името на канала не е налично
   Search Result Types: Видове резултати от търсенето
   All Results: Всички

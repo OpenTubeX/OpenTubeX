@@ -907,6 +907,13 @@ Profile:
   The selected image could not be loaded: Den valda bilden kunde inte läsas in
   Theme Color: Temafärg
 Channel:
+  Subscription settings: Prenumerationsinställningar
+  Failed to save subscription settings: Det gick inte att spara prenumerationsinställningarna
+  Videos per day: Videor per dag
+  Use global setting: Använd global inställning
+  Unlimited: Obegränsat
+  More videos hidden: '+{count} till | +{count} till'
+  Show in subscription feed: Visa i prenumerationsflödet
   Channel Name Unavailable: Kanalnamnet är inte tillgängligt
   Search Result Types: Typer av sökresultat
   All Results: Alla

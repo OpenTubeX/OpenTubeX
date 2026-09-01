@@ -1159,6 +1159,13 @@ Profile:
   Close Profile Dropdown: 프로필 드롭다운 닫기
   Open Profile Dropdown: 프로필 드롭다운 열기
 Channel:
+  Subscription settings: 구독 설정
+  Failed to save subscription settings: 구독 설정을 저장하지 못했습니다
+  Videos per day: 일일 동영상 수
+  Use global setting: 전역 설정 사용
+  Unlimited: 무제한
+  More videos hidden: '+{count}개 더'
+  Show in subscription feed: 구독 피드에 표시
   Channel Name Unavailable: 채널 이름을 확인할 수 없습니다
   Search Result Types: 검색 결과 유형
   All Results: 전체

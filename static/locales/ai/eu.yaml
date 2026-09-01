@@ -907,6 +907,13 @@ Profile:
   The selected image could not be loaded: Ezin izan da hautatutako irudia kargatu
   Theme Color: Gaiaren kolorea
 Channel:
+  Subscription settings: Harpidetzaren ezarpenak
+  Failed to save subscription settings: Ezin izan dira harpidetzaren ezarpenak gorde
+  Videos per day: Eguneko bideoak
+  Use global setting: Erabili ezarpen orokorra
+  Unlimited: Mugagabea
+  More videos hidden: '+{count} gehiago | +{count} gehiago'
+  Show in subscription feed: Erakutsi harpidetzen jarioan
   Channel Name Unavailable: Kanalaren izena ez dago erabilgarri
   Search Result Types: Bilaketa-emaitzen motak
   All Results: Guztiak

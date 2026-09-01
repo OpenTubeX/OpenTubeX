@@ -922,6 +922,13 @@ Profile:
   The selected image could not be loaded: Không thể tải ảnh đã chọn
   Theme Color: Màu chủ đề
 Channel:
+  Subscription settings: Cài đặt đăng ký
+  Failed to save subscription settings: Không thể lưu cài đặt đăng ký
+  Videos per day: Video mỗi ngày
+  Use global setting: Dùng cài đặt chung
+  Unlimited: Không giới hạn
+  More videos hidden: '+{count} video khác'
+  Show in subscription feed: Hiển thị trong nguồn cấp dữ liệu đăng ký
   Channel Name Unavailable: Không có tên kênh
   Search Result Types: Loại kết quả tìm kiếm
   All Results: Tất cả

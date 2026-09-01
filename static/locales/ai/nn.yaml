@@ -1196,6 +1196,13 @@ Profile:
   Close Profile Dropdown: Lukk profilmenyen
   Open Profile Dropdown: Opna profilmenyen
 Channel:
+  Subscription settings: Abonnementsinnstillingar
+  Failed to save subscription settings: Klarte ikkje å lagre abonnementsinnstillingane
+  Videos per day: Videoar per dag
+  Use global setting: Bruk global innstilling
+  Unlimited: Uavgrensa
+  More videos hidden: '+{count} til | +{count} til'
+  Show in subscription feed: Vis i abonnementsstraumen
   Channel Name Unavailable: Kanalnamnet er ikkje tilgjengeleg
   Search Result Types: Typar søkjeresultat
   All Results: Alle

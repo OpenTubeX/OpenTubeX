@@ -901,6 +901,13 @@ Profile:
   The selected image could not be loaded: Не удалось загрузить выбранное изображение
   Theme Color: Цвет темы
 Channel:
+  Subscription settings: Настройки подписки
+  Failed to save subscription settings: Не удалось сохранить настройки подписки
+  Videos per day: Видео в день
+  Use global setting: Использовать общую настройку
+  Unlimited: Без ограничений
+  More videos hidden: '+{count} ещё | +{count} ещё | +{count} ещё'
+  Show in subscription feed: Показывать в ленте подписок
   Channel Name Unavailable: Название канала недоступно
   Search Result Types: Типы результатов поиска
   All Results: Все

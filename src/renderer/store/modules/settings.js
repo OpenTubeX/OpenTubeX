@@ -1321,6 +1321,10 @@ const customActions = {
             commit('removeChannelFromProfiles', data)
             break
 
+          case SyncEvents.PROFILES.UPDATE_CHANNEL_SETTINGS:
+            commit('updateChannelSettings', data)
+            break
+
           case SyncEvents.GENERAL.DELETE:
             commit('removeProfileFromList', data)
             break

@@ -905,6 +905,13 @@ Profile:
   The selected image could not be loaded: 選択した画像を読み込めませんでした
   Theme Color: テーマカラー
 Channel:
+  Subscription settings: 登録設定
+  Failed to save subscription settings: 登録設定を保存できませんでした
+  Videos per day: 1日あたりの動画数
+  Use global setting: 全体設定を使用
+  Unlimited: 無制限
+  More videos hidden: '他{count}件'
+  Show in subscription feed: 登録チャンネルフィードに表示
   Channel Name Unavailable: チャンネル名を取得できません
   Search Result Types: 検索結果の種類
   All Results: すべて

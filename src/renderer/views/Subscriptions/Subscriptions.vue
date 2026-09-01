@@ -365,6 +365,7 @@ import {
   refreshSubscriptionShortsFromRemote,
   refreshSubscriptionVideosFromRemote
 } from '../../helpers/subscriptions'
+import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
 
 const isElectron = process.env.IS_ELECTRON
 
@@ -438,8 +439,16 @@ async function toggleNewFeedView() {
   resetNewFeedScroll()
 }
 
+const activeSubscriptions = computed(() => store.getters.getActiveProfile.subscriptions)
+
 const activeSubscriptionList = computed(() => {
-  return store.getters.getActiveProfile.subscriptions
+  const feedType = currentTab.value === 'community'
+    ? 'posts'
+    : currentTab.value === 'new' ? null : currentTab.value
+
+  return feedType === null
+    ? activeSubscriptions.value
+    : getSubscriptionsForFeed(activeSubscriptions.value, feedType)
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -898,11 +907,15 @@ async function markAllAsSeen(tab) {
         : visibleTabs.value.filter(visibleTab => visibleTab !== 'new')
       : [tab]
 
-    const channelIds = activeSubscriptionList.value.map(channel => channel.id)
+    const cacheFeedTabs = feedTabs.map(feedTab => feedTab === 'community' ? 'posts' : feedTab)
+    const channelIdsByTab = Object.fromEntries(cacheFeedTabs.map(feedTab => [
+      feedTab,
+      getSubscriptionsForFeed(activeSubscriptions.value, feedTab).map(channel => channel.id)
+    ]))
 
     await store.dispatch('markSubscriptionEntriesAsSeen', {
-      tabs: feedTabs.map(feedTab => feedTab === 'community' ? 'posts' : feedTab),
-      channelIds
+      tabs: cacheFeedTabs,
+      channelIdsByTab
     })
   } finally {
     markingSeenTab.value = null

@@ -929,6 +929,13 @@ Profile:
   The selected image could not be loaded: Δεν ήταν δυνατή η φόρτωση της επιλεγμένης εικόνας
   Theme Color: Χρώμα θέματος
 Channel:
+  Subscription settings: Ρυθμίσεις συνδρομής
+  Failed to save subscription settings: Δεν ήταν δυνατή η αποθήκευση των ρυθμίσεων συνδρομής
+  Videos per day: Βίντεο ανά ημέρα
+  Use global setting: Χρήση καθολικής ρύθμισης
+  Unlimited: Χωρίς όριο
+  More videos hidden: '+{count} ακόμη | +{count} ακόμη'
+  Show in subscription feed: Εμφάνιση στη ροή συνδρομών
   Channel Name Unavailable: Το όνομα καναλιού δεν είναι διαθέσιμο
   Search Result Types: Τύποι αποτελεσμάτων αναζήτησης
   All Results: Όλα

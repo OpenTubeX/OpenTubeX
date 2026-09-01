@@ -1264,6 +1264,13 @@ Profile:
   Close Profile Dropdown: Tanca el desplegable del perfil
   Open Profile Dropdown: Obre el desplegable del perfil
 Channel:
+  Subscription settings: Configuració de la subscripció
+  Failed to save subscription settings: No s'han pogut desar els paràmetres de subscripció
+  Videos per day: Vídeos per dia
+  Use global setting: Utilitza la configuració global
+  Unlimited: Sense límit
+  More videos hidden: '+{count} més | +{count} més | +{count} més'
+  Show in subscription feed: Mostra al canal de subscripcions
   Channel Name Unavailable: El nom del canal no està disponible
   Search Result Types: Tipus de resultats de cerca
   All Results: Tot

@@ -1,0 +1,156 @@
+.channelSettingsHeader {
+  flex: none;
+  padding-block: 16px 8px;
+  padding-inline: 20px;
+}
+
+.channelSettingsScroller {
+  flex: 1;
+  min-block-size: 0;
+  overflow-y: auto;
+  padding-block: 2px 20px;
+  padding-inline: 20px;
+}
+
+.emptyState {
+  color: var(--tertiary-text-color);
+  padding: 2rem;
+  text-align: center;
+}
+
+.channelSettingsList {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.channelSettings {
+  border: 1px solid var(--border-color);
+  border-radius: calc(4px * var(--ui-roundness));
+  display: grid;
+  gap: 16px;
+  min-inline-size: 0;
+  padding: 16px;
+}
+
+.channelIdentity {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  min-inline-size: 0;
+}
+
+.channelThumbnail {
+  block-size: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  inline-size: 40px;
+  object-fit: cover;
+}
+
+.channelThumbnailPlaceholder {
+  --icon-width: 1em;
+
+  background-color: var(--side-nav-hover-color);
+  color: var(--secondary-text-color);
+  display: grid;
+  font-size: 20px;
+  place-items: center;
+}
+
+.channelName {
+  font-weight: 500;
+  margin: 0;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.feedTypeSettings {
+  min-inline-size: 0;
+}
+
+.settingLabel {
+  color: var(--secondary-text-color);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-block: 0 8px;
+  text-transform: uppercase;
+}
+
+.feedTypeOptions {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.feedTypeOption {
+  align-items: center;
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: calc(6px * var(--ui-roundness));
+  color: var(--secondary-text-color);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 6px;
+  grid-template-columns: 16px minmax(0, 1fr) 14px;
+  min-block-size: 44px;
+  min-inline-size: 0;
+  padding-block: 7px;
+  padding-inline: 8px;
+  text-align: start;
+}
+
+.feedTypeOption:is(:hover, :focus-visible) {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+.feedTypeOption:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+.feedTypeOption.enabled {
+  border-color: color-mix(in srgb, var(--primary-color) 55%, var(--border-color));
+  color: var(--primary-text-color);
+}
+
+.feedTypeOption > span {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feedTypeCheck {
+  color: var(--primary-color);
+}
+
+.membersOnlySetting,
+.dailyLimitSetting {
+  border-block-start: 1px solid var(--divider-color);
+  padding-block-start: 12px;
+}
+
+.dailyLimitSelect {
+  inline-size: 100%;
+  margin-block-start: 27px;
+}
+
+@container (width <= 560px) {
+  .feedTypeOptions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (width <= 360px) {
+  .channelSettingsHeader,
+  .channelSettingsScroller {
+    padding-inline: 12px;
+  }
+}

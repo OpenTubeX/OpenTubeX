@@ -37,6 +37,7 @@ import { useSubscriptionChannelUpdates } from '../../composables/useSubscription
 import { getCachedRelativeTimeFormat, getRelativeTimeFromDate } from '../../helpers/utils'
 import { formatShortDateTime } from '../../helpers/dateFormat'
 import { refreshSubscriptionPostsFromRemote } from '../../helpers/subscriptions'
+import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
 
 const { locale, t } = useI18n()
 const tabUi = useTemplateRef('tabUi')
@@ -64,7 +65,9 @@ const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSub
 /** @type {import('vue').ComputedRef<boolean>} */
 const useRssFeeds = computed(() => store.getters.getUseRssFeeds)
 
-const activeSubscriptionList = computed(() => store.getters.getActiveProfile.subscriptions)
+const activeSubscriptionList = computed(() => (
+  getSubscriptionsForFeed(store.getters.getActiveProfile.subscriptions, 'posts')
+))
 
 const cacheEntriesForAllActiveProfileChannels = computed(() => {
   const postsCache = store.getters.getPostsCache

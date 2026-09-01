@@ -95,6 +95,18 @@ function profileWith(channelCount) {
   }
 }
 
+function profileWithFilteredChannel() {
+  const profile = profileWith(2)
+  profile.subscriptions[1].feedTypes = []
+  return profile
+}
+
+function profileWithDailyLimit(limit) {
+  const profile = profileWith(1)
+  profile.subscriptions[0].dailyVideoLimit = limit
+  return profile
+}
+
 /**
  * @param {(index: number) => number} delayFor per channel response delay
  */
@@ -117,6 +129,67 @@ async function routeFeeds(page, delayFor, feedFor = rssFeed) {
     }).catch(() => {})
   })
 }
+
+test.describe('per-channel subscription refresh filters', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        enableDownloads: true,
+        ytDlpAutomaticDownloadRules: JSON.stringify({
+          [channelId(1)]: { includeVideos: true }
+        })
+      },
+      profiles: [profileWithFilteredChannel()],
+      subscriptionCache: [cachedChannel(0), cachedChannel(1)]
+    }
+  })
+
+  test('keeps automatic-download refreshes independent from feed visibility', async ({ page }) => {
+    const requestedChannelIndexes = []
+    page.on('request', request => {
+      if (request.url().includes('/feeds/videos.xml')) {
+        requestedChannelIndexes.push(channelIndexFromUrl(request.url()))
+      }
+    })
+    await routeFeeds(page, () => 0)
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByText('Cached video 0', { exact: true })).toBeVisible()
+    await expect(page.getByText('Cached video 1', { exact: true })).toHaveCount(0)
+    await page.getByRole('button', { name: /Refresh Videos/ }).click()
+    await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
+    await expect(page.getByText('Fresh video 1', { exact: true })).toHaveCount(0)
+
+    expect(requestedChannelIndexes).toEqual([0, 1])
+  })
+})
+
+test.describe('invalid per-channel daily video limit', () => {
+  test.use({
+    seed: {
+      settings: commonSettings,
+      profiles: [profileWithDailyLimit(0)],
+      subscriptionCache: [cachedChannel(0)]
+    }
+  })
+
+  test('falls back to unlimited without suppressing the channel refresh', async ({ page }) => {
+    const requestedChannelIndexes = []
+    page.on('request', request => {
+      if (request.url().includes('/feeds/videos.xml')) {
+        requestedChannelIndexes.push(channelIndexFromUrl(request.url()))
+      }
+    })
+    await routeFeeds(page, () => 0)
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByText('Cached video 0', { exact: true })).toBeVisible()
+    await page.getByRole('button', { name: /Refresh Videos/ }).click()
+    await expect.poll(() => requestedChannelIndexes).toEqual([0])
+    await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
+  })
+})
 
 test.describe('incremental subscription feed refresh', () => {
   test.use({

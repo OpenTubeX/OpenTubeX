@@ -26,6 +26,7 @@ import {
   refreshSubscriptionShortsFromRemote,
   updateVideoListAfterProcessing
 } from '../helpers/subscriptions'
+import { getSubscriptionsForFeed } from '../helpers/subscription-channels'
 import { getCachedRelativeTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
 import { formatShortDateTime } from '../helpers/dateFormat'
 
@@ -54,7 +55,9 @@ const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCache
 /** @type {import('vue').ComputedRef<boolean>} */
 const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSubscriptionsAutomatically)
 
-const activeSubscriptionList = computed(() => store.getters.getActiveProfile.subscriptions)
+const activeSubscriptionList = computed(() => (
+  getSubscriptionsForFeed(store.getters.getActiveProfile.subscriptions, 'shorts')
+))
 
 const cacheEntriesForAllActiveProfileChannels = computed(() => {
   const shortsCache = store.getters.getShortsCache

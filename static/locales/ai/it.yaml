@@ -905,6 +905,13 @@ Profile:
   The selected image could not be loaded: Impossibile caricare l'immagine selezionata
   Theme Color: Colore del tema
 Channel:
+  Subscription settings: Impostazioni iscrizione
+  Failed to save subscription settings: Impossibile salvare le impostazioni dell’iscrizione
+  Videos per day: Video al giorno
+  Use global setting: Usa impostazione globale
+  Unlimited: Senza limiti
+  More videos hidden: '+{count} altri | +{count} altri | +{count} altri'
+  Show in subscription feed: Mostra nel feed degli abbonamenti
   Channel Name Unavailable: Nome del canale non disponibile
   Search Result Types: Tipi di risultati della ricerca
   All Results: Tutti

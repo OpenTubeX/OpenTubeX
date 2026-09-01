@@ -1181,6 +1181,13 @@ Profile:
   Close Profile Dropdown: Užverti profilio išskleidžiamąjį meniu
   Open Profile Dropdown: Atverti profilio išskleidžiamąjį meniu
 Channel:
+  Subscription settings: Prenumeratos nustatymai
+  Failed to save subscription settings: Nepavyko išsaugoti prenumeratos nustatymų
+  Videos per day: Vaizdo įrašų per dieną
+  Use global setting: Naudoti bendrąjį nustatymą
+  Unlimited: Neribota
+  More videos hidden: '+{count} daugiau | +{count} daugiau | +{count} daugiau'
+  Show in subscription feed: Rodyti prenumeratų sraute
   Channel Name Unavailable: Kanalo pavadinimas nepasiekiamas
   Search Result Types: Paieškos rezultatų tipai
   All Results: Visi

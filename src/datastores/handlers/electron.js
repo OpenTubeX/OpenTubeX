@@ -140,6 +140,10 @@ class Profiles {
     return dbProfiles(DBActions.PROFILES.REMOVE_CHANNEL, { channelId, profileIds })
   }
 
+  static updateChannelSettings(channel, profileIds) {
+    return dbProfiles(DBActions.PROFILES.UPDATE_CHANNEL_SETTINGS, { channel, profileIds })
+  }
+
   static delete(id) {
     return dbProfiles(DBActions.GENERAL.DELETE, id)
   }
