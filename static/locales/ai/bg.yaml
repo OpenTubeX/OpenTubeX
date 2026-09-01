@@ -764,7 +764,7 @@ Settings:
     Revoke Session Warning: "{device} ще загуби достъп до този акаунт за синхронизиране."
     Confirm Revoke Session: "Отнемане на сесията"
     Session Revoked: "Сесията е отнета"
-    Change Password Warning: "Промяната на паролата ще излезе от профила на всички други устройства. Това устройство ще остане свързано."
+    Change Password Warning: "При промяна на паролата всички други устройства ще излязат от профила. Това устройство ще остане свързано."
     Current Password: "Текуща парола"
     New Password: "Нова парола"
     Confirm New Password: "Потвърждаване на новата парола"

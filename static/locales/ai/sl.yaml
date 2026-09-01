@@ -1041,7 +1041,7 @@ Settings:
     Device Renamed: "Naprava je preimenovana"
     Revoke Session Confirmation: "Prekliči to sejo?"
     Revoke Current Session Warning: "Če prekličete to sejo, bo ta naprava prekinila povezavo z računom za sinhronizacijo."
-    Revoke Session Warning: "{device} bo izgubil dostop do tega računa za sinhronizacijo."
+    Revoke Session Warning: "Naprava {device} bo izgubila dostop do tega računa za sinhronizacijo."
     Confirm Revoke Session: "Prekliči sejo"
     Session Revoked: "Seja preklicana"
     Change Password Warning: "Če spremenite geslo, bodo vse druge naprave odjavljene. Ta naprava bo ostala povezana."

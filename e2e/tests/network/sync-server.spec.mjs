@@ -371,13 +371,38 @@ test.describe('OpenTubeX sync server', () => {
     await syncSection.getByRole('button', { name: 'Delete sync account' }).click()
     const deleteAccountPrompt = page.getByRole('dialog', { name: 'Delete sync account?' })
     const deleteAccountPassword = deleteAccountPrompt.getByLabel('Password')
+    let finishWrongPasswordDeletion
+    let wrongPasswordDeletionStarted
+    const wrongPasswordDeletionPending = new Promise(resolve => {
+      finishWrongPasswordDeletion = resolve
+    })
+    const wrongPasswordDeletionRequested = new Promise(resolve => {
+      wrongPasswordDeletionStarted = resolve
+    })
+    await page.route('**/account/delete', async route => {
+      if (route.request().postDataJSON()?.password !== 'wrong-password') {
+        await route.continue()
+        return
+      }
+      wrongPasswordDeletionStarted()
+      await wrongPasswordDeletionPending
+      await route.continue()
+    })
     await deleteAccountPassword.fill('wrong-password')
-    await deleteAccountPrompt.getByRole('button', { name: 'Delete account' }).click()
+    const confirmDeleteAccount = deleteAccountPrompt.getByRole('button', { name: 'Delete account' })
+    await confirmDeleteAccount.click()
+    await wrongPasswordDeletionRequested
+    try {
+      await expect(confirmDeleteAccount).toBeDisabled()
+    } finally {
+      finishWrongPasswordDeletion()
+    }
     await expect(deleteAccountPrompt.getByRole('alert')).toBeVisible()
+    await expect(confirmDeleteAccount).toBeEnabled()
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
 
     await deleteAccountPassword.fill(accountPassword)
-    await deleteAccountPrompt.getByRole('button', { name: 'Delete account' }).click()
+    await confirmDeleteAccount.click()
     await expect(deleteAccountPrompt).toBeHidden()
     await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeVisible()
 

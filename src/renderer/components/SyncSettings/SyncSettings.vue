@@ -602,7 +602,8 @@ watch([serverUrl, connected, syncEnabled], ([value, isConnected, isEnabled], [pr
       if (sequence !== serverCheckSequence) return
       serverPrivacySupported.value = capabilities.encrypted_sync === 1
       serverPairingSupported.value = capabilities.key_pairing === 1
-      serverAccountSessionsSupported.value = capabilities.account_sessions === 1
+      serverAccountSessionsSupported.value = capabilities.encrypted_sync === 1 &&
+        capabilities.account_sessions === 1
       serverCheckStatus.value = 'valid'
     } catch {
       if (sequence !== serverCheckSequence) return
@@ -758,12 +759,19 @@ async function deleteAccount() {
     return
   }
 
+  accountActionBusy.value = true
+  let deleted = false
   try {
     await store.dispatch('deleteSyncServerAccount', deleteAccountPassword.value)
-    closeDeleteAccountPrompt()
-    showToast({ message: t('Settings.Sync Settings.Account Deleted'), icon: ['fas', 'trash'] })
+    deleted = true
   } catch (error) {
     deleteAccountError.value = error.message
+  } finally {
+    accountActionBusy.value = false
+  }
+  if (deleted) {
+    closeDeleteAccountPrompt()
+    showToast({ message: t('Settings.Sync Settings.Account Deleted'), icon: ['fas', 'trash'] })
   }
 }
 

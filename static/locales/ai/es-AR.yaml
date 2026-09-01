@@ -844,7 +844,7 @@ Settings:
     Import search history formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Devices: "Dispositivos"
-    Devices Hint: "Revisa los dispositivos que pueden acceder a esta cuenta de sincronización."
+    Devices Hint: "Revisá los dispositivos que pueden acceder a esta cuenta de sincronización."
     Change Password: "Cambiar contraseña"
     Refresh Devices: "Actualizar dispositivos"
     Current Device: "Dispositivo actual"
@@ -869,7 +869,7 @@ Settings:
     Confirm New Password: "Confirmar nueva contraseña"
     Save New Password: "Guardar nueva contraseña"
     Account Management Failed: "No se pudieron cargar los datos de la cuenta de sincronización."
-    All Password Fields Required: "Completa todos los campos de contraseña."
+    All Password Fields Required: "Completá todos los campos de contraseña."
     New Password Too Short: "La nueva contraseña debe tener al menos 8 caracteres."
     New Passwords Do Not Match: "Las nuevas contraseñas no coinciden."
     Password Changed: "Contraseña cambiada. Se cerró la sesión en los demás dispositivos."

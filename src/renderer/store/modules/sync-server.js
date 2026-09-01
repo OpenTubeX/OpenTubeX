@@ -490,7 +490,7 @@ const actions = {
         privacySalt = privacy.salt
       }
 
-      if (await client.supportsAccountSessions()) {
+      if (privacySupported && await client.supportsAccountSessions()) {
         const encryptedDeviceInfo = await encryptSyncServerDeviceInfo(
           { name: deviceName, ...deviceSystemInfo },
           privacyKey,

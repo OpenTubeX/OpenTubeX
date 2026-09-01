@@ -765,7 +765,7 @@ Settings:
     Change Password Warning: "Zmenou hesla odhlásite všetky ostatné zariadenia. Toto zariadenie zostane pripojené."
     Current Password: "Aktuálne heslo"
     New Password: "Nové heslo"
-    Confirm New Password: "Potvrdiť nové heslo"
+    Confirm New Password: "Potvrdenie nového hesla"
     Save New Password: "Uložiť nové heslo"
     Account Management Failed: "Podrobnosti synchronizačného účtu sa nepodarilo načítať."
     All Password Fields Required: "Vyplňte všetky polia hesla."

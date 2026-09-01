@@ -98,6 +98,7 @@ export class SyncServerClient {
     try {
       const response = await fetch(`${this.serverUrl}${path}`, {
         ...options,
+        redirect: 'error',
         headers,
         body: options.body == null ? undefined : JSON.stringify(options.body),
         signal: controller.signal,
