@@ -122,17 +122,22 @@ export function getNewSubscriptionFeedEntries({
 
   mediaEntries.sort((a, b) => entryTimestamp(b.entry) - entryTimestamp(a.entry))
 
-  const categoriesByVideoId = new Map(
-    mediaEntries.map(({ category, entry }) => [entry.videoId, category])
-  )
-  mediaEntries = applySubscriptionVideoLimit(
-    mediaEntries.map(({ entry }) => entry),
-    activeSubscriptions,
-    onlyShowLatestFromChannel ? onlyShowLatestFromChannelNumber : null
-  ).map(entry => ({
-    category: categoriesByVideoId.get(entry.videoId),
-    entry
-  }))
+  const hasPerChannelLimit = [...subscriptionsById.values()].some(subscription => (
+    Number.isInteger(subscription.dailyVideoLimit) && subscription.dailyVideoLimit > 0
+  ))
+  if (onlyShowLatestFromChannel || hasPerChannelLimit) {
+    const categoriesByVideoId = new Map(
+      mediaEntries.map(({ category, entry }) => [entry.videoId, category])
+    )
+    mediaEntries = applySubscriptionVideoLimit(
+      mediaEntries.map(({ entry }) => entry),
+      activeSubscriptions,
+      onlyShowLatestFromChannel ? onlyShowLatestFromChannelNumber : null
+    ).map(entry => ({
+      category: categoriesByVideoId.get(entry.videoId),
+      entry
+    }))
+  }
 
   const mediaByCategory = mediaEntries.reduce((result, { category, entry }) => {
     result[category].push(entry)
