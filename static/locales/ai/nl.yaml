@@ -316,6 +316,7 @@ Settings:
     Show Progress as Notification: Voortgang als melding tonen
     Operation in Progress: Bewerking wordt uitgevoerd
     Toast Position:
+      Test Toast: Testmelding
       Toast Position: Positie van meldingen
       Bottom Left: Linksonder
       Bottom Center: Middenonder

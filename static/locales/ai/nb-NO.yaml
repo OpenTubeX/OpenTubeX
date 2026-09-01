@@ -314,6 +314,7 @@ Settings:
     Show Progress as Notification: Vis fremdrift som varsel
     Operation in Progress: En handling pågår
     Toast Position:
+      Test Toast: Testvarsel
       Toast Position: Varselplassering
       Bottom Left: Nederst til venstre
       Bottom Center: Nederst i midten

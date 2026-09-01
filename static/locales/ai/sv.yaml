@@ -314,6 +314,7 @@ Settings:
     Show Progress as Notification: Visa förlopp som avisering
     Operation in Progress: Åtgärd pågår
     Toast Position:
+      Test Toast: Testavisering
       Toast Position: Placering av popupmeddelanden
       Bottom Left: Nederst till vänster
       Bottom Center: Nederst i mitten

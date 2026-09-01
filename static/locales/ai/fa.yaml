@@ -329,6 +329,7 @@ Settings:
     Show Progress as Notification: نمایش پیشرفت به‌صورت اعلان
     Operation in Progress: عملیات در حال انجام است
     Toast Position:
+      Test Toast: اعلان آزمایشی
       Toast Position: جایگاه اعلان موقت
       Bottom Left: پایین چپ
       Bottom Center: پایین وسط

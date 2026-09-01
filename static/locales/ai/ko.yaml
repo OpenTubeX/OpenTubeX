@@ -408,6 +408,7 @@ Settings:
     Show Progress as Notification: 진행률을 알림으로 표시
     Operation in Progress: 작업 진행 중
     Toast Position:
+      Test Toast: 테스트 알림
       Toast Position: 알림 메시지 위치
       Bottom Left: 왼쪽 아래
       Bottom Center: 가운데 아래

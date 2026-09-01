@@ -30,6 +30,12 @@
         :icon="['fas', 'message']"
         @change="updateToastPosition"
       />
+      <FtButton
+        class="testToastButton"
+        :label="t('Settings.Theme Settings.Toast Position.Test Toast')"
+        :icon="['fas', 'message']"
+        @click="showTestToast"
+      />
     </FtFlexBox>
     <FtFlexBox
       v-if="baseTheme === 'system'"
@@ -818,12 +824,22 @@ const toastPositionNames = computed(() => [
 
 /** @type {import('vue').ComputedRef<'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'>} */
 const toastPosition = computed(() => normalizeToastPosition(store.getters.getToastPosition))
+let toastPositionUpdatePromise = Promise.resolve()
 
 /**
  * @param {'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'} value
  */
 function updateToastPosition(value) {
-  store.dispatch('updateToastPosition', value)
+  toastPositionUpdatePromise = toastPositionUpdatePromise
+    .then(() => store.dispatch('updateToastPosition', value))
+}
+
+async function showTestToast() {
+  await toastPositionUpdatePromise
+  showToast({
+    message: t('Settings.Theme Settings.Toast Position.Test Toast'),
+    icon: ['fas', 'message']
+  })
 }
 
 /** @type {import('vue').ComputedRef<number>} */
@@ -990,7 +1006,11 @@ function handleSmoothScrolling(value) {
   max-inline-size: 200px;
 }
 
-@container settings-content (width <= 720px) {
+.testToastButton {
+  margin-block-start: 30px;
+}
+
+@container settings-content (width <= 760px) {
   .themeSelectRow {
     align-items: center;
     flex-direction: column;
@@ -999,6 +1019,10 @@ function handleSmoothScrolling(value) {
   .themeSelectRow :deep(.select) {
     flex: 0 0 auto;
     inline-size: min(200px, 100%);
+  }
+
+  .testToastButton {
+    margin-block-start: 5px;
   }
 }
 

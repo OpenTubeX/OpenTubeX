@@ -440,6 +440,7 @@ Settings:
     Show Progress as Notification: Prikaži napredek kot obvestilo
     Operation in Progress: Opravilo poteka
     Toast Position:
+      Test Toast: Preskusno obvestilo
       Toast Position: Položaj obvestila
       Bottom Left: Spodaj levo
       Bottom Center: Spodaj na sredini

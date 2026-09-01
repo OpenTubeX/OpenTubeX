@@ -447,6 +447,7 @@ Settings:
     Show Progress as Notification: Mostra el progrés com a notificació
     Operation in Progress: Operació en curs
     Toast Position:
+      Test Toast: Notificació de prova
       Toast Position: Posició de les notificacions emergents
       Bottom Left: A baix a l'esquerra
       Bottom Center: A baix al centre

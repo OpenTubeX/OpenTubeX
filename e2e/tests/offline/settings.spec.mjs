@@ -3339,6 +3339,7 @@ test.describe('settings', () => {
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
+    await positionSelect.selectOption('bottom-right')
     await positionSelect.selectOption('top-right')
     await expect(holder).toHaveClass(/position-top-right/)
     toast = await showToast('Top right toast')
@@ -3348,6 +3349,25 @@ test.describe('settings', () => {
     await dragToast(toast, dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
+  })
+
+  test('shows a test toast from the toast position setting', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
+
+    const themeSection = page.locator('[data-section="appearance"]')
+    const toastPositionRow = themeSection.locator('.themeSelectRow')
+      .filter({ hasText: 'Toast Position' })
+    const positionSelect = toastPositionRow.locator('.select')
+      .filter({ hasText: 'Toast Position' })
+      .locator('select')
+    const holder = page.locator('.toast-holder')
+
+    await positionSelect.selectOption('top-right')
+    await toastPositionRow.getByRole('button', { name: 'Test toast' }).click()
+
+    await expect(holder).toHaveClass(/position-top-right/)
+    await expect(holder.locator('.toast', { hasText: 'Test toast' })).toBeVisible()
   })
 
   test('does not dismiss non-actionable toasts when clicked', async ({ page }) => {

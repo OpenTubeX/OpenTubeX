@@ -314,6 +314,7 @@ Settings:
     Show Progress as Notification: Показвай напредъка като известие
     Operation in Progress: Извършва се операция
     Toast Position:
+      Test Toast: Тестово известие
       Toast Position: Позиция на изскачащите известия
       Bottom Left: Долу вляво
       Bottom Center: Долу в средата

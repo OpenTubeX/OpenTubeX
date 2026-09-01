@@ -291,6 +291,7 @@ Settings:
     Show Progress as Notification: Показывать ход выполнения в уведомлении
     Operation in Progress: Выполняется операция
     Toast Position:
+      Test Toast: Тестовое уведомление
       Toast Position: Расположение уведомлений
       Bottom Left: Снизу слева
       Bottom Center: Снизу по центру

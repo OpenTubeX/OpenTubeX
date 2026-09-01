@@ -312,6 +312,7 @@ Settings:
     Show Progress as Notification: Zobrazovat průběh jako oznámení
     Operation in Progress: Probíhá operace
     Toast Position:
+      Test Toast: Testovací oznámení
       Toast Position: Umístění oznámení
       Bottom Left: Vlevo dole
       Bottom Center: Uprostřed dole

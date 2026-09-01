@@ -324,6 +324,7 @@ Settings:
     Show Progress as Notification: Vis status som meddelelse
     Operation in Progress: Handlingen er i gang
     Toast Position:
+      Test Toast: Testmeddelelse
       Toast Position: Placering af pop op-meddelelser
       Bottom Left: Nederst til venstre
       Bottom Center: Nederst i midten

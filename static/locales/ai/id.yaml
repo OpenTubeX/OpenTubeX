@@ -316,6 +316,7 @@ Settings:
     Show Progress as Notification: Tampilkan progres sebagai notifikasi
     Operation in Progress: Operasi sedang berlangsung
     Toast Position:
+      Test Toast: Notifikasi uji coba
       Toast Position: Posisi Notifikasi Singkat
       Bottom Left: Kiri bawah
       Bottom Center: Tengah bawah
