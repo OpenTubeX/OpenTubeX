@@ -4708,6 +4708,10 @@ export default defineComponent({
       return true
     },
 
+    isAndroidTransientHttpRecoveryEnabled() {
+      return process.env.IS_CAPACITOR
+    },
+
     async retryAndroidTransientHttpError() {
       if (this.androidHttpErrorRecoveryAttemptedForCurrentVideo) return false
 
@@ -4792,7 +4796,7 @@ export default defineComponent({
           return
         }
 
-        if (process.env.IS_CAPACITOR && await this.retryAndroidTransientHttpError()) {
+        if (this.isAndroidTransientHttpRecoveryEnabled() && await this.retryAndroidTransientHttpError()) {
           return
         }
       }

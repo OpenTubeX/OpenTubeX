@@ -163,24 +163,49 @@ test('Android transient HTTP recovery retries the current stream once', async ({
 
   const watchView = await watchViewHandle(page)
   const result = await watchView.evaluate(async view => {
+    if (!navigator.onLine) throw new Error('The Android transient recovery boundary requires an online renderer')
+
     const player = view.$refs.player
     const originalRetryStreaming = player.retryStreaming
+    const originalRecoveryEnabled = view.isAndroidTransientHttpRecoveryEnabled
+    const originalReloadSabrStream = view.reloadSabrStream
     let retries = 0
+    let existingRecoveries = 0
     player.retryStreaming = () => {
       retries++
       return true
     }
+    view.isAndroidTransientHttpRecoveryEnabled = () => true
+    view.reloadSabrStream = async () => {
+      existingRecoveries++
+      return true
+    }
 
     try {
-      const firstRecovered = await view.retryAndroidTransientHttpError()
-      const secondRecovered = await view.retryAndroidTransientHttpError()
-      return { firstRecovered, secondRecovered, retries }
+      const error = {
+        severity: 2,
+        category: 1,
+        code: 1002,
+        data: ['https://example.invalid/video', { message: 'Failed to fetch' }]
+      }
+      await view.handlePlayerError(error)
+      const afterFirstError = { retries, existingRecoveries, errorMessage: view.errorMessage }
+      await view.handlePlayerError(error)
+      return {
+        afterFirstError,
+        afterSecondError: { retries, existingRecoveries, errorMessage: view.errorMessage }
+      }
     } finally {
       player.retryStreaming = originalRetryStreaming
+      view.isAndroidTransientHttpRecoveryEnabled = originalRecoveryEnabled
+      view.reloadSabrStream = originalReloadSabrStream
     }
   })
 
-  expect(result).toEqual({ firstRecovered: true, secondRecovered: false, retries: 1 })
+  expect(result).toEqual({
+    afterFirstError: { retries: 1, existingRecoveries: 0, errorMessage: null },
+    afterSecondError: { retries: 1, existingRecoveries: 1, errorMessage: null }
+  })
 })
 
 test('terminal yt-dlp playback failure restores the built-in source once', async ({ app, page }) => {

@@ -146,14 +146,22 @@ public final class SubscriptionRefreshWorker extends Worker {
 
         int completed = 0;
         int failed = 0;
+        NotificationManager notifications = context.getSystemService(NotificationManager.class);
         try {
-            setForegroundAsync(SubscriptionRefreshNotification.foregroundInfo(
-                context,
-                token,
-                feed.title,
-                feed.cancelLabel,
-                0
-            )).get();
+            // A periodic job may recreate the process while the app is closed, where
+            // Android does not allow starting WorkManager's foreground service. Keep
+            // the durable work owned by JobScheduler and make its progress visible
+            // with a regular notification instead.
+            notifications.notify(
+                SubscriptionRefreshNotification.NOTIFICATION_ID,
+                SubscriptionRefreshNotification.build(
+                    context,
+                    token,
+                    feed.title,
+                    feed.cancelLabel,
+                    0
+                )
+            );
 
             int total = channelIds.size();
             for (String channelId : channelIds) {
@@ -176,15 +184,16 @@ public final class SubscriptionRefreshWorker extends Worker {
                 }
 
                 int progress = total == 0 ? 100 : (int) Math.round((completed + failed) * 100.0 / total);
-                setForegroundAsync(
-                    SubscriptionRefreshNotification.foregroundInfo(
+                notifications.notify(
+                    SubscriptionRefreshNotification.NOTIFICATION_ID,
+                    SubscriptionRefreshNotification.build(
                         context,
                         token,
                         feed.title,
                         feed.cancelLabel,
                         progress
                     )
-                ).get();
+                );
             }
 
             if (SubscriptionRefreshCoordinator.isCancelled(token) || isStopped()) {
@@ -204,15 +213,11 @@ public final class SubscriptionRefreshWorker extends Worker {
                 );
             }
             return Result.success();
-        } catch (InterruptedException error) {
-            Thread.currentThread().interrupt();
-            return Result.retry();
         } catch (Exception error) {
             return Result.retry();
         } finally {
             if (SubscriptionRefreshCoordinator.finish(token)) {
-                context.getSystemService(NotificationManager.class)
-                    .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+                notifications.cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
             }
         }
     }
