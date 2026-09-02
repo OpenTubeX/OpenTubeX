@@ -57,6 +57,9 @@
         :more-video-data-available="moreVideoDataAvailable"
         :is-playlist-bookmarked="isPlaylistBookmarked"
         :playlist-bookmark-pending="playlistBookmarkPending"
+        :preload-available="playlistPreloadAvailable"
+        :preload-pending="playlistPreloadPending"
+        :preload-complete="playlistPreloadComplete"
         :search-video-mode-allowed="isUserPlaylistRequested && shownVideoCount > 1"
         :search-query-text="searchQueryTextRequested"
         :theme="listType === 'list' ? 'base' : 'top-bar'"
@@ -68,6 +71,7 @@
         @prompt-open="promptOpen = true"
         @prompt-close="promptOpen = false"
         @toggle-playlist-bookmark="togglePlaylistBookmark"
+        @preload-playlist="preloadPlaylist"
       />
     </div>
 
@@ -251,6 +255,14 @@ import { runRetryablePlaylistRequest } from '../../helpers/playlist-pagination'
 import { formatDate } from '../../helpers/dateFormat'
 import { canonicalPlaylistThumbnailUrl, createPlaylistBookmark } from '../../helpers/playlist-bookmarks'
 import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
+import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
+import {
+  getYtDlpPlaybackSource,
+  getYtDlpPlaybackSourcesUsableUntil,
+  onYtDlpPlaybackSourceCacheChange,
+  reserveYtDlpPlaybackSourceCache,
+} from '../../helpers/player/ytDlpPlayback'
+import { buildYtDlpPlaybackCacheKey, preloadYtDlpPlaybackSources } from '../../helpers/player/ytDlpPlaybackPreload'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { useTabToast } from '../../composables/useTabToast'
@@ -320,6 +332,9 @@ const toBeDeletedPlaylistItemIds = ref([])
 const videosWithPlaylistToUnset = ref([])
 const pendingDeletionRemovalInProgress = ref(false)
 const playlistBookmarkPending = ref(false)
+const playlistPreloadPending = ref(false)
+const playlistPreloadComplete = ref(false)
+let playlistPreloadExpiryTimer = null
 /** @type {AbortController | null} */
 let undoToastAbortController = null
 let removePendingVideosAfterDrag = false
@@ -329,6 +344,54 @@ const backendPreference = computed(() => store.getters.getBackendPreference)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const backendFallback = computed(() => store.getters.getBackendFallback)
+
+const playlistPreloadAvailable = computed(() => {
+  return process.env.IS_ELECTRON && store.getters.getVideoPlaybackEngine === 'yt-dlp'
+})
+
+const playlistPreloadVideoIds = computed(() => [...new Set(playlistItems.value
+  .map(video => video.videoId)
+  .filter(videoId => typeof videoId === 'string' && videoId !== ''))])
+const playlistPreloadVideoIdsKey = computed(() => playlistPreloadVideoIds.value.join('\0'))
+const ytDlpPlaybackCacheKey = computed(() => buildYtDlpPlaybackCacheKey(store.getters))
+const ytDlpPlaybackUseAuthentication = computed(() =>
+  store.getters.getYtDlpPlaybackAlwaysUseCookies &&
+  hasConfiguredRestrictedPlaybackAuthentication(store.getters)
+)
+
+function clearPlaylistPreloadComplete() {
+  clearTimeout(playlistPreloadExpiryTimer)
+  playlistPreloadExpiryTimer = null
+  playlistPreloadComplete.value = false
+}
+
+function refreshPlaylistPreloadComplete() {
+  clearTimeout(playlistPreloadExpiryTimer)
+  playlistPreloadExpiryTimer = null
+
+  if (isLoading.value || playlistPreloadHasUnknownVideos.value) {
+    playlistPreloadComplete.value = false
+    return
+  }
+
+  const usableUntil = getYtDlpPlaybackSourcesUsableUntil(
+    playlistPreloadVideoIds.value,
+    ytDlpPlaybackCacheKey.value,
+    ytDlpPlaybackUseAuthentication.value
+  )
+  playlistPreloadComplete.value = usableUntil !== null
+  if (usableUntil === null) return
+
+  const delay = Math.min(
+    Math.max(usableUntil - Date.now() + 1, 0),
+    2_147_483_647
+  )
+  playlistPreloadExpiryTimer = setTimeout(refreshPlaylistPreloadComplete, delay)
+}
+
+const removePlaybackSourceCacheChangeListener = onYtDlpPlaybackSourceCacheChange(() => {
+  refreshPlaylistPreloadComplete()
+})
 
 /** @type {import('vue').ComputedRef<string>} */
 const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
@@ -399,6 +462,25 @@ const searchQueryTextPresent = computed(() => {
 
 const isUserPlaylistRequested = computed(() => route.query.playlistType === 'user')
 
+const playlistPreloadHasUnknownVideos = computed(() =>
+  !isUserPlaylistRequested.value && (
+    infoSource.value === 'invidious'
+      ? nextInvidiousPlaylistPage.value !== null
+      : continuationData.value !== null
+  )
+)
+
+watch(
+  [
+    playlistPreloadVideoIdsKey,
+    ytDlpPlaybackCacheKey,
+    ytDlpPlaybackUseAuthentication,
+    isLoading,
+    playlistPreloadHasUnknownVideos,
+  ],
+  refreshPlaylistPreloadComplete
+)
+
 const isPlaylistBookmarked = computed(() => {
   return !isUserPlaylistRequested.value && store.getters.getPlaylistBookmark(playlistId.value) != null
 })
@@ -450,6 +532,91 @@ async function togglePlaylistBookmark() {
     }
   } finally {
     playlistBookmarkPending.value = false
+  }
+}
+
+async function preloadPlaylist() {
+  if (!playlistPreloadAvailable.value || playlistPreloadPending.value || playlistPreloadComplete.value) return
+
+  const requestGeneration = playlistRequestGeneration
+  playlistPreloadPending.value = true
+  store.commit('setProgressBarIcon', ['fas', 'forward'])
+  store.commit('setProgressBarMessage', t('Playlist.Preloading Playlist'))
+  store.commit('setProgressBarPercentage', 0)
+  store.commit('setShowProgressBar', true)
+  try {
+    while (!isUserPlaylistRequested.value && moreVideoDataAvailable.value && nextPageError.value === '') {
+      if (isLoadingMore.value) {
+        await new Promise(resolve => {
+          const stop = watch(isLoadingMore, loading => {
+            if (!loading) {
+              stop()
+              resolve()
+            }
+          })
+        })
+        if (requestGeneration !== playlistRequestGeneration) return
+        if (!moreVideoDataAvailable.value || nextPageError.value !== '') break
+      }
+
+      await getNextPage()
+      if (requestGeneration !== playlistRequestGeneration) return
+    }
+
+    if (!isUserPlaylistRequested.value && moreVideoDataAvailable.value) {
+      showTabToast({
+        message: t('Playlist.Playlist Preload Pagination Failed'),
+        icon: ['fas', 'circle-exclamation'],
+      })
+      return
+    }
+
+    const videoIds = playlistPreloadVideoIds.value
+    store.commit('setProgressBarMessage', t('Playlist.Playlist Preload Progress', {
+      completed: 0,
+      requested: videoIds.length,
+    }))
+    reserveYtDlpPlaybackSourceCache(videoIds.length)
+
+    const cacheKey = ytDlpPlaybackCacheKey.value
+    const result = await preloadYtDlpPlaybackSources(videoIds, {
+      loadSource: videoId => getYtDlpPlaybackSource(
+        videoId,
+        cacheKey,
+        undefined,
+        ytDlpPlaybackUseAuthentication.value,
+        false,
+        true
+      ),
+      onProgress: progress => {
+        if (requestGeneration !== playlistRequestGeneration) return
+
+        store.commit('setProgressBarMessage', t('Playlist.Playlist Preload Progress', progress))
+        store.commit('setProgressBarPercentage', progress.requested === 0
+          ? 0
+          : progress.completed / progress.requested * 100)
+      },
+    })
+    if (requestGeneration !== playlistRequestGeneration) return
+
+    if (result.requested > 0 && result.failed === 0) {
+      refreshPlaylistPreloadComplete()
+    } else {
+      clearPlaylistPreloadComplete()
+    }
+
+    showTabToast({
+      message: result.failed === 0
+        ? t('Playlist.Playlist Preload Complete', { count: result.preloaded })
+        : t('Playlist.Playlist Preload Partial', result),
+      icon: result.failed === 0 ? ['fas', 'check'] : ['fas', 'circle-exclamation'],
+    })
+  } finally {
+    playlistPreloadPending.value = false
+    store.commit('setShowProgressBar', false)
+    store.commit('setProgressBarPercentage', 0)
+    store.commit('setProgressBarMessage', '')
+    store.commit('setProgressBarIcon', ['fas', 'sync'])
   }
 }
 
@@ -603,6 +770,7 @@ const getPlaylistInfoDebounce = debounce(getPlaylistInfo, 100)
 
 function resetState() {
   playlistRequestGeneration++
+  clearPlaylistPreloadComplete()
   isLoading.value = true
   playlistTitle.value = ''
   playlistDescription.value = ''
@@ -1394,6 +1562,8 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   playlistRequestGeneration++
+  clearPlaylistPreloadComplete()
+  removePlaybackSourceCacheChangeListener()
   window.removeEventListener('resize', handleResize)
 })
 

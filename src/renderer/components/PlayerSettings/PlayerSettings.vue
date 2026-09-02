@@ -127,6 +127,16 @@
           @change="updateAutoplayVideos"
         />
         <FtToggleSwitch
+          v-if="USING_ELECTRON"
+          :label="t('Settings.Player Settings.Preload Upcoming Videos')"
+          :compact="true"
+          :disabled="videoPlaybackEngine !== 'yt-dlp'"
+          :default-value="ytDlpPreloadEnabled"
+          setting-key="ytDlpPreloadEnabled"
+          :tooltip="t('Tooltips.Player Settings.Preload Upcoming Videos')"
+          @change="updateYtDlpPreloadEnabled"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Player Settings.Use YouTube-style Shorts')"
           :compact="true"
           :default-value="useCustomShortsPlayer"
@@ -346,6 +356,18 @@
         :step="1"
         :tooltip="t('Tooltips.Player Settings.Parallel Segment Loading')"
         @change="updateSegmentPrefetchLimit"
+      />
+      <FtSlider
+        v-if="USING_ELECTRON"
+        :label="t('Settings.Player Settings.Upcoming Videos to Preload')"
+        :default-value="ytDlpPreloadCount"
+        setting-key="ytDlpPreloadCount"
+        :min-value="1"
+        :max-value="MAX_YT_DLP_PRELOAD_COUNT"
+        :step="1"
+        :disabled="videoPlaybackEngine !== 'yt-dlp' || !ytDlpPreloadEnabled"
+        :tooltip="t('Tooltips.Player Settings.Upcoming Videos to Preload')"
+        @change="updateYtDlpPreloadCount"
       />
     </FtSliderGrid>
     <br>
@@ -599,6 +621,7 @@ import {
   MAX_SEGMENT_PREFETCH_LIMIT
 } from '../../helpers/player/segmentPrefetch'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
+import { MAX_YT_DLP_PRELOAD_COUNT } from '../../helpers/player/ytDlpPlaybackPreload'
 
 defineOptions({ inheritAttrs: false })
 
@@ -611,6 +634,7 @@ const QUICK_PLAYBACK_SPEED_LIMIT = 14
 /** @type {boolean} */
 const USING_ELECTRON = process.env.IS_ELECTRON
 const IS_CAPACITOR = process.env.IS_CAPACITOR
+const videoPlaybackEngine = computed(() => store.getters.getVideoPlaybackEngine)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const enableSubtitlesByDefault = computed(() => store.getters.getEnableSubtitlesByDefault)
@@ -743,6 +767,26 @@ const autoplayVideos = computed(() => store.getters.getAutoplayVideos)
  */
 function updateAutoplayVideos(value) {
   store.dispatch('updateAutoplayVideos', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const ytDlpPreloadEnabled = computed(() => store.getters.getYtDlpPreloadEnabled)
+
+/**
+ * @param {boolean} value
+ */
+function updateYtDlpPreloadEnabled(value) {
+  store.dispatch('updateYtDlpPreloadEnabled', value)
+}
+
+/** @type {import('vue').ComputedRef<number>} */
+const ytDlpPreloadCount = computed(() => store.getters.getYtDlpPreloadCount)
+
+/**
+ * @param {number} value
+ */
+function updateYtDlpPreloadCount(value) {
+  store.dispatch('updateYtDlpPreloadCount', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

@@ -502,6 +502,8 @@ Settings:
     Parallel Segment Loading: Paralelno učitavanje segmenata
     Rotate Wide Videos to Landscape in Fullscreen: 'Zakreni široke videozapise vodoravno preko cijelog zaslona'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Povucite gore ili dolje za ulazak u prikaz preko cijelog zaslona ili izlazak iz njega'
+    Preload Upcoming Videos: "Predmemoriraj sljedeće videozapise"
+    Upcoming Videos to Preload: "Broj videozapisa za predmemoriranje"
   Channel Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.
@@ -1190,7 +1192,14 @@ Video:
       DownvoteSegment: Glasaj protiv
       VoteFailed: Slanje glasa u SponsorBlock nije uspjelo.
 Playlist:
+  Playlist Already Preloaded: "Svi videozapisi na popisu već su predučitani"
+  Playlist Preload Progress: "Predučitavanje videozapisa: {completed} od {requested}"
   Close Playlist: Zatvori popis za reprodukciju
+  Preload Playlist: "Predmemoriraj sve videozapise"
+  Preloading Playlist: "Predmemoriranje svih videozapisa..."
+  Playlist Preload Complete: "Predmemorirani videozapisi: {count}."
+  Playlist Preload Partial: "Predmemorirano je {preloaded} od {requested} videozapisa. {failed} nije uspjelo."
+  Playlist Preload Pagination Failed: "Cijeli popis nije se mogao učitati pa je predmemoriranje otkazano."
 Change Format:
   Local Video File: Lokalna videodatoteka
   Local Audio File: Lokalna audiodatoteka
@@ -1387,6 +1396,8 @@ Tooltips:
       Veće vrijednosti mogu pomoći na sporim ili nestabilnim vezama, ali troše više propusnosti i memorije.
       Zbog njih Automatski odabir također može podcijeniti brzinu veze i odabrati nižu kvalitetu.
       Tokovi ograničeni na jedan zahtjev istodobno zanemaruju ovu postavku.
+    Preload Upcoming Videos: "Dohvaća i sprema yt-dlp adrese za sljedeće videozapise. Red čekanja ima prednost pred popisima i preporukama."
+    Upcoming Videos to Preload: "Najveći broj sljedećih videozapisa čije se yt-dlp adrese dohvaćaju u pozadini."
   Download Settings:
     Download Folder: Videozapisi se spremaju u ovu mapu. Ostavite prazno za upotrebu sustavske mape Preuzimanja.
     Global Additional yt-dlp Arguments: Dodatni argumenti naredbenog retka koji se prosljeđuju alatu yt-dlp pri svakom preuzimanju, primjerice --cookies-from-browser firefox.

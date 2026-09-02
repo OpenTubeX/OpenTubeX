@@ -508,6 +508,8 @@ Settings:
     Parallel Segment Loading: Tải song song các phân đoạn
     Rotate Wide Videos to Landscape in Fullscreen: 'Xoay video rộng sang ngang khi ở chế độ toàn màn hình'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Vuốt lên hoặc xuống để vào hoặc thoát chế độ toàn màn hình'
+    Preload Upcoming Videos: "Tải trước các video tiếp theo"
+    Upcoming Videos to Preload: "Số video cần tải trước"
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
@@ -1202,7 +1204,14 @@ Video:
       DownvoteSegment: Bình chọn tiêu cực
       VoteFailed: Không thể gửi bình chọn SponsorBlock.
 Playlist:
+  Playlist Already Preloaded: "Tất cả video trong danh sách phát đã được tải trước"
+  Playlist Preload Progress: "Đang tải trước video: {completed}/{requested}"
   Close Playlist: Đóng danh sách phát
+  Preload Playlist: "Tải trước tất cả video"
+  Preloading Playlist: "Đang tải trước tất cả video..."
+  Playlist Preload Complete: "Video đã tải trước: {count}."
+  Playlist Preload Partial: "Đã tải trước {preloaded}/{requested} video. Không thể tải trước {failed} video."
+  Playlist Preload Pagination Failed: "Không thể tải toàn bộ danh sách phát nên đã hủy tải trước."
 Change Format:
   Local Video File: Tệp video cục bộ
   Local Audio File: Tệp âm thanh cục bộ
@@ -1399,6 +1408,8 @@ Tooltips:
       Giá trị cao hơn có thể hữu ích với kết nối chậm hoặc không ổn định nhưng dùng nhiều băng thông và bộ nhớ hơn.
       Giá trị cao cũng có thể khiến chế độ Tự động đánh giá thấp tốc độ kết nối và chọn chất lượng thấp hơn.
       Luồng bị giới hạn ở một yêu cầu mỗi lần sẽ bỏ qua cài đặt này.
+    Preload Upcoming Videos: "Lấy và lưu đệm URL yt-dlp của các video tiếp theo. Hàng đợi được ưu tiên hơn danh sách phát và đề xuất."
+    Upcoming Videos to Preload: "Số video tiếp theo tối đa có URL yt-dlp được lấy trong nền."
   Download Settings:
     Download Folder: Video được lưu vào thư mục này. Để trống để dùng thư mục Tải xuống của hệ thống.
     Global Additional yt-dlp Arguments: Đối số dòng lệnh bổ sung được chuyển cho yt-dlp trong mọi lượt tải, ví dụ --cookies-from-browser firefox.

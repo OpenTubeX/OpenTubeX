@@ -502,6 +502,8 @@ Settings:
     Parallel Segment Loading: Segmentuak paraleloan kargatzea
     Rotate Wide Videos to Landscape in Fullscreen: 'Biratu bideo zabalak horizontalera pantaila osoan'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Irristatu gora edo behera pantaila osoan sartzeko edo irteteko'
+    Preload Upcoming Videos: "Aurrekargatu hurrengo bideoak"
+    Upcoming Videos to Preload: "Aurrekargatu beharreko bideo kopurua"
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
@@ -1195,7 +1197,14 @@ Video:
       DownvoteSegment: Eman kontrako botoa
       VoteFailed: Ezin izan da SponsorBlock botoa bidali.
 Playlist:
+  Playlist Already Preloaded: "Erreprodukzio-zerrendako bideo guztiak aurrez kargatuta daude"
+  Playlist Preload Progress: "Bideoak aurrez kargatzen: {completed}/{requested}"
   Close Playlist: Itxi erreprodukzio-zerrenda
+  Preload Playlist: "Aurrekargatu bideo guztiak"
+  Preloading Playlist: "Bideo guztiak aurrekargatzen..."
+  Playlist Preload Complete: "Aurrekargatutako bideoak: {count}."
+  Playlist Preload Partial: "{requested} bideotatik {preloaded} aurrekargatu dira. {failed} ezin izan dira aurrekargatu."
+  Playlist Preload Pagination Failed: "Ezin izan da erreprodukzio-zerrenda osoa kargatu; aurrekarga bertan behera utzi da."
 Change Format:
   Local Video File: Bideo-fitxategi lokala
   Local Audio File: Audio-fitxategi lokala
@@ -1392,6 +1401,8 @@ Tooltips:
       Balio handiagoek konexio motel edo ezegonkorretan lagun dezakete, baina banda-zabalera eta memoria gehiago erabiltzen dituzte.
       Baliteke Automatikoa aukerak konexioaren abiadura txikiagoa dela kalkulatzea eta kalitate txikiagoa hautatzea ere.
       Aldiko eskaera bakarrera mugatutako korronteek ezarpen hau baztertzen dute.
+    Preload Upcoming Videos: "Hurrengo bideoen yt-dlp URLak eskuratu eta cachean gordetzen ditu. Ilarak lehentasuna du zerrenden eta gomendioen aurretik."
+    Upcoming Videos to Preload: "Atzeko planoan yt-dlp URLak eskuratuko zaizkien hurrengo bideoen gehieneko kopurua."
   Download Settings:
     Download Folder: Bideoak karpeta honetan gordetzen dira. Utzi hutsik sistemako Deskargak karpeta erabiltzeko.
     Global Additional yt-dlp Arguments: Deskarga bakoitzean yt-dlp-ri emandako komando-lerroko argumentu gehigarriak; adibidez, --cookies-from-browser firefox.

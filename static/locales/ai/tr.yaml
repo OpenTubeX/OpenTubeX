@@ -500,6 +500,8 @@ Settings:
     Parallel Segment Loading: Paralel Bölüm Yükleme
     Rotate Wide Videos to Landscape in Fullscreen: 'Geniş videoları tam ekranda yatay konuma döndür'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Tam ekrana girmek veya çıkmak için yukarı ya da aşağı kaydır'
+    Preload Upcoming Videos: "Sonraki videoları önceden yükle"
+    Upcoming Videos to Preload: "Önceden yüklenecek video sayısı"
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.
@@ -1182,7 +1184,14 @@ Video:
       DownvoteSegment: Olumsuz oy ver
       VoteFailed: SponsorBlock oyu gönderilemedi.
 Playlist:
+  Playlist Already Preloaded: "Oynatma listesindeki tüm videolar zaten önceden yüklendi"
+  Playlist Preload Progress: "Videolar önceden yükleniyor: {completed}/{requested}"
   Close Playlist: Oynatma Listesini Kapat
+  Preload Playlist: "Tüm videoları önceden yükle"
+  Preloading Playlist: "Tüm videolar önceden yükleniyor..."
+  Playlist Preload Complete: "Önceden yüklenen videolar: {count}."
+  Playlist Preload Partial: "{requested} videodan {preloaded} tanesi önceden yüklendi. {failed} tanesi yüklenemedi."
+  Playlist Preload Pagination Failed: "Oynatma listesinin tamamı yüklenemediği için önceden yükleme iptal edildi."
 Change Format:
   Local Video File: Yerel video dosyası
   Local Audio File: Yerel ses dosyası
@@ -1379,6 +1388,8 @@ Tooltips:
       Yüksek değerler yavaş veya kararsız bağlantılarda yardımcı olabilir ancak daha fazla bant genişliği ve bellek kullanır.
       Otomatik seçeneğinin bağlantı hızını düşük hesaplayıp daha düşük kalite seçmesine de neden olabilir.
       Aynı anda tek istekle sınırlı akışlar bu ayarı yok sayar.
+    Preload Upcoming Videos: "Sonraki videoların yt-dlp adreslerini alıp önbelleğe kaydeder. Kuyruk, oynatma listeleri ve önerilerden önce gelir."
+    Upcoming Videos to Preload: "yt-dlp adresleri arka planda alınacak sonraki videoların azami sayısı."
   Download Settings:
     Download Folder: Videolar bu klasöre kaydedilir. Sisteminizin İndirilenler klasörünü kullanmak için boş bırakın.
     Global Additional yt-dlp Arguments: Her indirmede yt-dlp'ye iletilen ek komut satırı argümanları, örneğin --cookies-from-browser firefox.

@@ -29,7 +29,10 @@
         v-if="overlayIcon"
         class="icon"
       >
-        <FtIcon :icon="icon" />
+        <FtIcon
+          :icon="icon"
+          :spin="spin"
+        />
         <FtIcon
           class="overlayIcon"
           :icon="overlayIcon"
@@ -40,6 +43,7 @@
         v-else
         class="icon"
         :icon="icon"
+        :spin="spin"
       />
     </button>
     <template
@@ -176,6 +180,10 @@ const props = defineProps({
     default: null
   },
   disabled: {
+    type: Boolean,
+    default: false
+  },
+  spin: {
     type: Boolean,
     default: false
   },

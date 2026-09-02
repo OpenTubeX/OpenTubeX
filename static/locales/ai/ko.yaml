@@ -675,6 +675,8 @@ Settings:
         Clipboard: 클립보드에 복사
     Rotate Wide Videos to Landscape in Fullscreen: '전체 화면에서 가로형 동영상을 가로 방향으로 회전'
     Swipe Up or Down to Enter or Exit Fullscreen: '위아래로 밀어 전체 화면 시작 또는 종료'
+    Preload Upcoming Videos: "다음 동영상 미리 불러오기"
+    Upcoming Videos to Preload: "미리 불러올 동영상 수"
   Channel Settings:
     Channel Settings: 채널 설정
     Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.
@@ -1520,6 +1522,8 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': '프리롤 광고 남은 시간: {remindingTimeSeconds}초'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'SABR 대기 남은 시간: {remindingTimeSeconds}초'
 Playlist:
+  Playlist Already Preloaded: "재생목록의 모든 동영상을 이미 미리 불러왔습니다"
+  Playlist Preload Progress: "동영상 미리 불러오는 중: {requested}개 중 {completed}개"
   Close Playlist: 재생목록 닫기
   Sort By:
     DateAddedNewest: 추가한 날짜 (최신순)
@@ -1533,6 +1537,11 @@ Playlist:
     VideoDurationAscending: 재생 시간 (짧은순)
     VideoDurationDescending: 재생 시간 (긴순)
     Custom: 사용자 지정
+  Preload Playlist: "모든 동영상 미리 불러오기"
+  Preloading Playlist: "모든 동영상을 미리 불러오는 중..."
+  Playlist Preload Complete: "미리 불러온 동영상: {count}개."
+  Playlist Preload Partial: "동영상 {requested}개 중 {preloaded}개를 미리 불러왔습니다. {failed}개는 실패했습니다."
+  Playlist Preload Pagination Failed: "재생목록 전체를 불러오지 못해 미리 불러오기를 취소했습니다."
 Change Format:
   Local Video File: 로컬 동영상 파일
   Local Audio File: 로컬 오디오 파일
@@ -1740,6 +1749,8 @@ Tooltips:
       값이 높으면 느리거나 불안정한 연결에서 도움이 될 수 있지만 대역폭과 메모리를 더 많이 사용합니다.
       또한 자동 설정이 연결 속도를 실제보다 낮게 판단하여 더 낮은 화질을 선택할 수 있습니다.
       한 번에 하나의 요청으로 제한된 스트림에는 이 설정이 적용되지 않습니다.
+    Preload Upcoming Videos: "다음에 재생할 동영상의 yt-dlp URL을 가져와 캐시합니다. 대기열이 재생목록과 추천보다 우선합니다."
+    Upcoming Videos to Preload: "백그라운드에서 yt-dlp URL을 가져올 다음 동영상의 최대 개수입니다."
   External Player Settings:
     Ignore Default Arguments: 동영상 URL 외의 기본 인수를 외부 플레이어에 보내지 않습니다. 예를 들어 재생 속도와 재생목록 URL이 해당됩니다. 사용자 지정 인수는 계속 전달됩니다.
   Download Settings:

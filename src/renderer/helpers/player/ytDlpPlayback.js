@@ -29,11 +29,77 @@ const ITAG_REGEX = /^\d+/
 const URL_PROBE_TIMEOUT = 10_000
 const MINIMUM_LIVE_DVR_WINDOW_SECONDS = 30
 const playbackSourceCache = new YtDlpPlaybackSourceCache()
+const pendingPlaybackSourceLoads = new Map()
+const playbackSourceCacheChangeListeners = new Set()
+
+function notifyPlaybackSourceCacheChanged() {
+  for (const listener of playbackSourceCacheChangeListeners) listener()
+}
+
+function effectivePlaybackSourceCacheKey(cacheKey, useAuthentication) {
+  return JSON.stringify([cacheKey, useAuthentication])
+}
+
+/**
+ * @param {() => void} listener
+ * @returns {() => void}
+ */
+export function onYtDlpPlaybackSourceCacheChange(listener) {
+  playbackSourceCacheChangeListeners.add(listener)
+  return () => playbackSourceCacheChangeListeners.delete(listener)
+}
+
+/**
+ * Returns the earliest time at which any requested source stops being safely
+ * reusable, or null when at least one source is not cached.
+ * @param {string[]} videoIds
+ * @param {string} cacheKey
+ * @param {boolean} useAuthentication
+ * @param {boolean} [requireSubtitles]
+ * @returns {number | null}
+ */
+export function getYtDlpPlaybackSourcesUsableUntil(
+  videoIds,
+  cacheKey,
+  useAuthentication,
+  requireSubtitles = true
+) {
+  const uniqueVideoIds = [...new Set(videoIds)]
+  if (uniqueVideoIds.length === 0) return null
+
+  const effectiveCacheKey = effectivePlaybackSourceCacheKey(cacheKey, useAuthentication)
+  let usableUntil = Infinity
+
+  for (const videoId of uniqueVideoIds) {
+    const sourceUsableUntil = playbackSourceCache.getUsableUntil(
+      videoId,
+      effectiveCacheKey,
+      requireSubtitles
+    )
+    if (sourceUsableUntil === null) return null
+
+    usableUntil = Math.min(usableUntil, sourceUsableUntil)
+  }
+
+  return usableUntil
+}
+
+/**
+ * Keeps every source requested by an explicit playlist preload available for
+ * the rest of the app session, even when the playlist exceeds the normal LRU
+ * limit.
+ * @param {number} entries
+ */
+export function reserveYtDlpPlaybackSourceCache(entries) {
+  playbackSourceCache.ensureCapacity(entries)
+}
 
 async function cacheYtDlpPlaybackSource(videoId, cacheKey, source) {
   if (source.isLive) return
 
-  playbackSourceCache.set(videoId, cacheKey, source)
+  if (playbackSourceCache.set(videoId, cacheKey, source)) {
+    notifyPlaybackSourceCacheChanged()
+  }
   if (source.expiryDate === null) return
 
   try {
@@ -61,14 +127,18 @@ function hasLimitedLiveDvrWindow(url) {
  * @param {string} videoId
  */
 export function invalidateYtDlpPlaybackSource(videoId) {
-  playbackSourceCache.delete(videoId)
+  if (playbackSourceCache.delete(videoId)) {
+    notifyPlaybackSourceCacheChanged()
+  }
   window.ftElectron.ytDlpPlaybackCacheDelete(videoId).catch(error => {
     console.warn('Could not remove an entry from the persistent yt-dlp playback cache', error)
   })
 }
 
 export function invalidateAllYtDlpPlaybackSources() {
-  playbackSourceCache.clear()
+  if (playbackSourceCache.clear()) {
+    notifyPlaybackSourceCacheChanged()
+  }
   return window.ftElectron.ytDlpPlaybackCacheClear().catch(error => {
     console.warn('Could not clear the persistent yt-dlp playback cache', error)
     return false
@@ -387,7 +457,7 @@ function createPostLiveDvrActions(duration, fragmentCount) {
  * @param {boolean} [includeSubtitles] whether yt-dlp should request automatic subtitles
  * @returns {Promise<YtDlpPlaybackSource | null>}
  */
-export async function getYtDlpPlaybackSource(
+export function getYtDlpPlaybackSource(
   videoId,
   cacheKey = '',
   onDefaultClientsFallback,
@@ -395,7 +465,67 @@ export async function getYtDlpPlaybackSource(
   cachedOnly = false,
   includeSubtitles = true
 ) {
-  const effectiveCacheKey = JSON.stringify([cacheKey, useAuthentication])
+  if (cachedOnly) {
+    return loadYtDlpPlaybackSource(
+      videoId,
+      cacheKey,
+      onDefaultClientsFallback,
+      useAuthentication,
+      true,
+      includeSubtitles
+    )
+  }
+
+  const requestKey = JSON.stringify([videoId, cacheKey, useAuthentication, includeSubtitles])
+  const pendingLoad = pendingPlaybackSourceLoads.get(requestKey)
+  if (pendingLoad !== undefined) {
+    if (onDefaultClientsFallback !== undefined) {
+      pendingLoad.defaultClientsFallbackCallbacks.add(onDefaultClientsFallback)
+      if (pendingLoad.defaultClientsFallbackStarted) {
+        onDefaultClientsFallback()
+      }
+    }
+    return pendingLoad.promise
+  }
+
+  const defaultClientsFallbackCallbacks = new Set()
+  if (onDefaultClientsFallback !== undefined) {
+    defaultClientsFallbackCallbacks.add(onDefaultClientsFallback)
+  }
+
+  const pendingEntry = {
+    defaultClientsFallbackCallbacks,
+    defaultClientsFallbackStarted: false,
+    promise: null,
+  }
+  pendingEntry.promise = loadYtDlpPlaybackSource(
+    videoId,
+    cacheKey,
+    () => {
+      pendingEntry.defaultClientsFallbackStarted = true
+      for (const callback of defaultClientsFallbackCallbacks) callback()
+    },
+    useAuthentication,
+    false,
+    includeSubtitles
+  ).finally(() => {
+    if (pendingPlaybackSourceLoads.get(requestKey) === pendingEntry) {
+      pendingPlaybackSourceLoads.delete(requestKey)
+    }
+  })
+  pendingPlaybackSourceLoads.set(requestKey, pendingEntry)
+  return pendingEntry.promise
+}
+
+async function loadYtDlpPlaybackSource(
+  videoId,
+  cacheKey,
+  onDefaultClientsFallback,
+  useAuthentication,
+  cachedOnly,
+  includeSubtitles
+) {
+  const effectiveCacheKey = effectivePlaybackSourceCacheKey(cacheKey, useAuthentication)
   let cachedSource = playbackSourceCache.get(videoId, effectiveCacheKey)
 
   if (cachedSource === null) {
@@ -409,7 +539,9 @@ export async function getYtDlpPlaybackSource(
           subtitlesIncluded: entry.source.subtitlesIncluded ?? false,
           expiryDate: new Date(entry.expiryTime)
         }
-        playbackSourceCache.set(videoId, effectiveCacheKey, source)
+        if (playbackSourceCache.set(videoId, effectiveCacheKey, source)) {
+          notifyPlaybackSourceCacheChanged()
+        }
         cachedSource = playbackSourceCache.get(videoId, effectiveCacheKey)
 
         if (cachedSource === null) {

@@ -91,6 +91,44 @@ test('evicts the least recently used source at the size limit', () => {
   assert.equal(cache.get('third', 'settings'), third)
 })
 
+test('can reserve enough in-memory entries for an explicit playlist preload', () => {
+  const cache = new YtDlpPlaybackSourceCache({ maxEntries: 2, now: () => 0 })
+  cache.ensureCapacity(3)
+
+  cache.set('first', 'settings', source(new Date(1000000)))
+  cache.set('second', 'settings', source(new Date(1000000)))
+  cache.set('third', 'settings', source(new Date(1000000)))
+
+  assert.equal(cache.get('first', 'settings').expiryDate.getTime(), 1000000)
+  assert.equal(cache.get('second', 'settings').expiryDate.getTime(), 1000000)
+  assert.equal(cache.get('third', 'settings').expiryDate.getTime(), 1000000)
+})
+
+test('reports when a cached source stops being safely reusable', () => {
+  let now = 1000000
+  const cache = new YtDlpPlaybackSourceCache({
+    expiryMarginMs: 120000,
+    now: () => now
+  })
+  cache.set('video', 'settings', {
+    ...source(new Date(now + 300000)),
+    subtitlesIncluded: true
+  })
+
+  assert.equal(cache.getUsableUntil('video', 'settings', true), now + 180000)
+  now += 180000
+  assert.equal(cache.getUsableUntil('video', 'settings', true), null)
+})
+
+test('reports when a preloaded source is evicted', () => {
+  const cache = new YtDlpPlaybackSourceCache({ maxEntries: 1, now: () => 0 })
+  cache.set('playlist-video', 'settings', source(new Date(1000000)))
+  assert.equal(cache.getUsableUntil('playlist-video', 'settings'), 880000)
+
+  cache.set('other-video', 'settings', source(new Date(1000000)))
+  assert.equal(cache.getUsableUntil('playlist-video', 'settings'), null)
+})
+
 test('does not reuse sources extracted with different settings', () => {
   const cache = new YtDlpPlaybackSourceCache({ now: () => 0 })
   cache.set('video', 'old-settings', source(new Date(1000000)))

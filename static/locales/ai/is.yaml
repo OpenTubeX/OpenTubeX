@@ -508,6 +508,8 @@ Settings:
     Parallel Segment Loading: Samhliða hleðsla búta
     Rotate Wide Videos to Landscape in Fullscreen: 'Snúa breiðum myndskeiðum lárétt á öllum skjánum'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Strjúktu upp eða niður til að opna eða loka öllum skjánum'
+    Preload Upcoming Videos: "Forhlaða næstu myndskeið"
+    Upcoming Videos to Preload: "Fjöldi myndskeiða til að forhlaða"
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
@@ -1211,7 +1213,14 @@ Video:
       DownvoteSegment: Gefa neikvætt atkvæði
       VoteFailed: Ekki tókst að senda SponsorBlock-atkvæði.
 Playlist:
+  Playlist Already Preloaded: "Öll myndskeið spilunarlistans eru þegar forhlaðin"
+  Playlist Preload Progress: "Forhleð myndskeið: {completed} af {requested}"
   Close Playlist: Loka spilunarlista
+  Preload Playlist: "Forhlaða öll myndskeið"
+  Preloading Playlist: "Forhleð öllum myndskeiðum..."
+  Playlist Preload Complete: "Forhlaðin myndskeið: {count}."
+  Playlist Preload Partial: "Forhlóð {preloaded} af {requested} myndskeiðum. Ekki tókst að forhlaða {failed}."
+  Playlist Preload Pagination Failed: "Ekki tókst að hlaða allan spilunarlistann og forhleðslu var hætt."
 Change Format:
   Local Video File: Staðbundin myndbandsskrá
   Local Audio File: Staðbundin hljóðskrá
@@ -1408,6 +1417,8 @@ Tooltips:
       Hærri gildi geta hjálpað á hægum eða óstöðugum tengingum en nota meiri bandbreidd og minni.
       Þau geta einnig valdið því að Sjálfvirkt vanmeti tengingarhraðann og velji minni gæði.
       Streymi sem er takmarkað við eina beiðni í einu hunsar þessa stillingu.
+    Preload Upcoming Videos: "Sækir og vistar yt-dlp-slóðir næstu myndskeiða. Biðröðin hefur forgang fram yfir spilunarlista og tillögur."
+    Upcoming Videos to Preload: "Hámarksfjöldi næstu myndskeiða sem yt-dlp-slóðir eru sóttar fyrir í bakgrunni."
   Download Settings:
     Download Folder: Myndbönd vistast í þessa möppu. Skildu reitinn eftir auðan til að nota niðurhalsmöppu kerfisins.
     Global Additional yt-dlp Arguments: Viðbótarviðföng skipanalínu sem eru send til yt-dlp við hvert niðurhal, til dæmis --cookies-from-browser firefox.

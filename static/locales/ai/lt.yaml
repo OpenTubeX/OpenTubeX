@@ -700,6 +700,8 @@ Settings:
         Clipboard: Kopijuoti į iškarpinę
     Rotate Wide Videos to Landscape in Fullscreen: 'Pasukti plačius vaizdo įrašus gulsčiai visame ekrane'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Braukite aukštyn arba žemyn, kad įjungtumėte arba išjungtumėte visą ekraną'
+    Preload Upcoming Videos: "Iš anksto įkelti kitus vaizdo įrašus"
+    Upcoming Videos to Preload: "Iš anksto įkeliamų vaizdo įrašų skaičius"
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
@@ -1555,6 +1557,8 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Reklamos prieš vaizdo įrašą likęs laikas: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Likęs SABR delsos laikas: {remindingTimeSeconds} s'
 Playlist:
+  Playlist Already Preloaded: "Visi grojaraščio vaizdo įrašai jau įkelti iš anksto"
+  Playlist Preload Progress: "Vaizdo įrašų išankstinis įkėlimas: {completed} iš {requested}"
   Close Playlist: Uždaryti grojaraštį
   Sort By:
     DateAddedNewest: Pridėjimo data (naujausi viršuje)
@@ -1568,6 +1572,11 @@ Playlist:
     VideoDurationAscending: Trukmė (trumpiausi viršuje)
     VideoDurationDescending: Trukmė (ilgiausi viršuje)
     Custom: Pasirinktinė tvarka
+  Preload Playlist: "Iš anksto įkelti visus vaizdo įrašus"
+  Preloading Playlist: "Iš anksto įkeliami visi vaizdo įrašai..."
+  Playlist Preload Complete: "Iš anksto įkelta vaizdo įrašų: {count}."
+  Playlist Preload Partial: "Iš anksto įkelta {preloaded} iš {requested} vaizdo įrašų. Nepavyko įkelti {failed}."
+  Playlist Preload Pagination Failed: "Nepavyko įkelti viso grojaraščio, todėl išankstinis įkėlimas atšauktas."
 Change Format:
   Local Video File: Vietinis vaizdo įrašo failas
   Local Audio File: Vietinis garso failas
@@ -1778,6 +1787,8 @@ Tooltips:
       Didesnės reikšmės gali padėti esant lėtam ar nestabiliam ryšiui, bet naudoja daugiau pralaidumo ir atminties.
       Dėl jų Auto taip pat gali nepakankamai įvertinti ryšio greitį ir pasirinkti prastesnę kokybę.
       Srautai, apriboti iki vienos užklausos vienu metu, nepaiso šio nustatymo.
+    Preload Upcoming Videos: "Gauna ir talpykloje išsaugo kitų vaizdo įrašų yt-dlp adresus. Eilė yra svarbesnė už grojaraščius ir rekomendacijas."
+    Upcoming Videos to Preload: "Didžiausias kitų vaizdo įrašų skaičius, kurių yt-dlp adresai gaunami fone."
   External Player Settings:
     Ignore Default Arguments: Išoriniam leistuvui nesiųsti jokių numatytųjų argumentų, išskyrus vaizdo įrašo URL (pvz., atkūrimo greitį, grojaraščio URL ir kt.). Pasirinktiniai argumentai vis tiek bus perduoti.
   Download Settings:

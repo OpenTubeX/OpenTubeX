@@ -516,6 +516,8 @@ Settings:
         Clipboard: Copiar para a área de transferência
     Rotate Wide Videos to Landscape in Fullscreen: 'Rodar vídeos largos para a orientação horizontal em ecrã inteiro'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Deslize para cima ou para baixo para entrar ou sair do ecrã inteiro'
+    Preload Upcoming Videos: "Pré-carregar os próximos vídeos"
+    Upcoming Videos to Preload: "Número de vídeos a pré-carregar"
   Channel Settings:
     Channel Settings: Definições dos canais
     Channel Settings Description: Memorizar individualmente para cada canal as definições escolhidas durante a visualização, para que sejam aplicadas quando voltar a ver um dos seus vídeos.
@@ -1217,7 +1219,14 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Tempo restante do anúncio inicial: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Tempo restante de espera do SABR: {remindingTimeSeconds}s'
 Playlist:
+  Playlist Already Preloaded: "Todos os vídeos da lista já estão pré-carregados"
+  Playlist Preload Progress: "A pré-carregar vídeos: {completed} de {requested}"
   Close Playlist: Fechar lista de reprodução
+  Preload Playlist: "Pré-carregar todos os vídeos"
+  Preloading Playlist: "A pré-carregar todos os vídeos..."
+  Playlist Preload Complete: "Vídeos pré-carregados: {count}."
+  Playlist Preload Partial: "Foram pré-carregados {preloaded} de {requested} vídeos. Não foi possível pré-carregar {failed}."
+  Playlist Preload Pagination Failed: "Não foi possível carregar a lista completa, por isso o pré-carregamento foi cancelado."
 Change Format:
   Local Video File: Ficheiro de vídeo local
   Local Audio File: Ficheiro de áudio local
@@ -1414,6 +1423,8 @@ Tooltips:
       Valores mais altos podem ajudar em ligações lentas ou instáveis, mas utilizam mais largura de banda e memória.
       Também podem fazer com que o modo Automático subestime a velocidade da ligação e selecione uma qualidade inferior.
       As transmissões limitadas a um pedido de cada vez ignoram esta definição.
+    Preload Upcoming Videos: "Obtém e guarda em cache os URL do yt-dlp dos próximos vídeos. A fila tem prioridade sobre listas e recomendações."
+    Upcoming Videos to Preload: "Número máximo de próximos vídeos cujos URL do yt-dlp são obtidos em segundo plano."
   Download Settings:
     Download Folder: Os vídeos são guardados nesta pasta. Deixe em branco para utilizar a pasta Transferências do sistema.
     Global Additional yt-dlp Arguments: Argumentos adicionais da linha de comandos passados ao yt-dlp em cada descarga, por exemplo --cookies-from-browser firefox.

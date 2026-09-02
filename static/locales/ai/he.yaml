@@ -513,6 +513,8 @@ Settings:
         Clipboard: העתקה ללוח
     Rotate Wide Videos to Landscape in Fullscreen: 'סיבוב סרטונים רחבים לרוחב במסך מלא'
     Swipe Up or Down to Enter or Exit Fullscreen: 'החלקה למעלה או למטה כדי להיכנס למסך מלא או לצאת ממנו'
+    Preload Upcoming Videos: "טעינה מראש של הסרטונים הבאים"
+    Upcoming Videos to Preload: "מספר הסרטונים לטעינה מראש"
   Channel Settings:
     Channel Settings: הגדרות ערוץ
     Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.
@@ -1212,7 +1214,14 @@ Video:
       DownvoteSegment: הצבעה נגד
       VoteFailed: שליחת ההצבעה אל SponsorBlock נכשלה.
 Playlist:
+  Playlist Already Preloaded: "כל סרטוני הפלייליסט כבר נטענו מראש"
+  Playlist Preload Progress: "טוען סרטונים מראש: {completed} מתוך {requested}"
   Close Playlist: סגירת רשימת ההשמעה
+  Preload Playlist: "טעינת כל הסרטונים מראש"
+  Preloading Playlist: "כל הסרטונים נטענים מראש..."
+  Playlist Preload Complete: "סרטונים שנטענו מראש: {count}."
+  Playlist Preload Partial: "נטענו מראש {preloaded} מתוך {requested} סרטונים. טעינת {failed} נכשלה."
+  Playlist Preload Pagination Failed: "לא ניתן היה לטעון את כל רשימת ההשמעה, לכן הטעינה מראש בוטלה."
 Change Format:
   Local Video File: קובץ וידאו מקומי
   Local Audio File: קובץ שמע מקומי
@@ -1409,6 +1418,8 @@ Tooltips:
       ערכים גבוהים עשויים לעזור בחיבור איטי או לא יציב, אך צורכים יותר רוחב פס וזיכרון.
       הם גם עלולים לגרום למצב אוטומטי להעריך את מהירות החיבור בחסר ולבחור באיכות נמוכה יותר.
       זרמים המוגבלים לבקשה אחת בכל פעם מתעלמים מהגדרה זו.
+    Preload Upcoming Videos: "אחזור ושמירה במטמון של כתובות yt-dlp לסרטונים הבאים. לתור יש עדיפות על רשימות השמעה והמלצות."
+    Upcoming Videos to Preload: "המספר המרבי של סרטונים הבאים שכתובות yt-dlp שלהם יאוחזרו ברקע."
   Download Settings:
     Download Folder: הסרטונים נשמרים בתיקייה זו. השאירו ריק כדי להשתמש בתיקיית ההורדות של המערכת.
     Global Additional yt-dlp Arguments: ארגומנטים נוספים לשורת הפקודה שיועברו אל yt-dlp בכל הורדה, לדוגמה --cookies-from-browser firefox.

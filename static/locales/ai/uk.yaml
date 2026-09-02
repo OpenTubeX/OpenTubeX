@@ -508,6 +508,8 @@ Settings:
     Parallel Segment Loading: Паралельне завантаження сегментів
     Rotate Wide Videos to Landscape in Fullscreen: 'Повертати широкі відео горизонтально в повноекранному режимі'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Проведіть угору або вниз, щоб відкрити чи закрити повноекранний режим'
+    Preload Upcoming Videos: "Попередньо завантажувати наступні відео"
+    Upcoming Videos to Preload: "Кількість відео для попереднього завантаження"
   Channel Settings:
     Channel Settings: Налаштування каналів
     Channel Settings Description: Запам’ятовувати вибрані під час перегляду налаштування окремо для кожного каналу й застосовувати їх під час наступного перегляду його відео.
@@ -1205,7 +1207,14 @@ Video:
       DownvoteSegment: Проголосувати проти
       VoteFailed: Не вдалося надіслати голос у SponsorBlock.
 Playlist:
+  Playlist Already Preloaded: "Усі відео з плейлиста вже попередньо завантажені"
+  Playlist Preload Progress: "Попереднє завантаження відео: {completed} з {requested}"
   Close Playlist: Закрити список відтворення
+  Preload Playlist: "Попередньо завантажити всі відео"
+  Preloading Playlist: "Попереднє завантаження всіх відео..."
+  Playlist Preload Complete: "Попередньо завантажено відео: {count}."
+  Playlist Preload Partial: "Попередньо завантажено {preloaded} з {requested} відео. Не вдалося завантажити {failed}."
+  Playlist Preload Pagination Failed: "Не вдалося завантажити весь список, тому попереднє завантаження скасовано."
 Change Format:
   Local Video File: Локальний відеофайл
   Local Audio File: Локальний аудіофайл
@@ -1402,6 +1411,8 @@ Tooltips:
       Вищі значення можуть допомогти за повільного або нестабільного з'єднання, але потребують більшої пропускної здатності та пам'яті.
       Через них режим «Авто» також може недооцінити швидкість з'єднання й вибрати нижчу якість.
       Це налаштування не діє на потоки, обмежені одним одночасним запитом.
+    Preload Upcoming Videos: "Отримує та кешує адреси yt-dlp для наступних відео. Черга має пріоритет над списками й рекомендаціями."
+    Upcoming Videos to Preload: "Найбільша кількість наступних відео, адреси yt-dlp яких отримуються у тлі."
   Download Settings:
     Download Folder: Відео зберігаються в цій папці. Залиште поле порожнім, щоб використовувати системну папку «Завантаження».
     Global Additional yt-dlp Arguments: Додаткові аргументи командного рядка, що передаються yt-dlp під час кожного завантаження, наприклад --cookies-from-browser firefox.

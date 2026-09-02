@@ -487,6 +487,8 @@ Settings:
     Parallel Segment Loading: Parallel Segment Loading
     Rotate Wide Videos to Landscape in Fullscreen: 'Rotate wide videos to landscape in fullscreen'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Swipe up or down to enter or exit fullscreen'
+    Preload Upcoming Videos: "Preload Upcoming Videos"
+    Upcoming Videos to Preload: "Upcoming Videos to Preload"
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
@@ -1153,7 +1155,14 @@ Video:
       DownvoteSegment: Downvote
       VoteFailed: Failed to submit SponsorBlock vote.
 Playlist:
+  Playlist Already Preloaded: "All playlist videos are already preloaded"
+  Playlist Preload Progress: "Preloading videos: {completed} of {requested}"
   Close Playlist: Close Playlist
+  Preload Playlist: "Preload all videos"
+  Preloading Playlist: "Preloading all videos..."
+  Playlist Preload Complete: "Preloaded videos: {count}."
+  Playlist Preload Partial: "Preloaded {preloaded} of {requested} videos. {failed} could not be preloaded."
+  Playlist Preload Pagination Failed: "The full playlist could not be loaded, so preloading was cancelled."
 Change Format:
   Local Video File: Local video file
   Local Audio File: Local audio file
@@ -1350,6 +1359,8 @@ Tooltips:
       Higher values may help on slow or unstable connections, but use more bandwidth and memory.
       They may also make Auto underestimate the connection speed and select a lower quality.
       Streams limited to one request at a time ignore this setting.
+    Preload Upcoming Videos: "Fetches and caches yt-dlp stream URLs for the videos that can play next. The queue takes priority over playlists and recommendations."
+    Upcoming Videos to Preload: "The maximum number of upcoming videos whose yt-dlp stream URLs are fetched in the background."
   Download Settings:
     Download Folder: Videos are saved to this folder. Leave blank to use your system's Downloads folder.
     Global Additional yt-dlp Arguments: Additional command line arguments passed to yt-dlp for every download, for example --cookies-from-browser firefox.

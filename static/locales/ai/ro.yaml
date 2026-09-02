@@ -504,6 +504,8 @@ Settings:
     Parallel Segment Loading: Încărcarea paralelă a segmentelor
     Rotate Wide Videos to Landscape in Fullscreen: 'Rotește videoclipurile late în modul peisaj pe ecran complet'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Glisează în sus sau în jos pentru a intra sau a ieși din ecranul complet'
+    Preload Upcoming Videos: "Preîncarcă videoclipurile următoare"
+    Upcoming Videos to Preload: "Numărul de videoclipuri de preîncărcat"
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -1208,7 +1210,14 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Timp rămas din reclama de început: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Timp rămas din așteptarea SABR: {remindingTimeSeconds}s'
 Playlist:
+  Playlist Already Preloaded: "Toate videoclipurile din lista de redare sunt deja preîncărcate"
+  Playlist Preload Progress: "Se preîncarcă videoclipurile: {completed} din {requested}"
   Close Playlist: Închide playlistul
+  Preload Playlist: "Preîncarcă toate videoclipurile"
+  Preloading Playlist: "Se preîncarcă toate videoclipurile..."
+  Playlist Preload Complete: "Videoclipuri preîncărcate: {count}."
+  Playlist Preload Partial: "S-au preîncărcat {preloaded} din {requested} videoclipuri. {failed} nu au putut fi preîncărcate."
+  Playlist Preload Pagination Failed: "Lista completă nu a putut fi încărcată, așa că preîncărcarea a fost anulată."
 Change Format:
   Local Video File: Fișier video local
   Local Audio File: Fișier audio local
@@ -1409,6 +1418,8 @@ Tooltips:
       Valorile mai mari pot fi utile în cazul conexiunilor lente sau instabile, dar folosesc mai multă lățime de bandă și memorie.
       De asemenea, pot determina modul Automat să subestimeze viteza conexiunii și să selecteze o calitate mai scăzută.
       Fluxurile limitate la o singură solicitare simultană ignoră această setare.
+    Preload Upcoming Videos: "Obține și memorează în cache adresele yt-dlp ale videoclipurilor următoare. Coada are prioritate față de liste și recomandări."
+    Upcoming Videos to Preload: "Numărul maxim de videoclipuri următoare ale căror adrese yt-dlp sunt obținute în fundal."
   Download Settings:
     Download Folder: Videoclipurile sunt salvate în acest folder. Lăsați necompletat pentru a folosi folderul Descărcări al sistemului.
     Global Additional yt-dlp Arguments: Argumente suplimentare de linie de comandă transmise către yt-dlp pentru fiecare descărcare, de exemplu --cookies-from-browser firefox.

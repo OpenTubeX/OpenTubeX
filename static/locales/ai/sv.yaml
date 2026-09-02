@@ -502,6 +502,8 @@ Settings:
     Parallel Segment Loading: Parallell inläsning av segment
     Rotate Wide Videos to Landscape in Fullscreen: 'Rotera breda videor till liggande läge i helskärm'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Svep uppåt eller nedåt för att öppna eller lämna helskärm'
+    Preload Upcoming Videos: "Förinläs kommande videor"
+    Upcoming Videos to Preload: "Antal videor att förinläsa"
   Channel Settings:
     Channel Settings: Kanalinställningar
     Channel Settings Description: Kom ihåg inställningarna du väljer när du tittar för varje enskild kanal och använd dem nästa gång du tittar på en av kanalens videor.
@@ -1186,7 +1188,14 @@ Video:
       DownvoteSegment: Rösta ned
       VoteFailed: Det gick inte att skicka SponsorBlock-rösten.
 Playlist:
+  Playlist Already Preloaded: "Alla videor i spellistan är redan förladdade"
+  Playlist Preload Progress: "Förladdar videor: {completed} av {requested}"
   Close Playlist: Stäng spellista
+  Preload Playlist: "Förinläs alla videor"
+  Preloading Playlist: "Förinläser alla videor..."
+  Playlist Preload Complete: "Förinlästa videor: {count}."
+  Playlist Preload Partial: "Förinläste {preloaded} av {requested} videor. {failed} kunde inte förinläsas."
+  Playlist Preload Pagination Failed: "Hela spellistan kunde inte läsas in, så förinläsningen avbröts."
 Change Format:
   Local Video File: Lokal videofil
   Local Audio File: Lokal ljudfil
@@ -1383,6 +1392,8 @@ Tooltips:
       Högre värden kan hjälpa vid långsamma eller instabila anslutningar men använder mer bandbredd och minne.
       De kan även göra att Auto underskattar anslutningshastigheten och väljer en lägre kvalitet.
       Strömmar som är begränsade till en begäran åt gången ignorerar inställningen.
+    Preload Upcoming Videos: "Hämtar och mellanlagrar yt-dlp-adresser för nästa videor. Kön prioriteras före spellistor och rekommendationer."
+    Upcoming Videos to Preload: "Det högsta antalet kommande videor vars yt-dlp-adresser hämtas i bakgrunden."
   Download Settings:
     Download Folder: Videor sparas i den här mappen. Lämna tomt för att använda systemets nedladdningsmapp.
     Global Additional yt-dlp Arguments: Extra kommandoradsargument som skickas till yt-dlp vid varje nedladdning, exempelvis --cookies-from-browser firefox.

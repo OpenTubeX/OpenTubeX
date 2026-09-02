@@ -915,6 +915,8 @@ Settings:
     Loop Shorts: Loop Shorts
     Next Video Interval: Autoplay Countdown Timer
     Autoplay Interruption Timer: Autoplay Interruption Timer
+    Preload Upcoming Videos: Preload Upcoming Videos
+    Upcoming Videos to Preload: Upcoming Videos to Preload
     Fast-Forward / Rewind Interval: Fast-Forward / Rewind Interval
     Default Volume: Default Volume
     Remember Volume: Remember Volume
@@ -2135,6 +2137,13 @@ Playlist:
   Playlist: Playlist
   Close Playlist: Close Playlist
   View Full Playlist: View Full Playlist
+  Preload Playlist: Preload all videos
+  Preloading Playlist: Preloading all videos...
+  Playlist Already Preloaded: All playlist videos are already preloaded
+  Playlist Preload Progress: 'Preloading videos: {completed} of {requested}'
+  Playlist Preload Complete: 'Preloaded videos: {count}.'
+  Playlist Preload Partial: 'Preloaded {preloaded} of {requested} videos. {failed} could not be preloaded.'
+  Playlist Preload Pagination Failed: The full playlist could not be loaded, so preloading was canceled.
   Last Updated On: Last Updated On
   Sort By:
     DateAddedNewest: Date added (Newest)
@@ -2441,6 +2450,8 @@ Tooltips:
       Higher values may help on slow or unstable connections, but use more bandwidth and memory.
       They may also make Auto underestimate the connection speed and select a lower quality.
       Streams limited to one request at a time ignore this setting.
+    Preload Upcoming Videos: Fetches and caches yt-dlp stream URLs for videos that can play next. The watch queue takes priority over playlists and recommendations.
+    Upcoming Videos to Preload: The maximum number of upcoming videos whose yt-dlp stream URLs are fetched in the background.
   External Player Settings:
     External Player: Choosing an external player will display an icon, for opening the
       video (playlist if supported) in the external player, on the thumbnail. Warning, Invidious settings do not affect external players.

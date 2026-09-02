@@ -77,6 +77,11 @@ import {
   MANIFEST_TYPE_HLS
 } from '../../helpers/player/utils'
 import { getYtDlpPlaybackSource, invalidateYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
+import {
+  buildYtDlpPlaybackCacheKey,
+  preloadYtDlpPlaybackSources,
+  selectYtDlpPreloadVideoIds,
+} from '../../helpers/player/ytDlpPlaybackPreload'
 import { getMusicTrackArtist, MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
 import {
@@ -379,6 +384,7 @@ export default defineComponent({
       autoplayNextRecommendedVideo: false,
       autoplayNextPlaylistVideo: false,
       recommendedVideos: [],
+      upcomingPlaylistVideos: [],
       watchingPlaylist: false,
       playlistSkipAvailability: { canPlayNext: true, canPlayPrevious: true },
       playlistId: '',
@@ -601,30 +607,7 @@ export default defineComponent({
       return this.$store.getters.getProxyVideos
     },
     ytDlpPlaybackCacheKey: function () {
-      const getters = this.$store.getters
-      const proxyConfiguration = getters.getUseProxy
-        ? [
-            getters.getProxyProtocol,
-            getters.getProxyHostname,
-            getters.getProxyPort,
-            getters.getProxyUsername,
-            getters.getProxyPassword
-          ]
-        : []
-
-      // Older cached sources do not record whether yt-dlp checked for subtitles.
-      return JSON.stringify([
-        'captions-v4',
-        getters.getYtDlpSource,
-        getters.getYtDlpChannel,
-        getters.getYtDlpPath,
-        getters.getUseProxy,
-        ...proxyConfiguration,
-        getters.getYtDlpPlaybackAuthMode,
-        getters.getYtDlpPlaybackCookiesPath,
-        getters.getYtDlpPlaybackCookiesBrowser,
-        getters.getYtDlpPlaybackCookiesBrowserProfile
-      ])
+      return buildYtDlpPlaybackCacheKey(this.$store.getters)
     },
     hasConfiguredRestrictedPlaybackAuthentication: function () {
       return hasConfiguredRestrictedPlaybackAuthentication(this.$store.getters)
@@ -912,6 +895,27 @@ export default defineComponent({
     nextQueuedVideo: function () {
       return this.$store.getters.getNextQueuedVideo
     },
+    upcomingYtDlpPreloadVideoIds: function () {
+      if (
+        !process.env.IS_ELECTRON ||
+        this.videoPlaybackEngine !== 'yt-dlp' ||
+        !this.$store.getters.getYtDlpPreloadEnabled
+      ) return []
+
+      const recommendedVideos = this.hideRecommendedVideos
+        ? []
+        : this.recommendedVideos.filter(video =>
+            !this.isHiddenVideo(this.forbiddenTitles, this.channelsHidden, video)
+          )
+
+      return selectYtDlpPreloadVideoIds({
+        currentVideoId: this.videoId,
+        limit: this.$store.getters.getYtDlpPreloadCount,
+        queuedVideos: this.$store.getters.getWatchQueue,
+        playlistVideos: this.watchingPlaylist ? this.upcomingPlaylistVideos : null,
+        recommendedVideos,
+      })
+    },
     thumbnailPreference: function () {
       return this.$store.getters.getThumbnailPreference
     },
@@ -1186,6 +1190,12 @@ export default defineComponent({
     canSkipToPreviousVideo() {
       this.syncMediaSessionSkipHandlers()
     },
+    upcomingYtDlpPreloadVideoIds: {
+      immediate: true,
+      handler(videoIds) {
+        this.preloadUpcomingYtDlpPlaybackSources(videoIds)
+      }
+    },
   },
   created: function () {
     this.theatreModeAnimations = []
@@ -1252,6 +1262,25 @@ export default defineComponent({
     }
   },
   methods: {
+    handleUpcomingPlaylistVideosChange(videos) {
+      this.upcomingPlaylistVideos = Array.isArray(videos) ? videos : []
+    },
+    preloadUpcomingYtDlpPlaybackSources(videoIds) {
+      if (videoIds.length === 0) return
+
+      preloadYtDlpPlaybackSources(videoIds, {
+        loadSource: videoId => getYtDlpPlaybackSource(
+          videoId,
+          this.ytDlpPlaybackCacheKey,
+          undefined,
+          this.alwaysUseYtDlpPlaybackCookies,
+          false,
+          true
+        )
+      }).catch(error => {
+        console.warn('Could not preload upcoming yt-dlp playback sources', error)
+      })
+    },
     updateUpcomingTimestamp: function () {
       if (!(this.premiereDate instanceof Date)) return
 

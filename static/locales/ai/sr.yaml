@@ -523,6 +523,8 @@ Settings:
         Clipboard: Копирај у оставу
     Rotate Wide Videos to Landscape in Fullscreen: 'Окрени широке видео-снимке водоравно преко целог екрана'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Превуците нагоре или надоле за улазак у приказ преко целог екрана или излазак из њега'
+    Preload Upcoming Videos: "Unapred učitaj sledeće video-snimke"
+    Upcoming Videos to Preload: "Broj snimaka za učitavanje unapred"
   Channel Settings:
     Channel Settings: Подешавања канала
     Channel Settings Description: За сваки канал засебно запамти подешавања која изабереш током гледања, како би поново била примењена када следећи пут гледаш неки његов видео-снимак.
@@ -1235,7 +1237,14 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Преостало време уводног огласа: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Преостало време до поновног покушаја SABR-а: {remindingTimeSeconds}s'
 Playlist:
+  Playlist Already Preloaded: "Сви видео снимци са плејлисте су већ претходно учитани"
+  Playlist Preload Progress: "Претходно учитавање видео снимака: {completed} од {requested}"
   Close Playlist: Затвори листу за репродукцију
+  Preload Playlist: "Unapred učitaj sve snimke"
+  Preloading Playlist: "Učitavanje svih snimaka unapred..."
+  Playlist Preload Complete: "Unapred učitani snimci: {count}."
+  Playlist Preload Partial: "Unapred je učitano {preloaded} od {requested} snimaka. {failed} nije uspelo."
+  Playlist Preload Pagination Failed: "Cela plejlista nije mogla da se učita, pa je učitavanje unapred otkazano."
 Change Format:
   Local Video File: Локална видео-датотека
   Local Audio File: Локална аудио-датотека
@@ -1436,6 +1445,8 @@ Tooltips:
       Веће вредности могу помоћи на спорим или нестабилним везама, али користе више пропусног опсега и меморије.
       Због њих аутоматски избор може потценити брзину везе и изабрати нижи квалитет.
       Токови ограничени на један захтев истовремено занемарују ово подешавање.
+    Preload Upcoming Videos: "Preuzima i kešira yt-dlp adrese sledećih snimaka. Red ima prednost nad plejlistama i preporukama."
+    Upcoming Videos to Preload: "Najveći broj sledećih snimaka čije se yt-dlp adrese preuzimaju u pozadini."
   Download Settings:
     Download Folder: Видео-снимци се чувају у овој фасцикли. Оставите празно да бисте користили системску фасциклу за преузимања.
     Global Additional yt-dlp Arguments: Додатни аргументи командне линије који се прослеђују програму yt-dlp при сваком преузимању, на пример --cookies-from-browser firefox.

@@ -303,7 +303,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['close', 'pause-player', 'skip-availability-change'])
+const emit = defineEmits(['close', 'pause-player', 'skip-availability-change', 'upcoming-videos-change'])
 
 const { locale, t } = useI18n()
 const router = useRouter()
@@ -444,6 +444,21 @@ const nextVideo = computed(() => {
 
   return targetList[targetVideoIndex] ?? null
 })
+
+const upcomingVideos = computed(() => {
+  const targetList = shuffleEnabled.value ? randomizedPlaylistItems.value : playlistItems.value
+  const currentIndex = findIndexOfCurrentVideoInPlaylist(targetList)
+  const startIndex = currentIndex === -1 ? 0 : currentIndex + 1
+  const remainingVideos = targetList.slice(startIndex)
+
+  return loopEnabled.value && currentIndex !== -1
+    ? remainingVideos.concat(targetList.slice(0, startIndex))
+    : remainingVideos
+})
+
+watch(upcomingVideos, videos => {
+  emit('upcoming-videos-change', videos)
+}, { immediate: true })
 
 const playlistPageLinkTo = computed(() => ({
   path: `/playlist/${props.playlistId}`,

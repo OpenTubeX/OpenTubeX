@@ -156,6 +156,8 @@ Settings:
       Attribution: (obsługiwane przez Yandex)
     Rotate Wide Videos to Landscape in Fullscreen: 'Obracaj szerokie filmy poziomo w trybie pełnoekranowym'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Przesuń w górę lub w dół, aby włączyć lub wyłączyć pełny ekran'
+    Preload Upcoming Videos: "Wstępnie wczytuj następne filmy"
+    Upcoming Videos to Preload: "Liczba filmów do wstępnego wczytania"
   Download Settings:
     Concurrent Downloads: Jednoczesne pobieranie
     Bandwidth Limit: Limit przepustowości (KiB/s, 0 oznacza brak limitu)
@@ -648,6 +650,8 @@ Tooltips:
       Wyższe wartości mogą pomóc przy wolnym lub niestabilnym połączeniu, ale zwiększają użycie transferu i pamięci.
       Mogą też sprawić, że tryb Auto zaniży prędkość połączenia i wybierze niższą jakość.
       To ustawienie nie wpływa na strumienie ograniczone do jednego żądania naraz.
+    Preload Upcoming Videos: "Pobiera i zapisuje w pamięci podręcznej adresy yt-dlp następnych filmów. Kolejka ma pierwszeństwo przed playlistami i rekomendacjami."
+    Upcoming Videos to Preload: "Maksymalna liczba następnych filmów, których adresy yt-dlp są pobierane w tle."
   Download Settings:
     Global Additional yt-dlp Arguments: Dodatkowe argumenty wiersza poleceń przekazywane do yt-dlp przy każdym pobieraniu, na przykład --cookies-from-browser firefox.
     Concurrent Downloads: Maksymalna liczba zadań yt-dlp wykonywanych jednocześnie.
@@ -787,3 +791,11 @@ Downloads:
   Automatic Download Skipped: Pominięte przez filtry automatycznego pobierania
   Templates:
     Subtitles Format: Napisy - {format}
+Playlist:
+  Playlist Already Preloaded: "Wszystkie filmy z playlisty są już wstępnie wczytane"
+  Playlist Preload Progress: "Wstępne wczytywanie filmów: {completed} z {requested}"
+  Preload Playlist: "Wstępnie wczytaj wszystkie filmy"
+  Preloading Playlist: "Wstępne wczytywanie wszystkich filmów..."
+  Playlist Preload Complete: "Wstępnie wczytane filmy: {count}."
+  Playlist Preload Partial: "Wstępnie wczytano {preloaded} z {requested} filmów. Nie udało się wczytać {failed}."
+  Playlist Preload Pagination Failed: "Nie udało się wczytać całej playlisty, więc anulowano wstępne wczytywanie."

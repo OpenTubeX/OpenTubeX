@@ -712,6 +712,8 @@ Settings:
         Clipboard: Kopiraj v odložišče
     Rotate Wide Videos to Landscape in Fullscreen: 'Zavrti široke videoposnetke ležeče v celozaslonskem načinu'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Podrsajte navzgor ali navzdol za vstop v celozaslonski način ali izhod iz njega'
+    Preload Upcoming Videos: "Prednaloži naslednje videoposnetke"
+    Upcoming Videos to Preload: "Število videov za prednalaganje"
   Channel Settings:
     Channel Settings: Nastavitve kanalov
     Channel Settings Description: Zapomni si nastavitve, ki jih med gledanjem izberete za vsak kanal posebej, in jih znova uporabi ob naslednjem ogledu enega od njegovih videoposnetkov.
@@ -1629,6 +1631,8 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Preostali čas oglasa pred videoposnetkom: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Preostali čas zakasnitve SABR: {remindingTimeSeconds}s'
 Playlist:
+  Playlist Already Preloaded: "Vsi videoposnetki na seznamu so že prednaloženi"
+  Playlist Preload Progress: "Prednalaganje videoposnetkov: {completed} od {requested}"
   Close Playlist: Zapri seznam predvajanja
   Sort By:
     DateAddedNewest: Datum dodajanja (najnovejši)
@@ -1642,6 +1646,11 @@ Playlist:
     VideoDurationAscending: Trajanje (najkrajši)
     VideoDurationDescending: Trajanje (najdaljši)
     Custom: Po meri
+  Preload Playlist: "Prednaloži vse videoposnetke"
+  Preloading Playlist: "Prednalaganje vseh videoposnetkov..."
+  Playlist Preload Complete: "Prednaloženi videoposnetki: {count}."
+  Playlist Preload Partial: "Prednaloženih je {preloaded} od {requested} videov. {failed} jih ni bilo mogoče prednaložiti."
+  Playlist Preload Pagination Failed: "Celotnega seznama ni bilo mogoče naložiti, zato je bilo prednalaganje preklicano."
 Change Format:
   Local Video File: Lokalna videodatoteka
   Local Audio File: Lokalna zvočna datoteka
@@ -1865,6 +1874,8 @@ Tooltips:
       Višje vrednosti lahko pomagajo pri počasnih ali nestabilnih povezavah, vendar porabijo več pasovne širine in pomnilnika.
       Lahko tudi povzročijo, da možnost »Samodejno« podceni hitrost povezave in izbere nižjo kakovost.
       Pretoki, omejeni na eno zahtevo naenkrat, to nastavitev prezrejo.
+    Preload Upcoming Videos: "Pridobi in predpomni naslove yt-dlp naslednjih videov. Čakalna vrsta ima prednost pred seznami in priporočili."
+    Upcoming Videos to Preload: "Največje število naslednjih videov, katerih naslovi yt-dlp se pridobijo v ozadju."
   External Player Settings:
     External Player: Če izberete zunanji predvajalnik, se na sličici prikaže ikona za odpiranje videoposnetka oziroma seznama predvajanja, če je podprt, v zunanjem predvajalniku. Nastavitve Invidious ne vplivajo na zunanje predvajalnike.
     Custom External Player Executable: OpenTubeX privzeto predvideva, da je izbrani zunanji predvajalnik mogoče najti prek okoljske spremenljivke PATH. Po potrebi lahko tukaj nastavite pot po meri.

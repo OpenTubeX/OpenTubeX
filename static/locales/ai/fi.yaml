@@ -513,6 +513,8 @@ Settings:
         Clipboard: Kopioi leikepöydälle
     Rotate Wide Videos to Landscape in Fullscreen: 'Kierrä leveät videot vaakasuuntaan koko näytöllä'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Siirry koko näytön tilaan tai poistu siitä pyyhkäisemällä ylös tai alas'
+    Preload Upcoming Videos: "Esilataa seuraavat videot"
+    Upcoming Videos to Preload: "Esiladattavien videoiden määrä"
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
@@ -1210,7 +1212,14 @@ Video:
       DownvoteSegment: Äänestä vastaan
       VoteFailed: SponsorBlock-äänen lähettäminen epäonnistui.
 Playlist:
+  Playlist Already Preloaded: "Kaikki soittolistan videot on jo esiladattu"
+  Playlist Preload Progress: "Esiladataan videoita: {completed}/{requested}"
   Close Playlist: Sulje soittolista
+  Preload Playlist: "Esilataa kaikki videot"
+  Preloading Playlist: "Esiladataan kaikkia videoita..."
+  Playlist Preload Complete: "Esiladattuja videoita: {count}."
+  Playlist Preload Partial: "Esiladattiin {preloaded}/{requested} videota. {failed} videon esilataus epäonnistui."
+  Playlist Preload Pagination Failed: "Koko soittolistaa ei voitu ladata, joten esilataus peruttiin."
 Change Format:
   Local Video File: Paikallinen videotiedosto
   Local Audio File: Paikallinen äänitiedosto
@@ -1407,6 +1416,8 @@ Tooltips:
       Suuremmat arvot voivat auttaa hitailla tai epävakailla yhteyksillä, mutta ne käyttävät enemmän kaistanleveyttä ja muistia.
       Ne voivat myös saada automaattisen asetuksen aliarvioimaan yhteysnopeuden ja valitsemaan heikomman laadun.
       Tämä asetus ei vaikuta suoratoistovirtoihin, joissa sallitaan vain yksi pyyntö kerrallaan.
+    Preload Upcoming Videos: "Noutaa ja tallentaa välimuistiin seuraavien videoiden yt-dlp-osoitteet. Jono on etusijalla soittolistoihin ja suosituksiin nähden."
+    Upcoming Videos to Preload: "Enimmäismäärä seuraavia videoita, joiden yt-dlp-osoitteet noudetaan taustalla."
   Download Settings:
     Download Folder: Videot tallennetaan tähän kansioon. Jos kenttä jätetään tyhjäksi, käytetään järjestelmän Lataukset-kansiota.
     Global Additional yt-dlp Arguments: Kaikissa latauksissa yt-dlp:lle välitettävät komentorivin lisäargumentit, esimerkiksi --cookies-from-browser firefox.

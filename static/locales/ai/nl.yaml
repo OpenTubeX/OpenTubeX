@@ -513,6 +513,8 @@ Settings:
         Clipboard: Naar klembord kopiëren
     Rotate Wide Videos to Landscape in Fullscreen: 'Brede video’s liggend draaien in volledig scherm'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Veeg omhoog of omlaag om volledig scherm te openen of te sluiten'
+    Preload Upcoming Videos: "Volgende video’s vooraf laden"
+    Upcoming Videos to Preload: "Aantal vooraf te laden video’s"
   Channel Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
@@ -1221,7 +1223,14 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tijd van preroll-advertentie: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-wachttijd: {remindingTimeSeconds}s'
 Playlist:
+  Playlist Already Preloaded: "Alle video's in de afspeellijst zijn al vooraf geladen"
+  Playlist Preload Progress: "Video's vooraf laden: {completed} van {requested}"
   Close Playlist: Afspeellijst sluiten
+  Preload Playlist: "Alle video’s vooraf laden"
+  Preloading Playlist: "Alle video’s worden vooraf geladen..."
+  Playlist Preload Complete: "Vooraf geladen video’s: {count}."
+  Playlist Preload Partial: "{preloaded} van {requested} video’s vooraf geladen. {failed} konden niet worden geladen."
+  Playlist Preload Pagination Failed: "De volledige afspeellijst kon niet worden geladen. Vooraf laden is geannuleerd."
 Change Format:
   Local Video File: Lokaal videobestand
   Local Audio File: Lokaal audiobestand
@@ -1418,6 +1427,8 @@ Tooltips:
       Hogere waarden kunnen helpen bij langzame of instabiele verbindingen, maar gebruiken meer bandbreedte en geheugen.
       Hierdoor kan Automatisch de verbindingssnelheid ook onderschatten en een lagere kwaliteit kiezen.
       Streams die tot één aanvraag tegelijk zijn beperkt, negeren deze instelling.
+    Preload Upcoming Videos: "Haalt yt-dlp-URL’s voor de volgende video’s op en bewaart ze in de cache. De wachtrij heeft voorrang op afspeellijsten en aanbevelingen."
+    Upcoming Videos to Preload: "Het maximale aantal volgende video’s waarvan de yt-dlp-URL’s op de achtergrond worden opgehaald."
   Download Settings:
     Download Folder: Video's worden in deze map opgeslagen. Laat dit leeg om de downloadmap van je systeem te gebruiken.
     Global Additional yt-dlp Arguments: Aanvullende opdrachtregelargumenten die bij elke download aan yt-dlp worden doorgegeven, bijvoorbeeld --cookies-from-browser firefox.

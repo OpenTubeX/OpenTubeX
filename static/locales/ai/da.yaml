@@ -525,6 +525,8 @@ Settings:
         Clipboard: Kopiér til udklipsholder
     Rotate Wide Videos to Landscape in Fullscreen: 'Roter brede videoer til liggende format i fuld skærm'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Stryg op eller ned for at åbne eller forlade fuld skærm'
+    Preload Upcoming Videos: "Forudindlæs kommende videoer"
+    Upcoming Videos to Preload: "Antal videoer, der skal forudindlæses"
   Channel Settings:
     Channel Settings: Kanalindstillinger
     Channel Settings Description: Husk de indstillinger, du vælger under afspilning, for hver kanal, så de anvendes igen, næste gang du ser en af kanalens videoer.
@@ -1241,7 +1243,14 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tid for preroll-annonce: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-ventetid: {remindingTimeSeconds}s'
 Playlist:
+  Playlist Already Preloaded: "Alle videoer i playlisten er allerede forudindlæst"
+  Playlist Preload Progress: "Forudindlæser videoer: {completed} af {requested}"
   Close Playlist: Luk playliste
+  Preload Playlist: "Forudindlæs alle videoer"
+  Preloading Playlist: "Forudindlæser alle videoer..."
+  Playlist Preload Complete: "Forudindlæste videoer: {count}."
+  Playlist Preload Partial: "Forudindlæste {preloaded} af {requested} videoer. {failed} kunne ikke forudindlæses."
+  Playlist Preload Pagination Failed: "Hele afspilningslisten kunne ikke indlæses, så forudindlæsningen blev annulleret."
 Change Format:
   Local Video File: Lokal videofil
   Local Audio File: Lokal lydfil
@@ -1442,6 +1451,8 @@ Tooltips:
       Højere værdier kan hjælpe på langsomme eller ustabile forbindelser, men bruger mere båndbredde og hukommelse.
       De kan også få Auto til at undervurdere forbindelseshastigheden og vælge en lavere kvalitet.
       Streams, der er begrænset til én anmodning ad gangen, ignorerer denne indstilling.
+    Preload Upcoming Videos: "Henter og gemmer yt-dlp-streamadresser for de næste videoer. Køen har prioritet over afspilningslister og anbefalinger."
+    Upcoming Videos to Preload: "Det højeste antal kommende videoer, hvis yt-dlp-streamadresser hentes i baggrunden."
   Download Settings:
     Download Folder: Videoer gemmes i denne mappe. Lad feltet stå tomt for at bruge systemets Downloads-mappe.
     Global Additional yt-dlp Arguments: Yderligere kommandolinjeargumenter, der sendes til yt-dlp ved hver download, f.eks. --cookies-from-browser firefox.

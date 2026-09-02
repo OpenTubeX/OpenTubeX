@@ -512,6 +512,8 @@ Settings:
         Clipboard: இடைநிலைப் பலகைக்கு நகலெடு
     Rotate Wide Videos to Landscape in Fullscreen: 'முழுத்திரையில் அகலமான காணொளிகளைக் கிடைமட்டமாகச் சுழற்றவும்'
     Swipe Up or Down to Enter or Exit Fullscreen: 'முழுத்திரையில் நுழைய அல்லது வெளியேற மேலே அல்லது கீழே தேய்க்கவும்'
+    Preload Upcoming Videos: "அடுத்த காணொளிகளை முன்பே ஏற்று"
+    Upcoming Videos to Preload: "முன்பே ஏற்ற வேண்டிய காணொளிகளின் எண்ணிக்கை"
   Channel Settings:
     Channel Settings: சேனல் அமைப்புகள்
     Channel Settings Description: ஒவ்வொரு சேனலையும் பார்க்கும்போது தேர்ந்தெடுக்கும் அமைப்புகளைத் தனித்தனியாக நினைவில் கொண்டு, அதன் காணொளியை அடுத்த முறை பார்க்கும்போது மீண்டும் பயன்படுத்தும்.
@@ -1215,7 +1217,14 @@ Video:
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'தொடக்க விளம்பரத்தில் மீதமுள்ள நேரம்: {remindingTimeSeconds}வி.'
 Playlist:
+  Playlist Already Preloaded: "பிளேலிஸ்ட்டின் அனைத்து காணொளிகளும் ஏற்கனவே முன்பே ஏற்றப்பட்டுள்ளன"
+  Playlist Preload Progress: "காணொளிகளை முன்பே ஏற்றுகிறது: {requested} இல் {completed}"
   Close Playlist: பிளேலிஸ்ட்டை மூடு
+  Preload Playlist: "அனைத்து காணொளிகளையும் முன்பே ஏற்று"
+  Preloading Playlist: "அனைத்து காணொளிகளும் முன்பே ஏற்றப்படுகின்றன..."
+  Playlist Preload Complete: "முன்பே ஏற்றப்பட்ட காணொளிகள்: {count}."
+  Playlist Preload Partial: "{requested} காணொளிகளில் {preloaded} முன்பே ஏற்றப்பட்டன. {failed} ஏற்ற முடியவில்லை."
+  Playlist Preload Pagination Failed: "முழு இயக்கப்பட்டியலை ஏற்ற முடியாததால் முன்பே ஏற்றுவது நிறுத்தப்பட்டது."
 Change Format:
   Local Video File: உள்ளகக் காணொளிக் கோப்பு
   Local Audio File: உள்ளக ஒலிக் கோப்பு
@@ -1412,6 +1421,8 @@ Tooltips:
       அதிக மதிப்புகள் மெதுவான அல்லது நிலையற்ற இணைப்புகளில் உதவலாம். ஆனால் அதிக அலைவரிசையையும் நினைவகத்தையும் பயன்படுத்தும்.
       இணைப்பு வேகத்தைத் தானியக்கத் தேர்வு குறைவாக மதிப்பிட்டு, குறைந்த தரத்தைத் தேர்ந்தெடுக்கவும் அவை காரணமாகலாம்.
       ஒரே நேரத்தில் ஒரு கோரிக்கைக்கு வரம்பிடப்பட்ட ஸ்ட்ரீம்கள் இந்த அமைப்பைப் பொருட்படுத்தாது.
+    Preload Upcoming Videos: "அடுத்த காணொளிகளின் yt-dlp முகவரிகளைப் பெற்று தற்காலிகமாக சேமிக்கிறது. வரிசைக்கு இயக்கப்பட்டியல் மற்றும் பரிந்துரைகளை விட முன்னுரிமை உண்டு."
+    Upcoming Videos to Preload: "பின்னணியில் yt-dlp முகவரிகள் பெறப்படும் அடுத்த காணொளிகளின் அதிகபட்ச எண்ணிக்கை."
   Download Settings:
     Download Folder: காணொளிகள் இந்தக் கோப்புறையில் சேமிக்கப்படும். உங்கள் கணினியின் பதிவிறக்கங்கள் கோப்புறையைப் பயன்படுத்தக் காலியாக விடவும்.
     Global Additional yt-dlp Arguments: ஒவ்வொரு பதிவிறக்கத்திற்கும் yt-dlp-க்குக் கொடுக்கப்படும் கூடுதல் கட்டளைவரி அளவுருக்கள். எடுத்துக்காட்டு, --cookies-from-browser firefox.

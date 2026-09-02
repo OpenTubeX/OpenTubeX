@@ -2,6 +2,20 @@ const DEFAULT_EXPIRY_MARGIN_MS = 2 * 60 * 1000
 const DEFAULT_MAX_ENTRIES = 50
 
 /**
+ * @param {import('./ytDlpPlayback').YtDlpPlaybackSource} source
+ * @param {number} [now]
+ * @param {number} [expiryMarginMs]
+ */
+export function isYtDlpPlaybackSourceCacheable(
+  source,
+  now = Date.now(),
+  expiryMarginMs = DEFAULT_EXPIRY_MARGIN_MS
+) {
+  const expiryTime = source.expiryDate instanceof Date ? source.expiryDate.getTime() : NaN
+  return !source.isLive && Number.isFinite(expiryTime) && now < expiryTime - expiryMarginMs
+}
+
+/**
  * @param {{ url: string }[]} formats
  * @returns {Date | null}
  */
@@ -69,14 +83,11 @@ export class YtDlpPlaybackSourceCache {
    * @param {string} videoId
    * @param {string} cacheKey
    * @param {import('./ytDlpPlayback').YtDlpPlaybackSource} source
+   * @returns {boolean} whether the source was cached
    */
   set(videoId, cacheKey, source) {
-    const expiryTime = source.expiryDate instanceof Date ? source.expiryDate.getTime() : NaN
-    if (
-      !Number.isFinite(expiryTime) ||
-      this.now() >= expiryTime - this.expiryMarginMs
-    ) {
-      return
+    if (!isYtDlpPlaybackSourceCacheable(source, this.now(), this.expiryMarginMs)) {
+      return false
     }
 
     this.sources.delete(videoId)
@@ -84,16 +95,63 @@ export class YtDlpPlaybackSourceCache {
       this.sources.delete(this.sources.keys().next().value)
     }
     this.sources.set(videoId, { cacheKey, source })
+    return true
+  }
+
+  /**
+   * Returns when a cached source stops being safely reusable without changing
+   * its LRU position.
+   * @param {string} videoId
+   * @param {string} cacheKey
+   * @param {boolean} [requireSubtitles]
+   * @returns {number | null}
+   */
+  getUsableUntil(videoId, cacheKey, requireSubtitles = false) {
+    const entry = this.sources.get(videoId)
+    const expiryTime = entry?.source.expiryDate instanceof Date
+      ? entry.source.expiryDate.getTime()
+      : NaN
+
+    if (
+      entry === undefined ||
+      entry.cacheKey !== cacheKey ||
+      !Number.isFinite(expiryTime) ||
+      this.now() >= expiryTime - this.expiryMarginMs
+    ) {
+      this.sources.delete(videoId)
+      return null
+    }
+
+    if (requireSubtitles && !entry.source.subtitlesIncluded) return null
+
+    return expiryTime - this.expiryMarginMs
+  }
+
+  /**
+   * Expands the session cache for an explicit playlist preload. Automatic
+   * preloading remains within the normal entry limit.
+   * @param {number} entries
+   */
+  ensureCapacity(entries) {
+    if (Number.isInteger(entries) && entries > this.maxEntries) {
+      this.maxEntries = entries
+    }
   }
 
   /**
    * @param {string} videoId
+   * @returns {boolean} whether a source was removed
    */
   delete(videoId) {
-    this.sources.delete(videoId)
+    return this.sources.delete(videoId)
   }
 
+  /**
+   * @returns {boolean} whether any sources were removed
+   */
   clear() {
+    const changed = this.sources.size > 0
     this.sources.clear()
+    return changed
   }
 }
