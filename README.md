@@ -2,8 +2,8 @@
  <img alt="" src="/_icons/logoColor.svg" width=500 align="center">
 </p>
 
-OpenTubeX is an open-source, highly customizable, privacy-focused desktop YouTube client.
-It is available for Windows 10 and later, macOS 12 and later, and Linux.
+OpenTubeX is an open-source, highly customizable, privacy-focused YouTube client.
+It is available for Windows 10 and later, macOS 12 and later, and Linux. There are also early WIP Android builds and iOS support is planned.
 
 It originated as a fork of [FreeTube](https://github.com/FreeTubeApp/FreeTube)
 and is independently developed and supported. It is not affiliated with,
