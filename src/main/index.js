@@ -4,7 +4,8 @@ import {
   nativeTheme, net, protocol, clipboard,
   shell, Tray, Notification
 } from 'electron'
-import './e2eUserDataOverride'
+import './applicationDataBootstrap'
+import { isPortableBuild } from './applicationDataPaths'
 import path from 'path'
 import cp from 'child_process'
 import { randomUUID } from 'crypto'
@@ -1662,7 +1663,7 @@ function runApp() {
     return resolveSearchEngineFavicon(url)
   })
 
-  if (process.platform === 'win32') {
+  if (process.platform === 'win32' && !isPortableBuild()) {
     app.setUserTasks([
       {
         program: process.execPath,
@@ -1779,17 +1780,19 @@ function runApp() {
 
   const PLAYER_CACHE_PATH = `${userDataPath}/player_cache`
 
-  // See: https://stackoverflow.com/questions/45570589/electron-protocol-handler-not-working-on-windows
-  // remove so we can register each time as we run the app.
-  app.removeAsDefaultProtocolClient('opentubex')
+  if (!isPortableBuild()) {
+    // See: https://stackoverflow.com/questions/45570589/electron-protocol-handler-not-working-on-windows
+    // remove so we can register each time as we run the app.
+    app.removeAsDefaultProtocolClient('opentubex')
 
-  // If we are running a non-packaged version of the app && on windows
-  if (process.env.NODE_ENV === 'development' && process.platform === 'win32') {
-    // Set the path of electron.exe and your app.
-    // These two additional parameters are only available on windows.
-    app.setAsDefaultProtocolClient('opentubex', process.execPath, [path.resolve(process.argv[1])])
-  } else {
-    app.setAsDefaultProtocolClient('opentubex')
+    // If we are running a non-packaged version of the app && on windows
+    if (process.env.NODE_ENV === 'development' && process.platform === 'win32') {
+      // Set the path of electron.exe and your app.
+      // These two additional parameters are only available on windows.
+      app.setAsDefaultProtocolClient('opentubex', process.execPath, [path.resolve(process.argv[1])])
+    } else {
+      app.setAsDefaultProtocolClient('opentubex')
+    }
   }
 
   if (process.env.NODE_ENV !== 'development') {
