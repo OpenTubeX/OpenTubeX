@@ -7,6 +7,18 @@ import { DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 
 const seededPremiereStart = Date.now() + 86_400_000
 
+async function dispatchStoreAction(page, action, payload) {
+  await page.evaluate(async ({ action, payload }) => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch(action, payload)
+  }, { action, payload })
+}
+
+async function allThumbnailsInclude(playlistCard, expectedUrlPart) {
+  const sources = await playlistCard.locator('.thumbnailImage').evaluateAll(images => images.map(image => image.src))
+  return sources.length > 0 && sources.every(source => source.includes(expectedUrlPart))
+}
+
 test.describe('playlist creation', () => {
   test('a playlist can be created through the UI', async ({ page }) => {
     await goTo(page, 'userplaylists')
@@ -110,6 +122,45 @@ test.describe('seeded playlists', () => {
     await expect(page.getByText('Seeded video one')).toBeVisible()
     // Local playlists intentionally ignore the global hide-upcoming setting.
     await expect(page.getByText('Upcoming seeded premiere')).toBeVisible()
+  })
+
+  test('updates a playlist card video count while the list remains open', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+
+    const playlistCard = page.locator('.ft-list-video', {
+      has: page.getByRole('link', { name: 'My seeded playlist', exact: true })
+    })
+    const thumbnail = playlistCard.locator('.thumbnailImage')
+    const displayedVideoCounts = async () => {
+      const counts = await playlistCard.locator('.videoCountContainer').allTextContents()
+      return [...new Set(counts)]
+    }
+    await expect.poll(displayedVideoCounts).toEqual(['2'])
+    await expect(thumbnail).toHaveAttribute('src', /ccccccccccc/)
+
+    await dispatchStoreAction(page, 'removeAllVideos', 'e2eseeded')
+    await expect.poll(displayedVideoCounts).toEqual(['0'])
+    await expect(thumbnail).toHaveAttribute('src', /thumbnail_placeholder/)
+
+    await dispatchStoreAction(page, 'addVideo', {
+      _id: 'e2eseeded',
+      videoData: {
+        videoId: 'fffffffffff',
+        title: 'New playlist video',
+        playlistItemId: 'e2e-item-4',
+        type: 'video'
+      }
+    })
+    await expect.poll(displayedVideoCounts).toEqual(['1'])
+    await expect.poll(() => allThumbnailsInclude(playlistCard, 'fffffffffff')).toBe(true)
+
+    await dispatchStoreAction(page, 'removeVideo', {
+      _id: 'e2eseeded',
+      videoId: 'fffffffffff',
+      playlistItemId: 'e2e-item-4'
+    })
+    await expect.poll(displayedVideoCounts).toEqual(['0'])
+    await expect.poll(() => allThumbnailsInclude(playlistCard, 'thumbnail_placeholder')).toBe(true)
   })
 
   test('preloads every video in a user playlist with yt-dlp', async ({ app, page }) => {
@@ -246,7 +297,7 @@ test.describe('seeded playlists', () => {
       'https://www.youtube.com/playlist?list=secondary&playlistType=user'
     )
     await page.locator(sel.searchInput).press('Enter')
-    await expect(page.getByText('Secondary preload playlist')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Secondary preload playlist' })).toBeVisible()
     await expect(page.getByTestId('progress-toast')).toHaveCount(0)
 
     const secondaryPreloadButton = page.getByTitle('Preload all videos')
@@ -370,6 +421,66 @@ test.describe('seeded playlists', () => {
     await goTo(page, 'userplaylists')
     await page.getByText('Favorites').click()
     await expect(page.getByTitle('Quick Bookmark Enabled').locator('.ft-custom-icon__emoji')).toHaveText('❤️‍🔥')
+  })
+})
+
+test.describe('saved playlist metadata', () => {
+  test.use({
+    seed: {
+      settings: {
+        playlistBookmarks: [{
+          playlist: {
+            id: 'saved-playlist',
+            title: 'Saved playlist',
+            description: '',
+            thumbnail_url: 'https://i.ytimg.com/vi/ggggggggggg/mqdefault.jpg',
+            video_count: 4
+          },
+          uploader: {
+            id: 'UC-saved-playlist',
+            name: 'Saved channel',
+            avatar: null,
+            verified: false
+          },
+          savedAt: 1
+        }]
+      }
+    }
+  })
+
+  test('updates saved playlist card metadata while the list remains open', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+
+    const playlistCard = page.locator('.ft-list-video', {
+      has: page.locator('a.title[href*="/playlist/saved-playlist"]')
+    })
+    await expect(playlistCard.locator('.h3Title')).toHaveText('Saved playlist')
+    await expect(playlistCard.locator('.channelNameText')).toHaveText('Saved channel')
+    await expect(playlistCard.locator('.thumbnailImage')).toHaveAttribute('src', /ggggggggggg/)
+    await expect(playlistCard.locator('.videoCountContainer')).toHaveText('4')
+
+    await dispatchStoreAction(page, 'savePlaylistBookmark', {
+      playlist: {
+        id: 'saved-playlist',
+        title: 'Saved playlist updated',
+        description: 'Updated metadata',
+        thumbnail_url: 'https://i.ytimg.com/vi/hhhhhhhhhhh/mqdefault.jpg',
+        video_count: 5
+      },
+      uploader: {
+        id: 'UC-updated-saved-playlist',
+        name: 'Updated saved channel',
+        avatar: null,
+        verified: false
+      },
+      savedAt: 1
+    })
+
+    await expect(playlistCard.locator('.h3Title')).toHaveText('Saved playlist updated')
+    await expect(playlistCard.locator('.channelNameText')).toHaveText('Updated saved channel')
+    await expect(playlistCard.locator('.thumbnailImage')).toHaveAttribute('src', /hhhhhhhhhhh/)
+    await expect(playlistCard.locator('.videoCountContainer')).toHaveText('5')
+    await expect(playlistCard.locator('.channelName')).toHaveAttribute('href', '#/channel/UC-updated-saved-playlist')
   })
 })
 
