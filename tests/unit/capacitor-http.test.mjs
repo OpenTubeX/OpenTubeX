@@ -99,6 +99,18 @@ test('preserves an explicitly supplied user agent', async () => {
   assert.equal(receivedRequest.headers.get('user-agent'), 'OpenTubeX test client')
 })
 
+test('rejects native redirects when redirect mode is error', async () => {
+  globalThis.fetch = async () => new Response(null, {
+    status: 302,
+    headers: { location: 'https://example.com/redirected' }
+  })
+
+  await assert.rejects(
+    capacitorHttpFetch('https://example.com/original', { redirect: 'error' }),
+    { name: 'TypeError', message: 'Redirects are not allowed for this request' }
+  )
+})
+
 test('rejects non-HTTPS local API requests', async () => {
   await assert.rejects(
     capacitorHttpFetch('http://www.youtube.com/youtubei/v1/search'),

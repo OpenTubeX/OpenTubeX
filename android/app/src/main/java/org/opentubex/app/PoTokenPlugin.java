@@ -36,6 +36,7 @@ import java.util.Map;
 public class PoTokenPlugin extends Plugin {
     private static final long GENERATE_TIMEOUT_MS = 30_000;
     private static final Pattern EXPORT_PATTERN = Pattern.compile("export\\{(\\w+) as default\\};");
+    private final SerialTaskQueue requestQueue = new SerialTaskQueue();
 
     @PluginMethod
     public void generate(PluginCall call) {
@@ -49,7 +50,7 @@ public class PoTokenPlugin extends Plugin {
             return;
         }
 
-        getActivity().runOnUiThread(() -> {
+        getActivity().runOnUiThread(() -> requestQueue.enqueue(() -> {
             try {
                 String script = createBotGuardScript(
                     videoId,
@@ -58,10 +59,11 @@ public class PoTokenPlugin extends Plugin {
                     ytConfig
                 );
                 runBotGuard(call, script);
-            } catch (IOException | JSONException exception) {
+            } catch (IOException | JSONException | RuntimeException exception) {
                 call.reject("Failed to prepare PO token generation", exception);
+                requestQueue.complete();
             }
-        });
+        }));
     }
 
     private String createBotGuardScript(
@@ -110,9 +112,13 @@ public class PoTokenPlugin extends Plugin {
         boolean[] finished = { false };
 
         Runnable cleanup = () -> {
-            webView.stopLoading();
-            webView.removeJavascriptInterface("OpenTubeXPoToken");
-            webView.destroy();
+            try {
+                webView.stopLoading();
+                webView.removeJavascriptInterface("OpenTubeXPoToken");
+                webView.destroy();
+            } finally {
+                requestQueue.complete();
+            }
         };
 
         Runnable timeout = () -> {

@@ -94,9 +94,10 @@ async function getRequestBody(input, init) {
 }
 
 /**
- * Uses Capacitor's native HTTP client for the local API's small HTML and JSON
- * requests. Media requests must keep using the WebView so their response bodies
- * are streamed instead of copied through the JavaScript bridge as base64.
+ * Uses Capacitor's native HTTP client for small HTML and JSON requests that
+ * cannot rely on WebView CORS access. Media requests must keep using the
+ * WebView so their response bodies are streamed instead of copied through the
+ * JavaScript bridge as base64.
  * @param {RequestInfo | URL} input
  * @param {RequestInit | undefined} init
  * @returns {Promise<Response>}
@@ -119,9 +120,6 @@ export async function capacitorHttpFetch(input, init = undefined) {
   }
 
   const redirect = init?.redirect ?? inputRequest?.redirect ?? 'follow'
-  if (redirect === 'error') {
-    throw new TypeError('Capacitor local API requests do not support redirect mode "error"')
-  }
 
   const nativeResponse = await requestWithDnsRetry({
     url: url.toString(),
@@ -129,8 +127,12 @@ export async function capacitorHttpFetch(input, init = undefined) {
     headers: Object.fromEntries(headers),
     data: await getRequestBody(input, init),
     responseType: 'text',
-    disableRedirects: redirect === 'manual',
+    disableRedirects: redirect !== 'follow',
   }, signal)
+
+  if (redirect === 'error' && nativeResponse.status >= 300 && nativeResponse.status < 400) {
+    throw new TypeError('Redirects are not allowed for this request')
+  }
 
   const responseBody = nativeResponse.status === 204 || nativeResponse.status === 205 || nativeResponse.status === 304
     ? null

@@ -28,6 +28,7 @@ import { isValidPlaylistBookmark, playlistBookmarkForSync } from './playlist-boo
 import { getOtherDeviceSessions, mergeSyncSessions } from './sync-sessions'
 import { mergeSettingEntry } from './sync-settings-conflict'
 import { getCapacitorTabService } from '../tabs/CapacitorTabService'
+import { capacitorHttpFetch } from './api/capacitor-http'
 
 const LEGACY_HISTORY_PAGE_SIZE = 50
 const BULK_SYNC_CHUNK_SIZE = 100
@@ -38,6 +39,12 @@ const ENCRYPTED_SYNC_TIMEOUT_OVERHEAD_MS = 15_000
 const MAX_ENCRYPTED_SYNC_TIMEOUT_MS = 5 * 60 * 1000
 const DEFAULT_CHANNEL_AVATAR = 'https://yt3.googleusercontent.com/ytc/default'
 const YOUTUBE_VIDEO_THUMBNAIL_REGEX = /^https?:\/\/i\.ytimg\.com\/vi(?:_webp)?\//
+
+function syncServerFetch(input, init) {
+  return process.env.IS_CAPACITOR
+    ? capacitorHttpFetch(input, init)
+    : fetch(input, init)
+}
 
 export {
   SyncServerDataLossError,
@@ -99,7 +106,7 @@ export class SyncServerClient {
     })
 
     try {
-      const response = await fetch(`${this.serverUrl}${path}`, {
+      const response = await syncServerFetch(`${this.serverUrl}${path}`, {
         ...options,
         redirect: 'error',
         headers,
@@ -1109,7 +1116,10 @@ function getSyncDeviceId() {
 }
 
 export function getSavedOtherDeviceSessions(snapshot) {
-  return getOtherDeviceSessions(snapshot?.sessions, getSyncDeviceId())
+  return getOtherDeviceSessions(
+    snapshot?.sessionsV2 ?? snapshot?.sessions,
+    getSyncDeviceId()
+  )
 }
 
 function getTabSyncAdapter() {

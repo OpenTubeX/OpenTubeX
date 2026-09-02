@@ -523,7 +523,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 * openSUSE: [RPM repository](https://rpm.opentubex.org/)
 * Flatpak: [OpenTubeX remote](https://flatpak.opentubex.org/), [Flatpark](https://flatpark.org/apps/org.opentubex.OpenTubeX/), and [source code](https://github.com/OpenTubeX/flatpak)
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-bin/)
-* Android preview: requires Android 7.0 or newer (API 24). Current APKs compile and target Android 16 (API 36). [Install and update OpenTubeX with Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/OpenTubeX/OpenTubeX). A dedicated F-Droid repository is planned.
+* Android preview: requires Android 7.0 or newer (API 24). Current APKs compile and target Android 16 (API 36). Install and update through the [OpenTubeX F-Droid repository](https://fdroid.opentubex.org/) or [Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/OpenTubeX/OpenTubeX).
 
 iOS support is planned. The first iOS builds will be downloadable `.ipa` files.
 
@@ -548,7 +548,7 @@ The first build with a green check mark is the latest build.
 * openSUSE: [RPM nightly repository](https://rpm.opentubex.org/#nightly-builds)
 * Flatpak: [Nightly branch](https://flatpak.opentubex.org/#nightly-builds) (`org.opentubex.OpenTubeX//nightly`)
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-git/) (`opentubex-git`)
-* Android: universal APK artifact
+* Android: [OpenTubeX Nightly on F-Droid](https://fdroid.opentubex.org/#release-channels) or the universal APK artifact
 
 <a id="contributing"></a>
 ## 🤝 Contributing
