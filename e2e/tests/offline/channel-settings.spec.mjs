@@ -198,7 +198,7 @@ test.describe('channel settings', () => {
     await expect(picker).toHaveCount(0)
   })
 
-  test('preserves newer saved-channel edits when initialization rolls back', async ({ page }) => {
+  test('preserves newer edits when initialization rolls back', async ({ page }) => {
     await goToSettingsSection(page, 'playback')
     await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
     await page.getByRole('button', { name: 'Add subscribed channel' }).click()
@@ -217,13 +217,14 @@ test.describe('channel settings', () => {
     ))).toBe(true)
     await picker.getByRole('button', { name: 'Close' }).click()
 
-    await page.evaluate(async ({ channelId }) => {
+    await page.evaluate(async ({ channelId, newChannelId }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const playbackSpeeds = JSON.parse(store.state.settings.channelPlaybackSpeeds)
       playbackSpeeds[channelId] = 1.75
+      playbackSpeeds[newChannelId] = 1.5
       await store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(playbackSpeeds))
       window.rejectChannelVolumeUpdate(new Error('write failed'))
-    }, { channelId: CHANNEL_ID })
+    }, { channelId: CHANNEL_ID, newChannelId: NEW_CHANNEL_ID })
 
     await expect(page.locator('.toast', {
       hasText: 'Failed to save channel settings'
@@ -237,7 +238,7 @@ test.describe('channel settings', () => {
       }
     }, { channelId: CHANNEL_ID, newChannelId: NEW_CHANNEL_ID })).toEqual({
       existingChannel: 1.75,
-      newChannel: undefined
+      newChannel: 1.5
     })
   })
 

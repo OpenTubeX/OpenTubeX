@@ -622,15 +622,22 @@ function setPreference(channelId, type, value) {
  * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
  */
 function addPreference(channelId, type) {
+  return setPreference(channelId, type, defaultPreferenceValue(type))
+}
+
+/**
+ * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
+ */
+function defaultPreferenceValue(type) {
   switch (type) {
     case 'playbackSpeed':
-      return setPreference(channelId, type, store.getters.getDefaultPlayback)
+      return store.getters.getDefaultPlayback
     case 'videoQuality':
-      return setPreference(channelId, type, defaultQuality.value)
+      return defaultQuality.value
     case 'subtitlesState':
-      return setPreference(channelId, type, store.getters.getEnableSubtitlesByDefault)
+      return store.getters.getEnableSubtitlesByDefault
     case 'volume':
-      return setPreference(channelId, type, store.getters.getDefaultVolume)
+      return store.getters.getDefaultVolume
   }
 }
 
@@ -646,17 +653,20 @@ async function addSubscribedChannel(channelId) {
 
   addingSubscribedChannel.value = true
   try {
-    const preferencesToAdd = enabledPreferences.value
-    const saved = await Promise.all(preferencesToAdd.map(({ type }) => (
-      addPreference(channelId, type).catch((error) => {
+    const preferencesToAdd = enabledPreferences.value.map(({ type }) => ({
+      type,
+      initialValue: defaultPreferenceValue(type)
+    }))
+    const saved = await Promise.all(preferencesToAdd.map(({ type, initialValue }) => (
+      setPreference(channelId, type, initialValue).catch((error) => {
         console.error(error)
         return false
       })
     )))
 
     if (saved.some(value => !value)) {
-      await Promise.all(preferencesToAdd.map(({ type }) => (
-        deletePreference(channelId, type).catch(error => console.error(error))
+      await Promise.all(preferencesToAdd.map(({ type, initialValue }) => (
+        rollbackPreference(channelId, type, initialValue).catch(error => console.error(error))
       )))
       showToast({
         message: t('Channel.Failed to save subscription settings'),
@@ -678,15 +688,27 @@ function closeAddChannelPrompt() {
 }
 
 /**
+ * Removes an initialized value unless it has since been edited.
+ * @param {string} channelId
+ * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
+ * @param {number | string | boolean} initialValue
+ */
+function rollbackPreference(channelId, type, initialValue) {
+  const { valuesKey, values } = preferenceValuesFor(type)
+  if (!Object.hasOwn(values, channelId) || values[channelId] !== initialValue) {
+    return Promise.resolve(true)
+  }
+
+  delete values[channelId]
+  return updateSetting(valuesKey, JSON.stringify(values))
+}
+
+/**
  * @param {string} channelId
  * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
  */
 function deletePreference(channelId, type) {
   const { valuesKey, values } = preferenceValuesFor(type)
-  if (!Object.hasOwn(values, channelId)) {
-    return Promise.resolve(true)
-  }
-
   delete values[channelId]
   return updateSetting(valuesKey, JSON.stringify(values))
 }
