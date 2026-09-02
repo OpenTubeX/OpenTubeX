@@ -23,8 +23,12 @@ export async function requestAndroidSubscriptionRefreshNotificationPermission() 
 export async function startAndroidSubscriptionRefresh(title, cancelLabel) {
   if (!SubscriptionRefresh) return { acquired: true, notificationsDenied: false }
 
-  const notificationsDenied = await requestAndroidSubscriptionRefreshNotificationPermission()
-  const start = SubscriptionRefresh.start({ title, cancelLabel })
+  let notificationsDenied = false
+  const start = requestAndroidSubscriptionRefreshNotificationPermission()
+    .then(denied => {
+      notificationsDenied = denied
+      return SubscriptionRefresh.start({ title, cancelLabel })
+    })
     .then(({ token, acquired }) => acquired ? token : null)
     .catch(error => {
       console.error('Failed to start Android subscription refresh work', error)
