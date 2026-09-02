@@ -1,6 +1,14 @@
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
+import { DEFAULT_QUICK_SETTINGS } from '../../../src/renderer/helpers/quickSettings.js'
+
+const ALL_QUICK_SETTINGS = [
+  ...DEFAULT_QUICK_SETTINGS,
+  'useProxy',
+]
 
 test.describe('quick settings menu', () => {
+  test.use({ seed: { settings: { quickSettings: ALL_QUICK_SETTINGS } } })
+
   test('opens the command palette from the header action', async ({ page }) => {
     await page.locator('.profileTrigger').click()
     const menu = page.getByRole('dialog', { name: 'Quick settings' })
@@ -108,16 +116,18 @@ test.describe('quick settings menu', () => {
   test('keeps paired selects aligned and shows locale completeness', async ({ page }) => {
     await page.locator('.profileTrigger').click()
     const menu = page.locator('.quickSettingsMenu')
-    const pairs = menu.locator('.selectPair')
-    await expect(pairs).toHaveCount(3)
+    const pairs = [
+      ['baseTheme', 'mainColor'],
+      ['listType', 'playlistViewType'],
+      ['currentLocale', 'region'],
+    ]
 
-    for (const pair of await pairs.all()) {
-      const selects = pair.locator('.quickSelect')
-      await expect(selects).toHaveCount(2)
-      const [first, second] = await selects.evaluateAll(elements => elements.map(element => {
+    for (const pair of pairs) {
+      const controls = pair.map(settingId => menu.locator(`[data-setting-id="${settingId}"]`))
+      const [first, second] = await Promise.all(controls.map(control => control.evaluate(element => {
         const { x, y, width } = element.getBoundingClientRect()
         return { x, y, width }
-      }))
+      })))
       expect(Math.abs(first.y - second.y)).toBeLessThanOrEqual(1)
       expect(second.x).toBeGreaterThan(first.x + first.width)
     }
@@ -173,9 +183,11 @@ test.describe('quick settings menu', () => {
     await expect(menu).toBeVisible()
     await expect(baseTheme).toBeVisible()
     await expect(appearance.getByRole('combobox', { name: 'Main Color Theme' })).toHaveCount(0)
-    expect(await appearance.locator('.selectPair').evaluate(element => {
-      return getComputedStyle(element).gridTemplateColumns.split(' ').length
-    })).toBe(1)
+    const [sectionWidth, controlWidth] = await Promise.all([
+      appearance.evaluate(element => element.clientWidth),
+      appearance.locator('[data-setting-id="baseTheme"]').evaluate(element => element.clientWidth),
+    ])
+    expect(controlWidth).toBeGreaterThan(sectionWidth * 0.8)
     await expect.poll(() => scrollViewport.evaluate(element => {
       const content = element.querySelector('.quickSettingsContent')
       return element.scrollTop <= Math.max(0, content.offsetTop + content.offsetHeight - element.clientHeight) + 1
@@ -262,6 +274,221 @@ test.describe('quick settings menu', () => {
     await expect(aboutWindow.locator('.settingsBreadcrumb')).toContainText('About')
     await expect(aboutWindow.locator('.settingsMenu')).toHaveCount(0)
     await expect(aboutWindow).toBeHidden()
+  })
+})
+
+test.describe('automatic quick setting select pairs', () => {
+  test.use({ seed: { settings: { quickSettings: ['baseTheme', 'iconPack'] } } })
+
+  test('places any adjacent selects in two columns', async ({ page }) => {
+    await page.locator('.profileTrigger').click()
+    const menu = page.locator('.quickSettingsMenu')
+    const controls = ['baseTheme', 'iconPack'].map(settingId => (
+      menu.locator(`[data-setting-id="${settingId}"]`)
+    ))
+    const [first, second] = await Promise.all(controls.map(control => control.evaluate(element => {
+      const { x, y, width } = element.getBoundingClientRect()
+      return { x, y, width }
+    })))
+
+    expect(Math.abs(first.y - second.y)).toBeLessThanOrEqual(1)
+    expect(second.x).toBeGreaterThan(first.x + first.width)
+  })
+})
+
+test.describe('customizable quick settings', () => {
+  test('starts with the original quick settings', async ({ page }) => {
+    await page.locator('.profileTrigger').click()
+    const menu = page.getByRole('dialog', { name: 'Quick settings' })
+
+    await expect(menu.getByRole('combobox', { name: 'Base Theme' })).toBeVisible()
+    await expect(menu.getByRole('slider', { name: 'UI Scale' })).toBeVisible()
+    await expect(menu.getByRole('slider', { name: 'Thumbnail Size' })).toBeVisible()
+    await expect(menu.getByRole('combobox', { name: 'Default Quality' })).toBeVisible()
+    await expect(menu.getByRole('checkbox', { name: 'Autoplay Recommended Videos' })).toBeVisible()
+    await expect(menu.getByRole('checkbox', { name: 'Enable Subtitles by Default' })).toBeVisible()
+    await expect(menu.getByRole('combobox', { name: 'Video View Type' })).toBeVisible()
+    await expect(menu.getByRole('combobox', { name: 'Playlist View Type' })).toBeVisible()
+    await expect(menu.getByRole('checkbox', { name: 'Hide Recommended Videos' })).toBeVisible()
+    await expect(menu.getByRole('checkbox', { name: 'Hide Comments' })).toBeVisible()
+    await expect(menu.getByRole('combobox', { name: 'Language preference' })).toBeVisible()
+    await expect(menu.getByRole('combobox', { name: 'Region for Trending' })).toBeVisible()
+
+    await expect(menu.getByRole('checkbox', { name: 'Enable Tor / Proxy' })).toHaveCount(0)
+    await expect(menu.getByRole('button', { name: 'Customize quick settings' })).toHaveCount(0)
+  })
+
+  test('adds basic controls from Appearance and resets them', async ({ app, page }) => {
+    const appearance = await goToSettingsSection(page, 'appearance')
+    const customizeButton = appearance.getByRole('button', { name: 'Customize quick settings' })
+    const launcher = appearance.locator('.quickSettingsLauncher')
+    await expect(launcher).toBeVisible()
+    await expect(customizeButton).toBeVisible()
+    const [launcherBounds, buttonBounds] = await Promise.all([
+      launcher.boundingBox(),
+      customizeButton.boundingBox(),
+    ])
+    expect(Math.abs(
+      launcherBounds.x + launcherBounds.width / 2 - buttonBounds.x - buttonBounds.width / 2
+    )).toBeLessThanOrEqual(1)
+    await customizeButton.click()
+    await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize quick settings')
+
+    const selectedSettings = page.locator('.selectedSettings')
+    await expect(selectedSettings.locator('.selectedSetting')).toHaveCount(DEFAULT_QUICK_SETTINGS.length)
+    await expect(selectedSettings.locator('.selectedSettingIcon')).toHaveCount(DEFAULT_QUICK_SETTINGS.length)
+    await expect.poll(() => selectedSettings.locator('.selectedSetting').evaluateAll(rows => (
+      rows.map(row => row.dataset.settingId)
+    ))).toEqual(DEFAULT_QUICK_SETTINGS)
+    const actions = page.locator('.quickSettingsActions')
+    const [subpageBounds, actionsBounds, settingsBounds, actionButtonBounds] = await Promise.all([
+      page.locator('.settingsSubpageContent').boundingBox(),
+      actions.boundingBox(),
+      selectedSettings.boundingBox(),
+      actions.getByRole('button').evaluateAll(buttons => buttons.map(button => (
+        button.getBoundingClientRect().toJSON()
+      ))),
+    ])
+    const subpageCenter = subpageBounds.x + subpageBounds.width / 2
+    expect(Math.abs(actionsBounds.x + actionsBounds.width / 2 - subpageCenter)).toBeLessThanOrEqual(1)
+    expect(Math.abs(settingsBounds.x + settingsBounds.width / 2 - subpageCenter)).toBeLessThanOrEqual(1)
+    const actionGroupCenter = (
+      actionButtonBounds[0].x + actionButtonBounds.at(-1).x + actionButtonBounds.at(-1).width
+    ) / 2
+    expect(Math.abs(actionGroupCenter - subpageCenter)).toBeLessThanOrEqual(1)
+    await page.getByRole('button', { name: 'Remove Hide Comments' }).click()
+    await expect(selectedSettings).not.toContainText('Hide Comments')
+
+    await page.getByRole('button', { name: 'Add setting' }).click()
+    const settingPicker = page.getByPlaceholder('Search settings')
+    const settingPopover = page.getByRole('dialog', { name: 'Add setting' })
+    await expect(settingPopover).toBeVisible()
+    await expect(settingPopover).toHaveCSS('position', 'absolute')
+    await expect(settingPicker).toHaveAttribute('type', 'search')
+    await expect(settingPopover.locator('.clearInputTextButton')).toHaveCount(0)
+    for (const setting of ['Icon Pack', 'UI Roundness', 'Enable Tor / Proxy']) {
+      await settingPicker.fill(setting)
+      await page.locator('.settingPicker .optionWrapper').filter({ hasText: setting }).click()
+    }
+    await settingPicker.press('Escape')
+    await expect(settingPopover).toBeHidden()
+    await expect(page.getByRole('button', { name: 'Add setting' })).toBeFocused()
+    await page.locator('.settingsCloseButton').click()
+
+    await page.locator('.profileTrigger').click()
+    const menu = page.getByRole('dialog', { name: 'Quick settings' })
+    const iconPack = menu.getByRole('combobox', { name: 'Icon Pack' })
+    await expect(iconPack).toBeVisible()
+    await expect(menu.getByRole('slider', { name: 'UI Roundness' })).toBeVisible()
+    await expect(menu.getByRole('checkbox', { name: 'Hide Comments' })).toHaveCount(0)
+    await iconPack.click()
+    await page.getByRole('option', { name: 'Remix Icon' }).click()
+    await expect(iconPack).toContainText('Remix Icon')
+    await menu.locator('label.switch-label').filter({ hasText: 'Enable Tor / Proxy' }).click()
+    await expect.poll(() => app.electronApp.evaluate(async ({ BrowserWindow }) => {
+      return BrowserWindow.getAllWindows()[0].webContents.session.resolveProxy('https://example.com')
+    })).toContain('127.0.0.1:9050')
+
+    await menu.getByRole('button', { name: 'All Settings' }).click()
+    const reopenedAppearance = await goToSettingsSection(page, 'appearance')
+    await reopenedAppearance.getByRole('button', { name: 'Customize quick settings' }).click()
+    await page.getByRole('button', { name: 'Reset to defaults' }).click()
+    await expect(page.locator('.selectedSetting')).toHaveCount(DEFAULT_QUICK_SETTINGS.length)
+    await expect(page.locator('.selectedSettings')).toContainText(/Base theme/i)
+    await expect(page.locator('.selectedSettings')).not.toContainText('Icon Pack')
+  })
+
+  test('rearranges controls with buttons and drag and drop', async ({ page }) => {
+    const appearance = await goToSettingsSection(page, 'appearance')
+    await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
+
+    const selectedSettings = page.locator('.selectedSettings')
+    const settingIds = () => selectedSettings.locator('.selectedSetting').evaluateAll(rows => (
+      rows.map(row => row.dataset.settingId)
+    ))
+    await expect(page.getByRole('button', { name: 'Move Base Theme up' })).toBeDisabled()
+    await expect(page.getByRole('button', { name: 'Move Region for Trending down' })).toBeDisabled()
+
+    await page.getByRole('button', { name: 'Move Hide Comments up' }).click()
+    const hideCommentsMovedUp = [...DEFAULT_QUICK_SETTINGS]
+    const hideCommentsIndex = hideCommentsMovedUp.indexOf('hideComments')
+    hideCommentsMovedUp.splice(hideCommentsIndex, 1)
+    hideCommentsMovedUp.splice(hideCommentsIndex - 1, 0, 'hideComments')
+    await expect.poll(settingIds).toEqual(hideCommentsMovedUp)
+
+    const dragData = await page.evaluateHandle(() => new DataTransfer())
+    const hideComments = selectedSettings.locator('[data-setting-id="hideComments"]')
+    const baseTheme = selectedSettings.locator('[data-setting-id="baseTheme"]')
+    await hideComments.locator('.dragHandle').dispatchEvent('dragstart', { dataTransfer: dragData })
+    await baseTheme.dispatchEvent('dragover', { dataTransfer: dragData })
+    await baseTheme.dispatchEvent('drop', { dataTransfer: dragData })
+    await hideComments.locator('.dragHandle').dispatchEvent('dragend', { dataTransfer: dragData })
+    const hideCommentsFirst = [
+      'hideComments',
+      ...DEFAULT_QUICK_SETTINGS.filter(settingId => settingId !== 'hideComments'),
+    ]
+    await expect.poll(settingIds).toEqual(hideCommentsFirst)
+
+    await page.locator('.settingsCloseButton').click()
+    await page.locator('.profileTrigger').click()
+    const menu = page.getByRole('dialog', { name: 'Quick settings' })
+    await expect.poll(() => menu.locator('.quickSettingControl').evaluateAll(controls => (
+      controls.map(control => control.dataset.settingId)
+    ))).toEqual(hideCommentsFirst)
+
+    await menu.getByRole('button', { name: 'All Settings' }).click()
+    const reopenedAppearance = await goToSettingsSection(page, 'appearance')
+    await reopenedAppearance.getByRole('button', { name: 'Customize quick settings' }).click()
+    await expect.poll(settingIds).toEqual(hideCommentsFirst)
+  })
+})
+
+test.describe('quick settings customization at fractional UI scale', () => {
+  test.use({ seed: { settings: { uiScale: 125 } } })
+
+  test('keeps the searchable setting list usable when filtering shortens it', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 900, height: 650 })
+    })
+    const appearance = await goToSettingsSection(page, 'appearance')
+    await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
+    await page.getByRole('button', { name: 'Add setting' }).click()
+
+    const settingPicker = page.getByPlaceholder('Search settings')
+    const settingPopover = page.getByRole('dialog', { name: 'Add setting' })
+    const options = page.locator('.settingPicker .list')
+    const scrollbar = options.locator('.os-scrollbar-vertical')
+    await expect(options).toBeVisible()
+    await expect(settingPicker).toHaveCSS('padding-inline-start', '16px')
+    await expect(scrollbar).toHaveClass(/os-scrollbar-visible/)
+    await options.evaluate(element => element.scrollTo(0, element.scrollHeight))
+    await expect.poll(() => options.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    const [popoverBounds, scrollbarBounds] = await Promise.all([
+      settingPopover.evaluate(element => element.getBoundingClientRect().toJSON()),
+      scrollbar.evaluate(element => element.getBoundingClientRect().toJSON()),
+    ])
+    expect(scrollbarBounds.x).toBeGreaterThanOrEqual(popoverBounds.x - 1)
+    expect(scrollbarBounds.y).toBeGreaterThanOrEqual(popoverBounds.y - 1)
+    expect(scrollbarBounds.x + scrollbarBounds.width).toBeLessThanOrEqual(
+      popoverBounds.x + popoverBounds.width + 1
+    )
+    expect(scrollbarBounds.y + scrollbarBounds.height).toBeLessThanOrEqual(
+      popoverBounds.y + popoverBounds.height + 1
+    )
+    const hoveredOption = options.locator('li').nth(1)
+    await hoveredOption.hover()
+    const [hoveredOptionBounds, scrollbarTrackBounds] = await Promise.all([
+      hoveredOption.evaluate(element => element.getBoundingClientRect().toJSON()),
+      scrollbar.evaluate(element => element.getBoundingClientRect().toJSON()),
+    ])
+    expect(hoveredOptionBounds.x + hoveredOptionBounds.width).toBeLessThanOrEqual(
+      scrollbarTrackBounds.x + 1
+    )
+
+    await settingPicker.fill('Icon Pack')
+    await expect(options.locator('li')).toHaveCount(1)
+    await expect(options).toHaveJSProperty('scrollTop', 0)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
   })
 })
 

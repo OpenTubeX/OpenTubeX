@@ -39,6 +39,7 @@ import { terminateCommentTranslationLanguageDetector } from '../../helpers/comme
 import { DEFAULT_HOME_SECTION_LAYOUT } from '../../helpers/homeSections.js'
 import { isSettingSyncableOnPlatform } from '../../helpers/platformSettings.js'
 import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
+import { DEFAULT_QUICK_SETTINGS, normalizeQuickSettings } from '../../helpers/quickSettings.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
 const TUTORIAL_STATE_SETTING_IDS = new Set([
@@ -365,6 +366,7 @@ const state = {
   fixedTabWidth: DEFAULT_FIXED_TAB_WIDTH,
   listType: 'grid',
   playlistViewType: 'grid',
+  quickSettings: [...DEFAULT_QUICK_SETTINGS],
   maxVideoPlaybackRate: 3,
   onlyShowLatestFromChannel: false,
   onlyShowLatestFromChannelNumber: 1,
@@ -837,6 +839,8 @@ const customState = {
 }
 
 const customGetters = {
+  getQuickSettings: (state) => normalizeQuickSettings(state.quickSettings),
+
   getLandingPage: (state) => resolveLandingPage(state.landingPage, state.hideHome),
 
   getPlaylistBookmarks: (state) => {
@@ -916,6 +920,13 @@ const customActions = {
   recordSyncSettingEdit: ({ commit, state }, settingId) => (
     recordSettingSyncTimestamp(commit, state, settingId)
   ),
+  updateQuickSettings: ({ commit, state }, value) => updateValidatedSetting(
+    commit,
+    state,
+    'quickSettings',
+    normalizeQuickSettings(value)
+  ),
+
   savePlaylistBookmark: async ({ commit, getters }, bookmark) => {
     const bookmarks = getters.getPlaylistBookmarks
       .filter(entry => entry?.playlist?.id !== bookmark.playlist.id)

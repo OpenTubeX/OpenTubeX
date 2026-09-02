@@ -370,6 +370,7 @@
       @click="handleSmoothScrolling"
     />
   </FtSettingsSection>
+  <QuickSettingsCustomizer />
 </template>
 
 <script setup>
@@ -385,6 +386,7 @@ import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
 import FtButton from './FtButton/FtButton.vue'
 import FtPrompt from './FtPrompt/FtPrompt.vue'
 import CustomThemeEditor from './CustomThemeEditor/CustomThemeEditor.vue'
+import QuickSettingsCustomizer from './QuickSettingsCustomizer/QuickSettingsCustomizer.vue'
 
 import store from '../store/index'
 import { customThemeIdFromValue, customThemeValue, isCustomThemeValue } from '../../customTheme'
