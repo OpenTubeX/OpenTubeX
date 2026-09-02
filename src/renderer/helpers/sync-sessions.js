@@ -58,6 +58,16 @@ export function getOtherDeviceSessions(value, deviceId) {
     })))
 }
 
+export function removeSyncSession(value, deviceId, sessionId) {
+  const document = normalizeSyncSessionsDocument(value)
+  const device = document.devices[deviceId]
+  if (!device) return document
+
+  device.sessions = device.sessions.filter(session => session.sessionId !== sessionId)
+  if (device.sessions.length === 0) delete document.devices[deviceId]
+  return document
+}
+
 export function getPreviousSyncSessions(snapshot) {
   return snapshot?.sessionsV2 ?? snapshot?.sessions ?? null
 }
@@ -76,12 +86,13 @@ export function shouldShowOtherDeviceSessions({
     sessions.length > 0
 }
 
-function claimLegacyDesktopSessions(document, rawValue, deviceId, platform) {
-  if (platform !== 'desktop' || !Array.isArray(rawValue)) return document
+function claimLegacyDesktopSessions(document, deviceId, platform) {
+  if (platform !== 'desktop') return document
 
   const claimed = clone(document)
   const legacy = claimed.devices['legacy-desktop']
-  if (legacy) {
+  const current = claimed.devices[deviceId]
+  if (legacy && (!current || current.sessions.length === 0)) {
     claimed.devices[deviceId] = legacy
     delete claimed.devices['legacy-desktop']
   }
@@ -110,7 +121,6 @@ export function mergeSyncSessions({
 }) {
   const remote = claimLegacyDesktopSessions(
     normalizeSyncSessionsDocument(remoteValue),
-    remoteValue,
     deviceId,
     platform
   )
@@ -118,7 +128,6 @@ export function mergeSyncSessions({
     ? null
     : claimLegacyDesktopSessions(
         normalizeSyncSessionsDocument(previousValue),
-        previousValue,
         deviceId,
         platform
       )

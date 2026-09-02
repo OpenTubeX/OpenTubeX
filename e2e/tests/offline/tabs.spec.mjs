@@ -2184,6 +2184,59 @@ test.describe('background tab shortcuts', () => {
 })
 
 test.describe('tab organizer', () => {
+  test('shows and confirms deletion of synced tab sets', async ({ page }) => {
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setSyncServerEnabled', true)
+      store.commit('setSyncServerToken', 'e2e-token')
+      store.commit('setSyncServerPrivacyMode', 'enhanced')
+      store.commit('setSyncServerSyncSessions', true)
+      store.commit('setSyncServerSharedTabs', false)
+      store.commit('setSyncServerOtherDeviceSessions', [{
+        syncDeviceId: 'phone-e2e',
+        syncPlatform: 'mobile',
+        sessionId: 'mobile-session-e2e',
+        tabs: [
+          { id: 'synced-watch', title: 'Synced watch tab', url: '/watch/synced-video' },
+          { id: 'synced-history', title: 'Synced history tab', url: '/history' },
+        ],
+      }])
+      store._actions.deleteSyncServerSession = [session => {
+        store.commit(
+          'setSyncServerOtherDeviceSessions',
+          store.getters.getSyncServerOtherDeviceSessions.filter(candidate => (
+            candidate.syncDeviceId !== session.syncDeviceId ||
+            candidate.sessionId !== session.sessionId
+          ))
+        )
+        return Promise.resolve(true)
+      }]
+    })
+
+    await page.locator(sel.tabOrganizerButton).click()
+    const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    const syncedSection = organizer.locator('.syncedTabsSection')
+    const syncedSet = syncedSection.locator('.syncedSessionCard')
+    await expect(syncedSection.getByRole('heading', { name: 'Tabs from other devices' })).toBeVisible()
+    await expect(syncedSet).toContainText('Mobile · 2 tabs')
+    await expect(syncedSet.locator('[data-icon="layer-group"]')).toBeVisible()
+    await expect(syncedSet.locator('[data-icon="clapperboard"]')).toBeVisible()
+    await expect(syncedSet.locator('[data-icon="clock-rotate-left"]')).toBeVisible()
+    await expect(syncedSet.locator('[data-icon="arrow-up-right-from-square"]')).toHaveCount(2)
+
+    const deleteSet = syncedSet.getByRole('button', { name: 'Delete: Mobile · 2 tabs' })
+    await deleteSet.click()
+    let confirmation = page.getByRole('dialog', { name: 'Delete' })
+    await expect(confirmation).toContainText('Mobile · 2 tabs')
+    await confirmation.getByRole('button', { name: 'Cancel' }).click()
+    await expect(syncedSet).toBeVisible()
+
+    await deleteSet.click()
+    confirmation = page.getByRole('dialog', { name: 'Delete' })
+    await confirmation.getByRole('button', { name: 'Delete', exact: true }).click()
+    await expect(syncedSection).toHaveCount(0)
+  })
+
   test('selects a visible range with Shift-click', async ({ page }) => {
     await page.evaluate(async () => {
       for (let index = 1; index <= 3; index++) {

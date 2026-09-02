@@ -27,7 +27,7 @@ import {
 } from '../../helpers/sync-server-privacy'
 import { encryptSyncServerDeviceInfo } from '../../helpers/sync-server-sessions'
 import { mergePlaylistBookmarkConflict } from '../../helpers/playlist-bookmarks'
-import { getPreviousSyncSessions } from '../../helpers/sync-sessions'
+import { getPreviousSyncSessions, removeSyncSession } from '../../helpers/sync-sessions'
 import {
   AUTO_SYNC_INTERVAL_MS,
   isRecentSync,
@@ -438,6 +438,82 @@ const actions = {
       })
     }
     return true
+  },
+
+  async deleteSyncServerSession({ commit, dispatch, rootState }, session) {
+    const { syncDeviceId, sessionId } = session ?? {}
+    const settings = rootState.settings
+    if (typeof syncDeviceId !== 'string' || typeof sessionId !== 'string') {
+      throw new Error('Invalid synced tab set')
+    }
+    if (!settings.syncServerToken || !settings.syncServerPrivacyKey) {
+      throw new Error('Connect to the sync server first')
+    }
+
+    const deleteSession = async () => {
+      const client = trackSyncClient(new SyncServerClient(
+        settings.syncServerUrl,
+        settings.syncServerToken
+      ))
+      commit('setSyncServerStatus', 'syncing')
+      commit('setSyncServerError', '')
+
+      try {
+        for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
+          assertSyncEnabled(rootState, client)
+          const remote = await client.getEncryptedSyncCollection('sessionsV2')
+          let remoteValue = remote.payload
+            ? await decryptSyncDocument(remote.payload, settings.syncServerPrivacyKey)
+            : null
+
+          if (remoteValue === null) {
+            const legacy = await client.getEncryptedSyncCollection('sessions')
+            remoteValue = legacy.payload
+              ? await decryptSyncDocument(legacy.payload, settings.syncServerPrivacyKey)
+              : null
+          }
+
+          assertSyncEnabled(rootState, client)
+          const nextSessions = removeSyncSession(remoteValue, syncDeviceId, sessionId)
+          const payload = await encryptSyncDocument(
+            nextSessions,
+            settings.syncServerPrivacyKey,
+            settings.syncServerPrivacySalt
+          )
+
+          try {
+            await client.putEncryptedSyncCollection('sessionsV2', remote.revision, payload)
+          } catch (error) {
+            if (error.status === 409 && attempt < ENCRYPTED_SYNC_RETRIES - 1) continue
+            throw error
+          }
+
+          assertSyncEnabled(rootState, client)
+          const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
+          snapshot.sessionsV2 = nextSessions
+          await dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot), { root: true })
+          commit('setSyncServerOtherDeviceSessions', getSavedOtherDeviceSessions(snapshot))
+          commit('setSyncServerStatus', 'success')
+          return true
+        }
+      } catch (error) {
+        if (error instanceof SyncServerCancelledError) {
+          commit('setSyncServerStatus', 'idle')
+          return false
+        }
+        if (isSessionExpiredError(error)) {
+          await dispatch('expireSyncServerSession')
+          throw new Error(SYNC_SERVER_SESSION_EXPIRED_MESSAGE, { cause: error })
+        }
+        commit('setSyncServerError', error.message)
+        commit('setSyncServerStatus', 'error')
+        throw error
+      } finally {
+        releaseSyncClient(client)
+      }
+    }
+
+    return withSyncLock(deleteSession)
   },
 
   async completeSyncServerPairing(

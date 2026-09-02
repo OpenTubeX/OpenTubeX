@@ -12,6 +12,7 @@
         role="dialog"
         aria-modal="true"
         :aria-labelledby="titleId"
+        :inert="sessionToDelete !== null"
         @keydown="handleDialogKeydown"
       >
         <header class="tabOrganizerHeader">
@@ -421,11 +422,106 @@
             </section>
 
             <p
-              v-if="visibleTabs.length === 0"
+              v-if="visibleTabs.length === 0 && visibleOtherDeviceSessions.length === 0"
               class="emptyMessage"
             >
               {{ t('Tab Organizer.No Open Results') }}
             </p>
+
+            <section
+              v-if="showSyncedTabs && (normalizedQuery.length === 0 || visibleOtherDeviceSessions.length > 0)"
+              class="syncedTabsSection"
+            >
+              <header class="syncedTabsHeader">
+                <h3>
+                  <FtIcon
+                    class="syncedTabsIcon"
+                    :icon="['fas', 'layer-group']"
+                    aria-hidden="true"
+                  />
+                  {{ t('Settings.Sync Settings.Tabs From Other Devices') }}
+                </h3>
+              </header>
+              <div class="syncedSessionGrid">
+                <article
+                  v-for="session in visibleOtherDeviceSessions"
+                  :key="`${session.syncDeviceId}:${session.sessionId}`"
+                  class="syncedSessionCard"
+                >
+                  <header class="syncedSessionHeader">
+                    <div class="syncedSessionIdentity">
+                      <span class="syncedSessionIcon">
+                        <FtIcon
+                          :icon="session.syncPlatform === 'mobile' ? ['fas', 'layer-group'] : ['fas', 'display']"
+                          aria-hidden="true"
+                        />
+                      </span>
+                      <strong>{{ deviceSessionLabel(session) }}</strong>
+                    </div>
+                    <div class="syncedSessionActions">
+                      <button
+                        type="button"
+                        class="syncedSessionActionButton"
+                        @click="openOtherDeviceSession(session)"
+                      >
+                        <FtIcon
+                          :icon="['fas', 'folder-open']"
+                          aria-hidden="true"
+                        />
+                        {{ t('Settings.Sync Settings.Open All Tabs') }}
+                      </button>
+                      <button
+                        type="button"
+                        class="syncedSessionActionButton iconButton dangerButton"
+                        :aria-label="`${t('Delete')}: ${deviceSessionLabel(session)}`"
+                        :title="t('Delete')"
+                        @click="sessionToDelete = session"
+                      >
+                        <FtIcon
+                          :icon="['fas', 'trash']"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </div>
+                  </header>
+                  <ul class="syncedTabList">
+                    <li
+                      v-for="tab in session.visibleTabs"
+                      :key="tab.id"
+                    >
+                      <button
+                        type="button"
+                        class="syncedTabTarget"
+                        @click="openOtherDeviceSession({ ...session, tabs: [tab] })"
+                      >
+                        <span class="tabIcon">
+                          <img
+                            v-if="usableTabAvatarUrl(syncedTabPreview(tab))"
+                            :src="usableTabAvatarUrl(syncedTabPreview(tab))"
+                            alt=""
+                            @error="handleTabAvatarError(syncedTabPreview(tab))"
+                          >
+                          <FtIcon
+                            v-else
+                            :icon="getTabPageIcon(syncedTabPreview(tab)) || ['fas', 'display']"
+                            aria-hidden="true"
+                          />
+                        </span>
+                        <span class="syncedTabIdentity">
+                          <span dir="auto">{{ formatTabTitle(tab.title || tab.url) }}</span>
+                          <small>{{ tab.url }}</small>
+                        </span>
+                        <FtIcon
+                          class="syncedTabOpenIcon"
+                          :icon="['fas', 'arrow-up-right-from-square']"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </li>
+                  </ul>
+                </article>
+              </div>
+            </section>
 
             <section class="recentlyClosed">
               <header>
@@ -483,6 +579,16 @@
       </section>
     </div>
   </Teleport>
+  <FtPrompt
+    v-if="sessionToDelete"
+    :label="t('Delete')"
+    :extra-labels="[deviceSessionLabel(sessionToDelete)]"
+    :option-names="[t('Delete'), t('Cancel')]"
+    :option-values="['delete', 'cancel']"
+    is-first-option-destructive
+    autosize
+    @click="handleDeleteSessionPrompt"
+  />
 </template>
 
 <script setup>
@@ -492,10 +598,13 @@ import { useI18n } from 'vue-i18n'
 
 import { getTabAccentColor } from '../../constants/tabColors'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { shouldShowOtherDeviceSessions } from '../../helpers/sync-sessions'
+import { showToast } from '../../helpers/utils'
 import store from '../../store/index'
 import { getTabAvatarUrl, getTabPageIcon } from '../../tabs/tabPreview'
 import { formatTabTitle } from '../../tabs/tabTitle'
 import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
+import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
 import FtSelect from '../FtSelect/FtSelect.vue'
 
@@ -516,6 +625,7 @@ const editingNameGroupId = ref(null)
 const editingGroupName = ref('')
 const editingColorGroupId = ref(null)
 const failedTabAvatarUrls = ref({})
+const sessionToDelete = ref(null)
 const dialogRef = useTemplateRef('dialogRef')
 const searchRef = useTemplateRef('searchRef')
 const scrollRef = useTemplateRef('scrollRef')
@@ -585,6 +695,18 @@ const windowSelectValues = computed(() => [
 const normalizedQuery = computed(() => query.value.trim().toLocaleLowerCase(locale.value))
 const visibleTabs = computed(() => tabs.value.filter(matchesSearch))
 const visibleClosedTabs = computed(() => closedTabs.value.filter(matchesSearch))
+const otherDeviceSessions = computed(() => store.getters.getSyncServerOtherDeviceSessions)
+const showSyncedTabs = computed(() => shouldShowOtherDeviceSessions({
+  syncEnabled: store.getters.getSyncServerEnabled,
+  syncConnected: store.getters.getSyncServerToken !== '',
+  enhancedSyncEnabled: store.getters.getSyncServerPrivacyMode === 'enhanced' &&
+    store.getters.getSyncServerSyncSessions,
+  sharedTabsEnabled: store.getters.getSyncServerSharedTabs,
+  sessions: otherDeviceSessions.value,
+}))
+const visibleOtherDeviceSessions = computed(() => otherDeviceSessions.value
+  .map(session => ({ ...session, visibleTabs: session.tabs.filter(matchesSearch) }))
+  .filter(session => session.visibleTabs.length > 0))
 
 const displayedSections = computed(() => {
   const sections = groups.value.map(group => ({
@@ -637,7 +759,7 @@ onBeforeUnmount(() => {
   })
 })
 
-watch([query, groups, tabs, closedTabs], async () => {
+watch([query, groups, tabs, closedTabs, otherDeviceSessions], async () => {
   await nextTick()
   if (scrollRef.value && normalizedQuery.value.length > 0) {
     restoreOverlayScrollTop(scrollRef.value, 0)
@@ -664,6 +786,43 @@ function handleTabAvatarError(tab) {
   failedTabAvatarUrls.value = {
     ...failedTabAvatarUrls.value,
     [tab.id]: getTabAvatarUrl(tab)
+  }
+}
+
+function syncedTabPreview(tab) {
+  try {
+    const url = new URL(tab.url, window.location.origin)
+    return { ...tab, route: { path: url.pathname } }
+  } catch {
+    return tab
+  }
+}
+
+function deviceSessionLabel(session) {
+  return t('Settings.Sync Settings.Device Tab Session', {
+    platform: session.syncPlatform === 'mobile'
+      ? t('Settings.Sync Settings.Mobile Device')
+      : t('Settings.Sync Settings.Desktop Device'),
+    count: session.tabs.length,
+  })
+}
+
+async function openOtherDeviceSession(session) {
+  await store.dispatch('openSyncServerSession', session)
+}
+
+async function handleDeleteSessionPrompt(option) {
+  const session = sessionToDelete.value
+  sessionToDelete.value = null
+  if (option !== 'delete' || !session) return
+
+  try {
+    await store.dispatch('deleteSyncServerSession', session)
+  } catch (error) {
+    showToast({
+      message: t('Settings.Sync Settings.Sync failed', { error: error.message }),
+      icon: ['fas', 'circle-exclamation'],
+    })
   }
 }
 

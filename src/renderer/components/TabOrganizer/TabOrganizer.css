@@ -221,6 +221,7 @@
 }
 
 .tabGroup,
+.syncedTabsSection,
 .recentlyClosed {
   margin-inline: 12px;
 }
@@ -564,6 +565,149 @@
   text-align: center;
 }
 
+.syncedTabsSection {
+  border-block-start: 1px solid var(--divider-color);
+  margin-block-start: 14px;
+  padding-block-start: 8px;
+}
+
+.syncedTabsHeader {
+  align-items: center;
+  display: flex;
+  min-block-size: 44px;
+  padding-inline: 6px;
+}
+
+.syncedTabsHeader h3 {
+  align-items: center;
+  display: flex;
+  font-size: 14px;
+  gap: 8px;
+  margin: 0;
+}
+
+.syncedTabsIcon {
+  color: var(--secondary-text-color);
+}
+
+.syncedSessionGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+}
+
+.syncedSessionCard {
+  background: color-mix(in srgb, var(--side-nav-color) 72%, transparent);
+  border: 1px solid var(--divider-color);
+  border-radius: calc(10px * var(--ui-roundness));
+  min-inline-size: 0;
+  padding-block: 10px;
+  padding-inline: 10px;
+}
+
+.syncedSessionHeader,
+.syncedSessionIdentity,
+.syncedSessionActions,
+.syncedSessionActionButton {
+  align-items: center;
+  display: flex;
+}
+
+.syncedSessionHeader {
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.syncedSessionIdentity {
+  gap: 9px;
+  min-inline-size: 0;
+}
+
+.syncedSessionIdentity strong {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.syncedSessionIcon {
+  align-items: center;
+  background: color-mix(in srgb, var(--accent-color) 14%, transparent);
+  border-radius: calc(7px * var(--ui-roundness));
+  color: var(--accent-color);
+  display: flex;
+  flex: 0 0 32px;
+  block-size: 32px;
+  inline-size: 32px;
+  justify-content: center;
+}
+
+.syncedSessionActions {
+  flex: 0 0 auto;
+  gap: 5px;
+}
+
+.syncedSessionActionButton {
+  font-size: 12px;
+  gap: 6px;
+  justify-content: center;
+}
+
+.syncedSessionActions > .iconButton {
+  min-block-size: 34px;
+  min-inline-size: 34px;
+  padding: 0;
+}
+
+.syncedTabList {
+  border-block-start: 1px solid var(--divider-color);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  list-style: none;
+  margin-block: 10px 0;
+  padding-block: 8px 0;
+  padding-inline: 0;
+}
+
+.syncedTabTarget {
+  align-items: center;
+  background: transparent !important;
+  border-color: transparent !important;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 24px minmax(0, 1fr) 24px;
+  inline-size: 100%;
+  min-block-size: 48px !important;
+  padding-block: 5px !important;
+  text-align: start;
+}
+
+.syncedTabIdentity {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.syncedTabIdentity > span,
+.syncedTabIdentity small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.syncedTabIdentity small {
+  color: var(--secondary-text-color);
+  font-size: 11px;
+}
+
+.syncedTabOpenIcon {
+  color: var(--secondary-text-color);
+  justify-self: center;
+}
+
+.syncedTabTarget:hover:not(:disabled) {
+  background: var(--side-nav-hover-color) !important;
+}
+
 .tabOrganizer button:disabled,
 .tabOrganizer input:disabled {
   cursor: default;
@@ -619,6 +763,15 @@
     inline-size: auto;
     justify-content: flex-start;
     margin-inline-start: 0;
+  }
+
+  .syncedSessionHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .syncedSessionActions {
+    inline-size: 100%;
   }
 }
 
