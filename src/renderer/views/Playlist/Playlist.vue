@@ -263,6 +263,7 @@ import {
   reserveYtDlpPlaybackSourceCache,
 } from '../../helpers/player/ytDlpPlayback'
 import { buildYtDlpPlaybackCacheKey, preloadYtDlpPlaybackSources } from '../../helpers/player/ytDlpPlaybackPreload'
+import { startYtDlpPlaybackPreloadProgress } from '../../helpers/player/ytDlpPlaybackPreloadProgress'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { useTabToast } from '../../composables/useTabToast'
@@ -540,10 +541,11 @@ async function preloadPlaylist() {
 
   const requestGeneration = playlistRequestGeneration
   playlistPreloadPending.value = true
-  store.commit('setProgressBarIcon', ['fas', 'forward'])
-  store.commit('setProgressBarMessage', t('Playlist.Preloading Playlist'))
-  store.commit('setProgressBarPercentage', 0)
-  store.commit('setShowProgressBar', true)
+  const progressOperation = startYtDlpPlaybackPreloadProgress(store, {
+    icon: ['fas', 'forward'],
+    message: t('Playlist.Preloading Playlist'),
+    percentage: 0,
+  })
   try {
     while (!isUserPlaylistRequested.value && moreVideoDataAvailable.value && nextPageError.value === '') {
       if (isLoadingMore.value) {
@@ -572,10 +574,12 @@ async function preloadPlaylist() {
     }
 
     const videoIds = playlistPreloadVideoIds.value
-    store.commit('setProgressBarMessage', t('Playlist.Playlist Preload Progress', {
-      completed: 0,
-      requested: videoIds.length,
-    }))
+    progressOperation.update({
+      message: t('Playlist.Playlist Preload Progress', {
+        completed: 0,
+        requested: videoIds.length,
+      }),
+    })
     reserveYtDlpPlaybackSourceCache(videoIds.length)
 
     const cacheKey = ytDlpPlaybackCacheKey.value
@@ -588,13 +592,15 @@ async function preloadPlaylist() {
         false,
         true
       ),
-      onProgress: progress => {
+      onProgress: preloadProgress => {
         if (requestGeneration !== playlistRequestGeneration) return
 
-        store.commit('setProgressBarMessage', t('Playlist.Playlist Preload Progress', progress))
-        store.commit('setProgressBarPercentage', progress.requested === 0
-          ? 0
-          : progress.completed / progress.requested * 100)
+        progressOperation.update({
+          message: t('Playlist.Playlist Preload Progress', preloadProgress),
+          percentage: preloadProgress.requested === 0
+            ? 0
+            : preloadProgress.completed / preloadProgress.requested * 100,
+        })
       },
     })
     if (requestGeneration !== playlistRequestGeneration) return
@@ -613,10 +619,7 @@ async function preloadPlaylist() {
     })
   } finally {
     playlistPreloadPending.value = false
-    store.commit('setShowProgressBar', false)
-    store.commit('setProgressBarPercentage', 0)
-    store.commit('setProgressBarMessage', '')
-    store.commit('setProgressBarIcon', ['fas', 'sync'])
+    progressOperation.finish()
   }
 }
 

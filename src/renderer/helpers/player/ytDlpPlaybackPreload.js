@@ -4,6 +4,31 @@ export const DEFAULT_YT_DLP_PRELOAD_COUNT = 2
 export const MAX_YT_DLP_PRELOAD_COUNT = 10
 export const YT_DLP_PRELOAD_CONCURRENCY = 2
 
+const pendingPreloadTasks = []
+let activePreloadTasks = 0
+
+function startPendingPreloadTasks() {
+  while (activePreloadTasks < YT_DLP_PRELOAD_CONCURRENCY && pendingPreloadTasks.length > 0) {
+    const task = pendingPreloadTasks.shift()
+    activePreloadTasks++
+
+    Promise.resolve()
+      .then(task.loadSource)
+      .then(task.resolve, task.reject)
+      .finally(() => {
+        activePreloadTasks--
+        startPendingPreloadTasks()
+      })
+  }
+}
+
+function scheduleYtDlpPlaybackPreload(loadSource) {
+  return new Promise((resolve, reject) => {
+    pendingPreloadTasks.push({ loadSource, resolve, reject })
+    startPendingPreloadTasks()
+  })
+}
+
 /**
  * Identifies every setting that can change yt-dlp's extracted stream URLs.
  * @param {Record<string, unknown>} getters
@@ -103,7 +128,7 @@ export async function preloadYtDlpPlaybackSources(videoIds, {
     while (nextIndex < uniqueVideoIds.length) {
       const videoId = uniqueVideoIds[nextIndex++]
       try {
-        const source = await loadSource(videoId)
+        const source = await scheduleYtDlpPlaybackPreload(() => loadSource(videoId))
         if (source === null || !isYtDlpPlaybackSourceCacheable(source)) {
           failed++
         } else {

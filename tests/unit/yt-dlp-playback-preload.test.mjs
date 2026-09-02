@@ -141,6 +141,45 @@ test('preloads unique videos with bounded concurrency and reports failures', asy
   ])
 })
 
+test('shares the preload concurrency limit across overlapping runs', async () => {
+  let active = 0
+  let peakActive = 0
+  const loaded = []
+  const releases = []
+  const loadSource = videoId => new Promise(resolve => {
+    active++
+    peakActive = Math.max(peakActive, active)
+    loaded.push(videoId)
+    releases.push(() => {
+      active--
+      resolve(source(videoId))
+    })
+  })
+
+  const firstRun = preloadYtDlpPlaybackSources(['first00001', 'first00002', 'first00003'], { loadSource })
+  const secondRun = preloadYtDlpPlaybackSources(['second0001', 'second0002'], { loadSource })
+
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(loaded.length, 2)
+
+  for (let completed = 0; completed < 5; completed++) {
+    const release = releases.shift()
+    assert.ok(release)
+    release()
+    await new Promise(resolve => setImmediate(resolve))
+  }
+
+  await Promise.all([firstRun, secondRun])
+  assert.equal(peakActive, 2)
+  assert.deepEqual(new Set(loaded), new Set([
+    'first00001',
+    'first00002',
+    'first00003',
+    'second0001',
+    'second0002',
+  ]))
+})
+
 test('reports sources that cannot be cached as preload failures', async () => {
   const results = new Map([
     ['live0000001', { isLive: true, expiryDate: new Date(Date.now() + 10 * 60 * 1000) }],
