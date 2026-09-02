@@ -727,6 +727,8 @@ export class TabManager {
     this.lastReorderRequestId = null
     this.contextMenuSurface = 'content'
     this.contextMenuSubscriptionFeedTab = null
+    this.contextMenuSubscriptionNewFeedTab = false
+    this.contextMenuSubscriptionNewFeedHasContent = false
     this.contextMenuTabBarVertical = false
     this._sessionPersistenceDisabled = false
     this.sessionUpdatedAt = 0
@@ -3964,6 +3966,10 @@ export async function setupTabsIPC(options = {}) {
       ['videos', 'shorts', 'live', 'posts', 'all'].includes(payload?.feedTab)
       ? payload.feedTab
       : null
+    manager.contextMenuSubscriptionNewFeedTab = manager.contextMenuSubscriptionFeedTab !== null &&
+      payload?.isNewFeedTab === true
+    manager.contextMenuSubscriptionNewFeedHasContent = manager.contextMenuSubscriptionNewFeedTab &&
+      payload?.hasNewContent === true
     manager.contextMenuTabBarVertical = payload?.verticalLayout === true
   })
 

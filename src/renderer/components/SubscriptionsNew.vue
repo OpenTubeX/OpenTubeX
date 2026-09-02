@@ -161,6 +161,13 @@ const hasNewContent = computed(() => {
   return newVideos.value.length > 0 || hasAdditionalContent.value
 })
 
+const hasNewContentByCategory = computed(() => ({
+  videos: newVideos.value.length > 0,
+  shorts: newShorts.value.length > 0,
+  live: newLive.value.length > 0,
+  posts: newPosts.value.length > 0
+}))
+
 defineExpose({
   refresh,
   isLoading,
@@ -168,7 +175,8 @@ defineExpose({
   nextAutoRefreshTimestamp: '',
   nextAutoRefreshTooltip: '',
   refreshTitle: computed(() => t('Subscriptions.New Content')),
-  hasNewContent
+  hasNewContent,
+  hasNewContentByCategory
 })
 </script>
 

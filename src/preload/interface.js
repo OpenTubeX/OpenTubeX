@@ -802,6 +802,17 @@ export default {
 
   subscriptionFeeds: {
     /**
+     * Listen for a mark-seen request from a tabbed New feed category's context menu.
+     * @param {(payload: {tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts'}) => void} handler
+     * @returns {() => void}
+     */
+    onRequestMarkSeen: (handler) => {
+      const listener = (_event, payload) => handler(payload)
+      ipcRenderer.on(IpcChannels.SUBSCRIPTION_FEED_REQUEST_MARK_SEEN, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.SUBSCRIPTION_FEED_REQUEST_MARK_SEEN, listener)
+    },
+
+    /**
      * Listen for a reload requested from a subscription feed tab's context menu.
      * @param {(payload: {tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts' | 'all'}) => void} handler
      * @returns {() => void}
@@ -1309,7 +1320,7 @@ export default {
 
     /**
      * Track which tab-related surface the next context menu should target.
-     * @param {{ tabId: string | null, selectedTabIds?: string[], surface: 'tab' | 'tabBar' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | null, verticalLayout?: boolean }} payload
+     * @param {{ tabId: string | null, selectedTabIds?: string[], surface: 'tab' | 'tabBar' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | null, isNewFeedTab?: boolean, hasNewContent?: boolean, verticalLayout?: boolean }} payload
      */
     setContextMenuTab: (payload) => {
       ipcRenderer.send(IpcChannels.TABS_SET_CONTEXT_MENU_TAB, payload)
