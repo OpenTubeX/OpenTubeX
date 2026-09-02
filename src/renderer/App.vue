@@ -2004,12 +2004,13 @@ function handleSubscriptionRefreshCompleted(event) {
 }
 
 /**
- * @param {CustomEvent<{tab: string, profileId: string}>} event
+ * @param {CustomEvent<{tab: string, profileId: string, refreshId: number}>} event
  */
 async function handleSubscriptionRefreshStarted(event) {
   const isCurrentStart = subscriptionRefreshStartGuard.begin()
   if (isCapacitor) {
     const { acquired, notificationsDenied } = await startAndroidSubscriptionRefresh(
+      event.detail.refreshId,
       getSubscriptionRefreshNotificationTitle(event.detail.tab),
       t('Feed.Cancel Refresh')
     )
@@ -2054,14 +2055,18 @@ function showAndroidSubscriptionRefreshNotificationWarning() {
 }
 
 /**
- * @param {CustomEvent<{percentage: number, ownerTabId?: string | null}>} event
+ * @param {CustomEvent<{
+ *   percentage: number,
+ *   ownerTabId?: string | null,
+ *   refreshId?: number
+ * }>} event
  */
 function handleSubscriptionRefreshProgress(event) {
   const percentage = normalizeSubscriptionRefreshProgress(event.detail.percentage)
   store.commit('setSubscriptionFeedRefreshProgress', percentage)
 
   if (isCapacitor) {
-    updateAndroidSubscriptionRefresh(percentage)
+    updateAndroidSubscriptionRefresh(event.detail.refreshId, percentage)
   }
 
   if (process.env.IS_ELECTRON) {
@@ -2083,10 +2088,13 @@ function handleSubscriptionRefreshProgress(event) {
   }
 }
 
-function handleSubscriptionRefreshFinished() {
+/**
+ * @param {CustomEvent<{refreshId: number}>} event
+ */
+function handleSubscriptionRefreshFinished(event) {
   subscriptionRefreshStartGuard.finish()
   if (isCapacitor) {
-    finishAndroidSubscriptionRefresh()
+    finishAndroidSubscriptionRefresh(event.detail.refreshId)
   }
   if (!process.env.IS_ELECTRON) {
     try {

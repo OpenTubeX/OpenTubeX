@@ -33,22 +33,26 @@ test('a pending native refresh start keeps ownership until it finishes', async (
   let releaseFirstStart
   const firstNativeStart = new Promise(resolve => { releaseFirstStart = resolve })
 
-  const firstStart = controller.begin(() => {
+  const firstStart = controller.begin(1, () => {
     nativeStarts++
     return firstNativeStart
   })
-  const overlappingStart = controller.begin(() => {
+  const overlappingStart = controller.begin(2, () => {
     nativeStarts++
     return Promise.resolve('second-token')
   })
 
   assert.equal(overlappingStart, null)
   assert.equal(nativeStarts, 1)
-  assert.equal(controller.finish(), firstStart)
+  assert.equal(controller.current(2), null)
+  assert.equal(controller.isCurrent(2, firstStart), false)
+  assert.equal(controller.finish(2), null)
+  assert.equal(controller.current(1), firstStart)
+  assert.equal(controller.finish(1), firstStart)
 
   releaseFirstStart('first-token')
   assert.equal(await firstStart, 'first-token')
-  assert.equal(controller.current(), null)
+  assert.equal(controller.current(1), null)
 })
 
 test('creates one closed-app schedule input per profile and enabled feed', () => {

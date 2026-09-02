@@ -21,11 +21,11 @@ export async function requestAndroidSubscriptionRefreshNotificationPermission() 
   }
 }
 
-export async function startAndroidSubscriptionRefresh(title, cancelLabel) {
+export async function startAndroidSubscriptionRefresh(refreshId, title, cancelLabel) {
   if (!SubscriptionRefresh) return { acquired: true, notificationsDenied: false }
 
   let notificationsDenied = false
-  const start = startController.begin(() => (
+  const start = startController.begin(refreshId, () => (
     requestAndroidSubscriptionRefreshNotificationPermission()
       .then(denied => {
         notificationsDenied = denied
@@ -43,20 +43,20 @@ export async function startAndroidSubscriptionRefresh(title, cancelLabel) {
   return { acquired: token !== null, notificationsDenied }
 }
 
-export function updateAndroidSubscriptionRefresh(progress) {
-  const start = startController.current()
+export function updateAndroidSubscriptionRefresh(refreshId, progress) {
+  const start = startController.current(refreshId)
   if (!start) return
 
   start.then(token => {
-    if (!startController.isCurrent(start) || token === null) return
+    if (!startController.isCurrent(refreshId, start) || token === null) return
     return SubscriptionRefresh.update({ token, progress: Math.round(progress) })
   }).catch(error => {
     console.error('Failed to update Android subscription refresh work', error)
   })
 }
 
-export function finishAndroidSubscriptionRefresh() {
-  const start = startController.finish()
+export function finishAndroidSubscriptionRefresh(refreshId) {
+  const start = startController.finish(refreshId)
   if (!start) return
 
   start.then(token => token === null ? null : SubscriptionRefresh.finish({ token })).catch(error => {

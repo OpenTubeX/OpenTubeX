@@ -26,20 +26,28 @@ export function createSubscriptionRefreshStartController() {
   let activeStart = null
 
   return {
-    begin(createStart) {
+    begin(refreshId, createStart) {
       if (activeStart !== null) return null
 
-      activeStart = createStart()
-      return activeStart
+      activeStart = { refreshId, start: null }
+      try {
+        activeStart.start = createStart()
+        return activeStart.start
+      } catch (error) {
+        activeStart = null
+        throw error
+      }
     },
-    current() {
-      return activeStart
+    current(refreshId) {
+      return activeStart?.refreshId === refreshId ? activeStart.start : null
     },
-    isCurrent(start) {
-      return activeStart === start
+    isCurrent(refreshId, start) {
+      return activeStart?.refreshId === refreshId && activeStart.start === start
     },
-    finish() {
-      const start = activeStart
+    finish(refreshId) {
+      if (activeStart?.refreshId !== refreshId) return null
+
+      const { start } = activeStart
       activeStart = null
       return start
     }

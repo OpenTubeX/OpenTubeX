@@ -53,9 +53,11 @@ let electronRefreshOwnerTabId = null
 
 /**
  * Cancellation state of the refresh this renderer is running, if any.
- * @type {{ cancelled: boolean, tab: string, profileId: string } | null}
+ * @type {{ cancelled: boolean, tab: string, profileId: string, refreshId: number } | null}
  */
 let activeRefresh = null
+let nextRefreshId = 0
+let rendererRefreshReserved = false
 
 // Incremented on every cancellation request, so that a cancellation is not
 // missed when it arrives between two feed refreshes.
@@ -128,19 +130,29 @@ function isRefreshCancelled() {
  * @returns {Promise<T | null>}
  */
 async function withSubscriptionRefreshLock(tab, profileId, refresh) {
-  if (store.getters.getSubscriptionFeedRefreshInProgress) {
+  if (rendererRefreshReserved || store.getters.getSubscriptionFeedRefreshInProgress) {
     return null
   }
 
+  rendererRefreshReserved = true
+  try {
+    return await runWithSubscriptionRefreshLock(tab, profileId, refresh)
+  } finally {
+    rendererRefreshReserved = false
+  }
+}
+
+async function runWithSubscriptionRefreshLock(tab, profileId, refresh) {
   if (process.env.IS_CAPACITOR && await isAndroidSubscriptionRefreshActive()) {
     return null
   }
 
   const cancelCountAtStart = cancelCount
+  const refreshId = ++nextRefreshId
   const runRefresh = async () => {
-    activeRefresh = { cancelled: false, tab, profileId }
+    activeRefresh = { cancelled: false, tab, profileId, refreshId }
     window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_STARTED_EVENT, {
-      detail: { tab, profileId }
+      detail: { tab, profileId, refreshId }
     }))
 
     if (cancelCount !== cancelCountAtStart) {
@@ -152,7 +164,7 @@ async function withSubscriptionRefreshLock(tab, profileId, refresh) {
     } finally {
       activeRefresh = null
       window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_FINISHED_EVENT, {
-        detail: { tab, profileId }
+        detail: { tab, profileId, refreshId }
       }))
     }
   }
@@ -200,7 +212,11 @@ function completeSubscriptionRefresh(tab, profileId) {
  */
 function setSubscriptionRefreshProgress(percentage) {
   window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_PROGRESS_EVENT, {
-    detail: { percentage, ownerTabId: electronRefreshOwnerTabId }
+    detail: {
+      percentage,
+      ownerTabId: electronRefreshOwnerTabId,
+      refreshId: activeRefresh?.refreshId
+    }
   }))
 }
 
