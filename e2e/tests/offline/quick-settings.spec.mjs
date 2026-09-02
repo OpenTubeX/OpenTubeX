@@ -1,20 +1,5 @@
 import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
-
-const DEFAULT_QUICK_SETTINGS = [
-  'baseTheme',
-  'mainColor',
-  'uiScale',
-  'thumbnailSize',
-  'defaultQuality',
-  'playNextVideo',
-  'enableSubtitlesByDefault',
-  'listType',
-  'playlistViewType',
-  'hideRecommendedVideos',
-  'hideComments',
-  'currentLocale',
-  'region',
-]
+import { DEFAULT_QUICK_SETTINGS } from '../../../src/renderer/helpers/quickSettings.js'
 
 const ALL_QUICK_SETTINGS = [
   ...DEFAULT_QUICK_SETTINGS,
