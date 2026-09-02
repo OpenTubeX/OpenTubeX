@@ -4819,9 +4819,10 @@ test.describe('synced setting indicators', () => {
     await goTo(page, 'settings')
     const playbackSection = await goToSettingsSection(page, 'playback')
     const sliders = playbackSection.locator('.sliderGrid > *')
-    await expect(sliders).toHaveCount(7)
+    await expect(sliders).toHaveCount(8)
     await expect(sliders.nth(5)).toContainText(/Max video playback rate/i)
     await expect(sliders.nth(6)).toContainText(/Parallel segment loading/i)
+    await expect(sliders.nth(7)).toContainText(/Upcoming videos to preload/i)
 
     const boxes = await sliders.evaluateAll((elements) => elements.map((element) => {
       const { x, y, width } = element.getBoundingClientRect()
@@ -4832,15 +4833,8 @@ test.describe('synced setting indicators', () => {
     for (const { y } of boxes) {
       rowSizes.set(y, (rowSizes.get(y) ?? 0) + 1)
     }
-    expect([...rowSizes.values()]).toEqual([3, 3, 1])
+    expect([...rowSizes.values()]).toEqual([3, 3, 2])
     expect(new Set(boxes.map(({ width }) => width)).size).toBe(1)
-
-    const lastSlider = boxes.at(-1)
-    const gridCenter = await playbackSection.locator('.sliderGrid').evaluate(element => {
-      const bounds = element.getBoundingClientRect()
-      return bounds.x + bounds.width / 2
-    })
-    expect(lastSlider.x + lastSlider.width / 2).toBeCloseTo(gridCenter, 0)
 
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store

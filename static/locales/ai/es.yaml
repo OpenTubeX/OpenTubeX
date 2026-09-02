@@ -506,6 +506,8 @@ Settings:
     Parallel Segment Loading: Carga paralela de segmentos
     Rotate Wide Videos to Landscape in Fullscreen: 'Girar vídeos anchos a horizontal en pantalla completa'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Desliza hacia arriba o abajo para entrar o salir de pantalla completa'
+    Preload Upcoming Videos: "Precargar próximos vídeos"
+    Upcoming Videos to Preload: "Vídeos próximos para precargar"
   Channel Settings:
     Channel Settings: Ajustes de canales
     Channel Settings Description: Recuerda por separado los ajustes que elijas al ver cada canal para volver a aplicarlos la próxima vez que veas uno de sus vídeos.
@@ -1200,7 +1202,14 @@ Video:
       DownvoteSegment: Votar en contra
       VoteFailed: No se pudo enviar el voto a SponsorBlock.
 Playlist:
+  Playlist Already Preloaded: "Todos los videos de la lista ya están precargados"
+  Playlist Preload Progress: "Precargando videos: {completed} de {requested}"
   Close Playlist: Cerrar lista de reproducción
+  Preload Playlist: "Precargar todos los vídeos"
+  Preloading Playlist: "Precargando todos los vídeos..."
+  Playlist Preload Complete: "Vídeos precargados: {count}."
+  Playlist Preload Partial: "Se precargaron {preloaded} de {requested} vídeos. No se pudieron precargar {failed}."
+  Playlist Preload Pagination Failed: "No se pudo cargar la lista completa, así que se canceló la precarga."
 Change Format:
   Local Video File: Archivo de vídeo local
   Local Audio File: Archivo de audio local
@@ -1397,6 +1406,8 @@ Tooltips:
       Los valores más altos pueden ayudar en conexiones lentas o inestables, pero consumen más ancho de banda y memoria.
       También pueden hacer que Automático calcule una velocidad de conexión demasiado baja y seleccione una calidad inferior.
       Las emisiones limitadas a una solicitud simultánea ignoran este ajuste.
+    Preload Upcoming Videos: "Obtiene y guarda en caché las URL de yt-dlp de los próximos vídeos. La cola tiene prioridad sobre las listas y las recomendaciones."
+    Upcoming Videos to Preload: "Número máximo de próximos vídeos cuyas URL de yt-dlp se obtienen en segundo plano."
   Download Settings:
     Download Folder: Los vídeos se guardan en esta carpeta. Déjala en blanco para usar la carpeta Descargas del sistema.
     Global Additional yt-dlp Arguments: Argumentos de línea de comandos adicionales que se pasan a yt-dlp en todas las descargas, por ejemplo, --cookies-from-browser firefox.

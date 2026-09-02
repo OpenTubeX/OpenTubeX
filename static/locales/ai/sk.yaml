@@ -500,6 +500,8 @@ Settings:
     Parallel Segment Loading: Súbežné načítavanie segmentov
     Rotate Wide Videos to Landscape in Fullscreen: 'Otočiť široké videá na šírku v režime celej obrazovky'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Potiahnutím nahor alebo nadol otvoriť či opustiť celú obrazovku'
+    Preload Upcoming Videos: "Prednačítavať nasledujúce videá"
+    Upcoming Videos to Preload: "Počet videí na prednačítanie"
   Channel Settings:
     Channel Settings: Nastavenia kanálov
     Channel Settings Description: Nastavenia, ktoré vyberiete pri sledovaní, sa zapamätajú pre každý kanál samostatne a znova sa použijú pri ďalšom sledovaní jeho videa.
@@ -1182,7 +1184,14 @@ Video:
       DownvoteSegment: Hlasovať proti
       VoteFailed: Hlas SponsorBlock sa nepodarilo odoslať.
 Playlist:
+  Playlist Already Preloaded: "Všetky videá v playliste sú už predbežne načítané"
+  Playlist Preload Progress: "Predbežné načítavanie videí: {completed} z {requested}"
   Close Playlist: Zavrieť zoznam videí
+  Preload Playlist: "Prednačítať všetky videá"
+  Preloading Playlist: "Prednačítavajú sa všetky videá..."
+  Playlist Preload Complete: "Prednačítané videá: {count}."
+  Playlist Preload Partial: "Prednačítaných {preloaded} z {requested} videí. {failed} sa nepodarilo prednačítať."
+  Playlist Preload Pagination Failed: "Celý zoznam sa nepodarilo načítať, preto bolo prednačítanie zrušené."
 Change Format:
   Local Video File: Miestny súbor videa
   Local Audio File: Miestny zvukový súbor
@@ -1379,6 +1388,8 @@ Tooltips:
       Vyššie hodnoty môžu pomôcť pri pomalom alebo nestabilnom pripojení, ale využívajú väčšiu šírku pásma a viac pamäte.
       Môžu tiež spôsobiť, že automatický režim podhodnotí rýchlosť pripojenia a vyberie nižšiu kvalitu.
       Streamy obmedzené na jednu požiadavku naraz toto nastavenie ignorujú.
+    Preload Upcoming Videos: "Načíta a uloží do vyrovnávacej pamäte adresy yt-dlp pre nasledujúce videá. Front má prednosť pred zoznamami a odporúčaniami."
+    Upcoming Videos to Preload: "Najvyšší počet nasledujúcich videí, ktorých adresy yt-dlp sa načítajú na pozadí."
   Download Settings:
     Download Folder: Videá sa ukladajú do tohto priečinka. Ak chcete použiť systémový priečinok Stiahnuté súbory, ponechajte pole prázdne.
     Global Additional yt-dlp Arguments: Dodatočné argumenty príkazového riadka odovzdané nástroju yt-dlp pri každom sťahovaní, napríklad --cookies-from-browser firefox.

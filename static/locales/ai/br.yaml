@@ -500,6 +500,8 @@ Settings:
     Parallel Segment Loading: "Kargañ ar rannoù a-stroll"
     Rotate Wide Videos to Landscape in Fullscreen: 'C’hwelañ ar videoioù ledan d’ar mod gweledva er skramm leun'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Riklañ war-grec’h pe war-draoñ evit mont er skramm leun pe kuitaat anezhañ'
+    Preload Upcoming Videos: "Rakgargañ ar videoioù da-heul"
+    Upcoming Videos to Preload: "Niver a videoioù da rakgargañ"
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
@@ -1191,7 +1193,14 @@ Video:
       DownvoteSegment: "Mouezhiañ a-enep"
       VoteFailed: "N'eus ket bet gallet kas ar vouezh SponsorBlock."
 Playlist:
+  Playlist Already Preloaded: "Karget eo bet holl videoioù ar roll-lenn en a-raok"
+  Playlist Preload Progress: "O kargañ videoioù en a-raok: {completed} diwar {requested}"
   Close Playlist: "Serriñ ar roll-videoioù"
+  Preload Playlist: "Rakgargañ an holl videoioù"
+  Preloading Playlist: "O rakgargañ an holl videoioù..."
+  Playlist Preload Complete: "Videoioù rakgarget: {count}."
+  Playlist Preload Partial: "{preloaded} diwar {requested} video rakgarget. C’hwitet ez eus bet war {failed}."
+  Playlist Preload Pagination Failed: "N’haller ket kargañ ar roll lenn a-bezh, setu eo bet nullet ar rakgargañ."
 Change Format:
   Local Video File: "Restr video lec'hel"
   Local Audio File: "Restr son lec'hel"
@@ -1388,6 +1397,8 @@ Tooltips:
       Gallout a ra gwerzhioù uheloc'h sikour gant kennaskoù gorrek pe distabil, met muioc'h a ledander-bann hag a vemor a vez implijet ganto.
       Gallout a reont ivez lakaat ar mod Emgefreek da briziañ tizh ar c'hennask re izel ha da zibab ur berzhded izeloc'h.
       Ar gwazhioù bevennet d'un azgoulenn war un dro ne zalc'hont ket kont eus an arventenn-mañ.
+    Preload Upcoming Videos: "Kargañ ha krubuilhañ a ra liammoù yt-dlp ar videoioù da-heul. Ar steudad a zo kentoc’h eget ar rolloù lenn hag an erbedadennoù."
+    Upcoming Videos to Preload: "Niver brasañ a videoioù da-heul a vez karget o liammoù yt-dlp en drekleur."
   Download Settings:
     Download Folder: "Enrollet e vez ar videoioù en teuliad-mañ. Laoskit goullo evit implijout teuliad Pellgargadennoù ho reizhiad."
     Global Additional yt-dlp Arguments: "Arventennoù arc'had ouzhpenn tremenet da yt-dlp evit pep pellgargadenn, da skouer --cookies-from-browser firefox."

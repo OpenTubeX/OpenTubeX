@@ -500,6 +500,8 @@ Settings:
     Parallel Segment Loading: Souběžné načítání segmentů
     Rotate Wide Videos to Landscape in Fullscreen: 'Otočit široká videa na šířku v režimu celé obrazovky'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Přejetím nahoru nebo dolů otevřít či opustit celou obrazovku'
+    Preload Upcoming Videos: "Přednačítat následující videa"
+    Upcoming Videos to Preload: "Počet videí k přednačtení"
   Channel Settings:
     Channel Settings: Nastavení kanálů
     Channel Settings Description: Zapamatuje nastavení zvolená při sledování pro každý kanál zvlášť a znovu je použije při příštím sledování některého z jeho videí.
@@ -1182,7 +1184,14 @@ Video:
       DownvoteSegment: Hlasovat proti
       VoteFailed: Hlas pro SponsorBlock se nepodařilo odeslat.
 Playlist:
+  Playlist Already Preloaded: "Všechna videa v playlistu jsou již přednačtena"
+  Playlist Preload Progress: "Přednačítání videí: {completed} z {requested}"
   Close Playlist: Zavřít playlist
+  Preload Playlist: "Přednačíst všechna videa"
+  Preloading Playlist: "Přednačítají se všechna videa..."
+  Playlist Preload Complete: "Přednačtená videa: {count}."
+  Playlist Preload Partial: "Přednačteno {preloaded} z {requested} videí. {failed} se nepodařilo přednačíst."
+  Playlist Preload Pagination Failed: "Celý playlist se nepodařilo načíst, přednačítání bylo zrušeno."
 Change Format:
   Local Video File: Místní soubor videa
   Local Audio File: Místní zvukový soubor
@@ -1379,6 +1388,8 @@ Tooltips:
       Vyšší hodnoty mohou pomoci při pomalém nebo nestabilním připojení, ale spotřebují více přenosové rychlosti a paměti.
       Mohou také způsobit, že automatický režim podhodnotí rychlost připojení a zvolí nižší kvalitu.
       Streamy omezené na jeden požadavek současně toto nastavení ignorují.
+    Preload Upcoming Videos: "Načte a uloží do mezipaměti adresy yt-dlp pro následující videa. Fronta má přednost před playlisty a doporučeními."
+    Upcoming Videos to Preload: "Nejvyšší počet následujících videí, jejichž adresy yt-dlp se načtou na pozadí."
   Download Settings:
     Download Folder: Videa se ukládají do této složky. Chcete-li použít systémovou složku Stažené, ponechte pole prázdné.
     Global Additional yt-dlp Arguments: Další argumenty příkazového řádku předávané nástroji yt-dlp při každém stahování, například --cookies-from-browser firefox.

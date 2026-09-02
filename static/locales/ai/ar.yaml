@@ -508,6 +508,8 @@ Settings:
     Parallel Segment Loading: تحميل القطاع الموازي
     Rotate Wide Videos to Landscape in Fullscreen: 'تدوير مقاطع الفيديو العريضة إلى الوضع الأفقي في ملء الشاشة'
     Swipe Up or Down to Enter or Exit Fullscreen: 'اسحب لأعلى أو لأسفل للدخول إلى ملء الشاشة أو الخروج منها'
+    Preload Upcoming Videos: "تحميل الفيديوهات القادمة مسبقًا"
+    Upcoming Videos to Preload: "عدد الفيديوهات المراد تحميلها مسبقًا"
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.
@@ -1205,7 +1207,14 @@ Video:
       DownvoteSegment: التصويت السلبي
       VoteFailed: فشل إرسال تصويت SponsorBlock.
 Playlist:
+  Playlist Already Preloaded: "تم تحميل جميع فيديوهات قائمة التشغيل مسبقًا بالفعل"
+  Playlist Preload Progress: "جارٍ تحميل الفيديوهات مسبقًا: {completed} من {requested}"
   Close Playlist: إغلاق قائمة التشغيل
+  Preload Playlist: "تحميل كل الفيديوهات مسبقًا"
+  Preloading Playlist: "جارٍ تحميل كل الفيديوهات مسبقًا..."
+  Playlist Preload Complete: "الفيديوهات المحمّلة مسبقًا: {count}."
+  Playlist Preload Partial: "تم تحميل {preloaded} من أصل {requested} فيديو مسبقًا. تعذر تحميل {failed}."
+  Playlist Preload Pagination Failed: "تعذر تحميل قائمة التشغيل كاملة، لذا أُلغي التحميل المسبق."
 Change Format:
   Local Video File: ملف فيديو محلي
   Local Audio File: ملف صوتي محلي
@@ -1387,6 +1396,8 @@ Tooltips:
     Ambient Mode: يمزج ألوان الفيديو في المنطقة المحيطة بالمشغل.
     Default Volume: تم تعطيله أثناء تمكين تذكر مستوى الصوت. قم بإيقاف تشغيل تذكر مستوى الصوت لتعيين مستوى صوت ثابت لبدء التشغيل لكل فيديو.
     Parallel Segment Loading: "عدد مقاطع الفيديو والصوت التي سيتم تحميلها مرة واحدة قبل التشغيل.\nقد تساعد القيم الأعلى في الاتصالات البطيئة أو غير المستقرة، ولكنها تستخدم المزيد من النطاق الترددي والذاكرة.\nوقد يجعلون أيضًا Auto يقلل من سرعة الاتصال ويحدد جودة أقل.\nتتجاهل التدفقات التي تقتصر على طلب واحد في كل مرة هذا الإعداد."
+    Preload Upcoming Videos: "يجلب روابط بث yt-dlp للفيديوهات التالية ويخزنها مؤقتًا. لقائمة الانتظار الأولوية على قوائم التشغيل والاقتراحات."
+    Upcoming Videos to Preload: "الحد الأقصى لعدد الفيديوهات القادمة التي تُجلب روابط بثها في الخلفية."
   Download Settings:
     Download Folder: يتم حفظ مقاطع الفيديو في هذا المجلد. اتركه فارغًا لاستخدام مجلد التنزيلات الخاص بنظامك.
     Global Additional yt-dlp Arguments: يتم تمرير وسيطات سطر الأوامر الإضافية إلى yt-dlp لكل عملية تنزيل، على سبيل المثال --cookies-from-browser Firefox.

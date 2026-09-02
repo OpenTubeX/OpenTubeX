@@ -500,6 +500,8 @@ Settings:
     Parallel Segment Loading: 并行加载视频片段
     Rotate Wide Videos to Landscape in Fullscreen: '全屏时将宽屏视频旋转为横屏'
     Swipe Up or Down to Enter or Exit Fullscreen: '上下滑动以进入或退出全屏'
+    Preload Upcoming Videos: "预加载后续视频"
+    Upcoming Videos to Preload: "要预加载的视频数量"
   Channel Settings:
     Channel Settings: 频道设置
     Channel Settings Description: 分别记住观看各频道时选择的设置，以便下次观看该频道的视频时再次应用。
@@ -1182,7 +1184,14 @@ Video:
       DownvoteSegment: 反对
       VoteFailed: SponsorBlock 投票提交失败。
 Playlist:
+  Playlist Already Preloaded: "播放列表中的所有视频均已预加载"
+  Playlist Preload Progress: "正在预加载视频：{completed}/{requested}"
   Close Playlist: 关闭播放列表
+  Preload Playlist: "预加载所有视频"
+  Preloading Playlist: "正在预加载所有视频..."
+  Playlist Preload Complete: "已预加载视频：{count}。"
+  Playlist Preload Partial: "已预加载 {requested} 个视频中的 {preloaded} 个，{failed} 个未能预加载。"
+  Playlist Preload Pagination Failed: "无法加载完整播放列表，已取消预加载。"
 Change Format:
   Local Video File: 本地视频文件
   Local Audio File: 本地音频文件
@@ -1379,6 +1388,8 @@ Tooltips:
       较高的值可能有助于改善缓慢或不稳定的连接，但会占用更多带宽和内存。
       这也可能导致“自动”低估连接速度并选择较低的画质。
       对于限制为一次只能发出一个请求的流，此设置无效。
+    Preload Upcoming Videos: "获取并缓存后续视频的 yt-dlp 流地址。队列优先于播放列表和推荐。"
+    Upcoming Videos to Preload: "在后台获取 yt-dlp 流地址的后续视频数量上限。"
   Download Settings:
     Download Folder: 视频将保存到此文件夹。留空则使用系统的“下载”文件夹。
     Global Additional yt-dlp Arguments: 每次下载时传递给 yt-dlp 的额外命令行参数，例如 --cookies-from-browser firefox。

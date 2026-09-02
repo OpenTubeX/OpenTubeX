@@ -500,6 +500,8 @@ Settings:
     Parallel Segment Loading: セグメントを並列読み込み
     Rotate Wide Videos to Landscape in Fullscreen: '全画面表示で横長の動画を横向きに回転する'
     Swipe Up or Down to Enter or Exit Fullscreen: '上下にスワイプして全画面表示を開始または終了する'
+    Preload Upcoming Videos: "次の動画を先読み"
+    Upcoming Videos to Preload: "先読みする動画数"
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。
@@ -1182,7 +1184,14 @@ Video:
       DownvoteSegment: 低評価
       VoteFailed: SponsorBlockの評価を送信できませんでした。
 Playlist:
+  Playlist Already Preloaded: "プレイリストのすべての動画は先読み済みです"
+  Playlist Preload Progress: "動画を先読み中: {requested} 本中 {completed} 本"
   Close Playlist: プレイリストを閉じる
+  Preload Playlist: "すべての動画を先読み"
+  Preloading Playlist: "すべての動画を先読みしています..."
+  Playlist Preload Complete: "先読みした動画: {count}。"
+  Playlist Preload Partial: "{requested} 本中 {preloaded} 本を先読みしました。{failed} 本は先読みできませんでした。"
+  Playlist Preload Pagination Failed: "再生リスト全体を読み込めなかったため、先読みを中止しました。"
 Change Format:
   Local Video File: ローカル動画ファイル
   Local Audio File: ローカル音声ファイル
@@ -1379,6 +1388,8 @@ Tooltips:
       値を大きくすると、低速または不安定な接続では改善する場合がありますが、帯域幅とメモリの使用量が増えます。
       また、「自動」が接続速度を実際より低く見積もり、低い品質を選ぶ場合があります。
       一度に1件の要求しか行えないストリームでは、この設定は無視されます。
+    Preload Upcoming Videos: "次に再生可能な動画の yt-dlp URL を取得してキャッシュします。キューは再生リストやおすすめより優先されます。"
+    Upcoming Videos to Preload: "バックグラウンドで yt-dlp URL を取得する次の動画の最大数です。"
   Download Settings:
     Download Folder: 動画をこのフォルダーに保存します。空欄にすると、システムのダウンロードフォルダーを使用します。
     Global Additional yt-dlp Arguments: 'すべてのダウンロードでyt-dlpに渡す追加のコマンドライン引数です。例: --cookies-from-browser firefox'

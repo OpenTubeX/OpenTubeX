@@ -584,6 +584,8 @@ Settings:
         Clipboard: Copiar al Portapapeles
     Rotate Wide Videos to Landscape in Fullscreen: 'Girar videos anchos a horizontal en pantalla completa'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Deslizá hacia arriba o abajo para entrar o salir de pantalla completa'
+    Preload Upcoming Videos: "Precargar próximos vídeos"
+    Upcoming Videos to Preload: "Vídeos próximos para precargar"
   Channel Settings:
     Channel Settings: Ajustes de canales
     Channel Settings Description: Recuerda por separado los ajustes que elijas al ver cada canal para volver a aplicarlos la próxima vez que veas uno de sus videos.
@@ -1543,6 +1545,8 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Tiempo restante previo al anuncio: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Tiempo restante de retroceso de SABR: {remindingTimeSeconds} s'
 Playlist:
+  Playlist Already Preloaded: "Todos los videos de la lista ya están precargados"
+  Playlist Preload Progress: "Precargando videos: {completed} de {requested}"
   Playlist: Lista de reproducción
   Close Playlist: Cerrar lista de reproducción
   View Full Playlist: Ver la lista de reproducción completa
@@ -1559,6 +1563,11 @@ Playlist:
     VideoDurationAscending: Duración (Más corta)
     VideoDurationDescending: Duración (más larga)
     Custom: Personalizado
+  Preload Playlist: "Precargar todos los vídeos"
+  Preloading Playlist: "Precargando todos los vídeos..."
+  Playlist Preload Complete: "Vídeos precargados: {count}."
+  Playlist Preload Partial: "Se precargaron {preloaded} de {requested} vídeos. No se pudieron precargar {failed}."
+  Playlist Preload Pagination Failed: "No se pudo cargar la lista completa, así que se canceló la precarga."
 Change Format:
   Change Media Formats: Cambiar formato de video
   Use Dash Formats: Utilizar formatos DASH
@@ -1817,6 +1826,8 @@ Tooltips:
       Los valores más altos pueden ayudar en conexiones lentas o inestables, pero consumen más ancho de banda y memoria.
       También pueden hacer que Automático calcule una velocidad de conexión demasiado baja y seleccione una calidad inferior.
       Las emisiones limitadas a una solicitud simultánea ignoran este ajuste.
+    Preload Upcoming Videos: "Obtiene y guarda en caché las URL de yt-dlp de los próximos vídeos. La cola tiene prioridad sobre las listas y las recomendaciones."
+    Upcoming Videos to Preload: "Número máximo de próximos vídeos cuyas URL de yt-dlp se obtienen en segundo plano."
   External Player Settings:
     External Player: La elección de un reproductor externo mostrará un icono, para abrir el video (lista de reproducción si es compatible) en el reproductor externo, en la miniatura. Atención, los ajustes de Invidious no afectan a los reproductores externos.
     Custom External Player Executable: Por defecto, OpenTubeX buscará el reproductor externo seleccionado mediante la variable de entorno PATH, de no encontrarlo, podrás especificar una ruta personalizada acá.

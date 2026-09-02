@@ -1015,6 +1015,7 @@
           @close="closeFullscreenPlaylist"
           @pause-player="pausePlayer"
           @skip-availability-change="handlePlaylistSkipAvailabilityChange"
+          @upcoming-videos-change="handleUpcomingPlaylistVideosChange"
         />
       </Teleport>
       <watch-video-recommendations

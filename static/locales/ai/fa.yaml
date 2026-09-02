@@ -530,6 +530,8 @@ Settings:
         Clipboard: رونوشت در تخته‌گیره
     Rotate Wide Videos to Landscape in Fullscreen: 'چرخاندن ویدیوهای عریض به حالت افقی در تمام‌صفحه'
     Swipe Up or Down to Enter or Exit Fullscreen: 'برای ورود به تمام‌صفحه یا خروج از آن، بالا یا پایین بکشید'
+    Preload Upcoming Videos: "پیش‌بارگیری ویدیوهای بعدی"
+    Upcoming Videos to Preload: "تعداد ویدیوها برای پیش‌بارگیری"
   Channel Settings:
     Channel Settings: تنظیمات کانال
     Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.
@@ -1246,7 +1248,14 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ تبلیغ پیش از پخش: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ وقفهٔ SABR: {remindingTimeSeconds}s'
 Playlist:
+  Playlist Already Preloaded: "همه ویدیوهای فهرست پخش از قبل پیش‌بارگذاری شده‌اند"
+  Playlist Preload Progress: "در حال پیش‌بارگذاری ویدیوها: {completed} از {requested}"
   Close Playlist: بستن فهرست پخش
+  Preload Playlist: "پیش‌بارگیری همهٔ ویدیوها"
+  Preloading Playlist: "در حال پیش‌بارگیری همهٔ ویدیوها..."
+  Playlist Preload Complete: "ویدیوهای پیش‌بارگیری‌شده: {count}."
+  Playlist Preload Partial: "از {requested} ویدیو، {preloaded} مورد پیش‌بارگیری شد. پیش‌بارگیری {failed} مورد ناموفق بود."
+  Playlist Preload Pagination Failed: "فهرست پخش کامل بارگیری نشد، بنابراین پیش‌بارگیری لغو شد."
 Change Format:
   Local Video File: فایل ویدیویی محلی
   Local Audio File: فایل صوتی محلی
@@ -1447,6 +1456,8 @@ Tooltips:
       مقادیر بالاتر ممکن است به اتصال‌های کند یا ناپایدار کمک کنند، اما پهنای باند و حافظه بیشتری مصرف می‌کنند.
       همچنین ممکن است باعث شوند «خودکار» سرعت اتصال را کمتر برآورد کند و کیفیت پایین‌تری برگزیند.
       جریان‌هایی که هر بار به یک درخواست محدودند، این تنظیم را نادیده می‌گیرند.
+    Preload Upcoming Videos: "نشانی‌های پخش yt-dlp ویدیوهای بعدی را دریافت و ذخیره می‌کند. صف بر فهرست‌های پخش و پیشنهادها اولویت دارد."
+    Upcoming Videos to Preload: "بیشترین تعداد ویدیوهای بعدی که نشانی yt-dlp آن‌ها در پس‌زمینه دریافت می‌شود."
   Download Settings:
     Download Folder: ویدیوها در این پوشه ذخیره می‌شوند. برای استفاده از پوشه «بارگیری‌ها»ی سیستم، خالی بگذارید.
     Global Additional yt-dlp Arguments: آرگومان‌های اضافی خط فرمان که برای هر بارگیری به yt-dlp فرستاده می‌شوند؛ برای مثال --cookies-from-browser firefox.

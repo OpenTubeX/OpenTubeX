@@ -502,6 +502,8 @@ Settings:
     Parallel Segment Loading: 平行載入片段
     Rotate Wide Videos to Landscape in Fullscreen: '全螢幕時將寬幅影片旋轉為橫向'
     Swipe Up or Down to Enter or Exit Fullscreen: '向上或向下滑動以進入或離開全螢幕'
+    Preload Upcoming Videos: "預先載入後續影片"
+    Upcoming Videos to Preload: "要預先載入的影片數量"
   Channel Settings:
     Channel Settings: 頻道設定
     Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。
@@ -1188,7 +1190,14 @@ Video:
       DownvoteSegment: 投反對票
       VoteFailed: 無法提交 SponsorBlock 投票。
 Playlist:
+  Playlist Already Preloaded: "播放清單中的所有影片均已預載"
+  Playlist Preload Progress: "正在預載影片：{completed}/{requested}"
   Close Playlist: 關閉播放清單
+  Preload Playlist: "預先載入所有影片"
+  Preloading Playlist: "正在預先載入所有影片..."
+  Playlist Preload Complete: "已預先載入影片：{count}。"
+  Playlist Preload Partial: "已預先載入 {requested} 部影片中的 {preloaded} 部，{failed} 部無法載入。"
+  Playlist Preload Pagination Failed: "無法載入完整播放清單，已取消預先載入。"
 Change Format:
   Local Video File: 本機影片檔案
   Local Audio File: 本機音訊檔案
@@ -1385,6 +1394,8 @@ Tooltips:
       較高的值可能有助於改善緩慢或不穩定的連線，但會使用更多頻寬與記憶體。
       也可能使「自動」低估連線速度並選擇較低的畫質。
       限制為一次只能提出一項請求的串流會忽略此設定。
+    Preload Upcoming Videos: "取得並快取後續影片的 yt-dlp 串流網址。佇列優先於播放清單和推薦。"
+    Upcoming Videos to Preload: "在背景取得 yt-dlp 串流網址的後續影片數量上限。"
   Download Settings:
     Download Folder: 影片會儲存至此資料夾。留白可使用系統的「下載」資料夾。
     Global Additional yt-dlp Arguments: 每次下載時傳遞給 yt-dlp 的額外命令列引數，例如 --cookies-from-browser firefox。

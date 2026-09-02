@@ -1965,7 +1965,7 @@ test.describe('watch page', () => {
     })
   })
 
-  test('ignores a superseded yt-dlp extraction after rapid engine switches', async ({ app, page }) => {
+  test('shares a pending yt-dlp extraction after rapid engine switches', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.route('https://example.invalid/*.m3u8', route => route.fulfill({
       contentType: 'application/x-mpegURL',
@@ -1994,37 +1994,24 @@ test.describe('watch page', () => {
       await view.handlePlaybackEngineChange('built-in')
       window.__secondEngineSwitch = view.handlePlaybackEngineChange('yt-dlp')
     })
-    await expect.poll(() => app.electronApp.evaluate(
+    expect(await app.electronApp.evaluate(
       () => globalThis.__ytDlpPlaybackResolvers.length
-    )).toBe(2)
+    )).toBe(1)
 
     await app.electronApp.evaluate(() => {
       globalThis.__ytDlpPlaybackResolvers.shift()({
         isLive: true,
         liveStatus: 'is_live',
-        hlsManifestUrl: 'https://example.invalid/first.m3u8',
+        hlsManifestUrl: 'https://example.invalid/shared.m3u8',
         formats: [],
         duration: null,
-        version: 'first'
+        version: 'shared'
       })
     })
-    await page.evaluate(() => window.__firstEngineSwitch)
-    expect(await watchView.evaluate((view) => ({
-      activeEngine: view.activePlaybackEngine,
-      pending: view.ytDlpStreamsPending
-    }))).toEqual({ activeEngine: 'built-in', pending: true })
-
-    await app.electronApp.evaluate(() => {
-      globalThis.__ytDlpPlaybackResolvers.shift()({
-        isLive: true,
-        liveStatus: 'is_live',
-        hlsManifestUrl: 'https://example.invalid/second.m3u8',
-        formats: [],
-        duration: null,
-        version: 'second'
-      })
-    })
-    await page.evaluate(() => window.__secondEngineSwitch)
+    await page.evaluate(() => Promise.all([
+      window.__firstEngineSwitch,
+      window.__secondEngineSwitch
+    ]))
     expect(await watchView.evaluate((view) => ({
       activeEngine: view.activePlaybackEngine,
       builtInManifest: view.builtInPlaybackSource.manifestSrc,
@@ -2034,10 +2021,40 @@ test.describe('watch page', () => {
     }))).toEqual({
       activeEngine: 'yt-dlp',
       builtInManifest,
-      manifest: 'https://example.invalid/second.m3u8',
+      manifest: 'https://example.invalid/shared.m3u8',
       pending: false,
-      version: 'second'
+      version: 'shared'
     })
+  })
+
+  test('preloads the configured number of upcoming yt-dlp recommendations', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.__ytDlpPreloadCalls = []
+      ipcMain.removeHandler('yt-dlp-get-playback-info')
+      ipcMain.handle('yt-dlp-get-playback-info', (_event, videoId) => {
+        globalThis.__ytDlpPreloadCalls.push(videoId)
+        return { error: 'expected test extraction failure' }
+      })
+    })
+
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate(async (view) => {
+      view.recommendedVideos = [
+        { videoId: 'nextvideo01', title: 'First recommendation' },
+        { videoId: 'nextvideo02', title: 'Second recommendation' },
+        { videoId: 'nextvideo03', title: 'Third recommendation' }
+      ]
+      await view.$store.dispatch('updateYtDlpPreloadCount', 2)
+      await view.$store.dispatch('updateYtDlpPreloadEnabled', true)
+      await view.$store.dispatch('updateVideoPlaybackEngine', 'yt-dlp')
+    })
+
+    await expect.poll(() => app.electronApp.evaluate(() => [
+      ...new Set(globalThis.__ytDlpPreloadCalls.filter(videoId => videoId.startsWith('nextvideo')))
+    ])).toEqual(['nextvideo01', 'nextvideo02'])
   })
 
   test('an IP-blocked playback fallback retries yt-dlp with its default clients', async ({ app, page }) => {

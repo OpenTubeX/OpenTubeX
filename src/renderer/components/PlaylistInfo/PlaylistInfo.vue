@@ -197,6 +197,19 @@
             @click="showDownloadPrompt = true"
           />
           <FtIconButton
+            v-if="preloadAvailable && !editMode && videoCount > 0"
+            :title="preloadPending
+              ? t('Playlist.Preloading Playlist')
+              : preloadComplete
+                ? t('Playlist.Playlist Already Preloaded')
+                : t('Playlist.Preload Playlist')"
+            :icon="['fas', 'forward']"
+            :disabled="preloadPending || preloadComplete"
+            :spin="preloadPending"
+            theme="secondary"
+            @click="emit('preload-playlist')"
+          />
+          <FtIconButton
             v-if="!editMode && userPlaylistDuplicateItemCount > 0"
             :title="$t('User Playlists.Remove Duplicate Videos')"
             :icon="['fas', 'users-slash']"
@@ -415,9 +428,21 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  preloadAvailable: {
+    type: Boolean,
+    default: false,
+  },
+  preloadPending: {
+    type: Boolean,
+    default: false,
+  },
+  preloadComplete: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['enter-edit-mode', 'exit-edit-mode', 'search-video-query-change', 'prompt-open', 'prompt-close', 'toggle-playlist-bookmark'])
+const emit = defineEmits(['enter-edit-mode', 'exit-edit-mode', 'search-video-query-change', 'prompt-open', 'prompt-close', 'toggle-playlist-bookmark', 'preload-playlist'])
 
 const { locale, t } = useI18n()
 const IS_ELECTRON = process.env.IS_ELECTRON

@@ -712,6 +712,8 @@ Settings:
         Clipboard: Kopier til utklippstavla
     Rotate Wide Videos to Landscape in Fullscreen: 'Roter breie videoar til liggjande format i fullskjerm'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Sveip opp eller ned for å opne eller avslutte fullskjerm'
+    Preload Upcoming Videos: "Førehandslast komande videoar"
+    Upcoming Videos to Preload: "Talet på videoar som skal førehandslastast"
   Channel Settings:
     Channel Settings: Kanalinnstillingar
     Channel Settings Description: Hugs innstillingane du vel medan du ser på kvar einskild kanal, slik at dei blir brukte att neste gong du ser ein av videoane til kanalen.
@@ -1562,6 +1564,8 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Attverande tid for førehandsannonsen: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Attverande ventetid for SABR: {remindingTimeSeconds}s'
 Playlist:
+  Playlist Already Preloaded: "Alle videoane i spelelista er allereie førehandslasta"
+  Playlist Preload Progress: "Førehandslastar videoar: {completed} av {requested}"
   Close Playlist: Lukk spelelista
   Sort By:
     DateAddedNewest: Dato lagd til (nyaste)
@@ -1575,6 +1579,11 @@ Playlist:
     VideoDurationAscending: Lengd (kortaste)
     VideoDurationDescending: Lengd (lengste)
     Custom: Eigendefinert
+  Preload Playlist: "Førehandslast alle videoar"
+  Preloading Playlist: "Førehandslastar alle videoar..."
+  Playlist Preload Complete: "Førehandslasta videoar: {count}."
+  Playlist Preload Partial: "Førehandslasta {preloaded} av {requested} videoar. {failed} kunne ikkje førehandslastast."
+  Playlist Preload Pagination Failed: "Heile spelelista kunne ikkje lastast, så førehandslastinga vart avbroten."
 Change Format:
   Local Video File: Lokal videofil
   Local Audio File: Lokal lydfil
@@ -1782,6 +1791,8 @@ Tooltips:
       Høgare verdiar kan hjelpe på treige eller ustabile samband, men brukar meir bandbreidd og minne.
       Dei kan òg få Automatisk til å undervurdere tilkoplingsfarten og velje lågare kvalitet.
       Straumar som er avgrensa til éin førespurnad om gongen, ser bort frå denne innstillinga.
+    Preload Upcoming Videos: "Hentar og mellomlagrar yt-dlp-adresser for dei neste videoane. Køen har prioritet framfor spelelister og tilrådingar."
+    Upcoming Videos to Preload: "Det høgaste talet på komande videoar som får yt-dlp-adressene henta i bakgrunnen."
   External Player Settings:
     Ignore Default Arguments: Ikkje send andre standardargument enn URL-en til videoen til den eksterne spelaren, til dømes avspelingsfart eller URL til spelelista. Eigne argument vert framleis sende vidare.
   Download Settings:

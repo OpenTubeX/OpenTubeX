@@ -508,6 +508,8 @@ Settings:
     Parallel Segment Loading: Pemuatan Segmen Paralel
     Rotate Wide Videos to Landscape in Fullscreen: 'Putar video lebar ke lanskap dalam layar penuh'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Geser ke atas atau bawah untuk masuk atau keluar dari layar penuh'
+    Preload Upcoming Videos: "Pramuat video berikutnya"
+    Upcoming Videos to Preload: "Jumlah video yang dipramuat"
   Channel Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
@@ -1204,7 +1206,14 @@ Video:
       DownvoteSegment: Beri suara negatif
       VoteFailed: Gagal mengirim suara SponsorBlock.
 Playlist:
+  Playlist Already Preloaded: "Semua video dalam daftar putar sudah dimuat sebelumnya"
+  Playlist Preload Progress: "Memuat video terlebih dahulu: {completed} dari {requested}"
   Close Playlist: Tutup Daftar Putar
+  Preload Playlist: "Pramuat semua video"
+  Preloading Playlist: "Mempramuat semua video..."
+  Playlist Preload Complete: "Video yang dipramuat: {count}."
+  Playlist Preload Partial: "Berhasil mempramuat {preloaded} dari {requested} video. {failed} gagal dipramuat."
+  Playlist Preload Pagination Failed: "Daftar putar lengkap tidak dapat dimuat, sehingga pramuat dibatalkan."
 Change Format:
   Local Video File: Berkas video lokal
   Local Audio File: Berkas audio lokal
@@ -1401,6 +1410,8 @@ Tooltips:
       Nilai yang lebih tinggi dapat membantu pada koneksi lambat atau tidak stabil, tetapi menggunakan lebih banyak lebar pita dan memori.
       Nilai tersebut juga dapat membuat Otomatis memperkirakan kecepatan koneksi terlalu rendah dan memilih kualitas yang lebih rendah.
       Stream yang dibatasi satu permintaan pada satu waktu mengabaikan pengaturan ini.
+    Preload Upcoming Videos: "Mengambil dan menyimpan URL yt-dlp untuk video berikutnya. Antrean didahulukan dari daftar putar dan rekomendasi."
+    Upcoming Videos to Preload: "Jumlah maksimum video berikutnya yang URL yt-dlp-nya diambil di latar belakang."
   Download Settings:
     Download Folder: Video disimpan ke folder ini. Biarkan kosong untuk menggunakan folder Unduhan sistem.
     Global Additional yt-dlp Arguments: Argumen baris perintah tambahan yang diteruskan ke yt-dlp untuk setiap unduhan, misalnya --cookies-from-browser firefox.

@@ -530,6 +530,8 @@ Settings:
         Clipboard: Скапіраваць у буфер абмену
     Rotate Wide Videos to Landscape in Fullscreen: 'Паварочваць шырокія відэа гарызантальна ў поўнаэкранным рэжыме'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Правядзіце ўверх або ўніз, каб увайсці ў поўнаэкранны рэжым або выйсці з яго'
+    Preload Upcoming Videos: "Папярэдне загружаць наступныя відэа"
+    Upcoming Videos to Preload: "Колькасць відэа для папярэдняй загрузкі"
   Channel Settings:
     Channel Settings: Налады каналаў
     Channel Settings Description: Запамінаць асобныя налады, абраныя падчас прагляду кожнага канала, і ўжываць іх пры наступным праглядзе відэа з гэтага канала.
@@ -1252,7 +1254,14 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Да канца рэкламы перад відэа: {remindingTimeSeconds} с'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Да паўторнай спробы SABR: {remindingTimeSeconds} с'
 Playlist:
+  Playlist Already Preloaded: "Усе відэа плэйліста ўжо папярэдне загружаны"
+  Playlist Preload Progress: "Папярэдняя загрузка відэа: {completed} з {requested}"
   Close Playlist: Закрыць спіс прайгравання
+  Preload Playlist: "Папярэдне загрузіць усе відэа"
+  Preloading Playlist: "Папярэдняя загрузка ўсіх відэа..."
+  Playlist Preload Complete: "Папярэдне загружана відэа: {count}."
+  Playlist Preload Partial: "Папярэдне загружана {preloaded} з {requested} відэа. Не ўдалося загрузіць {failed}."
+  Playlist Preload Pagination Failed: "Не ўдалося загрузіць увесь плэйліст, таму папярэдняя загрузка скасавана."
 Change Format:
   Local Video File: Лакальны відэафайл
   Local Audio File: Лакальны аўдыяфайл
@@ -1453,6 +1462,8 @@ Tooltips:
       Большыя значэнні могуць дапамагчы пры павольным або нестабільным злучэнні, але патрабуюць больш прапускной здольнасці і памяці.
       Таксама праз іх аўтаматычная ацэнка можа занізіць хуткасць злучэння і выбраць ніжэйшую якасць.
       Плыні з абмежаваннем у адзін адначасовы запыт не ўлічваюць гэтую наладу.
+    Preload Upcoming Videos: "Атрымлівае і кэшуе спасылкі yt-dlp для наступных відэа. Чарга мае прыярытэт над плэйлістамі і рэкамендацыямі."
+    Upcoming Videos to Preload: "Максімальная колькасць наступных відэа, спасылкі на якія атрымліваюцца ў фоне."
   Download Settings:
     Download Folder: Відэа захоўваюцца ў гэтай папцы. Пакіньце поле пустым, каб выкарыстоўваць сістэмную папку «Спампоўванні».
     Global Additional yt-dlp Arguments: Дадатковыя аргументы каманднага радка, якія перадаюцца yt-dlp пры кожным спампоўванні, напрыклад --cookies-from-browser firefox.

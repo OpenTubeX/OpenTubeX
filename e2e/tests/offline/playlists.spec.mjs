@@ -1,7 +1,9 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
+import { IpcChannels } from '../../../src/constants.js'
 import { test, expect, sel, goTo, goToSettingsSection } from '../../helpers/app.mjs'
+import { DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 
 const seededPremiereStart = Date.now() + 86_400_000
 
@@ -25,7 +27,9 @@ test.describe('seeded playlists', () => {
     seed: {
       settings: {
         hideUpcomingPremieres: true,
-        quickBookmarkTargetPlaylistId: 'favorites'
+        quickBookmarkTargetPlaylistId: 'favorites',
+        videoPlaybackEngine: 'yt-dlp',
+        ytDlpPlaybackEngineDefaultMigration: true
       },
       playlists: [
         {
@@ -71,6 +75,27 @@ test.describe('seeded playlists', () => {
           ],
           createdAt: Date.now() - 86_400_000,
           lastUpdatedAt: Date.now()
+        },
+        {
+          _id: 'secondary',
+          playlistName: 'Secondary preload playlist',
+          protected: false,
+          description: 'Playlist used to test switching during preloading',
+          videos: [
+            {
+              videoId: 'eeeeeeeeeee',
+              title: 'Secondary seeded video',
+              author: 'Test Channel',
+              authorId: 'UC-test-channel-id',
+              lengthSeconds: 120,
+              published: Date.now() - 86_400_000,
+              timeAdded: Date.now(),
+              playlistItemId: 'e2e-item-3',
+              type: 'video'
+            }
+          ],
+          createdAt: Date.now() - 86_400_000,
+          lastUpdatedAt: Date.now()
         }
       ]
     }
@@ -85,6 +110,168 @@ test.describe('seeded playlists', () => {
     await expect(page.getByText('Seeded video one')).toBeVisible()
     // Local playlists intentionally ignore the global hide-upcoming setting.
     await expect(page.getByText('Upcoming seeded premiere')).toBeVisible()
+  })
+
+  test('preloads every video in a user playlist with yt-dlp', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ ipcMain }, channel) => {
+      globalThis.__ytDlpPreloadVideoIds = []
+      globalThis.__ytDlpPreloadResolvers = []
+      const requestCounts = new Map()
+      ipcMain.removeHandler(channel)
+      ipcMain.handle(channel, (_event, videoId) => {
+        globalThis.__ytDlpPreloadVideoIds.push(videoId)
+        const requestCount = (requestCounts.get(videoId) ?? 0) + 1
+        requestCounts.set(videoId, requestCount)
+        if (requestCount === 1) {
+          return new Promise(resolve => globalThis.__ytDlpPreloadResolvers.push(resolve))
+        }
+        return { error: 'mock failure' }
+      })
+    }, IpcChannels.YT_DLP_GET_PLAYBACK_INFO)
+
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+    await page.getByTitle('Preload all videos').click()
+
+    await expect.poll(() => app.electronApp.evaluate(
+      () => [...new Set(globalThis.__ytDlpPreloadVideoIds)]
+    )).toEqual(['ccccccccccc', 'ddddddddddd'])
+
+    const pendingButton = page.getByTitle('Preloading all videos...')
+    await expect(pendingButton).toHaveAttribute('aria-disabled', 'true')
+    await expect(pendingButton.locator('.ft-icon--spin')).toBeVisible()
+
+    const progressToast = page.getByTestId('progress-toast')
+    await expect(progressToast).toContainText('Preloading videos: 0 of 2')
+    await expect(progressToast.locator('.progress-indicator')).toHaveAttribute('data-progress', '0')
+
+    await app.electronApp.evaluate(() => globalThis.__ytDlpPreloadResolvers.shift()({ error: 'mock failure' }))
+    await expect(progressToast).toContainText('Preloading videos: 1 of 2')
+    await expect(progressToast.locator('.progress-indicator')).toHaveAttribute('data-progress', '50')
+
+    await app.electronApp.evaluate(() => globalThis.__ytDlpPreloadResolvers.shift()({ error: 'mock failure' }))
+    await expect(page.getByText(
+      'Preloaded 0 of 2 videos. 2 could not be preloaded.'
+    )).toBeVisible()
+    await expect(progressToast).toHaveCount(0)
+    await expect(page.getByTitle('Preload all videos')).toHaveAttribute('aria-disabled', 'false')
+  })
+
+  test('keeps a successfully preloaded playlist disabled', async ({ app, page }) => {
+    await routeDemoMedia(page)
+    await app.electronApp.evaluate(({ ipcMain }, { channel, mediaUrl }) => {
+      ipcMain.removeHandler(channel)
+      ipcMain.handle(channel, (_event, videoId) => ({
+        isLive: false,
+        liveStatus: 'not_live',
+        hlsManifestUrl: null,
+        formats: [{
+          formatId: '43',
+          url: `${mediaUrl}&expire=4102444800`,
+          manifestUrl: null,
+          protocol: 'https',
+          ext: 'webm',
+          container: 'webm',
+          vcodec: 'vp9',
+          acodec: 'opus',
+          width: 640,
+          height: 360,
+          fps: 15,
+          bitrate: 200_000,
+          audioSampleRate: 48_000,
+          audioChannels: 2,
+          language: null,
+          formatNote: '360p',
+          dynamicRange: 'SDR',
+          availableAt: null,
+        }],
+        duration: 30,
+        storyboardVtt: null,
+        captions: [],
+        captionTranslations: [],
+        title: videoId,
+        version: 'test',
+      }))
+    }, {
+      channel: IpcChannels.YT_DLP_GET_PLAYBACK_INFO,
+      mediaUrl: DEMO_MEDIA_URL,
+    })
+
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+    await page.getByTitle('Preload all videos').click()
+
+    await expect(page.getByText('Preloaded videos: 2.')).toBeVisible()
+    const completedButton = page.getByTitle('All playlist videos are already preloaded')
+    await expect(completedButton).toHaveAttribute('aria-disabled', 'true')
+    await expect(completedButton.locator('.ft-icon--spin')).toHaveCount(0)
+    await expect(page.getByTestId('progress-toast')).toHaveCount(0)
+
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+    await expect(page.getByTitle('All playlist videos are already preloaded')).toHaveAttribute('aria-disabled', 'true')
+
+    await app.electronApp.evaluate(({ BrowserWindow }, channel) => {
+      BrowserWindow.getAllWindows()[0].webContents.send(channel)
+    }, IpcChannels.YT_DLP_BINARY_UPDATED)
+    await expect(page.getByTitle('Preload all videos')).toHaveAttribute('aria-disabled', 'false')
+  })
+
+  test('releases stale preload UI when switching playlists', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ ipcMain }, channel) => {
+      globalThis.__ytDlpPreloadVideoIds = []
+      globalThis.__ytDlpPreloadResolvers = []
+      const requestCounts = new Map()
+      ipcMain.removeHandler(channel)
+      ipcMain.handle(channel, (_event, videoId) => {
+        globalThis.__ytDlpPreloadVideoIds.push(videoId)
+        const requestCount = (requestCounts.get(videoId) ?? 0) + 1
+        requestCounts.set(videoId, requestCount)
+        if (requestCount === 1) {
+          return new Promise(resolve => globalThis.__ytDlpPreloadResolvers.push({ videoId, resolve }))
+        }
+        return { error: 'mock failure' }
+      })
+    }, IpcChannels.YT_DLP_GET_PLAYBACK_INFO)
+
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+    await page.getByTitle('Preload all videos').click()
+
+    await expect.poll(() => app.electronApp.evaluate(
+      () => [...new Set(globalThis.__ytDlpPreloadVideoIds)]
+    )).toEqual(['ccccccccccc', 'ddddddddddd'])
+
+    await page.locator(sel.searchInput).fill(
+      'https://www.youtube.com/playlist?list=secondary&playlistType=user'
+    )
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page.getByText('Secondary preload playlist')).toBeVisible()
+    await expect(page.getByTestId('progress-toast')).toHaveCount(0)
+
+    const secondaryPreloadButton = page.getByTitle('Preload all videos')
+    await expect(secondaryPreloadButton).toHaveAttribute('aria-disabled', 'false')
+    await secondaryPreloadButton.click()
+    await expect(page.getByTestId('progress-toast')).toContainText('Preloading videos: 0 of 1')
+
+    await app.electronApp.evaluate(() => {
+      for (const entry of globalThis.__ytDlpPreloadResolvers.splice(0)) {
+        entry.resolve({ error: 'mock failure' })
+      }
+    })
+    await expect.poll(() => app.electronApp.evaluate(
+      () => [...new Set(globalThis.__ytDlpPreloadVideoIds)]
+    )).toEqual(['ccccccccccc', 'ddddddddddd', 'eeeeeeeeeee'])
+
+    await app.electronApp.evaluate(() => {
+      for (const entry of globalThis.__ytDlpPreloadResolvers.splice(0)) {
+        entry.resolve({ error: 'mock failure' })
+      }
+    })
+    await expect(page.getByText(
+      'Preloaded 0 of 1 videos. 1 could not be preloaded.'
+    )).toBeVisible()
+    await expect(page.getByTestId('progress-toast')).toHaveCount(0)
   })
 
   test('restores running premiere styling when the scheduled time arrives', async ({ page }) => {

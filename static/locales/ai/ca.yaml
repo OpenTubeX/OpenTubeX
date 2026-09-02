@@ -743,6 +743,8 @@ Settings:
         Empty File Name: Nom de fitxer buit
     Rotate Wide Videos to Landscape in Fullscreen: 'Gira els vídeos amples al mode apaïsat en pantalla completa'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Llisca amunt o avall per entrar o sortir de la pantalla completa'
+    Preload Upcoming Videos: "Precarrega els vídeos següents"
+    Upcoming Videos to Preload: "Vídeos següents per precarregar"
   Channel Settings:
     Channel Settings: Configuració dels canals
     Channel Settings Description: Recorda per separat la configuració que trieu mentre mireu cada canal, per tornar-la a aplicar la propera vegada que mireu un dels seus vídeos.
@@ -1650,6 +1652,8 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Temps restant de l''anunci previ: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Temps d''espera de SABR restant: {remindingTimeSeconds}s'
 Playlist:
+  Playlist Already Preloaded: "Tots els vídeos de la llista ja estan precarregats"
+  Playlist Preload Progress: "S'estan precarregant vídeos: {completed} de {requested}"
   Playlist: Llista de reproducció
   Close Playlist: Tanca la llista de reproducció
   Sort By:
@@ -1664,6 +1668,11 @@ Playlist:
     VideoDurationAscending: Durada (més curta)
     VideoDurationDescending: Durada (més llarga)
     Custom: Personalitzat
+  Preload Playlist: "Precarrega tots els vídeos"
+  Preloading Playlist: "S’estan precarregant tots els vídeos..."
+  Playlist Preload Complete: "Vídeos precarregats: {count}."
+  Playlist Preload Partial: "S’han precarregat {preloaded} de {requested} vídeos. No se n’han pogut precarregar {failed}."
+  Playlist Preload Pagination Failed: "No s’ha pogut carregar la llista sencera i s’ha cancel·lat la precàrrega."
 Change Format:
   Local Video File: Fitxer de vídeo local
   Local Audio File: Fitxer d'àudio local
@@ -1904,6 +1913,8 @@ Tooltips:
       Els valors més alts poden ajudar amb connexions lentes o inestables, però utilitzen més amplada de banda i memòria.
       També poden fer que Automàtic subestimi la velocitat de connexió i seleccioni una qualitat inferior.
       Els fluxos limitats a una sol·licitud alhora ignoren aquesta opció.
+    Preload Upcoming Videos: "Obté i desa a la memòria cau els URL de yt-dlp dels vídeos següents. La cua té prioritat sobre les llistes i les recomanacions."
+    Upcoming Videos to Preload: "Nombre màxim de vídeos següents els URL de yt-dlp dels quals s’obtenen en segon pla."
   External Player Settings:
     External Player: En triar un reproductor extern, es mostrarà a la miniatura una icona per obrir-hi el vídeo o, si s'admet, la llista de reproducció. La configuració d'Invidious no afecta els reproductors externs.
     Custom External Player Executable: De manera predeterminada, l'OpenTubeX suposa que el reproductor extern triat es pot trobar mitjançant la variable d'entorn PATH. Si cal, podeu definir aquí un camí personalitzat.

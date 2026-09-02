@@ -502,6 +502,8 @@ Settings:
     Parallel Segment Loading: Паралелно зареждане на сегменти
     Rotate Wide Videos to Landscape in Fullscreen: 'Завъртане на широките видеоклипове хоризонтално на цял екран'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Плъзнете нагоре или надолу за включване или изключване на цял екран'
+    Preload Upcoming Videos: "Предварително зареждане на следващите видеа"
+    Upcoming Videos to Preload: "Брой видеа за предварително зареждане"
   Channel Settings:
     Channel Settings: Настройки за каналите
     Channel Settings Description: Запомняне на избраните при гледане настройки поотделно за всеки канал, за да бъдат приложени отново следващия път, когато гледате негов видеоклип.
@@ -1186,7 +1188,14 @@ Video:
       DownvoteSegment: Гласуване „против“
       VoteFailed: Гласът в SponsorBlock не можа да бъде изпратен.
 Playlist:
+  Playlist Already Preloaded: "Всички видеоклипове в плейлиста вече са предварително заредени"
+  Playlist Preload Progress: "Предварително зареждане на видеоклипове: {completed} от {requested}"
   Close Playlist: Затваряне на плейлиста
+  Preload Playlist: "Предварително зареждане на всички видеа"
+  Preloading Playlist: "Предварително зареждане на всички видеа..."
+  Playlist Preload Complete: "Предварително заредени видеа: {count}."
+  Playlist Preload Partial: "Предварително заредени са {preloaded} от {requested} видеа. {failed} не можаха да се заредят."
+  Playlist Preload Pagination Failed: "Пълният плейлист не можа да се зареди и предварителното зареждане бе отменено."
 Change Format:
   Local Video File: Локален видеофайл
   Local Audio File: Локален аудиофайл
@@ -1383,6 +1392,8 @@ Tooltips:
       По-високите стойности може да помогнат при бавна или нестабилна връзка, но използват повече трафик и памет.
       Те може също да накарат автоматичния режим да подцени скоростта на връзката и да избере по-ниско качество.
       Потоците, ограничени до една заявка наведнъж, пренебрегват тази настройка.
+    Preload Upcoming Videos: "Извлича и кешира yt-dlp адресите за следващите видеа. Опашката е с приоритет пред плейлистите и препоръките."
+    Upcoming Videos to Preload: "Максималният брой предстоящи видеа, чиито yt-dlp адреси се извличат във фонов режим."
   Download Settings:
     Download Folder: Видеоклиповете се запазват в тази папка. Оставете празно, за да използвате системната папка за изтегляния.
     Global Additional yt-dlp Arguments: Допълнителни аргументи от командния ред, подавани на yt-dlp при всяко изтегляне, например --cookies-from-browser firefox.

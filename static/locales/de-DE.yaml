@@ -768,6 +768,8 @@ Settings:
     Multiply Seek Interval by Playback Rate: Sprungintervalle mit Wiedergabegeschwindigkeit multiplizieren
     Show Playback Rate Adjusted Timestamp: Wiedergabegeschwindigkeitsangepasste Zeitstempel anzeigen
     Autoplay Interruption Timer: Abbruch-Timer für Automatische Wiedergabe
+    Preload Upcoming Videos: Bevorstehende Videos vorladen
+    Upcoming Videos to Preload: Anzahl vorzuladender Videos
     Default Viewing Mode:
       Theater: Kinomodus
       Picture in Picture: Bild im Bild
@@ -1928,6 +1930,13 @@ Playlist:
   #& About
   Close Playlist: Playlist schließen
   View Full Playlist: Vollständige Playlist ansehen
+  Preload Playlist: Alle Videos vorladen
+  Preloading Playlist: Alle Videos werden vorgeladen ...
+  Playlist Already Preloaded: Alle Videos der Playlist sind bereits vorgeladen
+  Playlist Preload Progress: 'Videos werden vorgeladen: {completed} von {requested}'
+  Playlist Preload Complete: 'Vorgeladene Videos: {count}.'
+  Playlist Preload Partial: '{preloaded} von {requested} Videos wurden vorgeladen. {failed} konnten nicht vorgeladen werden.'
+  Playlist Preload Pagination Failed: Die vollständige Playlist konnte nicht geladen werden. Das Vorladen wurde abgebrochen.
   Last Updated On: Zuletzt aktualisiert am
   Playlist: Playlist
 
@@ -2191,6 +2200,8 @@ Tooltips:
       auswählen.
 
       Streams, die auf jeweils eine Anfrage beschränkt sind, ignorieren diese Einstellung.
+    Preload Upcoming Videos: Ruft die yt-dlp-Stream-URLs der Videos ab, die als Nächstes abgespielt werden können, und speichert sie zwischen. Die Warteschlange hat Vorrang vor Playlists und Empfehlungen.
+    Upcoming Videos to Preload: Die Höchstzahl bevorstehender Videos, deren yt-dlp-Stream-URLs im Hintergrund abgerufen werden.
   External Player Settings:
     Custom External Player Arguments: Alle benutzerdefinierten Befehlszeilenargumente, die an den externen Video-Player übergeben werden sollen.
     Ignore Warnings: Warnungen unterdrücken, wenn der aktuelle externe Video-Player die aktuelle Aktion nicht unterstützt (z. B. das Umkehren von Playlists usw.).

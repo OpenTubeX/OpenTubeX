@@ -508,6 +508,8 @@ Settings:
         Clipboard: Kopier til utklippstavlen
     Rotate Wide Videos to Landscape in Fullscreen: 'Roter brede videoer til liggende format i fullskjerm'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Sveip opp eller ned for å åpne eller avslutte fullskjerm'
+    Preload Upcoming Videos: "Forhåndslast kommende videoer"
+    Upcoming Videos to Preload: "Antall videoer som skal forhåndslastes"
   Channel Settings:
     Channel Settings: Kanalinnstillinger
     Channel Settings Description: Husk innstillingene du velger mens du ser på hver kanal, slik at de brukes igjen neste gang du ser en av videoene fra kanalen.
@@ -1209,7 +1211,14 @@ Video:
       DownvoteSegment: Stem ned
       VoteFailed: Kunne ikke sende inn SponsorBlock-stemmen.
 Playlist:
+  Playlist Already Preloaded: "Alle videoene i spillelisten er allerede forhåndslastet"
+  Playlist Preload Progress: "Forhåndslaster videoer: {completed} av {requested}"
   Close Playlist: Lukk spillelisten
+  Preload Playlist: "Forhåndslast alle videoer"
+  Preloading Playlist: "Forhåndslaster alle videoer..."
+  Playlist Preload Complete: "Forhåndslastede videoer: {count}."
+  Playlist Preload Partial: "Forhåndslastet {preloaded} av {requested} videoer. {failed} kunne ikke forhåndslastes."
+  Playlist Preload Pagination Failed: "Hele spillelisten kunne ikke lastes, så forhåndslastingen ble avbrutt."
 Change Format:
   Local Video File: Lokal videofil
   Local Audio File: Lokal lydfil
@@ -1406,6 +1415,8 @@ Tooltips:
       Høyere verdier kan hjelpe på trege eller ustabile forbindelser, men bruker mer båndbredde og minne.
       De kan også føre til at Automatisk undervurderer tilkoblingshastigheten og velger lavere kvalitet.
       Strømmer som er begrenset til én forespørsel om gangen, ignorerer denne innstillingen.
+    Preload Upcoming Videos: "Henter og mellomlagrer yt-dlp-adresser for de neste videoene. Køen prioriteres foran spillelister og anbefalinger."
+    Upcoming Videos to Preload: "Maksimalt antall kommende videoer som får yt-dlp-adressene hentet i bakgrunnen."
   Download Settings:
     Download Folder: Videoer lagres i denne mappen. La feltet stå tomt for å bruke systemets nedlastingsmappe.
     Global Additional yt-dlp Arguments: Ekstra kommandolinjeargumenter som sendes til yt-dlp for hver nedlasting, for eksempel --cookies-from-browser firefox.

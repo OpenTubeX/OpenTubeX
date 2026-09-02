@@ -500,6 +500,8 @@ Settings:
     Parallel Segment Loading: Szakaszok párhuzamos betöltése
     Rotate Wide Videos to Landscape in Fullscreen: 'A széles videók elforgatása fekvő helyzetbe teljes képernyőn'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Húzd felfelé vagy lefelé a teljes képernyő megnyitásához vagy bezárásához'
+    Preload Upcoming Videos: "Következő videók előtöltése"
+    Upcoming Videos to Preload: "Előtöltendő videók száma"
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
@@ -1182,7 +1184,14 @@ Video:
       DownvoteSegment: Negatív szavazat
       VoteFailed: Nem sikerült elküldeni a SponsorBlock-szavazatot.
 Playlist:
+  Playlist Already Preloaded: "A lejátszási lista összes videója már elő van töltve"
+  Playlist Preload Progress: "Videók előtöltése: {completed}/{requested}"
   Close Playlist: Lejátszási lista bezárása
+  Preload Playlist: "Összes videó előtöltése"
+  Preloading Playlist: "Az összes videó előtöltése..."
+  Playlist Preload Complete: "Előtöltött videók: {count}."
+  Playlist Preload Partial: "{requested} videóból {preloaded} előtöltve. {failed} előtöltése sikertelen."
+  Playlist Preload Pagination Failed: "A teljes lejátszási lista nem tölthető be, ezért az előtöltés megszakadt."
 Change Format:
   Local Video File: Helyi videófájl
   Local Audio File: Helyi hangfájl
@@ -1379,6 +1388,8 @@ Tooltips:
       A nagyobb érték lassú vagy instabil kapcsolatnál segíthet, de több sávszélességet és memóriát használ.
       Emiatt az Auto alábecsülheti a kapcsolat sebességét, és gyengébb minőséget választhat.
       Az egyszerre egy kérésre korlátozott adatfolyamok figyelmen kívül hagyják ezt a beállítást.
+    Preload Upcoming Videos: "Lekéri és gyorsítótárazza a következő videók yt-dlp-címeit. A várólista elsőbbséget élvez a lejátszási listákkal és ajánlásokkal szemben."
+    Upcoming Videos to Preload: "A háttérben lekért yt-dlp-címmel rendelkező következő videók legnagyobb száma."
   Download Settings:
     Download Folder: A videók ebbe a mappába kerülnek. Hagyja üresen a rendszer Letöltések mappájának használatához.
     Global Additional yt-dlp Arguments: Minden letöltésnél a yt-dlp számára átadott további parancssori argumentumok, például --cookies-from-browser firefox.
