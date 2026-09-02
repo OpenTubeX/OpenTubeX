@@ -93,12 +93,11 @@
       class="transcriptControls"
     >
       <FtInput
+        input-type="search"
         :value="searchQuery"
         :placeholder="t('Video.Transcript.Search')"
         :show-action-button="false"
-        :show-clear-text-button="true"
         @input="searchQuery = $event"
-        @clear="searchQuery = ''"
       />
     </div>
 

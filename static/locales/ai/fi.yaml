@@ -537,6 +537,8 @@ Settings:
     Forget Channel: Poista tämän kanavan kaikki asetukset
     Forget Value: Poista tämä asetus
     Add Setting: Muista toinen asetus tälle kanavalle
+    Add Subscribed Channel: Lisää tilattu kanava
+    Enable Setting Before Adding Channel: Ota ennen kanavan lisäämistä käyttöön vähintään yksi kanava-asetus toistoasetuksissa
     Video Quality: Videon laatu
     Subtitles Enabled: Tekstitys käytössä
     Volume: Äänenvoimakkuus
@@ -981,6 +983,7 @@ Channel:
   Subscription settings: Tilausasetukset
   Failed to save subscription settings: Tilausasetusten tallentaminen epäonnistui
   Videos per day: Videoita päivässä
+  Different values: Eri arvot
   Use global setting: Käytä yleistä asetusta
   Unlimited: Rajoittamaton
   More videos hidden: '+{count} lisää | +{count} lisää'

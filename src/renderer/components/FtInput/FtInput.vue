@@ -184,6 +184,8 @@ const props = defineProps({
     default: null
   },
   showClearTextButton: {
+    // Reserved for TopNav autocomplete. Regular search fields use inputType="search"
+    // so Chromium supplies the themed native cancel control.
     type: Boolean,
     default: false
   },

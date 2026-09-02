@@ -554,6 +554,8 @@ Settings:
     Forget Channel: Забыць усе налады гэтага канала
     Forget Value: Забыць гэту наладу
     Add Setting: Запомніць яшчэ адну наладу для гэтага канала
+    Add Subscribed Channel: Дадаць канал з падпісак
+    Enable Setting Before Adding Channel: Перад даданнем канала ўключыце хаця б адну наладу канала ў наладах прайгравання
     Video Quality: Якасць відэа
     Subtitles Enabled: Субцітры ўключаныя
     Volume: Гучнасць
@@ -1010,6 +1012,7 @@ Channel:
   Subscription settings: Налады падпіскі
   Failed to save subscription settings: Не ўдалося захаваць налады падпіскі
   Videos per day: Відэа за дзень
+  Different values: Розныя значэнні
   Use global setting: Выкарыстоўваць агульную наладу
   Unlimited: Без абмежаванняў
   More videos hidden: '+{count} яшчэ | +{count} яшчэ | +{count} яшчэ'

@@ -524,6 +524,8 @@ Settings:
     Forget Channel: このチャンネルの設定をすべて削除
     Forget Value: この設定を削除
     Add Setting: このチャンネルで別の設定を記憶
+    Add Subscribed Channel: 登録チャンネルを追加
+    Enable Setting Before Adding Channel: チャンネルを追加する前に、再生設定でチャンネル設定を1つ以上有効にしてください
     Video Quality: 動画品質
     Subtitles Enabled: 字幕を有効化
     Volume: 音量
@@ -957,6 +959,7 @@ Channel:
   Subscription settings: 登録設定
   Failed to save subscription settings: 登録設定を保存できませんでした
   Videos per day: 1日あたりの動画数
+  Different values: 異なる値
   Use global setting: 全体設定を使用
   Unlimited: 無制限
   More videos hidden: '他{count}件'

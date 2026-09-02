@@ -56,15 +56,24 @@
           :disable-label="savedChannelSyncDisableLabel"
         />
       </template>
+      <div
+        v-if="availableSubscriptions.length > 0"
+        class="channelManagerToolbar"
+      >
+        <FtButton
+          :label="t('Settings.Channel Settings.Add Subscribed Channel')"
+          :icon="['fas', 'plus']"
+          @click="showAddChannelPrompt = true"
+        />
+      </div>
       <FtInput
         v-if="channelEntries.length > SEARCH_THRESHOLD"
         class="channelSearch"
+        input-type="search"
         :placeholder="t('Settings.Channel Settings.Search Channels')"
         :show-action-button="false"
-        :show-clear-text-button="true"
         :value="searchQuery"
         @input="value => searchQuery = value"
-        @clear="searchQuery = ''"
       />
       <div
         v-overlay-scrollbars
@@ -187,19 +196,101 @@
           </li>
         </ul>
       </div>
+      <FtPrompt
+        v-if="showAddChannelPrompt"
+        :label="t('Settings.Channel Settings.Add Subscribed Channel')"
+        theme="readable-width"
+        fixed-layout
+        @click="closeAddChannelPrompt"
+      >
+        <div class="addSubscribedChannelPicker">
+          <p
+            v-if="enabledPreferences.length === 0"
+            class="addSubscribedChannelEmptyState"
+          >
+            {{ t('Settings.Channel Settings.Enable Setting Before Adding Channel') }}
+          </p>
+          <template v-else>
+            <FtInput
+              ref="addChannelSearch"
+              class="addSubscribedChannelSearch"
+              input-type="search"
+              :placeholder="t('Settings.Channel Settings.Search Channels')"
+              :show-action-button="false"
+              :value="addChannelSearchQuery"
+              @input="value => addChannelSearchQuery = value"
+            />
+            <p
+              v-if="visibleAvailableSubscriptions.length === 0"
+              class="addSubscribedChannelEmptyState"
+            >
+              {{ t('Settings.Channel Settings.No Matching Channels') }}
+            </p>
+            <ul
+              v-else
+              class="addSubscribedChannelList"
+            >
+              <li
+                v-for="channel in visibleAvailableSubscriptions"
+                :key="channel.id"
+              >
+                <button
+                  type="button"
+                  class="addSubscribedChannelOption"
+                  @click="addSubscribedChannel(channel.id)"
+                >
+                  <img
+                    v-if="channel.thumbnail"
+                    class="channelThumbnail"
+                    :src="channel.thumbnail"
+                    alt=""
+                  >
+                  <span
+                    v-else
+                    class="channelThumbnail channelThumbnailPlaceholder"
+                    aria-hidden="true"
+                  >
+                    <FtIcon :icon="['fas', 'circle-user']" />
+                  </span>
+                  <span
+                    class="addSubscribedChannelName"
+                    dir="auto"
+                  >
+                    {{ channel.name }}
+                  </span>
+                  <FtIcon
+                    class="addSubscribedChannelIcon"
+                    :icon="['fas', 'plus']"
+                    aria-hidden="true"
+                  />
+                </button>
+              </li>
+            </ul>
+          </template>
+        </div>
+        <template #footer>
+          <FtFlexBox>
+            <FtButton
+              :label="t('Close')"
+              @click="closeAddChannelPrompt"
+            />
+          </FtFlexBox>
+        </template>
+      </FtPrompt>
     </FtSettingsSubpage>
   </FtSettingsSection>
 </template>
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
+import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
@@ -321,6 +412,21 @@ const backendOptions = computed(() => ({
 }))
 
 const showManager = ref(false)
+const showAddChannelPrompt = ref(false)
+const addChannelSearchQuery = ref('')
+const addChannelSearch = useTemplateRef('addChannelSearch')
+
+watch(showAddChannelPrompt, async (open) => {
+  if (!open || enabledPreferences.value.length === 0) {
+    return
+  }
+
+  // FtPrompt assigns its initial focus after mounting. Wait for that pass,
+  // then put keyboard users directly in the channel search.
+  await nextTick()
+  await nextTick()
+  addChannelSearch.value?.focus()
+})
 
 /** @param {MouseEvent} event */
 function handleChannelLinkClick(event) {
@@ -426,6 +532,35 @@ const channelEntries = computed(() => {
   return entries.sort((a, b) => collator.value.compare(a.name, b.name))
 })
 
+const enabledPreferences = computed(() => (
+  PREFERENCES.filter(({ rememberKey }) => settings.value[rememberKey])
+))
+
+/** Subscriptions that do not have any saved channel preference yet. */
+const availableSubscriptions = computed(() => {
+  const savedChannelIds = new Set(channelEntries.value.map(({ id }) => id))
+
+  return Array.from(subscriptionsById.value, ([id, channel]) => ({
+    id,
+    name: channel.name || id,
+    thumbnail: channel.thumbnail ?? ''
+  }))
+    .filter(({ id }) => !savedChannelIds.has(id))
+    .sort((a, b) => collator.value.compare(a.name, b.name))
+})
+
+const visibleAvailableSubscriptions = computed(() => {
+  const query = addChannelSearchQuery.value.trim().toLowerCase()
+
+  if (query === '') {
+    return availableSubscriptions.value
+  }
+
+  return availableSubscriptions.value.filter(({ id, name }) => (
+    name.toLowerCase().includes(query) || id.toLowerCase().includes(query)
+  ))
+})
+
 const visibleChannelEntries = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
 
@@ -496,6 +631,29 @@ function addPreference(channelId, type) {
       setPreference(channelId, type, store.getters.getDefaultVolume)
       break
   }
+}
+
+/**
+ * Creates a saved channel entry with the global defaults for every enabled
+ * per-channel preference.
+ * @param {string} channelId
+ */
+function addSubscribedChannel(channelId) {
+  if (enabledPreferences.value.length === 0) {
+    return
+  }
+
+  for (const { type } of enabledPreferences.value) {
+    addPreference(channelId, type)
+  }
+
+  addChannelSearchQuery.value = ''
+  showAddChannelPrompt.value = false
+}
+
+function closeAddChannelPrompt() {
+  showAddChannelPrompt.value = false
+  addChannelSearchQuery.value = ''
 }
 
 /**

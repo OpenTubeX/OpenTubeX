@@ -554,6 +554,8 @@ Settings:
     Forget Channel: فراموش‌کردن همهٔ تنظیمات این کانال
     Forget Value: فراموش‌کردن این تنظیم
     Add Setting: به‌خاطر سپردن تنظیمی دیگر برای این کانال
+    Add Subscribed Channel: افزودن کانال مشترک‌شده
+    Enable Setting Before Adding Channel: پیش از افزودن کانال، حداقل یکی از تنظیمات کانال را در تنظیمات پخش فعال کنید
     Video Quality: کیفیت ویدیو
     Subtitles Enabled: زیرنویس فعال است
     Volume: بلندی صدا
@@ -1007,6 +1009,7 @@ Channel:
   Subscription settings: تنظیمات اشتراک
   Failed to save subscription settings: تنظیمات اشتراک ذخیره نشد
   Videos per day: ویدیو در روز
+  Different values: مقادیر متفاوت
   Use global setting: استفاده از تنظیم سراسری
   Unlimited: نامحدود
   More videos hidden: '+{count} ویدیوی دیگر | +{count} ویدیوی دیگر'

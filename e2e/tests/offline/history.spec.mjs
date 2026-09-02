@@ -368,9 +368,9 @@ test.describe('history search pagination', () => {
     await goTo(page, 'history')
 
     const historySearch = page.locator('.ft-input-component').filter({
-      has: page.getByRole('textbox', { name: 'Search in History' })
+      has: page.getByRole('searchbox', { name: 'Search in History' })
     })
-    const filterInput = historySearch.getByRole('textbox', { name: 'Search in History' })
+    const filterInput = historySearch.getByRole('searchbox', { name: 'Search in History' })
     const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
     const loadMoreButton = page.getByRole('button', { name: 'Load More Videos' })
 
@@ -395,7 +395,8 @@ test.describe('history search pagination', () => {
     await expect(loadMoreButton).toHaveCount(0)
 
     await scrollPageToEnd(page)
-    await historySearch.getByRole('button', { name: 'Clear Input' }).evaluate(button => button.click())
+    await expect(filterInput).toHaveAttribute('type', 'search')
+    await filterInput.fill('')
     await expect(filterInput).toHaveValue('')
     await expect(videos.first()).toContainText('Decoy match')
     await expect(videos).toHaveCount(100)
@@ -428,7 +429,7 @@ test.describe('history search automatic pagination', () => {
   test('loads the next filtered batch when the pagination control enters view', async ({ page }) => {
     await goTo(page, 'history')
 
-    const filterInput = page.getByRole('textbox', { name: 'Search in History' })
+    const filterInput = page.getByRole('searchbox', { name: 'Search in History' })
     const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
 
     await filterInput.fill('Automatic match')

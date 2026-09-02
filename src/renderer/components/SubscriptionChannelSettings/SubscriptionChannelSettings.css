@@ -4,6 +4,103 @@
   padding-inline: 20px;
 }
 
+.channelSelectionToolbar {
+  border: 1px solid var(--border-color);
+  border-radius: calc(6px * var(--ui-roundness));
+  margin-block-end: 12px;
+  padding: 12px;
+}
+
+.channelSelectionSummary {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.channelSelectionSummary > p {
+  margin: 0;
+}
+
+.channelSelectionActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.channelSelectionActions :deep(.btn) {
+  margin-block: 0;
+}
+
+.channelSelectionActionIcon {
+  flex: none;
+  margin-inline-start: auto;
+}
+
+.bulkFeedTypeSettings {
+  border-block-start: 1px solid var(--divider-color);
+  margin-block-start: 12px;
+  padding-block-start: 12px;
+}
+
+.bulkFeedTypeOptions {
+  max-inline-size: 680px;
+}
+
+.bulkAdditionalSettings {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  margin-block-start: 12px;
+  max-inline-size: 680px;
+}
+
+.bulkMembersOnlySetting {
+  align-items: center;
+  background-color: var(--search-bar-color);
+  border: 1px solid transparent;
+  border-radius: calc(5px * var(--ui-roundness));
+  color: var(--primary-text-color);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) 14px;
+  min-block-size: 45px;
+  padding-inline: 16px;
+  text-align: start;
+}
+
+.bulkMembersOnlySetting:is(:hover, :focus-visible) {
+  border-color: var(--primary-color);
+}
+
+.bulkMembersOnlySetting:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+.bulkMembersOnlySetting:is(.enabled, .mixed) {
+  border-color: color-mix(in srgb, var(--primary-color) 55%, var(--border-color));
+}
+
+.bulkMembersOnlyLabel {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bulkSettingCheck {
+  color: var(--primary-color);
+}
+
+.bulkDailyLimitSelect {
+  inline-size: 100%;
+}
+
 .channelSettingsScroller {
   flex: 1;
   min-block-size: 0;
@@ -36,11 +133,60 @@
   padding: 16px;
 }
 
+.channelSettings.selected {
+  border-color: color-mix(in srgb, var(--primary-color) 55%, var(--border-color));
+}
+
 .channelIdentity {
   align-items: center;
   display: flex;
   gap: 12px;
   min-inline-size: 0;
+}
+
+.channelSelectionOption {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--text-with-main-color);
+  cursor: pointer;
+  display: flex;
+  flex: none;
+  justify-content: center;
+  min-block-size: 44px;
+  min-inline-size: 44px;
+  padding: 0;
+  position: relative;
+}
+
+.channelSelectionOption::before {
+  block-size: 18px;
+  border: 2px solid var(--primary-text-color);
+  border-radius: calc(3px * var(--ui-roundness));
+  box-sizing: border-box;
+  content: '';
+  inline-size: 18px;
+  position: absolute;
+}
+
+.channelSelectionOption:is(:hover, :focus-visible)::before {
+  border-color: var(--primary-color);
+}
+
+.channelSelectionOption:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+.channelSelectionOption.selected::before {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.channelSelectionOption .ft-icon {
+  font-size: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .channelThumbnail {
@@ -120,6 +266,11 @@
   color: var(--primary-text-color);
 }
 
+.feedTypeOption.mixed {
+  border-color: color-mix(in srgb, var(--primary-color) 55%, var(--border-color));
+  color: var(--primary-text-color);
+}
+
 .feedTypeOption > span {
   min-inline-size: 0;
   overflow: hidden;
@@ -129,6 +280,13 @@
 
 .feedTypeCheck {
   color: var(--primary-color);
+}
+
+.feedTypeMixedIndicator {
+  background-color: var(--primary-color);
+  block-size: 2px;
+  inline-size: 10px;
+  justify-self: center;
 }
 
 .membersOnlySetting,
@@ -143,6 +301,24 @@
 }
 
 @container (width <= 560px) {
+  .channelSelectionSummary {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .channelSelectionActions {
+    justify-content: stretch;
+  }
+
+  .channelSelectionActions :deep(.btn) {
+    block-size: auto;
+    flex: 1 1 0;
+    margin: 0;
+    min-inline-size: 0;
+    padding-inline: 8px;
+    white-space: normal;
+  }
+
   .feedTypeOptions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

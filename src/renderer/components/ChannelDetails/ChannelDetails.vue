@@ -270,13 +270,12 @@
         <FtInput
           v-if="showSearchBar"
           ref="searchBar"
+          input-type="search"
           :placeholder="$t('Channel.Search Channel')"
           :value="query"
-          :show-clear-text-button="true"
           class="channelSearch"
           :maxlength="255"
           @input="handleSearchInput"
-          @clear="clearSearch"
           @click="search"
         />
       </FtFlexBox>

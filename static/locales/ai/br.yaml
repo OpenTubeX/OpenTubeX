@@ -524,6 +524,8 @@ Settings:
     Forget Channel: "Ankouaat holl arventennoù ar chadenn-mañ"
     Forget Value: "Ankouaat an arventenn-mañ"
     Add Setting: "Derc'hel soñj eus un arventenn all evit ar chadenn-mañ"
+    Add Subscribed Channel: Ouzhpennañ ur chadenn koumanantet
+    Enable Setting Before Adding Channel: Gweredekaat da nebeutañ un arventenn chadenn en arventennoù lenn a-raok ouzhpennañ ur chadenn
     Video Quality: "Perzhded ar video"
     Subtitles Enabled: "Istitloù gweredekaet"
     Volume: "Live ar son"
@@ -957,6 +959,7 @@ Channel:
   Subscription settings: Arventennoù ar c'houmanant
   Failed to save subscription settings: N'eus ket bet gallet enrollañ arventennoù ar c'houmanant
   Videos per day: Videoioù dre zevezh
+  Different values: Gwerzhioù disheñvel
   Use global setting: Ober gant an arventenn hollek
   Unlimited: Didermen
   More videos hidden: '+{count} ouzhpenn | +{count} ouzhpenn | +{count} ouzhpenn | +{count} ouzhpenn | +{count} ouzhpenn'

@@ -2,6 +2,22 @@ import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const CHANNEL_NAME = 'Alpha Channel'
+const NEW_CHANNEL_ID = 'UCbbbbbbbbbbbbbbbbbbbbbb'
+const NEW_CHANNEL_NAME = 'Beta Channel'
+const OTHER_CHANNEL_ID = 'UCcccccccccccccccccccccc'
+const OTHER_CHANNEL_NAME = 'Gamma Channel'
+const EXTRA_SUBSCRIPTIONS = Array.from({ length: 30 }, (_, index) => ({
+  id: `UC${String(index).padStart(22, '0')}`,
+  name: `Extra Channel ${index + 1}`,
+  thumbnail: ''
+}))
+
+async function updateInputWithoutScrolling(input, value) {
+  await input.evaluate((element, nextValue) => {
+    element.value = nextValue
+    element.dispatchEvent(new Event('input', { bubbles: true }))
+  }, value)
+}
 
 test.use({
   seed: {
@@ -9,6 +25,10 @@ test.use({
       channelPlaybackSpeeds: JSON.stringify({
         [CHANNEL_ID]: 1.5
       }),
+      defaultPlayback: 1.25,
+      defaultVolume: 0.4,
+      rememberPlaybackSpeedPerChannel: true,
+      rememberVolumePerChannel: true,
       syncServerSettingsExcluded: ['channelPlaybackSpeeds'],
       syncServerAutoSync: false,
       syncServerEnabled: true,
@@ -23,7 +43,10 @@ test.use({
         bgColor: '#000000',
         textColor: '#FFFFFF',
         subscriptions: [
-          { id: CHANNEL_ID, name: CHANNEL_NAME, thumbnail: '' }
+          { id: CHANNEL_ID, name: CHANNEL_NAME, thumbnail: '' },
+          { id: NEW_CHANNEL_ID, name: NEW_CHANNEL_NAME, thumbnail: '' },
+          { id: OTHER_CHANNEL_ID, name: OTHER_CHANNEL_NAME, thumbnail: '' },
+          ...EXTRA_SUBSCRIPTIONS
         ]
       }
     ]
@@ -90,6 +113,84 @@ test.describe('channel settings', () => {
     await expect(page).toHaveURL(new RegExp(`#/channel/${CHANNEL_ID}`))
     await expect(settingsWindow).toBeVisible()
     await expect(settingsWindow.locator('.settingsBreadcrumb')).toContainText('Saved Channel Settings')
+  })
+
+  test('adds subscriptions without saved channel settings', async ({ attachScreenshot, page }) => {
+    await goToSettingsSection(page, 'playback')
+    await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
+
+    const settingsWindow = page.locator('.settingsWindow')
+    const addChannel = settingsWindow.getByRole('button', { name: 'Add subscribed channel' })
+    await addChannel.click()
+
+    const picker = page.getByRole('dialog', { name: 'Add subscribed channel' })
+    const search = picker.getByPlaceholder('Search channels')
+    await expect(search).toBeVisible()
+    await expect(search).toBeFocused()
+    await expect(search).toHaveAttribute('type', 'search')
+    await expect(picker.getByRole('button', { name: 'Clear Input' })).toHaveCount(0)
+    const scroller = picker.locator('.promptContentScroller')
+    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+    await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+    await updateInputWithoutScrolling(search, NEW_CHANNEL_NAME)
+    await expect(picker.getByRole('button', { name: CHANNEL_NAME, exact: true })).toHaveCount(0)
+    await expect(picker.getByRole('button', { name: NEW_CHANNEL_NAME, exact: true })).toBeVisible()
+    await expect(picker.getByRole('button', { name: OTHER_CHANNEL_NAME, exact: true })).toHaveCount(0)
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+    await attachScreenshot('add subscription to saved channel settings')
+
+    await picker.getByRole('button', { name: NEW_CHANNEL_NAME, exact: true }).click()
+    const newChannel = settingsWindow.locator('.channelEntry', { hasText: NEW_CHANNEL_NAME })
+    await expect(newChannel).toBeVisible()
+    await expect(newChannel.locator('.channelPreference')).toHaveCount(2)
+
+    await expect.poll(() => page.evaluate(channelId => {
+      const settings = document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings
+      return {
+        playbackSpeed: JSON.parse(settings.channelPlaybackSpeeds)[channelId],
+        volume: JSON.parse(settings.channelVolumes)[channelId]
+      }
+    }, NEW_CHANNEL_ID)).toEqual({ playbackSpeed: 1.25, volume: 0.4 })
+
+    await addChannel.click()
+    const reopenedPicker = page.getByRole('dialog', { name: 'Add subscribed channel' })
+    await expect(reopenedPicker.getByRole('button', { name: NEW_CHANNEL_NAME, exact: true })).toHaveCount(0)
+    await expect(reopenedPicker.getByRole('button', { name: OTHER_CHANNEL_NAME, exact: true })).toBeVisible()
+  })
+
+  test('points to Playback settings when channel settings are disabled', async ({ page }) => {
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await Promise.all([
+        store.dispatch('updateRememberPlaybackSpeedPerChannel', false),
+        store.dispatch('updateRememberVideoQualityPerChannel', false),
+        store.dispatch('updateRememberSubtitlesStatePerChannel', false),
+        store.dispatch('updateRememberVolumePerChannel', false)
+      ])
+    })
+
+    await goToSettingsSection(page, 'playback')
+    await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
+    await page.getByRole('button', { name: 'Add subscribed channel' }).click()
+
+    const picker = page.getByRole('dialog', { name: 'Add subscribed channel' })
+    const message = picker.getByText(
+      'Enable at least one channel setting in Playback settings before adding a channel'
+    )
+    await expect(message).toBeVisible()
+
+    const [pickerBox, messageBox] = await Promise.all([
+      picker.boundingBox(),
+      message.boundingBox()
+    ])
+    expect(Math.abs(
+      pickerBox.x + pickerBox.width / 2 - (messageBox.x + messageBox.width / 2)
+    )).toBeLessThanOrEqual(1)
   })
 
   test('saved channels are not links when channel links are disabled', async ({ page }) => {

@@ -526,6 +526,8 @@ Settings:
     Forget Channel: Anghofio pob gosodiad ar gyfer y sianel hon
     Forget Value: Anghofio'r gosodiad hwn
     Add Setting: Cofio gosodiad arall ar gyfer y sianel hon
+    Add Subscribed Channel: Ychwanegu sianel rydych wedi tanysgrifio iddi
+    Enable Setting Before Adding Channel: Galluogwch o leiaf un gosodiad sianel yn y gosodiadau chwarae cyn ychwanegu sianel
     Video Quality: Ansawdd fideo
     Subtitles Enabled: Isdeitlau wedi'u galluogi
     Volume: Lefel y sain
@@ -959,6 +961,7 @@ Channel:
   Subscription settings: Gosodiadau tanysgrifiad
   Failed to save subscription settings: Methwyd cadw gosodiadau'r tanysgrifiad
   Videos per day: Fideos y dydd
+  Different values: Gwerthoedd gwahanol
   Use global setting: Defnyddio'r gosodiad cyffredinol
   Unlimited: Diderfyn
   More videos hidden: '+{count} yn rhagor | +{count} yn rhagor | +{count} yn rhagor | +{count} yn rhagor | +{count} yn rhagor | +{count} yn rhagor'

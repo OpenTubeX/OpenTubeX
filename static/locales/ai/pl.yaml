@@ -161,6 +161,9 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Przesuń w górę lub w dół, aby włączyć lub wyłączyć pełny ekran'
     Preload Upcoming Videos: "Wstępnie wczytuj następne filmy"
     Upcoming Videos to Preload: "Liczba filmów do wstępnego wczytania"
+  Channel Settings:
+    Add Subscribed Channel: Dodaj subskrybowany kanał
+    Enable Setting Before Adding Channel: Przed dodaniem kanału włącz co najmniej jedno ustawienie kanału w ustawieniach odtwarzania
   Download Settings:
     Concurrent Downloads: Jednoczesne pobieranie
     Bandwidth Limit: Limit przepustowości (KiB/s, 0 oznacza brak limitu)
@@ -436,6 +439,7 @@ Channel:
   Subscription settings: Ustawienia subskrypcji
   Failed to save subscription settings: Nie udało się zapisać ustawień subskrypcji
   Videos per day: Filmy dziennie
+  Different values: Różne wartości
   Use global setting: Użyj ustawienia globalnego
   Unlimited: Bez ograniczeń
   More videos hidden: '+{count} więcej | +{count} więcej | +{count} więcej'

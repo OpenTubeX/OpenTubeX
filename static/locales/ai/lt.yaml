@@ -724,6 +724,8 @@ Settings:
     Forget Channel: Pamiršti visus šio kanalo nustatymus
     Forget Value: Pamiršti šį nustatymą
     Add Setting: Įsiminti kitą šio kanalo nustatymą
+    Add Subscribed Channel: Pridėti prenumeruojamą kanalą
+    Enable Setting Before Adding Channel: Prieš pridėdami kanalą, atkūrimo nustatymuose įjunkite bent vieną kanalo nustatymą
     Video Quality: Vaizdo kokybė
     Subtitles Enabled: Subtitrai įjungti
     Volume: Garsumas
@@ -1233,6 +1235,7 @@ Channel:
   Subscription settings: Prenumeratos nustatymai
   Failed to save subscription settings: Nepavyko išsaugoti prenumeratos nustatymų
   Videos per day: Vaizdo įrašų per dieną
+  Different values: Skirtingos reikšmės
   Use global setting: Naudoti bendrąjį nustatymą
   Unlimited: Neribota
   More videos hidden: '+{count} daugiau | +{count} daugiau | +{count} daugiau'

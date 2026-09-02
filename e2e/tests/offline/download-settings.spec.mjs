@@ -152,7 +152,7 @@ test.describe('download settings', () => {
     await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
 
     const manager = page.locator('.settingsSubpageContent')
-    const search = manager.getByRole('textbox', { name: 'Search channels' })
+    const search = manager.getByRole('searchbox', { name: 'Search channels' })
     const scroller = manager.locator('.automaticDownloadsScroller')
     const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
     await scrollToBottom(scroller)

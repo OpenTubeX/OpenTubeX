@@ -73,7 +73,8 @@ test.describe('channel page', () => {
     expect(Math.abs(externalPlayerBounds.y - downloadBounds.y)).toBeLessThanOrEqual(2)
     expect(externalPlayerBounds.x + externalPlayerBounds.width).toBeLessThanOrEqual(downloadBounds.x)
 
-    await page.locator('.channelSearch .clearInputTextButton').click()
+    await expect(page.locator('.channelSearch input')).toHaveAttribute('type', 'search')
+    await page.locator('.channelSearch input').fill('')
     await expect(page).not.toHaveURL(/searchQueryText=/)
     await expect(page.locator(sel.activeTab)).toContainText('Blender')
 

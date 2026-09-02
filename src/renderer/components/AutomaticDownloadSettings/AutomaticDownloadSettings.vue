@@ -16,12 +16,11 @@
         {{ t('Settings.Download Settings.Automatic Downloads New Only') }}
       </p>
       <FtInput
+        input-type="search"
         :placeholder="t('Settings.Channel Settings.Search Channels')"
         :show-action-button="false"
-        :show-clear-text-button="true"
         :value="searchQuery"
         @input="searchQuery = $event"
-        @clear="searchQuery = ''"
       />
     </div>
     <div

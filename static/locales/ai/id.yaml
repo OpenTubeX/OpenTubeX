@@ -532,6 +532,8 @@ Settings:
     Forget Channel: Lupakan semua pengaturan untuk saluran ini
     Forget Value: Lupakan pengaturan ini
     Add Setting: Ingat pengaturan lain untuk saluran ini
+    Add Subscribed Channel: Tambahkan channel langganan
+    Enable Setting Before Adding Channel: Aktifkan setidaknya satu pengaturan channel di pengaturan Pemutaran sebelum menambahkan channel
     Video Quality: Kualitas Video
     Subtitles Enabled: Takarir Diaktifkan
     Volume: Volume
@@ -974,6 +976,7 @@ Channel:
   Subscription settings: Pengaturan langganan
   Failed to save subscription settings: Gagal menyimpan pengaturan langganan
   Videos per day: Video per hari
+  Different values: Nilai berbeda
   Use global setting: Gunakan pengaturan global
   Unlimited: Tanpa batas
   More videos hidden: '+{count} lainnya'

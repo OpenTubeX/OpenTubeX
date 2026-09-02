@@ -524,6 +524,8 @@ Settings:
     Forget Channel: Oublier tous les paramètres de cette chaîne
     Forget Value: Oublier ce paramètre
     Add Setting: Mémoriser un autre paramètre pour cette chaîne
+    Add Subscribed Channel: Ajouter une chaîne suivie
+    Enable Setting Before Adding Channel: Activez au moins un paramètre de chaîne dans les paramètres de lecture avant d'ajouter une chaîne
     Video Quality: Qualité vidéo
     Subtitles Enabled: Sous-titres activés
     Volume: Volume
@@ -956,6 +958,7 @@ Channel:
   Subscription settings: Paramètres d'abonnement
   Failed to save subscription settings: Impossible d’enregistrer les paramètres d’abonnement
   Videos per day: Vidéos par jour
+  Different values: Valeurs différentes
   Use global setting: Utiliser le paramètre général
   Unlimited: Illimité
   More videos hidden: '+{count} de plus | +{count} de plus | +{count} de plus'

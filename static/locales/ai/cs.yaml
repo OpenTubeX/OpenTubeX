@@ -524,6 +524,8 @@ Settings:
     Forget Channel: Zapomenout všechna nastavení tohoto kanálu
     Forget Value: Zapomenout toto nastavení
     Add Setting: Zapamatovat si pro tento kanál další nastavení
+    Add Subscribed Channel: Přidat odebíraný kanál
+    Enable Setting Before Adding Channel: Před přidáním kanálu povolte alespoň jedno nastavení kanálu v nastavení přehrávání
     Video Quality: Kvalita videa
     Subtitles Enabled: Titulky zapnuté
     Volume: Hlasitost
@@ -957,6 +959,7 @@ Channel:
   Subscription settings: Nastavení odběru
   Failed to save subscription settings: Nastavení odběru se nepodařilo uložit
   Videos per day: Videa za den
+  Different values: Různé hodnoty
   Use global setting: Použít globální nastavení
   Unlimited: Bez omezení
   More videos hidden: '+{count} dalších | +{count} dalších | +{count} dalších'

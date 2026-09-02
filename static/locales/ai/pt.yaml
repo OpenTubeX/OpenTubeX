@@ -540,6 +540,8 @@ Settings:
     Forget Channel: Esquecer todas as definições deste canal
     Forget Value: Esquecer esta definição
     Add Setting: Memorizar outra definição para este canal
+    Add Subscribed Channel: Adicionar canal subscrito
+    Enable Setting Before Adding Channel: Ative pelo menos uma definição de canal nas definições de reprodução antes de adicionar um canal
     Video Quality: Qualidade do vídeo
     Subtitles Enabled: Legendas ativadas
     Volume: Volume
@@ -984,6 +986,7 @@ Channel:
   Subscription settings: Definições da subscrição
   Failed to save subscription settings: Não foi possível guardar as definições da subscrição
   Videos per day: Vídeos por dia
+  Different values: Valores diferentes
   Use global setting: Usar definição global
   Unlimited: Sem limite
   More videos hidden: '+{count} mais | +{count} mais | +{count} mais'

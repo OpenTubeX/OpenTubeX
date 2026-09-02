@@ -532,6 +532,8 @@ Settings:
     Forget Channel: نسيان جميع إعدادات هذه القناة
     Forget Value: نسيان هذا الإعداد
     Add Setting: تذكر إعدادًا آخر لهذه القناة
+    Add Subscribed Channel: إضافة قناة مشترك بها
+    Enable Setting Before Adding Channel: فعّل إعداد قناة واحدًا على الأقل في إعدادات التشغيل قبل إضافة قناة
     Video Quality: جودة الفيديو
     Subtitles Enabled: تم تمكين الترجمات
     Volume: مستوى الصوت
@@ -976,6 +978,7 @@ Channel:
   Subscription settings: إعدادات الاشتراك
   Failed to save subscription settings: تعذّر حفظ إعدادات الاشتراك
   Videos per day: مقاطع الفيديو يوميًا
+  Different values: قيم مختلفة
   Use global setting: استخدام الإعداد العام
   Unlimited: بلا حدود
   More videos hidden: '+{count} مقاطع فيديو أخرى | +{count} مقطع فيديو آخر | +{count} مقطعا فيديو آخران | +{count} مقاطع فيديو أخرى | +{count} مقطع فيديو آخر | +{count} مقطع فيديو آخر'

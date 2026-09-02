@@ -1334,6 +1334,8 @@ Settings:
     Forget Channel: Alle Einstellungen für diesen Kanal vergessen
     Forget Value: Diese Einstellung vergessen
     Add Setting: Eine weitere Einstellung für diesen Kanal speichern
+    Add Subscribed Channel: Abonnierten Kanal hinzufügen
+    Enable Setting Before Adding Channel: Aktiviere in den Wiedergabeeinstellungen mindestens eine Kanaleinstellung, bevor du einen Kanal hinzufügst
     Video Quality: Videoqualität
     Subtitles Enabled: Untertitel aktiviert
     Volume: Lautstärke
@@ -1513,6 +1515,7 @@ Channel:
   Subscription settings: Abo-Einstellungen
   Failed to save subscription settings: Abo-Einstellungen konnten nicht gespeichert werden
   Videos per day: Videos pro Tag
+  Different values: Unterschiedliche Werte
   Use global setting: Globale Einstellung verwenden
   Unlimited: Unbegrenzt
   More videos hidden: '+{count} weiteres | +{count} weitere'

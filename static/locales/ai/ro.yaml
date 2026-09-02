@@ -528,6 +528,8 @@ Settings:
     Forget Channel: Uită toate setările acestui canal
     Forget Value: Uită această setare
     Add Setting: Reține altă setare pentru acest canal
+    Add Subscribed Channel: Adaugă canal abonat
+    Enable Setting Before Adding Channel: Activează cel puțin o setare de canal în setările de redare înainte de a adăuga un canal
     Video Quality: Calitate video
     Subtitles Enabled: Subtitrări activate
     Volume: Volum
@@ -975,6 +977,7 @@ Channel:
   Subscription settings: Setări abonament
   Failed to save subscription settings: Setările abonamentului nu au putut fi salvate
   Videos per day: Videoclipuri pe zi
+  Different values: Valori diferite
   Use global setting: Folosește setarea globală
   Unlimited: Nelimitat
   More videos hidden: '+{count} în plus | +{count} în plus | +{count} în plus'

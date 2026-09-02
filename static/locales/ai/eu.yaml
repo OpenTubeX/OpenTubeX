@@ -526,6 +526,8 @@ Settings:
     Forget Channel: Ahaztu kanal honen ezarpen guztiak
     Forget Value: Ahaztu ezarpen hau
     Add Setting: Gogoratu beste ezarpen bat kanal honetarako
+    Add Subscribed Channel: Gehitu harpidetutako kanal bat
+    Enable Setting Before Adding Channel: Gaitu gutxienez kanal-ezarpen bat erreprodukzio-ezarpenetan kanal bat gehitu aurretik
     Video Quality: Bideo-kalitatea
     Subtitles Enabled: Azpitituluak gaituta
     Volume: Bolumena
@@ -959,6 +961,7 @@ Channel:
   Subscription settings: Harpidetzaren ezarpenak
   Failed to save subscription settings: Ezin izan dira harpidetzaren ezarpenak gorde
   Videos per day: Eguneko bideoak
+  Different values: Balio desberdinak
   Use global setting: Erabili ezarpen orokorra
   Unlimited: Mugagabea
   More videos hidden: '+{count} gehiago | +{count} gehiago'
