@@ -1,5 +1,11 @@
 import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from './share.js'
 
+export function resolveExternalLinkAction(externalLinkHandling) {
+  if (externalLinkHandling === 'doNothing') return 'disabled'
+  if (externalLinkHandling === 'openLinkAfterPrompt') return 'prompt'
+  return 'open'
+}
+
 /**
  * Resolve the URL copied from the mobile long-press menu. App routes use their
  * public YouTube equivalent so the clipboard never receives a file URL.

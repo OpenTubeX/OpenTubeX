@@ -32,6 +32,28 @@ test('keeps a genuinely newer local setting edit', () => {
   assert.equal(entry.updatedAt, 40)
 })
 
+test('does not treat reordered object keys as a local setting edit', () => {
+  const remoteEntry = {
+    key: 'homeSections',
+    value: { subscriptions: true, trending: false },
+    updatedAt: 30,
+  }
+  const entry = mergeSettingEntry({
+    key: 'homeSections',
+    value: { trending: true, subscriptions: true },
+    old: {
+      key: 'homeSections',
+      value: { subscriptions: true, trending: true },
+      updatedAt: 10,
+    },
+    remoteEntry,
+    localUpdatedAt: 40,
+    now: 100,
+  })
+
+  assert.deepEqual(entry, remoteEntry)
+})
+
 test('records a custom-theme edit before publishing the new theme list', async () => {
   const calls = []
   const themes = [{ id: 'theme-1', name: 'Test theme' }]

@@ -3,7 +3,10 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import test from 'node:test'
 
-import { resolveMobileContextLinkCopyUrl } from '../../src/renderer/helpers/mobileLinkActions.js'
+import {
+  resolveExternalLinkAction,
+  resolveMobileContextLinkCopyUrl,
+} from '../../src/renderer/helpers/mobileLinkActions.js'
 
 const appUrl = 'https://localhost/'
 
@@ -35,4 +38,10 @@ test('mobile link actions preserve external URLs and reject private app routes',
 test('the mobile copy-link action uses the distinct copy icon', async () => {
   const app = await readFile(path.join(process.cwd(), 'src/renderer/App.vue'), 'utf8')
   assert.match(app, /@click="copyMobileContextLink"[\s\S]*?<FtIcon :icon="\['fas', 'copy'\]"/)
+})
+
+test('mobile external links respect the configured opening policy', () => {
+  assert.equal(resolveExternalLinkAction('doNothing'), 'disabled')
+  assert.equal(resolveExternalLinkAction('openLinkAfterPrompt'), 'prompt')
+  assert.equal(resolveExternalLinkAction(''), 'open')
 })

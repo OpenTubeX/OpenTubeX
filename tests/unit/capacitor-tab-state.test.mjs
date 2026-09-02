@@ -83,6 +83,19 @@ test('adds, activates, and closes Capacitor tabs while retaining one tab', () =>
   assert.equal(session.tabs[0].route.fullPath, '/home')
 })
 
+test('can add a Capacitor tab without activating it', () => {
+  const session = restoreCapacitorTabSession(null, HOME_ROUTE, () => 'tab-1')
+  const updated = addCapacitorTab(
+    session,
+    createCapacitorTab(WATCH_ROUTE, 'Video', 'tab-2'),
+    false
+  )
+
+  assert.deepEqual(updated.tabs.map(tab => tab.id), ['tab-1', 'tab-2'])
+  assert.equal(updated.activeTabId, 'tab-1')
+  assert.equal(updated.selectionRevision, session.selectionRevision)
+})
+
 test('maps the active Capacitor tab into the existing runtime tab shape', () => {
   let session = restoreCapacitorTabSession(null, HOME_ROUTE, () => 'tab-1')
   session = addCapacitorTab(session, createCapacitorTab(WATCH_ROUTE, 'Video', 'tab-2'))
@@ -112,6 +125,18 @@ test('pins Capacitor tabs first and only reorders within their pin group', () =>
   const restored = restoreCapacitorTabSession(session, HOME_ROUTE)
   assert.equal(restored.tabs[0].isPinned, true)
   assert.equal(toRuntimeTabState(restored).tabs[0].isPinned, true)
+})
+
+test('moves a Capacitor tab to the requested final index in either direction', () => {
+  let session = restoreCapacitorTabSession(null, HOME_ROUTE, () => 'tab-1')
+  session = addCapacitorTab(session, createCapacitorTab(WATCH_ROUTE, 'Video', 'tab-2'))
+  session = addCapacitorTab(session, createCapacitorTab(HOME_ROUTE, 'Home 2', 'tab-3'))
+
+  session = moveCapacitorTab(session, 'tab-1', 2)
+  assert.deepEqual(session.tabs.map(tab => tab.id), ['tab-2', 'tab-3', 'tab-1'])
+
+  session = moveCapacitorTab(session, 'tab-1', 0)
+  assert.deepEqual(session.tabs.map(tab => tab.id), ['tab-1', 'tab-2', 'tab-3'])
 })
 
 test('retains closed Capacitor tabs and restores the newest one with its history', () => {

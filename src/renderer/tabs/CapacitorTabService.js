@@ -81,11 +81,13 @@ class CapacitorTabService {
     this.persist()
   }
 
-  async createTab(location = `/${this.store.getters.getLandingPage}`, title = '') {
+  async createTab(location = `/${this.store.getters.getLandingPage}`, title = '', makeActive = true) {
     const tab = createCapacitorTab(this.router.resolve(location), title)
-    const session = addCapacitorTab(this.currentSession(), tab)
+    const session = addCapacitorTab(this.currentSession(), tab, makeActive)
     this.commitSession(session)
-    await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)
+    if (makeActive) {
+      await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)
+    }
     return tab.id
   }
 

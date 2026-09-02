@@ -63,13 +63,13 @@ export function restoreCapacitorTabSession(value, currentRoute, createId = () =>
   }
 }
 
-export function addCapacitorTab(session, tab) {
+export function addCapacitorTab(session, tab, makeActive = true) {
   const tabs = [...session.tabs, normalizePersistedTab(tab)]
   return {
     ...session,
     tabs,
-    activeTabId: tab.id,
-    selectionRevision: session.selectionRevision + 1
+    activeTabId: makeActive ? tab.id : session.activeTabId,
+    selectionRevision: session.selectionRevision + Number(makeActive)
   }
 }
 

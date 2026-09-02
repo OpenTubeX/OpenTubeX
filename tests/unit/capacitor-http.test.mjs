@@ -123,6 +123,23 @@ test('does not start an already-aborted request', async () => {
   assert.equal(requestStarted, false)
 })
 
+test('uses the abort signal from a Request object', async () => {
+  let requestStarted = false
+  globalThis.fetch = async () => {
+    requestStarted = true
+    return new Response()
+  }
+
+  const abortController = new AbortController()
+  abortController.abort()
+  const request = new Request('https://www.youtube.com', {
+    signal: abortController.signal,
+  })
+
+  await assert.rejects(capacitorHttpFetch(request), { name: 'AbortError' })
+  assert.equal(requestStarted, false)
+})
+
 test('loads YouTube avatars through Capacitor HTTP as data URLs', async () => {
   let receivedRequest
   globalThis.FileReader = TestFileReader

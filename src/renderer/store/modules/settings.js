@@ -806,24 +806,28 @@ export function getSyncableSettingKeys(settings) {
   ))
 }
 
-async function recordSettingSyncTimestamp(commit, settings, settingId) {
+let settingSyncTimestampWrite = Promise.resolve()
+
+function recordSettingSyncTimestamp(commit, settings, settingId) {
   if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY) return
 
-  const current = settings.syncServerSettingUpdatedAt !== null &&
-    typeof settings.syncServerSettingUpdatedAt === 'object' &&
-    !Array.isArray(settings.syncServerSettingUpdatedAt)
-    ? settings.syncServerSettingUpdatedAt
-    : {}
-  const updatedAt = {
-    ...current,
-    [settingId]: Date.now(),
-  }
-  try {
+  settingSyncTimestampWrite = settingSyncTimestampWrite.then(async () => {
+    const current = settings.syncServerSettingUpdatedAt !== null &&
+      typeof settings.syncServerSettingUpdatedAt === 'object' &&
+      !Array.isArray(settings.syncServerSettingUpdatedAt)
+      ? settings.syncServerSettingUpdatedAt
+      : {}
+    const updatedAt = {
+      ...current,
+      [settingId]: Date.now(),
+    }
     await DBSettingHandlers.upsert('syncServerSettingUpdatedAt', updatedAt)
     commit('setSyncServerSettingUpdatedAt', updatedAt)
-  } catch (error) {
+  }).catch(error => {
     console.error('Failed to record the setting sync timestamp', error)
-  }
+  })
+
+  return settingSyncTimestampWrite
 }
 
 const customState = {

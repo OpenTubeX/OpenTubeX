@@ -3,15 +3,17 @@ apply plugin: 'com.android.application'
 def releaseKeystorePath = System.getenv("ANDROID_RELEASE_KEYSTORE")
 def releaseStorePassword = System.getenv("ANDROID_RELEASE_STORE_PASSWORD")
 def releaseSigningConfigured = releaseKeystorePath?.trim() && releaseStorePassword?.trim()
-def releaseTaskRequested = gradle.startParameter.taskNames.any {
-    it.toLowerCase().contains("release")
-}
 
-if (releaseTaskRequested && !releaseSigningConfigured) {
-    throw new GradleException(
-        "Release signing is not configured. Set ANDROID_RELEASE_KEYSTORE and " +
-        "ANDROID_RELEASE_STORE_PASSWORD."
-    )
+gradle.taskGraph.whenReady { graph ->
+    def releaseTaskScheduled = graph.allTasks.any { task ->
+        task.project == project && task.name.toLowerCase().contains("release")
+    }
+    if (releaseTaskScheduled && !releaseSigningConfigured) {
+        throw new GradleException(
+            "Release signing is not configured. Set ANDROID_RELEASE_KEYSTORE and " +
+            "ANDROID_RELEASE_STORE_PASSWORD."
+        )
+    }
 }
 
 android {

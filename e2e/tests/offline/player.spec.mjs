@@ -1172,10 +1172,23 @@ test.describe('scroll mini player', () => {
     }, { dragY })
 
     await expect(player).toHaveClass(/scrollMiniPlayerStashed/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
     await expect(player.locator('.scrollMiniPlayerControls button')).toHaveCount(1)
     await expect(player.locator('.scrollMiniPlayPause')).toHaveCount(0)
     await expect(player.locator('.scrollMiniPointerLayer')).toHaveCSS('pointer-events', 'auto')
     await expect(player.locator('video')).toHaveCSS('pointer-events', 'none')
+
+    const visibleWidthBeforeResize = await player.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return Math.min(window.innerWidth, bounds.right) - Math.max(0, bounds.left)
+    })
+    await setWindowSize(app, page, { width: 420, height: 760 })
+    await expect(player).toHaveClass(/scrollMiniPlayerStashed/)
+    await expect.poll(async () => {
+      const bounds = await player.boundingBox()
+      if (!bounds) return Number.POSITIVE_INFINITY
+      return Math.min(420, bounds.x + bounds.width) - Math.max(0, bounds.x)
+    }).toBeCloseTo(visibleWidthBeforeResize, 0)
 
     const restoreLayer = player.locator('.scrollMiniPointerLayer')
     const restoreBounds = await restoreLayer.boundingBox()

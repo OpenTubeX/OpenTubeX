@@ -416,7 +416,10 @@ import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { hasVisibleGamepadLayer, initializeGamepadNavigation } from './helpers/gamepadNavigation'
 import { keyboardEventInitFromShortcut, OPEN_COMMAND_PALETTE_EVENT } from './helpers/commandPalette'
 import { createCommandPaletteRegistry } from './helpers/commandPaletteRegistry'
-import { resolveMobileContextLinkCopyUrl } from './helpers/mobileLinkActions'
+import {
+  resolveExternalLinkAction,
+  resolveMobileContextLinkCopyUrl,
+} from './helpers/mobileLinkActions'
 import { initializePlatformInfo, isLinuxWayland } from './helpers/platform'
 import {
   shouldShowProgressStartToast,
@@ -3456,7 +3459,7 @@ async function openMobileContextLink(newTab) {
     return
   }
 
-  openExternalLink(href)
+  handleExternalLink(href)
 }
 
 /**
@@ -3495,6 +3498,24 @@ function handleAuxClick(event) {
 }
 
 /**
+ * @param {string} href
+ */
+function handleExternalLink(href) {
+  const action = resolveExternalLinkAction(externalLinkHandling.value)
+  if (action === 'disabled') {
+    showToast({
+      message: t('External link opening has been disabled in Settings → Privacy'),
+      icon: ['fas', 'link-slash'],
+    })
+  } else if (action === 'prompt') {
+    lastExternalLinkToBeOpened.value = href
+    showExternalLinkOpeningPrompt.value = true
+  } else {
+    openExternalLink(href)
+  }
+}
+
+/**
  * @param {PointerEvent} event
  * @param {HTMLAnchorElement} link
  */
@@ -3522,20 +3543,8 @@ function handleLinkClick(event, link) {
       doCreateNewTab,
       isMiddleClick
     })
-  } else if (externalLinkHandling.value === 'doNothing') {
-    // Let user know opening external link is disabled via setting
-    showToast({
-      message: t('External link opening has been disabled in Settings → Privacy'),
-      icon: ['fas', 'link-slash'],
-    })
-  } else if (externalLinkHandling.value === 'openLinkAfterPrompt') {
-    // Storing the URL is necessary as
-    // there is no other way to pass the URL to click callback
-    lastExternalLinkToBeOpened.value = href
-    showExternalLinkOpeningPrompt.value = true
   } else {
-    // Open links externally
-    openExternalLink(href)
+    handleExternalLink(href)
   }
 }
 

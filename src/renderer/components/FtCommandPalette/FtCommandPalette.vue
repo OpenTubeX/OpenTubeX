@@ -330,6 +330,7 @@ function clampResultsScroll() {
 function handleDialogKeydown(event) {
   if (event.key === 'Escape') {
     event.preventDefault()
+    event.stopPropagation()
     close()
     return
   }

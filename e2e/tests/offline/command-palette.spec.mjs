@@ -174,6 +174,21 @@ test('restores prior focus when dismissed', async ({ page }) => {
   await expect(navigationSearch).toBeFocused()
 })
 
+test('consumes Escape inside the command palette once', async ({ page }) => {
+  await page.evaluate(() => {
+    window.__commandPaletteEscapes = 0
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') window.__commandPaletteEscapes++
+    })
+  })
+  await page.keyboard.press('Control+k')
+
+  await page.getByRole('combobox', { name: 'Search commands' }).press('Escape')
+
+  await expect(page.getByRole('dialog', { name: 'Command palette' })).toBeHidden()
+  expect(await page.evaluate(() => window.__commandPaletteEscapes)).toBe(0)
+})
+
 test('hides pages that are unavailable without an Invidious instance', async ({ page }) => {
   await page.keyboard.press('Control+k')
   const input = page.getByRole('combobox', { name: 'Search commands' })

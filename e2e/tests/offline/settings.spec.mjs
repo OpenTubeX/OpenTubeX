@@ -4257,6 +4257,20 @@ test.describe('sync settings', () => {
     await expect(username).toHaveValue('paired-user')
   })
 
+  test('records concurrent setting edits without losing a sync timestamp', async ({ page }) => {
+    const updatedAt = await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await Promise.all([
+        store.dispatch('recordSyncSettingEdit', 'baseTheme'),
+        store.dispatch('recordSyncSettingEdit', 'mainColor'),
+      ])
+      return store.state.settings.syncServerSettingUpdatedAt
+    })
+
+    expect(updatedAt.baseTheme).toEqual(expect.any(Number))
+    expect(updatedAt.mainColor).toEqual(expect.any(Number))
+  })
+
   test('does not follow sync-server redirects with credentials', async ({ page }) => {
     let credentialedRequestStarted
     const credentialedRequest = new Promise(resolve => {

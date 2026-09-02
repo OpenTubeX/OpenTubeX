@@ -765,7 +765,7 @@ Settings:
     Privacy Policy: Privacy policy for this server
     Enhanced Privacy Enabled: Enhanced privacy is enabled. The server stores only encrypted sync data.
     Enhanced Privacy Unsupported: Warning — this server does not support enhanced privacy. Synced data is visible to its operator.
-    Description: 'Synchronize subscriptions, profiles, playlists, watch history, and supported settings with an OpenTubeX or LibreTube sync server. Desktop and mobile tabs stay separate unless you explicitly share them. LibreTube servers may not support every sync feature.'
+    Description: 'Synchronise subscriptions, profiles, playlists, watch history, and supported settings with an OpenTubeX or LibreTube sync server. Desktop and mobile tabs stay separate unless you explicitly share them. LibreTube servers may not support every sync feature.'
     Server URL: Server URL
     Checking Server: Checking sync server…
     Server Unavailable: Unable to connect to this sync server. Check the URL and try again.

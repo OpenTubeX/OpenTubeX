@@ -795,6 +795,24 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   }
 
   function handleScrollMiniWindowResize() {
+    const stashedSide = scrollMiniPlayerStashedSide.value
+    if (stashedSide) {
+      const insets = getViewportInsets()
+      const restoreRect = reanchorScrollMiniPlayerRect(
+        scrollMiniPlayerRestoreRect ?? scrollMiniPlayerRect.value,
+        scrollMiniVideoAspectRatio.value
+      )
+      scrollMiniPlayerRestoreRect = restoreRect
+      scrollMiniPlayerRect.value = getStashedScrollMiniPlayerRect(
+        restoreRect,
+        stashedSide,
+        window.innerWidth,
+        insets
+      )
+      updateScrollMiniPlayer()
+      return
+    }
+
     resnapScrollMiniPlayerToEdge()
     updateScrollMiniPlayer()
   }

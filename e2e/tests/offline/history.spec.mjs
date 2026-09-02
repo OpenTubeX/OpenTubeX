@@ -190,15 +190,15 @@ test.describe('watch history', () => {
   })
 
   test('keeps thumbnail actions inset and separated on narrow layouts', async ({ page }) => {
-    await page.setViewportSize({ width: 520, height: 900 })
+    await page.setViewportSize({ width: 375, height: 800 })
     await goTo(page, 'history')
 
-    const video = page.locator('.ft-list-video').filter({ hasText: 'First test video' })
+    const video = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere' })
     await video.hover()
     const thumbnail = video.locator('.videoThumbnail')
     const actions = video.locator('.playlistIcons')
     const buttons = actions.locator('.iconButton')
-    await expect(buttons).toHaveCount(2)
+    await expect(buttons).toHaveCount(3)
 
     const [thumbnailBox, actionsBox, firstButtonBox, secondButtonBox] = await Promise.all([
       thumbnail.boundingBox(),
@@ -209,6 +209,8 @@ test.describe('watch history', () => {
     expect(actionsBox.y - thumbnailBox.y).toBeGreaterThanOrEqual(8)
     expect(thumbnailBox.x + thumbnailBox.width - actionsBox.x - actionsBox.width).toBeGreaterThanOrEqual(8)
     expect(secondButtonBox.x - firstButtonBox.x - firstButtonBox.width).toBeGreaterThanOrEqual(8)
+    expect(actionsBox.x).toBeGreaterThanOrEqual(thumbnailBox.x)
+    expect(actionsBox.x + actionsBox.width).toBeLessThanOrEqual(thumbnailBox.x + thumbnailBox.width)
   })
 
   test('uses edge-to-edge cards in the Capacitor phone layout', async ({ page }) => {

@@ -102,9 +102,10 @@ async function getRequestBody(input, init) {
  * @returns {Promise<Response>}
  */
 export async function capacitorHttpFetch(input, init = undefined) {
-  if (init?.signal?.aborted) throw createAbortError()
-
   const inputRequest = input instanceof Request ? input : null
+  const signal = init?.signal ?? inputRequest?.signal
+  if (signal?.aborted) throw createAbortError()
+
   const url = new URL(inputRequest?.url ?? input.toString())
 
   if (url.protocol !== 'https:') {
@@ -129,7 +130,7 @@ export async function capacitorHttpFetch(input, init = undefined) {
     data: await getRequestBody(input, init),
     responseType: 'text',
     disableRedirects: redirect === 'manual',
-  }, init?.signal)
+  }, signal)
 
   const responseBody = nativeResponse.status === 204 || nativeResponse.status === 205 || nativeResponse.status === 304
     ? null
