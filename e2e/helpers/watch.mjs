@@ -298,16 +298,23 @@ export function mockPlayableWatchPage(app, page, options = {}) {
 }
 
 /**
- * Returns a handle to the mounted Watch view, so tests can drive its methods
- * directly instead of going through a real player.
+ * Returns a handle to a mounted Watch view, so tests can drive its methods
+ * directly instead of going through a real player. A tab ID selects the Watch
+ * view when multiple logical tabs are mounted.
  *
  * @param {import('@playwright/test').Page} page
+ * @param {string|null} [tabId]
  */
-export function watchViewHandle(page) {
-  return page.evaluateHandle(() => {
+export function watchViewHandle(page, tabId = null) {
+  return page.evaluateHandle((targetTabId) => {
     const app = document.querySelector('#app')?.__vue_app__
     const find = (vnode) => {
-      if (vnode?.component?.type?.name === 'Watch') return vnode.component.proxy
+      if (
+        vnode?.component?.type?.name === 'Watch' &&
+        (targetTabId === null || vnode.component.proxy?.tabId === targetTabId)
+      ) {
+        return vnode.component.proxy
+      }
       if (vnode?.component?.subTree) {
         const match = find(vnode.component.subTree)
         if (match) return match
@@ -326,5 +333,5 @@ export function watchViewHandle(page) {
       throw new Error('Unable to access the watch view')
     }
     return watchView
-  })
+  }, tabId)
 }

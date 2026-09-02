@@ -191,6 +191,27 @@ test('PiP opened by the user is not closed on restore', () => {
   assert.deepEqual(player.toggles, [])
 })
 
+test('a restored automatic PiP request keeps its ownership while settling', () => {
+  const state = createAutoPictureInPictureState()
+
+  markPictureInPictureRequested(state, true, { automatic: true })
+  assert.equal(resolveAutoPictureInPictureAction(state, { wantPip: true, inPip: false }), 'wait')
+  applyPictureInPictureState(state, true)
+
+  assert.equal(state.autoPipActive, true)
+  assert.equal(resolveAutoPictureInPictureAction(state, { wantPip: false, inPip: true }), 'exit')
+})
+
+test('a restored manual PiP request remains user-owned', () => {
+  const state = createAutoPictureInPictureState()
+
+  markPictureInPictureRequested(state, true, { automatic: false })
+  applyPictureInPictureState(state, true)
+
+  assert.equal(state.autoPipActive, false)
+  assert.equal(resolveAutoPictureInPictureAction(state, { wantPip: false, inPip: true }), 'none')
+})
+
 test('window minimize and blur only trigger for the presented tab', () => {
   const state = createAutoPictureInPictureState({ minimized: true, focused: false })
   const options = { ...ALL_TRIGGERS, isActiveTab: false, triggerOnTabChange: false }
