@@ -85,6 +85,34 @@ async function expectSponsorBlockContentClamp(content, previousScrollTop) {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+test('reserves the loaded player height while video metadata is pending', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+
+  let releaseMedia
+  const mediaPending = new Promise(resolve => { releaseMedia = resolve })
+  await page.route(DEMO_MEDIA_URL, async route => {
+    await mediaPending
+    await route.fallback()
+  })
+
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await expect(player).toBeVisible({ timeout: 30_000 })
+  const pendingBounds = await player.boundingBox()
+  expect(Math.abs(pendingBounds.height - pendingBounds.width * 9 / 16)).toBeLessThanOrEqual(1)
+
+  releaseMedia()
+  await waitForPlayback(page)
+  await expect.poll(async () => {
+    const loadedBounds = await player.boundingBox()
+    return Math.abs(loadedBounds.height - pendingBounds.height)
+  }).toBeLessThanOrEqual(1)
+})
+
 test('keeps metadata errors visible in family-friendly-only mode', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await app.electronApp.evaluate(({ ipcMain }) => {
