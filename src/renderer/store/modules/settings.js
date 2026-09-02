@@ -40,6 +40,7 @@ import { DEFAULT_HOME_SECTION_LAYOUT } from '../../helpers/homeSections.js'
 import { isSettingSyncableOnPlatform } from '../../helpers/platformSettings.js'
 import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
 import { DEFAULT_QUICK_SETTINGS, normalizeQuickSettings } from '../../helpers/quickSettings.js'
+import { createSettingUpdateQueue } from '../../helpers/settingUpdateQueue.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
 const TUTORIAL_STATE_SETTING_IDS = new Set([
@@ -1489,6 +1490,7 @@ const customActions = {
 const getters = {}
 const mutations = {}
 const actions = {}
+const runSettingUpdate = createSettingUpdateQueue()
 
 // Build default getters, mutations and actions for every setting id
 for (const settingId of Object.keys(state)) {
@@ -1505,31 +1507,34 @@ for (const settingId of Object.keys(state)) {
     // If setting has side effects, generate action to handle them
     actions[triggerId] = sideEffectHandlers[settingId]
 
-    actions[updaterId] = async ({ commit, dispatch, state }, value) => {
-      try {
+    actions[updaterId] = ({ commit, dispatch, state }, value) => (
+      runSettingUpdate(settingId, async isLatest => {
         await DBSettingHandlers.upsert(settingId, value)
 
+        if (!isLatest()) return
         await recordSettingSyncTimestamp(commit, state, settingId)
 
+        if (!isLatest()) return
         dispatch(triggerId, value)
 
         commit(mutationId, value)
-      } catch (errMessage) {
+      }).catch(errMessage => {
         console.error(errMessage)
-      }
-    }
+      })
+    )
   } else {
-    actions[updaterId] = async ({ commit, state }, value) => {
-      try {
+    actions[updaterId] = ({ commit, state }, value) => (
+      runSettingUpdate(settingId, async isLatest => {
         await DBSettingHandlers.upsert(settingId, value)
 
+        if (!isLatest()) return
         await recordSettingSyncTimestamp(commit, state, settingId)
 
-        commit(mutationId, value)
-      } catch (errMessage) {
+        if (isLatest()) commit(mutationId, value)
+      }).catch(errMessage => {
         console.error(errMessage)
-      }
-    }
+      })
+    )
   }
 }
 
