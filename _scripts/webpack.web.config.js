@@ -13,8 +13,11 @@ const {
   SHAKA_LOCALES_PREBUNDLED,
   SHAKA_LOCALES_TO_BE_BUNDLED
 } = require('./getShakaLocales')
+const { sigFrameTemplateParameters } = require('./sigFrameConfig')
 
 const isDevMode = process.env.NODE_ENV === 'development'
+const isCapacitor = process.env.IS_CAPACITOR === 'true'
+const outputPath = path.join(__dirname, isCapacitor ? '../dist/capacitor' : '../dist/web')
 
 const { version: swiperVersion } = JSON.parse(fs.readFileSync(path.join(__dirname, '../node_modules/swiper/package.json')))
 
@@ -27,13 +30,17 @@ const config = {
     web: path.join(__dirname, '../src/renderer/main.js'),
   },
   output: {
-    path: path.join(__dirname, '../dist/web'),
+    path: outputPath,
     filename: '[name].js',
   },
-  externals: {
-    'youtubei.js': '{}',
-    googlevideo: '{}'
-  },
+  ...(isCapacitor
+    ? {}
+    : {
+        externals: {
+          'youtubei.js': '{}',
+          googlevideo: '{}'
+        }
+      }),
   module: {
     rules: [
       {
@@ -134,7 +141,8 @@ const config = {
       'process.platform': 'undefined',
       'process.env.IS_ELECTRON': false,
       'process.env.IS_ELECTRON_MAIN': false,
-      'process.env.SUPPORTS_LOCAL_API': false,
+      'process.env.IS_CAPACITOR': isCapacitor,
+      'process.env.SUPPORTS_LOCAL_API': isCapacitor,
       'process.env.BUILD_COMMIT': JSON.stringify(process.env.GITHUB_SHA ?? ''),
       __VUE_OPTIONS_API__: 'true',
       __VUE_PROD_DEVTOOLS__: 'false',
@@ -150,7 +158,8 @@ const config = {
     new HtmlWebpackPlugin({
       excludeChunks: ['processTaskWorker'],
       filename: 'index.html',
-      template: path.resolve(__dirname, '../src/index.ejs')
+      template: path.resolve(__dirname, '../src/index.ejs'),
+      ...(isCapacitor ? { templateParameters: sigFrameTemplateParameters } : {})
     }),
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({
@@ -224,13 +233,15 @@ config.plugins.push(
   }),
   new CopyWebpackPlugin({
     patterns: [
-      {
-        from: path.join(__dirname, '../static/pwabuilder-sw.js'),
-        to: path.join(__dirname, '../dist/web/pwabuilder-sw.js'),
-      },
+      ...(isCapacitor
+        ? []
+        : [{
+            from: path.join(__dirname, '../static/pwabuilder-sw.js'),
+            to: path.join(outputPath, 'pwabuilder-sw.js'),
+          }]),
       {
         from: path.join(__dirname, '../static'),
-        to: path.join(__dirname, '../dist/web/static'),
+        to: path.join(outputPath, 'static'),
         globOptions: {
           dot: true,
           ignore: ['**/.*', '**/locales/**', '**/pwabuilder-sw.js', '**/dashFiles/**', '**/storyboards/**'],
@@ -238,7 +249,7 @@ config.plugins.push(
       },
       {
         from: path.join(__dirname, '../node_modules/shaka-player/ui/locales', `{${SHAKA_LOCALES_TO_BE_BUNDLED.join(',')}}.json`).replaceAll('\\', '/'),
-        to: path.join(__dirname, '../dist/web/static/shaka-player-locales'),
+        to: path.join(outputPath, 'static/shaka-player-locales'),
         context: path.join(__dirname, '../node_modules/shaka-player/ui/locales')
       }
     ]

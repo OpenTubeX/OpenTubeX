@@ -32,6 +32,80 @@ test.describe('side nav navigation', () => {
     }
   })
 
+  test('keeps fixed mobile navigation below the system status bar', async ({ page }) => {
+    const safeAreaInsetTop = 24
+    for (const viewport of [
+      { width: 375, height: 667 },
+      { width: 667, height: 375 }
+    ]) {
+      await page.setViewportSize(viewport)
+      await page.evaluate((inset) => {
+        document.documentElement.style.setProperty('--safe-area-inset-top', `${inset}px`)
+        const app = document.querySelector('.app')
+        app.classList.add('capacitorTabs')
+        app.classList.remove('topTabs', 'bottomTabs', 'verticalTabs')
+      }, safeAreaInsetTop)
+
+      const topNavBounds = await page.locator('.topNav').boundingBox()
+      expect(topNavBounds.y).toBe(safeAreaInsetTop)
+      await expect.poll(() => page.locator('.app').evaluate((app) => {
+        const style = getComputedStyle(app, '::before')
+        return {
+          height: style.height,
+          position: style.position,
+          opaque: style.backgroundColor !== 'rgba(0, 0, 0, 0)',
+        }
+      })).toEqual({
+        height: `${safeAreaInsetTop}px`,
+        position: 'fixed',
+        opaque: true,
+      })
+    }
+  })
+
+  test('moves the active indicator along the bottom mobile navigation', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 700 })
+    await goTo(page, 'subscriptions')
+
+    const sideNav = page.locator('.sideNav')
+    const indicator = sideNav.locator('.activeIndicator')
+
+    async function indicatorAlignment() {
+      const activeOption = sideNav.locator('.inner > .navOption.router-link-active:visible')
+      const [navBounds, optionBounds, indicatorBounds] = await Promise.all([
+        sideNav.boundingBox(),
+        activeOption.boundingBox(),
+        indicator.boundingBox()
+      ])
+      if (!navBounds || !optionBounds || !indicatorBounds) return null
+
+      return {
+        bottomOffset: Math.abs(indicatorBounds.y + indicatorBounds.height - navBounds.y - navBounds.height),
+        height: indicatorBounds.height,
+        inlineOffset: Math.abs(indicatorBounds.x - optionBounds.x),
+        widthOffset: Math.abs(indicatorBounds.width - optionBounds.width),
+      }
+    }
+
+    await expect(indicator).toBeVisible()
+    await expect.poll(indicatorAlignment).toEqual({
+      bottomOffset: 0,
+      height: 3,
+      inlineOffset: 0,
+      widthOffset: 0,
+    })
+
+    const initialX = (await indicator.boundingBox()).x
+    await goTo(page, 'history')
+    await expect.poll(indicatorAlignment).toEqual({
+      bottomOffset: 0,
+      height: 3,
+      inlineOffset: 0,
+      widthOffset: 0,
+    })
+    await expect.poll(async () => (await indicator.boundingBox())?.x).not.toBe(initialX)
+  })
+
   test('navigation history back and forward work', async ({ page }) => {
     await goTo(page, 'history')
     await goTo(page, 'userplaylists')

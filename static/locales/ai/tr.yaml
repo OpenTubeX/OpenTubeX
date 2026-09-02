@@ -271,6 +271,11 @@ Settings:
       Mark as Watched: İzlenmiş Olarak İşaretle
       Copy YouTube Link: YouTube Bağlantısını Kopyala
       Open in YouTube: YouTube'da Aç
+    Mobile Layout:
+      Mobile Layout: 'Mobil düzen'
+      Automatic: 'Otomatik'
+      Phone: 'Telefon'
+      Tablet: 'Tablet'
   Context Menu Search Settings:
     Context Menu Search Settings: Bağlam Menüsü Araması
     Description: Seçili metne sağ tıkladığınızda görünecek arama motorlarını seçin. Aramalar varsayılan tarayıcınızda açılır.
@@ -493,6 +498,8 @@ Settings:
     Reorder Playback Speed: Oynatma hızını yeniden sıralamak için sürükleyin
     Playback Speed: Oynatma Hızı
     Parallel Segment Loading: Paralel Bölüm Yükleme
+    Rotate Wide Videos to Landscape in Fullscreen: 'Geniş videoları tam ekranda yatay konuma döndür'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Tam ekrana girmek veya çıkmak için yukarı ya da aşağı kaydır'
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.
@@ -779,7 +786,7 @@ Settings:
     Privacy Policy: Bu sunucunun gizlilik politikası
     Enhanced Privacy Enabled: Gelişmiş gizlilik etkin. Sunucu yalnızca şifrelenmiş eşitleme verilerini saklar.
     Enhanced Privacy Unsupported: 'Uyarı: Bu sunucu gelişmiş gizliliği desteklemiyor. Eşitlenen veriler sunucu işletmecisi tarafından görülebilir.'
-    Description: Abonelikleri, profilleri, oynatma listelerini, izleme geçmişini, ayarları ve açık sekmeleri bir OpenTubeX veya LibreTube eşitleme sunucusuyla eşitleyin. LibreTube sunucuları tüm eşitleme özelliklerini desteklemeyebilir.
+    Description: 'Abonelikleri, profilleri, oynatma listelerini, izleme geçmişini ve desteklenen ayarları bir OpenTubeX veya LibreTube eşitleme sunucusuyla eşitleyin. Açıkça paylaşmadığınız sürece masaüstü ve mobil sekmeler ayrı kalır. LibreTube sunucuları tüm eşitleme özelliklerini desteklemeyebilir.'
     Server URL: Sunucu URL'si
     Checking Server: Eşitleme sunucusu denetleniyor…
     Server Unavailable: Bu eşitleme sunucusuna bağlanılamadı. URL'yi denetleyip yeniden deneyin.
@@ -860,6 +867,13 @@ Settings:
     Data Loss Confirmation: Veri silen eşitleme onaylansın mı?
     Data Loss Warning: Sunucunun durumu, daha önce eşitlenen {previous} {collection} öğesinden {deleted} tanesini silecek. Bu durum, başarısız bir sunucu geçişine veya sıfırlamasına işaret edebilir. Yalnızca silme işlemi bilerek yapılıyorsa ve yedeğiniz varsa devam edin.
     Confirm Data Loss: Sil ve devam et
+    Use Shared Tabs: 'Cihazlar arasında tek bir ortak sekme grubu kullan'
+    Shared Tabs Warning: 'Ortak sekmeler, bağlı cihazlardaki mevcut sekme grubunun yerini alır. Masaüstü ve mobil sekmeleri ayrı tutmak için bunu kapalı bırakın.'
+    Tabs From Other Devices: 'Diğer cihazlardaki sekmeler'
+    Device Tab Session: '{platform} · {count} sekme'
+    Mobile Device: 'Mobil'
+    Desktop Device: 'Masaüstü'
+    Open All Tabs: 'Tüm sekmeleri aç'
   Proxy Settings:
     IP Block Recovery Script Path: IP Engeli Kurtarma Betiği Yolu
     Select IP Block Recovery Script File: IP Engeli Kurtarma Betiği Dosyasını Seç

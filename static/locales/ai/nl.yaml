@@ -275,6 +275,11 @@ Settings:
       Mark as Watched: Markeren als bekeken
       Copy YouTube Link: YouTube-link kopiëren
       Open in YouTube: Openen in YouTube
+    Mobile Layout:
+      Mobile Layout: 'Mobiele indeling'
+      Automatic: 'Automatisch'
+      Phone: 'Telefoon'
+      Tablet: 'Tablet'
   Context Menu Search Settings:
     Context Menu Search Settings: Zoeken via contextmenu
     Description: Kies welke zoekmachines verschijnen wanneer je met de rechtermuisknop op geselecteerde tekst klikt. Zoekopdrachten worden in je standaardbrowser geopend.
@@ -506,6 +511,8 @@ Settings:
       Modes:
         Save To Folder: Opslaan in map
         Clipboard: Naar klembord kopiëren
+    Rotate Wide Videos to Landscape in Fullscreen: 'Brede video’s liggend draaien in volledig scherm'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Veeg omhoog of omlaag om volledig scherm te openen of te sluiten'
   Channel Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
@@ -801,7 +808,7 @@ Settings:
     Privacy Policy: Privacybeleid van deze server
     Enhanced Privacy Enabled: Verbeterde privacy is ingeschakeld. De server bewaart alleen versleutelde synchronisatiegegevens.
     Enhanced Privacy Unsupported: Waarschuwing. Deze server ondersteunt geen verbeterde privacy. De beheerder kan gesynchroniseerde gegevens bekijken.
-    Description: Synchroniseer abonnementen, profielen, afspeellijsten, kijkgeschiedenis, instellingen en geopende tabbladen met een synchronisatieserver van OpenTubeX of LibreTube. LibreTube-servers ondersteunen mogelijk niet alle synchronisatiefuncties.
+    Description: 'Synchroniseer abonnementen, profielen, afspeellijsten, kijkgeschiedenis en ondersteunde instellingen met een OpenTubeX- of LibreTube-synchronisatieserver. Tabbladen op desktop en mobiel blijven gescheiden, tenzij je ze uitdrukkelijk deelt. LibreTube-servers ondersteunen mogelijk niet alle synchronisatiefuncties.'
     Server URL: Server-URL
     Checking Server: Synchronisatieserver controleren…
     Server Unavailable: Kan geen verbinding maken met deze synchronisatieserver. Controleer de URL en probeer het opnieuw.
@@ -882,6 +889,13 @@ Settings:
     Data Loss Confirmation: Synchronisatie met gegevensverlies bevestigen?
     Data Loss Warning: De serverstatus zou {deleted} van de {previous} eerder gesynchroniseerde items uit {collection} verwijderen. Dit kan wijzen op een mislukte servermigratie of reset. Ga alleen door als deze verwijdering de bedoeling is en je een back-up hebt.
     Confirm Data Loss: Verwijderen en doorgaan
+    Use Shared Tabs: 'Eén gedeelde set tabbladen op alle apparaten gebruiken'
+    Shared Tabs Warning: 'Gedeelde tabbladen vervangen de huidige set op verbonden apparaten. Laat dit uitgeschakeld om desktop- en mobiele tabbladen gescheiden te houden.'
+    Tabs From Other Devices: 'Tabbladen van andere apparaten'
+    Device Tab Session: '{platform} · {count} tabbladen'
+    Mobile Device: 'Mobiel'
+    Desktop Device: 'Desktop'
+    Open All Tabs: 'Alle tabbladen openen'
   Proxy Settings:
     IP Block Recovery Script Path: Pad naar herstelscript voor IP-blokkade
     Select IP Block Recovery Script File: Herstelscript voor IP-blokkade selecteren

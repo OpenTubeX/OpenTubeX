@@ -500,24 +500,6 @@
         class="noComments"
         :class="{ noCommentsMessageOnly: commentsDisabled || fullscreenOverlay }"
       >
-        <h3
-          v-if="commentsDisabled"
-          class="noCommentMsg"
-        >
-          {{ $t("Comments.Comments are turned off") }}
-        </h3>
-        <h3
-          v-else-if="isPostComments"
-          class="noCommentMsg"
-        >
-          {{ $t("Comments.There are no comments available for this post") }}
-        </h3>
-        <h3
-          v-else
-          class="noCommentMsg"
-        >
-          {{ $t("Comments.There are no comments available for this video") }}
-        </h3>
         <div
           v-if="!fullscreenOverlay && !commentsDisabled"
           class="noCommentActions"
@@ -542,6 +524,24 @@
             @click="reloadCommentData"
           />
         </div>
+        <h3
+          v-if="commentsDisabled"
+          class="noCommentMsg"
+        >
+          {{ $t("Comments.Comments are turned off") }}
+        </h3>
+        <h3
+          v-else-if="isPostComments"
+          class="noCommentMsg"
+        >
+          {{ $t("Comments.There are no comments available for this post") }}
+        </h3>
+        <h3
+          v-else
+          class="noCommentMsg"
+        >
+          {{ $t("Comments.There are no comments available for this video") }}
+        </h3>
       </div>
       <FtSpinner
         v-if="shouldShowAutoLoadMoreCommentsSpinner"

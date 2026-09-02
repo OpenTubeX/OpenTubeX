@@ -675,3 +675,26 @@
     transition-duration: 1ms;
   }
 }
+
+/* Phone toasts follow the mobile navigation instead of the desktop position
+   preference. Teleport puts the holder beside `.app`, hence the body query. */
+:global(body:has(.app.capacitorPhoneLayout)) .toast-holder[data-sonner-toaster] {
+  inset-block: auto calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px);
+  /* stylelint-disable-next-line liberty/use-logical-spec */
+  right: auto;
+  /* stylelint-disable-next-line liberty/use-logical-spec */
+  left: 50%;
+  inline-size: calc(100vw - 24px);
+  max-inline-size: calc(100vw - 24px);
+  transform: translateX(-50%);
+}
+
+:global(body:has(.app.capacitorPhoneLayout)) .toast-holder[data-sonner-toaster] [data-sonner-toast] {
+  justify-content: center;
+}
+
+:global(body:has(.app.capacitorPhoneLayout)) .progress-toast-holder {
+  inset-block: auto calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px);
+  inset-inline: 0;
+  justify-content: center;
+}

@@ -421,6 +421,7 @@ import {
 } from '../../helpers/utils.js'
 import { getLocalVideoChannels } from '../../helpers/api/local.js'
 import { isHistoryEntryWatched } from '../../helpers/history.js'
+import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import { getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries.js'
 import { isThumbnailPreviewImageUsable } from '../../helpers/thumbnailPreview.js'
 import { deArrowData, deArrowThumbnail, getSponsorBlockVideoLabel } from '../../helpers/sponsorblock.js'
@@ -619,7 +620,7 @@ const MAX_TIMEOUT_DELAY = 2_147_483_647
 let premiereStartTimer = null
 
 const canToggleLiveReminder = computed(() => (
-  process.env.IS_ELECTRON &&
+  supportsLiveReminders &&
   premiereTimestamp.value != null &&
   premiereTimestamp.value > premiereNow.value
 ))
@@ -868,6 +869,10 @@ const progressPercentage = computed(() => {
     return 0
   }
 
+  if (isWatched.value) {
+    return 100
+  }
+
   const percentage = (Math.ceil(watchProgress.value) / lengthSeconds.value) * 100
   return Math.min(percentage, 100)
 })
@@ -1091,7 +1096,7 @@ async function syncLiveReminder() {
   }
 
   try {
-    const reminder = await window.ftElectron.liveReminder.get(videoId)
+    const reminder = await liveReminder.get(videoId)
     if (
       generation !== liveReminderLoadGeneration ||
       videoId !== id.value ||
@@ -1101,7 +1106,7 @@ async function syncLiveReminder() {
     }
 
     if (reminder && reminder.startTimestamp !== startTimestamp) {
-      liveReminderActive.value = await window.ftElectron.liveReminder.schedule(getLiveReminderPayload())
+      liveReminderActive.value = await liveReminder.schedule(getLiveReminderPayload())
     } else {
       liveReminderActive.value = reminder !== null
     }
@@ -1117,7 +1122,7 @@ async function toggleLiveReminder() {
   liveReminderLoading.value = true
   try {
     if (liveReminderActive.value) {
-      await window.ftElectron.liveReminder.cancel(videoId)
+      await liveReminder.cancel(videoId)
       if (videoId !== id.value) return
       liveReminderActive.value = false
       showToast({
@@ -1126,7 +1131,7 @@ async function toggleLiveReminder() {
         icon: ['fas', 'calendar-days']
       })
     } else {
-      const scheduled = await window.ftElectron.liveReminder.schedule(getLiveReminderPayload())
+      const scheduled = await liveReminder.schedule(getLiveReminderPayload())
       if (videoId !== id.value) return
       liveReminderActive.value = scheduled
       showToast({
@@ -2077,11 +2082,11 @@ watch(premiereTimestamp, schedulePremiereStartInvalidation, { immediate: true })
 watch([id, premiereTimestamp], syncLiveReminder, { immediate: true })
 
 onMounted(() => {
-  removeLiveReminderUpdatedListener = window.ftElectron?.liveReminder?.onUpdated?.((videoId, scheduled) => {
+  removeLiveReminderUpdatedListener = liveReminder.onUpdated((videoId, scheduled) => {
     if (videoId === id.value) {
       liveReminderActive.value = scheduled
     }
-  }) ?? null
+  })
 })
 
 onBeforeUnmount(() => {

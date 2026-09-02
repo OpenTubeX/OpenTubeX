@@ -49,6 +49,8 @@
     "pack:renderer": "webpack --mode=production --config-node-env=production --config _scripts/webpack.renderer.config.js",
     "pack:preload": "webpack --mode=production --config-node-env=production --config _scripts/webpack.preload.config.js",
     "pack:web": "webpack --mode=production --config-node-env=production --config _scripts/webpack.web.config.js",
+    "pack:capacitor": "webpack --mode=production --config-node-env=production --config _scripts/webpack.capacitor.config.js",
+    "capacitor:sync:android": "pnpm run pack:capacitor && cap sync android",
     "pack:botGuardScript": "webpack --config _scripts/webpack.botGuardScript.config.js",
     "checkforbadtemplates": "node _scripts/findMissingTemplates.mjs",
     "test:e2e:pack": "pnpm run \"/^test:e2e:pack:(main|renderer|preload|botGuardScript)$/\" && node _scripts/injectAllowedPaths.mjs dist-e2e",
@@ -64,6 +66,11 @@
     "ci": "pnpm install --frozen-lockfile"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/browser": "^8.0.4",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/local-notifications": "^8.3.1",
     "@hpke/core": "^1.9.0",
     "@iconify/vue": "^5.0.1",
     "@seald-io/nedb": "^4.1.2",
@@ -92,6 +99,7 @@
   "devDependencies": {
     "@babel/core": "^8.0.1",
     "@babel/preset-env": "^8.0.2",
+    "@capacitor/cli": "^8.5.0",
     "@double-great/stylelint-a11y": "^3.5.2",
     "@eslint/js": "^10.0.1",
     "@iconify-json/material-symbols": "^1.2.90",

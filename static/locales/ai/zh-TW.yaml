@@ -273,6 +273,11 @@ Settings:
       Mark as Watched: 標示為已觀看
       Copy YouTube Link: 複製 YouTube 連結
       Open in YouTube: 在 YouTube 中開啟
+    Mobile Layout:
+      Mobile Layout: '行動版配置'
+      Automatic: '自動'
+      Phone: '手機'
+      Tablet: '平板電腦'
   Context Menu Search Settings:
     Context Menu Search Settings: 內容選單搜尋
     Description: 選擇在已選取文字上按一下滑鼠右鍵時顯示的搜尋引擎。搜尋結果會在預設瀏覽器中開啟。
@@ -495,6 +500,8 @@ Settings:
     Reorder Playback Speed: 拖曳以重新排列播放速度
     Playback Speed: 播放速度
     Parallel Segment Loading: 平行載入片段
+    Rotate Wide Videos to Landscape in Fullscreen: '全螢幕時將寬幅影片旋轉為橫向'
+    Swipe Up or Down to Enter or Exit Fullscreen: '向上或向下滑動以進入或離開全螢幕'
   Channel Settings:
     Channel Settings: 頻道設定
     Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。
@@ -781,7 +788,7 @@ Settings:
     Privacy Policy: 此伺服器的隱私權政策
     Enhanced Privacy Enabled: 已啟用加強隱私保護。伺服器只會儲存加密的同步資料。
     Enhanced Privacy Unsupported: 警告 — 此伺服器不支援加強隱私保護。伺服器營運者可查看同步的資料。
-    Description: 透過 OpenTubeX 或 LibreTube 同步伺服器同步訂閱、設定檔、播放清單、觀看記錄、設定和開啟的分頁。LibreTube 伺服器可能不支援所有同步功能。
+    Description: '透過 OpenTubeX 或 LibreTube 同步伺服器同步訂閱、個人檔案、播放清單、觀看記錄及支援的設定。除非您明確選擇共用，否則桌面版與行動版的分頁會保持獨立。LibreTube 伺服器可能不支援所有同步功能。'
     Server URL: 伺服器 URL
     Checking Server: 正在檢查同步伺服器…
     Server Unavailable: 無法連線至此同步伺服器。請檢查 URL 後再試一次。
@@ -862,6 +869,13 @@ Settings:
     Data Loss Confirmation: 要確認執行會刪除資料的同步嗎？
     Data Loss Warning: 伺服器目前的狀態會刪除先前同步的 {previous} 個 {collection} 項目中的 {deleted} 個。這可能表示伺服器移轉或重設失敗。只有在您確定要刪除且已有備份時才可繼續。
     Confirm Data Loss: 刪除並繼續
+    Use Shared Tabs: '在各裝置上使用同一組共用分頁'
+    Shared Tabs Warning: '共用分頁會取代已連線裝置上的目前分頁組。關閉此選項可讓桌面版與行動版的分頁保持獨立。'
+    Tabs From Other Devices: '其他裝置的分頁'
+    Device Tab Session: '{platform} · {count} 個分頁'
+    Mobile Device: '行動裝置'
+    Desktop Device: '桌面裝置'
+    Open All Tabs: '開啟所有分頁'
   Proxy Settings:
     IP Block Recovery Script Path: IP 封鎖復原指令碼路徑
     Select IP Block Recovery Script File: 選取 IP 封鎖復原指令碼檔案

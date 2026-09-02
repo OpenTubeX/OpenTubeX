@@ -34,6 +34,7 @@ import { mapConcurrently } from './concurrent-map'
 import { includeAutomaticDownloadChannels, startAutomaticDownloadsForChannel } from './automaticDownloads'
 import { extractAssignedJsonObject } from './assigned-json'
 import { getLocalPremiereState } from './premiere'
+import { shouldShowProgressStartToast } from './progressPresentation'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
 export const SUBSCRIPTION_REFRESH_CHANNEL_EVENT = 'opentubex-subscription-refresh-channel'
@@ -626,7 +627,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
   store.commit('setSubscriptionFeedRefreshInProgress', true)
   setSubscriptionRefreshProgress(0)
 
-  if (showStartToast && !store.getters.getShowProgressBarToast) {
+  if (showStartToast && shouldShowProgressStartToast(store.getters.getShowProgressBarToast)) {
     showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Videos'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'sync'])
   }
 
@@ -732,7 +733,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
   store.commit('setSubscriptionFeedRefreshInProgress', true)
   setSubscriptionRefreshProgress(0)
 
-  if (showStartToast && !store.getters.getShowProgressBarToast) {
+  if (showStartToast && shouldShowProgressStartToast(store.getters.getShowProgressBarToast)) {
     showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Shorts'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'sync'])
   }
 
@@ -822,7 +823,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
   store.commit('setSubscriptionFeedRefreshInProgress', true)
   setSubscriptionRefreshProgress(0)
 
-  if (showStartToast && !store.getters.getShowProgressBarToast) {
+  if (showStartToast && shouldShowProgressStartToast(store.getters.getShowProgressBarToast)) {
     showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Live Streams'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'sync'])
   }
 
@@ -927,7 +928,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
   store.commit('setSubscriptionFeedRefreshInProgress', true)
   setSubscriptionRefreshProgress(0)
 
-  if (showStartToast && !store.getters.getShowProgressBarToast) {
+  if (showStartToast && shouldShowProgressStartToast(store.getters.getShowProgressBarToast)) {
     showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Posts'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'sync'])
   }
 

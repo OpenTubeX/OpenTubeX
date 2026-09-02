@@ -7,6 +7,7 @@ import {
   DEFAULT_SCROLL_SPEED,
   normalizeScrollSpeed
 } from './scrollSpeed'
+import { initializePageScrollbar } from './pageScrollbar'
 
 // Kept out of the core bundle by the library, so `clickScroll` below silently
 // does nothing unless it is registered.
@@ -290,8 +291,8 @@ function optimizeBodyScrollbarDrag(instance) {
  * Replaces the main window's scrollbars. `window.scrollTo`, `window.scrollY`
  * and the document's scroll events keep working when the body is the target.
  */
-export function initializeAppScrollbars() {
-  create(document.body)
+export function initializeAppScrollbars({ useNativePageScrollbar = false } = {}) {
+  initializePageScrollbar(document, useNativePageScrollbar, create)
 
   watch(
     () => normalizeScrollSpeed(store.getters.getScrollSpeed),
@@ -439,6 +440,40 @@ export function clampOverlayScrollTop(element, contentElement = null) {
     } else {
       scrollOffsetElement.scrollTop = maximumScrollTop
     }
+  }
+}
+
+/**
+ * Recalculates a nested horizontal scroll container's range and clamps an
+ * offset that was valid before dynamically rendered content became narrower.
+ * @param {HTMLElement} element
+ * @param {HTMLElement | null} contentElement
+ */
+export function clampOverlayScrollLeft(element, contentElement = null) {
+  const instance = OverlayScrollbars(element)
+  const scrollOffsetElement = instance?.elements().scrollOffsetElement ?? element
+  instance?.update(true)
+
+  const maximumScrollLeft = Math.max(
+    0,
+    (contentElement?.scrollWidth ?? scrollOffsetElement.scrollWidth) - scrollOffsetElement.clientWidth
+  )
+  const rtl = getComputedStyle(scrollOffsetElement).direction === 'rtl'
+  const isOutOfBounds = rtl
+    ? scrollOffsetElement.scrollLeft < -maximumScrollLeft - SCROLL_BOUNDARY_TOLERANCE
+    : scrollOffsetElement.scrollLeft > maximumScrollLeft + SCROLL_BOUNDARY_TOLERANCE
+  if (!isOutOfBounds) return
+
+  if (instance) {
+    scrollOffsetElement.scrollLeft = 0
+    instance.update(true)
+    const available = instance.state().overflowAmount.x
+    scrollOffsetElement.scrollLeft = rtl
+      ? -Math.min(maximumScrollLeft, available)
+      : Math.min(maximumScrollLeft, available)
+    instance.update(true)
+  } else {
+    scrollOffsetElement.scrollLeft = rtl ? -maximumScrollLeft : maximumScrollLeft
   }
 }
 

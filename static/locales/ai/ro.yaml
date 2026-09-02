@@ -273,6 +273,11 @@ Settings:
       Mark as Watched: Marchează ca vizionat
       Copy YouTube Link: Copiază linkul YouTube
       Open in YouTube: Deschide în YouTube
+    Mobile Layout:
+      Mobile Layout: 'Aspect mobil'
+      Automatic: 'Automat'
+      Phone: 'Telefon'
+      Tablet: 'Tabletă'
   Context Menu Search Settings:
     Context Menu Search Settings: Căutare din meniul contextual
     Description: Alegeți motoarele de căutare care apar când faceți clic dreapta pe textul selectat. Căutările se deschid în browserul implicit.
@@ -497,6 +502,8 @@ Settings:
     Reorder Playback Speed: Trageți pentru a reordona viteza de redare
     Playback Speed: Viteză de redare
     Parallel Segment Loading: Încărcarea paralelă a segmentelor
+    Rotate Wide Videos to Landscape in Fullscreen: 'Rotește videoclipurile late în modul peisaj pe ecran complet'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Glisează în sus sau în jos pentru a intra sau a ieși din ecranul complet'
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -790,7 +797,7 @@ Settings:
     Privacy Policy: Politica de confidențialitate a acestui server
     Enhanced Privacy Enabled: Confidențialitatea sporită este activată. Serverul stochează numai date de sincronizare criptate.
     Enhanced Privacy Unsupported: Avertisment — acest server nu acceptă confidențialitatea sporită. Datele sincronizate sunt vizibile operatorului său.
-    Description: Sincronizați abonamentele, profilurile, playlisturile, istoricul vizionărilor, setările și filele deschise cu un server de sincronizare OpenTubeX sau LibreTube. Este posibil ca serverele LibreTube să nu accepte toate funcțiile de sincronizare.
+    Description: 'Sincronizați abonamentele, profilurile, listele de redare, istoricul vizionărilor și setările acceptate cu un server de sincronizare OpenTubeX sau LibreTube. Filele de pe desktop și mobil rămân separate dacă nu le partajați în mod explicit. Este posibil ca serverele LibreTube să nu accepte toate funcțiile de sincronizare.'
     Server URL: Adresa URL a serverului
     Checking Server: Se verifică serverul de sincronizare…
     Server Unavailable: Conectarea la acest server de sincronizare nu a reușit. Verificați adresa URL și încercați din nou.
@@ -871,6 +878,13 @@ Settings:
     Data Loss Confirmation: Confirmați sincronizarea distructivă?
     Data Loss Warning: Starea serverului ar șterge {deleted} din cele {previous} elemente {collection} sincronizate anterior. Acest lucru poate indica o migrare sau resetare nereușită a serverului. Continuați numai dacă ștergerea este intenționată și aveți o copie de rezervă.
     Confirm Data Loss: Șterge și continuă
+    Use Shared Tabs: 'Folosește un singur set de file partajat între dispozitive'
+    Shared Tabs Warning: 'Filele partajate înlocuiesc setul curent pe dispozitivele conectate. Păstrați opțiunea dezactivată pentru a menține separate filele de pe desktop și mobil.'
+    Tabs From Other Devices: 'File de pe alte dispozitive'
+    Device Tab Session: '{platform} · {count} file'
+    Mobile Device: 'Mobil'
+    Desktop Device: 'Desktop'
+    Open All Tabs: 'Deschide toate filele'
   Proxy Settings:
     Proxy Username: Nume de utilizator pentru proxy
     Proxy Password: Parolă pentru proxy

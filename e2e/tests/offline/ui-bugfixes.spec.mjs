@@ -1,7 +1,9 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, repoRoot } from '../../helpers/app.mjs'
+import { test, expect, goTo, repoRoot, setWindowSize } from '../../helpers/app.mjs'
+import { openMockedVideo } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 function historyEntry(videoId, title, timeWatched) {
   return {
@@ -21,6 +23,294 @@ function historyEntry(videoId, title, timeWatched) {
     type: 'video'
   }
 }
+
+async function enablePhoneTabSwitcher(page) {
+  await page.evaluate(() => {
+    const seen = new Set()
+    let switcher = null
+    const visit = (vnode) => {
+      if (!vnode || typeof vnode !== 'object' || seen.has(vnode)) return
+      seen.add(vnode)
+      if (vnode.component) {
+        const component = vnode.component
+        if (component.type?.__name === 'CapacitorPhoneTabSwitcher') switcher = component
+        visit(component.subTree)
+      }
+      if (Array.isArray(vnode.children)) vnode.children.forEach(visit)
+      if (Array.isArray(vnode.dynamicChildren)) vnode.dynamicChildren.forEach(visit)
+    }
+
+    visit(document.querySelector('#app')._vnode)
+    if (!switcher) throw new Error('Phone tab switcher component was not mounted')
+    switcher.props.enabled = true
+  })
+  await expect(page.locator('.capacitorPhoneTabSwitcherButton')).toBeVisible()
+}
+
+async function phoneTabScrollState(page, contentSelector) {
+  return await page.locator('.capacitorPhoneTabDialog').evaluate((dialog, selector) => {
+    const viewport = dialog.querySelector('[data-overlayscrollbars-viewport]')
+    const content = dialog.querySelector(selector)
+    const scrollbar = dialog.querySelector('.os-scrollbar-vertical')
+    const paddingBottom = Number.parseFloat(getComputedStyle(viewport).paddingBottom) || 0
+    const maximum = Math.max(0, content.offsetTop + content.offsetHeight + paddingBottom - viewport.clientHeight)
+    return {
+      scrollTop: viewport.scrollTop,
+      maximum,
+      scrollbarUnusable: scrollbar?.classList.contains('os-scrollbar-unusable') ?? false,
+    }
+  }, contentSelector)
+}
+
+test('centers phone tab close controls within their rows', async ({ page }) => {
+  await page.addStyleTag({
+    path: path.join(
+      repoRoot,
+      'src/renderer/components/TabBar/CapacitorPhoneTabSwitcher.css'
+    )
+  })
+  await page.evaluate(() => {
+    const overlay = document.createElement('div')
+    const row = document.createElement('div')
+    const target = document.createElement('button')
+    const close = document.createElement('button')
+
+    overlay.className = 'capacitorPhoneTabOverlay'
+    row.className = 'capacitorPhoneTabRow'
+    target.className = 'capacitorPhoneTabTarget'
+    target.textContent = 'Home'
+    close.className = 'capacitorPhoneTabClose'
+    close.setAttribute('aria-label', 'Close Home tab')
+    close.textContent = '×'
+    row.append(target, close)
+    overlay.append(row)
+    document.body.append(overlay)
+  })
+
+  const metrics = await page.locator('.capacitorPhoneTabRow').evaluate((row) => {
+    const rowBounds = row.getBoundingClientRect()
+    const closeBounds = row.querySelector('.capacitorPhoneTabClose').getBoundingClientRect()
+    return {
+      centerOffset: Math.abs(
+        closeBounds.top + closeBounds.height / 2 -
+        (rowBounds.top + rowBounds.height / 2)
+      ),
+      closeHeight: closeBounds.height,
+      closeWidth: closeBounds.width,
+      userSelect: getComputedStyle(row).userSelect,
+    }
+  })
+
+  expect(metrics.centerOffset).toBeLessThanOrEqual(1)
+  expect(metrics.closeHeight).toBeGreaterThanOrEqual(48)
+  expect(metrics.closeWidth).toBeGreaterThanOrEqual(48)
+  expect(metrics.userSelect).toBe('none')
+})
+
+test('fits synced-device tabs in the phone tab organizer', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 375, height: 760 })
+  await page.addStyleTag({
+    path: path.join(
+      repoRoot,
+      'src/renderer/components/TabBar/CapacitorPhoneTabSwitcher.css'
+    )
+  })
+  await page.evaluate(() => {
+    const dialog = document.createElement('section')
+    dialog.className = 'capacitorPhoneTabDialog'
+    dialog.style.height = 'min(620px, 100%)'
+    dialog.style.width = 'min(560px, 100%)'
+    dialog.innerHTML = `
+      <div class="capacitorPhoneTabViewTabs" role="tablist">
+        <button class="capacitorPhoneTabViewTab" role="tab" aria-selected="false">2 open tabs</button>
+        <button class="capacitorPhoneTabViewTab" role="tab" aria-selected="true">Tabs from other devices</button>
+      </div>
+      <div class="capacitorPhoneSyncedTabs" role="tabpanel">
+        <article class="capacitorPhoneSyncedSession">
+          <header class="capacitorPhoneSyncedSessionHeader">
+            <strong>Desktop · 2 tabs</strong>
+            <button class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedOpenAll"><span aria-hidden="true">↗</span><span>Open all tabs</span></button>
+          </header>
+          <div class="capacitorPhoneSyncedTabList">
+            <button class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedTabTarget"><span aria-hidden="true">↗</span><span>A very long channel tab title that must not overflow</span></button>
+            <button class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedTabTarget"><span aria-hidden="true">↗</span><span>Watch later</span></button>
+          </div>
+        </article>
+      </div>
+    `
+    document.body.append(dialog)
+  })
+
+  const dialog = page.locator('.capacitorPhoneTabDialog')
+  await expect.poll(() => dialog.evaluate(element => (
+    element.scrollWidth <= element.clientWidth + 1
+  ))).toBe(true)
+
+  const touchTargetHeights = await dialog.getByRole('button').evaluateAll(buttons => (
+    buttons.map(button => button.getBoundingClientRect().height)
+  ))
+  expect(touchTargetHeights.every(height => height >= 48)).toBe(true)
+  const activeIndicator = await dialog.getByRole('tab', { name: 'Tabs from other devices' })
+    .evaluate(element => {
+      const style = getComputedStyle(element)
+      return {
+        color: style.borderBottomColor,
+        width: Number.parseFloat(style.borderBottomWidth),
+      }
+    })
+  expect(activeIndicator.width).toBe(3)
+  expect(activeIndicator.color).not.toBe('rgba(0, 0, 0, 0)')
+
+  await setWindowSize(app, page, { width: 760, height: 375 })
+  await expect.poll(() => dialog.evaluate(element => (
+    element.scrollWidth <= element.clientWidth + 1 &&
+    element.scrollHeight <= element.clientHeight + 1
+  ))).toBe(true)
+})
+
+test('restores and clamps the real phone tab organizer viewports', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 375, height: 760 })
+  await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+  await enablePhoneTabSwitcher(page)
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+    store.commit('setSyncServerEnabled', true)
+    store.commit('setSyncServerToken', 'e2e-token')
+    store.commit('setSyncServerPrivacyMode', 'enhanced')
+    store.commit('setSyncServerSyncSessions', true)
+    store.commit('setSyncServerSharedTabs', false)
+    store.commit('setSyncServerOtherDeviceSessions', [{
+      syncDeviceId: 'desktop-e2e',
+      syncPlatform: 'desktop',
+      sessionId: 'session-e2e',
+      tabs: Array.from({ length: 30 }, (_, index) => ({
+        id: `synced-${index}`,
+        title: `Synced tab ${index}`,
+        url: `/watch/synced-${index}`,
+      })),
+    }])
+    for (let index = 0; index < 30; index++) {
+      await store.dispatch('createTab', { route: `/watch/local-${index}`, makeActive: false })
+    }
+  })
+  await expect.poll(() => page.locator('.capacitorPhoneTabCount').textContent()).toBe('31')
+  await page.locator('.capacitorPhoneTabSwitcherButton').click()
+
+  const openPanel = page.locator('#capacitor-phone-open-tabs-panel')
+  await expect(openPanel).toHaveAttribute('data-overlayscrollbars-viewport')
+  await openPanel.evaluate(element => { element.scrollTop = 240 })
+  await expect.poll(async () => (await phoneTabScrollState(page, '.capacitorPhoneOpenTabs')).scrollTop)
+    .toBeCloseTo(240, 0)
+  await page.getByRole('tab', { name: 'Tabs from other devices' }).click()
+
+  const syncedPanel = page.locator('#capacitor-phone-synced-tabs-panel')
+  await expect(syncedPanel).toHaveAttribute('data-overlayscrollbars-viewport')
+  await syncedPanel.evaluate(element => { element.scrollTop = 360 })
+  await expect.poll(async () => (await phoneTabScrollState(page, '.capacitorPhoneSyncedTabsContent')).scrollTop)
+    .toBeCloseTo(360, 0)
+  await page.getByRole('tab', { name: /open tabs/ }).click()
+  await expect.poll(async () => (await phoneTabScrollState(page, '.capacitorPhoneOpenTabs')).scrollTop)
+    .toBeCloseTo(240, 0)
+
+  await openPanel.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+    const ids = store.getters.getTabs.slice(0, -2).map(tab => tab.id)
+    for (const id of ids) await store.dispatch('closeTab', id)
+  })
+  await expect(page.locator('.capacitorPhoneTabRow')).toHaveCount(2)
+  await expect.poll(() => phoneTabScrollState(page, '.capacitorPhoneOpenTabs')).toEqual({
+    scrollTop: 0,
+    maximum: 0,
+    scrollbarUnusable: true,
+  })
+
+  await page.getByRole('tab', { name: 'Tabs from other devices' }).click()
+  await expect.poll(async () => (await phoneTabScrollState(page, '.capacitorPhoneSyncedTabsContent')).scrollTop)
+    .toBeCloseTo(360, 0)
+  await syncedPanel.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+    store.commit('setSyncServerOtherDeviceSessions', [{
+      syncDeviceId: 'desktop-e2e',
+      syncPlatform: 'desktop',
+      sessionId: 'session-e2e',
+      tabs: [{ id: 'synced-0', title: 'Synced tab 0', url: '/watch/synced-0' }],
+    }])
+  })
+  await expect(page.locator('.capacitorPhoneSyncedTabTarget')).toHaveCount(1)
+  await expect.poll(() => phoneTabScrollState(page, '.capacitorPhoneSyncedTabsContent')).toEqual({
+    scrollTop: 0,
+    maximum: 0,
+    scrollbarUnusable: true,
+  })
+})
+
+test('tablet tabs autosize by default and reuse the fixed tab width setting', async ({ page }) => {
+  await page.addStyleTag({
+    path: path.join(
+      repoRoot,
+      'src/renderer/components/TabBar/CapacitorTabletTabBar.css'
+    )
+  })
+  await page.evaluate(() => {
+    const bar = document.createElement('div')
+    const tabs = document.createElement('div')
+    for (const title of ['A', 'A much longer tab title']) {
+      const tab = document.createElement('div')
+      const target = document.createElement('button')
+      const close = document.createElement('button')
+      tab.className = 'capacitorTabletTab'
+      target.className = 'capacitorTabletTabTarget'
+      target.textContent = title
+      close.className = 'capacitorTabletTabClose'
+      close.textContent = 'x'
+      tab.append(target, close)
+      tabs.append(tab)
+    }
+    bar.className = 'capacitorTabletTabBar'
+    tabs.className = 'capacitorTabletTabs'
+    bar.append(tabs)
+    document.body.append(bar)
+  })
+
+  const tabs = page.locator('.capacitorTabletTab')
+  const automaticWidths = await tabs.evaluateAll(elements => (
+    elements.map(element => Math.round(element.getBoundingClientRect().width))
+  ))
+  expect(automaticWidths[1]).toBeGreaterThan(automaticWidths[0])
+
+  await page.locator('.capacitorTabletTabBar').evaluate(element => {
+    element.style.setProperty('--fixed-tab-width', '140px')
+  })
+  await expect.poll(() => tabs.evaluateAll(elements => (
+    elements.map(element => Math.round(element.getBoundingClientRect().width))
+  ))).toEqual([140, 140])
+})
+
+test('keeps the tablet main-card top gutter compact on narrow layouts', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  const appStyles = await readFile(path.join(repoRoot, 'src/renderer/App.css'), 'utf8')
+  await page.addStyleTag({
+    content: appStyles
+      .replaceAll(/:deep\(((?:[^()]|\([^()]*\))*)\)/g, '$1')
+      .replaceAll(/:global\(((?:[^()]|\([^()]*\))*)\)/g, '$1')
+  })
+  await page.evaluate(() => {
+    const testApp = document.createElement('div')
+    const outerRoute = document.createElement('div')
+    const pageRoute = document.createElement('div')
+    testApp.className = 'app capacitorTabs capacitorTabletLayout topTabs tabletMainCardTest'
+    outerRoute.className = 'routerView'
+    pageRoute.className = 'routerView'
+    outerRoute.append(pageRoute)
+    testApp.append(outerRoute)
+    document.body.append(testApp)
+  })
+
+  const pageRoute = page.locator('.tabletMainCardTest > .routerView .routerView')
+  await expect(pageRoute).toHaveCSS('margin-block-start', '18px')
+})
 
 test('collapsed description paints the More control above its text', async ({ page }) => {
   await page.addStyleTag({
@@ -68,6 +358,31 @@ test('collapsed description paints the More control above its text', async ({ pa
   })).toBe(true)
 })
 
+test('centers channel Home shelves within the available width', async ({ page }) => {
+  await page.addStyleTag({
+    path: path.join(
+      repoRoot,
+      'src/renderer/components/ChannelHome/ChannelHome.css'
+    )
+  })
+  await page.evaluate(() => {
+    const shelf = document.createElement('section')
+    shelf.className = 'shelfContainer'
+    shelf.textContent = 'Channel Home shelf'
+    document.body.append(shelf)
+  })
+
+  const gaps = await page.locator('.shelfContainer').evaluate((element) => {
+    const bounds = element.getBoundingClientRect()
+    return {
+      inlineStart: bounds.left,
+      inlineEnd: document.documentElement.clientWidth - bounds.right,
+    }
+  })
+
+  expect(Math.abs(gaps.inlineStart - gaps.inlineEnd)).toBeLessThanOrEqual(1)
+})
+
 test('full-window player shows the title overlay', async ({ page }) => {
   const playerStyles = await readFile(
     path.join(
@@ -94,6 +409,59 @@ test('full-window player shows the title overlay', async ({ page }) => {
   await expect(title).toHaveCSS('display', 'none')
   await player.evaluate(element => element.classList.add('fullWindow'))
   await expect(title).toHaveCSS('display', 'block')
+})
+
+test('keeps the full-window player title below the Android status bar', async ({ page }) => {
+  const playerStyles = await readFile(
+    path.join(
+      repoRoot,
+      'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.css'
+    ),
+    'utf8'
+  )
+  await page.addStyleTag({
+    content: playerStyles.replaceAll(/:deep\(((?:[^()]|\([^()]*\))*)\)/g, '$1')
+  })
+  await page.evaluate(() => {
+    document.documentElement.style.setProperty('--safe-area-inset-top', '32px')
+
+    const app = document.querySelector('.app')
+    const player = document.createElement('div')
+    const title = document.createElement('h1')
+    player.className = 'ftVideoPlayer fullWindow'
+    title.className = 'playerFullscreenTitleOverlay'
+    title.textContent = 'Test video title'
+    player.append(title)
+    app.append(player)
+  })
+
+  const title = page.locator('.ftVideoPlayer .playerFullscreenTitleOverlay')
+  await expect(title).toHaveCSS('top', '37px')
+})
+
+test('scopes Android fullscreen safe-area rules to the player UI', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  await page.evaluate(() => {
+    document.documentElement.style.setProperty('--safe-area-inset-top', '32px')
+    document.documentElement.style.setProperty('--safe-area-inset-bottom', '20px')
+    document.querySelector('.app').classList.add('capacitorTabs')
+
+    const player = document.querySelector('.ftVideoPlayer')
+    const topControls = document.createElement('div')
+    const metadataSide = document.createElement('div')
+    player.classList.add('shortsPlayer', 'fullWindow', 'fullscreenCommentsOpen')
+    topControls.className = 'shortsTopControls'
+    metadataSide.className = 'shortsFullscreenMetadataSide'
+    player.append(topControls, metadataSide)
+  })
+
+  await expect(page.locator('.app')).toHaveCSS('display', 'flex')
+  await expect(page.locator('.shortsTopControls')).toHaveCSS('padding-top', '48px')
+  await expect(page.locator('.shortsFullscreenMetadataSide')).toHaveCSS('display', 'none')
+  await expect(page.locator('.fullscreenCommentsOverlay')).toHaveCSS('top', '44px')
+  await expect(page.locator('.fullscreenCommentsOverlay')).toHaveCSS('bottom', '32px')
 })
 
 test('paid promotion badge follows the full-window title visibility', async ({ page }) => {
@@ -393,12 +761,57 @@ test.describe('autosized prompts', () => {
   })
 })
 
+test('isolates the video surface while Android Picture-in-Picture is active', async ({ page }) => {
+  await goTo(page, 'home')
+  await page.evaluate(() => {
+    const player = document.createElement('div')
+    player.className = 'ftVideoPlayer'
+    const video = document.createElement('video')
+    video.className = 'player'
+    player.append(video)
+    document.querySelector('.routerView').append(player)
+    document.body.classList.add('androidPictureInPicture')
+  })
+
+  await expect(page.locator('.topNav')).toHaveCSS('visibility', 'hidden')
+  await expect(page.locator('.ftVideoPlayer')).toHaveCSS('visibility', 'visible')
+  await expect(page.locator('.ftVideoPlayer > .player')).toHaveCSS('visibility', 'visible')
+})
+
 test.describe('thumbnail watched progress', () => {
   test.use({
     seed: {
       settings: { uiRoundness: 200 },
-      history: [historyEntry('aaaaaaaaaaa', 'Partially watched video', Date.now())]
+      history: [
+        historyEntry('aaaaaaaaaaa', 'Partially watched video', Date.now()),
+        {
+          ...historyEntry('bbbbbbbbbbb', 'Fully watched video', Date.now() - 1000),
+          // A completed sync record can retain the last saved position; the
+          // explicit watched state is authoritative for its visual progress.
+          watchProgress: 30,
+          isWatched: true,
+        },
+      ]
     }
+  })
+
+  test('covers the complete curved thumbnail path at 100 percent', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 375, height: 700 })
+    await page.locator('.app').evaluate(element => {
+      element.classList.add('capacitorTabs', 'capacitorPhoneLayout')
+    })
+    await goTo(page, 'history')
+
+    const progressPath = page.locator('.ft-list-item')
+      .filter({ hasText: 'Fully watched video' })
+      .locator('.watchedProgressBar .embeddedProgressPath')
+    await expect(progressPath).toBeVisible()
+
+    const lengths = await progressPath.evaluate(element => ({
+      dashLength: Number.parseFloat(element.style.strokeDasharray),
+      pathLength: element.getTotalLength(),
+    }))
+    expect(lengths.dashLength).toBeCloseTo(lengths.pathLength, 1)
   })
 
   test('matches the configured thumbnail corner radius', async ({ page }) => {
@@ -502,6 +915,28 @@ test.describe('toast timeout progress', () => {
     expect(Math.abs(trackBounds.height - toastBounds.height)).toBeLessThanOrEqual(1)
     expect(Math.abs(indicatorBounds.y - toastBounds.y)).toBeLessThanOrEqual(1)
     expect(Math.abs(indicatorBounds.height - toastBounds.height)).toBeLessThanOrEqual(1)
+  })
+
+  test('covers the complete curved toast path before its timeout starts', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 375, height: 700 })
+    await page.locator('.app').evaluate(element => {
+      element.classList.add('capacitorTabs', 'capacitorPhoneLayout')
+    })
+    await goTo(page, 'history')
+    await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('Full timeout progress', 10000)
+    })
+
+    const toast = page.locator('.toast', { hasText: 'Full timeout progress' })
+    const progressPath = toast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
+    await expect(progressPath).toBeVisible()
+    await toast.hover()
+
+    const lengths = await progressPath.evaluate(element => ({
+      dashLength: Number.parseFloat(element.style.strokeDasharray),
+      pathLength: element.getTotalLength(),
+    }))
+    expect(lengths.dashLength).toBeCloseTo(lengths.pathLength, 1)
   })
 
   test('stays wrapped around both corners until the toast has animated in', async ({ page }) => {

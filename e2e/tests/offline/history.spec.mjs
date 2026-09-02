@@ -96,7 +96,20 @@ async function updateInputWithoutScrolling(input, value) {
 
 test.use({
   seed: {
-    settings: { uiRoundness: 200 },
+    settings: {
+      uiRoundness: 200,
+      quickBookmarkTargetPlaylistId: 'favorites'
+    },
+    playlists: [{
+      _id: 'favorites',
+      playlistName: 'Favorites',
+      protected: true,
+      description: '',
+      quickBookmarkIcon: 'bookmark',
+      videos: [],
+      createdAt: now - DAY,
+      lastUpdatedAt: now - DAY
+    }],
     history: [
       historyEntry('aaaaaaaaaaa', 'First test video', now - 1000, true),
       historyEntry('bbbbbbbbbbb', 'Second test video', now - 2000),
@@ -124,6 +137,31 @@ test.describe('watch history', () => {
     await expect(titles.first()).toContainText('First test video')
   })
 
+  test('consumes the backdrop tap when dismissing a prompt', async ({ page }) => {
+    await goTo(page, 'history')
+    await page.getByRole('button', { name: 'Delete Old History' }).click()
+
+    const prompt = page.locator('.prompt')
+    await expect(prompt).toBeVisible()
+    await page.evaluate(() => {
+      window.__promptBackdropEvents = { clicks: 0, pointerDowns: 0 }
+      const app = document.querySelector('.app')
+      app.addEventListener('pointerdown', () => window.__promptBackdropEvents.pointerDowns++)
+      app.addEventListener('click', () => window.__promptBackdropEvents.clicks++)
+    })
+
+    const bounds = await prompt.boundingBox()
+    await page.mouse.move(bounds.x + 1, bounds.y + 1)
+    await page.mouse.down()
+    await page.mouse.up()
+
+    await expect(prompt).toHaveCount(0)
+    expect(await page.evaluate(() => window.__promptBackdropEvents)).toEqual({
+      clicks: 0,
+      pointerDowns: 0
+    })
+  })
+
   test('the sort options row keeps a gap above the video grid', async ({ page }) => {
     await goTo(page, 'history')
     await expect(page.getByText('First test video')).toBeVisible()
@@ -137,6 +175,59 @@ test.describe('watch history', () => {
       ])
       return videoBox.y - (optionsBox.y + optionsBox.height)
     }).toBeGreaterThanOrEqual(10)
+  })
+
+  test('keeps space between the history actions and search field', async ({ page }) => {
+    await page.setViewportSize({ width: 520, height: 900 })
+    await goTo(page, 'history')
+
+    const actions = page.locator('.headingActions')
+    const search = page.locator('.historySearch')
+    await expect.poll(async () => {
+      const [actionsBox, searchBox] = await Promise.all([actions.boundingBox(), search.boundingBox()])
+      return searchBox.y - actionsBox.y - actionsBox.height
+    }).toBeGreaterThanOrEqual(12)
+  })
+
+  test('keeps thumbnail actions inset and separated on narrow layouts', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 })
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere' })
+    await video.hover()
+    const thumbnail = video.locator('.videoThumbnail')
+    const actions = video.locator('.playlistIcons')
+    const buttons = actions.locator('.iconButton')
+    await expect(buttons).toHaveCount(3)
+
+    const [thumbnailBox, actionsBox, firstButtonBox, secondButtonBox] = await Promise.all([
+      thumbnail.boundingBox(),
+      actions.boundingBox(),
+      buttons.nth(0).boundingBox(),
+      buttons.nth(1).boundingBox()
+    ])
+    expect(actionsBox.y - thumbnailBox.y).toBeGreaterThanOrEqual(8)
+    expect(thumbnailBox.x + thumbnailBox.width - actionsBox.x - actionsBox.width).toBeGreaterThanOrEqual(8)
+    expect(secondButtonBox.x - firstButtonBox.x - firstButtonBox.width).toBeGreaterThanOrEqual(8)
+    expect(actionsBox.x).toBeGreaterThanOrEqual(thumbnailBox.x)
+    expect(actionsBox.x + actionsBox.width).toBeLessThanOrEqual(thumbnailBox.x + thumbnailBox.width)
+  })
+
+  test('uses edge-to-edge cards in the Capacitor phone layout', async ({ page }) => {
+    await page.setViewportSize({ width: 520, height: 900 })
+    await goTo(page, 'history')
+    await page.locator('.app').evaluate(element => element.classList.add('capacitorPhoneLayout'))
+
+    const card = page.locator('.card').first()
+    await expect.poll(async () => {
+      const cardBox = await card.boundingBox()
+      return Math.max(
+        Math.abs(cardBox.x),
+        Math.abs(520 - cardBox.x - cardBox.width)
+      )
+    }).toBeLessThanOrEqual(1)
+    await expect(card).toHaveCSS('margin-bottom', '0px')
+    await expect(card).toHaveCSS('border-radius', '0px')
   })
 
   test('history search filters entries', async ({ page }) => {
@@ -429,7 +520,7 @@ test.describe('watch history with an immediate watched threshold', () => {
       const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
       return records.filter(record => record.videoId === 'ddddddddddd').at(-1)?.watchProgress
     }).toBe(0)
-    await expect(video.locator('.watchedProgressBar')).toHaveCount(0)
+    await expect(video.locator('.watchedProgressBar')).toHaveAttribute('data-progress', '100')
   })
 })
 

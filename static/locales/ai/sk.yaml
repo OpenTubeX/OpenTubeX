@@ -271,6 +271,11 @@ Settings:
       Mark as Watched: Označiť ako pozreté
       Copy YouTube Link: Kopírovať odkaz na YouTube
       Open in YouTube: Otvoriť na YouTube
+    Mobile Layout:
+      Mobile Layout: 'Mobilné rozloženie'
+      Automatic: 'Automaticky'
+      Phone: 'Telefón'
+      Tablet: 'Tablet'
   Context Menu Search Settings:
     Context Menu Search Settings: Hľadanie v kontextovej ponuke
     Description: Vyberte vyhľadávače, ktoré sa zobrazia po kliknutí pravým tlačidlom na označený text. Výsledky hľadania sa otvoria v predvolenom prehliadači.
@@ -493,6 +498,8 @@ Settings:
     Reorder Playback Speed: Potiahnutím zmeniť poradie rýchlosti prehrávania
     Playback Speed: Rýchlosť prehrávania
     Parallel Segment Loading: Súbežné načítavanie segmentov
+    Rotate Wide Videos to Landscape in Fullscreen: 'Otočiť široké videá na šírku v režime celej obrazovky'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Potiahnutím nahor alebo nadol otvoriť či opustiť celú obrazovku'
   Channel Settings:
     Channel Settings: Nastavenia kanálov
     Channel Settings Description: Nastavenia, ktoré vyberiete pri sledovaní, sa zapamätajú pre každý kanál samostatne a znova sa použijú pri ďalšom sledovaní jeho videa.
@@ -779,7 +786,7 @@ Settings:
     Privacy Policy: Zásady ochrany súkromia tohto servera
     Enhanced Privacy Enabled: Rozšírená ochrana súkromia je zapnutá. Server uchováva len zašifrované synchronizované údaje.
     Enhanced Privacy Unsupported: 'Upozornenie: tento server nepodporuje rozšírenú ochranu súkromia. Prevádzkovateľ servera môže vidieť synchronizované údaje.'
-    Description: Synchronizujte odbery, profily, zoznamy videí, históriu sledovania, nastavenia a otvorené karty so synchronizačným serverom OpenTubeX alebo LibreTube. Servery LibreTube nemusia podporovať všetky funkcie synchronizácie.
+    Description: 'Synchronizujte odbery, profily, playlisty, históriu pozerania a podporované nastavenia so synchronizačným serverom OpenTubeX alebo LibreTube. Karty v počítači a mobile zostanú oddelené, pokiaľ ich výslovne nezdieľate. Servery LibreTube nemusia podporovať všetky funkcie synchronizácie.'
     Server URL: Adresa URL servera
     Checking Server: Kontroluje sa synchronizačný server…
     Server Unavailable: K tomuto synchronizačnému serveru sa nepodarilo pripojiť. Skontrolujte adresu URL a skúste to znova.
@@ -860,6 +867,13 @@ Settings:
     Data Loss Confirmation: Potvrdiť synchronizáciu s odstránením údajov?
     Data Loss Warning: Stav servera by odstránil {deleted} z {previous} predtým synchronizovaných položiek v kolekcii {collection}. Môže to znamenať neúspešnú migráciu alebo obnovenie servera. Pokračujte, len ak chcete tieto údaje odstrániť a máte zálohu.
     Confirm Data Loss: Odstrániť a pokračovať
+    Use Shared Tabs: 'Používať jednu zdieľanú súpravu kariet vo všetkých zariadeniach'
+    Shared Tabs Warning: 'Zdieľané karty nahradia aktuálnu súpravu na pripojených zariadeniach. Nechajte túto možnosť vypnutú, ak chcete zachovať oddelené karty v počítači a mobile.'
+    Tabs From Other Devices: 'Karty z iných zariadení'
+    Device Tab Session: '{platform} · kariet: {count}'
+    Mobile Device: 'Mobil'
+    Desktop Device: 'Počítač'
+    Open All Tabs: 'Otvoriť všetky karty'
   Proxy Settings:
     IP Block Recovery Script Path: Cesta k skriptu na obnovenie po zablokovaní IP adresy
     Select IP Block Recovery Script File: Vybrať súbor skriptu na obnovenie po zablokovaní IP adresy

@@ -13,6 +13,7 @@ import {
   openNewWindowFromTabBar,
   recordAnimations,
   sel,
+  setWindowSize,
   waitForAppReady
 } from '../../helpers/app.mjs'
 
@@ -853,6 +854,38 @@ test.describe('settings', () => {
     await expectControlsInsideCategories()
   })
 
+  test('vertically centers switch tracks with long labels and setting indicators', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 480, height: 800 })
+    const addOns = await goToSettingsSection(page, 'add-ons')
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('updateHighlightChangedSettings', true)
+    })
+
+    const sponsorBlock = addOns.getByRole('checkbox', { name: 'Enable SponsorBlock', exact: true })
+    if (!await sponsorBlock.isChecked()) {
+      await addOns.locator('label.switch-label').filter({ hasText: 'Enable SponsorBlock' }).click()
+    }
+
+    const submission = addOns.locator('.switch-ctn').filter({
+      has: page.getByText('Enable SponsorBlock Submission', { exact: true })
+    })
+    await expect(submission).toBeVisible()
+
+    const centerOffset = await submission.evaluate(element => {
+      const label = element.querySelector('.switch-label')
+      const text = element.querySelector('.switch-label-text').getBoundingClientRect()
+      const labelBounds = label.getBoundingClientRect()
+      const knob = getComputedStyle(label, '::after')
+      const transform = new DOMMatrix(knob.transform)
+      const knobCenter = labelBounds.top + Number.parseFloat(knob.top) +
+        transform.m42 + Number.parseFloat(knob.height) / 2
+      return Math.abs(knobCenter - (text.top + text.height / 2))
+    })
+
+    expect(centerOffset).toBeLessThanOrEqual(1)
+  })
+
   test('offers a custom SponsorBlock category color initialized from its default', async ({ app, page }) => {
     const addOns = await goToSettingsSection(page, 'add-ons')
     await addOns.locator('label.switch-label').filter({ hasText: 'Enable SponsorBlock' }).click()
@@ -1600,6 +1633,24 @@ test.describe('settings', () => {
     expect(restoredBounds.height).toBeCloseTo(resizedBounds.height, 0)
   })
 
+  test('does not expose a horizontal scrollbar in phone-sized Appearance settings', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 375, height: 700 })
+    await goToSettingsSection(page, 'appearance')
+
+    const scroller = page.locator('.settingsContent')
+    await expect(scroller).toBeVisible()
+    await expect.poll(() => scroller.evaluate(element => ({
+      horizontalScrollRange: element.scrollWidth - element.clientWidth,
+      overflowX: getComputedStyle(element).overflowX,
+      horizontalScrollbarVisible: element.querySelector('.os-scrollbar-horizontal')
+        ?.classList.contains('os-scrollbar-visible') ?? false,
+    }))).toEqual({
+      horizontalScrollRange: 0,
+      overflowX: 'hidden',
+      horizontalScrollbarVisible: false,
+    })
+  })
+
   test('keeps stacked theme selects compact in a narrow settings window', async ({ page }) => {
     await page.evaluate(() => {
       localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
@@ -1977,6 +2028,31 @@ test.describe('settings', () => {
     const bounds = await page.locator('.settingsWindow').boundingBox()
     expect(bounds.x).toBeGreaterThanOrEqual(0)
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(340)
+  })
+
+  test('keeps narrow settings maximized below the status bar after viewport height changes', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 })
+    await page.evaluate(() => {
+      document.documentElement.style.setProperty('--safe-area-inset-top', '24px')
+    })
+    await goTo(page, 'settings')
+
+    const settingsWindow = page.locator('.settingsWindow')
+    await expect(settingsWindow).toHaveClass(/maximized/)
+    await expect(page.getByRole('button', { name: /Maximi[sz]e|Restore/ })).toHaveCount(0)
+    await expect(page.locator('.settingsResizeHandle:visible')).toHaveCount(0)
+    await expect(page.getByRole('searchbox', { name: 'Search settings' })).not.toBeFocused()
+
+    await page.setViewportSize({ width: 375, height: 500 })
+    await page.setViewportSize({ width: 375, height: 800 })
+
+    await expect.poll(async () => (await settingsWindow.boundingBox()).y).toBe(24)
+    await expect.poll(async () => (await settingsWindow.boundingBox()).height).toBe(776)
+
+    await page.setViewportSize({ width: 720, height: 390 })
+    await expect(settingsWindow).toHaveClass(/maximized/)
+    await expect.poll(async () => (await settingsWindow.boundingBox()).width).toBe(720)
+    await expect.poll(async () => (await settingsWindow.boundingBox()).height).toBe(366)
   })
 
   test('keeps its minimum size when a resize pointer crosses the window', async ({ page }) => {
@@ -4181,6 +4257,20 @@ test.describe('sync settings', () => {
     await expect(username).toHaveValue('paired-user')
   })
 
+  test('records concurrent setting edits without losing a sync timestamp', async ({ page }) => {
+    const updatedAt = await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await Promise.all([
+        store.dispatch('recordSyncSettingEdit', 'baseTheme'),
+        store.dispatch('recordSyncSettingEdit', 'mainColor'),
+      ])
+      return store.state.settings.syncServerSettingUpdatedAt
+    })
+
+    expect(updatedAt.baseTheme).toEqual(expect.any(Number))
+    expect(updatedAt.mainColor).toEqual(expect.any(Number))
+  })
+
   test('does not follow sync-server redirects with credentials', async ({ page }) => {
     let credentialedRequestStarted
     const credentialedRequest = new Promise(resolve => {
@@ -5041,5 +5131,51 @@ test.describe('localized compact settings breadcrumb', () => {
     await expect.poll(() => category.locator('.settingsBreadcrumbText').evaluate(element => (
       element.scrollWidth <= element.clientWidth + 1
     ))).toBe(true)
+  })
+})
+
+test.describe('tabs from other synced devices', () => {
+  test.use({
+    seed: {
+      settings: {
+        currentLocale: 'en-US',
+        syncServerEnabled: true,
+        syncServerUsername: 'test-user',
+        syncServerToken: 'offline-test-token',
+        syncServerPrivacyMode: 'enhanced',
+        syncServerSyncSessions: true,
+        syncServerSharedTabs: false,
+      }
+    }
+  })
+
+  test('fits additive tab handoff actions on a phone-sized settings page', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 390, height: 760 })
+    const section = await goToSettingsSection(page, 'sync')
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setSyncServerOtherDeviceSessions', [{
+        sessionId: 'desktop-session',
+        syncDeviceId: 'desktop-device',
+        syncPlatform: 'desktop',
+        tabs: [
+          { id: 'first', title: 'A long channel tab title', url: 'https://www.youtube.com/' },
+          { id: 'second', title: 'Watch later', url: 'https://www.youtube.com/playlist?list=WL' },
+        ],
+      }])
+    })
+
+    const sessions = section.locator('.otherDeviceTabs')
+    await expect(sessions.getByRole('heading', { name: 'Tabs from other devices' })).toBeVisible()
+    await expect(sessions.getByRole('button', { name: 'Open all tabs' })).toBeVisible()
+    await expect(sessions.getByRole('button', { name: 'A long channel tab title' })).toBeVisible()
+    await expect.poll(() => sessions.evaluate(element => (
+      element.scrollWidth <= element.clientWidth + 1
+    ))).toBe(true)
+
+    const actionHeights = await sessions.getByRole('button').evaluateAll(buttons => (
+      buttons.map(button => button.getBoundingClientRect().height)
+    ))
+    expect(actionHeights.every(height => height >= 48)).toBe(true)
   })
 })

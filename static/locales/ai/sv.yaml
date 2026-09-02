@@ -273,6 +273,11 @@ Settings:
       Mark as Watched: Markera som sedd
       Copy YouTube Link: Kopiera YouTube-länk
       Open in YouTube: Öppna på YouTube
+    Mobile Layout:
+      Mobile Layout: 'Mobillayout'
+      Automatic: 'Automatiskt'
+      Phone: 'Telefon'
+      Tablet: 'Surfplatta'
   Context Menu Search Settings:
     Context Menu Search Settings: Sökning från snabbmenyn
     Description: Välj vilka sökmotorer som visas när du högerklickar på markerad text. Sökningar öppnas i din standardwebbläsare.
@@ -495,6 +500,8 @@ Settings:
     Reorder Playback Speed: Dra för att ändra ordning på uppspelningshastigheten
     Playback Speed: Uppspelningshastighet
     Parallel Segment Loading: Parallell inläsning av segment
+    Rotate Wide Videos to Landscape in Fullscreen: 'Rotera breda videor till liggande läge i helskärm'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Svep uppåt eller nedåt för att öppna eller lämna helskärm'
   Channel Settings:
     Channel Settings: Kanalinställningar
     Channel Settings Description: Kom ihåg inställningarna du väljer när du tittar för varje enskild kanal och använd dem nästa gång du tittar på en av kanalens videor.
@@ -781,7 +788,7 @@ Settings:
     Privacy Policy: Integritetspolicy för den här servern
     Enhanced Privacy Enabled: Förstärkt integritet är aktiverad. Servern lagrar endast krypterade synkroniseringsdata.
     Enhanced Privacy Unsupported: Varning! Den här servern stöder inte förstärkt integritet. Synkroniserade data är synliga för serveroperatören.
-    Description: Synkronisera prenumerationer, profiler, spellistor, visningshistorik, inställningar och öppna flikar med en synkroniseringsserver för OpenTubeX eller LibreTube. LibreTube-servrar kanske inte stöder alla synkroniseringsfunktioner.
+    Description: 'Synkronisera prenumerationer, profiler, spellistor, visningshistorik och inställningar som stöds med en synkroniseringsserver för OpenTubeX eller LibreTube. Flikar på dator och mobil hålls åtskilda om du inte uttryckligen delar dem. LibreTube-servrar stöder kanske inte alla synkroniseringsfunktioner.'
     Server URL: Server-URL
     Checking Server: Kontrollerar synkroniseringsservern…
     Server Unavailable: Det gick inte att ansluta till synkroniseringsservern. Kontrollera URL:en och försök igen.
@@ -862,6 +869,13 @@ Settings:
     Data Loss Confirmation: Bekräfta destruktiv synkronisering?
     Data Loss Warning: Serverstatusen skulle ta bort {deleted} av {previous} tidigare synkroniserade objekt i {collection}. Det kan tyda på en misslyckad servermigrering eller återställning. Fortsätt endast om borttagningen är avsiktlig och du har en säkerhetskopia.
     Confirm Data Loss: Ta bort och fortsätt
+    Use Shared Tabs: 'Använd en gemensam uppsättning flikar på alla enheter'
+    Shared Tabs Warning: 'Delade flikar ersätter den aktuella uppsättningen på anslutna enheter. Låt detta vara avstängt för att behålla separata flikar på dator och mobil.'
+    Tabs From Other Devices: 'Flikar från andra enheter'
+    Device Tab Session: '{platform} · {count} flikar'
+    Mobile Device: 'Mobil'
+    Desktop Device: 'Dator'
+    Open All Tabs: 'Öppna alla flikar'
   Proxy Settings:
     IP Block Recovery Script Path: Sökväg till skript för återställning efter IP-blockering
     Select IP Block Recovery Script File: Välj skriptfil för återställning efter IP-blockering

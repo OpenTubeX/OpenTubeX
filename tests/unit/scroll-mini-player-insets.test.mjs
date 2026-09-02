@@ -9,13 +9,35 @@ import {
   parseScrollMiniPlayerSavedRect,
   serializeScrollMiniPlayerSavedRect,
   getScrollMiniVerticalAnchor,
+  getScrollMiniPlayerStashSide,
+  getStashedScrollMiniPlayerRect,
   pickScrollMiniVerticalAnchor,
   reanchorScrollMiniPlayerRect,
   MARGIN
 } from '../../src/renderer/helpers/scrollMiniPlayer.js'
 
+test('a phone drag beyond either edge stashes the mini player', () => {
+  const rect = { left: 16, top: 120, width: 320, height: 180 }
+  const insets = { left: 0, right: 0 }
+
+  assert.equal(getScrollMiniPlayerStashSide(rect, -50, 400, insets), 'left')
+  assert.equal(getScrollMiniPlayerStashSide(rect, 100, 400, insets), 'right')
+  assert.equal(getScrollMiniPlayerStashSide(rect, 10, 400, insets), null)
+})
+
+test('a stashed mini player leaves a 36px restore target visible', () => {
+  const rect = { left: 16, top: 120, width: 320, height: 180 }
+  const insets = { left: 4, right: 8 }
+  const left = getStashedScrollMiniPlayerRect(rect, 'left', 400, insets)
+  const right = getStashedScrollMiniPlayerRect(rect, 'right', 400, insets)
+
+  assert.equal(left.left + left.width - insets.left, 36)
+  assert.equal(400 - insets.right - right.left, 36)
+})
+
 /**
  * @param {object} options
+ * @param {{ top: number, bottom: number, width: number, height: number } | null} [options.sideNavRect]
  * @param {{ left: number, right: number } | null} [options.verticalTabBarRect]
  * @param {{ top: number, bottom: number } | null} [options.tabBarRect]
  * @param {number} options.clientWidth usable width (excludes the scrollbar)
@@ -23,6 +45,7 @@ import {
  * @param {number} [options.clientHeight]
  */
 function stubViewport ({
+  sideNavRect = null,
   verticalTabBarRect = null,
   tabBarRect = null,
   clientWidth,
@@ -32,6 +55,9 @@ function stubViewport ({
   global.window = { innerWidth: clientWidth + scrollbarWidth, innerHeight: clientHeight }
   global.document = {
     querySelector (selector) {
+      if (selector === '.sideNav' && sideNavRect) {
+        return { getBoundingClientRect: () => sideNavRect }
+      }
       if (selector === '.tabBar.vertical' && verticalTabBarRect) {
         return { getBoundingClientRect: () => verticalTabBarRect }
       }
@@ -107,6 +133,30 @@ test('a bottom tab bar pads the bottom inset', () => {
 
   assert.equal(insets.top, MARGIN)
   assert.equal(insets.bottom, 34 + MARGIN)
+})
+
+test('a phone bottom navigation pads the bottom inset', () => {
+  stubViewport({
+    sideNavRect: { top: 716, bottom: 800, width: 375, height: 84 },
+    clientWidth: 375,
+    clientHeight: 800
+  })
+
+  const insets = getViewportInsets()
+
+  assert.equal(insets.bottom, 84 + MARGIN)
+})
+
+test('a desktop side navigation does not pad the bottom inset', () => {
+  stubViewport({
+    sideNavRect: { top: 0, bottom: 800, width: 88, height: 800 },
+    clientWidth: 1000,
+    clientHeight: 800
+  })
+
+  const insets = getViewportInsets()
+
+  assert.equal(insets.bottom, MARGIN)
 })
 
 test('the left dock edge follows the tab rail width', () => {

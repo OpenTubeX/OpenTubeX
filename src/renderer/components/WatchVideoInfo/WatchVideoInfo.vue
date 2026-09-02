@@ -804,7 +804,8 @@ const showSaveChannelSubtitlesStateButton = computed(() => {
 })
 
 const showSaveChannelVolumeButton = computed(() => {
-  return !props.isUpcoming &&
+  return !process.env.IS_CAPACITOR &&
+    !props.isUpcoming &&
     store.getters.getRememberVolumePerChannel &&
     !store.getters.getAutoUpdateChannelVolumes
 })

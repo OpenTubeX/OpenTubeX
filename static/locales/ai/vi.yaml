@@ -275,6 +275,11 @@ Settings:
       Mark as Watched: Đánh dấu đã xem
       Copy YouTube Link: Sao chép liên kết YouTube
       Open in YouTube: Mở trong YouTube
+    Mobile Layout:
+      Mobile Layout: 'Bố cục di động'
+      Automatic: 'Tự động'
+      Phone: 'Điện thoại'
+      Tablet: 'Máy tính bảng'
   Context Menu Search Settings:
     Context Menu Search Settings: Tìm kiếm trong menu ngữ cảnh
     Description: Chọn công cụ tìm kiếm xuất hiện khi bạn nhấp chuột phải vào văn bản đã chọn. Kết quả tìm kiếm sẽ mở trong trình duyệt mặc định.
@@ -501,6 +506,8 @@ Settings:
     Reorder Playback Speed: Kéo để sắp xếp lại tốc độ phát
     Playback Speed: Tốc độ phát
     Parallel Segment Loading: Tải song song các phân đoạn
+    Rotate Wide Videos to Landscape in Fullscreen: 'Xoay video rộng sang ngang khi ở chế độ toàn màn hình'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Vuốt lên hoặc xuống để vào hoặc thoát chế độ toàn màn hình'
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
@@ -796,7 +803,7 @@ Settings:
     Privacy Policy: Chính sách riêng tư của máy chủ này
     Enhanced Privacy Enabled: Đã bật quyền riêng tư nâng cao. Máy chủ chỉ lưu dữ liệu đồng bộ đã mã hóa.
     Enhanced Privacy Unsupported: Cảnh báo — máy chủ này không hỗ trợ quyền riêng tư nâng cao. Đơn vị vận hành có thể xem dữ liệu đã đồng bộ.
-    Description: Đồng bộ kênh đăng ký, hồ sơ, danh sách phát, lịch sử xem, cài đặt và thẻ đang mở với máy chủ đồng bộ OpenTubeX hoặc LibreTube. Máy chủ LibreTube có thể không hỗ trợ mọi tính năng đồng bộ.
+    Description: 'Đồng bộ gói đăng ký, hồ sơ, danh sách phát, lịch sử xem và các cài đặt được hỗ trợ với máy chủ đồng bộ OpenTubeX hoặc LibreTube. Các thẻ trên máy tính và thiết bị di động được giữ riêng trừ khi bạn chủ động chia sẻ chúng. Máy chủ LibreTube có thể không hỗ trợ mọi tính năng đồng bộ.'
     Server URL: URL máy chủ
     Checking Server: Đang kiểm tra máy chủ đồng bộ…
     Server Unavailable: Không thể kết nối với máy chủ đồng bộ này. Hãy kiểm tra URL rồi thử lại.
@@ -877,6 +884,13 @@ Settings:
     Data Loss Confirmation: Xác nhận đồng bộ có xóa dữ liệu?
     Data Loss Warning: Trạng thái máy chủ sẽ xóa {deleted} trong số {previous} mục {collection} đã đồng bộ trước đó. Điều này có thể cho thấy quá trình di chuyển hoặc đặt lại máy chủ đã lỗi. Chỉ tiếp tục nếu bạn chủ ý xóa và đã có bản sao lưu.
     Confirm Data Loss: Xóa và tiếp tục
+    Use Shared Tabs: 'Dùng một bộ thẻ chung trên các thiết bị'
+    Shared Tabs Warning: 'Các thẻ dùng chung sẽ thay thế bộ thẻ hiện tại trên thiết bị đã kết nối. Hãy tắt tùy chọn này để giữ riêng thẻ trên máy tính và thiết bị di động.'
+    Tabs From Other Devices: 'Thẻ từ thiết bị khác'
+    Device Tab Session: '{platform} · {count} thẻ'
+    Mobile Device: 'Di động'
+    Desktop Device: 'Máy tính'
+    Open All Tabs: 'Mở tất cả thẻ'
   Proxy Settings:
     IP Block Recovery Script Path: Đường dẫn tập lệnh khôi phục khi bị chặn IP
     Select IP Block Recovery Script File: Chọn tệp tập lệnh khôi phục khi bị chặn IP

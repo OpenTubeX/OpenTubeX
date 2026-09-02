@@ -4,6 +4,7 @@ import test from 'node:test'
 import {
   AUTO_SYNC_INTERVAL_MS,
   SYNC_ACTION_REASONS,
+  SYNC_MUTATION_REASONS,
   isRecentSync,
   isSyncReasonEnabled,
 } from '../../src/renderer/helpers/sync-server-scheduling.js'
@@ -28,6 +29,8 @@ test('maps local actions to their affected sync collection', () => {
   assert.equal(SYNC_ACTION_REASONS.get('updateCustomThemes'), 'settings')
   assert.equal(SYNC_ACTION_REASONS.get('createProfile'), 'profiles')
   assert.equal(SYNC_ACTION_REASONS.get('addChannelToProfiles'), 'profilesOrSubscriptions')
+  assert.equal(SYNC_MUTATION_REASONS.get('setTabsState'), 'sessions')
+  assert.equal(SYNC_MUTATION_REASONS.get('setTabNavigation'), 'sessions')
 })
 
 test('only schedules changes for enabled collections', () => {

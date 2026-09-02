@@ -457,6 +457,73 @@ test('updates boolean settings from the player options', async ({ app, page }) =
   await expect(skipSilence).toHaveAttribute('aria-pressed', 'true')
 })
 
+test('keeps watch metadata and comment filters inside a narrow viewport', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowWidth(app, 520)
+
+  const videoInfo = page.locator('.infoArea .watchVideoInfo')
+  await expect(videoInfo.locator('.videoCategory')).toBeVisible()
+  expect(await videoInfo.evaluate(element => element.scrollWidth - element.clientWidth))
+    .toBeLessThanOrEqual(1)
+
+  const loadComments = page.locator('.getCommentsTitle')
+  if (await loadComments.count() > 0) {
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+  }
+  await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+  await page.getByRole('button', { name: 'Filter loaded comments' }).click()
+
+  const menuBounds = await page.getByRole('dialog', { name: 'Comment filters' }).evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    return {
+      left: bounds.left,
+      right: bounds.right,
+      viewportLeft: window.visualViewport?.offsetLeft ?? 0,
+      viewportRight: (window.visualViewport?.offsetLeft ?? 0) +
+        (window.visualViewport?.width ?? window.innerWidth)
+    }
+  })
+  expect(menuBounds.left).toBeGreaterThanOrEqual(menuBounds.viewportLeft)
+  expect(menuBounds.right).toBeLessThanOrEqual(menuBounds.viewportRight)
+})
+
+test('keeps stacked watch cards separated in the Capacitor phone layout', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowWidth(app, 520)
+  await page.locator('.app').evaluate((element) => {
+    element.classList.add('capacitorTabs', 'capacitorPhoneLayout')
+    element.classList.remove('topTabs', 'bottomTabs', 'verticalTabs')
+  })
+
+  const cards = page.locator('.watchVideoInfo, .videoDescription, .watchVideoRecommendations, .commentsArea > .watchVideo')
+  await expect(cards).toHaveCount(4)
+
+  const geometry = await cards.evaluateAll((elements) => elements.map((element) => {
+    const bounds = element.getBoundingClientRect()
+    return {
+      bottom: bounds.bottom,
+      left: bounds.left,
+      right: bounds.right,
+      top: bounds.top,
+      viewportWidth: window.innerWidth
+    }
+  }))
+
+  for (const card of geometry) {
+    expect(card.left).toBeGreaterThanOrEqual(-1)
+    expect(card.right).toBeLessThanOrEqual(card.viewportWidth + 1)
+    expect(card.left).toBeLessThanOrEqual(1)
+    expect(card.viewportWidth - card.right).toBeLessThanOrEqual(1)
+  }
+
+  for (let index = 1; index < geometry.length; index++) {
+    expect(geometry[index].top - geometry[index - 1].bottom).toBeGreaterThanOrEqual(12)
+  }
+})
+
 for (const { name, options, expectedCount } of [
   { name: 'hides transcript actions without captions', options: {}, expectedCount: 0 },
   {
@@ -1346,6 +1413,60 @@ test.describe('Shorts transcript navigation', () => {
     expect(rendererErrors.filter(error => (
       error.includes('getTextTracks') || error.includes('failed to render')
     ))).toEqual([])
+  })
+
+  test('keeps the Shorts player, action rail, and comments inside a Capacitor phone viewport', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.locator(sel.searchInput)
+      .fill(`https://www.youtube.com/shorts/${CAPTIONED_SHORT_IDS[0]}`)
+    await page.locator(sel.searchInput).press('Enter')
+    await waitForPlayback(page)
+    await setWindowSize(app, page, { width: 461, height: 1026 })
+    await page.locator('.app').evaluate((element) => {
+      element.classList.add('capacitorTabs', 'capacitorPhoneLayout')
+      element.classList.remove('topTabs', 'bottomTabs', 'verticalTabs')
+      document.querySelector('.tabBar')?.style.setProperty('display', 'none')
+    })
+
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const rail = page.locator('.shortsActionRail')
+    const commentsPanel = page.locator('.shortsCommentsPanel')
+    await expect(player).toBeVisible()
+    await expect(rail).toBeVisible()
+    await page.locator('.shortsCommentsAction .iconButton').click()
+    await expect(commentsPanel).toHaveClass(/shortsCommentsPanelOpen/)
+
+    const geometry = await page.evaluate(() => {
+      const playerBounds = document.querySelector('.ftVideoPlayer.shortsPlayer').getBoundingClientRect()
+      const railBounds = document.querySelector('.shortsActionRail').getBoundingClientRect()
+      const commentsBounds = document.querySelector('.shortsCommentsPanel').getBoundingClientRect()
+      const actionLabels = [...document.querySelectorAll('.shortsAction > span')]
+      return {
+        commentsLeft: commentsBounds.left,
+        commentsRight: commentsBounds.right,
+        documentClientWidth: document.documentElement.clientWidth,
+        documentScrollWidth: document.documentElement.scrollWidth,
+        labelsHidden: actionLabels.every(label => getComputedStyle(label).display === 'none'),
+        railBottom: railBounds.bottom,
+        railLeft: railBounds.left,
+        railRight: railBounds.right,
+        playerBottom: playerBounds.bottom,
+        playerLeft: playerBounds.left,
+        playerRight: playerBounds.right,
+        viewportWidth: window.innerWidth,
+      }
+    })
+
+    expect(geometry.labelsHidden).toBe(true)
+    expect(geometry.documentScrollWidth).toBeLessThanOrEqual(geometry.documentClientWidth + 1)
+    expect(geometry.playerLeft).toBeGreaterThanOrEqual(0)
+    expect(geometry.playerRight).toBeLessThanOrEqual(geometry.viewportWidth)
+    expect(geometry.commentsLeft).toBeGreaterThanOrEqual(0)
+    expect(geometry.commentsRight).toBeLessThanOrEqual(geometry.viewportWidth)
+    expect(geometry.railLeft).toBeGreaterThanOrEqual(geometry.playerLeft)
+    expect(geometry.railRight).toBeLessThanOrEqual(geometry.playerRight)
+    expect(geometry.railRight).toBeLessThanOrEqual(geometry.viewportWidth)
+    expect(geometry.railBottom).toBeLessThanOrEqual(geometry.playerBottom)
   })
 })
 
@@ -2327,6 +2448,93 @@ test.describe('watch page', () => {
     await expect.poll(() => typeof releaseMetadata).toBe('function')
     releaseMetadata()
     await expect(page.locator(`${activeTab} .ftVideoPlayer`)).toBeVisible()
+  })
+
+  test('retries failed live chat avatars and preserves the pop-out target', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    let avatarRequests = 0
+    await page.route('https://yt3.ggpht.com/e2e-live-chat-avatar*', (route) => {
+      avatarRequests++
+      return route.fulfill({ status: 500, body: '' })
+    })
+
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate(async (view) => {
+      const listeners = new Map()
+      const liveChat = new EventTarget()
+      liveChat.is_replay = false
+      liveChat.on = (event, listener) => {
+        listeners.set(listener, event)
+        liveChat.addEventListener(event, listener)
+      }
+      liveChat.once = (event, listener) => {
+        listeners.set(listener, event)
+        liveChat.addEventListener(event, listener, { once: true })
+      }
+      liveChat.off = (_event, listener) => {
+        liveChat.removeEventListener(listeners.get(listener), listener)
+        listeners.delete(listener)
+      }
+      liveChat.emit = (event, value) => {
+        for (const [listener, listenerEvent] of listeners) {
+          if (listenerEvent === event) listener(value)
+        }
+      }
+      liveChat.start = () => {}
+      liveChat.stop = () => {}
+
+      view.$store.commit('setHideLiveChat', false)
+      view.liveChat = liveChat
+      view.liveChatIsReplay = false
+      view.liveChatOpen = true
+      view.isLive = true
+      view.isUpcoming = false
+      await view.$nextTick()
+    })
+
+    await expect(page.locator(`${activeTab} .liveChatSkeleton`)).toBeVisible()
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateExternalLinkHandling', '')
+      window.__e2eOpenedExternalUrl = null
+      window.open = (url) => {
+        window.__e2eOpenedExternalUrl = String(url)
+        return null
+      }
+    })
+    await page.getByRole('link', { name: 'Popout Chat' }).click()
+    await expect.poll(() => page.evaluate(() => window.__e2eOpenedExternalUrl))
+      .toBe('https://www.youtube.com/live_chat?is_popout=1&v=jNQXAC9IVRw')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+
+    await watchView.evaluate((view) => {
+      let actionTypeChecks = 0
+      view.liveChat.emit('start', {
+        actions: [{
+          is: () => ++actionTypeChecks === 2,
+          item: {
+            is: () => true,
+            id: 'avatar-retry-message',
+            timestamp: Date.now(),
+            message: { runs: [{ text: 'Avatar retry' }] },
+            author: {
+              badges: [],
+              id: 'avatar-retry-author',
+              name: 'Avatar retry author',
+              thumbnails: [{ url: 'https://yt3.ggpht.com/e2e-live-chat-avatar' }],
+              is_moderator: false
+            }
+          }
+        }]
+      })
+    })
+
+    const avatar = page.locator(`${activeTab} .liveChatComments .channelThumbnail`).first()
+    await expect(avatar).toHaveAttribute('src', /e2e-live-chat-avatar/)
+    await expect.poll(() => avatarRequests, { timeout: 6_000 }).toBeGreaterThanOrEqual(2)
+    await expect(avatar).toHaveAttribute('src', /opentubex_retry=/)
   })
 
   test('keeps live chat and replay visibility independent and restores a closed chat', async ({ app, page, attachScreenshot }) => {

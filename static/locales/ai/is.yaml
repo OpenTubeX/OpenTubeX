@@ -275,6 +275,11 @@ Settings:
       Mark as Watched: Merkja sem skoðað
       Copy YouTube Link: Afrita YouTube-tengil
       Open in YouTube: Opna á YouTube
+    Mobile Layout:
+      Mobile Layout: 'Farsímauppsetning'
+      Automatic: 'Sjálfvirkt'
+      Phone: 'Sími'
+      Tablet: 'Spjaldtölva'
   Context Menu Search Settings:
     Context Menu Search Settings: Leit í samhengisvalmynd
     Description: Veldu hvaða leitarvélar birtast þegar þú hægrismellir á valinn texta. Leitin opnast í sjálfgefna vafranum þínum.
@@ -501,6 +506,8 @@ Settings:
     Reorder Playback Speed: Dragðu til að breyta röð spilunarhraða
     Playback Speed: Spilunarhraði
     Parallel Segment Loading: Samhliða hleðsla búta
+    Rotate Wide Videos to Landscape in Fullscreen: 'Snúa breiðum myndskeiðum lárétt á öllum skjánum'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Strjúktu upp eða niður til að opna eða loka öllum skjánum'
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
@@ -796,7 +803,7 @@ Settings:
     Privacy Policy: Persónuverndarstefna þessa þjóns
     Enhanced Privacy Enabled: Aukin persónuvernd er virk. Þjónninn geymir aðeins dulkóðuð samstillingargögn.
     Enhanced Privacy Unsupported: Viðvörun. Þessi þjónn styður ekki aukna persónuvernd. Rekstraraðili hans getur séð samstillt gögn.
-    Description: Samstilltu áskriftir, notandasnið, spilunarlista, áhorfsferil, stillingar og opna flipa við OpenTubeX- eða LibreTube-samstillingarþjón. LibreTube-þjónar styðja ef til vill ekki alla eiginleika samstillingar.
+    Description: 'Samstilltu áskriftir, notandasnið, spilunarlista, áhorfsferil og studdar stillingar við OpenTubeX- eða LibreTube-samstillingarþjón. Flipar á tölvu og fartæki haldast aðskildir nema þú deilir þeim sérstaklega. LibreTube-þjónar styðja hugsanlega ekki alla samstillingareiginleika.'
     Server URL: Vefslóð þjóns
     Checking Server: Athuga samstillingarþjón…
     Server Unavailable: Ekki tókst að tengjast þessum samstillingarþjóni. Athugaðu vefslóðina og reyndu aftur.
@@ -877,6 +884,13 @@ Settings:
     Data Loss Confirmation: Staðfesta samstillingu sem eyðir gögnum?
     Data Loss Warning: Staða þjónsins myndi eyða {deleted} af {previous} atriðum í {collection} sem áður voru samstillt. Þetta getur bent til þess að gagnaflutningur þjónsins hafi mistekist eða hann hafi verið endurstilltur. Haltu aðeins áfram ef eyðingin er fyrirhuguð og þú átt öryggisafrit.
     Confirm Data Loss: Eyða og halda áfram
+    Use Shared Tabs: 'Nota eitt sameiginlegt flipasafn í öllum tækjum'
+    Shared Tabs Warning: 'Sameiginlegir flipar koma í stað núverandi flipasafns í tengdum tækjum. Hafðu þetta óvirkt til að halda tölvu- og farsímaflipum aðskildum.'
+    Tabs From Other Devices: 'Flipar úr öðrum tækjum'
+    Device Tab Session: '{platform} · {count} flipar'
+    Mobile Device: 'Fartæki'
+    Desktop Device: 'Tölva'
+    Open All Tabs: 'Opna alla flipa'
   Proxy Settings:
     IP Block Recovery Script Path: Slóð að endurheimtarskriftu fyrir IP-lokun
     Select IP Block Recovery Script File: Velja skrá með endurheimtarskriftu fyrir IP-lokun

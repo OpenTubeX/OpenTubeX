@@ -348,12 +348,8 @@
 }
 
 @media only screen and (width <= 520px) {
-  .homeHeading,
-  .sectionHeading {
-    align-items: flex-start;
-  }
-
   .homeHeading {
+    align-items: flex-start;
     flex-direction: column;
   }
 

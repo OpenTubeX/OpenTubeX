@@ -433,9 +433,78 @@ jobs:
         key: ${{ steps.restore_cache.outputs.cache-primary-key }}
         path: ${{ steps.cache_dir.outputs.cache_dir }}
 
+  android:
+    name: Build Android APK
+    if: github.repository == 'OpenTubeX/OpenTubeX' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write
+      contents: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+
+    - name: Use Node.js 24
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: 24.x
+        package-manager-cache: false
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      with:
+        version: 11
+        cache: false
+
+    - name: Use Java 21
+      uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.0.0
+      with:
+        distribution: temurin
+        java-version: 21
+
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+
+    - run: pnpm run ci
+      shell: bash
+
+    - name: Build signed universal APK
+      id: apk
+      shell: bash
+      run: |
+        set -euo pipefail
+        base_version="$(jq --raw-output .version package.json)"
+        lower_case_ref="${GITHUB_REF,,}"
+        version="$base_version"
+        if [[ "$lower_case_ref" == *development* ]]; then
+          version="${base_version}-nightly-${GITHUB_RUN_NUMBER}"
+        elif [[ "$lower_case_ref" == *rc* ]]; then
+          version="${base_version}-RC-${GITHUB_RUN_NUMBER}"
+        fi
+
+        ANDROID_VERSION_CODE="$(git rev-list --count HEAD)"
+        ANDROID_VERSION_NAME="$version"
+        export ANDROID_VERSION_CODE ANDROID_VERSION_NAME
+
+        apk_path=android/app/build/outputs/apk/debug/app-debug.apk
+        pnpm run capacitor:sync:android
+        ./android/gradlew --project-dir android assembleDebug
+        cp "$apk_path" android/app/build/outputs/apk/opentubex-android-universal.apk
+        printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+
+    - name: Upload Android APK
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: opentubex-${{ steps.apk.outputs.version }}-android-universal.apk
+        path: android/app/build/outputs/apk/opentubex-android-universal.apk
+
   publish-nightly:
     name: Publish nightly release
-    needs: build
+    needs: [build, android]
     if: github.event_name == 'workflow_dispatch' && inputs.publishNightly && github.ref == 'refs/heads/development'
     runs-on: ubuntu-latest
 

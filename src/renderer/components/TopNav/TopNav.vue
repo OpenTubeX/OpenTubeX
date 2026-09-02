@@ -156,6 +156,7 @@
             :icon="['fas', 'cog']"
           />
         </button>
+        <CapacitorPhoneTabSwitcher @request-exit="emit('request-android-exit')" />
         <FtQuickSettingsMenu />
       </div>
     </div>
@@ -171,6 +172,7 @@ import { useRoute, useRouter } from 'vue-router'
 import FtInput from '../FtInput/FtInput.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtQuickSettingsMenu from '../FtQuickSettingsMenu/FtQuickSettingsMenu.vue'
+import CapacitorPhoneTabSwitcher from '../TabBar/CapacitorPhoneTabSwitcher.vue'
 
 import store from '../../store/index'
 
@@ -184,12 +186,14 @@ import { getInvidiousSearchSuggestions } from '../../helpers/api/invidious'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 
 const { t } = useI18n()
+const emit = defineEmits(['request-android-exit'])
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
   store.getters.getKeyboardShortcuts
 ).APP.GENERAL)
 const router = useRouter()
 const route = useRoute()
-const navigation = process.env.IS_ELECTRON ? getTabNavigationService() : null
+const usesLogicalTabs = process.env.IS_ELECTRON || process.env.IS_CAPACITOR
+const navigation = usesLogicalTabs ? getTabNavigationService() : null
 
 const showSearchContainer = ref(true)
 const logicalHistoryState = computed(() => {
@@ -197,7 +201,7 @@ const logicalHistoryState = computed(() => {
   return store.getters.getTabHistoryState(tabId)
 })
 const navigationHistoryDropdownOptions = computed(() => {
-  return process.env.IS_ELECTRON ? logicalHistoryState.value.options : []
+  return usesLogicalTabs ? logicalHistoryState.value.options : []
 })
 /** @type {import('vue').ShallowRef<string[]>} */
 const searchSuggestionsDataList = shallowRef([])
@@ -271,7 +275,7 @@ function goToOffset(offset) {
     return
   }
 
-  if (process.env.IS_ELECTRON) {
+  if (usesLogicalTabs) {
     const tabId = store.getters.getPresentedTabId
     if (tabId) {
       navigation.go(tabId, offset)
@@ -415,7 +419,7 @@ function getSearchHistoryEntryDisplayText(entry) {
 }
 
 /** @type {import('vue').ComputedRef<string>} */
-const searchFilterTabId = computed(() => process.env.IS_ELECTRON
+const searchFilterTabId = computed(() => usesLogicalTabs
   ? (store.getters.getPresentedTabId ?? 'web')
   : 'web')
 
@@ -478,7 +482,7 @@ const activeDataListProperties = computed(() => {
 })
 
 const isArrowBackwardDisabled = computed(() => {
-  if (process.env.IS_ELECTRON) {
+  if (usesLogicalTabs) {
     return !logicalHistoryState.value.canGoBack
   }
 
@@ -487,7 +491,7 @@ const isArrowBackwardDisabled = computed(() => {
   return hasCurrentRoute && 'navigation' in window ? !window.navigation.canGoBack : false
 })
 const isArrowForwardDisabled = computed(() => {
-  if (process.env.IS_ELECTRON) {
+  if (usesLogicalTabs) {
     return !logicalHistoryState.value.canGoForward
   }
 
@@ -557,7 +561,7 @@ function getSearchTextForTab(tabId) {
 }
 
 const presentedRoutePath = computed(() => {
-  if (!process.env.IS_ELECTRON) {
+  if (!usesLogicalTabs) {
     return route.path
   }
 
@@ -579,7 +583,7 @@ watch([searchFilterTabId, presentedRoutePath], ([tabId, path], [previousTabId]) 
   }
 })
 
-if (process.env.IS_ELECTRON) {
+if (usesLogicalTabs) {
   const presentedTabId = computed(() => store.getters.getPresentedTabId)
 
   watch(presentedTabId, (tabId, previousTabId) => {
@@ -914,14 +918,16 @@ onMounted(() => {
 
   window.addEventListener('resize', handleWindowResize)
 
-  if (process.env.IS_ELECTRON) {
-    window.addEventListener('keydown', handleKeyboardShortcuts)
-
+  if (usesLogicalTabs) {
     const tabId = store.getters.getPresentedTabId
     const searchText = tabId != null ? getSearchTextForTab(tabId) : ''
     if (currentSearchText.length === 0 && searchText.length > 0) {
       updateSearchInputText(searchText)
     }
+  }
+
+  if (process.env.IS_ELECTRON) {
+    window.addEventListener('keydown', handleKeyboardShortcuts)
 
     window.ftElectron.handleUpdateSearchInputText((searchQueryText) => {
       if (searchQueryText) {

@@ -20,6 +20,7 @@ import { CaptionToggleButton, CLOSED_CAPTIONS_OUTLINED } from './player-componen
 import { ChapterOverlayButton } from './player-components/ChapterOverlayButton'
 import { CopyVideoUrlButton, setCopyVideoUrlContext } from './player-components/CopyVideoUrlButton'
 import { FullWindowButton } from './player-components/FullWindowButton'
+import { AndroidPictureInPictureButton } from './player-components/AndroidPictureInPictureButton'
 import { LegacyQualitySelection } from './player-components/LegacyQualitySelection'
 import { LoopButton, setLoopButtonContext } from './player-components/LoopButton'
 import { MusicVisualizerButton } from './player-components/MusicVisualizerButton'
@@ -68,12 +69,19 @@ import {
 } from '../../helpers/fullscreenDocks'
 import { addOverlayScrollbars, removeOverlayScrollbars } from '../../helpers/overlayScrollbars'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import {
+  enterAndroidPictureInPicture,
+  setAndroidFullscreenOrientation,
+  setAndroidStatusBarVisible,
+  shouldShowAndroidStatusBar,
+} from '../../helpers/androidUi'
 import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
 import { resolveSegmentPrefetchLimit } from '../../helpers/player/segmentPrefetch'
 import { AUTO_QUALITY_FALLBACK, streamsSupportAutoQuality } from '../../helpers/player/autoQuality'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
+import { shouldUseGoogleVideoPostRequest } from '../../helpers/player/playbackRequestPolicy'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
 import { parseChannelPreferences } from '../../helpers/channel-preferences'
 import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
@@ -106,6 +114,10 @@ import {
 } from '../../helpers/player/caption-settings'
 import { useAmbientMode } from './opentubex/useAmbientMode'
 import { useAutoPictureInPicture } from './opentubex/useAutoPictureInPicture'
+import {
+  isCapacitorMobilePlayer,
+  useMobileFullscreenGestures,
+} from './opentubex/useMobileFullscreenGestures'
 import { useMusicVisualizer } from './opentubex/useMusicVisualizer'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
 import { useSilenceSkipping } from './opentubex/useSilenceSkipping'
@@ -842,8 +854,12 @@ export default defineComponent({
       const weightAfter = totalWeight - weightBefore - fullscreenDockWeights[dock]
 
       return {
-        insetBlockStart: index === 0 ? '12px' : `calc(${weightBefore * 100 / totalWeight}% + 6px)`,
-        insetBlockEnd: index === openDocks.length - 1 ? '12px' : `calc(${weightAfter * 100 / totalWeight}% + 6px)`,
+        insetBlockStart: index === 0
+          ? 'calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 12px)'
+          : `calc(${weightBefore * 100 / totalWeight}% + 6px)`,
+        insetBlockEnd: index === openDocks.length - 1
+          ? 'calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px)'
+          : `calc(${weightAfter * 100 / totalWeight}% + 6px)`,
       }
     }
 
@@ -1258,6 +1274,7 @@ export default defineComponent({
         nextTick(() => {
           applyPendingPresentationModes()
           remeasureControlPanelWidth()
+          syncAndroidStatusBarVisibility()
         })
       } else {
         if (controlPanelLayoutFrame !== null) {
@@ -1265,6 +1282,7 @@ export default defineComponent({
           controlPanelLayoutFrame = null
         }
         handleTemporaryPlaybackRateFocusLoss()
+        syncAndroidStatusBarVisibility()
       }
     })
 
@@ -1415,7 +1433,7 @@ export default defineComponent({
 
     watch(displayVideoPlayButton, (newValue) => {
       ui.configure({
-        bigButtons: newValue ? ['play_pause'] : []
+        bigButtons: newValue || isCapacitorMobilePlayer() ? ['play_pause'] : []
       })
     })
 
@@ -1479,10 +1497,23 @@ export default defineComponent({
       return store.getters.getEnterFullscreenOnDisplayRotate
     })
 
+    const rotateFullscreenToLandscape = computed(() => {
+      return store.getters.getRotateFullscreenToLandscape
+    })
+
+    const enableMobileFullscreenSwipe = computed(() => {
+      return store.getters.getEnableMobileFullscreenSwipe
+    })
+
     watch(enterFullscreenOnDisplayRotate, (newValue) => {
       ui.configure({
         enableFullscreenOnRotation: newValue
       })
+    })
+
+    watch(rotateFullscreenToLandscape, (enabled) => {
+      if (!isNativeFullscreenActive()) return
+      setAndroidFullscreenOrientation(true, video.value, enabled).catch(() => {})
     })
 
     /** @type {import('vue').ComputedRef<number>} */
@@ -1641,7 +1672,8 @@ export default defineComponent({
 
     /** @type {import('vue').ComputedRef<string>} */
     const screenshotMode = computed(() => {
-      return store.getters.getScreenshotMode
+      const mode = store.getters.getScreenshotMode
+      return !process.env.IS_ELECTRON && mode === 'default_folder' ? 'prompt_folder' : mode
     })
 
     /** @type {import('vue').ComputedRef<string>} */
@@ -1656,7 +1688,7 @@ export default defineComponent({
 
     /** @type {import('vue').ComputedRef<boolean>} */
     const videoVolumeMouseScroll = computed(() => {
-      return store.getters.getVideoVolumeMouseScroll
+      return !process.env.IS_CAPACITOR && store.getters.getVideoVolumeMouseScroll
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -3578,6 +3610,7 @@ export default defineComponent({
 
     /** @param {PointerEvent} event */
     function handleVideoZoomPointerDown(event) {
+      startMobileFullscreenGesture(event)
       if (!videoZoomPannable.value || !event.shiftKey || event.button !== 0) {
         return
       }
@@ -3602,6 +3635,8 @@ export default defineComponent({
 
     /** @param {PointerEvent} event */
     function handleVideoZoomPointerMove(event) {
+      if (moveMobileFullscreenGesture(event)) return
+
       if (!videoZoomPanStart) {
         videoZoomPanReady.value = videoZoomPointerInside && videoZoomPannable.value && event.shiftKey
         return
@@ -3639,6 +3674,8 @@ export default defineComponent({
 
     /** @param {PointerEvent} event */
     function handleVideoZoomPointerUp(event) {
+      if (finishMobileFullscreenGesture(event)) return
+
       if (!endVideoZoomPan(event)) {
         return
       }
@@ -3649,6 +3686,8 @@ export default defineComponent({
 
     /** @param {PointerEvent} event */
     function handleVideoZoomPointerCancel(event) {
+      cancelMobileFullscreenGesture(event)
+
       if (!endVideoZoomPan(event)) {
         return
       }
@@ -3681,6 +3720,10 @@ export default defineComponent({
 
     /** Swallows the click that a finished pan would otherwise leave behind. */
     function handleVideoZoomClickCapture(event) {
+      if (handleMobilePlayerSurfaceClick(event)) {
+        return
+      }
+
       if (!videoZoomSuppressClick) {
         return
       }
@@ -4055,10 +4098,9 @@ export default defineComponent({
     const uiConfig = computed(() => {
       const controlPanelElements = [
         'ft_skip_previous',
-        'play_pause',
+        ...(!isCapacitorMobilePlayer() ? ['play_pause'] : []),
         'ft_skip_next',
-        'mute',
-        'volume',
+        ...(!isCapacitorMobilePlayer() ? ['mute', 'volume'] : []),
         'time_and_duration',
         'ft_playback_adjusted_time',
         ...(!onlyUseOverFlowMenu.value && props.chapters.length > 0
@@ -4077,7 +4119,7 @@ export default defineComponent({
         // Shorts have interactive controls over nearly the entire video
         // surface. Do not let Shaka interpret rapid control clicks as a
         // request to enter fullscreen.
-        doubleClickForFullscreen: !props.shortsPlayer,
+        doubleClickForFullscreen: !props.shortsPlayer && !isCapacitorMobilePlayer(),
 
         // only set this to label when we actually have labels, so that the warning doesn't show up
         // about it being set to labels, but that the audio tracks don't have labels
@@ -4090,6 +4132,9 @@ export default defineComponent({
 
       /** @type {string[]} */
       let elementList
+      const pictureInPictureElement = process.env.IS_CAPACITOR
+        ? 'ft_android_picture_in_picture'
+        : 'picture_in_picture'
 
       // Shorts always use their custom top controls and hide Shaka's standard
       // control panel. Keep every applicable action in the overflow menu even
@@ -4115,7 +4160,7 @@ export default defineComponent({
           'ft_loop',
           'ft_ab_repeat',
           'ft_screenshot',
-          'picture_in_picture',
+          ...(!isCapacitorMobilePlayer() || props.shortsPlayer ? [pictureInPictureElement] : []),
           'ft_full_window',
           'recenter_vr',
           'toggle_stereoscopic',
@@ -4128,6 +4173,7 @@ export default defineComponent({
             ? ['ft_quick_playback_rate_bar']
             : []),
           'ft_caption_toggle',
+          ...(isCapacitorMobilePlayer() && !props.shortsPlayer ? [pictureInPictureElement] : []),
           'overflow_menu',
           'fullscreen'
         )
@@ -4143,7 +4189,7 @@ export default defineComponent({
           'ft_autoplay_toggle',
           'ft_caption_toggle',
           'overflow_menu',
-          'picture_in_picture',
+          pictureInPictureElement,
           'ft_theatre_mode',
           'ft_full_window',
           'fullscreen'
@@ -4184,7 +4230,8 @@ export default defineComponent({
       }
 
       if (props.format === 'audio') {
-        removeFromArrayIfExists(elementList, 'picture_in_picture')
+        removeFromArrayIfExists(uiConfig.controlPanelElements, pictureInPictureElement)
+        removeFromArrayIfExists(uiConfig.overflowMenuButtons, pictureInPictureElement)
       }
 
       if (props.format === 'audio' || useVrMode.value) {
@@ -4271,6 +4318,9 @@ export default defineComponent({
             played: 'var(--primary-color)'
           },
           showAudioCodec: false,
+          // Touch users explicitly toggle the overlay, including while paused.
+          // Shaka's desktop default otherwise forces it visible again.
+          showUIOnPaused: !isCapacitorMobilePlayer(),
           // YouTube offers the same resolutions in several codecs, which shaka-player lists
           // separately, so the codec is what tells those entries apart. The built-in engine
           // keeps distinguishing them by their bitrate, the way it did before.
@@ -4292,7 +4342,7 @@ export default defineComponent({
           },
 
           // these have their own watchers
-          bigButtons: displayVideoPlayButton.value ? ['play_pause'] : [],
+          bigButtons: displayVideoPlayButton.value || isCapacitorMobilePlayer() ? ['play_pause'] : [],
           enableFullscreenOnRotation: enterFullscreenOnDisplayRotate.value,
           playbackRates: playbackRates.value,
           tapSeekDistance: defaultSkipInterval.value,
@@ -4453,9 +4503,29 @@ export default defineComponent({
      * @param {MouseEvent} event
      */
     function handlePlayerControlDoubleClick(event) {
-      if (!(event.target instanceof Element) || !event.target.closest(
-        '.shortsTopControls, .shaka-controls-button-panel, .shaka-settings-menu, .shaka-context-menu'
-      )) {
+      if (!(event.target instanceof Element)) {
+        return
+      }
+
+      if (event.target.closest(`${FULLSCREEN_DOCK_HEADER_SELECTOR}, .fullscreenDockResizeHandle`)) {
+        return
+      }
+
+      const interactiveTarget = event.target.closest(
+        '.playerFullscreenTitleOverlay, .fullscreenActions, .fullscreenMetadataOverlay, ' +
+        '.fullscreenTranscriptOverlay, .fullscreenSponsorBlockOverlay, .fullscreenLiveChatOverlay, ' +
+        '.fullscreenCommentsOverlay, .fullscreenPlaylistOverlay, .chapterOverlay, .shortsTopControls, ' +
+        '.shaka-controls-button-panel, .shaka-settings-menu, .shaka-context-menu'
+      )
+      if (!interactiveTarget && isCapacitorMobilePlayer()) {
+        const bounds = container.value?.getBoundingClientRect()
+        const relativeX = bounds?.width > 0 ? (event.clientX - bounds.left) / bounds.width : 0.5
+        // Keep side double-tap seeking, but replace center double-tap
+        // fullscreen with the vertical phone gesture.
+        if (relativeX <= 0.35 || relativeX >= 0.65) {
+          return
+        }
+      } else if (!interactiveTarget) {
         return
       }
 
@@ -4492,6 +4562,30 @@ export default defineComponent({
         'shaka-controls-container',
       ].some(className => target.classList.contains(className))
     }
+
+    const {
+      cancelMobileFullscreenGesture,
+      consumeMobileTitleClickSuppression,
+      finishMobileFullscreenGesture,
+      handleMobilePlayerSurfaceClick,
+      handleMobilePlayerTouchEnd,
+      mobileFullscreenSwipeSettling,
+      mobileFullscreenSwipeStyle,
+      mobileFullscreenSwiping,
+      moveMobileFullscreenGesture,
+      startMobileFullscreenGesture,
+    } = useMobileFullscreenGestures({
+      getContainer: () => container.value,
+      getControls: () => ui?.getControls(),
+      isFullscreenActive: () => isNativeFullscreenActive(),
+      isFullscreenMetadataShown: () => showFullscreenMetadata.value,
+      isFullscreenSwipeEnabled: () => enableMobileFullscreenSwipe.value,
+      isPlayerSurfaceTarget,
+      isScrollMiniPlayerActive: () => scrollMiniPlayerActive.value,
+      setFullscreenMetadata,
+      showOverlayControls,
+      togglePlayerFullScreen: () => ui?.getControls().toggleFullScreen(),
+    })
 
     /** @type {number | null} */
     let temporaryPlaybackRatePointerId = null
@@ -4767,6 +4861,7 @@ export default defineComponent({
     function addUICustomizations() {
       /** @type {HTMLDivElement} */
       const controlsContainer = ui.getControls().getControlsContainer()
+      observeFullscreenControlsVisibility(controlsContainer)
 
       controlsContainer.removeEventListener('wheel', handleControlsContainerWheel)
       controlsContainer.removeEventListener('click', handleControlsContainerClick, true)
@@ -4806,6 +4901,10 @@ export default defineComponent({
       const toggleFullscreenMetadata = (event) => {
         event.stopPropagation()
         if (event instanceof MouseEvent) {
+          if (consumeMobileTitleClickSuppression()) {
+            event.preventDefault()
+            return
+          }
           rememberFullscreenTitleClick(event)
         }
         setFullscreenMetadata(!showFullscreenMetadata.value)
@@ -5180,6 +5279,10 @@ export default defineComponent({
     /** @type {MutationObserver|null} */
     let controlPanelMutationObserver = null
 
+    /** @type {MutationObserver|null} */
+    let fullscreenControlsVisibilityObserver = null
+    let androidStatusBarVisible = true
+
     /** @type {number|null} */
     let controlPanelLayoutFrame = null
 
@@ -5308,6 +5411,39 @@ export default defineComponent({
       })
 
       scheduleControlPanelLayout(controlPanel)
+    }
+
+    function syncAndroidStatusBarVisibility() {
+      const controlsContainer = ui?.getControls().getControlsContainer()
+      if (
+        isCapacitorMobilePlayer() &&
+        video.value?.ended &&
+        controlsContainer?.hasAttribute('shown') === false
+      ) {
+        controlsContainer.setAttribute('shown', 'true')
+      }
+      const visible = shouldShowAndroidStatusBar({
+        active: isActiveTab.value,
+        fullscreen: isNativeFullscreenActive(),
+        controlsShown: controlsContainer?.hasAttribute('shown') === true,
+      })
+      if (visible === androidStatusBarVisible) return
+
+      androidStatusBarVisible = visible
+      setAndroidStatusBarVisible(visible).catch(error => {
+        androidStatusBarVisible = !visible
+        console.error('Failed to update Android status bar visibility:', error)
+      })
+    }
+
+    function observeFullscreenControlsVisibility(controlsContainer) {
+      fullscreenControlsVisibilityObserver?.disconnect()
+      fullscreenControlsVisibilityObserver = new MutationObserver(syncAndroidStatusBarVisibility)
+      fullscreenControlsVisibilityObserver.observe(controlsContainer, {
+        attributeFilter: ['shown'],
+        attributes: true,
+      })
+      syncAndroidStatusBarVisibility()
     }
 
     /** @type {ResizeObserverCallback} */
@@ -5615,6 +5751,10 @@ export default defineComponent({
       shortsEnded.value = true
       syncPlayPauseControlIcons()
 
+      if (isCapacitorMobilePlayer()) {
+        showOverlayControls()
+      }
+
       sleepTimer.pauseCountdown()
       const sleepTimerEnded = sleepTimer.consumeEndOfVideo()
 
@@ -5686,6 +5826,14 @@ export default defineComponent({
       updateAnnotationVideoAspectRatio()
       updateScrollMiniVideoAspectRatio()
       updateScrollMiniPlayer()
+
+      if (isActiveTab.value && isNativeFullscreenActive()) {
+        setAndroidFullscreenOrientation(
+          true,
+          video.value,
+          rotateFullscreenToLandscape.value
+        ).catch(() => {})
+      }
     }
 
     let volumeUserSetTimer = null
@@ -5727,6 +5875,8 @@ export default defineComponent({
         return
       }
 
+      if (isCapacitorMobilePlayer()) return
+
       const volume = video_.muted ? 0 : video_.volume
       emit('volume-updated', volume)
       emitVolumeUserSet(volume)
@@ -5752,6 +5902,14 @@ export default defineComponent({
      */
     function applyInitialVolume(videoElement) {
       applyingInitialVolume = true
+
+      if (isCapacitorMobilePlayer()) {
+        videoElement.volume = 1
+        videoElement.muted = false
+        applyingInitialVolume = false
+        emit('volume-updated', 1)
+        return
+      }
 
       // The channel's volume is more specific than the globally remembered one, so it wins
       if (savedChannelVolume.value !== null) {
@@ -5933,11 +6091,14 @@ export default defineComponent({
       scrollMiniPlayerDetached,
       scrollMiniPlayerDismissed,
       scrollMiniPlayerStyle,
+      scrollMiniPlayerStashed,
+      scrollMiniPlayerStashedSide,
       scrollMiniPlayPauseVisible,
       scrollMiniResizeCorner,
       scrollMiniResizeHandleOnLightBg,
       scrollMiniScrollToTop,
       scrollMiniTogglePlayPause,
+      restoreStashedScrollMiniPlayer,
       scrollMiniVolume,
       scrollMiniVolumeExpanded,
       scrollMiniVolumeIcon,
@@ -6282,7 +6443,7 @@ export default defineComponent({
 
         // only when we aren't proxying through Invidious,
         // it doesn't like the range param and makes get requests to youtube anyway
-        if (!isSabrRequest && url.hostname.endsWith('.googlevideo.com') && url.pathname === '/videoplayback') {
+        if (shouldUseGoogleVideoPostRequest(url, isSabrRequest)) {
           request.method = 'POST'
           request.body = new Uint8Array([0x78, 0]) // protobuf: { 15: 0 } (no idea what it means but this is what YouTube uses)
 
@@ -7540,6 +7701,26 @@ export default defineComponent({
       registerOwnElement(shakaOverflowMenu, 'ft_full_window', new FullWindowButtonFactory())
     }
 
+    function registerAndroidPictureInPictureButton() {
+      if (!process.env.IS_CAPACITOR) return
+
+      events.addEventListener('enterAndroidPictureInPicture', () => {
+        enterAndroidPictureInPicture(video.value).catch(error => {
+          console.error('Failed to enter Android Picture-in-Picture:', error)
+        })
+      })
+
+      class AndroidPictureInPictureButtonFactory {
+        create(rootElement, controls) {
+          return new AndroidPictureInPictureButton(events, rootElement, controls)
+        }
+      }
+
+      const factory = new AndroidPictureInPictureButtonFactory()
+      registerOwnElement(shakaControls, 'ft_android_picture_in_picture', factory)
+      registerOwnElement(shakaOverflowMenu, 'ft_android_picture_in_picture', factory)
+    }
+
     function registerShortsVideoInfoButton() {
       events.addEventListener('toggleShortsMetadata', () => {
         emit('toggle-shorts-metadata')
@@ -8165,6 +8346,8 @@ export default defineComponent({
 
       shakaControls.registerElement('ft_full_window', null)
       shakaOverflowMenu.registerElement('ft_full_window', null)
+      shakaControls.registerElement('ft_android_picture_in_picture', null)
+      shakaOverflowMenu.registerElement('ft_android_picture_in_picture', null)
       shakaOverflowMenu.registerElement('ft_shorts_video_info', null)
 
       shakaControls.registerElement('ft_legacy_quality', null)
@@ -9482,7 +9665,8 @@ export default defineComponent({
     }
 
     function fullscreenChangeHandler() {
-      isFullscreen.value = isNativeFullscreenActive()
+      const fullscreen = isNativeFullscreenActive()
+      isFullscreen.value = fullscreen
       if (props.shortsPlayer) {
         resetShortsOverflowMenu()
       }
@@ -9493,12 +9677,19 @@ export default defineComponent({
         return
       }
 
-      if (isNativeFullscreenActive()) {
+      setAndroidFullscreenOrientation(
+        fullscreen,
+        video.value,
+        rotateFullscreenToLandscape.value
+      ).catch(() => {})
+      syncAndroidStatusBarVisibility()
+
+      if (fullscreen) {
         if (scrollMiniPlayerActive.value) {
           deactivateScrollMiniPlayer()
         }
         restoreDockedPanels()
-      } else if (!isNativeFullscreenActive()) {
+      } else {
         if (!fullWindowEnabled.value) {
           rememberDockedPanels()
           closeFullscreenMetadata()
@@ -9685,6 +9876,7 @@ export default defineComponent({
 
       registerTheatreModeButton()
       registerFullWindowButton()
+      registerAndroidPictureInPictureButton()
       registerShortsVideoInfoButton()
 
       if (
@@ -10369,6 +10561,16 @@ export default defineComponent({
         controlPanelMutationObserver = null
       }
 
+      if (fullscreenControlsVisibilityObserver) {
+        fullscreenControlsVisibilityObserver.disconnect()
+        fullscreenControlsVisibilityObserver = null
+      }
+
+      if (!androidStatusBarVisible) {
+        androidStatusBarVisible = true
+        setAndroidStatusBarVisible(true).catch(() => {})
+      }
+
       if (controlPanelLayoutFrame !== null) {
         cancelAnimationFrame(controlPanelLayoutFrame)
         controlPanelLayoutFrame = null
@@ -10649,6 +10851,10 @@ export default defineComponent({
       fullscreenDockCanReorder,
       fullscreenDockResizing,
       fullscreenDockReordering,
+      enableMobileFullscreenSwipe,
+      mobileFullscreenSwiping,
+      mobileFullscreenSwipeSettling,
+      mobileFullscreenSwipeStyle,
       resetFullscreenDockHeights,
       handleFullscreenDockHeaderDoubleClick,
       handleFullscreenDockResizePointerDown,
@@ -10787,6 +10993,7 @@ export default defineComponent({
       handleVideoZoomPointerMove,
       handleVideoZoomPointerUp,
       handleVideoZoomPointerCancel,
+      handleMobilePlayerTouchEnd,
 
       valueChangeMessage,
       valueChangeIcons,
@@ -10801,6 +11008,8 @@ export default defineComponent({
       scrollMiniPlayerDismissed,
       scrollMiniPlaceholderHeight,
       scrollMiniPlayerStyle,
+      scrollMiniPlayerStashed,
+      scrollMiniPlayerStashedSide,
       scrollMiniIsPaused,
       scrollMiniVolume,
       scrollMiniVolumePercent,
@@ -10821,6 +11030,7 @@ export default defineComponent({
       dismissCrossTabMiniPlayer,
       scrollMiniTogglePlayPause,
       scrollMiniScrollToTop,
+      restoreStashedScrollMiniPlayer,
       updateScrollMiniVolume,
       handleScrollMiniVolumeMouseEnter,
       handleScrollMiniVolumeMouseLeave,

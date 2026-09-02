@@ -288,6 +288,11 @@ Settings:
       Mark as Watched: علامت‌گذاری به‌عنوان تماشاشده
       Copy YouTube Link: کپی پیوند YouTube
       Open in YouTube: باز کردن در YouTube
+    Mobile Layout:
+      Mobile Layout: 'چیدمان تلفن همراه'
+      Automatic: 'خودکار'
+      Phone: 'تلفن'
+      Tablet: 'تبلت'
   Context Menu Search Settings:
     Context Menu Search Settings: جست‌وجوی منوی زمینه
     Description: موتورهای جست‌وجویی را انتخاب کنید که با کلیک راست روی متن انتخاب‌شده نمایش داده می‌شوند. جست‌وجوها در مرورگر پیش‌فرض شما باز می‌شوند.
@@ -523,6 +528,8 @@ Settings:
       Modes:
         Save To Folder: ذخیره در پوشه
         Clipboard: رونوشت در تخته‌گیره
+    Rotate Wide Videos to Landscape in Fullscreen: 'چرخاندن ویدیوهای عریض به حالت افقی در تمام‌صفحه'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'برای ورود به تمام‌صفحه یا خروج از آن، بالا یا پایین بکشید'
   Channel Settings:
     Channel Settings: تنظیمات کانال
     Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.
@@ -824,7 +831,7 @@ Settings:
     Privacy Policy: سیاست حریم خصوصی این سرور
     Enhanced Privacy Enabled: حریم خصوصی پیشرفته فعال است. سرور فقط داده‌های رمزگذاری‌شدهٔ همگام‌سازی را نگه می‌دارد.
     Enhanced Privacy Unsupported: هشدار — این سرور از حریم خصوصی پیشرفته پشتیبانی نمی‌کند. گردانندهٔ سرور می‌تواند داده‌های همگام‌شده را ببیند.
-    Description: اشتراک‌ها، نمایه‌ها، فهرست‌های پخش، تاریخچهٔ تماشا، تنظیمات و زبانه‌های باز را با سرور همگام‌سازی OpenTubeX یا LibreTube همگام کنید. ممکن است سرورهای LibreTube از همهٔ قابلیت‌های همگام‌سازی پشتیبانی نکنند.
+    Description: 'اشتراک‌ها، نمایه‌ها، فهرست‌های پخش، تاریخچهٔ تماشا و تنظیمات پشتیبانی‌شده را با یک سرور همگام‌سازی OpenTubeX یا LibreTube همگام کنید. زبانه‌های رایانه و تلفن همراه جدا می‌مانند، مگر اینکه آن‌ها را به‌طور صریح به اشتراک بگذارید. ممکن است سرورهای LibreTube از همهٔ قابلیت‌های همگام‌سازی پشتیبانی نکنند.'
     Server URL: نشانی سرور
     Checking Server: در حال بررسی سرور همگام‌سازی…
     Server Unavailable: اتصال به این سرور همگام‌سازی ممکن نیست. نشانی را بررسی و دوباره تلاش کنید.
@@ -905,6 +912,13 @@ Settings:
     Data Loss Confirmation: همگام‌سازی مخرب تأیید شود؟
     Data Loss Warning: وضعیت سرور باعث حذف {deleted} مورد از {previous} مورد {collection} می‌شود که قبلاً همگام شده‌اند. این وضعیت می‌تواند نشانهٔ شکست انتقال یا بازنشانی سرور باشد. فقط در صورتی ادامه دهید که این حذف عمدی است و نسخهٔ پشتیبان دارید.
     Confirm Data Loss: حذف و ادامه
+    Use Shared Tabs: 'استفاده از یک مجموعه زبانهٔ مشترک در همهٔ دستگاه‌ها'
+    Shared Tabs Warning: 'زبانه‌های مشترک جایگزین مجموعهٔ فعلی در دستگاه‌های متصل می‌شوند. برای حفظ زبانه‌های جداگانهٔ رایانه و تلفن همراه، این گزینه را خاموش نگه دارید.'
+    Tabs From Other Devices: 'زبانه‌های دستگاه‌های دیگر'
+    Device Tab Session: '{platform} · {count} زبانه'
+    Mobile Device: 'تلفن همراه'
+    Desktop Device: 'رایانه'
+    Open All Tabs: 'باز کردن همهٔ زبانه‌ها'
   Proxy Settings:
     IP Block Recovery Script Path: مسیر اسکریپت بازیابی مسدودشدن IP
     Select IP Block Recovery Script File: انتخاب فایل اسکریپت بازیابی مسدودشدن IP

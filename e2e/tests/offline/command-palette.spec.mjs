@@ -64,6 +64,31 @@ test('opens with the configured shortcut and supports accessible fuzzy keyboard 
   await expect(page).toHaveURL(/#\/trending/)
 })
 
+test('keeps the backdrop mounted through pointer release without activating the page', async ({ page }) => {
+  await page.evaluate(() => {
+    window.__backdropBackgroundClicks = 0
+    const button = document.createElement('button')
+    button.dataset.backdropBackgroundTarget = ''
+    button.style.cssText = 'position:fixed;inset:0 auto auto 0;width:48px;height:48px;z-index:0'
+    button.addEventListener('click', () => { window.__backdropBackgroundClicks++ })
+    document.body.append(button)
+  })
+  await page.keyboard.press('Control+k')
+
+  const backdrop = page.locator('.commandPaletteBackdrop')
+  await expect(backdrop).toBeVisible()
+  await expect.poll(() => page.evaluate(() => document.documentElement.style.overflow)).toBe('hidden')
+
+  await page.mouse.move(12, 12)
+  await page.mouse.down()
+  await expect(backdrop).toBeVisible()
+  await page.mouse.up()
+
+  await expect(backdrop).toBeHidden()
+  expect(await page.evaluate(() => window.__backdropBackgroundClicks)).toBe(0)
+  await expect.poll(() => page.evaluate(() => document.documentElement.style.overflow)).toBe('')
+})
+
 test('clamps the results scroll position after filtering to a shorter list', async ({ page }) => {
   await page.keyboard.press('Control+k')
 
@@ -147,6 +172,21 @@ test('restores prior focus when dismissed', async ({ page }) => {
   await page.getByRole('combobox', { name: 'Search commands' }).press('Escape')
 
   await expect(navigationSearch).toBeFocused()
+})
+
+test('consumes Escape inside the command palette once', async ({ page }) => {
+  await page.evaluate(() => {
+    window.__commandPaletteEscapes = 0
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') window.__commandPaletteEscapes++
+    })
+  })
+  await page.keyboard.press('Control+k')
+
+  await page.getByRole('combobox', { name: 'Search commands' }).press('Escape')
+
+  await expect(page.getByRole('dialog', { name: 'Command palette' })).toBeHidden()
+  expect(await page.evaluate(() => window.__commandPaletteEscapes)).toBe(0)
 })
 
 test('hides pages that are unavailable without an Invidious instance', async ({ page }) => {

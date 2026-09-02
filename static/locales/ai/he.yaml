@@ -275,6 +275,11 @@ Settings:
       Mark as Watched: סימון כנצפה
       Copy YouTube Link: העתקת הקישור ל־YouTube
       Open in YouTube: פתיחה ב־YouTube
+    Mobile Layout:
+      Mobile Layout: 'פריסה לנייד'
+      Automatic: 'אוטומטי'
+      Phone: 'טלפון'
+      Tablet: 'טאבלט'
   Context Menu Search Settings:
     Context Menu Search Settings: חיפוש מתפריט ההקשר
     Description: יש לבחור אילו מנועי חיפוש יופיעו בלחיצה ימנית על טקסט מסומן. החיפושים ייפתחו בדפדפן ברירת המחדל.
@@ -506,6 +511,8 @@ Settings:
       Modes:
         Save To Folder: שמירה בתיקייה
         Clipboard: העתקה ללוח
+    Rotate Wide Videos to Landscape in Fullscreen: 'סיבוב סרטונים רחבים לרוחב במסך מלא'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'החלקה למעלה או למטה כדי להיכנס למסך מלא או לצאת ממנו'
   Channel Settings:
     Channel Settings: הגדרות ערוץ
     Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.
@@ -801,7 +808,7 @@ Settings:
     Privacy Policy: מדיניות הפרטיות של השרת
     Enhanced Privacy Enabled: פרטיות מוגברת מופעלת. השרת שומר רק נתוני סנכרון מוצפנים.
     Enhanced Privacy Unsupported: אזהרה — השרת הזה אינו תומך בפרטיות מוגברת. מפעיל השרת יכול לראות את הנתונים המסונכרנים.
-    Description: סנכרון מינויים, פרופילים, רשימות השמעה, היסטוריית צפייה, הגדרות וכרטיסיות פתוחות עם שרת סנכרון של OpenTubeX או LibreTube. ייתכן ששרתי LibreTube לא יתמכו בכל תכונות הסנכרון.
+    Description: 'סנכרון מינויים, פרופילים, רשימות השמעה, היסטוריית צפייה והגדרות נתמכות עם שרת סנכרון של OpenTubeX או LibreTube. כרטיסיות במחשב ובנייד נשארות נפרדות אלא אם משתפים אותן במפורש. ייתכן ששרתי LibreTube לא יתמכו בכל תכונות הסנכרון.'
     Server URL: כתובת ה-URL של השרת
     Checking Server: שרת הסנכרון נבדק…
     Server Unavailable: לא ניתן להתחבר לשרת הסנכרון. בדקו את כתובת ה-URL ונסו שוב.
@@ -882,6 +889,13 @@ Settings:
     Data Loss Confirmation: לאשר סנכרון שימחק נתונים?
     Data Loss Warning: מצב השרת ימחק {deleted} מתוך {previous} פריטי {collection} שסונכרנו בעבר. הדבר עשוי להעיד שהעברת השרת או האיפוס נכשלו. המשיכו רק אם המחיקה מכוונת ויש לכם גיבוי.
     Confirm Data Loss: מחיקה והמשך
+    Use Shared Tabs: 'שימוש בקבוצת כרטיסיות משותפת אחת בכל המכשירים'
+    Shared Tabs Warning: 'כרטיסיות משותפות מחליפות את קבוצת הכרטיסיות הנוכחית במכשירים מחוברים. יש להשאיר אפשרות זו כבויה כדי לשמור כרטיסיות נפרדות במחשב ובנייד.'
+    Tabs From Other Devices: 'כרטיסיות ממכשירים אחרים'
+    Device Tab Session: '{platform} · {count} כרטיסיות'
+    Mobile Device: 'נייד'
+    Desktop Device: 'מחשב'
+    Open All Tabs: 'פתיחת כל הכרטיסיות'
   Proxy Settings:
     IP Block Recovery Script Path: נתיב לסקריפט התאוששות מחסימת IP
     Select IP Block Recovery Script File: בחירת קובץ סקריפט התאוששות מחסימת IP

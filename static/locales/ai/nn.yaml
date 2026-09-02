@@ -404,6 +404,11 @@ Settings:
       Mark as Watched: Merk som sett
       Copy YouTube Link: Kopier YouTube-lenkje
       Open in YouTube: Opne på YouTube
+    Mobile Layout:
+      Mobile Layout: 'Mobiloppsett'
+      Automatic: 'Automatisk'
+      Phone: 'Telefon'
+      Tablet: 'Nettbrett'
   Context Menu Search Settings:
     Context Menu Search Settings: Søk i høgreklikkmenyen
     Description: Vel kva søkjemotorar som skal visast når du høgreklikkar på merkt tekst. Søka blir opna i standardnettlesaren din.
@@ -705,6 +710,8 @@ Settings:
       Modes:
         Save To Folder: Lagre i mappe
         Clipboard: Kopier til utklippstavla
+    Rotate Wide Videos to Landscape in Fullscreen: 'Roter breie videoar til liggjande format i fullskjerm'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Sveip opp eller ned for å opne eller avslutte fullskjerm'
   Channel Settings:
     Channel Settings: Kanalinnstillingar
     Channel Settings Description: Hugs innstillingane du vel medan du ser på kvar einskild kanal, slik at dei blir brukte att neste gong du ser ein av videoane til kanalen.
@@ -1050,7 +1057,7 @@ Settings:
     Privacy Policy: Personvernerklæring for denne tenaren
     Enhanced Privacy Enabled: Styrkt personvern er slått på. Tenaren lagrar berre krypterte synkroniseringsdata.
     Enhanced Privacy Unsupported: Åtvaring — denne tenaren støttar ikkje styrkt personvern. Den som driv tenaren, kan sjå dei synkroniserte dataa.
-    Description: Synkroniser abonnement, profilar, spelelister, sjåarhistorikk, innstillingar og opne faner med ein synkroniseringstenar for OpenTubeX eller LibreTube. LibreTube-tenarar støttar kanskje ikkje alle synkroniseringsfunksjonane.
+    Description: 'Synkroniser abonnement, profilar, spelelister, sjåarhistorikk og støtta innstillingar med ein OpenTubeX- eller LibreTube-synkroniseringstenar. Faner på datamaskin og mobil blir haldne frå kvarandre med mindre du uttrykkjeleg deler dei. LibreTube-tenarar støttar kanskje ikkje alle synkroniseringsfunksjonar.'
     Server URL: Tenaradresse
     Checking Server: Kontrollerer synkroniseringstenaren …
     Server Unavailable: Klarte ikkje å kopla til denne synkroniseringstenaren. Kontroller adressa og prøv på nytt.
@@ -1131,6 +1138,13 @@ Settings:
     Data Loss Confirmation: Vil du stadfesta synkronisering med sletting?
     Data Loss Warning: Tilstanden på tenaren vil sletta {deleted} av {previous} tidlegare synkroniserte element i {collection}. Dette kan tyda på at ei tenarflytting eller nullstilling mislykkast. Hald berre fram dersom slettinga er tilsikta og du har ein tryggleikskopi.
     Confirm Data Loss: Slett og hald fram
+    Use Shared Tabs: 'Bruk eitt delt fanesett på tvers av einingar'
+    Shared Tabs Warning: 'Delte faner erstattar det gjeldande fanesettet på tilkopla einingar. La dette vere avslått for å halde faner på datamaskin og mobil frå kvarandre.'
+    Tabs From Other Devices: 'Faner frå andre einingar'
+    Device Tab Session: '{platform} · {count} faner'
+    Mobile Device: 'Mobil'
+    Desktop Device: 'Datamaskin'
+    Open All Tabs: 'Opne alle faner'
   Proxy Settings:
     Proxy Warning: OpenTubeX har ingen innebygd mellomtenar, men kan kopla til ein ekstern mellomtenar, til dømes Tor som køyrer på maskina di, eller ein SOCKS5-mellomtenar frå enkelte VPN-tenester. Dersom du slår på dette, må du kontrollera at mellomtenaren eller Tor er rett sett opp. Elles kan ikkje OpenTubeX henta data.
     Proxy Username: Brukarnamn for mellomtenar

@@ -36,6 +36,8 @@ import {
 import { DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB } from '../../../ytDlpPlaybackCacheSettings.js'
 import { terminateCommentTranslationLanguageDetector } from '../../helpers/comment-translations'
 import { DEFAULT_HOME_SECTION_LAYOUT } from '../../helpers/homeSections.js'
+import { isSettingSyncableOnPlatform } from '../../helpers/platformSettings.js'
+import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
 const TUTORIAL_STATE_SETTING_IDS = new Set([
@@ -203,6 +205,7 @@ const state = {
   autoplayVideos: true,
   // Combinable triggers for automatically entering Picture-in-Picture: 'tab', 'minimize', 'blur'
   autoPictureInPictureTriggers: [],
+  androidAutoPictureInPicture: false,
   scrollMiniPlayerEnabled: true,
   scrollMiniPlayerOnAllTabs: false,
   scrollMiniPlayerSavedRect: '',
@@ -213,6 +216,7 @@ const state = {
   backendPreference: !process.env.SUPPORTS_LOCAL_API ? 'invidious' : 'local',
   barColor: false,
   checkForUpdates: true,
+  capacitorLayoutMode: 'auto',
   commentTranslationIgnoredLanguages: [],
   confirmCloseApp: true,
   confirmCloseMultipleTabs: true,
@@ -256,6 +260,8 @@ const state = {
   contextMenuSearchEngines: DEFAULT_SEARCH_ENGINES_SETTING,
   enableSubtitlesByDefault: false,
   enterFullscreenOnDisplayRotate: false,
+  rotateFullscreenToLandscape: true,
+  enableMobileFullscreenSwipe: true,
   externalLinkHandling: '',
   externalPlayer: '',
   externalPlayerExecutable: '',
@@ -453,8 +459,10 @@ const state = {
   syncServerSyncHistory: true,
   syncServerSyncProfiles: true,
   syncServerSyncSessions: true,
+  syncServerSharedTabs: false,
   syncServerSyncSettings: true,
   syncServerSettingsExcluded: [],
+  syncServerSettingUpdatedAt: {},
   syncServerLastSyncAt: 0,
   syncServerSnapshot: '{}',
   playlistBookmarks: [],
@@ -750,8 +758,10 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'syncServerSyncHistory',
   'syncServerSyncProfiles',
   'syncServerSyncSessions',
+  'syncServerSharedTabs',
   'syncServerSyncSettings',
   'syncServerSettingsExcluded',
+  'syncServerSettingUpdatedAt',
   'syncServerLastSyncAt',
   'syncServerSnapshot',
 
@@ -769,6 +779,9 @@ export const NON_SYNCABLE_SETTINGS = new Set([
   'checkForUpdates',
   // Window coordinates are only valid for the display they were saved on.
   'scrollMiniPlayerSavedRect',
+  // These choices describe one physical device, not the user's account.
+  'androidAutoPictureInPicture',
+  'capacitorLayoutMode',
   'uiScale',
   'verticalTabBarWidth',
 ])
@@ -786,7 +799,35 @@ export function isSettingSyncEnabled(settings, settingKey) {
 }
 
 export function getSyncableSettingKeys(settings) {
-  return Object.keys(state).filter(settingKey => isSettingSyncEnabled(settings, settingKey))
+  return Object.keys(state).filter(settingKey => (
+    isSettingSyncEnabled(settings, settingKey) &&
+    !(settingKey === 'defaultProfile' && !settings.syncServerSyncProfiles) &&
+    isSettingSyncableOnPlatform(settingKey)
+  ))
+}
+
+let settingSyncTimestampWrite = Promise.resolve()
+
+function recordSettingSyncTimestamp(commit, settings, settingId) {
+  if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY) return
+
+  settingSyncTimestampWrite = settingSyncTimestampWrite.then(async () => {
+    const current = settings.syncServerSettingUpdatedAt !== null &&
+      typeof settings.syncServerSettingUpdatedAt === 'object' &&
+      !Array.isArray(settings.syncServerSettingUpdatedAt)
+      ? settings.syncServerSettingUpdatedAt
+      : {}
+    const updatedAt = {
+      ...current,
+      [settingId]: Date.now(),
+    }
+    await DBSettingHandlers.upsert('syncServerSettingUpdatedAt', updatedAt)
+    commit('setSyncServerSettingUpdatedAt', updatedAt)
+  }).catch(error => {
+    console.error('Failed to record the setting sync timestamp', error)
+  })
+
+  return settingSyncTimestampWrite
 }
 
 const customState = {
@@ -847,9 +888,10 @@ const customMutations = {
   }
 }
 
-async function updateValidatedSetting(commit, settingId, value) {
+async function updateValidatedSetting(commit, settings, settingId, value) {
   try {
     await DBSettingHandlers.upsert(settingId, value)
+    await recordSettingSyncTimestamp(commit, settings, settingId)
     commit(defaultMutationId(settingId), value)
   } catch (error) {
     console.error(error)
@@ -868,6 +910,9 @@ async function persistPlaylistBookmarks(commit, bookmarks) {
 }
 
 const customActions = {
+  recordSyncSettingEdit: ({ commit, state }, settingId) => (
+    recordSettingSyncTimestamp(commit, state, settingId)
+  ),
   savePlaylistBookmark: async ({ commit, getters }, bookmark) => {
     const bookmarks = getters.getPlaylistBookmarks
       .filter(entry => entry?.playlist?.id !== bookmark.playlist.id)
@@ -887,21 +932,24 @@ const customActions = {
     return persistPlaylistBookmarks(commit, bookmarks)
   },
 
-  updatePreferredCaptionLocale: ({ commit }, value) => updateValidatedSetting(
+  updatePreferredCaptionLocale: ({ commit, state }, value) => updateValidatedSetting(
     commit,
+    state,
     'preferredCaptionLocale',
     normalizeYouTubeCaptionLanguageCode(value)
   ),
 
-  updateAppFont: ({ commit }, value) => updateValidatedSetting(
+  updateAppFont: ({ commit, state }, value) => updateValidatedSetting(
     commit,
+    state,
     'appFont',
     normalizeAppFont(value)
   ),
 
-  updateMoveDownloadsToAppHeader: async ({ commit }, value) => {
+  updateMoveDownloadsToAppHeader: async ({ commit, state }, value) => {
     try {
       await DBSettingHandlers.upsert('moveDownloadsToAppHeader', value)
+      await recordSettingSyncTimestamp(commit, state, 'moveDownloadsToAppHeader')
       commit('setMoveDownloadsToAppHeader', value)
       await DBSettingHandlers.delete('moveDownloadsToQuickSettings')
     } catch (error) {
@@ -909,43 +957,49 @@ const customActions = {
     }
   },
 
-  updateBaseTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
+  updateBaseTheme: ({ commit, rootGetters, state }, value) => updateValidatedSetting(
     commit,
+    state,
     'baseTheme',
     resolveBaseTheme(value, 'system', rootGetters.getCustomThemes)
   ),
 
-  updateSystemLightTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
+  updateSystemLightTheme: ({ commit, rootGetters, state }, value) => updateValidatedSetting(
     commit,
+    state,
     'systemLightTheme',
     resolveBaseTheme(value, 'light', rootGetters.getCustomThemes, false)
   ),
 
-  updateSystemDarkTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
+  updateSystemDarkTheme: ({ commit, rootGetters, state }, value) => updateValidatedSetting(
     commit,
+    state,
     'systemDarkTheme',
     resolveBaseTheme(value, 'dark', rootGetters.getCustomThemes, false)
   ),
 
-  updateMainColor: ({ commit }, value) => updateValidatedSetting(
+  updateMainColor: ({ commit, state }, value) => updateValidatedSetting(
     commit,
+    state,
     'mainColor',
     resolveColor(value, 'Red')
   ),
 
-  updateSecColor: ({ commit }, value) => updateValidatedSetting(
+  updateSecColor: ({ commit, state }, value) => updateValidatedSetting(
     commit,
+    state,
     'secColor',
     resolveColor(value, 'Blue')
   ),
 
-  updateTabBarPosition: ({ commit }, value) => updateValidatedSetting(
+  updateTabBarPosition: ({ commit, state }, value) => updateValidatedSetting(
     commit,
+    state,
     'tabBarPosition',
     normalizeTabBarPosition(value)
   ),
 
-  updateIconPack: async ({ commit }, value) => {
+  updateIconPack: async ({ commit, state }, value) => {
     const previousIconPack = currentIconPack.value
     if (!isIconPack(value) || !await setIconPack(value)) {
       return false
@@ -953,6 +1007,7 @@ const customActions = {
 
     try {
       await DBSettingHandlers.upsert('iconPack', value)
+      await recordSettingSyncTimestamp(commit, state, 'iconPack')
       commit('setIconPack', value)
       return true
     } catch (error) {
@@ -1436,9 +1491,11 @@ for (const settingId of Object.keys(state)) {
     // If setting has side effects, generate action to handle them
     actions[triggerId] = sideEffectHandlers[settingId]
 
-    actions[updaterId] = async ({ commit, dispatch }, value) => {
+    actions[updaterId] = async ({ commit, dispatch, state }, value) => {
       try {
         await DBSettingHandlers.upsert(settingId, value)
+
+        await recordSettingSyncTimestamp(commit, state, settingId)
 
         dispatch(triggerId, value)
 
@@ -1448,9 +1505,11 @@ for (const settingId of Object.keys(state)) {
       }
     }
   } else {
-    actions[updaterId] = async ({ commit }, value) => {
+    actions[updaterId] = async ({ commit, state }, value) => {
       try {
         await DBSettingHandlers.upsert(settingId, value)
+
+        await recordSettingSyncTimestamp(commit, state, settingId)
 
         commit(mutationId, value)
       } catch (errMessage) {

@@ -52,6 +52,7 @@ export function createCommandPaletteRegistry(context) {
     routePath,
     store,
     isElectron,
+    isCapacitor,
     navigate,
     openSettingsSection,
     openSettingsSearchResult,
@@ -105,14 +106,17 @@ export function createCommandPaletteRegistry(context) {
       icon: ['fas', 'magnifying-glass'],
       shortcut: appShortcuts.FOCUS_SEARCH,
       run: focusSearch,
-    }),
-    command('app.new-window', t('KeyboardShortcutPrompt.New Window'), groups.app, {
+    })
+  )
+
+  if (!isCapacitor) {
+    commands.push(command('app.new-window', t('KeyboardShortcutPrompt.New Window'), groups.app, {
       aliases: ['open window'],
       icon: ['fas', 'clone'],
       shortcut: appShortcuts.NEW_WINDOW,
       run: createWindow,
-    })
-  )
+    }))
+  }
 
   addNavigationCommands(commands, {
     t,

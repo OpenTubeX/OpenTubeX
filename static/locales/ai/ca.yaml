@@ -406,6 +406,11 @@ Settings:
       Mark as Watched: Marca com a vist
       Copy YouTube Link: Copia l'enllaç de YouTube
       Open in YouTube: Obre a YouTube
+    Mobile Layout:
+      Mobile Layout: 'Disposició mòbil'
+      Automatic: 'Automàtica'
+      Phone: 'Telèfon'
+      Tablet: 'Tauleta'
   Context Menu Search Settings:
     Context Menu Search Settings: Cerca al menú contextual
     Description: Trieu quins motors de cerca apareixen en fer clic dret al text seleccionat. Les cerques s'obren al navegador predeterminat.
@@ -736,6 +741,8 @@ Settings:
       Error:
         Forbidden Characters: Caràcters prohibits
         Empty File Name: Nom de fitxer buit
+    Rotate Wide Videos to Landscape in Fullscreen: 'Gira els vídeos amples al mode apaïsat en pantalla completa'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Llisca amunt o avall per entrar o sortir de la pantalla completa'
   Channel Settings:
     Channel Settings: Configuració dels canals
     Channel Settings Description: Recorda per separat la configuració que trieu mentre mireu cada canal, per tornar-la a aplicar la propera vegada que mireu un dels seus vídeos.
@@ -1096,7 +1103,7 @@ Settings:
     Privacy Policy: Política de privadesa d'aquest servidor
     Enhanced Privacy Enabled: La privadesa millorada està activada. El servidor només desa dades de sincronització xifrades.
     Enhanced Privacy Unsupported: 'Avís: aquest servidor no admet la privadesa millorada. L''operador pot veure les dades sincronitzades.'
-    Description: Sincronitzeu les subscripcions, els perfils, les llistes de reproducció, l'historial, la configuració i les pestanyes obertes amb un servidor de sincronització de l'OpenTubeX o LibreTube. És possible que els servidors de LibreTube no admetin totes les funcions de sincronització.
+    Description: 'Sincronitza les subscripcions, els perfils, les llistes de reproducció, l’historial de visualitzacions i els ajusts compatibles amb un servidor de sincronització d’OpenTubeX o LibreTube. Les pestanyes de l’ordinador i del mòbil es mantenen separades tret que les comparteixis explícitament. És possible que els servidors de LibreTube no admetin totes les funcions de sincronització.'
     Server URL: URL del servidor
     Checking Server: S'està comprovant el servidor de sincronització…
     Server Unavailable: No s'ha pogut connectar a aquest servidor de sincronització. Comproveu l'URL i torneu-ho a provar.
@@ -1177,6 +1184,13 @@ Settings:
     Data Loss Confirmation: Voleu confirmar la sincronització destructiva?
     Data Loss Warning: L'estat del servidor suprimiria {deleted} dels {previous} elements de {collection} sincronitzats anteriorment. Això pot indicar una migració o un restabliment fallits del servidor. Continueu només si voleu fer aquesta supressió i teniu una còpia de seguretat.
     Confirm Data Loss: Suprimeix i continua
+    Use Shared Tabs: 'Utilitza un únic conjunt de pestanyes compartit entre dispositius'
+    Shared Tabs Warning: 'Les pestanyes compartides substitueixen el conjunt actual als dispositius connectats. Mantén aquesta opció desactivada per conservar separades les pestanyes de l’ordinador i del mòbil.'
+    Tabs From Other Devices: 'Pestanyes d’altres dispositius'
+    Device Tab Session: '{platform} · {count} pestanyes'
+    Mobile Device: 'Mòbil'
+    Desktop Device: 'Ordinador'
+    Open All Tabs: 'Obre totes les pestanyes'
   Proxy Settings:
     Proxy Warning: L'OpenTubeX no té cap servidor intermediari integrat, però es pot connectar a un d'extern, com ara Tor executant-se al vostre ordinador o un servidor intermediari SOCKS5 proporcionat per algunes VPN. Si l'activeu, assegureu-vos que el servidor intermediari o Tor estigui ben configurat; altrament, l'OpenTubeX no podrà obtenir dades.
     Proxy Username: Nom d'usuari del servidor intermediari

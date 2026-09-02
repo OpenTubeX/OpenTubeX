@@ -63,6 +63,7 @@ import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, reactive, ref,
 import { useI18n } from 'vue-i18n'
 import { Toaster, toast as sonner } from 'vue-sonner'
 import { normalizeToastPosition } from '../../constants/toastPosition'
+import { shouldUseProgressToast } from '../../helpers/progressPresentation'
 import { showToast, ToastEventBus } from '../../helpers/utils'
 import store from '../../store'
 import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
@@ -239,7 +240,7 @@ const showProgressToast = computed(() => {
   // toast would sit on top of the fullscreen player. Hide it until fullscreen
   // is left, as progress updates aren't urgent enough to interrupt playback.
   return fullscreenTarget.value === null &&
-    store.getters.getShowProgressBarToast &&
+    shouldUseProgressToast(store.getters.getShowProgressBarToast) &&
     (store.getters.getShowProgressBar ||
       store.getters.getSubscriptionFeedRefreshInProgress)
 })

@@ -169,6 +169,7 @@ const config = {
       'process.platform': JSON.stringify(rendererPlatform),
       'process.env.IS_ELECTRON': true,
       'process.env.IS_ELECTRON_MAIN': false,
+      'process.env.IS_CAPACITOR': false,
       'process.env.SUPPORTS_LOCAL_API': true,
       'process.env.BUILD_COMMIT': JSON.stringify(process.env.GITHUB_SHA ?? ''),
       __VUE_OPTIONS_API__: 'true',

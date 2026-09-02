@@ -213,6 +213,7 @@ export function getViewportInsets() {
   let bottomInset = MARGIN
 
   const topNav = document.querySelector('.topNav')
+  const sideNav = document.querySelector('.sideNav')
   const tabBar = document.querySelector('.tabBar')
   const verticalTabBar = document.querySelector('.tabBar.vertical')
 
@@ -229,6 +230,18 @@ export function getViewportInsets() {
   if (tabBar && !verticalTabBar) {
     const rect = tabBar.getBoundingClientRect()
     if (rect.top >= window.innerHeight - rect.bottom) {
+      bottomInset = Math.max(bottomInset, window.innerHeight - rect.top + MARGIN)
+    }
+  }
+
+  // On phones the side navigation becomes a fixed bottom bar. Use its
+  // rendered geometry so the mini player also clears the Android safe area
+  // included in the bar, without affecting the vertical desktop sidebar.
+  if (sideNav) {
+    const rect = sideNav.getBoundingClientRect()
+    const isBottomBar = rect.width > rect.height &&
+      rect.top >= window.innerHeight - rect.bottom
+    if (isBottomBar) {
       bottomInset = Math.max(bottomInset, window.innerHeight - rect.top + MARGIN)
     }
   }
@@ -326,6 +339,41 @@ export function scrollMiniPlayerRectToStyle(rect) {
     height: `${rect.height}px`,
     zIndex: '150',
     '--scroll-mini-scale': `${scale}`,
+  }
+}
+
+export const SCROLL_MINI_STASH_VISIBLE_SIZE = 36
+export const SCROLL_MINI_STASH_THRESHOLD = 24
+
+/**
+ * Returns the physical side crossed by a drag far enough to stash the player.
+ * @param {ScrollMiniPlayerRect} startRect
+ * @param {number} deltaX
+ * @param {number} viewportWidth
+ * @param {{ left: number, right: number }} insets
+ * @returns {'left' | 'right' | null}
+ */
+export function getScrollMiniPlayerStashSide(startRect, deltaX, viewportWidth, insets) {
+  const rawLeft = startRect.left + deltaX
+  if (rawLeft < insets.left - SCROLL_MINI_STASH_THRESHOLD) return 'left'
+  if (rawLeft + startRect.width > viewportWidth - insets.right + SCROLL_MINI_STASH_THRESHOLD) return 'right'
+  return null
+}
+
+/**
+ * Leaves a tappable video sliver visible at the selected viewport edge.
+ * @param {ScrollMiniPlayerRect} rect
+ * @param {'left' | 'right'} side
+ * @param {number} viewportWidth
+ * @param {{ left: number, right: number }} insets
+ * @returns {ScrollMiniPlayerRect}
+ */
+export function getStashedScrollMiniPlayerRect(rect, side, viewportWidth, insets) {
+  return {
+    ...rect,
+    left: side === 'left'
+      ? insets.left - rect.width + SCROLL_MINI_STASH_VISIBLE_SIZE
+      : viewportWidth - insets.right - SCROLL_MINI_STASH_VISIBLE_SIZE,
   }
 }
 

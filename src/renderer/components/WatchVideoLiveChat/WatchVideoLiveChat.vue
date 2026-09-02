@@ -213,11 +213,10 @@
           @click="showSuperChatComment(comment)"
           @keydown.enter.space.prevent="showSuperChatComment(comment)"
         >
-          <img
+          <FtRetryImage
             :src="comment.author.thumbnailUrl"
             class="channelThumbnail"
-            alt=""
-          >
+          />
           <p
             class="superChatContent"
           >
@@ -246,11 +245,10 @@
             <div
               class="upperSuperChatMessage"
             >
-              <img
+              <FtRetryImage
                 :src="superChat.author.thumbnailUrl"
                 class="channelThumbnail"
-                alt=""
-              >
+              />
               <div class="superChatAuthor">
                 <span
                   v-if="showLiveChatTimestamps"
@@ -312,11 +310,10 @@
                 <div
                   class="upperSuperChatMessage"
                 >
-                  <img
+                  <FtRetryImage
                     :src="comment.author.thumbnailUrl"
                     class="channelThumbnail"
-                    alt=""
-                  >
+                  />
                   <div class="superChatAuthor">
                     <span
                       v-if="showLiveChatTimestamps"
@@ -349,11 +346,10 @@
               <template
                 v-else
               >
-                <img
+                <FtRetryImage
                   :src="comment.author.thumbnailUrl"
                   class="channelThumbnail"
-                  alt=""
-                >
+                />
                 <p
                   class="chatContent"
                 >
@@ -423,6 +419,7 @@ import { YTNodes } from 'youtubei.js'
 
 import FtCard from '../ft-card/ft-card.vue'
 import FtButton from '../FtButton/FtButton.vue'
+import FtRetryImage from '../FtRetryImage.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import FtRadioButton from '../FtRadioButton/FtRadioButton.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'

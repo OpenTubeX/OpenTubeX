@@ -476,6 +476,11 @@ Settings:
     app needs to restart for changes to take effect. Restart and apply change?
   General Settings:
     General Settings: General
+    Mobile Layout:
+      Mobile Layout: Mobile layout
+      Automatic: Automatic
+      Phone: Phone
+      Tablet: Tablet
     Update Relative Timestamps: Keep relative timestamps updated
     Stream Extraction Method:
       Stream Extraction Method: Stream extraction method
@@ -903,6 +908,8 @@ Settings:
     Multiply Seek Interval by Playback Rate: Multiply Seek Interval by Playback Rate
     Display Play Button In Video Player: Display Play Button In Video Player
     Enter Fullscreen on Display Rotate: Enter Fullscreen on Display Rotate
+    Rotate Wide Videos to Landscape in Fullscreen: Rotate wide videos to landscape in fullscreen
+    Swipe Up or Down to Enter or Exit Fullscreen: Swipe up or down to enter or exit fullscreen
     Show Playback Rate Adjusted Timestamp: Show Playback Rate Adjusted Timestamp
     Use YouTube-style Shorts: Use YouTube-style Shorts
     Loop Shorts: Loop Shorts
@@ -1381,7 +1388,7 @@ Settings:
     Privacy Policy: Privacy policy for this server
     Enhanced Privacy Enabled: Enhanced privacy is enabled. The server stores only encrypted sync data.
     Enhanced Privacy Unsupported: Warning — this server does not support enhanced privacy. Synced data is visible to its operator.
-    Description: Synchronize subscriptions, profiles, playlists, watch history, settings, and open tabs with an OpenTubeX or LibreTube sync server. LibreTube servers may not support every sync feature.
+    Description: Synchronize subscriptions, profiles, playlists, watch history, and supported settings with an OpenTubeX or LibreTube sync server. Desktop and mobile tabs stay separate unless you explicitly share them. LibreTube servers may not support every sync feature.
     Server URL: Server URL
     Checking Server: Checking sync server…
     Server Unavailable: Unable to connect to this sync server. Check the URL and try again.
@@ -1471,6 +1478,13 @@ Settings:
     Automatic Sync: Sync automatically after changes and every five minutes
     Profiles: Profiles
     Open Tabs: Open tabs and session
+    Use Shared Tabs: Use one shared tab set across devices
+    Shared Tabs Warning: Shared tabs replace the current tab set on connected devices. Keep this off to preserve separate desktop and mobile tabs.
+    Tabs From Other Devices: Tabs from other devices
+    Device Tab Session: '{platform} · {count} tabs'
+    Mobile Device: Mobile
+    Desktop Device: Desktop
+    Open All Tabs: Open all tabs
     Disable Setting Sync: Stop syncing this setting
     Enable Setting Sync: Sync this setting
     Sync Now: Sync now

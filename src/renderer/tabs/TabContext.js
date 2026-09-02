@@ -30,8 +30,14 @@ export function useTabTitle() {
       return
     }
 
-    if (process.env.IS_ELECTRON && tabId) {
-      getTabNavigationService().setTitle(tabId, title, options)
+    const targetTabId = process.env.IS_ELECTRON
+      ? tabId
+      : process.env.IS_CAPACITOR
+        ? store.getters.getActiveTabId
+        : null
+
+    if (targetTabId) {
+      getTabNavigationService().setTitle(targetTabId, title, options)
     } else {
       store.commit('setAppTitle', title)
     }

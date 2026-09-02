@@ -218,7 +218,10 @@ import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../
 
 const { locale, t } = useI18n()
 
-const PREFERENCES = CHANNEL_PREFERENCE_TYPES
+const IS_CAPACITOR = Boolean(process.env.IS_CAPACITOR)
+const PREFERENCES = CHANNEL_PREFERENCE_TYPES.filter(preference => (
+  !IS_CAPACITOR || preference.type !== 'volume'
+))
 const channelPreferenceSettingKeys = PREFERENCES.map(preference => preference.valuesKey)
 const disableChannelLinks = computed(() => store.getters.getDisableChannelLinks)
 

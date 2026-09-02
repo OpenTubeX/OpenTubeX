@@ -3,7 +3,7 @@
     ref="settingsWindowRef"
     class="settingsWindow"
     :class="{
-      maximized: isMaximized,
+      maximized: isWindowMaximized,
       utilityWindowMorphTarget: settingsWindowMorphing
     }"
     :style="windowStyle"
@@ -180,6 +180,7 @@
           <FtIcon :icon="['fas', 'angle-down']" />
         </button>
         <button
+          v-if="!isNarrowLayout"
           type="button"
           class="settingsHeaderButton"
           :aria-label="maximizeButtonLabel"
@@ -336,7 +337,7 @@
     </div>
     <div
       v-for="direction in RESIZE_DIRECTIONS"
-      v-show="!isMaximized"
+      v-show="!isWindowMaximized"
       :key="direction"
       class="settingsResizeHandle"
       :class="`resize-${direction}`"
@@ -397,6 +398,7 @@ import {
 } from '../../helpers/settingsSearch'
 
 const USING_ELECTRON = !!process.env.IS_ELECTRON
+const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
 const IS_MAC = process.platform === 'darwin'
 const SETTINGS_DESKTOP_WIDTH_THRESHOLD = 760
@@ -457,6 +459,7 @@ const settingsSearchSubsectionTargets = computed(() => ({
 }))
 const isInDesktopView = ref(true)
 const isMaximized = ref(false)
+const isNarrowLayout = ref(window.innerWidth < SETTINGS_DESKTOP_WIDTH_THRESHOLD)
 const activeSection = ref(
   LEGACY_SETTINGS_SECTION_MAP[store.getters.getSettingsWindowSection] ??
   store.getters.getSettingsWindowSection
@@ -506,12 +509,13 @@ let restoreBounds = null
 let preservedScrollPositions = []
 
 const windowBounds = ref(getInitialBounds())
-const windowStyle = computed(() => isMaximized.value
+const isWindowMaximized = computed(() => isMaximized.value || isNarrowLayout.value)
+const windowStyle = computed(() => isWindowMaximized.value
   ? {
       left: '0',
-      top: '0',
+      top: 'var(--app-safe-area-inset-top, 0px)',
       inlineSize: '100vw',
-      blockSize: '100vh'
+      blockSize: 'calc(100dvh - var(--app-safe-area-inset-top, 0px))'
     }
   : {
       left: `${windowBounds.value.x}px`,
@@ -636,6 +640,7 @@ const settingsSearchableValues = computed(() => createSettingsSearchIndex({
   tm,
   store,
   usingElectron: USING_ELECTRON,
+  isCapacitor: IS_CAPACITOR,
   supportsLocalApi: SUPPORTS_LOCAL_API,
   isMac: IS_MAC,
   isLinuxWayland: isLinuxWayland.value,
@@ -804,11 +809,17 @@ watch(() => props.searchTarget, async (target) => {
 
 function handleMounted() {
   unlocked.value = store.getters.getSettingsPassword === ''
+  updateNarrowLayout()
   handleResize(settingsWindowRef.value?.clientWidth ?? windowBounds.value.width)
   setInitialSection()
   nextTick(observeProfileManager)
   nextTick(observeStandaloneContent)
-  nextTick(() => (settingsSearchInputRef.value ?? settingsCloseButtonRef.value)?.focus())
+  nextTick(() => {
+    const initialFocus = isNarrowLayout.value
+      ? settingsCloseButtonRef.value
+      : settingsSearchInputRef.value ?? settingsCloseButtonRef.value
+    initialFocus?.focus()
+  })
   if (settingsResizeObserver !== null || observationScheduled) {
     return
   }
@@ -823,7 +834,7 @@ function handleMounted() {
       handleResize(width)
       if (width > 0 && height > 0) {
         if (
-          !isMaximized.value &&
+          !isWindowMaximized.value &&
           boundsAnimation === null &&
           draggingPointerId === null &&
           resizeSession === null
@@ -845,7 +856,7 @@ function handleMounted() {
       }
     })
     settingsResizeObserver.observe(element)
-    window.addEventListener('resize', clampWindowToViewport)
+    window.addEventListener('resize', handleViewportResize)
     observeActiveSettingsSection()
   })
 }
@@ -859,7 +870,7 @@ function stopObserving() {
   settingsSectionResizeObserver = null
   stopObservingProfileManager()
   stopObservingStandaloneContent()
-  window.removeEventListener('resize', clampWindowToViewport)
+  window.removeEventListener('resize', handleViewportResize)
 }
 
 function observeProfileManager() {
@@ -1228,6 +1239,7 @@ function restorePreservedScrollPositions() {
 }
 
 async function toggleMaximized() {
+  if (isNarrowLayout.value) return
   cancelBoundsAnimation()
   const element = settingsWindowRef.value
   const from = getWindowAnimationState(element)
@@ -1301,12 +1313,20 @@ function handleSettingsEscape(event) {
 }
 
 function handleHeaderDoubleClick(event) {
-  if (event.button !== 0 || event.target.closest('button, input, .settingsSearch')) return
+  if (
+    isNarrowLayout.value ||
+    event.button !== 0 ||
+    event.target.closest('button, input, .settingsSearch')
+  ) return
   toggleMaximized()
 }
 
 function startDragging(event) {
-  if (event.button !== 0 || event.target.closest('button, input, .settingsSearch')) return
+  if (
+    isNarrowLayout.value ||
+    event.button !== 0 ||
+    event.target.closest('button, input, .settingsSearch')
+  ) return
   cancelBoundsAnimation()
   const renderedBounds = settingsWindowRef.value.getBoundingClientRect()
   if (isMaximized.value) {
@@ -1367,7 +1387,7 @@ function stopDragging(event) {
 }
 
 function startResizing(event, direction) {
-  if (event.button !== 0 || isMaximized.value) return
+  if (event.button !== 0 || isWindowMaximized.value) return
   cancelBoundsAnimation()
   resizeSession = {
     direction,
@@ -1437,8 +1457,17 @@ function stopResizing(event) {
   scheduleBoundsSave()
 }
 
+function handleViewportResize() {
+  updateNarrowLayout()
+  clampWindowToViewport()
+}
+
+function updateNarrowLayout() {
+  isNarrowLayout.value = window.innerWidth < SETTINGS_DESKTOP_WIDTH_THRESHOLD
+}
+
 function clampWindowToViewport() {
-  if (isMaximized.value) return
+  if (isWindowMaximized.value) return
   windowBounds.value = clampBounds(windowBounds.value)
 }
 

@@ -271,6 +271,11 @@ Settings:
       Mark as Watched: "Merkañ evel sellet"
       Copy YouTube Link: "Eilañ al liamm YouTube"
       Open in YouTube: "Digeriñ e YouTube"
+    Mobile Layout:
+      Mobile Layout: 'Doare pellgomzer'
+      Automatic: 'Emgefreek'
+      Phone: 'Pellgomzer'
+      Tablet: 'Tablezenn'
   Context Menu Search Settings:
     Context Menu Search Settings: "Klask diwar ar roll lañser"
     Description: "Dibabit ar c'hefluskerioù enklask a vo diskouezet pa glikot a-zehou war destenn diuzet. Digoret e vo an enklaskoù en ho merdeer dre ziouer."
@@ -493,6 +498,8 @@ Settings:
     Reorder Playback Speed: "Riklañ evit adurzhiañ an tizh lenn"
     Playback Speed: "Tizh lenn"
     Parallel Segment Loading: "Kargañ ar rannoù a-stroll"
+    Rotate Wide Videos to Landscape in Fullscreen: 'C’hwelañ ar videoioù ledan d’ar mod gweledva er skramm leun'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Riklañ war-grec’h pe war-draoñ evit mont er skramm leun pe kuitaat anezhañ'
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
@@ -779,7 +786,7 @@ Settings:
     Privacy Policy: "Reolenn brevezded ar servijer-mañ"
     Enhanced Privacy Enabled: "Gweredekaet eo ar prevezded kreñvaet. Roadennoù goubredañ sifret hepken a vez kadavet gant ar servijer."
     Enhanced Privacy Unsupported: "Diwallit: ar servijer-mañ ne skor ket ar prevezded kreñvaet. Gallout a ra e verour gwelet ar roadennoù goubredet."
-    Description: "Goubredañ ar c'houmanantoù, ar profiloù, ar rolloù-videoioù, an istor sellout, an arventennoù hag an ivinelloù digor gant ur servijer goubredañ OpenTubeX pe LibreTube. Gallout a ra servijerioù LibreTube chom hep skorañ arc'hwelioù goubredañ zo."
+    Description: 'Goubredit ar c’houmanantoù, ar profiloù, ar rolloù-lenn, istor ar selladennoù hag an arventennoù skoret gant ur servijer goubredañ OpenTubeX pe LibreTube. Disparti e chom ivinelloù an urzhiataer hag ar pellgomzer nemet ma rannit anezho. Marteze ne skor ket servijerioù LibreTube an holl arc’hwelioù goubredañ.'
     Server URL: "URL ar servijer"
     Checking Server: "O wiriañ ar servijer goubredañ…"
     Server Unavailable: "N'eus ket bet gallet kennaskañ ouzh ar servijer goubredañ-mañ. Gwiriit an URL ha klaskit en-dro."
@@ -860,6 +867,13 @@ Settings:
     Data Loss Confirmation: "Kadarnaat ar goubredañ distrujus?"
     Data Loss Warning: "Stad ar servijer a zilamfe {deleted} diwar {previous} elfenn {collection} bet goubredet a-raok. Gallout a ra talvezout eo c'hwitet un treuzkas pe un adderaouekaat ar servijer. Kendalc'hit hepken ma fell deoc'h dilemel anezho hag ez eus un eiladenn-gwarediñ ganeoc'h."
     Confirm Data Loss: "Dilemel ha kenderc'hel"
+    Use Shared Tabs: 'Arverañ an hevelep strollad ivinelloù war an holl drevnadoù'
+    Shared Tabs Warning: 'Erlec’hiañ a ra an ivinelloù rannet ar strollad a-vremañ war an drevnadoù kennasket. Lezit an dra-mañ lazhet evit mirout ivinelloù disparti war urzhiataer ha pellgomzer.'
+    Tabs From Other Devices: 'Ivinelloù eus trevnadoù all'
+    Device Tab Session: '{platform} · {count} ivinell'
+    Mobile Device: 'Pellgomzer'
+    Desktop Device: 'Urzhiataer'
+    Open All Tabs: 'Digeriñ an holl ivinelloù'
   Proxy Settings:
     IP Block Recovery Script Path: "Hent ar skript adtapout goude ur stankadur IP"
     Select IP Block Recovery Script File: "Dibab restr ar skript adtapout goude ur stankadur IP"

@@ -25,6 +25,9 @@ import {
 } from './profile-sync.js'
 import { createSyncServerRequestHeaders } from './sync-server-request'
 import { isValidPlaylistBookmark, playlistBookmarkForSync } from './playlist-bookmarks'
+import { getOtherDeviceSessions, mergeSyncSessions } from './sync-sessions'
+import { mergeSettingEntry } from './sync-settings-conflict'
+import { getCapacitorTabService } from '../tabs/CapacitorTabService'
 
 const LEGACY_HISTORY_PAGE_SIZE = 50
 const BULK_SYNC_CHUNK_SIZE = 100
@@ -1088,14 +1091,41 @@ async function repairDeletedCustomThemeReferences(store, previousThemes, themes)
   }
 }
 
-function latestSessionUpdate(sessions) {
-  return sessions.reduce((latest, session) => (
-    Number.isFinite(session.updatedAt) ? Math.max(latest, session.updatedAt) : latest
-  ), 0)
+const SYNC_DEVICE_ID_KEY = 'opentubex-sync-device-id'
+let volatileSyncDeviceId = null
+
+function getSyncDeviceId() {
+  try {
+    let deviceId = localStorage.getItem(SYNC_DEVICE_ID_KEY)
+    if (!deviceId) {
+      deviceId = crypto.randomUUID()
+      localStorage.setItem(SYNC_DEVICE_ID_KEY, deviceId)
+    }
+    return deviceId
+  } catch {
+    volatileSyncDeviceId ??= crypto.randomUUID()
+    return volatileSyncDeviceId
+  }
 }
 
-export async function syncSessions(client, previous = null) {
-  const tabs = window.ftElectron?.tabs
+export function getSavedOtherDeviceSessions(snapshot) {
+  return getOtherDeviceSessions(snapshot?.sessions, getSyncDeviceId())
+}
+
+function getTabSyncAdapter() {
+  if (process.env.IS_ELECTRON) return window.ftElectron?.tabs ?? null
+  if (process.env.IS_CAPACITOR) {
+    try {
+      return getCapacitorTabService()
+    } catch {
+      return null
+    }
+  }
+  return null
+}
+
+export async function syncSessions(client, store, previous = null) {
+  const tabs = getTabSyncAdapter()
   if (typeof tabs?.getSyncSessions !== 'function' ||
       typeof tabs?.applySyncSessions !== 'function') {
     return null
@@ -1103,27 +1133,25 @@ export async function syncSessions(client, previous = null) {
 
   const local = await tabs.getSyncSessions()
   const remote = await client.getSessions()
-  const localChanged = previous !== null && !metadataEquals(local, previous)
-  const remoteChanged = previous !== null && !metadataEquals(remote, previous)
-  let merged
+  const merged = mergeSyncSessions({
+    localSessions: local,
+    remoteValue: remote,
+    previousValue: previous,
+    deviceId: getSyncDeviceId(),
+    platform: process.env.IS_CAPACITOR ? 'mobile' : 'desktop',
+    preferredMode: store.state.settings.syncServerSharedTabs ? 'shared' : 'separate',
+  })
 
-  if (previous === null) {
-    merged = remote.length > 0 ? remote : local
-  } else if (remoteChanged && !localChanged) {
-    merged = remote
-  } else if (remoteChanged && localChanged &&
-      latestSessionUpdate(remote) > latestSessionUpdate(local)) {
-    merged = remote
-  } else {
-    merged = local
+  if (!metadataEquals(remote, merged.document)) {
+    await client.putSessions(merged.document)
+  }
+  if (!metadataEquals(local, merged.sessionsToApply) && merged.sessionsToApply.length > 0) {
+    await tabs.applySyncSessions(merged.sessionsToApply)
+  }
+  if ((merged.mode === 'shared') !== store.state.settings.syncServerSharedTabs) {
+    await store.dispatch('updateSyncServerSharedTabs', merged.mode === 'shared')
   }
 
-  if (!metadataEquals(remote, merged)) {
-    await client.putSessions(merged)
-  }
-  if (!metadataEquals(local, merged) && merged.length > 0) {
-    await tabs.applySyncSessions(merged)
-  }
   return merged
 }
 
@@ -1132,6 +1160,11 @@ export async function syncSettings(client, store, previous = {}) {
   const remote = Object.fromEntries(remoteEntries.map(entry => [entry.key, entry]))
   const merged = {}
   const now = Date.now()
+  const localUpdatedAt = store.state.settings.syncServerSettingUpdatedAt !== null &&
+    typeof store.state.settings.syncServerSettingUpdatedAt === 'object' &&
+    !Array.isArray(store.state.settings.syncServerSettingUpdatedAt)
+    ? store.state.settings.syncServerSettingUpdatedAt
+    : {}
   const local = Object.fromEntries(getSyncableSettingKeys(store.state.settings).map(key => (
     [key, deepCopy(store.state.settings[key])]
   )))
@@ -1140,20 +1173,21 @@ export async function syncSettings(client, store, previous = {}) {
   for (const [key, value] of Object.entries(local)) {
     const old = previous[key]
     const remoteEntry = remote[key]
-    const localChanged = old !== undefined && !metadataEquals(value, old.value)
-    let entry
-
-    if (!old && remoteEntry) {
-      entry = remoteEntry
-    } else if (localChanged && (!remoteEntry || now >= remoteEntry.updatedAt)) {
-      entry = { key, value, updatedAt: now }
-    } else if (remoteEntry && (!old || remoteEntry.updatedAt > old.updatedAt)) {
-      entry = remoteEntry
-    } else {
-      entry = old ?? { key, value, updatedAt: now }
-    }
+    let entry = mergeSettingEntry({
+      key,
+      value,
+      old,
+      remoteEntry,
+      localUpdatedAt: localUpdatedAt[key],
+      now,
+    })
 
     merged[key] = entry
+    if (key === 'defaultProfile' &&
+        !store.state.profiles.profileList.some(profile => profile._id === entry.value)) {
+      entry = { key, value: MAIN_PROFILE_ID, updatedAt: now }
+      merged[key] = entry
+    }
     if (!metadataEquals(value, entry.value)) {
       if (key === CUSTOM_THEMES_SYNC_KEY) {
         const previousThemes = store.state.utils.customThemes

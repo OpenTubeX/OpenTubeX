@@ -6,10 +6,20 @@ import {
   applyMinimizedState,
   applyPictureInPictureState,
   createAutoPictureInPictureState,
+  canEnableAndroidAutoPictureInPicture,
   markPictureInPictureRequested,
   resolveAutoPictureInPictureAction,
   shouldAutoPictureInPicture
 } from '../../src/renderer/components/ft-shaka-video-player/opentubex/autoPictureInPictureState.js'
+
+test('Android auto PiP is enabled only while a video is actively playing', () => {
+  assert.equal(canEnableAndroidAutoPictureInPicture(true, 'video', null), false)
+  assert.equal(canEnableAndroidAutoPictureInPicture(true, 'video', { paused: true, ended: false }), false)
+  assert.equal(canEnableAndroidAutoPictureInPicture(true, 'video', { paused: false, ended: true }), false)
+  assert.equal(canEnableAndroidAutoPictureInPicture(false, 'video', { paused: false, ended: false }), false)
+  assert.equal(canEnableAndroidAutoPictureInPicture(true, 'audio', { paused: false, ended: false }), false)
+  assert.equal(canEnableAndroidAutoPictureInPicture(true, 'video', { paused: false, ended: false }), true)
+})
 
 const ALL_TRIGGERS = {
   canAutoPip: true,

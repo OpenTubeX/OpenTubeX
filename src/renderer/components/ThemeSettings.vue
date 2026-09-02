@@ -62,6 +62,7 @@
     </FtFlexBox>
     <FtFlexBox class="themeSelectRow">
       <FtSelect
+        v-if="!IS_CAPACITOR"
         :placeholder="t('Settings.Theme Settings.Font.App Font')"
         :value="appFont"
         setting-key="appFont"
@@ -116,6 +117,20 @@
     />
   </FtSettingsSection>
   <FtSettingsSection :title="t('Settings.Categories.Layout')">
+    <FtFlexBox
+      v-if="IS_CAPACITOR"
+      class="themeSelectRow"
+    >
+      <FtSelect
+        :placeholder="t('Settings.General Settings.Mobile Layout.Mobile Layout')"
+        :value="capacitorLayoutMode"
+        setting-key="capacitorLayoutMode"
+        :select-names="capacitorLayoutModeNames"
+        :select-values="CAPACITOR_LAYOUT_MODE_VALUES"
+        :icon="['fas', 'display']"
+        @change="store.dispatch('updateCapacitorLayoutMode', $event)"
+      />
+    </FtFlexBox>
     <div class="switchColumnGrid">
       <div class="switchColumn">
         <FtToggleSwitch
@@ -133,7 +148,7 @@
           @change="handleExpandSideBar"
         />
         <FtToggleSwitch
-          v-if="usingElectron"
+          v-if="usingElectron || IS_CAPACITOR"
           :label="$t('Settings.Theme Settings.Move Downloads to App Header')"
           compact
           :default-value="moveDownloadsToAppHeader"
@@ -171,7 +186,7 @@
           @change="updateUsePlayerMenuGrid"
         />
         <FtToggleSwitch
-          v-if="usingElectron"
+          v-if="usingElectron || IS_CAPACITOR"
           :label="$t('Settings.Theme Settings.Use Fixed Tab Width')"
           :tooltip="$t('Tooltips.Theme Settings.Use Fixed Tab Width')"
           compact
@@ -211,7 +226,7 @@
           @change="updateMoveSettingsToAppHeader"
         />
         <FtToggleSwitch
-          v-if="usingElectron"
+          v-if="usingElectron || IS_CAPACITOR"
           :label="$t('Settings.Theme Settings.Show Tab Icons')"
           compact
           :default-value="showTabIcons"
@@ -227,6 +242,7 @@
           @change="updateShowTabPreviews"
         />
         <FtToggleSwitch
+          v-if="!IS_CAPACITOR"
           :label="$t('Settings.Theme Settings.Show Progress as Notification')"
           :tooltip="$t('Tooltips.Theme Settings.Show Progress as Notification')"
           compact
@@ -236,8 +252,11 @@
         />
       </div>
     </div>
-    <template v-if="usingElectron">
-      <FtFlexBox class="themeSelectRow">
+    <template v-if="usingElectron || IS_CAPACITOR">
+      <FtFlexBox
+        v-if="usingElectron"
+        class="themeSelectRow"
+      >
         <FtSelect
           :placeholder="t('Settings.Theme Settings.Tab Layout.Tab Layout')"
           :value="tabBarPosition"
@@ -264,7 +283,7 @@
           />
         </div>
         <FtButton
-          v-if="showTabIcons"
+          v-if="usingElectron && showTabIcons"
           :label="loadingTabIcons
             ? $t('Settings.Theme Settings.Loading Missing Tab Icons')
             : $t('Settings.Theme Settings.Load Missing Tab Icons')"
@@ -406,6 +425,14 @@ import { ICON_PACKS } from '../icons/iconPackState'
 import { DEFAULT_APP_FONT, normalizeAppFont, SYSTEM_APP_FONT } from '../helpers/appFont'
 
 const { locale, t } = useI18n()
+const IS_CAPACITOR = !!process.env.IS_CAPACITOR
+const CAPACITOR_LAYOUT_MODE_VALUES = ['auto', 'phone', 'tablet']
+const capacitorLayoutMode = computed(() => store.getters.getCapacitorLayoutMode)
+const capacitorLayoutModeNames = computed(() => [
+  t('Settings.General Settings.Mobile Layout.Automatic'),
+  t('Settings.General Settings.Mobile Layout.Phone'),
+  t('Settings.General Settings.Mobile Layout.Tablet')
+])
 
 // Themes are devided into 3 groups.
 // The first group contains the default themes.

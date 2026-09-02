@@ -273,6 +273,11 @@ Settings:
       Mark as Watched: Markatu ikusita
       Copy YouTube Link: Kopiatu YouTube esteka
       Open in YouTube: Ireki YouTuben
+    Mobile Layout:
+      Mobile Layout: 'Mugikorreko diseinua'
+      Automatic: 'Automatikoa'
+      Phone: 'Telefonoa'
+      Tablet: 'Tableta'
   Context Menu Search Settings:
     Context Menu Search Settings: Laster-menuko bilaketa
     Description: Aukeratu hautatutako testuan eskuineko klik egitean agertuko diren bilaketa-motorrak. Bilaketak arakatzaile lehenetsian irekiko dira.
@@ -495,6 +500,8 @@ Settings:
     Reorder Playback Speed: Arrastatu erreprodukzio-abiadura berrantolatzeko
     Playback Speed: Erreprodukzio-abiadura
     Parallel Segment Loading: Segmentuak paraleloan kargatzea
+    Rotate Wide Videos to Landscape in Fullscreen: 'Biratu bideo zabalak horizontalera pantaila osoan'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Irristatu gora edo behera pantaila osoan sartzeko edo irteteko'
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
@@ -781,7 +788,7 @@ Settings:
     Privacy Policy: Zerbitzari honen pribatutasun-politika
     Enhanced Privacy Enabled: Pribatutasun hobetua gaituta dago. Zerbitzariak sinkronizatutako datu zifratuak soilik gordetzen ditu.
     Enhanced Privacy Unsupported: Abisua. Zerbitzari honek ez du pribatutasun hobetua onartzen. Sinkronizatutako datuak zerbitzariaren operadoreak ikus ditzake.
-    Description: Sinkronizatu harpidetzak, profilak, erreprodukzio-zerrendak, ikustaldi-historia, ezarpenak eta irekitako fitxak OpenTubeX edo LibreTube sinkronizazio-zerbitzari batekin. Baliteke LibreTube zerbitzariek sinkronizazio-eginbide guztiak ez onartzea.
+    Description: 'Sinkronizatu harpidetzak, profilak, erreprodukzio-zerrendak, ikustaldien historia eta onartutako ezarpenak OpenTubeX edo LibreTube sinkronizazio-zerbitzari batekin. Mahaigaineko eta mugikorreko fitxak bereizita mantenduko dira berariaz partekatzen ez badituzu. Baliteke LibreTube zerbitzariek sinkronizazio-eginbide guztiak ez onartzea.'
     Server URL: Zerbitzariaren URLa
     Checking Server: Sinkronizazio-zerbitzaria egiaztatzen…
     Server Unavailable: Ezin da sinkronizazio-zerbitzari honekin konektatu. Egiaztatu URLa eta saiatu berriro.
@@ -862,6 +869,13 @@ Settings:
     Data Loss Confirmation: Datuak ezabatuko dituen sinkronizazioa berretsi?
     Data Loss Warning: Zerbitzariaren egoerak aurretik sinkronizatutako {previous} {collection} elementuetatik {deleted} ezabatuko lituzke. Baliteke zerbitzariaren migrazio edo berrezarpen batek huts egin izana. Jarraitu ezabaketa nahita egiten ari bazara eta babeskopia bat baduzu soilik.
     Confirm Data Loss: Ezabatu eta jarraitu
+    Use Shared Tabs: 'Erabili partekatutako fitxa multzo bakarra gailu guztietan'
+    Shared Tabs Warning: 'Partekatutako fitxek uneko fitxa multzoa ordezten dute konektatutako gailuetan. Mantendu hau desaktibatuta mahaigaineko eta mugikorreko fitxak bereizita gordetzeko.'
+    Tabs From Other Devices: 'Beste gailuetako fitxak'
+    Device Tab Session: '{platform} · {count} fitxa'
+    Mobile Device: 'Mugikorra'
+    Desktop Device: 'Mahaigaina'
+    Open All Tabs: 'Ireki fitxa guztiak'
   Proxy Settings:
     IP Block Recovery Script Path: IP blokeoa berreskuratzeko scriptaren bide-izena
     Select IP Block Recovery Script File: Hautatu IP blokeoa berreskuratzeko script-fitxategia

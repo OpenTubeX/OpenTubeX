@@ -4,18 +4,133 @@
 }
 
 .app {
+  --app-safe-area-inset-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0));
   --top-nav-height: 60px;
   --top-tab-bar-height: 32px;
-  --top-nav-sticky-offset: var(--top-nav-height);
+  --top-nav-sticky-offset: calc(var(--app-safe-area-inset-top) + var(--top-nav-height));
 
+  box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
   font-family: var(--app-font-family);
   block-size: 100%;
+  padding-block-start: var(--app-safe-area-inset-top);
+}
+
+/* Keep the edge-to-edge status-bar inset opaque. The app itself scrolls, so
+   padding alone would still let route content paint through this area. */
+.app.capacitorTabs::before {
+  content: '';
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 1099;
+  block-size: var(--app-safe-area-inset-top);
+  background-color: var(--card-bg-color);
+  pointer-events: none;
+}
+
+/* Android WebView's default blue flash ignores the active theme. Use the
+   app's semantic pressed-state color instead. */
+:global(.capacitorTabs),
+:global(.capacitorTabs *) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:global(body.androidPictureInPicture) {
+  overflow: hidden !important;
+  background: #000 !important;
+}
+
+:global(body.androidPictureInPicture .app > *),
+:global(body.androidPictureInPicture .ftVideoPlayer *) {
+  visibility: hidden !important;
+}
+
+.mobileLinkActionsBackdrop {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  align-items: end;
+  background-color: rgb(0 0 0 / 48%);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobileLinkActions {
+  display: grid;
+  gap: 4px;
+  padding-block: 16px max(16px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  padding-inline: 16px;
+  color: var(--primary-text-color);
+  background-color: var(--card-bg-color);
+  border-start-start-radius: calc(20px * var(--ui-roundness));
+  border-start-end-radius: calc(20px * var(--ui-roundness));
+}
+
+.mobileLinkActions strong {
+  padding: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobileLinkActions button {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  min-block-size: 48px;
+  padding: 12px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: calc(12px * var(--ui-roundness));
+  font: inherit;
+  text-align: start;
+}
+
+.mobileLinkActions button:is(:active, :focus-visible) {
+  background-color: var(--side-nav-hover-color);
+}
+
+:global(body.androidPictureInPicture .ftVideoPlayer),
+:global(body.androidPictureInPicture .ftVideoPlayer .player) {
+  visibility: visible !important;
+}
+
+:global(body.androidPictureInPicture .ftVideoPlayer) {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483647 !important;
+  inline-size: 100vw !important;
+  block-size: 100vh !important;
+  border-radius: 0 !important;
+  transform: none !important;
+}
+
+:global(body.androidPictureInPicture .ftVideoPlayer > .player),
+:global(body.androidPictureInPicture .ftVideoPlayer > .vrCanvas) {
+  inline-size: 100% !important;
+  block-size: 100% !important;
+  border-radius: 0 !important;
+  object-fit: contain !important;
+}
+
+:global(body.androidPictureInPicture .ftVideoPlayer .shaka-controls-container),
+:global(body.androidPictureInPicture .ftVideoPlayer .scrollMiniPlayerControls) {
+  display: none !important;
 }
 
 .app:has(.videoLayout.ambientModeActive) {
   overflow-inline: clip;
+}
+
+:global(html:has(.app.capacitorPhoneLayout)),
+:global(body:has(.app.capacitorPhoneLayout)) {
+  max-inline-size: 100%;
+  overflow-inline: clip;
+  overscroll-behavior: none;
 }
 
 .routerView {
@@ -28,6 +143,38 @@
   min-inline-size: 0;
   container-name: route;
   container-type: inline-size;
+}
+
+/* Phone layouts use the full viewport for page-level cards. Cards stacked
+   inside the watch layout keep its vertical rhythm while remaining full-width. */
+.app.capacitorPhoneLayout > .routerView :deep(.ft-card:not(.watchVideo, .watchVideoSideBar)) {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: none;
+  margin-block: 0;
+  margin-inline: 0;
+  border-radius: 0;
+}
+
+/* The player owns vertical touch movement on mobile so a short drag can enter
+   or leave fullscreen without fighting page scrolling. The layout class lives
+   on this component while the player is inside a child component. */
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeEnabled:not(.scrollMiniPlayer)) {
+  touch-action: pan-x;
+}
+
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwiping > .player),
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeSettling > .player) {
+  translate: 0 var(--mobile-fullscreen-swipe-offset, 0);
+  will-change: translate;
+}
+
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwiping > .player) {
+  transition: none;
+}
+
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeSettling > .player) {
+  transition: translate 140ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 .crossTabMiniPlayerLayer {
@@ -56,6 +203,29 @@
 .watchSideNavOverlay .routerView {
   position: relative;
   z-index: 1;
+}
+
+.app.capacitorPhoneLayout > .routerView {
+  box-sizing: border-box;
+  flex-basis: 100%;
+  inline-size: 100%;
+  margin-block: var(--top-nav-height) 0;
+  margin-inline: 0;
+  overflow-inline: clip;
+}
+
+.app.capacitorPhoneLayout > .routerView :deep(.routerView) {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: none;
+  margin: 0;
+  padding-block-end: calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+}
+
+/* Narrow viewports normally reserve a phone-sized top gap. The tablet tab
+   strip already separates app chrome from the main page card. */
+.app.capacitorTabletLayout > .routerView :deep(.routerView) {
+  margin-block-start: 18px;
 }
 
 /* Applies both while entering the overlay (class present) and while leaving it
@@ -440,8 +610,8 @@
 
 /* The bottom strip includes a 2px compositor-safe inset. */
 .app.topTabs :deep(.sideNav) {
-  block-size: calc(100vh - 92px);
-  inset-block-start: 92px;
+  block-size: calc(100vh - var(--app-safe-area-inset-top) - var(--top-tab-bar-height) - var(--top-nav-height));
+  inset-block-start: calc(var(--app-safe-area-inset-top) + var(--top-tab-bar-height) + var(--top-nav-height));
 }
 
 .app.bottomTabs :deep(.sideNav) {
@@ -450,7 +620,7 @@
 }
 
 .app.topTabs .sideNavBackdrop {
-  inset-block-start: 92px;
+  inset-block-start: calc(var(--app-safe-area-inset-top) + var(--top-tab-bar-height) + var(--top-nav-height));
 }
 
 .app.bottomTabs {
@@ -467,7 +637,7 @@
 }
 
 .app.topTabs {
-  --top-nav-sticky-offset: calc(var(--top-tab-bar-height) + var(--top-nav-height));
+  --top-nav-sticky-offset: calc(var(--app-safe-area-inset-top) + var(--top-tab-bar-height) + var(--top-nav-height));
 }
 
 @media only screen and (width <= 680px) {

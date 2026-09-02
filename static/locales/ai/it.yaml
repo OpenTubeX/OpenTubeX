@@ -271,6 +271,11 @@ Settings:
       Mark as Watched: Segna come guardato
       Copy YouTube Link: Copia link YouTube
       Open in YouTube: Apri su YouTube
+    Mobile Layout:
+      Mobile Layout: 'Layout mobile'
+      Automatic: 'Automatico'
+      Phone: 'Telefono'
+      Tablet: 'Tablet'
   Context Menu Search Settings:
     Context Menu Search Settings: Ricerca dal menu contestuale
     Description: Scegli quali motori di ricerca mostrare quando fai clic destro sul testo selezionato. Le ricerche si aprono nel browser predefinito.
@@ -493,6 +498,8 @@ Settings:
     Reorder Playback Speed: Trascina per riordinare la velocità di riproduzione
     Playback Speed: Velocità di riproduzione
     Parallel Segment Loading: Caricamento parallelo dei segmenti
+    Rotate Wide Videos to Landscape in Fullscreen: 'Ruota i video larghi in orizzontale a schermo intero'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Scorri verso l’alto o il basso per aprire o chiudere lo schermo intero'
   Channel Settings:
     Channel Settings: Impostazioni dei canali
     Channel Settings Description: Ricorda separatamente per ogni canale le impostazioni scelte durante la visione e le riapplica quando guardi un altro video dello stesso canale.
@@ -779,7 +786,7 @@ Settings:
     Privacy Policy: Informativa sulla privacy di questo server
     Enhanced Privacy Enabled: La privacy avanzata è abilitata. Il server memorizza solo dati di sincronizzazione cifrati.
     Enhanced Privacy Unsupported: Avviso — questo server non supporta la privacy avanzata. I dati sincronizzati sono visibili al suo gestore.
-    Description: Sincronizza iscrizioni, profili, playlist, cronologia di visione, impostazioni e schede aperte con un server di sincronizzazione OpenTubeX o LibreTube. I server LibreTube potrebbero non supportare tutte le funzioni.
+    Description: 'Sincronizza iscrizioni, profili, playlist, cronologia di visualizzazione e impostazioni supportate con un server di sincronizzazione OpenTubeX o LibreTube. Le schede su computer e dispositivi mobili rimangono separate a meno che tu non scelga esplicitamente di condividerle. I server LibreTube potrebbero non supportare tutte le funzioni di sincronizzazione.'
     Server URL: URL del server
     Checking Server: Controllo del server di sincronizzazione…
     Server Unavailable: Impossibile connettersi a questo server di sincronizzazione. Controlla l'URL e riprova.
@@ -860,6 +867,13 @@ Settings:
     Data Loss Confirmation: Confermare la sincronizzazione distruttiva?
     Data Loss Warning: Lo stato del server eliminerebbe {deleted} dei {previous} elementi di {collection} sincronizzati in precedenza. Potrebbe indicare una migrazione o un ripristino del server non riuscito. Continua solo se l'eliminazione è intenzionale e disponi di un backup.
     Confirm Data Loss: Elimina e continua
+    Use Shared Tabs: 'Usa un unico gruppo di schede condiviso tra i dispositivi'
+    Shared Tabs Warning: 'Le schede condivise sostituiscono il gruppo attuale sui dispositivi connessi. Lascia disattivata questa opzione per mantenere separate le schede su computer e dispositivi mobili.'
+    Tabs From Other Devices: 'Schede da altri dispositivi'
+    Device Tab Session: '{platform} · {count} schede'
+    Mobile Device: 'Dispositivo mobile'
+    Desktop Device: 'Computer'
+    Open All Tabs: 'Apri tutte le schede'
   Proxy Settings:
     IP Block Recovery Script Path: Percorso dello script di ripristino dal blocco IP
     Select IP Block Recovery Script File: Seleziona file dello script di ripristino dal blocco IP

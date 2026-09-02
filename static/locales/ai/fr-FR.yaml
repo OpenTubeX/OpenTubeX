@@ -271,6 +271,11 @@ Settings:
       Mark as Watched: Marquer comme regardé
       Copy YouTube Link: Copier le lien YouTube
       Open in YouTube: Ouvrir dans YouTube
+    Mobile Layout:
+      Mobile Layout: 'Disposition mobile'
+      Automatic: 'Automatique'
+      Phone: 'Téléphone'
+      Tablet: 'Tablette'
   Context Menu Search Settings:
     Context Menu Search Settings: Recherche du menu contextuel
     Description: Choisissez les moteurs de recherche proposés lorsque vous faites un clic droit sur du texte sélectionné. Les recherches s’ouvrent dans votre navigateur par défaut.
@@ -493,6 +498,8 @@ Settings:
     Reorder Playback Speed: Faire glisser pour réorganiser la vitesse de lecture
     Playback Speed: Vitesse de lecture
     Parallel Segment Loading: Chargement parallèle des segments
+    Rotate Wide Videos to Landscape in Fullscreen: 'Faire pivoter les vidéos larges en mode paysage en plein écran'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Balayer vers le haut ou le bas pour ouvrir ou quitter le plein écran'
   Channel Settings:
     Channel Settings: Paramètres des chaînes
     Channel Settings Description: Mémorisez séparément pour chaque chaîne les paramètres choisis pendant le visionnage afin de les appliquer de nouveau à la prochaine vidéo de cette chaîne.
@@ -779,7 +786,7 @@ Settings:
     Privacy Policy: Politique de confidentialité de ce serveur
     Enhanced Privacy Enabled: La confidentialité renforcée est activée. Le serveur ne stocke que des données de synchronisation chiffrées.
     Enhanced Privacy Unsupported: Avertissement — ce serveur ne prend pas en charge la confidentialité renforcée. Les données synchronisées sont visibles par son opérateur.
-    Description: Synchronisez les abonnements, profils, playlists, l’historique de visionnage, les paramètres et les onglets ouverts avec un serveur de synchronisation OpenTubeX ou LibreTube. Les serveurs LibreTube peuvent ne pas prendre en charge toutes les fonctions de synchronisation.
+    Description: 'Synchronisez les abonnements, profils, playlists, historique de visionnage et paramètres compatibles avec un serveur de synchronisation OpenTubeX ou LibreTube. Les onglets sur ordinateur et mobile restent séparés sauf si vous choisissez explicitement de les partager. Les serveurs LibreTube peuvent ne pas prendre en charge toutes les fonctions de synchronisation.'
     Server URL: URL du serveur
     Checking Server: Vérification du serveur de synchronisation…
     Server Unavailable: Impossible de se connecter à ce serveur de synchronisation. Vérifiez l’URL et réessayez.
@@ -860,6 +867,13 @@ Settings:
     Data Loss Confirmation: Confirmer la synchronisation destructive ?
     Data Loss Warning: L’état du serveur supprimerait {deleted} éléments sur {previous} de la collection {collection} précédemment synchronisés. Cela peut indiquer l’échec d’une migration ou la réinitialisation du serveur. Ne continuez que si cette suppression est volontaire et si vous disposez d’une sauvegarde.
     Confirm Data Loss: Supprimer et continuer
+    Use Shared Tabs: 'Utiliser un seul ensemble d’onglets partagé entre les appareils'
+    Shared Tabs Warning: 'Les onglets partagés remplacent l’ensemble actuel sur les appareils connectés. Laissez cette option désactivée pour conserver des onglets distincts sur ordinateur et mobile.'
+    Tabs From Other Devices: 'Onglets d’autres appareils'
+    Device Tab Session: '{platform} · {count} onglets'
+    Mobile Device: 'Mobile'
+    Desktop Device: 'Ordinateur'
+    Open All Tabs: 'Ouvrir tous les onglets'
   Proxy Settings:
     IP Block Recovery Script Path: Chemin du script de récupération après blocage d’IP
     Select IP Block Recovery Script File: Sélectionner le fichier du script de récupération après blocage d’IP

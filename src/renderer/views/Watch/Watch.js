@@ -28,6 +28,7 @@ import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
+import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../../constants'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { parseLocalVideoGames } from '../../helpers/video-games'
@@ -243,7 +244,7 @@ export default defineComponent({
       paidPromotionDurationMs: 10000,
       upcomingTimestamp: null,
       upcomingTimeLeft: null,
-      supportsLiveReminders: process.env.IS_ELECTRON,
+      supportsLiveReminders,
       liveReminderActive: false,
       liveReminderLoading: false,
       liveReminderNow: Date.now(),
@@ -644,7 +645,10 @@ export default defineComponent({
       return this.$store.getters.getDefaultInterval
     },
     defaultViewingMode: function () {
-      return this.$store.getters.getDefaultViewingMode
+      const mode = this.$store.getters.getDefaultViewingMode
+      return process.env.IS_CAPACITOR && ['external_player', 'fullscreen', 'fullscreen_always_on', 'pip'].includes(mode)
+        ? 'default'
+        : mode
     },
     autoOpenChapters: function () {
       return this.$store.getters.getAutoOpenChapters
@@ -1211,11 +1215,11 @@ export default defineComponent({
       beforeDispose: this.cleanupWatchRuntime
     })
     this.syncMediaSessionSkipHandlers()
-    this.removeLiveReminderUpdatedListener = window.ftElectron?.liveReminder?.onUpdated?.((videoId, scheduled) => {
+    this.removeLiveReminderUpdatedListener = liveReminder.onUpdated((videoId, scheduled) => {
       if (videoId === this.videoId) {
         this.liveReminderActive = scheduled
       }
-    }) ?? null
+    })
     this.removeVideoMetadataCacheClearedListener = window.ftElectron?.videoMetadataCache?.onCleared?.(() => {
       this.videoMetadataHistory = null
     }) ?? null
@@ -1333,7 +1337,7 @@ export default defineComponent({
       if (!this.canToggleLiveReminder) return
 
       const startTimestamp = this.premiereDate.getTime()
-      const reminder = await window.ftElectron.liveReminder.get(videoId)
+      const reminder = await liveReminder.get(videoId)
       if (
         !this.isCurrentVideoLoad(loadGeneration, videoId) ||
         !(this.premiereDate instanceof Date) ||
@@ -1343,7 +1347,7 @@ export default defineComponent({
       }
 
       if (reminder && reminder.startTimestamp !== startTimestamp) {
-        const scheduled = await window.ftElectron.liveReminder.schedule(this.getLiveReminderPayload())
+        const scheduled = await liveReminder.schedule(this.getLiveReminderPayload())
         if (
           !this.isCurrentVideoLoad(loadGeneration, videoId) ||
           !(this.premiereDate instanceof Date) ||
@@ -1363,7 +1367,7 @@ export default defineComponent({
       this.liveReminderLoading = true
       try {
         if (this.liveReminderActive) {
-          await window.ftElectron.liveReminder.cancel(videoId)
+          await liveReminder.cancel(videoId)
           if (videoId !== this.videoId) return
           this.liveReminderActive = false
           this.showTabToast({
@@ -1371,7 +1375,7 @@ export default defineComponent({
             icon: ['fas', 'calendar-days']
           })
         } else {
-          const scheduled = await window.ftElectron.liveReminder.schedule(this.getLiveReminderPayload())
+          const scheduled = await liveReminder.schedule(this.getLiveReminderPayload())
           if (videoId !== this.videoId) return
           this.liveReminderActive = scheduled
           this.showTabToast({
@@ -2670,6 +2674,7 @@ export default defineComponent({
           isPremiere,
           watchPageIpBlocked,
           musicMediaType,
+          androidLiveHlsManifestUrl,
         } = videoInfo
 
         this.musicMediaType = musicMediaType
@@ -3009,7 +3014,7 @@ export default defineComponent({
               // without either manifest URL. Keep the missing source as `null`, as
               // expected by the player availability checks, while yt-dlp extracts
               // its independent HLS manifest.
-              this.manifestSrc = result.streaming_data?.hls_manifest_url ?? null
+              this.manifestSrc = result.streaming_data?.hls_manifest_url ?? androidLiveHlsManifestUrl
               this.manifestMimeType = MANIFEST_TYPE_HLS
             }
           }

@@ -3,6 +3,7 @@ import {
   SyncServerCancelledError,
   SyncServerDataLossError,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
+  getSavedOtherDeviceSessions,
   isExpiredSessionReauthentication,
   isSessionExpiredError,
   normalizeSyncServerUrl,
@@ -76,6 +77,7 @@ const state = {
   syncServerLastResult: null,
   syncServerHistorySupported: null,
   syncServerSessionExpired: false,
+  syncServerOtherDeviceSessions: [],
 }
 
 const getters = {
@@ -84,6 +86,7 @@ const getters = {
   getSyncServerError: state => state.syncServerError,
   getSyncServerLastResult: state => state.syncServerLastResult,
   getSyncServerHistorySupported: state => state.syncServerHistorySupported,
+  getSyncServerOtherDeviceSessions: state => state.syncServerOtherDeviceSessions,
 }
 
 function parseSnapshot(value) {
@@ -121,7 +124,7 @@ async function runSync(context, { allowDataLoss = false } = {}) {
     ...(settings.syncServerSyncPlaylists ? ['playlistBookmarks'] : []),
     ...(settings.syncServerSyncHistory ? ['history'] : []),
     ...(settings.syncServerSyncProfiles ? ['profiles'] : []),
-    ...(process.env.IS_ELECTRON &&
+    ...((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
       settings.syncServerPrivacyMode === 'enhanced' &&
       settings.syncServerSyncSessions
       ? ['sessions']
@@ -224,11 +227,16 @@ async function runSync(context, { allowDataLoss = false } = {}) {
       case 'sessions': {
         const sessions = await syncSessions(
           targetClient,
+          store,
           Object.prototype.hasOwnProperty.call(previous, 'sessions') ? previous.sessions : null
         )
         if (sessions !== null) {
-          next.sessions = sessions
-          result.sessions = sessions.reduce((count, session) => count + session.tabs.length, 0)
+          next.sessions = sessions.document
+          result.sessions = sessions.sessionsToApply.reduce(
+            (count, session) => count + session.tabs.length,
+            0
+          )
+          commit('setSyncServerOtherDeviceSessions', sessions.otherDeviceSessions)
         }
         break
       }
@@ -402,6 +410,30 @@ async function runSync(context, { allowDataLoss = false } = {}) {
 }
 
 const actions = {
+  async openSyncServerSession(_context, session) {
+    if (!Array.isArray(session?.tabs) || session.tabs.length === 0) return false
+
+    if (process.env.IS_CAPACITOR) {
+      const { getCapacitorTabService } = await import('../../tabs/CapacitorTabService')
+      return getCapacitorTabService().openSyncedSession(session)
+    }
+    if (!process.env.IS_ELECTRON) return false
+
+    for (const [index, tab] of session.tabs.entries()) {
+      let route = '/'
+      try {
+        const url = new URL(tab.url, window.location.origin)
+        route = `${url.pathname}${url.search}${url.hash}`
+      } catch {}
+      await window.ftElectron.tabs.create({
+        route,
+        title: tab.title ?? '',
+        makeActive: index === session.tabs.length - 1,
+      })
+    }
+    return true
+  },
+
   async completeSyncServerPairing(
     { commit, dispatch, rootState },
     { serverUrl, username, token, privacyKey, privacySalt, deviceId, deviceName }
@@ -564,6 +596,7 @@ const actions = {
     commit('setSyncServerProgress', null)
     commit('setSyncServerStatus', 'idle')
     commit('setSyncServerSessionExpired', false)
+    commit('setSyncServerOtherDeviceSessions', [])
   },
 
   async deleteSyncServerAccount({ commit, dispatch, rootState }, password) {
@@ -635,6 +668,11 @@ const actions = {
 
   async initializeSyncServer({ commit, dispatch, rootState }) {
     if (!rootState.settings.syncServerEnabled || !rootState.settings.syncServerToken) return
+
+    commit(
+      'setSyncServerOtherDeviceSessions',
+      getSavedOtherDeviceSessions(parseSnapshot(rootState.settings.syncServerSnapshot))
+    )
 
     try {
       const client = trackSyncClient(new SyncServerClient(
@@ -739,6 +777,7 @@ const actions = {
       commit('setSyncServerProgress', null)
       commit('setSyncServerError', '')
       commit('setSyncServerStatus', 'idle')
+      commit('setSyncServerOtherDeviceSessions', [])
       return
     }
     if (rootState.settings.syncServerToken) {
@@ -776,6 +815,9 @@ const mutations = {
   },
   setSyncServerSessionExpired(state, expired) {
     state.syncServerSessionExpired = expired
+  },
+  setSyncServerOtherDeviceSessions(state, sessions) {
+    state.syncServerOtherDeviceSessions = sessions
   },
 }
 

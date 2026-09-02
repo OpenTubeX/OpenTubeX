@@ -42,6 +42,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin-block-start: 13px;
+}
+
+.headingRow h2 {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 8px;
+  white-space: nowrap;
 }
 
 .headingActions {
@@ -49,6 +58,11 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
+  margin-inline-end: 5px;
+}
+
+.historySearch {
+  margin-block-start: 12px;
 }
 
 .historyActionButton {
@@ -60,8 +74,14 @@
 }
 
 .cleanupPromptContent {
-  inline-size: min(420px, 80vw);
+  box-sizing: border-box;
+  inline-size: min(420px, 100%);
+  min-inline-size: 0;
   margin-inline: auto;
+}
+
+.cleanupPromptContent p {
+  overflow-wrap: anywhere;
 }
 
 .cleanupPromptTitle {

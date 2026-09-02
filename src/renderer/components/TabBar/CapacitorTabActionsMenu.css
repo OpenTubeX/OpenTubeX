@@ -1,0 +1,79 @@
+.capacitorTabActionsBackdrop {
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  align-items: end;
+  background-color: rgb(0 0 0 / 48%);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.capacitorTabActionsBackdrop.mode-phone {
+  position: absolute;
+  z-index: 3;
+}
+
+.capacitorTabActionsBackdrop.mode-tablet {
+  position: fixed;
+}
+
+.capacitorTabActions {
+  display: grid;
+  gap: 4px;
+  padding-block: 16px max(16px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  padding-inline: 16px;
+  color: var(--primary-text-color);
+  background-color: var(--card-bg-color);
+  border-start-start-radius: calc(20px * var(--ui-roundness));
+  border-start-end-radius: calc(20px * var(--ui-roundness));
+  box-shadow: 0 -8px 32px rgb(0 0 0 / 35%);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.capacitorTabActions strong {
+  padding-block: 4px 12px;
+  padding-inline: 8px;
+  overflow: hidden;
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.capacitorTabActions button {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  min-block-size: 48px;
+  padding-block: 8px;
+  padding-inline: 12px;
+  color: inherit;
+  background-color: transparent;
+  border: 0;
+  border-radius: calc(12px * var(--ui-roundness));
+  font: inherit;
+  text-align: start;
+}
+
+.capacitorTabActions button:is(:hover, :active, :focus-visible) {
+  background-color: var(--side-nav-hover-color);
+}
+
+.capacitorTabActions .dangerAction {
+  color: var(--error-color, #d84f4f);
+}
+
+.capacitor-tab-actions-enter-active,
+.capacitor-tab-actions-leave-active {
+  transition: opacity 160ms ease;
+}
+
+.capacitor-tab-actions-enter-from,
+.capacitor-tab-actions-leave-to {
+  opacity: 0;
+}
+
+:global(:root[data-reduced-motion='reduce']) .capacitor-tab-actions-enter-active,
+:global(:root[data-reduced-motion='reduce']) .capacitor-tab-actions-leave-active {
+  transition: none;
+}

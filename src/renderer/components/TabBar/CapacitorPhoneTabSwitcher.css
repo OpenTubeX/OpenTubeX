@@ -1,0 +1,511 @@
+.capacitorPhoneTabSwitcher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  block-size: 100%;
+}
+
+.capacitorPhoneTabSwitcherButton {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  inline-size: 48px;
+  block-size: 48px;
+  padding: 0;
+  color: var(--primary-text-color);
+  background-color: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  touch-action: manipulation;
+}
+
+.capacitorPhoneTabSwitcherButton :deep(.ft-icon),
+.capacitorPhoneTabHeaderButton :deep(.ft-icon),
+.capacitorPhoneTabDragHandle :deep(.ft-icon),
+.capacitorPhoneTabClose :deep(.ft-icon),
+.capacitorPhoneTabFab :deep(.ft-icon),
+.capacitorPhoneSyncedTabButton :deep(.ft-icon) {
+  display: block;
+  inline-size: 1em;
+  block-size: 1em;
+  margin: auto;
+  line-height: 1;
+}
+
+.capacitorPhoneTabSwitcherButton:hover,
+.capacitorPhoneTabSwitcherButton:active {
+  color: var(--header-button-hover-text-color);
+  background-color: var(--header-button-hover-color);
+}
+
+.capacitorPhoneTabSwitcherButton:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -3px;
+}
+
+:global(.topNavBarColor) .capacitorPhoneTabSwitcherButton {
+  color: var(--text-with-main-color);
+}
+
+:global(.topNavBarColor) .capacitorPhoneTabSwitcherButton:hover,
+:global(.topNavBarColor) .capacitorPhoneTabSwitcherButton:active {
+  color: var(--colored-header-button-hover-text-color);
+  background-color: var(--colored-header-button-hover-color);
+}
+
+.capacitorPhoneTabCount {
+  position: absolute;
+  inset-block-start: 3px;
+  inset-inline-end: 1px;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  min-inline-size: 19px;
+  block-size: 19px;
+  padding-inline: 4px;
+  color: var(--text-with-main-color);
+  background-color: var(--primary-color);
+  border: 2px solid var(--card-bg-color);
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.capacitorPhoneTabOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  box-sizing: border-box;
+  display: grid;
+  place-items: stretch;
+  padding-block: var(--safe-area-inset-top, env(safe-area-inset-top, 0)) calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  background-color: rgb(0 0 0 / 68%);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.capacitorPhoneTabOverlay * {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.capacitorPhoneTabDialog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+  color: var(--primary-text-color);
+  background-color: var(--bg-color);
+  overflow: hidden;
+}
+
+.capacitorPhoneTabHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  min-block-size: 64px;
+  padding-block: 8px;
+  padding-inline: 16px 8px;
+  background-color: var(--card-bg-color);
+  box-shadow: 0 2px 1px var(--primary-shadow-color);
+}
+
+.capacitorPhoneTabHeading {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.capacitorPhoneTabHeading h2 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.capacitorPhoneTabHeading span {
+  display: block;
+  margin-block-start: 2px;
+  color: var(--secondary-text-color);
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.capacitorPhoneTabHeaderButton,
+.capacitorPhoneTabClose {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 48px;
+  inline-size: 48px;
+  block-size: 48px;
+  padding: 0;
+  color: inherit;
+  background-color: transparent;
+  border: 0;
+  border-radius: calc(8px * var(--ui-roundness));
+  cursor: pointer;
+  line-height: 0;
+  touch-action: manipulation;
+}
+
+.capacitorPhoneTabHeaderButton:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.capacitorPhoneTabHeaderButton :deep(svg),
+.capacitorPhoneTabClose :deep(svg) {
+  display: block;
+  margin: auto;
+  vertical-align: middle;
+}
+
+.capacitorPhoneTabClose {
+  align-self: center;
+}
+
+.capacitorPhoneTabList {
+  min-block-size: 0;
+  padding-block: 8px 88px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.capacitorPhoneOpenTabs,
+.capacitorPhoneSyncedTabsContent {
+  min-block-size: max-content;
+}
+
+.capacitorPhoneTabRow {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  min-block-size: 64px;
+  margin-block: 4px;
+  margin-inline: 8px;
+  border-inline-start: 3px solid transparent;
+  border-radius: calc(8px * var(--ui-roundness));
+  background-color: var(--card-bg-color);
+  touch-action: pan-y;
+  transition: transform 160ms ease, opacity 160ms ease;
+  will-change: transform;
+}
+
+.capacitorPhoneTabRow.swiping {
+  transition: none;
+}
+
+.capacitorPhoneTabRow.dragging {
+  opacity: 0.72;
+}
+
+.capacitorPhoneTabRow.active {
+  border-inline-start-color: var(--primary-color);
+  background-color: var(--side-nav-hover-color);
+}
+
+.capacitorPhoneTabTarget {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  min-block-size: 56px;
+  padding-block: 4px;
+  padding-inline: 13px 4px;
+  color: inherit;
+  background-color: transparent;
+  border: 0;
+  border-radius: calc(8px * var(--ui-roundness));
+  cursor: pointer;
+  text-align: start;
+  touch-action: manipulation;
+}
+
+.capacitorPhoneTabDragHandle {
+  display: grid;
+  place-items: center;
+  flex: 0 0 48px;
+  inline-size: 48px;
+  min-block-size: 56px;
+  padding: 0;
+  color: var(--secondary-text-color);
+  background: transparent;
+  border: 0;
+  border-radius: calc(8px * var(--ui-roundness));
+  cursor: grab;
+  touch-action: none;
+}
+
+.capacitorPhoneTabDragHandle:active {
+  cursor: grabbing;
+}
+
+.capacitorPhoneTabPageIcon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  inline-size: 32px;
+  block-size: 32px;
+  color: var(--secondary-text-color);
+  font-size: 18px;
+}
+
+.capacitorPhoneTabAvatar {
+  display: block;
+  inline-size: 28px;
+  block-size: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.capacitorPhoneTabPinBadge {
+  position: absolute;
+  inset-inline-end: -4px;
+  inset-block-end: -3px;
+  padding: 2px;
+  color: var(--primary-color);
+  background-color: var(--card-bg-color);
+  border-radius: 50%;
+  font-size: 9px;
+}
+
+.capacitorPhoneTabTitle {
+  min-inline-size: 0;
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.capacitorPhoneTabHeaderButton:focus-visible,
+.capacitorPhoneTabDragHandle:focus-visible,
+.capacitorPhoneTabTarget:focus-visible,
+.capacitorPhoneTabClose:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -3px;
+}
+
+.capacitorPhoneTabHeaderButton:not(:disabled):hover,
+.capacitorPhoneTabHeaderButton:not(:disabled):active,
+.capacitorPhoneTabDragHandle:hover,
+.capacitorPhoneTabDragHandle:active,
+.capacitorPhoneTabTarget:hover,
+.capacitorPhoneTabTarget:active,
+.capacitorPhoneTabClose:hover,
+.capacitorPhoneTabClose:active {
+  color: var(--side-nav-hover-text-color);
+  background-color: var(--side-nav-hover-color);
+}
+
+.capacitorPhoneTabViewTabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  flex: 0 0 auto;
+  background-color: var(--card-bg-color);
+  border-block-end: 1px solid var(--border-color);
+}
+
+.capacitorPhoneTabViewTab {
+  min-block-size: 52px;
+  padding-block: 8px 5px;
+  padding-inline: 12px;
+  color: var(--secondary-text-color);
+  background-color: transparent;
+  border: 0;
+  border-block-end: 3px solid transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  touch-action: manipulation;
+}
+
+.capacitorPhoneTabViewTab[aria-selected='true'] {
+  color: var(--primary-text-color);
+  border-block-end-color: var(--primary-color);
+}
+
+.capacitorPhoneTabViewTab:is(:hover, :active) {
+  background-color: var(--side-nav-hover-color);
+}
+
+.capacitorPhoneTabViewTab:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -4px;
+}
+
+.capacitorPhoneTabFab {
+  position: absolute;
+  inset-block-end: max(16px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  inset-inline-end: 16px;
+  z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  inline-size: 56px;
+  block-size: 56px;
+  padding: 0;
+  color: var(--text-with-main-color);
+  background-color: var(--primary-color);
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 3px 8px rgb(0 0 0 / 45%);
+  cursor: pointer;
+  font-size: 20px;
+  touch-action: manipulation;
+}
+
+.capacitorPhoneTabList,
+.capacitorPhoneSyncedTabs {
+  flex: 1 1 auto;
+}
+
+.capacitorPhoneSyncedTabs {
+  min-block-size: 0;
+  padding-block: 8px 24px;
+  padding-inline: 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.capacitorPhoneSyncedTabsEmpty {
+  margin-block: 32px;
+  margin-inline: 16px;
+  color: var(--secondary-text-color);
+  text-align: center;
+}
+
+.capacitorPhoneSyncedSession {
+  box-sizing: border-box;
+  margin-block: 4px 12px;
+  padding: 12px;
+  background-color: var(--card-bg-color);
+  border-radius: calc(10px * var(--ui-roundness));
+}
+
+.capacitorPhoneSyncedSessionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.capacitorPhoneSyncedSessionHeader strong {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+  font-size: 15px;
+}
+
+.capacitorPhoneSyncedTabButton {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-block-size: 48px;
+  padding-block: 8px;
+  padding-inline: 12px;
+  color: inherit;
+  background-color: transparent;
+  border: 0;
+  border-radius: calc(8px * var(--ui-roundness));
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
+  touch-action: manipulation;
+}
+
+.capacitorPhoneSyncedTabButton:is(:hover, :active) {
+  background-color: var(--side-nav-hover-color);
+}
+
+.capacitorPhoneSyncedTabButton:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -3px;
+}
+
+.capacitorPhoneSyncedOpenAll {
+  flex: 0 0 auto;
+}
+
+.capacitorPhoneSyncedTabList {
+  display: grid;
+  gap: 4px;
+  margin-block-start: 8px;
+  border-block-start: 1px solid var(--border-color);
+  padding-block-start: 8px;
+}
+
+.capacitorPhoneSyncedTabTarget {
+  inline-size: 100%;
+}
+
+.capacitorPhoneSyncedTabList span {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.capacitorPhoneTabFab:is(:hover, :active) {
+  background-color: var(--primary-color-hover);
+}
+
+.capacitorPhoneTabFab:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -3px;
+}
+
+@media only screen and (width >= 681px) {
+  .capacitorPhoneTabOverlay {
+    place-items: center;
+    padding-block: max(16px, var(--safe-area-inset-top, env(safe-area-inset-top, 0))) max(16px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)));
+    padding-inline: 16px;
+  }
+
+  .capacitorPhoneTabDialog {
+    inline-size: min(560px, 100%);
+    block-size: min(720px, 100%);
+    border: 1px solid var(--border-color);
+    border-radius: calc(12px * var(--ui-roundness));
+    box-shadow: 0 18px 55px rgb(0 0 0 / 55%);
+  }
+}
+
+@media only screen and (width >= 768px) {
+  .capacitorPhoneTabSwitcher {
+    display: none;
+  }
+}
+
+:global(.capacitorPhoneLayout .capacitorPhoneTabSwitcher) {
+  display: flex;
+}
+
+:global(.capacitorTabletLayout .capacitorPhoneTabSwitcher) {
+  display: none;
+}
+
+.capacitor-tabs-dialog-enter-active,
+.capacitor-tabs-dialog-leave-active {
+  transition: opacity 160ms ease;
+}
+
+.capacitor-tabs-dialog-enter-from,
+.capacitor-tabs-dialog-leave-to {
+  opacity: 0;
+}
+
+:global(:root[data-reduced-motion='reduce']) .capacitor-tabs-dialog-enter-active,
+:global(:root[data-reduced-motion='reduce']) .capacitor-tabs-dialog-leave-active {
+  transition: none;
+}
+
+:global(:root[data-reduced-motion='reduce']) .capacitorPhoneTabRow {
+  transition: none;
+}

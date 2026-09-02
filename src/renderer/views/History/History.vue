@@ -36,6 +36,7 @@
       <FtInput
         v-show="fullData.length > 1"
         ref="searchBar"
+        class="historySearch"
         :placeholder="t('History.Search bar placeholder')"
         :show-clear-text-button="true"
         :show-action-button="false"

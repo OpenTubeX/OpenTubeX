@@ -300,6 +300,11 @@ Settings:
       Mark as Watched: Marcar como visto
       Copy YouTube Link: Copiar enlace de YouTube
       Open in YouTube: Abrir en YouTube
+    Mobile Layout:
+      Mobile Layout: 'Diseño móvil'
+      Automatic: 'Automático'
+      Phone: 'Celular'
+      Tablet: 'Tablet'
   Context Menu Search Settings:
     Context Menu Search Settings: Búsqueda del menú contextual
     Description: Elige los motores de búsqueda que aparecerán al hacer clic derecho en el texto seleccionado. Las búsquedas se abren en el navegador predeterminado.
@@ -611,6 +616,8 @@ Settings:
       Folder Label: Carpeta de capturas de pantalla
       Folder Button: Seleccione una carpeta
       File Name Label: Patrón de nombre de archivo
+    Rotate Wide Videos to Landscape in Fullscreen: 'Girar videos anchos a horizontal en pantalla completa'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Desliza hacia arriba o abajo para entrar o salir de pantalla completa'
   Channel Settings:
     Channel Settings: Ajustes de canales
     Channel Settings Description: Recuerda por separado los ajustes que elijas al ver cada canal para volver a aplicarlos la próxima vez que veas uno de sus videos.
@@ -951,7 +958,7 @@ Settings:
     Privacy Policy: Política de privacidad de este servidor
     Enhanced Privacy Enabled: La privacidad mejorada está activada. El servidor solo guarda datos de sincronización cifrados.
     Enhanced Privacy Unsupported: 'Advertencia: este servidor no admite la privacidad mejorada. Su operador puede ver los datos sincronizados.'
-    Description: Sincroniza suscripciones, perfiles, listas de reproducción, historial de reproducción, ajustes y pestañas abiertas con un servidor de sincronización de OpenTubeX o LibreTube. Es posible que los servidores de LibreTube no admitan todas las funciones de sincronización.
+    Description: 'Sincroniza suscripciones, perfiles, listas de reproducción, historial de reproducciones y ajustes compatibles con un servidor de sincronización de OpenTubeX o LibreTube. Las pestañas de escritorio y del celular permanecen separadas a menos que decidas compartirlas. Es posible que los servidores de LibreTube no admitan todas las funciones de sincronización.'
     Server URL: URL del servidor
     Checking Server: Comprobando el servidor de sincronización…
     Server Unavailable: No se pudo conectar a este servidor de sincronización. Comprueba la URL y vuelve a intentarlo.
@@ -1032,6 +1039,13 @@ Settings:
     Data Loss Confirmation: ¿Confirmar sincronización destructiva?
     Data Loss Warning: El estado del servidor eliminaría {deleted} de {previous} elementos de {collection} sincronizados anteriormente. Esto puede indicar que una migración o un restablecimiento del servidor ha fallado. Continúa solo si quieres eliminar esos datos y tienes una copia de seguridad.
     Confirm Data Loss: Eliminar y continuar
+    Use Shared Tabs: 'Usar un solo conjunto de pestañas compartido entre dispositivos'
+    Shared Tabs Warning: 'Las pestañas compartidas reemplazan el conjunto actual en los dispositivos conectados. Mantén esto desactivado para conservar pestañas separadas en el escritorio y el celular.'
+    Tabs From Other Devices: 'Pestañas de otros dispositivos'
+    Device Tab Session: '{platform} · {count} pestañas'
+    Mobile Device: 'Celular'
+    Desktop Device: 'Escritorio'
+    Open All Tabs: 'Abrir todas las pestañas'
   Proxy Settings:
     Proxy Warning: OpenTubeX no tiene un proxy incorporado, pero puede conectarse a un proxy externo, como uno que se ejecuta en su máquina como Tor o un proxy externo como un proxy SOCKS5 proporcionado por algunas VPN. Si está habilitado, asegúrese de que su proxy/Tor esté configurado correctamente, o OpenTubeX no podrá recuperar ningún dato.
     Proxy Username: Nombre de Usuario del proxy

@@ -1,11 +1,13 @@
 import { computed, watch } from 'vue'
 
 import store from '../../../store/index'
+import { setAndroidAutoPictureInPicture } from '../../../helpers/androidUi'
 import {
   applyFocusState,
   applyMinimizedState,
   applyPictureInPictureState,
   BLUR_TRIGGER_RECHECK_DELAY_MS,
+  canEnableAndroidAutoPictureInPicture,
   createAutoPictureInPictureState,
   markPictureInPictureRequested,
   markPictureInPictureRequestFailed,
@@ -44,6 +46,7 @@ export function useAutoPictureInPicture({
     return !process.env.IS_ELECTRON || isTabPresented?.value === true
   })
   const autoPictureInPictureTriggers = computed(() => store.getters.getAutoPictureInPictureTriggers)
+  const androidAutoPictureInPicture = computed(() => store.getters.getAndroidAutoPictureInPicture)
 
   const triggerOnTabChange = computed(() => autoPictureInPictureTriggers.value.includes('tab'))
   const triggerOnMinimize = computed(() => autoPictureInPictureTriggers.value.includes('minimize'))
@@ -98,6 +101,19 @@ export function useAutoPictureInPicture({
   }
 
   function updateAutoPip() {
+    if (process.env.IS_CAPACITOR) {
+      const videoElement = video.value
+      setAndroidAutoPictureInPicture(
+        canEnableAndroidAutoPictureInPicture(
+          androidAutoPictureInPicture.value,
+          props.format,
+          videoElement
+        ),
+        videoElement
+      ).catch(error => console.warn('Failed to configure Android auto Picture-in-Picture:', error))
+      return
+    }
+
     const ui = getUi()
     if (!ui) return
 
@@ -170,7 +186,12 @@ export function useAutoPictureInPicture({
   }
 
   function setupAutoPictureInPicture() {
-    if (process.env.IS_ELECTRON) {
+    if (process.env.IS_CAPACITOR) {
+      video.value?.addEventListener('play', updateAutoPip)
+      video.value?.addEventListener('pause', updateAutoPip)
+      video.value?.addEventListener('ended', updateAutoPip)
+      updateAutoPip()
+    } else if (process.env.IS_ELECTRON) {
       removeMinimizedListener = window.ftElectron?.handleWindowMinimizedState?.(handleMinimizedState) ?? null
       removeFocusedListener = window.ftElectron?.handleWindowFocusedState?.(handleFocusedState) ?? null
     } else {
@@ -217,7 +238,12 @@ export function useAutoPictureInPicture({
   }
 
   function teardownAutoPictureInPicture() {
-    if (process.env.IS_ELECTRON) {
+    if (process.env.IS_CAPACITOR) {
+      video.value?.removeEventListener('play', updateAutoPip)
+      video.value?.removeEventListener('pause', updateAutoPip)
+      video.value?.removeEventListener('ended', updateAutoPip)
+      setAndroidAutoPictureInPicture(false, video.value).catch(() => {})
+    } else if (process.env.IS_ELECTRON) {
       removeMinimizedListener?.()
       removeMinimizedListener = null
       removeFocusedListener?.()
@@ -233,6 +259,7 @@ export function useAutoPictureInPicture({
   }
 
   watch(autoPictureInPictureTriggers, updateAutoPip)
+  watch(androidAutoPictureInPicture, updateAutoPip)
 
   return {
     getAutoPictureInPictureState,

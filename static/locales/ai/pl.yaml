@@ -84,6 +84,11 @@ Settings:
     Playlist View Type:
       Playlist View Type: Sposób wyświetlania playlisty
     Show Thumbnail Previews: Pokazuj podgląd miniatur
+    Mobile Layout:
+      Mobile Layout: 'Układ mobilny'
+      Automatic: 'Automatycznie'
+      Phone: 'Telefon'
+      Tablet: 'Tablet'
   Theme Settings:
     Toast Position:
       Test Toast: Powiadomienie testowe
@@ -149,6 +154,8 @@ Settings:
     Enable Skip Silence by Default: Domyślnie włącz pomijanie ciszy
     Voice-over Translation:
       Attribution: (obsługiwane przez Yandex)
+    Rotate Wide Videos to Landscape in Fullscreen: 'Obracaj szerokie filmy poziomo w trybie pełnoekranowym'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Przesuń w górę lub w dół, aby włączyć lub wyłączyć pełny ekran'
   Download Settings:
     Concurrent Downloads: Jednoczesne pobieranie
     Bandwidth Limit: Limit przepustowości (KiB/s, 0 oznacza brak limitu)
@@ -360,6 +367,13 @@ Settings:
     Pairing Completed: Urządzenia zostały sparowane
     Pairing Approved: Sparowanie urządzeń zostało zatwierdzone
     Sync failed: "Synchronizacja nie powiodła się: {error}"
+    Use Shared Tabs: 'Używaj jednego wspólnego zestawu kart na wszystkich urządzeniach'
+    Shared Tabs Warning: 'Udostępnione karty zastępują bieżący zestaw na połączonych urządzeniach. Pozostaw tę opcję wyłączoną, aby zachować oddzielne karty na komputerze i urządzeniu mobilnym.'
+    Tabs From Other Devices: 'Karty z innych urządzeń'
+    Device Tab Session: '{platform} · karty: {count}'
+    Mobile Device: 'Urządzenie mobilne'
+    Desktop Device: 'Komputer'
+    Open All Tabs: 'Otwórz wszystkie karty'
   SponsorBlock Settings:
     Custom Color: Własny kolor
   Password Dialog:

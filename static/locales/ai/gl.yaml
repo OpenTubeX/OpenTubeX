@@ -275,6 +275,11 @@ Settings:
       Mark as Watched: Marcar como visto
       Copy YouTube Link: Copiar a ligazón de YouTube
       Open in YouTube: Abrir en YouTube
+    Mobile Layout:
+      Mobile Layout: 'Disposición móbil'
+      Automatic: 'Automática'
+      Phone: 'Teléfono'
+      Tablet: 'Tableta'
   Context Menu Search Settings:
     Context Menu Search Settings: Busca no menú contextual
     Description: Escolle os motores de busca que aparecen ao premer co botón dereito sobre o texto seleccionado. As buscas ábrense no navegador predeterminado.
@@ -501,6 +506,8 @@ Settings:
     Reorder Playback Speed: Arrastra para reordenar a velocidade de reprodución
     Playback Speed: Velocidade de reprodución
     Parallel Segment Loading: Carga paralela de segmentos
+    Rotate Wide Videos to Landscape in Fullscreen: 'Xirar os vídeos panorámicos a horizontal na pantalla completa'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Pasa o dedo cara arriba ou abaixo para entrar ou saír da pantalla completa'
   Channel Settings:
     Channel Settings: Configuración das canles
     Channel Settings Description: Lembrar por separado os axustes escollidos mentres ves vídeos de cada canle para aplicalos de novo a próxima vez que vexas un dos seus vídeos.
@@ -796,7 +803,7 @@ Settings:
     Privacy Policy: Política de privacidade deste servidor
     Enhanced Privacy Enabled: A privacidade mellorada está activada. O servidor só garda datos de sincronización cifrados.
     Enhanced Privacy Unsupported: 'Aviso: este servidor non admite a privacidade mellorada. Quen o xestiona pode ver os datos sincronizados.'
-    Description: Sincroniza as subscricións, os perfís, as listas de reprodución, o historial de visualización, a configuración e as lapelas abertas cun servidor de sincronización de OpenTubeX ou LibreTube. É posible que os servidores de LibreTube non admitan todas as funcións de sincronización.
+    Description: 'Sincroniza subscricións, perfís, listas de reprodución, historial de visualización e axustes compatibles cun servidor de sincronización de OpenTubeX ou LibreTube. As lapelas do escritorio e do móbil mantéñense separadas agás que as compartas expresamente. É posible que os servidores de LibreTube non admitan todas as funcións de sincronización.'
     Server URL: URL do servidor
     Checking Server: Comprobando o servidor de sincronización…
     Server Unavailable: Non se puido conectar a este servidor de sincronización. Comproba a URL e téntao de novo.
@@ -877,6 +884,13 @@ Settings:
     Data Loss Confirmation: Queres confirmar a sincronización destrutiva?
     Data Loss Warning: O estado do servidor eliminaría {deleted} dos {previous} elementos de {collection} sincronizados anteriormente. Isto pode indicar un fallo nunha migración ou nun restablecemento do servidor. Continúa só se queres realizar esta eliminación e tes unha copia de seguranza.
     Confirm Data Loss: Eliminar e continuar
+    Use Shared Tabs: 'Usar un único conxunto de lapelas compartido entre dispositivos'
+    Shared Tabs Warning: 'As lapelas compartidas substitúen o conxunto actual nos dispositivos conectados. Mantén isto desactivado para conservar separadas as lapelas do escritorio e do móbil.'
+    Tabs From Other Devices: 'Lapelas doutros dispositivos'
+    Device Tab Session: '{platform} · {count} lapelas'
+    Mobile Device: 'Móbil'
+    Desktop Device: 'Escritorio'
+    Open All Tabs: 'Abrir todas as lapelas'
   Proxy Settings:
     IP Block Recovery Script Path: Ruta do script de recuperación dun bloqueo de IP
     Select IP Block Recovery Script File: Escolle o ficheiro do script de recuperación dun bloqueo de IP

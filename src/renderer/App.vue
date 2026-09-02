@@ -7,11 +7,14 @@
       isLocaleRightToLeft: isLocaleRightToLeft,
       isSideNavOpen: isSideNavOpen,
       hideLabelsSideBar: hideLabelsSideBar && !isSideNavOpen,
+      capacitorTabs: isCapacitor,
+      capacitorPhoneLayout: isCapacitor && !showTabletTabStrip,
+      capacitorTabletLayout: showTabletTabStrip,
       verticalTabs: useVerticalTabBar,
       verticalTabsLeft: tabBarPosition === 'left',
       verticalTabsRight: tabBarPosition === 'right',
       bottomTabs: isElectron && tabBarPosition === 'bottom',
-      topTabs: isElectron && tabBarPosition === 'top',
+      topTabs: (isElectron && tabBarPosition === 'top') || showTabletTabStrip,
       watchSideNavOverlay: useWatchSideNavOverlay,
       watchSideNavTransitionDisabled
     }, `tabBar-${tabBarPosition}`]"
@@ -20,8 +23,14 @@
     <TabBar
       :inert="isAnyPromptOpen"
     />
+    <CapacitorTabletTabBar
+      v-if="isCapacitor"
+      :inert="isAnyPromptOpen"
+      @request-exit="requestAndroidAppExit"
+    />
     <TopNav
       :inert="isAnyPromptOpen"
+      @request-android-exit="requestAndroidAppExit"
     />
     <SideNav
       :inert="isAnyPromptOpen"
@@ -86,6 +95,7 @@
     <FtCommandPalette
       v-if="commandPaletteOpen"
       :commands="commandPaletteCommands"
+      :show-shortcuts="hardwareKeyboardAttached"
       @close="closeCommandPalette"
     />
     <TabOrganizer
@@ -143,6 +153,16 @@
       :option-values="MULTIPLE_TABS_ACTION_PROMPT_VALUES"
       @click="handleMultipleTabsActionPromptAnswer"
     />
+    <FtPrompt
+      v-if="showAndroidExitPrompt"
+      autosize
+      is-first-option-destructive
+      :label="t('Close Confirmation.Title')"
+      :extra-labels="[t('Close Confirmation.Message')]"
+      :option-names="androidExitPromptNames"
+      :option-values="ANDROID_EXIT_PROMPT_VALUES"
+      @click="handleAndroidExitPromptAnswer"
+    />
     <FtSearchFilters
       v-if="showSearchFilters"
     />
@@ -153,6 +173,52 @@
       v-if="showCreatePlaylistPrompt"
     />
     <FtContextMenu v-if="isElectron" />
+    <Teleport to="body">
+      <div
+        v-if="mobileContextLink"
+        class="mobileLinkActionsBackdrop"
+        @pointerdown.self.stop
+        @click.self.stop="closeMobileLinkActions"
+        @keydown.esc="closeMobileLinkActions"
+      >
+        <section
+          ref="mobileLinkActionsRef"
+          class="mobileLinkActions"
+          role="menu"
+          :aria-label="mobileContextLinkLabel"
+          tabindex="-1"
+          @keydown.esc="closeMobileLinkActions"
+        >
+          <strong dir="auto">{{ mobileContextLinkLabel }}</strong>
+          <button
+            type="button"
+            role="menuitem"
+            @click="openMobileContextLink(false)"
+          >
+            <FtIcon :icon="['fas', 'link']" />
+            {{ t('Share.Open Link') }}
+          </button>
+          <button
+            v-if="mobileContextLinkCanOpenInTab"
+            type="button"
+            role="menuitem"
+            @click="openMobileContextLink(true)"
+          >
+            <FtIcon :icon="['fas', 'arrow-up-right-from-square']" />
+            {{ t('Context Menu.Open in a New Tab') }}
+          </button>
+          <button
+            v-if="mobileContextLinkCopyUrl"
+            type="button"
+            role="menuitem"
+            @click="copyMobileContextLink"
+          >
+            <FtIcon :icon="['fas', 'copy']" />
+            {{ t('Share.Copy Link') }}
+          </button>
+        </section>
+      </div>
+    </Teleport>
     <FtToast />
     <FtProgressBar
       v-if="showProgressBar"
@@ -315,7 +381,9 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, useTemplateRef, watch } from 'vue'
+import { App as CapacitorApp } from '@capacitor/app'
+import { Capacitor, SystemBarType, SystemBars, SystemBarsStyle } from '@capacitor/core'
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { routerKey, useRoute, useRouter } from 'vue-router'
 
@@ -323,12 +391,14 @@ import FtFlexBox from './components/ft-flex-box/ft-flex-box.vue'
 import TopNav from './components/TopNav/TopNav.vue'
 import SideNav from './components/SideNav/SideNav.vue'
 import TabBar from './components/TabBar/TabBar.vue'
+import CapacitorTabletTabBar from './components/TabBar/CapacitorTabletTabBar.vue'
 import TabContent from './components/TabContent/TabContent.vue'
 import FtPrompt from './components/FtPrompt/FtPrompt.vue'
 import FtButton from './components/FtButton/FtButton.vue'
 import FtToast from './components/FtToast/FtToast.vue'
 import FtProgressBar from './components/FtProgressBar/FtProgressBar.vue'
 import FtContextMenu from './components/FtContextMenu/FtContextMenu.vue'
+import { lockBodyScroll, unlockBodyScroll } from './components/FtPrompt/scrollLock'
 import { vSaferHtml } from './directives/vSaferHtml.js'
 
 import store from './store/index'
@@ -341,14 +411,28 @@ import {
 import packageDetails from '../../package.json'
 import { MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants'
 import { resolveBaseTheme } from '../appearanceSettings'
-import { resolveColor } from './helpers/colors'
+import { calculateColorLuminance, resolveColor } from './helpers/colors'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { hasVisibleGamepadLayer, initializeGamepadNavigation } from './helpers/gamepadNavigation'
 import { keyboardEventInitFromShortcut, OPEN_COMMAND_PALETTE_EVENT } from './helpers/commandPalette'
 import { createCommandPaletteRegistry } from './helpers/commandPaletteRegistry'
+import {
+  resolveExternalLinkAction,
+  resolveMobileContextLinkCopyUrl,
+} from './helpers/mobileLinkActions'
 import { initializePlatformInfo, isLinuxWayland } from './helpers/platform'
+import {
+  shouldShowProgressStartToast,
+  shouldUseProgressToast,
+} from './helpers/progressPresentation'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
-import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
+import { copyToClipboard, openExternalLink, openInternalPath, showToast } from './helpers/utils'
+import {
+  exitAndroidApp,
+  getAndroidHardwareKeyboardState,
+  setAndroidPictureInPictureDocumentState
+} from './helpers/androidUi'
+import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
 import {
   cancelSubscriptionRefresh,
   refreshSubscriptionLiveFromRemote,
@@ -366,7 +450,8 @@ import {
 import { translateWindowTitle } from './helpers/strings'
 import { formatTabTitle } from './tabs/tabTitle'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
-import { getAppFontFamily } from './helpers/appFont'
+import { DEFAULT_APP_FONT, getAppFontFamily } from './helpers/appFont'
+import { usesCapacitorTabletLayout } from './helpers/capacitorLayout'
 import { getTabAccentColor } from './constants/tabColors'
 import { getThumbnailListStyles } from './constants/thumbnailSize'
 import {
@@ -383,6 +468,7 @@ import {
 } from './helpers/tutorialState'
 import { invalidateAllYtDlpPlaybackSources } from './helpers/player/ytDlpPlayback'
 import { getTabNavigationService } from './tabs/TabNavigationService'
+import { initializeCapacitorTabService } from './tabs/CapacitorTabService'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
 import { preloadResolvedRoute, preloadUtilityRoutes } from './router/index'
@@ -399,9 +485,14 @@ const OPEN_TAB_ORGANIZER_EVENT = 'opentubex:open-tab-organizer'
 const route = useRoute()
 const router = useRouter()
 const availableRoutePaths = new Set(router.getRoutes().map(candidate => candidate.path))
-const navigation = process.env.IS_ELECTRON ? getTabNavigationService() : null
 const isElectron = process.env.IS_ELECTRON
-if (isElectron) {
+const isCapacitor = process.env.IS_CAPACITOR
+const usesLogicalTabs = isElectron || isCapacitor
+const navigation = usesLogicalTabs ? getTabNavigationService() : null
+const capacitorTabService = isCapacitor
+  ? initializeCapacitorTabService(router, store, navigation)
+  : null
+if (usesLogicalTabs) {
   provide(routerKey, navigation.createPresentedRouterFacade())
 }
 const { locale, t, tm } = useI18n()
@@ -426,14 +517,27 @@ const tabBarPosition = computed(() => isElectron
   ? normalizeTabBarPosition(store.getters.getTabBarPosition)
   : 'top')
 const useVerticalTabBar = computed(() => isElectron && isVerticalTabBarPosition(tabBarPosition.value))
+const tabletTabStripQuery = window.matchMedia('(min-width: 768px)')
+const automaticTabletTabStrip = ref(tabletTabStripQuery.matches)
+const capacitorLayoutMode = computed(() => store.getters.getCapacitorLayoutMode)
+const showTabletTabStrip = computed(() => isCapacitor && (
+  usesCapacitorTabletLayout(capacitorLayoutMode.value, automaticTabletTabStrip.value)
+))
+tabletTabStripQuery.addEventListener('change', handleTabletTabStripChange)
 
 const appStyle = computed(() => {
-  if (!useVerticalTabBar.value) {
-    return undefined
+  const style = {}
+  if (useVerticalTabBar.value) {
+    style['--vertical-tab-bar-width'] = `${store.getters.getVerticalTabBarWidth}px`
   }
+  if (showTabletTabStrip.value) style['--top-tab-bar-height'] = '48px'
 
-  return { '--vertical-tab-bar-width': `${store.getters.getVerticalTabBarWidth}px` }
+  return Object.keys(style).length > 0 ? style : undefined
 })
+
+function handleTabletTabStripChange(event) {
+  automaticTabletTabStrip.value = event.matches
+}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const useWatchSideNavOverlay = computed(() => {
@@ -518,7 +622,10 @@ const localProgressBarVisible = computed(() => store.getters.getShowProgressBar)
 /** @type {import('vue').ComputedRef<boolean>} */
 const subscriptionRefreshInProgress = computed(() => store.getters.getSubscriptionFeedRefreshInProgress)
 const progressUsesToast = computed(() => {
-  return store.getters.getShowProgressBarToast
+  return shouldUseProgressToast(store.getters.getShowProgressBarToast)
+})
+const showProgressStartToast = computed(() => {
+  return shouldShowProgressStartToast(store.getters.getShowProgressBarToast)
 })
 
 const showProgressBar = computed(() => {
@@ -583,7 +690,46 @@ const tabSwitcherFailedPreviewUrls = ref({})
 const tabSwitcherPointerActive = ref(false)
 const tabSwitcherRef = useTemplateRef('tabSwitcherRef')
 const commandPaletteOpen = ref(false)
+const hardwareKeyboardAttached = ref(!isCapacitor)
+const mobileContextLink = ref(null)
+const mobileLinkActionsPromptId = useId()
+const mobileLinkActionsRef = useTemplateRef('mobileLinkActionsRef')
+let mobileLinkActionsLocked = false
+const mobileContextLinkLabel = computed(() => {
+  const link = mobileContextLink.value
+  if (!link) return ''
+
+  const itemTitle = link.closest('.ft-list-item')?.querySelector('.h3Title, .playlistTitle')?.textContent
+  return link.dataset.tabTitle?.trim() ||
+    link.getAttribute('aria-label')?.trim() ||
+    link.textContent?.trim() ||
+    itemTitle?.trim() ||
+    link.href
+})
+const mobileContextLinkCanOpenInTab = computed(() => {
+  const href = mobileContextLink.value?.href ?? ''
+  return href.startsWith(`${window.location.href.split('#')[0]}#`) ||
+    /^https?:\/\/(?:www\.|m\.)?(?:youtube\.com|youtu\.be)\//.test(href)
+})
+const mobileContextLinkCopyUrl = computed(() => {
+  const href = mobileContextLink.value?.href
+  return href
+    ? resolveMobileContextLinkCopyUrl(href, window.location.href.split('#')[0])
+    : null
+})
+watch(() => mobileContextLink.value !== null, (isOpen) => {
+  if (isOpen && !mobileLinkActionsLocked) {
+    lockBodyScroll()
+    store.commit('addOpenPrompt', mobileLinkActionsPromptId)
+    mobileLinkActionsLocked = true
+  } else if (!isOpen && mobileLinkActionsLocked) {
+    store.commit('removeOpenPrompt', mobileLinkActionsPromptId)
+    unlockBodyScroll()
+    mobileLinkActionsLocked = false
+  }
+})
 const tabOrganizerOpen = ref(false)
+const showAndroidExitPrompt = ref(false)
 const settingsSearchTarget = ref(null)
 const subscriptionAutoRefreshTimers = {
   videos: null,
@@ -607,6 +753,7 @@ let removeTabsStateListener = null
 let removeReloadRequestListener = null
 let removeConfirmMultipleTabsActionListener = null
 let removeOpenUrlListener = null
+let removeCapacitorIntegrationListeners = null
 let removeYtDlpBinaryUpdatedListener = null
 let removeOpenTabOrganizerListener = null
 let removeGamepadNavigation = () => {}
@@ -779,7 +926,7 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
   if (downloadStarted) {
     const tools = binariesToUpdate.join(' and ')
     const message = t('Settings.Download Settings.Managed Tools Download Started Template', { tools })
-    if (!progressUsesToast.value) {
+    if (showProgressStartToast.value) {
       showToast({ message, icon: ['fas', 'download'] })
     }
     showToolProgress(message)
@@ -797,7 +944,7 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
       downloadStarted = true
       const tools = binariesToUpdate.join(' and ')
       const message = t('Settings.Download Settings.Managed Tools Update Started Template', { tools })
-      if (!progressUsesToast.value) {
+      if (showProgressStartToast.value) {
         showToast({ message, icon: ['fas', 'download'] })
       }
       showToolProgress(message)
@@ -980,6 +1127,8 @@ onMounted(async () => {
       removeTabsStateListener = removeListener
       window.ftElectron.tabs.rendererReady()
     })
+  } else if (isCapacitor) {
+    tabsReady = capacitorTabService.initialize(route)
   }
 
   const settingsReady = store.dispatch('grabUserSettings')
@@ -992,7 +1141,7 @@ onMounted(async () => {
     store.dispatch('grabAllProfiles', t('Profile.All Channels'))
   ))
   tabsReady.then(() => {
-    const initialRoute = isElectron ? store.getters.getActiveTab?.route : route
+    const initialRoute = usesLogicalTabs ? store.getters.getActiveTab?.route : route
     if (initialRoute) {
       return preloadResolvedRoute(router.resolve(initialRoute.fullPath))
     }
@@ -1070,6 +1219,8 @@ onMounted(async () => {
       removeReloadRequestListener = window.ftElectron.tabs.onRequestReload(prepareAndReloadTab)
       removeConfirmMultipleTabsActionListener = window.ftElectron.tabs
         .onConfirmMultipleAction(handleConfirmMultipleTabsActionRequest)
+    } else if (isCapacitor) {
+      removeCapacitorIntegrationListeners = await enableCapacitorIntegrations()
     }
 
     await syncDataReady
@@ -1112,6 +1263,13 @@ onMounted(async () => {
   document.addEventListener('keydown', handleKeyboardShortcuts)
   window.addEventListener(OPEN_COMMAND_PALETTE_EVENT, openCommandPalette)
   window.addEventListener(OPEN_TAB_ORGANIZER_EVENT, openTabOrganizer)
+  if (isCapacitor) {
+    window.addEventListener('opentubex:android-back', handleAndroidBack)
+    window.addEventListener('opentubex:android-pip', handleAndroidPictureInPictureChange)
+    window.addEventListener('opentubex:hardware-keyboard', handleHardwareKeyboardChange)
+    document.addEventListener('contextmenu', handleMobileLinkContextMenu, true)
+    hardwareKeyboardAttached.value = await getAndroidHardwareKeyboardState()
+  }
   document.addEventListener('keyup', handleKeyboardShortcutKeyup)
   document.addEventListener('mousedown', handleMouseDown)
   document.addEventListener('dragstart', handleDragStart)
@@ -1145,6 +1303,13 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  if (mobileLinkActionsLocked) {
+    store.commit('removeOpenPrompt', mobileLinkActionsPromptId)
+    unlockBodyScroll()
+    mobileLinkActionsLocked = false
+  }
+  tabletTabStripQuery.removeEventListener('change', handleTabletTabStripChange)
+  capacitorTabService?.dispose()
   document.documentElement.classList.remove('hideOutlines')
   removeGamepadNavigation()
   removeCustomThemeListener()
@@ -1161,6 +1326,10 @@ onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleKeyboardShortcuts)
   window.removeEventListener(OPEN_COMMAND_PALETTE_EVENT, openCommandPalette)
   window.removeEventListener(OPEN_TAB_ORGANIZER_EVENT, openTabOrganizer)
+  window.removeEventListener('opentubex:android-back', handleAndroidBack)
+  window.removeEventListener('opentubex:android-pip', handleAndroidPictureInPictureChange)
+  window.removeEventListener('opentubex:hardware-keyboard', handleHardwareKeyboardChange)
+  document.removeEventListener('contextmenu', handleMobileLinkContextMenu, true)
   document.removeEventListener('keyup', handleKeyboardShortcutKeyup)
   document.removeEventListener('mousedown', handleMouseDown)
   document.removeEventListener('dragstart', handleDragStart)
@@ -1183,6 +1352,7 @@ onBeforeUnmount(() => {
   removeReloadRequestListener?.()
   removeConfirmMultipleTabsActionListener?.()
   removeOpenUrlListener?.()
+  removeCapacitorIntegrationListeners?.()
   removeYtDlpBinaryUpdatedListener?.()
   removeOpenTabOrganizerListener?.()
 })
@@ -2007,10 +2177,27 @@ function updateTheme() {
   const customTheme = customThemes.find(theme => `custom:${theme.id}` === effectiveTheme) ??
     (effectiveTheme === 'custom' ? customThemes[0] : null) ?? null
   applyThemeToDocument(effectiveTheme, mainColor.value, secColor.value, customTheme)
+  updateSystemBarsStyle()
+}
+
+function updateSystemBarsStyle() {
+  if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('SystemBars')) return
+
+  const backgroundColor = getComputedStyle(document.body).backgroundColor
+  const usesDarkIcons = calculateColorLuminance(backgroundColor) === '#000000'
+  SystemBars.setStyle({
+    bar: SystemBarType.StatusBar,
+    style: usesDarkIcons ? SystemBarsStyle.Light : SystemBarsStyle.Dark
+  }).catch((error) => {
+    console.error('Failed to update system bar style:', error)
+  })
 }
 
 function updateAppFont() {
-  document.body.style.setProperty('--app-font-family', getAppFontFamily(appFont.value))
+  document.body.style.setProperty(
+    '--app-font-family',
+    getAppFontFamily(isCapacitor ? DEFAULT_APP_FONT : appFont.value)
+  )
 }
 
 async function sanitizeAppearanceSettings(customThemes) {
@@ -2176,6 +2363,7 @@ const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
   routePath: route.path,
   store,
   isElectron,
+  isCapacitor,
   navigate: navigateFromCommandPalette,
   openSettingsSection,
   openSettingsSearchResult,
@@ -2222,10 +2410,81 @@ function navigateFromCommandPalette(location) {
 }
 
 function goHistoryFromCommandPalette(offset) {
-  if (isElectron) {
+  if (usesLogicalTabs) {
     return navigation.go(presentedTabId.value, offset)
   }
   return router.go(offset)
+}
+
+const ANDROID_EXIT_PROMPT_VALUES = ['quit', 'cancel', 'neverAskAgain']
+const androidExitPromptNames = computed(() => [
+  t('Close Confirmation.Quit'),
+  t('Cancel'),
+  t('Close Confirmation.Never Ask Again')
+])
+
+async function requestAndroidAppExit() {
+  if (!store.getters.getConfirmCloseApp) {
+    await exitAndroidApp()
+    return
+  }
+
+  showAndroidExitPrompt.value = true
+}
+
+/** @param {'quit' | 'cancel' | 'neverAskAgain' | null} option */
+async function handleAndroidExitPromptAnswer(option) {
+  showAndroidExitPrompt.value = false
+  if (option === 'neverAskAgain') {
+    await store.dispatch('updateConfirmCloseApp', false)
+  }
+  if (option === 'quit' || option === 'neverAskAgain') {
+    await exitAndroidApp()
+  }
+}
+
+async function handleAndroidBack() {
+  if (mobileContextLink.value !== null) {
+    closeMobileLinkActions()
+    return
+  }
+
+  const hadOpenLayer = hasVisibleGamepadLayer() || isSideNavOpen.value
+  const target = document.activeElement instanceof HTMLElement ? document.activeElement : document
+  const escapeEvent = new KeyboardEvent('keydown', {
+    key: 'Escape',
+    code: 'Escape',
+    bubbles: true,
+    cancelable: true,
+  })
+
+  if (isSideNavOpen.value) {
+    closeSideNav()
+    return
+  }
+  if (!target.dispatchEvent(escapeEvent) || hadOpenLayer) {
+    return
+  }
+  if (document.fullscreenElement !== null) {
+    await document.exitFullscreen()
+    return
+  }
+
+  const tabId = presentedTabId.value
+  if (tabId && store.getters.getTabHistoryState(tabId).canGoBack) {
+    await navigation.back(tabId)
+    return
+  }
+
+  await requestAndroidAppExit()
+}
+
+function handleAndroidPictureInPictureChange(event) {
+  setAndroidPictureInPictureDocumentState(event.active === true)
+}
+
+function handleHardwareKeyboardChange(event) {
+  hardwareKeyboardAttached.value = event.attached === true
 }
 
 function openSettingsView(view) {
@@ -3153,6 +3412,56 @@ function handleClick(event) {
   }
 }
 
+async function handleMobileLinkContextMenu(event) {
+  const link = getEventLink(event)
+  if (!link) return
+
+  event.preventDefault()
+  event.stopPropagation()
+  mobileContextLink.value = link
+  await nextTick()
+  mobileLinkActionsRef.value?.focus({ preventScroll: true })
+}
+
+function closeMobileLinkActions() {
+  mobileContextLink.value = null
+}
+
+async function copyMobileContextLink() {
+  const url = mobileContextLinkCopyUrl.value
+  if (!url) return
+
+  closeMobileLinkActions()
+  await copyToClipboard(url)
+}
+
+async function openMobileContextLink(newTab) {
+  const link = mobileContextLink.value
+  if (!link) return
+
+  const href = link.href
+  closeMobileLinkActions()
+  const internalPrefix = `${window.location.href.split('#')[0]}#`
+  if (href.startsWith(internalPrefix)) {
+    const destination = router.resolve(new URL(href).hash.slice(1))
+    await openInternalPath({
+      path: destination.path,
+      query: destination.query,
+      title: link.dataset.tabTitle || undefined,
+      doCreateNewTab: newTab,
+      makeActive: true
+    })
+    return
+  }
+
+  if (/^https?:\/\/((www\.|m\.)?youtube\.com|youtu\.be)\//.test(href)) {
+    await handleYoutubeLink(href, { doCreateNewTab: newTab })
+    return
+  }
+
+  handleExternalLink(href)
+}
+
 /**
  * @param {PointerEvent} event
  */
@@ -3189,6 +3498,24 @@ function handleAuxClick(event) {
 }
 
 /**
+ * @param {string} href
+ */
+function handleExternalLink(href) {
+  const action = resolveExternalLinkAction(externalLinkHandling.value)
+  if (action === 'disabled') {
+    showToast({
+      message: t('External link opening has been disabled in Settings → Privacy'),
+      icon: ['fas', 'link-slash'],
+    })
+  } else if (action === 'prompt') {
+    lastExternalLinkToBeOpened.value = href
+    showExternalLinkOpeningPrompt.value = true
+  } else {
+    openExternalLink(href)
+  }
+}
+
+/**
  * @param {PointerEvent} event
  * @param {HTMLAnchorElement} link
  */
@@ -3216,20 +3543,8 @@ function handleLinkClick(event, link) {
       doCreateNewTab,
       isMiddleClick
     })
-  } else if (externalLinkHandling.value === 'doNothing') {
-    // Let user know opening external link is disabled via setting
-    showToast({
-      message: t('External link opening has been disabled in Settings → Privacy'),
-      icon: ['fas', 'link-slash'],
-    })
-  } else if (externalLinkHandling.value === 'openLinkAfterPrompt') {
-    // Storing the URL is necessary as
-    // there is no other way to pass the URL to click callback
-    lastExternalLinkToBeOpened.value = href
-    showExternalLinkOpeningPrompt.value = true
   } else {
-    // Open links externally
-    openExternalLink(href)
+    handleExternalLink(href)
   }
 }
 
@@ -3378,6 +3693,22 @@ function enableOpenUrl() {
   })
 }
 
+async function enableCapacitorIntegrations() {
+  const urlHandle = await CapacitorApp.addListener('appUrlOpen', ({ url }) => {
+    if (url) handleYoutubeLink(url)
+  })
+  const removeReminderActions = await initializeCapacitorLiveReminderActions((videoId) => {
+    handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`)
+  })
+  const launch = await CapacitorApp.getLaunchUrl()
+  if (launch?.url) await handleYoutubeLink(launch.url)
+
+  return () => {
+    urlHandle.remove()
+    removeReminderActions()
+  }
+}
+
 const windowTitle = computed(() => {
   const routePath = route.path
   if (
@@ -3428,7 +3759,7 @@ function setWindowTitle() {
   }
 
   const titleTabId = store.state.tabs.transitionTargetTabId ?? presentedTabId.value
-  if (isElectron && titleTabId) {
+  if (usesLogicalTabs && titleTabId) {
     // During startup the shared router briefly sits on its initial route while
     // the restored tab's own route hasn't been projected yet. Only attribute
     // the router's title to the tab when it is actually on this route.
