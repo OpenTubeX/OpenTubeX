@@ -171,6 +171,7 @@ import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import store from '../../store/index'
 import { defaultUpdaterId, NON_TRANSFERABLE_SETTINGS } from '../../store/modules/settings'
 import { migrateLegacySettings } from '../../helpers/settings-migrations'
+import { startProgressBarOperation } from '../../helpers/progressBar'
 
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { calculateColorLuminance, getRandomColor } from '../../helpers/colors'
@@ -396,6 +397,22 @@ function isChannelSubscribed(channelId, subscriptions) {
 }
 
 /**
+ * @param {(progressOperation: ReturnType<typeof startProgressBarOperation>) => void} importSubscriptions
+ */
+function runWithDataImportProgress(importSubscriptions) {
+  const progressOperation = startProgressBarOperation(store, {
+    icon: ['fas', 'sync'],
+    message: '',
+    percentage: 0,
+  })
+  try {
+    importSubscriptions(progressOperation)
+  } finally {
+    progressOperation.finish()
+  }
+}
+
+/**
  * @param {any[]} oldData
  */
 function convertOldFreeTubeFormatToNew(oldData) {
@@ -552,90 +569,86 @@ function importFreeTubeSubscriptions(profileRecords) {
  * @param {string} textDecode
  */
 function importCsvYouTubeSubscriptions(textDecode) { // first row = header, last row = empty
-  const youtubeSubscriptions = textDecode.split('\n').filter(sub => {
-    return sub !== ''
-  })
-  const subscriptions = []
-
-  store.commit('setShowProgressBar', true)
-  store.commit('setProgressBarPercentage', 0)
-
-  const splitCSVRegex = /(?:,|\n|^)("(?:(?:"")|[^"])*"|[^\n",]*|(?:\n|$))/g
-
-  const ytsubs = youtubeSubscriptions.slice(1).map(yt => {
-    return [...yt.matchAll(splitCSVRegex)].map(s => {
-      let newVal = s[1]
-      if (newVal.startsWith('"')) {
-        newVal = newVal.substring(1, newVal.length - 1).replaceAll('""', '"')
-      }
-      return newVal
+  runWithDataImportProgress(() => {
+    const youtubeSubscriptions = textDecode.split('\n').filter(sub => {
+      return sub !== ''
     })
-  }).filter(channel => {
-    return channel.length > 0
-  })
+    const subscriptions = []
 
-  ytsubs.forEach((yt) => {
-    const channelId = yt[0]
-    if (!isChannelSubscribed(channelId, subscriptions)) {
-      const subscription = {
-        id: channelId,
-        name: yt[2],
-        thumbnail: null
+    const splitCSVRegex = /(?:,|\n|^)("(?:(?:"")|[^"])*"|[^\n",]*|(?:\n|$))/g
+
+    const ytsubs = youtubeSubscriptions.slice(1).map(yt => {
+      return [...yt.matchAll(splitCSVRegex)].map(s => {
+        let newVal = s[1]
+        if (newVal.startsWith('"')) {
+          newVal = newVal.substring(1, newVal.length - 1).replaceAll('""', '"')
+        }
+        return newVal
+      })
+    }).filter(channel => {
+      return channel.length > 0
+    })
+
+    ytsubs.forEach((yt) => {
+      const channelId = yt[0]
+      if (!isChannelSubscribed(channelId, subscriptions)) {
+        const subscription = {
+          id: channelId,
+          name: yt[2],
+          thumbnail: null
+        }
+
+        subscriptions.push(subscription)
       }
+    })
 
-      subscriptions.push(subscription)
-    }
+    primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(subscriptions)
+    store.dispatch('updateProfile', primaryProfile.value)
+    showToast({
+      message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
+      icon: ['fas', 'rss'],
+    })
   })
-
-  primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(subscriptions)
-  store.dispatch('updateProfile', primaryProfile.value)
-  showToast({
-    message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
-    icon: ['fas', 'rss'],
-  })
-  store.commit('setShowProgressBar', false)
 }
 
 /**
  * @param {object} textDecode
  */
 function importYouTubeSubscriptions(textDecode) {
-  const subscriptions = []
-  let count = 0
+  runWithDataImportProgress(progressOperation => {
+    const subscriptions = []
+    let count = 0
 
-  store.commit('setShowProgressBar', true)
-  store.commit('setProgressBarPercentage', 0)
+    textDecode.forEach((channel) => {
+      const snippet = channel.snippet
+      if (typeof snippet === 'undefined') {
+        const message = t('Settings.Data Settings.Invalid subscriptions file')
+        showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
+        throw new Error('Unable to find channel data')
+      }
 
-  textDecode.forEach((channel) => {
-    const snippet = channel.snippet
-    if (typeof snippet === 'undefined') {
-      const message = t('Settings.Data Settings.Invalid subscriptions file')
-      showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
-      throw new Error('Unable to find channel data')
-    }
+      const channelId = snippet.resourceId.channelId
+      if (!isChannelSubscribed(channelId, subscriptions)) {
+        subscriptions.push({
+          id: channelId,
+          name: snippet.title,
+          thumbnail: snippet.thumbnails.default.url
+        })
+      }
 
-    const channelId = snippet.resourceId.channelId
-    if (!isChannelSubscribed(channelId, subscriptions)) {
-      subscriptions.push({
-        id: channelId,
-        name: snippet.title,
-        thumbnail: snippet.thumbnails.default.url
-      })
-    }
+      count++
 
-    count++
+      const progressPercentage = (count / (textDecode.length - 1)) * 100
+      progressOperation.update({ percentage: progressPercentage })
+    })
 
-    const progressPercentage = (count / (textDecode.length - 1)) * 100
-    store.commit('setProgressBarPercentage', progressPercentage)
+    primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(subscriptions)
+    store.dispatch('updateProfile', primaryProfile.value)
+    showToast({
+      message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
+      icon: ['fas', 'rss'],
+    })
   })
-
-  primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(subscriptions)
-  store.dispatch('updateProfile', primaryProfile.value)
-  showToast({
-    message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
-    icon: ['fas', 'rss'],
-  })
-  store.commit('setShowProgressBar', false)
 }
 
 /**
@@ -674,48 +687,46 @@ function importOpmlYouTubeSubscriptions(data) {
     return
   }
 
-  const subscriptions = []
+  runWithDataImportProgress(progressOperation => {
+    const subscriptions = []
 
-  store.commit('setShowProgressBar', true)
-  store.commit('setProgressBarPercentage', 0)
+    let count = 0
 
-  let count = 0
-
-  feedData.forEach((channel) => {
-    const xmlUrl = channel.getAttribute('xmlUrl')
-    const channelName = channel.getAttribute('title')
-    let channelId
-    if (xmlUrl.includes('https://www.youtube.com/feeds/videos.xml?channel_id=')) {
-      channelId = new URL(xmlUrl).searchParams.get('channel_id')
-    } else if (xmlUrl.includes('/feed/channel/')) {
-      // handle invidious exports https://yewtu.be/feed/channel/{CHANNELID}
-      channelId = new URL(xmlUrl).pathname.split('/').filter(part => part).at(-1)
-    } else {
-      console.error(`Unknown xmlUrl format: ${xmlUrl}`)
-    }
-
-    if (!isChannelSubscribed(channelId, subscriptions)) {
-      const subscription = {
-        id: channelId,
-        name: channelName,
-        thumbnail: null
+    feedData.forEach((channel) => {
+      const xmlUrl = channel.getAttribute('xmlUrl')
+      const channelName = channel.getAttribute('title')
+      let channelId
+      if (xmlUrl.includes('https://www.youtube.com/feeds/videos.xml?channel_id=')) {
+        channelId = new URL(xmlUrl).searchParams.get('channel_id')
+      } else if (xmlUrl.includes('/feed/channel/')) {
+        // handle invidious exports https://yewtu.be/feed/channel/{CHANNELID}
+        channelId = new URL(xmlUrl).pathname.split('/').filter(part => part).at(-1)
+      } else {
+        console.error(`Unknown xmlUrl format: ${xmlUrl}`)
       }
-      subscriptions.push(subscription)
-    }
 
-    count++
+      if (!isChannelSubscribed(channelId, subscriptions)) {
+        const subscription = {
+          id: channelId,
+          name: channelName,
+          thumbnail: null
+        }
+        subscriptions.push(subscription)
+      }
 
-    const progressPercentage = (count / feedData.length) * 100
-    store.commit('setProgressBarPercentage', progressPercentage)
+      count++
+
+      const progressPercentage = (count / feedData.length) * 100
+      progressOperation.update({ percentage: progressPercentage })
+    })
+
+    primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(subscriptions)
+    store.dispatch('updateProfile', primaryProfile.value)
+    showToast({
+      message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
+      icon: ['fas', 'rss'],
+    })
   })
-
-  primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(subscriptions)
-  store.dispatch('updateProfile', primaryProfile.value)
-  showToast({
-    message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
-    icon: ['fas', 'rss'],
-  })
-  store.commit('setShowProgressBar', false)
 }
 
 /**
@@ -736,27 +747,25 @@ function importLibreTubeSubscriptions(libreTubeSubscriptions) {
  * @param {{ id: string, name: string, thumbnail: string | null }[]} subscriptions
  */
 function mergeSubscriptionsIntoPrimaryProfile(subscriptions) {
-  store.commit('setShowProgressBar', true)
-  store.commit('setProgressBarPercentage', 0)
+  runWithDataImportProgress(progressOperation => {
+    const newSubscriptions = []
 
-  const newSubscriptions = []
+    subscriptions.forEach((channel, index) => {
+      if (!isChannelSubscribed(channel.id, newSubscriptions)) {
+        newSubscriptions.push(channel)
+      }
 
-  subscriptions.forEach((channel, index) => {
-    if (!isChannelSubscribed(channel.id, newSubscriptions)) {
-      newSubscriptions.push(channel)
-    }
+      const progressPercentage = ((index + 1) / subscriptions.length) * 100
+      progressOperation.update({ percentage: progressPercentage })
+    })
 
-    const progressPercentage = ((index + 1) / subscriptions.length) * 100
-    store.commit('setProgressBarPercentage', progressPercentage)
+    primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(newSubscriptions)
+    store.dispatch('updateProfile', primaryProfile.value)
+    showToast({
+      message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
+      icon: ['fas', 'rss'],
+    })
   })
-
-  primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(newSubscriptions)
-  store.dispatch('updateProfile', primaryProfile.value)
-  showToast({
-    message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
-    icon: ['fas', 'rss'],
-  })
-  store.commit('setShowProgressBar', false)
 }
 
 /**

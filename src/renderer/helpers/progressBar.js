@@ -15,8 +15,8 @@ function clearProgress(store) {
 }
 
 /**
- * Keeps the most recently started playlist preload visible while allowing an
- * earlier preload to resume ownership if the newer one finishes first.
+ * Keeps the most recently started operation visible while allowing an earlier
+ * operation to resume ownership if the newer one finishes first.
  * @param {{ commit: (mutation: string, value: unknown) => void }} store
  * @param {{ icon: string[], message: string, percentage: number }} initialProgress
  * @returns {{
@@ -24,7 +24,7 @@ function clearProgress(store) {
  *   finish: () => void,
  * }}
  */
-export function startYtDlpPlaybackPreloadProgress(store, initialProgress) {
+export function startProgressBarOperation(store, initialProgress) {
   const operations = operationsByStore.get(store) ?? []
   operationsByStore.set(store, operations)
 

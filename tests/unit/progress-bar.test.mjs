@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { startYtDlpPlaybackPreloadProgress } from '../../src/renderer/helpers/player/ytDlpPlaybackPreloadProgress.js'
+import { startProgressBarOperation } from '../../src/renderer/helpers/progressBar.js'
 
 function createStore () {
   const state = {}
@@ -13,26 +13,26 @@ function createStore () {
   }
 }
 
-test('restores an earlier playlist preload after an overlapping preload finishes', () => {
+test('restores an earlier operation after an overlapping operation finishes', () => {
   const store = createStore()
-  const first = startYtDlpPlaybackPreloadProgress(store, {
+  const first = startProgressBarOperation(store, {
     icon: ['fas', 'forward'],
-    message: 'First: 0 of 2',
+    message: 'Playlist: 0 of 2',
     percentage: 0,
   })
-  first.update({ message: 'First: 1 of 2', percentage: 50 })
+  first.update({ message: 'Playlist: 1 of 2', percentage: 50 })
 
-  const second = startYtDlpPlaybackPreloadProgress(store, {
+  const second = startProgressBarOperation(store, {
     icon: ['fas', 'forward'],
-    message: 'Second: 0 of 1',
+    message: 'Tool download: 0%',
     percentage: 0,
   })
-  first.update({ message: 'First: 2 of 2', percentage: 100 })
-  assert.equal(store.state.setProgressBarMessage, 'Second: 0 of 1')
+  first.update({ message: 'Playlist: 2 of 2', percentage: 100 })
+  assert.equal(store.state.setProgressBarMessage, 'Tool download: 0%')
 
   second.finish()
   assert.equal(store.state.setShowProgressBar, true)
-  assert.equal(store.state.setProgressBarMessage, 'First: 2 of 2')
+  assert.equal(store.state.setProgressBarMessage, 'Playlist: 2 of 2')
   assert.equal(store.state.setProgressBarPercentage, 100)
 
   first.finish()
@@ -41,14 +41,14 @@ test('restores an earlier playlist preload after an overlapping preload finishes
   assert.equal(store.state.setProgressBarPercentage, 0)
 })
 
-test('keeps a newer playlist preload visible when an earlier one finishes', () => {
+test('keeps a newer operation visible when an earlier operation finishes', () => {
   const store = createStore()
-  const first = startYtDlpPlaybackPreloadProgress(store, {
+  const first = startProgressBarOperation(store, {
     icon: ['fas', 'forward'],
     message: 'First',
     percentage: 50,
   })
-  const second = startYtDlpPlaybackPreloadProgress(store, {
+  const second = startProgressBarOperation(store, {
     icon: ['fas', 'forward'],
     message: 'Second',
     percentage: 25,

@@ -420,6 +420,7 @@ import {
   resolveExternalLinkAction,
   resolveMobileContextLinkCopyUrl,
 } from './helpers/mobileLinkActions'
+import { startProgressBarOperation } from './helpers/progressBar'
 import { initializePlatformInfo, isLinuxWayland } from './helpers/platform'
 import {
   shouldShowProgressStartToast,
@@ -915,12 +916,19 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
 
   let downloadStarted = missingManagedBinaries.length > 0
   let toolProgressPercentage = 0
+  let progressOperation = null
 
   function showToolProgress(message) {
-    store.commit('setProgressBarMessage', message)
-    store.commit('setProgressBarIcon', ['fas', 'download'])
-    store.commit('setProgressBarPercentage', toolProgressPercentage)
-    store.commit('setShowProgressBar', true)
+    const progress = {
+      icon: ['fas', 'download'],
+      message,
+      percentage: toolProgressPercentage,
+    }
+    if (progressOperation === null) {
+      progressOperation = startProgressBarOperation(store, progress)
+    } else {
+      progressOperation.update(progress)
+    }
   }
 
   if (downloadStarted) {
@@ -954,7 +962,7 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
     const percentages = Object.values(progressByBinary)
     const combinedPercentage = percentages.reduce((sum, value) => sum + value, 0) / percentages.length
     toolProgressPercentage = Math.max(toolProgressPercentage, combinedPercentage)
-    store.commit('setProgressBarPercentage', toolProgressPercentage)
+    progressOperation.update({ percentage: toolProgressPercentage })
   })
 
   try {
@@ -972,7 +980,7 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
 
     if (failures.length === 0 && updatedBinaries.length > 0) {
       toolProgressPercentage = 100
-      store.commit('setProgressBarPercentage', toolProgressPercentage)
+      progressOperation?.update({ percentage: toolProgressPercentage })
       const updatedTools = updatedBinaries.join(' and ')
       showToast({
         message: missingManagedBinaries.length > 0
@@ -991,12 +999,7 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
     }
   } finally {
     removeProgressListener()
-    if (downloadStarted) {
-      store.commit('setShowProgressBar', false)
-      store.commit('setProgressBarPercentage', 0)
-      store.commit('setProgressBarMessage', '')
-      store.commit('setProgressBarIcon', ['fas', 'sync'])
-    }
+    progressOperation?.finish()
   }
 
   if (updateMode === 'ask' && requestedUpdates === null) {

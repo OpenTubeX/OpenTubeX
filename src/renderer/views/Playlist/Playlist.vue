@@ -263,7 +263,7 @@ import {
   reserveYtDlpPlaybackSourceCache,
 } from '../../helpers/player/ytDlpPlayback'
 import { buildYtDlpPlaybackCacheKey, preloadYtDlpPlaybackSources } from '../../helpers/player/ytDlpPlaybackPreload'
-import { startYtDlpPlaybackPreloadProgress } from '../../helpers/player/ytDlpPlaybackPreloadProgress'
+import { startProgressBarOperation } from '../../helpers/progressBar'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { useTabToast } from '../../composables/useTabToast'
@@ -541,7 +541,7 @@ async function preloadPlaylist() {
 
   const requestGeneration = playlistRequestGeneration
   playlistPreloadPending.value = true
-  const progressOperation = startYtDlpPlaybackPreloadProgress(store, {
+  const progressOperation = startProgressBarOperation(store, {
     icon: ['fas', 'forward'],
     message: t('Playlist.Preloading Playlist'),
     percentage: 0,
