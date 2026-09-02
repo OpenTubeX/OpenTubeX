@@ -154,6 +154,35 @@ test('terminal built-in playback failure falls back to yt-dlp once', async ({ ap
   expect(result.errorMessage).toBe('')
 })
 
+test('Android transient HTTP recovery retries the current stream once', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.ftVideoPlayer')).toBeVisible({ timeout: 30_000 })
+
+  const watchView = await watchViewHandle(page)
+  const result = await watchView.evaluate(async view => {
+    const player = view.$refs.player
+    const originalRetryStreaming = player.retryStreaming
+    let retries = 0
+    player.retryStreaming = () => {
+      retries++
+      return true
+    }
+
+    try {
+      const firstRecovered = await view.retryAndroidTransientHttpError()
+      const secondRecovered = await view.retryAndroidTransientHttpError()
+      return { firstRecovered, secondRecovered, retries }
+    } finally {
+      player.retryStreaming = originalRetryStreaming
+    }
+  })
+
+  expect(result).toEqual({ firstRecovered: true, secondRecovered: false, retries: 1 })
+})
+
 test('terminal yt-dlp playback failure restores the built-in source once', async ({ app, page }) => {
   await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')

@@ -10637,6 +10637,12 @@ export default defineComponent({
       }
     }
 
+    function retryStreaming() {
+      if (!player) return false
+      ignoreErrors = false
+      return player.retryStreaming()
+    }
+
     /**
      * Vue's lifecycle hooks are synchonous, so if we destroy the player in {@linkcode onBeforeUnmount},
      * it won't be finished in time, as the player destruction is asynchronous.
@@ -10730,6 +10736,7 @@ export default defineComponent({
       getCurrentTime,
       setCurrentTime,
       getSabrReloadState,
+      retryStreaming,
       setFullscreenMetadata,
       closeFullscreenMetadata,
       setFullscreenTranscript,

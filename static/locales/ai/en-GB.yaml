@@ -1389,7 +1389,7 @@ Tooltips:
     Show New Content Feed: Shows a New tab containing subscription feed items that were not present during the previous fetch.
     Show New Content Indicators: Shows a small dot beside subscription feed items that were not present during the previous fetch.
     Show Scheduled Live Streams / Premieres First: Keeps upcoming live streams and premieres at the top of the subscription feed. When disabled, they remain at their announcement position until they start. Refresh the subscription feed once after disabling to retrieve announcement dates for existing scheduled entries.
-    Auto Refresh Interval: How often OpenTubeX automatically refreshes your subscription feed while the app is open.
+    Auto Refresh Interval: "How often OpenTubeX automatically refreshes your subscription feed while the app is open. On Android, a nonzero interval also refreshes it while the app is closed."
   Theme Settings:
     Show Progress as Notification: Shows a persistent notification with live progress for background operations, such as subscription refreshes and managed tool downloads, instead of using the global progress bar.
     Always Show Scrollbars: Keeps the scrollbars visible at all times. When disabled, they fade out shortly after you stop moving the mouse and reappear as soon as you move it again.

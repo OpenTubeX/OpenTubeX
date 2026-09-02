@@ -1449,7 +1449,7 @@ Tooltips:
     Show New Content Feed: Afișează o filă Nou cu elementele din fluxul de abonamente care nu existau la preluarea anterioară.
     Show New Content Indicators: Afișează un punct mic lângă elementele din fluxul de abonamente care nu existau la preluarea anterioară.
     Show Scheduled Live Streams / Premieres First: Păstrează viitoarele transmisiuni în direct și premiere în partea de sus a fluxului de abonamente. Când opțiunea este dezactivată, acestea rămân la poziția anunțului până când încep. Reîmprospătați o dată fluxul de abonamente după dezactivare pentru a prelua datele anunțurilor înregistrărilor programate existente.
-    Auto Refresh Interval: Frecvența cu care OpenTubeX reîmprospătează automat fluxul de abonamente cât timp aplicația este deschisă.
+    Auto Refresh Interval: "Frecvența cu care OpenTubeX reîmprospătează automat fluxul de abonamente cât timp aplicația este deschisă. Pe Android, un interval diferit de zero actualizează fluxul și când aplicația este închisă."
   Theme Settings:
     Show Progress as Notification: Afișează o notificare persistentă cu progresul în timp real pentru operațiunile din fundal, cum ar fi reîmprospătarea abonamentelor și descărcarea instrumentelor gestionate, în locul barei globale de progres.
     Always Show Scrollbars: Păstrează barele de derulare vizibile permanent. Când opțiunea este dezactivată, acestea dispar treptat la scurt timp după ce opriți mișcarea mouse-ului și reapar imediat ce îl mișcați din nou.

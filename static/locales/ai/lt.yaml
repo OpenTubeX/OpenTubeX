@@ -1824,7 +1824,7 @@ Tooltips:
     Show New Content Feed: Rodo kortelę Nauja su prenumeratų sklaidos kanalo elementais, kurių nebuvo gaunant ankstesnį kartą.
     Show New Content Indicators: Šalia prenumeratų sklaidos kanalo elementų, kurių nebuvo gaunant ankstesnį kartą, rodo mažą tašką.
     Show Scheduled Live Streams / Premieres First: Būsimas tiesiogines transliacijas ir premjeras rodo prenumeratų sklaidos kanalo viršuje. Išjungus iki pradžios jos lieka ten, kur buvo paskelbtos. Išjungę vieną kartą atnaujinkite prenumeratų sklaidos kanalą, kad gautumėte esamų suplanuotų elementų paskelbimo datas.
-    Auto Refresh Interval: Kaip dažnai OpenTubeX automatiškai atnaujina prenumeratų sklaidos kanalą, kol programa atverta.
+    Auto Refresh Interval: "Kaip dažnai OpenTubeX automatiškai atnaujina prenumeratų sklaidos kanalą, kol programa atverta. „Android“ sistemoje nenulinis intervalas atnaujina sklaidos kanalą ir tada, kai programa uždaryta."
   Theme Settings:
     Show Progress as Notification: Vietoje bendros eigos juostos rodo nuolatinį pranešimą su tikralaike foninių operacijų, pvz., prenumeratų atnaujinimo ir tvarkomų įrankių atsisiuntimo, eiga.
     Always Show Scrollbars: Slinkties juostos visada lieka matomos. Išjungus jos netrukus išblėsta nustojus judinti pelę ir vėl pasirodo vos ją pajudinus.

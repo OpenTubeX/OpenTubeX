@@ -1427,7 +1427,7 @@ Tooltips:
     Show New Content Feed: Prikazuje karticu Novo sa stavkama sažetka pretplata kojih nije bilo pri prethodnom dohvaćanju.
     Show New Content Indicators: Prikazuje malu točku uz stavke sažetka pretplata kojih nije bilo pri prethodnom dohvaćanju.
     Show Scheduled Live Streams / Premieres First: Zadržava predstojeće prijenose uživo i premijere na vrhu sažetka pretplata. Kada je isključeno, ostaju na mjestu svoje najave sve do početka. Nakon isključivanja jednom osvježite sažetak pretplata kako biste dohvatili datume najave za postojeće zakazane stavke.
-    Auto Refresh Interval: Učestalost kojom OpenTubeX automatski osvježava sažetak pretplata dok je aplikacija otvorena.
+    Auto Refresh Interval: "Učestalost kojom OpenTubeX automatski osvježava sažetak pretplata dok je aplikacija otvorena. Na Androidu interval koji nije nula osvježava sažetak i dok je aplikacija zatvorena."
   Theme Settings:
     Show Progress as Notification: Umjesto opće trake napretka prikazuje trajnu obavijest s trenutačnim napretkom pozadinskih postupaka, poput osvježavanja pretplata i preuzimanja alata kojima se upravlja.
     Always Show Scrollbars: Drži klizne trake uvijek vidljivima. Kada je isključeno, nestaju ubrzo nakon što prestanete pomicati miš i ponovno se pojavljuju čim ga pomaknete.

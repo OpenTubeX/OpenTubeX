@@ -435,12 +435,22 @@ import {
 } from './helpers/androidUi'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
 import {
+  acknowledgeAndroidSubscriptionRefreshResult,
+  addAndroidSubscriptionRefreshCancelledListener,
+  configureAndroidSubscriptionRefresh,
   finishAndroidSubscriptionRefresh,
+  getNextAndroidSubscriptionRefreshResult,
+  openAndroidNotificationSettings,
+  requestAndroidSubscriptionRefreshNotificationPermission,
   startAndroidSubscriptionRefresh,
   updateAndroidSubscriptionRefresh
 } from './helpers/androidSubscriptionRefresh'
+import { createAndroidSubscriptionRefreshConfiguration } from './helpers/androidSubscriptionRefreshData'
+import { normalizeInvidiousSubscriptionFeed } from './helpers/api/invidious'
+import { reconcileFetchedSubscriptionEntries } from './helpers/subscription-entries'
 import {
   cancelSubscriptionRefresh,
+  requestSubscriptionRefreshCancellation,
   refreshSubscriptionLiveFromRemote,
   refreshSubscriptionPostsFromRemote,
   refreshSubscriptionShortsFromRemote,
@@ -680,6 +690,7 @@ const hideSubscriptionsLive = computed(() => store.getters.getHideLiveStreams ||
 const hideSubscriptionsPosts = computed(() => store.getters.getHideSubscriptionsCommunity || store.getters.getUseRssFeeds)
 
 const dataReady = ref(false)
+const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCacheReady)
 const showTutorial = ref(false)
 const tutorialIsNewInstallation = ref(false)
 const findbarVisible = ref(false)
@@ -762,6 +773,7 @@ let removeOpenUrlListener = null
 let removeCapacitorIntegrationListeners = null
 let removeYtDlpBinaryUpdatedListener = null
 let removeOpenTabOrganizerListener = null
+let removeAndroidSubscriptionRefreshCancelledListener = null
 let removeGamepadNavigation = () => {}
 /** @type {number|null} */
 let utilityRoutePreloadId = null
@@ -1210,8 +1222,8 @@ onMounted(async () => {
     const syncDataReady = Promise.all([
       store.dispatch('grabHistory'),
       store.dispatch('grabAllPlaylists'),
+      store.dispatch('grabAllSubscriptions'),
     ])
-    store.dispatch('grabAllSubscriptions')
     store.dispatch('grabSearchHistoryEntries')
 
     // YouTube links have to be caught in both builds, otherwise the browser
@@ -1237,6 +1249,11 @@ onMounted(async () => {
     })
 
     dataReady.value = true
+
+    if (isCapacitor) {
+      removeAndroidSubscriptionRefreshCancelledListener =
+        await addAndroidSubscriptionRefreshCancelledListener(requestSubscriptionRefreshCancellation)
+    }
 
     await nextTick()
     scheduleUtilityRoutePreload()
@@ -1363,6 +1380,7 @@ onBeforeUnmount(() => {
   removeCapacitorIntegrationListeners?.()
   removeYtDlpBinaryUpdatedListener?.()
   removeOpenTabOrganizerListener?.()
+  removeAndroidSubscriptionRefreshCancelledListener?.()
 })
 
 watch([activeTabId, selectionRevision], ([tabId, revision]) => {
@@ -1440,6 +1458,52 @@ watch([subscriptionLiveAutoRefreshInterval, hideSubscriptionsLive], () => {
 
 watch([subscriptionPostsAutoRefreshInterval, hideSubscriptionsPosts], () => {
   resetSubscriptionTabAutoRefreshForAllProfiles('posts')
+})
+
+const androidSubscriptionRefreshConfiguration = computed(() => {
+  if (!isCapacitor || !dataReady.value) return null
+
+  return createAndroidSubscriptionRefreshConfiguration({
+    profiles: store.getters.getProfileList,
+    intervals: {
+      videos: subscriptionFeedAutoRefreshInterval.value,
+      shorts: subscriptionShortsAutoRefreshInterval.value,
+      live: subscriptionLiveAutoRefreshInterval.value,
+      posts: subscriptionPostsAutoRefreshInterval.value
+    },
+    hiddenFeedTypes: [
+      ...(hideSubscriptionsVideos.value ? ['videos'] : []),
+      ...(hideSubscriptionsShorts.value ? ['shorts'] : []),
+      ...(hideSubscriptionsLive.value ? ['live'] : []),
+      ...(hideSubscriptionsPosts.value ? ['posts'] : [])
+    ],
+    instanceUrl: store.getters.getCurrentInvidiousInstanceUrl,
+    authorization: store.getters.getCurrentInvidiousInstanceAuthorization,
+    titles: Object.fromEntries(subscriptionAutoRefreshTabs.map(tab => [
+      tab,
+      getSubscriptionRefreshNotificationTitle(tab)
+    ])),
+    cancelLabel: t('Feed.Cancel Refresh')
+  })
+})
+
+watch(androidSubscriptionRefreshConfiguration, async configuration => {
+  if (configuration === null) return
+  try {
+    await configureAndroidSubscriptionRefresh(configuration)
+    if (Object.values(configuration.intervals).some(interval => interval > 0)) {
+      const denied = await requestAndroidSubscriptionRefreshNotificationPermission()
+      if (denied) showAndroidSubscriptionRefreshNotificationWarning()
+    }
+  } catch (error) {
+    console.error('Failed to configure closed-app subscription refreshes', error)
+  }
+}, { deep: true })
+
+watch([dataReady, subscriptionCacheReady], ([ready, cacheReady]) => {
+  if (isCapacitor && ready && cacheReady) {
+    reconcileAndroidSubscriptionRefreshResults()
+  }
 })
 
 /**
@@ -1615,6 +1679,9 @@ function refreshOverdueSubscriptionFeeds() {
 function handleSubscriptionAutoRefreshVisibilityChange() {
   if (!document.hidden) {
     synchronizeSubscriptionRefreshInProgress()
+    if (isCapacitor && subscriptionCacheReady.value) {
+      reconcileAndroidSubscriptionRefreshResults()
+    }
     refreshOverdueSubscriptionFeeds()
   }
 }
@@ -1936,9 +2003,16 @@ function handleSubscriptionRefreshCompleted(event) {
 /**
  * @param {CustomEvent<{tab: string, profileId: string}>} event
  */
-function handleSubscriptionRefreshStarted(event) {
+async function handleSubscriptionRefreshStarted(event) {
   if (isCapacitor) {
-    startAndroidSubscriptionRefresh(getSubscriptionRefreshNotificationTitle(event.detail.tab))
+    const { acquired, notificationsDenied } = await startAndroidSubscriptionRefresh(
+      getSubscriptionRefreshNotificationTitle(event.detail.tab),
+      t('Feed.Cancel Refresh')
+    )
+    if (notificationsDenied) showAndroidSubscriptionRefreshNotificationWarning()
+    if (!acquired) {
+      cancelSubscriptionRefresh()
+    }
   }
   if (!process.env.IS_ELECTRON) {
     try {
@@ -1954,6 +2028,22 @@ function handleSubscriptionRefreshStarted(event) {
     inProgress: true,
     percentage: 0,
     tab: event.detail.tab
+  })
+}
+
+let androidSubscriptionRefreshNotificationWarningShown = false
+
+function showAndroidSubscriptionRefreshNotificationWarning() {
+  if (androidSubscriptionRefreshNotificationWarningShown) return
+  androidSubscriptionRefreshNotificationWarningShown = true
+  showToast({
+    message: t('Video.Notification unavailable'),
+    icon: ['fas', 'triangle-exclamation'],
+    buttons: [{
+      label: t('Settings.Settings'),
+      primary: true,
+      action: () => openAndroidNotificationSettings()
+    }]
   })
 }
 
@@ -2011,6 +2101,113 @@ function getSubscriptionRefreshNotificationTitle(tab) {
       return t('Subscriptions.Refreshing Subscription Posts')
     default:
       return t('Subscriptions.Refreshing Subscription Videos')
+  }
+}
+
+let reconcilingAndroidSubscriptionRefreshResults = false
+
+async function reconcileAndroidSubscriptionRefreshResults() {
+  if (reconcilingAndroidSubscriptionRefreshResults) return
+  reconcilingAndroidSubscriptionRefreshResults = true
+
+  try {
+    while (true) {
+      const result = await getNextAndroidSubscriptionRefreshResult()
+      if (result === null) return
+
+      if (
+        typeof result.id !== 'string' ||
+        typeof result.profileId !== 'string' ||
+        !subscriptionAutoRefreshTabs.includes(result.feedType)
+      ) {
+        await acknowledgeAndroidSubscriptionRefreshResult(result.id)
+        continue
+      }
+
+      if (result.kind === 'channel') {
+        await reconcileAndroidSubscriptionRefreshChannelResult(result)
+      } else if (result.kind === 'completion' && store.getters.profileById(result.profileId)) {
+        handleSubscriptionRefreshCompleted({
+          detail: {
+            tab: result.feedType,
+            profileId: result.profileId,
+            timestamp: Number(result.timestamp) || Date.now()
+          }
+        })
+      }
+
+      await acknowledgeAndroidSubscriptionRefreshResult(result.id)
+    }
+  } catch (error) {
+    console.error('Failed to reconcile closed-app subscription refresh data', error)
+  } finally {
+    reconcilingAndroidSubscriptionRefreshResults = false
+  }
+}
+
+async function reconcileAndroidSubscriptionRefreshChannelResult(result) {
+  if (
+    typeof result.channelId !== 'string' ||
+    !store.getters.getSubscribedChannelIdSet.has(result.channelId)
+  ) {
+    return
+  }
+
+  const feedType = result.feedType
+  const timestamp = new Date(Number(result.timestamp) || Date.now())
+  const entries = normalizeInvidiousSubscriptionFeed(feedType, result.payload, result.channelId)
+  const config = getAndroidSubscriptionCacheConfig(feedType)
+  const previousCache = config.getCache()[result.channelId]
+  const reconciledEntries = reconcileFetchedSubscriptionEntries(
+    entries,
+    previousCache?.[config.entriesKey],
+    config.idKey,
+    previousCache?.timestamp,
+    feedType === 'posts' ? undefined : store.getters.getHistoryCacheById
+  )
+
+  await store.dispatch(config.action, {
+    channelId: result.channelId,
+    [config.entriesKey]: reconciledEntries,
+    timestamp
+  })
+
+  const committedTimestamp = config.getCache()[result.channelId]?.timestamp
+  if (!(committedTimestamp instanceof Date) || committedTimestamp.getTime() !== timestamp.getTime()) {
+    throw new Error(`The ${feedType} cache write did not complete`)
+  }
+}
+
+function getAndroidSubscriptionCacheConfig(feedType) {
+  switch (feedType) {
+    case 'shorts':
+      return {
+        action: 'updateSubscriptionShortsCacheByChannel',
+        entriesKey: 'videos',
+        idKey: 'videoId',
+        getCache: () => store.getters.getShortsCache
+      }
+    case 'live':
+      return {
+        action: 'updateSubscriptionLiveCacheByChannel',
+        entriesKey: 'videos',
+        idKey: 'videoId',
+        getCache: () => store.getters.getLiveCache
+      }
+    case 'posts':
+      return {
+        action: 'updateSubscriptionPostsCacheByChannel',
+        entriesKey: 'posts',
+        idKey: 'postId',
+        getCache: () => store.getters.getPostsCache
+      }
+    default:
+      return {
+        action: 'updateSubscriptionVideosCacheByChannel',
+        entriesKey: 'videos',
+        idKey: 'videoId',
+        getCache: () => store.getters.getVideoCache
+      }
   }
 }
 

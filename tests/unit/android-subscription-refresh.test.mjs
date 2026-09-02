@@ -1,0 +1,75 @@
+import assert from 'node:assert/strict'
+import test from 'node:test'
+
+import { createAndroidSubscriptionRefreshConfiguration } from '../../src/renderer/helpers/androidSubscriptionRefreshData.js'
+
+test('creates one closed-app schedule input per profile and enabled feed', () => {
+  const configuration = createAndroidSubscriptionRefreshConfiguration({
+    profiles: [
+      {
+        _id: 'all',
+        subscriptions: [
+          { id: 'UC-video' },
+          { id: 'UC-short', feedTypes: ['shorts'] },
+          { id: 'UC-video' }
+        ]
+      },
+      {
+        _id: 'quiet',
+        subscriptions: [{ id: 'UC-post', feedTypes: ['posts'] }]
+      }
+    ],
+    intervals: {
+      videos: '1800000',
+      shorts: '3600000',
+      live: '0',
+      posts: '7200000'
+    },
+    hiddenFeedTypes: ['posts'],
+    instanceUrl: 'https://example.invalid',
+    authorization: 'Basic secret',
+    titles: { videos: 'Videos', shorts: 'Shorts', live: 'Live', posts: 'Posts' },
+    cancelLabel: 'Cancel refresh'
+  })
+
+  assert.deepEqual(configuration.intervals, {
+    videos: 1800000,
+    shorts: 3600000,
+    live: 0,
+    posts: 0
+  })
+  assert.deepEqual(configuration.profiles, [
+    {
+      id: 'all',
+      channels: {
+        videos: ['UC-video'],
+        shorts: ['UC-video', 'UC-short'],
+        live: ['UC-video'],
+        posts: ['UC-video']
+      }
+    },
+    {
+      id: 'quiet',
+      channels: {
+        videos: [],
+        shorts: [],
+        live: [],
+        posts: ['UC-post']
+      }
+    }
+  ])
+})
+
+test('invalid and disabled intervals do not opt in to closed-app refreshes', () => {
+  const configuration = createAndroidSubscriptionRefreshConfiguration({
+    profiles: [],
+    intervals: { videos: 'nope', shorts: -1, live: 0, posts: '' },
+    hiddenFeedTypes: [],
+    instanceUrl: '',
+    authorization: null,
+    titles: {},
+    cancelLabel: 'Cancel'
+  })
+
+  assert.deepEqual(configuration.intervals, { videos: 0, shorts: 0, live: 0, posts: 0 })
+})

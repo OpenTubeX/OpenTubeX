@@ -1419,7 +1419,7 @@ Tooltips:
     Show New Content Feed: Zobrazí kartu Nové s položkami kanála odberov, ktoré pri predchádzajúcom načítaní neboli prítomné.
     Show New Content Indicators: Vedľa položiek kanála odberov, ktoré pri predchádzajúcom načítaní neboli prítomné, zobrazí malú bodku.
     Show Scheduled Live Streams / Premieres First: Ponechá nadchádzajúce živé prenosy a premiéry v hornej časti kanála odberov. Po vypnutí zostanú až do začiatku na pozícii podľa oznámenia. Po vypnutí raz obnovte kanál odberov, aby sa načítali dátumy oznámenia existujúcich naplánovaných položiek.
-    Auto Refresh Interval: Určuje, ako často OpenTubeX automaticky obnoví kanál odberov, kým je aplikácia otvorená.
+    Auto Refresh Interval: "Určuje, ako často OpenTubeX automaticky obnoví kanál odberov, kým je aplikácia otvorená. V Androide nenulový interval obnovuje kanál aj vtedy, keď je aplikácia zatvorená."
   Theme Settings:
     Show Progress as Notification: Namiesto globálneho ukazovateľa priebehu zobrazí trvalé oznámenie s aktuálnym priebehom operácií na pozadí, napríklad obnovovania odberov a sťahovania spravovaných nástrojov.
     Always Show Scrollbars: Posúvače zostanú stále viditeľné. Po vypnutí krátko po zastavení pohybu myši zmiznú a pri ďalšom pohybe sa znova zobrazia.

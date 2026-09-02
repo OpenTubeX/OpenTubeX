@@ -1425,7 +1425,7 @@ Tooltips:
     Show New Content Feed: 顯示「新增」分頁，其中包含上次擷取時尚未出現的訂閱動態消息項目。
     Show New Content Indicators: 在上次擷取時尚未出現的訂閱動態消息項目旁顯示小圓點。
     Show Scheduled Live Streams / Premieres First: 將即將開始的直播與首播保留在訂閱動態消息頂端。停用後，這些項目會留在公告時的位置，直到開始為止。停用後請重新整理一次訂閱動態消息，以取得現有排程項目的公告日期。
-    Auto Refresh Interval: 應用程式開啟時，OpenTubeX 自動重新整理訂閱動態消息的頻率。
+    Auto Refresh Interval: "應用程式開啟時，OpenTubeX 自動重新整理訂閱動態消息的頻率。 在 Android 上，非零間隔也會在應用程式關閉時重新整理訂閱源。"
   Theme Settings:
     Show Progress as Notification: 以持續顯示的通知呈現背景作業的即時進度（例如重新整理訂閱與下載受管理工具），而不使用全域進度列。
     Always Show Scrollbars: 讓捲動軸隨時保持顯示。停用後，停止移動滑鼠不久便會淡出，再次移動滑鼠時則會立即顯示。

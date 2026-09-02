@@ -1454,7 +1454,7 @@ Tooltips:
     Show New Content Feed: Mostra um separador Novos com os elementos do feed de subscrições que não estavam presentes na obtenção anterior.
     Show New Content Indicators: Mostra um pequeno ponto junto aos elementos do feed de subscrições que não estavam presentes na obtenção anterior.
     Show Scheduled Live Streams / Premieres First: Mantém as próximas emissões em direto e estreias no início do feed de subscrições. Quando esta opção está desativada, permanecem na posição em que foram anunciadas até começarem. Depois de desativar, atualize uma vez o feed de subscrições para obter as datas de anúncio das entradas agendadas existentes.
-    Auto Refresh Interval: A frequência com que o OpenTubeX atualiza automaticamente o feed de subscrições enquanto a aplicação está aberta.
+    Auto Refresh Interval: "A frequência com que o OpenTubeX atualiza automaticamente o feed de subscrições enquanto a aplicação está aberta. No Android, um intervalo diferente de zero também atualiza o feed enquanto a aplicação está fechada."
   Theme Settings:
     Show Progress as Notification: Mostra uma notificação persistente com o progresso em tempo real das operações em segundo plano, como a atualização das subscrições e as descargas de ferramentas geridas, em vez de utilizar a barra de progresso global.
     Always Show Scrollbars: Mantém as barras de deslocamento sempre visíveis. Quando esta opção está desativada, desaparecem pouco depois de parar de mover o rato e reaparecem assim que volta a movê-lo.

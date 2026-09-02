@@ -11,7 +11,7 @@ public class SubscriptionRefreshStateTest {
     @Test
     public void onlyCurrentRefreshCanUpdateOrFinish() {
         SubscriptionRefreshState state = new SubscriptionRefreshState();
-        state.begin("current", "Refreshing subscriptions");
+        state.begin("current", "Refreshing subscriptions", "Cancel");
 
         assertFalse(state.update("stale", 50));
         assertFalse(state.finish("stale"));
@@ -26,7 +26,7 @@ public class SubscriptionRefreshStateTest {
     @Test
     public void progressIsClamped() {
         SubscriptionRefreshState state = new SubscriptionRefreshState();
-        state.begin("refresh", "Refreshing subscriptions");
+        state.begin("refresh", "Refreshing subscriptions", "Cancel");
 
         assertTrue(state.update("refresh", -5));
         assertEquals(0, state.snapshot("refresh").progress);
@@ -37,10 +37,11 @@ public class SubscriptionRefreshStateTest {
     @Test
     public void startingAnotherRefreshInvalidatesThePreviousToken() {
         SubscriptionRefreshState state = new SubscriptionRefreshState();
-        state.begin("first", "Refreshing videos");
-        state.begin("second", "Refreshing shorts");
+        state.begin("first", "Refreshing videos", "Cancel");
+        state.begin("second", "Refreshing shorts", "Cancel");
 
         assertNull(state.snapshot("first"));
         assertEquals("Refreshing shorts", state.snapshot("second").title);
+        assertEquals("Cancel", state.snapshot("second").cancelLabel);
     }
 }

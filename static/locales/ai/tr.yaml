@@ -1419,7 +1419,7 @@ Tooltips:
     Show New Content Feed: Önceki getirme sırasında bulunmayan abonelik akışı öğelerini içeren Yeni sekmesini gösterir.
     Show New Content Indicators: Önceki getirme sırasında bulunmayan abonelik akışı öğelerinin yanında küçük bir nokta gösterir.
     Show Scheduled Live Streams / Premieres First: Yaklaşan canlı yayınları ve ilk gösterimleri abonelik akışının en üstünde tutar. Devre dışı bırakıldığında başlayana kadar duyuruldukları konumda kalırlar. Mevcut planlanmış kayıtların duyuru tarihlerini almak için devre dışı bıraktıktan sonra abonelik akışını bir kez yenileyin.
-    Auto Refresh Interval: Uygulama açıkken OpenTubeX'in abonelik akışınızı ne sıklıkla otomatik yenileyeceğini belirler.
+    Auto Refresh Interval: "Uygulama açıkken OpenTubeX'in abonelik akışınızı ne sıklıkla otomatik yenileyeceğini belirler. Android’de sıfırdan farklı bir aralık, uygulama kapalıyken de akışı yeniler."
   Theme Settings:
     Show Progress as Notification: Abonelik yenilemeleri ve yönetilen araç indirmeleri gibi arka plan işlemlerinin anlık ilerlemesini genel ilerleme çubuğu yerine kalıcı bir bildirimde gösterir.
     Always Show Scrollbars: Kaydırma çubuklarını her zaman görünür tutar. Devre dışı bırakıldığında fareyi hareket ettirmeyi bıraktıktan kısa süre sonra kaybolur ve yeniden hareket ettirdiğinizde görünür.

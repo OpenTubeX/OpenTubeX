@@ -30,7 +30,7 @@ final class SubscriptionRefreshNotification {
         context.getSystemService(NotificationManager.class).createNotificationChannel(channel);
     }
 
-    static Notification build(Context context, String title, int progress) {
+    static Notification build(Context context, String token, String title, String cancelLabel, int progress) {
         createChannel(context);
         Notification.Builder builder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
             ? new Notification.Builder(context, CHANNEL_ID)
@@ -44,6 +44,15 @@ final class SubscriptionRefreshNotification {
             openApp,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
+        Intent cancelRefresh = new Intent(context, SubscriptionRefreshCancelReceiver.class)
+            .setAction(SubscriptionRefreshCancelReceiver.ACTION_CANCEL)
+            .putExtra(SubscriptionRefreshCancelReceiver.TOKEN_EXTRA, token);
+        PendingIntent cancelIntent = PendingIntent.getBroadcast(
+            context,
+            token.hashCode(),
+            cancelRefresh,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
 
         builder
             .setSmallIcon(R.drawable.ic_stat_opentubex)
@@ -51,6 +60,7 @@ final class SubscriptionRefreshNotification {
             .setContentText(progress + "%")
             .setCategory(Notification.CATEGORY_PROGRESS)
             .setContentIntent(contentIntent)
+            .addAction(new Notification.Action.Builder(0, cancelLabel, cancelIntent).build())
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setShowWhen(false);
@@ -64,8 +74,14 @@ final class SubscriptionRefreshNotification {
         return builder.build();
     }
 
-    static ForegroundInfo foregroundInfo(Context context, String title, int progress) {
-        Notification notification = build(context, title, progress);
+    static ForegroundInfo foregroundInfo(
+        Context context,
+        String token,
+        String title,
+        String cancelLabel,
+        int progress
+    ) {
+        Notification notification = build(context, token, title, cancelLabel, progress);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             return new ForegroundInfo(
                 NOTIFICATION_ID,

@@ -35,6 +35,7 @@ import { includeAutomaticDownloadChannels, startAutomaticDownloadsForChannel } f
 import { extractAssignedJsonObject } from './assigned-json'
 import { getLocalPremiereState } from './premiere'
 import { shouldShowProgressStartToast } from './progressPresentation'
+import { isAndroidSubscriptionRefreshActive } from './androidSubscriptionRefresh'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
 export const SUBSCRIPTION_REFRESH_CHANNEL_EVENT = 'opentubex-subscription-refresh-channel'
@@ -128,6 +129,10 @@ function isRefreshCancelled() {
  */
 async function withSubscriptionRefreshLock(tab, profileId, refresh) {
   if (store.getters.getSubscriptionFeedRefreshInProgress) {
+    return null
+  }
+
+  if (process.env.IS_CAPACITOR && await isAndroidSubscriptionRefreshActive()) {
     return null
   }
 

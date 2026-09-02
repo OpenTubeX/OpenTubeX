@@ -1458,7 +1458,7 @@ Tooltips:
     Show New Content Feed: Toont een tabblad Nieuw met items uit de abonnementsfeed die bij de vorige ophaalactie nog niet aanwezig waren.
     Show New Content Indicators: Toont een klein puntje naast items uit de abonnementsfeed die bij de vorige ophaalactie nog niet aanwezig waren.
     Show Scheduled Live Streams / Premieres First: Houdt aankomende livestreams en premières bovenaan de abonnementsfeed. Als dit is uitgeschakeld, blijven ze tot hun start op de positie van hun aankondiging staan. Vernieuw na het uitschakelen de abonnementsfeed eenmaal om de aankondigingsdatums van bestaande geplande items op te halen.
-    Auto Refresh Interval: Hoe vaak OpenTubeX je abonnementsfeed automatisch vernieuwt terwijl de app geopend is.
+    Auto Refresh Interval: "Hoe vaak OpenTubeX je abonnementsfeed automatisch vernieuwt terwijl de app geopend is. Op Android vernieuwt een interval dat niet nul is de feed ook wanneer de app gesloten is."
   Theme Settings:
     Show Progress as Notification: Toont een blijvende melding met actuele voortgang voor achtergrondbewerkingen, zoals het vernieuwen van abonnementen en downloaden van beheerde hulpprogramma's, in plaats van de algemene voortgangsbalk.
     Always Show Scrollbars: Houdt de schuifbalken altijd zichtbaar. Als dit is uitgeschakeld, verdwijnen ze kort nadat je stopt met het bewegen van de muis en verschijnen ze weer zodra je de muis beweegt.

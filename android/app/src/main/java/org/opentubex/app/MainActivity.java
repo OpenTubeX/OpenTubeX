@@ -10,6 +10,18 @@ import com.getcapacitor.PluginHandle;
 
 public class MainActivity extends BridgeActivity {
     @Override
+    public void onStart() {
+        super.onStart();
+        AppVisibility.setVisible(true);
+    }
+
+    @Override
+    public void onStop() {
+        AppVisibility.setVisible(false);
+        super.onStop();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         registerPlugin(PoTokenPlugin.class);
         registerPlugin(AndroidUiPlugin.class);

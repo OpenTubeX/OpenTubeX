@@ -1421,7 +1421,7 @@ Tooltips:
     Show New Content Feed: Kuvab vahelehe Uus, mis sisaldab tellimuste voo üksusi, mida eelmise hankimise ajal polnud.
     Show New Content Indicators: Kuvab väikese punkti nende tellimuste voo üksuste kõrval, mida eelmise hankimise ajal polnud.
     Show Scheduled Live Streams / Premieres First: Hoiab eelseisvad otseülekanded ja esilinastused tellimuste voo alguses. Kui see on välja lülitatud, jäävad need ülekande alguseni oma väljakuulutamise kohale. Olemasolevate ajastatud kirjete väljakuulutamise kuupäevade hankimiseks värskenda pärast väljalülitamist üks kord tellimuste voogu.
-    Auto Refresh Interval: Kui tihti OpenTubeX rakenduse töötamise ajal tellimuste voogu automaatselt värskendab.
+    Auto Refresh Interval: "Kui tihti OpenTubeX rakenduse töötamise ajal tellimuste voogu automaatselt värskendab. Androidis värskendab nullist erinev intervall voogu ka siis, kui rakendus on suletud."
   Theme Settings:
     Show Progress as Notification: Kuvab üldise edenemisriba asemel taustatoimingute, näiteks tellimuste värskendamise ja hallatavate tööriistade allalaadimise, reaalajas edenemisega püsiva teavituse.
     Always Show Scrollbars: Hoiab kerimisribad alati nähtaval. Kui see on välja lülitatud, kaovad need veidi pärast hiire liigutamise lõpetamist ja ilmuvad uuesti kohe, kui hiirt taas liigutad.

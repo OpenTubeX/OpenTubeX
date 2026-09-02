@@ -1448,7 +1448,7 @@ Tooltips:
     Show New Content Feed: Sýnir flipann Nýtt með færslum í áskriftarstreymi sem voru ekki til staðar þegar það var síðast sótt.
     Show New Content Indicators: Sýnir lítinn punkt við færslur í áskriftarstreymi sem voru ekki til staðar þegar það var síðast sótt.
     Show Scheduled Live Streams / Premieres First: Heldur væntanlegum beinum útsendingum og frumsýningum efst í áskriftarstreymi. Ef slökkt er á þessu haldast þær á upprunalegum stað í röðinni þar til þær hefjast. Endurnýjaðu áskriftarstreymið einu sinni eftir að slökkt er á þessu til að sækja tilkynningardagsetningar fyrir fyrirliggjandi tímasettar færslur.
-    Auto Refresh Interval: Hversu oft OpenTubeX endurnýjar áskriftarstreymið sjálfkrafa meðan forritið er opið.
+    Auto Refresh Interval: "Hversu oft OpenTubeX endurnýjar áskriftarstreymið sjálfkrafa meðan forritið er opið. Í Android endurnýjar bil sem er ekki núll einnig veituna þegar appið er lokað."
   Theme Settings:
     Show Progress as Notification: Sýnir tilkynningu með framvindu bakgrunnsaðgerða í rauntíma sem hverfur ekki, svo sem við endurnýjun áskriftarstreymis og niðurhal tóla sem forritið sér um, í stað almennu framvindustikunnar.
     Always Show Scrollbars: Heldur skrunstikum alltaf sýnilegum. Ef slökkt er á þessu dofna þær stuttu eftir að músin hættir að hreyfast og birtast aftur um leið og hún er hreyfð.
