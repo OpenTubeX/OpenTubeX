@@ -325,6 +325,7 @@ test.describe('default appearance', () => {
     await expect(fontOptions.nth(3)).toHaveAttribute('aria-selected', 'true')
     await appFont.click()
 
+    await page.locator('.settingsCloseButton').click()
     await page.locator('.profileTrigger').click()
     const profileSummary = page.locator('.profileSummary')
     await expect(profileSummary).toBeVisible()

@@ -674,7 +674,12 @@ test.describe('settings', () => {
     const appearance = await goToSettingsSection(page, 'appearance')
     const headings = appearance.getByRole('heading', { level: 3 })
 
-    await expect(headings).toHaveText(['Theme', 'Layout', 'Video lists and thumbnails'])
+    await expect(headings).toHaveText([
+      'Theme',
+      'Layout',
+      'Quick settings',
+      'Video lists and thumbnails',
+    ])
     const theme = appearance.locator('.settingsSection').filter({
       has: page.getByRole('heading', { name: 'Theme', exact: true })
     })
