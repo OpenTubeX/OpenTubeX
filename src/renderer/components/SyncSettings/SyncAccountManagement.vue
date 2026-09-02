@@ -4,16 +4,29 @@
     :aria-labelledby="headingId"
   >
     <div class="managementHeader">
-      <div>
-        <h3 :id="headingId">
-          {{ t('Settings.Sync Settings.Devices') }}
-        </h3>
-        <p>{{ t('Settings.Sync Settings.Devices Hint') }}</p>
+      <div class="managementTitle">
+        <span
+          class="managementIcon"
+          aria-hidden="true"
+        >
+          <FtIcon :icon="['fas', 'display']" />
+        </span>
+        <div>
+          <h3 :id="headingId">
+            {{ t('Settings.Sync Settings.Devices') }}
+          </h3>
+          <p>{{ t('Settings.Sync Settings.Devices Hint') }}</p>
+        </div>
       </div>
-      <FtButton
-        :label="t('Settings.Sync Settings.Refresh Devices')"
+      <FtIconButton
+        class="managementAction"
+        :title="t('Settings.Sync Settings.Refresh Devices')"
         :icon="['fas', 'sync']"
         :disabled="loading || actionBusy"
+        :use-shadow="false"
+        :padding="11"
+        :size="20"
+        theme="base-no-default"
         @click="loadSessions"
       />
     </div>
@@ -34,9 +47,16 @@
         v-for="session in sessions"
         :key="session.id"
         class="sessionCard"
+        :class="{ currentSession: session.current }"
       >
-        <div class="sessionSummary">
-          <div>
+        <span
+          class="sessionDeviceIcon"
+          aria-hidden="true"
+        >
+          <FtIcon :icon="deviceIcon(session.deviceInfo.platform)" />
+        </span>
+        <div class="sessionContent">
+          <div class="sessionSummary">
             <h4>{{ session.deviceInfo.name }}</h4>
             <span
               v-if="session.current"
@@ -45,42 +65,101 @@
               {{ t('Settings.Sync Settings.Current Device') }}
             </span>
           </div>
-          <FtFlexBox class="sessionActions">
-            <FtButton
-              :label="t('Settings.Sync Settings.Rename Device')"
-              :icon="['fas', 'edit']"
-              :disabled="actionBusy"
-              @click="openRenamePrompt(session)"
-            />
-            <FtButton
-              :label="t('Settings.Sync Settings.Revoke Session')"
-              :icon="['fas', 'trash']"
-              theme="destructive"
-              :disabled="actionBusy"
-              @click="sessionToRevoke = session"
-            />
-          </FtFlexBox>
+          <dl class="sessionDetails">
+            <div v-if="systemLabel(session.deviceInfo)">
+              <dt>
+                <FtIcon
+                  :icon="['fas', 'display']"
+                  aria-hidden="true"
+                />
+                {{ t('Settings.Sync Settings.Operating System') }}
+              </dt>
+              <dd>{{ systemLabel(session.deviceInfo) }}</dd>
+            </div>
+            <div>
+              <dt>
+                <FtIcon
+                  :icon="['fas', 'calendar-days']"
+                  aria-hidden="true"
+                />
+                {{ t('Settings.Sync Settings.Session Created') }}
+              </dt>
+              <dd><time :datetime="isoDate(session.created_at)">{{ dateLabel(session.created_at) }}</time></dd>
+            </div>
+            <div>
+              <dt>
+                <FtIcon
+                  :icon="['fas', 'clock']"
+                  aria-hidden="true"
+                />
+                {{ t('Settings.Sync Settings.Last Active') }}
+              </dt>
+              <dd>
+                <time
+                  :datetime="isoDate(session.last_active_at)"
+                  :title="dateLabel(session.last_active_at)"
+                >{{ relativeDateLabel(session.last_active_at) }}</time>
+              </dd>
+            </div>
+            <div>
+              <dt>
+                <FtIcon
+                  :icon="['fas', 'clock-rotate-left']"
+                  aria-hidden="true"
+                />
+                {{ t('Settings.Sync Settings.Session Expires') }}
+              </dt>
+              <dd><time :datetime="isoDate(session.expires_at)">{{ dateLabel(session.expires_at) }}</time></dd>
+            </div>
+          </dl>
         </div>
-        <dl class="sessionDetails">
-          <div v-if="systemLabel(session.deviceInfo)">
-            <dt>{{ t('Settings.Sync Settings.Operating System') }}</dt>
-            <dd>{{ systemLabel(session.deviceInfo) }}</dd>
-          </div>
-          <div>
-            <dt>{{ t('Settings.Sync Settings.Session Created') }}</dt>
-            <dd><time :datetime="isoDate(session.created_at)">{{ dateLabel(session.created_at) }}</time></dd>
-          </div>
-          <div>
-            <dt>{{ t('Settings.Sync Settings.Last Active') }}</dt>
-            <dd><time :datetime="isoDate(session.last_active_at)">{{ dateLabel(session.last_active_at) }}</time></dd>
-          </div>
-          <div>
-            <dt>{{ t('Settings.Sync Settings.Session Expires') }}</dt>
-            <dd><time :datetime="isoDate(session.expires_at)">{{ dateLabel(session.expires_at) }}</time></dd>
-          </div>
-        </dl>
+        <div class="sessionActions">
+          <FtIconButton
+            class="sessionAction"
+            :title="t('Settings.Sync Settings.Rename Device')"
+            :icon="['fas', 'edit']"
+            :disabled="actionBusy"
+            :use-shadow="false"
+            :padding="11"
+            :size="20"
+            theme="base-no-default"
+            @click="openRenamePrompt(session)"
+          />
+          <FtIconButton
+            class="sessionAction revokeAction"
+            :title="t('Settings.Sync Settings.Revoke Session')"
+            :icon="['fas', 'trash']"
+            :disabled="actionBusy"
+            :use-shadow="false"
+            :padding="11"
+            :size="20"
+            theme="base-no-default"
+            @click="sessionToRevoke = session"
+          />
+        </div>
       </li>
     </ul>
+
+    <button
+      v-if="passwordLogin"
+      class="passwordAction"
+      type="button"
+      :disabled="accountActionsDisabled || actionBusy"
+      @click="emit('change-password')"
+    >
+      <span
+        class="passwordActionIcon"
+        aria-hidden="true"
+      >
+        <FtIcon :icon="['fas', 'key']" />
+      </span>
+      <span>{{ t('Settings.Sync Settings.Change Password') }}</span>
+      <FtIcon
+        class="passwordActionArrow"
+        :icon="['fas', 'arrow-right']"
+        aria-hidden="true"
+      />
+    </button>
 
     <FtPrompt
       v-if="sessionToRename"
@@ -162,15 +241,18 @@
 </template>
 
 <script setup>
+import { FtIcon } from '@opentubex/icons'
 import { computed, onMounted, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
+import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { formatDateTime } from '../../helpers/dateFormat'
 import {
   SyncServerClient,
@@ -183,7 +265,7 @@ import {
   isValidSyncServerDeviceId,
   isValidSyncServerDeviceName,
 } from '../../helpers/sync-server-sessions'
-import { showToast } from '../../helpers/utils'
+import { getRelativeTimeFromDate, showToast } from '../../helpers/utils'
 import store from '../../store/index'
 
 const props = defineProps({
@@ -207,13 +289,22 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  passwordLogin: {
+    type: Boolean,
+    required: true,
+  },
+  accountActionsDisabled: {
+    type: Boolean,
+    required: true,
+  },
 })
-const emit = defineEmits(['current-revoked', 'password-login-changed'])
+const emit = defineEmits(['change-password', 'current-revoked', 'password-login-changed'])
 
 const { locale, t } = useI18n()
 const headingId = useId()
 const dateFormat = computed(() => store.getters.getDateFormat)
 const timeFormat = computed(() => store.getters.getTimeFormat)
+const relativeTimeNow = useRelativeTimeClock()
 const loading = ref(true)
 const actionBusy = ref(false)
 const error = ref('')
@@ -238,6 +329,10 @@ function dateLabel(timestamp) {
   )
 }
 
+function relativeDateLabel(timestamp) {
+  return getRelativeTimeFromDate(timestamp, true, true, relativeTimeNow.value)
+}
+
 function isoDate(timestamp) {
   return new Date(timestamp).toISOString()
 }
@@ -258,6 +353,10 @@ function systemLabel(deviceInfo) {
   return [platform && `${platform}${deviceInfo.release ? ` ${deviceInfo.release}` : ''}`, deviceInfo.architecture]
     .filter(Boolean)
     .join(' · ')
+}
+
+function deviceIcon(platform) {
+  return platform === 'web' ? ['fas', 'globe'] : ['fas', 'display']
 }
 
 async function handleRequestError(requestError, requestToken, target = error) {

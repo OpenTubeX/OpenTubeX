@@ -254,6 +254,9 @@ test.describe('OpenTubeX sync server', () => {
       const currentCard = devices.locator('.sessionCard', { hasText: 'Current device' })
       await expect(currentCard).toBeVisible()
       await expect(currentCard.getByRole('heading')).not.toHaveText('Unknown device')
+      const lastActiveTime = currentCard.locator('.sessionDetails > div', { hasText: 'Last active' }).locator('time')
+      await expect(lastActiveTime).toHaveText(/ago|Moments ago/)
+      await expect(lastActiveTime).toHaveAttribute('title', /\b20\d{2}\b/)
       const deviceInfo = await page.evaluate(() => window.ftElectron.getDeviceInfo())
       await expect(currentCard).toContainText(
         `${deviceInfo.platform}${deviceInfo.release ? ` ${deviceInfo.release}` : ''}`
@@ -335,7 +338,7 @@ test.describe('OpenTubeX sync server', () => {
       await devices.getByRole('button', { name: 'Refresh devices' }).click()
       await staleSessionRequestRequested
       try {
-        await syncSection.getByRole('button', { name: 'Change password' }).click()
+        await devices.getByRole('button', { name: 'Change password' }).click()
         const passwordPrompt = page.getByRole('dialog', { name: 'Change password' })
         await passwordPrompt.getByLabel('Current password').fill(accountPassword)
         await passwordPrompt.getByLabel('New password', { exact: true }).fill('new-local-test-password')
