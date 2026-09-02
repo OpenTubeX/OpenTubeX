@@ -32,6 +32,7 @@ export const performanceMetrics = [
     label: 'Startup: renderer longest frame',
     unit: 'ms',
     absoluteLimit: 500,
+    absoluteMinimumDelta: 100,
     relativeLimit: 1.2,
     minimumDelta: 100
   },
@@ -48,6 +49,7 @@ export const performanceMetrics = [
     label: 'Large route navigation longest frame',
     unit: 'ms',
     absoluteLimit: 200,
+    absoluteMinimumDelta: longestFrameMinimumDeltaMs,
     relativeLimit: 1.2,
     minimumDelta: longestFrameMinimumDeltaMs
   },
@@ -64,6 +66,7 @@ export const performanceMetrics = [
     label: 'Channel search longest frame',
     unit: 'ms',
     absoluteLimit: 100,
+    absoluteMinimumDelta: longestFrameMinimumDeltaMs,
     relativeLimit: 1.2,
     minimumDelta: longestFrameMinimumDeltaMs
   },
@@ -80,6 +83,7 @@ export const performanceMetrics = [
     label: 'First subscription switch longest frame',
     unit: 'ms',
     absoluteLimit: 200,
+    absoluteMinimumDelta: longestFrameMinimumDeltaMs,
     relativeLimit: 1.2,
     minimumDelta: longestFrameMinimumDeltaMs
   },
@@ -96,6 +100,7 @@ export const performanceMetrics = [
     label: 'Repeated subscription switch longest frame',
     unit: 'ms',
     absoluteLimit: 100,
+    absoluteMinimumDelta: longestFrameMinimumDeltaMs,
     relativeLimit: 1.2,
     minimumDelta: longestFrameMinimumDeltaMs
   },
@@ -104,6 +109,7 @@ export const performanceMetrics = [
     label: 'Large feed scrolling longest frame',
     unit: 'ms',
     absoluteLimit: 100,
+    absoluteMinimumDelta: longestFrameMinimumDeltaMs,
     relativeLimit: 1.2,
     minimumDelta: longestFrameMinimumDeltaMs
   },
@@ -131,6 +137,7 @@ export const performanceMetrics = [
     label: 'Local playback start longest frame',
     unit: 'ms',
     absoluteLimit: 750,
+    absoluteMinimumDelta: longestFrameMinimumDeltaMs,
     relativeLimit: 1.2,
     minimumDelta: longestFrameMinimumDeltaMs
   },
@@ -176,7 +183,8 @@ export function comparePerformanceSamples(samples) {
       Math.max(baseMedian, definition.relativeBaselineFloor ?? Number.MIN_VALUE)
     const gated = definition.gate !== false
     const crossesAbsoluteLimit = gated && definition.absoluteLimit !== undefined &&
-      baseMedian < definition.absoluteLimit && candidateMedian >= definition.absoluteLimit
+      baseMedian < definition.absoluteLimit && candidateMedian >= definition.absoluteLimit &&
+      delta > (definition.absoluteMinimumDelta ?? 0)
     const relativeRegression = gated && definition.relativeLimit !== undefined &&
       thresholdRatio > definition.relativeLimit && delta > definition.minimumDelta
 
@@ -230,12 +238,15 @@ function formatLimit(metric) {
   if (metric.gate === false) {
     return 'Diagnostic'
   }
-  const relativeLimit = `+${((metric.relativeLimit - 1) * 100).toFixed(0)}% and ` +
-    `+${metricValue(metric, metric.minimumDelta)}`
+  const minimumDelta = `+${metricValue(metric, metric.minimumDelta)}`
+  const relativeLimit = `+${((metric.relativeLimit - 1) * 100).toFixed(0)}% and ${minimumDelta}`
   if (metric.absoluteLimit === undefined) {
     return relativeLimit
   }
-  return `${metricValue(metric, metric.absoluteLimit)}<br>or ${relativeLimit}`
+  const absoluteMinimumDelta = metric.absoluteMinimumDelta === undefined
+    ? ''
+    : ` and +${metricValue(metric, metric.absoluteMinimumDelta)}`
+  return `${metricValue(metric, metric.absoluteLimit)}${absoluteMinimumDelta}<br>or ${relativeLimit}`
 }
 
 export function renderPerformanceSummary(base, candidate, comparison, reportOnly = false) {

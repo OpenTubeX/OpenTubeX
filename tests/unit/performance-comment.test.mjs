@@ -130,6 +130,18 @@ test('ignores a one-frame shift in longest-frame samples', () => {
   assert.doesNotMatch(comment, /Large route navigation longest frame regressed/)
 })
 
+test('ignores a one-frame shift that reaches a longest-frame limit', () => {
+  const input = result({ firstSwitchLongestFrameMs: 200 })
+  input.samples.base = Array.from({ length: 7 }, () => sample({
+    firstSwitchLongestFrameMs: 183.3
+  }))
+
+  const comment = renderPerformanceComment(input, { headSha, runUrl })
+
+  assert.match(comment, /First subscription switch longest frame .+ \+9\.1% .+ Pass/)
+  assert.doesNotMatch(comment, /First subscription switch longest frame is .+ at or above/)
+})
+
 test('reports a two-frame shift in longest-frame samples', () => {
   const input = result({ subscribedChannelsNavigationLongestFrameMs: 100 })
   input.samples.base = Array.from({ length: 7 }, () => sample({
