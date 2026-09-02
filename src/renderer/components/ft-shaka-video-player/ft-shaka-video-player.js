@@ -4581,6 +4581,7 @@ export default defineComponent({
       isFullscreenMetadataShown: () => showFullscreenMetadata.value,
       isFullscreenSwipeEnabled: () => enableMobileFullscreenSwipe.value,
       isPlaybackEnded: () => video.value?.ended === true,
+      isPlaybackPaused: () => video.value?.paused === true,
       isPlayerSurfaceTarget,
       isScrollMiniPlayerActive: () => scrollMiniPlayerActive.value,
       setFullscreenMetadata,
