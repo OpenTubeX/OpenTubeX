@@ -194,8 +194,8 @@ test('line-delimited search history keeps valid rows around a malformed row', as
   await expect.poll(() => page.evaluate(() => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     return store.getters.getSearchHistoryEntries
-      .map(({ _id }) => _id)
-      .filter(id => id.startsWith('issue866-search-'))
+      .map(({ query }) => query)
+      .filter(query => query.startsWith('issue866-search-'))
       .sort()
   })).toEqual(['issue866-search-a', 'issue866-search-b'])
   expect(pageErrors).toEqual([])
