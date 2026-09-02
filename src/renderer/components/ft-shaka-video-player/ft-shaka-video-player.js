@@ -4507,6 +4507,10 @@ export default defineComponent({
         return
       }
 
+      if (event.target.closest(`${FULLSCREEN_DOCK_HEADER_SELECTOR}, .fullscreenDockResizeHandle`)) {
+        return
+      }
+
       const interactiveTarget = event.target.closest(
         '.playerFullscreenTitleOverlay, .fullscreenActions, .fullscreenMetadataOverlay, ' +
         '.fullscreenTranscriptOverlay, .fullscreenSponsorBlockOverlay, .fullscreenLiveChatOverlay, ' +
