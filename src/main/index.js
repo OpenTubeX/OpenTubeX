@@ -70,6 +70,12 @@ import { clearVideoMetadataCache, getVideoMetadataCacheSize, updateVideoMetadata
 import { shouldAdvanceDockMediaSequence } from './dockMediaSession'
 import { clearStorage, compactStorageDatabases, getStorageUsage } from './storage'
 import { getLinuxDistributionInfo } from './linuxDistribution'
+import {
+  createKdeWaylandWindowStateBackend,
+  isWaylandPlatform as detectWaylandPlatform,
+  monitorKdeWaylandWindowState,
+  shouldMonitorKdeWaylandWindowState,
+} from './kdeWaylandWindowState'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
 if (process.argv.includes('--version')) {
@@ -1690,7 +1696,27 @@ function runApp() {
   const pendingOpenUrlsByWebContentsId = new Map()
   const openUrlReadyWebContentsIds = new Set()
   const activeLiveNotifications = new Set()
-  const isTrayOnMinimizeSupported = process.platform !== 'darwin' && (process.platform !== 'linux' || app.commandLine.getSwitchValue('ozone-platform') !== 'wayland')
+  const ozonePlatform = app.commandLine.getSwitchValue('ozone-platform')
+  const isWaylandPlatform = detectWaylandPlatform({
+    platform: process.platform,
+    ozonePlatform,
+    environment: process.env,
+  })
+  const monitorsKdeWaylandWindowState = shouldMonitorKdeWaylandWindowState({
+    platform: process.platform,
+    ozonePlatform,
+    environment: process.env,
+  })
+  const kdeWaylandWindowStateBackend = monitorsKdeWaylandWindowState
+    ? createKdeWaylandWindowStateBackend()
+    : Promise.resolve(null)
+  app.once('will-quit', () => {
+    kdeWaylandWindowStateBackend.then(backend => backend?.close()).catch(() => {})
+  })
+  const supportsAutoPictureInPictureMinimize = isWaylandPlatform
+    ? kdeWaylandWindowStateBackend.then(backend => backend !== null)
+    : Promise.resolve(true)
+  const isTrayOnMinimizeSupported = process.platform !== 'darwin' && !isWaylandPlatform
 
   const userDataPath = app.getPath('userData')
 
@@ -2703,6 +2729,25 @@ function runApp() {
             height: 800
           }
     })
+    const kdeWindowIdentity = monitorsKdeWaylandWindowState
+      ? `\u2063${newWindow.id.toString(2).replaceAll('0', '\u200b').replaceAll('1', '\u200c')}`
+      : ''
+    let kdeWindowIdentityReleased = false
+    const formatKdeWindowTitle = title => (
+      kdeWindowIdentityReleased || kdeWindowIdentity === '' || title.endsWith(kdeWindowIdentity)
+        ? title
+        : `${title}${kdeWindowIdentity}`
+    )
+    const applyKdeWindowIdentity = () => {
+      const title = formatKdeWindowTitle(newWindow.getTitle())
+      if (title !== newWindow.getTitle()) newWindow.setTitle(title)
+    }
+    const releaseKdeWindowIdentity = () => {
+      kdeWindowIdentityReleased = true
+      if (kdeWindowIdentity !== '' && !newWindow.isDestroyed() && newWindow.getTitle().endsWith(kdeWindowIdentity)) {
+        newWindow.setTitle(newWindow.getTitle().slice(0, -kdeWindowIdentity.length))
+      }
+    }
 
     // The single BrowserWindow renderer owns window.open handling through its
     // TabManager; logical tabs do not create child webContents.
@@ -2716,7 +2761,8 @@ function runApp() {
       newWindow,
       ROOT_APP_URL,
       preloadPath,
-      sessionData?.sessionId
+      sessionData?.sessionId,
+      title => newWindow.setTitle(formatKdeWindowTitle(title))
     )
 
     // Forward the native window minimized state to the renderer. The renderer can't
@@ -2732,6 +2778,15 @@ function runApp() {
     // Cover minimize-to-tray (and app hide), where the window is hidden rather than minimized.
     newWindow.on('hide', () => sendMinimizedState(true))
     newWindow.on('show', () => sendMinimizedState(false))
+    if (monitorsKdeWaylandWindowState) {
+      monitorKdeWaylandWindowState({
+        browserWindow: newWindow,
+        backend: kdeWaylandWindowStateBackend,
+        applyWindowIdentity: applyKdeWindowIdentity,
+        onMinimizedState: sendMinimizedState,
+        releaseWindowIdentity: releaseKdeWindowIdentity,
+      })
+    }
 
     // Renderer focus events can be skipped on Windows when focus returns after
     // another application's window is closed. Forward the native state so
@@ -2833,6 +2888,7 @@ function runApp() {
       if (isTrayOnMinimizeSupported && trayOnMinimize && trayWindows.length > 0) {
         trayClick(newWindow)
       } else {
+        applyKdeWindowIdentity()
         newWindow.show()
         newWindow.focus()
       }
@@ -3788,7 +3844,13 @@ function runApp() {
 
   ipcMain.handle(IpcChannels.IS_WAYLAND_PLATFORM, (event) => {
     if (isOpenTubeXUrl(event.senderFrame.url)) {
-      return app.commandLine.getSwitchValue('ozone-platform') === 'wayland'
+      return isWaylandPlatform
+    }
+  })
+
+  ipcMain.handle(IpcChannels.SUPPORTS_AUTO_PICTURE_IN_PICTURE_MINIMIZE, async (event) => {
+    if (isOpenTubeXUrl(event.senderFrame.url)) {
+      return supportsAutoPictureInPictureMinimize
     }
   })
 

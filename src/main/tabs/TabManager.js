@@ -702,9 +702,11 @@ export class TabManager {
    * @param {string} rootAppUrl
    * @param {string} _preloadPath
    * @param {string} [sessionId]
+   * @param {(title: string) => void} [setWindowTitle]
    */
-  constructor(browserWindow, rootAppUrl, _preloadPath, sessionId) {
+  constructor(browserWindow, rootAppUrl, _preloadPath, sessionId, setWindowTitle) {
     this.browserWindow = browserWindow
+    this._setWindowTitle = setWindowTitle ?? (title => browserWindow.setTitle(title))
     this.rootAppUrl = rootAppUrl
     this.sessionId = sessionId || randomUUID()
     /** @type {Map<string, TabInfo>} */
@@ -852,7 +854,7 @@ export class TabManager {
 
     tab.title = nextTitle
     if (this.activeTabId === tab.id) {
-      this.browserWindow.setTitle(nextTitle)
+      this._setWindowTitle(nextTitle)
     }
 
     this._broadcastStateUpdate()
@@ -1288,7 +1290,7 @@ export class TabManager {
     tab.lastActiveAt = Date.now()
     this.activeTabId = tabId
     this.selectionRevision += 1
-    this.browserWindow.setTitle(tab.title)
+    this._setWindowTitle(tab.title)
     this.bridge.send(IpcChannels.TABS_ACTIVE_CHANGED, tabId, this.selectionRevision)
     if (shouldResumeDeferredStartupWatchTabs) {
       this._resumeDeferredStartupWatchTabs()
@@ -3273,7 +3275,7 @@ export class TabManager {
       if (nextActiveTabId !== this.activeTabId || this.tabs.get(nextActiveTabId)?.loadState === 'unloaded') {
         this.activateTab(nextActiveTabId)
       } else {
-        this.browserWindow.setTitle(this.tabs.get(nextActiveTabId).title)
+        this._setWindowTitle(this.tabs.get(nextActiveTabId).title)
         this._broadcastStateUpdate()
       }
 

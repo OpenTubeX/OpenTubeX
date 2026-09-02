@@ -50,6 +50,9 @@ importers:
       bgutils-js:
         specifier: ^4.0.3
         version: 4.0.3
+      dbus-native:
+        specifier: ^0.15.2
+        version: 0.15.2
       dompurify:
         specifier: ^3.4.13
         version: 3.4.14
@@ -2458,6 +2461,11 @@ packages:
 
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+
+  dbus-native@0.15.2:
+    resolution: {integrity: sha512-J1IBi4LmbqrFhroN66Dj1tCCTP6TVbZgUKhWQZf3uS6t93yRWEcRRDjOZV9N6boGRhOp/BOjLliFm9vWu1QZOA==}
+    engines: {node: '>=22.12.0'}
+    hasBin: true
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -8076,6 +8084,10 @@ snapshots:
       css-tree: 2.2.1
 
   csstype@3.2.3: {}
+
+  dbus-native@0.15.2:
+    dependencies:
+      xml2js: 0.6.2
 
   debug@2.6.9:
     dependencies:

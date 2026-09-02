@@ -23,6 +23,7 @@ updates:
       - dependency-name: "@iconify/vue"
       - dependency-name: "@playwright/test"
       - dependency-name: "@vot.js/core"
+      - dependency-name: "dbus-native"
       - dependency-name: "eld"
       - dependency-name: "font-list"
       - dependency-name: "overlayscrollbars"

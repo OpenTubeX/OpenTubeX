@@ -119,6 +119,13 @@ export default {
   },
 
   /**
+   * @returns {Promise<boolean>}
+   */
+  supportsAutoPictureInPictureMinimize: () => {
+    return ipcRenderer.invoke(IpcChannels.SUPPORTS_AUTO_PICTURE_IN_PICTURE_MINIMIZE)
+  },
+
+  /**
    * @param {string} path
    * @param {Record<string, string> | null | undefined} query
    * @param {string | null | undefined} searchQueryText
