@@ -336,6 +336,7 @@ const playlistBookmarkPending = ref(false)
 const playlistPreloadPending = ref(false)
 const playlistPreloadComplete = ref(false)
 let playlistPreloadExpiryTimer = null
+let playlistPreloadRun = null
 /** @type {AbortController | null} */
 let undoToastAbortController = null
 let removePendingVideosAfterDrag = false
@@ -546,6 +547,8 @@ async function preloadPlaylist() {
     message: t('Playlist.Preloading Playlist'),
     percentage: 0,
   })
+  const preloadRun = { progressOperation }
+  playlistPreloadRun = preloadRun
   try {
     while (!isUserPlaylistRequested.value && moreVideoDataAvailable.value && nextPageError.value === '') {
       if (isLoadingMore.value) {
@@ -618,9 +621,20 @@ async function preloadPlaylist() {
       icon: result.failed === 0 ? ['fas', 'check'] : ['fas', 'circle-exclamation'],
     })
   } finally {
-    playlistPreloadPending.value = false
     progressOperation.finish()
+    if (playlistPreloadRun === preloadRun) {
+      playlistPreloadRun = null
+      playlistPreloadPending.value = false
+    }
   }
+}
+
+function releasePlaylistPreloadUi() {
+  if (playlistPreloadRun === null) return
+
+  playlistPreloadRun.progressOperation.finish()
+  playlistPreloadRun = null
+  playlistPreloadPending.value = false
 }
 
 /** @type {import('vue').ComputedRef<string | undefined>} */
@@ -773,6 +787,7 @@ const getPlaylistInfoDebounce = debounce(getPlaylistInfo, 100)
 
 function resetState() {
   playlistRequestGeneration++
+  releasePlaylistPreloadUi()
   clearPlaylistPreloadComplete()
   isLoading.value = true
   playlistTitle.value = ''
@@ -1565,6 +1580,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   playlistRequestGeneration++
+  releasePlaylistPreloadUi()
   clearPlaylistPreloadComplete()
   removePlaybackSourceCacheChangeListener()
   window.removeEventListener('resize', handleResize)
