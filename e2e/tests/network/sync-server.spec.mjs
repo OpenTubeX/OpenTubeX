@@ -108,7 +108,7 @@ test.describe('OpenTubeX sync server', () => {
     }
   })
 
-  test('pushes local data from multiple profiles and pulls remote changes', async ({ app, page }) => {
+  test('pushes local data from multiple profiles and pulls remote changes', async ({ app, page }, testInfo) => {
     const username = `opentubex-${Date.now()}-${Math.random().toString(16).slice(2)}`
     const capabilities = await getSyncCapabilities()
     const enhancedPrivacy = capabilities.encrypted_sync === 1
@@ -448,7 +448,10 @@ test.describe('OpenTubeX sync server', () => {
 
     const deletedAccountLoginResponse = await fetch(`${syncServerUrl}${apiPrefix}/account/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Forwarded-For': rateLimitClient(testInfo)
+      },
       body: JSON.stringify({ name: username, password: accountPassword })
     })
     expect(deletedAccountLoginResponse.ok).toBe(false)
@@ -458,7 +461,7 @@ test.describe('OpenTubeX sync server', () => {
     expect(await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')).toContain('dQw4w9WgXcQ')
   })
 
-  test('disconnects after revoking the current account session', async ({ page }) => {
+  test('disconnects after revoking the current account session', async ({ page }, testInfo) => {
     const capabilities = await getSyncCapabilities()
     test.skip(
       capabilities.encrypted_sync !== 1 || capabilities.account_sessions !== 1,
@@ -484,7 +487,10 @@ test.describe('OpenTubeX sync server', () => {
 
     const loginResponse = await fetch(`${syncServerUrl}/v1/account/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Forwarded-For': rateLimitClient(testInfo)
+      },
       body: JSON.stringify({ name: username, password })
     })
     expect(loginResponse.ok).toBe(true)
@@ -493,7 +499,8 @@ test.describe('OpenTubeX sync server', () => {
       method: 'DELETE',
       headers: {
         Authorization: jwt,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-Forwarded-For': rateLimitClient(testInfo)
       },
       body: JSON.stringify({ password })
     })
@@ -690,7 +697,7 @@ test.describe('OpenTubeX sync server', () => {
     expect(plaintextResponse.status).toBe(409)
   })
 
-  test('uses advertised history optimizations without rewriting unchanged local data', async ({ app, page }) => {
+  test('uses advertised history optimizations without rewriting unchanged local data', async ({ app, page }, testInfo) => {
     const username = `opentubex-fast-${Date.now()}-${Math.random().toString(16).slice(2)}`
     const bulkRequests = []
     const historyPageSizes = []
@@ -746,14 +753,15 @@ test.describe('OpenTubeX sync server', () => {
       method: 'DELETE',
       headers: {
         Authorization: settings.syncServerToken,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-Forwarded-For': rateLimitClient(testInfo)
       },
       body: JSON.stringify({ password: 'local-test-password' })
     })
     expect(cleanupResponse.ok).toBe(true)
   })
 
-  test('requires confirmation before an empty remote deletes local data', async ({ app, page }) => {
+  test('requires confirmation before an empty remote deletes local data', async ({ app, page }, testInfo) => {
     const username = `opentubex-reset-guard-${Date.now()}-${Math.random().toString(16).slice(2)}`
 
     await page.route('**/health', route => route.fulfill({
@@ -813,7 +821,8 @@ test.describe('OpenTubeX sync server', () => {
       method: 'DELETE',
       headers: {
         Authorization: settings.syncServerToken,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-Forwarded-For': rateLimitClient(testInfo)
       },
       body: JSON.stringify({ password: 'local-test-password' })
     })

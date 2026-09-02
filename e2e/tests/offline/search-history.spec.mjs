@@ -314,7 +314,10 @@ test.describe('search history suggestions', () => {
           type: 'all',
           duration: '',
           features: ['4k', 'hd']
-        }
+        },
+        nextPageRef: null,
+        hasMoreResults: false,
+        apiUsed: 'local'
       })
       store.commit('setSearchFeatures', { tabId, value: ['hd', '4k'] })
     })
