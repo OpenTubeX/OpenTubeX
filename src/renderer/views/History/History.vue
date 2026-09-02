@@ -37,12 +37,11 @@
         v-show="fullData.length > 1"
         ref="searchBar"
         class="historySearch"
+        input-type="search"
         :placeholder="t('History.Search bar placeholder')"
-        :show-clear-text-button="true"
         :show-action-button="false"
         :value="query"
         @input="handleQueryChange"
-        @clear="() => handleQueryChange('')"
       />
       <div
         v-if="fullData.length > 1"

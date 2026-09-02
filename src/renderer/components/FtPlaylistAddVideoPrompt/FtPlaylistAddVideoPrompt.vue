@@ -16,12 +16,11 @@
     >
       <FtInput
         ref="searchBar"
+        input-type="search"
         :placeholder="t('User Playlists.AddVideoPrompt.Search in Playlists')"
-        :show-clear-text-button="true"
         :show-action-button="false"
         :maxlength="255"
         @input="updateQueryDebounce"
-        @clear="updateQueryDebounce('')"
       />
     </div>
     <div

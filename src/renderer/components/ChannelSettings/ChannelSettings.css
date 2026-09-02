@@ -35,6 +35,68 @@
   margin-inline-start: 0;
 }
 
+.channelManagerToolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding-block-end: 12px;
+}
+
+.addSubscribedChannelPicker {
+  padding-inline: 12px;
+  text-align: start;
+}
+
+.addSubscribedChannelSearch {
+  margin-block-end: 8px;
+}
+
+.addSubscribedChannelEmptyState {
+  margin-block: 16px;
+  margin-inline: auto;
+  max-inline-size: 320px;
+  text-align: center;
+}
+
+.addSubscribedChannelList {
+  display: grid;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.addSubscribedChannelOption {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: calc(4px * var(--ui-roundness));
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 12px;
+  grid-template-columns: 40px minmax(0, 1fr) 16px;
+  inline-size: 100%;
+  min-block-size: 48px;
+  padding-block: 4px;
+  padding-inline: 8px;
+  text-align: start;
+}
+
+.addSubscribedChannelOption:is(:hover, :focus-visible) {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+.addSubscribedChannelName {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.addSubscribedChannelIcon {
+  justify-self: center;
+}
+
 .channelSearch {
   margin-block-end: 1em;
 }

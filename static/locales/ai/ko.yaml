@@ -699,6 +699,8 @@ Settings:
     Forget Channel: 이 채널의 모든 설정 삭제
     Forget Value: 이 설정 삭제
     Add Setting: 이 채널에 다른 설정 저장
+    Add Subscribed Channel: 구독 채널 추가
+    Enable Setting Before Adding Channel: 채널을 추가하기 전에 재생 설정에서 채널 설정을 하나 이상 활성화하세요
     Video Quality: 동영상 화질
     Subtitles Enabled: 자막 활성화됨
     Volume: 음량
@@ -1209,8 +1211,9 @@ Profile:
   Open Profile Dropdown: 프로필 드롭다운 열기
 Channel:
   Subscription settings: 구독 설정
-  Failed to save subscription settings: 구독 설정을 저장하지 못했습니다
+  Failed to save subscription settings: 채널 설정을 저장하지 못했습니다
   Videos per day: 일일 동영상 수
+  Different values: 서로 다른 값
   Use global setting: 전역 설정 사용
   Unlimited: 무제한
   More videos hidden: '+{count}개 더'

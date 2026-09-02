@@ -526,6 +526,8 @@ Settings:
     Forget Channel: 清除這個頻道的所有設定
     Forget Value: 清除這項設定
     Add Setting: 為這個頻道記住另一項設定
+    Add Subscribed Channel: 新增已訂閱的頻道
+    Enable Setting Before Adding Channel: 新增頻道前，請先在播放設定中啟用至少一項頻道設定
     Video Quality: 影片畫質
     Subtitles Enabled: 字幕已啟用
     Volume: 音量
@@ -957,8 +959,9 @@ Profile:
   Theme Color: 佈景主題色彩
 Channel:
   Subscription settings: 訂閱設定
-  Failed to save subscription settings: 無法儲存訂閱設定
+  Failed to save subscription settings: 無法儲存頻道設定
   Videos per day: 每日影片數
+  Different values: 不同的值
   Use global setting: 使用全域設定
   Unlimited: 不限
   More videos hidden: '另有 {count} 部'

@@ -536,6 +536,8 @@ Settings:
     Forget Channel: இந்தச் சேனலின் எல்லா அமைப்புகளையும் மற
     Forget Value: இந்த அமைப்பை மற
     Add Setting: இந்தச் சேனலுக்கான மற்றொரு அமைப்பை நினைவில் கொள்
+    Add Subscribed Channel: குழுசேர்ந்த சேனலைச் சேர்
+    Enable Setting Before Adding Channel: சேனலைச் சேர்ப்பதற்கு முன் பிளேபேக் அமைப்புகளில் குறைந்தது ஒரு சேனல் அமைப்பையாவது இயக்கு
     Video Quality: காணொளித் தரம்
     Subtitles Enabled: துணைத்தலைப்புகள் இயக்கப்பட்டுள்ளன
     Volume: ஒலியளவு
@@ -978,8 +980,9 @@ Profile:
   Theme Color: அலங்கார நிறம்
 Channel:
   Subscription settings: சந்தா அமைப்புகள்
-  Failed to save subscription settings: சந்தா அமைப்புகளைச் சேமிக்க முடியவில்லை
+  Failed to save subscription settings: சேனல் அமைப்புகளைச் சேமிக்க முடியவில்லை
   Videos per day: ஒரு நாளுக்கான காணொளிகள்
+  Different values: வெவ்வேறு மதிப்புகள்
   Use global setting: பொதுவான அமைப்பைப் பயன்படுத்து
   Unlimited: வரம்பற்றது
   More videos hidden: '+{count} மேலும் | +{count} மேலும்'

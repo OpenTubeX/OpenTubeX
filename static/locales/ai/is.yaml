@@ -532,6 +532,8 @@ Settings:
     Forget Channel: Gleyma öllum stillingum þessarar rásar
     Forget Value: Gleyma þessari stillingu
     Add Setting: Muna aðra stillingu fyrir þessa rás
+    Add Subscribed Channel: Bæta við áskriftarrás
+    Enable Setting Before Adding Channel: Virkjaðu að minnsta kosti eina rásarstillingu í spilunarstillingum áður en þú bætir við rás
     Video Quality: Myndgæði
     Subtitles Enabled: Skjátextar virkir
     Volume: Hljóðstyrkur
@@ -972,8 +974,9 @@ Profile:
   Theme Color: Þemalitur
 Channel:
   Subscription settings: Áskriftarstillingar
-  Failed to save subscription settings: Ekki tókst að vista áskriftarstillingar
+  Failed to save subscription settings: Ekki tókst að vista rásarstillingar
   Videos per day: Myndskeið á dag
+  Different values: Mismunandi gildi
   Use global setting: Nota almenna stillingu
   Unlimited: Ótakmarkað
   More videos hidden: '+{count} til viðbótar | +{count} til viðbótar'

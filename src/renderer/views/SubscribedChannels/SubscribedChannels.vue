@@ -13,13 +13,12 @@
       <ft-input
         v-show="subscribedChannels.length > 1"
         ref="searchBarChannels"
+        input-type="search"
         :placeholder="$t('Channels.Search bar placeholder')"
         :value="query"
-        :show-clear-text-button="true"
         :show-action-button="false"
         :maxlength="255"
         @input="handleQueryChange"
-        @clear="() => handleQueryChange('')"
       />
       <ft-flex-box
         v-if="activeSubscriptionList.length === 0"

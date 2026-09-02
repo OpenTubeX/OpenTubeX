@@ -524,6 +524,8 @@ Settings:
     Forget Channel: A csatorna összes beállításának elfelejtése
     Forget Value: Beállítás elfelejtése
     Add Setting: További beállítás megjegyzése ennél a csatornánál
+    Add Subscribed Channel: Feliratkozott csatorna hozzáadása
+    Enable Setting Before Adding Channel: Csatorna hozzáadása előtt engedélyezz legalább egy csatornabeállítást a lejátszási beállításokban
     Video Quality: Videóminőség
     Subtitles Enabled: Feliratok engedélyezve
     Volume: Hangerő
@@ -955,8 +957,9 @@ Profile:
   Theme Color: Téma színe
 Channel:
   Subscription settings: Feliratkozási beállítások
-  Failed to save subscription settings: Nem sikerült menteni a feliratkozási beállításokat
+  Failed to save subscription settings: Nem sikerült menteni a csatornabeállításokat
   Videos per day: Videók naponta
+  Different values: Eltérő értékek
   Use global setting: Globális beállítás használata
   Unlimited: Korlátlan
   More videos hidden: '+{count} további | +{count} további'

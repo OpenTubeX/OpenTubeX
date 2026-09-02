@@ -547,6 +547,8 @@ Settings:
     Forget Channel: Заборави сва подешавања за овај канал
     Forget Value: Заборави ово подешавање
     Add Setting: Запамти још једно подешавање за овај канал
+    Add Subscribed Channel: Додај канал на који сте претплаћени
+    Enable Setting Before Adding Channel: Пре додавања канала омогућите бар једно подешавање канала у подешавањима репродукције
     Video Quality: Квалитет видео-снимка
     Subtitles Enabled: Титлови укључени
     Volume: Јачина звука
@@ -1000,8 +1002,9 @@ Profile:
   Theme Color: Боја теме
 Channel:
   Subscription settings: Подешавања претплате
-  Failed to save subscription settings: Није могуће сачувати подешавања претплате
+  Failed to save subscription settings: Није могуће сачувати подешавања канала
   Videos per day: Видео-снимака дневно
+  Different values: Различите вредности
   Use global setting: Користи глобално подешавање
   Unlimited: Неограничено
   More videos hidden: '+{count} још | +{count} још | +{count} још'

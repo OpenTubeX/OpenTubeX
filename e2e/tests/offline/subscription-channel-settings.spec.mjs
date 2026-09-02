@@ -1,14 +1,22 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
+import {
+  test,
+  expect,
+  expectScrollAtRenderedEnd,
+  goTo,
+  goToSettingsSection,
+  setWindowSize
+} from '../../helpers/app.mjs'
 
 const CHANNEL_ID = `UC${'0'.repeat(22)}`
 const subscriptions = Array.from({ length: 18 }, (_, index) => ({
   id: `UC${String(index).padStart(22, '0')}`,
   name: index === 0 ? 'Alpha Channel' : `Channel ${String(index).padStart(2, '0')}`,
   thumbnail: '',
-  ...(index === 0 ? { feedTypes: ['videos'] } : {})
+  ...(index === 0 ? { feedTypes: ['videos'] } : {}),
+  ...(index === 1 ? { dailyVideoLimit: 1, showMembersOnly: true } : {})
 }))
 
 test.use({
@@ -155,10 +163,108 @@ test('keeps the popover and Subscription Settings manager in sync', async ({ app
     .getByRole('combobox', { name: 'Videos per day' })).toHaveText('Unlimited')
 })
 
+test('changes subscription settings for selected channels', async ({ app, attachScreenshot, page }) => {
+  const subscriptionSettings = await goToSettingsSection(page, 'subscription')
+  await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+
+  const selectionToolbar = page.locator('.channelSelectionToolbar')
+  const selectAll = selectionToolbar.getByRole('button', { name: 'Select All' })
+  const selectNone = selectionToolbar.getByRole('button', { name: 'Select None' })
+  await expect(selectAll.locator('.channelSelectionActionIcon')).toHaveCount(1)
+  await expect(selectNone.locator('.channelSelectionActionIcon')).toHaveCount(1)
+  for (const button of [selectAll, selectNone]) {
+    await expect.poll(() => button.evaluate(element => {
+      const label = element.querySelector(':scope > span')
+      const icon = element.querySelector(':scope > .channelSelectionActionIcon')
+      return label?.getBoundingClientRect().right <= icon?.getBoundingClientRect().left
+    })).toBe(true)
+  }
+  await expect(selectionToolbar).toContainText('0 selected')
+  await expect(page.locator('.bulkFeedTypeSettings')).toHaveCount(0)
+
+  await selectAll.click()
+  await expect(selectionToolbar).toContainText(`${subscriptions.length} selected`)
+  await expect(page.getByRole('checkbox', { name: 'Alpha Channel' }))
+    .toHaveAttribute('aria-checked', 'true')
+  await selectNone.click()
+
+  await page.getByRole('checkbox', { name: 'Alpha Channel' }).click()
+  await page.getByRole('checkbox', { name: 'Channel 01' }).click()
+  await expect(selectionToolbar).toContainText('2 selected')
+
+  const bulkSettings = page.locator('.bulkFeedTypeSettings')
+  const bulkVideos = bulkSettings.getByRole('checkbox', { name: 'Videos' })
+  const bulkShorts = bulkSettings.getByRole('checkbox', { name: 'Shorts' })
+  const bulkMembersOnly = bulkSettings.getByRole('checkbox', { name: 'Members only' })
+  const bulkDailyLimit = bulkSettings.getByRole('combobox', { name: 'Videos per day' })
+  await expect(bulkVideos).toHaveAttribute('aria-checked', 'true')
+  await expect(bulkShorts).toHaveAttribute('aria-checked', 'mixed')
+  await expect(bulkMembersOnly).toHaveAttribute('aria-checked', 'mixed')
+  await expect(bulkDailyLimit).toHaveText('Different values')
+
+  await setWindowSize(app, page, { width: 375, height: 700 })
+  await expect.poll(() => page.locator('.settingsContent').evaluate(element => (
+    element.scrollWidth - element.clientWidth
+  ))).toBeLessThanOrEqual(1)
+  await attachScreenshot('compact subscription channel selection controls')
+  await bulkDailyLimit.scrollIntoViewIfNeeded()
+  await expect(bulkMembersOnly).toBeVisible()
+  await expect(bulkDailyLimit).toBeVisible()
+  await attachScreenshot('compact subscription channel batch settings')
+
+  await bulkVideos.click()
+  await bulkShorts.click()
+  await bulkMembersOnly.click()
+  await bulkDailyLimit.click()
+  await page.getByRole('option', { name: '2', exact: true }).click()
+  await expect(bulkVideos).toHaveAttribute('aria-checked', 'false')
+  await expect(bulkShorts).toHaveAttribute('aria-checked', 'true')
+  await expect(bulkMembersOnly).toHaveAttribute('aria-checked', 'true')
+  await expect(bulkDailyLimit).toHaveText('2')
+
+  await expect.poll(async () => {
+    const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+    const records = contents.trim().split('\n').map(line => JSON.parse(line))
+    const latestProfiles = new Map(records.map(record => [record._id, record]))
+    return ['allChannels', 'profile-1'].map(profileId => (
+      latestProfiles.get(profileId).subscriptions
+        .filter(channel => [subscriptions[0].id, subscriptions[1].id].includes(channel.id))
+        .sort((left, right) => left.id.localeCompare(right.id))
+        .map(channel => ({
+          dailyVideoLimit: channel.dailyVideoLimit,
+          feedTypes: channel.feedTypes,
+          showMembersOnly: channel.showMembersOnly
+        }))
+    ))
+  }).toEqual([
+    [
+      { dailyVideoLimit: 2, feedTypes: ['shorts'], showMembersOnly: true },
+      { dailyVideoLimit: 2, feedTypes: ['shorts', 'live', 'posts'], showMembersOnly: true }
+    ],
+    [
+      { dailyVideoLimit: 2, feedTypes: ['shorts'], showMembersOnly: true }
+    ]
+  ])
+
+  const scroller = page.locator('.channelSettingsScroller')
+  const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+  await selectNone.evaluate(button => button.click())
+  await expect(selectionToolbar).toContainText('0 selected')
+  await expect(page.locator('.bulkFeedTypeSettings')).toHaveCount(0)
+  await expectScrollAtRenderedEnd(scroller)
+  await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+})
+
 test('only offers members-only controls when yt-dlp playback cookies are configured', async ({ page }) => {
   const subscriptionSettings = await goToSettingsSection(page, 'subscription')
   await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
   await expect(page.getByRole('checkbox', { name: 'Members only' })).toHaveCount(subscriptions.length)
+  await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
+  await expect(page.getByRole('checkbox', { name: 'Members only' })).toHaveCount(subscriptions.length + 1)
 
   await page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -190,7 +296,7 @@ test('reports subscription setting write failures from the channel popover', asy
   await shorts.click()
 
   await expect(page.locator('.toast', {
-    hasText: 'Failed to save subscription settings'
+    hasText: 'Failed to save channel settings'
   })).toBeVisible()
   await expect(shorts).toHaveAttribute('aria-checked', 'false')
 })
@@ -236,7 +342,7 @@ test('does not carry a failed popover edit into a later update', async ({ app, p
     }
   }).toEqual({ dailyVideoLimit: 2, showMembersOnly: false })
   await expect(page.locator('.toast', {
-    hasText: 'Failed to save subscription settings'
+    hasText: 'Failed to save channel settings'
   })).toBeVisible()
 })
 
@@ -254,9 +360,36 @@ test('reports subscription setting write failures from the settings manager', as
   await shorts.click()
 
   await expect(page.locator('.toast', {
-    hasText: 'Failed to save subscription settings'
+    hasText: 'Failed to save channel settings'
   })).toBeVisible()
   await expect(shorts).toHaveAttribute('aria-checked', 'false')
+})
+
+test('reports one failure toast for a failed batch update', async ({ page }) => {
+  const subscriptionSettings = await goToSettingsSection(page, 'subscription')
+  await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    let updateCount = 0
+    store._actions.updateChannelSettings = [() => {
+      updateCount += 1
+      return Promise.resolve(false)
+    }]
+    window.channelSettingsUpdateCount = () => updateCount
+  })
+
+  const selectionToolbar = page.locator('.channelSelectionToolbar')
+  await selectionToolbar.getByRole('button', { name: 'Select All' }).click()
+  await page.locator('.bulkFeedTypeSettings')
+    .getByRole('checkbox', { name: 'Videos' })
+    .click()
+
+  await expect.poll(() => page.evaluate(() => window.channelSettingsUpdateCount()))
+    .toBe(subscriptions.length)
+  await expect(page.locator('.toast', {
+    hasText: 'Failed to save channel settings'
+  })).toHaveCount(1)
 })
 
 test('reports a partial write when a requested profile no longer exists', async ({ page }) => {

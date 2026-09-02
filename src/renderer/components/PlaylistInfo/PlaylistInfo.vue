@@ -247,13 +247,12 @@
           <FtInput
             ref="searchInput"
             class="inputElement"
+            input-type="search"
             :placeholder="$t('User Playlists.SinglePlaylistView.Search for Videos')"
-            :show-clear-text-button="true"
             :show-action-button="false"
             :value="query"
             :maxlength="255"
             @input="updateQueryDebounced"
-            @clear="updateQueryDebounced('')"
           />
         </div>
       </div>

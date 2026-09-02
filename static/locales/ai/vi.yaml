@@ -532,6 +532,8 @@ Settings:
     Forget Channel: Xóa mọi cài đặt cho kênh này
     Forget Value: Xóa cài đặt này
     Add Setting: Ghi nhớ thêm một cài đặt cho kênh này
+    Add Subscribed Channel: Thêm kênh đã đăng ký
+    Enable Setting Before Adding Channel: Bật ít nhất một cài đặt kênh trong phần cài đặt phát trước khi thêm kênh
     Video Quality: Chất lượng video
     Subtitles Enabled: Đã bật phụ đề
     Volume: Âm lượng
@@ -972,8 +974,9 @@ Profile:
   Theme Color: Màu chủ đề
 Channel:
   Subscription settings: Cài đặt đăng ký
-  Failed to save subscription settings: Không thể lưu cài đặt đăng ký
+  Failed to save subscription settings: Không thể lưu cài đặt kênh
   Videos per day: Video mỗi ngày
+  Different values: Các giá trị khác nhau
   Use global setting: Dùng cài đặt chung
   Unlimited: Không giới hạn
   More videos hidden: '+{count} video khác'

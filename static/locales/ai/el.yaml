@@ -537,6 +537,8 @@ Settings:
     Forget Channel: Διαγραφή όλων των ρυθμίσεων αυτού του καναλιού
     Forget Value: Διαγραφή αυτής της ρύθμισης
     Add Setting: Απομνημόνευση άλλης ρύθμισης για αυτό το κανάλι
+    Add Subscribed Channel: Προσθήκη εγγεγραμμένου καναλιού
+    Enable Setting Before Adding Channel: Ενεργοποιήστε τουλάχιστον μία ρύθμιση καναλιού στις ρυθμίσεις αναπαραγωγής πριν προσθέσετε ένα κανάλι
     Video Quality: Ποιότητα βίντεο
     Subtitles Enabled: Υπότιτλοι ενεργοποιημένοι
     Volume: Ένταση ήχου
@@ -979,8 +981,9 @@ Profile:
   Theme Color: Χρώμα θέματος
 Channel:
   Subscription settings: Ρυθμίσεις συνδρομής
-  Failed to save subscription settings: Δεν ήταν δυνατή η αποθήκευση των ρυθμίσεων συνδρομής
+  Failed to save subscription settings: Δεν ήταν δυνατή η αποθήκευση των ρυθμίσεων καναλιού
   Videos per day: Βίντεο ανά ημέρα
+  Different values: Διαφορετικές τιμές
   Use global setting: Χρήση καθολικής ρύθμισης
   Unlimited: Χωρίς όριο
   More videos hidden: '+{count} ακόμη | +{count} ακόμη'

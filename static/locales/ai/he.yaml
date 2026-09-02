@@ -537,6 +537,8 @@ Settings:
     Forget Channel: הסרת כל ההגדרות של ערוץ זה
     Forget Value: הסרת הגדרה זו
     Add Setting: שמירת הגדרה נוספת לערוץ זה
+    Add Subscribed Channel: הוספת ערוץ שנרשמת אליו
+    Enable Setting Before Adding Channel: יש להפעיל לפחות הגדרת ערוץ אחת בהגדרות ההפעלה לפני הוספת ערוץ
     Video Quality: איכות וידאו
     Subtitles Enabled: הכתוביות מופעלות
     Volume: עוצמת קול
@@ -979,8 +981,9 @@ Profile:
   Theme Color: צבע ערכת הנושא
 Channel:
   Subscription settings: הגדרות מינוי
-  Failed to save subscription settings: לא ניתן לשמור את הגדרות המינוי
+  Failed to save subscription settings: לא ניתן לשמור את הגדרות הערוץ
   Videos per day: סרטונים ביום
+  Different values: ערכים שונים
   Use global setting: שימוש בהגדרה הכללית
   Unlimited: ללא הגבלה
   More videos hidden: '+{count} נוספים | +{count} נוספים | +{count} נוספים'

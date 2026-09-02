@@ -12,12 +12,11 @@
   >
     <div class="channelSettingsHeader">
       <FtInput
+        input-type="search"
         :placeholder="t('Settings.Channel Settings.Search Channels')"
         :show-action-button="false"
-        :show-clear-text-button="true"
         :value="searchQuery"
         @input="searchQuery = $event"
-        @clear="searchQuery = ''"
       />
     </div>
     <div
@@ -26,6 +25,126 @@
       class="channelSettingsScroller"
     >
       <div ref="channelSettingsContent">
+        <div
+          v-if="channels.length > 0"
+          class="channelSelectionToolbar"
+        >
+          <div class="channelSelectionSummary">
+            <p
+              :id="`${id}-selection-summary`"
+              aria-live="polite"
+            >
+              {{ selectedChannelCountText }}
+            </p>
+            <div class="channelSelectionActions">
+              <FtButton
+                :disabled="visibleChannels.length === 0 || allVisibleChannelsSelected"
+                @click="selectAllVisibleChannels"
+              >
+                <span>{{ t('Profile.Select All') }}</span>
+                <FtIcon
+                  class="channelSelectionActionIcon"
+                  :icon="['fas', 'check']"
+                  aria-hidden="true"
+                />
+              </FtButton>
+              <FtButton
+                :disabled="selectedChannelIds.size === 0"
+                @click="clearChannelSelection"
+              >
+                <span>{{ t('Profile.Select None') }}</span>
+                <FtIcon
+                  class="channelSelectionActionIcon"
+                  :icon="['fas', 'xmark']"
+                  aria-hidden="true"
+                />
+              </FtButton>
+            </div>
+          </div>
+          <div
+            v-if="selectedChannelIds.size > 0"
+            class="bulkFeedTypeSettings"
+            role="group"
+            :aria-labelledby="`${id}-selection-summary ${id}-bulk-feed-types`"
+          >
+            <p
+              :id="`${id}-bulk-feed-types`"
+              class="settingLabel"
+            >
+              {{ t('Channel.Show in subscription feed') }}
+            </p>
+            <div class="feedTypeOptions bulkFeedTypeOptions">
+              <button
+                v-for="feedType in feedTypes"
+                :key="feedType.id"
+                type="button"
+                class="feedTypeOption"
+                :class="{
+                  enabled: selectedFeedTypeStates[feedType.id] === true,
+                  mixed: selectedFeedTypeStates[feedType.id] === 'mixed'
+                }"
+                role="checkbox"
+                :aria-checked="selectedFeedTypeStates[feedType.id]"
+                @click="updateSelectedFeedType(feedType.id)"
+              >
+                <FtIcon
+                  :icon="feedType.icon"
+                  aria-hidden="true"
+                />
+                <span>{{ feedType.label }}</span>
+                <FtIcon
+                  v-if="selectedFeedTypeStates[feedType.id] === true"
+                  class="feedTypeCheck"
+                  :icon="['fas', 'check']"
+                  aria-hidden="true"
+                />
+                <span
+                  v-else-if="selectedFeedTypeStates[feedType.id] === 'mixed'"
+                  class="feedTypeMixedIndicator"
+                  aria-hidden="true"
+                />
+              </button>
+            </div>
+            <div class="bulkAdditionalSettings">
+              <button
+                v-if="restrictedPlaybackConfigured"
+                type="button"
+                class="bulkMembersOnlySetting"
+                :class="{
+                  enabled: selectedMembersOnlyState === true,
+                  mixed: selectedMembersOnlyState === 'mixed'
+                }"
+                role="checkbox"
+                :aria-checked="selectedMembersOnlyState"
+                @click="updateSelectedShowMembersOnly"
+              >
+                <span class="bulkMembersOnlyLabel">
+                  {{ t('Search Listing.Label.Members Only') }}
+                </span>
+                <FtIcon
+                  v-if="selectedMembersOnlyState === true"
+                  class="bulkSettingCheck"
+                  :icon="['fas', 'check']"
+                  aria-hidden="true"
+                />
+                <span
+                  v-else-if="selectedMembersOnlyState === 'mixed'"
+                  class="feedTypeMixedIndicator"
+                  aria-hidden="true"
+                />
+              </button>
+              <FtSelect
+                class="bulkDailyLimitSelect"
+                :placeholder="t('Channel.Videos per day')"
+                :value="selectedDailyLimitValue"
+                :select-names="bulkLimitNames"
+                :select-values="bulkLimitValues"
+                :icon="['fas', 'clock']"
+                @change="updateSelectedChannelLimit"
+              />
+            </div>
+          </div>
+        </div>
         <p
           v-if="channels.length === 0"
           class="emptyState"
@@ -46,10 +165,26 @@
             v-for="(channel, index) in visibleChannels"
             :key="channel.id"
             class="channelSettings"
+            :class="{ selected: isChannelSelected(channel.id) }"
             role="group"
             :aria-labelledby="`${id}-channel-${index}`"
           >
             <div class="channelIdentity">
+              <button
+                type="button"
+                class="channelSelectionOption"
+                :class="{ selected: isChannelSelected(channel.id) }"
+                role="checkbox"
+                :aria-checked="isChannelSelected(channel.id)"
+                :aria-labelledby="`${id}-channel-${index}`"
+                @click="toggleChannelSelection(channel.id)"
+              >
+                <FtIcon
+                  v-if="isChannelSelected(channel.id)"
+                  :icon="['fas', 'check']"
+                  aria-hidden="true"
+                />
+              </button>
               <img
                 v-if="channel.thumbnail"
                 class="channelThumbnail"
@@ -170,6 +305,7 @@ const searchQuery = ref('')
 const channelSettingsScroller = useTemplateRef('channelSettingsScroller')
 const channelSettingsContent = useTemplateRef('channelSettingsContent')
 const optimisticChannelSettings = shallowRef(new Map())
+const selectedChannelIds = shallowRef(new Set())
 const restrictedPlaybackConfigured = computed(() => (
   hasConfiguredRestrictedPlaybackAuthentication(store.getters)
 ))
@@ -177,6 +313,8 @@ const restrictedPlaybackConfigured = computed(() => (
 let contentResizeObserver = null
 let observationGeneration = 0
 let updateSequence = 0
+let pendingChannelSettingsUpdates = 0
+let hasFailedChannelSettingsUpdate = false
 let channelSettingsUpdateQueue = Promise.resolve()
 const latestUpdateByChannel = new Map()
 
@@ -232,6 +370,39 @@ const feedTypes = computed(() => getSubscriptionFeedTypeOptions(t))
 const limitOptions = computed(() => getSubscriptionDailyVideoLimitOptions(t))
 const limitNames = computed(() => limitOptions.value.map(option => option.label))
 const limitValues = computed(() => limitOptions.value.map(option => option.value))
+const selectedChannels = computed(() => channels.value.filter(channel => (
+  selectedChannelIds.value.has(channel.id)
+)))
+const selectedChannelCountText = computed(() => t('Profile.{number} selected', {
+  number: selectedChannelIds.value.size
+}))
+const allVisibleChannelsSelected = computed(() => (
+  visibleChannels.value.length > 0 &&
+  visibleChannels.value.every(channel => selectedChannelIds.value.has(channel.id))
+))
+const selectedMembersOnlyState = computed(() => selectedState(channel => (
+  channelSettings(channel).showMembersOnly
+)))
+const selectedDailyLimitValue = computed(() => {
+  const values = selectedChannels.value.map(channelLimitValue)
+  return values.every(value => value === values[0]) ? values[0] : 'mixed'
+})
+const bulkLimitOptions = computed(() => selectedDailyLimitValue.value === 'mixed'
+  ? [{ value: 'mixed', label: t('Channel.Different values') }, ...limitOptions.value]
+  : limitOptions.value)
+const bulkLimitNames = computed(() => bulkLimitOptions.value.map(option => option.label))
+const bulkLimitValues = computed(() => bulkLimitOptions.value.map(option => option.value))
+
+watch(channels, (channelList) => {
+  const channelIds = new Set(channelList.map(channel => channel.id))
+  const nextSelection = new Set(
+    [...selectedChannelIds.value].filter(channelId => channelIds.has(channelId))
+  )
+
+  if (nextSelection.size !== selectedChannelIds.value.size) {
+    selectedChannelIds.value = nextSelection
+  }
+})
 
 /**
  * @typedef {object} SubscriptionChannel
@@ -254,6 +425,97 @@ function channelLimitValue(channel) {
  */
 function isFeedTypeEnabled(channel, feedType) {
   return channelSettings(channel).feedTypes.includes(feedType)
+}
+
+/**
+ * @param {string} channelId
+ */
+function isChannelSelected(channelId) {
+  return selectedChannelIds.value.has(channelId)
+}
+
+/**
+ * @param {string} channelId
+ */
+function toggleChannelSelection(channelId) {
+  const nextSelection = new Set(selectedChannelIds.value)
+  if (nextSelection.has(channelId)) {
+    nextSelection.delete(channelId)
+  } else {
+    nextSelection.add(channelId)
+  }
+  selectedChannelIds.value = nextSelection
+}
+
+function selectAllVisibleChannels() {
+  selectedChannelIds.value = new Set([
+    ...selectedChannelIds.value,
+    ...visibleChannels.value.map(channel => channel.id)
+  ])
+}
+
+function clearChannelSelection() {
+  selectedChannelIds.value = new Set()
+}
+
+/**
+ * @param {(channel: SubscriptionChannel) => boolean} isEnabled
+ * @returns {boolean | 'mixed'}
+ */
+function selectedState(isEnabled) {
+  const enabledCount = selectedChannels.value.filter(isEnabled).length
+
+  if (enabledCount === 0) return false
+  if (enabledCount === selectedChannels.value.length) return true
+  return 'mixed'
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
+ * @returns {boolean | 'mixed'}
+ */
+function selectedFeedTypeState(feedType) {
+  return selectedState(channel => (
+    isFeedTypeEnabled(channel, feedType)
+  ))
+}
+
+const selectedFeedTypeStates = computed(() => Object.fromEntries(
+  feedTypes.value.map(({ id }) => [id, selectedFeedTypeState(id)])
+))
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
+ */
+function updateSelectedFeedType(feedType) {
+  const enabled = selectedFeedTypeState(feedType) !== true
+  selectedChannels.value.forEach((channel) => {
+    if (isFeedTypeEnabled(channel, feedType) !== enabled) {
+      updateFeedType(channel, feedType, enabled)
+    }
+  })
+}
+
+function updateSelectedShowMembersOnly() {
+  const enabled = selectedMembersOnlyState.value !== true
+  selectedChannels.value.forEach((channel) => {
+    if (channelSettings(channel).showMembersOnly !== enabled) {
+      updateShowMembersOnly(channel, enabled)
+    }
+  })
+}
+
+/**
+ * @param {string} value
+ */
+function updateSelectedChannelLimit(value) {
+  if (value === 'mixed') return
+
+  selectedChannels.value.forEach((channel) => {
+    if (channelLimitValue(channel) !== value) {
+      updateChannelLimit(channel, value)
+    }
+  })
 }
 
 /**
@@ -305,6 +567,7 @@ function channelSettings(channel) {
 function persistChannelSettings(channel, patch) {
   const settings = { ...channelSettings(channel), ...patch }
   const sequence = ++updateSequence
+  pendingChannelSettingsUpdates += 1
   latestUpdateByChannel.set(channel.id, sequence)
   optimisticChannelSettings.value = new Map(optimisticChannelSettings.value)
     .set(channel.id, settings)
@@ -324,12 +587,15 @@ function persistChannelSettings(channel, patch) {
         nextSettings.delete(channel.id)
         optimisticChannelSettings.value = nextSettings
         latestUpdateByChannel.delete(channel.id)
-        if (!saved) {
-          showToast({
-            message: t('Channel.Failed to save subscription settings'),
-            icon: ['fas', 'circle-exclamation']
-          })
-        }
+      }
+      if (!saved) hasFailedChannelSettingsUpdate = true
+      pendingChannelSettingsUpdates -= 1
+      if (pendingChannelSettingsUpdates === 0 && hasFailedChannelSettingsUpdate) {
+        hasFailedChannelSettingsUpdate = false
+        showToast({
+          message: t('Channel.Failed to save subscription settings'),
+          icon: ['fas', 'circle-exclamation']
+        })
       }
     }
   })

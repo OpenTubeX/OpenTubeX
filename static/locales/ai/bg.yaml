@@ -526,6 +526,8 @@ Settings:
     Forget Channel: Забравяне на всички настройки за този канал
     Forget Value: Забравяне на тази настройка
     Add Setting: Запомняне на още една настройка за този канал
+    Add Subscribed Channel: Добавяне на абониран канал
+    Enable Setting Before Adding Channel: Активирайте поне една настройка за канал в настройките за възпроизвеждане, преди да добавите канал
     Video Quality: Качество на видеоклипа
     Subtitles Enabled: Включени субтитри
     Volume: Сила на звука
@@ -957,8 +959,9 @@ Profile:
   Theme Color: Цвят на темата
 Channel:
   Subscription settings: Настройки на абонамента
-  Failed to save subscription settings: Настройките за абонамента не можаха да бъдат запазени
+  Failed to save subscription settings: Настройките на канала не можаха да бъдат запазени
   Videos per day: Видеоклипове на ден
+  Different values: Различни стойности
   Use global setting: Използване на глобалната настройка
   Unlimited: Без ограничение
   More videos hidden: '+{count} още | +{count} още'

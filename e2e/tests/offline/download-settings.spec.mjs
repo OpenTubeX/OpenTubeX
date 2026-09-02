@@ -1,7 +1,13 @@
 import { chmod, copyFile, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import {
+  test,
+  expect,
+  expectScrollAtRenderedEnd,
+  goToSettingsSection,
+  setWindowSize
+} from '../../helpers/app.mjs'
 import { DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
 
 const ALPHA_CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
@@ -40,16 +46,6 @@ const AUTOMATIC_RULE = {
 async function scrollToBottom(scroller) {
   await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-}
-
-async function expectScrollAtRenderedEnd(scroller) {
-  await expect.poll(() => scroller.evaluate((element) => {
-    const content = element.querySelector(':scope > div')
-    const contentEnd = content.offsetTop + content.offsetHeight +
-      Number.parseFloat(getComputedStyle(element).paddingBottom)
-    const maximumScrollTop = Math.max(0, contentEnd - element.clientHeight)
-    return Math.abs(element.scrollTop - maximumScrollTop)
-  })).toBeLessThanOrEqual(1)
 }
 
 test.use({
@@ -152,7 +148,7 @@ test.describe('download settings', () => {
     await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
 
     const manager = page.locator('.settingsSubpageContent')
-    const search = manager.getByRole('textbox', { name: 'Search channels' })
+    const search = manager.getByRole('searchbox', { name: 'Search channels' })
     const scroller = manager.locator('.automaticDownloadsScroller')
     const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
     await scrollToBottom(scroller)

@@ -56,15 +56,24 @@
           :disable-label="savedChannelSyncDisableLabel"
         />
       </template>
+      <div
+        v-if="availableSubscriptions.length > 0"
+        class="channelManagerToolbar"
+      >
+        <FtButton
+          :label="t('Settings.Channel Settings.Add Subscribed Channel')"
+          :icon="['fas', 'plus']"
+          @click="showAddChannelPrompt = true"
+        />
+      </div>
       <FtInput
         v-if="channelEntries.length > SEARCH_THRESHOLD"
         class="channelSearch"
+        input-type="search"
         :placeholder="t('Settings.Channel Settings.Search Channels')"
         :show-action-button="false"
-        :show-clear-text-button="true"
         :value="searchQuery"
         @input="value => searchQuery = value"
-        @clear="searchQuery = ''"
       />
       <div
         v-overlay-scrollbars
@@ -187,19 +196,102 @@
           </li>
         </ul>
       </div>
+      <FtPrompt
+        v-if="showAddChannelPrompt"
+        :label="t('Settings.Channel Settings.Add Subscribed Channel')"
+        theme="readable-width"
+        fixed-layout
+        @click="closeAddChannelPrompt"
+      >
+        <div class="addSubscribedChannelPicker">
+          <p
+            v-if="enabledPreferences.length === 0"
+            class="addSubscribedChannelEmptyState"
+          >
+            {{ t('Settings.Channel Settings.Enable Setting Before Adding Channel') }}
+          </p>
+          <template v-else>
+            <FtInput
+              ref="addChannelSearch"
+              class="addSubscribedChannelSearch"
+              input-type="search"
+              :placeholder="t('Settings.Channel Settings.Search Channels')"
+              :show-action-button="false"
+              :value="addChannelSearchQuery"
+              @input="value => addChannelSearchQuery = value"
+            />
+            <p
+              v-if="visibleAvailableSubscriptions.length === 0"
+              class="addSubscribedChannelEmptyState"
+            >
+              {{ t('Settings.Channel Settings.No Matching Channels') }}
+            </p>
+            <ul
+              v-else
+              class="addSubscribedChannelList"
+            >
+              <li
+                v-for="channel in visibleAvailableSubscriptions"
+                :key="channel.id"
+              >
+                <button
+                  type="button"
+                  class="addSubscribedChannelOption"
+                  :disabled="addingSubscribedChannel"
+                  @click="addSubscribedChannel(channel.id)"
+                >
+                  <img
+                    v-if="channel.thumbnail"
+                    class="channelThumbnail"
+                    :src="channel.thumbnail"
+                    alt=""
+                  >
+                  <span
+                    v-else
+                    class="channelThumbnail channelThumbnailPlaceholder"
+                    aria-hidden="true"
+                  >
+                    <FtIcon :icon="['fas', 'circle-user']" />
+                  </span>
+                  <span
+                    class="addSubscribedChannelName"
+                    dir="auto"
+                  >
+                    {{ channel.name }}
+                  </span>
+                  <FtIcon
+                    class="addSubscribedChannelIcon"
+                    :icon="['fas', 'plus']"
+                    aria-hidden="true"
+                  />
+                </button>
+              </li>
+            </ul>
+          </template>
+        </div>
+        <template #footer>
+          <FtFlexBox>
+            <FtButton
+              :label="t('Close')"
+              @click="closeAddChannelPrompt"
+            />
+          </FtFlexBox>
+        </template>
+      </FtPrompt>
     </FtSettingsSubpage>
   </FtSettingsSection>
 </template>
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
+import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
@@ -214,6 +306,7 @@ import {
   getCachedChannelInfo,
   parseChannelPreferences
 } from '../../helpers/channel-preferences'
+import { showToast } from '../../helpers/utils'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 
 const { locale, t } = useI18n()
@@ -321,6 +414,23 @@ const backendOptions = computed(() => ({
 }))
 
 const showManager = ref(false)
+const showAddChannelPrompt = ref(false)
+const addChannelSearchQuery = ref('')
+const addingSubscribedChannel = ref(false)
+const pendingPreferenceInitializations = new Map()
+const addChannelSearch = useTemplateRef('addChannelSearch')
+
+watch(showAddChannelPrompt, async (open) => {
+  if (!open || enabledPreferences.value.length === 0) {
+    return
+  }
+
+  // FtPrompt assigns its initial focus after mounting. Wait for that pass,
+  // then put keyboard users directly in the channel search.
+  await nextTick()
+  await nextTick()
+  addChannelSearch.value?.focus()
+})
 
 /** @param {MouseEvent} event */
 function handleChannelLinkClick(event) {
@@ -338,10 +448,12 @@ const fetchedChannels = ref(new Map())
 
 /**
  * @param {string} settingKey
- * @param {boolean} value
+ * @param {boolean | number | string} value
+ * @returns {Promise<boolean>}
  */
-function updateSetting(settingKey, value) {
-  store.dispatch(`update${settingKey[0].toUpperCase()}${settingKey.slice(1)}`, value)
+async function updateSetting(settingKey, value) {
+  await store.dispatch(`update${settingKey[0].toUpperCase()}${settingKey.slice(1)}`, value)
+  return settings.value[settingKey] === value
 }
 
 /**
@@ -426,6 +538,35 @@ const channelEntries = computed(() => {
   return entries.sort((a, b) => collator.value.compare(a.name, b.name))
 })
 
+const enabledPreferences = computed(() => (
+  PREFERENCES.filter(({ rememberKey }) => settings.value[rememberKey])
+))
+
+/** Subscriptions that do not have any saved channel preference yet. */
+const availableSubscriptions = computed(() => {
+  const savedChannelIds = new Set(channelEntries.value.map(({ id }) => id))
+
+  return Array.from(subscriptionsById.value, ([id, channel]) => ({
+    id,
+    name: channel.name || id,
+    thumbnail: channel.thumbnail ?? ''
+  }))
+    .filter(({ id }) => !savedChannelIds.has(id))
+    .sort((a, b) => collator.value.compare(a.name, b.name))
+})
+
+const visibleAvailableSubscriptions = computed(() => {
+  const query = addChannelSearchQuery.value.trim().toLowerCase()
+
+  if (query === '') {
+    return availableSubscriptions.value
+  }
+
+  return availableSubscriptions.value.filter(({ id, name }) => (
+    name.toLowerCase().includes(query) || id.toLowerCase().includes(query)
+  ))
+})
+
 const visibleChannelEntries = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
 
@@ -468,11 +609,19 @@ watch([showManager, channelEntries], ([isManagerOpen]) => {
  * @param {string} channelId
  * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
  * @param {number | string | boolean} value
+ * @param {symbol} [initializationToken]
  */
-function setPreference(channelId, type, value) {
+function setPreference(channelId, type, value, initializationToken) {
+  const key = `${channelId}:${type}`
+  if (initializationToken === undefined) {
+    pendingPreferenceInitializations.delete(key)
+  } else {
+    pendingPreferenceInitializations.set(key, initializationToken)
+  }
+
   const { valuesKey, values } = preferenceValuesFor(type)
   values[channelId] = value
-  updateSetting(valuesKey, JSON.stringify(values))
+  return updateSetting(valuesKey, JSON.stringify(values))
 }
 
 /**
@@ -482,20 +631,107 @@ function setPreference(channelId, type, value) {
  * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
  */
 function addPreference(channelId, type) {
+  return setPreference(channelId, type, defaultPreferenceValue(type))
+}
+
+/**
+ * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
+ */
+function defaultPreferenceValue(type) {
   switch (type) {
     case 'playbackSpeed':
-      setPreference(channelId, type, store.getters.getDefaultPlayback)
-      break
+      return store.getters.getDefaultPlayback
     case 'videoQuality':
-      setPreference(channelId, type, defaultQuality.value)
-      break
+      return defaultQuality.value
     case 'subtitlesState':
-      setPreference(channelId, type, store.getters.getEnableSubtitlesByDefault)
-      break
+      return store.getters.getEnableSubtitlesByDefault
     case 'volume':
-      setPreference(channelId, type, store.getters.getDefaultVolume)
-      break
+      return store.getters.getDefaultVolume
   }
+}
+
+/**
+ * Creates a saved channel entry with the global defaults for every enabled
+ * per-channel preference.
+ * @param {string} channelId
+ */
+async function addSubscribedChannel(channelId) {
+  if (enabledPreferences.value.length === 0 || addingSubscribedChannel.value) {
+    return
+  }
+
+  const preferencesToAdd = enabledPreferences.value.map(({ type }) => ({
+    type,
+    initialValue: defaultPreferenceValue(type)
+  }))
+  addingSubscribedChannel.value = true
+  const initializationToken = Symbol(channelId)
+  try {
+    const saved = await Promise.all(preferencesToAdd.map(({ type, initialValue }) => (
+      setPreference(channelId, type, initialValue, initializationToken).catch((error) => {
+        console.error(error)
+        return false
+      })
+    )))
+
+    if (saved.some(value => !value)) {
+      const rolledBack = await Promise.all(preferencesToAdd.map(({ type, initialValue }) => (
+        rollbackPreference(channelId, type, initialValue, initializationToken)
+          .catch(error => {
+            console.error(error)
+            return false
+          })
+      )))
+      if (rolledBack.some(value => !value)) {
+        addChannelSearchQuery.value = ''
+        showAddChannelPrompt.value = false
+      }
+      showToast({
+        message: t('Channel.Failed to save subscription settings'),
+        icon: ['fas', 'circle-exclamation']
+      })
+      return
+    }
+
+    addChannelSearchQuery.value = ''
+    showAddChannelPrompt.value = false
+  } finally {
+    for (const { type } of preferencesToAdd) {
+      const key = `${channelId}:${type}`
+      if (pendingPreferenceInitializations.get(key) === initializationToken) {
+        pendingPreferenceInitializations.delete(key)
+      }
+    }
+    addingSubscribedChannel.value = false
+  }
+}
+
+function closeAddChannelPrompt() {
+  showAddChannelPrompt.value = false
+  addChannelSearchQuery.value = ''
+}
+
+/**
+ * Removes an initialized value unless it has since been edited.
+ * @param {string} channelId
+ * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
+ * @param {number | string | boolean} initialValue
+ * @param {symbol} initializationToken
+ */
+function rollbackPreference(channelId, type, initialValue, initializationToken) {
+  const key = `${channelId}:${type}`
+  const { valuesKey, values } = preferenceValuesFor(type)
+  if (
+    pendingPreferenceInitializations.get(key) !== initializationToken ||
+    !Object.hasOwn(values, channelId) ||
+    values[channelId] !== initialValue
+  ) {
+    return Promise.resolve(true)
+  }
+
+  pendingPreferenceInitializations.delete(key)
+  delete values[channelId]
+  return updateSetting(valuesKey, JSON.stringify(values))
 }
 
 /**
@@ -505,7 +741,7 @@ function addPreference(channelId, type) {
 function deletePreference(channelId, type) {
   const { valuesKey, values } = preferenceValuesFor(type)
   delete values[channelId]
-  updateSetting(valuesKey, JSON.stringify(values))
+  return updateSetting(valuesKey, JSON.stringify(values))
 }
 
 /**

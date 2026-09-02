@@ -532,6 +532,8 @@ Settings:
     Forget Channel: Glem alle innstillingene for denne kanalen
     Forget Value: Glem denne innstillingen
     Add Setting: Husk en annen innstilling for denne kanalen
+    Add Subscribed Channel: Legg til kanal du abonnerer på
+    Enable Setting Before Adding Channel: Aktiver minst én kanalinnstilling i avspillingsinnstillingene før du legger til en kanal
     Video Quality: Videokvalitet
     Subtitles Enabled: Undertekster slått på
     Volume: Lydstyrke
@@ -974,8 +976,9 @@ Profile:
   Theme Color: Temafarge
 Channel:
   Subscription settings: Abonnementsinnstillinger
-  Failed to save subscription settings: Kunne ikke lagre abonnementsinnstillingene
+  Failed to save subscription settings: Kunne ikke lagre kanalinnstillingene
   Videos per day: Videoer per dag
+  Different values: Ulike verdier
   Use global setting: Bruk global innstilling
   Unlimited: Ubegrenset
   More videos hidden: '+{count} til | +{count} til'

@@ -736,6 +736,8 @@ Settings:
     Forget Channel: Pozabi vse nastavitve tega kanala
     Forget Value: Pozabi to nastavitev
     Add Setting: Zapomni si še eno nastavitev za ta kanal
+    Add Subscribed Channel: Dodaj naročen kanal
+    Enable Setting Before Adding Channel: Pred dodajanjem kanala omogočite vsaj eno nastavitev kanala v nastavitvah predvajanja
     Video Quality: Kakovost videoposnetka
     Subtitles Enabled: Podnapisi so omogočeni
     Volume: Glasnost
@@ -1283,8 +1285,9 @@ Profile:
   Open Profile Dropdown: Odpri spustni meni profila
 Channel:
   Subscription settings: Nastavitve naročnine
-  Failed to save subscription settings: Nastavitev naročnine ni bilo mogoče shraniti
+  Failed to save subscription settings: Nastavitev kanala ni bilo mogoče shraniti
   Videos per day: Videoposnetkov na dan
+  Different values: Različne vrednosti
   Use global setting: Uporabi splošno nastavitev
   Unlimited: Neomejeno
   More videos hidden: '+{count} več | +{count} več | +{count} več | +{count} več'

@@ -537,6 +537,8 @@ Settings:
     Forget Channel: Alle instellingen voor dit kanaal vergeten
     Forget Value: Deze instelling vergeten
     Add Setting: Nog een instelling voor dit kanaal onthouden
+    Add Subscribed Channel: Geabonneerd kanaal toevoegen
+    Enable Setting Before Adding Channel: Schakel minstens één kanaalinstelling in bij de afspeelinstellingen voordat je een kanaal toevoegt
     Video Quality: Videokwaliteit
     Subtitles Enabled: Ondertiteling ingeschakeld
     Volume: Volume
@@ -982,8 +984,9 @@ Profile:
   Theme Color: Themakleur
 Channel:
   Subscription settings: Abonnementsinstellingen
-  Failed to save subscription settings: Kan de abonnementsinstellingen niet opslaan
+  Failed to save subscription settings: Kan de kanaalinstellingen niet opslaan
   Videos per day: Video's per dag
+  Different values: Verschillende waarden
   Use global setting: Algemene instelling gebruiken
   Unlimited: Onbeperkt
   More videos hidden: '+{count} meer | +{count} meer'

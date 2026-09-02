@@ -524,6 +524,8 @@ Settings:
     Forget Channel: Bu kanalın tüm ayarlarını unut
     Forget Value: Bu ayarı unut
     Add Setting: Bu kanal için başka bir ayarı hatırla
+    Add Subscribed Channel: Abone olunan kanalı ekle
+    Enable Setting Before Adding Channel: Kanal eklemeden önce Oynatma ayarlarında en az bir kanal ayarını etkinleştirin
     Video Quality: Video Kalitesi
     Subtitles Enabled: Alt Yazılar Etkin
     Volume: Ses Düzeyi
@@ -955,8 +957,9 @@ Profile:
   Theme Color: Tema Rengi
 Channel:
   Subscription settings: Abonelik ayarları
-  Failed to save subscription settings: Abonelik ayarları kaydedilemedi
+  Failed to save subscription settings: Kanal ayarları kaydedilemedi
   Videos per day: Günlük video sayısı
+  Different values: Farklı değerler
   Use global setting: Genel ayarı kullan
   Unlimited: Sınırsız
   More videos hidden: '+{count} daha | +{count} daha'

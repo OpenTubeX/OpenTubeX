@@ -524,6 +524,8 @@ Settings:
     Forget Channel: Dimentica tutte le impostazioni di questo canale
     Forget Value: Dimentica questa impostazione
     Add Setting: Ricorda un'altra impostazione per questo canale
+    Add Subscribed Channel: Aggiungi canale a cui sei iscritto
+    Enable Setting Before Adding Channel: Attiva almeno un'impostazione del canale nelle impostazioni di riproduzione prima di aggiungere un canale
     Video Quality: Qualità video
     Subtitles Enabled: Sottotitoli abilitati
     Volume: Volume
@@ -955,8 +957,9 @@ Profile:
   Theme Color: Colore del tema
 Channel:
   Subscription settings: Impostazioni iscrizione
-  Failed to save subscription settings: Impossibile salvare le impostazioni dell’iscrizione
+  Failed to save subscription settings: Impossibile salvare le impostazioni del canale
   Videos per day: Video al giorno
+  Different values: Valori diversi
   Use global setting: Usa impostazione globale
   Unlimited: Senza limiti
   More videos hidden: '+{count} altri | +{count} altri | +{count} altri'
