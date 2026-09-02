@@ -850,9 +850,10 @@ function syncedSessionTabId(index) {
 
 async function selectOtherDeviceSession(session, focus = false) {
   selectedOtherDeviceSessionKey.value = otherDeviceSessionKey(session)
+  await nextTick()
+  clampScroll()
   if (!focus) return
 
-  await nextTick()
   const index = visibleOtherDeviceSessions.value.findIndex(candidate => (
     otherDeviceSessionKey(candidate) === selectedOtherDeviceSessionKey.value
   ))
