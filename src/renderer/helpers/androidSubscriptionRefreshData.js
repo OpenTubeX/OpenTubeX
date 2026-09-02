@@ -19,6 +19,34 @@ export function createSubscriptionRefreshStartGuard() {
 }
 
 /**
+ * Owns the one renderer refresh that may be waiting for or using native work.
+ * A start factory is only called after the controller has reserved the slot.
+ */
+export function createSubscriptionRefreshStartController() {
+  let activeStart = null
+
+  return {
+    begin(createStart) {
+      if (activeStart !== null) return null
+
+      activeStart = createStart()
+      return activeStart
+    },
+    current() {
+      return activeStart
+    },
+    isCurrent(start) {
+      return activeStart === start
+    },
+    finish() {
+      const start = activeStart
+      activeStart = null
+      return start
+    }
+  }
+}
+
+/**
  * Builds the renderer-to-native snapshot used by closed-app Android workers.
  * The native side receives channel IDs only, never browser datastore files.
  * @param {{

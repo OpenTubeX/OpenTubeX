@@ -1,11 +1,12 @@
 import { registerPlugin } from '@capacitor/core'
 import { LocalNotifications } from '@capacitor/local-notifications'
+import { createSubscriptionRefreshStartController } from './androidSubscriptionRefreshData'
 
 const SubscriptionRefresh = process.env.IS_CAPACITOR
   ? registerPlugin('SubscriptionRefresh')
   : null
 
-let activeStart = null
+const startController = createSubscriptionRefreshStartController()
 
 export async function requestAndroidSubscriptionRefreshNotificationPermission() {
   try {
@@ -24,27 +25,30 @@ export async function startAndroidSubscriptionRefresh(title, cancelLabel) {
   if (!SubscriptionRefresh) return { acquired: true, notificationsDenied: false }
 
   let notificationsDenied = false
-  const start = requestAndroidSubscriptionRefreshNotificationPermission()
-    .then(denied => {
-      notificationsDenied = denied
-      return SubscriptionRefresh.start({ title, cancelLabel })
-    })
-    .then(({ token, acquired }) => acquired ? token : null)
-    .catch(error => {
-      console.error('Failed to start Android subscription refresh work', error)
-      return null
-    })
-  activeStart = start
+  const start = startController.begin(() => (
+    requestAndroidSubscriptionRefreshNotificationPermission()
+      .then(denied => {
+        notificationsDenied = denied
+        return SubscriptionRefresh.start({ title, cancelLabel })
+      })
+      .then(({ token, acquired }) => acquired ? token : null)
+      .catch(error => {
+        console.error('Failed to start Android subscription refresh work', error)
+        return null
+      })
+  ))
+  if (start === null) return { acquired: false, notificationsDenied: false }
+
   const token = await start
   return { acquired: token !== null, notificationsDenied }
 }
 
 export function updateAndroidSubscriptionRefresh(progress) {
-  const start = activeStart
+  const start = startController.current()
   if (!start) return
 
   start.then(token => {
-    if (activeStart !== start || token === null) return
+    if (!startController.isCurrent(start) || token === null) return
     return SubscriptionRefresh.update({ token, progress: Math.round(progress) })
   }).catch(error => {
     console.error('Failed to update Android subscription refresh work', error)
@@ -52,8 +56,7 @@ export function updateAndroidSubscriptionRefresh(progress) {
 }
 
 export function finishAndroidSubscriptionRefresh() {
-  const start = activeStart
-  activeStart = null
+  const start = startController.finish()
   if (!start) return
 
   start.then(token => token === null ? null : SubscriptionRefresh.finish({ token })).catch(error => {

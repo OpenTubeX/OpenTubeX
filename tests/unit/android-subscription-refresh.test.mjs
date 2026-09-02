@@ -3,6 +3,7 @@ import test from 'node:test'
 
 import {
   createAndroidSubscriptionRefreshConfiguration,
+  createSubscriptionRefreshStartController,
   createSubscriptionRefreshStartGuard,
 } from '../../src/renderer/helpers/androidSubscriptionRefreshData.js'
 
@@ -10,7 +11,7 @@ test('a completed refresh cannot become active after its start await resumes', a
   const guard = createSubscriptionRefreshStartGuard()
   let releaseStart
   const nativeStart = new Promise(resolve => { releaseStart = resolve })
-  let inProgress = false
+  let inProgress
 
   const start = (async () => {
     const isCurrentStart = guard.begin()
@@ -24,6 +25,30 @@ test('a completed refresh cannot become active after its start await resumes', a
   await start
 
   assert.equal(inProgress, false)
+})
+
+test('a pending native refresh start keeps ownership until it finishes', async () => {
+  const controller = createSubscriptionRefreshStartController()
+  let nativeStarts = 0
+  let releaseFirstStart
+  const firstNativeStart = new Promise(resolve => { releaseFirstStart = resolve })
+
+  const firstStart = controller.begin(() => {
+    nativeStarts++
+    return firstNativeStart
+  })
+  const overlappingStart = controller.begin(() => {
+    nativeStarts++
+    return Promise.resolve('second-token')
+  })
+
+  assert.equal(overlappingStart, null)
+  assert.equal(nativeStarts, 1)
+  assert.equal(controller.finish(), firstStart)
+
+  releaseFirstStart('first-token')
+  assert.equal(await firstStart, 'first-token')
+  assert.equal(controller.current(), null)
 })
 
 test('creates one closed-app schedule input per profile and enabled feed', () => {
