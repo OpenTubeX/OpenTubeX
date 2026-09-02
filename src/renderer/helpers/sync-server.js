@@ -1152,11 +1152,12 @@ export async function syncSessions(client, store, previous = null) {
     preferredMode: store.state.settings.syncServerSharedTabs ? 'shared' : 'separate',
   })
 
+  if (!metadataEquals(local, merged.sessionsToApply) && merged.sessionsToApply.length > 0) {
+    const applied = await tabs.applySyncSessions(merged.sessionsToApply)
+    if (!applied) throw new Error('Failed to apply synced tab sessions')
+  }
   if (!metadataEquals(remote, merged.document)) {
     await client.putSessions(merged.document)
-  }
-  if (!metadataEquals(local, merged.sessionsToApply) && merged.sessionsToApply.length > 0) {
-    await tabs.applySyncSessions(merged.sessionsToApply)
   }
   if ((merged.mode === 'shared') !== store.state.settings.syncServerSharedTabs) {
     await store.dispatch('updateSyncServerSharedTabs', merged.mode === 'shared')

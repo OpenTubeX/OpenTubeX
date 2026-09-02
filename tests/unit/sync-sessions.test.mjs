@@ -6,6 +6,7 @@ import {
   getPreviousSyncSessions,
   mergeSyncSessions,
   normalizeSyncSessionsDocument,
+  removeSyncSession,
   shouldShowOtherDeviceSessions,
 } from '../../src/renderer/helpers/sync-sessions.js'
 
@@ -36,6 +37,92 @@ test('keeps mobile and desktop sessions separate by default', () => {
   assert.equal(result.otherDeviceSessions[0].syncPlatform, 'desktop')
 })
 
+test('removes one synced tab set and drops an empty device', () => {
+  const value = {
+    version: 1,
+    mode: 'separate',
+    devices: {
+      desktop: {
+        platform: 'desktop',
+        sessions: [session('keep', 1), session('remove', 2)],
+      },
+      phone: {
+        platform: 'mobile',
+        sessions: [session('phone', 3)],
+      },
+    },
+    shared: [],
+  }
+
+  const withOneRemoved = removeSyncSession(value, 'desktop', 'remove')
+  assert.deepEqual(withOneRemoved.devices.desktop.sessions, [session('keep', 1)])
+  assert.deepEqual(withOneRemoved.deletedSessions.desktop, ['remove'])
+  assert.deepEqual(value.devices.desktop.sessions, [session('keep', 1), session('remove', 2)])
+
+  const withoutPhone = removeSyncSession(withOneRemoved, 'phone', 'phone')
+  assert.equal(withoutPhone.devices.phone, undefined)
+  assert.deepEqual(withoutPhone.deletedSessions.phone, ['phone'])
+})
+
+test('records a deletion after a concurrent sync already removed the device', () => {
+  const value = {
+    version: 1,
+    mode: 'separate',
+    devices: {},
+    shared: [],
+  }
+
+  const removed = removeSyncSession(value, 'missing-phone', 'stale-session')
+  assert.deepEqual(removed.deletedSessions['missing-phone'], ['stale-session'])
+})
+
+test('keeps a deleted tab set from returning while its owning device still has it open', () => {
+  const retained = session('retained-on-phone', 1)
+  const previous = {
+    version: 1,
+    mode: 'separate',
+    devices: {
+      phone: { platform: 'mobile', sessions: [retained] },
+    },
+    shared: [],
+  }
+  const deleted = removeSyncSession(previous, 'phone', retained.sessionId)
+
+  const firstSync = mergeSyncSessions({
+    localSessions: [retained],
+    remoteValue: deleted,
+    previousValue: previous,
+    deviceId: 'phone',
+    platform: 'mobile',
+    preferredMode: 'separate',
+  })
+  assert.deepEqual(firstSync.sessionsToApply, [])
+  assert.deepEqual(firstSync.document.devices.phone.sessions, [])
+  assert.deepEqual(firstSync.document.deletedSessions.phone, [retained.sessionId])
+
+  const secondSync = mergeSyncSessions({
+    localSessions: [session(retained.sessionId, 2)],
+    remoteValue: firstSync.document,
+    previousValue: firstSync.document,
+    deviceId: 'phone',
+    platform: 'mobile',
+    preferredMode: 'separate',
+  })
+  assert.deepEqual(secondSync.sessionsToApply, [])
+  assert.deepEqual(secondSync.document.devices.phone.sessions, [])
+  assert.deepEqual(secondSync.document.deletedSessions.phone, [retained.sessionId])
+
+  const afterLocalClose = mergeSyncSessions({
+    localSessions: [],
+    remoteValue: secondSync.document,
+    previousValue: secondSync.document,
+    deviceId: 'phone',
+    platform: 'mobile',
+    preferredMode: 'separate',
+  })
+  assert.equal(afterLocalClose.document.deletedSessions.phone, undefined)
+})
+
 test('claims an upgraded desktop legacy session instead of showing it as another device', () => {
   const desktop = session('desktop', 3)
   const result = mergeSyncSessions({
@@ -50,6 +137,60 @@ test('claims an upgraded desktop legacy session instead of showing it as another
   assert.deepEqual(result.document.devices['upgraded-desktop'].sessions, [desktop])
   assert.equal(result.document.devices['legacy-desktop'], undefined)
   assert.deepEqual(result.otherDeviceSessions, [])
+})
+
+test('claims legacy desktop tabs after a mobile-first versioned migration', () => {
+  const legacy = session('desktop-before-upgrade', 3)
+  const mobileMigration = mergeSyncSessions({
+    localSessions: [],
+    remoteValue: [legacy],
+    deviceId: 'phone',
+    platform: 'mobile',
+    preferredMode: 'separate',
+  })
+
+  assert.deepEqual(mobileMigration.document.devices['legacy-desktop'].sessions, [legacy])
+
+  const desktopMigration = mergeSyncSessions({
+    localSessions: [session('temporary-desktop-tab', 4)],
+    remoteValue: mobileMigration.document,
+    deviceId: 'upgraded-desktop',
+    platform: 'desktop',
+    preferredMode: 'separate',
+  })
+
+  assert.deepEqual(desktopMigration.sessionsToApply, [legacy])
+  assert.deepEqual(desktopMigration.document.devices['upgraded-desktop'].sessions, [legacy])
+  assert.equal(desktopMigration.document.devices['legacy-desktop'], undefined)
+  assert.deepEqual(desktopMigration.otherDeviceSessions, [])
+})
+
+test('does not claim legacy tabs over an existing desktop session or named device', () => {
+  const legacy = session('legacy', 1)
+  const current = session('current', 2)
+  const named = session('named', 3)
+  const remoteValue = {
+    version: 1,
+    mode: 'separate',
+    devices: {
+      'legacy-desktop': { platform: 'desktop', sessions: [legacy] },
+      'current-desktop': { platform: 'desktop', sessions: [current] },
+      'named-desktop': { platform: 'desktop', sessions: [named] },
+    },
+    shared: [],
+  }
+
+  const result = mergeSyncSessions({
+    localSessions: [current],
+    remoteValue,
+    deviceId: 'current-desktop',
+    platform: 'desktop',
+    preferredMode: 'separate',
+  })
+
+  assert.deepEqual(result.document.devices['legacy-desktop'].sessions, [legacy])
+  assert.deepEqual(result.document.devices['current-desktop'].sessions, [current])
+  assert.deepEqual(result.document.devices['named-desktop'].sessions, [named])
 })
 
 test('an explicit shared mode mirrors the newest shared session set', () => {

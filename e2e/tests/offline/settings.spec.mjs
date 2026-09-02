@@ -5148,8 +5148,7 @@ test.describe('tabs from other synced devices', () => {
     }
   })
 
-  test('fits additive tab handoff actions on a phone-sized settings page', async ({ app, page }) => {
-    await setWindowSize(app, page, { width: 390, height: 760 })
+  test('keeps synced tab sets in the tab organizer instead of settings', async ({ page }) => {
     const section = await goToSettingsSection(page, 'sync')
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -5164,17 +5163,6 @@ test.describe('tabs from other synced devices', () => {
       }])
     })
 
-    const sessions = section.locator('.otherDeviceTabs')
-    await expect(sessions.getByRole('heading', { name: 'Tabs from other devices' })).toBeVisible()
-    await expect(sessions.getByRole('button', { name: 'Open all tabs' })).toBeVisible()
-    await expect(sessions.getByRole('button', { name: 'A long channel tab title' })).toBeVisible()
-    await expect.poll(() => sessions.evaluate(element => (
-      element.scrollWidth <= element.clientWidth + 1
-    ))).toBe(true)
-
-    const actionHeights = await sessions.getByRole('button').evaluateAll(buttons => (
-      buttons.map(button => button.getBoundingClientRect().height)
-    ))
-    expect(actionHeights.every(height => height >= 48)).toBe(true)
+    await expect(section.getByRole('heading', { name: 'Tabs from other devices' })).toHaveCount(0)
   })
 })
