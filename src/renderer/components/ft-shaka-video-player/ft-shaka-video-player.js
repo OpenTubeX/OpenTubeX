@@ -4318,9 +4318,8 @@ export default defineComponent({
             played: 'var(--primary-color)'
           },
           showAudioCodec: false,
-          // Touch users explicitly toggle the overlay, including while paused.
-          // Shaka's desktop default otherwise forces it visible again.
-          showUIOnPaused: !isCapacitorMobilePlayer(),
+          // Paused media needs a visible way to resume on both desktop and touch devices.
+          showUIOnPaused: true,
           // YouTube offers the same resolutions in several codecs, which shaka-player lists
           // separately, so the codec is what tells those entries apart. The built-in engine
           // keeps distinguishing them by their bitrate, the way it did before.
