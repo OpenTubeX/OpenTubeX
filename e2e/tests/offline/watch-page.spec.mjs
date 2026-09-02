@@ -129,8 +129,24 @@ test('reserves the player height when Shaka loads before video metadata', async 
   const shakaLoadedBounds = await player.boundingBox()
   expect(Math.abs(shakaLoadedBounds.height - pendingBounds.height)).toBeLessThanOrEqual(1)
 
+  await player.evaluate(element => {
+    window.__playerLoadingHeights = []
+    const recordHeight = () => {
+      window.__playerLoadingHeights.push(element.getBoundingClientRect().height)
+    }
+    window.__playerLoadingHeightObserver = new ResizeObserver(recordHeight)
+    window.__playerLoadingHeightObserver.observe(element)
+    recordHeight()
+  })
   releaseMedia()
   await waitForPlayback(page)
+  const loadingHeights = await player.evaluate((element) => {
+    window.__playerLoadingHeightObserver.disconnect()
+    return window.__playerLoadingHeights.filter(height => height > 0)
+  })
+  const maximumLoadingHeightChange = Math.max(...loadingHeights
+    .map(height => Math.abs(height - pendingBounds.height)))
+  expect(maximumLoadingHeightChange).toBeLessThanOrEqual(1)
   await expect.poll(async () => {
     const loadedBounds = await player.boundingBox()
     return Math.abs(loadedBounds.height - pendingBounds.height)

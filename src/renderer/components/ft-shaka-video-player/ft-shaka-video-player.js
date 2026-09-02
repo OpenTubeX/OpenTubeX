@@ -1068,6 +1068,7 @@ export default defineComponent({
     }
 
     const hasLoaded = ref(false)
+    const videoLayoutReady = ref(false)
     const annotationCurrentTime = ref(0)
     const annotationVideoAspectRatio = ref(null)
 
@@ -5830,6 +5831,7 @@ export default defineComponent({
       updateAnnotationVideoAspectRatio()
       updateScrollMiniVideoAspectRatio()
       updateScrollMiniPlayer()
+      videoLayoutReady.value = true
 
       if (isActiveTab.value && isNativeFullscreenActive()) {
         setAndroidFullscreenOrientation(
@@ -9962,6 +9964,7 @@ export default defineComponent({
       player.addEventListener('loading', () => {
         silenceSkipping.reset()
         hasLoaded.value = false
+        videoLayoutReady.value = false
         annotationVideoAspectRatio.value = null
         if (props.shortsPlayer) {
           shortsPaused.value = false
@@ -10806,6 +10809,7 @@ export default defineComponent({
 
     return {
       hasLoaded,
+      videoLayoutReady,
       shortsPaused,
       shortsEnded,
       replayIcon: shaka.ui.Enums.MaterialDesignSVGIcons.REPLAY,
