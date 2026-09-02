@@ -54,7 +54,8 @@
         fullWindow: fullWindowEnabled,
         shortsPlayer,
         shortsPaused: shortsPaused && hasLoaded,
-        sixteenByNine: (audioPlayerMode || forceAspectRatio || (!shortsPlayer && !hasLoaded)) &&
+        sixteenByNine: (audioPlayerMode || forceAspectRatio ||
+          (!shortsPlayer && annotationVideoAspectRatio === null)) &&
           !fullWindowEnabled && !scrollMiniPlayerActive,
         musicAudioPlayer: audioPlayerMode,
         scrollMiniPlayer: scrollMiniPlayerActive,

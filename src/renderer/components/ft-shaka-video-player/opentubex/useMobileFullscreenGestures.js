@@ -10,9 +10,11 @@ export function useMobileFullscreenGestures({
   isFullscreenActive,
   isFullscreenMetadataShown,
   isFullscreenSwipeEnabled,
+  isPlaybackEnded,
   isPlayerSurfaceTarget,
   isScrollMiniPlayerActive,
   setFullscreenMetadata,
+  setShowUiOnPaused,
   showOverlayControls,
   togglePlayerFullScreen,
 }) {
@@ -235,9 +237,11 @@ export function useMobileFullscreenGestures({
       const controlsContainer = controls?.getControlsContainer()
       if (!controls || !controlsContainer) return
 
-      if (showControls) {
+      if (showControls || isPlaybackEnded()) {
+        setShowUiOnPaused(true)
         controls.showUI()
       } else {
+        setShowUiOnPaused(false)
         controls.hideUI()
       }
     }, 240)

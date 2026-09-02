@@ -4579,9 +4579,11 @@ export default defineComponent({
       isFullscreenActive: () => isNativeFullscreenActive(),
       isFullscreenMetadataShown: () => showFullscreenMetadata.value,
       isFullscreenSwipeEnabled: () => enableMobileFullscreenSwipe.value,
+      isPlaybackEnded: () => video.value?.ended === true,
       isPlayerSurfaceTarget,
       isScrollMiniPlayerActive: () => scrollMiniPlayerActive.value,
       setFullscreenMetadata,
+      setShowUiOnPaused,
       showOverlayControls,
       togglePlayerFullScreen: () => ui?.getControls().toggleFullScreen(),
     })
@@ -5665,6 +5667,7 @@ export default defineComponent({
     }
 
     function handlePlay() {
+      setShowUiOnPaused(true)
       playerPaused.value = false
       clearPausedInterfaceReveal()
       shortsPaused.value = false
@@ -5719,6 +5722,7 @@ export default defineComponent({
     }
 
     function handlePause() {
+      setShowUiOnPaused(true)
       playerPaused.value = true
       clearPausedInterfaceReveal()
       shortsPaused.value = true
@@ -5746,6 +5750,7 @@ export default defineComponent({
     }
 
     function handleEnded() {
+      setShowUiOnPaused(true)
       shortsPaused.value = true
       shortsEnded.value = true
       syncPlayPauseControlIcons()
@@ -10766,6 +10771,11 @@ export default defineComponent({
     const showTemporaryPlaybackRateIndicator = ref(false)
     const temporaryPlaybackRateIndicatorMessage = ref('')
     let valueChangeTimeout = null
+
+    function setShowUiOnPaused(value) {
+      const config = ui?.getControls().getConfig()
+      if (config) config.showUIOnPaused = value
+    }
 
     function showOverlayControls() {
       ui.getControls().showUI()

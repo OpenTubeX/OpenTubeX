@@ -889,15 +889,18 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
   await video.evaluate(element => element.pause())
   await expect(surface).toHaveAttribute('shown', 'true')
   expect(await tapCenter()).toBe(true)
-  await page.waitForTimeout(1000)
-  await expect(surface).toHaveAttribute('shown', 'true')
+  await expect.poll(() => surface.getAttribute('shown')).toBeNull()
   expect(await video.evaluate(element => element.paused)).toBe(true)
+
+  expect(await tapCenter()).toBe(true)
+  await expect(surface).toHaveAttribute('shown', 'true')
 
   await video.evaluate(element => {
     Object.defineProperty(element, 'ended', { configurable: true, value: true })
     element.dispatchEvent(new Event('ended'))
   })
   await expect(surface).toHaveAttribute('shown', 'true')
+  expect(await tapCenter()).toBe(true)
   await page.waitForTimeout(3500)
   await expect(surface).toHaveAttribute('shown', 'true')
   await expect(player.locator('.shaka-controls-button-panel')).toHaveCSS('opacity', '1')

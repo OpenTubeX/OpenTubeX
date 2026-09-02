@@ -85,13 +85,13 @@ async function expectSponsorBlockContentClamp(content, previousScrollTop) {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
-test('reserves the loaded player height while video metadata is pending', async ({ app, page }) => {
+test('reserves the player height when Shaka loads before video metadata', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
 
   let releaseMedia
   const mediaPending = new Promise(resolve => { releaseMedia = resolve })
-  await page.route(DEMO_MEDIA_URL, async route => {
+  await page.route(/googlevideo\.com\/videoplayback/, async route => {
     await mediaPending
     await route.fallback()
   })
@@ -102,8 +102,32 @@ test('reserves the loaded player height while video metadata is pending', async 
 
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   await expect(player).toBeVisible({ timeout: 30_000 })
+  await expect.poll(async () => {
+    return await player.evaluate(element => {
+      const video = element.querySelector('video')
+      const bounds = element.getBoundingClientRect()
+      return {
+        hasReservedRatio: element.classList.contains('sixteenByNine'),
+        metadataPending: video?.videoWidth === 0,
+        geometryReserved: Math.abs(bounds.height - bounds.width * 9 / 16) <= 1,
+      }
+    })
+  }).toEqual({
+    hasReservedRatio: true,
+    metadataPending: true,
+    geometryReserved: true,
+  })
   const pendingBounds = await player.boundingBox()
   expect(Math.abs(pendingBounds.height - pendingBounds.width * 9 / 16)).toBeLessThanOrEqual(1)
+
+  const watchComponent = await page.evaluateHandle(findWatchComponent)
+  await watchComponent.evaluate(async component => {
+    component.refs.player.hasLoaded = true
+    await new Promise(resolve => requestAnimationFrame(resolve))
+  })
+  await expect(player).toHaveClass(/sixteenByNine/)
+  const shakaLoadedBounds = await player.boundingBox()
+  expect(Math.abs(shakaLoadedBounds.height - pendingBounds.height)).toBeLessThanOrEqual(1)
 
   releaseMedia()
   await waitForPlayback(page)
