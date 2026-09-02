@@ -3451,6 +3451,54 @@ test.describe('settings', () => {
     await expect(holder.locator('.toast', { hasText: 'Test toast' })).toBeVisible()
   })
 
+  test('keeps top toasts below the Android tablet app header', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 375, height: 700 })
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
+    await page.locator('.app').evaluate((app) => {
+      app.classList.add('capacitorTabletLayout', 'topTabs')
+      app.style.setProperty('--top-tab-bar-height', '48px')
+    })
+
+    const themeSection = page.locator('[data-section="appearance"]')
+    const toastPositionRow = themeSection.locator('.themeSelectRow')
+      .filter({ hasText: 'Toast Position' })
+    await toastPositionRow.locator('.select')
+      .filter({ hasText: 'Toast Position' })
+      .locator('select')
+      .selectOption('top-left')
+    await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('Earlier tablet toast', 10000)
+    })
+    await toastPositionRow.getByRole('button', { name: 'Test toast' }).click()
+
+    const toast = page.locator('.toast', { hasText: 'Test toast' })
+    const earlierToast = page.locator('.toast', { hasText: 'Earlier tablet toast' })
+    await expect(toast).toBeVisible()
+    await expect(earlierToast).toBeVisible()
+    await expect(toast).toHaveCSS('transform', 'none')
+    await page.waitForTimeout(400)
+
+    async function expectHeaderClearance() {
+      const [toastBounds, earlierToastBounds, headerBounds] = await Promise.all([
+        toast.boundingBox(),
+        earlierToast.boundingBox(),
+        page.locator('.topNav').boundingBox()
+      ])
+      expect(headerBounds.y).toBeCloseTo(48, 1)
+      expect(headerBounds.height).toBeCloseTo(60, 1)
+      const headerClearance = headerBounds.y + headerBounds.height + 12
+      expect(toastBounds.y).toBeCloseTo(headerClearance, 1)
+      expect(earlierToastBounds.y).toBeGreaterThanOrEqual(headerClearance)
+    }
+
+    await expectHeaderClearance()
+    await setWindowSize(app, page, { width: 700, height: 375 })
+    await expectHeaderClearance()
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+    await expectHeaderClearance()
+  })
+
   test('does not dismiss non-actionable toasts when clicked', async ({ page }) => {
     await page.evaluate(() => {
       window.ftElectron.showToastOnAllTabs('Swipe-only dismissal', 10000)
