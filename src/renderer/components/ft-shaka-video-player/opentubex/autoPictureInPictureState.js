@@ -11,6 +11,15 @@
 export const BLUR_TRIGGER_RECHECK_DELAY_MS = 750
 
 /**
+ * @param {boolean} enabled
+ * @param {string} format
+ * @param {{ paused: boolean, ended: boolean } | null} video
+ */
+export function canEnableAndroidAutoPictureInPicture(enabled, format, video) {
+  return enabled && format !== 'audio' && video != null && !video.paused && !video.ended
+}
+
+/**
  * @typedef {{
  *   windowMinimized: boolean,
  *   windowFocused: boolean,

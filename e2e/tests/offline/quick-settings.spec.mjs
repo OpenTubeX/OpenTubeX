@@ -59,6 +59,52 @@ test.describe('quick settings menu', () => {
     expect(menuBounds.bottom).toBeLessThanOrEqual(720)
   })
 
+  test('keeps its full phone width when route cards lose their gutters', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 375, height: 700 })
+    })
+    await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(375)
+    await page.locator('.app').evaluate((element) => {
+      element.classList.add('capacitorTabs', 'capacitorPhoneLayout')
+    })
+
+    await page.locator('.profileTrigger').click()
+    const menu = page.locator('.quickSettingsMenu')
+    await expect(menu).toBeVisible()
+
+    const bounds = await menu.evaluate(element => element.getBoundingClientRect().toJSON())
+    expect(bounds.width).toBeGreaterThan(300)
+    expect(bounds.left).toBeGreaterThanOrEqual(0)
+    expect(bounds.right).toBeLessThanOrEqual(375)
+  })
+
+  test('does not expose a horizontal scrollbar on a phone-sized viewport', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 375, height: 700 })
+    })
+    await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(375)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateCurrentLocale', 'es')
+      document.querySelector('.app').classList.add('capacitorTabs', 'capacitorPhoneLayout')
+    })
+
+    await page.locator('.profileTrigger').click()
+    const scroller = page.locator('.quickSettingsScroll')
+    await expect(scroller).toBeVisible()
+
+    await expect.poll(() => scroller.evaluate(element => ({
+      horizontalScrollRange: element.scrollWidth - element.clientWidth,
+      overflowX: getComputedStyle(element).overflowX,
+      horizontalScrollbarVisible: element.querySelector('.os-scrollbar-horizontal')
+        ?.classList.contains('os-scrollbar-visible') ?? false,
+    }))).toEqual({
+      horizontalScrollRange: 0,
+      overflowX: 'hidden',
+      horizontalScrollbarVisible: false,
+    })
+  })
+
   test('keeps paired selects aligned and shows locale completeness', async ({ page }) => {
     await page.locator('.profileTrigger').click()
     const menu = page.locator('.quickSettingsMenu')

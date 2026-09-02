@@ -273,6 +273,11 @@ Settings:
       Mark as Watched: Merk som sett
       Copy YouTube Link: Kopier YouTube-lenken
       Open in YouTube: Åpne i YouTube
+    Mobile Layout:
+      Mobile Layout: 'Mobiloppsett'
+      Automatic: 'Automatisk'
+      Phone: 'Telefon'
+      Tablet: 'Nettbrett'
   Context Menu Search Settings:
     Context Menu Search Settings: Søk fra hurtigmenyen
     Description: Velg hvilke søkemotorer som vises når du høyreklikker på merket tekst. Søk åpnes i standardnettleseren din.
@@ -501,6 +506,8 @@ Settings:
     Screenshot:
       Modes:
         Clipboard: Kopier til utklippstavlen
+    Rotate Wide Videos to Landscape in Fullscreen: 'Roter brede videoer til liggende format i fullskjerm'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Sveip opp eller ned for å åpne eller avslutte fullskjerm'
   Channel Settings:
     Channel Settings: Kanalinnstillinger
     Channel Settings Description: Husk innstillingene du velger mens du ser på hver kanal, slik at de brukes igjen neste gang du ser en av videoene fra kanalen.
@@ -796,7 +803,7 @@ Settings:
     Privacy Policy: Personvernerklæring for denne serveren
     Enhanced Privacy Enabled: Utvidet personvern er slått på. Serveren lagrer bare krypterte synkroniseringsdata.
     Enhanced Privacy Unsupported: Advarsel. Denne serveren støtter ikke utvidet personvern. De synkroniserte dataene er synlige for den som driver serveren.
-    Description: Synkroniser abonnementer, profiler, spillelister, seerhistorikk, innstillinger og åpne faner med en synkroniseringsserver for OpenTubeX eller LibreTube. LibreTube-servere støtter kanskje ikke alle synkroniseringsfunksjoner.
+    Description: 'Synkroniser abonnementer, profiler, spillelister, seerhistorikk og støttede innstillinger med en OpenTubeX- eller LibreTube-synkroniseringsserver. Faner på datamaskin og mobil holdes adskilt med mindre du uttrykkelig deler dem. LibreTube-servere støtter kanskje ikke alle synkroniseringsfunksjoner.'
     Server URL: Server-URL
     Checking Server: Kontrollerer synkroniseringsserveren…
     Server Unavailable: Kan ikke koble til denne synkroniseringsserveren. Kontroller URL-en og prøv på nytt.
@@ -877,6 +884,13 @@ Settings:
     Data Loss Confirmation: Vil du bekrefte synkronisering som sletter data?
     Data Loss Warning: Tilstanden på serveren vil slette {deleted} av {previous} tidligere synkroniserte elementer i {collection}. Dette kan tyde på en mislykket servermigrering eller tilbakestilling. Fortsett bare hvis slettingen er tilsiktet og du har en sikkerhetskopi.
     Confirm Data Loss: Slett og fortsett
+    Use Shared Tabs: 'Bruk ett delt fanesett på tvers av enheter'
+    Shared Tabs Warning: 'Delte faner erstatter det gjeldende fanesettet på tilkoblede enheter. La dette være avslått for å beholde separate faner på datamaskin og mobil.'
+    Tabs From Other Devices: 'Faner fra andre enheter'
+    Device Tab Session: '{platform} · {count} faner'
+    Mobile Device: 'Mobil'
+    Desktop Device: 'Datamaskin'
+    Open All Tabs: 'Åpne alle faner'
   Proxy Settings:
     IP Block Recovery Script Path: Bane til skript for gjenoppretting etter IP-blokkering
     Select IP Block Recovery Script File: Velg skriptfil for gjenoppretting etter IP-blokkering

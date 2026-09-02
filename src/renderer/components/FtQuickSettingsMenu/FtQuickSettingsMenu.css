@@ -182,7 +182,7 @@
 .quickSettingsScroll {
   flex: 1 1 auto;
   min-block-size: 0;
-  overflow-y: auto;
+  overflow: hidden auto;
   overscroll-behavior: contain;
 }
 

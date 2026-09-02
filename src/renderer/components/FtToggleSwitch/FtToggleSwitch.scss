@@ -21,8 +21,9 @@
 }
 
 .switch-label {
+  align-items: center;
   cursor: pointer;
-  display: inline-block;
+  display: inline-flex;
   font-weight: 500;
   margin-inline-start: -5px;
   padding-block: 12px;

@@ -9,6 +9,12 @@ updates:
       - "PR: dependencies"
     open-pull-requests-limit: 15
     allow:
+      - dependency-name: "@capacitor/android"
+      - dependency-name: "@capacitor/app"
+      - dependency-name: "@capacitor/browser"
+      - dependency-name: "@capacitor/cli"
+      - dependency-name: "@capacitor/core"
+      - dependency-name: "@capacitor/local-notifications"
       - dependency-name: "@hpke/core"
       - dependency-name: "@iconify-json/material-symbols"
       - dependency-name: "@iconify-json/ri"

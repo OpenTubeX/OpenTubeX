@@ -13,6 +13,7 @@
           @change="updateEnableSubtitlesByDefault"
         />
         <FtToggleSwitch
+          v-if="!IS_CAPACITOR"
           :label="t('Settings.Player Settings.Scroll Volume Over Video Player')"
           :compact="true"
           :disabled="videoSkipMouseScroll"
@@ -21,6 +22,7 @@
           @change="updateVideoVolumeMouseScroll"
         />
         <FtToggleSwitch
+          v-if="!IS_CAPACITOR"
           :label="t('Settings.Player Settings.Remember Volume')"
           :compact="true"
           :default-value="rememberVolume"
@@ -149,6 +151,7 @@
           @change="updateAutoOpenChapters"
         />
         <FtToggleSwitch
+          v-if="!IS_CAPACITOR"
           :label="t('Settings.Player Settings.Display Play Button In Video Player')"
           :compact="true"
           :default-value="displayVideoPlayButton"
@@ -161,6 +164,22 @@
           :default-value="enterFullscreenOnDisplayRotate"
           setting-key="enterFullscreenOnDisplayRotate"
           @change="updateEnterFullscreenOnDisplayRotate"
+        />
+        <FtToggleSwitch
+          v-if="IS_CAPACITOR"
+          :label="t('Settings.Player Settings.Rotate Wide Videos to Landscape in Fullscreen')"
+          :compact="true"
+          :default-value="rotateFullscreenToLandscape"
+          setting-key="rotateFullscreenToLandscape"
+          @change="updateRotateFullscreenToLandscape"
+        />
+        <FtToggleSwitch
+          v-if="IS_CAPACITOR"
+          :label="t('Settings.Player Settings.Swipe Up or Down to Enter or Exit Fullscreen')"
+          :compact="true"
+          :default-value="enableMobileFullscreenSwipe"
+          setting-key="enableMobileFullscreenSwipe"
+          @change="updateEnableMobileFullscreenSwipe"
         />
         <FtToggleSwitch
           :label="t('Settings.Player Settings.Show Playback Rate Adjusted Timestamp')"
@@ -188,7 +207,22 @@
         />
       </div>
     </div>
-    <FtFlexBox class="autoPictureInPictureSettings">
+    <FtFlexBox
+      v-if="IS_CAPACITOR"
+      class="autoPictureInPictureSettings"
+    >
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Auto Picture in Picture.Auto Picture in Picture')"
+        :compact="true"
+        :default-value="androidAutoPictureInPicture"
+        setting-key="androidAutoPictureInPicture"
+        @change="updateAndroidAutoPictureInPicture"
+      />
+    </FtFlexBox>
+    <FtFlexBox
+      v-else
+      class="autoPictureInPictureSettings"
+    >
       <FtCheckboxList
         v-model="autoPictureInPictureTriggers"
         :title="t('Settings.Player Settings.Auto Picture in Picture.Auto Picture in Picture')"
@@ -271,6 +305,7 @@
         @change="updateDefaultSkipInterval"
       />
       <FtSlider
+        v-if="!IS_CAPACITOR"
         :label="t('Settings.Player Settings.Default Volume')"
         :default-value="defaultVolume"
         setting-key="defaultVolume"
@@ -575,6 +610,7 @@ const QUICK_PLAYBACK_SPEED_LIMIT = 14
 
 /** @type {boolean} */
 const USING_ELECTRON = process.env.IS_ELECTRON
+const IS_CAPACITOR = process.env.IS_CAPACITOR
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const enableSubtitlesByDefault = computed(() => store.getters.getEnableSubtitlesByDefault)
@@ -780,6 +816,26 @@ function updateEnterFullscreenOnDisplayRotate(value) {
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
+const rotateFullscreenToLandscape = computed(() => store.getters.getRotateFullscreenToLandscape)
+
+/**
+ * @param {boolean} value
+ */
+function updateRotateFullscreenToLandscape(value) {
+  store.dispatch('updateRotateFullscreenToLandscape', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const enableMobileFullscreenSwipe = computed(() => store.getters.getEnableMobileFullscreenSwipe)
+
+/**
+ * @param {boolean} value
+ */
+function updateEnableMobileFullscreenSwipe(value) {
+  store.dispatch('updateEnableMobileFullscreenSwipe', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
 const showPlaybackRateAdjustedTimestamp = computed(() => store.getters.getShowPlaybackRateAdjustedTimestamp)
 
 /**
@@ -876,6 +932,12 @@ const autoPictureInPictureTriggers = computed({
   get: () => store.getters.getAutoPictureInPictureTriggers,
   set: (value) => store.dispatch('updateAutoPictureInPictureTriggers', value)
 })
+
+const androidAutoPictureInPicture = computed(() => store.getters.getAndroidAutoPictureInPicture)
+
+function updateAndroidAutoPictureInPicture(value) {
+  store.dispatch('updateAndroidAutoPictureInPicture', value)
+}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const scrollMiniPlayerEnabled = computed(() => store.getters.getScrollMiniPlayerEnabled)

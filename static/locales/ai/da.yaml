@@ -283,6 +283,11 @@ Settings:
       Mark as Watched: Markér som set
       Copy YouTube Link: Kopiér YouTube-link
       Open in YouTube: Åbn på YouTube
+    Mobile Layout:
+      Mobile Layout: 'Mobillayout'
+      Automatic: 'Automatisk'
+      Phone: 'Telefon'
+      Tablet: 'Tablet'
   Context Menu Search Settings:
     Context Menu Search Settings: Søgning i genvejsmenuen
     Description: Vælg, hvilke søgemaskiner der vises, når du højreklikker på markeret tekst. Søgninger åbnes i din standardbrowser.
@@ -518,6 +523,8 @@ Settings:
       Modes:
         Save To Folder: Gem i mappe
         Clipboard: Kopiér til udklipsholder
+    Rotate Wide Videos to Landscape in Fullscreen: 'Roter brede videoer til liggende format i fuld skærm'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Stryg op eller ned for at åbne eller forlade fuld skærm'
   Channel Settings:
     Channel Settings: Kanalindstillinger
     Channel Settings Description: Husk de indstillinger, du vælger under afspilning, for hver kanal, så de anvendes igen, næste gang du ser en af kanalens videoer.
@@ -820,7 +827,7 @@ Settings:
     Privacy Policy: Privatlivspolitik for denne server
     Enhanced Privacy Enabled: Udvidet beskyttelse af personlige oplysninger er slået til. Serveren gemmer kun krypterede synkroniseringsdata.
     Enhanced Privacy Unsupported: Advarsel. Denne server understøtter ikke udvidet beskyttelse af personlige oplysninger. De synkroniserede data er synlige for serverens operatør.
-    Description: Synkroniser abonnementer, profiler, playlister, visningshistorik, indstillinger og åbne faner med en OpenTubeX- eller LibreTube-synkroniseringsserver. LibreTube-servere understøtter muligvis ikke alle synkroniseringsfunktioner.
+    Description: 'Synkroniser abonnementer, profiler, afspilningslister, afspilningshistorik og understøttede indstillinger med en OpenTubeX- eller LibreTube-synkroniseringsserver. Faner på computer og mobil forbliver adskilt, medmindre du udtrykkeligt deler dem. LibreTube-servere understøtter muligvis ikke alle synkroniseringsfunktioner.'
     Server URL: Server-URL
     Checking Server: Kontrollerer synkroniseringsserver…
     Server Unavailable: Der kunne ikke oprettes forbindelse til denne synkroniseringsserver. Kontrollér URL'en, og prøv igen.
@@ -901,6 +908,13 @@ Settings:
     Data Loss Confirmation: Bekræft destruktiv synkronisering?
     Data Loss Warning: Serverens tilstand vil slette {deleted} af {previous} tidligere synkroniserede elementer i {collection}. Det kan skyldes en mislykket servermigrering eller nulstilling. Fortsæt kun, hvis sletningen er tilsigtet, og du har en sikkerhedskopi.
     Confirm Data Loss: Slet og fortsæt
+    Use Shared Tabs: 'Brug ét fælles sæt faner på tværs af enheder'
+    Shared Tabs Warning: 'Delte faner erstatter det aktuelle fanesæt på tilsluttede enheder. Lad dette være slået fra for at bevare separate faner på computer og mobil.'
+    Tabs From Other Devices: 'Faner fra andre enheder'
+    Device Tab Session: '{platform} · {count} faner'
+    Mobile Device: 'Mobil'
+    Desktop Device: 'Computer'
+    Open All Tabs: 'Åbn alle faner'
   Proxy Settings:
     Proxy Username: Proxybrugernavn
     Proxy Password: Proxyadgangskode

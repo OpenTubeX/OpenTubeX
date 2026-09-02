@@ -271,6 +271,11 @@ Settings:
       Mark as Watched: 視聴済みにする
       Copy YouTube Link: YouTubeリンクをコピー
       Open in YouTube: YouTubeで開く
+    Mobile Layout:
+      Mobile Layout: 'モバイルレイアウト'
+      Automatic: '自動'
+      Phone: 'スマートフォン'
+      Tablet: 'タブレット'
   Context Menu Search Settings:
     Context Menu Search Settings: コンテキストメニュー検索
     Description: 選択したテキストを右クリックしたときに表示する検索エンジンを選択します。検索結果は既定のブラウザーで開きます。
@@ -493,6 +498,8 @@ Settings:
     Reorder Playback Speed: ドラッグして再生速度を並べ替え
     Playback Speed: 再生速度
     Parallel Segment Loading: セグメントを並列読み込み
+    Rotate Wide Videos to Landscape in Fullscreen: '全画面表示で横長の動画を横向きに回転する'
+    Swipe Up or Down to Enter or Exit Fullscreen: '上下にスワイプして全画面表示を開始または終了する'
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。
@@ -779,7 +786,7 @@ Settings:
     Privacy Policy: このサーバーのプライバシーポリシー
     Enhanced Privacy Enabled: 強化プライバシーが有効です。サーバーには暗号化された同期データのみ保存されます。
     Enhanced Privacy Unsupported: '警告: このサーバーは強化プライバシーに対応していません。同期データはサーバーの運営者が閲覧できます。'
-    Description: 登録チャンネル、プロフィール、プレイリスト、視聴履歴、設定、開いているタブをOpenTubeXまたはLibreTubeの同期サーバーと同期します。LibreTubeサーバーでは一部の同期機能を利用できない場合があります。
+    Description: 'OpenTubeX または LibreTube の同期サーバーと、登録チャンネル、プロフィール、再生リスト、視聴履歴、対応する設定を同期します。明示的に共有しない限り、デスクトップとモバイルのタブは別々に保持されます。LibreTube サーバーでは一部の同期機能を利用できない場合があります。'
     Server URL: サーバーURL
     Checking Server: 同期サーバーを確認中…
     Server Unavailable: この同期サーバーに接続できません。URLを確認して再試行してください。
@@ -860,6 +867,13 @@ Settings:
     Data Loss Confirmation: データを削除する同期を確認しますか？
     Data Loss Warning: サーバーの状態に合わせると、以前に同期した{collection}の{previous}件中{deleted}件が削除されます。サーバーの移行失敗やリセットが原因の可能性があります。意図した削除であり、バックアップがある場合のみ続行してください。
     Confirm Data Loss: 削除して続行
+    Use Shared Tabs: 'すべてのデバイスで1つのタブセットを共有する'
+    Shared Tabs Warning: '共有タブを有効にすると、接続済みデバイスの現在のタブセットが置き換えられます。デスクトップとモバイルのタブを分けておくには無効にしてください。'
+    Tabs From Other Devices: '他のデバイスのタブ'
+    Device Tab Session: '{platform} · {count} 個のタブ'
+    Mobile Device: 'モバイル'
+    Desktop Device: 'デスクトップ'
+    Open All Tabs: 'すべてのタブを開く'
   Proxy Settings:
     IP Block Recovery Script Path: IPブロック復旧スクリプトのパス
     Select IP Block Recovery Script File: IPブロック復旧スクリプトを選択

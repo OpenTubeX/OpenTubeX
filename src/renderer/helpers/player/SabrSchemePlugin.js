@@ -338,7 +338,12 @@ async function doRequest(
 
     const sabrURL = new URL(currentState.sabrStreamState.sabrUrl)
     sabrURL.searchParams.set('rn', String(currentState.sabrStreamState.requestNumber++))
-    response = await fetch(sabrURL.toString(), currentState.requestInit)
+    if (process.env.IS_CAPACITOR) {
+      const { capacitorSabrFetch } = await import('../api/capacitor-sabr-http')
+      response = await capacitorSabrFetch(sabrURL.toString(), currentState.requestInit)
+    } else {
+      response = await fetch(sabrURL.toString(), currentState.requestInit)
+    }
 
     operationInputs.headersReceived({})
 

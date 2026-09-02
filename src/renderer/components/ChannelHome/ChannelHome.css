@@ -1,5 +1,6 @@
 .shelfContainer {
   margin-block-start: 0.5em;
+  margin-inline: auto;
   max-inline-size: 85vw;
 }
 

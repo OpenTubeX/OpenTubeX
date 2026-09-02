@@ -40,7 +40,7 @@ function wordGroup (color, scale, tx, ty) {
 // ---------------------------------------------------------------------------
 function appIcon (size) {
   const radius = round(size * 0.225)
-  const markTarget = size * 0.62 // visible mark width as a fraction of the icon
+  const markTarget = size * 0.56 // visible mark width as a fraction of the icon
   const s = markTarget / MARK.side
   const tx = (size - markTarget) / 2
   const ty = (size - markTarget) / 2

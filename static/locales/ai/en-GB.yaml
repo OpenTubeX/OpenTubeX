@@ -259,6 +259,11 @@ Settings:
     Playlist View Type:
       Playlist View Type: Playlist View Type
     Show Thumbnail Previews: Show thumbnail previews
+    Mobile Layout:
+      Mobile Layout: 'Mobile layout'
+      Automatic: 'Automatic'
+      Phone: 'Phone'
+      Tablet: 'Tablet'
   Context Menu Search Settings:
     Context Menu Search Settings: Context Menu Search
     Description: Choose which search engines appear when you right-click selected text. Searches open in your default browser.
@@ -480,6 +485,8 @@ Settings:
     Reorder Playback Speed: Drag to reorder playback speed
     Playback Speed: Playback Speed
     Parallel Segment Loading: Parallel Segment Loading
+    Rotate Wide Videos to Landscape in Fullscreen: 'Rotate wide videos to landscape in fullscreen'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Swipe up or down to enter or exit fullscreen'
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
@@ -758,7 +765,7 @@ Settings:
     Privacy Policy: Privacy policy for this server
     Enhanced Privacy Enabled: Enhanced privacy is enabled. The server stores only encrypted sync data.
     Enhanced Privacy Unsupported: Warning — this server does not support enhanced privacy. Synced data is visible to its operator.
-    Description: Synchronise subscriptions, profiles, playlists, watch history, settings, and open tabs with an OpenTubeX or LibreTube sync server. LibreTube servers may not support every sync feature.
+    Description: 'Synchronize subscriptions, profiles, playlists, watch history, and supported settings with an OpenTubeX or LibreTube sync server. Desktop and mobile tabs stay separate unless you explicitly share them. LibreTube servers may not support every sync feature.'
     Server URL: Server URL
     Checking Server: Checking sync server…
     Server Unavailable: Unable to connect to this sync server. Check the URL and try again.
@@ -839,6 +846,13 @@ Settings:
     Data Loss Confirmation: Confirm destructive sync?
     Data Loss Warning: The server state would delete {deleted} of {previous} previously synced {collection} items. This can indicate a failed server migration or reset. Continue only if this deletion is intentional and you have a backup.
     Confirm Data Loss: Delete and continue
+    Use Shared Tabs: 'Use one shared tab set across devices'
+    Shared Tabs Warning: 'Shared tabs replace the current tab set on connected devices. Keep this off to preserve separate desktop and mobile tabs.'
+    Tabs From Other Devices: 'Tabs from other devices'
+    Device Tab Session: '{platform} · {count} tabs'
+    Mobile Device: 'Mobile'
+    Desktop Device: 'Desktop'
+    Open All Tabs: 'Open all tabs'
   Proxy Settings:
     IP Block Recovery Script Path: IP Block Recovery Script Path
     Select IP Block Recovery Script File: Select IP Block Recovery Script File

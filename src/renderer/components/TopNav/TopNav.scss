@@ -14,7 +14,7 @@
   inset-inline: 0;
   line-height: var(--top-nav-height, 60px);
   position: sticky;
-  inset-block-start: 0;
+  inset-block-start: var(--app-safe-area-inset-top, 0);
   inline-size: 100%;
 
   // Open thumbnail dropdowns raise their list item above the vertical tab bar.
@@ -54,16 +54,16 @@
 
 /* Only the top tab bar sits above the navigation. */
 .app.topTabs .topNav {
-  inset-block-start: var(--top-tab-bar-height, 32px);
+  inset-block-start: calc(var(--app-safe-area-inset-top, 0px) + var(--top-tab-bar-height, 32px));
 
   @media only screen and (width <= 680px) {
-    inset-block-start: var(--top-tab-bar-height, 32px);
+    inset-block-start: calc(var(--app-safe-area-inset-top, 0px) + var(--top-tab-bar-height, 32px));
   }
 }
 
 /* The vertical tab bar sits beside the content instead of above it */
 .app.verticalTabs .topNav {
-  inset-block-start: 0;
+  inset-block-start: var(--app-safe-area-inset-top, 0);
 
   @media only screen and (width <= 680px) {
     inline-size: calc(100% - var(--vertical-tab-bar-width, 220px));
@@ -298,7 +298,7 @@
       background-color: var(--side-nav-color);
       inset-inline: 0;
       position: fixed;
-      inset-block-start: var(--top-nav-height, 60px);
+      inset-block-start: calc(var(--app-safe-area-inset-top, 0px) + var(--top-nav-height, 60px));
 
       @include top-nav-is-colored {
         background-color: var(--primary-color-hover);
@@ -319,13 +319,13 @@
    the same vertical/horizontal offsets as the top nav when a tab bar is present. */
 .app.topTabs .middle .searchContainer {
   @media only screen and (width <= 680px) {
-    inset-block-start: calc(var(--top-tab-bar-height, 32px) + var(--top-nav-height, 60px));
+    inset-block-start: calc(var(--app-safe-area-inset-top, 0px) + var(--top-tab-bar-height, 32px) + var(--top-nav-height, 60px));
   }
 }
 
 .app.verticalTabs .middle .searchContainer {
   @media only screen and (width <= 680px) {
-    inset-block-start: var(--top-nav-height, 60px);
+    inset-block-start: calc(var(--app-safe-area-inset-top, 0px) + var(--top-nav-height, 60px));
   }
 }
 

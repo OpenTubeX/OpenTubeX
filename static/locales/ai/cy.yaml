@@ -273,6 +273,11 @@ Settings:
       Mark as Watched: Marcio fel wedi'i wylio
       Copy YouTube Link: Copïo dolen YouTube
       Open in YouTube: Agor yn YouTube
+    Mobile Layout:
+      Mobile Layout: 'Cynllun symudol'
+      Automatic: 'Awtomatig'
+      Phone: 'Ffôn'
+      Tablet: 'Tabled'
   Context Menu Search Settings:
     Context Menu Search Settings: Chwilio o'r ddewislen cyd-destun
     Description: Dewiswch pa beiriannau chwilio sy'n ymddangos pan fyddwch yn de-glicio testun a ddewiswyd. Mae chwiliadau'n agor yn eich porwr rhagosodedig.
@@ -495,6 +500,8 @@ Settings:
     Reorder Playback Speed: Llusgo i aildrefnu'r cyflymder chwarae
     Playback Speed: Cyflymder chwarae
     Parallel Segment Loading: Llwytho segmentau ochr yn ochr
+    Rotate Wide Videos to Landscape in Fullscreen: 'Cylchdroi fideos llydan i’r dirwedd yn y sgrin lawn'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Llithro i fyny neu i lawr i fynd i mewn neu allan o’r sgrin lawn'
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
@@ -781,7 +788,7 @@ Settings:
     Privacy Policy: Polisi preifatrwydd y gweinydd hwn
     Enhanced Privacy Enabled: Mae preifatrwydd estynedig wedi'i alluogi. Dim ond data cysoni wedi'u hamgryptio y mae'r gweinydd yn eu storio.
     Enhanced Privacy Unsupported: 'Rhybudd: nid yw''r gweinydd hwn yn cynnal preifatrwydd estynedig. Gall ei weithredwr weld y data sydd wedi''u cysoni.'
-    Description: Cysonwch danysgrifiadau, proffiliau, rhestrau chwarae, hanes gwylio, gosodiadau a thabiau agored â gweinydd cysoni OpenTubeX neu LibreTube. Efallai na fydd gweinyddion LibreTube yn cynnal pob nodwedd gysoni.
+    Description: 'Cydweddwch danysgrifiadau, proffiliau, rhestrau chwarae, hanes gwylio a gosodiadau a gynhelir â gweinydd cydweddu OpenTubeX neu LibreTube. Cedwir tabiau bwrdd gwaith a symudol ar wahân oni bai eich bod yn eu rhannu’n benodol. Efallai na fydd gweinyddion LibreTube yn cynnal pob nodwedd gydweddu.'
     Server URL: URL y gweinydd
     Checking Server: Wrthi'n gwirio'r gweinydd cysoni…
     Server Unavailable: Nid oedd modd cysylltu â'r gweinydd cysoni hwn. Gwiriwch yr URL a rhowch gynnig arall arni.
@@ -862,6 +869,13 @@ Settings:
     Data Loss Confirmation: Cadarnhau cysoni dinistriol?
     Data Loss Warning: Byddai cyflwr y gweinydd yn dileu {deleted} o'r {previous} eitem {collection} a gysonwyd o'r blaen. Gall hyn ddangos bod mudo neu ailosod y gweinydd wedi methu. Parhewch dim ond os ydych am ddileu'r eitemau hyn a bod gennych gopi wrth gefn.
     Confirm Data Loss: Dileu a pharhau
+    Use Shared Tabs: 'Defnyddio un set o dabiau a rennir ar draws dyfeisiau'
+    Shared Tabs Warning: 'Mae tabiau a rennir yn disodli’r set gyfredol ar ddyfeisiau cysylltiedig. Cadwch hwn wedi’i ddiffodd i gadw tabiau bwrdd gwaith a symudol ar wahân.'
+    Tabs From Other Devices: 'Tabiau o ddyfeisiau eraill'
+    Device Tab Session: '{platform} · {count} tab'
+    Mobile Device: 'Symudol'
+    Desktop Device: 'Bwrdd gwaith'
+    Open All Tabs: 'Agor pob tab'
   Proxy Settings:
     IP Block Recovery Script Path: Llwybr sgript adfer ar ôl rhwystr IP
     Select IP Block Recovery Script File: Dewis ffeil sgript adfer ar ôl rhwystr IP

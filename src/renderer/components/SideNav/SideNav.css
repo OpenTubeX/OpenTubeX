@@ -276,19 +276,27 @@
 
   hr,
   .mobileHidden,
-  .refreshIcon,
-  .activeIndicator {
+  .refreshIcon {
     display: none;
   }
 
+  .activeIndicator {
+    position: fixed;
+    inset-block: auto var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0));
+    border-radius: calc(999px * var(--ui-roundness)) calc(999px * var(--ui-roundness)) 0 0;
+    transition: transform 200ms ease, inline-size 200ms ease;
+  }
+
   .sideNav {
+    box-sizing: border-box;
     inset-inline-start: 0;
     position: fixed;
     display: flex;
     margin-block-start: 0;
-    block-size: 60px;
+    block-size: calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)));
     inline-size: 100%;
     inset-block: auto 0;
+    padding-block-end: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0));
     overflow-y: hidden;
   }
 

@@ -392,6 +392,11 @@ Settings:
       Mark as Watched: Pažymėti kaip peržiūrėtą
       Copy YouTube Link: Kopijuoti „YouTube“ nuorodą
       Open in YouTube: Atverti per „YouTube“
+    Mobile Layout:
+      Mobile Layout: 'Mobilusis išdėstymas'
+      Automatic: 'Automatiškai'
+      Phone: 'Telefonas'
+      Tablet: 'Planšetinis kompiuteris'
   Context Menu Search Settings:
     Context Menu Search Settings: Paieška kontekstiniame meniu
     Description: Pasirinkite paieškos sistemas, rodomas spustelėjus pažymėtą tekstą dešiniuoju pelės mygtuku. Paieškos rezultatai atveriami numatytojoje naršyklėje.
@@ -693,6 +698,8 @@ Settings:
       Modes:
         Save To Folder: Išsaugoti aplanke
         Clipboard: Kopijuoti į iškarpinę
+    Rotate Wide Videos to Landscape in Fullscreen: 'Pasukti plačius vaizdo įrašus gulsčiai visame ekrane'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Braukite aukštyn arba žemyn, kad įjungtumėte arba išjungtumėte visą ekraną'
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
@@ -1030,7 +1037,7 @@ Settings:
     Privacy Policy: Šio serverio privatumo politika
     Enhanced Privacy Enabled: Sustiprintas privatumas įjungtas. Serveryje saugomi tik užšifruoti sinchronizavimo duomenys.
     Enhanced Privacy Unsupported: Įspėjimas — šis serveris nepalaiko sustiprinto privatumo. Sinchronizuojamus duomenis gali matyti jo operatorius.
-    Description: Sinchronizuokite prenumeratas, profilius, grojaraščius, peržiūrų istoriją, nustatymus ir atvertas korteles su OpenTubeX arba LibreTube sinchronizavimo serveriu. LibreTube serveriai gali palaikyti ne visas sinchronizavimo funkcijas.
+    Description: 'Sinchronizuokite prenumeratas, profilius, grojaraščius, žiūrėjimo istoriją ir palaikomus nustatymus su „OpenTubeX“ arba „LibreTube“ sinchronizavimo serveriu. Kompiuterio ir mobiliojo įrenginio kortelės lieka atskiros, nebent aiškiai jas bendrinate. „LibreTube“ serveriai gali nepalaikyti visų sinchronizavimo funkcijų.'
     Server URL: Serverio URL
     Checking Server: Tikrinamas sinchronizavimo serveris…
     Server Unavailable: Nepavyko prisijungti prie šio sinchronizavimo serverio. Patikrinkite URL ir bandykite dar kartą.
@@ -1111,6 +1118,13 @@ Settings:
     Data Loss Confirmation: Patvirtinti duomenis naikinantį sinchronizavimą?
     Data Loss Warning: Pagal serverio būseną būtų ištrinta {deleted} iš {previous} anksčiau sinchronizuotų rinkinio „{collection}“ elementų. Tai gali reikšti nepavykusį serverio perkėlimą arba atkūrimą. Tęskite tik jei šiuos duomenis ketinate ištrinti ir turite atsarginę kopiją.
     Confirm Data Loss: Ištrinti ir tęsti
+    Use Shared Tabs: 'Naudoti vieną bendrą kortelių rinkinį visuose įrenginiuose'
+    Shared Tabs Warning: 'Bendros kortelės pakeičia dabartinį rinkinį prijungtuose įrenginiuose. Palikite išjungta, jei norite išsaugoti atskiras kompiuterio ir mobiliojo įrenginio korteles.'
+    Tabs From Other Devices: 'Kortelės iš kitų įrenginių'
+    Device Tab Session: '{platform} · {count} kortelės'
+    Mobile Device: 'Mobilusis įrenginys'
+    Desktop Device: 'Kompiuteris'
+    Open All Tabs: 'Atverti visas korteles'
   Proxy Settings:
     Proxy Warning: OpenTubeX neturi integruoto įgaliotojo serverio, tačiau gali prisijungti prie išorinio, pavyzdžiui, šiame kompiuteryje veikiančio Tor arba kai kurių VPN teikiamo SOCKS5 įgaliotojo serverio. Įjungę įsitikinkite, kad įgaliotasis serveris arba Tor tinkamai sukonfigūruotas, kitaip OpenTubeX negalės gauti duomenų.
     Proxy Username: Įgaliotojo serverio naudotojo vardas

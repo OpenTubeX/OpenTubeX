@@ -22,6 +22,8 @@ import {
   getSavedScrollMiniPlayerRect,
   getViewportInsets,
   getScrollMiniInlineLayoutHeight,
+  getScrollMiniPlayerStashSide,
+  getStashedScrollMiniPlayerRect,
   getScrollMiniVerticalAnchor,
   parseScrollMiniPlayerSavedRect,
   pickScrollMiniVerticalAnchor,
@@ -86,6 +88,8 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   const scrollMiniPlaceholder = ref(null)
   const scrollMiniVolumeTrack = ref(null)
   const scrollMiniPlayerDismissed = ref(false)
+  const scrollMiniPlayerStashedSide = ref(null)
+  const scrollMiniPlayerStashed = computed(() => scrollMiniPlayerStashedSide.value !== null)
 
   const crossTabMiniPlayerCandidate = {
     canShow: () => canShowCrossTabMiniPlayer(),
@@ -131,6 +135,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
   /** @type {{ type: 'drag' | 'resize' | 'volume', corner?: string, startX: number, startY: number, startRect: import('../../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect } | null} */
   let scrollMiniPointerSession = null
+  let scrollMiniPlayerRestoreRect = null
   let lastKnownInlinePlayerHeight = 0
   /** @type {number | null} */
   let scrollMiniScrollFrame = null
@@ -503,6 +508,18 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     })
   }
 
+  function animateScrollMiniPlayerRectChange(update) {
+    const previousRect = container.value?.getBoundingClientRect()
+    cancelScrollMiniPlayerLayoutAnimation()
+    update()
+
+    if (!previousRect || isReducedMotionEnabled()) return
+
+    const sequence = ++scrollMiniLayoutAnimationSequence
+    scrollMiniPlayerAnimating.value = true
+    animateScrollMiniPlayerLayout(previousRect, true, sequence)
+  }
+
   function loadScrollMiniPlayerSavedRectFromSettings() {
     const savedRect = parseScrollMiniPlayerSavedRect(store.getters.getScrollMiniPlayerSavedRect)
     if (savedRect) {
@@ -672,6 +689,8 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     scrollMiniPlayerAnimating.value = previousRect !== null
 
     scrollMiniPlayerActive.value = false
+    scrollMiniPlayerStashedSide.value = null
+    scrollMiniPlayerRestoreRect = null
     scrollMiniPlaceholderHeight.value = 0
     scrollMiniDragHandleOnLightBg.value = false
     scrollMiniResizeHandleOnLightBg.value = false
@@ -919,6 +938,29 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     if (scrollMiniPointerSession.type === 'drag') {
       const insets = getViewportInsets()
       const currentRect = scrollMiniPlayerRect.value
+      const stashSide = window.matchMedia('(max-width: 767px)').matches
+        ? getScrollMiniPlayerStashSide(
+            scrollMiniPointerSession.startRect,
+            event.clientX - scrollMiniPointerSession.startX,
+            window.innerWidth,
+            insets
+          )
+        : null
+      if (stashSide) {
+        scrollMiniPlayerRestoreRect = snapScrollMiniPlayerToEdge(currentRect, insets)
+        animateScrollMiniPlayerRectChange(() => {
+          scrollMiniPlayerStashedSide.value = stashSide
+          scrollMiniPlayerRect.value = getStashedScrollMiniPlayerRect(
+            currentRect,
+            stashSide,
+            window.innerWidth,
+            insets
+          )
+        })
+        endScrollMiniPointerSession()
+        event.preventDefault()
+        return
+      }
 
       if (shouldBounceScrollMiniPlayerToEdge(currentRect, insets)) {
         const targetRect = snapScrollMiniPlayerToEdge(currentRect, insets)
@@ -948,6 +990,20 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
     endScrollMiniPointerSession()
     event.preventDefault()
+  }
+
+  function restoreStashedScrollMiniPlayer(event) {
+    if (!scrollMiniPlayerStashed.value) return
+
+    event?.preventDefault()
+    event?.stopPropagation()
+    const restoreRect = scrollMiniPlayerRestoreRect ?? getDefaultScrollMiniPlayerRect()
+    animateScrollMiniPlayerRectChange(() => {
+      scrollMiniPlayerStashedSide.value = null
+      scrollMiniPlayerRestoreRect = null
+      applyScrollMiniPlayerRect(restoreRect, true)
+    })
+    showScrollMiniPlayPause(true)
   }
 
   /** @param {PointerEvent} event */
@@ -1090,11 +1146,14 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     scrollMiniPlayerDetached,
     scrollMiniPlayerDismissed,
     scrollMiniPlayerStyle,
+    scrollMiniPlayerStashed,
+    scrollMiniPlayerStashedSide,
     scrollMiniPlayPauseVisible,
     scrollMiniResizeCorner,
     scrollMiniResizeHandleOnLightBg,
     scrollMiniScrollToTop,
     scrollMiniTogglePlayPause,
+    restoreStashedScrollMiniPlayer,
     scrollMiniVolume,
     scrollMiniVolumeExpanded,
     scrollMiniVolumeIcon,

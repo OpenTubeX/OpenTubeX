@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<!-- data-overlayscrollbars-initialize keeps the native scrollbars hidden until
-     OverlayScrollbars takes over, so they don't flash during startup -->
-<html data-overlayscrollbars-initialize>
+<!-- Desktop and web hide native scrollbars until OverlayScrollbars takes over.
+     Capacitor keeps Android's native page scrollbar. -->
+<html<% if (!process.env.IS_CAPACITOR) { %> data-overlayscrollbars-initialize<% } %>>
 
   <head>
     <meta charset="utf-8" />
     <meta name="viewport"
-          content="width=device-width, initial-scale=1.0" />
-    <% if (!process.env.IS_ELECTRON) { %>
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <% if (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR) { %>
     <link rel="manifest" href="static/manifest.json" />
     <% } %>
     <title></title>
   </head>
 
-  <body data-overlayscrollbars-initialize>
+  <body<% if (!process.env.IS_CAPACITOR) { %> data-overlayscrollbars-initialize<% } %>>
     <div id="app"></div>
-    <% if (process.env.IS_ELECTRON) { %>
+    <% if (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) { %>
     <iframe
       id="sigFrame"
       src="<%= sigFrameSrc %>"
@@ -26,7 +26,7 @@
       style="display: none; pointer-events: none"
       tabindex="-1"
     ></iframe>
-    <% } else { %>
+    <% } else if (!process.env.IS_CAPACITOR) { %>
     <script>
     // This is the service worker with the Advanced caching
 

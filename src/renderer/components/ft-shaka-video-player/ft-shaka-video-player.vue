@@ -57,6 +57,8 @@
         sixteenByNine: (audioPlayerMode || forceAspectRatio) && !fullWindowEnabled && !scrollMiniPlayerActive,
         musicAudioPlayer: audioPlayerMode,
         scrollMiniPlayer: scrollMiniPlayerActive,
+        scrollMiniPlayerStashed,
+        scrollMiniPlayerStashedRight: scrollMiniPlayerStashedSide === 'right',
         scrollMiniPlayerAnimating,
         scrollMiniPlayerDismissed,
         fullscreenMetadataOpen: showFullscreenMetadata,
@@ -70,6 +72,9 @@
         fullscreenAmbientBarsVisible,
         fullscreenDockResizing,
         fullscreenDockReordering,
+        mobileFullscreenSwipeEnabled: enableMobileFullscreenSwipe,
+        mobileFullscreenSwiping,
+        mobileFullscreenSwipeSettling,
         presentationModeChanging,
         videoZoomPannable: videoZoomPanReady,
         videoZoomPanning,
@@ -83,6 +88,7 @@
         captionCssVariables,
         captionPlayerVariables,
         scrollMiniPlayerActive ? scrollMiniPlayerStyle : undefined,
+        mobileFullscreenSwipeStyle,
         shortsPlayer ? { '--shorts-aspect-ratio': shortsAspectRatio } : undefined
       ]"
       @mouseenter="handleScrollMiniPlayerEnter"
@@ -94,6 +100,7 @@
       @pointermove.capture="handleVideoZoomPointerMove"
       @pointerup.capture="handleVideoZoomPointerUp"
       @pointercancel.capture="handleVideoZoomPointerCancel"
+      @touchend.capture="handleMobilePlayerTouchEnd"
       @focusin="handlePlayerFocusIn"
       @focusout="handleScrollMiniPlayerLeave"
       @contextmenu="positionShortsContextMenu"
@@ -374,6 +381,7 @@
         class="fullscreenActions shaka-no-propagation"
         @click.stop
         @dblclick.stop
+        @pointerdown.stop
       >
         <button
           v-if="watchingPlaylist"
@@ -1218,12 +1226,19 @@
         v-if="scrollMiniPlayerActive"
         class="scrollMiniPlayerControls"
       >
-        <div
+        <button
+          type="button"
           class="scrollMiniPointerLayer"
+          :aria-label="scrollMiniPlayerStashed ? $t('Video.Player.Scroll Mini Player.Back to Top') : undefined"
+          :tabindex="scrollMiniPlayerStashed ? 0 : -1"
+          @pointerdown.stop.prevent="restoreStashedScrollMiniPlayer"
+          @click.stop.prevent="restoreStashedScrollMiniPlayer"
+          @keydown.enter.space.stop.prevent="restoreStashedScrollMiniPlayer"
           @pointermove="handleScrollMiniControlsPointerMove"
           @wheel.passive="suppressScrollMiniPlayPausePointerReveal"
         />
         <button
+          v-if="!scrollMiniPlayerStashed"
           type="button"
           :tabindex="scrollMiniPlayerDetached ? 0 : -1"
           class="scrollMiniScrollTop"
@@ -1241,7 +1256,7 @@
           />
         </button>
         <button
-          v-if="scrollMiniPlayerDetached"
+          v-if="scrollMiniPlayerDetached && !scrollMiniPlayerStashed"
           type="button"
           class="scrollMiniDismiss"
           :title="$t('Video.Player.Scroll Mini Player.Hide')"
@@ -1252,6 +1267,7 @@
           <ft-icon :icon="['fas', 'times']" />
         </button>
         <button
+          v-if="!scrollMiniPlayerStashed"
           type="button"
           :tabindex="scrollMiniPlayerDetached ? 0 : -1"
           class="scrollMiniPlayPause"
@@ -1266,6 +1282,7 @@
           <ft-icon :icon="['fas', scrollMiniIsPaused ? 'play' : 'pause']" />
         </button>
         <div
+          v-if="!scrollMiniPlayerStashed"
           class="scrollMiniVolume"
           :class="{ isExpanded: scrollMiniVolumeExpanded }"
           @mouseenter="handleScrollMiniVolumeMouseEnter"
@@ -1296,6 +1313,7 @@
           </div>
         </div>
         <div
+          v-if="!scrollMiniPlayerStashed"
           class="scrollMiniDragHandle"
           :class="{
             isHidden: !scrollMiniPlayPauseVisible,
@@ -1306,6 +1324,7 @@
           @mousedown.stop.prevent
         />
         <div
+          v-if="!scrollMiniPlayerStashed"
           class="scrollMiniResizeHandle"
           :class="[
             `scrollMiniResizeHandle-${scrollMiniResizeCorner}`,

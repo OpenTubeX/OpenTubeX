@@ -166,3 +166,56 @@
 .passwordForm p {
   margin: 0;
 }
+
+.otherDeviceTabs {
+  margin-block: 1rem;
+  margin-inline: auto;
+  max-inline-size: 52rem;
+}
+
+.otherDeviceTabs h3 {
+  text-align: center;
+}
+
+.otherDeviceSession {
+  background: var(--card-bg-color);
+  border-radius: calc(10px * var(--ui-roundness));
+  box-sizing: border-box;
+  margin-block: 0.75rem;
+  padding: 0.75rem;
+}
+
+.otherDeviceSessionHeader {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.otherDeviceSessionHeader > span {
+  overflow-wrap: anywhere;
+}
+
+.otherDeviceSessionHeader :deep(button) {
+  min-block-size: 48px;
+}
+
+.otherDeviceTabActions {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+  margin-block-start: 0.75rem;
+}
+
+.otherDeviceTabActions :deep(button) {
+  inline-size: 100%;
+  min-block-size: 48px;
+}
+
+@media only screen and (width <= 600px) {
+  .otherDeviceSessionHeader > span,
+  .otherDeviceSessionHeader :deep(.btn) {
+    inline-size: 100%;
+  }
+}

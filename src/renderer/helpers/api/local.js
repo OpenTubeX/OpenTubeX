@@ -14,6 +14,7 @@ import { parseLocalShortLinkedVideo } from '../player/shorts'
 import { getPaidPromotionDurationMs } from '../player/paidPromotion'
 import { classifyMusicMediaType, MUSIC_MEDIA_TYPE } from '../player/musicMediaType'
 import { getLocalPremiereState } from '../premiere'
+import { getAndroidLiveHlsManifestUrl } from '../player/liveManifest'
 import { shouldHideMembersOnlyContent } from '../restricted-playback'
 import { getThumbnailPreviewUrl } from '../thumbnailPreview'
 import { isCollaborativeVideoAuthor, parseLocalVideoChannels } from '../video-collaborators'
@@ -35,6 +36,15 @@ const TRACKING_PARAM_NAMES = [
   'utm_term',
   'utm_content',
 ]
+
+async function localApiFetch(input, init) {
+  if (process.env.IS_CAPACITOR) {
+    const { capacitorHttpFetch } = await import('./capacitor-http')
+    return await capacitorHttpFetch(input, init)
+  }
+
+  return await fetch(input, init)
+}
 
 // YouTube moved Shorts grid images from `thumbnail` to
 // `thumbnailViewModel.thumbnailViewModel.image.sources`. Preserve that exact
@@ -63,7 +73,7 @@ if (process.env.SUPPORTS_LOCAL_API) {
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.floor(Math.random() * 10000)}`
 
-      if (process.env.IS_ELECTRON) {
+      if (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) {
         const iframe = document.getElementById('sigFrame')
 
         /** @param {MessageEvent} event */
@@ -131,8 +141,8 @@ async function createInnertube({ withPlayer = false, location = undefined, safet
     enable_safety_mode: !!safetyMode,
     client_type: clientType,
 
-    // use browser fetch
-    fetch: (fetchFunc ?? ((input, init) => fetch(input, init))),
+    // Use native HTTP in Capacitor without patching global fetch.
+    fetch: (fetchFunc ?? localApiFetch),
     cache,
     generate_session_locally: !!generateSessionLocally
   })
@@ -632,6 +642,7 @@ async function resolveMusicMediaType(playerResponse, actions, videoId) {
  *   paidPromotionDurationMs: number | null,
  *   isPremiere: boolean | undefined,
  *   watchPageIpBlocked: boolean,
+ *   androidLiveHlsManifestUrl: string | null,
  *   musicMediaType: import('../player/musicMediaType').MusicMediaType
  * }>}
  */
@@ -643,10 +654,10 @@ export async function getLocalVideoInfo(id) {
 
   const fetchFunc = async (input, init) => {
     if (!(input.url?.startsWith('https://www.youtube.com/youtubei/v1/player'))) {
-      return fetch(input, init)
+      return localApiFetch(input, init)
     }
 
-    const response = await fetch(input, init)
+    const response = await localApiFetch(input, init)
     const responseText = await response.text()
 
     responseTime = Date.now()
@@ -699,23 +710,34 @@ export async function getLocalVideoInfo(id) {
 
   player ??= await Player.create(
     process.env.IS_ELECTRON ? new PlayerCache() : new UniversalCache(false),
-    (input, init) => fetch(input, init),
+    localApiFetch,
     undefined,
     // If we found the player ID in the HTML we can pass it in to save one request inside Player.create()
     htmlExtracts.playerId
   )
+  htmlExtracts.session.player = player
 
   // based on the videoId
   let contentPoToken
 
-  if (process.env.IS_ELECTRON && !watchPageIpBlocked) {
+  if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !watchPageIpBlocked) {
     try {
-      contentPoToken = await window.ftElectron.generatePoToken(
-        id,
-        JSON.stringify(htmlExtracts.session.context),
-        JSON.stringify(htmlExtracts.initialAttestationData),
-        JSON.stringify(htmlExtracts.ytConfig)
-      )
+      if (process.env.IS_ELECTRON) {
+        contentPoToken = await window.ftElectron.generatePoToken(
+          id,
+          JSON.stringify(htmlExtracts.session.context),
+          JSON.stringify(htmlExtracts.initialAttestationData),
+          JSON.stringify(htmlExtracts.ytConfig)
+        )
+      } else {
+        const { generateCapacitorPoToken } = await import('./capacitor-po-token')
+        contentPoToken = await generateCapacitorPoToken(
+          id,
+          htmlExtracts.session.context,
+          htmlExtracts.initialAttestationData,
+          htmlExtracts.ytConfig
+        )
+      }
 
       player.po_token = contentPoToken
     } catch (error) {
@@ -730,6 +752,13 @@ export async function getLocalVideoInfo(id) {
   const paidPromotionRequest = htmlExtracts.session.actions.execute('/player', {
     videoId: id,
     client: 'ANDROID',
+    racyCheckOk: true,
+    contentCheckOk: true,
+    playbackContext: {
+      contentPlaybackContext: {
+        signatureTimestamp: player.signature_timestamp
+      }
+    },
     parse: false,
   }).catch(() => null)
 
@@ -778,7 +807,21 @@ export async function getLocalVideoInfo(id) {
 
   const info = new YT.VideoInfo([playerResponse, nextResponse], htmlExtracts.session.actions, cpn)
   const musicMediaType = await musicMediaTypeRequest
-  await paidPromotionRequest
+  const androidPlayerResponse = await paidPromotionRequest
+  let androidLiveHlsManifestUrl = getAndroidLiveHlsManifestUrl(androidPlayerResponse)
+  if (androidLiveHlsManifestUrl !== null) {
+    try {
+      androidLiveHlsManifestUrl = await decipherManifestUrl(
+        androidLiveHlsManifestUrl,
+        player,
+        contentPoToken,
+        false
+      )
+    } catch (error) {
+      console.warn('Failed to decipher the Android live HLS fallback', error)
+      androidLiveHlsManifestUrl = null
+    }
+  }
   const totalAdTimeMilliseconds = extractTotalAdTimeMilliseconds(playerResponse.data)
 
   // Some time would be used for parsing and maybe additional requests so end time should be calculated sooner to reduce actual waiting time
@@ -833,7 +876,16 @@ export async function getLocalVideoInfo(id) {
 
   if ((info.playability_status.status === 'UNPLAYABLE' && (!hasTrailer || trailerIsAgeRestricted)) ||
     info.playability_status.status === 'LOGIN_REQUIRED') {
-    return { info, poToken: undefined, clientInfo, paidPromotionDurationMs, isPremiere, watchPageIpBlocked, musicMediaType }
+    return {
+      info,
+      poToken: undefined,
+      clientInfo,
+      paidPromotionDurationMs,
+      isPremiere,
+      androidLiveHlsManifestUrl,
+      watchPageIpBlocked,
+      musicMediaType,
+    }
   }
 
   if (hasTrailer && info.playability_status.status !== 'OK') {
@@ -900,6 +952,7 @@ export async function getLocalVideoInfo(id) {
     adEndTimeUnixMs,
     paidPromotionDurationMs,
     isPremiere,
+    androidLiveHlsManifestUrl,
     watchPageIpBlocked,
     musicMediaType,
   }
@@ -973,7 +1026,7 @@ export function getLocalVideoChannels(id) {
 
     try {
       const innertube = await createInnertube({
-        fetchFunc: (input, init) => fetch(input, { ...init, signal: abortController.signal })
+        fetchFunc: (input, init) => localApiFetch(input, { ...init, signal: abortController.signal })
       })
       const response = await innertube.actions.execute('/next', {
         videoId: id,

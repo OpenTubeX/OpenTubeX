@@ -275,6 +275,11 @@ Settings:
       Mark as Watched: وضع علامة "تمت مشاهدته".
       Copy YouTube Link: انسخ رابط اليوتيوب
       Open in YouTube: افتح في يوتيوب
+    Mobile Layout:
+      Mobile Layout: 'تخطيط الهاتف المحمول'
+      Automatic: 'تلقائي'
+      Phone: 'هاتف'
+      Tablet: 'جهاز لوحي'
   Context Menu Search Settings:
     Context Menu Search Settings: البحث في قائمة السياق
     Description: اختر محركات البحث التي تظهر عند النقر بزر الماوس الأيمن فوق النص المحدد. عمليات البحث مفتوحة في المتصفح الافتراضي الخاص بك.
@@ -501,6 +506,8 @@ Settings:
     Reorder Playback Speed: اسحب لإعادة ترتيب سرعة التشغيل
     Playback Speed: سرعة التشغيل
     Parallel Segment Loading: تحميل القطاع الموازي
+    Rotate Wide Videos to Landscape in Fullscreen: 'تدوير مقاطع الفيديو العريضة إلى الوضع الأفقي في ملء الشاشة'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'اسحب لأعلى أو لأسفل للدخول إلى ملء الشاشة أو الخروج منها'
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.
@@ -796,7 +803,7 @@ Settings:
     Privacy Policy: سياسة الخصوصية لهذا الخادم
     Enhanced Privacy Enabled: تم تمكين الخصوصية المحسنة. يقوم الخادم بتخزين بيانات المزامنة المشفرة فقط.
     Enhanced Privacy Unsupported: تحذير — هذا الخادم لا يدعم الخصوصية المحسنة. البيانات المتزامنة مرئية لمشغلها.
-    Description: قم بمزامنة الاشتراكات والملفات الشخصية وقوائم التشغيل وسجل المشاهدة والإعدادات وعلامات التبويب المفتوحة باستخدام خادم مزامنة OpenTubeX أو LibreTube. قد لا تدعم خوادم LibreTube كل ميزات المزامنة.
+    Description: 'زامن الاشتراكات والملفات الشخصية وقوائم التشغيل وسجل المشاهدة والإعدادات المدعومة مع خادم مزامنة OpenTubeX أو LibreTube. تبقى علامات تبويب سطح المكتب والهاتف منفصلة ما لم تختر مشاركتها. قد لا تدعم خوادم LibreTube جميع ميزات المزامنة.'
     Server URL: عنوان URL للخادم
     Checking Server: جارٍ التحقق من خادم المزامنة…
     Server Unavailable: غير قادر على الاتصال بخادم المزامنة هذا. تحقق من عنوان URL وحاول مرة أخرى.
@@ -877,6 +884,13 @@ Settings:
     Data Loss Confirmation: هل تريد تأكيد المزامنة المدمرة؟
     Data Loss Warning: ستحذف حالة الخادم {deleted} من {previous} عنصرًا تمت مزامنته مسبقًا {collection}. يمكن أن يشير هذا إلى فشل عملية ترحيل الخادم أو إعادة تعيينه. استمر فقط إذا كان هذا الحذف مقصودًا ولديك نسخة احتياطية.
     Confirm Data Loss: حذف والمتابعة
+    Use Shared Tabs: 'استخدام مجموعة علامات تبويب مشتركة بين الأجهزة'
+    Shared Tabs Warning: 'تحل علامات التبويب المشتركة محل المجموعة الحالية على الأجهزة المتصلة. عطّل هذا الخيار للاحتفاظ بعلامات تبويب منفصلة لسطح المكتب والهاتف.'
+    Tabs From Other Devices: 'علامات تبويب من أجهزة أخرى'
+    Device Tab Session: '{platform} · {count} علامة تبويب'
+    Mobile Device: 'هاتف'
+    Desktop Device: 'سطح المكتب'
+    Open All Tabs: 'فتح كل علامات التبويب'
   Proxy Settings:
     IP Block Recovery Script Path: مسار البرنامج النصي لاسترداد كتلة IP
     Select IP Block Recovery Script File: حدد ملف البرنامج النصي لاسترداد حظر IP

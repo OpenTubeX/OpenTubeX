@@ -180,6 +180,14 @@
             @change="store.dispatch('updateSyncServerSyncSessions', $event)"
           />
           <FtToggleSwitch
+            v-if="sessionsSupported && syncSessionsEnabled"
+            :label="t('Settings.Sync Settings.Use Shared Tabs')"
+            :default-value="sharedTabsEnabled"
+            :disabled="busy"
+            compact
+            @change="setSharedTabs"
+          />
+          <FtToggleSwitch
             :label="t('Settings.Settings')"
             :default-value="syncSettingsEnabled"
             :disabled="busy || settingsSupported === false"
@@ -187,6 +195,46 @@
             @change="store.dispatch('updateSyncServerSyncSettings', $event)"
           />
         </FtFlexBox>
+        <p
+          v-if="sessionsSupported && syncSessionsEnabled && sharedTabsEnabled"
+          class="compatibilityWarning"
+        >
+          {{ t('Settings.Sync Settings.Shared Tabs Warning') }}
+        </p>
+        <section
+          v-if="!isCapacitor && sessionsSupported && syncSessionsEnabled && !sharedTabsEnabled && otherDeviceSessions.length > 0"
+          class="otherDeviceTabs"
+        >
+          <h3>{{ t('Settings.Sync Settings.Tabs From Other Devices') }}</h3>
+          <article
+            v-for="session in otherDeviceSessions"
+            :key="`${session.syncDeviceId}:${session.sessionId}`"
+            class="otherDeviceSession"
+          >
+            <div class="otherDeviceSessionHeader">
+              <span>{{ t('Settings.Sync Settings.Device Tab Session', {
+                platform: session.syncPlatform === 'mobile'
+                  ? t('Settings.Sync Settings.Mobile Device')
+                  : t('Settings.Sync Settings.Desktop Device'),
+                count: session.tabs.length,
+              }) }}</span>
+              <FtButton
+                :label="t('Settings.Sync Settings.Open All Tabs')"
+                :icon="['fas', 'folder-open']"
+                @click="openOtherDeviceSession(session)"
+              />
+            </div>
+            <div class="otherDeviceTabActions">
+              <FtButton
+                v-for="tab in session.tabs"
+                :key="tab.id"
+                :label="tab.title || tab.url"
+                :icon="['fas', 'arrow-up-right-from-square']"
+                @click="openOtherDeviceSession({ ...session, tabs: [tab] })"
+              />
+            </div>
+          </article>
+        </section>
         <p
           v-if="lastSyncLabel"
           class="lastSync"
@@ -449,6 +497,7 @@ import {
 const { locale, t } = useI18n()
 const dateFormat = computed(() => store.getters.getDateFormat)
 const timeFormat = computed(() => store.getters.getTimeFormat)
+const isCapacitor = process.env.IS_CAPACITOR
 
 const OPENTUBEX_SYNC_SERVER_URL = 'https://sync.d3sox.me'
 const OPENTUBEX_SYNC_SERVER_PRIVACY_POLICY_URL =
@@ -540,6 +589,8 @@ const syncPlaylistsEnabled = computed(() => store.getters.getSyncServerSyncPlayl
 const syncHistoryEnabled = computed(() => store.getters.getSyncServerSyncHistory)
 const syncProfilesEnabled = computed(() => store.getters.getSyncServerSyncProfiles)
 const syncSessionsEnabled = computed(() => store.getters.getSyncServerSyncSessions)
+const sharedTabsEnabled = computed(() => store.getters.getSyncServerSharedTabs)
+const otherDeviceSessions = computed(() => store.getters.getSyncServerOtherDeviceSessions)
 const syncSettingsEnabled = computed(() => store.getters.getSyncServerSyncSettings)
 const historySupported = computed(() => store.getters.getSyncServerHistorySupported)
 const privacyMode = computed(() => store.getters.getSyncServerPrivacyMode)
@@ -559,7 +610,7 @@ const accountSessionsSupported = computed(() => (
 ))
 const settingsSupported = computed(() => privacyMode.value === 'enhanced')
 const sessionsSupported = computed(() => (
-  process.env.IS_ELECTRON && privacyMode.value === 'enhanced'
+  (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && privacyMode.value === 'enhanced'
 ))
 const lastSyncLabel = computed(() => {
   const timestamp = store.getters.getSyncServerLastSyncAt
@@ -739,6 +790,15 @@ async function disconnect() {
 
 function setAutoSync(enabled) {
   store.dispatch('setSyncServerAutoSync', enabled)
+}
+
+async function setSharedTabs(enabled) {
+  await store.dispatch('updateSyncServerSharedTabs', enabled)
+  store.dispatch('scheduleSyncServer', 'sessions')
+}
+
+async function openOtherDeviceSession(session) {
+  await store.dispatch('openSyncServerSession', session)
 }
 
 function setSyncEnabled(enabled) {

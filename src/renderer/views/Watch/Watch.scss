@@ -991,8 +991,10 @@
 
     .shortsAuxPanelTarget :deep(.datePublishedAndViewCount) {
       display: flex;
+      flex: 0 0 auto;
       flex-wrap: wrap;
       align-items: baseline;
+      align-content: flex-start;
       gap: 2px 5px;
     }
 
@@ -1153,6 +1155,7 @@
         background-color: rgb(0 0 0 / 55%);
       }
     }
+
   }
 
   .watchVideoPlaylist,
@@ -1364,6 +1367,62 @@
       scroll-margin-block-start: 76px;
     }
   }
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsActionRail) {
+  position: relative;
+  grid-column: 1;
+  grid-row: 1;
+  place-self: end;
+  inset: auto;
+  inline-size: auto;
+  margin: 0;
+  padding-inline-end: 8px;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 8px;
+  padding-block-end: 0;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .videoArea .videoAreaMargin) {
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 0;
+  inline-size: 100%;
+  max-inline-size: 100%;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .videoArea .videoPlayer),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsExternalMetadata),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsNextPreview) {
+  grid-column: 1;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsCommentsPanel),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsAuxPanel) {
+  inset-inline: 0 auto;
+  box-sizing: border-box;
+  inline-size: calc(100% - 58px);
+  max-inline-size: 420px;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsAction) {
+  gap: 0;
+  max-inline-size: 44px;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsAction > span) {
+  display: none;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsNavigation) {
+  gap: 8px;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsComponentAction .iconButton),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsSoundThumbnail),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsNavigationButton) {
+  inline-size: 42px;
+  block-size: 42px;
 }
 
 @keyframes shorts-transition-in {

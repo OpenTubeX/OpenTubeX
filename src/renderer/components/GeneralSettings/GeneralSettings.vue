@@ -307,14 +307,14 @@
       </FtFlexBox>
     </div>
     <FtFlexBox
-      v-if="mode === 'general' && USING_ELECTRON"
+      v-if="mode === 'general' && (USING_ELECTRON || IS_CAPACITOR)"
       class="confirmations"
     >
       <FtCheckboxList
         v-model="enabledConfirmations"
         :title="t('Settings.General Settings.Confirm Before')"
         :labels="confirmationLabels"
-        :values="CONFIRMATION_VALUES"
+        :values="confirmationValues"
       />
     </FtFlexBox>
   </FtSettingsSection>
@@ -351,6 +351,7 @@ import {
 } from '../../helpers/dateFormat'
 
 const USING_ELECTRON = !!process.env.IS_ELECTRON
+const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
 const IS_MAC = process.platform === 'darwin'
 const PLAYBACK_ENGINE_VALUES = ['yt-dlp', 'built-in']
@@ -434,13 +435,16 @@ const CONFIRMATION_OPTIONS = [
     action: 'updateConfirmUnloadMultipleTabs'
   }
 ]
-const CONFIRMATION_VALUES = CONFIRMATION_OPTIONS.map(option => option.value)
-const confirmationLabels = computed(() => CONFIRMATION_OPTIONS.map(option => option.label()))
+const visibleConfirmationOptions = computed(() => IS_CAPACITOR
+  ? CONFIRMATION_OPTIONS.slice(0, 1)
+  : CONFIRMATION_OPTIONS)
+const confirmationValues = computed(() => visibleConfirmationOptions.value.map(option => option.value))
+const confirmationLabels = computed(() => visibleConfirmationOptions.value.map(option => option.label()))
 const enabledConfirmations = computed({
-  get: () => CONFIRMATION_OPTIONS.filter(option => option.enabled()).map(option => option.value),
+  get: () => visibleConfirmationOptions.value.filter(option => option.enabled()).map(option => option.value),
   set: values => {
     const enabled = new Set(values)
-    for (const option of CONFIRMATION_OPTIONS) {
+    for (const option of visibleConfirmationOptions.value) {
       const next = enabled.has(option.value)
       if (option.enabled() !== next) {
         store.dispatch(option.action, next)

@@ -37,7 +37,7 @@ const tabNavigation = initializeTabNavigationService(router, store)
 
 router.isReady().then(() => {
   app.mount('#app')
-  initializeAppScrollbars()
+  initializeAppScrollbars({ useNativePageScrollbar: process.env.IS_CAPACITOR })
 })
 
 // to avoid accessing electron api from web app build

@@ -249,12 +249,12 @@ kbd {
 
 @media only screen and (width <= 520px) {
   .commandPaletteBackdrop {
-    padding-block-start: 12px;
+    padding-block: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 12px) calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px);
     padding-inline: 8px;
   }
 
   .commandPalette {
-    max-block-size: calc(100vh - 24px);
+    max-block-size: calc(100dvh - var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) - 24px);
   }
 
   .commandPaletteFooter {

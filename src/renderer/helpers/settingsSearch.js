@@ -77,6 +77,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
   const {
     store,
     usingElectron,
+    isCapacitor = false,
     supportsLocalApi,
     isMac,
     isLinuxWayland,
@@ -112,6 +113,9 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
   }
 
   if (sectionType === 'general') {
+    if (group === 'Mobile Layout') {
+      return isCapacitor
+    }
     if (group === 'Minimize to system tray') {
       return usingElectron && !isMac && !isLinuxWayland
     }
@@ -157,7 +161,8 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
       return connected
     }
     if (group === 'Open Tabs') {
-      return connected && usingElectron && store.getters.getSyncServerPrivacyMode === 'enhanced'
+      return connected && (usingElectron || isCapacitor) &&
+        store.getters.getSyncServerPrivacyMode === 'enhanced'
     }
     return true
   }
@@ -246,6 +251,9 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
   }
 
   if (sectionType === 'channel') {
+    if (isCapacitor && ['Enable Volume', 'Auto Update Volume', 'Volume'].includes(group)) {
+      return false
+    }
     if (group === 'Auto Update') {
       return store.getters.getRememberPlaybackSpeedPerChannel ||
         store.getters.getRememberVideoQualityPerChannel
@@ -274,6 +282,9 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
   }
 
   if (sectionType === 'theme') {
+    if (isCapacitor && ['Font', 'Show Progress as Notification'].includes(group)) {
+      return false
+    }
     if (group === 'Custom Theme' && item === 'Edit Custom Theme') {
       const baseTheme = store.getters.getBaseTheme
       const selectedTheme = baseTheme === 'system'
@@ -286,15 +297,17 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     if (group === 'Light Theme' || group === 'Dark Theme') {
       return store.getters.getBaseTheme === 'system'
     }
+    if (group === 'Move Downloads to App Header') {
+      return usingElectron || isCapacitor
+    }
+    if (['Use Fixed Tab Width', 'Show Tab Icons', 'Tab Width'].includes(group)) {
+      return usingElectron || isCapacitor
+    }
     if ([
-      'Move Downloads to App Header',
       'Disable Smooth Scrolling',
-      'Use Fixed Tab Width',
       'Move Settings to App Header',
-      'Show Tab Icons',
       'Show Tab Previews',
       'Tab Layout',
-      'Tab Width',
       'Load Missing Tab Icons',
       'UI Scale'
     ].includes(group)) {
@@ -302,6 +315,22 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
         group !== 'Load Missing Tab Icons' || store.getters.getShowTabIcons
       )
     }
+  }
+
+  if (sectionType === 'player' && isCapacitor && [
+    'Default Volume',
+    'Display Play Button In Video Player',
+    'Remember Volume',
+    'Scroll Volume Over Video Player',
+  ].includes(group)) {
+    return false
+  }
+
+  if (sectionType === 'player' && !isCapacitor && [
+    'Rotate Wide Videos to Landscape in Fullscreen',
+    'Swipe Up or Down to Enter or Exit Fullscreen',
+  ].includes(group)) {
+    return false
   }
 
   if (sectionType === 'password') {

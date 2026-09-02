@@ -31,6 +31,7 @@ jobs:
       matrix:
         node-version: [24.x]
         runtime:
+          - android
           - linux-x64
           - linux-armv7l
           - linux-arm64
@@ -39,6 +40,9 @@ jobs:
           - osx-x64
           - osx-arm64
         include:
+        - runtime: android
+          os: ubuntu-latest
+
         - runtime: linux-x64
           os: ubuntu-latest
           appimage-arch: amd64
@@ -68,6 +72,7 @@ jobs:
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
+        fetch-depth: 0
         persist-credentials: false
 
     # Do not restore the pnpm cache, to avoid cache poisoning affecting releases
@@ -88,6 +93,17 @@ jobs:
     - run: pnpm run lint
       shell: bash
 
+    - name: Use Java 21 for Android
+      if: matrix.runtime == 'android'
+      uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.0.0
+      with:
+        distribution: temurin
+        java-version: 21
+
+    - name: Set up Android SDK
+      if: matrix.runtime == 'android'
+      uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+
     - name: Get Version Number
       id: getPackageInfo
       shell: bash
@@ -95,7 +111,7 @@ jobs:
         jq --raw-output '"version=" + .version' package.json >> "$GITHUB_OUTPUT"
 
     - name: Install Linux packaging dependencies
-      if: startsWith(matrix.os, 'ubuntu')
+      if: startsWith(matrix.os, 'ubuntu') && matrix.runtime != 'android'
       shell: bash
       run: |
         sudo apt update
@@ -161,6 +177,27 @@ jobs:
           sleep 10
         done
 
+    - name: Build signed universal Android APK
+      if: matrix.runtime == 'android'
+      shell: bash
+      env:
+        ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+        ANDROID_RELEASE_STORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD }}
+        ANDROID_RELEASE_KEYSTORE: ${{ github.workspace }}/android/release.keystore
+      run: |
+        set -euo pipefail
+        if [[ -z "$ANDROID_RELEASE_KEYSTORE_BASE64" || -z "$ANDROID_RELEASE_STORE_PASSWORD" ]]; then
+          echo "Android release signing secrets are not configured." >&2
+          exit 1
+        fi
+        printf '%s' "$ANDROID_RELEASE_KEYSTORE_BASE64" | base64 --decode > "$ANDROID_RELEASE_KEYSTORE"
+        chmod 600 "$ANDROID_RELEASE_KEYSTORE"
+        ANDROID_VERSION_CODE="$(git rev-list --count HEAD)"
+        ANDROID_VERSION_NAME="$(jq --raw-output .version package.json)"
+        export ANDROID_VERSION_CODE ANDROID_VERSION_NAME
+        pnpm run capacitor:sync:android
+        ./android/gradlew --project-dir android assembleRelease
+
     - name: Convert x64 AppImage to Anylinux AppImage
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       shell: bash
@@ -219,6 +256,10 @@ jobs:
         mkdir release-assets
 
         case "$RUNTIME" in
+          android)
+            cp "android/app/build/outputs/apk/release/app-release.apk" \
+              "release-assets/org.opentubex.app-${VERSION}-alpha.apk"
+            ;;
           linux-x64)
             cp "build/opentubex-${VERSION}.zip" \
               "release-assets/opentubex-${VERSION}-beta-linux-x64-portable.zip"

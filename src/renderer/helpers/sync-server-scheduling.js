@@ -30,6 +30,11 @@ export const SYNC_ACTION_REASONS = new Map([
 ])
 
 export const SYNC_MUTATION_REASONS = new Map([
+  ['setHistoryEntryScroll', 'sessions'],
+  ['setPresentedTab', 'sessions'],
+  ['setTabContentTitle', 'sessions'],
+  ['setTabNavigation', 'sessions'],
+  ['setTabsState', 'sessions'],
   ['setCustomThemes', 'settings'],
   ['addProfileToList', 'profiles'],
   ['addChannelToProfiles', 'profilesOrSubscriptions'],

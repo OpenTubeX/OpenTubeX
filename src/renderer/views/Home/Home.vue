@@ -415,6 +415,7 @@ import {
   getRecentDownloads,
   normalizeHomeSectionLayout,
 } from '../../helpers/homeSections'
+import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import {
   getEnabledSubscriptionFeedSources,
   getNewSubscriptionFeedEntries,
@@ -434,11 +435,10 @@ let removeReminderListener = null
 let reminderLoadGeneration = 0
 
 const sectionLayout = computed(() => normalizeHomeSectionLayout(store.getters.getHomeSectionLayout))
-const supportedSectionIds = computed(() => new Set(IS_ELECTRON
-  ? sectionLayout.value.map(section => section.id)
-  : sectionLayout.value
-      .map(section => section.id)
-      .filter(id => !['recentDownloads', 'reminders'].includes(id))))
+const supportedSectionIds = computed(() => new Set(sectionLayout.value
+  .map(section => section.id)
+  .filter(id => IS_ELECTRON || id !== 'recentDownloads')
+  .filter(id => supportsLiveReminders || id !== 'reminders')))
 const configurableSections = computed(() => (
   sectionLayout.value.filter(section => supportedSectionIds.value.has(section.id))
 ))
@@ -729,7 +729,7 @@ function formatReminderTime(timestamp) {
 async function loadReminders() {
   const generation = ++reminderLoadGeneration
   try {
-    const records = await window.ftElectron.liveReminder.list()
+    const records = await liveReminder.list()
     if (generation === reminderLoadGeneration) {
       reminders.value = records
     }
@@ -745,13 +745,13 @@ watch(
     removeReminderListener = null
     reminderLoadGeneration++
 
-    if (!IS_ELECTRON || !visible) {
+    if (!supportsLiveReminders || !visible) {
       reminders.value = []
       return
     }
 
     loadReminders()
-    removeReminderListener = window.ftElectron.liveReminder.onUpdated(() => loadReminders())
+    removeReminderListener = liveReminder.onUpdated(() => loadReminders())
   },
   { immediate: true }
 )

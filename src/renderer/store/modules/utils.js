@@ -3,6 +3,7 @@ import { nextTick } from 'vue'
 import i18n from '../../i18n/index'
 
 import { checkYoutubeChannelId } from '../../helpers/channels'
+import { commitCustomThemesEdit } from '../../helpers/customThemeSync.js'
 import {
   CHANNEL_HANDLE_REGEX,
   createWebURL,
@@ -298,9 +299,7 @@ const getters = {
 }
 
 const actions = {
-  updateCustomThemes({ commit }, themes) {
-    commit('setCustomThemes', themes)
-  },
+  updateCustomThemes: commitCustomThemesEdit,
 
   showOutlines({ commit }) {
     commit('setOutlinesHidden', false)

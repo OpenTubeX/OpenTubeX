@@ -122,11 +122,68 @@ test('shared settings search index includes only settings available on this plat
   const webValues = createSettingsSearchIndex({
     ...options,
     usingElectron: false,
+    isCapacitor: false,
+  }).get('appearance')
+  const mobileValues = createSettingsSearchIndex({
+    ...options,
+    usingElectron: false,
+    isCapacitor: true,
   }).get('appearance')
 
   assert.ok(desktopValues.some(({ label }) => label === 'Show thumbnail previews'))
   assert.ok(desktopValues.some(({ label }) => label === 'UI Scale'))
   assert.ok(!webValues.some(({ label }) => label === 'UI Scale'))
+  assert.ok(mobileValues.some(({ label }) => label === 'Mobile layout'))
+  assert.ok(mobileValues.some(({ label }) => label === 'Use Fixed Tab Width in Horizontal Mode'))
+  assert.ok(mobileValues.some(({ label }) => label === 'Show Tab Icons'))
+  assert.ok(!mobileValues.some(({ label }) => label === 'App Font'))
+  assert.ok(!mobileValues.some(({ label }) => label === 'Show progress as notification'))
+})
+
+test('mobile playback search excludes settings that have no Capacitor behavior', () => {
+  const options = {
+    sections: [{
+      type: 'playback',
+      title: locale.Settings.Categories.Playback,
+      description: locale.Settings.Categories['Playback Description'],
+    }],
+    tm: path => getAtPath(locale, path),
+    store: {
+      getters: new Proxy({}, {
+        get(target, key) {
+          return target[key] ?? false
+        }
+      })
+    },
+    supportsLocalApi: true,
+    isMac: false,
+    isLinuxWayland: false,
+    systemUsesDarkTheme: true,
+  }
+  const values = createSettingsSearchIndex({
+    ...options,
+    usingElectron: false,
+    isCapacitor: true,
+  }).get('playback')
+  const desktopValues = createSettingsSearchIndex({
+    ...options,
+    usingElectron: true,
+    isCapacitor: false,
+  }).get('playback')
+
+  const labels = new Set(values.map(({ label }) => label))
+  const desktopLabels = new Set(desktopValues.map(({ label }) => label))
+  assert.ok(labels.has('Automatically enter Picture-in-Picture'))
+  assert.ok(labels.has('Rotate wide videos to landscape in fullscreen'))
+  assert.ok(labels.has('Swipe up or down to enter or exit fullscreen'))
+  assert.ok(!labels.has('Scroll Volume Over Video Player'))
+  assert.ok(!labels.has('Remember Volume'))
+  assert.ok(!labels.has('Default Volume'))
+  assert.ok(!labels.has('Display Play Button In Video Player'))
+  assert.ok(!labels.has('Enable Volume'))
+  assert.ok(!labels.has('Volume'))
+  assert.ok(!desktopLabels.has('Rotate wide videos to landscape in fullscreen'))
+  assert.ok(!desktopLabels.has('Swipe up or down to enter or exit fullscreen'))
 })
 
 test('settings search results retain their source tab', () => {

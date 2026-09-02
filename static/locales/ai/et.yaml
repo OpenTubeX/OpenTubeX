@@ -271,6 +271,11 @@ Settings:
       Mark as Watched: Märgi vaadatuks
       Copy YouTube Link: Kopeeri YouTube'i link
       Open in YouTube: Ava YouTube'is
+    Mobile Layout:
+      Mobile Layout: 'Mobiilipaigutus'
+      Automatic: 'Automaatne'
+      Phone: 'Telefon'
+      Tablet: 'Tahvelarvuti'
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekstimenüü otsing
     Description: Valige otsingumootorid, mis kuvatakse valitud tekstil paremklõpsamisel. Otsingud avanevad vaikebrauseris.
@@ -493,6 +498,8 @@ Settings:
     Reorder Playback Speed: Lohista esituskiiruse järjestuse muutmiseks
     Playback Speed: Esituskiirus
     Parallel Segment Loading: Segmentide paralleelne laadimine
+    Rotate Wide Videos to Landscape in Fullscreen: 'Pööra laiad videod täisekraanil rõhtpaigutusse'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Täisekraanile minemiseks või sealt väljumiseks nipsa üles või alla'
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
@@ -779,7 +786,7 @@ Settings:
     Privacy Policy: Selle serveri privaatsuspoliitika
     Enhanced Privacy Enabled: Täiustatud privaatsus on lubatud. Server salvestab ainult krüptitud sünkroonimisandmeid.
     Enhanced Privacy Unsupported: Hoiatus — see server ei toeta täiustatud privaatsust. Sünkroonitud andmed on serveri haldajale nähtavad.
-    Description: Sünkroonige tellimused, profiilid, esitusloendid, vaatamisajalugu, seaded ja avatud vahekaardid OpenTubeXi või LibreTube’i sünkroonimisserveriga. LibreTube’i serverid ei pruugi kõiki sünkroonimisfunktsioone toetada.
+    Description: 'Sünkrooni tellimused, profiilid, esitusloendid, vaatamisajalugu ja toetatud seaded OpenTubeXi või LibreTube’i sünkroonimisserveriga. Arvuti ja mobiilseadme vahelehed jäävad eraldi, kui sa neid otseselt ei jaga. LibreTube’i serverid ei pruugi kõiki sünkroonimisfunktsioone toetada.'
     Server URL: Serveri URL
     Checking Server: Sünkroonimisserveri kontrollimine…
     Server Unavailable: Selle sünkroonimisserveriga ei saa ühendust luua. Kontrollige URL-i ja proovige uuesti.
@@ -860,6 +867,13 @@ Settings:
     Data Loss Confirmation: Kas kinnitada andmeid kustutav sünkroonimine?
     Data Loss Warning: Serveri olek kustutaks varem sünkroonitud kogu {collection} üksustest {deleted}/{previous}. See võib viidata serveri nurjunud migreerimisele või lähtestamisele. Jätkake ainult siis, kui kustutamine on tahtlik ja teil on varukoopia.
     Confirm Data Loss: Kustuta ja jätka
+    Use Shared Tabs: 'Kasuta seadmetes üht jagatud vahelehtede komplekti'
+    Shared Tabs Warning: 'Jagatud vahelehed asendavad ühendatud seadmete praeguse vahelehtede komplekti. Hoia see väljas, et arvuti ja mobiilseadme vahelehed jääksid eraldi.'
+    Tabs From Other Devices: 'Teiste seadmete vahelehed'
+    Device Tab Session: '{platform} · {count} vahelehte'
+    Mobile Device: 'Mobiilseade'
+    Desktop Device: 'Arvuti'
+    Open All Tabs: 'Ava kõik vahelehed'
   Proxy Settings:
     IP Block Recovery Script Path: IP-blokeeringust taastamise skripti asukoht
     Select IP Block Recovery Script File: Vali IP-blokeeringust taastamise skriptifail

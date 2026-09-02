@@ -416,10 +416,13 @@ let navMutationObserver = null
 
 function updateIndicator() {
   const inner = innerRef.value
+  const mobile = window.matchMedia('(max-width: 680px)').matches
   // Skip hidden matches (e.g. links inside the collapsed "More" menu)
   const active = inner == null
     ? null
-    : Array.from(inner.querySelectorAll('.navOption.router-link-active, .navChannel.router-link-active'))
+    : Array.from(inner.querySelectorAll(mobile
+        ? ':scope > .navOption.router-link-active'
+        : '.navOption.router-link-active, .navChannel.router-link-active'))
         .find((el) => el instanceof HTMLElement && el.offsetParent !== null)
 
   if (!(active instanceof HTMLElement)) {
@@ -427,8 +430,30 @@ function updateIndicator() {
     return
   }
 
+  if (mobile) {
+    const nav = active.closest('.sideNav')
+    if (!(nav instanceof HTMLElement)) {
+      indicatorStyle.value = null
+      return
+    }
+
+    const navBounds = nav.getBoundingClientRect()
+    const activeBounds = active.getBoundingClientRect()
+    const inlineOffset = getComputedStyle(nav).direction === 'rtl'
+      ? navBounds.right - activeBounds.right
+      : activeBounds.left - navBounds.left
+
+    indicatorStyle.value = {
+      transform: `translateX(${getComputedStyle(nav).direction === 'rtl' ? -inlineOffset : inlineOffset}px)`,
+      inlineSize: `${activeBounds.width}px`,
+      blockSize: '3px'
+    }
+    return
+  }
+
   indicatorStyle.value = {
     transform: `translateY(${active.offsetTop}px)`,
+    inlineSize: '3px',
     blockSize: `${active.offsetHeight}px`
   }
 }

@@ -275,6 +275,11 @@ Settings:
       Mark as Watched: Merkitse katsotuksi
       Copy YouTube Link: Kopioi YouTube-linkki
       Open in YouTube: Avaa YouTubessa
+    Mobile Layout:
+      Mobile Layout: 'Mobiiliasettelu'
+      Automatic: 'Automaattinen'
+      Phone: 'Puhelin'
+      Tablet: 'Tabletti'
   Context Menu Search Settings:
     Context Menu Search Settings: Pikavalikon haku
     Description: Valitse hakukoneet, jotka näkyvät, kun napsautat valittua tekstiä hiiren kakkospainikkeella. Haut avautuvat oletusselaimessasi.
@@ -506,6 +511,8 @@ Settings:
       Modes:
         Save To Folder: Tallenna kansioon
         Clipboard: Kopioi leikepöydälle
+    Rotate Wide Videos to Landscape in Fullscreen: 'Kierrä leveät videot vaakasuuntaan koko näytöllä'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Siirry koko näytön tilaan tai poistu siitä pyyhkäisemällä ylös tai alas'
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
@@ -801,7 +808,7 @@ Settings:
     Privacy Policy: Tämän palvelimen tietosuojakäytäntö
     Enhanced Privacy Enabled: Parannettu tietosuoja on käytössä. Palvelin säilyttää vain salattuja synkronointitietoja.
     Enhanced Privacy Unsupported: Varoitus — tämä palvelin ei tue parannettua tietosuojaa. Palvelimen ylläpitäjä voi nähdä synkronoidut tiedot.
-    Description: Synkronoi tilaukset, profiilit, soittolistat, katseluhistoria, asetukset ja avoimet välilehdet OpenTubeX- tai LibreTube-synkronointipalvelimen kanssa. LibreTube-palvelimet eivät välttämättä tue kaikkia synkronointiominaisuuksia.
+    Description: 'Synkronoi tilaukset, profiilit, soittolistat, katseluhistoria ja tuetut asetukset OpenTubeX- tai LibreTube-synkronointipalvelimen kanssa. Tietokoneen ja mobiililaitteen välilehdet pysyvät erillään, ellet erikseen jaa niitä. LibreTube-palvelimet eivät välttämättä tue kaikkia synkronointiominaisuuksia.'
     Server URL: Palvelimen URL-osoite
     Checking Server: Tarkistetaan synkronointipalvelinta…
     Server Unavailable: Synkronointipalvelimeen ei saatu yhteyttä. Tarkista URL-osoite ja yritä uudelleen.
@@ -882,6 +889,13 @@ Settings:
     Data Loss Confirmation: Vahvistetaanko tietoja poistava synkronointi?
     Data Loss Warning: Palvelimen tila poistaisi {deleted}/{previous} aiemmin synkronoitua {collection}-kohdetta. Tämä voi johtua epäonnistuneesta palvelimen siirrosta tai nollauksesta. Jatka vain, jos poisto on tarkoituksellinen ja sinulla on varmuuskopio.
     Confirm Data Loss: Poista ja jatka
+    Use Shared Tabs: 'Käytä yhtä jaettua välilehtijoukkoa kaikilla laitteilla'
+    Shared Tabs Warning: 'Jaetut välilehdet korvaavat yhdistettyjen laitteiden nykyisen välilehtijoukon. Pidä tämä poissa käytöstä, jos haluat säilyttää tietokoneen ja mobiililaitteen välilehdet erillään.'
+    Tabs From Other Devices: 'Muiden laitteiden välilehdet'
+    Device Tab Session: '{platform} · {count} välilehteä'
+    Mobile Device: 'Mobiililaite'
+    Desktop Device: 'Tietokone'
+    Open All Tabs: 'Avaa kaikki välilehdet'
   Proxy Settings:
     IP Block Recovery Script Path: IP-eston palautuskomentosarjan polku
     Select IP Block Recovery Script File: Valitse IP-eston palautuskomentosarjatiedosto

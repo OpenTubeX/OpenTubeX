@@ -2,7 +2,9 @@
   <Teleport :to="teleportTarget">
     <div
       class="commandPaletteBackdrop"
-      @pointerdown.self="close"
+      @pointerdown.self.stop
+      @click.self.stop="close"
+      @keydown.esc="close"
     >
       <section
         class="commandPalette"
@@ -130,7 +132,7 @@
                     <small v-if="command.disabledReason">{{ command.disabledReason }}</small>
                     <small v-else-if="command.detail">{{ command.detail }}</small>
                   </span>
-                  <kbd v-if="command.shortcut">{{ getLocalizedShortcut(command.shortcut) }}</kbd>
+                  <kbd v-if="showShortcuts && command.shortcut">{{ getLocalizedShortcut(command.shortcut) }}</kbd>
                 </div>
               </div>
             </template>
@@ -144,6 +146,7 @@
         </div>
 
         <footer
+          v-if="showShortcuts"
           class="commandPaletteFooter"
           aria-hidden="true"
         >
@@ -179,6 +182,10 @@ const props = defineProps({
   commands: {
     type: Array,
     required: true
+  },
+  showShortcuts: {
+    type: Boolean,
+    default: true
   }
 })
 

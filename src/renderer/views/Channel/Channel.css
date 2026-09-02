@@ -79,4 +79,8 @@
     max-inline-size: none;
     inline-size: 100%;
   }
+
+  .elementList :deep(.autoGrid.grid) {
+    justify-content: center;
+  }
 }

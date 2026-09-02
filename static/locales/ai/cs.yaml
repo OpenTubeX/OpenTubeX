@@ -271,6 +271,11 @@ Settings:
       Mark as Watched: Označit jako zhlédnuté
       Copy YouTube Link: Kopírovat odkaz na YouTube
       Open in YouTube: Otevřít na YouTube
+    Mobile Layout:
+      Mobile Layout: 'Mobilní rozvržení'
+      Automatic: 'Automaticky'
+      Phone: 'Telefon'
+      Tablet: 'Tablet'
   Context Menu Search Settings:
     Context Menu Search Settings: Hledání z místní nabídky
     Description: Vyberte vyhledávače, které se zobrazí po kliknutí pravým tlačítkem na vybraný text. Výsledky se otevřou ve výchozím prohlížeči.
@@ -493,6 +498,8 @@ Settings:
     Reorder Playback Speed: Přetažením změnit pořadí rychlosti přehrávání
     Playback Speed: Rychlost přehrávání
     Parallel Segment Loading: Souběžné načítání segmentů
+    Rotate Wide Videos to Landscape in Fullscreen: 'Otočit široká videa na šířku v režimu celé obrazovky'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Přejetím nahoru nebo dolů otevřít či opustit celou obrazovku'
   Channel Settings:
     Channel Settings: Nastavení kanálů
     Channel Settings Description: Zapamatuje nastavení zvolená při sledování pro každý kanál zvlášť a znovu je použije při příštím sledování některého z jeho videí.
@@ -779,7 +786,7 @@ Settings:
     Privacy Policy: Zásady ochrany soukromí tohoto serveru
     Enhanced Privacy Enabled: Rozšířená ochrana soukromí je zapnutá. Server ukládá pouze šifrovaná synchronizovaná data.
     Enhanced Privacy Unsupported: Varování. Tento server nepodporuje rozšířenou ochranu soukromí. Jeho provozovatel může synchronizovaná data zobrazit.
-    Description: Synchronizujte odběry, profily, playlisty, historii sledování, nastavení a otevřené karty se synchronizačním serverem OpenTubeX nebo LibreTube. Servery LibreTube nemusí podporovat všechny funkce synchronizace.
+    Description: 'Synchronizujte odběry, profily, playlisty, historii sledování a podporovaná nastavení se synchronizačním serverem OpenTubeX nebo LibreTube. Karty na počítači a mobilu zůstanou oddělené, pokud je výslovně nesdílíte. Servery LibreTube nemusí podporovat všechny funkce synchronizace.'
     Server URL: Adresa URL serveru
     Checking Server: Kontrola synchronizačního serveru…
     Server Unavailable: K tomuto synchronizačnímu serveru se nelze připojit. Zkontrolujte adresu URL a zkuste to znovu.
@@ -860,6 +867,13 @@ Settings:
     Data Loss Confirmation: Potvrdit synchronizaci s mazáním dat?
     Data Loss Warning: Stav serveru by smazal {deleted} z {previous} dříve synchronizovaných položek kolekce {collection}. Může to znamenat, že se nezdařil převod nebo obnovení serveru. Pokračujte jen v případě, že je smazání záměrné a máte zálohu.
     Confirm Data Loss: Smazat a pokračovat
+    Use Shared Tabs: 'Používat jednu sdílenou sadu karet na všech zařízeních'
+    Shared Tabs Warning: 'Sdílené karty nahradí aktuální sadu karet na připojených zařízeních. Nechte tuto možnost vypnutou, chcete-li zachovat oddělené karty na počítači a mobilu.'
+    Tabs From Other Devices: 'Karty z jiných zařízení'
+    Device Tab Session: '{platform} · karet: {count}'
+    Mobile Device: 'Mobil'
+    Desktop Device: 'Počítač'
+    Open All Tabs: 'Otevřít všechny karty'
   Proxy Settings:
     IP Block Recovery Script Path: Cesta ke skriptu pro obnovení po blokování IP adresy
     Select IP Block Recovery Script File: Vybrat soubor skriptu pro obnovení po blokování IP adresy

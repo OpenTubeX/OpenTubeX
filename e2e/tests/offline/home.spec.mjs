@@ -482,6 +482,57 @@ test.describe('hidden Home page', () => {
 test.describe('compact scaled Home page', () => {
   test.use({ seed: { ...homeSeed, settings: { uiScale: 95 } } })
 
+  test('keeps Capacitor phone pages inside the viewport and clear of the bottom navigation', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 375, height: 700 })
+    await goTo(page, 'home')
+    await page.evaluate(() => {
+      document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
+      const app = document.querySelector('.app')
+      app.classList.add('capacitorTabs', 'capacitorPhoneLayout')
+      app.classList.remove('topTabs', 'bottomTabs', 'verticalTabs')
+      document.querySelector('.tabBar')?.style.setProperty('display', 'none')
+    })
+
+    for (const pageLayout of [
+      { route: 'home', pageSelector: '.homePage', cardSelector: '.homeIntro' },
+      { route: 'subscriptions', pageSelector: '.subscriptionsPage', cardSelector: '.card' }
+    ]) {
+      await goTo(page, pageLayout.route)
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+
+      const metrics = await page.evaluate(({ pageSelector, cardSelector }) => {
+        const pageBounds = document.querySelector(pageSelector).getBoundingClientRect()
+        const firstCardBounds = document.querySelector(cardSelector).getBoundingClientRect()
+        const cards = [...document.querySelectorAll(`${pageSelector} .ft-card`)]
+        const lastCardBounds = cards.at(-1).getBoundingClientRect()
+        const topNavBounds = document.querySelector('.topNav').getBoundingClientRect()
+        const bottomNavBounds = document.querySelector('.sideNav').getBoundingClientRect()
+
+        return {
+          bottomNavBottomOffset: Math.abs(bottomNavBounds.bottom - window.innerHeight),
+          bottomNavHeight: bottomNavBounds.height,
+          cardBottomClearance: bottomNavBounds.top - lastCardBounds.bottom,
+          cardLeft: firstCardBounds.left,
+          cardRightOffset: Math.abs(window.innerWidth - firstCardBounds.right),
+          horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+          pageLeft: pageBounds.left,
+          pageRightOffset: Math.abs(window.innerWidth - pageBounds.right),
+          topGap: firstCardBounds.top + window.scrollY - topNavBounds.bottom,
+        }
+      }, pageLayout)
+
+      expect(metrics.horizontalOverflow).toBeLessThanOrEqual(0)
+      expect(Math.abs(metrics.pageLeft)).toBeLessThanOrEqual(1)
+      expect(metrics.pageRightOffset).toBeLessThanOrEqual(1)
+      expect(Math.abs(metrics.cardLeft)).toBeLessThanOrEqual(1)
+      expect(metrics.cardRightOffset).toBeLessThanOrEqual(1)
+      expect(Math.abs(metrics.topGap)).toBeLessThanOrEqual(1)
+      expect(metrics.bottomNavHeight).toBeCloseTo(84, 0)
+      expect(metrics.bottomNavBottomOffset).toBeLessThanOrEqual(1)
+      expect(metrics.cardBottomClearance).toBeGreaterThanOrEqual(-1)
+    }
+  })
+
   test('fits customization controls without horizontal overflow', async ({ app, page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await setWindowSize(app, page, { width: 375, height: 700 })

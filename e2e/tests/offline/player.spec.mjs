@@ -1,4 +1,4 @@
-import { goTo, sel, setWindowSize, test, expect } from '../../helpers/app.mjs'
+import { goTo, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import {
   activeTab,
   expectDockedToBottomRight,
@@ -782,7 +782,304 @@ test('keeps the context menu open when the pointer leaves a playing video', asyn
   await attachScreenshot('context menu after the pointer left')
 })
 
+test('scopes the mobile fullscreen swipe movement to the video in tablet layout', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  const appRoot = page.locator('.app')
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+
+  await appRoot.evaluate(element => element.classList.add('capacitorTabs', 'capacitorTabletLayout'))
+  await expect(appRoot).toHaveCSS('touch-action', 'auto')
+  await expect(player).toHaveClass(/mobileFullscreenSwipeEnabled/)
+  await expect(player).toHaveCSS('touch-action', 'pan-x')
+
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateEnableMobileFullscreenSwipe', false)
+  })
+  await expect(player).not.toHaveClass(/mobileFullscreenSwipeEnabled/)
+  await expect(player).toHaveCSS('touch-action', 'auto')
+
+  await player.evaluate(element => {
+    element.classList.add('mobileFullscreenSwiping')
+    element.style.setProperty('--mobile-fullscreen-swipe-offset', '-42px')
+  })
+  await expect(video).toHaveCSS('translate', '0px -42px')
+  await expect(player).toHaveCSS('transform', 'none')
+})
+
+test('uses mobile surface taps for controls and keeps an on-video play button', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const appRoot = page.locator('.app')
+  await appRoot.evaluate(element => {
+    const applyMobileClasses = () => {
+      if (!element.classList.contains('capacitorTabs')) element.classList.add('capacitorTabs')
+      if (!element.classList.contains('capacitorTabletLayout')) element.classList.add('capacitorTabletLayout')
+    }
+    new MutationObserver(applyMobileClasses).observe(element, { attributeFilter: ['class'] })
+    applyMobileClasses()
+  })
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateRememberVolume', false)
+    await store.dispatch('updateDefaultVolume', 0.25)
+  })
+  const video = await openMockedVideo(page)
+  await expect.poll(() => appRoot.evaluate(element => Math.abs(
+    element.getBoundingClientRect().width - window.innerWidth
+  ))).toBeLessThanOrEqual(1)
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const surface = player.locator('.shaka-controls-container')
+  const playButtons = player.locator('.shaka-play-button')
+
+  await expect(playButtons).toHaveCount(1)
+  await expect(player.locator('.shaka-controls-button-panel .shaka-pip-button')).toBeVisible()
+  await expect(player.locator('.shaka-settings-menu .shaka-pip-button')).toHaveCount(0)
+  await expect(player.locator('.shaka-mute-button, .shaka-volume-bar-container')).toHaveCount(0)
+  await expect.poll(() => video.evaluate(element => ({ muted: element.muted, volume: element.volume })))
+    .toEqual({ muted: false, volume: 1 })
+  await video.evaluate(element => element.play())
+  await surface.evaluate(element => element.setAttribute('shown', 'true'))
+
+  let pointerId = 1
+  const tapCenter = async () => {
+    const bounds = await player.boundingBox()
+    if (!bounds) throw new Error('player is not visible')
+    const clientX = bounds.x + bounds.width / 2
+    const clientY = bounds.y + bounds.height * 0.42
+    const currentPointerId = pointerId++
+
+    await surface.dispatchEvent('pointerdown', {
+      button: 0,
+      clientX,
+      clientY,
+      isPrimary: true,
+      pointerId: currentPointerId,
+      pointerType: 'touch'
+    })
+    await surface.dispatchEvent('touchstart', {
+      touches: [{ clientX, clientY, identifier: currentPointerId }]
+    })
+    await surface.dispatchEvent('pointerup', {
+      button: 0,
+      clientX,
+      clientY,
+      isPrimary: true,
+      pointerId: currentPointerId,
+      pointerType: 'touch'
+    })
+
+    return await surface.evaluate(element => !element.dispatchEvent(new TouchEvent('touchend', {
+      bubbles: true,
+      cancelable: true
+    })))
+  }
+
+  expect(await tapCenter()).toBe(true)
+  await expect.poll(() => surface.getAttribute('shown')).toBeNull()
+  expect(await video.evaluate(element => element.paused)).toBe(false)
+
+  expect(await tapCenter()).toBe(true)
+  await expect(surface).toHaveAttribute('shown', 'true')
+  await page.waitForTimeout(1000)
+  await expect(surface).toHaveAttribute('shown', 'true')
+  expect(await video.evaluate(element => element.paused)).toBe(false)
+  expect(await page.evaluate(() => document.fullscreenElement)).toBeNull()
+
+  await video.evaluate(element => element.pause())
+  await surface.evaluate(element => element.setAttribute('shown', 'true'))
+  expect(await tapCenter()).toBe(true)
+  await expect.poll(() => surface.getAttribute('shown')).toBeNull()
+  expect(await video.evaluate(element => element.paused)).toBe(true)
+
+  await video.evaluate(element => {
+    Object.defineProperty(element, 'ended', { configurable: true, value: true })
+    element.dispatchEvent(new Event('ended'))
+  })
+  await expect(surface).toHaveAttribute('shown', 'true')
+  await page.waitForTimeout(3500)
+  await expect(surface).toHaveAttribute('shown', 'true')
+  await expect(player.locator('.shaka-controls-button-panel')).toHaveCSS('opacity', '1')
+  await expect(player.locator('.shaka-seek-bar-container')).toHaveCSS('opacity', '1')
+
+  await player.evaluate(element => element.classList.add('fullWindow'))
+  const mobileCenterButtonWidth = await playButtons.last().evaluate(element => (
+    element.getBoundingClientRect().width
+  ))
+  expect(mobileCenterButtonWidth).toBeGreaterThanOrEqual(48)
+  expect(mobileCenterButtonWidth).toBeLessThanOrEqual(64)
+})
+
+test('caps the optional desktop center play button on wide players', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateDisplayVideoPlayButton', true)
+  })
+  await openMockedVideo(page)
+
+  const centerPlayButton = page.locator(
+    `${activeTab} .ftVideoPlayer .shaka-big-buttons-container .shaka-play-button`
+  )
+  await expect(centerPlayButton).toBeVisible()
+  const width = await centerPlayButton.evaluate(element => element.getBoundingClientRect().width)
+  expect(width).toBeGreaterThanOrEqual(48)
+  expect(width).toBeLessThanOrEqual(80)
+})
+
+test('handles mobile title taps before Shaka can toggle fullscreen in tablet layout', async ({ app, page }) => {
+  await openDemoVideo({ app, page })
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const title = player.locator('.playerFullscreenTitleOverlay')
+
+  await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs', 'capacitorTabletLayout'))
+  await setPlayerFullscreen(page, true)
+
+  let pointerId = 20
+  const tapAt = async (clientX, clientY, targetSelector) => {
+    return await page.evaluate(({ clientX, clientY, pointerId, targetSelector }) => {
+      const target = targetSelector === null
+        ? document.elementFromPoint(clientX, clientY)
+        : document.querySelector(targetSelector)
+      if (!(target instanceof Element)) throw new Error('touch target is not visible')
+
+      for (const type of ['pointerdown', 'pointerup']) {
+        target.dispatchEvent(new PointerEvent(type, {
+          bubbles: true,
+          button: 0,
+          clientX,
+          clientY,
+          isPrimary: true,
+          pointerId,
+          pointerType: 'touch'
+        }))
+      }
+
+      return !target.dispatchEvent(new TouchEvent('touchend', {
+        bubbles: true,
+        cancelable: true
+      }))
+    }, { clientX, clientY, pointerId: pointerId++, targetSelector })
+  }
+
+  const titleBounds = await title.boundingBox()
+  if (!titleBounds) throw new Error('fullscreen title is not visible')
+  const clientX = titleBounds.x + Math.min(titleBounds.width / 2, 120)
+  const clientY = titleBounds.y + titleBounds.height / 2
+
+  expect(await tapAt(clientX, clientY, '.playerFullscreenTitleOverlay')).toBe(true)
+  await expect(player).toHaveClass(/fullscreenMetadataOpen/)
+  await expect.poll(() => player.evaluate(element => document.fullscreenElement === element)).toBe(true)
+
+  const watchComponent = await page.evaluateHandle(findWatchComponent)
+  await watchComponent.evaluate(component => component.proxy.$refs.player.setFullscreenMetadata(false))
+  await expect(player).not.toHaveClass(/fullscreenMetadataOpen/)
+
+  expect(await tapAt(clientX, clientY, '.playerFullscreenTitleOverlay')).toBe(true)
+  await page.waitForTimeout(80)
+  expect(await tapAt(clientX, clientY, null)).toBe(true)
+  await page.waitForTimeout(320)
+
+  await expect.poll(() => player.evaluate(element => document.fullscreenElement === element)).toBe(true)
+  await watchComponent.dispose()
+})
+
+test('animates the fullscreen title when the Android status-bar inset changes', async ({ app, page }) => {
+  await openDemoVideo({ app, page })
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const controls = player.locator('.shaka-controls-container')
+  const title = player.locator('.playerFullscreenTitleOverlay')
+
+  await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
+  await setPlayerFullscreen(page, true)
+  await player.evaluate(element => element.style.setProperty('--safe-area-inset-top', '32px'))
+  await controls.evaluate(element => element.setAttribute('shown', 'true'))
+  await expect(title).toBeVisible()
+  await page.waitForTimeout(300)
+
+  const shownTop = await title.evaluate(element => element.getBoundingClientRect().top)
+  await player.evaluate(element => element.style.setProperty('--safe-area-inset-top', '0px'))
+  await controls.evaluate(element => element.removeAttribute('shown'))
+  const immediateTop = await title.evaluate(element => element.getBoundingClientRect().top)
+  await page.waitForTimeout(75)
+  const transitioningTop = await title.evaluate(element => element.getBoundingClientRect().top)
+  await page.waitForTimeout(300)
+  const hiddenTop = await title.evaluate(element => element.getBoundingClientRect().top)
+
+  const totalMovement = Math.abs(hiddenTop - shownTop)
+  expect(totalMovement).toBeGreaterThanOrEqual(30)
+  expect(Math.abs(immediateTop - shownTop)).toBeLessThan(totalMovement * 0.25)
+  expect(transitioningTop).toBeLessThan(shownTop)
+  expect(transitioningTop).toBeGreaterThan(hiddenTop)
+
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect.poll(() => title.evaluate(element => (
+    getComputedStyle(element).transitionProperty.split(', ').includes('top')
+  ))).toBe(false)
+})
+
 test.describe('scroll mini player', () => {
+  test('keeps a phone mini player above the bottom navigation', async ({ app, page }) => {
+    const video = await openDemoVideo({ app, page })
+    await video.evaluate(element => element.pause())
+    await page.evaluate(() => {
+      document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
+    })
+
+    const player = page.locator('.ftVideoPlayer')
+    await scrollBelowPlayer(player)
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await setWindowSize(app, page, { width: 480, height: 800 })
+    await page.evaluate(() => {
+      const app = document.querySelector('.app')
+      app.classList.add('capacitorTabs', 'capacitorPhoneLayout')
+      app.classList.remove('topTabs', 'bottomTabs', 'verticalTabs')
+      document.querySelector('.tabBar')?.style.setProperty('display', 'none')
+    })
+
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+
+    const expectBottomNavigationClearance = async () => {
+      await expect.poll(async () => {
+        const [playerBounds, navigationBounds] = await Promise.all([
+          player.boundingBox(),
+          page.locator('.sideNav').boundingBox()
+        ])
+        if (playerBounds == null || navigationBounds == null) {
+          return Number.NEGATIVE_INFINITY
+        }
+        return navigationBounds.y - (playerBounds.y + playerBounds.height)
+      }).toBeGreaterThanOrEqual(15)
+    }
+
+    await expectBottomNavigationClearance()
+
+    const dragHandle = player.locator('.scrollMiniDragHandle')
+    const dragStart = await dragHandle.boundingBox()
+    if (!dragStart) throw new Error('scroll mini player drag handle is not visible')
+    const dragX = dragStart.x + dragStart.width / 2
+    const dragY = dragStart.y + dragStart.height / 2
+    await dragHandle.dispatchEvent('pointerdown', {
+      button: 0,
+      clientX: dragX,
+      clientY: dragY,
+      pointerId: 1,
+      pointerType: 'touch'
+    })
+    await page.evaluate(({ dragX }) => {
+      for (const type of ['pointermove', 'pointerup']) {
+        window.dispatchEvent(new PointerEvent(type, {
+          bubbles: true,
+          clientX: dragX,
+          clientY: window.innerHeight,
+          pointerId: 1,
+          pointerType: 'touch'
+        }))
+      }
+    }, { dragX })
+
+    await expectBottomNavigationClearance()
+  })
+
   test('animates into and out of the scroll mini player', async ({ app, page, attachScreenshot }) => {
     const video = await openDemoVideo({ app, page })
     await video.evaluate(element => element.pause())
@@ -831,6 +1128,78 @@ test.describe('scroll mini player', () => {
     expect(animations[1].className).toContain('scrollMiniPlayerAnimating')
     expect(animations[1].position).toBe('relative')
     expect(animations[1].zIndex).toBe('150')
+  })
+
+  test('restores a phone mini player by tapping its tucked sliver', async ({ app, page }) => {
+    const video = await openDemoVideo({ app, page })
+    await video.evaluate(element => element.pause())
+
+    const player = page.locator('.ftVideoPlayer')
+    await scrollBelowPlayer(player)
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await setWindowSize(app, page, { width: 480, height: 800 })
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+
+    const dragHandle = player.locator('.scrollMiniDragHandle')
+    const dragStart = await dragHandle.boundingBox()
+    if (!dragStart) throw new Error('scroll mini player drag handle is not visible')
+    const dragY = dragStart.y + dragStart.height / 2
+
+    await dragHandle.dispatchEvent('pointerdown', {
+      button: 0,
+      clientX: dragStart.x + dragStart.width / 2,
+      clientY: dragY,
+      pointerId: 1,
+      pointerType: 'touch'
+    })
+    await expect(page.locator('body')).toHaveClass(/scroll-mini-player-grabbing/)
+    await page.evaluate(({ dragY }) => {
+      window.dispatchEvent(new PointerEvent('pointermove', {
+        bubbles: true,
+        clientX: 10,
+        clientY: dragY,
+        pointerId: 1,
+        pointerType: 'touch'
+      }))
+      window.dispatchEvent(new PointerEvent('pointerup', {
+        bubbles: true,
+        clientX: 10,
+        clientY: dragY,
+        pointerId: 1,
+        pointerType: 'touch'
+      }))
+    }, { dragY })
+
+    await expect(player).toHaveClass(/scrollMiniPlayerStashed/)
+    await expect(player.locator('.scrollMiniPlayerControls button')).toHaveCount(1)
+    await expect(player.locator('.scrollMiniPlayPause')).toHaveCount(0)
+    await expect(player.locator('.scrollMiniPointerLayer')).toHaveCSS('pointer-events', 'auto')
+    await expect(player.locator('video')).toHaveCSS('pointer-events', 'none')
+
+    const restoreLayer = player.locator('.scrollMiniPointerLayer')
+    const restoreBounds = await restoreLayer.boundingBox()
+    if (!restoreBounds) throw new Error('tucked scroll mini player restore target is not visible')
+    const pausedBeforeRestore = await video.evaluate(element => element.paused)
+    const viewport = await page.evaluate(() => ({ width: window.innerWidth, height: window.innerHeight }))
+    const restoreX = (
+      Math.max(0, restoreBounds.x) +
+      Math.min(viewport.width, restoreBounds.x + restoreBounds.width)
+    ) / 2
+    const restoreY = (
+      Math.max(0, restoreBounds.y) +
+      Math.min(viewport.height, restoreBounds.y + restoreBounds.height)
+    ) / 2
+    await expect.poll(() => page.evaluate(({ x, y }) => {
+      return document.elementFromPoint(x, y)?.closest('.scrollMiniPointerLayer') != null
+    }, { x: restoreX, y: restoreY })).toBe(true)
+
+    await page.mouse.move(restoreX, restoreY)
+    await page.mouse.down()
+
+    await expect(player).not.toHaveClass(/scrollMiniPlayerStashed/)
+    await page.mouse.up()
+    await expect.poll(() => video.evaluate(element => element.paused)).toBe(pausedBeforeRestore)
   })
 
   test('does not replay the animation after switching tabs', async ({ app, page, attachScreenshot }) => {

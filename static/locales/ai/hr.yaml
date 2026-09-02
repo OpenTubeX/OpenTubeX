@@ -273,6 +273,11 @@ Settings:
       Mark as Watched: Označi kao pogledano
       Copy YouTube Link: Kopiraj poveznicu na YouTube
       Open in YouTube: Otvori na YouTubeu
+    Mobile Layout:
+      Mobile Layout: 'Mobilni raspored'
+      Automatic: 'Automatski'
+      Phone: 'Telefon'
+      Tablet: 'Tablet'
   Context Menu Search Settings:
     Context Menu Search Settings: Pretraživanje iz kontekstnog izbornika
     Description: Odaberite tražilice koje se prikazuju kada desnom tipkom miša kliknete odabrani tekst. Pretraživanja se otvaraju u zadanom pregledniku.
@@ -495,6 +500,8 @@ Settings:
     Reorder Playback Speed: Povucite za promjenu redoslijeda brzine reprodukcije
     Playback Speed: Brzina reprodukcije
     Parallel Segment Loading: Paralelno učitavanje segmenata
+    Rotate Wide Videos to Landscape in Fullscreen: 'Zakreni široke videozapise vodoravno preko cijelog zaslona'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Povucite gore ili dolje za ulazak u prikaz preko cijelog zaslona ili izlazak iz njega'
   Channel Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.
@@ -781,7 +788,7 @@ Settings:
     Privacy Policy: Pravila o privatnosti ovog poslužitelja
     Enhanced Privacy Enabled: Poboljšana privatnost je omogućena. Poslužitelj pohranjuje samo šifrirane podatke sinkronizacije.
     Enhanced Privacy Unsupported: Upozorenje — ovaj poslužitelj ne podržava poboljšanu privatnost. Sinkronizirani podaci vidljivi su njegovu administratoru.
-    Description: Sinkronizirajte pretplate, profile, popise za reprodukciju, povijest gledanja, postavke i otvorene kartice s poslužiteljem za sinkronizaciju OpenTubeX ili LibreTube. LibreTube poslužitelji možda ne podržavaju sve značajke sinkronizacije.
+    Description: 'Sinkronizirajte pretplate, profile, popise za reprodukciju, povijest gledanja i podržane postavke s OpenTubeX ili LibreTube poslužiteljem za sinkronizaciju. Kartice na računalu i mobilnom uređaju ostaju odvojene osim ako ih izričito ne podijelite. LibreTube poslužitelji možda ne podržavaju sve značajke sinkronizacije.'
     Server URL: URL poslužitelja
     Checking Server: Provjera poslužitelja za sinkronizaciju…
     Server Unavailable: Povezivanje s ovim poslužiteljem za sinkronizaciju nije moguće. Provjerite URL i pokušajte ponovno.
@@ -862,6 +869,13 @@ Settings:
     Data Loss Confirmation: Potvrditi sinkronizaciju koja briše podatke?
     Data Loss Warning: Stanje poslužitelja izbrisalo bi {deleted} od {previous} prethodno sinkroniziranih stavki zbirke {collection}. To može upućivati na neuspjelu migraciju ili ponovno postavljanje poslužitelja. Nastavite samo ako namjerno želite izbrisati te podatke i imate sigurnosnu kopiju.
     Confirm Data Loss: Izbriši i nastavi
+    Use Shared Tabs: 'Upotrebljavaj jedan zajednički skup kartica na svim uređajima'
+    Shared Tabs Warning: 'Dijeljene kartice zamjenjuju trenutačni skup kartica na povezanim uređajima. Ostavite ovo isključeno da biste zadržali odvojene kartice na računalu i mobilnom uređaju.'
+    Tabs From Other Devices: 'Kartice s drugih uređaja'
+    Device Tab Session: '{platform} · {count} kartica'
+    Mobile Device: 'Mobilni uređaj'
+    Desktop Device: 'Računalo'
+    Open All Tabs: 'Otvori sve kartice'
   Proxy Settings:
     IP Block Recovery Script Path: Putanja skripte za oporavak nakon blokiranja IP adrese
     Select IP Block Recovery Script File: Odaberi datoteku skripte za oporavak nakon blokiranja IP adrese

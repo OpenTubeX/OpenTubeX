@@ -28,6 +28,16 @@
   overflow: hidden;
 }
 
+/* Shaka sizes its center button as a percentage of the player width, which
+   becomes enormous in a wide desktop or fullscreen player. */
+.ftVideoPlayer :deep(.shaka-big-buttons-container > button) {
+  inline-size: clamp(48px, 12.5%, var(--center-play-button-max-size, 80px));
+}
+
+:global(.capacitorTabs) .ftVideoPlayer {
+  --center-play-button-max-size: 64px;
+}
+
 .player {
   width: 100%;
 
@@ -2312,7 +2322,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   position: absolute;
   z-index: 4;
   margin: 0;
-  top: 5px;
+  top: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 5px);
   left: 5px;
   box-sizing: border-box;
   inline-size: fit-content;
@@ -2337,7 +2347,15 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
   /* copied from .shaka-scrim-container */
   transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 0.6s,
-    background-color 150ms ease;
+    background-color 150ms ease,
+    top 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :deep(.playerFullscreenTitleOverlay) {
+    transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 0.6s,
+      background-color 150ms ease;
+  }
 }
 
 :deep(.playerFullscreenTitleOverlay:hover),
@@ -2464,6 +2482,14 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .ftVideoPlayer.shortsPlayer.fullWindow .fullscreenActions {
   opacity: 1;
   pointer-events: auto;
+}
+
+/* Shaka's full-surface tap layers must stay below the app's fullscreen
+   metadata trigger and action dock on touch devices. */
+:global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow) .playerFullscreenTitleOverlay),
+:global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow) .fullscreenActions) {
+  z-index: 7;
+  touch-action: manipulation;
 }
 
 .fullscreenMetadataOverlay,
@@ -2697,8 +2723,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 .fullscreenMetadataTarget :deep(.datePublishedAndViewCount) {
   display: flex;
+  flex: 0 0 auto;
   flex-wrap: wrap;
   align-items: baseline;
+  align-content: flex-start;
   gap: 2px 5px;
 }
 
@@ -3889,8 +3917,24 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .scrollMiniPointerLayer {
   position: absolute;
   inset: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
   pointer-events: auto;
   z-index: 0;
+}
+
+.ftVideoPlayer.scrollMiniPlayerStashed {
+  border-radius: calc(18px * var(--ui-roundness));
+}
+
+.ftVideoPlayer.scrollMiniPlayerStashed > :not(.scrollMiniPlayerControls),
+.ftVideoPlayer.scrollMiniPlayerStashed .scrollMiniPlayerControls > :not(.scrollMiniPointerLayer) {
+  pointer-events: none !important;
+}
+
+.ftVideoPlayer.scrollMiniPlayerStashed .scrollMiniPointerLayer {
+  z-index: 20;
 }
 
 .scrollMiniScrollTop,
@@ -4205,6 +4249,41 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 .ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) > .player {
   object-fit: contain;
+}
+
+/* Android draws fullscreen content behind the system bars. */
+:global(.capacitorTabs .ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) .shortsTopControls) {
+  padding-block-start: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 16px);
+}
+
+/* On a phone the dock already contains the metadata. Reserving another
+   metadata column squeezes the Shorts title into a one-character strip. */
+@media only screen and (width <= 680px) {
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow):is(
+    .fullscreenDockLayoutOpen,
+    .fullscreenMetadataOpen,
+    .fullscreenTranscriptOpen,
+    .fullscreenSponsorBlockOpen,
+    .fullscreenLiveChatOpen,
+    .fullscreenCommentsOpen,
+    .fullscreenPlaylistOpen,
+    .chaptersOverlayOpen
+  )) {
+    --shorts-metadata-min-width: 0;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow):is(
+    .fullscreenDockLayoutOpen,
+    .fullscreenMetadataOpen,
+    .fullscreenTranscriptOpen,
+    .fullscreenSponsorBlockOpen,
+    .fullscreenLiveChatOpen,
+    .fullscreenCommentsOpen,
+    .fullscreenPlaylistOpen,
+    .chaptersOverlayOpen
+  ) .shortsFullscreenMetadataSide) {
+    display: none;
+  }
 }
 
 /* stylelint-enable liberty/use-logical-spec */

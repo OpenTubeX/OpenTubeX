@@ -513,7 +513,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 ### Official Downloads
 
 > [!CAUTION]
-> OpenTubeX is only supported on Windows 10 and later, macOS 12 and above, and various Linux distributions. Installing it on unsupported systems may result in unexpected issues.
+> Stable OpenTubeX releases currently support Windows 10 and later, macOS 12 and above, and various Linux distributions. Mobile builds are an early preview and may have incomplete features.
 
 * [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases)
 * [OpenTubeX Website](https://opentubex.org/downloads/)
@@ -523,6 +523,9 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 * openSUSE: [RPM repository](https://rpm.opentubex.org/)
 * Flatpak: [OpenTubeX remote](https://flatpak.opentubex.org/), [Flatpark](https://flatpark.org/apps/org.opentubex.OpenTubeX/), and [source code](https://github.com/OpenTubeX/flatpak)
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-bin/)
+* Android preview: requires Android 7.0 or newer (API 24). Current APKs compile and target Android 16 (API 36). [Install and update OpenTubeX with Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/OpenTubeX/OpenTubeX). A dedicated F-Droid repository is planned.
+
+iOS support is planned. The first iOS builds will be downloadable `.ipa` files.
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/opentubex.svg)](https://repology.org/project/opentubex/versions)
 <br />
@@ -545,6 +548,7 @@ The first build with a green check mark is the latest build.
 * openSUSE: [RPM nightly repository](https://rpm.opentubex.org/#nightly-builds)
 * Flatpak: [Nightly branch](https://flatpak.opentubex.org/#nightly-builds) (`org.opentubex.OpenTubeX//nightly`)
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-git/) (`opentubex-git`)
+* Android: universal APK artifact
 
 <a id="contributing"></a>
 ## 🤝 Contributing

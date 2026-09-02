@@ -5,7 +5,8 @@
       :class="{ lockScroll }"
       tabindex="-1"
       :inert="inert"
-      @pointerdown.self="hide"
+      @pointerdown.self.stop
+      @click.self.stop="hide"
       @keydown.enter.self="hide"
       @keydown.left.right.capture="handleArrowKeys"
     >

@@ -271,6 +271,11 @@ Settings:
       Mark as Watched: 标记为已观看
       Copy YouTube Link: 复制 YouTube 链接
       Open in YouTube: 在 YouTube 中打开
+    Mobile Layout:
+      Mobile Layout: '移动端布局'
+      Automatic: '自动'
+      Phone: '手机'
+      Tablet: '平板电脑'
   Context Menu Search Settings:
     Context Menu Search Settings: 右键菜单搜索
     Description: 选择右键单击所选文本时显示的搜索引擎。搜索结果会在默认浏览器中打开。
@@ -493,6 +498,8 @@ Settings:
     Reorder Playback Speed: 拖动以调整播放速度顺序
     Playback Speed: 播放速度
     Parallel Segment Loading: 并行加载视频片段
+    Rotate Wide Videos to Landscape in Fullscreen: '全屏时将宽屏视频旋转为横屏'
+    Swipe Up or Down to Enter or Exit Fullscreen: '上下滑动以进入或退出全屏'
   Channel Settings:
     Channel Settings: 频道设置
     Channel Settings Description: 分别记住观看各频道时选择的设置，以便下次观看该频道的视频时再次应用。
@@ -779,7 +786,7 @@ Settings:
     Privacy Policy: 此服务器的隐私政策
     Enhanced Privacy Enabled: 已启用增强隐私保护。服务器仅存储加密的同步数据。
     Enhanced Privacy Unsupported: 警告：此服务器不支持增强隐私保护，服务器运营者可以查看同步的数据。
-    Description: 通过 OpenTubeX 或 LibreTube 同步服务器同步订阅、配置文件、播放列表、观看历史记录、设置和打开的标签页。LibreTube 服务器可能不支持所有同步功能。
+    Description: '通过 OpenTubeX 或 LibreTube 同步服务器同步订阅、个人资料、播放列表、观看历史记录及支持的设置。除非您明确选择共享，否则桌面端和移动端的标签页会保持独立。LibreTube 服务器可能不支持所有同步功能。'
     Server URL: 服务器 URL
     Checking Server: 正在检查同步服务器…
     Server Unavailable: 无法连接到此同步服务器。请检查 URL 后重试。
@@ -860,6 +867,13 @@ Settings:
     Data Loss Confirmation: 要执行会删除数据的同步吗？
     Data Loss Warning: 服务器状态会删除之前同步的 {previous} 个 {collection} 项目中的 {deleted} 个。这可能表示服务器迁移失败或服务器已重置。仅当您有备份且确实要删除这些项目时才继续。
     Confirm Data Loss: 删除并继续
+    Use Shared Tabs: '在各设备上使用同一组共享标签页'
+    Shared Tabs Warning: '共享标签页会替换已连接设备上的当前标签页组。关闭此选项可让桌面端和移动端的标签页保持独立。'
+    Tabs From Other Devices: '其他设备的标签页'
+    Device Tab Session: '{platform} · {count} 个标签页'
+    Mobile Device: '移动设备'
+    Desktop Device: '桌面设备'
+    Open All Tabs: '打开所有标签页'
   Proxy Settings:
     IP Block Recovery Script Path: IP 封锁恢复脚本路径
     Select IP Block Recovery Script File: 选择 IP 封锁恢复脚本文件

@@ -2,7 +2,9 @@
   <Teleport :to="teleportTarget">
     <div
       class="tabOrganizerBackdrop"
-      @pointerdown.self="close"
+      @pointerdown.self.stop
+      @click.self.stop="close"
+      @keydown.esc="close"
     >
       <section
         ref="dialogRef"

@@ -1,11 +1,14 @@
+import { Browser } from '@capacitor/browser'
 import { nextTick } from 'vue'
 import i18n from '../i18n/index'
 import router from '../router/index'
+import { getCapacitorTabService } from '../tabs/CapacitorTabService'
 import { getTabNavigationService } from '../tabs/TabNavigationService'
 import { UnsupportedPlayerActions } from '../../constants'
 import { getSearchHistoryEntryKey } from '../../search-history'
 import { getPreferredShortThumbnailUrl } from './player/shorts'
 import { isRoundedNumber } from './viewCounts'
+import { writeAndroidClipboard } from './androidUi'
 
 // allowed characters in channel handle: A-Z, a-z, 0-9, -, _, .
 // https://support.google.com/youtube/answer/11585688#change_handle
@@ -337,9 +340,12 @@ export function showToastOnAllTabs(message, time = null, icon = null) {
  * @param {null|string} options.messageOnError the message to be displayed as a toast when the copy fails (optional)
  */
 export async function copyToClipboard(content, { messageOnSuccess = null, messageOnError = null } = {}) {
-  if (navigator.clipboard !== undefined && window.isSecureContext) {
+  const useAndroidClipboard = process.env.IS_CAPACITOR && typeof content === 'string'
+  if (useAndroidClipboard || (navigator.clipboard !== undefined && window.isSecureContext)) {
     try {
-      if (content instanceof Blob) {
+      if (useAndroidClipboard) {
+        await writeAndroidClipboard(content)
+      } else if (content instanceof Blob) {
         await navigator.clipboard.write([
           new ClipboardItem({
             [content.type]: content
@@ -399,6 +405,11 @@ export function showApiErrorToast(message, error, show = showToast) {
  * @param {string} url the URL to open
  */
 export async function openExternalLink(url) {
+  if (process.env.IS_CAPACITOR) {
+    await Browser.open({ url })
+    return
+  }
+
   window.open(url, '_blank', 'noreferrer')
 }
 
@@ -442,6 +453,16 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
         state: title ? { tabTitle: title } : undefined
       })
     }
+  } else if (process.env.IS_CAPACITOR) {
+    if (doCreateNewTab || doCreateNewWindow) {
+      return getCapacitorTabService().createTab({ path, query }, title)
+    }
+
+    return getTabNavigationService().pushPresented({
+      path,
+      query,
+      state: title ? { tabTitle: title } : undefined
+    })
   } else {
     // The web build has no tabs or windows of its own, so a Ctrl/middle/Shift+click
     // is handed to the browser, pointed at this app's route for the destination

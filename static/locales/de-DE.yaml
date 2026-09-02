@@ -303,6 +303,11 @@ Settings:
     Alternative providers: Video- und Metadatenanbieter
   General Settings:
     General Settings: Allgemein
+    Mobile Layout:
+      Mobile Layout: Mobiles Layout
+      Automatic: Automatisch
+      Phone: Smartphone
+      Tablet: Tablet
     Playback Engine:
       Playback Engine: Wiedergabe-Engine
       yt-dlp: yt-dlp
@@ -757,6 +762,8 @@ Settings:
       File Name Tooltip: Du kannst die folgenden Variablen verwenden. %Y Jahr 4-stellig. %M Monat 2 Ziffern. %D Tag 2 Ziffern. %H Stunde 2 Ziffern. %N Minute 2 Ziffern. %S Sekunde 2 Ziffern. %T Millisekunde 3 Ziffern. %s Video-Sekunde. %t Video Millisekunde 3 Ziffern. %i Video-ID.
       Mode: Screenshot-Modus
     Enter Fullscreen on Display Rotate: Beim Drehen des Bildschirms zu Vollbild wechseln
+    Rotate Wide Videos to Landscape in Fullscreen: Breite Videos im Vollbild ins Querformat drehen
+    Swipe Up or Down to Enter or Exit Fullscreen: Zum Öffnen oder Schließen des Vollbilds nach oben oder unten wischen
     Skip by Scrolling Over Video Player: Überspringen durch Scrollen
     Multiply Seek Interval by Playback Rate: Sprungintervalle mit Wiedergabegeschwindigkeit multiplizieren
     Show Playback Rate Adjusted Timestamp: Wiedergabegeschwindigkeitsangepasste Zeitstempel anzeigen
@@ -1339,9 +1346,9 @@ Settings:
       Warnung – dieser Server unterstützt keinen erweiterten Datenschutz. Synchronisierte Daten sind für den Betreiber
       sichtbar.
     Description: >-
-      Synchronisiere Abos, Profile, Wiedergabelisten, Wiedergabeverlauf, Einstellungen und offene Tabs mit einem
-      OpenTubeX- oder LibreTube-Synchronisierungsserver. LibreTube-Server unterstützen möglicherweise nicht alle
-      Synchronisierungsfunktionen.
+      Synchronisiere Abos, Profile, Wiedergabelisten, Wiedergabeverlauf und unterstützte Einstellungen mit einem
+      OpenTubeX- oder LibreTube-Synchronisierungsserver. Desktop- und Mobil-Tabs bleiben getrennt, sofern du sie nicht
+      ausdrücklich teilst. LibreTube-Server unterstützen möglicherweise nicht alle Synchronisierungsfunktionen.
     Server URL: Server-URL
     Checking Server: Synchronisierungsserver wird überprüft…
     Server Unavailable: Verbindung zu diesem Synchronisierungsserver fehlgeschlagen. Überprüfe die URL und versuche es erneut.
@@ -1433,6 +1440,13 @@ Settings:
     Automatic Sync: Nach Änderungen und alle fünf Minuten automatisch synchronisieren
     Profiles: Profile
     Open Tabs: Offene Tabs und Sitzung
+    Use Shared Tabs: Einen gemeinsamen Tab-Satz auf allen Geräten verwenden
+    Shared Tabs Warning: Gemeinsame Tabs ersetzen den aktuellen Tab-Satz auf verbundenen Geräten. Lass dies deaktiviert, um Desktop- und Mobil-Tabs getrennt zu halten.
+    Tabs From Other Devices: Tabs von anderen Geräten
+    Device Tab Session: '{platform} · {count} Tabs'
+    Mobile Device: Mobilgerät
+    Desktop Device: Desktop
+    Open All Tabs: Alle Tabs öffnen
     Disable Setting Sync: Synchronisierung dieser Einstellung beenden
     Enable Setting Sync: Diese Einstellung synchronisieren
     Sync Now: Jetzt synchronisieren

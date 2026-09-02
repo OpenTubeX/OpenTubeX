@@ -105,10 +105,18 @@
 .videoMetrics {
   font-size: 14px;
   color: var(--tertiary-text-color);
+  flex-wrap: wrap;
+}
+
+.datePublishedAndViewCount {
+  display: flex;
+  flex: 1 1 240px;
+  flex-wrap: wrap;
+  min-inline-size: 0;
 }
 
 .videoCategory {
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .likeSection {

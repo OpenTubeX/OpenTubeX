@@ -59,6 +59,7 @@
   display: flex;
   align-items: center;
   gap: 9px;
+  min-inline-size: 0;
   margin: 0;
   font-size: 18px;
 }
@@ -66,7 +67,29 @@
 .fullscreenCommentActions {
   position: relative;
   display: flex;
+  flex: 0 0 auto;
   gap: 4px;
+}
+
+@container comments (width <= 320px) {
+  .fullscreenCommentHeader {
+    block-size: auto;
+    min-block-size: 52px;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+    padding-block: 6px;
+  }
+
+  .fullscreenCommentHeader h3 {
+    flex: 1 1 100%;
+  }
+
+  .fullscreenCommentActions {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
 }
 
 .fullscreenCommentAction {
@@ -222,8 +245,8 @@
 
 .noComments {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-flow: column wrap;
+  align-items: stretch;
   justify-content: space-between;
   gap: 8px;
   padding-block: 8px;
@@ -240,11 +263,12 @@
   flex: 0 0 auto;
   align-items: flex-start;
   gap: 8px;
+  align-self: flex-end;
   margin-inline-start: auto;
 }
 
 .noCommentActions :deep(.select) {
-  margin-block-start: 20px;
+  margin-block-start: 0;
 }
 
 .commentsTitle {
@@ -346,6 +370,10 @@
 @container comments (width <= 520px) {
   .commentHeaderActions {
     flex: 1 0 100%;
+  }
+
+  .commentFilterMenu:not(.fullscreenCommentFilterMenu) {
+    inset-inline: 0 auto;
   }
 
   .commentHeaderActions :deep(.select) {

@@ -22,6 +22,7 @@ const GENERAL_EVERYDAY_KEYS = new Set([
 ])
 
 const GENERAL_APPEARANCE_KEYS = new Set([
+  'Mobile Layout',
   'Playlist View Type',
   'Show Thumbnail Previews',
   'Thumbnail Preference',
@@ -185,6 +186,7 @@ export const SETTINGS_SEARCH_SOURCES = {
 export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
   general: {
     'Stream Extraction Method': ['Stream Extraction Method'],
+    'Mobile Layout': ['Mobile Layout'],
     'New Tab Position': ['New Tab Position'],
     'Tab Close Focus': ['Tab Close Focus'],
     'Startup Behavior': ['Startup Behavior'],
