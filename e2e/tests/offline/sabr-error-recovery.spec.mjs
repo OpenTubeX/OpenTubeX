@@ -487,6 +487,8 @@ test('yt-dlp recovery remounts only the player and preserves playback state', as
   const player = page.locator('.ftVideoPlayer')
   const video = player.locator('video')
   await expect(player).toBeVisible({ timeout: 30_000 })
+  await expect.poll(() => video.evaluate(element => element.currentTime))
+    .toBeGreaterThanOrEqual(watchHistoryEntry.watchProgress)
   await video.evaluate((element) => {
     element.pause()
     element.currentTime = 5.25
@@ -496,6 +498,15 @@ test('yt-dlp recovery remounts only the player and preserves playback state', as
 
   const playerBeforeReload = await player.elementHandle()
   const watchView = await watchViewHandle(page)
+  const activeVideoQualityBeforeReload = await watchView.evaluate(view => {
+    const getSabrReloadState = view.$refs.player.getSabrReloadState.bind(view.$refs.player)
+    view.$refs.player.getSabrReloadState = () => ({
+      ...getSabrReloadState(),
+      videoQuality: '360'
+    })
+    view.currentVideoQuality = 'auto'
+    return view.$refs.player.getSabrReloadState().videoQuality
+  })
   const stateBeforeReload = await watchView.evaluate(view => ({
     videoLoadGeneration: view.videoLoadGeneration,
     videoTitle: view.videoTitle,
@@ -515,6 +526,7 @@ test('yt-dlp recovery remounts only the player and preserves playback state', as
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(5, 1)
   await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
   expect(await video.evaluate(element => element.paused)).toBe(true)
+  expect(await watchView.evaluate(view => view.currentVideoQuality)).toBe(activeVideoQualityBeforeReload)
 
   const playerAfterReload = await player.elementHandle()
   expect(await playerBeforeReload.evaluate(

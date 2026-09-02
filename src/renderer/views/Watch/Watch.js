@@ -4718,6 +4718,7 @@ export default defineComponent({
       const videoId = this.videoId
       const playbackEngineSwitchGeneration = this.playbackEngineSwitchGeneration
       this.setPlayerReloadState(this.$refs.player?.getSabrReloadState())
+      this.initializeVideoQuality()
 
       const timestamp = this.getTimestamp()
       if (timestamp > 0) {
