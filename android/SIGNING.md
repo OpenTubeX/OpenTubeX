@@ -1,6 +1,6 @@
 # Android signing
 
-Debug APKs use `nightly.keystore`. Its credentials are public by design, so it must never sign an APK offered as an official release.
+Debug APKs use `nightly.keystore`. Its credentials are public by design, so debug builds use the separate `org.opentubex.app.nightly` application ID. This prevents a publicly signed APK from updating the production `org.opentubex.app` package or accessing its private data. The nightly identity is for preview builds only and must never sign an APK offered as an official release.
 
 Release builds require the private OpenTubeX Android release key. Gradle refuses to run a release task unless both environment variables are present:
 

@@ -50,6 +50,10 @@ android {
     }
     buildTypes {
         debug {
+            // The public nightly key must never be trusted for the production
+            // package identity. Keep preview builds isolated and installable
+            // alongside official releases.
+            applicationIdSuffix ".nightly"
             signingConfig signingConfigs.nightly
         }
         release {
