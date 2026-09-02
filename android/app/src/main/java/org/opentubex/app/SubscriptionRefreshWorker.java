@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.work.Data;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
@@ -47,8 +48,12 @@ public final class SubscriptionRefreshWorker extends Worker {
     static boolean finish(Context context, String token) {
         boolean finished = STATE.finish(token);
         if (finished) {
-            context.getSystemService(NotificationManager.class)
-                .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+            NotificationManager notifications = context.getSystemService(NotificationManager.class);
+            notifications.cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+            WorkManager.getInstance(context).cancelUniqueWork(UNIQUE_WORK_NAME).getResult().addListener(
+                () -> notifications.cancel(SubscriptionRefreshNotification.NOTIFICATION_ID),
+                ContextCompat.getMainExecutor(context)
+            );
         }
         return finished;
     }

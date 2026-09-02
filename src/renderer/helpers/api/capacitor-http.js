@@ -18,6 +18,7 @@ const AVATAR_MIME_TYPES = new Set([
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024
 const MAX_AVATAR_BASE64_LENGTH = Math.ceil(MAX_AVATAR_BYTES / 3) * 4
 const DNS_RETRY_DELAYS_MS = [150, 500]
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308])
 
 /**
  * @param {Promise<import('@capacitor/core').HttpResponse>} request
@@ -130,7 +131,7 @@ export async function capacitorHttpFetch(input, init = undefined) {
     disableRedirects: redirect !== 'follow',
   }, signal)
 
-  if (redirect === 'error' && nativeResponse.status >= 300 && nativeResponse.status < 400) {
+  if (redirect === 'error' && REDIRECT_STATUSES.has(nativeResponse.status)) {
     throw new TypeError('Redirects are not allowed for this request')
   }
 

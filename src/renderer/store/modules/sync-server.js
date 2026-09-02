@@ -27,6 +27,7 @@ import {
 } from '../../helpers/sync-server-privacy'
 import { encryptSyncServerDeviceInfo } from '../../helpers/sync-server-sessions'
 import { mergePlaylistBookmarkConflict } from '../../helpers/playlist-bookmarks'
+import { getPreviousSyncSessions } from '../../helpers/sync-sessions'
 import {
   AUTO_SYNC_INTERVAL_MS,
   isRecentSync,
@@ -228,9 +229,7 @@ async function runSync(context, { allowDataLoss = false } = {}) {
         const sessions = await syncSessions(
           targetClient,
           store,
-          Object.prototype.hasOwnProperty.call(previous, 'sessionsV2')
-            ? previous.sessionsV2
-            : previous.sessions ?? null
+          getPreviousSyncSessions(previous)
         )
         if (sessions !== null) {
           next.sessionsV2 = sessions.document

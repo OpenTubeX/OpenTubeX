@@ -111,6 +111,15 @@ test('rejects native redirects when redirect mode is error', async () => {
   )
 })
 
+test('accepts a 304 response when redirect mode is error', async () => {
+  globalThis.fetch = async () => new Response(null, { status: 304 })
+
+  const response = await capacitorHttpFetch('https://example.com/cached', { redirect: 'error' })
+
+  assert.equal(response.status, 304)
+  assert.equal(await response.text(), '')
+})
+
 test('rejects non-HTTPS local API requests', async () => {
   await assert.rejects(
     capacitorHttpFetch('http://www.youtube.com/youtubei/v1/search'),

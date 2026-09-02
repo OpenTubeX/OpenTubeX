@@ -3,6 +3,7 @@ import test from 'node:test'
 
 import {
   getOtherDeviceSessions,
+  getPreviousSyncSessions,
   mergeSyncSessions,
   normalizeSyncSessionsDocument,
   shouldShowOtherDeviceSessions,
@@ -140,4 +141,32 @@ test('restores migrated desktop tabs from the saved sync snapshot', () => {
     syncDeviceId: 'legacy-desktop',
     syncPlatform: 'desktop',
   }])
+})
+
+test('uses legacy sessions as the baseline when the versioned snapshot is null', () => {
+  const previousSessions = [session('previous', 1)]
+  const localSessions = [session('local', 3)]
+  const remoteValue = {
+    version: 1,
+    mode: 'separate',
+    devices: {
+      desktop: { platform: 'desktop', sessions: [session('remote', 2)] },
+    },
+    shared: [],
+  }
+  const previousValue = getPreviousSyncSessions({
+    sessions: previousSessions,
+    sessionsV2: null,
+  })
+
+  const result = mergeSyncSessions({
+    localSessions,
+    remoteValue,
+    previousValue,
+    deviceId: 'desktop',
+    platform: 'desktop',
+    preferredMode: 'separate',
+  })
+
+  assert.deepEqual(result.sessionsToApply, localSessions)
 })
