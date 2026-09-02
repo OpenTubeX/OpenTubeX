@@ -1,6 +1,6 @@
 /**
- * Progress notifications cover content in the Android shell, so Capacitor
- * always uses the global bottom progress bar regardless of the desktop setting.
+ * Capacitor shows native progress while a subscription refresh runs in the
+ * background and keeps the global bottom progress bar visible in the app.
  *
  * @param {boolean} showAsNotification
  * @param {boolean} isCapacitor
@@ -15,7 +15,7 @@ export function shouldUseProgressToast(
 
 /**
  * Desktop shows a short start toast when the persistent notification is turned
- * off. Capacitor keeps the view clear and relies on the bottom progress bar.
+ * off. Capacitor keeps the view clear because it has native and in-app progress.
  *
  * @param {boolean} showAsNotification
  * @param {boolean} isCapacitor

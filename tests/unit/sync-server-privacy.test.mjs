@@ -121,3 +121,24 @@ test('stores playlist bookmarks in the encrypted sync document', async () => {
   await adapter.deletePlaylistBookmark('saved-playlist')
   assert.deepEqual(await adapter.getPlaylistBookmarks(), [])
 })
+
+test('keeps versioned sessions isolated from older clients', async () => {
+  const legacySessions = [{ sessionId: 'legacy-desktop', tabs: [] }]
+  const versionedSessions = {
+    version: 1,
+    mode: 'separate',
+    devices: {},
+    shared: [],
+  }
+  const document = createEmptySyncDocument()
+  document.sessions = legacySessions
+  const adapter = new EncryptedSyncAdapter(document)
+
+  assert.deepEqual(await adapter.getSessions(), legacySessions)
+  await adapter.putSessions(versionedSessions)
+  assert.deepEqual(document.sessions, legacySessions)
+  assert.deepEqual(await adapter.getSessions(), versionedSessions)
+
+  document.sessions = [{ sessionId: 'changed-by-older-client', tabs: [] }]
+  assert.deepEqual(await adapter.getSessions(), versionedSessions)
+})

@@ -27,6 +27,7 @@ import {
 } from '../../helpers/sync-server-privacy'
 import { encryptSyncServerDeviceInfo } from '../../helpers/sync-server-sessions'
 import { mergePlaylistBookmarkConflict } from '../../helpers/playlist-bookmarks'
+import { getPreviousSyncSessions } from '../../helpers/sync-sessions'
 import {
   AUTO_SYNC_INTERVAL_MS,
   isRecentSync,
@@ -127,7 +128,7 @@ async function runSync(context, { allowDataLoss = false } = {}) {
     ...((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
       settings.syncServerPrivacyMode === 'enhanced' &&
       settings.syncServerSyncSessions
-      ? ['sessions']
+      ? ['sessionsV2']
       : []),
     ...(settings.syncServerPrivacyMode === 'enhanced' && settings.syncServerSyncSettings
       ? ['settings']
@@ -224,14 +225,14 @@ async function runSync(context, { allowDataLoss = false } = {}) {
         next.settings = await syncSettings(targetClient, store, previous.settings)
         result.settings = Object.keys(next.settings).length
         break
-      case 'sessions': {
+      case 'sessionsV2': {
         const sessions = await syncSessions(
           targetClient,
           store,
-          Object.prototype.hasOwnProperty.call(previous, 'sessions') ? previous.sessions : null
+          getPreviousSyncSessions(previous)
         )
         if (sessions !== null) {
-          next.sessions = sessions.document
+          next.sessionsV2 = sessions.document
           result.sessions = sessions.sessionsToApply.reduce(
             (count, session) => count + session.tabs.length,
             0
@@ -277,9 +278,14 @@ async function runSync(context, { allowDataLoss = false } = {}) {
         const hasLegacyPlaybackSpeeds = manifest.collections.some(
           entry => entry.collection === 'playbackSpeeds'
         )
-        const downloadCollections = hasLegacyPlaybackSpeeds
-          ? Array.from(new Set([...uploadCollections, 'playbackSpeeds']))
-          : uploadCollections
+        const compatibilityCollections = [
+          ...(hasLegacyPlaybackSpeeds ? ['playbackSpeeds'] : []),
+          ...(enabledCollections.includes('sessionsV2') ? ['sessions'] : []),
+        ]
+        const downloadCollections = Array.from(new Set([
+          ...uploadCollections,
+          ...compatibilityCollections,
+        ]))
         const document = createEmptySyncDocument()
         const original = {}
         const entries = await Promise.all(downloadCollections.map(async collection => {

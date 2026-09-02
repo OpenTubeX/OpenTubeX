@@ -885,10 +885,12 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
   expect(await video.evaluate(element => element.paused)).toBe(false)
   expect(await page.evaluate(() => document.fullscreenElement)).toBeNull()
 
+  await surface.evaluate(element => element.removeAttribute('shown'))
   await video.evaluate(element => element.pause())
-  await surface.evaluate(element => element.setAttribute('shown', 'true'))
+  await expect(surface).toHaveAttribute('shown', 'true')
   expect(await tapCenter()).toBe(true)
-  await expect.poll(() => surface.getAttribute('shown')).toBeNull()
+  await page.waitForTimeout(1000)
+  await expect(surface).toHaveAttribute('shown', 'true')
   expect(await video.evaluate(element => element.paused)).toBe(true)
 
   await video.evaluate(element => {

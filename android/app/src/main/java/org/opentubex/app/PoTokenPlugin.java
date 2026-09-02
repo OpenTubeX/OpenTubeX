@@ -36,6 +36,7 @@ import java.util.Map;
 public class PoTokenPlugin extends Plugin {
     private static final long GENERATE_TIMEOUT_MS = 30_000;
     private static final Pattern EXPORT_PATTERN = Pattern.compile("export\\{(\\w+) as default\\};");
+    private final SerialTaskQueue requestQueue = new SerialTaskQueue();
 
     @PluginMethod
     public void generate(PluginCall call) {
@@ -49,7 +50,7 @@ public class PoTokenPlugin extends Plugin {
             return;
         }
 
-        getActivity().runOnUiThread(() -> {
+        getActivity().runOnUiThread(() -> requestQueue.enqueue(() -> {
             try {
                 String script = createBotGuardScript(
                     videoId,
@@ -60,8 +61,9 @@ public class PoTokenPlugin extends Plugin {
                 runBotGuard(call, script);
             } catch (IOException | JSONException exception) {
                 call.reject("Failed to prepare PO token generation", exception);
+                requestQueue.complete();
             }
-        });
+        }));
     }
 
     private String createBotGuardScript(
@@ -99,71 +101,105 @@ public class PoTokenPlugin extends Plugin {
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     private void runBotGuard(PluginCall call, String script) {
-        WebView webView = new WebView(getContext());
-        WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(true);
-        settings.setAllowFileAccess(false);
-        settings.setAllowContentAccess(false);
-        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        WebView webView;
+        try {
+            webView = new WebView(getContext());
+        } catch (RuntimeException exception) {
+            call.reject("Failed to prepare PO token generation", exception);
+            requestQueue.complete();
+            return;
+        }
 
         Handler handler = new Handler(Looper.getMainLooper());
         boolean[] finished = { false };
+        boolean[] cleanedUp = { false };
 
         Runnable cleanup = () -> {
-            webView.stopLoading();
-            webView.removeJavascriptInterface("OpenTubeXPoToken");
-            webView.destroy();
+            if (cleanedUp[0]) return;
+            cleanedUp[0] = true;
+            try {
+                webView.stopLoading();
+                webView.removeJavascriptInterface("OpenTubeXPoToken");
+                webView.destroy();
+            } finally {
+                requestQueue.complete();
+            }
         };
 
         Runnable timeout = () -> {
             if (finished[0]) return;
             finished[0] = true;
-            call.reject("PO token generation timed out");
-            cleanup.run();
+            try {
+                call.reject("PO token generation timed out");
+            } finally {
+                cleanup.run();
+            }
         };
-        handler.postDelayed(timeout, GENERATE_TIMEOUT_MS);
 
-        webView.addJavascriptInterface(new Object() {
-            @JavascriptInterface
-            public void resolve(String token) {
-                handler.post(() -> {
-                    if (finished[0]) return;
-                    finished[0] = true;
-                    handler.removeCallbacks(timeout);
-                    JSObject result = new JSObject();
-                    result.put("token", token);
-                    call.resolve(result);
-                    cleanup.run();
-                });
+        try {
+            WebSettings settings = webView.getSettings();
+            settings.setJavaScriptEnabled(true);
+            settings.setAllowFileAccess(false);
+            settings.setAllowContentAccess(false);
+            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+
+            webView.addJavascriptInterface(new Object() {
+                @JavascriptInterface
+                public void resolve(String token) {
+                    handler.post(() -> {
+                        if (finished[0]) return;
+                        finished[0] = true;
+                        handler.removeCallbacks(timeout);
+                        JSObject result = new JSObject();
+                        result.put("token", token);
+                        try {
+                            call.resolve(result);
+                        } finally {
+                            cleanup.run();
+                        }
+                    });
+                }
+
+                @JavascriptInterface
+                public void reject(String message) {
+                    handler.post(() -> {
+                        if (finished[0]) return;
+                        finished[0] = true;
+                        handler.removeCallbacks(timeout);
+                        try {
+                            call.reject(message);
+                        } finally {
+                            cleanup.run();
+                        }
+                    });
+                }
+            }, "OpenTubeXPoToken");
+
+            webView.setWebViewClient(new BotGuardWebViewClient());
+
+            String document = "<!doctype html><html><head><meta charset=\"UTF-8\"></head><body>" +
+                "<script>" + script +
+                ".then(token=>OpenTubeXPoToken.resolve(token))" +
+                ".catch(error=>OpenTubeXPoToken.reject(String(error)))" +
+                "</script></body></html>";
+
+            handler.postDelayed(timeout, GENERATE_TIMEOUT_MS);
+            webView.loadDataWithBaseURL(
+                "https://www.youtube.com/",
+                document,
+                "text/html",
+                "UTF-8",
+                null
+            );
+        } catch (RuntimeException exception) {
+            finished[0] = true;
+            handler.removeCallbacks(timeout);
+            try {
+                call.reject("Failed to prepare PO token generation", exception);
+            } finally {
+                cleanup.run();
             }
-
-            @JavascriptInterface
-            public void reject(String message) {
-                handler.post(() -> {
-                    if (finished[0]) return;
-                    finished[0] = true;
-                    handler.removeCallbacks(timeout);
-                    call.reject(message);
-                    cleanup.run();
-                });
-            }
-        }, "OpenTubeXPoToken");
-
-        webView.setWebViewClient(new BotGuardWebViewClient());
-
-        String document = "<!doctype html><html><head><meta charset=\"UTF-8\"></head><body>" +
-            "<script>" + script +
-            ".then(token=>OpenTubeXPoToken.resolve(token))" +
-            ".catch(error=>OpenTubeXPoToken.reject(String(error)))" +
-            "</script></body></html>";
-
-        webView.loadDataWithBaseURL(
-            "https://www.youtube.com/",
-            document,
-            "text/html",
-            "UTF-8",
-            null
-        );
+        }
     }
 
     private static class BotGuardWebViewClient extends WebViewClient {

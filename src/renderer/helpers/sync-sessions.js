@@ -58,6 +58,10 @@ export function getOtherDeviceSessions(value, deviceId) {
     })))
 }
 
+export function getPreviousSyncSessions(snapshot) {
+  return snapshot?.sessionsV2 ?? snapshot?.sessions ?? null
+}
+
 export function shouldShowOtherDeviceSessions({
   syncEnabled,
   syncConnected,

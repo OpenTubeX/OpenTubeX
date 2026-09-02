@@ -19,6 +19,7 @@ import { shouldHideMembersOnlyContent } from '../restricted-playback'
 import { getThumbnailPreviewUrl } from '../thumbnailPreview'
 import { isCollaborativeVideoAuthor, parseLocalVideoChannels } from '../video-collaborators'
 import { getResultAuthorThumbnailUrl } from '../result-channel-avatar'
+import { evaluatePlayerScript, generateContentPoToken } from './local-api-platform'
 import {
   CHANNEL_HANDLE_REGEX,
   calculatePublishedDate,
@@ -64,42 +65,7 @@ if (process.env.SUPPORTS_LOCAL_API) {
 }
 
 if (process.env.SUPPORTS_LOCAL_API) {
-  Platform.shim.eval = (data) => {
-    return new Promise((resolve, reject) => {
-      const code = data.output
-
-      // Generate a unique ID, as there may be multiple eval calls going on at the same time (e.g. DASH manifest generation)
-      const messageId = process.env.IS_ELECTRON || crypto.randomUUID
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.floor(Math.random() * 10000)}`
-
-      if (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) {
-        const iframe = document.getElementById('sigFrame')
-
-        /** @param {MessageEvent} event */
-        const listener = (event) => {
-          if (event.source === iframe.contentWindow && typeof event.data === 'string') {
-            const data = JSON.parse(event.data)
-
-            if (data.id === messageId) {
-              window.removeEventListener('message', listener)
-
-              if (data.error) {
-                reject(data.error)
-              } else {
-                resolve(data.result)
-              }
-            }
-          }
-        }
-
-        window.addEventListener('message', listener)
-        iframe.contentWindow.postMessage(JSON.stringify({ id: messageId, code }), '*')
-      } else {
-        reject(new Error('Please setup the eval function for the n/sig deciphering'))
-      }
-    })
-  }
+  Platform.shim.eval = evaluatePlayerScript
 }
 
 /**
@@ -722,22 +688,12 @@ export async function getLocalVideoInfo(id) {
 
   if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !watchPageIpBlocked) {
     try {
-      if (process.env.IS_ELECTRON) {
-        contentPoToken = await window.ftElectron.generatePoToken(
-          id,
-          JSON.stringify(htmlExtracts.session.context),
-          JSON.stringify(htmlExtracts.initialAttestationData),
-          JSON.stringify(htmlExtracts.ytConfig)
-        )
-      } else {
-        const { generateCapacitorPoToken } = await import('./capacitor-po-token')
-        contentPoToken = await generateCapacitorPoToken(
-          id,
-          htmlExtracts.session.context,
-          htmlExtracts.initialAttestationData,
-          htmlExtracts.ytConfig
-        )
-      }
+      contentPoToken = await generateContentPoToken(
+        id,
+        htmlExtracts.session.context,
+        htmlExtracts.initialAttestationData,
+        htmlExtracts.ytConfig
+      )
 
       player.po_token = contentPoToken
     } catch (error) {

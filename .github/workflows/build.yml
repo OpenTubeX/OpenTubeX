@@ -618,7 +618,7 @@ jobs:
       run: |
         set -euo pipefail
 
-        for repository in apt rpm flatpak snap; do
+        for repository in apt rpm fdroid flatpak snap; do
           gh api "repos/OpenTubeX/${repository}/dispatches" \
             --method POST \
             -f event_type=opentubex-nightly \

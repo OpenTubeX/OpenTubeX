@@ -13,6 +13,7 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         registerPlugin(PoTokenPlugin.class);
         registerPlugin(AndroidUiPlugin.class);
+        registerPlugin(SubscriptionRefreshPlugin.class);
         registerPlugin(SabrHttpPlugin.class);
         super.onCreate(savedInstanceState);
         // Capacitor falls back to addJavascriptInterface when the modern,

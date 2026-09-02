@@ -435,6 +435,11 @@ import {
 } from './helpers/androidUi'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
 import {
+  finishAndroidSubscriptionRefresh,
+  startAndroidSubscriptionRefresh,
+  updateAndroidSubscriptionRefresh
+} from './helpers/androidSubscriptionRefresh'
+import {
   cancelSubscriptionRefresh,
   refreshSubscriptionLiveFromRemote,
   refreshSubscriptionPostsFromRemote,
@@ -1932,6 +1937,9 @@ function handleSubscriptionRefreshCompleted(event) {
  * @param {CustomEvent<{tab: string, profileId: string}>} event
  */
 function handleSubscriptionRefreshStarted(event) {
+  if (isCapacitor) {
+    startAndroidSubscriptionRefresh(getSubscriptionRefreshNotificationTitle(event.detail.tab))
+  }
   if (!process.env.IS_ELECTRON) {
     try {
       localStorage.setItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY, JSON.stringify({
@@ -1956,6 +1964,10 @@ function handleSubscriptionRefreshProgress(event) {
   const percentage = normalizeSubscriptionRefreshProgress(event.detail.percentage)
   store.commit('setSubscriptionFeedRefreshProgress', percentage)
 
+  if (isCapacitor) {
+    updateAndroidSubscriptionRefresh(percentage)
+  }
+
   if (process.env.IS_ELECTRON) {
     window.ftElectron.subscriptionAutoRefresh.setProgress(
       event.detail.ownerTabId ?? store.getters.getActiveTabId,
@@ -1976,6 +1988,9 @@ function handleSubscriptionRefreshProgress(event) {
 }
 
 function handleSubscriptionRefreshFinished() {
+  if (isCapacitor) {
+    finishAndroidSubscriptionRefresh()
+  }
   if (!process.env.IS_ELECTRON) {
     try {
       localStorage.removeItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
@@ -1984,6 +1999,19 @@ function handleSubscriptionRefreshFinished() {
     }
   }
   applySubscriptionAutoRefreshState({ inProgress: false, percentage: 0 })
+}
+
+function getSubscriptionRefreshNotificationTitle(tab) {
+  switch (tab) {
+    case 'shorts':
+      return t('Subscriptions.Refreshing Subscription Shorts')
+    case 'live':
+      return t('Subscriptions.Refreshing Subscription Live Streams')
+    case 'posts':
+      return t('Subscriptions.Refreshing Subscription Posts')
+    default:
+      return t('Subscriptions.Refreshing Subscription Videos')
+  }
 }
 
 /**

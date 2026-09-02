@@ -171,7 +171,7 @@ test.describe('OpenTubeX sync server', () => {
           'playlists',
           'history',
           'profiles',
-          'sessions',
+          'sessionsV2',
           'settings'
         ])
       )
