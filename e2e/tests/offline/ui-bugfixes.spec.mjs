@@ -239,6 +239,8 @@ test('restores and clamps the real phone tab organizer viewports', async ({ app,
     }])
   })
   await expect(page.locator('.capacitorPhoneSyncedTabTarget')).toHaveCount(1)
+  await expect(syncedPanel.locator('.capacitorPhoneSyncedSessionHeader strong'))
+    .toHaveText('Desktop · 1 tab')
   await expect.poll(() => phoneTabScrollState(page, '.capacitorPhoneSyncedTabsContent')).toEqual({
     scrollTop: 0,
     maximum: 0,

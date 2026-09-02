@@ -115,6 +115,14 @@ export function shouldShowOtherDeviceSessions({
     sessions.length > 0
 }
 
+export function formatDeviceSessionLabel(session, t) {
+  const count = session.tabs.length
+  const platform = session.syncPlatform === 'mobile'
+    ? t('Settings.Sync Settings.Mobile Device')
+    : t('Settings.Sync Settings.Desktop Device')
+  return `${platform} · ${t('Tab Organizer.Tab Count', { count }, count)}`
+}
+
 function claimLegacyDesktopSessions(document, deviceId, platform) {
   if (platform !== 'desktop') return document
 

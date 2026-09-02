@@ -2184,7 +2184,7 @@ test.describe('background tab shortcuts', () => {
 })
 
 test.describe('tab organizer', () => {
-  test('shows and confirms deletion of synced tab sets', async ({ page }) => {
+  test('shows synced tab sets in device tabs and confirms deletion', async ({ page }) => {
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setSyncServerEnabled', true)
@@ -2192,15 +2192,25 @@ test.describe('tab organizer', () => {
       store.commit('setSyncServerPrivacyMode', 'enhanced')
       store.commit('setSyncServerSyncSessions', true)
       store.commit('setSyncServerSharedTabs', false)
-      store.commit('setSyncServerOtherDeviceSessions', [{
-        syncDeviceId: 'phone-e2e',
-        syncPlatform: 'mobile',
-        sessionId: 'mobile-session-e2e',
-        tabs: [
-          { id: 'synced-watch', title: 'Synced watch tab', url: '/watch/synced-video' },
-          { id: 'synced-history', title: 'Synced history tab', url: '/history' },
-        ],
-      }])
+      store.commit('setSyncServerOtherDeviceSessions', [
+        {
+          syncDeviceId: 'phone-e2e',
+          syncPlatform: 'mobile',
+          sessionId: 'mobile-session-e2e',
+          tabs: [
+            { id: 'synced-watch', title: 'Synced watch tab', url: '/watch/synced-video' },
+            { id: 'synced-history', title: 'Synced history tab', url: '/history' },
+          ],
+        },
+        {
+          syncDeviceId: 'desktop-e2e',
+          syncPlatform: 'desktop',
+          sessionId: 'desktop-session-e2e',
+          tabs: [
+            { id: 'synced-desktop', title: 'Desktop synced tab', url: '/subscriptions' },
+          ],
+        },
+      ])
       store._actions.deleteSyncServerSession = [session => {
         store.commit(
           'setSyncServerOtherDeviceSessions',
@@ -2216,13 +2226,30 @@ test.describe('tab organizer', () => {
     await page.locator(sel.tabOrganizerButton).click()
     const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
     const syncedSection = organizer.locator('.syncedTabsSection')
-    const syncedSet = syncedSection.locator('.syncedSessionCard')
+    const sessionTabs = syncedSection.getByRole('tablist', { name: 'Tabs from other devices' })
+    const mobileTab = sessionTabs.getByRole('tab', { name: 'Mobile · 2 tabs', exact: true })
+    const desktopTab = sessionTabs.getByRole('tab', { name: 'Desktop · 1 tab', exact: true })
+    const syncedSet = syncedSection.getByRole('tabpanel')
     await expect(syncedSection.getByRole('heading', { name: 'Tabs from other devices' })).toBeVisible()
-    await expect(syncedSet).toContainText('Mobile · 2 tabs')
-    await expect(syncedSet.locator('[data-icon="layer-group"]')).toBeVisible()
+    await expect(sessionTabs.getByRole('tab')).toHaveCount(2)
+    await expect(mobileTab).toHaveAttribute('aria-selected', 'true')
+    await expect(desktopTab).toHaveAttribute('aria-selected', 'false')
+    await expect(sessionTabs.locator('[data-icon="layer-group"]')).toBeVisible()
+    await expect(sessionTabs.locator('[data-icon="display"]')).toBeVisible()
     await expect(syncedSet.locator('[data-icon="clapperboard"]')).toBeVisible()
     await expect(syncedSet.locator('[data-icon="clock-rotate-left"]')).toBeVisible()
     await expect(syncedSet.locator('[data-icon="arrow-up-right-from-square"]')).toHaveCount(2)
+    await expect(syncedSet).not.toContainText('Desktop synced tab')
+
+    await mobileTab.press('ArrowRight')
+    await expect(desktopTab).toBeFocused()
+    await expect(desktopTab).toHaveAttribute('aria-selected', 'true')
+    await expect(syncedSet).toContainText('Desktop synced tab')
+    await expect(syncedSet).not.toContainText('Synced watch tab')
+
+    await desktopTab.press('Home')
+    await expect(mobileTab).toBeFocused()
+    await expect(syncedSet).toContainText('Synced watch tab')
 
     const deleteSet = syncedSet.getByRole('button', { name: 'Delete: Mobile · 2 tabs' })
     await deleteSet.click()
@@ -2234,7 +2261,58 @@ test.describe('tab organizer', () => {
     await deleteSet.click()
     confirmation = page.getByRole('dialog', { name: 'Delete' })
     await confirmation.getByRole('button', { name: 'Delete', exact: true }).click()
-    await expect(syncedSection).toHaveCount(0)
+    await expect(mobileTab).toHaveCount(0)
+    await expect(desktopTab).toHaveAttribute('aria-selected', 'true')
+    await expect(syncedSet).toContainText('Desktop synced tab')
+  })
+
+  test('clamps scroll after switching to a shorter synced session at fractional UI scale', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setSyncServerEnabled', true)
+      store.commit('setSyncServerToken', 'e2e-token')
+      store.commit('setSyncServerPrivacyMode', 'enhanced')
+      store.commit('setSyncServerSyncSessions', true)
+      store.commit('setSyncServerSharedTabs', false)
+      store.commit('setSyncServerOtherDeviceSessions', [
+        {
+          syncDeviceId: 'phone-e2e',
+          syncPlatform: 'mobile',
+          sessionId: 'long-mobile-session',
+          tabs: Array.from({ length: 30 }, (_, index) => ({
+            id: `long-synced-${index}`,
+            title: `Long synced tab ${index}`,
+            url: `/watch/long-synced-${index}`,
+          })),
+        },
+        {
+          syncDeviceId: 'desktop-e2e',
+          syncPlatform: 'desktop',
+          sessionId: 'short-desktop-session',
+          tabs: [{ id: 'short-synced', title: 'Short synced tab', url: '/subscriptions' }],
+        },
+      ])
+    })
+
+    await page.locator(sel.tabOrganizerButton).click()
+    const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    const scroller = organizer.locator('.tabOrganizerScroll')
+    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+    const syncedSection = organizer.locator('.syncedTabsSection')
+    const desktopTab = syncedSection.getByRole('tab', { name: 'Desktop · 1 tab', exact: true })
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await desktopTab.evaluate(element => element.click())
+    await expect(syncedSection.locator('.syncedTabTarget')).toHaveCount(1)
+    await expect.poll(() => scroller.evaluate(element => ({
+      distanceFromEnd: Math.abs(element.scrollTop - Math.max(0, element.scrollHeight - element.clientHeight)),
+      scrollTop: element.scrollTop
+    }))).toEqual({ distanceFromEnd: 0, scrollTop: 0 })
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
   })
 
   test('selects a visible range with Shift-click', async ({ page }) => {

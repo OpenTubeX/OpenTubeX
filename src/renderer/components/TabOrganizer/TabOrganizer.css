@@ -590,10 +590,56 @@
   color: var(--secondary-text-color);
 }
 
-.syncedSessionGrid {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+.syncedSessionTabs {
+  border-block-end: 1px solid var(--divider-color);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-inline: 4px;
+}
+
+.syncedSessionTab {
+  align-items: center;
+  background: transparent !important;
+  border-color: transparent !important;
+  border-radius: calc(7px * var(--ui-roundness)) calc(7px * var(--ui-roundness)) 0 0 !important;
+  display: flex;
+  gap: 8px;
+  min-block-size: 44px !important;
+  padding-block: 6px !important;
+  position: relative;
+}
+
+.syncedSessionTab::after {
+  background: transparent;
+  block-size: 2px;
+  border-radius: 2px;
+  content: '';
+  inset-block-end: -1px;
+  inset-inline: 8px;
+  position: absolute;
+}
+
+.syncedSessionTab:hover,
+.syncedSessionTab:focus-visible {
+  background: var(--side-nav-hover-color) !important;
+}
+
+.syncedSessionTab.selected {
+  color: var(--primary-text-color);
+}
+
+.syncedSessionTab.selected::after {
+  background: var(--accent-color);
+}
+
+.syncedSessionTab strong {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.syncedSessionPanels {
+  padding-block-start: 10px;
 }
 
 .syncedSessionCard {
@@ -606,7 +652,6 @@
 }
 
 .syncedSessionHeader,
-.syncedSessionIdentity,
 .syncedSessionActions,
 .syncedSessionActionButton {
   align-items: center;
@@ -615,17 +660,7 @@
 
 .syncedSessionHeader {
   gap: 10px;
-  justify-content: space-between;
-}
-
-.syncedSessionIdentity {
-  gap: 9px;
-  min-inline-size: 0;
-}
-
-.syncedSessionIdentity strong {
-  font-size: 13px;
-  overflow-wrap: anywhere;
+  justify-content: flex-end;
 }
 
 .syncedSessionIcon {
@@ -766,8 +801,7 @@
   }
 
   .syncedSessionHeader {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: stretch;
   }
 
   .syncedSessionActions {

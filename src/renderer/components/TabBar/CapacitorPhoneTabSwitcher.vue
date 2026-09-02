@@ -237,7 +237,7 @@
                   class="capacitorPhoneSyncedSession"
                 >
                   <header class="capacitorPhoneSyncedSessionHeader">
-                    <strong>{{ deviceSessionLabel(session) }}</strong>
+                    <strong>{{ formatDeviceSessionLabel(session, t) }}</strong>
                     <button
                       type="button"
                       class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedOpenAll"
@@ -305,7 +305,7 @@ import { useI18n } from 'vue-i18n'
 import store from '../../store/index'
 import { shouldCloseSwipedTab } from '../../helpers/capacitorTabSwipe'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { shouldShowOtherDeviceSessions } from '../../helpers/sync-sessions'
+import { formatDeviceSessionLabel, shouldShowOtherDeviceSessions } from '../../helpers/sync-sessions'
 import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
 import { getTabAvatarUrl, getTabPageIcon } from '../../tabs/tabPreview'
 import FtRetryImage from '../FtRetryImage.vue'
@@ -475,15 +475,6 @@ async function restoreClosedTab() {
 async function activateTab(tabId) {
   if (swipe.suppressClick) return
   await activateTabAction(tabId)
-}
-
-function deviceSessionLabel(session) {
-  return t('Settings.Sync Settings.Device Tab Session', {
-    platform: session.syncPlatform === 'mobile'
-      ? t('Settings.Sync Settings.Mobile Device')
-      : t('Settings.Sync Settings.Desktop Device'),
-    count: session.tabs.length,
-  })
 }
 
 async function openOtherDeviceSession(session) {
