@@ -198,6 +198,37 @@ test.describe('channel settings', () => {
     await expect(picker).toHaveCount(0)
   })
 
+  test('shows a partially saved channel when initialization cannot roll back', async ({ page }) => {
+    await goToSettingsSection(page, 'playback')
+    await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
+    await page.getByRole('button', { name: 'Add subscribed channel' }).click()
+
+    await page.evaluate(channelId => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const updatePlaybackSpeeds = store._actions.updateChannelPlaybackSpeeds[0]
+      store._actions.updateChannelPlaybackSpeeds = [value => {
+        const playbackSpeeds = JSON.parse(value)
+        return Object.hasOwn(playbackSpeeds, channelId)
+          ? updatePlaybackSpeeds(value)
+          : Promise.resolve(false)
+      }]
+      store._actions.updateChannelVolumes = [() => Promise.reject(new Error('write failed'))]
+    }, NEW_CHANNEL_ID)
+
+    const picker = page.getByRole('dialog', { name: 'Add subscribed channel' })
+    await picker.getByRole('button', { name: NEW_CHANNEL_NAME, exact: true }).click()
+
+    await expect(picker).toHaveCount(0)
+    await expect(page.locator('.toast', {
+      hasText: 'Failed to save channel settings'
+    })).toBeVisible()
+
+    const newChannel = page.locator('.settingsWindow .channelEntry', { hasText: NEW_CHANNEL_NAME })
+    await expect(newChannel).toBeVisible()
+    await expect(newChannel.locator('.channelPreference')).toHaveCount(1)
+    await expect(newChannel.getByRole('slider', { name: /Playback Speed/ })).toBeVisible()
+  })
+
   test('preserves newer edits when initialization rolls back', async ({ page }) => {
     await goToSettingsSection(page, 'playback')
     await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()

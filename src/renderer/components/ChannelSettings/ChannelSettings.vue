@@ -675,10 +675,17 @@ async function addSubscribedChannel(channelId) {
     )))
 
     if (saved.some(value => !value)) {
-      await Promise.all(preferencesToAdd.map(({ type, initialValue }) => (
+      const rolledBack = await Promise.all(preferencesToAdd.map(({ type, initialValue }) => (
         rollbackPreference(channelId, type, initialValue, initializationToken)
-          .catch(error => console.error(error))
+          .catch(error => {
+            console.error(error)
+            return false
+          })
       )))
+      if (rolledBack.some(value => !value)) {
+        addChannelSearchQuery.value = ''
+        showAddChannelPrompt.value = false
+      }
       showToast({
         message: t('Channel.Failed to save subscription settings'),
         icon: ['fas', 'circle-exclamation']
