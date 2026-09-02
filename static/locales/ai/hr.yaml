@@ -502,8 +502,8 @@ Settings:
     Parallel Segment Loading: Paralelno učitavanje segmenata
     Rotate Wide Videos to Landscape in Fullscreen: 'Zakreni široke videozapise vodoravno preko cijelog zaslona'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Povucite gore ili dolje za ulazak u prikaz preko cijelog zaslona ili izlazak iz njega'
-    Preload Upcoming Videos: "Predmemoriraj sljedeće videozapise"
-    Upcoming Videos to Preload: "Broj videozapisa za predmemoriranje"
+    Preload Upcoming Videos: "Predučitaj sljedeće videozapise"
+    Upcoming Videos to Preload: "Broj videozapisa za predučitavanje"
   Channel Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.
@@ -1195,11 +1195,11 @@ Playlist:
   Playlist Already Preloaded: "Svi videozapisi na popisu već su predučitani"
   Playlist Preload Progress: "Predučitavanje videozapisa: {completed} od {requested}"
   Close Playlist: Zatvori popis za reprodukciju
-  Preload Playlist: "Predmemoriraj sve videozapise"
-  Preloading Playlist: "Predmemoriranje svih videozapisa..."
-  Playlist Preload Complete: "Predmemorirani videozapisi: {count}."
-  Playlist Preload Partial: "Predmemorirano je {preloaded} od {requested} videozapisa. {failed} nije uspjelo."
-  Playlist Preload Pagination Failed: "Cijeli popis nije se mogao učitati pa je predmemoriranje otkazano."
+  Preload Playlist: "Predučitaj sve videozapise"
+  Preloading Playlist: "Predučitavanje svih videozapisa..."
+  Playlist Preload Complete: "Predučitani videozapisi: {count}."
+  Playlist Preload Partial: "Predučitano je {preloaded} od {requested} videozapisa. Predučitavanje {failed} videozapisa nije uspjelo."
+  Playlist Preload Pagination Failed: "Cijeli popis nije se mogao učitati pa je predučitavanje otkazano."
 Change Format:
   Local Video File: Lokalna videodatoteka
   Local Audio File: Lokalna audiodatoteka

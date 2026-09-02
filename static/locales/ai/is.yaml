@@ -1214,10 +1214,10 @@ Video:
       VoteFailed: Ekki tókst að senda SponsorBlock-atkvæði.
 Playlist:
   Playlist Already Preloaded: "Öll myndskeið spilunarlistans eru þegar forhlaðin"
-  Playlist Preload Progress: "Forhleð myndskeið: {completed} af {requested}"
+  Playlist Preload Progress: "Forhleðsla myndskeiða: {completed} af {requested}"
   Close Playlist: Loka spilunarlista
   Preload Playlist: "Forhlaða öll myndskeið"
-  Preloading Playlist: "Forhleð öllum myndskeiðum..."
+  Preloading Playlist: "Forhleðsla allra myndskeiða..."
   Playlist Preload Complete: "Forhlaðin myndskeið: {count}."
   Playlist Preload Partial: "Forhlóð {preloaded} af {requested} myndskeiðum. Ekki tókst að forhlaða {failed}."
   Playlist Preload Pagination Failed: "Ekki tókst að hlaða allan spilunarlistann og forhleðslu var hætt."

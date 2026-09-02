@@ -1213,7 +1213,7 @@ Playlist:
   Preload Playlist: "Попередньо завантажити всі відео"
   Preloading Playlist: "Попереднє завантаження всіх відео..."
   Playlist Preload Complete: "Попередньо завантажено відео: {count}."
-  Playlist Preload Partial: "Попередньо завантажено {preloaded} з {requested} відео. Не вдалося завантажити {failed}."
+  Playlist Preload Partial: "Попередньо завантажено {preloaded} з {requested} відео. Не вдалося попередньо завантажити {failed} відео."
   Playlist Preload Pagination Failed: "Не вдалося завантажити весь список, тому попереднє завантаження скасовано."
 Change Format:
   Local Video File: Локальний відеофайл
