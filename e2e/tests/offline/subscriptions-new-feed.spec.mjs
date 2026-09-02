@@ -262,6 +262,41 @@ test.describe('new subscriptions feed', () => {
     ]])
   })
 
+  test('shows category dots and marks an inactive category as seen from its context menu', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await page.getByRole('button', { name: 'Show tabbed view' }).click()
+
+    const tabs = page.getByRole('tablist', { name: 'New content tabs' })
+    const videosTab = tabs.locator('[data-new-feed-tab="videos"]')
+    const shortsTab = tabs.locator('[data-new-feed-tab="shorts"]')
+    const liveTab = tabs.locator('[data-new-feed-tab="live"]')
+    const postsTab = tabs.locator('[data-new-feed-tab="posts"]')
+
+    await expect(videosTab.locator('.newContentDot')).toBeVisible()
+    await expect(shortsTab.locator('.newContentDot')).toBeVisible()
+    await expect(liveTab.locator('.newContentDot')).toBeVisible()
+    await expect(postsTab.locator('.newContentDot')).toBeVisible()
+    await expect(videosTab).toHaveAttribute('aria-selected', 'true')
+
+    await shortsTab.click({ button: 'right' })
+    const menu = page.getByRole('menu', { name: 'Context menu' })
+    await menu.getByRole('menuitem', { name: 'Mark all as seen' }).click()
+
+    await expect(videosTab).toHaveAttribute('aria-selected', 'true')
+    await expect(shortsTab.locator('.newContentDot')).toHaveCount(0)
+    await expect(videosTab.locator('.newContentDot')).toBeVisible()
+    await expect(liveTab.locator('.newContentDot')).toBeVisible()
+    await expect(postsTab.locator('.newContentDot')).toBeVisible()
+
+    await shortsTab.click()
+    await expect(page.getByText('There is no new content.')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Mark all as seen' })).toHaveCount(0)
+
+    await shortsTab.click({ button: 'right' })
+    await expect(menu.getByRole('menuitem', { name: 'Mark all as seen' })).toHaveCount(0)
+  })
+
   test('shows Shorts as portrait cards with their duration and upload time', async ({ page }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
@@ -546,6 +581,9 @@ test.describe('new feed settings and seen state', () => {
     await expect(page.getByRole('button', { name: 'Mark all as seen' })).toHaveCount(0)
 
     await page.locator('[data-subscription-feed-tab="all"]').click()
+    await page.getByRole('button', { name: 'Show tabbed view' }).click()
+    await expect(page.getByRole('tablist', { name: 'New content tabs' }).locator('.newContentDot')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Show combined view' }).click()
     const newVideoCard = page.locator('.ft-list-video').filter({
       has: page.getByRole('heading', { name: 'New video', exact: true })
     })

@@ -976,10 +976,30 @@ function createNewTab() {
 
 // ===== Context menu =====
 /**
- * @param {{ tabId: string | null, selectedTabIds?: string[], surface: 'tab' | 'tabBar' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | null }} payload
+ * @param {{ tabId: string | null, selectedTabIds?: string[], surface: 'tab' | 'tabBar' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | null, isNewFeedTab?: boolean, hasNewContent?: boolean }} payload
  */
 function updateContextMenuTab(payload) {
   window.ftElectron.tabs.setContextMenuTab({ ...payload, verticalLayout: vertical.value })
+}
+
+/**
+ * @param {Element} target
+ */
+function updateContextMenuTarget(target) {
+  const tabId = target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
+  const contextMenuSelectedTabIds = getContextMenuSelectedTabIds(tabId)
+  const newFeedTab = target.closest('[data-new-feed-tab]')
+  const feedTab = target.closest('[data-subscription-feed-tab]')?.dataset.subscriptionFeedTab ??
+    newFeedTab?.dataset.newFeedTab ?? null
+  const isTabBar = target.closest('.tabBar') != null
+  updateContextMenuTab({
+    tabId,
+    selectedTabIds: contextMenuSelectedTabIds,
+    surface: tabId ? 'tab' : isTabBar ? 'tabBar' : feedTab ? 'subscriptionFeedTab' : 'content',
+    feedTab,
+    isNewFeedTab: newFeedTab != null,
+    hasNewContent: newFeedTab?.dataset.hasNewContent === 'true'
+  })
 }
 
 /**
@@ -990,16 +1010,7 @@ function handleContextMenuPointerDown(event) {
     return
   }
 
-  const tabId = event.target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
-  const contextMenuSelectedTabIds = getContextMenuSelectedTabIds(tabId)
-  const feedTab = event.target.closest('[data-subscription-feed-tab]')?.dataset.subscriptionFeedTab ?? null
-  const isTabBar = event.target.closest('.tabBar') != null
-  updateContextMenuTab({
-    tabId,
-    selectedTabIds: contextMenuSelectedTabIds,
-    surface: tabId ? 'tab' : isTabBar ? 'tabBar' : feedTab ? 'subscriptionFeedTab' : 'content',
-    feedTab
-  })
+  updateContextMenuTarget(event.target)
 }
 
 /**
@@ -1010,16 +1021,7 @@ function handleContextMenuEvent(event) {
     return
   }
 
-  const tabId = event.target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
-  const contextMenuSelectedTabIds = getContextMenuSelectedTabIds(tabId)
-  const feedTab = event.target.closest('[data-subscription-feed-tab]')?.dataset.subscriptionFeedTab ?? null
-  const isTabBar = event.target.closest('.tabBar') != null
-  updateContextMenuTab({
-    tabId,
-    selectedTabIds: contextMenuSelectedTabIds,
-    surface: tabId ? 'tab' : isTabBar ? 'tabBar' : feedTab ? 'subscriptionFeedTab' : 'content',
-    feedTab
-  })
+  updateContextMenuTarget(event.target)
 }
 
 /**

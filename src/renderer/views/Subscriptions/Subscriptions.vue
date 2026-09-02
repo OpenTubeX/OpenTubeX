@@ -263,6 +263,7 @@
             :aria-selected="currentNewFeedTab === tab.id"
             aria-controls="subscriptionsPanel"
             :data-new-feed-tab="tab.id"
+            :data-has-new-content="newFeedTabHasNewContent(tab.id)"
             :tabindex="currentNewFeedTab === tab.id ? 0 : -1"
             @click="changeNewFeedTab(tab.id)"
             @keydown.left.right="switchNewFeedTab($event, tab.id)"
@@ -273,6 +274,10 @@
               class="subscriptionIcon"
             />
             <span>{{ tab.label }}</span>
+            <FtNewContentDot
+              v-if="showNewSubscriptionFeedIndicators && newFeedTabHasNewContent(tab.id)"
+              class="newFeedTabDot"
+            />
           </button>
         </FtFlexBox>
       </div>
@@ -341,6 +346,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
+import FtNewContentDot from '../../components/FtNewContentDot/FtNewContentDot.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtPrompt from '../../components/FtPrompt/FtPrompt.vue'
@@ -555,6 +561,7 @@ function nextAnimationFrame() {
 
 let isMounted = false
 let removeFeedReloadRequestListener = null
+let removeFeedMarkSeenRequestListener = null
 
 onMounted(() => {
   isMounted = true
@@ -562,6 +569,7 @@ onMounted(() => {
 
   if (isElectron) {
     removeFeedReloadRequestListener = window.ftElectron.subscriptionFeeds.onRequestReload(handleFeedReloadRequest)
+    removeFeedMarkSeenRequestListener = window.ftElectron.subscriptionFeeds.onRequestMarkSeen(handleFeedMarkSeenRequest)
   }
 })
 
@@ -570,6 +578,7 @@ onBeforeUnmount(() => {
   tabChangeSequence++
   document.removeEventListener('keydown', handlePanelTabNavigation)
   removeFeedReloadRequestListener?.()
+  removeFeedMarkSeenRequestListener?.()
 })
 
 watch(currentTab, async (value) => {
@@ -863,6 +872,13 @@ const shortsPanel = useTemplateRef('shortsPanel')
 const communityPanel = useTemplateRef('communityPanel')
 const newPanel = useTemplateRef('newPanel')
 
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ */
+function newFeedTabHasNewContent(tab) {
+  return newPanel.value?.hasNewContentByCategory?.[tab] === true
+}
+
 const currentTabPanel = computed(() => {
   switch (currentTab.value) {
     case 'videos':
@@ -893,8 +909,9 @@ const markingSeenTab = ref(null)
 
 /**
  * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} [newFeedTab=currentNewFeedTab.value]
  */
-async function markAllAsSeen(tab) {
+async function markAllAsSeen(tab, newFeedTab = currentNewFeedTab.value) {
   if (markingSeenTab.value !== null) {
     return
   }
@@ -903,7 +920,7 @@ async function markAllAsSeen(tab) {
   try {
     const feedTabs = tab === 'new'
       ? newFeedView.value === 'tabbed'
-        ? [currentNewFeedTab.value]
+        ? [newFeedTab]
         : visibleTabs.value.filter(visibleTab => visibleTab !== 'new')
       : [tab]
 
@@ -920,6 +937,22 @@ async function markAllAsSeen(tab) {
   } finally {
     markingSeenTab.value = null
   }
+}
+
+/**
+ * @param {{tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts'}} payload
+ */
+function handleFeedMarkSeenRequest(payload) {
+  if (
+    payload?.tabId !== tabId ||
+    currentTab.value !== 'new' ||
+    newFeedView.value !== 'tabbed' ||
+    !visibleNewFeedTabs.value.some(tab => tab.id === payload.feedTab)
+  ) {
+    return
+  }
+
+  markAllAsSeen('new', payload.feedTab)
 }
 
 const currentAutoRefresh = computed(() => {

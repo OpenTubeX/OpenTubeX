@@ -765,6 +765,7 @@ function runApp() {
     Copy: 'Copy',
     Cut: 'Cut',
     Green: 'Settings.Theme Settings.Main Color Theme.Green',
+    'Mark All as Seen': 'Subscriptions.Mark All as Seen',
     'New Tab': 'New Tab',
     'New Window': 'New Window',
     Orange: 'Settings.Theme Settings.Main Color Theme.Orange',
@@ -836,6 +837,8 @@ function runApp() {
       const subscriptionFeedTab = manager?.contextMenuSurface === 'subscriptionFeedTab'
         ? manager.contextMenuSubscriptionFeedTab
         : null
+      const isSubscriptionNewFeedTab = subscriptionFeedTab != null &&
+        manager?.contextMenuSubscriptionNewFeedTab === true
       const subscriptionFeedLabelKeys = {
         videos: 'Reload Videos',
         shorts: 'Reload Shorts',
@@ -947,6 +950,21 @@ function runApp() {
             if (!manager.presentedTabId) return
 
             manager.bridge.send(IpcChannels.SUBSCRIPTION_FEED_REQUEST_RELOAD, {
+              tabId: manager.presentedTabId,
+              feedTab: subscriptionFeedTab
+            })
+          }
+        },
+        {
+          label: contextMenuLabel('Mark All as Seen'),
+          visible: isSubscriptionNewFeedTab &&
+            manager?.contextMenuSubscriptionNewFeedHasContent === true,
+          click: () => {
+            if (!manager?.presentedTabId || !subscriptionFeedTab || subscriptionFeedTab === 'all') {
+              return
+            }
+
+            manager.bridge.send(IpcChannels.SUBSCRIPTION_FEED_REQUEST_MARK_SEEN, {
               tabId: manager.presentedTabId,
               feedTab: subscriptionFeedTab
             })

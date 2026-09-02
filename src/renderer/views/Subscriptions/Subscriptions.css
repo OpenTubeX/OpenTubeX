@@ -326,6 +326,13 @@
   font-weight: bold;
 }
 
+.newFeedTabDot {
+  inset-block-start: 8px;
+  inset-inline-end: 7px;
+  margin: 0;
+  position: absolute;
+}
+
 .tab .tabLoadingIndicator {
   display: inline-flex;
   inline-size: auto;
