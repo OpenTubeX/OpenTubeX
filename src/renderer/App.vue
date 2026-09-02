@@ -445,7 +445,10 @@ import {
   startAndroidSubscriptionRefresh,
   updateAndroidSubscriptionRefresh
 } from './helpers/androidSubscriptionRefresh'
-import { createAndroidSubscriptionRefreshConfiguration } from './helpers/androidSubscriptionRefreshData'
+import {
+  createAndroidSubscriptionRefreshConfiguration,
+  createSubscriptionRefreshStartGuard
+} from './helpers/androidSubscriptionRefreshData'
 import { normalizeInvidiousSubscriptionFeed } from './helpers/api/invidious'
 import { reconcileFetchedSubscriptionEntries } from './helpers/subscription-entries'
 import {
@@ -2004,11 +2007,13 @@ function handleSubscriptionRefreshCompleted(event) {
  * @param {CustomEvent<{tab: string, profileId: string}>} event
  */
 async function handleSubscriptionRefreshStarted(event) {
+  const isCurrentStart = subscriptionRefreshStartGuard.begin()
   if (isCapacitor) {
     const { acquired, notificationsDenied } = await startAndroidSubscriptionRefresh(
       getSubscriptionRefreshNotificationTitle(event.detail.tab),
       t('Feed.Cancel Refresh')
     )
+    if (!isCurrentStart()) return
     if (notificationsDenied) showAndroidSubscriptionRefreshNotificationWarning()
     if (!acquired) {
       cancelSubscriptionRefresh()
@@ -2031,6 +2036,7 @@ async function handleSubscriptionRefreshStarted(event) {
   })
 }
 
+const subscriptionRefreshStartGuard = createSubscriptionRefreshStartGuard()
 let androidSubscriptionRefreshNotificationWarningShown = false
 
 function showAndroidSubscriptionRefreshNotificationWarning() {
@@ -2078,6 +2084,7 @@ function handleSubscriptionRefreshProgress(event) {
 }
 
 function handleSubscriptionRefreshFinished() {
+  subscriptionRefreshStartGuard.finish()
   if (isCapacitor) {
     finishAndroidSubscriptionRefresh()
   }

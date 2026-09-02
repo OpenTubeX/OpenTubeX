@@ -1,7 +1,30 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { createAndroidSubscriptionRefreshConfiguration } from '../../src/renderer/helpers/androidSubscriptionRefreshData.js'
+import {
+  createAndroidSubscriptionRefreshConfiguration,
+  createSubscriptionRefreshStartGuard,
+} from '../../src/renderer/helpers/androidSubscriptionRefreshData.js'
+
+test('a completed refresh cannot become active after its start await resumes', async () => {
+  const guard = createSubscriptionRefreshStartGuard()
+  let releaseStart
+  const nativeStart = new Promise(resolve => { releaseStart = resolve })
+  let inProgress = false
+
+  const start = (async () => {
+    const isCurrentStart = guard.begin()
+    await nativeStart
+    if (isCurrentStart()) inProgress = true
+  })()
+
+  guard.finish()
+  inProgress = false
+  releaseStart()
+  await start
+
+  assert.equal(inProgress, false)
+})
 
 test('creates one closed-app schedule input per profile and enabled feed', () => {
   const configuration = createAndroidSubscriptionRefreshConfiguration({

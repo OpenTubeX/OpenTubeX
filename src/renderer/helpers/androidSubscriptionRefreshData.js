@@ -1,6 +1,24 @@
 const FEED_TYPES = ['videos', 'shorts', 'live', 'posts']
 
 /**
+ * Prevents an asynchronous refresh-start handler from restoring progress
+ * after the matching refresh already finished.
+ */
+export function createSubscriptionRefreshStartGuard() {
+  let generation = 0
+
+  return {
+    begin() {
+      const startGeneration = ++generation
+      return () => generation === startGeneration
+    },
+    finish() {
+      generation++
+    }
+  }
+}
+
+/**
  * Builds the renderer-to-native snapshot used by closed-app Android workers.
  * The native side receives channel IDs only, never browser datastore files.
  * @param {{
