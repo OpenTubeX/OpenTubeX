@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, updateInputWithoutScrolling } from '../../helpers/app.mjs'
 
 const now = Date.now()
 const DAY = 86_400_000
@@ -85,13 +85,6 @@ async function expectPageScrollWithinRenderedRange(page) {
     scrollWithinRenderedRange: true,
     scrollbarMatchesOverflow: true
   })
-}
-
-async function updateInputWithoutScrolling(input, value) {
-  await input.evaluate((element, nextValue) => {
-    element.value = nextValue
-    element.dispatchEvent(new Event('input', { bubbles: true }))
-  }, value)
 }
 
 test.use({

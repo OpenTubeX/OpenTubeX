@@ -1,4 +1,9 @@
-import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
+import {
+  test,
+  expect,
+  goToSettingsSection,
+  updateInputWithoutScrolling
+} from '../../helpers/app.mjs'
 
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const CHANNEL_NAME = 'Alpha Channel'
@@ -11,13 +16,6 @@ const EXTRA_SUBSCRIPTIONS = Array.from({ length: 30 }, (_, index) => ({
   name: `Extra Channel ${index + 1}`,
   thumbnail: ''
 }))
-
-async function updateInputWithoutScrolling(input, value) {
-  await input.evaluate((element, nextValue) => {
-    element.value = nextValue
-    element.dispatchEvent(new Event('input', { bubbles: true }))
-  }, value)
-}
 
 test.use({
   seed: {
@@ -171,7 +169,7 @@ test.describe('channel settings', () => {
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       window.updateChannelVolumes = store._actions.updateChannelVolumes[0]
-      store._actions.updateChannelVolumes = [() => Promise.resolve()]
+      store._actions.updateChannelVolumes = [() => Promise.reject(new Error('write failed'))]
     })
 
     const picker = page.getByRole('dialog', { name: 'Add subscribed channel' })

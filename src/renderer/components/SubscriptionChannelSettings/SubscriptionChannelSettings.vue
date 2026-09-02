@@ -80,11 +80,11 @@
                 type="button"
                 class="feedTypeOption"
                 :class="{
-                  enabled: selectedFeedTypeState(feedType.id) === true,
-                  mixed: selectedFeedTypeState(feedType.id) === 'mixed'
+                  enabled: selectedFeedTypeStates[feedType.id] === true,
+                  mixed: selectedFeedTypeStates[feedType.id] === 'mixed'
                 }"
                 role="checkbox"
-                :aria-checked="selectedFeedTypeState(feedType.id)"
+                :aria-checked="selectedFeedTypeStates[feedType.id]"
                 @click="updateSelectedFeedType(feedType.id)"
               >
                 <FtIcon
@@ -93,13 +93,13 @@
                 />
                 <span>{{ feedType.label }}</span>
                 <FtIcon
-                  v-if="selectedFeedTypeState(feedType.id) === true"
+                  v-if="selectedFeedTypeStates[feedType.id] === true"
                   class="feedTypeCheck"
                   :icon="['fas', 'check']"
                   aria-hidden="true"
                 />
                 <span
-                  v-else-if="selectedFeedTypeState(feedType.id) === 'mixed'"
+                  v-else-if="selectedFeedTypeStates[feedType.id] === 'mixed'"
                   class="feedTypeMixedIndicator"
                   aria-hidden="true"
                 />
@@ -313,6 +313,8 @@ const restrictedPlaybackConfigured = computed(() => (
 let contentResizeObserver = null
 let observationGeneration = 0
 let updateSequence = 0
+let pendingChannelSettingsUpdates = 0
+let hasFailedChannelSettingsUpdate = false
 let channelSettingsUpdateQueue = Promise.resolve()
 const latestUpdateByChannel = new Map()
 
@@ -478,6 +480,10 @@ function selectedFeedTypeState(feedType) {
   ))
 }
 
+const selectedFeedTypeStates = computed(() => Object.fromEntries(
+  feedTypes.value.map(({ id }) => [id, selectedFeedTypeState(id)])
+))
+
 /**
  * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
  */
@@ -561,6 +567,7 @@ function channelSettings(channel) {
 function persistChannelSettings(channel, patch) {
   const settings = { ...channelSettings(channel), ...patch }
   const sequence = ++updateSequence
+  pendingChannelSettingsUpdates += 1
   latestUpdateByChannel.set(channel.id, sequence)
   optimisticChannelSettings.value = new Map(optimisticChannelSettings.value)
     .set(channel.id, settings)
@@ -581,7 +588,10 @@ function persistChannelSettings(channel, patch) {
         optimisticChannelSettings.value = nextSettings
         latestUpdateByChannel.delete(channel.id)
       }
-      if (!saved) {
+      if (!saved) hasFailedChannelSettingsUpdate = true
+      pendingChannelSettingsUpdates -= 1
+      if (pendingChannelSettingsUpdates === 0 && hasFailedChannelSettingsUpdate) {
+        hasFailedChannelSettingsUpdate = false
         showToast({
           message: t('Channel.Failed to save subscription settings'),
           icon: ['fas', 'circle-exclamation']

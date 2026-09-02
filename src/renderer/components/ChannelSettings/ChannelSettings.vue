@@ -653,12 +653,17 @@ async function addSubscribedChannel(channelId) {
     })
 
     const saved = await Promise.all(preferencesToAdd.map(({ type }) => (
-      addPreference(channelId, type)
+      addPreference(channelId, type).catch((error) => {
+        console.error(error)
+        return false
+      })
     )))
 
     if (saved.some(value => !value)) {
       await Promise.all(previousValues.map(({ valuesKey, value }, index) => (
-        saved[index] ? updateSetting(valuesKey, value) : Promise.resolve(true)
+        saved[index]
+          ? updateSetting(valuesKey, value).catch(error => console.error(error))
+          : Promise.resolve(true)
       )))
       showToast({
         message: t('Channel.Failed to save subscription settings'),

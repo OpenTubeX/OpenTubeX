@@ -1,7 +1,14 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import {
+  test,
+  expect,
+  expectScrollAtRenderedEnd,
+  goTo,
+  goToSettingsSection,
+  setWindowSize
+} from '../../helpers/app.mjs'
 
 const CHANNEL_ID = `UC${'0'.repeat(22)}`
 const subscriptions = Array.from({ length: 18 }, (_, index) => ({
@@ -11,16 +18,6 @@ const subscriptions = Array.from({ length: 18 }, (_, index) => ({
   ...(index === 0 ? { feedTypes: ['videos'] } : {}),
   ...(index === 1 ? { dailyVideoLimit: 1, showMembersOnly: true } : {})
 }))
-
-async function expectScrollAtRenderedEnd(scroller) {
-  await expect.poll(() => scroller.evaluate((element) => {
-    const content = element.querySelector(':scope > div')
-    const contentEnd = content.offsetTop + content.offsetHeight +
-      Number.parseFloat(getComputedStyle(element).paddingBottom)
-    const maximumScrollTop = Math.max(0, contentEnd - element.clientHeight)
-    return Math.abs(element.scrollTop - maximumScrollTop)
-  })).toBeLessThanOrEqual(1)
-}
 
 test.use({
   seed: {
@@ -366,6 +363,33 @@ test('reports subscription setting write failures from the settings manager', as
     hasText: 'Failed to save channel settings'
   })).toBeVisible()
   await expect(shorts).toHaveAttribute('aria-checked', 'false')
+})
+
+test('reports one failure toast for a failed batch update', async ({ page }) => {
+  const subscriptionSettings = await goToSettingsSection(page, 'subscription')
+  await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    let updateCount = 0
+    store._actions.updateChannelSettings = [() => {
+      updateCount += 1
+      return Promise.resolve(false)
+    }]
+    window.channelSettingsUpdateCount = () => updateCount
+  })
+
+  const selectionToolbar = page.locator('.channelSelectionToolbar')
+  await selectionToolbar.getByRole('button', { name: 'Select All' }).click()
+  await page.locator('.bulkFeedTypeSettings')
+    .getByRole('checkbox', { name: 'Videos' })
+    .click()
+
+  await expect.poll(() => page.evaluate(() => window.channelSettingsUpdateCount()))
+    .toBe(subscriptions.length)
+  await expect(page.locator('.toast', {
+    hasText: 'Failed to save channel settings'
+  })).toHaveCount(1)
 })
 
 test('reports a partial write when a requested profile no longer exists', async ({ page }) => {

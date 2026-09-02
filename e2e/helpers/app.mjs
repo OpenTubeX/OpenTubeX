@@ -40,6 +40,23 @@ export function latestSettings(contents) {
     .map(record => [record._id, record.value]))
 }
 
+export async function updateInputWithoutScrolling(input, value) {
+  await input.evaluate((element, nextValue) => {
+    element.value = nextValue
+    element.dispatchEvent(new Event('input', { bubbles: true }))
+  }, value)
+}
+
+export async function expectScrollAtRenderedEnd(scroller) {
+  await expect.poll(() => scroller.evaluate((element) => {
+    const content = element.querySelector(':scope > div')
+    const contentEnd = content.offsetTop + content.offsetHeight +
+      Number.parseFloat(getComputedStyle(element).paddingBottom)
+    const maximumScrollTop = Math.max(0, contentEnd - element.clientHeight)
+    return Math.abs(element.scrollTop - maximumScrollTop)
+  })).toBeLessThanOrEqual(1)
+}
+
 /**
  * Creates an isolated userData directory, optionally seeded with
  * settings and datastore documents.
