@@ -4670,12 +4670,11 @@ export default defineComponent({
     },
 
     /**
-     * Reload once for a playback error that may be fixed by fetching fresh
-     * streaming data.
+     * Starts the one stream-error recovery allowed for the current video.
      * @param {string} specificError
-     * @returns {Promise<boolean>} whether a reload was started
+     * @returns {boolean} whether recovery started
      */
-    reloadAfterStreamErrorOnce: async function (specificError) {
+    beginStreamErrorRecoveryOnce: function (specificError) {
       if (this.streamErrorReloadAttemptedForCurrentVideo) {
         return false
       }
@@ -4686,8 +4685,73 @@ export default defineComponent({
         message: `${this.t('Video.Reloading video after streaming URL error')}: ${specificError}`,
         icon: ['fas', 'sync'],
       })
+      return true
+    },
+
+    /**
+     * Reload once for a playback error that may be fixed by fetching fresh
+     * streaming data.
+     * @param {string} specificError
+     * @returns {Promise<boolean>} whether a reload was started
+     */
+    reloadAfterStreamErrorOnce: async function (specificError) {
+      if (!this.beginStreamErrorRecoveryOnce(specificError)) {
+        return false
+      }
+
       await this.reloadView()
       return true
+    },
+
+    /**
+     * Refreshes yt-dlp's streams and recreates only the player. The watch-page
+     * metadata and the built-in fallback source stay loaded.
+     * @param {string} specificError
+     * @returns {Promise<boolean>} whether recovery handled the error
+     */
+    reloadYtDlpPlayerAfterStreamErrorOnce: async function (specificError) {
+      if (!this.beginStreamErrorRecoveryOnce(specificError)) {
+        return false
+      }
+
+      const loadGeneration = this.videoLoadGeneration
+      const videoId = this.videoId
+      const playbackEngineSwitchGeneration = this.playbackEngineSwitchGeneration
+      this.setPlayerReloadState(this.$refs.player?.getSabrReloadState())
+
+      const timestamp = this.getTimestamp()
+      if (timestamp > 0) {
+        this.oneTimeTimestamp = timestamp
+      }
+
+      if (this.$refs.player) {
+        await this.destroyPlayer()
+      }
+
+      if (
+        !this.isCurrentVideoLoad(loadGeneration, videoId) ||
+        playbackEngineSwitchGeneration !== this.playbackEngineSwitchGeneration
+      ) {
+        return true
+      }
+
+      this.ytDlpStreamsPending = true
+      await this.$nextTick()
+
+      try {
+        return await this.extractYtDlpPlaybackSource(
+          loadGeneration,
+          videoId,
+          playbackEngineSwitchGeneration
+        )
+      } finally {
+        if (
+          this.isCurrentVideoLoad(loadGeneration, videoId) &&
+          playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration
+        ) {
+          this.ytDlpStreamsPending = false
+        }
+      }
     },
 
     /**
@@ -4724,7 +4788,7 @@ export default defineComponent({
           invalidateYtDlpPlaybackSource(this.videoId)
         }
         const status = error.code === Code.BAD_HTTP_STATUS ? error.data[1] : error.code
-        if (await this.reloadAfterStreamErrorOnce(`[PLAYER_ERROR: ${status}]`)) {
+        if (await this.reloadYtDlpPlayerAfterStreamErrorOnce(`[PLAYER_ERROR: ${status}]`)) {
           return
         }
       }
@@ -4899,7 +4963,11 @@ export default defineComponent({
         const source = this.builtInPlaybackSource
         if (
           source === null ||
-          (source.manifestSrc === null && source.legacyFormats.length === 0)
+          (source.manifestSrc === null && source.legacyFormats.length === 0) ||
+          (
+            source.streamingDataExpiryDate !== null &&
+            new Date() > source.streamingDataExpiryDate
+          )
         ) {
           return false
         }
@@ -4925,25 +4993,6 @@ export default defineComponent({
           playbackEngineSwitchGeneration !== this.playbackEngineSwitchGeneration
         ) {
           return true
-        }
-
-        if (
-          source.streamingDataExpiryDate !== null &&
-          new Date() > source.streamingDataExpiryDate
-        ) {
-          try {
-            await this.reloadView({ preserveTitle: true })
-            return true
-          } catch (reloadError) {
-            console.error('Refreshing the built-in playback source failed', reloadError)
-            if (
-              this.tabRoute.params.id === videoId &&
-              playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration
-            ) {
-              this.ytDlpStreamsPending = false
-            }
-            return false
-          }
         }
 
         this.manifestSrc = source.manifestSrc
@@ -5191,12 +5240,14 @@ export default defineComponent({
 
       if (this.playbackEngineFallbackTarget === 'built-in' && !cachedOnly) { return false }
 
-      this.builtInPlaybackSource = {
-        manifestSrc: this.manifestSrc,
-        manifestMimeType: this.manifestMimeType,
-        sabrData: this.sabrData,
-        legacyFormats: this.legacyFormats,
-        streamingDataExpiryDate: this.streamingDataExpiryDate
+      if (this.activePlaybackEngine !== 'yt-dlp') {
+        this.builtInPlaybackSource = {
+          manifestSrc: this.manifestSrc,
+          manifestMimeType: this.manifestMimeType,
+          sabrData: this.sabrData,
+          legacyFormats: this.legacyFormats,
+          streamingDataExpiryDate: this.streamingDataExpiryDate
+        }
       }
 
       this.manifestSrc = source.manifestSrc
@@ -5864,7 +5915,7 @@ export default defineComponent({
       }
     },
 
-    async performSabrReload(payload, toastMessage) {
+    setPlayerReloadState(payload) {
       const wasPlaying = payload?.wasPlaying === true
       this.resumePlaybackAfterSabrReload = wasPlaying
       this.suppressAutoplayAfterSabrReload = !wasPlaying
@@ -5875,6 +5926,10 @@ export default defineComponent({
         : this.currentPlaybackRate
       this.sabrReloadVideoQuality = this.normalizeVideoQuality(payload?.videoQuality) ||
         this.normalizeVideoQuality(this.currentVideoQuality) || null
+    },
+
+    async performSabrReload(payload, toastMessage) {
+      this.setPlayerReloadState(payload)
       this.preserveTitleOnNextReload = true
       this.showTabToast({ message: toastMessage, icon: ['fas', 'sync'] })
 
