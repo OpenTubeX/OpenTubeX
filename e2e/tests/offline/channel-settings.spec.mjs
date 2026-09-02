@@ -198,6 +198,49 @@ test.describe('channel settings', () => {
     await expect(picker).toHaveCount(0)
   })
 
+  test('preserves newer saved-channel edits when initialization rolls back', async ({ page }) => {
+    await goToSettingsSection(page, 'playback')
+    await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
+    await page.getByRole('button', { name: 'Add subscribed channel' }).click()
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store._actions.updateChannelVolumes = [() => new Promise((_resolve, reject) => {
+        window.rejectChannelVolumeUpdate = reject
+      })]
+    })
+
+    const picker = page.getByRole('dialog', { name: 'Add subscribed channel' })
+    await picker.getByRole('button', { name: NEW_CHANNEL_NAME, exact: true }).click()
+    await expect.poll(() => page.evaluate(() => (
+      typeof window.rejectChannelVolumeUpdate === 'function'
+    ))).toBe(true)
+    await picker.getByRole('button', { name: 'Close' }).click()
+
+    await page.evaluate(async ({ channelId }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const playbackSpeeds = JSON.parse(store.state.settings.channelPlaybackSpeeds)
+      playbackSpeeds[channelId] = 1.75
+      await store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(playbackSpeeds))
+      window.rejectChannelVolumeUpdate(new Error('write failed'))
+    }, { channelId: CHANNEL_ID })
+
+    await expect(page.locator('.toast', {
+      hasText: 'Failed to save channel settings'
+    })).toBeVisible()
+    await expect.poll(() => page.evaluate(({ channelId, newChannelId }) => {
+      const settings = document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings
+      const playbackSpeeds = JSON.parse(settings.channelPlaybackSpeeds)
+      return {
+        existingChannel: playbackSpeeds[channelId],
+        newChannel: playbackSpeeds[newChannelId]
+      }
+    }, { channelId: CHANNEL_ID, newChannelId: NEW_CHANNEL_ID })).toEqual({
+      existingChannel: 1.75,
+      newChannel: undefined
+    })
+  })
+
   test('points to Playback settings when channel settings are disabled', async ({ page }) => {
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store

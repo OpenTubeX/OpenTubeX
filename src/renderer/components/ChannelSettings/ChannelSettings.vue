@@ -647,11 +647,6 @@ async function addSubscribedChannel(channelId) {
   addingSubscribedChannel.value = true
   try {
     const preferencesToAdd = enabledPreferences.value
-    const previousValues = preferencesToAdd.map(({ type }) => {
-      const { valuesKey } = preferenceValuesFor(type)
-      return { valuesKey, value: settings.value[valuesKey] }
-    })
-
     const saved = await Promise.all(preferencesToAdd.map(({ type }) => (
       addPreference(channelId, type).catch((error) => {
         console.error(error)
@@ -660,10 +655,8 @@ async function addSubscribedChannel(channelId) {
     )))
 
     if (saved.some(value => !value)) {
-      await Promise.all(previousValues.map(({ valuesKey, value }, index) => (
-        saved[index]
-          ? updateSetting(valuesKey, value).catch(error => console.error(error))
-          : Promise.resolve(true)
+      await Promise.all(preferencesToAdd.map(({ type }) => (
+        deletePreference(channelId, type).catch(error => console.error(error))
       )))
       showToast({
         message: t('Channel.Failed to save subscription settings'),
@@ -690,8 +683,12 @@ function closeAddChannelPrompt() {
  */
 function deletePreference(channelId, type) {
   const { valuesKey, values } = preferenceValuesFor(type)
+  if (!Object.hasOwn(values, channelId)) {
+    return Promise.resolve(true)
+  }
+
   delete values[channelId]
-  updateSetting(valuesKey, JSON.stringify(values))
+  return updateSetting(valuesKey, JSON.stringify(values))
 }
 
 /**
