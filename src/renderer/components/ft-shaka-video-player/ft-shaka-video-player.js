@@ -69,6 +69,7 @@ import {
 } from '../../helpers/fullscreenDocks'
 import { addOverlayScrollbars, removeOverlayScrollbars } from '../../helpers/overlayScrollbars'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import { initializePlatformInfo, isLinuxWayland } from '../../helpers/platform'
 import {
   enterAndroidPictureInPicture,
   setAndroidFullscreenOrientation,
@@ -80,6 +81,7 @@ import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
 import { resolveSegmentPrefetchLimit } from '../../helpers/player/segmentPrefetch'
 import { AUTO_QUALITY_FALLBACK, streamsSupportAutoQuality } from '../../helpers/player/autoQuality'
+import { shouldEnableDocumentPictureInPicture } from '../../helpers/player/documentPictureInPicture'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { shouldUseGoogleVideoPostRequest } from '../../helpers/player/playbackRequestPolicy'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
@@ -4516,7 +4518,10 @@ export default defineComponent({
           enableKeyboardPlaybackControls: false,
 
           documentPictureInPicture: {
-            enabled: true
+            enabled: shouldEnableDocumentPictureInPicture(
+              process.env.IS_ELECTRON,
+              isLinuxWayland.value
+            )
           }
         }
 
@@ -10119,6 +10124,7 @@ export default defineComponent({
       voiceOverTranslation.attach(videoElement)
 
       await initializeActiveTab()
+      await initializePlatformInfo()
 
       const localPlayer = new shaka.Player()
 
