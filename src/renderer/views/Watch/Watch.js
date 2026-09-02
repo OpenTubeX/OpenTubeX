@@ -661,6 +661,9 @@ export default defineComponent({
         this.isShort &&
         this.activeFormat !== 'audio'
     },
+    isStandaloneShort: function () {
+      return this.isShort && !this.watchingPlaylist
+    },
     shortsPlayerWidth: function () {
       const playerHeight = Math.max(0, this.shortsViewportHeight - 156)
       return Math.min(600, playerHeight * (this.videoAspectRatio ?? 9 / 16))
@@ -888,7 +891,7 @@ export default defineComponent({
         !this.manifestSrc.includes('/demuxed/1'))
     },
     autoplayEnabled: function () {
-      if (this.isShort) { return false }
+      if (this.isStandaloneShort) { return false }
       if (this.nextQueuedVideo) { return true }
       return this.watchingPlaylist ? this.autoplayNextPlaylistVideo : this.autoplayNextRecommendedVideo
     },
@@ -997,7 +1000,7 @@ export default defineComponent({
       return this.watchingPlaylist && this.playlistSkipAvailability.canPlayPrevious
     },
     autoplayPossible: function () {
-      return !this.isShort && (
+      return !this.isStandaloneShort && (
         !!this.nextQueuedVideo ||
         (!this.watchingPlaylist && !this.hideRecommendedVideos && !!this.nextRecommendedVideo) ||
         (this.watchingPlaylist && !this.$refs.watchVideoPlaylist?.shouldStopDueToPlaylistEnd)
@@ -4494,16 +4497,15 @@ export default defineComponent({
       if (process.env.IS_ELECTRON && !this.isTabPresented) {
         return
       }
-      // YouTube-style Shorts stop for the replay control instead of advancing.
-      // With looping disabled they emit `ended`, so this must run before queue
-      // autoplay.
-      if (this.customShortsPlayerActive) {
+      // Standalone YouTube-style Shorts stop for the replay control instead of
+      // advancing. Playlist Shorts still follow the playlist autoplay setting.
+      if (this.customShortsPlayerActive && this.isStandaloneShort) {
         return
       }
       if (this.playNextQueuedVideo()) {
         return
       }
-      if (this.isShort) {
+      if (this.isStandaloneShort) {
         return
       }
       if (!this.autoplayEnabled) {
