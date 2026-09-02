@@ -133,20 +133,27 @@ class CapacitorTabService {
   }
 
   async closeTab(tabId) {
-    const previous = this.currentSession()
+    let previous = this.currentSession()
     if (!previous.tabs.some(tab => tab.id === tabId)) return false
 
     const wasActive = previous.activeTabId === tabId
     if (wasActive) this.navigation.saveScroll(tabId)
 
+    if (wasActive && previous.tabs.length > 1) {
+      const nextTabId = findReplacementTabId(previous.tabs, tabId)
+      if (!nextTabId || !await this.activateTab(nextTabId)) return false
+      previous = this.currentSession()
+    }
+
     const landingRoute = this.router.resolve(`/${this.store.getters.getLandingPage}`)
     let session = closeCapacitorTab(previous, tabId, landingRoute)
-    if (wasActive) {
+    const needsPresentation = session.activeTabId === tabId
+    if (needsPresentation) {
       session = loadCapacitorTab(session, session.activeTabId)
     }
     this.commitSession(session)
 
-    if (wasActive) {
+    if (needsPresentation) {
       await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)
     }
     return true

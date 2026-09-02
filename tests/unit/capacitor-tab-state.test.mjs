@@ -44,6 +44,26 @@ test('restores valid tabs and ignores malformed persisted entries', () => {
   assert.deepEqual(session.tabs.map(tab => tab.id), ['tab-1', 'tab-2'])
   assert.equal(session.activeTabId, 'tab-2')
   assert.equal(session.selectionRevision, 4)
+  assert.equal(session.tabs[0].loadState, 'mounting')
+  assert.equal(session.tabs[0].mountRevision, 1)
+  assert.equal(session.tabs[0].isLoading, true)
+})
+
+test('restored Capacitor tabs can report a fresh mount failure', () => {
+  const persistedTab = createCapacitorTab(WATCH_ROUTE, 'Video', 'tab-1')
+  delete persistedTab.loadState
+  delete persistedTab.mountRevision
+  delete persistedTab.isLoading
+
+  let session = restoreCapacitorTabSession({
+    activeTabId: 'tab-1',
+    tabs: [persistedTab]
+  }, HOME_ROUTE)
+
+  assert.equal(session.tabs[0].loadState, 'mounting')
+  assert.equal(session.tabs[0].mountRevision, 1)
+  session = completeCapacitorTabMount(session, 'tab-1', 1, false)
+  assert.equal(session.tabs[0].loadState, 'unloaded')
 })
 
 test('retains complete Capacitor sessions with more than twenty tabs', () => {

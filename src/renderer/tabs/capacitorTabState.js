@@ -33,7 +33,7 @@ export function restoreCapacitorTabSession(value, currentRoute, createId = () =>
           seenIds.add(tab.id)
           return true
         })
-        .map(normalizePersistedTab)
+        .map(normalizeRestoredTab)
     : []
 
   const closedTabIds = new Set()
@@ -329,6 +329,19 @@ function normalizePersistedTab(tab) {
       : 0,
     isLoading: tab.isLoading === true,
     isPlaying: tab.isPlaying === true
+  }
+}
+
+function normalizeRestoredTab(tab) {
+  const normalized = normalizePersistedTab(tab)
+  if (normalized.loadState === 'unloaded') return normalized
+
+  return {
+    ...normalized,
+    loadState: 'mounting',
+    mountRevision: 1,
+    isLoading: true,
+    isPlaying: false
   }
 }
 
