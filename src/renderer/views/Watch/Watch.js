@@ -188,6 +188,7 @@ export default defineComponent({
       startNextVideoInFullscreen: false,
       startNextVideoInFullwindow: false,
       startNextVideoInPip: false,
+      nextVideoAutoPictureInPictureState: null,
       startNextVideoWithChapters: false,
       startNextVideoWithFullscreenMetadata: false,
       startNextVideoWithFullscreenComments: false,
@@ -5768,6 +5769,7 @@ export default defineComponent({
         this.startNextVideoInFullscreen = uiState.startNextVideoInFullscreen
         this.startNextVideoInFullwindow = uiState.startNextVideoInFullwindow
         this.startNextVideoInPip = uiState.startNextVideoInPip
+        this.nextVideoAutoPictureInPictureState = uiState.autoPictureInPictureState
         this.startNextVideoWithChapters = uiState.startNextVideoWithChapters
         this.startNextVideoWithFullscreenMetadata = uiState.startNextVideoWithFullscreenMetadata
         this.startNextVideoWithFullscreenComments = uiState.startNextVideoWithFullscreenComments

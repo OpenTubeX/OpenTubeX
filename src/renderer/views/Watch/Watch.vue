@@ -125,6 +125,7 @@
           :start-in-fullscreen="startNextVideoInFullscreen"
           :start-in-fullwindow="startNextVideoInFullwindow"
           :start-in-pip="startNextVideoInPip"
+          :auto-picture-in-picture-state="nextVideoAutoPictureInPictureState"
           :start-with-chapters="startNextVideoWithChapters"
           :start-with-fullscreen-metadata="startNextVideoWithFullscreenMetadata"
           :start-with-fullscreen-comments="startNextVideoWithFullscreenComments"

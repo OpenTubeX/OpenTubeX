@@ -394,6 +394,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    autoPictureInPictureState: {
+      type: Object,
+      default: null
+    },
     startWithChapters: {
       type: Boolean,
       default: false
@@ -1217,9 +1221,11 @@ export default defineComponent({
     // #region settings
 
     const {
+      getAutoPictureInPictureState,
       initializeActiveTab,
       isActiveTab,
       notifyPictureInPictureState,
+      restorePictureInPicture,
       setupAutoPictureInPicture,
       teardownAutoPictureInPicture,
       updateAutoPip,
@@ -1229,6 +1235,7 @@ export default defineComponent({
       video,
       tabId,
       isTabPresented,
+      initialState: props.autoPictureInPictureState,
     })
 
     // Capture the replacement player's initial state. The parent clears its
@@ -5660,11 +5667,12 @@ export default defineComponent({
       if (
         startInPip &&
         props.format !== 'audio' &&
+        video.value?.readyState >= HTMLMediaElement.HAVE_METADATA &&
         ui.getControls().isPiPAllowed() &&
         process.env.IS_ELECTRON
       ) {
         startInPip = false
-        window.ftElectron.requestPiP(tabId)
+        restorePictureInPicture(props.autoPictureInPictureState?.autoPipActive === true)
       }
     }
 
@@ -10437,6 +10445,7 @@ export default defineComponent({
      *   startNextVideoInFullscreen: boolean,
      *   startNextVideoInFullwindow: boolean,
      *   startNextVideoInPip: boolean,
+     *   autoPictureInPictureState: object | null,
      *   startNextVideoWithChapters: boolean,
      *   startNextVideoWithFullscreenMetadata: boolean,
      *   startNextVideoWithFullscreenComments: boolean,
@@ -10456,6 +10465,7 @@ export default defineComponent({
         startNextVideoInFullscreen: false,
         startNextVideoInFullwindow: false,
         startNextVideoInPip: false,
+        autoPictureInPictureState: null,
         startNextVideoWithChapters: false,
         startNextVideoWithFullscreenMetadata: false,
         startNextVideoWithFullscreenComments: false,
@@ -10471,6 +10481,9 @@ export default defineComponent({
             startNextVideoInFullscreen: controls.isFullScreenEnabled(),
             startNextVideoInFullwindow: fullWindowEnabled.value,
             startNextVideoInPip: controls.isPiPEnabled(),
+            autoPictureInPictureState: controls.isPiPEnabled()
+              ? getAutoPictureInPictureState()
+              : null,
             startNextVideoWithChapters: showChaptersOverlay.value,
             startNextVideoWithFullscreenMetadata: showFullscreenMetadata.value,
             startNextVideoWithFullscreenComments: showFullscreenComments.value,

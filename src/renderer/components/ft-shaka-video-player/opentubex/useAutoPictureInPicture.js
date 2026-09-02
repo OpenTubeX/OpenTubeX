@@ -21,10 +21,25 @@ import {
  *   props: { format: string },
  *   video: import('vue').Ref<HTMLVideoElement | null>,
  *   tabId?: string | null,
- *   isTabPresented?: import('vue').ComputedRef<boolean> | null
+ *   isTabPresented?: import('vue').ComputedRef<boolean> | null,
+ *   initialState?: {
+ *     minimized?: boolean,
+ *     focused?: boolean,
+ *     autoPipActive?: boolean,
+ *     pendingPipTarget?: boolean | null,
+ *     blurTriggerArmed?: boolean,
+ *     pictureInPictureDismissed?: boolean
+ *   } | null
  * }} options
  */
-export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isTabPresented = null }) {
+export function useAutoPictureInPicture({
+  getUi,
+  props,
+  video,
+  tabId = null,
+  isTabPresented = null,
+  initialState = null
+}) {
   const isActiveTab = computed(() => {
     return !process.env.IS_ELECTRON || isTabPresented?.value === true
   })
@@ -38,7 +53,7 @@ export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isT
   // In Electron the minimized state is driven by native window events (see setup below),
   // because `document.hidden` doesn't fire on minimize on Wayland. On the web we fall back
   // to `document.hidden`, which also covers browser-tab switches.
-  const state = createAutoPictureInPictureState({
+  const state = createAutoPictureInPictureState(initialState ?? {
     minimized: process.env.IS_ELECTRON ? false : document.hidden,
     focused: document.hasFocus()
   })
@@ -177,6 +192,30 @@ export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isT
     }
   }
 
+  /**
+   * Restores PiP without letting an active automatic trigger request a second
+   * toggle before Chromium reports the first one.
+   *
+   * @param {boolean} automatic
+   */
+  function restorePictureInPicture(automatic) {
+    markPictureInPictureRequested(state, true, { automatic })
+    if (!triggerPipToggle()) {
+      markPictureInPictureRequestFailed(state)
+    }
+  }
+
+  function getAutoPictureInPictureState() {
+    return {
+      minimized: state.windowMinimized,
+      focused: state.windowFocused,
+      autoPipActive: state.autoPipActive,
+      pendingPipTarget: state.pendingPipTarget,
+      blurTriggerArmed: state.blurTriggerArmed,
+      pictureInPictureDismissed: state.pictureInPictureDismissed
+    }
+  }
+
   function teardownAutoPictureInPicture() {
     if (process.env.IS_ELECTRON) {
       removeMinimizedListener?.()
@@ -196,9 +235,11 @@ export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isT
   watch(autoPictureInPictureTriggers, updateAutoPip)
 
   return {
+    getAutoPictureInPictureState,
     initializeActiveTab,
     isActiveTab,
     notifyPictureInPictureState,
+    restorePictureInPicture,
     setupAutoPictureInPicture,
     teardownAutoPictureInPicture,
     updateAutoPip,

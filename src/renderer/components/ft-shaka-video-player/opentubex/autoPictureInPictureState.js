@@ -22,24 +22,38 @@ export const BLUR_TRIGGER_RECHECK_DELAY_MS = 750
  */
 
 /**
- * @param {{ minimized?: boolean, focused?: boolean }} [initial]
+ * @param {{
+ *   minimized?: boolean,
+ *   focused?: boolean,
+ *   autoPipActive?: boolean,
+ *   pendingPipTarget?: boolean | null,
+ *   blurTriggerArmed?: boolean,
+ *   pictureInPictureDismissed?: boolean
+ * }} [initial]
  * @returns {AutoPictureInPictureState}
  */
-export function createAutoPictureInPictureState({ minimized = false, focused = true } = {}) {
+export function createAutoPictureInPictureState({
+  minimized = false,
+  focused = true,
+  autoPipActive = false,
+  pendingPipTarget = null,
+  blurTriggerArmed = true,
+  pictureInPictureDismissed = false
+} = {}) {
   return {
     windowMinimized: minimized,
     windowFocused: focused,
     // Whether the current PiP window was opened automatically. Only then may it
     // be closed again automatically, so a manually opened one is left alone.
-    autoPipActive: false,
+    autoPipActive,
     // Desired PiP state of a toggle that was requested but not observed yet.
-    pendingPipTarget: null,
+    pendingPipTarget,
     // A blur only counts as a trigger once the document has been focused since
     // the last restore, see `applyMinimizedState`.
-    blurTriggerArmed: true,
+    blurTriggerArmed,
     // Whether the user closed an automatically opened PiP window while its
     // trigger still applies, see `applyPictureInPictureState`.
-    pictureInPictureDismissed: false
+    pictureInPictureDismissed
   }
 }
 
@@ -107,10 +121,11 @@ export function resolveAutoPictureInPictureAction(state, { wantPip, inPip }) {
 /**
  * @param {AutoPictureInPictureState} state
  * @param {boolean} target
+ * @param {{ automatic?: boolean }} [options]
  */
-export function markPictureInPictureRequested(state, target) {
+export function markPictureInPictureRequested(state, target, { automatic = target } = {}) {
   state.pendingPipTarget = target
-  state.autoPipActive = target
+  state.autoPipActive = target && automatic
 }
 
 /**
