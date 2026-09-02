@@ -56,10 +56,59 @@ test('removes one synced tab set and drops an empty device', () => {
 
   const withOneRemoved = removeSyncSession(value, 'desktop', 'remove')
   assert.deepEqual(withOneRemoved.devices.desktop.sessions, [session('keep', 1)])
+  assert.deepEqual(withOneRemoved.deletedSessions.desktop, ['remove'])
   assert.deepEqual(value.devices.desktop.sessions, [session('keep', 1), session('remove', 2)])
 
   const withoutPhone = removeSyncSession(withOneRemoved, 'phone', 'phone')
   assert.equal(withoutPhone.devices.phone, undefined)
+  assert.deepEqual(withoutPhone.deletedSessions.phone, ['phone'])
+})
+
+test('keeps a deleted tab set from returning while its owning device still has it open', () => {
+  const retained = session('retained-on-phone', 1)
+  const previous = {
+    version: 1,
+    mode: 'separate',
+    devices: {
+      phone: { platform: 'mobile', sessions: [retained] },
+    },
+    shared: [],
+  }
+  const deleted = removeSyncSession(previous, 'phone', retained.sessionId)
+
+  const firstSync = mergeSyncSessions({
+    localSessions: [retained],
+    remoteValue: deleted,
+    previousValue: previous,
+    deviceId: 'phone',
+    platform: 'mobile',
+    preferredMode: 'separate',
+  })
+  assert.deepEqual(firstSync.sessionsToApply, [])
+  assert.deepEqual(firstSync.document.devices.phone.sessions, [])
+  assert.deepEqual(firstSync.document.deletedSessions.phone, [retained.sessionId])
+
+  const secondSync = mergeSyncSessions({
+    localSessions: [session(retained.sessionId, 2)],
+    remoteValue: firstSync.document,
+    previousValue: firstSync.document,
+    deviceId: 'phone',
+    platform: 'mobile',
+    preferredMode: 'separate',
+  })
+  assert.deepEqual(secondSync.sessionsToApply, [])
+  assert.deepEqual(secondSync.document.devices.phone.sessions, [])
+  assert.deepEqual(secondSync.document.deletedSessions.phone, [retained.sessionId])
+
+  const afterLocalClose = mergeSyncSessions({
+    localSessions: [],
+    remoteValue: secondSync.document,
+    previousValue: secondSync.document,
+    deviceId: 'phone',
+    platform: 'mobile',
+    preferredMode: 'separate',
+  })
+  assert.equal(afterLocalClose.document.deletedSessions.phone, undefined)
 })
 
 test('claims an upgraded desktop legacy session instead of showing it as another device', () => {
