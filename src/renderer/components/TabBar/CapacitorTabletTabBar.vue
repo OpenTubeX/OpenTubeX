@@ -20,7 +20,7 @@
           v-for="tab in tabs"
           :key="tab.id"
           class="capacitorTabletTab"
-          :class="{ active: tab.id === activeTabId }"
+          :class="{ active: tab.id === activeTabId, unloaded: tab.isUnloaded }"
           @contextmenu.prevent.stop="openTabActions(tab.id)"
         >
           <button
@@ -29,6 +29,7 @@
             role="tab"
             :data-tab-id="tab.id"
             :aria-selected="tab.id === activeTabId"
+            :aria-label="tabAriaLabel(tab)"
             :tabindex="tab.id === activeTabId ? 0 : -1"
             :title="tabTitle(tab)"
             @click="activateTab(tab.id)"
@@ -87,10 +88,15 @@
       <CapacitorTabActionsMenu
         :tab="actionTab"
         :title="actionTab ? tabTitle(actionTab) : ''"
+        :youtube-url="actionTabYoutubeUrl"
+        :can-toggle-loaded="canToggleActionTabLoaded"
         mode="tablet"
         @close="closeActionTab"
+        @copy-youtube-link="copyActionTabYoutubeLink"
         @dismiss="closeTabActions"
         @duplicate="duplicateActionTab"
+        @reload="reloadActionTab"
+        @toggle-loaded="toggleActionTabLoaded"
         @toggle-pinned="toggleActionTabPinned"
       />
     </Teleport>
@@ -123,15 +129,21 @@ const fixedTabWidthStyle = computed(() => store.getters.getUseFixedTabWidth
   : undefined)
 const {
   actionTab,
+  actionTabYoutubeUrl,
   activateTab,
+  canToggleActionTabLoaded,
   closeActionTab,
   closeTab,
   closeTabActions,
   createTab,
+  copyActionTabYoutubeLink,
   duplicateActionTab,
   handleTabTargetKeydown,
   openTabActions,
+  reloadActionTab,
+  tabAriaLabel,
   tabTitle,
+  toggleActionTabLoaded,
   toggleActionTabPinned,
 } = useCapacitorTabActions({
   tabs,

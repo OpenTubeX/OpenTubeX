@@ -374,6 +374,7 @@ import {
 import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
 
 const isElectron = process.env.IS_ELECTRON
+const usesLogicalTabs = process.env.IS_ELECTRON || process.env.IS_CAPACITOR
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hasHorizontalTabBar = computed(() => isElectron && store.getters.getTabBarPosition === 'top')
@@ -533,7 +534,7 @@ async function resetScrollAfterRefresh(refreshedTab) {
     return
   }
 
-  if (isElectron && tabId) {
+  if (usesLogicalTabs && tabId) {
     getTabNavigationService().resetScroll(tabId)
   } else {
     window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
@@ -549,7 +550,7 @@ async function resetScrollAfterRefresh(refreshedTab) {
   if (
     isMounted &&
     (currentTab.value === refreshedTab || currentTab.value === 'new') &&
-    (!isElectron || isTabPresented?.value === true)
+    (!usesLogicalTabs || isTabPresented?.value === true)
   ) {
     window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
   }
@@ -594,7 +595,7 @@ watch(currentTab, async (value) => {
     return
   }
 
-  if (isElectron && isTabPresented?.value !== true) {
+  if (usesLogicalTabs && isTabPresented?.value !== true) {
     // The shared window scroll still belongs to the presented logical tab.
     // Restore this feed only after tab activation restores its page-level scroll.
     scrollPositionOwnerTab = null
@@ -612,7 +613,7 @@ watch(currentTab, async (value) => {
   if (
     value !== currentTab.value ||
     !isMounted ||
-    (isElectron && isTabPresented?.value !== true)
+    (usesLogicalTabs && isTabPresented?.value !== true)
   ) {
     return
   }
@@ -734,7 +735,7 @@ function changeTab(tab) {
   if (
     !isMounted ||
     target === null ||
-    (isElectron && isTabPresented?.value !== true)
+    (usesLogicalTabs && isTabPresented?.value !== true)
   ) {
     currentTab.value = target
     return
@@ -837,12 +838,12 @@ async function resetNewFeedScroll() {
 
   if (
     currentTab.value !== 'new' ||
-    (isElectron && isTabPresented?.value !== true)
+    (usesLogicalTabs && isTabPresented?.value !== true)
   ) {
     return
   }
 
-  if (isElectron && tabId) {
+  if (usesLogicalTabs && tabId) {
     getTabNavigationService().resetScroll(tabId)
   } else {
     window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
@@ -854,7 +855,7 @@ async function resetNewFeedScroll() {
   if (
     isMounted &&
     currentTab.value === 'new' &&
-    (!isElectron || isTabPresented?.value === true)
+    (!usesLogicalTabs || isTabPresented?.value === true)
   ) {
     window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
     scrollPositionOwnerTab = 'new'

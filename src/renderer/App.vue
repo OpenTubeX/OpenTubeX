@@ -54,7 +54,7 @@
         id="cross-tab-mini-player-layer"
         class="crossTabMiniPlayerLayer"
       />
-      <template v-if="isElectron">
+      <template v-if="usesLogicalTabs">
         <TabContent
           v-for="tab in tabContainers"
           :key="tab.id"

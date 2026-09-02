@@ -43,7 +43,7 @@ export function useAutoPictureInPicture({
   initialState = null
 }) {
   const isActiveTab = computed(() => {
-    return !process.env.IS_ELECTRON || isTabPresented?.value === true
+    return isTabPresented?.value !== false
   })
   const autoPictureInPictureTriggers = computed(() => store.getters.getAutoPictureInPictureTriggers)
   const androidAutoPictureInPicture = computed(() => store.getters.getAndroidAutoPictureInPicture)

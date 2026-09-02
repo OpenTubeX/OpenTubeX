@@ -10,6 +10,10 @@ export function createCapacitorTab(route, title = '', id = window.crypto.randomU
     id,
     title: resolvedTitle,
     isPinned: false,
+    loadState: 'mounting',
+    mountRevision: 1,
+    refreshKey: 0,
+    isLoading: true,
     route: normalizedRoute,
     history: [{
       route: cloneRoute(normalizedRoute),
@@ -85,14 +89,81 @@ export function activateCapacitorTab(session, tabId) {
   }
 }
 
+export function rollbackCapacitorTabActivation(session, failedTabId, fallbackTabId, selectionRevision) {
+  if (
+    session.activeTabId !== failedTabId ||
+    session.selectionRevision !== selectionRevision ||
+    failedTabId === fallbackTabId ||
+    !session.tabs.some(tab => tab.id === fallbackTabId)
+  ) {
+    return session
+  }
+
+  return activateCapacitorTab(loadCapacitorTab(session, fallbackTabId), fallbackTabId)
+}
+
+export function loadCapacitorTab(session, tabId) {
+  return updateCapacitorTabRuntime(session, tabId, tab => {
+    if (tab.loadState !== 'unloaded') return tab
+
+    return {
+      ...tab,
+      loadState: 'mounting',
+      mountRevision: tab.mountRevision + 1,
+      isLoading: true,
+      isPlaying: false
+    }
+  })
+}
+
+export function unloadCapacitorTab(session, tabId) {
+  return updateCapacitorTabRuntime(session, tabId, tab => {
+    if (tab.loadState === 'unloaded' || tab.loadState === 'unloading') return tab
+
+    return {
+      ...tab,
+      loadState: 'unloaded',
+      isLoading: false,
+      isPlaying: false,
+      refreshKey: tab.refreshKey + 1
+    }
+  })
+}
+
+export function reloadCapacitorTab(session, tabId) {
+  return updateCapacitorTabRuntime(session, tabId, tab => ({
+    ...tab,
+    loadState: 'mounting',
+    mountRevision: tab.mountRevision + 1,
+    refreshKey: tab.refreshKey + 1,
+    isLoading: true,
+    isPlaying: false
+  }))
+}
+
+export function completeCapacitorTabMount(session, tabId, mountRevision, succeeded = true) {
+  return updateCapacitorTabRuntime(session, tabId, tab => {
+    if (tab.mountRevision !== mountRevision || tab.loadState !== 'mounting') return tab
+
+    return {
+      ...tab,
+      loadState: succeeded ? 'loaded' : 'unloaded',
+      isLoading: false
+    }
+  })
+}
+
 export function closeCapacitorTab(session, tabId, fallbackRoute) {
   const closedIndex = session.tabs.findIndex(tab => tab.id === tabId)
   if (closedIndex === -1) return session
 
   if (session.tabs.length === 1) {
+    const tab = createCapacitorTab(fallbackRoute, '', tabId)
+    tab.mountRevision = session.tabs[0].mountRevision + 1
+    tab.refreshKey = session.tabs[0].refreshKey + 1
     return {
       ...session,
-      tabs: [createCapacitorTab(fallbackRoute, '', tabId)],
+      tabs: [tab],
       activeTabId: tabId,
       selectionRevision: session.selectionRevision + 1
     }
@@ -120,7 +191,13 @@ export function restoreClosedCapacitorTab(session, createId = () => window.crypt
   if (!Array.isArray(session.closedTabs) || session.closedTabs.length === 0) return session
 
   const closedTab = session.closedTabs.at(-1)
-  const tab = normalizePersistedTab({ ...closedTab, id: createId() })
+  const tab = normalizePersistedTab({
+    ...closedTab,
+    id: createId(),
+    loadState: 'mounting',
+    mountRevision: 1,
+    refreshKey: 0
+  })
   const tabs = tab.isPinned
     ? [
         ...session.tabs.filter(candidate => candidate.isPinned),
@@ -174,16 +251,18 @@ export function moveCapacitorTab(session, tabId, targetIndex) {
   return { ...session, tabs }
 }
 
-export function toRuntimeTabState(session) {
+export function toRuntimeTabState(session, presentedTabId = session.activeTabId) {
   return {
     tabs: session.tabs.map(tab => ({
       ...tab,
       syncedNavigationRevision: session.selectionRevision,
       isActive: tab.id === session.activeTabId,
-      isLoading: false,
-      isPlaying: false,
+      isActivatable: tab.loadState !== 'unloading',
+      isUnloaded: tab.loadState === 'unloaded',
+      isLoading: tab.isLoading === true || tab.loadState === 'mounting',
+      isPlaying: tab.isPlaying === true,
       isPinned: tab.isPinned,
-      loadState: 'loaded'
+      preloadInBackground: tab.loadState === 'mounting' && tab.id !== session.activeTabId
     })),
     groups: [],
     closedTabs: (session.closedTabs ?? []).toReversed().map(tab => ({
@@ -196,7 +275,7 @@ export function toRuntimeTabState(session) {
       }))
     })),
     activeTabId: session.activeTabId,
-    presentedTabId: session.activeTabId,
+    presentedTabId,
     selectionRevision: session.selectionRevision,
     tabBarScrollPosition: 0
   }
@@ -234,7 +313,43 @@ function normalizePersistedTab(tab) {
   history[historyIndex].route = cloneRoute(route)
   history[historyIndex].title = title
 
-  return { id: tab.id, title, isPinned: tab.isPinned === true, route, history, historyIndex }
+  return {
+    id: tab.id,
+    title,
+    isPinned: tab.isPinned === true,
+    route,
+    history,
+    historyIndex,
+    loadState: normalizeLoadState(tab),
+    mountRevision: Number.isInteger(tab.mountRevision) && tab.mountRevision >= 0
+      ? tab.mountRevision
+      : 0,
+    refreshKey: Number.isInteger(tab.refreshKey) && tab.refreshKey >= 0
+      ? tab.refreshKey
+      : 0,
+    isLoading: tab.isLoading === true,
+    isPlaying: tab.isPlaying === true
+  }
+}
+
+function normalizeLoadState(tab) {
+  if (['loaded', 'mounting', 'unloading', 'unloaded'].includes(tab.loadState)) {
+    return tab.loadState
+  }
+  return tab.isUnloaded === true ? 'unloaded' : 'loaded'
+}
+
+function updateCapacitorTabRuntime(session, tabId, update) {
+  const tabIndex = session.tabs.findIndex(tab => tab.id === tabId)
+  if (tabIndex === -1) return session
+
+  const tab = session.tabs[tabIndex]
+  const updatedTab = update(tab)
+  if (updatedTab === tab) return session
+
+  const tabs = [...session.tabs]
+  tabs[tabIndex] = updatedTab
+  return { ...session, tabs }
 }
 
 function normalizeRoute(route) {

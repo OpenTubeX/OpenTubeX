@@ -1780,7 +1780,7 @@ export default defineComponent({
     },
 
     activateWatchRuntime() {
-      if (process.env.IS_ELECTRON && !this.isTabPresented) {
+      if (this.isTabPresented === false) {
         return
       }
 
@@ -4082,7 +4082,7 @@ export default defineComponent({
       // A background tab force-pauses its brief autoplay attempt, which would
       // otherwise save a spurious ~1 second resume point. Only persist progress
       // for tabs the user has actually presented.
-      if (process.env.IS_ELECTRON && !this.hasBeenPresented) { return }
+      if (!this.hasBeenPresented) { return }
       if (!this.$refs.player?.hasLoaded) { return }
 
       const currentTime = this.shortsPlaybackCompleted && this.watchedProgressSavingEnabled
@@ -4497,7 +4497,7 @@ export default defineComponent({
 
     handleVideoEnded: function () {
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
-      if (process.env.IS_ELECTRON && !this.isTabPresented) {
+      if (this.isTabPresented === false) {
         return
       }
       // Standalone YouTube-style Shorts stop for the replay control instead of

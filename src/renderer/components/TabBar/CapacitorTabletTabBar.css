@@ -126,6 +126,10 @@
   outline-offset: -3px;
 }
 
+.capacitorTabletTab.unloaded .capacitorTabletTabTarget {
+  opacity: 0.6;
+}
+
 .capacitorTabletTabIcon {
   display: grid;
   place-items: center;
