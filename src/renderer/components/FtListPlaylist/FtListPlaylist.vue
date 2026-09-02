@@ -28,7 +28,7 @@
       >
         <div class="background" />
         <div class="inner">
-          <div>{{ videoCount }}</div>
+          <div>{{ playlistMetadata.videoCount }}</div>
           <div><FtIcon :icon="['fas','list']" /></div>
         </div>
       </div>
@@ -47,16 +47,16 @@
       </RouterLink>
       <div class="infoLine">
         <RouterLink
-          v-if="channelId && enableChannelLinks"
+          v-if="playlistMetadata.channelId && enableChannelLinks"
           class="channelName"
           dir="auto"
-          :to="`/channel/${channelId}`"
+          :to="`/channel/${playlistMetadata.channelId}`"
         >
           <FtChannelAvatar
             v-if="showChannelAvatar"
             :thumbnail="channelThumbnail"
           />
-          <span class="channelNameText">{{ channelName }}</span>
+          <span class="channelNameText">{{ playlistMetadata.channelName }}</span>
         </RouterLink>
         <bdi
           v-else
@@ -66,7 +66,7 @@
             v-if="showChannelAvatar"
             :thumbnail="channelThumbnail"
           />
-          <span class="channelNameText">{{ channelName }}</span>
+          <span class="channelNameText">{{ playlistMetadata.channelName }}</span>
         </bdi>
       </div>
       <div class="buttonStack playlistButtonStack">
@@ -81,7 +81,7 @@
           @click="handleExternalPlayer"
         />
         <FtIconButton
-          v-if="IS_ELECTRON && enableDownloads && videoCount > 0"
+          v-if="IS_ELECTRON && enableDownloads && playlistMetadata.videoCount > 0"
           :title="t('Downloads.Download Playlist')"
           :icon="['fas', 'download']"
           theme="base-no-default"
@@ -111,11 +111,11 @@
     </div>
     <WatchVideoDownloadPrompt
       v-if="enableDownloads && showDownloadPrompt"
-      :playlist-id="isUserPlaylist ? '' : playlistId"
-      :playlist-key="playlistId"
+      :playlist-id="isUserPlaylist ? '' : playlistMetadata.playlistId"
+      :playlist-key="playlistMetadata.playlistId"
       :video-ids="isUserPlaylist ? data.videos.map(video => video.videoId) : []"
       :is-playlist="true"
-      :title="title"
+      :title="playlistMetadata.title"
       :thumbnail="thumbnailForDisplay"
       @close="showDownloadPrompt = false"
     />
@@ -161,28 +161,8 @@ watch(enableDownloads, (enabled) => {
   if (!enabled) showDownloadPrompt.value = false
 })
 
-let playlistId = ''
-let title = ''
-/** @type {string} */
-let thumbnail = thumbnailPlaceholder
-/** @type {import('vue').Ref<string | null>} */
-const channelId = ref(null)
-const channelName = ref('')
-let videoCount = 0
-
 /** @type {import('vue').ComputedRef<'grid' | 'list'>} */
 const listType = computed(() => store.getters.getListType)
-
-const titleForDisplay = computed(() => {
-  if (typeof title !== 'string') {
-    return ''
-  }
-  if (title.length <= 255) {
-    return title
-  }
-
-  return `${title.slice(0, 255)}...`
-})
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
@@ -190,13 +170,78 @@ const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
 /** @type {import('vue').ComputedRef<'' | 'start' | 'middle' | 'end' | 'hidden' | 'blur'>} */
 const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
 
+/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+const backendPreference = computed(() => store.getters.getBackendPreference)
+
 /** @type {import('vue').ComputedRef<string>} */
-const thumbnailForDisplay = computed(() => {
-  return thumbnailPreference.value !== 'hidden' ? thumbnail : thumbnailPlaceholder
-})
+const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
 
 const isUserPlaylist = computed(() => props.data._id != null)
 const isPlaylistBookmark = computed(() => props.data.isPlaylistBookmark === true)
+const playlistMetadata = computed(() => {
+  if (isUserPlaylist.value) {
+    let thumbnailUrl = thumbnailPlaceholder
+    if (props.data.videos.length > 0) {
+      const origin = backendPreference.value === 'invidious'
+        ? currentInvidiousInstanceUrl.value
+        : 'https://i.ytimg.com'
+      thumbnailUrl = `${origin}/vi/${props.data.videos[0].videoId}/mqdefault.jpg`
+    }
+
+    return {
+      playlistId: props.data._id,
+      title: props.data.playlistName,
+      thumbnailUrl,
+      channelName: '',
+      channelId: '',
+      videoCount: props.data.videos.length,
+    }
+  }
+
+  if (props.data.dataSource === 'local') {
+    return {
+      playlistId: props.data.playlistId,
+      title: props.data.title,
+      thumbnailUrl: props.data.thumbnail,
+      channelName: props.data.channelName,
+      channelId: props.data.channelId,
+      videoCount: props.data.videoCount,
+    }
+  }
+
+  let thumbnailUrl = thumbnailPlaceholder
+  if (props.data.proxyThumbnail === false) {
+    thumbnailUrl = props.data.playlistThumbnail
+  } else if (typeof props.data.playlistThumbnail === 'string' && props.data.playlistThumbnail !== '') {
+    thumbnailUrl = props.data.playlistThumbnail.replace('hqdefault', 'mqdefault')
+    if (!isPlaylistBookmark.value || backendPreference.value === 'invidious') {
+      thumbnailUrl = thumbnailUrl.replace('https://i.ytimg.com', currentInvidiousInstanceUrl.value)
+    }
+  }
+
+  return {
+    playlistId: props.data.playlistId,
+    title: props.data.title,
+    thumbnailUrl,
+    channelName: props.data.author,
+    channelId: props.data.authorId,
+    videoCount: props.data.videoCount,
+  }
+})
+
+const titleForDisplay = computed(() => {
+  const { title } = playlistMetadata.value
+  if (typeof title !== 'string') return ''
+  if (title.length <= 255) return title
+  return `${title.slice(0, 255)}...`
+})
+
+/** @type {import('vue').ComputedRef<string>} */
+const thumbnailForDisplay = computed(() => {
+  return thumbnailPreference.value !== 'hidden'
+    ? playlistMetadata.value.thumbnailUrl
+    : thumbnailPlaceholder
+})
 
 // For `router-link` attribute `to`
 const playlistPageLinkTo = computed(() => {
@@ -212,80 +257,20 @@ const playlistPageLinkTo = computed(() => {
   }
 
   return {
-    path: `/playlist/${playlistId}`,
+    path: `/playlist/${playlistMetadata.value.playlistId}`,
     query,
   }
 })
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
-const backendPreference = computed(() => store.getters.getBackendPreference)
-
-/** @type {import('vue').ComputedRef<string>} */
-const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
-
-if (isUserPlaylist.value) {
-  parseUserData()
-} else if (props.data.dataSource === 'local') {
-  parseLocalData()
-} else {
-  parseInvidiousData()
-}
-
-function parseInvidiousData() {
-  title = props.data.title
-
-  if (typeof props.data.playlistThumbnail === 'string' && props.data.playlistThumbnail !== '') {
-    thumbnail = props.data.playlistThumbnail.replace('hqdefault', 'mqdefault')
-    if (!isPlaylistBookmark.value || backendPreference.value === 'invidious') {
-      thumbnail = thumbnail.replace('https://i.ytimg.com', currentInvidiousInstanceUrl.value)
-    }
-  }
-
-  channelName.value = props.data.author
-  channelId.value = props.data.authorId
-  playlistId = props.data.playlistId
-  videoCount = props.data.videoCount
-
-  if (props.data.proxyThumbnail === false) {
-    thumbnail = props.data.playlistThumbnail
-  }
-}
-
-function parseLocalData() {
-  title = props.data.title
-
-  thumbnail = props.data.thumbnail
-
-  channelName.value = props.data.channelName
-  channelId.value = props.data.channelId
-  playlistId = props.data.playlistId
-  videoCount = props.data.videoCount
-}
-
-function parseUserData() {
-  title = props.data.playlistName
-
-  if (props.data.videos.length > 0) {
-    const origin = backendPreference.value === 'invidious'
-      ? currentInvidiousInstanceUrl.value
-      : 'https://i.ytimg.com'
-
-    thumbnail = `${origin}/vi/${props.data.videos[0].videoId}/mqdefault.jpg`
-  }
-
-  channelName.value = ''
-  channelId.value = ''
-  playlistId = props.data._id
-  videoCount = props.data.videos.length
-}
+const channelId = computed(() => playlistMetadata.value.channelId)
 
 const showChannelAvatar = computed(() => (
   !store.getters.getHideChannelAvatars &&
   (props.appearance === 'result' || props.appearance === 'youtubeShort') &&
-  typeof channelName.value === 'string' &&
-  channelName.value !== '' &&
-  typeof channelId.value === 'string' &&
-  channelId.value !== ''
+  typeof playlistMetadata.value.channelName === 'string' &&
+  playlistMetadata.value.channelName !== '' &&
+  typeof playlistMetadata.value.channelId === 'string' &&
+  playlistMetadata.value.channelId !== ''
 ))
 
 const { channelThumbnail } = useResultChannelAvatar(
@@ -300,9 +285,9 @@ const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
 
 const markedAsQuickBookmarkTarget = computed(() => {
   // Only user playlists can be target
-  return playlistId != null &&
+  return playlistMetadata.value.playlistId != null &&
     quickBookmarkPlaylistId.value != null &&
-    quickBookmarkPlaylistId.value === playlistId
+    quickBookmarkPlaylistId.value === playlistMetadata.value.playlistId
 })
 
 function handleQuickBookmarkEnabledDisabledClick() {
@@ -315,7 +300,7 @@ function handleQuickBookmarkEnabledDisabledClick() {
 async function enableQuickBookmarkForThisPlaylist() {
   const currentQuickBookmarkTargetPlaylist = store.getters.getQuickBookmarkPlaylist
 
-  store.dispatch('updateQuickBookmarkTargetPlaylistId', playlistId)
+  store.dispatch('updateQuickBookmarkTargetPlaylistId', playlistMetadata.value.playlistId)
 
   if (currentQuickBookmarkTargetPlaylist != null) {
     showToast({
@@ -344,7 +329,7 @@ async function enableQuickBookmarkForThisPlaylist() {
 }
 
 async function removePlaylistBookmark() {
-  const removed = await store.dispatch('removePlaylistBookmark', playlistId)
+  const removed = await store.dispatch('removePlaylistBookmark', playlistMetadata.value.playlistId)
   if (!removed) {
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
@@ -364,7 +349,7 @@ const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
 function handleExternalPlayer() {
   if (process.env.IS_ELECTRON) {
     window.ftElectron.openInExternalPlayer({
-      playlistId: playlistId,
+      playlistId: playlistMetadata.value.playlistId,
       playbackRate: defaultPlayback.value,
     })
   }
