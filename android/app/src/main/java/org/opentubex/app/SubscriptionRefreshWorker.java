@@ -176,16 +176,15 @@ public final class SubscriptionRefreshWorker extends Worker {
                 }
 
                 int progress = total == 0 ? 100 : (int) Math.round((completed + failed) * 100.0 / total);
-                context.getSystemService(NotificationManager.class).notify(
-                    SubscriptionRefreshNotification.NOTIFICATION_ID,
-                    SubscriptionRefreshNotification.build(
+                setForegroundAsync(
+                    SubscriptionRefreshNotification.foregroundInfo(
                         context,
                         token,
                         feed.title,
                         feed.cancelLabel,
                         progress
                     )
-                );
+                ).get();
             }
 
             if (SubscriptionRefreshCoordinator.isCancelled(token) || isStopped()) {
