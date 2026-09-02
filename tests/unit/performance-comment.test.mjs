@@ -93,6 +93,31 @@ test('recomputes regressions instead of trusting artifact conclusions', () => {
   assert.match(comment, /Repeated subscription switch elapsed regressed by 100\.0 ms \(\+125\.0%\)/)
 })
 
+test('does not fail an absolute limit when the candidate improves on an over-limit base', () => {
+  const input = result({ firstSwitchElapsedMs: 252.5 })
+  input.samples.base = Array.from({ length: 7 }, () => sample({
+    firstSwitchElapsedMs: 258
+  }))
+
+  const comment = renderPerformanceComment(input, { headSha, runUrl })
+
+  assert.match(comment, /First subscription switch elapsed .+ -2\.1% .+ Pass/)
+  assert.doesNotMatch(comment, /First subscription switch elapsed is .+ at or above/)
+})
+
+test('fails when the candidate crosses an absolute limit from below', () => {
+  const input = result({ firstSwitchElapsedMs: 250 })
+  input.samples.base = Array.from({ length: 7 }, () => sample({
+    firstSwitchElapsedMs: 240
+  }))
+
+  const comment = renderPerformanceComment(input, { headSha, runUrl })
+
+  assert.match(comment, /First subscription switch elapsed .+ \+4\.2% .+ Regression/)
+  assert.match(comment, /First subscription switch elapsed is 250\.0 ms, at or above/)
+  assert.doesNotMatch(comment, /First subscription switch elapsed regressed by/)
+})
+
 test('ignores a one-frame shift in longest-frame samples', () => {
   const input = result({ subscribedChannelsNavigationLongestFrameMs: 83.3 })
   input.samples.base = Array.from({ length: 7 }, () => sample({

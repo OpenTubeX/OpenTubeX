@@ -127,12 +127,12 @@ compares the median of seven samples. A single pull-request comment and the
 Actions summary show the comparison, and the raw samples are uploaded as
 `performance-results.json`.
 
-The workflow fails when the candidate crosses a metric's absolute limit or
-exceeds both its relative limit and minimum delta. Elapsed metrics allow 15%,
-longest-frame metrics 20%, renderer heap growth 50%, and packed code size 5%. Each
-metric's minimum delta lives in `e2e/performance/report.mjs`. A trusted
-follow-up workflow updates the comment so pull requests from forks never
-receive a write-capable token.
+The workflow fails when the candidate crosses a metric's absolute limit from
+below or exceeds both its relative limit and minimum delta. Elapsed metrics
+allow 15%, longest-frame metrics 20%, renderer heap growth 50%, and packed code
+size 5%. Each metric's minimum delta lives in `e2e/performance/report.mjs`. A
+trusted follow-up workflow updates the comment so pull requests from forks
+never receive a write-capable token.
 
 To compare two checkouts locally, build `dist-e2e` in both and run:
 

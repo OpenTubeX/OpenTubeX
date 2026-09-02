@@ -175,12 +175,12 @@ export function comparePerformanceSamples(samples) {
     const thresholdRatio = candidateMedian /
       Math.max(baseMedian, definition.relativeBaselineFloor ?? Number.MIN_VALUE)
     const gated = definition.gate !== false
-    const exceedsAbsoluteLimit = gated && definition.absoluteLimit !== undefined &&
-      candidateMedian >= definition.absoluteLimit
+    const crossesAbsoluteLimit = gated && definition.absoluteLimit !== undefined &&
+      baseMedian < definition.absoluteLimit && candidateMedian >= definition.absoluteLimit
     const relativeRegression = gated && definition.relativeLimit !== undefined &&
       thresholdRatio > definition.relativeLimit && delta > definition.minimumDelta
 
-    if (exceedsAbsoluteLimit) {
+    if (crossesAbsoluteLimit) {
       failures.push(
         `${definition.label} is ${metricValue(definition, candidateMedian)}, ` +
         `at or above the ${metricValue(definition, definition.absoluteLimit)} limit`
@@ -201,9 +201,9 @@ export function comparePerformanceSamples(samples) {
       candidateMedian,
       delta,
       ratio,
-      exceedsAbsoluteLimit,
+      crossesAbsoluteLimit,
       relativeRegression,
-      passed: !exceedsAbsoluteLimit && !relativeRegression
+      passed: !crossesAbsoluteLimit && !relativeRegression
     }
   })
 
