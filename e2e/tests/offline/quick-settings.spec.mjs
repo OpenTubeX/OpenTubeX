@@ -336,8 +336,11 @@ test.describe('customizable quick settings', () => {
   test('adds basic controls from Appearance and resets them', async ({ app, page }) => {
     const appearance = await goToSettingsSection(page, 'appearance')
     const customizeButton = appearance.getByRole('button', { name: 'Customize quick settings' })
+    const launcher = appearance.locator('.quickSettingsLauncher')
+    await expect(launcher).toBeVisible()
+    await expect(customizeButton).toBeVisible()
     const [launcherBounds, buttonBounds] = await Promise.all([
-      appearance.locator('.quickSettingsLauncher').boundingBox(),
+      launcher.boundingBox(),
       customizeButton.boundingBox(),
     ])
     expect(Math.abs(
