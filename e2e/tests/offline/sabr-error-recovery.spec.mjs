@@ -277,8 +277,9 @@ test('yt-dlp playback refreshes once then prefers built-in SABR over legacy', as
     }
 
     let refreshes = 0
-    watchView.reloadView = async () => {
+    watchView.extractYtDlpPlaybackSource = async () => {
       refreshes++
+      return true
     }
     let progressSaves = 0
     watchView.handleWatchProgressAutoSaveWhenProgressEnabled = () => {
@@ -341,7 +342,7 @@ test('yt-dlp playback refreshes once then prefers built-in SABR over legacy', as
   })
 })
 
-test('yt-dlp timeout reload reuses cache while a rejected source is invalidated', async ({ app, page }) => {
+test('yt-dlp player reload keeps metadata and reuses cache while a rejected source is invalidated', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await goTo(page, 'history')
   await page.getByText('SABR test video').click()
@@ -386,7 +387,20 @@ test('yt-dlp timeout reload reuses cache while a rejected source is invalidated'
     view.manifestSrc = 'data:application/dash+xml,yt-dlp'
     view.manifestMimeType = 'application/dash+xml'
     view.legacyFormats = []
+    view.builtInPlaybackSource = {
+      manifestSrc: 'data:application/dash+xml,built-in',
+      manifestMimeType: 'application/dash+xml',
+      sabrData: null,
+      legacyFormats: [],
+      streamingDataExpiryDate: new Date(Date.now() + 60_000)
+    }
 
+    const metadataBeforeReload = JSON.stringify({
+      title: view.videoTitle,
+      description: view.videoDescription,
+      channelName: view.channelName,
+      recommendations: view.recommendedVideos
+    })
     const initialLoadGeneration = view.videoLoadGeneration
     const cacheReuseResults = []
     const extractYtDlpPlaybackSource = view.extractYtDlpPlaybackSource.bind(view)
@@ -436,26 +450,99 @@ test('yt-dlp timeout reload reuses cache while a rejected source is invalidated'
 
     return {
       activePlaybackEngineAfterTimeout,
+      activePlaybackEngineAfterRejection: view.activePlaybackEngine,
       cacheEntryAfterRejection: await window.ftElectron.ytDlpPlaybackCacheGet(
         view.videoId,
         cacheKey
       ),
       cachePreservedAfterTimeout: cacheEntryAfterTimeout !== null,
       cacheReuseResults,
+      metadataPreserved: metadataBeforeReload === JSON.stringify({
+        title: view.videoTitle,
+        description: view.videoDescription,
+        channelName: view.channelName,
+        recommendations: view.recommendedVideos
+      }),
       reloads: view.videoLoadGeneration - initialLoadGeneration
     }
   })
 
   expect(result).toEqual({
     activePlaybackEngineAfterTimeout: 'yt-dlp',
+    activePlaybackEngineAfterRejection: 'built-in',
     cacheEntryAfterRejection: null,
     cachePreservedAfterTimeout: true,
     cacheReuseResults: [true, false],
-    reloads: 2
+    metadataPreserved: true,
+    reloads: 0
   })
 })
 
-test('expired built-in playback source is refreshed before yt-dlp falls back', async ({ app, page }) => {
+test('yt-dlp recovery remounts only the player and preserves playback state', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+
+  const player = page.locator('.ftVideoPlayer')
+  const video = player.locator('video')
+  await expect(player).toBeVisible({ timeout: 30_000 })
+  await expect.poll(() => video.evaluate(element => element.currentTime))
+    .toBeGreaterThanOrEqual(watchHistoryEntry.watchProgress)
+  await video.evaluate((element) => {
+    element.pause()
+    element.currentTime = 5.25
+    element.playbackRate = 1.5
+  })
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(5.25, 1)
+
+  const playerBeforeReload = await player.elementHandle()
+  const watchView = await watchViewHandle(page)
+  const activeVideoQualityBeforeReload = await watchView.evaluate(view => {
+    const getSabrReloadState = view.$refs.player.getSabrReloadState.bind(view.$refs.player)
+    view.$refs.player.getSabrReloadState = () => ({
+      ...getSabrReloadState(),
+      videoQuality: '360'
+    })
+    view.currentVideoQuality = 'auto'
+    return view.$refs.player.getSabrReloadState().videoQuality
+  })
+  const stateBeforeReload = await watchView.evaluate(view => ({
+    videoLoadGeneration: view.videoLoadGeneration,
+    videoTitle: view.videoTitle,
+    videoDescription: view.videoDescription,
+    channelName: view.channelName,
+    recommendedVideos: view.recommendedVideos
+  }))
+
+  await watchView.evaluate(async (view) => {
+    view.activePlaybackEngine = 'yt-dlp'
+    view.streamErrorReloadAttemptedForCurrentVideo = false
+    view.extractYtDlpPlaybackSource = async () => true
+    await view.handlePlayerError({ code: 1003, data: [] })
+  })
+
+  await expect(player).toBeVisible()
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(5, 1)
+  await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
+  expect(await video.evaluate(element => element.paused)).toBe(true)
+  expect(await watchView.evaluate(view => view.currentVideoQuality)).toBe(activeVideoQualityBeforeReload)
+
+  const playerAfterReload = await player.elementHandle()
+  expect(await playerBeforeReload.evaluate(
+    (before, after) => before === after,
+    playerAfterReload
+  )).toBe(false)
+  expect(await watchView.evaluate(view => ({
+    videoLoadGeneration: view.videoLoadGeneration,
+    videoTitle: view.videoTitle,
+    videoDescription: view.videoDescription,
+    channelName: view.channelName,
+    recommendedVideos: view.recommendedVideos
+  }))).toEqual(stateBeforeReload)
+})
+
+test('expired built-in playback source is not restored after yt-dlp fails', async ({ app, page }) => {
   await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
   await page.getByText('SABR test video').click()
@@ -487,6 +574,7 @@ test('expired built-in playback source is refreshed before yt-dlp falls back', a
     watchView.isPostLiveDvr = false
     watchView.activePlaybackEngine = 'yt-dlp'
     watchView.playbackEngineFallbackTarget = null
+    watchView.manifestSrc = 'https://example.invalid/yt-dlp.mpd'
     watchView.builtInPlaybackSource = {
       manifestSrc: 'https://example.invalid/expired.mpd',
       manifestMimeType: 'application/dash+xml',
@@ -495,34 +583,18 @@ test('expired built-in playback source is refreshed before yt-dlp falls back', a
       streamingDataExpiryDate: new Date(Date.now() - 1)
     }
 
-    let reloadOptions = null
-    watchView.reloadView = async (options) => {
-      reloadOptions = options
-      watchView.activePlaybackEngine = 'built-in'
-      watchView.manifestSrc = 'https://example.invalid/refreshed.mpd'
-    }
+    let reloads = 0
+    watchView.reloadView = async () => { reloads++ }
 
     const fallbackApplied = await watchView.tryPlaybackEngineFallback({
       code: 1002,
       data: ['https://example.invalid/video', 500]
     })
 
-    watchView.activePlaybackEngine = 'yt-dlp'
-    watchView.playbackEngineFallbackAttemptedForCurrentVideo = false
-    watchView.playbackEngineFallbackTarget = null
-    watchView.reloadView = async () => {
-      throw new Error('Synthetic built-in source refresh rejection')
-    }
-    const rejectedFallbackApplied = await watchView.tryPlaybackEngineFallback({
-      code: 1002,
-      data: ['https://example.invalid/video', 500]
-    })
-
     return {
       fallbackApplied,
-      rejectedFallbackApplied,
-      pendingAfterRejectedRefresh: watchView.ytDlpStreamsPending,
-      reloadOptions,
+      reloads,
+      pending: watchView.ytDlpStreamsPending,
       fallbackTarget: watchView.playbackEngineFallbackTarget,
       activePlaybackEngine: watchView.activePlaybackEngine,
       manifestSrc: watchView.manifestSrc
@@ -530,13 +602,12 @@ test('expired built-in playback source is refreshed before yt-dlp falls back', a
   })
 
   expect(result).toEqual({
-    fallbackApplied: true,
-    rejectedFallbackApplied: false,
-    pendingAfterRejectedRefresh: false,
-    reloadOptions: { preserveTitle: true },
-    fallbackTarget: 'built-in',
+    fallbackApplied: false,
+    reloads: 0,
+    pending: false,
+    fallbackTarget: null,
     activePlaybackEngine: 'yt-dlp',
-    manifestSrc: 'https://example.invalid/refreshed.mpd'
+    manifestSrc: 'https://example.invalid/yt-dlp.mpd'
   })
 })
 
