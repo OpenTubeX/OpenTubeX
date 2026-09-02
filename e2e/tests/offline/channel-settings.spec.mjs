@@ -163,6 +163,43 @@ test.describe('channel settings', () => {
     await expect(reopenedPicker.getByRole('button', { name: OTHER_CHANNEL_NAME, exact: true })).toBeVisible()
   })
 
+  test('keeps the subscribed-channel picker open when initialization fails', async ({ page }) => {
+    await goToSettingsSection(page, 'playback')
+    await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
+    await page.getByRole('button', { name: 'Add subscribed channel' }).click()
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      window.updateChannelVolumes = store._actions.updateChannelVolumes[0]
+      store._actions.updateChannelVolumes = [() => Promise.resolve()]
+    })
+
+    const picker = page.getByRole('dialog', { name: 'Add subscribed channel' })
+    const channel = picker.getByRole('button', { name: NEW_CHANNEL_NAME, exact: true })
+    await channel.click()
+
+    await expect(picker).toBeVisible()
+    await expect(page.locator('.toast', {
+      hasText: 'Failed to save channel settings'
+    })).toBeVisible()
+    await expect(channel).toBeEnabled()
+    await expect.poll(() => page.evaluate(channelId => {
+      const settings = document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings
+      return {
+        playbackSpeed: JSON.parse(settings.channelPlaybackSpeeds)[channelId],
+        volume: JSON.parse(settings.channelVolumes)[channelId]
+      }
+    }, NEW_CHANNEL_ID)).toEqual({ playbackSpeed: undefined, volume: undefined })
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store._actions.updateChannelVolumes = [window.updateChannelVolumes]
+    })
+    await channel.click()
+
+    await expect(picker).toHaveCount(0)
+  })
+
   test('points to Playback settings when channel settings are disabled', async ({ page }) => {
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store

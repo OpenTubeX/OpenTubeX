@@ -299,7 +299,7 @@ test('reports subscription setting write failures from the channel popover', asy
   await shorts.click()
 
   await expect(page.locator('.toast', {
-    hasText: 'Failed to save subscription settings'
+    hasText: 'Failed to save channel settings'
   })).toBeVisible()
   await expect(shorts).toHaveAttribute('aria-checked', 'false')
 })
@@ -345,7 +345,7 @@ test('does not carry a failed popover edit into a later update', async ({ app, p
     }
   }).toEqual({ dailyVideoLimit: 2, showMembersOnly: false })
   await expect(page.locator('.toast', {
-    hasText: 'Failed to save subscription settings'
+    hasText: 'Failed to save channel settings'
   })).toBeVisible()
 })
 
@@ -363,7 +363,7 @@ test('reports subscription setting write failures from the settings manager', as
   await shorts.click()
 
   await expect(page.locator('.toast', {
-    hasText: 'Failed to save subscription settings'
+    hasText: 'Failed to save channel settings'
   })).toBeVisible()
   await expect(shorts).toHaveAttribute('aria-checked', 'false')
 })

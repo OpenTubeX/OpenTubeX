@@ -237,6 +237,7 @@
                 <button
                   type="button"
                   class="addSubscribedChannelOption"
+                  :disabled="addingSubscribedChannel"
                   @click="addSubscribedChannel(channel.id)"
                 >
                   <img
@@ -305,6 +306,7 @@ import {
   getCachedChannelInfo,
   parseChannelPreferences
 } from '../../helpers/channel-preferences'
+import { showToast } from '../../helpers/utils'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 
 const { locale, t } = useI18n()
@@ -414,6 +416,7 @@ const backendOptions = computed(() => ({
 const showManager = ref(false)
 const showAddChannelPrompt = ref(false)
 const addChannelSearchQuery = ref('')
+const addingSubscribedChannel = ref(false)
 const addChannelSearch = useTemplateRef('addChannelSearch')
 
 watch(showAddChannelPrompt, async (open) => {
@@ -444,10 +447,12 @@ const fetchedChannels = ref(new Map())
 
 /**
  * @param {string} settingKey
- * @param {boolean} value
+ * @param {boolean | number | string} value
+ * @returns {Promise<boolean>}
  */
-function updateSetting(settingKey, value) {
-  store.dispatch(`update${settingKey[0].toUpperCase()}${settingKey.slice(1)}`, value)
+async function updateSetting(settingKey, value) {
+  await store.dispatch(`update${settingKey[0].toUpperCase()}${settingKey.slice(1)}`, value)
+  return settings.value[settingKey] === value
 }
 
 /**
@@ -607,7 +612,7 @@ watch([showManager, channelEntries], ([isManagerOpen]) => {
 function setPreference(channelId, type, value) {
   const { valuesKey, values } = preferenceValuesFor(type)
   values[channelId] = value
-  updateSetting(valuesKey, JSON.stringify(values))
+  return updateSetting(valuesKey, JSON.stringify(values))
 }
 
 /**
@@ -619,17 +624,13 @@ function setPreference(channelId, type, value) {
 function addPreference(channelId, type) {
   switch (type) {
     case 'playbackSpeed':
-      setPreference(channelId, type, store.getters.getDefaultPlayback)
-      break
+      return setPreference(channelId, type, store.getters.getDefaultPlayback)
     case 'videoQuality':
-      setPreference(channelId, type, defaultQuality.value)
-      break
+      return setPreference(channelId, type, defaultQuality.value)
     case 'subtitlesState':
-      setPreference(channelId, type, store.getters.getEnableSubtitlesByDefault)
-      break
+      return setPreference(channelId, type, store.getters.getEnableSubtitlesByDefault)
     case 'volume':
-      setPreference(channelId, type, store.getters.getDefaultVolume)
-      break
+      return setPreference(channelId, type, store.getters.getDefaultVolume)
   }
 }
 
@@ -638,17 +639,39 @@ function addPreference(channelId, type) {
  * per-channel preference.
  * @param {string} channelId
  */
-function addSubscribedChannel(channelId) {
-  if (enabledPreferences.value.length === 0) {
+async function addSubscribedChannel(channelId) {
+  if (enabledPreferences.value.length === 0 || addingSubscribedChannel.value) {
     return
   }
 
-  for (const { type } of enabledPreferences.value) {
-    addPreference(channelId, type)
-  }
+  addingSubscribedChannel.value = true
+  try {
+    const preferencesToAdd = enabledPreferences.value
+    const previousValues = preferencesToAdd.map(({ type }) => {
+      const { valuesKey } = preferenceValuesFor(type)
+      return { valuesKey, value: settings.value[valuesKey] }
+    })
 
-  addChannelSearchQuery.value = ''
-  showAddChannelPrompt.value = false
+    const saved = await Promise.all(preferencesToAdd.map(({ type }) => (
+      addPreference(channelId, type)
+    )))
+
+    if (saved.some(value => !value)) {
+      await Promise.all(previousValues.map(({ valuesKey, value }, index) => (
+        saved[index] ? updateSetting(valuesKey, value) : Promise.resolve(true)
+      )))
+      showToast({
+        message: t('Channel.Failed to save subscription settings'),
+        icon: ['fas', 'circle-exclamation']
+      })
+      return
+    }
+
+    addChannelSearchQuery.value = ''
+    showAddChannelPrompt.value = false
+  } finally {
+    addingSubscribedChannel.value = false
+  }
 }
 
 function closeAddChannelPrompt() {

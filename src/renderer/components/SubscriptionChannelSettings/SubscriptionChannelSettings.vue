@@ -580,12 +580,12 @@ function persistChannelSettings(channel, patch) {
         nextSettings.delete(channel.id)
         optimisticChannelSettings.value = nextSettings
         latestUpdateByChannel.delete(channel.id)
-        if (!saved) {
-          showToast({
-            message: t('Channel.Failed to save subscription settings'),
-            icon: ['fas', 'circle-exclamation']
-          })
-        }
+      }
+      if (!saved) {
+        showToast({
+          message: t('Channel.Failed to save subscription settings'),
+          icon: ['fas', 'circle-exclamation']
+        })
       }
     }
   })
