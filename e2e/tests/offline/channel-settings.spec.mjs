@@ -217,14 +217,26 @@ test.describe('channel settings', () => {
     ))).toBe(true)
     await picker.getByRole('button', { name: 'Close' }).click()
 
-    await page.evaluate(async ({ channelId, newChannelId }) => {
+    const newChannel = page.locator('.settingsWindow .channelEntry', { hasText: NEW_CHANNEL_NAME })
+    const playbackSpeed = newChannel.getByRole('slider', { name: /Playback Speed/ })
+    await playbackSpeed.fill('1.5')
+    await expect.poll(() => page.evaluate(channelId => {
+      const settings = document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings
+      return JSON.parse(settings.channelPlaybackSpeeds)[channelId]
+    }, NEW_CHANNEL_ID)).toBe(1.5)
+    await playbackSpeed.fill('1.25')
+    await expect.poll(() => page.evaluate(channelId => {
+      const settings = document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings
+      return JSON.parse(settings.channelPlaybackSpeeds)[channelId]
+    }, NEW_CHANNEL_ID)).toBe(1.25)
+
+    await page.evaluate(async ({ channelId }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const playbackSpeeds = JSON.parse(store.state.settings.channelPlaybackSpeeds)
       playbackSpeeds[channelId] = 1.75
-      playbackSpeeds[newChannelId] = 1.5
       await store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(playbackSpeeds))
       window.rejectChannelVolumeUpdate(new Error('write failed'))
-    }, { channelId: CHANNEL_ID, newChannelId: NEW_CHANNEL_ID })
+    }, { channelId: CHANNEL_ID })
 
     await expect(page.locator('.toast', {
       hasText: 'Failed to save channel settings'
@@ -238,7 +250,7 @@ test.describe('channel settings', () => {
       }
     }, { channelId: CHANNEL_ID, newChannelId: NEW_CHANNEL_ID })).toEqual({
       existingChannel: 1.75,
-      newChannel: 1.5
+      newChannel: 1.25
     })
   })
 

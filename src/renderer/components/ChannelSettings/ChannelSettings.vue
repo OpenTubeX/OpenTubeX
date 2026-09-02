@@ -417,6 +417,7 @@ const showManager = ref(false)
 const showAddChannelPrompt = ref(false)
 const addChannelSearchQuery = ref('')
 const addingSubscribedChannel = ref(false)
+const pendingPreferenceInitializations = new Map()
 const addChannelSearch = useTemplateRef('addChannelSearch')
 
 watch(showAddChannelPrompt, async (open) => {
@@ -608,8 +609,16 @@ watch([showManager, channelEntries], ([isManagerOpen]) => {
  * @param {string} channelId
  * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
  * @param {number | string | boolean} value
+ * @param {symbol} [initializationToken]
  */
-function setPreference(channelId, type, value) {
+function setPreference(channelId, type, value, initializationToken) {
+  const key = `${channelId}:${type}`
+  if (initializationToken === undefined) {
+    pendingPreferenceInitializations.delete(key)
+  } else {
+    pendingPreferenceInitializations.set(key, initializationToken)
+  }
+
   const { valuesKey, values } = preferenceValuesFor(type)
   values[channelId] = value
   return updateSetting(valuesKey, JSON.stringify(values))
@@ -651,14 +660,15 @@ async function addSubscribedChannel(channelId) {
     return
   }
 
+  const preferencesToAdd = enabledPreferences.value.map(({ type }) => ({
+    type,
+    initialValue: defaultPreferenceValue(type)
+  }))
   addingSubscribedChannel.value = true
+  const initializationToken = Symbol(channelId)
   try {
-    const preferencesToAdd = enabledPreferences.value.map(({ type }) => ({
-      type,
-      initialValue: defaultPreferenceValue(type)
-    }))
     const saved = await Promise.all(preferencesToAdd.map(({ type, initialValue }) => (
-      setPreference(channelId, type, initialValue).catch((error) => {
+      setPreference(channelId, type, initialValue, initializationToken).catch((error) => {
         console.error(error)
         return false
       })
@@ -666,7 +676,8 @@ async function addSubscribedChannel(channelId) {
 
     if (saved.some(value => !value)) {
       await Promise.all(preferencesToAdd.map(({ type, initialValue }) => (
-        rollbackPreference(channelId, type, initialValue).catch(error => console.error(error))
+        rollbackPreference(channelId, type, initialValue, initializationToken)
+          .catch(error => console.error(error))
       )))
       showToast({
         message: t('Channel.Failed to save subscription settings'),
@@ -678,6 +689,12 @@ async function addSubscribedChannel(channelId) {
     addChannelSearchQuery.value = ''
     showAddChannelPrompt.value = false
   } finally {
+    for (const { type } of preferencesToAdd) {
+      const key = `${channelId}:${type}`
+      if (pendingPreferenceInitializations.get(key) === initializationToken) {
+        pendingPreferenceInitializations.delete(key)
+      }
+    }
     addingSubscribedChannel.value = false
   }
 }
@@ -692,13 +709,20 @@ function closeAddChannelPrompt() {
  * @param {string} channelId
  * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
  * @param {number | string | boolean} initialValue
+ * @param {symbol} initializationToken
  */
-function rollbackPreference(channelId, type, initialValue) {
+function rollbackPreference(channelId, type, initialValue, initializationToken) {
+  const key = `${channelId}:${type}`
   const { valuesKey, values } = preferenceValuesFor(type)
-  if (!Object.hasOwn(values, channelId) || values[channelId] !== initialValue) {
+  if (
+    pendingPreferenceInitializations.get(key) !== initializationToken ||
+    !Object.hasOwn(values, channelId) ||
+    values[channelId] !== initialValue
+  ) {
     return Promise.resolve(true)
   }
 
+  pendingPreferenceInitializations.delete(key)
   delete values[channelId]
   return updateSetting(valuesKey, JSON.stringify(values))
 }
