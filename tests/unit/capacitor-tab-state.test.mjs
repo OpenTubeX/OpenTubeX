@@ -161,6 +161,10 @@ test('reloads a Capacitor tab with a fresh mount and refresh key', () => {
   let session = restoreCapacitorTabSession(null, HOME_ROUTE, () => 'tab-1')
   session = completeCapacitorTabMount(session, 'tab-1', 1)
   session.tabs[0].isPlaying = true
+  session.tabs[0].pendingReloadRoute = {
+    path: '/watch/video',
+    fullPath: '/watch/video?oneTimeTimestamp=42'
+  }
 
   session = reloadCapacitorTab(session, 'tab-1')
 
@@ -169,6 +173,10 @@ test('reloads a Capacitor tab with a fresh mount and refresh key', () => {
   assert.equal(session.tabs[0].refreshKey, 1)
   assert.equal(session.tabs[0].isLoading, true)
   assert.equal(session.tabs[0].isPlaying, false)
+  assert.equal(
+    toRuntimeTabState(session).tabs[0].pendingReloadRoute.fullPath,
+    '/watch/video?oneTimeTimestamp=42'
+  )
 })
 
 test('restores unloaded Capacitor tabs from persisted sessions', () => {

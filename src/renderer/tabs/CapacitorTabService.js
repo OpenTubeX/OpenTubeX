@@ -307,7 +307,8 @@ class CapacitorTabService {
         mountRevision: tab.mountRevision,
         refreshKey: tab.refreshKey,
         isLoading: tab.isLoading,
-        isPlaying: tab.isPlaying
+        isPlaying: tab.isPlaying,
+        pendingReloadRoute: tab.pendingReloadRoute
       })),
       closedTabs: this.store.getters.getClosedTabs.toReversed().map(tab => ({
         id: tab.id,
