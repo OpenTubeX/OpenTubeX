@@ -91,7 +91,7 @@
       <button
         class="tabOrganizerButton"
         :aria-label="t('Tab Organizer.Title')"
-        :title="t('Tab Organizer.Title')"
+        :title="tabOrganizerTooltip"
         @click="openTabOrganizer"
       >
         <FtIcon
@@ -298,6 +298,13 @@ const newTabTooltip = computed(() => {
   return localizeAndAddKeyboardShortcutToActionTitle(
     t('New Tab'),
     appKeyboardShortcuts.value.NEW_TAB
+  )
+})
+
+const tabOrganizerTooltip = computed(() => {
+  return localizeAndAddKeyboardShortcutToActionTitle(
+    t('Tab Organizer.Title'),
+    appKeyboardShortcuts.value.OPEN_TAB_ORGANIZER
   )
 })
 

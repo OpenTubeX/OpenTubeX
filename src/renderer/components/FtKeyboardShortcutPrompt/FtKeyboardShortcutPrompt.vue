@@ -234,6 +234,7 @@ const tabAppShortcuts = computed(() => getLocalizedShortcutNamesAndValues(
     'NEXT_TAB',
     'PREV_TAB',
     'SWITCH_TO_TAB',
+    'OPEN_TAB_ORGANIZER',
     'TOGGLE_TAB_ORIENTATION',
   ]
 ))
@@ -342,6 +343,7 @@ const localizedShortcutNameToShortcutsMappings = computed(() => {
     [t('KeyboardShortcutPrompt.Next Tab'), ['NEXT_TAB']],
     [t('KeyboardShortcutPrompt.Previous Tab'), ['PREV_TAB']],
     [t('KeyboardShortcutPrompt.Switch to Tab'), ['SWITCH_TO_TAB']],
+    [t('Tab Organizer.Title'), ['OPEN_TAB_ORGANIZER']],
     [t('KeyboardShortcutPrompt.Toggle Tab Orientation'), ['TOGGLE_TAB_ORIENTATION']],
     [t('KeyboardShortcutPrompt.Minimize Window'), ['MINIMIZE_WINDOW']],
     [t('KeyboardShortcutPrompt.Close Window'), ['CLOSE_WINDOW']],

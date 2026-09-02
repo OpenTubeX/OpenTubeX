@@ -2685,6 +2685,13 @@ function handleKeyboardShortcuts(event) {
       }
     }
 
+    // Open the tab organizer with its optional user-assigned shortcut
+    if (matchesKeyboardShortcut(event, shortcuts.OPEN_TAB_ORGANIZER) && !isTypingTarget(event.target)) {
+      event.preventDefault()
+      openTabOrganizer()
+      return
+    }
+
     // F1: Toggle between horizontal and vertical tabs
     if (matchesKeyboardShortcut(event, shortcuts.TOGGLE_TAB_ORIENTATION) && !isTypingTarget(event.target)) {
       event.preventDefault()
