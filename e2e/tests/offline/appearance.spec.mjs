@@ -503,6 +503,10 @@ test.describe('custom theme editor', () => {
   })
 
   test('copies built-in themes, previews efficiently, persists, and survives closing settings', async ({ app, page }) => {
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('updateQuickSettings', ['baseTheme', 'mainColor'])
+    })
     await goToSettingsSection(page, 'theme')
     await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
     await page.getByRole('button', { name: 'Create custom theme' }).click()

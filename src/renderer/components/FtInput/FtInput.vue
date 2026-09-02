@@ -7,7 +7,7 @@
       forceTextColor,
       showActionButton,
       showClearTextButton,
-      clearTextButtonVisible: inputDataPresent || showOptions,
+      clearTextButtonVisible: showClearTextButton && (inputDataPresent || showOptions),
       inputDataPresent,
       showOptions
     }"

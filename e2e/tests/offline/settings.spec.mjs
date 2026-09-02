@@ -1784,7 +1784,7 @@ test.describe('settings', () => {
     await expect(downloadsShortcut).toBeVisible()
     await expect(allSettingsShortcut).toBeVisible()
     await expect(menu.getByRole('heading', { name: 'Playback', exact: true })).toBeVisible()
-    await expect(menu.getByRole('heading', { name: 'Language and region', exact: true })).toBeVisible()
+    await expect(menu.getByRole('heading', { name: 'Content', exact: true })).toBeVisible()
     await page.locator('.profileTrigger').click()
 
     await themeSection.locator('label.switch-label')

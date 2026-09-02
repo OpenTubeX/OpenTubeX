@@ -152,10 +152,21 @@
               ref="mainContentRef"
               class="quickSettingsContent"
             >
-              <section class="menuSection">
-                <h3>{{ t('Settings.Quick Settings.Appearance') }}</h3>
-                <div class="selectPair">
+              <section
+                v-for="(section, sectionIndex) in orderedQuickSettingSections"
+                :key="`${section.id}-${sectionIndex}`"
+                class="menuSection"
+              >
+                <h3>{{ section.label }}</h3>
+                <div
+                  v-for="setting in section.settings"
+                  :key="setting.id"
+                  class="quickSettingControl"
+                  :class="{ pairedQuickSetting: isPairedQuickSetting(section.settings, setting.id) }"
+                  :data-setting-id="setting.id"
+                >
                   <FtSelect
+                    v-if="setting.id === 'baseTheme'"
                     class="quickSelect"
                     :placeholder="t('Settings.Theme Settings.Base Theme.Base Theme')"
                     :value="baseTheme"
@@ -167,7 +178,7 @@
                     @change="updateSetting('BaseTheme', $event)"
                   />
                   <FtSelect
-                    v-if="mainColorAvailable"
+                    v-else-if="setting.id === 'mainColor'"
                     class="quickSelect"
                     :placeholder="t('Settings.Theme Settings.Main Color Theme.Main Color Theme')"
                     :value="mainColor"
@@ -179,66 +190,67 @@
                     icon-color="var(--primary-color)"
                     @change="updateSetting('MainColor', $event)"
                   />
-                </div>
-                <div class="sliderGroup">
-                  <FtSlider
-                    v-if="USING_ELECTRON"
-                    :label="t('Settings.Theme Settings.UI Scale')"
-                    :default-value="uiScale"
-                    :min-value="50"
-                    :max-value="300"
-                    :step="5"
-                    value-extension="%"
-                    @change="updateUiScale"
-                  />
-                  <FtSlider
-                    class="thumbnailSizeSlider"
-                    :label="t('Settings.Theme Settings.Thumbnail Size')"
-                    :default-value="thumbnailSize"
-                    setting-key="thumbnailSize"
-                    :min-value="MIN_THUMBNAIL_SIZE"
-                    :max-value="MAX_THUMBNAIL_SIZE"
-                    :step="THUMBNAIL_SIZE_STEP"
-                    value-extension="%"
-                    @input="previewThumbnailSize"
-                    @change="updateThumbnailSize"
-                  />
-                </div>
-              </section>
-
-              <section class="menuSection">
-                <h3>{{ t('Settings.Quick Settings.Playback') }}</h3>
-                <FtSelect
-                  class="quickSelect"
-                  :placeholder="t('Settings.Player Settings.Default Quality.Default Quality')"
-                  :value="defaultQuality"
-                  setting-key="defaultQuality"
-                  :select-names="qualityNames"
-                  :select-values="qualityValues"
-                  :icon="['fas', 'photo-film']"
-                  @change="updateSetting('DefaultQuality', $event)"
-                />
-                <FtToggleSwitch
-                  :label="t('Settings.Player Settings.Play Next Video')"
-                  :default-value="playNextVideo"
-                  :disabled="hideRecommendedVideos"
-                  setting-key="playNextVideo"
-                  compact
-                  @change="updateSetting('PlayNextVideo', $event)"
-                />
-                <FtToggleSwitch
-                  :label="t('Settings.Player Settings.Turn on Subtitles by Default')"
-                  :default-value="enableSubtitlesByDefault"
-                  setting-key="enableSubtitlesByDefault"
-                  compact
-                  @change="updateSetting('EnableSubtitlesByDefault', $event)"
-                />
-              </section>
-
-              <section class="menuSection">
-                <h3>{{ t('Settings.Quick Settings.Content') }}</h3>
-                <div class="selectPair">
+                  <div
+                    v-else-if="setting.id === 'uiScale'"
+                    class="sliderGroup"
+                  >
+                    <FtSlider
+                      :label="t('Settings.Theme Settings.UI Scale')"
+                      :default-value="uiScale"
+                      :min-value="50"
+                      :max-value="300"
+                      :step="5"
+                      value-extension="%"
+                      @change="updateUiScale"
+                    />
+                  </div>
+                  <div
+                    v-else-if="setting.id === 'thumbnailSize'"
+                    class="sliderGroup"
+                  >
+                    <FtSlider
+                      class="thumbnailSizeSlider"
+                      :label="t('Settings.Theme Settings.Thumbnail Size')"
+                      :default-value="thumbnailSize"
+                      setting-key="thumbnailSize"
+                      :min-value="MIN_THUMBNAIL_SIZE"
+                      :max-value="MAX_THUMBNAIL_SIZE"
+                      :step="THUMBNAIL_SIZE_STEP"
+                      value-extension="%"
+                      @input="previewThumbnailSize"
+                      @change="updateThumbnailSize"
+                    />
+                  </div>
                   <FtSelect
+                    v-else-if="setting.id === 'defaultQuality'"
+                    class="quickSelect"
+                    :placeholder="t('Settings.Player Settings.Default Quality.Default Quality')"
+                    :value="defaultQuality"
+                    setting-key="defaultQuality"
+                    :select-names="qualityNames"
+                    :select-values="qualityValues"
+                    :icon="['fas', 'photo-film']"
+                    @change="updateSetting('DefaultQuality', $event)"
+                  />
+                  <FtToggleSwitch
+                    v-else-if="setting.id === 'playNextVideo'"
+                    :label="t('Settings.Player Settings.Play Next Video')"
+                    :default-value="playNextVideo"
+                    :disabled="hideRecommendedVideos"
+                    setting-key="playNextVideo"
+                    compact
+                    @change="updateSetting('PlayNextVideo', $event)"
+                  />
+                  <FtToggleSwitch
+                    v-else-if="setting.id === 'enableSubtitlesByDefault'"
+                    :label="t('Settings.Player Settings.Turn on Subtitles by Default')"
+                    :default-value="enableSubtitlesByDefault"
+                    setting-key="enableSubtitlesByDefault"
+                    compact
+                    @change="updateSetting('EnableSubtitlesByDefault', $event)"
+                  />
+                  <FtSelect
+                    v-else-if="setting.id === 'listType'"
                     class="quickSelect"
                     :placeholder="t('Settings.General Settings.Video View Type.Video View Type')"
                     :value="listType"
@@ -249,6 +261,7 @@
                     @change="updateSetting('ListType', $event)"
                   />
                   <FtSelect
+                    v-else-if="setting.id === 'playlistViewType'"
                     class="quickSelect"
                     :placeholder="t('Settings.General Settings.Playlist View Type.Playlist View Type')"
                     :value="playlistViewType"
@@ -258,27 +271,24 @@
                     :icon="playlistViewType === 'grid' ? ['fas', 'grip'] : ['fas', 'list']"
                     @change="updateSetting('PlaylistViewType', $event)"
                   />
-                </div>
-                <FtToggleSwitch
-                  :label="t('Settings.Distraction Free Settings.Hide Recommended Videos')"
-                  :default-value="hideRecommendedVideos"
-                  setting-key="hideRecommendedVideos"
-                  compact
-                  @change="handleHideRecommendedVideos"
-                />
-                <FtToggleSwitch
-                  :label="t('Settings.Distraction Free Settings.Hide Comments')"
-                  :default-value="hideComments"
-                  setting-key="hideComments"
-                  compact
-                  @change="updateSetting('HideComments', $event)"
-                />
-              </section>
-
-              <section class="menuSection">
-                <h3>{{ t('Settings.Quick Settings.Language and Region') }}</h3>
-                <div class="selectPair">
+                  <FtToggleSwitch
+                    v-else-if="setting.id === 'hideRecommendedVideos'"
+                    :label="t('Settings.Distraction Free Settings.Hide Recommended Videos')"
+                    :default-value="hideRecommendedVideos"
+                    setting-key="hideRecommendedVideos"
+                    compact
+                    @change="handleHideRecommendedVideos"
+                  />
+                  <FtToggleSwitch
+                    v-else-if="setting.id === 'hideComments'"
+                    :label="t('Settings.Distraction Free Settings.Hide Comments')"
+                    :default-value="hideComments"
+                    setting-key="hideComments"
+                    compact
+                    @change="updateSetting('HideComments', $event)"
+                  />
                   <FtSelect
+                    v-else-if="setting.id === 'currentLocale'"
                     class="quickSelect"
                     :placeholder="t('Settings.General Settings.Locale Preference')"
                     :value="currentLocale"
@@ -290,7 +300,7 @@
                     @change="updateSetting('CurrentLocale', $event)"
                   />
                   <FtSelect
-                    v-if="regionValues.length > 0"
+                    v-else-if="setting.id === 'region'"
                     class="quickSelect"
                     :placeholder="t('Settings.General Settings.Region for Trending')"
                     :value="region"
@@ -299,6 +309,19 @@
                     :select-values="regionValues"
                     :icon="['fas', 'globe']"
                     @change="updateSetting('Region', $event)"
+                  />
+                  <FtToggleSwitch
+                    v-else-if="setting.id === 'useProxy'"
+                    :label="t('Settings.Proxy Settings.Enable Tor / Proxy')"
+                    :default-value="useProxy"
+                    setting-key="useProxy"
+                    compact
+                    @change="updateProxy"
+                  />
+                  <FtQuickSettingControl
+                    v-else
+                    :definition="setting"
+                    @update="updateBasicQuickSetting"
                   />
                 </div>
               </section>
@@ -346,6 +369,7 @@ import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSlider from '../FtSlider/FtSlider.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
+import FtQuickSettingControl from '../FtQuickSettingControl/FtQuickSettingControl.vue'
 
 import store from '../../store/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
@@ -361,6 +385,12 @@ import {
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 import { getFirstCharacter } from '../../helpers/strings'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import {
+  createQuickSettingCatalog,
+  createQuickSettingSections,
+  isQuickSettingPaired,
+} from '../../helpers/quickSettings'
+import { defaultUpdaterId } from '../../store/modules/settings'
 import { switchActiveProfile, translateProfileName as getTranslatedProfileName } from '../../helpers/profileSwitching'
 import { customThemeValue, isCustomThemeValue } from '../../../customTheme'
 
@@ -474,6 +504,10 @@ const currentLocale = computed(() => store.getters.getCurrentLocale)
 const region = computed(() => store.getters.getRegion)
 const regionNames = computed(() => store.getters.getRegionNames)
 const regionValues = computed(() => store.getters.getRegionValues)
+const useProxy = computed(() => store.getters.getUseProxy)
+const proxyUrl = computed(() => (
+  `${store.getters.getProxyProtocol}://${store.getters.getProxyHostname}:${store.getters.getProxyPort}`
+))
 const showDownloadsShortcut = computed(() => (
   USING_ELECTRON &&
   store.getters.getEnableDownloads &&
@@ -482,6 +516,42 @@ const showDownloadsShortcut = computed(() => (
 const showSettingsShortcut = computed(() => (
   !USING_ELECTRON || !store.getters.getMoveSettingsToAppHeader
 ))
+
+const quickSettings = computed(() => store.getters.getQuickSettings)
+const quickSettingCatalog = computed(() => createQuickSettingCatalog(t, USING_ELECTRON))
+const quickSettingSectionLabels = computed(() => new Map(
+  createQuickSettingSections(t, USING_ELECTRON).map(section => [section.id, section.label])
+))
+const orderedQuickSettingSections = computed(() => {
+  const catalogById = new Map(quickSettingCatalog.value.map(setting => [setting.id, setting]))
+  const visibleSettings = quickSettings.value
+    .map(settingId => catalogById.get(settingId))
+    .filter(setting => setting != null && (
+      (setting.id !== 'mainColor' || mainColorAvailable.value) &&
+      (setting.id !== 'region' || regionValues.value.length > 0)
+    ))
+
+  return visibleSettings.reduce((sections, setting) => {
+    let section = sections.at(-1)
+    if (section?.id !== setting.section) {
+      section = {
+        id: setting.section,
+        label: setting.id === 'useProxy'
+          ? t('Settings.Proxy Settings.Proxy Settings')
+          : quickSettingSectionLabels.value.get(setting.section),
+        settings: [],
+      }
+      sections.push(section)
+    }
+    section.settings.push(setting)
+    return sections
+  }, [])
+})
+
+function isPairedQuickSetting(settings, settingId) {
+  const settingIndex = settings.findIndex(setting => setting.id === settingId)
+  return isQuickSettingPaired(settings, settingIndex)
+}
 
 const RESOLUTION_VALUES = ['2160', '1440', '1080', '720', '480', '360', '240', '144']
 const autoQualityAvailable = computed(() => playbackEngineSupportsAutoQuality(store.getters.getVideoPlaybackEngine))
@@ -597,13 +667,13 @@ onBeforeUnmount(() => {
   stopObservingMainContent()
 })
 
-watch(profilePanelOpen, async (open) => {
+watch(profilePanelOpen, async (profileOpen) => {
   if (!menuOpen.value) return
   stopObservingMainContent()
   await nextTick()
-  const scrollViewport = open ? profileScrollRef.value : mainScrollRef.value
+  const scrollViewport = profileOpen ? profileScrollRef.value : mainScrollRef.value
   if (scrollViewport) restoreOverlayScrollTop(scrollViewport, 0)
-  if (!open) observeMainContent()
+  if (!profileOpen) observeMainContent()
 })
 
 watch(mainColorAvailable, async () => {
@@ -624,6 +694,10 @@ function openProfilePanelFromContextMenu() {
 function closeProfilePanel() {
   profilePanelOpen.value = false
   focusMenu()
+}
+
+function updateBasicQuickSetting(settingId, value) {
+  return runSettingUpdate(() => store.dispatch(defaultUpdaterId(settingId), value))
 }
 
 function handleMenuFocusOut(event) {
@@ -714,6 +788,19 @@ async function runSettingUpdate(update) {
 
 function updateUiScale(value) {
   return runSettingUpdate(() => store.dispatch('updateUiScale', value))
+}
+
+function updateProxy(value) {
+  return runSettingUpdate(async () => {
+    if (USING_ELECTRON) {
+      if (value) {
+        await window.ftElectron.enableProxy(proxyUrl.value)
+      } else {
+        await window.ftElectron.disableProxy()
+      }
+    }
+    await store.dispatch('updateUseProxy', value)
+  })
 }
 
 function previewThumbnailSize(value) {

@@ -206,6 +206,9 @@
 
 .menuSection {
   border-block-start: 1px solid var(--divider-color);
+  column-gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   padding-block: 10px 12px;
   padding-inline: 18px;
 }
@@ -214,10 +217,19 @@
   color: var(--secondary-text-color);
   font-size: 12px;
   font-weight: 600;
+  grid-column: 1 / -1;
   line-height: 1.2;
   margin-block: 0 10px;
   margin-inline: 0;
   text-transform: uppercase;
+}
+
+.quickSettingControl {
+  grid-column: 1 / -1;
+}
+
+.quickSettingControl.pairedQuickSetting {
+  grid-column: auto;
 }
 
 .menuSection :deep(.pure-material-slider),
@@ -233,20 +245,6 @@
 
 .menuSection :deep(.quickSelect + .quickSelect) {
   margin-block-start: 28px;
-}
-
-.selectPair {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.selectPair:has(> :only-child) {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.selectPair :deep(.quickSelect + .quickSelect) {
-  margin-block-start: 26px;
 }
 
 .menuSection :deep(.quickSelect .select-text),
@@ -336,11 +334,7 @@
 }
 
 @media only screen and (width <= 400px) {
-  .selectPair {
-    grid-template-columns: 1fr;
-  }
-
-  .selectPair :deep(.quickSelect + .quickSelect) {
-    margin-block-start: 28px;
+  .quickSettingControl.pairedQuickSetting {
+    grid-column: 1 / -1;
   }
 }
