@@ -426,12 +426,12 @@ async function main() {
     title: options.title,
   })
   const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'opentubex-release-promo-'))
-  const htmlPath = path.join(tempDirectory, 'promo.html')
-  fs.writeFileSync(htmlPath, html)
-  fs.mkdirSync(path.dirname(options.output), { recursive: true })
-
   let electronApp
   try {
+    const htmlPath = path.join(tempDirectory, 'promo.html')
+    fs.writeFileSync(htmlPath, html)
+    fs.mkdirSync(path.dirname(options.output), { recursive: true })
+
     electronApp = await electron.launch({
       args: [electronEntry],
       env: {
