@@ -64,6 +64,18 @@ test('removes one synced tab set and drops an empty device', () => {
   assert.deepEqual(withoutPhone.deletedSessions.phone, ['phone'])
 })
 
+test('records a deletion after a concurrent sync already removed the device', () => {
+  const value = {
+    version: 1,
+    mode: 'separate',
+    devices: {},
+    shared: [],
+  }
+
+  const removed = removeSyncSession(value, 'missing-phone', 'stale-session')
+  assert.deepEqual(removed.deletedSessions['missing-phone'], ['stale-session'])
+})
+
 test('keeps a deleted tab set from returning while its owning device still has it open', () => {
   const retained = session('retained-on-phone', 1)
   const previous = {

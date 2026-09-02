@@ -86,13 +86,13 @@ export function getOtherDeviceSessions(value, deviceId) {
 export function removeSyncSession(value, deviceId, sessionId) {
   const document = normalizeSyncSessionsDocument(value)
   const device = document.devices[deviceId]
-  if (!device) return document
-
-  device.sessions = device.sessions.filter(session => session.sessionId !== sessionId)
   document.deletedSessions[deviceId] = Array.from(new Set([
     ...(document.deletedSessions[deviceId] ?? []),
     sessionId,
   ]))
+  if (!device) return document
+
+  device.sessions = device.sessions.filter(session => session.sessionId !== sessionId)
   if (device.sessions.length === 0) delete document.devices[deviceId]
   return document
 }
