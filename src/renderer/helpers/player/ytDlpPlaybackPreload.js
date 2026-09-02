@@ -30,27 +30,15 @@ function scheduleYtDlpPlaybackPreload(loadSource) {
 }
 
 /**
- * Identifies every setting that can change yt-dlp's extracted stream URLs.
+ * Identifies every setting that requires fresh yt-dlp stream URLs.
  * @param {Record<string, unknown>} getters
  */
 export function buildYtDlpPlaybackCacheKey(getters) {
-  const proxyConfiguration = getters.getUseProxy
-    ? [
-        getters.getProxyProtocol,
-        getters.getProxyHostname,
-        getters.getProxyPort,
-        getters.getProxyUsername,
-        getters.getProxyPassword,
-      ]
-    : []
-
   return JSON.stringify([
     'captions-v4',
     getters.getYtDlpSource,
     getters.getYtDlpChannel,
     getters.getYtDlpPath,
-    getters.getUseProxy,
-    ...proxyConfiguration,
     getters.getYtDlpPlaybackAuthMode,
     getters.getYtDlpPlaybackCookiesPath,
     getters.getYtDlpPlaybackCookiesBrowser,

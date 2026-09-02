@@ -16,28 +16,48 @@ const source = videoId => ({
   expiryDate: new Date(Date.now() + 10 * 60 * 1000),
 })
 
-test('includes proxy and authentication settings in the playback cache key', () => {
-  const getters = {
+test('reuses preloaded playback sources across proxy changes', () => {
+  const directGetters = {
     getYtDlpSource: 'system',
     getYtDlpChannel: 'stable',
     getYtDlpPath: '/usr/bin/yt-dlp',
+    getUseProxy: false,
+    getYtDlpPlaybackAuthMode: 'browser',
+    getYtDlpPlaybackCookiesPath: '',
+    getYtDlpPlaybackCookiesBrowser: 'firefox',
+    getYtDlpPlaybackCookiesBrowserProfile: 'default',
+  }
+  const proxyGetters = {
+    ...directGetters,
     getUseProxy: true,
     getProxyProtocol: 'socks5',
     getProxyHostname: 'localhost',
     getProxyPort: 9050,
     getProxyUsername: 'user',
     getProxyPassword: 'password',
-    getYtDlpPlaybackAuthMode: 'browser',
-    getYtDlpPlaybackCookiesPath: '',
-    getYtDlpPlaybackCookiesBrowser: 'firefox',
-    getYtDlpPlaybackCookiesBrowserProfile: 'default',
   }
+  const directKey = buildYtDlpPlaybackCacheKey(directGetters)
 
-  assert.deepEqual(JSON.parse(buildYtDlpPlaybackCacheKey(getters)), [
-    'captions-v4', 'system', 'stable', '/usr/bin/yt-dlp', true,
-    'socks5', 'localhost', 9050, 'user', 'password',
-    'browser', '', 'firefox', 'default',
-  ])
+  assert.equal(
+    directKey,
+    buildYtDlpPlaybackCacheKey(proxyGetters)
+  )
+
+  for (const [setting, value] of Object.entries({
+    getYtDlpSource: 'bundled',
+    getYtDlpChannel: 'nightly',
+    getYtDlpPath: '/opt/yt-dlp',
+    getYtDlpPlaybackAuthMode: 'cookies',
+    getYtDlpPlaybackCookiesPath: '/tmp/cookies.txt',
+    getYtDlpPlaybackCookiesBrowser: 'chromium',
+    getYtDlpPlaybackCookiesBrowserProfile: 'Profile 1',
+  })) {
+    assert.notEqual(
+      directKey,
+      buildYtDlpPlaybackCacheKey({ ...directGetters, [setting]: value }),
+      setting
+    )
+  }
 })
 
 test('normalizes the number of upcoming yt-dlp videos to preload', () => {
