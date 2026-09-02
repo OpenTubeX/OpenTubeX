@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 test.use({
@@ -63,4 +63,29 @@ test('restores user-opened Picture-in-Picture across a video reload', async ({ a
   await setMinimized(app, false)
   await page.waitForTimeout(1000)
   expect(await pictureInPictureActive(page)).toBe(true)
+})
+
+test('does not transfer Picture-in-Picture from another tab during reload', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await setFocused(app, page, true)
+  const firstVideo = await openMockedVideo(page)
+  const firstTabId = await page.locator(activeTab).getAttribute('data-tab-id')
+
+  await firstVideo.evaluate(element => element.requestPictureInPicture())
+  await expect.poll(() => firstVideo.evaluate(
+    element => document.pictureInPictureElement === element
+  )).toBe(true)
+
+  await page.keyboard.press('Control+t')
+  await openMockedVideo(page)
+  const secondTabId = await page.locator(activeTab).getAttribute('data-tab-id')
+
+  const watchView = await watchViewHandle(page, secondTabId)
+  await watchView.evaluate(view => view.reloadView())
+  await waitForPlayback(page)
+
+  const originalVideo = page.locator(`.tabContent[data-tab-id="${firstTabId}"] video`)
+  expect(await originalVideo.evaluate(
+    element => document.pictureInPictureElement === element
+  )).toBe(true)
 })

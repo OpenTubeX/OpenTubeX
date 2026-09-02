@@ -10477,11 +10477,12 @@ export default defineComponent({
         if (ui.getControls()) {
           // save the state of player settings to reinitialize them upon next creation
           const controls = ui.getControls()
+          const isCurrentPlayerInPip = document.pictureInPictureElement === video.value
           uiState = {
             startNextVideoInFullscreen: controls.isFullScreenEnabled(),
             startNextVideoInFullwindow: fullWindowEnabled.value,
-            startNextVideoInPip: controls.isPiPEnabled(),
-            autoPictureInPictureState: controls.isPiPEnabled()
+            startNextVideoInPip: isCurrentPlayerInPip,
+            autoPictureInPictureState: isCurrentPlayerInPip
               ? getAutoPictureInPictureState()
               : null,
             startNextVideoWithChapters: showChaptersOverlay.value,
