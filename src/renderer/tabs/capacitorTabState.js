@@ -89,19 +89,6 @@ export function activateCapacitorTab(session, tabId) {
   }
 }
 
-export function rollbackCapacitorTabActivation(session, failedTabId, fallbackTabId, selectionRevision) {
-  if (
-    session.activeTabId !== failedTabId ||
-    session.selectionRevision !== selectionRevision ||
-    failedTabId === fallbackTabId ||
-    !session.tabs.some(tab => tab.id === fallbackTabId)
-  ) {
-    return session
-  }
-
-  return activateCapacitorTab(loadCapacitorTab(session, fallbackTabId), fallbackTabId)
-}
-
 export function loadCapacitorTab(session, tabId) {
   return updateCapacitorTabRuntime(session, tabId, tab => {
     if (tab.loadState !== 'unloaded') return tab
@@ -265,7 +252,7 @@ export function toRuntimeTabState(session, presentedTabId = session.activeTabId)
       preloadInBackground: tab.loadState === 'mounting' && tab.id !== session.activeTabId
     })),
     groups: [],
-    closedTabs: (session.closedTabs ?? []).toReversed().map(tab => ({
+    closedTabs: (session.closedTabs ?? []).slice().reverse().map(tab => ({
       ...tab,
       route: cloneRoute(tab.route),
       history: tab.history.map(entry => ({

@@ -7,10 +7,10 @@ import {
   applyMinimizedState,
   applyPictureInPictureState,
   BLUR_TRIGGER_RECHECK_DELAY_MS,
-  canEnableAndroidAutoPictureInPicture,
   createAutoPictureInPictureState,
   markPictureInPictureRequested,
   markPictureInPictureRequestFailed,
+  resolveAndroidAutoPictureInPictureUpdate,
   resolveAutoPictureInPictureAction,
   shouldAutoPictureInPicture
 } from './autoPictureInPictureState'
@@ -103,12 +103,15 @@ export function useAutoPictureInPicture({
   function updateAutoPip() {
     if (process.env.IS_CAPACITOR) {
       const videoElement = video.value
+      const enabled = resolveAndroidAutoPictureInPictureUpdate(
+        isActiveTab.value,
+        androidAutoPictureInPicture.value,
+        props.format,
+        videoElement
+      )
+      if (enabled === null) return
       setAndroidAutoPictureInPicture(
-        canEnableAndroidAutoPictureInPicture(
-          androidAutoPictureInPicture.value,
-          props.format,
-          videoElement
-        ),
+        enabled,
         videoElement
       ).catch(error => console.warn('Failed to configure Android auto Picture-in-Picture:', error))
       return
@@ -242,7 +245,9 @@ export function useAutoPictureInPicture({
       video.value?.removeEventListener('play', updateAutoPip)
       video.value?.removeEventListener('pause', updateAutoPip)
       video.value?.removeEventListener('ended', updateAutoPip)
-      setAndroidAutoPictureInPicture(false, video.value).catch(() => {})
+      if (isActiveTab.value) {
+        setAndroidAutoPictureInPicture(false, video.value).catch(() => {})
+      }
     } else if (process.env.IS_ELECTRON) {
       removeMinimizedListener?.()
       removeMinimizedListener = null

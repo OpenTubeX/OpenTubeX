@@ -10,7 +10,6 @@ import {
   loadCapacitorTab,
   moveCapacitorTab,
   reloadCapacitorTab,
-  rollbackCapacitorTabActivation,
   restoreClosedCapacitorTab,
   restoreCapacitorTabSession,
   setCapacitorTabPinned,
@@ -223,29 +222,6 @@ test('keeps the previously presented Capacitor tab during activation', () => {
   assert.equal(state.presentedTabId, 'tab-1')
 })
 
-test('rolls back a failed Capacitor tab activation without overriding newer selections', () => {
-  let session = restoreCapacitorTabSession(null, HOME_ROUTE, () => 'tab-1')
-  session = completeCapacitorTabMount(session, 'tab-1', 1)
-  session = addCapacitorTab(session, createCapacitorTab(WATCH_ROUTE, 'Video', 'tab-2'))
-  const failedRevision = session.selectionRevision
-  session = completeCapacitorTabMount(session, 'tab-2', 1, false)
-
-  const rolledBack = rollbackCapacitorTabActivation(
-    session,
-    'tab-2',
-    'tab-1',
-    failedRevision
-  )
-  assert.equal(rolledBack.activeTabId, 'tab-1')
-  assert.equal(rolledBack.selectionRevision, failedRevision + 1)
-
-  const newerSelection = activateCapacitorTab(rolledBack, 'tab-2')
-  assert.equal(
-    rollbackCapacitorTabActivation(newerSelection, 'tab-2', 'tab-1', failedRevision),
-    newerSelection
-  )
-})
-
 test('pins Capacitor tabs first and only reorders within their pin group', () => {
   let session = restoreCapacitorTabSession(null, HOME_ROUTE, () => 'tab-1')
   session = addCapacitorTab(session, createCapacitorTab(WATCH_ROUTE, 'Video', 'tab-2'))
@@ -340,6 +316,21 @@ test('persists at most ten closed Capacitor tabs and exposes newest first at run
   const restored = restoreCapacitorTabSession(session, HOME_ROUTE)
   assert.deepEqual(restored.closedTabs.map(tab => tab.title), session.closedTabs.map(tab => tab.title))
   assert.equal(toRuntimeTabState(restored).closedTabs[0].title, 'Video 11')
+})
+
+test('converts a Capacitor session on Android WebViews without Array.toReversed', () => {
+  const toReversed = Array.prototype.toReversed
+  Array.prototype.toReversed = undefined
+
+  try {
+    let session = restoreCapacitorTabSession(null, HOME_ROUTE, () => 'tab-home')
+    session = addCapacitorTab(session, createCapacitorTab(WATCH_ROUTE, 'Video', 'tab-video'))
+    session = closeCapacitorTab(session, 'tab-video', HOME_ROUTE)
+
+    assert.equal(toRuntimeTabState(session).closedTabs[0].title, 'Video')
+  } finally {
+    Array.prototype.toReversed = toReversed
+  }
 })
 
 test('does not retain the synthetic landing tab created when the final tab closes', () => {

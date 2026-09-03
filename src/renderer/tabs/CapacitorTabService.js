@@ -7,13 +7,12 @@ import {
   loadCapacitorTab,
   moveCapacitorTab,
   reloadCapacitorTab,
-  rollbackCapacitorTabActivation,
   restoreClosedCapacitorTab,
   restoreCapacitorTabSession,
   setCapacitorTabPinned,
   toRuntimeTabState,
   unloadCapacitorTab
-} from './capacitorTabState'
+} from './capacitorTabState.js'
 
 const STORAGE_KEY = 'opentubex-capacitor-tabs'
 const PERSISTED_MUTATIONS = new Set([
@@ -37,7 +36,7 @@ export function getCapacitorTabService() {
   return service
 }
 
-class CapacitorTabService {
+export class CapacitorTabService {
   constructor(router, store, navigation) {
     this.router = router
     this.store = store
@@ -89,12 +88,14 @@ class CapacitorTabService {
 
   async createTab(location = `/${this.store.getters.getLandingPage}`, title = '', makeActive = true) {
     const tab = createCapacitorTab(this.router.resolve(location), title)
-    const session = addCapacitorTab(this.currentSession(), tab, makeActive)
-    this.commitSession(session)
-    if (makeActive) {
-      await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)
+    const previous = this.currentSession()
+    const session = addCapacitorTab(previous, tab, makeActive)
+    if (!makeActive) {
+      this.commitSession(session)
+      return tab.id
     }
-    return tab.id
+
+    return await this.commitAndPresent(previous, session) ? tab.id : null
   }
 
   async activateTab(tabId) {
@@ -102,22 +103,7 @@ class CapacitorTabService {
     const session = activateCapacitorTab(loadCapacitorTab(previous, tabId), tabId)
     if (session === previous) return false
 
-    this.commitSession(session)
-    const presented = await this.navigation.requestPresentation(tabId, session.selectionRevision)
-    if (presented) return true
-
-    const current = this.currentSession()
-    const rolledBack = rollbackCapacitorTabActivation(
-      current,
-      tabId,
-      previous.activeTabId,
-      session.selectionRevision
-    )
-    if (rolledBack !== current) {
-      this.commitSession(rolledBack)
-      await this.navigation.requestPresentation(rolledBack.activeTabId, rolledBack.selectionRevision)
-    }
-    return false
+    return await this.commitAndPresent(previous, session)
   }
 
   async duplicateTab(tabId) {
@@ -126,10 +112,9 @@ class CapacitorTabService {
 
     const tab = createCapacitorTab(source.route)
     tab.title = source.contentTitle || source.title || source.route.fullPath
-    const session = addCapacitorTab(this.currentSession(), tab)
-    this.commitSession(session)
-    await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)
-    return tab.id
+    const previous = this.currentSession()
+    const session = addCapacitorTab(previous, tab)
+    return await this.commitAndPresent(previous, session) ? tab.id : null
   }
 
   async closeTab(tabId) {
@@ -137,6 +122,8 @@ class CapacitorTabService {
     if (!previous.tabs.some(tab => tab.id === tabId)) return false
 
     const wasActive = previous.activeTabId === tabId
+    const wasPresented = this.store.getters.getPresentedTabId === tabId
+    if (wasPresented && !wasActive) return false
     if (wasActive) this.navigation.saveScroll(tabId)
 
     if (wasActive && previous.tabs.length > 1) {
@@ -151,11 +138,11 @@ class CapacitorTabService {
     if (needsPresentation) {
       session = loadCapacitorTab(session, session.activeTabId)
     }
-    this.commitSession(session)
-
     if (needsPresentation) {
-      await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)
+      return await this.commitAndPresent(previous, session)
     }
+
+    this.commitSession(session)
     return true
   }
 
@@ -164,9 +151,7 @@ class CapacitorTabService {
     const session = restoreClosedCapacitorTab(previous)
     if (session === previous) return null
 
-    this.commitSession(session)
-    await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)
-    return session.activeTabId
+    return await this.commitAndPresent(previous, session) ? session.activeTabId : null
   }
 
   getSyncSessions() {
@@ -188,6 +173,7 @@ class CapacitorTabService {
     const synced = sessions.find(session => Array.isArray(session?.tabs) && session.tabs.length > 0)
     if (!synced) return false
 
+    const previous = this.currentSession()
     const tabs = synced.tabs.map(tab => createCapacitorTab(
       this.router.resolve(syncTabRoute(tab.url)),
       tab.title,
@@ -203,9 +189,9 @@ class CapacitorTabService {
         : tabs[0].id,
       closedTabs: [],
     }, this.router.currentRoute.value)
+    if (!await this.commitAndPresent(previous, session)) return false
+
     this.sessionUpdatedAt = Number.isFinite(synced.updatedAt) ? synced.updatedAt : Date.now()
-    this.commitSession(session)
-    await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)
     this.persist()
     return true
   }
@@ -215,6 +201,7 @@ class CapacitorTabService {
 
     for (const tab of session.tabs) {
       const tabId = await this.createTab(syncTabRoute(tab.url), tab.title)
+      if (!tabId) return false
       if (tab.isPinned === true) this.setPinned(tabId, true)
     }
     return true
@@ -274,6 +261,10 @@ class CapacitorTabService {
     const tab = session.tabs.find(candidate => candidate.id === tabId)
     if (!tab || tab.loadState === 'unloaded' || tab.loadState === 'unloading') return false
 
+    if (this.store.getters.getPresentedTabId === tabId && session.activeTabId !== tabId) {
+      return false
+    }
+
     if (session.activeTabId === tabId) {
       if (session.tabs.length <= 1) return false
 
@@ -301,6 +292,33 @@ class CapacitorTabService {
     if (session !== previous) this.commitSession(session)
   }
 
+  async commitAndPresent(previous, session) {
+    const previousPresentedTabId = this.store.getters.getPresentedTabId
+    this.commitSession(session)
+    if (await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)) {
+      return true
+    }
+
+    const current = this.currentSession()
+    if (
+      current.activeTabId !== session.activeTabId ||
+      current.selectionRevision !== session.selectionRevision
+    ) {
+      return false
+    }
+
+    const rollbackPresentedTabId = previous.tabs.some(tab => tab.id === previousPresentedTabId)
+      ? previousPresentedTabId
+      : previous.activeTabId
+    const rollback = {
+      ...previous,
+      selectionRevision: current.selectionRevision + 1
+    }
+    this.commitSession(rollback, rollbackPresentedTabId)
+    await this.navigation.requestPresentation(rollback.activeTabId, rollback.selectionRevision)
+    return false
+  }
+
   currentSession() {
     return {
       tabs: this.store.getters.getTabs.map(tab => ({
@@ -317,7 +335,7 @@ class CapacitorTabService {
         isPlaying: tab.isPlaying,
         pendingReloadRoute: tab.pendingReloadRoute
       })),
-      closedTabs: this.store.getters.getClosedTabs.toReversed().map(tab => ({
+      closedTabs: this.store.getters.getClosedTabs.slice().reverse().map(tab => ({
         id: tab.id,
         title: tab.title || tab.route.fullPath,
         isPinned: tab.isPinned === true,
@@ -357,7 +375,7 @@ function findReplacementTabId(tabs, tabId) {
 
   const candidates = [
     ...tabs.slice(tabIndex + 1),
-    ...tabs.slice(0, tabIndex).toReversed()
+    ...tabs.slice(0, tabIndex).reverse()
   ]
   return candidates.find(tab => tab.loadState === 'loaded')?.id ?? candidates[0]?.id ?? null
 }

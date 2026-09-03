@@ -226,6 +226,7 @@ onErrorCaptured((error) => {
 })
 
 onBeforeUnmount(() => {
+  lifecycleRevision += 1
   disposeMountedContent().catch(error => {
     console.error(`Failed to dispose logical tab ${props.tab.id}:`, error)
   })

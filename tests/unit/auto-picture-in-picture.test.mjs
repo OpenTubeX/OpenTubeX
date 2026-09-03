@@ -8,6 +8,7 @@ import {
   createAutoPictureInPictureState,
   canEnableAndroidAutoPictureInPicture,
   markPictureInPictureRequested,
+  resolveAndroidAutoPictureInPictureUpdate,
   resolveAutoPictureInPictureAction,
   shouldAutoPictureInPicture
 } from '../../src/renderer/components/ft-shaka-video-player/opentubex/autoPictureInPictureState.js'
@@ -19,6 +20,19 @@ test('Android auto PiP is enabled only while a video is actively playing', () =>
   assert.equal(canEnableAndroidAutoPictureInPicture(false, 'video', { paused: false, ended: false }), false)
   assert.equal(canEnableAndroidAutoPictureInPicture(true, 'audio', { paused: false, ended: false }), false)
   assert.equal(canEnableAndroidAutoPictureInPicture(true, 'video', { paused: false, ended: false }), true)
+})
+
+test('background Android players cannot update the global auto PiP state', () => {
+  const playingVideo = { paused: false, ended: false }
+
+  assert.equal(
+    resolveAndroidAutoPictureInPictureUpdate(false, true, 'video', playingVideo),
+    null
+  )
+  assert.equal(
+    resolveAndroidAutoPictureInPictureUpdate(true, true, 'video', playingVideo),
+    true
+  )
 })
 
 const ALL_TRIGGERS = {
@@ -33,7 +47,7 @@ const ALL_TRIGGERS = {
  * Mirrors the composable: resolve an action, request the matching toggle and
  * report which toggles the player would have been asked to perform.
  */
-function createPlayer(state, options = ALL_TRIGGERS) {
+function createPlayer (state, options = ALL_TRIGGERS) {
   const toggles = []
   let inPip = false
 
