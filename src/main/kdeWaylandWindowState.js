@@ -1,7 +1,17 @@
 import dbus from 'dbus-native'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
 const KDE_DESKTOP_PATTERN = /(?:^|[:;/_-])(?:kde|plasma(?:wayland)?)(?:$|[:;/_-])/i
 const KWIN_SERVICE = 'org.kde.KWin'
+const KWIN_SCRIPTING_PATH = '/Scripting'
+const KWIN_SCRIPTING_INTERFACE = 'org.kde.kwin.Scripting'
+const KWIN_ACTIVE_WINDOW_SCRIPT_PREFIX = 'opentubex-active-window'
+const ACTIVE_WINDOW_REPORT_PATH = '/io/github/OpenTubeX/KWinActiveWindow'
+const ACTIVE_WINDOW_REPORT_INTERFACE = 'io.github.OpenTubeX.KWinActiveWindow'
+const ACTIVE_WINDOW_QUERY_TIMEOUT = 1_500
+const KDE_DESKTOP_POPUP_CLASS = /(?:^|\.)(?:krunner|plasmashell)$/i
 const WINDOW_SEARCH_TERM = 'OpenTubeX'
 
 /**
@@ -72,6 +82,14 @@ export function shouldMonitorKdeWaylandWindowState({
  *   width: number,
  *   height: number
  * }} KwinWindowInfo
+ */
+
+/**
+ * @typedef {{
+ *   uuid: string,
+ *   skipTaskbar: boolean,
+ *   resourceClass: string
+ * }} KwinActiveWindowInfo
  */
 
 /**
@@ -198,29 +216,142 @@ async function queryKwinWindows(kwin, runner, processId) {
  *
  * @returns {Promise<{
  *   close: () => Promise<void>,
+ *   queryActiveWindow: () => Promise<KwinActiveWindowInfo | null>,
  *   queryWindow: (uuid: string) => Promise<KwinWindowInfo | null>,
  *   queryWindows: (processId: number) => Promise<KwinWindowInfo[]>
  * } | null>}
  */
 export async function createKdeWaylandWindowStateBackend() {
   let bus
+  let scriptDirectory
 
   try {
     bus = dbus.sessionBus({ reconnect: true, timeout: 2_000 })
     bus.connection.on('error', () => {})
     const service = bus.getService(KWIN_SERVICE)
-    const [kwin, runner] = await Promise.all([
+    const [kwin, runner, scripting] = await Promise.all([
       service.getInterface('/KWin', 'org.kde.KWin'),
       service.getInterface('/WindowsRunner', 'org.kde.krunner1'),
+      service.getInterface(KWIN_SCRIPTING_PATH, KWIN_SCRIPTING_INTERFACE),
     ])
     await runner.Match(WINDOW_SEARCH_TERM)
+    if (typeof bus.name !== 'string') throw new Error('D-Bus connection has no unique name')
+
+    scriptDirectory = await mkdtemp(join(tmpdir(), 'opentubex-kwin-'))
+    const scriptPath = join(scriptDirectory, 'active-window.js')
+    const scriptPluginName = `${KWIN_ACTIVE_WINDOW_SCRIPT_PREFIX}-${process.pid}`
+    let activeWindowQueryId = 0
+    let closed = false
+    let pendingReport = null
+    let queryQueue = Promise.resolve()
+
+    // KWin's public getWindowInfo map omits activation state. A one-shot script
+    // can read workspace.activeWindow without staying loaded between queries.
+    const loadScript = (scriptPath, pluginName) => bus.invoke({
+      destination: KWIN_SERVICE,
+      path: KWIN_SCRIPTING_PATH,
+      interface: KWIN_SCRIPTING_INTERFACE,
+      member: 'loadScript',
+      signature: 'ss',
+      body: [scriptPath, pluginName],
+    })
+
+    bus.exportInterface({
+      ReportActiveWindow: (requestId, uuid, skipTaskbar, resourceClass) => {
+        if (pendingReport?.requestId === requestId) {
+          pendingReport.resolve({ uuid, skipTaskbar, resourceClass })
+        }
+        return null
+      },
+    }, ACTIVE_WINDOW_REPORT_PATH, {
+      name: ACTIVE_WINDOW_REPORT_INTERFACE,
+      methods: {
+        ReportActiveWindow: ['ssbs', '', ['requestId', 'uuid', 'skipTaskbar', 'resourceClass'], []],
+      },
+      signals: {},
+      properties: {},
+    })
+
+    // A previous process may have exited while its one-shot script was running.
+    await scripting.unloadScript(scriptPluginName).catch(() => {})
+
+    /** @returns {Promise<KwinActiveWindowInfo | null>} */
+    const runActiveWindowQuery = async () => {
+      if (closed) return null
+
+      const requestId = `${process.pid}-${++activeWindowQueryId}`
+      const script = `
+const activeWindow = workspace.activeWindow;
+callDBus(
+  ${JSON.stringify(bus.name)},
+  ${JSON.stringify(ACTIVE_WINDOW_REPORT_PATH)},
+  ${JSON.stringify(ACTIVE_WINDOW_REPORT_INTERFACE)},
+  "ReportActiveWindow",
+  ${JSON.stringify(requestId)},
+  activeWindow ? activeWindow.internalId.toString() : "",
+  activeWindow ? activeWindow.skipTaskbar : false,
+  activeWindow ? activeWindow.resourceClass.toString() : ""
+);
+`
+      await writeFile(scriptPath, script, 'utf8')
+
+      try {
+        const scriptId = await loadScript(scriptPath, scriptPluginName)
+        if (!Number.isInteger(scriptId) || scriptId < 0) return null
+
+        const scriptInterface = await service.getInterface(
+          `${KWIN_SCRIPTING_PATH}/Script${scriptId}`,
+          'org.kde.kwin.Script'
+        )
+        const report = new Promise(resolve => {
+          const timeout = setTimeout(() => {
+            if (pendingReport?.requestId === requestId) pendingReport = null
+            resolve(null)
+          }, ACTIVE_WINDOW_QUERY_TIMEOUT)
+          pendingReport = {
+            requestId,
+            resolve: value => {
+              clearTimeout(timeout)
+              if (pendingReport?.requestId === requestId) pendingReport = null
+              resolve(value)
+            },
+          }
+        })
+        await scriptInterface.run()
+        return await report
+      } finally {
+        if (pendingReport?.requestId === requestId) {
+          pendingReport.resolve(null)
+        }
+        await scripting.unloadScript(scriptPluginName).catch(() => {})
+      }
+    }
+
+    /** @returns {Promise<KwinActiveWindowInfo | null>} */
+    const queryActiveWindow = () => {
+      const query = queryQueue.then(runActiveWindowQuery)
+      queryQueue = query.catch(() => null)
+      return query
+    }
 
     return {
-      close: () => bus.close(),
+      close: async () => {
+        closed = true
+        pendingReport?.resolve(null)
+        pendingReport = null
+        await scripting.unloadScript(scriptPluginName).catch(() => {})
+        bus.unexportInterface(ACTIVE_WINDOW_REPORT_PATH, ACTIVE_WINDOW_REPORT_INTERFACE)
+        await rm(scriptDirectory, { force: true, recursive: true }).catch(() => {})
+        await bus.close()
+      },
+      queryActiveWindow,
       queryWindow: uuid => queryKwinWindow(kwin, uuid),
       queryWindows: processId => queryKwinWindows(kwin, runner, processId),
     }
   } catch {
+    if (scriptDirectory !== undefined) {
+      await rm(scriptDirectory, { force: true, recursive: true }).catch(() => {})
+    }
     await bus?.close().catch(() => {})
     return null
   }
@@ -235,6 +366,7 @@ export async function createKdeWaylandWindowStateBackend() {
  *   browserWindow: import('electron').BrowserWindow,
  *   backend: ReturnType<typeof createKdeWaylandWindowStateBackend>,
  *   applyWindowIdentity?: () => void,
+ *   onFocusedState?: (focused: boolean) => void,
  *   onMinimizedState: (minimized: boolean) => void,
  *   releaseWindowIdentity?: () => void,
  *   processId?: number,
@@ -247,6 +379,7 @@ export function monitorKdeWaylandWindowState({
   browserWindow,
   backend,
   applyWindowIdentity = () => {},
+  onFocusedState = () => {},
   onMinimizedState,
   releaseWindowIdentity = () => {},
   processId = process.pid,
@@ -258,9 +391,14 @@ export function monitorKdeWaylandWindowState({
   let minimized = false
   let minimizedUuid = null
   let windowUuid = null
+  let focusPollTimer = null
   let pollTimer = null
   let stopped = false
 
+  const clearFocusPoll = () => {
+    if (focusPollTimer !== null) clearTimeout(focusPollTimer)
+    focusPollTimer = null
+  }
   const clearPoll = () => {
     if (pollTimer !== null) clearTimeout(pollTimer)
     pollTimer = null
@@ -316,17 +454,51 @@ export function monitorKdeWaylandWindowState({
       refreshBaseline(token).catch(() => {})
     }, pollInterval)
   }
+  const isDesktopPopup = activeWindow => activeWindow !== null &&
+    activeWindow.skipTaskbar &&
+    KDE_DESKTOP_POPUP_CLASS.test(activeWindow.resourceClass)
+  const isLogicallyFocused = (activeWindow, targetUuid) => (
+    activeWindow !== null && activeWindow.uuid === targetUuid
+  ) || isDesktopPopup(activeWindow)
+  // Starting an app from the launcher does not blur this BrowserWindow again.
+  // Keep checking until the popup closes or hands focus to an app. Some shell
+  // popups leave the app's top-level KWin window active while Electron blurs.
+  const scheduleFocusPoll = (token, targetUuid) => {
+    clearFocusPoll()
+    if (stopped) return
+
+    focusPollTimer = setTimeout(async () => {
+      focusPollTimer = null
+      if (stopped || generation !== token) return
+
+      let activeWindow = null
+      try {
+        const value = await backend
+        if (value !== null) activeWindow = await value.queryActiveWindow()
+      } catch {
+        // Treat an unavailable compositor query as an ordinary focus loss.
+      }
+      if (stopped || generation !== token) return
+
+      const focused = isLogicallyFocused(activeWindow, targetUuid)
+      onFocusedState(focused)
+      if (focused) scheduleFocusPoll(token, targetUuid)
+    }, pollInterval)
+  }
   const handleFocus = () => {
     applyWindowIdentity()
     const token = ++generation
+    clearFocusPoll()
     clearPoll()
     minimizedUuid = null
     setMinimized(false)
+    onFocusedState(true)
     refreshBaseline(token).catch(() => {})
   }
   const handleBlur = async () => {
     applyWindowIdentity()
     const token = ++generation
+    clearFocusPoll()
     clearPoll()
 
     const previous = baseline
@@ -337,6 +509,7 @@ export function monitorKdeWaylandWindowState({
       const value = await backend
       if (value === null) {
         releaseWindowIdentity()
+        onFocusedState(false)
         return
       }
       applyWindowIdentity()
@@ -344,10 +517,20 @@ export function monitorKdeWaylandWindowState({
         caption: browserWindow.getTitle(),
         bounds: browserWindow.getBounds(),
       }
-      const current = await value.queryWindows(processId)
+      const [current, activeWindow] = await Promise.all([
+        value.queryWindows(processId),
+        value.queryActiveWindow(),
+      ])
       if (stopped || generation !== token) return
 
       baseline = current
+      const matchedWindow = windowUuid === null
+        ? findMatchingWindow(current, target)
+        : current.find(window => window.uuid === windowUuid) ?? null
+      const targetUuid = matchedWindow?.uuid ?? windowUuid
+      const focused = isLogicallyFocused(activeWindow, targetUuid)
+      onFocusedState(focused)
+      if (focused) scheduleFocusPoll(token, targetUuid)
       const previousByUuid = new Map(previous.map(window => [window.uuid, window]))
       const claimedWindow = windowUuid === null
         ? null
@@ -367,11 +550,13 @@ export function monitorKdeWaylandWindowState({
     } catch {
       // A failed query disables this transition only. The next focus or blur
       // retries without affecting normal Electron window events.
+      if (!stopped && generation === token) onFocusedState(false)
     }
   }
   const stop = () => {
     stopped = true
     generation++
+    clearFocusPoll()
     clearPoll()
     browserWindow.removeListener('focus', handleFocus)
     browserWindow.removeListener('blur', handleBlur)

@@ -131,6 +131,90 @@ test('does not mistake an ordinary focus change for minimize', () => {
   assert.equal(findNewlyMinimizedWindow(state, state, targetWindow()), null)
 })
 
+test('keeps focus when a KDE desktop popup leaves the window active', async () => {
+  const focusedStates = await focusedStatesAfterBlur({
+    resourceClass: 'electron',
+    skipTaskbar: false,
+    uuid: 'window',
+  })
+
+  assert.deepEqual(focusedStates, [true])
+})
+
+test('keeps focus when a KDE shell popup becomes active', async () => {
+  const focusedStates = await focusedStatesAfterBlur({
+    resourceClass: 'org.kde.krunner',
+    skipTaskbar: true,
+    uuid: 'krunner',
+  })
+
+  assert.deepEqual(focusedStates, [true])
+})
+
+test('reports focus loss when another application window becomes active', async () => {
+  const focusedStates = await focusedStatesAfterBlur({
+    resourceClass: 'org.kde.konsole',
+    skipTaskbar: false,
+    uuid: 'konsole',
+  })
+
+  assert.deepEqual(focusedStates, [false])
+})
+
+test('does not mistake another app utility window for a KDE shell popup', async () => {
+  const focusedStates = await focusedStatesAfterBlur({
+    resourceClass: 'electron',
+    skipTaskbar: true,
+    uuid: 'picture-in-picture',
+  })
+
+  assert.deepEqual(focusedStates, [false])
+})
+
+test('reports an app switch made through a KDE shell popup', async () => {
+  const activeWindows = [
+    {
+      resourceClass: 'plasmashell',
+      skipTaskbar: true,
+      uuid: 'launcher',
+    },
+    {
+      resourceClass: 'org.kde.konsole',
+      skipTaskbar: false,
+      uuid: 'konsole',
+    },
+  ]
+  let queryIndex = 0
+  const focusedStates = await focusedStatesAfterBlur(
+    () => activeWindows[Math.min(queryIndex++, activeWindows.length - 1)],
+    { pollInterval: 0 }
+  )
+
+  assert.deepEqual(focusedStates, [true, false])
+})
+
+test('reports an app switch when a desktop popup leaves the window active', async () => {
+  const activeWindows = [
+    {
+      resourceClass: 'electron',
+      skipTaskbar: false,
+      uuid: 'window',
+    },
+    {
+      resourceClass: 'org.kde.konsole',
+      skipTaskbar: false,
+      uuid: 'konsole',
+    },
+  ]
+  let queryIndex = 0
+  const focusedStates = await focusedStatesAfterBlur(
+    () => activeWindows[Math.min(queryIndex++, activeWindows.length - 1)],
+    { pollInterval: 0 }
+  )
+
+  assert.deepEqual(focusedStates, [true, false])
+})
+
 test('detects a single minimized window when no earlier KWin snapshot is available', () => {
   const current = [
     windowInfo({ uuid: 'one', minimized: true }),
@@ -209,6 +293,7 @@ test('preserves the window identity across title updates during detection', asyn
   browserWindow.emit('blur')
   title = targetWindow().caption
   resolveBackend({
+    queryActiveWindow: async () => null,
     queryWindow: async () => minimized,
     queryWindows: async () => {
       setWindowTitle(targetWindow().caption)
@@ -237,4 +322,31 @@ function targetWindow () {
     caption: 'Subscriptions - OpenTubeX',
     bounds: { x: 10, y: 20, width: 1200, height: 800 },
   }
+}
+
+async function focusedStatesAfterBlur (activeWindow, { pollInterval = 1000 } = {}) {
+  const browserWindow = new EventEmitter()
+  browserWindow.getBounds = () => targetWindow().bounds
+  browserWindow.getTitle = () => targetWindow().caption
+  browserWindow.isFocused = () => false
+  const focusedStates = []
+  const backend = Promise.resolve({
+    queryActiveWindow: async () => typeof activeWindow === 'function' ? activeWindow() : activeWindow,
+    queryWindow: async () => null,
+    queryWindows: async () => [windowInfo()],
+  })
+  const stop = monitorKdeWaylandWindowState({
+    browserWindow,
+    backend,
+    detectionDelay: 0,
+    pollInterval,
+    onFocusedState: focused => focusedStates.push(focused),
+    onMinimizedState: () => {},
+  })
+
+  browserWindow.emit('blur')
+  await new Promise(resolve => setTimeout(resolve, 20))
+  stop()
+
+  return focusedStates
 }
