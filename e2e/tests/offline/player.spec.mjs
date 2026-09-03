@@ -579,6 +579,9 @@ test('pinch zoom starts over the paused player controls without toggling playbac
     ],
   })
 
+  await expect.poll(() => video.evaluate(element => {
+    return new DOMMatrix(getComputedStyle(element).transform).a
+  })).toBeGreaterThan(startGeometry.zoom)
   const pinchTransform = await video.evaluate(element => {
     const { a: scale, e: x, f: y } = new DOMMatrix(getComputedStyle(element).transform)
     return { scale, x, y }

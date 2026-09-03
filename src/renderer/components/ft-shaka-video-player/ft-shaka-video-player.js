@@ -5287,6 +5287,7 @@ export default defineComponent({
 
     watch(() => props.videoId, () => {
       resetAbRepeat()
+      mediaSessionStopped = false
       voiceOverTranslation.reset()
       showPoster.value = true
       sponsorBlockMuteController.reset()
@@ -5837,7 +5838,6 @@ export default defineComponent({
     }
 
     function handlePlay() {
-      mediaSessionStopped = false
       setShowUiOnPaused(true)
       playerPaused.value = false
       clearPausedInterfaceReveal()
@@ -5852,6 +5852,8 @@ export default defineComponent({
         video.value.pause()
         return
       }
+
+      mediaSessionStopped = false
 
       flushPendingMusicPlaybackRateToast()
 
@@ -6335,6 +6337,7 @@ export default defineComponent({
 
     watch(scrollMiniPlayerDetached, (detached) => {
       isCrossTabMiniPlayerPresented.value = detached
+      tabMediaCoordinator.setMiniPlayer(mediaTabId, detached)
     }, { immediate: true })
 
     // Logical tabs restore their saved scroll position after becoming active.

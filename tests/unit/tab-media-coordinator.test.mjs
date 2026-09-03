@@ -3,6 +3,78 @@ import test from 'node:test'
 
 import { tabMediaCoordinator } from '../../src/renderer/tabs/TabMediaCoordinator.js'
 
+function enableCapacitorMode(t) {
+  const previous = process.env.IS_CAPACITOR
+  process.env.IS_CAPACITOR = 'true'
+  t.after(() => {
+    if (previous === undefined) {
+      delete process.env.IS_CAPACITOR
+    } else {
+      process.env.IS_CAPACITOR = previous
+    }
+  })
+}
+
+test('keeps Android media controls on a detached cross-tab mini player', async (t) => {
+  enableCapacitorMode(t)
+  const actions = []
+  const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: {
+      mediaSession: {
+        metadata: null,
+        playbackState: 'none',
+        setActionHandler () {}
+      }
+    }
+  })
+  t.after(() => {
+    tabMediaCoordinator.setMiniPlayer('video-tab', false)
+    tabMediaCoordinator.unregister('video-tab')
+    tabMediaCoordinator.unregister('other-tab')
+    tabMediaCoordinator.setPresented(null)
+    if (navigatorDescriptor) {
+      Object.defineProperty(globalThis, 'navigator', navigatorDescriptor)
+    } else {
+      delete globalThis.navigator
+    }
+  })
+
+  tabMediaCoordinator.setPresented('video-tab')
+  tabMediaCoordinator.setActionHandlers('video-tab', 'player', {
+    pause: () => actions.push('pause')
+  })
+  tabMediaCoordinator.setPlaybackState('video-tab', 'playing')
+  tabMediaCoordinator.setMiniPlayer('video-tab', true)
+  tabMediaCoordinator.setPresented('other-tab')
+  await Promise.resolve()
+
+  assert.deepEqual(actions, [])
+  tabMediaCoordinator.dispatchAction('pause')
+  assert.deepEqual(actions, ['pause'])
+})
+
+test('pauses an outgoing Android player that has no visible mini player', async (t) => {
+  enableCapacitorMode(t)
+  const actions = []
+  t.after(() => {
+    tabMediaCoordinator.unregister('outgoing-tab')
+    tabMediaCoordinator.unregister('empty-tab')
+    tabMediaCoordinator.setPresented(null)
+  })
+
+  tabMediaCoordinator.setPresented('outgoing-tab')
+  tabMediaCoordinator.setActionHandlers('outgoing-tab', 'player', {
+    pause: () => actions.push('pause')
+  })
+  tabMediaCoordinator.setPlaybackState('outgoing-tab', 'playing')
+  tabMediaCoordinator.setPresented('empty-tab')
+  await Promise.resolve()
+
+  assert.deepEqual(actions, ['pause'])
+})
+
 test('keeps media controls associated with a paused PiP video', (t) => {
   const handlers = new Map()
   const played = []

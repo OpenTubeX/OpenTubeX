@@ -12,6 +12,7 @@ const mediaByTabId = new Map()
 let presentedTabId = null
 let ownerTabId = null
 let pictureInPictureTabId = null
+let miniPlayerTabId = null
 let playSequence = 0
 let powerSaveBlocked = false
 
@@ -36,6 +37,9 @@ function getEntry(tabId) {
 
 function chooseOwner() {
   if (process.env.IS_CAPACITOR) {
+    if (miniPlayerTabId && mediaByTabId.has(miniPlayerTabId)) {
+      return miniPlayerTabId
+    }
     return presentedTabId && mediaByTabId.has(presentedTabId) ? presentedTabId : null
   }
 
@@ -160,7 +164,32 @@ export const tabMediaCoordinator = {
   },
 
   setPresented(tabId) {
+    const outgoingTabId = presentedTabId
     presentedTabId = tabId
+
+    if (process.env.IS_CAPACITOR && outgoingTabId && outgoingTabId !== tabId) {
+      ownerTabId = null
+      queueMicrotask(() => {
+        if (miniPlayerTabId !== outgoingTabId) {
+          const outgoing = mediaByTabId.get(outgoingTabId)
+          const pause = getActionHandlers(outgoing).pause
+          if (outgoing?.playbackState === 'playing' && typeof pause === 'function') pause()
+        }
+        applyOwner()
+      })
+      return
+    }
+
+    applyOwner()
+  },
+
+  setMiniPlayer(tabId, active) {
+    if (active) {
+      if (!mediaByTabId.has(tabId)) return
+      miniPlayerTabId = tabId
+    } else if (miniPlayerTabId === tabId) {
+      miniPlayerTabId = null
+    }
     applyOwner()
   },
 
@@ -249,6 +278,9 @@ export const tabMediaCoordinator = {
     mediaByTabId.delete(tabId)
     if (pictureInPictureTabId === tabId) {
       pictureInPictureTabId = null
+    }
+    if (miniPlayerTabId === tabId) {
+      miniPlayerTabId = null
     }
     if (ownerTabId === tabId) {
       ownerTabId = null

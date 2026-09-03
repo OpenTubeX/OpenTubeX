@@ -24,6 +24,7 @@ import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -40,6 +41,7 @@ public class AndroidMediaSessionService extends Service {
     private static final String CHANNEL_ID = "media-playback";
     private static final int NOTIFICATION_ID = 0x4d454449;
     private static final double DEFAULT_SEEK_SECONDS = 10;
+    private static final int MAX_ARTWORK_REDIRECTS = 5;
     private static final long PAUSED_WAKE_LOCK_GRACE_MS = 15_000;
 
     private final ExecutorService artworkExecutor = Executors.newSingleThreadExecutor();
@@ -225,20 +227,77 @@ public class AndroidMediaSessionService extends Service {
     }
 
     private Bitmap downloadArtwork(String source) {
-        HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) new URL(source).openConnection();
-            connection.setConnectTimeout(5_000);
-            connection.setReadTimeout(5_000);
-            connection.setInstanceFollowRedirects(true);
-            try (InputStream input = connection.getInputStream()) {
-                return BitmapFactory.decodeStream(input);
+            URL url = new URL(source);
+            for (int redirects = 0; redirects <= MAX_ARTWORK_REDIRECTS; redirects++) {
+                if (!isSafeArtworkUrl(url)) return null;
+
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                try {
+                    connection.setConnectTimeout(5_000);
+                    connection.setReadTimeout(5_000);
+                    connection.setInstanceFollowRedirects(false);
+                    int status = connection.getResponseCode();
+                    if (isRedirectStatus(status)) {
+                        String location = connection.getHeaderField("Location");
+                        if (location == null || redirects == MAX_ARTWORK_REDIRECTS) return null;
+                        url = new URL(url, location);
+                        continue;
+                    }
+                    if (status < 200 || status >= 300) return null;
+                    try (InputStream input = connection.getInputStream()) {
+                        return BitmapFactory.decodeStream(input);
+                    }
+                } finally {
+                    connection.disconnect();
+                }
             }
         } catch (Exception ignored) {
             return null;
-        } finally {
-            if (connection != null) connection.disconnect();
         }
+        return null;
+    }
+
+    static boolean isSafeArtworkUrl(URL url) {
+        if (!"https".equalsIgnoreCase(url.getProtocol()) || url.getUserInfo() != null) return false;
+        try {
+            InetAddress[] addresses = InetAddress.getAllByName(url.getHost());
+            if (addresses.length == 0) return false;
+            for (InetAddress address : addresses) {
+                if (!isPublicAddress(address)) return false;
+            }
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    private static boolean isPublicAddress(InetAddress address) {
+        if (
+            address.isAnyLocalAddress() ||
+            address.isLoopbackAddress() ||
+            address.isLinkLocalAddress() ||
+            address.isSiteLocalAddress() ||
+            address.isMulticastAddress()
+        ) {
+            return false;
+        }
+
+        byte[] bytes = address.getAddress();
+        if (bytes.length == 4) {
+            int first = Byte.toUnsignedInt(bytes[0]);
+            int second = Byte.toUnsignedInt(bytes[1]);
+            return first != 0 && !(first == 100 && second >= 64 && second <= 127);
+        }
+        return bytes.length != 16 || (Byte.toUnsignedInt(bytes[0]) & 0xfe) != 0xfc;
+    }
+
+    private static boolean isRedirectStatus(int status) {
+        return status == HttpURLConnection.HTTP_MOVED_PERM ||
+            status == HttpURLConnection.HTTP_MOVED_TEMP ||
+            status == HttpURLConnection.HTTP_SEE_OTHER ||
+            status == 307 ||
+            status == 308;
     }
 
     private void runOnMainThread(Runnable runnable) {
