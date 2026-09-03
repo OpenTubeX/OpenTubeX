@@ -28,6 +28,7 @@ test.use({
       userPlaylistSortOrder: 'custom',
       useCustomShortsPlayer: true,
       loopShorts: true,
+      autoplayPlaylists: true,
       videoPlaybackEngine: 'built-in',
       ytDlpPlaybackEngineDefaultMigration: true
     },
