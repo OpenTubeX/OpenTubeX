@@ -336,6 +336,7 @@ const DefaultKeyboardShortcuts = {
       PREV_TAB: 'control+shift+tab',
       RESTORE_CLOSED_TAB: 'ctrl+shift+T',
       SWITCH_TO_TAB: 'ctrl+1-9',
+      OPEN_TAB_ORGANIZER: '',
       TOGGLE_TAB_ORIENTATION: 'f1',
     },
     SITUATIONAL: {

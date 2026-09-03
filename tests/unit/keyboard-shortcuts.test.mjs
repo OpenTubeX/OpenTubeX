@@ -50,6 +50,17 @@ test('opens downloads with Ctrl or Command+J by default', () => {
   assert.equal(getConfiguredKeyboardShortcuts().APP.GENERAL.NAVIGATE_TO_DOWNLOADS, 'ctrl+J')
 })
 
+test('allows the tab organizer shortcut to be configured', () => {
+  assert.equal(getConfiguredKeyboardShortcuts().APP.GENERAL.OPEN_TAB_ORGANIZER, '')
+  assert.equal(getConfiguredKeyboardShortcuts({
+    APP: {
+      GENERAL: {
+        OPEN_TAB_ORGANIZER: 'ctrl+shift+o',
+      }
+    }
+  }).APP.GENERAL.OPEN_TAB_ORGANIZER, 'ctrl+shift+o')
+})
+
 test('allows A-B repeat shortcuts to be configured', () => {
   const shortcuts = getConfiguredKeyboardShortcuts({
     VIDEO_PLAYER: {

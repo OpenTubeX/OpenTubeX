@@ -77,3 +77,24 @@ test('context-dependent shortcuts are shown as non-editable', async ({ page }) =
   await expect(page.locator('.keyboardShortcutPromptEmbedded')).toHaveCount(0)
   await expect(page.locator('.settingsMenu')).toBeVisible()
 })
+
+test('assigns and runs a shortcut for the tab organizer', async ({ page }) => {
+  await goTo(page, 'settings')
+  await page.getByRole('button', { name: 'Show Keyboard Shortcuts' }).click()
+
+  const shortcut = page.locator('[data-shortcut-path="APP.GENERAL.OPEN_TAB_ORGANIZER"]')
+  await expect(shortcut).toHaveText('Unassigned')
+  await shortcut.click()
+  await shortcut.press('Control+Shift+o')
+  await expect(shortcut).toHaveText('Ctrl+Shift+o')
+  await expect(page.locator('.tabOrganizerButton')).toHaveAttribute(
+    'title',
+    'Tab Organizer (Ctrl+Shift+o)'
+  )
+
+  await page.locator('.settingsCloseButton').click()
+  await expect(page.locator('.settingsWindow')).toBeHidden()
+  await page.keyboard.press('Control+Shift+o')
+
+  await expect(page.getByRole('dialog', { name: 'Tab Organizer' })).toBeVisible()
+})
