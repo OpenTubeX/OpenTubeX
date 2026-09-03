@@ -1,17 +1,9 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$registryEventId = @{
-  CreateKey = 1
-  OpenKey = 2
-  DeleteKey = 3
-  SetValue = 5
-  DeleteValue = 6
-  SetInformation = 11
-  Flush = 12
-  Close = 13
-  SetSecurity = 15
-}
+. (Join-Path $PSScriptRoot 'windowsPortableRegistryTrace.ps1')
+& (Join-Path $PSScriptRoot 'testWindowsPortableRegistryTrace.ps1')
+
 $processStartEventId = 1
 $fileEventId = @{
   NameCreate = 10
@@ -27,9 +19,6 @@ $fileEventId = @{
   RenameAlternate = 29
   CreateNewFile = 30
 }
-$registrySuccessStatus = 0
-$newRegistryKeyDisposition = 1
-$keyWriteTimeInformationClass = 0
 $registryProviderName = 'Microsoft-Windows-Kernel-Registry'
 $processProviderName = 'Microsoft-Windows-Kernel-Process'
 $fileProviderName = 'Microsoft-Windows-Kernel-File'
@@ -245,19 +234,6 @@ function Stop-RegistryTrace {
   }
 }
 
-function Convert-RegistryEventNumber {
-  param([Parameter(Mandatory)] [string] $Value)
-
-  $trimmedValue = $Value.Trim()
-  if ($trimmedValue -match '^0[xX](?<Hex>[0-9a-fA-F]+)') {
-    return [Convert]::ToUInt32($Matches.Hex, 16)
-  }
-  if ($trimmedValue -match '^(?<Decimal>[0-9]+)') {
-    return [Convert]::ToUInt32($Matches.Decimal, 10)
-  }
-  return $null
-}
-
 function Get-TraceEventData {
   param([Parameter(Mandatory)] [System.Xml.XmlElement] $Event)
 
@@ -326,47 +302,6 @@ function Test-AppOwnedHostPath {
       return $true
     }
   }
-  return $false
-}
-
-function Test-SuccessfulRegistryMutation {
-  param(
-    [Parameter(Mandatory)] [int] $EventId,
-    [Parameter(Mandatory)] [hashtable] $EventData
-  )
-
-  if (-not $EventData.ContainsKey('Status') -or
-      (Convert-RegistryEventNumber $EventData.Status) -ne $registrySuccessStatus) {
-    return $false
-  }
-
-  if ($EventId -eq $registryEventId.CreateKey) {
-    # CreateKey also reports ordinary opens. NewKey means that the call
-    # created a key; OpenedExistingKey means that it only opened one.
-    return $EventData.ContainsKey('Disposition') -and
-      (Convert-RegistryEventNumber $EventData.Disposition) -eq
-        $newRegistryKeyDisposition
-  }
-
-  if ($EventId -in @(
-    $registryEventId.SetValue,
-    $registryEventId.DeleteValue,
-    $registryEventId.DeleteKey,
-    $registryEventId.Flush,
-    $registryEventId.SetSecurity
-  )) {
-    return $true
-  }
-
-  if ($EventId -eq $registryEventId.SetInformation) {
-    # Only KeyWriteTimeInformation changes persisted key metadata. Other
-    # information classes configure the open handle or runtime state.
-    return $EventData.ContainsKey('InfoClass') -and
-      ((Convert-RegistryEventNumber $EventData.InfoClass) -eq
-         $keyWriteTimeInformationClass -or
-       $EventData.InfoClass -eq 'KeyWriteTimeInformation')
-  }
-
   return $false
 }
 
@@ -530,7 +465,8 @@ function Assert-NoHostWrites {
         $eventData.ContainsKey('KeyObject') -and $eventData.KeyObject) {
       $registryKeyPaths.Remove($eventData.KeyObject.Trim())
     }
-    if (-not (Test-SuccessfulRegistryMutation -EventId $eventId -EventData $eventData)) {
+    if (-not (Test-PortableHostRegistryMutation -EventId $eventId `
+        -EventData $eventData)) {
       continue
     }
     if ($ProcessIds.Contains($eventProcessId)) {
