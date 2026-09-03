@@ -281,12 +281,20 @@ export async function createKdeWaylandWindowStateBackend() {
       properties: {},
     })
 
-    // A previous process may have exited while its activation script was running.
-    await scripting.unloadScript(scriptPluginName).catch(() => {})
-    const script = `
+    const loadActiveWindowScript = async () => {
+      if (closed) return
+      if (typeof bus.name !== 'string') {
+        throw new Error('D-Bus connection has no unique name')
+      }
+
+      const destination = bus.name
+      await scripting.unloadScript(scriptPluginName).catch(() => {})
+      if (closed) return
+
+      const script = `
 const reportActiveWindow = activeWindow => {
   callDBus(
-    ${JSON.stringify(bus.name)},
+    ${JSON.stringify(destination)},
     ${JSON.stringify(ACTIVE_WINDOW_REPORT_PATH)},
     ${JSON.stringify(ACTIVE_WINDOW_REPORT_INTERFACE)},
     "ReportActiveWindow",
@@ -298,31 +306,45 @@ const reportActiveWindow = activeWindow => {
 reportActiveWindow(workspace.activeWindow)
 workspace.windowActivated.connect(reportActiveWindow)
 `
-    await writeFile(scriptPath, script, 'utf8')
-    const scriptId = await bus.invoke({
-      destination: KWIN_SERVICE,
-      path: KWIN_SCRIPTING_PATH,
-      interface: KWIN_SCRIPTING_INTERFACE,
-      member: 'loadScript',
-      signature: 'ss',
-      body: [scriptPath, scriptPluginName],
-    })
-    if (!Number.isInteger(scriptId) || scriptId < 0) {
-      throw new Error('KWin rejected the active-window script')
+      await writeFile(scriptPath, script, 'utf8')
+      if (closed) return
+
+      const scriptId = await bus.invoke({
+        destination: KWIN_SERVICE,
+        path: KWIN_SCRIPTING_PATH,
+        interface: KWIN_SCRIPTING_INTERFACE,
+        member: 'loadScript',
+        signature: 'ss',
+        body: [scriptPath, scriptPluginName],
+      })
+      if (!Number.isInteger(scriptId) || scriptId < 0) {
+        throw new Error('KWin rejected the active-window script')
+      }
+      const scriptInterface = await service.getInterface(
+        `${KWIN_SCRIPTING_PATH}/Script${scriptId}`,
+        'org.kde.kwin.Script'
+      )
+      if (closed) return
+      await scriptInterface.run()
     }
-    const scriptInterface = await service.getInterface(
-      `${KWIN_SCRIPTING_PATH}/Script${scriptId}`,
-      'org.kde.kwin.Script'
-    )
-    await scriptInterface.run()
+
+    // A previous process may have exited while its activation script was running.
+    await loadActiveWindowScript()
     if (await initialReport === null) throw new Error('KWin did not report its active window')
+    let scriptReload = Promise.resolve()
+    const handleReconnect = () => {
+      scriptReload = scriptReload.then(loadActiveWindowScript).catch(() => {})
+    }
+    bus.on('reconnected', handleReconnect)
 
     return {
       close: async () => {
         if (closed) return
         closed = true
+        bus.removeListener('reconnected', handleReconnect)
         resolveInitialReport?.(null)
         activeWindowListeners.clear()
+        await scriptReload
         await scripting.unloadScript(scriptPluginName).catch(() => {})
         bus.unexportInterface(ACTIVE_WINDOW_REPORT_PATH, ACTIVE_WINDOW_REPORT_INTERFACE)
         await rm(scriptDirectory, { force: true, recursive: true }).catch(() => {})

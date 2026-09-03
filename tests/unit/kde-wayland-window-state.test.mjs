@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict'
+import dbus from 'dbus-native'
 import { EventEmitter } from 'node:events'
+import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 
 import {
+  createKdeWaylandWindowStateBackend,
   extractKwinWindowHandles,
   findNewlyMinimizedWindow,
   isKdePlasmaDesktop,
@@ -105,6 +108,69 @@ test('extracts KWin runner handles and validates D-Bus window state', () => {
 test('rejects malformed D-Bus window state and runner matches', () => {
   assert.equal(normalizeKwinWindowInfo({ minimized: true }), null)
   assert.deepEqual(extractKwinWindowHandles([['invalid-id'], null]), [])
+})
+
+test('reloads the KWin reporter with the new D-Bus name after reconnect', async t => {
+  const originalSessionBus = dbus.sessionBus
+  const bus = new EventEmitter()
+  bus.name = ':1.10'
+  bus.connection = new EventEmitter()
+  const scripts = []
+  let reportInterface
+  let scriptRuns = 0
+  let resolveSecondRun
+  const secondRun = new Promise(resolve => {
+    resolveSecondRun = resolve
+  })
+  const scripting = {
+    unloadScript: async () => true,
+  }
+  const service = {
+    getInterface: async path => {
+      if (path === '/KWin') return { getWindowInfo: async () => null }
+      if (path === '/WindowsRunner') return { Match: async () => [] }
+      if (path === '/Scripting') return scripting
+      return {
+        run: async () => {
+          scriptRuns++
+          reportInterface.ReportActiveWindow('window', false, 'electron')
+          if (scriptRuns === 2) resolveSecondRun()
+        },
+      }
+    },
+  }
+  bus.getService = () => service
+  bus.invoke = async ({ body: [scriptPath] }) => {
+    scripts.push(await readFile(scriptPath, 'utf8'))
+    return scripts.length
+  }
+  bus.exportInterface = implementation => {
+    reportInterface = implementation
+  }
+  bus.unexportInterface = () => {}
+  bus.close = async () => {}
+  dbus.sessionBus = () => bus
+  t.after(() => {
+    dbus.sessionBus = originalSessionBus
+  })
+
+  const backend = await createKdeWaylandWindowStateBackend()
+  assert.notEqual(backend, null)
+  assert.match(scripts[0], /":1\.10"/)
+  const activeWindows = []
+  const watch = backend.watchActiveWindow(activeWindow => activeWindows.push(activeWindow))
+
+  bus.name = ':1.11'
+  bus.emit('reconnected', { name: bus.name })
+  await secondRun
+
+  assert.equal(scripts.length, 2)
+  assert.match(scripts[1], /":1\.11"/)
+  assert.doesNotMatch(scripts[1], /":1\.10"/)
+  assert.deepEqual(activeWindows, [{ uuid: 'window', skipTaskbar: false, resourceClass: 'electron' }])
+  watch.stop()
+  await backend.close()
+  assert.equal(bus.listenerCount('reconnected'), 0)
 })
 
 test('detects the KWin window newly minimized by a shortcut', () => {
