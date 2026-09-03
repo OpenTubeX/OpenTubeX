@@ -83,6 +83,7 @@ import {
   selectYtDlpPreloadVideoIds,
 } from '../../helpers/player/ytDlpPlaybackPreload'
 import { getMusicTrackArtist, MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
+import { resolveAndroidBackgroundPlaybackFormat } from '../../helpers/player/androidBackgroundPlayback'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
 import {
   buildSubscriptionShortsFeed,
@@ -259,6 +260,8 @@ export default defineComponent({
       removeVideoMetadataCacheClearedListener: null,
       /** @type {'dash' | 'audio' | 'legacy'} */
       activeFormat: 'legacy',
+      /** @type {'dash' | 'legacy' | null} */
+      androidBackgroundRestoreFormat: null,
       localFilePlayback: false,
       thumbnail: '',
       videoId: '',
@@ -1219,6 +1222,7 @@ export default defineComponent({
   },
   mounted: function () {
     document.addEventListener('keydown', this.handleShortsNavigationKeydown, true)
+    document.addEventListener('visibilitychange', this.updateAndroidBackgroundPlaybackFormat)
     window.addEventListener('resize', this.updateShortsViewportHeight)
     window.addEventListener('resize', this.updateTheatreLayoutAvailability)
     window.addEventListener('scroll', this.handleShortsWindowScroll, { passive: true })
@@ -1242,6 +1246,7 @@ export default defineComponent({
   },
   beforeUnmount: function () {
     document.removeEventListener('keydown', this.handleShortsNavigationKeydown, true)
+    document.removeEventListener('visibilitychange', this.updateAndroidBackgroundPlaybackFormat)
     window.removeEventListener('resize', this.updateShortsViewportHeight)
     window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
     window.removeEventListener('scroll', this.handleShortsWindowScroll)
@@ -1267,6 +1272,23 @@ export default defineComponent({
     }
   },
   methods: {
+    updateAndroidBackgroundPlaybackFormat() {
+      if (!process.env.IS_CAPACITOR) return
+
+      const change = resolveAndroidBackgroundPlaybackFormat({
+        hidden: document.hidden,
+        continuePlayback: this.$store.getters.getContinuePlaybackWhenScreenIsLocked,
+        activeFormat: this.activeFormat,
+        audioFormatAvailable: this.audioFormatAvailable,
+        paused: this.$refs.player?.isPaused() ?? true,
+        restoreFormat: this.androidBackgroundRestoreFormat,
+      })
+      if (change === null) return
+
+      this.androidBackgroundRestoreFormat = change.restoreFormat
+      this.activeFormat = change.activeFormat
+    },
+
     handleUpcomingPlaylistVideosChange(videos) {
       this.upcomingPlaylistVideos = Array.isArray(videos) ? videos : []
     },
@@ -1973,6 +1995,7 @@ export default defineComponent({
       this.manifestSrc = null
       this.manifestMimeType = MANIFEST_TYPE_DASH
       this.sabrData = null
+      this.androidBackgroundRestoreFormat = null
       this.activePlaybackEngine = 'built-in'
       this.activePlaybackEngineVersion = null
       this.onlinePlaybackSource = null
@@ -4010,6 +4033,9 @@ export default defineComponent({
       this.flushWatchTime()
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
     },
+    handleVideoPlay() {
+      if (document.hidden) this.updateAndroidBackgroundPlaybackFormat()
+    },
     handlePlayerSeeking() {
       if (!this.customShortsPlayerActive) {
         return
@@ -4646,8 +4672,6 @@ export default defineComponent({
     // Keeps the operating system's media controls in sync with the player's skip
     // buttons, so that both offer the same skips and take the same route to them
     syncMediaSessionSkipHandlers: function () {
-      if (!('mediaSession' in navigator)) { return }
-
       tabMediaCoordinator.setActionHandlers(this.tabId ?? 'web', 'playlist', {
         previoustrack: this.canSkipToPreviousVideo ? this.handleSkipToPrev : null,
         nexttrack: this.canSkipToNextVideo ? this.handleSkipToNext : null

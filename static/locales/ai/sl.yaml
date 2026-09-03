@@ -624,6 +624,7 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Nadaljuj predvajanje, ko je zaslon zaklenjen'
     Music Visualizer: Glasbeni vizualizator
     Automatically Open Chapters: Samodejno odpri poglavja
     Caption Appearance:
@@ -1863,6 +1864,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Pot do skriptne datoteke, ki se zažene ob zaznani blokadi naslova IP. OpenTubeX počaka, da se izvajanje konča, nato znova naloži videoposnetek. Če je omogočen nadomestni način, se skript zažene le, kadar tudi ta ne uspe.
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Nadaljuje predvajanje zvoka v ozadju in omogoča predstavnostne kontrolnike Android. Izklopite, da se predvajanje začasno ustavi, ko aplikacija ni več vidna.'
     Enable Caption Translations: Ko je možnost omogočena in videoposnetek nima ustrezne izvirne sledi, imata gumb za podnapise in bližnjica C prednostno samodejno prevedeno sled v prednostnem jeziku podnapisov.
     Proxy Videos Through Invidious: Za posredovanje videoposnetkov se poveže z Invidiousom namesto neposredno z YouTubom.
     Default Video Format: Nastavite oblike zapisa za predvajanje videoposnetkov. Oblike DASH omogočajo višjo kakovost. Starejše oblike so omejene na največ 360p, vendar porabijo manj pasovne širine. Zvočne oblike vsebujejo le zvočni pretok.

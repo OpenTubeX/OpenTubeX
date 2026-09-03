@@ -434,6 +434,7 @@ Settings:
         Destructive pressed: Destruktiv handling ved trykk
         Text and icons on destructive actions: Tekst og ikoner på destruktive handlinger
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Fortsett avspillingen når skjermen er låst'
     Music Visualizer: Musikkvisualisering
     Automatically Open Chapters: Åpne kapitler automatisk
     Caption Appearance:
@@ -1407,6 +1408,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Filbane til skriptet som skal kjøres når en IP-blokkering oppdages. OpenTubeX venter til det er ferdig og laster deretter inn videoen på nytt. Hvis reserveløsning er slått på, kjøres skriptet bare når også reserveløsningen mislykkes.
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Fortsetter lydavspillingen i bakgrunnen og viser Android-mediekontroller. Slå av dette for å sette på pause når appen ikke lenger er synlig.'
     Enable Caption Translations: Når dette er slått på, foretrekker undertekstknappen og hurtigtasten C et automatisk oversatt spor på det foretrukne undertekstspråket hvis videoen ikke har et samsvarende originalspor.
     Use Quick Playback Speed Bar: Viser et hurtigfelt for avspillingshastighet til høyre blant spillerkontrollene. Hvis manuell lagring av avspillingshastighet per kanal er slått på, inneholder feltet også en knapp for å lagre hastigheten for den gjeldende kanalen.
     Multiply Seek Interval by Playback Rate: Når dette er slått på, multipliseres spoleintervallene (piltastene og J/L) med gjeldende avspillingshastighet. Når det er slått av, forblir spoleintervallene konstante uansett avspillingshastighet.

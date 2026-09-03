@@ -432,6 +432,7 @@ Settings:
         Destructive pressed: Basılı yıkıcı işlem
         Text and icons on destructive actions: Yıkıcı işlemlerdeki metin ve simgeler
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Ekran kilitliyken oynatmaya devam et'
     Music Visualizer: Müzik görselleştirici
     Automatically Open Chapters: Bölümleri Otomatik Olarak Aç
     Caption Appearance:
@@ -1380,6 +1381,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: IP engeli algılandığında çalıştırılacak betik dosyasının yolu. OpenTubeX betiğin tamamlanmasını bekler ve videoyu yeniden yükler. Yedek arka uç etkinse yalnızca yedek arka uç da başarısız olduğunda çalışır.
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Sesi arka planda çalmaya devam eder ve Android medya kontrolleri sağlar. Uygulama artık görünür olmadığında duraklatmak için bunu kapatın.'
     Enable Caption Translations: Etkinleştirildiğinde ve videoda eşleşen özgün bir parça olmadığında alt yazı düğmesi ile C kısayolu, tercih edilen alt yazı diline otomatik çevrilmiş parçayı seçer.
     Use Quick Playback Speed Bar: Sağdaki oynatıcı denetimlerinde hızlı oynatma hızı çubuğunu gösterir. Kanal başına oynatma hızını elle kaydetme etkinse çubukta geçerli kanalın hızını kaydetme düğmesi de bulunur.
     Multiply Seek Interval by Playback Rate: Etkinleştirildiğinde sarma aralıkları (ok tuşları ve J/L) geçerli oynatma hızıyla çarpılır. Devre dışı bırakıldığında sarma aralıkları oynatma hızından bağımsız olarak sabit kalır.

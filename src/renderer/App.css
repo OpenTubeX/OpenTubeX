@@ -163,6 +163,12 @@
   touch-action: pan-x;
 }
 
+/* Chromium may claim the first finger as a pan before the second finger lands,
+   cancelling the pointer stream before the player can recognize a pinch. */
+.app.capacitorTabs :deep(.ftVideoPlayer.videoZoomTouchEnabled:not(.scrollMiniPlayer)) {
+  touch-action: none;
+}
+
 .app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwiping > .player),
 .app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeSettling > .player) {
   translate: 0 var(--mobile-fullscreen-swipe-offset, 0);

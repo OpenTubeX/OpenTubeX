@@ -164,6 +164,7 @@
           @timeupdate="handleTimeUpdate"
           @terminal-outro-started="handleTerminalOutroStarted"
           @ended="handlePlayerEnded"
+          @play="handleVideoPlay"
           @pause="handleVideoPause"
           @seeking="handlePlayerSeeking"
           @toggle-theatre-mode="toggleTheatreMode"

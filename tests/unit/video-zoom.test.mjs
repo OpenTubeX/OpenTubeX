@@ -4,6 +4,7 @@ import test from 'node:test'
 import {
   DEFAULT_VIDEO_ZOOM,
   formatVideoZoom,
+  resolveVideoZoomPinch,
   sanitizeVideoZoom,
   stepVideoZoom,
   VIDEO_ZOOM_LEVELS,
@@ -44,4 +45,32 @@ test('zoom levels are formatted as percentages', () => {
   assert.equal(formatVideoZoom(1), '100%')
   assert.equal(formatVideoZoom(1.25), '125%')
   assert.equal(formatVideoZoom(3), '300%')
+})
+
+test('pinch zoom keeps the gesture focal point over the same video content', () => {
+  assert.deepEqual(resolveVideoZoomPinch({
+    startZoom: 1,
+    startOffset: { x: 0, y: 0 },
+    startFocal: { x: -100, y: 0 },
+    focal: { x: -100, y: 0 },
+    scale: 2,
+    size: { width: 400, height: 200 }
+  }), {
+    zoom: 2,
+    offset: { x: 0.5, y: 0 }
+  })
+})
+
+test('pinch zoom clamps zoom and panning to the supported crop', () => {
+  assert.deepEqual(resolveVideoZoomPinch({
+    startZoom: 2,
+    startOffset: { x: 1, y: -1 },
+    startFocal: { x: 0, y: 0 },
+    focal: { x: 500, y: -500 },
+    scale: 10,
+    size: { width: 400, height: 200 }
+  }), {
+    zoom: 3,
+    offset: { x: 1, y: -1 }
+  })
 })

@@ -436,6 +436,7 @@ Settings:
         Destructive pressed: Poistava toiminto painettaessa
         Text and icons on destructive actions: Poistavien toimintojen teksti ja kuvakkeet
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Jatka toistoa näytön ollessa lukittuna'
     Music Visualizer: Musiikkivisualisointi
     Automatically Open Chapters: Avaa luvut automaattisesti
     Caption Appearance:
@@ -1408,6 +1409,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Komentosarjatiedosto, joka suoritetaan IP-eston havaitsemisen jälkeen. OpenTubeX odottaa suorituksen päättymistä ja lataa sitten videon uudelleen. Jos varamenetelmä on käytössä, komentosarja suoritetaan vain, jos myös varamenetelmä epäonnistuu.
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Jatkaa äänen toistamista taustalla ja tarjoaa Androidin mediasäätimet. Poista tämä käytöstä, jos haluat keskeyttää toiston, kun sovellus ei enää ole näkyvissä.'
     Enable Caption Translations: Kun asetus on käytössä, tekstityspainike ja C-pikanäppäin suosivat automaattisesti käännettyä tekstitysraitaa ensisijaisella tekstityskielellä, jos videossa ei ole vastaavaa alkuperäistä raitaa.
     Use Quick Playback Speed Bar: Näyttää toistonopeuden pikapalkin soittimen säätimien oikeassa reunassa. Jos kanavakohtaisen toistonopeuden manuaalinen tallennus on käytössä, palkissa on myös painike nykyisen kanavan nopeuden tallentamiseen.
     Multiply Seek Interval by Playback Rate: Kun asetus on käytössä, siirtymäväli kerrotaan nykyisellä toistonopeudella käytettäessä nuolinäppäimiä tai J/L-näppäimiä. Kun asetus on poistettu käytöstä, siirtymäväli pysyy samana toistonopeudesta riippumatta.

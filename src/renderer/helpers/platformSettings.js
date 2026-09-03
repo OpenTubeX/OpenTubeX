@@ -2,6 +2,7 @@ export const DEVICE_LOCAL_SETTING_KEYS = new Set([
   'autoPictureInPictureTriggers',
   'autoUpdateChannelVolumes',
   'channelVolumes',
+  'continuePlaybackWhenScreenIsLocked',
   'defaultVolume',
   'displayVideoPlayButton',
   'enableClosedAppSubscriptionRefresh',

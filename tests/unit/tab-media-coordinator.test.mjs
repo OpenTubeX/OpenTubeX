@@ -153,6 +153,98 @@ test('dispatches native menu actions to the media session owner', (t) => {
   assert.deepEqual(dispatched, ['play', 'pause', 'previous', 'next'])
 })
 
+test('passes native seek details to the presented player', (t) => {
+  const dispatched = []
+  const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: { mediaSession: { setActionHandler () {} } }
+  })
+  t.after(() => {
+    tabMediaCoordinator.unregister('seek-tab')
+    if (navigatorDescriptor) Object.defineProperty(globalThis, 'navigator', navigatorDescriptor)
+    else delete globalThis.navigator
+  })
+
+  tabMediaCoordinator.setPresented('seek-tab')
+  tabMediaCoordinator.setMetadata('seek-tab', { title: 'Seek video' })
+  tabMediaCoordinator.setActionHandlers('seek-tab', 'player', {
+    seekto: details => dispatched.push(details.seekTime)
+  })
+  tabMediaCoordinator.dispatchAction('seekto', { seekTime: 42 })
+
+  assert.deepEqual(dispatched, [42])
+})
+
+test('Capacitor never routes media actions to a background tab', (t) => {
+  const originalCapacitor = process.env.IS_CAPACITOR
+  process.env.IS_CAPACITOR = 'true'
+  let plays = 0
+  t.after(() => {
+    tabMediaCoordinator.unregister('background-media-tab')
+    tabMediaCoordinator.unregister('presented-plain-tab')
+    if (originalCapacitor === undefined) delete process.env.IS_CAPACITOR
+    else process.env.IS_CAPACITOR = originalCapacitor
+  })
+
+  tabMediaCoordinator.setPresented('background-media-tab')
+  tabMediaCoordinator.setActionHandlers('background-media-tab', 'player', {
+    play: () => { plays++ }
+  })
+  tabMediaCoordinator.setPlaybackState('background-media-tab', 'playing')
+  tabMediaCoordinator.setPresented('presented-plain-tab')
+  tabMediaCoordinator.dispatchAction('play')
+
+  assert.equal(plays, 0)
+})
+
+test('pauses every playing tab when Android background playback is disabled', (t) => {
+  const paused = []
+  t.after(() => {
+    tabMediaCoordinator.unregister('first-android-tab')
+    tabMediaCoordinator.unregister('second-android-tab')
+  })
+
+  for (const tabId of ['first-android-tab', 'second-android-tab']) {
+    tabMediaCoordinator.setActionHandlers(tabId, 'player', {
+      pause: () => paused.push(tabId)
+    })
+    tabMediaCoordinator.setPlaybackState(tabId, 'playing')
+  }
+  tabMediaCoordinator.pauseAll()
+
+  assert.deepEqual(paused, ['first-android-tab', 'second-android-tab'])
+})
+
+test('reconciles playing state from the presented video clock', (t) => {
+  const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
+  const mediaSession = {
+    playbackState: 'none',
+    setActionHandler () {},
+    setPositionState () {}
+  }
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: { mediaSession }
+  })
+  t.after(() => {
+    tabMediaCoordinator.unregister('clock-tab')
+    if (navigatorDescriptor) Object.defineProperty(globalThis, 'navigator', navigatorDescriptor)
+    else delete globalThis.navigator
+  })
+
+  tabMediaCoordinator.setPresented('clock-tab')
+  tabMediaCoordinator.setMetadata('clock-tab', { title: 'Clock video' })
+  tabMediaCoordinator.setPlaybackState('clock-tab', 'none')
+  tabMediaCoordinator.setPositionState(
+    'clock-tab',
+    { duration: 120, position: 30, playbackRate: 1 },
+    'playing'
+  )
+
+  assert.equal(mediaSession.playbackState, 'playing')
+})
+
 test('reports playback starts without treating owner reselection as a new start', (t) => {
   const states = []
   const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator')

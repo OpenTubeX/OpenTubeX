@@ -271,6 +271,7 @@ const state = {
   enterFullscreenOnDisplayRotate: false,
   rotateFullscreenToLandscape: true,
   enableMobileFullscreenSwipe: true,
+  continuePlaybackWhenScreenIsLocked: true,
   externalLinkHandling: '',
   externalPlayer: '',
   externalPlayerExecutable: '',
@@ -798,6 +799,7 @@ export const NON_SYNCABLE_SETTINGS = new Set([
   // These choices describe one physical device, not the user's account.
   'androidAutoPictureInPicture',
   'capacitorLayoutMode',
+  'continuePlaybackWhenScreenIsLocked',
   'uiScale',
   'verticalTabBarWidth',
 ])

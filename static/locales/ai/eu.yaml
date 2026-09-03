@@ -434,6 +434,7 @@ Settings:
         Destructive pressed: Ekintza suntsitzailea sakatzean
         Text and icons on destructive actions: Ekintza suntsitzaileetako testua eta ikonoak
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Jarraitu erreproduzitzen pantaila blokeatuta dagoenean'
     Music Visualizer: Musika-bistaratzailea
     Automatically Open Chapters: Ireki kapituluak automatikoki
     Caption Appearance:
@@ -1393,6 +1394,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: IP blokeoa hautematean exekutatuko den script-fitxategiaren bide-izena. OpenTubeX aplikazioak amaitu arte itxaroten du eta gero bideoa berriro kargatzen du. Ordezko motorra gaituta badago, hark ere huts egiten duenean soilik exekutatzen da.
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Audioa atzeko planoan erreproduzitzen mantentzen du eta Android multimedia-kontrolak eskaintzen ditu. Desaktibatu aplikazioa ikusgai ez dagoenean erreprodukzioa pausatzeko.'
     Enable Caption Translations: Gaituta dagoenean, azpitituluen botoiak eta C lasterbideak hobetsitako azpititulu-hizkuntzara automatikoki itzulitako pista aukeratzen dute, bideoak hizkuntza horretako jatorrizko pistarik ez badu.
     Use Quick Playback Speed Bar: Erreprodukzio-abiaduraren barra azkar bat erakusten du eskuineko erreproduzigailu-kontroletan. Kanal bakoitzaren erreprodukzio-abiadura eskuz gordetzea gaituta badago, barrak uneko kanalerako abiadura gordetzeko botoia ere izango du.
     Multiply Seek Interval by Playback Rate: Gaituta dagoenean, bilaketa-tarteak (gezi-teklak eta J/L) uneko erreprodukzio-abiadurarekin biderkatzen dira. Desgaituta dagoenean, tarteak ez dira aldatzen erreprodukzio-abiadura edozein dela ere.

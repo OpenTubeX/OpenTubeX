@@ -432,6 +432,7 @@ Settings:
         Destructive pressed: Deštruktívna akcia pri stlačení
         Text and icons on destructive actions: Text a ikony deštruktívnych akcií
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Pokračovať v prehrávaní pri zamknutej obrazovke'
     Music Visualizer: Hudobný vizualizér
     Automatically Open Chapters: Automaticky otvárať kapitoly
     Caption Appearance:
@@ -1380,6 +1381,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Cesta k súboru skriptu, ktorý sa spustí po zistení zablokovania IP adresy. OpenTubeX počká na jeho dokončenie a potom znova načíta video. Ak je zapnutý záložný backend, skript sa spustí až po jeho zlyhaní.
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Ponechá zvuk prehrávať na pozadí a poskytne ovládanie médií systému Android. Vypnutím sa prehrávanie pozastaví, keď aplikácia prestane byť viditeľná.'
     Enable Caption Translations: Ak video neposkytuje pôvodnú stopu v uprednostnenom jazyku titulkov, tlačidlo titulkov a klávesová skratka C po zapnutí uprednostnia automaticky preloženú stopu v tomto jazyku.
     Use Quick Playback Speed Bar: V pravej časti ovládacích prvkov prehrávača zobrazí panel rýchlej zmeny rýchlosti prehrávania. Ak je zapnuté ručné ukladanie rýchlosti prehrávania pre jednotlivé kanály, panel obsahuje aj tlačidlo na uloženie rýchlosti aktuálneho kanála.
     Multiply Seek Interval by Playback Rate: Po zapnutí sa intervaly posunu pomocou klávesov so šípkami a J/L násobia aktuálnou rýchlosťou prehrávania. Po vypnutí zostávajú rovnaké bez ohľadu na rýchlosť prehrávania.

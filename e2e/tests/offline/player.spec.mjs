@@ -484,6 +484,148 @@ test('shift-dragging moves the visible part of a zoomed video', async ({ app, pa
   await expect(video).toHaveCSS('transform', 'none')
 })
 
+test('pinch zoom starts over the paused player controls without toggling playback', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return store.dispatch('updateDisplayVideoPlayButton', true)
+  })
+  const video = await openMockedVideo(page)
+  await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+  await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(0.95, 2)
+  await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
+
+  for (let step = 0; step < 4; step++) await page.locator('body').press('z')
+  await expect(video).toHaveCSS('transform', 'matrix(2, 0, 0, 2, 0, 0)')
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await expect(player).toHaveCSS('touch-action', 'none')
+  const zoomedBox = await video.boundingBox()
+  await page.keyboard.down('Shift')
+  await page.mouse.move(zoomedBox.x + zoomedBox.width / 2, zoomedBox.y + zoomedBox.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(zoomedBox.x + zoomedBox.width / 2 - 60, zoomedBox.y + zoomedBox.height / 2)
+  await page.mouse.up()
+  await page.keyboard.up('Shift')
+  await video.evaluate(element => element.pause())
+
+  const playIcon = player.locator('.shaka-big-buttons-container .shaka-play-button path').first()
+  await expect(playIcon).toBeVisible()
+  const [iconBox, playerBox] = await Promise.all([
+    playIcon.boundingBox(),
+    player.boundingBox(),
+  ])
+  const first = {
+    x: iconBox.x + iconBox.width / 2,
+    y: iconBox.y + iconBox.height / 2,
+  }
+  const second = {
+    x: Math.min(first.x + 70, playerBox.x + playerBox.width - 20),
+    y: first.y,
+  }
+  expect(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.tagName, first)).toBe('path')
+
+  const startGeometry = await video.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    const matrix = new DOMMatrix(getComputedStyle(element).transform)
+    return {
+      zoom: matrix.a,
+      translation: { x: matrix.e, y: matrix.f },
+      center: {
+        x: bounds.left + bounds.width / 2 - matrix.e,
+        y: bounds.top + bounds.height / 2 - matrix.f,
+      },
+    }
+  })
+  await player.evaluate(element => {
+    const pointers = { start: new Map(), current: new Map(), pinchStart: null }
+    globalThis.__playerPinchTestPointers = pointers
+    element.addEventListener('pointerdown', (event) => {
+      if (event.pointerType !== 'touch') return
+      const point = { x: event.clientX, y: event.clientY }
+      pointers.start.set(event.pointerId, point)
+      pointers.current.set(event.pointerId, point)
+      if (pointers.current.size === 2) {
+        pointers.pinchStart = [...pointers.current.values()]
+      }
+    }, true)
+    element.addEventListener('pointermove', (event) => {
+      if (event.pointerType === 'touch') {
+        pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
+      }
+    }, true)
+  })
+
+  const session = await page.context().newCDPSession(page)
+  await session.send('Input.dispatchTouchEvent', {
+    type: 'touchStart',
+    touchPoints: [{ ...first, id: 1 }],
+  })
+  await page.waitForTimeout(200)
+  const firstAtPinch = { x: first.x + 12, y: first.y, id: 1 }
+  await session.send('Input.dispatchTouchEvent', {
+    type: 'touchMove',
+    touchPoints: [firstAtPinch],
+  })
+  await page.waitForTimeout(80)
+  await session.send('Input.dispatchTouchEvent', {
+    type: 'touchStart',
+    touchPoints: [firstAtPinch, { ...second, id: 2 }],
+  })
+  await session.send('Input.dispatchTouchEvent', {
+    type: 'touchMove',
+    touchPoints: [
+      { x: firstAtPinch.x - 50, y: firstAtPinch.y, id: 1 },
+      { x: second.x + 50, y: second.y, id: 2 },
+    ],
+  })
+
+  const pinchTransform = await video.evaluate(element => {
+    const { a: scale, e: x, f: y } = new DOMMatrix(getComputedStyle(element).transform)
+    return { scale, x, y }
+  })
+  const pointerCoordinates = await page.evaluate(() => {
+    const pointers = globalThis.__playerPinchTestPointers
+    return {
+      start: [...pointers.start.values()],
+      current: [...pointers.current.values()],
+      pinchStart: pointers.pinchStart,
+    }
+  })
+  expect(pointerCoordinates.start).toHaveLength(2)
+  expect(pointerCoordinates.current).toHaveLength(2)
+  expect(pointerCoordinates.pinchStart).toHaveLength(2)
+  const startFocal = {
+    x: (pointerCoordinates.pinchStart[0].x + pointerCoordinates.pinchStart[1].x) / 2 - startGeometry.center.x,
+    y: (pointerCoordinates.pinchStart[0].y + pointerCoordinates.pinchStart[1].y) / 2 - startGeometry.center.y,
+  }
+  const currentFocal = {
+    x: (pointerCoordinates.current[0].x + pointerCoordinates.current[1].x) / 2 - startGeometry.center.x,
+    y: (pointerCoordinates.current[0].y + pointerCoordinates.current[1].y) / 2 - startGeometry.center.y,
+  }
+  const content = {
+    x: (startFocal.x - startGeometry.translation.x) / startGeometry.zoom,
+    y: (startFocal.y - startGeometry.translation.y) / startGeometry.zoom,
+  }
+  expect(pinchTransform.scale).toBeGreaterThan(1)
+  expect(pinchTransform.x).toBeCloseTo(currentFocal.x - pinchTransform.scale * content.x, 0)
+  expect(pinchTransform.y).toBeCloseTo(currentFocal.y - pinchTransform.scale * content.y, 0)
+
+  await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await session.detach()
+
+  const persistedTransform = await video.evaluate(element => {
+    const { a: scale, e: x, f: y } = new DOMMatrix(getComputedStyle(element).transform)
+    return { scale, x, y }
+  })
+  expect(persistedTransform.scale).toBe(3)
+  expect(persistedTransform.x).toBeCloseTo(currentFocal.x - persistedTransform.scale * content.x, 0)
+  expect(persistedTransform.y).toBeCloseTo(currentFocal.y - persistedTransform.scale * content.y, 0)
+  expect(await video.evaluate(element => element.paused)).toBe(true)
+
+  await player.locator('.shaka-big-buttons-container .shaka-play-button').click()
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+})
+
 test('the overflow menu can turn the zoom off again', async ({ app, page, attachScreenshot }) => {
   const video = await openDemoVideo({ app, page })
 
@@ -585,6 +727,38 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   await expect(overflowMenu.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
   await expect(autoplaySwitch).toHaveCSS('margin-right', '14px')
   await watchComponent.dispose()
+})
+
+test('mobile fullscreen keeps menus and SponsorBlock notices above the action dock', async ({ app, page }) => {
+  await openDemoVideo({ app, page })
+  await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
+
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const actions = player.locator('.fullscreenActions')
+  await page.locator('body').press('s')
+  await player.hover()
+  await expect(actions).toBeVisible()
+
+  await player.getByRole('button', { name: 'More settings' }).click()
+  await player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Zoom' }).click()
+  await expect(player.locator('.video-zoom-menu')).toBeVisible()
+  await expect(actions).toHaveCSS('opacity', '0')
+  await expect(actions).toHaveCSS('pointer-events', 'none')
+
+  const layers = await player.evaluate(element => {
+    const notice = document.createElement('div')
+    notice.className = 'skippedSegmentsWrapper'
+    element.append(notice)
+    const result = {
+      actions: Number(getComputedStyle(element.querySelector('.fullscreenActions')).zIndex),
+      notice: Number(getComputedStyle(notice).zIndex),
+      controls: Number(getComputedStyle(element.querySelector('.shaka-controls-container')).zIndex),
+    }
+    notice.remove()
+    return result
+  })
+  expect(layers.notice).toBeGreaterThan(layers.actions)
+  expect(layers.controls).toBeGreaterThan(layers.notice)
 })
 
 /**
@@ -790,6 +964,12 @@ test('scopes the mobile fullscreen swipe movement to the video in tablet layout'
   await appRoot.evaluate(element => element.classList.add('capacitorTabs', 'capacitorTabletLayout'))
   await expect(appRoot).toHaveCSS('touch-action', 'auto')
   await expect(player).toHaveClass(/mobileFullscreenSwipeEnabled/)
+  await expect(player).toHaveCSS('touch-action', 'none')
+
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateEnableVideoZoom', false)
+  })
   await expect(player).toHaveCSS('touch-action', 'pan-x')
 
   await page.evaluate(async () => {

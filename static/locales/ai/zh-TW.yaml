@@ -434,6 +434,7 @@ Settings:
         Destructive pressed: 危險操作的按下狀態
         Text and icons on destructive actions: 危險操作上的文字與圖示
   Player Settings:
+    Continue Playback When Screen Is Locked: '螢幕鎖定時繼續播放'
     Music Visualizer: 音樂視覺化工具
     Automatically Open Chapters: 自動開啟章節
     Caption Appearance:
@@ -1386,6 +1387,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: 偵測到 IP 封鎖時要執行的指令碼檔案路徑。OpenTubeX 會等候指令碼執行完畢，再重新載入影片。若已啟用備援功能，則僅在備援也失敗時執行。
   Player Settings:
+    Continue Playback When Screen Is Locked: '在背景繼續播放音訊並提供 Android 媒體控制項。關閉此選項後，應用程式不再顯示時將暫停播放。'
     Enable Caption Translations: 啟用後，若影片未提供符合偏好字幕語言的原始字幕軌，字幕按鈕與 C 快捷鍵會優先選用自動翻譯的字幕軌。
     Use Quick Playback Speed Bar: 在播放器右側的控制項中顯示快速播放速度列。若已啟用手動儲存各頻道播放速度，速度列也會顯示用來儲存目前頻道播放速度的按鈕。
     Multiply Seek Interval by Playback Rate: 啟用後，快轉與倒轉間隔（方向鍵及 J/L）會乘以目前的播放速率。停用後，無論播放速率為何，間隔都保持不變。

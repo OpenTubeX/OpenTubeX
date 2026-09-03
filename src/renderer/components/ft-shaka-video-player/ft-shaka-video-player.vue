@@ -79,6 +79,8 @@
         presentationModeChanging,
         videoZoomPannable: videoZoomPanReady,
         videoZoomPanning,
+        videoZoomPinching,
+        videoZoomTouchEnabled: videoZoomPossible,
         playerPaused: playerPaused && hasLoaded,
         pausedInterfaceRevealed,
         hidePlayerControlsWhenPaused: !showPlayerControlsWhenPaused,
@@ -136,6 +138,7 @@
         @canplay="handleCanPlay"
         @volumechange="updateVolume"
         @timeupdate="handleTimeupdate"
+        @ratechange="syncMediaSessionPosition"
         @loadedmetadata="handleAbRepeatDurationChange"
         @durationchange="handleAbRepeatDurationChange"
         @enterpictureinpicture="handleEnterPictureInPicture"

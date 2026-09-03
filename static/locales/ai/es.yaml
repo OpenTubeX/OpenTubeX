@@ -434,6 +434,7 @@ Settings:
         Destructive pressed: Acción destructiva al pulsarla
         Text and icons on destructive actions: Texto e iconos de las acciones destructivas
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Continuar la reproducción con la pantalla bloqueada'
     Music Visualizer: Visualizador de música
     Automatically Open Chapters: Abrir capítulos automáticamente
     Caption Appearance:
@@ -1398,6 +1399,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Ruta del archivo de script que se ejecutará al detectar un bloqueo de IP. OpenTubeX espera a que termine y después recarga el vídeo. Si la fuente alternativa está activada, solo se ejecuta cuando esta también falla.
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Mantiene el audio reproduciéndose en segundo plano y proporciona controles multimedia de Android. Desactívalo para pausar cuando la aplicación deje de estar visible.'
     Enable Caption Translations: Al activarlo, el botón de subtítulos y el atajo C prefieren una pista traducida automáticamente al idioma de subtítulos elegido cuando el vídeo no ofrece una pista original coincidente.
     Use Quick Playback Speed Bar: Muestra una barra rápida de velocidad de reproducción en los controles situados a la derecha del reproductor. Si está activado el guardado manual de la velocidad por canal, la barra también incluye un botón para guardar la velocidad del canal actual.
     Multiply Seek Interval by Playback Rate: Al activarlo, los intervalos de avance (teclas de flecha y J/L) se multiplican por la velocidad de reproducción actual. Si se desactiva, los intervalos permanecen constantes independientemente de la velocidad.

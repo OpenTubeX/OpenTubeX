@@ -4,4 +4,13 @@
     <string name="title_activity_main">OpenTubeX</string>
     <string name="package_name">org.opentubex.app</string>
     <string name="custom_url_scheme">org.opentubex.app</string>
+    <string name="media_notification_channel">Media playback</string>
+    <string name="media_notification_channel_description">Controls for audio and video playback</string>
+    <string name="media_play">Play</string>
+    <string name="media_pause">Pause</string>
+    <string name="media_stop">Stop</string>
+    <string name="media_previous">Previous</string>
+    <string name="media_next">Next</string>
+    <string name="media_rewind">Rewind</string>
+    <string name="media_fast_forward">Fast forward</string>
 </resources>

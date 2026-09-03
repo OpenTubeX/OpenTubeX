@@ -25,6 +25,7 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         registerPlugin(PoTokenPlugin.class);
         registerPlugin(AndroidUiPlugin.class);
+        registerPlugin(AndroidMediaSessionPlugin.class);
         registerPlugin(SubscriptionRefreshPlugin.class);
         registerPlugin(SabrHttpPlugin.class);
         super.onCreate(savedInstanceState);
