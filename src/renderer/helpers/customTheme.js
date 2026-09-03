@@ -9,10 +9,18 @@ import {
 } from '../../customTheme'
 
 const STORAGE_KEY = 'opentubex-custom-theme'
+let appliedBodyThemeClasses = []
 
 export function applyThemeToDocument(baseTheme, mainColor, secColor, customTheme) {
   const themeClass = isCustomThemeValue(baseTheme) ? 'custom' : (baseTheme || 'system')
-  document.body.className = `${themeClass} main${mainColor || 'Red'} sec${secColor || 'Blue'}`
+  const themeClasses = [
+    themeClass,
+    `main${mainColor || 'Red'}`,
+    `sec${secColor || 'Blue'}`,
+  ]
+  document.body.classList.remove(...appliedBodyThemeClasses)
+  document.body.classList.add(...themeClasses)
+  appliedBodyThemeClasses = themeClasses
   document.body.dataset.systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
     ? 'dark'
     : 'light'

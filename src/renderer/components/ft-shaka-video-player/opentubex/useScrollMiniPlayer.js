@@ -12,6 +12,7 @@ import {
   unregisterCrossTabMiniPlayer,
 } from '../../../helpers/crossTabMiniPlayer'
 import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
+import { getCapacitorTabService } from '../../../tabs/CapacitorTabService'
 import {
   animateScrollMiniPlayerBounce,
   clampScrollMiniPlayerRect,
@@ -822,7 +823,11 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     event?.stopPropagation()
 
     if (scrollMiniPlayerDetached.value && tabId) {
-      store.dispatch('activateTab', tabId)
+      if (process.env.IS_CAPACITOR) {
+        getCapacitorTabService().activateTab(tabId)
+      } else {
+        store.dispatch('activateTab', tabId)
+      }
       return
     }
 

@@ -1,6 +1,7 @@
 import { Capacitor, registerPlugin, SystemBarType, SystemBars } from '@capacitor/core'
 
 const AndroidUi = process.env.IS_CAPACITOR ? registerPlugin('AndroidUi') : null
+const ANDROID_PICTURE_IN_PICTURE_TARGET_ATTRIBUTE = 'data-android-picture-in-picture-target'
 
 function videoDimensions(video) {
   return {
@@ -9,16 +10,30 @@ function videoDimensions(video) {
   }
 }
 
+function setAndroidPictureInPictureTarget(enabled, video) {
+  const player = video?.closest?.('.ftVideoPlayer')
+  if (enabled) {
+    document.querySelectorAll(`[${ANDROID_PICTURE_IN_PICTURE_TARGET_ATTRIBUTE}]`)
+      .forEach(element => element.removeAttribute(ANDROID_PICTURE_IN_PICTURE_TARGET_ATTRIBUTE))
+    player?.setAttribute(ANDROID_PICTURE_IN_PICTURE_TARGET_ATTRIBUTE, '')
+  } else {
+    player?.removeAttribute(ANDROID_PICTURE_IN_PICTURE_TARGET_ATTRIBUTE)
+  }
+}
+
 export function enterAndroidPictureInPicture(video) {
+  setAndroidPictureInPictureTarget(true, video)
   setAndroidPictureInPictureDocumentState(true)
   const request = AndroidUi?.enterPictureInPicture(videoDimensions(video)) ?? Promise.resolve()
   return request.catch(error => {
+    setAndroidPictureInPictureTarget(false, video)
     setAndroidPictureInPictureDocumentState(false)
     throw error
   })
 }
 
 export function setAndroidAutoPictureInPicture(enabled, video) {
+  setAndroidPictureInPictureTarget(enabled, video)
   return AndroidUi?.setAutoPictureInPicture({
     enabled,
     ...videoDimensions(video),

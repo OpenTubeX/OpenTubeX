@@ -24,6 +24,7 @@ import {
  *   video: import('vue').Ref<HTMLVideoElement | null>,
  *   tabId?: string | null,
  *   isTabPresented?: import('vue').ComputedRef<boolean> | null,
+ *   isCrossTabMiniPlayerPresented?: import('vue').Ref<boolean> | null,
  *   initialState?: {
  *     minimized?: boolean,
  *     focused?: boolean,
@@ -40,10 +41,14 @@ export function useAutoPictureInPicture({
   video,
   tabId = null,
   isTabPresented = null,
+  isCrossTabMiniPlayerPresented = null,
   initialState = null
 }) {
   const isActiveTab = computed(() => {
     return isTabPresented?.value !== false
+  })
+  const isAndroidPictureInPictureTarget = computed(() => {
+    return isActiveTab.value || isCrossTabMiniPlayerPresented?.value === true
   })
   const autoPictureInPictureTriggers = computed(() => store.getters.getAutoPictureInPictureTriggers)
   const androidAutoPictureInPicture = computed(() => store.getters.getAndroidAutoPictureInPicture)
@@ -64,6 +69,7 @@ export function useAutoPictureInPicture({
   let removeMinimizedListener = null
   let removeFocusedListener = null
   let blurTriggerRecheckTimeout = null
+  let wasAndroidPictureInPictureTarget = isAndroidPictureInPictureTarget.value
 
   function canAutoPipNow() {
     if (!autoPipEnabled.value || props.format === 'audio') return false
@@ -103,12 +109,15 @@ export function useAutoPictureInPicture({
   function updateAutoPip() {
     if (process.env.IS_CAPACITOR) {
       const videoElement = video.value
+      const isPresented = isAndroidPictureInPictureTarget.value
       const enabled = resolveAndroidAutoPictureInPictureUpdate(
-        isActiveTab.value,
+        isPresented,
         androidAutoPictureInPicture.value,
         props.format,
-        videoElement
+        videoElement,
+        { wasPresented: wasAndroidPictureInPictureTarget }
       )
+      wasAndroidPictureInPictureTarget = isPresented
       if (enabled === null) return
       setAndroidAutoPictureInPicture(
         enabled,
@@ -245,7 +254,7 @@ export function useAutoPictureInPicture({
       video.value?.removeEventListener('play', updateAutoPip)
       video.value?.removeEventListener('pause', updateAutoPip)
       video.value?.removeEventListener('ended', updateAutoPip)
-      if (isActiveTab.value) {
+      if (isAndroidPictureInPictureTarget.value || wasAndroidPictureInPictureTarget) {
         setAndroidAutoPictureInPicture(false, video.value).catch(() => {})
       }
     } else if (process.env.IS_ELECTRON) {
@@ -265,6 +274,7 @@ export function useAutoPictureInPicture({
 
   watch(autoPictureInPictureTriggers, updateAutoPip)
   watch(androidAutoPictureInPicture, updateAutoPip)
+  watch(isAndroidPictureInPictureTarget, updateAutoPip)
 
   return {
     getAutoPictureInPictureState,

@@ -24,10 +24,17 @@ export function canEnableAndroidAutoPictureInPicture(enabled, format, video) {
  * @param {boolean} enabled
  * @param {string} format
  * @param {{ paused: boolean, ended: boolean } | null} video
+ * @param {{ wasPresented?: boolean }} [options]
  * @returns {boolean | null}
  */
-export function resolveAndroidAutoPictureInPictureUpdate(isPresented, enabled, format, video) {
-  if (!isPresented) return null
+export function resolveAndroidAutoPictureInPictureUpdate(
+  isPresented,
+  enabled,
+  format,
+  video,
+  { wasPresented = false } = {}
+) {
+  if (!isPresented) return wasPresented ? false : null
   return canEnableAndroidAutoPictureInPicture(enabled, format, video)
 }
 

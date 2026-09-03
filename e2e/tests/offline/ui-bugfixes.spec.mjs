@@ -763,21 +763,43 @@ test.describe('autosized prompts', () => {
   })
 })
 
-test('isolates the video surface while Android Picture-in-Picture is active', async ({ page }) => {
+test('isolates the owning video surface while Android Picture-in-Picture is active', async ({ page }) => {
   await goTo(page, 'home')
+  await page.emulateMedia({ colorScheme: 'light' })
+  await expect(page.locator('body')).toHaveAttribute('data-system-theme', 'light')
   await page.evaluate(() => {
-    const player = document.createElement('div')
-    player.className = 'ftVideoPlayer'
-    const video = document.createElement('video')
-    video.className = 'player'
-    player.append(video)
-    document.querySelector('.routerView').append(player)
+    for (const target of [false, true]) {
+      const player = document.createElement('div')
+      player.className = 'ftVideoPlayer'
+      if (target) player.setAttribute('data-android-picture-in-picture-target', '')
+      const video = document.createElement('video')
+      video.className = 'player'
+      player.append(video)
+      document.querySelector('.routerView').append(player)
+    }
     document.body.classList.add('androidPictureInPicture')
   })
 
   await expect(page.locator('.topNav')).toHaveCSS('visibility', 'hidden')
-  await expect(page.locator('.ftVideoPlayer')).toHaveCSS('visibility', 'visible')
-  await expect(page.locator('.ftVideoPlayer > .player')).toHaveCSS('visibility', 'visible')
+  await expect(page.locator('.ftVideoPlayer').first()).toHaveCSS('visibility', 'hidden')
+  const target = page.locator('[data-android-picture-in-picture-target]')
+  await expect(target).toHaveCSS('visibility', 'visible')
+  await expect(target.locator('> .player')).toHaveCSS('visibility', 'visible')
+
+  // Vue replaces the class attribute when the player changes into its
+  // cross-tab mini-player layout. PiP ownership must survive that update.
+  await target.evaluate(element => {
+    element.className = 'ftVideoPlayer scrollMiniPlayer'
+  })
+  await expect(target).toHaveAttribute('data-android-picture-in-picture-target', '')
+  await expect(target.locator('> .player')).toHaveCSS('visibility', 'visible')
+
+  // Entering Android PiP can change the reported system color scheme. Theme
+  // updates must not discard the transient class that isolates the video.
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await expect(page.locator('body')).toHaveAttribute('data-system-theme', 'dark')
+  await expect(page.locator('body')).toHaveClass(/androidPictureInPicture/)
+  await expect(target).toHaveCSS('visibility', 'visible')
 })
 
 test.describe('thumbnail watched progress', () => {

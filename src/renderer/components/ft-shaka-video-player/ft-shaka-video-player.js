@@ -1239,6 +1239,8 @@ export default defineComponent({
 
     // #region settings
 
+    const isCrossTabMiniPlayerPresented = ref(false)
+
     const {
       getAutoPictureInPictureState,
       initializeActiveTab,
@@ -1254,6 +1256,7 @@ export default defineComponent({
       video,
       tabId,
       isTabPresented,
+      isCrossTabMiniPlayerPresented,
       initialState: props.autoPictureInPictureState,
     })
 
@@ -6329,6 +6332,10 @@ export default defineComponent({
       tabId,
       video,
     })
+
+    watch(scrollMiniPlayerDetached, (detached) => {
+      isCrossTabMiniPlayerPresented.value = detached
+    }, { immediate: true })
 
     // Logical tabs restore their saved scroll position after becoming active.
     // Refresh once that restoration is complete so an already-active mini player

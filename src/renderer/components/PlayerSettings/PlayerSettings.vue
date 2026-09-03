@@ -216,7 +216,7 @@
           @change="updateScrollMiniPlayerEnabled"
         />
         <FtToggleSwitch
-          v-if="USING_ELECTRON"
+          v-if="USING_ELECTRON || IS_CAPACITOR"
           :label="t('Settings.Player Settings.Scroll Mini Player.On All Tabs')"
           :compact="true"
           :default-value="scrollMiniPlayerOnAllTabs"
