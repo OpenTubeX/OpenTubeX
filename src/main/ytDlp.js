@@ -19,6 +19,7 @@ import {
   resumePendingDownload,
   updatePendingDownloadStatuses,
 } from './downloadQueue'
+import { supportsNativeNotifications } from './nativeNotifications'
 
 const execFileAsync = promisify(execFile)
 
@@ -217,7 +218,7 @@ function broadcastToRenderers(channel, payload) {
 }
 
 function showAutomaticDownloadNotification(payload, phase, downloadId = null) {
-  if (payload.automatic !== true || !Notification.isSupported()) {
+  if (payload.automatic !== true || !supportsNativeNotifications(Notification)) {
     return
   }
 

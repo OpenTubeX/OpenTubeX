@@ -76,6 +76,7 @@ import {
   monitorKdeWaylandWindowState,
   shouldMonitorKdeWaylandWindowState,
 } from './kdeWaylandWindowState'
+import { supportsNativeNotifications } from './nativeNotifications'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
 if (process.argv.includes('--version')) {
@@ -1736,7 +1737,7 @@ function runApp() {
   }
 
   function showLiveReminderNotification(reminder) {
-    if (!Notification.isSupported()) return
+    if (!supportsNativeNotifications(Notification)) return
 
     const notification = new Notification({
       title: reminder.notificationTitle,
@@ -3389,14 +3390,14 @@ function runApp() {
   const isValidVideoId = videoId => typeof videoId === 'string' && /^[\w-]{11}$/.test(videoId)
 
   ipcMain.handle(IpcChannels.LIVE_REMINDER_GET, (event, videoId) => {
-    if (!isValidLiveReminderSender(event) || !isValidVideoId(videoId) || !Notification.isSupported()) {
+    if (!isValidLiveReminderSender(event) || !isValidVideoId(videoId) || !supportsNativeNotifications(Notification)) {
       return null
     }
     return liveReminderManager.get(videoId)
   })
 
   ipcMain.handle(IpcChannels.LIVE_REMINDER_LIST, (event) => {
-    if (!isValidLiveReminderSender(event) || !Notification.isSupported()) {
+    if (!isValidLiveReminderSender(event) || !supportsNativeNotifications(Notification)) {
       return []
     }
     return liveReminderManager.list()
@@ -3405,7 +3406,7 @@ function runApp() {
   ipcMain.handle(IpcChannels.LIVE_REMINDER_SCHEDULE, (event, reminder) => {
     if (
       !isValidLiveReminderSender(event) ||
-      !Notification.isSupported() ||
+      !supportsNativeNotifications(Notification) ||
       !isValidVideoId(reminder?.videoId) ||
       !Number.isFinite(reminder?.startTimestamp) ||
       reminder.startTimestamp <= Date.now() ||
