@@ -408,6 +408,9 @@ const actions = {
   },
 
   reloadTab(_context, tabId) {
+    if (process.env.IS_CAPACITOR && tabId) {
+      return getCapacitorTabService().reloadTab(tabId)
+    }
     if (process.env.IS_ELECTRON && tabId) {
       window.ftElectron.tabs.reload(tabId)
     }

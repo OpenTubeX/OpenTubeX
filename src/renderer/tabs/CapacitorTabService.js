@@ -2,13 +2,17 @@ import {
   activateCapacitorTab,
   addCapacitorTab,
   closeCapacitorTab,
+  completeCapacitorTabMount,
   createCapacitorTab,
+  loadCapacitorTab,
   moveCapacitorTab,
+  reloadCapacitorTab,
   restoreClosedCapacitorTab,
   restoreCapacitorTabSession,
   setCapacitorTabPinned,
-  toRuntimeTabState
-} from './capacitorTabState'
+  toRuntimeTabState,
+  unloadCapacitorTab
+} from './capacitorTabState.js'
 
 const STORAGE_KEY = 'opentubex-capacitor-tabs'
 const PERSISTED_MUTATIONS = new Set([
@@ -32,12 +36,13 @@ export function getCapacitorTabService() {
   return service
 }
 
-class CapacitorTabService {
+export class CapacitorTabService {
   constructor(router, store, navigation) {
     this.router = router
     this.store = store
     this.navigation = navigation
     this.initialized = false
+    this.sessionGeneration = 0
     this.removeRouterHook = () => {}
     this.removeStoreSubscription = () => {}
   }
@@ -49,11 +54,12 @@ class CapacitorTabService {
     this.sessionUpdatedAt = Number.isFinite(persisted?.updatedAt)
       ? persisted.updatedAt
       : Date.now()
-    const session = restoreCapacitorTabSession(
+    let session = restoreCapacitorTabSession(
       persisted,
       currentRoute
     )
-    this.commitSession(session)
+    session = loadCapacitorTab(session, session.activeTabId)
+    this.commitSession(session, session.activeTabId)
     this.store.commit('setPresentedTab', session.activeTabId)
     this.initialized = true
 
@@ -83,21 +89,22 @@ class CapacitorTabService {
 
   async createTab(location = `/${this.store.getters.getLandingPage}`, title = '', makeActive = true) {
     const tab = createCapacitorTab(this.router.resolve(location), title)
-    const session = addCapacitorTab(this.currentSession(), tab, makeActive)
-    this.commitSession(session)
-    if (makeActive) {
-      await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)
+    const previous = this.currentSession()
+    const session = addCapacitorTab(previous, tab, makeActive)
+    if (!makeActive) {
+      this.commitSession(session)
+      return tab.id
     }
-    return tab.id
+
+    return await this.commitAndPresent(previous, session) ? tab.id : null
   }
 
   async activateTab(tabId) {
     const previous = this.currentSession()
-    const session = activateCapacitorTab(previous, tabId)
+    const session = activateCapacitorTab(loadCapacitorTab(previous, tabId), tabId)
     if (session === previous) return false
 
-    this.commitSession(session)
-    return await this.navigation.requestPresentation(tabId, session.selectionRevision)
+    return await this.commitAndPresent(previous, session)
   }
 
   async duplicateTab(tabId) {
@@ -106,26 +113,37 @@ class CapacitorTabService {
 
     const tab = createCapacitorTab(source.route)
     tab.title = source.contentTitle || source.title || source.route.fullPath
-    const session = addCapacitorTab(this.currentSession(), tab)
-    this.commitSession(session)
-    await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)
-    return tab.id
+    const previous = this.currentSession()
+    const session = addCapacitorTab(previous, tab)
+    return await this.commitAndPresent(previous, session) ? tab.id : null
   }
 
   async closeTab(tabId) {
-    const previous = this.currentSession()
+    let previous = this.currentSession()
     if (!previous.tabs.some(tab => tab.id === tabId)) return false
 
     const wasActive = previous.activeTabId === tabId
+    const wasPresented = this.store.getters.getPresentedTabId === tabId
+    if (wasPresented && !wasActive) return false
     if (wasActive) this.navigation.saveScroll(tabId)
 
-    const landingRoute = this.router.resolve(`/${this.store.getters.getLandingPage}`)
-    const session = closeCapacitorTab(previous, tabId, landingRoute)
-    this.commitSession(session)
-
-    if (wasActive) {
-      await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)
+    if (wasActive && previous.tabs.length > 1) {
+      const nextTabId = findReplacementTabId(previous.tabs, tabId)
+      if (!nextTabId || !await this.activateTab(nextTabId)) return false
+      previous = this.currentSession()
     }
+
+    const landingRoute = this.router.resolve(`/${this.store.getters.getLandingPage}`)
+    let session = closeCapacitorTab(previous, tabId, landingRoute)
+    const needsPresentation = session.activeTabId === tabId
+    if (needsPresentation) {
+      session = loadCapacitorTab(session, session.activeTabId)
+    }
+    if (needsPresentation) {
+      return await this.commitAndPresent(previous, session)
+    }
+
+    this.commitSession(session)
     return true
   }
 
@@ -134,9 +152,7 @@ class CapacitorTabService {
     const session = restoreClosedCapacitorTab(previous)
     if (session === previous) return null
 
-    this.commitSession(session)
-    await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)
-    return session.activeTabId
+    return await this.commitAndPresent(previous, session) ? session.activeTabId : null
   }
 
   getSyncSessions() {
@@ -158,6 +174,7 @@ class CapacitorTabService {
     const synced = sessions.find(session => Array.isArray(session?.tabs) && session.tabs.length > 0)
     if (!synced) return false
 
+    const previous = this.currentSession()
     const tabs = synced.tabs.map(tab => createCapacitorTab(
       this.router.resolve(syncTabRoute(tab.url)),
       tab.title,
@@ -173,9 +190,9 @@ class CapacitorTabService {
         : tabs[0].id,
       closedTabs: [],
     }, this.router.currentRoute.value)
+    if (!await this.commitAndPresent(previous, session)) return false
+
     this.sessionUpdatedAt = Number.isFinite(synced.updatedAt) ? synced.updatedAt : Date.now()
-    this.commitSession(session)
-    await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)
     this.persist()
     return true
   }
@@ -185,6 +202,7 @@ class CapacitorTabService {
 
     for (const tab of session.tabs) {
       const tabId = await this.createTab(syncTabRoute(tab.url), tab.title)
+      if (!tabId) return false
       if (tab.isPinned === true) this.setPinned(tabId, true)
     }
     return true
@@ -208,6 +226,101 @@ class CapacitorTabService {
     return true
   }
 
+  async reloadTab(tabId) {
+    const tab = this.store.getters.getTabById(tabId)
+    if (!tab) return false
+
+    if (tab.route.path.startsWith('/watch/')) {
+      const timestamp = this.store.getters.getWatchTimestamp(tabId)
+      if (typeof timestamp === 'number' && timestamp > 0) {
+        this.navigation.prepareReload(tabId, {
+          path: tab.route.path,
+          query: { ...tab.route.query, oneTimeTimestamp: Math.floor(timestamp) }
+        })
+      }
+    }
+
+    const previous = this.currentSession()
+    const session = reloadCapacitorTab(previous, tabId)
+    if (session === previous) return false
+
+    this.commitSession(session)
+    return true
+  }
+
+  loadTab(tabId) {
+    const previous = this.currentSession()
+    const session = loadCapacitorTab(previous, tabId)
+    if (session === previous) return false
+
+    this.commitSession(session)
+    return true
+  }
+
+  async unloadTab(tabId) {
+    let session = this.currentSession()
+    const tab = session.tabs.find(candidate => candidate.id === tabId)
+    if (!tab || tab.loadState === 'unloaded' || tab.loadState === 'unloading') return false
+
+    if (this.store.getters.getPresentedTabId === tabId && session.activeTabId !== tabId) {
+      return false
+    }
+
+    if (session.activeTabId === tabId) {
+      if (session.tabs.length <= 1) return false
+
+      const nextTabId = findReplacementTabId(session.tabs, tabId)
+      if (!nextTabId || !await this.activateTab(nextTabId)) return false
+      session = this.currentSession()
+    }
+
+    const unloaded = unloadCapacitorTab(session, tabId)
+    if (unloaded === session) return false
+
+    this.commitSession(unloaded)
+    return true
+  }
+
+  markTabMounted(tabId, mountRevision) {
+    const previous = this.currentSession()
+    const session = completeCapacitorTabMount(previous, tabId, mountRevision)
+    if (session !== previous) this.commitSession(session)
+  }
+
+  markTabMountFailed(tabId, mountRevision) {
+    const previous = this.currentSession()
+    const session = completeCapacitorTabMount(previous, tabId, mountRevision, false)
+    if (session !== previous) this.commitSession(session)
+  }
+
+  async commitAndPresent(previous, session) {
+    const previousPresentedTabId = this.store.getters.getPresentedTabId
+    const presentationGeneration = this.commitSession(session)
+    if (await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)) {
+      return true
+    }
+
+    const current = this.currentSession()
+    if (
+      this.sessionGeneration !== presentationGeneration ||
+      current.activeTabId !== session.activeTabId ||
+      current.selectionRevision !== session.selectionRevision
+    ) {
+      return false
+    }
+
+    const rollbackPresentedTabId = previous.tabs.some(tab => tab.id === previousPresentedTabId)
+      ? previousPresentedTabId
+      : previous.activeTabId
+    const rollback = {
+      ...previous,
+      selectionRevision: current.selectionRevision + 1
+    }
+    this.commitSession(rollback, rollbackPresentedTabId)
+    await this.navigation.requestPresentation(rollback.activeTabId, rollback.selectionRevision)
+    return false
+  }
+
   currentSession() {
     return {
       tabs: this.store.getters.getTabs.map(tab => ({
@@ -216,9 +329,15 @@ class CapacitorTabService {
         isPinned: tab.isPinned === true,
         route: tab.route,
         history: tab.history,
-        historyIndex: tab.historyIndex
+        historyIndex: tab.historyIndex,
+        loadState: tab.loadState,
+        mountRevision: tab.mountRevision,
+        refreshKey: tab.refreshKey,
+        isLoading: tab.isLoading,
+        isPlaying: tab.isPlaying,
+        pendingReloadRoute: tab.pendingReloadRoute
       })),
-      closedTabs: this.store.getters.getClosedTabs.toReversed().map(tab => ({
+      closedTabs: this.store.getters.getClosedTabs.slice().reverse().map(tab => ({
         id: tab.id,
         title: tab.title || tab.route.fullPath,
         isPinned: tab.isPinned === true,
@@ -232,14 +351,16 @@ class CapacitorTabService {
     }
   }
 
-  commitSession(session) {
-    this.store.commit('setTabsState', toRuntimeTabState(session))
+  commitSession(session, presentedTabId = this.store.getters.getPresentedTabId ?? session.activeTabId) {
+    this.store.commit('setTabsState', toRuntimeTabState(session, presentedTabId))
+    this.sessionGeneration += 1
+    return this.sessionGeneration
   }
 
   persist() {
     try {
       this.sessionUpdatedAt = Date.now()
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.currentSession()))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(toPersistedSession(this.currentSession())))
     } catch (error) {
       console.error('Failed to persist Capacitor tabs:', error)
     }
@@ -249,6 +370,37 @@ class CapacitorTabService {
     this.removeRouterHook()
     this.removeStoreSubscription()
     this.initialized = false
+  }
+}
+
+function findReplacementTabId(tabs, tabId) {
+  const tabIndex = tabs.findIndex(tab => tab.id === tabId)
+  if (tabIndex === -1) return null
+
+  const candidates = [
+    ...tabs.slice(tabIndex + 1),
+    ...tabs.slice(0, tabIndex).reverse()
+  ]
+  return candidates.find(tab => tab.loadState === 'loaded')?.id ?? candidates[0]?.id ?? null
+}
+
+function toPersistedSession(session) {
+  const serializeTab = (tab, includeLoadState) => ({
+    id: tab.id,
+    title: tab.title,
+    isPinned: tab.isPinned,
+    route: tab.route,
+    history: tab.history,
+    historyIndex: tab.historyIndex,
+    ...(includeLoadState && { isUnloaded: tab.loadState === 'unloaded' })
+  })
+
+  return {
+    tabs: session.tabs.map(tab => serializeTab(tab, true)),
+    closedTabs: session.closedTabs.map(tab => serializeTab(tab, false)),
+    activeTabId: session.activeTabId,
+    selectionRevision: session.selectionRevision,
+    updatedAt: session.updatedAt
   }
 }
 

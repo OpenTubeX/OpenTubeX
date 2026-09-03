@@ -1,5 +1,8 @@
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
+import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../../helpers/share'
+import { copyToClipboard } from '../../helpers/utils'
 import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
 import { formatTabTitle } from '../../tabs/tabTitle'
 
@@ -30,13 +33,30 @@ export function useCapacitorTabActions({
   afterCloseActions = noop,
   stopContextMenuPropagation = false,
 }) {
+  const { t } = useI18n()
   const actionTabId = ref(null)
   const actionTab = computed(() => (
     tabs.value.find(tab => tab.id === actionTabId.value) ?? null
   ))
+  const actionTabYoutubeUrl = computed(() => {
+    const route = actionTab.value?.route?.fullPath
+    return isShareableOpenTubeXRoute(route)
+      ? transformOpenTubeXRouteUrl(route, true)
+      : null
+  })
+  const canToggleActionTabLoaded = computed(() => {
+    const tab = actionTab.value
+    if (!tab || tab.loadState === 'mounting' || tab.loadState === 'unloading') return false
+    return tab.loadState === 'unloaded' || tabs.value.length > 1
+  })
 
   function tabTitle(tab) {
     return formatTabTitle(tab.contentTitle || tab.title || tab.route.fullPath)
+  }
+
+  function tabAriaLabel(tab) {
+    const title = tabTitle(tab)
+    return tab.isUnloaded ? `${title}, ${t('Tab Organizer.Unloaded')}` : title
   }
 
   async function createTab() {
@@ -94,6 +114,36 @@ export function useCapacitorTabActions({
     await afterDuplicate()
   }
 
+  async function copyActionTabYoutubeLink() {
+    const url = actionTabYoutubeUrl.value
+    if (!url) return
+
+    closeTabActions()
+    await copyToClipboard(url, {
+      messageOnSuccess: t('Share.YouTube URL copied to clipboard')
+    })
+  }
+
+  async function reloadActionTab() {
+    if (!actionTab.value) return
+
+    const tabId = actionTab.value.id
+    closeTabActions()
+    await getCapacitorTabService().reloadTab(tabId)
+  }
+
+  async function toggleActionTabLoaded() {
+    if (!actionTab.value || !canToggleActionTabLoaded.value) return
+
+    const tab = actionTab.value
+    closeTabActions()
+    if (tab.loadState === 'unloaded') {
+      getCapacitorTabService().loadTab(tab.id)
+    } else {
+      await getCapacitorTabService().unloadTab(tab.id)
+    }
+  }
+
   async function closeActionTab() {
     if (!actionTab.value) return
 
@@ -104,15 +154,21 @@ export function useCapacitorTabActions({
 
   return {
     actionTab,
+    actionTabYoutubeUrl,
     activateTab,
+    canToggleActionTabLoaded,
     closeActionTab,
     closeTab,
     closeTabActions,
     createTab,
+    copyActionTabYoutubeLink,
     duplicateActionTab,
     handleTabTargetKeydown,
     openTabActions,
+    reloadActionTab,
+    tabAriaLabel,
     tabTitle,
+    toggleActionTabLoaded,
     toggleActionTabPinned,
   }
 }

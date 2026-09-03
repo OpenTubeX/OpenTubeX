@@ -303,6 +303,10 @@
   background-color: var(--side-nav-hover-color);
 }
 
+.capacitorPhoneTabRow.unloaded .capacitorPhoneTabTarget {
+  opacity: 0.6;
+}
+
 .capacitorPhoneTabViewTabs {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

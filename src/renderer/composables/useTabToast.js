@@ -19,7 +19,7 @@ export function useTabToast() {
 
   return (message, time = null, action = null, abortSignal = null) => {
     // No provider (web build, single view) means there are no background tabs.
-    if (process.env.IS_ELECTRON && isTabPresented != null && !isTabPresented.value) {
+    if (isTabPresented != null && !isTabPresented.value) {
       return
     }
 

@@ -20,6 +20,18 @@ export function canEnableAndroidAutoPictureInPicture(enabled, format, video) {
 }
 
 /**
+ * @param {boolean} isPresented
+ * @param {boolean} enabled
+ * @param {string} format
+ * @param {{ paused: boolean, ended: boolean } | null} video
+ * @returns {boolean | null}
+ */
+export function resolveAndroidAutoPictureInPictureUpdate(isPresented, enabled, format, video) {
+  if (!isPresented) return null
+  return canEnableAndroidAutoPictureInPicture(enabled, format, video)
+}
+
+/**
  * @typedef {{
  *   windowMinimized: boolean,
  *   windowFocused: boolean,

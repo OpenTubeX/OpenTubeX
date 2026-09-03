@@ -136,6 +136,7 @@
                   :class="{
                     active: tab.id === activeTabId,
                     pinned: tab.isPinned,
+                    unloaded: tab.isUnloaded,
                     dragging: drag.tabId === tab.id,
                     swiping: swipe.tabId === tab.id && swipe.dragging,
                     closing: swipe.tabId === tab.id && swipe.closing
@@ -168,6 +169,7 @@
                     role="tab"
                     :data-tab-id="tab.id"
                     :aria-selected="tab.id === activeTabId"
+                    :aria-label="tabAriaLabel(tab)"
                     :tabindex="tab.id === activeTabId ? 0 : -1"
                     @click="activateTab(tab.id)"
                     @keydown="handleTabTargetKeydown($event, tab.id)"
@@ -284,10 +286,15 @@
             <CapacitorTabActionsMenu
               :tab="actionTab"
               :title="actionTab ? tabTitle(actionTab) : ''"
+              :youtube-url="actionTabYoutubeUrl"
+              :can-toggle-loaded="canToggleActionTabLoaded"
               mode="phone"
               @close="closeActionTab"
+              @copy-youtube-link="copyActionTabYoutubeLink"
               @dismiss="closeTabActions"
               @duplicate="duplicateActionTab"
+              @reload="reloadActionTab"
+              @toggle-loaded="toggleActionTabLoaded"
               @toggle-pinned="toggleActionTabPinned"
             />
           </section>
@@ -369,15 +376,21 @@ const swipe = reactive({
 const drag = reactive({ tabId: null, pointerId: null, moved: false })
 const {
   actionTab,
+  actionTabYoutubeUrl,
   activateTab: activateTabAction,
+  canToggleActionTabLoaded,
   closeActionTab,
   closeTab,
   closeTabActions,
   createTab,
+  copyActionTabYoutubeLink,
   duplicateActionTab,
   handleTabTargetKeydown,
   openTabActions,
+  reloadActionTab,
+  tabAriaLabel,
   tabTitle,
+  toggleActionTabLoaded,
   toggleActionTabPinned,
 } = useCapacitorTabActions({
   tabs,

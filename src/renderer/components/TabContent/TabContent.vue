@@ -39,6 +39,7 @@ import { routeLocationKey, routerKey } from 'vue-router'
 import store from '../../store/index'
 import { resolveRouteComponent } from '../../router/index'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
+import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
 import { tabLifecycleService } from '../../tabs/TabLifecycleService'
 import { tabRuntimeRegistry } from '../../tabs/TabRuntimeRegistry'
 import { tabIdKey, tabLifecycleKey, tabPresentedKey } from '../../tabs/TabContext'
@@ -100,6 +101,7 @@ let loaderAnimationFrameId = null
 let loaderSettleTimeoutId = null
 let acknowledgedMountRevision = 0
 let previousRefreshKey = props.tab.refreshKey ?? 0
+let lifecycleRevision = 0
 // Guards against notifying `beforeDispose` twice for the same mounted instance:
 // the unload watcher and onBeforeUnmount can both fire for one instance. Reset
 // when the tab mounts again so a subsequent mount receives one notification.
@@ -138,9 +140,11 @@ async function disposeMountedContent() {
 watch(
   () => [shouldMount.value, props.tab.mountRevision, props.tab.refreshKey],
   async ([mount, mountRevision, refreshKey]) => {
+    const revision = ++lifecycleRevision
     if (!mount) {
       if (initialized.value && !disposalNotified) {
         await disposeMountedContent()
+        if (revision !== lifecycleRevision || shouldMount.value) return
         initialized.value = false
       }
       navigation.setLoadingSource(props.tab.id, TAB_LOADER_LOADING_SOURCE, false)
@@ -149,9 +153,11 @@ watch(
 
     if (refreshKey !== previousRefreshKey) {
       await tabLifecycleService.run(props.tab.id, 'beforeReload')
+      if (revision !== lifecycleRevision) return
       previousRefreshKey = refreshKey
       initialized.value = false
       await nextTick()
+      if (revision !== lifecycleRevision) return
       store.commit('applyPendingReloadRoute', props.tab.id)
     }
 
@@ -168,6 +174,9 @@ watch(
       acknowledgedMountRevision = mountRevision
       tabRuntimeRegistry.markMounted(props.tab.id, mountRevision)
       window.ftElectron?.tabs?.mountReady?.(props.tab.id, mountRevision)
+      if (process.env.IS_CAPACITOR) {
+        getCapacitorTabService().markTabMounted(props.tab.id, mountRevision)
+      }
       // Mount readiness can race the initial active-tab watcher. Retry now that
       // the runtime is guaranteed to exist so the tab cannot remain hidden.
       if (
@@ -208,12 +217,16 @@ onErrorCaptured((error) => {
   if (mountRevision > acknowledgedMountRevision) {
     tabRuntimeRegistry.markMountFailed(props.tab.id, mountRevision)
     window.ftElectron?.tabs?.mountFailed?.(props.tab.id, mountRevision)
+    if (process.env.IS_CAPACITOR) {
+      getCapacitorTabService().markTabMountFailed(props.tab.id, mountRevision)
+    }
   }
   // Return undefined (not false) so the error still propagates to the app-level
   // errorHandler in main.js after our IPC notification, preserving observability.
 })
 
 onBeforeUnmount(() => {
+  lifecycleRevision += 1
   disposeMountedContent().catch(error => {
     console.error(`Failed to dispose logical tab ${props.tab.id}:`, error)
   })

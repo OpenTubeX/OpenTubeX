@@ -5676,7 +5676,6 @@ export default defineComponent({
       shortsEnded.value = false
       const isCurrentPictureInPictureVideo = document.pictureInPictureElement === video.value
       if (
-        process.env.IS_ELECTRON &&
         !isActiveTab.value &&
         !isCurrentPictureInPictureVideo &&
         !scrollMiniPlayerDetached.value
