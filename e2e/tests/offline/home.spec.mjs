@@ -506,6 +506,23 @@ test.describe('landing page availability', () => {
     }))
     expect(tab.route.fullPath).toBe('/subscriptions')
   })
+
+  test.describe('with Trending configured as the landing page', () => {
+    test.use({
+      seed: {
+        settings: {
+          backendFallback: false,
+          backendPreference: 'local',
+          landingPage: 'trending',
+          navigationItems: ['trending', 'subscriptions'],
+        }
+      }
+    })
+
+    test('opens Trending when the Electron renderer supports the local API', async ({ page }) => {
+      await expect(page).toHaveURL(/#\/trending$/)
+    })
+  })
 })
 
 test.describe('legacy landing page visibility', () => {
