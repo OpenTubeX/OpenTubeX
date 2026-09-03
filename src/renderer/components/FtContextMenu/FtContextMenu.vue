@@ -179,6 +179,7 @@ const itemIcons = {
   'Duplicate Tab': ['fas', 'clone'],
   'Load Tab': ['fas', 'download'],
   'Load Tabs': ['fas', 'download'],
+  'Mark All as Seen': ['fas', 'check'],
   'Move Tab': ['fas', 'exchange-alt'],
   'Move Tab to Group': ['fas', 'layer-group'],
   'Move Tab to Window': ['fas', 'display'],

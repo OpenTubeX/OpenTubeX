@@ -281,7 +281,9 @@ test.describe('new subscriptions feed', () => {
 
     await shortsTab.click({ button: 'right' })
     const menu = page.getByRole('menu', { name: 'Context menu' })
-    await menu.getByRole('menuitem', { name: 'Mark all as seen' }).click()
+    const markAllAsSeen = menu.getByRole('menuitem', { name: 'Mark all as seen' })
+    await expect(markAllAsSeen.locator('[data-prefix="fas"][data-icon="check"]')).toBeVisible()
+    await markAllAsSeen.click()
 
     await expect(videosTab).toHaveAttribute('aria-selected', 'true')
     await expect(shortsTab.locator('.newContentDot')).toHaveCount(0)
