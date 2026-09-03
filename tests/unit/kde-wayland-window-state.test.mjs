@@ -131,18 +131,14 @@ test('does not mistake an ordinary focus change for minimize', () => {
   assert.equal(findNewlyMinimizedWindow(state, state, targetWindow()), null)
 })
 
-test('bounds polling when a KDE desktop popup leaves the window active', async () => {
-  const focusedStates = await focusedStatesAfterBlur(
-    {
-      resourceClass: 'electron',
-      skipTaskbar: false,
-      uuid: 'window',
-    },
-    { pollInterval: 0 }
-  )
+test('keeps focus when a KDE desktop popup leaves the window active', async () => {
+  const focusedStates = await focusedStatesAfterBlur({
+    resourceClass: 'electron',
+    skipTaskbar: false,
+    uuid: 'window',
+  })
 
-  assert.equal(focusedStates.length, 6)
-  assert.equal(focusedStates.every(Boolean), true)
+  assert.deepEqual(focusedStates, [true])
 })
 
 test('keeps focus when a KDE shell popup becomes active', async () => {
@@ -176,32 +172,36 @@ test('does not mistake another app utility window for a KDE shell popup', async 
 })
 
 test('reports an app switch made through a KDE shell popup', async () => {
-  const activeWindows = [
+  const focusedStates = await focusedStatesAfterBlur(
     {
       resourceClass: 'plasmashell',
       skipTaskbar: true,
       uuid: 'launcher',
     },
     {
-      resourceClass: 'electron',
-      skipTaskbar: false,
-      uuid: 'window',
-    },
-    {
-      resourceClass: 'electron',
-      skipTaskbar: false,
-      uuid: 'window',
-    },
-    {
-      resourceClass: 'org.kde.konsole',
-      skipTaskbar: false,
-      uuid: 'konsole',
-    },
-  ]
-  let queryIndex = 0
-  const focusedStates = await focusedStatesAfterBlur(
-    () => activeWindows[Math.min(queryIndex++, activeWindows.length - 1)],
-    { pollInterval: 0 }
+      activeWindowChanges: [
+        {
+          resourceClass: 'electron',
+          skipTaskbar: false,
+          uuid: 'window',
+        },
+        {
+          resourceClass: 'electron',
+          skipTaskbar: false,
+          uuid: 'window',
+        },
+        {
+          resourceClass: 'org.kde.konsole',
+          skipTaskbar: false,
+          uuid: 'konsole',
+        },
+        {
+          resourceClass: 'plasmashell',
+          skipTaskbar: true,
+          uuid: 'launcher',
+        },
+      ],
+    }
   )
 
   assert.deepEqual(focusedStates, [true, true, true, false])
@@ -285,12 +285,12 @@ test('preserves the window identity across title updates during detection', asyn
   browserWindow.emit('blur')
   title = targetWindow().caption
   resolveBackend({
-    queryActiveWindow: async () => null,
     queryWindow: async () => minimized,
     queryWindows: async () => {
       setWindowTitle(targetWindow().caption)
       return [otherWindow, minimized]
     },
+    watchActiveWindow: () => ({ activeWindow: null, stop: () => {} }),
   })
   await detected
 
@@ -316,28 +316,42 @@ function targetWindow () {
   }
 }
 
-async function focusedStatesAfterBlur (activeWindow, { pollInterval = 1000 } = {}) {
+async function focusedStatesAfterBlur (activeWindow, { activeWindowChanges = [] } = {}) {
   const browserWindow = new EventEmitter()
   browserWindow.getBounds = () => targetWindow().bounds
   browserWindow.getTitle = () => targetWindow().caption
   browserWindow.isFocused = () => false
   const focusedStates = []
+  let activeWindowListener = null
   const backend = Promise.resolve({
-    queryActiveWindow: async () => typeof activeWindow === 'function' ? activeWindow() : activeWindow,
     queryWindow: async () => null,
     queryWindows: async () => [windowInfo()],
+    watchActiveWindow: listener => {
+      activeWindowListener = listener
+      return {
+        activeWindow,
+        stop: () => {
+          if (activeWindowListener === listener) activeWindowListener = null
+        },
+      }
+    },
   })
   const stop = monitorKdeWaylandWindowState({
     browserWindow,
     backend,
     detectionDelay: 0,
-    pollInterval,
     onFocusedState: focused => focusedStates.push(focused),
     onMinimizedState: () => {},
   })
 
   browserWindow.emit('blur')
-  await new Promise(resolve => setTimeout(resolve, 20))
+  await new Promise(resolve => setTimeout(resolve, 10))
+  for (const nextActiveWindow of activeWindowChanges) {
+    activeWindow = nextActiveWindow
+    if (activeWindowListener !== null) activeWindowListener(activeWindow)
+    await Promise.resolve()
+  }
+  await new Promise(resolve => setTimeout(resolve, 10))
   stop()
 
   return focusedStates
