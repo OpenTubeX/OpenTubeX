@@ -922,6 +922,7 @@ Settings:
     Shorts Auto Refresh Interval: Shorts 자동 새로 고침 간격
     Live Auto Refresh Interval: 실시간 스트림 자동 새로 고침 간격
     Posts Auto Refresh Interval: 게시물 자동 새로 고침 간격
+    Refresh Subscriptions While App Is Closed: "앱이 닫혀 있을 때 구독 새로 고침"
     Limit the number of videos displayed for each channel: 채널별 표시 동영상 수 제한
     To: 다음으로
     Confirm Before Unsubscribing: 구독 취소 전 확인
@@ -1786,6 +1787,7 @@ Tooltips:
     Show New Content Indicators: 이전에 가져올 때 없었던 구독 피드 항목 옆에 작은 점을 표시합니다.
     Show Scheduled Live Streams / Premieres First: 예정된 실시간 스트림과 최초 공개를 구독 피드 맨 위에 유지합니다. 비활성화하면 시작될 때까지 공지된 위치에 유지됩니다. 비활성화한 후 구독 피드를 한 번 새로 고쳐 기존 예정 항목의 공지 날짜를 가져오세요.
     Auto Refresh Interval: "앱이 열려 있는 동안 OpenTubeX에서 구독 피드를 자동으로 새로 고칠 간격입니다. Android에서는 0이 아닌 간격을 선택하면 앱이 닫혀 있을 때도 피드를 새로 고칩니다."
+    Refresh Subscriptions While App Is Closed: "OpenTubeX가 닫혀 있을 때 Android가 선택한 간격으로 구독 피드를 새로 고칠 수 있도록 합니다. 앱이 열려 있을 때만 자동으로 새로 고치려면 이 옵션을 끄세요."
   Theme Settings:
     Show Progress as Notification: 전체 진행률 표시줄 대신 구독 새로 고침 및 관리되는 도구 다운로드 같은 백그라운드 작업의 실시간 진행률을 지속 알림으로 표시합니다.
     Always Show Scrollbars: 스크롤바를 항상 표시합니다. 비활성화하면 마우스 움직임을 멈춘 직후 서서히 사라지고 다시 움직이면 즉시 나타납니다.

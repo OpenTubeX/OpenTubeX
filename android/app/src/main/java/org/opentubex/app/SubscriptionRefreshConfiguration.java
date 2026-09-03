@@ -76,7 +76,9 @@ final class SubscriptionRefreshConfiguration {
         String instanceUrl = configuration.optString("instanceUrl", "").replaceAll("/+$", "");
         if (!instanceUrl.startsWith("https://")) return Collections.emptyList();
 
-        String authorization = configuration.optString("authorization", null);
+        String authorization = configuration.isNull("authorization")
+            ? null
+            : configuration.optString("authorization", null);
         if (authorization != null && authorization.isEmpty()) authorization = null;
         String cancelLabel = configuration.optString("cancelLabel", "Cancel");
         JSONObject intervals = configuration.optJSONObject("intervals");

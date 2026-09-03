@@ -282,6 +282,7 @@ Settings:
     Cleanup Failed: Czyszczenie pamięci nie powiodło się
   Subscription Settings:
     Show Scheduled Live Streams / Premieres First: Najpierw pokazuj zaplanowane transmisje na żywo i premiery
+    Refresh Subscriptions While App Is Closed: "Odświeżaj subskrypcje, gdy aplikacja jest zamknięta"
   Distraction Free Settings:
     Sections:
       Visible While Paused: Widoczne po wstrzymaniu w trybie pełnego okna lub pełnego ekranu
@@ -674,6 +675,7 @@ Tooltips:
     Shorten View Counts: Pokazuje liczbę wyświetleń i polubień komentarzy w skróconej postaci zaokrąglonej przez YouTube, na przykład 14 tys. zamiast 14 000. Dokładne wartości są zawsze wyświetlane w całości.
   Subscription Settings:
     Show Scheduled Live Streams / Premieres First: Umieszcza nadchodzące transmisje na żywo i premiery na górze kanału subskrypcji. Po wyłączeniu pozostają na pozycji zgodnej z datą ogłoszenia aż do rozpoczęcia. Po wyłączeniu odśwież kanał subskrypcji, aby pobrać daty ogłoszenia istniejących zaplanowanych pozycji.
+    Refresh Subscriptions While App Is Closed: "Pozwala systemowi Android odświeżać kanały subskrypcji w wybranych odstępach czasu, gdy OpenTubeX jest zamknięty. Wyłącz tę opcję, aby automatyczne odświeżanie działało tylko przy otwartej aplikacji."
   Theme Settings:
     Show Progress as Notification: Zamiast ogólnego paska postępu wyświetla stałe powiadomienie z bieżącym postępem operacji w tle, takich jak odświeżanie subskrypcji i pobieranie zarządzanych narzędzi.
     Scroll Speed: Zmienia odległość przewijania gestami kółka myszy i panelu dotykowego.

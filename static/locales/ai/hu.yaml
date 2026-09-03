@@ -731,6 +731,7 @@ Settings:
     Shorts Auto Refresh Interval: Shorts-videók automatikus frissítésének időköze
     Live Auto Refresh Interval: Élő közvetítések automatikus frissítésének időköze
     Posts Auto Refresh Interval: Bejegyzések automatikus frissítésének időköze
+    Refresh Subscriptions While App Is Closed: "Feliratkozások frissítése bezárt alkalmazásnál"
   Distraction Free Settings:
     Sections:
       Visible While Paused: Szüneteltetéskor látható teljes ablakos vagy teljes képernyős módban
@@ -1420,6 +1421,7 @@ Tooltips:
     Show New Content Indicators: Egy kis pont megjelenítése azok mellett a feliratkozási hírfolyamelemek mellett, amelyek az előző lekéréskor még nem szerepeltek.
     Show Scheduled Live Streams / Premieres First: A közelgő élő közvetítések és premierek a feliratkozási hírfolyam tetején maradnak. Kikapcsolva a kezdésükig a bejelentésük helyén maradnak. Kikapcsolás után frissítse egyszer a feliratkozási hírfolyamot a meglévő ütemezett bejegyzések bejelentési dátumának lekéréséhez.
     Auto Refresh Interval: "Milyen gyakran frissítse automatikusan az OpenTubeX a feliratkozási hírfolyamot, amíg az alkalmazás nyitva van. Androidon a nullától eltérő időköz akkor is frissíti a hírfolyamot, amikor az alkalmazás be van zárva."
+    Refresh Subscriptions While App Is Closed: "Lehetővé teszi, hogy az Android a kiválasztott időközönként frissítse a feliratkozási hírfolyamokat, amikor az OpenTubeX be van zárva. Kapcsold ki, hogy az automatikus frissítés csak nyitott alkalmazásnál működjön."
   Theme Settings:
     Show Progress as Notification: Állandó értesítés megjelenítése a háttérműveletek, például a feliratkozások frissítése és a kezelt eszközök letöltése valós idejű állapotával a globális folyamatjelző helyett.
     Always Show Scrollbars: A görgetősávok állandó megjelenítése. Kikapcsolva röviddel az egér mozgatásának befejezése után elhalványulnak, és az egér újbóli megmozdításakor ismét megjelennek.

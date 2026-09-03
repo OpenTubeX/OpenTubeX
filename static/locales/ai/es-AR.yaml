@@ -815,6 +815,7 @@ Settings:
     Shorts Auto Refresh Interval: Intervalo de actualización automática de Shorts
     Live Auto Refresh Interval: Intervalo de actualización automática de emisiones en directo
     Posts Auto Refresh Interval: Intervalo de actualización automática de publicaciones
+    Refresh Subscriptions While App Is Closed: "Actualizar suscripciones con la aplicación cerrada"
   Distraction Free Settings:
     Sections:
       Visible While Paused: Visible al pausar en ventana completa o pantalla completa
@@ -1869,6 +1870,7 @@ Tooltips:
     Show New Content Indicators: Muestra un punto pequeño junto a los elementos de la fuente de suscripciones que no estaban presentes en la obtención anterior.
     Show Scheduled Live Streams / Premieres First: Mantiene las próximas emisiones en directo y los estrenos en la parte superior de la fuente de suscripciones. Si se desactiva, permanecen en la posición en la que se anunciaron hasta que empiezan. Actualiza una vez la fuente de suscripciones después de desactivarlo para obtener las fechas de anuncio de las entradas programadas existentes.
     Auto Refresh Interval: "Frecuencia con la que OpenTubeX actualiza automáticamente la fuente de suscripciones mientras la aplicación está abierta. En Android, un intervalo distinto de cero también actualiza el feed mientras la aplicación está cerrada."
+    Refresh Subscriptions While App Is Closed: "Permite que Android actualice las fuentes de suscripciones en los intervalos seleccionados mientras OpenTubeX está cerrado. Desactivá esta opción para limitar las actualizaciones automáticas a cuando la aplicación esté abierta."
   Theme Settings:
     Show Progress as Notification: Muestra una notificación persistente con el progreso en tiempo real de las operaciones en segundo plano, como la actualización de suscripciones y la descarga de herramientas gestionadas, en lugar de usar la barra de progreso global.
     Always Show Scrollbars: Mantiene las barras de desplazamiento visibles en todo momento. Si se desactiva, desaparecen poco después de dejar de mover el mouse y reaparecen en cuanto vuelves a moverlo.

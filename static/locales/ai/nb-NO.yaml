@@ -739,6 +739,7 @@ Settings:
     Shorts Auto Refresh Interval: Intervall for automatisk oppdatering av Shorts
     Live Auto Refresh Interval: Intervall for automatisk oppdatering av direktesendinger
     Posts Auto Refresh Interval: Intervall for automatisk oppdatering av innlegg
+    Refresh Subscriptions While App Is Closed: "Oppdater abonnementer mens appen er lukket"
   Distraction Free Settings:
     Sections:
       Visible While Paused: Synlig ved pause i fullt vindu / fullskjerm
@@ -1447,6 +1448,7 @@ Tooltips:
     Show New Content Indicators: Viser en liten prikk ved siden av elementer i abonnementsstrømmen som ikke var med forrige gang den ble hentet.
     Show Scheduled Live Streams / Premieres First: Beholder kommende direktesendinger og premierer øverst i abonnementsstrømmen. Når dette er slått av, blir de stående der de ble kunngjort, til de starter. Oppdater abonnementsstrømmen én gang etter at dette er slått av, for å hente kunngjøringsdatoer for eksisterende planlagte elementer.
     Auto Refresh Interval: "Hvor ofte OpenTubeX automatisk oppdaterer abonnementsstrømmen mens appen er åpen. På Android oppdaterer et intervall over null også strømmen mens appen er lukket."
+    Refresh Subscriptions While App Is Closed: "Lar Android oppdatere abonnementsstrømmer med de valgte intervallene mens OpenTubeX er lukket. Slå av dette for å begrense automatiske oppdateringer til når appen er åpen."
   Theme Settings:
     Show Progress as Notification: Viser et varig varsel med løpende fremdrift for bakgrunnsoperasjoner, for eksempel oppdatering av abonnementer og nedlasting av administrerte verktøy, i stedet for den globale fremdriftslinjen.
     Always Show Scrollbars: Holder rullefeltene synlige hele tiden. Når dette er slått av, tones de ut kort tid etter at du slutter å bevege musen, og vises igjen så snart du beveger den.

@@ -525,6 +525,7 @@ const state = {
   subscriptionShortsAutoRefreshInterval: '0',
   subscriptionLiveAutoRefreshInterval: '0',
   subscriptionPostsAutoRefreshInterval: '0',
+  enableClosedAppSubscriptionRefresh: true,
   showProgressBarToast: true,
   settingsPassword: '',
   useDeArrowTitles: false,

@@ -739,6 +739,7 @@ Settings:
     Shorts Auto Refresh Interval: Intervalo de actualización automática dos vídeos curtos
     Live Auto Refresh Interval: Intervalo de actualización automática das emisións en directo
     Posts Auto Refresh Interval: Intervalo de actualización automática das publicacións
+    Refresh Subscriptions While App Is Closed: "Actualizar as subscricións coa aplicación pechada"
   Distraction Free Settings:
     Sections:
       Visible While Paused: Visibles durante a pausa en xanela completa ou pantalla completa
@@ -1452,6 +1453,7 @@ Tooltips:
     Show New Content Indicators: Amosa un punto pequeno xunto aos elementos da fonte das subscricións que non estaban presentes na obtención anterior.
     Show Scheduled Live Streams / Premieres First: Mantén as próximas emisións en directo e estreas na parte superior da fonte das subscricións. Se se desactiva, permanecen na posición do anuncio ata que comezan. Actualiza a fonte unha vez despois de desactivar esta opción para obter as datas de anuncio das entradas programadas existentes.
     Auto Refresh Interval: "Frecuencia coa que OpenTubeX actualiza automaticamente a fonte das subscricións mentres a aplicación está aberta. En Android, un intervalo distinto de cero tamén actualiza a fonte mentres a aplicación está pechada."
+    Refresh Subscriptions While App Is Closed: "Permite que Android actualice as fontes de subscricións nos intervalos seleccionados mentres OpenTubeX está pechado. Desactiva esta opción para limitar as actualizacións automáticas aos momentos nos que a aplicación está aberta."
   Theme Settings:
     Show Progress as Notification: Amosa unha notificación persistente co progreso en directo das operacións en segundo plano, como as actualizacións das subscricións e as descargas de ferramentas xestionadas, en lugar da barra de progreso global.
     Always Show Scrollbars: Mantén as barras de desprazamento visibles en todo momento. Se se desactiva, esvaecen pouco despois de deixar de mover o rato e reaparecen en canto volves movelo.

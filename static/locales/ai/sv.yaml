@@ -733,6 +733,7 @@ Settings:
     Shorts Auto Refresh Interval: Intervall för automatisk uppdatering av Shorts
     Live Auto Refresh Interval: Intervall för automatisk uppdatering av liveströmmar
     Posts Auto Refresh Interval: Intervall för automatisk uppdatering av inlägg
+    Refresh Subscriptions While App Is Closed: "Uppdatera prenumerationer medan appen är stängd"
   Distraction Free Settings:
     Sections:
       Visible While Paused: Synligt under paus i helfönster eller helskärm
@@ -1424,6 +1425,7 @@ Tooltips:
     Show New Content Indicators: Visar en liten punkt bredvid poster i prenumerationsflödet som inte fanns vid föregående hämtning.
     Show Scheduled Live Streams / Premieres First: Behåller kommande liveströmmar och premiärer högst upp i prenumerationsflödet. När funktionen är inaktiverad ligger de kvar på platsen för tillkännagivandet tills de startar. Uppdatera prenumerationsflödet en gång efter inaktiveringen för att hämta tillkännagivandedatum för befintliga schemalagda poster.
     Auto Refresh Interval: "Hur ofta OpenTubeX automatiskt uppdaterar prenumerationsflödet medan appen är öppen. På Android uppdaterar ett intervall över noll även flödet när appen är stängd."
+    Refresh Subscriptions While App Is Closed: "Låter Android uppdatera prenumerationsflöden med valda intervall medan OpenTubeX är stängt. Stäng av detta för att begränsa automatiska uppdateringar till när appen är öppen."
   Theme Settings:
     Show Progress as Notification: Visar en beständig avisering med aktuellt förlopp för bakgrundsåtgärder, exempelvis uppdatering av prenumerationer och nedladdning av hanterade verktyg, i stället för det globala förloppsfältet.
     Always Show Scrollbars: Håller rullningslisterna synliga hela tiden. När funktionen är inaktiverad tonas de bort en kort stund efter att du slutat röra musen och visas igen så snart du rör den.

@@ -731,6 +731,7 @@ Settings:
     Shorts Auto Refresh Interval: "Etrevez adkargañ emgefreek ar videoioù berr (Shorts)"
     Live Auto Refresh Interval: "Etrevez adkargañ emgefreek ar skignadoù war-eeun"
     Posts Auto Refresh Interval: "Etrevez adkargañ emgefreek ar pennadoù"
+    Refresh Subscriptions While App Is Closed: "Freskañ ar c'houmanantoù pa vez serret an arload"
   Distraction Free Settings:
     Sections:
       Visible While Paused: "Gwelus e-pad un ehan er prenestr leun pe er skramm leun"
@@ -1429,6 +1430,7 @@ Tooltips:
     Show New Content Indicators: "Diskouez ur pik bihan e-kichen elfennoù eus gwazh ar c'houmanantoù na oant ket aze en adtapout kent."
     Show Scheduled Live Streams / Premieres First: "Derc'hel ar skignadoù war-eeun hag ar c'hentañ skignadennoù da zont e penn gwazh ar c'houmanantoù. Pa vez diweredekaet e chomont el lec'h ma oant bet embannet betek ma krogont. Adkargit gwazh ar c'houmanantoù ur wech goude diweredekaat evit adtapout deiziadoù embann an elfennoù rakluniet a zo anezho dija."
     Auto Refresh Interval: "Alies ma adkarg OpenTubeX gwazh ho koumanantoù ent emgefreek pa vez digor an arload. War Android, un etremez anvannel a freska ar gwazh ivez pa vez serret an arload."
+    Refresh Subscriptions While App Is Closed: "Aotreañ a ra Android da freskaat gwazhioù ar c'houmanantoù hervez an etremezioù dibabet pa vez serret OpenTubeX. Diweredekait an dibarzh-mañ evit ma vo graet an adkargañ emgefreek nemet pa vez digor an arload."
   Theme Settings:
     Show Progress as Notification: "Diskouez ur rebuad padus gant araokadur diouzhtu evit an oberoù en drekleur, evel adkargañ ar c'houmanantoù ha pellgargañ ostilhoù meret, e-lec'h implijout ar varrenn araokadur hollek."
     Always Show Scrollbars: "Derc'hel ar barrennoù dibunañ gwelus bepred. Pa vez diweredekaet e steuziont nebeut goude ma paouezit da zilec'hiañ al logodenn hag e tistroont kerkent ha ma tilec'hiit anezhi en-dro."

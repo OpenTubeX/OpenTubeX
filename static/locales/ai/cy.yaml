@@ -733,6 +733,7 @@ Settings:
     Shorts Auto Refresh Interval: Cyfwng adnewyddu Byrion yn awtomatig
     Live Auto Refresh Interval: Cyfwng adnewyddu ffrydiau byw yn awtomatig
     Posts Auto Refresh Interval: Cyfwng adnewyddu postiadau yn awtomatig
+    Refresh Subscriptions While App Is Closed: "Adnewyddu tanysgrifiadau pan fydd yr ap ar gau"
   Distraction Free Settings:
     Sections:
       Visible While Paused: Yn weladwy wrth oedi mewn ffenestr lawn / sgrin lawn
@@ -1433,6 +1434,7 @@ Tooltips:
     Show New Content Indicators: Mae'n dangos dot bach wrth ymyl eitemau o'r ffrwd tanysgrifiadau nad oeddent yn bresennol yn ystod y cyrchiad blaenorol.
     Show Scheduled Live Streams / Premieres First: Mae'n cadw ffrydiau byw a premières sydd ar ddod ar frig y ffrwd tanysgrifiadau. Pan fydd wedi'i analluogi, maent yn aros yn safle eu cyhoeddiad nes iddynt ddechrau. Adnewyddwch y ffrwd tanysgrifiadau unwaith ar ôl analluogi'r dewis i gyrchu dyddiadau cyhoeddi cofnodion sydd eisoes wedi'u hamserlennu.
     Auto Refresh Interval: "Pa mor aml y mae OpenTubeX yn adnewyddu eich ffrwd tanysgrifiadau'n awtomatig tra bo'r ap ar agor. Ar Android, mae cyfwng nad yw’n sero hefyd yn adnewyddu’r ffrwd pan fydd yr ap ar gau."
+    Refresh Subscriptions While App Is Closed: "Mae'n caniatáu i Android adnewyddu ffrydiau tanysgrifiadau ar yr ysbeidiau a ddewiswyd pan fydd OpenTubeX ar gau. Diffoddwch hyn i gyfyngu adnewyddu awtomatig i'r adegau pan fydd yr ap ar agor."
   Theme Settings:
     Show Progress as Notification: Mae'n dangos hysbysiad parhaol â chynnydd byw ar gyfer gweithredoedd cefndir, megis adnewyddu tanysgrifiadau a lawrlwytho offer a reolir, yn lle defnyddio'r bar cynnydd byd-eang.
     Always Show Scrollbars: Mae'n cadw'r bariau sgrolio'n weladwy bob amser. Pan fydd wedi'i analluogi, maent yn pylu ychydig ar ôl i chi roi'r gorau i symud y llygoden ac yn ailymddangos cyn gynted ag y byddwch yn ei symud eto.

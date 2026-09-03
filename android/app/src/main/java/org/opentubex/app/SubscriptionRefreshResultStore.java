@@ -10,7 +10,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.UUID;
 
 final class SubscriptionRefreshResultStore {
@@ -48,9 +47,14 @@ final class SubscriptionRefreshResultStore {
     static synchronized JSONObject readNext(Context context) throws IOException, JSONException {
         File[] files = directory(context).listFiles((dir, name) -> name.endsWith(".json"));
         if (files == null || files.length == 0) return null;
-        Arrays.sort(files, (first, second) -> first.getName().compareTo(second.getName()));
-        File file = files[0];
-        return read(file);
+        JSONObject next = null;
+        for (File file : files) {
+            JSONObject result = read(file);
+            if (next == null || result.getString("id").compareTo(next.getString("id")) < 0) {
+                next = result;
+            }
+        }
+        return next;
     }
 
     static synchronized boolean acknowledge(Context context, String id) throws IOException, JSONException {

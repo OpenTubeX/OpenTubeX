@@ -739,6 +739,7 @@ Settings:
     Shorts Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna Shorts-myndbanda
     Live Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna beinna útsendinga
     Posts Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna færslna
+    Refresh Subscriptions While App Is Closed: "Uppfæra áskriftir þegar forritið er lokað"
   Distraction Free Settings:
     Sections:
       Visible While Paused: Sýnilegt þegar gert er hlé í heilum glugga eða á öllum skjánum
@@ -1449,6 +1450,7 @@ Tooltips:
     Show New Content Indicators: Sýnir lítinn punkt við færslur í áskriftarstreymi sem voru ekki til staðar þegar það var síðast sótt.
     Show Scheduled Live Streams / Premieres First: Heldur væntanlegum beinum útsendingum og frumsýningum efst í áskriftarstreymi. Ef slökkt er á þessu haldast þær á upprunalegum stað í röðinni þar til þær hefjast. Endurnýjaðu áskriftarstreymið einu sinni eftir að slökkt er á þessu til að sækja tilkynningardagsetningar fyrir fyrirliggjandi tímasettar færslur.
     Auto Refresh Interval: "Hversu oft OpenTubeX endurnýjar áskriftarstreymið sjálfkrafa meðan forritið er opið. Í Android endurnýjar bil sem er ekki núll einnig veituna þegar appið er lokað."
+    Refresh Subscriptions While App Is Closed: "Leyfir Android að uppfæra áskriftarstreymi með völdu millibili þegar OpenTubeX er lokað. Slökktu á þessu til að sjálfvirkar uppfærslur fari aðeins fram þegar forritið er opið."
   Theme Settings:
     Show Progress as Notification: Sýnir tilkynningu með framvindu bakgrunnsaðgerða í rauntíma sem hverfur ekki, svo sem við endurnýjun áskriftarstreymis og niðurhal tóla sem forritið sér um, í stað almennu framvindustikunnar.
     Always Show Scrollbars: Heldur skrunstikum alltaf sýnilegum. Ef slökkt er á þessu dofna þær stuttu eftir að músin hættir að hreyfast og birtast aftur um leið og hún er hreyfð.

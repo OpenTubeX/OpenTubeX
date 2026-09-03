@@ -13,6 +13,7 @@ test('platform-specific settings stay local to every device', () => {
     'channelVolumes',
     'defaultVolume',
     'displayVideoPlayButton',
+    'enableClosedAppSubscriptionRefresh',
     'enableMobileFullscreenSwipe',
     'rememberTabNavigationHistory',
     'rememberVolume',

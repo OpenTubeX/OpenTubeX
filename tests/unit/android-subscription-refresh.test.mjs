@@ -2,9 +2,12 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  AndroidSubscriptionRefreshPayloadError,
   createAndroidSubscriptionRefreshConfiguration,
   createSubscriptionRefreshStartController,
   createSubscriptionRefreshStartGuard,
+  normalizeAndroidSubscriptionRefreshPayload,
+  processAndroidSubscriptionRefreshChannelResult,
 } from '../../src/renderer/helpers/androidSubscriptionRefreshData.js'
 
 test('a completed refresh cannot become active after its start await resumes', async () => {
@@ -71,6 +74,7 @@ test('creates one closed-app schedule input per profile and enabled feed', () =>
         subscriptions: [{ id: 'UC-post', feedTypes: ['posts'] }]
       }
     ],
+    closedAppRefreshEnabled: true,
     intervals: {
       videos: '1800000',
       shorts: '3600000',
@@ -115,6 +119,7 @@ test('creates one closed-app schedule input per profile and enabled feed', () =>
 test('invalid and disabled intervals do not opt in to closed-app refreshes', () => {
   const configuration = createAndroidSubscriptionRefreshConfiguration({
     profiles: [],
+    closedAppRefreshEnabled: true,
     intervals: { videos: 'nope', shorts: -1, live: 0, posts: '' },
     hiddenFeedTypes: [],
     instanceUrl: '',
@@ -124,4 +129,53 @@ test('invalid and disabled intervals do not opt in to closed-app refreshes', () 
   })
 
   assert.deepEqual(configuration.intervals, { videos: 0, shorts: 0, live: 0, posts: 0 })
+})
+
+test('closed-app refresh opt-out preserves selected intervals outside the native configuration', () => {
+  const selectedIntervals = { videos: '1800000', shorts: '3600000', live: '7200000', posts: '14400000' }
+  const configuration = createAndroidSubscriptionRefreshConfiguration({
+    profiles: [],
+    closedAppRefreshEnabled: false,
+    intervals: selectedIntervals,
+    hiddenFeedTypes: [],
+    instanceUrl: '',
+    authorization: null,
+    titles: {},
+    cancelLabel: 'Cancel'
+  })
+
+  assert.deepEqual(configuration.intervals, { videos: 0, shorts: 0, live: 0, posts: 0 })
+  assert.deepEqual(selectedIntervals, {
+    videos: '1800000',
+    shorts: '3600000',
+    live: '7200000',
+    posts: '14400000'
+  })
+})
+
+test('acknowledges malformed stored payloads without dropping transient cache failures', async () => {
+  const result = { id: 'result-1' }
+  const acknowledged = []
+  const acknowledge = id => { acknowledged.push(id) }
+
+  await processAndroidSubscriptionRefreshChannelResult(
+    result,
+    async () => {
+      normalizeAndroidSubscriptionRefreshPayload(() => {
+        throw new TypeError('missing post fields')
+      }, 'posts', {}, 'UC-channel')
+    },
+    acknowledge
+  )
+  assert.deepEqual(acknowledged, ['result-1'])
+
+  await assert.rejects(
+    processAndroidSubscriptionRefreshChannelResult(
+      result,
+      async () => { throw new Error('cache write failed') },
+      acknowledge
+    ),
+    error => !(error instanceof AndroidSubscriptionRefreshPayloadError) && error.message === 'cache write failed'
+  )
+  assert.deepEqual(acknowledged, ['result-1'])
 })

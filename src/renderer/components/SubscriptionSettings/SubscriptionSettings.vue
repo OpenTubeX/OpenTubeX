@@ -12,6 +12,15 @@
           compact
           @change="updateFetchSubscriptionsAutomatically"
         />
+        <FtToggleSwitch
+          v-if="IS_CAPACITOR"
+          :label="$t('Settings.Subscription Settings.Refresh Subscriptions While App Is Closed')"
+          :default-value="enableClosedAppSubscriptionRefresh"
+          setting-key="enableClosedAppSubscriptionRefresh"
+          :tooltip="$t('Tooltips.Subscription Settings.Refresh Subscriptions While App Is Closed')"
+          compact
+          @change="updateEnableClosedAppSubscriptionRefresh"
+        />
         <FtSelect
           :placeholder="$t('Settings.Subscription Settings.Videos Auto Refresh Interval')"
           :value="subscriptionFeedAutoRefreshInterval"
@@ -133,6 +142,7 @@ import SubscriptionChannelSettings from '../SubscriptionChannelSettings/Subscrip
 import store from '../../store/index'
 
 const { t } = useI18n()
+const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSubscriptionsAutomatically)
@@ -162,6 +172,16 @@ const subscriptionFeedAutoRefreshIntervalValues = [
  */
 function updateFetchSubscriptionsAutomatically(value) {
   store.dispatch('updateFetchSubscriptionsAutomatically', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const enableClosedAppSubscriptionRefresh = computed(() => store.getters.getEnableClosedAppSubscriptionRefresh)
+
+/**
+ * @param {boolean} value
+ */
+function updateEnableClosedAppSubscriptionRefresh(value) {
+  store.dispatch('updateEnableClosedAppSubscriptionRefresh', value)
 }
 
 /** @type {import('vue').ComputedRef<string>} */

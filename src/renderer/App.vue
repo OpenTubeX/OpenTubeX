@@ -447,7 +447,9 @@ import {
 } from './helpers/androidSubscriptionRefresh'
 import {
   createAndroidSubscriptionRefreshConfiguration,
-  createSubscriptionRefreshStartGuard
+  createSubscriptionRefreshStartGuard,
+  normalizeAndroidSubscriptionRefreshPayload,
+  processAndroidSubscriptionRefreshChannelResult
 } from './helpers/androidSubscriptionRefreshData'
 import { normalizeInvidiousSubscriptionFeed } from './helpers/api/invidious'
 import { reconcileFetchedSubscriptionEntries } from './helpers/subscription-entries'
@@ -673,6 +675,9 @@ const subscriptionLiveAutoRefreshInterval = computed(() => store.getters.getSubs
 
 /** @type {import('vue').ComputedRef<string>} */
 const subscriptionPostsAutoRefreshInterval = computed(() => store.getters.getSubscriptionPostsAutoRefreshInterval)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const enableClosedAppSubscriptionRefresh = computed(() => store.getters.getEnableClosedAppSubscriptionRefresh)
 
 /** @type {import('vue').ComputedRef<string | null>} */
 const activeSubscriptionProfileId = computed(() => store.getters.getActiveProfile?._id ?? null)
@@ -1468,6 +1473,7 @@ const androidSubscriptionRefreshConfiguration = computed(() => {
 
   return createAndroidSubscriptionRefreshConfiguration({
     profiles: store.getters.getProfileList,
+    closedAppRefreshEnabled: enableClosedAppSubscriptionRefresh.value,
     intervals: {
       videos: subscriptionFeedAutoRefreshInterval.value,
       shorts: subscriptionShortsAutoRefreshInterval.value,
@@ -2140,7 +2146,12 @@ async function reconcileAndroidSubscriptionRefreshResults() {
       }
 
       if (result.kind === 'channel') {
-        await reconcileAndroidSubscriptionRefreshChannelResult(result)
+        await processAndroidSubscriptionRefreshChannelResult(
+          result,
+          reconcileAndroidSubscriptionRefreshChannelResult,
+          acknowledgeAndroidSubscriptionRefreshResult
+        )
+        continue
       } else if (result.kind === 'completion' && store.getters.profileById(result.profileId)) {
         handleSubscriptionRefreshCompleted({
           detail: {
@@ -2170,7 +2181,12 @@ async function reconcileAndroidSubscriptionRefreshChannelResult(result) {
 
   const feedType = result.feedType
   const timestamp = new Date(Number(result.timestamp) || Date.now())
-  const entries = normalizeInvidiousSubscriptionFeed(feedType, result.payload, result.channelId)
+  const entries = normalizeAndroidSubscriptionRefreshPayload(
+    normalizeInvidiousSubscriptionFeed,
+    feedType,
+    result.payload,
+    result.channelId
+  )
   const config = getAndroidSubscriptionCacheConfig(feedType)
   const previousCache = config.getCache()[result.channelId]
   const reconciledEntries = reconcileFetchedSubscriptionEntries(

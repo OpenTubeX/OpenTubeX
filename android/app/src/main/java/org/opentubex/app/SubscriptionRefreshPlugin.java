@@ -1,9 +1,12 @@
 package org.opentubex.app;
 
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
+import android.os.Build;
 import android.provider.Settings;
 
 import com.getcapacitor.JSObject;
@@ -110,11 +113,34 @@ public class SubscriptionRefreshPlugin extends Plugin {
 
     @PluginMethod
     public void openNotificationSettings(PluginCall call) {
-        Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-            .putExtra(Settings.EXTRA_APP_PACKAGE, getContext().getPackageName())
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        getContext().startActivity(intent);
-        call.resolve();
+        Context context = getContext();
+        Intent intent = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent notificationSettings = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                .putExtra(Settings.EXTRA_APP_PACKAGE, context.getPackageName())
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (notificationSettings.resolveActivity(context.getPackageManager()) != null) {
+                intent = notificationSettings;
+            }
+        }
+        if (intent == null) {
+            Intent applicationSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                .setData(Uri.parse("package:" + context.getPackageName()))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (applicationSettings.resolveActivity(context.getPackageManager()) != null) {
+                intent = applicationSettings;
+            }
+        }
+        if (intent == null) {
+            call.reject("Notification settings are unavailable");
+            return;
+        }
+        try {
+            context.startActivity(intent);
+            call.resolve();
+        } catch (ActivityNotFoundException error) {
+            call.reject("Notification settings are unavailable", error);
+        }
     }
 
     @PluginMethod

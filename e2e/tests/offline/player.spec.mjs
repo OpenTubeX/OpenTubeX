@@ -875,7 +875,7 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
   }
 
   expect(await tapPlayer()).toBe(true)
-  await expect.poll(() => surface.getAttribute('shown')).toBeNull()
+  await expect.poll(() => surface.getAttribute('shown'), { timeout: 500 }).toBeNull()
   expect(await video.evaluate(element => element.paused)).toBe(false)
 
   expect(await tapPlayer()).toBe(true)

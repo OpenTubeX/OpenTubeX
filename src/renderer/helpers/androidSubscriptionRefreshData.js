@@ -1,5 +1,29 @@
 const FEED_TYPES = ['videos', 'shorts', 'live', 'posts']
 
+export class AndroidSubscriptionRefreshPayloadError extends Error {
+  constructor(cause) {
+    super('The stored Android subscription refresh payload is invalid', { cause })
+    this.name = 'AndroidSubscriptionRefreshPayloadError'
+  }
+}
+
+export function normalizeAndroidSubscriptionRefreshPayload(normalize, feedType, payload, channelId) {
+  try {
+    return normalize(feedType, payload, channelId)
+  } catch (error) {
+    throw new AndroidSubscriptionRefreshPayloadError(error)
+  }
+}
+
+export async function processAndroidSubscriptionRefreshChannelResult(result, reconcile, acknowledge) {
+  try {
+    await reconcile(result)
+  } catch (error) {
+    if (!(error instanceof AndroidSubscriptionRefreshPayloadError)) throw error
+  }
+  await acknowledge(result.id)
+}
+
 /**
  * Prevents an asynchronous refresh-start handler from restoring progress
  * after the matching refresh already finished.
@@ -59,6 +83,7 @@ export function createSubscriptionRefreshStartController() {
  * The native side receives channel IDs only, never browser datastore files.
  * @param {{
  *   profiles: object[],
+ *   closedAppRefreshEnabled: boolean,
  *   intervals: Record<string, string | number>,
  *   hiddenFeedTypes: string[],
  *   instanceUrl: string,
@@ -73,7 +98,10 @@ export function createAndroidSubscriptionRefreshConfiguration(input) {
     const interval = Number(input.intervals[feedType])
     return [
       feedType,
-      hiddenFeedTypes.has(feedType) || !Number.isFinite(interval) || interval <= 0
+      input.closedAppRefreshEnabled === false ||
+      hiddenFeedTypes.has(feedType) ||
+      !Number.isFinite(interval) ||
+      interval <= 0
         ? 0
         : Math.floor(interval)
     ]

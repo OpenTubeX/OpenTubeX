@@ -4,6 +4,7 @@ export const DEVICE_LOCAL_SETTING_KEYS = new Set([
   'channelVolumes',
   'defaultVolume',
   'displayVideoPlayButton',
+  'enableClosedAppSubscriptionRefresh',
   'enableMobileFullscreenSwipe',
   'rememberTabNavigationHistory',
   'rememberVolume',
