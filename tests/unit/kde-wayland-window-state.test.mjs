@@ -1,0 +1,240 @@
+import assert from 'node:assert/strict'
+import { EventEmitter } from 'node:events'
+import test from 'node:test'
+
+import {
+  extractKwinWindowHandles,
+  findNewlyMinimizedWindow,
+  isKdePlasmaDesktop,
+  isWaylandPlatform,
+  monitorKdeWaylandWindowState,
+  normalizeKwinWindowInfo,
+  shouldMonitorKdeWaylandWindowState,
+} from '../../src/main/kdeWaylandWindowState.js'
+
+test('recognizes common KDE Plasma desktop environment values', () => {
+  assert.equal(isKdePlasmaDesktop({ XDG_CURRENT_DESKTOP: 'KDE' }), true)
+  assert.equal(isKdePlasmaDesktop({ XDG_CURRENT_DESKTOP: 'KDE:GNOME' }), true)
+  assert.equal(isKdePlasmaDesktop({ XDG_SESSION_DESKTOP: 'plasmawayland' }), true)
+  assert.equal(isKdePlasmaDesktop({ DESKTOP_SESSION: '/usr/share/wayland-sessions/plasma' }), true)
+  assert.equal(isKdePlasmaDesktop({ KDE_FULL_SESSION: 'true' }), true)
+})
+
+test('does not treat other desktops as KDE Plasma', () => {
+  assert.equal(isKdePlasmaDesktop({ XDG_CURRENT_DESKTOP: 'GNOME' }), false)
+  assert.equal(isKdePlasmaDesktop({ XDG_CURRENT_DESKTOP: 'sway' }), false)
+  assert.equal(isKdePlasmaDesktop({}), false)
+})
+
+test('reports native Wayland only for an explicit Electron runtime choice', () => {
+  assert.equal(isWaylandPlatform({
+    platform: 'linux',
+    ozonePlatform: 'wayland',
+    environment: {},
+  }), true)
+  assert.equal(isWaylandPlatform({
+    platform: 'linux',
+    ozonePlatform: '',
+    environment: { XDG_SESSION_TYPE: 'wayland' },
+  }), false)
+  assert.equal(isWaylandPlatform({
+    platform: 'linux',
+    ozonePlatform: 'x11',
+    environment: { XDG_SESSION_TYPE: 'wayland', WAYLAND_DISPLAY: 'wayland-0' },
+  }), false)
+})
+
+test('monitors window state only for KDE Plasma in a Wayland session', () => {
+  const kde = { XDG_CURRENT_DESKTOP: 'KDE' }
+
+  assert.equal(shouldMonitorKdeWaylandWindowState({
+    platform: 'linux',
+    ozonePlatform: 'wayland',
+    environment: kde,
+  }), true)
+  assert.equal(shouldMonitorKdeWaylandWindowState({
+    platform: 'linux',
+    ozonePlatform: 'x11',
+    environment: { ...kde, XDG_SESSION_TYPE: 'wayland' },
+  }), false)
+  assert.equal(shouldMonitorKdeWaylandWindowState({
+    platform: 'linux',
+    ozonePlatform: 'wayland',
+    environment: { XDG_CURRENT_DESKTOP: 'GNOME' },
+  }), false)
+  assert.equal(shouldMonitorKdeWaylandWindowState({
+    platform: 'win32',
+    ozonePlatform: 'wayland',
+    environment: kde,
+  }), false)
+})
+
+test('extracts KWin runner handles and validates D-Bus window state', () => {
+  const matches = [
+    [
+      '0_{01234567-89ab-cdef-0123-456789abcdef}',
+      'Subscriptions - OpenTubeX',
+      'electron',
+      100,
+      1,
+      {},
+    ],
+  ]
+  const windowInfo = {
+    caption: 'Subscriptions - OpenTubeX',
+    height: 832,
+    minimized: true,
+    pid: 1234,
+    uuid: '{01234567-89ab-cdef-0123-456789abcdef}',
+    width: 1200,
+  }
+
+  assert.deepEqual(extractKwinWindowHandles(matches), [
+    '{01234567-89ab-cdef-0123-456789abcdef}',
+  ])
+  assert.deepEqual(normalizeKwinWindowInfo(windowInfo), {
+    uuid: '{01234567-89ab-cdef-0123-456789abcdef}',
+    caption: 'Subscriptions - OpenTubeX',
+    height: 832,
+    minimized: true,
+    pid: 1234,
+    width: 1200,
+  })
+})
+
+test('rejects malformed D-Bus window state and runner matches', () => {
+  assert.equal(normalizeKwinWindowInfo({ minimized: true }), null)
+  assert.deepEqual(extractKwinWindowHandles([['invalid-id'], null]), [])
+})
+
+test('detects the KWin window newly minimized by a shortcut', () => {
+  const previous = [
+    windowInfo({ uuid: 'one', minimized: false }),
+    windowInfo({ uuid: 'two', caption: 'Watch - OpenTubeX', minimized: true }),
+  ]
+  const current = [
+    windowInfo({ uuid: 'one', minimized: true }),
+    windowInfo({ uuid: 'two', caption: 'Watch - OpenTubeX', minimized: true }),
+  ]
+
+  assert.deepEqual(
+    findNewlyMinimizedWindow(previous, current, targetWindow()),
+    current[0]
+  )
+})
+
+test('does not mistake an ordinary focus change for minimize', () => {
+  const state = [
+    windowInfo({ uuid: 'one', minimized: false }),
+  ]
+
+  assert.equal(findNewlyMinimizedWindow(state, state, targetWindow()), null)
+})
+
+test('detects a single minimized window when no earlier KWin snapshot is available', () => {
+  const current = [
+    windowInfo({ uuid: 'one', minimized: true }),
+  ]
+
+  assert.deepEqual(
+    findNewlyMinimizedWindow([], current, targetWindow()),
+    current[0]
+  )
+})
+
+test('identifies the only minimized window among duplicate captions', () => {
+  const current = [
+    windowInfo({ uuid: 'one', minimized: false }),
+    windowInfo({ uuid: 'two', minimized: true }),
+  ]
+
+  assert.deepEqual(findNewlyMinimizedWindow([], current, targetWindow()), current[1])
+})
+
+test('uses size to identify a window when matching captions are already minimized', () => {
+  const current = [
+    windowInfo({ uuid: 'one', minimized: true, width: 900 }),
+    windowInfo({ uuid: 'two', minimized: true }),
+  ]
+
+  assert.deepEqual(findNewlyMinimizedWindow([], current, targetWindow()), current[1])
+})
+
+test('uses the invisible startup identity for equal-sized minimized windows', () => {
+  const target = targetWindow()
+  target.caption += '\u2063\u200b'
+  const current = [
+    windowInfo({ uuid: 'one', minimized: true, caption: `${targetWindow().caption}\u2063\u200c` }),
+    windowInfo({ uuid: 'two', minimized: true, caption: target.caption }),
+  ]
+
+  assert.deepEqual(findNewlyMinimizedWindow([], current, target), current[1])
+})
+
+test('preserves the window identity across title updates during detection', async () => {
+  const browserWindow = new EventEmitter()
+  browserWindow.getBounds = () => targetWindow().bounds
+  let title = targetWindow().caption
+  browserWindow.getTitle = () => title
+  browserWindow.isFocused = () => false
+
+  let resolveBackend
+  const backend = new Promise(resolve => {
+    resolveBackend = resolve
+  })
+  const identity = '\u2063\u200b'
+  const minimized = windowInfo({ minimized: true, caption: `${title}${identity}` })
+  const otherWindow = windowInfo({ uuid: 'other', minimized: true })
+  const setWindowTitle = nextTitle => {
+    title = nextTitle.endsWith(identity) ? nextTitle : `${nextTitle}${identity}`
+  }
+  const states = []
+  const detected = new Promise(resolve => {
+    const stop = monitorKdeWaylandWindowState({
+      browserWindow,
+      backend,
+      applyWindowIdentity: () => {
+        setWindowTitle(targetWindow().caption)
+      },
+      detectionDelay: 0,
+      pollInterval: 60000,
+      onMinimizedState: state => {
+        states.push(state)
+        stop()
+        resolve()
+      },
+    })
+  })
+
+  browserWindow.emit('blur')
+  title = targetWindow().caption
+  resolveBackend({
+    queryWindow: async () => minimized,
+    queryWindows: async () => {
+      setWindowTitle(targetWindow().caption)
+      return [otherWindow, minimized]
+    },
+  })
+  await detected
+
+  assert.deepEqual(states, [true])
+})
+
+function windowInfo (overrides = {}) {
+  return {
+    uuid: 'window',
+    caption: 'Subscriptions - OpenTubeX',
+    minimized: false,
+    pid: 1234,
+    width: 1200,
+    height: 832,
+    ...overrides,
+  }
+}
+
+function targetWindow () {
+  return {
+    caption: 'Subscriptions - OpenTubeX',
+    bounds: { x: 10, y: 20, width: 1200, height: 800 },
+  }
+}

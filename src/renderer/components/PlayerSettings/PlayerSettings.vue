@@ -238,9 +238,9 @@
         :title="t('Settings.Player Settings.Auto Picture in Picture.Auto Picture in Picture')"
         :labels="autoPictureInPictureTriggerLabels"
         :values="AUTO_PIP_TRIGGER_VALUES"
-        :disabled-values="isLinuxWayland ? ['minimize'] : []"
+        :disabled-values="supportsAutoPictureInPictureMinimize ? [] : ['minimize']"
         setting-key="autoPictureInPictureTriggers"
-        :tooltips="isLinuxWayland ? { minimize: t('Settings.Player Settings.Auto Picture in Picture.Wayland Minimize Unsupported') } : {}"
+        :tooltips="supportsAutoPictureInPictureMinimize ? {} : { minimize: t('Settings.Player Settings.Auto Picture in Picture.Wayland Minimize Unsupported') }"
       />
     </FtFlexBox>
     <FtFlexBox class="playerSelectGrid">
@@ -615,7 +615,7 @@ import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 
 import store from '../../store/index'
 import { DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS } from '../../../constants'
-import { initializePlatformInfo, isLinuxWayland } from '../../helpers/platform'
+import { initializePlatformInfo, supportsAutoPictureInPictureMinimize } from '../../helpers/platform'
 import {
   DEFAULT_SEGMENT_PREFETCH_LIMIT,
   MAX_SEGMENT_PREFETCH_LIMIT
@@ -961,8 +961,6 @@ function updateDefaultViewingMode(value) {
 
 const AUTO_PIP_TRIGGER_VALUES = ['tab', 'minimize', 'blur']
 
-// The 'minimize' window event doesn't fire on Wayland, so the minimize trigger can't work there.
-// https://github.com/electron/electron/issues/51766
 initializePlatformInfo()
 
 const autoPictureInPictureTriggerLabels = computed(() => [
