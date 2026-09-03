@@ -245,8 +245,8 @@
 
 .noComments {
   display: flex;
-  flex-flow: column wrap;
-  align-items: stretch;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
   padding-block: 8px;
@@ -263,12 +263,21 @@
   flex: 0 0 auto;
   align-items: flex-start;
   gap: 8px;
-  align-self: flex-end;
   margin-inline-start: auto;
 }
 
 .noCommentActions :deep(.select) {
-  margin-block-start: 0;
+  margin-block-start: 20px;
+}
+
+:global(.capacitorPhoneLayout .noComments) {
+  flex-flow: column wrap;
+  align-items: stretch;
+}
+
+:global(.capacitorPhoneLayout .noCommentActions) {
+  order: -1;
+  align-self: flex-end;
 }
 
 .commentsTitle {

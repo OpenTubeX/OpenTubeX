@@ -500,30 +500,6 @@
         class="noComments"
         :class="{ noCommentsMessageOnly: commentsDisabled || fullscreenOverlay }"
       >
-        <div
-          v-if="!fullscreenOverlay && !commentsDisabled"
-          class="noCommentActions"
-        >
-          <FtSelect
-            v-if="showSortBy"
-            :placeholder="$t('Global.Sort By')"
-            :value="currentSortValue"
-            :select-names="sortNames"
-            :select-values="sortValues"
-            :icon="['fas', 'arrow-down-short-wide']"
-            @change="handleSortChange"
-          />
-          <FtIconButton
-            :title="$t('Comments.Reload Comments')"
-            :icon="['fas', 'sync']"
-            :size="12"
-            :padding="8"
-            :use-shadow="false"
-            class="reloadComments"
-            :class="{ reloadCommentsAligned: showSortBy }"
-            @click="reloadCommentData"
-          />
-        </div>
         <h3
           v-if="commentsDisabled"
           class="noCommentMsg"
@@ -542,6 +518,30 @@
         >
           {{ $t("Comments.There are no comments available for this video") }}
         </h3>
+        <div
+          v-if="!fullscreenOverlay && !commentsDisabled"
+          class="noCommentActions"
+        >
+          <FtIconButton
+            :title="$t('Comments.Reload Comments')"
+            :icon="['fas', 'sync']"
+            :size="12"
+            :padding="8"
+            :use-shadow="false"
+            class="reloadComments"
+            :class="{ reloadCommentsAligned: showSortBy }"
+            @click="reloadCommentData"
+          />
+          <FtSelect
+            v-if="showSortBy"
+            :placeholder="$t('Global.Sort By')"
+            :value="currentSortValue"
+            :select-names="sortNames"
+            :select-values="sortValues"
+            :icon="['fas', 'arrow-down-short-wide']"
+            @change="handleSortChange"
+          />
+        </div>
       </div>
       <FtSpinner
         v-if="shouldShowAutoLoadMoreCommentsSpinner"
