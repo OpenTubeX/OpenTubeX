@@ -4,7 +4,7 @@ import {
   KeyboardShortcuts,
 } from '../../constants'
 import { createSettingsSearchIndex } from './settingsSearch'
-import { isMostPopularAvailable, isTrendingAvailable } from './navigationAvailability'
+import { isMostPopularAvailable, isTrendingAvailable } from '../../navigationAvailability'
 import { getTabAvatarUrl, getTabPageIcon } from '../tabs/tabPreview'
 import { switchActiveProfile, translateProfileName } from './profileSwitching'
 import { getFirstCharacter } from './strings'

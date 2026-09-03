@@ -219,6 +219,10 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Navigation:
+      Navigation: Navigointi
+      Customize Navigation: Mukauta navigointia
+      Add Item: Lisää kohde
     Date Format: Päivämäärän muoto
     Time Format: Ajan muoto
     Language Default: Kielen oletus

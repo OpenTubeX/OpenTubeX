@@ -214,6 +214,10 @@ Settings:
       Network: network
       Disk: disk
   General Settings:
+    Navigation:
+      Navigation: Navigation
+      Customize Navigation: Customise navigation
+      Add Item: Add item
     Date Format: Date format
     Time Format: Time format
     Language Default: Language default

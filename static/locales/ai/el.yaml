@@ -219,6 +219,10 @@ Settings:
       Network: δικτύου
       Disk: δίσκου
   General Settings:
+    Navigation:
+      Navigation: Πλοήγηση
+      Customize Navigation: Προσαρμογή πλοήγησης
+      Add Item: Προσθήκη στοιχείου
     Date Format: Μορφή ημερομηνίας
     Time Format: Μορφή ώρας
     Language Default: Προεπιλογή γλώσσας

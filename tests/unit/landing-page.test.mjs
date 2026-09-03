@@ -18,3 +18,15 @@ test('falls back to Subscriptions when Home is hidden', () => {
 test('keeps another configured landing page when Home is hidden', () => {
   assert.equal(resolveLandingPage('history', true), 'history')
 })
+
+test('falls back to the first visible navigation page', () => {
+  assert.equal(resolveLandingPage('home', ['history', 'subscriptions']), 'history')
+})
+
+test('keeps a landing page that remains in navigation', () => {
+  assert.equal(resolveLandingPage('history', ['subscriptions', 'history']), 'history')
+})
+
+test('keeps a usable fallback when navigation is empty', () => {
+  assert.equal(resolveLandingPage('home', []), LEGACY_DEFAULT_LANDING_PAGE)
+})

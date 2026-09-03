@@ -342,6 +342,10 @@ Settings:
       Disk: disc
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
+    Navigation:
+      Navigation: Navegació
+      Customize Navigation: Personalitza la navegació
+      Add Item: Afegeix un element
     Date Format: Format de data
     Time Format: Format d'hora
     Language Default: Predeterminat de l'idioma

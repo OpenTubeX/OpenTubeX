@@ -219,6 +219,10 @@ Settings:
       Network: nets
       Disk: disks
   General Settings:
+    Navigation:
+      Navigation: Leiðsögn
+      Customize Navigation: Sérsníða leiðsögn
+      Add Item: Bæta við atriði
     Date Format: Dagsetningarsnið
     Time Format: Tímasnið
     Language Default: Sjálfgefið fyrir tungumál

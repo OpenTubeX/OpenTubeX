@@ -217,6 +217,10 @@ Settings:
       Network: мрежата
       Disk: диска
   General Settings:
+    Navigation:
+      Navigation: Навигация
+      Customize Navigation: Персонализиране на навигацията
+      Add Item: Добавяне на елемент
     Date Format: Формат на датата
     Time Format: Формат на часа
     Language Default: По подразбиране за езика

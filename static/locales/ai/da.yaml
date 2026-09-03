@@ -226,6 +226,10 @@ Settings:
       Network: netværk
       Disk: diskplads
   General Settings:
+    Navigation:
+      Navigation: Navigation
+      Customize Navigation: Tilpas navigation
+      Add Item: Tilføj element
     Date Format: Datoformat
     Time Format: Tidsformat
     Language Default: Baseret på sprog

@@ -328,6 +328,10 @@ Settings:
       Disk: disko
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
+    Navigation:
+      Navigation: Naršymas
+      Customize Navigation: Tinkinti naršymą
+      Add Item: Pridėti elementą
     Date Format: Datos formatas
     Time Format: Laiko formatas
     Language Default: Pagal kalbą

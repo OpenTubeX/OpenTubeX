@@ -231,6 +231,10 @@ Settings:
       Network: сетка
       Disk: дыск
   General Settings:
+    Navigation:
+      Navigation: Навігацыя
+      Customize Navigation: Наладзіць навігацыю
+      Add Item: Дадаць элемент
     Date Format: Фармат даты
     Time Format: Фармат часу
     Language Default: Паводле мовы

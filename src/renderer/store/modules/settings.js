@@ -41,6 +41,12 @@ import { isSettingSyncableOnPlatform } from '../../helpers/platformSettings.js'
 import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
 import { DEFAULT_QUICK_SETTINGS, normalizeQuickSettings } from '../../helpers/quickSettings.js'
 import { createSettingUpdateQueue } from '../../helpers/settingUpdateQueue.js'
+import { filterAvailableNavigationItems } from '../../../navigationAvailability.js'
+import {
+  DEFAULT_NAVIGATION_ITEMS,
+  navigationItemsFromLegacySettings,
+  normalizeNavigationItems,
+} from '../../../navigationItems.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
 const TUTORIAL_STATE_SETTING_IDS = new Set([
@@ -324,7 +330,9 @@ const state = {
   hideLiveChatReplay: false,
   hideLiveStreams: false,
   hideHeaderLogo: false,
+  // Former navigation switches remain loadable so older settings can migrate.
   hideHome: false,
+  // This also controls playlist actions outside navigation.
   hidePlaylists: false,
   hidePopularVideos: false,
   hideRecommendedVideos: false,
@@ -368,6 +376,7 @@ const state = {
   listType: 'grid',
   playlistViewType: 'grid',
   quickSettings: [...DEFAULT_QUICK_SETTINGS],
+  navigationItems: [...DEFAULT_NAVIGATION_ITEMS],
   maxVideoPlaybackRate: 3,
   onlyShowLatestFromChannel: false,
   onlyShowLatestFromChannelNumber: 1,
@@ -843,7 +852,17 @@ const customState = {
 const customGetters = {
   getQuickSettings: (state) => normalizeQuickSettings(state.quickSettings),
 
-  getLandingPage: (state) => resolveLandingPage(state.landingPage, state.hideHome),
+  getNavigationItems: (state) => normalizeNavigationItems(state.navigationItems),
+
+  getLandingPage: (state) => resolveLandingPage(
+    state.landingPage,
+    filterAvailableNavigationItems(normalizeNavigationItems(state.navigationItems), {
+      supportsLocalApi: !!process.env.SUPPORTS_LOCAL_API,
+      backendPreference: state.backendPreference,
+      backendFallback: state.backendFallback,
+      showWatchStats: state.rememberHistory && state.enableWatchStats,
+    })
+  ),
 
   getPlaylistBookmarks: (state) => {
     return Array.isArray(state.playlistBookmarks) ? state.playlistBookmarks : []
@@ -927,6 +946,13 @@ const customActions = {
     state,
     'quickSettings',
     normalizeQuickSettings(value)
+  ),
+
+  updateNavigationItems: ({ commit, state }, value) => updateValidatedSetting(
+    commit,
+    state,
+    'navigationItems',
+    normalizeNavigationItems(value)
   ),
 
   savePlaylistBookmark: async ({ commit, getters }, bookmark) => {
@@ -1084,6 +1110,13 @@ const customActions = {
         if (mutationIds.includes(defaultMutationId(_id))) {
           commit(defaultMutationId(_id), resolvedValue)
         }
+      }
+
+      const hasNavigationItems = userSettings.some(entry => entry._id === 'navigationItems')
+      if (!hasNavigationItems && userSettings.length > 0) {
+        await dispatch('updateNavigationItems', navigationItemsFromLegacySettings(
+          Object.fromEntries(userSettings.map(({ _id, value }) => [_id, value]))
+        ))
       }
 
       const preferredCaptionLocaleEntry = userSettings.find(
@@ -1271,9 +1304,12 @@ const customActions = {
             }
 
             commit(defaultMutationId(data._id), data.value)
-            if (data._id === 'hideHome' && data.value === true) {
+            if (
+              data._id === 'navigationItems' &&
+              !normalizeNavigationItems(data.value).includes('home')
+            ) {
               dispatch('redirectHomeTabsToLandingPage').catch(error => {
-                console.error('Failed to redirect Home tabs after syncing Hide Home', error)
+                console.error('Failed to redirect Home tabs after syncing navigation items', error)
               })
             }
             if (data._id === 'syncServerEnabled') {

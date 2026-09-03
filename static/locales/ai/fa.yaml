@@ -232,6 +232,10 @@ Settings:
       Network: شبکه
       Disk: دیسک
   General Settings:
+    Navigation:
+      Navigation: پیمایش
+      Customize Navigation: سفارشی‌سازی پیمایش
+      Add Item: افزودن مورد
     Date Format: قالب تاریخ
     Time Format: قالب زمان
     Language Default: پیش‌فرض زبان

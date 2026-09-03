@@ -219,6 +219,10 @@ Settings:
       Network: רשת
       Disk: כונן
   General Settings:
+    Navigation:
+      Navigation: ניווט
+      Customize Navigation: התאמה אישית של הניווט
+      Add Item: הוספת פריט
     Date Format: תבנית תאריך
     Time Format: תבנית שעה
     Language Default: ברירת המחדל של השפה

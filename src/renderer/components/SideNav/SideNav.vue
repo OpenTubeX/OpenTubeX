@@ -18,171 +18,32 @@
         aria-hidden="true"
       />
       <router-link
-        v-if="!hideHome"
-        class="navOption topNavOption mobileShow"
+        v-for="(item, index) in visibleNavigationItems"
+        :key="item.id"
+        class="navOption"
+        :class="{
+          topNavOption: index === 0,
+          mobileHidden: !mobilePrimaryItemIds.has(item.id),
+        }"
         role="button"
-        to="/home"
-        :title="$t('Home Page.Home')"
+        :to="`/${item.id}`"
+        :title="item.id === 'history' ? historyTitle : item.label"
       >
         <div class="thumbnailContainer">
           <FtIcon
-            :icon="['fas', 'house']"
+            :icon="item.icon"
             class="navIcon"
             :class="applyNavIconExpand"
           />
         </div>
         <p class="navLabel">
-          {{ $t('Home Page.Home') }}
+          {{ item.label }}
         </p>
       </router-link>
-      <router-link
-        class="navOption mobileShow"
-        role="button"
-        to="/subscriptions"
-        :title="$t('Subscriptions.Subscriptions')"
-      >
-        <div
-          class="thumbnailContainer"
-        >
-          <FtIcon
-            :icon="['fas', 'rss']"
-            class="navIcon"
-            :class="applyNavIconExpand"
-          />
-        </div>
-        <p
-          class="navLabel"
-        >
-          {{ $t("Subscriptions.Subscriptions") }}
-        </p>
-      </router-link>
-      <router-link
-        class="navOption mobileHidden"
-        role="button"
-        to="/subscribedchannels"
-        :title="$t('Channels.Channels')"
-      >
-        <div
-          class="thumbnailContainer"
-        >
-          <FtIcon
-            :icon="['fas', 'user-check']"
-            class="navIcon"
-            :class="applyNavIconExpand"
-          />
-        </div>
-        <p
-          class="navLabel"
-        >
-          {{ $t("Channels.Channels") }}
-        </p>
-      </router-link>
-      <router-link
-        v-if="trendingAvailable && !hideTrendingVideos"
-        class="navOption mobileHidden"
-        role="button"
-        to="/trending"
-        :title="$t('Trending.Trending')"
-      >
-        <div
-          class="thumbnailContainer"
-        >
-          <FtIcon
-            :icon="['fas', 'fire']"
-            class="navIcon"
-            :class="applyNavIconExpand"
-          />
-        </div>
-        <p
-          class="navLabel"
-        >
-          {{ $t("Trending.Trending") }}
-        </p>
-      </router-link>
-      <router-link
-        v-if="popularAvailable && !hidePopularVideos"
-        class="navOption mobileHidden"
-        role="button"
-        to="/popular"
-        :title="$t('Most Popular')"
-      >
-        <div
-          class="thumbnailContainer"
-        >
-          <FtIcon
-            :icon="['fas', 'users']"
-            class="navIcon"
-            :class="applyNavIconExpand"
-          />
-        </div>
-        <p
-          class="navLabel"
-        >
-          {{ $t("Most Popular") }}
-        </p>
-      </router-link>
-      <router-link
-        v-if="!hidePlaylists"
-        class="navOption mobileShow"
-        role="button"
-        to="/userplaylists"
-        :title="$t('Playlists')"
-      >
-        <div
-          class="thumbnailContainer"
-        >
-          <FtIcon
-            :icon="['fas', 'bookmark']"
-            class="navIcon"
-            :class="applyNavIconExpand"
-          />
-        </div>
-        <p
-          class="navLabel"
-        >
-          {{ $t("Playlists") }}
-        </p>
-      </router-link>
-      <SideNavMoreOptions />
-      <router-link
-        class="navOption mobileShow"
-        role="button"
-        to="/history"
-        :title="historyTitle"
-      >
-        <div
-          class="thumbnailContainer"
-        >
-          <FtIcon
-            :icon="['fas', 'history']"
-            class="navIcon"
-            :class="applyNavIconExpand"
-          />
-        </div>
-        <p
-          class="navLabel"
-        >
-          {{ $t("History.History") }}
-        </p>
-      </router-link>
-      <router-link
-        v-if="showWatchStats"
-        class="navOption mobileHidden"
-        role="button"
-        to="/stats"
-        :title="$t('Stats.Stats')"
-      >
-        <div class="thumbnailContainer">
-          <FtIcon
-            :icon="['fas', 'chart-line']"
-            class="navIcon"
-            :class="applyNavIconExpand"
-          />
-        </div>
-        <p class="navLabel">
-          {{ $t('Stats.Stats') }}
-        </p>
-      </router-link>
+      <SideNavMoreOptions
+        v-if="mobileOverflowItems.length > 0"
+        :items="mobileOverflowItems"
+      />
       <hr>
       <div
         v-if="!hideActiveSubscriptions"
@@ -250,9 +111,10 @@ import SideNavMoreOptions from '../SideNavMoreOptions/SideNavMoreOptions.vue'
 import store from '../../store/index'
 
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
-import { isMostPopularAvailable, isTrendingAvailable } from '../../helpers/navigationAvailability'
+import { filterAvailableNavigationItems } from '../../../navigationAvailability'
 import { deepCopy, localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import { getConfiguredKeyboardShortcuts } from '../../../constants'
+import { NAVIGATION_ITEM_DEFINITIONS } from '../../../navigationItems'
 
 const { locale, t } = useI18n()
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
@@ -283,17 +145,6 @@ const backendFallback = computed(() => {
 const backendPreference = computed(() => {
   return store.getters.getBackendPreference
 })
-
-const trendingAvailable = computed(() => isTrendingAvailable({
-  supportsLocalApi: !!SUPPORTS_LOCAL_API,
-  backendPreference: backendPreference.value,
-  backendFallback: backendFallback.value,
-}))
-
-const popularAvailable = computed(() => isMostPopularAvailable({
-  backendPreference: backendPreference.value,
-  backendFallback: backendFallback.value,
-}))
 
 /** @type {import('vue').ComputedRef<string>} */
 const currentInvidiousInstanceUrl = computed(() => {
@@ -348,26 +199,6 @@ function onActiveSubscriptionsVisibilityChanged(isVisible) {
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const hidePopularVideos = computed(() => {
-  return store.getters.getHidePopularVideos
-})
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideHome = computed(() => {
-  return store.getters.getHideHome
-})
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hidePlaylists = computed(() => {
-  return store.getters.getHidePlaylists
-})
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideTrendingVideos = computed(() => {
-  return store.getters.getHideTrendingVideos
-})
-
-/** @type {import('vue').ComputedRef<boolean>} */
 const hideActiveSubscriptions = computed(() => {
   return store.getters.getHideActiveSubscriptions
 })
@@ -376,6 +207,35 @@ const hideActiveSubscriptions = computed(() => {
 const showWatchStats = computed(() => {
   return store.getters.getRememberHistory && store.getters.getEnableWatchStats
 })
+
+const navigationCatalog = computed(() => new Map(NAVIGATION_ITEM_DEFINITIONS.map(item => [
+  item.id,
+  {
+    ...item,
+    // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
+    label: t(item.labelKey),
+  },
+])))
+
+const visibleNavigationItems = computed(() => filterAvailableNavigationItems(
+  store.getters.getNavigationItems,
+  {
+    supportsLocalApi: !!SUPPORTS_LOCAL_API,
+    backendPreference: backendPreference.value,
+    backendFallback: backendFallback.value,
+    showWatchStats: showWatchStats.value,
+  }
+)
+  .map(id => navigationCatalog.value.get(id))
+  .filter(item => item != null))
+
+const mobilePrimaryItems = computed(() => visibleNavigationItems.value.length > 5
+  ? visibleNavigationItems.value.slice(0, 4)
+  : visibleNavigationItems.value)
+const mobilePrimaryItemIds = computed(() => new Set(mobilePrimaryItems.value.map(({ id }) => id)))
+const mobileOverflowItems = computed(() => visibleNavigationItems.value.length > 5
+  ? visibleNavigationItems.value.slice(4)
+  : [])
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideText = computed(() => {
@@ -417,11 +277,11 @@ let navMutationObserver = null
 function updateIndicator() {
   const inner = innerRef.value
   const mobile = window.matchMedia('(max-width: 680px)').matches
-  // Skip hidden matches (e.g. links inside the collapsed "More" menu)
+  // Hidden overflow links use the visible More button as their mobile target.
   const active = inner == null
     ? null
     : Array.from(inner.querySelectorAll(mobile
-        ? ':scope > .navOption.router-link-active'
+        ? ':scope > .navOption.router-link-active, :scope > .sideNavMoreOptions > .moreOptionNav.router-link-active'
         : '.navOption.router-link-active, .navChannel.router-link-active'))
         .find((el) => el instanceof HTMLElement && el.offsetParent !== null)
 

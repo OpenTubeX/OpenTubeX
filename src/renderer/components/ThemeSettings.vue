@@ -267,7 +267,7 @@
           @change="updateTabBarPosition"
         />
       </FtFlexBox>
-      <FtFlexBox>
+      <FtFlexBox class="tabSettingsRow">
         <div class="switchColumn">
           <FtSlider
             :label="$t('Settings.Theme Settings.Tab Width')"
@@ -1043,6 +1043,13 @@ function handleSmoothScrolling(value) {
   .themeSelectRow {
     align-items: center;
     flex-direction: column;
+  }
+
+  .tabSettingsRow {
+    align-items: center;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: center;
   }
 
   .themeSelectRow :deep(.select) {

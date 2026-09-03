@@ -217,6 +217,10 @@ Settings:
       Network: 網路
       Disk: 磁碟
   General Settings:
+    Navigation:
+      Navigation: 導覽
+      Customize Navigation: 自訂導覽
+      Add Item: 新增項目
     Date Format: 日期格式
     Time Format: 時間格式
     Language Default: 語言預設

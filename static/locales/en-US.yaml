@@ -478,6 +478,10 @@ Settings:
     app needs to restart for changes to take effect. Restart and apply change?
   General Settings:
     General Settings: General
+    Navigation:
+      Navigation: Navigation
+      Customize Navigation: Customize navigation
+      Add Item: Add item
     Mobile Layout:
       Mobile Layout: Mobile layout
       Automatic: Automatic

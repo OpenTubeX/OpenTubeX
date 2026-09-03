@@ -4601,10 +4601,6 @@ function runApp() {
               backendPreference = data.value
               await setMenu()
               break
-            case 'hideHome':
-            case 'hideTrendingVideos':
-            case 'hidePopularVideos':
-            case 'hidePlaylists':
             case 'keyboardShortcuts':
               await setMenu()
               break
@@ -5472,13 +5468,8 @@ function runApp() {
   }
 
   async function setMenu() {
-    const sidenavSettings = baseHandlers.settings._findSidenavSettings()
     const keyboardShortcutsSetting = await baseHandlers.settings._findOne('keyboardShortcuts')
     const keyboardShortcuts = getConfiguredKeyboardShortcuts(keyboardShortcutsSetting?.value)
-    const hideHome = (await sidenavSettings.hideHome)?.value
-    const hideTrendingVideos = (await sidenavSettings.hideTrendingVideos)?.value
-    const hidePopularVideos = (await sidenavSettings.hidePopularVideos)?.value
-    const hidePlaylists = (await sidenavSettings.hidePlaylists)?.value
 
     const template = [
       ...process.platform === 'darwin'
@@ -5676,7 +5667,7 @@ function runApp() {
       {
         label: 'Navigate',
         submenu: [
-          !hideHome && {
+          {
             label: 'Home',
             click: (_menuItem, browserWindow, _event) => {
               navigateTo('/home', browserWindow)
@@ -5697,21 +5688,21 @@ function runApp() {
             },
             type: 'normal'
           },
-          (!hideTrendingVideos && (backendFallback || backendPreference === 'local')) && {
+          (backendFallback || backendPreference === 'local') && {
             label: 'Trending',
             click: (_menuItem, browserWindow, _event) => {
               navigateTo('/trending', browserWindow)
             },
             type: 'normal'
           },
-          (!hidePopularVideos && (backendFallback || backendPreference === 'invidious')) && {
+          (backendFallback || backendPreference === 'invidious') && {
             label: 'Most Popular',
             click: (_menuItem, browserWindow, _event) => {
               navigateTo('/popular', browserWindow)
             },
             type: 'normal'
           },
-          !hidePlaylists && {
+          {
             label: 'Playlists',
             click: (_menuItem, browserWindow, _event) => {
               navigateTo('/userplaylists', browserWindow)

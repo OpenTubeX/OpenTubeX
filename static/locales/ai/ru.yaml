@@ -194,6 +194,10 @@ Settings:
       Network: сеть
       Disk: диск
   General Settings:
+    Navigation:
+      Navigation: Навигация
+      Customize Navigation: Настроить навигацию
+      Add Item: Добавить элемент
     Date Format: Формат даты
     Time Format: Формат времени
     Language Default: По умолчанию для языка

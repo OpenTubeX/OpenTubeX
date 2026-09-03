@@ -215,6 +215,10 @@ Settings:
       Network: sieť
       Disk: disk
   General Settings:
+    Navigation:
+      Navigation: Navigácia
+      Customize Navigation: Prispôsobiť navigáciu
+      Add Item: Pridať položku
     Date Format: Formát dátumu
     Time Format: Formát času
     Language Default: Predvolené pre jazyk

@@ -217,6 +217,10 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Navigation:
+      Navigation: Nabigazioa
+      Customize Navigation: Pertsonalizatu nabigazioa
+      Add Item: Gehitu elementua
     Date Format: Data-formatua
     Time Format: Ordu-formatua
     Language Default: Hizkuntzaren lehenetsia

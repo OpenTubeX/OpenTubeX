@@ -220,6 +220,10 @@ Settings:
       Network: பிணையம்
       Disk: வட்டு
   General Settings:
+    Navigation:
+      Navigation: வழிசெலுத்தல்
+      Customize Navigation: வழிசெலுத்தலைத் தனிப்பயனாக்கு
+      Add Item: உருப்படியைச் சேர்
     Date Format: தேதி வடிவம்
     Time Format: நேர வடிவம்
     Language Default: மொழி இயல்புநிலை

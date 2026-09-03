@@ -23,6 +23,7 @@ const GENERAL_EVERYDAY_KEYS = new Set([
 
 const GENERAL_APPEARANCE_KEYS = new Set([
   'Mobile Layout',
+  'Navigation',
   'Playlist View Type',
   'Show Thumbnail Previews',
   'Thumbnail Preference',
@@ -105,7 +106,12 @@ export const SETTINGS_SEARCH_SOURCES = {
   }],
   focus: [{
     type: 'distraction',
-    key: 'Settings.Distraction Free Settings'
+    key: 'Settings.Distraction Free Settings',
+    exclude: new Set([
+      'Hide Home',
+      'Hide Popular Videos',
+      'Hide Trending Videos',
+    ])
   }, {
     type: 'parental-control',
     key: 'Settings.Parental Control Settings'

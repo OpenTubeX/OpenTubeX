@@ -1,6 +1,4 @@
 /**
- * Provider availability for navigation entries. Distraction-free settings
- * are intentionally handled by each navigation surface separately.
  * @param {object} options
  * @param {boolean} options.supportsLocalApi
  * @param {'local' | 'invidious'} options.backendPreference
@@ -19,4 +17,23 @@ export function isTrendingAvailable({ supportsLocalApi, backendPreference, backe
  */
 export function isMostPopularAvailable({ backendPreference, backendFallback }) {
   return backendFallback || backendPreference === 'invidious'
+}
+
+/**
+ * Removes navigation destinations that cannot be opened in the current app
+ * state while preserving the configured order.
+ *
+ * @param {string[]} items
+ * @param {object} options
+ * @param {boolean} options.supportsLocalApi
+ * @param {'local' | 'invidious'} options.backendPreference
+ * @param {boolean} options.backendFallback
+ * @param {boolean} options.showWatchStats
+ * @returns {string[]}
+ */
+export function filterAvailableNavigationItems(items, options) {
+  return items
+    .filter(id => id !== 'trending' || isTrendingAvailable(options))
+    .filter(id => id !== 'popular' || isMostPopularAvailable(options))
+    .filter(id => id !== 'stats' || options.showWatchStats)
 }

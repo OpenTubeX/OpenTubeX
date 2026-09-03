@@ -297,6 +297,23 @@ test.describe('automatic quick setting select pairs', () => {
 })
 
 test.describe('customizable quick settings', () => {
+  test('centers setting icons vertically within their rows', async ({ page }) => {
+    const appearance = await goToSettingsSection(page, 'appearance')
+    await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
+
+    const offsets = await page.locator('.selectedSetting').evaluateAll(rows => rows.map(row => {
+      const icon = row.querySelector('.selectedSettingIcon > svg')
+      const rowBounds = row.getBoundingClientRect()
+      const iconBounds = icon.getBoundingClientRect()
+      return Math.abs(
+        iconBounds.y + iconBounds.height / 2 -
+        (rowBounds.y + rowBounds.height / 2)
+      )
+    }))
+
+    expect(Math.max(...offsets)).toBeLessThanOrEqual(0.5)
+  })
+
   test('starts with the original quick settings', async ({ page }) => {
     await page.locator('.profileTrigger').click()
     const menu = page.getByRole('dialog', { name: 'Quick settings' })
@@ -321,16 +338,11 @@ test.describe('customizable quick settings', () => {
   test('adds basic controls from Appearance and resets them', async ({ app, page }) => {
     const appearance = await goToSettingsSection(page, 'appearance')
     const customizeButton = appearance.getByRole('button', { name: 'Customize quick settings' })
-    const launcher = appearance.locator('.quickSettingsLauncher')
+    const launcher = appearance.locator('.customizerLaunchers')
     await expect(launcher).toBeVisible()
     await expect(customizeButton).toBeVisible()
-    const [launcherBounds, buttonBounds] = await Promise.all([
-      launcher.boundingBox(),
-      customizeButton.boundingBox(),
-    ])
-    expect(Math.abs(
-      launcherBounds.x + launcherBounds.width / 2 - buttonBounds.x - buttonBounds.width / 2
-    )).toBeLessThanOrEqual(1)
+    await expect(launcher.getByRole('button')).toHaveCount(2)
+    await expect(launcher.getByRole('button', { name: 'Customize navigation' })).toBeVisible()
     await customizeButton.click()
     await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize quick settings')
 
@@ -366,6 +378,9 @@ test.describe('customizable quick settings', () => {
     await expect(settingPopover).toHaveCSS('position', 'absolute')
     await expect(settingPicker).toHaveAttribute('type', 'search')
     await expect(settingPopover.locator('.clearInputTextButton')).toHaveCount(0)
+    await expect(page.locator('.settingPicker .optionWrapper').first()).toHaveCSS('cursor', 'pointer')
+    await expect(page.locator('.settingPicker .optionWrapper').first()).toHaveCSS('user-select', 'none')
+    await expect(selectedSettings.locator('.selectedSetting').first()).toHaveCSS('user-select', 'none')
     for (const setting of ['Icon Pack', 'UI Roundness', 'Enable Tor / Proxy']) {
       await settingPicker.fill(setting)
       await page.locator('.settingPicker .optionWrapper').filter({ hasText: setting }).click()

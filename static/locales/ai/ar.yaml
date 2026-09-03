@@ -219,6 +219,10 @@ Settings:
       Network: شبكة
       Disk: القرص
   General Settings:
+    Navigation:
+      Navigation: التنقل
+      Customize Navigation: تخصيص التنقل
+      Add Item: إضافة عنصر
     Date Format: تنسيق التاريخ
     Time Format: تنسيق الوقت
     Language Default: الإعداد الافتراضي للغة
