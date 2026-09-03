@@ -184,9 +184,18 @@ test('keeps the search result thumbnail when saving a playlist', async ({ page }
     .toHaveAttribute('src', expectedThumbnail)
 })
 
-test('refreshes a saved playlist thumbnail after opening the playlist again', async ({ app, page }) => {
+test('refreshes saved playlist metadata after opening the playlist again', async ({ app, page }) => {
   const playlistId = 'dynamic-saved-playlist'
   let firstVideoId = 'original-first-video'
+  let videoCount = 1
+  let playlistTitle = 'Dynamic saved playlist'
+  let playlistDescription = 'Original playlist description'
+  let channelName = 'Playlist channel'
+  let channelId = 'UCplaylistchannel'
+  let channelAvatar = 'https://yt3.ggpht.com/original-avatar=s76'
+  const getSavedPlaylistCard = () => page.locator('.ft-list-video:visible', {
+    has: page.locator(`a.title[href*="/playlist/${playlistId}"]`)
+  })
   let markStaleRequestStarted
   const staleRequestStarted = new Promise(resolve => { markStaleRequestStarted = resolve })
   let releaseStaleRequest
@@ -196,9 +205,13 @@ test('refreshes a saved playlist thumbnail after opening the playlist again', as
 
   await page.route(new RegExp(`/api/v1/playlists/${playlistId}\\?`), route => route.fulfill({
     json: {
-      ...playlistResponse([playlistVideo(0, firstVideoId)], 1),
-      title: 'Dynamic saved playlist',
+      ...playlistResponse([playlistVideo(0, firstVideoId)], videoCount),
+      title: playlistTitle,
+      description: playlistDescription,
       playlistId,
+      author: channelName,
+      authorId: channelId,
+      authorThumbnails: [{ url: channelAvatar }],
     },
   }))
   await page.route(/\/api\/v1\/playlists\/stale-thumbnail-source\?/, async route => {
@@ -218,22 +231,44 @@ test('refreshes a saved playlist thumbnail after opening the playlist again', as
   await page.getByTitle('Save Playlist').click()
   await goTo(page, 'userplaylists')
 
-  const savedPlaylistCard = page.getByRole('link', { name: 'Dynamic saved playlist' })
-    .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
-  const savedPlaylistThumbnail = savedPlaylistCard.locator('img.thumbnailImage')
+  let savedPlaylistCard = getSavedPlaylistCard()
+  let savedPlaylistThumbnail = savedPlaylistCard.locator('img.thumbnailImage')
   await expect(savedPlaylistThumbnail).toHaveAttribute(
     'src',
     'https://invidious.test/vi/original-first-video/mqdefault.jpg'
   )
+  await expect(savedPlaylistCard.locator('.videoCountContainer')).toHaveText('1')
 
-  firstVideoId = 'updated-first-video'
+  videoCount = 5
+  playlistTitle = 'Updated saved playlist'
+  playlistDescription = 'Updated playlist description'
+  channelName = 'Updated playlist channel'
+  channelId = 'UCupdatedplaylistchannel'
+  channelAvatar = 'https://yt3.ggpht.com/updated-avatar=s76'
   await openPlaylistTab(page, '/playlist/stale-thumbnail-source')
   await staleRequestStarted
   await page.locator(sel.searchInput).fill(`https://www.youtube.com/playlist?list=${playlistId}`)
   await page.locator(sel.searchInput).press('Enter')
   await expect(page.getByText('Playlist video 1', { exact: true })).toBeVisible()
+  await expect(page.locator('.playlistInfo')).toContainText('5 videos')
   releaseStaleRequest()
   await staleRequestFinished
+  await goTo(page, 'userplaylists')
+
+  savedPlaylistCard = getSavedPlaylistCard()
+  savedPlaylistThumbnail = savedPlaylistCard.locator('img.thumbnailImage')
+  await expect(savedPlaylistCard.locator('.h3Title')).toHaveText(playlistTitle)
+  await expect(savedPlaylistCard.locator('.channelNameText')).toHaveText(channelName)
+  await expect(savedPlaylistCard.locator('.channelName')).toHaveAttribute('href', `#/channel/${channelId}`)
+  await expect(savedPlaylistThumbnail).toHaveAttribute(
+    'src',
+    'https://invidious.test/vi/original-first-video/mqdefault.jpg'
+  )
+  await expect(savedPlaylistCard.locator('.videoCountContainer')).toHaveText('5')
+
+  firstVideoId = 'updated-first-video'
+  await page.getByRole('link', { name: playlistTitle }).click()
+  await expect(page.getByText('Playlist video 1', { exact: true })).toBeVisible()
   await goTo(page, 'userplaylists')
 
   const updatedThumbnailUrl = 'https://invidious.test/vi/updated-first-video/mqdefault.jpg'
@@ -241,10 +276,27 @@ test('refreshes a saved playlist thumbnail after opening the playlist again', as
 
   ;({ page } = await app.relaunch())
   await goTo(page, 'userplaylists')
-  const persistedPlaylistCard = page.getByRole('link', { name: 'Dynamic saved playlist' })
-    .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
+  const persistedPlaylistCard = getSavedPlaylistCard()
+  await expect(persistedPlaylistCard.locator('.h3Title')).toHaveText(playlistTitle)
+  await expect(persistedPlaylistCard.locator('.channelNameText')).toHaveText(channelName)
+  await expect(persistedPlaylistCard.locator('.channelName')).toHaveAttribute('href', `#/channel/${channelId}`)
   await expect(persistedPlaylistCard.locator('img.thumbnailImage'))
     .toHaveAttribute('src', updatedThumbnailUrl)
+  await expect(persistedPlaylistCard.locator('.videoCountContainer')).toHaveText('5')
+  await expect(page.evaluate(id => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return store.getters.getPlaylistBookmark(id)
+  }, playlistId)).resolves.toMatchObject({
+    playlist: {
+      title: playlistTitle,
+      description: playlistDescription,
+    },
+    uploader: {
+      id: channelId,
+      name: channelName,
+      avatar: 'https://yt3.googleusercontent.com/updated-avatar=s76',
+    },
+  })
 })
 
 test('retries the failed Invidious page and merges its overlapping videos once', async ({ page }) => {

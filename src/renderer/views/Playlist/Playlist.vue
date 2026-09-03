@@ -253,7 +253,11 @@ import { invidiousGetPlaylistInfo, youtubeImageUrlToInvidious } from '../../help
 import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../../helpers/api/invidious-playlists'
 import { runRetryablePlaylistRequest } from '../../helpers/playlist-pagination'
 import { formatDate } from '../../helpers/dateFormat'
-import { canonicalPlaylistThumbnailUrl, createPlaylistBookmark } from '../../helpers/playlist-bookmarks'
+import {
+  canonicalChannelAvatarUrl,
+  canonicalPlaylistThumbnailUrl,
+  createPlaylistBookmark,
+} from '../../helpers/playlist-bookmarks'
 import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import {
@@ -487,7 +491,7 @@ const isPlaylistBookmarked = computed(() => {
   return !isUserPlaylistRequested.value && store.getters.getPlaylistBookmark(playlistId.value) != null
 })
 
-async function refreshPlaylistBookmarkThumbnail() {
+async function refreshPlaylistBookmarkMetadata() {
   const bookmark = store.getters.getPlaylistBookmark(playlistId.value)
   if (bookmark == null) return
 
@@ -495,13 +499,33 @@ async function refreshPlaylistBookmarkThumbnail() {
     ? `https://i.ytimg.com/vi/${firstVideoId.value}/mqdefault.jpg`
     : null)
   const canonicalThumbnailUrl = canonicalPlaylistThumbnailUrl(thumbnailUrl)
-  if (bookmark.playlist.thumbnail_url === canonicalThumbnailUrl) return
+  const canonicalChannelAvatar = canonicalChannelAvatarUrl(channelThumbnail.value)
+  const refreshedChannelId = channelId.value || playlistId.value
+  const refreshedChannelName = channelName.value || playlistTitle.value
+  if (
+    bookmark.playlist.title === playlistTitle.value &&
+    bookmark.playlist.description === playlistDescription.value &&
+    bookmark.playlist.thumbnail_url === canonicalThumbnailUrl &&
+    bookmark.playlist.video_count === videoCount.value &&
+    bookmark.uploader.id === refreshedChannelId &&
+    bookmark.uploader.name === refreshedChannelName &&
+    bookmark.uploader.avatar === canonicalChannelAvatar
+  ) return
 
   await store.dispatch('savePlaylistBookmark', {
     ...bookmark,
     playlist: {
       ...bookmark.playlist,
+      title: playlistTitle.value,
+      description: playlistDescription.value,
       thumbnail_url: canonicalThumbnailUrl,
+      video_count: videoCount.value,
+    },
+    uploader: {
+      ...bookmark.uploader,
+      id: refreshedChannelId,
+      name: refreshedChannelName,
+      avatar: canonicalChannelAvatar,
     },
   })
 }
@@ -859,7 +883,7 @@ async function getPlaylistLocal() {
 
     playlistItems.value = playlistItems_
 
-    await refreshPlaylistBookmarkThumbnail()
+    await refreshPlaylistBookmarkMetadata()
     if (!requestIsCurrent()) return
 
     let shouldGetNextPage = false
@@ -922,7 +946,7 @@ async function getPlaylistInvidious() {
     updateLastUpdatedDate()
 
     playlistItems.value = result.videos
-    await refreshPlaylistBookmarkThumbnail()
+    await refreshPlaylistBookmarkMetadata()
     if (!requestIsCurrent()) return
     const hasMorePages = hasMoreInvidiousPlaylistPages(
       result.videoCount,
