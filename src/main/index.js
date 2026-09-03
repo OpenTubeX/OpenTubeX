@@ -2778,26 +2778,30 @@ function runApp() {
     // Cover minimize-to-tray (and app hide), where the window is hidden rather than minimized.
     newWindow.on('hide', () => sendMinimizedState(true))
     newWindow.on('show', () => sendMinimizedState(false))
-    if (monitorsKdeWaylandWindowState) {
-      monitorKdeWaylandWindowState({
-        browserWindow: newWindow,
-        backend: kdeWaylandWindowStateBackend,
-        applyWindowIdentity: applyKdeWindowIdentity,
-        onMinimizedState: sendMinimizedState,
-        releaseWindowIdentity: releaseKdeWindowIdentity,
-      })
-    }
 
     // Renderer focus events can be skipped on Windows when focus returns after
     // another application's window is closed. Forward the native state so
-    // blur-triggered auto PiP can still re-embed the video.
+    // blur-triggered auto PiP can still re-embed the video. KDE Wayland checks
+    // KWin first because desktop popups blur the Wayland surface without
+    // switching away from the app's top-level window.
     const sendFocusedState = (focused) => {
       if (!newWindow.isDestroyed() && !newWindow.webContents.isDestroyed()) {
         newWindow.webContents.send(IpcChannels.WINDOW_FOCUSED_STATE, focused)
       }
     }
-    newWindow.on('focus', () => sendFocusedState(true))
-    newWindow.on('blur', () => sendFocusedState(false))
+    if (monitorsKdeWaylandWindowState) {
+      monitorKdeWaylandWindowState({
+        browserWindow: newWindow,
+        backend: kdeWaylandWindowStateBackend,
+        applyWindowIdentity: applyKdeWindowIdentity,
+        onFocusedState: sendFocusedState,
+        onMinimizedState: sendMinimizedState,
+        releaseWindowIdentity: releaseKdeWindowIdentity,
+      })
+    } else {
+      newWindow.on('focus', () => sendFocusedState(true))
+      newWindow.on('blur', () => sendFocusedState(false))
+    }
 
     if (isTrayOnMinimizeSupported) {
       function manageTray(window, removeWindow = false) {

@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict'
+import dbus from 'dbus-native'
 import { EventEmitter } from 'node:events'
+import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 
 import {
+  createKdeWaylandWindowStateBackend,
   extractKwinWindowHandles,
   findNewlyMinimizedWindow,
   isKdePlasmaDesktop,
@@ -107,6 +110,69 @@ test('rejects malformed D-Bus window state and runner matches', () => {
   assert.deepEqual(extractKwinWindowHandles([['invalid-id'], null]), [])
 })
 
+test('reloads the KWin reporter with the new D-Bus name after reconnect', async t => {
+  const originalSessionBus = dbus.sessionBus
+  const bus = new EventEmitter()
+  bus.name = ':1.10'
+  bus.connection = new EventEmitter()
+  const scripts = []
+  let reportInterface
+  let scriptRuns = 0
+  let resolveSecondRun
+  const secondRun = new Promise(resolve => {
+    resolveSecondRun = resolve
+  })
+  const scripting = {
+    unloadScript: async () => true,
+  }
+  const service = {
+    getInterface: async path => {
+      if (path === '/KWin') return { getWindowInfo: async () => null }
+      if (path === '/WindowsRunner') return { Match: async () => [] }
+      if (path === '/Scripting') return scripting
+      return {
+        run: async () => {
+          scriptRuns++
+          reportInterface.ReportActiveWindow('window', false, 'electron')
+          if (scriptRuns === 2) resolveSecondRun()
+        },
+      }
+    },
+  }
+  bus.getService = () => service
+  bus.invoke = async ({ body: [scriptPath] }) => {
+    scripts.push(await readFile(scriptPath, 'utf8'))
+    return scripts.length
+  }
+  bus.exportInterface = implementation => {
+    reportInterface = implementation
+  }
+  bus.unexportInterface = () => {}
+  bus.close = async () => {}
+  dbus.sessionBus = () => bus
+  t.after(() => {
+    dbus.sessionBus = originalSessionBus
+  })
+
+  const backend = await createKdeWaylandWindowStateBackend()
+  assert.notEqual(backend, null)
+  assert.match(scripts[0], /":1\.10"/)
+  const activeWindows = []
+  const watch = backend.watchActiveWindow(activeWindow => activeWindows.push(activeWindow))
+
+  bus.name = ':1.11'
+  bus.emit('reconnected', { name: bus.name })
+  await secondRun
+
+  assert.equal(scripts.length, 2)
+  assert.match(scripts[1], /":1\.11"/)
+  assert.doesNotMatch(scripts[1], /":1\.10"/)
+  assert.deepEqual(activeWindows, [{ uuid: 'window', skipTaskbar: false, resourceClass: 'electron' }])
+  watch.stop()
+  await backend.close()
+  assert.equal(bus.listenerCount('reconnected'), 0)
+})
+
 test('detects the KWin window newly minimized by a shortcut', () => {
   const previous = [
     windowInfo({ uuid: 'one', minimized: false }),
@@ -129,6 +195,82 @@ test('does not mistake an ordinary focus change for minimize', () => {
   ]
 
   assert.equal(findNewlyMinimizedWindow(state, state, targetWindow()), null)
+})
+
+test('keeps focus when a KDE desktop popup leaves the window active', async () => {
+  const focusedStates = await focusedStatesAfterBlur({
+    resourceClass: 'electron',
+    skipTaskbar: false,
+    uuid: 'window',
+  })
+
+  assert.deepEqual(focusedStates, [true])
+})
+
+test('keeps focus when a KDE shell popup becomes active', async () => {
+  const focusedStates = await focusedStatesAfterBlur({
+    resourceClass: 'org.kde.krunner',
+    skipTaskbar: true,
+    uuid: 'krunner',
+  })
+
+  assert.deepEqual(focusedStates, [true])
+})
+
+test('reports focus loss when another application window becomes active', async () => {
+  const focusedStates = await focusedStatesAfterBlur({
+    resourceClass: 'org.kde.konsole',
+    skipTaskbar: false,
+    uuid: 'konsole',
+  })
+
+  assert.deepEqual(focusedStates, [false])
+})
+
+test('does not mistake another app utility window for a KDE shell popup', async () => {
+  const focusedStates = await focusedStatesAfterBlur({
+    resourceClass: 'electron',
+    skipTaskbar: true,
+    uuid: 'picture-in-picture',
+  })
+
+  assert.deepEqual(focusedStates, [false])
+})
+
+test('reports an app switch made through a KDE shell popup', async () => {
+  const focusedStates = await focusedStatesAfterBlur(
+    {
+      resourceClass: 'plasmashell',
+      skipTaskbar: true,
+      uuid: 'launcher',
+    },
+    {
+      activeWindowChanges: [
+        {
+          resourceClass: 'electron',
+          skipTaskbar: false,
+          uuid: 'window',
+        },
+        {
+          resourceClass: 'electron',
+          skipTaskbar: false,
+          uuid: 'window',
+        },
+        {
+          resourceClass: 'org.kde.konsole',
+          skipTaskbar: false,
+          uuid: 'konsole',
+        },
+        {
+          resourceClass: 'plasmashell',
+          skipTaskbar: true,
+          uuid: 'launcher',
+        },
+      ],
+    }
+  )
+
+  assert.deepEqual(focusedStates, [true, true, true, false])
 })
 
 test('detects a single minimized window when no earlier KWin snapshot is available', () => {
@@ -214,6 +356,7 @@ test('preserves the window identity across title updates during detection', asyn
       setWindowTitle(targetWindow().caption)
       return [otherWindow, minimized]
     },
+    watchActiveWindow: () => ({ activeWindow: null, stop: () => {} }),
   })
   await detected
 
@@ -237,4 +380,45 @@ function targetWindow () {
     caption: 'Subscriptions - OpenTubeX',
     bounds: { x: 10, y: 20, width: 1200, height: 800 },
   }
+}
+
+async function focusedStatesAfterBlur (activeWindow, { activeWindowChanges = [] } = {}) {
+  const browserWindow = new EventEmitter()
+  browserWindow.getBounds = () => targetWindow().bounds
+  browserWindow.getTitle = () => targetWindow().caption
+  browserWindow.isFocused = () => false
+  const focusedStates = []
+  let activeWindowListener = null
+  const backend = Promise.resolve({
+    queryWindow: async () => null,
+    queryWindows: async () => [windowInfo()],
+    watchActiveWindow: listener => {
+      activeWindowListener = listener
+      return {
+        activeWindow,
+        stop: () => {
+          if (activeWindowListener === listener) activeWindowListener = null
+        },
+      }
+    },
+  })
+  const stop = monitorKdeWaylandWindowState({
+    browserWindow,
+    backend,
+    detectionDelay: 0,
+    onFocusedState: focused => focusedStates.push(focused),
+    onMinimizedState: () => {},
+  })
+
+  browserWindow.emit('blur')
+  await new Promise(resolve => setTimeout(resolve, 10))
+  for (const nextActiveWindow of activeWindowChanges) {
+    activeWindow = nextActiveWindow
+    if (activeWindowListener !== null) activeWindowListener(activeWindow)
+    await Promise.resolve()
+  }
+  await new Promise(resolve => setTimeout(resolve, 10))
+  stop()
+
+  return focusedStates
 }
