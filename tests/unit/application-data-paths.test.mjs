@@ -4,7 +4,10 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 
-import { configureApplicationDataPaths } from '../../src/main/applicationDataPaths.js'
+import {
+  configureApplicationDataPaths,
+  configurePortableEnvironment
+} from '../../src/main/applicationDataPaths.js'
 
 function createPathRecorder () {
   const configuredPaths = new Map()
@@ -51,6 +54,37 @@ test('leaves installed builds on Electron default paths', () => {
   configureApplicationDataPaths(app, {})
 
   assert.equal(configuredPaths.size, 0)
+})
+
+test('detects marked Windows archive builds before configuring paths', () => {
+  const environment = {}
+  const checkedPaths = []
+
+  configurePortableEnvironment(
+    environment,
+    'win32',
+    'D:\\OpenTubeX\\OpenTubeX.exe',
+    candidate => {
+      checkedPaths.push(candidate)
+      return candidate === 'D:\\OpenTubeX\\portable.marker'
+    }
+  )
+
+  assert.deepEqual(checkedPaths, ['D:\\OpenTubeX\\portable.marker'])
+  assert.equal(environment.PORTABLE_EXECUTABLE_DIR, 'D:\\OpenTubeX')
+})
+
+test('does not mark installed or non-Windows builds as portable', () => {
+  for (const platform of ['linux', 'darwin', 'win32']) {
+    const environment = {}
+    configurePortableEnvironment(
+      environment,
+      platform,
+      'C:\\Program Files\\OpenTubeX\\OpenTubeX.exe',
+      () => false
+    )
+    assert.equal(environment.PORTABLE_EXECUTABLE_DIR, undefined)
+  }
 })
 
 test('keeps test data overrides isolated from portable data', () => {
