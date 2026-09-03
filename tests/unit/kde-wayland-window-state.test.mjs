@@ -131,7 +131,7 @@ test('does not mistake an ordinary focus change for minimize', () => {
   assert.equal(findNewlyMinimizedWindow(state, state, targetWindow()), null)
 })
 
-test('keeps focus without polling when a KDE desktop popup leaves the window active', async () => {
+test('bounds polling when a KDE desktop popup leaves the window active', async () => {
   const focusedStates = await focusedStatesAfterBlur(
     {
       resourceClass: 'electron',
@@ -141,7 +141,8 @@ test('keeps focus without polling when a KDE desktop popup leaves the window act
     { pollInterval: 0 }
   )
 
-  assert.deepEqual(focusedStates, [true])
+  assert.equal(focusedStates.length, 6)
+  assert.equal(focusedStates.every(Boolean), true)
 })
 
 test('keeps focus when a KDE shell popup becomes active', async () => {
@@ -182,6 +183,16 @@ test('reports an app switch made through a KDE shell popup', async () => {
       uuid: 'launcher',
     },
     {
+      resourceClass: 'electron',
+      skipTaskbar: false,
+      uuid: 'window',
+    },
+    {
+      resourceClass: 'electron',
+      skipTaskbar: false,
+      uuid: 'window',
+    },
+    {
       resourceClass: 'org.kde.konsole',
       skipTaskbar: false,
       uuid: 'konsole',
@@ -193,7 +204,7 @@ test('reports an app switch made through a KDE shell popup', async () => {
     { pollInterval: 0 }
   )
 
-  assert.deepEqual(focusedStates, [true, false])
+  assert.deepEqual(focusedStates, [true, true, true, false])
 })
 
 test('detects a single minimized window when no earlier KWin snapshot is available', () => {

@@ -11,6 +11,7 @@ const KWIN_ACTIVE_WINDOW_SCRIPT_PREFIX = 'opentubex-active-window'
 const ACTIVE_WINDOW_REPORT_PATH = '/io/github/OpenTubeX/KWinActiveWindow'
 const ACTIVE_WINDOW_REPORT_INTERFACE = 'io.github.OpenTubeX.KWinActiveWindow'
 const ACTIVE_WINDOW_QUERY_TIMEOUT = 1_500
+const FOCUS_HANDOFF_POLL_ATTEMPTS = 5
 const KDE_DESKTOP_POPUP_CLASS = /(?:^|\.)(?:krunner|plasmashell)$/i
 const WINDOW_SEARCH_TERM = 'OpenTubeX'
 
@@ -457,13 +458,19 @@ export function monitorKdeWaylandWindowState({
   const isDesktopPopup = activeWindow => activeWindow !== null &&
     activeWindow.skipTaskbar &&
     KDE_DESKTOP_POPUP_CLASS.test(activeWindow.resourceClass)
-  const isLogicallyFocused = (activeWindow, targetUuid) => (
+  const isTargetWindowActive = (activeWindow, targetUuid) => (
     activeWindow !== null && activeWindow.uuid === targetUuid
-  ) || isDesktopPopup(activeWindow)
+  )
+  const isLogicallyFocused = (activeWindow, targetUuid) =>
+    isTargetWindowActive(activeWindow, targetUuid) || isDesktopPopup(activeWindow)
   // Starting an app from the launcher does not blur this BrowserWindow again.
-  // Keep checking until the popup closes or hands focus to an app. Some shell
-  // popups leave the app's top-level KWin window active while Electron blurs.
-  const scheduleFocusPoll = (token, targetUuid) => {
+  // Keep checking while the popup is open. KWin can briefly reactivate this
+  // window during launcher handoff, so allow a bounded number of final polls.
+  const scheduleFocusPoll = (
+    token,
+    targetUuid,
+    remainingHandoffPolls = FOCUS_HANDOFF_POLL_ATTEMPTS
+  ) => {
     clearFocusPoll()
     if (stopped) return
 
@@ -481,9 +488,14 @@ export function monitorKdeWaylandWindowState({
       if (stopped || generation !== token) return
 
       const desktopPopupActive = isDesktopPopup(activeWindow)
-      const focused = isLogicallyFocused(activeWindow, targetUuid)
+      const targetWindowActive = isTargetWindowActive(activeWindow, targetUuid)
+      const focused = targetWindowActive || desktopPopupActive
       onFocusedState(focused)
-      if (desktopPopupActive) scheduleFocusPoll(token, targetUuid)
+      if (desktopPopupActive) {
+        scheduleFocusPoll(token, targetUuid)
+      } else if (targetWindowActive && remainingHandoffPolls > 1) {
+        scheduleFocusPoll(token, targetUuid, remainingHandoffPolls - 1)
+      }
     }, pollInterval)
   }
   const handleFocus = () => {
@@ -529,10 +541,9 @@ export function monitorKdeWaylandWindowState({
         ? findMatchingWindow(current, target)
         : current.find(window => window.uuid === windowUuid) ?? null
       const targetUuid = matchedWindow?.uuid ?? windowUuid
-      const desktopPopupActive = isDesktopPopup(activeWindow)
       const focused = isLogicallyFocused(activeWindow, targetUuid)
       onFocusedState(focused)
-      if (desktopPopupActive) scheduleFocusPoll(token, targetUuid)
+      if (focused) scheduleFocusPoll(token, targetUuid)
       const previousByUuid = new Map(previous.map(window => [window.uuid, window]))
       const claimedWindow = windowUuid === null
         ? null
