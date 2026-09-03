@@ -1,34 +1,58 @@
 import { goTo, test, expect } from '../../helpers/app.mjs'
+import { activeTab, waitForPlayback } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 const VIDEO_TITLES = ['Skip test video one', 'Skip test video two', 'Skip test video three']
+const SHORT_PLAYLIST_ID = 'e2eshortplaylist'
+const SHORT_PLAYLIST_NAME = 'Short autoplay playlist'
+
+function playlistVideo(title, index, isShort = false) {
+  return {
+    videoId: `skipvideo${index}`,
+    title,
+    author: 'Test Channel',
+    authorId: 'UC-test-channel-id',
+    lengthSeconds: 120,
+    published: Date.now() - 86_400_000,
+    timeAdded: Date.now() + index,
+    playlistItemId: `e2e-skip-item-${index}`,
+    type: 'video',
+    isShort
+  }
+}
 
 test.use({
   seed: {
     settings: {
       // Keep the seeded order, the default sorts the newest addition to the top
-      userPlaylistSortOrder: 'custom'
+      userPlaylistSortOrder: 'custom',
+      useCustomShortsPlayer: true,
+      loopShorts: true,
+      autoplayPlaylists: true,
+      videoPlaybackEngine: 'built-in',
+      ytDlpPlaybackEngineDefaultMigration: true
     },
-    playlists: [
-      {
-        _id: 'e2eskipplaylist',
-        playlistName: 'Skip button playlist',
-        protected: false,
-        description: 'Playlist for the player skip buttons',
-        videos: VIDEO_TITLES.map((title, index) => ({
-          videoId: `skipvideo${index}`,
-          title,
-          author: 'Test Channel',
-          authorId: 'UC-test-channel-id',
-          lengthSeconds: 120,
-          published: Date.now() - 86_400_000,
-          timeAdded: Date.now() + index,
-          playlistItemId: `e2e-skip-item-${index}`,
-          type: 'video'
-        })),
-        createdAt: Date.now() - 86_400_000,
-        lastUpdatedAt: Date.now()
-      }
-    ],
+    playlists: [{
+      _id: 'e2eskipplaylist',
+      playlistName: 'Skip button playlist',
+      protected: false,
+      description: 'Playlist for the player skip buttons',
+      videos: VIDEO_TITLES.map((title, index) => playlistVideo(title, index)),
+      createdAt: Date.now() - 86_400_000,
+      lastUpdatedAt: Date.now()
+    }, {
+      _id: SHORT_PLAYLIST_ID,
+      playlistName: SHORT_PLAYLIST_NAME,
+      protected: false,
+      description: 'Playlist with a Short followed by a normal video',
+      videos: VIDEO_TITLES.slice(0, 2).map((title, index) => playlistVideo(
+        title,
+        index,
+        index === 0
+      )),
+      createdAt: Date.now() - 86_400_000,
+      lastUpdatedAt: Date.now()
+    }],
     history: ['Queued video', 'Standalone video'].map((title, index) => ({
       _id: `queuevideo${index}`,
       videoId: `queuevideo${index}`,
@@ -129,6 +153,30 @@ test('only offers skipping to playlist videos that exist', async ({ page, attach
     canPlayNext: true,
     canPlayPrevious: true
   })
+})
+
+test('continues a playlist after a Short ends', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+
+  await goTo(page, 'userplaylists')
+  await page.getByText(SHORT_PLAYLIST_NAME).click()
+  await page.getByText(VIDEO_TITLES[0]).first().click()
+  await expect(page).toHaveURL(new RegExp(`#\\/watch\\/skipvideo0\\?.*playlistId=${SHORT_PLAYLIST_ID}`))
+
+  const video = await waitForPlayback(page)
+  await expect(page.locator(`${activeTab} .ftVideoPlayer`)).toHaveClass(/shortsPlayer/)
+  await expect.poll(() => readSkipAvailability(page)).toEqual({
+    canPlayNext: true,
+    canPlayPrevious: false
+  })
+  expect(await video.evaluate(element => element.loop)).toBe(false)
+
+  await video.evaluate(element => {
+    element.currentTime = Math.max(0, element.duration - 0.25)
+  })
+
+  await expect(page).toHaveURL(new RegExp(`#\\/watch\\/skipvideo1\\?.*playlistId=${SHORT_PLAYLIST_ID}`))
+  await waitForPlayback(page)
 })
 
 test('offers skipping to a queued video without a playlist', async ({ page }) => {
