@@ -465,11 +465,12 @@ function Assert-NoHostWrites {
         $eventData.ContainsKey('KeyObject') -and $eventData.KeyObject) {
       $registryKeyPaths.Remove($eventData.KeyObject.Trim())
     }
+    $isAppProcess = $ProcessIds.Contains($eventProcessId)
     if (-not (Test-PortableHostRegistryMutation -EventId $eventId `
-        -EventData $eventData)) {
+        -EventData $eventData -IsAppProcess $isAppProcess)) {
       continue
     }
-    if ($ProcessIds.Contains($eventProcessId)) {
+    if ($isAppProcess) {
       $appRegistryWrites.Add($description)
     } elseif ($payload -match '(?i)OpenTubeX|electron\.app\.OpenTubeX') {
       $externalOpenTubeXRegistryWrites.Add($description)

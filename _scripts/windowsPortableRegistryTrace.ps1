@@ -70,7 +70,8 @@ function Test-SuccessfulRegistryMutation {
 function Test-PortableHostRegistryMutation {
   param(
     [Parameter(Mandatory)] [int] $EventId,
-    [Parameter(Mandatory)] [hashtable] $EventData
+    [Parameter(Mandatory)] [hashtable] $EventData,
+    [Parameter(Mandatory)] [bool] $IsAppProcess
   )
 
   if (-not (Test-SuccessfulRegistryMutation -EventId $EventId `
@@ -102,5 +103,16 @@ function Test-PortableHostRegistryMutation {
     $EventData.ValueName.Trim() -match
       '^\\Device\\HarddiskVolume\d+\\.+\\OpenTubeX\.exe$'
 
-  return -not $isBamExecutionHistoryWrite
+  # Explorer writes display metadata for newly observed executables from its
+  # own process, which the packaged application's Interposer cannot affect.
+  $isMuiCacheMetadataWrite =
+    -not $IsAppProcess -and
+    -not $EventData.KeyName.Trim() -and
+    (Convert-RegistryEventNumber $EventData.Type) -eq 1 -and
+    $EventData.ResolvedKeyName.Trim() -match
+      '^\\REGISTRY\\USER\\S-1-5-(?:\d+-)+\d+_Classes\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\MuiCache$' -and
+    $EventData.ValueName.Trim() -match
+      '^(?:[A-Z]:\\|\\Device\\HarddiskVolume\d+\\).+\\OpenTubeX\.exe\.(?:FriendlyAppName|ApplicationCompany)$'
+
+  return -not ($isBamExecutionHistoryWrite -or $isMuiCacheMetadataWrite)
 }
