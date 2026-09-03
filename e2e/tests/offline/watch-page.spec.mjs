@@ -785,6 +785,73 @@ test('repeats an A-B range and manages it from the player menu', async ({ app, p
   await expect(player.getByRole('button', { name: /^Clear A-B repeat range/ })).not.toBeVisible()
 })
 
+test('repeats an A-B range when point B is at the end of the video', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  const player = page.locator('.ftVideoPlayer')
+
+  await video.evaluate((element) => {
+    element.pause()
+    element.currentTime = 5
+  })
+  await page.keyboard.press('Shift+A')
+  await video.evaluate((element) => { element.currentTime = element.duration })
+  await page.keyboard.press('Shift+B')
+  await expect(player.locator('.abRepeatMarker')).toHaveCount(2)
+
+  const watchComponent = await page.evaluateHandle(findWatchComponent)
+  await watchComponent.evaluate((component) => {
+    const findPlayer = (vnode) => {
+      if (vnode?.component?.type?.name === 'FtShakaVideoPlayer') return vnode.component
+      if (vnode?.component?.subTree) {
+        const match = findPlayer(vnode.component.subTree)
+        if (match) return match
+      }
+      if (Array.isArray(vnode?.children)) {
+        for (const child of vnode.children) {
+          const match = findPlayer(child)
+          if (match) return match
+        }
+      }
+      return null
+    }
+    const playerComponent = findPlayer(component.subTree)
+    const onEnded = playerComponent.vnode.props.onEnded
+    window.__abRepeatEndedEvents = 0
+    playerComponent.vnode.props.onEnded = (...args) => {
+      window.__abRepeatEndedEvents++
+      return onEnded(...args)
+    }
+  })
+  await video.evaluate((element) => {
+    const currentTime = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime')
+    const play = element.play.bind(element)
+    window.__abRepeatRestartTime = null
+    window.__abRepeatPlayCalls = 0
+    Object.defineProperty(element, 'currentTime', {
+      configurable: true,
+      get: currentTime.get,
+      set(value) {
+        if (Math.abs(value - 5) < 0.001) {
+          window.__abRepeatRestartTime = value
+        }
+        currentTime.set.call(this, value)
+      }
+    })
+    element.play = () => {
+      window.__abRepeatPlayCalls++
+      return play()
+    }
+    element.currentTime = element.duration
+    element.dispatchEvent(new Event('ended'))
+  })
+
+  await expect.poll(() => page.evaluate(() => window.__abRepeatRestartTime)).toBeCloseTo(5, 2)
+  await expect.poll(() => page.evaluate(() => window.__abRepeatPlayCalls)).toBe(1)
+  expect(await page.evaluate(() => window.__abRepeatEndedEvents)).toBe(0)
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+})
+
 test.describe('with A-B repeat disabled', () => {
   test.use({
     seed: {

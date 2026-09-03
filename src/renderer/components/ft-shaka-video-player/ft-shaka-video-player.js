@@ -5751,6 +5751,12 @@ export default defineComponent({
     }
 
     function handleEnded() {
+      if (abRepeatEnabled.value && hasValidAbRepeatRange()) {
+        repeatAbRangeFromStart()
+        video.value.play()
+        return
+      }
+
       setShowUiOnPaused(true)
       shortsPaused.value = true
       shortsEnded.value = true
