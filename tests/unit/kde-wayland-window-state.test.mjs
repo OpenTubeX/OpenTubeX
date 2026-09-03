@@ -131,12 +131,15 @@ test('does not mistake an ordinary focus change for minimize', () => {
   assert.equal(findNewlyMinimizedWindow(state, state, targetWindow()), null)
 })
 
-test('keeps focus when a KDE desktop popup leaves the window active', async () => {
-  const focusedStates = await focusedStatesAfterBlur({
-    resourceClass: 'electron',
-    skipTaskbar: false,
-    uuid: 'window',
-  })
+test('keeps focus without polling when a KDE desktop popup leaves the window active', async () => {
+  const focusedStates = await focusedStatesAfterBlur(
+    {
+      resourceClass: 'electron',
+      skipTaskbar: false,
+      uuid: 'window',
+    },
+    { pollInterval: 0 }
+  )
 
   assert.deepEqual(focusedStates, [true])
 })
@@ -177,28 +180,6 @@ test('reports an app switch made through a KDE shell popup', async () => {
       resourceClass: 'plasmashell',
       skipTaskbar: true,
       uuid: 'launcher',
-    },
-    {
-      resourceClass: 'org.kde.konsole',
-      skipTaskbar: false,
-      uuid: 'konsole',
-    },
-  ]
-  let queryIndex = 0
-  const focusedStates = await focusedStatesAfterBlur(
-    () => activeWindows[Math.min(queryIndex++, activeWindows.length - 1)],
-    { pollInterval: 0 }
-  )
-
-  assert.deepEqual(focusedStates, [true, false])
-})
-
-test('reports an app switch when a desktop popup leaves the window active', async () => {
-  const activeWindows = [
-    {
-      resourceClass: 'electron',
-      skipTaskbar: false,
-      uuid: 'window',
     },
     {
       resourceClass: 'org.kde.konsole',

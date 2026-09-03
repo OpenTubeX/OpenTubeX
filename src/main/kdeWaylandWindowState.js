@@ -480,9 +480,10 @@ export function monitorKdeWaylandWindowState({
       }
       if (stopped || generation !== token) return
 
+      const desktopPopupActive = isDesktopPopup(activeWindow)
       const focused = isLogicallyFocused(activeWindow, targetUuid)
       onFocusedState(focused)
-      if (focused) scheduleFocusPoll(token, targetUuid)
+      if (desktopPopupActive) scheduleFocusPoll(token, targetUuid)
     }, pollInterval)
   }
   const handleFocus = () => {
@@ -528,9 +529,10 @@ export function monitorKdeWaylandWindowState({
         ? findMatchingWindow(current, target)
         : current.find(window => window.uuid === windowUuid) ?? null
       const targetUuid = matchedWindow?.uuid ?? windowUuid
+      const desktopPopupActive = isDesktopPopup(activeWindow)
       const focused = isLogicallyFocused(activeWindow, targetUuid)
       onFocusedState(focused)
-      if (focused) scheduleFocusPoll(token, targetUuid)
+      if (desktopPopupActive) scheduleFocusPoll(token, targetUuid)
       const previousByUuid = new Map(previous.map(window => [window.uuid, window]))
       const claimedWindow = windowUuid === null
         ? null
