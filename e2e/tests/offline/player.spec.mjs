@@ -1232,6 +1232,7 @@ test.describe('scroll mini player', () => {
       app.classList.add('capacitorTabs', 'capacitorPhoneLayout')
       app.classList.remove('topTabs', 'bottomTabs', 'verticalTabs')
       document.querySelector('.tabBar')?.style.setProperty('display', 'none')
+      window.dispatchEvent(new Event('resize'))
     })
 
     await expect(player).toHaveClass(/scrollMiniPlayer/)
