@@ -1195,15 +1195,18 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 /*
   An active entry is readable at a glance, without going over its value. Toggles
-  say so through `aria-pressed`, entries that are active without being a toggle
-  (the sleep timer) mark themselves with `ft-active`.
+  say so through `aria-pressed`, expandable entries through `aria-expanded`,
+  and entries that are active without either state mark themselves with
+  `ft-active`.
 */
 :deep(.shaka-overflow-menu.ft-menu-grid > button[aria-pressed='true']),
+:deep(.shaka-overflow-menu.ft-menu-grid > button[aria-expanded='true']),
 :deep(.shaka-overflow-menu.ft-menu-grid > button.ft-active) {
   background: color-mix(in srgb, var(--primary-color) 32%, transparent);
 }
 
 :deep(.shaka-overflow-menu.ft-menu-grid > button[aria-pressed='true']:hover),
+:deep(.shaka-overflow-menu.ft-menu-grid > button[aria-expanded='true']:hover),
 :deep(.shaka-overflow-menu.ft-menu-grid > button.ft-active:hover) {
   background: color-mix(in srgb, var(--primary-color) 48%, transparent);
 }

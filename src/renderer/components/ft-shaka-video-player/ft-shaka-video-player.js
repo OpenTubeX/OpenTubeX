@@ -5947,6 +5947,7 @@ export default defineComponent({
 
       pauseSponsorBlockHighlightLabelCountdown()
       cancelSponsorBlockSkipSchedule()
+      promptSponsorBlockSegments.value = []
       clearAbRepeatBoundarySchedule()
 
       tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
