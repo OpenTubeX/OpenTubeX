@@ -96,15 +96,6 @@ class Settings {
     return db.settings.findOneAsync({ _id })
   }
 
-  static _findSidenavSettings() {
-    return {
-      hideHome: db.settings.findOneAsync({ _id: 'hideHome' }),
-      hideTrendingVideos: db.settings.findOneAsync({ _id: 'hideTrendingVideos' }),
-      hidePopularVideos: db.settings.findOneAsync({ _id: 'hidePopularVideos' }),
-      hidePlaylists: db.settings.findOneAsync({ _id: 'hidePlaylists' }),
-    }
-  }
-
   static _updateBounds(value) {
     return db.settings.updateAsync({ _id: 'bounds' }, { _id: 'bounds', value }, { upsert: true })
   }

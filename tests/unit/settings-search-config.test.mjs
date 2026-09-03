@@ -131,6 +131,7 @@ test('shared settings search index includes only settings available on this plat
   }).get('appearance')
 
   assert.ok(desktopValues.some(({ label }) => label === 'Show thumbnail previews'))
+  assert.ok(desktopValues.some(({ label }) => label === 'Navigation'))
   assert.ok(desktopValues.some(({ label }) => label === 'UI Scale'))
   assert.ok(!webValues.some(({ label }) => label === 'UI Scale'))
   assert.ok(mobileValues.some(({ label }) => label === 'Mobile layout'))

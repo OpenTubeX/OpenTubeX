@@ -628,12 +628,18 @@ const MAIN_PROFILE_ID = 'allChannels'
 const DEFAULT_LANDING_PAGE = 'home'
 const LEGACY_DEFAULT_LANDING_PAGE = 'subscriptions'
 
-function resolveLandingPage(landingPage, hideHome = false) {
-  if (hideHome && landingPage === DEFAULT_LANDING_PAGE) {
-    return LEGACY_DEFAULT_LANDING_PAGE
+function resolveLandingPage(landingPage, availablePages = null) {
+  if (typeof availablePages === 'boolean') {
+    return availablePages && landingPage === DEFAULT_LANDING_PAGE
+      ? LEGACY_DEFAULT_LANDING_PAGE
+      : landingPage
   }
 
-  return landingPage
+  if (!Array.isArray(availablePages) || availablePages.includes(landingPage)) {
+    return landingPage
+  }
+
+  return availablePages[0] ?? LEGACY_DEFAULT_LANDING_PAGE
 }
 
 // Profile colors that follow the selected theme color instead of a fixed value

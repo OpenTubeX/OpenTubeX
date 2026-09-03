@@ -8,6 +8,8 @@ import {
   LEGACY_DEFAULT_LANDING_PAGE,
   resolveLandingPage,
 } from '../../constants.js'
+import { normalizeNavigationItems } from '../../navigationItems.js'
+import { filterAvailableNavigationItems } from '../../navigationAvailability.js'
 import * as baseHandlers from '../../datastores/handlers/base.js'
 import { getFixedInternalRouteTitle } from '../../internalRoutes.js'
 import {
@@ -312,9 +314,22 @@ export class TabManager {
    */
   static async getStoredLandingRoute() {
     try {
-      const [landingPageSetting, hideHomeSetting] = await Promise.all([
+      const [
+        landingPageSetting,
+        navigationItemsSetting,
+        hideHomeSetting,
+        backendPreferenceSetting,
+        backendFallbackSetting,
+        rememberHistorySetting,
+        enableWatchStatsSetting,
+      ] = await Promise.all([
         baseHandlers.settings._findOne('landingPage'),
+        baseHandlers.settings._findOne('navigationItems'),
         baseHandlers.settings._findOne('hideHome'),
+        baseHandlers.settings._findOne('backendPreference'),
+        baseHandlers.settings._findOne('backendFallback'),
+        baseHandlers.settings._findOne('rememberHistory'),
+        baseHandlers.settings._findOne('enableWatchStats'),
       ])
 
       let landingPage = landingPageSetting?.value
@@ -328,7 +343,21 @@ export class TabManager {
           : DEFAULT_LANDING_PAGE
       }
 
-      return normalizeRoutePath(resolveLandingPage(landingPage, hideHomeSetting?.value === true))
+      const configuredPages = navigationItemsSetting == null
+        ? (hideHomeSetting?.value === true
+            ? normalizeNavigationItems(undefined).filter(id => id !== 'home')
+            : normalizeNavigationItems(undefined))
+        : normalizeNavigationItems(navigationItemsSetting.value)
+      const supportsLocalApi = !!process.env.SUPPORTS_LOCAL_API
+      const availablePages = filterAvailableNavigationItems(configuredPages, {
+        supportsLocalApi,
+        backendPreference: backendPreferenceSetting?.value ?? (supportsLocalApi ? 'local' : 'invidious'),
+        backendFallback: backendFallbackSetting?.value === true,
+        showWatchStats: (rememberHistorySetting?.value ?? true) &&
+          (enableWatchStatsSetting?.value ?? true),
+      })
+
+      return normalizeRoutePath(resolveLandingPage(landingPage, availablePages))
     } catch (error) {
       console.error('Failed to load landing page preference:', error)
       return `/${LEGACY_DEFAULT_LANDING_PAGE}`

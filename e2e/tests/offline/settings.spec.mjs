@@ -3051,6 +3051,37 @@ test.describe('settings', () => {
     expect(Math.max(...switchX) - Math.min(...switchX)).toBeLessThanOrEqual(1)
   })
 
+  test('stacks tab layout controls evenly in a narrow settings window', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 720, height: 700 })
+    const appearance = await goToSettingsSection(page, 'appearance')
+
+    const tabLayout = appearance.locator('.themeSelectRow').filter({ hasText: 'Tab Layout' })
+    const tabWidth = appearance.locator('.ft-flex-box').filter({
+      has: page.getByRole('slider', { name: /Tab Width/ })
+    }).locator('.switchColumn')
+    const loadIcons = appearance.getByRole('button', { name: 'Load Missing Tab Icons' })
+    const centerDifference = async () => {
+      const centers = await Promise.all([tabLayout, tabWidth, loadIcons].map(async locator => {
+        const bounds = await locator.boundingBox()
+        return bounds.x + bounds.width / 2
+      }))
+      return Math.max(...centers) - Math.min(...centers)
+    }
+
+    expect(await centerDifference()).toBeLessThanOrEqual(3)
+    for (const viewport of [
+      { width: 375, height: 667 },
+      { width: 667, height: 375 },
+    ]) {
+      await page.setViewportSize(viewport)
+      expect(await centerDifference()).toBeLessThanOrEqual(3)
+    }
+
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+    await page.setViewportSize({ width: 667, height: 375 })
+    expect(await centerDifference()).toBeLessThanOrEqual(3)
+  })
+
   test('keeps the current icon pack when another pack fails to load', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="appearance"]').click()

@@ -73,6 +73,10 @@ Settings:
     Advanced Description: Dostawcy, aplikacje zewnętrzne i sieć
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Navigation:
+      Navigation: Nawigacja
+      Customize Navigation: Dostosuj nawigację
+      Add Item: Dodaj element
     Date Format: Format daty
     Time Format: Format czasu
     Language Default: Domyślny dla języka

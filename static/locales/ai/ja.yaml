@@ -215,6 +215,10 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Navigation:
+      Navigation: ナビゲーション
+      Customize Navigation: ナビゲーションをカスタマイズ
+      Add Item: 項目を追加
     Date Format: 日付形式
     Time Format: 時刻形式
     Language Default: 言語の既定値

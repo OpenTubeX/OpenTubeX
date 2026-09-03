@@ -215,6 +215,10 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Navigation:
+      Navigation: Navigáció
+      Customize Navigation: Navigáció testreszabása
+      Add Item: Elem hozzáadása
     Date Format: Dátumformátum
     Time Format: Időformátum
     Language Default: Nyelvi alapértelmezés

@@ -2,9 +2,10 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  filterAvailableNavigationItems,
   isMostPopularAvailable,
   isTrendingAvailable,
-} from '../../src/renderer/helpers/navigationAvailability.js'
+} from '../../src/navigationAvailability.js'
 
 test('exposes only navigation supported by the selected provider', () => {
   const localOnly = {
@@ -36,4 +37,16 @@ test('does not expose Trending in builds without the Local API', () => {
     backendPreference: 'local',
     backendFallback: true,
   }), false)
+})
+
+test('filters unavailable navigation items without changing their order', () => {
+  assert.deepEqual(filterAvailableNavigationItems(
+    ['history', 'stats', 'popular', 'home', 'trending'],
+    {
+      supportsLocalApi: true,
+      backendPreference: 'local',
+      backendFallback: false,
+      showWatchStats: false,
+    }
+  ), ['history', 'home', 'trending'])
 })

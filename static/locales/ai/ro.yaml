@@ -217,6 +217,10 @@ Settings:
       Network: rețea
       Disk: disc
   General Settings:
+    Navigation:
+      Navigation: Navigare
+      Customize Navigation: Personalizează navigarea
+      Add Item: Adaugă element
     Date Format: Formatul datei
     Time Format: Formatul orei
     Language Default: Valoarea implicită a limbii

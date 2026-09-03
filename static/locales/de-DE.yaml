@@ -303,6 +303,10 @@ Settings:
     Alternative providers: Video- und Metadatenanbieter
   General Settings:
     General Settings: Allgemein
+    Navigation:
+      Navigation: Navigation
+      Customize Navigation: Navigation anpassen
+      Add Item: Eintrag hinzufügen
     Mobile Layout:
       Mobile Layout: Mobiles Layout
       Automatic: Automatisch

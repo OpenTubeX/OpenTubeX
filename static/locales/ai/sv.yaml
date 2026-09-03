@@ -217,6 +217,10 @@ Settings:
       Network: nätverk
       Disk: diskutrymme
   General Settings:
+    Navigation:
+      Navigation: Navigering
+      Customize Navigation: Anpassa navigeringen
+      Add Item: Lägg till objekt
     Date Format: Datumformat
     Time Format: Tidsformat
     Language Default: Språkstandard

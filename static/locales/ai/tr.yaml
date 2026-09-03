@@ -215,6 +215,10 @@ Settings:
       Network: ağ
       Disk: disk
   General Settings:
+    Navigation:
+      Navigation: Gezinme
+      Customize Navigation: Gezinmeyi özelleştir
+      Add Item: Öğe ekle
     Date Format: Tarih biçimi
     Time Format: Saat biçimi
     Language Default: Dil varsayılanı

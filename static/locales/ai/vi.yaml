@@ -219,6 +219,10 @@ Settings:
       Network: mạng
       Disk: ổ đĩa
   General Settings:
+    Navigation:
+      Navigation: Điều hướng
+      Customize Navigation: Tùy chỉnh điều hướng
+      Add Item: Thêm mục
     Date Format: Định dạng ngày
     Time Format: Định dạng thời gian
     Language Default: Mặc định theo ngôn ngữ

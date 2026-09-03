@@ -217,6 +217,10 @@ Settings:
       Network: rhwydwaith
       Disk: disg
   General Settings:
+    Navigation:
+      Navigation: Llywio
+      Customize Navigation: Addasu'r llywio
+      Add Item: Ychwanegu eitem
     Date Format: Fformat dyddiad
     Time Format: Fformat amser
     Language Default: Rhagosodiad yr iaith

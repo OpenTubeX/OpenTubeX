@@ -56,8 +56,6 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
   ['showToastTimeoutIndicator', 'Settings.Theme Settings.Show Toast Timeout Indicator', 'appearance', ['fas', 'message']],
   ['useSponsorBlock', 'Settings.SponsorBlock Settings.Enable SponsorBlock', 'add-ons', ['fas', 'forward']],
   ['useReturnYouTubeDislikes', 'Settings.Return YouTube Dislike Settings.Enable Return YouTube Dislike', 'add-ons', ['fas', 'thumbs-down']],
-  ['hideTrendingVideos', 'Settings.Distraction Free Settings.Hide Trending Videos', 'content', ['fas', 'fire']],
-  ['hidePopularVideos', 'Settings.Distraction Free Settings.Hide Popular Videos', 'content', ['fas', 'users']],
 ].map(definition => Object.freeze(Array.isArray(definition)
   ? {
       id: definition[0],
@@ -132,31 +130,6 @@ export function isQuickSettingPaired(settings, settingIndex) {
 
   const positionInRun = settingIndex - runStart
   return positionInRun % 2 === 1 || settings[settingIndex + 1]?.control === 'select'
-}
-
-/**
- * Moves a setting relative to its visible neighbors while preserving settings
- * that are unavailable on the current platform.
- *
- * @param {string[]} settings
- * @param {string[]} visibleSettings
- * @param {string} settingId
- * @param {number} offset
- * @returns {string[]}
- */
-export function moveQuickSettingByVisibleOffset(settings, visibleSettings, settingId, offset) {
-  const visibleIndex = visibleSettings.indexOf(settingId)
-  const targetId = visibleSettings[visibleIndex + offset]
-  if (visibleIndex === -1 || targetId == null) return settings
-
-  const reordered = settings.slice()
-  const sourceIndex = reordered.indexOf(settingId)
-  if (sourceIndex === -1) return settings
-
-  reordered.splice(sourceIndex, 1)
-  const targetIndex = reordered.indexOf(targetId)
-  reordered.splice(targetIndex + (offset > 0 ? 1 : 0), 0, settingId)
-  return reordered
 }
 
 export const DEFAULT_QUICK_SETTINGS = Object.freeze([

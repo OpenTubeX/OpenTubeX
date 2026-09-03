@@ -243,6 +243,10 @@ Settings:
       Network: red
       Disk: disco
   General Settings:
+    Navigation:
+      Navigation: Navegación
+      Customize Navigation: Personalizar navegación
+      Add Item: Agregar elemento
     Date Format: Formato de fecha
     Time Format: Formato de hora
     Language Default: Predeterminado del idioma

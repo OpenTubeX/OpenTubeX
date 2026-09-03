@@ -1,4 +1,5 @@
-import { test, expect, goTo, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
+import { DEFAULT_NAVIGATION_ITEMS } from '../../../src/navigationItems.js'
 
 // Pages that work without any network access.
 const OFFLINE_PAGES = [
@@ -104,6 +105,90 @@ test.describe('side nav navigation', () => {
       widthOffset: 0,
     })
     await expect.poll(async () => (await indicator.boundingBox())?.x).not.toBe(initialX)
+  })
+
+  test('customizes navigation order on the side bar and mobile bar', async ({ page }) => {
+    const appearance = await goToSettingsSection(page, 'appearance')
+    await appearance.getByRole('button', { name: 'Customize navigation' }).click()
+
+    const selectedItems = page.locator('.selectedItems')
+    const selectedIds = () => selectedItems.locator('.selectedItem').evaluateAll(rows => (
+      rows.map(row => row.dataset.navigationItemId)
+    ))
+    await expect.poll(selectedIds).toEqual(DEFAULT_NAVIGATION_ITEMS)
+    await expect(selectedItems.locator('.selectedItem').first()).toHaveCSS('user-select', 'none')
+
+    await page.getByRole('button', { name: 'Remove Most Popular' }).click()
+    await page.getByRole('button', { name: 'Add item' }).click()
+    const itemPicker = page.getByRole('menu', { name: 'Add item' })
+    const popularOption = itemPicker.getByRole('menuitem', { name: 'Most Popular' })
+    await expect(itemPicker.getByRole('searchbox')).toHaveCount(0)
+    await expect(popularOption).toHaveCSS('cursor', 'pointer')
+    await expect(popularOption).toHaveCSS('user-select', 'none')
+    await popularOption.click()
+    await expect.poll(selectedIds).toEqual([
+      ...DEFAULT_NAVIGATION_ITEMS.filter(id => id !== 'popular'),
+      'popular',
+    ])
+    await page.getByRole('button', { name: 'Reset to defaults' }).click()
+    await expect.poll(selectedIds).toEqual(DEFAULT_NAVIGATION_ITEMS)
+
+    await page.getByRole('button', { name: 'Move History up' }).click()
+    const reordered = [...DEFAULT_NAVIGATION_ITEMS]
+    reordered.splice(reordered.indexOf('history'), 1)
+    reordered.splice(2, 0, 'history')
+    await expect.poll(selectedIds).toEqual(reordered)
+
+    await page.locator('.settingsCloseButton').click()
+    await page.setViewportSize({ width: 375, height: 700 })
+    await expect.poll(() => page.locator('.sideNav .inner > .navOption:visible').evaluateAll(links => (
+      links.map(link => link.getAttribute('href'))
+    ))).toEqual(reordered.slice(0, 4).map(id => `#/${id}`))
+
+    await page.locator('.sideNav .moreOptionNav').click()
+    await expect.poll(() => page.locator('.sideNav .moreOptionContainer .navOption').evaluateAll(links => (
+      links.map(link => link.getAttribute('href'))
+    ))).toEqual(reordered.filter(id => id !== 'popular').slice(4).map(id => `#/${id}`))
+
+    await page.locator('.sideNav .moreOptionContainer a[href="#/subscribedchannels"]').click()
+    await expect(page).toHaveURL(/#\/subscribedchannels$/)
+    await expect.poll(async () => {
+      const [indicator, moreButton] = await Promise.all([
+        page.locator('.sideNav .activeIndicator').boundingBox(),
+        page.locator('.sideNav .moreOptionNav').boundingBox(),
+      ])
+      if (indicator == null || moreButton == null) return null
+      return {
+        inlineOffset: Math.abs(indicator.x - moreButton.x),
+        widthOffset: Math.abs(indicator.width - moreButton.width),
+      }
+    }).toEqual({ inlineOffset: 0, widthOffset: 0 })
+  })
+
+  test('clamps the add-item picker after its options shrink', async ({ page }) => {
+    const appearance = await goToSettingsSection(page, 'appearance')
+    await appearance.getByRole('button', { name: 'Customize navigation' }).click()
+
+    const selectedItems = page.locator('.selectedItems .selectedItem')
+    while (await selectedItems.count() > 0) {
+      await selectedItems.first().getByRole('button', { name: /^Remove / }).click()
+    }
+
+    await page.getByRole('button', { name: 'Add item' }).click()
+    const picker = page.getByRole('menu', { name: 'Add item' })
+    const scroller = picker.locator('.itemPickerList')
+    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+    const initialScrollTop = await scroller.evaluate(element => {
+      element.scrollTop = element.scrollHeight
+      return element.scrollTop
+    })
+    expect(initialScrollTop).toBeGreaterThan(0)
+
+    await picker.getByRole('menuitem').last().click()
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
   })
 
   test('navigation history back and forward work', async ({ page }) => {

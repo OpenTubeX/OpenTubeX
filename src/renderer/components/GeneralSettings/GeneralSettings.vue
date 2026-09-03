@@ -341,6 +341,7 @@ import allLocales from '../../../../static/locales/activeLocales.json'
 import { debounce, randomArrayItem, showToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 import { initializePlatformInfo, isLinuxWayland } from '../../helpers/platform'
+import { filterAvailableNavigationItems } from '../../../navigationAvailability'
 import {
   DATE_FORMAT_OPTIONS,
   TIME_FORMAT_OPTIONS,
@@ -545,48 +546,18 @@ function updateBackendPreference(value) {
   store.dispatch('updateBackendPreference', value)
 }
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const hidePlaylists = computed(() => store.getters.getHidePlaylists)
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideHome = computed(() => store.getters.getHideHome)
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hidePopularVideos = computed(() => store.getters.getHidePopularVideos)
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideTrendingVideos = computed(() => store.getters.getHideTrendingVideos)
-
-const INCLUDED_DEFAULT_PAGE_NAMES = [
-  'home',
-  'subscriptions',
-  'subscribedChannels',
-  'popular',
-  'userPlaylists',
-  'history',
-  ...(process.env.SUPPORTS_LOCAL_API ? ['trending'] : [])
-]
+const navigationItems = computed(() => store.getters.getNavigationItems)
 
 const defaultPages = computed(() => {
-  let includedPageNames = INCLUDED_DEFAULT_PAGE_NAMES
-
-  if (hideHome.value) {
-    includedPageNames = includedPageNames.filter((pageName) => pageName !== 'home')
-  }
-
-  if (hideTrendingVideos.value || !backendFallback.value || backendPreference.value !== 'local') {
-    includedPageNames = includedPageNames.filter((pageName) => pageName !== 'trending')
-  }
-
-  if (hidePlaylists.value) {
-    includedPageNames = includedPageNames.filter((pageName) => pageName !== 'userPlaylists')
-  }
-
-  if (!(!hidePopularVideos.value && (backendFallback.value || backendPreference.value === 'invidious'))) {
-    includedPageNames = includedPageNames.filter((pageName) => pageName !== 'popular')
-  }
-
-  return router.getRoutes().filter((route) => includedPageNames.includes(route.name))
+  const routeByPath = new Map(router.getRoutes().map(route => [route.path.slice(1), route]))
+  return filterAvailableNavigationItems(navigationItems.value, {
+    supportsLocalApi: SUPPORTS_LOCAL_API,
+    backendPreference: backendPreference.value,
+    backendFallback: backendFallback.value,
+    showWatchStats: store.getters.getRememberHistory && store.getters.getEnableWatchStats,
+  })
+    .map(id => routeByPath.get(id))
+    .filter(route => route != null)
 })
 
 const defaultPageNames = computed(() => defaultPages.value.map((route) => translateWindowTitle(route.meta.title)))
@@ -596,7 +567,7 @@ const defaultPageValues = computed(() => {
   return defaultPages.value.map((route) => route.path.slice(1))
 })
 
-/** @type {import('vue').ComputedRef<'home' | 'subscriptions' | 'subscribedChannels' | 'popular' | 'userPlaylists' | 'history' | 'trending'>} */
+/** @type {import('vue').ComputedRef<'home' | 'subscriptions' | 'subscribedchannels' | 'popular' | 'userplaylists' | 'history' | 'trending' | 'stats'>} */
 const landingPage = computed(() => store.getters.getLandingPage)
 
 /**

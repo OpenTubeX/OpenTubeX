@@ -76,6 +76,13 @@
           setting-key="showDistractionFreeTitles"
           @change="updateShowDistractionFreeTitles"
         />
+        <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Hide Playlists')"
+          :compact="true"
+          :default-value="hidePlaylists"
+          setting-key="hidePlaylists"
+          @change="updateHidePlaylists"
+        />
       </div>
     </div>
     <br class="hide-on-mobile">
@@ -164,39 +171,6 @@
     </h4>
     <div class="switchColumnGrid">
       <div class="switchColumn">
-        <FtToggleSwitch
-          :label="t('Settings.Distraction Free Settings.Hide Home')"
-          :compact="true"
-          :default-value="hideHome"
-          setting-key="hideHome"
-          @change="updateHideHome"
-        />
-        <FtToggleSwitch
-          v-if="SUPPORTS_LOCAL_API"
-          :label="t('Settings.Distraction Free Settings.Hide Trending Videos')"
-          :compact="true"
-          :disabled="disableHideTrendingVideos"
-          :default-value="hideTrendingVideos"
-          setting-key="hideTrendingVideos"
-          @change="updateHideTrendingVideos"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Distraction Free Settings.Hide Popular Videos')"
-          :compact="true"
-          :disabled="disableHidePopularVideos"
-          :default-value="disableHidePopularVideos || hidePopularVideos"
-          setting-key="hidePopularVideos"
-          @change="updateHidePopularVideos"
-        />
-      </div>
-      <div class="switchColumn">
-        <FtToggleSwitch
-          :label="t('Settings.Distraction Free Settings.Hide Playlists')"
-          :compact="true"
-          :default-value="hidePlaylists"
-          setting-key="hidePlaylists"
-          @change="updateHidePlaylists"
-        />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Active Subscriptions')"
           :compact="true"
@@ -417,7 +391,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
 
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
@@ -431,10 +404,6 @@ import { showToast } from '../../helpers/utils'
 import { checkYoutubeChannelId, findChannelTagInfo } from '../../helpers/channels'
 
 const { t } = useI18n()
-const route = useRoute()
-const router = useRouter()
-
-const SUPPORTS_LOCAL_API = process.env.SUPPORTS_LOCAL_API
 
 const channelHiderDisabled = ref(false)
 
@@ -521,48 +490,6 @@ function handleHideRecommendedVideos(value) {
   }
 
   store.dispatch('updateHideRecommendedVideos', value)
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideTrendingVideos = computed(() => store.getters.getHideTrendingVideos)
-
-const disableHideTrendingVideos = computed(() => backendPreference.value !== 'local' && !backendFallback.value)
-/**
- * @param {boolean} value
- */
-function updateHideTrendingVideos(value) {
-  store.dispatch('updateHideTrendingVideos', value)
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideHome = computed(() => store.getters.getHideHome)
-
-/**
- * @param {boolean} value
- */
-async function updateHideHome(value) {
-  await store.dispatch('updateHideHome', value)
-
-  if (!value) { return }
-
-  const landingRoute = { path: `/${store.getters.getLandingPage}` }
-  if (process.env.IS_ELECTRON) {
-    await store.dispatch('redirectHomeTabsToLandingPage')
-  } else if (route.path === '/home') {
-    await router.replace(landingRoute)
-  }
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hidePopularVideos = computed(() => store.getters.getHidePopularVideos)
-
-const disableHidePopularVideos = computed(() => backendPreference.value !== 'invidious' && !backendFallback.value)
-
-/**
- * @param {boolean} value
- */
-function updateHidePopularVideos(value) {
-  store.dispatch('updateHidePopularVideos', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

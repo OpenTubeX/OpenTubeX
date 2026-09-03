@@ -219,6 +219,10 @@ Settings:
       Network: jaringan
       Disk: disk
   General Settings:
+    Navigation:
+      Navigation: Navigasi
+      Customize Navigation: Sesuaikan navigasi
+      Add Item: Tambah item
     Date Format: Format tanggal
     Time Format: Format waktu
     Language Default: Default bahasa

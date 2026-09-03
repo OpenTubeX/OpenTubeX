@@ -219,6 +219,10 @@ Settings:
       Network: netwerk
       Disk: schijf
   General Settings:
+    Navigation:
+      Navigation: Navigatie
+      Customize Navigation: Navigatie aanpassen
+      Add Item: Item toevoegen
     Date Format: Datumnotatie
     Time Format: Tijdnotatie
     Language Default: Standaard voor taal

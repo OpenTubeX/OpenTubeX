@@ -432,8 +432,10 @@ test.describe('hidden Home page', () => {
       lazyLoad: true
     }))
 
-    const distractionSettings = await goToSettingsSection(page, 'distraction')
-    await distractionSettings.locator('label.switch-label').filter({ hasText: 'Hide Home' }).click()
+    const appearanceSettings = await goToSettingsSection(page, 'appearance')
+    await appearanceSettings.getByRole('button', { name: 'Customize navigation' }).click()
+    const navigationSubpage = page.locator('.settingsSubpageContent')
+    await navigationSubpage.getByRole('button', { name: 'Remove Home' }).click()
     await expect(page.locator('.sideNav a[href="#/home"]')).toHaveCount(0)
     await expect(page).toHaveURL(/#\/subscriptions$/)
     await expect(otherWindow).toHaveURL(/#\/subscriptions$/)
@@ -446,14 +448,16 @@ test.describe('hidden Home page', () => {
     await expect(activeNavOption).toHaveAttribute('href', '#/subscriptions')
     await expectSideNavIndicatorAligned(page)
 
-    await distractionSettings.locator('label.switch-label').filter({ hasText: 'Hide Home' }).click()
+    await navigationSubpage.getByRole('button', { name: 'Add item' }).click()
+    await navigationSubpage.getByRole('menuitem', { name: 'Home' }).click()
     await expect(page.locator('.sideNav a[href="#/home"]')).toBeVisible()
     await expectSideNavIndicatorAligned(page)
 
-    await distractionSettings.locator('label.switch-label').filter({ hasText: 'Hide Home' }).click()
+    await navigationSubpage.getByRole('button', { name: 'Remove Home' }).click()
     await expect(page.locator('.sideNav a[href="#/home"]')).toHaveCount(0)
     await expectSideNavIndicatorAligned(page)
 
+    await page.locator('.settingsBackButton').click()
     await goToSettingsSection(page, 'general')
     const landingPageSelect = page.getByRole('combobox', { name: /Default landing page/i })
     await expect(landingPageSelect).toContainText('Subscriptions')
@@ -475,7 +479,32 @@ test.describe('hidden Home page', () => {
         .submenu.items
         .map(item => item.label)
     })
-    expect(navigateItems).not.toContain('Home')
+    expect(navigateItems).toContain('Home')
+  })
+})
+
+test.describe('landing page availability', () => {
+  test.use({
+    seed: {
+      settings: {
+        backendFallback: false,
+        backendPreference: 'local',
+        enableWatchStats: true,
+        landingPage: 'home',
+        navigationItems: ['stats', 'popular', 'subscriptions'],
+        rememberHistory: false,
+      }
+    }
+  })
+
+  test('skips unavailable destinations when choosing a fallback', async ({ page }) => {
+    await expect(page).toHaveURL(/#\/subscriptions$/)
+
+    const tab = await page.evaluate(() => window.ftElectron.tabs.create({
+      makeActive: false,
+      lazyLoad: true,
+    }))
+    expect(tab.route.fullPath).toBe('/subscriptions')
   })
 })
 

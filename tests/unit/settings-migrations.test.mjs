@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
+import { DEFAULT_NAVIGATION_ITEMS } from '../../src/navigationItems.js'
 import { migrateLegacySettings } from '../../src/renderer/helpers/settings-migrations.js'
 
 test('migrates an enabled legacy subscription progress notification preference', () => {
@@ -71,5 +72,42 @@ test('prefers the current Downloads placement preference', () => {
     moveDownloadsToAppHeader: false,
   }), {
     moveDownloadsToAppHeader: false,
+  })
+})
+
+test('migrates navigation visibility switches to an ordered list', () => {
+  assert.deepEqual(migrateLegacySettings({
+    hideHome: true,
+    hidePlaylists: false,
+    hidePopularVideos: true,
+    hideTrendingVideos: false,
+  }), {
+    hidePlaylists: false,
+    navigationItems: [
+      'subscriptions',
+      'userplaylists',
+      'history',
+      'subscribedchannels',
+      'trending',
+      'stats',
+    ],
+  })
+})
+
+test('prefers current navigation items over former visibility switches', () => {
+  assert.deepEqual(migrateLegacySettings({
+    navigationItems: ['history'],
+    hideHome: false,
+  }), {
+    navigationItems: ['history'],
+  })
+})
+
+test('keeps Hide Playlists because it also controls playlist actions', () => {
+  assert.deepEqual(migrateLegacySettings({
+    hidePlaylists: true,
+  }), {
+    hidePlaylists: true,
+    navigationItems: DEFAULT_NAVIGATION_ITEMS.filter(id => id !== 'userplaylists'),
   })
 })

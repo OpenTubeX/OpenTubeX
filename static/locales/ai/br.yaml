@@ -215,6 +215,10 @@ Settings:
       Network: "ar rouedad"
       Disk: "ar bladenn"
   General Settings:
+    Navigation:
+      Navigation: Merdeiñ
+      Customize Navigation: Personelaat ar merdeiñ
+      Add Item: Ouzhpennañ un elfenn
     Date Format: Mentrezh an deiziad
     Time Format: Mentrezh an eur
     Language Default: Dre ziouer ar yezh

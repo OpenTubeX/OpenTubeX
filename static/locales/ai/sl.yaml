@@ -335,6 +335,10 @@ Settings:
       Disk: disk
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
+    Navigation:
+      Navigation: Krmarjenje
+      Customize Navigation: Prilagodi krmarjenje
+      Add Item: Dodaj element
     Date Format: Oblika datuma
     Time Format: Oblika časa
     Language Default: Privzeto za jezik

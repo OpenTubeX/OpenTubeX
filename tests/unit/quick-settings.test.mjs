@@ -4,7 +4,6 @@ import test from 'node:test'
 import {
   DEFAULT_QUICK_SETTINGS,
   isQuickSettingPaired,
-  moveQuickSettingByVisibleOffset,
   normalizeQuickSettings,
   QUICK_SETTING_DEFINITIONS,
 } from '../../src/renderer/helpers/quickSettings.js'
@@ -42,18 +41,6 @@ test('pairs adjacent selects without leaving an odd select in a half-row', () =>
       isQuickSettingPaired(settings, index)
     )),
     [true, true, false, true, true, false]
-  )
-})
-
-test('moves between visible settings without dropping hidden platform settings', () => {
-  assert.deepEqual(
-    moveQuickSettingByVisibleOffset(
-      ['baseTheme', 'mainColor', 'uiScale', 'thumbnailSize'],
-      ['baseTheme', 'mainColor', 'thumbnailSize'],
-      'mainColor',
-      1
-    ),
-    ['baseTheme', 'uiScale', 'thumbnailSize', 'mainColor']
   )
 })
 

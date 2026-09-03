@@ -5,9 +5,12 @@
   >
     <div
       class="navOption moreOptionNav"
+      :class="{ 'router-link-active': overflowRouteActive }"
       tabindex="0"
       role="button"
-      aria-labelledby="moreNavLabel"
+      :aria-labelledby="hideLabelsSideBar ? null : 'moreNavLabel'"
+      :aria-label="hideLabelsSideBar ? $t('More') : null"
+      :aria-expanded="openMoreOptions"
       :title="$t('More')"
       @click="openMoreOptions = !openMoreOptions"
       @keydown.enter.space.prevent="openMoreOptions = !openMoreOptions"
@@ -30,81 +33,16 @@
       class="moreOptionContainer"
     >
       <router-link
-        class="navOption mobileHidden"
-        :title="$t('Channels.Channels')"
-        :aria-label="hideLabelsSideBar ? $t('Channels.Channels') : null"
-        to="/subscribedchannels"
-        @click="closeMenu"
-      >
-        <div
-          class="thumbnailContainer"
-        >
-          <FtIcon
-            :icon="['fas', 'user-check']"
-            class="navIcon"
-            :class="applyNavIconExpand"
-          />
-        </div>
-        <p
-          v-if="!hideLabelsSideBar"
-          id="channelLabel"
-          class="navLabel"
-        >
-          {{ $t("Channels.Channels") }}
-        </p>
-      </router-link>
-      <router-link
-        v-if="trendingVisible"
+        v-for="item in items"
+        :key="item.id"
         class="navOption"
-        :title="$t('Trending.Trending')"
-        :aria-label="hideLabelsSideBar ? $t('Trending.Trending') : null"
-        to="/trending"
+        :title="item.label"
+        :aria-label="hideLabelsSideBar ? item.label : null"
+        :to="`/${item.id}`"
         @click="closeMenu"
       >
         <FtIcon
-          :icon="['fas', 'fire']"
-          class="navIcon"
-          :class="applyNavIconExpand"
-        />
-        <p
-          v-if="!hideLabelsSideBar"
-          id="trendingNavLabel"
-          class="navLabel"
-        >
-          {{ $t("Trending.Trending") }}
-        </p>
-      </router-link>
-      <router-link
-        v-if="popularVisible"
-        class="navOption"
-        :title="$t('Most Popular')"
-        :aria-label="hideLabelsSideBar ? $t('Most Popular') : null"
-        to="/popular"
-        @click="closeMenu"
-      >
-        <FtIcon
-          :icon="['fas', 'users']"
-          class="navIcon"
-          :class="applyNavIconExpand"
-        />
-        <p
-          v-if="!hideLabelsSideBar"
-          id="mostPopularNavLabel"
-          class="navLabel"
-        >
-          {{ $t("Most Popular") }}
-        </p>
-      </router-link>
-      <router-link
-        v-if="showWatchStats"
-        class="navOption"
-        :title="$t('Stats.Stats')"
-        :aria-label="hideLabelsSideBar ? $t('Stats.Stats') : null"
-        to="/stats"
-        @click="closeMenu"
-      >
-        <FtIcon
-          :icon="['fas', 'chart-line']"
+          :icon="item.icon"
           class="navIcon"
           :class="applyNavIconExpand"
         />
@@ -112,72 +50,36 @@
           v-if="!hideLabelsSideBar"
           class="navLabel"
         >
-          {{ $t('Stats.Stats') }}
+          {{ item.label }}
         </p>
       </router-link>
     </div>
-    <router-link
-      class="navOption navOptionButton mobileShow"
-      :title="$t('History.History')"
-      :aria-label="hideLabelsSideBar ? $t('History.History'): null"
-      to="/history"
-    >
-      <FtIcon
-        :icon="['fas', 'history']"
-        class="navIcon"
-        :class="applyNavIconExpand"
-      />
-      <p
-        id="historyNavLabel"
-        class="navLabel"
-      >
-        {{ $t("History.History") }}
-      </p>
-    </router-link>
   </div>
 </template>
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import { computed, ref, onMounted, onBeforeUnmount, useTemplateRef } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import store from '../../store/index'
-import { isMostPopularAvailable, isTrendingAvailable } from '../../helpers/navigationAvailability'
 
-const SUPPORTS_LOCAL_API = process.env.SUPPORTS_LOCAL_API
+const props = defineProps({
+  items: {
+    type: Array,
+    required: true,
+  },
+})
 
 const openMoreOptions = ref(false)
+const route = useRoute()
 
 const menuRef = useTemplateRef('menuRef')
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const trendingVisible = computed(() => {
-  return !store.getters.getHideTrendingVideos &&
-    isTrendingAvailable({
-      supportsLocalApi: !!SUPPORTS_LOCAL_API,
-      backendPreference: store.getters.getBackendPreference,
-      backendFallback: store.getters.getBackendFallback,
-    })
-})
+const overflowRouteActive = computed(() => props.items.some(item => route.path === `/${item.id}`))
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideLabelsSideBar = computed(() => {
   return store.getters.getHideLabelsSideBar
-})
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const popularVisible = computed(() => {
-  return !store.getters.getHidePopularVideos &&
-    isMostPopularAvailable({
-      backendPreference: store.getters.getBackendPreference,
-      backendFallback: store.getters.getBackendFallback,
-    })
-})
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const showWatchStats = computed(() => {
-  return store.getters.getRememberHistory && store.getters.getEnableWatchStats
 })
 
 const applyNavIconExpand = computed(() => {

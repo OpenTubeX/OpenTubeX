@@ -1,3 +1,5 @@
+import { navigationItemsFromLegacySettings } from '../../navigationItems.js'
+
 /**
  * Replaces setting keys that were renamed between exported settings formats.
  * Current keys take precedence when an import contains both versions.
@@ -6,6 +8,20 @@
  */
 export function migrateLegacySettings(settings) {
   const migratedSettings = { ...settings }
+
+  const formerNavigationKeys = [
+    'hideHome',
+    'hidePopularVideos',
+    'hideTrendingVideos',
+  ]
+  const navigationMigrationKeys = [...formerNavigationKeys, 'hidePlaylists']
+  if (
+    !Object.hasOwn(migratedSettings, 'navigationItems') &&
+    navigationMigrationKeys.some(key => Object.hasOwn(migratedSettings, key))
+  ) {
+    migratedSettings.navigationItems = navigationItemsFromLegacySettings(migratedSettings)
+  }
+  for (const key of formerNavigationKeys) delete migratedSettings[key]
 
   if (Object.hasOwn(migratedSettings, 'showSubscriptionRefreshToast')) {
     if (!Object.hasOwn(migratedSettings, 'showProgressBarToast')) {

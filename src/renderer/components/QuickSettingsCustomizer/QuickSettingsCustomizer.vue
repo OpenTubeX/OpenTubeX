@@ -1,11 +1,14 @@
 <template>
-  <FtSettingsSection :title="t('Settings.Quick Settings.Quick Settings')">
-    <div class="quickSettingsLauncher">
+  <FtSettingsSection
+    :title="`${t('Settings.General Settings.Navigation.Navigation')} / ${t('Settings.Quick Settings.Quick Settings')}`"
+  >
+    <div class="customizerLaunchers">
       <FtButton
         :label="t('Settings.Quick Settings.Customize Quick Settings')"
         :icon="['fas', 'sliders-h']"
         @click="open = true"
       />
+      <NavigationCustomizer />
     </div>
   </FtSettingsSection>
 
@@ -163,20 +166,20 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
+import NavigationCustomizer from '../NavigationCustomizer/NavigationCustomizer.vue'
 
 import store from '../../store/index'
+import { moveItemByVisibleOffset } from '../../../orderedItems'
+import { useOrderedItemDrag } from '../../composables/useOrderedItemDrag'
 import {
   createQuickSettingCatalog,
   DEFAULT_QUICK_SETTINGS,
-  moveQuickSettingByVisibleOffset,
 } from '../../helpers/quickSettings'
 
 const { locale, t } = useI18n()
 const open = ref(false)
 const settingPickerOpen = ref(false)
 const settingSearchQuery = ref('')
-const draggedSettingId = ref(null)
-const dropTarget = ref(null)
 const reorderStatus = ref('')
 const settingPickerId = `quick-setting-picker-${useId().replaceAll(':', '')}`
 const settingPickerAnchorRef = useTemplateRef('settingPickerAnchorRef')
@@ -263,7 +266,7 @@ function moveQuickSetting(settingId, offset) {
   const visibleSettings = selectedSettings.value.map(setting => setting.id)
   const currentIndex = visibleSettings.indexOf(settingId)
   const targetIndex = currentIndex + offset
-  const reordered = moveQuickSettingByVisibleOffset(
+  const reordered = moveItemByVisibleOffset(
     quickSettings.value,
     visibleSettings,
     settingId,
@@ -275,56 +278,19 @@ function moveQuickSetting(settingId, offset) {
   announceQuickSettingMoved(settingId, targetIndex)
 }
 
-function startDragging(event, settingId) {
-  draggedSettingId.value = settingId
-  event.dataTransfer.effectAllowed = 'move'
-  event.dataTransfer.setData('text/plain', settingId)
-  event.dataTransfer.setDragImage(event.currentTarget.closest('.selectedSetting'), 20, 20)
-}
-
-function handleDragOver(event, settingId) {
-  if (draggedSettingId.value == null || draggedSettingId.value === settingId) {
-    dropTarget.value = null
-    return
-  }
-
-  const bounds = event.currentTarget.getBoundingClientRect()
-  dropTarget.value = {
-    id: settingId,
-    after: event.clientY >= bounds.top + bounds.height / 2,
-  }
-  event.dataTransfer.dropEffect = 'move'
-}
-
-function dropQuickSetting(event, settingId) {
-  const draggedId = draggedSettingId.value
-  if (draggedId == null || draggedId === settingId) {
-    stopDragging()
-    return
-  }
-
-  const sourceIndex = quickSettings.value.indexOf(draggedId)
-  const targetIndex = quickSettings.value.indexOf(settingId)
-  if (sourceIndex === -1 || targetIndex === -1) {
-    stopDragging()
-    return
-  }
-
-  const bounds = event.currentTarget.getBoundingClientRect()
-  let insertIndex = targetIndex + (event.clientY >= bounds.top + bounds.height / 2 ? 1 : 0)
-  const reordered = quickSettings.value.slice()
-  reordered.splice(sourceIndex, 1)
-  if (sourceIndex < insertIndex) insertIndex--
-  reordered.splice(insertIndex, 0, draggedId)
-  store.dispatch('updateQuickSettings', reordered)
-  announceQuickSettingMoved(draggedId, insertIndex)
-  stopDragging()
-}
-
-function stopDragging() {
-  draggedSettingId.value = null
-  dropTarget.value = null
-}
+const {
+  draggedItemId: draggedSettingId,
+  dropTarget,
+  dropItem: dropQuickSetting,
+  handleDragOver,
+  startDragging,
+  stopDragging,
+} = useOrderedItemDrag({
+  items: quickSettings,
+  rowSelector: '.selectedSetting',
+  updateItems: items => store.dispatch('updateQuickSettings', items),
+  announceMoved: announceQuickSettingMoved,
+})
 
 function resetQuickSettings() {
   return store.dispatch('updateQuickSettings', [...DEFAULT_QUICK_SETTINGS])
@@ -332,8 +298,9 @@ function resetQuickSettings() {
 </script>
 
 <style scoped>
-.quickSettingsLauncher {
+.customizerLaunchers {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
 }
 
@@ -380,6 +347,11 @@ function resetQuickSettings() {
   margin-inline-end: var(--scrollbar-track-width);
 }
 
+.settingPicker :deep(.optionWrapper) {
+  cursor: pointer;
+  user-select: none;
+}
+
 .selectedSettings {
   display: grid;
   gap: 8px;
@@ -400,6 +372,7 @@ function resetQuickSettings() {
   grid-template-columns: 44px 24px minmax(0, 1fr) auto;
   min-block-size: 56px;
   position: relative;
+  user-select: none;
 }
 
 .selectedSetting.dragging {
