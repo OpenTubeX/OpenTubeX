@@ -1,8 +1,10 @@
 import { app } from 'electron'
-import { configureApplicationDataPaths } from './applicationDataPaths'
+import {
+  configureApplicationDataPaths,
+  configurePortableEnvironment
+} from './applicationDataPaths'
 
-// Configure portable builds, E2E tests, and worktree development servers
-// before any module resolves an Electron data path. This module must be
-// imported before modules such as src/datastores/index.js, which resolve
-// app.getPath('userData') during import.
+// Configure process-wide paths before modules such as src/datastores/index.js
+// resolve app.getPath('userData') during import.
+configurePortableEnvironment()
 configureApplicationDataPaths(app)

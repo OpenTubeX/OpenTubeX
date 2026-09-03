@@ -305,8 +305,6 @@ jobs:
           win-x64)
             cp "build/opentubex Setup ${VERSION}.exe" \
               "release-assets/opentubex-${VERSION}-beta-setup-x64.exe"
-            cp "build/OpenTubeX ${VERSION}.exe" \
-              "release-assets/opentubex-${VERSION}-beta-win-x64-portable.exe"
             cp "build/opentubex-${VERSION}-win.zip" \
               "release-assets/opentubex-${VERSION}-beta-win-x64-portable.zip"
             cp "build/opentubex-${VERSION}-win.7z" \
@@ -315,12 +313,6 @@ jobs:
           win-arm64)
             cp "build/opentubex Setup ${VERSION}.exe" \
               "release-assets/opentubex-${VERSION}-beta-setup-arm64.exe"
-            cp "build/OpenTubeX ${VERSION}.exe" \
-              "release-assets/opentubex-${VERSION}-beta-win-arm64-portable.exe"
-            cp "build/opentubex-${VERSION}-arm64-win.zip" \
-              "release-assets/opentubex-${VERSION}-beta-win-arm64-portable.zip"
-            cp "build/opentubex-${VERSION}-arm64-win.7z" \
-              "release-assets/opentubex-${VERSION}-beta-win-arm64-portable.7z"
             ;;
           osx-x64)
             cp "build/opentubex-${VERSION}.dmg" \
