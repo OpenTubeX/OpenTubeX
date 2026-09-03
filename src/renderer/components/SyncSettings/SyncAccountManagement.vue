@@ -140,27 +140,6 @@
       </li>
     </ul>
 
-    <button
-      v-if="passwordLogin"
-      class="passwordAction"
-      type="button"
-      :disabled="accountActionsDisabled || actionBusy"
-      @click="emit('change-password')"
-    >
-      <span
-        class="passwordActionIcon"
-        aria-hidden="true"
-      >
-        <FtIcon :icon="['fas', 'key']" />
-      </span>
-      <span>{{ t('Settings.Sync Settings.Change Password') }}</span>
-      <FtIcon
-        class="passwordActionArrow"
-        :icon="['fas', 'arrow-right']"
-        aria-hidden="true"
-      />
-    </button>
-
     <FtPrompt
       v-if="sessionToRename"
       :label="t('Settings.Sync Settings.Rename Device')"
@@ -289,16 +268,8 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  passwordLogin: {
-    type: Boolean,
-    required: true,
-  },
-  accountActionsDisabled: {
-    type: Boolean,
-    required: true,
-  },
 })
-const emit = defineEmits(['change-password', 'current-revoked', 'password-login-changed'])
+const emit = defineEmits(['current-revoked', 'password-login-changed'])
 
 const { locale, t } = useI18n()
 const headingId = useId()

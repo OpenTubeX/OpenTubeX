@@ -338,7 +338,10 @@ test.describe('OpenTubeX sync server', () => {
       await devices.getByRole('button', { name: 'Refresh devices' }).click()
       await staleSessionRequestRequested
       try {
-        await devices.getByRole('button', { name: 'Change password' }).click()
+        const changePasswordButton = syncSection.getByRole('button', { name: 'Change password' })
+        await expect(changePasswordButton).toBeVisible()
+        await expect(devices.getByRole('button', { name: 'Change password' })).toHaveCount(0)
+        await changePasswordButton.click()
         const passwordPrompt = page.getByRole('dialog', { name: 'Change password' })
         await passwordPrompt.getByLabel('Current password').fill(accountPassword)
         await passwordPrompt.getByLabel('New password', { exact: true }).fill('new-local-test-password')

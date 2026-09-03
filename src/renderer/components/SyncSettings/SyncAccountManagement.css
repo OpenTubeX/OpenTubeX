@@ -26,8 +26,7 @@
 }
 
 .managementIcon,
-.sessionDeviceIcon,
-.passwordActionIcon {
+.sessionDeviceIcon {
   align-items: center;
   background-color: color-mix(in srgb, var(--primary-color) 14%, transparent);
   color: var(--primary-color);
@@ -197,54 +196,6 @@
   color: var(--destructive-color);
 }
 
-.passwordAction {
-  align-items: center;
-  background-color: var(--card-bg-color);
-  border: 1px solid var(--divider-color);
-  border-radius: calc(10px * var(--ui-roundness));
-  box-sizing: border-box;
-  color: var(--primary-text-color);
-  cursor: pointer;
-  display: grid;
-  font: inherit;
-  font-weight: 600;
-  gap: 0.75rem;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  inline-size: 100%;
-  margin-block-start: 0.75rem;
-  min-block-size: 3.75rem;
-  padding-block: 0.625rem;
-  padding-inline: 0.875rem;
-  text-align: start;
-  transition: background-color 150ms ease, border-color 150ms ease;
-}
-
-.passwordAction:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.passwordAction:not(:disabled):is(:hover, :focus-visible) {
-  background-color: var(--side-nav-hover-color);
-  border-color: color-mix(in srgb, var(--primary-color) 44%, var(--divider-color));
-  color: var(--side-nav-hover-text-color);
-}
-
-.passwordAction:not(:disabled):active {
-  background-color: var(--side-nav-active-color);
-}
-
-.passwordActionIcon {
-  block-size: 2.25rem;
-  border-radius: calc(8px * var(--ui-roundness));
-  inline-size: 2.25rem;
-}
-
-.passwordActionArrow {
-  color: var(--secondary-text-color);
-  margin-inline: 0.25rem;
-}
-
 .managementError {
   color: var(--error-color, #c62828);
   text-align: center;
@@ -304,11 +255,5 @@
 
   .sessionActions {
     grid-column: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .passwordAction {
-    transition: none;
   }
 }
