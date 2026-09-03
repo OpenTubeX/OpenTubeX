@@ -3824,18 +3824,7 @@ export default defineComponent({
       }
 
       const gestureZoom = videoZoomGestureZoom.value ?? videoZoomPinchStart.zoom
-      const snappedZoom = sanitizeVideoZoom(gestureZoom)
-      const snapped = resolveVideoZoomPinch({
-        startZoom: gestureZoom,
-        startOffset: { ...videoZoomOffset },
-        startFocal: videoZoomPinchStart.currentFocal,
-        focal: videoZoomPinchStart.currentFocal,
-        scale: snappedZoom / gestureZoom,
-        size: videoZoomPinchStart.size,
-      })
-      videoZoomOffset.x = snapped.offset.x
-      videoZoomOffset.y = snapped.offset.y
-      updateVideoZoom(snapped.zoom)
+      updateVideoZoom(gestureZoom)
       videoZoomGestureZoom.value = null
       videoZoomPinchStart = null
       videoZoomPinching.value = false

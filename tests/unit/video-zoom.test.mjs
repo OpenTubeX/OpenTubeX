@@ -23,10 +23,10 @@ test('unusable values fall back to no zoom', () => {
   assert.equal(sanitizeVideoZoom(Infinity), DEFAULT_VIDEO_ZOOM)
 })
 
-test('values in between are snapped to the closest offered level', () => {
-  assert.equal(sanitizeVideoZoom(1.4), 1.5)
-  assert.equal(sanitizeVideoZoom(2.2), 2)
-  // out of range values end up at the closest end
+test('continuous values are preserved within the offered range', () => {
+  assert.equal(sanitizeVideoZoom(1.4), 1.4)
+  assert.equal(sanitizeVideoZoom(2.2), 2.2)
+  // out of range values are clamped to the closest end
   assert.equal(sanitizeVideoZoom(0.2), 1)
   assert.equal(sanitizeVideoZoom(10), 3)
 })
@@ -34,8 +34,8 @@ test('values in between are snapped to the closest offered level', () => {
 test('stepping moves one level at a time and stops at both ends', () => {
   assert.equal(stepVideoZoom(1, 1), 1.25)
   assert.equal(stepVideoZoom(1.25, -1), 1)
-  // stale values are stepped relative to the level they snap to
-  assert.equal(stepVideoZoom(1.4, 1), 1.75)
+  assert.equal(stepVideoZoom(1.4, 1), 1.5)
+  assert.equal(stepVideoZoom(1.4, -1), 1.25)
 
   assert.equal(stepVideoZoom(1, -1), 1)
   assert.equal(stepVideoZoom(3, 1), 3)
@@ -44,6 +44,7 @@ test('stepping moves one level at a time and stops at both ends', () => {
 test('zoom levels are formatted as percentages', () => {
   assert.equal(formatVideoZoom(1), '100%')
   assert.equal(formatVideoZoom(1.25), '125%')
+  assert.equal(formatVideoZoom(1.403), '140%')
   assert.equal(formatVideoZoom(3), '300%')
 })
 

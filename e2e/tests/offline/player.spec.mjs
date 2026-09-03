@@ -617,9 +617,13 @@ test('pinch zoom starts over the paused player controls without toggling playbac
     const { a: scale, e: x, f: y } = new DOMMatrix(getComputedStyle(element).transform)
     return { scale, x, y }
   })
-  expect(persistedTransform.scale).toBe(3)
+  expect(persistedTransform.scale).toBeCloseTo(pinchTransform.scale, 4)
   expect(persistedTransform.x).toBeCloseTo(currentFocal.x - persistedTransform.scale * content.x, 0)
   expect(persistedTransform.y).toBeCloseTo(currentFocal.y - persistedTransform.scale * content.y, 0)
+  await expect(player.locator('.video-zoom-button')).toHaveAttribute(
+    'shaka-status',
+    `${Math.round(persistedTransform.scale * 100)}%`
+  )
   expect(await video.evaluate(element => element.paused)).toBe(true)
 
   await player.locator('.shaka-big-buttons-container .shaka-play-button').click()
