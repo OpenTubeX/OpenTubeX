@@ -442,27 +442,52 @@
                   {{ t('Settings.Sync Settings.Tabs From Other Devices') }}
                 </h3>
               </header>
-              <div class="syncedSessionGrid">
-                <article
-                  v-for="session in visibleOtherDeviceSessions"
+              <div
+                class="syncedSessionTabs"
+                role="tablist"
+                :aria-label="t('Settings.Sync Settings.Tabs From Other Devices')"
+              >
+                <button
+                  v-for="(session, index) in visibleOtherDeviceSessions"
+                  :id="syncedSessionTabId(index)"
                   :key="`${session.syncDeviceId}:${session.sessionId}`"
+                  type="button"
+                  class="syncedSessionTab"
+                  :class="{ selected: activeOtherDeviceSessionKey === otherDeviceSessionKey(session) }"
+                  role="tab"
+                  :aria-controls="syncedSessionPanelId"
+                  :aria-selected="activeOtherDeviceSessionKey === otherDeviceSessionKey(session)"
+                  :tabindex="activeOtherDeviceSessionKey === otherDeviceSessionKey(session) ? 0 : -1"
+                  @click="selectOtherDeviceSession(session)"
+                  @keydown.left.prevent="selectOtherDeviceSessionAt(index - 1, true)"
+                  @keydown.right.prevent="selectOtherDeviceSessionAt(index + 1, true)"
+                  @keydown.home.prevent="selectOtherDeviceSessionAt(0, true)"
+                  @keydown.end.prevent="selectOtherDeviceSessionAt(visibleOtherDeviceSessions.length - 1, true)"
+                >
+                  <span class="syncedSessionIcon">
+                    <FtIcon
+                      :icon="session.syncPlatform === 'mobile' ? ['fas', 'layer-group'] : ['fas', 'display']"
+                      aria-hidden="true"
+                    />
+                  </span>
+                  <strong>{{ formatDeviceSessionLabel(session, t) }}</strong>
+                </button>
+              </div>
+              <div class="syncedSessionPanels">
+                <article
+                  v-if="activeOtherDeviceSession"
+                  :id="syncedSessionPanelId"
+                  :key="activeOtherDeviceSessionKey"
                   class="syncedSessionCard"
+                  role="tabpanel"
+                  :aria-labelledby="activeOtherDeviceSessionTabId"
                 >
                   <header class="syncedSessionHeader">
-                    <div class="syncedSessionIdentity">
-                      <span class="syncedSessionIcon">
-                        <FtIcon
-                          :icon="session.syncPlatform === 'mobile' ? ['fas', 'layer-group'] : ['fas', 'display']"
-                          aria-hidden="true"
-                        />
-                      </span>
-                      <strong>{{ deviceSessionLabel(session) }}</strong>
-                    </div>
                     <div class="syncedSessionActions">
                       <button
                         type="button"
                         class="syncedSessionActionButton"
-                        @click="openOtherDeviceSession(session)"
+                        @click="openOtherDeviceSession(activeOtherDeviceSession)"
                       >
                         <FtIcon
                           :icon="['fas', 'folder-open']"
@@ -473,9 +498,9 @@
                       <button
                         type="button"
                         class="syncedSessionActionButton iconButton dangerButton"
-                        :aria-label="`${t('Delete')}: ${deviceSessionLabel(session)}`"
+                        :aria-label="`${t('Delete')}: ${formatDeviceSessionLabel(activeOtherDeviceSession, t)}`"
                         :title="t('Delete')"
-                        @click="sessionToDelete = session"
+                        @click="sessionToDelete = activeOtherDeviceSession"
                       >
                         <FtIcon
                           :icon="['fas', 'trash']"
@@ -486,13 +511,13 @@
                   </header>
                   <ul class="syncedTabList">
                     <li
-                      v-for="tab in session.visibleTabs"
+                      v-for="tab in activeOtherDeviceSession.visibleTabs"
                       :key="tab.id"
                     >
                       <button
                         type="button"
                         class="syncedTabTarget"
-                        @click="openOtherDeviceSession({ ...session, tabs: [tab] })"
+                        @click="openOtherDeviceSession({ ...activeOtherDeviceSession, tabs: [tab] })"
                       >
                         <span class="tabIcon">
                           <img
@@ -582,7 +607,7 @@
   <FtPrompt
     v-if="sessionToDelete"
     :label="t('Delete')"
-    :extra-labels="[deviceSessionLabel(sessionToDelete)]"
+    :extra-labels="[formatDeviceSessionLabel(sessionToDelete, t)]"
     :option-names="[t('Delete'), t('Cancel')]"
     :option-values="['delete', 'cancel']"
     is-first-option-destructive
@@ -598,7 +623,7 @@ import { useI18n } from 'vue-i18n'
 
 import { getTabAccentColor } from '../../constants/tabColors'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { shouldShowOtherDeviceSessions } from '../../helpers/sync-sessions'
+import { formatDeviceSessionLabel, shouldShowOtherDeviceSessions } from '../../helpers/sync-sessions'
 import { showToast } from '../../helpers/utils'
 import store from '../../store/index'
 import { getTabAvatarUrl, getTabPageIcon } from '../../tabs/tabPreview'
@@ -612,6 +637,8 @@ const emit = defineEmits(['close'])
 const { locale, t } = useI18n()
 const titleId = `tab-organizer-title-${useId().replaceAll(':', '')}`
 const promptId = `tab-organizer-${useId().replaceAll(':', '')}`
+const syncedSessionIdPrefix = `tab-organizer-synced-session-${useId().replaceAll(':', '')}`
+const syncedSessionPanelId = `${syncedSessionIdPrefix}-panel`
 const teleportTarget = document.fullscreenElement ?? '.app'
 const query = ref('')
 const newGroupName = ref('')
@@ -626,6 +653,7 @@ const editingGroupName = ref('')
 const editingColorGroupId = ref(null)
 const failedTabAvatarUrls = ref({})
 const sessionToDelete = ref(null)
+const selectedOtherDeviceSessionKey = ref(null)
 const dialogRef = useTemplateRef('dialogRef')
 const searchRef = useTemplateRef('searchRef')
 const scrollRef = useTemplateRef('scrollRef')
@@ -707,6 +735,20 @@ const showSyncedTabs = computed(() => shouldShowOtherDeviceSessions({
 const visibleOtherDeviceSessions = computed(() => otherDeviceSessions.value
   .map(session => ({ ...session, visibleTabs: session.tabs.filter(matchesSearch) }))
   .filter(session => session.visibleTabs.length > 0))
+const activeOtherDeviceSession = computed(() => (
+  visibleOtherDeviceSessions.value.find(session => (
+    otherDeviceSessionKey(session) === selectedOtherDeviceSessionKey.value
+  )) ?? visibleOtherDeviceSessions.value[0] ?? null
+))
+const activeOtherDeviceSessionKey = computed(() => (
+  activeOtherDeviceSession.value ? otherDeviceSessionKey(activeOtherDeviceSession.value) : null
+))
+const activeOtherDeviceSessionTabId = computed(() => {
+  const activeIndex = visibleOtherDeviceSessions.value.findIndex(session => (
+    otherDeviceSessionKey(session) === activeOtherDeviceSessionKey.value
+  ))
+  return syncedSessionTabId(Math.max(0, activeIndex))
+})
 
 const displayedSections = computed(() => {
   const sections = groups.value.map(group => ({
@@ -798,13 +840,31 @@ function syncedTabPreview(tab) {
   }
 }
 
-function deviceSessionLabel(session) {
-  return t('Settings.Sync Settings.Device Tab Session', {
-    platform: session.syncPlatform === 'mobile'
-      ? t('Settings.Sync Settings.Mobile Device')
-      : t('Settings.Sync Settings.Desktop Device'),
-    count: session.tabs.length,
-  })
+function otherDeviceSessionKey(session) {
+  return `${session.syncDeviceId}:${session.sessionId}`
+}
+
+function syncedSessionTabId(index) {
+  return `${syncedSessionIdPrefix}-tab-${index}`
+}
+
+async function selectOtherDeviceSession(session, focus = false) {
+  selectedOtherDeviceSessionKey.value = otherDeviceSessionKey(session)
+  await nextTick()
+  clampScroll()
+  if (!focus) return
+
+  const index = visibleOtherDeviceSessions.value.findIndex(candidate => (
+    otherDeviceSessionKey(candidate) === selectedOtherDeviceSessionKey.value
+  ))
+  dialogRef.value?.querySelector(`#${syncedSessionTabId(index)}`)?.focus({ preventScroll: true })
+}
+
+function selectOtherDeviceSessionAt(index, focus = false) {
+  const sessions = visibleOtherDeviceSessions.value
+  if (sessions.length === 0) return
+  const wrappedIndex = (index + sessions.length) % sessions.length
+  selectOtherDeviceSession(sessions[wrappedIndex], focus)
 }
 
 async function openOtherDeviceSession(session) {

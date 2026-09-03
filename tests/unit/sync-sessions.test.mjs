@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  formatDeviceSessionLabel,
   getOtherDeviceSessions,
   getPreviousSyncSessions,
   mergeSyncSessions,
@@ -15,6 +16,18 @@ const session = (id, updatedAt, url = `https://opentubex.local/${id}`) => ({
   updatedAt,
   activeTabId: `${id}-tab`,
   tabs: [{ id: `${id}-tab`, url }],
+})
+
+test('formats device session labels with localized tab plurals', () => {
+  const t = (key, { count } = {}, choice) => {
+    if (key === 'Settings.Sync Settings.Mobile Device') return 'Mobile'
+    if (key === 'Settings.Sync Settings.Desktop Device') return 'Desktop'
+    if (key === 'Tab Organizer.Tab Count') return `${count} ${choice === 1 ? 'tab' : 'tabs'}`
+    throw new Error(`Unexpected translation key: ${key}`)
+  }
+
+  assert.equal(formatDeviceSessionLabel({ syncPlatform: 'desktop', tabs: [{}] }, t), 'Desktop · 1 tab')
+  assert.equal(formatDeviceSessionLabel({ syncPlatform: 'mobile', tabs: [{}, {}] }, t), 'Mobile · 2 tabs')
 })
 
 test('treats legacy session arrays as a separate desktop device', () => {
