@@ -99,15 +99,16 @@ function handleClickOutside(event) {
 }
 
 const router = useRouter()
+let removeNavigationHook = null
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
-  router.afterEach(() => {
-    closeMenu()
-  })
+  removeNavigationHook = router.afterEach(closeMenu)
 })
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
+  removeNavigationHook?.()
+  removeNavigationHook = null
 })
 </script>
 

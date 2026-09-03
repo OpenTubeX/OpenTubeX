@@ -412,9 +412,12 @@ function resetQuickSettings() {
 }
 
 .selectedSettingIcon {
+  align-items: center;
   block-size: 20px;
   color: var(--secondary-text-color);
+  display: flex;
   inline-size: 20px;
+  justify-content: center;
 }
 
 .settingActions {

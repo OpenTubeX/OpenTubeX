@@ -117,6 +117,16 @@ test.describe('side nav navigation', () => {
     ))
     await expect.poll(selectedIds).toEqual(DEFAULT_NAVIGATION_ITEMS)
     await expect(selectedItems.locator('.selectedItem').first()).toHaveCSS('user-select', 'none')
+    const iconOffsets = await selectedItems.locator('.selectedItem').evaluateAll(rows => rows.map(row => {
+      const icon = row.querySelector('.selectedItemIcon > svg')
+      const rowBounds = row.getBoundingClientRect()
+      const iconBounds = icon.getBoundingClientRect()
+      return Math.abs(
+        iconBounds.y + iconBounds.height / 2 -
+        (rowBounds.y + rowBounds.height / 2)
+      )
+    }))
+    expect(Math.max(...iconOffsets)).toBeLessThanOrEqual(0.5)
 
     await page.getByRole('button', { name: 'Remove Most Popular' }).click()
     await page.getByRole('button', { name: 'Add item' }).click()

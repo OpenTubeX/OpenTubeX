@@ -220,8 +220,8 @@ Settings:
       Disk: levytila
   General Settings:
     Navigation:
-      Navigation: Siirtyminen
-      Customize Navigation: Mukauta siirtymistä
+      Navigation: Navigointi
+      Customize Navigation: Mukauta navigointia
       Add Item: Lisää kohde
     Date Format: Päivämäärän muoto
     Time Format: Ajan muoto

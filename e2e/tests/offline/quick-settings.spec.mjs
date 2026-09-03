@@ -297,6 +297,23 @@ test.describe('automatic quick setting select pairs', () => {
 })
 
 test.describe('customizable quick settings', () => {
+  test('centers setting icons vertically within their rows', async ({ page }) => {
+    const appearance = await goToSettingsSection(page, 'appearance')
+    await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
+
+    const offsets = await page.locator('.selectedSetting').evaluateAll(rows => rows.map(row => {
+      const icon = row.querySelector('.selectedSettingIcon > svg')
+      const rowBounds = row.getBoundingClientRect()
+      const iconBounds = icon.getBoundingClientRect()
+      return Math.abs(
+        iconBounds.y + iconBounds.height / 2 -
+        (rowBounds.y + rowBounds.height / 2)
+      )
+    }))
+
+    expect(Math.max(...offsets)).toBeLessThanOrEqual(0.5)
+  })
+
   test('starts with the original quick settings', async ({ page }) => {
     await page.locator('.profileTrigger').click()
     const menu = page.getByRole('dialog', { name: 'Quick settings' })

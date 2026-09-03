@@ -508,6 +508,22 @@ test.describe('landing page availability', () => {
   })
 })
 
+test.describe('legacy landing page visibility', () => {
+  test.use({
+    seed: {
+      settings: {
+        hidePlaylists: true,
+        landingPage: 'userplaylists',
+      }
+    }
+  })
+
+  test('applies every legacy navigation switch before opening the first tab', async ({ page }) => {
+    await expect(page).toHaveURL(/#\/home$/)
+    await expect(page.locator('.sideNav a[href="#/userplaylists"]')).toHaveCount(0)
+  })
+})
+
 test.describe('compact scaled Home page', () => {
   test.use({ seed: { ...homeSeed, settings: { uiScale: 95 } } })
 
