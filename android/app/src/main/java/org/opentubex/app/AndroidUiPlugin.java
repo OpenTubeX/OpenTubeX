@@ -1,5 +1,6 @@
 package org.opentubex.app;
 
+import android.app.Activity;
 import android.app.PictureInPictureParams;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -9,6 +10,8 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Rational;
+
+import androidx.annotation.RequiresApi;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -38,7 +41,11 @@ public class AndroidUiPlugin extends Plugin {
                 return;
             }
 
-            boolean entered = getActivity().enterPictureInPictureMode(buildPictureInPictureParams(false));
+            boolean entered = PictureInPicture.enter(
+                getActivity(),
+                pictureInPictureAspectRatio,
+                false
+            );
             if (entered) {
                 call.resolve();
             } else {
@@ -53,8 +60,10 @@ public class AndroidUiPlugin extends Plugin {
         updateAspectRatio(call);
         getActivity().runOnUiThread(() -> {
             if (supportsPictureInPicture()) {
-                getActivity().setPictureInPictureParams(
-                    buildPictureInPictureParams(autoPictureInPictureEnabled)
+                PictureInPicture.configure(
+                    getActivity(),
+                    pictureInPictureAspectRatio,
+                    autoPictureInPictureEnabled
                 );
             }
             call.resolve();
@@ -121,24 +130,12 @@ public class AndroidUiPlugin extends Plugin {
             return;
         }
 
-        getActivity().enterPictureInPictureMode(buildPictureInPictureParams(false));
+        PictureInPicture.enter(getActivity(), pictureInPictureAspectRatio, false);
     }
 
     private boolean supportsPictureInPicture() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE);
-    }
-
-    private PictureInPictureParams buildPictureInPictureParams(boolean automatic) {
-        PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder()
-            .setAspectRatio(pictureInPictureAspectRatio);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            builder.setAutoEnterEnabled(automatic);
-            builder.setSeamlessResizeEnabled(true);
-        }
-
-        return builder.build();
     }
 
     private void updateAspectRatio(PluginCall call) {
@@ -149,6 +146,34 @@ public class AndroidUiPlugin extends Plugin {
         // Android only accepts PiP aspect ratios between 1:2.39 and 2.39:1.
         if (ratio >= (1.0 / 2.39) && ratio <= 2.39) {
             pictureInPictureAspectRatio = new Rational(width, height);
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private static final class PictureInPicture {
+        private PictureInPicture() {}
+
+        static boolean enter(Activity activity, Rational aspectRatio, boolean automatic) {
+            return activity.enterPictureInPictureMode(buildParams(aspectRatio, automatic));
+        }
+
+        static void configure(Activity activity, Rational aspectRatio, boolean automatic) {
+            activity.setPictureInPictureParams(buildParams(aspectRatio, automatic));
+        }
+
+        private static PictureInPictureParams buildParams(
+            Rational aspectRatio,
+            boolean automatic
+        ) {
+            PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder()
+                .setAspectRatio(aspectRatio);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                builder.setAutoEnterEnabled(automatic);
+                builder.setSeamlessResizeEnabled(true);
+            }
+
+            return builder.build();
         }
     }
 }

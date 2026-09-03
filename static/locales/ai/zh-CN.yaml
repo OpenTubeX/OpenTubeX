@@ -731,6 +731,7 @@ Settings:
     Shorts Auto Refresh Interval: Shorts 自动刷新间隔
     Live Auto Refresh Interval: 直播自动刷新间隔
     Posts Auto Refresh Interval: 帖子自动刷新间隔
+    Refresh Subscriptions While App Is Closed: "应用关闭时刷新订阅"
   Distraction Free Settings:
     Sections:
       Visible While Paused: 全窗口或全屏暂停时显示
@@ -1419,7 +1420,8 @@ Tooltips:
     Show New Content Feed: 显示“新内容”标签页，其中包含上次获取时尚未出现的订阅动态项目。
     Show New Content Indicators: 在上次获取时尚未出现的订阅动态项目旁显示一个小圆点。
     Show Scheduled Live Streams / Premieres First: 将即将开始的直播和首映置于订阅动态顶部。禁用后，它们会保留在公告发布时的位置，直到开始。禁用后请刷新一次订阅动态，以获取现有预定项目的公告日期。
-    Auto Refresh Interval: OpenTubeX 在应用打开期间自动刷新订阅动态的频率。
+    Auto Refresh Interval: "OpenTubeX 在应用打开期间自动刷新订阅动态的频率。 在 Android 上，非零间隔还会在应用关闭时刷新订阅源。"
+    Refresh Subscriptions While App Is Closed: "允许 Android 在 OpenTubeX 关闭时按所选间隔刷新订阅源。关闭此选项后，仅在应用打开时自动刷新。"
   Theme Settings:
     Show Progress as Notification: 以持续通知实时显示后台操作的进度（例如刷新订阅动态和下载托管工具），而不使用全局进度条。
     Always Show Scrollbars: 始终显示滚动条。禁用后，停止移动鼠标不久，滚动条便会淡出；再次移动鼠标时会立即重新出现。

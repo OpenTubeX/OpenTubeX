@@ -705,6 +705,35 @@ export async function invidiousGetCommunityPosts(channelId, continuation = null)
   return { posts: response.comments, continuation: response.continuation ?? null }
 }
 
+/**
+ * Normalizes a raw Invidious channel response fetched by an Android worker.
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
+ * @param {object} response
+ * @param {string} channelId
+ * @returns {object[]}
+ */
+export function normalizeInvidiousSubscriptionFeed(feedType, response, channelId) {
+  if (feedType === 'posts') {
+    return Array.isArray(response?.comments)
+      ? response.comments.map(parseInvidiousCommunityData)
+      : []
+  }
+
+  const videos = Array.isArray(response?.videos) ? response.videos : []
+  if (feedType === 'shorts') {
+    videos.forEach(video => {
+      video.isUpcoming = false
+      video.isShort = true
+      delete video.published
+      delete video.premiereTimestamp
+    })
+  } else {
+    normalizeManyInvidiousVideosAttributes(videos, channelId)
+    setMultiplePublishedTimestamps(videos)
+  }
+  return videos
+}
+
 export async function getInvidiousCommunityPost(postId, authorId = null) {
   const payload = {
     resource: 'post',

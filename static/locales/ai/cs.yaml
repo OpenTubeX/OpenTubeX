@@ -731,6 +731,7 @@ Settings:
     Shorts Auto Refresh Interval: Interval automatického obnovení krátkých videí
     Live Auto Refresh Interval: Interval automatického obnovení živých přenosů
     Posts Auto Refresh Interval: Interval automatického obnovení příspěvků
+    Refresh Subscriptions While App Is Closed: "Obnovovat odběry, když je aplikace zavřená"
   Distraction Free Settings:
     Sections:
       Visible While Paused: Viditelné při pozastavení v režimu celého okna nebo celé obrazovky
@@ -1419,7 +1420,8 @@ Tooltips:
     Show New Content Feed: Zobrazí kartu Nové s položkami kanálu odběrů, které při předchozím načtení nebyly dostupné.
     Show New Content Indicators: Vedle položek kanálu odběrů, které při předchozím načtení nebyly dostupné, zobrazí malou tečku.
     Show Scheduled Live Streams / Premieres First: Ponechá nadcházející živé přenosy a premiéry v horní části kanálu odběrů. Pokud je funkce vypnutá, zůstanou až do zahájení na pozici podle data oznámení. Po vypnutí jednou obnovte kanál odběrů, aby se načetla data oznámení stávajících naplánovaných položek.
-    Auto Refresh Interval: Určuje, jak často OpenTubeX automaticky obnovuje kanál odběrů, když je aplikace otevřená.
+    Auto Refresh Interval: "Určuje, jak často OpenTubeX automaticky obnovuje kanál odběrů, když je aplikace otevřená. V Androidu nenulový interval obnovuje kanál také tehdy, když je aplikace zavřená."
+    Refresh Subscriptions While App Is Closed: "Umožní Androidu obnovovat kanály odběrů ve vybraných intervalech, když je OpenTubeX zavřený. Vypnutím této možnosti omezíte automatické obnovování na dobu, kdy je aplikace otevřená."
   Theme Settings:
     Show Progress as Notification: Místo celkového ukazatele průběhu zobrazí trvalé oznámení s aktuálním průběhem operací na pozadí, například obnovování odběrů a stahování spravovaných nástrojů.
     Always Show Scrollbars: Ponechá posuvníky stále viditelné. Pokud je funkce vypnutá, krátce po zastavení pohybu myši zmizí a při dalším pohybu se znovu zobrazí.

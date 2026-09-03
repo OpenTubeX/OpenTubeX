@@ -993,6 +993,7 @@ Settings:
     Shorts Auto Refresh Interval: Interval d'actualització automàtica dels vídeos curts
     Live Auto Refresh Interval: Interval d'actualització automàtica dels directes
     Posts Auto Refresh Interval: Interval d'actualització automàtica de les publicacions
+    Refresh Subscriptions While App Is Closed: "Actualitza les subscripcions amb l'aplicació tancada"
     Limit the number of videos displayed for each channel: Limita el nombre de vídeos mostrats per canal
     To: A
     Confirm Before Unsubscribing: Confirma abans de donar-se de baixa
@@ -1956,7 +1957,8 @@ Tooltips:
     Show New Content Feed: Mostra una pestanya Nou amb els elements del canal de subscripcions que no hi eren en l'obtenció anterior.
     Show New Content Indicators: Mostra un punt petit al costat dels elements del canal de subscripcions que no hi eren en l'obtenció anterior.
     Show Scheduled Live Streams / Premieres First: Manté les properes emissions en directe i estrenes a dalt del canal de subscripcions. Si es desactiva, romanen a la posició de l'anunci fins que comencen. Després de desactivar-ho, actualitzeu el canal una vegada per obtenir les dates d'anunci de les entrades programades existents.
-    Auto Refresh Interval: Freqüència amb què l'OpenTubeX actualitza automàticament el canal de subscripcions mentre l'aplicació està oberta.
+    Auto Refresh Interval: "Freqüència amb què l'OpenTubeX actualitza automàticament el canal de subscripcions mentre l'aplicació està oberta. A Android, un interval diferent de zero també actualitza el canal quan l’aplicació està tancada."
+    Refresh Subscriptions While App Is Closed: "Permet que Android actualitzi els canals de subscripcions als intervals seleccionats mentre l'OpenTubeX està tancat. Desactiveu aquesta opció per limitar les actualitzacions automàtiques als moments en què l'aplicació està oberta."
   Theme Settings:
     Show Progress as Notification: Mostra una notificació persistent amb el progrés en directe de les operacions en segon pla, com ara actualitzar les subscripcions i baixar eines gestionades, en lloc d'utilitzar la barra de progrés general.
     Always Show Scrollbars: Manté les barres de desplaçament sempre visibles. Si es desactiva, s'esvaeixen poc després que deixeu de moure el ratolí i reapareixen quan el torneu a moure.

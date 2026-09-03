@@ -946,6 +946,7 @@ Settings:
     Shorts Auto Refresh Interval: „Shorts“ automatinio atnaujinimo intervalas
     Live Auto Refresh Interval: Tiesioginių transliacijų automatinio atnaujinimo intervalas
     Posts Auto Refresh Interval: Įrašų automatinio atnaujinimo intervalas
+    Refresh Subscriptions While App Is Closed: "Atnaujinti prenumeratas, kai programa uždaryta"
     Limit the number of videos displayed for each channel: Riboti kiekvieno kanalo rodomų vaizdo įrašų skaičių
     To: Iki
     Confirm Before Unsubscribing: Klausti prieš atsisakant prenumeratos
@@ -1824,7 +1825,8 @@ Tooltips:
     Show New Content Feed: Rodo kortelę Nauja su prenumeratų sklaidos kanalo elementais, kurių nebuvo gaunant ankstesnį kartą.
     Show New Content Indicators: Šalia prenumeratų sklaidos kanalo elementų, kurių nebuvo gaunant ankstesnį kartą, rodo mažą tašką.
     Show Scheduled Live Streams / Premieres First: Būsimas tiesiogines transliacijas ir premjeras rodo prenumeratų sklaidos kanalo viršuje. Išjungus iki pradžios jos lieka ten, kur buvo paskelbtos. Išjungę vieną kartą atnaujinkite prenumeratų sklaidos kanalą, kad gautumėte esamų suplanuotų elementų paskelbimo datas.
-    Auto Refresh Interval: Kaip dažnai OpenTubeX automatiškai atnaujina prenumeratų sklaidos kanalą, kol programa atverta.
+    Auto Refresh Interval: "Kaip dažnai OpenTubeX automatiškai atnaujina prenumeratų sklaidos kanalą, kol programa atverta. „Android“ sistemoje nenulinis intervalas atnaujina sklaidos kanalą ir tada, kai programa uždaryta."
+    Refresh Subscriptions While App Is Closed: "Leidžia „Android“ atnaujinti prenumeratų sklaidos kanalus pasirinktais intervalais, kai „OpenTubeX“ uždaryta. Išjunkite šią parinktį, kad automatinis atnaujinimas vyktų tik atvėrus programą."
   Theme Settings:
     Show Progress as Notification: Vietoje bendros eigos juostos rodo nuolatinį pranešimą su tikralaike foninių operacijų, pvz., prenumeratų atnaujinimo ir tvarkomų įrankių atsisiuntimo, eiga.
     Always Show Scrollbars: Slinkties juostos visada lieka matomos. Išjungus jos netrukus išblėsta nustojus judinti pelę ir vėl pasirodo vos ją pajudinus.

@@ -12,18 +12,30 @@ import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import org.json.JSONObject;
+
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 public final class SubscriptionRefreshWorker extends Worker {
     private static final String UNIQUE_WORK_NAME = "subscription-refresh";
     private static final String TOKEN_INPUT = "token";
+    static final String FEED_TYPE_INPUT = "feedType";
     private static final SubscriptionRefreshState STATE = new SubscriptionRefreshState();
 
     public SubscriptionRefreshWorker(@NonNull Context context, @NonNull WorkerParameters parameters) {
         super(context, parameters);
     }
 
-    static void start(Context context, String token, String title) {
-        STATE.begin(token, title);
-        Data input = new Data.Builder().putString(TOKEN_INPUT, token).build();
+    static boolean start(Context context, String token, String title, String cancelLabel) {
+        if (!SubscriptionRefreshCoordinator.begin(token)) return false;
+        STATE.begin(token, title, cancelLabel);
+        Data input = new Data.Builder()
+            .putString(TOKEN_INPUT, token)
+            .putString("cancelLabel", cancelLabel)
+            .build();
         OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(SubscriptionRefreshWorker.class)
             .setInputData(input)
             .build();
@@ -32,6 +44,7 @@ public final class SubscriptionRefreshWorker extends Worker {
             ExistingWorkPolicy.REPLACE,
             request
         );
+        return true;
     }
 
     static boolean update(Context context, String token, int progress) {
@@ -40,13 +53,20 @@ public final class SubscriptionRefreshWorker extends Worker {
         if (snapshot == null) return false;
         context.getSystemService(NotificationManager.class).notify(
             SubscriptionRefreshNotification.NOTIFICATION_ID,
-            SubscriptionRefreshNotification.build(context, snapshot.title, snapshot.progress)
+            SubscriptionRefreshNotification.build(
+                context,
+                token,
+                snapshot.title,
+                snapshot.cancelLabel,
+                snapshot.progress
+            )
         );
         return true;
     }
 
     static boolean finish(Context context, String token) {
         boolean finished = STATE.finish(token);
+        SubscriptionRefreshCoordinator.finish(token);
         if (finished) {
             NotificationManager notifications = context.getSystemService(NotificationManager.class);
             notifications.cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
@@ -58,17 +78,37 @@ public final class SubscriptionRefreshWorker extends Worker {
         return finished;
     }
 
+    static boolean cancel(Context context, String token) {
+        boolean cancelled = SubscriptionRefreshCoordinator.cancel(token);
+        STATE.finish(token);
+        if (cancelled) {
+            context.getSystemService(NotificationManager.class)
+                .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+        }
+        return cancelled;
+    }
+
     @NonNull
     @Override
     public Result doWork() {
         String token = getInputData().getString(TOKEN_INPUT);
+        if (token == null) return doScheduledWork();
+
+        return doRendererWork(token);
+    }
+
+    private Result doRendererWork(String token) {
         SubscriptionRefreshState.Snapshot snapshot = STATE.snapshot(token);
-        if (snapshot == null) return Result.success();
+        if (snapshot == null || !SubscriptionRefreshCoordinator.isCurrent(token)) return Result.success();
+        String cancelLabel = getInputData().getString("cancelLabel");
+        if (cancelLabel == null) cancelLabel = "Cancel";
 
         try {
             setForegroundAsync(SubscriptionRefreshNotification.foregroundInfo(
                 getApplicationContext(),
+                token,
                 snapshot.title,
+                cancelLabel,
                 snapshot.progress
             )).get();
             STATE.awaitCompletion(token);
@@ -78,6 +118,107 @@ public final class SubscriptionRefreshWorker extends Worker {
             return Result.failure();
         } catch (Exception error) {
             return Result.failure();
+        } finally {
+            if (SubscriptionRefreshCoordinator.finish(token)) {
+                getApplicationContext().getSystemService(NotificationManager.class)
+                    .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+            }
+        }
+    }
+
+    private Result doScheduledWork() {
+        Context context = getApplicationContext();
+        if (AppVisibility.isVisible()) return Result.success();
+        String feedType = getInputData().getString(FEED_TYPE_INPUT);
+        if (feedType == null) return Result.failure();
+
+        List<SubscriptionRefreshConfiguration.Feed> feeds =
+            SubscriptionRefreshConfiguration.findFeeds(context, feedType);
+        if (feeds.isEmpty()) return Result.success();
+        SubscriptionRefreshConfiguration.Feed feed = feeds.get(0);
+        Set<String> channelIds = new LinkedHashSet<>();
+        for (SubscriptionRefreshConfiguration.Feed profileFeed : feeds) {
+            channelIds.addAll(profileFeed.channelIds);
+        }
+
+        String token = UUID.randomUUID().toString();
+        if (!SubscriptionRefreshCoordinator.begin(token)) return Result.retry();
+
+        int completed = 0;
+        int failed = 0;
+        NotificationManager notifications = context.getSystemService(NotificationManager.class);
+        try {
+            // A periodic job may recreate the process while the app is closed, where
+            // Android does not allow starting WorkManager's foreground service. Keep
+            // the durable work owned by JobScheduler and make its progress visible
+            // with a regular notification instead.
+            notifications.notify(
+                SubscriptionRefreshNotification.NOTIFICATION_ID,
+                SubscriptionRefreshNotification.build(
+                    context,
+                    token,
+                    feed.title,
+                    feed.cancelLabel,
+                    0
+                )
+            );
+
+            int total = channelIds.size();
+            for (String channelId : channelIds) {
+                if (SubscriptionRefreshCoordinator.isCancelled(token) || isStopped()) {
+                    return Result.success();
+                }
+                try {
+                    JSONObject payload = SubscriptionRefreshHttpClient.fetch(feed, channelId);
+                    SubscriptionRefreshResultStore.writeChannel(
+                        context,
+                        feed.profileId,
+                        feedType,
+                        channelId,
+                        payload,
+                        System.currentTimeMillis()
+                    );
+                    completed++;
+                } catch (Exception error) {
+                    failed++;
+                }
+
+                int progress = total == 0 ? 100 : (int) Math.round((completed + failed) * 100.0 / total);
+                notifications.notify(
+                    SubscriptionRefreshNotification.NOTIFICATION_ID,
+                    SubscriptionRefreshNotification.build(
+                        context,
+                        token,
+                        feed.title,
+                        feed.cancelLabel,
+                        progress
+                    )
+                );
+            }
+
+            if (SubscriptionRefreshCoordinator.isCancelled(token) || isStopped()) {
+                return Result.success();
+            }
+            if (failed > 0 && completed == 0 && !channelIds.isEmpty()) {
+                return Result.retry();
+            }
+
+            long completionTimestamp = System.currentTimeMillis();
+            for (SubscriptionRefreshConfiguration.Feed profileFeed : feeds) {
+                SubscriptionRefreshResultStore.writeCompletion(
+                    context,
+                    profileFeed.profileId,
+                    feedType,
+                    completionTimestamp
+                );
+            }
+            return Result.success();
+        } catch (Exception error) {
+            return Result.retry();
+        } finally {
+            if (SubscriptionRefreshCoordinator.finish(token)) {
+                notifications.cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+            }
         }
     }
 }

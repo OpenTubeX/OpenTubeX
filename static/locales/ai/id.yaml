@@ -739,6 +739,7 @@ Settings:
     Shorts Auto Refresh Interval: Interval Pembaruan Otomatis Shorts
     Live Auto Refresh Interval: Interval Pembaruan Otomatis Siaran Langsung
     Posts Auto Refresh Interval: Interval Pembaruan Otomatis Postingan
+    Refresh Subscriptions While App Is Closed: "Perbarui Langganan Saat Aplikasi Ditutup"
   Distraction Free Settings:
     Sections:
       Visible While Paused: Terlihat Saat Dijeda dalam Jendela Penuh / Layar Penuh
@@ -1441,7 +1442,8 @@ Tooltips:
     Show New Content Feed: Menampilkan tab Baru yang berisi item umpan langganan yang belum ada saat pengambilan sebelumnya.
     Show New Content Indicators: Menampilkan titik kecil di sebelah item umpan langganan yang belum ada saat pengambilan sebelumnya.
     Show Scheduled Live Streams / Premieres First: Mempertahankan siaran langsung dan premiere mendatang di bagian atas umpan langganan. Jika dinonaktifkan, item tetap pada posisi pengumuman hingga dimulai. Perbarui umpan langganan satu kali setelah menonaktifkannya untuk mengambil tanggal pengumuman entri terjadwal yang sudah ada.
-    Auto Refresh Interval: Frekuensi OpenTubeX memperbarui umpan langganan secara otomatis selama aplikasi terbuka.
+    Auto Refresh Interval: "Frekuensi OpenTubeX memperbarui umpan langganan secara otomatis selama aplikasi terbuka. Di Android, interval bukan nol juga memperbarui feed saat aplikasi ditutup."
+    Refresh Subscriptions While App Is Closed: "Memungkinkan Android memperbarui umpan langganan pada interval yang dipilih saat OpenTubeX ditutup. Matikan opsi ini agar pembaruan otomatis hanya berjalan saat aplikasi terbuka."
   Theme Settings:
     Show Progress as Notification: Menampilkan notifikasi tetap dengan progres langsung untuk operasi latar belakang, seperti pembaruan langganan dan unduhan alat terkelola, sebagai pengganti bilah progres global.
     Always Show Scrollbars: Mempertahankan bilah gulir agar selalu terlihat. Jika dinonaktifkan, bilah memudar sesaat setelah Anda berhenti menggerakkan tetikus dan muncul kembali begitu tetikus digerakkan.

@@ -733,6 +733,7 @@ Settings:
     Shorts Auto Refresh Interval: Razmak automatskog osvježavanja Shorts videozapisa
     Live Auto Refresh Interval: Razmak automatskog osvježavanja prijenosa uživo
     Posts Auto Refresh Interval: Razmak automatskog osvježavanja objava
+    Refresh Subscriptions While App Is Closed: "Osvježavaj pretplate dok je aplikacija zatvorena"
   Distraction Free Settings:
     Sections:
       Visible While Paused: Vidljivo tijekom pauze u punom prozoru / preko cijelog zaslona
@@ -1427,7 +1428,8 @@ Tooltips:
     Show New Content Feed: Prikazuje karticu Novo sa stavkama sažetka pretplata kojih nije bilo pri prethodnom dohvaćanju.
     Show New Content Indicators: Prikazuje malu točku uz stavke sažetka pretplata kojih nije bilo pri prethodnom dohvaćanju.
     Show Scheduled Live Streams / Premieres First: Zadržava predstojeće prijenose uživo i premijere na vrhu sažetka pretplata. Kada je isključeno, ostaju na mjestu svoje najave sve do početka. Nakon isključivanja jednom osvježite sažetak pretplata kako biste dohvatili datume najave za postojeće zakazane stavke.
-    Auto Refresh Interval: Učestalost kojom OpenTubeX automatski osvježava sažetak pretplata dok je aplikacija otvorena.
+    Auto Refresh Interval: "Učestalost kojom OpenTubeX automatski osvježava sažetak pretplata dok je aplikacija otvorena. Na Androidu interval koji nije nula osvježava sažetak i dok je aplikacija zatvorena."
+    Refresh Subscriptions While App Is Closed: "Omogućuje Androidu osvježavanje sažetaka pretplata u odabranim razmacima dok je OpenTubeX zatvoren. Isključite ovu opciju kako bi se automatsko osvježavanje odvijalo samo dok je aplikacija otvorena."
   Theme Settings:
     Show Progress as Notification: Umjesto opće trake napretka prikazuje trajnu obavijest s trenutačnim napretkom pozadinskih postupaka, poput osvježavanja pretplata i preuzimanja alata kojima se upravlja.
     Always Show Scrollbars: Drži klizne trake uvijek vidljivima. Kada je isključeno, nestaju ubrzo nakon što prestanete pomicati miš i ponovno se pojavljuju čim ga pomaknete.

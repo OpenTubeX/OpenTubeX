@@ -739,6 +739,7 @@ Settings:
     Shorts Auto Refresh Interval: Khoảng tự động làm mới video ngắn
     Live Auto Refresh Interval: Khoảng tự động làm mới luồng trực tiếp
     Posts Auto Refresh Interval: Khoảng tự động làm mới bài đăng
+    Refresh Subscriptions While App Is Closed: "Làm mới đăng ký khi ứng dụng đã đóng"
   Distraction Free Settings:
     Sections:
       Visible While Paused: Hiện khi tạm dừng ở chế độ toàn cửa sổ / toàn màn hình
@@ -1439,7 +1440,8 @@ Tooltips:
     Show New Content Feed: Hiện thẻ Mới chứa các mục trong bảng tin đăng ký chưa có ở lần tải trước.
     Show New Content Indicators: Hiện một chấm nhỏ bên cạnh các mục trong bảng tin đăng ký chưa có ở lần tải trước.
     Show Scheduled Live Streams / Premieres First: Giữ luồng trực tiếp và buổi công chiếu sắp tới ở đầu bảng tin đăng ký. Khi tắt, chúng vẫn ở vị trí thông báo cho đến khi bắt đầu. Hãy làm mới bảng tin đăng ký một lần sau khi tắt để lấy ngày thông báo cho các mục đã lên lịch hiện có.
-    Auto Refresh Interval: Tần suất OpenTubeX tự động làm mới bảng tin đăng ký khi ứng dụng đang mở.
+    Auto Refresh Interval: "Tần suất OpenTubeX tự động làm mới bảng tin đăng ký khi ứng dụng đang mở. Trên Android, khoảng thời gian khác 0 cũng làm mới bảng tin khi ứng dụng đã đóng."
+    Refresh Subscriptions While App Is Closed: "Cho phép Android làm mới bảng tin đăng ký theo các khoảng đã chọn khi OpenTubeX đã đóng. Tắt tùy chọn này để chỉ tự động làm mới khi ứng dụng đang mở."
   Theme Settings:
     Show Progress as Notification: Hiện thông báo cố định với tiến trình trực tiếp cho các thao tác nền, chẳng hạn làm mới đăng ký và tải công cụ được quản lý, thay cho thanh tiến trình chung.
     Always Show Scrollbars: Luôn giữ thanh cuộn hiển thị. Khi tắt, thanh cuộn mờ dần ngay sau khi bạn ngừng di chuyển chuột và xuất hiện lại khi bạn di chuyển chuột.

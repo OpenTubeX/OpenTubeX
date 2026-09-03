@@ -960,6 +960,7 @@ Settings:
     Shorts Auto Refresh Interval: Interval samodejnega osveževanja kratkih videoposnetkov
     Live Auto Refresh Interval: Interval samodejnega osveževanja prenosov v živo
     Posts Auto Refresh Interval: Interval samodejnega osveževanja objav
+    Refresh Subscriptions While App Is Closed: "Osvežuj naročnine, ko je aplikacija zaprta"
     Limit the number of videos displayed for each channel: Omeji število prikazanih videoposnetkov za posamezen kanal
     To: Na
     Confirm Before Unsubscribing: Zahtevaj potrditev pred odjavo
@@ -1916,7 +1917,8 @@ Tooltips:
     Show New Content Feed: Prikaže zavihek Novo z elementi vira naročnin, ki ob prejšnjem pridobivanju še niso bili prisotni.
     Show New Content Indicators: Ob elementih vira naročnin, ki ob prejšnjem pridobivanju še niso bili prisotni, prikaže majhno piko.
     Show Scheduled Live Streams / Premieres First: Prihajajoče prenose v živo in premiere obdrži na vrhu vira naročnin. Ko je možnost onemogočena, ostanejo do začetka na mestu svoje napovedi. Po izklopu enkrat osvežite vir naročnin, da pridobite datume napovedi za obstoječe načrtovane vnose.
-    Auto Refresh Interval: Kako pogosto OpenTubeX samodejno osveži vir naročnin, ko je aplikacija odprta.
+    Auto Refresh Interval: "Kako pogosto OpenTubeX samodejno osveži vir naročnin, ko je aplikacija odprta. V Androidu interval, ki ni nič, osvežuje vir tudi, ko je aplikacija zaprta."
+    Refresh Subscriptions While App Is Closed: "Androidu omogoča osveževanje virov naročnin v izbranih intervalih, ko je OpenTubeX zaprt. Izklopite to možnost, da se samodejno osveževanje izvaja samo pri odprti aplikaciji."
   Theme Settings:
     Show Progress as Notification: Namesto splošne vrstice napredka prikaže trajno obvestilo s sprotnim napredkom opravil v ozadju, kot sta osveževanje naročnin in prenos upravljanih orodij.
     Always Show Scrollbars: Drsniki so vedno vidni. Če je ta možnost onemogočena, izginejo kmalu po tem, ko nehate premikati miško, in se znova prikažejo, ko jo premaknete.

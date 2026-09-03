@@ -744,6 +744,7 @@ Settings:
     Shorts Auto Refresh Interval: מרווח ריענון אוטומטי של Shorts
     Live Auto Refresh Interval: מרווח ריענון אוטומטי של שידורים חיים
     Posts Auto Refresh Interval: מרווח ריענון אוטומטי של פוסטים
+    Refresh Subscriptions While App Is Closed: "ריענון מינויים כשהיישום סגור"
   Distraction Free Settings:
     Sections:
       Visible While Paused: מוצג בזמן השהיה בחלון מלא או במסך מלא
@@ -1449,7 +1450,8 @@ Tooltips:
     Show New Content Feed: מציג לשונית בשם חדש ובה פריטים מפיד המינויים שלא היו בטעינה הקודמת.
     Show New Content Indicators: מציג נקודה קטנה לצד פריטים מפיד המינויים שלא היו בטעינה הקודמת.
     Show Scheduled Live Streams / Premieres First: משאיר שידורים חיים והקרנות בכורה עתידיים בראש פיד המינויים. כשהאפשרות מושבתת, הם נשארים במיקום ההכרזה עד שיתחילו. לאחר ההשבתה, רעננו את פיד המינויים פעם אחת כדי לאחזר את תאריכי ההכרזה של פריטים מתוזמנים קיימים.
-    Auto Refresh Interval: התדירות שבה OpenTubeX מרעננת אוטומטית את פיד המינויים כשהיישום פתוח.
+    Auto Refresh Interval: "התדירות שבה OpenTubeX מרעננת אוטומטית את פיד המינויים כשהיישום פתוח. ב-Android, מרווח שאינו אפס מרענן את הפיד גם כשהיישום סגור."
+    Refresh Subscriptions While App Is Closed: "מאפשר ל-Android לרענן את פידי המינויים במרווחים שנבחרו כאשר OpenTubeX סגור. השבתת האפשרות תגביל ריענונים אוטומטיים לזמן שבו היישום פתוח."
   Theme Settings:
     Show Progress as Notification: מציג התראה קבועה עם התקדמות בזמן אמת של פעולות רקע, כגון רענון מינויים והורדת כלים מנוהלים, במקום סרגל ההתקדמות הכללי.
     Always Show Scrollbars: משאיר את פסי הגלילה גלויים תמיד. כשהאפשרות מושבתת, הם נעלמים זמן קצר לאחר הפסקת תנועת העכבר ומופיעים שוב מיד כשמזיזים אותו.

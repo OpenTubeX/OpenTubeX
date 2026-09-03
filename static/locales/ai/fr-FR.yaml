@@ -731,6 +731,7 @@ Settings:
     Shorts Auto Refresh Interval: Intervalle d’actualisation automatique des Shorts
     Live Auto Refresh Interval: Intervalle d’actualisation automatique des directs
     Posts Auto Refresh Interval: Intervalle d’actualisation automatique des publications
+    Refresh Subscriptions While App Is Closed: "Actualiser les abonnements quand l'application est fermée"
   Distraction Free Settings:
     Sections:
       Visible While Paused: Visible pendant la pause en mode pleine fenêtre ou plein écran
@@ -1417,7 +1418,8 @@ Tooltips:
     Show New Content Feed: Affiche un onglet Nouveau contenant les éléments du flux d’abonnements qui n’étaient pas présents lors de la récupération précédente.
     Show New Content Indicators: Affiche un petit point à côté des éléments du flux d’abonnements qui n’étaient pas présents lors de la récupération précédente.
     Show Scheduled Live Streams / Premieres First: Maintient les prochaines diffusions en direct et premières en haut du flux d’abonnements. Lorsque cette option est désactivée, elles restent à la position de leur annonce jusqu’à leur démarrage. Actualisez une fois le flux d’abonnements après la désactivation pour récupérer les dates d’annonce des éléments planifiés existants.
-    Auto Refresh Interval: Fréquence à laquelle OpenTubeX actualise automatiquement votre flux d’abonnements tant que l’application est ouverte.
+    Auto Refresh Interval: "Fréquence à laquelle OpenTubeX actualise automatiquement votre flux d’abonnements tant que l’application est ouverte. Sur Android, un intervalle non nul actualise aussi le flux lorsque l’application est fermée."
+    Refresh Subscriptions While App Is Closed: "Permet à Android d'actualiser les flux d'abonnements aux intervalles choisis lorsque OpenTubeX est fermé. Désactivez cette option pour limiter les actualisations automatiques aux périodes où l'application est ouverte."
   Theme Settings:
     Show Progress as Notification: Affiche une notification persistante indiquant en temps réel la progression des opérations en arrière-plan, comme l’actualisation des abonnements et le téléchargement des outils gérés, au lieu d’utiliser la barre de progression globale.
     Always Show Scrollbars: Maintient les barres de défilement visibles en permanence. Lorsque cette option est désactivée, elles disparaissent peu après l’arrêt du mouvement de la souris et réapparaissent dès que vous la déplacez.

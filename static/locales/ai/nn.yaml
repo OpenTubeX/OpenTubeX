@@ -959,6 +959,7 @@ Settings:
     Shorts Auto Refresh Interval: Intervall for automatisk oppdatering av kortvideoar
     Live Auto Refresh Interval: Intervall for automatisk oppdatering av direktesendingar
     Posts Auto Refresh Interval: Intervall for automatisk oppdatering av innlegg
+    Refresh Subscriptions While App Is Closed: "Oppdater abonnement medan appen er lukka"
     Limit the number of videos displayed for each channel: Avgrens talet på videoar som blir viste for kvar kanal
     To: til
     Confirm Before Unsubscribing: Stadfest før du avsluttar abonnement
@@ -1827,7 +1828,8 @@ Tooltips:
     Show New Content Feed: Viser fana Ny med element frå abonnementsstraumen som ikkje fanst ved førre henting.
     Show New Content Indicators: Viser ein liten prikk ved element i abonnementsstraumen som ikkje fanst ved førre henting.
     Show Scheduled Live Streams / Premieres First: Held komande direktesendingar og premierar øvst i abonnementsstraumen. Når dette er slått av, vert dei ståande der dei vart kunngjorde, fram til dei startar. Oppdater abonnementsstraumen éin gong etter at du slår av innstillinga, for å hente kunngjeringsdatoane til eksisterande planlagde element.
-    Auto Refresh Interval: Kor ofte OpenTubeX automatisk oppdaterer abonnementsstraumen medan appen er open.
+    Auto Refresh Interval: "Kor ofte OpenTubeX automatisk oppdaterer abonnementsstraumen medan appen er open. På Android oppdaterer eit intervall over null òg straumen medan appen er lukka."
+    Refresh Subscriptions While App Is Closed: "Lèt Android oppdatere abonnementsstraumar med dei valde intervalla medan OpenTubeX er lukka. Slå av dette for å avgrense automatiske oppdateringar til når appen er open."
   Theme Settings:
     Show Progress as Notification: Viser eit vedvarande varsel med framdrift i sanntid for bakgrunnsoperasjonar, til dømes oppdatering av abonnementsstraumen og nedlasting av administrerte verktøy, i staden for den globale framdriftslinja.
     Always Show Scrollbars: Held rullefelta synlege heile tida. Når dette er slått av, tonar dei ut kort tid etter at du sluttar å flytte musa, og kjem fram att så snart du flyttar henne.

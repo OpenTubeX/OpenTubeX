@@ -85,6 +85,74 @@ async function expectSponsorBlockContentClamp(content, previousScrollTop) {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+test('reserves the player height when Shaka loads before video metadata', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+
+  let releaseMedia
+  const mediaPending = new Promise(resolve => { releaseMedia = resolve })
+  await page.route(/googlevideo\.com\/videoplayback/, async route => {
+    await mediaPending
+    await route.fallback()
+  })
+
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await expect(player).toBeVisible({ timeout: 30_000 })
+  await expect.poll(async () => {
+    return await player.evaluate(element => {
+      const video = element.querySelector('video')
+      const bounds = element.getBoundingClientRect()
+      return {
+        hasReservedRatio: element.classList.contains('sixteenByNine'),
+        metadataPending: video?.videoWidth === 0,
+        geometryReserved: Math.abs(bounds.height - bounds.width * 9 / 16) <= 1,
+      }
+    })
+  }).toEqual({
+    hasReservedRatio: true,
+    metadataPending: true,
+    geometryReserved: true,
+  })
+  const pendingBounds = await player.boundingBox()
+  expect(Math.abs(pendingBounds.height - pendingBounds.width * 9 / 16)).toBeLessThanOrEqual(1)
+
+  const watchComponent = await page.evaluateHandle(findWatchComponent)
+  await watchComponent.evaluate(async component => {
+    component.refs.player.hasLoaded = true
+    await new Promise(resolve => requestAnimationFrame(resolve))
+  })
+  await expect(player).toHaveClass(/sixteenByNine/)
+  const shakaLoadedBounds = await player.boundingBox()
+  expect(Math.abs(shakaLoadedBounds.height - pendingBounds.height)).toBeLessThanOrEqual(1)
+
+  await player.evaluate(element => {
+    window.__playerLoadingHeights = []
+    const recordHeight = () => {
+      window.__playerLoadingHeights.push(element.getBoundingClientRect().height)
+    }
+    window.__playerLoadingHeightObserver = new ResizeObserver(recordHeight)
+    window.__playerLoadingHeightObserver.observe(element)
+    recordHeight()
+  })
+  releaseMedia()
+  await waitForPlayback(page)
+  const loadingHeights = await player.evaluate((element) => {
+    window.__playerLoadingHeightObserver.disconnect()
+    return window.__playerLoadingHeights.filter(height => height > 0)
+  })
+  const maximumLoadingHeightChange = Math.max(...loadingHeights
+    .map(height => Math.abs(height - pendingBounds.height)))
+  expect(maximumLoadingHeightChange).toBeLessThanOrEqual(1)
+  await expect.poll(async () => {
+    const loadedBounds = await player.boundingBox()
+    return Math.abs(loadedBounds.height - pendingBounds.height)
+  }).toBeLessThanOrEqual(1)
+})
+
 test('keeps metadata errors visible in family-friendly-only mode', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await app.electronApp.evaluate(({ ipcMain }) => {

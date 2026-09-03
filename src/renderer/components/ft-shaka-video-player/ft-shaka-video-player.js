@@ -1068,6 +1068,7 @@ export default defineComponent({
     }
 
     const hasLoaded = ref(false)
+    const videoLayoutReady = ref(false)
     const annotationCurrentTime = ref(0)
     const annotationVideoAspectRatio = ref(null)
 
@@ -4579,9 +4580,12 @@ export default defineComponent({
       isFullscreenActive: () => isNativeFullscreenActive(),
       isFullscreenMetadataShown: () => showFullscreenMetadata.value,
       isFullscreenSwipeEnabled: () => enableMobileFullscreenSwipe.value,
+      isPlaybackEnded: () => video.value?.ended === true,
+      isPlaybackPaused: () => video.value?.paused === true,
       isPlayerSurfaceTarget,
       isScrollMiniPlayerActive: () => scrollMiniPlayerActive.value,
       setFullscreenMetadata,
+      setShowUiOnPaused,
       showOverlayControls,
       togglePlayerFullScreen: () => ui?.getControls().toggleFullScreen(),
     })
@@ -5665,6 +5669,7 @@ export default defineComponent({
     }
 
     function handlePlay() {
+      setShowUiOnPaused(true)
       playerPaused.value = false
       clearPausedInterfaceReveal()
       shortsPaused.value = false
@@ -5719,6 +5724,7 @@ export default defineComponent({
     }
 
     function handlePause() {
+      setShowUiOnPaused(true)
       playerPaused.value = true
       clearPausedInterfaceReveal()
       shortsPaused.value = true
@@ -5746,6 +5752,7 @@ export default defineComponent({
     }
 
     function handleEnded() {
+      setShowUiOnPaused(true)
       shortsPaused.value = true
       shortsEnded.value = true
       syncPlayPauseControlIcons()
@@ -5825,6 +5832,7 @@ export default defineComponent({
       updateAnnotationVideoAspectRatio()
       updateScrollMiniVideoAspectRatio()
       updateScrollMiniPlayer()
+      videoLayoutReady.value = true
 
       if (isActiveTab.value && isNativeFullscreenActive()) {
         setAndroidFullscreenOrientation(
@@ -9957,6 +9965,7 @@ export default defineComponent({
       player.addEventListener('loading', () => {
         silenceSkipping.reset()
         hasLoaded.value = false
+        videoLayoutReady.value = false
         annotationVideoAspectRatio.value = null
         if (props.shortsPlayer) {
           shortsPaused.value = false
@@ -10637,6 +10646,12 @@ export default defineComponent({
       }
     }
 
+    function retryStreaming() {
+      if (!player) return false
+      ignoreErrors = false
+      return player.retryStreaming()
+    }
+
     /**
      * Vue's lifecycle hooks are synchonous, so if we destroy the player in {@linkcode onBeforeUnmount},
      * it won't be finished in time, as the player destruction is asynchronous.
@@ -10730,6 +10745,7 @@ export default defineComponent({
       getCurrentTime,
       setCurrentTime,
       getSabrReloadState,
+      retryStreaming,
       setFullscreenMetadata,
       closeFullscreenMetadata,
       setFullscreenTranscript,
@@ -10760,6 +10776,11 @@ export default defineComponent({
     const temporaryPlaybackRateIndicatorMessage = ref('')
     let valueChangeTimeout = null
 
+    function setShowUiOnPaused(value) {
+      const config = ui?.getControls().getConfig()
+      if (config) config.showUIOnPaused = value
+    }
+
     function showOverlayControls() {
       ui.getControls().showUI()
     }
@@ -10789,6 +10810,7 @@ export default defineComponent({
 
     return {
       hasLoaded,
+      videoLayoutReady,
       shortsPaused,
       shortsEnded,
       replayIcon: shaka.ui.Enums.MaterialDesignSVGIcons.REPLAY,

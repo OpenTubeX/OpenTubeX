@@ -733,6 +733,7 @@ Settings:
     Shorts Auto Refresh Interval: Shorts bideoen freskatze automatikoaren tartea
     Live Auto Refresh Interval: Zuzeneko emankizunen freskatze automatikoaren tartea
     Posts Auto Refresh Interval: Argitalpenen freskatze automatikoaren tartea
+    Refresh Subscriptions While App Is Closed: "Freskatu harpidetzak aplikazioa itxita dagoenean"
   Distraction Free Settings:
     Sections:
       Visible While Paused: Ikusgai pausatuta dagoenean leiho osoan edo pantaila osoan
@@ -1432,7 +1433,8 @@ Tooltips:
     Show New Content Feed: Berria fitxa erakusten du, aurreko eskuratzean ez zeuden harpidetza-jarioko elementuekin.
     Show New Content Indicators: Puntu txiki bat erakusten du aurreko eskuratzean ez zeuden harpidetza-jarioko elementuen ondoan.
     Show Scheduled Live Streams / Premieres First: Laster hasiko diren zuzeneko emankizunak eta estreinaldiak harpidetza-jarioaren goialdean mantentzen ditu. Desgaituta dagoenean, iragarpenaren kokapenean geratzen dira hasi arte. Desgaitu ondoren, freskatu behin harpidetza-jarioa lehendik programatutako elementuen iragarpen-datak eskuratzeko.
-    Auto Refresh Interval: OpenTubeX aplikazioak harpidetza-jarioa automatikoki freskatuko duen maiztasuna, aplikazioa irekita dagoen bitartean.
+    Auto Refresh Interval: "OpenTubeX aplikazioak harpidetza-jarioa automatikoki freskatuko duen maiztasuna, aplikazioa irekita dagoen bitartean. Androiden, zero ez den tarte batek jarioa freskatzen du aplikazioa itxita dagoenean ere."
+    Refresh Subscriptions While App Is Closed: "Androidi aukera ematen dio harpidetza-jarioak hautatutako tarteetan freskatzeko OpenTubeX itxita dagoenean. Desaktibatu aukera hau freskatze automatikoak aplikazioa irekita dagoenean soilik egiteko."
   Theme Settings:
     Show Progress as Notification: Jakinarazpen iraunkor batean erakusten du atzeko planoko eragiketen uneko aurrerapena, hala nola harpidetzen freskatzea eta kudeatutako tresnen deskargak, aurrerapen-barra globala erabili beharrean.
     Always Show Scrollbars: Korritze-barrak ikusgai mantentzen ditu beti. Desgaituta dagoenean, sagua mugitzeari utzi eta handik gutxira desagertzen dira, eta berriro mugitu bezain laster agertzen.

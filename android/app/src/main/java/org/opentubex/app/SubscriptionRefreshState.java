@@ -6,24 +6,28 @@ final class SubscriptionRefreshState {
     static final class Snapshot {
         final String token;
         final String title;
+        final String cancelLabel;
         final int progress;
 
-        Snapshot(String token, String title, int progress) {
+        Snapshot(String token, String title, String cancelLabel, int progress) {
             this.token = token;
             this.title = title;
+            this.cancelLabel = cancelLabel;
             this.progress = progress;
         }
     }
 
     private String token;
     private String title;
+    private String cancelLabel;
     private int progress;
     private CountDownLatch completion = new CountDownLatch(0);
 
-    synchronized void begin(String nextToken, String nextTitle) {
+    synchronized void begin(String nextToken, String nextTitle, String nextCancelLabel) {
         completion.countDown();
         token = nextToken;
         title = nextTitle;
+        cancelLabel = nextCancelLabel;
         progress = 0;
         completion = new CountDownLatch(1);
     }
@@ -36,7 +40,7 @@ final class SubscriptionRefreshState {
 
     synchronized Snapshot snapshot(String expectedToken) {
         if (!isCurrent(expectedToken)) return null;
-        return new Snapshot(token, title, progress);
+        return new Snapshot(token, title, cancelLabel, progress);
     }
 
     void awaitCompletion(String expectedToken) throws InterruptedException {
@@ -52,6 +56,7 @@ final class SubscriptionRefreshState {
         if (!isCurrent(expectedToken)) return false;
         token = null;
         title = null;
+        cancelLabel = null;
         progress = 0;
         completion.countDown();
         return true;

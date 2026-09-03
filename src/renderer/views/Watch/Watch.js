@@ -136,6 +136,7 @@ const SABR_ERROR_RECOVERY_MAX_TICK_SECONDS = 2
 // ever. This is the hard stop for a whole video: once it is spent the format
 // fallback runs and the video settles on something that plays.
 const MAX_SABR_ERROR_RECOVERIES_PER_VIDEO = 8
+const ANDROID_HTTP_ERROR_RETRY_DELAY_MS = 750
 let nextSabrSchemeId = 0
 const UNAVAILABLE_VIDEO_THUMBNAILS = {
   light: 'https://www.youtube.com/img/desktop/unavailable/unavailable_video.png',
@@ -444,6 +445,7 @@ export default defineComponent({
       preserveTitleOnNextReload: false,
       ipBlockDetectedInCurrentChain: false,
       ipBlockRecoveryAttemptedForCurrentVideo: false,
+      androidHttpErrorRecoveryAttemptedForCurrentVideo: false,
       streamErrorReloadAttemptedForCurrentVideo: false,
       sabrErrorRecoveryAttempts: 0,
       sabrErrorRecoveriesForCurrentVideo: 0,
@@ -1841,6 +1843,7 @@ export default defineComponent({
         if (videoIdChanged) {
           this.useCustomShortsPlayerForCurrentVideo = this.$store.getters.getUseCustomShortsPlayer
           this.ipBlockRecoveryAttemptedForCurrentVideo = false
+          this.androidHttpErrorRecoveryAttemptedForCurrentVideo = false
           this.streamErrorReloadAttemptedForCurrentVideo = false
           this.playbackEngineFallbackAttemptedForCurrentVideo = false
           this.playbackEngineFallbackTarget = null
@@ -4705,6 +4708,20 @@ export default defineComponent({
       return true
     },
 
+    isAndroidTransientHttpRecoveryEnabled() {
+      return process.env.IS_CAPACITOR
+    },
+
+    async retryAndroidTransientHttpError() {
+      if (this.androidHttpErrorRecoveryAttemptedForCurrentVideo) return false
+
+      this.androidHttpErrorRecoveryAttemptedForCurrentVideo = true
+      const videoId = this.videoId
+      await new Promise(resolve => setTimeout(resolve, ANDROID_HTTP_ERROR_RETRY_DELAY_MS))
+      if (videoId !== this.videoId || this.isLoading) return true
+      return this.$refs.player?.retryStreaming() === true
+    },
+
     /**
      * Refreshes yt-dlp's streams and recreates only the player. The watch-page
      * metadata and the built-in fallback source stay loaded.
@@ -4776,6 +4793,10 @@ export default defineComponent({
         if (error.data[1]?.message === 'Failed to fetch' && !navigator.onLine) {
           // Internet connection was lost, do nothing on our side as
           // shaka-player will keep trying until the internet connection returns and resume playback automatically when it does
+          return
+        }
+
+        if (this.isAndroidTransientHttpRecoveryEnabled() && await this.retryAndroidTransientHttpError()) {
           return
         }
       }

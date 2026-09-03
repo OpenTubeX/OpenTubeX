@@ -10,9 +10,12 @@ export function useMobileFullscreenGestures({
   isFullscreenActive,
   isFullscreenMetadataShown,
   isFullscreenSwipeEnabled,
+  isPlaybackEnded,
+  isPlaybackPaused,
   isPlayerSurfaceTarget,
   isScrollMiniPlayerActive,
   setFullscreenMetadata,
+  setShowUiOnPaused,
   showOverlayControls,
   togglePlayerFullScreen,
 }) {
@@ -170,12 +173,13 @@ export function useMobileFullscreenGestures({
       if (elapsed > 450 || distance > 12) return false
 
       mobilePlayerSuppressClickUntil = performance.now() + 350
-      if (!gesture.sideDoubleTap) {
+      const waitForDoubleTap = gesture.sideDoubleTap && !isPlaybackPaused()
+      if (!waitForDoubleTap) {
         mobileSurfaceSuppressTouchEndUntil = performance.now() + 350
         event.preventDefault()
         event.stopImmediatePropagation()
       }
-      queueMobilePlayerSurfaceTap(!gesture.controlsShownAtStart)
+      queueMobilePlayerSurfaceTap(!gesture.controlsShownAtStart, waitForDoubleTap)
       return true
     }
 
@@ -222,7 +226,30 @@ export function useMobileFullscreenGestures({
     return wasActive
   }
 
-  function queueMobilePlayerSurfaceTap(showControls) {
+  function applyMobilePlayerSurfaceTap(showControls) {
+    const controls = getControls()
+    const controlsContainer = controls?.getControlsContainer()
+    if (!controls || !controlsContainer) return
+
+    if (showControls || isPlaybackEnded()) {
+      setShowUiOnPaused(true)
+      controls.showUI()
+    } else {
+      setShowUiOnPaused(false)
+      const config = controls.getConfig()
+      const fadeDelay = config.fadeDelay
+      config.fadeDelay = 0
+      controls.hideUI()
+      config.fadeDelay = fadeDelay
+    }
+  }
+
+  function queueMobilePlayerSurfaceTap(showControls, waitForDoubleTap) {
+    if (!waitForDoubleTap) {
+      applyMobilePlayerSurfaceTap(showControls)
+      return
+    }
+
     if (mobileSurfaceTapTimer !== null) {
       clearTimeout(mobileSurfaceTapTimer)
       mobileSurfaceTapTimer = null
@@ -231,15 +258,7 @@ export function useMobileFullscreenGestures({
 
     mobileSurfaceTapTimer = window.setTimeout(() => {
       mobileSurfaceTapTimer = null
-      const controls = getControls()
-      const controlsContainer = controls?.getControlsContainer()
-      if (!controls || !controlsContainer) return
-
-      if (showControls) {
-        controls.showUI()
-      } else {
-        controls.hideUI()
-      }
+      applyMobilePlayerSurfaceTap(showControls)
     }, 240)
   }
 
@@ -273,7 +292,10 @@ export function useMobileFullscreenGestures({
     }
 
     const controlsContainer = getControls()?.getControlsContainer()
-    queueMobilePlayerSurfaceTap(controlsContainer?.hasAttribute('shown') !== true)
+    const bounds = getContainer()?.getBoundingClientRect()
+    const relativeX = bounds?.width > 0 ? (event.clientX - bounds.left) / bounds.width : 0.5
+    const waitForDoubleTap = !isPlaybackPaused() && (relativeX <= 0.35 || relativeX >= 0.65)
+    queueMobilePlayerSurfaceTap(controlsContainer?.hasAttribute('shown') !== true, waitForDoubleTap)
     return true
   }
 

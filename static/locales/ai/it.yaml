@@ -731,6 +731,7 @@ Settings:
     Shorts Auto Refresh Interval: Intervallo di aggiornamento automatico degli Shorts
     Live Auto Refresh Interval: Intervallo di aggiornamento automatico delle dirette
     Posts Auto Refresh Interval: Intervallo di aggiornamento automatico dei post
+    Refresh Subscriptions While App Is Closed: "Aggiorna le iscrizioni quando l'app è chiusa"
   Distraction Free Settings:
     Sections:
       Visible While Paused: Visibile durante la pausa in finestra intera o a schermo intero
@@ -1419,7 +1420,8 @@ Tooltips:
     Show New Content Feed: Mostra una scheda Nuovi con gli elementi del feed delle iscrizioni assenti durante il recupero precedente.
     Show New Content Indicators: Mostra un puntino accanto agli elementi del feed delle iscrizioni assenti durante il recupero precedente.
     Show Scheduled Live Streams / Premieres First: Mantiene le prossime dirette e première all'inizio del feed delle iscrizioni. Se disabilitato, restano nella posizione dell'annuncio fino all'inizio. Dopo la disattivazione, aggiorna una volta il feed per recuperare le date degli annunci delle voci programmate esistenti.
-    Auto Refresh Interval: Frequenza con cui OpenTubeX aggiorna automaticamente il feed delle iscrizioni mentre l'app è aperta.
+    Auto Refresh Interval: "Frequenza con cui OpenTubeX aggiorna automaticamente il feed delle iscrizioni mentre l'app è aperta. Su Android, un intervallo diverso da zero aggiorna il feed anche quando l’app è chiusa."
+    Refresh Subscriptions While App Is Closed: "Consente ad Android di aggiornare i feed delle iscrizioni agli intervalli selezionati mentre OpenTubeX è chiuso. Disattiva questa opzione per limitare gli aggiornamenti automatici ai periodi in cui l'app è aperta."
   Theme Settings:
     Show Progress as Notification: Mostra una notifica persistente con l'avanzamento in tempo reale delle operazioni in background, come l'aggiornamento delle iscrizioni e il download degli strumenti gestiti, al posto della barra di avanzamento globale.
     Always Show Scrollbars: Mantiene le barre di scorrimento sempre visibili. Se disabilitato, scompaiono poco dopo che smetti di muovere il mouse e riappaiono non appena lo muovi di nuovo.

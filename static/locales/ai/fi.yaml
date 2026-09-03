@@ -744,6 +744,7 @@ Settings:
     Shorts Auto Refresh Interval: Shorts-videoiden automaattisen päivityksen aikaväli
     Live Auto Refresh Interval: Suorien lähetysten automaattisen päivityksen aikaväli
     Posts Auto Refresh Interval: Julkaisujen automaattisen päivityksen aikaväli
+    Refresh Subscriptions While App Is Closed: "Päivitä tilaukset sovelluksen ollessa suljettuna"
   Distraction Free Settings:
     Sections:
       Visible While Paused: Näkyvissä keskeytyksen aikana koko ikkunan tai koko näytön tilassa
@@ -1447,7 +1448,8 @@ Tooltips:
     Show New Content Feed: Näyttää Uudet-välilehden, joka sisältää tilausnäkymän kohteet, joita ei ollut edellisellä hakukerralla.
     Show New Content Indicators: Näyttää pienen pisteen niiden tilausnäkymän kohteiden vieressä, joita ei ollut edellisellä hakukerralla.
     Show Scheduled Live Streams / Premieres First: Pitää tulevat suorat lähetykset ja ensi-illat tilausnäkymän alussa. Kun asetus on poistettu käytöstä, ne pysyvät ilmoitusajankohdan mukaisella paikallaan alkamiseensa asti. Päivitä tilausnäkymä kerran asetuksen poistamisen jälkeen, jotta olemassa olevien ajastettujen kohteiden ilmoituspäivät haetaan.
-    Auto Refresh Interval: Kuinka usein OpenTubeX päivittää tilausnäkymän automaattisesti sovelluksen ollessa avoinna.
+    Auto Refresh Interval: "Kuinka usein OpenTubeX päivittää tilausnäkymän automaattisesti sovelluksen ollessa avoinna. Androidissa nollasta poikkeava aikaväli päivittää syötteen myös sovelluksen ollessa suljettuna."
+    Refresh Subscriptions While App Is Closed: "Sallii Androidin päivittää tilaussyötteet valituin aikavälein, kun OpenTubeX on suljettuna. Poista tämä käytöstä, jos haluat automaattiset päivitykset vain sovelluksen ollessa avoinna."
   Theme Settings:
     Show Progress as Notification: Näyttää taustatoimintojen, kuten tilausten päivityksen ja ylläpidettyjen työkalujen latausten, etenemisen jatkuvassa ilmoituksessa yleisen edistymispalkin sijaan.
     Always Show Scrollbars: Pitää vierityspalkit aina näkyvissä. Kun asetus on poistettu käytöstä, ne häipyvät pian hiiren liikkeen pysähdyttyä ja tulevat uudelleen näkyviin heti, kun hiirtä liikutetaan.

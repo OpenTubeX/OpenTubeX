@@ -731,6 +731,7 @@ Settings:
     Shorts Auto Refresh Interval: ショート動画の自動更新間隔
     Live Auto Refresh Interval: ライブ配信の自動更新間隔
     Posts Auto Refresh Interval: 投稿の自動更新間隔
+    Refresh Subscriptions While App Is Closed: "アプリを閉じている間も登録チャンネルを更新"
   Distraction Free Settings:
     Sections:
       Visible While Paused: 全ウィンドウ表示・全画面表示で一時停止中に表示
@@ -1419,7 +1420,8 @@ Tooltips:
     Show New Content Feed: 前回の取得時にはなかった登録チャンネルのフィード項目を「新着」タブに表示します。
     Show New Content Indicators: 前回の取得時にはなかった登録チャンネルのフィード項目の横に小さな点を表示します。
     Show Scheduled Live Streams / Premieres First: 予定されているライブ配信とプレミア公開を登録チャンネルのフィード上部に表示します。無効にすると、開始するまで告知時の位置に表示されます。無効にした後、一度フィードを更新すると、既存の予定項目の告知日を取得できます。
-    Auto Refresh Interval: アプリの起動中にOpenTubeXが登録チャンネルのフィードを自動更新する間隔です。
+    Auto Refresh Interval: "アプリの起動中にOpenTubeXが登録チャンネルのフィードを自動更新する間隔です。 Android では、0 以外の間隔を選ぶと、アプリを閉じている間もフィードが更新されます。"
+    Refresh Subscriptions While App Is Closed: "OpenTubeX を閉じている間も、Android が選択した間隔で登録チャンネルのフィードを更新できるようにします。アプリを開いている間だけ自動更新する場合は、この設定をオフにしてください。"
   Theme Settings:
     Show Progress as Notification: 登録チャンネルの更新や管理対象ツールのダウンロードなど、バックグラウンド処理の進行状況を共通の進行状況バーではなく、常に表示される通知で示します。
     Always Show Scrollbars: スクロールバーを常に表示します。無効にすると、マウスを止めてから少し後に消え、再び動かすとすぐに表示されます。

@@ -678,7 +678,7 @@
 
 /* Phone toasts follow the mobile navigation instead of the desktop position
    preference. Teleport puts the holder beside `.app`, hence the body query. */
-:global(body:has(.app.capacitorPhoneLayout)) .toast-holder[data-sonner-toaster] {
+body:has(.app.capacitorPhoneLayout) .toast-holder[data-sonner-toaster] {
   inset-block: auto calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px);
   /* stylelint-disable-next-line liberty/use-logical-spec */
   right: auto;
@@ -689,12 +689,23 @@
   transform: translateX(-50%);
 }
 
-:global(body:has(.app.capacitorPhoneLayout)) .toast-holder[data-sonner-toaster] [data-sonner-toast] {
+body:has(.app.capacitorPhoneLayout) .toast-holder[data-sonner-toaster] [data-sonner-toast] {
   justify-content: center;
 }
 
-:global(body:has(.app.capacitorPhoneLayout)) .progress-toast-holder {
+body:has(.app.capacitorPhoneLayout) .progress-toast-holder {
   inset-block: auto calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px);
   inset-inline: 0;
   justify-content: center;
+}
+
+/* Tablet tabs and the top navigation are both fixed app chrome on Android.
+   Keep top-positioned toasts below them instead of covering either bar. */
+body:has(.app.capacitorTabletLayout) .toast-holder.position-top-left[data-sonner-toaster],
+body:has(.app.capacitorTabletLayout) .toast-holder.position-top-center[data-sonner-toaster],
+body:has(.app.capacitorTabletLayout) .toast-holder.position-top-right[data-sonner-toaster],
+body:has(.app.capacitorTabletLayout) .progress-toast-holder.position-top-left,
+body:has(.app.capacitorTabletLayout) .progress-toast-holder.position-top-center,
+body:has(.app.capacitorTabletLayout) .progress-toast-holder.position-top-right {
+  inset-block-start: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 48px + var(--top-nav-height, 60px) + 12px);
 }

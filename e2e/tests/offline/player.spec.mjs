@@ -841,10 +841,10 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
   await surface.evaluate(element => element.setAttribute('shown', 'true'))
 
   let pointerId = 1
-  const tapCenter = async () => {
+  const tapPlayer = async (relativeX = 0.5) => {
     const bounds = await player.boundingBox()
     if (!bounds) throw new Error('player is not visible')
-    const clientX = bounds.x + bounds.width / 2
+    const clientX = bounds.x + bounds.width * relativeX
     const clientY = bounds.y + bounds.height * 0.42
     const currentPointerId = pointerId++
 
@@ -874,11 +874,11 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
     })))
   }
 
-  expect(await tapCenter()).toBe(true)
-  await expect.poll(() => surface.getAttribute('shown')).toBeNull()
+  expect(await tapPlayer()).toBe(true)
+  await expect.poll(() => surface.getAttribute('shown'), { timeout: 500 }).toBeNull()
   expect(await video.evaluate(element => element.paused)).toBe(false)
 
-  expect(await tapCenter()).toBe(true)
+  expect(await tapPlayer()).toBe(true)
   await expect(surface).toHaveAttribute('shown', 'true')
   await page.waitForTimeout(1000)
   await expect(surface).toHaveAttribute('shown', 'true')
@@ -888,16 +888,25 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
   await surface.evaluate(element => element.removeAttribute('shown'))
   await video.evaluate(element => element.pause())
   await expect(surface).toHaveAttribute('shown', 'true')
-  expect(await tapCenter()).toBe(true)
-  await page.waitForTimeout(1000)
-  await expect(surface).toHaveAttribute('shown', 'true')
+  expect(await tapPlayer()).toBe(true)
+  await expect.poll(() => surface.getAttribute('shown'), { timeout: 500 }).toBeNull()
   expect(await video.evaluate(element => element.paused)).toBe(true)
+
+  expect(await tapPlayer(0.85)).toBe(true)
+  await expect(surface).toHaveAttribute('shown', 'true')
+  await page.waitForTimeout(500)
+  expect(await tapPlayer(0.85)).toBe(true)
+  await expect.poll(() => surface.getAttribute('shown'), { timeout: 500 }).toBeNull()
+
+  expect(await tapPlayer()).toBe(true)
+  await expect(surface).toHaveAttribute('shown', 'true')
 
   await video.evaluate(element => {
     Object.defineProperty(element, 'ended', { configurable: true, value: true })
     element.dispatchEvent(new Event('ended'))
   })
   await expect(surface).toHaveAttribute('shown', 'true')
+  expect(await tapPlayer()).toBe(true)
   await page.waitForTimeout(3500)
   await expect(surface).toHaveAttribute('shown', 'true')
   await expect(player.locator('.shaka-controls-button-panel')).toHaveCSS('opacity', '1')
