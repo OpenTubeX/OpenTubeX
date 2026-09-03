@@ -677,7 +677,7 @@ test.describe('settings', () => {
     await expect(headings).toHaveText([
       'Theme',
       'Layout',
-      'Quick settings',
+      'Navigation / Quick settings',
       'Video lists and thumbnails',
     ])
     const theme = appearance.locator('.settingsSection').filter({
