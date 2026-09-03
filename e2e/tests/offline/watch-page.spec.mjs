@@ -4436,6 +4436,69 @@ test('treats an empty comments response as no comments', async ({ app, page }) =
   await page.locator('.commentAutoLoadSentinel').scrollIntoViewIfNeeded()
 
   await expect(page.locator('.noCommentMsg')).toHaveText('There are no comments available for this video')
+  const reloadButton = page.locator('.noCommentActions .reloadComments .iconButton')
+  const sortSelect = page.locator('.noCommentActions .select-text')
+  const expectReloadAlignedBeforeSort = async () => {
+    const [reloadBox, sortBox] = await Promise.all([
+      reloadButton.boundingBox(),
+      sortSelect.boundingBox()
+    ])
+    expect({
+      reloadBeforeSort: reloadBox.x + reloadBox.width <= sortBox.x,
+      verticallyAligned: Math.abs(
+        reloadBox.y + reloadBox.height / 2 -
+        (sortBox.y + sortBox.height / 2)
+      ) <= 1
+    }).toEqual({
+      reloadBeforeSort: true,
+      verticallyAligned: true
+    })
+  }
+  await expectReloadAlignedBeforeSort()
+
+  const [actionsBox, messageBox] = await Promise.all([
+    page.locator('.noCommentActions').boundingBox(),
+    page.locator('.noCommentMsg').boundingBox()
+  ])
+  expect(Math.abs(
+    actionsBox.y + actionsBox.height / 2 -
+    (messageBox.y + messageBox.height / 2)
+  )).toBeLessThanOrEqual(1)
+
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+  const [scaledActionsBox, scaledMessageBox] = await Promise.all([
+    page.locator('.noCommentActions').boundingBox(),
+    page.locator('.noCommentMsg').boundingBox()
+  ])
+  expect(Math.abs(
+    scaledActionsBox.y + scaledActionsBox.height / 2 -
+    (scaledMessageBox.y + scaledMessageBox.height / 2)
+  )).toBeLessThanOrEqual(1)
+
+  await setWindowSize(app, page, { width: 375, height: 800 })
+  await page.locator('.app').evaluate((element) => {
+    element.classList.add('capacitorTabs', 'capacitorPhoneLayout')
+    element.classList.remove('topTabs', 'bottomTabs', 'verticalTabs')
+  })
+
+  const readMobileLayout = () => page.locator('.noComments').evaluate((element) => {
+    const actionsBounds = element.querySelector('.noCommentActions').getBoundingClientRect()
+    const messageBounds = element.querySelector('.noCommentMsg').getBoundingClientRect()
+    return {
+      actionsAboveMessage: actionsBounds.bottom <= messageBounds.top,
+      hasHorizontalOverflow: element.scrollWidth > element.clientWidth + 1
+    }
+  })
+  const expectedMobileLayout = {
+    actionsAboveMessage: true,
+    hasHorizontalOverflow: false
+  }
+  expect(await readMobileLayout()).toEqual(expectedMobileLayout)
+  await expectReloadAlignedBeforeSort()
+
+  await setWindowSize(app, page, { width: 800, height: 375 })
+  expect(await readMobileLayout()).toEqual(expectedMobileLayout)
+  await expectReloadAlignedBeforeSort()
   await expect(page.locator('.toast', { hasText: 'Local API Error' })).toHaveCount(0)
   expect(commentRequestCount).toBe(1)
 })
