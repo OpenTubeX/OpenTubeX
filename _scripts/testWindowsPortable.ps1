@@ -140,10 +140,14 @@ function Wait-ForInterposerState {
   $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
   do {
     Update-AppProcessIds -RootProcessId $RootProcessId -ProcessIds $ProcessIds
-    $registryContents = if (Test-Path $RegistryFile) {
-      Get-Content $RegistryFile -Raw
-    } else {
-      ''
+    $registryContents = ''
+    if (Test-Path $RegistryFile) {
+      try {
+        $registryContents = Get-Content $RegistryFile -Raw
+      } catch [System.IO.IOException] {
+        # Interposer rewrites this file while registry calls are in flight.
+        # Retry on the next poll if it temporarily holds an exclusive lock.
+      }
     }
     if ($registryContents -match '(?i)LocalServer32') {
       return
@@ -208,6 +212,49 @@ function Stop-RegistryTrace {
   }
 }
 
+function Convert-RegistryEventNumber {
+  param([Parameter(Mandatory)] [string] $Value)
+
+  $trimmedValue = $Value.Trim()
+  if ($trimmedValue -match '^0[xX](?<Hex>[0-9a-fA-F]+)') {
+    return [Convert]::ToUInt32($Matches.Hex, 16)
+  }
+  if ($trimmedValue -match '^(?<Decimal>[0-9]+)') {
+    return [Convert]::ToUInt32($Matches.Decimal, 10)
+  }
+  return $null
+}
+
+function Test-SuccessfulRegistryMutation {
+  param(
+    [Parameter(Mandatory)] [int] $EventId,
+    [Parameter(Mandatory)] [hashtable] $EventData
+  )
+
+  if (-not $EventData.ContainsKey('Status') -or
+      (Convert-RegistryEventNumber $EventData.Status) -ne 0) {
+    return $false
+  }
+
+  switch ($EventId) {
+    1 {
+      # CreateKey also reports ordinary opens. Disposition 1 means that the
+      # call created a new key; disposition 2 means that it opened one.
+      return $EventData.ContainsKey('Disposition') -and
+        (Convert-RegistryEventNumber $EventData.Disposition) -eq 1
+    }
+    { $_ -in 3, 5, 6, 15 } { return $true }
+    11 {
+      # Only KeyWriteTimeInformation (0) changes persisted key metadata.
+      # Other information classes configure the open handle or runtime state.
+      return $EventData.ContainsKey('InfoClass') -and
+        ((Convert-RegistryEventNumber $EventData.InfoClass) -eq 0 -or
+         $EventData.InfoClass -eq 'KeyWriteTimeInformation')
+    }
+    default { return $false }
+  }
+}
+
 function Assert-NoHostRegistryWrites {
   param(
     [Parameter(Mandatory)] [string] $TraceFile,
@@ -221,9 +268,9 @@ function Assert-NoHostRegistryWrites {
   }
 
   [xml] $trace = Get-Content $OutputFile -Raw
-  $registryMutationEventIds = @(1, 3, 5, 6, 11, 12, 15)
   $appRegistryWrites = [System.Collections.Generic.List[string]]::new()
   $externalOpenTubeXRegistryWrites = [System.Collections.Generic.List[string]]::new()
+  $registryKeyPaths = @{}
 
   foreach ($event in $trace.SelectNodes("//*[local-name()='Event']")) {
     $system = $event.SelectSingleNode("./*[local-name()='System']")
@@ -238,10 +285,55 @@ function Assert-NoHostRegistryWrites {
 
     $eventProcessId = [int] $execution.GetAttribute('ProcessID')
     $eventId = [int] $eventIdNode.InnerText
-    $payload = @($event.SelectNodes("./*[local-name()='EventData']/*[local-name()='Data']") |
-      ForEach-Object { $_.InnerText }) -join ' '
+    $eventData = @{}
+    foreach ($dataNode in $event.SelectNodes(
+      "./*[local-name()='EventData']/*[local-name()='Data']"
+    )) {
+      $eventData[$dataNode.GetAttribute('Name')] = $dataNode.InnerText
+    }
+    if ($eventId -in 1, 2 -and
+        $eventData.ContainsKey('Status') -and
+        (Convert-RegistryEventNumber $eventData.Status) -eq 0 -and
+        $eventData.ContainsKey('KeyObject') -and $eventData.KeyObject) {
+      $basePath = if ($eventData.ContainsKey('BaseName')) {
+        $eventData.BaseName.Trim()
+      } else { '' }
+      $baseObject = if ($eventData.ContainsKey('BaseObject')) {
+        $eventData.BaseObject.Trim()
+      } else { '' }
+      if (-not $basePath -and $registryKeyPaths.ContainsKey($baseObject)) {
+        $basePath = $registryKeyPaths[$baseObject]
+      }
+      $relativePath = if ($eventData.ContainsKey('RelativeName')) {
+        $eventData.RelativeName.Trim()
+      } else { '' }
+      $keyPath = if ($basePath -and $relativePath) {
+        "$basePath\$relativePath"
+      } elseif ($relativePath) {
+        $relativePath
+      } else {
+        $basePath
+      }
+      if ($keyPath) {
+        $registryKeyPaths[$eventData.KeyObject.Trim()] = $keyPath
+      }
+    }
+    $keyName = if ($eventData.ContainsKey('KeyName')) {
+      $eventData.KeyName.Trim()
+    } else { '' }
+    if (-not $keyName -and
+        $eventData.ContainsKey('KeyObject') -and $eventData.KeyObject -and
+        $registryKeyPaths.ContainsKey($eventData.KeyObject.Trim())) {
+      $eventData.ResolvedKeyName = $registryKeyPaths[$eventData.KeyObject.Trim()]
+    }
+    $payload = @($eventData.GetEnumerator() | Sort-Object Key |
+      ForEach-Object { "$($_.Key)=$($_.Value)" }) -join ' '
     $description = "event $eventId, process $eventProcessId`: $payload"
-    if ($eventId -notin $registryMutationEventIds) {
+    if ($eventId -eq 13 -and
+        $eventData.ContainsKey('KeyObject') -and $eventData.KeyObject) {
+      $registryKeyPaths.Remove($eventData.KeyObject.Trim())
+    }
+    if (-not (Test-SuccessfulRegistryMutation -EventId $eventId -EventData $eventData)) {
       continue
     }
     if ($ProcessIds.Contains($eventProcessId)) {
