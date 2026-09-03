@@ -893,6 +893,7 @@ test.describe('OpenTubeX sync server', () => {
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
     await expect(syncSection.getByLabel('Settings')).toBeVisible()
     await expect(syncSection.getByLabel('Settings')).toBeDisabled()
+    await expect(syncSection.getByRole('button', { name: 'Change password' })).toHaveCount(0)
     await expect(syncSection.getByText(/does not support settings syncing/)).toBeVisible()
     await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
     expect(maxConcurrentSubscriptionWrites).toBeGreaterThan(1)

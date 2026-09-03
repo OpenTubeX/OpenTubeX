@@ -244,7 +244,7 @@
             @click="disconnect"
           />
           <FtButton
-            v-if="passwordLogin"
+            v-if="accountSessionsSupported && passwordLogin"
             :label="t('Settings.Sync Settings.Change Password')"
             :icon="['fas', 'key']"
             :disabled="busy || accountActionBusy"
