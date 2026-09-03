@@ -5285,6 +5285,8 @@ export default defineComponent({
       updateSponsorBlockSubmissionState()
     }, { immediate: true })
 
+    let mediaSessionStopped = false
+
     watch(() => props.videoId, () => {
       resetAbRepeat()
       mediaSessionStopped = false
@@ -5716,8 +5718,6 @@ export default defineComponent({
     watch(() => store.getters.getKeyboardShortcuts, () => setLocale(locale.value))
 
     // #endregion player locales
-
-    let mediaSessionStopped = false
 
     function registerMediaSessionHandlers() {
       tabMediaCoordinator.setActionHandlers(mediaTabId, 'player', {
