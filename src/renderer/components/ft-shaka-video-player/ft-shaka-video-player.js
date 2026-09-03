@@ -6458,9 +6458,26 @@ export default defineComponent({
     let pipWindow = null
     let pipWindowUsesInnerSize = false
     let documentPipPageHideHandler = null
+    let documentPipPageHideWindow = null
     let documentPipEnterTimeout = null
+    let disposed = false
     const pipWindowWidth = ref(null)
     const pipWindowHeight = ref(null)
+
+    /** @param {Window | null} [expectedWindow] */
+    function removeDocumentPipPageHideHandler(expectedWindow = null) {
+      if (
+        !documentPipPageHideHandler ||
+        !documentPipPageHideWindow ||
+        (expectedWindow && documentPipPageHideWindow !== expectedWindow)
+      ) {
+        return
+      }
+
+      documentPipPageHideWindow.removeEventListener('pagehide', documentPipPageHideHandler)
+      documentPipPageHideHandler = null
+      documentPipPageHideWindow = null
+    }
 
     /**
      * @param {PictureInPictureWindow | Window} nextPipWindow
@@ -6469,10 +6486,7 @@ export default defineComponent({
     function activatePictureInPicture(nextPipWindow, usesInnerSize = false) {
       if (pipWindow && pipWindow !== nextPipWindow) {
         pipWindow.removeEventListener('resize', handlePictureInPictureResize)
-        if (documentPipPageHideHandler) {
-          pipWindow.removeEventListener('pagehide', documentPipPageHideHandler)
-          documentPipPageHideHandler = null
-        }
+        removeDocumentPipPageHideHandler(pipWindow)
       }
 
       pictureInPictureActive.value = true
@@ -6512,13 +6526,23 @@ export default defineComponent({
       if (documentPipEnterTimeout !== null) {
         clearTimeout(documentPipEnterTimeout)
       }
+      removeDocumentPipPageHideHandler()
+      documentPipPageHideHandler = () => {
+        if (documentPipEnterTimeout !== null) {
+          clearTimeout(documentPipEnterTimeout)
+          documentPipEnterTimeout = null
+        }
+        documentPipPageHideHandler = null
+        documentPipPageHideWindow = null
+        deactivatePictureInPicture(documentPipWindow)
+      }
+      documentPipPageHideWindow = documentPipWindow
+      documentPipWindow.addEventListener('pagehide', documentPipPageHideHandler, { once: true })
       documentPipEnterTimeout = setTimeout(() => {
         documentPipEnterTimeout = null
         if (container.value?.ownerDocument !== documentPipWindow.document) return
 
         activatePictureInPicture(documentPipWindow, true)
-        documentPipPageHideHandler = () => deactivatePictureInPicture(documentPipWindow)
-        documentPipWindow.addEventListener('pagehide', documentPipPageHideHandler, { once: true })
       })
     }
 
@@ -6533,14 +6557,11 @@ export default defineComponent({
 
       if (pipWindow) {
         pipWindow.removeEventListener('resize', handlePictureInPictureResize)
-        if (documentPipPageHideHandler) {
-          pipWindow.removeEventListener('pagehide', documentPipPageHideHandler)
-        }
+        removeDocumentPipPageHideHandler(pipWindow)
       }
 
       pipWindow = null
       pipWindowUsesInnerSize = false
-      documentPipPageHideHandler = null
       pipWindowWidth.value = null
       pipWindowHeight.value = null
 
@@ -10133,6 +10154,8 @@ export default defineComponent({
       await initializeActiveTab()
       await initializePlatformInfo()
 
+      if (disposed) return
+
       const localPlayer = new shaka.Player()
 
       ui = new shaka.ui.Overlay(
@@ -10816,6 +10839,7 @@ export default defineComponent({
     // #region tear down
 
     onBeforeUnmount(() => {
+      disposed = true
       clearTimeout(paidPromotionTimer)
       if (fullscreenDockLayoutFrame !== null) {
         cancelAnimationFrame(fullscreenDockLayoutFrame)
@@ -10855,6 +10879,7 @@ export default defineComponent({
         clearTimeout(documentPipEnterTimeout)
         documentPipEnterTimeout = null
       }
+      removeDocumentPipPageHideHandler()
 
       // Clean up IPC listener for exit fullscreen
       if (exitFullscreenCleanup) {
