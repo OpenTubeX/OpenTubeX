@@ -338,7 +338,10 @@ test.describe('OpenTubeX sync server', () => {
       await devices.getByRole('button', { name: 'Refresh devices' }).click()
       await staleSessionRequestRequested
       try {
-        await devices.getByRole('button', { name: 'Change password' }).click()
+        const changePasswordButton = syncSection.getByRole('button', { name: 'Change password' })
+        await expect(changePasswordButton).toBeVisible()
+        await expect(devices.getByRole('button', { name: 'Change password' })).toHaveCount(0)
+        await changePasswordButton.click()
         const passwordPrompt = page.getByRole('dialog', { name: 'Change password' })
         await passwordPrompt.getByLabel('Current password').fill(accountPassword)
         await passwordPrompt.getByLabel('New password', { exact: true }).fill('new-local-test-password')
@@ -890,6 +893,7 @@ test.describe('OpenTubeX sync server', () => {
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
     await expect(syncSection.getByLabel('Settings')).toBeVisible()
     await expect(syncSection.getByLabel('Settings')).toBeDisabled()
+    await expect(syncSection.getByRole('button', { name: 'Change password' })).toHaveCount(0)
     await expect(syncSection.getByText(/does not support settings syncing/)).toBeVisible()
     await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
     expect(maxConcurrentSubscriptionWrites).toBeGreaterThan(1)

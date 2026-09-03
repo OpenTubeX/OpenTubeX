@@ -244,6 +244,13 @@
             @click="disconnect"
           />
           <FtButton
+            v-if="accountSessionsSupported && passwordLogin"
+            :label="t('Settings.Sync Settings.Change Password')"
+            :icon="['fas', 'key']"
+            :disabled="busy || accountActionBusy"
+            @click="openPasswordPrompt"
+          />
+          <FtButton
             :label="t('Settings.Sync Settings.Delete Account')"
             theme="destructive"
             :icon="['fas', 'trash']"
@@ -259,9 +266,6 @@
           :privacy-key="privacyKey"
           :device-id="currentDeviceId"
           :device-name="currentDeviceName"
-          :password-login="passwordLogin"
-          :account-actions-disabled="busy || accountActionBusy"
-          @change-password="openPasswordPrompt"
           @current-revoked="disconnect"
           @password-login-changed="passwordLogin = $event"
         />
