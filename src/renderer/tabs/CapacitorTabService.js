@@ -42,6 +42,7 @@ export class CapacitorTabService {
     this.store = store
     this.navigation = navigation
     this.initialized = false
+    this.sessionGeneration = 0
     this.removeRouterHook = () => {}
     this.removeStoreSubscription = () => {}
   }
@@ -294,13 +295,14 @@ export class CapacitorTabService {
 
   async commitAndPresent(previous, session) {
     const previousPresentedTabId = this.store.getters.getPresentedTabId
-    this.commitSession(session)
+    const presentationGeneration = this.commitSession(session)
     if (await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)) {
       return true
     }
 
     const current = this.currentSession()
     if (
+      this.sessionGeneration !== presentationGeneration ||
       current.activeTabId !== session.activeTabId ||
       current.selectionRevision !== session.selectionRevision
     ) {
@@ -351,6 +353,8 @@ export class CapacitorTabService {
 
   commitSession(session, presentedTabId = this.store.getters.getPresentedTabId ?? session.activeTabId) {
     this.store.commit('setTabsState', toRuntimeTabState(session, presentedTabId))
+    this.sessionGeneration += 1
+    return this.sessionGeneration
   }
 
   persist() {

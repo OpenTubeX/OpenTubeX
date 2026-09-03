@@ -4082,7 +4082,7 @@ export default defineComponent({
       // A background tab force-pauses its brief autoplay attempt, which would
       // otherwise save a spurious ~1 second resume point. Only persist progress
       // for tabs the user has actually presented.
-      if (!this.hasBeenPresented) { return }
+      if (!this.isCurrentlyPresented() || !this.hasBeenPresented) { return }
       if (!this.$refs.player?.hasLoaded) { return }
 
       const currentTime = this.shortsPlaybackCompleted && this.watchedProgressSavingEnabled
@@ -4481,6 +4481,9 @@ export default defineComponent({
     },
 
     handlePlayerEnded: function (sleepTimerEnded = false) {
+      if (!this.isCurrentlyPresented()) {
+        return
+      }
       this.markAsWatchedIfFinished(this.videoLengthSeconds, true)
 
       if (sleepTimerEnded) {
@@ -4496,10 +4499,10 @@ export default defineComponent({
     },
 
     handleVideoEnded: function () {
-      this.handleWatchProgressAutoSaveWhenProgressEnabled()
-      if (this.isTabPresented === false) {
+      if (!this.isCurrentlyPresented()) {
         return
       }
+      this.handleWatchProgressAutoSaveWhenProgressEnabled()
       // Standalone YouTube-style Shorts stop for the replay control instead of
       // advancing. Playlist Shorts still follow the playlist autoplay setting.
       if (this.customShortsPlayerActive && this.isStandaloneShort) {

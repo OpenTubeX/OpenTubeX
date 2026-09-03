@@ -137,6 +137,29 @@ test('does not roll back over a newer tab selection', async () => {
   assert.deepEqual(store.getters.getTabs.map(tab => tab.id), ['tab-a', 'tab-b'])
 })
 
+test('does not roll back over a reload while presentation is pending', async () => {
+  let session = createLoadedSession()
+  session = addCapacitorTab(session, createCapacitorTab(WATCH_ROUTE, 'Video', 'tab-b'))
+  session = completeCapacitorTabMount(session, 'tab-b', 1)
+  session = activateCapacitorTab(session, 'tab-a')
+  const store = createStore(session)
+  let finishPresentation
+  const navigation = createNavigation(store)
+  navigation.requestPresentation = () => new Promise(resolve => {
+    finishPresentation = resolve
+  })
+  const service = new CapacitorTabService(createRouter(), store, navigation)
+
+  const activation = service.activateTab('tab-b')
+  assert.equal(await service.reloadTab('tab-b'), true)
+  finishPresentation(false)
+
+  assert.equal(await activation, false)
+  assert.equal(store.getters.getActiveTabId, 'tab-b')
+  assert.equal(store.getters.getTabById('tab-b').refreshKey, 1)
+  assert.equal(store.getters.getTabById('tab-b').mountRevision, 2)
+})
+
 test('rolls back newly created tabs when presentation fails', async () => {
   const store = createStore(createLoadedSession())
   const service = new CapacitorTabService(createRouter(), store, createNavigation(store))
