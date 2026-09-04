@@ -273,6 +273,47 @@ test('reports an app switch made through a KDE shell popup', async () => {
   assert.deepEqual(focusedStates, [true, true, true, false])
 })
 
+test('does not report transient focus loss while KWin hands off to another app', async () => {
+  // Forwarding the empty report would produce false, true, false and make
+  // automatic PiP open, close, then reopen during the same app switch.
+  const focusedStates = await focusedStatesAfterBlur(
+    {
+      resourceClass: '',
+      skipTaskbar: false,
+      uuid: '',
+    },
+    {
+      activeWindowChanges: [
+        {
+          resourceClass: 'electron',
+          skipTaskbar: false,
+          uuid: 'window',
+        },
+        {
+          resourceClass: 'org.kde.konsole',
+          skipTaskbar: false,
+          uuid: 'konsole',
+        },
+      ],
+    }
+  )
+
+  assert.deepEqual(focusedStates, [true, false])
+})
+
+test('reports focus loss when KWin keeps the active window empty', async () => {
+  const focusedStates = await focusedStatesAfterBlur(
+    {
+      resourceClass: '',
+      skipTaskbar: false,
+      uuid: '',
+    },
+    { focusHandoffDelay: 0 }
+  )
+
+  assert.deepEqual(focusedStates, [false])
+})
+
 test('detects a single minimized window when no earlier KWin snapshot is available', () => {
   const current = [
     windowInfo({ uuid: 'one', minimized: true }),
@@ -382,7 +423,10 @@ function targetWindow () {
   }
 }
 
-async function focusedStatesAfterBlur (activeWindow, { activeWindowChanges = [] } = {}) {
+async function focusedStatesAfterBlur (
+  activeWindow,
+  { activeWindowChanges = [], focusHandoffDelay } = {}
+) {
   const browserWindow = new EventEmitter()
   browserWindow.getBounds = () => targetWindow().bounds
   browserWindow.getTitle = () => targetWindow().caption
@@ -406,6 +450,7 @@ async function focusedStatesAfterBlur (activeWindow, { activeWindowChanges = [] 
     browserWindow,
     backend,
     detectionDelay: 0,
+    focusHandoffDelay,
     onFocusedState: focused => focusedStates.push(focused),
     onMinimizedState: () => {},
   })
