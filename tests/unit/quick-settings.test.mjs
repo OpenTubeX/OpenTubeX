@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  createQuickSettingSections,
   DEFAULT_QUICK_SETTINGS,
   isQuickSettingPaired,
   normalizeQuickSettings,
@@ -30,6 +31,21 @@ test('gives every customizable setting an icon', () => {
   for (const setting of QUICK_SETTING_DEFINITIONS) {
     assert.equal(Array.isArray(setting.icon) && setting.icon.length, 2, setting.id)
   }
+})
+
+test('uses the settings category icons for quick setting sections', () => {
+  const sectionIcons = Object.fromEntries(
+    createQuickSettingSections(key => key, true).map(section => [section.id, section.icon])
+  )
+
+  assert.deepEqual(sectionIcons, {
+    appearance: ['fas', 'display'],
+    playback: ['fas', 'circle-play'],
+    content: ['fas', 'eye-slash'],
+    language: ['fas', 'globe'],
+    advanced: ['fas', 'flask'],
+    'add-ons': ['fas', 'puzzle-piece'],
+  })
 })
 
 test('pairs adjacent selects without leaving an odd select in a half-row', () => {

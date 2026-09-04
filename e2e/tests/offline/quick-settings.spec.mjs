@@ -47,6 +47,26 @@ test.describe('quick settings menu', () => {
     expect(Math.abs(gaps[0] - gaps[1])).toBeLessThanOrEqual(1)
   })
 
+  test('shows settings category icons before section names', async ({ page }) => {
+    await page.locator('.profileTrigger').click()
+    const menu = page.getByRole('dialog', { name: 'Quick settings' })
+    const expectedHeaders = [
+      ['Appearance', 'display'],
+      ['Playback', 'circle-play'],
+      ['Content', 'eye-slash'],
+      ['Language and region', 'globe'],
+      ['Proxy', 'flask'],
+    ]
+
+    for (const [label, icon] of expectedHeaders) {
+      const heading = menu.getByRole('heading', { name: label, exact: true })
+      await expect(heading.locator(`[data-icon="${icon}"]`)).toBeVisible()
+      expect(await heading.evaluate(element => [...element.children].map(child => (
+        child.classList.contains('menuSectionIcon') ? 'icon' : child.tagName.toLowerCase()
+      )))).toEqual(['icon', 'span'])
+    }
+  })
+
   test('stays inside a short viewport below horizontal tabs', async ({ app, page }) => {
     await app.electronApp.evaluate(({ BrowserWindow }) => {
       BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 1280, height: 720 })

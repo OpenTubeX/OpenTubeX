@@ -157,7 +157,14 @@
                 :key="`${section.id}-${sectionIndex}`"
                 class="menuSection"
               >
-                <h3>{{ section.label }}</h3>
+                <h3>
+                  <FtIcon
+                    class="menuSectionIcon"
+                    :icon="section.icon"
+                    aria-hidden="true"
+                  />
+                  <span>{{ section.label }}</span>
+                </h3>
                 <div
                   v-for="setting in section.settings"
                   :key="setting.id"
@@ -519,8 +526,8 @@ const showSettingsShortcut = computed(() => (
 
 const quickSettings = computed(() => store.getters.getQuickSettings)
 const quickSettingCatalog = computed(() => createQuickSettingCatalog(t, USING_ELECTRON))
-const quickSettingSectionLabels = computed(() => new Map(
-  createQuickSettingSections(t, USING_ELECTRON).map(section => [section.id, section.label])
+const quickSettingSectionDefinitions = computed(() => new Map(
+  createQuickSettingSections(t, USING_ELECTRON).map(section => [section.id, section])
 ))
 const orderedQuickSettingSections = computed(() => {
   const catalogById = new Map(quickSettingCatalog.value.map(setting => [setting.id, setting]))
@@ -534,11 +541,13 @@ const orderedQuickSettingSections = computed(() => {
   return visibleSettings.reduce((sections, setting) => {
     let section = sections.at(-1)
     if (section?.id !== setting.section) {
+      const sectionDefinition = quickSettingSectionDefinitions.value.get(setting.section)
       section = {
         id: setting.section,
         label: setting.id === 'useProxy'
           ? t('Settings.Proxy Settings.Proxy Settings')
-          : quickSettingSectionLabels.value.get(setting.section),
+          : sectionDefinition.label,
+        icon: sectionDefinition.icon,
         settings: [],
       }
       sections.push(section)
