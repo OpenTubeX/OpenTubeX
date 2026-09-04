@@ -35,8 +35,6 @@ Subscriptions:
   New Content Tabs: Karty nowych treści
   Show Tabbed View: Pokaż widok kart
   Show Combined View: Pokaż widok łączny
-  Posts:
-    RSS Message: YouTube nie udostępnia kanałów RSS dla postów. Wyłącz ustawienie „{rssSetting}”, aby wyświetlić posty, lub włącz ustawienie „{hideSetting}”, aby ukryć tę kartę.
 Trending:
   Load Error: Nie udało się wczytać popularnych treści.
   Unsupported Backend: Popularne treści wymagają lokalnego API. Wybierz lokalne API lub włącz zapasowy backend.
@@ -474,8 +472,6 @@ Video:
   Configure Restricted Playback Cookies Hint: Skonfiguruj ciasteczka w sekcji Ustawienia → Oprogramowanie zewnętrzne → Ciasteczka odtwarzania dla yt-dlp.
   Try With Configured Cookies: Spróbuj ze skonfigurowanymi ciasteczkami
   Restricted Playback Authentication Failed Template: 'yt-dlp nie uzyskał dostępu do tego filmu za pomocą skonfigurowanych ciasteczek: {error}'
-  Collapse Playlist: Zwiń playlistę
-  Expand Playlist: Rozwiń playlistę
   Save Channel Subtitles State: Zapisz ustawienie napisów dla kanału
   Channel Subtitles State Saved: Zapisano ustawienie napisów dla kanału
   Save Channel Volume: Zapisz głośność dla kanału

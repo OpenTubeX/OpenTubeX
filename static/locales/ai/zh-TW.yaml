@@ -135,8 +135,6 @@ Subscriptions:
   Show Combined View: 顯示合併檢視
   Newest First: 最新優先
   Oldest First: 最舊優先
-  Posts:
-    RSS Message: YouTube 不提供貼文的 RSS 摘要。停用「{rssSetting}」設定以查看貼文，或啟用「{hideSetting}」設定以隱藏此分頁。
 Trending:
   Load Error: 無法載入熱門趨勢。
   Unsupported Backend: 熱門趨勢需要 Local API。請選擇 Local API 或啟用後端備援。
@@ -994,8 +992,6 @@ Video:
   Queue Item Cannot Move Down: 無法將 {title} 下移。此影片已位於第 {total} 位，共 {total} 部影片。
   Metadata: 影片資訊
   Close Metadata: 關閉影片資訊
-  Collapse Playlist: 收合播放清單
-  Expand Playlist: 展開播放清單
   Metadata Cache:
     Title History: 標題紀錄
     Thumbnail History: 縮圖紀錄

@@ -318,7 +318,7 @@
 
 .playlistItem {
   display: grid;
-  grid-template-columns: 30px 1fr;
+  grid-template-columns: fit-content(50px) 1fr;
   align-items: center;
   border-radius: calc(8px * var(--ui-roundness));
   transition: background 0.2s ease-out;

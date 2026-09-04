@@ -112,6 +112,8 @@ Subscriptions:
   Mark as Seen: Oznacz jako widziane
   Newest First: Najnowsze na początku
   Oldest First: Najstarsze na początku
+  Posts:
+    RSS Message: Serwis YouTube nie udostępnia kanałów RSS dla postów. Wyłącz opcję " {rssSetting}" , aby wyświetlić posty, lub włącz opcję " {hideSetting}" , aby ukryć tę zakładkę.
 Trending:
   Trending: 'Na czasie'
   Trending Tabs: Karty „Na czasie”
@@ -1443,6 +1445,8 @@ Video:
   Video has been removed from {playlistName}: Film został usunięty z listy odtwarzania {playlistName}
   There was a problem saving the video to {playlistName}: Wystąpił problem z zapisaniem filmu na liście odtwarzania {playlistName}
   There was a problem removing the video from {playlistName}: Wystąpił problem podczas usuwania filmu z listy odtwarzania {playlistName}
+  Collapse Playlist: Zwiń listę odtwarzania
+  Expand Playlist: Rozwiń listę odtwarzania
 Playlist:
   #& About
   View Full Playlist: 'Zobacz całą playlistę'

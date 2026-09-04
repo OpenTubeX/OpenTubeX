@@ -135,8 +135,6 @@ Subscriptions:
   Show Combined View: Vis samlet visning
   Newest First: Nyeste først
   Oldest First: Eldste først
-  Posts:
-    RSS Message: YouTube tilbyr ikke RSS-strømmer for innlegg. Deaktiver innstillingen "{rssSetting}" for å se innlegg, eller aktiver innstillingen "{hideSetting}" for å skjule denne fanen.
 Trending:
   Load Error: Populært innhold kunne ikke lastes inn.
   Unsupported Backend: Populært innhold krever Local API. Velg Local API, eller slå på bruk av reserveleverandør.
@@ -463,9 +461,6 @@ Settings:
         Outline: Omriss
         Drop Shadow: Slagskygge
       Reset: Tilbakestill utseendet på undertekstene
-    Default Viewing Mode:
-      Full Window (Always On): Fullt vindu (alltid aktivert)
-      Tooltip: De fleste standard visningsmoduser brukes bare når en avspillingsøkt starter. Endringer du gjør under økten, beholdes til den avsluttes. Visningsmoduser som alltid er på, brukes hver gang du bytter til en ny video, uavhengig av endringer du gjorde mens du så på den forrige videoen.
     Auto Picture in Picture:
       Auto Picture in Picture: Start bilde-i-bilde automatisk
       On Tab Change: Ved bytte av fane
@@ -510,9 +505,6 @@ Settings:
     Reorder Playback Speed: Dra for å endre rekkefølgen på avspillingshastigheten
     Playback Speed: Avspillingshastighet
     Parallel Segment Loading: Parallell innlasting av segmenter
-    Screenshot:
-      Modes:
-        Clipboard: Kopier til utklippstavlen
     Rotate Wide Videos to Landscape in Fullscreen: 'Roter brede videoer til liggende format i fullskjerm'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Sveip opp eller ned for å åpne eller avslutte fullskjerm'
     Preload Upcoming Videos: "Forhåndslast kommende videoer"
@@ -763,16 +755,7 @@ Settings:
     Data And Storage: Data og lagring
     Profile Directory: Profilmappe
     Open Profile Directory: Åpne profilmappen
-    Settings File: Innstillingsfil
-    Import Settings: Importer innstillinger
-    Export Settings: Eksporter innstillinger
-    Settings Tooltip: Innstillinger som er spesifikke for operativsystemet eller brukeren, eller som er eksperimentelle, kan ikke eksporteres eller importeres (f.eks. mellomtjener, ekstern spiller, skjermbildemappe ...)
     Invalid JSON row, skipping item: Ugyldig JSON på rad {row}. Hopper over elementet
-    All settings have been successfully imported: Alle innstillingene er importert
-    All settings have been successfully exported: Alle innstillingene er eksportert
-    Setting object has insufficient data, skipping item: Innstillingsobjektet inneholder ikke nok data. Hopper over elementet
-    Unknown setting key: 'Ukjent innstillingsnøkkel: {key}'
-    Non-transferable setting key: 'Innstillingsnøkkel som ikke kan overføres: {key}'
     Import subscriptions formats: 'Støttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-sikkerhetskopi eller FreeTube-eksport (.json)'
     Import history formats: 'Støttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-sikkerhetskopi (.json)'
     Import playlists formats: 'Støttede formater: OpenTubeX / FreeTube (.db)'
@@ -926,8 +909,6 @@ Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Slå på Return YouTube Dislike
     Return YouTube Dislike Url: API-URL for Return YouTube Dislike (standard er https://ryd-proxy.kavin.rocks)
-  Parental Control Settings:
-    Disable Channel Links: Slå av kanallenker
   Password Dialog:
     Incorrect Password: Feil passord
     Unlock: Lås opp
@@ -992,7 +973,6 @@ Channel:
   Channel Name Unavailable: Kanalnavnet er ikke tilgjengelig
   Search Result Types: Typer søkeresultater
   All Results: Alle
-  View All: Vis alle
 Video:
   Includes paid promotion: Inneholder betalt promotering
   Age Restricted Badge: Aldersbegrenset
@@ -1041,9 +1021,6 @@ Video:
   Configure Restricted Playback Cookies Hint: Konfigurer informasjonskapsler under Innstillinger → Ekstern programvare → Informasjonskapsler for yt-dlp-avspilling.
   Try With Configured Cookies: Prøv med de konfigurerte informasjonskapslene
   Restricted Playback Authentication Failed Template: 'yt-dlp fikk ikke tilgang til denne videoen med de konfigurerte informasjonskapslene: {error}'
-  Private: Private videoer kan ikke ses i OpenTubeX fordi de krever Google-innlogging og at du eier videoen.
-  Collapse Playlist: Minimer spillelisten
-  Expand Playlist: Utvid spillelisten
   Unmark As Watched: Merk som ikke sett
   Video has been unmarked as watched: Videoen er merket som ikke sett
   Save Channel Playback Speed: Lagre avspillingshastighet for kanalen
@@ -1463,8 +1440,6 @@ Tooltips:
     Use Grid Player Menu: Ordner innstillingsmenyen til videospilleren som et rutenett med fliser i stedet for en liste med rader.
 The playlist is at the beginning. Enable loop to continue playing: Spillelisten er ved begynnelsen. Slå på gjentakelse for å fortsette avspillingen
 External link opening has been disabled in Settings → Privacy: Åpning av eksterne lenker er slått av under Innstillinger → Personvern
-Screenshot Clipboard Success: Skjermbildet ble lagret på utklippstavlen
-Screenshot Clipboard Error: Skjermbildet kunne ikke kopieres til utklippstavlen
 KeyboardShortcutPrompt:
   Edit Hint: Velg en hurtigtast, og trykk deretter på en ny tastekombinasjon. Trykk på Backspace eller Delete for å fjerne tilordningen.
   Change Shortcut: Endre hurtigtasten for {action}

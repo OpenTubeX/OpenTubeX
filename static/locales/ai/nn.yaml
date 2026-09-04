@@ -46,7 +46,6 @@ Right-click or hold to see history: Høgreklikk eller hald inne for å sjå hist
 Use Vertical Tabs: Bruk loddrette faner
 Use Horizontal Tabs: Bruk vassrette faner
 Resize Tab Bar: Endre storleik på fanelinja
-Close Banner: Lukk banneret
 Find in page: Finn på sida
 Previous match: Førre treff
 Next match: Neste treff
@@ -63,35 +62,9 @@ Global:
   Counts:
     Like Count: 1 likerklikk | {count} likerklikk
     Watching Count: 1 ser på | {count} ser på
-Search Bar:
-  Remove: Fjern
-Search character limit: Søket er lengre enn grensa på {searchCharacterLimit} teikn
 Search Listing:
   Label:
-    VR180: VR180
-    360 Video: 360°
     Members Only: Berre for medlemmer
-Search Filters:
-  Prioritize:
-    Prioritize: Prioriter
-    Popularity: Popularitet
-  Type:
-    Movies: Filmar
-  Duration:
-    3 - 20 minutes: 3–20 minutt
-  Features:
-    Features: Funksjonar
-    HD: HD
-    Subtitles: Undertekstar
-    Creative Commons: Creative Commons
-    3D: 3D
-    Live: Direkte
-    4K: 4K
-    360 Video: 360-video
-    Location: Stad
-    HDR: HDR
-    VR180: VR180
-  Clear Filters: Tøm filtera
 Stats:
   Stats: Statistikk
   Watch time summary: Samandrag av sjåtid
@@ -152,8 +125,6 @@ Home Page:
   All sections hidden: Alle delar er gøymde
   All sections hidden description: Tilpass heimesida for å vise ein del igjen.
 Subscriptions:
-  Empty Posts: Kanalane du abonnerer på, har ingen innlegg enno.
-  Load More Posts: Last inn fleire innlegg
   Subscriptions Tabs: Abonnementsfaner
   All Subscription Tabs Hidden: Alle abonnementsfanene er gøymde. Vis nokre faner i delen "{subsection}" under "{settingsSection}" for å sjå innhald her.
   Refreshing Subscription Videos: Oppdaterer abonnementsvideoar
@@ -180,69 +151,28 @@ Trending:
 Most Popular Feed Empty: «Most Popular»-straumen frå denne Invidious-instansen er tom.
 Feed:
   Cancel Refresh: Avbryt oppdateringa
-  Feed Last Updated: 'Straumen {feedName} vart sist oppdatert: {date}'
   Next Auto Refresh: 'Neste automatiske oppdatering: {date}'
-  Refresh Feed: Oppdater {subscriptionName}
 User Playlists:
   Save Playlist: "Lagre speleliste"
   Remove Saved Playlist: "Fjern lagra speleliste"
   Load More Playlists: Last inn fleire spelelister
-  You have no playlists. Click on the create new playlist button to create a new one.: Du har ingen spelelister. Trykk på knappen for å lage ei ny speleliste.
-  Playlists with Matching Videos: Spelelister med videoar som passar
-  This playlist currently has no videos.: Denne spelelista har ingen videoar enno.
-  Create New Playlist: Lag ny speleliste
-  Add to Playlist: Legg til i speleliste
   Save to: Lagre i …
-  Add to Favorites: Legg til i {playlistName}
-  Remove from Favorites: Fjern frå {playlistName}
-  Move Video Up: Flytt videoen opp
-  Move Video Down: Flytt videoen ned
-  Move Video to the Top: Flytt videoen øvst
-  Move Video to the Bottom: Flytt videoen nedst
-  Remove from Playlist: Fjern frå spelelista
-  Playlist Name: Namn på spelelista
-  Playlist Description: Skildring av spelelista
   Quick Bookmark Icon: Ikon for snøggbokmerke
   Custom Emoji: Eigendefinert emoji
   Choose Image: Vel bilete
   Use Bookmark Icon: Bruk bokmerkeikon
-  Save Changes: Lagre endringane
-  Cancel: Avbryt
-  Edit Playlist Info: Rediger informasjon om spelelista
-  Copy Playlist: Kopier spelelista
-  Remove Duplicate Videos: Fjern duplikatvideoar
-  Remove Watched Videos: Fjern videoar du har sett
   Enable Quick Bookmark With This Playlist: Bruk denne spelelista som snøggbokmerke
   Quick Bookmark Enabled: Snøggbokmerke er slått på
   Export Playlist: Eksporter denne spelelista
   Export list of URLs: Eksporter liste over nettadresser
   The playlist has been successfully exported: Spelelista er eksportert
-  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: Er du sikker på at du vil fjerne 1 duplikatvideo frå denne spelelista? Dette kan ikkje angrast. | Er du sikker på at du vil fjerne {playlistItemCount} duplikatvideoar frå denne spelelista? Dette kan ikkje angrast.
-  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: Er du sikker på at du vil fjerne 1 video du har sett, frå denne spelelista? Dette kan ikkje angrast. | Er du sikker på at du vil fjerne {playlistItemCount} videoar du har sett, frå denne spelelista? Dette kan ikkje angrast.
-  Delete Playlist: Slett spelelista
   Cannot delete the quick bookmark target playlist.: Du kan ikkje slette spelelista som blir brukt som snøggbokmerke.
   Are you sure you want to delete this playlist? This cannot be undone: Er du sikker på at du vil slette denne spelelista? Dette kan ikkje angrast.
-  TotalTimePlaylist: 'Samla tid: {duration}'
-  Sort By:
-    NameAscending: A-Z
-    NameDescending: Z-A
-    LatestCreatedFirst: Oppretta (nyaste)
-    EarliestCreatedFirst: Oppretta (eldste)
-    LatestUpdatedFirst: Oppdatert (nyaste)
-    EarliestUpdatedFirst: Oppdatert (eldste)
-    LatestPlayedFirst: Spelt av (nyaste)
-    EarliestPlayedFirst: Spelt av (eldste)
   SinglePlaylistView:
-    Search for Videos: Søk etter videoar
     Retry: Prøv igjen
     This playlist could not be loaded.: Klarte ikkje å laste inn denne spelelista.
     More videos could not be loaded.: Klarte ikkje å laste inn fleire videoar.
     Toast:
-      This video cannot be moved up.: Denne videoen kan ikkje flyttast opp.
-      This video cannot be moved down.: Denne videoen kan ikkje flyttast ned.
-      Video has been removed: Videoen er fjerna
-      Video has been removed. Click here to undo.: Videoen er fjerna. Trykk her for å angre.
-      There was a problem with removing this video: Det oppstod eit problem då videoen skulle fjernast
       This playlist is already being used for quick bookmark.: Denne spelelista blir allereie brukt som snøggbokmerke.
       This playlist is now used for quick bookmark: Denne spelelista blir no brukt som snøggbokmerke
       This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo: Denne spelelista blir no brukt som snøggbokmerke i staden for {oldPlaylistName}. Trykk her for å angre
