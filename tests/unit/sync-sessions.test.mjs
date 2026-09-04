@@ -64,6 +64,41 @@ test('moves this device tab sets from its old local ID to its account-session ID
   }])
 })
 
+test('merges legacy tab sets into an existing account-session device', () => {
+  const current = session('current', 3)
+  const duplicate = session('duplicate', 2)
+  const legacyOnly = session('legacy-only', 1)
+  const result = mergeSyncSessions({
+    localSessions: [current, duplicate],
+    remoteValue: {
+      version: 1,
+      mode: 'separate',
+      devices: {
+        'current-account-id': {
+          platform: 'desktop',
+          sessions: [current, duplicate],
+        },
+        'old-local-id': {
+          platform: 'desktop',
+          sessions: [session('duplicate', 1), legacyOnly],
+        },
+      },
+      shared: [],
+    },
+    deviceId: 'current-account-id',
+    legacyDeviceIds: ['old-local-id'],
+    platform: 'desktop',
+    preferredMode: 'separate',
+  })
+
+  assert.deepEqual(result.document.devices['current-account-id'].sessions, [
+    current,
+    duplicate,
+    legacyOnly,
+  ])
+  assert.equal(result.document.devices['old-local-id'], undefined)
+})
+
 test('treats legacy session arrays as a separate desktop device', () => {
   const document = normalizeSyncSessionsDocument([session('desktop', 1)])
   assert.equal(document.mode, 'separate')

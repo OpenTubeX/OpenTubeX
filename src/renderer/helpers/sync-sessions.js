@@ -132,7 +132,20 @@ function claimLegacyDeviceSessions(document, deviceId, legacyDeviceIds) {
   for (const legacyDeviceId of legacyDeviceIds) {
     if (legacyDeviceId === deviceId || !claimed.devices[legacyDeviceId]) continue
 
-    claimed.devices[deviceId] ??= claimed.devices[legacyDeviceId]
+    const legacyDevice = claimed.devices[legacyDeviceId]
+    const currentDevice = claimed.devices[deviceId]
+    if (currentDevice) {
+      const currentSessionIds = new Set(
+        currentDevice.sessions.map(session => session?.sessionId)
+      )
+      for (const session of legacyDevice.sessions) {
+        if (currentSessionIds.has(session?.sessionId)) continue
+        currentDevice.sessions.push(session)
+        currentSessionIds.add(session?.sessionId)
+      }
+    } else {
+      claimed.devices[deviceId] = legacyDevice
+    }
     delete claimed.devices[legacyDeviceId]
     if (claimed.deletedSessions[legacyDeviceId]) {
       claimed.deletedSessions[deviceId] = Array.from(new Set([
