@@ -26,10 +26,10 @@
             android:pathData="m445.062,324.666c3.9,1.775 8.602,4.916 12.287,7.274l-0.903,1.088c-4.194,-2.631 -7.787,-4.948 -11.384,-8.362z" />
     </group>
 
-    <!-- Nightly wrench -->
+    <!-- Nightly wrench, entirely inside the adaptive icon's central 66dp safe circle. -->
     <group
-        android:translateX="650"
-        android:translateY="640"
+        android:translateX="530"
+        android:translateY="575"
         android:scaleX="8"
         android:scaleY="8">
         <path
