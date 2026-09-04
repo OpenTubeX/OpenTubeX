@@ -159,6 +159,15 @@ function median(values) {
   return (sorted[midpoint - 1] + sorted[midpoint]) / 2
 }
 
+function percentile(values, percentile) {
+  const sorted = [...values].sort((left, right) => left - right)
+  const position = (sorted.length - 1) * percentile
+  const lowerIndex = Math.floor(position)
+  const upperIndex = Math.ceil(position)
+  const weight = position - lowerIndex
+  return sorted[lowerIndex] + (sorted[upperIndex] - sorted[lowerIndex]) * weight
+}
+
 function metricValue(definition, value) {
   return `${value.toFixed(1)} ${definition.unit}`
 }
@@ -176,17 +185,22 @@ export function comparePerformanceSamples(samples) {
     const baseMedian = median(baseValues)
     const candidateMedian = median(candidateValues)
     const delta = candidateMedian - baseMedian
+    const baseUpperQuartile = percentile(baseValues, 0.75)
+    const candidateLowerQuartile = percentile(candidateValues, 0.25)
+    const interquartileDelta = candidateLowerQuartile - baseUpperQuartile
     const ratio = baseMedian === 0
       ? (candidateMedian === 0 ? 1 : Number.POSITIVE_INFINITY)
       : candidateMedian / baseMedian
-    const thresholdRatio = candidateMedian /
-      Math.max(baseMedian, definition.relativeBaselineFloor ?? Number.MIN_VALUE)
+    const interquartileThresholdRatio = candidateLowerQuartile /
+      Math.max(baseUpperQuartile, definition.relativeBaselineFloor ?? Number.MIN_VALUE)
     const gated = definition.gate !== false
     const crossesAbsoluteLimit = gated && definition.absoluteLimit !== undefined &&
-      baseMedian < definition.absoluteLimit && candidateMedian >= definition.absoluteLimit &&
-      delta > (definition.absoluteMinimumDelta ?? 0)
+      baseUpperQuartile < definition.absoluteLimit &&
+      candidateLowerQuartile >= definition.absoluteLimit &&
+      interquartileDelta > (definition.absoluteMinimumDelta ?? 0)
     const relativeRegression = gated && definition.relativeLimit !== undefined &&
-      thresholdRatio > definition.relativeLimit && delta > definition.minimumDelta
+      interquartileThresholdRatio > definition.relativeLimit &&
+      interquartileDelta > definition.minimumDelta
 
     if (crossesAbsoluteLimit) {
       failures.push(
@@ -209,6 +223,10 @@ export function comparePerformanceSamples(samples) {
       candidateMedian,
       delta,
       ratio,
+      baseUpperQuartile,
+      candidateLowerQuartile,
+      interquartileDelta,
+      interquartileThresholdRatio,
       crossesAbsoluteLimit,
       relativeRegression,
       passed: !crossesAbsoluteLimit && !relativeRegression
