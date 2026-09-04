@@ -1,8 +1,6 @@
 package org.opentubex.app;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -40,7 +38,7 @@ public class AndroidMediaSessionService extends Service {
     static final String EXTRA_STATE = "state";
 
     private static final String ACTION_CONTROL_PREFIX = "org.opentubex.app.media.CONTROL.";
-    private static final String CHANNEL_ID = "media-playback";
+    private static final String CHANNEL_ID = OpenTubeXNotificationChannels.MEDIA_PLAYBACK_ID;
     private static final int NOTIFICATION_ID = 0x4d454449;
     private static final double DEFAULT_SEEK_SECONDS = 10;
     private static final int MAX_ARTWORK_REDIRECTS = 5;
@@ -66,7 +64,7 @@ public class AndroidMediaSessionService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        createNotificationChannel();
+        OpenTubeXNotificationChannels.createAll(this);
         mediaSession = new MediaSession(this, "OpenTubeX");
         mediaSession.setFlags(
             MediaSession.FLAG_HANDLES_MEDIA_BUTTONS |
@@ -515,17 +513,6 @@ public class AndroidMediaSessionService extends Service {
     private long secondsToMillis(double seconds) {
         if (!Double.isFinite(seconds) || seconds <= 0) return 0;
         return (long) Math.min(Long.MAX_VALUE, seconds * 1000);
-    }
-
-    private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
-        NotificationChannel channel = new NotificationChannel(
-            CHANNEL_ID,
-            getString(R.string.media_notification_channel),
-            NotificationManager.IMPORTANCE_LOW
-        );
-        channel.setDescription(getString(R.string.media_notification_channel_description));
-        getSystemService(NotificationManager.class).createNotificationChannel(channel);
     }
 
     private void stopPlaybackService() {

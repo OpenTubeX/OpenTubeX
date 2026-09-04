@@ -3,7 +3,6 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 const STORAGE_KEY = 'opentubex-capacitor-live-reminders'
 const CHANNEL_ID = 'live-reminders'
 const listeners = new Set()
-let channelReady = false
 
 export const supportsLiveReminders = Boolean(process.env.IS_ELECTRON || process.env.IS_CAPACITOR)
 
@@ -46,19 +45,6 @@ function emitUpdated(videoId, scheduled) {
   for (const listener of listeners) listener(videoId, scheduled)
 }
 
-async function ensureNotificationChannel() {
-  if (channelReady) return
-  await LocalNotifications.createChannel({
-    id: CHANNEL_ID,
-    name: 'Livestream reminders',
-    description: 'Notifications when scheduled livestreams begin',
-    importance: 4,
-    visibility: 1,
-    vibration: true,
-  })
-  channelReady = true
-}
-
 async function requestNotificationPermission() {
   let status = await LocalNotifications.checkPermissions()
   if (status.display !== 'granted') {
@@ -83,7 +69,6 @@ const capacitorLiveReminder = {
 
   async schedule(reminder) {
     if (!await requestNotificationPermission()) return false
-    await ensureNotificationChannel()
 
     const records = readCapacitorReminders()
     const notificationId = notificationIdForVideo(reminder.videoId, records)

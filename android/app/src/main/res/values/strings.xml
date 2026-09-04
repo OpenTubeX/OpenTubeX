@@ -4,8 +4,12 @@
     <string name="title_activity_main">OpenTubeX</string>
     <string name="package_name">org.opentubex.app</string>
     <string name="custom_url_scheme">org.opentubex.app</string>
-    <string name="media_notification_channel">Media playback</string>
-    <string name="media_notification_channel_description">Controls for audio and video playback</string>
+    <string name="notification_channel_media_playback_name">Media playback</string>
+    <string name="notification_channel_media_playback_description">Playback controls while media is playing</string>
+    <string name="notification_channel_subscription_refresh_name">Subscription refresh</string>
+    <string name="notification_channel_subscription_refresh_description">Progress for subscription refreshes running in the background</string>
+    <string name="notification_channel_live_reminders_name">Live reminders</string>
+    <string name="notification_channel_live_reminders_description">Alerts when scheduled live streams begin</string>
     <string name="media_play">Play</string>
     <string name="media_pause">Pause</string>
     <string name="media_stop">Stop</string>

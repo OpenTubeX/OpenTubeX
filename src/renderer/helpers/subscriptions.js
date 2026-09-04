@@ -36,6 +36,7 @@ import { extractAssignedJsonObject } from './assigned-json'
 import { getLocalPremiereState } from './premiere'
 import { shouldShowProgressStartToast } from './progressPresentation'
 import { isAndroidSubscriptionRefreshActive } from './androidSubscriptionRefresh'
+import { buildRequestDiagnostic, formatRequestDiagnostic } from './api/requestDiagnostics'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
 export const SUBSCRIPTION_REFRESH_CHANNEL_EVENT = 'opentubex-subscription-refresh-channel'
@@ -273,12 +274,14 @@ async function fetchSubscriptionsInBatches(channels, fetchChannel) {
  * @param {{ id: string, name?: string }} channel
  * @param {unknown} error
  * @param {string} title
+ * @param {{ category: string, backend: string }} context
  */
-export function showSubscriptionFetchError(channel, error, title) {
+export function showSubscriptionFetchError(channel, error, title, context) {
   const channelLabel = channel.name ? `${channel.name} (${channel.id})` : channel.id
-  const message = `${channelLabel}: ${error}`
+  const diagnostic = formatRequestDiagnostic(buildRequestDiagnostic(error, context))
+  const message = `${channelLabel}: ${diagnostic}`
 
-  console.error(`Failed to fetch subscription channel ${channelLabel}`, error)
+  console.error(`Failed to fetch subscription channel ${channelLabel}: ${diagnostic}`)
   showApiErrorToast(title, message)
 }
 
@@ -1027,7 +1030,10 @@ async function getChannelPostsLocal(channel, t, errorChannels) {
 
     return posts
   } catch (err) {
-    showSubscriptionFetchError(channel, err, t('Local API Error (Click to copy)'))
+    showSubscriptionFetchError(channel, err, t('Local API Error (Click to copy)'), {
+      category: 'subscription posts',
+      backend: 'local API'
+    })
 
     if (store.getters.getBackendPreference === 'local' && store.getters.getBackendFallback) {
       showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
@@ -1044,7 +1050,10 @@ async function getChannelPostsInvidious(channel, t, errorChannels) {
 
     return result.posts
   } catch (err) {
-    showSubscriptionFetchError(channel, err, t('Invidious API Error (Click to copy)'))
+    showSubscriptionFetchError(channel, err, t('Invidious API Error (Click to copy)'), {
+      category: 'subscription posts',
+      backend: 'Invidious API'
+    })
 
     if (
       process.env.SUPPORTS_LOCAL_API &&
@@ -1075,7 +1084,10 @@ async function getChannelVideosLocalScraper(channel, t, errorChannels, failedAtt
         : await enrichScrapedUpcomingPublicationDates(channel.id, result.videos)
     }
   } catch (err) {
-    showSubscriptionFetchError(channel, err, t('Local API Error (Click to copy)'))
+    showSubscriptionFetchError(channel, err, t('Local API Error (Click to copy)'), {
+      category: 'subscription videos',
+      backend: 'local API'
+    })
 
     switch (failedAttempts) {
       case 0:
@@ -1120,7 +1132,10 @@ async function getChannelVideosLocalRSS(channel, t, errorChannels, failedAttempt
 
     return await parseYouTubeRSSFeed(await response.text(), channel.id)
   } catch (error) {
-    showSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'))
+    showSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'), {
+      category: 'subscription videos',
+      backend: 'YouTube RSS'
+    })
 
     switch (failedAttempts) {
       case 0:
@@ -1153,7 +1168,10 @@ async function getChannelVideosInvidiousScraper(channel, t, errorChannels, faile
       videos: result.videos
     }
   } catch (err) {
-    showSubscriptionFetchError(channel, err, t('Invidious API Error (Click to copy)'))
+    showSubscriptionFetchError(channel, err, t('Invidious API Error (Click to copy)'), {
+      category: 'subscription videos',
+      backend: 'Invidious API'
+    })
 
     switch (failedAttempts) {
       case 0:
@@ -1194,7 +1212,10 @@ async function getChannelVideosInvidiousRSS(channel, t, errorChannels, failedAtt
 
     return await parseYouTubeRSSFeed(await response.text(), channel.id)
   } catch (error) {
-    showSubscriptionFetchError(channel, error, t('Invidious API Error (Click to copy)'))
+    showSubscriptionFetchError(channel, error, t('Invidious API Error (Click to copy)'), {
+      category: 'subscription videos',
+      backend: 'Invidious RSS'
+    })
 
     switch (failedAttempts) {
       case 0:
@@ -1245,7 +1266,10 @@ async function getChannelShortsLocal(channel, t, errorChannels, failedAttempts =
     result.videos.forEach(video => { video.isShort = true })
     return result
   } catch (error) {
-    showSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'))
+    showSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'), {
+      category: 'subscription Shorts',
+      backend: 'YouTube RSS'
+    })
 
     if (failedAttempts === 0 && store.getters.getBackendFallback) {
       showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
@@ -1290,7 +1314,10 @@ async function getChannelShortsInvidious(channel, t, errorChannels, failedAttemp
     result.videos.forEach(video => { video.isShort = true })
     return result
   } catch (error) {
-    showSubscriptionFetchError(channel, error, t('Invidious API Error (Click to copy)'))
+    showSubscriptionFetchError(channel, error, t('Invidious API Error (Click to copy)'), {
+      category: 'subscription Shorts',
+      backend: 'Invidious RSS'
+    })
 
     if (failedAttempts === 0 && process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
       showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
@@ -1312,7 +1339,10 @@ async function getChannelLiveLocal(channel, t, errorChannels, failedAttempts = 0
 
     return result
   } catch (err) {
-    showSubscriptionFetchError(channel, err, t('Local API Error (Click to copy)'))
+    showSubscriptionFetchError(channel, err, t('Local API Error (Click to copy)'), {
+      category: 'subscription live streams',
+      backend: 'local API'
+    })
 
     switch (failedAttempts) {
       case 0:
@@ -1357,7 +1387,10 @@ async function getChannelLiveLocalRSS(channel, t, errorChannels, failedAttempts 
 
     return await parseYouTubeRSSFeed(await response.text(), channel.id)
   } catch (error) {
-    showSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'))
+    showSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'), {
+      category: 'subscription live streams',
+      backend: 'YouTube RSS'
+    })
 
     switch (failedAttempts) {
       case 0:
@@ -1390,7 +1423,10 @@ async function getChannelLiveInvidious(channel, t, errorChannels, failedAttempts
       videos: result.videos
     }
   } catch (err) {
-    showSubscriptionFetchError(channel, err, t('Invidious API Error (Click to copy)'))
+    showSubscriptionFetchError(channel, err, t('Invidious API Error (Click to copy)'), {
+      category: 'subscription live streams',
+      backend: 'Invidious API'
+    })
 
     switch (failedAttempts) {
       case 0:
@@ -1431,7 +1467,10 @@ async function getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttem
 
     return await parseYouTubeRSSFeed(await response.text(), channel.id)
   } catch (error) {
-    showSubscriptionFetchError(channel, error, t('Invidious API Error (Click to copy)'))
+    showSubscriptionFetchError(channel, error, t('Invidious API Error (Click to copy)'), {
+      category: 'subscription live streams',
+      backend: 'Invidious RSS'
+    })
 
     switch (failedAttempts) {
       case 0:

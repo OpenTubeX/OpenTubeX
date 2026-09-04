@@ -2,6 +2,7 @@ package org.opentubex.app;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -14,16 +15,25 @@ import androidx.work.WorkerParameters;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
 public final class SubscriptionRefreshWorker extends Worker {
+    private static final String LOG_TAG = "OpenTubeXFetch";
     private static final String UNIQUE_WORK_NAME = "subscription-refresh";
     private static final String TOKEN_INPUT = "token";
     static final String FEED_TYPE_INPUT = "feedType";
     private static final SubscriptionRefreshState STATE = new SubscriptionRefreshState();
+
+    @FunctionalInterface
+    interface ProfileCompletionWriter {
+        void write(SubscriptionRefreshConfiguration.Feed profileFeed) throws Exception;
+    }
 
     public SubscriptionRefreshWorker(@NonNull Context context, @NonNull WorkerParameters parameters) {
         super(context, parameters);
@@ -146,6 +156,7 @@ public final class SubscriptionRefreshWorker extends Worker {
 
         int completed = 0;
         int failed = 0;
+        Set<String> failedProfileIds = new LinkedHashSet<>();
         NotificationManager notifications = context.getSystemService(NotificationManager.class);
         try {
             // A periodic job may recreate the process while the app is closed, where
@@ -168,19 +179,48 @@ public final class SubscriptionRefreshWorker extends Worker {
                 if (SubscriptionRefreshCoordinator.isCancelled(token) || isStopped()) {
                     return Result.success();
                 }
+                List<String> profileIds = targetProfileIds(feeds, channelId);
                 try {
                     JSONObject payload = SubscriptionRefreshHttpClient.fetch(feed, channelId);
-                    SubscriptionRefreshResultStore.writeChannel(
-                        context,
-                        feed.profileId,
-                        feedType,
-                        channelId,
-                        payload,
-                        System.currentTimeMillis()
-                    );
-                    completed++;
+                    boolean stored = false;
+                    long timestamp = System.currentTimeMillis();
+                    for (String profileId : profileIds) {
+                        try {
+                            SubscriptionRefreshResultStore.writeChannel(
+                                context,
+                                profileId,
+                                feedType,
+                                channelId,
+                                payload,
+                                timestamp
+                            );
+                            stored = true;
+                        } catch (Exception error) {
+                            failedProfileIds.add(profileId);
+                            recordFailure(
+                                context,
+                                Collections.singletonList(profileId),
+                                feedType,
+                                "Android result store",
+                                error
+                            );
+                        }
+                    }
+                    if (stored) {
+                        completed++;
+                    } else {
+                        failed++;
+                    }
                 } catch (Exception error) {
                     failed++;
+                    failedProfileIds.addAll(profileIds);
+                    recordFailure(
+                        context,
+                        profileIds,
+                        feedType,
+                        "Invidious API",
+                        error
+                    );
                 }
 
                 int progress = total == 0 ? 100 : (int) Math.round((completed + failed) * 100.0 / total);
@@ -204,20 +244,108 @@ public final class SubscriptionRefreshWorker extends Worker {
             }
 
             long completionTimestamp = System.currentTimeMillis();
-            for (SubscriptionRefreshConfiguration.Feed profileFeed : feeds) {
-                SubscriptionRefreshResultStore.writeCompletion(
-                    context,
-                    profileFeed.profileId,
-                    feedType,
-                    completionTimestamp
-                );
-            }
-            return Result.success();
+            Set<String> completionFailedProfileIds = new LinkedHashSet<>();
+            writeProfileCompletions(
+                feeds,
+                failedProfileIds,
+                profileFeed -> {
+                    SubscriptionRefreshResultStore.clearFailure(
+                        context,
+                        profileFeed.profileId,
+                        feedType
+                    );
+                    SubscriptionRefreshResultStore.writeCompletion(
+                        context,
+                        profileFeed.profileId,
+                        feedType,
+                        completionTimestamp
+                    );
+                },
+                (profileFeed, error) -> {
+                    completionFailedProfileIds.add(profileFeed.profileId);
+                    recordFailure(
+                        context,
+                        Collections.singletonList(profileFeed.profileId),
+                        feedType,
+                        "Android result store",
+                        error
+                    );
+                }
+            );
+            return completionFailedProfileIds.isEmpty() ? Result.success() : Result.retry();
         } catch (Exception error) {
+            List<String> profileIds = new ArrayList<>();
+            for (SubscriptionRefreshConfiguration.Feed profileFeed : feeds) {
+                profileIds.add(profileFeed.profileId);
+            }
+            recordFailure(
+                context,
+                profileIds,
+                feedType,
+                "Android background worker",
+                error
+            );
             return Result.retry();
         } finally {
             if (SubscriptionRefreshCoordinator.finish(token)) {
                 notifications.cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+            }
+        }
+    }
+
+    static List<String> targetProfileIds(
+        List<SubscriptionRefreshConfiguration.Feed> feeds,
+        String channelId
+    ) {
+        List<String> profileIds = new ArrayList<>();
+        for (SubscriptionRefreshConfiguration.Feed feed : feeds) {
+            if (feed.channelIds.contains(channelId)) profileIds.add(feed.profileId);
+        }
+        return profileIds;
+    }
+
+    static void writeProfileCompletions(
+        List<SubscriptionRefreshConfiguration.Feed> feeds,
+        Set<String> failedProfileIds,
+        ProfileCompletionWriter writer,
+        BiConsumer<SubscriptionRefreshConfiguration.Feed, Exception> onFailure
+    ) {
+        for (SubscriptionRefreshConfiguration.Feed profileFeed : feeds) {
+            if (failedProfileIds.contains(profileFeed.profileId)) continue;
+            try {
+                writer.write(profileFeed);
+            } catch (Exception error) {
+                onFailure.accept(profileFeed, error);
+            }
+        }
+    }
+
+    private static void recordFailure(
+        Context context,
+        List<String> profileIds,
+        String feedType,
+        String backend,
+        Throwable error
+    ) {
+        SubscriptionRefreshRequestDiagnostic diagnostic =
+            SubscriptionRefreshRequestDiagnostic.create(feedType, backend, error);
+        Log.w(LOG_TAG, diagnostic.toString());
+        long timestamp = System.currentTimeMillis();
+        for (String profileId : profileIds) {
+            try {
+                SubscriptionRefreshResultStore.writeFailure(
+                    context,
+                    profileId,
+                    feedType,
+                    diagnostic,
+                    timestamp
+                );
+            } catch (Exception storageError) {
+                Log.e(
+                    LOG_TAG,
+                    "Unable to persist a subscription request diagnostic: " +
+                        storageError.getClass().getSimpleName()
+                );
             }
         }
     }

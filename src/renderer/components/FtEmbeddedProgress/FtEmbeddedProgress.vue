@@ -169,6 +169,5 @@ onBeforeUnmount(() => {
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: v-bind(lineWidth);
-  vector-effect: non-scaling-stroke;
 }
 </style>

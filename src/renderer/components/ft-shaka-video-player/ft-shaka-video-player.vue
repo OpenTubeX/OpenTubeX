@@ -85,7 +85,10 @@
         pausedInterfaceRevealed,
         hidePlayerControlsWhenPaused: !showPlayerControlsWhenPaused,
         hideVideoTitleWhenPaused: !showVideoTitleWhenPaused,
-        hideFullscreenActionsWhenPaused: !showFullscreenActionsWhenPaused
+        hideFullscreenActionsWhenPaused: !showFullscreenActionsWhenPaused,
+        actionDockVisible,
+        playerControlsShown,
+        isSubMenuOpened
       }"
       :style="[
         captionCssVariables,
@@ -386,6 +389,8 @@
         @click.stop
         @dblclick.stop
         @pointerdown.stop
+        @focusin="actionDockFocused = true"
+        @focusout="actionDockFocused = $event.currentTarget.contains($event.relatedTarget)"
       >
         <button
           v-if="watchingPlaylist"

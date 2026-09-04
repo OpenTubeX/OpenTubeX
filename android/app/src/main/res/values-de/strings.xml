@@ -1,7 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="media_notification_channel">Medienwiedergabe</string>
-    <string name="media_notification_channel_description">Steuerung für die Audio- und Videowiedergabe</string>
+    <string name="notification_channel_media_playback_name">Medienwiedergabe</string>
+    <string name="notification_channel_media_playback_description">Wiedergabesteuerung während der Medienwiedergabe</string>
+    <string name="notification_channel_subscription_refresh_name">Abonnement-Aktualisierung</string>
+    <string name="notification_channel_subscription_refresh_description">Fortschritt von Abonnement-Aktualisierungen im Hintergrund</string>
+    <string name="notification_channel_live_reminders_name">Livestream-Erinnerungen</string>
+    <string name="notification_channel_live_reminders_description">Benachrichtigungen beim Start geplanter Livestreams</string>
     <string name="media_play">Wiedergeben</string>
     <string name="media_pause">Pausieren</string>
     <string name="media_stop">Beenden</string>
