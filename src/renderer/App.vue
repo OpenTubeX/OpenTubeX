@@ -1992,7 +1992,12 @@ function handleSubscriptionRefreshCancelled(event) {
  */
 function handleSubscriptionRefreshCompleted(event) {
   const { tab, profileId, timestamp } = event.detail
-  if (!subscriptionAutoRefreshTabs.includes(tab) || typeof profileId !== 'string') {
+  if (
+    !subscriptionAutoRefreshTabs.includes(tab) ||
+    typeof profileId !== 'string' ||
+    !Number.isFinite(timestamp) ||
+    timestamp < getStoredSubscriptionTabLastRefreshTimestamp(profileId, tab)
+  ) {
     return
   }
 
@@ -2203,6 +2208,7 @@ async function reconcileAndroidSubscriptionRefreshChannelResult(result) {
   )
   const config = getAndroidSubscriptionCacheConfig(feedType)
   const previousCache = config.getCache()[result.channelId]
+  if (previousCache?.timestamp > timestamp) return
   const reconciledEntries = reconcileFetchedSubscriptionEntries(
     entries,
     previousCache?.[config.entriesKey],
@@ -2211,14 +2217,15 @@ async function reconcileAndroidSubscriptionRefreshChannelResult(result) {
     feedType === 'posts' ? undefined : store.getters.getHistoryCacheById
   )
 
-  await store.dispatch(config.action, {
+  const applied = await store.dispatch(config.action, {
     channelId: result.channelId,
     [config.entriesKey]: reconciledEntries,
     timestamp
   })
+  if (applied === false) return
 
   const committedTimestamp = config.getCache()[result.channelId]?.timestamp
-  if (!(committedTimestamp instanceof Date) || committedTimestamp.getTime() !== timestamp.getTime()) {
+  if (!(committedTimestamp instanceof Date) || committedTimestamp.getTime() < timestamp.getTime()) {
     throw new Error(`The ${feedType} cache write did not complete`)
   }
 }

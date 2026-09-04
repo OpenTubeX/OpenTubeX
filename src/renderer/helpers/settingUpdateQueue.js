@@ -30,3 +30,36 @@ export function createSettingUpdateQueue() {
     })
   }
 }
+
+/**
+ * Publishes list edits immediately so the next edit starts from the intended
+ * value. Failed writes restore the last persisted value, unless superseded.
+ */
+export function createOptimisticSettingUpdater() {
+  const runUpdate = createSettingUpdateQueue()
+  const pending = new Map()
+
+  return (settingId, value, { read, commit, persist }) => {
+    const currentValue = read()
+    const previous = pending.get(settingId)
+    const saved = previous && previous.optimisticValue === currentValue ? previous : { value: currentValue }
+    const token = {}
+    saved.latest = token
+    pending.set(settingId, saved)
+    commit(value)
+    const optimisticValue = read()
+    saved.optimisticValue = optimisticValue
+
+    return runUpdate(settingId, async isLatest => {
+      try {
+        await persist(value)
+        saved.value = value
+      } catch (error) {
+        if (isLatest() && read() === optimisticValue) commit(saved.value)
+        throw error
+      }
+    }).finally(() => {
+      if (pending.get(settingId) === saved && saved.latest === token) pending.delete(settingId)
+    })
+  }
+}

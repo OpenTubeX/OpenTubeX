@@ -152,7 +152,7 @@ const actions = {
     )
 
     try {
-      await DBSubscriptionCacheHandlers.updateVideosByChannelId(channelId, videos, timestamp)
+      if (await DBSubscriptionCacheHandlers.updateVideosByChannelId(channelId, videos, timestamp) === false) return false
       commit('updateVideoCacheByChannel', { channelId, entries: videos, timestamp })
     } catch (errMessage) {
       console.error(errMessage)
@@ -161,7 +161,7 @@ const actions = {
 
   async updateSubscriptionShortsCacheByChannel({ commit }, { channelId, videos, timestamp = new Date() }) {
     try {
-      await DBSubscriptionCacheHandlers.updateShortsByChannelId(channelId, videos, timestamp)
+      if (await DBSubscriptionCacheHandlers.updateShortsByChannelId(channelId, videos, timestamp) === false) return false
       commit('updateShortsCacheByChannel', { channelId, entries: videos, timestamp })
     } catch (errMessage) {
       console.error(errMessage)
@@ -188,7 +188,7 @@ const actions = {
     )
 
     try {
-      await DBSubscriptionCacheHandlers.updateLiveStreamsByChannelId(channelId, videos, timestamp)
+      if (await DBSubscriptionCacheHandlers.updateLiveStreamsByChannelId(channelId, videos, timestamp) === false) return false
       commit('updateLiveCacheByChannel', { channelId, entries: videos, timestamp })
     } catch (errMessage) {
       console.error(errMessage)
@@ -205,7 +205,7 @@ const actions = {
     )
 
     try {
-      await DBSubscriptionCacheHandlers.updateCommunityPostsByChannelId(channelId, posts, timestamp)
+      if (await DBSubscriptionCacheHandlers.updateCommunityPostsByChannelId(channelId, posts, timestamp) === false) return false
       commit('updatePostsCacheByChannel', { channelId, entries: posts, timestamp })
     } catch (errMessage) {
       console.error(errMessage)
@@ -264,11 +264,12 @@ const actions = {
           ...entry,
           isNewInSubscriptionFeed: false
         }))
+        const timestamp = cacheEntry.timestamp
 
         writes.push(async () => {
           try {
-            await config.updateEntries(channelId, seenEntries, cacheEntry.timestamp)
-            return { tab: feedTab, channelId }
+            if (await config.updateEntries(channelId, seenEntries, timestamp) === false) return null
+            return { tab: feedTab, channelId, timestamp }
           } catch (errMessage) {
             console.error(errMessage)
             return null
@@ -313,11 +314,12 @@ const actions = {
         const seenEntries = cacheEntry.videos.map(video => video.videoId === videoId
           ? { ...video, isNewInSubscriptionFeed: false }
           : video)
+        const timestamp = cacheEntry.timestamp
 
         writes.push(async () => {
           try {
-            await updateEntries(channelId, seenEntries, cacheEntry.timestamp)
-            commit('markSubscriptionVideoAsSeenByChannel', { tab, channelId, videoId })
+            if (await updateEntries(channelId, seenEntries, timestamp) === false) return
+            commit('markSubscriptionVideoAsSeenByChannel', { tab, channelId, videoId, timestamp })
           } catch (errMessage) {
             console.error(errMessage)
           }
@@ -338,15 +340,17 @@ const actions = {
       const seenEntries = cacheEntry.posts.map(post => post.postId === postId
         ? { ...post, isNewInSubscriptionFeed: false }
         : post)
+      const timestamp = cacheEntry.timestamp
 
       writes.push(async () => {
         try {
-          await DBSubscriptionCacheHandlers.updateCommunityPostsByChannelId(
+          const applied = await DBSubscriptionCacheHandlers.updateCommunityPostsByChannelId(
             channelId,
             seenEntries,
-            cacheEntry.timestamp
+            timestamp
           )
-          commit('markSubscriptionPostAsSeenByChannel', { channelId, postId })
+          if (applied === false) return
+          commit('markSubscriptionPostAsSeenByChannel', { channelId, postId, timestamp })
         } catch (errMessage) {
           console.error(errMessage)
         }
@@ -377,7 +381,8 @@ const actions = {
 }
 
 const mutations = {
-  markSubscriptionPostAsSeenByChannel(state, { channelId, postId }) {
+  markSubscriptionPostAsSeenByChannel(state, { channelId, postId, timestamp }) {
+    if (toDate(state.postsCache[channelId]?.timestamp).getTime() !== toDate(timestamp).getTime()) return
     const entry = state.postsCache[channelId]?.posts?.find(post => post.postId === postId)
 
     if (entry) {
@@ -385,12 +390,13 @@ const mutations = {
     }
   },
 
-  markSubscriptionVideoAsSeenByChannel(state, { tab, channelId, videoId }) {
+  markSubscriptionVideoAsSeenByChannel(state, { tab, channelId, videoId, timestamp }) {
     const cacheEntry = tab === 'videos'
       ? state.videoCache[channelId]
       : tab === 'shorts'
         ? state.shortsCache[channelId]
         : state.liveCache[channelId]
+    if (toDate(cacheEntry?.timestamp).getTime() !== toDate(timestamp).getTime()) return
     const entry = cacheEntry?.videos?.find(video => video.videoId === videoId)
 
     if (entry) {
@@ -399,7 +405,7 @@ const mutations = {
   },
 
   markSubscriptionEntriesAsSeenInCache(state, cacheEntries) {
-    for (const { tab, channelId } of cacheEntries) {
+    for (const { tab, channelId, timestamp } of cacheEntries) {
       const cache = tab === 'videos'
         ? state.videoCache
         : tab === 'shorts'
@@ -408,6 +414,7 @@ const mutations = {
             ? state.liveCache
             : state.postsCache
       const cacheEntry = cache[channelId]
+      if (toDate(cacheEntry?.timestamp).getTime() !== toDate(timestamp).getTime()) continue
       const entries = tab === 'posts' ? cacheEntry?.posts : cacheEntry?.videos
 
       entries?.forEach(entry => {
@@ -418,6 +425,7 @@ const mutations = {
 
   updateVideoCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
     const existingObject = state.videoCache[channelId]
+    if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { videos: null }
     if (entries != null) { newObject.videos = entries }
     newObject.timestamp = toDate(timestamp)
@@ -425,6 +433,7 @@ const mutations = {
   },
   updateShortsCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
     const existingObject = state.shortsCache[channelId]
+    if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { videos: null }
     if (entries != null) { newObject.videos = entries }
     newObject.timestamp = toDate(timestamp)
@@ -458,6 +467,7 @@ const mutations = {
   },
   updateLiveCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
     const existingObject = state.liveCache[channelId]
+    if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { videos: null }
     if (entries != null) { newObject.videos = entries }
     newObject.timestamp = toDate(timestamp)
@@ -465,6 +475,7 @@ const mutations = {
   },
   updatePostsCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
     const existingObject = state.postsCache[channelId]
+    if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { posts: null }
     if (entries != null) { newObject.posts = entries }
     newObject.timestamp = toDate(timestamp)

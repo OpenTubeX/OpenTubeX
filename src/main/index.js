@@ -5117,7 +5117,7 @@ function runApp() {
           return await baseHandlers.subscriptionCache.find()
 
         case DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL:
-          await baseHandlers.subscriptionCache.updateVideosByChannelId(data.channelId, data.entries, data.timestamp)
+          if (!await baseHandlers.subscriptionCache.updateVideosByChannelId(data.channelId, data.entries, data.timestamp)) return false
           syncOtherWindows(
             IpcChannels.SYNC_SUBSCRIPTION_CACHE,
             event,
@@ -5126,7 +5126,7 @@ function runApp() {
           return null
 
         case DBActions.SUBSCRIPTION_CACHE.UPDATE_LIVE_STREAMS_BY_CHANNEL:
-          await baseHandlers.subscriptionCache.updateLiveStreamsByChannelId(data.channelId, data.entries, data.timestamp)
+          if (!await baseHandlers.subscriptionCache.updateLiveStreamsByChannelId(data.channelId, data.entries, data.timestamp)) return false
           syncOtherWindows(
             IpcChannels.SYNC_SUBSCRIPTION_CACHE,
             event,
@@ -5135,7 +5135,7 @@ function runApp() {
           return null
 
         case DBActions.SUBSCRIPTION_CACHE.UPDATE_SHORTS_BY_CHANNEL:
-          await baseHandlers.subscriptionCache.updateShortsByChannelId(data.channelId, data.entries, data.timestamp)
+          if (!await baseHandlers.subscriptionCache.updateShortsByChannelId(data.channelId, data.entries, data.timestamp)) return false
           syncOtherWindows(
             IpcChannels.SYNC_SUBSCRIPTION_CACHE,
             event,
@@ -5153,7 +5153,7 @@ function runApp() {
           return null
 
         case DBActions.SUBSCRIPTION_CACHE.UPDATE_COMMUNITY_POSTS_BY_CHANNEL:
-          await baseHandlers.subscriptionCache.updateCommunityPostsByChannelId(data.channelId, data.entries, data.timestamp)
+          if (!await baseHandlers.subscriptionCache.updateCommunityPostsByChannelId(data.channelId, data.entries, data.timestamp)) return false
           syncOtherWindows(
             IpcChannels.SYNC_SUBSCRIPTION_CACHE,
             event,

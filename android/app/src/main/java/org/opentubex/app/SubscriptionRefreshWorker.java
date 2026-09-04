@@ -2,6 +2,7 @@ package org.opentubex.app;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -16,6 +17,7 @@ import androidx.work.WorkerParameters;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.io.File;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -28,6 +30,7 @@ public final class SubscriptionRefreshWorker extends Worker {
     private static final String UNIQUE_WORK_NAME = "subscription-refresh";
     private static final String TOKEN_INPUT = "token";
     static final String FEED_TYPE_INPUT = "feedType";
+    private static final long MAXIMUM_BATCH_MILLIS = 5 * 60 * 1000;
     private static final SubscriptionRefreshState STATE = new SubscriptionRefreshState();
 
     @FunctionalInterface
@@ -161,6 +164,16 @@ public final class SubscriptionRefreshWorker extends Worker {
             new SubscriptionRefreshNotificationProgress();
         NotificationManager notifications = context.getSystemService(NotificationManager.class);
         try {
+            List<String> orderedChannelIds = new ArrayList<>(channelIds);
+            SubscriptionRefreshCheckpoint checkpoint = SubscriptionRefreshCheckpoint.load(
+                new File(context.getFilesDir(), "subscription-refresh-" + feedType + ".properties"),
+                SubscriptionRefreshCheckpoint.configurationId(feeds),
+                orderedChannelIds.size()
+            );
+            completed = checkpoint.completed;
+            failed = checkpoint.failed;
+            failedProfileIds.addAll(checkpoint.failedProfileIds);
+            long batchStartedAt = SystemClock.elapsedRealtime();
             // A periodic job may recreate the process while the app is closed, where
             // Android does not allow starting WorkManager's foreground service. Keep
             // the durable work owned by JobScheduler and make its progress visible
@@ -172,15 +185,20 @@ public final class SubscriptionRefreshWorker extends Worker {
                     token,
                     feed.title,
                     feed.cancelLabel,
-                    0
+                    channelIds.isEmpty() ? 100 : (int) Math.round(checkpoint.nextIndex * 100.0 / channelIds.size())
                 )
             );
 
             int total = channelIds.size();
-            for (String channelId : channelIds) {
-                if (SubscriptionRefreshCoordinator.isCancelled(token) || isStopped()) {
+            for (int index = checkpoint.nextIndex; index < orderedChannelIds.size(); index++) {
+                if (SubscriptionRefreshCoordinator.isCancelled(token)) {
+                    checkpoint.clear();
                     return Result.success();
                 }
+                if (isStopped() || SystemClock.elapsedRealtime() - batchStartedAt >= MAXIMUM_BATCH_MILLIS) {
+                    return Result.retry();
+                }
+                String channelId = orderedChannelIds.get(index);
                 List<String> profileIds = targetProfileIds(feeds, channelId);
                 try {
                     JSONObject payload = SubscriptionRefreshHttpClient.fetch(feed, channelId);
@@ -225,6 +243,7 @@ public final class SubscriptionRefreshWorker extends Worker {
                     );
                 }
 
+                checkpoint.save(index + 1, completed, failed, failedProfileIds);
                 int progress = total == 0 ? 100 : (int) Math.round((completed + failed) * 100.0 / total);
                 if (notificationProgress.advanceTo(progress)) {
                     notifications.notify(
@@ -240,10 +259,13 @@ public final class SubscriptionRefreshWorker extends Worker {
                 }
             }
 
-            if (SubscriptionRefreshCoordinator.isCancelled(token) || isStopped()) {
+            if (SubscriptionRefreshCoordinator.isCancelled(token)) {
+                checkpoint.clear();
                 return Result.success();
             }
+            if (isStopped()) return Result.retry();
             if (failed > 0 && completed == 0 && !channelIds.isEmpty()) {
+                checkpoint.clear();
                 return Result.retry();
             }
 
@@ -276,7 +298,9 @@ public final class SubscriptionRefreshWorker extends Worker {
                     );
                 }
             );
-            return completionFailedProfileIds.isEmpty() ? Result.success() : Result.retry();
+            if (!completionFailedProfileIds.isEmpty()) return Result.retry();
+            checkpoint.clear();
+            return Result.success();
         } catch (Exception error) {
             List<String> profileIds = new ArrayList<>();
             for (SubscriptionRefreshConfiguration.Feed profileFeed : feeds) {

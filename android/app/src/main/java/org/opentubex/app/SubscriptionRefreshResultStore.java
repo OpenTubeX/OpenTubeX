@@ -14,6 +14,8 @@ import java.util.UUID;
 
 final class SubscriptionRefreshResultStore {
     private static final String DIRECTORY_NAME = "subscription-refresh-results";
+    private static File indexedDirectory;
+    private static SubscriptionRefreshResultIndex index;
 
     private SubscriptionRefreshResultStore() {}
 
@@ -60,30 +62,25 @@ final class SubscriptionRefreshResultStore {
         String slot = profileId + "\n" + feedType + "\nfailure";
         String slotName = UUID.nameUUIDFromBytes(slot.getBytes(StandardCharsets.UTF_8)).toString();
         File failure = new File(directory(context), slotName + ".json");
-        if (failure.exists()) failure.delete();
+        if (failure.delete() && index != null && failure.getParentFile().equals(indexedDirectory)) {
+            index.remove(failure);
+        }
     }
 
     static synchronized JSONObject readNext(Context context) throws IOException, JSONException {
-        File[] files = directory(context).listFiles((dir, name) -> name.endsWith(".json"));
-        if (files == null || files.length == 0) return null;
-        JSONObject next = null;
-        for (File file : files) {
-            JSONObject result = read(file);
-            if (next == null || result.getString("id").compareTo(next.getString("id")) < 0) {
-                next = result;
-            }
-        }
-        return next;
+        File file = index(context).first();
+        return file == null ? null : read(file);
     }
 
     static synchronized boolean acknowledge(Context context, String id) throws IOException, JSONException {
         if (id == null) return false;
-        File[] files = directory(context).listFiles((dir, name) -> name.endsWith(".json"));
-        if (files == null) return false;
-        for (File file : files) {
-            if (id.equals(read(file).optString("id"))) return file.delete();
-        }
-        // A newer result may have replaced the slot after the renderer read it.
+        SubscriptionRefreshResultIndex pending = index(context);
+        File file = pending.get(id);
+        // Replacing a slot removes its old ID, so an old acknowledgement cannot
+        // delete the replacement. All writes and acknowledgements hold this lock.
+        if (file == null) return true;
+        if (!file.delete() && file.exists()) return false;
+        pending.remove(file);
         return true;
     }
 
@@ -98,21 +95,41 @@ final class SubscriptionRefreshResultStore {
     }
 
     private static void write(Context context, JSONObject result, String slot) throws IOException, JSONException {
+        File directory = directory(context);
+        SubscriptionRefreshResultIndex pending = directory.equals(indexedDirectory) ? index : null;
         String id = result.getString("id");
         String slotName = UUID.nameUUIDFromBytes(slot.getBytes(StandardCharsets.UTF_8)).toString();
-        File target = new File(directory(context), slotName + ".json");
-        File temporary = new File(directory(context), id + ".tmp");
+        File target = new File(directory, slotName + ".json");
+        File temporary = new File(directory, id + ".tmp");
         byte[] bytes = result.toString().getBytes(StandardCharsets.UTF_8);
         try (FileOutputStream output = new FileOutputStream(temporary)) {
             output.write(bytes);
             output.getFD().sync();
         }
         if (!temporary.renameTo(target)) {
-            if (!target.delete() || !temporary.renameTo(target)) {
+            boolean removed = target.delete();
+            if (removed && pending != null) pending.remove(target);
+            if (!removed || !temporary.renameTo(target)) {
                 temporary.delete();
                 throw new IOException("Unable to commit pending refresh result");
             }
         }
+        if (pending != null) pending.put(target, id);
+    }
+
+    private static SubscriptionRefreshResultIndex index(Context context) throws IOException {
+        File directory = directory(context);
+        if (index == null || !directory.equals(indexedDirectory)) {
+            index = new SubscriptionRefreshResultIndex(directory, file -> {
+                try {
+                    return read(file).getString("id");
+                } catch (JSONException error) {
+                    throw new IOException("Invalid pending refresh result", error);
+                }
+            });
+            indexedDirectory = directory;
+        }
+        return index;
     }
 
     private static String createId() {

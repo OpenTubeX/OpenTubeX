@@ -110,6 +110,11 @@ function isValidEntry(entry) {
     (hasDashManifest || hasHlsManifest || hasLegacyFormatsOnly) &&
     Array.isArray(legacyFormats) &&
     hasValidCaptions &&
+    (source.storyboardSrc == null || (
+      typeof source.storyboardSrc === 'string' &&
+      source.storyboardSrc.startsWith('data:text/vtt;')
+    )) &&
+    (source.duration == null || (Number.isFinite(source.duration) && source.duration > 0)) &&
     (source.subtitlesIncluded === undefined || typeof source.subtitlesIncluded === 'boolean') &&
     (source.title === null || typeof source.title === 'string')
 }
@@ -195,6 +200,8 @@ export async function handleYtDlpPlaybackCacheSet(event, videoId, cacheKey, expi
           captionTranslations: source.captionTranslations,
           subtitlesIncluded: source.subtitlesIncluded,
           title: source.title,
+          storyboardSrc: source.storyboardSrc,
+          duration: source.duration,
           isLive: source.isLive,
           version: source.version
         }
