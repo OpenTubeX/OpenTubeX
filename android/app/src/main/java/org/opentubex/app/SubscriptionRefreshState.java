@@ -21,7 +21,8 @@ final class SubscriptionRefreshState {
     private String title;
     private String cancelLabel;
     private int progress;
-    private int notifiedProgress;
+    private final SubscriptionRefreshNotificationProgress notificationProgress =
+        new SubscriptionRefreshNotificationProgress();
     private CountDownLatch completion = new CountDownLatch(0);
 
     synchronized void begin(String nextToken, String nextTitle, String nextCancelLabel) {
@@ -30,7 +31,7 @@ final class SubscriptionRefreshState {
         title = nextTitle;
         cancelLabel = nextCancelLabel;
         progress = 0;
-        notifiedProgress = 0;
+        notificationProgress.reset();
         completion = new CountDownLatch(1);
     }
 
@@ -46,8 +47,7 @@ final class SubscriptionRefreshState {
     }
 
     synchronized Snapshot takeNotificationSnapshot(String expectedToken) {
-        if (!isCurrent(expectedToken) || progress == notifiedProgress) return null;
-        notifiedProgress = progress;
+        if (!isCurrent(expectedToken) || !notificationProgress.advanceTo(progress)) return null;
         return new Snapshot(token, title, cancelLabel, progress);
     }
 
@@ -66,7 +66,7 @@ final class SubscriptionRefreshState {
         title = null;
         cancelLabel = null;
         progress = 0;
-        notifiedProgress = 0;
+        notificationProgress.reset();
         completion.countDown();
         return true;
     }

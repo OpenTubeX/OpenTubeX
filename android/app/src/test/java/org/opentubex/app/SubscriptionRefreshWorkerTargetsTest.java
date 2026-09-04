@@ -53,6 +53,20 @@ public class SubscriptionRefreshWorkerTargetsTest {
         assertEquals(List.of("second"), failedProfileIds);
     }
 
+    @Test
+    public void scheduledRefreshCoalescesNotificationUpdatesForLargeProfiles() {
+        SubscriptionRefreshNotificationProgress progress =
+            new SubscriptionRefreshNotificationProgress();
+        int notificationUpdates = 0;
+
+        for (int completed = 1; completed <= 900; completed++) {
+            int percentage = (int) Math.round(completed * 100.0 / 900);
+            if (progress.advanceTo(percentage)) notificationUpdates++;
+        }
+
+        assertEquals(100, notificationUpdates);
+    }
+
     private static SubscriptionRefreshConfiguration.Feed feed(
         String profileId,
         List<String> channelIds
