@@ -696,6 +696,9 @@ export default defineComponent({
     const showVideoTitleWhenPaused = computed(() => store.getters.getShowVideoTitleWhenPaused)
     const showFullscreenActionsWhenPaused = computed(() => store.getters.getShowFullscreenActionsWhenPaused)
     const pausedInterfaceHideDelay = computed(() => store.getters.getPausedInterfaceHideDelay)
+    const documentPictureInPictureEnabled = computed(() => {
+      return store.getters.getDocumentPictureInPictureEnabled
+    })
     const playerControlsShown = computed(() => (
       shakaControlsShown.value &&
       (
@@ -4293,7 +4296,10 @@ export default defineComponent({
         // Only set it to label if we added the captions ourselves,
         // some live streams come with subtitles in the DASH manifest, but without labels
         textTrackLabelFormat: props.captions.length > 0 ? TrackLabelFormat.LABEL : TrackLabelFormat.LANGUAGE,
-        displayInVrMode: useVrMode.value
+        displayInVrMode: useVrMode.value,
+        documentPictureInPicture: {
+          enabled: documentPictureInPictureEnabled.value
+        }
       }
 
       /** @type {string[]} */
@@ -4514,10 +4520,6 @@ export default defineComponent({
 
           // we have our own ones (shaka-player's ones are quite limited)
           enableKeyboardPlaybackControls: false,
-
-          documentPictureInPicture: {
-            enabled: true
-          }
         }
 
         if (document.pictureInPictureEnabled) {
@@ -6304,6 +6306,7 @@ export default defineComponent({
     /** Height of the video element in CSS pixels, used to scale the captions with the player. */
     const videoElementLayoutHeight = ref(0)
     const pictureInPictureActive = ref(false)
+    const documentPictureInPictureActive = ref(false)
 
     const captionPlayerVariables = computed(() => {
       return getCaptionPlayerVariables(videoElementLayoutHeight.value)
@@ -6484,6 +6487,7 @@ export default defineComponent({
       }
 
       pictureInPictureActive.value = true
+      documentPictureInPictureActive.value = usesInnerSize
       pipWindow = nextPipWindow
       pipWindowUsesInnerSize = usesInnerSize
       tabMediaCoordinator.setPictureInPicture(mediaTabId, true)
@@ -6547,6 +6551,7 @@ export default defineComponent({
       if (pipWindow !== expectedPipWindow) return
 
       pictureInPictureActive.value = false
+      documentPictureInPictureActive.value = false
       tabMediaCoordinator.setPictureInPicture(mediaTabId, false)
 
       if (pipWindow) {
@@ -6582,6 +6587,16 @@ export default defineComponent({
 
       pipWindowWidth.value = width * devicePixelRatio
       pipWindowHeight.value = height * devicePixelRatio
+    }
+
+    function closeDocumentPictureInPicture() {
+      const documentPipWindow = window.documentPictureInPicture?.window
+      if (
+        documentPictureInPictureActive.value &&
+        documentPipWindow?.document === container.value?.ownerDocument
+      ) {
+        documentPipWindow.close()
+      }
     }
 
     function clearDisplayedCaptions() {
@@ -11365,6 +11380,8 @@ export default defineComponent({
       syncMediaSessionPosition,
       handleEnterPictureInPicture,
       handleLeavePictureInPicture,
+      closeDocumentPictureInPicture,
+      documentPictureInPictureActive,
 
       videoZoomStyle,
       videoZoomPossible,
