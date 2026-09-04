@@ -6,6 +6,9 @@ import org.json.JSONObject;
 import java.util.Locale;
 
 final class SubscriptionRefreshRequestDiagnostic {
+    private static final int MAX_MESSAGE_LENGTH = 500;
+    private static final String TRUNCATION_MARKER = "<truncated>";
+
     final String category;
     final String backend;
     final String lifecycle;
@@ -38,12 +41,14 @@ final class SubscriptionRefreshRequestDiagnostic {
         Throwable error
     ) {
         Throwable cause = deepestCause(error);
+        String rawMessage = normalizedMessage(cause.getMessage());
+        String message = boundedMessage(rawMessage);
         return new SubscriptionRefreshRequestDiagnostic(
             category(feedType),
             backend,
-            classify(cause),
+            classify(cause, boundedClassificationMessage(rawMessage)),
             cause.getClass().getSimpleName(),
-            sanitize(cause.getMessage())
+            sanitize(message)
         );
     }
 
@@ -86,8 +91,35 @@ final class SubscriptionRefreshRequestDiagnostic {
         }
     }
 
-    private static String classify(Throwable error) {
-        String signature = (error.getClass().getName() + " " + error.getMessage())
+    private static String normalizedMessage(String rawMessage) {
+        return rawMessage == null ? "No error message" : rawMessage;
+    }
+
+    private static String boundedMessage(String message) {
+        if (message.length() <= MAX_MESSAGE_LENGTH) return message;
+        if (
+            Character.isWhitespace(message.charAt(MAX_MESSAGE_LENGTH - 1)) ||
+            Character.isWhitespace(message.charAt(MAX_MESSAGE_LENGTH))
+        ) {
+            return message.substring(0, MAX_MESSAGE_LENGTH);
+        }
+
+        int prefixLength = MAX_MESSAGE_LENGTH - TRUNCATION_MARKER.length();
+        while (prefixLength > 0 && !Character.isWhitespace(message.charAt(prefixLength - 1))) {
+            prefixLength--;
+        }
+        return message.substring(0, prefixLength) + TRUNCATION_MARKER;
+    }
+
+    private static String boundedClassificationMessage(String message) {
+        if (message.length() <= MAX_MESSAGE_LENGTH) return message;
+        int headLength = (MAX_MESSAGE_LENGTH - 1) / 2;
+        return message.substring(0, headLength) + " " +
+            message.substring(message.length() - (MAX_MESSAGE_LENGTH - headLength - 1));
+    }
+
+    private static String classify(Throwable error, String message) {
+        String signature = (error.getClass().getName() + " " + message)
             .toLowerCase(Locale.ROOT);
         if (signature.matches(".*(cancel|interrupt|aborted).*")) return "cancellation";
         if (signature.matches(
@@ -106,14 +138,13 @@ final class SubscriptionRefreshRequestDiagnostic {
         return "api";
     }
 
-    private static String sanitize(String rawMessage) {
-        String message = rawMessage == null ? "No error message" : rawMessage;
+    private static String sanitize(String message) {
         message = message.replaceAll(
             "(?i)(https?://)(?:[^/@\\s?#]+@)?([^/\\s?#]+)[^\\s)]*",
             "$1$2"
         );
         message = message.replaceAll(
-            "(?i)authorization\\s*:\\s*(?:bearer\\s+)?[^\\s,;]+",
+            "(?i)\\bauthorization\\s*:\\s*[^\\r\\n]*",
             "Authorization: <redacted>"
         );
         message = message.replaceAll(
@@ -134,6 +165,6 @@ final class SubscriptionRefreshRequestDiagnostic {
             "(?i)\\brequest\\s+body\\s*[:=]\\s*[^\\r\\n]*",
             "request body=<redacted>"
         );
-        return message.substring(0, Math.min(500, message.length()));
+        return message.substring(0, Math.min(MAX_MESSAGE_LENGTH, message.length()));
     }
 }

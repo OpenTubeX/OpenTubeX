@@ -247,14 +247,13 @@ public final class SubscriptionRefreshWorker extends Worker {
             Set<String> completionFailedProfileIds = new LinkedHashSet<>();
             writeProfileCompletions(
                 feeds,
+                failedProfileIds,
                 profileFeed -> {
-                    if (!failedProfileIds.contains(profileFeed.profileId)) {
-                        SubscriptionRefreshResultStore.clearFailure(
-                            context,
-                            profileFeed.profileId,
-                            feedType
-                        );
-                    }
+                    SubscriptionRefreshResultStore.clearFailure(
+                        context,
+                        profileFeed.profileId,
+                        feedType
+                    );
                     SubscriptionRefreshResultStore.writeCompletion(
                         context,
                         profileFeed.profileId,
@@ -307,10 +306,12 @@ public final class SubscriptionRefreshWorker extends Worker {
 
     static void writeProfileCompletions(
         List<SubscriptionRefreshConfiguration.Feed> feeds,
+        Set<String> failedProfileIds,
         ProfileCompletionWriter writer,
         BiConsumer<SubscriptionRefreshConfiguration.Feed, Exception> onFailure
     ) {
         for (SubscriptionRefreshConfiguration.Feed profileFeed : feeds) {
+            if (failedProfileIds.contains(profileFeed.profileId)) continue;
             try {
                 writer.write(profileFeed);
             } catch (Exception error) {

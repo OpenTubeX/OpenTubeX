@@ -1215,6 +1215,14 @@ test.describe('thumbnail watched progress', () => {
         window.ftElectron.setZoomFactor(scale)
       }, scenario)
       await expect(progress).toBeVisible()
+      await expect.poll(() => progress.evaluate(element => {
+        const viewBox = element.viewBox.baseVal
+        const style = getComputedStyle(element)
+        return Math.max(
+          Math.abs(viewBox.width - Number.parseFloat(style.width)),
+          Math.abs(viewBox.height - Number.parseFloat(style.height))
+        )
+      })).toBeLessThan(0.1)
 
       const geometry = await progressPath.evaluate(element => ({
         dashLength: Number.parseFloat(element.style.strokeDasharray),

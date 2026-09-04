@@ -25,7 +25,7 @@ function stripUrlDetails(value) {
 
 export function sanitizeRequestErrorMessage(error) {
   return stripUrlDetails(errorText(error))
-    .replaceAll(/authorization\s*:\s*(?:bearer\s+)?[^\s,;]+/gi, 'Authorization: <redacted>')
+    .replaceAll(/\bauthorization\s*:\s*[^\r\n]*/gi, 'Authorization: <redacted>')
     .replaceAll(/\b(bearer|basic)\s+[A-Za-z0-9._~+/=-]+/gi, '$1 <redacted>')
     .replaceAll(/\b(?:cookie|set-cookie)\s*:\s*[^\r\n]*/gi, 'Cookie: <redacted>')
     .replaceAll(

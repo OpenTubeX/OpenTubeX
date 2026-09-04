@@ -2,6 +2,7 @@ package org.opentubex.app;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.net.UnknownHostException;
 
@@ -37,6 +38,11 @@ public class SubscriptionRefreshRequestDiagnosticTest {
             SubscriptionRefreshRequestDiagnostic.create("posts", new JSONException("bad json"))
                 .failure
         );
+        assertEquals(
+            "http",
+            SubscriptionRefreshRequestDiagnostic.create("videos", new Exception("HTTP 503"))
+                .failure
+        );
         SubscriptionRefreshRequestDiagnostic restricted =
             SubscriptionRefreshRequestDiagnostic.create(
                 "videos",
@@ -69,7 +75,8 @@ public class SubscriptionRefreshRequestDiagnosticTest {
     @Test
     public void stripsCredentialFieldsCookiesAndRequestBodies() {
         Exception error = new Exception(
-            "Cookie: SID=cookie-secret\n" +
+            "Authorization: Basic basic-secret with spaces\n" +
+                "Cookie: SID=cookie-secret\n" +
                 "token=token-secret api_key=key-secret\n" +
                 "request body={\"password\":\"body-secret\"}"
         );
@@ -77,6 +84,7 @@ public class SubscriptionRefreshRequestDiagnosticTest {
             SubscriptionRefreshRequestDiagnostic.create("videos", error);
 
         for (String secret : new String[] {
+            "basic-secret",
             "cookie-secret",
             "token-secret",
             "key-secret",
@@ -85,10 +93,41 @@ public class SubscriptionRefreshRequestDiagnosticTest {
             assertFalse(diagnostic.message.contains(secret));
         }
         assertEquals(
-            "Cookie: <redacted>\n" +
+            "Authorization: <redacted>\n" +
+                "Cookie: <redacted>\n" +
                 "token=<redacted> api_key=<redacted>\n" +
                 "request body=<redacted>",
             diagnostic.message
         );
+    }
+
+    @Test
+    public void boundsMessagesBeforeClassifyingThem() {
+        String message = "x".repeat(600) + " timeout";
+        SubscriptionRefreshRequestDiagnostic diagnostic =
+            SubscriptionRefreshRequestDiagnostic.create("videos", new Exception(message));
+
+        assertEquals("network", diagnostic.failure);
+        assertTrue(diagnostic.message.length() <= 500);
+    }
+
+    @Test
+    public void redactsUrlCredentialsSplitByTheMessageLimit() {
+        String message = "x ".repeat(240) + "https://user:password@example.test/path";
+        SubscriptionRefreshRequestDiagnostic diagnostic =
+            SubscriptionRefreshRequestDiagnostic.create("videos", new Exception(message));
+
+        assertFalse(diagnostic.message.contains("user"));
+        assertFalse(diagnostic.message.contains("password"));
+        assertTrue(diagnostic.message.length() <= 500);
+    }
+
+    @Test
+    public void keepsClassificationSamplesSeparate() {
+        String message = "x".repeat(246) + "time" + "z" + "out" + "y".repeat(247);
+        SubscriptionRefreshRequestDiagnostic diagnostic =
+            SubscriptionRefreshRequestDiagnostic.create("videos", new Exception(message));
+
+        assertEquals("api", diagnostic.failure);
     }
 }

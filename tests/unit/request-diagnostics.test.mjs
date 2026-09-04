@@ -57,6 +57,11 @@ test('redacts credential fields, cookies, and request bodies', () => {
   assert.match(sanitized, /token=<redacted>/)
   assert.match(sanitized, /api_key=<redacted>/)
   assert.match(sanitized, /request body=<redacted>/)
+
+  assert.equal(
+    sanitizeRequestErrorMessage(new Error('Authorization: Basic basic-secret with spaces')),
+    'Authorization: <redacted>'
+  )
 })
 
 test('labels foreground, background, and recent resume requests', () => {

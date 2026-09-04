@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -27,7 +28,7 @@ public class SubscriptionRefreshWorkerTargetsTest {
     }
 
     @Test
-    public void completionFailuresDoNotSkipLaterProfiles() {
+    public void failedProfilesAreSkippedAndCompletionFailuresDoNotSkipLaterProfiles() {
         List<SubscriptionRefreshConfiguration.Feed> feeds = List.of(
             feed("first", List.of("shared")),
             feed("second", List.of("shared")),
@@ -38,6 +39,7 @@ public class SubscriptionRefreshWorkerTargetsTest {
 
         SubscriptionRefreshWorker.writeProfileCompletions(
             feeds,
+            Set.of("first"),
             profileFeed -> {
                 attemptedProfileIds.add(profileFeed.profileId);
                 if (profileFeed.profileId.equals("second")) {
@@ -47,7 +49,7 @@ public class SubscriptionRefreshWorkerTargetsTest {
             (profileFeed, error) -> failedProfileIds.add(profileFeed.profileId)
         );
 
-        assertEquals(List.of("first", "second", "third"), attemptedProfileIds);
+        assertEquals(List.of("second", "third"), attemptedProfileIds);
         assertEquals(List.of("second"), failedProfileIds);
     }
 
