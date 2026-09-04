@@ -326,10 +326,10 @@ test.describe('OpenTubeX sync server', () => {
           return
         }
         holdStaleSessionRequest = false
+        const response = await route.fetch()
         staleSessionRequestStarted()
         await staleSessionRequestPending
         try {
-          const response = await route.fetch()
           await route.fulfill({ response })
         } finally {
           staleSessionRequestFinished()
@@ -361,10 +361,18 @@ test.describe('OpenTubeX sync server', () => {
         headers.Authorization = latestSettings(
           await readFile(settingsPath, 'utf8')
         ).syncServerToken
+        await page.evaluate(() => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('setSyncServerDeviceNames', { 'new-account': 'New account' })
+        })
       } finally {
         finishStaleSessionRequest()
       }
       await staleSessionRequestCompleted
+      await expect.poll(() => page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return store.state.syncServer.syncServerDeviceNames
+      })).toEqual({ 'new-account': 'New account' })
       await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
       await expect(currentCard).toBeVisible()
 

@@ -405,7 +405,9 @@ async function loadSessions(token = props.token) {
       }
       return { ...session, deviceInfo }
     }))
-    store.commit('setSyncServerDeviceNames', deviceNames)
+    if (requestClient.token === store.getters.getSyncServerToken) {
+      store.commit('setSyncServerDeviceNames', deviceNames)
+    }
   } catch (requestError) {
     await handleRequestError(requestError, requestClient.token)
   } finally {
