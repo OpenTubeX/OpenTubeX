@@ -675,7 +675,9 @@ Settings:
     Application Caches: ذاكرات التخزين المؤقت للتطبيق
     Browser Caches: ذاكرات التخزين المؤقت للمتصفح
     Browser Caches Hint: ذاكرات التخزين المؤقت لـ HTTP وGPU والرمز والتظليل وعامل الخدمة والقاموس في Chromium.
+    Clear Android Cache Confirmation: هل تريد مسح ذاكرة التخزين المؤقت للمتصفح في Android؟
     Stored App Data: بيانات التطبيق المخزنة
+    Included In App Data: مضمن في بيانات التطبيق المعروضة أعلاه
     Browser Runtime Data: بيانات وقت تشغيل المتصفح
     Browser Runtime Data Hint: جلسة Chromium والتخزين المحلي وملفات تعريف الارتباط والخصوصية وحالة الشبكة وملفات الأعطال.
     Subscription Feed Cache: الاشتراك وذاكرة التخزين المؤقت للتغذية

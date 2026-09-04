@@ -896,7 +896,9 @@ Settings:
     Application Caches: Predpomnilniki aplikacije
     Browser Caches: Predpomnilniki brskalnika
     Browser Caches Hint: Chromiumovi predpomnilniki HTTP, GPU, kode, senčilnikov, service-workerjev in slovarjev.
+    Clear Android Cache Confirmation: Počistiti predpomnilnik brskalnika Android?
     Stored App Data: Shranjeni podatki aplikacije
+    Included In App Data: Vključeno v zgoraj prikazane podatke aplikacije
     Browser Runtime Data: Izvajalni podatki brskalnika
     Browser Runtime Data Hint: Chromiumova shramba sej in lokalna shramba, piškotki, stanje zasebnosti in omrežja ter datoteke zrušitev.
     Subscription Feed Cache: Predpomnilnik naročnin in virov

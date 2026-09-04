@@ -669,7 +669,9 @@ Settings:
     Application Caches: Appens cacheminnen
     Browser Caches: Webbläsarens cacheminnen
     Browser Caches Hint: Chromiums cacheminnen för HTTP, GPU, kod, shaders, service workers och ordlistor.
+    Clear Android Cache Confirmation: Rensa Androids webbläsarcache?
     Stored App Data: Lagrade appdata
+    Included In App Data: Ingår i appdata som visas ovan
     Browser Runtime Data: Webbläsarens körningsdata
     Browser Runtime Data Hint: Chromiums sessionslagring och lokala lagring, kakor, integritets- och nätverksstatus samt kraschfiler.
     Subscription Feed Cache: Cacheminne för prenumerationer och flöden

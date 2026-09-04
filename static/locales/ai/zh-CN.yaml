@@ -667,7 +667,9 @@ Settings:
     Application Caches: 应用缓存
     Browser Caches: 浏览器缓存
     Browser Caches Hint: Chromium 的 HTTP、GPU、代码、着色器、Service Worker 和字典缓存。
+    Clear Android Cache Confirmation: 清除 Android 的浏览器缓存？
     Stored App Data: 已存储的应用数据
+    Included In App Data: 已包含在上方显示的应用数据中
     Browser Runtime Data: 浏览器运行时数据
     Browser Runtime Data Hint: Chromium 的会话存储和本地存储、Cookie、隐私和网络状态以及崩溃文件。
     Subscription Feed Cache: 订阅和动态缓存

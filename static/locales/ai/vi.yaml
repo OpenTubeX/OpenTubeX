@@ -675,7 +675,9 @@ Settings:
     Application Caches: Bộ nhớ đệm ứng dụng
     Browser Caches: Bộ nhớ đệm trình duyệt
     Browser Caches Hint: Bộ nhớ đệm HTTP, GPU, mã, shader, service worker và từ điển của Chromium.
+    Clear Android Cache Confirmation: Xóa bộ nhớ đệm trình duyệt của Android?
     Stored App Data: Dữ liệu ứng dụng đã lưu
+    Included In App Data: Đã bao gồm trong dữ liệu ứng dụng hiển thị ở trên
     Browser Runtime Data: Dữ liệu thời gian chạy của trình duyệt
     Browser Runtime Data Hint: Bộ nhớ phiên và bộ nhớ cục bộ, cookie, trạng thái riêng tư và mạng cùng tệp sự cố của Chromium.
     Subscription Feed Cache: Bộ nhớ đệm đăng ký và bảng tin

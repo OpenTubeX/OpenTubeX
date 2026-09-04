@@ -697,7 +697,9 @@ Settings:
     Application Caches: حافظه‌های نهان برنامه
     Browser Caches: حافظه‌های نهان مرورگر
     Browser Caches Hint: حافظه‌های نهان HTTP، GPU، کد، سایه‌زن، سرویس‌ورکر و واژه‌نامهٔ Chromium.
+    Clear Android Cache Confirmation: حافظهٔ پنهان مرورگر اندروید پاک شود؟
     Stored App Data: داده‌های ذخیره‌شدهٔ برنامه
+    Included In App Data: در داده‌های برنامهٔ نمایش‌داده‌شده در بالا گنجانده شده است
     Browser Runtime Data: داده‌های زمان اجرای مرورگر
     Browser Runtime Data Hint: نشست و فضای ذخیره‌سازی محلی، کوکی‌ها، وضعیت حریم خصوصی و شبکه و فایل‌های خرابی Chromium.
     Subscription Feed Cache: حافظهٔ نهان اشتراک‌ها و خوراک

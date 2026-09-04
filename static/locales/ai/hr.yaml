@@ -669,7 +669,9 @@ Settings:
     Application Caches: Predmemorije aplikacije
     Browser Caches: Predmemorije preglednika
     Browser Caches Hint: Chromiumove predmemorije za HTTP, GPU, kôd, sjenčare, servisne radnike i rječnike.
+    Clear Android Cache Confirmation: Očistiti predmemoriju preglednika Androida?
     Stored App Data: Pohranjeni podaci aplikacije
+    Included In App Data: Uključeno u gore prikazane podatke aplikacije
     Browser Runtime Data: Podaci preglednika tijekom rada
     Browser Runtime Data Hint: Chromiumova pohrana sesije i lokalna pohrana, kolačići, stanje privatnosti i mreže te datoteke rušenja.
     Subscription Feed Cache: Predmemorija pretplata i sažetka sadržaja

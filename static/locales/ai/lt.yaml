@@ -882,7 +882,9 @@ Settings:
     Application Caches: Programos podėliai
     Browser Caches: Naršyklės podėliai
     Browser Caches Hint: Chromium HTTP, GPU, kodo, šešėliavimo programų, paslaugų modulio ir žodynų podėliai.
+    Clear Android Cache Confirmation: Išvalyti „Android“ naršyklės podėlį?
     Stored App Data: Išsaugoti programos duomenys
+    Included In App Data: Įtraukta į anksčiau parodytus programos duomenis
     Browser Runtime Data: Naršyklės vykdymo duomenys
     Browser Runtime Data Hint: Chromium seanso ir vietinė saugykla, slapukai, privatumo bei tinklo būsena ir strigčių failai.
     Subscription Feed Cache: Prenumeratų ir sklaidos kanalų podėlis

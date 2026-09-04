@@ -667,7 +667,9 @@ Settings:
     Application Caches: アプリのキャッシュ
     Browser Caches: ブラウザーのキャッシュ
     Browser Caches Hint: ChromiumのHTTP、GPU、コード、シェーダー、Service Worker、辞書の各キャッシュです。
+    Clear Android Cache Confirmation: Android のブラウザーキャッシュを消去しますか？
     Stored App Data: 保存済みのアプリデータ
+    Included In App Data: 上に表示されたアプリデータに含まれます
     Browser Runtime Data: ブラウザーの実行時データ
     Browser Runtime Data Hint: Chromiumのセッション、ローカルストレージ、Cookie、プライバシーとネットワークの状態、クラッシュファイルです。
     Subscription Feed Cache: 登録チャンネルとフィードのキャッシュ

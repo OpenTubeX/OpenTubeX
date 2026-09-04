@@ -224,7 +224,9 @@ Settings:
     Application Caches: Pamięci podręczne aplikacji
     Browser Caches: Pamięci podręczne przeglądarki
     Browser Caches Hint: Pamięci podręczne HTTP, GPU, kodu, modułów cieniujących, skryptów service worker i słowników Chromium.
+    Clear Android Cache Confirmation: Wyczyścić pamięć podręczną przeglądarki Androida?
     Stored App Data: Zapisane dane aplikacji
+    Included In App Data: Uwzględniono w danych aplikacji pokazanych powyżej
     Browser Runtime Data: Dane środowiska przeglądarki
     Browser Runtime Data Hint: Dane sesji i pamięci lokalnej Chromium, ciasteczka, stan prywatności i sieci oraz pliki awarii.
     Subscription Feed Cache: Pamięć podręczna subskrypcji i kanału

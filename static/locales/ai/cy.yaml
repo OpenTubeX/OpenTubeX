@@ -669,7 +669,9 @@ Settings:
     Application Caches: Storfeydd yr ap
     Browser Caches: Storfeydd y porwr
     Browser Caches Hint: Storfeydd HTTP, GPU, cod, arlliwiwr, gweithiwr gwasanaeth a geiriadur Chromium.
+    Clear Android Cache Confirmation: Clirio storfa porwr Android?
     Stored App Data: Data ap sydd wedi'u storio
+    Included In App Data: Wedi'i gynnwys yn nata'r ap uchod
     Browser Runtime Data: Data amser rhedeg y porwr
     Browser Runtime Data Hint: Storfa sesiwn a lleol, cwcis, cyflwr preifatrwydd a rhwydwaith, a ffeiliau chwalu Chromium.
     Subscription Feed Cache: Storfa tanysgrifiadau a ffrydiau

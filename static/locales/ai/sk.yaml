@@ -667,7 +667,9 @@ Settings:
     Application Caches: Vyrovnávacie pamäte aplikácie
     Browser Caches: Vyrovnávacie pamäte prehliadača
     Browser Caches Hint: Vyrovnávacie pamäte HTTP, GPU, kódu, shaderov, service workerov a slovníkov prehliadača Chromium.
+    Clear Android Cache Confirmation: Vymazať vyrovnávaciu pamäť prehliadača Android?
     Stored App Data: Uložené údaje aplikácie
+    Included In App Data: Zahrnuté v údajoch aplikácie zobrazených vyššie
     Browser Runtime Data: Prevádzkové údaje prehliadača
     Browser Runtime Data Hint: Úložisko relácie a miestne úložisko, súbory cookie, stav súkromia a siete a súbory zlyhaní prehliadača Chromium.
     Subscription Feed Cache: Vyrovnávacia pamäť odberov a kanálov

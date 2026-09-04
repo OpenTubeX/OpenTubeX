@@ -669,7 +669,9 @@ Settings:
     Application Caches: Кешове на приложението
     Browser Caches: Кешове на браузъра
     Browser Caches Hint: Кешовете на Chromium за HTTP, GPU, код, шейдъри, service-worker и речници.
+    Clear Android Cache Confirmation: Да се изчисти ли кешът на браузъра на Android?
     Stored App Data: Съхранени данни на приложението
+    Included In App Data: Включено в данните на приложението по-горе
     Browser Runtime Data: Данни от работата на браузъра
     Browser Runtime Data Hint: Сесийното и локалното хранилище, бисквитките, състоянието на поверителността и мрежата и файловете от сривове на Chromium.
     Subscription Feed Cache: Кеш на абонаментите и емисията

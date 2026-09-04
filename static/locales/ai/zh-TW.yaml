@@ -667,7 +667,9 @@ Settings:
     Application Caches: 應用程式快取
     Browser Caches: 瀏覽器快取
     Browser Caches Hint: Chromium 的 HTTP、GPU、程式碼、著色器、Service Worker 和字典快取。
+    Clear Android Cache Confirmation: 清除 Android 的瀏覽器快取？
     Stored App Data: 已儲存的應用程式資料
+    Included In App Data: 已包含在上方顯示的應用程式資料中
     Browser Runtime Data: 瀏覽器執行階段資料
     Browser Runtime Data Hint: Chromium 的工作階段儲存空間與本機儲存空間、Cookie、隱私權與網路狀態，以及當機檔案。
     Subscription Feed Cache: 訂閱與動態快取

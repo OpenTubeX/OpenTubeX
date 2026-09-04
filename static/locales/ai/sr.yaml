@@ -690,7 +690,9 @@ Settings:
     Application Caches: Кешеви апликације
     Browser Caches: Кешеви прегледача
     Browser Caches Hint: Chromium кешеви за HTTP, GPU, кôд, шејдере, service-worker и речник.
+    Clear Android Cache Confirmation: Обрисати кеш Android прегледача?
     Stored App Data: Сачувани подаци апликације
+    Included In App Data: Укључено у податке апликације приказане изнад
     Browser Runtime Data: Подаци прегледача током рада
     Browser Runtime Data Hint: Chromium складиште сесије и локално складиште, колачићи, стање приватности и мреже и датотеке о падовима.
     Subscription Feed Cache: Кеш претплата и фида

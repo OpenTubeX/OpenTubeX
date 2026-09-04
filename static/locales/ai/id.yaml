@@ -675,7 +675,9 @@ Settings:
     Application Caches: Cache aplikasi
     Browser Caches: Cache peramban
     Browser Caches Hint: Cache HTTP, GPU, kode, shader, service worker, dan kamus Chromium.
+    Clear Android Cache Confirmation: Hapus cache browser Android?
     Stored App Data: Data aplikasi tersimpan
+    Included In App Data: Termasuk dalam data aplikasi di atas
     Browser Runtime Data: Data waktu jalan peramban
     Browser Runtime Data Hint: Penyimpanan sesi dan lokal, kuki, status privasi dan jaringan, serta berkas crash Chromium.
     Subscription Feed Cache: Cache langganan dan umpan

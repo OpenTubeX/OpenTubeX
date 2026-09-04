@@ -858,7 +858,9 @@ Settings:
     Application Caches: 앱 캐시
     Browser Caches: 브라우저 캐시
     Browser Caches Hint: Chromium의 HTTP, GPU, 코드, 셰이더, 서비스 워커 및 사전 캐시입니다.
+    Clear Android Cache Confirmation: Android 브라우저 캐시를 지울까요?
     Stored App Data: 저장된 앱 데이터
+    Included In App Data: 위에 표시된 앱 데이터에 포함됨
     Browser Runtime Data: 브라우저 런타임 데이터
     Browser Runtime Data Hint: Chromium의 세션 및 로컬 저장소, 쿠키, 개인 정보 및 네트워크 상태, 충돌 파일입니다.
     Subscription Feed Cache: 구독 및 피드 캐시

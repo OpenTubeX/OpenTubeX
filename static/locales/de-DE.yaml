@@ -909,7 +909,9 @@ Settings:
     Application Caches: Anwendungscaches
     Browser Caches: Browser-Caches
     Browser Caches Hint: HTTP-, GPU-, Code-, Shader-, Service-Worker- und Wörterbuch-Caches von Chromium.
+    Clear Android Cache Confirmation: Browser-Cache von Android leeren?
     Stored App Data: Gespeicherte Anwendungsdaten
+    Included In App Data: In den oben angezeigten Anwendungsdaten enthalten
     Browser Runtime Data: Browser-Laufzeitdaten
     Browser Runtime Data Hint: Sitzungs- und lokaler Speicher, Cookies, Datenschutz- und Netzwerkstatus sowie Absturzdateien von Chromium.
     Subscription Feed Cache: Abo- und Feed-Cache

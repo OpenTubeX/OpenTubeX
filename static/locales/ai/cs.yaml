@@ -667,7 +667,9 @@ Settings:
     Application Caches: Mezipaměti aplikace
     Browser Caches: Mezipaměti prohlížeče
     Browser Caches Hint: Mezipaměti Chromia pro HTTP, GPU, kód, shadery, service workery a slovníky.
+    Clear Android Cache Confirmation: Vymazat mezipaměť prohlížeče Android?
     Stored App Data: Uložená data aplikace
+    Included In App Data: Zahrnuto v datech aplikace zobrazených výše
     Browser Runtime Data: Provozní data prohlížeče
     Browser Runtime Data Hint: Úložiště relace a místní úložiště Chromia, cookies, stav soukromí a sítě a soubory pádů.
     Subscription Feed Cache: Mezipaměť odběrů a kanálu

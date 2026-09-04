@@ -667,7 +667,9 @@ Settings:
     Application Caches: Hurtigbuffere for programmet
     Browser Caches: Hurtigbuffere for nettleseren
     Browser Caches Hint: Chromiums hurtigbuffere for HTTP, GPU, kode, shadere, service workers og ordlister.
+    Clear Android Cache Confirmation: Tømme Androids nettleserbuffer?
     Stored App Data: Lagrede programdata
+    Included In App Data: Inkludert i appdataene ovenfor
     Browser Runtime Data: Kjøretidsdata for nettleseren
     Browser Runtime Data Hint: Chromiums øktlagring og lokale lagringsdata, informasjonskapsler, personvern- og nettverkstilstand samt krasjfiler.
     Subscription Feed Cache: Hurtigbuffer for abonnementer og informasjonsstrøm

@@ -667,7 +667,9 @@ Settings:
     Application Caches: Cache dell'applicazione
     Browser Caches: Cache del browser
     Browser Caches Hint: Cache HTTP, GPU, del codice, degli shader, dei service worker e dei dizionari di Chromium.
+    Clear Android Cache Confirmation: Cancellare la cache del browser Android?
     Stored App Data: Dati dell'app archiviati
+    Included In App Data: Incluso nei dati dell'app mostrati sopra
     Browser Runtime Data: Dati di esecuzione del browser
     Browser Runtime Data Hint: Dati di sessione e archiviazione locale, cookie, stato della privacy e della rete e file degli arresti anomali di Chromium.
     Subscription Feed Cache: Cache delle iscrizioni e dei feed

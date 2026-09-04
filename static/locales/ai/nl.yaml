@@ -680,7 +680,9 @@ Settings:
     Application Caches: Appcaches
     Browser Caches: Browsercaches
     Browser Caches Hint: HTTP-, GPU-, code-, shader-, serviceworker- en woordenboekcaches van Chromium.
+    Clear Android Cache Confirmation: Browsercache van Android wissen?
     Stored App Data: Opgeslagen appgegevens
+    Included In App Data: Opgenomen in de appgegevens hierboven
     Browser Runtime Data: Runtimegegevens van browser
     Browser Runtime Data Hint: Sessie- en lokale opslag, cookies, privacy- en netwerkstatus en crashbestanden van Chromium.
     Subscription Feed Cache: Cache van abonnementen en feeds

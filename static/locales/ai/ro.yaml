@@ -671,7 +671,9 @@ Settings:
     Application Caches: Memorii cache ale aplicației
     Browser Caches: Memorii cache ale browserului
     Browser Caches Hint: Memoriile cache Chromium pentru HTTP, GPU, cod, shadere, service worker și dicționare.
+    Clear Android Cache Confirmation: Goliți memoria cache a browserului Android?
     Stored App Data: Date stocate ale aplicației
+    Included In App Data: Inclus în datele aplicației afișate mai sus
     Browser Runtime Data: Date de rulare ale browserului
     Browser Runtime Data Hint: Spațiul de stocare local și al sesiunii Chromium, cookie-urile, starea confidențialității și a rețelei și fișierele de avarie.
     Subscription Feed Cache: Memoria cache pentru abonamente și fluxuri

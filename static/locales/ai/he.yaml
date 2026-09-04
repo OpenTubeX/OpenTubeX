@@ -680,7 +680,9 @@ Settings:
     Application Caches: מטמוני היישום
     Browser Caches: מטמוני הדפדפן
     Browser Caches Hint: מטמוני HTTP, GPU, קוד, shader, service-worker ומילון של Chromium.
+    Clear Android Cache Confirmation: לנקות את מטמון הדפדפן של Android?
     Stored App Data: נתוני יישום שמורים
+    Included In App Data: כלול בנתוני היישום שמוצגים למעלה
     Browser Runtime Data: נתוני זמן הריצה של הדפדפן
     Browser Runtime Data Hint: אחסון הפעלה ואחסון מקומי, עוגיות, מצב פרטיות ורשת וקובצי קריסה של Chromium.
     Subscription Feed Cache: מטמון מינויים ועדכונים

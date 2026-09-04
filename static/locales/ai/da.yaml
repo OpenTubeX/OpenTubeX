@@ -692,7 +692,9 @@ Settings:
     Application Caches: Appcacher
     Browser Caches: Browsercacher
     Browser Caches Hint: Chromiums cacher til HTTP, GPU, kode, shaders, service workers og ordbøger.
+    Clear Android Cache Confirmation: Ryd Androids browsercache?
     Stored App Data: Gemte appdata
+    Included In App Data: Inkluderet i appdataene ovenfor
     Browser Runtime Data: Browserens kørselsdata
     Browser Runtime Data Hint: Chromiums sessionslager og lokale lager, cookies, privatlivs- og netværkstilstand samt nedbrudsfiler.
     Subscription Feed Cache: Cache til abonnementer og feeds

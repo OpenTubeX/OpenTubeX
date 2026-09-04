@@ -669,7 +669,9 @@ Settings:
     Application Caches: Aplikazioaren cacheak
     Browser Caches: Arakatzailearen cacheak
     Browser Caches Hint: Chromium-en HTTP, GPU, kode, itzaldura, service worker eta hiztegi cacheak.
+    Clear Android Cache Confirmation: Android-en arakatzailearen cachea garbitu?
     Stored App Data: Gordetako aplikazio-datuak
+    Included In App Data: Goian erakutsitako aplikazio-datuetan sartuta
     Browser Runtime Data: Arakatzailearen exekuzio-datuak
     Browser Runtime Data Hint: Chromium-en saio- eta biltegiratze lokala, cookieak, pribatutasun- eta sare-egoera eta hutsegite-fitxategiak.
     Subscription Feed Cache: Harpidetzen eta jarioen cachea

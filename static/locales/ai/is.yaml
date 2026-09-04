@@ -675,7 +675,9 @@ Settings:
     Application Caches: Skyndiminni forritsins
     Browser Caches: Skyndiminni vafrans
     Browser Caches Hint: HTTP-, GPU-, kóða-, skyggingar-, þjónustuvinnu- og orðabókarskyndiminni Chromium.
+    Clear Android Cache Confirmation: Hreinsa skyndiminni Android-vafrans?
     Stored App Data: Geymd forritsgögn
+    Included In App Data: Innifalið í forritsgögnunum hér að ofan
     Browser Runtime Data: Keyrslugögn vafrans
     Browser Runtime Data Hint: Setugeymsla og staðbundin geymsla Chromium, vefkökur, persónuverndar- og netkerfisstaða og hrunskrár.
     Subscription Feed Cache: Skyndiminni áskrifta og efnisstraums
