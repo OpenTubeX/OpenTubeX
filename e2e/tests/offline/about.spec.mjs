@@ -13,6 +13,15 @@ test('about page shows the bundled runtime versions', async ({ app, page }) => {
 
   const aboutWindow = page.getByRole('dialog', { name: 'About' })
   await expect(aboutWindow).toBeVisible()
+  const versionLineBox = await aboutWindow.locator('.version').evaluate(element => {
+    const style = getComputedStyle(element)
+    return {
+      fontSize: Number.parseFloat(style.fontSize),
+      lineHeight: Number.parseFloat(style.lineHeight)
+    }
+  })
+  expect(versionLineBox.lineHeight).toBe(versionLineBox.fontSize)
+
   const versionRows = aboutWindow.locator('.runtimeVersion')
   const expectedEntries = Object.entries(expectedVersions)
   await expect(versionRows).toHaveCount(expectedEntries.length)
