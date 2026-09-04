@@ -278,6 +278,10 @@ class SubscriptionCache {
   }
 }
 
+function compactAllDatastores() {
+  return window.ftElectron.storage.compactDatabases()
+}
+
 export {
   Settings as settings,
   History as history,
@@ -286,4 +290,5 @@ export {
   Playlists as playlists,
   SearchHistory as searchHistory,
   SubscriptionCache as subscriptionCache,
+  compactAllDatastores,
 }

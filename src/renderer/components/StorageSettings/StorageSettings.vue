@@ -8,7 +8,7 @@
       hide-title
     >
       <figure
-        v-if="USING_ELECTRON"
+        v-if="SUPPORTS_STORAGE_USAGE"
         class="storageBreakdown"
         :aria-label="chartAriaLabel"
       >
@@ -123,9 +123,9 @@
     <FtSettingsSection :title="t('Settings.Storage Settings.Replaceable Caches')">
       <StorageItem
         :title="t('Settings.Storage Settings.Subscription Feed Cache')"
-        :size="sizeText('subscriptionCache')"
+        :size="storedDataSizeText('subscriptionCache')"
         :description="t('Settings.Storage Settings.Subscription Feed Cache Description')"
-        location="subscription-cache.db"
+        :location="storedDataLocation('subscription-cache.db')"
       >
         <FtButton
           :label="t('Settings.Storage Settings.Clear Subscription Feed Cache')"
@@ -148,6 +148,20 @@
           :icon="['fas', 'trash']"
           :disabled="sessionSearchCount === 0"
           @click="requestCleanup('session-search')"
+        />
+      </StorageItem>
+      <StorageItem
+        v-if="IS_CAPACITOR"
+        :title="t('Settings.Storage Settings.Browser Caches')"
+        :size="sizeText('androidCache')"
+        :description="t('Settings.Storage Settings.Browser Caches Hint')"
+      >
+        <FtButton
+          :label="t('Settings.Storage Settings.Clear Cache')"
+          theme="destructive"
+          :icon="['fas', 'trash']"
+          :disabled="isUsageEmpty('androidCache')"
+          @click="requestCleanup('android-cache')"
         />
       </StorageItem>
       <template v-if="USING_ELECTRON">
@@ -234,9 +248,9 @@
       </StorageItem>
       <StorageItem
         :title="t('Settings.Storage Settings.Watch History')"
-        :size="watchHistoryText"
+        :size="storedDataSizeText('history', 'watchStats')"
         :description="t('Settings.Storage Settings.Watch History Description')"
-        location="history.db, watch-stats.db"
+        :location="storedDataLocation('history.db, watch-stats.db')"
       >
         <FtInput
           :placeholder="t('Settings.Privacy Settings.Automatic History Retention Placeholder')"
@@ -267,9 +281,9 @@
       </StorageItem>
       <StorageItem
         :title="t('Settings.Storage Settings.Search History')"
-        :size="sizeText('searchHistory')"
+        :size="storedDataSizeText('searchHistory')"
         :description="t('Settings.Storage Settings.Search History Description')"
-        location="search-history.db"
+        :location="storedDataLocation('search-history.db')"
       >
         <FtButton
           :label="t('Settings.Storage Settings.Delete Search History')"
@@ -283,9 +297,9 @@
     <FtSettingsSection :title="t('Settings.Storage Settings.Other User Data')">
       <StorageItem
         :title="t('Settings.Storage Settings.Subscriptions And Profiles')"
-        :size="sizeText('profiles')"
+        :size="storedDataSizeText('profiles')"
         :description="t('Settings.Storage Settings.Subscriptions And Profiles Description')"
-        location="profiles.db"
+        :location="storedDataLocation('profiles.db')"
       >
         <FtButton
           :label="t('Settings.Privacy Settings.Remove All Subscriptions / Profiles')"
@@ -296,9 +310,9 @@
       </StorageItem>
       <StorageItem
         :title="t('Playlists')"
-        :size="sizeText('playlists')"
+        :size="storedDataSizeText('playlists')"
         :description="t('Settings.Storage Settings.Playlists Description')"
-        location="playlists.db"
+        :location="storedDataLocation('playlists.db')"
       >
         <FtButton
           :label="t('Settings.Privacy Settings.Remove All Playlists')"
@@ -309,9 +323,9 @@
       </StorageItem>
       <StorageItem
         :title="t('Settings.Storage Settings.Settings And Sessions')"
-        :size="settingsAndSessionsText"
+        :size="storedDataSizeText('settings', 'tabSessions', 'liveReminders')"
         :description="t('Settings.Storage Settings.Settings And Sessions Description')"
-        location="settings.db, tab-session.db, live-reminders.db"
+        :location="storedDataLocation('settings.db, tab-session.db, live-reminders.db')"
       >
         <FtButton
           v-if="USING_ELECTRON"
@@ -349,11 +363,13 @@ import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import StorageItem from './StorageItem.vue'
 
 import { MAIN_PROFILE_ID } from '../../../constants'
+import { compactAllDatastores } from '../../../datastores/handlers/index'
 import {
   MAX_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
   MIN_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
   normalizeYtDlpPlaybackCacheMaxEntrySize
 } from '../../../ytDlpPlaybackCacheSettings'
+import { clearAndroidCache, getAndroidStorageUsage } from '../../helpers/androidStorage'
 import { formatBytes } from '../../helpers/fileSize'
 import { invalidateAllYtDlpPlaybackSources } from '../../helpers/player/ytDlpPlayback'
 import { showToast } from '../../helpers/utils'
@@ -361,6 +377,8 @@ import store from '../../store/index'
 
 const { locale, t } = useI18n()
 const USING_ELECTRON = !!process.env.IS_ELECTRON
+const IS_CAPACITOR = !!process.env.IS_CAPACITOR
+const SUPPORTS_STORAGE_USAGE = USING_ELECTRON || IS_CAPACITOR
 const usage = ref({})
 const downloads = ref([])
 const hoveredChartKey = ref(null)
@@ -404,6 +422,16 @@ function sizeText(key) {
   return sumSizeText(key)
 }
 
+function storedDataSizeText(...keys) {
+  return IS_CAPACITOR
+    ? t('Settings.Storage Settings.Included In App Data')
+    : sumSizeText(...keys)
+}
+
+function storedDataLocation(electronLocation) {
+  return USING_ELECTRON ? electronLocation : ''
+}
+
 function isUsageEmpty(...keys) {
   return hasLoadedUsage.value &&
     keys.every(key => Number.isFinite(usage.value[key])) &&
@@ -411,61 +439,77 @@ function isUsageEmpty(...keys) {
 }
 
 const playbackCachesText = computed(() => sumSizeText('ytDlpPlayback', 'playerCache'))
-const watchHistoryText = computed(() => sumSizeText('history', 'watchStats'))
-const settingsAndSessionsText = computed(() => sumSizeText('settings', 'tabSessions', 'liveReminders'))
-const chartCategories = computed(() => [
-  {
-    key: 'downloads',
-    label: t('Settings.Storage Settings.Downloaded Media'),
-    bytes: downloadedMediaBytes.value,
-    exact: true,
-    color: 'var(--storage-chart-downloads)'
-  },
-  {
-    key: 'app-caches',
-    label: t('Settings.Storage Settings.Application Caches'),
-    ...chartUsage(['subscriptionCache', 'tabPreviews', 'ytDlpPlayback', 'playerCache']),
-    color: 'var(--storage-chart-app-caches)'
-  },
-  {
-    key: 'browser-caches',
-    label: t('Settings.Storage Settings.Browser Caches'),
-    hint: t('Settings.Storage Settings.Browser Caches Hint'),
-    ...chartUsage(['httpCache', 'browserCacheData']),
-    color: 'var(--storage-chart-browser-caches)'
-  },
-  {
-    key: 'app-data',
-    label: t('Settings.Storage Settings.Stored App Data'),
-    ...chartUsage([
-      'downloadRecords',
-      'videoMetadata',
-      'searchHistory',
-      'history',
-      'watchStats',
-      'playlists',
-      'profiles',
-      'settings',
-      'tabSessions',
-      'liveReminders'
-    ]),
-    color: 'var(--storage-chart-app-data)'
-  },
-  {
-    key: 'browser-runtime',
-    label: t('Settings.Storage Settings.Browser Runtime Data'),
-    hint: t('Settings.Storage Settings.Browser Runtime Data Hint'),
-    ...chartUsage(['browserRuntimeData']),
-    color: 'var(--storage-chart-browser-runtime)'
-  },
-  {
-    key: 'other-profile-files',
-    label: t('Settings.Storage Settings.Other Profile Files'),
-    hint: t('Settings.Storage Settings.Other Profile Files Hint'),
-    ...chartUsage(['otherProfileData']),
-    color: 'var(--storage-chart-profile-other)'
-  }
-])
+const chartCategories = computed(() => IS_CAPACITOR
+  ? [
+      {
+        key: 'browser-caches',
+        label: t('Settings.Storage Settings.Browser Caches'),
+        hint: t('Settings.Storage Settings.Browser Caches Hint'),
+        bytes: Number.isFinite(usage.value.androidCache) ? usage.value.androidCache : 0,
+        exact: Number.isFinite(usage.value.androidCache),
+        color: 'var(--storage-chart-browser-caches)'
+      },
+      {
+        key: 'app-data',
+        label: t('Settings.Storage Settings.Stored App Data'),
+        bytes: Number.isFinite(usage.value.androidAppData) ? usage.value.androidAppData : 0,
+        exact: Number.isFinite(usage.value.androidAppData),
+        color: 'var(--storage-chart-app-data)'
+      }
+    ]
+  : [
+      {
+        key: 'downloads',
+        label: t('Settings.Storage Settings.Downloaded Media'),
+        bytes: downloadedMediaBytes.value,
+        exact: true,
+        color: 'var(--storage-chart-downloads)'
+      },
+      {
+        key: 'app-caches',
+        label: t('Settings.Storage Settings.Application Caches'),
+        ...chartUsage(['subscriptionCache', 'tabPreviews', 'ytDlpPlayback', 'playerCache']),
+        color: 'var(--storage-chart-app-caches)'
+      },
+      {
+        key: 'browser-caches',
+        label: t('Settings.Storage Settings.Browser Caches'),
+        hint: t('Settings.Storage Settings.Browser Caches Hint'),
+        ...chartUsage(['httpCache', 'browserCacheData']),
+        color: 'var(--storage-chart-browser-caches)'
+      },
+      {
+        key: 'app-data',
+        label: t('Settings.Storage Settings.Stored App Data'),
+        ...chartUsage([
+          'downloadRecords',
+          'videoMetadata',
+          'searchHistory',
+          'history',
+          'watchStats',
+          'playlists',
+          'profiles',
+          'settings',
+          'tabSessions',
+          'liveReminders'
+        ]),
+        color: 'var(--storage-chart-app-data)'
+      },
+      {
+        key: 'browser-runtime',
+        label: t('Settings.Storage Settings.Browser Runtime Data'),
+        hint: t('Settings.Storage Settings.Browser Runtime Data Hint'),
+        ...chartUsage(['browserRuntimeData']),
+        color: 'var(--storage-chart-browser-runtime)'
+      },
+      {
+        key: 'other-profile-files',
+        label: t('Settings.Storage Settings.Other Profile Files'),
+        hint: t('Settings.Storage Settings.Other Profile Files Hint'),
+        ...chartUsage(['otherProfileData']),
+        color: 'var(--storage-chart-profile-other)'
+      }
+    ])
 const chartTotalBytes = computed(() => chartCategories.value.reduce((total, item) => (
   total + item.bytes
 ), 0))
@@ -572,6 +616,11 @@ const cleanupPrompt = computed(() => {
       extraLabels: [t('Settings.Storage Settings.HTTP Cache Effect')],
       confirm: t('Settings.Storage Settings.Clear Cache')
     },
+    'android-cache': {
+      label: t('Settings.Storage Settings.Clear Android Cache Confirmation'),
+      extraLabels: [t('Settings.Storage Settings.HTTP Cache Effect')],
+      confirm: t('Settings.Storage Settings.Clear Cache')
+    },
     'tab-previews': {
       label: t('Settings.Storage Settings.Clear Tab Image Cache Confirmation'),
       extraLabels: [t('Settings.Storage Settings.Tab Image Cache Effect')],
@@ -627,6 +676,8 @@ async function refreshUsage() {
       ])
       usage.value = nextUsage
       downloads.value = nextDownloads
+    } else if (IS_CAPACITOR) {
+      usage.value = await getAndroidStorageUsage()
     }
   } catch (error) {
     console.error('Failed to calculate storage usage', error)
@@ -649,6 +700,9 @@ async function compactAndRefresh() {
   try {
     if (USING_ELECTRON) {
       await requireCleanupSuccess(window.ftElectron.storage.compactDatabases())
+    } else if (IS_CAPACITOR) {
+      const results = await compactAllDatastores()
+      await requireCleanupSuccess(results.every(result => result.status === 'fulfilled'))
     }
   } finally {
     await refreshUsage()
@@ -675,6 +729,9 @@ async function performCleanup(action) {
       break
     case 'http-cache':
       await requireCleanupSuccess(window.ftElectron.storage.clear('http-cache'))
+      break
+    case 'android-cache':
+      await requireCleanupSuccess(clearAndroidCache())
       break
     case 'tab-previews':
       await requireCleanupSuccess(window.ftElectron.storage.clear('tab-previews'))
@@ -799,6 +856,8 @@ onMounted(async () => {
     removeVideoMetadataCacheClearedListener = window.ftElectron.videoMetadataCache.onCleared(() => {
       if (!cleanupInProgress.value) refreshUsage()
     })
+  }
+  if (SUPPORTS_STORAGE_USAGE) {
     document.addEventListener('visibilitychange', refreshWhenVisible)
   }
   await refreshUsage()

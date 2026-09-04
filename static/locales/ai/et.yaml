@@ -667,7 +667,9 @@ Settings:
     Application Caches: Rakenduse vahemälud
     Browser Caches: Brauseri vahemälud
     Browser Caches Hint: Chromiumi HTTP-, GPU-, koodi-, varjutaja-, service worker’i ja sõnastikuvahemälud.
+    Clear Android Cache Confirmation: Kas tühjendada Androidi brauseri vahemälu?
     Stored App Data: Salvestatud rakenduseandmed
+    Included In App Data: Sisaldub ülal näidatud rakenduse andmetes
     Browser Runtime Data: Brauseri käitusandmed
     Browser Runtime Data Hint: Chromiumi seansi- ja kohalik salvestusruum, küpsised, privaatsus- ja võrguolek ning krahhifailid.
     Subscription Feed Cache: Tellimuste ja voo vahemälu

@@ -825,7 +825,9 @@ Settings:
     Application Caches: Appmellomlager
     Browser Caches: Nettlesarmellomlager
     Browser Caches Hint: HTTP-, GPU-, kode-, shader-, service-worker- og ordbokmellomlagera til Chromium.
+    Clear Android Cache Confirmation: Tømme nettlesarmellomlageret til Android?
     Stored App Data: Lagra appdata
+    Included In App Data: Inkludert i appdataa ovanfor
     Browser Runtime Data: Køyretidsdata for nettlesaren
     Browser Runtime Data Hint: Økt- og lokallagring, informasjonskapslar, personvern- og nettverkstilstand og krasjfiler frå Chromium.
     Subscription Feed Cache: Mellomlager for abonnement og straumar

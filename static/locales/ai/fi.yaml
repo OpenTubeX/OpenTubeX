@@ -680,7 +680,9 @@ Settings:
     Application Caches: Sovelluksen välimuistit
     Browser Caches: Selaimen välimuistit
     Browser Caches Hint: Chromiumin HTTP-, GPU-, koodi-, varjostin-, service worker- ja sanastovälimuistit.
+    Clear Android Cache Confirmation: Tyhjennetäänkö Androidin selaimen välimuisti?
     Stored App Data: Tallennetut sovellustiedot
+    Included In App Data: Sisältyy yllä näkyviin sovellustietoihin
     Browser Runtime Data: Selaimen ajonaikaiset tiedot
     Browser Runtime Data Hint: Chromiumin istunto- ja paikallinen tallennustila, evästeet, tietosuoja- ja verkkotila sekä kaatumistiedostot.
     Subscription Feed Cache: Tilausten ja syötteiden välimuisti

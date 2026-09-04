@@ -654,7 +654,9 @@ Settings:
     Application Caches: Application caches
     Browser Caches: Browser caches
     Browser Caches Hint: Chromium’s HTTP, GPU, code, shader, service-worker, and dictionary caches.
+    Clear Android Cache Confirmation: Clear Android's browser cache?
     Stored App Data: Stored app data
+    Included In App Data: Included in app data above
     Browser Runtime Data: Browser runtime data
     Browser Runtime Data Hint: Chromium’s session and local storage, cookies, privacy and network state, and crash files.
     Subscription Feed Cache: Subscription and feed cache

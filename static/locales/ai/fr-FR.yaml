@@ -667,7 +667,9 @@ Settings:
     Application Caches: Caches de l’application
     Browser Caches: Caches du navigateur
     Browser Caches Hint: Caches HTTP, GPU, de code, de shaders, des service workers et de dictionnaires de Chromium.
+    Clear Android Cache Confirmation: Effacer le cache du navigateur Android ?
     Stored App Data: Données d’application stockées
+    Included In App Data: Inclus dans les données de l’application affichées ci-dessus
     Browser Runtime Data: Données d’exécution du navigateur
     Browser Runtime Data Hint: Stockage de session et local, cookies, état de confidentialité et du réseau, ainsi que fichiers de plantage de Chromium.
     Subscription Feed Cache: Cache des abonnements et des flux

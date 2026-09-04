@@ -929,7 +929,9 @@ Settings:
     Application Caches: Memòries cau de l'aplicació
     Browser Caches: Memòries cau del navegador
     Browser Caches Hint: Memòries cau HTTP, de GPU, de codi, d'ombrejadors, de treballadors de servei i de diccionaris de Chromium.
+    Clear Android Cache Confirmation: Voleu esborrar la memòria cau del navegador d'Android?
     Stored App Data: Dades desades de l'aplicació
+    Included In App Data: Inclòs en les dades de l'aplicació mostrades més amunt
     Browser Runtime Data: Dades d'execució del navegador
     Browser Runtime Data Hint: Emmagatzematge de sessió i local, galetes, estat de privadesa i xarxa i fitxers de fallada de Chromium.
     Subscription Feed Cache: Memòria cau de subscripcions i canals

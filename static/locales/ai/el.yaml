@@ -680,7 +680,9 @@ Settings:
     Application Caches: Κρυφές μνήμες εφαρμογής
     Browser Caches: Κρυφές μνήμες προγράμματος περιήγησης
     Browser Caches Hint: Κρυφές μνήμες HTTP, GPU, κώδικα, shader, service worker και λεξικών του Chromium.
+    Clear Android Cache Confirmation: Εκκαθάριση της προσωρινής μνήμης προγράμματος περιήγησης του Android;
     Stored App Data: Αποθηκευμένα δεδομένα εφαρμογής
+    Included In App Data: Περιλαμβάνεται στα δεδομένα εφαρμογής που εμφανίζονται παραπάνω
     Browser Runtime Data: Δεδομένα εκτέλεσης προγράμματος περιήγησης
     Browser Runtime Data Hint: Χώρος αποθήκευσης συνεδρίας και τοπικός χώρος αποθήκευσης, cookie, κατάσταση απορρήτου και δικτύου, καθώς και αρχεία κατάρρευσης του Chromium.
     Subscription Feed Cache: Κρυφή μνήμη συνδρομών και ροών

@@ -667,7 +667,9 @@ Settings:
     Application Caches: Uygulama önbellekleri
     Browser Caches: Tarayıcı önbellekleri
     Browser Caches Hint: Chromium'un HTTP, GPU, kod, gölgelendirici, service worker ve sözlük önbellekleri.
+    Clear Android Cache Confirmation: Android'in tarayıcı önbelleği temizlensin mi?
     Stored App Data: Saklanan uygulama verileri
+    Included In App Data: Yukarıda gösterilen uygulama verilerine dahildir
     Browser Runtime Data: Tarayıcı çalışma zamanı verileri
     Browser Runtime Data Hint: Chromium'un oturum ve yerel depolama verileri, çerezleri, gizlilik ve ağ durumu ile kilitlenme dosyaları.
     Subscription Feed Cache: Abonelik ve akış önbelleği
