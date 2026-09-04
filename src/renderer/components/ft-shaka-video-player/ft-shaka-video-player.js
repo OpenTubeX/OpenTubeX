@@ -1277,6 +1277,7 @@ export default defineComponent({
       tabId,
       isTabPresented,
       isCrossTabMiniPlayerPresented,
+      isPictureInPictureRestorePending: () => startInPip,
       initialState: props.autoPictureInPictureState,
     })
 

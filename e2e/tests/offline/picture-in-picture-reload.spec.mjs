@@ -1,4 +1,4 @@
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
@@ -32,6 +32,34 @@ function pictureInPictureActive(page) {
   return page.evaluate(() => document.pictureInPictureElement !== null)
 }
 
+async function makeDetachedPictureInPictureExitHang(page) {
+  await page.evaluate(() => {
+    const nativeExitPictureInPicture = document.exitPictureInPicture.bind(document)
+    document.exitPictureInPicture = () => {
+      if (document.pictureInPictureElement?.isConnected === false) {
+        return new Promise(resolve => { window.__resolveStalePipExit = resolve })
+      }
+      return nativeExitPictureInPicture()
+    }
+  })
+}
+
+async function createDetachedPictureInPictureOwner(video) {
+  await video.evaluate(async element => {
+    const owner = document.createElement('div')
+    owner.className = 'ftVideoPlayer'
+    owner.dataset.tabId = element.closest('.ftVideoPlayer').dataset.tabId
+    const orphan = document.createElement('video')
+    orphan.muted = true
+    orphan.src = element.currentSrc
+    owner.append(orphan)
+    document.body.append(owner)
+    await orphan.play()
+    await orphan.requestPictureInPicture()
+    owner.remove()
+  })
+}
+
 test('restores automatic Picture-in-Picture across a video reload', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await setFocused(app, page, true)
@@ -48,17 +76,37 @@ test('restores automatic Picture-in-Picture across a video reload', async ({ app
   await expect.poll(() => pictureInPictureActive(page)).toBe(false)
 })
 
+test('clears a detached PiP owner when mounting a replacement player', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await setFocused(app, page, true)
+  const video = await openMockedVideo(page)
+
+  await makeDetachedPictureInPictureExitHang(page)
+  await createDetachedPictureInPictureOwner(video)
+  await expect.poll(() => page.evaluate(() => document.pictureInPictureElement?.isConnected)).toBe(false)
+
+  const watchView = await watchViewHandle(page)
+  await watchView.evaluate(view => view.reloadView())
+  await expect.poll(() => pictureInPictureActive(page)).toBe(false)
+  await setPlayerFullscreen(page, true)
+  await setPlayerFullscreen(page, false)
+})
+
 test('restores user-opened Picture-in-Picture across a video reload', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await setFocused(app, page, true)
   const video = await openMockedVideo(page)
 
+  await makeDetachedPictureInPictureExitHang(page)
   await video.evaluate(element => element.requestPictureInPicture())
   await expect.poll(() => pictureInPictureActive(page)).toBe(true)
 
   const watchView = await watchViewHandle(page)
   await watchView.evaluate(view => view.reloadView())
-  await expect.poll(() => pictureInPictureActive(page)).toBe(true)
+  const replacementVideo = await waitForPlayback(page)
+  await expect.poll(() => replacementVideo.evaluate(
+    element => document.pictureInPictureElement === element
+  )).toBe(true)
 
   await setMinimized(app, false)
   await page.waitForTimeout(1000)
@@ -88,4 +136,38 @@ test('does not transfer Picture-in-Picture from another tab during reload', asyn
   expect(await originalVideo.evaluate(
     element => document.pictureInPictureElement === element
   )).toBe(true)
+})
+
+test.describe('after default Picture-in-Picture startup', () => {
+  test.use({
+    seed: {
+      settings: {
+        autoPictureInPictureTriggers: ['minimize'],
+        defaultViewingMode: 'pip',
+        videoPlaybackEngine: 'built-in',
+        ytDlpPlaybackEngineDefaultMigration: true
+      }
+    }
+  })
+
+  test('recovers a detached owner after the startup request settles', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await setFocused(app, page, true)
+    const video = await openMockedVideo(page)
+    await expect.poll(() => video.evaluate(
+      element => document.pictureInPictureElement === element
+    )).toBe(true)
+
+    await makeDetachedPictureInPictureExitHang(page)
+    await page.evaluate(() => document.exitPictureInPicture())
+    await createDetachedPictureInPictureOwner(video)
+    await expect.poll(() => page.evaluate(
+      () => document.pictureInPictureElement?.isConnected
+    )).toBe(false)
+
+    await setFocused(app, page, false)
+    await expect.poll(() => pictureInPictureActive(page)).toBe(false)
+    await setPlayerFullscreen(page, true)
+    await setPlayerFullscreen(page, false)
+  })
 })

@@ -25,6 +25,7 @@ import {
  *   tabId?: string | null,
  *   isTabPresented?: import('vue').ComputedRef<boolean> | null,
  *   isCrossTabMiniPlayerPresented?: import('vue').Ref<boolean> | null,
+ *   isPictureInPictureRestorePending?: () => boolean,
  *   initialState?: {
  *     minimized?: boolean,
  *     focused?: boolean,
@@ -42,6 +43,7 @@ export function useAutoPictureInPicture({
   tabId = null,
   isTabPresented = null,
   isCrossTabMiniPlayerPresented = null,
+  isPictureInPictureRestorePending = () => false,
   initialState = null
 }) {
   const isActiveTab = computed(() => {
@@ -69,6 +71,8 @@ export function useAutoPictureInPicture({
   let removeMinimizedListener = null
   let removeFocusedListener = null
   let blurTriggerRecheckTimeout = null
+  let stalePictureInPictureRecovery = null
+  let autoPictureInPictureTornDown = false
   let wasAndroidPictureInPictureTarget = isAndroidPictureInPictureTarget.value
 
   function canAutoPipNow() {
@@ -125,6 +129,8 @@ export function useAutoPictureInPicture({
       ).catch(error => console.warn('Failed to configure Android auto Picture-in-Picture:', error))
       return
     }
+
+    if (recoverStalePictureInPicture()) return
 
     const ui = getUi()
     if (!ui) return
@@ -197,7 +203,58 @@ export function useAutoPictureInPicture({
     updateAutoPip()
   }
 
+  function recoverStalePictureInPicture() {
+    const pictureInPictureElement = document.pictureInPictureElement
+    const ownerTabId = pictureInPictureElement
+      ?.closest('.ftVideoPlayer')
+      ?.getAttribute('data-tab-id')
+    const ownerTabStillMounted = ownerTabId != null && [...document.querySelectorAll('.tabContent')]
+      .some(tabContent => tabContent.getAttribute('data-tab-id') === ownerTabId)
+
+    if (
+      isPictureInPictureRestorePending() ||
+      pictureInPictureElement?.isConnected !== false ||
+      (ownerTabId !== tabId && ownerTabStillMounted)
+    ) {
+      return false
+    }
+
+    const videoElement = video.value
+    if (
+      stalePictureInPictureRecovery ||
+      !videoElement ||
+      videoElement.readyState < HTMLMediaElement.HAVE_METADATA
+    ) {
+      return true
+    }
+
+    const keepPictureInPicture = shouldAutoPipNow()
+    let recoverySucceeded = false
+    markPictureInPictureRequested(state, true, { automatic: keepPictureInPicture })
+    stalePictureInPictureRecovery = (async () => {
+      await videoElement.requestPictureInPicture()
+      if (keepPictureInPicture && !autoPictureInPictureTornDown) return
+
+      markPictureInPictureRequested(state, false)
+      await document.exitPictureInPicture()
+    })()
+      .then(() => {
+        recoverySucceeded = true
+      })
+      .catch(error => {
+        markPictureInPictureRequestFailed(state)
+        console.warn('Failed to recover stale Picture-in-Picture:', error)
+      })
+      .finally(() => {
+        stalePictureInPictureRecovery = null
+        if (recoverySucceeded && !autoPictureInPictureTornDown) updateAutoPip()
+      })
+
+    return true
+  }
+
   function setupAutoPictureInPicture() {
+    autoPictureInPictureTornDown = false
     if (process.env.IS_CAPACITOR) {
       video.value?.addEventListener('play', updateAutoPip)
       video.value?.addEventListener('pause', updateAutoPip)
@@ -212,6 +269,7 @@ export function useAutoPictureInPicture({
       window.addEventListener('blur', refreshFocusState)
     }
     stopActiveTabWatch = watch(isActiveTab, updateAutoPip)
+    recoverStalePictureInPicture()
   }
 
   /**
@@ -250,6 +308,7 @@ export function useAutoPictureInPicture({
   }
 
   function teardownAutoPictureInPicture() {
+    autoPictureInPictureTornDown = true
     if (process.env.IS_CAPACITOR) {
       video.value?.removeEventListener('play', updateAutoPip)
       video.value?.removeEventListener('pause', updateAutoPip)
