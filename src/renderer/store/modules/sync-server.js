@@ -56,6 +56,11 @@ let eventSyncTimer = null
 let lifecycleSyncStarted = false
 let deviceNameRefreshId = 0
 
+function clearSyncServerDeviceNames(commit) {
+  deviceNameRefreshId++
+  commit('setSyncServerDeviceNames', {})
+}
+
 function trackSyncClient(client) {
   activeSyncClients.add(client)
   return client
@@ -698,7 +703,7 @@ const actions = {
     commit('setSyncServerError', SYNC_SERVER_SESSION_EXPIRED_MESSAGE)
     commit('setSyncServerSessionExpired', true)
     commit('setSyncServerStatus', 'error')
-    commit('setSyncServerDeviceNames', {})
+    clearSyncServerDeviceNames(commit)
   },
 
   async disconnectSyncServer({ commit, dispatch }) {
@@ -717,7 +722,7 @@ const actions = {
     commit('setSyncServerStatus', 'idle')
     commit('setSyncServerSessionExpired', false)
     commit('setSyncServerOtherDeviceSessions', [])
-    commit('setSyncServerDeviceNames', {})
+    clearSyncServerDeviceNames(commit)
   },
 
   async deleteSyncServerAccount({ commit, dispatch, rootState }, password) {
@@ -858,12 +863,12 @@ const actions = {
   },
 
   async refreshSyncServerDeviceNames({ commit, dispatch, rootState }) {
-    const refreshId = ++deviceNameRefreshId
     const settings = rootState.settings
     if (!settings.syncServerToken || !settings.syncServerPrivacyKey) {
-      commit('setSyncServerDeviceNames', {})
+      clearSyncServerDeviceNames(commit)
       return
     }
+    const refreshId = ++deviceNameRefreshId
 
     const client = trackSyncClient(new SyncServerClient(
       settings.syncServerUrl,
@@ -936,7 +941,7 @@ const actions = {
       commit('setSyncServerError', '')
       commit('setSyncServerStatus', 'idle')
       commit('setSyncServerOtherDeviceSessions', [])
-      commit('setSyncServerDeviceNames', {})
+      clearSyncServerDeviceNames(commit)
       return
     }
     if (rootState.settings.syncServerToken) {

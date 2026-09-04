@@ -2207,11 +2207,19 @@ test.describe('tab organizer', () => {
     )
     let markDelayedResponseStarted
     let releaseDelayedResponse
+    let markExpiredSessionResponseStarted
+    let releaseExpiredSessionResponse
     const delayedResponseStarted = new Promise(resolve => {
       markDelayedResponseStarted = resolve
     })
     const delayedResponseRelease = new Promise(resolve => {
       releaseDelayedResponse = resolve
+    })
+    const expiredSessionResponseStarted = new Promise(resolve => {
+      markExpiredSessionResponseStarted = resolve
+    })
+    const expiredSessionResponseRelease = new Promise(resolve => {
+      releaseExpiredSessionResponse = resolve
     })
     let accountSessionRequests = 0
     let healthRequests = 0
@@ -2229,6 +2237,9 @@ test.describe('tab organizer', () => {
         if (requestNumber === 2) {
           markDelayedResponseStarted()
           await delayedResponseRelease
+        } else if (requestNumber === 4) {
+          markExpiredSessionResponseStarted()
+          await expiredSessionResponseRelease
         }
         await route.fulfill({
           status: 200,
@@ -2366,6 +2377,22 @@ test.describe('tab organizer', () => {
     await expect(renamedMobileTab).toHaveCount(0)
     await expect(desktopTab).toHaveAttribute('aria-selected', 'true')
     await expect(syncedSet).toContainText('Desktop synced tab')
+
+    await organizer.locator('.tabOrganizerHeader .iconButton').click()
+    await expect(organizer).toBeHidden()
+    await page.locator(sel.tabOrganizerButton).click()
+    await expiredSessionResponseStarted
+    await expect.poll(() => accountSessionRequests).toBe(4)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('expireSyncServerSession')
+    })
+    releaseExpiredSessionResponse()
+    await expect.poll(() => page.evaluate(() => window.__deviceNameRefreshCompletions)).toBe(4)
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.state.syncServer.syncServerDeviceNames
+    })).toEqual({})
   })
 
   test('clamps scroll after switching to a shorter synced session at fractional UI scale', async ({ page }) => {
