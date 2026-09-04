@@ -561,7 +561,7 @@ const actions = {
     await dispatch('updateSyncServerPrivacyMode', 'enhanced', { root: true })
     await dispatch('updateSyncServerPrivacyKey', privacyKey, { root: true })
     await dispatch('updateSyncServerPrivacySalt', privacySalt, { root: true })
-    await dispatch('updateSyncServerToken', token, { root: true })
+    await dispatch('replaceSyncServerToken', token)
     commit('setSyncServerSessionExpired', false)
 
     if (deviceSystemInfo) {
@@ -673,7 +673,7 @@ const actions = {
       )
       await updateWhileEnabled('updateSyncServerPrivacyKey', privacyKey)
       await updateWhileEnabled('updateSyncServerPrivacySalt', privacySalt)
-      await updateWhileEnabled('updateSyncServerToken', token)
+      await updateWhileEnabled('replaceSyncServerToken', token)
       commit('setSyncServerSessionExpired', false)
 
       await dispatch('startSyncServerAutoSync')
@@ -681,7 +681,7 @@ const actions = {
     } catch (error) {
       if (error instanceof SyncServerCancelledError &&
           rootState.settings.syncServerToken !== previousToken) {
-        await dispatch('updateSyncServerToken', previousToken, { root: true })
+        await dispatch('replaceSyncServerToken', previousToken)
       }
       throw error
     } finally {
@@ -698,12 +698,11 @@ const actions = {
    */
   async expireSyncServerSession({ commit, dispatch }) {
     await dispatch('stopSyncServerAutoSync')
-    await dispatch('updateSyncServerToken', '', { root: true })
+    await dispatch('replaceSyncServerToken', '')
     commit('setSyncServerProgress', null)
     commit('setSyncServerError', SYNC_SERVER_SESSION_EXPIRED_MESSAGE)
     commit('setSyncServerSessionExpired', true)
     commit('setSyncServerStatus', 'error')
-    clearSyncServerDeviceNames(commit)
   },
 
   async disconnectSyncServer({ commit, dispatch }) {
@@ -714,7 +713,7 @@ const actions = {
     await dispatch('updateSyncServerPrivacyMode', 'unknown', { root: true })
     await dispatch('updateSyncServerPrivacyKey', '', { root: true })
     await dispatch('updateSyncServerPrivacySalt', '', { root: true })
-    await dispatch('updateSyncServerToken', '', { root: true })
+    await dispatch('replaceSyncServerToken', '')
     commit('setSyncServerError', '')
     commit('setSyncServerLastResult', null)
     commit('setSyncServerHistorySupported', null)
@@ -722,7 +721,6 @@ const actions = {
     commit('setSyncServerStatus', 'idle')
     commit('setSyncServerSessionExpired', false)
     commit('setSyncServerOtherDeviceSessions', [])
-    clearSyncServerDeviceNames(commit)
   },
 
   async deleteSyncServerAccount({ commit, dispatch, rootState }, password) {
@@ -894,6 +892,11 @@ const actions = {
     } finally {
       releaseSyncClient(client)
     }
+  },
+
+  async replaceSyncServerToken({ commit, dispatch }, token) {
+    clearSyncServerDeviceNames(commit)
+    await dispatch('updateSyncServerToken', token, { root: true })
   },
 
   restartSyncServerAutoSync({ dispatch }) {

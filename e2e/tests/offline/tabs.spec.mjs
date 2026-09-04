@@ -2207,19 +2207,19 @@ test.describe('tab organizer', () => {
     )
     let markDelayedResponseStarted
     let releaseDelayedResponse
-    let markExpiredSessionResponseStarted
-    let releaseExpiredSessionResponse
+    let markTokenReplacementResponseStarted
+    let releaseTokenReplacementResponse
     const delayedResponseStarted = new Promise(resolve => {
       markDelayedResponseStarted = resolve
     })
     const delayedResponseRelease = new Promise(resolve => {
       releaseDelayedResponse = resolve
     })
-    const expiredSessionResponseStarted = new Promise(resolve => {
-      markExpiredSessionResponseStarted = resolve
+    const tokenReplacementResponseStarted = new Promise(resolve => {
+      markTokenReplacementResponseStarted = resolve
     })
-    const expiredSessionResponseRelease = new Promise(resolve => {
-      releaseExpiredSessionResponse = resolve
+    const tokenReplacementResponseRelease = new Promise(resolve => {
+      releaseTokenReplacementResponse = resolve
     })
     let accountSessionRequests = 0
     let healthRequests = 0
@@ -2238,8 +2238,8 @@ test.describe('tab organizer', () => {
           markDelayedResponseStarted()
           await delayedResponseRelease
         } else if (requestNumber === 4) {
-          markExpiredSessionResponseStarted()
-          await expiredSessionResponseRelease
+          markTokenReplacementResponseStarted()
+          await tokenReplacementResponseRelease
         }
         await route.fulfill({
           status: 200,
@@ -2381,18 +2381,22 @@ test.describe('tab organizer', () => {
     await organizer.locator('.tabOrganizerHeader .iconButton').click()
     await expect(organizer).toBeHidden()
     await page.locator(sel.tabOrganizerButton).click()
-    await expiredSessionResponseStarted
+    await tokenReplacementResponseStarted
     await expect.poll(() => accountSessionRequests).toBe(4)
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      await store.dispatch('expireSyncServerSession')
+      await store.dispatch('replaceSyncServerToken', 'replacement-token')
     })
-    releaseExpiredSessionResponse()
+    releaseTokenReplacementResponse()
     await expect.poll(() => page.evaluate(() => window.__deviceNameRefreshCompletions)).toBe(4)
     await expect.poll(() => page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return store.state.syncServer.syncServerDeviceNames
     })).toEqual({})
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getSyncServerToken
+    })).toBe('replacement-token')
   })
 
   test('clamps scroll after switching to a shorter synced session at fractional UI scale', async ({ page }) => {

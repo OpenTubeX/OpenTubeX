@@ -834,7 +834,7 @@ async function changePassword() {
   try {
     const response = await client.changePassword(currentPassword.value, newPassword.value)
     if (!response || typeof response.jwt !== 'string' || !response.jwt) throw new Error()
-    await store.dispatch('updateSyncServerToken', response.jwt)
+    await store.dispatch('replaceSyncServerToken', response.jwt)
     resetPasswordPrompt()
     showToast({
       message: t('Settings.Sync Settings.Password Changed'),
