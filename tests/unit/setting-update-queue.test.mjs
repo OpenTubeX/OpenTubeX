@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { createSettingUpdateQueue } from '../../src/renderer/helpers/settingUpdateQueue.js'
+import { createOptimisticSettingUpdater, createSettingUpdateQueue } from '../../src/renderer/helpers/settingUpdateQueue.js'
 
 function deferred () {
   let resolvePromise
@@ -10,6 +10,59 @@ function deferred () {
   })
   return { promise, resolve: resolvePromise }
 }
+
+test('optimistic list edits compose before persistence and survive delayed earlier writes', async () => {
+  const update = createOptimisticSettingUpdater()
+  const started = deferred()
+  const release = deferred()
+  let value = ['first', 'second', 'third']
+  let persisted = value
+  const options = {
+    read: () => value,
+    commit: next => { value = next },
+    persist: async next => {
+      if (next.includes('second')) {
+        started.resolve()
+        await release.promise
+      }
+      persisted = next
+    },
+  }
+  const first = update('items', value.filter(id => id !== 'first'), options)
+  await started.promise
+  const second = update('items', value.filter(id => id !== 'second'), options)
+  assert.deepEqual(value, ['third'])
+  release.resolve()
+  await Promise.all([first, second])
+  assert.deepEqual(value, ['third'])
+  assert.deepEqual(persisted, ['third'])
+})
+
+test('a failed latest list edit restores the last successful write, not an obsolete optimistic value', async () => {
+  const update = createOptimisticSettingUpdater()
+  const started = deferred()
+  const release = deferred()
+  let value = ['first', 'second', 'third']
+  const options = {
+    read: () => value,
+    commit: next => { value = next },
+    persist: async next => {
+      if (next.length === 2) {
+        started.resolve()
+        await release.promise
+      } else {
+        throw new Error('Disk write failed')
+      }
+    },
+  }
+  const first = update('items', ['second', 'third'], options)
+  await started.promise
+  const second = update('items', ['third'], options)
+  const failure = assert.rejects(second, /Disk write failed/)
+  release.resolve()
+  await Promise.all([first, failure])
+  assert.deepEqual(value, ['second', 'third'])
+})
 
 test('keeps an in-flight setting write from applying after a newer update', async () => {
   const runUpdate = createSettingUpdateQueue()

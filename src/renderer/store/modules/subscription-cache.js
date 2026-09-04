@@ -152,7 +152,7 @@ const actions = {
     )
 
     try {
-      await DBSubscriptionCacheHandlers.updateVideosByChannelId(channelId, videos, timestamp)
+      if (await DBSubscriptionCacheHandlers.updateVideosByChannelId(channelId, videos, timestamp) === false) return false
       commit('updateVideoCacheByChannel', { channelId, entries: videos, timestamp })
     } catch (errMessage) {
       console.error(errMessage)
@@ -161,7 +161,7 @@ const actions = {
 
   async updateSubscriptionShortsCacheByChannel({ commit }, { channelId, videos, timestamp = new Date() }) {
     try {
-      await DBSubscriptionCacheHandlers.updateShortsByChannelId(channelId, videos, timestamp)
+      if (await DBSubscriptionCacheHandlers.updateShortsByChannelId(channelId, videos, timestamp) === false) return false
       commit('updateShortsCacheByChannel', { channelId, entries: videos, timestamp })
     } catch (errMessage) {
       console.error(errMessage)
@@ -188,7 +188,7 @@ const actions = {
     )
 
     try {
-      await DBSubscriptionCacheHandlers.updateLiveStreamsByChannelId(channelId, videos, timestamp)
+      if (await DBSubscriptionCacheHandlers.updateLiveStreamsByChannelId(channelId, videos, timestamp) === false) return false
       commit('updateLiveCacheByChannel', { channelId, entries: videos, timestamp })
     } catch (errMessage) {
       console.error(errMessage)
@@ -205,7 +205,7 @@ const actions = {
     )
 
     try {
-      await DBSubscriptionCacheHandlers.updateCommunityPostsByChannelId(channelId, posts, timestamp)
+      if (await DBSubscriptionCacheHandlers.updateCommunityPostsByChannelId(channelId, posts, timestamp) === false) return false
       commit('updatePostsCacheByChannel', { channelId, entries: posts, timestamp })
     } catch (errMessage) {
       console.error(errMessage)
@@ -418,6 +418,7 @@ const mutations = {
 
   updateVideoCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
     const existingObject = state.videoCache[channelId]
+    if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { videos: null }
     if (entries != null) { newObject.videos = entries }
     newObject.timestamp = toDate(timestamp)
@@ -425,6 +426,7 @@ const mutations = {
   },
   updateShortsCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
     const existingObject = state.shortsCache[channelId]
+    if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { videos: null }
     if (entries != null) { newObject.videos = entries }
     newObject.timestamp = toDate(timestamp)
@@ -458,6 +460,7 @@ const mutations = {
   },
   updateLiveCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
     const existingObject = state.liveCache[channelId]
+    if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { videos: null }
     if (entries != null) { newObject.videos = entries }
     newObject.timestamp = toDate(timestamp)
@@ -465,6 +468,7 @@ const mutations = {
   },
   updatePostsCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
     const existingObject = state.postsCache[channelId]
+    if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { posts: null }
     if (entries != null) { newObject.posts = entries }
     newObject.timestamp = toDate(timestamp)

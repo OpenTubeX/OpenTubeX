@@ -43,7 +43,7 @@ import { DEFAULT_HOME_SECTION_LAYOUT } from '../../helpers/homeSections.js'
 import { isSettingSyncableOnPlatform } from '../../helpers/platformSettings.js'
 import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
 import { DEFAULT_QUICK_SETTINGS, normalizeQuickSettings } from '../../helpers/quickSettings.js'
-import { createSettingUpdateQueue } from '../../helpers/settingUpdateQueue.js'
+import { createOptimisticSettingUpdater, createSettingUpdateQueue } from '../../helpers/settingUpdateQueue.js'
 import { filterAvailableNavigationItems } from '../../../navigationAvailability.js'
 import {
   DEFAULT_NAVIGATION_ITEMS,
@@ -943,18 +943,34 @@ async function persistPlaylistBookmarks(commit, bookmarks) {
   }
 }
 
+const updateOptimisticSetting = createOptimisticSettingUpdater()
+
+function updateOrderedSetting(commit, settings, settingId, value) {
+  return updateOptimisticSetting(settingId, value, {
+    read: () => settings[settingId],
+    commit: nextValue => commit(defaultMutationId(settingId), nextValue),
+    persist: async nextValue => {
+      await DBSettingHandlers.upsert(settingId, nextValue)
+      await recordSettingSyncTimestamp(commit, settings, settingId)
+    },
+  }).then(() => true).catch(error => {
+    console.error(error)
+    return false
+  })
+}
+
 const customActions = {
   recordSyncSettingEdit: ({ commit, state }, settingId) => (
     recordSettingSyncTimestamp(commit, state, settingId)
   ),
-  updateQuickSettings: ({ commit, state }, value) => updateValidatedSetting(
+  updateQuickSettings: ({ commit, state }, value) => updateOrderedSetting(
     commit,
     state,
     'quickSettings',
     normalizeQuickSettings(value)
   ),
 
-  updateNavigationItems: ({ commit, state }, value) => updateValidatedSetting(
+  updateNavigationItems: ({ commit, state }, value) => updateOrderedSetting(
     commit,
     state,
     'navigationItems',

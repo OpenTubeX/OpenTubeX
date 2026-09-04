@@ -659,76 +659,89 @@ class SearchHistory {
 }
 
 class SubscriptionCache {
+  static pendingUpdates = new Map()
+
+  static queueUpdate(channelId, field, operation) {
+    const key = JSON.stringify([channelId, field])
+    const previous = this.pendingUpdates.get(key) ?? Promise.resolve()
+    const update = previous.catch(() => {}).then(operation)
+    this.pendingUpdates.set(key, update)
+    return update.finally(() => {
+      if (this.pendingUpdates.get(key) === update) this.pendingUpdates.delete(key)
+    })
+  }
+
+  static updateFeed(channelId, entries, timestamp, field) {
+    return this.queueUpdate(channelId, field, async () => {
+      const timestampField = `${field}Timestamp`
+      const current = await db.subscriptionCache.findOneAsync({ _id: channelId })
+      if (new Date(current?.[timestampField]).getTime() > new Date(timestamp).getTime()) return false
+
+      await db.subscriptionCache.updateAsync(
+        { _id: channelId },
+        { $set: { [field]: entries, [timestampField]: timestamp } },
+        { upsert: true }
+      )
+      return true
+    })
+  }
+
   static find() {
     return db.subscriptionCache.findAsync({})
   }
 
   static updateVideosByChannelId(channelId, entries, timestamp) {
-    return db.subscriptionCache.updateAsync(
-      { _id: channelId },
-      { $set: { videos: entries, videosTimestamp: timestamp } },
-      { upsert: true }
-    )
+    return SubscriptionCache.updateFeed(channelId, entries, timestamp, 'videos')
   }
 
   static updateLiveStreamsByChannelId(channelId, entries, timestamp) {
-    return db.subscriptionCache.updateAsync(
-      { _id: channelId },
-      { $set: { liveStreams: entries, liveStreamsTimestamp: timestamp } },
-      { upsert: true }
-    )
+    return SubscriptionCache.updateFeed(channelId, entries, timestamp, 'liveStreams')
   }
 
   static updateShortsByChannelId(channelId, entries, timestamp) {
-    return db.subscriptionCache.updateAsync(
-      { _id: channelId },
-      { $set: { shorts: entries, shortsTimestamp: timestamp } },
-      { upsert: true }
-    )
+    return SubscriptionCache.updateFeed(channelId, entries, timestamp, 'shorts')
   }
 
-  static async updateShortsWithChannelPageShortsByChannelId(channelId, entries) {
-    const doc = await db.subscriptionCache.findOneAsync({ _id: channelId }, { shorts: 1 })
+  static updateShortsWithChannelPageShortsByChannelId(channelId, entries) {
+    return SubscriptionCache.queueUpdate(channelId, 'shorts', async () => {
+      const doc = await db.subscriptionCache.findOneAsync({ _id: channelId }, { shorts: 1 })
 
-    if (!Array.isArray(doc?.shorts)) {
-      return
-    }
+      if (!Array.isArray(doc?.shorts)) {
+        return
+      }
 
-    let hasUpdates = false
+      let hasUpdates = false
 
-    doc.shorts.forEach(cachedVideo => {
-      const channelVideo = entries.find(short => cachedVideo.videoId === short.videoId)
-      if (!channelVideo) { return }
+      doc.shorts.forEach(cachedVideo => {
+        const channelVideo = entries.find(short => cachedVideo.videoId === short.videoId)
+        if (!channelVideo) { return }
 
-      hasUpdates = true
+        hasUpdates = true
 
-      // authorId probably never changes, so we don't need to update that
-      cachedVideo.title = channelVideo.title
-      cachedVideo.author = channelVideo.author
+        // authorId probably never changes, so we don't need to update that
+        cachedVideo.title = channelVideo.title
+        cachedVideo.author = channelVideo.author
 
-      // as the channel shorts page only has compact view counts for numbers above 1000 e.g. 12k
-      // and the RSS feeds include an exact value, we only want to overwrite it when the number is larger than the cached value
-      // 12345 vs 12000 => 12345
-      // 12345 vs 15000 => 15000
-      if (channelVideo.viewCount > cachedVideo.viewCount) {
-        cachedVideo.viewCount = channelVideo.viewCount
+        // as the channel shorts page only has compact view counts for numbers above 1000 e.g. 12k
+        // and the RSS feeds include an exact value, we only want to overwrite it when the number is larger than the cached value
+        // 12345 vs 12000 => 12345
+        // 12345 vs 15000 => 15000
+        if (channelVideo.viewCount > cachedVideo.viewCount) {
+          cachedVideo.viewCount = channelVideo.viewCount
+        }
+      })
+
+      if (hasUpdates) {
+        await db.subscriptionCache.updateAsync(
+          { _id: channelId },
+          { $set: { shorts: doc.shorts } }
+        )
       }
     })
-
-    if (hasUpdates) {
-      await db.subscriptionCache.updateAsync(
-        { _id: channelId },
-        { $set: { shorts: doc.shorts } }
-      )
-    }
   }
 
   static updateCommunityPostsByChannelId(channelId, entries, timestamp) {
-    return db.subscriptionCache.updateAsync(
-      { _id: channelId },
-      { $set: { communityPosts: entries, communityPostsTimestamp: timestamp } },
-      { upsert: true }
-    )
+    return SubscriptionCache.updateFeed(channelId, entries, timestamp, 'communityPosts')
   }
 
   static deleteMultipleChannels(channelIds) {

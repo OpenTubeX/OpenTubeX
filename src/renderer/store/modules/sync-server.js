@@ -385,7 +385,9 @@ async function runSync(context, { allowDataLoss = false } = {}) {
                 continue
               }
               retryDocument[collection] = remoteData
-              retryDocument.subscriptions = client.document.subscriptions
+              if (collection !== 'subscriptions') {
+                retryDocument.subscriptions = client.document.subscriptions
+              }
               const retryClient = new EncryptedSyncAdapter(retryDocument)
               if (collection === 'settings') {
                 next.settings = await syncSettings(retryClient, store, next.settings)

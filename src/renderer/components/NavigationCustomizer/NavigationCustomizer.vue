@@ -285,9 +285,9 @@ onBeforeUnmount(() => {
 
 async function updateItems(items) {
   const removedHome = navigationItems.value.includes('home') && !items.includes('home')
-  await store.dispatch('updateNavigationItems', items)
+  const saved = await store.dispatch('updateNavigationItems', items)
 
-  if (!removedHome) return
+  if (!saved || !removedHome || navigationItems.value.includes('home')) return
   if (process.env.IS_ELECTRON) {
     await store.dispatch('redirectHomeTabsToLandingPage')
   } else if (route.path === '/home') {
