@@ -1195,10 +1195,12 @@ export async function syncSettings(client, store, previous = {}) {
     !Array.isArray(store.state.settings.syncServerSettingUpdatedAt)
     ? store.state.settings.syncServerSettingUpdatedAt
     : {}
-  const local = Object.fromEntries(getSyncableSettingKeys(store.state.settings).map(key => (
-    [key, deepCopy(store.state.settings[key])]
-  )))
-  local[CUSTOM_THEMES_SYNC_KEY] = normalizeCustomThemes(store.state.utils.customThemes)
+  const local = Object.fromEntries([
+    [CUSTOM_THEMES_SYNC_KEY, normalizeCustomThemes(store.state.utils.customThemes)],
+    ...getSyncableSettingKeys(store.state.settings).map(key => (
+      [key, deepCopy(store.state.settings[key])]
+    )),
+  ])
 
   for (const [key, value] of Object.entries(local)) {
     const old = previous[key]

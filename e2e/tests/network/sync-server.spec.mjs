@@ -542,6 +542,7 @@ test.describe('OpenTubeX sync server', () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const themes = await window.ftElectron.saveCustomTheme(customTheme)
       store.commit('setCustomThemes', themes)
+      await store.dispatch('updateSystemDarkTheme', `custom:${customTheme.id}`)
     }, theme)
 
     const syncSection = await goToSettingsSection(page, 'sync')
@@ -570,6 +571,7 @@ test.describe('OpenTubeX sync server', () => {
       await store.dispatch('setSyncServerAutoSync', false)
       const themes = await window.ftElectron.replaceCustomThemes([])
       store.commit('setCustomThemes', themes)
+      await store.dispatch('updateSystemDarkTheme', 'dark')
       await store.dispatch('updateSyncServerSnapshot', '')
     })
     await syncNow()
@@ -582,6 +584,10 @@ test.describe('OpenTubeX sync server', () => {
       name: theme.name,
       colors: { background: '#123456' },
     })
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getSystemDarkTheme
+    })).toBe('custom:synced-theme')
 
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
