@@ -436,6 +436,7 @@ Settings:
         Destructive pressed: Eyðandi aðgerð þegar ýtt er
         Text and icons on destructive actions: Texti og tákn á eyðandi aðgerðum
   Player Settings:
+    yt-dlp Streaming: "yt-dlp-streymi"
     Continue Playback When Screen Is Locked: 'Halda spilun áfram þegar skjárinn er læstur'
     Music Visualizer: Tónlistarmyndgerð
     Automatically Open Chapters: Opna kafla sjálfkrafa
@@ -517,6 +518,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Strjúktu upp eða niður til að opna eða loka öllum skjánum'
     Preload Upcoming Videos: "Forhlaða næstu myndskeið"
     Upcoming Videos to Preload: "Fjöldi myndskeiða til að forhlaða"
+    Concurrent Preloads: "Samtímis forhleðslur"
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
@@ -1431,6 +1433,7 @@ Tooltips:
       Streymi sem er takmarkað við eina beiðni í einu hunsar þessa stillingu.
     Preload Upcoming Videos: "Sækir og vistar yt-dlp-slóðir næstu myndskeiða. Biðröðin hefur forgang fram yfir spilunarlista og tillögur."
     Upcoming Videos to Preload: "Hámarksfjöldi næstu myndskeiða sem yt-dlp-slóðir eru sóttar fyrir í bakgrunni."
+    Concurrent Preloads: "Hámarksfjöldi yt-dlp-ferla sem eru notaðir til að forhlaða myndskeiðum samtímis. Hærri gildi nota meira örgjörvaafl, minni og netbandvídd."
   Download Settings:
     Download Folder: Myndbönd vistast í þessa möppu. Skildu reitinn eftir auðan til að nota niðurhalsmöppu kerfisins.
     Global Additional yt-dlp Arguments: Viðbótarviðföng skipanalínu sem eru send til yt-dlp við hvert niðurhal, til dæmis --cookies-from-browser firefox.

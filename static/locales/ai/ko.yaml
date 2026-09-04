@@ -592,6 +592,7 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    yt-dlp Streaming: "yt-dlp 스트리밍"
     Continue Playback When Screen Is Locked: '화면이 잠겨 있을 때도 재생 계속'
     Music Visualizer: 음악 시각화
     Automatically Open Chapters: 챕터 자동 열기
@@ -684,6 +685,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: '위아래로 밀어 전체 화면 시작 또는 종료'
     Preload Upcoming Videos: "다음 동영상 미리 불러오기"
     Upcoming Videos to Preload: "미리 불러올 동영상 수"
+    Concurrent Preloads: "동시 미리 로드 수"
   Channel Settings:
     Channel Settings: 채널 설정
     Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.
@@ -1763,6 +1765,7 @@ Tooltips:
       한 번에 하나의 요청으로 제한된 스트림에는 이 설정이 적용되지 않습니다.
     Preload Upcoming Videos: "다음에 재생할 동영상의 yt-dlp URL을 가져와 캐시합니다. 대기열이 재생목록과 추천보다 우선합니다."
     Upcoming Videos to Preload: "백그라운드에서 yt-dlp URL을 가져올 다음 동영상의 최대 개수입니다."
+    Concurrent Preloads: "동시에 동영상을 미리 로드하는 데 사용할 yt-dlp 프로세스의 최대 개수입니다. 값이 높을수록 CPU, 메모리 및 네트워크 대역폭을 더 많이 사용합니다."
   External Player Settings:
     Ignore Default Arguments: 동영상 URL 외의 기본 인수를 외부 플레이어에 보내지 않습니다. 예를 들어 재생 속도와 재생목록 URL이 해당됩니다. 사용자 지정 인수는 계속 전달됩니다.
   Download Settings:

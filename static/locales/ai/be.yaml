@@ -453,6 +453,7 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
+    yt-dlp Streaming: "Стрымінг yt-dlp"
     Continue Playback When Screen Is Locked: 'Працягваць прайграванне пры заблакіраваным экране'
     Music Visualizer: Музычны візуалізатар
     Automatically Open Chapters: Аўтаматычна адкрываць раздзелы
@@ -539,6 +540,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Правядзіце ўверх або ўніз, каб увайсці ў поўнаэкранны рэжым або выйсці з яго'
     Preload Upcoming Videos: "Папярэдне загружаць наступныя відэа"
     Upcoming Videos to Preload: "Колькасць відэа для папярэдняй загрузкі"
+    Concurrent Preloads: "Адначасовыя папярэднія загрузкі"
   Channel Settings:
     Channel Settings: Налады каналаў
     Channel Settings Description: Запамінаць асобныя налады, абраныя падчас прагляду кожнага канала, і ўжываць іх пры наступным праглядзе відэа з гэтага канала.
@@ -1476,6 +1478,7 @@ Tooltips:
       Плыні з абмежаваннем у адзін адначасовы запыт не ўлічваюць гэтую наладу.
     Preload Upcoming Videos: "Атрымлівае і кэшуе спасылкі yt-dlp для наступных відэа. Чарга мае прыярытэт над плэйлістамі і рэкамендацыямі."
     Upcoming Videos to Preload: "Максімальная колькасць наступных відэа, спасылкі на якія атрымліваюцца ў фоне."
+    Concurrent Preloads: "Найбольшая колькасць працэсаў yt-dlp, якія адначасова папярэдне загружаюць відэа. Большыя значэнні выкарыстоўваюць больш рэсурсаў працэсара, памяці і прапускной здольнасці сеткі."
   Download Settings:
     Download Folder: Відэа захоўваюцца ў гэтай папцы. Пакіньце поле пустым, каб выкарыстоўваць сістэмную папку «Спампоўванні».
     Global Additional yt-dlp Arguments: Дадатковыя аргументы каманднага радка, якія перадаюцца yt-dlp пры кожным спампоўванні, напрыклад --cookies-from-browser firefox.

@@ -446,6 +446,7 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
+    yt-dlp Streaming: "yt-dlp стримовање"
     Continue Playback When Screen Is Locked: 'Настави репродукцију када је екран закључан'
     Music Visualizer: Музички визуализатор
     Automatically Open Chapters: Аутоматски отварај поглавља
@@ -532,6 +533,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Превуците нагоре или надоле за улазак у приказ преко целог екрана или излазак из њега'
     Preload Upcoming Videos: "Учитај следеће видео-снимке унапред"
     Upcoming Videos to Preload: "Број снимака за учитавање унапред"
+    Concurrent Preloads: "Истовремена предучитавања"
   Channel Settings:
     Channel Settings: Подешавања канала
     Channel Settings Description: За сваки канал засебно запамти подешавања која изабереш током гледања, како би поново била примењена када следећи пут гледаш неки његов видео-снимак.
@@ -1459,6 +1461,7 @@ Tooltips:
       Токови ограничени на један захтев истовремено занемарују ово подешавање.
     Preload Upcoming Videos: "Преузима и кешира yt-dlp адресе следећих снимака. Ред има предност над плејлистама и препорукама."
     Upcoming Videos to Preload: "Највећи број следећих снимака чије се yt-dlp адресе преузимају у позадини."
+    Concurrent Preloads: "Највећи број yt-dlp процеса који се користе за истовремено предучитавање видео-снимака. Веће вредности користе више процесора, меморије и мрежног протока."
   Download Settings:
     Download Folder: Видео-снимци се чувају у овој фасцикли. Оставите празно да бисте користили системску фасциклу за преузимања.
     Global Additional yt-dlp Arguments: Додатни аргументи командне линије који се прослеђују програму yt-dlp при сваком преузимању, на пример --cookies-from-browser firefox.

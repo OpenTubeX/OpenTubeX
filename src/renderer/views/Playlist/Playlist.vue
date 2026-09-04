@@ -611,6 +611,7 @@ async function preloadPlaylist() {
 
     const cacheKey = ytDlpPlaybackCacheKey.value
     const result = await preloadYtDlpPlaybackSources(videoIds, {
+      concurrency: store.getters.getYtDlpPreloadConcurrency,
       loadSource: videoId => getYtDlpPlaybackSource(
         videoId,
         cacheKey,

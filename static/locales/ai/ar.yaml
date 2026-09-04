@@ -436,6 +436,7 @@ Settings:
         Destructive pressed: الضغط المدمر
         Text and icons on destructive actions: النص والأيقونات على الإجراءات المدمرة
   Player Settings:
+    yt-dlp Streaming: "بث yt-dlp"
     Continue Playback When Screen Is Locked: 'متابعة التشغيل عند قفل الشاشة'
     Music Visualizer: مؤثرات موسيقية مرئية
     Automatically Open Chapters: فتح الفصول تلقائيا
@@ -517,6 +518,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'اسحب لأعلى أو لأسفل للدخول إلى ملء الشاشة أو الخروج منها'
     Preload Upcoming Videos: "تحميل الفيديوهات القادمة مسبقًا"
     Upcoming Videos to Preload: "عدد الفيديوهات المراد تحميلها مسبقًا"
+    Concurrent Preloads: "عمليات التحميل المسبق المتزامنة"
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.
@@ -1410,6 +1412,7 @@ Tooltips:
     Parallel Segment Loading: "عدد مقاطع الفيديو والصوت التي سيتم تحميلها مرة واحدة قبل التشغيل.\nقد تساعد القيم الأعلى في الاتصالات البطيئة أو غير المستقرة، ولكنها تستخدم المزيد من النطاق الترددي والذاكرة.\nوقد يجعلون أيضًا Auto يقلل من سرعة الاتصال ويحدد جودة أقل.\nتتجاهل التدفقات التي تقتصر على طلب واحد في كل مرة هذا الإعداد."
     Preload Upcoming Videos: "يجلب روابط بث yt-dlp للفيديوهات التالية ويخزنها مؤقتًا. لقائمة الانتظار الأولوية على قوائم التشغيل والاقتراحات."
     Upcoming Videos to Preload: "الحد الأقصى لعدد الفيديوهات القادمة التي تُجلب روابط بثها في الخلفية."
+    Concurrent Preloads: "الحد الأقصى لعدد عمليات yt-dlp المستخدمة لتحميل مقاطع الفيديو مسبقًا في الوقت نفسه. تستخدم القيم الأعلى مزيدًا من وحدة المعالجة المركزية والذاكرة وعرض النطاق الترددي للشبكة."
   Download Settings:
     Download Folder: يتم حفظ مقاطع الفيديو في هذا المجلد. اتركه فارغًا لاستخدام مجلد التنزيلات الخاص بنظامك.
     Global Additional yt-dlp Arguments: يتم تمرير وسيطات سطر الأوامر الإضافية إلى yt-dlp لكل عملية تنزيل، على سبيل المثال --cookies-from-browser Firefox.

@@ -434,6 +434,7 @@ Settings:
         Destructive pressed: Destruktiv handling ved trykk
         Text and icons on destructive actions: Tekst og ikoner på destruktive handlinger
   Player Settings:
+    yt-dlp Streaming: "yt-dlp-strømming"
     Continue Playback When Screen Is Locked: 'Fortsett avspillingen når skjermen er låst'
     Music Visualizer: Musikkvisualisering
     Automatically Open Chapters: Åpne kapitler automatisk
@@ -517,6 +518,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Sveip opp eller ned for å åpne eller avslutte fullskjerm'
     Preload Upcoming Videos: "Forhåndslast kommende videoer"
     Upcoming Videos to Preload: "Antall videoer som skal forhåndslastes"
+    Concurrent Preloads: "Samtidige forhåndslastinger"
   Channel Settings:
     Channel Settings: Kanalinnstillinger
     Channel Settings Description: Husk innstillingene du velger mens du ser på hver kanal, slik at de brukes igjen neste gang du ser en av videoene fra kanalen.
@@ -1429,6 +1431,7 @@ Tooltips:
       Strømmer som er begrenset til én forespørsel om gangen, ignorerer denne innstillingen.
     Preload Upcoming Videos: "Henter og mellomlagrer yt-dlp-adresser for de neste videoene. Køen prioriteres foran spillelister og anbefalinger."
     Upcoming Videos to Preload: "Maksimalt antall kommende videoer som får yt-dlp-adressene hentet i bakgrunnen."
+    Concurrent Preloads: "Det høyeste antallet yt-dlp-prosesser som brukes til å forhåndslaste videoer samtidig. Høyere verdier bruker mer prosessorkraft, minne og nettverksbåndbredde."
   Download Settings:
     Download Folder: Videoer lagres i denne mappen. La feltet stå tomt for å bruke systemets nedlastingsmappe.
     Global Additional yt-dlp Arguments: Ekstra kommandolinjeargumenter som sendes til yt-dlp for hver nedlasting, for eksempel --cookies-from-browser firefox.

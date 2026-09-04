@@ -453,6 +453,7 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
+    yt-dlp Streaming: "پخش جریانی yt-dlp"
     Continue Playback When Screen Is Locked: 'ادامه پخش هنگام قفل بودن صفحه'
     Music Visualizer: تصویرساز موسیقی
     Automatically Open Chapters: بازکردن خودکار فصل‌ها
@@ -539,6 +540,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'برای ورود به تمام‌صفحه یا خروج از آن، بالا یا پایین بکشید'
     Preload Upcoming Videos: "پیش‌بارگیری ویدیوهای بعدی"
     Upcoming Videos to Preload: "تعداد ویدیوها برای پیش‌بارگیری"
+    Concurrent Preloads: "پیش‌بارگذاری‌های هم‌زمان"
   Channel Settings:
     Channel Settings: تنظیمات کانال
     Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.
@@ -1470,6 +1472,7 @@ Tooltips:
       جریان‌هایی که هر بار به یک درخواست محدودند، این تنظیم را نادیده می‌گیرند.
     Preload Upcoming Videos: "نشانی‌های پخش yt-dlp ویدیوهای بعدی را دریافت و ذخیره می‌کند. صف بر فهرست‌های پخش و پیشنهادها اولویت دارد."
     Upcoming Videos to Preload: "بیشترین تعداد ویدیوهای بعدی که نشانی yt-dlp آن‌ها در پس‌زمینه دریافت می‌شود."
+    Concurrent Preloads: "بیشترین تعداد فرایندهای yt-dlp که برای پیش‌بارگذاری هم‌زمان ویدیوها استفاده می‌شوند. مقادیر بالاتر از پردازنده، حافظه و پهنای باند شبکه بیشتری استفاده می‌کنند."
   Download Settings:
     Download Folder: ویدیوها در این پوشه ذخیره می‌شوند. برای استفاده از پوشه «بارگیری‌ها»ی سیستم، خالی بگذارید.
     Global Additional yt-dlp Arguments: آرگومان‌های اضافی خط فرمان که برای هر بارگیری به yt-dlp فرستاده می‌شوند؛ برای مثال --cookies-from-browser firefox.

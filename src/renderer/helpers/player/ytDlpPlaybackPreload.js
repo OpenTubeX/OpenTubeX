@@ -2,14 +2,18 @@ import { isYtDlpPlaybackSourceCacheable } from './ytDlpPlaybackCache.js'
 
 export const DEFAULT_YT_DLP_PRELOAD_COUNT = 2
 export const MAX_YT_DLP_PRELOAD_COUNT = 10
-export const YT_DLP_PRELOAD_CONCURRENCY = 2
+export const DEFAULT_YT_DLP_PRELOAD_CONCURRENCY = 2
+export const MAX_YT_DLP_PRELOAD_CONCURRENCY = 8
 
 const pendingPreloadTasks = []
 let activePreloadTasks = 0
 
 function startPendingPreloadTasks() {
-  while (activePreloadTasks < YT_DLP_PRELOAD_CONCURRENCY && pendingPreloadTasks.length > 0) {
-    const task = pendingPreloadTasks.shift()
+  while (pendingPreloadTasks.length > 0) {
+    const task = pendingPreloadTasks[0]
+    if (activePreloadTasks >= task.concurrency) return
+
+    pendingPreloadTasks.shift()
     activePreloadTasks++
 
     Promise.resolve()
@@ -22,9 +26,9 @@ function startPendingPreloadTasks() {
   }
 }
 
-function scheduleYtDlpPlaybackPreload(loadSource) {
+function scheduleYtDlpPlaybackPreload(loadSource, concurrency) {
   return new Promise((resolve, reject) => {
-    pendingPreloadTasks.push({ loadSource, resolve, reject })
+    pendingPreloadTasks.push({ loadSource, concurrency, resolve, reject })
     startPendingPreloadTasks()
   })
 }
@@ -53,6 +57,17 @@ export function normalizeYtDlpPreloadCount(value) {
   const count = Number(value)
   if (!Number.isInteger(count) || count <= 0) return 0
   return Math.min(count, MAX_YT_DLP_PRELOAD_COUNT)
+}
+
+/**
+ * @param {unknown} value
+ */
+export function normalizeYtDlpPreloadConcurrency(value) {
+  const concurrency = Number(value)
+  if (!Number.isInteger(concurrency) || concurrency <= 0) {
+    return DEFAULT_YT_DLP_PRELOAD_CONCURRENCY
+  }
+  return Math.min(concurrency, MAX_YT_DLP_PRELOAD_CONCURRENCY)
 }
 
 /**
@@ -104,10 +119,11 @@ export function selectYtDlpPreloadVideoIds({
  */
 export async function preloadYtDlpPlaybackSources(videoIds, {
   loadSource,
-  concurrency = YT_DLP_PRELOAD_CONCURRENCY,
+  concurrency = DEFAULT_YT_DLP_PRELOAD_CONCURRENCY,
   onProgress = () => {},
 }) {
   const uniqueVideoIds = [...new Set(videoIds.filter(videoId => typeof videoId === 'string' && videoId !== ''))]
+  const normalizedConcurrency = normalizeYtDlpPreloadConcurrency(concurrency)
   let nextIndex = 0
   let preloaded = 0
   let failed = 0
@@ -116,7 +132,10 @@ export async function preloadYtDlpPlaybackSources(videoIds, {
     while (nextIndex < uniqueVideoIds.length) {
       const videoId = uniqueVideoIds[nextIndex++]
       try {
-        const source = await scheduleYtDlpPlaybackPreload(() => loadSource(videoId))
+        const source = await scheduleYtDlpPlaybackPreload(
+          () => loadSource(videoId),
+          normalizedConcurrency
+        )
         if (source === null || !isYtDlpPlaybackSourceCacheable(source)) {
           failed++
         } else {
@@ -136,7 +155,7 @@ export async function preloadYtDlpPlaybackSources(videoIds, {
 
   const workerCount = Math.min(
     uniqueVideoIds.length,
-    Math.max(1, Math.floor(concurrency))
+    normalizedConcurrency
   )
   await Promise.all(Array.from({ length: workerCount }, worker))
 

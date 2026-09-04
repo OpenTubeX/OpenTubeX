@@ -436,6 +436,7 @@ Settings:
         Destructive pressed: Thao tác xóa khi nhấn
         Text and icons on destructive actions: Chữ và biểu tượng trên thao tác xóa
   Player Settings:
+    yt-dlp Streaming: "Phát trực tuyến bằng yt-dlp"
     Continue Playback When Screen Is Locked: 'Tiếp tục phát khi màn hình bị khóa'
     Music Visualizer: Trình trực quan hóa nhạc
     Automatically Open Chapters: Tự động mở chương
@@ -517,6 +518,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Vuốt lên hoặc xuống để vào hoặc thoát chế độ toàn màn hình'
     Preload Upcoming Videos: "Tải trước các video tiếp theo"
     Upcoming Videos to Preload: "Số video cần tải trước"
+    Concurrent Preloads: "Số lượt tải trước đồng thời"
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
@@ -1422,6 +1424,7 @@ Tooltips:
       Luồng bị giới hạn ở một yêu cầu mỗi lần sẽ bỏ qua cài đặt này.
     Preload Upcoming Videos: "Lấy và lưu đệm URL yt-dlp của các video tiếp theo. Hàng đợi được ưu tiên hơn danh sách phát và đề xuất."
     Upcoming Videos to Preload: "Số video tiếp theo tối đa có URL yt-dlp được lấy trong nền."
+    Concurrent Preloads: "Số tiến trình yt-dlp tối đa được dùng để tải trước nhiều video cùng lúc. Giá trị cao hơn sử dụng nhiều CPU, bộ nhớ và băng thông mạng hơn."
   Download Settings:
     Download Folder: Video được lưu vào thư mục này. Để trống để dùng thư mục Tải xuống của hệ thống.
     Global Additional yt-dlp Arguments: Đối số dòng lệnh bổ sung được chuyển cho yt-dlp trong mọi lượt tải, ví dụ --cookies-from-browser firefox.

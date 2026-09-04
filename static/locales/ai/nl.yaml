@@ -436,6 +436,7 @@ Settings:
         Destructive pressed: Verwijderactie bij indrukken
         Text and icons on destructive actions: Tekst en pictogrammen bij verwijderacties
   Player Settings:
+    yt-dlp Streaming: "yt-dlp-streaming"
     Continue Playback When Screen Is Locked: 'Doorgaan met afspelen wanneer het scherm is vergrendeld'
     Music Visualizer: Muziekvisualisatie
     Automatically Open Chapters: Hoofdstukken automatisch openen
@@ -522,6 +523,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Veeg omhoog of omlaag om volledig scherm te openen of te sluiten'
     Preload Upcoming Videos: "Volgende video’s vooraf laden"
     Upcoming Videos to Preload: "Aantal vooraf te laden video’s"
+    Concurrent Preloads: "Gelijktijdige voorladingen"
   Channel Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
@@ -1441,6 +1443,7 @@ Tooltips:
       Streams die tot één aanvraag tegelijk zijn beperkt, negeren deze instelling.
     Preload Upcoming Videos: "Haalt yt-dlp-URL’s voor de volgende video’s op en bewaart ze in de cache. De wachtrij heeft voorrang op afspeellijsten en aanbevelingen."
     Upcoming Videos to Preload: "Het maximale aantal volgende video’s waarvan de yt-dlp-URL’s op de achtergrond worden opgehaald."
+    Concurrent Preloads: "Het maximale aantal yt-dlp-processen dat wordt gebruikt om video's tegelijk vooraf te laden. Hogere waarden gebruiken meer CPU, geheugen en netwerkbandbreedte."
   Download Settings:
     Download Folder: Video's worden in deze map opgeslagen. Laat dit leeg om de downloadmap van je systeem te gebruiken.
     Global Additional yt-dlp Arguments: Aanvullende opdrachtregelargumenten die bij elke download aan yt-dlp worden doorgegeven, bijvoorbeeld --cookies-from-browser firefox.

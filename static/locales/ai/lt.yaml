@@ -617,6 +617,7 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    yt-dlp Streaming: "yt-dlp srautinis perdavimas"
     Continue Playback When Screen Is Locked: 'Tęsti atkūrimą, kai ekranas užrakintas'
     Music Visualizer: Muzikos vizualizacija
     Automatically Open Chapters: Automatiškai atverti skyrius
@@ -709,6 +710,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Braukite aukštyn arba žemyn, kad įjungtumėte arba išjungtumėte visą ekraną'
     Preload Upcoming Videos: "Iš anksto įkelti kitus vaizdo įrašus"
     Upcoming Videos to Preload: "Iš anksto įkeliamų vaizdo įrašų skaičius"
+    Concurrent Preloads: "Vienalaikiai išankstiniai įkėlimai"
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
@@ -1801,6 +1803,7 @@ Tooltips:
       Srautai, apriboti iki vienos užklausos vienu metu, nepaiso šio nustatymo.
     Preload Upcoming Videos: "Gauna ir talpykloje išsaugo kitų vaizdo įrašų yt-dlp adresus. Eilė yra svarbesnė už grojaraščius ir rekomendacijas."
     Upcoming Videos to Preload: "Didžiausias kitų vaizdo įrašų skaičius, kurių yt-dlp adresai gaunami fone."
+    Concurrent Preloads: "Didžiausias yt-dlp procesų, vienu metu naudojamų vaizdo įrašams iš anksto įkelti, skaičius. Didesnės reikšmės naudoja daugiau procesoriaus, atminties ir tinklo pralaidumo."
   External Player Settings:
     Ignore Default Arguments: Išoriniam leistuvui nesiųsti jokių numatytųjų argumentų, išskyrus vaizdo įrašo URL (pvz., atkūrimo greitį, grojaraščio URL ir kt.). Pasirinktiniai argumentai vis tiek bus perduoti.
   Download Settings:

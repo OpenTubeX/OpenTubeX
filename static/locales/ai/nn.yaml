@@ -629,6 +629,7 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    yt-dlp Streaming: "yt-dlp-strauming"
     Continue Playback When Screen Is Locked: 'Hald fram med avspeling når skjermen er låst'
     Music Visualizer: Musikkvisualisering
     Automatically Open Chapters: Opne kapittel automatisk
@@ -721,6 +722,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Sveip opp eller ned for å opne eller avslutte fullskjerm'
     Preload Upcoming Videos: "Førehandslast komande videoar"
     Upcoming Videos to Preload: "Talet på videoar som skal førehandslastast"
+    Concurrent Preloads: "Samstundes førehandslasting"
   Channel Settings:
     Channel Settings: Kanalinnstillingar
     Channel Settings Description: Hugs innstillingane du vel medan du ser på kvar einskild kanal, slik at dei blir brukte att neste gong du ser ein av videoane til kanalen.
@@ -1805,6 +1807,7 @@ Tooltips:
       Straumar som er avgrensa til éin førespurnad om gongen, ser bort frå denne innstillinga.
     Preload Upcoming Videos: "Hentar og mellomlagrar yt-dlp-adresser for dei neste videoane. Køen har prioritet framfor spelelister og tilrådingar."
     Upcoming Videos to Preload: "Det høgaste talet på komande videoar som får yt-dlp-adressene henta i bakgrunnen."
+    Concurrent Preloads: "Det høgaste talet på yt-dlp-prosessar som blir brukte til å førehandslaste videoar samstundes. Høgare verdiar bruker meir prosessorkraft, minne og nettverksbandbreidd."
   External Player Settings:
     Ignore Default Arguments: Ikkje send andre standardargument enn URL-en til videoen til den eksterne spelaren, til dømes avspelingsfart eller URL til spelelista. Eigne argument vert framleis sende vidare.
   Download Settings:

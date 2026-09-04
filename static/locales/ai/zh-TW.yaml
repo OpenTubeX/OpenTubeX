@@ -434,6 +434,7 @@ Settings:
         Destructive pressed: 危險操作的按下狀態
         Text and icons on destructive actions: 危險操作上的文字與圖示
   Player Settings:
+    yt-dlp Streaming: "yt-dlp 串流"
     Continue Playback When Screen Is Locked: '螢幕鎖定時繼續播放'
     Music Visualizer: 音樂視覺化工具
     Automatically Open Chapters: 自動開啟章節
@@ -511,6 +512,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: '向上或向下滑動以進入或離開全螢幕'
     Preload Upcoming Videos: "預先載入後續影片"
     Upcoming Videos to Preload: "要預先載入的影片數量"
+    Concurrent Preloads: "同時預先載入數量"
   Channel Settings:
     Channel Settings: 頻道設定
     Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。
@@ -1408,6 +1410,7 @@ Tooltips:
       限制為一次只能提出一項請求的串流會忽略此設定。
     Preload Upcoming Videos: "取得並快取後續影片的 yt-dlp 串流網址。佇列優先於播放清單和推薦。"
     Upcoming Videos to Preload: "在背景取得 yt-dlp 串流網址的後續影片數量上限。"
+    Concurrent Preloads: "同時用於預先載入影片的 yt-dlp 處理程序數量上限。數值越高，使用的 CPU、記憶體和網路頻寬越多。"
   Download Settings:
     Download Folder: 影片會儲存至此資料夾。留白可使用系統的「下載」資料夾。
     Global Additional yt-dlp Arguments: 每次下載時傳遞給 yt-dlp 的額外命令列引數，例如 --cookies-from-browser firefox。

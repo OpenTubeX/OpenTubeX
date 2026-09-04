@@ -432,6 +432,7 @@ Settings:
         Destructive pressed: Basılı yıkıcı işlem
         Text and icons on destructive actions: Yıkıcı işlemlerdeki metin ve simgeler
   Player Settings:
+    yt-dlp Streaming: "yt-dlp Akışı"
     Continue Playback When Screen Is Locked: 'Ekran kilitliyken oynatmaya devam et'
     Music Visualizer: Müzik görselleştirici
     Automatically Open Chapters: Bölümleri Otomatik Olarak Aç
@@ -509,6 +510,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Tam ekrana girmek veya çıkmak için yukarı ya da aşağı kaydır'
     Preload Upcoming Videos: "Sonraki videoları önceden yükle"
     Upcoming Videos to Preload: "Önceden yüklenecek video sayısı"
+    Concurrent Preloads: "Eş Zamanlı Ön Yüklemeler"
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.
@@ -1402,6 +1404,7 @@ Tooltips:
       Aynı anda tek istekle sınırlı akışlar bu ayarı yok sayar.
     Preload Upcoming Videos: "Sonraki videoların yt-dlp adreslerini alıp önbelleğe kaydeder. Kuyruk, oynatma listeleri ve önerilerden önce gelir."
     Upcoming Videos to Preload: "yt-dlp adresleri arka planda alınacak sonraki videoların azami sayısı."
+    Concurrent Preloads: "Videoları aynı anda önceden yüklemek için kullanılan en fazla yt-dlp işlemi sayısı. Daha yüksek değerler daha fazla CPU, bellek ve ağ bant genişliği kullanır."
   Download Settings:
     Download Folder: Videolar bu klasöre kaydedilir. Sisteminizin İndirilenler klasörünü kullanmak için boş bırakın.
     Global Additional yt-dlp Arguments: Her indirmede yt-dlp'ye iletilen ek komut satırı argümanları, örneğin --cookies-from-browser firefox.
