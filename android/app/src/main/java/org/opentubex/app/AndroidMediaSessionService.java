@@ -22,6 +22,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
@@ -42,6 +44,10 @@ public class AndroidMediaSessionService extends Service {
     private static final int NOTIFICATION_ID = 0x4d454449;
     private static final double DEFAULT_SEEK_SECONDS = 10;
     private static final int MAX_ARTWORK_REDIRECTS = 5;
+    static final int MAX_ARTWORK_BYTES = 5 * 1024 * 1024;
+    static final int MAX_ARTWORK_DIMENSION = 2048;
+    static final long MAX_ARTWORK_PIXELS = 2048L * 2048L;
+    static final long MAX_ARTWORK_DECODED_BYTES = MAX_ARTWORK_PIXELS * 4L;
     private static final long PAUSED_WAKE_LOCK_GRACE_MS = 15_000;
 
     private final ExecutorService artworkExecutor = Executors.newSingleThreadExecutor();
@@ -246,7 +252,8 @@ public class AndroidMediaSessionService extends Service {
                     }
                     if (status < 200 || status >= 300) return null;
                     try (InputStream input = connection.getInputStream()) {
-                        return BitmapFactory.decodeStream(input);
+                        byte[] encoded = readArtworkBytes(input, connection.getContentLengthLong());
+                        return encoded == null ? null : decodeArtwork(encoded);
                     }
                 } finally {
                     connection.disconnect();
@@ -256,6 +263,67 @@ public class AndroidMediaSessionService extends Service {
             return null;
         }
         return null;
+    }
+
+    static byte[] readArtworkBytes(InputStream input, long contentLength) throws IOException {
+        if (contentLength > MAX_ARTWORK_BYTES) return null;
+
+        int initialSize = contentLength > 0 ? (int) contentLength : 8192;
+        ByteArrayOutputStream output = new ByteArrayOutputStream(initialSize);
+        byte[] buffer = new byte[8192];
+        int read;
+        while ((read = input.read(buffer)) != -1) {
+            if (output.size() + read > MAX_ARTWORK_BYTES) return null;
+            output.write(buffer, 0, read);
+        }
+        return output.toByteArray();
+    }
+
+    private static Bitmap decodeArtwork(byte[] encoded) {
+        BitmapFactory.Options bounds = new BitmapFactory.Options();
+        bounds.inJustDecodeBounds = true;
+        BitmapFactory.decodeByteArray(encoded, 0, encoded.length, bounds);
+        int sampleSize = calculateArtworkSampleSize(bounds.outWidth, bounds.outHeight);
+        if (sampleSize == 0) return null;
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inScaled = false;
+        options.inSampleSize = sampleSize;
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        Bitmap decoded = BitmapFactory.decodeByteArray(encoded, 0, encoded.length, options);
+        if (
+            decoded != null &&
+            (
+                !hasSafeArtworkDimensions(decoded.getWidth(), decoded.getHeight()) ||
+                decoded.getByteCount() > MAX_ARTWORK_DECODED_BYTES
+            )
+        ) {
+            decoded.recycle();
+            return null;
+        }
+        return decoded;
+    }
+
+    static int calculateArtworkSampleSize(int width, int height) {
+        if (width <= 0 || height <= 0) return 0;
+
+        int sampleSize = 1;
+        while (!hasSafeArtworkDimensions(
+            (int) (((long) width + sampleSize - 1) / sampleSize),
+            (int) (((long) height + sampleSize - 1) / sampleSize)
+        )) {
+            sampleSize *= 2;
+        }
+        return sampleSize;
+    }
+
+    static boolean hasSafeArtworkDimensions(int width, int height) {
+        return width > 0 &&
+            height > 0 &&
+            width <= MAX_ARTWORK_DIMENSION &&
+            height <= MAX_ARTWORK_DIMENSION &&
+            (long) width * height <= MAX_ARTWORK_PIXELS &&
+            (long) width * height * 4L <= MAX_ARTWORK_DECODED_BYTES;
     }
 
     static boolean isSafeArtworkUrl(URL url) {

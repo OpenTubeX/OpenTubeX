@@ -10805,6 +10805,7 @@ export default defineComponent({
       videoZoomGestureZoom.value = null
       clearTimeout(videoZoomSuppressClickTimer)
 
+      tabMediaCoordinator.setMiniPlayer(mediaTabId, false)
       tabMediaCoordinator.setActionHandlers(mediaTabId, 'player', {})
       tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
 

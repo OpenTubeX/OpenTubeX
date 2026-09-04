@@ -75,6 +75,33 @@ test('pauses an outgoing Android player that has no visible mini player', async 
   assert.deepEqual(actions, ['pause'])
 })
 
+test('releases Android media ownership when a mini player is torn down', async (t) => {
+  enableCapacitorMode(t)
+  const actions = []
+  t.after(() => {
+    tabMediaCoordinator.unregister('removed-mini-player')
+    tabMediaCoordinator.unregister('replacement-tab')
+    tabMediaCoordinator.setPresented(null)
+  })
+
+  tabMediaCoordinator.setPresented('removed-mini-player')
+  tabMediaCoordinator.setActionHandlers('removed-mini-player', 'player', {
+    pause: () => actions.push('pause')
+  })
+  tabMediaCoordinator.setPlaybackState('removed-mini-player', 'playing')
+  tabMediaCoordinator.setMiniPlayer('removed-mini-player', true)
+
+  // Mirrors the player component's teardown before its handlers are removed.
+  tabMediaCoordinator.setMiniPlayer('removed-mini-player', false)
+  tabMediaCoordinator.setActionHandlers('removed-mini-player', 'player', {})
+  tabMediaCoordinator.setPlaybackState('removed-mini-player', 'none')
+  tabMediaCoordinator.setPresented('replacement-tab')
+  await Promise.resolve()
+
+  tabMediaCoordinator.dispatchAction('pause')
+  assert.deepEqual(actions, [])
+})
+
 test('keeps media controls associated with a paused PiP video', (t) => {
   const handlers = new Map()
   const played = []
