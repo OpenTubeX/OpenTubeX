@@ -2,6 +2,8 @@ package org.opentubex.app;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -22,6 +24,31 @@ public class SubscriptionRefreshWorkerTargetsTest {
             List.of("second"),
             SubscriptionRefreshWorker.targetProfileIds(feeds, "second-only")
         );
+    }
+
+    @Test
+    public void completionFailuresDoNotSkipLaterProfiles() {
+        List<SubscriptionRefreshConfiguration.Feed> feeds = List.of(
+            feed("first", List.of("shared")),
+            feed("second", List.of("shared")),
+            feed("third", List.of("shared"))
+        );
+        List<String> attemptedProfileIds = new ArrayList<>();
+        List<String> failedProfileIds = new ArrayList<>();
+
+        SubscriptionRefreshWorker.writeProfileCompletions(
+            feeds,
+            profileFeed -> {
+                attemptedProfileIds.add(profileFeed.profileId);
+                if (profileFeed.profileId.equals("second")) {
+                    throw new IOException("Result store unavailable");
+                }
+            },
+            (profileFeed, error) -> failedProfileIds.add(profileFeed.profileId)
+        );
+
+        assertEquals(List.of("first", "second", "third"), attemptedProfileIds);
+        assertEquals(List.of("second"), failedProfileIds);
     }
 
     private static SubscriptionRefreshConfiguration.Feed feed(

@@ -21,6 +21,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
 public final class SubscriptionRefreshWorker extends Worker {
     private static final String LOG_TAG = "OpenTubeXFetch";
@@ -28,6 +29,11 @@ public final class SubscriptionRefreshWorker extends Worker {
     private static final String TOKEN_INPUT = "token";
     static final String FEED_TYPE_INPUT = "feedType";
     private static final SubscriptionRefreshState STATE = new SubscriptionRefreshState();
+
+    @FunctionalInterface
+    interface ProfileCompletionWriter {
+        void write(SubscriptionRefreshConfiguration.Feed profileFeed) throws Exception;
+    }
 
     public SubscriptionRefreshWorker(@NonNull Context context, @NonNull WorkerParameters parameters) {
         super(context, parameters);
@@ -238,22 +244,36 @@ public final class SubscriptionRefreshWorker extends Worker {
             }
 
             long completionTimestamp = System.currentTimeMillis();
-            for (SubscriptionRefreshConfiguration.Feed profileFeed : feeds) {
-                if (!failedProfileIds.contains(profileFeed.profileId)) {
-                    SubscriptionRefreshResultStore.clearFailure(
+            Set<String> completionFailedProfileIds = new LinkedHashSet<>();
+            writeProfileCompletions(
+                feeds,
+                profileFeed -> {
+                    if (!failedProfileIds.contains(profileFeed.profileId)) {
+                        SubscriptionRefreshResultStore.clearFailure(
+                            context,
+                            profileFeed.profileId,
+                            feedType
+                        );
+                    }
+                    SubscriptionRefreshResultStore.writeCompletion(
                         context,
                         profileFeed.profileId,
-                        feedType
+                        feedType,
+                        completionTimestamp
+                    );
+                },
+                (profileFeed, error) -> {
+                    completionFailedProfileIds.add(profileFeed.profileId);
+                    recordFailure(
+                        context,
+                        Collections.singletonList(profileFeed.profileId),
+                        feedType,
+                        "Android result store",
+                        error
                     );
                 }
-                SubscriptionRefreshResultStore.writeCompletion(
-                    context,
-                    profileFeed.profileId,
-                    feedType,
-                    completionTimestamp
-                );
-            }
-            return Result.success();
+            );
+            return completionFailedProfileIds.isEmpty() ? Result.success() : Result.retry();
         } catch (Exception error) {
             List<String> profileIds = new ArrayList<>();
             for (SubscriptionRefreshConfiguration.Feed profileFeed : feeds) {
@@ -283,6 +303,20 @@ public final class SubscriptionRefreshWorker extends Worker {
             if (feed.channelIds.contains(channelId)) profileIds.add(feed.profileId);
         }
         return profileIds;
+    }
+
+    static void writeProfileCompletions(
+        List<SubscriptionRefreshConfiguration.Feed> feeds,
+        ProfileCompletionWriter writer,
+        BiConsumer<SubscriptionRefreshConfiguration.Feed, Exception> onFailure
+    ) {
+        for (SubscriptionRefreshConfiguration.Feed profileFeed : feeds) {
+            try {
+                writer.write(profileFeed);
+            } catch (Exception error) {
+                onFailure.accept(profileFeed, error);
+            }
+        }
     }
 
     private static void recordFailure(
