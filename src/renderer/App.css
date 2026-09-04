@@ -47,6 +47,13 @@
   visibility: hidden !important;
 }
 
+/* Chromium WebView treats an inline-size query container as the containing
+   block for fixed descendants. Drop that containment so the PiP player uses
+   the activity viewport instead of inheriting the route's top-nav offset. */
+:global(body.androidPictureInPicture .app > .routerView) {
+  container-type: normal;
+}
+
 .mobileLinkActionsBackdrop {
   position: fixed;
   z-index: 1200;
@@ -115,6 +122,7 @@
   block-size: 100% !important;
   border-radius: 0 !important;
   object-fit: contain !important;
+  transition: none !important;
 }
 
 :global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .shaka-controls-container),
