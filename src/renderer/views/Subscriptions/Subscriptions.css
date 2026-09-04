@@ -373,7 +373,13 @@
   }
 
   .headerActions {
+    flex-wrap: wrap;
     gap: 6px;
+    inline-size: 100%;
+  }
+
+  .headerActions .headerSortSelect {
+    flex-basis: 0;
   }
 
   .headerSortSelect :deep(.select-text) {
@@ -392,15 +398,7 @@
 
   .markAllSeenButton {
     min-block-size: 36px;
-  }
-
-  .markAllSeenLabel {
-    position: absolute;
-    inline-size: 1px;
-    block-size: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
+    order: 2;
   }
 
   .newFeedTabs {

@@ -180,18 +180,6 @@
                   ><span>{{ $t("Global.New") }}</span></span>
                 </div>
               </FtFlexBox>
-              <button
-                v-if="currentTabHasNewContent"
-                class="markAllSeenButton"
-                type="button"
-                :disabled="markingSeenTab !== null || currentTabRefreshing"
-                @click="markAllAsSeen(currentTab)"
-              >
-                <FtIcon :icon="['fas', 'check']" />
-                <span class="markAllSeenLabel">
-                  {{ $t('Subscriptions.Mark All as Seen') }}
-                </span>
-              </button>
             </div>
             <div
               v-if="currentTabPanel !== null"
@@ -221,9 +209,21 @@
                 :icon="newFeedSortByIcon"
                 @change="updateNewFeedSortBy"
               />
+              <button
+                v-if="currentTabHasNewContent"
+                class="markAllSeenButton"
+                type="button"
+                :disabled="markingSeenTab !== null || currentTabRefreshing"
+                @click="markAllAsSeen(currentTab)"
+              >
+                <FtIcon :icon="['fas', 'check']" />
+                <span class="markAllSeenLabel">
+                  {{ $t('Subscriptions.Mark All as Seen') }}
+                </span>
+              </button>
               <FtRefreshWidget
                 embedded
-                class="headerRefreshWidget"
+                class="headerRefreshWidget subscriptionsHeaderRefreshWidget"
                 :disable-refresh="subscriptionFeedRefreshInProgress || currentTabPanel.isLoading || activeSubscriptionList.length === 0"
                 :last-refresh-timestamp="currentTabPanel.lastRefreshTimestamp"
                 :next-auto-refresh-timestamp="currentTabPanel.nextAutoRefreshTimestamp"
