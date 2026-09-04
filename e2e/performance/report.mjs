@@ -197,7 +197,7 @@ export function comparePerformanceSamples(samples) {
     const crossesAbsoluteLimit = gated && definition.absoluteLimit !== undefined &&
       baseMedian < definition.absoluteLimit &&
       candidateLowerQuartile >= definition.absoluteLimit &&
-      interquartileDelta > (definition.absoluteMinimumDelta ?? 0)
+      delta > (definition.absoluteMinimumDelta ?? 0)
     const relativeRegression = gated && definition.relativeLimit !== undefined &&
       interquartileThresholdRatio > definition.relativeLimit &&
       interquartileDelta > definition.minimumDelta

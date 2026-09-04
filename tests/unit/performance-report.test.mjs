@@ -103,18 +103,18 @@ test('reports a consistent regression despite sample spread', () => {
   ))
 })
 
-test('reports a stable absolute crossing when the base upper quartile reaches the limit', () => {
+test('reports a stable absolute crossing despite a noisy base upper quartile', () => {
   const comparison = comparePerformanceSamples(samplesForMetric(
-    'firstSwitchElapsedMs',
-    [230, 235, 240, 245, 250, 255, 260],
-    [255, 260, 265, 270, 275, 280, 285]
+    'startupLongestFrameMs',
+    [450, 475, 490, 495, 500, 525, 550],
+    [600, 605, 610, 615, 620, 625, 630]
   ))
 
   const metric = comparison.metrics.find(
-    metric => metric.key === 'firstSwitchElapsedMs'
+    metric => metric.key === 'startupLongestFrameMs'
   )
   assert.equal(metric.passed, false)
   assert.ok(comparison.failures.some(
-    failure => /First subscription switch elapsed is 270\.0 ms/.test(failure)
+    failure => /Startup: renderer longest frame is 615\.0 ms/.test(failure)
   ))
 })
