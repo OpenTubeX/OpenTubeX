@@ -387,6 +387,7 @@ workspace.windowActivated.connect(reportActiveWindow)
  *   releaseWindowIdentity?: () => void,
  *   processId?: number,
  *   detectionDelay?: number,
+ *   focusHandoffDelay?: number,
  *   pollInterval?: number
  * }} options
  * @returns {() => void}
@@ -400,6 +401,7 @@ export function monitorKdeWaylandWindowState({
   releaseWindowIdentity = () => {},
   processId = process.pid,
   detectionDelay = 100,
+  focusHandoffDelay = 100,
   pollInterval = 1_000,
 }) {
   let baseline = []
@@ -407,11 +409,17 @@ export function monitorKdeWaylandWindowState({
   let minimized = false
   let minimizedUuid = null
   let windowUuid = null
+  let focusHandoffTimer = null
   let pollTimer = null
   let stopActiveWindowWatch = null
   let stopped = false
 
+  const clearFocusHandoff = () => {
+    if (focusHandoffTimer !== null) clearTimeout(focusHandoffTimer)
+    focusHandoffTimer = null
+  }
   const clearActiveWindowWatch = () => {
+    clearFocusHandoff()
     stopActiveWindowWatch?.()
     stopActiveWindowWatch = null
   }
@@ -485,10 +493,24 @@ export function monitorKdeWaylandWindowState({
     clearActiveWindowWatch()
     const reportActiveWindow = activeWindow => {
       if (stopped || browserWindow.isFocused()) return
+      clearFocusHandoff()
+      // KWin reports an empty active window between the two sides of some
+      // focus handoffs. Give the next activation time to arrive, but still
+      // report focus loss when no window becomes active, such as on desktop.
+      if (activeWindow === null || activeWindow.uuid === '') {
+        focusHandoffTimer = setTimeout(() => {
+          focusHandoffTimer = null
+          if (stopped || browserWindow.isFocused()) return
+
+          onFocusedState(false)
+          clearActiveWindowWatch()
+        }, focusHandoffDelay)
+        return
+      }
 
       const focused = isLogicallyFocused(activeWindow, targetUuid)
       onFocusedState(focused)
-      if (!focused && activeWindow !== null && activeWindow.uuid !== '') {
+      if (!focused) {
         clearActiveWindowWatch()
       }
     }
