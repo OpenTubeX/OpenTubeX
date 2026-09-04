@@ -138,6 +138,12 @@
     border-inline-start: none;
   }
 
+  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget,
+  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget.sideNavOpen,
+  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget.hideLabelsSideBar {
+    display: contents;
+  }
+
   .floatingRefreshSection.embedded,
   .floatingRefreshSection.embedded.sideNavOpen,
   .floatingRefreshSection.embedded.hideLabelsSideBar {
@@ -145,7 +151,29 @@
     justify-content: space-between;
   }
 
-  .nextAutoRefreshTimestamp {
-    display: none;
+  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget > .lastRefreshTimestamp {
+    flex: 1 0 100%;
+    order: 1;
+    text-align: start;
+  }
+
+  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget .refreshActions {
+    flex: 1 1 150px;
+    min-inline-size: 0;
+    margin-inline-start: 0;
+    order: 2;
+  }
+
+  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget .refreshActions:not(:has(.nextAutoRefreshTimestamp)) {
+    flex: 0 0 auto;
+  }
+
+  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget .nextAutoRefreshTimestamp {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+
+    .lastRefreshTimestamp {
+      text-align: start;
+    }
   }
 }

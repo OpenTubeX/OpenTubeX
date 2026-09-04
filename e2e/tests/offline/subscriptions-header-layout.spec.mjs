@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
 
 const now = Date.now()
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
@@ -83,6 +83,75 @@ function headerBoxes (page) {
 }
 
 test.describe('subscriptions header layout', () => {
+  test('shows the New feed action and regular feed refresh status on mobile', async ({ app, page, attachScreenshot }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await setWindowWidth(app, page, 375)
+
+    const markAllSeen = page.getByRole('button', { name: 'Mark all as seen' })
+    await expect(markAllSeen).toBeVisible()
+    await expect(markAllSeen.locator('xpath=..')).toHaveClass(/headerActions/)
+
+    const labelWidth = await markAllSeen.locator('.markAllSeenLabel').evaluate(element => {
+      return element.getBoundingClientRect().width
+    })
+    expect(labelWidth).toBeGreaterThan(40)
+
+    const sharesControlRow = await page.evaluate(() => {
+      const markRect = document.querySelector('.markAllSeenButton').getBoundingClientRect()
+      return ['.headerViewToggle', '.headerSortSelect'].some(selector => {
+        const rect = document.querySelector(selector).getBoundingClientRect()
+        return rect.top < markRect.bottom && rect.bottom > markRect.top
+      })
+    })
+    expect(sharesControlRow).toBe(true)
+    expect(await page.evaluate(() => {
+      const markRect = document.querySelector('.markAllSeenButton').getBoundingClientRect()
+      const refreshRect = document.querySelector('.refreshButton').getBoundingClientRect()
+      return refreshRect.top < markRect.bottom && refreshRect.bottom > markRect.top
+    })).toBe(true)
+    await expect(page.locator('.headerRefreshWidget .lastRefreshTimestamp')).toHaveCount(0)
+    await expect(page.locator('.headerRefreshWidget .nextAutoRefreshTimestamp')).toHaveCount(0)
+    await attachScreenshot('portrait mobile New feed action')
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setSubscriptionFeedAutoRefreshInterval', String(60 * 60 * 1000))
+      store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', Date.now() + 60 * 60 * 1000)
+    })
+    await page.locator('[data-subscription-feed-tab="videos"]').click()
+
+    await expect(page.getByText(/Videos feed last updated:/)).toBeVisible()
+    await expect(page.getByText(/Next auto refresh:/)).toBeVisible()
+    expect(await page.evaluate(() => {
+      const markRect = document.querySelector('.markAllSeenButton').getBoundingClientRect()
+      const refreshRect = document.querySelector('.refreshButton').getBoundingClientRect()
+      return refreshRect.top < markRect.bottom && refreshRect.bottom > markRect.top
+    })).toBe(true)
+    await expect.poll(() => page.evaluate(() => {
+      return document.documentElement.scrollWidth - document.documentElement.clientWidth
+    })).toBeLessThanOrEqual(2)
+    await attachScreenshot('portrait mobile subscription refresh status')
+
+    await setWindowSize(app, page, { width: 640, height: 375 })
+    await expect(markAllSeen.locator('.markAllSeenLabel')).toBeVisible()
+    await expect(page.getByText(/Videos feed last updated:/)).toBeVisible()
+    await expect(page.getByText(/Next auto refresh:/)).toBeVisible()
+    await expect.poll(() => page.evaluate(() => {
+      return document.documentElement.scrollWidth - document.documentElement.clientWidth
+    })).toBeLessThanOrEqual(2)
+    await attachScreenshot('landscape mobile subscription refresh status')
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBaseTheme', 'black')
+    })
+    await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(0, 0, 0)')
+    await expect(markAllSeen.locator('.markAllSeenLabel')).toBeVisible()
+    await expect(page.getByText(/Next auto refresh:/)).toBeVisible()
+    await attachScreenshot('dark landscape mobile subscription refresh status')
+  })
+
   test('keeps the New feed sort control wide until its row needs to shrink', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
@@ -107,6 +176,7 @@ test.describe('subscriptions header layout', () => {
         viewToggle: toBox(document.querySelector('.headerViewToggle .iconButton')),
         select: toBox(select),
         label: toBox(document.querySelector('.headerSortSelect .select-label')),
+        markAllSeen: toBox(document.querySelector('.markAllSeenButton')),
         refresh: toBox(document.querySelector('.headerRefreshWidget .refreshButton')),
         selectedText: select.textContent.trim()
       }
@@ -116,7 +186,9 @@ test.describe('subscriptions header layout', () => {
     expect(layout.select.end - layout.select.start).toBeLessThan(roomySelectWidth)
     expect(layout.viewToggle.start).toBeGreaterThanOrEqual(layout.header.start)
     expect(layout.viewToggle.end).toBeLessThanOrEqual(layout.select.start)
-    expect(layout.select.end).toBeLessThanOrEqual(layout.refresh.start)
+    expect(layout.select.end).toBeLessThanOrEqual(layout.header.end)
+    expect(layout.markAllSeen.end).toBeLessThanOrEqual(layout.header.end)
+    expect(layout.refresh.start).toBeGreaterThanOrEqual(layout.header.start)
     expect(layout.refresh.end).toBeLessThanOrEqual(layout.header.end)
     expect(Math.abs(
       (layout.viewToggle.top + layout.viewToggle.bottom) / 2 -
@@ -124,7 +196,7 @@ test.describe('subscriptions header layout', () => {
     )).toBeLessThanOrEqual(1)
     expect(Math.abs(
       (layout.select.top + layout.select.bottom) / 2 -
-      (layout.refresh.top + layout.refresh.bottom) / 2
+      (layout.markAllSeen.top + layout.markAllSeen.bottom) / 2
     )).toBeLessThanOrEqual(1)
     expect(layout.label.top).toBeGreaterThanOrEqual(layout.select.top)
     expect(layout.label.bottom).toBeLessThanOrEqual(layout.select.bottom)
@@ -210,7 +282,6 @@ test.describe('subscriptions header layout', () => {
       }
     })
 
-    await setWindowWidth(app, page, 1120)
     const wideLayout = await readLayout()
     expect(wideLayout.actions.top).toBeLessThan(wideLayout.tabs.bottom)
     expect(wideLayout.tabs.top).toBeLessThan(wideLayout.actions.bottom)
