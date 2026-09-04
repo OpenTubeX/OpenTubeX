@@ -409,10 +409,11 @@ import {
   handleCustomThemeUpdated,
   loadCustomThemes,
 } from './helpers/customTheme'
+import { repairSystemThemeSettings } from './helpers/customThemeSync'
 
 import packageDetails from '../../package.json'
 import { MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants'
-import { resolveBaseTheme } from '../appearanceSettings'
+import { resolveBaseTheme, resolveSystemThemeSettings } from '../appearanceSettings'
 import { calculateColorLuminance, resolveColor } from './helpers/colors'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { hasVisibleGamepadLayer, initializeGamepadNavigation } from './helpers/gamepadNavigation'
@@ -1204,8 +1205,9 @@ onMounted(async () => {
   } catch (error) {
     console.error('Failed to load custom theme:', error)
   }
-  removeCustomThemeListener = handleCustomThemeUpdated((themes) => {
+  removeCustomThemeListener = handleCustomThemeUpdated(async (themes) => {
     store.commit('setCustomThemes', themes)
+    await repairSystemThemeSettings(store, themes)
     updateTheme()
   })
   updateTheme()
@@ -2483,10 +2485,14 @@ function updateAppFont() {
 }
 
 async function sanitizeAppearanceSettings(customThemes) {
+  const systemThemes = resolveSystemThemeSettings({
+    systemLightTheme: store.getters.getSystemLightTheme,
+    systemDarkTheme: store.getters.getSystemDarkTheme,
+  }, customThemes)
   const settings = [
     ['BaseTheme', resolveBaseTheme(store.getters.getBaseTheme, 'system', customThemes)],
-    ['SystemLightTheme', resolveBaseTheme(store.getters.getSystemLightTheme, 'light', customThemes, false)],
-    ['SystemDarkTheme', resolveBaseTheme(store.getters.getSystemDarkTheme, 'dark', customThemes, false)],
+    ['SystemLightTheme', systemThemes.systemLightTheme],
+    ['SystemDarkTheme', systemThemes.systemDarkTheme],
     ['MainColor', resolveColor(store.getters.getMainColor, 'Red')],
     ['SecColor', resolveColor(store.getters.getSecColor, 'Blue')],
   ]

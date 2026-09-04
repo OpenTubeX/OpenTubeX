@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { commitCustomThemesEdit } from '../../src/renderer/helpers/customThemeSync.js'
+import {
+  commitCustomThemesEdit,
+  repairSystemThemeSettings,
+} from '../../src/renderer/helpers/customThemeSync.js'
 import { mergeSettingEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 test('uses the actual local edit time instead of the later sync time', () => {
@@ -61,12 +64,51 @@ test('records a custom-theme edit before publishing the new theme list', async (
   await commitCustomThemesEdit({
     dispatch: async (action, payload) => calls.push(['dispatch', action, payload]),
     commit: (mutation, payload) => calls.push(['commit', mutation, payload]),
+    rootGetters: {
+      getSystemLightTheme: 'light',
+      getSystemDarkTheme: 'dark',
+    },
   }, themes)
 
   assert.deepEqual(calls, [
     ['dispatch', 'recordSyncSettingEdit', 'customThemes'],
     ['commit', 'setCustomThemes', themes],
   ])
+})
+
+test('resets a system theme slot when a custom theme changes classification', async () => {
+  const calls = []
+  const themes = [{ id: 'theme-1', name: 'Test theme', isDark: true }]
+
+  await commitCustomThemesEdit({
+    dispatch: async (action, payload) => calls.push(['dispatch', action, payload]),
+    commit: (mutation, payload) => calls.push(['commit', mutation, payload]),
+    rootGetters: {
+      getSystemLightTheme: 'custom:theme-1',
+      getSystemDarkTheme: 'dark',
+    },
+  }, themes)
+
+  assert.deepEqual(calls, [
+    ['dispatch', 'recordSyncSettingEdit', 'customThemes'],
+    ['commit', 'setCustomThemes', themes],
+    ['dispatch', 'updateSystemLightTheme', 'light'],
+  ])
+})
+
+test('repairs system theme slots from a store after a cross-window update', async () => {
+  const calls = []
+  const themes = [{ id: 'theme-1', name: 'Test theme', isDark: true }]
+
+  await repairSystemThemeSettings({
+    dispatch: async (action, payload) => calls.push([action, payload]),
+    getters: {
+      getSystemLightTheme: 'custom:theme-1',
+      getSystemDarkTheme: 'dark',
+    },
+  }, themes)
+
+  assert.deepEqual(calls, [['updateSystemLightTheme', 'light']])
 })
 
 test('uses the custom-theme edit timestamp when resolving a conflict', () => {

@@ -16,6 +16,7 @@ import {
 import { getSyncableSettingKeys } from '../store/modules/settings'
 import { deepCopy } from './utils'
 import { replaceCustomThemes } from './customTheme'
+import { repairSystemThemeSettings } from './customThemeSync'
 import { generateRandomUniqueId } from './playlists'
 import {
   getMergedProfileBackground,
@@ -1077,7 +1078,7 @@ function settingUpdater(key) {
   return `update${key.charAt(0).toUpperCase()}${key.slice(1)}`
 }
 
-async function repairDeletedCustomThemeReferences(store, previousThemes, themes) {
+async function repairCustomThemeReferences(store, previousThemes, themes) {
   const themeIds = new Set(themes.map(theme => theme.id))
   const previousById = new Map(previousThemes.map(theme => [theme.id, theme]))
   const fallbacks = {
@@ -1097,6 +1098,8 @@ async function repairDeletedCustomThemeReferences(store, previousThemes, themes)
     }
     await store.dispatch(settingUpdater(key), deletedTheme?.basedOn ?? defaultTheme)
   }
+
+  await repairSystemThemeSettings(store, themes)
 }
 
 const SYNC_DEVICE_ID_KEY = 'opentubex-sync-device-id'
@@ -1220,7 +1223,7 @@ export async function syncSettings(client, store, previous = {}) {
         const previousThemes = store.state.utils.customThemes
         const themes = await replaceCustomThemes(entry.value)
         store.commit('setCustomThemes', themes)
-        await repairDeletedCustomThemeReferences(store, previousThemes, themes)
+        await repairCustomThemeReferences(store, previousThemes, themes)
       } else {
         await store.dispatch(settingUpdater(key), deepCopy(entry.value))
       }

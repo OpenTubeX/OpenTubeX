@@ -26,7 +26,7 @@ import { DEFAULT_SEARCH_ENGINES_SETTING } from '../../../searchEngines'
 import { DEFAULT_SEGMENT_PREFETCH_LIMIT } from '../../helpers/player/segmentPrefetch'
 import { normalizeYouTubeCaptionLanguageCode } from '../../helpers/player/youtubeCaptionLanguages'
 import { currentIconPack, isIconPack, setIconPack } from '../../icons/iconPackState'
-import { resolveBaseTheme } from '../../../appearanceSettings.js'
+import { resolveBaseTheme, resolveSystemTheme } from '../../../appearanceSettings.js'
 import { resolveColor } from '../../helpers/colors.js'
 import { DEFAULT_APP_FONT, normalizeAppFont } from '../../helpers/appFont.js'
 import {
@@ -1032,14 +1032,14 @@ const customActions = {
     commit,
     state,
     'systemLightTheme',
-    resolveBaseTheme(value, 'light', rootGetters.getCustomThemes, false)
+    resolveSystemTheme(value, 'light', rootGetters.getCustomThemes)
   ),
 
   updateSystemDarkTheme: ({ commit, rootGetters, state }, value) => updateValidatedSetting(
     commit,
     state,
     'systemDarkTheme',
-    resolveBaseTheme(value, 'dark', rootGetters.getCustomThemes, false)
+    resolveSystemTheme(value, 'dark', rootGetters.getCustomThemes)
   ),
 
   updateMainColor: ({ commit, state }, value) => updateValidatedSetting(

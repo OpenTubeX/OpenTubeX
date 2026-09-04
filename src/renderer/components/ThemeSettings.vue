@@ -45,8 +45,8 @@
         :placeholder="t('Settings.Theme Settings.Light Theme')"
         :value="systemLightTheme"
         setting-key="systemLightTheme"
-        :select-names="systemVariantThemeNames"
-        :select-values="systemVariantThemeValues"
+        :select-names="systemLightThemeNames"
+        :select-values="systemLightThemeValues"
         :icon="['fas', 'sun']"
         @change="store.dispatch('updateSystemLightTheme', $event)"
       />
@@ -54,8 +54,8 @@
         :placeholder="t('Settings.Theme Settings.Dark Theme')"
         :value="systemDarkTheme"
         setting-key="systemDarkTheme"
-        :select-names="systemVariantThemeNames"
-        :select-values="systemVariantThemeValues"
+        :select-names="systemDarkThemeNames"
+        :select-values="systemDarkThemeValues"
         :icon="['fas', 'moon']"
         @change="store.dispatch('updateSystemDarkTheme', $event)"
       />
@@ -389,6 +389,7 @@ import CustomThemeEditor from './CustomThemeEditor/CustomThemeEditor.vue'
 import QuickSettingsCustomizer from './QuickSettingsCustomizer/QuickSettingsCustomizer.vue'
 
 import store from '../store/index'
+import { getThemeClassification } from '../../appearanceSettings'
 import { customThemeIdFromValue, customThemeValue, isCustomThemeValue } from '../../customTheme'
 
 import { colors } from '../helpers/colors'
@@ -503,8 +504,19 @@ const baseThemeNames = computed(() => [
   ...builtInBaseThemeNames.value,
   ...customThemes.value.map(({ name }) => name)
 ])
-const systemVariantThemeValues = computed(() => baseThemeValues.value.filter(value => value !== 'system'))
-const systemVariantThemeNames = computed(() => baseThemeNames.value.slice(1))
+function systemThemeOptions(classification) {
+  return baseThemeValues.value.flatMap((value, index) =>
+    getThemeClassification(value, customThemes.value) === classification
+      ? [{ name: baseThemeNames.value[index], value }]
+      : [])
+}
+
+const systemLightThemeOptions = computed(() => systemThemeOptions('light'))
+const systemLightThemeValues = computed(() => systemLightThemeOptions.value.map(({ value }) => value))
+const systemLightThemeNames = computed(() => systemLightThemeOptions.value.map(({ name }) => name))
+const systemDarkThemeOptions = computed(() => systemThemeOptions('dark'))
+const systemDarkThemeValues = computed(() => systemDarkThemeOptions.value.map(({ value }) => value))
+const systemDarkThemeNames = computed(() => systemDarkThemeOptions.value.map(({ name }) => name))
 
 const iconPackNames = computed(() => [
   t('Settings.Theme Settings.Icon Pack.Material Symbols'),

@@ -33,6 +33,7 @@ import {
   normalizeCustomTheme,
   normalizeCustomThemes,
 } from '../customTheme'
+import { resolveSystemTheme, resolveSystemThemeSettings } from '../appearanceSettings'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
 import { liveReminders } from '../datastores'
@@ -489,6 +490,22 @@ function runApp() {
         window.webContents.send(IpcChannels.SYNC_SETTINGS, syncPayload)
       }
     }
+  }
+
+  async function repairSystemThemeSettingsFromMain(themes) {
+    const [systemLightTheme, systemDarkTheme] = await Promise.all([
+      baseHandlers.settings._findOne('systemLightTheme'),
+      baseHandlers.settings._findOne('systemDarkTheme')
+    ])
+    const currentSettings = {
+      systemLightTheme: systemLightTheme?.value ?? 'light',
+      systemDarkTheme: systemDarkTheme?.value ?? 'dark',
+    }
+    const resolvedSettings = resolveSystemThemeSettings(currentSettings, themes)
+
+    await Promise.all(Object.entries(resolvedSettings).map(([key, value]) => (
+      value === currentSettings[key] ? null : updateSettingFromMain(key, value)
+    )))
   }
 
   /**
@@ -4527,6 +4544,7 @@ function runApp() {
     if (!isOpenTubeXUrl(event.senderFrame.url)) return
 
     const themes = await saveCustomTheme(theme)
+    await repairSystemThemeSettingsFromMain(themes)
     await publishCustomThemes(themes)
     return themes
   })
@@ -4535,6 +4553,7 @@ function runApp() {
     if (!isOpenTubeXUrl(event.senderFrame.url)) return
 
     const normalizedThemes = await replaceCustomThemes(themes)
+    await repairSystemThemeSettingsFromMain(normalizedThemes)
     await publishCustomThemes(normalizedThemes)
     return normalizedThemes
   })
@@ -4552,10 +4571,16 @@ function runApp() {
         baseHandlers.settings._findOne('systemDarkTheme')
       ])
       if (systemLightTheme?.value === deletedThemeValue) {
-        await updateSettingFromMain('systemLightTheme', deletedTheme.basedOn)
+        await updateSettingFromMain(
+          'systemLightTheme',
+          resolveSystemTheme(deletedTheme.basedOn, 'light')
+        )
       }
       if (systemDarkTheme?.value === deletedThemeValue) {
-        await updateSettingFromMain('systemDarkTheme', deletedTheme.basedOn)
+        await updateSettingFromMain(
+          'systemDarkTheme',
+          resolveSystemTheme(deletedTheme.basedOn, 'dark')
+        )
       }
       if (baseTheme?.value === deletedThemeValue) {
         await updateSettingFromMain('mainColor', deletedTheme.mainColor)
@@ -4564,6 +4589,7 @@ function runApp() {
         updateThemeSource(deletedTheme.basedOn)
       }
     }
+    await repairSystemThemeSettingsFromMain(themes)
     await publishCustomThemes(themes)
     return themes
   })
