@@ -130,7 +130,7 @@ function withSyncLock(callback) {
 }
 
 async function runSync(context, { allowDataLoss = false } = {}) {
-  const { commit, dispatch, rootState } = context
+  const { commit, dispatch, rootGetters, rootState } = context
   const settings = rootState.settings
   const networkClient = trackSyncClient(
     new SyncServerClient(settings.syncServerUrl, settings.syncServerToken)
@@ -140,7 +140,7 @@ async function runSync(context, { allowDataLoss = false } = {}) {
   const previous = parseSnapshot(settings.syncServerSnapshot)
   const next = { ...previous }
   const result = {}
-  const store = { state: rootState, commit, dispatch }
+  const store = { state: rootState, getters: rootGetters, commit, dispatch }
   const stages = [
     ...(settings.syncServerPrivacyMode === 'enhanced' ? ['download'] : []),
     ...(settings.syncServerSyncSubscriptions ? ['subscriptions'] : []),

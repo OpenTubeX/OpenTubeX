@@ -540,6 +540,7 @@ test.describe('OpenTubeX sync server', () => {
 
     await page.evaluate(async customTheme => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateSyncServerSyncSessions', false)
       const themes = await window.ftElectron.saveCustomTheme(customTheme)
       store.commit('setCustomThemes', themes)
       await store.dispatch('updateSystemDarkTheme', `custom:${customTheme.id}`)
