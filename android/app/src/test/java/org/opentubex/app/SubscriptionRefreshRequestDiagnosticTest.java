@@ -50,7 +50,8 @@ public class SubscriptionRefreshRequestDiagnosticTest {
     @Test
     public void stripsPathsQueriesAndCredentialsFromDiagnostics() {
         Exception error = new Exception(
-            "Request https://example.test/private?token=secret Authorization: Bearer secret-token"
+            "Request https://user:password@example.test/private?token=secret " +
+                "Authorization: Bearer secret-token"
         );
         SubscriptionRefreshRequestDiagnostic diagnostic =
             SubscriptionRefreshRequestDiagnostic.create("shorts", error);

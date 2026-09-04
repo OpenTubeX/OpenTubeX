@@ -108,7 +108,10 @@ final class SubscriptionRefreshRequestDiagnostic {
 
     private static String sanitize(String rawMessage) {
         String message = rawMessage == null ? "No error message" : rawMessage;
-        message = message.replaceAll("(?i)(https?://[^/\\s?#]+)[^\\s)]*", "$1");
+        message = message.replaceAll(
+            "(?i)(https?://)(?:[^/@\\s?#]+@)?([^/\\s?#]+)[^\\s)]*",
+            "$1$2"
+        );
         message = message.replaceAll(
             "(?i)authorization\\s*:\\s*(?:bearer\\s+)?[^\\s,;]+",
             "Authorization: <redacted>"

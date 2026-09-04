@@ -16,6 +16,7 @@ import androidx.work.WorkerParameters;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -149,6 +150,7 @@ public final class SubscriptionRefreshWorker extends Worker {
 
         int completed = 0;
         int failed = 0;
+        Set<String> failedProfileIds = new LinkedHashSet<>();
         NotificationManager notifications = context.getSystemService(NotificationManager.class);
         try {
             // A periodic job may recreate the process while the app is closed, where
@@ -171,33 +173,48 @@ public final class SubscriptionRefreshWorker extends Worker {
                 if (SubscriptionRefreshCoordinator.isCancelled(token) || isStopped()) {
                     return Result.success();
                 }
-                JSONObject payload = null;
+                List<String> profileIds = targetProfileIds(feeds, channelId);
                 try {
-                    payload = SubscriptionRefreshHttpClient.fetch(feed, channelId);
+                    JSONObject payload = SubscriptionRefreshHttpClient.fetch(feed, channelId);
+                    boolean storageFailed = false;
+                    long timestamp = System.currentTimeMillis();
+                    for (String profileId : profileIds) {
+                        try {
+                            SubscriptionRefreshResultStore.writeChannel(
+                                context,
+                                profileId,
+                                feedType,
+                                channelId,
+                                payload,
+                                timestamp
+                            );
+                        } catch (Exception error) {
+                            storageFailed = true;
+                            failedProfileIds.add(profileId);
+                            recordFailure(
+                                context,
+                                Collections.singletonList(profileId),
+                                feedType,
+                                "Android result store",
+                                error
+                            );
+                        }
+                    }
+                    if (storageFailed) {
+                        failed++;
+                    } else {
+                        completed++;
+                    }
                 } catch (Exception error) {
                     failed++;
+                    failedProfileIds.addAll(profileIds);
                     recordFailure(
                         context,
-                        targetProfileIds(feeds, channelId),
+                        profileIds,
                         feedType,
                         "Invidious API",
                         error
                     );
-                }
-
-                if (payload != null) {
-                    long timestamp = System.currentTimeMillis();
-                    for (String profileId : targetProfileIds(feeds, channelId)) {
-                        SubscriptionRefreshResultStore.writeChannel(
-                            context,
-                            profileId,
-                            feedType,
-                            channelId,
-                            payload,
-                            timestamp
-                        );
-                    }
-                    completed++;
                 }
 
                 int progress = total == 0 ? 100 : (int) Math.round((completed + failed) * 100.0 / total);
@@ -222,7 +239,7 @@ public final class SubscriptionRefreshWorker extends Worker {
 
             long completionTimestamp = System.currentTimeMillis();
             for (SubscriptionRefreshConfiguration.Feed profileFeed : feeds) {
-                if (failed == 0) {
+                if (!failedProfileIds.contains(profileFeed.profileId)) {
                     SubscriptionRefreshResultStore.clearFailure(
                         context,
                         profileFeed.profileId,

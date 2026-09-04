@@ -47,7 +47,7 @@ export function classifyRequestFailure(error) {
     /foregroundservicestartnotallowed|backgroundservicestartnotallowed|(?:foreground|background) service.*(?:not allowed|restrict)|background execution.*(?:not allowed|restrict)/.test(signature)
   ) return 'background restriction'
   if (
-    typeof error?.status === 'number' ||
+    (Number.isInteger(error?.status) && error.status >= 100 && error.status <= 599) ||
     /\bhttp\s+\d{3}\b|\bstatus(?: code)?[: ]+\d{3}\b/.test(signature)
   ) return 'http'
   if (/ssl|tls|certificate|certpath|handshake/.test(signature)) return 'tls'

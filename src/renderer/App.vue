@@ -2166,7 +2166,11 @@ async function reconcileAndroidSubscriptionRefreshResults() {
             timestamp: Number(result.timestamp) || Date.now()
           }
         })
-      } else if (result.kind === 'failure' && result.diagnostic) {
+      } else if (
+        result.kind === 'failure' &&
+        result.diagnostic &&
+        store.getters.profileById(result.profileId)
+      ) {
         const diagnostic = formatRequestDiagnostic(result.diagnostic)
         console.error(`Closed-app subscription refresh request failed: ${diagnostic}`)
         showApiErrorToast(t('Invidious API Error (Click to copy)'), diagnostic)

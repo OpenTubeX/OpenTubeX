@@ -39,6 +39,7 @@ test('distinguishes HTTP, TLS, parsing, cancellation, and API failures', () => {
   )
   assert.equal(classifyRequestFailure(new SyntaxError('Unexpected token')), 'parsing')
   assert.equal(classifyRequestFailure({ name: 'AbortError' }), 'cancellation')
+  assert.equal(classifyRequestFailure({ status: 0 }), 'api')
   assert.equal(classifyRequestFailure(new Error('API rejected the request')), 'api')
 })
 

@@ -3,7 +3,6 @@ package org.opentubex.app;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.app.NotificationManager;
@@ -16,6 +15,7 @@ public class OpenTubeXNotificationChannelsTest {
         OpenTubeXNotificationChannels.ChannelSpec[] channels =
             OpenTubeXNotificationChannels.specifications();
 
+        assertEquals(3, channels.length);
         assertArrayEquals(
             new String[] { "media-playback", "subscription-refresh", "live-reminders" },
             new String[] { channels[0].id, channels[1].id, channels[2].id }
@@ -26,9 +26,18 @@ public class OpenTubeXNotificationChannelsTest {
         assertEquals(R.string.notification_channel_media_playback_name, channels[0].nameResource);
         assertEquals(R.string.notification_channel_subscription_refresh_name, channels[1].nameResource);
         assertEquals(R.string.notification_channel_live_reminders_name, channels[2].nameResource);
-        for (OpenTubeXNotificationChannels.ChannelSpec channel : channels) {
-            assertNotEquals(0, channel.descriptionResource);
-        }
+        assertEquals(
+            R.string.notification_channel_media_playback_description,
+            channels[0].descriptionResource
+        );
+        assertEquals(
+            R.string.notification_channel_subscription_refresh_description,
+            channels[1].descriptionResource
+        );
+        assertEquals(
+            R.string.notification_channel_live_reminders_description,
+            channels[2].descriptionResource
+        );
         assertFalse(channels[0].showBadge);
         assertFalse(channels[1].showBadge);
         assertTrue(channels[2].showBadge);
