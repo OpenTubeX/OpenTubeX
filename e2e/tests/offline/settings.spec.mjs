@@ -2864,11 +2864,19 @@ test.describe('settings', () => {
     await expect(privacyPolicy).toHaveCount(0)
   })
 
-  test('creates and cancels a secure sync pairing code without uploading key material', async ({ page }) => {
+  test('waits for the device name before creating a secure sync pairing code', async ({ app, page }) => {
     const serverUrl = 'https://pairing.example'
     let createdSession
     let cancelledSessionId
     let cancelledRecipientToken
+
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.__pairingDeviceNameResolvers = []
+      ipcMain.removeHandler('get-device-name')
+      ipcMain.handle('get-device-name', () => new Promise(resolve => {
+        globalThis.__pairingDeviceNameResolvers.push(resolve)
+      }))
+    })
 
     await page.route(`${serverUrl}/**`, async route => {
       const request = route.request()
@@ -2924,10 +2932,12 @@ test.describe('settings', () => {
 
     await pairButton.click()
     const dialog = page.getByRole('dialog', { name: 'Pair with an existing device' })
-    const deviceName = await page.evaluate(() => window.ftElectron.getDeviceName())
-    await expect(dialog.getByLabel('Device name')).toHaveValue(deviceName)
-    await dialog.getByLabel('Device name').fill('Travel laptop')
+    await expect(dialog.getByLabel('Device name')).toHaveValue('This device')
     await dialog.getByRole('button', { name: 'Create pairing code' }).click()
+    await app.electronApp.evaluate(() => {
+      for (const resolve of globalThis.__pairingDeviceNameResolvers) resolve('Travel laptop')
+      delete globalThis.__pairingDeviceNameResolvers
+    })
 
     await expect(dialog.getByRole('img', { name: 'Pairing QR code for Travel laptop' })).toBeVisible()
     await expect(dialog.getByText('Pairing code expires at')).toBeVisible()
@@ -4313,7 +4323,19 @@ test.describe('sync settings', () => {
     }
   })
 
-  test('shows the paired username when the connected field becomes disabled', async ({ page }) => {
+  test('keeps the paired username when its device metadata update fails', async ({ page }) => {
+    await page.route('https://sync.d3sox.me/**', route => {
+      const url = new URL(route.request().url())
+      if (url.pathname === '/health') {
+        return route.fulfill({
+          json: { status: 'ok', capabilities: { account_sessions: 1 } }
+        })
+      }
+      if (url.pathname.endsWith('/account/sessions/current')) {
+        return route.fulfill({ status: 503, body: 'metadata unavailable' })
+      }
+      return route.fulfill({ status: 404 })
+    })
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="sync"]').click()
 
@@ -4333,7 +4355,12 @@ test.describe('sync settings', () => {
         privacyKey: 'paired-privacy-key',
         privacySalt: 'paired-privacy-salt',
         deviceId: 'MDEyMzQ1Njc4OTo7PD0-Pw',
-        deviceName: 'Paired device'
+        deviceName: 'Paired device',
+        deviceSystemInfo: {
+          platform: 'android',
+          architecture: 'arm64-v8a',
+          release: '16'
+        }
       })
     })
 

@@ -518,7 +518,7 @@ const actions = {
 
   async completeSyncServerPairing(
     { commit, dispatch, rootState },
-    { serverUrl, username, token, privacyKey, privacySalt, deviceId, deviceName }
+    { serverUrl, username, token, privacyKey, privacySalt, deviceId, deviceName, deviceSystemInfo }
   ) {
     if (!rootState.settings.syncServerEnabled) {
       throw new Error('Enable sync first')
@@ -540,6 +540,25 @@ const actions = {
     await dispatch('updateSyncServerPrivacySalt', privacySalt, { root: true })
     await dispatch('updateSyncServerToken', token, { root: true })
     commit('setSyncServerSessionExpired', false)
+
+    if (deviceSystemInfo) {
+      const client = trackSyncClient(new SyncServerClient(normalizedUrl, token))
+      try {
+        if (await client.supportsAccountSessions()) {
+          const encryptedDeviceInfo = await encryptSyncServerDeviceInfo(
+            { name: deviceName, ...deviceSystemInfo },
+            privacyKey,
+            deviceId
+          )
+          await client.updateAccountSession('current', encryptedDeviceInfo)
+        }
+      } catch {
+        // The one-time pairing transfer has already been consumed. Keep the
+        // saved account session; account management repairs its metadata later.
+      } finally {
+        releaseSyncClient(client)
+      }
+    }
 
     return dispatch('startSyncServerAutoSync')
   },

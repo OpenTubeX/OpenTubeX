@@ -9,6 +9,7 @@ import android.content.res.Configuration;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.provider.Settings;
 import android.util.Rational;
 
 import androidx.annotation.RequiresApi;
@@ -95,6 +96,30 @@ public class AndroidUiPlugin extends Plugin {
     public void getHardwareKeyboardState(PluginCall call) {
         JSObject result = new JSObject();
         result.put("attached", hasHardwareKeyboard());
+        call.resolve(result);
+    }
+
+    @PluginMethod
+    public void getDeviceInfo(PluginCall call) {
+        String name = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            name = Settings.Global.getString(
+                getContext().getContentResolver(),
+                Settings.Global.DEVICE_NAME
+            );
+        }
+        if (name == null || name.trim().isEmpty()) {
+            name = Build.MODEL;
+        }
+
+        JSObject result = new JSObject();
+        result.put("name", name);
+        result.put("platform", "android");
+        result.put(
+            "architecture",
+            Build.SUPPORTED_ABIS.length == 0 ? "" : Build.SUPPORTED_ABIS[0]
+        );
+        result.put("release", Build.VERSION.RELEASE);
         call.resolve(result);
     }
 
