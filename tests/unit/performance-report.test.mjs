@@ -102,3 +102,19 @@ test('reports a consistent regression despite sample spread', () => {
     failure => /Repeated subscription switch elapsed regressed/.test(failure)
   ))
 })
+
+test('reports a stable absolute crossing when the base upper quartile reaches the limit', () => {
+  const comparison = comparePerformanceSamples(samplesForMetric(
+    'firstSwitchElapsedMs',
+    [230, 235, 240, 245, 250, 255, 260],
+    [255, 260, 265, 270, 275, 280, 285]
+  ))
+
+  const metric = comparison.metrics.find(
+    metric => metric.key === 'firstSwitchElapsedMs'
+  )
+  assert.equal(metric.passed, false)
+  assert.ok(comparison.failures.some(
+    failure => /First subscription switch elapsed is 270\.0 ms/.test(failure)
+  ))
+})

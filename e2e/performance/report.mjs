@@ -195,7 +195,7 @@ export function comparePerformanceSamples(samples) {
       Math.max(baseUpperQuartile, definition.relativeBaselineFloor ?? Number.MIN_VALUE)
     const gated = definition.gate !== false
     const crossesAbsoluteLimit = gated && definition.absoluteLimit !== undefined &&
-      baseUpperQuartile < definition.absoluteLimit &&
+      baseMedian < definition.absoluteLimit &&
       candidateLowerQuartile >= definition.absoluteLimit &&
       interquartileDelta > (definition.absoluteMinimumDelta ?? 0)
     const relativeRegression = gated && definition.relativeLimit !== undefined &&
