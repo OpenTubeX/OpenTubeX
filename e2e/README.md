@@ -127,8 +127,12 @@ compares the median of seven samples. A single pull-request comment and the
 Actions summary show the comparison, and the raw samples are uploaded as
 `performance-results.json`.
 
-The workflow fails when the candidate crosses a metric's absolute limit from
-below or exceeds both its relative limit and minimum delta. Elapsed metrics
+An absolute gate fails when the base median is below the limit, the candidate's
+lower quartile reaches the limit, and the median increase exceeds the configured
+absolute minimum delta. A relative gate fails when the candidate's lower
+quartile clears the threshold against the base's upper quartile and the
+interquartile increase exceeds the configured minimum delta. This prevents an
+overlapping distribution from failing because of a median flip. Elapsed metrics
 allow 15%, longest-frame metrics 20%, renderer heap growth 50%, and packed code
 size 5%. Each metric's minimum delta lives in `e2e/performance/report.mjs`. A
 trusted follow-up workflow updates the comment so pull requests from forks
