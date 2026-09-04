@@ -525,6 +525,39 @@ test('updates boolean settings from the player options', async ({ app, page }) =
   await expect(skipSilence).toHaveAttribute('aria-pressed', 'true')
 })
 
+test('marks the chapters player-option tile active while chapters are open', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  await page.locator('.app').evaluate(element => {
+    element.classList.add('capacitorTabs', 'capacitorPhoneLayout')
+  })
+
+  const watchComponent = await page.evaluateHandle(findWatchComponent)
+  await watchComponent.evaluate(async (component) => {
+    component.proxy.videoChapters = [{
+      title: 'Opening',
+      startSeconds: 0,
+      endSeconds: 30,
+    }]
+    await component.proxy.$nextTick()
+  })
+
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+  const chapters = player.locator('.shaka-overflow-menu .ft-chapters-button')
+  await expect(chapters).toHaveAttribute('aria-expanded', 'false')
+  const closedBackground = await chapters.evaluate(element => getComputedStyle(element).backgroundColor)
+
+  await chapters.click()
+  await page.mouse.move(0, 0)
+  await expect(chapters).toHaveAttribute('aria-expanded', 'true')
+  const openBackground = await chapters.evaluate(element => getComputedStyle(element).backgroundColor)
+
+  expect(openBackground).not.toBe(closedBackground)
+  await watchComponent.dispose()
+})
+
 test('keeps watch metadata and comment filters inside a narrow viewport', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
@@ -4029,6 +4062,44 @@ test.describe('watch page', () => {
     }))
 
     await expect(page.locator('.skippedSegment').filter({ hasText: 'Endcards/Credits Skipped' })).toBeVisible()
+    await expect(prompt).toHaveCount(0)
+  })
+
+  test('dismisses a SponsorBlock prompt when playback ends', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route('**/api/skipSegments/**', route => route.fulfill({
+      body: JSON.stringify([{
+        videoID: 'jNQXAC9IVRw',
+        segments: [{
+          UUID: 'terminal-outro-prompt',
+          actionType: 'skip',
+          category: 'outro',
+          description: '',
+          locked: 0,
+          segment: [15, 30],
+          videoDuration: 30,
+          votes: 1
+        }]
+      }]),
+      contentType: 'application/json'
+    }))
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseSponsorBlock', true)
+    })
+    await openMockedVideo(page)
+
+    const video = page.locator('.ftVideoPlayer video')
+    await video.evaluate(element => {
+      element.pause()
+      element.currentTime = 29
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+
+    const prompt = page.locator('.skippedSegment').filter({ hasText: 'Skip Endcards/Credits?' })
+    await expect(prompt).toBeVisible()
+    await video.dispatchEvent('ended')
+
     await expect(prompt).toHaveCount(0)
   })
 

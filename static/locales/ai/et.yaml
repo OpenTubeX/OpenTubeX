@@ -432,6 +432,7 @@ Settings:
         Destructive pressed: Pöördumatu toiming vajutamisel
         Text and icons on destructive actions: Pöördumatute toimingute tekst ja ikoonid
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Jätka esitamist lukustatud ekraaniga'
     Music Visualizer: Muusika visualiseerija
     Automatically Open Chapters: Ava peatükid automaatselt
     Caption Appearance:
@@ -1382,6 +1383,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Skriptifaili asukoht, mida kasutatakse IP-blokeeringu tuvastamisel. OpenTubeX ootab skripti lõppemist ja laadib seejärel video uuesti. Kui varumeetod on lubatud, käivitatakse skript ainult siis, kui ka varumeetod nurjub.
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Jätab heli taustal mängima ja pakub Androidi meediajuhtelemente. Lülita see välja, et esitus peatataks, kui rakendus pole enam nähtav.'
     Enable Caption Translations: Kui see on lubatud ja videol pole eelistatud subtiitrikeeles sobivat originaalrada, eelistavad subtiitrinupp ja kiirklahv C automaatselt tõlgitud rada.
     Use Quick Playback Speed Bar: Kuvab paremal asuvates pleieri juhtelementides esituskiiruse kiirvalikuriba. Kui esituskiiruse kanalipõhine käsitsi salvestamine on lubatud, sisaldab riba ka praeguse kanali kiiruse salvestamise nuppu.
     Multiply Seek Interval by Playback Rate: Kui see on lubatud, korrutatakse kerimissammud (nooleklahvid ja J/L) praeguse esituskiirusega. Kui see on välja lülitatud, jäävad kerimissammud esituskiirusest olenemata samaks.

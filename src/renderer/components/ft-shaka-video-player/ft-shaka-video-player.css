@@ -1195,15 +1195,18 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 /*
   An active entry is readable at a glance, without going over its value. Toggles
-  say so through `aria-pressed`, entries that are active without being a toggle
-  (the sleep timer) mark themselves with `ft-active`.
+  say so through `aria-pressed`, expandable entries through `aria-expanded`,
+  and entries that are active without either state mark themselves with
+  `ft-active`.
 */
 :deep(.shaka-overflow-menu.ft-menu-grid > button[aria-pressed='true']),
+:deep(.shaka-overflow-menu.ft-menu-grid > button[aria-expanded='true']),
 :deep(.shaka-overflow-menu.ft-menu-grid > button.ft-active) {
   background: color-mix(in srgb, var(--primary-color) 32%, transparent);
 }
 
 :deep(.shaka-overflow-menu.ft-menu-grid > button[aria-pressed='true']:hover),
+:deep(.shaka-overflow-menu.ft-menu-grid > button[aria-expanded='true']:hover),
 :deep(.shaka-overflow-menu.ft-menu-grid > button.ft-active:hover) {
   background: color-mix(in srgb, var(--primary-color) 48%, transparent);
 }
@@ -2490,6 +2493,29 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 :global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow) .fullscreenActions) {
   z-index: 7;
   touch-action: manipulation;
+}
+
+/* Nested Shaka menus occupy the same corner as the phone action dock. */
+:global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow):has(
+  .shaka-settings-menu:not(.shaka-hidden),
+  .shaka-sub-menu:not(.shaka-hidden)
+) .fullscreenActions) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* SponsorBlock notices remain actionable above the mobile action dock. */
+:global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow) .skippedSegmentsWrapper) {
+  z-index: 8;
+}
+
+:global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow) .shaka-controls-container:has(
+  .shaka-overflow-menu:not(.shaka-hidden),
+  .shaka-settings-menu:not(.shaka-hidden),
+  .shaka-sub-menu:not(.shaka-hidden),
+  .shaka-context-menu:not(.shaka-hidden)
+)) {
+  z-index: 9;
 }
 
 .fullscreenMetadataOverlay,
@@ -4226,6 +4252,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 /* Panning must track the pointer instead of easing toward it. */
 .ftVideoPlayer.videoZoomPanning > .player {
   transition: inline-size 250ms ease;
+}
+
+.ftVideoPlayer.videoZoomPinching > .player {
+  transition: none;
 }
 
 .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) > .player {

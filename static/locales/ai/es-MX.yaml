@@ -532,6 +532,7 @@ Settings:
       Everforest Light Blue: Everforest Claro Azul
       Everforest Light Purple: Everforest Claro Morado
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Continuar la reproducción con la pantalla bloqueada'
     Music Visualizer: Visualizador de música
     Automatically Open Chapters: Abrir capítulos automáticamente
     Caption Appearance:
@@ -1713,6 +1714,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Ruta del archivo de script que se ejecutará al detectar un bloqueo de IP. OpenTubeX espera a que termine y después recarga el video. Si la fuente alternativa está activada, solo se ejecuta cuando esta también falla.
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Mantiene el audio reproduciéndose en segundo plano y ofrece controles multimedia de Android. Desactiva esta opción para pausar cuando la aplicación deje de estar visible.'
     Enable Caption Translations: Al activarlo, el botón de subtítulos y el atajo C prefieren una pista traducida automáticamente al idioma de subtítulos elegido cuando el video no ofrece una pista original coincidente.
     Use Quick Playback Speed Bar: Muestra una barra rápida de velocidad de reproducción en los controles situados a la derecha del reproductor. Si está activado el guardado manual de la velocidad por canal, la barra también incluye un botón para guardar la velocidad del canal actual.
     Skip by Scrolling Over Video Player: Usa la rueda del mouse sobre el reproductor para desplazarte por el video, al estilo de MPV.

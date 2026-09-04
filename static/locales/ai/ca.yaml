@@ -647,6 +647,7 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Continua la reproducció amb la pantalla bloquejada'
     Music Visualizer: Visualitzador de música
     Automatically Open Chapters: Obre els capítols automàticament
     Caption Appearance:
@@ -1901,6 +1902,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Camí de l'script que s'executa quan es detecta un bloqueig d'IP. L'OpenTubeX espera que acabi i després torna a carregar el vídeo. Si l'alternativa està activada, només s'executa quan també falla.
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Manté l’àudio reproduint-se en segon pla i proporciona controls multimèdia d’Android. Desactiveu-ho per posar en pausa quan l’aplicació deixi de ser visible.'
     Enable Caption Translations: Si s'activa i el vídeo no proporciona cap pista original coincident, el botó de subtítols i la drecera C prefereixen una pista traduïda automàticament a la llengua de subtítols preferida.
     Proxy Videos Through Invidious: Es connecta a Invidious per servir els vídeos en lloc de connectar-se directament a YouTube.
     Default Video Format: Defineix els formats utilitzats en reproduir un vídeo. Els formats DASH poden reproduir qualitats més altes. Els formats antics estan limitats a 360p com a màxim, però utilitzen menys amplada de banda. Els formats d'àudio només contenen fluxos d'àudio.

@@ -436,6 +436,7 @@ Settings:
         Destructive pressed: الضغط المدمر
         Text and icons on destructive actions: النص والأيقونات على الإجراءات المدمرة
   Player Settings:
+    Continue Playback When Screen Is Locked: 'متابعة التشغيل عند قفل الشاشة'
     Music Visualizer: مؤثرات موسيقية مرئية
     Automatically Open Chapters: فتح الفصول تلقائيا
     Caption Appearance:
@@ -1392,6 +1393,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: مسار ملف البرنامج النصي الذي سيتم تشغيله عند اكتشاف حظر IP. ينتظر OpenTubeX انتهاء الفيديو، ثم يعيد تحميله. إذا تم تمكين الإجراء الاحتياطي، فسيتم تشغيله فقط عند فشل الإجراء الاحتياطي أيضًا.
   Player Settings:
+    Continue Playback When Screen Is Locked: 'يبقي الصوت قيد التشغيل في الخلفية ويوفر عناصر تحكم وسائط Android. عطّل هذا الخيار لإيقاف التشغيل مؤقتًا عندما لا يعود التطبيق مرئيًا.'
     Enable Caption Translations: عند التمكين، يفضل زر التسميات التوضيحية واختصار C المسار المترجم تلقائيًا بلغة التسميات التوضيحية المفضلة عندما لا يوفر الفيديو مسارًا أصليًا مطابقًا.
     Use Quick Playback Speed Bar: يُظهر شريط سرعة التشغيل السريع في عناصر تحكم المشغل على الجانب الأيمن. إذا تم تمكين توفير سرعة التشغيل اليدوي لكل قناة، فسيتضمن الشريط أيضًا زرًا لحفظ السرعة للقناة الحالية.
     Multiply Seek Interval by Playback Rate: عند التمكين، يتم ضرب الفواصل الزمنية للبحث (مفاتيح الأسهم وJ/L) بمعدل التشغيل الحالي. عند التعطيل، تظل فترات البحث ثابتة بغض النظر عن معدل التشغيل.

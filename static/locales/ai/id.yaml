@@ -436,6 +436,7 @@ Settings:
         Destructive pressed: Tindakan destruktif saat ditekan
         Text and icons on destructive actions: Teks dan ikon pada tindakan destruktif
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Lanjutkan pemutaran saat layar terkunci'
     Music Visualizer: Visualisator musik
     Automatically Open Chapters: Buka Bab Secara Otomatis
     Caption Appearance:
@@ -1402,6 +1403,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Jalur berkas skrip yang dijalankan saat blokir IP terdeteksi. OpenTubeX menunggu skrip selesai, lalu memuat ulang video. Jika metode cadangan diaktifkan, skrip hanya berjalan ketika metode cadangan juga gagal.
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Menjaga audio tetap diputar di latar belakang dan menyediakan kontrol media Android. Nonaktifkan untuk menjeda saat aplikasi tidak lagi terlihat.'
     Enable Caption Translations: Jika diaktifkan, tombol takarir dan pintasan C akan memilih trek yang diterjemahkan otomatis ke bahasa takarir pilihan jika video tidak menyediakan trek asli yang cocok.
     Use Quick Playback Speed Bar: Menampilkan bilah kecepatan pemutaran cepat di sisi kanan kontrol pemutar. Jika penyimpanan kecepatan pemutaran manual per saluran diaktifkan, bilah juga memuat tombol untuk menyimpan kecepatan bagi saluran saat ini.
     Multiply Seek Interval by Playback Rate: Jika diaktifkan, interval pencarian posisi (tombol panah dan J/L) dikalikan dengan kecepatan pemutaran saat ini. Jika dinonaktifkan, interval tetap sama pada kecepatan pemutaran apa pun.

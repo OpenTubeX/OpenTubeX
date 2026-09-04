@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="media_notification_channel">Medienwiedergabe</string>
+    <string name="media_notification_channel_description">Steuerung für die Audio- und Videowiedergabe</string>
+    <string name="media_play">Wiedergeben</string>
+    <string name="media_pause">Pausieren</string>
+    <string name="media_stop">Beenden</string>
+    <string name="media_previous">Zurück</string>
+    <string name="media_next">Weiter</string>
+    <string name="media_rewind">Zurückspulen</string>
+    <string name="media_fast_forward">Vorspulen</string>
+</resources>

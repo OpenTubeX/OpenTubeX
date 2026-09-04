@@ -1,12 +1,10 @@
+import {
+  ANDROID_MEDIA_SESSION_ACTIONS,
+  updateAndroidMediaSession,
+} from '../helpers/androidMediaSession.js'
+
 const MEDIA_SESSION_ACTIONS = [
-  'play',
-  'pause',
-  'stop',
-  'seekbackward',
-  'seekforward',
-  'seekto',
-  'previoustrack',
-  'nexttrack',
+  ...ANDROID_MEDIA_SESSION_ACTIONS,
   'enterpictureinpicture'
 ]
 
@@ -14,6 +12,7 @@ const mediaByTabId = new Map()
 let presentedTabId = null
 let ownerTabId = null
 let pictureInPictureTabId = null
+let miniPlayerTabId = null
 let playSequence = 0
 let powerSaveBlocked = false
 
@@ -28,6 +27,7 @@ function getEntry(tabId) {
       playbackState: 'none',
       lastPlayedAt: 0,
       metadata: null,
+      positionState: null,
       actionHandlerSources: new Map()
     }
     mediaByTabId.set(tabId, entry)
@@ -36,6 +36,13 @@ function getEntry(tabId) {
 }
 
 function chooseOwner() {
+  if (process.env.IS_CAPACITOR) {
+    if (miniPlayerTabId && mediaByTabId.has(miniPlayerTabId)) {
+      return miniPlayerTabId
+    }
+    return presentedTabId && mediaByTabId.has(presentedTabId) ? presentedTabId : null
+  }
+
   if (pictureInPictureTabId && mediaByTabId.has(pictureInPictureTabId)) {
     return pictureInPictureTabId
   }
@@ -74,24 +81,39 @@ function getActionHandlers(entry) {
 }
 
 function applyOwner(playbackStartedTabId = null) {
-  if (!('mediaSession' in navigator)) {
-    return
-  }
-
   ownerTabId = chooseOwner()
   const owner = mediaByTabId.get(ownerTabId)
   const actionHandlers = getActionHandlers(owner)
 
-  navigator.mediaSession.playbackState = owner?.playbackState ?? 'none'
-  navigator.mediaSession.metadata = owner?.metadata ?? null
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.playbackState = owner?.playbackState ?? 'none'
+    navigator.mediaSession.metadata = owner?.metadata ?? null
 
-  for (const action of MEDIA_SESSION_ACTIONS) {
+    for (const action of MEDIA_SESSION_ACTIONS) {
+      try {
+        navigator.mediaSession.setActionHandler(action, actionHandlers[action] ?? null)
+      } catch {
+        // The action is not supported on this platform.
+      }
+    }
+
     try {
-      navigator.mediaSession.setActionHandler(action, actionHandlers[action] ?? null)
+      if (owner?.positionState) {
+        navigator.mediaSession.setPositionState(owner.positionState)
+      } else {
+        navigator.mediaSession.setPositionState()
+      }
     } catch {
-      // The action is not supported on this platform.
+      // Position state is optional and unsupported in some Chromium versions.
     }
   }
+
+  updateAndroidMediaSession({
+    playbackState: owner?.playbackState,
+    metadata: owner?.metadata,
+    positionState: owner?.positionState,
+    actionHandlers,
+  })
 
   globalThis.window?.ftElectron?.tabs?.setMediaSessionState?.({
     playbackState: owner?.playbackState ?? 'none',
@@ -122,19 +144,52 @@ function applyPowerSaveState() {
 }
 
 export const tabMediaCoordinator = {
-  dispatchAction(action) {
+  dispatchAction(action, details = {}) {
     if (!MEDIA_SESSION_ACTIONS.includes(action)) {
       return
     }
 
     const handler = getActionHandlers(mediaByTabId.get(ownerTabId))[action]
     if (typeof handler === 'function') {
-      handler()
+      handler(details)
+    }
+  },
+
+  pauseAll() {
+    for (const entry of mediaByTabId.values()) {
+      if (entry.playbackState !== 'playing') continue
+      const pause = getActionHandlers(entry).pause
+      if (typeof pause === 'function') pause()
     }
   },
 
   setPresented(tabId) {
+    const outgoingTabId = presentedTabId
     presentedTabId = tabId
+
+    if (process.env.IS_CAPACITOR && outgoingTabId && outgoingTabId !== tabId) {
+      ownerTabId = null
+      queueMicrotask(() => {
+        if (miniPlayerTabId !== outgoingTabId) {
+          const outgoing = mediaByTabId.get(outgoingTabId)
+          const pause = getActionHandlers(outgoing).pause
+          if (outgoing?.playbackState === 'playing' && typeof pause === 'function') pause()
+        }
+        applyOwner()
+      })
+      return
+    }
+
+    applyOwner()
+  },
+
+  setMiniPlayer(tabId, active) {
+    if (active) {
+      if (!mediaByTabId.has(tabId)) return
+      miniPlayerTabId = tabId
+    } else if (miniPlayerTabId === tabId) {
+      miniPlayerTabId = null
+    }
     applyOwner()
   },
 
@@ -177,6 +232,25 @@ export const tabMediaCoordinator = {
     applyOwner()
   },
 
+  setPositionState(tabId, positionState, playbackState = null) {
+    const entry = getEntry(tabId)
+    if (!entry) {
+      return
+    }
+
+    const playbackStarted = playbackState === 'playing' && entry.playbackState !== 'playing'
+    const playbackChanged = playbackState !== null && entry.playbackState !== playbackState
+    if (playbackState !== null) {
+      entry.playbackState = playbackState
+      if (playbackStarted) entry.lastPlayedAt = ++playSequence
+    }
+    entry.positionState = positionState
+    if (ownerTabId === tabId || presentedTabId === tabId) {
+      applyOwner(playbackStarted ? tabId : null)
+    }
+    if (playbackChanged) applyPowerSaveState()
+  },
+
   setActionHandlers(tabId, source, actionHandlers) {
     const entry = getEntry(tabId)
     if (!entry) {
@@ -204,6 +278,9 @@ export const tabMediaCoordinator = {
     mediaByTabId.delete(tabId)
     if (pictureInPictureTabId === tabId) {
       pictureInPictureTabId = null
+    }
+    if (miniPlayerTabId === tabId) {
+      miniPlayerTabId = null
     }
     if (ownerTabId === tabId) {
       ownerTabId = null

@@ -26,12 +26,25 @@ test('background Android players cannot update the global auto PiP state', () =>
   const playingVideo = { paused: false, ended: false }
 
   assert.equal(
-    resolveAndroidAutoPictureInPictureUpdate(false, true, 'video', playingVideo),
+    resolveAndroidAutoPictureInPictureUpdate(false, true, 'video', playingVideo, {
+      wasPresented: false
+    }),
     null
   )
   assert.equal(
     resolveAndroidAutoPictureInPictureUpdate(true, true, 'video', playingVideo),
     true
+  )
+})
+
+test('leaving a playing Android video tab clears its automatic PiP state', () => {
+  const playingVideo = { paused: false, ended: false }
+
+  assert.equal(
+    resolveAndroidAutoPictureInPictureUpdate(false, true, 'video', playingVideo, {
+      wasPresented: true
+    }),
+    false
   )
 })
 

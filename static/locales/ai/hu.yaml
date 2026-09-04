@@ -432,6 +432,7 @@ Settings:
         Destructive pressed: Törlő művelet lenyomáskor
         Text and icons on destructive actions: Törlő műveletek szövege és ikonjai
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Lejátszás folytatása zárolt képernyőnél'
     Music Visualizer: Zenevizualizáció
     Automatically Open Chapters: Fejezetek automatikus megnyitása
     Caption Appearance:
@@ -1380,6 +1381,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Az IP-cím letiltásának észlelésekor futtatandó parancsfájl elérési útja. Az OpenTubeX megvárja a befejezését, majd újratölti a videót. Ha a tartalék módszer engedélyezett, csak akkor fut le, ha az is sikertelen.
   Player Settings:
+    Continue Playback When Screen Is Locked: 'A háttérben folytatja a hang lejátszását, és Android-médiavezérlőket biztosít. Kapcsold ki, ha az alkalmazás elrejtésekor szüneteltetni szeretnéd a lejátszást.'
     Enable Caption Translations: Bekapcsolva a feliratok gomb és a C billentyűparancs az előnyben részesített feliratnyelvre automatikusan lefordított sávot választja, ha a videóhoz nincs ezen a nyelven eredeti sáv.
     Use Quick Playback Speed Bar: Gyors lejátszásisebesség-sáv megjelenítése a lejátszó jobb oldali vezérlői között. Ha engedélyezett a lejátszási sebesség csatornánkénti kézi mentése, a sávon az aktuális csatorna sebességének mentésére szolgáló gomb is megjelenik.
     Multiply Seek Interval by Playback Rate: Bekapcsolva a tekerési időközök (nyílbillentyűk és J/L) az aktuális lejátszási sebességgel szorzódnak. Kikapcsolva az időközök a lejátszási sebességtől függetlenül változatlanok maradnak.

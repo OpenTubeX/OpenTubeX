@@ -434,6 +434,7 @@ Settings:
         Destructive pressed: Gweithred ddinistriol wedi'i gwasgu
         Text and icons on destructive actions: Testun ac eiconau ar weithredoedd dinistriol
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Parhau i chwarae pan fydd y sgrin wedi’i chloi'
     Music Visualizer: Delweddydd cerddoriaeth
     Automatically Open Chapters: Agor penodau'n awtomatig
     Caption Appearance:
@@ -1393,6 +1394,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Llwybr y ffeil sgript i'w rhedeg pan ganfyddir rhwystr IP. Mae OpenTubeX yn aros iddi orffen, yna'n ail-lwytho'r fideo. Os yw'r darparwr wrth gefn wedi'i alluogi, dim ond pan fydd y darparwr hwnnw hefyd yn methu y bydd y sgript yn rhedeg.
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Yn cadw sain yn chwarae yn y cefndir ac yn darparu rheolyddion cyfryngau Android. Diffoddwch hyn i oedi pan nad yw’r ap yn weladwy mwyach.'
     Enable Caption Translations: Pan fydd wedi'i alluogi ac nad yw'r fideo'n darparu trac gwreiddiol cyfatebol, bydd y botwm capsiynau a'r llwybr byr C yn rhoi blaenoriaeth i drac sydd wedi'i gyfieithu'n awtomatig yn yr iaith capsiynau ddewisol.
     Use Quick Playback Speed Bar: Mae'n dangos bar cyflymder chwarae cyflym yn rheolyddion y chwaraewr ar y dde. Os yw cadw cyflymder chwarae â llaw fesul sianel wedi'i alluogi, mae'r bar hefyd yn cynnwys y botwm i gadw'r cyflymder ar gyfer y sianel bresennol.
     Multiply Seek Interval by Playback Rate: Pan fydd wedi'i alluogi, caiff cyfyngau neidio, gan gynnwys y bysellau saeth a J/L, eu lluosi â'r gyfradd chwarae bresennol. Pan fydd wedi'i analluogi, mae'r cyfyngau'n aros yn gyson beth bynnag fo'r gyfradd chwarae.

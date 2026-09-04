@@ -957,15 +957,17 @@ function handleExternalPlayer() {
 watch(
   () => [props.title, props.channelName, props.videoThumbnail],
   ([title, artist, artworkSrc]) => {
-    if ('mediaSession' in navigator && typeof MediaMetadata === 'function') {
-      tabMediaCoordinator.setMetadata(tabId ?? 'web', new MediaMetadata({
-        title,
-        artist,
-        artwork: artworkSrc
-          ? [{ src: artworkSrc, sizes: '128x128', type: 'image/png' }]
-          : []
-      }))
+    const metadata = {
+      title,
+      artist,
+      artwork: artworkSrc
+        ? [{ src: artworkSrc, sizes: '128x128', type: 'image/png' }]
+        : []
     }
+    tabMediaCoordinator.setMetadata(
+      tabId ?? 'web',
+      typeof MediaMetadata === 'function' ? new MediaMetadata(metadata) : metadata
+    )
   },
   { immediate: true }
 )

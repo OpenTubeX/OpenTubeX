@@ -11,6 +11,7 @@ test('platform-specific settings stay local to every device', () => {
     'autoPictureInPictureTriggers',
     'autoUpdateChannelVolumes',
     'channelVolumes',
+    'continuePlaybackWhenScreenIsLocked',
     'defaultVolume',
     'displayVideoPlayButton',
     'enableClosedAppSubscriptionRefresh',

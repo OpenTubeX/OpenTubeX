@@ -192,6 +192,15 @@
           @change="updateEnableMobileFullscreenSwipe"
         />
         <FtToggleSwitch
+          v-if="IS_CAPACITOR"
+          :label="t('Settings.Player Settings.Continue Playback When Screen Is Locked')"
+          :compact="true"
+          :default-value="continuePlaybackWhenScreenIsLocked"
+          setting-key="continuePlaybackWhenScreenIsLocked"
+          :tooltip="t('Tooltips.Player Settings.Continue Playback When Screen Is Locked')"
+          @change="updateContinuePlaybackWhenScreenIsLocked"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Player Settings.Show Playback Rate Adjusted Timestamp')"
           :compact="true"
           :default-value="showPlaybackRateAdjustedTimestamp"
@@ -207,7 +216,7 @@
           @change="updateScrollMiniPlayerEnabled"
         />
         <FtToggleSwitch
-          v-if="USING_ELECTRON"
+          v-if="USING_ELECTRON || IS_CAPACITOR"
           :label="t('Settings.Player Settings.Scroll Mini Player.On All Tabs')"
           :compact="true"
           :default-value="scrollMiniPlayerOnAllTabs"
@@ -877,6 +886,14 @@ const enableMobileFullscreenSwipe = computed(() => store.getters.getEnableMobile
  */
 function updateEnableMobileFullscreenSwipe(value) {
   store.dispatch('updateEnableMobileFullscreenSwipe', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const continuePlaybackWhenScreenIsLocked = computed(() => store.getters.getContinuePlaybackWhenScreenIsLocked)
+
+/** @param {boolean} value */
+function updateContinuePlaybackWhenScreenIsLocked(value) {
+  store.dispatch('updateContinuePlaybackWhenScreenIsLocked', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

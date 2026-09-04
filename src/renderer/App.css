@@ -94,12 +94,12 @@
   background-color: var(--side-nav-hover-color);
 }
 
-:global(body.androidPictureInPicture .ftVideoPlayer),
-:global(body.androidPictureInPicture .ftVideoPlayer .player) {
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target]),
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .player) {
   visibility: visible !important;
 }
 
-:global(body.androidPictureInPicture .ftVideoPlayer) {
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target]) {
   position: fixed !important;
   inset: 0 !important;
   z-index: 2147483647 !important;
@@ -109,16 +109,16 @@
   transform: none !important;
 }
 
-:global(body.androidPictureInPicture .ftVideoPlayer > .player),
-:global(body.androidPictureInPicture .ftVideoPlayer > .vrCanvas) {
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] > .player),
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] > .vrCanvas) {
   inline-size: 100% !important;
   block-size: 100% !important;
   border-radius: 0 !important;
   object-fit: contain !important;
 }
 
-:global(body.androidPictureInPicture .ftVideoPlayer .shaka-controls-container),
-:global(body.androidPictureInPicture .ftVideoPlayer .scrollMiniPlayerControls) {
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .shaka-controls-container),
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .scrollMiniPlayerControls) {
   display: none !important;
 }
 
@@ -161,6 +161,12 @@
    on this component while the player is inside a child component. */
 .app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeEnabled:not(.scrollMiniPlayer)) {
   touch-action: pan-x;
+}
+
+/* Chromium may claim the first finger as a pan before the second finger lands,
+   cancelling the pointer stream before the player can recognize a pinch. */
+.app.capacitorTabs :deep(.ftVideoPlayer.videoZoomTouchEnabled:not(.scrollMiniPlayer)) {
+  touch-action: none;
 }
 
 .app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwiping > .player),

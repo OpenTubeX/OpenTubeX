@@ -432,6 +432,7 @@ Settings:
         Destructive pressed: "Ober distrujus pouezet"
         Text and icons on destructive actions: "Testenn hag arlunioù war an oberoù distrujus"
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Kenderc’hel da lenn pa vez prennet ar skramm'
     Music Visualizer: Gweladur sonerezh
     Automatically Open Chapters: "Digeriñ ar chabistroù ent emgefreek"
     Caption Appearance:
@@ -1389,6 +1390,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: "Hent ar restr skript da erounit pa vez dinoet ur stankadur IP. Gortoz a ra OpenTubeX ma vo echu, hag adkargañ a ra ar video. Ma vez gweredekaet an diskoulm erlec'hiañ ne vez erounit ar skript nemet pa c'hwit an diskoulm-se ivez."
   Player Settings:
+    Continue Playback When Screen Is Locked: 'Dalc’h a ra ar son o vont en-dro en drekleur ha reiñ a ra reolerezhioù media Android. Diweredekait evit lakaat war ehan pa ne vez ket mui gwelet an arload.'
     Enable Caption Translations: "Pa vez gweredekaet e tibab bouton an istitloù hag ar verradenn C ur roudenn troet ent emgefreek er yezh istitloù gwellañ-garet, ma ne bourchas ket ar video ur roudenn orin o klotañ."
     Use Quick Playback Speed Bar: "Diskouez ur varrenn prim evit an tizh lenn e reolerezhioù al lenner war an tu dehou. Ma vez gweredekaet enrollañ tizh lenn pep chadenn gant an dorn, enderc'hel a ra ar varrenn ivez ar bouton da enrollañ an tizh evit ar chadenn vremanel."
     Multiply Seek Interval by Playback Rate: "Pa vez gweredekaet e vez lieskementet etrevezioù ar mont en-dro, gant ar birioù ha J/L, dre an tizh lenn bremanel. Pa vez diweredekaet e chom digemm an etrevezioù forzh an tizh lenn."

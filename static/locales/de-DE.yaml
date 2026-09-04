@@ -768,6 +768,7 @@ Settings:
     Enter Fullscreen on Display Rotate: Beim Drehen des Bildschirms zu Vollbild wechseln
     Rotate Wide Videos to Landscape in Fullscreen: Breite Videos im Vollbild ins Querformat drehen
     Swipe Up or Down to Enter or Exit Fullscreen: Zum Öffnen oder Schließen des Vollbilds nach oben oder unten wischen
+    Continue Playback When Screen Is Locked: Wiedergabe bei gesperrtem Bildschirm fortsetzen
     Skip by Scrolling Over Video Player: Überspringen durch Scrollen
     Multiply Seek Interval by Playback Rate: Sprungintervalle mit Wiedergabegeschwindigkeit multiplizieren
     Show Playback Rate Adjusted Timestamp: Wiedergabegeschwindigkeitsangepasste Zeitstempel anzeigen
@@ -2198,6 +2199,9 @@ Tooltips:
     Enable Video Zoom: >-
       Zeigt die Zoomsteuerung im Einstellungsmenü des Players an und aktiviert die zugehörigen Tastenkürzel und
       Schwenksteuerungen.
+    Continue Playback When Screen Is Locked: >-
+      Spielt Audio im Hintergrund weiter und stellt Android-Mediensteuerungen bereit. Deaktiviere diese Option, um die
+      Wiedergabe anzuhalten, sobald die App nicht mehr sichtbar ist.
     Voice-over Translation: >-
       Sendet Video-ID, Dauer und ausgewählte Sprache an den inoffiziellen Yandex-Dienst für Voice-over-Übersetzungen, wenn
       du eine Übersetzung anforderst. Standardmäßig deaktiviert.

@@ -13,6 +13,7 @@ import {
   toRuntimeTabState,
   unloadCapacitorTab
 } from './capacitorTabState.js'
+import { tabMediaCoordinator } from './TabMediaCoordinator.js'
 
 const STORAGE_KEY = 'opentubex-capacitor-tabs'
 const PERSISTED_MUTATIONS = new Set([
@@ -61,6 +62,7 @@ export class CapacitorTabService {
     session = loadCapacitorTab(session, session.activeTabId)
     this.commitSession(session, session.activeTabId)
     this.store.commit('setPresentedTab', session.activeTabId)
+    tabMediaCoordinator.setPresented(session.activeTabId)
     this.initialized = true
 
     this.removeRouterHook = this.router.afterEach((to, _from, failure) => {

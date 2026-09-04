@@ -435,6 +435,10 @@ import {
 } from './helpers/androidUi'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
 import {
+  addAndroidMediaSessionActionListener,
+  shouldPauseAndroidPlaybackOnAppStateChange,
+} from './helpers/androidMediaSession'
+import {
   acknowledgeAndroidSubscriptionRefreshResult,
   addAndroidSubscriptionRefreshCancelledListener,
   configureAndroidSubscriptionRefresh,
@@ -490,6 +494,7 @@ import {
 import { invalidateAllYtDlpPlaybackSources } from './helpers/player/ytDlpPlayback'
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { initializeCapacitorTabService } from './tabs/CapacitorTabService'
+import { tabMediaCoordinator } from './tabs/TabMediaCoordinator'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
 import { preloadResolvedRoute, preloadUtilityRoutes } from './router/index'
@@ -3966,12 +3971,25 @@ async function enableCapacitorIntegrations() {
   const removeReminderActions = await initializeCapacitorLiveReminderActions((videoId) => {
     handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`)
   })
+  const removeMediaActions = await addAndroidMediaSessionActionListener(({ action, ...details }) => {
+    tabMediaCoordinator.dispatchAction(action, details)
+  })
+  const appStateHandle = await CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+    if (shouldPauseAndroidPlaybackOnAppStateChange(
+      isActive,
+      store.getters.getContinuePlaybackWhenScreenIsLocked
+    )) {
+      tabMediaCoordinator.pauseAll()
+    }
+  })
   const launch = await CapacitorApp.getLaunchUrl()
   if (launch?.url) await handleYoutubeLink(launch.url)
 
   return () => {
     urlHandle.remove()
+    appStateHandle.remove()
     removeReminderActions()
+    removeMediaActions()
   }
 }
 

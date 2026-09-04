@@ -90,6 +90,7 @@ import { getDashQualityFromDimensions } from '../../helpers/player/videoQuality'
 import {
   DEFAULT_VIDEO_ZOOM,
   formatVideoZoom,
+  resolveVideoZoomPinch,
   sanitizeVideoZoom,
   stepVideoZoom,
 } from '../../helpers/player/videoZoom'
@@ -531,6 +532,7 @@ export default defineComponent({
     'error',
     'loaded',
     'ended',
+    'play',
     'pause',
     'timeupdate',
     'terminal-outro-started',
@@ -1237,6 +1239,8 @@ export default defineComponent({
 
     // #region settings
 
+    const isCrossTabMiniPlayerPresented = ref(false)
+
     const {
       getAutoPictureInPictureState,
       initializeActiveTab,
@@ -1252,6 +1256,7 @@ export default defineComponent({
       video,
       tabId,
       isTabPresented,
+      isCrossTabMiniPlayerPresented,
       initialState: props.autoPictureInPictureState,
     })
 
@@ -3499,6 +3504,7 @@ export default defineComponent({
     const selectedVideoZoom = computed(() => {
       return sanitizeVideoZoom(store.getters.getTabVideoZoom(mediaTabId))
     })
+    const videoZoomGestureZoom = ref(null)
 
     const videoZoomPossible = computed(() => {
       // Audio only playback has no video surface to crop and the shorts player
@@ -3513,7 +3519,7 @@ export default defineComponent({
         return DEFAULT_VIDEO_ZOOM
       }
 
-      return selectedVideoZoom.value
+      return videoZoomGestureZoom.value ?? selectedVideoZoom.value
     })
 
     /**
@@ -3526,6 +3532,7 @@ export default defineComponent({
 
     /** Whether a shift-drag is currently moving the zoomed video. */
     const videoZoomPanning = ref(false)
+    const videoZoomPinching = ref(false)
 
     /** Whether releasing the pointer would start a pan, which the cursor shows. */
     const videoZoomPanReady = ref(false)
@@ -3591,6 +3598,9 @@ export default defineComponent({
     let videoZoomPanStart = null
     let videoZoomPointerInside = false
     let videoZoomSuppressClick = false
+    let videoZoomSuppressClickTimer = null
+    const videoZoomTouchPointers = new Map()
+    let videoZoomPinchStart = null
 
     function handleVideoZoomPointerEnter() {
       videoZoomPointerInside = true
@@ -3604,6 +3614,42 @@ export default defineComponent({
       }
     }
 
+    function getVideoZoomGestureGeometry() {
+      const videoElement = video.value
+      if (!videoElement) return null
+
+      const bounds = videoElement.getBoundingClientRect()
+      const transform = getComputedStyle(videoElement).transform
+      const matrix = transform === 'none' ? new DOMMatrix() : new DOMMatrix(transform)
+      const scale = Math.hypot(matrix.a, matrix.b)
+      if (bounds.width <= 0 || bounds.height <= 0 || scale <= 0) return null
+      const size = {
+        width: bounds.width / scale,
+        height: bounds.height / scale,
+      }
+      const maximumTranslation = {
+        x: size.width * (scale - 1) / 2,
+        y: size.height * (scale - 1) / 2,
+      }
+
+      return {
+        zoom: scale,
+        center: {
+          x: bounds.left + bounds.width / 2 - matrix.e,
+          y: bounds.top + bounds.height / 2 - matrix.f,
+        },
+        offset: {
+          x: maximumTranslation.x > 0
+            ? clampVideoZoomOffset(matrix.e / maximumTranslation.x)
+            : 0,
+          y: maximumTranslation.y > 0
+            ? clampVideoZoomOffset(matrix.f / maximumTranslation.y)
+            : 0,
+        },
+        size,
+      }
+    }
+
     /** @param {KeyboardEvent} event */
     function handleVideoZoomModifierKey(event) {
       videoZoomPanReady.value = videoZoomPointerInside && videoZoomPannable.value && event.shiftKey
@@ -3612,6 +3658,46 @@ export default defineComponent({
     /** @param {PointerEvent} event */
     function handleVideoZoomPointerDown(event) {
       startMobileFullscreenGesture(event)
+
+      if (
+        event.pointerType === 'touch' &&
+        videoZoomPossible.value &&
+        isVideoZoomGestureTarget(event.target)
+      ) {
+        videoZoomTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
+        if (videoZoomTouchPointers.size === 2) {
+          const points = [...videoZoomTouchPointers.values()]
+          const geometry = getVideoZoomGestureGeometry()
+          if (geometry) {
+            cancelMobileFullscreenGesture()
+            videoZoomGestureZoom.value = geometry.zoom
+            videoZoomOffset.x = geometry.offset.x
+            videoZoomOffset.y = geometry.offset.y
+            const focal = {
+              x: (points[0].x + points[1].x) / 2 - geometry.center.x,
+              y: (points[0].y + points[1].y) / 2 - geometry.center.y,
+            }
+            videoZoomPinchStart = {
+              distance: Math.max(1, Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y)),
+              zoom: geometry.zoom,
+              offset: geometry.offset,
+              focal,
+              currentFocal: focal,
+              center: geometry.center,
+              size: geometry.size,
+            }
+            videoZoomPinching.value = true
+            videoZoomSuppressClick = true
+            for (const pointerId of videoZoomTouchPointers.keys()) {
+              container.value?.setPointerCapture(pointerId)
+            }
+            event.preventDefault()
+            event.stopPropagation()
+            return
+          }
+        }
+      }
+
       if (!videoZoomPannable.value || !event.shiftKey || event.button !== 0) {
         return
       }
@@ -3636,6 +3722,34 @@ export default defineComponent({
 
     /** @param {PointerEvent} event */
     function handleVideoZoomPointerMove(event) {
+      if (videoZoomTouchPointers.has(event.pointerId)) {
+        videoZoomTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
+      }
+
+      if (videoZoomPinchStart && videoZoomTouchPointers.size >= 2) {
+        const points = [...videoZoomTouchPointers.values()]
+        const focal = {
+          x: (points[0].x + points[1].x) / 2 - videoZoomPinchStart.center.x,
+          y: (points[0].y + points[1].y) / 2 - videoZoomPinchStart.center.y,
+        }
+        const distance = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y)
+        const resolved = resolveVideoZoomPinch({
+          startZoom: videoZoomPinchStart.zoom,
+          startOffset: videoZoomPinchStart.offset,
+          startFocal: videoZoomPinchStart.focal,
+          focal,
+          scale: distance / videoZoomPinchStart.distance,
+          size: videoZoomPinchStart.size,
+        })
+        videoZoomGestureZoom.value = resolved.zoom
+        videoZoomOffset.x = resolved.offset.x
+        videoZoomOffset.y = resolved.offset.y
+        videoZoomPinchStart.currentFocal = focal
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+
       if (moveMobileFullscreenGesture(event)) return
 
       if (!videoZoomPanStart) {
@@ -3675,6 +3789,7 @@ export default defineComponent({
 
     /** @param {PointerEvent} event */
     function handleVideoZoomPointerUp(event) {
+      if (endVideoZoomPinchPointer(event)) return
       if (finishMobileFullscreenGesture(event)) return
 
       if (!endVideoZoomPan(event)) {
@@ -3687,6 +3802,7 @@ export default defineComponent({
 
     /** @param {PointerEvent} event */
     function handleVideoZoomPointerCancel(event) {
+      if (endVideoZoomPinchPointer(event)) return
       cancelMobileFullscreenGesture(event)
 
       if (!endVideoZoomPan(event)) {
@@ -3696,6 +3812,32 @@ export default defineComponent({
       // A cancelled gesture never produces the click that clears this itself,
       // so it would otherwise swallow the next unrelated click on the player.
       videoZoomSuppressClick = false
+    }
+
+    function endVideoZoomPinchPointer(event) {
+      if (!videoZoomTouchPointers.has(event.pointerId)) return false
+
+      videoZoomTouchPointers.delete(event.pointerId)
+      if (!videoZoomPinchStart) return false
+
+      event.preventDefault()
+      event.stopPropagation()
+      if (container.value?.hasPointerCapture(event.pointerId)) {
+        container.value.releasePointerCapture(event.pointerId)
+      }
+
+      const gestureZoom = videoZoomGestureZoom.value ?? videoZoomPinchStart.zoom
+      updateVideoZoom(gestureZoom)
+      videoZoomGestureZoom.value = null
+      videoZoomPinchStart = null
+      videoZoomPinching.value = false
+      videoZoomTouchPointers.clear()
+      clearTimeout(videoZoomSuppressClickTimer)
+      videoZoomSuppressClickTimer = setTimeout(() => {
+        videoZoomSuppressClick = false
+        videoZoomSuppressClickTimer = null
+      }, 0)
+      return true
     }
 
     /**
@@ -3730,6 +3872,8 @@ export default defineComponent({
       }
 
       videoZoomSuppressClick = false
+      clearTimeout(videoZoomSuppressClickTimer)
+      videoZoomSuppressClickTimer = null
       event.preventDefault()
       event.stopPropagation()
     }
@@ -4069,6 +4213,7 @@ export default defineComponent({
       refreshAbRepeatMarkers()
       scheduleAbRepeatBoundary()
       updateVideoElementGeometry()
+      syncMediaSessionPosition()
     }
 
     // #endregion A-B repeat
@@ -4561,6 +4706,26 @@ export default defineComponent({
         'shaka-play-button',
         'shaka-controls-container',
       ].some(className => target.classList.contains(className))
+    }
+
+    /**
+     * Pinch gestures may begin on non-interactive descendants of Shaka's
+     * surface, including the SVG inside its central play button. Menus and the
+     * bottom control panel retain their own two-finger interactions.
+     * @param {EventTarget | null} target
+     * @returns {boolean}
+     */
+    function isVideoZoomGestureTarget(target) {
+      if (target === video.value) return true
+      if (!(target instanceof Element)) return false
+
+      return target.closest('.shaka-controls-container') !== null &&
+        target.closest([
+          '.shaka-controls-button-panel',
+          '.shaka-seek-bar-container',
+          '.shaka-settings-menu',
+          '.shaka-context-menu',
+        ].join(',')) === null
     }
 
     const {
@@ -5120,8 +5285,11 @@ export default defineComponent({
       updateSponsorBlockSubmissionState()
     }, { immediate: true })
 
+    let mediaSessionStopped = false
+
     watch(() => props.videoId, () => {
       resetAbRepeat()
+      mediaSessionStopped = false
       voiceOverTranslation.reset()
       showPoster.value = true
       sponsorBlockMuteController.reset()
@@ -5552,19 +5720,20 @@ export default defineComponent({
     // #endregion player locales
 
     function registerMediaSessionHandlers() {
-      if (!('mediaSession' in navigator)) {
-        return
-      }
-
       tabMediaCoordinator.setActionHandlers(mediaTabId, 'player', {
         play: () => video.value?.play(),
         pause: () => video.value?.pause(),
         stop: () => {
           const videoElement = video.value
           if (!videoElement) return
+          const wasPaused = videoElement.paused
+          mediaSessionStopped = true
           videoElement.pause()
           if (Number.isFinite(videoElement.duration)) {
             videoElement.currentTime = 0
+          }
+          if (wasPaused) {
+            tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
           }
         },
         seekbackward: (details = {}) => {
@@ -5684,6 +5853,8 @@ export default defineComponent({
         return
       }
 
+      mediaSessionStopped = false
+
       flushPendingMusicPlaybackRateToast()
 
       syncPlayPauseControlIcons()
@@ -5701,6 +5872,8 @@ export default defineComponent({
       if (scrollMiniPlayerActive.value) {
         showScrollMiniPlayPause(true)
       }
+
+      emit('play')
     }
 
     function handlePlaying() {
@@ -5734,7 +5907,10 @@ export default defineComponent({
       cancelSponsorBlockSkipSchedule()
       clearAbRepeatBoundarySchedule()
 
-      tabMediaCoordinator.setPlaybackState(mediaTabId, 'paused')
+      tabMediaCoordinator.setPlaybackState(
+        mediaTabId,
+        mediaSessionStopped ? 'none' : 'paused'
+      )
 
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
         window.ftElectron.tabs.setPlaybackState('paused', tabId)
@@ -5771,6 +5947,7 @@ export default defineComponent({
 
       pauseSponsorBlockHighlightLabelCountdown()
       cancelSponsorBlockSkipSchedule()
+      promptSponsorBlockSegments.value = []
       clearAbRepeatBoundarySchedule()
 
       tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
@@ -5956,6 +6133,7 @@ export default defineComponent({
 
         emit('timeupdate', currentTime)
         emitTerminalSponsorBlockOutroStarted(currentTime)
+        syncMediaSessionPosition()
 
         if (showStats.value && hasLoaded.value) {
           updateStats()
@@ -5978,6 +6156,28 @@ export default defineComponent({
 
         updateScrollMiniDragHandleContrast()
       }
+    }
+
+    function syncMediaSessionPosition() {
+      const videoElement = video.value
+      if (
+        !videoElement ||
+        !Number.isFinite(videoElement.duration) ||
+        videoElement.duration <= 0 ||
+        !Number.isFinite(videoElement.currentTime)
+      ) {
+        return
+      }
+
+      tabMediaCoordinator.setPositionState(
+        mediaTabId,
+        {
+          duration: videoElement.duration,
+          position: Math.min(videoElement.duration, Math.max(0, videoElement.currentTime)),
+          playbackRate: videoElement.playbackRate,
+        },
+        mediaSessionStopped ? 'none' : videoElement.paused ? 'paused' : 'playing'
+      )
     }
 
     /**
@@ -6135,6 +6335,11 @@ export default defineComponent({
       tabId,
       video,
     })
+
+    watch(scrollMiniPlayerDetached, (detached) => {
+      isCrossTabMiniPlayerPresented.value = detached
+      tabMediaCoordinator.setMiniPlayer(mediaTabId, detached)
+    }, { immediate: true })
 
     // Logical tabs restore their saved scroll position after becoming active.
     // Refresh once that restoration is complete so an already-active mini player
@@ -9999,7 +10204,7 @@ export default defineComponent({
             const firstVariant = player.getVariantTracks()[0]
 
             // force the player aspect ratio to 16:9 to avoid overflowing the layout
-            forceAspectRatio.value = !props.shortsPlayer &&
+            forceAspectRatio.value = firstVariant != null && !props.shortsPlayer &&
               firstVariant.width / firstVariant.height < 1.5
           }
         })
@@ -10595,6 +10800,12 @@ export default defineComponent({
 
       cleanUpCustomPlayerControls()
 
+      videoZoomTouchPointers.clear()
+      videoZoomPinchStart = null
+      videoZoomGestureZoom.value = null
+      clearTimeout(videoZoomSuppressClickTimer)
+
+      tabMediaCoordinator.setMiniPlayer(mediaTabId, false)
       tabMediaCoordinator.setActionHandlers(mediaTabId, 'player', {})
       tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
 
@@ -11007,11 +11218,14 @@ export default defineComponent({
       handleAbRepeatDurationChange,
       updateVolume,
       handleTimeupdate,
+      syncMediaSessionPosition,
       handleEnterPictureInPicture,
       handleLeavePictureInPicture,
 
       videoZoomStyle,
+      videoZoomPossible,
       videoZoomPanning,
+      videoZoomPinching,
       videoZoomPanReady,
       handleVideoZoomPointerEnter,
       handleVideoZoomPointerLeave,
