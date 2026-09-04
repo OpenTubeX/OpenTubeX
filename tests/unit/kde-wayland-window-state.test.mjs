@@ -197,6 +197,38 @@ test('does not mistake an ordinary focus change for minimize', () => {
   assert.equal(findNewlyMinimizedWindow(state, state, targetWindow()), null)
 })
 
+test('waits for the KWin transition before reporting a minimized window', async () => {
+  const browserWindow = new EventEmitter()
+  browserWindow.getBounds = () => targetWindow().bounds
+  browserWindow.getTitle = () => targetWindow().caption
+  browserWindow.isFocused = () => false
+  const minimizedStates = []
+  let stop
+  const reported = new Promise(resolve => {
+    stop = monitorKdeWaylandWindowState({
+      browserWindow,
+      backend: Promise.resolve({
+        queryWindow: async () => windowInfo({ minimized: true }),
+        queryWindows: async () => [windowInfo({ minimized: true })],
+        watchActiveWindow: () => ({ activeWindow: null, stop: () => {} }),
+      }),
+      onMinimizedState: minimized => {
+        minimizedStates.push(minimized)
+        resolve()
+      },
+      pollInterval: 60000,
+    })
+  })
+
+  browserWindow.emit('blur')
+  await new Promise(resolve => setTimeout(resolve, 200))
+  assert.deepEqual(minimizedStates, [])
+
+  await reported
+  stop()
+  assert.deepEqual(minimizedStates, [true])
+})
+
 test('keeps focus when a KDE desktop popup leaves the window active', async () => {
   const focusedStates = await focusedStatesAfterBlur({
     resourceClass: 'electron',
