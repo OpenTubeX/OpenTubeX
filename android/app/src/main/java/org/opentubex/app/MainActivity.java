@@ -34,6 +34,7 @@ public class MainActivity extends BridgeActivity {
         // exposing native plugins to untrusted subframes.
         getBridge().getWebView().removeJavascriptInterface("androidBridge");
         getBridge().setWebViewClient(new OpenTubeXWebViewClient(getBridge()));
+        OpenTubeXNotificationChannels.createAll(this);
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override

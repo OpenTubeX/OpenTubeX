@@ -427,7 +427,7 @@ import {
   shouldUseProgressToast,
 } from './helpers/progressPresentation'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
-import { copyToClipboard, openExternalLink, openInternalPath, showToast } from './helpers/utils'
+import { copyToClipboard, openExternalLink, openInternalPath, showApiErrorToast, showToast } from './helpers/utils'
 import {
   exitAndroidApp,
   getAndroidHardwareKeyboardState,
@@ -456,6 +456,7 @@ import {
   processAndroidSubscriptionRefreshChannelResult
 } from './helpers/androidSubscriptionRefreshData'
 import { normalizeInvidiousSubscriptionFeed } from './helpers/api/invidious'
+import { formatRequestDiagnostic } from './helpers/api/requestDiagnostics'
 import { reconcileFetchedSubscriptionEntries } from './helpers/subscription-entries'
 import {
   cancelSubscriptionRefresh,
@@ -2165,6 +2166,10 @@ async function reconcileAndroidSubscriptionRefreshResults() {
             timestamp: Number(result.timestamp) || Date.now()
           }
         })
+      } else if (result.kind === 'failure' && result.diagnostic) {
+        const diagnostic = formatRequestDiagnostic(result.diagnostic)
+        console.error(`Closed-app subscription refresh request failed: ${diagnostic}`)
+        showApiErrorToast(t('Invidious API Error (Click to copy)'), diagnostic)
       }
 
       await acknowledgeAndroidSubscriptionRefreshResult(result.id)

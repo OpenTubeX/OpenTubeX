@@ -1,7 +1,6 @@
 package org.opentubex.app;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -14,24 +13,13 @@ import androidx.annotation.RequiresApi;
 import androidx.work.ForegroundInfo;
 
 final class SubscriptionRefreshNotification {
-    static final String CHANNEL_ID = "subscription-refresh";
+    static final String CHANNEL_ID = OpenTubeXNotificationChannels.SUBSCRIPTION_REFRESH_ID;
     static final int NOTIFICATION_ID = 0x53554253;
 
     private SubscriptionRefreshNotification() {}
 
-    static void createChannel(Context context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
-
-        NotificationChannel channel = new NotificationChannel(
-            CHANNEL_ID,
-            context.getString(R.string.app_name),
-            NotificationManager.IMPORTANCE_LOW
-        );
-        context.getSystemService(NotificationManager.class).createNotificationChannel(channel);
-    }
-
     static Notification build(Context context, String token, String title, String cancelLabel, int progress) {
-        createChannel(context);
+        OpenTubeXNotificationChannels.createAll(context);
         Notification.Builder builder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
             ? new Notification.Builder(context, CHANNEL_ID)
             : new Notification.Builder(context);

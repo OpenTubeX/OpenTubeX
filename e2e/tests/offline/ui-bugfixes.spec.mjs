@@ -807,6 +807,10 @@ test.describe('thumbnail watched progress', () => {
     seed: {
       settings: { uiRoundness: 200 },
       history: [
+        {
+          ...historyEntry('00000000000', 'Unwatched video', Date.now() + 1000),
+          watchProgress: 0,
+        },
         historyEntry('aaaaaaaaaaa', 'Partially watched video', Date.now()),
         {
           ...historyEntry('bbbbbbbbbbb', 'Fully watched video', Date.now() - 1000),
@@ -817,6 +821,14 @@ test.describe('thumbnail watched progress', () => {
         },
       ]
     }
+  })
+
+  test('renders no progress fill at zero percent', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-item').filter({ hasText: 'Unwatched video' })
+    await expect(video).toBeVisible()
+    await expect(video.locator('.watchedProgressBar')).toHaveCount(0)
   })
 
   test('covers the complete curved thumbnail path at 100 percent', async ({ app, page }) => {
@@ -856,11 +868,13 @@ test.describe('thumbnail watched progress', () => {
         strokeDasharray: element.style.strokeDasharray,
         strokeLinecap: line.strokeLinecap,
         strokeWidth: line.strokeWidth,
+        vectorEffect: line.vectorEffect,
       }
     })
     expect(progressGeometry).toMatchObject({
       strokeLinecap: 'round',
       strokeWidth: '3px',
+      vectorEffect: 'none',
     })
     expect(progressGeometry.path).toContain('A 14.5 14.5')
     const [visibleLength, gapLength] = progressGeometry.strokeDasharray
@@ -880,6 +894,41 @@ test.describe('thumbnail watched progress', () => {
       document.body.dir = 'rtl'
     })
     await expect.poll(() => progressPath.getAttribute('d')).not.toBe(leftToRightPath)
+  })
+
+  test('keeps full progress aligned across Android screen shapes and UI scales', async ({ app, page }) => {
+    await goTo(page, 'history')
+    const progress = page.locator('.ft-list-item')
+      .filter({ hasText: 'Fully watched video' })
+      .locator('.watchedProgressBar')
+    const progressPath = progress.locator('.embeddedProgressPath')
+    const scenarios = [
+      { width: 375, height: 700, layout: 'capacitorPhoneLayout', direction: 'ltr', scale: 1 },
+      { width: 700, height: 375, layout: 'capacitorPhoneLayout', direction: 'rtl', scale: 1 },
+      { width: 768, height: 1024, layout: 'capacitorTabletLayout', direction: 'ltr', scale: 1 },
+      { width: 1024, height: 768, layout: 'capacitorTabletLayout', direction: 'rtl', scale: 0.95 },
+    ]
+
+    for (const scenario of scenarios) {
+      await setWindowSize(app, page, { width: scenario.width, height: scenario.height })
+      await page.evaluate(({ layout, direction, scale }) => {
+        const application = document.querySelector('.app')
+        application.classList.add('capacitorTabs')
+        application.classList.remove('capacitorPhoneLayout', 'capacitorTabletLayout')
+        application.classList.add(layout)
+        document.body.dir = direction
+        window.ftElectron.setZoomFactor(scale)
+      }, scenario)
+      await expect(progress).toBeVisible()
+
+      const geometry = await progressPath.evaluate(element => ({
+        dashLength: Number.parseFloat(element.style.strokeDasharray),
+        pathLength: element.getTotalLength(),
+        vectorEffect: getComputedStyle(element).vectorEffect,
+      }))
+      expect(geometry.dashLength).toBeCloseTo(geometry.pathLength, 1)
+      expect(geometry.vectorEffect).toBe('none')
+    }
   })
 })
 

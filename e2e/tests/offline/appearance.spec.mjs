@@ -906,6 +906,13 @@ test.describe('global progress presentation', () => {
     await expect(progressToast).toContainText('Downloading yt-dlp and ffmpeg')
     await expect(progressToast.locator('.icon')).toHaveAttribute('data-icon', 'download')
     await expect(progressToast.locator('.progress-indicator')).toHaveAttribute('data-progress', '42')
+    const progressGeometry = await progressToast.locator('.embeddedProgressPath').evaluate(element => ({
+      dashLength: Number.parseFloat(element.style.strokeDasharray),
+      pathLength: element.getTotalLength(),
+      vectorEffect: getComputedStyle(element).vectorEffect,
+    }))
+    expect(progressGeometry.dashLength / progressGeometry.pathLength).toBeCloseTo(0.42, 2)
+    expect(progressGeometry.vectorEffect).toBe('none')
     await expect(page.locator('.app > .progressBar')).toHaveCount(0)
 
     await page.evaluate(() => {

@@ -44,6 +44,25 @@ final class SubscriptionRefreshResultStore {
         );
     }
 
+    static synchronized void writeFailure(
+        Context context,
+        String profileId,
+        String feedType,
+        SubscriptionRefreshRequestDiagnostic diagnostic,
+        long timestamp
+    ) throws IOException, JSONException {
+        JSONObject result = baseResult("failure", profileId, feedType, timestamp)
+            .put("diagnostic", diagnostic.toJson());
+        write(context, result, profileId + "\n" + feedType + "\nfailure");
+    }
+
+    static synchronized void clearFailure(Context context, String profileId, String feedType) {
+        String slot = profileId + "\n" + feedType + "\nfailure";
+        String slotName = UUID.nameUUIDFromBytes(slot.getBytes(StandardCharsets.UTF_8)).toString();
+        File failure = new File(directory(context), slotName + ".json");
+        if (failure.exists()) failure.delete();
+    }
+
     static synchronized JSONObject readNext(Context context) throws IOException, JSONException {
         File[] files = directory(context).listFiles((dir, name) -> name.endsWith(".json"));
         if (files == null || files.length == 0) return null;

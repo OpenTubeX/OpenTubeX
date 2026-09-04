@@ -2,6 +2,7 @@ package org.opentubex.app;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -14,12 +15,14 @@ import androidx.work.WorkerParameters;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 public final class SubscriptionRefreshWorker extends Worker {
+    private static final String LOG_TAG = "OpenTubeXFetch";
     private static final String UNIQUE_WORK_NAME = "subscription-refresh";
     private static final String TOKEN_INPUT = "token";
     static final String FEED_TYPE_INPUT = "feedType";
@@ -168,19 +171,33 @@ public final class SubscriptionRefreshWorker extends Worker {
                 if (SubscriptionRefreshCoordinator.isCancelled(token) || isStopped()) {
                     return Result.success();
                 }
+                JSONObject payload = null;
                 try {
-                    JSONObject payload = SubscriptionRefreshHttpClient.fetch(feed, channelId);
-                    SubscriptionRefreshResultStore.writeChannel(
-                        context,
-                        feed.profileId,
-                        feedType,
-                        channelId,
-                        payload,
-                        System.currentTimeMillis()
-                    );
-                    completed++;
+                    payload = SubscriptionRefreshHttpClient.fetch(feed, channelId);
                 } catch (Exception error) {
                     failed++;
+                    recordFailure(
+                        context,
+                        targetProfileIds(feeds, channelId),
+                        feedType,
+                        "Invidious API",
+                        error
+                    );
+                }
+
+                if (payload != null) {
+                    long timestamp = System.currentTimeMillis();
+                    for (String profileId : targetProfileIds(feeds, channelId)) {
+                        SubscriptionRefreshResultStore.writeChannel(
+                            context,
+                            profileId,
+                            feedType,
+                            channelId,
+                            payload,
+                            timestamp
+                        );
+                    }
+                    completed++;
                 }
 
                 int progress = total == 0 ? 100 : (int) Math.round((completed + failed) * 100.0 / total);
@@ -205,6 +222,13 @@ public final class SubscriptionRefreshWorker extends Worker {
 
             long completionTimestamp = System.currentTimeMillis();
             for (SubscriptionRefreshConfiguration.Feed profileFeed : feeds) {
+                if (failed == 0) {
+                    SubscriptionRefreshResultStore.clearFailure(
+                        context,
+                        profileFeed.profileId,
+                        feedType
+                    );
+                }
                 SubscriptionRefreshResultStore.writeCompletion(
                     context,
                     profileFeed.profileId,
@@ -214,10 +238,62 @@ public final class SubscriptionRefreshWorker extends Worker {
             }
             return Result.success();
         } catch (Exception error) {
+            List<String> profileIds = new ArrayList<>();
+            for (SubscriptionRefreshConfiguration.Feed profileFeed : feeds) {
+                profileIds.add(profileFeed.profileId);
+            }
+            recordFailure(
+                context,
+                profileIds,
+                feedType,
+                "Android background worker",
+                error
+            );
             return Result.retry();
         } finally {
             if (SubscriptionRefreshCoordinator.finish(token)) {
                 notifications.cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+            }
+        }
+    }
+
+    static List<String> targetProfileIds(
+        List<SubscriptionRefreshConfiguration.Feed> feeds,
+        String channelId
+    ) {
+        List<String> profileIds = new ArrayList<>();
+        for (SubscriptionRefreshConfiguration.Feed feed : feeds) {
+            if (feed.channelIds.contains(channelId)) profileIds.add(feed.profileId);
+        }
+        return profileIds;
+    }
+
+    private static void recordFailure(
+        Context context,
+        List<String> profileIds,
+        String feedType,
+        String backend,
+        Throwable error
+    ) {
+        SubscriptionRefreshRequestDiagnostic diagnostic =
+            SubscriptionRefreshRequestDiagnostic.create(feedType, backend, error);
+        Log.w(LOG_TAG, diagnostic.toString());
+        long timestamp = System.currentTimeMillis();
+        for (String profileId : profileIds) {
+            try {
+                SubscriptionRefreshResultStore.writeFailure(
+                    context,
+                    profileId,
+                    feedType,
+                    diagnostic,
+                    timestamp
+                );
+            } catch (Exception storageError) {
+                Log.e(
+                    LOG_TAG,
+                    "Unable to persist a subscription request diagnostic: " +
+                        storageError.getClass().getSimpleName()
+                );
             }
         }
     }
