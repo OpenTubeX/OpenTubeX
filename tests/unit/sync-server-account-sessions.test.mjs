@@ -7,6 +7,7 @@ import {
   getCurrentSyncServerDeviceInfo,
   isValidSyncServerDeviceId,
   isValidSyncServerDeviceName,
+  loadSyncServerDeviceNames,
   randomSyncServerDeviceId,
   resolveSyncServerDeviceName,
 } from '../../src/renderer/helpers/sync-server-sessions.js'
@@ -71,6 +72,30 @@ test('encrypts device identification for one device and privacy key', async () =
     () => decryptSyncServerDeviceInfo(payload, key, otherDeviceId),
     /device info is invalid/
   )
+})
+
+test('loads valid device names from encrypted account-session metadata', async () => {
+  const key = bytesToBase64(crypto.getRandomValues(new Uint8Array(32)))
+  const laptopId = randomSyncServerDeviceId()
+  const phoneId = randomSyncServerDeviceId()
+  const encryptedLaptop = await encryptSyncServerDeviceInfo({
+    name: 'Travel laptop',
+    platform: 'linux',
+    architecture: 'x64',
+    release: '6.16.4-arch1-1',
+  }, key, laptopId)
+
+  const names = await loadSyncServerDeviceNames({
+    getAccountSessions: async () => ({
+      sessions: [
+        { device_id: laptopId, encrypted_device_info: encryptedLaptop },
+        { device_id: phoneId, encrypted_device_info: 'invalid ciphertext' },
+        { device_id: 'invalid-device-id', encrypted_device_info: encryptedLaptop },
+      ],
+    }),
+  }, key)
+
+  assert.deepEqual(names, { [laptopId]: 'Travel laptop' })
 })
 
 test('validates device names and rejects invalid encrypted device info', async () => {

@@ -419,6 +419,11 @@ const {
 function openSwitcher() {
   activeView.value = 'open'
   open.value = true
+  if (showSyncedTabsView.value) {
+    store.dispatch('refreshSyncServerDeviceNames').catch(error => {
+      console.error('Failed to refresh sync device names:', error)
+    })
+  }
 }
 
 async function selectView(view, focus = false) {

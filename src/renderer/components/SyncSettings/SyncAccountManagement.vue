@@ -350,6 +350,7 @@ async function loadSessions(token = props.token) {
     if (!response || !Array.isArray(response.sessions)) throw new Error()
     emit('password-login-changed', response.password_login === true)
     const currentSystemInfo = await getCurrentSyncServerSystemInfo()
+    const deviceNames = {}
     sessions.value = await Promise.all(response.sessions.map(async session => {
       if (!session || typeof session.id !== 'string' ||
           !isValidSyncServerDeviceId(session.device_id) ||
@@ -399,8 +400,14 @@ async function loadSessions(token = props.token) {
         )
         await requestClient.updateAccountSession(session.id, session.encrypted_device_info)
       }
+      if (deviceInfoDecrypted || currentSystemInfoChanged) {
+        deviceNames[session.device_id] = deviceInfo.name
+      }
       return { ...session, deviceInfo }
     }))
+    if (requestClient.token === store.getters.getSyncServerToken) {
+      store.commit('setSyncServerDeviceNames', deviceNames)
+    }
   } catch (requestError) {
     await handleRequestError(requestError, requestClient.token)
   } finally {

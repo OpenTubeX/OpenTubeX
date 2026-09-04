@@ -28,6 +28,75 @@ test('formats device session labels with localized tab plurals', () => {
 
   assert.equal(formatDeviceSessionLabel({ syncPlatform: 'desktop', tabs: [{}] }, t), 'Desktop · 1 tab')
   assert.equal(formatDeviceSessionLabel({ syncPlatform: 'mobile', tabs: [{}, {}] }, t), 'Mobile · 2 tabs')
+  assert.equal(formatDeviceSessionLabel({
+    syncDeviceName: 'Travel phone',
+    syncPlatform: 'mobile',
+    tabs: [{}, {}],
+  }, t), 'Travel phone · 2 tabs')
+})
+
+test('moves this device tab sets from its old local ID to its account-session ID', () => {
+  const local = session('local', 2)
+  const remote = session('remote', 1)
+  const result = mergeSyncSessions({
+    localSessions: [local],
+    remoteValue: {
+      version: 1,
+      mode: 'separate',
+      devices: {
+        'old-local-id': { platform: 'desktop', sessions: [local] },
+        'remote-account-id': { platform: 'mobile', sessions: [remote] },
+      },
+      shared: [],
+    },
+    deviceId: 'current-account-id',
+    legacyDeviceIds: ['old-local-id'],
+    platform: 'desktop',
+    preferredMode: 'separate',
+  })
+
+  assert.deepEqual(result.document.devices['current-account-id'].sessions, [local])
+  assert.equal(result.document.devices['old-local-id'], undefined)
+  assert.deepEqual(result.otherDeviceSessions, [{
+    ...remote,
+    syncDeviceId: 'remote-account-id',
+    syncPlatform: 'mobile',
+  }])
+})
+
+test('merges legacy tab sets into an existing account-session device', () => {
+  const current = session('current', 3)
+  const duplicate = session('duplicate', 2)
+  const legacyOnly = session('legacy-only', 1)
+  const result = mergeSyncSessions({
+    localSessions: [current, duplicate],
+    remoteValue: {
+      version: 1,
+      mode: 'separate',
+      devices: {
+        'current-account-id': {
+          platform: 'desktop',
+          sessions: [current, duplicate],
+        },
+        'old-local-id': {
+          platform: 'desktop',
+          sessions: [session('duplicate', 1), legacyOnly],
+        },
+      },
+      shared: [],
+    },
+    deviceId: 'current-account-id',
+    legacyDeviceIds: ['old-local-id'],
+    platform: 'desktop',
+    preferredMode: 'separate',
+  })
+
+  assert.deepEqual(result.document.devices['current-account-id'].sessions, [
+    current,
+    duplicate,
+    legacyOnly,
+  ])
+  assert.equal(result.document.devices['old-local-id'], undefined)
 })
 
 test('treats legacy session arrays as a separate desktop device', () => {

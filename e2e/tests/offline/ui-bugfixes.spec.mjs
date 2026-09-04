@@ -1,9 +1,14 @@
+import { randomBytes } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, goTo, repoRoot, setWindowSize } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import {
+  encryptSyncServerDeviceInfo,
+  randomSyncServerDeviceId,
+} from '../../../src/renderer/helpers/sync-server-sessions.js'
 
 function historyEntry(videoId, title, timeWatched) {
   return {
@@ -128,7 +133,7 @@ test('fits synced-device tabs in the phone tab organizer', async ({ app, page })
       <div class="capacitorPhoneSyncedTabs" role="tabpanel">
         <article class="capacitorPhoneSyncedSession">
           <header class="capacitorPhoneSyncedSessionHeader">
-            <strong>Desktop · 2 tabs</strong>
+            <strong>A very long encrypted device name that must wrap · 2 tabs</strong>
             <button class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedOpenAll"><span aria-hidden="true">↗</span><span>Open all tabs</span></button>
           </header>
           <div class="capacitorPhoneSyncedTabList">
@@ -169,18 +174,49 @@ test('fits synced-device tabs in the phone tab organizer', async ({ app, page })
 })
 
 test('restores and clamps the real phone tab organizer viewports', async ({ app, page }) => {
+  const privacyKey = randomBytes(32).toString('base64')
+  const desktopDeviceId = randomSyncServerDeviceId()
+  const encryptedDeviceInfo = await encryptSyncServerDeviceInfo({
+    name: 'Living room PC',
+    platform: 'linux',
+    architecture: 'x64',
+    release: '6.16.4-arch1-1',
+  }, privacyKey, desktopDeviceId)
+  let accountSessionRequests = 0
+  let healthRequests = 0
+  await page.route('https://sync.d3sox.me/**', async route => {
+    const pathname = new URL(route.request().url()).pathname
+    if (pathname === '/health') {
+      healthRequests++
+      await route.fulfill({ status: 200, json: { capabilities: { account_sessions: 1 } } })
+    } else if (pathname === '/v1/account/sessions') {
+      accountSessionRequests++
+      await route.fulfill({
+        status: 200,
+        json: {
+          sessions: [{
+            device_id: desktopDeviceId,
+            encrypted_device_info: encryptedDeviceInfo,
+          }],
+        },
+      })
+    } else {
+      await route.fulfill({ status: 500, body: 'Unexpected sync request' })
+    }
+  })
   await setWindowSize(app, page, { width: 375, height: 760 })
   await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
   await enablePhoneTabSwitcher(page)
-  await page.evaluate(async () => {
+  await page.evaluate(async ({ desktopDeviceId, privacyKey }) => {
     const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
     store.commit('setSyncServerEnabled', true)
     store.commit('setSyncServerToken', 'e2e-token')
+    store.commit('setSyncServerPrivacyKey', privacyKey)
     store.commit('setSyncServerPrivacyMode', 'enhanced')
     store.commit('setSyncServerSyncSessions', true)
     store.commit('setSyncServerSharedTabs', false)
     store.commit('setSyncServerOtherDeviceSessions', [{
-      syncDeviceId: 'desktop-e2e',
+      syncDeviceId: desktopDeviceId,
       syncPlatform: 'desktop',
       sessionId: 'session-e2e',
       tabs: Array.from({ length: 30 }, (_, index) => ({
@@ -192,9 +228,11 @@ test('restores and clamps the real phone tab organizer viewports', async ({ app,
     for (let index = 0; index < 30; index++) {
       await store.dispatch('createTab', { route: `/watch/local-${index}`, makeActive: false })
     }
-  })
+  }, { desktopDeviceId, privacyKey })
   await expect.poll(() => page.locator('.capacitorPhoneTabCount').textContent()).toBe('31')
   await page.locator('.capacitorPhoneTabSwitcherButton').click()
+  await expect.poll(() => accountSessionRequests).toBe(1)
+  expect(healthRequests).toBe(0)
 
   const openPanel = page.locator('#capacitor-phone-open-tabs-panel')
   await expect(openPanel).toHaveAttribute('data-overlayscrollbars-viewport')
@@ -204,6 +242,8 @@ test('restores and clamps the real phone tab organizer viewports', async ({ app,
   await page.getByRole('tab', { name: 'Tabs from other devices' }).click()
 
   const syncedPanel = page.locator('#capacitor-phone-synced-tabs-panel')
+  await expect(syncedPanel.locator('.capacitorPhoneSyncedSessionHeader strong'))
+    .toHaveText('Living room PC · 30 tabs')
   await expect(syncedPanel).toHaveAttribute('data-overlayscrollbars-viewport')
   await syncedPanel.evaluate(element => { element.scrollTop = 360 })
   await expect.poll(async () => (await phoneTabScrollState(page, '.capacitorPhoneSyncedTabsContent')).scrollTop)
@@ -229,18 +269,19 @@ test('restores and clamps the real phone tab organizer viewports', async ({ app,
   await expect.poll(async () => (await phoneTabScrollState(page, '.capacitorPhoneSyncedTabsContent')).scrollTop)
     .toBeCloseTo(360, 0)
   await syncedPanel.evaluate(element => { element.scrollTop = element.scrollHeight })
-  await page.evaluate(() => {
+  await page.evaluate(desktopDeviceId => {
     const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+    store.commit('setSyncServerDeviceNames', { [desktopDeviceId]: 'Desk PC' })
     store.commit('setSyncServerOtherDeviceSessions', [{
-      syncDeviceId: 'desktop-e2e',
+      syncDeviceId: desktopDeviceId,
       syncPlatform: 'desktop',
       sessionId: 'session-e2e',
       tabs: [{ id: 'synced-0', title: 'Synced tab 0', url: '/watch/synced-0' }],
     }])
-  })
+  }, desktopDeviceId)
   await expect(page.locator('.capacitorPhoneSyncedTabTarget')).toHaveCount(1)
   await expect(syncedPanel.locator('.capacitorPhoneSyncedSessionHeader strong'))
-    .toHaveText('Desktop · 1 tab')
+    .toHaveText('Desk PC · 1 tab')
   await expect.poll(() => phoneTabScrollState(page, '.capacitorPhoneSyncedTabsContent')).toEqual({
     scrollTop: 0,
     maximum: 0,

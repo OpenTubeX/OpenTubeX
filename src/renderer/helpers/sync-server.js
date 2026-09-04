@@ -26,6 +26,7 @@ import {
 import { createSyncServerRequestHeaders } from './sync-server-request'
 import { isValidPlaylistBookmark, playlistBookmarkForSync } from './playlist-bookmarks'
 import { getOtherDeviceSessions, mergeSyncSessions } from './sync-sessions'
+import { isValidSyncServerDeviceId } from './sync-server-sessions'
 import { mergeSettingEntry } from './sync-settings-conflict'
 import { getCapacitorTabService } from '../tabs/CapacitorTabService'
 import { capacitorHttpFetch } from './api/capacitor-http'
@@ -1115,10 +1116,23 @@ function getSyncDeviceId() {
   }
 }
 
-export function getSavedOtherDeviceSessions(snapshot) {
+function getTabSessionDeviceIdentity(settings = {}) {
+  const legacyDeviceId = getSyncDeviceId()
+  const deviceId = isValidSyncServerDeviceId(settings.syncServerDeviceId)
+    ? settings.syncServerDeviceId
+    : legacyDeviceId
+  return {
+    deviceId,
+    legacyDeviceIds: deviceId === legacyDeviceId ? [] : [legacyDeviceId],
+  }
+}
+
+export function getSavedOtherDeviceSessions(snapshot, settings) {
+  const { deviceId, legacyDeviceIds } = getTabSessionDeviceIdentity(settings)
   return getOtherDeviceSessions(
     snapshot?.sessionsV2 ?? snapshot?.sessions,
-    getSyncDeviceId()
+    deviceId,
+    legacyDeviceIds
   )
 }
 
@@ -1143,13 +1157,15 @@ export async function syncSessions(client, store, previous = null) {
 
   const local = await tabs.getSyncSessions()
   const remote = await client.getSessions()
+  const { deviceId, legacyDeviceIds } = getTabSessionDeviceIdentity(store.state.settings)
   const merged = mergeSyncSessions({
     localSessions: local,
     remoteValue: remote,
     previousValue: previous,
-    deviceId: getSyncDeviceId(),
+    deviceId,
     platform: process.env.IS_CAPACITOR ? 'mobile' : 'desktop',
     preferredMode: store.state.settings.syncServerSharedTabs ? 'shared' : 'separate',
+    legacyDeviceIds,
   })
 
   if (!metadataEquals(local, merged.sessionsToApply) && merged.sessionsToApply.length > 0) {

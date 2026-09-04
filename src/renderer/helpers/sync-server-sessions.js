@@ -177,3 +177,30 @@ export async function decryptSyncServerDeviceInfo(payload, exportedKey, deviceId
     throw new Error('The encrypted sync device info is invalid')
   }
 }
+
+export async function loadSyncServerDeviceNames(client, exportedKey) {
+  const response = await client.getAccountSessions()
+  if (!response || !Array.isArray(response.sessions)) {
+    throw new Error('The sync server account sessions are invalid')
+  }
+
+  const entries = await Promise.all(response.sessions.map(async session => {
+    if (!isValidSyncServerDeviceId(session?.device_id) ||
+        typeof session.encrypted_device_info !== 'string') {
+      return null
+    }
+
+    try {
+      const deviceInfo = await decryptSyncServerDeviceInfo(
+        session.encrypted_device_info,
+        exportedKey,
+        session.device_id
+      )
+      return [session.device_id, deviceInfo.name]
+    } catch {
+      return null
+    }
+  }))
+
+  return Object.fromEntries(entries.filter(Boolean))
+}

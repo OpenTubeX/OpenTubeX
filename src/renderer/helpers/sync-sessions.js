@@ -72,10 +72,11 @@ export function normalizeSyncSessionsDocument(value) {
   }
 }
 
-export function getOtherDeviceSessions(value, deviceId) {
+export function getOtherDeviceSessions(value, deviceId, legacyDeviceIds = []) {
   const document = normalizeSyncSessionsDocument(value)
+  const currentDeviceIds = new Set([deviceId, ...legacyDeviceIds])
   return Object.entries(document.devices)
-    .filter(([id]) => id !== deviceId)
+    .filter(([id]) => !currentDeviceIds.has(id))
     .flatMap(([id, device]) => device.sessions.map(session => ({
       ...clone(session),
       syncDeviceId: id,
@@ -117,10 +118,44 @@ export function shouldShowOtherDeviceSessions({
 
 export function formatDeviceSessionLabel(session, t) {
   const count = session.tabs.length
-  const platform = session.syncPlatform === 'mobile'
+  const fallbackName = session.syncPlatform === 'mobile'
     ? t('Settings.Sync Settings.Mobile Device')
     : t('Settings.Sync Settings.Desktop Device')
-  return `${platform} · ${t('Tab Organizer.Tab Count', { count }, count)}`
+  const name = typeof session.syncDeviceName === 'string' && session.syncDeviceName.trim()
+    ? session.syncDeviceName
+    : fallbackName
+  return `${name} · ${t('Tab Organizer.Tab Count', { count }, count)}`
+}
+
+function claimLegacyDeviceSessions(document, deviceId, legacyDeviceIds) {
+  const claimed = clone(document)
+  for (const legacyDeviceId of legacyDeviceIds) {
+    if (legacyDeviceId === deviceId || !claimed.devices[legacyDeviceId]) continue
+
+    const legacyDevice = claimed.devices[legacyDeviceId]
+    const currentDevice = claimed.devices[deviceId]
+    if (currentDevice) {
+      const currentSessionIds = new Set(
+        currentDevice.sessions.map(session => session?.sessionId)
+      )
+      for (const session of legacyDevice.sessions) {
+        if (currentSessionIds.has(session?.sessionId)) continue
+        currentDevice.sessions.push(session)
+        currentSessionIds.add(session?.sessionId)
+      }
+    } else {
+      claimed.devices[deviceId] = legacyDevice
+    }
+    delete claimed.devices[legacyDeviceId]
+    if (claimed.deletedSessions[legacyDeviceId]) {
+      claimed.deletedSessions[deviceId] = Array.from(new Set([
+        ...(claimed.deletedSessions[deviceId] ?? []),
+        ...claimed.deletedSessions[legacyDeviceId],
+      ]))
+      delete claimed.deletedSessions[legacyDeviceId]
+    }
+  }
+  return claimed
 }
 
 function claimLegacyDesktopSessions(document, deviceId, platform) {
@@ -162,18 +197,27 @@ export function mergeSyncSessions({
   deviceId,
   platform,
   preferredMode,
+  legacyDeviceIds = [],
 }) {
-  const remote = claimLegacyDesktopSessions(
-    normalizeSyncSessionsDocument(remoteValue),
+  const remote = claimLegacyDeviceSessions(
+    claimLegacyDesktopSessions(
+      normalizeSyncSessionsDocument(remoteValue),
+      deviceId,
+      platform
+    ),
     deviceId,
-    platform
+    legacyDeviceIds
   )
   const previous = previousValue === null
     ? null
-    : claimLegacyDesktopSessions(
-        normalizeSyncSessionsDocument(previousValue),
+    : claimLegacyDeviceSessions(
+        claimLegacyDesktopSessions(
+          normalizeSyncSessionsDocument(previousValue),
+          deviceId,
+          platform
+        ),
         deviceId,
-        platform
+        legacyDeviceIds
       )
   const localMode = preferredMode === 'shared' ? 'shared' : 'separate'
   const localModeChanged = previous !== null && previous.mode !== localMode
