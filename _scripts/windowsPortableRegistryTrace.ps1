@@ -22,7 +22,8 @@ function Test-WindowsMuiCacheSnapshotLine {
 
 function ConvertTo-MatchingRegistryState {
   param(
-    [Parameter(Mandatory)] [AllowEmptyCollection()] [string[]] $Lines,
+    [Parameter(Mandatory)] [AllowEmptyCollection()] [AllowEmptyString()]
+    [string[]] $Lines,
     [Parameter(Mandatory)] [string] $Search
   )
 

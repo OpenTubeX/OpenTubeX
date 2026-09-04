@@ -75,6 +75,7 @@ if (-not (Test-PortableHostRegistryMutation -EventId $registryEventId.SetValue `
 $muiCacheKey = 'HKEY_CURRENT_USER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache'
 $muiCacheValue = 'D:\a\OpenTubeX\OpenTubeX\build\win-unpacked\OpenTubeX.exe.FriendlyAppName    REG_SZ    OpenTubeX'
 $normalizedMuiCacheState = @(ConvertTo-MatchingRegistryState -Lines @(
+  '',
   $muiCacheKey,
   "    $muiCacheValue",
   'End of search: 1 match(es) found.'
