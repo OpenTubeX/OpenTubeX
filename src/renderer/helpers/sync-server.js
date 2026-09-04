@@ -27,6 +27,7 @@ import { createSyncServerRequestHeaders } from './sync-server-request'
 import { isValidPlaylistBookmark, playlistBookmarkForSync } from './playlist-bookmarks'
 import { getOtherDeviceSessions, mergeSyncSessions } from './sync-sessions'
 import { mergeSettingEntry } from './sync-settings-conflict'
+import { applyChangedSyncSettings } from './sync-settings-apply'
 import { getCapacitorTabService } from '../tabs/CapacitorTabService'
 import { capacitorHttpFetch } from './api/capacitor-http'
 
@@ -1199,17 +1200,20 @@ export async function syncSettings(client, store, previous = {}) {
       entry = { key, value: MAIN_PROFILE_ID, updatedAt: now }
       merged[key] = entry
     }
-    if (!metadataEquals(value, entry.value)) {
-      if (key === CUSTOM_THEMES_SYNC_KEY) {
-        const previousThemes = store.state.utils.customThemes
-        const themes = await replaceCustomThemes(entry.value)
-        store.commit('setCustomThemes', themes)
-        await repairDeletedCustomThemeReferences(store, previousThemes, themes)
-      } else {
-        await store.dispatch(settingUpdater(key), deepCopy(entry.value))
-      }
-    }
   }
+
+  await applyChangedSyncSettings({
+    local,
+    merged,
+    valuesEqual: metadataEquals,
+    applyCustomThemes: async value => {
+      const previousThemes = store.state.utils.customThemes
+      const themes = await replaceCustomThemes(value)
+      store.commit('setCustomThemes', themes)
+      await repairDeletedCustomThemeReferences(store, previousThemes, themes)
+    },
+    applySetting: (key, value) => store.dispatch(settingUpdater(key), deepCopy(value)),
+  })
 
   for (const [key, entry] of Object.entries(remote)) {
     if (!Object.prototype.hasOwnProperty.call(local, key)) merged[key] = entry
