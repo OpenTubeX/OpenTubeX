@@ -5059,10 +5059,11 @@ test.describe('synced setting indicators', () => {
     await goTo(page, 'settings')
     const playbackSection = await goToSettingsSection(page, 'playback')
     const sliders = playbackSection.locator('.sliderGrid > *')
-    await expect(sliders).toHaveCount(8)
+    await expect(sliders).toHaveCount(9)
     await expect(sliders.nth(5)).toContainText(/Max video playback rate/i)
     await expect(sliders.nth(6)).toContainText(/Parallel segment loading/i)
     await expect(sliders.nth(7)).toContainText(/Upcoming videos to preload/i)
+    await expect(sliders.nth(8)).toContainText(/Concurrent Preloads/i)
 
     const boxes = await sliders.evaluateAll((elements) => elements.map((element) => {
       const { x, y, width } = element.getBoundingClientRect()
@@ -5073,7 +5074,7 @@ test.describe('synced setting indicators', () => {
     for (const { y } of boxes) {
       rowSizes.set(y, (rowSizes.get(y) ?? 0) + 1)
     }
-    expect([...rowSizes.values()]).toEqual([3, 3, 2])
+    expect([...rowSizes.values()]).toEqual([3, 3, 3])
     expect(new Set(boxes.map(({ width }) => width)).size).toBe(1)
 
     await page.evaluate(async () => {
@@ -5082,21 +5083,30 @@ test.describe('synced setting indicators', () => {
     })
     await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(1.25, 2)
 
-    const scaledLayout = await playbackSection.locator('.sliderGrid').evaluate(element => {
-      const gridBounds = element.getBoundingClientRect()
-      const sliderBounds = Array.from(element.children, child => child.getBoundingClientRect())
-      const rowSizes = new Map()
-      for (const bounds of sliderBounds) {
-        const y = Math.round(bounds.y)
-        rowSizes.set(y, (rowSizes.get(y) ?? 0) + 1)
+    const scaledLayout = await playbackSection.locator('.sliderGrid').evaluateAll(elements => {
+      const overflows = []
+      const rowSizes = []
+
+      for (const element of elements) {
+        const gridBounds = element.getBoundingClientRect()
+        const sliderBounds = Array.from(element.children, child => child.getBoundingClientRect())
+        const rows = new Map()
+
+        for (const bounds of sliderBounds) {
+          const y = Math.round(bounds.y)
+          rows.set(y, (rows.get(y) ?? 0) + 1)
+          overflows.push(
+            gridBounds.left - bounds.left,
+            bounds.right - gridBounds.right
+          )
+        }
+
+        rowSizes.push(...rows.values())
       }
 
       return {
-        maximumOverflow: Math.max(...sliderBounds.flatMap(bounds => [
-          gridBounds.left - bounds.left,
-          bounds.right - gridBounds.right
-        ])),
-        maximumRowSize: Math.max(...rowSizes.values())
+        maximumOverflow: Math.max(...overflows),
+        maximumRowSize: Math.max(...rowSizes)
       }
     })
     expect(scaledLayout.maximumOverflow).toBeLessThanOrEqual(1)
