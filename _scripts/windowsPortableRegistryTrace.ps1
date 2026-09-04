@@ -13,6 +13,43 @@ $registrySuccessStatus = 0
 $newRegistryKeyDisposition = 1
 $keyWriteTimeInformationClass = 0
 
+function Test-WindowsMuiCacheSnapshotLine {
+  param([Parameter(Mandatory)] [string] $Line)
+
+  return $Line.Trim() -match
+    '^HKCU\\Software:\s+HKEY_CURRENT_USER\\Software\\Classes\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\MuiCache:\s+[A-Z]:\\(?:.*\\)?OpenTubeX\.exe\.(?:FriendlyAppName|ApplicationCompany)\s+REG_SZ(?:\s+.*)?$'
+}
+
+function ConvertTo-MatchingRegistryState {
+  param(
+    [Parameter(Mandatory)] [AllowEmptyCollection()] [string[]] $Lines,
+    [Parameter(Mandatory)] [string] $Search
+  )
+
+  $currentKey = ''
+  $state = [System.Collections.Generic.List[string]]::new()
+  $escapedSearch = [regex]::Escape($Search)
+  foreach ($rawLine in $Lines) {
+    $line = $rawLine.Trim()
+    if (-not $line -or $line -match '^End of search:') {
+      continue
+    }
+    if ($line -match '^HKEY_') {
+      $currentKey = $line
+      if ($line -match $escapedSearch) {
+        $state.Add($line)
+      }
+      continue
+    }
+    if ($currentKey) {
+      $state.Add("$currentKey`: $line")
+    } else {
+      $state.Add($line)
+    }
+  }
+  return @($state | Sort-Object -Unique)
+}
+
 function Convert-RegistryEventNumber {
   param([Parameter(Mandatory)] [string] $Value)
 

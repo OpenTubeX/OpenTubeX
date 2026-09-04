@@ -78,9 +78,7 @@ function Get-MatchingRegistryState {
   if ($LASTEXITCODE -ne 0) {
     return @()
   }
-  return @($result | ForEach-Object { $_.Trim() } | Where-Object {
-    $_ -and $_ -notmatch '^End of search:'
-  } | Sort-Object -Unique)
+  return @(ConvertTo-MatchingRegistryState -Lines @($result) -Search $Search)
 }
 
 function Get-HostState {
@@ -113,7 +111,10 @@ function Get-HostState {
   }
   foreach ($root in @('HKCU\Software')) {
     foreach ($line in @(Get-MatchingRegistryState -Root $root -Search 'OpenTubeX')) {
-      $state.Add("$root`: $line")
+      $snapshotLine = "$root`: $line"
+      if (-not (Test-WindowsMuiCacheSnapshotLine -Line $snapshotLine)) {
+        $state.Add($snapshotLine)
+      }
     }
   }
   return @($state | Sort-Object -Unique)

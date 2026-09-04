@@ -72,6 +72,52 @@ if (-not (Test-PortableHostRegistryMutation -EventId $registryEventId.SetValue `
   throw 'Application-process MuiCache writes must remain host registry mutations'
 }
 
+$muiCacheKey = 'HKEY_CURRENT_USER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache'
+$muiCacheValue = 'D:\a\OpenTubeX\OpenTubeX\build\win-unpacked\OpenTubeX.exe.FriendlyAppName    REG_SZ    OpenTubeX'
+$normalizedMuiCacheState = @(ConvertTo-MatchingRegistryState -Lines @(
+  $muiCacheKey,
+  "    $muiCacheValue",
+  'End of search: 1 match(es) found.'
+) -Search 'OpenTubeX')
+if ($normalizedMuiCacheState.Count -ne 1 -or
+    $normalizedMuiCacheState[0] -ne "$muiCacheKey`: $muiCacheValue") {
+  throw 'Registry snapshot values did not retain their parent key'
+}
+
+$muiCacheSnapshotValue = "HKCU\Software: $($normalizedMuiCacheState[0])"
+$muiCacheCompanySnapshotValue = $muiCacheSnapshotValue.Replace(
+  '.FriendlyAppName', '.ApplicationCompany'
+)
+foreach ($line in @(
+  $muiCacheSnapshotValue,
+  $muiCacheCompanySnapshotValue
+)) {
+  if (-not (Test-WindowsMuiCacheSnapshotLine -Line $line)) {
+    throw "Windows MuiCache snapshot entry was not ignored: $line"
+  }
+}
+
+foreach ($line in @(
+  $muiCacheSnapshotValue.Replace('HKCU\Software:', 'HKLM\Software:'),
+  $muiCacheSnapshotValue.Replace('\MuiCache:', '\OpenTubeX:'),
+  $muiCacheSnapshotValue.Replace('OpenTubeX.exe.', 'OpenTubeX.dll.'),
+  $muiCacheSnapshotValue.Replace('.FriendlyAppName', '.OpenTubeX'),
+  $muiCacheSnapshotValue.Replace('REG_SZ', 'REG_BINARY')
+)) {
+  if (Test-WindowsMuiCacheSnapshotLine -Line $line) {
+    throw "A non-MuiCache snapshot entry was ignored: $line"
+  }
+}
+
+$matchingKeyState = @(ConvertTo-MatchingRegistryState -Lines @(
+  'HKEY_CURRENT_USER\Software\OpenTubeX',
+  'End of search: 1 match(es) found.'
+) -Search 'OpenTubeX')
+if ($matchingKeyState.Count -ne 1 -or
+    $matchingKeyState[0] -ne 'HKEY_CURRENT_USER\Software\OpenTubeX') {
+  throw 'A registry key whose path matches the search was lost from the snapshot'
+}
+
 foreach ($change in @(
   @{ Name = 'KeyName'; Value = 'HKEY_CURRENT_USER\Software\OpenTubeX' },
   @{ Name = 'ResolvedKeyName'; Value = 'HKEY_CURRENT_USER\Software\OpenTubeX' },
