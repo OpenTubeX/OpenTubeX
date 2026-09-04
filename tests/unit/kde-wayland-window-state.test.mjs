@@ -203,6 +203,7 @@ test('waits for the KWin transition before reporting a minimized window', async 
   browserWindow.getTitle = () => targetWindow().caption
   browserWindow.isFocused = () => false
   const minimizedStates = []
+  let watcherStopped = false
   let stop
   const reported = new Promise(resolve => {
     stop = monitorKdeWaylandWindowState({
@@ -210,7 +211,10 @@ test('waits for the KWin transition before reporting a minimized window', async 
       backend: Promise.resolve({
         queryWindow: async () => windowInfo({ minimized: true }),
         queryWindows: async () => [windowInfo({ minimized: true })],
-        watchActiveWindow: () => ({ activeWindow: null, stop: () => {} }),
+        watchActiveWindow: () => ({
+          activeWindow: null,
+          stop: () => { watcherStopped = true },
+        }),
       }),
       onMinimizedState: minimized => {
         minimizedStates.push(minimized)
@@ -226,6 +230,7 @@ test('waits for the KWin transition before reporting a minimized window', async 
 
   await reported
   stop()
+  assert.equal(watcherStopped, true)
   assert.deepEqual(minimizedStates, [true])
 })
 
