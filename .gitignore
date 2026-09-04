@@ -25,6 +25,8 @@ __coverage__
 csak-timelog.json
 .idea/
 debug/
+!android/app/src/debug/
+!android/app/src/debug/**
 
 # Lefthook
 lefthook-local.yml

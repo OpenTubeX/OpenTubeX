@@ -16,6 +16,7 @@
 .version {
   text-align: center;
   font-size: 2em;
+  line-height: 1;
 }
 
 .commit {
