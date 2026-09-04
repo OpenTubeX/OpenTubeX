@@ -25,7 +25,10 @@ import {
   migrateLegacyPlaybackSpeedsToSettings,
   preparePrivacyKey,
 } from '../../helpers/sync-server-privacy'
-import { encryptSyncServerDeviceInfo } from '../../helpers/sync-server-sessions'
+import {
+  encryptSyncServerDeviceInfo,
+  loadSyncServerDeviceNames,
+} from '../../helpers/sync-server-sessions'
 import { mergePlaylistBookmarkConflict } from '../../helpers/playlist-bookmarks'
 import { getPreviousSyncSessions, removeSyncSession } from '../../helpers/sync-sessions'
 import {
@@ -51,6 +54,7 @@ const activeSyncClients = new Set()
 let autoSyncTimer = null
 let eventSyncTimer = null
 let lifecycleSyncStarted = false
+let deviceNameRefreshId = 0
 
 function trackSyncClient(client) {
   activeSyncClients.add(client)
@@ -71,6 +75,16 @@ function assertSyncEnabled(rootState, client) {
   }
 }
 
+async function tryLoadSyncServerDeviceNames(client, privacyKey) {
+  try {
+    return await loadSyncServerDeviceNames(client, privacyKey)
+  } catch (error) {
+    if (error instanceof SyncServerCancelledError || isSessionExpiredError(error)) throw error
+    console.warn('Failed to load encrypted sync device names:', error)
+    return null
+  }
+}
+
 const state = {
   syncServerStatus: 'idle',
   syncServerProgress: null,
@@ -79,6 +93,7 @@ const state = {
   syncServerHistorySupported: null,
   syncServerSessionExpired: false,
   syncServerOtherDeviceSessions: [],
+  syncServerDeviceNames: {},
 }
 
 const getters = {
@@ -87,7 +102,10 @@ const getters = {
   getSyncServerError: state => state.syncServerError,
   getSyncServerLastResult: state => state.syncServerLastResult,
   getSyncServerHistorySupported: state => state.syncServerHistorySupported,
-  getSyncServerOtherDeviceSessions: state => state.syncServerOtherDeviceSessions,
+  getSyncServerOtherDeviceSessions: state => state.syncServerOtherDeviceSessions.map(session => ({
+    ...session,
+    syncDeviceName: state.syncServerDeviceNames[session.syncDeviceId] ?? '',
+  })),
 }
 
 function parseSnapshot(value) {
@@ -492,7 +510,7 @@ const actions = {
           const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
           snapshot.sessionsV2 = nextSessions
           await dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot), { root: true })
-          commit('setSyncServerOtherDeviceSessions', getSavedOtherDeviceSessions(snapshot))
+          commit('setSyncServerOtherDeviceSessions', getSavedOtherDeviceSessions(snapshot, settings))
           commit('setSyncServerStatus', 'success')
           return true
         }
@@ -680,6 +698,7 @@ const actions = {
     commit('setSyncServerError', SYNC_SERVER_SESSION_EXPIRED_MESSAGE)
     commit('setSyncServerSessionExpired', true)
     commit('setSyncServerStatus', 'error')
+    commit('setSyncServerDeviceNames', {})
   },
 
   async disconnectSyncServer({ commit, dispatch }) {
@@ -698,6 +717,7 @@ const actions = {
     commit('setSyncServerStatus', 'idle')
     commit('setSyncServerSessionExpired', false)
     commit('setSyncServerOtherDeviceSessions', [])
+    commit('setSyncServerDeviceNames', {})
   },
 
   async deleteSyncServerAccount({ commit, dispatch, rootState }, password) {
@@ -772,7 +792,10 @@ const actions = {
 
     commit(
       'setSyncServerOtherDeviceSessions',
-      getSavedOtherDeviceSessions(parseSnapshot(rootState.settings.syncServerSnapshot))
+      getSavedOtherDeviceSessions(
+        parseSnapshot(rootState.settings.syncServerSnapshot),
+        rootState.settings
+      )
     )
 
     try {
@@ -834,6 +857,40 @@ const actions = {
     }, AUTO_SYNC_INTERVAL_MS)
   },
 
+  async refreshSyncServerDeviceNames({ commit, dispatch, rootState }) {
+    const refreshId = ++deviceNameRefreshId
+    const settings = rootState.settings
+    if (!settings.syncServerToken || !settings.syncServerPrivacyKey) {
+      commit('setSyncServerDeviceNames', {})
+      return
+    }
+
+    const client = trackSyncClient(new SyncServerClient(
+      settings.syncServerUrl,
+      settings.syncServerToken
+    ))
+    try {
+      const deviceNames = await tryLoadSyncServerDeviceNames(
+        client,
+        settings.syncServerPrivacyKey
+      )
+      assertSyncEnabled(rootState, client)
+      if (refreshId === deviceNameRefreshId && deviceNames !== null) {
+        commit('setSyncServerDeviceNames', deviceNames)
+      }
+    } catch (error) {
+      if (refreshId !== deviceNameRefreshId) return
+      if (error instanceof SyncServerCancelledError) return
+      if (isSessionExpiredError(error)) {
+        await dispatch('expireSyncServerSession')
+        return
+      }
+      throw error
+    } finally {
+      releaseSyncClient(client)
+    }
+  },
+
   restartSyncServerAutoSync({ dispatch }) {
     clearTimeout(autoSyncTimer)
     autoSyncTimer = null
@@ -879,6 +936,7 @@ const actions = {
       commit('setSyncServerError', '')
       commit('setSyncServerStatus', 'idle')
       commit('setSyncServerOtherDeviceSessions', [])
+      commit('setSyncServerDeviceNames', {})
       return
     }
     if (rootState.settings.syncServerToken) {
@@ -919,6 +977,9 @@ const mutations = {
   },
   setSyncServerOtherDeviceSessions(state, sessions) {
     state.syncServerOtherDeviceSessions = sessions
+  },
+  setSyncServerDeviceNames(state, deviceNames) {
+    state.syncServerDeviceNames = deviceNames
   },
 }
 

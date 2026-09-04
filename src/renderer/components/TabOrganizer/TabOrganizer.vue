@@ -774,6 +774,11 @@ onBeforeMount(lockBodyScroll)
 onMounted(async () => {
   lastActiveElement = document.activeElement
   store.commit('addOpenPrompt', promptId)
+  if (showSyncedTabs.value) {
+    store.dispatch('refreshSyncServerDeviceNames').catch(error => {
+      console.error('Failed to refresh sync device names:', error)
+    })
+  }
   await window.ftElectron.tabs.setShortcutsBlocked(true).catch(error => {
     console.error('Failed to block shortcuts for the tab organizer:', error)
   })

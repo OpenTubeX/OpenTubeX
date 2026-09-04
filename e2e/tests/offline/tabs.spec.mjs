@@ -1,4 +1,10 @@
+import { randomBytes } from 'node:crypto'
+
 import { test, expect, sel, goTo, goToSettingsSection } from '../../helpers/app.mjs'
+import {
+  encryptSyncServerDeviceInfo,
+  randomSyncServerDeviceId,
+} from '../../../src/renderer/helpers/sync-server-sessions.js'
 
 /**
  * Returns the box of an element that has stopped moving. Menus and submenus
@@ -2185,16 +2191,78 @@ test.describe('background tab shortcuts', () => {
 
 test.describe('tab organizer', () => {
   test('shows synced tab sets in device tabs and confirms deletion', async ({ page }) => {
-    await page.evaluate(() => {
+    const privacyKey = randomBytes(32).toString('base64')
+    const phoneDeviceId = randomSyncServerDeviceId()
+    const desktopDeviceId = randomSyncServerDeviceId()
+    const phoneDeviceInfo = {
+      name: 'Pixel 9',
+      platform: 'android',
+      architecture: 'arm64-v8a',
+      release: '16',
+    }
+    let encryptedPhoneInfo = await encryptSyncServerDeviceInfo(
+      phoneDeviceInfo,
+      privacyKey,
+      phoneDeviceId
+    )
+    let markDelayedResponseStarted
+    let releaseDelayedResponse
+    const delayedResponseStarted = new Promise(resolve => {
+      markDelayedResponseStarted = resolve
+    })
+    const delayedResponseRelease = new Promise(resolve => {
+      releaseDelayedResponse = resolve
+    })
+    let accountSessionRequests = 0
+    let healthRequests = 0
+    await page.route('https://sync.d3sox.me/**', async route => {
+      const pathname = new URL(route.request().url()).pathname
+      if (pathname === '/health') {
+        healthRequests++
+        await route.fulfill({
+          status: 200,
+          json: { capabilities: { account_sessions: 1 } },
+        })
+      } else if (pathname === '/v1/account/sessions') {
+        const requestNumber = ++accountSessionRequests
+        const responseEncryptedPhoneInfo = encryptedPhoneInfo
+        if (requestNumber === 2) {
+          markDelayedResponseStarted()
+          await delayedResponseRelease
+        }
+        await route.fulfill({
+          status: 200,
+          json: {
+            sessions: [{
+              device_id: phoneDeviceId,
+              encrypted_device_info: responseEncryptedPhoneInfo,
+            }],
+          },
+        })
+      } else {
+        await route.fulfill({ status: 500, body: 'Unexpected sync request' })
+      }
+    })
+
+    await page.evaluate(({ desktopDeviceId, phoneDeviceId, privacyKey }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setSyncServerEnabled', true)
       store.commit('setSyncServerToken', 'e2e-token')
+      store.commit('setSyncServerPrivacyKey', privacyKey)
       store.commit('setSyncServerPrivacyMode', 'enhanced')
       store.commit('setSyncServerSyncSessions', true)
       store.commit('setSyncServerSharedTabs', false)
+      window.__deviceNameRefreshCompletions = 0
+      store.subscribeAction({
+        after(action) {
+          if (action.type === 'refreshSyncServerDeviceNames') {
+            window.__deviceNameRefreshCompletions++
+          }
+        },
+      })
       store.commit('setSyncServerOtherDeviceSessions', [
         {
-          syncDeviceId: 'phone-e2e',
+          syncDeviceId: phoneDeviceId,
           syncPlatform: 'mobile',
           sessionId: 'mobile-session-e2e',
           tabs: [
@@ -2203,7 +2271,7 @@ test.describe('tab organizer', () => {
           ],
         },
         {
-          syncDeviceId: 'desktop-e2e',
+          syncDeviceId: desktopDeviceId,
           syncPlatform: 'desktop',
           sessionId: 'desktop-session-e2e',
           tabs: [
@@ -2221,15 +2289,18 @@ test.describe('tab organizer', () => {
         )
         return Promise.resolve(true)
       }]
-    })
+    }, { desktopDeviceId, phoneDeviceId, privacyKey })
 
     await page.locator(sel.tabOrganizerButton).click()
     const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
     const syncedSection = organizer.locator('.syncedTabsSection')
     const sessionTabs = syncedSection.getByRole('tablist', { name: 'Tabs from other devices' })
-    const mobileTab = sessionTabs.getByRole('tab', { name: 'Mobile · 2 tabs', exact: true })
+    const mobileTab = sessionTabs.getByRole('tab', { name: 'Pixel 9 · 2 tabs', exact: true })
     const desktopTab = sessionTabs.getByRole('tab', { name: 'Desktop · 1 tab', exact: true })
     const syncedSet = syncedSection.getByRole('tabpanel')
+    await expect.poll(() => accountSessionRequests).toBe(1)
+    await expect.poll(() => page.evaluate(() => window.__deviceNameRefreshCompletions)).toBe(1)
+    expect(healthRequests).toBe(0)
     await expect(syncedSection.getByRole('heading', { name: 'Tabs from other devices' })).toBeVisible()
     await expect(sessionTabs.getByRole('tab')).toHaveCount(2)
     await expect(mobileTab).toHaveAttribute('aria-selected', 'true')
@@ -2241,27 +2312,58 @@ test.describe('tab organizer', () => {
     await expect(syncedSet.locator('[data-icon="arrow-up-right-from-square"]')).toHaveCount(2)
     await expect(syncedSet).not.toContainText('Desktop synced tab')
 
-    await mobileTab.press('ArrowRight')
+    encryptedPhoneInfo = await encryptSyncServerDeviceInfo(
+      { ...phoneDeviceInfo, name: 'Stale phone' },
+      privacyKey,
+      phoneDeviceId
+    )
+    await organizer.locator('.tabOrganizerHeader .iconButton').click()
+    await expect(organizer).toBeHidden()
+    await page.locator(sel.tabOrganizerButton).click()
+    await delayedResponseStarted
+    await expect.poll(() => accountSessionRequests).toBe(2)
+
+    encryptedPhoneInfo = await encryptSyncServerDeviceInfo(
+      { ...phoneDeviceInfo, name: 'Travel phone' },
+      privacyKey,
+      phoneDeviceId
+    )
+    await organizer.locator('.tabOrganizerHeader .iconButton').click()
+    await expect(organizer).toBeHidden()
+    await page.locator(sel.tabOrganizerButton).click()
+    await expect.poll(() => accountSessionRequests).toBe(3)
+    await expect.poll(() => page.evaluate(() => window.__deviceNameRefreshCompletions)).toBe(2)
+    expect(healthRequests).toBe(0)
+    const renamedMobileTab = sessionTabs.getByRole('tab', {
+      name: 'Travel phone · 2 tabs',
+      exact: true,
+    })
+    await expect(renamedMobileTab).toBeVisible()
+    releaseDelayedResponse()
+    await expect.poll(() => page.evaluate(() => window.__deviceNameRefreshCompletions)).toBe(3)
+    await expect(renamedMobileTab).toBeVisible()
+
+    await renamedMobileTab.press('ArrowRight')
     await expect(desktopTab).toBeFocused()
     await expect(desktopTab).toHaveAttribute('aria-selected', 'true')
     await expect(syncedSet).toContainText('Desktop synced tab')
     await expect(syncedSet).not.toContainText('Synced watch tab')
 
     await desktopTab.press('Home')
-    await expect(mobileTab).toBeFocused()
+    await expect(renamedMobileTab).toBeFocused()
     await expect(syncedSet).toContainText('Synced watch tab')
 
-    const deleteSet = syncedSet.getByRole('button', { name: 'Delete: Mobile · 2 tabs' })
+    const deleteSet = syncedSet.getByRole('button', { name: 'Delete: Travel phone · 2 tabs' })
     await deleteSet.click()
     let confirmation = page.getByRole('dialog', { name: 'Delete' })
-    await expect(confirmation).toContainText('Mobile · 2 tabs')
+    await expect(confirmation).toContainText('Travel phone · 2 tabs')
     await confirmation.getByRole('button', { name: 'Cancel' }).click()
     await expect(syncedSet).toBeVisible()
 
     await deleteSet.click()
     confirmation = page.getByRole('dialog', { name: 'Delete' })
     await confirmation.getByRole('button', { name: 'Delete', exact: true }).click()
-    await expect(mobileTab).toHaveCount(0)
+    await expect(renamedMobileTab).toHaveCount(0)
     await expect(desktopTab).toHaveAttribute('aria-selected', 'true')
     await expect(syncedSet).toContainText('Desktop synced tab')
   })
