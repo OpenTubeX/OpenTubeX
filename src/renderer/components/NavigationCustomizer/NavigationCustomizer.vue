@@ -1,9 +1,12 @@
 <template>
-  <FtButton
-    :label="t('Settings.General Settings.Navigation.Customize Navigation')"
-    :icon="['fas', 'bars']"
-    @click="open = true"
-  />
+  <div class="settingButtonWithSync">
+    <FtButton
+      :label="t('Settings.General Settings.Navigation.Customize Navigation')"
+      :icon="['fas', 'bars']"
+      @click="open = true"
+    />
+    <FtSyncedSettingIndicator setting-key="navigationItems" />
+  </div>
 
   <FtSettingsSubpage
     :open="open"
@@ -178,6 +181,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 
 import store from '../../store/index'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
@@ -357,6 +361,11 @@ function resetItems() {
 </script>
 
 <style scoped>
+.settingButtonWithSync {
+  align-items: center;
+  display: inline-flex;
+}
+
 .navigationActions {
   display: flex;
   flex-wrap: wrap;
