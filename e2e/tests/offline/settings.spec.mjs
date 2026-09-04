@@ -3492,6 +3492,135 @@ test.describe('settings', () => {
     await expect(holder.locator('.toast', { hasText: 'Test toast' })).toBeVisible()
   })
 
+  test('honors the configured toast position on Android phones', async ({ app, page }) => {
+    const phoneSafeArea = { top: 24, bottom: 16 }
+    await setWindowSize(app, page, { width: 375, height: 700 })
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
+    await page.locator('.app').evaluate((element, safeArea) => {
+      document.documentElement.style.setProperty('--safe-area-inset-top', `${safeArea.top}px`)
+      document.documentElement.style.setProperty('--safe-area-inset-bottom', `${safeArea.bottom}px`)
+      element.classList.remove('topTabs', 'bottomTabs', 'verticalTabs', 'verticalTabsLeft', 'verticalTabsRight')
+      element.classList.add('capacitorTabs', 'capacitorPhoneLayout')
+    }, phoneSafeArea)
+
+    const positionSelect = page.locator('[data-section="appearance"] .select')
+      .filter({ hasText: 'Toast Position' })
+      .locator('select')
+    const holder = page.locator('.toast-holder')
+    const progressToast = page.getByTestId('progress-toast')
+
+    async function viewportSize () {
+      return page.evaluate(() => ({
+        width: document.documentElement.clientWidth,
+        height: document.documentElement.clientHeight
+      }))
+    }
+
+    async function preparePhoneEdge (edge) {
+      // Electron needs a non-horizontal tab position to match Capacitor's 29px
+      // base inset. Keep that desktop tab on the edge opposite the one under
+      // test so it cannot affect the toast's horizontal alignment.
+      await page.evaluate((tabBarPosition) => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setTabBarPosition', tabBarPosition)
+      }, edge === 'bottom' ? 'right' : 'left')
+      await expect(holder).not.toHaveClass(/horizontal-tabs/)
+      // Updating the desktop tab position also refreshes `.app`'s responsive
+      // classes. Reapply the Capacitor fixture after that update has landed.
+      await page.locator('.app').evaluate((element) => {
+        element.classList.remove('topTabs', 'bottomTabs', 'verticalTabs', 'verticalTabsLeft', 'verticalTabsRight')
+        element.classList.add('capacitorTabs', 'capacitorPhoneLayout')
+      })
+      await expect(page.locator('.app')).toHaveClass(/capacitorPhoneLayout/)
+      const progressBounds = await progressToast.count() === 1
+        ? await progressToast.boundingBox()
+        : null
+      const progressInset = progressBounds ? progressBounds.height + 10 : 0
+      const expectedOffset = 29 + progressInset
+      await expect.poll(() => holder.evaluate((element, { edge, expectedOffset }) => {
+        const style = getComputedStyle(element)
+        return Math.max(
+          Math.abs(Number.parseFloat(style.getPropertyValue(`--offset-${edge}`)) - expectedOffset),
+          Math.abs(Number.parseFloat(style.getPropertyValue(`--mobile-offset-${edge}`)) - expectedOffset)
+        )
+      }, { edge, expectedOffset })).toBeLessThan(0.01)
+      return progressInset
+    }
+
+    async function expectBottomLeftToast (message) {
+      await positionSelect.selectOption('bottom-left')
+      await expect(holder).toHaveClass(/position-bottom-left/)
+      const progressInset = await preparePhoneEdge('bottom')
+      await page.evaluate((text) => {
+        window.ftElectron.showToastOnAllTabs(text, 10000)
+      }, message)
+      const toast = page.locator('.toast', { hasText: message })
+      const row = page.locator('[data-sonner-toast]', { hasText: message })
+      await expect(toast).toBeVisible()
+      await expect(row).toHaveAttribute('data-mounted', 'true')
+      await page.waitForTimeout(400)
+      const [bounds, viewport] = await Promise.all([
+        toast.boundingBox(),
+        viewportSize()
+      ])
+      expect.soft(bounds.x).toBeLessThan(30)
+      expect.soft(viewport.height - bounds.y - bounds.height)
+        .toBeCloseTo(72 + phoneSafeArea.bottom + progressInset, 1)
+      if (await progressToast.count() === 1) {
+        const progressBounds = await progressToast.boundingBox()
+        expect(bounds.y + bounds.height).toBeLessThan(progressBounds.y)
+      }
+      await row.focus()
+      await page.keyboard.press('Escape')
+      await expect(toast).toHaveCount(0)
+    }
+
+    async function expectTopRightToast (message) {
+      await positionSelect.selectOption('top-right')
+      await expect(holder).toHaveClass(/position-top-right/)
+      const progressInset = await preparePhoneEdge('top')
+      await page.evaluate((text) => {
+        window.ftElectron.showToastOnAllTabs(text, 10000)
+      }, message)
+      const toast = page.locator('.toast', { hasText: message })
+      const row = page.locator('[data-sonner-toast]', { hasText: message })
+      await expect(toast).toBeVisible()
+      await expect(row).toHaveAttribute('data-mounted', 'true')
+      await page.waitForTimeout(400)
+      const [bounds, topNavBounds, viewport] = await Promise.all([
+        toast.boundingBox(),
+        page.locator('.topNav').boundingBox(),
+        viewportSize()
+      ])
+      expect.soft(bounds.x + bounds.width).toBeGreaterThan(viewport.width - 30)
+      expect.soft(bounds.y).toBeGreaterThanOrEqual(topNavBounds.y + topNavBounds.height + 12 + progressInset)
+      expect.soft(bounds.y).toBeLessThan(viewport.height / 2)
+      if (await progressToast.count() === 1) {
+        const progressBounds = await progressToast.boundingBox()
+        expect(bounds.y).toBeGreaterThan(progressBounds.y + progressBounds.height)
+      }
+      await row.focus()
+      await page.keyboard.press('Escape')
+      await expect(toast).toHaveCount(0)
+    }
+
+    await expectBottomLeftToast('Android phone bottom-left toast')
+    await expectTopRightToast('Android phone top-right toast')
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+    await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(1.25, 2)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setProgressBarMessage', 'Phone progress toast')
+      store.commit('setProgressBarPercentage', 50)
+      store.commit('setShowProgressBar', true)
+    })
+    await expect(progressToast).toBeVisible()
+
+    await expectBottomLeftToast('Scaled Android phone bottom-left toast')
+    await expectTopRightToast('Scaled Android phone top-right toast')
+  })
+
   test('keeps top toasts below the Android tablet app header', async ({ app, page }) => {
     await setWindowSize(app, page, { width: 375, height: 700 })
     await goTo(page, 'settings')
