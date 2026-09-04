@@ -59,8 +59,8 @@ public final class SubscriptionRefreshWorker extends Worker {
 
     static boolean update(Context context, String token, int progress) {
         if (!STATE.update(token, progress)) return false;
-        SubscriptionRefreshState.Snapshot snapshot = STATE.snapshot(token);
-        if (snapshot == null) return false;
+        SubscriptionRefreshState.Snapshot snapshot = STATE.takeNotificationSnapshot(token);
+        if (snapshot == null) return true;
         context.getSystemService(NotificationManager.class).notify(
             SubscriptionRefreshNotification.NOTIFICATION_ID,
             SubscriptionRefreshNotification.build(
