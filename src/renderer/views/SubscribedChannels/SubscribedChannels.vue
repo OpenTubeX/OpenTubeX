@@ -86,6 +86,7 @@
           <ft-flex-box>
             <FtButton
               :label="$t('Channels.Load More Channels')"
+              :icon="['fas', 'arrow-down']"
               background-color="var(--primary-color)"
               text-color="var(--text-with-main-color)"
               @click="loadMoreChannels"

@@ -91,6 +91,7 @@
       <FtFlexBox>
         <FtButton
           :label="$t('Close')"
+          :icon="['fas', 'xmark']"
           @click="emit('close')"
         />
       </FtFlexBox>

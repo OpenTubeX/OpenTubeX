@@ -921,7 +921,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Tempel ID pengguna pribadi SponsorBlock dari ekstensi peramban. Biarkan kosong untuk menggunakan ID yang dibuat aplikasi.
     Generated SponsorBlock User ID: ID Pengguna SponsorBlock Buatan Aplikasi
     Generated SponsorBlock User ID Tooltip: ID pengguna SponsorBlock buatan aplikasi ini dapat digunakan di ekstensi peramban atau saat Anda menggunakan aplikasi di komputer lain.
-    Export Generated User ID: Ekspor ID Pengguna Buatan Aplikasi
+    Reveal Generated User ID: Tampilkan ID Pengguna Buatan Aplikasi
     Generated SponsorBlock User ID Copy Button: Salin ID pengguna SponsorBlock buatan aplikasi
     Generated SponsorBlock User ID Copied: ID pengguna SponsorBlock buatan aplikasi disalin ke papan klip
     Skip notification timeout: Batas waktu notifikasi lewati

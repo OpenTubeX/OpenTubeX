@@ -904,7 +904,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Cole o ID de usuário privado do SponsorBlock obtido na extensão do navegador. Deixe este campo vazio para usar um ID gerado pelo aplicativo.
     Generated SponsorBlock User ID: ID de usuário do SponsorBlock gerado
     Generated SponsorBlock User ID Tooltip: Este ID de usuário do SponsorBlock gerado pelo aplicativo pode ser usado na extensão do navegador ou ao usar o aplicativo noutro computador.
-    Export Generated User ID: Exportar ID de usuário gerado
+    Reveal Generated User ID: Mostrar ID de usuário gerado
     Generated SponsorBlock User ID Copy Button: Copiar ID de usuário do SponsorBlock gerado
     Generated SponsorBlock User ID Copied: ID de usuário do SponsorBlock gerado copiado para a área de download
     Skip notification timeout: Duração da notificação de salto

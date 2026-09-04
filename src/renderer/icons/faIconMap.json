@@ -406,6 +406,10 @@
     "ri": "puzzle-line",
     "material": "extension-outline"
   },
+  "qrcode": {
+    "ri": "qr-code-line",
+    "material": "qr-code-2-rounded"
+  },
   "question-circle": {
     "ri": "question-line",
     "material": "help-outline"

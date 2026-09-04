@@ -1125,7 +1125,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Füge die private SponsorBlock-Benutzer-ID aus der Browser-Erweiterung ein. Lasse dieses Feld leer, um eine von der App erzeugte ID zu verwenden.
     Generated SponsorBlock User ID: Erzeugte SponsorBlock-Benutzer-ID
     Generated SponsorBlock User ID Tooltip: Diese von der App erzeugte SponsorBlock-Benutzer-ID kann in der Browser-Erweiterung oder bei Nutzung der App auf einem anderen Computer verwendet werden.
-    Export Generated User ID: Erzeugte Benutzer-ID exportieren
+    Reveal Generated User ID: Erzeugte Benutzer-ID anzeigen
     Generated SponsorBlock User ID Copy Button: Erzeugte SponsorBlock-Benutzer-ID kopieren
     Generated SponsorBlock User ID Copied: Erzeugte SponsorBlock-Benutzer-ID in die Zwischenablage kopiert
     SponsorBlock Settings: SponsorBlock

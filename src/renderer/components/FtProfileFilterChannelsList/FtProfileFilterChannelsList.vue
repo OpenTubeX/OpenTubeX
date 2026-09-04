@@ -37,14 +37,17 @@
       >
         <FtButton
           :label="$t('Profile.Select All')"
+          :icon="['fas', 'check']"
           @click="selectAll"
         />
         <FtButton
           :label="$t('Profile.Select None')"
+          :icon="['fas', 'xmark']"
           @click="selectNone"
         />
         <FtButton
           :label="$t('Profile.Add Selected To Profile')"
+          :icon="['fas', 'user-plus']"
           text-color="var(--text-with-main-color)"
           background-color="var(--primary-color)"
           @click="addChannelsToProfile"

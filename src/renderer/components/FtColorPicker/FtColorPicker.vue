@@ -165,6 +165,7 @@
             :aria-expanded="showColorSources"
             @click="toggleColorSources"
           >
+            <FtIcon :icon="['fas', 'copy']" />
             {{ t('Color Picker.Copy From Another Color') }}
           </button>
           <div
@@ -923,8 +924,12 @@ onBeforeUnmount(() => {
 }
 
 .copyFromButton {
+  display: flex;
   inline-size: 100%;
   min-block-size: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   border: 1px solid var(--border-color);
   border-radius: calc(5px * var(--ui-roundness));
   color: var(--primary-text-color);

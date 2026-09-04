@@ -177,6 +177,7 @@
       <FtButton
         v-if="showEnableChat"
         :label="t('Video.Enable Live Chat')"
+        :icon="['fas', 'comment-alt']"
         class="enableLiveChat"
         @click="enableLiveChat"
       />

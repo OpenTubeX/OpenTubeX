@@ -906,7 +906,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Zalijepite privatni korisnički ID za SponsorBlock iz proširenja preglednika. Ostavite prazno da biste upotrijebili ID koji je stvorila aplikacija.
     Generated SponsorBlock User ID: Stvoreni korisnički ID za SponsorBlock
     Generated SponsorBlock User ID Tooltip: Ovaj korisnički ID za SponsorBlock koji je stvorila aplikacija možete upotrijebiti u proširenju preglednika ili pri uporabi aplikacije na drugom računalu.
-    Export Generated User ID: Izvezi stvoreni korisnički ID
+    Reveal Generated User ID: Prikaži stvoreni korisnički ID
     Generated SponsorBlock User ID Copy Button: Kopiraj stvoreni korisnički ID za SponsorBlock
     Generated SponsorBlock User ID Copied: Stvoreni korisnički ID za SponsorBlock kopiran je u međuspremnik
     Skip notification timeout: Trajanje obavijesti o preskakanju

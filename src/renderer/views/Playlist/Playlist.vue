@@ -23,6 +23,7 @@
         <FtButton
           v-if="playlistErrorRetryable"
           :label="t('User Playlists.SinglePlaylistView.Retry')"
+          :icon="['fas', 'sync']"
           background-color="var(--primary-color)"
           text-color="var(--text-with-main-color)"
           @click="getPlaylistInfo"
@@ -179,6 +180,7 @@
             </p>
             <FtButton
               :label="t('User Playlists.SinglePlaylistView.Retry')"
+              :icon="['fas', 'sync']"
               background-color="var(--primary-color)"
               text-color="var(--text-with-main-color)"
               @click="getNextPage"
@@ -192,6 +194,7 @@
           <FtFlexBox>
             <FtButton
               :label="t('Subscriptions.Load More Videos')"
+              :icon="['fas', 'arrow-down']"
               background-color="var(--primary-color)"
               text-color="var(--text-with-main-color)"
               @click="getNextPage"

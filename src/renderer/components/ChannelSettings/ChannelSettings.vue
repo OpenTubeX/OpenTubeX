@@ -273,6 +273,7 @@
           <FtFlexBox>
             <FtButton
               :label="t('Close')"
+              :icon="['fas', 'xmark']"
               @click="closeAddChannelPrompt"
             />
           </FtFlexBox>

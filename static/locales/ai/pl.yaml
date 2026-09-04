@@ -391,6 +391,7 @@ Settings:
     Desktop Device: 'Komputer'
     Open All Tabs: 'Otwórz wszystkie karty'
   SponsorBlock Settings:
+    Reveal Generated User ID: Pokaż wygenerowany identyfikator użytkownika
     Custom Color: Własny kolor
   Password Dialog:
     Incorrect Password: Nieprawidłowe hasło

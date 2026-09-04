@@ -926,7 +926,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Liitä selainlaajennuksen yksityinen SponsorBlock-käyttäjätunnus. Jätä kenttä tyhjäksi, jos haluat käyttää sovelluksen luomaa tunnusta.
     Generated SponsorBlock User ID: Luotu SponsorBlock-käyttäjätunnus
     Generated SponsorBlock User ID Tooltip: Sovelluksen luomaa SponsorBlock-käyttäjätunnusta voi käyttää selainlaajennuksessa tai toisella tietokoneella käytettävässä sovelluksessa.
-    Export Generated User ID: Vie luotu käyttäjätunnus
+    Reveal Generated User ID: Näytä luotu käyttäjätunnus
     Generated SponsorBlock User ID Copy Button: Kopioi luotu SponsorBlock-käyttäjätunnus
     Generated SponsorBlock User ID Copied: Luotu SponsorBlock-käyttäjätunnus kopioitiin leikepöydälle
     Skip notification timeout: Ohitusilmoituksen näyttöaika

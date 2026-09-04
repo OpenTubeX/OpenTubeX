@@ -97,6 +97,7 @@
         <FtFlexBox>
           <FtButton
             :label="t('Subscriptions.Load More Videos')"
+            :icon="['fas', 'arrow-down']"
             background-color="var(--primary-color)"
             text-color="var(--text-with-main-color)"
             @click="increaseLimit"
@@ -158,6 +159,7 @@
             />
             <FtButton
               :label="t('Cancel')"
+              :icon="['fas', 'xmark']"
               :text-color="null"
               :background-color="null"
               @click="closeHistoryCleanupPrompt"

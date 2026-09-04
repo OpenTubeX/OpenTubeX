@@ -14,6 +14,7 @@
       class="viewAllLink"
       @click="emit('view-all')"
     >
+      <FtIcon :icon="['fas', 'arrow-right']" />
       {{ t('Home Page.View all') }}
     </button>
     <RouterLink
@@ -21,6 +22,7 @@
       class="viewAllLink"
       :to="to"
     >
+      <FtIcon :icon="['fas', 'arrow-right']" />
       {{ t('Home Page.View all') }}
     </RouterLink>
   </header>

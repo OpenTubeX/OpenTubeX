@@ -194,7 +194,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
       return useSponsorBlock && store.getters.getSponsorBlockEnableSubmission
     }
     if (group === 'Generated SponsorBlock User ID') return false
-    if (group === 'Export Generated User ID') {
+    if (group === 'Reveal Generated User ID') {
       return useSponsorBlock && store.getters.getSponsorBlockEnableSubmission &&
         store.getters.getSponsorBlockGeneratedUserId !== ''
     }

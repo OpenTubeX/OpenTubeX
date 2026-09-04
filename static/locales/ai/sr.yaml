@@ -944,7 +944,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Налепите приватни SponsorBlock кориснички ID из проширења прегледача. Оставите празно да бисте користили ID који је направила апликација.
     Generated SponsorBlock User ID: SponsorBlock кориснички ID који је направила апликација
     Generated SponsorBlock User ID Tooltip: Овај SponsorBlock кориснички ID који је направила апликација може да се користи у проширењу прегледача или при коришћењу апликације на другом рачунару.
-    Export Generated User ID: Извези направљени кориснички ID
+    Reveal Generated User ID: Прикажи направљени кориснички ID
     Generated SponsorBlock User ID Copy Button: Копирај направљени SponsorBlock кориснички ID
     Generated SponsorBlock User ID Copied: Направљени SponsorBlock кориснички ID је копиран у међуспремник
     Skip notification timeout: Трајање обавештења о прескакању

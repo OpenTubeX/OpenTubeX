@@ -921,7 +921,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Límdu einkaauðkenni SponsorBlock-notandans úr vafraviðbótinni. Skildu reitinn eftir auðan til að nota auðkenni sem forritið býr til.
     Generated SponsorBlock User ID: SponsorBlock-notandaauðkenni sem forritið bjó til
     Generated SponsorBlock User ID Tooltip: Hægt er að nota SponsorBlock-notandaauðkennið sem forritið bjó til í vafraviðbótinni eða þegar forritið er notað á annarri tölvu.
-    Export Generated User ID: Flytja út notandaauðkenni sem forritið bjó til
+    Reveal Generated User ID: Sýna notandaauðkenni sem forritið bjó til
     Generated SponsorBlock User ID Copy Button: Afrita SponsorBlock-notandaauðkenni sem forritið bjó til
     Generated SponsorBlock User ID Copied: SponsorBlock-notandaauðkennið sem forritið bjó til var afritað á klippiborð
     Skip notification timeout: Birtingartími tilkynningar um sleppingu

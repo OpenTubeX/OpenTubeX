@@ -370,6 +370,7 @@
                 class="autoplayButton autoplayCancel"
                 @click="cancelAutoplayCountdown"
               >
+                <ft-icon :icon="['fas', 'xmark']" />
                 {{ $t('Cancel') }}
               </button>
               <button
@@ -377,6 +378,7 @@
                 class="autoplayButton autoplayPlayNow"
                 @click="playAutoplayVideoNow"
               >
+                <ft-icon :icon="['fas', 'play']" />
                 {{ $t('Video.Player.Play now') }}
               </button>
             </div>

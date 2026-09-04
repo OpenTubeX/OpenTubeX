@@ -34,6 +34,9 @@
 }
 
 .clearQueue {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   border: 0;
   background: transparent;
   color: var(--link-color);

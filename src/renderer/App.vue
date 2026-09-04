@@ -125,10 +125,12 @@
       <FtFlexBox>
         <FtButton
           :label="t('Download From Site')"
+          :icon="['fas', 'download']"
           @click="openDownloadsPage"
         />
         <FtButton
           :label="t('Close')"
+          :icon="['fas', 'xmark']"
           :text-color="null"
           :background-color="null"
           @click="closeReleaseNotes"

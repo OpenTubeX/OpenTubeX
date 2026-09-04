@@ -78,6 +78,7 @@
             :label="showTextCode
               ? t('Settings.Sync Settings.Show QR Code')
               : t('Settings.Sync Settings.Use Text Pairing Code')"
+            :icon="showTextCode ? ['fas', 'qrcode'] : ['fas', 'keyboard']"
             @click="showTextCode = !showTextCode"
           />
         </FtFlexBox>
@@ -126,6 +127,7 @@
         <FtFlexBox class="pairingActions">
           <FtButton
             :label="t('Settings.Sync Settings.Try Again')"
+            :icon="['fas', 'sync']"
             @click="resetReceiver"
           />
         </FtFlexBox>
@@ -135,6 +137,7 @@
       <FtFlexBox class="pairingFooter">
         <FtButton
           :label="t('Cancel')"
+          :icon="['fas', 'xmark']"
           @click="closeReceiver"
         />
       </FtFlexBox>
@@ -169,6 +172,7 @@
         <FtFlexBox class="pairingActions">
           <FtButton
             :label="t('Settings.Sync Settings.Enter Pairing Code')"
+            :icon="['fas', 'keyboard']"
             @click="openManualEntry"
           />
         </FtFlexBox>
@@ -195,11 +199,13 @@
         <FtFlexBox class="pairingActions">
           <FtButton
             :label="t('Settings.Sync Settings.Check Pairing Code')"
+            :icon="['fas', 'check']"
             :disabled="manualPairingCode.trim() === ''"
             @click="submitManualCode"
           />
           <FtButton
             :label="t('Settings.Sync Settings.Scan QR Code')"
+            :icon="['fas', 'qrcode']"
             @click="restartScanner"
           />
         </FtFlexBox>
@@ -259,11 +265,13 @@
             :label="pairingApproval
               ? t('Settings.Sync Settings.Try Again')
               : t('Settings.Sync Settings.Scan Again')"
+            :icon="['fas', 'sync']"
             @click="pairingApproval ? approvePairing() : restartScanner()"
           />
           <FtButton
             v-if="!pairingApproval"
             :label="t('Settings.Sync Settings.Enter Pairing Code')"
+            :icon="['fas', 'keyboard']"
             @click="openManualEntry"
           />
         </FtFlexBox>
@@ -273,6 +281,7 @@
       <FtFlexBox class="pairingFooter">
         <FtButton
           :label="approveStage === 'approved' ? t('Close') : t('Cancel')"
+          :icon="['fas', 'xmark']"
           @click="closeScanner"
         />
       </FtFlexBox>

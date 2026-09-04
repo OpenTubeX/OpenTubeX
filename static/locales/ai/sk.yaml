@@ -904,7 +904,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Vložte súkromné ID používateľa SponsorBlock z rozšírenia prehliadača. Ak chcete použiť ID vytvorené aplikáciou, ponechajte pole prázdne.
     Generated SponsorBlock User ID: Vytvorené ID používateľa SponsorBlock
     Generated SponsorBlock User ID Tooltip: Toto ID používateľa SponsorBlock vytvorené aplikáciou môžete použiť v rozšírení prehliadača alebo v aplikácii na inom počítači.
-    Export Generated User ID: Exportovať vytvorené ID používateľa
+    Reveal Generated User ID: Zobraziť vytvorené ID používateľa
     Generated SponsorBlock User ID Copy Button: Kopírovať vytvorené ID používateľa SponsorBlock
     Generated SponsorBlock User ID Copied: Vytvorené ID používateľa SponsorBlock bolo skopírované do schránky
     Skip notification timeout: Trvanie oznámenia o preskočení

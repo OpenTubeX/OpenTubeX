@@ -926,7 +926,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Plak de privé-gebruikers-ID van SponsorBlock uit de browserextensie. Laat dit leeg om een door de app gegenereerde ID te gebruiken.
     Generated SponsorBlock User ID: Gegenereerde SponsorBlock-gebruikers-ID
     Generated SponsorBlock User ID Tooltip: Deze door de app gegenereerde SponsorBlock-gebruikers-ID kan worden gebruikt in de browserextensie of als je de app op een andere computer gebruikt.
-    Export Generated User ID: Gegenereerde gebruikers-ID exporteren
+    Reveal Generated User ID: Gegenereerde gebruikers-ID tonen
     Generated SponsorBlock User ID Copy Button: Gegenereerde SponsorBlock-gebruikers-ID kopiëren
     Generated SponsorBlock User ID Copied: Gegenereerde SponsorBlock-gebruikers-ID naar klembord gekopieerd
     Skip notification timeout: Weergaveduur van oversla-melding

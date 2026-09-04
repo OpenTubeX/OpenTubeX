@@ -198,6 +198,7 @@
             class="adjustEstimateButton"
             @click="openHistoricalAdjustment"
           >
+            <FtIcon :icon="['fas', 'clock-rotate-left']" />
             {{ t('Stats.Adjust imported watch time') }}
           </button>
         </div>
@@ -241,10 +242,12 @@
           <div class="adjustmentActions">
             <FtButton
               :label="t('Stats.Apply playback speed')"
+              :icon="['fas', 'check']"
               @click="applyHistoricalAdjustment"
             />
             <FtButton
               :label="t('Cancel')"
+              :icon="['fas', 'xmark']"
               background-color="var(--secondary-card-bg-color)"
               text-color="var(--primary-text-color)"
               @click="showHistoricalAdjustment = false"

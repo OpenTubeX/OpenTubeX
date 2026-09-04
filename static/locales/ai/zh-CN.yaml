@@ -904,7 +904,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: 粘贴浏览器扩展中的 SponsorBlock 私有用户 ID。留空则使用应用生成的 ID。
     Generated SponsorBlock User ID: 生成的 SponsorBlock 用户 ID
     Generated SponsorBlock User ID Tooltip: 应用生成的此 SponsorBlock 用户 ID 可用于浏览器扩展，也可在另一台电脑上使用本应用时使用。
-    Export Generated User ID: 导出生成的用户 ID
+    Reveal Generated User ID: 显示生成的用户 ID
     Generated SponsorBlock User ID Copy Button: 复制生成的 SponsorBlock 用户 ID
     Generated SponsorBlock User ID Copied: 已将生成的 SponsorBlock 用户 ID 复制到剪贴板
     Skip notification timeout: 跳过通知显示时长

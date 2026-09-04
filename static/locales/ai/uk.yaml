@@ -921,7 +921,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Вставте приватний ідентифікатор користувача SponsorBlock із розширення браузера. Залиште поле порожнім, щоб використати ідентифікатор, створений застосунком.
     Generated SponsorBlock User ID: Створений ідентифікатор користувача SponsorBlock
     Generated SponsorBlock User ID Tooltip: Цей створений застосунком ідентифікатор користувача SponsorBlock можна використовувати в розширенні браузера або в застосунку на іншому комп’ютері.
-    Export Generated User ID: Експортувати створений ідентифікатор користувача
+    Reveal Generated User ID: Показати створений ідентифікатор користувача
     Generated SponsorBlock User ID Copy Button: Копіювати створений ідентифікатор користувача SponsorBlock
     Generated SponsorBlock User ID Copied: Створений ідентифікатор користувача SponsorBlock скопійовано до буфера обміну
     Skip notification timeout: Час показу сповіщення про пропуск

@@ -1555,7 +1555,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Paste the private SponsorBlock user ID from the browser extension. Leave this empty to use an app-generated ID.
     Generated SponsorBlock User ID: Generated SponsorBlock User ID
     Generated SponsorBlock User ID Tooltip: This app-generated SponsorBlock user ID can be used in the browser extension or if you use the app on another computer.
-    Export Generated User ID: Export Generated User ID
+    Reveal Generated User ID: Reveal Generated User ID
     Generated SponsorBlock User ID Copy Button: Copy generated SponsorBlock user ID
     Generated SponsorBlock User ID Copied: Generated SponsorBlock user ID copied to clipboard
     Notify when sponsor segment is skipped: Show notice after a segment is skipped

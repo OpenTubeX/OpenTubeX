@@ -364,7 +364,7 @@ test.describe('settings search highlights', () => {
       'Edit custom theme',
       'Remove Password',
       'Generated SponsorBlock User ID',
-      'Export Generated User ID'
+      'Reveal Generated User ID'
     ]) {
       await search.fill(searchTerm)
       await expect(page.locator('.settingsNoResults')).toBeVisible()

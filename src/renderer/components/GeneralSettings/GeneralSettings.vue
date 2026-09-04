@@ -298,10 +298,12 @@
       <FtFlexBox>
         <FtButton
           :label="t('Settings.General Settings.Set Current Instance as Default')"
+          :icon="['fas', 'thumbtack']"
           @click="handleSetDefaultInstanceClick"
         />
         <FtButton
           :label="t('Settings.General Settings.Clear Default Instance')"
+          :icon="['fas', 'thumbtack-slash']"
           @click="handleClearDefaultInstanceClick"
         />
       </FtFlexBox>
