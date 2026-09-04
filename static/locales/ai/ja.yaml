@@ -432,6 +432,7 @@ Settings:
         Destructive pressed: 破壊的な操作の押下時
         Text and icons on destructive actions: 破壊的な操作上のテキストとアイコン
   Player Settings:
+    yt-dlp Streaming: "yt-dlp ストリーミング"
     Continue Playback When Screen Is Locked: '画面ロック中も再生を続ける'
     Music Visualizer: 音楽ビジュアライザー
     Automatically Open Chapters: チャプターを自動的に開く
@@ -509,6 +510,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: '上下にスワイプして全画面表示を開始または終了する'
     Preload Upcoming Videos: "次の動画を先読み"
     Upcoming Videos to Preload: "先読みする動画数"
+    Concurrent Preloads: "同時先読み数"
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。
@@ -1404,6 +1406,7 @@ Tooltips:
       一度に1件の要求しか行えないストリームでは、この設定は無視されます。
     Preload Upcoming Videos: "次に再生可能な動画の yt-dlp URL を取得してキャッシュします。キューは再生リストやおすすめより優先されます。"
     Upcoming Videos to Preload: "バックグラウンドで yt-dlp URL を取得する次の動画の最大数です。"
+    Concurrent Preloads: "動画の先読みに同時使用する yt-dlp プロセスの最大数です。値を大きくすると、CPU、メモリ、ネットワーク帯域をより多く使用します。"
   Download Settings:
     Download Folder: 動画をこのフォルダーに保存します。空欄にすると、システムのダウンロードフォルダーを使用します。
     Global Additional yt-dlp Arguments: 'すべてのダウンロードでyt-dlpに渡す追加のコマンドライン引数です。例: --cookies-from-browser firefox'

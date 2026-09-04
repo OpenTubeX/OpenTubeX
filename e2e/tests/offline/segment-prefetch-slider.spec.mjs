@@ -4,9 +4,11 @@ import path from 'node:path'
 import { test, expect, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
 
 async function openPlayerSettings(page) {
-  await goToSettingsSection(page, 'playback')
+  const section = await goToSettingsSection(page, 'playback')
+  const heading = section.getByRole('heading', { name: 'yt-dlp Streaming', exact: true })
+  const ytDlpSection = heading.locator('xpath=../..')
 
-  return page.getByRole('slider', { name: /Parallel Segment Loading/ })
+  return ytDlpSection.getByRole('slider', { name: /Parallel Segment Loading/ })
 }
 
 test.describe('parallel segment loading slider', () => {

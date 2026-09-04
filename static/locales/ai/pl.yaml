@@ -153,6 +153,7 @@ Settings:
         Destructive hover and focus: Działanie usuwające dane po najechaniu lub zaznaczeniu
         Destructive pressed: Działanie usuwające dane po naciśnięciu
   Player Settings:
+    yt-dlp Streaming: "Strumieniowanie yt-dlp"
     Continue Playback When Screen Is Locked: 'Kontynuuj odtwarzanie przy zablokowanym ekranie'
     Music Visualizer: Wizualizator muzyki
     Scroll Mini Player:
@@ -164,6 +165,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Przesuń w górę lub w dół, aby włączyć lub wyłączyć pełny ekran'
     Preload Upcoming Videos: "Wstępnie wczytuj następne filmy"
     Upcoming Videos to Preload: "Liczba filmów do wstępnego wczytania"
+    Concurrent Preloads: "Jednoczesne wstępne ładowanie"
   Channel Settings:
     Add Subscribed Channel: Dodaj subskrybowany kanał
     Enable Setting Before Adding Channel: Przed dodaniem kanału włącz co najmniej jedno ustawienie kanału w ustawieniach odtwarzania
@@ -664,6 +666,7 @@ Tooltips:
       To ustawienie nie wpływa na strumienie ograniczone do jednego żądania naraz.
     Preload Upcoming Videos: "Pobiera i zapisuje w pamięci podręcznej adresy yt-dlp następnych filmów. Kolejka ma pierwszeństwo przed playlistami i rekomendacjami."
     Upcoming Videos to Preload: "Maksymalna liczba następnych filmów, których adresy yt-dlp są pobierane w tle."
+    Concurrent Preloads: "Maksymalna liczba procesów yt-dlp używanych do jednoczesnego wstępnego ładowania filmów. Wyższe wartości zużywają więcej procesora, pamięci i przepustowości sieci."
   Download Settings:
     Global Additional yt-dlp Arguments: Dodatkowe argumenty wiersza poleceń przekazywane do yt-dlp przy każdym pobieraniu, na przykład --cookies-from-browser firefox.
     Concurrent Downloads: Maksymalna liczba zadań yt-dlp wykonywanych jednocześnie.

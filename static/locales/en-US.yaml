@@ -856,6 +856,7 @@ Settings:
         #* Main Color Theme
   Player Settings:
     Player Settings: Player
+    yt-dlp Streaming: yt-dlp Streaming
     Music Visualizer: Music visualizer
     Play Next Video: Autoplay Recommended Videos
     Autoplay Playlists: Autoplay Playlist Videos
@@ -923,6 +924,7 @@ Settings:
     Autoplay Interruption Timer: Autoplay Interruption Timer
     Preload Upcoming Videos: Preload Upcoming Videos
     Upcoming Videos to Preload: Upcoming Videos to Preload
+    Concurrent Preloads: Concurrent Preloads
     Fast-Forward / Rewind Interval: Fast-Forward / Rewind Interval
     Default Volume: Default Volume
     Remember Volume: Remember Volume
@@ -2466,6 +2468,7 @@ Tooltips:
       Streams limited to one request at a time ignore this setting.
     Preload Upcoming Videos: Fetches and caches yt-dlp stream URLs for videos that can play next. The watch queue takes priority over playlists and recommendations.
     Upcoming Videos to Preload: The maximum number of upcoming videos whose yt-dlp stream URLs are fetched in the background.
+    Concurrent Preloads: The maximum number of yt-dlp processes used to preload videos at once. Higher values use more CPU, memory, and network bandwidth.
   External Player Settings:
     External Player: Choosing an external player will display an icon, for opening the
       video (playlist if supported) in the external player, on the thumbnail. Warning, Invidious settings do not affect external players.

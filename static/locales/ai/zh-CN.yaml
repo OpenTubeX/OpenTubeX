@@ -432,6 +432,7 @@ Settings:
         Destructive pressed: 危险操作按下状态
         Text and icons on destructive actions: 危险操作的文本和图标
   Player Settings:
+    yt-dlp Streaming: "yt-dlp 流媒体"
     Continue Playback When Screen Is Locked: '屏幕锁定时继续播放'
     Music Visualizer: 音乐可视化
     Automatically Open Chapters: 自动展开章节
@@ -509,6 +510,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: '上下滑动以进入或退出全屏'
     Preload Upcoming Videos: "预加载后续视频"
     Upcoming Videos to Preload: "要预加载的视频数量"
+    Concurrent Preloads: "并发预加载数"
   Channel Settings:
     Channel Settings: 频道设置
     Channel Settings Description: 分别记住观看各频道时选择的设置，以便下次观看该频道的视频时再次应用。
@@ -1404,6 +1406,7 @@ Tooltips:
       对于限制为一次只能发出一个请求的流，此设置无效。
     Preload Upcoming Videos: "获取并缓存后续视频的 yt-dlp 流地址。队列优先于播放列表和推荐。"
     Upcoming Videos to Preload: "在后台获取 yt-dlp 流地址的后续视频数量上限。"
+    Concurrent Preloads: "同时用于预加载视频的 yt-dlp 进程数上限。数值越高，使用的 CPU、内存和网络带宽越多。"
   Download Settings:
     Download Folder: 视频将保存到此文件夹。留空则使用系统的“下载”文件夹。
     Global Additional yt-dlp Arguments: 每次下载时传递给 yt-dlp 的额外命令行参数，例如 --cookies-from-browser firefox。

@@ -432,6 +432,7 @@ Settings:
         Destructive pressed: Ação destrutiva ao premir
         Text and icons on destructive actions: Texto e ícones nas ações destrutivas
   Player Settings:
+    yt-dlp Streaming: "Streaming do yt-dlp"
     Continue Playback When Screen Is Locked: 'Continuar a reprodução com a tela bloqueada'
     Music Visualizer: Visualizador de música
     Automatically Open Chapters: Abrir capítulos automaticamente
@@ -509,6 +510,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Deslize para cima ou para baixo para entrar ou sair da tela cheia'
     Preload Upcoming Videos: "Pré-carregar os próximos vídeos"
     Upcoming Videos to Preload: "Número de vídeos a pré-carregar"
+    Concurrent Preloads: "Pré-carregamentos simultâneos"
   Channel Settings:
     Channel Settings: Configurações dos canais
     Channel Settings Description: Memorizar individualmente para cada canal as configurações escolhidas durante a visualização, para que sejam aplicadas quando voltar a ver um dos seus vídeos.
@@ -1404,6 +1406,7 @@ Tooltips:
       As transmissões limitadas a um pedido de cada vez ignoram esta configuração.
     Preload Upcoming Videos: "Obtém e guarda em cache os URL do yt-dlp dos próximos vídeos. A fila tem prioridade sobre listas e recomendações."
     Upcoming Videos to Preload: "Número máximo de próximos vídeos cujos URL do yt-dlp são obtidos em segundo plano."
+    Concurrent Preloads: "O número máximo de processos do yt-dlp usados para pré-carregar vídeos ao mesmo tempo. Valores maiores usam mais CPU, memória e largura de banda da rede."
   Download Settings:
     Download Folder: Os vídeos são salvos nesta pasta. Deixe em branco para usar a pasta Downloads do sistema.
     Global Additional yt-dlp Arguments: Argumentos adicionais da linha de comandos passados ao yt-dlp em cada download, por exemplo --cookies-from-browser firefox.

@@ -448,6 +448,7 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
+    yt-dlp Streaming: "yt-dlp-streaming"
     Continue Playback When Screen Is Locked: 'Fortsæt afspilning, når skærmen er låst'
     Music Visualizer: Musikvisualisering
     Automatically Open Chapters: Åbn kapitler automatisk
@@ -534,6 +535,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Stryg op eller ned for at åbne eller forlade fuld skærm'
     Preload Upcoming Videos: "Forudindlæs kommende videoer"
     Upcoming Videos to Preload: "Antal videoer, der skal forudindlæses"
+    Concurrent Preloads: "Samtidige forudindlæsninger"
   Channel Settings:
     Channel Settings: Kanalindstillinger
     Channel Settings Description: Husk de indstillinger, du vælger under afspilning, for hver kanal, så de anvendes igen, næste gang du ser en af kanalens videoer.
@@ -1467,6 +1469,7 @@ Tooltips:
       Streams, der er begrænset til én anmodning ad gangen, ignorerer denne indstilling.
     Preload Upcoming Videos: "Henter og gemmer yt-dlp-streamadresser for de næste videoer. Køen har prioritet over afspilningslister og anbefalinger."
     Upcoming Videos to Preload: "Det højeste antal kommende videoer, hvis yt-dlp-streamadresser hentes i baggrunden."
+    Concurrent Preloads: "Det højeste antal yt-dlp-processer, der bruges til at forudindlæse videoer samtidig. Højere værdier bruger mere CPU, hukommelse og netværksbåndbredde."
   Download Settings:
     Download Folder: Videoer gemmes i denne mappe. Lad feltet stå tomt for at bruge systemets Downloads-mappe.
     Global Additional yt-dlp Arguments: Yderligere kommandolinjeargumenter, der sendes til yt-dlp ved hver download, f.eks. --cookies-from-browser firefox.

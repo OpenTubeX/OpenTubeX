@@ -432,6 +432,7 @@ Settings:
         Destructive pressed: Törlő művelet lenyomáskor
         Text and icons on destructive actions: Törlő műveletek szövege és ikonjai
   Player Settings:
+    yt-dlp Streaming: "yt-dlp streamelés"
     Continue Playback When Screen Is Locked: 'Lejátszás folytatása zárolt képernyőnél'
     Music Visualizer: Zenevizualizáció
     Automatically Open Chapters: Fejezetek automatikus megnyitása
@@ -509,6 +510,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Húzd felfelé vagy lefelé a teljes képernyő megnyitásához vagy bezárásához'
     Preload Upcoming Videos: "Következő videók előtöltése"
     Upcoming Videos to Preload: "Előtöltendő videók száma"
+    Concurrent Preloads: "Egyidejű előtöltések"
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
@@ -1404,6 +1406,7 @@ Tooltips:
       Az egyszerre egy kérésre korlátozott adatfolyamok figyelmen kívül hagyják ezt a beállítást.
     Preload Upcoming Videos: "Lekéri és gyorsítótárazza a következő videók yt-dlp-címeit. A várólista elsőbbséget élvez a lejátszási listákkal és ajánlásokkal szemben."
     Upcoming Videos to Preload: "A háttérben lekért yt-dlp-címmel rendelkező következő videók legnagyobb száma."
+    Concurrent Preloads: "A videók egyidejű előtöltésére használt yt-dlp-folyamatok legnagyobb száma. A magasabb értékek több processzort, memóriát és hálózati sávszélességet használnak."
   Download Settings:
     Download Folder: A videók ebbe a mappába kerülnek. Hagyja üresen a rendszer Letöltések mappájának használatához.
     Global Additional yt-dlp Arguments: Minden letöltésnél a yt-dlp számára átadott további parancssori argumentumok, például --cookies-from-browser firefox.

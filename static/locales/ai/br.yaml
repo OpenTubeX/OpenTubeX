@@ -432,6 +432,7 @@ Settings:
         Destructive pressed: "Ober distrujus pouezet"
         Text and icons on destructive actions: "Testenn hag arlunioù war an oberoù distrujus"
   Player Settings:
+    yt-dlp Streaming: "Skignañ yt-dlp"
     Continue Playback When Screen Is Locked: 'Kenderc’hel da lenn pa vez prennet ar skramm'
     Music Visualizer: Gweladur sonerezh
     Automatically Open Chapters: "Digeriñ ar chabistroù ent emgefreek"
@@ -509,6 +510,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Riklañ war-grec’h pe war-draoñ evit mont er skramm leun pe kuitaat anezhañ'
     Preload Upcoming Videos: "Rakgargañ ar videoioù da-heul"
     Upcoming Videos to Preload: "Niver a videoioù da rakgargañ"
+    Concurrent Preloads: "Rakgargadennoù war un dro"
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
@@ -1413,6 +1415,7 @@ Tooltips:
       Ar gwazhioù bevennet d'un azgoulenn war un dro ne zalc'hont ket kont eus an arventenn-mañ.
     Preload Upcoming Videos: "Kargañ ha krubuilhañ a ra liammoù yt-dlp ar videoioù da-heul. Ar steudad a zo kentoc’h eget ar rolloù lenn hag an erbedadennoù."
     Upcoming Videos to Preload: "Niver brasañ a videoioù da-heul a vez karget o liammoù yt-dlp en drekleur."
+    Concurrent Preloads: "Niver brasañ a argerzhioù yt-dlp a vez implijet evit rakgargañ videoioù war un dro. An talvoudoù uheloc'h a implij muioc'h a c'halloud ar c'hewerier, a vemor hag a ledander rouedad."
   Download Settings:
     Download Folder: "Enrollet e vez ar videoioù en teuliad-mañ. Laoskit goullo evit implijout teuliad Pellgargadennoù ho reizhiad."
     Global Additional yt-dlp Arguments: "Arventennoù arc'had ouzhpenn tremenet da yt-dlp evit pep pellgargadenn, da skouer --cookies-from-browser firefox."

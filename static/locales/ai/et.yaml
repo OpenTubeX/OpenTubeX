@@ -432,6 +432,7 @@ Settings:
         Destructive pressed: Pöördumatu toiming vajutamisel
         Text and icons on destructive actions: Pöördumatute toimingute tekst ja ikoonid
   Player Settings:
+    yt-dlp Streaming: "yt-dlp voogedastus"
     Continue Playback When Screen Is Locked: 'Jätka esitamist lukustatud ekraaniga'
     Music Visualizer: Muusika visualiseerija
     Automatically Open Chapters: Ava peatükid automaatselt
@@ -509,6 +510,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Täisekraanile minemiseks või sealt väljumiseks nipsa üles või alla'
     Preload Upcoming Videos: "Järgmiste videote eellaadimine"
     Upcoming Videos to Preload: "Eellaaditavate videote arv"
+    Concurrent Preloads: "Samaaegsed eellaadimised"
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
@@ -1406,6 +1408,7 @@ Tooltips:
       Vood, mida saab laadida ainult ühe päringu kaupa, eiravad seda seadet.
     Preload Upcoming Videos: "Hangib ja salvestab järgmiste videote yt-dlp voogedastusaadressid vahemällu. Järjekord on esitusloenditest ja soovitustest tähtsam."
     Upcoming Videos to Preload: "Taustal hangitavate yt-dlp aadressidega järgmiste videote suurim arv."
+    Concurrent Preloads: "Suurim arv yt-dlp protsesse, mida kasutatakse videote samaaegseks eellaadimiseks. Suuremad väärtused kasutavad rohkem protsessorit, mälu ja võrgu läbilaskevõimet."
   Download Settings:
     Download Folder: Videod salvestatakse sellesse kausta. Süsteemi allalaadimiste kausta kasutamiseks jäta väli tühjaks.
     Global Additional yt-dlp Arguments: Täiendavad käsureaargumendid, mis edastatakse iga allalaadimise puhul yt-dlp-le, näiteks --cookies-from-browser firefox.

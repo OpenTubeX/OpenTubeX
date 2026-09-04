@@ -434,6 +434,7 @@ Settings:
         Destructive pressed: Gweithred ddinistriol wedi'i gwasgu
         Text and icons on destructive actions: Testun ac eiconau ar weithredoedd dinistriol
   Player Settings:
+    yt-dlp Streaming: "Ffrydio yt-dlp"
     Continue Playback When Screen Is Locked: 'Parhau i chwarae pan fydd y sgrin wedi’i chloi'
     Music Visualizer: Delweddydd cerddoriaeth
     Automatically Open Chapters: Agor penodau'n awtomatig
@@ -511,6 +512,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Llithro i fyny neu i lawr i fynd i mewn neu allan o’r sgrin lawn'
     Preload Upcoming Videos: "Rhaglwytho fideos nesaf"
     Upcoming Videos to Preload: "Nifer y fideos i’w rhaglwytho"
+    Concurrent Preloads: "Rhaglwythiadau cydamserol"
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
@@ -1417,6 +1419,7 @@ Tooltips:
       Mae ffrydiau sydd wedi'u cyfyngu i un cais ar y tro yn anwybyddu'r gosodiad hwn.
     Preload Upcoming Videos: "Mae’n nôl ac yn storio URLau yt-dlp y fideos nesaf. Mae’r ciw yn cael blaenoriaeth dros restrau chwarae ac argymhellion."
     Upcoming Videos to Preload: "Uchafswm y fideos nesaf y nôlir eu URLau yt-dlp yn y cefndir."
+    Concurrent Preloads: "Uchafswm nifer y prosesau yt-dlp a ddefnyddir i raglwytho fideos ar yr un pryd. Mae gwerthoedd uwch yn defnyddio mwy o CPU, cof a lled band rhwydwaith."
   Download Settings:
     Download Folder: Caiff fideos eu cadw yn y ffolder hon. Gadewch yn wag i ddefnyddio ffolder Lawrlwythiadau eich system.
     Global Additional yt-dlp Arguments: Ymresymiadau llinell orchymyn ychwanegol a drosglwyddir i yt-dlp ar gyfer pob lawrlwythiad, er enghraifft --cookies-from-browser firefox.

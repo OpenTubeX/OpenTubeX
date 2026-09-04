@@ -34,7 +34,10 @@ import {
   TUTORIAL_AUDIENCE_SETTING_ID,
 } from '../../helpers/tutorialState.js'
 import { DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB } from '../../../ytDlpPlaybackCacheSettings.js'
-import { DEFAULT_YT_DLP_PRELOAD_COUNT } from '../../helpers/player/ytDlpPlaybackPreload.js'
+import {
+  DEFAULT_YT_DLP_PRELOAD_CONCURRENCY,
+  DEFAULT_YT_DLP_PRELOAD_COUNT,
+} from '../../helpers/player/ytDlpPlaybackPreload.js'
 import { terminateCommentTranslationLanguageDetector } from '../../helpers/comment-translations'
 import { DEFAULT_HOME_SECTION_LAYOUT } from '../../helpers/homeSections.js'
 import { isSettingSyncableOnPlatform } from '../../helpers/platformSettings.js'
@@ -291,6 +294,7 @@ const state = {
   ytDlpPlaybackCacheMaxEntrySize: DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
   ytDlpPreloadEnabled: false,
   ytDlpPreloadCount: DEFAULT_YT_DLP_PRELOAD_COUNT,
+  ytDlpPreloadConcurrency: DEFAULT_YT_DLP_PRELOAD_CONCURRENCY,
   ytDlpFfmpegSource: 'system',
   ytDlpFfmpegPath: '',
   externalSoftwareUpdateMode: 'automatic',

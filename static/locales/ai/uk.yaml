@@ -436,6 +436,7 @@ Settings:
         Destructive pressed: Натиснута небезпечна дія
         Text and icons on destructive actions: Текст і піктограми небезпечних дій
   Player Settings:
+    yt-dlp Streaming: "Потокове передавання yt-dlp"
     Continue Playback When Screen Is Locked: 'Продовжувати відтворення із заблокованим екраном'
     Music Visualizer: Музичний візуалізатор
     Automatically Open Chapters: Автоматично відкривати розділи
@@ -517,6 +518,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Проведіть угору або вниз, щоб відкрити чи закрити повноекранний режим'
     Preload Upcoming Videos: "Попередньо завантажувати наступні відео"
     Upcoming Videos to Preload: "Кількість відео для попереднього завантаження"
+    Concurrent Preloads: "Одночасне попереднє завантаження"
   Channel Settings:
     Channel Settings: Налаштування каналів
     Channel Settings Description: Запам’ятовувати вибрані під час перегляду налаштування окремо для кожного каналу й застосовувати їх під час наступного перегляду його відео.
@@ -1427,6 +1429,7 @@ Tooltips:
       Це налаштування не діє на потоки, обмежені одним одночасним запитом.
     Preload Upcoming Videos: "Отримує та кешує адреси yt-dlp для наступних відео. Черга має пріоритет над списками й рекомендаціями."
     Upcoming Videos to Preload: "Найбільша кількість наступних відео, адреси yt-dlp яких отримуються у тлі."
+    Concurrent Preloads: "Найбільша кількість процесів yt-dlp, які одночасно попередньо завантажують відео. Вищі значення використовують більше ресурсів процесора, пам'яті та пропускної здатності мережі."
   Download Settings:
     Download Folder: Відео зберігаються в цій папці. Залиште поле порожнім, щоб використовувати системну папку «Завантаження».
     Global Additional yt-dlp Arguments: Додаткові аргументи командного рядка, що передаються yt-dlp під час кожного завантаження, наприклад --cookies-from-browser firefox.

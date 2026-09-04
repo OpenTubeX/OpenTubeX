@@ -3,39 +3,53 @@ import path from 'node:path'
 
 import { test, expect, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
 
-async function openPreloadSettings(page) {
+async function openYtDlpStreamingSettings(page) {
   const section = await goToSettingsSection(page, 'playback')
+  const heading = section.getByRole('heading', { name: 'yt-dlp Streaming', exact: true })
+  const ytDlpSection = heading.locator('xpath=../..')
   return {
-    toggle: section.getByRole('checkbox', { name: 'Preload Upcoming Videos' }),
-    toggleLabel: section.locator('label.switch-label').filter({ hasText: 'Preload Upcoming Videos' }),
-    slider: section.getByRole('slider', { name: /Upcoming Videos to Preload/ })
+    section,
+    heading,
+    segmentSlider: ytDlpSection.getByRole('slider', { name: /Parallel Segment Loading/ }),
+    toggle: ytDlpSection.getByRole('checkbox', { name: 'Preload Upcoming Videos' }),
+    toggleLabel: ytDlpSection.locator('label.switch-label').filter({ hasText: 'Preload Upcoming Videos' }),
+    countSlider: ytDlpSection.getByRole('slider', { name: /Upcoming Videos to Preload/ }),
+    concurrencySlider: ytDlpSection.getByRole('slider', { name: /Concurrent Preloads/ })
   }
 }
 
 test.describe('yt-dlp playback preloading', () => {
   test.use({
     seed: {
-      settings: {
-        videoPlaybackEngine: 'yt-dlp',
-        ytDlpPlaybackEngineDefaultMigration: true
-      }
+      settings: { videoPlaybackEngine: 'built-in' }
     }
   })
 
-  test('persists the switch and number of upcoming videos', async ({ app }) => {
-    const { toggle, toggleLabel, slider } = await openPreloadSettings(app.page)
+  test('persists the switch, preload count, and concurrency', async ({ app }) => {
+    const { section, heading, segmentSlider, toggle, toggleLabel, countSlider, concurrencySlider } = await openYtDlpStreamingSettings(app.page)
+
+    await expect(heading).toBeVisible()
+    const sectionHeadings = await section.getByRole('heading', { level: 3 }).allTextContents()
+    expect(sectionHeadings.indexOf('yt-dlp Streaming')).toBe(sectionHeadings.indexOf('Captions') - 1)
 
     await expect(toggle).not.toBeChecked()
     await expect(toggle).toBeEnabled()
-    await expect(slider).toBeDisabled()
-    await expect(slider).toHaveValue('2')
-    await expect(slider).toHaveAttribute('min', '1')
-    await expect(slider).toHaveAttribute('max', '10')
+    await expect(segmentSlider).toBeEnabled()
+    await expect(countSlider).toBeDisabled()
+    await expect(countSlider).toHaveValue('2')
+    await expect(countSlider).toHaveAttribute('min', '1')
+    await expect(countSlider).toHaveAttribute('max', '10')
+    await expect(concurrencySlider).toHaveValue('2')
+    await expect(concurrencySlider).toHaveAttribute('min', '1')
+    await expect(concurrencySlider).toHaveAttribute('max', '8')
+    await expect(concurrencySlider).toBeDisabled()
 
     await toggleLabel.click()
     await expect(toggle).toBeChecked()
-    await expect(slider).toBeEnabled()
-    await slider.fill('4')
+    await expect(countSlider).toBeEnabled()
+    await expect(concurrencySlider).toBeEnabled()
+    await countSlider.fill('4')
+    await concurrencySlider.fill('6')
 
     await expect.poll(async () => {
       const settings = latestSettings(
@@ -43,13 +57,15 @@ test.describe('yt-dlp playback preloading', () => {
       )
       return {
         enabled: settings.ytDlpPreloadEnabled,
-        count: settings.ytDlpPreloadCount
+        count: settings.ytDlpPreloadCount,
+        concurrency: settings.ytDlpPreloadConcurrency
       }
-    }).toEqual({ enabled: true, count: 4 })
+    }).toEqual({ enabled: true, count: 4, concurrency: 6 })
 
     const relaunched = await app.relaunch()
-    const reloaded = await openPreloadSettings(relaunched.page)
+    const reloaded = await openYtDlpStreamingSettings(relaunched.page)
     await expect(reloaded.toggle).toBeChecked()
-    await expect(reloaded.slider).toHaveValue('4')
+    await expect(reloaded.countSlider).toHaveValue('4')
+    await expect(reloaded.concurrencySlider).toHaveValue('6')
   })
 })

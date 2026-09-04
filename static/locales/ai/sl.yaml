@@ -624,6 +624,7 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    yt-dlp Streaming: "Pretakanje z yt-dlp"
     Continue Playback When Screen Is Locked: 'Nadaljuj predvajanje, ko je zaslon zaklenjen'
     Music Visualizer: Glasbeni vizualizator
     Automatically Open Chapters: Samodejno odpri poglavja
@@ -721,6 +722,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Podrsajte navzgor ali navzdol za vstop v celozaslonski način ali izhod iz njega'
     Preload Upcoming Videos: "Prednaloži naslednje videoposnetke"
     Upcoming Videos to Preload: "Število videov za prednalaganje"
+    Concurrent Preloads: "Sočasno prednalaganje"
   Channel Settings:
     Channel Settings: Nastavitve kanalov
     Channel Settings Description: Zapomni si nastavitve, ki jih med gledanjem izberete za vsak kanal posebej, in jih znova uporabi ob naslednjem ogledu enega od njegovih videoposnetkov.
@@ -1890,6 +1892,7 @@ Tooltips:
       Pretoki, omejeni na eno zahtevo naenkrat, to nastavitev prezrejo.
     Preload Upcoming Videos: "Pridobi in predpomni naslove yt-dlp naslednjih videov. Čakalna vrsta ima prednost pred seznami in priporočili."
     Upcoming Videos to Preload: "Največje število naslednjih videov, katerih naslovi yt-dlp se pridobijo v ozadju."
+    Concurrent Preloads: "Največje število procesov yt-dlp, ki se uporabljajo za sočasno prednalaganje videov. Višje vrednosti porabijo več procesorske moči, pomnilnika in omrežne pasovne širine."
   External Player Settings:
     External Player: Če izberete zunanji predvajalnik, se na sličici prikaže ikona za odpiranje videoposnetka oziroma seznama predvajanja, če je podprt, v zunanjem predvajalniku. Nastavitve Invidious ne vplivajo na zunanje predvajalnike.
     Custom External Player Executable: OpenTubeX privzeto predvideva, da je izbrani zunanji predvajalnik mogoče najti prek okoljske spremenljivke PATH. Po potrebi lahko tukaj nastavite pot po meri.

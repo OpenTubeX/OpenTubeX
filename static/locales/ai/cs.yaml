@@ -432,6 +432,7 @@ Settings:
         Destructive pressed: Destruktivní akce při stisknutí
         Text and icons on destructive actions: Text a ikony destruktivních akcí
   Player Settings:
+    yt-dlp Streaming: "Streamování přes yt-dlp"
     Continue Playback When Screen Is Locked: 'Pokračovat v přehrávání při zamčené obrazovce'
     Music Visualizer: Hudební vizualizér
     Automatically Open Chapters: Automaticky otevírat kapitoly
@@ -509,6 +510,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Přejetím nahoru nebo dolů otevřít či opustit celou obrazovku'
     Preload Upcoming Videos: "Přednačítat následující videa"
     Upcoming Videos to Preload: "Počet videí k přednačtení"
+    Concurrent Preloads: "Souběžná přednačtení"
   Channel Settings:
     Channel Settings: Nastavení kanálů
     Channel Settings Description: Zapamatuje nastavení zvolená při sledování pro každý kanál zvlášť a znovu je použije při příštím sledování některého z jeho videí.
@@ -1404,6 +1406,7 @@ Tooltips:
       Streamy omezené na jeden požadavek současně toto nastavení ignorují.
     Preload Upcoming Videos: "Načte a uloží do mezipaměti adresy yt-dlp pro následující videa. Fronta má přednost před playlisty a doporučeními."
     Upcoming Videos to Preload: "Nejvyšší počet následujících videí, jejichž adresy yt-dlp se načtou na pozadí."
+    Concurrent Preloads: "Maximální počet procesů yt-dlp použitých k současnému přednačítání videí. Vyšší hodnoty využívají více výkonu procesoru, paměti a šířky pásma sítě."
   Download Settings:
     Download Folder: Videa se ukládají do této složky. Chcete-li použít systémovou složku Stažené, ponechte pole prázdné.
     Global Additional yt-dlp Arguments: Další argumenty příkazového řádku předávané nástroji yt-dlp při každém stahování, například --cookies-from-browser firefox.

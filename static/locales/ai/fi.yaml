@@ -436,6 +436,7 @@ Settings:
         Destructive pressed: Poistava toiminto painettaessa
         Text and icons on destructive actions: Poistavien toimintojen teksti ja kuvakkeet
   Player Settings:
+    yt-dlp Streaming: "yt-dlp-suoratoisto"
     Continue Playback When Screen Is Locked: 'Jatka toistoa näytön ollessa lukittuna'
     Music Visualizer: Musiikkivisualisointi
     Automatically Open Chapters: Avaa luvut automaattisesti
@@ -522,6 +523,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Siirry koko näytön tilaan tai poistu siitä pyyhkäisemällä ylös tai alas'
     Preload Upcoming Videos: "Esilataa seuraavat videot"
     Upcoming Videos to Preload: "Esiladattavien videoiden määrä"
+    Concurrent Preloads: "Samanaikaiset esilataukset"
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
@@ -1432,6 +1434,7 @@ Tooltips:
       Tämä asetus ei vaikuta suoratoistovirtoihin, joissa sallitaan vain yksi pyyntö kerrallaan.
     Preload Upcoming Videos: "Noutaa ja tallentaa välimuistiin seuraavien videoiden yt-dlp-osoitteet. Jono on etusijalla soittolistoihin ja suosituksiin nähden."
     Upcoming Videos to Preload: "Enimmäismäärä seuraavia videoita, joiden yt-dlp-osoitteet noudetaan taustalla."
+    Concurrent Preloads: "Videoiden samanaikaiseen esilataukseen käytettävien yt-dlp-prosessien enimmäismäärä. Suuremmat arvot käyttävät enemmän suoritinta, muistia ja verkon kaistanleveyttä."
   Download Settings:
     Download Folder: Videot tallennetaan tähän kansioon. Jos kenttä jätetään tyhjäksi, käytetään järjestelmän Lataukset-kansiota.
     Global Additional yt-dlp Arguments: Kaikissa latauksissa yt-dlp:lle välitettävät komentorivin lisäargumentit, esimerkiksi --cookies-from-browser firefox.

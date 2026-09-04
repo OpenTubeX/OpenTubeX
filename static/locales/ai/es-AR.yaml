@@ -507,6 +507,7 @@ Settings:
       Everforest Light Blue: Everforest Claro Azul
       Everforest Light Purple: Everforest Claro Morado
   Player Settings:
+    yt-dlp Streaming: "Streaming con yt-dlp"
     Continue Playback When Screen Is Locked: 'Continuar la reproducción con la pantalla bloqueada'
     Music Visualizer: Visualizador de música
     Automatically Open Chapters: Abrir capítulos automáticamente
@@ -593,6 +594,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Deslizá hacia arriba o abajo para entrar o salir de pantalla completa'
     Preload Upcoming Videos: "Precargar próximos vídeos"
     Upcoming Videos to Preload: "Vídeos próximos para precargar"
+    Concurrent Preloads: "Precargas simultáneas"
   Channel Settings:
     Channel Settings: Ajustes de canales
     Channel Settings Description: Recuerda por separado los ajustes que elijas al ver cada canal para volver a aplicarlos la próxima vez que veas uno de sus videos.
@@ -1842,6 +1844,7 @@ Tooltips:
       Las emisiones limitadas a una solicitud simultánea ignoran este ajuste.
     Preload Upcoming Videos: "Obtiene y guarda en caché las URL de yt-dlp de los próximos vídeos. La cola tiene prioridad sobre las listas y las recomendaciones."
     Upcoming Videos to Preload: "Número máximo de próximos vídeos cuyas URL de yt-dlp se obtienen en segundo plano."
+    Concurrent Preloads: "La cantidad máxima de procesos de yt-dlp usados para precargar videos al mismo tiempo. Los valores más altos usan más CPU, memoria y ancho de banda de red."
   External Player Settings:
     External Player: La elección de un reproductor externo mostrará un icono, para abrir el video (lista de reproducción si es compatible) en el reproductor externo, en la miniatura. Atención, los ajustes de Invidious no afectan a los reproductores externos.
     Custom External Player Executable: Por defecto, OpenTubeX buscará el reproductor externo seleccionado mediante la variable de entorno PATH, de no encontrarlo, podrás especificar una ruta personalizada acá.

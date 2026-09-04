@@ -411,6 +411,7 @@ Settings:
         Destructive pressed: Опасное действие при нажатии
         Text and icons on destructive actions: Текст и значки опасных действий
   Player Settings:
+    yt-dlp Streaming: "Потоковая передача yt-dlp"
     Continue Playback When Screen Is Locked: 'Продолжать воспроизведение при заблокированном экране'
     Music Visualizer: Музыкальный визуализатор
     Automatically Open Chapters: Автоматически открывать главы
@@ -494,6 +495,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Проведите вверх или вниз, чтобы открыть или закрыть полноэкранный режим'
     Preload Upcoming Videos: "Предзагружать следующие видео"
     Upcoming Videos to Preload: "Количество видео для предзагрузки"
+    Concurrent Preloads: "Одновременная предзагрузка"
   Channel Settings:
     Channel Settings: Настройки каналов
     Channel Settings Description: Запоминать выбранные при просмотре настройки отдельно для каждого канала и применять их снова при следующем просмотре видео с этого канала.
@@ -1404,6 +1406,7 @@ Tooltips:
       Этот параметр не влияет на потоки, ограниченные одним запросом за раз.
     Preload Upcoming Videos: "Получает и кэширует адреса yt-dlp для следующих видео. Очередь имеет приоритет над плейлистами и рекомендациями."
     Upcoming Videos to Preload: "Максимальное количество следующих видео, адреса yt-dlp которых загружаются в фоне."
+    Concurrent Preloads: "Максимальное количество процессов yt-dlp, используемых для одновременной предзагрузки видео. Более высокие значения требуют больше ресурсов процессора, памяти и пропускной способности сети."
   Download Settings:
     Download Folder: Видео сохраняются в эту папку. Оставьте поле пустым, чтобы использовать системную папку «Загрузки».
     Global Additional yt-dlp Arguments: Дополнительные аргументы командной строки, передаваемые yt-dlp при каждой загрузке, например --cookies-from-browser firefox.

@@ -436,6 +436,7 @@ Settings:
         Destructive pressed: Καταστροφική ενέργεια κατά το πάτημα
         Text and icons on destructive actions: Κείμενο και εικονίδια καταστροφικών ενεργειών
   Player Settings:
+    yt-dlp Streaming: "Ροή μέσω yt-dlp"
     Continue Playback When Screen Is Locked: 'Συνέχιση αναπαραγωγής όταν η οθόνη είναι κλειδωμένη'
     Music Visualizer: Οπτικοποίηση μουσικής
     Automatically Open Chapters: Αυτόματο άνοιγμα κεφαλαίων
@@ -522,6 +523,7 @@ Settings:
     Swipe Up or Down to Enter or Exit Fullscreen: 'Σύρετε πάνω ή κάτω για είσοδο ή έξοδο από την πλήρη οθόνη'
     Preload Upcoming Videos: "Προφόρτωση επόμενων βίντεο"
     Upcoming Videos to Preload: "Πλήθος βίντεο για προφόρτωση"
+    Concurrent Preloads: "Ταυτόχρονες προφορτώσεις"
   Channel Settings:
     Channel Settings: Ρυθμίσεις καναλιών
     Channel Settings Description: Απομνημόνευση των ρυθμίσεων που επιλέγετε κατά την παρακολούθηση, ξεχωριστά για κάθε κανάλι, ώστε να εφαρμόζονται ξανά την επόμενη φορά που θα παρακολουθήσετε κάποιο βίντεό του.
@@ -1432,6 +1434,7 @@ Tooltips:
       Οι ροές που περιορίζονται σε ένα αίτημα κάθε φορά αγνοούν αυτήν τη ρύθμιση.
     Preload Upcoming Videos: "Ανακτά και αποθηκεύει προσωρινά τις διευθύνσεις yt-dlp των επόμενων βίντεο. Η ουρά προηγείται των λιστών και των προτάσεων."
     Upcoming Videos to Preload: "Ο μέγιστος αριθμός επόμενων βίντεο των οποίων οι διευθύνσεις yt-dlp ανακτώνται στο παρασκήνιο."
+    Concurrent Preloads: "Ο μέγιστος αριθμός διεργασιών yt-dlp που χρησιμοποιούνται για την ταυτόχρονη προφόρτωση βίντεο. Οι υψηλότερες τιμές χρησιμοποιούν περισσότερη CPU, μνήμη και εύρος ζώνης δικτύου."
   Download Settings:
     Download Folder: Τα βίντεο αποθηκεύονται σε αυτόν τον φάκελο. Αφήστε το κενό για να χρησιμοποιηθεί ο φάκελος Λήψεις του συστήματός σας.
     Global Additional yt-dlp Arguments: Πρόσθετα ορίσματα γραμμής εντολών που διαβιβάζονται στο yt-dlp για κάθε λήψη, για παράδειγμα --cookies-from-browser firefox.
