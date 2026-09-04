@@ -82,6 +82,7 @@
       <KeepAlive>
         <SettingsWindow
           v-if="settingsWindowOpen"
+          :hardware-keyboard-attached="hardwareKeyboardAttached"
           :search-target="settingsSearchTarget"
           @search-target-opened="clearSettingsSearchTarget"
         />
@@ -2646,6 +2647,7 @@ const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
   store,
   isElectron,
   isCapacitor,
+  hardwareKeyboardAttached: hardwareKeyboardAttached.value,
   navigate: navigateFromCommandPalette,
   openSettingsSection,
   openSettingsSearchResult,

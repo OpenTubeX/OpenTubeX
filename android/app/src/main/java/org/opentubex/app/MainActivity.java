@@ -1,6 +1,7 @@
 package org.opentubex.app;
 
 import android.content.res.Configuration;
+import android.hardware.input.InputManager;
 import android.os.Bundle;
 
 import androidx.activity.OnBackPressedCallback;
@@ -9,6 +10,25 @@ import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.PluginHandle;
 
 public class MainActivity extends BridgeActivity {
+    private InputManager inputManager;
+    private final InputManager.InputDeviceListener inputDeviceListener =
+        new InputManager.InputDeviceListener() {
+            @Override
+            public void onInputDeviceAdded(int deviceId) {
+                notifyHardwareKeyboardState();
+            }
+
+            @Override
+            public void onInputDeviceRemoved(int deviceId) {
+                notifyHardwareKeyboardState();
+            }
+
+            @Override
+            public void onInputDeviceChanged(int deviceId) {
+                notifyHardwareKeyboardState();
+            }
+        };
+
     @Override
     public void onStart() {
         super.onStart();
@@ -36,6 +56,8 @@ public class MainActivity extends BridgeActivity {
         getBridge().getWebView().removeJavascriptInterface("androidBridge");
         getBridge().setWebViewClient(new OpenTubeXWebViewClient(getBridge()));
         OpenTubeXNotificationChannels.createAll(this);
+        inputManager = (InputManager) getSystemService(INPUT_SERVICE);
+        inputManager.registerInputDeviceListener(inputDeviceListener, null);
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -43,6 +65,12 @@ public class MainActivity extends BridgeActivity {
                 getBridge().triggerWindowJSEvent("opentubex:android-back");
             }
         });
+    }
+
+    @Override
+    public void onDestroy() {
+        inputManager.unregisterInputDeviceListener(inputDeviceListener);
+        super.onDestroy();
     }
 
     @Override
@@ -71,6 +99,10 @@ public class MainActivity extends BridgeActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
+        notifyHardwareKeyboardState();
+    }
+
+    private void notifyHardwareKeyboardState() {
         PluginHandle handle = getBridge().getPlugin("AndroidUi");
         if (handle != null && handle.getInstance() instanceof AndroidUiPlugin) {
             boolean attached = ((AndroidUiPlugin) handle.getInstance()).hasHardwareKeyboard();

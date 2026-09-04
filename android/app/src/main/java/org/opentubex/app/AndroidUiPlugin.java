@@ -5,12 +5,13 @@ import android.app.PictureInPictureParams;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.hardware.input.InputManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.Rational;
+import android.view.InputDevice;
 
 import androidx.annotation.RequiresApi;
 
@@ -140,9 +141,26 @@ public class AndroidUiPlugin extends Plugin {
     }
 
     public boolean hasHardwareKeyboard() {
-        Configuration configuration = getContext().getResources().getConfiguration();
-        return configuration.keyboard != Configuration.KEYBOARD_NOKEYS &&
-            configuration.hardKeyboardHidden != Configuration.HARDKEYBOARDHIDDEN_YES;
+        InputManager inputManager = (InputManager) getContext()
+            .getSystemService(Context.INPUT_SERVICE);
+        for (int deviceId : inputManager.getInputDeviceIds()) {
+            InputDevice device = inputManager.getInputDevice(deviceId);
+            if (isHardwareKeyboardDevice(device)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static boolean isHardwareKeyboardDevice(InputDevice device) {
+        return device != null && isHardwareKeyboardDevice(
+            device.isVirtual(),
+            device.getKeyboardType()
+        );
+    }
+
+    static boolean isHardwareKeyboardDevice(boolean virtual, int keyboardType) {
+        return !virtual && keyboardType == InputDevice.KEYBOARD_TYPE_ALPHABETIC;
     }
 
     public void enterAutomaticPictureInPictureIfEnabled() {
