@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -48,6 +50,28 @@ public class SubscriptionRefreshCheckpointTest {
         assertEquals(Set.of("profile-with-failure"), resumed.failedProfileIds);
         assertEquals(0, SubscriptionRefreshCheckpoint.load(file, "second", 10).nextIndex);
         assertEquals(0, SubscriptionRefreshCheckpoint.load(file, "first", 2).nextIndex);
+    }
+
+    @Test
+    public void nullAuthorizationDiffersFromLiteralNull() {
+        SubscriptionRefreshConfiguration.Feed anonymous = feed("https://first.test", List.of("one"));
+        SubscriptionRefreshConfiguration.Feed authorized = new SubscriptionRefreshConfiguration.Feed(
+            "profile", "videos", 900_000, List.of("one"), "https://first.test", "null", "Refresh", "Cancel"
+        );
+        assertNotEquals(
+            SubscriptionRefreshCheckpoint.configurationId(List.of(anonymous)),
+            SubscriptionRefreshCheckpoint.configurationId(List.of(authorized))
+        );
+    }
+
+    @Test
+    public void malformedPropertiesStartAFreshPassAndCanBeReplaced() throws Exception {
+        File file = new File(temporary.newFolder(), "progress.properties");
+        Files.write(file.toPath(), "bad=\\u12G4\n".getBytes(StandardCharsets.UTF_8));
+        SubscriptionRefreshCheckpoint checkpoint = SubscriptionRefreshCheckpoint.load(file, "configuration", 10);
+        assertEquals(0, checkpoint.nextIndex);
+        checkpoint.save(1, 1, 0, Set.of());
+        assertEquals(1, SubscriptionRefreshCheckpoint.load(file, "configuration", 10).nextIndex);
     }
 
     @Test

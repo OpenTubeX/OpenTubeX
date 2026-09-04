@@ -40,22 +40,26 @@ export function createOptimisticSettingUpdater() {
   const pending = new Map()
 
   return (settingId, value, { read, commit, persist }) => {
-    const saved = pending.get(settingId) ?? { value: read() }
+    const currentValue = read()
+    const previous = pending.get(settingId)
+    const saved = previous && previous.optimisticValue === currentValue ? previous : { value: currentValue }
     const token = {}
     saved.latest = token
     pending.set(settingId, saved)
     commit(value)
+    const optimisticValue = read()
+    saved.optimisticValue = optimisticValue
 
     return runUpdate(settingId, async isLatest => {
       try {
         await persist(value)
         saved.value = value
       } catch (error) {
-        if (isLatest()) commit(saved.value)
+        if (isLatest() && read() === optimisticValue) commit(saved.value)
         throw error
       }
     }).finally(() => {
-      if (saved.latest === token) pending.delete(settingId)
+      if (pending.get(settingId) === saved && saved.latest === token) pending.delete(settingId)
     })
   }
 }

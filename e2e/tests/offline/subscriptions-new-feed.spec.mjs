@@ -258,7 +258,7 @@ test.describe('new subscriptions feed', () => {
       window.__unsubscribeMarkSeen()
       return window.__markSeenMutations
     })).toEqual([[
-      { tab: 'videos', channelId: CHANNEL_ID }
+      { tab: 'videos', channelId: CHANNEL_ID, timestamp: expect.any(Date) }
     ]])
   })
 
@@ -608,10 +608,10 @@ test.describe('new feed settings and seen state', () => {
       window.__unsubscribeMarkSeen()
       return window.__markSeenMutations
     })).toEqual([[
-      { tab: 'videos', channelId: CHANNEL_ID },
-      { tab: 'shorts', channelId: CHANNEL_ID },
-      { tab: 'live', channelId: CHANNEL_ID },
-      { tab: 'posts', channelId: CHANNEL_ID }
+      { tab: 'videos', channelId: CHANNEL_ID, timestamp: expect.any(Date) },
+      { tab: 'shorts', channelId: CHANNEL_ID, timestamp: expect.any(Date) },
+      { tab: 'live', channelId: CHANNEL_ID, timestamp: expect.any(Date) },
+      { tab: 'posts', channelId: CHANNEL_ID, timestamp: expect.any(Date) }
     ]])
     await expect(markAllAsSeen).toHaveCount(0)
 

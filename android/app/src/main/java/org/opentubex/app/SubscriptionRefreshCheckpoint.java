@@ -29,8 +29,8 @@ final class SubscriptionRefreshCheckpoint {
         StringBuilder value = new StringBuilder();
         for (SubscriptionRefreshConfiguration.Feed feed : feeds) {
             for (String field : new String[] { feed.profileId, feed.type, feed.instanceUrl, feed.authorization }) {
-                String text = String.valueOf(field);
-                value.append(text.length()).append(':').append(text);
+                if (field == null) value.append("-1:");
+                else value.append(field.length()).append(':').append(field);
             }
             value.append(feed.channelIds.size()).append(':');
             for (String channelId : feed.channelIds) value.append(channelId.length()).append(':').append(channelId);
@@ -44,6 +44,9 @@ final class SubscriptionRefreshCheckpoint {
         Properties saved = new Properties();
         try (FileInputStream input = new FileInputStream(file)) {
             saved.load(input);
+        } catch (IllegalArgumentException error) {
+            // Malformed properties must not prevent every later retry from starting.
+            return checkpoint;
         }
         if (!configuration.equals(saved.getProperty("configuration"))) return checkpoint;
         try {

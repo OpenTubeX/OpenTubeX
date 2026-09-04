@@ -189,3 +189,115 @@ test('stale refresh completion cannot rewind feed refresh timing', async ({ page
   })
   expect(result.actual).toBe(result.expected)
 })
+
+for (const mode of ['all', 'video', 'post']) {
+  test(`marking ${mode} seen does not mutate a newer refresh after a rejected write`, async ({ app, page }) => {
+    const result = await page.evaluate(async mode => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const isPost = mode === 'post'
+      const key = isPost ? 'posts' : 'videos'
+      const idKey = isPost ? 'postId' : 'videoId'
+      const action = isPost ? 'updateSubscriptionPostsCacheByChannel' : 'updateSubscriptionVideosCacheByChannel'
+      const save = (timestamp, ids) => store.dispatch(action, {
+        channelId: 'audit-seen',
+        timestamp: new Date(timestamp),
+        [key]: ids.map(id => ({ [idKey]: id, isNewInSubscriptionFeed: true })),
+      })
+      await save(1000, ['existing'])
+      const refresh = save(2000, ['existing', 'new'])
+      const seen = mode === 'all'
+        ? store.dispatch('markSubscriptionEntriesAsSeen', { tab: 'videos', channelIds: ['audit-seen'] })
+        : store.dispatch(isPost ? 'markSubscriptionPostAsSeen' : 'markSubscriptionVideoAsSeen', 'existing')
+      await Promise.all([refresh, seen])
+      return store.state.subscriptionCache[isPost ? 'postsCache' : 'videoCache']['audit-seen'][key]
+    }, mode)
+    expect(result.map(entry => entry.isNewInSubscriptionFeed)).toEqual([true, true])
+    const records = (await readFile(path.join(app.userDataDir, 'subscription-cache.db'), 'utf8'))
+      .trim().split('\n').map(line => JSON.parse(line))
+    const persisted = records.filter(record => record._id === 'audit-seen').at(-1)
+    expect(persisted[mode === 'post' ? 'communityPosts' : 'videos']).toEqual(result)
+  })
+}
+
+test('failed Home re-addition redirects when removal was already persisted', async ({ app, page }) => {
+  await page.locator('.sideNav .navOption[title="Home"]').click()
+  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTab.route.path)).toBe('/home')
+  const appearance = await goToSettingsSection(page, 'appearance')
+  await appearance.getByRole('button', { name: 'Customize navigation' }).click()
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    const original = ipcMain._invokeHandlers.get('db-settings')
+    let writes = 0
+    ipcMain.removeHandler('db-settings')
+    ipcMain.handle('db-settings', async (event, request) => {
+      if (request.action !== 2 || request.data._id !== 'navigationItems') return original(event, request)
+      if (++writes === 2) throw new Error('Fixture disk failure')
+      const result = await original(event, request)
+      await new Promise(resolve => { globalThis.releaseNavigationWrite = resolve })
+      return result
+    })
+  })
+  await page.locator('[data-navigation-item-id="home"]').getByRole('button', { name: 'Remove Home' }).click()
+  await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseNavigationWrite)).toBe('function')
+  await page.getByRole('button', { name: 'Add item', exact: true }).click()
+  await page.getByRole('menuitem', { name: 'Home', exact: true }).click()
+  await expect(page.locator('[data-navigation-item-id="home"]')).toHaveCount(1)
+  await app.electronApp.evaluate(() => globalThis.releaseNavigationWrite())
+  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getNavigationItems.includes('home'))).toBe(false)
+  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$route.path)).not.toBe('/home')
+})
+
+test('queued bulk seen writes and their final mutation retain the original snapshot', async ({ app, page }) => {
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    for (let i = 0; i < 9; i++) {
+      await store.dispatch('updateSubscriptionVideosCacheByChannel', {
+        channelId: `audit-bulk-${i}`,
+        timestamp: new Date(1000),
+        videos: [{ videoId: 'old', isNewInSubscriptionFeed: true }],
+      })
+    }
+  })
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    const original = ipcMain._invokeHandlers.get('db-subscription-cache')
+    let seenRequests = 0
+    globalThis.blockedSeenWrites = []
+    globalThis.finishedSeenWrites = 0
+    ipcMain.removeHandler('db-subscription-cache')
+    ipcMain.handle('db-subscription-cache', async (event, request) => {
+      const seen = request.data?.channelId?.startsWith('audit-bulk-') && request.data.entries?.every(entry => entry.isNewInSubscriptionFeed === false)
+      if (seen && ++seenRequests <= 8) {
+        await new Promise(resolve => globalThis.blockedSeenWrites.push(resolve))
+      }
+      const result = await original(event, request)
+      if (seen) globalThis.finishedSeenWrites++
+      return result
+    })
+  })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.bulkSeenWrite = store.dispatch('markSubscriptionEntriesAsSeen', {
+      tab: 'videos', channelIds: Array.from({ length: 9 }, (_, i) => `audit-bulk-${i}`),
+    })
+  })
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.blockedSeenWrites.length)).toBe(8)
+  const refresh = id => page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateSubscriptionVideosCacheByChannel', {
+    channelId: `audit-bulk-${id}`,
+    timestamp: new Date(2000),
+    videos: [{ videoId: 'new', isNewInSubscriptionFeed: true }],
+  }), id)
+  // The ninth write has not started; it must not borrow the new timestamp.
+  await refresh(8)
+  await app.electronApp.evaluate(() => globalThis.blockedSeenWrites.shift()())
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.finishedSeenWrites)).toBeGreaterThan(0)
+  // The first write has finished, but the final bulk mutation is still pending.
+  await refresh(0)
+  await app.electronApp.evaluate(() => globalThis.blockedSeenWrites.splice(0).forEach(resolve => resolve()))
+  await page.evaluate(() => window.bulkSeenWrite)
+  const records = (await readFile(path.join(app.userDataDir, 'subscription-cache.db'), 'utf8'))
+    .trim().split('\n').map(line => JSON.parse(line))
+  for (const id of [0, 8]) {
+    const expected = [{ videoId: 'new', isNewInSubscriptionFeed: true }]
+    expect(records.filter(record => record._id === `audit-bulk-${id}`).at(-1).videos).toEqual(expected)
+    expect(await page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.subscriptionCache.videoCache[`audit-bulk-${id}`].videos, id)).toEqual(expected)
+  }
+})

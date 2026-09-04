@@ -64,6 +64,51 @@ test('a failed latest list edit restores the last successful write, not an obsol
   assert.deepEqual(value, ['second', 'third'])
 })
 
+test('a failed optimistic write cannot roll back a newer synchronized value', async () => {
+  const update = createOptimisticSettingUpdater()
+  const started = deferred()
+  const release = deferred()
+  let value = ['original']
+  const pending = update('items', ['local'], {
+    read: () => value,
+    commit: next => { value = next },
+    persist: async () => {
+      started.resolve()
+      await release.promise
+      throw new Error('Disk write failed')
+    },
+  })
+  const failure = assert.rejects(pending, /Disk write failed/)
+  await started.promise
+  value = ['synchronized']
+  release.resolve()
+  await failure
+  assert.deepEqual(value, ['synchronized'])
+})
+
+test('edits after synchronization use the synchronized rollback baseline', async () => {
+  const update = createOptimisticSettingUpdater()
+  const started = deferred()
+  const release = deferred()
+  let value = ['original']
+  const options = {
+    read: () => value,
+    commit: next => { value = next },
+    persist: async () => {
+      started.resolve()
+      await release.promise
+      throw new Error('Disk write failed')
+    },
+  }
+  const first = assert.rejects(update('items', ['first'], options), /Disk write failed/)
+  await started.promise
+  value = ['synchronized']
+  const second = assert.rejects(update('items', ['second'], options), /Disk write failed/)
+  release.resolve()
+  await Promise.all([first, second])
+  assert.deepEqual(value, ['synchronized'])
+})
+
 test('keeps an in-flight setting write from applying after a newer update', async () => {
   const runUpdate = createSettingUpdateQueue()
   const firstStarted = deferred()
