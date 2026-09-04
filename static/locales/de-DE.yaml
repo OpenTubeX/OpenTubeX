@@ -330,7 +330,7 @@ Settings:
     Date Format: Datumsformat
     Time Format: Zeitformat
     Language Default: Sprachvorgabe
-    Use AI Translation Completions: Fehlende Übersetzungen mit KI ergänzen
+    Use AI Translation Completions: Fehlende Übersetzungen durch KI-generierte ergänzen
     Preferred API Backend:
       Preferred API Backend: Bevorzugtes API-Backend
       Local API: Lokale API

@@ -197,7 +197,7 @@ test.describe('skip silence settings search', () => {
 })
 
 test.describe('AI translation completions', () => {
-  const englishLabel = 'Fill missing translations with AI-generated text'
+  const englishLabel = 'Fill missing translations with AI-generated ones'
   const generatedLabel = 'ترجمة اختبار بالذكاء الاصطناعي'
 
   test.use({
@@ -963,7 +963,7 @@ test.describe('settings', () => {
     await minimizeToTray.evaluate(element => { element.style.display = 'none' })
 
     const aiTranslations = general.getByRole('checkbox', {
-      name: 'Fill missing translations with AI-generated text'
+      name: 'Fill missing translations with AI-generated ones'
     }).locator('..')
     const grid = general.locator('.switchColumnGrid').first()
 
