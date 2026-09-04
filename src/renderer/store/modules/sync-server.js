@@ -518,7 +518,7 @@ const actions = {
 
   async completeSyncServerPairing(
     { commit, dispatch, rootState },
-    { serverUrl, username, token, privacyKey, privacySalt, deviceId, deviceName }
+    { serverUrl, username, token, privacyKey, privacySalt, deviceId, deviceName, deviceSystemInfo }
   ) {
     if (!rootState.settings.syncServerEnabled) {
       throw new Error('Enable sync first')
@@ -527,6 +527,20 @@ const actions = {
     const trimmedUsername = username.trim()
     if (!trimmedUsername || !token || !privacyKey || !privacySalt || !deviceId || !deviceName) {
       throw new Error('Incomplete pairing result')
+    }
+
+    if (deviceSystemInfo) {
+      const client = trackSyncClient(new SyncServerClient(normalizedUrl, token))
+      try {
+        const encryptedDeviceInfo = await encryptSyncServerDeviceInfo(
+          { name: deviceName, ...deviceSystemInfo },
+          privacyKey,
+          deviceId
+        )
+        await client.updateAccountSession('current', encryptedDeviceInfo)
+      } finally {
+        releaseSyncClient(client)
+      }
     }
 
     await dispatch('updateSyncServerUrl', normalizedUrl, { root: true })

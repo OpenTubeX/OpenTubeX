@@ -87,6 +87,10 @@ export async function getAndroidHardwareKeyboardState() {
   return result.attached === true
 }
 
+export function getAndroidDeviceInfo() {
+  return AndroidUi?.getDeviceInfo() ?? Promise.resolve()
+}
+
 export function setAndroidPictureInPictureDocumentState(active) {
   document.body.classList.toggle('androidPictureInPicture', active)
 }

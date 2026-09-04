@@ -69,20 +69,54 @@ export function isValidSyncServerDeviceId(value) {
   }
 }
 
-export async function getCurrentSyncServerSystemInfo() {
-  let systemInfo
+export function resolveSyncServerDeviceName(savedName, systemName, fallbackName) {
+  const name = typeof savedName === 'string' ? savedName.trim() : ''
+  if ((!isValidSyncServerDeviceName(name) || name === fallbackName) &&
+      isValidSyncServerDeviceName(systemName)) {
+    return systemName
+  }
+  return isValidSyncServerDeviceName(name) ? name : fallbackName
+}
+
+async function loadAndroidDeviceInfo() {
+  const { getAndroidDeviceInfo } = await import('./androidUi.js')
+  return getAndroidDeviceInfo()
+}
+
+async function loadElectronDeviceInfo() {
+  const [deviceInfo, name] = await Promise.all([
+    globalThis.window?.ftElectron?.getDeviceInfo?.(),
+    globalThis.window?.ftElectron?.getDeviceName?.(),
+  ])
+  return { ...deviceInfo, name }
+}
+
+export async function getCurrentSyncServerDeviceInfo({
+  isCapacitor = Boolean(process.env.IS_CAPACITOR),
+  getAndroidDeviceInfo = loadAndroidDeviceInfo,
+  getElectronDeviceInfo = loadElectronDeviceInfo,
+} = {}) {
+  let deviceInfo
   try {
-    systemInfo = await globalThis.window?.ftElectron?.getDeviceInfo?.()
+    deviceInfo = await (isCapacitor ? getAndroidDeviceInfo() : getElectronDeviceInfo())
   } catch {}
 
   const electronPlatform = typeof process !== 'undefined' && process.env?.IS_ELECTRON
     ? process.platform
     : 'web'
+  const name = typeof deviceInfo?.name === 'string' ? deviceInfo.name.trim() : ''
+  const platform = deviceInfo?.platform || (isCapacitor ? 'android' : electronPlatform) || 'web'
   return {
-    platform: validateSystemField(systemInfo?.platform || electronPlatform || 'web'),
-    architecture: validateSystemField(systemInfo?.architecture || ''),
-    release: validateSystemField(systemInfo?.release || ''),
+    name: isValidSyncServerDeviceName(name) ? name : '',
+    platform: validateSystemField(platform),
+    architecture: validateSystemField(deviceInfo?.architecture || ''),
+    release: validateSystemField(deviceInfo?.release || ''),
   }
+}
+
+export async function getCurrentSyncServerSystemInfo() {
+  const { name, ...systemInfo } = await getCurrentSyncServerDeviceInfo()
+  return systemInfo
 }
 
 export async function encryptSyncServerDeviceInfo(value, exportedKey, deviceId) {

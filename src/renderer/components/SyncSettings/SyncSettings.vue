@@ -454,10 +454,10 @@ import {
 import { showToast } from '../../helpers/utils'
 import { formatDateTime } from '../../helpers/dateFormat'
 import {
-  getCurrentSyncServerSystemInfo,
+  getCurrentSyncServerDeviceInfo,
   isValidSyncServerDeviceId,
-  isValidSyncServerDeviceName,
   randomSyncServerDeviceId,
+  resolveSyncServerDeviceName,
 } from '../../helpers/sync-server-sessions'
 
 const { locale, t } = useI18n()
@@ -686,19 +686,17 @@ async function ensureDeviceIdentity() {
     await store.dispatch('updateSyncServerDeviceId', id)
   }
 
-  let name = store.getters.getSyncServerDeviceName?.trim()
-  if (!isValidSyncServerDeviceName(name)) {
-    try {
-      const systemName = await window.ftElectron?.getDeviceName?.()
-      const trimmedName = systemName?.trim()
-      if (isValidSyncServerDeviceName(trimmedName)) name = trimmedName
-    } catch {}
-  }
-  if (!isValidSyncServerDeviceName(name)) name = t('Settings.Sync Settings.This Device')
+  const { name: systemName, ...systemInfo } = await getCurrentSyncServerDeviceInfo()
+  const fallbackName = t('Settings.Sync Settings.This Device')
+  const name = resolveSyncServerDeviceName(
+    store.getters.getSyncServerDeviceName,
+    systemName,
+    fallbackName
+  )
   if (name !== store.getters.getSyncServerDeviceName) {
     await store.dispatch('updateSyncServerDeviceName', name)
   }
-  return { id, name, systemInfo: await getCurrentSyncServerSystemInfo() }
+  return { id, name, systemInfo }
 }
 
 async function syncNow() {

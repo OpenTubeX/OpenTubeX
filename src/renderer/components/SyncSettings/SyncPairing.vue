@@ -310,6 +310,7 @@ import {
 import { SyncServerClient, normalizeSyncServerUrl } from '../../helpers/sync-server'
 import {
   encryptSyncServerDeviceInfo,
+  getCurrentSyncServerDeviceInfo,
 } from '../../helpers/sync-server-sessions'
 import { formatTime } from '../../helpers/dateFormat'
 import store from '../../store/index'
@@ -379,7 +380,7 @@ let approveSequence = 0
 let pairingClient = null
 const pairingApproval = ref(null)
 
-window.ftElectron?.getDeviceName?.().then(name => {
+getCurrentSyncServerDeviceInfo().then(({ name }) => {
   const trimmedName = name?.trim()
   if (trimmedName && deviceName.value === fallbackDeviceName) {
     deviceName.value = trimmedName
@@ -521,6 +522,7 @@ async function confirmReceiver() {
   receiveStage.value = 'finishing'
   const privacy = active.transfer
   try {
+    const { name, ...deviceSystemInfo } = await getCurrentSyncServerDeviceInfo()
     await store.dispatch('completeSyncServerPairing', {
       serverUrl: active.request.origin,
       username: privacy.username,
@@ -529,6 +531,7 @@ async function confirmReceiver() {
       privacySalt: privacy.salt,
       deviceId: active.recipient.recipientDeviceId,
       deviceName: active.recipient.recipientDeviceName,
+      deviceSystemInfo,
     })
     await finishReceiver()
     emit('paired', 'completed')

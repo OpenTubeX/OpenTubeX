@@ -4,9 +4,11 @@ import test from 'node:test'
 import {
   decryptSyncServerDeviceInfo,
   encryptSyncServerDeviceInfo,
+  getCurrentSyncServerDeviceInfo,
   isValidSyncServerDeviceId,
   isValidSyncServerDeviceName,
   randomSyncServerDeviceId,
+  resolveSyncServerDeviceName,
 } from '../../src/renderer/helpers/sync-server-sessions.js'
 
 function bytesToBase64 (bytes) {
@@ -18,6 +20,30 @@ test('creates random canonical device identifiers', () => {
   assert.equal(identifiers.size, 100)
   for (const identifier of identifiers) assert.equal(isValidSyncServerDeviceId(identifier), true)
   assert.equal(isValidSyncServerDeviceId('not a device id'), false)
+})
+
+test('uses native Android identity for the current sync device', async () => {
+  const deviceInfo = await getCurrentSyncServerDeviceInfo({
+    isCapacitor: true,
+    getAndroidDeviceInfo: async () => ({
+      name: 'Pixel 9',
+      platform: 'android',
+      architecture: 'arm64-v8a',
+      release: '16',
+    }),
+  })
+
+  assert.deepEqual(deviceInfo, {
+    name: 'Pixel 9',
+    platform: 'android',
+    architecture: 'arm64-v8a',
+    release: '16',
+  })
+})
+
+test('replaces the generic current-device name without overwriting a custom name', () => {
+  assert.equal(resolveSyncServerDeviceName('This device', 'Pixel 9', 'This device'), 'Pixel 9')
+  assert.equal(resolveSyncServerDeviceName('My phone', 'Pixel 9', 'This device'), 'My phone')
 })
 
 test('encrypts device identification for one device and privacy key', async () => {
