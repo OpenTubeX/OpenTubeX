@@ -12,9 +12,6 @@ const ACTIVE_WINDOW_REPORT_PATH = '/io/github/OpenTubeX/KWinActiveWindow'
 const ACTIVE_WINDOW_REPORT_INTERFACE = 'io.github.OpenTubeX.KWinActiveWindow'
 const ACTIVE_WINDOW_QUERY_TIMEOUT = 1_500
 const KDE_DESKTOP_POPUP_CLASS = /(?:^|\.)(?:krunner|plasmashell)$/i
-// Mapping PiP during KWin's source-window transition can expose one fully
-// painted frame before KWin starts the PiP opening animation.
-const KWIN_TRANSITION_SETTLE_DELAY = 250
 const WINDOW_SEARCH_TERM = 'OpenTubeX'
 
 /**
@@ -403,7 +400,7 @@ export function monitorKdeWaylandWindowState({
   onMinimizedState,
   releaseWindowIdentity = () => {},
   processId = process.pid,
-  detectionDelay = KWIN_TRANSITION_SETTLE_DELAY,
+  detectionDelay = 100,
   focusHandoffDelay = 100,
   pollInterval = 1_000,
 }) {
