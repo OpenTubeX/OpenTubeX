@@ -6455,7 +6455,6 @@ export default defineComponent({
     let documentPipPageHideHandler = null
     let documentPipPageHideWindow = null
     let documentPipEnterTimeout = null
-    let disposed = false
     const pipWindowWidth = ref(null)
     const pipWindowHeight = ref(null)
 
@@ -10146,9 +10145,7 @@ export default defineComponent({
 
       voiceOverTranslation.attach(videoElement)
 
-      await initializeActiveTab()
-
-      if (disposed) return
+      initializeActiveTab()
 
       const localPlayer = new shaka.Player()
 
@@ -10833,7 +10830,6 @@ export default defineComponent({
     // #region tear down
 
     onBeforeUnmount(() => {
-      disposed = true
       clearTimeout(paidPromotionTimer)
       if (fullscreenDockLayoutFrame !== null) {
         cancelAnimationFrame(fullscreenDockLayoutFrame)
