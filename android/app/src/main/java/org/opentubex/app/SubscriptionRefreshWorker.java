@@ -176,7 +176,7 @@ public final class SubscriptionRefreshWorker extends Worker {
                 List<String> profileIds = targetProfileIds(feeds, channelId);
                 try {
                     JSONObject payload = SubscriptionRefreshHttpClient.fetch(feed, channelId);
-                    boolean storageFailed = false;
+                    boolean stored = false;
                     long timestamp = System.currentTimeMillis();
                     for (String profileId : profileIds) {
                         try {
@@ -188,8 +188,8 @@ public final class SubscriptionRefreshWorker extends Worker {
                                 payload,
                                 timestamp
                             );
+                            stored = true;
                         } catch (Exception error) {
-                            storageFailed = true;
                             failedProfileIds.add(profileId);
                             recordFailure(
                                 context,
@@ -200,10 +200,10 @@ public final class SubscriptionRefreshWorker extends Worker {
                             );
                         }
                     }
-                    if (storageFailed) {
-                        failed++;
-                    } else {
+                    if (stored) {
                         completed++;
+                    } else {
+                        failed++;
                     }
                 } catch (Exception error) {
                     failed++;
