@@ -151,6 +151,10 @@
     "ri": "computer-line",
     "material": "desktop-windows-outline"
   },
+  "devices": {
+    "ri": "device-line",
+    "material": "devices-outline"
+  },
   "download": {
     "ri": "download-line",
     "material": "download-rounded"
@@ -473,6 +477,10 @@
   "sliders-h": {
     "ri": "equalizer-line",
     "material": "tune-rounded"
+  },
+  "smartphone": {
+    "ri": "smartphone-line",
+    "material": "smartphone-outline"
   },
   "sort-alpha-down": {
     "ri": "sort-alphabet-asc",

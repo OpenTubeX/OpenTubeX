@@ -9,7 +9,7 @@
           class="managementIcon"
           aria-hidden="true"
         >
-          <FtIcon :icon="['fas', 'display']" />
+          <FtIcon :icon="['fas', 'devices']" />
         </span>
         <div>
           <h3 :id="headingId">
@@ -327,7 +327,8 @@ function systemLabel(deviceInfo) {
 }
 
 function deviceIcon(platform) {
-  return platform === 'web' ? ['fas', 'globe'] : ['fas', 'display']
+  if (platform === 'web') return ['fas', 'globe']
+  return platform === 'android' ? ['fas', 'smartphone'] : ['fas', 'display']
 }
 
 async function handleRequestError(requestError, requestToken, target = error) {
