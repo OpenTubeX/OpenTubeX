@@ -686,6 +686,9 @@ export default defineComponent({
     const isFullscreen = ref(false)
     const playerPaused = ref(true)
     const pausedInterfaceRevealed = ref(false)
+    const shakaControlsShown = ref(false)
+    const isSubMenuOpened = ref(false)
+    const actionDockFocused = ref(false)
     /** @type {number|null} */
     let pausedInterfaceRevealTimeout = null
 
@@ -693,7 +696,24 @@ export default defineComponent({
     const showVideoTitleWhenPaused = computed(() => store.getters.getShowVideoTitleWhenPaused)
     const showFullscreenActionsWhenPaused = computed(() => store.getters.getShowFullscreenActionsWhenPaused)
     const pausedInterfaceHideDelay = computed(() => store.getters.getPausedInterfaceHideDelay)
-
+    const playerControlsShown = computed(() => (
+      shakaControlsShown.value &&
+      (
+        !playerPaused.value ||
+        showPlayerControlsWhenPaused.value ||
+        pausedInterfaceRevealed.value ||
+        (!isFullscreen.value && !fullWindowEnabled.value)
+      )
+    ))
+    const actionDockVisible = computed(() => (
+      !isSubMenuOpened.value &&
+      (
+        actionDockFocused.value || (
+          (shakaControlsShown.value || props.shortsPlayer) &&
+          (!playerPaused.value || showFullscreenActionsWhenPaused.value || pausedInterfaceRevealed.value)
+        )
+      )
+    ))
     function clearPausedInterfaceReveal() {
       if (pausedInterfaceRevealTimeout !== null) {
         clearTimeout(pausedInterfaceRevealTimeout)
@@ -5031,6 +5051,12 @@ export default defineComponent({
       const controlsContainer = ui.getControls().getControlsContainer()
       observeFullscreenControlsVisibility(controlsContainer)
 
+      const controls = ui.getControls()
+      controls.removeEventListener('submenuopen', handleSubMenuOpen)
+      controls.removeEventListener('submenuclose', handleSubMenuClose)
+      controls.addEventListener('submenuopen', handleSubMenuOpen)
+      controls.addEventListener('submenuclose', handleSubMenuClose)
+
       controlsContainer.removeEventListener('wheel', handleControlsContainerWheel)
       controlsContainer.removeEventListener('click', handleControlsContainerClick, true)
       controlsContainer.removeEventListener('pointerdown', handleTemporaryPlaybackRatePointerDown, true)
@@ -5454,6 +5480,14 @@ export default defineComponent({
     let fullscreenControlsVisibilityObserver = null
     let androidStatusBarVisible = true
 
+    function handleSubMenuOpen() {
+      isSubMenuOpened.value = true
+    }
+
+    function handleSubMenuClose() {
+      isSubMenuOpened.value = false
+    }
+
     /** @type {number|null} */
     let controlPanelLayoutFrame = null
 
@@ -5593,6 +5627,7 @@ export default defineComponent({
       ) {
         controlsContainer.setAttribute('shown', 'true')
       }
+      shakaControlsShown.value = controlsContainer?.hasAttribute('shown') === true
       const visible = shouldShowAndroidStatusBar({
         active: isActiveTab.value,
         fullscreen: isNativeFullscreenActive(),
@@ -10784,6 +10819,10 @@ export default defineComponent({
         fullscreenControlsVisibilityObserver = null
       }
 
+      const controls = ui?.getControls()
+      controls?.removeEventListener('submenuopen', handleSubMenuOpen)
+      controls?.removeEventListener('submenuclose', handleSubMenuClose)
+
       if (!androidStatusBarVisible) {
         androidStatusBarVisible = true
         setAndroidStatusBarVisible(true).catch(() => {})
@@ -11078,6 +11117,10 @@ export default defineComponent({
       showPlayerControlsWhenPaused,
       showVideoTitleWhenPaused,
       showFullscreenActionsWhenPaused,
+      actionDockVisible,
+      actionDockFocused,
+      playerControlsShown,
+      isSubMenuOpened,
       presentationModeChanging,
       chapterThumbnails,
       closeChaptersOverlay,

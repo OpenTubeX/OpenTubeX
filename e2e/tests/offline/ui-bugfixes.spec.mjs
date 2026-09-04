@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, goTo, repoRoot, setWindowSize } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 function historyEntry(videoId, title, timeWatched) {
@@ -464,6 +464,301 @@ test('scopes Android fullscreen safe-area rules to the player UI', async ({ app,
   await expect(page.locator('.shortsFullscreenMetadataSide')).toHaveCSS('display', 'none')
   await expect(page.locator('.fullscreenCommentsOverlay')).toHaveCSS('top', '44px')
   await expect(page.locator('.fullscreenCommentsOverlay')).toHaveCSS('bottom', '32px')
+})
+
+test('keeps Android player notices and end cards clear of visible controls', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 800, height: 480 })
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+  await page.evaluate(async () => {
+    document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
+    const app = document.querySelector('.app')
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateShowFullscreenActionsWhenPaused', true)
+    app.classList.add('capacitorTabs')
+  })
+  const watchComponent = await page.evaluateHandle(findWatchComponent)
+  await page.locator('.full-window-button').first().dispatchEvent('click')
+  await expect(page.locator('.ftVideoPlayer')).toHaveClass(/fullWindow/)
+  await page.evaluate(() => {
+    const player = document.querySelector('.ftVideoPlayer')
+    const controls = player.querySelector('.shaka-controls-container')
+    const seekBar = controls.querySelector('.shaka-seek-bar-container')
+    const actionDock = player.querySelector('.fullscreenActions')
+    const notice = document.createElement('div')
+    const noticeAction = document.createElement('button')
+    const annotations = document.createElement('div')
+    const endCard = document.createElement('button')
+
+    player.dir = 'rtl'
+    controls.setAttribute('shown', 'true')
+    window.__keepTestControlsShown = new MutationObserver(() => {
+      if (controls.getAttribute('shown') !== 'true') controls.setAttribute('shown', 'true')
+    })
+    window.__keepTestControlsShown.observe(controls, {
+      attributeFilter: ['shown'],
+      attributes: true,
+    })
+
+    notice.className = 'skippedSegmentsWrapper'
+    for (const { name } of actionDock.attributes) {
+      if (name.startsWith('data-v-')) {
+        notice.setAttribute(name, '')
+        noticeAction.setAttribute(name, '')
+      }
+    }
+    noticeAction.className = 'skippedSegment'
+    noticeAction.textContent = 'SponsorBlock action'
+    noticeAction.addEventListener('click', (event) => {
+      event.stopPropagation()
+      window.__sponsorBlockActionClicked = true
+    })
+    notice.append(noticeAction)
+
+    annotations.className = 'videoAnnotations'
+    Object.assign(annotations.style, {
+      position: 'absolute',
+      inset: '0',
+      zIndex: '2',
+      pointerEvents: 'none',
+    })
+    endCard.className = 'annotation'
+    endCard.textContent = 'End card'
+    Object.assign(endCard.style, {
+      position: 'absolute',
+      inlineSize: '220px',
+      blockSize: '180px',
+      pointerEvents: 'auto',
+    })
+    annotations.append(endCard)
+    player.append(notice, annotations)
+
+    const playerBounds = player.getBoundingClientRect()
+    const seekBounds = seekBar.getBoundingClientRect()
+    endCard.style.left = 'calc(50% - 110px)'
+    endCard.style.top = `${seekBounds.top - playerBounds.top - 90}px`
+  })
+
+  const player = page.locator('.ftVideoPlayer')
+  const controls = player.locator('.shaka-controls-container')
+  const bottomControls = controls.locator('.shaka-bottom-controls')
+  const seekBar = controls.locator('.shaka-seek-bar-container')
+  const actionDock = player.locator('.fullscreenActions')
+  const notice = player.locator('.skippedSegmentsWrapper')
+  const endCard = player.locator('.annotation')
+
+  const alignEndCardWithSeekBar = () => player.evaluate((element) => {
+    const playerBounds = element.getBoundingClientRect()
+    const seekBounds = element.querySelector('.shaka-seek-bar-container').getBoundingClientRect()
+    element.querySelector('.annotation').style.top = `${seekBounds.top - playerBounds.top - 90}px`
+  })
+  await expect(controls).toHaveAttribute('shown', 'true')
+  await expect(player).toHaveClass(/actionDockVisible/)
+  await expect(player).toHaveClass(/playerControlsShown/)
+
+  const verticalGap = () => player.evaluate((element) => {
+    const dockBounds = element.querySelector('.fullscreenActions').getBoundingClientRect()
+    const noticeBounds = element.querySelector('.skippedSegmentsWrapper').getBoundingClientRect()
+    return dockBounds.top - noticeBounds.bottom
+  })
+  const noticeBottom = () => player.evaluate((element) => {
+    const playerBounds = element.getBoundingClientRect()
+    const noticeBounds = element.querySelector('.skippedSegmentsWrapper').getBoundingClientRect()
+    return playerBounds.bottom - noticeBounds.bottom
+  })
+  const hitOwnership = () => player.evaluate((element) => {
+    const seekBar = element.querySelector('.shaka-seek-bar-container')
+    const endCard = element.querySelector('.annotation')
+    const seekBounds = seekBar.getBoundingClientRect()
+    const cardBounds = endCard.getBoundingClientRect()
+    const seekHit = document.elementFromPoint(
+      seekBounds.left + seekBounds.width / 2,
+      seekBounds.top + seekBounds.height / 2
+    )
+    const cardHit = document.elementFromPoint(
+      element.dir === 'rtl' ? cardBounds.right - 20 : cardBounds.left + 20,
+      cardBounds.top + 20
+    )
+
+    return {
+      cardOwnsClearArea: endCard.contains(cardHit),
+      controlsOwnSeekBar: seekBar.contains(seekHit),
+    }
+  })
+
+  await expect(actionDock).toHaveCSS('opacity', '1')
+  await expect(actionDock).toHaveCSS('pointer-events', 'auto')
+  await expect(notice).toHaveCSS('bottom', '164px')
+  await expect.poll(verticalGap).toBeGreaterThanOrEqual(8)
+  await expect.poll(() => player.evaluate((element) => {
+    const playerBounds = element.getBoundingClientRect()
+    const dockBounds = element.querySelector('.fullscreenActions').getBoundingClientRect()
+    return playerBounds.bottom - dockBounds.bottom
+  })).toBeCloseTo(106, 0)
+  const raisedNoticeBottom = await noticeBottom()
+
+  await expect(controls).toHaveCSS('z-index', 'auto')
+  await expect(bottomControls).toHaveCSS('z-index', '3')
+  const [seekBounds, cardBounds] = await Promise.all([
+    seekBar.boundingBox(),
+    endCard.boundingBox(),
+  ])
+  expect(seekBounds.y).toBeLessThan(cardBounds.y + cardBounds.height)
+  expect(seekBounds.y + seekBounds.height).toBeGreaterThan(cardBounds.y)
+  await expect.poll(async () => {
+    const ownership = await hitOwnership()
+    return {
+      cardOwnsClearArea: ownership.cardOwnsClearArea,
+      controlsOwnSeekBar: ownership.controlsOwnSeekBar,
+    }
+  }).toEqual({ cardOwnsClearArea: true, controlsOwnSeekBar: true })
+  await notice.getByRole('button', { name: 'SponsorBlock action' }).click()
+  await expect.poll(() => page.evaluate(() => window.__sponsorBlockActionClicked)).toBe(true)
+
+  await seekBar.evaluate((element) => {
+    window.__seekDragEvents = []
+    for (const type of ['pointerdown', 'pointermove', 'pointerup']) {
+      element.addEventListener(type, () => window.__seekDragEvents.push(type), {
+        capture: true,
+      })
+    }
+  })
+  const dragBounds = await seekBar.boundingBox()
+  await page.mouse.move(dragBounds.x + dragBounds.width / 2, dragBounds.y + dragBounds.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(dragBounds.x + dragBounds.width / 2 + 40, dragBounds.y + dragBounds.height / 2)
+  await page.mouse.up()
+  await expect.poll(() => page.evaluate(() => window.__seekDragEvents)).toEqual([
+    'pointermove',
+    'pointerdown',
+    'pointermove',
+    'pointerup',
+  ])
+
+  for (const { width, height, direction, zoom } of [
+    { width: 480, height: 800, direction: 'ltr', zoom: 1 },
+    { width: 1024, height: 768, direction: 'rtl', zoom: 1.25 },
+  ]) {
+    await page.evaluate((factor) => window.ftElectron.setZoomFactor(factor), zoom)
+    await setWindowSize(app, page, { width, height })
+    await player.evaluate((element, dir) => { element.dir = dir }, direction)
+    await alignEndCardWithSeekBar()
+    await expect.poll(verticalGap).toBeGreaterThanOrEqual(8)
+    await expect.poll(async () => {
+      const ownership = await hitOwnership()
+      return {
+        cardOwnsClearArea: ownership.cardOwnsClearArea,
+        controlsOwnSeekBar: ownership.controlsOwnSeekBar,
+      }
+    }).toEqual({ cardOwnsClearArea: true, controlsOwnSeekBar: true })
+  }
+
+  const moreOptions = player.getByRole('button', { name: 'More settings' })
+  const overflowMenu = player.locator('.shaka-overflow-menu')
+  await moreOptions.click()
+  const zoomMenuButton = overflowMenu.getByRole('button', { name: 'Zoom' })
+  await expect(controls).toHaveCSS('z-index', '9')
+  await endCard.evaluate((element) => {
+    const playerBounds = element.closest('.ftVideoPlayer').getBoundingClientRect()
+    const menuButtonBounds = document.querySelector('.shaka-overflow-menu .video-zoom-button')
+      .getBoundingClientRect()
+    element.style.left = `${menuButtonBounds.left - playerBounds.left}px`
+    element.style.top = `${menuButtonBounds.top - playerBounds.top}px`
+  })
+  await expect.poll(async () => zoomMenuButton.evaluate((element) => {
+    const bounds = element.getBoundingClientRect()
+    return element.contains(document.elementFromPoint(
+      bounds.left + bounds.width / 2,
+      bounds.top + bounds.height / 2
+    ))
+  })).toBe(true)
+  await zoomMenuButton.click()
+  await expect(player).toHaveClass(/isSubMenuOpened/)
+  await expect(actionDock).toHaveCSS('opacity', '0')
+  await expect(actionDock).toHaveCSS('pointer-events', 'none')
+  await expect.poll(noticeBottom).toBeLessThan(raisedNoticeBottom - 40)
+
+  await player.locator('.video-zoom-menu .shaka-back-to-overflow-button').click()
+  await expect(player).not.toHaveClass(/isSubMenuOpened/)
+  await expect(actionDock).toHaveCSS('opacity', '1')
+  await expect(actionDock).toHaveCSS('pointer-events', 'auto')
+  await expect.poll(verticalGap).toBeGreaterThanOrEqual(8)
+  await moreOptions.click()
+  await expect(overflowMenu).toBeHidden()
+  await alignEndCardWithSeekBar()
+
+  await player.locator('video').evaluate(element => element.pause())
+  await watchComponent.evaluate(async (component) => {
+    await component.proxy.$store.dispatch('updateShowPlayerControlsWhenPaused', false)
+    component.proxy.$refs.player.$.setupState.pausedInterfaceRevealed = false
+    await component.proxy.$nextTick()
+  })
+  await expect(player).toHaveClass(/playerPaused/)
+  await expect(player).not.toHaveClass(/playerControlsShown/)
+  await expect(bottomControls).toHaveCSS('z-index', '1')
+  await expect.poll(async () => {
+    const ownership = await hitOwnership()
+    return {
+      cardOwnsClearArea: ownership.cardOwnsClearArea,
+      controlsOwnSeekBar: ownership.controlsOwnSeekBar,
+    }
+  }).toEqual({ cardOwnsClearArea: true, controlsOwnSeekBar: false })
+  await watchComponent.evaluate(async (component) => {
+    await component.proxy.$store.dispatch('updateShowPlayerControlsWhenPaused', true)
+    await component.proxy.$nextTick()
+  })
+  await expect(player).toHaveClass(/playerControlsShown/)
+  await player.locator('video').evaluate(element => element.play())
+  await expect(player).not.toHaveClass(/playerPaused/)
+
+  await controls.evaluate(element => {
+    window.__keepTestControlsShown.disconnect()
+    element.removeAttribute('shown')
+  })
+  await expect(player).not.toHaveClass(/actionDockVisible/)
+  await expect(player).not.toHaveClass(/playerControlsShown/)
+  await expect(actionDock).toHaveCSS('opacity', '0')
+  await expect(bottomControls).toHaveCSS('z-index', '1')
+  await endCard.evaluate(element => { element.style.top = '100px' })
+  await endCard.click({ trial: true })
+
+  const dockFocusAction = actionDock.locator('.fullscreenShareAction > .iconButton')
+  await expect(dockFocusAction).toHaveCount(1)
+  await dockFocusAction.focus()
+  await expect(actionDock).toHaveCSS('opacity', '1')
+  await expect(player).toHaveClass(/actionDockVisible/)
+  await expect.poll(verticalGap).toBeGreaterThanOrEqual(8)
+  await dockFocusAction.evaluate(element => element.blur())
+  await expect(actionDock).toHaveCSS('opacity', '0')
+  await expect.poll(noticeBottom).toBeLessThan(raisedNoticeBottom - 40)
+
+  await watchComponent.evaluate(async (component) => {
+    component.proxy.$refs.player.$.setupState.fullWindowEnabled = false
+    await component.proxy.$nextTick()
+  })
+  await expect(player).not.toHaveClass(/fullWindow/)
+  await expect(notice).toHaveCSS('bottom', /.+/)
+  await expect.poll(noticeBottom).toBeLessThan(raisedNoticeBottom - 40)
+
+  await page.locator('.app').evaluate(element => element.classList.remove('capacitorTabs'))
+  await watchComponent.evaluate(async (component) => {
+    component.proxy.$refs.player.$.setupState.fullWindowEnabled = true
+    await component.proxy.$nextTick()
+  })
+  await expect(player).toHaveClass(/fullWindow/)
+  await controls.evaluate(element => element.setAttribute('shown', 'true'))
+  await expect(controls).toHaveCSS('z-index', '1')
+  await expect(bottomControls).toHaveCSS('z-index', '1')
+  await moreOptions.click()
+  await overflowMenu.getByRole('button', { name: 'Zoom' }).click()
+  await expect(player).toHaveClass(/isSubMenuOpened/)
+  await expect(actionDock).toHaveCSS('opacity', '1')
+  await expect(actionDock).toHaveCSS('pointer-events', 'auto')
+  await player.locator('.video-zoom-menu .shaka-back-to-overflow-button').click()
+  await moreOptions.click()
+  await endCard.click({ trial: true })
+  await watchComponent.dispose()
 })
 
 test('paid promotion badge follows the full-window title visibility', async ({ page }) => {
