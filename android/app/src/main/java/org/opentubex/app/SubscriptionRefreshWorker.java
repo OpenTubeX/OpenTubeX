@@ -59,8 +59,8 @@ public final class SubscriptionRefreshWorker extends Worker {
 
     static boolean update(Context context, String token, int progress) {
         if (!STATE.update(token, progress)) return false;
-        SubscriptionRefreshState.Snapshot snapshot = STATE.snapshot(token);
-        if (snapshot == null) return false;
+        SubscriptionRefreshState.Snapshot snapshot = STATE.takeNotificationSnapshot(token);
+        if (snapshot == null) return true;
         context.getSystemService(NotificationManager.class).notify(
             SubscriptionRefreshNotification.NOTIFICATION_ID,
             SubscriptionRefreshNotification.build(
@@ -157,6 +157,8 @@ public final class SubscriptionRefreshWorker extends Worker {
         int completed = 0;
         int failed = 0;
         Set<String> failedProfileIds = new LinkedHashSet<>();
+        SubscriptionRefreshNotificationProgress notificationProgress =
+            new SubscriptionRefreshNotificationProgress();
         NotificationManager notifications = context.getSystemService(NotificationManager.class);
         try {
             // A periodic job may recreate the process while the app is closed, where
@@ -224,16 +226,18 @@ public final class SubscriptionRefreshWorker extends Worker {
                 }
 
                 int progress = total == 0 ? 100 : (int) Math.round((completed + failed) * 100.0 / total);
-                notifications.notify(
-                    SubscriptionRefreshNotification.NOTIFICATION_ID,
-                    SubscriptionRefreshNotification.build(
-                        context,
-                        token,
-                        feed.title,
-                        feed.cancelLabel,
-                        progress
-                    )
-                );
+                if (notificationProgress.advanceTo(progress)) {
+                    notifications.notify(
+                        SubscriptionRefreshNotification.NOTIFICATION_ID,
+                        SubscriptionRefreshNotification.build(
+                            context,
+                            token,
+                            feed.title,
+                            feed.cancelLabel,
+                            progress
+                        )
+                    );
+                }
             }
 
             if (SubscriptionRefreshCoordinator.isCancelled(token) || isStopped()) {

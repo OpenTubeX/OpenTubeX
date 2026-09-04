@@ -44,4 +44,22 @@ public class SubscriptionRefreshStateTest {
         assertEquals("Refreshing shorts", state.snapshot("second").title);
         assertEquals("Cancel", state.snapshot("second").cancelLabel);
     }
+
+    @Test
+    public void coalescesNotificationUpdatesForLargeProfiles() {
+        SubscriptionRefreshState state = new SubscriptionRefreshState();
+        state.begin("refresh", "Refreshing videos", "Cancel");
+        int notificationUpdates = 0;
+
+        for (int completed = 1; completed <= 900; completed++) {
+            int progress = (int) Math.round(completed * 100.0 / 900);
+            assertTrue(state.update("refresh", progress));
+            if (state.takeNotificationSnapshot("refresh") != null) {
+                notificationUpdates++;
+            }
+        }
+
+        assertEquals(100, notificationUpdates);
+        assertEquals(100, state.snapshot("refresh").progress);
+    }
 }
