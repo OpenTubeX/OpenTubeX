@@ -295,6 +295,8 @@ test('does not report transient focus loss while KWin hands off to another app',
           uuid: 'konsole',
         },
       ],
+      focusHandoffDelay: 30,
+      settleDelay: 60,
     }
   )
 
@@ -425,7 +427,7 @@ function targetWindow () {
 
 async function focusedStatesAfterBlur (
   activeWindow,
-  { activeWindowChanges = [], focusHandoffDelay } = {}
+  { activeWindowChanges = [], focusHandoffDelay, settleDelay = 10 } = {}
 ) {
   const browserWindow = new EventEmitter()
   browserWindow.getBounds = () => targetWindow().bounds
@@ -462,7 +464,7 @@ async function focusedStatesAfterBlur (
     if (activeWindowListener !== null) activeWindowListener(activeWindow)
     await Promise.resolve()
   }
-  await new Promise(resolve => setTimeout(resolve, 10))
+  await new Promise(resolve => setTimeout(resolve, settleDelay))
   stop()
 
   return focusedStates
