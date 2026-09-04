@@ -679,7 +679,7 @@ Settings:
     Application Caches: செயலித் தேக்ககங்கள்
     Browser Caches: உலாவித் தேக்ககங்கள்
     Browser Caches Hint: Chromium-இன் HTTP, GPU, நிரல், shader, service-worker மற்றும் அகராதித் தேக்ககங்கள்.
-    Clear Android Cache Confirmation: Android உலாவித் தற்காலிக சேமிப்பை அழிக்கவா?
+    Clear Android Cache Confirmation: Android உலாவித் தேக்ககத்தை அழிக்கவா?
     Stored App Data: சேமித்த செயலித் தரவு
     Included In App Data: மேலே காட்டப்பட்ட செயலித் தரவில் சேர்க்கப்பட்டுள்ளது
     Browser Runtime Data: உலாவி இயக்கநேரத் தரவு

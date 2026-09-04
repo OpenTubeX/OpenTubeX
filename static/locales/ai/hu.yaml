@@ -667,7 +667,7 @@ Settings:
     Application Caches: Alkalmazás gyorsítótárai
     Browser Caches: Böngésző gyorsítótárai
     Browser Caches Hint: A Chromium HTTP-, GPU-, kód-, shader-, service worker- és szótár-gyorsítótárai.
-    Clear Android Cache Confirmation: Törlöd az Android böngésző-gyorsítótárát?
+    Clear Android Cache Confirmation: Törli az Android böngésző-gyorsítótárát?
     Stored App Data: Tárolt alkalmazásadatok
     Included In App Data: A fent megjelenített alkalmazásadatok része
     Browser Runtime Data: Böngésző futásidejű adatai
