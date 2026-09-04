@@ -529,20 +529,6 @@ const actions = {
       throw new Error('Incomplete pairing result')
     }
 
-    if (deviceSystemInfo) {
-      const client = trackSyncClient(new SyncServerClient(normalizedUrl, token))
-      try {
-        const encryptedDeviceInfo = await encryptSyncServerDeviceInfo(
-          { name: deviceName, ...deviceSystemInfo },
-          privacyKey,
-          deviceId
-        )
-        await client.updateAccountSession('current', encryptedDeviceInfo)
-      } finally {
-        releaseSyncClient(client)
-      }
-    }
-
     await dispatch('updateSyncServerUrl', normalizedUrl, { root: true })
     await dispatch('updateSyncServerUsername', trimmedUsername, { root: true })
     await dispatch('updateSyncServerDeviceId', deviceId, { root: true })
@@ -554,6 +540,25 @@ const actions = {
     await dispatch('updateSyncServerPrivacySalt', privacySalt, { root: true })
     await dispatch('updateSyncServerToken', token, { root: true })
     commit('setSyncServerSessionExpired', false)
+
+    if (deviceSystemInfo) {
+      const client = trackSyncClient(new SyncServerClient(normalizedUrl, token))
+      try {
+        if (await client.supportsAccountSessions()) {
+          const encryptedDeviceInfo = await encryptSyncServerDeviceInfo(
+            { name: deviceName, ...deviceSystemInfo },
+            privacyKey,
+            deviceId
+          )
+          await client.updateAccountSession('current', encryptedDeviceInfo)
+        }
+      } catch {
+        // The one-time pairing transfer has already been consumed. Keep the
+        // saved account session; account management repairs its metadata later.
+      } finally {
+        releaseSyncClient(client)
+      }
+    }
 
     return dispatch('startSyncServerAutoSync')
   },

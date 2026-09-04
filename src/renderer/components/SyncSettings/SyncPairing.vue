@@ -380,12 +380,13 @@ let approveSequence = 0
 let pairingClient = null
 const pairingApproval = ref(null)
 
-getCurrentSyncServerDeviceInfo().then(({ name }) => {
+const currentDeviceInfoPromise = getCurrentSyncServerDeviceInfo().catch(() => ({ name: '' }))
+currentDeviceInfoPromise.then(({ name }) => {
   const trimmedName = name?.trim()
   if (trimmedName && deviceName.value === fallbackDeviceName) {
     deviceName.value = trimmedName
   }
-}).catch(() => {})
+})
 
 function openReceiver() {
   resetReceiver()
@@ -404,6 +405,15 @@ function resetReceiver() {
 
 async function startReceiving() {
   const sequence = ++receiveSequence
+  receiveStage.value = 'creating'
+  receiveError.value = ''
+
+  const { name } = await currentDeviceInfoPromise
+  if (sequence !== receiveSequence || !receivePromptOpen.value) return
+  const trimmedSystemName = name?.trim()
+  if (trimmedSystemName && deviceName.value === fallbackDeviceName) {
+    deviceName.value = trimmedSystemName
+  }
   const requestedName = deviceName.value.trim()
   if (!requestedName) {
     receiveError.value = t('Settings.Sync Settings.Device Name Required')
@@ -411,8 +421,6 @@ async function startReceiving() {
     return
   }
   deviceName.value = requestedName
-  receiveStage.value = 'creating'
-  receiveError.value = ''
 
   const client = new SyncServerClient(props.serverUrl)
   try {
