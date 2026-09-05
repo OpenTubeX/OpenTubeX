@@ -3,11 +3,14 @@
     :title="`${t('Settings.General Settings.Navigation.Navigation')} / ${t('Settings.Quick Settings.Quick Settings')}`"
   >
     <div class="customizerLaunchers">
-      <FtButton
-        :label="t('Settings.Quick Settings.Customize Quick Settings')"
-        :icon="['fas', 'sliders-h']"
-        @click="open = true"
-      />
+      <div class="settingButtonWithSync">
+        <FtButton
+          :label="t('Settings.Quick Settings.Customize Quick Settings')"
+          :icon="['fas', 'sliders-h']"
+          @click="open = true"
+        />
+        <FtSyncedSettingIndicator setting-key="quickSettings" />
+      </div>
       <NavigationCustomizer />
     </div>
   </FtSettingsSection>
@@ -166,6 +169,7 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 import NavigationCustomizer from '../NavigationCustomizer/NavigationCustomizer.vue'
 
 import store from '../../store/index'
@@ -302,6 +306,11 @@ function resetQuickSettings() {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+}
+
+.settingButtonWithSync {
+  align-items: center;
+  display: inline-flex;
 }
 
 .quickSettingsActions {

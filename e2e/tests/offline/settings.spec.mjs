@@ -4920,6 +4920,33 @@ test.describe('synced setting indicators', () => {
     await expect(localOnlyLabel.getByRole('button', { name: /syncing this setting/i })).toHaveCount(0)
   })
 
+  test('allows quick settings and navigation customization to be excluded independently', async ({ page }) => {
+    const appearance = await goToSettingsSection(page, 'appearance')
+    const quickSettings = appearance.locator('.settingButtonWithSync').filter({
+      hasText: 'Customize quick settings'
+    })
+    const navigation = appearance.locator('.settingButtonWithSync').filter({
+      hasText: 'Customize navigation'
+    })
+
+    await quickSettings.getByRole('button', { name: 'Stop syncing this setting' }).click()
+    await expect(quickSettings.getByRole('button', { name: 'Sync this setting' })).toBeVisible()
+    await expect(navigation.getByRole('button', { name: 'Stop syncing this setting' })).toBeVisible()
+
+    await navigation.getByRole('button', { name: 'Stop syncing this setting' }).click()
+    await expect(navigation.getByRole('button', { name: 'Sync this setting' })).toBeVisible()
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.state.settings.syncServerSettingsExcluded
+    })).toEqual(['quickSettings', 'navigationItems'])
+
+    await quickSettings.getByRole('button', { name: 'Sync this setting' }).click()
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.state.settings.syncServerSettingsExcluded
+    })).toEqual(['navigationItems'])
+  })
+
   test('spaces setting sync and help icons', async ({ page }) => {
     await goTo(page, 'settings')
 
