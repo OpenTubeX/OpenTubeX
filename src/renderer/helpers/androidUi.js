@@ -78,6 +78,11 @@ export function writeAndroidClipboard(text) {
   return AndroidUi?.writeClipboard({ text }) ?? Promise.resolve()
 }
 
+export async function readAndroidClipboard() {
+  const result = await AndroidUi.readClipboard()
+  return result.text
+}
+
 export function exitAndroidApp() {
   return AndroidUi?.exitApp() ?? Promise.resolve()
 }

@@ -349,6 +349,8 @@ Settings:
     Light Theme: Licht thema
     Dark Theme: Donker thema
     Custom Theme:
+      Import from Clipboard: "Importeren uit het klembord"
+      Invalid Clipboard Theme: "Het klembord bevat geen geldig thema. Kopieer de JSON van het thema en probeer het opnieuw."
       Create Custom Theme: Aangepast thema maken
       Edit Custom Theme: Aangepast thema bewerken
       Custom Theme Creator: Editor voor aangepaste thema's

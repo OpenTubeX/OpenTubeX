@@ -345,6 +345,8 @@ Settings:
     Light Theme: Hele teema
     Dark Theme: Tume teema
     Custom Theme:
+      Import from Clipboard: "Impordi lõikelaualt"
+      Invalid Clipboard Theme: "Lõikelaual pole kehtivat teemat. Kopeeri teema JSON ja proovi uuesti."
       Create Custom Theme: Loo kohandatud teema
       Edit Custom Theme: Muuda kohandatud teemat
       Custom Theme Creator: Kohandatud teema loomine

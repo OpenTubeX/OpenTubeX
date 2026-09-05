@@ -24,6 +24,11 @@
             @click="importTheme"
           />
           <FtIconButton
+            :title="t('Settings.Theme Settings.Custom Theme.Import from Clipboard')"
+            :icon="['fas', 'paste']"
+            @click="importThemeFromClipboard"
+          />
+          <FtIconButton
             :title="t('Settings.Theme Settings.Custom Theme.Export Theme')"
             :icon="['fas', 'download']"
             @click="exportTheme"
@@ -166,7 +171,7 @@ import {
   saveCustomTheme,
 } from '../../helpers/customTheme'
 import { colors } from '../../helpers/colors'
-import { openExternalLink, readFileWithPicker, showToast, writeFileWithPicker } from '../../helpers/utils'
+import { openExternalLink, readClipboard, readFileWithPicker, showToast, writeFileWithPicker } from '../../helpers/utils'
 
 const CUSTOM_THEME_DISCUSSION_URL = 'https://github.com/OpenTubeX/OpenTubeX/discussions/new'
 
@@ -544,6 +549,7 @@ async function handleDeletePrompt(value) {
 }
 
 async function importTheme() {
+  const loadId = editorLoadId
   try {
     const file = await readFileWithPicker(
       t('Settings.Theme Settings.Custom Theme.Theme File'),
@@ -551,21 +557,45 @@ async function importTheme() {
       'custom-theme-import',
       'documents'
     )
-    if (file === null) return
-    cancelPendingColorPreviews()
-    const importedTheme = normalizeCustomTheme(JSON.parse(file.content))
-    importedTheme.id = crypto.randomUUID()
-    setDraft(importedTheme)
-    themeSourceColors.value = readThemeSourceColors()
-    previewing = true
-    previewTheme()
-    showToast({
-      message: t('Settings.Theme Settings.Custom Theme.Theme Imported'),
-      icon: ['fas', 'check']
-    })
+    if (file === null || !props.open || loadId !== editorLoadId) return
+    importThemeContent(file.content)
   } catch (error) {
+    if (!props.open || loadId !== editorLoadId) return
     showError(t('Settings.Theme Settings.Custom Theme.Invalid Theme File'), error)
   }
+}
+
+async function importThemeFromClipboard() {
+  const loadId = editorLoadId
+  let content
+  try {
+    content = await readClipboard()
+  } catch (error) {
+    if (!props.open || loadId !== editorLoadId) return
+    showError(t('Color Picker.Clipboard Unavailable'), error)
+    return
+  }
+  if (!props.open || loadId !== editorLoadId) return
+  try {
+    importThemeContent(content)
+  } catch (error) {
+    showError(t('Settings.Theme Settings.Custom Theme.Invalid Clipboard Theme'), error)
+  }
+}
+
+function importThemeContent(content) {
+  const importedTheme = normalizeCustomTheme(JSON.parse(content))
+  importedTheme.id = crypto.randomUUID()
+  keepSystemThemeOnSave = false
+  cancelPendingColorPreviews()
+  setDraft(importedTheme)
+  themeSourceColors.value = readThemeSourceColors()
+  previewing = true
+  previewTheme()
+  showToast({
+    message: t('Settings.Theme Settings.Custom Theme.Theme Imported'),
+    icon: ['fas', 'check']
+  })
 }
 
 async function exportTheme() {
@@ -636,6 +666,7 @@ function showError(message, error) {
 }
 
 onBeforeUnmount(() => {
+  editorLoadId++
   cancelPendingColorPreviews()
   store.commit('setCustomThemeEditorOpen', false)
 })
@@ -680,6 +711,7 @@ onBeforeUnmount(() => {
 
 .themeNameField {
   flex: 1;
+  min-inline-size: 0;
   display: grid;
   gap: 8px;
   color: var(--secondary-text-color);

@@ -349,6 +349,8 @@ Settings:
     Light Theme: Світла тема
     Dark Theme: Темна тема
     Custom Theme:
+      Import from Clipboard: "Імпортувати з буфера обміну"
+      Invalid Clipboard Theme: "Буфер обміну не містить дійсної теми. Скопіюйте JSON теми та повторіть спробу."
       Create Custom Theme: Створити власну тему
       Edit Custom Theme: Редагувати власну тему
       Custom Theme Creator: Редактор власної теми

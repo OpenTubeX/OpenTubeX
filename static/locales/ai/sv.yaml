@@ -347,6 +347,8 @@ Settings:
     Light Theme: Ljust tema
     Dark Theme: Mörkt tema
     Custom Theme:
+      Import from Clipboard: "Importera från urklipp"
+      Invalid Clipboard Theme: "Urklipp innehåller inget giltigt tema. Kopiera temats JSON och försök igen."
       Create Custom Theme: Skapa eget tema
       Edit Custom Theme: Redigera eget tema
       Custom Theme Creator: Skapa eget tema

@@ -347,6 +347,8 @@ Settings:
     Light Theme: Gai argia
     Dark Theme: Gai iluna
     Custom Theme:
+      Import from Clipboard: "Inportatu arbeletik"
+      Invalid Clipboard Theme: "Arbelak ez du baliozko gairik. Kopiatu gaiaren JSONa eta saiatu berriro."
       Create Custom Theme: Sortu gai pertsonalizatua
       Edit Custom Theme: Editatu gai pertsonalizatua
       Custom Theme Creator: Gai pertsonalizatuen sortzailea

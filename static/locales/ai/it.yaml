@@ -345,6 +345,8 @@ Settings:
     Light Theme: Tema chiaro
     Dark Theme: Tema scuro
     Custom Theme:
+      Import from Clipboard: "Importa dagli appunti"
+      Invalid Clipboard Theme: "Gli appunti non contengono un tema valido. Copia il JSON del tema e riprova."
       Create Custom Theme: Crea tema personalizzato
       Edit Custom Theme: Modifica tema personalizzato
       Custom Theme Creator: Editor dei temi personalizzati

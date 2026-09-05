@@ -349,6 +349,8 @@ Settings:
     Light Theme: Chủ đề sáng
     Dark Theme: Chủ đề tối
     Custom Theme:
+      Import from Clipboard: "Nhập từ bảng nhớ tạm"
+      Invalid Clipboard Theme: "Bảng nhớ tạm không chứa giao diện hợp lệ. Sao chép JSON của giao diện rồi thử lại."
       Create Custom Theme: Tạo chủ đề tùy chỉnh
       Edit Custom Theme: Sửa chủ đề tùy chỉnh
       Custom Theme Creator: Trình tạo chủ đề tùy chỉnh

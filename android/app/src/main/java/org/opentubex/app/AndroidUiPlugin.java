@@ -140,6 +140,20 @@ public class AndroidUiPlugin extends Plugin {
         });
     }
 
+    @PluginMethod
+    public void readClipboard(PluginCall call) {
+        getActivity().runOnUiThread(() -> {
+            ClipboardManager clipboard = (ClipboardManager) getContext()
+                .getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = clipboard.getPrimaryClip();
+            CharSequence text = clip != null && clip.getItemCount() > 0
+                ? clip.getItemAt(0).getText() : null;
+            JSObject result = new JSObject();
+            result.put("text", text == null ? "" : text.toString());
+            call.resolve(result);
+        });
+    }
+
     public boolean hasHardwareKeyboard() {
         InputManager inputManager = (InputManager) getContext()
             .getSystemService(Context.INPUT_SERVICE);

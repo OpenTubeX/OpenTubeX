@@ -89,6 +89,13 @@ export default {
     return ipcRenderer.invoke(IpcChannels.GET_SYSTEM_FONTS)
   },
 
+  /**
+   * @returns {Promise<string>}
+   */
+  readClipboard: () => {
+    return ipcRenderer.invoke(IpcChannels.READ_CLIPBOARD)
+  },
+
   loadCustomTheme: () => {
     return ipcRenderer.invoke(IpcChannels.CUSTOM_THEME_LOAD)
   },

@@ -8,7 +8,7 @@ import { UnsupportedPlayerActions } from '../../constants'
 import { getSearchHistoryEntryKey } from '../../search-history'
 import { getPreferredShortThumbnailUrl } from './player/shorts'
 import { isRoundedNumber } from './viewCounts'
-import { writeAndroidClipboard } from './androidUi'
+import { readAndroidClipboard, writeAndroidClipboard } from './androidUi'
 
 // allowed characters in channel handle: A-Z, a-z, 0-9, -, _, .
 // https://support.google.com/youtube/answer/11585688#change_handle
@@ -328,6 +328,13 @@ export function showToastOnAllTabs(message, time = null, icon = null) {
   } else {
     showToast({ message, time, icon })
   }
+}
+
+/** @returns {Promise<string>} */
+export async function readClipboard() {
+  if (process.env.IS_ELECTRON) return window.ftElectron.readClipboard()
+  if (process.env.IS_CAPACITOR) return readAndroidClipboard()
+  return navigator.clipboard.readText()
 }
 
 /**

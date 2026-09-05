@@ -345,6 +345,8 @@ Settings:
     Light Theme: "Neuz sklaer"
     Dark Theme: "Neuz teñval"
     Custom Theme:
+      Import from Clipboard: "Enporzhiañ eus ar golver"
+      Invalid Clipboard Theme: "N’eus tem reizh ebet er golver. Eilit JSON an tem ha klaskit en-dro."
       Create Custom Theme: "Krouiñ un neuz personelaet"
       Edit Custom Theme: "Kemmañ an neuz personelaet"
       Custom Theme Creator: "Krouer neuzioù personelaet"

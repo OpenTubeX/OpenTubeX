@@ -358,6 +358,8 @@ Settings:
     Light Theme: Lyst tema
     Dark Theme: Mørkt tema
     Custom Theme:
+      Import from Clipboard: "Importér fra udklipsholder"
+      Invalid Clipboard Theme: "Udklipsholderen indeholder ikke et gyldigt tema. Kopiér temaets JSON, og prøv igen."
       Create Custom Theme: Opret brugerdefineret tema
       Edit Custom Theme: Rediger brugerdefineret tema
       Custom Theme Creator: Temaeditor

@@ -347,6 +347,8 @@ Settings:
     Light Theme: Светла тема
     Dark Theme: Тъмна тема
     Custom Theme:
+      Import from Clipboard: "Импортиране от клипборда"
+      Invalid Clipboard Theme: "Клипбордът не съдържа валидна тема. Копирайте JSON кода на темата и опитайте отново."
       Create Custom Theme: Създаване на персонализирана тема
       Edit Custom Theme: Редактиране на персонализираната тема
       Custom Theme Creator: Редактор на персонализирана тема

@@ -345,6 +345,8 @@ Settings:
     Light Theme: 淺色主題
     Dark Theme: 深色主題
     Custom Theme:
+      Import from Clipboard: "從剪貼簿匯入"
+      Invalid Clipboard Theme: "剪貼簿中沒有有效的佈景主題。請複製佈景主題 JSON 後再試一次。"
       Create Custom Theme: 建立自訂主題
       Edit Custom Theme: 編輯自訂主題
       Custom Theme Creator: 自訂主題建立工具

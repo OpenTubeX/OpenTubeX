@@ -324,6 +324,8 @@ Settings:
     Light Theme: Светлая тема
     Dark Theme: Тёмная тема
     Custom Theme:
+      Import from Clipboard: "Импортировать из буфера обмена"
+      Invalid Clipboard Theme: "Буфер обмена не содержит допустимой темы. Скопируйте JSON темы и повторите попытку."
       Create Custom Theme: Создать тему
       Edit Custom Theme: Изменить тему
       Custom Theme Creator: Редактор тем

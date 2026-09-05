@@ -423,6 +423,8 @@ Settings:
     Light Theme: Lyst tema
     Dark Theme: Mørkt tema
     Custom Theme:
+      Import from Clipboard: "Importer frå utklippstavla"
+      Invalid Clipboard Theme: "Utklippstavla inneheld ikkje eit gyldig tema. Kopier JSON-koden til temaet og prøv igjen."
       Create Custom Theme: Lag eit eige tema
       Edit Custom Theme: Rediger eige tema
       Custom Theme Creator: Temaverktøy
