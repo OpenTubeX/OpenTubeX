@@ -6,6 +6,7 @@ import {
   isSubscriptionFeedTypeEnabled
 } from './subscription-channels'
 import { isVideoHiddenByPreferences } from './subscriptions'
+import { getNewSubscriptionEntriesSnapshot } from './subscription-entry-snapshot'
 
 /**
  * Returns the locally cached subscription feeds enabled by the current
@@ -78,7 +79,7 @@ export function getNewSubscriptionFeedEntries({
         return
       }
 
-      cacheEntry?.[entriesKey]?.forEach(entry => {
+      getNewSubscriptionEntriesSnapshot(cacheEntry?.[entriesKey] ?? []).forEach(entry => {
         if (!isMembersOnlySubscriptionVideoVisible(
           entry,
           subscription,
@@ -87,10 +88,8 @@ export function getNewSubscriptionFeedEntries({
           return
         }
 
-        if (entry.isNewInSubscriptionFeed !== true) {
-          return
-        }
-
+        // Premiere history depends on the clock, so recheck it even when this
+        // channel's entry snapshot has not changed.
         if (entry.videoId != null && isHistoryEntryWatched(historyCacheById[entry.videoId])) {
           return
         }
@@ -101,11 +100,7 @@ export function getNewSubscriptionFeedEntries({
         }
 
         seenIds.add(id)
-        entries[category].push({
-          ...entry,
-          hideNewSubscriptionFeedIndicator: true,
-          isInNewSubscriptionFeed: true,
-        })
+        entries[category].push(entry)
       })
     })
   })
