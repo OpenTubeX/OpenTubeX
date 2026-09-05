@@ -6,6 +6,7 @@
 
 .brand {
   text-align: center;
+  margin-block-end: 2em;
 }
 
 .logo {
@@ -28,7 +29,7 @@
   flex-wrap: wrap;
   gap: 4px 16px;
   justify-content: center;
-  margin-block: 8px 2em;
+  margin-block: 8px 0;
   margin-inline: 0;
 }
 
