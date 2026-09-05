@@ -1466,6 +1466,59 @@ test.describe('scroll mini player', () => {
       }
     })
 
+    test('remembers separate mini player positions for scrolling and tab switches', async ({ app, page }) => {
+      await openDemoVideo({ app, page })
+      let player = page.locator('.ftVideoPlayer')
+      const videoTab = page.locator('.tabBar .tab').first()
+      const readPosition = () => player.evaluate(element => ({
+        left: Number.parseFloat(element.style.left),
+        top: Number.parseFloat(element.style.top)
+      }))
+      const dragTo = async (left, top) => {
+        const position = await readPosition()
+        await player.locator('.scrollMiniDragHandle').dispatchEvent('pointerdown', {
+          button: 0, clientX: 0, clientY: 0, pointerId: 1
+        })
+        await page.evaluate(({ dx, dy }) => {
+          for (const type of ['pointermove', 'pointerup']) {
+            window.dispatchEvent(new PointerEvent(type, {
+              clientX: dx, clientY: dy, pointerId: 1
+            }))
+          }
+        }, { dx: left - position.left, dy: top - position.top })
+        await expect.poll(async () => Math.abs((await readPosition()).top - top)).toBeLessThan(1)
+      }
+
+      await scrollBelowPlayer(player)
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+      await dragTo(16, 160)
+      const scrollPosition = await readPosition()
+
+      await page.locator('.tabBar .newTabButton').click()
+      await expect(player.getByRole('button', { name: 'Hide mini player' })).toBeVisible()
+      await expect.poll(readPosition).not.toEqual(scrollPosition)
+      await dragTo(16, 260)
+      const tabPosition = await readPosition()
+
+      await videoTab.click()
+      await expect.poll(readPosition).toEqual(scrollPosition)
+      await page.locator('.tabBar .tab').nth(1).click()
+      await expect.poll(readPosition).toEqual(tabPosition)
+
+      // Both positions must survive restarting the app, not just remain in memory.
+      await videoTab.click()
+      await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
+      await expect(page).toHaveURL(/#\/subscriptions$/)
+      ;({ page } = await app.relaunch())
+      await openDemoVideo({ app, page })
+      player = page.locator('.ftVideoPlayer')
+      await scrollBelowPlayer(player)
+      await expect.poll(readPosition).toEqual(scrollPosition)
+      await page.locator('.tabBar .newTabButton').click()
+      await expect.poll(readPosition).toEqual(tabPosition)
+    })
+
     test('keeps the most recently left video visible across tabs', async ({ app, page, attachScreenshot }) => {
       const video = await openDemoVideo({ app, page })
       const playbackTimeBeforeSwitch = await video.evaluate(element => element.currentTime)

@@ -8,6 +8,8 @@ import {
   clampScrollMiniPlayerRect,
   parseScrollMiniPlayerSavedRect,
   serializeScrollMiniPlayerSavedRect,
+  getSavedScrollMiniPlayerRect,
+  setSavedScrollMiniPlayerRect,
   getScrollMiniVerticalAnchor,
   getScrollMiniPlayerStashSide,
   getStashedScrollMiniPlayerRect,
@@ -184,6 +186,18 @@ const SAVED_RECT = {
   verticalDock: 'bottom',
   verticalOffset: 96
 }
+
+test('scroll and tab-switch positions do not overwrite each other', () => {
+  const tabRect = { ...SAVED_RECT, top: 200 }
+  setSavedScrollMiniPlayerRect(SAVED_RECT, 'scroll')
+  setSavedScrollMiniPlayerRect(tabRect, 'tab')
+  assert.deepEqual(getSavedScrollMiniPlayerRect('scroll'), SAVED_RECT)
+  assert.deepEqual(getSavedScrollMiniPlayerRect('tab'), tabRect)
+  setSavedScrollMiniPlayerRect(null, 'tab')
+  assert.equal(getSavedScrollMiniPlayerRect('tab'), null)
+  assert.deepEqual(getSavedScrollMiniPlayerRect('scroll'), SAVED_RECT)
+  setSavedScrollMiniPlayerRect(null, 'scroll')
+})
 
 test('parsing a saved rect round-trips it without consulting the viewport', () => {
   const saved = serializeScrollMiniPlayerSavedRect(SAVED_RECT)

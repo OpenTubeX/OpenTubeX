@@ -37,21 +37,24 @@ export function getScrollMiniInlineLayoutHeight(container, lastKnownHeight = 0) 
 
 /** @typedef {{ left: number, top: number, width: number, height: number, dock: 'left' | 'right', verticalDock?: 'top' | 'bottom', verticalOffset?: number }} ScrollMiniPlayerRect */
 
-/** @type {ScrollMiniPlayerRect | null} */
-let savedScrollMiniPlayerRect = null
+/** @type {Record<'scroll' | 'tab', ScrollMiniPlayerRect | null>} */
+const savedScrollMiniPlayerRects = { scroll: null, tab: null }
 
 /**
  * @returns {ScrollMiniPlayerRect | null}
+ * @param {'scroll' | 'tab'} mode
  */
-export function getSavedScrollMiniPlayerRect() {
+export function getSavedScrollMiniPlayerRect(mode) {
+  const savedScrollMiniPlayerRect = savedScrollMiniPlayerRects[mode]
   return savedScrollMiniPlayerRect ? { ...savedScrollMiniPlayerRect } : null
 }
 
 /**
  * @param {ScrollMiniPlayerRect | null} rect
+ * @param {'scroll' | 'tab'} mode
  */
-export function setSavedScrollMiniPlayerRect(rect) {
-  savedScrollMiniPlayerRect = rect ? { ...rect } : null
+export function setSavedScrollMiniPlayerRect(rect, mode) {
+  savedScrollMiniPlayerRects[mode] = rect ? { ...rect } : null
 }
 
 /**

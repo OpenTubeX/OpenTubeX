@@ -221,6 +221,7 @@ const state = {
   scrollMiniPlayerEnabled: true,
   scrollMiniPlayerOnAllTabs: false,
   scrollMiniPlayerSavedRect: '',
+  crossTabMiniPlayerSavedRect: '',
   scrollbarThumbWidth: DEFAULT_SCROLLBAR_THUMB_WIDTH,
   scrollSpeed: DEFAULT_SCROLL_SPEED,
   avoidTranslation: 'disabled',
@@ -800,6 +801,7 @@ export const NON_SYNCABLE_SETTINGS = new Set([
   'checkForUpdates',
   // Window coordinates are only valid for the display they were saved on.
   'scrollMiniPlayerSavedRect',
+  'crossTabMiniPlayerSavedRect',
   // These choices describe one physical device, not the user's account.
   'androidAutoPictureInPicture',
   'capacitorLayoutMode',
