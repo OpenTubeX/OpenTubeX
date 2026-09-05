@@ -1,3 +1,4 @@
+import { isAppHidden } from '../../helpers/appVisibility.js'
 import { defineComponent } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { mapActions } from 'vuex'
@@ -1276,7 +1277,7 @@ export default defineComponent({
       if (!process.env.IS_CAPACITOR) return
 
       const change = resolveAndroidBackgroundPlaybackFormat({
-        hidden: document.hidden,
+        hidden: isAppHidden(),
         continuePlayback: this.$store.getters.getContinuePlaybackWhenScreenIsLocked,
         activeFormat: this.activeFormat,
         audioFormatAvailable: this.audioFormatAvailable,
@@ -4035,7 +4036,7 @@ export default defineComponent({
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
     },
     handleVideoPlay() {
-      if (document.hidden) this.updateAndroidBackgroundPlaybackFormat()
+      if (isAppHidden()) this.updateAndroidBackgroundPlaybackFormat()
     },
     handlePlayerSeeking() {
       if (!this.customShortsPlayerActive) {

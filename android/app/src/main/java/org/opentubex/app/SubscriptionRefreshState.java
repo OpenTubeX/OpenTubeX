@@ -1,6 +1,7 @@
 package org.opentubex.app;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 final class SubscriptionRefreshState {
     static final class Snapshot {
@@ -24,6 +25,16 @@ final class SubscriptionRefreshState {
     private final SubscriptionRefreshNotificationProgress notificationProgress =
         new SubscriptionRefreshNotificationProgress();
     private CountDownLatch completion = new CountDownLatch(0);
+    private Consumer<Boolean> activeListener;
+
+    synchronized void observeActive(Consumer<Boolean> listener) {
+        activeListener = listener;
+        listener.accept(token != null);
+    }
+
+    synchronized void removeActiveListener(Consumer<Boolean> listener) {
+        if (activeListener == listener) activeListener = null;
+    }
 
     synchronized void begin(String nextToken, String nextTitle, String nextCancelLabel) {
         completion.countDown();
@@ -33,6 +44,7 @@ final class SubscriptionRefreshState {
         progress = 0;
         notificationProgress.reset();
         completion = new CountDownLatch(1);
+        if (activeListener != null) activeListener.accept(true);
     }
 
     synchronized boolean update(String expectedToken, int nextProgress) {
@@ -68,6 +80,7 @@ final class SubscriptionRefreshState {
         progress = 0;
         notificationProgress.reset();
         completion.countDown();
+        if (activeListener != null) activeListener.accept(false);
         return true;
     }
 

@@ -1,4 +1,12 @@
 import * as baseHandlers from './base'
+import { loadLegacySubscriptionCache, removeLegacySubscriptionCache } from '../index'
+import { createBrowserSubscriptionCache } from '../browserSubscriptionCache'
+
+export const subscriptionCache = createBrowserSubscriptionCache(
+  loadLegacySubscriptionCache,
+  'opentubex-subscription-cache',
+  removeLegacySubscriptionCache
+)
 
 // TODO: Syncing
 // Syncing on the web would involve a different implementation
@@ -34,6 +42,5 @@ export {
   profiles,
   playlists,
   searchHistory,
-  subscriptionCache,
   compactAllDatastores,
 } from './base'

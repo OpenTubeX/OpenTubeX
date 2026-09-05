@@ -6,8 +6,41 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class SubscriptionRefreshStateTest {
+    @Test
+    public void rendererStaysActiveOnlyUntilItsOwnRefreshFinishes() {
+        SubscriptionRefreshState state = new SubscriptionRefreshState();
+        List<Boolean> activity = new ArrayList<>();
+        state.observeActive(activity::add);
+        state.begin("current", "Refreshing", "Cancel");
+        state.finish("stale");
+        assertEquals(Arrays.asList(false, true), activity);
+        state.finish("current");
+        assertEquals(Arrays.asList(false, true, false), activity);
+    }
+
+    @Test
+    public void recreatedWebViewInheritsActiveRefreshWithoutOldListenerRemovingIt() {
+        SubscriptionRefreshState state = new SubscriptionRefreshState();
+        Consumer<Boolean> oldListener = active -> {};
+        state.observeActive(oldListener);
+        state.begin("current", "Refreshing", "Cancel");
+        List<Boolean> activity = new ArrayList<>();
+        Consumer<Boolean> newListener = activity::add;
+        state.observeActive(newListener);
+        state.removeActiveListener(oldListener);
+        state.finish("current");
+        assertEquals(Arrays.asList(true, false), activity);
+        state.removeActiveListener(newListener);
+        state.begin("next", "Refreshing", "Cancel");
+        assertEquals(Arrays.asList(true, false), activity);
+    }
+
     @Test
     public void onlyCurrentRefreshCanUpdateOrFinish() {
         SubscriptionRefreshState state = new SubscriptionRefreshState();

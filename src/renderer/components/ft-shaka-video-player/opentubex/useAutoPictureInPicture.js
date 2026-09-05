@@ -1,3 +1,4 @@
+import { isAppHidden } from '../../../helpers/appVisibility.js'
 import { computed, watch } from 'vue'
 
 import store from '../../../store/index'
@@ -61,10 +62,10 @@ export function useAutoPictureInPicture({
   const autoPipEnabled = computed(() => autoPictureInPictureTriggers.value.length > 0)
 
   // In Electron the minimized state is driven by native window events (see setup below),
-  // because `document.hidden` doesn't fire on minimize on Wayland. On the web we fall back
-  // to `document.hidden`, which also covers browser-tab switches.
+  // because document visibility doesn't change on minimize on Wayland. Other
+  // platforms use app visibility, which also covers browser-tab switches.
   const state = createAutoPictureInPictureState(initialState ?? {
-    minimized: process.env.IS_ELECTRON ? false : document.hidden,
+    minimized: process.env.IS_ELECTRON ? false : isAppHidden(),
     focused: document.hasFocus()
   })
   let stopActiveTabWatch = null
@@ -164,7 +165,7 @@ export function useAutoPictureInPicture({
   }
 
   function refreshVisibilityState() {
-    state.windowMinimized = document.hidden
+    state.windowMinimized = isAppHidden()
     applyFocusState(state, document.hasFocus())
     updateAutoPip()
   }
@@ -198,7 +199,7 @@ export function useAutoPictureInPicture({
   function initializeActiveTab() {
     applyFocusState(state, document.hasFocus())
     if (!process.env.IS_ELECTRON) {
-      state.windowMinimized = document.hidden
+      state.windowMinimized = isAppHidden()
     }
     updateAutoPip()
   }

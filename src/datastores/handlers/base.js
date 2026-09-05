@@ -819,7 +819,8 @@ function compactAllDatastores() {
     db.profiles.compactDatafileAsync(),
     db.playlists.compactDatafileAsync(),
     db.searchHistory.compactDatafileAsync(),
-    db.subscriptionCache.compactDatafileAsync(),
+    // IndexedDB stores each browser cache record directly and needs no compaction.
+    ...(db.subscriptionCache ? [db.subscriptionCache.compactDatafileAsync()] : []),
     db.tabSession.compactDatafileAsync(),
     db.liveReminders.compactDatafileAsync(),
     db.videoMetadataCache.compactDatafileAsync(),

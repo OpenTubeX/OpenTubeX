@@ -1,3 +1,4 @@
+import { isAppHidden } from '../../../helpers/appVisibility.js'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const AMBIENT_FRAME_INTERVAL_MS = 100
@@ -39,7 +40,7 @@ export function useAmbientMode({ enabled, video }) {
 
     const videoTimeChanged = videoElement?.currentTime !== lastVideoTime
 
-    if (!enabled.value || document.hidden || !canvas || !videoElement ||
+    if (!enabled.value || isAppHidden() || !canvas || !videoElement ||
       videoElement.readyState < HTMLMediaElement.HAVE_CURRENT_DATA ||
       (!videoTimeChanged && blendTicksRemaining === 0)) {
       // Nothing left to draw and no new frames coming: 'play' restarts the timer.

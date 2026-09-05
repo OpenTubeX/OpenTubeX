@@ -1,3 +1,4 @@
+import { isAppHidden } from '../../../helpers/appVisibility.js'
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const FFT_SIZE = 256
@@ -48,7 +49,7 @@ export function useMusicVisualizer({ active, video, sourceKey }) {
 
   function canDraw() {
     return active.value &&
-      !document.hidden &&
+      !isAppHidden() &&
       document.documentElement.dataset.reducedMotion !== 'reduce' &&
       video.value?.paused === false
   }
@@ -268,7 +269,7 @@ export function useMusicVisualizer({ active, video, sourceKey }) {
   }
 
   function handleVisibilityChange() {
-    if (document.hidden) {
+    if (isAppHidden()) {
       stopDrawing()
     } else {
       runVisualizerTask(startDrawing())

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public final class SubscriptionRefreshWorker extends Worker {
     private static final String LOG_TAG = "OpenTubeXFetch";
@@ -32,6 +33,14 @@ public final class SubscriptionRefreshWorker extends Worker {
     static final String FEED_TYPE_INPUT = "feedType";
     private static final long MAXIMUM_BATCH_MILLIS = 5 * 60 * 1000;
     private static final SubscriptionRefreshState STATE = new SubscriptionRefreshState();
+
+    static void observeRendererActive(Consumer<Boolean> listener) {
+        STATE.observeActive(listener);
+    }
+
+    static void removeRendererActiveListener(Consumer<Boolean> listener) {
+        STATE.removeActiveListener(listener);
+    }
 
     @FunctionalInterface
     interface ProfileCompletionWriter {
@@ -132,6 +141,7 @@ public final class SubscriptionRefreshWorker extends Worker {
         } catch (Exception error) {
             return Result.failure();
         } finally {
+            STATE.finish(token);
             if (SubscriptionRefreshCoordinator.finish(token)) {
                 getApplicationContext().getSystemService(NotificationManager.class)
                     .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);

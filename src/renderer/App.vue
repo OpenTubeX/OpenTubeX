@@ -383,6 +383,7 @@
 </template>
 
 <script setup>
+import { isAppHidden, setAndroidAppVisible } from './helpers/appVisibility.js'
 import { FtIcon } from '@opentubex/icons'
 import { App as CapacitorApp } from '@capacitor/app'
 import { Capacitor, SystemBarType, SystemBars, SystemBarsStyle } from '@capacitor/core'
@@ -1610,7 +1611,7 @@ async function processPendingSubscriptionAutoRefreshes() {
           profileId !== activeSubscriptionProfileId.value ||
           !isSubscriptionTabAutoRefreshEnabled(tab) ||
           navigator.onLine === false ||
-          document.hidden
+          isAppHidden()
         ) {
           continue
         }
@@ -1698,7 +1699,7 @@ function refreshOverdueSubscriptionFeeds() {
 }
 
 function handleSubscriptionAutoRefreshVisibilityChange() {
-  if (!document.hidden) {
+  if (!isAppHidden()) {
     synchronizeSubscriptionRefreshInProgress()
     if (isCapacitor && subscriptionCacheReady.value) {
       reconcileAndroidSubscriptionRefreshResults()
@@ -4004,7 +4005,10 @@ async function enableCapacitorIntegrations() {
   const removeMediaActions = await addAndroidMediaSessionActionListener(({ action, ...details }) => {
     tabMediaCoordinator.dispatchAction(action, details)
   })
+  let receivedAppState = false
   const appStateHandle = await CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+    receivedAppState = true
+    setAndroidAppVisible(isActive)
     if (shouldPauseAndroidPlaybackOnAppStateChange(
       isActive,
       store.getters.getContinuePlaybackWhenScreenIsLocked
@@ -4012,12 +4016,15 @@ async function enableCapacitorIntegrations() {
       tabMediaCoordinator.pauseAll()
     }
   })
+  const appState = await CapacitorApp.getState()
+  if (!receivedAppState) setAndroidAppVisible(appState.isActive)
   const launch = await CapacitorApp.getLaunchUrl()
   if (launch?.url) await handleYoutubeLink(launch.url)
 
   return () => {
     urlHandle.remove()
     appStateHandle.remove()
+    setAndroidAppVisible(null)
     removeReminderActions()
     removeMediaActions()
   }
