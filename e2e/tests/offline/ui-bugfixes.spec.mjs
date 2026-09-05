@@ -131,9 +131,11 @@ test('fits synced-device tabs in the phone tab organizer', async ({ app, page })
         <button class="capacitorPhoneTabViewTab" role="tab" aria-selected="true">Tabs from other devices</button>
       </div>
       <div class="capacitorPhoneSyncedView" role="tabpanel">
-        <div class="capacitorPhoneSyncedSessionTabs" role="tablist" aria-label="Tabs from other devices">
-          <button class="capacitorPhoneSyncedSessionTab" role="tab" aria-selected="true"><span aria-hidden="true">▣</span><strong>A very long encrypted device name that must wrap · 2 tabs</strong></button>
-          <button class="capacitorPhoneSyncedSessionTab" role="tab" aria-selected="false"><span aria-hidden="true">▣</span><strong>Mobile · 1 tab</strong></button>
+        <div class="capacitorPhoneSyncedSessionTabs">
+          <div class="capacitorPhoneSyncedSessionTabsInner" role="tablist" aria-label="Tabs from other devices">
+            <button class="capacitorPhoneSyncedSessionTab" role="tab" aria-selected="true"><span aria-hidden="true">▣</span><strong>A very long encrypted device name that must wrap · 2 tabs</strong></button>
+            <button class="capacitorPhoneSyncedSessionTab" role="tab" aria-selected="false"><span aria-hidden="true">▣</span><strong>Mobile · 1 tab</strong></button>
+          </div>
         </div>
         <div class="capacitorPhoneSyncedTabs">
           <article class="capacitorPhoneSyncedSession" role="tabpanel">
@@ -252,6 +254,10 @@ test('shows remote tab sets as tabs and confirms deletion in the phone organizer
   const syncedPanel = organizer.locator('.capacitorPhoneSyncedTabs')
   const syncedSet = organizer.locator('.capacitorPhoneSyncedSession[role="tabpanel"]')
   await expect(sessionTabs).toHaveAttribute('data-overlayscrollbars-viewport')
+  const sessionTablist = sessionTabs.getByRole('tablist', { name: 'Tabs from other devices' })
+  await expect(sessionTablist).toHaveCount(1)
+  await expect(sessionTablist.locator(':scope > *')).toHaveCount(9)
+  await expect(sessionTablist.locator(':scope > [role="tab"]')).toHaveCount(9)
   await expect(sessionTabs.getByRole('tab')).toHaveCount(9)
   await expect.poll(() => sessionTabs.evaluate(element => ({
     horizontallyScrollable: element.scrollWidth > element.clientWidth,

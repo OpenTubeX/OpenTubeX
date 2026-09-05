@@ -225,31 +225,35 @@
               <div
                 v-overlay-scrollbars
                 class="capacitorPhoneSyncedSessionTabs"
-                role="tablist"
-                :aria-label="t('Settings.Sync Settings.Tabs From Other Devices')"
               >
-                <button
-                  v-for="(session, index) in otherDeviceSessions"
-                  :id="syncedSessionTabId(index)"
-                  :key="`${session.syncDeviceId}:${session.sessionId}`"
-                  type="button"
-                  class="capacitorPhoneSyncedSessionTab"
-                  role="tab"
-                  :aria-controls="syncedSessionPanelId"
-                  :aria-selected="activeOtherDeviceSessionKey === otherDeviceSessionKey(session)"
-                  :tabindex="activeOtherDeviceSessionKey === otherDeviceSessionKey(session) ? 0 : -1"
-                  @click="selectOtherDeviceSession(session)"
-                  @keydown.left.prevent="selectOtherDeviceSessionAt(index - 1, true)"
-                  @keydown.right.prevent="selectOtherDeviceSessionAt(index + 1, true)"
-                  @keydown.home.prevent="selectOtherDeviceSessionAt(0, true)"
-                  @keydown.end.prevent="selectOtherDeviceSessionAt(otherDeviceSessions.length - 1, true)"
+                <div
+                  class="capacitorPhoneSyncedSessionTabsInner"
+                  role="tablist"
+                  :aria-label="t('Settings.Sync Settings.Tabs From Other Devices')"
                 >
-                  <FtIcon
-                    :icon="session.syncPlatform === 'mobile' ? ['fas', 'layer-group'] : ['fas', 'display']"
-                    aria-hidden="true"
-                  />
-                  <strong>{{ formatDeviceSessionLabel(session, t) }}</strong>
-                </button>
+                  <button
+                    v-for="(session, index) in otherDeviceSessions"
+                    :id="syncedSessionTabId(index)"
+                    :key="`${session.syncDeviceId}:${session.sessionId}`"
+                    type="button"
+                    class="capacitorPhoneSyncedSessionTab"
+                    role="tab"
+                    :aria-controls="syncedSessionPanelId"
+                    :aria-selected="activeOtherDeviceSessionKey === otherDeviceSessionKey(session)"
+                    :tabindex="activeOtherDeviceSessionKey === otherDeviceSessionKey(session) ? 0 : -1"
+                    @click="selectOtherDeviceSession(session)"
+                    @keydown.left.prevent="selectOtherDeviceSessionAt(index - 1, true)"
+                    @keydown.right.prevent="selectOtherDeviceSessionAt(index + 1, true)"
+                    @keydown.home.prevent="selectOtherDeviceSessionAt(0, true)"
+                    @keydown.end.prevent="selectOtherDeviceSessionAt(otherDeviceSessions.length - 1, true)"
+                  >
+                    <FtIcon
+                      :icon="session.syncPlatform === 'mobile' ? ['fas', 'layer-group'] : ['fas', 'display']"
+                      aria-hidden="true"
+                    />
+                    <strong>{{ formatDeviceSessionLabel(session, t) }}</strong>
+                  </button>
+                </div>
               </div>
               <div
                 ref="syncedTabsScrollRef"

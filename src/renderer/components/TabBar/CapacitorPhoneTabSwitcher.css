@@ -379,10 +379,7 @@
 }
 
 .capacitorPhoneSyncedSessionTabs {
-  display: flex;
   flex: 0 0 auto;
-  flex-wrap: nowrap;
-  gap: 4px;
   max-inline-size: 100%;
   min-inline-size: 0;
   padding-inline: 8px;
@@ -390,6 +387,12 @@
   border-block-end: 1px solid var(--border-color);
   overflow: auto hidden;
   overscroll-behavior-inline: contain;
+}
+
+.capacitorPhoneSyncedSessionTabsInner {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
 }
 
 .capacitorPhoneSyncedSessionTab {
