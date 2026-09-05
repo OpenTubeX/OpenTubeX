@@ -947,7 +947,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Indsæt det private SponsorBlock-bruger-id fra browserudvidelsen. Lad feltet stå tomt for at bruge et id, der genereres af appen.
     Generated SponsorBlock User ID: Genereret SponsorBlock-bruger-id
     Generated SponsorBlock User ID Tooltip: Dette appgenererede SponsorBlock-bruger-id kan bruges i browserudvidelsen, eller hvis du bruger appen på en anden computer.
-    Export Generated User ID: Eksportér genereret bruger-id
+    Reveal Generated User ID: Vis genereret bruger-id
     Generated SponsorBlock User ID Copy Button: Kopiér genereret SponsorBlock-bruger-id
     Generated SponsorBlock User ID Copied: Det genererede SponsorBlock-bruger-id er kopieret til udklipsholderen
     Skip notification timeout: Varighed af meddelelse om overspringning

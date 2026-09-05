@@ -527,6 +527,7 @@
   min-block-size: 32px;
   max-inline-size: calc(100% - 60px);
   align-items: center;
+  gap: 6px;
   padding-block: 4px;
   padding-inline: 10px;
   color: var(--title-color);

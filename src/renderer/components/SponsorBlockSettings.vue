@@ -85,7 +85,8 @@
           >
             <FtButton
               v-if="!showGeneratedSponsorBlockUserId"
-              :label="t('Settings.SponsorBlock Settings.Export Generated User ID')"
+              :label="t('Settings.SponsorBlock Settings.Reveal Generated User ID')"
+              :icon="['fas', 'eye']"
               @click="handleShowGeneratedSponsorBlockUserId"
             />
             <div

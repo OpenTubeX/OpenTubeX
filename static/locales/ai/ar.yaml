@@ -921,7 +921,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: الصق معرف مستخدم SponsorBlock الخاص من ملحق المتصفح. اترك هذا الحقل فارغًا لاستخدام المعرف الذي أنشأه التطبيق.
     Generated SponsorBlock User ID: تم إنشاء معرف مستخدم SponsorBlock
     Generated SponsorBlock User ID Tooltip: يمكن استخدام معرف مستخدم SponsorBlock الذي تم إنشاؤه بواسطة التطبيق في ملحق المتصفح أو إذا كنت تستخدم التطبيق على جهاز كمبيوتر آخر.
-    Export Generated User ID: تصدير معرف المستخدم الذي تم إنشاؤه
+    Reveal Generated User ID: إظهار معرّف المستخدم المُنشأ
     Generated SponsorBlock User ID Copy Button: انسخ معرف مستخدم SponsorBlock الذي تم إنشاؤه
     Generated SponsorBlock User ID Copied: تم نسخ معرف مستخدم SponsorBlock الذي تم إنشاؤه إلى الحافظة
     Skip notification timeout: تخطي مهلة الإخطار

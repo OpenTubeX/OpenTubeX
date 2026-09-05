@@ -904,7 +904,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Kleepige brauserilaiendist SponsorBlocki privaatne kasutaja-ID. Rakenduse loodud ID kasutamiseks jätke see tühjaks.
     Generated SponsorBlock User ID: Loodud SponsorBlocki kasutaja-ID
     Generated SponsorBlock User ID Tooltip: Seda rakenduse loodud SponsorBlocki kasutaja-ID-d saab kasutada brauserilaiendis või rakenduse kasutamisel teises arvutis.
-    Export Generated User ID: Ekspordi loodud kasutaja-ID
+    Reveal Generated User ID: Kuva loodud kasutaja-ID
     Generated SponsorBlock User ID Copy Button: Kopeeri loodud SponsorBlocki kasutaja-ID
     Generated SponsorBlock User ID Copied: Loodud SponsorBlocki kasutaja-ID kopeeriti lõikelauale
     Skip notification timeout: Vahelejätmisteavituse kuvamisaeg

@@ -904,7 +904,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Illessze be a böngészőbővítményből a privát SponsorBlock felhasználói azonosítót. Hagyja üresen az alkalmazás által létrehozott azonosító használatához.
     Generated SponsorBlock User ID: Létrehozott SponsorBlock felhasználói azonosító
     Generated SponsorBlock User ID Tooltip: Az alkalmazás által létrehozott SponsorBlock felhasználói azonosító használható a böngészőbővítményben, illetve akkor, ha az alkalmazást másik számítógépen használja.
-    Export Generated User ID: Létrehozott felhasználói azonosító exportálása
+    Reveal Generated User ID: Létrehozott felhasználói azonosító megjelenítése
     Generated SponsorBlock User ID Copy Button: Létrehozott SponsorBlock felhasználói azonosító másolása
     Generated SponsorBlock User ID Copied: A létrehozott SponsorBlock felhasználói azonosító a vágólapra másolva
     Skip notification timeout: Átugrási értesítés időtúllépése

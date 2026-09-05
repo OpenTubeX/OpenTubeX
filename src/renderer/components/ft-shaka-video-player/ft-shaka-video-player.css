@@ -733,8 +733,12 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 .autoplayButton {
+  display: inline-flex;
   flex: 1;
   min-block-size: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   padding: 8px 14px;
   color: #fff;
   background-color: #252525;

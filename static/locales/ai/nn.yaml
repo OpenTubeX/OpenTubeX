@@ -1108,7 +1108,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Lim inn den private SponsorBlock-brukar-ID-en frå nettlesarutvidinga. La feltet stå tomt for å bruka ein ID som appen har laga.
     Generated SponsorBlock User ID: SponsorBlock-brukar-ID laga av appen
     Generated SponsorBlock User ID Tooltip: Denne SponsorBlock-brukar-ID-en er laga av appen og kan brukast i nettlesarutvidinga eller når du brukar appen på ei anna datamaskin.
-    Export Generated User ID: Eksporter den genererte brukar-ID-en
+    Reveal Generated User ID: Vis den genererte brukar-ID-en
     Generated SponsorBlock User ID Copy Button: Kopier den genererte SponsorBlock-brukar-ID-en
     Generated SponsorBlock User ID Copied: Den genererte SponsorBlock-brukar-ID-en er kopiert til utklippstavla
     Skip notification timeout: Tidsgrense for hoppvarsel

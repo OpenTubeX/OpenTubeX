@@ -81,6 +81,7 @@
       <FtFlexBox class="proxyTestActions">
         <FtButton
           :label="$t('Settings.Proxy Settings.Test Proxy')"
+          :icon="['fas', 'flask']"
           @click="testProxy"
         />
       </FtFlexBox>

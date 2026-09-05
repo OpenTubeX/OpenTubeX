@@ -904,7 +904,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Lim inn den private SponsorBlock-bruker-ID-en fra nettleserutvidelsen. La feltet stå tomt for å bruke en ID som programmet oppretter.
     Generated SponsorBlock User ID: Generert SponsorBlock-bruker-ID
     Generated SponsorBlock User ID Tooltip: Denne SponsorBlock-bruker-ID-en, som programmet har opprettet, kan brukes i nettleserutvidelsen eller hvis du bruker programmet på en annen datamaskin.
-    Export Generated User ID: Eksporter generert bruker-ID
+    Reveal Generated User ID: Vis generert bruker-ID
     Generated SponsorBlock User ID Copy Button: Kopier generert SponsorBlock-bruker-ID
     Generated SponsorBlock User ID Copied: Den genererte SponsorBlock-bruker-ID-en er kopiert til utklippstavlen
     Skip notification timeout: Visningstid for varsel om hopp

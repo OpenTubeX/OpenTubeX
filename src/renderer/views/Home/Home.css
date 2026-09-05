@@ -40,6 +40,9 @@
 }
 
 .sectionHeading :deep(.viewAllLink) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   border: 0;
   color: var(--primary-text-color);
   background: none;

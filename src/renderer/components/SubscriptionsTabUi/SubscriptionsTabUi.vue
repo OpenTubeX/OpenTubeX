@@ -68,6 +68,7 @@
       <FtFlexBox>
         <FtButton
           :label="isCommunity ? $t('Subscriptions.Load More Posts') : $t('Subscriptions.Load More Videos')"
+          :icon="['fas', 'arrow-down']"
           background-color="var(--primary-color)"
           text-color="var(--text-with-main-color)"
           @click="increaseLimit"

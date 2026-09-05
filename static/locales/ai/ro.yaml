@@ -917,7 +917,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Lipiți ID-ul privat de utilizator SponsorBlock din extensia de browser. Lăsați câmpul gol pentru a folosi un ID generat de aplicație.
     Generated SponsorBlock User ID: ID de utilizator SponsorBlock generat
     Generated SponsorBlock User ID Tooltip: Acest ID de utilizator SponsorBlock generat de aplicație poate fi folosit în extensia de browser sau când folosiți aplicația pe alt computer.
-    Export Generated User ID: Exportă ID-ul de utilizator generat
+    Reveal Generated User ID: Afișează ID-ul de utilizator generat
     Generated SponsorBlock User ID Copy Button: Copiază ID-ul de utilizator SponsorBlock generat
     Generated SponsorBlock User ID Copied: ID-ul de utilizator SponsorBlock generat a fost copiat în clipboard
     Skip notification timeout: Durata notificării de omitere

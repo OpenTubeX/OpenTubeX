@@ -904,7 +904,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: ブラウザー拡張機能の非公開SponsorBlockユーザーIDを貼り付けてください。空欄にすると、アプリが生成したIDを使用します。
     Generated SponsorBlock User ID: 生成されたSponsorBlockユーザーID
     Generated SponsorBlock User ID Tooltip: アプリが生成したSponsorBlockユーザーIDです。ブラウザー拡張機能や、別のコンピューターでアプリを使用するときにも利用できます。
-    Export Generated User ID: 生成されたユーザーIDをエクスポート
+    Reveal Generated User ID: 生成されたユーザーIDを表示
     Generated SponsorBlock User ID Copy Button: 生成されたSponsorBlockユーザーIDをコピー
     Generated SponsorBlock User ID Copied: 生成されたSponsorBlockユーザーIDをクリップボードにコピーしました
     Skip notification timeout: スキップ通知の表示時間

@@ -426,6 +426,7 @@
         />
         <FtButton
           :label="t('Settings.Player Settings.Screenshot.Folder Button')"
+          :icon="['fas', 'folder-open']"
           class="screenshotFolderButton"
           @click="chooseScreenshotFolder"
         />

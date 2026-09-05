@@ -16,6 +16,7 @@
         :title="t('Video.Clear Queue')"
         @click="clearQueue"
       >
+        <FtIcon :icon="['fas', 'trash']" />
         {{ t('Video.Clear Queue') }}
       </button>
     </header>

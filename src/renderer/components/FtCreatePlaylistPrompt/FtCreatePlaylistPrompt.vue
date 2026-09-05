@@ -30,11 +30,13 @@
     <FtFlexBox>
       <FtButton
         :label="$t('User Playlists.CreatePlaylistPrompt.Create')"
+        :icon="['fas', 'playlist-add']"
         :disabled="playlistPersistenceDisabled"
         @click="createNewPlaylist"
       />
       <FtButton
         :label="$t('User Playlists.Cancel')"
+        :icon="['fas', 'xmark']"
         :text-color="null"
         :background-color="null"
         @click="hideCreatePlaylistPrompt"

@@ -921,7 +921,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Dán ID người dùng riêng tư SponsorBlock từ tiện ích trình duyệt. Để trống để dùng ID do ứng dụng tạo.
     Generated SponsorBlock User ID: ID người dùng SponsorBlock đã tạo
     Generated SponsorBlock User ID Tooltip: Có thể dùng ID người dùng SponsorBlock do ứng dụng tạo này trong tiện ích trình duyệt hoặc khi dùng ứng dụng trên máy tính khác.
-    Export Generated User ID: Xuất ID người dùng đã tạo
+    Reveal Generated User ID: Hiện ID người dùng đã tạo
     Generated SponsorBlock User ID Copy Button: Sao chép ID người dùng SponsorBlock đã tạo
     Generated SponsorBlock User ID Copied: Đã sao chép ID người dùng SponsorBlock vào bảng nhớ tạm
     Skip notification timeout: Thời gian hiện thông báo bỏ qua

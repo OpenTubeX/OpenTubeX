@@ -65,6 +65,7 @@
     <div class="searchFilterCloseButtonContainer">
       <FtButton
         :label="$t('Close')"
+        :icon="['fas', 'xmark']"
         background-color="null"
         text-color="null"
         @click="hideSearchFilters"

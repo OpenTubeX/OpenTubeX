@@ -906,7 +906,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Klistra in ditt privata användar-ID för SponsorBlock från webbläsartillägget. Lämna tomt för att använda ett ID som appen skapar.
     Generated SponsorBlock User ID: Skapat användar-ID för SponsorBlock
     Generated SponsorBlock User ID Tooltip: Detta användar-ID för SponsorBlock har skapats av appen och kan användas i webbläsartillägget eller när du använder appen på en annan dator.
-    Export Generated User ID: Exportera skapat användar-ID
+    Reveal Generated User ID: Visa skapat användar-ID
     Generated SponsorBlock User ID Copy Button: Kopiera skapat användar-ID för SponsorBlock
     Generated SponsorBlock User ID Copied: Det skapade användar-ID:t för SponsorBlock har kopierats till urklipp
     Skip notification timeout: Tidsgräns för hoppavisering

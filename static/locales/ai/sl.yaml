@@ -1192,7 +1192,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Prilepite zasebni uporabniški ID za SponsorBlock iz razširitve brskalnika. Če želite uporabiti ID, ki ga ustvari aplikacija, pustite polje prazno.
     Generated SponsorBlock User ID: Ustvarjeni uporabniški ID za SponsorBlock
     Generated SponsorBlock User ID Tooltip: Uporabniški ID za SponsorBlock, ki ga je ustvarila aplikacija, lahko uporabite v razširitvi brskalnika ali v aplikaciji v drugem računalniku.
-    Export Generated User ID: Izvozi ustvarjeni uporabniški ID
+    Reveal Generated User ID: Prikaži ustvarjeni ID uporabnika
     Generated SponsorBlock User ID Copy Button: Kopiraj ustvarjeni uporabniški ID za SponsorBlock
     Generated SponsorBlock User ID Copied: Ustvarjeni uporabniški ID za SponsorBlock je kopiran v odložišče
     Notify when sponsor segment is skipped: Po preskoku odseka prikaži obvestilo

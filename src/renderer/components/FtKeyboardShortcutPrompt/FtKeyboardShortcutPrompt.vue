@@ -30,6 +30,7 @@
       </p>
       <FtButton
         :label="$t('KeyboardShortcutPrompt.Reset to Defaults')"
+        :icon="['fas', 'undo']"
         :text-color="null"
         :background-color="null"
         :disabled="!hasModifiedKeyboardShortcuts"

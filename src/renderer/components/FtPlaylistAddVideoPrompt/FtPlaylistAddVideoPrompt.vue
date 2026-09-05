@@ -85,14 +85,17 @@
       <FtFlexBox>
         <FtButton
           :label="t('User Playlists.Create New Playlist')"
+          :icon="['fas', 'playlist-add']"
           @click="openCreatePlaylistPrompt"
         />
         <FtButton
           :label="t('User Playlists.AddVideoPrompt.Save')"
+          :icon="['fas', 'floppy-disk']"
           @click="addSelectedToPlaylists"
         />
         <FtButton
           :label="t('User Playlists.Cancel')"
+          :icon="['fas', 'xmark']"
           :text-color="null"
           :background-color="null"
           @click="hide"

@@ -1224,7 +1224,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Enganxeu l'ID d'usuari privat de SponsorBlock de l'extensió del navegador. Deixeu-ho buit per utilitzar un ID generat per l'aplicació.
     Generated SponsorBlock User ID: ID d'usuari de SponsorBlock generat
     Generated SponsorBlock User ID Tooltip: Aquest ID d'usuari de SponsorBlock generat per l'aplicació es pot utilitzar a l'extensió del navegador o en un altre ordinador on utilitzeu l'aplicació.
-    Export Generated User ID: Exporta l'ID d'usuari generat
+    Reveal Generated User ID: Mostra l'ID d'usuari generat
     Generated SponsorBlock User ID Copy Button: Copia l'ID d'usuari de SponsorBlock generat
     Generated SponsorBlock User ID Copied: S'ha copiat al porta-retalls l'ID d'usuari de SponsorBlock generat
     Skip notification timeout: Temps d'espera de la notificació d'omissió

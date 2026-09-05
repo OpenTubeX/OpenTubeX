@@ -904,7 +904,7 @@ Settings:
     SponsorBlock Private User ID Tooltip: Tarayıcı uzantısındaki özel SponsorBlock kullanıcı kimliğini yapıştırın. Uygulama tarafından oluşturulan bir kimlik kullanmak için boş bırakın.
     Generated SponsorBlock User ID: Oluşturulan SponsorBlock Kullanıcı Kimliği
     Generated SponsorBlock User ID Tooltip: Uygulama tarafından oluşturulan bu SponsorBlock kullanıcı kimliği, tarayıcı uzantısında veya uygulamayı başka bir bilgisayarda kullandığınızda kullanılabilir.
-    Export Generated User ID: Oluşturulan Kullanıcı Kimliğini Dışa Aktar
+    Reveal Generated User ID: Oluşturulan Kullanıcı Kimliğini Göster
     Generated SponsorBlock User ID Copy Button: Oluşturulan SponsorBlock kullanıcı kimliğini kopyala
     Generated SponsorBlock User ID Copied: Oluşturulan SponsorBlock kullanıcı kimliği panoya kopyalandı
     Skip notification timeout: Atlama bildirimi süresi

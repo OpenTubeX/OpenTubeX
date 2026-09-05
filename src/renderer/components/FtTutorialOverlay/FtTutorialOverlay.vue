@@ -99,6 +99,7 @@
               <FtButton
                 v-if="steps.length > 1 && stepIndex === 0"
                 :label="t('Tutorial.Skip')"
+                :icon="['fas', 'step-forward']"
                 :text-color="null"
                 :background-color="null"
                 @click="finishTutorial"

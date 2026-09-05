@@ -17,11 +17,14 @@
         border-width="2px"
         :label="$t('Comments.Translating comment, please wait')"
       />
-      <template v-else-if="comment.showTranslated && comment.translatedLanguage === targetLanguage">
-        {{ $t('Comments.Show original') }}
-      </template>
       <template v-else>
-        {{ $t('Comments.Translate to {language}', { language: targetLanguageName }) }}
+        <FtIcon :icon="['fas', 'language']" />
+        <template v-if="comment.showTranslated && comment.translatedLanguage === targetLanguage">
+          {{ $t('Comments.Show original') }}
+        </template>
+        <template v-else>
+          {{ $t('Comments.Translate to {language}', { language: targetLanguageName }) }}
+        </template>
       </template>
     </button>
   </div>
