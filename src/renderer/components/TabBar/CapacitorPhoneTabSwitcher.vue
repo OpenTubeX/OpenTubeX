@@ -611,6 +611,8 @@ async function handleDeleteSessionPrompt(option) {
       dialogRef.value
         ?.querySelector(`#${activeOtherDeviceSessionTabId.value}`)
         ?.focus({ preventScroll: true })
+    } else {
+      focusActiveTab()
     }
   } catch (error) {
     showToast({

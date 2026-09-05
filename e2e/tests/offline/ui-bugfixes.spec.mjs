@@ -301,6 +301,15 @@ test('shows remote tab sets as tabs and confirms deletion in the phone organizer
     maximum: 0,
     scrollbarUnusable: true,
   })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+    store.commit('setSyncServerOtherDeviceSessions', store.getters.getSyncServerOtherDeviceSessions.slice(0, 1))
+  })
+  await syncedSet.getByRole('button', { name: 'Delete: Desktop · 1 tab' }).click()
+  await page.getByRole('dialog', { name: 'Delete' })
+    .getByRole('button', { name: 'Delete', exact: true }).click()
+  await expect(sessionTabs).toHaveCount(0)
+  await expect(organizer.locator('.capacitorPhoneTabTarget[aria-selected="true"]')).toBeFocused()
 })
 
 test('restores and clamps the real phone tab organizer viewports', async ({ app, page }) => {
