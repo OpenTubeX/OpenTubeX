@@ -456,6 +456,39 @@ test.describe('custom theme editor', () => {
     await expect(name).toHaveValue('Keep my draft')
   })
 
+  test('ignores clipboard read failures after leaving the editor session', async ({ app, page }) => {
+    const staleErrors = []
+    page.on('console', message => {
+      if (message.type() === 'error' && message.text().includes('Delayed clipboard failure')) {
+        staleErrors.push(message.text())
+      }
+    })
+    await app.electronApp.evaluate(({ clipboard }) => {
+      clipboard.readText = () => new Promise((resolve, reject) => {
+        globalThis.rejectThemeClipboardRead = () => {
+          clipboard.readText = () => ''
+          reject(new Error('Delayed clipboard failure'))
+        }
+      })
+    })
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await page.getByRole('button', { name: 'Import from clipboard' }).click()
+    await expect.poll(() => app.electronApp.evaluate(() =>
+      typeof globalThis.rejectThemeClipboardRead)).toBe('function')
+    await page.locator('.settingsBackButton').click()
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await page.getByRole('textbox', { name: 'Theme name' }).fill('New session')
+    await app.electronApp.evaluate(() => globalThis.rejectThemeClipboardRead())
+    // A second IPC round trip lets the renderer process the earlier rejection.
+    await page.evaluate(() => window.ftElectron.readClipboard())
+    // Allow deferred toast rendering before asserting that no stale error appears.
+    await page.waitForTimeout(500)
+    expect(staleErrors).toEqual([])
+    await expect(page.locator('.toast').filter({ hasText: 'Delayed clipboard failure' })).toHaveCount(0)
+    await expect(page.getByRole('textbox', { name: 'Theme name' })).toHaveValue('New session')
+  })
+
   test('keeps clipboard import controls visible in narrow and scaled windows', async ({ app, page }, testInfo) => {
     await goToSettingsSection(page, 'theme')
     await page.getByRole('button', { name: 'Create custom theme' }).click()

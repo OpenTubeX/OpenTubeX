@@ -560,6 +560,7 @@ async function importTheme() {
     if (file === null || !props.open || loadId !== editorLoadId) return
     importThemeContent(file.content)
   } catch (error) {
+    if (!props.open || loadId !== editorLoadId) return
     showError(t('Settings.Theme Settings.Custom Theme.Invalid Theme File'), error)
   }
 }
@@ -570,6 +571,7 @@ async function importThemeFromClipboard() {
   try {
     content = await readClipboard()
   } catch (error) {
+    if (!props.open || loadId !== editorLoadId) return
     showError(t('Color Picker.Clipboard Unavailable'), error)
     return
   }
