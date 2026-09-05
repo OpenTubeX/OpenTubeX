@@ -67,7 +67,7 @@
         />
       </div>
       <FtInput
-        v-if="channelEntries.length > SEARCH_THRESHOLD"
+        v-if="channelEntries.length > SEARCH_THRESHOLD || searchQuery !== ''"
         class="channelSearch"
         input-type="search"
         :placeholder="t('Settings.Channel Settings.Search Channels')"
@@ -76,125 +76,146 @@
         @input="value => searchQuery = value"
       />
       <div
+        v-if="visibleChannelEntries.length > channelsPerPage"
+        class="channelSettingsPagination"
+      >
+        <FtButton
+          :label="t('Video.Previous')"
+          :disabled="channelPage === 0"
+          @click="channelPage--"
+        />
+        <span aria-live="polite">
+          {{ channelPage * channelsPerPage + 1 }}-{{ Math.min((channelPage + 1) * channelsPerPage, visibleChannelEntries.length) }} / {{ visibleChannelEntries.length }}
+        </span>
+        <FtButton
+          :label="t('Video.Next')"
+          :disabled="channelPage === lastChannelPage"
+          @click="channelPage++"
+        />
+      </div>
+      <div
+        ref="channelListContainer"
         v-overlay-scrollbars
         class="channelListContainer"
       >
-        <p
-          v-if="visibleChannelEntries.length === 0"
-          class="emptyState"
-        >
-          {{ channelEntries.length === 0
-            ? t('Settings.Channel Settings.No Saved Channels')
-            : t('Settings.Channel Settings.No Matching Channels') }}
-        </p>
-        <ul
-          v-else
-          class="channelList"
-        >
-          <li
-            v-for="channel in visibleChannelEntries"
-            :key="channel.id"
-            class="channelEntry"
+        <div ref="channelListContent">
+          <p
+            v-if="visibleChannelEntries.length === 0"
+            class="emptyState"
           >
-            <div class="channelHeader">
-              <component
-                :is="disableChannelLinks ? 'span' : 'router-link'"
-                class="channelLink"
-                :to="disableChannelLinks ? undefined : `/channel/${channel.id}`"
-                @click="handleChannelLinkClick"
-              >
-                <img
-                  v-if="channel.thumbnail"
-                  class="channelThumbnail"
-                  :src="channel.thumbnail"
-                  alt=""
+            {{ channelEntries.length === 0
+              ? t('Settings.Channel Settings.No Saved Channels')
+              : t('Settings.Channel Settings.No Matching Channels') }}
+          </p>
+          <ul
+            v-else
+            class="channelList"
+          >
+            <li
+              v-for="channel in displayedChannelEntries"
+              :key="channel.id"
+              class="channelEntry"
+            >
+              <div class="channelHeader">
+                <component
+                  :is="disableChannelLinks ? 'span' : 'router-link'"
+                  class="channelLink"
+                  :to="disableChannelLinks ? undefined : `/channel/${channel.id}`"
+                  @click="handleChannelLinkClick"
                 >
-                <span
-                  v-else
-                  class="channelThumbnail channelThumbnailPlaceholder"
-                >
-                  <FtIcon :icon="['fas', 'circle-user']" />
-                </span>
-                <p
-                  class="channelName"
-                  dir="auto"
-                >
-                  {{ channel.name }}
-                </p>
-              </component>
-              <FtIconButton
-                v-if="channel.addableOptions.length > 0"
-                :title="t('Settings.Channel Settings.Add Setting')"
-                :icon="['fas', 'plus']"
-                :dropdown-options="channel.addableOptions"
-                dropdown-position-x="left"
-                :dropdown-portal="true"
-                @click="type => addPreference(channel.id, type)"
-              />
-              <FtIconButton
-                :title="t('Settings.Channel Settings.Forget Channel')"
-                :icon="['fas', 'trash']"
-                theme="destructive"
-                @click="forgetChannel(channel.id)"
-              />
-            </div>
-            <div class="channelPreferences">
-              <div
-                v-for="preference in channel.preferences"
-                :key="preference.type"
-                class="channelPreference"
-              >
-                <FtIcon
-                  class="preferenceIcon"
-                  :icon="preference.icon"
-                  :title="preference.label"
-                />
-                <FtSlider
-                  v-if="preference.type === 'playbackSpeed'"
-                  :label="t('Settings.Player Settings.Playback Speed')"
-                  :default-value="preference.value"
-                  :min-value="videoPlaybackRateInterval"
-                  :max-value="maxVideoPlaybackRate"
-                  :step="videoPlaybackRateInterval"
-                  value-extension="x"
-                  @change="value => setPreference(channel.id, preference.type, value)"
-                />
-                <FtSelect
-                  v-else-if="preference.type === 'videoQuality'"
-                  :placeholder="t('Settings.Channel Settings.Video Quality')"
-                  :value="preference.value"
-                  :select-names="qualityNames"
-                  :select-values="qualityValues"
-                  :icon="preference.icon"
-                  :show-icon="false"
-                  @change="value => setPreference(channel.id, preference.type, value)"
-                />
-                <FtToggleSwitch
-                  v-else-if="preference.type === 'subtitlesState'"
-                  :label="t('Settings.Channel Settings.Subtitles Enabled')"
-                  :compact="true"
-                  :default-value="preference.value"
-                  @change="value => setPreference(channel.id, preference.type, value)"
-                />
-                <FtSlider
-                  v-else
-                  :label="t('Settings.Channel Settings.Volume')"
-                  :default-value="Math.round(preference.value * 100)"
-                  :min-value="0"
-                  :max-value="100"
-                  :step="1"
-                  value-extension="%"
-                  @change="value => setPreference(channel.id, preference.type, value / 100)"
+                  <img
+                    v-if="channel.thumbnail"
+                    class="channelThumbnail"
+                    :src="channel.thumbnail"
+                    alt=""
+                  >
+                  <span
+                    v-else
+                    class="channelThumbnail channelThumbnailPlaceholder"
+                  >
+                    <FtIcon :icon="['fas', 'circle-user']" />
+                  </span>
+                  <p
+                    class="channelName"
+                    dir="auto"
+                  >
+                    {{ channel.name }}
+                  </p>
+                </component>
+                <FtIconButton
+                  v-if="channel.addableOptions.length > 0"
+                  :title="t('Settings.Channel Settings.Add Setting')"
+                  :icon="['fas', 'plus']"
+                  :dropdown-options="channel.addableOptions"
+                  dropdown-position-x="left"
+                  :dropdown-portal="true"
+                  @click="type => addPreference(channel.id, type)"
                 />
                 <FtIconButton
-                  :title="t('Settings.Channel Settings.Forget Value')"
-                  :icon="['fas', 'xmark']"
-                  @click="deletePreference(channel.id, preference.type)"
+                  :title="t('Settings.Channel Settings.Forget Channel')"
+                  :icon="['fas', 'trash']"
+                  theme="destructive"
+                  @click="forgetChannel(channel.id)"
                 />
               </div>
-            </div>
-          </li>
-        </ul>
+              <div class="channelPreferences">
+                <div
+                  v-for="preference in channel.preferences"
+                  :key="preference.type"
+                  class="channelPreference"
+                >
+                  <FtIcon
+                    class="preferenceIcon"
+                    :icon="preference.icon"
+                    :title="preference.label"
+                  />
+                  <FtSlider
+                    v-if="preference.type === 'playbackSpeed'"
+                    :label="t('Settings.Player Settings.Playback Speed')"
+                    :default-value="preference.value"
+                    :min-value="videoPlaybackRateInterval"
+                    :max-value="maxVideoPlaybackRate"
+                    :step="videoPlaybackRateInterval"
+                    value-extension="x"
+                    @change="value => setPreference(channel.id, preference.type, value)"
+                  />
+                  <FtSelect
+                    v-else-if="preference.type === 'videoQuality'"
+                    :placeholder="t('Settings.Channel Settings.Video Quality')"
+                    :value="preference.value"
+                    :select-names="qualityNames"
+                    :select-values="qualityValues"
+                    :icon="preference.icon"
+                    :show-icon="false"
+                    @change="value => setPreference(channel.id, preference.type, value)"
+                  />
+                  <FtToggleSwitch
+                    v-else-if="preference.type === 'subtitlesState'"
+                    :label="t('Settings.Channel Settings.Subtitles Enabled')"
+                    :compact="true"
+                    :default-value="preference.value"
+                    @change="value => setPreference(channel.id, preference.type, value)"
+                  />
+                  <FtSlider
+                    v-else
+                    :label="t('Settings.Channel Settings.Volume')"
+                    :default-value="Math.round(preference.value * 100)"
+                    :min-value="0"
+                    :max-value="100"
+                    :step="1"
+                    value-extension="%"
+                    @change="value => setPreference(channel.id, preference.type, value / 100)"
+                  />
+                  <FtIconButton
+                    :title="t('Settings.Channel Settings.Forget Value')"
+                    :icon="['fas', 'xmark']"
+                    @click="deletePreference(channel.id, preference.type)"
+                  />
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
       <FtPrompt
         v-if="showAddChannelPrompt"
@@ -285,7 +306,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
@@ -308,6 +329,7 @@ import {
   parseChannelPreferences
 } from '../../helpers/channel-preferences'
 import { showToast } from '../../helpers/utils'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 
 const { locale, t } = useI18n()
@@ -440,6 +462,35 @@ function handleChannelLinkClick(event) {
   }
 }
 const searchQuery = ref('')
+const channelsPerPage = 24
+const channelPage = ref(0)
+const channelListContainer = useTemplateRef('channelListContainer')
+const channelListContent = useTemplateRef('channelListContent')
+let contentResizeObserver = null
+
+watch(showManager, async (open, _previous, onCleanup) => {
+  let cancelled = false
+  onCleanup(() => {
+    cancelled = true
+    contentResizeObserver?.disconnect()
+    contentResizeObserver = null
+  })
+  if (!open) return
+  channelPage.value = 0
+  await nextTick()
+  if (cancelled) return
+
+  const scroller = channelListContainer.value
+  const content = channelListContent.value
+  if (!scroller || !content) return
+  const clampScroll = () => clampOverlayScrollTop(scroller, content)
+  contentResizeObserver = new ResizeObserver(clampScroll)
+  contentResizeObserver.observe(scroller)
+  contentResizeObserver.observe(content)
+  clampScroll()
+})
+
+onBeforeUnmount(() => contentResizeObserver?.disconnect())
 
 /**
  * Channels that had to be fetched, so that they can be displayed once they arrive.
@@ -580,6 +631,32 @@ const visibleChannelEntries = computed(() => {
   })
 })
 
+// Keep the number of mounted controls bounded as users page through saved channels.
+const lastChannelPage = computed(() => Math.max(0, Math.ceil(visibleChannelEntries.value.length / channelsPerPage) - 1))
+const displayedChannelEntries = computed(() => visibleChannelEntries.value.slice(
+  channelPage.value * channelsPerPage,
+  (channelPage.value + 1) * channelsPerPage
+))
+
+watch(searchQuery, () => { channelPage.value = 0 })
+watch(lastChannelPage, (lastPage) => {
+  channelPage.value = Math.min(channelPage.value, lastPage)
+})
+watch(channelPage, async () => {
+  await nextTick()
+  if (channelListContainer.value) {
+    restoreOverlayScrollTop(channelListContainer.value, 0)
+  }
+})
+
+/** @param {string} channelId */
+async function revealChannel(channelId) {
+  searchQuery.value = ''
+  await nextTick()
+  const index = visibleChannelEntries.value.findIndex(channel => channel.id === channelId)
+  if (index !== -1) channelPage.value = Math.floor(index / channelsPerPage)
+}
+
 const manageButtonLabel = computed(() => {
   return t('Settings.Channel Settings.Manage Saved Channels', { channelCount: channelEntries.value.length })
 })
@@ -686,6 +763,7 @@ async function addSubscribedChannel(channelId) {
       if (rolledBack.some(value => !value)) {
         addChannelSearchQuery.value = ''
         showAddChannelPrompt.value = false
+        await revealChannel(channelId)
       }
       showToast({
         message: t('Channel.Failed to save subscription settings'),
@@ -696,6 +774,7 @@ async function addSubscribedChannel(channelId) {
 
     addChannelSearchQuery.value = ''
     showAddChannelPrompt.value = false
+    await revealChannel(channelId)
   } finally {
     for (const { type } of preferencesToAdd) {
       const key = `${channelId}:${type}`

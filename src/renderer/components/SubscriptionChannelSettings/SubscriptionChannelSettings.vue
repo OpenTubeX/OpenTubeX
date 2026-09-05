@@ -18,6 +18,24 @@
         :value="searchQuery"
         @input="searchQuery = $event"
       />
+      <div
+        v-if="visibleChannels.length > channelsPerPage"
+        class="channelSettingsPagination"
+      >
+        <FtButton
+          :label="t('Video.Previous')"
+          :disabled="channelPage === 0"
+          @click="channelPage--"
+        />
+        <span aria-live="polite">
+          {{ channelPage * channelsPerPage + 1 }}-{{ Math.min((channelPage + 1) * channelsPerPage, visibleChannels.length) }} / {{ visibleChannels.length }}
+        </span>
+        <FtButton
+          :label="t('Video.Next')"
+          :disabled="channelPage === lastChannelPage"
+          @click="channelPage++"
+        />
+      </div>
     </div>
     <div
       ref="channelSettingsScroller"
@@ -162,7 +180,7 @@
           class="channelSettingsList"
         >
           <li
-            v-for="(channel, index) in visibleChannels"
+            v-for="(channel, index) in displayedChannels"
             :key="channel.id"
             class="channelSettings"
             :class="{ selected: isChannelSelected(channel.id) }"
@@ -287,7 +305,7 @@ import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
 import { showToast } from '../../helpers/utils'
-import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import {
   formatSubscriptionDailyVideoLimit,
@@ -302,6 +320,10 @@ const { locale, t } = useI18n()
 const id = useId()
 const showManager = ref(false)
 const searchQuery = ref('')
+// Each editor mounts several controls and icons. Bound that work even for
+// profiles with hundreds of subscriptions, including after paging through them.
+const channelsPerPage = 24
+const channelPage = ref(0)
 const channelSettingsScroller = useTemplateRef('channelSettingsScroller')
 const channelSettingsContent = useTemplateRef('channelSettingsContent')
 const optimisticChannelSettings = shallowRef(new Map())
@@ -322,6 +344,7 @@ watch(showManager, async (open) => {
   const generation = ++observationGeneration
   stopObservingContent()
   if (!open) return
+  channelPage.value = 0
 
   await nextTick()
   if (generation !== observationGeneration || !showManager.value) return
@@ -364,6 +387,23 @@ const visibleChannels = computed(() => {
     (channel.name || '').toLocaleLowerCase().includes(query) ||
     channel.id.toLocaleLowerCase().includes(query)
   ))
+})
+
+const lastChannelPage = computed(() => Math.max(0, Math.ceil(visibleChannels.value.length / channelsPerPage) - 1))
+const displayedChannels = computed(() => visibleChannels.value.slice(
+  channelPage.value * channelsPerPage,
+  (channelPage.value + 1) * channelsPerPage
+))
+
+watch(searchQuery, () => { channelPage.value = 0 })
+watch(lastChannelPage, (lastPage) => {
+  channelPage.value = Math.min(channelPage.value, lastPage)
+})
+watch(channelPage, async () => {
+  await nextTick()
+  if (channelSettingsScroller.value) {
+    restoreOverlayScrollTop(channelSettingsScroller.value, 0)
+  }
 })
 
 const feedTypes = computed(() => getSubscriptionFeedTypeOptions(t))
