@@ -28,7 +28,7 @@ import { createSyncServerRequestHeaders } from './sync-server-request'
 import { isValidPlaylistBookmark, playlistBookmarkForSync } from './playlist-bookmarks'
 import { getOtherDeviceSessions, mergeSyncSessions } from './sync-sessions'
 import { isValidSyncServerDeviceId } from './sync-server-sessions'
-import { mergeSettingEntry } from './sync-settings-conflict'
+import { mergeSettingEntry, resolveMergedThemeEntry } from './sync-settings-conflict'
 import { getCapacitorTabService } from '../tabs/CapacitorTabService'
 import { capacitorHttpFetch } from './api/capacitor-http'
 
@@ -1214,13 +1214,17 @@ export async function syncSettings(client, store, previous = {}) {
       now,
     })
 
+    entry = resolveMergedThemeEntry(
+      entry, store.state.utils.customThemes, local[CUSTOM_THEMES_SYNC_KEY], now
+    )
     merged[key] = entry
     if (key === 'defaultProfile' &&
         !store.state.profiles.profileList.some(profile => profile._id === entry.value)) {
       entry = { key, value: MAIN_PROFILE_ID, updatedAt: now }
       merged[key] = entry
     }
-    if (!metadataEquals(value, entry.value)) {
+    const currentValue = key === CUSTOM_THEMES_SYNC_KEY ? value : store.state.settings[key]
+    if (!metadataEquals(currentValue, entry.value)) {
       if (key === CUSTOM_THEMES_SYNC_KEY) {
         const previousThemes = store.state.utils.customThemes
         const themes = await replaceCustomThemes(entry.value)

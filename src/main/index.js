@@ -478,9 +478,14 @@ function runApp() {
    * open renderer so its Settings UI remains accurate.
    * @param {string} settingKey
    * @param {unknown} value
+   * @param {unknown} [expectedValue] Only repair a value that has not changed.
    */
-  async function updateSettingFromMain(settingKey, value) {
-    await baseHandlers.settings.upsert(settingKey, value)
+  async function updateSettingFromMain(settingKey, value, expectedValue) {
+    if (expectedValue !== undefined) {
+      if (!await baseHandlers.settings._updateIfUnchanged(settingKey, expectedValue, value)) return
+    } else {
+      await baseHandlers.settings.upsert(settingKey, value)
+    }
     const syncPayload = {
       event: SyncEvents.GENERAL.UPSERT,
       data: { _id: settingKey, value }
@@ -504,7 +509,7 @@ function runApp() {
     const resolvedSettings = resolveSystemThemeSettings(currentSettings, themes)
 
     await Promise.all(Object.entries(resolvedSettings).map(([key, value]) => (
-      value === currentSettings[key] ? null : updateSettingFromMain(key, value)
+      value === currentSettings[key] ? null : updateSettingFromMain(key, value, currentSettings[key])
     )))
   }
 
@@ -4573,13 +4578,15 @@ function runApp() {
       if (systemLightTheme?.value === deletedThemeValue) {
         await updateSettingFromMain(
           'systemLightTheme',
-          resolveSystemTheme(deletedTheme.basedOn, 'light')
+          resolveSystemTheme(deletedTheme.basedOn, 'light'),
+          deletedThemeValue
         )
       }
       if (systemDarkTheme?.value === deletedThemeValue) {
         await updateSettingFromMain(
           'systemDarkTheme',
-          resolveSystemTheme(deletedTheme.basedOn, 'dark')
+          resolveSystemTheme(deletedTheme.basedOn, 'dark'),
+          deletedThemeValue
         )
       }
       if (baseTheme?.value === deletedThemeValue) {
