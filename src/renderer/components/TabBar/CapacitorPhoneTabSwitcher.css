@@ -28,6 +28,7 @@
 .capacitorPhoneTabDragHandle :deep(.ft-icon),
 .capacitorPhoneTabClose :deep(.ft-icon),
 .capacitorPhoneTabFab :deep(.ft-icon),
+.capacitorPhoneSyncedSessionTab :deep(.ft-icon),
 .capacitorPhoneSyncedTabButton :deep(.ft-icon) {
   display: block;
   inline-size: 1em;
@@ -370,19 +371,77 @@
   flex: 1 1 auto;
 }
 
+.capacitorPhoneSyncedView {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: 0;
+}
+
+.capacitorPhoneSyncedSessionTabs {
+  flex: 0 0 auto;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  padding-inline: 8px;
+  background-color: var(--card-bg-color);
+  border-block-end: 1px solid var(--border-color);
+  overflow: auto hidden;
+  overscroll-behavior-inline: contain;
+}
+
+.capacitorPhoneSyncedSessionTabsInner {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+
+.capacitorPhoneSyncedSessionTab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  min-inline-size: 0;
+  min-block-size: 48px;
+  padding-block: 8px 5px;
+  padding-inline: 10px;
+  color: var(--secondary-text-color);
+  background-color: transparent;
+  border: 0;
+  border-block-end: 3px solid transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.25;
+  text-align: start;
+  touch-action: manipulation;
+}
+
+.capacitorPhoneSyncedSessionTab strong {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.capacitorPhoneSyncedSessionTab[aria-selected='true'] {
+  color: var(--primary-text-color);
+  border-block-end-color: var(--primary-color);
+}
+
+.capacitorPhoneSyncedSessionTab:is(:hover, :active) {
+  background-color: var(--side-nav-hover-color);
+}
+
+.capacitorPhoneSyncedSessionTab:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -4px;
+}
+
 .capacitorPhoneSyncedTabs {
   min-block-size: 0;
   padding-block: 8px 24px;
   padding-inline: 8px;
   overflow-y: auto;
   overscroll-behavior: contain;
-}
-
-.capacitorPhoneSyncedTabsEmpty {
-  margin-block: 32px;
-  margin-inline: 16px;
-  color: var(--secondary-text-color);
-  text-align: center;
 }
 
 .capacitorPhoneSyncedSession {
@@ -398,12 +457,6 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-}
-
-.capacitorPhoneSyncedSessionHeader strong {
-  min-inline-size: 0;
-  overflow-wrap: anywhere;
-  font-size: 15px;
 }
 
 .capacitorPhoneSyncedTabButton {
@@ -437,6 +490,17 @@
   flex: 0 0 auto;
 }
 
+.capacitorPhoneSyncedDelete {
+  grid-template-columns: 1fr;
+  flex: 0 0 48px;
+  inline-size: 48px;
+  padding: 0;
+}
+
+.dangerButton {
+  color: var(--error-color, #d84f4f);
+}
+
 .capacitorPhoneSyncedTabList {
   display: grid;
   gap: 4px;
@@ -454,6 +518,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+:global(.prompt:has(.capacitorPhoneDeletePrompt)) {
+  z-index: 1200;
 }
 
 .capacitorPhoneTabFab:is(:hover, :active) {

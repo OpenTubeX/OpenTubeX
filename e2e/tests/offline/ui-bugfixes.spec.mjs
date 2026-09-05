@@ -54,9 +54,9 @@ async function enablePhoneTabSwitcher(page) {
 
 async function phoneTabScrollState(page, contentSelector) {
   return await page.locator('.capacitorPhoneTabDialog').evaluate((dialog, selector) => {
-    const viewport = dialog.querySelector('[data-overlayscrollbars-viewport]')
     const content = dialog.querySelector(selector)
-    const scrollbar = dialog.querySelector('.os-scrollbar-vertical')
+    const viewport = content.closest('[data-overlayscrollbars-viewport]')
+    const scrollbar = viewport.querySelector(':scope > .os-scrollbar-vertical')
     const paddingBottom = Number.parseFloat(getComputedStyle(viewport).paddingBottom) || 0
     const maximum = Math.max(0, content.offsetTop + content.offsetHeight + paddingBottom - viewport.clientHeight)
     return {
@@ -130,17 +130,25 @@ test('fits synced-device tabs in the phone tab organizer', async ({ app, page })
         <button class="capacitorPhoneTabViewTab" role="tab" aria-selected="false">2 open tabs</button>
         <button class="capacitorPhoneTabViewTab" role="tab" aria-selected="true">Tabs from other devices</button>
       </div>
-      <div class="capacitorPhoneSyncedTabs" role="tabpanel">
-        <article class="capacitorPhoneSyncedSession">
-          <header class="capacitorPhoneSyncedSessionHeader">
-            <strong>A very long encrypted device name that must wrap · 2 tabs</strong>
-            <button class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedOpenAll"><span aria-hidden="true">↗</span><span>Open all tabs</span></button>
-          </header>
-          <div class="capacitorPhoneSyncedTabList">
-            <button class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedTabTarget"><span aria-hidden="true">↗</span><span>A very long channel tab title that must not overflow</span></button>
-            <button class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedTabTarget"><span aria-hidden="true">↗</span><span>Watch later</span></button>
+      <div class="capacitorPhoneSyncedView" role="tabpanel">
+        <div class="capacitorPhoneSyncedSessionTabs">
+          <div class="capacitorPhoneSyncedSessionTabsInner" role="tablist" aria-label="Tabs from other devices">
+            <button class="capacitorPhoneSyncedSessionTab" role="tab" aria-selected="true"><span aria-hidden="true">▣</span><strong>A very long encrypted device name that must wrap · 2 tabs</strong></button>
+            <button class="capacitorPhoneSyncedSessionTab" role="tab" aria-selected="false"><span aria-hidden="true">▣</span><strong>Mobile · 1 tab</strong></button>
           </div>
-        </article>
+        </div>
+        <div class="capacitorPhoneSyncedTabs">
+          <article class="capacitorPhoneSyncedSession" role="tabpanel">
+            <header class="capacitorPhoneSyncedSessionHeader">
+              <button class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedOpenAll"><span aria-hidden="true">↗</span><span>Open all tabs</span></button>
+              <button class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedDelete dangerButton" aria-label="Delete: Desktop · 2 tabs"><span aria-hidden="true">×</span></button>
+            </header>
+            <div class="capacitorPhoneSyncedTabList">
+              <button class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedTabTarget"><span aria-hidden="true">↗</span><span>A very long channel tab title that must not overflow</span></button>
+              <button class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedTabTarget"><span aria-hidden="true">↗</span><span>Watch later</span></button>
+            </div>
+          </article>
+        </div>
       </div>
     `
     document.body.append(dialog)
@@ -155,6 +163,18 @@ test('fits synced-device tabs in the phone tab organizer', async ({ app, page })
     buttons.map(button => button.getBoundingClientRect().height)
   ))
   expect(touchTargetHeights.every(height => height >= 48)).toBe(true)
+  const actionAlignment = await dialog.locator('.capacitorPhoneSyncedSessionHeader')
+    .evaluate(header => {
+      const headerBounds = header.getBoundingClientRect()
+      const openAllBounds = header.querySelector('.capacitorPhoneSyncedOpenAll').getBoundingClientRect()
+      const deleteBounds = header.querySelector('.capacitorPhoneSyncedDelete').getBoundingClientRect()
+      return {
+        openAllStartOffset: Math.abs(openAllBounds.left - headerBounds.left),
+        deleteEndOffset: Math.abs(deleteBounds.right - headerBounds.right),
+      }
+    })
+  expect(actionAlignment.openAllStartOffset).toBeLessThanOrEqual(1)
+  expect(actionAlignment.deleteEndOffset).toBeLessThanOrEqual(1)
   const activeIndicator = await dialog.getByRole('tab', { name: 'Tabs from other devices' })
     .evaluate(element => {
       const style = getComputedStyle(element)
@@ -171,6 +191,131 @@ test('fits synced-device tabs in the phone tab organizer', async ({ app, page })
     element.scrollWidth <= element.clientWidth + 1 &&
     element.scrollHeight <= element.clientHeight + 1
   ))).toBe(true)
+})
+
+test('shows remote tab sets as tabs and confirms deletion in the phone organizer', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 375, height: 760 })
+  await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+  await enablePhoneTabSwitcher(page)
+  await page.evaluate(() => {
+    const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+    store.commit('setSyncServerEnabled', true)
+    store.commit('setSyncServerToken', 'e2e-token')
+    store.commit('setSyncServerPrivacyMode', 'enhanced')
+    store.commit('setSyncServerSyncSessions', true)
+    store.commit('setSyncServerSharedTabs', false)
+    store.commit('setSyncServerOtherDeviceSessions', [
+      {
+        syncDeviceId: 'phone-e2e',
+        syncPlatform: 'mobile',
+        sessionId: 'mobile-session-e2e',
+        tabs: Array.from({ length: 30 }, (_, index) => ({
+          id: `mobile-${index}`,
+          title: `Mobile tab ${index}`,
+          url: `/watch/mobile-${index}`,
+        })),
+      },
+      {
+        syncDeviceId: 'desktop-e2e',
+        syncPlatform: 'desktop',
+        sessionId: 'desktop-session-e2e',
+        tabs: [{ id: 'desktop-subscriptions', title: 'Desktop subscriptions', url: '/subscriptions' }],
+      },
+      ...Array.from({ length: 7 }, (_, sessionIndex) => ({
+        syncDeviceId: `extra-desktop-${sessionIndex}`,
+        syncPlatform: 'desktop',
+        sessionId: `extra-session-${sessionIndex}`,
+        tabs: Array.from({ length: sessionIndex + 2 }, (_, tabIndex) => ({
+          id: `extra-${sessionIndex}-${tabIndex}`,
+          title: `Extra tab ${sessionIndex}-${tabIndex}`,
+          url: `/watch/extra-${sessionIndex}-${tabIndex}`,
+        })),
+      })),
+    ])
+    store._actions.deleteSyncServerSession = [session => {
+      store.commit(
+        'setSyncServerOtherDeviceSessions',
+        store.getters.getSyncServerOtherDeviceSessions.filter(candidate => (
+          candidate.syncDeviceId !== session.syncDeviceId ||
+          candidate.sessionId !== session.sessionId
+        ))
+      )
+      return Promise.resolve(true)
+    }]
+  })
+
+  await page.locator('.capacitorPhoneTabSwitcherButton').click()
+  const organizer = page.locator('.capacitorPhoneTabDialog')
+  await organizer.getByRole('tab', { name: 'Tabs from other devices' }).click()
+
+  const sessionTabs = organizer.locator('.capacitorPhoneSyncedSessionTabs')
+  const mobileTab = sessionTabs.getByRole('tab', { name: 'Mobile · 30 tabs', exact: true })
+  const desktopTab = sessionTabs.getByRole('tab', { name: 'Desktop · 1 tab', exact: true })
+  const syncedPanel = organizer.locator('.capacitorPhoneSyncedTabs')
+  const syncedSet = organizer.locator('.capacitorPhoneSyncedSession[role="tabpanel"]')
+  await expect(sessionTabs).toHaveAttribute('data-overlayscrollbars-viewport')
+  const sessionTablist = sessionTabs.getByRole('tablist', { name: 'Tabs from other devices' })
+  await expect(sessionTablist).toHaveCount(1)
+  await expect(sessionTablist.locator(':scope > *')).toHaveCount(9)
+  await expect(sessionTablist.locator(':scope > [role="tab"]')).toHaveCount(9)
+  await expect(sessionTabs.getByRole('tab')).toHaveCount(9)
+  await expect.poll(() => sessionTabs.evaluate(element => ({
+    horizontallyScrollable: element.scrollWidth > element.clientWidth,
+    selectedSetVisible: document.querySelector('.capacitorPhoneSyncedTabs').clientHeight > 0,
+  }))).toEqual({ horizontallyScrollable: true, selectedSetVisible: true })
+  await expect(mobileTab).toHaveAttribute('aria-selected', 'true')
+  await expect(desktopTab).toHaveAttribute('aria-selected', 'false')
+  await expect(syncedSet).toContainText('Mobile tab 0')
+  await expect(syncedSet).not.toContainText('Desktop subscriptions')
+
+  await mobileTab.press('ArrowRight')
+  await expect(desktopTab).toBeFocused()
+  await expect(desktopTab).toHaveAttribute('aria-selected', 'true')
+  await expect(syncedSet).toContainText('Desktop subscriptions')
+  await expect(syncedSet).not.toContainText('Mobile tab 0')
+
+  await desktopTab.press('Home')
+  await expect(mobileTab).toBeFocused()
+  await expect(mobileTab).toHaveAttribute('aria-selected', 'true')
+  await syncedPanel.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(async () => (
+    await phoneTabScrollState(page, '.capacitorPhoneSyncedTabsContent')
+  ).scrollTop).toBeGreaterThan(0)
+
+  const deleteSet = syncedSet.getByRole('button', { name: 'Delete: Mobile · 30 tabs' })
+  await deleteSet.click()
+  let confirmation = page.getByRole('dialog', { name: 'Delete' })
+  await expect(confirmation).toContainText('Mobile · 30 tabs')
+  await expect(organizer).toHaveAttribute('inert', '')
+  await expect.poll(async () => ({
+    confirmation: Number.parseInt(await confirmation.evaluate(element => getComputedStyle(element.closest('.prompt')).zIndex)),
+    organizer: Number.parseInt(await organizer.evaluate(element => getComputedStyle(element.closest('.capacitorPhoneTabOverlay')).zIndex)),
+  })).toEqual({ confirmation: 1200, organizer: 1100 })
+  await confirmation.getByRole('button', { name: 'Cancel' }).click()
+  await expect(organizer).not.toHaveAttribute('inert')
+  await expect(syncedSet).toBeVisible()
+
+  await deleteSet.click()
+  confirmation = page.getByRole('dialog', { name: 'Delete' })
+  await confirmation.getByRole('button', { name: 'Delete', exact: true }).click()
+  await expect(mobileTab).toHaveCount(0)
+  await expect(desktopTab).toBeFocused()
+  await expect(desktopTab).toHaveAttribute('aria-selected', 'true')
+  await expect(syncedSet).toContainText('Desktop subscriptions')
+  await expect.poll(() => phoneTabScrollState(page, '.capacitorPhoneSyncedTabsContent')).toEqual({
+    scrollTop: 0,
+    maximum: 0,
+    scrollbarUnusable: true,
+  })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+    store.commit('setSyncServerOtherDeviceSessions', store.getters.getSyncServerOtherDeviceSessions.slice(0, 1))
+  })
+  await syncedSet.getByRole('button', { name: 'Delete: Desktop · 1 tab' }).click()
+  await page.getByRole('dialog', { name: 'Delete' })
+    .getByRole('button', { name: 'Delete', exact: true }).click()
+  await expect(sessionTabs).toHaveCount(0)
+  await expect(organizer.locator('.capacitorPhoneTabTarget[aria-selected="true"]')).toBeFocused()
 })
 
 test('restores and clamps the real phone tab organizer viewports', async ({ app, page }) => {
@@ -215,16 +360,24 @@ test('restores and clamps the real phone tab organizer viewports', async ({ app,
     store.commit('setSyncServerPrivacyMode', 'enhanced')
     store.commit('setSyncServerSyncSessions', true)
     store.commit('setSyncServerSharedTabs', false)
-    store.commit('setSyncServerOtherDeviceSessions', [{
-      syncDeviceId: desktopDeviceId,
-      syncPlatform: 'desktop',
-      sessionId: 'session-e2e',
-      tabs: Array.from({ length: 30 }, (_, index) => ({
-        id: `synced-${index}`,
-        title: `Synced tab ${index}`,
-        url: `/watch/synced-${index}`,
-      })),
-    }])
+    store.commit('setSyncServerOtherDeviceSessions', [
+      {
+        syncDeviceId: desktopDeviceId,
+        syncPlatform: 'desktop',
+        sessionId: 'long-session-e2e',
+        tabs: Array.from({ length: 30 }, (_, index) => ({
+          id: `synced-${index}`,
+          title: `Synced tab ${index}`,
+          url: `/watch/synced-${index}`,
+        })),
+      },
+      {
+        syncDeviceId: desktopDeviceId,
+        syncPlatform: 'desktop',
+        sessionId: 'short-session-e2e',
+        tabs: [{ id: 'short-synced', title: 'Short synced tab', url: '/subscriptions' }],
+      },
+    ])
     for (let index = 0; index < 30; index++) {
       await store.dispatch('createTab', { route: `/watch/local-${index}`, makeActive: false })
     }
@@ -241,9 +394,9 @@ test('restores and clamps the real phone tab organizer viewports', async ({ app,
     .toBeCloseTo(240, 0)
   await page.getByRole('tab', { name: 'Tabs from other devices' }).click()
 
-  const syncedPanel = page.locator('#capacitor-phone-synced-tabs-panel')
-  await expect(syncedPanel.locator('.capacitorPhoneSyncedSessionHeader strong'))
-    .toHaveText('Living room PC · 30 tabs')
+  const syncedPanel = page.locator('.capacitorPhoneSyncedTabs')
+  await expect(page.getByRole('tab', { name: 'Living room PC · 30 tabs', exact: true }))
+    .toHaveAttribute('aria-selected', 'true')
   await expect(syncedPanel).toHaveAttribute('data-overlayscrollbars-viewport')
   await syncedPanel.evaluate(element => { element.scrollTop = 360 })
   await expect.poll(async () => (await phoneTabScrollState(page, '.capacitorPhoneSyncedTabsContent')).scrollTop)
@@ -272,15 +425,10 @@ test('restores and clamps the real phone tab organizer viewports', async ({ app,
   await page.evaluate(desktopDeviceId => {
     const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
     store.commit('setSyncServerDeviceNames', { [desktopDeviceId]: 'Desk PC' })
-    store.commit('setSyncServerOtherDeviceSessions', [{
-      syncDeviceId: desktopDeviceId,
-      syncPlatform: 'desktop',
-      sessionId: 'session-e2e',
-      tabs: [{ id: 'synced-0', title: 'Synced tab 0', url: '/watch/synced-0' }],
-    }])
   }, desktopDeviceId)
+  await page.getByRole('tab', { name: 'Desk PC · 1 tab', exact: true }).click()
   await expect(page.locator('.capacitorPhoneSyncedTabTarget')).toHaveCount(1)
-  await expect(syncedPanel.locator('.capacitorPhoneSyncedSessionHeader strong'))
+  await expect(page.locator('.capacitorPhoneSyncedSessionTab[aria-selected="true"]'))
     .toHaveText('Desk PC · 1 tab')
   await expect.poll(() => phoneTabScrollState(page, '.capacitorPhoneSyncedTabsContent')).toEqual({
     scrollTop: 0,

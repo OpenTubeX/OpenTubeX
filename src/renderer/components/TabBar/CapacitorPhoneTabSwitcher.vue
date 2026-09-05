@@ -43,6 +43,7 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="capacitor-phone-tab-dialog-title"
+            :inert="sessionToDelete !== null"
           >
             <header class="capacitorPhoneTabHeader">
               <div class="capacitorPhoneTabHeading">
@@ -217,57 +218,102 @@
             <div
               v-else
               id="capacitor-phone-synced-tabs-panel"
-              ref="syncedTabsScrollRef"
-              v-overlay-scrollbars
-              class="capacitorPhoneSyncedTabs"
+              class="capacitorPhoneSyncedView"
               role="tabpanel"
               aria-labelledby="capacitor-phone-synced-tabs-tab"
             >
               <div
-                ref="syncedTabsContentRef"
-                class="capacitorPhoneSyncedTabsContent"
+                v-overlay-scrollbars
+                class="capacitorPhoneSyncedSessionTabs"
               >
-                <p
-                  v-if="otherDeviceSessions.length === 0"
-                  class="capacitorPhoneSyncedTabsEmpty"
+                <div
+                  class="capacitorPhoneSyncedSessionTabsInner"
+                  role="tablist"
+                  :aria-label="t('Settings.Sync Settings.Tabs From Other Devices')"
                 >
-                  {{ t('Tab Organizer.Open Tab Count', { count: 0 }, 0) }}
-                </p>
-                <article
-                  v-for="session in otherDeviceSessions"
-                  :key="`${session.syncDeviceId}:${session.sessionId}`"
-                  class="capacitorPhoneSyncedSession"
-                >
-                  <header class="capacitorPhoneSyncedSessionHeader">
+                  <button
+                    v-for="(session, index) in otherDeviceSessions"
+                    :id="syncedSessionTabId(index)"
+                    :key="`${session.syncDeviceId}:${session.sessionId}`"
+                    type="button"
+                    class="capacitorPhoneSyncedSessionTab"
+                    role="tab"
+                    :aria-controls="syncedSessionPanelId"
+                    :aria-selected="activeOtherDeviceSessionKey === otherDeviceSessionKey(session)"
+                    :tabindex="activeOtherDeviceSessionKey === otherDeviceSessionKey(session) ? 0 : -1"
+                    @click="selectOtherDeviceSession(session)"
+                    @keydown.left.prevent="selectOtherDeviceSessionAt(index - 1, true)"
+                    @keydown.right.prevent="selectOtherDeviceSessionAt(index + 1, true)"
+                    @keydown.home.prevent="selectOtherDeviceSessionAt(0, true)"
+                    @keydown.end.prevent="selectOtherDeviceSessionAt(otherDeviceSessions.length - 1, true)"
+                  >
+                    <FtIcon
+                      :icon="session.syncPlatform === 'mobile' ? ['fas', 'layer-group'] : ['fas', 'display']"
+                      aria-hidden="true"
+                    />
                     <strong>{{ formatDeviceSessionLabel(session, t) }}</strong>
-                    <button
-                      type="button"
-                      class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedOpenAll"
-                      @click="openOtherDeviceSession(session)"
-                    >
-                      <FtIcon
-                        :icon="['fas', 'folder-open']"
-                        aria-hidden="true"
-                      />
-                      {{ t('Settings.Sync Settings.Open All Tabs') }}
-                    </button>
-                  </header>
-                  <div class="capacitorPhoneSyncedTabList">
-                    <button
-                      v-for="tab in session.tabs"
-                      :key="tab.id"
-                      type="button"
-                      class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedTabTarget"
-                      @click="openOtherDeviceSession({ ...session, tabs: [tab] })"
-                    >
-                      <FtIcon
-                        :icon="['fas', 'arrow-up-right-from-square']"
-                        aria-hidden="true"
-                      />
-                      <span dir="auto">{{ tab.title || tab.url }}</span>
-                    </button>
-                  </div>
-                </article>
+                  </button>
+                </div>
+              </div>
+              <div
+                ref="syncedTabsScrollRef"
+                v-overlay-scrollbars
+                class="capacitorPhoneSyncedTabs"
+              >
+                <div
+                  ref="syncedTabsContentRef"
+                  class="capacitorPhoneSyncedTabsContent"
+                >
+                  <article
+                    v-if="activeOtherDeviceSession"
+                    :id="syncedSessionPanelId"
+                    :key="activeOtherDeviceSessionKey"
+                    class="capacitorPhoneSyncedSession"
+                    role="tabpanel"
+                    :aria-labelledby="activeOtherDeviceSessionTabId"
+                  >
+                    <header class="capacitorPhoneSyncedSessionHeader">
+                      <button
+                        type="button"
+                        class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedOpenAll"
+                        @click="openOtherDeviceSession(activeOtherDeviceSession)"
+                      >
+                        <FtIcon
+                          :icon="['fas', 'folder-open']"
+                          aria-hidden="true"
+                        />
+                        {{ t('Settings.Sync Settings.Open All Tabs') }}
+                      </button>
+                      <button
+                        type="button"
+                        class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedDelete dangerButton"
+                        :aria-label="`${t('Delete')}: ${formatDeviceSessionLabel(activeOtherDeviceSession, t)}`"
+                        :title="t('Delete')"
+                        @click="sessionToDelete = activeOtherDeviceSession"
+                      >
+                        <FtIcon
+                          :icon="['fas', 'trash']"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </header>
+                    <div class="capacitorPhoneSyncedTabList">
+                      <button
+                        v-for="tab in activeOtherDeviceSession.tabs"
+                        :key="tab.id"
+                        type="button"
+                        class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedTabTarget"
+                        @click="openOtherDeviceSession({ ...activeOtherDeviceSession, tabs: [tab] })"
+                      >
+                        <FtIcon
+                          :icon="['fas', 'arrow-up-right-from-square']"
+                          aria-hidden="true"
+                        />
+                        <span dir="auto">{{ tab.title || tab.url }}</span>
+                      </button>
+                    </div>
+                  </article>
+                </div>
               </div>
             </div>
             <button
@@ -301,6 +347,17 @@
         </div>
       </Transition>
     </Teleport>
+    <FtPrompt
+      v-if="sessionToDelete"
+      card-class="capacitorPhoneDeletePrompt"
+      :label="t('Delete')"
+      :extra-labels="[formatDeviceSessionLabel(sessionToDelete, t)]"
+      :option-names="[t('Delete'), t('Cancel')]"
+      :option-values="['delete', 'cancel']"
+      is-first-option-destructive
+      autosize
+      @click="handleDeleteSessionPrompt"
+    />
   </div>
 </template>
 
@@ -313,8 +370,10 @@ import store from '../../store/index'
 import { shouldCloseSwipedTab } from '../../helpers/capacitorTabSwipe'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { formatDeviceSessionLabel, shouldShowOtherDeviceSessions } from '../../helpers/sync-sessions'
+import { showToast } from '../../helpers/utils'
 import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
 import { getTabAvatarUrl, getTabPageIcon } from '../../tabs/tabPreview'
+import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
 import CapacitorTabActionsMenu from './CapacitorTabActionsMenu.vue'
@@ -331,6 +390,10 @@ const { t } = useI18n()
 const open = ref(false)
 const activeView = ref('open')
 const promptId = useId()
+const syncedSessionIdPrefix = `capacitor-phone-synced-session-${useId().replaceAll(':', '')}`
+const syncedSessionPanelId = `${syncedSessionIdPrefix}-panel`
+const selectedOtherDeviceSessionKey = ref(null)
+const sessionToDelete = ref(null)
 const triggerRef = useTemplateRef('triggerRef')
 const dialogRef = useTemplateRef('dialogRef')
 const openTabsScrollRef = useTemplateRef('openTabsScrollRef')
@@ -345,6 +408,20 @@ const syncConnected = computed(() => store.getters.getSyncServerToken !== '')
 const syncSessionsEnabled = computed(() => store.getters.getSyncServerSyncSessions)
 const sharedTabsEnabled = computed(() => store.getters.getSyncServerSharedTabs)
 const otherDeviceSessions = computed(() => store.getters.getSyncServerOtherDeviceSessions)
+const activeOtherDeviceSession = computed(() => (
+  otherDeviceSessions.value.find(session => (
+    otherDeviceSessionKey(session) === selectedOtherDeviceSessionKey.value
+  )) ?? otherDeviceSessions.value[0] ?? null
+))
+const activeOtherDeviceSessionKey = computed(() => (
+  activeOtherDeviceSession.value ? otherDeviceSessionKey(activeOtherDeviceSession.value) : null
+))
+const activeOtherDeviceSessionTabId = computed(() => {
+  const activeIndex = otherDeviceSessions.value.findIndex(session => (
+    otherDeviceSessionKey(session) === activeOtherDeviceSessionKey.value
+  ))
+  return syncedSessionTabId(Math.max(0, activeIndex))
+})
 const showSyncedTabsView = computed(() => shouldShowOtherDeviceSessions({
   syncEnabled: syncEnabled.value,
   syncConnected: syncConnected.value,
@@ -495,8 +572,58 @@ async function activateTab(tabId) {
   await activateTabAction(tabId)
 }
 
+function otherDeviceSessionKey(session) {
+  return `${session.syncDeviceId}:${session.sessionId}`
+}
+
+function syncedSessionTabId(index) {
+  return `${syncedSessionIdPrefix}-tab-${index}`
+}
+
+async function selectOtherDeviceSession(session, focus = false) {
+  selectedOtherDeviceSessionKey.value = otherDeviceSessionKey(session)
+  await nextTick()
+  clampActiveContentScroll()
+  if (!focus) return
+
+  const index = otherDeviceSessions.value.findIndex(candidate => (
+    otherDeviceSessionKey(candidate) === selectedOtherDeviceSessionKey.value
+  ))
+  dialogRef.value?.querySelector(`#${syncedSessionTabId(index)}`)?.focus({ preventScroll: true })
+}
+
+function selectOtherDeviceSessionAt(index, focus = false) {
+  const sessions = otherDeviceSessions.value
+  if (sessions.length === 0) return
+  const wrappedIndex = (index + sessions.length) % sessions.length
+  selectOtherDeviceSession(sessions[wrappedIndex], focus)
+}
+
 async function openOtherDeviceSession(session) {
   if (await store.dispatch('openSyncServerSession', session)) closeSwitcher()
+}
+
+async function handleDeleteSessionPrompt(option) {
+  const session = sessionToDelete.value
+  sessionToDelete.value = null
+  if (option !== 'delete' || !session) return
+
+  try {
+    if (!await store.dispatch('deleteSyncServerSession', session)) return
+    await nextTick()
+    if (activeView.value === 'synced') {
+      dialogRef.value
+        ?.querySelector(`#${activeOtherDeviceSessionTabId.value}`)
+        ?.focus({ preventScroll: true })
+    } else {
+      focusActiveTab()
+    }
+  } catch (error) {
+    showToast({
+      message: t('Settings.Sync Settings.Sync failed', { error: error.message }),
+      icon: ['fas', 'circle-exclamation'],
+    })
+  }
 }
 
 function swipeStyle(tabId) {
