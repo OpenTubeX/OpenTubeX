@@ -76,13 +76,31 @@ export const QUICK_SETTING_DEFINITIONS = Object.freeze([
   ...BASIC_QUICK_SETTING_DEFINITIONS,
 ])
 
-const SECTION_LABEL_KEYS = Object.freeze({
-  appearance: 'Settings.Quick Settings.Appearance',
-  playback: 'Settings.Quick Settings.Playback',
-  content: 'Settings.Quick Settings.Content',
-  language: 'Settings.Quick Settings.Language and Region',
-  'add-ons': 'Settings.Categories.Add-ons',
-  advanced: 'Settings.Categories.Advanced',
+const SECTION_DEFINITIONS = Object.freeze({
+  appearance: Object.freeze({
+    labelKey: 'Settings.Quick Settings.Appearance',
+    icon: Object.freeze(['fas', 'display']),
+  }),
+  playback: Object.freeze({
+    labelKey: 'Settings.Quick Settings.Playback',
+    icon: Object.freeze(['fas', 'circle-play']),
+  }),
+  content: Object.freeze({
+    labelKey: 'Settings.Quick Settings.Content',
+    icon: Object.freeze(['fas', 'eye-slash']),
+  }),
+  language: Object.freeze({
+    labelKey: 'Settings.Quick Settings.Language and Region',
+    icon: Object.freeze(['fas', 'globe']),
+  }),
+  'add-ons': Object.freeze({
+    labelKey: 'Settings.Categories.Add-ons',
+    icon: Object.freeze(['fas', 'puzzle-piece']),
+  }),
+  advanced: Object.freeze({
+    labelKey: 'Settings.Categories.Advanced',
+    icon: Object.freeze(['fas', 'flask']),
+  }),
 })
 
 export function createQuickSettingCatalog(t, usingElectron) {
@@ -100,10 +118,12 @@ export function createQuickSettingSections(t, usingElectron) {
 
   for (const definition of createQuickSettingCatalog(t, usingElectron)) {
     if (!sections.has(definition.section)) {
+      const sectionDefinition = SECTION_DEFINITIONS[definition.section]
       sections.set(definition.section, {
         id: definition.section,
         // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
-        label: t(SECTION_LABEL_KEYS[definition.section]),
+        label: t(sectionDefinition.labelKey),
+        icon: sectionDefinition.icon,
         settings: [],
       })
     }

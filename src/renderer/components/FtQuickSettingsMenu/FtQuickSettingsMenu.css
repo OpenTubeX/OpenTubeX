@@ -214,14 +214,23 @@
 }
 
 .menuSection h3 {
+  align-items: center;
   color: var(--secondary-text-color);
+  display: flex;
   font-size: 12px;
   font-weight: 600;
+  gap: 6px;
   grid-column: 1 / -1;
   line-height: 1.2;
   margin-block: 0 10px;
   margin-inline: 0;
   text-transform: uppercase;
+}
+
+.menuSectionIcon {
+  block-size: 14px;
+  flex: 0 0 auto;
+  inline-size: 14px;
 }
 
 .quickSettingControl {
