@@ -1,9 +1,10 @@
+import { isAppHidden } from '../appVisibility.js'
 const RESUME_WINDOW_MS = 5000
 let lastVisibleAt = Number.NEGATIVE_INFINITY
 
 if (typeof document !== 'undefined') {
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') lastVisibleAt = Date.now()
+    if (!isAppHidden()) lastVisibleAt = Date.now()
   })
 }
 
@@ -67,7 +68,7 @@ export function classifyRequestLifecycle(visibilityState, visibleAt, now = Date.
 }
 
 export function getRequestLifecycle() {
-  const visibilityState = typeof document === 'undefined' ? 'visible' : document.visibilityState
+  const visibilityState = isAppHidden() ? 'hidden' : 'visible'
   return classifyRequestLifecycle(visibilityState, lastVisibleAt)
 }
 

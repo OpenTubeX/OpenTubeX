@@ -1,3 +1,4 @@
+import { isAppHidden } from '../../helpers/appVisibility.js'
 import { computed, defineComponent, inject, nextTick, onBeforeUnmount, onMounted, onUnmounted, reactive, ref, shallowRef, watch } from 'vue'
 import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
@@ -9294,7 +9295,7 @@ export default defineComponent({
     }
 
     function handleTemporaryPlaybackRateVisibilityChange() {
-      if (document.hidden) {
+      if (isAppHidden()) {
         handleTemporaryPlaybackRateFocusLoss()
       }
     }

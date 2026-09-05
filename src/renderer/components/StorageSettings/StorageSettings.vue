@@ -350,6 +350,7 @@
 </template>
 
 <script setup>
+import { isAppHidden } from '../../helpers/appVisibility.js'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -848,7 +849,7 @@ function openProfileDirectory() {
 }
 
 function refreshWhenVisible() {
-  if (!document.hidden) refreshUsage()
+  if (!isAppHidden()) refreshUsage()
 }
 
 onMounted(async () => {

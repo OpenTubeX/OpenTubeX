@@ -1,3 +1,4 @@
+import { isAppHidden } from '../../helpers/appVisibility.js'
 import {
   SyncServerClient,
   SyncServerCancelledError,
@@ -835,7 +836,7 @@ const actions = {
       lifecycleSyncStarted = true
       window.addEventListener('online', () => dispatch('scheduleSyncServer', 'automatic'))
       document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
+        if (!isAppHidden()) {
           dispatch('scheduleSyncServer', 'automatic')
         }
       })

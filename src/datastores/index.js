@@ -40,7 +40,17 @@ export const playlists = createDatastore('playlists')
 export const history = createDatastore('history')
 export const watchStats = createDatastore('watch-stats')
 export const searchHistory = createDatastore('search-history')
-export const subscriptionCache = createDatastore('subscription-cache')
+// Web/Android use channel records in IndexedDB. Load the old NeDB cache only
+// when importing an existing installation, not on every application startup.
+export const subscriptionCache = process.env.IS_ELECTRON_MAIN ? createDatastore('subscription-cache') : null
+
+export function loadLegacySubscriptionCache() {
+  return createDatastore('subscription-cache').findAsync({})
+}
+
+export function removeLegacySubscriptionCache() {
+  return new Datastore({ filename: dbPath('subscription-cache') }).dropDatabaseAsync()
+}
 export const tabSession = createDatastore('tab-session')
 export const liveReminders = createDatastore('live-reminders')
 export const videoMetadataCache = createDatastore('video-metadata-cache')

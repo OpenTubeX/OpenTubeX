@@ -16,15 +16,23 @@ import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import androidx.core.content.ContextCompat;
 
 @CapacitorPlugin(name = "SubscriptionRefresh")
 public class SubscriptionRefreshPlugin extends Plugin {
     private BroadcastReceiver cancellationReceiver;
+    private Consumer<Boolean> rendererActiveListener;
 
     @Override
     public void load() {
+        rendererActiveListener = active -> bridge.executeOnMainThread(() -> {
+            if (bridge.getWebView() instanceof SubscriptionRefreshWebView webView) {
+                webView.setRefreshActive(active);
+            }
+        });
+        SubscriptionRefreshWorker.observeRendererActive(rendererActiveListener);
         cancellationReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -41,6 +49,7 @@ public class SubscriptionRefreshPlugin extends Plugin {
 
     @Override
     protected void handleOnDestroy() {
+        SubscriptionRefreshWorker.removeRendererActiveListener(rendererActiveListener);
         if (cancellationReceiver != null) {
             getContext().unregisterReceiver(cancellationReceiver);
             cancellationReceiver = null;
