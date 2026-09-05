@@ -4005,7 +4005,9 @@ async function enableCapacitorIntegrations() {
   const removeMediaActions = await addAndroidMediaSessionActionListener(({ action, ...details }) => {
     tabMediaCoordinator.dispatchAction(action, details)
   })
+  let receivedAppState = false
   const appStateHandle = await CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+    receivedAppState = true
     setAndroidAppVisible(isActive)
     if (shouldPauseAndroidPlaybackOnAppStateChange(
       isActive,
@@ -4015,7 +4017,7 @@ async function enableCapacitorIntegrations() {
     }
   })
   const appState = await CapacitorApp.getState()
-  setAndroidAppVisible(appState.isActive)
+  if (!receivedAppState) setAndroidAppVisible(appState.isActive)
   const launch = await CapacitorApp.getLaunchUrl()
   if (launch?.url) await handleYoutubeLink(launch.url)
 

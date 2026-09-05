@@ -170,3 +170,43 @@ test('snapshots reactive entries before awaiting storage and preserves other fee
   expect(result[0].liveStreams[0].videoId).toBe('live')
   expect(result[0].communityPosts[0].postId).toBe('post')
 })
+
+for (const closure of ['versionchange', 'close']) {
+  test(`reopens the cache after ${closure} without letting old close events discard a new connection`, async ({ page }) => {
+    const result = await page.evaluate(async reason => {
+      const name = `cache-${reason}-test`
+      const original = IDBFactory.prototype.open
+      const connections = []
+      IDBFactory.prototype.open = function (...args) {
+        const request = original.apply(this, args)
+        if (args[0] === name) request.addEventListener('success', () => connections.push(request.result))
+        return request
+      }
+      try {
+        const cache = window.createTestCache(async () => [], name)
+        await cache.updateVideosByChannelId('channel', [{ videoId: 'old' }], new Date(1000))
+        const first = connections[0]
+        if (reason === 'versionchange') {
+          await new Promise((resolve, reject) => {
+            const request = indexedDB.deleteDatabase(name)
+            request.onsuccess = resolve
+            request.onerror = () => reject(request.error)
+          })
+        } else {
+          // Chromium has no public force-close API. Close the real connection
+          // and deliver the event emitted by an abnormal storage closure.
+          first.close()
+          first.dispatchEvent(new Event('close'))
+        }
+        await cache.updateVideosByChannelId('channel', [{ videoId: 'new' }], new Date(2000))
+        first.dispatchEvent(new Event('close'))
+        return { records: await cache.find(), opens: connections.length }
+      } finally {
+        IDBFactory.prototype.open = original
+        connections.forEach(connection => connection.close())
+      }
+    }, closure)
+    expect(result.records[0].videos[0].videoId).toBe('new')
+    expect(result.opens).toBe(2)
+  })
+}

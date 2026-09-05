@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { readFile } from 'node:fs/promises'
+import vm from 'node:vm'
 
 import { isAppHidden, setAndroidAppVisible } from '../../src/renderer/helpers/appVisibility.js'
 import { resolveAndroidBackgroundPlaybackFormat } from '../../src/renderer/helpers/player/androidBackgroundPlayback.js'
@@ -38,3 +40,41 @@ test('Android background playback follows Home even when Chromium stays visible 
     else globalThis.document = originalDocument
   }
 })
+
+for (const eventFirst of [false, true]) {
+  test(`Android initial visibility preserves ${eventFirst ? 'a newer app-state event' : 'the initial snapshot without an event'}`, async () => {
+    const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+    const start = source.indexOf('async function enableCapacitorIntegrations() {')
+    const integration = source.slice(start, source.indexOf('\nconst windowTitle', start))
+    const initialState = Promise.withResolvers()
+    const requestedState = Promise.withResolvers()
+    const changes = []
+    let listener
+    let pauses = 0
+    const enable = vm.runInNewContext(`${integration}\nenableCapacitorIntegrations`, {
+      CapacitorApp: {
+        addListener: async (name, callback) => {
+          if (name === 'appStateChange') listener = callback
+          return { remove() {} }
+        },
+        getState: () => { requestedState.resolve(); return initialState.promise },
+        getLaunchUrl: async () => null,
+      },
+      initializeCapacitorLiveReminderActions: async () => () => {},
+      addAndroidMediaSessionActionListener: async () => () => {},
+      setAndroidAppVisible: visible => changes.push(visible),
+      shouldPauseAndroidPlaybackOnAppStateChange: active => !active,
+      store: { getters: { getContinuePlaybackWhenScreenIsLocked: false } },
+      tabMediaCoordinator: { pauseAll: () => { pauses++ } },
+    })
+    const enabling = enable()
+    await requestedState.promise
+    if (eventFirst) listener({ isActive: false })
+    initialState.resolve({ isActive: true })
+    const cleanup = await enabling
+    assert.deepEqual(changes, eventFirst ? [false] : [true])
+    assert.equal(pauses, eventFirst ? 1 : 0)
+    cleanup()
+    assert.equal(changes.at(-1), null)
+  })
+}

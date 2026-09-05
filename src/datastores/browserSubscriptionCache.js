@@ -28,7 +28,7 @@ export function createBrowserSubscriptionCache(loadLegacyRecords, name = 'opentu
     })
   }
 
-  async function open() {
+  async function open(onClose) {
     const database = await new Promise((resolve, reject) => {
       const request = indexedDB.open(name, 1)
       request.onupgradeneeded = () => {
@@ -38,7 +38,11 @@ export function createBrowserSubscriptionCache(loadLegacyRecords, name = 'opentu
       request.onerror = () => reject(request.error)
       request.onsuccess = () => resolve(request.result)
     })
-    database.onversionchange = () => database.close()
+    database.onversionchange = () => {
+      onClose()
+      database.close()
+    }
+    database.onclose = onClose
 
     try {
       const imported = await transaction(database, ['metadata'], 'readonly', (tx, done) => {
@@ -79,10 +83,16 @@ export function createBrowserSubscriptionCache(loadLegacyRecords, name = 'opentu
   }
 
   function database() {
-    ready ??= open().catch(error => {
-      ready = null
-      throw error
-    })
+    if (!ready) {
+      const forget = () => {
+        if (ready === pending) ready = null
+      }
+      const pending = open(forget).catch(error => {
+        forget()
+        throw error
+      })
+      ready = pending
+    }
     return ready
   }
 
