@@ -350,6 +350,8 @@ Settings:
     Light Theme: வெளிர் அலங்காரம்
     Dark Theme: கருமை அலங்காரம்
     Custom Theme:
+      Import from Clipboard: "இடைநிலைப் பலகையிலிருந்து இறக்குமதி செய்"
+      Invalid Clipboard Theme: "இடைநிலைப் பலகையில் செல்லுபடியான கருப்பொருள் இல்லை. கருப்பொருளின் JSON ஐ நகலெடுத்து மீண்டும் முயற்சிக்கவும்."
       Create Custom Theme: தனிப்பயன் அலங்காரத்தை உருவாக்கு
       Edit Custom Theme: தனிப்பயன் அலங்காரத்தைத் திருத்து
       Custom Theme Creator: தனிப்பயன் அலங்கார உருவாக்கி

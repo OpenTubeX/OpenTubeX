@@ -497,6 +497,8 @@ Settings:
     Light Theme: Tema clar
     Dark Theme: Tema fosc
     Custom Theme:
+      Import from Clipboard: "Importa del porta-retalls"
+      Invalid Clipboard Theme: "El porta-retalls no conté cap tema vàlid. Copieu el JSON del tema i torneu-ho a provar."
       Create Custom Theme: Crea un tema personalitzat
       Edit Custom Theme: Edita el tema personalitzat
       Custom Theme Creator: Creador de temes personalitzats

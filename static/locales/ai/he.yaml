@@ -349,6 +349,8 @@ Settings:
     Light Theme: ערכת נושא בהירה
     Dark Theme: ערכת נושא כהה
     Custom Theme:
+      Import from Clipboard: "ייבוא מהלוח"
+      Invalid Clipboard Theme: "הלוח אינו מכיל ערכת נושא תקינה. יש להעתיק את ה־JSON של ערכת הנושא ולנסות שוב."
       Create Custom Theme: יצירת ערכת נושא מותאמת אישית
       Edit Custom Theme: עריכת ערכת נושא מותאמת אישית
       Custom Theme Creator: יוצר ערכות נושא מותאמות אישית

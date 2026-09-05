@@ -345,6 +345,8 @@ Settings:
     Light Theme: Thème clair
     Dark Theme: Thème sombre
     Custom Theme:
+      Import from Clipboard: "Importer depuis le presse-papiers"
+      Invalid Clipboard Theme: "Le presse-papiers ne contient pas de thème valide. Copiez le JSON du thème et réessayez."
       Create Custom Theme: Créer un thème personnalisé
       Edit Custom Theme: Modifier le thème personnalisé
       Custom Theme Creator: Créateur de thèmes personnalisés

@@ -349,6 +349,8 @@ Settings:
     Light Theme: Φωτεινό θέμα
     Dark Theme: Σκοτεινό θέμα
     Custom Theme:
+      Import from Clipboard: "Εισαγωγή από το πρόχειρο"
+      Invalid Clipboard Theme: "Το πρόχειρο δεν περιέχει έγκυρο θέμα. Αντιγράψτε το JSON του θέματος και δοκιμάστε ξανά."
       Create Custom Theme: Δημιουργία προσαρμοσμένου θέματος
       Edit Custom Theme: Επεξεργασία προσαρμοσμένου θέματος
       Custom Theme Creator: Δημιουργία προσαρμοσμένου θέματος

@@ -345,6 +345,8 @@ Settings:
     Light Theme: ライトテーマ
     Dark Theme: ダークテーマ
     Custom Theme:
+      Import from Clipboard: "クリップボードからインポート"
+      Invalid Clipboard Theme: "クリップボードに有効なテーマがありません。テーマのJSONをコピーして、もう一度お試しください。"
       Create Custom Theme: カスタムテーマを作成
       Edit Custom Theme: カスタムテーマを編集
       Custom Theme Creator: カスタムテーマ作成

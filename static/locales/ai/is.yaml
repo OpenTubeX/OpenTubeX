@@ -349,6 +349,8 @@ Settings:
     Light Theme: Ljóst þema
     Dark Theme: Dökkt þema
     Custom Theme:
+      Import from Clipboard: "Flytja inn af klippispjaldi"
+      Invalid Clipboard Theme: "Klippispjaldið inniheldur ekki gilt þema. Afritaðu JSON þemans og reyndu aftur."
       Create Custom Theme: Búa til sérsniðið þema
       Edit Custom Theme: Breyta sérsniðnu þema
       Custom Theme Creator: Sérsniðinn þemasmiður

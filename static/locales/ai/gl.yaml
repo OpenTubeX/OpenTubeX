@@ -349,6 +349,8 @@ Settings:
     Light Theme: Tema claro
     Dark Theme: Tema escuro
     Custom Theme:
+      Import from Clipboard: "Importar do portapapeis"
+      Invalid Clipboard Theme: "O portapapeis non contén un tema válido. Copia o JSON do tema e téntao de novo."
       Create Custom Theme: Crear un tema personalizado
       Edit Custom Theme: Editar o tema personalizado
       Custom Theme Creator: Creador de temas personalizados

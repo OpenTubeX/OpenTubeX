@@ -347,6 +347,8 @@ Settings:
     Light Theme: Temă luminoasă
     Dark Theme: Temă întunecată
     Custom Theme:
+      Import from Clipboard: "Importă din clipboard"
+      Invalid Clipboard Theme: "Clipboardul nu conține o temă validă. Copiază JSON-ul temei și încearcă din nou."
       Create Custom Theme: Creează o temă personalizată
       Edit Custom Theme: Editează tema personalizată
       Custom Theme Creator: Editor de teme personalizate

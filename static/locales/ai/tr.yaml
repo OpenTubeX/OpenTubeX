@@ -345,6 +345,8 @@ Settings:
     Light Theme: Açık tema
     Dark Theme: Koyu tema
     Custom Theme:
+      Import from Clipboard: "Panodan içe aktar"
+      Invalid Clipboard Theme: "Pano geçerli bir tema içermiyor. Temanın JSON kodunu kopyalayıp tekrar deneyin."
       Create Custom Theme: Özel tema oluştur
       Edit Custom Theme: Özel temayı düzenle
       Custom Theme Creator: Özel tema oluşturucu

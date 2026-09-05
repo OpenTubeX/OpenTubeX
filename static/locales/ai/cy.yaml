@@ -347,6 +347,8 @@ Settings:
     Light Theme: Thema olau
     Dark Theme: Thema dywyll
     Custom Theme:
+      Import from Clipboard: "Mewnforio o’r clipfwrdd"
+      Invalid Clipboard Theme: "Nid yw’r clipfwrdd yn cynnwys thema ddilys. Copïwch JSON y thema a rhowch gynnig arall arni."
       Create Custom Theme: Creu thema bersonol
       Edit Custom Theme: Golygu thema bersonol
       Custom Theme Creator: Crëwr themâu personol

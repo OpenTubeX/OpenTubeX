@@ -349,6 +349,8 @@ Settings:
     Light Theme: Vaalea teema
     Dark Theme: Tumma teema
     Custom Theme:
+      Import from Clipboard: "Tuo leikepöydältä"
+      Invalid Clipboard Theme: "Leikepöydällä ei ole kelvollista teemaa. Kopioi teeman JSON ja yritä uudelleen."
       Create Custom Theme: Luo mukautettu teema
       Edit Custom Theme: Muokkaa mukautettua teemaa
       Custom Theme Creator: Mukautetun teeman luonti

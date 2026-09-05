@@ -349,6 +349,8 @@ Settings:
     Light Theme: Tema terang
     Dark Theme: Tema gelap
     Custom Theme:
+      Import from Clipboard: "Impor dari papan klip"
+      Invalid Clipboard Theme: "Papan klip tidak berisi tema yang valid. Salin JSON tema dan coba lagi."
       Create Custom Theme: Buat tema khusus
       Edit Custom Theme: Edit tema khusus
       Custom Theme Creator: Pembuat tema khusus

@@ -4540,6 +4540,11 @@ function runApp() {
           : 'system')
   }
 
+  ipcMain.handle(IpcChannels.READ_CLIPBOARD, (event) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) throw new Error('Untrusted clipboard request')
+    return clipboard.readText()
+  })
+
   ipcMain.handle(IpcChannels.CUSTOM_THEME_LOAD, async (event) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) return
     return await loadCustomThemes()

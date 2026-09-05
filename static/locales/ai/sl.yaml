@@ -488,6 +488,8 @@ Settings:
     Light Theme: Svetla tema
     Dark Theme: Temna tema
     Custom Theme:
+      Import from Clipboard: "Uvozi iz odložišča"
+      Invalid Clipboard Theme: "Odložišče ne vsebuje veljavne teme. Kopirajte JSON teme in poskusite znova."
       Create Custom Theme: Ustvari temo po meri
       Edit Custom Theme: Uredi temo po meri
       Custom Theme Creator: Urejevalnik tem po meri

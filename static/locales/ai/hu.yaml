@@ -345,6 +345,8 @@ Settings:
     Light Theme: Világos téma
     Dark Theme: Sötét téma
     Custom Theme:
+      Import from Clipboard: "Importálás a vágólapról"
+      Invalid Clipboard Theme: "A vágólap nem tartalmaz érvényes témát. Másolja a téma JSON-kódját, és próbálja újra."
       Create Custom Theme: Egyéni téma létrehozása
       Edit Custom Theme: Egyéni téma szerkesztése
       Custom Theme Creator: Egyénitéma-készítő

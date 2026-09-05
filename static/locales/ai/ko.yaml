@@ -456,6 +456,8 @@ Settings:
     Light Theme: 밝은 테마
     Dark Theme: 어두운 테마
     Custom Theme:
+      Import from Clipboard: "클립보드에서 가져오기"
+      Invalid Clipboard Theme: "클립보드에 유효한 테마가 없습니다. 테마 JSON을 복사한 후 다시 시도하세요."
       Create Custom Theme: 사용자 지정 테마 만들기
       Edit Custom Theme: 사용자 지정 테마 편집
       Custom Theme Creator: 사용자 지정 테마 만들기

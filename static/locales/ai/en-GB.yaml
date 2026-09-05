@@ -332,6 +332,8 @@ Settings:
     Light Theme: Light theme
     Dark Theme: Dark theme
     Custom Theme:
+      Import from Clipboard: "Import from clipboard"
+      Invalid Clipboard Theme: "Clipboard does not contain a valid theme. Copy the theme JSON and try again."
       Create Custom Theme: Create custom theme
       Edit Custom Theme: Edit custom theme
       Custom Theme Creator: Custom theme creator

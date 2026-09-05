@@ -347,6 +347,8 @@ Settings:
     Light Theme: Svijetla tema
     Dark Theme: Tamna tema
     Custom Theme:
+      Import from Clipboard: "Uvezi iz međuspremnika"
+      Invalid Clipboard Theme: "Međuspremnik ne sadrži valjanu temu. Kopirajte JSON teme i pokušajte ponovno."
       Create Custom Theme: Izradi prilagođenu temu
       Edit Custom Theme: Uredi prilagođenu temu
       Custom Theme Creator: Izrada prilagođene teme

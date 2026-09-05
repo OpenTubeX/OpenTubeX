@@ -1,5 +1,6 @@
 import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
+import { cloneDefaultCustomTheme } from '../../../src/customTheme.js'
 
 import {
   test,
@@ -411,6 +412,82 @@ test.describe('custom theme editor', () => {
         quickSettings: ['baseTheme', 'mainColor'],
       },
     },
+  })
+
+  test('imports clipboard themes as new drafts and saves only on confirmation', async ({ app, page }) => {
+    const theme = cloneDefaultCustomTheme()
+    theme.name = 'Clipboard midnight'
+    theme.colors.background = '#112233'
+    await app.electronApp.evaluate(({ clipboard }, text) => clipboard.writeText(text), JSON.stringify(theme))
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    const importButton = page.getByRole('button', { name: 'Import from clipboard' })
+    await expect(importButton.locator('.ft-icon')).toBeVisible()
+    await importButton.focus()
+    await page.keyboard.press('Enter')
+    await expect(page.getByRole('textbox', { name: 'Theme name' })).toHaveValue(theme.name)
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#112233')
+    expect(await page.evaluate(() => window.ftElectron.loadCustomTheme())).toEqual([])
+    await page.getByRole('button', { name: 'Save and apply' }).click()
+    const saved = await page.evaluate(() => window.ftElectron.loadCustomTheme())
+    expect(saved).toHaveLength(1)
+    expect(saved[0].id).not.toBe(theme.id)
+    expect(saved[0].colors.background).toBe('#112233')
+
+    await page.getByRole('button', { name: 'Edit custom theme' }).click()
+    await importButton.click()
+    await page.getByRole('button', { name: 'Save and apply' }).click()
+    const importedAgain = await page.evaluate(() => window.ftElectron.loadCustomTheme())
+    expect(importedAgain).toHaveLength(2)
+    expect(new Set(importedAgain.map(({ id }) => id)).size).toBe(2)
+    expect(importedAgain).toContainEqual(saved[0])
+  })
+
+  test('reports clipboard read failures without replacing the draft', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ clipboard }) => {
+      clipboard.readText = () => { throw new Error('Clipboard read failed') }
+    })
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    const name = page.getByRole('textbox', { name: 'Theme name' })
+    await name.fill('Keep my draft')
+    await page.getByRole('button', { name: 'Import from clipboard' }).click()
+    await expect(page.locator('.toast').filter({ hasText: 'Clipboard unavailable' })).toBeVisible()
+    await expect(name).toHaveValue('Keep my draft')
+  })
+
+  test('keeps clipboard import controls visible in narrow and scaled windows', async ({ app, page }, testInfo) => {
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    for (const [width, scale] of [[1200, 1], [420, 1], [500, 1.25]]) {
+      await setWindowWidth(app, width)
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      const buttons = page.locator('.fileActions button')
+      await expect(buttons).toHaveCount(4)
+      for (const button of await buttons.all()) {
+        await expect(button).toBeInViewport({ ratio: 1 })
+      }
+      await expect.poll(() => page.locator('.editorHeader').evaluate(element =>
+        element.scrollWidth <= element.clientWidth)).toBe(true)
+    }
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+    await page.screenshot({ path: testInfo.outputPath('clipboard-import.png') })
+  })
+
+  test('preserves the draft when clipboard themes are empty or invalid', async ({ app, page }) => {
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    const name = page.getByRole('textbox', { name: 'Theme name' })
+    await name.fill('Keep my draft')
+    const originalBackground = await page.locator('body').evaluate(element => element.style.getPropertyValue('--bg-color'))
+    for (const text of ['', 'not JSON', '{"name":"Missing colors"}']) {
+      await app.electronApp.evaluate(({ clipboard }, value) => clipboard.writeText(value), text)
+      await page.getByRole('button', { name: 'Import from clipboard' }).click()
+      await expect(page.locator('.toast').filter({ hasText: 'Clipboard does not contain a valid theme' }).last()).toBeVisible()
+      await expect(name).toHaveValue('Keep my draft')
+      await expect(page.locator('body')).toHaveCSS('--bg-color', originalBackground)
+      expect(await page.evaluate(() => window.ftElectron.loadCustomTheme())).toEqual([])
+    }
   })
 
   test('clamps the color-source list after a responsive reflow', async ({ app, page }) => {
