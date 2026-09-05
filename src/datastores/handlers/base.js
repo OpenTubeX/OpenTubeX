@@ -1,4 +1,5 @@
 import * as db from '../index'
+import { updateSettingIfUnchanged } from '../settingRepair'
 import { PlaylistVideoAddResult } from '../../constants'
 import { hasReachedWatchedThreshold, migrateLegacyHistoryRecord } from '../../history'
 import { resolveSearchHistoryEntry } from '../../search-history'
@@ -67,6 +68,10 @@ class Settings {
 
   static upsert(_id, value) {
     return db.settings.updateAsync({ _id }, { _id, value }, { upsert: true })
+  }
+
+  static _updateIfUnchanged(_id, expectedValue, value) {
+    return updateSettingIfUnchanged(db.settings, _id, expectedValue, value)
   }
 
   static delete(_id) {

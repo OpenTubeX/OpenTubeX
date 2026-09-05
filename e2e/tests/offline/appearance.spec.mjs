@@ -1,7 +1,15 @@
 import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
+import {
+  test,
+  expect,
+  goTo,
+  goToSettingsSection,
+  openNewWindowFromTabBar,
+  sel,
+  waitForAppReady,
+} from '../../helpers/app.mjs'
 
 async function readSavedThemes (userDataDir) {
   const themeDirectory = path.join(userDataDir, 'themes')
@@ -223,19 +231,65 @@ test.describe('default appearance', () => {
     await expect(page.locator('.select').filter({ has: darkTheme }).locator('.select-icon')).toBeVisible()
 
     await lightTheme.click()
-    await page.locator(`#${await lightTheme.getAttribute('aria-controls')}`)
-      .getByRole('option', { name: 'Catppuccin Frappe', exact: true }).click()
-    await expect(page.locator('body')).toHaveClass(/catppuccinFrappe/)
+    const lightThemeOptions = page.locator(`#${await lightTheme.getAttribute('aria-controls')}`)
+    await expect(lightThemeOptions.getByRole('option', { name: 'Catppuccin Frappe', exact: true }))
+      .toHaveCount(0)
+    await expect(lightThemeOptions.getByRole('option', { name: 'Catppuccin Latte', exact: true }))
+      .toBeVisible()
+    await lightThemeOptions.getByRole('option', { name: 'Catppuccin Latte', exact: true }).click()
+    await expect(page.locator('body')).toHaveClass(/catppuccinLatte/)
 
     await darkTheme.click()
-    await page.locator(`#${await darkTheme.getAttribute('aria-controls')}`)
-      .getByRole('option', { name: 'Catppuccin Mocha', exact: true }).click()
+    const darkThemeOptions = page.locator(`#${await darkTheme.getAttribute('aria-controls')}`)
+    await expect(darkThemeOptions.getByRole('option', { name: 'Catppuccin Latte', exact: true }))
+      .toHaveCount(0)
+    await expect(darkThemeOptions.getByRole('option', { name: 'Catppuccin Mocha', exact: true }))
+      .toBeVisible()
+    await darkThemeOptions.getByRole('option', { name: 'Catppuccin Mocha', exact: true }).click()
     await page.emulateMedia({ colorScheme: 'dark' })
     await expect(page.locator('body')).toHaveClass(/catppuccinMocha/)
 
     ;({ page } = await app.relaunch())
     await page.emulateMedia({ colorScheme: 'dark' })
     await expect(page.locator('body')).toHaveClass(/catppuccinMocha/)
+  })
+
+  test('repairs a reclassified system theme in every open window', async ({ app, page }) => {
+    await page.emulateMedia({ colorScheme: 'light' })
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await page.getByRole('textbox', { name: 'Theme name' }).fill('Paper')
+    await page.getByRole('button', { name: 'Save and apply' }).click()
+
+    const baseTheme = page.getByRole('combobox', { name: 'Base Theme' })
+    await baseTheme.click()
+    await page.locator(`#${await baseTheme.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: /System default/i }).click()
+    const lightTheme = page.getByRole('combobox', { name: 'Light theme' })
+    await lightTheme.click()
+    await page.locator(`#${await lightTheme.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: 'Paper', exact: true }).click()
+    await page.locator('.settingsCloseButton').click()
+
+    const secondWindow = await openNewWindowFromTabBar(app, page)
+    await waitForAppReady(secondWindow)
+    await secondWindow.emulateMedia({ colorScheme: 'light' })
+    await expect(page.locator('body')).toHaveClass(/custom/)
+    await expect(secondWindow.locator('body')).toHaveClass(/custom/)
+
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Edit custom theme' }).click()
+    await page.locator('label.switch-label').filter({ hasText: 'Dark theme' }).click()
+    await page.getByRole('button', { name: 'Save and apply' }).click()
+
+    for (const openWindow of [page, secondWindow]) {
+      await expect.poll(() => openWindow.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return store.getters.getSystemLightTheme
+      })).toBe('light')
+      await expect(openWindow.locator('body')).toHaveClass(/light/)
+      await expect(openWindow.locator('body')).not.toHaveClass(/custom/)
+    }
   })
 
   test('keeps a changed theme marker clear of the previous select', async ({ page }) => {
@@ -755,6 +809,11 @@ test.describe('custom theme editor', () => {
     await expect(page.getByRole('combobox', { name: /Main colou?r theme/i })).toBeDisabled()
     await expect(page.getByRole('combobox', { name: /Secondary colou?r theme/i })).toBeDisabled()
 
+    await page.getByRole('button', { name: 'Edit custom theme' }).click()
+    await page.locator('label.switch-label').filter({ hasText: 'Dark theme' }).click()
+    await expect(darkTheme).toBeChecked()
+    await saveAndApplyButton.click()
+
     await page.getByRole('button', { name: 'Create custom theme' }).click()
     await expect(backgroundValue).toHaveText('#445566')
     await expect(page.getByRole('combobox', { name: 'Based on' })).toHaveText('Dark')
@@ -780,8 +839,10 @@ test.describe('custom theme editor', () => {
       .getByRole('option', { name: /System default/i }).click()
     const darkSystemTheme = page.getByRole('combobox', { name: 'Dark theme' })
     await darkSystemTheme.click()
-    await page.locator(`#${await darkSystemTheme.getAttribute('aria-controls')}`)
-      .getByRole('option', { name: 'Midnight', exact: true }).click()
+    const darkSystemThemeOptions = page.locator(`#${await darkSystemTheme.getAttribute('aria-controls')}`)
+    await expect(darkSystemThemeOptions.getByRole('option', { name: 'Paper', exact: true })).toHaveCount(0)
+    await expect(darkSystemThemeOptions.getByRole('option', { name: 'Midnight', exact: true })).toBeVisible()
+    await darkSystemThemeOptions.getByRole('option', { name: 'Midnight', exact: true }).click()
 
     await page.locator('.settingsCloseButton').click()
     await page.locator('.topNav .profileTrigger').click()
@@ -803,8 +864,9 @@ test.describe('custom theme editor', () => {
 
     const lightSystemTheme = page.getByRole('combobox', { name: 'Light theme' })
     await lightSystemTheme.click()
-    await page.locator(`#${await lightSystemTheme.getAttribute('aria-controls')}`)
-      .getByRole('option', { name: 'Paper', exact: true }).click()
+    const lightSystemThemeOptions = page.locator(`#${await lightSystemTheme.getAttribute('aria-controls')}`)
+    await expect(lightSystemThemeOptions.getByRole('option', { name: 'Midnight', exact: true })).toHaveCount(0)
+    await lightSystemThemeOptions.getByRole('option', { name: 'Paper', exact: true }).click()
     await expect(page.getByRole('button', { name: 'Edit custom theme' })).toBeVisible()
     await page.getByRole('button', { name: 'Edit custom theme' }).click()
     await setEditorColor('Page background', '#abcdef')
@@ -835,7 +897,7 @@ test.describe('custom theme editor', () => {
     ;({ page } = await app.relaunch())
     await expect(page.locator('body')).toHaveClass(/custom/)
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#445566')
-    await expect(page.locator('body')).toHaveAttribute('data-custom-theme', 'light')
+    await expect(page.locator('body')).toHaveAttribute('data-custom-theme', 'dark')
 
     await goToSettingsSection(page, 'theme')
     await page.getByRole('button', { name: 'Edit custom theme' }).click()
@@ -860,8 +922,8 @@ test.describe('invalid appearance values', () => {
     seed: {
       settings: {
         baseTheme: 'missingTheme',
-        systemLightTheme: 'missingLightTheme',
-        systemDarkTheme: 'missingDarkTheme',
+        systemLightTheme: 'solarizedDark',
+        systemDarkTheme: 'solarizedLight',
         mainColor: 'missingMainColor',
         secColor: 'missingSecondaryColor'
       }

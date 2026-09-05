@@ -158,6 +158,7 @@ import {
   hexColorToRgbComponents,
   normalizeCustomTheme,
 } from '../../../customTheme'
+import { getThemeClassification } from '../../../appearanceSettings'
 import {
   applyThemeToDocument,
   deleteCustomTheme,
@@ -462,9 +463,7 @@ function copyThemeSources() {
   themeSourceColors.value = sourceColors
   draft.colors = { ...sourceColors }
   draft.blurs = Object.fromEntries(CUSTOM_THEME_BLURS.map(([key]) => [key, 0]))
-  draft.isDark = !['light', 'pastelPink', 'catppuccinLatte', 'everforestLightHard',
-    'everforestLightMedium', 'everforestLightLow', 'gruvboxLight', 'solarizedLight']
-    .includes(draft.basedOn)
+  draft.isDark = getThemeClassification(draft.basedOn) !== 'light'
   previewing = true
   previewTheme()
 }

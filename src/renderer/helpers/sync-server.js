@@ -16,6 +16,7 @@ import {
 import { getSyncableSettingKeys } from '../store/modules/settings'
 import { deepCopy } from './utils'
 import { replaceCustomThemes } from './customTheme'
+import { repairSystemThemeSettings } from './customThemeSync'
 import { generateRandomUniqueId } from './playlists'
 import {
   getMergedProfileBackground,
@@ -27,7 +28,7 @@ import { createSyncServerRequestHeaders } from './sync-server-request'
 import { isValidPlaylistBookmark, playlistBookmarkForSync } from './playlist-bookmarks'
 import { getOtherDeviceSessions, mergeSyncSessions } from './sync-sessions'
 import { isValidSyncServerDeviceId } from './sync-server-sessions'
-import { mergeSettingEntry } from './sync-settings-conflict'
+import { mergeSettingEntry, resolveMergedThemeEntry } from './sync-settings-conflict'
 import { getCapacitorTabService } from '../tabs/CapacitorTabService'
 import { capacitorHttpFetch } from './api/capacitor-http'
 
@@ -1077,7 +1078,7 @@ function settingUpdater(key) {
   return `update${key.charAt(0).toUpperCase()}${key.slice(1)}`
 }
 
-async function repairDeletedCustomThemeReferences(store, previousThemes, themes) {
+async function repairCustomThemeReferences(store, previousThemes, themes) {
   const themeIds = new Set(themes.map(theme => theme.id))
   const previousById = new Map(previousThemes.map(theme => [theme.id, theme]))
   const fallbacks = {
@@ -1097,6 +1098,8 @@ async function repairDeletedCustomThemeReferences(store, previousThemes, themes)
     }
     await store.dispatch(settingUpdater(key), deletedTheme?.basedOn ?? defaultTheme)
   }
+
+  await repairSystemThemeSettings(store, themes)
 }
 
 const SYNC_DEVICE_ID_KEY = 'opentubex-sync-device-id'
@@ -1192,10 +1195,12 @@ export async function syncSettings(client, store, previous = {}) {
     !Array.isArray(store.state.settings.syncServerSettingUpdatedAt)
     ? store.state.settings.syncServerSettingUpdatedAt
     : {}
-  const local = Object.fromEntries(getSyncableSettingKeys(store.state.settings).map(key => (
-    [key, deepCopy(store.state.settings[key])]
-  )))
-  local[CUSTOM_THEMES_SYNC_KEY] = normalizeCustomThemes(store.state.utils.customThemes)
+  const local = Object.fromEntries([
+    [CUSTOM_THEMES_SYNC_KEY, normalizeCustomThemes(store.state.utils.customThemes)],
+    ...getSyncableSettingKeys(store.state.settings).map(key => (
+      [key, deepCopy(store.state.settings[key])]
+    )),
+  ])
 
   for (const [key, value] of Object.entries(local)) {
     const old = previous[key]
@@ -1209,18 +1214,22 @@ export async function syncSettings(client, store, previous = {}) {
       now,
     })
 
+    entry = resolveMergedThemeEntry(
+      entry, store.state.utils.customThemes, local[CUSTOM_THEMES_SYNC_KEY], now
+    )
     merged[key] = entry
     if (key === 'defaultProfile' &&
         !store.state.profiles.profileList.some(profile => profile._id === entry.value)) {
       entry = { key, value: MAIN_PROFILE_ID, updatedAt: now }
       merged[key] = entry
     }
-    if (!metadataEquals(value, entry.value)) {
+    const currentValue = key === CUSTOM_THEMES_SYNC_KEY ? value : store.state.settings[key]
+    if (!metadataEquals(currentValue, entry.value)) {
       if (key === CUSTOM_THEMES_SYNC_KEY) {
         const previousThemes = store.state.utils.customThemes
         const themes = await replaceCustomThemes(entry.value)
         store.commit('setCustomThemes', themes)
-        await repairDeletedCustomThemeReferences(store, previousThemes, themes)
+        await repairCustomThemeReferences(store, previousThemes, themes)
       } else {
         await store.dispatch(settingUpdater(key), deepCopy(entry.value))
       }

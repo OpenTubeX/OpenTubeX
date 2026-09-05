@@ -540,8 +540,10 @@ test.describe('OpenTubeX sync server', () => {
 
     await page.evaluate(async customTheme => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateSyncServerSyncSessions', false)
       const themes = await window.ftElectron.saveCustomTheme(customTheme)
       store.commit('setCustomThemes', themes)
+      await store.dispatch('updateSystemDarkTheme', `custom:${customTheme.id}`)
     }, theme)
 
     const syncSection = await goToSettingsSection(page, 'sync')
@@ -570,6 +572,7 @@ test.describe('OpenTubeX sync server', () => {
       await store.dispatch('setSyncServerAutoSync', false)
       const themes = await window.ftElectron.replaceCustomThemes([])
       store.commit('setCustomThemes', themes)
+      await store.dispatch('updateSystemDarkTheme', 'dark')
       await store.dispatch('updateSyncServerSnapshot', '')
     })
     await syncNow()
@@ -582,6 +585,10 @@ test.describe('OpenTubeX sync server', () => {
       name: theme.name,
       colors: { background: '#123456' },
     })
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getSystemDarkTheme
+    })).toBe('custom:synced-theme')
 
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -595,7 +602,12 @@ test.describe('OpenTubeX sync server', () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const themes = await window.ftElectron.replaceCustomThemes([customTheme])
       store.commit('setCustomThemes', themes)
-      await store.dispatch('updateSyncServerSnapshot', '')
+      const snapshot = JSON.parse(store.state.settings.syncServerSnapshot)
+      snapshot.settings.customThemes.value = themes
+      snapshot.settings.customThemes.updatedAt = 1
+      await store.dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot))
+      await store.dispatch('updateBaseTheme', 'custom:synced-theme')
+      await store.dispatch('updateSystemDarkTheme', 'custom:synced-theme')
     }, theme)
     await syncNow()
     await expect.poll(async () => readFile(themePath, 'utf8').then(
@@ -605,6 +617,16 @@ test.describe('OpenTubeX sync server', () => {
     await expect.poll(async () => (
       latestSettings(await readFile(settingsPath, 'utf8')).baseTheme
     )).toBe(theme.basedOn)
+    await expect.poll(async () => {
+      const settings = latestSettings(await readFile(settingsPath, 'utf8'))
+      const snapshot = JSON.parse(settings.syncServerSnapshot).settings
+      return [settings.systemDarkTheme, snapshot.baseTheme.value, snapshot.systemDarkTheme.value]
+    }).toEqual(['dark', theme.basedOn, 'dark'])
+    await syncNow()
+    await expect.poll(async () => {
+      const settings = latestSettings(await readFile(settingsPath, 'utf8'))
+      return [settings.baseTheme, settings.systemDarkTheme]
+    }).toEqual([theme.basedOn, 'dark'])
   })
 
   test('migrates existing plaintext data before locking the account', async ({ app, page }, testInfo) => {
