@@ -434,6 +434,12 @@ test.describe('custom theme editor', () => {
     expect(saved[0].id).not.toBe(theme.id)
     expect(saved[0].colors.background).toBe('#112233')
 
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.evaluate(async (themeId) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateSystemDarkTheme', `custom:${themeId}`)
+      await store.dispatch('updateBaseTheme', 'system')
+    }, saved[0].id)
     await page.getByRole('button', { name: 'Edit custom theme' }).click()
     await importButton.click()
     await page.getByRole('button', { name: 'Save and apply' }).click()
@@ -441,6 +447,41 @@ test.describe('custom theme editor', () => {
     expect(importedAgain).toHaveLength(2)
     expect(new Set(importedAgain.map(({ id }) => id)).size).toBe(2)
     expect(importedAgain).toContainEqual(saved[0])
+    const importedId = importedAgain.find(({ id }) => id !== saved[0].id).id
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getBaseTheme
+    })).toBe(`custom:${importedId}`)
+  })
+
+  test('ignores clipboard imports after the editor unmounts', async ({ app, page }) => {
+    const theme = cloneDefaultCustomTheme()
+    theme.colors.background = '#112233'
+    await app.electronApp.evaluate(({ clipboard }) => {
+      clipboard.readText = () => new Promise(resolve => {
+        globalThis.resolveThemeClipboardRead = (text) => {
+          clipboard.readText = () => ''
+          resolve(text)
+        }
+      })
+    })
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await page.getByRole('button', { name: 'Import from clipboard' }).click()
+    await expect.poll(() => app.electronApp.evaluate(() =>
+      typeof globalThis.resolveThemeClipboardRead)).toBe('function')
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setSettingsWindowView', 'about')
+    })
+    await expect(page.locator('.customThemeEditor')).toHaveCount(0)
+    const background = await page.locator('body').evaluate(element => element.style.getPropertyValue('--bg-color'))
+    await app.electronApp.evaluate((_, text) => globalThis.resolveThemeClipboardRead(text), JSON.stringify(theme))
+    await page.evaluate(() => window.ftElectron.readClipboard())
+    // Observe the completed IPC result before checking that no preview was applied.
+    await page.waitForTimeout(500)
+    await expect(page.locator('body')).toHaveCSS('--bg-color', background)
+    expect(await page.evaluate(() => window.ftElectron.loadCustomTheme())).toEqual([])
   })
 
   test('reports clipboard read failures without replacing the draft', async ({ app, page }) => {

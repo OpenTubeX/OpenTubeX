@@ -586,6 +586,7 @@ async function importThemeFromClipboard() {
 function importThemeContent(content) {
   const importedTheme = normalizeCustomTheme(JSON.parse(content))
   importedTheme.id = crypto.randomUUID()
+  keepSystemThemeOnSave = false
   cancelPendingColorPreviews()
   setDraft(importedTheme)
   themeSourceColors.value = readThemeSourceColors()
@@ -665,6 +666,7 @@ function showError(message, error) {
 }
 
 onBeforeUnmount(() => {
+  editorLoadId++
   cancelPendingColorPreviews()
   store.commit('setCustomThemeEditorOpen', false)
 })

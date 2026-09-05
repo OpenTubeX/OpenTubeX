@@ -356,8 +356,8 @@ Settings:
     Light Theme: Светла тема
     Dark Theme: Тамна тема
     Custom Theme:
-      Import from Clipboard: "Увези из оставе"
-      Invalid Clipboard Theme: "Остава не садржи исправну тему. Копирајте JSON теме и покушајте поново."
+      Import from Clipboard: "Увези из међуспремника"
+      Invalid Clipboard Theme: "Међуспремник не садржи исправну тему. Копирајте JSON теме и покушајте поново."
       Create Custom Theme: Направи прилагођену тему
       Edit Custom Theme: Уреди прилагођену тему
       Custom Theme Creator: Прављење прилагођене теме

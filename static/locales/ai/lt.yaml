@@ -482,7 +482,7 @@ Settings:
     Dark Theme: Tamsi tema
     Custom Theme:
       Import from Clipboard: "Importuoti iš iškarpinės"
-      Invalid Clipboard Theme: "Iškarpinėje nėra tinkamo apipavidalinimo. Nukopijuokite apipavidalinimo JSON ir bandykite dar kartą."
+      Invalid Clipboard Theme: "Iškarpinėje nėra tinkamos temos. Nukopijuokite temos JSON ir bandykite dar kartą."
       Create Custom Theme: Kurti pasirinktinę temą
       Edit Custom Theme: Redaguoti pasirinktinę temą
       Custom Theme Creator: Pasirinktinės temos kūrimo priemonė
