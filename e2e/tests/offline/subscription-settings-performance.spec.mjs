@@ -106,7 +106,26 @@ for (const uiScale of [95, 125]) {
 
       await scrollToBottom()
       await setWindowSize(app, page, { width: 1600, height: 900 })
+      // Resizing may clamp through intermediate layouts; only an offset past
+      // the final content end is invalid. Bottom anchoring is not required.
+      await expect.poll(() => scroller.evaluate(element => {
+        const content = element.querySelector(':scope > div')
+        const contentEnd = content.offsetTop + content.offsetHeight +
+          Number.parseFloat(getComputedStyle(element).paddingBottom)
+        return element.scrollTop - Math.max(0, contentEnd - element.clientHeight)
+      })).toBeLessThanOrEqual(1)
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expectScrollAtRenderedEnd(scroller)
+      if (await scroller.evaluate(element => element.scrollHeight > element.clientHeight)) {
+        await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+        await expect.poll(() => scrollbar.evaluate(element => {
+          const track = element.querySelector('.os-scrollbar-track').getBoundingClientRect()
+          const handle = element.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+          return Math.abs(track.bottom - handle.bottom)
+        })).toBeLessThanOrEqual(1)
+      } else {
+        await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+      }
       await toolbar.getByRole('button', { name: 'Select All' }).click()
       await expect(toolbar).toContainText('50 selected')
       await previous.click()
