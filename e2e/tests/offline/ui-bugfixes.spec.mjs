@@ -1111,16 +1111,34 @@ test('isolates the owning video surface while Android Picture-in-Picture is acti
       const video = document.createElement('video')
       video.className = 'player'
       player.append(video)
-      document.querySelector('.routerView').append(player)
+      const canvas = document.createElement('canvas')
+      canvas.className = 'vrCanvas'
+      player.append(canvas)
+      document.querySelector('.app > .routerView').append(player)
     }
     document.body.classList.add('androidPictureInPicture')
   })
 
   await expect(page.locator('.topNav')).toHaveCSS('visibility', 'hidden')
+  await expect(page.locator('.app > .routerView')).toHaveCSS('container-type', 'normal')
   await expect(page.locator('.ftVideoPlayer').first()).toHaveCSS('visibility', 'hidden')
   const target = page.locator('[data-android-picture-in-picture-target]')
   await expect(target).toHaveCSS('visibility', 'visible')
   await expect(target.locator('> .player')).toHaveCSS('visibility', 'visible')
+  await expect(target.locator('> .player')).toHaveCSS('transition-property', 'none')
+  await expect(target.locator('> .vrCanvas')).toHaveCSS('transition-property', 'none')
+  await expect.poll(() => target.evaluate(element => {
+    const fillsViewport = (bounds) => {
+      return Math.abs(bounds.top) <= 1 &&
+        Math.abs(bounds.right - window.innerWidth) <= 1 &&
+        Math.abs(bounds.bottom - window.innerHeight) <= 1 &&
+        Math.abs(bounds.left) <= 1
+    }
+    return {
+      target: fillsViewport(element.getBoundingClientRect()),
+      video: fillsViewport(element.querySelector(':scope > .player').getBoundingClientRect()),
+    }
+  })).toEqual({ target: true, video: true })
 
   // Vue replaces the class attribute when the player changes into its
   // cross-tab mini-player layout. PiP ownership must survive that update.
