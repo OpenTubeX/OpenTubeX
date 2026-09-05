@@ -444,8 +444,11 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
     if (persist) {
       // Drag and bounce frames can be interrupted, so only remember settled positions.
-      setSavedScrollMiniPlayerRect(clamped)
-      store.dispatch('updateScrollMiniPlayerSavedRect', serializeScrollMiniPlayerSavedRect(clamped))
+      setSavedScrollMiniPlayerRect(clamped, isActiveTab.value ? 'scroll' : 'tab')
+      store.dispatch(
+        isActiveTab.value ? 'updateScrollMiniPlayerSavedRect' : 'updateCrossTabMiniPlayerSavedRect',
+        serializeScrollMiniPlayerSavedRect(clamped)
+      )
     }
   }
 
@@ -519,13 +522,6 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     const sequence = ++scrollMiniLayoutAnimationSequence
     scrollMiniPlayerAnimating.value = true
     animateScrollMiniPlayerLayout(previousRect, true, sequence)
-  }
-
-  function loadScrollMiniPlayerSavedRectFromSettings() {
-    const savedRect = parseScrollMiniPlayerSavedRect(store.getters.getScrollMiniPlayerSavedRect)
-    if (savedRect) {
-      setSavedScrollMiniPlayerRect(savedRect)
-    }
   }
 
   function syncScrollMiniPlayerState() {
@@ -647,18 +643,9 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     const animationSequence = scrollMiniLayoutAnimationSequence
     scrollMiniPlayerAnimating.value = previousRect !== null
 
-    const savedRect = getSavedScrollMiniPlayerRect()
     scrollMiniPlayerActive.value = true
     updateScrollMiniVideoAspectRatio()
-    applyScrollMiniPlayerRect(
-      savedRect
-        // The window may have changed size since the rect was saved, so replay
-        // it against the edges it was docked to rather than its old coordinates.
-        ? reanchorScrollMiniPlayerRect(savedRect, scrollMiniVideoAspectRatio.value)
-        : getDefaultScrollMiniPlayerRect(scrollMiniVideoAspectRatio.value),
-      false,
-      true
-    )
+    restoreScrollMiniPlayerPosition()
     syncScrollMiniPlayerState()
 
     if (scrollMiniPlayPauseHiddenByTimer) {
@@ -675,6 +662,18 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     if (previousRect) {
       animateScrollMiniPlayerLayout(previousRect, true, animationSequence)
     }
+  }
+
+  function restoreScrollMiniPlayerPosition() {
+    const savedRect = getSavedScrollMiniPlayerRect(isActiveTab.value ? 'scroll' : 'tab')
+    applyScrollMiniPlayerRect(
+      savedRect
+        // Restore against the saved edges, since the viewport may have resized.
+        ? reanchorScrollMiniPlayerRect(savedRect, scrollMiniVideoAspectRatio.value)
+        : getDefaultScrollMiniPlayerRect(scrollMiniVideoAspectRatio.value),
+      false,
+      true
+    )
   }
 
   /** @param {boolean} [animate] */
@@ -1109,6 +1108,17 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   })
 
   watch(isActiveTab, (active) => {
+    if (scrollMiniPlayerActive.value) {
+      // A tab switch can change modes without deactivating the mini player.
+      // Cancel unfinished gestures so they cannot overwrite the new mode's position.
+      cancelScrollMiniPlayerBounce()
+      cancelScrollMiniPlayerLayoutAnimation()
+      endScrollMiniPointerSession()
+      scrollMiniPlayerStashedSide.value = null
+      scrollMiniPlayerRestoreRect = null
+      restoreScrollMiniPlayerPosition()
+    }
+
     if (active) {
       scrollMiniPlayerDismissed.value = false
       markCrossTabMiniPlayerActive(crossTabMiniPlayerCandidate)
@@ -1121,7 +1131,12 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
   watch(
     () => store.getters.getScrollMiniPlayerSavedRect,
-    loadScrollMiniPlayerSavedRectFromSettings,
+    value => setSavedScrollMiniPlayerRect(parseScrollMiniPlayerSavedRect(value), 'scroll'),
+    { immediate: true }
+  )
+  watch(
+    () => store.getters.getCrossTabMiniPlayerSavedRect,
+    value => setSavedScrollMiniPlayerRect(parseScrollMiniPlayerSavedRect(value), 'tab'),
     { immediate: true }
   )
 
