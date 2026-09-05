@@ -371,3 +371,42 @@ test.describe('large subscribed channel lists', () => {
     await expect(page.locator('.channel', { hasText: 'Channel 899' })).toBeVisible()
   })
 })
+
+test.describe('subscribed channel pagination', () => {
+  const subscriptions = Array.from({ length: 123 }, (_, index) => ({
+    id: `UC${String(index).padStart(22, '0')}`,
+    name: `Channel ${String(index).padStart(3, '0')}`,
+    thumbnail: ''
+  }))
+  test.use({
+    seed: {
+      settings: {
+        currentLocale: 'en-GB',
+        fetchSubscriptionsAutomatically: false,
+        generalAutoLoadMorePaginatedItemsEnabled: false
+      },
+      profiles: [{ _id: 'allChannels', name: 'All Channels', subscriptions }]
+    }
+  })
+
+  test('keeps earlier pages when loading more and resets the limit after searching', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+    const channels = page.locator('.channel')
+    const loadMore = page.getByRole('button', { name: 'Load more channels', exact: true })
+    await expect(channels).toHaveCount(50)
+    await loadMore.click()
+    await expect(channels).toHaveCount(100)
+    await expect(channels.first()).toContainText('Channel 000')
+    await loadMore.click()
+    await expect(channels).toHaveCount(123)
+    await expect(loadMore).toHaveCount(0)
+
+    const search = page.getByPlaceholder('Search Channels')
+    await search.fill('Channel 11')
+    await expect(channels).toHaveCount(10)
+    await expect(channels.first()).toContainText('Channel 110')
+    await search.fill('')
+    await expect(channels).toHaveCount(50)
+    await expect(loadMore).toBeVisible()
+  })
+})

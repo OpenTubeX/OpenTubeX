@@ -101,6 +101,11 @@
   margin-block-end: 1em;
 }
 
+.channelSettingsPagination {
+  margin-block-end: 1em;
+}
+
+
 .channelListContainer {
   /* Use the height the search field and the close button leave over */
   flex-grow: 1;

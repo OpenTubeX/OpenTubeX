@@ -18,6 +18,12 @@
         :value="searchQuery"
         @input="searchQuery = $event"
       />
+      <FtPagination
+        v-model:page="channelPage"
+        class="channelSettingsPagination"
+        :page-size="channelsPerPage"
+        :total="visibleChannels.length"
+      />
     </div>
     <div
       ref="channelSettingsScroller"
@@ -162,7 +168,7 @@
           class="channelSettingsList"
         >
           <li
-            v-for="(channel, index) in visibleChannels"
+            v-for="(channel, index) in displayedChannels"
             :key="channel.id"
             class="channelSettings"
             :class="{ selected: isChannelSelected(channel.id) }"
@@ -280,6 +286,8 @@ import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplat
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
+import FtPagination from '../FtPagination/FtPagination.vue'
+import { useListPagination } from '../../composables/useListPagination'
 import FtInput from '../FtInput/FtInput.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
@@ -302,6 +310,9 @@ const { locale, t } = useI18n()
 const id = useId()
 const showManager = ref(false)
 const searchQuery = ref('')
+// Each editor mounts several controls and icons. Bound that work even for
+// profiles with hundreds of subscriptions, including after paging through them.
+const channelsPerPage = 24
 const channelSettingsScroller = useTemplateRef('channelSettingsScroller')
 const channelSettingsContent = useTemplateRef('channelSettingsContent')
 const optimisticChannelSettings = shallowRef(new Map())
@@ -322,6 +333,7 @@ watch(showManager, async (open) => {
   const generation = ++observationGeneration
   stopObservingContent()
   if (!open) return
+  resetChannelPage()
 
   await nextTick()
   if (generation !== observationGeneration || !showManager.value) return
@@ -364,6 +376,12 @@ const visibleChannels = computed(() => {
     (channel.name || '').toLocaleLowerCase().includes(query) ||
     channel.id.toLocaleLowerCase().includes(query)
   ))
+})
+
+const { page: channelPage, displayedItems: displayedChannels, reset: resetChannelPage } = useListPagination(visibleChannels, {
+  pageSize: channelsPerPage,
+  resetOn: searchQuery,
+  scrollTarget: channelSettingsScroller
 })
 
 const feedTypes = computed(() => getSubscriptionFeedTypeOptions(t))
