@@ -1,4 +1,4 @@
-import { computed, defineComponent, nextTick, onBeforeUnmount, onMounted, onUnmounted, reactive, ref, shallowRef, watch } from 'vue'
+import { computed, defineComponent, inject, nextTick, onBeforeUnmount, onMounted, onUnmounted, reactive, ref, shallowRef, watch } from 'vue'
 import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import shaka from 'shaka-player'
@@ -569,6 +569,7 @@ export default defineComponent({
   ],
   setup: function (props, { emit, expose }) {
     const { locale, t } = useI18n()
+    const hardwareKeyboardAttached = inject('hardwareKeyboardAttached', ref(!process.env.IS_CAPACITOR))
     const { tabId, isTabPresented } = useTabContext()
     const mediaTabId = tabId ?? 'web'
     // Shorts request autoplay, so do not render their paused-only controls
@@ -2493,7 +2494,7 @@ export default defineComponent({
           : t('Video.Player.SponsorBlock.SkipToastUnskip')
 
       const activeToast = getActiveSponsorBlockToast()
-      if (getActivePromptSponsorBlockToast() || activeToast?.uuid !== uuid) {
+      if (!hardwareKeyboardAttached.value || getActivePromptSponsorBlockToast() || activeToast?.uuid !== uuid) {
         return actionLabel
       }
 
@@ -2537,7 +2538,7 @@ export default defineComponent({
         ? t('Video.Player.SponsorBlock.MuteActionType')
         : t('Video.Player.SponsorBlock.SkipPromptAction')
 
-      if (getActivePromptSponsorBlockToast()?.uuid !== uuid) {
+      if (!hardwareKeyboardAttached.value || getActivePromptSponsorBlockToast()?.uuid !== uuid) {
         return actionLabel
       }
 

@@ -2531,7 +2531,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 /* Keep SponsorBlock notices above the mobile action dock while it is visible. */
-:global(.capacitorTabs .ftVideoPlayer.actionDockVisible > .skippedSegmentsWrapper) {
+:global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow).actionDockVisible > .skippedSegmentsWrapper) {
   bottom: calc(
     var(--mobile-fullscreen-actions-block-end) +
     var(--mobile-fullscreen-actions-block-size) +
