@@ -1,6 +1,16 @@
 export const OPEN_COMMAND_PALETTE_EVENT = 'opentubex:open-command-palette'
 
 /**
+ * Keeps keyboard-specific commands available on desktop and on Android when
+ * Android reports a physical keyboard.
+ * @param {{isCapacitor: boolean, hardwareKeyboardAttached: boolean}} context
+ * @returns {boolean}
+ */
+export function shouldShowKeyboardShortcutCommand({ isCapacitor, hardwareKeyboardAttached }) {
+  return !isCapacitor || hardwareKeyboardAttached
+}
+
+/**
  * Normalizes command text without losing words written in non-Latin scripts.
  * @param {string} value
  * @param {string} locale

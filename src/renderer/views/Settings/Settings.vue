@@ -136,7 +136,7 @@
       </label>
       <div class="settingsHeaderActions">
         <button
-          v-if="USING_ELECTRON && !isStandaloneViewOpen"
+          v-if="showKeyboardShortcutAction && !isStandaloneViewOpen"
           type="button"
           class="settingsHeaderButton"
           :aria-label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
@@ -410,11 +410,18 @@ const DEFAULT_WIDTH = 1280
 const DEFAULT_HEIGHT = 820
 const RESIZE_DIRECTIONS = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']
 const props = defineProps({
+  hardwareKeyboardAttached: {
+    type: Boolean,
+    default: false
+  },
   searchTarget: {
     type: Object,
     default: null
   }
 })
+const showKeyboardShortcutAction = computed(() => (
+  USING_ELECTRON || (IS_CAPACITOR && props.hardwareKeyboardAttached)
+))
 const emit = defineEmits(['search-target-opened'])
 const LEGACY_SETTINGS_SECTION_MAP = {
   theme: 'appearance',

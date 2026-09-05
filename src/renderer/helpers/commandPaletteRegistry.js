@@ -8,6 +8,7 @@ import { isMostPopularAvailable, isTrendingAvailable } from '../../navigationAva
 import { getTabAvatarUrl, getTabPageIcon } from '../tabs/tabPreview'
 import { switchActiveProfile, translateProfileName } from './profileSwitching'
 import { getFirstCharacter } from './strings'
+import { shouldShowKeyboardShortcutCommand } from './commandPalette'
 
 const SETTINGS_SECTIONS = [
   ['general', 'Settings.General Settings.General Settings', 'Settings.Categories.General Description', ['preferences', 'options']],
@@ -53,6 +54,7 @@ export function createCommandPaletteRegistry(context) {
     store,
     isElectron,
     isCapacitor,
+    hardwareKeyboardAttached,
     navigate,
     openSettingsSection,
     openSettingsSearchResult,
@@ -88,13 +90,16 @@ export function createCommandPaletteRegistry(context) {
   const appShortcuts = configuredShortcuts.APP.GENERAL
   const videoShortcuts = configuredShortcuts.VIDEO_PLAYER
 
-  commands.push(
-    command('app.shortcuts', t('KeyboardShortcutPrompt.Show Keyboard Shortcuts'), groups.app, {
+  if (shouldShowKeyboardShortcutCommand({ isCapacitor, hardwareKeyboardAttached })) {
+    commands.push(command('app.shortcuts', t('KeyboardShortcutPrompt.Show Keyboard Shortcuts'), groups.app, {
       aliases: ['hotkeys', 'key bindings'],
       icon: ['fas', 'keyboard'],
       shortcut: appShortcuts.SHOW_SHORTCUTS,
       run: showKeyboardShortcuts,
-    }),
+    }))
+  }
+
+  commands.push(
     command('app.find', t('KeyboardShortcutPrompt.Find in Page'), groups.app, {
       aliases: ['search page', 'text'],
       icon: ['fas', 'magnifying-glass'],

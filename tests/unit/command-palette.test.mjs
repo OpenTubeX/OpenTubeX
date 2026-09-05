@@ -6,6 +6,7 @@ import {
   highlightCommandText,
   keyboardEventInitFromShortcut,
   normalizeCommandText,
+  shouldShowKeyboardShortcutCommand,
 } from '../../src/renderer/helpers/commandPalette.js'
 
 const commands = [
@@ -102,6 +103,21 @@ test('keeps direct actions ahead of settings search results', () => {
       .map(command => command.id),
     ['action', 'setting']
   )
+})
+
+test('hides the keyboard shortcuts command on Android without a hardware keyboard', () => {
+  assert.equal(shouldShowKeyboardShortcutCommand({
+    isCapacitor: true,
+    hardwareKeyboardAttached: false,
+  }), false)
+  assert.equal(shouldShowKeyboardShortcutCommand({
+    isCapacitor: true,
+    hardwareKeyboardAttached: true,
+  }), true)
+  assert.equal(shouldShowKeyboardShortcutCommand({
+    isCapacitor: false,
+    hardwareKeyboardAttached: false,
+  }), true)
 })
 
 test('converts configured shortcuts into keyboard event data', () => {

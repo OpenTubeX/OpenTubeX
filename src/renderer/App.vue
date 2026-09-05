@@ -82,6 +82,7 @@
       <KeepAlive>
         <SettingsWindow
           v-if="settingsWindowOpen"
+          :hardware-keyboard-attached="hardwareKeyboardAttached"
           :search-target="settingsSearchTarget"
           @search-target-opened="clearSettingsSearchTarget"
         />
@@ -2646,6 +2647,7 @@ const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
   store,
   isElectron,
   isCapacitor,
+  hardwareKeyboardAttached: hardwareKeyboardAttached.value,
   navigate: navigateFromCommandPalette,
   openSettingsSection,
   openSettingsSearchResult,
@@ -2767,6 +2769,9 @@ function handleAndroidPictureInPictureChange(event) {
 
 function handleHardwareKeyboardChange(event) {
   hardwareKeyboardAttached.value = event.attached === true
+  if (!hardwareKeyboardAttached.value) {
+    store.dispatch('hideKeyboardShortcutPrompt')
+  }
 }
 
 function openSettingsView(view) {
