@@ -2769,6 +2769,9 @@ function handleAndroidPictureInPictureChange(event) {
 
 function handleHardwareKeyboardChange(event) {
   hardwareKeyboardAttached.value = event.attached === true
+  if (!hardwareKeyboardAttached.value) {
+    store.dispatch('hideKeyboardShortcutPrompt')
+  }
 }
 
 function openSettingsView(view) {

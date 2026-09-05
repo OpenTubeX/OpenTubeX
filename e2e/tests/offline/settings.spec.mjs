@@ -1314,6 +1314,35 @@ test.describe('settings', () => {
     await expect(page.locator('.settingsContent > [data-section="playback"]')).toBeVisible()
   })
 
+  test('closes an open shortcut prompt when Android reports keyboard disconnection', async ({ page }) => {
+    // Electron removes the Android-only handler from its bundle. Exercise the
+    // source handler against the running store and Settings UI instead.
+    const appSource = await readFile(new URL('../../../src/renderer/App.vue', import.meta.url), 'utf8')
+    const handlerSource = appSource.match(/function handleHardwareKeyboardChange\(event\) \{[\s\S]*?\n\}/)?.[0]
+    expect(handlerSource).toBeTruthy()
+    const reportKeyboardState = attached => page.evaluate(`(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const hardwareKeyboardAttached = { value: ${!attached} }
+      ${handlerSource}
+      handleHardwareKeyboardChange({ attached: ${attached} })
+      return hardwareKeyboardAttached.value
+    })()`)
+
+    await goTo(page, 'settings')
+    await page.getByRole('button', { name: 'Show Keyboard Shortcuts' }).click()
+    await expect(page.locator('.shortcutColumns')).toBeVisible()
+
+    expect(await reportKeyboardState(true)).toBe(true)
+    await expect(page.locator('.shortcutColumns')).toBeVisible()
+
+    expect(await reportKeyboardState(false)).toBe(false)
+    await expect(page.locator('.shortcutColumns')).toHaveCount(0)
+    await expect(page.locator('.settingsWindow')).toBeVisible()
+
+    expect(await reportKeyboardState(true)).toBe(true)
+    await expect(page.locator('.shortcutColumns')).toHaveCount(0)
+  })
+
   test('reopens Keyboard Shortcuts when its shortcut is pressed during closing', async ({ page }) => {
     await goTo(page, 'settings')
     await page.getByRole('button', { name: 'Show Keyboard Shortcuts' }).click()
