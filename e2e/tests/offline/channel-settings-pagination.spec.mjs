@@ -66,6 +66,11 @@ for (const uiScale of [95, 125]) {
       await expect(pagination).toContainText('1-24 / 49')
       await expect(previous).toBeDisabled()
       await scrollToBottom()
+      await search.fill('Channel 00')
+      await expect(page.locator('.channelEntry')).toHaveCount(10)
+      await expectAtTop()
+      await search.fill('')
+      await scrollToBottom()
       await next.click()
       await expectAtTop()
       await expect(pagination).toContainText('25-48 / 49')
@@ -124,3 +129,23 @@ for (const uiScale of [95, 125]) {
     })
   })
 }
+
+test.describe('adding playback settings on the current page', () => {
+  const seed = channelSettingsSeed(23)
+  seed.profiles[0].subscriptions[23].name = 'Added channel'
+  test.use({ seed })
+
+  test('reveals an added channel when pagination stays on page one', async ({ page }) => {
+    await goToSettingsSection(page, 'playback')
+    await page.getByRole('button', { name: 'Manage Saved Channels (23)' }).click()
+    const scroller = page.locator('.channelListContainer')
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await page.getByRole('button', { name: 'Add subscribed channel', exact: true }).click()
+    const picker = page.getByRole('dialog', { name: 'Add subscribed channel', exact: true })
+    await picker.getByRole('button', { name: 'Added channel', exact: true }).click()
+    await expect(picker).toHaveCount(0)
+    await expect(page.locator('.channelEntry')).toHaveCount(24)
+    await expect(page.locator('.channelEntry', { hasText: 'Added channel' })).toBeInViewport()
+  })
+})

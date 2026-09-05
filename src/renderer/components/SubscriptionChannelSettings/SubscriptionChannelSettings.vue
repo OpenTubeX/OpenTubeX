@@ -18,24 +18,12 @@
         :value="searchQuery"
         @input="searchQuery = $event"
       />
-      <div
-        v-if="visibleChannels.length > channelsPerPage"
+      <FtPagination
+        v-model:page="channelPage"
         class="channelSettingsPagination"
-      >
-        <FtButton
-          :label="t('Video.Previous')"
-          :disabled="channelPage === 0"
-          @click="channelPage--"
-        />
-        <span aria-live="polite">
-          {{ channelPage * channelsPerPage + 1 }}-{{ Math.min((channelPage + 1) * channelsPerPage, visibleChannels.length) }} / {{ visibleChannels.length }}
-        </span>
-        <FtButton
-          :label="t('Video.Next')"
-          :disabled="channelPage === lastChannelPage"
-          @click="channelPage++"
-        />
-      </div>
+        :page-size="channelsPerPage"
+        :total="visibleChannels.length"
+      />
     </div>
     <div
       ref="channelSettingsScroller"
@@ -298,6 +286,8 @@ import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplat
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
+import FtPagination from '../FtPagination/FtPagination.vue'
+import { useListPagination } from '../../composables/useListPagination'
 import FtInput from '../FtInput/FtInput.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
@@ -305,7 +295,7 @@ import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
 import { showToast } from '../../helpers/utils'
-import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import {
   formatSubscriptionDailyVideoLimit,
@@ -323,7 +313,6 @@ const searchQuery = ref('')
 // Each editor mounts several controls and icons. Bound that work even for
 // profiles with hundreds of subscriptions, including after paging through them.
 const channelsPerPage = 24
-const channelPage = ref(0)
 const channelSettingsScroller = useTemplateRef('channelSettingsScroller')
 const channelSettingsContent = useTemplateRef('channelSettingsContent')
 const optimisticChannelSettings = shallowRef(new Map())
@@ -344,7 +333,7 @@ watch(showManager, async (open) => {
   const generation = ++observationGeneration
   stopObservingContent()
   if (!open) return
-  channelPage.value = 0
+  resetChannelPage()
 
   await nextTick()
   if (generation !== observationGeneration || !showManager.value) return
@@ -389,21 +378,10 @@ const visibleChannels = computed(() => {
   ))
 })
 
-const lastChannelPage = computed(() => Math.max(0, Math.ceil(visibleChannels.value.length / channelsPerPage) - 1))
-const displayedChannels = computed(() => visibleChannels.value.slice(
-  channelPage.value * channelsPerPage,
-  (channelPage.value + 1) * channelsPerPage
-))
-
-watch(searchQuery, () => { channelPage.value = 0 })
-watch(lastChannelPage, (lastPage) => {
-  channelPage.value = Math.min(channelPage.value, lastPage)
-})
-watch(channelPage, async () => {
-  await nextTick()
-  if (channelSettingsScroller.value) {
-    restoreOverlayScrollTop(channelSettingsScroller.value, 0)
-  }
+const { page: channelPage, displayedItems: displayedChannels, reset: resetChannelPage } = useListPagination(visibleChannels, {
+  pageSize: channelsPerPage,
+  resetOn: searchQuery,
+  scrollTarget: channelSettingsScroller
 })
 
 const feedTypes = computed(() => getSubscriptionFeedTypeOptions(t))

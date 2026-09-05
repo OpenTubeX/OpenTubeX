@@ -80,8 +80,8 @@
         </ft-flex-box>
         <FtAutoLoadNextPageWrapper
           v-if="hasMoreChannels"
-          :key="channelLimit"
-          @load-next-page="loadMoreChannels"
+          :key="channelPage"
+          @load-next-page="channelPage++"
         >
           <ft-flex-box>
             <FtButton
@@ -89,7 +89,7 @@
               :icon="['fas', 'arrow-down']"
               background-color="var(--primary-color)"
               text-color="var(--text-with-main-color)"
-              @click="loadMoreChannels"
+              @click="channelPage++"
             />
           </ft-flex-box>
         </FtAutoLoadNextPageWrapper>
@@ -110,6 +110,7 @@ import FtInput from '../../components/FtInput/FtInput.vue'
 import FtSubscribeButton from '../../components/FtSubscribeButton/FtSubscribeButton.vue'
 import { invidiousGetChannelInfo, youtubeImageUrlToInvidious, invidiousImageUrlToInvidious } from '../../helpers/api/invidious'
 import { getLocalChannel, parseLocalChannelHeader } from '../../helpers/api/local'
+import { useListPagination } from '../../composables/useListPagination'
 import { ctrlFHandler } from '../../helpers/utils'
 import { useI18n } from 'vue-i18n'
 import store from '../../store/index'
@@ -128,7 +129,6 @@ const channelsPerPage = 50
 let errorCount = 0
 
 const query = ref('')
-const channelLimit = ref(channelsPerPage)
 const subscribedChannels = ref([])
 const filteredChannels = ref([])
 const failedThumbnailUrls = ref(new Set())
@@ -159,12 +159,10 @@ const channelList = computed(() => {
   }
 })
 
-const displayedChannels = computed(() => {
-  return channelList.value.slice(0, channelLimit.value)
-})
-
-const hasMoreChannels = computed(() => {
-  return displayedChannels.value.length < channelList.value.length
+const { page: channelPage, displayedItems: displayedChannels, hasMore: hasMoreChannels } = useListPagination(channelList, {
+  pageSize: channelsPerPage,
+  append: true,
+  resetOn: [query, activeProfileId]
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -276,14 +274,9 @@ function updateThumbnail(channel) {
 
 function handleQueryChange(val) {
   query.value = val
-  channelLimit.value = channelsPerPage
   filterChannels()
 
   saveStateInRouter(val)
-}
-
-function loadMoreChannels() {
-  channelLimit.value += channelsPerPage
 }
 
 async function saveStateInRouter(query) {
@@ -316,7 +309,6 @@ function keyboardShortcutHandler(event) {
 
 watch(activeProfileId, () => {
   query.value = ''
-  channelLimit.value = channelsPerPage
   getSubscription()
 })
 

@@ -75,24 +75,12 @@
         :value="searchQuery"
         @input="value => searchQuery = value"
       />
-      <div
-        v-if="visibleChannelEntries.length > channelsPerPage"
+      <FtPagination
+        v-model:page="channelPage"
         class="channelSettingsPagination"
-      >
-        <FtButton
-          :label="t('Video.Previous')"
-          :disabled="channelPage === 0"
-          @click="channelPage--"
-        />
-        <span aria-live="polite">
-          {{ channelPage * channelsPerPage + 1 }}-{{ Math.min((channelPage + 1) * channelsPerPage, visibleChannelEntries.length) }} / {{ visibleChannelEntries.length }}
-        </span>
-        <FtButton
-          :label="t('Video.Next')"
-          :disabled="channelPage === lastChannelPage"
-          @click="channelPage++"
-        />
-      </div>
+        :page-size="channelsPerPage"
+        :total="visibleChannelEntries.length"
+      />
       <div
         ref="channelListContainer"
         v-overlay-scrollbars
@@ -114,6 +102,7 @@
             <li
               v-for="channel in displayedChannelEntries"
               :key="channel.id"
+              :data-channel-id="channel.id"
               class="channelEntry"
             >
               <div class="channelHeader">
@@ -310,6 +299,8 @@ import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
+import FtPagination from '../FtPagination/FtPagination.vue'
+import { useListPagination } from '../../composables/useListPagination'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
@@ -329,7 +320,7 @@ import {
   parseChannelPreferences
 } from '../../helpers/channel-preferences'
 import { showToast } from '../../helpers/utils'
-import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 
 const { locale, t } = useI18n()
@@ -463,7 +454,6 @@ function handleChannelLinkClick(event) {
 }
 const searchQuery = ref('')
 const channelsPerPage = 24
-const channelPage = ref(0)
 const channelListContainer = useTemplateRef('channelListContainer')
 const channelListContent = useTemplateRef('channelListContent')
 let contentResizeObserver = null
@@ -476,7 +466,7 @@ watch(showManager, async (open, _previous, onCleanup) => {
     contentResizeObserver = null
   })
   if (!open) return
-  channelPage.value = 0
+  resetChannelPage()
   await nextTick()
   if (cancelled) return
 
@@ -632,21 +622,10 @@ const visibleChannelEntries = computed(() => {
 })
 
 // Keep the number of mounted controls bounded as users page through saved channels.
-const lastChannelPage = computed(() => Math.max(0, Math.ceil(visibleChannelEntries.value.length / channelsPerPage) - 1))
-const displayedChannelEntries = computed(() => visibleChannelEntries.value.slice(
-  channelPage.value * channelsPerPage,
-  (channelPage.value + 1) * channelsPerPage
-))
-
-watch(searchQuery, () => { channelPage.value = 0 })
-watch(lastChannelPage, (lastPage) => {
-  channelPage.value = Math.min(channelPage.value, lastPage)
-})
-watch(channelPage, async () => {
-  await nextTick()
-  if (channelListContainer.value) {
-    restoreOverlayScrollTop(channelListContainer.value, 0)
-  }
+const { page: channelPage, displayedItems: displayedChannelEntries, reset: resetChannelPage, restoreScroll: restoreChannelScroll } = useListPagination(visibleChannelEntries, {
+  pageSize: channelsPerPage,
+  resetOn: searchQuery,
+  scrollTarget: channelListContainer
 })
 
 /** @param {string} channelId */
@@ -654,7 +633,11 @@ async function revealChannel(channelId) {
   searchQuery.value = ''
   await nextTick()
   const index = visibleChannelEntries.value.findIndex(channel => channel.id === channelId)
-  if (index !== -1) channelPage.value = Math.floor(index / channelsPerPage)
+  if (index === -1) return
+  channelPage.value = Math.floor(index / channelsPerPage)
+  await restoreChannelScroll()
+  channelListContent.value?.querySelector(`[data-channel-id="${CSS.escape(channelId)}"]`)
+    ?.scrollIntoView({ block: 'nearest' })
 }
 
 const manageButtonLabel = computed(() => {
