@@ -1111,6 +1111,9 @@ test('isolates the owning video surface while Android Picture-in-Picture is acti
       const video = document.createElement('video')
       video.className = 'player'
       player.append(video)
+      const canvas = document.createElement('canvas')
+      canvas.className = 'vrCanvas'
+      player.append(canvas)
       document.querySelector('.app > .routerView').append(player)
     }
     document.body.classList.add('androidPictureInPicture')
@@ -1123,6 +1126,7 @@ test('isolates the owning video surface while Android Picture-in-Picture is acti
   await expect(target).toHaveCSS('visibility', 'visible')
   await expect(target.locator('> .player')).toHaveCSS('visibility', 'visible')
   await expect(target.locator('> .player')).toHaveCSS('transition-property', 'none')
+  await expect(target.locator('> .vrCanvas')).toHaveCSS('transition-property', 'none')
   await expect.poll(() => target.evaluate(element => {
     const fillsViewport = (bounds) => {
       return Math.abs(bounds.top) <= 1 &&
