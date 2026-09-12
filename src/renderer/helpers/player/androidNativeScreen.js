@@ -230,6 +230,8 @@ export function createAndroidNativeScreen({ element, container, getController, g
       container.checkVisibility?.({ checkOpacity: true, checkVisibilityCSS: true }) !== false
     // Notices need the same native clipping and touch priority as menus.
     const playerMenus = [...container.querySelectorAll('.shaka-overflow-menu:not(.shaka-hidden), .shaka-settings-menu:not(.shaka-hidden), .shaka-sub-menu:not(.shaka-hidden), .shaka-context-menu:not(.shaka-hidden), .skippedSegmentsWrapper')]
+    // Seek previews cover native buttons without becoming Back-dismissable menus.
+    const seekPreviews = [...container.querySelectorAll('.shaka-player-ui-thumbnail-container')]
     const countdowns = [...container.querySelectorAll('.countdownProgress')]
     // Global dialogs such as Quick Settings can cover only one native button.
     // Keep their whole rectangle above native controls, not just the center hit.
@@ -245,7 +247,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
       .filter(menu => menu.checkVisibility?.({ checkVisibilityCSS: true }) !== false)
     // Hidden notices retain their layout box during native scrolling/gestures.
     // Clipping that box would punch through the raised video into the page.
-    const menuElements = [...playerMenus, ...countdowns, ...globalMenus, ...appChrome]
+    const menuElements = [...playerMenus, ...seekPreviews, ...countdowns, ...globalMenus, ...appChrome]
       .filter(menu => menu.checkVisibility?.({ checkOpacity: true, checkVisibilityCSS: true }) !== false)
     const pageScroll = followsPageScroll()
     const nativeY = y => pageScroll ? Math.round((y + window.scrollY) * 1000) / 1000 : y
