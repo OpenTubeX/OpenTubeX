@@ -73,7 +73,8 @@ public final class SubscriptionRefreshWorker extends Worker {
         return true;
     }
 
-    static boolean startNextFeed(Context context, String token, String title, String cancelLabel) {
+    // Keep notification publication and cancellation in one critical section.
+    static synchronized boolean startNextFeed(Context context, String token, String title, String cancelLabel) {
         if (SubscriptionRefreshCoordinator.isCancelled(token)) return false;
         SubscriptionRefreshState.Snapshot snapshot = STATE.nextFeed(token, title, cancelLabel);
         if (snapshot == null) return false;
@@ -81,7 +82,7 @@ public final class SubscriptionRefreshWorker extends Worker {
         return true;
     }
 
-    static boolean update(Context context, String token, int progress) {
+    static synchronized boolean update(Context context, String token, int progress) {
         if (!STATE.update(token, progress)) return false;
         SubscriptionRefreshState.Snapshot snapshot = STATE.takeNotificationSnapshot(token);
         if (snapshot == null) return true;
@@ -102,7 +103,7 @@ public final class SubscriptionRefreshWorker extends Worker {
         );
     }
 
-    static boolean finish(Context context, String token) {
+    static synchronized boolean finish(Context context, String token) {
         boolean finished = STATE.finish(token);
         SubscriptionRefreshCoordinator.finish(token);
         if (finished) {
@@ -116,7 +117,7 @@ public final class SubscriptionRefreshWorker extends Worker {
         return finished;
     }
 
-    static boolean cancel(Context context, String token) {
+    static synchronized boolean cancel(Context context, String token) {
         boolean cancelled = SubscriptionRefreshCoordinator.cancel(token);
         STATE.finish(token);
         if (cancelled) {
