@@ -653,8 +653,31 @@
 }
 
 @media only screen and (width <= 680px) {
+  .app {
+    --mobile-nav-height: calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+    --mobile-nav-reveal-transition: transform 280ms cubic-bezier(0.2, 0, 0, 1);
+    --mobile-nav-hide-transition: transform 220ms cubic-bezier(0.4, 0, 1, 1);
+  }
+
   .app:has(> .progressBar) {
     --mobile-progress-bar-space: var(--progress-bar-height);
+  }
+
+  .app > :deep(.progressBar) {
+    transform: translateY(0);
+    transition: var(--mobile-nav-reveal-transition);
+  }
+
+  .app > :deep(.sideNav.scrollHidden:not(:has(:focus-visible)) ~ .progressBar) {
+    transform: translateY(var(--mobile-nav-height));
+    transition: var(--mobile-nav-hide-transition);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .app {
+      --mobile-nav-reveal-transition: none;
+      --mobile-nav-hide-transition: none;
+    }
   }
 
   .routerView {

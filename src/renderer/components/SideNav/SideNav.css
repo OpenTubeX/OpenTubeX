@@ -295,19 +295,18 @@
     position: fixed;
     display: flex;
     margin-block-start: 0;
-    block-size: calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)));
+    block-size: var(--mobile-nav-height);
     inline-size: 100%;
     inset-block: auto 0;
     padding-block-end: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0));
     overflow-y: hidden;
     transform: none;
-    transition: transform 280ms cubic-bezier(0.2, 0, 0, 1);
+    transition: var(--mobile-nav-reveal-transition);
   }
 
   .sideNav.scrollHidden:not(:has(:focus-visible)) {
     transform: translateY(100%);
-    transition-duration: 220ms;
-    transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+    transition: var(--mobile-nav-hide-transition);
     pointer-events: none;
   }
 

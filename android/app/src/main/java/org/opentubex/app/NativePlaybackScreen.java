@@ -66,8 +66,9 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
     private float pageTouchY;
     private long lastPageScroll;
     private int lastWebScrollY;
+    private float videoAspectRatio;
     private final Runnable pageScrollSettled = this::requestPageScrollEnd;
-    private final android.view.ViewTreeObserver.OnScrollChangedListener pageScrollListener = this::onPageScroll;
+    private final View.OnScrollChangeListener pageScrollListener = (view, x, y, oldX, oldY) -> onPageScroll();
     private long transitionSequence;
     private long readyWebFrame = -1;
     private final java.util.Set<Runnable> pendingWebFrames = new java.util.HashSet<>();
@@ -155,7 +156,9 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
             originalParent.addOnLayoutChangeListener(originalParentLayout);
             originalParent.removeView(webOverlay);
             webOverlay.setBackgroundColor(Color.TRANSPARENT);
-            webOverlay.getViewTreeObserver().addOnScrollChangedListener(pageScrollListener);
+            // Move native layers as WebView scrolls, before the next traversal
+            // draws them against Chromium's already-scrolled page.
+            webOverlay.setOnScrollChangeListener(pageScrollListener);
             webOverlayHost = originalParent instanceof PullToRefreshLayout
                 ? ((PullToRefreshLayout) originalParent).wrapPlaybackOverlay(webOverlay)
                 : webOverlay;
@@ -525,8 +528,9 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
         }
         if (webOverlay == null || viewportWidth <= 0 || width <= 0 || height <= 0 || getWidth() <= 0) return;
         double scale = getWidth() / viewportWidth;
-        VideoSize size = engine.getPlayer().getVideoSize();
-        double ratio = size.height > 0 ? size.width * size.pixelWidthHeightRatio / size.height : width / height;
+        // Use the same ratio as the frame's measurement, including while the
+        // decoder reports an unknown size but its last frame remains visible.
+        double ratio = videoAspectRatio > 0 ? videoAspectRatio : width / height;
         double fittedWidth = Math.min(width, height * ratio);
         double fittedHeight = Math.min(height, width / ratio);
         // Keep the decoder's TextureView at a stable size. Resizing it for each
@@ -604,9 +608,10 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
         });
     }
 
-    private void updateAspectRatio(VideoSize size) {
+    void updateAspectRatio(VideoSize size) {
         if (size.width > 0 && size.height > 0) {
-            videoFrame.setAspectRatio(size.width * size.pixelWidthHeightRatio / size.height);
+            videoAspectRatio = size.width * size.pixelWidthHeightRatio / size.height;
+            videoFrame.setAspectRatio(videoAspectRatio);
             refreshVideoLayout();
         }
     }
@@ -730,7 +735,7 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
         afterWebDraw.clear();
         transitionSequence++;
         removeCallbacks(pageScrollSettled);
-        if (webOverlay != null) webOverlay.getViewTreeObserver().removeOnScrollChangedListener(pageScrollListener);
+        if (webOverlay != null) webOverlay.setOnScrollChangeListener(null);
         if (videoAnimation != null) videoAnimation.cancel();
         clearNativeButtonDown();
         engine.getControlsPlayer().removeListener(queueListener);

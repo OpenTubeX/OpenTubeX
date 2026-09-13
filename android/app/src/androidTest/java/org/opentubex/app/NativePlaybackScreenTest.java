@@ -119,11 +119,52 @@ public class NativePlaybackScreenTest {
         }, (screen, controls, web, engine) -> {
             web.scrollTo(0, 120);
             assertEquals(120, web.getScrollY());
+            float expected = 180 * screen.getWidth() / 1000f - web.getScrollY();
+            assertEquals("Video must move in the scroll callback, before a later view-tree traversal", expected, frame[0].getTranslationY(), 1f);
+            assertEquals("Controls must move in the scroll callback", expected, controls.getY(), 1f);
         }, (screen, controls, web, engine) -> {
             assertEquals(120, web.getScrollY());
             float expected = 180 * screen.getWidth() / 1000f - web.getScrollY();
             assertEquals("The native video must follow Chromium scrolling without waiting for JS", expected, frame[0].getTranslationY(), 1f);
             assertEquals("Native transport buttons must scroll with the shared toolbar", expected, controls.getY(), 1f);
+        });
+    }
+
+    @Test public void miniPlayerEntersScrollingModeBeforeTheNextTraversal() {
+        View[] frame = new View[1];
+        withScreen((screen, controls, web, engine) -> {
+            screen.setFullscreen(false);
+            screen.setInlineVisible(true);
+            screen.layoutVideo(200, 200, 400, 225, 1000);
+            screen.setMiniPlayer(true, 12);
+            frame[0] = screen.getChildAt(0);
+            web.loadData("<html><body style='height:4000px'></body></html>", "text/html", "UTF-8");
+        }, (screen, controls, web, engine) -> {
+            web.scrollTo(0, 120);
+            assertEquals(120, web.getScrollY());
+            assertTrue("Momentum scrolling must raise video before Chromium paints the scrolling page",
+                screen.indexOfChild(frame[0]) > screen.indexOfChild((View) web.getParent()));
+        });
+    }
+
+    @Test public void retainedVideoAspectRatioStaysCenteredWhileDecoderSizeIsUnknown() {
+        View[] frame = new View[1];
+        withScreen((screen, controls, web, engine) -> {
+            screen.setFullscreen(false);
+            screen.setInlineVisible(true);
+            // The retained frame still has its last decoded aspect ratio when
+            // the decoder temporarily reports no size during surface changes.
+            assertEquals(0, engine.getPlayer().getVideoSize().height);
+            screen.updateAspectRatio(new androidx.media3.common.VideoSize(640, 480));
+            screen.updateAspectRatio(androidx.media3.common.VideoSize.UNKNOWN);
+            frame[0] = screen.getChildAt(0);
+            screen.layoutVideo(0, 100, 400, 225, 400);
+        }, (screen, controls, web, engine) -> {
+            float renderedWidth = frame[0].getWidth() * frame[0].getScaleX();
+            assertEquals("Retained 4:3 video must keep its fitted width",
+                300 * screen.getWidth() / 400f, renderedWidth, 1f);
+            float center = frame[0].getX() + renderedWidth / 2;
+            assertEquals("Retained 4:3 video must have equal side bars", screen.getWidth() / 2f, center, 1f);
         });
     }
 
