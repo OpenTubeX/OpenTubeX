@@ -8,6 +8,9 @@ const source = (await readFile(new URL('../../src/renderer/helpers/player/androi
   .replace(/^import .*\n/gm, '').replace('export function ', 'function ')
 
 async function fixture({ fullscreen = true, chrome = [], dialogs = [], deferTransitions = false, deferFullscreen = false } = {}) {
+  const snapshots = []
+  const snapshotInvalidations = []
+  let publishSnapshot
   const frames = new Map()
   const layouts = []
   const presentations = []
@@ -55,6 +58,10 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], deferTran
   const create = vm.runInNewContext(`${source}\ncreateAndroidNativeScreen`, {
     document, window, Event,
     ResizeObserver: Observer, MutationObserver: Observer, overrideShakaMethods,
+    createMiniControlsSnapshot(onChange) {
+      publishSnapshot = onChange
+      return { update(...args) { snapshots.push(args) }, invalidate(value) { snapshotInvalidations.push(value) }, destroy() {} }
+    },
     getComputedStyle: () => ({ borderTopLeftRadius: '12px' }),
     requestAnimationFrame(callback) { frames.set(++id, callback); return id },
     cancelAnimationFrame(id) { frames.delete(id) },
@@ -75,7 +82,7 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], deferTran
   if (fullscreen) await screen.show()
   else await screen.attach()
   await flush()
-  return { screen, container, layouts, presentations, completeTransitions, completeFullscreen, fullscreenEvents, bounds, observers, window, styleWrites, flush, change({ visible = shown, menuOpen = menu, panelOpen = panel, containerAnimating = animating, endedRecommendations = recommendations, playbackEnded = ended, loadingPoster = poster }) {
+  return { snapshotInvalidations, snapshots, publishSnapshot, screen, container, layouts, presentations, completeTransitions, completeFullscreen, fullscreenEvents, bounds, observers, window, styleWrites, flush, change({ visible = shown, menuOpen = menu, panelOpen = panel, containerAnimating = animating, endedRecommendations = recommendations, playbackEnded = ended, loadingPoster = poster }) {
     poster = loadingPoster
     shown = visible; menu = menuOpen; panel = panelOpen
     recommendations = endedRecommendations
@@ -425,3 +432,62 @@ test('loading poster uses the browser animation instead of raising an empty text
   assert.equal(motion.defaultPrevented, false)
   f.screen.destroy()
 })
+
+test('mini-player PNG is sent only when the snapshot changes', async () => {
+  const f = await fixture({ fullscreen: false })
+  f.publishSnapshot('data:image/png;base64,test')
+  await f.flush()
+  assert.equal(f.layouts.at(-1).miniControlsImage, 'data:image/png;base64,test')
+  f.bounds.x++
+  f.observers[0].callback([])
+  await f.flush()
+  assert.equal('miniControlsImage' in f.layouts.at(-1), false)
+  f.publishSnapshot(null)
+  await f.flush()
+  assert.equal(f.layouts.at(-1).miniControlsImage, null)
+  f.screen.destroy()
+})
+
+test('mini-player snapshots freeze during page scrolling and resume afterward', async () => {
+  const f = await fixture({ fullscreen: false })
+  f.screen.action('scroll-start')
+  f.observers[0].callback([])
+  await f.flush()
+  assert.equal(f.snapshots.at(-1)[3], true)
+  f.screen.action('scroll-end')
+  assert.equal(f.snapshots.at(-1)[3], false)
+  f.screen.destroy()
+})
+
+
+test('mini control transition completion refreshes snapshots while scrolling', async () => {
+  const f = await fixture({ fullscreen: false })
+  const originalQuery = f.container.querySelector
+  const mini = { contains: () => true }
+  f.container.querySelector = selector => selector === '.scrollMiniPlayerControls' ? mini : originalQuery(selector)
+  f.screen.action('scroll-start')
+  for (const type of ['transitionend', 'transitioncancel']) {
+    f.container.dispatchEvent(new Event(type))
+    assert.equal(f.snapshotInvalidations.at(-1), true)
+    await f.flush()
+    assert.equal(f.snapshots.at(-1)[3], true)
+  }
+  f.screen.destroy()
+})
+
+for (const scale of [1, 2]) {
+  test(`native layout and animation preserve fractional viewport width at visual scale ${scale}`, async () => {
+    const f = await fixture({ fullscreen: false })
+    f.window.innerWidth = 461
+    f.window.visualViewport = { width: 460.79998779296875 / scale, scale }
+    f.change({})
+    await f.flush()
+    assert.equal(f.layouts.at(-1).viewportWidth, 460.79998779296875)
+    const event = new Event('native-player-transition', { cancelable: true })
+    event.detail = { from: f.bounds, to: { ...f.bounds, x: 205 }, duration: 300 }
+    f.container.dispatchEvent(event)
+    await event.detail.finished
+    assert.equal(f.layouts.findLast(layout => layout.transition).viewportWidth, 460.79998779296875)
+    f.screen.destroy()
+  })
+}
