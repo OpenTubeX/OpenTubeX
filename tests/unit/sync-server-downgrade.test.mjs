@@ -10,7 +10,7 @@ import { mergeSettingEntry, resolveMergedThemeEntry } from '../../src/renderer/h
 
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
 import * as privacy from '../../src/renderer/helpers/sync-server-privacy.js'
-import { isRecentSync } from '../../src/renderer/helpers/sync-server-scheduling.js'
+import { isRecentSync, isSyncReasonEnabled } from '../../src/renderer/helpers/sync-server-scheduling.js'
 import { createSyncServerRequestHeaders } from '../../src/renderer/helpers/sync-server-request.js'
 import { mergeSubscriptionSeenVideos } from '../../src/subscriptionSeenVideos.js'
 import { syncSubscriptionSeenVideos } from '../../src/renderer/helpers/subscription-seen-videos.js'
@@ -26,7 +26,9 @@ function withoutImports (source) {
 const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false } = {}) {
+  const connectionEvents = new EventTarget()
+  const network = { state: connectionState, online }
   const requests = []
   const commits = []
   const notifications = []
@@ -56,6 +58,12 @@ function fixture (overrides = {}, { encrypted = false, respond } = {}) {
     ...privacy,
     syncSubscriptionSeenVideos,
     isRecentSync,
+    isSyncReasonEnabled,
+    getConnectionState: () => network.state,
+    navigator: { get onLine() { return network.online },
+      ...(deferLock ? { locks: { request: (name, callback) => Promise.resolve().then(callback) } } : {}) },
+    connectionEvents,
+    ...(browser ? { window: new EventTarget(), document: new EventTarget(), isAppHidden: () => false } : {}),
     crypto,
     URL,
     Headers,
@@ -129,10 +137,11 @@ function fixture (overrides = {}, { encrypted = false, respond } = {}) {
       }
       if (action === 'updateChannelPlaybackSpeeds') settings.channelPlaybackSpeeds = value
       if (action === 'replaceSyncServerToken') settings.syncServerToken = value
+      if (action === 'initializeSyncServer') return store.exports.actions.initializeSyncServer(context, value)
       if (action === 'syncWithSyncServer') return store.exports.actions.syncWithSyncServer(context, value)
     },
   }
-  return { settings, requests, commits, notifications, dispatched, context, actions: store.exports.actions, Client: helper.exports.SyncServerClient }
+  return { network, connectionEvents, settings, requests, commits, notifications, dispatched, context, actions: store.exports.actions, Client: helper.exports.SyncServerClient }
 }
 
 for (const [method, args, path, verb] of [
@@ -470,4 +479,111 @@ test('disabling sync clears recovery before a later manual sync succeeds', async
   await f.actions.setSyncServerEnabled(f.context, true)
   await f.actions.syncWithSyncServer(f.context, { allowDataLoss: true })
   assert.equal(f.settings.syncServerAutoSync, false)
+})
+
+for (const offline of [{ connectionState: 'offline' }, { online: false }]) {
+  test(`sync skips requests while offline: ${JSON.stringify(offline)}`, async () => {
+    const f = fixture({}, { encrypted: true, ...offline })
+    await f.actions.initializeSyncServer(f.context)
+    assert.equal(f.requests.length, 0, 'startup must not contact the server offline')
+    await f.actions.syncWithSyncServer(f.context)
+    assert.equal(f.requests.length, 0)
+    assert.equal(f.commits.some(([name]) => name === 'setSyncServerError'), false)
+    f.network.state = 'online'
+    f.network.online = true
+    await f.actions.initializeSyncServer(f.context)
+    assert.ok(f.requests.length > 0, 'sync can resume once connectivity returns')
+  })
+}
+
+test('offline startup registers recovery and reconnect initializes sync', async () => {
+  const f = fixture({}, { encrypted: true, connectionState: 'offline', browser: true })
+  await f.actions.initializeSyncServer(f.context)
+  assert.equal(f.requests.length, 0)
+  f.network.state = 'restored'
+  f.connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'restored' }))
+  await Promise.resolve()
+  assert.ok(f.dispatched.some(([action]) => action === 'initializeSyncServer'))
+  for (let i = 0; i < 100 && !f.requests.length; i++) await Promise.resolve()
+  assert.ok(f.requests.length > 0)
+})
+
+test('a queued sync rechecks connectivity after acquiring its lock', async () => {
+  const f = fixture({}, { encrypted: true, deferLock: true })
+  const syncing = f.actions.syncWithSyncServer(f.context)
+  f.network.state = 'offline'
+  await syncing
+  assert.equal(f.requests.length, 0)
+})
+
+for (const settings of [{ syncServerSyncSubscriptions: false }, { syncServerAutoSync: false }]) {
+  test(`reconnect respects automatic sync preferences: ${JSON.stringify(settings)}`, async () => {
+    const f = fixture(settings, { encrypted: true, connectionState: 'offline', browser: true })
+    await f.actions.initializeSyncServer(f.context)
+    f.network.state = 'restored'
+    f.connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'restored' }))
+    await Promise.resolve()
+    assert.equal(f.dispatched.some(([action]) => action === 'initializeSyncServer'), false)
+    assert.equal(f.requests.length, 0)
+  })
+}
+
+test('startup without an account still registers reconnect handling for a later connection', async () => {
+  const f = fixture({ syncServerToken: '' }, { encrypted: true, connectionState: 'offline', browser: true })
+  await f.actions.initializeSyncServer(f.context)
+  f.settings.syncServerToken = 'connected-token'
+  f.network.state = 'restored'
+  f.connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'restored' }))
+  for (let i = 0; i < 20; i++) await Promise.resolve()
+  assert.ok(f.dispatched.some(([action]) => action === 'initializeSyncServer'))
+})
+
+test('reconnect sync includes offline changes even when the last sync was recent', async () => {
+  const f = fixture({ syncServerLastSyncAt: Date.now() }, { encrypted: true, connectionState: 'offline', browser: true })
+  await f.actions.initializeSyncServer(f.context)
+  let options
+  const dispatch = f.context.dispatch
+  f.context.dispatch = async (action, value) => {
+    if (action === 'syncWithSyncServer') { options = value; return null }
+    return dispatch(action, value)
+  }
+  f.network.state = 'restored'
+  f.connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'restored' }))
+  for (let i = 0; i < 100 && !options; i++) await Promise.resolve()
+  assert.equal(options?.skipIfRecent, false)
+})
+
+test('disconnect cancels an active sync and reconnect waits for it to settle', async () => {
+  let releaseRequest
+  let signal
+  let started
+  const requestStarted = new Promise(resolve => { started = resolve })
+  const f = fixture({}, { encrypted: true, connectionState: 'offline', browser: true,
+    respond: (url, options) => {
+      if (signal) return
+      signal = options.signal
+      return new Promise((resolve, reject) => {
+        releaseRequest = () => reject(new DOMException('Aborted', 'AbortError'))
+        started()
+      })
+    },
+  })
+  await f.actions.initializeSyncServer(f.context)
+  f.network.state = 'online'
+  const syncing = f.actions.syncWithSyncServer(f.context)
+  await requestStarted
+  try {
+    f.network.state = 'offline'
+    f.connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'offline' }))
+    assert.equal(signal.aborted, true)
+    f.network.state = 'restored'
+    f.connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'restored' }))
+    for (let i = 0; i < 20; i++) await Promise.resolve()
+    assert.equal(f.requests.length, 1, 'reconnect must wait for the cancelled sync to settle')
+  } finally {
+    releaseRequest()
+    await syncing
+  }
+  for (let i = 0; i < 100 && f.requests.length === 1; i++) await Promise.resolve()
+  assert.ok(f.requests.length > 1, 'a fresh sync starts after cancellation settles')
 })

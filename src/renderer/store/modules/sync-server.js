@@ -1,6 +1,7 @@
 import i18n from '../../i18n/index'
 import { showToastOnAllTabs } from '../../helpers/utils'
 import { isAppHidden } from '../../helpers/appVisibility.js'
+import { connectionEvents, getConnectionState } from '../../helpers/networkRecovery.js'
 import {
   SyncServerClient,
   SyncServerCancelledError,
@@ -58,6 +59,11 @@ let autoSyncTimer = null
 let eventSyncTimer = null
 let lifecycleSyncStarted = false
 let deviceNameRefreshId = 0
+
+function isSyncServerOffline() {
+  return getConnectionState() === 'offline' ||
+    (typeof navigator !== 'undefined' && navigator.onLine === false)
+}
 
 function clearSyncServerDeviceNames(commit) {
   deviceNameRefreshId++
@@ -819,12 +825,13 @@ const actions = {
     if (!context.rootState.settings.syncServerToken) {
       return Promise.reject(new Error('Connect to a sync server first'))
     }
+    if (isSyncServerOffline()) return Promise.resolve(null)
     if (!activeSyncPromise) {
       let syncStarted = false
       clearTimeout(eventSyncTimer)
       eventSyncTimer = null
       activeSyncPromise = withSyncLock(() => {
-        if (!context.rootState.settings.syncServerEnabled) return null
+        if (!context.rootState.settings.syncServerEnabled || isSyncServerOffline()) return null
         if (options.skipIfRecent &&
             isRecentSync(context.rootState.settings.syncServerLastSyncAt)) {
           return null
@@ -841,7 +848,31 @@ const actions = {
     return activeSyncPromise
   },
 
-  async initializeSyncServer({ commit, dispatch, rootState }) {
+  async initializeSyncServer({ commit, dispatch, rootState }, { skipIfRecent = true } = {}) {
+    if (!lifecycleSyncStarted && typeof window !== 'undefined') {
+      lifecycleSyncStarted = true
+      connectionEvents.addEventListener('change', async ({ detail }) => {
+        if (detail === 'offline') cancelActiveSyncClients()
+        else if (detail === 'restored') {
+          try {
+            // A reconnect must start a fresh sync after cancellation finishes.
+            await activeSyncPromise?.catch(() => {})
+            if (rootState.settings.syncServerAutoSync &&
+                isSyncReasonEnabled(rootState.settings, 'automatic')) {
+              await dispatch('initializeSyncServer', { skipIfRecent: false })
+            }
+          } catch (error) {
+            console.error('Sync server reconnect sync failed', error)
+          }
+        }
+      })
+      document.addEventListener('visibilitychange', () => {
+        if (!isAppHidden()) {
+          dispatch('scheduleSyncServer', 'automatic')
+        }
+      })
+    }
+
     if (!rootState.settings.syncServerEnabled || !rootState.settings.syncServerToken) return
 
     commit(
@@ -851,6 +882,8 @@ const actions = {
         rootState.settings
       )
     )
+
+    if (isSyncServerOffline()) return
 
     try {
       const client = trackSyncClient(new SyncServerClient(
@@ -881,17 +914,8 @@ const actions = {
     }
 
     await dispatch('startSyncServerAutoSync')
-    if (!lifecycleSyncStarted && typeof window !== 'undefined') {
-      lifecycleSyncStarted = true
-      window.addEventListener('online', () => dispatch('scheduleSyncServer', 'automatic'))
-      document.addEventListener('visibilitychange', () => {
-        if (!isAppHidden()) {
-          dispatch('scheduleSyncServer', 'automatic')
-        }
-      })
-    }
     if (rootState.settings.syncServerAutoSync) {
-      await dispatch('syncWithSyncServer', { skipIfRecent: true })
+      await dispatch('syncWithSyncServer', { skipIfRecent })
     }
   },
 
@@ -913,6 +937,7 @@ const actions = {
   },
 
   async refreshSyncServerDeviceNames({ commit, dispatch, rootState }) {
+    if (isSyncServerOffline()) return
     const settings = rootState.settings
     if (!settings.syncServerToken || !settings.syncServerPrivacyKey) {
       clearSyncServerDeviceNames(commit)
@@ -965,7 +990,8 @@ const actions = {
   },
 
   scheduleSyncServer({ dispatch, rootState }, reason = 'data') {
-    if (!rootState.settings.syncServerEnabled ||
+    if (isSyncServerOffline() ||
+        !rootState.settings.syncServerEnabled ||
         !rootState.settings.syncServerAutoSync ||
         !rootState.settings.syncServerToken ||
         !isSyncReasonEnabled(rootState.settings, reason) ||

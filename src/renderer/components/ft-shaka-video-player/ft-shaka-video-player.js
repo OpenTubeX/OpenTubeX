@@ -287,6 +287,10 @@ export default defineComponent({
       type: Number,
       default: 0
     },
+    localFilePlayback: {
+      type: Boolean,
+      default: false
+    },
     startTime: {
       type: Number,
       default: null
@@ -10350,11 +10354,12 @@ export default defineComponent({
     window.addEventListener('online', onlineHandler)
     window.addEventListener('offline', offlineHandler)
 
-    // Only display the offline message while buffering/the loading symbol is visible.
+    // Local files can buffer while seeking without needing a network connection.
+    // Only display the offline message for streams while buffering/the loading symbol is visible.
     // If we briefly lose the connection but it comes back before the buffer is empty,
     // the user won't notice anything so we don't need to display the message.
     const showOfflineMessage = computed(() => {
-      return isOffline.value && isBuffering.value
+      return !props.localFilePlayback && isOffline.value && isBuffering.value
     })
 
     // #endregion offline message
