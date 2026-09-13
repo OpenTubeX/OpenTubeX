@@ -14,10 +14,28 @@ import java.util.concurrent.TimeoutException;
 
 public class SubscriptionRefreshWorkerConcurrencyTest {
     @Test
-    public void nextFeedAndCancellationShareTheNotificationMonitor() throws Exception {
+    public void notificationOperationsShareTheMonitor() throws Exception {
         assertUsesNotificationMonitor(() ->
             SubscriptionRefreshWorker.startNextFeed(null, "inactive", "Refresh", "Cancel"));
+        assertUsesNotificationMonitor(() -> SubscriptionRefreshWorker.update(null, "inactive", 0));
+        assertUsesNotificationMonitor(() -> SubscriptionRefreshWorker.finish(null, "inactive"));
+        assertUsesNotificationMonitor(() -> SubscriptionRefreshWorker.completeWorker(null, "inactive"));
         assertUsesNotificationMonitor(() -> SubscriptionRefreshWorker.cancel(null, "inactive"));
+    }
+
+    @Test
+    public void delayedCleanupPreservesAnActiveRefresh() throws Exception {
+        String token = "new-refresh";
+        assertTrue(SubscriptionRefreshCoordinator.begin(token));
+        try {
+            // A null context also proves cleanup does not touch notifications
+            // belonging to a refresh that started before the callback ran.
+            assertUsesNotificationMonitor(() ->
+                SubscriptionRefreshWorker.dismissInactiveNotification(null));
+            assertTrue(SubscriptionRefreshCoordinator.isCurrent(token));
+        } finally {
+            SubscriptionRefreshCoordinator.finish(token);
+        }
     }
 
     private static void assertUsesNotificationMonitor(Runnable action) throws Exception {
