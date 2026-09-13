@@ -45,6 +45,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(PoTokenPlugin.class);
         registerPlugin(YtDlpPlugin.class);
         registerPlugin(AndroidUiPlugin.class);
+        registerPlugin(AndroidDynamicColorsPlugin.class);
         registerPlugin(AppIconPlugin.class);
         registerPlugin(ScreenshotPlugin.class);
         registerPlugin(PullToRefreshPlugin.class);

@@ -510,6 +510,13 @@ import { lockBodyScroll, unlockBodyScroll } from './components/FtPrompt/scrollLo
 import { vSaferHtml } from './directives/vSaferHtml.js'
 
 import store from './store/index'
+import { androidDynamicColors, getAndroidDynamicColors, onAndroidDynamicColorsChanged } from './helpers/dynamicColors'
+import {
+  exitAndroidApp,
+  getAndroidHardwareKeyboardState,
+  setAndroidPictureInPictureDocumentState,
+  setAndroidSystemBarsBackground
+} from './helpers/androidUi'
 import {
   applyThemeToDocument,
   handleCustomThemeUpdated,
@@ -538,12 +545,6 @@ import {
 } from './helpers/progressPresentation'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
 import { copyToClipboard, openExternalLink, openInternalPath, shareLink, showApiErrorToast, showToast } from './helpers/utils'
-import {
-  exitAndroidApp,
-  getAndroidHardwareKeyboardState,
-  setAndroidPictureInPictureDocumentState,
-  setAndroidSystemBarsBackground
-} from './helpers/androidUi'
 import { openNotificationSettings } from './helpers/capacitorUi'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
 import {
@@ -2713,6 +2714,32 @@ const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
 const systemUsesDarkTheme = ref(systemColorScheme.matches)
 systemColorScheme.addEventListener('change', handleSystemColorSchemeChange)
 
+if (isCapacitor) {
+  let dynamicColorsListener
+  let disposed = false
+  const receiveColors = (colors) => {
+    if (disposed) return
+    androidDynamicColors.value = colors
+    if (baseTheme.value === 'dynamic') updateTheme()
+  }
+  onMounted(async () => {
+    try {
+      dynamicColorsListener = await onAndroidDynamicColorsChanged(receiveColors)
+      if (disposed) {
+        await dynamicColorsListener?.remove()
+        return
+      }
+      receiveColors(await getAndroidDynamicColors())
+    } catch (error) {
+      console.error('Failed to load Android dynamic colors:', error)
+    }
+  })
+  onBeforeUnmount(() => {
+    disposed = true
+    dynamicColorsListener?.remove()
+  })
+}
+
 watch(baseTheme, updateTheme)
 watch(appFont, updateAppFont)
 watch(() => store.getters.getSystemLightTheme, updateTheme)
@@ -2797,7 +2824,7 @@ async function sanitizeAppearanceSettings(customThemes) {
 
 function handleSystemColorSchemeChange(event) {
   systemUsesDarkTheme.value = event.matches
-  if (baseTheme.value === 'system') updateTheme()
+  if (['system', 'dynamic'].includes(baseTheme.value)) updateTheme()
 }
 
 function updateUiRoundness() {

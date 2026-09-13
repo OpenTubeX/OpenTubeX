@@ -203,6 +203,112 @@ public class MobileAppearanceSettingsTest {
         }
     }
 
+    @Test
+    public void dynamicColorsFollowNativePaletteAndClearWhenDisabled() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = webView(scenario);
+            prepare(view);
+            String store = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
+            String savedTheme = evaluate(view, store + ".getters.getBaseTheme");
+            try {
+                evaluate(view, "document.querySelector('.profileTrigger').click()");
+                awaitCondition(view, "!!document.querySelector('.quickSettingsContent select')");
+                if (android.os.Build.VERSION.SDK_INT < 31) {
+                    assertEquals("Dynamic option is absent on older Android", "false", evaluate(view,
+                        "!!document.querySelector('.quickSettingsContent option[value=dynamic]')"));
+                    return;
+                }
+                awaitCondition(view, "!!document.querySelector('.quickSettingsContent option[value=dynamic]')");
+                evaluate(view, store + ".commit('setBaseTheme', 'dynamic')");
+                String primary = "document.body.style.getPropertyValue('--primary-color')";
+                awaitCondition(view, primary + " !== ''");
+                android.content.Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+                boolean dark = (context.getResources().getConfiguration().uiMode &
+                    android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                    android.content.res.Configuration.UI_MODE_NIGHT_YES;
+                int colorId = context.getResources().getIdentifier(
+                    "system_accent1_" + (dark ? "200" : "600"), "color", "android");
+                String expected = String.format(java.util.Locale.ROOT, "#%06x", context.getColor(colorId) & 0xffffff);
+                assertEquals("Renderer uses the actual system accent", JSONObject.quote(expected),
+                    evaluate(view, primary + ".toLowerCase()"));
+                assertEquals("Dynamic fields, tracks and text retain accessible contrast", "true", evaluate(view,
+                    """
+                    (() => {
+                        const style = getComputedStyle(document.body);
+                        const color = name => style.getPropertyValue(name).trim();
+                        const luminance = hex => hex.slice(1).match(/../g).map(channel => {
+                            const value = parseInt(channel, 16) / 255;
+                            return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+                        }).reduce((sum, value, i) => sum + value * [0.2126, 0.7152, 0.0722][i], 0);
+                        const contrast = (a, b) => {
+                            const values = [luminance(color(a)), luminance(color(b))].sort((a, b) => b - a);
+                            return (values[0] + 0.05) / (values[1] + 0.05);
+                        };
+                        const surfaces = ['--bg-color', '--card-bg-color', '--search-bar-color', '--dropdown-item-hover-color'];
+                        return document.body.classList.contains('dynamicColors') &&
+                            color('--search-bar-color') !== color('--card-bg-color') && surfaces.every(background =>
+                                ['--primary-text-color', '--secondary-text-color', '--link-color', '--red-500'].every(
+                                    foreground => contrast(foreground, background) >= 4.5) &&
+                                ['--input-border-color', '--slider-track-color', '--toggle-track-color',
+                                 '--toggle-checked-track-color', '--scrollbar-color-hover'].every(
+                                    foreground => contrast(foreground, background) >= 3)) &&
+                            contrast('--toggle-thumb-color', '--toggle-track-color') >= 3 &&
+                            contrast('--toggle-checked-thumb-color', '--toggle-checked-track-color') >= 3;
+                    })()
+                    """));
+                evaluate(view, "document.body.style.removeProperty('--primary-color')");
+                scenario.onActivity(activity -> activity.onConfigurationChanged(
+                    new android.content.res.Configuration(activity.getResources().getConfiguration())));
+                awaitCondition(view, primary + ".toLowerCase() === '" + expected + "'");
+                evaluate(view, store + ".commit('setBaseTheme', 'light')");
+                awaitCondition(view, primary + " === '' && document.body.classList.contains('light')");
+                assertEquals("Dynamic backgrounds are removed", "\"\"", evaluate(view,
+                    "document.body.style.getPropertyValue('--bg-color')"));
+            } finally {
+                evaluate(view, store + ".commit('setBaseTheme', " + savedTheme + ")");
+                restore(view);
+            }
+        }
+    }
+
+    @Test
+    public void systemPaletteChangeUpdatesTheExistingWebView() throws Exception {
+        org.junit.Assume.assumeTrue(android.os.Build.VERSION.SDK_INT >= 31);
+        android.content.Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        android.app.UiAutomation automation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
+        automation.adoptShellPermissionIdentity(android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        String setting = "theme_customization_overlay_packages";
+        String originalPalette = android.provider.Settings.Secure.getString(context.getContentResolver(), setting);
+        String store = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = webView(scenario);
+            String savedTheme = evaluate(view, store + ".getters.getBaseTheme");
+            try {
+                evaluate(view, store + ".dispatch('updateBaseTheme', 'dynamic').then(() => window.__themeSaved = true)");
+                awaitCondition(view, "window.__themeSaved === true && document.body.style.getPropertyValue('--primary-color') !== ''");
+                String originalColor = evaluate(view, "document.body.style.getPropertyValue('--primary-color')");
+                String seed = originalPalette != null && originalPalette.contains("FF0066") ? "6750A4" : "FF0066";
+                android.provider.Settings.Secure.putString(context.getContentResolver(), setting,
+                    new JSONObject()
+                        .put("android.theme.customization.system_palette", seed)
+                        .put("android.theme.customization.accent_color", seed)
+                        .put("android.theme.customization.color_source", "preset")
+                        .put("android.theme.customization.theme_style", "TONAL_SPOT")
+                        .toString());
+                awaitCondition(view, store + ".getters.getBaseTheme === 'dynamic' && " +
+                    "document.body.style.getPropertyValue('--primary-color') !== '' && " +
+                    "document.body.style.getPropertyValue('--primary-color') !== " + originalColor);
+            } finally {
+                view = webView(scenario);
+                evaluate(view, store + ".dispatch('updateBaseTheme', " + savedTheme + ").then(() => window.__themeRestored = true)");
+                awaitCondition(view, "window.__themeRestored === true");
+            }
+        } finally {
+            android.provider.Settings.Secure.putString(context.getContentResolver(), setting, originalPalette);
+            automation.dropShellPermissionIdentity();
+        }
+    }
+
     private static WebView webView(ActivityScenario<MainActivity> scenario) throws Exception {
         AtomicReference<WebView> view = new AtomicReference<>();
         scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));

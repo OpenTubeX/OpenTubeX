@@ -443,7 +443,7 @@ import { localeTranslationPercentages } from '../../i18n/index'
 import { colors } from '../../helpers/colors'
 import { OPEN_COMMAND_PALETTE_EVENT } from '../../helpers/commandPalette'
 import { useColorTranslations } from '../../composables/colors'
-import { useBaseThemeNames } from '../../composables/baseThemes'
+import { useBaseThemeOptions } from '../../composables/baseThemes'
 import { useThumbnailSizeSlider } from '../../composables/useThumbnailSizeSlider'
 import {
   MIN_THUMBNAIL_SIZE,
@@ -459,9 +459,7 @@ import {
 } from '../../helpers/quickSettings'
 import { defaultUpdaterId } from '../../store/modules/settings'
 import { switchActiveProfile, translateProfileName as getTranslatedProfileName } from '../../helpers/profileSwitching'
-import { customThemeValue } from '../../../customTheme'
 import { getThemeClassification, hasFixedThemeColors } from '../../../appearanceSettings'
-import { BUILTIN_BASE_THEME_VALUES } from '../../../constants'
 
 const quickHeaderActions = useTemplateRef('quickHeaderActions')
 const { locale, t } = useI18n()
@@ -502,16 +500,8 @@ const profileInitials = computed(() => profileList.value.reduce((initials, profi
   return initials
 }, {}))
 
-const builtInBaseThemeNames = useBaseThemeNames()
 const customThemes = computed(() => store.getters.getCustomThemes)
-const baseThemeValues = computed(() => [
-  ...BUILTIN_BASE_THEME_VALUES,
-  ...customThemes.value.map(({ id }) => customThemeValue(id))
-])
-const baseThemeNames = computed(() => [
-  ...builtInBaseThemeNames.value,
-  ...customThemes.value.map(({ name }) => name)
-])
+const { baseThemeValues, baseThemeNames } = useBaseThemeOptions(customThemes)
 const systemThemeOptions = computed(() => {
   const options = { systemLightTheme: [], systemDarkTheme: [] }
   baseThemeValues.value.forEach((value, index) => {

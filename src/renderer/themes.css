@@ -3101,3 +3101,52 @@ body .os-scrollbar {
   --primary-shadow-color: rgb(0 0 0 / 35%);
   --focus-ring-contrast-color: #fff;
 }
+
+/* Android system tones supply the palette; these roles keep controls visible
+   against both their fill and the surrounding card. */
+.dynamicColors {
+  --input-border-color: var(--border-color);
+  --slider-track-color: var(--secondary-text-color);
+  --toggle-track-color: var(--secondary-text-color);
+  --toggle-checked-track-color: var(--accent-color);
+  --toggle-thumb-color: var(--bg-color);
+  --toggle-checked-thumb-color: var(--bg-color);
+  --settings-changed-color: var(--accent-color);
+
+  .switch-input:not(:disabled) + .switch-label::after {
+    outline: 2px solid var(--secondary-text-color);
+    outline-offset: -2px;
+  }
+
+  .ft-input-component .ft-input::placeholder {
+    opacity: 1;
+  }
+
+  .forceTextColor :is(.inputAction.enabled, .clearInputTextButton.visible):is(:hover, :active) {
+    color: var(--text-with-main-color);
+  }
+
+  .topNav.topNavBarColor .navFilterButton:not(:hover, :active) {
+    color: #eee;
+  }
+
+  .ft-input-component .list {
+    --scrollbar-color: var(--secondary-text-color);
+  }
+
+  /* Separate the thumb from the track, including during focus and dragging.
+     The thumb is scaled sixfold by the slider component. */
+  .pure-material-slider .input:not(:disabled)::-webkit-slider-thumb {
+    outline: 0.25px solid var(--bg-color);
+    outline-offset: 0;
+  }
+
+  .pure-material-slider .input:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  .btn:focus-visible {
+    outline-color: currentcolor;
+  }
+}

@@ -6,15 +6,21 @@ import {
   isCustomThemeValue,
   normalizeCustomTheme,
   normalizeCustomThemes,
-} from '../../customTheme'
-import { PALETTE_BASE_THEMES } from '../../constants'
+} from '../../customTheme.js'
+import { PALETTE_BASE_THEMES } from '../../constants.js'
+
+import { androidDynamicColors, applyDynamicColors } from './dynamicColors.js'
 
 const STORAGE_KEY = 'opentubex-custom-theme'
 let appliedBodyThemeClasses = []
 
 export function applyThemeToDocument(baseTheme, mainColor, secColor, customTheme) {
+  const dynamic = baseTheme === 'dynamic'
+  const dark = window.matchMedia('(prefers-color-scheme: dark)').matches
+  if (dynamic) baseTheme = dark ? 'dark' : 'light'
   const themeClass = isCustomThemeValue(baseTheme) ? 'custom' : (baseTheme || 'system')
   const themeClasses = [themeClass]
+  if (dynamic) themeClasses.push('dynamicColors')
   // Fixed palettes must not inherit selectable accent or destructive overrides.
   if (!PALETTE_BASE_THEMES.includes(themeClass)) {
     themeClasses.push(`main${mainColor || 'Red'}`, `sec${secColor || 'Blue'}`)
@@ -53,6 +59,9 @@ export function applyThemeToDocument(baseTheme, mainColor, secColor, customTheme
       '--accent-color-rgb',
       hexColorToRgbComponents(customTheme.colors.accent)
     )
+  }
+  if (dynamic && androidDynamicColors.value.supported) {
+    applyDynamicColors(androidDynamicColors.value.palette, dark)
   }
 }
 

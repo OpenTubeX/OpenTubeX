@@ -4,7 +4,7 @@ import { isCustomThemeValue } from './customTheme.js'
 const BUILTIN_BASE_THEMES = new Set(BUILTIN_BASE_THEME_VALUES)
 
 function hasFixedThemeColors(theme) {
-  return FIXED_COLOR_BASE_THEMES.includes(theme) || isCustomThemeValue(theme)
+  return theme === 'dynamic' || FIXED_COLOR_BASE_THEMES.includes(theme) || isCustomThemeValue(theme)
 }
 
 function getThemeClassification(value, customThemes = []) {
@@ -19,7 +19,7 @@ function getThemeClassification(value, customThemes = []) {
 
 function resolveBaseTheme(value, fallback, customThemes = [], allowSystem = true) {
   if (!allowSystem && value === 'system') return fallback
-  if (BUILTIN_BASE_THEMES.has(value) || customThemes.some(({ id }) => value === `custom:${id}`)) {
+  if (value === 'dynamic' || BUILTIN_BASE_THEMES.has(value) || customThemes.some(({ id }) => value === `custom:${id}`)) {
     return value
   }
   return fallback
