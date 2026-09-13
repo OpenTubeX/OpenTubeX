@@ -160,7 +160,10 @@ public class NativePlaybackScreenTest {
             frame[0] = screen.getChildAt(0);
             screen.layoutVideo(0, 100, 400, 225, 400);
         }, (screen, controls, web, engine) -> {
-            float center = frame[0].getX() + frame[0].getWidth() * frame[0].getScaleX() / 2;
+            float renderedWidth = frame[0].getWidth() * frame[0].getScaleX();
+            assertEquals("Retained 4:3 video must keep its fitted width",
+                300 * screen.getWidth() / 400f, renderedWidth, 1f);
+            float center = frame[0].getX() + renderedWidth / 2;
             assertEquals("Retained 4:3 video must have equal side bars", screen.getWidth() / 2f, center, 1f);
         });
     }
