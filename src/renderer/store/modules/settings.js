@@ -555,7 +555,7 @@ const state = {
   subscriptionShortsAutoRefreshInterval: '0',
   subscriptionLiveAutoRefreshInterval: '0',
   subscriptionPostsAutoRefreshInterval: '0',
-  enableClosedAppSubscriptionRefresh: true,
+  enableClosedAppSubscriptionRefresh: !process.env.IS_ELECTRON,
   showProgressBarToast: true,
   settingsPassword: '',
   useDeArrowTitles: false,

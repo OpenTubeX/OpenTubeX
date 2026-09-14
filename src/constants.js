@@ -42,6 +42,7 @@ const IpcChannels = {
   STORAGE_GET_USAGE: 'storage-get-usage',
   STORAGE_CLEAR: 'storage-clear',
   STORAGE_COMPACT_DATABASES: 'storage-compact-databases',
+  SUBSCRIPTION_BACKGROUND: 'subscription-background',
   SUBSCRIPTION_AUTO_REFRESH_ACQUIRE: 'subscription-auto-refresh-acquire',
   SUBSCRIPTION_AUTO_REFRESH_CANCEL: 'subscription-auto-refresh-cancel',
   SUBSCRIPTION_AUTO_REFRESH_GET_STATE: 'subscription-auto-refresh-get-state',

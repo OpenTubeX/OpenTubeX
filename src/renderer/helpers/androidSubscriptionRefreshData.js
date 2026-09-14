@@ -1,3 +1,5 @@
+import { Constants } from 'youtubei.js'
+import { createBackgroundSubscriptionRequests } from '../../subscriptionBackgroundRequests.js'
 import { normalizeAutomaticDownloadRule } from './automaticDownloadRules.js'
 
 const FEED_TYPES = ['videos', 'shorts', 'live', 'posts']
@@ -87,6 +89,10 @@ export function createSubscriptionRefreshStartController() {
  *   profiles: object[],
  *   automaticDownloadRules?: Record<string, object>,
  *   closedAppRefreshEnabled: boolean,
+ *   backend?: string,
+ *   useRss?: boolean,
+ *   fallback?: boolean,
+ *   region?: string,
  *   intervals: Record<string, string | number>,
  *   hiddenFeedTypes: string[],
  *   instanceUrl: string,
@@ -139,6 +145,7 @@ export function createAndroidSubscriptionRefreshConfiguration(input) {
     : []
 
   return {
+    requests: createBackgroundSubscriptionRequests({ ...input, clientVersion: Constants.CLIENTS.WEB.VERSION }),
     instanceUrl: input.instanceUrl,
     authorization: input.authorization,
     intervals,

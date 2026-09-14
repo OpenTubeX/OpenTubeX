@@ -1557,7 +1557,7 @@ Tooltips:
     Show New Content Indicators: Viser en liten prikk ved siden av elementer i abonnementsstrømmen som ikke var med forrige gang den ble hentet.
     Show Scheduled Live Streams / Premieres First: Beholder kommende direktesendinger og premierer øverst i abonnementsstrømmen. Når dette er slått av, blir de stående der de ble kunngjort, til de starter. Oppdater abonnementsstrømmen én gang etter at dette er slått av, for å hente kunngjøringsdatoer for eksisterende planlagte elementer.
     Auto Refresh Interval: "Hvor ofte OpenTubeX automatisk oppdaterer abonnementsstrømmen mens appen er åpen. På Android oppdaterer et intervall over null også strømmen mens appen er lukket."
-    Refresh Subscriptions While App Is Closed: "Lar Android oppdatere abonnementsstrømmer med de valgte intervallene mens OpenTubeX er lukket. Slå av dette for å begrense automatiske oppdateringer til når appen er åpen."
+    Refresh Subscriptions While App Is Closed: "Oppdaterer strømmer med innstillingene du har valgt. På datamaskinen blir OpenTubeX i systemstatusfeltet til du avslutter. Android bestemmer når bakgrunnsoppdateringer kjøres."
   Theme Settings:
     Show Progress as Notification: Viser et varig varsel med løpende fremdrift for bakgrunnsoperasjoner, for eksempel oppdatering av abonnementer og nedlasting av administrerte verktøy, i stedet for den globale fremdriftslinjen.
     Always Show Scrollbars: Holder rullefeltene synlige hele tiden. Når dette er slått av, tones de ut kort tid etter at du slutter å bevege musen, og vises igjen så snart du beveger den.

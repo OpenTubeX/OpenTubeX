@@ -277,7 +277,7 @@ public final class SubscriptionRefreshWorker extends Worker {
                         context,
                         profileIds,
                         feedType,
-                        "Invidious API",
+                        "Subscription backend",
                         error
                     );
                 }

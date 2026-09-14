@@ -79,12 +79,14 @@ export async function isAndroidSubscriptionRefreshActive() {
 }
 
 export async function getNextAndroidSubscriptionRefreshResult() {
+  if (process.env.IS_ELECTRON) return window.ftElectron.subscriptionAutoRefresh.nextBackgroundResult()
   if (!SubscriptionRefresh) return null
   const { result } = await SubscriptionRefresh.nextPendingResult()
   return result ?? null
 }
 
 export async function acknowledgeAndroidSubscriptionRefreshResult(id) {
+  if (process.env.IS_ELECTRON) return window.ftElectron.subscriptionAutoRefresh.acknowledgeBackgroundResult(id)
   if (!SubscriptionRefresh) return
   const { removed } = await SubscriptionRefresh.acknowledgePendingResult({ id })
   if (!removed) throw new Error('Unable to acknowledge pending subscription refresh data')

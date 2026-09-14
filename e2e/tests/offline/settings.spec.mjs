@@ -2747,7 +2747,18 @@ test.describe('settings', () => {
     const automaticPipLabel = playback.locator('.pure-checkbox label')
       .filter({ hasText: 'When switching tabs' })
 
+    const keepPlayingToggle = playback.getByRole('checkbox', {
+      name: 'Keep playing when navigating away from a video'
+    })
+    await expect(keepPlayingToggle).toBeChecked()
+    await expect(miniPlayerToggle).toBeDisabled()
+    await expect(miniPlayerToggle).toBeChecked()
+    await playback.locator('label.switch-label')
+      .filter({ hasText: 'Keep playing when navigating away from a video' })
+      .click()
+    await expect(keepPlayingToggle).not.toBeChecked()
     await expect(miniPlayerToggle).toBeEnabled()
+    await expect(miniPlayerToggle).not.toBeChecked()
     await playback.locator('label.switch-label')
       .filter({ hasText: 'Keep a mini player on screen when switching tabs' })
       .click()

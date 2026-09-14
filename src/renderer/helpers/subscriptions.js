@@ -1,3 +1,5 @@
+import { enrichShortPublicationDates } from './api/short-publication'
+import { parseSubscriptionRss, parseRssUpcomingInfo, isRssUpcomingPremiereCandidate } from './api/feed-rss'
 import { shallowReactive } from 'vue'
 import { subscriptionRefreshErrors } from './subscriptionRefreshErrors'
 import store from '../store/index'
@@ -37,7 +39,6 @@ import {
 import { mapConcurrently } from './concurrent-map'
 import { includeAutomaticDownloadChannels, startAutomaticDownloadsForChannel } from './automaticDownloads'
 import { extractAssignedJsonObject } from './assigned-json'
-import { getLocalPremiereState } from './premiere'
 import { getInvidiousSubscriptionPremiereUpdate, getLocalSubscriptionPremiereUpdate, shouldRefreshSubscriptionPremiere } from './subscription-premieres'
 import { shouldShowProgressStartToast } from './progressPresentation'
 import { finishAndroidSubscriptionRefresh, isAndroidSubscriptionRefreshActive } from './androidSubscriptionRefresh'
@@ -71,8 +72,6 @@ let rendererRefreshReserved = false
 // missed when it arrives between two feed refreshes.
 let cancelCount = 0
 
-const IS_UPCOMING_REGEX = /"isUpcoming"\s*:\s*true/
-const SCHEDULED_START_REGEX = /"scheduledStartTime"\s*:\s*"(\d+)"/
 const SUBSCRIPTION_FETCH_BATCH_SIZE = 80
 const SUBSCRIPTION_FETCH_BATCH_DELAY_MS = 2000
 const SUBSCRIPTION_FETCH_CONCURRENCY = 8
@@ -441,30 +440,6 @@ function handleSubscriptionFetchError(channel, error, title, context) {
 }
 
 /**
- * @param {number | string | null | undefined} viewCount
- */
-function getNumericViewCount(viewCount) {
-  if (viewCount == null) {
-    return null
-  }
-
-  const numericViewCount = typeof viewCount === 'string' ? parseInt(viewCount, 10) : viewCount
-
-  return Number.isNaN(numericViewCount) ? null : numericViewCount
-}
-
-/**
- * RSS feeds don't expose premiere status directly. Upcoming premieres usually have
- * very low view counts, so we only look up metadata for those entries.
- * @param {number | string | null | undefined} viewCount
- */
-function isRssUpcomingPremiereCandidate(viewCount) {
-  const numericViewCount = getNumericViewCount(viewCount)
-
-  return numericViewCount != null && numericViewCount <= 1
-}
-
-/**
  * @param {{
  *  isRSS?: boolean,
  *  isUpcoming?: boolean,
@@ -631,33 +606,7 @@ async function fetchRssVideoUpcomingInfoUncached(videoId) {
       return { isUpcoming: false, failed: true }
     }
 
-    const html = await response.text()
-    const isUpcoming = IS_UPCOMING_REGEX.test(html)
-
-    if (!isUpcoming) {
-      return { isUpcoming: false }
-    }
-
-    const scheduledStartMatch = html.match(SCHEDULED_START_REGEX)
-    const premiereDate = scheduledStartMatch
-      ? new Date(parseInt(scheduledStartMatch[1], 10) * 1000)
-      : undefined
-    const playerResponseText = extractAssignedJsonObject(html, 'ytInitialPlayerResponse')
-    let isPremiere
-
-    if (playerResponseText) {
-      try {
-        isPremiere = getLocalPremiereState(JSON.parse(playerResponseText).videoDetails)
-      } catch {
-        // The upcoming state is still useful when YouTube's embedded response is malformed.
-      }
-    }
-
-    return {
-      isUpcoming: true,
-      isPremiere,
-      premiereDate
-    }
+    return parseRssUpcomingInfo(await response.text())
   } catch {
     return { isUpcoming: false, failed: true }
   }
@@ -672,6 +621,24 @@ async function enrichRssVideoIfNeeded(video) {
   }
 
   return applyRssPremiereVerdict(video, await fetchRssVideoUpcomingInfo(video.videoId))
+}
+
+/** Restore missing Local Shorts dates before importing native background results. */
+export function enrichSubscriptionShortDates(entries, channelId) {
+  return enrichShortPublicationDates(entries, async videoId => {
+    const response = await localApiFetch(`https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`, {
+      signal: AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS),
+      nativeTimeoutMs: RSS_ENRICHMENT_TIMEOUT_MS
+    })
+    checkSubscriptionFeedResponse(response)
+    return response.text()
+  }, store.getters.getShortsCache[channelId]?.videos ?? [])
+}
+
+/** Enrich imported RSS entries using the same cache and limits as foreground refreshes. */
+export function enrichSubscriptionRssEntries(entries) {
+  return mapConcurrently(entries, RSS_ENRICHMENT_CONCURRENCY, entry =>
+    entry.isRSS && entry.isUpcoming == null ? enrichRssVideoIfNeeded(entry) : entry)
 }
 
 /**
@@ -706,25 +673,14 @@ export function updateVideoListAfterProcessing(videos, now = Date.now()) {
  * @param {string} channelId
  */
 export async function parseYouTubeRSSFeed(rssString, channelId) {
-  // doesn't need to be asynchronous, but doing it allows us to do the relatively slow DOM querying in parallel
   try {
-    const xmlDom = new DOMParser().parseFromString(rssString, 'application/xml')
-    const channelName = xmlDom.querySelector('author > name').textContent
-    const entries = xmlDom.querySelectorAll('entry')
-
-    const promises = []
-
-    for (const entry of entries) {
-      promises.push(parseRSSEntry(entry, channelId, channelName))
-    }
-
-    const videos = await Promise.all(promises)
+    const { name: channelName, videos } = parseSubscriptionRss(rssString, channelId)
 
     return {
       name: channelName,
       // Enrichment downloads a watch page per candidate, so cap how many of them
       // a single channel can have in flight at once.
-      videos: await mapConcurrently(videos, RSS_ENRICHMENT_CONCURRENCY, enrichRssVideoIfNeeded)
+      videos: await enrichSubscriptionRssEntries(videos)
     }
   } catch {
     return {
@@ -1715,39 +1671,5 @@ async function getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttem
       default:
         return { videos: null }
     }
-  }
-}
-
-/**
- * @param {Element} entry
- * @param {string} channelId
- * @param {string} channelName
- */
-async function parseRSSEntry(entry, channelId, channelName) {
-  // doesn't need to be asynchronous, but doing it allows us to do the relatively slow DOM querying in parallel
-
-  const rawViewCount = entry.getElementsByTagName('media:statistics')[0]?.getAttribute('views')
-
-  let viewCount = null
-
-  if (rawViewCount) {
-    const parsedViewCount = parseInt(rawViewCount)
-
-    if (!isNaN(parsedViewCount)) {
-      viewCount = parsedViewCount
-    }
-  }
-
-  return {
-    authorId: channelId,
-    author: channelName,
-    // querySelector doesn't support xml namespaces so we have to use getElementsByTagName here
-    videoId: entry.getElementsByTagName('yt:videoId')[0].textContent,
-    title: entry.querySelector('title').textContent,
-    published: Date.parse(entry.querySelector('published').textContent),
-    viewCount,
-    type: 'video',
-    lengthSeconds: '0:00',
-    isRSS: true
   }
 }

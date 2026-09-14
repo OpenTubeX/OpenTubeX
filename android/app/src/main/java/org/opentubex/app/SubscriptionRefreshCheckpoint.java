@@ -28,7 +28,7 @@ final class SubscriptionRefreshCheckpoint {
     static String configurationId(List<SubscriptionRefreshConfiguration.Feed> feeds) {
         StringBuilder value = new StringBuilder();
         for (SubscriptionRefreshConfiguration.Feed feed : feeds) {
-            for (String field : new String[] { feed.profileId, feed.type, feed.instanceUrl, feed.authorization }) {
+            for (String field : new String[] { feed.profileId, feed.type, feed.instanceUrl, feed.authorization, feed.requests == null ? null : feed.requests.toString() }) {
                 if (field == null) value.append("-1:");
                 else value.append(field.length()).append(':').append(field);
             }

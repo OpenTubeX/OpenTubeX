@@ -769,6 +769,15 @@ export default {
   },
 
   subscriptionAutoRefresh: {
+    onBackgroundResultsAvailable: handler => {
+      const listener = () => handler()
+      ipcRenderer.on(IpcChannels.SUBSCRIPTION_BACKGROUND, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.SUBSCRIPTION_BACKGROUND, listener)
+    },
+    configureBackground: configuration => ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_BACKGROUND, 'configure', configuration),
+    nextBackgroundResult: () => ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_BACKGROUND, 'next'),
+    acknowledgeBackgroundResult: id => ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_BACKGROUND, 'acknowledge', id),
+    backgroundCompleted: value => ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_BACKGROUND, 'completed', value),
     /**
      * Atomically claim ownership of the subscription auto refresh.
      * @param {string} tabId

@@ -80,6 +80,7 @@ import {
   monitorKdeWaylandWindowState,
   shouldMonitorKdeWaylandWindowState,
 } from './kdeWaylandWindowState'
+import { createSubscriptionBackgroundService } from './subscriptionBackground'
 import { supportsNativeNotifications } from './nativeNotifications'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
@@ -1748,6 +1749,45 @@ function runApp() {
   const isTrayOnMinimizeSupported = process.platform !== 'darwin' && !isWaylandPlatform
 
   const userDataPath = app.getPath('userData')
+  const backgroundSubscriptions = createSubscriptionBackgroundService(userDataPath)
+  let keepRefreshingInBackground = false
+
+  ipcMain.handle(IpcChannels.SUBSCRIPTION_BACKGROUND, async (event, method, value) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || !TabManager.getFromWebContents(event.sender)) return
+    switch (method) {
+      case 'configure':
+        keepRefreshingInBackground = value.enabled === true
+        await backgroundSubscriptions.configure(value)
+        if (keepRefreshingInBackground) ensureBackgroundTray()
+        else if (trayWindows.length === 0) destroyTray()
+        return
+      case 'next':
+        await backgroundSubscriptions.setBackground(false)
+        return backgroundSubscriptions.next()
+      case 'acknowledge': return backgroundSubscriptions.acknowledge(value)
+      case 'completed': return backgroundSubscriptions.completed(value)
+    }
+  })
+
+  function updateBackgroundSubscriptionVisibility() {
+    const hidden = BrowserWindow.getAllWindows().every(window => !window.isVisible() || window.isMinimized())
+    backgroundSubscriptions.setBackground(hidden && !isSubscriptionAutoRefreshInProgress()).catch(console.error)
+  }
+
+  function ensureBackgroundTray() {
+    if (!tray) {
+      const icon = process.env.NODE_ENV === 'development'
+        ? path.join(__dirname, '..', '..', '_icons', 'iconColor.png')
+        : path.join(__dirname, '..', '_icons', 'iconColor.png')
+      tray = new Tray(icon)
+      tray.setToolTip('OpenTubeX')
+      tray.on('click', () => {
+        const window = BrowserWindow.getAllWindows()[0]
+        if (window) { window.show(); window.focus() } else createWindow()
+      })
+    }
+    createTrayContextMenu()
+  }
 
   asyncFs.rm(path.join(userDataPath, 'voice_over_translation_cache'), {
     force: true,
@@ -2562,7 +2602,7 @@ function runApp() {
         label: 'New Window',
         click: () => createWindow({
           showWindowNow: true,
-          replaceMainWindow: trayWindows.some(item => item.id === mainWindow.id)
+          replaceMainWindow: !mainWindow || mainWindow.isDestroyed() || trayWindows.some(item => item.id === mainWindow.id)
         })
       },
       {
@@ -2584,6 +2624,10 @@ function runApp() {
   function destroyTray() {
     if (!tray) return
 
+    if (keepRefreshingInBackground) {
+      tray.setContextMenu(Menu.buildFromTemplate(defaultTrayMenu()))
+      return
+    }
     if (process.platform !== 'linux') {
       tray.destroy()
       tray = null
@@ -2644,6 +2688,7 @@ function runApp() {
       restoreTabLoadStateOnRestore = false,
       loadLandingPageOnRestore = false
     } = { }) {
+    await backgroundSubscriptions.setBackground(false)
     // Syncing new window background to theme choice.
     const windowBackground = await baseHandlers.settings._findOne('baseTheme').then(async (setting) => {
       let theme = setting?.value ?? 'system'
@@ -2983,12 +3028,12 @@ function runApp() {
           (wasLastWindow || tabManager.tabs.size > 1)) {
         event.preventDefault()
 
-        let confirmed = wasLastWindow
+        let confirmed = wasLastWindow && !keepRefreshingInBackground
           ? await confirmCloseApp(newWindow)
           : await confirmCloseWindowWithMultipleTabs(newWindow, tabManager.tabs.size)
         const openWindowCount = BrowserWindow.getAllWindows()
           .filter(window => !closingWindowIds.has(window.id)).length
-        if (confirmed && !wasLastWindow && openWindowCount === 1) {
+        if (confirmed && !wasLastWindow && openWindowCount === 1 && !keepRefreshingInBackground) {
           confirmed = await confirmCloseApp(newWindow)
         }
         if (confirmed) {
@@ -3048,6 +3093,15 @@ function runApp() {
       }
     })
 
+    for (const event of ['show', 'hide', 'minimize', 'restore']) {
+      newWindow.on(event, () => {
+        updateBackgroundSubscriptionVisibility()
+        // backgroundThrottling is disabled, so Chromium may not emit visibilitychange.
+        if (event === 'show' || event === 'restore') {
+          newWindow.webContents.send(IpcChannels.SUBSCRIPTION_BACKGROUND)
+        }
+      })
+    }
     newWindow.once('closed', () => {
       closingWindowIds.delete(newWindow.id)
       const allWindows = BrowserWindow.getAllWindows()
@@ -3058,6 +3112,7 @@ function runApp() {
       }
 
       stopPowerSaveBlockerForWindow(newWindow)
+      updateBackgroundSubscriptionVisibility()
     })
 
     return newWindow
@@ -3651,6 +3706,8 @@ function runApp() {
       return false
     }
 
+    await backgroundSubscriptions.setBackground(false)
+    if (!canAcquire() || isSubscriptionAutoRefreshInProgress()) return false
     const owner = event.sender
     subscriptionAutoRefreshOwner = {
       webContents: owner,
@@ -3722,6 +3779,7 @@ function runApp() {
       subscriptionAutoRefreshOwner = null
       subscriptionAutoRefreshProgress = 0
       broadcastSubscriptionAutoRefreshState()
+      updateBackgroundSubscriptionVisibility()
     }
   })
 
@@ -5353,10 +5411,18 @@ function runApp() {
     }
 
     isQuitting = true
+    backgroundSubscriptions.stop()
     if (process.platform !== 'darwin' && tray) { tray.destroy() }
   })
 
   app.on('window-all-closed', () => {
+    mainWindow = null
+    trayWindows = []
+    if (keepRefreshingInBackground && !isQuitting) {
+      ensureBackgroundTray()
+      backgroundSubscriptions.setBackground(true).catch(error => console.error(error))
+      return
+    }
     // Clean up resources (datastores' compaction + Electron cache and storage data clearing)
     handleQuit()
   })

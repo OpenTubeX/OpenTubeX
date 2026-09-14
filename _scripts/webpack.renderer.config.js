@@ -235,6 +235,8 @@ const config = {
   ],
   resolve: {
     fallback: {
+      // Feed parsing uses sax.parser, not its optional Node stream wrapper.
+      stream: false,
       // @hpke/core prefers Web Crypto in supported browsers. Its old-Node
       // fallback is unreachable in Electron's renderer and must not be bundled.
       crypto: false
@@ -262,6 +264,27 @@ if (isDevMode) {
   // hack to pass it through to the dev-runner.js script
   // gets removed there before the config object is passed to webpack
   config.SHAKA_LOCALES_TO_BE_BUNDLED = SHAKA_LOCALES_TO_BE_BUNDLED
+}
+
+if (!isDevMode) {
+  // The main build emits this UMD artifact once; keep renderer and utility
+  // imports on that same implementation without sharing runtime state.
+  config.externals = { 'youtubei.js': 'window OpenTubeXYouTube' }
+  config.plugins.push({
+    apply(compiler) {
+      compiler.hooks.compilation.tap('SharedYouTubeLibrary', compilation => {
+        HtmlWebpackPlugin.getHooks(compilation).alterAssetTags.tap('SharedYouTubeLibrary', data => {
+          data.assetTags.scripts.unshift({
+            tagName: 'script',
+            voidTag: false,
+            attributes: { defer: true, src: 'youtubei.js' },
+            meta: { plugin: 'SharedYouTubeLibrary' }
+          })
+          return data
+        })
+      })
+    }
+  })
 }
 
 module.exports = config

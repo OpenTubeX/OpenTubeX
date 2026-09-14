@@ -25,6 +25,7 @@ final class SubscriptionRefreshConfiguration {
         final String authorization;
         final String title;
         final String cancelLabel;
+        JSONArray requests;
 
         Feed(
             String profileId,
@@ -72,9 +73,9 @@ final class SubscriptionRefreshConfiguration {
         return matches;
     }
 
-    private static List<Feed> parseFeeds(JSONObject configuration) throws JSONException {
+    static List<Feed> parseFeeds(JSONObject configuration) throws JSONException {
         String instanceUrl = configuration.optString("instanceUrl", "").replaceAll("/+$", "");
-        if (!instanceUrl.startsWith("https://")) return Collections.emptyList();
+
 
         String authorization = configuration.isNull("authorization")
             ? null
@@ -107,7 +108,7 @@ final class SubscriptionRefreshConfiguration {
                     }
                 }
 
-                feeds.add(new Feed(
+                Feed feed = new Feed(
                     profileId,
                     type,
                     intervalMillis,
@@ -116,7 +117,10 @@ final class SubscriptionRefreshConfiguration {
                     authorization,
                     titles == null ? "Refreshing subscriptions" : titles.optString(type, "Refreshing subscriptions"),
                     cancelLabel
-                ));
+                );
+                JSONObject requests = configuration.optJSONObject("requests");
+                feed.requests = requests == null ? null : requests.optJSONArray(type);
+                if (feed.requests != null || instanceUrl.startsWith("https://")) feeds.add(feed);
             }
         }
         return feeds;
