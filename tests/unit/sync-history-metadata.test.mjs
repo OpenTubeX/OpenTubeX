@@ -124,3 +124,37 @@ test('equal timestamps persist remote metadata even when watch state already mat
   assert.equal(uploaded.length, 0)
   assert.equal(await downloadHistory(changes.updates, entry), undefined)
 })
+
+for (const duration of [null, 0, '', '0:00', undefined]) {
+  test(`newer local history with unknown duration ${JSON.stringify(duration)} preserves the known server duration`, async () => {
+    const local = {
+      ...imported, lengthSeconds: duration, isLive: false,
+      timeWatched: 300, watchProgress: 200, isWatched: false,
+    }
+    const entry = { ...remote, video: { ...remote.video, duration: 682 } }
+    const uploaded = []
+    const changes = await downloadHistory([local], entry, uploaded)
+    assert.equal(uploaded.length, 1)
+    assert.equal(uploaded[0].video.duration, 682)
+    assert.deepEqual(uploaded[0].metadata, {
+      added_date: 300, watched_state: 'watching', position_millis: 200000,
+    })
+    assert.deepEqual(changes?.updates, [{
+      ...local, lengthSeconds: 682, isLive: false, isUpcoming: false,
+    }])
+    const received = await downloadHistory([], uploaded[0])
+    assert.equal(received.insertions[0].lengthSeconds, 682)
+    assert.equal(received.insertions[0].isLive, false)
+    assert.equal(await downloadHistory(changes.updates, uploaded[0]), undefined)
+  })
+}
+
+test('newer local history keeps its own known duration when uploading', async () => {
+  const local = { ...imported, lengthSeconds: 700, isLive: false, timeWatched: 300 }
+  const uploaded = []
+  const changes = await downloadHistory([local], {
+    ...remote, video: { ...remote.video, duration: 682 },
+  }, uploaded)
+  assert.equal(changes, undefined)
+  assert.equal(uploaded[0].video.duration, 700)
+})

@@ -960,9 +960,12 @@ export async function syncHistory(client, store, previousIds = [], options = {})
     const remote = remoteById.get(id)
     const useLocal = local && (!remote || local.timeWatched >= remote.metadata.added_date)
     let merged = useLocal ? local : historyToLocal(remote, local)
-    // Progress can change without changing timeWatched. Keep that local state
-    // while accepting a known duration for the same history timestamp.
-    if (useLocal && remote && local.timeWatched === remote.metadata.added_date &&
+    // Watch time orders progress, not metadata completeness. Fill an unknown
+    // local duration before uploading so it cannot erase a known server value.
+    // Equal timestamps also refresh metadata without replacing local progress.
+    if (useLocal && remote &&
+        (local.timeWatched === remote.metadata.added_date ||
+          !Number.isFinite(local.lengthSeconds) || local.lengthSeconds <= 0) &&
         Number.isFinite(remote.video.duration) && remote.video.duration > 0 &&
         (local.lengthSeconds !== remote.video.duration || local.isLive === true || local.isUpcoming === true)) {
       merged = { ...local, lengthSeconds: remote.video.duration, isLive: false, isUpcoming: false }
