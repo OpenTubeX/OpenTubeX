@@ -481,8 +481,11 @@ const timeFormat = computed(() => store.getters.getTimeFormat)
 /** @type {import('youtubei.js').YT.LiveChat|null} */
 let liveChatInstance = null
 let hasEnded = false
+let isUnmounted = false
 let stayAtBottom = true
 let isScrollingToBottom = false
+/** @type {number | null} */
+let liveEdgeScrollFrame = null
 /** @type {ReturnType<typeof setTimeout> | null} */
 let scrollToLiveHoldTimer = null
 /**
@@ -593,7 +596,12 @@ const formattedWatchingCount = computed(() => {
 })
 
 onBeforeUnmount(() => {
+  isUnmounted = true
   pendingReadbackTrimRestore = null
+  if (liveEdgeScrollFrame !== null) {
+    cancelAnimationFrame(liveEdgeScrollFrame)
+    liveEdgeScrollFrame = null
+  }
   document.removeEventListener('pointerdown', handleChatSettingsClickOutside, true)
   if (scrollToLiveHoldTimer !== null) {
     clearTimeout(scrollToLiveHoldTimer)
@@ -1069,11 +1077,7 @@ function pushComment(comment) {
   }
 
   if (!isLoading.value && shouldStayAtBottom) {
-    nextTick(() => {
-      // Smooth scrolling can be interrupted when another message arrives or the
-      // tab is backgrounded. An instant follow-up keeps the bottom anchored.
-      scrollToBottom('instant')
-    })
+    scheduleLiveEdgeScroll()
   }
 }
 
@@ -1323,9 +1327,25 @@ function hideSuperChat() {
  * re-pin once the new message has finished sliding in.
  */
 function onLiveChatMessageEntered() {
-  if (stayAtBottom) {
-    scrollToBottom('instant')
+  scheduleLiveEdgeScroll()
+}
+
+/**
+ * Replay batches and their enter hooks can request hundreds of identical forced
+ * scrollbar measurements. Measure once per frame, after Vue renders the batch.
+ */
+function scheduleLiveEdgeScroll() {
+  if (liveEdgeScrollFrame !== null || !stayAtBottom) {
+    return
   }
+
+  liveEdgeScrollFrame = requestAnimationFrame(() => {
+    liveEdgeScrollFrame = null
+    // Wheel/keyboard input or unmounting may have happened since scheduling.
+    if (stayAtBottom && !isUnmounted) {
+      scrollToBottom('instant')
+    }
+  })
 }
 
 /**

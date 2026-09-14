@@ -3059,6 +3059,80 @@ test.describe('watch page', () => {
     await expect(avatar).toHaveAttribute('src', /opentubex_retry=/)
   })
 
+  for (const zoom of [1, 1.25]) {
+    test(`replay bursts follow and trim at ${zoom} UI scale`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+      await openMockedVideo(page)
+      await page.locator('video.player').evaluate(element => element.pause())
+      const view = await watchViewHandle(page)
+      await view.evaluate(async view => {
+        const listeners = new Map()
+        const chat = new EventTarget()
+        chat.is_replay = true
+        chat.on = (event, listener) => listeners.set(listener, event)
+        chat.once = chat.on
+        chat.off = (_event, listener) => listeners.delete(listener)
+        chat.stop = () => {}
+        chat.pollNext = async () => {}
+        chat.seekTo = () => {}
+        chat.start = () => {
+          for (const [listener, event] of listeners) {
+            if (event !== 'start') continue
+            listener({
+              actions: Array.from({ length: 300 }, (_, id) => ({
+                is: type => type.type === 'ReplayChatItemAction',
+                video_offset_time_msec: id < 150 ? '1000' : '2000',
+                actions: [{
+                  is: type => type.type === 'AddChatItemAction',
+                  item: {
+                    is: type => type.type === 'LiveChatTextMessage',
+                    id: `burst-${id}`,
+                    message: { runs: [{ text: `Replay burst message ${id}` }] },
+                    author: {
+                      id: 'burst-author',
+                      name: 'Replay author',
+                      badges: [],
+                      thumbnails: [{ url: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' }]
+                    }
+                  }
+                }]
+              }))
+            })
+          }
+        }
+        view.$store.commit('setHideLiveChatReplay', false)
+        view.currentTime = 0
+        view.liveChat = chat
+        view.liveChatIsReplay = true
+        view.liveChatOpen = true
+        view.isLive = false
+        view.isUpcoming = false
+        await view.$nextTick()
+      })
+      const chat = page.locator(`${activeTab} .watchVideoPlaylist`).filter({ hasText: 'Live Chat Replay' })
+      await expect(chat.locator('.liveChatMessage')).toBeVisible()
+      const scroller = chat.locator('.liveChatComments')
+      for (const seconds of [1, 2]) {
+        await view.evaluate((view, seconds) => { view.currentTime = seconds }, seconds)
+        await expect(scroller.locator('.comment')).toHaveCount(150)
+        await expect(scroller.locator('.chatMessage').first()).toHaveText(`Replay burst message ${(seconds - 1) * 150}`)
+        await expect.poll(() => scroller.evaluate(element =>
+          Math.abs(element.scrollHeight - element.clientHeight - element.scrollTop)
+        )).toBeLessThanOrEqual(1)
+        await expect(scroller.locator(':scope > .os-scrollbar-vertical')).not.toHaveClass(/os-scrollbar-unusable/)
+      }
+      // Seek clears the full list while playback remains paused.
+      await view.evaluate(view => { view.liveChatSeekRequest = { seconds: 0 } })
+      await expect(chat.locator('.liveChatMessage')).toBeVisible()
+      await expect(chat.locator('.comment')).toHaveCount(0)
+      // Empty chat replaces the viewport instead of retaining a zero-range scroller.
+      await expect(scroller).toHaveCount(0)
+      await expect(chat.locator('.os-scrollbar-vertical')).toHaveCount(0)
+      await expect(chat.getByRole('button', { name: 'Scroll to Bottom' })).toHaveCount(0)
+    })
+  }
+
   test('keeps replay messages after delayed playback updates and resets on actual seeks', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
