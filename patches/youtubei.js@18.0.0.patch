@@ -258,7 +258,7 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b0cf4a9ba22fa9e1e482d9084738319e
              else {
                  // There are more than 10 actions, emit them asynchronously so we can request the next incremental continuation.
                  this.#emitSmoothedActions(actions);
-@@ -69,54 +68,164 @@ export default class LiveChat extends EventEmitter {
+@@ -69,54 +68,165 @@ export default class LiveChat extends EventEmitter {
          if (!this.running) {
              this.running = true;
              this.#pollLivechat();
@@ -377,6 +377,7 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b0cf4a9ba22fa9e1e482d9084738319e
 +                        this.emit('error', new InnertubeError('Unexpected live chat incremental continuation response', response));
 +                        this.emit('end');
 +                        this.stop();
++                        return;
 +                    }
 +                    if (!(contents instanceof LiveChatContinuation)) {
 +                        this.stop();
