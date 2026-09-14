@@ -65,6 +65,9 @@ for (const uiScale of [100, 125]) {
           return card.left >= 0 && card.right <= innerWidth + 1 &&
             buttons.left >= card.left && buttons.right <= card.right
         }))).toBe(true)
+        if (width <= 375) {
+          await expect.poll(() => page.locator('.channels').evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(1)
+        }
         if (width === 461 && uiScale === 100) {
           await expect.poll(() => page.locator('.channels').evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(2)
         }
