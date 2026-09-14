@@ -26,7 +26,7 @@ endorsed by, maintained by, or supported by the FreeTube project.
 </p>
 
 <hr>
-<p align="center"><a href="#features-added-by-opentubex">Added features</a> &bull; <a href="#screenshots">Screenshots</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#features">Features</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
+<p align="center"><a href="#screenshots">Screenshots</a> &bull; <a href="#features">Features</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
 <p align="center"><a href="https://opentubex.org/">Website</a> &bull; <a href="PRIVACY.md">Privacy</a> &bull; <a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
 
 > [!NOTE]
@@ -50,11 +50,6 @@ appears in your feed, how videos play and how the app looks.
 - **Decide where your library lives.** Keep your data local or enable sync across devices. End-to-end encryption is available with enhanced-privacy sync on a compatible server. See the [privacy guide](PRIVACY.md) for what each option shares.
 - **Keep track of your viewing.** See your watch time in daily and weekly charts, search your watch history and choose how long to keep it.
 
-<a id="features-added-by-opentubex"></a>
-## 🚀 Features
-
-[View the feature overview on the OpenTubeX website](https://opentubex.org/extra-features/).
-
 <a id="screenshots"></a>
 ## 📸 Screenshots
 
@@ -70,19 +65,10 @@ appears in your feed, how videos play and how the app looks.
 | --- |
 | <picture> <source media="(prefers-color-scheme: light)" srcset="docs/screenshots/OpenTubeX3-light.png"> <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/OpenTubeX3-dark.png"> <img alt="OpenTubeX settings dialog maximized" src="docs/screenshots/OpenTubeX3-dark.png"> </picture> |
 
-<a id="how-does-it-work"></a>
-## ⚙️ How does it work?
-OpenTubeX uses a built-in extractor to request data and videos directly from YouTube. The [Invidious API](https://github.com/iv-org/invidious) can be used instead; depending on the video proxy setting, media requests may still go directly to YouTube. OpenTubeX does not use YouTube's official API.
-
-OpenTubeX does not load the standard YouTube website or its page JavaScript, which reduces the browser-based tracking surface. It does not hide network requests: YouTube, an Invidious operator, or an optional service may still observe request metadata, including your IP address unless a proxy is used. See [PRIVACY.md](PRIVACY.md) for the complete threat model.
-
-By default, subscriptions, playlists, settings, history, profiles and other app data remain on your device. When synchronization is enabled, copies of the selected data categories are sent to the configured sync server. Enhanced-privacy sync encrypts those copies on your device before upload; legacy sync servers may receive them in plaintext.
-
-> [!IMPORTANT]  
-> Using a VPN or Tor is highly recommended to hide your IP while using OpenTubeX.
-
+<a id="features-added-by-opentubex"></a>
 <a id="features"></a>
-## 🎯 Features
+## 🚀 Features
+
 * Watch videos without ads
 * Use YouTube without Google tracking you using cookies and JavaScript
 * Two extractor APIs to choose from (Built in or Invidious)
@@ -107,7 +93,21 @@ By default, subscriptions, playlists, settings, history, profiles and other app 
 * Show/hide functionality or elements within the app using the distraction free settings
 * View channel posts
 
-### Browser Extensions
+[View more on the OpenTubeX website](https://opentubex.org/extra-features/).
+
+<a id="how-does-it-work"></a>
+## ⚙️ How does it work?
+OpenTubeX uses a built-in extractor to request data and videos directly from YouTube. The [Invidious API](https://github.com/iv-org/invidious) can be used instead; depending on the video proxy setting, media requests may still go directly to YouTube. OpenTubeX does not use YouTube's official API.
+
+OpenTubeX does not load the standard YouTube website or its page JavaScript, which reduces the browser-based tracking surface. It does not hide network requests: YouTube, an Invidious operator, or an optional service may still observe request metadata, including your IP address unless a proxy is used. See [PRIVACY.md](PRIVACY.md) for the complete threat model.
+
+By default, subscriptions, playlists, settings, history, profiles and other app data remain on your device. When synchronization is enabled, copies of the selected data categories are sent to the configured sync server. Enhanced-privacy sync encrypts those copies on your device before upload; legacy sync servers may receive them in plaintext.
+
+> [!IMPORTANT]  
+> Using a VPN or Tor is highly recommended to hide your IP while using OpenTubeX.
+
+<a id="browser-extensions"></a>
+## 🧩 Browser Extensions
 The following extensions open YouTube links directly in OpenTubeX:
 
 - ~~[LibRedirect](https://libredirect.manerakai.com/)~~ not yet, pending PR [#1139](https://github.com/libredirect/browser_extension/pull/1139)
