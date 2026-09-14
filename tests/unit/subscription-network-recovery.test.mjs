@@ -112,6 +112,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     getLocalChannel: async () => channelInfo,
     getLocalPlaylist: async () => { if (playlistError) throw playlistError; return { items: playlistItems } },
     parseLocalSubscriberCount: text => Number.parseInt(text, 10),
+    calculatePublishedDate: () => Date.parse(shortPublishDate),
     mergeSubscriptionShortThumbnails: videos => videos,
     DOMParser: class {
       parseFromString() {
@@ -655,6 +656,33 @@ for (const type of ['ReelItem', 'ShortsLockupView']) {
     assert.equal(update.value.videos[0].videoId, 'short-video')
     assert.equal(update.value.videos[0].author, 'Shorts channel')
     assert.equal(update.value.videos[0].authorId, channelId)
+    assert.equal(update.value.videos[0].isShort, true)
+  })
+}
+
+for (const hasByline of [false, true]) {
+  test(`Shorts playlist refresh handles PlaylistVideo with byline=${hasByline}`, async () => {
+    const channelId = 'UCshorts-channel'
+    const short = new YTNodes.PlaylistVideo({
+      videoId: 'short-video',
+      title: { simpleText: 'A Short', accessibility: { accessibilityData: { label: 'A Short' } } },
+      thumbnail: { thumbnails: [] },
+      lengthSeconds: '30',
+      ...(hasByline ? { shortBylineText: { runs: [{
+        text: 'Provided channel',
+        navigationEndpoint: { browseEndpoint: { browseId: 'UCprovided-channel' } }
+      }] } } : {})
+    })
+    const app = createRefresh({ rssStatus: 404, playlistItems: [short] })
+    app.getters.getActiveProfile.subscriptions = [{ id: channelId, name: 'Shorts channel' }]
+    app.getters.getBackendFallback = false
+    app.reconnect()
+    const errorChannels = []
+    await app.refresh({ t: key => key, errorChannels })
+    assert.deepEqual(errorChannels, [])
+    const update = app.writes.find(write => write.key === 'updateSubscriptionShortsCacheByChannel')
+    assert.equal(update.value.videos[0].author, hasByline ? 'Provided channel' : 'Shorts channel')
+    assert.equal(update.value.videos[0].authorId, hasByline ? 'UCprovided-channel' : channelId)
     assert.equal(update.value.videos[0].isShort, true)
   })
 }

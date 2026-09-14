@@ -1442,7 +1442,9 @@ async function getChannelShortsLocal(channel, t, errorChannels, failedAttempts =
         videos.forEach(video => {
           video.isShort = true
           // Shorts playlist entries can omit the channel byline.
-          video.author ??= channel.name
+          if (video.author == null || video.author === 'N/A') {
+            video.author = channel.name
+          }
           video.authorId ??= channel.id
         })
         return { videos }
