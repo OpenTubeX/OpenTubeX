@@ -719,6 +719,8 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Lights Off: Llums apagats
+    Show Lights Off Toggle: Mostra el commutador per apagar els llums
     Swipe Gestures:
       Fullscreen Brightness: Brillantor màxima a pantalla completa
       Left: Lliscar al costat esquerre

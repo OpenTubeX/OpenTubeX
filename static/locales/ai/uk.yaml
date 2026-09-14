@@ -506,6 +506,8 @@ Settings:
         Destructive pressed: Натиснута небезпечна дія
         Text and icons on destructive actions: Текст і піктограми небезпечних дій
   Player Settings:
+    Lights Off: Вимкнути світло
+    Show Lights Off Toggle: Показувати перемикач вимкнення світла
     Swipe Gestures:
       Fullscreen Brightness: Максимальна яскравість у повноекранному режимі
       Left: Жест на лівій стороні

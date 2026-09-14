@@ -742,6 +742,8 @@ Settings:
         Destructive pressed: Destruktive Aktion beim Drücken
         Text and icons on destructive actions: Text und Symbole auf destruktiven Aktionen
   Player Settings:
+    Lights Off: Licht aus
+    Show Lights Off Toggle: Schalter für „Licht aus“ anzeigen
     Swipe Gestures:
       Fullscreen Brightness: Volle Helligkeit im Vollbild
       Left: Wischen auf der linken Seite

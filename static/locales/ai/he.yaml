@@ -506,6 +506,8 @@ Settings:
         Destructive pressed: פעולה הרסנית בלחיצה
         Text and icons on destructive actions: טקסט וסמלים בפעולות הרסניות
   Player Settings:
+    Lights Off: כיבוי אורות
+    Show Lights Off Toggle: הצגת מתג לכיבוי האורות
     Swipe Gestures:
       Fullscreen Brightness: בהירות מרבית במסך מלא
       Left: החלקה בצד שמאל

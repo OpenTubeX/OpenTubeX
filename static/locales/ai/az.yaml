@@ -504,6 +504,8 @@ Settings:
         Destructive pressed: Silinmə elementi basıldıqda
         Text and icons on destructive actions: Silinmə əməliyyatlarında mətn və nişanlar
   Player Settings:
+    Lights Off: İşıqları söndür
+    Show Lights Off Toggle: İşıqları söndürmə keçidini göstər
     Swipe Gestures:
       Fullscreen Brightness: Tam ekranda tam parlaqlıq
       Left: Sol tərəfdə sürüşdürmə

@@ -506,6 +506,8 @@ Settings:
         Destructive pressed: الضغط المدمر
         Text and icons on destructive actions: النص والأيقونات على الإجراءات المدمرة
   Player Settings:
+    Lights Off: إطفاء الأنوار
+    Show Lights Off Toggle: إظهار مفتاح إطفاء الأنوار
     Swipe Gestures:
       Fullscreen Brightness: أقصى سطوع في وضع ملء الشاشة
       Left: السحب على الجانب الأيسر

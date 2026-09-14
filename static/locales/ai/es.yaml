@@ -504,6 +504,8 @@ Settings:
         Destructive pressed: Acción destructiva al pulsarla
         Text and icons on destructive actions: Texto e iconos de las acciones destructivas
   Player Settings:
+    Lights Off: Luces apagadas
+    Show Lights Off Toggle: Mostrar interruptor para apagar las luces
     Swipe Gestures:
       Fullscreen Brightness: Brillo máximo en pantalla completa
       Left: Deslizar en el lado izquierdo

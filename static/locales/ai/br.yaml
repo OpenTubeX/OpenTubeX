@@ -502,6 +502,8 @@ Settings:
         Destructive pressed: "Ober distrujus pouezet"
         Text and icons on destructive actions: "Testenn hag arlunioù war an oberoù distrujus"
   Player Settings:
+    Lights Off: Gouloù lazhet
+    Show Lights Off Toggle: Diskouez an afell evit lazhañ ar gouloù
     Swipe Gestures:
       Fullscreen Brightness: Sklerijenn uhelañ e skramm leun
       Left: Riklañ a-gleiz

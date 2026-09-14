@@ -502,6 +502,8 @@ Settings:
         Destructive pressed: 危险操作按下状态
         Text and icons on destructive actions: 危险操作的文本和图标
   Player Settings:
+    Lights Off: 关灯
+    Show Lights Off Toggle: 显示关灯开关
     Swipe Gestures:
       Fullscreen Brightness: 全屏时使用最高亮度
       Left: 左侧滑动

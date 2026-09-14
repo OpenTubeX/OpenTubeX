@@ -26,10 +26,12 @@ const state = {
   tabBarScrollPosition: 0,
   currentWatchTimestamps: {},
   videoZoomByTabId: {},
+  lightsOffByTabId: {},
   skipSilenceByTabId: {}
 }
 
 const getters = {
+  getTabLightsOff: (state) => (tabId) => state.lightsOffByTabId[tabId] ?? false,
   getTabs: (state) => state.tabs,
   getTabGroups: (state) => state.groups,
   getClosedTabs: (state) => state.closedTabs,
@@ -130,6 +132,11 @@ const mutations = {
     for (const tabId of Object.keys(state.videoZoomByTabId)) {
       if (tabId !== 'web' && !incomingIds.has(tabId)) {
         delete state.videoZoomByTabId[tabId]
+      }
+    }
+    for (const tabId of Object.keys(state.lightsOffByTabId)) {
+      if (tabId !== 'web' && !incomingIds.has(tabId)) {
+        delete state.lightsOffByTabId[tabId]
       }
     }
     for (const tabId of Object.keys(state.skipSilenceByTabId)) {
@@ -254,6 +261,10 @@ const mutations = {
 
   setTabVideoZoom(state, { tabId, value }) {
     state.videoZoomByTabId[tabId] = value
+  },
+
+  setTabLightsOff(state, { tabId, value }) {
+    state.lightsOffByTabId[tabId] = value === true
   },
 
   setTabSkipSilence(state, { tabId, value }) {

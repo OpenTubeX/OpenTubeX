@@ -1,5 +1,8 @@
 import shaka from 'shaka-player'
-import { watch } from 'vue'
+import { h, render, watch } from 'vue'
+import { Icon } from '@iconify/vue/offline'
+import { currentIconPack } from '../../../icons/iconPackState'
+import { resolveIconifyId } from '../../../icons/resolveIconifyId'
 
 /**
  * Shared Shaka overflow-menu control for boolean Vue settings.
@@ -11,12 +14,13 @@ export class BooleanSettingButton extends shaka.ui.Element {
    * @param {(value: boolean) => void} options.updateValue
    * @param {EventTarget} options.events
    * @param {string} options.className
-   * @param {string} options.icon
+   * @param {string} [options.icon]
+   * @param {string} [options.mappedIcon]
    * @param {() => string} options.getLabel
    * @param {HTMLElement} parent
    * @param {shaka.ui.Controls} controls
    */
-  constructor({ value, updateValue, events, className, icon, getLabel }, parent, controls) {
+  constructor({ value, updateValue, events, className, icon, mappedIcon, getLabel }, parent, controls) {
     super(parent, controls)
 
     /** @private */
@@ -34,6 +38,14 @@ export class BooleanSettingButton extends shaka.ui.Element {
 
     /** @private */
     this.icon_ = new shaka.ui.Icon(this.button_, icon)
+    this.icon_.getSvgElement().setAttribute('aria-hidden', 'true')
+
+    /** @private */
+    this.stopIconWatch_ = mappedIcon && watch(currentIconPack, () => {
+      const svg = this.icon_.getSvgElement()
+      svg.setAttribute('viewBox', '0 0 24 24')
+      render(h(Icon, { icon: resolveIconifyId(mappedIcon), width: 24, height: 24 }), svg)
+    }, { immediate: true })
 
     const label = document.createElement('label')
     label.classList.add(
@@ -92,6 +104,10 @@ export class BooleanSettingButton extends shaka.ui.Element {
 
   release() {
     this.stopValueWatch_()
+    if (this.stopIconWatch_) {
+      this.stopIconWatch_()
+      render(null, this.icon_.getSvgElement())
+    }
     super.release()
   }
 

@@ -502,6 +502,8 @@ Settings:
         Destructive pressed: Azione distruttiva premuta
         Text and icons on destructive actions: Testo e icone sulle azioni distruttive
   Player Settings:
+    Lights Off: Spegni le luci
+    Show Lights Off Toggle: Mostra l'interruttore per spegnere le luci
     Swipe Gestures:
       Fullscreen Brightness: Luminosità massima a schermo intero
       Left: Scorrimento sul lato sinistro

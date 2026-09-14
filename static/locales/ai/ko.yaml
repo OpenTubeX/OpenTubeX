@@ -661,6 +661,8 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Lights Off: 조명 끄기
+    Show Lights Off Toggle: 조명 끄기 토글 표시
     Swipe Gestures:
       Fullscreen Brightness: 전체 화면에서 최대 밝기 사용
       Left: 왼쪽 스와이프

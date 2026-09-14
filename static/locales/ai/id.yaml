@@ -506,6 +506,8 @@ Settings:
         Destructive pressed: Tindakan destruktif saat ditekan
         Text and icons on destructive actions: Teks dan ikon pada tindakan destruktif
   Player Settings:
+    Lights Off: Matikan lampu
+    Show Lights Off Toggle: Tampilkan tombol matikan lampu
     Swipe Gestures:
       Fullscreen Brightness: Kecerahan penuh dalam layar penuh
       Left: Usap sisi kiri

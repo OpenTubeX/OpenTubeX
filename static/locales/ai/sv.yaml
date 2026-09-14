@@ -504,6 +504,8 @@ Settings:
         Destructive pressed: Nedtryckt destruktiv åtgärd
         Text and icons on destructive actions: Text och ikoner på destruktiva åtgärder
   Player Settings:
+    Lights Off: Släck ljuset
+    Show Lights Off Toggle: Visa reglage för att släcka ljuset
     Swipe Gestures:
       Fullscreen Brightness: Full ljusstyrka i helskärm
       Left: Svep på vänster sida

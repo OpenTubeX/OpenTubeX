@@ -504,6 +504,8 @@ Settings:
         Destructive pressed: Ekintza suntsitzailea sakatzean
         Text and icons on destructive actions: Ekintza suntsitzaileetako testua eta ikonoak
   Player Settings:
+    Lights Off: Argiak itzali
+    Show Lights Off Toggle: Erakutsi argiak itzaltzeko etengailua
     Swipe Gestures:
       Fullscreen Brightness: Distira maximoa pantaila osoan
       Left: Irristatu ezkerreko aldean
