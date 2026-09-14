@@ -35,6 +35,11 @@ function trackAnimation(event) {
   if (!(target instanceof Element) || !player ||
     !(target === player || target.contains(player) || target.matches('.topNav, .tabBar, .sideNav'))) return
 
+  collectAnimations(target)
+  scheduleUpdate()
+}
+
+function collectAnimations(target) {
   for (const animation of target.getAnimations()) {
     if (animation.playState !== 'running' || animations.has(animation) || !Number.isFinite(animation.effect?.getComputedTiming().endTime)) continue
     animations.add(animation)
@@ -44,7 +49,6 @@ function trackAnimation(event) {
     }
     animation.finished.then(finish, finish)
   }
-  scheduleUpdate()
 }
 
 // Track rendered geometry, including mini-player animations and fractional UI
@@ -54,9 +58,13 @@ function updateHole() {
   animationFrame = 0
   const player = props.player
   if (player?.isConnected) {
+    // Layout changes also start WAAPI motion, which emits no CSS animation
+    // events. Capture those animations on the scheduled layout measurement.
+    collectAnimations(player)
     const rect = player.getBoundingClientRect()
     let { left, top, right, bottom } = rect
     for (let parent = player.parentElement; parent; parent = parent.parentElement) {
+      collectAnimations(parent)
       const style = getComputedStyle(parent)
       if (/(auto|scroll|hidden|clip)/.test(`${style.overflowX} ${style.overflowY}`)) {
         const clip = parent.getBoundingClientRect()
@@ -79,6 +87,7 @@ function updateHole() {
     // Sticky navigation can cover the normal player. Hit-test the overlap so
     // mini/full-window players that render above that chrome remain bright.
     for (const chrome of document.querySelectorAll('.topNav, .tabBar, .sideNav')) {
+      collectAnimations(chrome)
       const bounds = chrome.getBoundingClientRect()
       const overlapLeft = Math.max(left, bounds.left)
       const overlapRight = Math.min(right, bounds.right)
@@ -115,11 +124,9 @@ onMounted(() => {
   resizeObserver = new ResizeObserver(scheduleUpdate)
   for (let element = props.player; element; element = element.parentElement) {
     resizeObserver.observe(element)
-    trackAnimation({ target: element })
   }
   for (const chrome of document.querySelectorAll('.topNav, .tabBar, .sideNav')) {
     resizeObserver.observe(chrome)
-    trackAnimation({ target: chrome })
   }
   // Changes outside the player can move it without changing its own size.
   // Ignore the dimmer itself and playback UI updates inside the player.

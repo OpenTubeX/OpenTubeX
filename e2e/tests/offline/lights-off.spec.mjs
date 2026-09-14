@@ -139,5 +139,37 @@ for (const uiScale of [100, 125]) {
         return Object.hasOwn(store.state.tabs.lightsOffByTabId, tabId)
       }, closedTabId)).toBe(false)
     })
+    test('tracks full-window animations without CSS animation events', async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      const video = await openMockedVideo(page)
+      await video.evaluate(element => element.pause())
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        .dispatch('updateShowLightsOffToggle', true))
+      const player = page.locator(`${activeTab} .ftVideoPlayer`)
+      await player.hover()
+      await player.locator('.shaka-overflow-menu-button').click()
+      await player.locator('.lights-off-button').click()
+      await expect(page.locator('.lightsOffOverlay')).toBeVisible()
+      for (let transition = 0; transition < 2; transition++) {
+        const largestGap = await player.evaluate(async element => {
+          element.querySelector('.full-window-button').click()
+          await new Promise(resolve => setTimeout(resolve, 30))
+          let largestGap = 0
+          const started = performance.now()
+          while (performance.now() - started < 120) {
+            await new Promise(resolve => requestAnimationFrame(() => queueMicrotask(resolve)))
+            const rect = element.getBoundingClientRect()
+            const hole = document.querySelector('.lightsOffOverlay > div').getBoundingClientRect()
+            largestGap = Math.max(largestGap, Math.abs(rect.left - hole.left), Math.abs(rect.width - hole.width))
+          }
+          return largestGap
+        })
+        expect(largestGap).toBeLessThan(2)
+        await expect(player).not.toHaveClass(/presentationModeChanging/)
+        await expect.poll(() => player.evaluate(element => element.getAnimations().filter(animation =>
+          animation.playState === 'running' && Number.isFinite(animation.effect?.getComputedTiming().endTime)
+        ).length)).toBe(0)
+      }
+    })
   })
 }

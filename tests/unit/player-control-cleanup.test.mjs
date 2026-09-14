@@ -5,7 +5,10 @@ import test from 'node:test'
 
 const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 const start = source.indexOf('    function cleanUpCustomPlayerControls() {')
-const cleanup = source.slice(start, source.indexOf('\n    }', start) + 6)
+assert.notEqual(start, -1, 'Update the cleanup harness after renaming cleanUpCustomPlayerControls')
+const end = source.indexOf('\n    }', start)
+assert.notEqual(end, -1, 'Update the cleanup harness after changing the function boundary')
+const cleanup = source.slice(start, end + 6)
 
 for (const players of [1, 2]) {
   test(`Lights Off factory cleanup with ${players} mounted player(s)`, () => {
