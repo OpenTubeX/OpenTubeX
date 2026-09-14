@@ -43,7 +43,6 @@
       <div class="select-container">
         <FtButton
           v-if="showViewAllButton"
-          style="margin-top: 33px;"
           :label="$t('Channel.View All')"
           :icon="['fas', 'arrow-right']"
           @click="router.push(currentTabViewAllRoute)"
