@@ -3,7 +3,6 @@ import test from 'node:test'
 
 import {
   createCoalescingPoller,
-  isReplaySeek,
   parseReplayOffsetMs,
   shouldPrefetchReplay,
   takeDueReplayComments,
@@ -20,19 +19,6 @@ test('falls back to the start of the video for unusable replay offsets', () => {
   assert.equal(parseReplayOffsetMs('not a number'), 0)
   // Messages sent before the stream went live carry a negative offset.
   assert.equal(parseReplayOffsetMs('-4000'), 0)
-})
-
-test('treats small forward steps as playback rather than as a seek', () => {
-  assert.equal(isReplaySeek(0, 0), false)
-  assert.equal(isReplaySeek(10, 10.25), false)
-  assert.equal(isReplaySeek(10, 15), false)
-})
-
-test('treats jumps in either direction as a seek', () => {
-  assert.equal(isReplaySeek(10, 15.5), true)
-  assert.equal(isReplaySeek(3600, 60), true)
-  // Restarting a finished video seeks back to the beginning.
-  assert.equal(isReplaySeek(600, 0), true)
 })
 
 test('shows only the buffered messages the player has reached', () => {

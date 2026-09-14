@@ -384,6 +384,7 @@ export default defineComponent({
       captions: [],
       captionTranslations: [],
       currentTime: 0,
+      liveChatSeekRequest: null,
       showTranscript: false,
       showSidebarChapters: false,
       showSidebarSponsorBlock: false,
@@ -1009,7 +1010,7 @@ export default defineComponent({
       return this.liveChatAvailable && this.liveChatOpen
     },
     // The player reports its position about four times a second, but a chat replay
-    // buffers 20 seconds ahead and only cares about jumps of more than a few seconds.
+    // buffers 20 seconds ahead and releases messages at one-second intervals.
     // Rounding keeps the chat from re-rendering its message list on every tick.
     liveChatCurrentTime: function () {
       return Math.floor(this.currentTime)
@@ -4196,6 +4197,8 @@ export default defineComponent({
       if (isAppHidden()) this.updateAndroidBackgroundPlaybackFormat()
     },
     handlePlayerSeeking() {
+      this.liveChatSeekRequest = { seconds: this.$refs.player.getCurrentTime() }
+
       if (!this.customShortsPlayerActive) {
         return
       }

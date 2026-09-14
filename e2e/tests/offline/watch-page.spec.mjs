@@ -3059,6 +3059,72 @@ test.describe('watch page', () => {
     await expect(avatar).toHaveAttribute('src', /opentubex_retry=/)
   })
 
+  test('keeps replay messages after delayed playback updates and resets on actual seeks', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const video = page.locator('video.player')
+    await video.evaluate(element => element.pause())
+    const view = await watchViewHandle(page)
+    await view.evaluate(async view => {
+      const listeners = new Map()
+      const chat = new EventTarget()
+      chat.is_replay = true
+      chat.on = (event, listener) => listeners.set(listener, event)
+      chat.once = chat.on
+      chat.off = (_event, listener) => listeners.delete(listener)
+      chat.stop = () => {}
+      chat.pollNext = async () => {}
+      chat.seekTo = position => { chat.lastSeek = position }
+      chat.start = () => {
+        for (const [listener, event] of listeners) {
+          if (event === 'start') {
+            listener({
+              actions: [{
+                is: type => type.type === 'AddChatItemAction',
+                item: {
+                  is: type => type.type === 'LiveChatTextMessage',
+                  id: 'delayed-update-message',
+                  message: { runs: [{ text: 'Keep this replay message' }] },
+                  author: {
+                    id: 'replay-author',
+                    name: 'Replay author',
+                    badges: [],
+                    thumbnails: [{ url: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' }]
+                  }
+                }
+              }]
+            })
+          }
+        }
+      }
+      view.$store.commit('setHideLiveChatReplay', false)
+      view.currentTime = 0
+      view.liveChat = chat
+      view.liveChatIsReplay = true
+      view.liveChatOpen = true
+      view.isLive = false
+      view.isUpcoming = false
+      await view.$nextTick()
+    })
+    const chat = page.locator(`${activeTab} .watchVideoPlaylist`).filter({ hasText: 'Live Chat Replay' })
+    await expect(chat.getByText('Keep this replay message')).toBeVisible()
+
+    // Simulate a throttled timeupdate without a media seek.
+    await view.evaluate(async view => {
+      view.currentTime = 8
+      await view.$nextTick()
+    })
+    await expect(chat.getByText('Keep this replay message')).toBeVisible()
+    await expect(chat.locator('.liveChatMessage')).toHaveCount(0)
+    expect(await view.evaluate(view => view.liveChat.lastSeek)).toBeUndefined()
+
+    // Exercise the real media event through the player and Watch into chat.
+    await video.evaluate(element => { element.currentTime = 2.25 })
+    await expect.poll(() => view.evaluate(view => view.liveChat.lastSeek)).toBe(2250)
+    await expect(chat.locator('.liveChatMessage')).toBeVisible()
+    await expect(chat.getByText('Keep this replay message')).toHaveCount(0)
+  })
+
   test('keeps live chat and replay visibility independent and restores a closed chat', async ({ app, page, attachScreenshot }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

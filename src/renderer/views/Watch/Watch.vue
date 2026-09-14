@@ -1061,6 +1061,7 @@
               :video-id="videoId"
               :channel-id="channelId"
               :current-time="liveChatCurrentTime"
+              :seek-request="liveChatSeekRequest"
               :fullscreen-overlay="fullscreenLiveChatOpen"
               class="watchVideoSideBar watchVideoPlaylist phoneLiveChat"
               :class="{ theatrePlaylist: useTheatreMode }"
