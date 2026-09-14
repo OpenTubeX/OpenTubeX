@@ -151,7 +151,7 @@
     "json-minimizer-webpack-plugin": "^5.0.1",
     "lefthook": "^2.1.12",
     "mini-css-extract-plugin": "^2.10.2",
-    "node-gyp": "^12.4.0",
+    "node-gyp": "^13.0.2",
     "postcss": "^8.5.26",
     "postcss-scss": "^4.0.9",
     "sass": "^1.103.1",
