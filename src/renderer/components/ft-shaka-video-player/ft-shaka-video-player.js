@@ -9389,12 +9389,15 @@ export default defineComponent({
         video_.currentTime = newTime
       }
       if (showPopUp) {
-        const popUpLayout = seconds > 0
+        const totalSeconds = accumulatedSeekSeconds + seconds
+        const popUpLayout = totalSeconds > 0
           ? { icon: 'arrow-right', invertContentOrder: true }
           : { icon: 'arrow-left', invertContentOrder: false }
         // `+value` converts string back to float
-        const formattedSeconds = +Math.abs(seconds).toFixed(2)
-        showValueChange(`${formattedSeconds}s`, popUpLayout.icon, popUpLayout.invertContentOrder)
+        const formattedSeconds = +Math.abs(totalSeconds).toFixed(2)
+        showValueChange(`${formattedSeconds}s`, popUpLayout.icon, popUpLayout.invertContentOrder, totalSeconds)
+      } else {
+        accumulatedSeekSeconds = 0
       }
 
       if (revealControls) showOverlayControls()
@@ -11397,6 +11400,7 @@ export default defineComponent({
     const showTemporaryPlaybackRateIndicator = ref(false)
     const temporaryPlaybackRateIndicatorMessage = ref('')
     let valueChangeTimeout = null
+    let accumulatedSeekSeconds = 0
 
     function setShowUiOnPaused(value) {
       const config = ui?.getControls().getConfig()
@@ -11412,8 +11416,10 @@ export default defineComponent({
      * @param {string} message - The message to display.
      * @param {ValueChangeIcon | ValueChangeIcon[]} icons - The icons to display.
      * @param {boolean} invertContentOrder - Whether to invert the order of the icon and message.
+     * @param {number} seekSeconds - Accumulated seek offset, reset by other messages.
      */
-    function showValueChange(message, icons = [], invertContentOrder = false) {
+    function showValueChange(message, icons = [], invertContentOrder = false, seekSeconds = 0) {
+      accumulatedSeekSeconds = seekSeconds
       valueChangeMessage.value = message
       valueChangeIcons.value = Array.isArray(icons) ? icons : [icons]
       showValueChangePopup.value = true
@@ -11425,6 +11431,7 @@ export default defineComponent({
 
       valueChangeTimeout = setTimeout(() => {
         showValueChangePopup.value = false
+        accumulatedSeekSeconds = 0
       }, 2000)
 
       showOverlayControls()

@@ -118,6 +118,32 @@ async function expectOverlayAbovePlayer(player, overlay) {
   expect(result.overlayIsTopmost).toBe(true)
 }
 
+test('repeated seek shortcuts accumulate the OSD while seeking immediately', async ({ app, page, attachScreenshot }) => {
+  const video = await openDemoVideo({ app, page })
+  await video.evaluate(element => {
+    element.pause()
+    element.currentTime = 0
+  })
+  const popup = page.locator(`${activeTab} .valueChangePopup`)
+  const text = popup.locator('.valueChangeText')
+
+  for (const seconds of [5, 10]) {
+    await page.keyboard.press('ArrowRight')
+    await expect(text).toHaveText(`${seconds}s`)
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(seconds)
+  }
+  await attachScreenshot('accumulated seek OSD')
+
+  await page.keyboard.press('ArrowLeft')
+  await expect(text).toHaveText('5s')
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(5)
+  await expect(popup).toBeHidden()
+
+  await page.keyboard.press('ArrowRight')
+  await expect(text).toHaveText('5s')
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(10)
+})
+
 test('playback starts', async ({ app, page, attachScreenshot }) => {
   const video = await openDemoVideo({ app, page })
 
