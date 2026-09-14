@@ -14,8 +14,13 @@ const config = {
     main: path.join(__dirname, '../src/main/index.js'),
   },
   module: {
-    parser: { javascript: { createRequire: false } },
     rules: [
+      {
+        // The Windows addon path is resolved at runtime. Dependencies such as
+        // font-list still need webpack to follow their static createRequire calls.
+        include: path.join(__dirname, '../src/main/desktopShare.js'),
+        parser: { createRequire: false },
+      },
       {
         test: /\.js$/,
         use: 'babel-loader',
