@@ -652,6 +652,26 @@ jobs:
           -f event_type=opentubex-release \
           -f "client_payload[tag]=$TAG"
 
+  trigger-homebrew-update:
+    name: Trigger Homebrew tap update
+    needs: publish-release
+    if: inputs.publishRelease
+    runs-on: ubuntu-latest
+
+    permissions: {}
+
+    steps:
+    - name: Trigger Homebrew update workflow
+      env:
+        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        gh workflow run update.yml \
+          --repo OpenTubeX/homebrew-tap \
+          --ref main
+
   trigger-website-update:
     name: Trigger website update
     needs: publish-release
