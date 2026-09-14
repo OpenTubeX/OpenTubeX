@@ -38,14 +38,14 @@ async function loadPreloadInterface() {
 test('player IPC subscriptions share one Electron listener per channel', async () => {
   const { api, ipcRenderer, IpcChannels } = await loadPreloadInterface()
   const calls = []
-  const unsubscribers = []
+  const subscriptions = []
 
   for (let index = 0; index < 11; index++) {
-    unsubscribers.push(
-      api.handleWindowMinimizedState(value => calls.push(['minimized', index, value])),
-      api.handleWindowFocusedState(value => calls.push(['focused', index, value])),
-      api.tabs.onExitFullscreen(value => calls.push(['fullscreen', index, value]), `tab-${index}`)
-    )
+    subscriptions.push({
+      unsubscribeMinimized: api.handleWindowMinimizedState(value => calls.push(['minimized', index, value])),
+      unsubscribeFocused: api.handleWindowFocusedState(value => calls.push(['focused', index, value])),
+      unsubscribeFullscreen: api.tabs.onExitFullscreen(value => calls.push(['fullscreen', index, value]), `tab-${index}`)
+    })
   }
 
   assert.equal(ipcRenderer.listenerCount(IpcChannels.WINDOW_MINIMIZED_STATE), 1)
@@ -56,13 +56,36 @@ test('player IPC subscriptions share one Electron listener per channel', async (
   ipcRenderer.emit(IpcChannels.WINDOW_FOCUSED_STATE, {}, false)
   ipcRenderer.emit(IpcChannels.TABS_EXIT_FULLSCREEN, {}, 'tab-7')
 
-  assert.equal(calls.filter(([event]) => event === 'minimized').length, 11)
-  assert.equal(calls.filter(([event]) => event === 'focused').length, 11)
+  assert.deepEqual(calls.filter(([event]) => event === 'minimized'),
+    Array.from({ length: 11 }, (_, index) => ['minimized', index, true]))
+  assert.deepEqual(calls.filter(([event]) => event === 'focused'),
+    Array.from({ length: 11 }, (_, index) => ['focused', index, false]))
   assert.deepEqual(calls.filter(([event]) => event === 'fullscreen'), [['fullscreen', 7, 'tab-7']])
 
-  for (const unsubscribe of unsubscribers) unsubscribe()
+  for (const subscription of subscriptions.slice(0, 5)) {
+    subscription.unsubscribeMinimized()
+    subscription.unsubscribeFocused()
+    subscription.unsubscribeFullscreen()
+  }
+  calls.length = 0
   ipcRenderer.emit(IpcChannels.WINDOW_MINIMIZED_STATE, {}, false)
   ipcRenderer.emit(IpcChannels.WINDOW_FOCUSED_STATE, {}, true)
   ipcRenderer.emit(IpcChannels.TABS_EXIT_FULLSCREEN, {}, 'tab-7')
-  assert.equal(calls.length, 23)
+
+  assert.deepEqual(calls.filter(([event]) => event === 'minimized'),
+    Array.from({ length: 6 }, (_, index) => ['minimized', index + 5, false]))
+  assert.deepEqual(calls.filter(([event]) => event === 'focused'),
+    Array.from({ length: 6 }, (_, index) => ['focused', index + 5, true]))
+  assert.deepEqual(calls.filter(([event]) => event === 'fullscreen'), [['fullscreen', 7, 'tab-7']])
+
+  for (const subscription of subscriptions.slice(5)) {
+    subscription.unsubscribeMinimized()
+    subscription.unsubscribeFocused()
+    subscription.unsubscribeFullscreen()
+  }
+  calls.length = 0
+  ipcRenderer.emit(IpcChannels.WINDOW_MINIMIZED_STATE, {}, false)
+  ipcRenderer.emit(IpcChannels.WINDOW_FOCUSED_STATE, {}, true)
+  ipcRenderer.emit(IpcChannels.TABS_EXIT_FULLSCREEN, {}, 'tab-7')
+  assert.equal(calls.length, 0)
 })
