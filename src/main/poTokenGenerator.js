@@ -212,7 +212,7 @@ async function internalGeneratePotoken(videoId, context, initialAttestationData,
       }
     })
 
-    const script = cachedScript.replace('FT_PARAMS', `"${videoId}",${context},${initialAttestationData},${ytConfig}`)
+    const script = cachedScript.replace('FT_PARAMS', () => `"${videoId}",${context},${initialAttestationData},${ytConfig}`)
 
     return await withTimeout(
       webContentsView.webContents.executeJavaScript(script),
