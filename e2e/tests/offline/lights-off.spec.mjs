@@ -64,6 +64,11 @@ for (const uiScale of [100, 125]) {
       // A stationary paused player must not keep polling its layout every frame.
       const idleMeasurements = await player.evaluate(async element => {
         await new Promise(resolve => setTimeout(resolve, 500))
+        const animation = element.animate([{ opacity: 1 }, { opacity: 0.99 }], { duration: 10000 })
+        element.style.outlineWidth = '0px'
+        await new Promise(resolve => setTimeout(resolve, 100))
+        animation.pause()
+        await new Promise(resolve => setTimeout(resolve, 100))
         const original = element.getBoundingClientRect
         let measurements = 0
         element.getBoundingClientRect = function () {
@@ -72,6 +77,7 @@ for (const uiScale of [100, 125]) {
         }
         await new Promise(resolve => setTimeout(resolve, 250))
         element.getBoundingClientRect = original
+        animation.cancel()
         return measurements
       })
       expect(idleMeasurements).toBeLessThan(5)
@@ -156,12 +162,16 @@ for (const uiScale of [100, 125]) {
           await new Promise(resolve => setTimeout(resolve, 30))
           let largestGap = 0
           const started = performance.now()
-          while (performance.now() - started < 120) {
+          do {
             await new Promise(resolve => requestAnimationFrame(() => queueMicrotask(resolve)))
             const rect = element.getBoundingClientRect()
             const hole = document.querySelector('.lightsOffOverlay > div').getBoundingClientRect()
             largestGap = Math.max(largestGap, Math.abs(rect.left - hole.left), Math.abs(rect.width - hole.width))
-          }
+          } while (performance.now() - started < 2000 && (
+            element.classList.contains('presentationModeChanging') ||
+            element.getAnimations().some(animation => animation.playState === 'running' &&
+              Number.isFinite(animation.effect?.getComputedTiming().endTime))
+          ))
           return largestGap
         })
         expect(largestGap).toBeLessThan(2)

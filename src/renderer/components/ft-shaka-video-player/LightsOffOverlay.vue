@@ -116,6 +116,10 @@ function updateHole() {
       holeStyle.value = nextStyle
     }
   }
+  // Pausing does not settle Animation.finished, but no longer moves the hole.
+  for (const animation of animations) {
+    if (animation.playState !== 'running') animations.delete(animation)
+  }
   if (animations.size > 0) scheduleUpdate()
 }
 
