@@ -788,6 +788,24 @@ test.describe('settings', () => {
     ])
   })
 
+  test('keeps delay slider units beside their numbers at fractional UI scales', async ({ page }) => {
+    const focus = await goToSettingsSection(page, 'focus')
+    for (const scale of [1, 1.25]) {
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      for (const name of [/Playing Interface Hide Delay/, /Paused Interface Hide Delay/]) {
+        const value = focus.getByRole('slider', { name }).locator('..').locator('.value')
+        await expect.poll(() => value.evaluate(element => {
+          const number = element.querySelector('.valueNumber')
+          const numberRange = document.createRange()
+          numberRange.selectNodeContents(number)
+          const unitRange = document.createRange()
+          unitRange.selectNodeContents(element.lastChild)
+          return unitRange.getBoundingClientRect().left - numberRange.getBoundingClientRect().right
+        })).toBeLessThanOrEqual(1)
+      }
+    }
+  })
+
   test('saves the playing interface hide delay independently of the paused delay', async ({ page }) => {
     const focus = await goToSettingsSection(page, 'focus')
     const slider = focus.getByRole('slider', { name: /Playing Interface Hide Delay/ })
