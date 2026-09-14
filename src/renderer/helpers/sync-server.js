@@ -900,19 +900,22 @@ function historyToRemote(record) {
   }
 }
 
-function historyToLocal(entry) {
+function historyToLocal(entry, local) {
   return {
+    ...local,
     videoId: entry.video.id,
     title: entry.video.title,
     author: entry.video.uploader.name,
     authorId: entry.video.uploader.id,
     published: entry.video.upload_date,
-    description: '',
-    lengthSeconds: entry.video.duration,
+    description: local?.description ?? '',
+    lengthSeconds: entry.video.duration > 0 ? entry.video.duration : (local?.lengthSeconds ?? 0),
     watchProgress: (entry.metadata.position_millis ?? 0) / 1000,
     isWatched: entry.metadata.watched_state === 'completed',
     timeWatched: entry.metadata.added_date,
-    isLive: entry.video.duration <= 0,
+    // Sync stores unknown durations as zero and does not carry live status.
+    isLive: entry.video.duration > 0 ? false : local?.isLive === true,
+    isUpcoming: entry.video.duration > 0 ? false : local?.isUpcoming === true,
     type: 'video',
   }
 }
@@ -956,8 +959,19 @@ export async function syncHistory(client, store, previousIds = [], options = {})
     const local = localById.get(id)
     const remote = remoteById.get(id)
     const useLocal = local && (!remote || local.timeWatched >= remote.metadata.added_date)
-    const merged = useLocal ? local : historyToLocal(remote)
-    const localPayload = local ? historyToRemote(local) : null
+    let merged = useLocal ? local : historyToLocal(remote, local)
+    // Watch time orders progress, not metadata completeness. Fill an unknown
+    // local duration before uploading so it cannot erase a known server value.
+    // Equal timestamps also refresh metadata without replacing local progress.
+    if (useLocal && remote &&
+        (local.timeWatched === remote.metadata.added_date ||
+          !Number.isFinite(local.lengthSeconds) || local.lengthSeconds <= 0) &&
+        Number.isFinite(remote.video.duration) && remote.video.duration > 0 &&
+        (local.lengthSeconds !== remote.video.duration || local.isLive === true || local.isUpcoming === true)) {
+      merged = { ...local, lengthSeconds: remote.video.duration, isLive: false, isUpcoming: false }
+      localUpdates.push(merged)
+    }
+    const localPayload = useLocal ? historyToRemote(merged) : null
 
     if (useLocal && localPayload && (
       !remote ||
