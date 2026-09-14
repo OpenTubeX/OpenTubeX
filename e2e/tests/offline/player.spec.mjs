@@ -301,6 +301,7 @@ test('uses the playing interface hide delay in fullscreen and full window', asyn
     const bounds = await player.boundingBox()
     await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
     await expect(controls).toHaveAttribute('shown', 'true')
+    await expect(player).not.toHaveClass(/no-cursor/)
     await expect(controls).not.toHaveAttribute('shown', 'true', { timeout: 2000 })
     await expect(player).toHaveClass(/no-cursor/)
 

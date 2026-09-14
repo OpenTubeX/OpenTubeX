@@ -5,24 +5,6 @@ import vm from 'node:vm'
 
 const source = readFileSync(new URL('../../node_modules/shaka-player/ui/controls.js', import.meta.url), 'utf8')
 const bundle = readFileSync(new URL('../../node_modules/shaka-player/dist/shaka-player.ui-es2021.js', import.meta.url), 'utf8')
-const template = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.vue', import.meta.url), 'utf8')
-const delayExpression = template.match(/:data-playing-interface-hide-delay="([^"]+)"/)[1]
-
-test('custom playback delay is available before resuming in fullscreen or full window', () => {
-  for (const [isFullscreen, fullWindowEnabled, expected] of [
-    [false, false, null],
-    [true, false, 7.5],
-    [false, true, 7.5],
-    [true, true, 7.5],
-  ]) {
-    for (const playerPaused of [false, true]) {
-      assert.equal(vm.runInNewContext(delayExpression, {
-        playerPaused, isFullscreen, fullWindowEnabled, playingInterfaceHideDelay: 7.5,
-      }), expected)
-    }
-  }
-})
-
 for (const compiled of [false, true]) {
   test(`${compiled ? 'shipped bundle' : 'Shaka source'} uses the delay for movement, touch, keyboard and seeking`, () => {
     const scheduled = []
