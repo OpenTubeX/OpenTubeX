@@ -900,19 +900,22 @@ function historyToRemote(record) {
   }
 }
 
-function historyToLocal(entry) {
+function historyToLocal(entry, local) {
   return {
+    ...local,
     videoId: entry.video.id,
     title: entry.video.title,
     author: entry.video.uploader.name,
     authorId: entry.video.uploader.id,
     published: entry.video.upload_date,
-    description: '',
-    lengthSeconds: entry.video.duration,
+    description: local?.description ?? '',
+    lengthSeconds: entry.video.duration > 0 ? entry.video.duration : (local?.lengthSeconds ?? 0),
     watchProgress: (entry.metadata.position_millis ?? 0) / 1000,
     isWatched: entry.metadata.watched_state === 'completed',
     timeWatched: entry.metadata.added_date,
-    isLive: entry.video.duration <= 0,
+    // Sync stores unknown durations as zero and does not carry live status.
+    isLive: entry.video.duration > 0 ? false : local?.isLive === true,
+    isUpcoming: entry.video.duration > 0 ? false : local?.isUpcoming === true,
     type: 'video',
   }
 }
@@ -956,8 +959,18 @@ export async function syncHistory(client, store, previousIds = [], options = {})
     const local = localById.get(id)
     const remote = remoteById.get(id)
     const useLocal = local && (!remote || local.timeWatched >= remote.metadata.added_date)
-    const merged = useLocal ? local : historyToLocal(remote)
+    // Older sync downloads inferred live status from zero duration. They also
+    // discarded descriptions, view counts and upcoming status, unlike playback.
+    const repairSyncedLiveFlag = local?.isLive === true && local.lengthSeconds === 0 &&
+      local.description === '' && !Object.hasOwn(local, 'viewCount') &&
+      !Object.hasOwn(local, 'isUpcoming')
+    const repairedLocal = repairSyncedLiveFlag ? { ...local, isLive: false } : local
+    const merged = useLocal ? repairedLocal : historyToLocal(remote, repairedLocal)
     const localPayload = local ? historyToRemote(local) : null
+
+    if (useLocal && repairSyncedLiveFlag) {
+      localUpdates.push(merged)
+    }
 
     if (useLocal && localPayload && (
       !remote ||
