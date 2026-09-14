@@ -106,8 +106,9 @@ jobs:
             const projects = process.env.SELECTED_PROJECT === "all"
               ? ["offline", "network"]
               : [process.env.SELECTED_PROJECT]
-            const testsPerShard = 200
-            const maxShards = 8
+            // Keep full-suite runs short without sharing an X server between workers.
+            const testsPerShard = 100
+            const maxShards = 16
             const include = projects.flatMap((project) => {
               const testCount = counts[project]
               if (!testCount) throw new Error(`No tests found for project ${project}`)
