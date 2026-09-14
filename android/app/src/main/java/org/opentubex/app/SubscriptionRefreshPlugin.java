@@ -27,6 +27,7 @@ public class SubscriptionRefreshPlugin extends Plugin {
     private boolean batchActive;
     private boolean waitingForNextFeed;
     private volatile boolean rendererRetained;
+    private SubscriptionRefreshDisplay retainedDisplay;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final Runnable releaseRenderer = () -> {
         if (!markRendererForDisposal()) return;
@@ -46,6 +47,14 @@ public class SubscriptionRefreshPlugin extends Plugin {
     // since Capacitor normally destroys it with the recents task.
     synchronized boolean retainRenderer() {
         if (!SubscriptionRefreshWorker.isRendererActive(rendererToken)) return false;
+        if (retainedDisplay == null) {
+            try {
+                retainedDisplay = new SubscriptionRefreshDisplay(bridge.getWebView());
+            } catch (RuntimeException error) {
+                android.util.Log.e("OpenTubeXFetch", "Unable to retain subscription refresh display", error);
+                return false;
+            }
+        }
         rendererRetained = true;
         return true;
     }
@@ -85,6 +94,10 @@ public class SubscriptionRefreshPlugin extends Plugin {
     @Override
     protected synchronized void handleOnDestroy() {
         destroyed = true;
+        if (retainedDisplay != null) {
+            retainedDisplay.close();
+            retainedDisplay = null;
+        }
         mainHandler.removeCallbacks(releaseRenderer);
         SubscriptionRefreshWorker.removeRendererActiveListener(rendererActiveListener);
         // The renderer cannot finish its refresh once its WebView is destroyed.

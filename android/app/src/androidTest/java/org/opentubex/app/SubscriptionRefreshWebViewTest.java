@@ -25,6 +25,7 @@ public class SubscriptionRefreshWebViewTest {
     public void hiddenWindowKeepsChromiumActiveOnlyForTheCurrentRefresh() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             AtomicReference<SubscriptionRefreshWebView> view = new AtomicReference<>();
+            AtomicReference<SubscriptionRefreshDisplay> display = new AtomicReference<>();
             CountDownLatch loaded = new CountDownLatch(1);
             SubscriptionRefreshState state = new SubscriptionRefreshState();
             scenario.onActivity(activity -> {
@@ -48,6 +49,18 @@ public class SubscriptionRefreshWebViewTest {
                     view.get().onWindowVisibilityChanged(View.GONE);
                 });
                 assertVisibility(view.get(), "visible");
+                AtomicReference<ViewGroup> parent = new AtomicReference<>();
+                onMain(() -> {
+                    parent.set((ViewGroup) view.get().getParent());
+                    display.set(new SubscriptionRefreshDisplay(view.get()));
+                });
+                assertVisibility(view.get(), "visible");
+                onMain(() -> {
+                    display.get().close();
+                    parent.get().addView(view.get());
+                    view.get().onWindowVisibilityChanged(View.GONE);
+                });
+                assertVisibility(view.get(), "visible");
                 onMain(() -> state.finish("stale"));
                 assertVisibility(view.get(), "visible");
                 onMain(() -> state.finish("refresh"));
@@ -62,7 +75,8 @@ public class SubscriptionRefreshWebViewTest {
                 assertVisibility(view.get(), "visible");
             } finally {
                 onMain(() -> {
-                    ((ViewGroup) view.get().getParent()).removeView(view.get());
+                    if (display.get() != null) display.get().close();
+                    if (view.get().getParent() instanceof ViewGroup parent) parent.removeView(view.get());
                     view.get().destroy();
                 });
             }

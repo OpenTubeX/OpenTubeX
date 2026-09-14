@@ -8,11 +8,13 @@ import static org.junit.Assert.assertTrue;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.display.DisplayManager;
 import android.webkit.WebView;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.os.SystemClock;
 import android.os.Looper;
+import android.os.PowerManager;
 
 import androidx.lifecycle.Lifecycle;
 import androidx.test.core.app.ActivityScenario;
@@ -23,6 +25,7 @@ import com.getcapacitor.JSObject;
 import com.getcapacitor.PluginCall;
 
 import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -41,6 +44,13 @@ public class SubscriptionRefreshLifecycleTest {
     @Before
     public void resetCoordinator() {
         SubscriptionRefreshCoordinator.resetForTest();
+    }
+
+    @After
+    public void refreshDisplayIsReleased() throws Exception {
+        await("offscreen refresh display released", () ->
+            Arrays.stream(context.getSystemService(DisplayManager.class).getDisplays())
+                .noneMatch(display -> display.getName().equals("OpenTubeX subscription refresh")));
     }
 
     @Test
@@ -116,12 +126,45 @@ public class SubscriptionRefreshLifecycleTest {
 
     @Test
     public void inFlightResponseIsStoredAndRefreshFinishesAfterTaskRemoval() throws Exception {
+        assertDelayedRefreshFinishes(RefreshLifecycle.REMOVED);
+    }
+
+    @Test
+    public void delayedRefreshFinishesWhileOpen() throws Exception {
+        assertDelayedRefreshFinishes(RefreshLifecycle.OPEN);
+    }
+
+    @Test
+    public void delayedRefreshFinishesInBackground() throws Exception {
+        assertDelayedRefreshFinishes(RefreshLifecycle.BACKGROUND);
+    }
+
+    @Test
+    public void delayedRefreshFinishesWithScreenLocked() throws Exception {
+        assertDelayedRefreshFinishes(RefreshLifecycle.SCREEN_LOCKED);
+    }
+
+    @Test
+    public void delayedRefreshFinishesAfterRemovalAndReopening() throws Exception {
+        assertDelayedRefreshFinishes(RefreshLifecycle.REOPENED);
+    }
+
+    @Test
+    public void delayedRefreshFinishesAfterRemovalWithScreenLocked() throws Exception {
+        assertDelayedRefreshFinishes(RefreshLifecycle.REMOVED_SCREEN_LOCKED);
+    }
+
+    private enum RefreshLifecycle { OPEN, BACKGROUND, SCREEN_LOCKED, REMOVED, REOPENED, REMOVED_SCREEN_LOCKED }
+
+    private void assertDelayedRefreshFinishes(RefreshLifecycle lifecycle) throws Exception {
         CountDownLatch requested = new CountDownLatch(1);
         CountDownLatch response = new CountDownLatch(1);
         CountDownLatch loaded = new CountDownLatch(1);
         AtomicReference<WebView> view = new AtomicReference<>();
         AtomicReference<SubscriptionRefreshPlugin> retained = new AtomicReference<>();
         String token = null;
+        ActivityScenario<MainActivity> reopenedDuringRefresh = null;
+        boolean restoreScreen = false;
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             try {
                 scenario.onActivity(activity -> {
@@ -140,6 +183,18 @@ public class SubscriptionRefreshLifecycleTest {
                         if (!refresh.acquired) throw new Error('Refresh not acquired');
                         window.refreshToken = refresh.token;
                         const result = await fetch('/refresh-lifecycle-response').then(r => r.json());
+                        // Stop before the test deadline even if the refresh fails,
+                        // so animation cannot keep activity teardown waiting for idle.
+                        const rendering = document.body.animate([{ opacity: 1 }, { opacity: 0.5 }], {
+                            duration: 32, iterations: 1500, direction: 'alternate'
+                        });
+                        // Feed batches yield between requests. Do not evaluate JavaScript
+                        // from the test while waiting: that can wake a frozen renderer.
+                        for (let batch = 0; batch < 40; batch++) {
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                            window.completedBatches = batch + 1;
+                        }
+                        rendering.cancel();
                         await new Promise((resolve, reject) => {
                             const open = indexedDB.open('opentubex-recents-lifecycle-test', 1);
                             open.onupgradeneeded = () => open.result.createObjectStore('results');
@@ -164,14 +219,57 @@ public class SubscriptionRefreshLifecycleTest {
                 token = new org.json.JSONArray("[" + javascript(view.get(), "window.refreshToken") + "]").getString(0);
                 assertTrue("refresh request started", requested.await(10, TimeUnit.SECONDS));
                 await("foreground notification appears", this::hasRefreshNotification);
-                scenario.onActivity(MainActivity::finishAndRemoveTask);
-                await("activity destroyed", () -> scenario.getState() == Lifecycle.State.DESTROYED);
-                assertTrue(retained.get().isRendererRetained());
+                switch (lifecycle) {
+                    case OPEN -> {}
+                    case BACKGROUND -> scenario.moveToState(Lifecycle.State.CREATED);
+                    case SCREEN_LOCKED -> {
+                        restoreScreen = context.getSystemService(PowerManager.class).isInteractive();
+                        setScreenAwake(false);
+                    }
+                    case REMOVED, REOPENED, REMOVED_SCREEN_LOCKED -> {
+                        scenario.onActivity(MainActivity::finishAndRemoveTask);
+                        await("activity destroyed", () -> scenario.getState() == Lifecycle.State.DESTROYED);
+                        assertTrue(retained.get().isRendererRetained());
+                        if (lifecycle == RefreshLifecycle.REMOVED_SCREEN_LOCKED) {
+                            restoreScreen = context.getSystemService(PowerManager.class).isInteractive();
+                            setScreenAwake(false);
+                        }
+                        if (lifecycle == RefreshLifecycle.REOPENED) {
+                            reopenedDuringRefresh = ActivityScenario.launch(MainActivity.class);
+                            reopenedDuringRefresh.onActivity(activity ->
+                                activity.getBridge().getWebView().loadUrl("about:blank"));
+                        }
+                    }
+                }
                 response.countDown();
-                await("request and database write finish", () -> !SubscriptionRefreshCoordinator.isActive());
+                if (lifecycle == RefreshLifecycle.REMOVED) {
+                    // Rendering must recover when a busy main looper briefly delays
+                    // draining the offscreen display. Do not wake JS by polling it.
+                    for (int delay = 0; delay < 4; delay++) {
+                        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> SystemClock.sleep(500));
+                    }
+                }
+                long completionDeadline = SystemClock.elapsedRealtime() + 55000;
+                while (SubscriptionRefreshCoordinator.isActive() && SystemClock.elapsedRealtime() < completionDeadline) {
+                    Thread.sleep(50);
+                }
+                if (SubscriptionRefreshCoordinator.isActive()) {
+                    throw new AssertionError("request and database write finish; batches=" +
+                        javascript(view.get(), "JSON.stringify({batches: window.completedBatches, visibility: document.visibilityState, error: window.refreshError})"));
+                }
                 await("finished renderer released", () -> !retained.get().isRendererRetained());
                 await("finished notification removed", () -> !hasRefreshNotification());
                 assertFalse(SubscriptionRefreshCoordinator.isActive());
+
+                if (restoreScreen) {
+                    setScreenAwake(true);
+                    restoreScreen = false;
+                }
+                if (reopenedDuringRefresh != null) {
+                    reopenedDuringRefresh.close();
+                    reopenedDuringRefresh = null;
+                }
+                scenario.close();
 
                 CountDownLatch reopenedLoaded = new CountDownLatch(1);
                 try (ActivityScenario<MainActivity> reopened = ActivityScenario.launch(MainActivity.class)) {
@@ -197,12 +295,27 @@ public class SubscriptionRefreshLifecycleTest {
                 }
             } finally {
                 response.countDown();
-                if (token != null) SubscriptionRefreshWorker.finish(context, token);
-                if (retained.get() != null) {
-                    await("retained renderer cleaned up", () -> !retained.get().isRendererRetained());
+                try {
+                    if (token != null) SubscriptionRefreshWorker.finish(context, token);
+                    if (retained.get() != null) {
+                        await("retained renderer cleaned up", () -> !retained.get().isRendererRetained());
+                    }
+                } finally {
+                    try {
+                        if (reopenedDuringRefresh != null) reopenedDuringRefresh.close();
+                    } finally {
+                        if (restoreScreen) setScreenAwake(true);
+                    }
                 }
             }
         }
+    }
+
+    private void setScreenAwake(boolean awake) throws Exception {
+        InstrumentationRegistry.getInstrumentation().getUiAutomation()
+            .executeShellCommand("input keyevent " + (awake ? "KEYCODE_WAKEUP" : "KEYCODE_SLEEP")).close();
+        await("screen power state restored", () ->
+            context.getSystemService(PowerManager.class).isInteractive() == awake);
     }
 
     private static void loadFixture(
