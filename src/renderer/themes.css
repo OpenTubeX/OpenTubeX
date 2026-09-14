@@ -312,10 +312,10 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --logo-text: url('../../_icons/textBlackSmall.svg');
 }
 
-/* Custom and OpenTubeX themes tint the header logo instead of displaying the fixed-color
+/* Custom, OpenTubeX, and dynamic themes tint the header logo instead of displaying the fixed-color
    theme assets. Keeping the assets as masks preserves their sharp edges. */
-:is(.custom, .openTubeXLight, .openTubeXDark) .topNav .logoIcon,
-:is(.custom, .openTubeXLight, .openTubeXDark) .topNav .logoText {
+:is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .topNav .logoIcon,
+:is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .topNav .logoText {
   /* The component's fixed SVG has intentionally high scoped specificity. */
   /* stylelint-disable-next-line declaration-no-important */
   background-image: none !important;
@@ -325,23 +325,23 @@ it can be safely elided. This looks quite pleasant on this theme. */
   mask-position: center;
 }
 
-:is(.custom, .openTubeXLight, .openTubeXDark) .topNav .logoIcon {
+:is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .topNav .logoIcon {
   background-color: var(--logo-primary-color);
   mask-image: var(--logo-icon);
   mask-size: 25px;
 }
 
-:is(.custom, .openTubeXLight, .openTubeXDark) .topNav .logoText {
+:is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .topNav .logoText {
   background-color: var(--logo-secondary-color);
   mask-image: var(--logo-text);
   mask-size: 100px;
 }
 
-:is(.custom, .openTubeXLight, .openTubeXDark) .logo:hover :is(.logoIcon, .logoText) {
+:is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .logo:hover :is(.logoIcon, .logoText) {
   background-color: var(--logo-tertiary-color);
 }
 
-:is(.custom, .openTubeXLight, .openTubeXDark) .logo:active :is(.logoIcon, .logoText) {
+:is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .logo:active :is(.logoIcon, .logoText) {
   background-color: var(--logo-pressed-color);
 }
 
@@ -3100,4 +3100,57 @@ body .os-scrollbar {
   --red-500: #f17e84;
   --primary-shadow-color: rgb(0 0 0 / 35%);
   --focus-ring-contrast-color: #fff;
+}
+
+/* Android system tones supply the palette; these roles keep controls visible
+   against both their fill and the surrounding card. */
+.dynamicColors {
+  .topNavBarColor .logo :is(.logoIcon, .logoText) {
+    background-color: var(--text-with-main-color);
+  }
+
+  --input-border-color: var(--border-color);
+  --slider-track-color: var(--secondary-text-color);
+  --toggle-track-color: var(--secondary-text-color);
+  --toggle-checked-track-color: var(--accent-color);
+  --toggle-thumb-color: var(--bg-color);
+  --toggle-checked-thumb-color: var(--bg-color);
+  --settings-changed-color: var(--accent-color);
+
+  .switch-input:not(:disabled) + .switch-label::after {
+    outline: 2px solid var(--secondary-text-color);
+    outline-offset: -2px;
+  }
+
+  .ft-input-component .ft-input::placeholder {
+    opacity: 1;
+  }
+
+  .forceTextColor :is(.inputAction.enabled, .clearInputTextButton.visible):is(:hover, :active) {
+    color: var(--text-with-main-color);
+  }
+
+  .topNav.topNavBarColor .navFilterButton:not(:hover, :active) {
+    color: #eee;
+  }
+
+  .ft-input-component .list {
+    --scrollbar-color: var(--secondary-text-color);
+  }
+
+  /* Separate the thumb from the track, including during focus and dragging.
+     The thumb is scaled sixfold by the slider component. */
+  .pure-material-slider .input:not(:disabled)::-webkit-slider-thumb {
+    outline: 0.25px solid var(--bg-color);
+    outline-offset: 0;
+  }
+
+  .pure-material-slider .input:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  .btn:focus-visible {
+    outline-color: currentcolor;
+  }
 }
