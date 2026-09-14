@@ -1,7 +1,16 @@
 import { abortUnmockedRequest, test, expect, goTo } from '../../helpers/app.mjs'
 import { largeSubscriptionsSeed } from '../../performance/subscriptions.mjs'
 
-test.use({ seed: largeSubscriptionsSeed })
+test.use({
+  seed: {
+    ...largeSubscriptionsSeed,
+    settings: {
+      ...largeSubscriptionsSeed.settings,
+      // Exercise synced seen-state filtering while channel responses arrive.
+      subscriptionSeenVideos: JSON.stringify([{ videoId: 'video-0-1', seenAt: Date.now() }])
+    }
+  }
+})
 
 for (const feed of ['videos', 'new']) {
   test(`refreshes cached channels efficiently with the ${feed} feed visible`, async ({ page }, testInfo) => {
@@ -29,6 +38,8 @@ for (const feed of ['videos', 'new']) {
           videos: JSON.parse(JSON.stringify(cache.videos))
         }))
       responses[0].videos[0].title = 'Refreshed video 0-0'
+      // Remote responses do not know about this device's synced seen marks.
+      responses[0].videos[1].isNewInSubscriptionFeed = true
       const durations = []
       let next = 0
       const started = performance.now()
@@ -46,6 +57,7 @@ for (const feed of ['videos', 'new']) {
       }))
       return {
         elapsedMs: performance.now() - started,
+        seenVideoIsNew: store.getters.getVideoCache[responses[0].channelId].videos[1].isNewInSubscriptionFeed,
         updates: durations.length,
         medianUpdateMs: durations.sort((a, b) => a - b)[Math.floor(durations.length / 2)]
       }
@@ -61,6 +73,7 @@ for (const feed of ['videos', 'new']) {
       body: JSON.stringify(metrics), contentType: 'application/json'
     })
     expect(metrics.updates).toBe(80)
+    expect(metrics.seenVideoIsNew).toBe(false)
     await expect(page.getByText('Refreshed video 0-0', { exact: true })).toBeVisible()
     // The full-feed dependency scan took ~40 seconds for this replay. Leave
     // room for runner jitter while catching that repeated work reliably.
