@@ -7,7 +7,7 @@ import { overrideShakaMethods } from '../../src/renderer/helpers/player/override
 const source = (await readFile(new URL('../../src/renderer/helpers/player/androidNativeScreen.js', import.meta.url), 'utf8'))
   .replace(/^import .*\n/gm, '').replace('export function ', 'function ')
 
-async function fixture({ fullscreen = true, chrome = [], dialogs = [], deferTransitions = false, deferFullscreen = false } = {}) {
+async function fixture({ fullscreen = true, chrome = [], dialogs = [], previews = [], deferTransitions = false, deferFullscreen = false } = {}) {
   const snapshots = []
   const snapshotInvalidations = []
   let publishSnapshot
@@ -32,11 +32,14 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], deferTran
   const controlsElement = { hasAttribute: () => shown, getBoundingClientRect: () => bounds }
   const container = Object.assign(new EventTarget(), {
     classList: { contains: name => panel && ['fullscreenDockLayoutOpen', 'chaptersOverlayOpen'].includes(name) },
-    contains: () => false,
+    contains: element => previews.includes(element),
     getBoundingClientRect: () => bounds,
     toggleAttribute() {},
     getAnimations: () => animating ? [{ playState: 'running' }] : [],
-    querySelectorAll(selector) { return menu && selector.includes('shaka-overflow-menu') ? [{ getAnimations: () => [], getBoundingClientRect: () => ({ x: 400, y: 100, width: 200, height: 240 }) }] : [] },
+    querySelectorAll(selector) {
+      if (selector.includes('.shaka-player-ui-thumbnail-container')) return previews
+      return menu && selector.includes('shaka-overflow-menu') ? [{ getAnimations: () => [], getBoundingClientRect: () => ({ x: 400, y: 100, width: 200, height: 240 }) }] : []
+    },
     querySelector(selector) {
       if (selector === '.countdownPoster' && poster) return {}
       if (selector === '.shaka-controls-container') return controlsElement
@@ -510,3 +513,39 @@ test('reset detaches mini controls before the native screen is reused', async ()
   assert.ok(f.snapshots.length > 1, 'The snapshot helper remains usable after reset')
   f.screen.destroy()
 })
+
+for (const fullscreen of [false, true]) {
+  test(`seek previews clip native transport buttons while visible (${fullscreen ? 'fullscreen' : 'inline'})`, async () => {
+    let visible = false
+    const bounds = { x: 220.25, y: 100.5, width: 200, height: 140 }
+    const preview = {
+      checkVisibility: () => visible,
+      getAnimations: () => [],
+      getBoundingClientRect: () => bounds
+    }
+    const f = await fixture({ fullscreen, previews: [preview] })
+    assert.equal(f.layouts.at(-1).menus.length, 0)
+    visible = true
+    f.change({})
+    await f.flush()
+    assert.deepEqual(JSON.parse(JSON.stringify(f.layouts.at(-1).menus)), [{ ...bounds, pageScroll: !fullscreen }],
+      'The entire thumbnail and timestamp must exclude native control drawing')
+    assert.equal(f.layouts.at(-1).overlayActive, false, 'A seek preview must not consume Android Back as a menu')
+    bounds.x = 340.75
+    f.change({})
+    await f.flush()
+    assert.equal(f.layouts.at(-1).menus[0].x, bounds.x)
+    if (!fullscreen) {
+      f.window.scrollY = 40.25
+      bounds.y -= 40.25
+      f.window.dispatchEvent(new Event('scroll'))
+      await f.flush()
+      assert.equal(f.layouts.at(-1).menus[0].y, 100.5, 'Inline clipping follows native page scrolling')
+    }
+    visible = false
+    f.change({})
+    await f.flush()
+    assert.equal(f.layouts.at(-1).menus.length, 0, 'Hiding the preview must restore native drawing')
+    f.screen.destroy()
+  })
+}
