@@ -504,6 +504,8 @@ Settings:
         Destructive pressed: Thao tác xóa khi nhấn
         Text and icons on destructive actions: Chữ và biểu tượng trên thao tác xóa
   Player Settings:
+    Lights Off: Tắt đèn
+    Show Lights Off Toggle: Hiển thị nút bật/tắt đèn
     Swipe Gestures:
       Fullscreen Brightness: Độ sáng tối đa khi toàn màn hình
       Left: Vuốt bên trái

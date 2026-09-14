@@ -505,6 +505,8 @@ Settings:
         Destructive pressed: அழிக்கும் செயல் அழுத்தப்பட்டது
         Text and icons on destructive actions: அழிக்கும் செயல்களிலுள்ள உரையும் படவுருக்களும்
   Player Settings:
+    Lights Off: விளக்குகளை அணை
+    Show Lights Off Toggle: விளக்குகளை அணைக்கும் நிலைமாற்றியைக் காட்டு
     Swipe Gestures:
       Fullscreen Brightness: முழுத்திரையில் அதிகபட்ச ஒளிர்வு
       Left: இடப்புற ஸ்வைப்

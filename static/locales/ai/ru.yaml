@@ -479,6 +479,8 @@ Settings:
         Destructive pressed: Опасное действие при нажатии
         Text and icons on destructive actions: Текст и значки опасных действий
   Player Settings:
+    Lights Off: Выключить свет
+    Show Lights Off Toggle: Показывать переключатель выключения света
     Swipe Gestures:
       Fullscreen Brightness: Максимальная яркость в полноэкранном режиме
       Left: Смахивание слева

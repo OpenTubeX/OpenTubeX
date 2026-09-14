@@ -504,6 +504,8 @@ Settings:
         Destructive pressed: Καταστροφική ενέργεια κατά το πάτημα
         Text and icons on destructive actions: Κείμενο και εικονίδια καταστροφικών ενεργειών
   Player Settings:
+    Lights Off: Σβήσιμο φώτων
+    Show Lights Off Toggle: Εμφάνιση διακόπτη σβησίματος φώτων
     Swipe Gestures:
       Fullscreen Brightness: Μέγιστη φωτεινότητα σε πλήρη οθόνη
       Left: Σύρσιμο στην αριστερή πλευρά

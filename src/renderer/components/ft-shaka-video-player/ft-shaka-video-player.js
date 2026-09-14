@@ -13,6 +13,8 @@ import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
 import { getSubtitleRequestUrl } from '../../helpers/player/subtitleCookies'
+import LightsOffOverlay from './LightsOffOverlay.vue'
+import { BooleanSettingButton } from './player-components/BooleanSettingButton'
 import { KeyboardShortcuts } from '../../../constants'
 import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
@@ -245,6 +247,7 @@ const LOCALE_MAPPINGS = new Map(process.env.SHAKA_LOCALE_MAPPINGS)
 export default defineComponent({
   name: 'FtShakaVideoPlayer',
   components: {
+    LightsOffOverlay,
     FtPaidPromotionBadge,
     FtSelect,
     FtShareButton,
@@ -593,6 +596,10 @@ export default defineComponent({
     const hardwareKeyboardAttached = inject('hardwareKeyboardAttached', ref(!process.env.IS_CAPACITOR))
     const { tabId, isTabPresented } = useTabContext()
     const mediaTabId = tabId ?? 'web'
+    const lightsOff = computed(() => store.getters.getTabLightsOff(mediaTabId))
+    const showLightsOffToggle = computed(() => store.getters.getShowLightsOffToggle)
+    const lightsOffVisible = computed(() => showLightsOffToggle.value && lightsOff.value &&
+      (isTabPresented?.value ?? true))
     // Shorts request autoplay, so do not render their paused-only controls
     // while the media element is still preparing its first `play` event.
     const shortsPaused = ref(false)
@@ -4466,6 +4473,7 @@ export default defineComponent({
           'ft_voice_over_translation',
           'ft_music_visualizer',
           'ft_ambient_mode',
+          'ft_lights_off',
           'ft_video_zoom',
           'ft_loop',
           'ft_ab_repeat',
@@ -4516,6 +4524,7 @@ export default defineComponent({
           'ft_voice_over_translation',
           'ft_music_visualizer',
           'ft_ambient_mode',
+          'ft_lights_off',
           'ft_video_zoom',
           'ft_loop',
           'ft_ab_repeat',
@@ -4554,6 +4563,10 @@ export default defineComponent({
 
       if (!videoZoomPossible.value) {
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_video_zoom')
+      }
+
+      if (!showLightsOffToggle.value) {
+        removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_lights_off')
       }
 
       if (!showSkipSilenceButton.value || isLive.value) {
@@ -8462,6 +8475,21 @@ export default defineComponent({
       registerOwnElement(shakaOverflowMenu, 'ft_video_zoom', new VideoZoomSelectionFactory())
     }
 
+    function registerLightsOffButton() {
+      registerOwnElement(shakaOverflowMenu, 'ft_lights_off', {
+        create(rootElement, controls) {
+          return new BooleanSettingButton({
+            value: lightsOff,
+            updateValue: value => store.commit('setTabLightsOff', { tabId: mediaTabId, value }),
+            events,
+            className: 'lights-off-button',
+            mappedIcon: 'moon',
+            getLabel: () => t('Settings.Player Settings.Lights Off'),
+          }, rootElement, controls)
+        }
+      })
+    }
+
     function registerSkipSilenceButton() {
       /** @implements {shaka.extern.IUIElement.Factory} */
       class SkipSilenceButtonFactory {
@@ -10508,6 +10536,7 @@ export default defineComponent({
       registerAmbientModeButton()
       registerMusicVisualizerButton()
       registerVideoZoomSelection()
+      registerLightsOffButton()
       registerSkipSilenceButton()
       registerVoiceOverTranslationButton()
       registerSleepTimer()
@@ -11526,6 +11555,7 @@ export default defineComponent({
       actionDockVisible,
       actionDockFocused,
       playerControlsShown,
+      lightsOffVisible,
       isSubMenuOpened,
       presentationModeChanging,
       chapterThumbnails,

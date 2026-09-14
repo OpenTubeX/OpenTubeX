@@ -502,6 +502,8 @@ Settings:
         Destructive pressed: Pritisnuta destruktivna radnja
         Text and icons on destructive actions: Tekst i ikone na destruktivnim radnjama
   Player Settings:
+    Lights Off: Ugasi svjetla
+    Show Lights Off Toggle: Prikaži prekidač za gašenje svjetala
     Swipe Gestures:
       Fullscreen Brightness: Najveća svjetlina preko cijelog zaslona
       Left: Povlačenje s lijeve strane

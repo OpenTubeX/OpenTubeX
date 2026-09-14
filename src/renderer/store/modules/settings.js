@@ -514,6 +514,7 @@ const state = {
   videoPlaybackRateInterval: 0.25,
   rememberVolume: true,
   enableVideoZoom: true,
+  showLightsOffToggle: false,
   showSkipSilenceButton: false,
   enableSkipSilenceByDefault: false,
   useVoiceOverTranslation: false,

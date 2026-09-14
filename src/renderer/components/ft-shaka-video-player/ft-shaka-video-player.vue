@@ -7,6 +7,10 @@
       shortsPlayer
     }"
   >
+    <LightsOffOverlay
+      v-if="lightsOffVisible"
+      :player="container"
+    />
     <canvas
       v-show="ambientModeVisible"
       ref="ambientLayoutCanvas"

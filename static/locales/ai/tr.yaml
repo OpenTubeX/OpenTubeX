@@ -500,6 +500,8 @@ Settings:
         Destructive pressed: Basılı yıkıcı işlem
         Text and icons on destructive actions: Yıkıcı işlemlerdeki metin ve simgeler
   Player Settings:
+    Lights Off: Işıkları kapat
+    Show Lights Off Toggle: Işıkları kapatma düğmesini göster
     Swipe Gestures:
       Fullscreen Brightness: Tam ekranda en yüksek parlaklık
       Left: Sol tarafta kaydırma

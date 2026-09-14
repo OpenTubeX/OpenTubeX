@@ -500,6 +500,8 @@ Settings:
         Destructive pressed: Deštruktívna akcia pri stlačení
         Text and icons on destructive actions: Text a ikony deštruktívnych akcií
   Player Settings:
+    Lights Off: Zhasnúť
+    Show Lights Off Toggle: Zobraziť prepínač zhasnutia
     Swipe Gestures:
       Fullscreen Brightness: Maximálny jas na celej obrazovke
       Left: Potiahnutie na ľavej strane

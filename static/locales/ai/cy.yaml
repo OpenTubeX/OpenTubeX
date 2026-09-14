@@ -502,6 +502,8 @@ Settings:
         Destructive pressed: Gweithred ddinistriol wedi'i gwasgu
         Text and icons on destructive actions: Testun ac eiconau ar weithredoedd dinistriol
   Player Settings:
+    Lights Off: Diffodd y goleuadau
+    Show Lights Off Toggle: Dangos togl diffodd y goleuadau
     Swipe Gestures:
       Fullscreen Brightness: Disgleirdeb llawn ar sgrin lawn
       Left: Sweipio ar yr ochr chwith

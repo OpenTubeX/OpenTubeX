@@ -513,6 +513,8 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
+    Lights Off: Угаси светла
+    Show Lights Off Toggle: Прикажи прекидач за гашење светала
     Swipe Gestures:
       Fullscreen Brightness: Највећа осветљеност на целом екрану
       Left: Превлачење на левој страни

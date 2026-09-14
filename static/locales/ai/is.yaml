@@ -502,6 +502,8 @@ Settings:
         Destructive pressed: Eyðandi aðgerð þegar ýtt er
         Text and icons on destructive actions: Texti og tákn á eyðandi aðgerðum
   Player Settings:
+    Lights Off: Slökkva ljósin
+    Show Lights Off Toggle: Sýna rofa til að slökkva ljósin
     Swipe Gestures:
       Fullscreen Brightness: Hámarksbirta í skjáfylli
       Left: Strjúka vinstra megin

@@ -368,7 +368,7 @@
     "tabler": "moon",
     "ph": "moon",
     "ri": "moon-line",
-    "material": "dark-mode-outline"
+    "material": "dark-mode-outline-rounded"
   },
   "network-wired": {
     "ri": "node-tree",

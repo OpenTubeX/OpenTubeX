@@ -500,6 +500,8 @@ Settings:
         Destructive pressed: Törlő művelet lenyomáskor
         Text and icons on destructive actions: Törlő műveletek szövege és ikonjai
   Player Settings:
+    Lights Off: Fények lekapcsolása
+    Show Lights Off Toggle: Fények lekapcsolása kapcsoló megjelenítése
     Swipe Gestures:
       Fullscreen Brightness: Maximális fényerő teljes képernyőn
       Left: Bal oldali húzás

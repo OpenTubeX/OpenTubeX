@@ -500,6 +500,8 @@ Settings:
         Destructive pressed: Destruktiv handling ved trykk
         Text and icons on destructive actions: Tekst og ikoner på destruktive handlinger
   Player Settings:
+    Lights Off: Slå av lyset
+    Show Lights Off Toggle: Vis bryter for å slå av lyset
     Swipe Gestures:
       Fullscreen Brightness: Full lysstyrke i fullskjerm
       Left: Sveip på venstre side

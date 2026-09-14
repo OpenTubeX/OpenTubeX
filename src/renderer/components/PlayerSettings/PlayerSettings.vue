@@ -30,6 +30,13 @@
           @change="updateRememberVolume"
         />
         <FtToggleSwitch
+          :label="t('Settings.Player Settings.Show Lights Off Toggle')"
+          :compact="true"
+          :default-value="showLightsOffToggle"
+          setting-key="showLightsOffToggle"
+          @change="store.dispatch('updateShowLightsOffToggle', $event)"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Player Settings.Show Skip Silence Toggle')"
           :compact="true"
           :default-value="showSkipSilenceButton"
@@ -693,6 +700,8 @@ function updateRememberVolume(value) {
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
+const showLightsOffToggle = computed(() => store.getters.getShowLightsOffToggle)
+
 const showSkipSilenceButton = computed(() => store.getters.getShowSkipSilenceButton)
 
 /**

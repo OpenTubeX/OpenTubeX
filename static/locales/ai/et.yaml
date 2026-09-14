@@ -500,6 +500,8 @@ Settings:
         Destructive pressed: Pöördumatu toiming vajutamisel
         Text and icons on destructive actions: Pöördumatute toimingute tekst ja ikoonid
   Player Settings:
+    Lights Off: Tuled välja
+    Show Lights Off Toggle: Näita tulede väljalülitamise lülitit
     Swipe Gestures:
       Fullscreen Brightness: Täisheledus täisekraanil
       Left: Vasakul küljel pühkimine
