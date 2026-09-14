@@ -70,6 +70,7 @@
 }
 
 .mobileLinkActions {
+  min-inline-size: 0;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -97,9 +98,7 @@
 .mobileLinkActions strong {
   min-inline-size: 0;
   padding: 8px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .mobileLinkActions button {
