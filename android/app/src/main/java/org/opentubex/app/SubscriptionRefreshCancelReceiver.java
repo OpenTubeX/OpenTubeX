@@ -1,6 +1,5 @@
 package org.opentubex.app;
 
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -19,8 +18,7 @@ public final class SubscriptionRefreshCancelReceiver extends BroadcastReceiver {
         if (SubscriptionRefreshWorker.cancel(context, token)) {
             context.sendBroadcast(new Intent(ACTION_CANCELLED).setPackage(context.getPackageName()));
         } else {
-            context.getSystemService(NotificationManager.class)
-                .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+            SubscriptionRefreshWorker.dismissInactiveNotification(context);
         }
     }
 }

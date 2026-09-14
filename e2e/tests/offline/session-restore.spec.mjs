@@ -174,7 +174,7 @@ test('restores tab order, titles, active route, and saved load state across rest
   await expect.poll(() => page.evaluate(async () => {
     const state = await window.ftElectron.tabs.getState()
     return state.groups
-  })).toEqual([{ id: GROUP_ID, name: 'Recherche', color: 'blue', isCollapsed: true }])
+  })).toEqual([{ id: GROUP_ID, name: 'Recherche', color: 'blue', icon: 'layer-group', isCollapsed: true }])
 
   await tabs.nth(0).click()
   await expect(page).toHaveURL(/#\/subscriptions/)
@@ -197,7 +197,7 @@ test('restores tab order, titles, active route, and saved load state across rest
       groupedTabIds: state.tabs.filter(tab => tab.groupId === groupId).map(tab => tab.id)
     }
   }, GROUP_ID)).toEqual({
-    groups: [{ id: GROUP_ID, name: 'Recherche', color: 'blue', isCollapsed: true }],
+    groups: [{ id: GROUP_ID, name: 'Recherche', color: 'blue', icon: 'layer-group', isCollapsed: true }],
     groupedTabIds: [HISTORY_TAB_ID, WATCH_TAB_ID]
   })
 

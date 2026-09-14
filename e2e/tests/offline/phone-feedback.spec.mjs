@@ -476,9 +476,11 @@ test('comment loading at the end stays visible without a second swipe or horizon
     const spinner = sheet.getByRole('status', { name: 'Load More Comments' })
     await expect(spinner).toBeVisible()
     await expect.poll(() => scroller.evaluate(el => el.scrollWidth - el.clientWidth)).toBeLessThan(2)
-    const bounds = await scroller.boundingBox()
-    const loading = await spinner.boundingBox()
-    expect(loading.y + loading.height).toBeLessThanOrEqual(bounds.y + bounds.height + 1)
+    await expect.poll(() => spinner.evaluate(el => {
+      const bounds = el.closest('.commentsContentWrapper').getBoundingClientRect()
+      const loading = el.getBoundingClientRect()
+      return loading.bottom - bounds.bottom
+    })).toBeLessThanOrEqual(1)
   } finally {
     release()
     await page.unrouteAll({ behavior: 'wait' })

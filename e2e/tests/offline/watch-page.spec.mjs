@@ -4930,24 +4930,19 @@ test('treats an empty comments response as no comments', async ({ app, page }) =
   await page.locator('.commentAutoLoadSentinel').scrollIntoViewIfNeeded()
 
   await expect(page.locator('.noCommentMsg')).toHaveText('There are no comments available for this video')
-  const reloadButton = page.locator('.noCommentActions .reloadComments .iconButton')
-  const sortSelect = page.locator('.noCommentActions .select-text')
-  const expectReloadAlignedBeforeSort = async () => {
-    const [reloadBox, sortBox] = await Promise.all([
-      reloadButton.boundingBox(),
-      sortSelect.boundingBox()
-    ])
-    expect({
-      reloadBeforeSort: reloadBox.x + reloadBox.width <= sortBox.x,
-      verticallyAligned: Math.abs(
-        reloadBox.y + reloadBox.height / 2 -
-        (sortBox.y + sortBox.height / 2)
-      ) <= 1
-    }).toEqual({
-      reloadBeforeSort: true,
-      verticallyAligned: true
+  const expectReloadAlignedBeforeSort = () => expect.poll(() =>
+    page.locator('.noCommentActions').evaluate(actions => {
+      const reloadBox = actions.querySelector('.reloadComments .iconButton').getBoundingClientRect()
+      const sortBox = actions.querySelector('.select-text').getBoundingClientRect()
+      return {
+        reloadBeforeSort: reloadBox.x + reloadBox.width <= sortBox.x,
+        verticallyAligned: Math.abs(
+          reloadBox.y + reloadBox.height / 2 -
+          (sortBox.y + sortBox.height / 2)
+        ) <= 1
+      }
     })
-  }
+  ).toEqual({ reloadBeforeSort: true, verticallyAligned: true })
   await expectReloadAlignedBeforeSort()
 
   const [actionsBox, messageBox] = await Promise.all([

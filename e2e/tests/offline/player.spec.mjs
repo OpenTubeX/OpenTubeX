@@ -118,6 +118,44 @@ async function expectOverlayAbovePlayer(player, overlay) {
   expect(result.overlayIsTopmost).toBe(true)
 }
 
+test('repeated seek shortcuts accumulate the OSD while seeking immediately', async ({ app, page, attachScreenshot }) => {
+  const video = await openDemoVideo({ app, page })
+  await video.evaluate(element => {
+    element.pause()
+    element.currentTime = 0
+  })
+  const popup = page.locator(`${activeTab} .valueChangePopup`)
+  const text = popup.locator('.valueChangeText')
+
+  for (const seconds of [5, 10]) {
+    await page.keyboard.press('ArrowRight')
+    await expect(text).toHaveText(`${seconds}s`)
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(seconds, 3)
+  }
+  await attachScreenshot('accumulated seek OSD')
+
+  await page.keyboard.press('ArrowLeft')
+  await expect(text).toHaveText('5s')
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(5, 3)
+  await expect(popup).toBeHidden()
+
+  await page.keyboard.press('ArrowRight')
+  await expect(text).toHaveText('5s')
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(10, 3)
+
+  await page.keyboard.press('0')
+  await page.keyboard.press('ArrowRight')
+  await expect(text).toHaveText('5s')
+
+  const seekBar = page.locator(`${activeTab} .shaka-seek-bar`)
+  await seekBar.click({ position: { x: 0, y: 1 } })
+  await seekBar.evaluate(element => element.blur())
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(0, 3)
+  await page.keyboard.press('ArrowRight')
+  await expect(text).toHaveText('5s')
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(5, 3)
+})
+
 test('playback starts', async ({ app, page, attachScreenshot }) => {
   const video = await openDemoVideo({ app, page })
 
@@ -1024,7 +1062,8 @@ test('scopes the mobile fullscreen swipe movement to the video in tablet layout'
     await store.dispatch('updateEnableMobileFullscreenSwipe', false)
   })
   await expect(player).not.toHaveClass(/mobileFullscreenSwipeEnabled/)
-  await expect(player).toHaveCSS('touch-action', 'auto')
+  // Downward mini-player swipes remain enabled independently of fullscreen.
+  await expect(player).toHaveCSS('touch-action', 'pan-x pan-down')
 
   await player.evaluate(element => {
     element.classList.add('mobileFullscreenSwiping')
@@ -1264,6 +1303,26 @@ test('animates the fullscreen title when the Android status-bar inset changes', 
 })
 
 test.describe('scroll mini player', () => {
+  test('a stationary touch reveals hidden mini-player controls without pausing', async ({ app, page }) => {
+    const video = await openDemoVideo({ app, page })
+    const player = page.locator('.ftVideoPlayer')
+    await video.evaluate(element => element.play())
+    await scrollBelowPlayer(player)
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await page.mouse.move(0, 0)
+    const button = player.locator('.scrollMiniPlayPause')
+    await expect(button).toHaveClass(/isHidden/, { timeout: 6000 })
+    await expect(button).toHaveCSS('opacity', '0')
+    const bounds = await player.boundingBox()
+    const session = await page.context().newCDPSession(page)
+    const point = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
+    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await session.detach()
+    await expect(button).not.toHaveClass(/isHidden/)
+    await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+  })
+
   test('keeps a phone mini player above the bottom navigation', async ({ app, page }) => {
     const video = await openDemoVideo({ app, page })
     await video.evaluate(element => element.pause())
@@ -1325,6 +1384,23 @@ test.describe('scroll mini player', () => {
     }, { dragX })
 
     await expectBottomNavigationClearance()
+  })
+
+  test.describe('bottom tabs at fractional scale', () => {
+    test.use({ seed: { settings: { ...PLAYER_SEED, tabBarPosition: 'bottom', uiScale: 125 } } })
+    test('keeps the mini player above mobile navigation and bottom tabs', async ({ app, page }) => {
+      await openDemoVideo({ app, page })
+      const player = page.locator('.ftVideoPlayer')
+      await scrollBelowPlayer(player)
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      await setWindowSize(app, page, { width: 480, height: 800 })
+      await page.locator('.sideNav a').first().evaluate(link => link.focus({ preventScroll: true }))
+      await expect.poll(() => player.evaluate(element => {
+        const playerBounds = element.getBoundingClientRect()
+        const navigationBounds = document.querySelector('.sideNav').getBoundingClientRect()
+        return navigationBounds.top - playerBounds.bottom
+      })).toBeGreaterThanOrEqual(15)
+    })
   })
 
   test('animates into and out of the scroll mini player', async ({ app, page, attachScreenshot }) => {
@@ -1571,6 +1647,7 @@ test.describe('scroll mini player', () => {
       seed: {
         settings: {
           ...PLAYER_SEED,
+          keepPlayingOnNavigation: false,
           scrollMiniPlayerOnAllTabs: true,
           uiScale: 125
         }
@@ -1901,6 +1978,7 @@ test.describe('scroll mini player', () => {
           settings: {
             ...PLAYER_SEED,
             autoPictureInPictureTriggers: ['tab'],
+            keepPlayingOnNavigation: false,
             scrollMiniPlayerOnAllTabs: true,
             uiScale: 125
           }
@@ -2261,7 +2339,7 @@ for (const uiScale of [100, 125]) {
 }
 
 test.describe('navigation playback lifecycle', () => {
-  test.use({ seed: { settings: { ...PLAYER_SEED, keepPlayingOnNavigation: true } } })
+  test.use({ seed: { settings: PLAYER_SEED } })
 
   test('returns through history without restarting playback', async ({ app, page }) => {
     await openDemoVideo({ app, page })
@@ -2351,12 +2429,16 @@ test.describe('navigation playback lifecycle', () => {
   })
 })
 
-test('navigation stops playback with the setting disabled', async ({ app, page }) => {
-  await openDemoVideo({ app, page })
-  await page.getByRole('button', { name: 'Expand side navigation', exact: true }).click()
-  await goTo(page, 'history')
-  await expect(page).toHaveURL(/#\/history$/)
-  await expect(page.locator('.ftVideoPlayer')).toHaveCount(0)
+test.describe('navigation playback disabled', () => {
+  test.use({ seed: { settings: { ...PLAYER_SEED, keepPlayingOnNavigation: false } } })
+
+  test('stops playback when navigating away', async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+    await page.getByRole('button', { name: 'Expand side navigation', exact: true }).click()
+    await goTo(page, 'history')
+    await expect(page).toHaveURL(/#\/history$/)
+    await expect(page.locator('.ftVideoPlayer')).toHaveCount(0)
+  })
 })
 
 test.describe('retained navigation player across tabs', () => {

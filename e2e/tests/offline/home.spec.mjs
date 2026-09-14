@@ -562,6 +562,14 @@ test.describe('compact scaled Home page', () => {
       await goTo(page, pageLayout.route)
       await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
 
+      // Keep the mobile bar revealed through its keyboard focus behavior while
+      // measuring clearance at the page bottom.
+      await page.locator('.sideNav .navOption:not(.router-link-active)').first().focus()
+      await expect(page.locator('.sideNav')).not.toHaveClass(/scrollHidden/)
+      await expect.poll(() => page.locator('.sideNav').evaluate(nav =>
+        Math.abs(nav.getBoundingClientRect().bottom - window.innerHeight)
+      )).toBeLessThanOrEqual(1)
+
       const metrics = await page.evaluate(({ pageSelector, cardSelector }) => {
         const pageBounds = document.querySelector(pageSelector).getBoundingClientRect()
         const firstCardBounds = document.querySelector(cardSelector).getBoundingClientRect()

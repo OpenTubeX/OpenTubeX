@@ -22,18 +22,23 @@ test.describe('password protected settings', () => {
     await expect(passwordInput).toBeVisible()
     await expect(unlockButton).toBeDisabled()
     await expect(page.getByRole('checkbox', { name: 'Check for Updates' })).toHaveCount(0)
-    const [pageBounds, passwordBounds] = await Promise.all([
-      page.locator('.settingsPage').boundingBox(),
-      page.locator('.settingsPassword').boundingBox()
-    ])
-    expect(passwordBounds.width).toBeCloseTo(pageBounds.width, 0)
-    expect(passwordBounds.x).toBeCloseTo(pageBounds.x, 0)
-    const [cardBounds, unlockBounds] = await Promise.all([
-      page.locator('.settingsPassword .card').boundingBox(),
-      unlockButton.boundingBox()
-    ])
-    expect(unlockBounds.x + unlockBounds.width / 2)
-      .toBeCloseTo(cardBounds.x + cardBounds.width / 2, 0)
+    await expect(async () => {
+      // Read related bounds in one frame during the page entrance animation.
+      const gaps = await unlockButton.evaluate(button => {
+        const pageBounds = document.querySelector('.settingsPage').getBoundingClientRect()
+        const passwordBounds = document.querySelector('.settingsPassword').getBoundingClientRect()
+        const cardBounds = document.querySelector('.settingsPassword .card').getBoundingClientRect()
+        const unlockBounds = button.getBoundingClientRect()
+        return {
+          width: passwordBounds.width - pageBounds.width,
+          left: passwordBounds.x - pageBounds.x,
+          center: unlockBounds.x + unlockBounds.width / 2 - (cardBounds.x + cardBounds.width / 2)
+        }
+      })
+      expect(gaps.width).toBeCloseTo(0, 0)
+      expect(gaps.left).toBeCloseTo(0, 0)
+      expect(gaps.center).toBeCloseTo(0, 0)
+    }).toPass()
 
     // A wrong password keeps it locked.
     await passwordInput.fill('wrong')

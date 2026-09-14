@@ -7,7 +7,10 @@ import { overrideShakaMethods } from '../../src/renderer/helpers/player/override
 const source = (await readFile(new URL('../../src/renderer/helpers/player/androidNativeScreen.js', import.meta.url), 'utf8'))
   .replace(/^import .*\n/gm, '').replace('export function ', 'function ')
 
-async function fixture({ fullscreen = true, chrome = [], dialogs = [], deferTransitions = false, deferFullscreen = false } = {}) {
+async function fixture({ fullscreen = true, chrome = [], dialogs = [], previews = [], deferTransitions = false, deferFullscreen = false } = {}) {
+  const snapshots = []
+  const snapshotInvalidations = []
+  let publishSnapshot
   const frames = new Map()
   const layouts = []
   const presentations = []
@@ -29,11 +32,14 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], deferTran
   const controlsElement = { hasAttribute: () => shown, getBoundingClientRect: () => bounds }
   const container = Object.assign(new EventTarget(), {
     classList: { contains: name => panel && ['fullscreenDockLayoutOpen', 'chaptersOverlayOpen'].includes(name) },
-    contains: () => false,
+    contains: element => previews.includes(element),
     getBoundingClientRect: () => bounds,
     toggleAttribute() {},
     getAnimations: () => animating ? [{ playState: 'running' }] : [],
-    querySelectorAll(selector) { return menu && selector.includes('shaka-overflow-menu') ? [{ getAnimations: () => [], getBoundingClientRect: () => ({ x: 400, y: 100, width: 200, height: 240 }) }] : [] },
+    querySelectorAll(selector) {
+      if (selector.includes('.shaka-player-ui-thumbnail-container')) return previews
+      return menu && selector.includes('shaka-overflow-menu') ? [{ getAnimations: () => [], getBoundingClientRect: () => ({ x: 400, y: 100, width: 200, height: 240 }) }] : []
+    },
     querySelector(selector) {
       if (selector === '.countdownPoster' && poster) return {}
       if (selector === '.shaka-controls-container') return controlsElement
@@ -55,6 +61,10 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], deferTran
   const create = vm.runInNewContext(`${source}\ncreateAndroidNativeScreen`, {
     document, window, Event,
     ResizeObserver: Observer, MutationObserver: Observer, overrideShakaMethods,
+    createMiniControlsSnapshot(onChange) {
+      publishSnapshot = onChange
+      return { update(...args) { snapshots.push(args) }, invalidate(value) { snapshotInvalidations.push(value) }, destroy() {} }
+    },
     getComputedStyle: () => ({ borderTopLeftRadius: '12px' }),
     requestAnimationFrame(callback) { frames.set(++id, callback); return id },
     cancelAnimationFrame(id) { frames.delete(id) },
@@ -75,7 +85,7 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], deferTran
   if (fullscreen) await screen.show()
   else await screen.attach()
   await flush()
-  return { screen, container, layouts, presentations, completeTransitions, completeFullscreen, fullscreenEvents, bounds, observers, window, styleWrites, flush, change({ visible = shown, menuOpen = menu, panelOpen = panel, containerAnimating = animating, endedRecommendations = recommendations, playbackEnded = ended, loadingPoster = poster }) {
+  return { snapshotInvalidations, snapshots, publishSnapshot, screen, container, layouts, presentations, completeTransitions, completeFullscreen, fullscreenEvents, bounds, observers, window, styleWrites, flush, change({ visible = shown, menuOpen = menu, panelOpen = panel, containerAnimating = animating, endedRecommendations = recommendations, playbackEnded = ended, loadingPoster = poster }) {
     poster = loadingPoster
     shown = visible; menu = menuOpen; panel = panelOpen
     recommendations = endedRecommendations
@@ -425,3 +435,117 @@ test('loading poster uses the browser animation instead of raising an empty text
   assert.equal(motion.defaultPrevented, false)
   f.screen.destroy()
 })
+
+test('mini-player PNG is sent only when the snapshot changes', async () => {
+  const f = await fixture({ fullscreen: false })
+  f.publishSnapshot('data:image/png;base64,test')
+  await f.flush()
+  assert.equal(f.layouts.at(-1).miniControlsImage, 'data:image/png;base64,test')
+  f.bounds.x++
+  f.observers[0].callback([])
+  await f.flush()
+  assert.equal('miniControlsImage' in f.layouts.at(-1), false)
+  f.publishSnapshot(null)
+  await f.flush()
+  assert.equal(f.layouts.at(-1).miniControlsImage, null)
+  f.screen.destroy()
+})
+
+test('mini-player snapshots freeze during page scrolling and resume afterward', async () => {
+  const f = await fixture({ fullscreen: false })
+  f.screen.action('scroll-start')
+  f.observers[0].callback([])
+  await f.flush()
+  assert.equal(f.snapshots.at(-1)[3], true)
+  f.screen.action('scroll-end')
+  assert.equal(f.snapshots.at(-1)[3], false)
+  f.screen.destroy()
+})
+
+
+test('mini control transition completion refreshes snapshots while scrolling', async () => {
+  const f = await fixture({ fullscreen: false })
+  const originalQuery = f.container.querySelector
+  const mini = { contains: () => true }
+  f.container.querySelector = selector => selector === '.scrollMiniPlayerControls' ? mini : originalQuery(selector)
+  f.screen.action('scroll-start')
+  for (const type of ['transitionend', 'transitioncancel']) {
+    f.container.dispatchEvent(new Event(type))
+    assert.equal(f.snapshotInvalidations.at(-1), true)
+    await f.flush()
+    assert.equal(f.snapshots.at(-1)[3], true)
+  }
+  f.screen.destroy()
+})
+
+for (const scale of [1, 2]) {
+  test(`native layout and animation preserve fractional viewport width at visual scale ${scale}`, async () => {
+    const f = await fixture({ fullscreen: false })
+    f.window.innerWidth = 461
+    f.window.visualViewport = { width: 460.79998779296875 / scale, scale }
+    f.change({})
+    await f.flush()
+    assert.equal(f.layouts.at(-1).viewportWidth, 460.79998779296875)
+    const event = new Event('native-player-transition', { cancelable: true })
+    event.detail = { from: f.bounds, to: { ...f.bounds, x: 205 }, duration: 300 }
+    f.container.dispatchEvent(event)
+    await event.detail.finished
+    assert.equal(f.layouts.findLast(layout => layout.transition).viewportWidth, 460.79998779296875)
+    f.screen.destroy()
+  })
+}
+
+test('reset detaches mini controls before the native screen is reused', async () => {
+  const f = await fixture({ fullscreen: false })
+  const root = { contains: () => false }
+  const querySelector = f.container.querySelector
+  f.container.classList.contains = name => name === 'scrollMiniPlayer'
+  f.container.querySelector = selector => selector === '.scrollMiniPlayerControls' ? root : querySelector(selector)
+  f.change({})
+  await f.flush()
+  assert.equal(f.snapshots.at(-1)[0], root)
+  f.snapshots.length = 0
+  f.screen.reset()
+  assert.equal(f.snapshots.length, 1)
+  assert.equal(f.snapshots[0][0], null)
+  await f.screen.attach()
+  await f.flush()
+  assert.ok(f.snapshots.length > 1, 'The snapshot helper remains usable after reset')
+  f.screen.destroy()
+})
+
+for (const fullscreen of [false, true]) {
+  test(`seek previews clip native transport buttons while visible (${fullscreen ? 'fullscreen' : 'inline'})`, async () => {
+    let visible = false
+    const bounds = { x: 220.25, y: 100.5, width: 200, height: 140 }
+    const preview = {
+      checkVisibility: () => visible,
+      getAnimations: () => [],
+      getBoundingClientRect: () => bounds
+    }
+    const f = await fixture({ fullscreen, previews: [preview] })
+    assert.equal(f.layouts.at(-1).menus.length, 0)
+    visible = true
+    f.change({})
+    await f.flush()
+    assert.deepEqual(JSON.parse(JSON.stringify(f.layouts.at(-1).menus)), [{ ...bounds, pageScroll: !fullscreen }],
+      'The entire thumbnail and timestamp must exclude native control drawing')
+    assert.equal(f.layouts.at(-1).overlayActive, false, 'A seek preview must not consume Android Back as a menu')
+    bounds.x = 340.75
+    f.change({})
+    await f.flush()
+    assert.equal(f.layouts.at(-1).menus[0].x, bounds.x)
+    if (!fullscreen) {
+      f.window.scrollY = 40.25
+      bounds.y -= 40.25
+      f.window.dispatchEvent(new Event('scroll'))
+      await f.flush()
+      assert.equal(f.layouts.at(-1).menus[0].y, 100.5, 'Inline clipping follows native page scrolling')
+    }
+    visible = false
+    f.change({})
+    await f.flush()
+    assert.equal(f.layouts.at(-1).menus.length, 0, 'Hiding the preview must restore native drawing')
+    f.screen.destroy()
+  })
+}

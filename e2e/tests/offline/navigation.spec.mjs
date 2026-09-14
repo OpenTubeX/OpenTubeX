@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, sel, setWindowSize } from '../../helpers/app.mjs'
 import { DEFAULT_NAVIGATION_ITEMS } from '../../../src/navigationItems.js'
 
 // Pages that work without any network access.
@@ -487,4 +487,15 @@ test('preserves a pasted YouTube comment link target', async ({ page }) => {
   await page.locator(sel.searchInput).press('Enter')
 
   await expect(page).toHaveURL(new RegExp(`#\\/watch\\/jNQXAC9IVRw\\?.*commentId=${commentId}`))
+})
+
+test.describe('scaled mobile navigation', () => {
+  test.use({ seed: { settings: { uiScale: 125 } } })
+
+  test('keeps More menu links clickable above the mobile bar', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 500, height: 700 })
+    await page.locator('.sideNav .moreOptionNav').click()
+    await page.locator('.sideNav .moreOptionContainer a[href="#/subscribedchannels"]').click()
+    await expect(page).toHaveURL(/#\/subscribedchannels$/)
+  })
 })

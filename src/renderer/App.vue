@@ -120,12 +120,18 @@
         </h1>
       </template>
       <div
-        v-safer-html.lenient="updateChangelog"
+        ref="changeLogScroller"
         v-overlay-scrollbars
         class="changeLogText"
         dir="ltr"
         lang="en"
-      />
+      >
+        <div
+          ref="changeLogContent"
+          v-safer-html.lenient="updateChangelog"
+          class="changeLogContent"
+        />
+      </div>
       <FtFlexBox>
         <FtButton
           :label="t('Download From Site')"
@@ -490,6 +496,7 @@ import { App as CapacitorApp } from '@capacitor/app'
 import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from './helpers/overlayScrollbars'
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, unref, useId, useTemplateRef, watch } from 'vue'
+import { useScrollClamp } from './composables/useScrollClamp'
 import { useI18n } from 'vue-i18n'
 import { routerKey, useRoute, useRouter } from 'vue-router'
 
@@ -510,6 +517,13 @@ import { lockBodyScroll, unlockBodyScroll } from './components/FtPrompt/scrollLo
 import { vSaferHtml } from './directives/vSaferHtml.js'
 
 import store from './store/index'
+import { androidDynamicColors, getAndroidDynamicColors, onAndroidDynamicColorsChanged } from './helpers/dynamicColors'
+import {
+  exitAndroidApp,
+  getAndroidHardwareKeyboardState,
+  setAndroidPictureInPictureDocumentState,
+  setAndroidSystemBarsBackground
+} from './helpers/androidUi'
 import {
   applyThemeToDocument,
   handleCustomThemeUpdated,
@@ -538,12 +552,6 @@ import {
 } from './helpers/progressPresentation'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
 import { copyToClipboard, openExternalLink, openInternalPath, shareLink, showApiErrorToast, showToast } from './helpers/utils'
-import {
-  exitAndroidApp,
-  getAndroidHardwareKeyboardState,
-  setAndroidPictureInPictureDocumentState,
-  setAndroidSystemBarsBackground
-} from './helpers/androidUi'
 import { openNotificationSettings } from './helpers/capacitorUi'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
 import {
@@ -554,7 +562,6 @@ import {
   acknowledgeAndroidSubscriptionRefreshResult,
   addAndroidSubscriptionRefreshCancelledListener,
   configureAndroidSubscriptionRefresh,
-  finishAndroidSubscriptionRefresh,
   getNextAndroidSubscriptionRefreshResult,
   requestAndroidSubscriptionRefreshNotificationPermission,
   startAndroidSubscriptionRefresh,
@@ -2396,9 +2403,6 @@ function handleSubscriptionRefreshProgress(event) {
  */
 function handleSubscriptionRefreshFinished(event) {
   subscriptionRefreshStartGuard.finish()
-  if (isCapacitor) {
-    finishAndroidSubscriptionRefresh(event.detail.refreshId)
-  }
   if (!process.env.IS_ELECTRON) {
     try {
       localStorage.removeItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
@@ -2713,6 +2717,32 @@ const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
 const systemUsesDarkTheme = ref(systemColorScheme.matches)
 systemColorScheme.addEventListener('change', handleSystemColorSchemeChange)
 
+if (isCapacitor) {
+  let dynamicColorsListener
+  let disposed = false
+  const receiveColors = (colors) => {
+    if (disposed) return
+    androidDynamicColors.value = colors
+    if (baseTheme.value === 'dynamic') updateTheme()
+  }
+  onMounted(async () => {
+    try {
+      dynamicColorsListener = await onAndroidDynamicColorsChanged(receiveColors)
+      if (disposed) {
+        await dynamicColorsListener?.remove()
+        return
+      }
+      receiveColors(await getAndroidDynamicColors())
+    } catch (error) {
+      console.error('Failed to load Android dynamic colors:', error)
+    }
+  })
+  onBeforeUnmount(() => {
+    disposed = true
+    dynamicColorsListener?.remove()
+  })
+}
+
 watch(baseTheme, updateTheme)
 watch(appFont, updateAppFont)
 watch(() => store.getters.getSystemLightTheme, updateTheme)
@@ -2797,7 +2827,7 @@ async function sanitizeAppearanceSettings(customThemes) {
 
 function handleSystemColorSchemeChange(event) {
   systemUsesDarkTheme.value = event.matches
-  if (baseTheme.value === 'system') updateTheme()
+  if (['system', 'dynamic'].includes(baseTheme.value)) updateTheme()
 }
 
 function updateUiRoundness() {
@@ -2828,6 +2858,7 @@ updateThumbnailListSize()
 const showReleaseNotes = ref(false)
 const changeLogTitle = ref('')
 const updateChangelog = ref('')
+useScrollClamp(useTemplateRef('changeLogScroller'), useTemplateRef('changeLogContent'))
 const DISMISSED_UPDATE_VERSION_STORAGE_KEY = 'opentubex-dismissed-update-version'
 /** @type {{ tagName: string, versionNumber: string } | null} */
 let availableUpdate = null
@@ -4370,6 +4401,8 @@ async function enableCapacitorIntegrations() {
   const removeMediaActions = await addAndroidMediaSessionActionListener(({ action, ...details }) => {
     tabMediaCoordinator.dispatchAction(action, details)
   })
+  const handleTaskRemoved = () => tabMediaCoordinator.pauseAll()
+  window.addEventListener('opentubex:android-task-removed', handleTaskRemoved)
   let receivedAppState = false
   const appStateHandle = await CapacitorApp.addListener('appStateChange', ({ isActive }) => {
     receivedAppState = true
@@ -4396,6 +4429,7 @@ async function enableCapacitorIntegrations() {
     backButtonHandle?.remove()
     urlHandle.remove()
     appStateHandle.remove()
+    window.removeEventListener('opentubex:android-task-removed', handleTaskRemoved)
     playbackScreenWake?.setAppActive(false)
     setAndroidAppVisible(null)
     removeReminderActions()

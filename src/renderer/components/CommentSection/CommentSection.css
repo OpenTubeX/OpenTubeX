@@ -539,6 +539,10 @@
   text-decoration: none;
 }
 
+.commentText :deep(img) {
+  display: inline-block;
+}
+
 .commentText {
   white-space: pre-wrap;
   font-size: 14px;

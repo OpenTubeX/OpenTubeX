@@ -38,9 +38,15 @@ test('disabled fullscreen and zoom gestures allow upward scrolling and downward 
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...point, y: point.y - distance }] })
       await page.waitForTimeout(30)
     }
+    await page.evaluate(() => {
+      window.testScrollFinished = new Promise(resolve => {
+        window.addEventListener('scrollend', () => resolve(), { once: true })
+      })
+    })
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(20)
     await expect(player).not.toHaveClass(/mobileFullscreenSwiping/)
+    await page.evaluate(() => window.testScrollFinished)
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
     const restored = await player.boundingBox()

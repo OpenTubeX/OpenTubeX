@@ -1,4 +1,5 @@
 import { overrideShakaMethods } from './overrideShakaMethods'
+import { createMiniControlsSnapshot } from './miniControlsSnapshot'
 
 let inlineScreenOwner = null
 let inlineBackdrop = null
@@ -21,12 +22,22 @@ export function createAndroidNativeScreen({ element, container, getController, g
   const inlineOwner = { clearPageClip }
   let transitionSequence = 0
   let transitioning = false
+  const miniSnapshot = createMiniControlsSnapshot(image => {
+    getController()?.layout({ miniControlsImage: image }).catch(onError)
+  }, onError)
   let pageScrolling = false
   let gestureActive = false
   let appChromeElements = []
   let globalMenuElements = []
   let globalElementsDirty = true
   const appChromeSelector = '.topNav, .sideNav, .tabBar, .capacitorTabletTabBar'
+
+  function nativeViewportWidth() {
+    // innerWidth rounds CSS pixels, shifting the raised native layer at Android
+    // display scales. Undo visual zoom to retain the layout viewport's precision.
+    const viewport = window.visualViewport
+    return viewport?.width * viewport?.scale || window.innerWidth
+  }
 
   function endTransition() {
     if (!transitioning) return
@@ -62,7 +73,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
       ...rect(to),
       y: to.y + (pageScroll ? window.scrollY : 0),
       pageScroll,
-      viewportWidth: window.innerWidth,
+      viewportWidth: nativeViewportWidth(),
       transition: { from: rect(from), duration, radius: parseFloat(getComputedStyle(container).borderTopLeftRadius) || 0 }
     }).catch(onError).finally(() => {
       if (transitionSequence === sequence) return endTransition()
@@ -230,6 +241,8 @@ export function createAndroidNativeScreen({ element, container, getController, g
       container.checkVisibility?.({ checkOpacity: true, checkVisibilityCSS: true }) !== false
     // Notices need the same native clipping and touch priority as menus.
     const playerMenus = [...container.querySelectorAll('.shaka-overflow-menu:not(.shaka-hidden), .shaka-settings-menu:not(.shaka-hidden), .shaka-sub-menu:not(.shaka-hidden), .shaka-context-menu:not(.shaka-hidden), .skippedSegmentsWrapper')]
+    // Seek previews cover native buttons without becoming Back-dismissable menus.
+    const seekPreviews = [...container.querySelectorAll('.shaka-player-ui-thumbnail-container')]
     const countdowns = [...container.querySelectorAll('.countdownProgress')]
     // Global dialogs such as Quick Settings can cover only one native button.
     // Keep their whole rectangle above native controls, not just the center hit.
@@ -245,7 +258,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
       .filter(menu => menu.checkVisibility?.({ checkVisibilityCSS: true }) !== false)
     // Hidden notices retain their layout box during native scrolling/gestures.
     // Clipping that box would punch through the raised video into the page.
-    const menuElements = [...playerMenus, ...countdowns, ...globalMenus, ...appChrome]
+    const menuElements = [...playerMenus, ...seekPreviews, ...countdowns, ...globalMenus, ...appChrome]
       .filter(menu => menu.checkVisibility?.({ checkOpacity: true, checkVisibilityCSS: true }) !== false)
     const pageScroll = followsPageScroll()
     const nativeY = y => pageScroll ? Math.round((y + window.scrollY) * 1000) / 1000 : y
@@ -256,13 +269,17 @@ export function createAndroidNativeScreen({ element, container, getController, g
         ? { x: bounds.x, y: 0, width: bounds.width, height: bounds.y + bounds.height }
         : { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height, pageScroll: pageScroll && container.contains(menu) }
     }).filter(menu => menu.width > 0 && menu.height > 0)
+    miniSnapshot.update(container.classList.contains('scrollMiniPlayer')
+      ? container.querySelector('.scrollMiniPlayerControls')
+      : null,
+    bounds.width, bounds.height, pageScrolling || gestureActive)
     const panelOpen = ['fullscreenDockLayoutOpen', 'chaptersOverlayOpen'].some(name => container.classList.contains(name))
     const layout = {
       x: bounds.x,
       y: nativeY(bounds.y),
       width: bounds.width,
       height: bounds.height,
-      viewportWidth: window.innerWidth,
+      viewportWidth: nativeViewportWidth(),
       pageScroll,
       miniPlayer: !poster && (nativeGesture || container.classList.contains('scrollMiniPlayer')),
       gestureActive: nativeGesture,
@@ -296,8 +313,19 @@ export function createAndroidNativeScreen({ element, container, getController, g
   function scheduleLayout() {
     if ((open || attached) && frame === null) frame = requestAnimationFrame(syncLayout)
   }
+  function handleMiniControlTransition(event) {
+    if (!container.querySelector('.scrollMiniPlayerControls')?.contains(event.target)) return
+    miniSnapshot.invalidate(true)
+    scheduleLayout()
+  }
+  container.addEventListener('transitionend', handleMiniControlTransition)
+  container.addEventListener('transitioncancel', handleMiniControlTransition)
   const resize = new ResizeObserver(scheduleLayout)
   const mutations = new MutationObserver(records => {
+    const mini = container.querySelector('.scrollMiniPlayerControls')
+    if (records.some(record => mini?.contains(record.target) || record.target.contains?.(mini))) {
+      miniSnapshot.invalidate(records.some(record => mini?.contains(record.target)))
+    }
     if (records.some(record => record.type === 'childList'
       ? [...record.addedNodes, ...record.removedNodes].some(node => node.nodeType === 1)
       : ['role', 'aria-modal', 'open'].includes(record.attributeName) ||
@@ -401,6 +429,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
         container.toggleAttribute('data-native-player-scrolling', true)
       } else if (action === 'scroll-end') {
         pageScrolling = false
+        miniSnapshot.invalidate()
         container.toggleAttribute('data-native-player-scrolling', false)
         lastLayout = ''
         syncLayout()
@@ -433,6 +462,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
       scheduleLayout()
     },
     reset() {
+      miniSnapshot.update(null, 0, 0, false)
       attachmentSequence++
       endGesture()
       endTransition()
@@ -445,6 +475,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
       setOpen(false)
     },
     destroy() {
+      miniSnapshot.destroy()
       attachmentSequence++
       endGesture()
       endTransition()
@@ -464,6 +495,8 @@ export function createAndroidNativeScreen({ element, container, getController, g
       container.removeEventListener('click', handleFullscreenClick, true)
       container.removeEventListener('native-player-transition', handleTransition)
       container.removeEventListener('native-player-gesture', handleGesture)
+      container.removeEventListener('transitionend', handleMiniControlTransition)
+      container.removeEventListener('transitioncancel', handleMiniControlTransition)
       if (frame !== null) cancelAnimationFrame(frame)
       restoreControls?.()
     },

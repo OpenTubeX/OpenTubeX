@@ -250,14 +250,16 @@ export function getViewportInsets() {
   }
 
   // On phones the side navigation becomes a fixed bottom bar. Use its
-  // rendered geometry so the mini player also clears the Android safe area
-  // included in the bar, without affecting the vertical desktop sidebar.
+  // rendered height so the mini player also clears the Android safe area.
+  // Reserve that height throughout its hide animation: its translated top
+  // would otherwise change the saved bottom-relative player position.
   if (sideNav) {
     const rect = sideNav.getBoundingClientRect()
     const isBottomBar = rect.width > rect.height &&
       rect.top >= window.innerHeight - rect.bottom
     if (isBottomBar) {
-      bottomInset = Math.max(bottomInset, window.innerHeight - rect.top + MARGIN)
+      // In narrow Electron windows this bar sits above any bottom tabs.
+      bottomInset += rect.height
     }
   }
 

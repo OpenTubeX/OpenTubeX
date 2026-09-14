@@ -6,6 +6,8 @@ reviews:
   auto_review:
     ignore_title_keywords:
       - "Translations update from Weblate"
+    ignore_usernames:
+      - "dependabot[bot]"
     labels:
       - "!translations"
     enabled: false

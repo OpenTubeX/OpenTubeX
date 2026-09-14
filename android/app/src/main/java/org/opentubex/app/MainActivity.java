@@ -45,6 +45,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(PoTokenPlugin.class);
         registerPlugin(YtDlpPlugin.class);
         registerPlugin(AndroidUiPlugin.class);
+        registerPlugin(AndroidDynamicColorsPlugin.class);
         registerPlugin(AppIconPlugin.class);
         registerPlugin(ScreenshotPlugin.class);
         registerPlugin(PullToRefreshPlugin.class);
@@ -88,6 +89,18 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onDestroy() {
         inputManager.unregisterInputDeviceListener(inputDeviceListener);
+        if (isFinishing() && bridge != null) {
+            PluginHandle handle = bridge.getPlugin("SubscriptionRefresh");
+            if (handle != null && handle.getInstance() instanceof SubscriptionRefreshPlugin refresh &&
+                refresh.retainRenderer()) {
+                // Dismiss playback with the task, but let subscription requests and
+                // their database writes finish before destroying the Capacitor bridge.
+                bridge.triggerWindowJSEvent("opentubex:android-task-removed");
+                ((AndroidPlaybackPlugin) bridge.getPlugin("AndroidPlayback").getInstance()).handleOnDestroy();
+                ((AndroidMediaSessionPlugin) bridge.getPlugin("AndroidMediaSession").getInstance()).handleOnDestroy();
+                bridge = null;
+            }
+        }
         super.onDestroy();
     }
 

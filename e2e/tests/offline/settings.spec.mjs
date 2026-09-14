@@ -2247,13 +2247,15 @@ test.describe('settings', () => {
     })
     await goTo(page, 'settings')
     await expect(page.locator('.settingsPage')).toHaveClass(/compactSettings/)
-    const [headerBounds, searchBounds] = await Promise.all([
-      page.locator('.settingsWindowHeader').boundingBox(),
-      page.locator('.settingsSearch').boundingBox()
-    ])
-    expect(searchBounds.x - headerBounds.x).toBeCloseTo(10, 0)
-    expect(headerBounds.x + headerBounds.width - searchBounds.x - searchBounds.width)
-      .toBeCloseTo(10, 0)
+    await expect(async () => {
+      const gaps = await page.locator('.settingsWindow').evaluate(element => {
+        const header = element.querySelector('.settingsWindowHeader').getBoundingClientRect()
+        const search = element.querySelector('.settingsSearch').getBoundingClientRect()
+        return { left: search.left - header.left, right: header.right - search.right }
+      })
+      expect(gaps.left).toBeCloseTo(10, 0)
+      expect(gaps.right).toBeCloseTo(10, 0)
+    }).toPass()
     await page.getByRole('searchbox', { name: 'Search settings' }).fill('FFmpeg Source')
     await expect(page.locator('.settingsMenu')).toBeHidden()
     await expect(page.getByRole('button', { name: 'FFmpeg Source', exact: true })).toBeVisible()

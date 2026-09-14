@@ -57,14 +57,18 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
     private boolean miniPlayer;
     private float miniRadius;
     private boolean scrollingPage;
+    private android.graphics.Bitmap miniControlsImage;
+    private final android.graphics.Paint miniControlsPaint = new android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG);
+
     private boolean gestureActive;
     private boolean scrollEndRequested;
     private boolean pageTouchDown;
     private float pageTouchY;
     private long lastPageScroll;
     private int lastWebScrollY;
+    private float videoAspectRatio;
     private final Runnable pageScrollSettled = this::requestPageScrollEnd;
-    private final android.view.ViewTreeObserver.OnScrollChangedListener pageScrollListener = this::onPageScroll;
+    private final View.OnScrollChangeListener pageScrollListener = (view, x, y, oldX, oldY) -> onPageScroll();
     private long transitionSequence;
     private long readyWebFrame = -1;
     private final java.util.Set<Runnable> pendingWebFrames = new java.util.HashSet<>();
@@ -152,7 +156,9 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
             originalParent.addOnLayoutChangeListener(originalParentLayout);
             originalParent.removeView(webOverlay);
             webOverlay.setBackgroundColor(Color.TRANSPARENT);
-            webOverlay.getViewTreeObserver().addOnScrollChangedListener(pageScrollListener);
+            // Move native layers as WebView scrolls, before the next traversal
+            // draws them against Chromium's already-scrolled page.
+            webOverlay.setOnScrollChangeListener(pageScrollListener);
             webOverlayHost = originalParent instanceof PullToRefreshLayout
                 ? ((PullToRefreshLayout) originalParent).wrapPlaybackOverlay(webOverlay)
                 : webOverlay;
@@ -283,6 +289,9 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
             canvas.clipPath(clip);
             canvas.drawColor(Color.BLACK);
             boolean drawn = super.drawChild(canvas, child, drawingTime);
+            if (miniControlsImage != null && !gestureActive && videoAnimation == null) {
+                canvas.drawBitmap(miniControlsImage, null, transitionBounds, miniControlsPaint);
+            }
             canvas.restoreToCount(save);
             return drawn;
         }
@@ -386,7 +395,7 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
     void setMiniPlayer(boolean enabled, float radius) {
         miniPlayer = enabled;
         miniRadius = radius;
-        if (!enabled) setGestureActive(false);
+        if (!enabled) { setGestureActive(false); clearMiniControlsImage(); }
         if (!enabled && scrollingPage) {
             scrollingPage = false;
             pageTouchDown = false;
@@ -428,6 +437,33 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
         }
     }
 
+    void setMiniControlsImage(String image) {
+        if (image == null) { clearMiniControlsImage(); return; }
+        String prefix = "data:image/png;base64,";
+        if (!image.startsWith(prefix) || image.length() > 1000000) return;
+        try {
+            byte[] encoded = android.util.Base64.decode(image.substring(prefix.length()), android.util.Base64.DEFAULT);
+            android.graphics.BitmapFactory.Options options = new android.graphics.BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            android.graphics.BitmapFactory.decodeByteArray(encoded, 0, encoded.length, options);
+            if (options.outWidth <= 0 || options.outHeight <= 0 || options.outWidth > 2048 || options.outHeight > 2048 ||
+                (long) options.outWidth * options.outHeight > 2097152) return;
+            android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(encoded, 0, encoded.length);
+            if (bitmap == null) return;
+            clearMiniControlsImage();
+            miniControlsImage = bitmap;
+            invalidate();
+        } catch (IllegalArgumentException ignored) {
+            // Ignore malformed images without replacing the last usable controls.
+        }
+    }
+
+    private void clearMiniControlsImage() {
+        if (miniControlsImage == null) return;
+        miniControlsImage.recycle();
+        miniControlsImage = null;
+        invalidate();
+    }
     private void beginPageScroll() {
         if (!miniPlayer || fullscreen || pictureInPicture || !inlineVisible || videoBounds == null) return;
         lastPageScroll = android.os.SystemClock.uptimeMillis();
@@ -492,8 +528,9 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
         }
         if (webOverlay == null || viewportWidth <= 0 || width <= 0 || height <= 0 || getWidth() <= 0) return;
         double scale = getWidth() / viewportWidth;
-        VideoSize size = engine.getPlayer().getVideoSize();
-        double ratio = size.height > 0 ? size.width * size.pixelWidthHeightRatio / size.height : width / height;
+        // Use the same ratio as the frame's measurement, including while the
+        // decoder reports an unknown size but its last frame remains visible.
+        double ratio = videoAspectRatio > 0 ? videoAspectRatio : width / height;
         double fittedWidth = Math.min(width, height * ratio);
         double fittedHeight = Math.min(height, width / ratio);
         // Keep the decoder's TextureView at a stable size. Resizing it for each
@@ -571,9 +608,10 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
         });
     }
 
-    private void updateAspectRatio(VideoSize size) {
+    void updateAspectRatio(VideoSize size) {
         if (size.width > 0 && size.height > 0) {
-            videoFrame.setAspectRatio(size.width * size.pixelWidthHeightRatio / size.height);
+            videoAspectRatio = size.width * size.pixelWidthHeightRatio / size.height;
+            videoFrame.setAspectRatio(videoAspectRatio);
             refreshVideoLayout();
         }
     }
@@ -691,12 +729,13 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
     }
 
     void close() {
+        clearMiniControlsImage();
         for (Runnable callback : new java.util.ArrayList<>(pendingWebFrames)) callback.run();
         pendingWebFrames.clear();
         afterWebDraw.clear();
         transitionSequence++;
         removeCallbacks(pageScrollSettled);
-        if (webOverlay != null) webOverlay.getViewTreeObserver().removeOnScrollChangedListener(pageScrollListener);
+        if (webOverlay != null) webOverlay.setOnScrollChangeListener(null);
         if (videoAnimation != null) videoAnimation.cancel();
         clearNativeButtonDown();
         engine.getControlsPlayer().removeListener(queueListener);

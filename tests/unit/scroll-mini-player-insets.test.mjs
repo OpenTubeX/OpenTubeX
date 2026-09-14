@@ -151,6 +151,17 @@ test('a phone bottom navigation pads the bottom inset', () => {
   assert.equal(insets.bottom, 84 + MARGIN)
 })
 
+test('bottom tabs stay below the phone navigation throughout its hide animation', () => {
+  for (const translation of [0, 12, 30.4, 60.8]) {
+    stubViewport({
+      sideNavRect: { top: 705.2 + translation, bottom: 766 + translation, width: 375, height: 60.8 },
+      tabBarRect: { top: 766, bottom: 800 },
+      clientWidth: 375
+    })
+    assert.equal(getViewportInsets().bottom, 34 + 60.8 + MARGIN)
+  }
+})
+
 test('a desktop side navigation does not pad the bottom inset', () => {
   stubViewport({
     sideNavRect: { top: 0, bottom: 800, width: 88, height: 800 },
@@ -161,6 +172,20 @@ test('a desktop side navigation does not pad the bottom inset', () => {
   const insets = getViewportInsets()
 
   assert.equal(insets.bottom, MARGIN)
+})
+
+test('remembered mini player position stays fixed while bottom navigation slides away', () => {
+  for (const height of [60, 60.8, 84]) {
+    const sideNavRect = { top: 800 - height, bottom: 800, width: 375, height }
+    stubViewport({ sideNavRect, clientWidth: 375 })
+    const rect = { left: 19, top: 400, width: 320, height: 180, dock: 'right' }
+    const saved = { ...rect, ...getScrollMiniVerticalAnchor(rect) }
+    for (const translation of [12, height / 2, height]) {
+      sideNavRect.top = 800 - height + translation
+      sideNavRect.bottom = 800 + translation
+      assert.equal(reanchorScrollMiniPlayerRect(saved).top, rect.top)
+    }
+  }
 })
 
 test('the left dock edge follows the tab rail width', () => {

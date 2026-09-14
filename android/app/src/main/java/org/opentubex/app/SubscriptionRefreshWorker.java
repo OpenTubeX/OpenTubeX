@@ -34,6 +34,10 @@ public final class SubscriptionRefreshWorker extends Worker {
     private static final long MAXIMUM_BATCH_MILLIS = 5 * 60 * 1000;
     private static final SubscriptionRefreshState STATE = new SubscriptionRefreshState();
 
+    static boolean isRendererActive(String token) {
+        return STATE.snapshot(token) != null;
+    }
+
     static void observeRendererActive(Consumer<Boolean> listener) {
         STATE.observeActive(listener);
     }
@@ -51,7 +55,7 @@ public final class SubscriptionRefreshWorker extends Worker {
         super(context, parameters);
     }
 
-    static boolean start(Context context, String token, String title, String cancelLabel) {
+    static synchronized boolean start(Context context, String token, String title, String cancelLabel) {
         if (!SubscriptionRefreshCoordinator.begin(token)) return false;
         STATE.begin(token, title, cancelLabel);
         Data input = new Data.Builder()
@@ -69,38 +73,53 @@ public final class SubscriptionRefreshWorker extends Worker {
         return true;
     }
 
-    static boolean update(Context context, String token, int progress) {
+    // Keep notification publication and cancellation in one critical section.
+    static synchronized boolean startNextFeed(Context context, String token, String title, String cancelLabel) {
+        if (SubscriptionRefreshCoordinator.isCancelled(token)) return false;
+        SubscriptionRefreshState.Snapshot snapshot = STATE.nextFeed(token, title, cancelLabel);
+        if (snapshot == null) return false;
+        publishNotification(context, snapshot);
+        return true;
+    }
+
+    static synchronized boolean update(Context context, String token, int progress) {
         if (!STATE.update(token, progress)) return false;
         SubscriptionRefreshState.Snapshot snapshot = STATE.takeNotificationSnapshot(token);
         if (snapshot == null) return true;
+        publishNotification(context, snapshot);
+        return true;
+    }
+
+    private static synchronized void publishNotification(Context context, SubscriptionRefreshState.Snapshot snapshot) {
+        if (!SubscriptionRefreshCoordinator.isCurrent(snapshot.token) ||
+            SubscriptionRefreshCoordinator.isCancelled(snapshot.token)) return;
         context.getSystemService(NotificationManager.class).notify(
             SubscriptionRefreshNotification.NOTIFICATION_ID,
             SubscriptionRefreshNotification.build(
                 context,
-                token,
+                snapshot.token,
                 snapshot.title,
                 snapshot.cancelLabel,
                 snapshot.progress
             )
         );
-        return true;
     }
 
-    static boolean finish(Context context, String token) {
+    static synchronized boolean finish(Context context, String token) {
         boolean finished = STATE.finish(token);
         SubscriptionRefreshCoordinator.finish(token);
         if (finished) {
             NotificationManager notifications = context.getSystemService(NotificationManager.class);
             notifications.cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
             WorkManager.getInstance(context).cancelUniqueWork(UNIQUE_WORK_NAME).getResult().addListener(
-                () -> notifications.cancel(SubscriptionRefreshNotification.NOTIFICATION_ID),
+                () -> dismissInactiveNotification(context),
                 ContextCompat.getMainExecutor(context)
             );
         }
         return finished;
     }
 
-    static boolean cancel(Context context, String token) {
+    static synchronized boolean cancel(Context context, String token) {
         boolean cancelled = SubscriptionRefreshCoordinator.cancel(token);
         STATE.finish(token);
         if (cancelled) {
@@ -108,6 +127,21 @@ public final class SubscriptionRefreshWorker extends Worker {
                 .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
         }
         return cancelled;
+    }
+
+    static synchronized void dismissInactiveNotification(Context context) {
+        if (!SubscriptionRefreshCoordinator.isActive()) {
+            context.getSystemService(NotificationManager.class)
+                .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+        }
+    }
+
+    static synchronized void completeWorker(Context context, String token) {
+        STATE.finish(token);
+        if (SubscriptionRefreshCoordinator.finish(token)) {
+            context.getSystemService(NotificationManager.class)
+                .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+        }
     }
 
     @NonNull
@@ -141,11 +175,7 @@ public final class SubscriptionRefreshWorker extends Worker {
         } catch (Exception error) {
             return Result.failure();
         } finally {
-            STATE.finish(token);
-            if (SubscriptionRefreshCoordinator.finish(token)) {
-                getApplicationContext().getSystemService(NotificationManager.class)
-                    .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
-            }
+            completeWorker(getApplicationContext(), token);
         }
     }
 
@@ -172,7 +202,6 @@ public final class SubscriptionRefreshWorker extends Worker {
         Set<String> failedProfileIds = new LinkedHashSet<>();
         SubscriptionRefreshNotificationProgress notificationProgress =
             new SubscriptionRefreshNotificationProgress();
-        NotificationManager notifications = context.getSystemService(NotificationManager.class);
         try {
             List<String> orderedChannelIds = new ArrayList<>(channelIds);
             SubscriptionRefreshCheckpoint checkpoint = SubscriptionRefreshCheckpoint.load(
@@ -188,10 +217,8 @@ public final class SubscriptionRefreshWorker extends Worker {
             // Android does not allow starting WorkManager's foreground service. Keep
             // the durable work owned by JobScheduler and make its progress visible
             // with a regular notification instead.
-            notifications.notify(
-                SubscriptionRefreshNotification.NOTIFICATION_ID,
-                SubscriptionRefreshNotification.build(
-                    context,
+            publishNotification(context,
+                new SubscriptionRefreshState.Snapshot(
                     token,
                     feed.title,
                     feed.cancelLabel,
@@ -258,10 +285,8 @@ public final class SubscriptionRefreshWorker extends Worker {
                 checkpoint.save(index + 1, completed, failed, failedProfileIds);
                 int progress = total == 0 ? 100 : (int) Math.round((completed + failed) * 100.0 / total);
                 if (notificationProgress.advanceTo(progress)) {
-                    notifications.notify(
-                        SubscriptionRefreshNotification.NOTIFICATION_ID,
-                        SubscriptionRefreshNotification.build(
-                            context,
+                    publishNotification(context,
+                        new SubscriptionRefreshState.Snapshot(
                             token,
                             feed.title,
                             feed.cancelLabel,
@@ -327,9 +352,7 @@ public final class SubscriptionRefreshWorker extends Worker {
             );
             return Result.retry();
         } finally {
-            if (SubscriptionRefreshCoordinator.finish(token)) {
-                notifications.cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
-            }
+            completeWorker(context, token);
         }
     }
 

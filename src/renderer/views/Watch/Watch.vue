@@ -94,6 +94,7 @@
           :sabr-data="sabrData"
           :legacy-formats="legacyFormats"
           :playback-source-key="playbackSourceKey"
+          :local-file-playback="localFilePlayback"
           :start-time="startTimeSeconds"
           :captions="captions"
           :caption-translations="captionTranslations"
