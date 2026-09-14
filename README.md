@@ -28,24 +28,27 @@ endorsed by, maintained by, or supported by the FreeTube project.
 <hr>
 <p align="center"><a href="#features-added-by-opentubex">Added features</a> &bull; <a href="#screenshots">Screenshots</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#features">Features</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
 <p align="center"><a href="https://opentubex.org/">Website</a> &bull; <a href="PRIVACY.md">Privacy</a> &bull; <a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
+
+> [!NOTE]
+> OpenTubeX is currently in Beta. While it should work well for most users, there are still bugs and missing features that need to be addressed.
+>
+> If you have an idea or if you found a bug, please submit a [GitHub issue](https://github.com/OpenTubeX/OpenTubeX/issues/new/choose) so that we can track it.  Please [search the existing issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) before submitting to prevent duplicates!
+
 <hr>
 
 <a id="why-opentubex"></a>
 ## ✨ Why OpenTubeX?
 
-OpenTubeX is aimed at users who want extensive control over their viewing
-experience. Some of its major areas of focus are:
+Watch YouTube without ads or a Google account, with subscriptions, playlists and
+history stored on your device by default. OpenTubeX gives you control over what
+appears in your feed, how videos play and how the app looks.
 
-- **More playback control**, including per-channel speed and quality preferences, customizable shortcuts, a quick speed bar and silence skipping.
-- **A browser-style desktop workflow** with tabs, configurable session restoration, multiple windows, a scroll mini-player and a watch queue.
-- **Deeper SponsorBlock integration** with a segment side panel, richer skip controls, channel whitelisting, submissions and full-video labels.
-- **More ways to manage and understand your library** through watch-time statistics, configurable history retention, enhanced subscription refreshes and advanced search history.
-- **Optional end-to-end encrypted sync** for subscriptions, playlists, history, profiles, tabs and settings, including saved channel settings.
-
-> [!NOTE] 
-> OpenTubeX is currently in Beta. While it should work well for most users, there are still bugs and missing features that need to be addressed.
->
-> If you have an idea or if you found a bug, please submit a [GitHub issue](https://github.com/OpenTubeX/OpenTubeX/issues/new/choose) so that we can track it.  Please [search the existing issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) before submitting to prevent duplicates!
+- **Choose what fills your feed.** Group subscriptions into profiles, choose whether each channel shows videos, Shorts, live streams or posts, and set daily video limits. Optional recommendations rank unwatched videos locally using your viewing activity and feedback.
+- **Set playback preferences once.** Save speed and quality preferences per channel, customize keyboard shortcuts, skip silence or repeat a section of a video. SponsorBlock lets you choose which segments to skip and which channels to exempt.
+- **Keep watching while you browse.** Open videos in tabs, build a queue and keep the mini-player playing as you switch tabs. Restore your desktop session when you return.
+- **Make the interface fit you.** Choose or create a theme, rearrange navigation and put the controls you use in Quick Settings. Customize your Home page with subscriptions, unfinished videos, playlists and more.
+- **Decide where your library lives.** Keep your data local or enable sync across devices. End-to-end encryption is available with enhanced-privacy sync on a compatible server. See the [privacy guide](PRIVACY.md) for what each option shares.
+- **Keep track of your viewing.** See your watch time in daily and weekly charts, search your watch history and choose how long to keep it.
 
 <a id="features-added-by-opentubex"></a>
 ## 🚀 Features
