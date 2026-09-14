@@ -183,12 +183,18 @@ public class SubscriptionRefreshLifecycleTest {
                         if (!refresh.acquired) throw new Error('Refresh not acquired');
                         window.refreshToken = refresh.token;
                         const result = await fetch('/refresh-lifecycle-response').then(r => r.json());
+                        // Stop before the test deadline even if the refresh fails,
+                        // so animation cannot keep activity teardown waiting for idle.
+                        const rendering = document.body.animate([{ opacity: 1 }, { opacity: 0.5 }], {
+                            duration: 32, iterations: 1500, direction: 'alternate'
+                        });
                         // Feed batches yield between requests. Do not evaluate JavaScript
                         // from the test while waiting: that can wake a frozen renderer.
                         for (let batch = 0; batch < 40; batch++) {
                             await new Promise(resolve => setTimeout(resolve, 1000));
                             window.completedBatches = batch + 1;
                         }
+                        rendering.cancel();
                         await new Promise((resolve, reject) => {
                             const open = indexedDB.open('opentubex-recents-lifecycle-test', 1);
                             open.onupgradeneeded = () => open.result.createObjectStore('results');
@@ -236,6 +242,13 @@ public class SubscriptionRefreshLifecycleTest {
                     }
                 }
                 response.countDown();
+                if (lifecycle == RefreshLifecycle.REMOVED) {
+                    // Rendering must recover when a busy main looper briefly delays
+                    // draining the offscreen display. Do not wake JS by polling it.
+                    for (int delay = 0; delay < 4; delay++) {
+                        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> SystemClock.sleep(500));
+                    }
+                }
                 long completionDeadline = SystemClock.elapsedRealtime() + 55000;
                 while (SubscriptionRefreshCoordinator.isActive() && SystemClock.elapsedRealtime() < completionDeadline) {
                     Thread.sleep(50);
@@ -281,12 +294,18 @@ public class SubscriptionRefreshLifecycleTest {
                     awaitJavascript(view.get(), "window.storedVideo", "\"refresh-fixture\"");
                 }
             } finally {
-                if (restoreScreen) setScreenAwake(true);
-                if (reopenedDuringRefresh != null) reopenedDuringRefresh.close();
                 response.countDown();
-                if (token != null) SubscriptionRefreshWorker.finish(context, token);
-                if (retained.get() != null) {
-                    await("retained renderer cleaned up", () -> !retained.get().isRendererRetained());
+                try {
+                    if (token != null) SubscriptionRefreshWorker.finish(context, token);
+                    if (retained.get() != null) {
+                        await("retained renderer cleaned up", () -> !retained.get().isRendererRetained());
+                    }
+                } finally {
+                    try {
+                        if (reopenedDuringRefresh != null) reopenedDuringRefresh.close();
+                    } finally {
+                        if (restoreScreen) setScreenAwake(true);
+                    }
                 }
             }
         }
