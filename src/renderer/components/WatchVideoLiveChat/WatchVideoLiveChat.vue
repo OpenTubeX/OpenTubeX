@@ -440,7 +440,6 @@ import { getLocalVideoInfo, parseLocalTextRuns } from '../../helpers/api/local'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import {
   createCoalescingPoller,
-  isReplaySeek,
   parseReplayOffsetMs,
   shouldPrefetchReplay,
   takeDueReplayComments
@@ -463,6 +462,10 @@ const props = defineProps({
   channelId: {
     type: String,
     required: true
+  },
+  seekRequest: {
+    type: Object,
+    default: null
   },
   currentTime: {
     type: Number,
@@ -514,7 +517,6 @@ const MAX_LIVE_CHAT_READBACK_COMMENTS = 500
  * @type {{ offsetMs: number, comment: any }[]}
  */
 let pendingReplayComments = []
-let lastCurrentTime = props.currentTime
 
 /**
  * The player position the replay has been fetched up to. Unlike the pending
@@ -913,18 +915,16 @@ function releaseReplayComments() {
   }
 }
 
-watch(() => props.currentTime, (currentTime) => {
+watch([() => props.currentTime, () => props.seekRequest], ([, seekRequest], [, previousSeekRequest]) => {
   if (!isReplay.value || liveChatInstance === null) {
     return
   }
 
-  const seeked = isReplaySeek(lastCurrentTime, currentTime)
-  lastCurrentTime = currentTime
-
-  if (seeked) {
-    // Everything on screen and in the buffer belongs to the position we just left.
+  if (seekRequest !== null && seekRequest !== previousSeekRequest) {
+    // Only an actual player seek invalidates chat. Delayed time updates can span
+    // many seconds on a busy or backgrounded renderer during ordinary playback.
     clearChat()
-    liveChatInstance.seekTo(currentTime * 1000)
+    liveChatInstance.seekTo(seekRequest.seconds * 1000)
   } else {
     releaseReplayComments()
   }

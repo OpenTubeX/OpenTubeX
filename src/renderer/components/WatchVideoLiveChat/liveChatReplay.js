@@ -4,12 +4,6 @@
 export const REPLAY_PREFETCH_MS = 20_000
 
 /**
- * A jump of more than this many seconds between two player position updates is
- * treated as a seek rather than as normal playback.
- */
-export const REPLAY_SEEK_TOLERANCE_SECONDS = 5
-
-/**
  * @param {string|undefined} videoOffsetTimeMsec the raw offset of a replay action
  * @returns {number} the player position the action belongs to, in milliseconds
  */
@@ -17,19 +11,6 @@ export function parseReplayOffsetMs(videoOffsetTimeMsec) {
   const offsetMs = Number.parseInt(videoOffsetTimeMsec)
 
   return Number.isFinite(offsetMs) && offsetMs > 0 ? offsetMs : 0
-}
-
-/**
- * Playback moves the position forward in small steps, so anything else is the
- * player having jumped somewhere, which the replay has to be re-anchored to.
- * @param {number} previousSeconds the previously seen player position
- * @param {number} currentSeconds the current player position
- * @returns {boolean}
- */
-export function isReplaySeek(previousSeconds, currentSeconds) {
-  const elapsedSeconds = currentSeconds - previousSeconds
-
-  return elapsedSeconds < 0 || elapsedSeconds > REPLAY_SEEK_TOLERANCE_SECONDS
 }
 
 /**
