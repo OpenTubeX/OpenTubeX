@@ -1,7 +1,16 @@
 import { abortUnmockedRequest, test, expect, goTo } from '../../helpers/app.mjs'
 import { largeSubscriptionsSeed } from '../../performance/subscriptions.mjs'
 
-test.use({ seed: largeSubscriptionsSeed })
+test.use({
+  seed: {
+    ...largeSubscriptionsSeed,
+    settings: {
+      ...largeSubscriptionsSeed.settings,
+      // Exercise synced seen-state filtering while channel responses arrive.
+      subscriptionSeenVideos: JSON.stringify([{ videoId: 'video-932-35', seenAt: Date.now() }])
+    }
+  }
+})
 
 for (const feed of ['videos', 'new']) {
   test(`refreshes cached channels efficiently with the ${feed} feed visible`, async ({ page }, testInfo) => {

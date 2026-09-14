@@ -1,27 +1,52 @@
+import { computed, isReactive } from 'vue'
 import { parseSubscriptionSeenVideos, mergeSubscriptionSeenVideos } from '../../subscriptionSeenVideos.js'
 import { isHistoryEntryWatched } from '../../history.js'
 
+const cacheSelectors = new WeakMap()
+
 export function applySubscriptionSeenVideosToCache(cache, seenVideos) {
-  const byId = new Map(mergeSubscriptionSeenVideos([], seenVideos).map(entry => [entry.videoId, entry]))
+  const indexSeenVideos = () => new Map(mergeSubscriptionSeenVideos([], seenVideos).map(entry => [entry.videoId, entry]))
+  // Plain mutable inputs cannot invalidate computed results. Keep those calls
+  // uncached, as with the feed's entry snapshots.
+  const canCache = isReactive(cache) && (typeof seenVideos === 'string' || isReactive(seenVideos))
+  let selectors
+  if (canCache) {
+    selectors = cacheSelectors.get(cache)
+    if (!selectors || selectors.seenVideos !== seenVideos) {
+      selectors = { seenVideos, index: computed(indexSeenVideos), channels: new WeakMap() }
+      cacheSelectors.set(cache, selectors)
+    }
+  }
+  const byId = selectors ? selectors.index.value : indexSeenVideos()
   if (byId.size === 0) return cache
 
   return Object.fromEntries(Object.entries(cache).map(([channelId, cached]) => {
     if (!cached?.videos) return [channelId, cached]
-    const videos = cached.videos.map(video => {
-      const seen = byId.get(video.videoId)
-      if (!seen) return video
-      if (seen.unseenAt >= seen.seenAt) {
-        return video.isNewInSubscriptionFeed ? video : { ...video, isNewInSubscriptionFeed: true }
-      }
-      // A members-only upload becoming public is new content again.
-      if (!video.isNewInSubscriptionFeed ||
-          (seen.isMembersOnly && video.isMembersOnly === false)) return video
-      return { ...video, isNewInSubscriptionFeed: false }
-    })
-    return [channelId, videos.every((video, index) => video === cached.videos[index])
-      ? cached
-      : { ...cached, videos }]
+    if (!selectors || !isReactive(cached)) return [channelId, applySeenVideosToChannel(cached, byId)]
+    let channel = selectors.channels.get(cached)
+    if (!channel) {
+      channel = computed(() => applySeenVideosToChannel(cached, selectors.index.value))
+      selectors.channels.set(cached, channel)
+    }
+    return [channelId, channel.value]
   }))
+}
+
+function applySeenVideosToChannel(cached, byId) {
+  const videos = cached.videos.map(video => {
+    const seen = byId.get(video.videoId)
+    if (!seen) return video
+    if (seen.unseenAt >= seen.seenAt) {
+      return video.isNewInSubscriptionFeed ? video : { ...video, isNewInSubscriptionFeed: true }
+    }
+    // A members-only upload becoming public is new content again.
+    if (!video.isNewInSubscriptionFeed ||
+        (seen.isMembersOnly && video.isMembersOnly === false)) return video
+    return { ...video, isNewInSubscriptionFeed: false }
+  })
+  return videos.every((video, index) => video === cached.videos[index])
+    ? cached
+    : { ...cached, videos }
 }
 
 export async function syncSubscriptionSeenVideos(client, store) {
