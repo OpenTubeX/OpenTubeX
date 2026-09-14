@@ -484,6 +484,12 @@
 
 <script setup>
 import '@fontsource-variable/geist'
+import '@fontsource-variable/figtree'
+import '@fontsource-variable/source-sans-3'
+import '@fontsource-variable/ibm-plex-sans'
+import '@fontsource-variable/inter'
+import '@fontsource-variable/manrope'
+import '@fontsource-variable/plus-jakarta-sans'
 import FtRetryImage from './components/FtRetryImage.vue'
 import { initializeAndroidYtDlp, ytDlp } from './helpers/ytDlp'
 import { parseAutomaticDownloadRules } from './helpers/automaticDownloadRules'

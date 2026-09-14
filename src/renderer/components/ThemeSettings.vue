@@ -67,10 +67,19 @@
         setting-key="appFont"
         :select-names="fontNames"
         :select-values="fontValues"
+        :option-groups="fontGroups"
+        :option-group-labels="{
+          bundled: t('Settings.Theme Settings.Font.Bundled Fonts'),
+          system: t('Settings.Theme Settings.Font.System Fonts')
+        }"
         :icon="['fas', 'font']"
         @change="updateAppFont"
         @open="loadSystemFonts"
-      />
+      >
+        <template #option="{ label, value }">
+          <span :style="{ fontFamily: getAppFontFamily(value) }">{{ label }}</span>
+        </template>
+      </FtSelect>
       <FtSelect
         :placeholder="$t('Settings.Theme Settings.Main Color Theme.Main Color Theme')"
         :value="mainColor"
@@ -443,7 +452,7 @@ import { getMissingTabAvatarTabs, loadMissingTabAvatars } from '../helpers/loadT
 import { showToast } from '../helpers/utils'
 import { ICON_PACKS } from '../icons/iconPackState'
 import { CAPACITOR_UI_SCALE_MIN, CAPACITOR_UI_SCALE_MAX } from '../helpers/capacitorUiScale'
-import { DEFAULT_APP_FONT, normalizeAppFont, SYSTEM_APP_FONT } from '../helpers/appFont'
+import { DEFAULT_APP_FONT, getAppFontFamily, normalizeAppFont, SYSTEM_APP_FONT } from '../helpers/appFont'
 
 const { locale, t } = useI18n()
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
@@ -502,23 +511,30 @@ const systemFonts = ref([])
 let systemFontsPromise = null
 
 const appFont = computed(() => normalizeAppFont(store.getters.getAppFont))
+const bundledFontNames = ['Figtree', 'Source Sans 3', 'IBM Plex Sans', 'Inter', 'Manrope', 'Plus Jakarta Sans']
+const bundledFontValues = bundledFontNames.map(name => `${name} Variable`)
 const fontValues = computed(() => [
   DEFAULT_APP_FONT,
   'Roboto',
+  ...bundledFontValues,
   SYSTEM_APP_FONT,
   ...[...new Set([
     ...IS_CAPACITOR ? [] : [appFont.value],
     ...systemFonts.value
   ])]
-    .filter(font => font !== DEFAULT_APP_FONT && font !== 'Roboto' && font !== SYSTEM_APP_FONT)
+    .filter(font => font !== DEFAULT_APP_FONT && font !== 'Roboto' && font !== SYSTEM_APP_FONT && !bundledFontValues.includes(font))
     .toSorted(new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' }).compare)
 ])
 const fontNames = computed(() => [
   'Geist',
   'Roboto',
+  ...bundledFontNames,
   t('Settings.Theme Settings.Font.System Default'),
-  ...fontValues.value.slice(3)
+  ...fontValues.value.slice(3 + bundledFontValues.length)
 ])
+
+const fontGroups = computed(() => fontValues.value.map((font, index) =>
+  index < 2 + bundledFontValues.length ? 'bundled' : 'system'))
 
 function updateAppFont(value) {
   store.dispatch('updateAppFont', value)

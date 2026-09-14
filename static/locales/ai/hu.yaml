@@ -388,6 +388,8 @@ Settings:
       App Font: Alkalmazás betűkészlete
       System Default: A rendszer alapértelmezettje
       Unable to Load: A rendszerre telepített betűkészletek nem tölthetők be
+      Bundled Fonts: Mellékelt betűtípusok
+      System Fonts: Rendszerbetűtípusok
     Always Show Scrollbars: Görgetősávok mindig láthatók
     Base Theme:
       Dynamic colors: Dinamikus színek

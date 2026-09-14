@@ -388,6 +388,8 @@ Settings:
       App Font: 應用程式字型
       System Default: 系統預設
       Unable to Load: 無法載入已安裝的系統字型
+      Bundled Fonts: 內建字型
+      System Fonts: 系統字型
     Always Show Scrollbars: 永遠顯示捲軸
     Base Theme:
       Dynamic colors: 動態色彩

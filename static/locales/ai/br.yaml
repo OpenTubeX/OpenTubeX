@@ -388,6 +388,8 @@ Settings:
       App Font: "Nodrezh an arload"
       System Default: "Re ar reizhiad dre ziouer"
       Unable to Load: "N'eus ket bet gallet kargañ nodrezhoù ar reizhiad staliet"
+      Bundled Fonts: Nodrezhoù enframmet
+      System Fonts: Nodrezhoù ar reizhiad
     Always Show Scrollbars: "Diskouez ar barrennoù dibunañ bepred"
     Base Theme:
       Dynamic colors: Livioù dinamek

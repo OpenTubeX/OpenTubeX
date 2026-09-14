@@ -494,6 +494,8 @@ Settings:
       App Font: Programos šriftas
       System Default: Sistemos numatytasis
       Unable to Load: Nepavyko įkelti įdiegtų sistemos šriftų
+      Bundled Fonts: Kartu pateikiami šriftai
+      System Fonts: Sistemos šriftai
     Always Show Scrollbars: Visada rodyti slankjuostes
     Base Theme:
       Dynamic colors: Dinaminės spalvos

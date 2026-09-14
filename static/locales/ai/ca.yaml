@@ -511,6 +511,8 @@ Settings:
       App Font: Tipus de lletra de l'aplicació
       System Default: Predeterminat del sistema
       Unable to Load: No s'han pogut carregar els tipus de lletra instal·lats al sistema
+      Bundled Fonts: Tipus de lletra inclosos
+      System Fonts: Tipus de lletra del sistema
     Always Show Scrollbars: Mostra sempre les barres de desplaçament
     Hide OpenTubeX Header Logo: Oculta el logotip de l'OpenTubeX de la capçalera
     Base Theme:

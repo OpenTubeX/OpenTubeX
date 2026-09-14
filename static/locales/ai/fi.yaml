@@ -392,6 +392,8 @@ Settings:
       App Font: Sovelluksen fontti
       System Default: Järjestelmän oletus
       Unable to Load: Asennettuja järjestelmäfontteja ei voitu ladata
+      Bundled Fonts: Mukana tulevat fontit
+      System Fonts: Järjestelmän fontit
     Always Show Scrollbars: Näytä vierityspalkit aina
     Base Theme:
       Dynamic colors: Dynaamiset värit

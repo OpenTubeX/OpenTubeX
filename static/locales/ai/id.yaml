@@ -392,6 +392,8 @@ Settings:
       App Font: Font aplikasi
       System Default: Bawaan sistem
       Unable to Load: Tidak dapat memuat font sistem yang terpasang
+      Bundled Fonts: Font yang disertakan
+      System Fonts: Font sistem
     Always Show Scrollbars: Selalu Tampilkan Bilah Gulir
     Base Theme:
       Dynamic colors: Warna dinamis

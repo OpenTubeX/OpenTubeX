@@ -388,6 +388,8 @@ Settings:
       App Font: Carattere dell'app
       System Default: Predefinito del sistema
       Unable to Load: Impossibile caricare i caratteri installati nel sistema
+      Bundled Fonts: Caratteri inclusi
+      System Fonts: Caratteri di sistema
     Always Show Scrollbars: Mostra sempre le barre di scorrimento
     Base Theme:
       Dynamic colors: Colori dinamici

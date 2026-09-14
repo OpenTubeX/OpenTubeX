@@ -388,6 +388,8 @@ Settings:
       App Font: 应用字体
       System Default: 系统默认
       Unable to Load: 无法加载已安装的系统字体
+      Bundled Fonts: 内置字体
+      System Fonts: 系统字体
     Always Show Scrollbars: 始终显示滚动条
     Base Theme:
       Dynamic colors: 动态颜色

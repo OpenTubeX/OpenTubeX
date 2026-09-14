@@ -390,6 +390,8 @@ Settings:
       App Font: Leturgerð forrits
       System Default: Sjálfgefið kerfisletur
       Unable to Load: Ekki tókst að hlaða uppsettum kerfisleturgerðum
+      Bundled Fonts: Meðfylgjandi leturgerðir
+      System Fonts: Kerfisleturgerðir
     Always Show Scrollbars: Sýna alltaf skrunstikur
     Base Theme:
       Dynamic colors: Breytilegir litir

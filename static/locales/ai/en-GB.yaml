@@ -375,6 +375,8 @@ Settings:
       App Font: App font
       System Default: System default
       Unable to Load: Unable to load installed system fonts
+      Bundled Fonts: Bundled fonts
+      System Fonts: System fonts
     Always Show Scrollbars: Always Show Scrollbars
     Base Theme:
       Dynamic colors: Dynamic colours

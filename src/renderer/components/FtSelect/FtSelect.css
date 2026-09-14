@@ -399,3 +399,14 @@
   white-space: normal;
   overflow-wrap: anywhere;
 }
+
+.selectGroupHeading {
+  margin: 0;
+  padding-block: 8px;
+  padding-inline: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--secondary-text-color);
+  background-color: color-mix(in srgb, var(--primary-text-color) 5%, var(--card-bg-color));
+  list-style: none;
+}

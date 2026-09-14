@@ -503,6 +503,8 @@ Settings:
       App Font: Pisava aplikacije
       System Default: Sistemsko privzeto
       Unable to Load: Nameščenih sistemskih pisav ni mogoče naložiti
+      Bundled Fonts: Priložene pisave
+      System Fonts: Sistemske pisave
     Always Show Scrollbars: Vedno prikaži drsne trakove
     Base Theme:
       Dynamic colors: Dinamične barve

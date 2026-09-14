@@ -388,6 +388,8 @@ Settings:
       App Font: Skrift i appen
       System Default: Systemets standardinnstilling
       Unable to Load: Kan ikke laste inn installerte systemskrifter
+      Bundled Fonts: Medfølgende skrifter
+      System Fonts: Systemskrifter
     Always Show Scrollbars: Vis alltid rullefelt
     Base Theme:
       Dynamic colors: Dynamiske farger

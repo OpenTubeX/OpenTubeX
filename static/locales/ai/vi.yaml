@@ -392,6 +392,8 @@ Settings:
       App Font: Phông chữ ứng dụng
       System Default: Mặc định của hệ thống
       Unable to Load: Không thể tải các phông chữ hệ thống đã cài đặt
+      Bundled Fonts: Phông chữ đi kèm
+      System Fonts: Phông chữ hệ thống
     Always Show Scrollbars: Luôn hiện thanh cuộn
     Base Theme:
       Dynamic colors: Màu động

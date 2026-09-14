@@ -392,6 +392,8 @@ Settings:
       App Font: Γραμματοσειρά εφαρμογής
       System Default: Προεπιλογή συστήματος
       Unable to Load: Δεν ήταν δυνατή η φόρτωση των εγκατεστημένων γραμματοσειρών συστήματος
+      Bundled Fonts: Ενσωματωμένες γραμματοσειρές
+      System Fonts: Γραμματοσειρές συστήματος
     Always Show Scrollbars: Μόνιμη εμφάνιση γραμμών κύλισης
     Base Theme:
       Dynamic colors: Δυναμικά χρώματα

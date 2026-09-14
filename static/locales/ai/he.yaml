@@ -392,6 +392,8 @@ Settings:
       App Font: גופן היישום
       System Default: ברירת המחדל של המערכת
       Unable to Load: לא ניתן לטעון גופני מערכת מותקנים
+      Bundled Fonts: גופנים כלולים
+      System Fonts: גופני מערכת
     Always Show Scrollbars: הצגת פסי גלילה תמיד
     Base Theme:
       Dynamic colors: צבעים דינמיים

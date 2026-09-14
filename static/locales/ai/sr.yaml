@@ -383,6 +383,8 @@ Settings:
       App Font: Фонт апликације
       System Default: Системски подразумевани фонт
       Unable to Load: Није могуће учитати инсталиране системске фонтове
+      Bundled Fonts: Уграђени фонтови
+      System Fonts: Системски фонтови
     Always Show Scrollbars: Увек приказуј траке за померање
     Base Theme:
       Dynamic colors: Динамичке боје

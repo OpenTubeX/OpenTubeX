@@ -649,6 +649,8 @@ Settings:
       App Font: App-Schriftart
       System Default: Systemstandard
       Unable to Load: Installierte Systemschriftarten konnten nicht geladen werden
+      Bundled Fonts: Mitgelieferte Schriftarten
+      System Fonts: Systemschriftarten
     Always Show Scrollbars: Scrollbars immer anzeigen
     Light Theme: Helles Design
     Dark Theme: Dunkles Design

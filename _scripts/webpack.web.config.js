@@ -170,6 +170,11 @@ const config = {
     new CopyWebpackPlugin({
       patterns: [
         {
+          from: '*/LICENSE',
+          context: path.join(__dirname, '../node_modules/@fontsource-variable'),
+          to: 'fonts/licenses/[path][name][ext]'
+        },
+        {
           from: path.join(__dirname, '../node_modules/swiper/modules/{a11y,navigation,pagination}-element.css').replaceAll('\\', '/'),
           to: `swiper-${swiperVersion}.css`,
           context: path.join(__dirname, '../node_modules/swiper/modules'),

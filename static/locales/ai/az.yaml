@@ -375,6 +375,8 @@ Settings:
       App Font: Tətbiqin şrifti
       System Default: Sistemin ilkin şrifti
       Unable to Load: Quraşdırılmış sistem şriftlərini yükləmək mümkün olmadı
+      Bundled Fonts: Daxil edilmiş şriftlər
+      System Fonts: Sistem şriftləri
     Always Show Scrollbars: Sürüşdürmə çubuqlarını həmişə göstər
     Base Theme:
       Dynamic colors: Dinamik rənglər

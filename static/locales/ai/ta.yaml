@@ -393,6 +393,8 @@ Settings:
       App Font: செயலி எழுத்துரு
       System Default: கணினி இயல்புநிலை
       Unable to Load: நிறுவப்பட்ட கணினி எழுத்துருக்களை ஏற்ற முடியவில்லை
+      Bundled Fonts: சேர்க்கப்பட்ட எழுத்துருக்கள்
+      System Fonts: கணினி எழுத்துருக்கள்
     Always Show Scrollbars: உருள் பட்டைகளை எப்போதும் காட்டு
     Base Theme:
       Dynamic colors: மாறும் வண்ணங்கள்

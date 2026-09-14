@@ -367,6 +367,8 @@ Settings:
       App Font: Шрифт приложения
       System Default: Системный
       Unable to Load: Не удалось загрузить установленные системные шрифты
+      Bundled Fonts: Встроенные шрифты
+      System Fonts: Системные шрифты
     Always Show Scrollbars: Всегда показывать полосы прокрутки
     Base Theme:
       Dynamic colors: Динамические цвета
