@@ -1439,7 +1439,14 @@ async function getChannelShortsLocal(channel, t, errorChannels, failedAttempts =
       try {
         const playlist = await getLocalPlaylist(playlistId, activeRefresh?.controller.signal)
         const videos = parseLocalPlaylistVideos(playlist.items)
-        videos.forEach(video => { video.isShort = true })
+        videos.forEach(video => {
+          video.isShort = true
+          // Shorts playlist entries can omit the channel byline.
+          if (video.author == null || video.author === 'N/A') {
+            video.author = channel.name
+          }
+          video.authorId ??= channel.id
+        })
         return { videos }
       } catch (error) {
         if (error.message !== 'The playlist does not exist.') throw error

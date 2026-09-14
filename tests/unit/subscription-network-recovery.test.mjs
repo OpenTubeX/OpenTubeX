@@ -29,7 +29,7 @@ const source = (await readFile(new URL('../../src/renderer/helpers/subscriptions
 
 // Exercise the real refresh, fallback, cache, and notification paths with fake
 // platform APIs. Webpack-only imports are supplied in the isolated context.
-function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('Failed to fetch'), webCors = false, backend = 'local', fallbackWorks = false, rssStatus = 200, channelInfo = { has_shorts: true, getShorts: async () => ({ videos: [] }) }, playlistError = null, stallChannelProbe = false, channelStatus = rssStatus, scraperError = null, shortPublishDate = '2026-09-06T12:00:00Z', beforeShortMetadata = async () => {}, finishNative = async () => {} } = {}) {
+function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('Failed to fetch'), webCors = false, backend = 'local', fallbackWorks = false, rssStatus = 200, channelInfo = { has_shorts: true, getShorts: async () => ({ videos: [] }) }, playlistError = null, playlistItems = [], stallChannelProbe = false, channelStatus = rssStatus, scraperError = null, shortPublishDate = '2026-09-06T12:00:00Z', beforeShortMetadata = async () => {}, finishNative = async () => {} } = {}) {
   const window = new EventTarget()
   const navigator = { onLine: online }
   const toasts = []
@@ -110,8 +110,9 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     getLocalChannelCommunity: async id => (await fetchLocal(id)).posts,
     invidiousGetCommunityPosts: fetchInvidious,
     getLocalChannel: async () => channelInfo,
-    getLocalPlaylist: async () => { if (playlistError) throw playlistError; return { items: [] } },
-    parseLocalPlaylistVideos: () => [],
+    getLocalPlaylist: async () => { if (playlistError) throw playlistError; return { items: playlistItems } },
+    parseLocalSubscriberCount: text => Number.parseInt(text, 10),
+    calculatePublishedDate: () => Date.parse(shortPublishDate),
     mergeSubscriptionShortThumbnails: videos => videos,
     DOMParser: class {
       parseFromString() {
@@ -119,6 +120,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
       }
     },
   })
+  vm.runInContext(localSource.slice(localSource.indexOf('export function parseLocalPlaylistVideo('), localSource.indexOf('export function parseLocalListVideo(')).replace(/^export /gm, ''), context)
   vm.runInContext(shortsParserSource, context)
   vm.runInContext(networkSource, context)
   const sharedRecovery = vm.runInContext('initializeNetworkRecovery()', context)
@@ -633,5 +635,54 @@ for (const count of [1, 3, 4, 5]) {
     const names = Array.from({ length: Math.min(count, 3) }, (_, i) => `Channel ${i}`).join(', ')
     const more = count > 3 ? ` and ${count - 3} more` : ''
     assert.equal(app.toasts[0][0].message(), `Channels that could not be refreshed: ${names}${more}. Click to view details.`)
+  })
+}
+
+for (const type of ['ReelItem', 'ShortsLockupView']) {
+  test(`Shorts playlist refresh preserves the channel byline for ${type}`, async () => {
+    const channelId = 'UCshorts-channel'
+    const common = { type }
+    const short = type === 'ReelItem'
+      ? { ...common, id: 'short-video', title: { text: 'A Short' }, views: { text: '123' }, thumbnails: [] }
+      : { ...common, on_tap_endpoint: { payload: { videoId: 'short-video' } }, overlay_metadata: { primary_text: { text: 'A Short' } }, accessibility_text: 'A Short 123 views', thumbnail: [] }
+    const app = createRefresh({ rssStatus: 404, playlistItems: [short] })
+    app.getters.getActiveProfile.subscriptions = [{ id: channelId, name: 'Shorts channel' }]
+    app.getters.getBackendFallback = false
+    app.reconnect()
+    const errorChannels = []
+    await app.refresh({ t: key => key, errorChannels })
+    assert.deepEqual(errorChannels, [])
+    const update = app.writes.find(write => write.key === 'updateSubscriptionShortsCacheByChannel')
+    assert.equal(update.value.videos[0].videoId, 'short-video')
+    assert.equal(update.value.videos[0].author, 'Shorts channel')
+    assert.equal(update.value.videos[0].authorId, channelId)
+    assert.equal(update.value.videos[0].isShort, true)
+  })
+}
+
+for (const hasByline of [false, true]) {
+  test(`Shorts playlist refresh handles PlaylistVideo with byline=${hasByline}`, async () => {
+    const channelId = 'UCshorts-channel'
+    const short = new YTNodes.PlaylistVideo({
+      videoId: 'short-video',
+      title: { simpleText: 'A Short', accessibility: { accessibilityData: { label: 'A Short' } } },
+      thumbnail: { thumbnails: [] },
+      lengthSeconds: '30',
+      ...(hasByline ? { shortBylineText: { runs: [{
+        text: 'Provided channel',
+        navigationEndpoint: { browseEndpoint: { browseId: 'UCprovided-channel' } }
+      }] } } : {})
+    })
+    const app = createRefresh({ rssStatus: 404, playlistItems: [short] })
+    app.getters.getActiveProfile.subscriptions = [{ id: channelId, name: 'Shorts channel' }]
+    app.getters.getBackendFallback = false
+    app.reconnect()
+    const errorChannels = []
+    await app.refresh({ t: key => key, errorChannels })
+    assert.deepEqual(errorChannels, [])
+    const update = app.writes.find(write => write.key === 'updateSubscriptionShortsCacheByChannel')
+    assert.equal(update.value.videos[0].author, hasByline ? 'Provided channel' : 'Shorts channel')
+    assert.equal(update.value.videos[0].authorId, hasByline ? 'UCprovided-channel' : channelId)
+    assert.equal(update.value.videos[0].isShort, true)
   })
 }
