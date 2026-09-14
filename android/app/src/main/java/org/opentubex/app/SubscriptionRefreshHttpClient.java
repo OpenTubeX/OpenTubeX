@@ -52,7 +52,7 @@ final class SubscriptionRefreshHttpClient {
                     throw new IOException("Subscription API returned an error");
                 }
                 if (format.equals("local") || format.equals("localPlaylist")) {
-                    if (!response.has("contents") || response.optString("alerts").contains("\"type\":\"ERROR\"")) {
+                    if (!hasSelectedContentTab(response.optJSONObject("contents")) || response.optString("alerts").contains("\"type\":\"ERROR\"")) {
                         throw new IOException("Channel unavailable");
                     }
                     JSONObject metadata = response.optJSONObject("metadata");
@@ -90,6 +90,24 @@ final class SubscriptionRefreshHttpClient {
             }
         }
         throw new IOException("Background subscription requests failed", lastError);
+    }
+
+    private static boolean hasSelectedContentTab(JSONObject contents) {
+        if (contents == null) return false;
+        JSONObject browse = contents.optJSONObject("twoColumnBrowseResultsRenderer");
+        Object tabs = browse == null ? null : browse.opt("tabs");
+        if (tabs == null || tabs == JSONObject.NULL) {
+            browse = contents.optJSONObject("singleColumnBrowseResultsRenderer");
+            tabs = browse == null ? null : browse.opt("tabs");
+        }
+        if (!(tabs instanceof org.json.JSONArray)) return false;
+        org.json.JSONArray items = (org.json.JSONArray) tabs;
+        for (int i = 0; i < items.length(); i++) {
+            JSONObject item = items.optJSONObject(i);
+            JSONObject tab = item == null ? null : item.optJSONObject("tabRenderer");
+            if (tab != null && Boolean.TRUE.equals(tab.opt("selected"))) return tab.optJSONObject("content") != null;
+        }
+        return false;
     }
 
     private static Object find(Object node, String key) {
@@ -146,7 +164,7 @@ final class SubscriptionRefreshHttpClient {
     private static String fetchRequest(JSONObject request, String type, String channelId)
         throws IOException, JSONException {
         URL url = new URL(substitute(request.getString("url"), type, channelId));
-        if (!url.getProtocol().equals("https")) throw new IOException("Background refresh requires HTTPS");
+        if (!url.getProtocol().equals("https") && !url.getProtocol().equals("http")) throw new IOException("Background refresh requires HTTP or HTTPS");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setConnectTimeout(TIMEOUT_MILLIS);
         connection.setReadTimeout(TIMEOUT_MILLIS);

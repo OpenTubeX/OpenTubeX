@@ -27,7 +27,7 @@ export function createSubscriptionBackgroundService(userDataPath) {
         requests.set(message.id, controller)
         try {
           const { request } = message
-          if (new URL(request.url).protocol !== 'https:') throw new Error('Background refresh requires HTTPS')
+          if (!['http:', 'https:'].includes(new URL(request.url).protocol)) throw new Error('Background refresh requires an HTTP URL')
           const response = await net.fetch(request.url, {
             method: request.method ?? 'GET',
             body: request.body,
@@ -56,14 +56,23 @@ export function createSubscriptionBackgroundService(userDataPath) {
       if (message.error) operation?.reject(new Error(message.error))
       else operation?.resolve(message.value)
     })
-    child.once('exit', () => {
-      if (worker !== child) return
-      worker = null
-      for (const request of requests.values()) request.abort()
-      requests.clear()
-      for (const operation of pending.values()) operation.reject(new Error('Background refresh process exited'))
-      pending.clear()
-    })
+    child.once('exit', () => releaseWorker(child))
+  }
+
+  function releaseWorker(child) {
+    if (worker !== child) return
+    worker = null
+    for (const request of requests.values()) request.abort()
+    requests.clear()
+    for (const operation of pending.values()) operation.reject(new Error('Background refresh process exited'))
+    pending.clear()
+  }
+
+  function stopWorker() {
+    const child = worker
+    if (!child) return
+    releaseWorker(child)
+    child.kill()
   }
 
   function call(method, value) {
@@ -92,11 +101,18 @@ export function createSubscriptionBackgroundService(userDataPath) {
       if (!worker && !value.enabled) return
       await call('configure', value)
       await call('background', background && value.enabled && net.isOnline())
+      if (configuration === value && !value.enabled && pending.size === 0) stopWorker()
     },
     async setBackground(value) { background = value; if (worker) await call('background', value && configuration?.enabled === true && net.isOnline()) },
     completed(value) { return worker ? call('completed', value) : Promise.resolve() },
-    next() { return !worker && !existsSync(resultPath) ? Promise.resolve(null) : call('next') },
+    async next() {
+      if (!worker && !existsSync(resultPath)) return null
+      const result = await call('next')
+      // A disabled feature may still briefly need the worker to drain saved results.
+      if (!configuration?.enabled && result === null && pending.size === 0) stopWorker()
+      return result
+    },
     acknowledge(id) { return call('acknowledge', id) },
-    stop() { stopped = true; clearInterval(timer); worker?.kill() }
+    stop() { stopped = true; clearInterval(timer); stopWorker() }
   }
 }

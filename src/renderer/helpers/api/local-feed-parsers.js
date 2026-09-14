@@ -1109,15 +1109,20 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
   /** Parse native background HTTP results without making new network requests. */
   function normalizeLocalSubscriptionFeed(feedType, payload, channelId, timestamp = Date.now()) {
     const { data } = payload
-    if (payload.backgroundFormat === 'localPlaylist') return parseLocalPlaylistVideos(new YT.Playlist(null, { data }).items)
-    const channel = new YT.Channel(null, { data })
-    const { name } = parseLocalChannelHeader(channel, true)
-    const suffix = { videos: '/videos', shorts: '/shorts', live: '/streams', posts: '/posts' }[feedType]
-    if (!channel.current_tab?.endpoint.metadata.url?.endsWith(suffix)) return []
-    if (feedType === 'shorts') return parseLocalChannelShorts(channel.videos, channelId, name)
-    const page = payload.continuation ? new Mixins.Feed(null, { data: payload.continuation }) : channel
-    const entries = feedType === 'posts' ? parseLocalCommunityPosts(channel.posts) : parseLocalChannelVideos(page.videos, channelId, name)
-    // Channel pages express publication dates relative to the fetch time.
+    let entries
+    if (payload.backgroundFormat === 'localPlaylist') {
+      entries = parseLocalPlaylistVideos(new YT.Playlist(null, { data }).items)
+    } else {
+      const channel = new YT.Channel(null, { data })
+      const { name } = parseLocalChannelHeader(channel, true)
+      const suffix = { videos: '/videos', shorts: '/shorts', live: '/streams', posts: '/posts' }[feedType]
+      if (!channel.current_tab?.endpoint.metadata.url?.endsWith(suffix)) return []
+      const page = payload.continuation ? new Mixins.Feed(null, { data: payload.continuation }) : channel
+      entries = feedType === 'shorts'
+        ? parseLocalChannelShorts(channel.videos, channelId, name)
+        : feedType === 'posts' ? parseLocalCommunityPosts(channel.posts) : parseLocalChannelVideos(page.videos, channelId, name)
+    }
+    // Channel and playlist pages express publication dates relative to the fetch time.
     const elapsed = Math.max(0, Date.now() - timestamp)
     for (const entry of entries) {
       if (Number.isFinite(entry.published) && !entry.isUpcoming) entry.published -= elapsed

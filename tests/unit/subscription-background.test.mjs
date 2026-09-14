@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { createSubscriptionBackgroundScheduler } from '../../src/main/subscriptionBackgroundScheduler.js'
-import { createBackgroundSubscriptionRequests, fetchBackgroundSubscriptionChannel, resolveBackgroundSubscriptionRequest } from '../../src/subscriptionBackgroundRequests.js'
+import { createBackgroundSubscriptionRequests, fetchBackgroundSubscriptionChannel, parseBackgroundSubscriptionResponse, resolveBackgroundSubscriptionRequest } from '../../src/subscriptionBackgroundRequests.js'
 import { createAndroidSubscriptionRefreshConfiguration } from '../../src/renderer/helpers/androidSubscriptionRefreshData.js'
 
 for (const backend of ['local', 'invidious']) {
@@ -15,7 +15,7 @@ for (const backend of ['local', 'invidious']) {
           assert.equal(request.authorization, backend === 'local' ? undefined : 'Basic private')
           assert.ok(!request.url.includes('%CHANNEL%'))
         }
-        assert.equal(plans[0].format, feed === 'posts' ? backend : (useRss || feed === 'shorts' ? 'rss' : backend))
+        assert.equal(plans[0].format, feed === 'posts' ? backend : (useRss ? 'rss' : backend))
       }
     })
   }
@@ -26,9 +26,9 @@ test('fallback tries the other backend only when enabled and does not leak autho
   const urls = []
   const result = await fetchBackgroundSubscriptionChannel({ requests }, 'videos', 'UCtest', new AbortController().signal, async request => {
     urls.push(request.url)
-    if (request.url.startsWith('https://instance.example')) throw new Error('Offline instance')
+    if (new URL(request.url).hostname === 'instance.example') throw new Error('Offline instance')
     assert.equal(request.authorization, undefined)
-    return JSON.stringify({ contents: {} })
+    return JSON.stringify({ contents: { twoColumnBrowseResultsRenderer: { tabs: [{ tabRenderer: { selected: true, content: {} } }] } } })
   })
   assert.equal(result.backgroundFormat, 'local')
   assert.equal(urls.length, 3)
@@ -155,7 +155,7 @@ test('empty Live pages follow continuations before saving a result', async () =>
     bodies.push(body)
     return JSON.stringify(body.continuation
       ? { onResponseReceivedActions: [{ videoRenderer: { videoId: 'live' } }] }
-      : { contents: { continuationItemRenderer: { continuationEndpoint: { continuationCommand: { token: 'next' } } } } })
+      : { contents: { twoColumnBrowseResultsRenderer: { tabs: [{ tabRenderer: { selected: true, content: { continuationItemRenderer: { continuationEndpoint: { continuationCommand: { token: 'next' } } } } } }] } } })
   })
   assert.equal(bodies.length, 2)
   assert.equal(bodies[1].continuation, 'next')
@@ -167,16 +167,29 @@ test('closing the last window leaves process shutdown to Quit, including macOS r
   const { readFile } = await import('node:fs/promises')
   const vm = await import('node:vm')
   const source = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
-  const start = source.indexOf("app.on('window-all-closed', ") + "app.on('window-all-closed', ".length
-  const end = source.indexOf('\n  })', start) + '\n  }'.length
-  const calls = []
-  const closed = vm.runInNewContext(`(${source.slice(start, end)})`, {
-    mainWindow: {}, trayWindows: [], keepRefreshingInBackground: false, isQuitting: false,
-    backgroundSubscriptions: { stop: () => calls.push('stop') },
-    handleQuit: () => calls.push('cleanup'),
-  })
-  closed()
-  assert.deepEqual(calls, ['cleanup'])
+  const marker = "app.on('window-all-closed', "
+  const markerIndex = source.indexOf(marker)
+  assert.notEqual(markerIndex, -1, 'window-all-closed handler must exist')
+  const start = markerIndex + marker.length
+  const closingIndex = source.indexOf('\n  })', start)
+  assert.ok(closingIndex > start, 'window-all-closed handler must have a closing boundary')
+  const end = closingIndex + '\n  }'.length
+  for (const [enabled, quitting, expected] of [
+    [false, false, ['cleanup']], [true, false, ['tray', 'background']], [true, true, ['cleanup']]
+  ]) {
+    const calls = []
+    const closed = vm.runInNewContext(`(${source.slice(start, end)})`, {
+      mainWindow: {}, trayWindows: [], keepRefreshingInBackground: enabled, isQuitting: quitting,
+      backgroundSubscriptions: {
+        stop: () => calls.push('stop'),
+        setBackground: async value => { assert.equal(value, true); calls.push('background') }
+      },
+      ensureBackgroundTray: () => calls.push('tray'),
+      handleQuit: () => calls.push('cleanup'),
+    })
+    closed()
+    assert.deepEqual(calls, expected)
+  }
 })
 
 test('background RSS enrichment distinguishes ordinary low-view uploads from scheduled premieres', async () => {
@@ -208,4 +221,106 @@ test('failed RSS enrichment remains retryable and cancellation prevents a comple
     controller.abort()
     throw controller.signal.reason
   }, controller.signal), { name: 'AbortError' })
+})
+
+test('Shorts date enrichment preserves known dates and validates fetched video identity', async () => {
+  const { enrichShortPublicationDates } = await import('../../src/renderer/helpers/api/short-publication.js')
+  const requested = []
+  const entries = await enrichShortPublicationDates([
+    { videoId: 'known', published: 123 }, { videoId: 'cached' }, { videoId: 'fresh' }
+  ], async id => {
+    requested.push(id)
+    return `var ytInitialPlayerResponse = ${JSON.stringify({ videoDetails: { videoId: id }, microformat: { playerMicroformatRenderer: { publishDate: '2026-09-14T08:00:00Z' } } })};`
+  }, [{ videoId: 'cached', published: 456 }])
+  assert.deepEqual(requested, ['fresh'])
+  assert.deepEqual(entries.map(entry => entry.published), [123, 456, Date.parse('2026-09-14T08:00:00Z')])
+  await assert.rejects(enrichShortPublicationDates([{ videoId: 'fresh' }], async () => 'var ytInitialPlayerResponse = {"videoDetails":{"videoId":"other"},"microformat":{"playerMicroformatRenderer":{"publishDate":"2026-09-14"}}}'), /publication date/)
+})
+
+test('utility completes missing Local Shorts dates without forwarding backend credentials', async () => {
+  const { readFile } = await import('node:fs/promises')
+  const vm = await import('node:vm')
+  const { enrichShortPublicationDates } = await import('../../src/renderer/helpers/api/short-publication.js')
+  const { mapConcurrently } = await import('../../src/renderer/helpers/concurrent-map.js')
+  const source = await readFile(new URL('../../src/renderer/helpers/api/background-feed-parser.js', import.meta.url), 'utf8')
+  const context = vm.createContext({
+    enrichShortPublicationDates, mapConcurrently,
+    parseBackgroundFeed: () => [{ videoId: 'short', isShort: true }]
+  })
+  vm.runInContext(source.slice(source.indexOf('export async function parseAndEnrichBackgroundFeed')).replace('export ', ''), context)
+  const requests = []
+  const [entry] = await context.parseAndEnrichBackgroundFeed({ backgroundFormat: 'local' }, 'shorts', 'UCtest', 'https://instance.example', async request => {
+    requests.push(request)
+    return 'var ytInitialPlayerResponse = {"videoDetails":{"videoId":"short"},"microformat":{"playerMicroformatRenderer":{"publishDate":"2026-09-14"}}};'
+  }, new AbortController().signal)
+  assert.equal(entry.published, Date.parse('2026-09-14'))
+  assert.equal(requests.length, 1)
+  assert.equal(requests[0].url, 'https://www.youtube.com/watch?v=short')
+  assert.equal(requests[0].authorization, undefined)
+})
+
+test('a disabled configuration stops due work before its persistence finishes', async () => {
+  let now = 0
+  let calls = 0
+  const scheduler = createSubscriptionBackgroundScheduler({ now: () => now, fetchChannel: async () => { calls++; return {} }, saveResult: async () => {} })
+  scheduler.configure(configuration())
+  await scheduler.setBackground(true)
+  now = 100
+  scheduler.configure({ ...configuration(), enabled: false })
+  await scheduler.tick()
+  assert.equal(calls, 0)
+})
+
+test('a failed retention is retried for an identical worker configuration', async () => {
+  const { readFile } = await import('node:fs/promises')
+  const vm = await import('node:vm')
+  const source = await readFile(new URL('../../src/main/subscriptionBackgroundWorker.js', import.meta.url), 'utf8')
+  let attempts = 0
+  const context = vm.createContext({
+    scheduler: { configure() {} },
+    results: { async retain() { if (++attempts === 1) throw new Error('temporary disk failure') } }
+  })
+  vm.runInContext('let configurationJson = null;\n' + source.slice(source.indexOf('const methods = {'), source.indexOf('\nfunction tick()')) + '\nglobalThis.configure = methods.configure', context)
+  await assert.rejects(context.configure(configuration()), /temporary disk failure/)
+  await context.configure(configuration())
+  assert.equal(attempts, 2)
+})
+
+
+test('invalid Local browse shapes fall back without treating malformed responses as empty feeds', async () => {
+  const valid = { contents: { twoColumnBrowseResultsRenderer: { tabs: [{ tabRenderer: { selected: true, content: {} } }] } } }
+  for (const contents of [{}, [], '', { unrecognizedRenderer: {} }, { twoColumnBrowseResultsRenderer: { tabs: [] } }]) {
+    assert.throws(() => parseBackgroundSubscriptionResponse('local', JSON.stringify({ contents }), 'videos'))
+  }
+  assert.equal(parseBackgroundSubscriptionResponse('local', JSON.stringify(valid), 'videos').backgroundFormat, 'local')
+  const requests = createBackgroundSubscriptionRequests({ backend: 'local', useRss: false, fallback: true, instanceUrl: 'https://instance.example' })
+  const urls = []
+  const result = await fetchBackgroundSubscriptionChannel({ requests }, 'videos', 'UCtest', new AbortController().signal, async request => {
+    urls.push(request.url)
+    return new URL(request.url).hostname === 'www.youtube.com' ? '{"contents":{}}' : '{"videos":[]}'
+  })
+  assert.deepEqual(result, { videos: [] })
+  assert.ok(urls.some(url => new URL(url).hostname === 'instance.example'))
+})
+
+test('delayed playlist imports anchor relative dates to fetch time while preserving upcoming dates', async () => {
+  const { readFile } = await import('node:fs/promises')
+  const vm = await import('node:vm')
+  const source = await readFile(new URL('../../src/renderer/helpers/api/local-feed-parsers.js', import.meta.url), 'utf8')
+  const start = source.indexOf('  function normalizeLocalSubscriptionFeed(')
+  const end = source.indexOf('\n  return {\n    normalizeLocalSubscriptionFeed,', start)
+  assert.ok(start >= 0 && end > start)
+  const now = Date.now()
+  const context = vm.createContext({
+    Date: { now: () => now },
+    YT: { Playlist: class { constructor(client, { data }) { this.items = data } } },
+    parseLocalPlaylistVideos: entries => entries
+  })
+  vm.runInContext(source.slice(start, end), context)
+  const entries = context.normalizeLocalSubscriptionFeed('shorts', {
+    backgroundFormat: 'localPlaylist',
+    data: [{ published: now - 3600000 }, { published: now + 3600000, isUpcoming: true }]
+  }, 'UCtest', now - 86400000)
+  assert.equal(entries[0].published, now - 3600000 - 86400000)
+  assert.equal(entries[1].published, now + 3600000)
 })

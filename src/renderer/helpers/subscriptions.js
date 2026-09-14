@@ -1,3 +1,4 @@
+import { enrichShortPublicationDates } from './api/short-publication'
 import { parseSubscriptionRss, parseRssUpcomingInfo, isRssUpcomingPremiereCandidate } from './api/feed-rss'
 import { shallowReactive } from 'vue'
 import { subscriptionRefreshErrors } from './subscriptionRefreshErrors'
@@ -620,6 +621,18 @@ async function enrichRssVideoIfNeeded(video) {
   }
 
   return applyRssPremiereVerdict(video, await fetchRssVideoUpcomingInfo(video.videoId))
+}
+
+/** Restore missing Local Shorts dates before importing native background results. */
+export function enrichSubscriptionShortDates(entries, channelId) {
+  return enrichShortPublicationDates(entries, async videoId => {
+    const response = await localApiFetch(`https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`, {
+      signal: AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS),
+      nativeTimeoutMs: RSS_ENRICHMENT_TIMEOUT_MS
+    })
+    checkSubscriptionFeedResponse(response)
+    return response.text()
+  }, store.getters.getShortsCache[channelId]?.videos ?? [])
 }
 
 /** Enrich imported RSS entries using the same cache and limits as foreground refreshes. */

@@ -28,7 +28,9 @@ export function calculatePublishedDate(publishedText, isLive = false, isUpcoming
 
   const match = publishedText.match(PUBLISHED_TEXT_REGEX)
 
-  const timeFrame = match[2]
+  if (!match) return undefined
+
+  const timeFrame = match[2].toLowerCase()
   const timeAmount = parseInt(match[1])
   let timeSpan = null
 
@@ -49,7 +51,7 @@ export function calculatePublishedDate(publishedText, isLive = false, isUpcoming
     timeSpan = timeAmount * 31556952000
   }
 
-  return now - timeSpan
+  return timeSpan === null ? undefined : now - timeSpan
 }
 
 export function extractNumberFromString(str) {

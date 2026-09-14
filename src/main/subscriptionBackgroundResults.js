@@ -14,6 +14,10 @@ export function createSubscriptionBackgroundResults(directory) {
   async function initialize() {
     await mkdir(directory, { recursive: true })
     for (const file of await readdir(directory)) {
+      if (/^[a-f0-9]{64}\.json\.tmp$/.test(file)) {
+        await unlink(path.join(directory, file))
+        continue
+      }
       if (!/^[a-f0-9]{64}\.json$/.test(file)) continue
       try { remember(JSON.parse(await readFile(path.join(directory, file), 'utf8'))) } catch (error) {
         console.error('Invalid saved background subscription result', error)

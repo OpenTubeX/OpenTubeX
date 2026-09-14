@@ -1,5 +1,6 @@
 import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
+import { gunzipSync } from 'node:zlib'
 import { test, expect, waitForAppReady } from '../../helpers/app.mjs'
 import { createBackgroundSubscriptionRequests } from '../../../src/subscriptionBackgroundRequests.js'
 
@@ -72,7 +73,41 @@ test('turning off background refresh makes closing the last window quit', async 
   })
   // Wait for the settings watcher and its native configuration handshake.
   await page.evaluate(() => window.ftElectron.subscriptionAutoRefresh.configureBackground({ enabled: false, profiles: [], intervals: {}, requests: {} }))
+  await expect.poll(() => app.electronApp.evaluate(({ app }) => app.getAppMetrics().some(process => process.name === 'Subscription refresh'))).toBe(false)
+  await page.evaluate(() => window.ftElectron.subscriptionAutoRefresh.configureBackground({ enabled: true, profiles: [], intervals: {}, requests: {} }))
+  await expect.poll(() => app.electronApp.evaluate(({ app }) => app.getAppMetrics().some(process => process.name === 'Subscription refresh'))).toBe(true)
+  await page.evaluate(() => window.ftElectron.subscriptionAutoRefresh.configureBackground({ enabled: false, profiles: [], intervals: {}, requests: {} }))
+  await expect.poll(() => app.electronApp.evaluate(({ app }) => app.getAppMetrics().some(process => process.name === 'Subscription refresh'))).toBe(false)
   const closed = app.electronApp.waitForEvent('close')
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close())
   await closed
+})
+
+test('normalizes Local API responses with every renderer closed', async ({ app, page }) => {
+  const response = gunzipSync(await readFile(new URL('../../fixtures/innertube/channel/shows-channel-info-and-videos/browse-43cf009333cb.0.json.gz', import.meta.url))).toString('utf8')
+  await app.electronApp.evaluate(({ net }, body) => {
+    const originalFetch = net.fetch
+    net.fetch = (url, options) => String(url).startsWith('https://www.youtube.com/youtubei/v1/browse')
+      ? Promise.resolve(new Response(body, { status: 200 }))
+      : originalFetch(url, options)
+  }, response)
+  await page.evaluate(configuration => window.ftElectron.subscriptionAutoRefresh.configureBackground(configuration), {
+    enabled: true,
+    intervals: { videos: 1 },
+    profiles: [{ id: 'allChannels', channels: { videos: [channelId] } }],
+    requests: createBackgroundSubscriptionRequests({ backend: 'local', useRss: false, fallback: false })
+  })
+  await app.electronApp.evaluate(({ BrowserWindow }) => { for (const window of BrowserWindow.getAllWindows()) window.close() })
+  await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(0)
+  const directory = path.join(app.userDataDir, 'background-subscription-results')
+  let saved
+  await expect.poll(async () => {
+    const results = await Promise.all((await readdir(directory)).filter(file => file.endsWith('.json')).map(async file => JSON.parse(await readFile(path.join(directory, file), 'utf8'))))
+    saved = results.find(result => result.kind === 'channel')
+    return saved?.payload.entries.length
+  }).toBe(30)
+  expect(saved.payload.entries.every(entry => entry.author === 'Blender')).toBe(true)
+  const quit = app.electronApp.waitForEvent('close')
+  await app.electronApp.evaluate(({ app }) => { app.quit() })
+  await quit
 })

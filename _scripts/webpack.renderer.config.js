@@ -266,4 +266,25 @@ if (isDevMode) {
   config.SHAKA_LOCALES_TO_BE_BUNDLED = SHAKA_LOCALES_TO_BE_BUNDLED
 }
 
+if (!isDevMode) {
+  // The main build emits this UMD artifact once; keep renderer and utility
+  // imports on that same implementation without sharing runtime state.
+  config.externals = { 'youtubei.js': 'window OpenTubeXYouTube' }
+  config.plugins.push({
+    apply(compiler) {
+      compiler.hooks.compilation.tap('SharedYouTubeLibrary', compilation => {
+        HtmlWebpackPlugin.getHooks(compilation).alterAssetTags.tap('SharedYouTubeLibrary', data => {
+          data.assetTags.scripts.unshift({
+            tagName: 'script',
+            voidTag: false,
+            attributes: { defer: true, src: 'youtubei.js' },
+            meta: { plugin: 'SharedYouTubeLibrary' }
+          })
+          return data
+        })
+      })
+    }
+  })
+}
+
 module.exports = config

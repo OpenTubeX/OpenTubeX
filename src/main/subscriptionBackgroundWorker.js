@@ -38,9 +38,9 @@ const methods = {
   async configure(configuration) {
     const encoded = JSON.stringify(configuration)
     if (encoded === configurationJson) return
-    configurationJson = encoded
     scheduler.configure(configuration)
     await results.retain(configuration)
+    configurationJson = encoded
   },
   async background(value) { await scheduler.setBackground(value); tick() },
   completed({ profileId, feedType, timestamp }) { scheduler.completed(profileId, feedType, timestamp) },

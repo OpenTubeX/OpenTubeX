@@ -16,8 +16,8 @@ export function createBackgroundSubscriptionRequests({ backend = 'local', useRss
     const invidiousApi = { format: 'invidious', url: `${instance}/api/v1/channels/%CHANNEL%/${RESOURCES[feed]}`, authorization }
     const localRss = { format: 'rss', url: 'https://www.youtube.com/feeds/videos.xml?playlist_id=%PLAYLIST%' }
     const invidiousRss = { format: 'rss', url: `${instance}/feed/playlist/%PLAYLIST%`, authorization }
-    const local = feed === 'posts' ? [localApi] : feed === 'shorts' ? [localRss, localPlaylist, localApi] : [...(useRss ? [localRss, localApi] : [localApi, localRss]), ...(feed === 'videos' ? [localPlaylist] : [])]
-    const invidious = feed === 'posts' ? [invidiousApi] : ((useRss || feed === 'shorts') ? [invidiousRss, invidiousApi] : [invidiousApi, invidiousRss])
+    const local = feed === 'posts' ? [localApi] : feed === 'shorts' ? (useRss ? [localRss, localPlaylist, localApi] : [localApi, localPlaylist, localRss]) : [...(useRss ? [localRss, localApi] : [localApi, localRss]), ...(feed === 'videos' ? [localPlaylist] : [])]
+    const invidious = feed === 'posts' ? [invidiousApi] : (useRss ? [invidiousRss, invidiousApi] : [invidiousApi, invidiousRss])
     return [feed, backend === 'invidious' ? [...invidious, ...(fallback ? local : [])] : [...local, ...(fallback ? invidious : [])]]
   }))
 }
@@ -39,7 +39,10 @@ export function parseBackgroundSubscriptionResponse(format, text, feedType) {
     throw new Error('Subscription API returned an error')
   }
   if (format === 'local' || format === 'localPlaylist') {
-    if (!data.contents || data.alerts?.some(alert => alert.alertRenderer?.type === 'ERROR')) throw new Error('Channel unavailable')
+    const tabs = data.contents?.twoColumnBrowseResultsRenderer?.tabs ?? data.contents?.singleColumnBrowseResultsRenderer?.tabs
+    const selectedContent = Array.isArray(tabs) ? tabs.find(tab => tab.tabRenderer?.selected === true)?.tabRenderer.content : null
+    if (!selectedContent || typeof selectedContent !== 'object' || Array.isArray(selectedContent) ||
+        data.alerts?.some(alert => alert.alertRenderer?.type === 'ERROR')) throw new Error('Channel unavailable')
     if (format === 'local' && feedType === 'videos' && data.metadata?.channelMetadataRenderer?.musicArtistName) {
       const tabs = data.contents.twoColumnBrowseResultsRenderer?.tabs ?? []
       const selected = tabs.find(tab => tab.tabRenderer?.selected)?.tabRenderer

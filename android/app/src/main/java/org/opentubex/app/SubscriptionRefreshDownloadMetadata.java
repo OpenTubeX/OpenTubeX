@@ -127,6 +127,11 @@ final class SubscriptionRefreshDownloadMetadata {
             for (int i = 0; i < array.length(); i++) collectBadges(array.get(i), video);
         } else if (node instanceof JSONObject) {
             JSONObject object = (JSONObject) node;
+            JSONObject metadataBadge = object.optJSONObject("metadataBadgeRenderer");
+            if (metadataBadge != null) {
+                if (metadataBadge.optString("style").equals("BADGE_STYLE_TYPE_LIVE_NOW")) video.put("liveNow", true);
+                return;
+            }
             JSONObject status = object.optJSONObject("thumbnailOverlayTimeStatusRenderer");
             if (status != null) {
                 long seconds = duration(label(status.optJSONObject("text")));
@@ -164,14 +169,14 @@ final class SubscriptionRefreshDownloadMetadata {
             if (video == null) video = object.optJSONObject("gridVideoRenderer");
             if (video == null) video = object.optJSONObject("playlistVideoRenderer");
             if (video != null) {
-                String encoded = video.toString();
                 JSONObject parsed = new JSONObject()
                     .put("videoId", video.optString("videoId"))
                     .put("title", label(video.optJSONObject("title")))
                     .put("published", published(label(video.optJSONObject("publishedTimeText")), now))
                     .put("lengthSeconds", duration(label(video.optJSONObject("lengthText"))))
-                    .put("isUpcoming", video.has("upcomingEventData") || encoded.contains("UPCOMING"))
-                    .put("liveNow", encoded.contains("BADGE_STYLE_TYPE_LIVE_NOW"));
+                    .put("isUpcoming", video.optJSONObject("upcomingEventData") != null)
+                    .put("liveNow", false);
+                collectBadges(video.opt("badges"), parsed);
                 collectBadges(video.opt("thumbnailOverlays"), parsed);
                 videos.put(parsed);
                 return;

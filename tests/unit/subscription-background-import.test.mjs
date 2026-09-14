@@ -12,10 +12,11 @@ function section(start, end) {
 
 test('concurrent background imports wait for the existing cache import', async () => {
   let finish
+  let requests = 0
   const blocked = new Promise(resolve => { finish = resolve })
   const context = vm.createContext({
     console,
-    getNextAndroidSubscriptionRefreshResult: async () => { await blocked; return null }
+    getNextAndroidSubscriptionRefreshResult: async () => { requests++; await blocked; return null }
   })
   vm.runInContext(section('let reconcilingAndroidSubscriptionRefreshResults', 'async function reconcileAndroidSubscriptionRefreshChannelResult'), context)
   const first = context.reconcileAndroidSubscriptionRefreshResults()
@@ -23,6 +24,7 @@ test('concurrent background imports wait for the existing cache import', async (
   const second = context.reconcileAndroidSubscriptionRefreshResults().then(() => { secondFinished = true })
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(secondFinished, false)
+  assert.equal(requests, 1)
   finish()
   await Promise.all([first, second])
 })
@@ -69,7 +71,7 @@ test('an imported background completion prevents an unnecessary foreground refre
 })
 
 test('background playlist imports restore missing authors and keep explicit bylines', async () => {
-  const cache = {}
+  const cache = { UCchannel: { videos: [{ videoId: 'missing', thumbnailUrl: 'https://images.example/portrait.jpg' }] } }
   let saved
   const context = vm.createContext({
     console, Date,
@@ -83,22 +85,25 @@ test('background playlist imports restore missing authors and keep explicit byli
     getAndroidSubscriptionCacheConfig: () => ({ getCache: () => cache, entriesKey: 'videos', idKey: 'videoId', action: 'save' }),
     shouldHideMembersOnlyContent: () => false,
     enrichSubscriptionRssEntries: async entries => entries,
+    enrichSubscriptionShortDates: async entries => entries.map(entry => ({ ...entry, published: 123456 })),
     reconcileFetchedSubscriptionEntries: entries => entries
   })
   vm.runInContext(section('async function reconcileAndroidSubscriptionRefreshChannelResult', 'function getAndroidSubscriptionCacheConfig'), context)
   await context.reconcileAndroidSubscriptionRefreshChannelResult({
     channelId: 'UCchannel', feedType: 'shorts', timestamp: Date.now(),
     payload: { backgroundFormat: 'entries', entries: [
-      { videoId: 'missing', author: 'N/A', authorId: null },
-      { videoId: 'absent' },
+      { videoId: 'missing', author: 'N/A', authorId: 'N/A', isRSS: true },
+      { videoId: 'absent', author: '', authorId: '' },
       { videoId: 'explicit', author: 'Explicit creator', authorId: 'UCexplicit' }
     ] }
   })
   assert.equal(saved[0].author, 'Subscribed creator')
   assert.equal(saved[0].authorId, 'UCchannel')
+  assert.equal(saved[0].thumbnailUrl, 'https://images.example/portrait.jpg')
   assert.equal(saved[1].author, 'Subscribed creator')
   assert.equal(saved[1].authorId, 'UCchannel')
   assert.equal(saved[2].author, 'Explicit creator')
   assert.equal(saved[2].authorId, 'UCexplicit')
   assert.ok(saved.every(video => video.isShort))
+  assert.ok(saved.every(video => video.published === 123456))
 })

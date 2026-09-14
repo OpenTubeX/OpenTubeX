@@ -76,6 +76,22 @@ const config = {
 }
 
 if (!isDevMode) {
+  // Ship one youtubei module for the renderer and the headless feed process.
+  // Its web adapter uses standard fetch/crypto globals, available in both.
+  config.entry.youtubei = {
+    import: 'youtubei.js/web',
+    library: { name: 'OpenTubeXYouTube', type: 'umd' }
+  }
+  config.output.globalObject = 'globalThis'
+  // youtubei's dependencies must also use browser exports: fflate's Node
+  // adapter eagerly requires worker_threads, which a renderer cannot load.
+  config.module.rules.push({
+    test: /node_modules[\\/]youtubei\.js[\\/]/,
+    resolve: { conditionNames: ['browser', 'import', 'default'] }
+  })
+  config.externals = [({ request }, callback) => {
+    callback(null, request === 'youtubei.js' ? 'commonjs ./youtubei.js' : undefined)
+  }]
   config.plugins.push(
     new CopyWebpackPlugin({
       patterns: [

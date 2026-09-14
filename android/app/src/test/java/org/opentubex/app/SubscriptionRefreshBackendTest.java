@@ -25,7 +25,7 @@ public class SubscriptionRefreshBackendTest {
         List<String> urls = new ArrayList<>();
         JSONObject result = SubscriptionRefreshHttpClient.fetch(feed, "UCtest", (request, type, id) -> {
             urls.add(request.getString("url"));
-            return "{\"contents\":{}}";
+            return "{\"contents\":{\"twoColumnBrowseResultsRenderer\":{\"tabs\":[{\"tabRenderer\":{\"selected\":true,\"content\":{}}}]}}}";
         });
         assertEquals(List.of("https://www.youtube.com/youtubei/v1/browse"), urls);
         assertEquals("local", result.getString("backgroundFormat"));
@@ -150,6 +150,64 @@ public class SubscriptionRefreshBackendTest {
         parsed = SubscriptionRefreshDownloadMetadata.forDownloads(response, 4000000000L).getJSONArray("videos").getJSONObject(0);
         assertEquals(0, parsed.getLong("published"));
         assertFalse(YtDlpAutomaticDownloads.matches(parsed, "videos", new JSONObject().put("includeVideos", true).put("enabledAt", 1000), 4000000000L));
+    }
+
+    @Test
+    public void ordinaryTitlesDoNotBecomeUpcomingOrLiveDownloadEntries() throws Exception {
+        JSONObject video = new JSONObject().put("videoId", "abcdefghijk")
+            .put("title", new JSONObject().put("simpleText", "UPCOMING games and BADGE_STYLE_TYPE_LIVE_NOW explained"))
+            .put("publishedTimeText", new JSONObject().put("simpleText", "1 hour ago"));
+        JSONObject response = new JSONObject().put("backgroundFormat", "local")
+            .put("data", new JSONObject().put("contents", new JSONObject().put("videoRenderer", video)));
+        JSONObject parsed = SubscriptionRefreshDownloadMetadata.forDownloads(response, 10000000).getJSONArray("videos").getJSONObject(0);
+        assertFalse(parsed.optBoolean("isUpcoming"));
+        assertFalse(parsed.optBoolean("liveNow"));
+        video.put("badges", new JSONArray().put(new JSONObject().put("metadataBadgeRenderer", new JSONObject().put("style", "BADGE_STYLE_TYPE_LIVE_NOW"))));
+        parsed = SubscriptionRefreshDownloadMetadata.forDownloads(response, 10000000).getJSONArray("videos").getJSONObject(0);
+        assertTrue(parsed.optBoolean("liveNow"));
+        video.put("upcomingEventData", new JSONObject().put("startTime", "10000000"));
+        parsed = SubscriptionRefreshDownloadMetadata.forDownloads(response, 10000000).getJSONArray("videos").getJSONObject(0);
+        assertTrue(parsed.optBoolean("isUpcoming"));
+    }
+
+    @Test
+    public void nativeTransportSupportsExplicitHttpInvidiousInstances() throws Exception {
+        try (java.net.ServerSocket server = new java.net.ServerSocket(0, 1, java.net.InetAddress.getLoopbackAddress())) {
+            server.setSoTimeout(2000);
+            Thread responder = new Thread(() -> {
+                try (java.net.Socket socket = server.accept()) {
+                    socket.setSoTimeout(2000);
+                    java.io.BufferedReader input = new java.io.BufferedReader(new java.io.InputStreamReader(socket.getInputStream(), java.nio.charset.StandardCharsets.US_ASCII));
+                    for (String line; (line = input.readLine()) != null && !line.isEmpty();) { }
+                    socket.getOutputStream().write("HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: close\r\n\r\n{\"videos\":[]}".getBytes(java.nio.charset.StandardCharsets.US_ASCII));
+                } catch (IOException ignored) { }
+            });
+            responder.start();
+            try {
+                JSONObject request = new JSONObject().put("format", "invidious")
+                    .put("url", "http://localhost:" + server.getLocalPort() + "/api/v1/channels/UCtest/videos");
+                assertEquals(0, SubscriptionRefreshHttpClient.fetch(feed(new JSONArray().put(request)), "UCtest").getJSONArray("videos").length());
+            } finally {
+                server.close();
+                responder.join(3000);
+            }
+        }
+        JSONObject file = new JSONObject().put("format", "invidious").put("url", "file:///tmp/feed.json");
+        assertThrows(IOException.class, () -> SubscriptionRefreshHttpClient.fetch(feed(new JSONArray().put(file)), "UCtest"));
+    }
+
+    @Test
+    public void malformedLocalContentFallsBackInsteadOfSavingAnEmptySuccess() throws Exception {
+        JSONArray requests = new JSONArray().put(new JSONObject().put("format", "local")).put(new JSONObject().put("format", "invidious"));
+        for (String contents : List.of("{}", "42", "{\"twoColumnBrowseResultsRenderer\":{\"tabs\":[]}}")) {
+            List<String> formats = new ArrayList<>();
+            JSONObject result = SubscriptionRefreshHttpClient.fetch(feed(requests), "UCtest", (request, type, id) -> {
+                formats.add(request.getString("format"));
+                return request.getString("format").equals("local") ? "{\"contents\":" + contents + "}" : "{\"videos\":[]}";
+            });
+            assertEquals(List.of("local", "invidious"), formats);
+            assertEquals(0, result.getJSONArray("videos").length());
+        }
     }
 
 }

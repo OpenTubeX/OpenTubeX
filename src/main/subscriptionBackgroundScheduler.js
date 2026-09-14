@@ -22,6 +22,7 @@ export function createSubscriptionBackgroundScheduler({ fetchChannel, saveResult
     configure(value) {
       active?.abort()
       configuration = value
+      if (value.enabled === false) background = false
       const wanted = new Set()
       for (const feed of feeds()) {
         wanted.add(feed.key)

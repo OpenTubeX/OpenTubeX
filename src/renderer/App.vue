@@ -582,6 +582,7 @@ import { reconcileFetchedSubscriptionEntries } from './helpers/subscription-entr
 import { parseSubscriptionRss } from './helpers/api/feed-rss'
 import {
   enrichSubscriptionRssEntries,
+  enrichSubscriptionShortDates,
   cancelSubscriptionRefresh,
   requestSubscriptionRefreshCancellation,
   refreshSubscriptionLiveFromRemote,
@@ -2547,12 +2548,18 @@ async function reconcileAndroidSubscriptionRefreshChannelResult(result) {
   entries = entries.filter(entry => !shouldHideMembersOnlyContent(entry.isMembersOnly, store.getters))
   if (feedType !== 'posts') {
     const channel = store.getters.getSubscribedChannelsById.get(result.channelId)
+    const cachedThumbnails = new Map((previousCache?.videos ?? []).map(video => [video.videoId, video.thumbnailUrl]))
     for (const entry of entries) {
-      if (entry.author == null || entry.author === 'N/A') entry.author = channel?.name
-      entry.authorId ??= result.channelId
-      if (feedType === 'shorts') entry.isShort = true
+      if (!entry.author || entry.author === 'N/A') entry.author = channel?.name
+      if (!entry.authorId || entry.authorId === 'N/A') entry.authorId = result.channelId
+      if (feedType === 'shorts') {
+        entry.isShort = true
+        // RSS has no selected portrait image; keep the last known Shorts thumbnail.
+        entry.thumbnailUrl ||= cachedThumbnails.get(entry.videoId)
+      }
     }
   }
+  if (feedType === 'shorts') entries = await enrichSubscriptionShortDates(entries, result.channelId)
   entries = await enrichSubscriptionRssEntries(entries)
   const reconciledEntries = reconcileFetchedSubscriptionEntries(
     entries,

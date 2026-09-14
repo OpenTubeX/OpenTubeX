@@ -1,3 +1,4 @@
+import { enrichShortPublicationDates } from './short-publication.js'
 import { createLocalFeedParsers } from './local-feed-parsers.js'
 import { createInvidiousFeedParsers } from './invidious-feed-parsers.js'
 import { parseSubscriptionRss, parseRssUpcomingInfo, isRssUpcomingPremiereCandidate } from './feed-rss.js'
@@ -22,7 +23,13 @@ export function parseBackgroundFeed(payload, feedType, channelId, instanceUrl, t
 
 /** Complete RSS metadata in the utility process before committing its cache result. */
 export async function parseAndEnrichBackgroundFeed(payload, feedType, channelId, instanceUrl, fetchText, signal) {
-  const entries = parseBackgroundFeed(payload, feedType, channelId, instanceUrl)
+  let entries = parseBackgroundFeed(payload, feedType, channelId, instanceUrl)
+  if (feedType === 'shorts' && payload.backgroundFormat?.startsWith('local')) {
+    entries = await enrichShortPublicationDates(entries, videoId => {
+      signal.throwIfAborted()
+      return fetchText({ url: `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}` }, signal)
+    })
+  }
   return mapConcurrently(entries, 3, async entry => {
     signal.throwIfAborted()
     if (!entry.isRSS || !isRssUpcomingPremiereCandidate(entry.viewCount)) return entry
