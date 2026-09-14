@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import { runInNewContext } from 'node:vm'
+import { createContext, runInContext, runInNewContext } from 'node:vm'
 import { effectScope, nextTick, reactive, watch } from 'vue'
 import * as replayHelpers from '../../src/renderer/components/WatchVideoLiveChat/liveChatReplay.js'
 
@@ -9,18 +9,20 @@ const source = readFileSync(new URL('../../src/renderer/components/WatchVideoLiv
 const clearChat = source.slice(source.indexOf('function clearChat()'), source.indexOf('/**', source.indexOf('function clearChat()')))
 const positionUpdates = source.slice(source.indexOf('function releaseReplayComments()'), source.indexOf('/**', source.indexOf('function releaseReplayComments()')))
 
-function setup(t, isReplay = true) {
+function setup(t, isReplay = true, ready = true) {
   const props = reactive({ currentTime: 10, seekRequest: null })
   const comments = ['already visible']
   const seeks = []
   let polls = 0
   const scope = effectScope()
   t.after(() => scope.stop())
-  scope.run(() => runInNewContext(`${clearChat}\n${positionUpdates}`, {
+  const instance = { seekTo: position => seeks.push(position), is_replay: true, on() {}, once() {}, start() {} }
+  const context = createContext({
     ...replayHelpers,
     props, comments, watch,
     isReplay: { value: isReplay },
-    liveChatInstance: { seekTo: position => seeks.push(position) },
+    liveChatInstance: ready ? instance : null,
+    pendingReplaySeekSeconds: null,
     pendingReadbackTrimRestore: null,
     superChatComments: [],
     showSuperChat: { value: false },
@@ -28,8 +30,9 @@ function setup(t, isReplay = true) {
     replayFetchedUntilMs: 30_000,
     deliverComment: comment => comments.push(comment),
     requestMoreReplayComments: () => { polls++ },
-  }))
-  return { props, comments, seeks, polls: () => polls }
+  })
+  scope.run(() => runInContext(`${clearChat}\n${positionUpdates}`, context))
+  return { props, comments, seeks, context, instance, polls: () => polls }
 }
 
 test('delayed playback updates keep visible chat and release buffered messages', async t => {
@@ -104,3 +107,30 @@ test('the Watch seeking handler forwards the current player position for regular
   assert.match(template, /@seeking="handlePlayerSeeking"/)
   assert.match(template, /<watch-video-live-chat\b[^>]*:seek-request="liveChatSeekRequest"/)
 })
+
+
+for (const playbackPosition of [null, 20, 23]) {
+  test(`a seek during metadata loading follows the latest position after update ${playbackPosition}`, async t => {
+    const chat = setup(t, false, false)
+    let resolveInfo
+    chat.context.getLocalVideoInfo = () => new Promise(resolve => { resolveInfo = resolve })
+    for (const handler of ['handleStart', 'handleChatUpdate', 'handleMetadataUpdate', 'handleError', 'handleEnd']) {
+      chat.context[handler] = () => {}
+    }
+    const getLocalChat = source.slice(source.indexOf('async function getLiveChatLocal()'), source.indexOf('function showLiveChatUnavailable()'))
+    const startChat = source.slice(source.indexOf('function startLiveChatLocal()'), source.indexOf('const commentsRef ='))
+    const loading = runInContext(`${getLocalChat}\n${startChat}\ngetLiveChatLocal()`, chat.context)
+
+    chat.props.seekRequest = { seconds: 20.9 }
+    await nextTick()
+    assert.deepEqual(chat.seeks, [])
+    if (playbackPosition !== null) {
+      chat.props.currentTime = playbackPosition
+      await nextTick()
+    }
+
+    resolveInfo({ livechat: {}, getLiveChat: () => chat.instance })
+    await loading
+    assert.deepEqual(chat.seeks, [playbackPosition === 23 ? 23_000 : 20_900])
+  })
+}
