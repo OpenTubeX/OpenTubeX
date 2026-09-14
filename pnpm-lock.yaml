@@ -10,7 +10,7 @@ overrides:
   yauzl: '>=3.3.1'
 
 patchedDependencies:
-  '@capacitor/android@8.5.1': 12c2128338ac622453e4a18693e731185c696f8870f9b9a5f4e86c49e948501b
+  '@capacitor/android@8.5.2': 12c2128338ac622453e4a18693e731185c696f8870f9b9a5f4e86c49e948501b
   '@capacitor/barcode-scanner@3.1.2': b4c45d0161b7a4f0e708d232e3d2067f01a39f1ffb5497b5c3c7f4df318c50f3
   '@capawesome/capacitor-app-shortcuts@8.0.2': 2581c86d60ce7892c0b3136523994591d24ee7313bbc5fc9b4ad1c710719c70a
   '@capawesome/capacitor-clipboard@0.1.2': 729c6071cbf0e196e2212b015677cdd162c287dca48137c24250c0d056c9fd5b
@@ -24,52 +24,52 @@ importers:
     dependencies:
       '@capacitor-community/keep-awake':
         specifier: ^8.0.1
-        version: 8.0.1(@capacitor/core@8.5.1)
+        version: 8.0.1(@capacitor/core@8.5.2)
       '@capacitor-community/screen-brightness':
         specifier: ^8.0.0
-        version: 8.0.0(@capacitor/core@8.5.1)
+        version: 8.0.0(@capacitor/core@8.5.2)
       '@capacitor/android':
-        specifier: ^8.5.1
-        version: 8.5.1(patch_hash=12c2128338ac622453e4a18693e731185c696f8870f9b9a5f4e86c49e948501b)(@capacitor/core@8.5.1)
+        specifier: ^8.5.2
+        version: 8.5.2(patch_hash=12c2128338ac622453e4a18693e731185c696f8870f9b9a5f4e86c49e948501b)(@capacitor/core@8.5.2)
       '@capacitor/app':
         specifier: ^8.1.1
-        version: 8.1.1(@capacitor/core@8.5.1)
+        version: 8.1.1(@capacitor/core@8.5.2)
       '@capacitor/barcode-scanner':
         specifier: ^3.1.2
-        version: 3.1.2(patch_hash=b4c45d0161b7a4f0e708d232e3d2067f01a39f1ffb5497b5c3c7f4df318c50f3)(@capacitor/core@8.5.1)
+        version: 3.1.2(patch_hash=b4c45d0161b7a4f0e708d232e3d2067f01a39f1ffb5497b5c3c7f4df318c50f3)(@capacitor/core@8.5.2)
       '@capacitor/browser':
         specifier: ^8.0.4
-        version: 8.0.4(@capacitor/core@8.5.1)
+        version: 8.0.4(@capacitor/core@8.5.2)
       '@capacitor/core':
-        specifier: ^8.5.1
-        version: 8.5.1
+        specifier: ^8.5.2
+        version: 8.5.2
       '@capacitor/device':
         specifier: ^8.0.3
-        version: 8.0.3(@capacitor/core@8.5.1)
+        version: 8.0.3(@capacitor/core@8.5.2)
       '@capacitor/filesystem':
         specifier: ^8.1.3
-        version: 8.1.3(@capacitor/core@8.5.1)
+        version: 8.1.3(@capacitor/core@8.5.2)
       '@capacitor/local-notifications':
         specifier: ^8.3.1
-        version: 8.3.1(@capacitor/core@8.5.1)
+        version: 8.3.1(@capacitor/core@8.5.2)
       '@capacitor/share':
         specifier: ^8.0.1
-        version: 8.0.1(@capacitor/core@8.5.1)
+        version: 8.0.1(@capacitor/core@8.5.2)
       '@capawesome/capacitor-app-shortcuts':
         specifier: ^8.0.2
-        version: 8.0.2(patch_hash=2581c86d60ce7892c0b3136523994591d24ee7313bbc5fc9b4ad1c710719c70a)(@capacitor/core@8.5.1)
+        version: 8.0.2(patch_hash=2581c86d60ce7892c0b3136523994591d24ee7313bbc5fc9b4ad1c710719c70a)(@capacitor/core@8.5.2)
       '@capawesome/capacitor-clipboard':
         specifier: ^0.1.2
-        version: 0.1.2(patch_hash=729c6071cbf0e196e2212b015677cdd162c287dca48137c24250c0d056c9fd5b)(@capacitor/core@8.5.1)
+        version: 0.1.2(patch_hash=729c6071cbf0e196e2212b015677cdd162c287dca48137c24250c0d056c9fd5b)(@capacitor/core@8.5.2)
       '@capawesome/capacitor-screen-orientation':
         specifier: ^8.0.3
-        version: 8.0.3(@capacitor/core@8.5.1)
+        version: 8.0.3(@capacitor/core@8.5.2)
       '@capawesome/capacitor-settings-launcher':
         specifier: ^0.1.2
-        version: 0.1.2(@capacitor/core@8.5.1)
+        version: 0.1.2(@capacitor/core@8.5.2)
       '@capawesome/capacitor-volume':
         specifier: ^0.1.3
-        version: 0.1.3(@capacitor/core@8.5.1)
+        version: 0.1.3(@capacitor/core@8.5.2)
       '@fontsource-variable/figtree':
         specifier: ^5.3.0
         version: 5.3.0
@@ -183,8 +183,8 @@ importers:
         specifier: ^8.0.2
         version: 8.0.2(@babel/core@8.0.1)
       '@capacitor/cli':
-        specifier: ^8.5.1
-        version: 8.5.1(supports-color@10.2.2)
+        specifier: ^8.5.2
+        version: 8.5.2(supports-color@10.2.2)
       '@double-great/stylelint-a11y':
         specifier: ^3.5.2
         version: 3.5.2(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
@@ -880,8 +880,8 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/android@8.5.1':
-    resolution: {integrity: sha512-o8fUIPDSEASeXHHrDz26WU7OlyiRb+QqtI9KFdnLS1jUL77o5iGrvegibaZX8rWpiCyDJ6jlUhhhHlfeq3ou9A==}
+  '@capacitor/android@8.5.2':
+    resolution: {integrity: sha512-rtiaz78egCcS+vs29wkWCL3C+RhazKMSygXcjutwWP8NmO6r5UBxOvGf3Wjz5+ahobyQ723tn9gCePwRwcNDZQ==}
     peerDependencies:
       '@capacitor/core': ^8.5.0
 
@@ -900,12 +900,13 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/cli@8.5.1':
-    resolution: {integrity: sha512-LKQFSyLg1QbTN6CGDoFqeRtAlj8C3c9OymP8OuhwlmkbSQwh9i1HQjwUCaNyVem2XkY9rv0v2UOfVlgoxH5pAw==}
+  '@capacitor/cli@8.5.2':
+    resolution: {integrity: sha512-O2kpA5ZPJUAmliDCcmpMf8xnJwMezxlFPUrlyOAjbL3U9MFNY3l4ZpPI/UXwvyPmR8ETcVF9pFr+VdWq61rqTQ==}
     engines: {node: '>=22.0.0'}
+    hasBin: true
 
-  '@capacitor/core@8.5.1':
-    resolution: {integrity: sha512-IOQ7ynG1qgrJ/RLuCO3WgyRGmkmmG/cdStRR4ftU2dWEN1FdtLrnI/XpZmZuUsOEHEnzBRJY/PmRH8eTLiXfhA==}
+  '@capacitor/core@8.5.2':
+    resolution: {integrity: sha512-agnQbGdhGw/KZFuLf7H9SY2o+oE7upkr/WPQsYaokXP6f9chaE8iVmbKkfN6SVl4w3pmz7oZ3Ur1hbkmy1hx+w==}
 
   '@capacitor/device@8.0.3':
     resolution: {integrity: sha512-rliPCCZwxtjU6200jJNDAsQhioyozV3fGgiP+NgRqtDOI7i+Jdz+DYNwEup+3MGZZ4NEmkuFaBeWLM3T01vJRg==}
@@ -3582,6 +3583,7 @@ packages:
   is-docker@2.2.1:
     resolution: {integrity: sha512-F+i2BKsFrH66iaUFc0woD8sLy8getkwTwtOBjvs56Cx4CgJDeKQeqfz8wAYiSb8JOprWhHH5p77PbmYCvvUuXQ==}
     engines: {node: '>=8'}
+    hasBin: true
 
   is-docker@3.0.0:
     resolution: {integrity: sha512-eljcgEDlEns/7AXFosB5K/2nCM4P7FQPkGc/DWLy5rmFEWvZayGrik1d9/QIY5nJ4f9YsVvBkA6kJpHn9rISdQ==}
@@ -4129,6 +4131,7 @@ packages:
   native-run@2.0.3:
     resolution: {integrity: sha512-U1PllBuzW5d1gfan+88L+Hky2eZx+9gv3Pf6rNBxKbORxi7boHzqiA6QFGSnqMem4j0A9tZ08NMIs5+0m/VS1Q==}
     engines: {node: '>=16.0.0'}
+    hasBin: true
 
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
@@ -4839,6 +4842,7 @@ packages:
   rimraf@6.1.3:
     resolution: {integrity: sha512-LKg+Cr2ZF61fkcaK1UdkH2yEBBKnYjTyWzTJT6KNPcSPaiT7HSdhtMXQuN5wkTX0Xu72KQ1l8S42rlmexS2hSA==}
     engines: {node: 20 || >=22}
+    hasBin: true
 
   roarr@2.15.4:
     resolution: {integrity: sha512-CHhPh+UNHD2GTXNYhPWLnU8ONHdI+5DI+4EYIAOaiD63rHeYlZvyh8P+in5999TTSFgUYuKUAjzRI4mdh/p+2A==}
@@ -5281,6 +5285,7 @@ packages:
 
   tree-kill@1.2.2:
     resolution: {integrity: sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==}
+    hasBin: true
 
   truncate-utf8-bytes@1.0.2:
     resolution: {integrity: sha512-95Pu1QXQvruGEhv62XCMO3Mm90GscOCClvrIUwCM0PYOXK3kaF3l3sIHxx71ThJfcbM2O5Au6SO3AWCSEfW4mQ==}
@@ -5451,6 +5456,7 @@ packages:
 
   uuid@14.0.2:
     resolution: {integrity: sha512-xZe/16rV4aa+HGSOCiY2YeLT1OybRLrrkL/Rqaq7p7GMVXjFh+6wN4oMYgjFmnSnhY8t6Xpdl2l9qmnHYuMHwQ==}
+    hasBin: true
 
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
@@ -6370,32 +6376,32 @@ snapshots:
       hashery: 1.5.1
       keyv: 5.6.0
 
-  '@capacitor-community/keep-awake@8.0.1(@capacitor/core@8.5.1)':
+  '@capacitor-community/keep-awake@8.0.1(@capacitor/core@8.5.2)':
     dependencies:
-      '@capacitor/core': 8.5.1
+      '@capacitor/core': 8.5.2
 
-  '@capacitor-community/screen-brightness@8.0.0(@capacitor/core@8.5.1)':
+  '@capacitor-community/screen-brightness@8.0.0(@capacitor/core@8.5.2)':
     dependencies:
-      '@capacitor/core': 8.5.1
+      '@capacitor/core': 8.5.2
 
-  '@capacitor/android@8.5.1(patch_hash=12c2128338ac622453e4a18693e731185c696f8870f9b9a5f4e86c49e948501b)(@capacitor/core@8.5.1)':
+  '@capacitor/android@8.5.2(patch_hash=12c2128338ac622453e4a18693e731185c696f8870f9b9a5f4e86c49e948501b)(@capacitor/core@8.5.2)':
     dependencies:
-      '@capacitor/core': 8.5.1
+      '@capacitor/core': 8.5.2
 
-  '@capacitor/app@8.1.1(@capacitor/core@8.5.1)':
+  '@capacitor/app@8.1.1(@capacitor/core@8.5.2)':
     dependencies:
-      '@capacitor/core': 8.5.1
+      '@capacitor/core': 8.5.2
 
-  '@capacitor/barcode-scanner@3.1.2(patch_hash=b4c45d0161b7a4f0e708d232e3d2067f01a39f1ffb5497b5c3c7f4df318c50f3)(@capacitor/core@8.5.1)':
+  '@capacitor/barcode-scanner@3.1.2(patch_hash=b4c45d0161b7a4f0e708d232e3d2067f01a39f1ffb5497b5c3c7f4df318c50f3)(@capacitor/core@8.5.2)':
     dependencies:
-      '@capacitor/core': 8.5.1
+      '@capacitor/core': 8.5.2
       html5-qrcode: 2.3.8
 
-  '@capacitor/browser@8.0.4(@capacitor/core@8.5.1)':
+  '@capacitor/browser@8.0.4(@capacitor/core@8.5.2)':
     dependencies:
-      '@capacitor/core': 8.5.1
+      '@capacitor/core': 8.5.2
 
-  '@capacitor/cli@8.5.1(supports-color@10.2.2)':
+  '@capacitor/cli@8.5.2(supports-color@10.2.2)':
     dependencies:
       '@ionic/cli-framework-output': 2.2.8(supports-color@10.2.2)
       '@ionic/utils-subprocess': 3.0.1(supports-color@10.2.2)
@@ -6418,48 +6424,48 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@capacitor/core@8.5.1':
+  '@capacitor/core@8.5.2':
     dependencies:
       tslib: 2.8.1
 
-  '@capacitor/device@8.0.3(@capacitor/core@8.5.1)':
+  '@capacitor/device@8.0.3(@capacitor/core@8.5.2)':
     dependencies:
-      '@capacitor/core': 8.5.1
+      '@capacitor/core': 8.5.2
 
-  '@capacitor/filesystem@8.1.3(@capacitor/core@8.5.1)':
+  '@capacitor/filesystem@8.1.3(@capacitor/core@8.5.2)':
     dependencies:
-      '@capacitor/core': 8.5.1
+      '@capacitor/core': 8.5.2
       '@capacitor/synapse': 1.0.4
 
-  '@capacitor/local-notifications@8.3.1(@capacitor/core@8.5.1)':
+  '@capacitor/local-notifications@8.3.1(@capacitor/core@8.5.2)':
     dependencies:
-      '@capacitor/core': 8.5.1
+      '@capacitor/core': 8.5.2
 
-  '@capacitor/share@8.0.1(@capacitor/core@8.5.1)':
+  '@capacitor/share@8.0.1(@capacitor/core@8.5.2)':
     dependencies:
-      '@capacitor/core': 8.5.1
+      '@capacitor/core': 8.5.2
 
   '@capacitor/synapse@1.0.4': {}
 
-  '@capawesome/capacitor-app-shortcuts@8.0.2(patch_hash=2581c86d60ce7892c0b3136523994591d24ee7313bbc5fc9b4ad1c710719c70a)(@capacitor/core@8.5.1)':
+  '@capawesome/capacitor-app-shortcuts@8.0.2(patch_hash=2581c86d60ce7892c0b3136523994591d24ee7313bbc5fc9b4ad1c710719c70a)(@capacitor/core@8.5.2)':
     dependencies:
-      '@capacitor/core': 8.5.1
+      '@capacitor/core': 8.5.2
 
-  '@capawesome/capacitor-clipboard@0.1.2(patch_hash=729c6071cbf0e196e2212b015677cdd162c287dca48137c24250c0d056c9fd5b)(@capacitor/core@8.5.1)':
+  '@capawesome/capacitor-clipboard@0.1.2(patch_hash=729c6071cbf0e196e2212b015677cdd162c287dca48137c24250c0d056c9fd5b)(@capacitor/core@8.5.2)':
     dependencies:
-      '@capacitor/core': 8.5.1
+      '@capacitor/core': 8.5.2
 
-  '@capawesome/capacitor-screen-orientation@8.0.3(@capacitor/core@8.5.1)':
+  '@capawesome/capacitor-screen-orientation@8.0.3(@capacitor/core@8.5.2)':
     dependencies:
-      '@capacitor/core': 8.5.1
+      '@capacitor/core': 8.5.2
 
-  '@capawesome/capacitor-settings-launcher@0.1.2(@capacitor/core@8.5.1)':
+  '@capawesome/capacitor-settings-launcher@0.1.2(@capacitor/core@8.5.2)':
     dependencies:
-      '@capacitor/core': 8.5.1
+      '@capacitor/core': 8.5.2
 
-  '@capawesome/capacitor-volume@0.1.3(@capacitor/core@8.5.1)':
+  '@capawesome/capacitor-volume@0.1.3(@capacitor/core@8.5.2)':
     dependencies:
-      '@capacitor/core': 8.5.1
+      '@capacitor/core': 8.5.2
 
   '@csstools/css-calc@3.3.0(@csstools/css-parser-algorithms@4.0.0(@csstools/css-tokenizer@4.0.0))(@csstools/css-tokenizer@4.0.0)':
     dependencies:
