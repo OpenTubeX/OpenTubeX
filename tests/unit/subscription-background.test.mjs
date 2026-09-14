@@ -338,7 +338,10 @@ test('a failed completion write retries after five minutes instead of the normal
   now = 3600000
   await scheduler.tick().catch(() => {})
   fail = false
-  now += 300000
+  now += 150000
+  await scheduler.tick()
+  assert.equal(fetches, 1)
+  now += 150000
   await scheduler.tick()
   assert.equal(fetches, 2)
 })
