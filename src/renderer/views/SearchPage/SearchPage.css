@@ -38,3 +38,41 @@
     inline-size: 100%;
   }
 }
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .card :deep(.info .title),
+  .card :deep(.info a.channelName),
+  .card :deep(.info button.channelName),
+  .card :deep(.info a.handle) {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    min-block-size: 48px;
+    min-inline-size: 48px;
+    padding-block: 8px;
+  }
+
+  .card :deep(.info .title:active),
+  .card :deep(.info a.channelName:active),
+  .card :deep(.info button.channelName:active),
+  .card :deep(.info a.handle:active) {
+    background-color: var(--side-nav-hover-color);
+    color: var(--side-nav-hover-text-color);
+  }
+
+  .card :deep(.ft-list-item .iconButton),
+  .card :deep(.ft-list-item .deArrowToggleButton),
+  .card :deep(.channelSubscribeButton button) {
+    box-sizing: border-box;
+    min-block-size: 48px;
+    min-inline-size: 48px;
+  }
+
+  .getNextPage {
+    min-block-size: 48px;
+    block-size: auto;
+    line-height: 1.5;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+}

@@ -629,3 +629,47 @@
     font-size: 16px;
   }
 }
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .settingsWindowHeader,
+  .settingsHeaderActions {
+    gap: 8px;
+  }
+
+  .settingsSearch {
+    block-size: 48px;
+  }
+
+  .settingsHeaderButton {
+    inline-size: 48px;
+    block-size: 48px;
+  }
+
+  .settingsBreadcrumbRoot,
+  .settingsBreadcrumbParent {
+    min-block-size: 48px;
+  }
+
+  .settingsSearchResult {
+    gap: 8px;
+  }
+
+  .settingsSearchResultHeading,
+  .settingsSearchResultMatch {
+    box-sizing: border-box;
+    min-block-size: 48px;
+    padding: 12px;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .settingsSearchResultHeading > svg {
+    flex-shrink: 0;
+  }
+
+  .settingsSearchResultHeading:active,
+  .settingsSearchResultMatch:active {
+    color: var(--primary-text-color);
+    background: var(--side-nav-hover-color);
+  }
+}
