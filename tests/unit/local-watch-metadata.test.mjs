@@ -5,13 +5,16 @@ import { compileFunction } from 'node:vm'
 import { YTNodes } from 'youtubei.js'
 import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-feed-parsers.js'
 
-const { parseLocalSubscriberCount } = createLocalFeedParsers(() => false)
+const { parseLocalSubscriberCount, parseLocalTextRuns } = createLocalFeedParsers(() => false)
 import { parseLocalVideoGames } from '../../src/renderer/helpers/video-games.js'
 import { parseLocalVideoCollaborators } from '../../src/renderer/helpers/video-collaborators.js'
 
 const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
 const start = source.indexOf('    getVideoInformationLocal:')
 const end = source.indexOf('\n    },', start)
+const chapterStart = source.indexOf('    extractChaptersFromDescription:')
+const chapterEnd = source.indexOf('\n    },', chapterStart)
+const extractChaptersFromDescription = compileFunction(`return ({${source.slice(chapterStart, chapterEnd)}\n} }).extractChaptersFromDescription`)()
 
 async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
   info.streaming_data = { formats: [], adaptive_formats: [{ url: 'https://example.com/video' }] }
@@ -25,7 +28,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     parseLocalEndscreen: () => [],
     parseLocalVideoGames,
     YTNodes,
-    parseLocalTextRuns: runs => runs.map(run => run.text).join(''),
+    parseLocalTextRuns,
     MANIFEST_TYPE_DASH: 'dash',
     parseLocalVideoCollaborators,
     parseLocalSubscriberCount,
@@ -45,7 +48,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     isCurrentVideoLoad: () => true,
     $store: { getters: { getAvoidTranslation: avoidTranslation }, commit() {} },
     setTabAvatar() {}, updateSubscriptionDetails() {}, initializePlaybackRate() {}, initializeVideoQuality() {},
-    extractChaptersFromDescription: () => [], getSponsorBlockCommunityChapters: async () => [],
+    extractChaptersFromDescription, finalizeChapters() {}, getSponsorBlockCommunityChapters: async () => [],
     updateShortsPlayerState() {}, updateTitle() { completed = true },
     runIpBlockRecoveryScriptAndReload: async () => false,
     finishDownloadedPlaybackWithoutMetadata: () => false,
@@ -345,3 +348,18 @@ test('tolerates omitted raw description-header fields after parsing', async () =
   assert.equal(watch.channelThumbnail, '')
   assert.equal(watch.videoPublished, 0)
 })
+
+
+for (const original of [false, true]) {
+  test(`extracts plain-text chapters with the original-language preference ${original}`, async () => {
+    const content = descriptionPanel()
+    content.items[2] = new YTNodes.ExpandableVideoDescriptionBody({
+      attributedDescriptionBodyText: { content: '0:00 Intro & setup\n0:10 Main topic' },
+    })
+    const watch = await loadMetadata({
+      playability_status: { status: 'OK' }, basic_info: { short_description: original ? '0:00 Original chapter' : '' },
+      page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content }] }],
+    }, original ? 'entire_app' : 'disabled')
+    assert.deepEqual(watch.videoChapters.map(chapter => chapter.title), original ? ['Original chapter'] : ['Intro & setup', 'Main topic'])
+  })
+}

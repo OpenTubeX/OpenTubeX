@@ -3091,7 +3091,10 @@ export default defineComponent({
               }
               chaptersKind = 'keyMoments'
             } else {
-              chapters = this.extractChaptersFromDescription(result.basic_info.short_description ?? localizedDescription?.text ?? '')
+              const chapterDescription = avoidTranslation
+                ? result.basic_info.short_description
+                : localizedDescription?.text || result.basic_info.short_description
+              chapters = this.extractChaptersFromDescription(chapterDescription ?? '')
             }
           }
 
