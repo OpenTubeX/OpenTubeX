@@ -29,6 +29,12 @@ ipcRenderer.on(IpcChannels.YT_DLP_BINARY_UPDATED, () => {
 /** @type {Set<{ handler: (videoId: string, scheduled: boolean) => void }>} */
 const liveReminderUpdatedListeners = new Set()
 const videoMetadataCacheClearedListeners = new Set()
+/** @type {Set<{ handler: (minimized: boolean) => void }>} */
+const windowMinimizedStateListeners = new Set()
+/** @type {Set<{ handler: (focused: boolean) => void }>} */
+const windowFocusedStateListeners = new Set()
+/** @type {Set<{ handler: (tabId: string) => void, tabId?: string }>} */
+const tabsExitFullscreenListeners = new Set()
 
 // Video lists subscribe once per row, which would exceed Node's listener
 // warning threshold on this channel, so they share a single IPC listener.
@@ -41,6 +47,26 @@ ipcRenderer.on(IpcChannels.LIVE_REMINDER_UPDATED, (_, videoId, scheduled) => {
 ipcRenderer.on(IpcChannels.VIDEO_METADATA_CACHE_CLEARED, () => {
   for (const listener of videoMetadataCacheClearedListeners) {
     listener()
+  }
+})
+
+ipcRenderer.on(IpcChannels.WINDOW_MINIMIZED_STATE, (_, minimized) => {
+  for (const { handler } of windowMinimizedStateListeners) {
+    handler(minimized)
+  }
+})
+
+ipcRenderer.on(IpcChannels.WINDOW_FOCUSED_STATE, (_, focused) => {
+  for (const { handler } of windowFocusedStateListeners) {
+    handler(focused)
+  }
+})
+
+ipcRenderer.on(IpcChannels.TABS_EXIT_FULLSCREEN, (_, targetTabId) => {
+  for (const { handler, tabId } of tabsExitFullscreenListeners) {
+    if (tabId == null || targetTabId === tabId) {
+      handler(targetTabId)
+    }
   }
 })
 
@@ -222,9 +248,9 @@ export default {
    * @returns {() => void} unsubscribe
    */
   handleWindowMinimizedState: (handler) => {
-    const listener = (_, minimized) => handler(minimized)
-    ipcRenderer.on(IpcChannels.WINDOW_MINIMIZED_STATE, listener)
-    return () => ipcRenderer.removeListener(IpcChannels.WINDOW_MINIMIZED_STATE, listener)
+    const subscription = { handler }
+    windowMinimizedStateListeners.add(subscription)
+    return () => windowMinimizedStateListeners.delete(subscription)
   },
 
   /**
@@ -234,9 +260,9 @@ export default {
    * @returns {() => void} unsubscribe
    */
   handleWindowFocusedState: (handler) => {
-    const listener = (_, focused) => handler(focused)
-    ipcRenderer.on(IpcChannels.WINDOW_FOCUSED_STATE, listener)
-    return () => ipcRenderer.removeListener(IpcChannels.WINDOW_FOCUSED_STATE, listener)
+    const subscription = { handler }
+    windowFocusedStateListeners.add(subscription)
+    return () => windowFocusedStateListeners.delete(subscription)
   },
 
   /**
@@ -1407,13 +1433,9 @@ export default {
      * @returns {() => void}
      */
     onExitFullscreen: (handler, tabId) => {
-      const listener = (_event, targetTabId) => {
-        if (tabId == null || targetTabId === tabId) {
-          handler(targetTabId)
-        }
-      }
-      ipcRenderer.on(IpcChannels.TABS_EXIT_FULLSCREEN, listener)
-      return () => ipcRenderer.removeListener(IpcChannels.TABS_EXIT_FULLSCREEN, listener)
+      const subscription = { handler, tabId }
+      tabsExitFullscreenListeners.add(subscription)
+      return () => tabsExitFullscreenListeners.delete(subscription)
     },
 
     /**
