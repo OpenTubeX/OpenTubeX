@@ -89,9 +89,10 @@
 
 .playlistSearch {
   box-sizing: border-box;
-  min-block-size: var(--phone-touch-target, 48px);
+  min-block-size: 32px;
   margin: 8px;
-  padding: 10px;
+  padding-block: 6px;
+  padding-inline: 10px;
   min-inline-size: 0;
   border: 1px solid var(--divider-color);
   background: var(--search-bar-color);
@@ -111,6 +112,11 @@
 
   .dropdownHeader {
     display: none;
+  }
+
+  .playlistSearch {
+    min-block-size: var(--phone-touch-target, 48px);
+    padding: 10px;
   }
 
   .playlistList {
