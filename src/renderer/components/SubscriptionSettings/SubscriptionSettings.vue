@@ -13,7 +13,7 @@
           @change="updateFetchSubscriptionsAutomatically"
         />
         <FtToggleSwitch
-          v-if="IS_CAPACITOR"
+          v-if="IS_CAPACITOR || IS_ELECTRON"
           :label="$t('Settings.Subscription Settings.Refresh Subscriptions While App Is Closed')"
           :default-value="enableClosedAppSubscriptionRefresh"
           setting-key="enableClosedAppSubscriptionRefresh"
@@ -143,6 +143,7 @@ import store from '../../store/index'
 
 const { t } = useI18n()
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
+const IS_ELECTRON = !!process.env.IS_ELECTRON
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSubscriptionsAutomatically)

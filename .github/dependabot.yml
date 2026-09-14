@@ -47,6 +47,7 @@ updates:
       - dependency-name: "qr-scanner"
       - dependency-name: "qrcode"
       - dependency-name: "quickjs-emscripten-core"
+      - dependency-name: "sax"
       - dependency-name: "vue-sonner"
       - dependency-name: "yaml"
   - package-ecosystem: "github-actions"

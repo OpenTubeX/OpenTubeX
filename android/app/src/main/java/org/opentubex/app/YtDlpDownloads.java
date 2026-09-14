@@ -88,7 +88,7 @@ final class YtDlpDownloads {
         JSONObject entry = rules == null ? null : rules.optJSONObject(channelId);
         if (entry == null) return;
         JSONObject rule = entry.getJSONObject("rule");
-        JSONArray videos = response.optJSONArray("videos");
+        JSONArray videos = SubscriptionRefreshDownloadMetadata.forDownloads(response, System.currentTimeMillis()).optJSONArray("videos");
         if (videos == null) return;
         for (int i = 0; i < videos.length(); i++) {
             JSONObject video = videos.optJSONObject(i);

@@ -235,6 +235,8 @@ const config = {
   ],
   resolve: {
     fallback: {
+      // Feed parsing uses sax.parser, not its optional Node stream wrapper.
+      stream: false,
       // @hpke/core prefers Web Crypto in supported browsers. Its old-Node
       // fallback is unreachable in Electron's renderer and must not be bundled.
       crypto: false

@@ -1,3 +1,4 @@
+import { calculatePublishedDate, extractNumberFromString, escapeHTML, CHANNEL_HANDLE_REGEX } from './feed-metadata'
 import { Browser } from '@capacitor/browser'
 import { Clipboard } from '@capawesome/capacitor-clipboard'
 import { Share } from '@capacitor/share'
@@ -12,12 +13,10 @@ import { getPreferredShortThumbnailUrl } from './player/shorts'
 import { isRoundedNumber } from './viewCounts'
 import { blobToDataUrl } from './fileData'
 import { saveAndroidFile } from './androidStorage'
+export { calculatePublishedDate, extractNumberFromString, escapeHTML, CHANNEL_HANDLE_REGEX }
 
 // allowed characters in channel handle: A-Z, a-z, 0-9, -, _, .
 // https://support.google.com/youtube/answer/11585688#change_handle
-export const CHANNEL_HANDLE_REGEX = /^@[\w.-]{3,30}$/
-
-const PUBLISHED_TEXT_REGEX = /(\d+)\s?([a-z]+)/i
 
 /**
  * @param {string} sortPreference
@@ -56,56 +55,6 @@ export function getIconForSortPreference(sortPreference) {
       // quantity ascending
       return ['fas', 'arrow-down-short-wide']
   }
-}
-
-/**
- * @param {string} publishedText
- * @param {boolean} isLive
- * @param {boolean} isUpcoming
- * @param {Date|undefined} premiereDate
- */
-export function calculatePublishedDate(publishedText, isLive = false, isUpcoming = false, premiereDate = undefined) {
-  const now = Date.now()
-
-  if (isLive) {
-    return now
-  } else if (isUpcoming) {
-    if (premiereDate) {
-      return premiereDate.getTime()
-    } else {
-      // should never happen but just to be sure that we always return a number
-      return now
-    }
-  }
-
-  if (!publishedText) {
-    return undefined
-  }
-
-  const match = publishedText.match(PUBLISHED_TEXT_REGEX)
-
-  const timeFrame = match[2]
-  const timeAmount = parseInt(match[1])
-  let timeSpan = null
-
-  if (timeFrame.startsWith('second') || timeFrame === 's') {
-    timeSpan = timeAmount * 1000
-  } else if (timeFrame.startsWith('minute') || timeFrame === 'm') {
-    timeSpan = timeAmount * 60000
-  } else if (timeFrame.startsWith('hour') || timeFrame === 'h') {
-    timeSpan = timeAmount * 3600000
-  } else if (timeFrame.startsWith('day') || timeFrame === 'd') {
-    timeSpan = timeAmount * 86400000
-  } else if (timeFrame.startsWith('week') || timeFrame === 'w') {
-    timeSpan = timeAmount * 604800000
-  } else if (timeFrame.startsWith('month') || timeFrame === 'mo') {
-    // 30 day month being used
-    timeSpan = timeAmount * 2592000000
-  } else if (timeFrame.startsWith('year') || timeFrame === 'y') {
-    timeSpan = timeAmount * 31556952000
-  }
-
-  return now - timeSpan
 }
 
 /**
@@ -848,14 +797,6 @@ export async function getSystemLocale() {
   return locale || 'en-US'
 }
 
-export function extractNumberFromString(str) {
-  if (typeof str === 'string') {
-    return parseInt(str.replaceAll(/\D+/g, ''))
-  } else {
-    return NaN
-  }
-}
-
 /**
  * @param {string} externalPlayer
  * @param {import('../../constants').UnsupportedPlayerAction} action
@@ -1125,19 +1066,6 @@ export function getRelativeTimeFromDate(date, hideSeconds = false, useThirtyDayM
   // Using `Math.ceil` so that -1.x days ago displayed as 1 day ago
   // Notice that the value is turned to negative to be displayed as "ago"
   return getCachedRelativeTimeFormat(i18n.global.locale.value).format(Math.ceil(-timeDiffFromNow), timeUnit)
-}
-
-/**
- * Escapes HTML tags to avoid XSS
- * @param {string} untrusted
- * @returns {string}
- */
-export function escapeHTML(untrusted) {
-  return untrusted.replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll('\'', '&apos;')
 }
 
 /**

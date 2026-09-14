@@ -1,19 +1,9 @@
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
 import test from 'node:test'
-import vm from 'node:vm'
-import { Utils, YTNodes } from 'youtubei.js'
+import { YTNodes } from 'youtubei.js'
+import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-feed-parsers.js'
 
-// The API module imports platform services through webpack. Exercise its actual
-// parser with isolated metadata helpers so unavailable clips need no services.
-const source = await readFile(new URL('../../src/renderer/helpers/api/local.js', import.meta.url), 'utf8')
-const start = source.indexOf('export function parseLocalListVideo(')
-const parserSource = source.slice(start, source.indexOf('\n}\n', start) + 2).replace('export ', '')
-const parseLocalListVideo = vm.runInNewContext(`${parserSource}\nparseLocalListVideo`, {
-  Utils,
-  calculatePublishedDate: () => '2026-09-09',
-  getThumbnailPreviewUrl: () => undefined,
-})
+const { parseLocalListVideo } = createLocalFeedParsers(() => false)
 
 for (const videoId of [null, undefined, '']) {
   test(`skips an unavailable grid clip with ${String(videoId)} video ID`, () => {

@@ -568,15 +568,20 @@ import {
   updateAndroidSubscriptionRefresh
 } from './helpers/androidSubscriptionRefresh'
 import {
+  AndroidSubscriptionRefreshPayloadError,
   createAndroidSubscriptionRefreshConfiguration,
   createSubscriptionRefreshStartGuard,
   normalizeAndroidSubscriptionRefreshPayload,
   processAndroidSubscriptionRefreshChannelResult
 } from './helpers/androidSubscriptionRefreshData'
+import { shouldHideMembersOnlyContent } from './helpers/restricted-playback'
+import { normalizeLocalSubscriptionFeed } from './helpers/api/local'
 import { normalizeInvidiousSubscriptionFeed } from './helpers/api/invidious'
 import { classifyRequestFailure, formatRequestDiagnostic } from './helpers/api/requestDiagnostics'
 import { reconcileFetchedSubscriptionEntries } from './helpers/subscription-entries'
+import { parseSubscriptionRss } from './helpers/api/feed-rss'
 import {
+  enrichSubscriptionRssEntries,
   cancelSubscriptionRefresh,
   requestSubscriptionRefreshCancellation,
   refreshSubscriptionLiveFromRemote,
@@ -951,6 +956,7 @@ const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live', 'posts']
 let removeSubscriptionAutoRefreshActiveChangedListener = null
 let removeSubscriptionAutoRefreshCancelListener = null
 let removeSubscriptionAutoRefreshStateChangedListener = null
+let removeBackgroundResultsAvailableListener = null
 let removeTabsStateListener = null
 let removeReloadRequestListener = null
 let removeConfirmMultipleTabsActionListener = null
@@ -1577,6 +1583,9 @@ onMounted(async () => {
   document.addEventListener('visibilitychange', handleSubscriptionAutoRefreshVisibilityChange)
   if (process.env.IS_ELECTRON) {
     removeOpenTabOrganizerListener = window.ftElectron.tabs.onOpenOrganizer(openTabOrganizer)
+    removeBackgroundResultsAvailableListener = window.ftElectron.subscriptionAutoRefresh.onBackgroundResultsAvailable(
+      handleSubscriptionAutoRefreshVisibilityChange
+    )
     removeSubscriptionAutoRefreshStateChangedListener = window.ftElectron.subscriptionAutoRefresh.onStateChanged(
       applySubscriptionAutoRefreshState
     )
@@ -1643,6 +1652,7 @@ onBeforeUnmount(() => {
   removeSubscriptionAutoRefreshActiveChangedListener?.()
   removeSubscriptionAutoRefreshCancelListener?.()
   removeSubscriptionAutoRefreshStateChangedListener?.()
+  removeBackgroundResultsAvailableListener?.()
   removeTabsStateListener?.()
   removeReloadRequestListener?.()
   removeConfirmMultipleTabsActionListener?.()
@@ -1767,12 +1777,16 @@ watch([subscriptionPostsAutoRefreshInterval, hideSubscriptionsPosts], () => {
 })
 
 const androidSubscriptionRefreshConfiguration = computed(() => {
-  if (!isCapacitor || !dataReady.value) return null
+  if ((!isCapacitor && !isElectron) || !dataReady.value) return null
 
   return createAndroidSubscriptionRefreshConfiguration({
     profiles: store.getters.getProfileList,
     automaticDownloadRules: store.getters.getEnableDownloads ? parseAutomaticDownloadRules(store.getters.getYtDlpAutomaticDownloadRules) : {},
     closedAppRefreshEnabled: enableClosedAppSubscriptionRefresh.value,
+    backend: store.getters.getBackendPreference,
+    useRss: store.getters.getUseRssFeeds,
+    fallback: store.getters.getBackendFallback,
+    region: store.getters.getRegion,
     intervals: {
       videos: subscriptionFeedAutoRefreshInterval.value,
       shorts: subscriptionShortsAutoRefreshInterval.value,
@@ -1798,6 +1812,12 @@ const androidSubscriptionRefreshConfiguration = computed(() => {
 watch(androidSubscriptionRefreshConfiguration, async configuration => {
   if (configuration === null) return
   try {
+    if (isElectron) {
+      await window.ftElectron.subscriptionAutoRefresh.configureBackground({
+        ...configuration, enabled: enableClosedAppSubscriptionRefresh.value
+      })
+      return
+    }
     await configureAndroidSubscriptionRefresh(configuration)
     if (Object.values(configuration.intervals).some(interval => interval > 0)) {
       const denied = await requestAndroidSubscriptionRefreshNotificationPermission()
@@ -1809,7 +1829,7 @@ watch(androidSubscriptionRefreshConfiguration, async configuration => {
 }, { deep: true })
 
 watch([dataReady, subscriptionCacheReady], ([ready, cacheReady]) => {
-  if (isCapacitor && ready && cacheReady) {
+  if ((isCapacitor || isElectron) && ready && cacheReady) {
     reconcileAndroidSubscriptionRefreshResults()
   }
 })
@@ -1912,6 +1932,14 @@ async function processPendingSubscriptionAutoRefreshes() {
           continue
         }
 
+        if (isElectron || isCapacitor) {
+          await reconcileAndroidSubscriptionRefreshResults()
+          const refreshedTimestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
+          if (refreshedTimestamp !== null && refreshedTimestamp > Date.now()) {
+            scheduleSubscriptionTabAutoRefresh(tab, profileId, refreshedTimestamp)
+            continue
+          }
+        }
         cancelledSubscriptionAutoRefreshKeys.delete(key)
         const result = await getSubscriptionTabRefreshHandler(tab)({
           t,
@@ -1984,11 +2012,11 @@ function refreshOverdueSubscriptionFeeds() {
   }
 }
 
-function handleSubscriptionAutoRefreshVisibilityChange() {
+async function handleSubscriptionAutoRefreshVisibilityChange() {
   if (!isAppHidden()) {
     synchronizeSubscriptionRefreshInProgress()
-    if (isCapacitor && subscriptionCacheReady.value) {
-      reconcileAndroidSubscriptionRefreshResults()
+    if ((isCapacitor || isElectron) && subscriptionCacheReady.value) {
+      await reconcileAndroidSubscriptionRefreshResults()
     }
     refreshOverdueSubscriptionFeeds()
   }
@@ -2294,6 +2322,9 @@ function handleSubscriptionRefreshCompleted(event) {
     return
   }
 
+  if (isElectron) {
+    window.ftElectron.subscriptionAutoRefresh.backgroundCompleted({ profileId, feedType: tab, timestamp }).catch(console.error)
+  }
   setStoredSubscriptionAutoRefreshTimestamp(
     getSubscriptionAutoRefreshStorageKey(
       SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX,
@@ -2426,12 +2457,17 @@ function getSubscriptionRefreshNotificationTitle(tab) {
   }
 }
 
-let reconcilingAndroidSubscriptionRefreshResults = false
+let reconcilingAndroidSubscriptionRefreshResults = null
 
-async function reconcileAndroidSubscriptionRefreshResults() {
-  if (reconcilingAndroidSubscriptionRefreshResults) return
-  reconcilingAndroidSubscriptionRefreshResults = true
+function reconcileAndroidSubscriptionRefreshResults() {
+  if (reconcilingAndroidSubscriptionRefreshResults) return reconcilingAndroidSubscriptionRefreshResults
+  reconcilingAndroidSubscriptionRefreshResults = importAndroidSubscriptionRefreshResults().finally(() => {
+    reconcilingAndroidSubscriptionRefreshResults = null
+  })
+  return reconcilingAndroidSubscriptionRefreshResults
+}
 
+async function importAndroidSubscriptionRefreshResults() {
   try {
     while (true) {
       const result = await getNextAndroidSubscriptionRefreshResult()
@@ -2468,15 +2504,13 @@ async function reconcileAndroidSubscriptionRefreshResults() {
       ) {
         const diagnostic = formatRequestDiagnostic(result.diagnostic)
         console.error(`Closed-app subscription refresh request failed: ${diagnostic}`)
-        showApiErrorToast(t('Invidious API Error (Click to copy)'), diagnostic)
+        showApiErrorToast(store.getters.getBackendPreference === 'local' ? t('Local API Error (Click to copy)') : t('Invidious API Error (Click to copy)'), diagnostic)
       }
 
       await acknowledgeAndroidSubscriptionRefreshResult(result.id)
     }
   } catch (error) {
     console.error('Failed to reconcile closed-app subscription refresh data', error)
-  } finally {
-    reconcilingAndroidSubscriptionRefreshResults = false
   }
 }
 
@@ -2490,15 +2524,36 @@ async function reconcileAndroidSubscriptionRefreshChannelResult(result) {
 
   const feedType = result.feedType
   const timestamp = new Date(Number(result.timestamp) || Date.now())
-  const entries = normalizeAndroidSubscriptionRefreshPayload(
-    normalizeInvidiousSubscriptionFeed,
-    feedType,
-    result.payload,
-    result.channelId
-  )
   const config = getAndroidSubscriptionCacheConfig(feedType)
   const previousCache = config.getCache()[result.channelId]
   if (previousCache?.timestamp > timestamp) return
+  let entries = result.payload?.backgroundFormat === 'entries'
+    ? result.payload.entries
+    : result.payload?.backgroundFormat === 'rss'
+      ? (() => {
+          try { return parseSubscriptionRss(result.payload.text, result.channelId).videos } catch (error) {
+            throw new AndroidSubscriptionRefreshPayloadError(error)
+          }
+        })()
+      : normalizeAndroidSubscriptionRefreshPayload(
+          result.payload?.backgroundFormat?.startsWith('local')
+            ? (type, payload, id) => normalizeLocalSubscriptionFeed(type, payload, id, timestamp.getTime())
+            : normalizeInvidiousSubscriptionFeed,
+          feedType,
+          result.payload,
+          result.channelId
+        )
+  if (!Array.isArray(entries)) throw new AndroidSubscriptionRefreshPayloadError(new Error('Invalid saved entries'))
+  entries = entries.filter(entry => !shouldHideMembersOnlyContent(entry.isMembersOnly, store.getters))
+  if (feedType !== 'posts') {
+    const channel = store.getters.getSubscribedChannelsById.get(result.channelId)
+    for (const entry of entries) {
+      if (entry.author == null || entry.author === 'N/A') entry.author = channel?.name
+      entry.authorId ??= result.channelId
+      if (feedType === 'shorts') entry.isShort = true
+    }
+  }
+  entries = await enrichSubscriptionRssEntries(entries)
   const reconciledEntries = reconcileFetchedSubscriptionEntries(
     entries,
     previousCache?.[config.entriesKey],

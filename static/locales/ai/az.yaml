@@ -1556,7 +1556,7 @@ Tooltips:
     Show New Content Indicators: Əvvəlki alınma zamanı olmayan abunəlik axını elementlərinin yanında kiçik nöqtə göstərir.
     Show Scheduled Live Streams / Premieres First: Gələcək canlı yayımları və premyeraları abunəlik axınının yuxarısında saxlayır. Bağlandıqda, onlar başlayana qədər elan edildikləri mövqedə qalırlar. Mövcud planlaşdırılmış elementlərin elan tarixlərini almaq üçün bağladıqdan sonra abunəlik axınını bir dəfə yeniləyin.
     Auto Refresh Interval: Tətbiq açıq olduqda OpenTubeX-in abunəlik axınınızı hansı tezliklə avtomatik yeniləyəcəyi. Android-də sıfırdan fərqli aralıq tətbiq bağlı olduqda da axını yeniləyir.
-    Refresh Subscriptions While App Is Closed: OpenTubeX bağlı olduqda Android-in abunəlik axınlarını seçilmiş aralıqlarla yeniləməsinə icazə verir. Avtomatik yeniləmələri yalnız tətbiq açıq olan vaxtlarla məhdudlaşdırmaq üçün bunu bağlayın.
+    Refresh Subscriptions While App Is Closed: "Lentləri seçdiyiniz parametrlərlə yeniləyir. Masaüstündə OpenTubeX çıxana qədər sistem treyində qalır. Android arxa plan yeniləmələrinin vaxtını müəyyən edir."
   Theme Settings:
     Show Progress as Notification: Ümumi gedişat zolağı əvəzinə abunəlik yeniləmələri və idarə olunan vasitələrin endirilməsi kimi arxa plan əməliyyatlarının cari gedişatını daimi bildirişdə göstərir.
     Always Show Scrollbars: Sürüşdürmə zolaqlarını həmişə görünən saxlayır. Bağlandıqda, siçanı hərəkət etdirməyi dayandırdıqdan az sonra solub yox olur və onu yenidən hərəkət etdirən kimi görünürlər.

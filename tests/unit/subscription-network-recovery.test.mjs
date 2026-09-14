@@ -6,6 +6,8 @@ import { shallowReactive } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { load } from 'js-yaml'
 import { YTNodes } from 'youtubei.js'
+import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-feed-parsers.js'
+import { parseSubscriptionRss, parseRssUpcomingInfo, isRssUpcomingPremiereCandidate } from '../../src/renderer/helpers/api/feed-rss.js'
 
 import { createNetworkRecovery } from '../../src/renderer/helpers/networkRecovery.js'
 import { createAbortError } from '../../src/renderer/helpers/api/requestErrors.js'
@@ -16,9 +18,7 @@ import { getSubscriptionsForFeed } from '../../src/renderer/helpers/subscription
 import { extractAssignedJsonObject } from '../../src/renderer/helpers/assigned-json.js'
 import { getSubscriptionVideoSortTimestamp, updateUpcomingPremiereState, reconcileFetchedSubscriptionEntries } from '../../src/renderer/helpers/subscription-entries.js'
 
-const localSource = await readFile(new URL('../../src/renderer/helpers/api/local.js', import.meta.url), 'utf8')
-const shortsParserSource = localSource.slice(localSource.indexOf('export function parseShort('), localSource.indexOf('export function parseLocalListPlaylist('))
-  .replace(/^export /gm, '')
+const { parseLocalChannelShorts, parseLocalPlaylistVideos } = createLocalFeedParsers(() => false)
 
 const networkSource = (await readFile(new URL('../../src/renderer/helpers/networkRecovery.js', import.meta.url), 'utf8'))
   .replace(/^import .* from .*\n/gm, '').replace(/^export /gm, '')
@@ -65,11 +65,11 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
         microformat: { playerMicroformatRenderer: { publishDate: shortPublishDate } }
       })};` }
     }
-    return { videos: [], posts: [], status: url.includes('/feed/channel/') ? channelStatus : rssStatus, text: async () => '<feed/>' }
+    return { videos: [], posts: [], status: url.includes('/feed/channel/') ? channelStatus : rssStatus, text: async () => '<feed><author><name>Channel</name></author></feed>' }
   }
   const fetchFallback = async url => {
     fallbackRequests.push(url)
-    return { videos: [], posts: [], status: 200, text: async () => '<feed/>' }
+    return { videos: [], posts: [], status: 200, text: async () => '<feed><author><name>Channel</name></author></feed>' }
   }
   const fetchLocal = fallbackWorks && backend === 'invidious' ? fetchFallback : fetchChannel
   const fetchInvidious = fallbackWorks && backend === 'local' ? fetchFallback : fetchChannel
@@ -111,8 +111,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     invidiousGetCommunityPosts: fetchInvidious,
     getLocalChannel: async () => channelInfo,
     getLocalPlaylist: async () => { if (playlistError) throw playlistError; return { items: playlistItems } },
-    parseLocalSubscriberCount: text => Number.parseInt(text, 10),
-    calculatePublishedDate: () => Date.parse(shortPublishDate),
+    parseLocalPlaylistVideos, parseLocalChannelShorts, parseSubscriptionRss, parseRssUpcomingInfo, isRssUpcomingPremiereCandidate,
     mergeSubscriptionShortThumbnails: videos => videos,
     DOMParser: class {
       parseFromString() {
@@ -120,8 +119,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
       }
     },
   })
-  vm.runInContext(localSource.slice(localSource.indexOf('export function parseLocalPlaylistVideo('), localSource.indexOf('export function parseLocalListVideo(')).replace(/^export /gm, ''), context)
-  vm.runInContext(shortsParserSource, context)
+
   vm.runInContext(networkSource, context)
   const sharedRecovery = vm.runInContext('initializeNetworkRecovery()', context)
   context.createSubscriptionNetworkRecovery = options => createSubscriptionNetworkRecovery({ ...options, recovery: sharedRecovery })

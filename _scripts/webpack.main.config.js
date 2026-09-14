@@ -12,6 +12,7 @@ const config = {
   devtool: isDevMode ? 'eval-cheap-module-source-map' : false,
   entry: {
     main: path.join(__dirname, '../src/main/index.js'),
+    subscriptionBackgroundWorker: path.join(__dirname, '../src/main/subscriptionBackgroundWorker.js'),
   },
   module: {
     rules: [
