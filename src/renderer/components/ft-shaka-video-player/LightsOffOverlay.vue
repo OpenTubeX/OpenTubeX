@@ -1,6 +1,7 @@
 <template>
   <Teleport to="body">
     <div
+      ref="overlay"
       class="lightsOffOverlay"
       aria-hidden="true"
     >
@@ -10,19 +11,47 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 
 const props = defineProps({
   player: { type: Object, default: null }
 })
 
 const holeStyle = ref({})
+const overlay = useTemplateRef('overlay')
+const animations = new Set()
 let animationFrame = 0
+let mounted = false
+let resizeObserver
+let mutationObserver
+
+function scheduleUpdate() {
+  if (mounted && !animationFrame) animationFrame = requestAnimationFrame(updateHole)
+}
+
+function trackAnimation(event) {
+  const target = event.target
+  const player = props.player
+  if (!(target instanceof Element) || !player ||
+    !(target === player || target.contains(player) || target.matches('.topNav, .tabBar, .sideNav'))) return
+
+  for (const animation of target.getAnimations()) {
+    if (animation.playState !== 'running' || animations.has(animation) || !Number.isFinite(animation.effect?.getComputedTiming().endTime)) continue
+    animations.add(animation)
+    const finish = () => {
+      animations.delete(animation)
+      scheduleUpdate()
+    }
+    animation.finished.then(finish, finish)
+  }
+  scheduleUpdate()
+}
 
 // Track rendered geometry, including mini-player animations and fractional UI
 // scales. A body-level shadow dims every stacking context without intercepting
 // clicks or changing the player's own layout or stacking order.
 function updateHole() {
+  animationFrame = 0
   const player = props.player
   if (player?.isConnected) {
     const rect = player.getBoundingClientRect()
@@ -78,11 +107,44 @@ function updateHole() {
       holeStyle.value = nextStyle
     }
   }
-  animationFrame = requestAnimationFrame(updateHole)
+  if (animations.size > 0) scheduleUpdate()
 }
 
-onMounted(updateHole)
-onBeforeUnmount(() => cancelAnimationFrame(animationFrame))
+onMounted(() => {
+  mounted = true
+  resizeObserver = new ResizeObserver(scheduleUpdate)
+  for (let element = props.player; element; element = element.parentElement) {
+    resizeObserver.observe(element)
+    trackAnimation({ target: element })
+  }
+  for (const chrome of document.querySelectorAll('.topNav, .tabBar, .sideNav')) {
+    resizeObserver.observe(chrome)
+    trackAnimation({ target: chrome })
+  }
+  // Changes outside the player can move it without changing its own size.
+  // Ignore the dimmer itself and playback UI updates inside the player.
+  mutationObserver = new MutationObserver(records => {
+    if (records.some(({ target }) => !overlay.value?.contains(target) &&
+      (target === props.player || !props.player?.contains(target)))) scheduleUpdate()
+  })
+  mutationObserver.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'style'] })
+  window.addEventListener('scroll', scheduleUpdate, true)
+  window.addEventListener('resize', scheduleUpdate)
+  document.addEventListener('transitionrun', trackAnimation, true)
+  document.addEventListener('animationstart', trackAnimation, true)
+  scheduleUpdate()
+})
+onBeforeUnmount(() => {
+  mounted = false
+  cancelAnimationFrame(animationFrame)
+  resizeObserver?.disconnect()
+  mutationObserver?.disconnect()
+  animations.clear()
+  window.removeEventListener('scroll', scheduleUpdate, true)
+  window.removeEventListener('resize', scheduleUpdate)
+  document.removeEventListener('transitionrun', trackAnimation, true)
+  document.removeEventListener('animationstart', trackAnimation, true)
+})
 </script>
 
 <style scoped src="./LightsOffOverlay.css" />

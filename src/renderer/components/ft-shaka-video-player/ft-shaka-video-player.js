@@ -8966,6 +8966,7 @@ export default defineComponent({
       shakaContextMenu.registerElement('ft_loop', null)
       shakaContextMenu.registerElement('ft_stats', null)
       shakaOverflowMenu.registerElement('ft_ambient_mode', null)
+      shakaOverflowMenu.registerElement('ft_lights_off', null)
       shakaOverflowMenu.registerElement('ft_music_visualizer', null)
       shakaOverflowMenu.registerElement('ft_video_zoom', null)
       shakaOverflowMenu.registerElement('ft_skip_silence', null)

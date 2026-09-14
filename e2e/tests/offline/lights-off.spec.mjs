@@ -61,6 +61,20 @@ for (const uiScale of [100, 125]) {
       }
       await expectHoleMatchesPlayer()
       await attachScreenshot('lights off player options')
+      // A stationary paused player must not keep polling its layout every frame.
+      const idleMeasurements = await player.evaluate(async element => {
+        await new Promise(resolve => setTimeout(resolve, 500))
+        const original = element.getBoundingClientRect
+        let measurements = 0
+        element.getBoundingClientRect = function () {
+          measurements++
+          return original.call(this)
+        }
+        await new Promise(resolve => setTimeout(resolve, 250))
+        element.getBoundingClientRect = original
+        return measurements
+      })
+      expect(idleMeasurements).toBeLessThan(5)
       await setWindowSize(app, page, { width: 1400, height: 850 })
       await expectHoleMatchesPlayer()
 
