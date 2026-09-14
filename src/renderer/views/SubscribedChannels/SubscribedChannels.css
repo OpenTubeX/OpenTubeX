@@ -23,12 +23,13 @@
 .channels {
   inline-size: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
   gap: 2.5rem;
   margin-block-start: 2rem;
 }
 
 .channel {
+  min-inline-size: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -58,7 +59,7 @@
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
   inline-size: 100%;
   display: -webkit-box;
   line-clamp: 3;
@@ -88,6 +89,7 @@
   }
 
   .channels {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 11.5rem), 1fr));
     gap: 1.5rem;
   }
 
