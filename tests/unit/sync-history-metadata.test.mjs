@@ -46,9 +46,8 @@ const imported = {
   lengthSeconds: 0, isLive: true, isWatched: true, watchProgress: 1, type: 'video',
 }
 
-test('sync repairs an existing imported live flag even when watch timestamps match', async () => {
-  const changes = await downloadHistory([imported])
-  assert.deepEqual(changes.updates, [{ ...imported, isLive: false }])
+test('sync preserves imported live status when optional metadata is absent', async () => {
+  assert.equal(await downloadHistory([imported]), undefined)
 })
 
 test('newer sync progress preserves a known video duration', async () => {
@@ -65,10 +64,11 @@ test('sync leaves an existing real livestream with its own publication date alon
   assert.equal(changes, undefined)
 })
 
-test('sync repairs duration-less synced entries with a separate publication date', async () => {
-  const local = { ...imported, published: 50 }
+test('newer synced progress preserves imported live status without optional metadata', async () => {
+  const local = { ...imported, timeWatched: 100 }
   const changes = await downloadHistory([local])
-  assert.deepEqual(changes.updates, [{ ...local, isLive: false }])
+  assert.equal(changes.updates[0].isLive, true)
+  assert.equal(changes.updates[0].timeWatched, 200)
 })
 
 test('newer synced progress preserves live status recorded by playback', async () => {
@@ -84,7 +84,6 @@ test('newer synced progress preserves live status recorded by playback', async (
   assert.equal(changes.updates[0].timeWatched, 200)
   assert.equal(await downloadHistory(changes.updates), undefined)
 })
-
 
 test('a synced duration clears stale live and upcoming flags', async () => {
   const local = { ...imported, timeWatched: 100, isUpcoming: true, viewCount: 123 }

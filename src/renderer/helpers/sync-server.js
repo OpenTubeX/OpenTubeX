@@ -959,18 +959,8 @@ export async function syncHistory(client, store, previousIds = [], options = {})
     const local = localById.get(id)
     const remote = remoteById.get(id)
     const useLocal = local && (!remote || local.timeWatched >= remote.metadata.added_date)
-    // Older sync downloads inferred live status from zero duration. They also
-    // discarded descriptions, view counts and upcoming status, unlike playback.
-    const repairSyncedLiveFlag = local?.isLive === true && local.lengthSeconds === 0 &&
-      local.description === '' && !Object.hasOwn(local, 'viewCount') &&
-      !Object.hasOwn(local, 'isUpcoming')
-    const repairedLocal = repairSyncedLiveFlag ? { ...local, isLive: false } : local
-    const merged = useLocal ? repairedLocal : historyToLocal(remote, repairedLocal)
+    const merged = useLocal ? local : historyToLocal(remote, local)
     const localPayload = local ? historyToRemote(local) : null
-
-    if (useLocal && repairSyncedLiveFlag) {
-      localUpdates.push(merged)
-    }
 
     if (useLocal && localPayload && (
       !remote ||
