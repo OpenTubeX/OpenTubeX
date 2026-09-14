@@ -414,6 +414,8 @@ test.describe('default appearance', () => {
     await expect(fontOptions.nth(8)).toHaveText('System default')
     const headings = fontDropdown.locator('.selectGroupHeading')
     await expect(headings).toHaveText(['Bundled fonts', 'System fonts'])
+    await expect(fontOptions.first()).toHaveAccessibleDescription('Bundled fonts')
+    await expect(fontOptions.nth(8)).toHaveAccessibleDescription('System fonts')
     await expect(headings.nth(1).locator('xpath=following-sibling::li[1]')).toHaveText('System default')
     await fontDropdown.screenshot({ path: testInfo.outputPath('font-picker.png') })
     await expect(headings.first()).toHaveCSS('border-top-width', '0px')

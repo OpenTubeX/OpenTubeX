@@ -154,6 +154,7 @@
           >
             <li
               v-if="optionGroupLabels[optionGroups[index]] && (visibleIndex === 0 || optionGroups[index] !== optionGroups[filteredOptions[visibleIndex - 1].index])"
+              :id="`${id}-group-${optionGroups[index]}`"
               class="selectGroupHeading"
               role="presentation"
             >
@@ -173,6 +174,7 @@
               role="option"
               :tabindex="phoneLayout ? 0 : -1"
               :aria-selected="selectValues[index] === value"
+              :aria-describedby="optionGroupLabels[optionGroups[index]] ? `${id}-group-${optionGroups[index]}` : null"
               :dir="isLocaleSelector ? 'auto' : null"
               :lang="isLocaleSelector && selectValues[index] !== 'system' && selectValues[index] !== '' ? selectValues[index] : null"
               @mousedown.prevent
