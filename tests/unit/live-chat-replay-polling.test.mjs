@@ -547,3 +547,19 @@ test('a collapsed poll resolves only once the batch it joined has emitted', asyn
   assert.equal(secondResolved, true)
   assert.deepEqual(updates, [fakeReplayAction('5000')])
 })
+
+test('an empty continuation ends the chat exactly once', async () => {
+  const { liveChat } = createReplay(() => ({}))
+  const errors = []
+  let ended = 0
+  liveChat.on('error', (error) => errors.push(error))
+  liveChat.on('end', () => { ended++ })
+
+  liveChat.start()
+  await flush()
+
+  assert.equal(errors.length, 1)
+  assert.match(errors[0].message, /Unexpected live chat incremental continuation response/)
+  assert.equal(ended, 1)
+  assert.equal(liveChat.running, false)
+})

@@ -42,10 +42,43 @@ index 0000000000000000000000000000000000000000..7f5b5872e1a87cda497e7b4c14444fa4
 +    }
 +}
 diff --git a/dist/src/parser/nodes.d.ts b/dist/src/parser/nodes.d.ts
-index 270a1d15489deec9645e790215b544b42b372307..7837992e5fb0e1a723f7c2636103761dc5ea24a6 100644
+index 270a1d15489deec9645e790215b544b42b372307..a4504dd14432fee77c9afdd92b99c9721adaee72 100644
 --- a/dist/src/parser/nodes.d.ts
 +++ b/dist/src/parser/nodes.d.ts
-@@ -542,5 +542,6 @@ export { default as VideoSecondaryInfo } from './classes/VideoSecondaryInfo.js';
+@@ -86,6 +86,7 @@ export { default as UpdateEngagementPanelContentCommand } from './classes/comman
+ export { default as AuthorCommentBadge } from './classes/comments/AuthorCommentBadge.js';
+ export { default as CommentActionButtons } from './classes/comments/CommentActionButtons.js';
+ export { default as CommentDialog } from './classes/comments/CommentDialog.js';
++export { default as CommentFilterContextView } from './classes/CommentFilterContextView.js';
+ export { default as CommentReplies } from './classes/comments/CommentReplies.js';
+ export { default as CommentReplyDialog } from './classes/comments/CommentReplyDialog.js';
+ export { default as CommentsEntryPointHeader } from './classes/comments/CommentsEntryPointHeader.js';
+@@ -109,6 +110,7 @@ export { default as CompactStation } from './classes/CompactStation.js';
+ export { default as CompactVideo } from './classes/CompactVideo.js';
+ export { default as CompositeVideoPrimaryInfo } from './classes/CompositeVideoPrimaryInfo.js';
+ export { default as ConfirmDialog } from './classes/ConfirmDialog.js';
++export { default as ContentLoading } from './classes/ContentLoading.js';
+ export { default as ContentListItemView } from './classes/ContentListItemView.js';
+ export { default as ContentMetadataView } from './classes/ContentMetadataView.js';
+ export { default as ContentPreviewImageView } from './classes/ContentPreviewImageView.js';
+@@ -220,6 +222,7 @@ export { default as ImageBannerView } from './classes/ImageBannerView.js';
+ export { default as IncludingResultsFor } from './classes/IncludingResultsFor.js';
+ export { default as InfoPanelContainer } from './classes/InfoPanelContainer.js';
+ export { default as InfoPanelContent } from './classes/InfoPanelContent.js';
++export { default as InterstitialView } from './classes/InterstitialView.js';
+ export { default as InfoRow } from './classes/InfoRow.js';
+ export { default as InteractiveTabbedHeader } from './classes/InteractiveTabbedHeader.js';
+ export { default as ItemSection } from './classes/ItemSection.js';
+@@ -371,6 +374,7 @@ export { default as PlayerCaptchaView } from './classes/PlayerCaptchaView.js';
+ export { default as PlayerCaptionsTracklist } from './classes/PlayerCaptionsTracklist.js';
+ export { default as PlayerControlsOverlay } from './classes/PlayerControlsOverlay.js';
+ export { default as PlayerErrorMessage } from './classes/PlayerErrorMessage.js';
++export { default as PlayerInterstitial } from './classes/PlayerInterstitial.js';
+ export { default as PlayerLegacyDesktopYpcOffer } from './classes/PlayerLegacyDesktopYpcOffer.js';
+ export { default as PlayerLegacyDesktopYpcTrailer } from './classes/PlayerLegacyDesktopYpcTrailer.js';
+ export { default as PlayerLiveStoryboardSpec } from './classes/PlayerLiveStoryboardSpec.js';
+@@ -541,6 +545,7 @@ export { default as VideoPrimaryInfo } from './classes/VideoPrimaryInfo.js';
+ export { default as VideoSecondaryInfo } from './classes/VideoSecondaryInfo.js';
  export { default as VideoSummaryContentView } from './classes/VideoSummaryContentView.js';
  export { default as VideoSummaryParagraphView } from './classes/VideoSummaryParagraphView.js';
 +export { default as VideoTitleHeaderView } from './classes/VideoTitleHeaderView.js';
@@ -53,10 +86,43 @@ index 270a1d15489deec9645e790215b544b42b372307..7837992e5fb0e1a723f7c2636103761d
  export { default as ViewCountFactoid } from './classes/ViewCountFactoid.js';
  export { default as WatchCardCompactVideo } from './classes/WatchCardCompactVideo.js';
 diff --git a/dist/src/parser/nodes.js b/dist/src/parser/nodes.js
-index 3511b11a22302980a4c1b57bbc897a307e1e51bd..240195d26d731f5e347d5192e96d57e5b0af71ce 100644
+index ed9b62636c238d9a21bac7e2b78a4042ce6efe45..c14752245565fc3e647264f6618804cfd4bafe93 100644
 --- a/dist/src/parser/nodes.js
 +++ b/dist/src/parser/nodes.js
-@@ -544,5 +544,6 @@ export { default as VideoSecondaryInfo } from './classes/VideoSecondaryInfo.js';
+@@ -88,6 +88,7 @@ export { default as UpdateEngagementPanelContentCommand } from './classes/comman
+ export { default as AuthorCommentBadge } from './classes/comments/AuthorCommentBadge.js';
+ export { default as CommentActionButtons } from './classes/comments/CommentActionButtons.js';
+ export { default as CommentDialog } from './classes/comments/CommentDialog.js';
++export { default as CommentFilterContextView } from './classes/CommentFilterContextView.js';
+ export { default as CommentReplies } from './classes/comments/CommentReplies.js';
+ export { default as CommentReplyDialog } from './classes/comments/CommentReplyDialog.js';
+ export { default as CommentsEntryPointHeader } from './classes/comments/CommentsEntryPointHeader.js';
+@@ -111,6 +112,7 @@ export { default as CompactStation } from './classes/CompactStation.js';
+ export { default as CompactVideo } from './classes/CompactVideo.js';
+ export { default as CompositeVideoPrimaryInfo } from './classes/CompositeVideoPrimaryInfo.js';
+ export { default as ConfirmDialog } from './classes/ConfirmDialog.js';
++export { default as ContentLoading } from './classes/ContentLoading.js';
+ export { default as ContentListItemView } from './classes/ContentListItemView.js';
+ export { default as ContentMetadataView } from './classes/ContentMetadataView.js';
+ export { default as ContentPreviewImageView } from './classes/ContentPreviewImageView.js';
+@@ -222,6 +224,7 @@ export { default as ImageBannerView } from './classes/ImageBannerView.js';
+ export { default as IncludingResultsFor } from './classes/IncludingResultsFor.js';
+ export { default as InfoPanelContainer } from './classes/InfoPanelContainer.js';
+ export { default as InfoPanelContent } from './classes/InfoPanelContent.js';
++export { default as InterstitialView } from './classes/InterstitialView.js';
+ export { default as InfoRow } from './classes/InfoRow.js';
+ export { default as InteractiveTabbedHeader } from './classes/InteractiveTabbedHeader.js';
+ export { default as ItemSection } from './classes/ItemSection.js';
+@@ -373,6 +376,7 @@ export { default as PlayerCaptchaView } from './classes/PlayerCaptchaView.js';
+ export { default as PlayerCaptionsTracklist } from './classes/PlayerCaptionsTracklist.js';
+ export { default as PlayerControlsOverlay } from './classes/PlayerControlsOverlay.js';
+ export { default as PlayerErrorMessage } from './classes/PlayerErrorMessage.js';
++export { default as PlayerInterstitial } from './classes/PlayerInterstitial.js';
+ export { default as PlayerLegacyDesktopYpcOffer } from './classes/PlayerLegacyDesktopYpcOffer.js';
+ export { default as PlayerLegacyDesktopYpcTrailer } from './classes/PlayerLegacyDesktopYpcTrailer.js';
+ export { default as PlayerLiveStoryboardSpec } from './classes/PlayerLiveStoryboardSpec.js';
+@@ -543,6 +547,7 @@ export { default as VideoPrimaryInfo } from './classes/VideoPrimaryInfo.js';
+ export { default as VideoSecondaryInfo } from './classes/VideoSecondaryInfo.js';
  export { default as VideoSummaryContentView } from './classes/VideoSummaryContentView.js';
  export { default as VideoSummaryParagraphView } from './classes/VideoSummaryParagraphView.js';
 +export { default as VideoTitleHeaderView } from './classes/VideoTitleHeaderView.js';
@@ -192,7 +258,7 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b0cf4a9ba22fa9e1e482d9084738319e
              else {
                  // There are more than 10 actions, emit them asynchronously so we can request the next incremental continuation.
                  this.#emitSmoothedActions(actions);
-@@ -69,54 +68,164 @@ export default class LiveChat extends EventEmitter {
+@@ -69,54 +68,165 @@ export default class LiveChat extends EventEmitter {
          if (!this.running) {
              this.running = true;
              this.#pollLivechat();
@@ -311,6 +377,7 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b0cf4a9ba22fa9e1e482d9084738319e
 +                        this.emit('error', new InnertubeError('Unexpected live chat incremental continuation response', response));
 +                        this.emit('end');
 +                        this.stop();
++                        return;
 +                    }
 +                    if (!(contents instanceof LiveChatContinuation)) {
 +                        this.stop();
@@ -406,3 +473,209 @@ diff --git a/dist/src/utils/ProtoUtils.js b/dist/src/utils/ProtoUtils.js
  }
  export function encodeNextParams(video_ids, playlist_title) {
      const writer = NextParams.encode({ videoId: video_ids, playlistTitle: playlist_title });
+diff --git a/dist/src/parser/classes/CommentFilterContextView.d.ts b/dist/src/parser/classes/CommentFilterContextView.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..38ae8fba7c1c76c25f316b3b989e65694a8ba096
+--- /dev/null
++++ b/dist/src/parser/classes/CommentFilterContextView.d.ts
+@@ -0,0 +1,8 @@
++import { YTNode } from '../helpers.js';
++import { type RawNode } from '../index.js';
++import Text from './misc/Text.js';
++export default class CommentFilterContextView extends YTNode {
++    static type: string;
++    text: Text;
++    constructor(data: RawNode);
++}
+diff --git a/dist/src/parser/classes/CommentFilterContextView.js b/dist/src/parser/classes/CommentFilterContextView.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..25d0c68d41f6253b8442c0ed9067bf126c965e18
+--- /dev/null
++++ b/dist/src/parser/classes/CommentFilterContextView.js
+@@ -0,0 +1,10 @@
++import { YTNode } from '../helpers.js';
++import Text from './misc/Text.js';
++export default class CommentFilterContextView extends YTNode {
++    static type = 'CommentFilterContextView';
++    text;
++    constructor(data) {
++        super();
++        this.text = Text.fromAttributed(data.text);
++    }
++}
+diff --git a/dist/src/parser/classes/ContentLoading.d.ts b/dist/src/parser/classes/ContentLoading.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..ba9d9c00d7d88de7d36e3714bfdbd8269ae7d656
+--- /dev/null
++++ b/dist/src/parser/classes/ContentLoading.d.ts
+@@ -0,0 +1,8 @@
++import { YTNode } from '../helpers.js';
++import { type RawNode } from '../index.js';
++
++export default class ContentLoading extends YTNode {
++    static type: string;
++    use_spinner: boolean;
++    constructor(data: RawNode);
++}
+diff --git a/dist/src/parser/classes/ContentLoading.js b/dist/src/parser/classes/ContentLoading.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..0823bb69830d316d06a5d4c82904e8a0239c945a
+--- /dev/null
++++ b/dist/src/parser/classes/ContentLoading.js
+@@ -0,0 +1,10 @@
++import { YTNode } from '../helpers.js';
++
++export default class ContentLoading extends YTNode {
++    static type = 'ContentLoading';
++    use_spinner;
++    constructor(data) {
++        super();
++        this.use_spinner = data.useSpinner;
++    }
++}
+diff --git a/dist/src/parser/classes/EngagementPanelSectionList.d.ts b/dist/src/parser/classes/EngagementPanelSectionList.d.ts
+index f9a57b0fe2835c9929d0b94c9c69be7d2fd8a0b6..7781e54b6e0246083d23510fd503d8933fcbfcde 100644
+--- a/dist/src/parser/classes/EngagementPanelSectionList.d.ts
++++ b/dist/src/parser/classes/EngagementPanelSectionList.d.ts
+@@ -9,10 +9,11 @@ import ProductList from './ProductList.js';
+ import SectionList from './SectionList.js';
+ import StructuredDescriptionContent from './StructuredDescriptionContent.js';
+ import VideoAttributeView from './VideoAttributeView.js';
++import ContentLoading from './ContentLoading.js';
+ export default class EngagementPanelSectionList extends YTNode {
+     static type: string;
+     header: EngagementPanelTitleHeader | null;
+-    content: PlaylistCollaborationView | VideoAttributeView | SectionList | ContinuationItem | ClipSection | StructuredDescriptionContent | MacroMarkersList | ProductList | null;
++    content: PlaylistCollaborationView | VideoAttributeView | SectionList | ContinuationItem | ClipSection | StructuredDescriptionContent | MacroMarkersList | ProductList | ContentLoading | null;
+     target_id?: string;
+     panel_identifier?: string;
+     identifier?: {
+diff --git a/dist/src/parser/classes/EngagementPanelSectionList.js b/dist/src/parser/classes/EngagementPanelSectionList.js
+index 66690decd06b861f47529a511960365e6fb672c3..df9ebfe1a3e03c66e8c0cbd1f7ed5acd5c7027ac 100644
+--- a/dist/src/parser/classes/EngagementPanelSectionList.js
++++ b/dist/src/parser/classes/EngagementPanelSectionList.js
+@@ -9,6 +9,7 @@ import ProductList from './ProductList.js';
+ import SectionList from './SectionList.js';
+ import StructuredDescriptionContent from './StructuredDescriptionContent.js';
+ import VideoAttributeView from './VideoAttributeView.js';
++import ContentLoading from './ContentLoading.js';
+ export default class EngagementPanelSectionList extends YTNode {
+     static type = 'EngagementPanelSectionList';
+     header;
+@@ -23,7 +24,7 @@ export default class EngagementPanelSectionList extends YTNode {
+         this.content = Parser.parseItem(data.content, [
+             PlaylistCollaborationView, VideoAttributeView, SectionList,
+             ContinuationItem, ClipSection, StructuredDescriptionContent,
+-            MacroMarkersList, ProductList
++            MacroMarkersList, ProductList, ContentLoading
+         ]);
+         this.panel_identifier = data.panelIdentifier;
+         if ('identifier' in data) {
+diff --git a/dist/src/parser/classes/InterstitialView.d.ts b/dist/src/parser/classes/InterstitialView.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..9e6a4f81906be3258f2e6e98b20bcd882d8ccea6
+--- /dev/null
++++ b/dist/src/parser/classes/InterstitialView.d.ts
+@@ -0,0 +1,11 @@
++import { YTNode } from '../helpers.js';
++import { type RawNode } from '../index.js';
++import Text from './misc/Text.js';
++import ButtonView from './ButtonView.js';
++export default class InterstitialView extends YTNode {
++    static type: string;
++    title: Text;
++    description: Text;
++    primary_button: ButtonView | null;
++    constructor(data: RawNode);
++}
+diff --git a/dist/src/parser/classes/InterstitialView.js b/dist/src/parser/classes/InterstitialView.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..4a6a56df003866441f0fb5c451571c76dbecc3e2
+--- /dev/null
++++ b/dist/src/parser/classes/InterstitialView.js
+@@ -0,0 +1,16 @@
++import { YTNode } from '../helpers.js';
++import { Parser } from '../index.js';
++import Text from './misc/Text.js';
++import ButtonView from './ButtonView.js';
++export default class InterstitialView extends YTNode {
++    static type = 'InterstitialView';
++    title;
++    description;
++    primary_button;
++    constructor(data) {
++        super();
++        this.title = Text.fromAttributed(data.title);
++        this.description = Text.fromAttributed(data.description);
++        this.primary_button = Parser.parseItem(data.primaryButton, ButtonView);
++    }
++}
+diff --git a/dist/src/parser/classes/PlayerInterstitial.d.ts b/dist/src/parser/classes/PlayerInterstitial.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..9ff26cbb55d1fda78d4f72c253882e163cb2578b
+--- /dev/null
++++ b/dist/src/parser/classes/PlayerInterstitial.d.ts
+@@ -0,0 +1,8 @@
++import { YTNode } from '../helpers.js';
++import { type RawNode } from '../index.js';
++import InterstitialView from './InterstitialView.js';
++export default class PlayerInterstitial extends YTNode {
++    static type: string;
++    content: InterstitialView | null;
++    constructor(data: RawNode);
++}
+diff --git a/dist/src/parser/classes/PlayerInterstitial.js b/dist/src/parser/classes/PlayerInterstitial.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..652e7c006017ad83e2872bdf3e7e24277712fe8c
+--- /dev/null
++++ b/dist/src/parser/classes/PlayerInterstitial.js
+@@ -0,0 +1,11 @@
++import { YTNode } from '../helpers.js';
++import { Parser } from '../index.js';
++import InterstitialView from './InterstitialView.js';
++export default class PlayerInterstitial extends YTNode {
++    static type = 'PlayerInterstitial';
++    content;
++    constructor(data) {
++        super();
++        this.content = Parser.parseItem(data.content, InterstitialView);
++    }
++}
+diff --git a/dist/src/parser/classes/StructuredDescriptionContent.d.ts b/dist/src/parser/classes/StructuredDescriptionContent.d.ts
+index 29052ffc49d8b40e2c36faf387032485e5e77285..5410c117de4954fd4769eb74f2f4f84ff7eba102 100644
+--- a/dist/src/parser/classes/StructuredDescriptionContent.d.ts
++++ b/dist/src/parser/classes/StructuredDescriptionContent.d.ts
+@@ -14,8 +14,10 @@ import ExpandableMetadata from './ExpandableMetadata.js';
+ import MerchandiseShelf from './MerchandiseShelf.js';
+ import HypeFanCreditsSectionView from './HypeFanCreditsSectionView.js';
+ import VideoDescriptionYouchatSectionView from './VideoDescriptionYouchatSectionView.js';
++import VideoTitleHeaderView from './VideoTitleHeaderView.js';
++import Shelf from './Shelf.js';
+ export default class StructuredDescriptionContent extends YTNode {
+     static type: string;
+-    items: ObservedArray<VideoDescriptionHeader | ExpandableVideoDescriptionBody | VideoDescriptionMusicSection | VideoDescriptionInfocardsSection | VideoDescriptionTranscriptSection | VideoDescriptionCourseSection | VideoDescriptionYouchatSectionView | HorizontalCardList | ReelShelf | VideoAttributesSectionView | HowThisWasMadeSectionView | ExpandableMetadata | MerchandiseShelf | HypeFanCreditsSectionView>;
++    items: ObservedArray<VideoDescriptionHeader | ExpandableVideoDescriptionBody | VideoDescriptionMusicSection | VideoDescriptionInfocardsSection | VideoDescriptionTranscriptSection | VideoDescriptionCourseSection | VideoDescriptionYouchatSectionView | HorizontalCardList | ReelShelf | VideoAttributesSectionView | HowThisWasMadeSectionView | ExpandableMetadata | MerchandiseShelf | HypeFanCreditsSectionView | VideoTitleHeaderView | Shelf>;
+     constructor(data: RawNode);
+ }
+diff --git a/dist/src/parser/classes/StructuredDescriptionContent.js b/dist/src/parser/classes/StructuredDescriptionContent.js
+index dc4ba3a66eed7051370c883503cf5309e8f253cc..acf606459353271a2565f4c09bf87073db2dbdd0 100644
+--- a/dist/src/parser/classes/StructuredDescriptionContent.js
++++ b/dist/src/parser/classes/StructuredDescriptionContent.js
+@@ -14,6 +14,8 @@ import ExpandableMetadata from './ExpandableMetadata.js';
+ import MerchandiseShelf from './MerchandiseShelf.js';
+ import HypeFanCreditsSectionView from './HypeFanCreditsSectionView.js';
+ import VideoDescriptionYouchatSectionView from './VideoDescriptionYouchatSectionView.js';
++import VideoTitleHeaderView from './VideoTitleHeaderView.js';
++import Shelf from './Shelf.js';
+ export default class StructuredDescriptionContent extends YTNode {
+     static type = 'StructuredDescriptionContent';
+     items;
+@@ -23,7 +25,7 @@ export default class StructuredDescriptionContent extends YTNode {
+             VideoDescriptionHeader, ExpandableVideoDescriptionBody, VideoDescriptionMusicSection,
+             VideoDescriptionInfocardsSection, VideoDescriptionCourseSection, VideoDescriptionTranscriptSection,
+             VideoDescriptionYouchatSectionView, HorizontalCardList, ReelShelf, VideoAttributesSectionView,
+-            HowThisWasMadeSectionView, ExpandableMetadata, MerchandiseShelf, HypeFanCreditsSectionView
++            HowThisWasMadeSectionView, ExpandableMetadata, MerchandiseShelf, HypeFanCreditsSectionView, VideoTitleHeaderView, Shelf
+         ]);
+     }
+ }
