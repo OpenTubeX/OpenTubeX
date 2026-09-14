@@ -1425,6 +1425,7 @@ export default defineComponent({
 
     const silenceSkipping = useSilenceSkipping({
       available: showSkipSilenceButton,
+      setCurrentTime,
       enabled: skipSilence,
       isLive,
       video,
@@ -2000,6 +2001,7 @@ export default defineComponent({
       updateSponsorBlockSubmissionState,
     } = useSponsorBlockSubmission({
       canSeek,
+      setCurrentTime,
       events,
       getPlayer: () => player,
       isLive,
@@ -2361,6 +2363,7 @@ export default defineComponent({
         manuallyMutedSponsorBlockSegments.add(uuid)
         const currentTime = video.value.currentTime
         if (currentTime < segment.startTime || currentTime >= segment.endTime) {
+          accumulatedSeekSeconds = 0
           video.value.currentTime = segment.startTime
           sponsorBlockCurrentTime.value = segment.startTime
         }
@@ -2370,6 +2373,7 @@ export default defineComponent({
       }
 
       const seekRange = player.seekRange()
+      accumulatedSeekSeconds = 0
       video.value.currentTime = Math.min(
         Math.max(getSponsorBlockSegmentSkipTarget(segment), seekRange.start),
         seekRange.end
@@ -2721,6 +2725,7 @@ export default defineComponent({
         Math.max(getSponsorBlockSegmentSkipTarget(segment), seekRange.start),
         seekRange.end
       )
+      accumulatedSeekSeconds = 0
       video.value.currentTime = targetTime
       sponsorBlockCurrentTime.value = targetTime
 
@@ -2747,6 +2752,7 @@ export default defineComponent({
         Math.max(segment.startTime, seekRange.start),
         seekRange.end
       )
+      accumulatedSeekSeconds = 0
       video.value.currentTime = targetTime
       sponsorBlockCurrentTime.value = targetTime
       updateSponsorBlockHighlightState(targetTime)
@@ -3010,6 +3016,7 @@ export default defineComponent({
         newTime = videoEnd
       }
 
+      accumulatedSeekSeconds = 0
       video_.currentTime = newTime
       sponsorBlockCurrentTime.value = newTime
 
@@ -3242,6 +3249,7 @@ export default defineComponent({
           Math.max(toastEntry.unskipTime, seekRange.start),
           seekRange.end
         )
+        accumulatedSeekSeconds = 0
         video.value.currentTime = targetTime
         sponsorBlockCurrentTime.value = targetTime
         removeSponsorBlockToast(uuid)
@@ -3256,6 +3264,7 @@ export default defineComponent({
       if (canSeek()) {
         const seekRange = player.seekRange()
         const targetTime = Math.max(segment.startTime, seekRange.start)
+        accumulatedSeekSeconds = 0
         video.value.currentTime = targetTime
         sponsorBlockCurrentTime.value = targetTime
       }
@@ -3305,6 +3314,7 @@ export default defineComponent({
       if (canSeek()) {
         const seekRange = player.seekRange()
         const targetTime = Math.min(segment.endTime, seekRange.end)
+        accumulatedSeekSeconds = 0
         video.value.currentTime = targetTime
         sponsorBlockCurrentTime.value = targetTime
       }
@@ -4225,6 +4235,7 @@ export default defineComponent({
 
       clearAbRepeatBoundarySchedule()
       if (countRepeat) repeatStatsTracker?.repeat()
+      accumulatedSeekSeconds = 0
       videoElement.currentTime = abRepeatStart.value
     }
 
@@ -5243,12 +5254,20 @@ export default defineComponent({
       }
     }
 
+    function handleSeekBarInput() {
+      accumulatedSeekSeconds = 0
+    }
+
     function setupChapterPreview() {
       if (!container.value) return
 
       const seekBarContainer = container.value.querySelector('.shaka-seek-bar-container')
       if (!seekBarContainer) return
 
+      for (const event of ['pointerdown', 'keydown', 'input']) {
+        seekBarContainer.removeEventListener(event, handleSeekBarInput, true)
+        seekBarContainer.addEventListener(event, handleSeekBarInput, true)
+      }
       seekBarContainer.removeEventListener('mousemove', handleSeekBarMouseMove)
       seekBarContainer.removeEventListener('mouseleave', handleSeekBarMouseLeave)
       seekBarContainer.addEventListener('mousemove', handleSeekBarMouseMove)
@@ -5992,6 +6011,7 @@ export default defineComponent({
           mediaSessionStopped = true
           videoElement.pause()
           if (Number.isFinite(videoElement.duration)) {
+            accumulatedSeekSeconds = 0
             videoElement.currentTime = 0
           }
           if (wasPaused) {
@@ -6007,6 +6027,7 @@ export default defineComponent({
         seekto: (details = {}) => {
           const videoElement = video.value
           if (!videoElement || !Number.isFinite(details.seekTime)) return
+          accumulatedSeekSeconds = 0
           if (details.fastSeek === true && typeof videoElement.fastSeek === 'function') {
             videoElement.fastSeek(details.seekTime)
           } else {
@@ -9389,12 +9410,15 @@ export default defineComponent({
         video_.currentTime = newTime
       }
       if (showPopUp) {
-        const popUpLayout = seconds > 0
+        const totalSeconds = accumulatedSeekSeconds + seconds
+        const popUpLayout = totalSeconds > 0
           ? { icon: 'arrow-right', invertContentOrder: true }
           : { icon: 'arrow-left', invertContentOrder: false }
         // `+value` converts string back to float
-        const formattedSeconds = +Math.abs(seconds).toFixed(2)
-        showValueChange(`${formattedSeconds}s`, popUpLayout.icon, popUpLayout.invertContentOrder)
+        const formattedSeconds = +Math.abs(totalSeconds).toFixed(2)
+        showValueChange(`${formattedSeconds}s`, popUpLayout.icon, popUpLayout.invertContentOrder, totalSeconds)
+      } else {
+        accumulatedSeekSeconds = 0
       }
 
       if (revealControls) showOverlayControls()
@@ -9831,6 +9855,7 @@ export default defineComponent({
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LAST_CHAPTER):
           if (props.chapters.length > 0 && props.currentChapterIndex > 0) {
             event.preventDefault()
+            accumulatedSeekSeconds = 0
             video_.currentTime = props.chapters[props.currentChapterIndex - 1].startSeconds
             showOverlayControls()
           }
@@ -9838,6 +9863,7 @@ export default defineComponent({
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.NEXT_CHAPTER):
           if (props.chapters.length > 0 && props.currentChapterIndex < props.chapters.length - 1) {
             event.preventDefault()
+            accumulatedSeekSeconds = 0
             video_.currentTime = props.chapters[props.currentChapterIndex + 1].startSeconds
             showOverlayControls()
           }
@@ -9878,6 +9904,7 @@ export default defineComponent({
             const length = seekRange.end - seekRange.start
             const percentage = parseInt(event.key) / 10
 
+            accumulatedSeekSeconds = 0
             video_.currentTime = seekRange.start + (length * percentage)
             showOverlayControls()
           }
@@ -9911,6 +9938,7 @@ export default defineComponent({
             event.preventDefault()
             // use seek range instead of duration so that it works for live streams too
             const seekRange = player.seekRange()
+            accumulatedSeekSeconds = 0
             video_.currentTime = seekRange.start
             showOverlayControls()
           }
@@ -9921,6 +9949,7 @@ export default defineComponent({
             event.preventDefault()
             // use seek range instead of duration so that it works for live streams too
             const seekRange = player.seekRange()
+            accumulatedSeekSeconds = 0
             video_.currentTime = seekRange.end
             showOverlayControls()
           }
@@ -11236,6 +11265,7 @@ export default defineComponent({
      * @param {number} time
      */
     function setCurrentTime(time) {
+      accumulatedSeekSeconds = 0
       video.value.currentTime = time
     }
 
@@ -11397,7 +11427,7 @@ export default defineComponent({
     const showTemporaryPlaybackRateIndicator = ref(false)
     const temporaryPlaybackRateIndicatorMessage = ref('')
     let valueChangeTimeout = null
-
+    let accumulatedSeekSeconds = 0
     function setShowUiOnPaused(value) {
       const config = ui?.getControls().getConfig()
       if (config) config.showUIOnPaused = value
@@ -11412,8 +11442,10 @@ export default defineComponent({
      * @param {string} message - The message to display.
      * @param {ValueChangeIcon | ValueChangeIcon[]} icons - The icons to display.
      * @param {boolean} invertContentOrder - Whether to invert the order of the icon and message.
+     * @param {number} seekSeconds - Accumulated seek offset, reset by other messages.
      */
-    function showValueChange(message, icons = [], invertContentOrder = false) {
+    function showValueChange(message, icons = [], invertContentOrder = false, seekSeconds = 0) {
+      accumulatedSeekSeconds = seekSeconds
       valueChangeMessage.value = message
       valueChangeIcons.value = Array.isArray(icons) ? icons : [icons]
       showValueChangePopup.value = true
@@ -11425,6 +11457,7 @@ export default defineComponent({
 
       valueChangeTimeout = setTimeout(() => {
         showValueChangePopup.value = false
+        accumulatedSeekSeconds = 0
       }, 2000)
 
       showOverlayControls()

@@ -88,10 +88,11 @@ export function releaseAnalysisSegmentsBefore(analysisSegments, appendQueue, end
  * @param {object} options
  * @param {import('vue').ComputedRef<boolean>} options.available
  * @param {import('vue').ComputedRef<boolean>} options.enabled
+ * @param {(time: number) => void} options.setCurrentTime
  * @param {import('vue').Ref<boolean>} options.isLive
  * @param {import('vue').Ref<HTMLVideoElement | null>} options.video
  */
-export function useSilenceSkipping({ available, enabled, isLive, video }) {
+export function useSilenceSkipping({ available, enabled, isLive, video, setCurrentTime }) {
   /** @type {AudioContext | null} */
   let analysisAudioContext = null
   /** @type {HTMLAudioElement | null} */
@@ -610,7 +611,7 @@ export function useSilenceSkipping({ available, enabled, isLive, video }) {
     if (range) {
       const target = range.end - SILENCE_END_PADDING_SECONDS
       if (target - currentTime >= MIN_SKIP_SECONDS) {
-        videoElement.currentTime = target
+        setCurrentTime(target)
         return
       }
     }

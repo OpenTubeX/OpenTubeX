@@ -118,6 +118,44 @@ async function expectOverlayAbovePlayer(player, overlay) {
   expect(result.overlayIsTopmost).toBe(true)
 }
 
+test('repeated seek shortcuts accumulate the OSD while seeking immediately', async ({ app, page, attachScreenshot }) => {
+  const video = await openDemoVideo({ app, page })
+  await video.evaluate(element => {
+    element.pause()
+    element.currentTime = 0
+  })
+  const popup = page.locator(`${activeTab} .valueChangePopup`)
+  const text = popup.locator('.valueChangeText')
+
+  for (const seconds of [5, 10]) {
+    await page.keyboard.press('ArrowRight')
+    await expect(text).toHaveText(`${seconds}s`)
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(seconds, 3)
+  }
+  await attachScreenshot('accumulated seek OSD')
+
+  await page.keyboard.press('ArrowLeft')
+  await expect(text).toHaveText('5s')
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(5, 3)
+  await expect(popup).toBeHidden()
+
+  await page.keyboard.press('ArrowRight')
+  await expect(text).toHaveText('5s')
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(10, 3)
+
+  await page.keyboard.press('0')
+  await page.keyboard.press('ArrowRight')
+  await expect(text).toHaveText('5s')
+
+  const seekBar = page.locator(`${activeTab} .shaka-seek-bar`)
+  await seekBar.click({ position: { x: 0, y: 1 } })
+  await seekBar.evaluate(element => element.blur())
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(0, 3)
+  await page.keyboard.press('ArrowRight')
+  await expect(text).toHaveText('5s')
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(5, 3)
+})
+
 test('playback starts', async ({ app, page, attachScreenshot }) => {
   const video = await openDemoVideo({ app, page })
 

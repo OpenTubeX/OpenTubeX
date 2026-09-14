@@ -102,6 +102,7 @@ function normalizeSponsorBlockDraftTime(seconds) {
  *
  * @param {{
  *   canSeek: () => boolean,
+ *   setCurrentTime: (time: number) => void,
  *   events: EventTarget,
  *   getPlayer: () => import('shaka-player').Player | null,
  *   isLive: import('vue').Ref<boolean>,
@@ -117,6 +118,7 @@ function normalizeSponsorBlockDraftTime(seconds) {
  */
 export function useSponsorBlockSubmission({
   canSeek,
+  setCurrentTime,
   events,
   getPlayer,
   isLive,
@@ -606,7 +608,7 @@ export function useSponsorBlockSubmission({
     stopSponsorBlockPreviewSkip()
 
     if (mode === 'inspect') {
-      video.value.currentTime = draft.startTime
+      setCurrentTime(draft.startTime)
       sponsorBlockCurrentTime.value = draft.startTime
       showOverlayControls()
       return
@@ -617,14 +619,14 @@ export function useSponsorBlockSubmission({
         return
       }
 
-      video.value.currentTime = draft.endTime
+      setCurrentTime(draft.endTime)
       sponsorBlockCurrentTime.value = draft.endTime
       showOverlayControls()
       return
     }
 
     if (isSponsorBlockPointSegment(draft)) {
-      video.value.currentTime = draft.startTime
+      setCurrentTime(draft.startTime)
       sponsorBlockCurrentTime.value = draft.startTime
       replaceSponsorBlockDraftSegment(segmentId, (segment) => ({
         ...segment,
@@ -640,7 +642,7 @@ export function useSponsorBlockSubmission({
       ? 0
       : Math.max(draft.startTime - (SPONSORBLOCK_PREVIEW_SECONDS * video.value.playbackRate), 0)
 
-    video.value.currentTime = previewStartTime
+    setCurrentTime(previewStartTime)
     sponsorBlockCurrentTime.value = previewStartTime
     sponsorBlockPreviewSkipSegment.value = {
       id: draft.id,
@@ -861,7 +863,7 @@ export function useSponsorBlockSubmission({
       const player = getPlayer()
       const seekRange = player.seekRange()
       const targetTime = Math.min(previewSegment.endTime + SPONSORBLOCK_PREVIEW_END_EPSILON_SECONDS, seekRange.end)
-      video.value.currentTime = targetTime
+      setCurrentTime(targetTime)
       sponsorBlockCurrentTime.value = targetTime
       stopSponsorBlockPreviewSkip()
     }
