@@ -788,6 +788,21 @@ test.describe('settings', () => {
     ])
   })
 
+  test('saves the playing interface hide delay independently of the paused delay', async ({ page }) => {
+    const focus = await goToSettingsSection(page, 'focus')
+    const slider = focus.getByRole('slider', { name: /Playing Interface Hide Delay/ })
+    await expect(slider).toHaveValue('3')
+    await expect(slider).toBeEnabled()
+    await slider.fill('7.5')
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return [store.getters.getPlayingInterfaceHideDelay, store.getters.getPausedInterfaceHideDelay]
+    })).toEqual([7.5, 2.5])
+    await goToSettingsSection(page, 'privacy')
+    const reopened = await goToSettingsSection(page, 'focus')
+    await expect(reopened.getByRole('slider', { name: /Playing Interface Hide Delay/ })).toHaveValue('7.5')
+  })
+
   test('keeps comment translation controls out of Distraction Free settings', async ({ page }) => {
     const focus = await goToSettingsSection(page, 'focus')
 

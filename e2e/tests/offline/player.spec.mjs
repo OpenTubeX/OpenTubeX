@@ -284,6 +284,51 @@ test('a Short opened in a background tab never starts playback', async ({ app, p
   }))).toEqual({ paused: true, currentTime: 0 })
 })
 
+test('uses the playing interface hide delay in fullscreen and full window', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  await video.evaluate(element => { element.loop = true })
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const controls = player.locator('.shaka-controls-container')
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updatePlayingInterfaceHideDelay', 0.5)
+  })
+
+  for (const mode of ['fullWindow', 'fullscreen']) {
+    if (mode === 'fullWindow') await page.locator('body').press('s')
+    else await setPlayerFullscreen(page, true)
+    await expect(player).toHaveAttribute('data-playing-interface-hide-delay', '0.5')
+    const bounds = await player.boundingBox()
+    await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+    await expect(controls).toHaveAttribute('shown', 'true')
+    await expect(controls).not.toHaveAttribute('shown', 'true', { timeout: 2000 })
+    await expect(player).toHaveClass(/no-cursor/)
+
+    if (mode === 'fullWindow') await page.locator('body').press('s')
+    else await setPlayerFullscreen(page, false)
+    await expect(player).not.toHaveAttribute('data-playing-interface-hide-delay')
+  }
+})
+
+test('keeps the configured interface hide delay when playback resumes', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const controls = player.locator('.shaka-controls-container')
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updatePlayingInterfaceHideDelay', 10)
+  })
+  await setPlayerFullscreen(page, true)
+  await video.evaluate(element => element.pause())
+  await expect(player).toHaveClass(/playerPaused/)
+  const bounds = await player.boundingBox()
+  await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+  await video.evaluate(element => element.play())
+  await expect(player).not.toHaveClass(/playerPaused/)
+  await page.waitForTimeout(4000)
+  await expect(controls).toHaveAttribute('shown', 'true', { timeout: 500 })
+})
+
 test('hides configured paused interface elements until pointer activity', async ({ app, page }) => {
   const video = await openDemoVideo({ app, page })
   const watchComponent = await page.evaluateHandle(findWatchComponent)

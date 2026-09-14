@@ -1,5 +1,5 @@
 diff --git a/dist/shaka-player.ui-es2021.js b/dist/shaka-player.ui-es2021.js
-index 15a75205adac5ae9c14227791bcd307d5687b67c..7020e86c562d3a918f38689919b913b4f06e7614 100644
+index 15a75205adac5ae9c14227791bcd307d5687b67c..a9e5e038fa59d39c456e92ec4b05edc18196a758 100644
 --- a/dist/shaka-player.ui-es2021.js
 +++ b/dist/shaka-player.ui-es2021.js
 @@ -1559,9 +1559,9 @@ function vI(a){const b=a.F.seekBarColors.chapters;var c=a.controls.H;if(c.length
@@ -15,7 +15,16 @@ index 15a75205adac5ae9c14227791bcd307d5687b67c..7020e86c562d3a918f38689919b913b4
  "left top");k=Math.floor(f*k.height/k.width);!isNaN(k)&&isFinite(k)&&(a.i.style.height=k+"px")}}}function BI(a,b){for(const c of a.controls.H)if(c.startTime<=b&&c.endTime>=b)return c;return null}
  function CI(a){if(!a||!a.images.length)return null;const b=a.images[0];return{segment:null,imageHeight:b.height||0,imageWidth:b.width||0,height:b.height||0,positionX:0,positionY:0,startTime:a.startTime,duration:a.endTime-a.startTime,uris:[b.url],startByte:0,endByte:null,width:b.width||0,sprite:!1,mimeType:"",codecs:""}}
  var DI=class extends sI{constructor(a,b){super(a,b,["shaka-seek-bar-container"],["shaka-seek-bar","shaka-no-propagation","shaka-show-controls-on-mouse-over"]);this.H=N("div");this.H.classList.add("shaka-ad-markers");this.container.insertBefore(this.H,this.container.childNodes[0]);this.o=N("div");this.o.classList.add("shaka-chapter-markers");this.container.insertBefore(this.o,this.container.childNodes[0]);this.F=this.controls.g;this.K=new I(()=>{let c=this.getValue();this.player.ra()||c==this.video.duration&&
-@@ -1733,7 +1733,7 @@ break;case a.g.shortcuts.captions.toLowerCase():if(!a.ib)break;a.j.Ua().some(k=>
+@@ -1722,7 +1722,7 @@ function NJ(a){a.jb=N("div");a.jb.classList.add("shaka-top-controls");a.jb.class
+ (b=lJ.get(d).create(a.I,a),a.J.push(b),d=="time_and_duration"&&(b=new UH(a.I,a),a.J.push(b))):ma("Unrecognized control panel element requested:",d)}function OJ(a){a.X=N("div");a.X.classList.add("shaka-ad-controls");var b=a.l!=null&&a.l.isLinear();V(a.X,b);a.O.appendChild(a.X);b=new HI(a.X,a);a.J.push(b)}
+ function PJ(a){if(a.g.addSeekBar)a.D=QJ.create(a.O,a),a.J.push(a.D);else{for(const b of a.T)b.classList.add("shaka-low-position");a=a.I;a.classList.contains("shaka-tooltips-on")&&a.classList.add("shaka-tooltips-low-position")}}function sJ(a){a.Aa&&(a.l&&a.l.isClientRendering()&&a.l.isLinear()?V(a.K,!1):V(a.K,a.j.Ue()))}
+ function tJ(a,b){a.Ha.add(b.key);const c=a.Hb();b.key=="Tab"&&(a.h.classList.add("shaka-keyboard-navigation"),uJ(a),a.i.u(window,"mousedown",()=>{a.i.Ea(window,"mousedown")}));b.key=="Escape"&&a.R.ya();c&&a.Ha.has("Tab")&&RJ(a,b)}
+-function oJ(a,b){b.type=="mousemove"&&(a.h.classList.remove("shaka-keyboard-navigation"),uJ(a));b.type=="touchstart"||b.type=="touchmove"||b.type=="touchend"||b.type=="keyup"?a.S=Date.now():a.S+1E3<Date.now()&&(a.S=null);a.S&&b.type=="mousemove"||(a.m.classList.remove("no-cursor"),a.Eb=!0,a.R.stop(),a.Fa()||(mI(a),uJ(a)),a.U.stop(),b.type!="touchend"&&b.type!="wheel"&&b.type!="keyup"&&a.S||a.U.Y(3))}
++function oJ(a,b){b.type=="mousemove"&&(a.h.classList.remove("shaka-keyboard-navigation"),uJ(a));b.type=="touchstart"||b.type=="touchmove"||b.type=="touchend"||b.type=="keyup"?a.S=Date.now():a.S+1E3<Date.now()&&(a.S=null);a.S&&b.type=="mousemove"||(a.m.classList.remove("no-cursor"),a.Eb=!0,a.R.stop(),a.Fa()||(mI(a),uJ(a)),a.U.stop(),b.type!="touchend"&&b.type!="wheel"&&b.type!="keyup"&&a.S||a.U.Y(Number(a.m.dataset.playingInterfaceHideDelay)||3))}
+ function wJ(a,b,c){a.i.u(b,"keydown",d=>{c()&&SJ(a,d)});a.i.u(b,"keyup",d=>{c()&&a.Ha.delete(d.key)})}async function xJ(a){a.A&&a.A.readyState!=0&&!a.C.La()&&a.g.enableFullscreenOnRotation&&a.vd()&&(screen.orientation.type.includes("landscape")&&!a.Mb()?await FJ(a):screen.orientation.type.includes("portrait")&&a.Mb()&&await zJ(a))}
+ function uJ(a){const b=a.l?a.l.isPaused():!1,c=a.A.paused&&!a.W&&a.g.showUIOnPaused,d=a.h.classList.contains("shaka-keyboard-navigation");b||(!a.l||!a.l.isLinear())&&c||a.Eb||d||TJ(a)?(mI(a),a.h.getAttribute("shown")==null&&(a.h.setAttribute("shown","true"),pJ(a)),qJ(a),a.gb.stop()):a.gb.Y(a.g.fadeDelay);a.Hb()&&(a.L.classList.remove("shaka-tooltips-on"),a.I.classList.remove("shaka-tooltips-on"))}
+ function TJ(a){return window.matchMedia("hover: hover").matches?a.Tc.some(b=>b.matches(":hover")):!1}
+@@ -1733,14 +1733,14 @@ break;case a.g.shortcuts.captions.toLowerCase():if(!a.ib)break;a.j.Ua().some(k=>
  (d=a.j.sa(),e=d.end-d.start,e>0&&nI(a,d.start+parseInt(b.key,10)/10*e))}}}function nI(a,b,c=!1){c&&"fastSeek"in a.A?a.A.fastSeek(b):a.A.currentTime=b;mI(a)}function UJ(a,b){if(!(a.l&&a.l.isLinear()||a.j.yc())){var c=a.j.getVideoTracks().find(d=>d.active);c&&c.frameRate&&(a.A.paused||a.A.pause(),mI(a),c=1/c.frameRate,b=a.$b()+c*b,b>=0&&b<=a.j.sa().end&&a.A.currentTime!==b&&nI(a,b))}}
  function RJ(a,b){var c=a.T.filter(e=>!e.classList.contains("shaka-hidden"));if(c.length){var d=c[0];if(d.childNodes.length){for(c=d.firstElementChild;c&&c.classList.contains("shaka-hidden");)c=c.nextElementSibling;for(d=d.lastElementChild;d&&d.classList.contains("shaka-hidden");)d=d.previousElementSibling;const e=document.activeElement;a.Ha.has("Shift")?e==c&&(b.preventDefault(),d.focus()):e==d&&(b.preventDefault(),c.focus())}}}
  var X=class extends ta{constructor(a,b,c,d,e){super();this.Aa=!0;this.g=e;this.C=new fv(c,a,this.g.castReceiverAppId,this.g.castAndroidReceiverCompatible);this.Va=null;this.Oa=!0;this.A=this.C.sd();this.o=c;this.j=this.C.Lb();this.Ka=a;this.m=b;this.kd=d;this.M=this.C.Zb();this.Nb=this.j.wc();this.Nb.setCustomPlayer(this.j);this.l=this.M.getCurrentAd();this.ua=[];this.H=[];this.D=null;this.W=!1;this.T=[];this.Db=[];this.ib=null;this.Tc=[];this.Eb=!1;this.U=new I(()=>{this.g.showUIAlways||this.g.showUIAlwaysOnAudioOnly&&
@@ -24,8 +33,16 @@ index 15a75205adac5ae9c14227791bcd307d5687b67c..7020e86c562d3a918f38689919b913b4
  {this.Th()});this.Fb=new I(()=>{this.Fa()&&mI(this)});this.ba=this.S=null;this.J=[];this.ia=jJ();this.i=new nc;this.B=null;this.configure(this.g);rJ(this);this.Ha=new Set;vJ(this);this.Fb.va(this.g.refreshTickInSeconds);this.i.u(this.ia,"locale-updated",()=>{yJ(this)});this.i.u(this.ia,"locale-changed",f=>{f=f.locales[0];this.M.setLocale(f);this.m.setAttribute("lang",f);yJ(this)});this.M.setContainers(this.F,this.G);this.i.u(this.j,"textchanged",()=>{qJ(this);const f=this.j.Ua().find(g=>g.active);
  f&&(this.ib=f)});this.i.N(this.j,["trackschanged","manifestupdated","loaded"],()=>{this.j.wd()&&yJ(this)});this.i.u(this.j,"unloading",f=>{this.l||(f=f.isSwitchingContent||!1,this.ua=[],this.ib=null,this.Mb()&&!f&&zJ(this),this.yd()&&!f&&this.Fc(),this.H.length&&(this.H=[],this.dispatchEvent(new C("chaptersupdated"))))});this.na=new oI(this)}async destroy(a=!1){document.pictureInPictureElement==this.o&&await document.exitPictureInPicture();this.i?.release();this.i=null;this.U?.stop();this.U=null;
  this.gb?.stop();this.gb=null;this.R?.stop();this.R=null;this.Z?.stop();this.Z=null;this.Fb?.stop();this.Fb=null;this.B?.release();this.B=null;BJ(this);this.h&&(this.m.removeChild(this.h),this.h=null);this.C&&(await this.C.destroy(a),this.C=null);this.K&&(this.m.removeChild(this.K),this.K=null);this.F&&(this.m.removeChild(this.F),this.F=null);this.G&&(this.m.removeChild(this.G),this.G=null);this.Ka&&(await this.Ka.destroy(),this.Ka=null);this.ia=this.A=this.o=this.j=null;this.Ha.clear();this.na&&(this.na.release(),
+ this.na=null);super.release()}Oi(a){this.Oa=a;vJ(this)}ck(){uJ(this)}configure(a){this.g=a;this.C.Bh(a.castReceiverAppId,a.castAndroidReceiverCompatible);this.D&&(this.D=null);this.Ba&&(this.Ba=null);this.B&&this.B.configure(a);this.h?(wj(this.h),BJ(this)):(CJ(this),DJ(this),this.B=new iJ(this.h,this.kd,this.o,this.j,this.g,this));this.m.classList.add("shaka-video-container");this.o.classList.add("shaka-video");IJ(this);this.g.bigButtons.length&&JJ(this);this.K||KJ(this);this.g.seekOnTaps&&(LJ(this),
+ MJ(this));NJ(this);this.g.customContextMenu&&(this.Ba=new YH(this.I,this),this.J.push(this.Ba));this.T=Array.from(this.m.getElementsByClassName("shaka-settings-menu"));this.T.push(...Array.from(this.m.getElementsByClassName("shaka-overflow-menu")));this.Db=Array.from(this.m.getElementsByClassName("shaka-context-menu"));this.Tc=Array.from(this.m.getElementsByClassName("shaka-show-controls-on-mouse-over"));uJ(this);a=this.m.getElementsByClassName("shaka-no-propagation");for(const b of a)this.i.N(b,
+ ["click","dblclick"],c=>c.stopPropagation()),navigator.maxTouchPoints>0&&this.i.u(b,"touchend",c=>{this.Fa()&&c.stopPropagation()});this.na&&this.na.configure(this.g)}Yg(a){(this.Aa=a)?(this.m.setAttribute("shaka-controls","true"),this.o.tabIndex=-1,this.o.controls=!1):this.m.removeAttribute("shaka-controls");uJ(this)}si(a){this.o.controls=a;this.o.tabIndex=a?0:-1;a&&this.Yg(!1)}Ik(a){this.Va=a}getAd(){return this.l}aj(){return this.ua}ij(){return this.H}gj(){return this.C}hj(){return this.Va}xj(){return this.ia}Oc(){return this.m}sd(){return this.A}wj(){return this.o}Lb(){return this.j}vj(){return this.Ka}Zb(){return this.M}wc(){return this.Nb}Bj(){return this.na}nj(){return this.h}Ij(){return this.G}jj(){return this.F}kj(){return this.g}Yj(){return this.W}$g(a){(this.W=
+-a)?this.U.stop():this.U.Y(3)}Tj(){return this.Oa}$b(){return this.D?this.D.getValue():this.A.currentTime}Mk(){Sf("setLastTouchEventTime","This method is no longer used.")}Hb(){return this.T.some(a=>!a.classList.contains("shaka-hidden"))}ec(){this.R.ya()}rh(){return this.Db.some(a=>!a.classList.contains("shaka-hidden"))}Xd(){for(const a of this.Db)V(a,!1)}vd(){return this.C.La()?!1:AJ(this)||(!this.l||!this.l.isUsingAnotherMediaElement())&&this.o.webkitSupportsFullscreen?!0:!1}Mb(){if(AJ(this))return!!document.fullscreenElement;
++a)?this.U.stop():this.U.Y(Number(this.m.dataset.playingInterfaceHideDelay)||3)}Tj(){return this.Oa}$b(){return this.D?this.D.getValue():this.A.currentTime}Mk(){Sf("setLastTouchEventTime","This method is no longer used.")}Hb(){return this.T.some(a=>!a.classList.contains("shaka-hidden"))}ec(){this.R.ya()}rh(){return this.Db.some(a=>!a.classList.contains("shaka-hidden"))}Xd(){for(const a of this.Db)V(a,!1)}vd(){return this.C.La()?!1:AJ(this)||(!this.l||!this.l.isUsingAnotherMediaElement())&&this.o.webkitSupportsFullscreen?!0:!1}Mb(){if(AJ(this))return!!document.fullscreenElement;
+ const a=this.o;return a.webkitSupportsFullscreen?a.webkitDisplayingFullscreen:!1}async me(){this.Mb()?await zJ(this):await FJ(this)}Xe(){return this.C.La()?!1:document.pictureInPictureEnabled||EJ(this)?!this.o.disablePictureInPicture:!1}yd(){return!!(window.documentPictureInPicture&&window.documentPictureInPicture.window||document.pictureInPictureElement)}async Fc(){try{EJ(this)?(this.Mb()&&await zJ(this),await GJ(this)):document.pictureInPictureElement?await document.exitPictureInPicture():(this.Mb()&&
+ zJ(this),await this.o.requestPictureInPicture())}catch(a){this.dispatchEvent(new C("error",(new Map).set("detail",a)))}}Bi(){V(this.X,!0);this.F&&this.F.hasChildNodes()&&V(this.F,!0);this.G&&this.G.hasChildNodes()&&V(this.G,!0);this.l.hasCustomClick()?this.h.setAttribute("ad-active","true"):this.h.removeAttribute("ad-active")}Sh(){V(this.X,!1);V(this.F,!1);V(this.G,!1);this.h.removeAttribute("ad-active")}Fa(){return this.Aa?this.h.getAttribute("shown")!=null||this.h.getAttribute("casting")!=null:
+ !1}He(){let a=!0;this.zc()&&(a=!1);a&&this.C.La()&&(a=!1);a&&(this.j.drmInfo()||this.j.yc())&&(a=!1);a&&this.l&&(a=!1);a&&this.j.Ga()&&(a=!1);return a}fh(){if(this.He()){var a=document.createElement("canvas"),b=a.getContext("2d"),c=this.o;a.width=c.videoWidth;a.height=c.videoHeight;b.drawImage(c,0,0,a.width,a.height);a=a.toDataURL("image/png");b=document.createElement("a");b.href=a;b.download="videoframe_"+c.currentTime.toFixed(3)+".png";b.click()}}Rf(){let a=this.He();navigator.clipboard&&navigator.clipboard.write||
 diff --git a/ui/controls.js b/ui/controls.js
-index b525e966d69c8e891adf54b7349b36add9b5e8b5..e85a973f83a55de978fcc1963bd423067eb97086 100644
+index b525e966d69c8e891adf54b7349b36add9b5e8b5..a4903b6f95109a8c1a5157e2630b34f6c4544fdb 100644
 --- a/ui/controls.js
 +++ b/ui/controls.js
 @@ -258,7 +258,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
@@ -38,6 +55,26 @@ index b525e966d69c8e891adf54b7349b36add9b5e8b5..e85a973f83a55de978fcc1963bd42306
          return;
        }
        this.controlsContainer_.removeAttribute('shown');
+@@ -852,7 +853,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+     if (seeking) {
+       this.mouseStillTimer_.stop();
+     } else {
+-      this.mouseStillTimer_.tickAfter(/* seconds= */ 3);
++      this.mouseStillTimer_.tickAfter(/* seconds= */
++          Number(this.videoContainer_.dataset.playingInterfaceHideDelay) || 3);
+     }
+   }
+
+@@ -1796,7 +1798,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+     if (event.type == 'touchend' ||
+         event.type == 'wheel' ||
+         event.type == 'keyup'|| !this.lastTouchEventTime_) {
+-      this.mouseStillTimer_.tickAfter(/* seconds= */ 3);
++      this.mouseStillTimer_.tickAfter(/* seconds= */
++          Number(this.videoContainer_.dataset.playingInterfaceHideDelay) || 3);
+     }
+   }
+
 diff --git a/ui/seek_bar.js b/ui/seek_bar.js
 index a5f4162b45c06d7ae196fbe163219f07c1ee9780..7e8797e4ce7b313daba6592faac9aebbedb2c49c 100644
 --- a/ui/seek_bar.js

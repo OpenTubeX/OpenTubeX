@@ -824,6 +824,7 @@ Settings:
     Posts Auto Refresh Interval: Intervall for automatisk oppdatering av innlegg
     Refresh Subscriptions While App Is Closed: "Oppdater abonnementer mens appen er lukket"
   Distraction Free Settings:
+    Playing Interface Hide Delay: Forsinkelse før grensesnittet skjules under avspilling
     Hide Startup Splash: Skjul oppstartsskjerm
     Hide Repeat Stats: Skjul gjentakelsesstatistikk
     Sections:

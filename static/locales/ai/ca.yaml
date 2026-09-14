@@ -1091,6 +1091,7 @@ Settings:
     To: A
     Confirm Before Unsubscribing: Confirma abans de donar-se de baixa
   Distraction Free Settings:
+    Playing Interface Hide Delay: Retard per amagar la interfície durant la reproducció
     Hide Startup Splash: Amaga la pantalla d’inici
     Hide Repeat Stats: Amaga les estadístiques de repetició
     Sections:
