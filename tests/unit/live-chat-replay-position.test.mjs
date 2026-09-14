@@ -89,14 +89,18 @@ test('live chat ignores playback updates and seeks', async t => {
   assert.equal(chat.polls(), 0)
 })
 
-test('the Watch seeking handler forwards the current player position for regular videos', async t => {
+test('the Watch seeking handler forwards the player position even before loading completes', async t => {
   const watchSource = readFileSync(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
   const handler = watchSource.slice(watchSource.indexOf('    handlePlayerSeeking() {'), watchSource.indexOf('    clearPendingWatchTime()'))
   const handlePlayerSeeking = runInNewContext(`({${handler}}).handlePlayerSeeking`)
+  const progress = watchSource.slice(watchSource.indexOf('    getWatchedProgress: function () {'), watchSource.indexOf('    getTimestamp: function () {'))
+  const getWatchedProgress = runInNewContext(`({${progress}}).getWatchedProgress`)
   const chat = setup(t)
   const watchState = {
     customShortsPlayerActive: false,
-    getWatchedProgress: () => 42.25,
+    isLoading: false,
+    $refs: { player: { hasLoaded: false, getCurrentTime: () => 42.25 } },
+    getWatchedProgress,
     set liveChatSeekRequest(request) { chat.props.seekRequest = request },
   }
   handlePlayerSeeking.call(watchState)

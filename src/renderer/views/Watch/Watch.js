@@ -4197,7 +4197,7 @@ export default defineComponent({
       if (isAppHidden()) this.updateAndroidBackgroundPlaybackFormat()
     },
     handlePlayerSeeking() {
-      this.liveChatSeekRequest = { seconds: this.getWatchedProgress() }
+      this.liveChatSeekRequest = { seconds: this.$refs.player.getCurrentTime() }
 
       if (!this.customShortsPlayerActive) {
         return
