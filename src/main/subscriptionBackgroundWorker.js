@@ -10,6 +10,7 @@ let configurationJson = null
 
 function fetchText(request, signal) {
   return new Promise((resolve, reject) => {
+    signal.throwIfAborted()
     const id = randomUUID()
     const abort = () => {
       requests.delete(id)

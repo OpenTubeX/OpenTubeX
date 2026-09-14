@@ -210,4 +210,26 @@ public class SubscriptionRefreshBackendTest {
         }
     }
 
+
+    @Test
+    public void malformedRssEntriesDoNotDiscardValidDownloadCandidates() throws Exception {
+        String valid = "<entry><yt:videoId>valid</yt:videoId><title>Valid</title><published>2026-09-14T08:00:00Z</published><media:statistics views=\"42\"/></entry>";
+        String missing = "<entry><media:statistics views=\"42\"/></entry>";
+        String invalid = valid.replace("2026-09-14T08:00:00Z", "invalid");
+        JSONObject response = new JSONObject().put("backgroundFormat", "rss").put("text", "<feed>" + missing + valid + invalid + "</feed>");
+        JSONArray videos = SubscriptionRefreshDownloadMetadata.forDownloads(response, 0).getJSONArray("videos");
+        assertEquals(1, videos.length());
+        assertEquals("valid", videos.getJSONObject(0).getString("videoId"));
+    }
+
+    @Test
+    public void nativeYearDurationMatchesTheSharedFeedParser() throws Exception {
+        long now = 1800000000000L;
+        JSONObject video = new JSONObject().put("videoId", "yearold")
+            .put("publishedTimeText", new JSONObject().put("simpleText", "1 year ago"));
+        JSONObject response = new JSONObject().put("backgroundFormat", "local")
+            .put("data", new JSONObject().put("contents", new JSONObject().put("videoRenderer", video)));
+        long published = SubscriptionRefreshDownloadMetadata.forDownloads(response, now).getJSONArray("videos").getJSONObject(0).getLong("published");
+        assertEquals(now / 1000 - 31556952, published);
+    }
 }

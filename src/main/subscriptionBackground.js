@@ -6,6 +6,7 @@ import { existsSync } from 'node:fs'
 export function createSubscriptionBackgroundService(userDataPath) {
   const resultPath = path.join(userDataPath, 'background-subscription-results')
   let worker = null
+  let ready = null
   let sequence = 0
   let configuration = null
   let background = false
@@ -57,11 +58,20 @@ export function createSubscriptionBackgroundService(userDataPath) {
       else operation?.resolve(message.value)
     })
     child.once('exit', () => releaseWorker(child))
+    // Every replacement must restore its scheduler, regardless of which call started it.
+    ready = configuration
+      ? send('configure', configuration).then(() => send('background', background && configuration.enabled && net.isOnline()))
+      : Promise.resolve()
+    ready = ready.catch(error => {
+      if (worker === child) stopWorker()
+      throw error
+    })
   }
 
   function releaseWorker(child) {
     if (worker !== child) return
     worker = null
+    ready = null
     for (const request of requests.values()) request.abort()
     requests.clear()
     for (const operation of pending.values()) operation.reject(new Error('Background refresh process exited'))
@@ -75,15 +85,22 @@ export function createSubscriptionBackgroundService(userDataPath) {
     child.kill()
   }
 
-  function call(method, value) {
-    start()
-    if (!worker) return Promise.reject(new Error('Background refresh stopped'))
+  function send(method, value) {
     return new Promise((resolve, reject) => {
       const id = ++sequence
       const timeout = setTimeout(() => { pending.delete(id); reject(new Error('Background refresh process timed out')) }, 30000)
       pending.set(id, { resolve: value => { clearTimeout(timeout); resolve(value) }, reject: error => { clearTimeout(timeout); reject(error) } })
       worker.postMessage({ id, method, value })
     })
+  }
+
+  async function call(method, value) {
+    start()
+    const child = worker
+    if (!child) throw new Error('Background refresh stopped')
+    await ready
+    if (worker !== child) throw new Error('Background refresh process exited')
+    return send(method, value)
   }
 
   // Restart after crashes, without requiring a renderer to reconfigure the job.

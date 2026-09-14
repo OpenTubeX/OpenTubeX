@@ -67,6 +67,7 @@ export function createSubscriptionBackgroundScheduler({ fetchChannel, saveResult
                 const payload = await fetchChannel(snapshot, feedType, channelId, controller.signal)
                 if (controller.signal.aborted) return
                 for (const feed of targets) {
+                  if (controller.signal.aborted) return
                   await saveResult({ kind: 'channel', profileId: feed.profileId, feedType, channelId, timestamp: now(), payload })
                 }
               } catch (error) {
@@ -77,11 +78,17 @@ export function createSubscriptionBackgroundScheduler({ fetchChannel, saveResult
           }
           if (controller.signal.aborted) break
           for (const feed of due) {
+            if (controller.signal.aborted) break
             const timestamp = now()
-            deadlines.set(feed.key, timestamp + (failed.has(feed.key) ? Math.min(feed.interval, 300000) : feed.interval))
             if (!failed.has(feed.key)) {
-              await saveResult({ kind: 'completion', profileId: feed.profileId, feedType, timestamp })
+              try {
+                await saveResult({ kind: 'completion', profileId: feed.profileId, feedType, timestamp })
+              } catch (error) {
+                failed.add(feed.key)
+                if (!controller.signal.aborted) console.error('Background subscription completion failed', error)
+              }
             }
+            if (!controller.signal.aborted) deadlines.set(feed.key, timestamp + (failed.has(feed.key) ? Math.min(feed.interval, 300000) : feed.interval))
           }
         }
       } finally {

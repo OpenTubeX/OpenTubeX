@@ -2462,7 +2462,10 @@ let reconcilingAndroidSubscriptionRefreshResults = null
 
 function reconcileAndroidSubscriptionRefreshResults() {
   if (reconcilingAndroidSubscriptionRefreshResults) return reconcilingAndroidSubscriptionRefreshResults
-  reconcilingAndroidSubscriptionRefreshResults = importAndroidSubscriptionRefreshResults().finally(() => {
+  const importing = isElectron
+    ? navigator.locks.request('opentubex-background-subscription-import', importAndroidSubscriptionRefreshResults)
+    : importAndroidSubscriptionRefreshResults()
+  reconcilingAndroidSubscriptionRefreshResults = importing.finally(() => {
     reconcilingAndroidSubscriptionRefreshResults = null
   })
   return reconcilingAndroidSubscriptionRefreshResults

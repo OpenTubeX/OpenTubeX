@@ -38,10 +38,17 @@ final class SubscriptionRefreshDownloadMetadata {
                 } catch (NumberFormatException invalidViews) {
                     continue;
                 }
-                videos.put(new JSONObject()
-                    .put("videoId", text(entry, "yt:videoId"))
-                    .put("title", text(entry, "title"))
-                    .put("published", Instant.parse(text(entry, "published")).getEpochSecond()));
+                String videoId = text(entry, "yt:videoId");
+                String title = text(entry, "title");
+                if (videoId.isEmpty() || title.isEmpty()) continue;
+                try {
+                    videos.put(new JSONObject()
+                        .put("videoId", videoId)
+                        .put("title", title)
+                        .put("published", Instant.parse(text(entry, "published")).getEpochSecond()));
+                } catch (java.time.format.DateTimeParseException invalidDate) {
+                    // A malformed entry must not discard other download candidates.
+                }
             }
         } else if (format.equals("local") || format.equals("localPlaylist")) {
             collect(response.getJSONObject("data").opt("contents"), videos, now);
@@ -55,7 +62,8 @@ final class SubscriptionRefreshDownloadMetadata {
     }
 
     private static String text(Element entry, String tag) {
-        return entry.getElementsByTagName(tag).item(0).getTextContent();
+        NodeList nodes = entry.getElementsByTagName(tag);
+        return nodes.getLength() == 0 ? "" : nodes.item(0).getTextContent();
     }
 
     private static String label(JSONObject value) {
@@ -79,7 +87,7 @@ final class SubscriptionRefreshDownloadMetadata {
             case "day": seconds = 86400; break;
             case "week": seconds = 604800; break;
             case "month": seconds = 2592000; break;
-            default: seconds = 31536000;
+            default: seconds = 31556952;
         }
         return now / 1000 - Long.parseLong(age.group(1)) * seconds;
     }

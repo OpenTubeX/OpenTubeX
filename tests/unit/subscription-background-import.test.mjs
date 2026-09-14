@@ -15,7 +15,7 @@ test('concurrent background imports wait for the existing cache import', async (
   let requests = 0
   const blocked = new Promise(resolve => { finish = resolve })
   const context = vm.createContext({
-    console,
+    console, isElectron: false,
     getNextAndroidSubscriptionRefreshResult: async () => { requests++; await blocked; return null }
   })
   vm.runInContext(section('let reconcilingAndroidSubscriptionRefreshResults', 'async function reconcileAndroidSubscriptionRefreshChannelResult'), context)
@@ -106,4 +106,32 @@ test('background playlist imports restore missing authors and keep explicit byli
   assert.equal(saved[2].authorId, 'UCexplicit')
   assert.ok(saved.every(video => video.isShort))
   assert.ok(saved.every(video => video.published === 123456))
+})
+
+
+test('separate Electron renderers serialize background result imports', async () => {
+  let finish
+  let requests = 0
+  const blocked = new Promise(resolve => { finish = resolve })
+  let queue = Promise.resolve()
+  const locks = { request(name, callback) {
+    assert.equal(name, 'opentubex-background-subscription-import')
+    const result = queue.then(callback)
+    queue = result.catch(() => {})
+    return result
+  } }
+  const contexts = [0, 1].map(() => {
+    const context = vm.createContext({
+      console, isElectron: true, navigator: { locks },
+      getNextAndroidSubscriptionRefreshResult: async () => { requests++; await blocked; return null }
+    })
+    vm.runInContext(section('let reconcilingAndroidSubscriptionRefreshResults', 'async function reconcileAndroidSubscriptionRefreshChannelResult'), context)
+    return context
+  })
+  const imports = contexts.map(context => context.reconcileAndroidSubscriptionRefreshResults())
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(requests, 1, 'the second renderer must wait for the first import to finish')
+  finish()
+  await Promise.all(imports)
+  assert.equal(requests, 2)
 })

@@ -65,3 +65,52 @@ test('desktop transport supports a configured HTTP instance and rejects non-HTTP
     assert.equal(requests.length, 2)
   } finally { service.stop() }
 })
+
+async function serviceFixture() {
+  const source = (await readFile(new URL('../../src/main/subscriptionBackground.js', import.meta.url), 'utf8'))
+    .replace(/^import .*\n/gm, '').replace('export function', 'function')
+  const children = []
+  class Worker extends EventEmitter {
+    messages = []
+    postMessage(message) {
+      this.messages.push(message)
+      queueMicrotask(() => this.emit('message', { id: message.id, value: null }))
+    }
+    kill() { this.emit('exit') }
+  }
+  const context = vm.createContext({
+    path, existsSync: () => true, __dirname: '/fixture', setInterval: () => 0, clearInterval() {},
+    setTimeout, clearTimeout, console,
+    utilityProcess: { fork() { const child = new Worker(); children.push(child); return child } },
+    net: { isOnline: () => true }
+  })
+  vm.runInContext(source, context)
+  return { service: context.createSubscriptionBackgroundService('/fixture/data'), children }
+}
+
+test('draining results after a worker crash restores configuration before any concurrent operations', async () => {
+  const { service, children } = await serviceFixture()
+  try {
+    const configuration = { enabled: true, profiles: [], intervals: {} }
+    await service.configure(configuration)
+    await service.setBackground(true)
+    children[0].emit('exit')
+    await Promise.all([service.next(), service.completed({ profileId: 'all' })])
+    assert.equal(children.length, 2)
+    assert.deepEqual(children[1].messages.slice(0, 2).map(message => message.method), ['configure', 'background'])
+    assert.deepEqual(children[1].messages[0].value, configuration)
+    assert.equal(children[1].messages[1].value, true)
+  } finally { service.stop() }
+})
+
+test('an already-aborted worker fetch rejects without sending an HTTP request', async () => {
+  const source = await readFile(new URL('../../src/main/subscriptionBackgroundWorker.js', import.meta.url), 'utf8')
+  const messages = []
+  const context = vm.createContext({ requests: new Map(), randomUUID: () => 'id', process: { parentPort: { postMessage: message => messages.push(message) } } })
+  vm.runInContext(source.slice(source.indexOf('function fetchText('), source.indexOf('\nconst scheduler')), context)
+  const controller = new AbortController()
+  controller.abort(new Error('cancelled'))
+  const result = context.fetchText({ url: 'https://example.com' }, controller.signal)
+  assert.equal(messages.length, 0)
+  await assert.rejects(result, /cancelled/)
+})

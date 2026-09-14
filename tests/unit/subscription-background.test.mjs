@@ -324,3 +324,47 @@ test('delayed playlist imports anchor relative dates to fetch time while preserv
   assert.equal(entries[0].published, now - 3600000 - 86400000)
   assert.equal(entries[1].published, now + 3600000)
 })
+
+test('a failed completion write retries after five minutes instead of the normal interval', async () => {
+  let now = 0
+  let fetches = 0
+  let fail = true
+  const scheduler = createSubscriptionBackgroundScheduler({ now: () => now,
+    fetchChannel: async () => { fetches++; return {} },
+    saveResult: async result => { if (result.kind === 'completion' && fail) throw new Error('disk full') }
+  })
+  scheduler.configure({ intervals: { videos: 3600000 }, profiles: [{ id: 'all', channels: { videos: ['UC1'] } }] })
+  await scheduler.setBackground(true)
+  now = 3600000
+  await scheduler.tick().catch(() => {})
+  fail = false
+  now += 300000
+  await scheduler.tick()
+  assert.equal(fetches, 2)
+})
+
+for (const kind of ['channel', 'completion']) {
+  test(`configuration cancellation stops remaining ${kind} writes`, async () => {
+    let now = 0
+    const saved = []
+    let scheduler
+    scheduler = createSubscriptionBackgroundScheduler({ now: () => now, fetchChannel: async () => ({}), saveResult: async result => {
+      saved.push(result)
+      if (result.kind === kind) scheduler.configure({ profiles: [], intervals: {} })
+    } })
+    scheduler.configure({ intervals: { videos: 100 }, profiles: ['all', 'custom'].map(id => ({ id, channels: { videos: ['UC1'] } })) })
+    await scheduler.setBackground(true)
+    now = 100
+    await scheduler.tick()
+    assert.equal(saved.filter(result => result.kind === kind).length, 1)
+  })
+}
+
+test('topic channels accept the selected videos tab in either browse layout', () => {
+  for (const layout of ['singleColumnBrowseResultsRenderer', 'twoColumnBrowseResultsRenderer']) {
+    const data = { metadata: { channelMetadataRenderer: { musicArtistName: 'Artist' } }, contents: { [layout]: { tabs: [{ tabRenderer: {
+      selected: true, content: {}, endpoint: { commandMetadata: { webCommandMetadata: { url: '/channel/UCtest/videos' } } }
+    } }] } } }
+    assert.equal(parseBackgroundSubscriptionResponse('local', JSON.stringify(data), 'videos').backgroundFormat, 'local')
+  }
+})

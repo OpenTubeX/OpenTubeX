@@ -1,7 +1,7 @@
 import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import { gunzipSync } from 'node:zlib'
-import { test, expect, waitForAppReady } from '../../helpers/app.mjs'
+import { test, expect, waitForAppReady, openNewWindowFromTabBar } from '../../helpers/app.mjs'
 import { createBackgroundSubscriptionRequests } from '../../../src/subscriptionBackgroundRequests.js'
 
 const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa'
@@ -38,7 +38,10 @@ for (const windowAction of ['close', 'hide']) {
       try {
         const directory = path.join(app.userDataDir, 'background-subscription-results')
         return (await Promise.all((await readdir(directory)).filter(file => file.endsWith('.json')).map(file => readFile(path.join(directory, file), 'utf8')))).join('')
-      } catch { return '' }
+      } catch (error) {
+        if (error.code === 'ENOENT') return ''
+        throw error
+      }
     }).toContain('Fetched with the window closed')
 
     const directory = path.join(app.userDataDir, 'background-subscription-results')
@@ -110,4 +113,21 @@ test('normalizes Local API responses with every renderer closed', async ({ app, 
   const quit = app.electronApp.waitForEvent('close')
   await app.electronApp.evaluate(({ app }) => { app.quit() })
   await quit
+})
+
+test('restored windows wait for the shared import lock and recover when its owner closes', async ({ app, page }) => {
+  await page.evaluate(() => {
+    navigator.locks.request('opentubex-background-subscription-import', () => new Promise(() => {}))
+  })
+  await expect.poll(() => page.evaluate(async () => (await navigator.locks.query()).held.some(lock => lock.name === 'opentubex-background-subscription-import'))).toBe(true)
+  const other = await openNewWindowFromTabBar(app, page)
+  await waitForAppReady(other)
+  await other.evaluate(() => document.dispatchEvent(new Event('visibilitychange')))
+  await expect.poll(() => other.evaluate(async () => (await navigator.locks.query()).pending.some(lock => lock.name === 'opentubex-background-subscription-import'))).toBe(true)
+  await page.close()
+  app.page = other
+  await expect.poll(() => other.evaluate(async () => {
+    const locks = await navigator.locks.query()
+    return [...locks.held, ...locks.pending].some(lock => lock.name === 'opentubex-background-subscription-import')
+  })).toBe(false)
 })

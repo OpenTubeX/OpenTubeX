@@ -44,7 +44,6 @@ export function parseBackgroundSubscriptionResponse(format, text, feedType) {
     if (!selectedContent || typeof selectedContent !== 'object' || Array.isArray(selectedContent) ||
         data.alerts?.some(alert => alert.alertRenderer?.type === 'ERROR')) throw new Error('Channel unavailable')
     if (format === 'local' && feedType === 'videos' && data.metadata?.channelMetadataRenderer?.musicArtistName) {
-      const tabs = data.contents.twoColumnBrowseResultsRenderer?.tabs ?? []
       const selected = tabs.find(tab => tab.tabRenderer?.selected)?.tabRenderer
       if (!selected?.endpoint?.commandMetadata?.webCommandMetadata?.url?.endsWith('/videos')) throw new Error('Topic channel requires its uploads playlist')
     }
