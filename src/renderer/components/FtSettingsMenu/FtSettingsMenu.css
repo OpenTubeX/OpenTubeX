@@ -100,3 +100,28 @@
 .settingsMenu.mobileSettingsMenu .titleItem {
   min-block-size: 48px;
 }
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .settingsMenu {
+    gap: 8px;
+  }
+
+  .settingsMenu .titleItem,
+  .settingsMenu.mobileSettingsMenu .titleItem {
+    min-block-size: 64px;
+  }
+
+  .title {
+    padding-block: 12px;
+  }
+
+  .titleDescription {
+    font-size: 13px;
+    margin-block-start: 4px;
+  }
+
+  .title:active {
+    color: var(--side-nav-hover-text-color);
+    background: var(--side-nav-hover-color);
+  }
+}
