@@ -721,6 +721,7 @@ const isLoadingMoreComments = ref(false)
 const loadingReplyIds = ref(new Set())
 const loadingTranslationIds = ref(new Set())
 const showComments = ref(false)
+const areCommentsDisabled = ref(false)
 const nextPageToken = shallowRef(null)
 
 // Has to be ref not shallowRef, as the replies are stored in a property on the comments
@@ -1546,6 +1547,7 @@ function copyCommentYoutubeLink(commentId) {
 
 function getCommentData({ preserveSort = false } = {}) {
   isLoading.value = true
+  areCommentsDisabled.value = false
 
   const useInvidious = !process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious'
 
@@ -1852,6 +1854,7 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
       setCommentCount(0)
       isLoading.value = false
       showComments.value = true
+      areCommentsDisabled.value = true
       localCommentsInstance = undefined
       return
     }
@@ -2051,6 +2054,7 @@ async function getCommentDataInvidious() {
       setCommentCount(0)
       isLoading.value = false
       showComments.value = true
+      areCommentsDisabled.value = true
       return
     }
     // endregion No comment detection

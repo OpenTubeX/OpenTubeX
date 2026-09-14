@@ -937,6 +937,7 @@ async function getPlaylistLocal() {
       console.warn('Falling back to Invidious API')
       return getPlaylistInvidious()
     } else {
+      updatePageTitle()
       isLoading.value = false
       playlistError.value = t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']")
       playlistErrorRetryable.value = true
@@ -998,6 +999,7 @@ async function getPlaylistInvidious() {
       console.warn('Error getting data with Invidious, falling back to local backend')
       return getPlaylistLocal()
     } else {
+      updatePageTitle()
       isLoading.value = false
       playlistError.value = t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']")
       playlistErrorRetryable.value = true

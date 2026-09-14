@@ -32,7 +32,6 @@ on:
       - '.github/pr-labeler.yml'
       - '.github/pull.yml'
       - '.github/workflows/autoMerge.yml'
-      - '.github/workflows/calibreapp-image-actions.yml'
       - '.github/workflows/codeql.yml'
       - '.github/workflows/conflicts.yml'
       - '.github/workflows/e2e.yml'

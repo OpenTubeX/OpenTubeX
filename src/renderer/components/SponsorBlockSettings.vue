@@ -126,7 +126,6 @@
         v-if="useDeArrowThumbnails"
       >
         <FtInput
-          v-if="useDeArrowThumbnails"
           ref="deArrowThumbnailGeneratorUrl"
           :placeholder="$t('Settings.SponsorBlock Settings[\'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)\']')"
           :show-action-button="false"
