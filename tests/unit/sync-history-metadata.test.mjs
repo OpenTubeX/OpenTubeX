@@ -18,11 +18,12 @@ const remote = {
   metadata: { added_date: 200, watched_state: 'completed', position_millis: 1000 },
 }
 
-async function downloadHistory(local = [], entry = remote) {
+async function downloadHistory(local = [], entry = remote, uploaded = []) {
   const changes = []
   await context.syncHistory({
     getWatchHistory: async () => [entry],
     supportsBulkSync: async () => true,
+    putWatchHistoryBulk: async entries => uploaded.push(...structuredClone(entries)),
   }, {
     state: { history: { historyCacheSorted: local } },
     dispatch: async (action, payload) => {
@@ -94,4 +95,32 @@ test('a synced duration clears stale live and upcoming flags', async () => {
   assert.equal(changes.updates[0].isLive, false)
   assert.equal(changes.updates[0].isUpcoming, false)
   assert.equal(changes.updates[0].lengthSeconds, 682)
+})
+
+
+test('equal timestamps refresh duration and stale flags without discarding newer local progress', async () => {
+  const local = { ...imported, watchProgress: 200, isWatched: false, isUpcoming: true }
+  const entry = { ...remote, video: { ...remote.video, duration: 682 } }
+  const uploaded = []
+  const changes = await downloadHistory([local], entry, uploaded)
+  assert.deepEqual(changes?.updates, [{
+    ...local, lengthSeconds: 682, isLive: false, isUpcoming: false,
+  }])
+  assert.equal(uploaded.length, 1)
+  assert.equal(uploaded[0].video.duration, 682)
+  assert.deepEqual(uploaded[0].metadata, {
+    added_date: local.timeWatched, watched_state: 'watching', position_millis: 200000,
+  })
+})
+
+test('equal timestamps persist remote metadata even when watch state already matches', async () => {
+  const entry = { ...remote, video: { ...remote.video, duration: 682 } }
+  const uploaded = []
+  const changes = await downloadHistory([imported], entry, uploaded)
+  assert.equal(changes?.updates[0].lengthSeconds, 682)
+  assert.equal(changes.updates[0].isLive, false)
+  assert.equal(changes.updates[0].watchProgress, imported.watchProgress)
+  assert.equal(changes.updates[0].isWatched, imported.isWatched)
+  assert.equal(uploaded.length, 0)
+  assert.equal(await downloadHistory(changes.updates, entry), undefined)
 })

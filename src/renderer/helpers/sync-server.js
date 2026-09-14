@@ -959,8 +959,16 @@ export async function syncHistory(client, store, previousIds = [], options = {})
     const local = localById.get(id)
     const remote = remoteById.get(id)
     const useLocal = local && (!remote || local.timeWatched >= remote.metadata.added_date)
-    const merged = useLocal ? local : historyToLocal(remote, local)
-    const localPayload = local ? historyToRemote(local) : null
+    let merged = useLocal ? local : historyToLocal(remote, local)
+    // Progress can change without changing timeWatched. Keep that local state
+    // while accepting a known duration for the same history timestamp.
+    if (useLocal && remote && local.timeWatched === remote.metadata.added_date &&
+        Number.isFinite(remote.video.duration) && remote.video.duration > 0 &&
+        (local.lengthSeconds !== remote.video.duration || local.isLive === true || local.isUpcoming === true)) {
+      merged = { ...local, lengthSeconds: remote.video.duration, isLive: false, isUpcoming: false }
+      localUpdates.push(merged)
+    }
+    const localPayload = useLocal ? historyToRemote(merged) : null
 
     if (useLocal && localPayload && (
       !remote ||
