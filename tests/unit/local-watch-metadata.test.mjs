@@ -324,3 +324,24 @@ test('tolerates a loading placeholder in the description panel', async () => {
   })
   assert.equal(watch.videoTitle, 'Player title')
 })
+
+test('falls back from a non-finite player view count', async () => {
+  const content = descriptionPanel()
+  const watch = await loadMetadata({
+    playability_status: { status: 'OK' }, basic_info: { view_count: Number.NaN },
+    page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content }] }],
+  })
+  assert.equal(watch.videoViewCount, 42)
+})
+
+test('tolerates omitted raw description-header fields after parsing', async () => {
+  const content = new YTNodes.StructuredDescriptionContent({ items: [{ videoDescriptionHeaderRenderer: {} }] })
+  const watch = await loadMetadata({
+    playability_status: { status: 'OK' }, basic_info: { title: 'Player title' },
+    page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content }] }],
+  }, 'disabled', { hideVideoLikesAndDislikes: false })
+  assert.equal(watch.videoTitle, 'Player title')
+  assert.equal(watch.videoViewCount, null)
+  assert.equal(watch.channelThumbnail, '')
+  assert.equal(watch.videoPublished, 0)
+})

@@ -2938,9 +2938,11 @@ export default defineComponent({
           })
         }
         const localizedViews = result.primary_info?.view_count?.text || descriptionHeader?.views.text
-        const viewCount = result.basic_info.view_count ?? (localizedViews?.toLowerCase() === 'no views'
-          ? 0
-          : parseLocalSubscriberCount(localizedViews ?? ''))
+        const viewCount = Number.isFinite(result.basic_info.view_count)
+          ? result.basic_info.view_count
+          : localizedViews?.toLowerCase() === 'no views'
+            ? 0
+            : parseLocalSubscriberCount(localizedViews ?? '')
         this.videoViewCount = Number.isFinite(viewCount) ? viewCount : null
         this.license = result.secondary_info?.metadata?.rows.find(element => element.title?.text === 'License')?.contents[0]?.text
         this.videoGames = parseLocalVideoGames(result)
