@@ -16,15 +16,25 @@ for (const uiScale of [100, 125]) {
       })).toBe(true)
       const category = page.locator('.settingsMenu .title[data-section="appearance"]')
       await expect(category).toBeVisible()
+      await expect(category.locator('..')).toHaveCSS('min-block-size', '64px')
       expect((await category.boundingBox()).height).toBeGreaterThanOrEqual(64)
       await category.click({ position: { x: 12, y: 4 } })
       await expect(page.locator('.settingsContent > [data-section="appearance"]')).toBeVisible()
       const search = page.getByRole('searchbox', { name: 'Search settings' })
-      await search.fill('Show')
+      await search.fill('SponsorBlock API')
       const buttons = page.locator('.settingsSearchResultHeading, .settingsSearchResultMatch')
       await expect(buttons.first()).toBeVisible()
       expect(await buttons.evaluateAll(elements => Math.min(...elements.map(el => el.getBoundingClientRect().height)))).toBeGreaterThanOrEqual(47.99)
       expect(await buttons.evaluateAll(elements => elements.every(el => el.scrollWidth <= el.clientWidth + 1))).toBe(true)
+      const longLabel = page.locator('.settingsSearchResultMatch').filter({ hasText: 'SponsorBlock API Url' })
+      await expect(longLabel).toHaveCount(1)
+      expect(await longLabel.evaluate(element => {
+        const range = document.createRange()
+        range.selectNodeContents(element)
+        return new Set([...range.getClientRects()]
+          .filter(rect => rect.width > 0)
+          .map(rect => Math.round(rect.top))).size
+      })).toBeGreaterThan(1)
       await session.detach()
     })
 
