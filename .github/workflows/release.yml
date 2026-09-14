@@ -652,6 +652,41 @@ jobs:
           -f event_type=opentubex-release \
           -f "client_payload[tag]=$TAG"
 
+  trigger-nix-update:
+    name: Trigger Nix repository update
+    needs: publish-release
+    if: inputs.publishRelease
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+    - name: Resolve release tag
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
+        echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+    - name: Trigger Nix repository workflow
+      env:
+        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+        TAG: ${{ steps.release.outputs.tag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        gh api repos/OpenTubeX/nix/dispatches \
+          --method POST \
+          -f event_type=opentubex-release \
+          -f "client_payload[tag]=$TAG"
+
   trigger-homebrew-update:
     name: Trigger Homebrew tap update
     needs: publish-release
