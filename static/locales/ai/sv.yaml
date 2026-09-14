@@ -390,6 +390,8 @@ Settings:
       App Font: Appens typsnitt
       System Default: Systemstandard
       Unable to Load: Det gick inte att läsa in installerade systemtypsnitt
+      Bundled Fonts: Medföljande teckensnitt
+      System Fonts: Systemteckensnitt
     Always Show Scrollbars: Visa alltid rullningslister
     Base Theme:
       Dynamic colors: Dynamiska färger

@@ -377,6 +377,8 @@ Settings:
       App Font: Tipo de letra da aplicação
       System Default: Predefinição do sistema
       Unable to Load: Não foi possível carregar os tipos de letra instalados no sistema
+      Bundled Fonts: Tipos de letra incluídos
+      System Fonts: Tipos de letra do sistema
     Always Show Scrollbars: Mostrar sempre as barras de deslocamento
     Base Theme:
       Dynamic colors: Cores dinâmicas

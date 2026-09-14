@@ -402,6 +402,8 @@ Settings:
       App Font: Fuente de la aplicación
       System Default: Predeterminada del sistema
       Unable to Load: No se pudieron cargar las fuentes instaladas en el sistema
+      Bundled Fonts: Fuentes incluidas
+      System Fonts: Fuentes del sistema
     Always Show Scrollbars: Mostrar siempre las barras de desplazamiento
     Base Theme:
       Dynamic colors: Colores dinámicos

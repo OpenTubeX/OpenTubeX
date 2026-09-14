@@ -390,6 +390,8 @@ Settings:
       App Font: Шрифт на приложението
       System Default: Стандартният за системата
       Unable to Load: Инсталираните системни шрифтове не могат да бъдат заредени
+      Bundled Fonts: Вградени шрифтове
+      System Fonts: Системни шрифтове
     Always Show Scrollbars: Винаги показвай лентите за превъртане
     Base Theme:
       Dynamic colors: Динамични цветове

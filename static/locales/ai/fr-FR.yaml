@@ -388,6 +388,8 @@ Settings:
       App Font: Police de l’application
       System Default: Police par défaut du système
       Unable to Load: Impossible de charger les polices installées sur le système
+      Bundled Fonts: Polices incluses
+      System Fonts: Polices système
     Always Show Scrollbars: Toujours afficher les barres de défilement
     Base Theme:
       Dynamic colors: Couleurs dynamiques

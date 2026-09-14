@@ -58,7 +58,13 @@
         :style="selectedOptionColor == null ? null : { '--option-color': selectedOptionColor }"
         aria-hidden="true"
       />
-      <span class="selectedValue">{{ selectedName }}</span>
+      <span class="selectedValue">
+        <slot
+          name="option"
+          :label="selectedName"
+          :value="value"
+        >{{ selectedName }}</slot>
+      </span>
     </button>
     <FtIcon
       :icon="['fas', 'angle-down']"
@@ -142,49 +148,65 @@
           @pointerdown="handleDropdownPointerDown"
           @keydown="handlePickerKeydown"
         >
-          <!-- Desktop uses aria-activedescendant; phone sheets move focus between rows. -->
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <li
-            v-for="{ name, index } in filteredOptions"
-            :id="`${id}-option-${index}`"
+          <template
+            v-for="({ name, index }, visibleIndex) in filteredOptions"
             :key="selectValues[index]"
-            ref="options"
-            class="selectOption"
-            :class="{
-              active: index === activeIndex,
-              selected: selectValues[index] === value,
-              hasOptionVisuals
-            }"
-            role="option"
-            :tabindex="phoneLayout ? 0 : -1"
-            :aria-selected="selectValues[index] === value"
-            :dir="isLocaleSelector ? 'auto' : null"
-            :lang="isLocaleSelector && selectValues[index] !== 'system' && selectValues[index] !== '' ? selectValues[index] : null"
-            @mousedown.prevent
-            @pointermove="activeIndex = index"
-            @click="selectOption(index)"
-            @keydown.enter.space.prevent="selectOption(index)"
           >
-            <FtIcon
-              v-if="optionIcons[index]"
-              :icon="optionIcons[index]"
-              class="optionIcon"
-              aria-hidden="true"
-            />
-            <span
-              v-else-if="optionColors[index] !== undefined"
-              class="optionColorDot"
-              :class="{ empty: optionColors[index] == null }"
-              :style="optionColors[index] == null ? null : { '--option-color': optionColors[index] }"
-              aria-hidden="true"
-            />
-            <span class="optionName">{{ name }}</span>
-            <FtIcon
-              v-if="phoneLayout && selectValues[index] === value"
-              :icon="['fas', 'check']"
-              aria-hidden="true"
-            />
-          </li>
+            <li
+              v-if="optionGroupLabels[optionGroups[index]] && (visibleIndex === 0 || optionGroups[index] !== optionGroups[filteredOptions[visibleIndex - 1].index])"
+              class="selectGroupHeading"
+              role="presentation"
+            >
+              {{ optionGroupLabels[optionGroups[index]] }}
+            </li>
+            <!-- Desktop uses aria-activedescendant; phone sheets move focus between rows. -->
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <li
+              :id="`${id}-option-${index}`"
+              ref="options"
+              class="selectOption"
+              :class="{
+                active: index === activeIndex,
+                selected: selectValues[index] === value,
+                hasOptionVisuals
+              }"
+              role="option"
+              :tabindex="phoneLayout ? 0 : -1"
+              :aria-selected="selectValues[index] === value"
+              :dir="isLocaleSelector ? 'auto' : null"
+              :lang="isLocaleSelector && selectValues[index] !== 'system' && selectValues[index] !== '' ? selectValues[index] : null"
+              @mousedown.prevent
+              @pointermove="activeIndex = index"
+              @click="selectOption(index)"
+              @keydown.enter.space.prevent="selectOption(index)"
+            >
+              <FtIcon
+                v-if="optionIcons[index]"
+                :icon="optionIcons[index]"
+                class="optionIcon"
+                aria-hidden="true"
+              />
+              <span
+                v-else-if="optionColors[index] !== undefined"
+                class="optionColorDot"
+                :class="{ empty: optionColors[index] == null }"
+                :style="optionColors[index] == null ? null : { '--option-color': optionColors[index] }"
+                aria-hidden="true"
+              />
+              <span class="optionName">
+                <slot
+                  name="option"
+                  :label="name"
+                  :value="selectValues[index]"
+                >{{ name }}</slot>
+              </span>
+              <FtIcon
+                v-if="phoneLayout && selectValues[index] === value"
+                :icon="['fas', 'check']"
+                aria-hidden="true"
+              />
+            </li>
+          </template>
         </ul>
       </FtMobileSheet>
     </Teleport>
@@ -219,6 +241,14 @@ const props = defineProps({
   selectValues: {
     type: Array,
     required: true
+  },
+  optionGroupLabels: {
+    type: Object,
+    default: () => ({})
+  },
+  optionGroups: {
+    type: Array,
+    default: () => []
   },
   optionColors: {
     type: Array,

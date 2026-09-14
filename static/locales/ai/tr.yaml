@@ -388,6 +388,8 @@ Settings:
       App Font: Uygulama yazı tipi
       System Default: Sistem varsayılanı
       Unable to Load: Yüklü sistem yazı tipleri yüklenemedi
+      Bundled Fonts: Birlikte gelen yazı tipleri
+      System Fonts: Sistem yazı tipleri
     Always Show Scrollbars: Kaydırma Çubuklarını Her Zaman Göster
     Base Theme:
       Dynamic colors: Dinamik renkler

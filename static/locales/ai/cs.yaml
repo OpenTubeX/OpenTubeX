@@ -388,6 +388,8 @@ Settings:
       App Font: Písmo aplikace
       System Default: Výchozí systémové
       Unable to Load: Nainstalovaná systémová písma se nepodařilo načíst
+      Bundled Fonts: Přibalená písma
+      System Fonts: Systémová písma
     Always Show Scrollbars: Vždy zobrazovat posuvníky
     Base Theme:
       Dynamic colors: Dynamické barvy

@@ -388,6 +388,8 @@ Settings:
       App Font: アプリのフォント
       System Default: システムの既定値
       Unable to Load: インストール済みのシステムフォントを読み込めませんでした
+      Bundled Fonts: 同梱フォント
+      System Fonts: システムフォント
     Always Show Scrollbars: スクロールバーを常に表示
     Base Theme:
       Dynamic colors: ダイナミックカラー

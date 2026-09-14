@@ -390,6 +390,8 @@ Settings:
       App Font: Font aplikacije
       System Default: Zadani font sustava
       Unable to Load: Instalirane fontove sustava nije moguće učitati
+      Bundled Fonts: Priloženi fontovi
+      System Fonts: Fontovi sustava
     Always Show Scrollbars: Uvijek prikaži klizne trake
     Base Theme:
       Dynamic colors: Dinamičke boje

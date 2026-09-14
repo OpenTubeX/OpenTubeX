@@ -390,6 +390,8 @@ Settings:
       App Font: Fontul aplicației
       System Default: Implicit al sistemului
       Unable to Load: Fonturile instalate în sistem nu au putut fi încărcate
+      Bundled Fonts: Fonturi incluse
+      System Fonts: Fonturi de sistem
     Always Show Scrollbars: Afișează întotdeauna barele de derulare
     Base Theme:
       Dynamic colors: Culori dinamice

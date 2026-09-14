@@ -388,6 +388,8 @@ Settings:
       App Font: Rakenduse font
       System Default: Süsteemi vaikefont
       Unable to Load: Paigaldatud süsteemifonte ei saa laadida
+      Bundled Fonts: Kaasasolevad fondid
+      System Fonts: Süsteemi fondid
     Always Show Scrollbars: Kuva kerimisribad alati
     Base Theme:
       Dynamic colors: Dünaamilised värvid

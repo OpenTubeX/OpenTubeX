@@ -390,6 +390,8 @@ Settings:
       App Font: Ffont yr ap
       System Default: Rhagosodiad y system
       Unable to Load: Nid oedd modd llwytho ffontiau'r system sydd wedi'u gosod
+      Bundled Fonts: Ffontiau wedi’u cynnwys
+      System Fonts: Ffontiau system
     Always Show Scrollbars: Dangos bariau sgrolio bob amser
     Base Theme:
       Dynamic colors: Lliwiau deinamig

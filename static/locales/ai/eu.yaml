@@ -390,6 +390,8 @@ Settings:
       App Font: Aplikazioaren letra-tipoa
       System Default: Sistemaren lehenetsia
       Unable to Load: Ezin izan dira sisteman instalatutako letra-tipoak kargatu
+      Bundled Fonts: Barneko letra-tipoak
+      System Fonts: Sistemako letra-tipoak
     Always Show Scrollbars: Erakutsi beti korritze-barrak
     Base Theme:
       Dynamic colors: Kolore dinamikoak

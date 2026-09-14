@@ -392,6 +392,8 @@ Settings:
       App Font: خط التطبيق
       System Default: الافتراضي للنظام
       Unable to Load: غير قادر على تحميل خطوط النظام المثبتة
+      Bundled Fonts: الخطوط المضمّنة
+      System Fonts: خطوط النظام
     Always Show Scrollbars: إظهار أشرطة التمرير دائمًا
     Base Theme:
       Dynamic colors: ألوان ديناميكية

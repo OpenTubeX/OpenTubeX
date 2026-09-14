@@ -392,6 +392,8 @@ Settings:
       App Font: Lettertype van app
       System Default: Systeemstandaard
       Unable to Load: Geïnstalleerde systeemlettertypen kunnen niet worden geladen
+      Bundled Fonts: Meegeleverde lettertypen
+      System Fonts: Systeemlettertypen
     Always Show Scrollbars: Schuifbalken altijd tonen
     Base Theme:
       Dynamic colors: Dynamische kleuren

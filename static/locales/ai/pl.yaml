@@ -222,6 +222,9 @@ Settings:
         Destructive action: Działanie usuwające dane
         Destructive hover and focus: Działanie usuwające dane po najechaniu lub zaznaczeniu
         Destructive pressed: Działanie usuwające dane po naciśnięciu
+    Font:
+      Bundled Fonts: Dołączone czcionki
+      System Fonts: Czcionki systemowe
   Player Settings:
     Swipe Gestures:
       Fullscreen Brightness: Maksymalna jasność na pełnym ekranie
