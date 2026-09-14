@@ -44,7 +44,6 @@ import { parseChannelPreferences } from '../../helpers/channel-preferences'
 import {
   buildChaptersVttFile,
   buildVTTFileLocally,
-  extractNumberFromString,
   formatDurationAsTimestamp,
   formatNumber,
   getCachedOembedTitle,
@@ -2910,23 +2909,52 @@ export default defineComponent({
           return
         }
 
+        // YouTube can omit the main watch panels while retaining metadata in the description panel.
+        /** @type {import('youtubei.js').YTNodes.StructuredDescriptionContent | undefined} */
+        const structuredDescription = result.page[1]?.engagement_panels
+          ?.find(panel => panel.panel_identifier === 'engagement-panel-structured-description')?.content
+        const titleHeader = structuredDescription?.items?.find(item => item.is(YTNodes.VideoTitleHeaderView))
+        const descriptionHeader = structuredDescription?.items?.find(item => item.is(YTNodes.VideoDescriptionHeader))
+        const descriptionChannel = structuredDescription?.items?.find(item => item.is(YTNodes.VideoDescriptionInfocardsSection))
+        const descriptionBody = structuredDescription?.items?.find(item => item.is(YTNodes.ExpandableVideoDescriptionBody))
+        const localizedDescription = result.secondary_info?.description?.text?.trim()
+          ? result.secondary_info.description
+          : descriptionBody?.attributed_description_body_text
+
         if (avoidTranslation) {
           this.videoTitle = result.basic_info.title?.trim() ?? ''
         } else {
           // extract localised title first and fall back to the not localised one
-          this.videoTitle = result.primary_info?.title?.text?.trim() ?? result.basic_info.title?.trim() ?? ''
+          this.videoTitle = result.primary_info?.title?.text?.trim() || titleHeader?.video_title.text?.trim() || descriptionHeader?.title.text?.trim() || result.basic_info.title?.trim() || ''
         }
         this.hasResolvedVideoTitle = this.videoTitle.length > 0
-        this.videoViewCount = result.basic_info.view_count ?? (result.primary_info.view_count ? extractNumberFromString(result.primary_info.view_count.text) : null)
-        this.license = result.secondary_info.metadata.rows.find(element => element.title?.text === 'License')?.contents[0]?.text
+        if (!this.hasResolvedVideoTitle) {
+          // Reuse the cache and in-flight request used by original-language list titles.
+          getOembedTitle(videoId).then(title => {
+            if (!title || this.hasResolvedVideoTitle || !this.isCurrentVideoLoad(loadGeneration, videoId)) return
+            this.videoTitle = title
+            this.hasResolvedVideoTitle = true
+            this.updateTitle()
+          })
+        }
+        const localizedViews = result.primary_info?.view_count?.text || descriptionHeader?.views.text
+        const viewCount = result.basic_info.view_count ?? (localizedViews?.toLowerCase() === 'no views'
+          ? 0
+          : parseLocalSubscriberCount(localizedViews ?? ''))
+        this.videoViewCount = Number.isFinite(viewCount) ? viewCount : null
+        this.license = result.secondary_info?.metadata?.rows.find(element => element.title?.text === 'License')?.contents[0]?.text
         this.videoGames = parseLocalVideoGames(result)
 
         this.channelCollaborators = parseLocalVideoCollaborators(result)
         const primaryCollaborator = this.channelCollaborators[0]
+        const ownerAuthor = result.secondary_info?.owner?.author
+        // YouTube.js uses N/A for an owner whose identifying fields were omitted.
+        const ownerChannelId = ownerAuthor?.id !== 'N/A' ? ownerAuthor?.id : undefined
+        const ownerChannelName = ownerAuthor?.name !== 'N/A' ? ownerAuthor?.name : undefined
 
-        this.channelId = result.basic_info.channel_id ?? result.secondary_info.owner?.author.id ?? primaryCollaborator?.id ?? ''
-        this.channelName = result.basic_info.author ?? result.secondary_info.owner?.author.name ?? primaryCollaborator?.name ?? ''
-        this.channelThumbnail = primaryCollaborator?.thumbnail ?? result.secondary_info.owner?.author?.best_thumbnail?.url ?? ''
+        this.channelId = result.basic_info.channel_id ?? ownerChannelId ?? primaryCollaborator?.id ?? descriptionHeader?.channel_navigation_endpoint?.payload?.browseId ?? ''
+        this.channelName = result.basic_info.author ?? ownerChannelName ?? primaryCollaborator?.name ?? descriptionHeader?.channel.text ?? ''
+        this.channelThumbnail = primaryCollaborator?.thumbnail ?? ownerAuthor?.best_thumbnail?.url ?? descriptionHeader?.channel_thumbnail[0]?.url ?? descriptionChannel?.channel_avatar[0]?.url ?? ''
         this.$store.commit('setVideoAvatar', {
           videoId: this.videoId,
           avatar: this.channelThumbnail
@@ -2952,17 +2980,17 @@ export default defineComponent({
           published = Date.parse(result.page[0].microformat.publish_date)
         } else {
           // text date Jan 1, 2000, not as accurate but better than nothing
-          published = Date.parse(result.primary_info?.published)
+          published = Date.parse(result.primary_info?.published?.text || descriptionHeader?.publish_date.text)
         }
         this.videoPublished = Number.isFinite(published) ? published : 0
 
         if (avoidTranslation) {
           this.videoDescription = result.basic_info.short_description
-        } else if (result.secondary_info?.description.runs) {
+        } else if (localizedDescription?.runs) {
           try {
-            this.videoDescription = parseLocalTextRuns(result.secondary_info.description.runs)
+            this.videoDescription = parseLocalTextRuns(localizedDescription.runs)
           } catch (error) {
-            console.error('Failed to extract the localised description, falling back to the standard one.', error, JSON.stringify(result.secondary_info.description.runs))
+            console.error('Failed to extract the localised description, falling back to the standard one.', error, JSON.stringify(localizedDescription.runs))
             this.videoDescription = result.basic_info.short_description
           }
         } else {
@@ -2988,7 +3016,12 @@ export default defineComponent({
           this.videoLikeCount = null
           this.videoDislikeCount = null
         } else {
-          this.videoLikeCount = isNaN(result.basic_info.like_count) ? 0 : result.basic_info.like_count
+          // Watch HTML and the WEB session use English for numeric metadata.
+          const descriptionLikes = descriptionHeader?.factoids.find(item => item.is(YTNodes.Factoid) && item.label.text === 'Likes')
+          const likeCount = Number.isFinite(result.basic_info.like_count)
+            ? result.basic_info.like_count
+            : parseLocalSubscriberCount(descriptionLikes?.accessibility_text ?? descriptionLikes?.value.text ?? '')
+          this.videoLikeCount = isNaN(likeCount) ? 0 : likeCount
 
           // YouTube doesn't return dislikes anymore
           this.videoDislikeCount = 0
@@ -3004,13 +3037,14 @@ export default defineComponent({
         this.isPremiere = isPremiere === true
         this.isPostLiveDvr = !!result.basic_info.is_post_live_dvr
         this.isUnlisted = !!result.basic_info.is_unlisted
-        this.hasAiGeneratedContent = result.primary_info?.badges.some(badge => badge.label === 'AI') ?? false
+        this.hasAiGeneratedContent = result.primary_info?.badges?.some(badge => badge.label === 'AI') ?? false
 
         if (this.isLive && !this.isLiveContent) {
           this.videoPublished = result.basic_info.start_timestamp.getTime()
         }
 
-        const subCount = !result.secondary_info.owner.subscriber_count.isEmpty() ? parseLocalSubscriberCount(result.secondary_info.owner.subscriber_count.text) : NaN
+        const subscriberCountText = result.secondary_info?.owner?.subscriber_count?.text?.trim() || descriptionChannel?.section_subtitle.text
+        const subCount = parseLocalSubscriberCount(subscriberCountText ?? '')
 
         if (!isNaN(subCount)) {
           this.channelSubscriptionCountText = formatNumber(subCount, subCount >= 10000 ? { notation: 'compact' } : undefined)
@@ -3055,7 +3089,7 @@ export default defineComponent({
               }
               chaptersKind = 'keyMoments'
             } else {
-              chapters = this.extractChaptersFromDescription(result.basic_info.short_description ?? result.secondary_info.description.text)
+              chapters = this.extractChaptersFromDescription(result.basic_info.short_description ?? localizedDescription?.text ?? '')
             }
           }
 
