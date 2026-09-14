@@ -245,6 +245,7 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Show Video Menu Button: Videómenü gombjának megjelenítése
     Swipe to refresh: Frissítés húzással
     Blur Thumbnails: Bélyegképek elhomályosítása
     Navigation:

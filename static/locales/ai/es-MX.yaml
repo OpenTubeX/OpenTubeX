@@ -273,6 +273,7 @@ Settings:
       Network: red
       Disk: disco
   General Settings:
+    Show Video Menu Button: Mostrar botón del menú del video
     Swipe to refresh: Deslizar para actualizar
     Blur Thumbnails: Desenfocar miniaturas
     Navigation:

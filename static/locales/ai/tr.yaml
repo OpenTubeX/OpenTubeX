@@ -245,6 +245,7 @@ Settings:
       Network: ağ
       Disk: disk
   General Settings:
+    Show Video Menu Button: Video menüsü düğmesini göster
     Swipe to refresh: Yenilemek için kaydır
     Blur Thumbnails: Küçük resimleri bulanıklaştır
     Navigation:

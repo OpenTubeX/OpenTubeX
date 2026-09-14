@@ -256,6 +256,7 @@ Settings:
       Network: netværk
       Disk: diskplads
   General Settings:
+    Show Video Menu Button: Vis videomenuknap
     Swipe to refresh: Stryg for at opdatere
     Blur Thumbnails: Slør miniaturebilleder
     Navigation:

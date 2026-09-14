@@ -245,6 +245,7 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Show Video Menu Button: 動画メニューボタンを表示
     Swipe to refresh: スワイプして更新
     Blur Thumbnails: サムネイルをぼかす
     Navigation:

@@ -245,6 +245,7 @@ Settings:
       Network: sieť
       Disk: disk
   General Settings:
+    Show Video Menu Button: Zobraziť tlačidlo ponuky videa
     Swipe to refresh: Obnoviť potiahnutím
     Blur Thumbnails: Rozmazať miniatúry
     Navigation:

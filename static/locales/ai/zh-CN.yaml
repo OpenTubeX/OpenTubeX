@@ -245,6 +245,7 @@ Settings:
       Network: 网络
       Disk: 磁盘
   General Settings:
+    Show Video Menu Button: 显示视频菜单按钮
     Swipe to refresh: 下拉刷新
     Blur Thumbnails: 模糊缩略图
     Navigation:

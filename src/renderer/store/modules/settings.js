@@ -470,6 +470,7 @@ const state = {
   },
   thumbnailPreference: '',
   showThumbnailPreviews: true,
+  showVideoMenuButton: false,
   thumbnailSize: DEFAULT_THUMBNAIL_SIZE,
   uiRoundness: 100,
   animationSpeed: 100,

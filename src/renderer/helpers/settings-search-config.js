@@ -27,6 +27,7 @@ const GENERAL_APPEARANCE_KEYS = new Set([
   'Navigation',
   'Playlist View Type',
   'Show Thumbnail Previews',
+  'Show Video Menu Button',
   'Thumbnail Preference',
   'Video View Type'
 ])
