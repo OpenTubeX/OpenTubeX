@@ -46,7 +46,10 @@
           {{ titleForDisplay }}
         </h3>
       </RouterLink>
-      <div class="infoLine">
+      <div
+        v-if="!isUserPlaylist"
+        class="infoLine"
+      >
         <RouterLink
           v-if="playlistMetadata.channelId && enableChannelLinks"
           class="channelName"

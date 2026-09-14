@@ -69,6 +69,7 @@
       </FtFlexBox>
       <FtElementList
         v-else-if="activeData.length > 0"
+        class="playlistList"
         :data="activeData"
         data-type="playlist"
         :search-query-text="doSearchPlaylistsWithMatchingVideos ? lowerCaseQuery : ''"

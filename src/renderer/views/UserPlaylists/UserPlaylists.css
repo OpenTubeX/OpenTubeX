@@ -11,6 +11,19 @@
   display: inline-block;
 }
 
+.playlistList {
+  margin-block-start: 16px;
+}
+
+/* Playlist tiles need no reserved space for video metadata. */
+.playlistList :deep(.grid) {
+  min-block-size: 0;
+}
+
+.playlistList :deep(.ft-list-item.grid) {
+  padding-block: 6px;
+}
+
 .newPlaylistButton {
   margin-inline-start: 0.5em;
   display: inline-block;
