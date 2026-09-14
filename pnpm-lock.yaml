@@ -86,8 +86,8 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2
       '@vot.js/core':
-        specifier: ^3.0.2
-        version: 3.0.2(typescript@6.0.3)
+        specifier: ^3.0.3
+        version: 3.0.3(typescript@6.0.3)
       autolinker:
         specifier: ^4.1.5
         version: 4.1.5
@@ -842,6 +842,9 @@ packages:
 
   '@bufbuild/protobuf@2.12.1':
     resolution: {integrity: sha512-BvAMfS6LrgZiryOAZ4pBYucu4wG/Ei/9o9DZ9akbREnMLbPJiom2i8b9C8IsKErQoiKqVhrerzt3kOT/RrzLHg==}
+
+  '@bufbuild/protobuf@2.14.1':
+    resolution: {integrity: sha512-agRJn3+EJDUe8AvxTx/LnHA/GErvLE62pSaSk7+MwFOtOv8eWBu/qCq2qoZjBjVZ3C2aiFJCveuSs17KMkYGOw==}
 
   '@cacheable/memory@2.2.0':
     resolution: {integrity: sha512-CTLKqLItRCEixEAewD3/j9DB3/o96gpTPD4eJ1v+DGOlxZRZncRQkGYqqnAGCscYd6RNeXfGeiuCphsPtqyIfQ==}
@@ -1938,14 +1941,14 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@vot.js/core@3.0.2':
-    resolution: {integrity: sha512-MzvV31J++VTIc+OWv/vXh52cPtKBnfuOfelI7O4kaEHCPtn36XAMqPyaI7CjidugB54kIfD9mBvLnJaBWYhtkA==}
+  '@vot.js/core@3.0.3':
+    resolution: {integrity: sha512-jMY+edEF5i9i0k9To439vrvnZY6Pw6+ikeo+z5NnXZYd8MAqkhOkwPr8rjUh1issi8ov3PrOpaifvDJxDwQbNA==}
     engines: {node: '>=18'}
     peerDependencies:
       typescript: ^6.0.0
 
-  '@vot.js/shared@3.0.2':
-    resolution: {integrity: sha512-FvAM7TDlNyUrGio+uu0FYRO8rkN++3gTtEqKRjG2gqBs5ceeGQYBTr5j83qxjsNp3HcwJp0qJiL867ehW5F46g==}
+  '@vot.js/shared@3.0.3':
+    resolution: {integrity: sha512-jfHyzduppiWnundB3pXsMfNayGeWt37ZkWFazwf0rfvf/9Arnu7gTaeY50jafo4cytqDoYQOrO69fV8U+g9xHQ==}
     engines: {node: '>=18'}
     peerDependencies:
       typescript: ^6.0.0
@@ -6394,6 +6397,8 @@ snapshots:
 
   '@bufbuild/protobuf@2.12.1': {}
 
+  '@bufbuild/protobuf@2.14.1': {}
+
   '@cacheable/memory@2.2.0':
     dependencies:
       '@cacheable/utils': 2.5.0
@@ -7645,14 +7650,14 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
-  '@vot.js/core@3.0.2(typescript@6.0.3)':
+  '@vot.js/core@3.0.3(typescript@6.0.3)':
     dependencies:
-      '@vot.js/shared': 3.0.2(typescript@6.0.3)
+      '@vot.js/shared': 3.0.3(typescript@6.0.3)
       typescript: 6.0.3
 
-  '@vot.js/shared@3.0.2(typescript@6.0.3)':
+  '@vot.js/shared@3.0.3(typescript@6.0.3)':
     dependencies:
-      '@bufbuild/protobuf': 2.12.1
+      '@bufbuild/protobuf': 2.14.1
       typescript: 6.0.3
 
   '@vue-macros/common@3.1.3(vue@3.5.42(typescript@6.0.3))':
