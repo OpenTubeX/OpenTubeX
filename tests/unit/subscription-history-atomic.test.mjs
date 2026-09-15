@@ -185,6 +185,10 @@ test('metadata repair returns partial success when an individual database write 
     { videoId: 'third', lengthSeconds: 120 },
   ] })
   assert.deepEqual(Array.from(result.records, record => record.videoId), ['video', 'third'])
+  for (const videoId of ['video', 'third']) {
+    assert.equal((await db.history.findOneAsync({ videoId })).lengthSeconds, 120)
+    assert.equal(result.records.find(record => record.videoId === videoId).lengthSeconds, 120)
+  }
   assert.equal(result.failedCount, 1)
   assert.equal(errors.length, 1)
   assert.equal((await db.history.findOneAsync({ videoId: 'second' })).lengthSeconds, undefined)
