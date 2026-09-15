@@ -50,6 +50,7 @@
     min-block-size: 48px;
     min-inline-size: 48px;
     padding-block: 8px;
+    border-radius: calc(5px * var(--ui-roundness));
   }
 
   .card :deep(.info .title:active),

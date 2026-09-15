@@ -30,7 +30,7 @@
   }
 
   .playerSelectGrid :deep(.selectIndicators) {
-    inset-inline: auto 8px;
+    inset-inline: calc(100% - 54px) auto;
   }
 }
 
@@ -242,9 +242,13 @@
 }
 
 @media only screen and (width <= 680px) {
-  .quickPlaybackSpeedEntry,
-  .quickPlaybackSpeedFields {
-    grid-template-columns: 1fr;
+  .quickPlaybackSpeedEntry {
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+  }
+
+  .quickPlaybackSpeedInput {
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 
   .quickPlaybackSpeedDragHandle,

@@ -667,6 +667,8 @@ Settings:
     Title Excludes: Titlul exclude
     Title Filter Hint: Separați prin virgule mai mulți termeni pentru titlu. Un videoclip trebuie să corespundă cel puțin unui termen inclus și niciunui termen exclus.
   External Software Settings:
+    Checking FFmpeg and FFprobe: Se verifică FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe nu au fost descărcate încă. Apăsați butonul de mai jos pentru a le descărca.
     External Software Settings: Software extern
     yt-dlp Source: Sursa yt-dlp
     yt-dlp Channel: Canalul yt-dlp

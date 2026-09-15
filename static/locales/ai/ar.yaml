@@ -671,6 +671,8 @@ Settings:
     Title Excludes: العنوان يستبعد
     Title Filter Hint: افصل بين مصطلحات العناوين المتعددة بفواصل. يجب أن يتطابق الفيديو مع مصطلح واحد مدرج على الأقل ولا يتطابق مع أي مصطلحات مستبعدة.
   External Software Settings:
+    Checking FFmpeg and FFprobe: جارٍ التحقق من FFmpeg/FFprobe...
+    FFmpeg and FFprobe Managed Not Downloaded: لم يتم تنزيل FFmpeg/FFprobe بعد. انقر على الزر أدناه لتنزيلهما.
     External Software Settings: البرامج الخارجية
     yt-dlp Source: yt-dlp المصدر
     yt-dlp Channel: قناة yt-dlp

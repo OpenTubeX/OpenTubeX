@@ -129,53 +129,68 @@
         </div>
         <div class="externalSoftwareToolStatus">
           <p
-            v-if="ffmpegInfo === null"
+            v-if="ffmpegInfo === null && ffprobeInfo === null"
             class="ytDlpStatus"
           >
-            {{ t('Settings.External Software Settings.Checking FFmpeg') }}
+            {{ t('Settings.External Software Settings.Checking FFmpeg and FFprobe') }}
           </p>
           <p
-            v-else-if="!ffmpegInfo.available"
+            v-else-if="ytDlpFfmpegSource === 'managed' && ffmpegInfo?.available === false && ffprobeInfo?.available === false"
             class="ytDlpStatus ytDlpWarning"
           >
             <FtIcon :icon="['fas', 'circle-exclamation']" />
-            {{ ytDlpFfmpegSource === 'managed'
-              ? t('Settings.External Software Settings.FFmpeg Managed Not Downloaded')
-              : t('Settings.External Software Settings.System FFmpeg Missing Warning') }}
+            {{ t('Settings.External Software Settings.FFmpeg and FFprobe Managed Not Downloaded') }}
           </p>
-          <p
-            v-else-if="ffmpegVersionsMatch"
-            class="ytDlpStatus"
-          >
-            {{ t('Settings.External Software Settings.Detected FFmpeg and FFprobe Version Template', { version: ffmpegInfo.version }) }}
-          </p>
-          <p
-            v-else
-            class="ytDlpStatus"
-          >
-            {{ t('Settings.External Software Settings.Detected FFmpeg Version Template', { version: ffmpegInfo.version }) }}
-          </p>
-          <p
-            v-if="!ffmpegVersionsMatch && ffprobeInfo === null"
-            class="ytDlpStatus"
-          >
-            {{ t('Settings.External Software Settings.Checking FFprobe') }}
-          </p>
-          <p
-            v-else-if="!ffmpegVersionsMatch && !ffprobeInfo.available"
-            class="ytDlpStatus ytDlpWarning"
-          >
-            <FtIcon :icon="['fas', 'circle-exclamation']" />
-            {{ ytDlpFfmpegSource === 'managed'
-              ? t('Settings.External Software Settings.FFprobe Managed Not Downloaded')
-              : t('Settings.External Software Settings.System FFprobe Missing Warning') }}
-          </p>
-          <p
-            v-else-if="!ffmpegVersionsMatch"
-            class="ytDlpStatus"
-          >
-            {{ t('Settings.External Software Settings.Detected FFprobe Version Template', { version: ffprobeInfo.version }) }}
-          </p>
+          <template v-else>
+            <p
+              v-if="ffmpegInfo === null"
+              class="ytDlpStatus"
+            >
+              {{ t('Settings.External Software Settings.Checking FFmpeg') }}
+            </p>
+            <p
+              v-else-if="!ffmpegInfo.available"
+              class="ytDlpStatus ytDlpWarning"
+            >
+              <FtIcon :icon="['fas', 'circle-exclamation']" />
+              {{ ytDlpFfmpegSource === 'managed'
+                ? t('Settings.External Software Settings.FFmpeg Managed Not Downloaded')
+                : t('Settings.External Software Settings.System FFmpeg Missing Warning') }}
+            </p>
+            <p
+              v-else-if="ffmpegVersionsMatch"
+              class="ytDlpStatus"
+            >
+              {{ t('Settings.External Software Settings.Detected FFmpeg and FFprobe Version Template', { version: ffmpegInfo.version }) }}
+            </p>
+            <p
+              v-else
+              class="ytDlpStatus"
+            >
+              {{ t('Settings.External Software Settings.Detected FFmpeg Version Template', { version: ffmpegInfo.version }) }}
+            </p>
+            <p
+              v-if="!ffmpegVersionsMatch && ffprobeInfo === null"
+              class="ytDlpStatus"
+            >
+              {{ t('Settings.External Software Settings.Checking FFprobe') }}
+            </p>
+            <p
+              v-else-if="!ffmpegVersionsMatch && !ffprobeInfo.available"
+              class="ytDlpStatus ytDlpWarning"
+            >
+              <FtIcon :icon="['fas', 'circle-exclamation']" />
+              {{ ytDlpFfmpegSource === 'managed'
+                ? t('Settings.External Software Settings.FFprobe Managed Not Downloaded')
+                : t('Settings.External Software Settings.System FFprobe Missing Warning') }}
+            </p>
+            <p
+              v-else-if="!ffmpegVersionsMatch"
+              class="ytDlpStatus"
+            >
+              {{ t('Settings.External Software Settings.Detected FFprobe Version Template', { version: ffprobeInfo.version }) }}
+            </p>
+          </template>
         </div>
         <FtButton
           v-if="!IS_CAPACITOR && ytDlpFfmpegSource === 'managed'"
@@ -183,7 +198,7 @@
           :label="ffmpegBinaryDownloadInProgress
             ? t('Settings.External Software Settings.Downloading FFmpeg and FFprobe')
             : (ffmpegInfo === null
-              ? t('Settings.External Software Settings.Checking FFmpeg')
+              ? t('Settings.External Software Settings.Checking FFmpeg and FFprobe')
               : ffmpegToolsAvailable
                 ? t('Settings.External Software Settings.Update FFmpeg and FFprobe')
                 : t('Settings.External Software Settings.Download FFmpeg and FFprobe'))"

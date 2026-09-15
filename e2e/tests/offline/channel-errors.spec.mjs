@@ -146,3 +146,25 @@ test('shows fallback metadata for unavailable channels', async ({ page }) => {
   await expect(unknownChannel.locator('.name')).toHaveText('Localized unavailable name')
   await expect(page.locator(sel.activeTab)).toContainText('Localized unavailable name')
 })
+
+test('translated view-all labels keep their padding beside the channel sort control', async ({ page }) => {
+  const videos = [0, 1].map(index => ({ videoId: `video${index}aaaaa`, title: 'Video', author: 'Channel', lengthSeconds: 60, videoThumbnails: [] }))
+  await page.route('https://invidious.test/api/v1/channels/**', route => route.fulfill({
+    json: { author: 'Channel', authorId: CACHED_CHANNEL_ID, authorThumbnails: [], authorBanners: [], description: '', subCount: 0, totalViews: 0, joined: 0, tabs: ['videos'], relatedChannels: [], videos, latestVideos: videos }
+  }))
+  await page.setViewportSize({ width: 375, height: 812 })
+  await openChannelTab(page, CACHED_CHANNEL_ID)
+  const button = page.locator('.channel-view-all:visible')
+  await expect(button).toBeVisible()
+  await button.evaluate(el => {
+    const text = [...el.childNodes].find(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim())
+    text.textContent = 'Alle verfügbaren Videos anzeigen'
+  })
+  expect(await button.evaluate(el => {
+    const bounds = el.getBoundingClientRect()
+    const text = [...el.childNodes].find(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim())
+    const range = document.createRange()
+    range.selectNodeContents(text)
+    return bounds.right - range.getBoundingClientRect().right
+  })).toBeGreaterThanOrEqual(15)
+})

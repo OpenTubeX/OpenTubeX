@@ -880,6 +880,8 @@ Settings:
     Title Excludes: Naslov ne vključuje
     Title Filter Hint: Več izrazov za naslov ločite z vejicami. Videoposnetek se mora ujemati z vsaj enim vključenim izrazom in z nobenim izključenim izrazom.
   External Software Settings:
+    Checking FFmpeg and FFprobe: Preverjanje FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg in FFprobe še nista prenesena. Za prenos kliknite spodnji gumb.
     External Software Settings: Zunanja programska oprema
     yt-dlp Source: Vir za yt-dlp
     yt-dlp Channel: Kanal za yt-dlp

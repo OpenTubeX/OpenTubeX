@@ -2711,7 +2711,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 /* Menus must also clear the raised controls inside the same container. */
-:global(.capacitorTabs .ftVideoPlayer :is(
+:global(.capacitorTabs :is(
   .shaka-overflow-menu,
   .shaka-settings-menu,
   .shaka-sub-menu,
@@ -3512,6 +3512,16 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   border: 0;
   background-color: transparent;
   line-height: 0.5;
+  white-space: nowrap;
+}
+
+:deep(.ft-controls-stack-times > .shaka-spacer) {
+  min-inline-size: 0;
+  padding: 0;
+}
+
+:deep(.ft-controls-stack-times > .shaka-volume-bar-container) {
+  margin-inline: 0;
 }
 
 :deep(.ft-controls-stack-times > .ft-time-display-group) {
@@ -4745,4 +4755,20 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 /* Inline video is short: reserve the close row, but use the space below it. */
 .ftVideoPlayer:not(:fullscreen, [data-native-player-screen], .fullWindow) :deep(.phonePlayerOptions[open]) {
   padding-block-end: 8px;
+}
+
+/* Keep neighbouring controls easy to distinguish with a finger. The adaptive
+   panel moves optional controls into its menu when the larger targets need room. */
+@media (any-pointer: coarse) {
+  :deep(:is(.shaka-controls-button-panel, .shaka-controls-top-button-panel) > :is(.shaka-overflow-menu-button, .shaka-pip-button)) {
+    min-inline-size: 56px;
+    min-block-size: 56px;
+    flex-shrink: 0;
+  }
+}
+
+:global(.capacitorTabs :is(.shaka-controls-button-panel, .shaka-controls-top-button-panel) > button:not(:disabled)) {
+  min-inline-size: 56px;
+  min-block-size: 56px;
+  flex-shrink: 0;
 }

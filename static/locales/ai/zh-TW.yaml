@@ -663,6 +663,8 @@ Settings:
     Title Excludes: 標題不含
     Title Filter Hint: 請用逗號分隔多個標題詞彙。影片必須至少符合一個包含詞彙，且不得含有任何排除詞彙。
   External Software Settings:
+    Checking FFmpeg and FFprobe: 正在檢查 FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: 尚未下載 FFmpeg/FFprobe。請按下方按鈕下載。
     External Software Settings: 外部軟體
     yt-dlp Source: yt-dlp 來源
     yt-dlp Channel: yt-dlp 頻道

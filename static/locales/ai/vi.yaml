@@ -671,6 +671,8 @@ Settings:
     Title Excludes: Tiêu đề không chứa
     Title Filter Hint: Phân tách nhiều cụm từ trong tiêu đề bằng dấu phẩy. Video phải khớp ít nhất một cụm từ cần có và không khớp cụm từ loại trừ nào.
   External Software Settings:
+    Checking FFmpeg and FFprobe: Đang kiểm tra FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: Chưa tải FFmpeg/FFprobe. Nhấp vào nút bên dưới để tải.
     External Software Settings: Phần mềm bên ngoài
     yt-dlp Source: Nguồn yt-dlp
     yt-dlp Channel: Kênh yt-dlp

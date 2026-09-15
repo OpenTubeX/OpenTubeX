@@ -663,6 +663,8 @@ Settings:
     Title Excludes: Le titre ne contient pas
     Title Filter Hint: Séparez les termes du titre par des virgules. Une vidéo doit correspondre à au moins un terme inclus et à aucun terme exclu.
   External Software Settings:
+    Checking FFmpeg and FFprobe: Vérification de FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe n’ont pas encore été téléchargés. Cliquez sur le bouton ci-dessous pour les télécharger.
     External Software Settings: Logiciels externes
     yt-dlp Source: Source de yt-dlp
     yt-dlp Channel: Canal de yt-dlp

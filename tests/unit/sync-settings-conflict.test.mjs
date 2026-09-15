@@ -151,3 +151,23 @@ test('uses the custom-theme edit timestamp when resolving a conflict', () => {
   assert.deepEqual(entry.value, remoteThemes)
   assert.equal(entry.updatedAt, 30)
 })
+
+test('deleting the selected custom theme restores its base and accent colors before removing it', async () => {
+  const calls = []
+  const theme = { id: 'deleted', basedOn: 'dark', mainColor: 'Purple', secondaryColor: 'Blue' }
+  await commitCustomThemesEdit({
+    dispatch: async (action, payload) => calls.push([action, payload]),
+    commit: (mutation, payload) => calls.push([mutation, payload]),
+    rootGetters: {
+      getBaseTheme: 'custom:deleted', getCustomThemes: [theme],
+      getSystemLightTheme: 'light', getSystemDarkTheme: 'dark',
+    },
+  }, [])
+  assert.deepEqual(calls, [
+    ['recordSyncSettingEdit', 'customThemes'],
+    ['updateMainColor', 'Purple'],
+    ['updateSecColor', 'Blue'],
+    ['updateBaseTheme', 'dark'],
+    ['setCustomThemes', []],
+  ])
+})

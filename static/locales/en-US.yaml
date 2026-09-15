@@ -1160,6 +1160,8 @@ Settings:
     Title Excludes: Title excludes
     Title Filter Hint: Separate multiple title terms with commas. A video must match at least one included term and no excluded terms.
   External Software Settings:
+    Checking FFmpeg and FFprobe: Checking FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe have not been downloaded yet. Click the button below to download them.
     External Software Settings: External Software
     yt-dlp Source: yt-dlp Source
     yt-dlp Channel: yt-dlp Channel

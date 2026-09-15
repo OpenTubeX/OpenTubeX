@@ -7,6 +7,15 @@
       :class="{ appearanceSwitchGrid: mode === 'appearance' }"
     >
       <FtToggleSwitch
+        v-if="mode === 'general'"
+        :label="t('Settings.Privacy Settings.Enable Watch Statistics')"
+        compact
+        :disabled="!rememberHistory"
+        :default-value="enableWatchStats"
+        setting-key="enableWatchStats"
+        @change="updateEnableWatchStats"
+      />
+      <FtToggleSwitch
         v-if="mode === 'appearance'"
         :label="t('Settings.General Settings.Show Video Menu Button')"
         :default-value="showVideoMenuButton"
@@ -124,6 +133,17 @@
       />
     </div>
     <div class="switchGrid generalSelectGrid">
+      <FtSelect
+        v-if="mode === 'general'"
+        :placeholder="t('Settings.Privacy Settings.Week Starts On')"
+        :value="statsWeekStartsOn"
+        setting-key="statsWeekStartsOn"
+        :select-names="weekStartNames"
+        :select-values="WEEK_START_VALUES"
+        :icon="['fas', 'chart-line']"
+        :disabled="!rememberHistory || !enableWatchStats"
+        @change="updateStatsWeekStartsOn"
+      />
       <FtSelect
         v-if="mode === 'providers' && supportsYtDlp"
         :placeholder="t('Settings.General Settings.Stream Extraction Method.Stream Extraction Method')"
@@ -397,6 +417,40 @@ const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
 const PLAYBACK_ENGINE_VALUES = ['yt-dlp', 'built-in']
 
 const { locale, t } = useI18n()
+
+const rememberHistory = computed(() => store.getters.getRememberHistory)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const enableWatchStats = computed(() => store.getters.getEnableWatchStats)
+
+/**
+ * @param {boolean} value
+ */
+function updateEnableWatchStats(value) {
+  store.dispatch('updateEnableWatchStats', value)
+}
+
+const WEEK_START_VALUES = ['0', '1', '2', '3', '4', '5', '6']
+const weekStartNames = computed(() => {
+  const formatter = new Intl.DateTimeFormat(locale.value, { weekday: 'long' })
+  const sunday = new Date(2024, 0, 7, 12)
+
+  return WEEK_START_VALUES.map((_, index) => {
+    const date = new Date(sunday)
+    date.setDate(date.getDate() + index)
+    return formatter.format(date)
+  })
+})
+
+/** @type {import('vue').ComputedRef<string>} */
+const statsWeekStartsOn = computed(() => store.getters.getStatsWeekStartsOn)
+
+/**
+ * @param {string} value
+ */
+function updateStatsWeekStartsOn(value) {
+  store.dispatch('updateStatsWeekStartsOn', value)
+}
 const router = useRouter()
 
 const props = defineProps({

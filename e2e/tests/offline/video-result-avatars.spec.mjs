@@ -66,6 +66,27 @@ test.describe('Invidious search video avatars', () => {
     }
   })
 
+  test('search result press highlights follow UI roundness', async ({ page }) => {
+    await page.route(`${instanceUrl}/api/v1/search/**`, route => route.fulfill({
+      json: [invidiousVideo('avatar-search-1', 'Rounded press result')]
+    }))
+    await page.locator(sel.searchInput).fill('rounded links')
+    await page.locator(sel.searchInput).press('Enter')
+    await page.setViewportSize({ width: 375, height: 812 })
+    const link = page.locator('.ft-list-video a.channelName').first()
+    await expect(link).toBeVisible()
+    await link.evaluate(el => el.addEventListener('click', event => { event.preventDefault(); event.stopImmediatePropagation() }, true))
+    for (const roundness of [0, 1, 2]) {
+      await page.evaluate(value => document.body.style.setProperty('--ui-roundness', value), String(roundness))
+      await link.scrollIntoViewIfNeeded()
+      const bounds = await link.boundingBox()
+      await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+      await page.mouse.down()
+      await expect(link).toHaveCSS('border-top-left-radius', `${5 * roundness}px`)
+      await page.mouse.up()
+    }
+  })
+
   test('retries failed video and playlist thumbnails without reloading the results', async ({ page }) => {
     await page.route(`${instanceUrl}/api/v1/search/**`, route => route.fulfill({
       json: [invidiousVideo('avatar-search-1', 'Retry thumbnail result'), invidiousPlaylist()]

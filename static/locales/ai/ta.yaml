@@ -675,6 +675,8 @@ Settings:
     Title Excludes: தலைப்பில் இல்லாதவை
     Title Filter Hint: பல தலைப்புச் சொற்களைக் காற்புள்ளிகளால் பிரிக்கவும். ஒரு காணொளி சேர்க்கப்பட்ட சொற்களில் குறைந்தது ஒன்றுடன் பொருந்த வேண்டும்; விலக்கப்பட்ட சொற்கள் எதனுடனும் பொருந்தக்கூடாது.
   External Software Settings:
+    Checking FFmpeg and FFprobe: FFmpeg/FFprobe சரிபார்க்கப்படுகின்றன…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe இன்னும் பதிவிறக்கப்படவில்லை. அவற்றைப் பதிவிறக்கக் கீழுள்ள பொத்தானைக் கிளிக் செய்யவும்.
     External Software Settings: வெளிப்புற மென்பொருள்
     yt-dlp Source: yt-dlp மூலம்
     yt-dlp Channel: yt-dlp சேனல்

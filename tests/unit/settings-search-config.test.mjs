@@ -380,3 +380,17 @@ test('tray requirement explanation never becomes a selectable settings result', 
     assert.ok(entries.some(({ label }) => label === 'Use tray icon'))
   }
 })
+
+test('watch statistics settings are indexed under general rather than privacy', () => {
+  const index = createSettingsSearchIndex({
+    sections: ['general', 'privacy'].map(type => ({ type, title: type, description: '' })),
+    tm: path => getAtPath(locale, path),
+    store: { getters: {} },
+    isCapacitor: true,
+    usingElectron: false,
+  })
+  for (const label of ['Enable Watch Statistics', 'Week Starts On']) {
+    assert.ok(index.get('general').some(entry => entry.label === label), label)
+    assert.ok(!index.get('privacy').some(entry => entry.label === label), label)
+  }
+})

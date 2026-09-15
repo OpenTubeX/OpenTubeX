@@ -6228,6 +6228,7 @@ export default defineComponent({
     }
 
     function handleEnded() {
+      clearSabrBackoffTimer({ refreshPreview: true })
       if (abRepeatEnabled.value && hasValidAbRepeatRange()) {
         // Seeking to the media end can queue ended after seeked has returned
         // playback to A. Only count a natural arrival that is still at B.
@@ -6929,7 +6930,7 @@ export default defineComponent({
     }
 
     function startSabrBackoffTimer(backoffMs) {
-      if (backoffMs <= 0) {
+      if (props.localFilePlayback || props.manifestMimeType !== MANIFEST_TYPE_SABR || ignoreErrors || video.value?.ended || backoffMs <= 0) {
         clearSabrBackoffTimer({ refreshPreview: true })
         return
       }
@@ -10708,6 +10709,7 @@ export default defineComponent({
     })
 
     async function performFirstLoad(isCurrentLoad = () => true) {
+      clearSabrBackoffTimer()
       if (process.env.SUPPORTS_LOCAL_API && sabrStream) {
         // Longer timeout for receiving larger responses
         player.configure({
@@ -11340,6 +11342,7 @@ export default defineComponent({
      * }>}
      */
     async function destroyPlayer() {
+      clearSabrBackoffTimer()
       repeatStatsTracker?.destroy()
       repeatStatsLoopObserver?.disconnect()
       screenWakeBinding?.destroy()

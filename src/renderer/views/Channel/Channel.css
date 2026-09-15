@@ -13,7 +13,7 @@
 
 .select-container {
   display: flex;
-  flex-direction: row;
+  flex-flow: row wrap;
   justify-content: flex-end;
   align-items: flex-end;
   gap: 10px;
@@ -25,7 +25,17 @@
   margin-inline-end: auto;
 }
 
+@media (width <= 800px) {
+  .select-container > :deep(.select) {
+    flex: 1 1 200px;
+    min-inline-size: 0;
+  }
+}
+
 .select-container > :deep(.channel-view-all) {
+  flex-shrink: 0;
+  max-inline-size: calc(100% - 10px);
+  white-space: normal;
   color: var(--accent-color);
   background-color: transparent;
   border-color: var(--accent-color);

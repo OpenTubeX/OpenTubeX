@@ -180,21 +180,31 @@
 
 @container settings-content (width <= 600px) {
   .storageBreakdown {
-    grid-template-columns: 144px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
   }
 
   .storageDonut {
     inline-size: 144px;
   }
-}
-
-@container settings-content (width <= 430px) {
-  .storageBreakdown {
-    grid-template-columns: 1fr;
-    justify-items: center;
-  }
 
   .storageBreakdownDetails {
     inline-size: 100%;
+  }
+
+  .storageBreakdownDetails li {
+    grid-template-columns: 12px minmax(0, 1fr) auto;
+  }
+
+  .storageBreakdownDetails strong {
+    grid-column: 2 / -1;
+    grid-row: 2;
+    overflow-wrap: anywhere;
+  }
+
+  .storageLegendPercentage {
+    grid-column: 3;
+    grid-row: 1;
+    white-space: nowrap;
   }
 }
