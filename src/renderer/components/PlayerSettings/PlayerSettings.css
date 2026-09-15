@@ -5,7 +5,7 @@
 @container settings-content (width <= 680px) {
   .playerSwitchGrid .switchColumn {
     align-items: stretch;
-    inline-size: 100%;
+    inline-size: min(100%, 294px);
   }
 
   .playerSelectGrid {
@@ -31,6 +31,30 @@
 
   .playerSelectGrid :deep(.selectIndicators) {
     inset-inline: calc(100% - 54px) auto;
+  }
+}
+
+@media only screen and (width <= 680px) {
+  @container settings-content (width <= 680px) {
+    .playerSwitchGrid .switchColumn {
+      inline-size: 100%;
+    }
+
+    .quickPlaybackSpeedCustomizeButton :deep(.btn) {
+      max-inline-size: 380px;
+      gap: 8px;
+      padding-inline: 12px;
+      overflow-wrap: normal;
+      text-wrap: wrap;
+    }
+
+    .quickPlaybackSpeedToggle {
+      inline-size: min(calc(100% - 32px), 380px);
+    }
+
+    .quickPlaybackSpeedToggle :deep(.switch-label) {
+      max-inline-size: 100%;
+    }
   }
 }
 
@@ -104,22 +128,6 @@
 .settingButtonWithSync :deep(.btn) {
   min-inline-size: 0;
   white-space: normal;
-}
-
-.quickPlaybackSpeedCustomizeButton :deep(.btn) {
-  max-inline-size: 380px;
-  gap: 8px;
-  padding-inline: 12px;
-  overflow-wrap: normal;
-  text-wrap: wrap;
-}
-
-.quickPlaybackSpeedToggle {
-  inline-size: min(calc(100% - 32px), 380px);
-}
-
-.quickPlaybackSpeedToggle :deep(.switch-label) {
-  max-inline-size: 100%;
 }
 
 .quickPlaybackSpeedToolbarActions,

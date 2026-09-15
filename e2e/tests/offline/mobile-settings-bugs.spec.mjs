@@ -205,3 +205,58 @@ test.describe('German playback settings on a narrow screen', () => {
     expect(await getMidWordLineBreaks(customize)).toEqual([])
   })
 })
+
+test.describe('desktop switch layout', () => {
+  test.use({
+    seed: {
+      settings: {
+        syncServerEnabled: true,
+        syncServerAutoSync: false,
+        syncServerSyncSettings: true,
+        syncServerToken: 'e2e-sync-token'
+      }
+    }
+  })
+
+  test('keeps switch labels and their indicators content-sized', async ({ page }) => {
+    await page.setViewportSize({ width: 1042, height: 630 })
+    const focus = await goToSettingsSection(page, 'focus')
+    const toggle = focus.locator('.switch-ctn').filter({ hasText: 'Show Player Controls' }).first()
+    const sync = toggle.getByRole('button', { name: 'Stop syncing this setting' })
+    await expect(sync).toBeVisible()
+
+    const metrics = await toggle.evaluate(element => {
+      const textElement = element.querySelector('.switch-label-text')
+      const indicator = element.querySelector('.syncedSettingIndicator').getBoundingClientRect()
+      const range = document.createRange()
+      range.selectNodeContents(textElement)
+      const textRects = Array.from(range.getClientRects())
+      return {
+        lineCount: textRects.length,
+        indicatorGap: indicator.left - Math.max(...textRects.map(rect => rect.right)),
+        labelMaxInlineSize: getComputedStyle(element.querySelector('.switch-label')).maxInlineSize
+      }
+    })
+
+    expect(metrics.indicatorGap).toBeLessThanOrEqual(8)
+    expect(metrics.lineCount).toBe(1)
+    expect(metrics.labelMaxInlineSize).toBe('none')
+
+    const appearance = await goToSettingsSection(page, 'appearance')
+    const tooltipToggle = appearance.locator('.switch-ctn').filter({ hasText: 'Always Show Scrollbars' })
+    const tooltipGaps = await tooltipToggle.evaluate(element => {
+      const textElement = element.querySelector('.switch-label-text')
+      const tooltip = element.querySelector('.tooltip').getBoundingClientRect()
+      const indicator = element.querySelector('.syncedSettingIndicator').getBoundingClientRect()
+      const range = document.createRange()
+      range.selectNodeContents(textElement)
+      const textRight = Math.max(...Array.from(range.getClientRects(), rect => rect.right))
+      return {
+        textToTooltip: tooltip.left - textRight,
+        tooltipToSync: indicator.left - tooltip.right
+      }
+    })
+    expect(tooltipGaps.textToTooltip).toBeLessThanOrEqual(8)
+    expect(tooltipGaps.tooltipToSync).toBeLessThanOrEqual(8)
+  })
+})
