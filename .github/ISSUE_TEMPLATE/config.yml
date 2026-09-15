@@ -1,4 +1,4 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
   - name: Fluxer Community
     url: https://fluxer.opentubex.org
