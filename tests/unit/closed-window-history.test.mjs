@@ -28,3 +28,26 @@ test('history ignores empty windows, retains ten windows, and allows retry after
   for (let i = 0; i < 11; i++) await history.restore(async data => restored.push(data.tabs[0].id))
   assert.deepEqual(restored, [11, 10, 9, 8, 7, 6, 5, 4, 3, 2])
 })
+
+test('serializes overlapping restores and preserves newest-first order after failure', async () => {
+  const history = new ClosedWindowHistory()
+  history.remember({ tabs: [{ id: 'older' }] })
+  history.remember({ tabs: [{ id: 'newer' }] })
+  let rejectFirst
+  const started = []
+  const first = history.restore(async session => {
+    started.push(session.tabs[0].id)
+    await new Promise((resolve, reject) => { rejectFirst = reject })
+  })
+  const failed = assert.rejects(first, /failed/)
+  const second = history.restore(async session => { started.push(session.tabs[0].id) })
+  await new Promise(setImmediate)
+  assert.deepEqual(started, ['newer'])
+  history.remember({ tabs: [{ id: 'newest' }] })
+  rejectFirst(new Error('failed'))
+  await failed
+  await second
+  await history.restore(async session => { started.push(session.tabs[0].id) })
+  await history.restore(async session => { started.push(session.tabs[0].id) })
+  assert.deepEqual(started, ['newer', 'newest', 'newer', 'older'])
+})

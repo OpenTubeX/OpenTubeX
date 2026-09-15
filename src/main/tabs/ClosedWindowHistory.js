@@ -1,5 +1,6 @@
 export class ClosedWindowHistory {
   sessions = []
+  pendingRestore = Promise.resolve()
 
   remember(session) {
     if (session.tabs.length === 0) return
@@ -14,14 +15,17 @@ export class ClosedWindowHistory {
     if (this.sessions.length > 10) this.sessions.shift()
   }
 
-  async restore(createWindow) {
-    const session = this.sessions.pop()
-    if (!session) return
-    try {
+  restore(createWindow) {
+    const restored = this.pendingRestore.then(async () => {
+      const session = this.sessions.at(-1)
+      if (!session) return
       await createWindow(session)
-    } catch (error) {
-      this.sessions.push(session)
-      throw error
-    }
+      // Keep failed entries in place even if another window closes while the
+      // restore is running. Successful restores consume only their own entry.
+      const index = this.sessions.indexOf(session)
+      if (index !== -1) this.sessions.splice(index, 1)
+    })
+    this.pendingRestore = restored.catch(() => {})
+    return restored
   }
 }
