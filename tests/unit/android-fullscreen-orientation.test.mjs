@@ -44,3 +44,30 @@ for (const [label, width, height, active, fullscreen, enabled, fromRotation, exp
     media.detach()
   })
 }
+
+for (const electron of [false, true]) {
+  test(`${electron ? 'Electron' : 'Android'} restores fullscreen after the replacement player loads`, async () => {
+    const calls = []
+    const start = source.indexOf('    function applyPendingPresentationModes(')
+    const body = source.slice(start, source.indexOf('\n    }', start) + 6)
+    const context = vm.createContext({
+      startInFullscreen: true, startInFullwindow: false, startInPip: false,
+      isActiveTab: { value: false }, hasLoaded: { value: false },
+      ui: {}, player: { nativePlayback: electron ? undefined : { show: async () => calls.push('native') } },
+      process: { env: { IS_ELECTRON: electron } },
+      window: { ftElectron: { requestFullscreen: () => calls.push('electron') } },
+      tabId: 'watch', console,
+    })
+    const restore = vm.runInContext(`${body}\napplyPendingPresentationModes`, context)
+    restore()
+    context.isActiveTab.value = true
+    restore()
+    assert.deepEqual(calls, [])
+    context.hasLoaded.value = true
+    restore()
+    await Promise.resolve()
+    assert.deepEqual(calls, [electron ? 'electron' : 'native'])
+    restore()
+    assert.equal(calls.length, 1, 'canplay must not enter fullscreen again')
+  })
+}
