@@ -1,5 +1,33 @@
 import { test, expect, goTo, sel, setWindowSize } from '../../helpers/app.mjs'
 
+const getVideoMetadataGap = locator => locator.evaluate(element => {
+  const textBounds = (selector) => {
+    const range = document.createRange()
+    range.selectNodeContents(element.querySelector(selector))
+    return range.getBoundingClientRect()
+  }
+  return textBounds('.channelNameText').top - textBounds('.title').bottom
+})
+
+const getChannelMetadataLayout = locator => locator.evaluate(element => {
+  const line = element.querySelector('.infoLine').getBoundingClientRect()
+  const handle = element.querySelector('.handle').getBoundingClientRect()
+  const subscribers = element.querySelector('.subscriberCount').getBoundingClientRect()
+  const titleRange = document.createRange()
+  titleRange.selectNodeContents(element.querySelector('.h3Title'))
+  const title = titleRange.getBoundingClientRect()
+  const centerDifference = bounds => Math.abs(
+    bounds.left + bounds.width / 2 - line.left - line.width / 2
+  )
+  return {
+    metadataGap: handle.top - title.bottom,
+    wrapped: subscribers.top > handle.top + 1,
+    handleCenterDifference: centerDifference(handle),
+    subscriberCenterDifference: centerDifference(subscribers),
+    separator: getComputedStyle(element.querySelector('.subscriberCount'), '::before').content
+  }
+})
+
 for (const uiScale of [100, 125]) {
   test.describe(`mobile search and settings at ${uiScale}%`, () => {
     test.use({ seed: { settings: { uiScale, useDeArrowTitles: true } } })
@@ -38,7 +66,7 @@ for (const uiScale of [100, 125]) {
       await session.detach()
     })
 
-    test('video search titles and channel links have separate touch targets', async ({ page, app }) => {
+    test('keeps video search metadata as compact as desktop', async ({ page, app }) => {
       await page.evaluate(() => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         store.commit('addVideoToDeArrowCache', {
@@ -55,20 +83,24 @@ for (const uiScale of [100, 125]) {
       })
       await page.locator(sel.searchInput).fill('touch')
       await page.locator(sel.searchInput).press('Enter')
-      await setWindowSize(app, page, { width: 460, height: 850 })
-      const session = await page.context().newCDPSession(page)
-      await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
       const title = page.locator('.ft-list-item .title').first()
       const channel = page.locator('.ft-list-item a.channelName').first()
       await expect(title).toHaveText('Clear title')
       await expect(page.locator('.deArrowToggleButton')).toBeVisible()
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateListType', 'grid'))
+      const desktopTextGap = await getVideoMetadataGap(title.locator('xpath=..'))
+
+      await setWindowSize(app, page, { width: 460, height: 850 })
+      const session = await page.context().newCDPSession(page)
+      await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+      const mobileTextGap = await getVideoMetadataGap(title.locator('xpath=..'))
+      expect(mobileTextGap).toBeLessThanOrEqual(desktopTextGap + 1)
+
       for (const listType of ['grid', 'list']) {
         await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateListType', value), listType)
         await expect(page.locator('.ft-list-item').first()).toHaveClass(new RegExp(listType))
         const titleBounds = await title.boundingBox()
         const channelBounds = await channel.boundingBox()
-        expect(titleBounds.height).toBeGreaterThanOrEqual(47.99)
-        expect(channelBounds.height).toBeGreaterThanOrEqual(47.99)
         expect(channelBounds.y).toBeGreaterThanOrEqual(titleBounds.y + titleBounds.height - 0.01)
         // Fractional UI scales can round a 48px target just below 48.
         expect(await page.locator('.ft-list-item .iconButton, .ft-list-item .deArrowToggleButton').evaluateAll(elements => elements.every(element => {
@@ -84,3 +116,48 @@ for (const uiScale of [100, 125]) {
     })
   })
 }
+
+test.describe('mobile channel search metadata', () => {
+  test.use({ seed: { settings: { currentLocale: 'de-DE', listType: 'grid' } } })
+
+  test('centers wrapped metadata and hides its leading separator', async ({ page }) => {
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('addToSessionSearchHistory', {
+        query: 'channels',
+        data: [{
+          type: 'channel',
+          dataSource: 'local',
+          id: 'UCmobilechannelresult1',
+          name: 'Dinge Erklärt - Kurzgesagt',
+          thumbnail: '',
+          handle: '@KurzgesagtDE',
+          subscribers: 2670000,
+          descriptionShort: ''
+        }],
+        searchSettings: { prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] },
+        nextPageRef: null,
+        hasMoreResults: false,
+        apiUsed: 'local'
+      })
+    })
+    await page.locator(sel.searchInput).fill('channels')
+    await page.locator(sel.searchInput).press('Enter')
+
+    const channel = page.locator('.ft-list-channel')
+    const metadata = channel.locator('.infoLine')
+    await expect(metadata).toBeVisible()
+    const desktopLayout = await getChannelMetadataLayout(channel)
+    expect(desktopLayout.wrapped).toBe(false)
+    expect(desktopLayout.separator).not.toBe('none')
+
+    await page.setViewportSize({ width: 504, height: 900 })
+    await expect(channel).toHaveClass(/ft-list-channel/)
+    await expect.poll(async () => (await getChannelMetadataLayout(channel)).separator).toBe('none')
+    const mobileLayout = await getChannelMetadataLayout(channel)
+    expect(mobileLayout.wrapped).toBe(true)
+    expect(mobileLayout.metadataGap).toBeLessThanOrEqual(desktopLayout.metadataGap + 1)
+    expect(mobileLayout.handleCenterDifference).toBeLessThanOrEqual(1)
+    expect(mobileLayout.subscriberCenterDifference).toBeLessThanOrEqual(1)
+  })
+})

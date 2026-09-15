@@ -403,7 +403,7 @@
         :tooltip="t('Tooltips.Player Settings.Use Quick Playback Speed Bar')"
         @change="updateUseQuickPlaybackSpeedBar"
       />
-      <div class="settingButtonWithSync">
+      <div class="settingButtonWithSync quickPlaybackSpeedCustomizeButton">
         <FtButton
           :label="t('Settings.Player Settings.Customize Quick Playback Speed Bar')"
           :icon="['fas', 'sliders-h']"

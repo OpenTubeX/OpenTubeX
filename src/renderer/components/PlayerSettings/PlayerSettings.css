@@ -106,6 +106,12 @@
   white-space: normal;
 }
 
+.quickPlaybackSpeedCustomizeButton :deep(.btn) {
+  max-inline-size: 300px;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
 .quickPlaybackSpeedToolbarActions,
 .quickPlaybackSpeedList {
   inline-size: min(800px, 100%);

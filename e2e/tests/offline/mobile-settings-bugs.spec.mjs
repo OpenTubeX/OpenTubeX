@@ -86,3 +86,81 @@ test('storage chart labels stay readable while sizes are calculating on a phone'
   expect(await storage.locator('.storageLegendLabel > span:first-child').evaluateAll(elements => elements.every(el => el.getBoundingClientRect().width >= 100))).toBe(true)
   expect(await storage.locator('.storageBreakdown').evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true)
 })
+
+test.describe('German playback settings on a narrow screen', () => {
+  test.use({
+    seed: {
+      settings: {
+        currentLocale: 'de-DE',
+        useQuickPlaybackSpeedBar: true
+      }
+    }
+  })
+
+  test('keeps the back button and quick-speed breadcrumb on one row', async ({ page }) => {
+    await page.setViewportSize({ width: 504, height: 900 })
+    const playback = await goToSettingsSection(page, 'playback')
+    await playback.getByRole('button', {
+      name: 'Schnelle Wiedergabegeschwindigkeitsleiste anpassen'
+    }).click()
+
+    const header = page.locator('.settingsWindowHeader')
+    const back = header.locator('.settingsBackButton')
+    const breadcrumb = header.locator('.settingsBreadcrumb')
+    const [backBounds, breadcrumbBounds] = await Promise.all([
+      back.boundingBox(),
+      breadcrumb.boundingBox()
+    ])
+
+    expect(Math.abs(
+      backBounds.y + backBounds.height / 2 - breadcrumbBounds.y - breadcrumbBounds.height / 2
+    )).toBeLessThanOrEqual(1)
+    await expect.poll(() => breadcrumb.evaluate(element => (
+      element.scrollWidth <= element.clientWidth + 1
+    ))).toBe(true)
+    expect(await breadcrumb.locator('.settingsBreadcrumbText').evaluateAll(elements => (
+      elements.some(element => (
+        element.scrollWidth > element.clientWidth + 1 &&
+        getComputedStyle(element).textOverflow === 'ellipsis'
+      ))
+    ))).toBe(true)
+  })
+
+  test('keeps playback controls inside the content gutter', async ({ page }) => {
+    await page.setViewportSize({ width: 504, height: 900 })
+    const playback = await goToSettingsSection(page, 'playback')
+    const content = page.locator('.settingsContent')
+    const defaultRate = playback.locator('.pure-material-slider')
+      .filter({ hasText: 'Standard-Wiedergabegeschwindigkeit:' })
+    const customize = playback.getByRole('button', {
+      name: 'Schnelle Wiedergabegeschwindigkeitsleiste anpassen'
+    })
+
+    await expect(defaultRate).toBeVisible()
+    await expect(customize).toBeVisible()
+    // Electron has one extra volume slider. Remove it so the shared renderer
+    // uses the same slider positions as the Capacitor screen in this regression.
+    await defaultRate.evaluate(element => { element.previousElementSibling.remove() })
+    const metrics = await content.evaluate((element) => {
+      const contentBounds = element.getBoundingClientRect()
+      const labelBounds = Array.from(element.querySelectorAll('.pure-material-slider .label'))
+        .find(label => label.textContent.includes('Standard-Wiedergabegeschwindigkeit'))
+        .getBoundingClientRect()
+      const buttonBounds = Array.from(element.querySelectorAll('.settingButtonWithSync .btn'))
+        .find(button => button.textContent.includes('Schnelle Wiedergabegeschwindigkeitsleiste'))
+        .getBoundingClientRect()
+      return {
+        horizontalScrollRange: element.scrollWidth - element.clientWidth,
+        horizontalScrollbarVisible: element.querySelector('.os-scrollbar-horizontal')
+          ?.classList.contains('os-scrollbar-visible') ?? false,
+        labelEndGutter: contentBounds.right - labelBounds.right,
+        buttonWidth: buttonBounds.width
+      }
+    })
+
+    expect(metrics.horizontalScrollRange).toBeLessThanOrEqual(0)
+    expect(metrics.horizontalScrollbarVisible).toBe(false)
+    expect(metrics.labelEndGutter).toBeGreaterThanOrEqual(14)
+    expect(metrics.buttonWidth).toBeLessThanOrEqual(300)
+  })
+})

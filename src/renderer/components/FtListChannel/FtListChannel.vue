@@ -36,7 +36,11 @@
             {{ name }}
           </h3>
         </component>
-        <div class="infoLine">
+        <div
+          ref="metadataLine"
+          class="infoLine"
+          :class="{ metadataWrapped }"
+        >
           <component
             :is="enableChannelLinks ? 'router-link' : 'span'"
             v-if="handle !== null"
@@ -49,15 +53,15 @@
           <span
             v-if="subscriberCount !== null && !hideChannelSubscriptions"
             class="subscriberCount"
+            :class="{ hasMetadataSeparator: handle !== null }"
           >
-            <template v-if="handle !== null"> • </template>
             {{ $t('Global.Counts.Subscriber Count', {count: formattedSubscriberCount}, subscriberCount) }}
           </span>
           <span
             v-if="handle == null && videoCount != null"
             class="videoCount"
+            :class="{ hasMetadataSeparator: subscriberCount !== null && !hideChannelSubscriptions }"
           >
-            <template v-if="subscriberCount !== null && !hideChannelSubscriptions"> • </template>
             {{ $t('Global.Counts.Video Count', {count: formattedVideoCount}, videoCount) }}
           </span>
         </div>
@@ -81,7 +85,7 @@
 
 <script setup>
 import FtRetryImage from '../FtRetryImage.vue'
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml'
@@ -123,6 +127,32 @@ const hideUnsubscribeButton = computed(() => {
 })
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
+
+const metadataLine = useTemplateRef('metadataLine')
+const metadataWrapped = ref(false)
+let metadataResizeObserver = null
+
+function updateMetadataWrapping() {
+  const [firstItem, secondItem] = metadataLine.value?.children ?? []
+  metadataWrapped.value = firstItem != null && secondItem != null &&
+    Math.abs(firstItem.getBoundingClientRect().top - secondItem.getBoundingClientRect().top) > 1
+}
+
+onMounted(() => {
+  updateMetadataWrapping()
+
+  if (typeof ResizeObserver !== 'function') {
+    return
+  }
+
+  metadataResizeObserver = new ResizeObserver(updateMetadataWrapping)
+  metadataResizeObserver.observe(metadataLine.value)
+  for (const item of metadataLine.value.children) {
+    metadataResizeObserver.observe(item)
+  }
+})
+
+onBeforeUnmount(() => metadataResizeObserver?.disconnect())
 
 let id = ''
 let thumbnail = ''
