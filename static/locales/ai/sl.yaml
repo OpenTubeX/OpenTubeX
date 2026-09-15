@@ -1449,6 +1449,7 @@ Channel:
     Hide Answers: Skrij odgovore
     Video hidden by OpenTubeX: OpenTubeX je skril videoposnetek
 Video:
+  Mark as fully seen: Označi kot ogledano do konca
   Move Queue Item Up: "Premakni {title} navzgor"
   Move Queue Item Down: "Premakni {title} navzdol"
   Includes paid promotion: Vključuje plačano promocijo

@@ -1482,6 +1482,7 @@ Channel:
     Hide Answers: Oculta les respostes
     Video hidden by OpenTubeX: Vídeo ocult per l'OpenTubeX
 Video:
+  Mark as fully seen: Marca com a vist completament
   Move Queue Item Up: "Mou {title} amunt"
   Move Queue Item Down: "Mou {title} avall"
   Includes paid promotion: Inclou promoció de pagament

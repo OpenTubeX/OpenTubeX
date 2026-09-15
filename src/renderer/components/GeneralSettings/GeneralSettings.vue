@@ -809,7 +809,7 @@ function resetThumbnailPreference() {
 
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
-/** @type {import('vue').ComputedRef<'' | 'history' | 'copyYoutube' | 'openYoutube' | 'download'>} */
+/** @type {import('vue').ComputedRef<'' | 'history' | 'markAsFullySeen' | 'copyYoutube' | 'openYoutube' | 'download'>} */
 const extraThumbnailAction = computed(() => store.getters.getExtraThumbnailAction)
 
 const effectiveExtraThumbnailAction = computed(() => (
@@ -821,6 +821,7 @@ const effectiveExtraThumbnailAction = computed(() => (
 const extraThumbnailActionValues = computed(() => [
   '',
   'history',
+  'markAsFullySeen',
   'copyYoutube',
   'openYoutube',
   ...(supportsYtDlp && enableDownloads.value ? ['download'] : [])
@@ -829,13 +830,14 @@ const extraThumbnailActionValues = computed(() => [
 const extraThumbnailActionNames = computed(() => [
   t('Settings.General Settings.Extra Thumbnail Action Button.None'),
   t('Settings.General Settings.Extra Thumbnail Action Button.Mark as Watched'),
+  t('Video.Mark as fully seen'),
   t('Settings.General Settings.Extra Thumbnail Action Button.Copy YouTube Link'),
   t('Settings.General Settings.Extra Thumbnail Action Button.Open in YouTube'),
   ...(supportsYtDlp && enableDownloads.value ? [t('Downloads.Download Video')] : [])
 ])
 
 /**
- * @param {'' | 'history' | 'copyYoutube' | 'openYoutube' | 'download'} value
+ * @param {'' | 'history' | 'markAsFullySeen' | 'copyYoutube' | 'openYoutube' | 'download'} value
  */
 function updateExtraThumbnailAction(value) {
   store.dispatch('updateExtraThumbnailAction', value)
