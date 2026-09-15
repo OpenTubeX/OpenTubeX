@@ -247,6 +247,9 @@ Settings:
       Network: rete
       Disk: disco
   General Settings:
+    Use tray icon: "Usa l’icona nell’area di notifica"
+    Close to system tray: "Chiudi nell’area di notifica"
+    Tray required for background refresh: "L’icona nell’area di notifica è necessaria quando l’aggiornamento degli abbonamenti in background è attivo."
     Show Video Menu Button: Mostra il pulsante del menu video
     Swipe to refresh: Scorri per aggiornare
     Blur Thumbnails: Sfoca le miniature
@@ -1758,3 +1761,6 @@ App Icon:
   Saved Message: "Icona salvata. L'aggiornamento del launcher potrebbe richiedere un momento."
   Title: "Icona dell'app"
   Error: "Impossibile caricare o cambiare l'icona dell'app"
+
+Tray:
+  Show All Windows: "Mostra tutte le finestre"

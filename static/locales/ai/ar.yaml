@@ -251,6 +251,9 @@ Settings:
       Network: شبكة
       Disk: القرص
   General Settings:
+    Use tray icon: "استخدام أيقونة علبة النظام"
+    Close to system tray: "الإغلاق إلى علبة النظام"
+    Tray required for background refresh: "أيقونة علبة النظام مطلوبة أثناء تفعيل تحديث الاشتراكات في الخلفية."
     Show Video Menu Button: إظهار زر قائمة الفيديو
     Swipe to refresh: اسحب للتحديث
     Blur Thumbnails: تمويه الصور المصغرة
@@ -1781,3 +1784,6 @@ App Icon:
   Saved Message: "تم حفظ الأيقونة. قد يستغرق مشغّل التطبيقات لحظة لتحديثها."
   Title: "أيقونة التطبيق"
   Error: "تعذر تحميل أيقونة التطبيق أو تغييرها"
+
+Tray:
+  Show All Windows: "إظهار جميع النوافذ"

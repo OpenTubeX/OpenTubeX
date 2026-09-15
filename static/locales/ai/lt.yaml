@@ -360,6 +360,9 @@ Settings:
       Disk: disko
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
+    Use tray icon: "Naudoti sistemos dėklo piktogramą"
+    Close to system tray: "Uždaryti į sistemos dėklą"
+    Tray required for background refresh: "Sistemos dėklo piktograma būtina, kol įjungtas prenumeratų atnaujinimas fone."
     Show Video Menu Button: Rodyti vaizdo įrašo meniu mygtuką
     Swipe to refresh: Perbraukite, kad atnaujintumėte
     Blur Thumbnails: Sulieti miniatiūras
@@ -2256,3 +2259,6 @@ App Icon:
   Saved Message: "Piktograma išsaugota. Paleidyklės atnaujinimas gali šiek tiek užtrukti."
   Title: "Programėlės piktograma"
   Error: "Nepavyko įkelti ar pakeisti programėlės piktogramos"
+
+Tray:
+  Show All Windows: "Rodyti visus langus"

@@ -77,9 +77,29 @@
         @change="updateGeneralAutoLoadMorePaginatedItemsEnabled"
       />
       <FtToggleSwitch
-        v-if="mode === 'general' && !IS_MAC && !isLinuxWayland && USING_ELECTRON"
+        v-if="mode === 'general' && USING_ELECTRON"
+        :label="t('Settings.General Settings.Use tray icon')"
+        :default-value="trayEnabled"
+        :disabled="closedAppRefresh"
+        :tooltip="closedAppRefresh ? t('Settings.General Settings.Tray required for background refresh') : ''"
+        setting-key="useTrayIcon"
+        :compact="true"
+        @change="store.dispatch('updateUseTrayIcon', $event)"
+      />
+      <FtToggleSwitch
+        v-if="mode === 'general' && USING_ELECTRON"
+        :label="t('Settings.General Settings.Close to system tray')"
+        :default-value="store.getters.getHideToTrayOnClose"
+        :disabled="!trayEnabled"
+        setting-key="hideToTrayOnClose"
+        :compact="true"
+        @change="store.dispatch('updateHideToTrayOnClose', $event)"
+      />
+      <FtToggleSwitch
+        v-if="mode === 'general' && supportsAutoPictureInPictureMinimize && USING_ELECTRON"
         :label="t('Settings.General Settings.Minimize to system tray')"
         :default-value="hideToTrayOnMinimize"
+        :disabled="!trayEnabled"
         setting-key="hideToTrayOnMinimize"
         :compact="true"
         @change="updateHideToTrayOnMinimize"
@@ -359,7 +379,7 @@ import { localeTranslationPercentages } from '../../i18n/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
 import { debounce, randomArrayItem, showToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
-import { initializePlatformInfo, isLinuxWayland } from '../../helpers/platform'
+import { initializePlatformInfo, supportsAutoPictureInPictureMinimize } from '../../helpers/platform'
 import { filterAvailableNavigationItems } from '../../../navigationAvailability'
 import {
   DATE_FORMAT_OPTIONS,
@@ -374,7 +394,6 @@ const USING_ELECTRON = !!process.env.IS_ELECTRON
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const enablePullToRefresh = computed(() => store.getters.getEnablePullToRefresh)
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
-const IS_MAC = process.platform === 'darwin'
 const PLAYBACK_ENGINE_VALUES = ['yt-dlp', 'built-in']
 
 const { locale, t } = useI18n()
@@ -507,6 +526,8 @@ function updateGeneralAutoLoadMorePaginatedItemsEnabled(value) {
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
+const closedAppRefresh = computed(() => store.getters.getEnableClosedAppSubscriptionRefresh)
+const trayEnabled = computed(() => store.getters.getUseTrayIcon || closedAppRefresh.value)
 const hideToTrayOnMinimize = computed(() => store.getters.getHideToTrayOnMinimize)
 
 /**

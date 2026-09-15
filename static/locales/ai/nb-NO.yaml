@@ -247,6 +247,9 @@ Settings:
       Network: nettverk
       Disk: disk
   General Settings:
+    Use tray icon: "Bruk ikon i systemstatusfeltet"
+    Close to system tray: "Lukk til systemstatusfeltet"
+    Tray required for background refresh: "Ikonet i systemstatusfeltet kreves mens oppdatering av abonnementer i bakgrunnen er aktivert."
     Show Video Menu Button: Vis videomenyknapp
     Swipe to refresh: Sveip for å oppdatere
     Blur Thumbnails: Gjør miniatyrbilder uskarpe
@@ -1777,3 +1780,6 @@ App Icon:
   Saved Message: "Ikonet er lagret. Det kan ta litt tid før startskjermen oppdateres."
   Title: "Appikon"
   Error: "Kunne ikke laste inn eller endre appikonet"
+
+Tray:
+  Show All Windows: "Vis alle vinduer"

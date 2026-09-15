@@ -249,6 +249,9 @@ Settings:
       Network: nätverk
       Disk: diskutrymme
   General Settings:
+    Use tray icon: "Använd ikon i systemfältet"
+    Close to system tray: "Stäng till systemfältet"
+    Tray required for background refresh: "Ikonen i systemfältet krävs medan uppdatering av prenumerationer i bakgrunden är aktiverad."
     Show Video Menu Button: Visa videomenyknapp
     Swipe to refresh: Svep för att uppdatera
     Blur Thumbnails: Gör miniatyrbilder suddiga
@@ -1777,3 +1780,6 @@ App Icon:
   Saved Message: "Ikonen har sparats. Det kan ta en stund innan startskärmen uppdateras."
   Title: "Appikon"
   Error: "Kunde inte läsa in eller ändra appikonen"
+
+Tray:
+  Show All Windows: "Visa alla fönster"

@@ -249,6 +249,9 @@ Settings:
       Network: rețea
       Disk: disc
   General Settings:
+    Use tray icon: "Folosește pictograma din zona de notificare"
+    Close to system tray: "Închide în zona de notificare"
+    Tray required for background refresh: "Pictograma din zona de notificare este necesară cât timp actualizarea abonamentelor în fundal este activată."
     Show Video Menu Button: Afișează butonul meniului video
     Swipe to refresh: Glisează pentru a reîmprospăta
     Blur Thumbnails: Estompează miniaturile
@@ -1805,3 +1808,6 @@ App Icon:
   Saved Message: "Pictograma a fost salvată. Actualizarea lansatorului poate dura puțin."
   Title: "Pictograma aplicației"
   Error: "Nu s-a putut încărca sau schimba pictograma aplicației"
+
+Tray:
+  Show All Windows: "Arată toate ferestrele"

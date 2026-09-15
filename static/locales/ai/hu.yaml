@@ -247,6 +247,9 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Use tray icon: "Tálcaikon használata"
+    Close to system tray: "Bezárás a tálcára"
+    Tray required for background refresh: "A tálcaikon szükséges, amíg a feliratkozások háttérben történő frissítése engedélyezve van."
     Show Video Menu Button: Videómenü gombjának megjelenítése
     Swipe to refresh: Frissítés húzással
     Blur Thumbnails: Bélyegképek elhomályosítása
@@ -1759,3 +1762,6 @@ App Icon:
   Saved Message: "Ikon mentve. A kezdőképernyő frissítése eltarthat egy ideig."
   Title: "Alkalmazásikon"
   Error: "Nem sikerült betölteni vagy módosítani az alkalmazás ikonját"
+
+Tray:
+  Show All Windows: "Összes ablak megjelenítése"

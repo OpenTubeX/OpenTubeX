@@ -390,7 +390,7 @@ import {
   isOverlayScrollTopOutOfBounds,
   restoreOverlayScrollTop
 } from '../../helpers/overlayScrollbars'
-import { initializePlatformInfo, isLinuxWayland } from '../../helpers/platform'
+import { initializePlatformInfo, isLinuxWayland, supportsAutoPictureInPictureMinimize } from '../../helpers/platform'
 import {
   createSettingsSearchIndex,
   findSettingsSearchTab,
@@ -653,6 +653,7 @@ const settingsSearchableValues = computed(() => createSettingsSearchIndex({
   supportsLocalApi: SUPPORTS_LOCAL_API,
   isMac: IS_MAC,
   isLinuxWayland: isLinuxWayland.value,
+  supportsAutoPictureInPictureMinimize: supportsAutoPictureInPictureMinimize.value,
   systemUsesDarkTheme: systemUsesDarkTheme.value,
 }))
 const settingsSearchResults = computed(() => {

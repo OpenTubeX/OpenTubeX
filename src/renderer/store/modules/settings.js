@@ -569,6 +569,8 @@ const state = {
   quickBookmarkTargetPlaylistId: 'favorites',
   generalAutoLoadMorePaginatedItemsEnabled: true,
   enablePullToRefresh: true,
+  useTrayIcon: true,
+  hideToTrayOnClose: false,
   hideToTrayOnMinimize: false,
   dateFormat: 'locale',
   timeFormat: 'locale',
@@ -781,6 +783,8 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'ytDlpDownloadCustomArgs',
   // Others
   'disableSmoothScrolling',
+  'useTrayIcon',
+  'hideToTrayOnClose',
   'hideToTrayOnMinimize',
   'settingsPassword',
   'screenshotAskPath',

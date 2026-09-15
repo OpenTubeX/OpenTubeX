@@ -258,6 +258,9 @@ Settings:
       Network: netværk
       Disk: diskplads
   General Settings:
+    Use tray icon: "Brug ikon i systembakken"
+    Close to system tray: "Luk til systembakken"
+    Tray required for background refresh: "Ikonet i systembakken er påkrævet, mens opdatering af abonnementer i baggrunden er aktiveret."
     Show Video Menu Button: Vis videomenuknap
     Swipe to refresh: Stryg for at opdatere
     Blur Thumbnails: Slør miniaturebilleder
@@ -1840,3 +1843,6 @@ App Icon:
   Saved Message: "Ikonet er gemt. Det kan tage et øjeblik, før din startskærm opdateres."
   Title: "Appikon"
   Error: "Kunne ikke indlæse eller ændre appikonet"
+
+Tray:
+  Show All Windows: "Vis alle vinduer"

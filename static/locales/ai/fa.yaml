@@ -264,6 +264,9 @@ Settings:
       Network: شبکه
       Disk: دیسک
   General Settings:
+    Use tray icon: "استفاده از نماد سینی سیستم"
+    Close to system tray: "بستن به سینی سیستم"
+    Tray required for background refresh: "تا زمانی که به‌روزرسانی اشتراک‌ها در پس‌زمینه فعال است، نماد سینی سیستم لازم است."
     Show Video Menu Button: نمایش دکمه منوی ویدیو
     Swipe to refresh: کشیدن برای تازه‌سازی
     Blur Thumbnails: تار کردن تصاویر بندانگشتی
@@ -1842,3 +1845,6 @@ App Icon:
   Saved Message: "نماد ذخیره شد. ممکن است به‌روزرسانی راه‌انداز کمی طول بکشد."
   Title: "نماد برنامه"
   Error: "بارگیری یا تغییر نماد برنامه ممکن نشد"
+
+Tray:
+  Show All Windows: "نمایش همهٔ پنجره‌ها"

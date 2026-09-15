@@ -377,6 +377,9 @@ Settings:
       Disk: disc
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
+    Use tray icon: "Utilitza la icona de la safata"
+    Close to system tray: "Tanca a la safata del sistema"
+    Tray required for background refresh: "La icona de la safata és necessària mentre l’actualització de subscripcions en segon pla està activada."
     Show Video Menu Button: Mostra el botó del menú del vídeo
     Swipe to refresh: Llisca per actualitzar
     Blur Thumbnails: Difumina les miniatures
@@ -2402,3 +2405,6 @@ App Icon:
   Saved Message: "Icona desada. El llançador pot trigar un moment a actualitzar-se."
   Title: "Icona de l'aplicació"
   Error: "No s'ha pogut carregar o canviar la icona de l'aplicació"
+
+Tray:
+  Show All Windows: "Mostra totes les finestres"

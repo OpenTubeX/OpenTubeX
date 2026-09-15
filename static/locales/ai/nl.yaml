@@ -251,6 +251,9 @@ Settings:
       Network: netwerk
       Disk: schijf
   General Settings:
+    Use tray icon: "Systeemvakpictogram gebruiken"
+    Close to system tray: "Sluiten naar systeemvak"
+    Tray required for background refresh: "Het systeemvakpictogram is vereist zolang abonnementen op de achtergrond worden vernieuwd."
     Show Video Menu Button: Videomenuknop tonen
     Swipe to refresh: Vegen om te vernieuwen
     Blur Thumbnails: Miniaturen vervagen
@@ -1814,3 +1817,6 @@ App Icon:
   Saved Message: "Pictogram opgeslagen. Het kan even duren voordat je launcher is bijgewerkt."
   Title: "App-pictogram"
   Error: "Kan het app-pictogram niet laden of wijzigen"
+
+Tray:
+  Show All Windows: "Alle vensters tonen"

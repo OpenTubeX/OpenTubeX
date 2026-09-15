@@ -249,6 +249,9 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Use tray icon: "Erabili sistemaren erretiluko ikonoa"
+    Close to system tray: "Itxi sistemaren erretilura"
+    Tray required for background refresh: "Sistemaren erretiluko ikonoa beharrezkoa da harpidetzak atzeko planoan eguneratzea gaituta dagoen bitartean."
     Show Video Menu Button: Erakutsi bideo-menuaren botoia
     Swipe to refresh: Irristatu freskatzeko
     Blur Thumbnails: Lausotu koadro txikiak
@@ -1786,3 +1789,6 @@ App Icon:
   Saved Message: "Ikonoa gorde da. Abiarazleak une bat behar izan dezake eguneratzeko."
   Title: "Aplikazioaren ikonoa"
   Error: "Ezin izan da aplikazioaren ikonoa kargatu edo aldatu"
+
+Tray:
+  Show All Windows: "Erakutsi leiho guztiak"

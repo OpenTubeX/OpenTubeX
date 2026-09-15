@@ -195,31 +195,13 @@ function runApp() {
   }
 
   function updateDockMenu() {
+    createTrayContextMenu()
     if (process.platform !== 'darwin' || !app.dock) {
       return
     }
 
-    const session = getDockMediaSession()
-    const actions = session?.actions ?? new Set()
-    const toggleAction = session?.playbackState === 'playing' ? 'pause' : 'play'
     const dockMenu = Menu.buildFromTemplate([
-      {
-        label: dockMediaLabels.previous,
-        enabled: actions.has('previoustrack'),
-        click: () => requestDockMediaAction('previoustrack')
-      },
-      {
-        label: session?.playbackState === 'playing'
-          ? dockMediaLabels.pause
-          : dockMediaLabels.play,
-        enabled: actions.has(toggleAction),
-        click: () => requestDockMediaAction(toggleAction)
-      },
-      {
-        label: dockMediaLabels.next,
-        enabled: actions.has('nexttrack'),
-        click: () => requestDockMediaAction('nexttrack')
-      },
+      ...createMediaMenuItems(),
       { type: 'separator' },
       {
         label: dockMediaLabels.newWindow,
@@ -1719,7 +1701,11 @@ function runApp() {
   let mainWindow
   let startupUrl
   let tray = null
+  let useTrayIcon = true
+  let trayOnClose = false
   let trayOnMinimize = false
+  let trayTranslate = key => key
+  const trayClosingWindowIds = new Set()
   let trayWindows = []
   const trayMaximizedWindows = {}
   /** @type {Map<number, Array<{url: string, tabId: string | null}>>} */
@@ -1746,7 +1732,8 @@ function runApp() {
   const supportsAutoPictureInPictureMinimize = isWaylandPlatform
     ? kdeWaylandWindowStateBackend.then(backend => backend !== null)
     : Promise.resolve(true)
-  const isTrayOnMinimizeSupported = process.platform !== 'darwin' && !isWaylandPlatform
+  let isTrayOnMinimizeSupported = !isWaylandPlatform
+  supportsAutoPictureInPictureMinimize.then(supported => { isTrayOnMinimizeSupported = supported })
 
   const userDataPath = app.getPath('userData')
   const backgroundSubscriptions = createSubscriptionBackgroundService(userDataPath)
@@ -1758,8 +1745,7 @@ function runApp() {
       case 'configure':
         keepRefreshingInBackground = value.enabled === true
         await backgroundSubscriptions.configure(value)
-        if (keepRefreshingInBackground) ensureBackgroundTray()
-        else if (trayWindows.length === 0) destroyTray()
+        updateTrayEnabled()
         return
       case 'next':
         await backgroundSubscriptions.setBackground(false)
@@ -1781,10 +1767,11 @@ function runApp() {
         : path.join(__dirname, '..', '_icons', 'iconColor.png')
       tray = new Tray(icon)
       tray.setToolTip('OpenTubeX')
-      tray.on('click', () => {
-        const window = BrowserWindow.getAllWindows()[0]
-        if (window) { window.show(); window.focus() } else createWindow()
-      })
+      tray.on('click', toggleTrayWindow)
+      if (process.platform === 'darwin') {
+        tray.setIgnoreDoubleClickEvents(true)
+        tray.on('right-click', () => tray.popUpContextMenu(Menu.buildFromTemplate(defaultTrayMenu())))
+      }
     }
     createTrayContextMenu()
   }
@@ -1926,8 +1913,8 @@ function runApp() {
         const openDeepLinksInNewWindow = (await baseHandlers.settings._findOne('openDeepLinksInNewWindow'))?.value
         if (!openDeepLinksInNewWindow) {
           // Just focus the main window (instead of starting a new instance)
-          if (mainWindow.isMinimized()) {
-            if (isTrayOnMinimizeSupported && trayOnMinimize) {
+          if (!mainWindow.isVisible() || mainWindow.isMinimized()) {
+            if (trayWindows.includes(mainWindow)) {
               trayClick(mainWindow)
             } else {
               mainWindow.restore()
@@ -1960,8 +1947,9 @@ function runApp() {
     } catch (error) {
       console.warn('Could not restore the download queue', error)
     }
-    if (process.platform === 'darwin') {
+    {
       const t = await createMainTranslator()
+      trayTranslate = t
       dockMediaLabels = {
         previous: t('Video.Previous'),
         play: t('Video.Player.Scroll Mini Player.Play'),
@@ -2103,14 +2091,20 @@ function runApp() {
           case 'backendPreference':
             backendPreference = doc.value
             break
+          case 'useTrayIcon':
+            useTrayIcon = doc.value
+            break
+          case 'hideToTrayOnClose':
+            trayOnClose = doc.value
+            break
           case 'hideToTrayOnMinimize':
-            if (isTrayOnMinimizeSupported) {
-              trayOnMinimize = doc.value
-            }
+            trayOnMinimize = doc.value
             break
         }
       })
     }
+
+    updateTrayEnabled()
 
     if (disableSmoothScrolling) {
       app.commandLine.appendSwitch('disable-smooth-scrolling')
@@ -2538,112 +2532,136 @@ function runApp() {
     }
   })
 
-  function trayClick(window, close = false) {
-    if (!close) {
-      if (window.id in trayMaximizedWindows) {
-        window.maximize()
-      } else {
-        window.show()
+  function isTrayEnabled() {
+    return useTrayIcon || keepRefreshingInBackground
+  }
 
-        // Calling hide() inside minimize is broken for some Linux distros (window minimizes again when trying to drag,
-        // resize or maximize it, among other shenanigans). It seems to work as intended with this workaround.
-        if (process.platform === 'linux') {
-          window.hide()
-          window.show()
-        }
-      }
-
-      if (trayWindows.length === BrowserWindow.getAllWindows().length) { mainWindow = window }
-    } else if (trayWindows.length > 0) {
-      window.close()
-    }
-
-    trayWindows.splice(trayWindows.findIndex(item => item.id === window.id), 1)
-
-    if (trayWindows.length > 0) {
-      createTrayContextMenu()
+  function updateTrayEnabled() {
+    if (isTrayEnabled()) {
+      ensureBackgroundTray()
     } else {
+      // Restore every hidden window before removing its way back into the app.
+      showHiddenWindows()
       destroyTray()
     }
   }
 
+  function hideWindowToTray(window) {
+    if (!isTrayEnabled() || isQuitting || window.isDestroyed()) return
+    ensureBackgroundTray()
+    if (!trayWindows.includes(window)) {
+      trayWindows.push(window)
+      if (window.isMaximized()) trayMaximizedWindows[window.id] = true
+    }
+    window.hide()
+    createTrayContextMenu()
+  }
+
+  function toggleTrayWindow() {
+    const window = mainWindow && !mainWindow.isDestroyed()
+      ? mainWindow
+      : BrowserWindow.getAllWindows()[0]
+    if (!window) {
+      createWindow({ showWindowNow: true })
+    } else if (window.isVisible() && !window.isMinimized() && !trayWindows.includes(window)) {
+      hideWindowToTray(window)
+    } else {
+      trayClick(window)
+    }
+  }
+
+  function trayClick(window) {
+    if (window.isDestroyed()) return
+    trayWindows = trayWindows.filter(item => item.id !== window.id)
+    if (window.isMinimized()) window.restore()
+    window.show()
+    if (window.id in trayMaximizedWindows) window.maximize()
+    delete trayMaximizedWindows[window.id]
+    window.focus()
+    mainWindow = window
+    createTrayContextMenu()
+  }
+
   function createTrayContextMenu() {
-    const menuItems = []
-    trayWindows.forEach(window => {
-      menuItems.push({
-        label: window.title,
-        submenu: [
-          {
-            label: 'Show',
-            click: () => trayClick(window)
-          },
-          {
-            label: 'Close',
-            click: () => trayClick(window, true)
-          }
-        ]
-      })
-    })
+    if (!tray || tray.isDestroyed()) return
+    // macOS opens an attached context menu on left click; show it explicitly
+    // on right click so left click can toggle the window on every platform.
+    if (process.platform !== 'darwin') {
+      tray.setContextMenu(Menu.buildFromTemplate(defaultTrayMenu()))
+    }
+  }
 
-    menuItems.push(
+  function createMediaMenuItems() {
+    const session = getDockMediaSession()
+    const actions = session?.actions ?? new Set()
+    const toggleAction = session?.playbackState === 'playing' ? 'pause' : 'play'
+    return [
       {
-        type: 'separator'
+        label: dockMediaLabels.previous,
+        enabled: actions.has('previoustrack'),
+        click: () => requestDockMediaAction('previoustrack')
       },
-      ...defaultTrayMenu()
-    )
-
-    const menu = Menu.buildFromTemplate(menuItems)
-    tray.setContextMenu(menu)
+      {
+        label: toggleAction === 'pause' ? dockMediaLabels.pause : dockMediaLabels.play,
+        enabled: actions.has(toggleAction),
+        click: () => requestDockMediaAction(toggleAction)
+      },
+      {
+        label: dockMediaLabels.next,
+        enabled: actions.has('nexttrack'),
+        click: () => requestDockMediaAction('nexttrack')
+      }
+    ]
   }
 
   function defaultTrayMenu() {
     return [
+      ...BrowserWindow.getAllWindows().map(window => ({
+        label: window.getTitle(),
+        submenu: [
+          { label: trayTranslate('Video.Player.Show'), click: () => trayClick(window) },
+          {
+            label: trayTranslate('Close'),
+            click: () => {
+              trayClick(window)
+              trayClosingWindowIds.add(window.id)
+              window.close()
+            }
+          }
+        ]
+      })),
+      { type: 'separator' },
+      ...createMediaMenuItems(),
+      { type: 'separator' },
       {
-        label: 'New Window',
+        label: dockMediaLabels.newWindow,
         click: () => createWindow({
           showWindowNow: true,
-          replaceMainWindow: !mainWindow || mainWindow.isDestroyed() || trayWindows.some(item => item.id === mainWindow.id)
+          replaceMainWindow: !mainWindow || mainWindow.isDestroyed() || trayWindows.includes(mainWindow)
         })
       },
       {
-        label: 'Show All Windows',
+        label: trayTranslate('Tray.Show All Windows'),
+        enabled: BrowserWindow.getAllWindows().length > 0,
         click: () => {
-          // Use while loop instead of for loop as trayClick modifies the trayWindows array
-          while (trayWindows.length > 0) {
-            trayClick(trayWindows[0])
-          }
+          for (const window of BrowserWindow.getAllWindows()) trayClick(window)
         }
       },
       {
-        label: 'Quit',
+        label: trayTranslate('Quit'),
         click: () => requestQuit(BrowserWindow.getFocusedWindow() ?? mainWindow)
       }
     ]
   }
 
   function destroyTray() {
-    if (!tray) return
-
-    if (keepRefreshingInBackground) {
-      tray.setContextMenu(Menu.buildFromTemplate(defaultTrayMenu()))
-      return
-    }
-    if (process.platform !== 'linux') {
-      tray.destroy()
-      tray = null
-    } else {
-      const menu = Menu.buildFromTemplate(defaultTrayMenu())
-      tray.setContextMenu(menu)
-    }
+    if (!tray || isTrayEnabled()) return
+    tray.destroy()
+    tray = null
   }
 
   function showHiddenWindows() {
-    trayWindows.forEach(window => {
-      window.minimize()
-    })
-
-    destroyTray()
-    trayWindows = []
+    for (const window of [...trayWindows]) trayClick(window)
   }
 
   /**
@@ -2853,7 +2871,12 @@ function runApp() {
         backend: kdeWaylandWindowStateBackend,
         applyWindowIdentity: applyKdeWindowIdentity,
         onFocusedState: sendFocusedState,
-        onMinimizedState: sendMinimizedState,
+        onMinimizedState: minimized => {
+          // KWin can report restored after restore-before-hide; the window
+          // still counts as minimized for auto PiP while it remains hidden.
+          sendMinimizedState(minimized || !newWindow.isVisible())
+          if (minimized) minimizeToTray()
+        },
         releaseWindowIdentity: releaseKdeWindowIdentity,
       })
     } else {
@@ -2861,68 +2884,48 @@ function runApp() {
       newWindow.on('blur', () => sendFocusedState(false))
     }
 
-    if (isTrayOnMinimizeSupported) {
-      function manageTray(window, removeWindow = false) {
-        if (tray) {
-          if (!removeWindow) {
-            trayWindows.push(window)
-            createTrayContextMenu()
-          } else if (trayWindows.some(item => item.id === window.id)) {
-            trayClick(window)
-          }
-        } else {
-          const icon = process.env.NODE_ENV === 'development'
-            ? path.join(__dirname, '..', '..', '_icons', 'iconColor.png')
-            : path.join(__dirname, '..', '_icons', 'iconColor.png')
-
-          tray = new Tray(icon)
-
-          tray.setIgnoreDoubleClickEvents(true)
-          tray.setToolTip('OpenTubeX')
-
-          trayWindows = [window]
-          createTrayContextMenu()
-
-          if (process.platform !== 'linux') {
-            tray.on('click', (event) => {
-              if (trayWindows.length === 1) { trayClick(trayWindows[0]) }
-            })
-          }
-        }
+    let minimizeToTrayTimer = null
+    const minimizeToTray = () => {
+      if (!isTrayOnMinimizeSupported || !trayOnMinimize || !isTrayEnabled() ||
+          isQuitting || newWindow.isDestroyed() || trayWindows.includes(newWindow)) return
+      if (minimizeToTrayTimer !== null) return
+      // Restore before hiding on Linux to avoid Electron's stuck minimized state.
+      if (process.platform === 'linux') {
+        minimizeToTrayTimer = setTimeout(() => {
+          minimizeToTrayTimer = null
+          if (newWindow.isDestroyed() || isQuitting || !trayOnMinimize || !isTrayEnabled()) return
+          newWindow.restore()
+          hideWindowToTray(newWindow)
+        }, 100)
+      } else {
+        hideWindowToTray(newWindow)
       }
-
-      newWindow.on('minimize', () => {
-        if (trayOnMinimize) {
-          // Workaround for https://github.com/electron/electron/issues/49253
-          if (process.platform === 'linux') {
-            setTimeout(() => {
-              newWindow.restore()
-              newWindow.hide()
-            }, 100)
-          } else {
-            newWindow.hide()
-          }
-
-          manageTray(newWindow)
-
-          if (newWindow === mainWindow) {
-            // A timer is needed because getFocusedWindow doesn't update until the minimize event ends
-            setTimeout(() => {
-              const newMainWindow = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows().find(window => window.isVisible())
-              if (newMainWindow) { mainWindow = newMainWindow }
-            }, 100)
-          }
-        }
-      })
-
-      newWindow.on('maximize', () => {
-        if (trayOnMinimize) { trayMaximizedWindows[newWindow.id] = true }
-      })
-
-      newWindow.on('unmaximize', () => {
-        if (trayOnMinimize) { delete trayMaximizedWindows[newWindow.id] }
-      })
     }
+    newWindow.on('minimize', minimizeToTray)
+    newWindow.on('maximize', () => { trayMaximizedWindows[newWindow.id] = true })
+    newWindow.on('unmaximize', () => {
+      if (!trayWindows.includes(newWindow)) delete trayMaximizedWindows[newWindow.id]
+    })
+    const cancelMinimizeToTray = () => {
+      clearTimeout(minimizeToTrayTimer)
+      minimizeToTrayTimer = null
+    }
+    newWindow.on('restore', cancelMinimizeToTray)
+    newWindow.on('focus', cancelMinimizeToTray)
+    newWindow.on('show', () => {
+      cancelMinimizeToTray()
+      trayWindows = trayWindows.filter(window => window !== newWindow)
+      createTrayContextMenu()
+    })
+    newWindow.on('focus', () => { mainWindow = newWindow })
+    newWindow.on('page-title-updated', createTrayContextMenu)
+    newWindow.once('closed', () => {
+      clearTimeout(minimizeToTrayTimer)
+      trayWindows = trayWindows.filter(window => window !== newWindow)
+      delete trayMaximizedWindows[newWindow.id]
+      trayClosingWindowIds.delete(newWindow.id)
+      createTrayContextMenu()
+    })
 
     if (replaceMainWindow) {
       mainWindow = newWindow
@@ -3022,6 +3025,13 @@ function runApp() {
     })
 
     newWindow.on('close', async (event) => {
+      if (!isQuitting && trayOnClose && isTrayEnabled() &&
+          !trayClosingWindowIds.has(newWindow.id) && tabManager.tabs.size > 0) {
+        event.preventDefault()
+        hideWindowToTray(newWindow)
+        return
+      }
+
       const wasLastWindow = BrowserWindow.getAllWindows().length === 1
 
       if (!isQuitting && !closeConfirmedWindowIds.delete(newWindow.id) &&
@@ -3039,6 +3049,8 @@ function runApp() {
         if (confirmed) {
           closeConfirmedWindowIds.add(newWindow.id)
           newWindow.close()
+        } else {
+          trayClosingWindowIds.delete(newWindow.id)
         }
 
         return
@@ -4757,11 +4769,15 @@ function runApp() {
             case 'enableSkipSilenceByDefault':
               TabManager.setEnableSkipSilenceByDefault(data.value)
               break
+            case 'useTrayIcon':
+              useTrayIcon = data.value
+              updateTrayEnabled()
+              break
+            case 'hideToTrayOnClose':
+              trayOnClose = data.value
+              break
             case 'hideToTrayOnMinimize':
-              if (isTrayOnMinimizeSupported) {
-                trayOnMinimize = data.value
-                if (!trayOnMinimize) { showHiddenWindows() }
-              }
+              trayOnMinimize = data.value
               break
             case 'baseTheme':
               if (isCustomThemeValue(data.value)) {
@@ -5412,7 +5428,7 @@ function runApp() {
 
     isQuitting = true
     backgroundSubscriptions.stop()
-    if (process.platform !== 'darwin' && tray) { tray.destroy() }
+    if (tray) { tray.destroy(); tray = null }
   })
 
   app.on('window-all-closed', () => {

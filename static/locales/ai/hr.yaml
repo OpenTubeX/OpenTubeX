@@ -249,6 +249,9 @@ Settings:
       Network: mreže
       Disk: diska
   General Settings:
+    Use tray icon: "Koristi ikonu u sistemskoj traci"
+    Close to system tray: "Zatvori u sistemsku traku"
+    Tray required for background refresh: "Ikona u sistemskoj traci potrebna je dok je omogućeno osvježavanje pretplata u pozadini."
     Show Video Menu Button: Prikaži gumb izbornika videozapisa
     Swipe to refresh: Povucite za osvježavanje
     Blur Thumbnails: Zamuti minijature
@@ -1781,3 +1784,6 @@ App Icon:
   Saved Message: "Ikona je spremljena. Ažuriranje pokretača može potrajati trenutak."
   Title: "Ikona aplikacije"
   Error: "Nije moguće učitati ili promijeniti ikonu aplikacije"
+
+Tray:
+  Show All Windows: "Prikaži sve prozore"

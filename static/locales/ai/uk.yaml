@@ -251,6 +251,9 @@ Settings:
       Network: мережа
       Disk: диск
   General Settings:
+    Use tray icon: "Використовувати значок у треї"
+    Close to system tray: "Згортати в трей при закритті"
+    Tray required for background refresh: "Значок у треї потрібний, поки ввімкнено фонове оновлення підписок."
     Show Video Menu Button: Показувати кнопку меню відео
     Swipe to refresh: Проведіть, щоб оновити
     Blur Thumbnails: Розмивати мініатюри
@@ -1796,3 +1799,6 @@ App Icon:
   Saved Message: "Значок збережено. Оновлення в лаунчері може зайняти трохи часу."
   Title: "Значок застосунку"
   Error: "Не вдалося завантажити або змінити значок застосунку"
+
+Tray:
+  Show All Windows: "Показати всі вікна"

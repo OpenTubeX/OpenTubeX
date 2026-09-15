@@ -247,6 +247,9 @@ Settings:
       Network: 网络
       Disk: 磁盘
   General Settings:
+    Use tray icon: "使用托盘图标"
+    Close to system tray: "关闭时最小化到系统托盘"
+    Tray required for background refresh: "启用后台刷新订阅时，必须显示托盘图标。"
     Show Video Menu Button: 显示视频菜单按钮
     Swipe to refresh: 下拉刷新
     Blur Thumbnails: 模糊缩略图
@@ -1758,3 +1761,6 @@ App Icon:
   Saved Message: "图标已保存。启动器可能需要一些时间来更新。"
   Title: "应用图标"
   Error: "无法加载或更改应用图标"
+
+Tray:
+  Show All Windows: "显示所有窗口"

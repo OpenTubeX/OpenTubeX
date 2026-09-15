@@ -101,6 +101,9 @@ Settings:
     Advanced Description: Dostawcy, aplikacje zewnętrzne i sieć
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Use tray icon: "Używaj ikony w zasobniku"
+    Close to system tray: "Zamykaj do zasobnika systemowego"
+    Tray required for background refresh: "Ikona w zasobniku jest wymagana, gdy odświeżanie subskrypcji w tle jest włączone."
     Show Video Menu Button: Pokaż przycisk menu filmu
     Swipe to refresh: Przeciągnij, aby odświeżyć
     Blur Thumbnails: Rozmyj miniatury
@@ -978,3 +981,6 @@ App Icon:
 History:
   Repair: "Napraw historię"
   Repair Progress: "Sprawdzono {checked}/{total} · Naprawiono {repaired} · Błędy {failed}"
+
+Tray:
+  Show All Windows: "Pokaż wszystkie okna"

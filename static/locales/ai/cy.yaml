@@ -249,6 +249,9 @@ Settings:
       Network: rhwydwaith
       Disk: disg
   General Settings:
+    Use tray icon: "Defnyddio eicon hambwrdd"
+    Close to system tray: "Cau i hambwrdd y system"
+    Tray required for background refresh: "Mae angen yr eicon hambwrdd tra bo diweddaru tanysgrifiadau yn y cefndir wedi’i alluogi."
     Show Video Menu Button: Dangos botwm dewislen fideo
     Swipe to refresh: Sychwch i adnewyddu
     Blur Thumbnails: Niwlio mân-luniau
@@ -1786,3 +1789,6 @@ App Icon:
   Saved Message: "Eicon wedi'i gadw. Gall gymryd eiliad i'ch lansiwr ddiweddaru."
   Title: "Eicon yr ap"
   Error: "Methu llwytho neu newid eicon yr ap"
+
+Tray:
+  Show All Windows: "Dangos pob ffenestr"

@@ -79,8 +79,8 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     usingElectron,
     isCapacitor = false,
     supportsLocalApi,
-    isMac,
     isLinuxWayland,
+    supportsAutoPictureInPictureMinimize = !isLinuxWayland,
     systemUsesDarkTheme,
   } = options
   const [group, item] = path
@@ -117,8 +117,9 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     if (['Mobile Layout', 'Swipe to refresh'].includes(group)) {
       return isCapacitor
     }
+    if (['Use tray icon', 'Close to system tray', 'Tray required for background refresh'].includes(group)) return usingElectron
     if (group === 'Minimize to system tray') {
-      return usingElectron && !isMac && !isLinuxWayland
+      return usingElectron && supportsAutoPictureInPictureMinimize
     }
     if (['New Tab Position', 'Tab Close Focus', 'Startup Behavior', 'Remember Tab Navigation History'].includes(group)) {
       return usingElectron || isCapacitor

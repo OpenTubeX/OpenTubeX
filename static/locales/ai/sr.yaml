@@ -257,6 +257,9 @@ Settings:
       Network: мрежа
       Disk: диск
   General Settings:
+    Use tray icon: "Користи икону у системској палети"
+    Close to system tray: "Затвори у системску палету"
+    Tray required for background refresh: "Икона у системској палети је потребна док је омогућено освежавање праћења у позадини."
     Show Video Menu Button: Прикажи дугме менија видеа
     Swipe to refresh: Превуците за освежавање
     Blur Thumbnails: Замагли сличице
@@ -1831,3 +1834,6 @@ App Icon:
   Saved Message: "Икона је сачувана. Ажурирање покретача може потрајати."
   Title: "Икона апликације"
   Error: "Није могуће учитати или променити икону апликације"
+
+Tray:
+  Show All Windows: "Прикажи све прозоре"
