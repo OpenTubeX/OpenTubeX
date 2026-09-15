@@ -1766,3 +1766,19 @@ App Icon:
   Saved Message: "Nişan saxlanıldı. Başladıcının yenilənməsi bir qədər vaxt ala bilər."
   Title: "Tətbiq nişanı"
   Error: "Tətbiq nişanını yükləmək və ya dəyişmək mümkün olmadı"
+
+UnifiedPush:
+  Description: Bu cihazda quraşdırılmış UnifiedPush provayderi vasitəsilə bildirişlər alın.
+  Sender Hint: Uyğun göndərən bağlantı məlumatlarınızdan istifadə etməlidir. Bu, yeni YouTube videoları üçün avtomatik bildirişləri aktivləşdirmir.
+  Provider: Provayder
+  No Providers: ntfy və ya NextPush kimi UnifiedPush distribyutorunu quraşdırıb konfiqurasiya edin, sonra siyahını yeniləyin.
+  Connect: Qoşul
+  Disconnect: Bağlantını kəs
+  Refresh: Yenilə
+  Waiting: Provayder gözlənilir…
+  Connected: Qoşulub
+  Failed: Qoşulmaq mümkün olmadı. Provayderi, bildiriş icazəsini və VAPID açarını yoxlayıb yenidən cəhd edin.
+  Unavailable: Provayder əlçatan deyil
+  VAPID Key: VAPID açıq açarı (istəyə bağlı)
+  Copy Connection: Bağlantı məlumatlarını köçür
+  Copied: Bağlantı məlumatları köçürüldü
