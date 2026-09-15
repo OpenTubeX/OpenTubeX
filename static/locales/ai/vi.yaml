@@ -844,6 +844,7 @@ Settings:
     Posts Auto Refresh Interval: Khoảng tự động làm mới bài đăng
     Refresh Subscriptions While App Is Closed: "Làm mới đăng ký khi ứng dụng đã đóng"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Ẩn bản tóm tắt video bằng AI"
     Playing Interface Hide Delay: Độ trễ ẩn giao diện khi phát
     Hide Startup Splash: Ẩn màn hình khởi động
     Hide Repeat Stats: Ẩn thống kê lặp lại
@@ -1105,6 +1106,8 @@ Channel:
   View All: Xem tất cả
 Video:
   Mark as fully seen: Đánh dấu là đã xem hết
+  AI-generated video summary: "Bản tóm tắt video do AI tạo"
+  Quality and accuracy may vary: "Chất lượng và độ chính xác có thể khác nhau"
   Move Queue Item Up: "Di chuyển {title} lên"
   Move Queue Item Down: "Di chuyển {title} xuống"
   Includes paid promotion: Có quảng cáo trả phí

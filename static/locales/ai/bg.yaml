@@ -838,6 +838,7 @@ Settings:
     Posts Auto Refresh Interval: Интервал за автоматично опресняване на публикациите
     Refresh Subscriptions While App Is Closed: "Опресняване на абонаментите при затворено приложение"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Скриване на резюметата на видеоклипове от ИИ"
     Playing Interface Hide Delay: Забавяне на скриването на интерфейса при възпроизвеждане
     Hide Startup Splash: Скриване на началния екран
     Hide Repeat Stats: Скриване на статистиката на повторенията
@@ -1089,6 +1090,8 @@ Channel:
   All Results: Всички
 Video:
   Mark as fully seen: Отбележи като изцяло гледано
+  AI-generated video summary: "Резюме на видеоклипа, генерирано от ИИ"
+  Quality and accuracy may vary: "Качеството и точността може да варират"
   Move Queue Item Up: "Преместване на {title} нагоре"
   Move Queue Item Down: "Преместване на {title} надолу"
   Includes paid promotion: Съдържа платена реклама

@@ -836,6 +836,7 @@ Settings:
     Posts Auto Refresh Interval: Bejegyzések automatikus frissítésének időköze
     Refresh Subscriptions While App Is Closed: "Feliratkozások frissítése bezárt alkalmazásnál"
   Distraction Free Settings:
+    Hide AI Video Summaries: "MI-videóösszefoglalók elrejtése"
     Playing Interface Hide Delay: Felület elrejtésének késleltetése lejátszás közben
     Hide Startup Splash: Indítóképernyő elrejtése
     Hide Repeat Stats: Ismétlési statisztikák elrejtése
@@ -1082,6 +1083,8 @@ Channel:
   All Results: Összes
 Video:
   Mark as fully seen: Megjelölés teljesen megtekintettként
+  AI-generated video summary: "MI által készített videóösszefoglaló"
+  Quality and accuracy may vary: "A minőség és a pontosság változó lehet"
   Move Queue Item Up: "{title} feljebb mozgatása"
   Move Queue Item Down: "{title} lejjebb mozgatása"
   Includes paid promotion: Fizetett promóciót tartalmaz

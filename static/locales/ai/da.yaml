@@ -861,6 +861,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Opdater abonnementer, mens appen er lukket"
     Limit the number of videos displayed for each channel: Begræns antallet af viste videoer for hver kanal
   Distraction Free Settings:
+    Hide AI Video Summaries: "Skjul AI-videoresuméer"
     Playing Interface Hide Delay: Forsinkelse før grænsefladen skjules under afspilning
     Hide Startup Splash: Skjul opstartsskærm
     Hide Repeat Stats: Skjul gentagelsesstatistik
@@ -1136,6 +1137,8 @@ Channel:
   View All: Vis alle
 Video:
   Mark as fully seen: Markér som set til ende
+  AI-generated video summary: "AI-genereret videoresumé"
+  Quality and accuracy may vary: "Kvalitet og nøjagtighed kan variere"
   Move Queue Item Up: "Flyt {title} op"
   Move Queue Item Down: "Flyt {title} ned"
   Includes paid promotion: Indeholder betalt promovering

@@ -838,6 +838,7 @@ Settings:
     Posts Auto Refresh Interval: Paylaşımların avtomatik yenilənmə aralığı
     Refresh Subscriptions While App Is Closed: Tətbiq bağlı olarkən abunəlikləri yenilə
   Distraction Free Settings:
+    Hide AI Video Summaries: "Süni intellekt video xülasələrini gizlət"
     Playing Interface Hide Delay: Oxutma zamanı interfeysin gizlədilmə gecikməsi
     Hide Startup Splash: Başlanğıc ekranını gizlət
     Sections:
@@ -1085,6 +1086,8 @@ Channel:
   All Results: Hamısı
 Video:
   Mark as fully seen: Tam baxılmış kimi işarələ
+  AI-generated video summary: "Süni intellektlə yaradılmış video xülasəsi"
+  Quality and accuracy may vary: "Keyfiyyət və dəqiqlik dəyişə bilər"
   Move Queue Item Up: "{title} videosunu yuxarı köçür"
   Move Queue Item Down: "{title} videosunu aşağı köçür"
   Includes paid promotion: Ödənişli tanıtım daxildir

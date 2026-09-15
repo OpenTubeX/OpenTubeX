@@ -836,6 +836,7 @@ Settings:
     Posts Auto Refresh Interval: Postituste automaatse värskendamise intervall
     Refresh Subscriptions While App Is Closed: "Värskenda tellimusi, kui rakendus on suletud"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Peida tehisintellekti video kokkuvõtted"
     Playing Interface Hide Delay: Liidese peitmise viivitus esitamise ajal
     Hide Startup Splash: Peida käivituskuva
     Hide Repeat Stats: Peida korduste statistika
@@ -1082,6 +1083,8 @@ Channel:
   All Results: Kõik
 Video:
   Mark as fully seen: Märgi täielikult vaadatuks
+  AI-generated video summary: "Tehisintellekti loodud video kokkuvõte"
+  Quality and accuracy may vary: "Kvaliteet ja täpsus võivad erineda"
   Move Queue Item Up: "Liiguta {title} üles"
   Move Queue Item Down: "Liiguta {title} alla"
   Includes paid promotion: Sisaldab tasulist reklaami

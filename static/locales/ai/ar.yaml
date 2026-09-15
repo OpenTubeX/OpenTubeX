@@ -844,6 +844,7 @@ Settings:
     Posts Auto Refresh Interval: المشاركات الفاصل الزمني للتحديث التلقائي
     Refresh Subscriptions While App Is Closed: "تحديث الاشتراكات أثناء إغلاق التطبيق"
   Distraction Free Settings:
+    Hide AI Video Summaries: "إخفاء ملخصات الفيديو بالذكاء الاصطناعي"
     Playing Interface Hide Delay: مهلة إخفاء الواجهة أثناء التشغيل
     Hide Startup Splash: إخفاء شاشة بدء التشغيل
     Hide Repeat Stats: إخفاء إحصاءات التكرار
@@ -1107,6 +1108,8 @@ Channel:
   View All: عرض الكل
 Video:
   Mark as fully seen: وضع علامة على أنه تمت مشاهدته بالكامل
+  AI-generated video summary: "ملخص فيديو تم إنشاؤه بالذكاء الاصطناعي"
+  Quality and accuracy may vary: "قد تختلف الجودة والدقة"
   Move Queue Item Up: "نقل {title} لأعلى"
   Move Queue Item Down: "نقل {title} لأسفل"
   Includes paid promotion: يشمل الترويج المدفوع

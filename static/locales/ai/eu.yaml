@@ -838,6 +838,7 @@ Settings:
     Posts Auto Refresh Interval: Argitalpenen freskatze automatikoaren tartea
     Refresh Subscriptions While App Is Closed: "Freskatu harpidetzak aplikazioa itxita dagoenean"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Ezkutatu AAren bideo-laburpenak"
     Playing Interface Hide Delay: Erreprodukzioan interfazea ezkutatzeko atzerapena
     Hide Startup Splash: Ezkutatu abio-pantaila
     Hide Repeat Stats: Ezkutatu errepikapenen estatistikak
@@ -1089,6 +1090,8 @@ Channel:
   All Results: Guztiak
 Video:
   Mark as fully seen: Markatu osorik ikusita bezala
+  AI-generated video summary: "AAk sortutako bideo-laburpena"
+  Quality and accuracy may vary: "Kalitatea eta zehaztasuna alda daitezke"
   Move Queue Item Up: "Eraman {title} gora"
   Move Queue Item Down: "Eraman {title} behera"
   Includes paid promotion: Ordainpeko sustapena du

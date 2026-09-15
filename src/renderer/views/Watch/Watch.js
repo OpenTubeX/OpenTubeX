@@ -1,3 +1,5 @@
+import { parseLocalVideoSummary } from '../../helpers/video-summary.js'
+import WatchVideoSummary from '../../components/WatchVideoSummary/WatchVideoSummary.vue'
 import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { connectionEvents, initializeNetworkRecovery, getConnectionState } from '../../helpers/networkRecovery'
@@ -164,6 +166,7 @@ export default defineComponent({
     'ft-shaka-video-player': FtShakaVideoPlayer,
     'watch-video-info': WatchVideoInfo,
     'watch-video-description': WatchVideoDescription,
+    WatchVideoSummary,
     'watch-video-transcript': WatchVideoTranscript,
     'watch-video-chapters': WatchVideoChapters,
     'watch-video-sponsor-block': WatchVideoSponsorBlock,
@@ -306,6 +309,7 @@ export default defineComponent({
       videoTitle: '',
       hasResolvedVideoTitle: false,
       videoDescription: '',
+      videoSummary: [],
       videoDescriptionHtml: '',
       videoMetadataHistory: null,
       videoCategory: '',
@@ -1021,6 +1025,9 @@ export default defineComponent({
     commentsAvailable: function () {
       return areCommentsAvailable(this)
     },
+    hideAiVideoSummaries: function () {
+      return this.$store.getters.getHideAiVideoSummaries
+    },
     hideVideoDescription: function () {
       return this.$store.getters.getHideVideoDescription
     },
@@ -1163,6 +1170,12 @@ export default defineComponent({
     }
   },
   watch: {
+    hideAiVideoSummaries() {
+      this.clampShortsAuxPanelScroll()
+    },
+    videoSummary() {
+      this.clampShortsAuxPanelScroll()
+    },
     currentLocale: 'updateUpcomingTimestamp',
     dateFormatPreference: 'updateUpcomingTimestamp',
     timeFormatPreference: 'updateUpcomingTimestamp',
@@ -2060,6 +2073,7 @@ export default defineComponent({
       this.liveReminderLoading = false
       this.thumbnail = ''
       this.videoTitle = preserveTitle ? previousVideoTitle : placeholderTitle
+      this.videoSummary = []
       this.videoDescription = ''
       this.videoDescriptionHtml = ''
       this.videoMetadataHistory = null
@@ -2909,6 +2923,8 @@ export default defineComponent({
           this.handleVideoEnded()
           return
         }
+
+        this.videoSummary = parseLocalVideoSummary(result)
 
         // YouTube can omit the main watch panels while retaining metadata in the description panel.
         /** @type {import('youtubei.js').YTNodes.StructuredDescriptionContent | undefined} */

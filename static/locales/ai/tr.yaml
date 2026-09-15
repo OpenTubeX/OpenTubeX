@@ -836,6 +836,7 @@ Settings:
     Posts Auto Refresh Interval: Gönderilerin Otomatik Yenileme Aralığı
     Refresh Subscriptions While App Is Closed: "Uygulama Kapalıyken Abonelikleri Yenile"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Yapay zekâ video özetlerini gizle"
     Playing Interface Hide Delay: Oynatma sırasında arayüzü gizleme gecikmesi
     Hide Startup Splash: Başlangıç Ekranını Gizle
     Hide Repeat Stats: Tekrar istatistiklerini gizle
@@ -1082,6 +1083,8 @@ Channel:
   All Results: Tümü
 Video:
   Mark as fully seen: Tamamı izlendi olarak işaretle
+  AI-generated video summary: "Yapay zekâ tarafından oluşturulan video özeti"
+  Quality and accuracy may vary: "Kalite ve doğruluk değişebilir"
   Move Queue Item Up: "{title} videosunu yukarı taşı"
   Move Queue Item Down: "{title} videosunu aşağı taşı"
   Includes paid promotion: Ücretli tanıtım içeriyor

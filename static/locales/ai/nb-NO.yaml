@@ -836,6 +836,7 @@ Settings:
     Posts Auto Refresh Interval: Intervall for automatisk oppdatering av innlegg
     Refresh Subscriptions While App Is Closed: "Oppdater abonnementer mens appen er lukket"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Skjul KI-videosammendrag"
     Playing Interface Hide Delay: Forsinkelse før grensesnittet skjules under avspilling
     Hide Startup Splash: Skjul oppstartsskjerm
     Hide Repeat Stats: Skjul gjentakelsesstatistikk
@@ -1087,6 +1088,8 @@ Channel:
   All Results: Alle
 Video:
   Mark as fully seen: Merk som ferdig sett
+  AI-generated video summary: "KI-generert videosammendrag"
+  Quality and accuracy may vary: "Kvalitet og nøyaktighet kan variere"
   Move Queue Item Up: "Flytt {title} opp"
   Move Queue Item Down: "Flytt {title} ned"
   Includes paid promotion: Inneholder betalt promotering

@@ -838,6 +838,7 @@ Settings:
     Posts Auto Refresh Interval: Intervall för automatisk uppdatering av inlägg
     Refresh Subscriptions While App Is Closed: "Uppdatera prenumerationer medan appen är stängd"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Dölj AI-videosammanfattningar"
     Playing Interface Hide Delay: Fördröjning innan gränssnittet döljs under uppspelning
     Hide Startup Splash: Dölj startskärm
     Hide Repeat Stats: Dölj upprepningsstatistik
@@ -1089,6 +1090,8 @@ Channel:
   All Results: Alla
 Video:
   Mark as fully seen: Markera som sedd till slutet
+  AI-generated video summary: "AI-genererad videosammanfattning"
+  Quality and accuracy may vary: "Kvalitet och noggrannhet kan variera"
   Move Queue Item Up: "Flytta {title} uppåt"
   Move Queue Item Down: "Flytta {title} nedåt"
   Includes paid promotion: Innehåller betald marknadsföring

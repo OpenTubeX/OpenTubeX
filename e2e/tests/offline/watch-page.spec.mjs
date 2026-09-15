@@ -3644,6 +3644,56 @@ test.describe('watch page', () => {
     await watchComponent.dispose()
   })
 
+  test('clamps the Shorts panel when an AI summary collapses, changes, or is hidden', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+    const component = await page.evaluateHandle(findWatchComponent)
+    await component.evaluate(async component => {
+      const view = component.proxy
+      view.isShort = true
+      view.shortsMetadataOpen = true
+      view.videoDescription = 'Short description'
+      view.videoDescriptionHtml = ''
+      await view.$nextTick()
+    })
+    const target = page.locator('.shortsAuxPanelTarget')
+    const summary = target.locator('.videoSummary')
+    for (const trigger of ['collapse', 'replace', 'hide']) {
+      await component.evaluate(async component => {
+        const view = component.proxy
+        await view.$store.dispatch('updateHideAiVideoSummaries', false)
+        view.videoSummary = Array(100).fill('A long summary paragraph for scrolling.')
+        await view.$nextTick()
+      })
+      await summary.evaluate(element => { element.open = true })
+      await target.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => target.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      if (trigger === 'collapse') {
+        await summary.evaluate(element => { element.open = false })
+      } else {
+        await component.evaluate(async (component, trigger) => {
+          if (trigger === 'hide') await component.proxy.$store.dispatch('updateHideAiVideoSummaries', true)
+          else component.proxy.videoSummary = ['Short summary']
+          await component.proxy.$nextTick()
+        }, trigger)
+      }
+      await expect.poll(() => target.evaluate(element => {
+        const end = element.querySelector('.shortsAuxPanelContentEnd').getBoundingClientRect().bottom
+        const bounds = element.getBoundingClientRect()
+        const max = Math.max(0, element.scrollTop + end - bounds.bottom)
+        return element.scrollTop <= max + 1
+      })).toBe(true)
+      await expect.poll(() => target.evaluate(element => {
+        const end = element.querySelector('.shortsAuxPanelContentEnd').getBoundingClientRect().bottom
+        const bounds = element.getBoundingClientRect()
+        const overflow = element.scrollTop + end - bounds.bottom > 1
+        return element.querySelector('.os-scrollbar-vertical')?.classList.contains('os-scrollbar-visible') === overflow
+      })).toBe(true)
+    }
+    await component.dispose()
+  })
+
   test('handles videos without a description', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

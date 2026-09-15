@@ -6,6 +6,7 @@ import { YTNodes } from 'youtubei.js'
 import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-feed-parsers.js'
 
 const { parseLocalSubscriberCount, parseLocalTextRuns } = createLocalFeedParsers(() => false)
+import { parseLocalVideoSummary } from '../../src/renderer/helpers/video-summary.js'
 import { parseLocalVideoGames } from '../../src/renderer/helpers/video-games.js'
 import { parseLocalVideoCollaborators } from '../../src/renderer/helpers/video-collaborators.js'
 
@@ -27,6 +28,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     areLocalCommentsDisabled: () => true,
     parseLocalEndscreen: () => [],
     parseLocalVideoGames,
+    parseLocalVideoSummary,
     YTNodes,
     parseLocalTextRuns,
     MANIFEST_TYPE_DASH: 'dash',

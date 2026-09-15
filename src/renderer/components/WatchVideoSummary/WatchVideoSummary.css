@@ -1,0 +1,86 @@
+.videoSummary {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  padding-block: 0;
+  padding-inline: 16px;
+  border-radius: calc(8px * var(--ui-roundness));
+  background-color: var(--card-bg-color);
+  background-image: var(--card-bg-image);
+  background-attachment: fixed;
+  backdrop-filter: var(--card-bg-blur, none);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+  color: var(--primary-text-color);
+  overflow-wrap: anywhere;
+}
+
+.videoSummary summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-block-size: 48px;
+  box-sizing: border-box;
+  padding-block: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.videoSummary summary::-webkit-details-marker {
+  display: none;
+}
+
+.videoSummary summary:focus-visible {
+  outline: 2px solid var(--primary-text-color);
+  outline-offset: 4px;
+}
+
+.summaryHeading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.summaryTitle {
+  font-weight: bold;
+}
+
+.summaryDisclaimer {
+  color: var(--secondary-text-color);
+  font-size: 0.875em;
+}
+
+.summaryDisclaimer::before {
+  content: '·';
+  margin-inline-end: 8px;
+}
+
+.summaryChevron {
+  flex-shrink: 0;
+  transition: transform 180ms ease;
+}
+
+.videoSummary[open] .summaryChevron {
+  transform: rotate(180deg);
+}
+
+.summaryParagraph {
+  white-space: pre-wrap;
+  line-height: 1.5;
+  margin-block: 0 12px;
+}
+
+.videoSummary[open] {
+  padding-block-end: 16px;
+}
+
+.summaryParagraph:last-child {
+  margin-block-end: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .summaryChevron {
+    transition: none;
+  }
+}

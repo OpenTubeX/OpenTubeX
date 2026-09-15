@@ -342,6 +342,7 @@ const state = {
   showAddedChannelsHidden: true,
   showAddedForbiddenTitles: true,
   hideVideoDescription: false,
+  hideAiVideoSummaries: false,
   hideLiveChat: false,
   hideLiveChatReplay: false,
   hideLiveStreams: false,

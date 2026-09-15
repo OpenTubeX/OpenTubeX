@@ -684,6 +684,13 @@
             class="watchVideo"
             @timestamp-event="changeTimestamp"
           />
+          <WatchVideoSummary
+            v-if="shortsMetadataOpen && !isLoading && !hideAiVideoSummaries && videoSummary.length"
+            :key="videoId"
+            :paragraphs="videoSummary"
+            class="watchVideo"
+            @toggle="clampShortsAuxPanelScroll"
+          />
           <watch-video-sponsor-block
             v-if="showSidebarSponsorBlock && !isLoading"
             class="watchVideoSideBar watchVideoSponsorBlock"
@@ -875,6 +882,12 @@
             @timestamp-event="changeTimestamp"
           />
         </FtPhonePanel>
+        <WatchVideoSummary
+          v-if="!isLoading && !hideAiVideoSummaries && videoSummary.length"
+          :key="videoId"
+          :paragraphs="videoSummary"
+          class="watchVideo"
+        />
       </Teleport>
     </div>
     <div

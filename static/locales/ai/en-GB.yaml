@@ -822,6 +822,7 @@ Settings:
     Posts Auto Refresh Interval: Posts Auto Refresh Interval
     Refresh Subscriptions While App Is Closed: "Refresh Subscriptions While App Is Closed"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Hide AI video summaries"
     Playing Interface Hide Delay: Playing Interface Hide Delay
     Hide Startup Splash: Hide Startup Splash
     Hide Repeat Stats: Hide Repeat Stats
@@ -1065,6 +1066,8 @@ Channel:
   All Results: All
 Video:
   Mark as fully seen: Mark as fully seen
+  AI-generated video summary: "AI-generated video summary"
+  Quality and accuracy may vary: "Quality and accuracy may vary"
   Move Queue Item Up: "Move {title} up"
   Move Queue Item Down: "Move {title} down"
   Includes paid promotion: Includes paid promotion

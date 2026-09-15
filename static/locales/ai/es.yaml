@@ -842,6 +842,7 @@ Settings:
     Posts Auto Refresh Interval: Intervalo de actualización automática de publicaciones
     Refresh Subscriptions While App Is Closed: "Actualizar suscripciones con la aplicación cerrada"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Ocultar resúmenes de vídeos con IA"
     Playing Interface Hide Delay: Retraso para ocultar la interfaz durante la reproducción
     Hide Startup Splash: Ocultar pantalla de inicio
     Hide Repeat Stats: Ocultar estadísticas de repetición
@@ -1103,6 +1104,8 @@ Channel:
   View All: Ver todo
 Video:
   Mark as fully seen: Marcar como visto por completo
+  AI-generated video summary: "Resumen del vídeo generado por IA"
+  Quality and accuracy may vary: "La calidad y la precisión pueden variar"
   Move Queue Item Up: "Subir {title}"
   Move Queue Item Down: "Bajar {title}"
   Includes paid promotion: Incluye promoción pagada

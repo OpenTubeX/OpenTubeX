@@ -996,6 +996,7 @@ Settings:
     To: til
     Confirm Before Unsubscribing: Stadfest før du avsluttar abonnement
   Distraction Free Settings:
+    Hide AI Video Summaries: "Gøym KI-videosamandrag"
     Playing Interface Hide Delay: Forseinking før grensesnittet vert skjult under avspeling
     Hide Startup Splash: Gøym oppstartsskjerm
     Hide Repeat Stats: Skjul gjentakingsstatistikk
@@ -1343,6 +1344,8 @@ Channel:
     Video hidden by OpenTubeX: Videoen er gøymd av OpenTubeX
 Video:
   Mark as fully seen: Merk som ferdig sett
+  AI-generated video summary: "KI-generert videosamandrag"
+  Quality and accuracy may vary: "Kvalitet og nøyaktigheit kan variere"
   Move Queue Item Up: "Flytt {title} opp"
   Move Queue Item Down: "Flytt {title} ned"
   Includes paid promotion: Inneheld betalt marknadsføring
