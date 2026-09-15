@@ -2,7 +2,10 @@
   <details
     class="videoSummary"
   >
-    <summary>
+    <summary
+      @keydown.enter.space.stop
+      @keyup.enter.space.stop
+    >
       <span class="summaryHeading">
         <span class="summaryTitle">{{ $t('Video.AI-generated video summary') }}</span>
         <span class="summaryDisclaimer">
@@ -19,6 +22,7 @@
       v-for="(paragraph, index) in paragraphs"
       :key="index"
       class="summaryParagraph"
+      dir="auto"
     >
       {{ paragraph }}
     </p>

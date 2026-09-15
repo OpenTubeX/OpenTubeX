@@ -1170,11 +1170,11 @@ export default defineComponent({
     }
   },
   watch: {
-    hideAiVideoSummaries() {
-      this.clampShortsAuxPanelScroll()
+    hideAiVideoSummaries(hidden) {
+      if (hidden && this.videoSummary.length > 0) this.clampShortsAuxPanelScroll()
     },
-    videoSummary() {
-      this.clampShortsAuxPanelScroll()
+    videoSummary(summary, previousSummary) {
+      if (previousSummary.length > 0 && !this.hideAiVideoSummaries) this.clampShortsAuxPanelScroll()
     },
     currentLocale: 'updateUpcomingTimestamp',
     dateFormatPreference: 'updateUpcomingTimestamp',

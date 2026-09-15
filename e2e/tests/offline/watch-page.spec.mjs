@@ -3654,11 +3654,20 @@ test.describe('watch page', () => {
       view.isShort = true
       view.shortsMetadataOpen = true
       view.videoDescription = 'Short description'
+      view.videoSummary = ['Short summary']
       view.videoDescriptionHtml = ''
       await view.$nextTick()
     })
     const target = page.locator('.shortsAuxPanelTarget')
     const summary = target.locator('.videoSummary')
+    await expect(summary).not.toHaveAttribute('open')
+    await summary.locator('summary').focus()
+    await page.keyboard.press('Enter')
+    await expect(summary).toHaveAttribute('open', '')
+    await expect(summary.locator('.summaryChevron')).toHaveCSS('transform', 'matrix(-1, 0, 0, -1, 0, 0)')
+    await page.keyboard.press('Space')
+    await expect(summary).not.toHaveAttribute('open')
+    await expect(summary.locator('.summaryChevron')).toHaveCSS('transform', 'none')
     for (const trigger of ['collapse', 'replace', 'hide']) {
       await component.evaluate(async component => {
         const view = component.proxy

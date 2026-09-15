@@ -550,6 +550,8 @@ function updateHideLiveChatReplay(value) {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideAiVideoSummaries = computed(() => store.getters.getHideAiVideoSummaries)
+
+/** @type {import('vue').ComputedRef<boolean>} */
 const hideVideoDescription = computed(() => store.getters.getHideVideoDescription)
 
 /**

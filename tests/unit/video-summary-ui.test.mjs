@@ -11,6 +11,8 @@ const summaryComponent = { props: ['paragraphs'], render: compile(descriptor.tem
 const watch = await readFile(new URL('../../src/renderer/views/Watch/Watch.vue', import.meta.url), 'utf8')
 const placements = [...watch.matchAll(/<WatchVideoSummary\s[\s\S]*?\/>/g)].map(([template]) => template)
 
+assert.equal(placements.length, 2, 'expected Shorts and general summary placements')
+
 for (const [index, template] of placements.entries()) {
   for (const hidden of [false, true]) {
     test(`summary placement ${index} respects the distraction setting ${hidden}`, async () => {
