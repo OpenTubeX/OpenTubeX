@@ -14,6 +14,7 @@ export function parseLocalVideoSummary(videoInfo) {
     item.type === 'ExpandableMetadata' && item.expanded_content?.type === 'VideoSummaryContentView'
   )?.expanded_content
 
-  return summary?.paragraphs.map(paragraph => paragraph.text?.text?.trim())
-    .filter(text => typeof text === 'string' && text.length > 0) ?? []
+  const paragraphs = Array.isArray(summary?.paragraphs) ? summary.paragraphs : []
+  return paragraphs.map(paragraph => paragraph.text?.text?.trim())
+    .filter(text => typeof text === 'string' && text.length > 0)
 }

@@ -35,6 +35,15 @@ test('handles missing summaries and missing watch responses', () => {
   assert.deepEqual(parseLocalVideoSummary(videoInfo([summary([' ', ''])])), [])
 })
 
+test('handles a summary with invalid paragraphs', () => {
+  const info = videoInfo([summary(['Paragraph'])])
+  const parsedSummary = info.page[1].contents.item().results[0].expanded_content
+
+  parsedSummary.paragraphs = null
+
+  assert.deepEqual(parseLocalVideoSummary(info), [])
+})
+
 test('ignores non-watch response contents', () => {
   assert.deepEqual(parseLocalVideoSummary({ page: [{}, Parser.parseResponse({
     contents: { messageRenderer: { text: { simpleText: 'Unavailable' } } }
