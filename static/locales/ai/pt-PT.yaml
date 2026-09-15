@@ -251,9 +251,9 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
-    Use tray icon: "Usar ícone na bandeja"
-    Close to system tray: "Fechar para a bandeja do sistema"
-    Tray required for background refresh: "O ícone na bandeja é necessário enquanto a atualização de subscrições em segundo plano estiver ativada."
+    Use tray icon: "Usar ícone na área de notificação"
+    Close to system tray: "Fechar para a área de notificação"
+    Tray required for background refresh: "O ícone na área de notificação é necessário enquanto a atualização de subscrições em segundo plano estiver ativada."
     Show Video Menu Button: Mostrar botão do menu do vídeo
     Swipe to refresh: Deslizar para atualizar
     Blur Thumbnails: Desfocar miniaturas

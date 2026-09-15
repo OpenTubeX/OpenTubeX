@@ -117,7 +117,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     if (['Mobile Layout', 'Swipe to refresh'].includes(group)) {
       return isCapacitor
     }
-    if (['Use tray icon', 'Close to system tray', 'Tray required for background refresh'].includes(group)) return usingElectron
+    if (['Use tray icon', 'Close to system tray'].includes(group)) return usingElectron
     if (group === 'Minimize to system tray') {
       return usingElectron && supportsAutoPictureInPictureMinimize
     }

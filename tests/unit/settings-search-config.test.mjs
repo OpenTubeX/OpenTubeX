@@ -367,3 +367,16 @@ test('startup splash setting is searchable only on Electron', () => {
     assert.equal(entries.some(({ label }) => label === 'Hide Startup Splash'), usingElectron)
   }
 })
+
+test('tray requirement explanation never becomes a selectable settings result', () => {
+  for (const enabled of [false, true]) {
+    const entries = createSettingsSearchIndex({
+      sections: [{ type: 'general', title: 'General', description: '' }],
+      tm: path => getAtPath(locale, path),
+      store: { getters: { getEnableClosedAppSubscriptionRefresh: enabled } },
+      usingElectron: true,
+    }).get('general')
+    assert.equal(entries.some(({ label }) => label === locale.Settings['General Settings']['Tray required for background refresh']), false)
+    assert.ok(entries.some(({ label }) => label === 'Use tray icon'))
+  }
+})

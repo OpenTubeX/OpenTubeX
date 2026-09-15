@@ -247,9 +247,9 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
-    Use tray icon: "Tálcaikon használata"
-    Close to system tray: "Bezárás a tálcára"
-    Tray required for background refresh: "A tálcaikon szükséges, amíg a feliratkozások háttérben történő frissítése engedélyezve van."
+    Use tray icon: "Rendszertálcaikon használata"
+    Close to system tray: "Bezárás a rendszertálcára"
+    Tray required for background refresh: "A rendszertálcaikon szükséges, amíg a feliratkozások háttérben történő frissítése engedélyezve van."
     Show Video Menu Button: Videómenü gombjának megjelenítése
     Swipe to refresh: Frissítés húzással
     Blur Thumbnails: Bélyegképek elhomályosítása

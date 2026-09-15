@@ -73,6 +73,7 @@ export function createCommandPaletteRegistry(context) {
     supportsLocalApi,
     isMac,
     isLinuxWayland,
+    supportsAutoPictureInPictureMinimize,
     systemUsesDarkTheme,
   } = context
 
@@ -165,6 +166,7 @@ export function createCommandPaletteRegistry(context) {
     supportsLocalApi,
     isMac,
     isLinuxWayland,
+    supportsAutoPictureInPictureMinimize,
     systemUsesDarkTheme,
   })
 
@@ -289,6 +291,7 @@ function addSettingsSearchCommands(commands, context) {
     supportsLocalApi,
     isMac,
     isLinuxWayland,
+    supportsAutoPictureInPictureMinimize,
     systemUsesDarkTheme,
   } = context
   const sections = SETTINGS_SECTIONS
@@ -309,6 +312,7 @@ function addSettingsSearchCommands(commands, context) {
     supportsLocalApi,
     isMac,
     isLinuxWayland,
+    supportsAutoPictureInPictureMinimize,
     systemUsesDarkTheme,
   })
 

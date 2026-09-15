@@ -12,7 +12,6 @@ const GENERAL_EVERYDAY_KEYS = new Set([
   'Minimize to system tray',
   'Use tray icon',
   'Close to system tray',
-  'Tray required for background refresh',
   'New Tab Position',
   'Open Deep Links In New Window',
   'Reduced Motion',

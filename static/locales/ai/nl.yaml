@@ -253,7 +253,7 @@ Settings:
   General Settings:
     Use tray icon: "Systeemvakpictogram gebruiken"
     Close to system tray: "Sluiten naar systeemvak"
-    Tray required for background refresh: "Het systeemvakpictogram is vereist zolang abonnementen op de achtergrond worden vernieuwd."
+    Tray required for background refresh: "Het systeemvakpictogram is vereist zolang het vernieuwen van abonnementen op de achtergrond is ingeschakeld."
     Show Video Menu Button: Videomenuknop tonen
     Swipe to refresh: Vegen om te vernieuwen
     Blur Thumbnails: Miniaturen vervagen
