@@ -245,6 +245,7 @@ Settings:
       Network: le réseau
       Disk: le disque
   General Settings:
+    Show Video Menu Button: Afficher le bouton du menu vidéo
     Swipe to refresh: Balayer pour actualiser
     Blur Thumbnails: Flouter les miniatures
     Navigation:

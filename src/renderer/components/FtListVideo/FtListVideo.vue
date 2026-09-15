@@ -348,6 +348,17 @@
         </div>
       </div>
       <div class="buttonStack">
+        <FtIconButton
+          v-if="showVideoMenuButton"
+          ref="videoMenuButton"
+          class="optionsButton"
+          :icon="['fas', 'ellipsis-v']"
+          :title="t('Video.More Options')"
+          theme="base-no-default"
+          :size="16"
+          :use-shadow="false"
+          @click="openVideoOptionsMenu"
+        />
         <button
           v-if="deArrowChangedContent || deArrowTogglePinned"
           :title="deArrowToggleTitle"
@@ -388,7 +399,7 @@
 import FtRetryImage from '../FtRetryImage.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
-import { computed, inject, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue'
+import { computed, inject, onBeforeUnmount, onMounted, ref, toRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
@@ -1270,6 +1281,24 @@ onBeforeUnmount(() => {
   resetMenuHold()
   window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: videoContextMenuItems }))
 })
+
+const showVideoMenuButton = computed(() => store.getters.getShowVideoMenuButton)
+
+const videoMenuButton = useTemplateRef('videoMenuButton')
+
+function openVideoOptionsMenu() {
+  cancelMenuHold()
+  const button = videoMenuButton.value.$el.querySelector('button')
+  button.focus({ preventScroll: true })
+  const bounds = button.getBoundingClientRect()
+  window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
+    detail: {
+      x: document.body.dir === 'rtl' ? bounds.right : bounds.left,
+      y: bounds.bottom,
+      items: videoContextMenuItems
+    }
+  }))
+}
 
 function openVideoContextMenu(event) {
   const target = event.target

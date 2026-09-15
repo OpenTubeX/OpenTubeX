@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
 
 const VIDEO_ID = 'jNQXAC9IVRw'
 
@@ -27,7 +27,7 @@ test.use({ seed: SEED })
 test('video thumbnails, titles, and metadata share one menu', async ({ page, app, attachScreenshot }) => {
   await goTo(page, 'history')
   const card = page.locator('.ft-list-video').first()
-  await expect(card.getByTitle('More Options', { exact: true })).toHaveCount(0)
+  await expect(card.getByRole('button', { name: /^More options$/i })).toHaveCount(0)
   const menu = page.getByRole('menu', { name: 'Context menu', exact: true })
 
   for (const selector of ['.thumbnailImage', '.h3Title', '.videoInfo']) {
@@ -450,4 +450,63 @@ test.describe('single link choice', () => {
     await copy.click()
     await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(`https://youtu.be/${VIDEO_ID}`)
   })
+})
+
+for (const uiScale of [100, 125]) {
+  for (const listType of ['grid', 'list']) {
+    test.describe(`optional video menu button in ${listType} at ${uiScale}%`, () => {
+      test.use({ seed: { ...SEED, settings: { ...SEED.settings, uiScale, listType, showVideoMenuButton: true } } })
+
+      test('opens the unified menu beside the button and restores focus', async ({ page, attachScreenshot }) => {
+        await goTo(page, 'history')
+        const card = page.locator('.ft-list-video').first()
+        const button = card.getByRole('button', { name: /^More options$/i })
+        const menu = page.getByRole('menu', { name: 'Context menu', exact: true })
+        await card.hover()
+        await expect(button).toBeVisible()
+
+        for (const input of ['mouse', 'Enter', 'Space']) {
+          await button.focus()
+          if (input === 'mouse') await button.click()
+          else await button.press(input)
+          await expect(menu).toBeVisible()
+          await expect(menu.getByRole('menuitem').first()).toBeFocused()
+          await expect(menu.getByRole('menuitem', { name: 'Play Next', exact: true })).toBeVisible()
+          const anchor = await button.boundingBox()
+          const bounds = await menu.boundingBox()
+          const viewportWidth = await page.evaluate(() => window.innerWidth)
+          const expectedX = Math.max(8, Math.min(anchor.x, viewportWidth - bounds.width - 8))
+          expect(Math.abs(bounds.x - expectedX)).toBeLessThanOrEqual(1)
+          // The shared menu clamps vertically when there is insufficient space below the button.
+          expect(bounds.y).toBeLessThanOrEqual(anchor.y + anchor.height + 1)
+          expect(bounds.y + bounds.height).toBeGreaterThan(anchor.y)
+          if (input === 'mouse') await attachScreenshot('optional video menu button')
+          await page.keyboard.press('Escape')
+          await expect(menu).toHaveCount(0)
+          await expect(button).toBeFocused()
+        }
+
+        await button.click()
+        await menu.getByRole('menuitem', { name: 'Mark As Watched', exact: true }).click()
+        await expect(card).toHaveClass(/watched/)
+        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowVideoMenuButton', false))
+        await expect(button).toHaveCount(0)
+        await card.locator('.title').click({ button: 'right' })
+        await expect(menu.getByRole('menuitem', { name: 'Unmark As Watched', exact: true })).toBeVisible()
+      })
+    })
+  }
+}
+
+test('optional video menu button can be enabled in appearance settings', async ({ page }) => {
+  const appearance = await goToSettingsSection(page, 'appearance')
+  const toggle = appearance.getByRole('checkbox', { name: /^Show video menu button/ })
+  await expect(toggle).not.toBeChecked()
+  await appearance.locator('label.switch-label').filter({ hasText: 'Show video menu button' }).click()
+  await expect(toggle).toBeChecked()
+  await goTo(page, 'history')
+  const button = page.locator('.ft-list-video').first().getByRole('button', { name: /^More options$/i })
+  await expect(button).toHaveCount(1)
+  await page.reload()
+  await expect(button).toHaveCount(1)
 })

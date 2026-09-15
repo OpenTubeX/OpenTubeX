@@ -244,6 +244,7 @@ Settings:
       Network: network
       Disk: disk
   General Settings:
+    Show Video Menu Button: Show video menu button
     Swipe to refresh: Swipe to refresh
     Blur Thumbnails: Blur thumbnails
     Navigation:

@@ -247,6 +247,7 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Show Video Menu Button: Erakutsi bideo-menuaren botoia
     Swipe to refresh: Irristatu freskatzeko
     Blur Thumbnails: Lausotu koadro txikiak
     Navigation:

@@ -249,6 +249,7 @@ Settings:
       Network: شبكة
       Disk: القرص
   General Settings:
+    Show Video Menu Button: إظهار زر قائمة الفيديو
     Swipe to refresh: اسحب للتحديث
     Blur Thumbnails: تمويه الصور المصغرة
     Navigation:

@@ -224,6 +224,7 @@ Settings:
       Network: сеть
       Disk: диск
   General Settings:
+    Show Video Menu Button: Показывать кнопку меню видео
     Swipe to refresh: Обновлять смахиванием
     Blur Thumbnails: Размывать миниатюры
     Navigation:

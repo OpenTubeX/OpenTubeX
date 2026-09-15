@@ -8,6 +8,14 @@
     >
       <FtToggleSwitch
         v-if="mode === 'appearance'"
+        :label="t('Settings.General Settings.Show Video Menu Button')"
+        :default-value="showVideoMenuButton"
+        setting-key="showVideoMenuButton"
+        :compact="true"
+        @change="store.dispatch('updateShowVideoMenuButton', $event)"
+      />
+      <FtToggleSwitch
+        v-if="mode === 'appearance'"
         :label="t('Settings.General Settings.Show Thumbnail Previews')"
         :default-value="showThumbnailPreviews"
         setting-key="showThumbnailPreviews"
@@ -670,6 +678,9 @@ const playlistViewType = computed(() => store.getters.getPlaylistViewType)
 function updatePlaylistViewType(value) {
   store.dispatch('updatePlaylistViewType', value)
 }
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showVideoMenuButton = computed(() => store.getters.getShowVideoMenuButton)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showThumbnailPreviews = computed(() => store.getters.getShowThumbnailPreviews)

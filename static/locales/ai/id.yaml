@@ -249,6 +249,7 @@ Settings:
       Network: jaringan
       Disk: disk
   General Settings:
+    Show Video Menu Button: Tampilkan tombol menu video
     Swipe to refresh: Geser untuk menyegarkan
     Blur Thumbnails: Buramkan gambar mini
     Navigation:

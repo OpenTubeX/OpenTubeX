@@ -247,6 +247,7 @@ Settings:
       Network: nätverk
       Disk: diskutrymme
   General Settings:
+    Show Video Menu Button: Visa videomenyknapp
     Swipe to refresh: Svep för att uppdatera
     Blur Thumbnails: Gör miniatyrbilder suddiga
     Navigation:
