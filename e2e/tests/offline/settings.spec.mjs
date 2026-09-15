@@ -1048,16 +1048,14 @@ test.describe('settings', () => {
 
   test('places an incomplete General toggle row at the inline start', async ({ page }) => {
     const general = await goToSettingsSection(page, 'general')
-    const minimizeToTray = general.getByRole('checkbox', {
-      name: /Minimi[sz]e to system tray/
-    }).locator('..')
-    await expect(minimizeToTray).toBeVisible()
-    await minimizeToTray.evaluate(element => { element.style.display = 'none' })
-
+    const grid = general.locator('.switchColumnGrid').first()
+    const visibleSwitches = grid.locator(':scope > *:visible')
+    if ((await visibleSwitches.count()) % 2 === 0) {
+      await visibleSwitches.first().evaluate(element => { element.style.display = 'none' })
+    }
     const aiTranslations = general.getByRole('checkbox', {
       name: 'Fill missing translations with AI-generated ones'
     }).locator('..')
-    const grid = general.locator('.switchColumnGrid').first()
 
     for (const direction of ['ltr', 'rtl']) {
       await page.evaluate(value => { document.documentElement.dir = value }, direction)
