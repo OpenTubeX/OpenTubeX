@@ -196,7 +196,7 @@ User Playlists:
       Video(s) added to {playlistCount} playlists: Videoen blev føjet til 1 playliste | Videoerne blev føjet til {playlistCount} playlister
 History:
   Repair: "Reparer historik"
-  Repair Progress: "Kontrolleret {checked}/{total} · Repareret {repaired} · Mislykkede: {failed}"
+  Repair Progress: "Kontrolleret: {checked}/{total} · Repareret: {repaired} · Mislykkede: {failed}"
   Mark All As Watched: Markér alle som set
   Mark All As Watched Confirmation: Er du sikker på, at du vil markere alle videoer i din historik som set?
   All History Marked as Watched: Alle videoer i din historik er blevet markeret som set

@@ -91,24 +91,30 @@ test.describe('Invidious history repair', () => {
     }
   })
 
-  test('uses the selected Invidious instance for metadata', async ({ page }) => {
-    await page.route('https://history-repair.test/api/v1/videos/**', route => route.fulfill({
-      json: {
-        videoId: original.videoId,
-        title: original.title,
-        author: 'Invidious channel',
-        authorId: 'UCabcdefghijklmnopqrstuv',
-        lengthSeconds: 120,
-        liveNow: false,
-        isUpcoming: false,
-        published: 1735689600
-      }
-    }))
-    await goTo(page, 'history')
-    await page.getByRole('button', { name: 'Repair History', exact: true }).click()
-    await expect(page.getByRole('status')).toContainText('Checked 1/1 · Repaired 1 · Failed 0')
-    await expect(page.getByText('Invidious channel', { exact: true })).toBeVisible()
-  })
+  for (const isUpcoming of [false, true]) {
+    test(`uses Invidious metadata with upcoming status ${isUpcoming}`, async ({ page }) => {
+      await page.route('https://history-repair.test/api/v1/videos/**', route => route.fulfill({
+        json: {
+          videoId: original.videoId,
+          title: original.title,
+          author: 'Invidious channel',
+          authorId: 'UCabcdefghijklmnopqrstuv',
+          lengthSeconds: 120,
+          liveNow: false,
+          isUpcoming,
+          published: 1735689600
+        }
+      }))
+      await goTo(page, 'history')
+      await page.getByRole('button', { name: 'Repair History', exact: true }).click()
+      await expect(page.getByRole('status')).toContainText('Checked 1/1 · Repaired 1 · Failed 0')
+      await expect(page.getByText('Invidious channel', { exact: true })).toBeVisible()
+      const saved = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById.abcdefghijk)
+      expect(saved.isUpcoming).toBe(isUpcoming)
+      expect(saved.isLive).toBe(false)
+      expect(saved.liveNow).toBe(false)
+    })
+  }
 
   test('preserves live flags when Invidious omits the upcoming status', async ({ page }) => {
     await page.route('https://history-repair.test/api/v1/videos/**', route => route.fulfill({
@@ -129,5 +135,4 @@ test.describe('Invidious history repair', () => {
     expect(saved.isLive).toBe(true)
     expect(saved.lengthSeconds).toBe(0)
   })
-
 })
