@@ -17,6 +17,8 @@ Maximize: "Brasaat"
 Restore: "Assav"
 Close Tab: "Serriñ an ivinell"
 Close Confirmation:
+  Background Sync Warning: Kuitaat a vo paouez gant hizivaat an enskrivadurioù en drekleur.
+  Hide Window: Kuzhat ar prenestr
   Title: "Kuitaat OpenTubeX?"
   Message: "Ha sur oc'h e faot deoc'h kuitaat OpenTubeX?"
   Quit: "Kuitaat"

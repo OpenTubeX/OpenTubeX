@@ -620,7 +620,7 @@ function runApp() {
    * @param {import('electron').BrowserWindow | null | undefined} browserWindow
    * @returns {Promise<boolean>}
    */
-  async function confirmCloseApp(browserWindow) {
+  async function confirmCloseApp(browserWindow, allowHideWindow = false) {
     if (isQuitting || isQuitConfirmed || !await getConfirmCloseApp()) {
       return true
     }
@@ -631,22 +631,37 @@ function runApp() {
 
     quitPromptInProgress = (async () => {
       const t = await createMainTranslator()
+      const buttons = allowHideWindow
+        ? [
+            t('Close Confirmation.Quit'),
+            t('Close Confirmation.Hide Window'),
+            t('Cancel'),
+            t('Close Confirmation.Never Ask Again')
+          ]
+        : [
+            t('Close Confirmation.Quit'),
+            t('Cancel'),
+            t('Close Confirmation.Never Ask Again')
+          ]
       const { response } = await dialog.showMessageBox(browserWindow ?? undefined, {
         type: 'question',
         title: t('Close Confirmation.Title'),
         message: t('Close Confirmation.Message'),
-        detail: t('Confirmations.Settings Hint'),
-        buttons: [
-          t('Close Confirmation.Quit'),
-          t('Cancel'),
-          t('Close Confirmation.Never Ask Again')
-        ],
+        detail: allowHideWindow
+          ? `${t('Close Confirmation.Background Sync Warning')}\n\n${t('Confirmations.Settings Hint')}`
+          : t('Confirmations.Settings Hint'),
+        buttons,
         defaultId: 1,
-        cancelId: 1,
+        cancelId: allowHideWindow ? 2 : 1,
         noLink: true
       })
 
-      if (response === 2) {
+      if (allowHideWindow && response === 1) {
+        hideWindowToTray(browserWindow)
+        return false
+      }
+
+      if (response === (allowHideWindow ? 3 : 2)) {
         try {
           await updateSettingFromMain('confirmCloseApp', false)
         } catch (error) {
@@ -3066,15 +3081,20 @@ function runApp() {
           (wasLastWindow || tabManager.tabs.size > 1)) {
         event.preventDefault()
 
-        let confirmed = wasLastWindow && !keepRefreshingInBackground
-          ? await confirmCloseApp(newWindow)
+        let quitsApp = wasLastWindow && !trayOnClose
+        let confirmed = quitsApp
+          ? await confirmCloseApp(newWindow, keepRefreshingInBackground)
           : await confirmCloseWindowWithMultipleTabs(newWindow, tabManager.tabs.size)
         const openWindowCount = BrowserWindow.getAllWindows()
           .filter(window => !closingWindowIds.has(window.id)).length
-        if (confirmed && !wasLastWindow && openWindowCount === 1 && !keepRefreshingInBackground) {
-          confirmed = await confirmCloseApp(newWindow)
+        if (confirmed && !wasLastWindow && openWindowCount === 1 && !trayOnClose) {
+          confirmed = await confirmCloseApp(newWindow, keepRefreshingInBackground)
+          quitsApp = confirmed
         }
-        if (confirmed) {
+        if (confirmed && quitsApp) {
+          isQuitConfirmed = true
+          app.quit()
+        } else if (confirmed) {
           closeConfirmedWindowIds.add(newWindow.id)
           newWindow.close()
         } else {

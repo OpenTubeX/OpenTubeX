@@ -17,6 +17,8 @@ Maximize: Maximizar
 Restore: Restaurar
 Close Tab: Fechar separador
 Close Confirmation:
+  Background Sync Warning: Sair irá interromper a atualização de subscrições em segundo plano.
+  Hide Window: Ocultar janela
   Title: Sair do OpenTubeX?
   Message: Tem a certeza de que pretende sair do OpenTubeX?
   Quit: Sair

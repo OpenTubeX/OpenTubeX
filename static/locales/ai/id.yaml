@@ -17,6 +17,8 @@ Maximize: Maksimalkan
 Restore: Pulihkan
 Close Tab: Tutup Tab
 Close Confirmation:
+  Background Sync Warning: Keluar akan menghentikan penyegaran langganan di latar belakang.
+  Hide Window: Sembunyikan Jendela
   Title: Keluar dari OpenTubeX?
   Message: Anda yakin ingin keluar dari OpenTubeX?
   Quit: Keluar

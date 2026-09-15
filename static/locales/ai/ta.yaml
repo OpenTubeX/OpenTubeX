@@ -17,6 +17,8 @@ Maximize: பெரிதாக்கு
 Restore: மீட்டெடு
 Close Tab: தாவலை மூடு
 Close Confirmation:
+  Background Sync Warning: வெளியேறினால் பின்னணிச் சந்தா புதுப்பிப்புகள் நிறுத்தப்படும்.
+  Hide Window: சாளரத்தை மறை
   Title: OpenTubeX-இலிருந்து வெளியேறவா?
   Message: OpenTubeX-இலிருந்து வெளியேற விரும்புகிறீர்களா?
   Quit: வெளியேறு

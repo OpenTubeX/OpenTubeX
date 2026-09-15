@@ -2579,6 +2579,8 @@ Screenshot Clipboard Error: Screenshot-Kopie in die Zwischenablage ist fehlgesch
 Close Confirmation:
   Title: OpenTubeX beenden?
   Message: Bist du sicher, dass du OpenTubeX beenden möchtest?
+  Background Sync Warning: Wenn du OpenTubeX beendest, werden Abonnements nicht mehr im Hintergrund aktualisiert.
+  Hide Window: Fenster ausblenden
   Quit: Beenden
   Never Ask Again: Nicht erneut fragen
 Find in page: Auf Seite suchen
