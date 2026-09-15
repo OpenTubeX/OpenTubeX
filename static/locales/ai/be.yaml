@@ -857,6 +857,7 @@ Settings:
     Posts Auto Refresh Interval: Інтэрвал аўтаматычнага абнаўлення допісаў
     Refresh Subscriptions While App Is Closed: "Абнаўляць падпіскі, калі праграма закрыта"
   Distraction Free Settings:
+    Playing Interface Hide Delay: Затрымка схавання інтэрфейсу падчас прайгравання
     Hide Startup Splash: Схаваць стартавы экран
     Hide Repeat Stats: Схаваць статыстыку паўтораў
     Sections:

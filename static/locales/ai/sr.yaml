@@ -850,6 +850,7 @@ Settings:
     Posts Auto Refresh Interval: Интервал аутоматског освежавања објава
     Refresh Subscriptions While App Is Closed: "Освежавај претплате док је апликација затворена"
   Distraction Free Settings:
+    Playing Interface Hide Delay: Одлагање скривања интерфејса током репродукције
     Hide Startup Splash: Сакриј почетни екран
     Hide Repeat Stats: Сакриј статистику понављања
     Sections:

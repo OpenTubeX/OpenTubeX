@@ -830,6 +830,7 @@ Settings:
     Posts Auto Refresh Interval: Интервал за автоматично опресняване на публикациите
     Refresh Subscriptions While App Is Closed: "Опресняване на абонаментите при затворено приложение"
   Distraction Free Settings:
+    Playing Interface Hide Delay: Забавяне на скриването на интерфейса при възпроизвеждане
     Hide Startup Splash: Скриване на началния екран
     Hide Repeat Stats: Скриване на статистиката на повторенията
     Sections:

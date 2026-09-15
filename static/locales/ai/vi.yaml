@@ -836,6 +836,7 @@ Settings:
     Posts Auto Refresh Interval: Khoảng tự động làm mới bài đăng
     Refresh Subscriptions While App Is Closed: "Làm mới đăng ký khi ứng dụng đã đóng"
   Distraction Free Settings:
+    Playing Interface Hide Delay: Độ trễ ẩn giao diện khi phát
     Hide Startup Splash: Ẩn màn hình khởi động
     Hide Repeat Stats: Ẩn thống kê lặp lại
     Sections:

@@ -814,6 +814,7 @@ Settings:
     Posts Auto Refresh Interval: Posts Auto Refresh Interval
     Refresh Subscriptions While App Is Closed: "Refresh Subscriptions While App Is Closed"
   Distraction Free Settings:
+    Playing Interface Hide Delay: Playing Interface Hide Delay
     Hide Startup Splash: Hide Startup Splash
     Hide Repeat Stats: Hide Repeat Stats
     Hide Channel Avatars: Hide Channel Avatars

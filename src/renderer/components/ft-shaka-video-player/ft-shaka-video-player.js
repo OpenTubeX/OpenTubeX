@@ -759,6 +759,7 @@ export default defineComponent({
     const showPlayerControlsWhenPaused = computed(() => store.getters.getShowPlayerControlsWhenPaused)
     const showVideoTitleWhenPaused = computed(() => store.getters.getShowVideoTitleWhenPaused)
     const showFullscreenActionsWhenPaused = computed(() => store.getters.getShowFullscreenActionsWhenPaused)
+    const playingInterfaceHideDelay = computed(() => store.getters.getPlayingInterfaceHideDelay)
     const pausedInterfaceHideDelay = computed(() => store.getters.getPausedInterfaceHideDelay)
     const playerControlsShown = computed(() => (
       shakaControlsShown.value &&
@@ -11550,6 +11551,7 @@ export default defineComponent({
       isFullscreen,
       playerPaused,
       pausedInterfaceRevealed,
+      playingInterfaceHideDelay,
       showPlayerControlsWhenPaused,
       showVideoTitleWhenPaused,
       showFullscreenActionsWhenPaused,

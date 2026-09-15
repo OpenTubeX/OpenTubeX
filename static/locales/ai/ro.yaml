@@ -832,6 +832,7 @@ Settings:
     Posts Auto Refresh Interval: Interval de reîmprospătare automată a postărilor
     Refresh Subscriptions While App Is Closed: "Reîmprospătează abonamentele când aplicația este închisă"
   Distraction Free Settings:
+    Playing Interface Hide Delay: Întârziere la ascunderea interfeței în timpul redării
     Hide Startup Splash: Ascunde ecranul de pornire
     Hide Repeat Stats: Ascunde statisticile de repetare
     Sections:

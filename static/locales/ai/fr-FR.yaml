@@ -828,6 +828,7 @@ Settings:
     Posts Auto Refresh Interval: Intervalle d’actualisation automatique des publications
     Refresh Subscriptions While App Is Closed: "Actualiser les abonnements quand l'application est fermée"
   Distraction Free Settings:
+    Playing Interface Hide Delay: Délai de masquage de l’interface pendant la lecture
     Hide Startup Splash: Masquer l’écran de démarrage
     Hide Repeat Stats: Masquer les statistiques de répétition
     Sections:

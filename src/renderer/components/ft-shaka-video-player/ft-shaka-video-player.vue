@@ -48,9 +48,13 @@
       :disabled="!scrollMiniPlayerDragStyle && !scrollMiniPlayerDetached && !(useNativePlayback && scrollMiniPlayerActive)"
     >
     <!-- Keep controls visibility out of :class: Vue would erase Shaka's
-         no-cursor class when the controls time out. -->
+         no-cursor class when the controls time out.
+         Keep the inactivity delay available while paused: pointer activity can
+         schedule the timer before a click resumes playback. Paused interface
+         visibility uses its own reveal timer. -->
     <div
       ref="container"
+      :data-playing-interface-hide-delay="isFullscreen || fullWindowEnabled ? playingInterfaceHideDelay : null"
       class="ftVideoPlayer shaka-video-container"
       :data-tab-id="tabId"
       :data-action-dock-visible="actionDockVisible"

@@ -836,6 +836,7 @@ Settings:
     Posts Auto Refresh Interval: Interval Pembaruan Otomatis Postingan
     Refresh Subscriptions While App Is Closed: "Perbarui Langganan Saat Aplikasi Ditutup"
   Distraction Free Settings:
+    Playing Interface Hide Delay: Jeda penyembunyian antarmuka saat pemutaran
     Hide Startup Splash: Sembunyikan Layar Pembuka
     Hide Repeat Stats: Sembunyikan statistik pengulangan
     Sections:

@@ -127,6 +127,18 @@
         @toggle-show-tags="handleAddedForbiddenTitles"
       />
     </FtFlexBox>
+    <FtFlexBox>
+      <FtSlider
+        :label="t('Settings.Distraction Free Settings.Playing Interface Hide Delay')"
+        :default-value="playingInterfaceHideDelay"
+        setting-key="playingInterfaceHideDelay"
+        :min-value="0.5"
+        :max-value="10"
+        :step="0.5"
+        value-extension="s"
+        @change="updatePlayingInterfaceHideDelay"
+      />
+    </FtFlexBox>
     <h4
       class="groupTitle"
     >
@@ -810,6 +822,16 @@ const pausedInterfaceVisibilityUnchanged = computed(() => {
     showVideoTitleWhenPaused.value &&
     showFullscreenActionsWhenPaused.value
 })
+
+/** @type {import('vue').ComputedRef<number>} */
+const playingInterfaceHideDelay = computed(() => store.getters.getPlayingInterfaceHideDelay)
+
+/**
+ * @param {number} value
+ */
+function updatePlayingInterfaceHideDelay(value) {
+  store.dispatch('updatePlayingInterfaceHideDelay', value)
+}
 
 /** @type {import('vue').ComputedRef<number>} */
 const pausedInterfaceHideDelay = computed(() => store.getters.getPausedInterfaceHideDelay)

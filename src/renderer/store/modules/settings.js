@@ -379,6 +379,7 @@ const state = {
   showVideoTitleWhenPaused: true,
   showFullscreenActionsWhenPaused: true,
   pausedInterfaceHideDelay: 2.5,
+  playingInterfaceHideDelay: 3,
   showLiveChatTimestamps: false,
   liveChatFilter: 'TOP_CHAT',
   landingPage: DEFAULT_LANDING_PAGE,

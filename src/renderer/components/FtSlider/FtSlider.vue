@@ -12,11 +12,13 @@
       >
         <template #label>{{ label }}</template>
         <template #value>
-          <span class="value">
-            <span
-              class="valueNumber"
-              :style="{ minInlineSize: `${valueWidth}ch` }"
-            >{{ displayValue }}</span>{{ valueExtension }}
+          <span
+            class="value"
+            :data-width-value="widestValue"
+          >
+            <span class="valueText">
+              <span class="valueNumber">{{ displayValue }}</span>{{ valueExtension }}
+            </span>
           </span>
         </template>
       </I18nT>
@@ -117,11 +119,12 @@ const valuePrecision = computed(() => {
 
 const displayValue = computed(() => currentValue.value.toFixed(valuePrecision.value))
 
-// Reserve digit width without relying on a font's figure-space glyph.
-const valueWidth = computed(() => Math.max(
-  props.minValue.toFixed(valuePrecision.value).length,
-  props.maxValue.toFixed(valuePrecision.value).length
-))
+// Reserve room for the complete value and unit, without spacing them apart.
+const widestValue = computed(() => {
+  const min = props.minValue.toFixed(valuePrecision.value)
+  const max = props.maxValue.toFixed(valuePrecision.value)
+  return `${min.length > max.length ? min : max}${props.valueExtension ?? ''}`
+})
 
 function change() {
   emit('change', currentValue.value)

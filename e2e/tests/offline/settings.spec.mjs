@@ -788,6 +788,57 @@ test.describe('settings', () => {
     ])
   })
 
+  test('keeps slider values and units together without padding at fractional UI scales', async ({ page }) => {
+    for (const scale of [1, 1.25]) {
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      for (const [section, name] of [
+        ['focus', /Playing Interface Hide Delay/],
+        ['focus', /Paused Interface Hide Delay/],
+        ['appearance', /Scrollbar Width/],
+      ]) {
+        const settings = await goToSettingsSection(page, section)
+        const value = settings.getByRole('slider', { name }).locator('..').locator('.value')
+        await expect.poll(() => value.evaluate(element => {
+          const number = element.querySelector('.valueNumber')
+          const numberRange = document.createRange()
+          numberRange.selectNodeContents(number)
+          const unitRange = document.createRange()
+          unitRange.selectNodeContents(element.querySelector('.valueText').lastChild)
+          return unitRange.getBoundingClientRect().left - numberRange.getBoundingClientRect().right
+        })).toBeLessThanOrEqual(1)
+        await expect.poll(() => value.evaluate(element => {
+          const numberRange = document.createRange()
+          numberRange.selectNodeContents(element.querySelector('.valueNumber'))
+          return numberRange.getBoundingClientRect().left - element.getBoundingClientRect().left
+        })).toBeLessThanOrEqual(1)
+      }
+    }
+  })
+
+  test('does not reserve unit text for a unitless slider', async ({ page }) => {
+    const subscriptions = await goToSettingsSection(page, 'subscriptions')
+    const slider = subscriptions.getByRole('slider', { name: /^To:/ })
+    const value = slider.locator('..').locator('.value')
+    await expect.poll(() => value.evaluate(element => (
+      getComputedStyle(element, '::after').content
+    ))).toMatch(/^"\d+"$/)
+  })
+
+  test('saves the playing interface hide delay independently of the paused delay', async ({ page }) => {
+    const focus = await goToSettingsSection(page, 'focus')
+    const slider = focus.getByRole('slider', { name: /Playing Interface Hide Delay/ })
+    await expect(slider).toHaveValue('3')
+    await expect(slider).toBeEnabled()
+    await slider.fill('7.5')
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return [store.getters.getPlayingInterfaceHideDelay, store.getters.getPausedInterfaceHideDelay]
+    })).toEqual([7.5, 2.5])
+    await goToSettingsSection(page, 'privacy')
+    const reopened = await goToSettingsSection(page, 'focus')
+    await expect(reopened.getByRole('slider', { name: /Playing Interface Hide Delay/ })).toHaveValue('7.5')
+  })
+
   test('keeps comment translation controls out of Distraction Free settings', async ({ page }) => {
     const focus = await goToSettingsSection(page, 'focus')
 

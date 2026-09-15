@@ -836,6 +836,7 @@ Settings:
     Posts Auto Refresh Interval: المشاركات الفاصل الزمني للتحديث التلقائي
     Refresh Subscriptions While App Is Closed: "تحديث الاشتراكات أثناء إغلاق التطبيق"
   Distraction Free Settings:
+    Playing Interface Hide Delay: مهلة إخفاء الواجهة أثناء التشغيل
     Hide Startup Splash: إخفاء شاشة بدء التشغيل
     Hide Repeat Stats: إخفاء إحصاءات التكرار
     Sections:

@@ -828,6 +828,7 @@ Settings:
     Posts Auto Refresh Interval: Interval automatického obnovenia príspevkov
     Refresh Subscriptions While App Is Closed: "Obnovovať odbery, keď je aplikácia zatvorená"
   Distraction Free Settings:
+    Playing Interface Hide Delay: Oneskorenie skrytia rozhrania počas prehrávania
     Hide Startup Splash: Skryť úvodnú obrazovku
     Hide Repeat Stats: Skryť štatistiky opakovania
     Sections:
