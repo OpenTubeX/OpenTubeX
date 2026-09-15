@@ -107,3 +107,24 @@ test('repair progress includes both successful and failed writes in the same bat
   })
   assert.deepEqual(result, { total: 4, checked: 4, repaired: 3, failed: 1 })
 })
+
+test('explicit broadcast status overrides legacy isLive on ended and upcoming premieres', () => {
+  for (const isUpcoming of [false, true]) {
+    const metadata = parseHistoryRepairPlayer({
+      videoDetails: { videoId: record.videoId, isLive: true, isUpcoming, lengthSeconds: '120' },
+      microformat: { playerMicroformatRenderer: { liveBroadcastDetails: { isLiveNow: false } } }
+    }, record.videoId)
+    assert.equal(metadata.isLive, false)
+    const patch = historyRepairPatch(record, metadata)
+    assert.equal(patch.isLive, false)
+    assert.equal(patch.liveNow, false)
+    assert.equal(patch.isUpcoming, isUpcoming)
+  }
+})
+
+test('upcoming status suppresses legacy live status even without broadcast metadata', () => {
+  const metadata = parseHistoryRepairPlayer({
+    videoDetails: { videoId: record.videoId, isLive: true, isUpcoming: true }
+  }, record.videoId)
+  assert.equal(metadata.isLive, false)
+})

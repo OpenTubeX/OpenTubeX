@@ -44,7 +44,7 @@ export function parseHistoryRepairPlayer(response, videoId) {
     lengthSeconds: Number(details.lengthSeconds),
     published: Date.parse(microformat?.publishDate),
     // isLiveContent also marks ended streams and cannot identify a live video.
-    isLive: details.isLive === true || microformat?.liveBroadcastDetails?.isLiveNow === true,
+    isLive: details.isUpcoming !== true && (microformat?.liveBroadcastDetails?.isLiveNow ?? details.isLive) === true,
     isUpcoming: details.isUpcoming === true,
   }
 }

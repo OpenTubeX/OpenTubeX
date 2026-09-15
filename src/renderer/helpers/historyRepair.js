@@ -22,7 +22,6 @@ async function fetchMetadata(videoId, signal) {
       ...info,
       published: info.published * 1000,
       isLive: info.liveNow,
-      isUpcoming: info.isUpcoming === true,
     }
   }
   return parseHistoryRepairPlayer(await getLocalHistoryMetadata(videoId, timeoutSignal), videoId)

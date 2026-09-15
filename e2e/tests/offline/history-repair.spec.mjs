@@ -63,6 +63,26 @@ test('failed history metadata requests leave imported entries intact', async ({ 
   await expect(page.getByText('Imported video', { exact: true })).toBeVisible()
 })
 
+test('keeps Cancel available if history is cleared during a repair', async ({ page }) => {
+  let release
+  const pending = new Promise(resolve => { release = resolve })
+  await page.route('**/youtubei/v1/player*', async route => {
+    await pending
+    await route.fulfill({ json: {} }).catch(() => {})
+  })
+  try {
+    await goTo(page, 'history')
+    await page.getByRole('button', { name: 'Repair History', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Cancel', exact: true })).toBeVisible()
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removeAllHistory'))
+    await expect(page.getByRole('button', { name: 'Cancel', exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Cancel', exact: true })).toHaveCount(0)
+  } finally {
+    release()
+  }
+})
+
 test.describe('Invidious history repair', () => {
   test.use({
     seed: {
@@ -89,4 +109,25 @@ test.describe('Invidious history repair', () => {
     await expect(page.getByRole('status')).toContainText('Checked 1/1 · Repaired 1 · Failed 0')
     await expect(page.getByText('Invidious channel', { exact: true })).toBeVisible()
   })
+
+  test('preserves live flags when Invidious omits the upcoming status', async ({ page }) => {
+    await page.route('https://history-repair.test/api/v1/videos/**', route => route.fulfill({
+      json: {
+        videoId: original.videoId,
+        title: original.title,
+        author: 'Invidious channel',
+        authorId: 'UCabcdefghijklmnopqrstuv',
+        lengthSeconds: 120,
+        liveNow: false,
+        published: 1735689600
+      }
+    }))
+    await goTo(page, 'history')
+    await page.getByRole('button', { name: 'Repair History', exact: true }).click()
+    await expect(page.getByRole('status')).toContainText('Checked 1/1 · Repaired 1 · Failed 0')
+    const saved = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById.abcdefghijk)
+    expect(saved.isLive).toBe(true)
+    expect(saved.lengthSeconds).toBe(0)
+  })
+
 })

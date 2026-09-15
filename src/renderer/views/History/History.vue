@@ -12,7 +12,7 @@
           {{ t('History.History') }}
         </h2>
         <div
-          v-if="historyCacheSorted.length > 0"
+          v-if="historyCacheSorted.length > 0 || historyRepairState.running"
           class="headingActions"
         >
           <FtButton

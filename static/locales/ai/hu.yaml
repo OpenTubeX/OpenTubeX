@@ -187,7 +187,7 @@ User Playlists:
     More videos could not be loaded.: Nem tölthető be több videó.
 History:
   Repair: "Előzmények javítása"
-  Repair Progress: "Ellenőrizve {checked}/{total} · Javítva {repaired} · Sikertelen {failed}"
+  Repair Progress: "Ellenőrizve: {checked}/{total} · Javítva: {repaired} · Sikertelen: {failed}"
   Mark All As Watched: Összes megjelölése megtekintettként
   Mark All As Watched Confirmation: Biztosan megtekintettként jelöli meg az előzmények összes videóját?
   All History Marked as Watched: Az előzmények összes videója megtekintettként megjelölve
