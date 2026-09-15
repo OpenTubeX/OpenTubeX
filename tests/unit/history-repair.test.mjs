@@ -39,7 +39,7 @@ test('repair uses latest entries, batches saves, reports errors and skips remove
       if (id.endsWith('1')) throw new Error('Unavailable')
       return metadata
     },
-    saveMetadata: async patches => { saved.push(patches); return patches.length }
+    saveMetadata: async patches => { saved.push(patches); return { repaired: patches.length, failed: 0 } }
   })
   assert.equal(maxActive, 4)
   assert.equal(saved.length, 2)
@@ -84,7 +84,7 @@ test('database failures are counted and do not stop later repair batches', async
   const result = await repairHistory({
     records: Array(8).fill(record), signal: new AbortController().signal, onProgress: () => {},
     getRecord: () => record, fetchMetadata: async () => metadata,
-    saveMetadata: async patches => { if (++saves === 1) throw new Error('Write failed'); return patches.length }
+    saveMetadata: async patches => { if (++saves === 1) throw new Error('Write failed'); return { repaired: patches.length, failed: 0 } }
   })
   assert.deepEqual(result, { total: 8, checked: 8, repaired: 4, failed: 4 })
 })
@@ -96,4 +96,14 @@ test('repair selects imports whose only missing metadata is the publication date
     assert.equal(needsHistoryRepair(imported), true)
     assert.equal(historyRepairPatch(imported, { ...metadata, published: 123 }).published, 123)
   }
+})
+
+
+test('repair progress includes both successful and failed writes in the same batch', async () => {
+  const result = await repairHistory({
+    records: Array(4).fill(record), signal: new AbortController().signal, onProgress: () => {},
+    getRecord: () => record, fetchMetadata: async () => metadata,
+    saveMetadata: async () => ({ repaired: 3, failed: 1 })
+  })
+  assert.deepEqual(result, { total: 4, checked: 4, repaired: 3, failed: 1 })
 })

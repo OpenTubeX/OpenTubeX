@@ -73,7 +73,9 @@ export async function repairHistory({ records, getRecord, fetchMetadata, saveMet
     const updates = patches.filter(Boolean)
     if (updates.length && !signal.aborted) {
       try {
-        result.repaired += await saveMetadata(updates)
+        const saved = await saveMetadata(updates)
+        result.repaired += saved.repaired
+        result.failed += saved.failed
       } catch {
         result.failed += updates.length
       }

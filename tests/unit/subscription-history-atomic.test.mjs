@@ -170,3 +170,22 @@ test('metadata repair preserves watch state and does not recreate deleted histor
   assert.equal(saved.isWatched, false)
   assert.equal(await db.history.findOneAsync({ videoId: 'deleted' }), null)
 })
+
+test('metadata repair returns partial success when an individual database write fails', async () => {
+  const { db, History, errors } = await fixture()
+  await db.history.insertAsync([{ videoId: 'second' }, { videoId: 'third' }])
+  const update = db.history.updateAsync.bind(db.history)
+  db.history.updateAsync = (query, ...args) => {
+    if (query.videoId === 'second') throw new Error('Disk write failed')
+    return update(query, ...args)
+  }
+  const result = await History.updateSubscriptionState({ metadata: [
+    { videoId: 'video', lengthSeconds: 120 },
+    { videoId: 'second', lengthSeconds: 120 },
+    { videoId: 'third', lengthSeconds: 120 },
+  ] })
+  assert.deepEqual(Array.from(result.records, record => record.videoId), ['video', 'third'])
+  assert.equal(result.failedCount, 1)
+  assert.equal(errors.length, 1)
+  assert.equal((await db.history.findOneAsync({ videoId: 'second' })).lengthSeconds, undefined)
+})
