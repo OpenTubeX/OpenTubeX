@@ -67,10 +67,6 @@ public class MainActivity extends BridgeActivity {
         }
         // Honor viewport widths larger than the device for UI scales below 100%.
         getBridge().getWebView().getSettings().setUseWideViewPort(true);
-        // Android draws its page indicator over fixed headers and ignores CSS
-        // scrollbar bounds. The renderer supplies the themed scrollbar instead.
-        getBridge().getWebView().setVerticalScrollBarEnabled(false);
-        getBridge().getWebView().setHorizontalScrollBarEnabled(false);
         // Capacitor falls back to addJavascriptInterface when the modern,
         // top-frame-only bridge is unavailable. Fail closed instead of
         // exposing native plugins to untrusted subframes.

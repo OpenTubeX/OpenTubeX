@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<!-- Hide native scrollbars until OverlayScrollbars takes over. -->
-<html data-overlayscrollbars-initialize>
+<!-- Desktop and web hide native scrollbars until OverlayScrollbars takes over.
+     Capacitor keeps Android's native page scrollbar. -->
+<html<% if (!process.env.IS_CAPACITOR) { %> data-overlayscrollbars-initialize<% } %>>
 
   <head>
     <meta charset="utf-8" />
@@ -15,7 +16,7 @@
     <% } %>
   </head>
 
-  <body data-overlayscrollbars-initialize>
+  <body<% if (!process.env.IS_CAPACITOR) { %> data-overlayscrollbars-initialize<% } %>>
     <div id="app"<% if (typeof startupSplash !== 'undefined') { %> inert<% } %>></div>
     <% if (typeof startupSplash !== 'undefined') { %>
     <div id="startup-splash" class="startupSplash" role="status" aria-label="OpenTubeX" aria-busy="true">

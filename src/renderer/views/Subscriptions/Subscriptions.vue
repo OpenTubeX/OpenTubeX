@@ -10,7 +10,6 @@
   >
     <FtCard class="card">
       <div
-        v-page-scrollbar-header
         class="subscriptionsHeader"
         :class="{
           singleRow: headerFitsOneRow,
