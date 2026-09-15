@@ -188,6 +188,8 @@ User Playlists:
     This playlist could not be loaded.: Bu pleylisti yükləmək mümkün olmadı.
     More videos could not be loaded.: Daha çox video yükləmək mümkün olmadı.
 History:
+  Repair: "Tarixçəni düzəlt"
+  Repair Progress: "Yoxlanılıb {checked}/{total} · Düzəldilib {repaired} · Uğursuz {failed}"
   Mark All As Watched: Hamısını baxılmış kimi işarələ
   Mark All As Watched Confirmation: Tarixçənizdəki bütün videoları baxılmış kimi işarələmək istədiyinizə əminsiniz?
   All History Marked as Watched: Tarixçənizdəki bütün videolar baxılmış kimi işarələndi

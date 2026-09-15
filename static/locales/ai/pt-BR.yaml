@@ -186,6 +186,8 @@ User Playlists:
     This playlist could not be loaded.: Não foi possível carregar esta lista de reprodução.
     More videos could not be loaded.: Não foi possível carregar mais vídeos.
 History:
+  Repair: "Reparar histórico"
+  Repair Progress: "Verificados {checked}/{total} · Reparados {repaired} · Falhas {failed}"
   Mark All As Watched: Marcar tudo como reproduzido
   Mark All As Watched Confirmation: Tem certeza de que deseja marcar como reproduzidos todos os vídeos do histórico?
   All History Marked as Watched: Todos os vídeos do histórico foram marcados como reproduzidos

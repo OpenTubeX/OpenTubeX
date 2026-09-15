@@ -270,6 +270,8 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: '{playlistName} 재생목록을 만들었습니다.'
       There was an issue with creating the playlist.: 재생목록을 만드는 중 문제가 발생했습니다.
 History:
+  Repair: "기록 복구"
+  Repair Progress: "확인 {checked}/{total} · 복구 {repaired} · 실패 {failed}"
   Case Sensitive Search: 대소문자 구분 검색
   Mark All As Watched: 모두 시청함으로 표시
   Mark All As Watched Confirmation: 시청 기록의 모든 동영상을 시청함으로 표시하시겠습니까?

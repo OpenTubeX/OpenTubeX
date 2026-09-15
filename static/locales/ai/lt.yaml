@@ -295,6 +295,8 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Grojaraštis {playlistName} sėkmingai sukurtas.
       There was an issue with creating the playlist.: Kuriant grojaraštį kilo klaida.
 History:
+  Repair: "Taisyti istoriją"
+  Repair Progress: "Patikrinta {checked}/{total} · Pataisyta {repaired} · Nepavyko {failed}"
   Case Sensitive Search: Skirti didžiąsias ir mažąsias raides
   Mark All As Watched: Pažymėti visus kaip peržiūrėtus
   Mark All As Watched Confirmation: Ar tikrai norite visus istorijos vaizdo įrašus pažymėti kaip peržiūrėtus?

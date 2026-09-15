@@ -909,3 +909,12 @@ export function mapInvidiousLegacyFormat(format) {
     url: format.url
   }
 }
+
+export function getInvidiousHistoryMetadata(videoId, signal) {
+  return invidiousAPICall({
+    resource: 'videos',
+    id: videoId,
+    params: { fields: 'videoId,title,author,authorId,description,lengthSeconds,published,liveNow,isUpcoming' },
+    signal,
+  })
+}

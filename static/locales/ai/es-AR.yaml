@@ -204,6 +204,8 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: Video(s) agregado(s) a 1 lista de reproducción | Video(s) agregado(s) a {playlistCount} listas de reproducción | Video(s) agregado(s) a {playlistCount} listas de reproducción
 History:
+  Repair: "Reparar historial"
+  Repair Progress: "Comprobados {checked}/{total} · Reparados {repaired} · Fallidos {failed}"
   Mark All As Watched: Marcar todo como visto
   Mark All As Watched Confirmation: ¿Seguro que querés marcar como vistos todos los videos del historial?
   All History Marked as Watched: Todos los videos del historial se han marcado como vistos

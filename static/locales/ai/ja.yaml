@@ -186,6 +186,8 @@ User Playlists:
     This playlist could not be loaded.: このプレイリストを読み込めませんでした。
     More videos could not be loaded.: 動画をさらに読み込めませんでした。
 History:
+  Repair: "履歴を修復"
+  Repair Progress: "確認済み {checked}/{total} · 修復済み {repaired} · 失敗 {failed}"
   Mark All As Watched: すべて視聴済みにする
   Mark All As Watched Confirmation: 履歴内のすべての動画を視聴済みにしてもよろしいですか？
   All History Marked as Watched: 履歴内のすべての動画を視聴済みにしました

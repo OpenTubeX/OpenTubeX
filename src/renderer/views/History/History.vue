@@ -17,6 +17,20 @@
         >
           <FtButton
             class="historyActionButton"
+            :label="t('History.Repair')"
+            :icon="['fas', 'sync']"
+            :disabled="historyRepairState.running"
+            @click="startHistoryRepair"
+          />
+          <FtButton
+            v-if="historyRepairState.running"
+            class="historyActionButton"
+            :label="t('Cancel')"
+            :icon="['fas', 'xmark']"
+            @click="cancelHistoryRepair"
+          />
+          <FtButton
+            class="historyActionButton"
             :label="t('History.Mark All As Watched')"
             :icon="['fas', 'eye']"
             :disabled="!hasUnwatchedHistory"
@@ -33,6 +47,12 @@
           />
         </div>
       </div>
+      <p
+        v-if="historyRepairState.started"
+        role="status"
+      >
+        {{ t('History.Repair Progress', historyRepairState) }}
+      </p>
       <FtInput
         v-show="fullData.length > 1"
         ref="searchBar"
@@ -190,6 +210,7 @@ import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store'
 
 import { canMarkHistoryEntryAsWatched } from '../../helpers/history'
+import { historyRepairState, startHistoryRepair, cancelHistoryRepair } from '../../helpers/historyRepair'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { ctrlFHandler, debounce, getIconForSortPreference, showToast } from '../../helpers/utils'
 import { useTabContext } from '../../tabs/TabContext'

@@ -190,6 +190,8 @@ User Playlists:
     This playlist could not be loaded.: Daftar putar ini tidak dapat dimuat.
     More videos could not be loaded.: Video lainnya tidak dapat dimuat.
 History:
+  Repair: "Perbaiki riwayat"
+  Repair Progress: "Diperiksa {checked}/{total} · Diperbaiki {repaired} · Gagal {failed}"
   Mark All As Watched: Tandai Semua Sudah Ditonton
   Mark All As Watched Confirmation: Anda yakin ingin menandai semua video dalam riwayat sebagai sudah ditonton?
   All History Marked as Watched: Semua video dalam riwayat telah ditandai sebagai sudah ditonton

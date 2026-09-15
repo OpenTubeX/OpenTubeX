@@ -312,6 +312,8 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: S'ha creat correctament la llista de reproducció {playlistName}.
       There was an issue with creating the playlist.: Hi ha hagut un problema en crear la llista de reproducció.
 History:
+  Repair: "Repara l’historial"
+  Repair Progress: "Comprovats {checked}/{total} · Reparats {repaired} · Fallits {failed}"
   Case Sensitive Search: Cerca amb distinció entre majúscules i minúscules
   Mark All As Watched: Marca-ho tot com a vist
   Mark All As Watched Confirmation: Segur que voleu marcar com a vistos tots els vídeos de l'historial?

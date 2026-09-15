@@ -186,6 +186,8 @@ User Playlists:
     This playlist could not be loaded.: Denne spillelisten kunne ikke lastes inn.
     More videos could not be loaded.: Flere videoer kunne ikke lastes inn.
 History:
+  Repair: "Reparer historikk"
+  Repair Progress: "Kontrollert {checked}/{total} · Reparert {repaired} · Mislyktes {failed}"
   Mark All As Watched: Merk alle som sett
   Mark All As Watched Confirmation: Er du sikker på at du vil merke alle videoene i loggen som sett?
   All History Marked as Watched: Alle videoene i loggen er merket som sett

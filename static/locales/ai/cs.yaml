@@ -186,6 +186,8 @@ User Playlists:
     This playlist could not be loaded.: Tento playlist se nepodařilo načíst.
     More videos could not be loaded.: Další videa se nepodařilo načíst.
 History:
+  Repair: "Opravit historii"
+  Repair Progress: "Zkontrolováno {checked}/{total} · Opraveno {repaired} · Selhalo {failed}"
   Mark All As Watched: Označit vše jako zhlédnuté
   Mark All As Watched Confirmation: Opravdu chcete všechna videa v historii označit jako zhlédnutá?
   All History Marked as Watched: Všechna videa v historii byla označena jako zhlédnutá

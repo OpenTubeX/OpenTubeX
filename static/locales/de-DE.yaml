@@ -284,6 +284,8 @@ User Playlists:
   Choose Image: Bild auswählen
   Use Bookmark Icon: Lesezeichensymbol verwenden
 History:
+  Repair: "Verlauf reparieren"
+  Repair Progress: "Geprüft {checked}/{total} · Repariert {repaired} · Fehlgeschlagen {failed}"
   # On History Page
   History: Verlauf
   Watch History: Wiedergabeverlauf

@@ -237,6 +237,8 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Spelelista {playlistName} er oppretta.
       There was an issue with creating the playlist.: Det oppstod eit problem då spelelista skulle opprettast.
 History:
+  Repair: "Reparer historikk"
+  Repair Progress: "Kontrollert {checked}/{total} · Reparert {repaired} · Mislukka {failed}"
   Case Sensitive Search: Skil mellom store og små bokstavar
   Mark All As Watched: Merk alle som sette
   Mark All As Watched Confirmation: Er du sikker på at du vil merke alle videoane i historikken som sette?

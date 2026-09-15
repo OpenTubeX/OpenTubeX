@@ -165,6 +165,8 @@ User Playlists:
     This playlist could not be loaded.: Не удалось загрузить этот плейлист.
     More videos could not be loaded.: Не удалось загрузить другие видео.
 History:
+  Repair: "Исправить историю"
+  Repair Progress: "Проверено {checked}/{total} · Исправлено {repaired} · Ошибок {failed}"
   Mark All As Watched: Отметить всё как просмотренное
   Mark All As Watched Confirmation: Отметить все видео в истории как просмотренные?
   All History Marked as Watched: Все видео в истории отмечены как просмотренные

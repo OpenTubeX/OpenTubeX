@@ -190,6 +190,8 @@ User Playlists:
     This playlist could not be loaded.: Deze afspeellijst kan niet worden geladen.
     More videos could not be loaded.: Er kunnen geen video's meer worden geladen.
 History:
+  Repair: "Geschiedenis herstellen"
+  Repair Progress: "Gecontroleerd {checked}/{total} · Hersteld {repaired} · Mislukt {failed}"
   Mark All As Watched: Alles markeren als bekeken
   Mark All As Watched Confirmation: Weet je zeker dat je alle video's in je geschiedenis als bekeken wilt markeren?
   All History Marked as Watched: Alle video's in je geschiedenis zijn als bekeken gemarkeerd

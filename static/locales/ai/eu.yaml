@@ -188,6 +188,8 @@ User Playlists:
     This playlist could not be loaded.: Ezin izan da erreprodukzio-zerrenda hau kargatu.
     More videos could not be loaded.: Ezin izan dira bideo gehiago kargatu.
 History:
+  Repair: "Konpondu historia"
+  Repair Progress: "Egiaztatuta {checked}/{total} · Konponduta {repaired} · Huts egin dute {failed}"
   Mark All As Watched: Markatu guztiak ikusita
   Mark All As Watched Confirmation: Ziur historiako bideo guztiak ikusita markatu nahi dituzula?
   All History Marked as Watched: Historiako bideo guztiak ikusita markatu dira

@@ -191,6 +191,8 @@ User Playlists:
     This playlist could not be loaded.: இந்தப் பிளேலிஸ்ட்டை ஏற்ற முடியவில்லை.
     More videos could not be loaded.: மேலும் காணொளிகளை ஏற்ற முடியவில்லை.
 History:
+  Repair: "வரலாற்றைச் சரிசெய்"
+  Repair Progress: "சரிபார்க்கப்பட்டவை {checked}/{total} · சரிசெய்யப்பட்டவை {repaired} · தோல்வியடைந்தவை {failed}"
   Mark All As Watched: அனைத்தையும் பார்த்ததாகக் குறி
   Mark All As Watched Confirmation: வரலாற்றிலுள்ள எல்லாக் காணொளிகளையும் பார்த்ததாகக் குறிக்க விரும்புகிறீர்களா?
   All History Marked as Watched: வரலாற்றிலுள்ள எல்லாக் காணொளிகளும் பார்த்ததாகக் குறிக்கப்பட்டன

@@ -155,3 +155,18 @@ for (const unseen of [false, true]) {
     assert.deepEqual(result.records[0], await db.history.findOneAsync({ videoId: 'video' }))
   })
 }
+
+test('metadata repair preserves watch state and does not recreate deleted history', async () => {
+  const { db, History } = await fixture()
+  const result = await History.updateSubscriptionState({ metadata: [
+    { videoId: 'video', lengthSeconds: 120, isLive: false, title: 'Recovered' },
+    { videoId: 'deleted', lengthSeconds: 120 }
+  ] })
+  assert.equal(result.records.length, 1)
+  const saved = await db.history.findOneAsync({ videoId: 'video' })
+  assert.equal(saved.lengthSeconds, 120)
+  assert.equal(saved.watchProgress, 12)
+  assert.equal(saved.timeWatched, 1)
+  assert.equal(saved.isWatched, false)
+  assert.equal(await db.history.findOneAsync({ videoId: 'deleted' }), null)
+})

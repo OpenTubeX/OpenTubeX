@@ -186,6 +186,8 @@ User Playlists:
     This playlist could not be loaded.: Bu oynatma listesi yüklenemedi.
     More videos could not be loaded.: Daha fazla video yüklenemedi.
 History:
+  Repair: "Geçmişi onar"
+  Repair Progress: "Kontrol edilen {checked}/{total} · Onarılan {repaired} · Başarısız {failed}"
   Mark All As Watched: Tümünü İzlenmiş Olarak İşaretle
   Mark All As Watched Confirmation: Geçmişinizdeki tüm videoları izlenmiş olarak işaretlemek istediğinizden emin misiniz?
   All History Marked as Watched: Geçmişinizdeki tüm videolar izlenmiş olarak işaretlendi

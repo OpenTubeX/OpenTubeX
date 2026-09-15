@@ -188,6 +188,8 @@ User Playlists:
     This playlist could not be loaded.: Spellistan kunde inte läsas in.
     More videos could not be loaded.: Fler videor kunde inte läsas in.
 History:
+  Repair: "Reparera historik"
+  Repair Progress: "Kontrollerade {checked}/{total} · Reparerade {repaired} · Misslyckade {failed}"
   Mark All As Watched: Markera alla som sedda
   Mark All As Watched Confirmation: Vill du markera alla videor i historiken som sedda?
   All History Marked as Watched: Alla videor i historiken har markerats som sedda

@@ -196,6 +196,8 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: Видео-снимци су додати на 1 листу за репродукцију | Видео-снимци су додати на {playlistCount} листе за репродукцију | Видео-снимци су додати на {playlistCount} листа за репродукцију
 History:
+  Repair: "Поправи историју"
+  Repair Progress: "Проверено {checked}/{total} · Поправљено {repaired} · Неуспешно {failed}"
   Mark All As Watched: Означи све као одгледано
   Mark All As Watched Confirmation: Желите ли заиста да означите све видео-снимке у историји као одгледане?
   All History Marked as Watched: Сви видео-снимци у историји означени су као одгледани

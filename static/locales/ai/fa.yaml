@@ -203,6 +203,8 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: ویدیو به 1 فهرست پخش افزوده شد | ویدیو به {playlistCount} فهرست پخش افزوده شد
 History:
+  Repair: "ترمیم تاریخچه"
+  Repair Progress: "بررسی‌شده {checked}/{total} · ترمیم‌شده {repaired} · ناموفق {failed}"
   Mark All As Watched: علامت‌گذاری همه به‌عنوان تماشاشده
   Mark All As Watched Confirmation: مطمئنید می‌خواهید همه ویدیوهای تاریخچه را تماشاشده علامت‌گذاری کنید؟
   All History Marked as Watched: همه ویدیوهای تاریخچه تماشاشده علامت‌گذاری شدند

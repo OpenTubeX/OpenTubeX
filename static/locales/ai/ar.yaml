@@ -190,6 +190,8 @@ User Playlists:
     This playlist could not be loaded.: لا يمكن تحميل قائمة التشغيل هذه.
     More videos could not be loaded.: لا يمكن تحميل المزيد من مقاطع الفيديو.
 History:
+  Repair: "إصلاح السجل"
+  Repair Progress: "تم فحص {checked}/{total} · تم إصلاح {repaired} · فشل {failed}"
   Mark All As Watched: وضع علامة على الكل كما تمت مشاهدته
   Mark All As Watched Confirmation: هل أنت متأكد أنك تريد وضع علامة على جميع مقاطع الفيديو في سجلك كمشاهدة؟
   All History Marked as Watched: تم وضع علامة على جميع مقاطع الفيديو في سجلك على أنها تمت مشاهدتها

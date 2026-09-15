@@ -190,6 +190,8 @@ User Playlists:
     This playlist could not be loaded.: Δεν ήταν δυνατή η φόρτωση αυτής της λίστας αναπαραγωγής.
     More videos could not be loaded.: Δεν ήταν δυνατή η φόρτωση περισσότερων βίντεο.
 History:
+  Repair: "Επιδιόρθωση ιστορικού"
+  Repair Progress: "Ελέγχθηκαν {checked}/{total} · Διορθώθηκαν {repaired} · Απέτυχαν {failed}"
   Mark All As Watched: Επισήμανση όλων ως παρακολουθημένων
   Mark All As Watched Confirmation: Θέλετε σίγουρα να επισημάνετε ως παρακολουθημένα όλα τα βίντεο στο ιστορικό σας;
   All History Marked as Watched: Όλα τα βίντεο στο ιστορικό σας επισημάνθηκαν ως παρακολουθημένα

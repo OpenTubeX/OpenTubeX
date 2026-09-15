@@ -190,6 +190,8 @@ User Playlists:
     This playlist could not be loaded.: Tätä soittolistaa ei voitu ladata.
     More videos could not be loaded.: Lisää videoita ei voitu ladata.
 History:
+  Repair: "Korjaa historia"
+  Repair Progress: "Tarkistettu {checked}/{total} · Korjattu {repaired} · Epäonnistui {failed}"
   Mark All As Watched: Merkitse kaikki katsotuiksi
   Mark All As Watched Confirmation: Haluatko varmasti merkitä kaikki katseluhistoriasi videot katsotuiksi?
   All History Marked as Watched: Kaikki katseluhistoriasi videot on merkitty katsotuiksi
