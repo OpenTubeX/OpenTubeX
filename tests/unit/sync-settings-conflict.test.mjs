@@ -163,8 +163,11 @@ test('deleting the selected custom theme restores its base and accent colors bef
       getSystemLightTheme: 'light', getSystemDarkTheme: 'dark',
     },
   }, [])
-  assert.ok(calls.find(([action, value]) => action === 'updateBaseTheme' && value === 'dark'))
-  assert.ok(calls.find(([action, value]) => action === 'updateMainColor' && value === 'Purple'))
-  assert.ok(calls.find(([action, value]) => action === 'updateSecColor' && value === 'Blue'))
-  assert.ok(calls.findIndex(([action]) => action === 'updateBaseTheme') < calls.findIndex(([action]) => action === 'setCustomThemes'))
+  assert.deepEqual(calls, [
+    ['recordSyncSettingEdit', 'customThemes'],
+    ['updateMainColor', 'Purple'],
+    ['updateSecColor', 'Blue'],
+    ['updateBaseTheme', 'dark'],
+    ['setCustomThemes', []],
+  ])
 })

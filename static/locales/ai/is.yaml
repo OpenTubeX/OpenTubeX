@@ -668,7 +668,7 @@ Settings:
     Title Filter Hint: Aðgreindu fleiri en eitt leitarorð fyrir titil með kommum. Myndband verður að passa við minnst eitt leitarorð sem á að taka með en ekkert þeirra sem á að útiloka.
   External Software Settings:
     Checking FFmpeg and FFprobe: Athuga FFmpeg/FFprobe…
-    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe hefur ekki verið hlaðið niður enn. Smelltu á hnappinn fyrir neðan til að hlaða því niður.
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg og FFprobe hafa ekki verið hlaðin niður enn. Smelltu á hnappinn fyrir neðan til að hlaða þeim niður.
     External Software Settings: Utanaðkomandi hugbúnaður
     yt-dlp Source: Uppruni yt-dlp
     yt-dlp Channel: Útgáfurás yt-dlp

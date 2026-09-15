@@ -63,7 +63,7 @@ test('groups FFmpeg and FFprobe checking and missing messages', async ({ app, pa
     globalThis.releaseFollowupToolInfo()
     delete globalThis.releaseFollowupToolInfo
   })
-  await expect(status.locator('p')).toHaveText(['FFmpeg/FFprobe has not been downloaded yet. Click the button below to download it.'])
+  await expect(status.locator('p')).toHaveText(['FFmpeg/FFprobe have not been downloaded yet. Click the button below to download them.'])
 })
 
 test('keeps watch statistics and week start together in general settings', async ({ page }) => {

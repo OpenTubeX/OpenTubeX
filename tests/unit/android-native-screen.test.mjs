@@ -72,7 +72,7 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], previews 
   const screen = create({ element, container, getController: () => ({
     async show(value) {
       presentations.push(value)
-      if (deferFullscreen && value.fullscreen) await new Promise(resolve => completeFullscreen.push(resolve))
+      if (deferFullscreen && value.fullscreen) await new Promise((resolve, reject) => completeFullscreen.push(Object.assign(resolve, { reject })))
     }, async hide() {}, async layout(value) {
       layouts.push(value)
       if (deferTransitions && value.transition) await new Promise(resolve => completeTransitions.push(resolve))
@@ -549,3 +549,19 @@ for (const fullscreen of [false, true]) {
     f.screen.destroy()
   })
 }
+
+
+test('a superseded fullscreen entry cannot close the replacement screen when it rejects', async () => {
+  const f = await fixture({ fullscreen: false, deferFullscreen: true })
+  const entering = f.screen.show()
+  const rejected = assert.rejects(entering, /old owner replaced/)
+  f.screen.reset({ preserveFullscreen: true })
+  const replacement = f.screen.attach()
+  f.completeFullscreen[1]()
+  await replacement
+  f.completeFullscreen[0].reject(new Error('old owner replaced'))
+  await rejected
+  assert.equal(f.screen.isOpen(), true)
+  assert.equal(f.screen.hasSurface(), true)
+  f.screen.destroy()
+})

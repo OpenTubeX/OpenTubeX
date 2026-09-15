@@ -263,7 +263,7 @@ Settings:
     Bandwidth Limit: Limit przepustowości (KiB/s, 0 oznacza brak limitu)
   External Software Settings:
     Checking FFmpeg and FFprobe: Sprawdzanie FFmpeg/FFprobe…
-    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe nie został jeszcze pobrany. Kliknij przycisk poniżej, aby go pobrać.
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe nie zostały jeszcze pobrane. Kliknij przycisk poniżej, aby je pobrać.
     Detected FFmpeg and FFprobe Version Template: 'Wykryta wersja FFmpeg/FFprobe: {version}'
     Download FFmpeg and FFprobe: Pobierz FFmpeg i FFprobe
     Update FFmpeg and FFprobe: Zaktualizuj FFmpeg i FFprobe

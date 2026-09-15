@@ -142,7 +142,11 @@
         />
       </div>
     </template>
-    <div class="fullScreenshotStage">
+    <!-- FtPrompt stops touchend before Swiper's document listener receives it. -->
+    <div
+      class="fullScreenshotStage"
+      @touchend="screenshotSwiper?.onTouchEnd?.($event)"
+    >
       <Transition
         name="themeScreenshot"
         mode="out-in"
@@ -153,7 +157,7 @@
           class="screenshotZoom"
           :modules="[Zoom]"
           :zoom="{ maxRatio: 5 }"
-          :allow-touch-move="false"
+          @swiper="screenshotSwiper = $event"
         >
           <SwiperSlide>
             <div class="swiper-zoom-container">
@@ -194,7 +198,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, reactive, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, reactive, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Zoom } from 'swiper/modules'
@@ -221,6 +225,8 @@ const loadFailed = ref(false)
 const hasMore = ref(false)
 const installing = ref(null)
 const preview = ref(null)
+/** @type {import('vue').ShallowRef<import('swiper').Swiper | null>} */
+const screenshotSwiper = shallowRef(null)
 const scroller = useTemplateRef('scroller')
 const content = useTemplateRef('content')
 const selectedScreenshots = reactive({})

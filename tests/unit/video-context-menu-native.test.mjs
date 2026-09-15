@@ -8,7 +8,11 @@ const source = await readFile(new URL('../../src/renderer/components/FtListVideo
 const start = source.indexOf('function openVideoContextMenu(event) {')
 const handler = source.slice(start, source.indexOf('\nfunction handleContextMenuKeydown', start))
 
-function openMenu ({ electron = false, capacitor = false, media = false, selected = false, unrelatedSelection = false, touch = false } = {}) {
+const playlistSource = await readFile(new URL('../../src/renderer/components/FtListPlaylist/FtListPlaylist.vue', import.meta.url), 'utf8')
+const playlistStart = playlistSource.indexOf('function openPlaylistContextMenu(event) {')
+const playlistHandler = playlistSource.slice(playlistStart, playlistSource.indexOf('function handleContextMenuKeydown', playlistStart))
+
+function openMenu ({ playlist = false, electron = false, capacitor = false, media = false, selected = false, unrelatedSelection = false, touch = false } = {}) {
   const dispatched = []
   const listeners = []
   const mobileMenus = []
@@ -45,12 +49,14 @@ function openMenu ({ electron = false, capacitor = false, media = false, selecte
     suppressMenuHoldClick () {},
     resetMenuHold () {},
     title: { value: 'Test video' },
+    titleForDisplay: { value: 'Test playlist' },
+    playlistMenuItems: { value: [] },
     videoMenuOptions: { value: [{ label: 'Play Next', value: 'playNext', icon: ['fas', 'step-forward'] }] },
     openMobileContextActions: menu => mobileMenus.push(menu),
     videoContextMenuItems: { value: [{ label: 'Play Next', icon: ['fas', 'step-forward'], quickAction: true }] },
     event
   }
-  vm.runInNewContext(handler + '\nopenVideoContextMenu(event)', context)
+  vm.runInNewContext(playlist ? playlistHandler + '\nopenPlaylistContextMenu(event)' : handler + '\nopenVideoContextMenu(event)', context)
   return { event, dispatched, listeners, mobileMenus }
 }
 
@@ -115,5 +121,14 @@ test('Android video menus share a public video URL and omit private playlist IDs
     }
     vm.runInNewContext(menuSource + '\nvideoContextMenuItems.value.find(item => item.label === "Share.Share Link").run()', context)
     assert.deepEqual(shared, [publicPlaylist ? 'https://youtu.be/video-id?list=PL-public' : 'https://youtu.be/video-id'])
+  }
+})
+
+
+test('playlist images and selected text retain the native menu on web', () => {
+  for (const options of [{ media: true }, { selected: true }]) {
+    const { event, dispatched } = openMenu({ ...options, playlist: true })
+    assert.equal(event.defaultPrevented, false)
+    assert.deepEqual(dispatched, [])
   }
 })

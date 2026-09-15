@@ -462,6 +462,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
       scheduleLayout()
     },
     reset({ preserveFullscreen = false } = {}) {
+      presentationSequence++
       miniSnapshot.update(null, 0, 0, false)
       attachmentSequence++
       endGesture()

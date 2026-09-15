@@ -665,8 +665,8 @@ Settings:
     Title Excludes: Заглавието не съдържа
     Title Filter Hint: Разделете с запетаи отделните изрази за заглавие. Видеоклипът трябва да съответства на поне един от включените изрази и на нито един от изключените.
   External Software Settings:
-    Checking FFmpeg and FFprobe: Проверява се FFmpeg/FFprobe…
-    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe все още не е изтеглен. Натиснете бутона по-долу, за да го изтеглите.
+    Checking FFmpeg and FFprobe: Проверяват се FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe все още не са изтеглени. Натиснете бутона по-долу, за да ги изтеглите.
     External Software Settings: Външен софтуер
     yt-dlp Source: Източник на yt-dlp
     yt-dlp Channel: Канал на yt-dlp

@@ -685,8 +685,8 @@ Settings:
     Title Excludes: Наслов не садржи
     Title Filter Hint: Више израза за наслов раздвоји запетама. Видео-снимак мора да садржи бар један укључени израз и ниједан искључени израз.
   External Software Settings:
-    Checking FFmpeg and FFprobe: Проверава се FFmpeg/FFprobe…
-    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe још није преузет. Кликни на дугме испод да га преузмеш.
+    Checking FFmpeg and FFprobe: Проверавају се FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe још нису преузети. Кликни на дугме испод да их преузмеш.
     External Software Settings: Спољни софтвер
     yt-dlp Source: Извор за yt-dlp
     yt-dlp Channel: Канал за yt-dlp

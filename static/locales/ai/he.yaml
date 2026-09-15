@@ -676,8 +676,8 @@ Settings:
     Title Excludes: הכותרת אינה כוללת
     Title Filter Hint: הפרידו מונחי כותרת בפסיקים. סרטון חייב להתאים לפחות למונח אחד שנכלל ולא להתאים לאף מונח שהוחרג.
   External Software Settings:
-    Checking FFmpeg and FFprobe: FFmpeg/FFprobe נבדק…
-    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe עדיין לא הורד. לחצו על הכפתור למטה כדי להוריד אותו.
+    Checking FFmpeg and FFprobe: FFmpeg/FFprobe נבדקים…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe עדיין לא הורדו. לחצו על הכפתור למטה כדי להוריד אותם.
     External Software Settings: תוכנות חיצוניות
     yt-dlp Source: מקור yt-dlp
     yt-dlp Channel: ערוץ yt-dlp

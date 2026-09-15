@@ -248,10 +248,10 @@ export function createAndroidPlayer(element, container, getOptions) {
           })
         : { source: uri, mimeType }
       source.onReloadOnce?.(() => {
-        if (!destroyed && generation === loadGeneration) options.onReload?.()
+        if (!destroyed && !suspended && generation === loadGeneration) options.onReload?.()
       })
       source.onBackoffRequested?.(event => {
-        if (!destroyed && generation === loadGeneration) options.onBackoff?.(event)
+        if (!destroyed && !suspended && generation === loadGeneration) options.onBackoff?.(event)
       })
       // Attach the surface before preparing paused media so its first decoded
       // frame is presented instead of being consumed by ExoPlayer's dummy surface.

@@ -421,12 +421,23 @@ test('pinches theme screenshots to zoom and resets zoom when switching screensho
   const y = bounds.y + bounds.height / 2
   const session = await page.context().newCDPSession(page)
   try {
+    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: x - 20, y, id: 1 }] })
     await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: x - 20, y, id: 1 }, { x: x + 20, y, id: 2 }] })
     for (const distance of [30, 45, 65, 85]) {
       await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x - distance, y, id: 1 }, { x: x + distance, y, id: 2 }] })
     }
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [{ x: x - 85, y, id: 1 }] })
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await expect.poll(() => image.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).a)).toBeGreaterThan(1.5)
+    await page.waitForTimeout(350) // Finish the pinch transition before starting a separate drag.
+    const wrapper = page.locator('.screenshotZoom .swiper-zoom-container')
+    const initialX = await wrapper.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).e)
+    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y, id: 1 }] })
+    for (const distance of [15, 30, 50, 70]) {
+      await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x + distance, y, id: 1 }] })
+    }
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await expect.poll(() => wrapper.evaluate((el, initial) => Math.abs(new DOMMatrix(getComputedStyle(el).transform).e - initial), initialX)).toBeGreaterThan(20)
     await page.locator('.screenshotNavigation button').last().click()
     await expect(image).toHaveAttribute('src', secondScreenshot)
     await expect.poll(() => image.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).a)).toBe(1)

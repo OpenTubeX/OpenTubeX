@@ -1291,8 +1291,8 @@ Settings:
       Trenne mehrere Titelbegriffe durch Kommas. Ein Video muss mindestens einen eingeschlossenen und keinen
       ausgeschlossenen Begriff enthalten.
   External Software Settings:
-    Checking FFmpeg and FFprobe: FFmpeg/FFprobe wird überprüft…
-    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe wurde noch nicht heruntergeladen. Klicke auf die Schaltfläche unten, um es herunterzuladen.
+    Checking FFmpeg and FFprobe: FFmpeg/FFprobe werden überprüft…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe wurden noch nicht heruntergeladen. Klicke auf die Schaltfläche unten, um sie herunterzuladen.
     External Software Settings: Externe Software
     Managed Tool Updates: Aktualisierungen verwalteter Tools
     Update Modes:

@@ -672,7 +672,7 @@ Settings:
     Title Filter Hint: Separe vários termos do título com vírgulas. Um vídeo tem de corresponder a pelo menos um termo incluído e a nenhum termo excluído.
   External Software Settings:
     Checking FFmpeg and FFprobe: A verificar o FFmpeg/FFprobe…
-    FFmpeg and FFprobe Managed Not Downloaded: O FFmpeg/FFprobe ainda não foi transferido. Clique no botão abaixo para o transferir.
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ainda não foram transferidos. Clique no botão abaixo para os transferir.
     External Software Settings: Software externo
     yt-dlp Source: Origem do yt-dlp
     yt-dlp Channel: Canal do yt-dlp

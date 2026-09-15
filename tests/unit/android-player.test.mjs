@@ -15,6 +15,7 @@ const source = (await readFile(new URL('../../src/renderer/helpers/player/androi
 async function fixture({ failLoad = false, initialTracks = [], captionCues = [], captionBytes = Promise.resolve(new Uint8Array()), options = {} } = {}) {
   const calls = []
   const sabrCallbacks = []
+  const reloadCallbacks = []
   const listeners = new Set()
   let state
   const publish = next => {
@@ -80,7 +81,7 @@ async function fixture({ failLoad = false, initialTracks = [], captionCues = [],
         async attach() { calls.push(['attach']) },
       }
     },
-    createAndroidSabrSource: () => ({ source: 'sabr', onBackoffRequested(callback) { sabrCallbacks.push(callback) } }),
+    createAndroidSabrSource: () => ({ source: 'sabr', onReloadOnce(callback) { reloadCallbacks.push(callback) }, onBackoffRequested(callback) { sabrCallbacks.push(callback) } }),
     MANIFEST_TYPE_SABR: 'application/sabr+json',
     crypto, AbortController, clearInterval, console,
   })
@@ -89,7 +90,7 @@ async function fixture({ failLoad = false, initialTracks = [], captionCues = [],
   })
   const player = createPlayer(element, {}, () => options)
   await player.attach()
-  return { player, element, calls, publish, sabrCallbacks }
+  return { player, element, calls, publish, sabrCallbacks, reloadCallbacks }
 }
 
 test('returning to a paused native tab preserves its position without reapplying autoplay', async () => {
@@ -308,5 +309,28 @@ test('an old SABR backoff cannot appear after switching to a local file or unloa
   await player.unload()
   sabrCallbacks[0]({ backoffMs: 6000 })
   assert.deepEqual(backoffs, [100])
+  await player.destroy()
+})
+
+test('suspended SABR sources stop emitting reloads and backoffs until a fresh load', async () => {
+  const backoffs = []
+  let reloads = 0
+  const { player, publish, sabrCallbacks, reloadCallbacks } = await fixture({ options: {
+    onBackoff: event => backoffs.push(event.backoffMs), onReload: () => { reloads++ }
+  } })
+  const load = () => player.load('data:application/sabr+json,%7B%7D', 0, 'application/sabr+json')
+  await load()
+  sabrCallbacks[0]({ backoffMs: 100 })
+  reloadCallbacks[0]()
+  publish({ event: 'suspended' })
+  sabrCallbacks[0]({ backoffMs: 5000 })
+  reloadCallbacks[0]()
+  assert.deepEqual(backoffs, [100])
+  assert.equal(reloads, 1)
+  await player.nativePlayback.setPresented(true)
+  sabrCallbacks[1]({ backoffMs: 200 })
+  reloadCallbacks[1]()
+  assert.deepEqual(backoffs, [100, 200])
+  assert.equal(reloads, 2)
   await player.destroy()
 })

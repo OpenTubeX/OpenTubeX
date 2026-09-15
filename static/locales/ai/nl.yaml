@@ -677,7 +677,7 @@ Settings:
     Title Filter Hint: Scheid meerdere titeltermen met komma's. Een video moet ten minste één opgenomen term bevatten en geen enkele uitgesloten term.
   External Software Settings:
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe controleren…
-    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe is nog niet gedownload. Klik op de knop hieronder om het te downloaden.
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe zijn nog niet gedownload. Klik op de knop hieronder om ze te downloaden.
     External Software Settings: Externe software
     yt-dlp Source: yt-dlp-bron
     yt-dlp Channel: yt-dlp-kanaal

@@ -676,8 +676,8 @@ Settings:
     Title Excludes: Otsikko ei sisällä
     Title Filter Hint: Erota otsikon hakusanat pilkuilla. Videon otsikossa on oltava vähintään yksi mukaan otettava hakusana, eikä siinä saa olla yhtäkään pois rajattavaa hakusanaa.
   External Software Settings:
-    Checking FFmpeg and FFprobe: Tarkistetaan FFmpeg/FFprobe-ohjelmaa…
-    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe-ohjelmaa ei ole vielä ladattu. Lataa se napsauttamalla alla olevaa painiketta.
+    Checking FFmpeg and FFprobe: Tarkistetaan FFmpeg- ja FFprobe-ohjelmia…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg- ja FFprobe-ohjelmia ei ole vielä ladattu. Lataa ne napsauttamalla alla olevaa painiketta.
     External Software Settings: Ulkoiset ohjelmistot
     yt-dlp Source: yt-dlp-lähde
     yt-dlp Channel: yt-dlp:n julkaisukanava
