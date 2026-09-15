@@ -883,7 +883,7 @@
           />
         </FtPhonePanel>
         <WatchVideoSummary
-          v-if="!isLoading && !hideAiVideoSummaries && videoSummary.length"
+          v-if="!isLoading && !hideAiVideoSummaries && videoSummary.length && (!customShortsPlayerActive || fullscreenMetadataOpen)"
           :key="videoId"
           :paragraphs="videoSummary"
           class="watchVideo"

@@ -18,6 +18,7 @@ for (const [index, template] of placements.entries()) {
         render: compile(template),
         setup: () => ({
           clampShortsAuxPanelScroll() {},
+          customShortsPlayerActive: false, fullscreenMetadataOpen: false,
           shortsMetadataOpen: true, isLoading: false, hideAiVideoSummaries: hidden,
           videoSummary: ['<img src=x onerror=alert(1)>', 'Second paragraph'], videoId: 'video'
         })
@@ -38,4 +39,21 @@ for (const [index, template] of placements.entries()) {
       }
     })
   }
+}
+
+for (const fullscreenMetadataOpen of [false, true]) {
+  test(`general summary follows Shorts fullscreen metadata visibility ${fullscreenMetadataOpen}`, async () => {
+    const app = createSSRApp({
+      render: compile(placements[1]),
+      setup: () => ({
+        isLoading: false, hideAiVideoSummaries: false,
+        customShortsPlayerActive: true, fullscreenMetadataOpen,
+        videoSummary: ['Summary'], videoId: 'short'
+      })
+    })
+    app.component('WatchVideoSummary', summaryComponent)
+    app.component('ft-icon', { render: () => h('svg') })
+    app.config.globalProperties.$t = key => key
+    assert.equal((await renderToString(app)).includes('<details'), fullscreenMetadataOpen)
+  })
 }
