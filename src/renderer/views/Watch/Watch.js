@@ -478,12 +478,7 @@ export default defineComponent({
       // When true, the new player after a SABR reload must ignore the normal autoplay setting.
       suppressAutoplayAfterSabrReload: false,
       playerTeardownInProgress: false,
-      /** @type {number|null} */
-      sabrReloadCaptionIndex: null,
-      /** @type {number|null} */
-      sabrReloadPlaybackRate: null,
-      /** @type {string|null} */
-      sabrReloadVideoQuality: null,
+      sabrReloadState: null,
       preserveTitleOnNextReload: false,
       ipBlockDetectedInCurrentChain: false,
       ipBlockRecoveryAttemptedForCurrentVideo: false,
@@ -2124,9 +2119,7 @@ export default defineComponent({
       if (!preserveTitle) {
         this.resumePlaybackAfterSabrReload = false
         this.suppressAutoplayAfterSabrReload = false
-        this.sabrReloadCaptionIndex = null
-        this.sabrReloadPlaybackRate = null
-        this.sabrReloadVideoQuality = null
+        this.sabrReloadState = null
         this.updateTitle()
       }
     },
@@ -4392,8 +4385,7 @@ export default defineComponent({
 
       // Only used one time = remove after use
       this.oneTimeTimestamp = null
-      this.sabrReloadCaptionIndex = null
-      this.sabrReloadPlaybackRate = null
+      this.sabrReloadState = null
 
       if (
         !this.localFilePlayback &&
@@ -6086,8 +6078,8 @@ export default defineComponent({
     },
 
     initializePlaybackRate() {
-      if (this.sabrReloadPlaybackRate !== null) {
-        this.currentPlaybackRate = this.sabrReloadPlaybackRate
+      if (this.sabrReloadState?.playbackRate !== undefined) {
+        this.currentPlaybackRate = this.sabrReloadState.playbackRate
         return
       }
 
@@ -6112,8 +6104,8 @@ export default defineComponent({
     },
 
     initializeVideoQuality() {
-      if (this.sabrReloadVideoQuality !== null) {
-        this.currentVideoQuality = this.sabrReloadVideoQuality
+      if (this.sabrReloadState?.videoQuality) {
+        this.currentVideoQuality = this.sabrReloadState.videoQuality
         return
       }
 
@@ -6205,13 +6197,18 @@ export default defineComponent({
       const wasPlaying = payload?.wasPlaying === true
       this.resumePlaybackAfterSabrReload = wasPlaying
       this.suppressAutoplayAfterSabrReload = !wasPlaying
-      this.sabrReloadCaptionIndex = Number.isInteger(payload?.captionIndex) ? payload.captionIndex : null
       const playbackRate = Number(payload?.playbackRate)
-      this.sabrReloadPlaybackRate = Number.isFinite(playbackRate) && playbackRate > 0.07
+      const restoredPlaybackRate = Number.isFinite(playbackRate) && playbackRate > 0.07
         ? playbackRate
         : this.currentPlaybackRate
-      this.sabrReloadVideoQuality = this.normalizeVideoQuality(payload?.videoQuality) ||
-        this.normalizeVideoQuality(this.currentVideoQuality) || null
+      this.sabrReloadState = {
+        captionIndex: Number.isInteger(payload?.captionIndex) ? payload.captionIndex : null,
+        playbackRate: restoredPlaybackRate,
+        videoQuality: this.normalizeVideoQuality(payload?.videoQuality) ||
+          this.normalizeVideoQuality(this.currentVideoQuality) || null,
+        loopEnabled: payload?.loopEnabled === true,
+        repeatStats: payload?.repeatStats ?? null
+      }
     },
 
     async performSabrReload(payload, toastMessage) {
