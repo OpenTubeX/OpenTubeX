@@ -44,12 +44,6 @@
   .card :deep(.info a.channelName),
   .card :deep(.info button.channelName),
   .card :deep(.info a.handle) {
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    min-block-size: 48px;
-    min-inline-size: 48px;
-    padding-block: 8px;
     border-radius: calc(5px * var(--ui-roundness));
   }
 

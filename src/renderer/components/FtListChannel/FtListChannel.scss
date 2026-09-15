@@ -40,3 +40,29 @@
   color: inherit;
   text-decoration: none;
 }
+
+.hasMetadataSeparator {
+  position: relative;
+}
+
+.hasMetadataSeparator::before {
+  background-color: currentcolor;
+  block-size: 0.25em;
+  border-radius: 50%;
+  content: '';
+  inline-size: 0.25em;
+  inset-block-start: 50%;
+  inset-inline-start: -0.5em;
+  position: absolute;
+  transform: translateY(-50%);
+}
+
+@media only screen and (width <= 680px) {
+  .ft-list-channel.grid .infoLine {
+    justify-content: center;
+  }
+}
+
+.metadataWrapped .hasMetadataSeparator::before {
+  content: none;
+}
