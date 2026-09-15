@@ -1765,4 +1765,5 @@ App Icon:
   Error: "Impossible de charger ou de modifier l'icône de l'application"
 
 Tray:
+  Hide All Windows: "Masquer toutes les fenêtres"
   Show All Windows: "Afficher toutes les fenêtres"

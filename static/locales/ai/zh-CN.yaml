@@ -1766,4 +1766,5 @@ App Icon:
   Error: "无法加载或更改应用图标"
 
 Tray:
+  Hide All Windows: "隐藏所有窗口"
   Show All Windows: "显示所有窗口"

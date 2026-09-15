@@ -2410,4 +2410,5 @@ App Icon:
   Error: "No s'ha pogut carregar o canviar la icona de l'aplicació"
 
 Tray:
+  Hide All Windows: "Amaga totes les finestres"
   Show All Windows: "Mostra totes les finestres"

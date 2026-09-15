@@ -1767,4 +1767,5 @@ App Icon:
   Error: "Uygulama simgesi yüklenemedi veya değiştirilemedi"
 
 Tray:
+  Hide All Windows: "Tüm pencereleri gizle"
   Show All Windows: "Tüm Pencereleri Göster"

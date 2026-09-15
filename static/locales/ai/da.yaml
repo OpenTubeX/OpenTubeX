@@ -1848,4 +1848,5 @@ App Icon:
   Error: "Kunne ikke indlæse eller ændre appikonet"
 
 Tray:
+  Hide All Windows: "Skjul alle vinduer"
   Show All Windows: "Vis alle vinduer"

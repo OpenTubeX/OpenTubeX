@@ -1785,4 +1785,5 @@ App Icon:
   Error: "Kunne ikke laste inn eller endre appikonet"
 
 Tray:
+  Hide All Windows: "Skjul alle vinduer"
   Show All Windows: "Vis alle vinduer"

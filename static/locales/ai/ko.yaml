@@ -2217,4 +2217,5 @@ App Icon:
   Error: "앱 아이콘을 불러오거나 변경할 수 없습니다"
 
 Tray:
+  Hide All Windows: "모든 창 숨기기"
   Show All Windows: "모든 창 표시"

@@ -1749,4 +1749,5 @@ App Icon:
   Error: "Unable to load or change the app icon"
 
 Tray:
+  Hide All Windows: "Hide All Windows"
   Show All Windows: "Show All Windows"

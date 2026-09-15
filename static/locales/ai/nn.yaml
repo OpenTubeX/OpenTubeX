@@ -2196,4 +2196,5 @@ App Icon:
   Error: "Kunne ikkje laste inn eller endre appikonet"
 
 Tray:
+  Hide All Windows: "Gøym alle vindauge"
   Show All Windows: "Vis alle vindauge"

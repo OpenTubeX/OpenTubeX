@@ -1783,4 +1783,5 @@ App Icon:
   Error: "無法載入或變更應用程式圖示"
 
 Tray:
+  Hide All Windows: "隱藏所有視窗"
   Show All Windows: "顯示所有視窗"
