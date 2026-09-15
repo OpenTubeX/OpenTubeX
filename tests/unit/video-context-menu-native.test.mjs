@@ -124,7 +124,6 @@ test('Android video menus share a public video URL and omit private playlist IDs
   }
 })
 
-
 test('playlist images and selected text retain the native menu on web', () => {
   for (const options of [{ media: true }, { selected: true }]) {
     const { event, dispatched } = openMenu({ ...options, playlist: true })
