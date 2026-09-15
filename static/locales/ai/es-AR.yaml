@@ -1316,6 +1316,7 @@ Channel:
     Hide Answers: Ocultar las respuestas
     Video hidden by OpenTubeX: Video oculto por OpenTubeX
 Video:
+  Mark as fully seen: Marcar como visto por completo
   Move Queue Item Up: "Subir {title}"
   Move Queue Item Down: "Bajar {title}"
   Includes paid promotion: Incluye promoción pagada

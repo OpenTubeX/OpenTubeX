@@ -1074,6 +1074,7 @@ Channel:
   Search Result Types: 搜索结果类型
   All Results: 全部
 Video:
+  Mark as fully seen: 标记为已完整观看
   Move Queue Item Up: "将{title}上移"
   Move Queue Item Down: "将{title}下移"
   Includes paid promotion: 包含付费宣传内容

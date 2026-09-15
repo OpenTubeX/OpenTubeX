@@ -1074,6 +1074,7 @@ Channel:
   Search Result Types: Arama sonucu türleri
   All Results: Tümü
 Video:
+  Mark as fully seen: Tamamı izlendi olarak işaretle
   Move Queue Item Up: "{title} videosunu yukarı taşı"
   Move Queue Item Down: "{title} videosunu aşağı taşı"
   Includes paid promotion: Ücretli tanıtım içeriyor

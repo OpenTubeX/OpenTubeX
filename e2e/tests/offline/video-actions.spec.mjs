@@ -77,6 +77,41 @@ function silentWav(duration, sampleRate = 8_000) {
 
 test.use({ seed: SEED })
 
+test('marks progress fully seen from the menu and the configurable thumbnail action', async ({ app, page }) => {
+  await goTo(page, 'history')
+  const video = page.locator('.ft-list-video').filter({ hasText: 'Bookmarkable video' })
+  const persistedProgress = async () => {
+    const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+    const records = contents.trim().split('\n').map(line => JSON.parse(line))
+    const latest = records.filter(record => record.videoId === 'eeeeeeeeeee').at(-1)
+    return { watchProgress: latest.watchProgress, isWatched: latest.isWatched }
+  }
+
+  await video.hover()
+  await video.locator('.title').click({ button: 'right' })
+  await page.getByRole('menuitem', { name: 'Mark As Watched', exact: true }).click()
+  await expect.poll(persistedProgress).toEqual({ watchProgress: 10, isWatched: true })
+
+  await video.locator('.title').click({ button: 'right' })
+  await page.getByRole('menuitem', { name: 'Mark as fully seen', exact: true }).click()
+  await expect.poll(persistedProgress).toEqual({ watchProgress: 60, isWatched: true })
+
+  const generalSection = await goToSettingsSection(page, 'general')
+  await generalSection.getByRole('combobox', { name: 'Extra Thumbnail Action Button' }).click()
+  await page.getByRole('option', { name: 'Mark as fully seen', exact: true }).click()
+  await page.locator('.settingsCloseButton').click()
+
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const entry = store.getters.getHistoryCacheById.eeeeeeeeeee
+    await store.dispatch('updateHistory', { ...entry, watchProgress: 15, isWatched: false })
+  })
+  await expect.poll(persistedProgress).toEqual({ watchProgress: 15, isWatched: false })
+  await video.hover()
+  await video.locator('.extraThumbnailActionIcon .iconButton').click()
+  await expect.poll(persistedProgress).toEqual({ watchProgress: 60, isWatched: true })
+})
+
 test.describe('video link copy actions', () => {
   test.use({
     seed: {

@@ -1390,6 +1390,7 @@ Channel:
     Hide Answers: Slėpti atsakymus
     Video hidden by OpenTubeX: Vaizdo įrašą paslėpė OpenTubeX
 Video:
+  Mark as fully seen: Pažymėti kaip visiškai peržiūrėtą
   Move Queue Item Up: "Perkelti {title} aukštyn"
   Move Queue Item Down: "Perkelti {title} žemyn"
   Includes paid promotion: Yra mokamos reklamos

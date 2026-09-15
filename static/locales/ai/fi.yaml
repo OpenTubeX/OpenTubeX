@@ -1104,6 +1104,7 @@ Channel:
   All Results: Kaikki
   View All: Näytä kaikki
 Video:
+  Mark as fully seen: Merkitse kokonaan katsotuksi
   Move Queue Item Up: "Siirrä {title} ylöspäin"
   Move Queue Item Down: "Siirrä {title} alaspäin"
   Includes paid promotion: Sisältää maksettua mainontaa

@@ -1367,6 +1367,7 @@ Channel:
     Hide Answers: 답변 숨기기
     Video hidden by OpenTubeX: OpenTubeX에서 숨긴 동영상
 Video:
+  Mark as fully seen: 끝까지 시청한 것으로 표시
   Move Queue Item Up: "{title} 위로 이동"
   Move Queue Item Down: "{title} 아래로 이동"
   Includes paid promotion: 유료 프로모션 포함

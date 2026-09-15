@@ -672,6 +672,9 @@ function schedulePremiereStartInvalidation() {
   }, Math.min(timestamp - now + 1, MAX_TIMEOUT_DELAY))
 }
 
+const canMarkAsFullySeen = computed(() => canMarkAsWatched.value &&
+  Number.isFinite(lengthSeconds.value) && lengthSeconds.value > 0)
+
 const watchProgress = computed(() => {
   if (!historyEntryExists.value || !watchedProgressSavingEnabled.value) {
     return 0
@@ -835,6 +838,13 @@ const extraThumbnailActionButton = computed(() => {
           : t('Video.Mark As Watched'),
         icon: isWatched.value ? ['fas', 'eye-slash'] : ['fas', 'eye']
       }
+    case 'markAsFullySeen':
+      return canMarkAsFullySeen.value
+        ? {
+            title: t('Video.Mark as fully seen'),
+            icon: ['fas', 'check']
+          }
+        : null
     case 'copyYoutube':
       return {
         title: t('Video.Copy YouTube Link'),
@@ -948,6 +958,13 @@ const videoMenuOptions = computed(() => {
             : t('Video.Mark As Watched'),
           value: 'history',
           icon: isWatched.value ? ['fas', 'eye-slash'] : ['fas', 'eye']
+        }]
+      : [],
+    ...canMarkAsFullySeen.value
+      ? [{
+          label: t('Video.Mark as fully seen'),
+          value: 'markAsFullySeen',
+          icon: ['fas', 'check']
         }]
       : [],
     ...historyEntryExists.value
@@ -1390,6 +1407,11 @@ function handleOptionsClick(option) {
         unmarkAsWatched()
       } else {
         markAsWatched()
+      }
+      break
+    case 'markAsFullySeen':
+      if (canMarkAsFullySeen.value) {
+        markAsWatched(true)
       }
       break
     case 'removeHistory':
@@ -2056,7 +2078,7 @@ async function fetchSponsorBlockVideoLabel(videoId) {
   }
 }
 
-function markAsWatched() {
+function markAsWatched(fullySeen = false) {
   if (!canMarkAsWatched.value) {
     return
   }
@@ -2070,8 +2092,8 @@ function markAsWatched() {
     published: published.value,
     description: description.value,
     viewCount: viewCount.value,
-    lengthSeconds: props.data.lengthSeconds,
-    watchProgress: historyEntry.value?.watchProgress ?? 0,
+    lengthSeconds: lengthSeconds.value,
+    watchProgress: fullySeen ? lengthSeconds.value : historyEntry.value?.watchProgress ?? 0,
     isWatched: true,
     timeWatched: historyEntry.value?.timeWatched ?? Date.now(),
     isLive: false,

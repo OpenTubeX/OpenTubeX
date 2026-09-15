@@ -1335,6 +1335,7 @@ Channel:
     Hide Answers: Gøym svar
     Video hidden by OpenTubeX: Videoen er gøymd av OpenTubeX
 Video:
+  Mark as fully seen: Merk som ferdig sett
   Move Queue Item Up: "Flytt {title} opp"
   Move Queue Item Down: "Flytt {title} ned"
   Includes paid promotion: Inneheld betalt marknadsføring
