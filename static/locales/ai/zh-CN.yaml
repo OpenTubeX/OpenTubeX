@@ -836,6 +836,7 @@ Settings:
     Posts Auto Refresh Interval: 帖子自动刷新间隔
     Refresh Subscriptions While App Is Closed: "应用关闭时刷新订阅"
   Distraction Free Settings:
+    Hide AI Video Summaries: "隐藏 AI 视频摘要"
     Playing Interface Hide Delay: 播放时界面隐藏延迟
     Hide Startup Splash: 隐藏启动画面
     Hide Repeat Stats: 隐藏循环统计
@@ -1082,6 +1083,8 @@ Channel:
   All Results: 全部
 Video:
   Mark as fully seen: 标记为已完整观看
+  AI-generated video summary: "AI 生成的视频摘要"
+  Quality and accuracy may vary: "质量和准确性可能有所不同"
   Move Queue Item Up: "将{title}上移"
   Move Queue Item Down: "将{title}下移"
   Includes paid promotion: 包含付费宣传内容

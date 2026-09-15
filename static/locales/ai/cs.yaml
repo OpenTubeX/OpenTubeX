@@ -836,6 +836,7 @@ Settings:
     Posts Auto Refresh Interval: Interval automatického obnovení příspěvků
     Refresh Subscriptions While App Is Closed: "Obnovovat odběry, když je aplikace zavřená"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Skrýt shrnutí videí od AI"
     Playing Interface Hide Delay: Prodleva skrytí rozhraní při přehrávání
     Hide Startup Splash: Skrýt úvodní obrazovku
     Hide Repeat Stats: Skrýt statistiky opakování
@@ -1082,6 +1083,8 @@ Channel:
   All Results: Vše
 Video:
   Mark as fully seen: Označit jako zcela zhlédnuté
+  AI-generated video summary: "Shrnutí videa vytvořené AI"
+  Quality and accuracy may vary: "Kvalita a přesnost se mohou lišit"
   Move Queue Item Up: "Přesunout {title} nahoru"
   Move Queue Item Down: "Přesunout {title} dolů"
   Includes paid promotion: Obsahuje placenou propagaci

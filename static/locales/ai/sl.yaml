@@ -1069,6 +1069,7 @@ Settings:
     To: Na
     Confirm Before Unsubscribing: Zahtevaj potrditev pred odjavo
   Distraction Free Settings:
+    Hide AI Video Summaries: "Skrij povzetke videoposnetkov z UI"
     Playing Interface Hide Delay: Zakasnitev skrivanja vmesnika med predvajanjem
     Hide Startup Splash: Skrij začetni zaslon
     Hide Repeat Stats: Skrij statistiko ponavljanja
@@ -1450,6 +1451,8 @@ Channel:
     Video hidden by OpenTubeX: OpenTubeX je skril videoposnetek
 Video:
   Mark as fully seen: Označi kot ogledano do konca
+  AI-generated video summary: "Povzetek videoposnetka, ustvarjen z UI"
+  Quality and accuracy may vary: "Kakovost in natančnost se lahko razlikujeta"
   Move Queue Item Up: "Premakni {title} navzgor"
   Move Queue Item Down: "Premakni {title} navzdol"
   Includes paid promotion: Vključuje plačano promocijo

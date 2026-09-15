@@ -840,6 +840,7 @@ Settings:
     Posts Auto Refresh Interval: Interval de reîmprospătare automată a postărilor
     Refresh Subscriptions While App Is Closed: "Reîmprospătează abonamentele când aplicația este închisă"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Ascunde rezumatele video generate de IA"
     Playing Interface Hide Delay: Întârziere la ascunderea interfeței în timpul redării
     Hide Startup Splash: Ascunde ecranul de pornire
     Hide Repeat Stats: Ascunde statisticile de repetare
@@ -1106,6 +1107,8 @@ Channel:
   View All: Vezi tot
 Video:
   Mark as fully seen: Marchează ca vizionat integral
+  AI-generated video summary: "Rezumat video generat de IA"
+  Quality and accuracy may vary: "Calitatea și precizia pot varia"
   Move Queue Item Up: "Mută {title} în sus"
   Move Queue Item Down: "Mută {title} în jos"
   Includes paid promotion: Include promovare plătită

@@ -849,6 +849,7 @@ Settings:
     Posts Auto Refresh Interval: Interval voor automatisch vernieuwen van berichten
     Refresh Subscriptions While App Is Closed: "Abonnementen vernieuwen terwijl de app gesloten is"
   Distraction Free Settings:
+    Hide AI Video Summaries: "AI-videosamenvattingen verbergen"
     Playing Interface Hide Delay: Vertraging bij het verbergen van de interface tijdens het afspelen
     Hide Startup Splash: Opstartscherm verbergen
     Hide Repeat Stats: Herhaalstatistieken verbergen
@@ -1115,6 +1116,8 @@ Channel:
   View All: Alles bekijken
 Video:
   Mark as fully seen: Markeren als volledig bekeken
+  AI-generated video summary: "Door AI gegenereerde videosamenvatting"
+  Quality and accuracy may vary: "Kwaliteit en nauwkeurigheid kunnen variëren"
   Move Queue Item Up: "Verplaats {title} omhoog"
   Move Queue Item Down: "Verplaats {title} omlaag"
   Includes paid promotion: Bevat betaalde promotie

@@ -1120,6 +1120,7 @@ Settings:
     Import search history formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Setting object has insufficient data, skipping item: Das Objekt enthält unzureichende Daten, Element wird übersprungen
   Distraction Free Settings:
+    Hide AI Video Summaries: "KI-Videozusammenfassungen ausblenden"
     Playing Interface Hide Delay: Verzögerung zum Ausblenden der Oberfläche bei Wiedergabe
     Hide Startup Splash: Startbildschirm ausblenden
     Hide Repeat Stats: Wiederholungsstatistik ausblenden
@@ -1701,6 +1702,8 @@ Channel:
   All Results: Alle
 Video:
   Mark as fully seen: Als vollständig angesehen markieren
+  AI-generated video summary: "KI-generierte Videozusammenfassung"
+  Quality and accuracy may vary: "Qualität und Genauigkeit können variieren"
   Move Queue Item Up: "{title} nach oben verschieben"
   Move Queue Item Down: "{title} nach unten verschieben"
   Age Restricted Badge: Altersbeschränkt

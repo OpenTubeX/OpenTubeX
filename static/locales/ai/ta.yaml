@@ -848,6 +848,7 @@ Settings:
     Posts Auto Refresh Interval: இடுகைத் தானியக்கப் புதுப்பிப்பு இடைவெளி
     Refresh Subscriptions While App Is Closed: "செயலி மூடியிருக்கும்போது சந்தாக்களைப் புதுப்பி"
   Distraction Free Settings:
+    Hide AI Video Summaries: "AI காணொளிச் சுருக்கங்களை மறை"
     Playing Interface Hide Delay: இயக்கத்தின்போது இடைமுகத்தை மறைப்பதற்கான தாமதம்
     Hide Startup Splash: தொடக்கத் திரையை மறை
     Hide Repeat Stats: மீளியக்கப் புள்ளிவிவரங்களை மறை
@@ -1111,6 +1112,8 @@ Channel:
   View All: அனைத்தையும் பார்
 Video:
   Mark as fully seen: முழுமையாகப் பார்த்ததாகக் குறி
+  AI-generated video summary: "AI உருவாக்கிய காணொளிச் சுருக்கம்"
+  Quality and accuracy may vary: "தரமும் துல்லியமும் மாறுபடலாம்"
   Move Queue Item Up: "{title} ஐ மேலே நகர்த்து"
   Move Queue Item Down: "{title} ஐ கீழே நகர்த்து"
   Includes paid promotion: கட்டண விளம்பரம் உள்ளது

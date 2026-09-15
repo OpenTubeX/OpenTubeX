@@ -865,6 +865,7 @@ Settings:
     Posts Auto Refresh Interval: Інтэрвал аўтаматычнага абнаўлення допісаў
     Refresh Subscriptions While App Is Closed: "Абнаўляць падпіскі, калі праграма закрыта"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Хаваць зводкі відэа ад ШІ"
     Playing Interface Hide Delay: Затрымка схавання інтэрфейсу падчас прайгравання
     Hide Startup Splash: Схаваць стартавы экран
     Hide Repeat Stats: Схаваць статыстыку паўтораў
@@ -1140,6 +1141,8 @@ Channel:
   View All: Паказаць усе
 Video:
   Mark as fully seen: Пазначыць як цалкам прагледжанае
+  AI-generated video summary: "Зводка відэа, створаная ШІ"
+  Quality and accuracy may vary: "Якасць і дакладнасць могуць адрознівацца"
   Move Queue Item Up: "Перамясціць {title} вышэй"
   Move Queue Item Down: "Перамясціць {title} ніжэй"
   Includes paid promotion: Ёсць платная рэклама

@@ -836,6 +836,7 @@ Settings:
     Posts Auto Refresh Interval: 投稿の自動更新間隔
     Refresh Subscriptions While App Is Closed: "アプリを閉じている間も登録チャンネルを更新"
   Distraction Free Settings:
+    Hide AI Video Summaries: "AI による動画概要を非表示"
     Playing Interface Hide Delay: 再生中のインターフェースを非表示にするまでの時間
     Hide Startup Splash: 起動画面を非表示
     Hide Repeat Stats: リピート統計を非表示
@@ -1082,6 +1083,8 @@ Channel:
   All Results: すべて
 Video:
   Mark as fully seen: 最後まで視聴済みにする
+  AI-generated video summary: "AI 生成の動画概要"
+  Quality and accuracy may vary: "品質と精度は異なる場合があります"
   Move Queue Item Up: "{title}を上へ移動"
   Move Queue Item Down: "{title}を下へ移動"
   Includes paid promotion: 有料プロモーションを含みます

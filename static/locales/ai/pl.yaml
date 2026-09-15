@@ -386,6 +386,7 @@ Settings:
     Show Scheduled Live Streams / Premieres First: Najpierw pokazuj zaplanowane transmisje na żywo i premiery
     Refresh Subscriptions While App Is Closed: "Odświeżaj subskrypcje, gdy aplikacja jest zamknięta"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Ukryj podsumowania filmów SI"
     Playing Interface Hide Delay: Opóźnienie ukrywania interfejsu podczas odtwarzania
     Hide Startup Splash: Ukryj ekran startowy
     Hide Repeat Stats: Ukryj statystyki powtarzania
@@ -564,6 +565,8 @@ Channel:
   All Results: Wszystkie
 Video:
   Mark as fully seen: Oznacz jako obejrzany w całości
+  AI-generated video summary: "Podsumowanie filmu wygenerowane przez SI"
+  Quality and accuracy may vary: "Jakość i dokładność mogą się różnić"
   Move Queue Item Up: "Przenieś film {title} w górę"
   Move Queue Item Down: "Przenieś film {title} w dół"
   Includes paid promotion: Zawiera płatną promocję

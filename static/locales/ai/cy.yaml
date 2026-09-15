@@ -838,6 +838,7 @@ Settings:
     Posts Auto Refresh Interval: Cyfwng adnewyddu postiadau yn awtomatig
     Refresh Subscriptions While App Is Closed: "Adnewyddu tanysgrifiadau pan fydd yr ap ar gau"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Cuddio crynodebau fideo AI"
     Playing Interface Hide Delay: Oedi cyn cuddio’r rhyngwyneb wrth chwarae
     Hide Startup Splash: Cuddio’r sgrin gychwyn
     Hide Repeat Stats: Cuddio ystadegau ailadrodd
@@ -1089,6 +1090,8 @@ Channel:
   All Results: Pob un
 Video:
   Mark as fully seen: Marcio fel wedi ei wylio yn llawn
+  AI-generated video summary: "Crynodeb fideo wedi'i gynhyrchu gan AI"
+  Quality and accuracy may vary: "Gall ansawdd a chywirdeb amrywio"
   Move Queue Item Up: "Symud {title} i fyny"
   Move Queue Item Down: "Symud {title} i lawr"
   Includes paid promotion: Yn cynnwys hyrwyddiad taledig

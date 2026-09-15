@@ -865,6 +865,7 @@ Settings:
     Posts Auto Refresh Interval: فاصلهٔ تازه‌سازی خودکار پست‌ها
     Refresh Subscriptions While App Is Closed: "تازه‌سازی اشتراک‌ها هنگام بسته بودن برنامه"
   Distraction Free Settings:
+    Hide AI Video Summaries: "پنهان کردن خلاصه‌های ویدیویی هوش مصنوعی"
     Playing Interface Hide Delay: تأخیر پنهان شدن رابط هنگام پخش
     Hide Startup Splash: پنهان کردن صفحهٔ آغازین
     Hide Repeat Stats: پنهان کردن آمار تکرار
@@ -1137,6 +1138,8 @@ Channel:
   View All: مشاهدهٔ همه
 Video:
   Mark as fully seen: علامت‌گذاری به‌عنوان کاملاً دیده‌شده
+  AI-generated video summary: "خلاصهٔ تولیدشده با هوش مصنوعی از ویدیو"
+  Quality and accuracy may vary: "کیفیت و دقت ممکن است متفاوت باشد"
   Move Queue Item Up: "انتقال {title} به بالا"
   Move Queue Item Down: "انتقال {title} به پایین"
   Includes paid promotion: دارای تبلیغ پولی

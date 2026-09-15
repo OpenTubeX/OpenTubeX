@@ -844,6 +844,7 @@ Settings:
     Posts Auto Refresh Interval: Interval Pembaruan Otomatis Postingan
     Refresh Subscriptions While App Is Closed: "Perbarui Langganan Saat Aplikasi Ditutup"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Sembunyikan ringkasan video AI"
     Playing Interface Hide Delay: Jeda penyembunyian antarmuka saat pemutaran
     Hide Startup Splash: Sembunyikan Layar Pembuka
     Hide Repeat Stats: Sembunyikan statistik pengulangan
@@ -1105,6 +1106,8 @@ Channel:
   View All: Lihat Semua
 Video:
   Mark as fully seen: Tandai sebagai sudah ditonton sepenuhnya
+  AI-generated video summary: "Ringkasan video buatan AI"
+  Quality and accuracy may vary: "Kualitas dan akurasi dapat bervariasi"
   Move Queue Item Up: "Pindahkan {title} ke atas"
   Move Queue Item Down: "Pindahkan {title} ke bawah"
   Includes paid promotion: Memuat promosi berbayar

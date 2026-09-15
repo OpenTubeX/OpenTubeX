@@ -1029,6 +1029,7 @@ Settings:
     To: 다음으로
     Confirm Before Unsubscribing: 구독 취소 전 확인
   Distraction Free Settings:
+    Hide AI Video Summaries: "AI 동영상 요약 숨기기"
     Playing Interface Hide Delay: 재생 중 인터페이스 숨김 지연
     Hide Startup Splash: 시작 화면 숨기기
     Hide Repeat Stats: 반복 통계 숨기기
@@ -1375,6 +1376,8 @@ Channel:
     Video hidden by OpenTubeX: OpenTubeX에서 숨긴 동영상
 Video:
   Mark as fully seen: 끝까지 시청한 것으로 표시
+  AI-generated video summary: "AI 생성 동영상 요약"
+  Quality and accuracy may vary: "품질과 정확도는 다를 수 있습니다"
   Move Queue Item Up: "{title} 위로 이동"
   Move Queue Item Down: "{title} 아래로 이동"
   Includes paid promotion: 유료 프로모션 포함

@@ -335,6 +335,13 @@
           @change="updateHideEndScreenAnnotations"
         />
         <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Hide AI Video Summaries')"
+          :compact="true"
+          :default-value="hideAiVideoSummaries"
+          setting-key="hideAiVideoSummaries"
+          @change="store.dispatch('updateHideAiVideoSummaries', $event)"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Video Description')"
           :compact="true"
           :default-value="hideVideoDescription"
@@ -540,6 +547,9 @@ const hideLiveChatReplay = computed(() => store.getters.getHideLiveChatReplay)
 function updateHideLiveChatReplay(value) {
   store.dispatch('updateHideLiveChatReplay', value)
 }
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideAiVideoSummaries = computed(() => store.getters.getHideAiVideoSummaries)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideVideoDescription = computed(() => store.getters.getHideVideoDescription)

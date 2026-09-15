@@ -838,6 +838,7 @@ Settings:
     Posts Auto Refresh Interval: Razmak automatskog osvježavanja objava
     Refresh Subscriptions While App Is Closed: "Osvježavaj pretplate dok je aplikacija zatvorena"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Sakrij AI sažetke videozapisa"
     Playing Interface Hide Delay: Odgoda skrivanja sučelja tijekom reprodukcije
     Hide Startup Splash: Sakrij početni zaslon
     Hide Repeat Stats: Sakrij statistiku ponavljanja
@@ -1089,6 +1090,8 @@ Channel:
   All Results: Sve
 Video:
   Mark as fully seen: Označi kao pogledano do kraja
+  AI-generated video summary: "Sažetak videozapisa generiran umjetnom inteligencijom"
+  Quality and accuracy may vary: "Kvaliteta i točnost mogu varirati"
   Move Queue Item Up: "Pomakni {title} gore"
   Move Queue Item Down: "Pomakni {title} dolje"
   Includes paid promotion: Sadržava plaćenu promociju

@@ -849,6 +849,7 @@ Settings:
     Posts Auto Refresh Interval: Julkaisujen automaattisen päivityksen aikaväli
     Refresh Subscriptions While App Is Closed: "Päivitä tilaukset sovelluksen ollessa suljettuna"
   Distraction Free Settings:
+    Hide AI Video Summaries: "Piilota tekoälyn videoyhteenvedot"
     Playing Interface Hide Delay: Käyttöliittymän piilotusviive toiston aikana
     Hide Startup Splash: Piilota käynnistysruutu
     Hide Repeat Stats: Piilota toistotilastot
@@ -1112,6 +1113,8 @@ Channel:
   View All: Näytä kaikki
 Video:
   Mark as fully seen: Merkitse kokonaan katsotuksi
+  AI-generated video summary: "Tekoälyn luoma videoyhteenveto"
+  Quality and accuracy may vary: "Laatu ja tarkkuus voivat vaihdella"
   Move Queue Item Up: "Siirrä {title} ylöspäin"
   Move Queue Item Down: "Siirrä {title} alaspäin"
   Includes paid promotion: Sisältää maksettua mainontaa

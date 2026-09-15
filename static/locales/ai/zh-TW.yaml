@@ -836,6 +836,7 @@ Settings:
     Posts Auto Refresh Interval: 貼文自動重新整理間隔
     Refresh Subscriptions While App Is Closed: "應用程式關閉時重新整理訂閱"
   Distraction Free Settings:
+    Hide AI Video Summaries: "隱藏 AI 影片摘要"
     Playing Interface Hide Delay: 播放時介面隱藏延遲
     Hide Startup Splash: 隱藏啟動畫面
     Hide Repeat Stats: 隱藏循環統計
@@ -1087,6 +1088,8 @@ Channel:
   All Results: 全部
 Video:
   Mark as fully seen: 標示為已完整觀看
+  AI-generated video summary: "AI 產生的影片摘要"
+  Quality and accuracy may vary: "品質和準確性可能有所不同"
   Move Queue Item Up: "將{title}上移"
   Move Queue Item Down: "將{title}下移"
   Includes paid promotion: 包含付費宣傳內容

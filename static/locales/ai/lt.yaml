@@ -1053,6 +1053,7 @@ Settings:
     To: Iki
     Confirm Before Unsubscribing: Klausti prieš atsisakant prenumeratos
   Distraction Free Settings:
+    Hide AI Video Summaries: "Slėpti DI vaizdo įrašų santraukas"
     Playing Interface Hide Delay: Sąsajos slėpimo delsa atkuriant
     Hide Startup Splash: Slėpti paleidimo ekraną
     Hide Repeat Stats: Slėpti kartojimo statistiką
@@ -1398,6 +1399,8 @@ Channel:
     Video hidden by OpenTubeX: Vaizdo įrašą paslėpė OpenTubeX
 Video:
   Mark as fully seen: Pažymėti kaip visiškai peržiūrėtą
+  AI-generated video summary: "DI sukurta vaizdo įrašo santrauka"
+  Quality and accuracy may vary: "Kokybė ir tikslumas gali skirtis"
   Move Queue Item Up: "Perkelti {title} aukštyn"
   Move Queue Item Down: "Perkelti {title} žemyn"
   Includes paid promotion: Yra mokamos reklamos

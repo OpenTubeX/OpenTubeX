@@ -1103,6 +1103,7 @@ Settings:
     To: A
     Confirm Before Unsubscribing: Confirma abans de donar-se de baixa
   Distraction Free Settings:
+    Hide AI Video Summaries: "Amaga els resums de vídeos amb IA"
     Playing Interface Hide Delay: Retard per amagar la interfície durant la reproducció
     Hide Startup Splash: Amaga la pantalla d’inici
     Hide Repeat Stats: Amaga les estadístiques de repetició
@@ -1483,6 +1484,8 @@ Channel:
     Video hidden by OpenTubeX: Vídeo ocult per l'OpenTubeX
 Video:
   Mark as fully seen: Marca com a vist completament
+  AI-generated video summary: "Resum del vídeo generat per IA"
+  Quality and accuracy may vary: "La qualitat i la precisió poden variar"
   Move Queue Item Up: "Mou {title} amunt"
   Move Queue Item Down: "Mou {title} avall"
   Includes paid promotion: Inclou promoció de pagament
