@@ -2322,3 +2322,31 @@ test('fetches an uncached synced channel avatar in the phone organizer', async (
   await expect.poll(() => avatar.evaluate(image => image.naturalWidth)).toBe(24)
   expect(requests).toBe(1)
 })
+
+test('fetches an uncached local channel avatar in the phone organizer', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 375, height: 760 })
+  await enablePhoneTabSwitcher(page)
+  const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa'
+  let requests = 0
+  await page.route('https://invidious.test/api/v1/channels/**', route => {
+    requests++
+    return route.fulfill({ json: { author: 'Local channel', authorId: channelId, authorThumbnails: [{ url: 'https://invidious.test/avatar.svg' }], tabs: [] } })
+  })
+  await page.route('https://invidious.test/avatar.svg', route => route.fulfill({
+    contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" fill="red"/></svg>'
+  }))
+  await page.evaluate(async id => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setBackendPreference', 'invidious')
+    store.commit('setCurrentInvidiousInstance', 'https://invidious.test')
+    await store.dispatch('createTab', { route: '/channel/' + id, title: 'Local channel', makeActive: false, lazyLoad: true })
+  }, channelId)
+  const activeUrl = page.url()
+  expect(requests).toBe(0)
+  await page.locator('.capacitorPhoneTabSwitcherButton').click()
+  const avatar = page.locator('.capacitorPhoneTabTarget', { hasText: 'Local channel' }).locator('img')
+  await expect(avatar).toBeVisible()
+  await expect.poll(() => avatar.evaluate(image => image.naturalWidth)).toBe(24)
+  expect(requests).toBe(1)
+  expect(page.url()).toBe(activeUrl)
+})

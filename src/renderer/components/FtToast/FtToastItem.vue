@@ -19,22 +19,24 @@
       @pointerdown="onPointerDown"
       @pointerup="onPointerUp"
     >
-      <img
-        v-if="toast.image"
-        :src="toast.image"
-        class="image"
-        alt=""
-        draggable="false"
-      >
-      <FtIcon
-        v-else-if="toast.icon"
-        :icon="toast.icon"
-        class="icon"
-        fixed-width
-      />
-      <p class="message">
-        {{ toast.message }}
-      </p>
+      <div class="toastMessage">
+        <img
+          v-if="toast.image"
+          :src="toast.image"
+          class="image"
+          alt=""
+          draggable="false"
+        >
+        <FtIcon
+          v-else-if="toast.icon"
+          :icon="toast.icon"
+          class="icon"
+          fixed-width
+        />
+        <p class="message">
+          {{ toast.message }}
+        </p>
+      </div>
       <div
         v-if="toast.buttons.length > 0"
         class="toastActions"

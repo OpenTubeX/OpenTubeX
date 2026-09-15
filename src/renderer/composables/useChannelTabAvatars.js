@@ -5,11 +5,11 @@ import { fetchChannelInfo, getCachedChannelInfo } from '../helpers/channel-prefe
 import { mapConcurrently } from '../helpers/concurrent-map'
 import { youtubeImageUrlToInvidious } from '../helpers/api/invidious'
 
-/** Load channel avatars only for the remote tabs currently being displayed. */
-export function useSyncedChannelAvatars(tabs) {
+/** Load channel avatars only for the tabs currently being displayed. */
+export function useChannelTabAvatars(tabs) {
   watch(tabs, async visibleTabs => {
     const channelIds = [...new Set(visibleTabs.map(tab => (
-      getSyncedTabPreview(tab).route?.path?.match(/^\/channel\/([^/]+)/)?.[1]
+      (tab.route?.path ?? getSyncedTabPreview(tab).route?.path)?.match(/^\/channel\/([^/]+)/)?.[1]
     )).filter(Boolean))]
     await mapConcurrently(channelIds, 4, async channelId => {
       if (store.getters.getChannelThumbnail(channelId)) return

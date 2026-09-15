@@ -677,7 +677,7 @@
 </template>
 
 <script setup>
-import { useSyncedChannelAvatars } from '../../composables/useSyncedChannelAvatars'
+import { useChannelTabAvatars } from '../../composables/useChannelTabAvatars'
 import FtRetryImage from '../FtRetryImage.vue'
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeMount, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
@@ -819,7 +819,7 @@ const activeOtherDeviceSession = computed(() => (
     otherDeviceSessionKey(session) === selectedOtherDeviceSessionKey.value
   )) ?? visibleOtherDeviceSessions.value[0] ?? null
 ))
-useSyncedChannelAvatars(computed(() => showSyncedTabs.value
+useChannelTabAvatars(computed(() => showSyncedTabs.value
   ? activeOtherDeviceSession.value?.visibleTabs ?? []
   : []))
 

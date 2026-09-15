@@ -122,6 +122,10 @@
   align-items: center;
 }
 
+.mobileLinkActionsBack {
+  inline-size: 100%;
+}
+
 .mobileLinkQuickActions {
   display: grid;
   grid-auto-flow: column;
