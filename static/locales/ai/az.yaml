@@ -1583,6 +1583,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Pleylist başlanğıcdadır. Oynatmağa davam etmək üçün təkrarlanmanı aktivləşdir
 External link opening has been disabled in Settings → Privacy: Xarici linklərin açılması Tənzimləmələr → Məxfilik bölməsində bağlanıb
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Son bağlanmış pəncərəni yenidən aç
   Edit Hint: Qısayol seçin, sonra yeni düymə birləşməsini basın. Təyinatını ləğv etmək üçün Backspace və ya Delete basın.
   Change Shortcut: "{action} üçün qısayolu dəyiş"
   Press Shortcut: Qısayolu basın…

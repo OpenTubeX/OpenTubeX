@@ -1552,6 +1552,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: The playlist is at the beginning. Enable loop to continue playing
 External link opening has been disabled in Settings → Privacy: External link opening has been disabled in Settings → Privacy
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Reopen the last closed window
   Edit Hint: Select a shortcut, then press a new key combination. Press Backspace or Delete to unassign it.
   Change Shortcut: Change shortcut for {action}
   Press Shortcut: Press shortcut…

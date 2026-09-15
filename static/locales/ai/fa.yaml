@@ -1651,6 +1651,7 @@ External link opening has been disabled in Settings → Privacy: بازکردن 
 Screenshot Clipboard Success: نماگرفت در بریده‌دان ذخیره شد
 Screenshot Clipboard Error: کپی نماگرفت در بریده‌دان ناموفق بود
 KeyboardShortcutPrompt:
+  Reopen Closed Window: باز کردن دوبارهٔ آخرین پنجرهٔ بسته‌شده
   Edit Hint: یک میان‌بر را انتخاب کنید، سپس ترکیب کلید جدید را فشار دهید. برای حذف انتساب، Backspace یا Delete را فشار دهید.
   Change Shortcut: تغییر میان‌بر برای {action}
   Press Shortcut: میان‌بر را فشار دهید…

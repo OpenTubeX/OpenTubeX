@@ -270,6 +270,7 @@ const windowAndViewAppShortcuts = computed(() => getLocalizedShortcutNamesAndVal
   ['APP', 'GENERAL'],
   [
     'NEW_WINDOW',
+    'RESTORE_CLOSED_WINDOW',
     'MINIMIZE_WINDOW',
     'CLOSE_WINDOW',
     'TOGGLE_DEVTOOLS',
@@ -338,6 +339,7 @@ const localizedShortcutNameToShortcutsMappings = computed(() => {
     [t('Downloads.Open Downloads'), ['NAVIGATE_TO_DOWNLOADS']],
     [t('KeyboardShortcutPrompt.Navigate to History'), ['NAVIGATE_TO_HISTORY', 'NAVIGATE_TO_HISTORY_MAC']],
     [t('KeyboardShortcutPrompt.New Window'), ['NEW_WINDOW']],
+    [t('KeyboardShortcutPrompt.Reopen Closed Window'), ['RESTORE_CLOSED_WINDOW']],
     [t('KeyboardShortcutPrompt.New Tab'), ['NEW_TAB']],
     [t('KeyboardShortcutPrompt.Close Tab'), ['CLOSE_TAB']],
     [t('KeyboardShortcutPrompt.Reload Tab'), ['RELOAD_TAB', 'RELOAD_TAB_ALT']],

@@ -1959,6 +1959,7 @@ Keys:
   arrowright: Flecha hacía la derecha
   arrowup: Flecha hacia arriba
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Volver a abrir la última ventana cerrada
   Keyboard Shortcuts: Atajos de teclado
   Edit Hint: Selecciona un atajo y pulsa una combinación de teclas nueva. Pulsa Retroceso o Supr para quitar la asignación.
   Change Shortcut: Cambiar atajo de {action}

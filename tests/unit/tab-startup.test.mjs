@@ -38,6 +38,7 @@ function createManager(t) {
   })
   window.setTitle = () => {}
   window.getBounds = () => ({ x: 0, y: 0, width: 1200, height: 800 })
+  window.getNormalBounds = window.getBounds
   window.isDestroyed = () => false
   window.isMaximized = () => false
   window.isFullScreen = () => false
@@ -60,6 +61,37 @@ function session(count) {
     })),
     activeTabId: `tab-${count - 1}`
   }
+}
+
+test('closed window snapshots restore tab state and groups without a disk save', async t => {
+  const manager = createManager(t)
+  const saved = session(3)
+  saved.tabs[0].isPinned = true
+  saved.tabs[1].isUnloaded = true
+  saved.tabs[1].color = 'blue'
+  saved.tabs[1].skipSilence = true
+  saved.groups = [{ id: 'research', name: 'Research', color: 'blue' }]
+  saved.tabs[1].groupId = 'research'
+  await manager.restoreFromData(saved, { restoreTabLoadState: true })
+  const snapshot = structuredClone(manager.getSessionData())
+  assert.deepEqual(snapshot.bounds, { x: 0, y: 0, width: 1200, height: 800, maximized: false, fullScreen: false })
+  const reopened = createManager(t)
+  await reopened.restoreFromData(snapshot, { restoreTabLoadState: true })
+  const restored = reopened.getSessionData()
+  assert.deepEqual(restored.tabs, snapshot.tabs)
+  assert.deepEqual(restored.groups, snapshot.groups)
+  assert.equal(restored.activeTabId, snapshot.activeTabId)
+})
+
+for (const count of [1, 3]) {
+  test(`closing all ${count} tabs retains the complete window snapshot`, async t => {
+    const manager = createManager(t)
+    await manager.restoreFromData(session(count), { restoreTabLoadState: true })
+    const before = structuredClone(manager.getSessionData())
+    await manager.closeTabs([...manager.tabs.keys()])
+    assert.equal(manager.tabs.size, 0)
+    assert.deepEqual(manager.getSessionDataForWindowClose(), before)
+  })
 }
 
 test('foreground tabs become selected before their content mounts', async t => {

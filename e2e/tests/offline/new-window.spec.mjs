@@ -166,6 +166,70 @@ test.describe('multi-tab window close confirmation', () => {
 test.describe('disabled multi-tab window close confirmation', () => {
   test.use({ seed: { settings: { confirmCloseWindowWithMultipleTabs: false } } })
 
+  for (const closeMethod of ['closing the window', 'closing the final tab', 'closing all tabs']) {
+    test(`reopens a closed window after ${closeMethod} with Ctrl+Shift+N`, async ({ app, page }) => {
+      const { newWindow, windowId } = await openSecondWindowWithTwoTabs(app, page)
+      await newWindow.locator('.sideNav a[href="#/history"]:visible').first().click()
+      await expect(newWindow).toHaveURL(/#\/history/)
+      if (closeMethod === 'closing the final tab') {
+        const state = await newWindow.evaluate(() => window.ftElectron.tabs.getState())
+        await newWindow.evaluate(id => window.ftElectron.tabs.close(id), state.tabs[0].id)
+      }
+      const before = await newWindow.evaluate(() => window.ftElectron.tabs.getState())
+      const closed = newWindow.waitForEvent('close')
+      if (closeMethod === 'closing the window') {
+        await app.electronApp.evaluate(({ BrowserWindow }, id) => BrowserWindow.fromId(id)?.close(), windowId)
+      } else {
+        await newWindow.evaluate(async method => {
+          const state = await window.ftElectron.tabs.getState()
+          if (method === 'closing the final tab') await window.ftElectron.tabs.close(state.activeTabId)
+          else await window.ftElectron.tabs.closeMultiple(state.tabs.map(tab => tab.id))
+        }, closeMethod).catch(error => {
+          if (!newWindow.isClosed()) throw error
+        })
+      }
+      await closed
+
+      const reopenedPromise = app.electronApp.waitForEvent('window')
+      await page.bringToFront()
+      await page.keyboard.press('Control+Shift+N')
+      const reopened = await reopenedPromise
+      await waitForAppReady(reopened)
+      await expect(reopened).toHaveURL(/#\/history/)
+      const after = await reopened.evaluate(() => window.ftElectron.tabs.getState())
+      expect(after.tabs.map(tab => tab.url)).toEqual(before.tabs.map(tab => tab.url))
+      expect(after.tabs.findIndex(tab => tab.id === after.activeTabId))
+        .toBe(before.tabs.findIndex(tab => tab.id === before.activeTabId))
+    })
+  }
+
+  test('retries reopening a window when initialization fails', async ({ app, page }) => {
+    const { newWindow, windowId } = await openSecondWindowWithTwoTabs(app, page)
+    await newWindow.locator('.sideNav a[href="#/history"]:visible').first().click()
+    await expect(newWindow).toHaveURL(/#\/history/)
+    const closed = newWindow.waitForEvent('close')
+    await app.electronApp.evaluate(({ BrowserWindow }, id) => BrowserWindow.fromId(id)?.close(), windowId)
+    await closed
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      const original = BrowserWindow.prototype.loadURL
+      globalThis.reopenFailureInjected = false
+      BrowserWindow.prototype.loadURL = async function () {
+        BrowserWindow.prototype.loadURL = original
+        globalThis.reopenFailureInjected = true
+        throw new Error('Injected reopen initialization failure')
+      }
+    })
+    await page.evaluate(() => window.ftElectron.reopenClosedWindow())
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.reopenFailureInjected)).toBe(true)
+    await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(1)
+    const reopenedPromise = app.electronApp.waitForEvent('window')
+    await page.evaluate(() => window.ftElectron.reopenClosedWindow())
+    const reopened = await reopenedPromise
+    await waitForAppReady(reopened)
+    await expect(reopened).toHaveURL(/#\/history/)
+    await expect(reopened.locator('.tab[data-tab-id]')).toHaveCount(2)
+  })
+
   test('can disable the multi-tab window close confirmation', async ({ app, page }) => {
     const { newWindow, windowId } = await openSecondWindowWithTwoTabs(app, page)
 
