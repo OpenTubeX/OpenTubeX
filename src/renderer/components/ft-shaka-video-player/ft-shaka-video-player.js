@@ -6228,6 +6228,7 @@ export default defineComponent({
     }
 
     function handleEnded() {
+      clearSabrBackoffTimer({ refreshPreview: true })
       if (abRepeatEnabled.value && hasValidAbRepeatRange()) {
         // Seeking to the media end can queue ended after seeked has returned
         // playback to A. Only count a natural arrival that is still at B.
@@ -6929,7 +6930,7 @@ export default defineComponent({
     }
 
     function startSabrBackoffTimer(backoffMs) {
-      if (props.localFilePlayback || props.manifestMimeType !== MANIFEST_TYPE_SABR || ignoreErrors || backoffMs <= 0) {
+      if (props.localFilePlayback || props.manifestMimeType !== MANIFEST_TYPE_SABR || ignoreErrors || video.value?.ended || backoffMs <= 0) {
         clearSabrBackoffTimer({ refreshPreview: true })
         return
       }
