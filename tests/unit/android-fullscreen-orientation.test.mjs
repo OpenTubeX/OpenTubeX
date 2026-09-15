@@ -53,7 +53,7 @@ for (const electron of [false, true]) {
     const context = vm.createContext({
       startInFullscreen: true, startInFullwindow: false, startInPip: false,
       isActiveTab: { value: false }, hasLoaded: { value: false },
-      ui: {}, player: { nativePlayback: electron ? undefined : { show: async () => calls.push('native') } },
+      ui: {}, player: { nativePlayback: electron ? undefined : { show: async () => calls.push('native'), isScreenOpen: () => true } },
       process: { env: { IS_ELECTRON: electron } },
       window: { ftElectron: { requestFullscreen: () => calls.push('electron') } },
       tabId: 'watch', console,
@@ -71,3 +71,31 @@ for (const electron of [false, true]) {
     assert.equal(calls.length, 1, 'canplay must not enter fullscreen again')
   })
 }
+
+test('Android retries fullscreen restoration when the native controller was not ready', async () => {
+  const start = source.indexOf('    function applyPendingPresentationModes(')
+  const body = source.slice(start, source.indexOf('\n    }', start) + 6)
+  let ready = false
+  let open = false
+  let attempts = 0
+  const context = vm.createContext({
+    startInFullscreen: true, startInFullwindow: false, startInPip: false,
+    isActiveTab: { value: true }, hasLoaded: { value: true }, ui: {},
+    player: { nativePlayback: {
+      async show() { attempts++; open = ready },
+      isScreenOpen: () => open,
+    } },
+    process: { env: { IS_ELECTRON: false } }, console,
+  })
+  const restore = vm.runInContext(`${body}\napplyPendingPresentationModes`, context)
+  restore()
+  await Promise.resolve()
+  assert.equal(context.startInFullscreen, true, 'A no-op show must retain the pending request')
+  ready = true
+  restore()
+  await Promise.resolve()
+  assert.equal(open, true)
+  assert.equal(context.startInFullscreen, false)
+  restore()
+  assert.equal(attempts, 2)
+})

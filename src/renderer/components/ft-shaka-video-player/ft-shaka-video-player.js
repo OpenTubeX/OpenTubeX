@@ -6293,8 +6293,10 @@ export default defineComponent({
       }
 
       if (startInFullscreen && hasLoaded.value && player?.nativePlayback) {
-        startInFullscreen = false
-        player.nativePlayback.show().catch(error => console.error('Unable to restore native fullscreen', error))
+        const nativePlayback = player.nativePlayback
+        nativePlayback.show().then(() => {
+          if (nativePlayback.isScreenOpen()) startInFullscreen = false
+        }).catch(error => console.error('Unable to restore native fullscreen', error))
       } else if (startInFullscreen && hasLoaded.value && process.env.IS_ELECTRON) {
         startInFullscreen = false
         window.ftElectron.requestFullscreen(tabId)
