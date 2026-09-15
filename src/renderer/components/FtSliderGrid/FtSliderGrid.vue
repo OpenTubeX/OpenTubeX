@@ -39,4 +39,12 @@
   flex-basis: var(--slider-size);
   max-inline-size: var(--slider-size);
 }
+
+@media only screen and (width <= 680px) {
+  .sliderGrid :deep(.pure-material-slider),
+  .sliderGrid:has(:nth-child(5)) :deep(.pure-material-slider) {
+    flex-basis: 100%;
+    max-inline-size: 380px;
+  }
+}
 </style>

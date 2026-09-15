@@ -11,6 +11,10 @@
   &.compact {
     margin: 0;
   }
+
+  @media (width <= 680px) {
+    inline-size: calc(100% - 32px);
+  }
 }
 
 .switch-input {
@@ -84,13 +88,15 @@
   }
 
   @media (width <= 680px) {
-    max-inline-size: 250px;
+    inline-size: 100%;
+    max-inline-size: 100%;
   }
 }
 
 .switch-label-text {
   min-inline-size: 0;
-  overflow-wrap: anywhere;
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 
 .containsTooltip .switch-label-text {
