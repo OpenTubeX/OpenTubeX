@@ -117,7 +117,7 @@ test.describe('fully seen eligibility', () => {
     { ...historyEntry('aaaaaaaaaaa', 'Live video'), isLive: true },
     { ...historyEntry('bbbbbbbbbbb', 'Upcoming video'), isUpcoming: true },
     { ...historyEntry('ccccccccccc', 'Zero duration'), lengthSeconds: 0 },
-    { ...historyEntry('ddddddddddd', 'Unknown duration'), lengthSeconds: undefined }
+    { ...historyEntry('ddddddddddd', 'Unknown duration'), lengthSeconds: '' }
   ]
   test.use({
     seed: {
