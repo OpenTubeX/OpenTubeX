@@ -16,7 +16,7 @@ patchedDependencies:
   '@capawesome/capacitor-clipboard@0.1.2': 729c6071cbf0e196e2212b015677cdd162c287dca48137c24250c0d056c9fd5b
   shaka-player@5.1.12: e81454ee0a9154ea22159447b4691ba189545a11f5282589cf45d630fda52e27
   vue-sonner@2.0.9: 1edf0a77b800d7b7f56694e3a77ff40dd2f7ba21658639d2ff90d5173eae26b4
-  youtubei.js@18.0.0: 9a6ae51924a2693d934c645d7fe5dbef0f0994eb10ea21eea9ddca4e7a1e616d
+  youtubei.js@18.0.0: a74ade61a943e91f7594469a5c56b2620aa78688a50d8b9ed7d4bcb0f6c89d0e
 
 importers:
 
@@ -174,7 +174,7 @@ importers:
         version: 4.1.0(vue@3.5.42(typescript@6.0.3))
       youtubei.js:
         specifier: ^18.0.0
-        version: 18.0.0(patch_hash=9a6ae51924a2693d934c645d7fe5dbef0f0994eb10ea21eea9ddca4e7a1e616d)
+        version: 18.0.0(patch_hash=a74ade61a943e91f7594469a5c56b2620aa78688a50d8b9ed7d4bcb0f6c89d0e)
     devDependencies:
       '@babel/core':
         specifier: ^8.0.1
@@ -11842,7 +11842,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@18.0.0(patch_hash=9a6ae51924a2693d934c645d7fe5dbef0f0994eb10ea21eea9ddca4e7a1e616d):
+  youtubei.js@18.0.0(patch_hash=a74ade61a943e91f7594469a5c56b2620aa78688a50d8b9ed7d4bcb0f6c89d0e):
     dependencies:
       '@bufbuild/protobuf': 2.12.1
       fflate: 0.8.3

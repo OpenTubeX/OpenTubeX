@@ -1000,7 +1000,7 @@ function parseLiveChatComment(comment) {
   const parsedComment = {
     id: comment.id,
     timestampText: formatLiveChatTimestamp(comment),
-    message: autolinker.link(parseLocalTextRuns(comment.message.runs, 20)),
+    message: parseLiveChatMessage(comment.message),
     author: {
       id: comment.author.id,
       name: comment.author.name,
@@ -1028,7 +1028,7 @@ function parseLiveChatSuperChat(superChat) {
   const parsedComment = {
     id: superChat.id,
     timestampText: formatLiveChatTimestamp(superChat),
-    message: autolinker.link(parseLocalTextRuns(superChat.message.runs, 20)),
+    message: parseLiveChatMessage(superChat.message),
     author: {
       id: superChat.author.id,
       name: superChat.author.name.text,
@@ -1041,6 +1041,10 @@ function parseLiveChatSuperChat(superChat) {
   }
 
   return parsedComment
+}
+
+function parseLiveChatMessage(message) {
+  return autolinker.link(parseLocalTextRuns(message.runs ?? [{ text: message.text ?? '' }], 20))
 }
 
 /**

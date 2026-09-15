@@ -473,6 +473,253 @@ diff --git a/dist/src/utils/ProtoUtils.js b/dist/src/utils/ProtoUtils.js
  }
  export function encodeNextParams(video_ids, playlist_title) {
      const writer = NextParams.encode({ videoId: video_ids, playlistTitle: playlist_title });
+diff --git a/dist/src/parser/classes/RecognitionShelf.js b/dist/src/parser/classes/RecognitionShelf.js
+--- a/dist/src/parser/classes/RecognitionShelf.js
++++ b/dist/src/parser/classes/RecognitionShelf.js
+@@ -13,7 +13,7 @@ export default class RecognitionShelf extends YTNode {
+         super();
+         this.title = new Text(data.title);
+         this.subtitle = new Text(data.subtitle);
+-        this.avatars = data.avatars.map((avatar) => new Thumbnail(avatar));
++        this.avatars = data.avatars?.map((avatar) => new Thumbnail(avatar)) ?? [];
+         this.button = Parser.parseItem(data.button, Button);
+         this.surface = data.surface;
+     }
+diff --git a/dist/src/parser/classes/ShoppingContentLineItemView.d.ts b/dist/src/parser/classes/ShoppingContentLineItemView.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..68ec9419255f0e7d5d6f2d128bbda93027e4d95e
+--- /dev/null
++++ b/dist/src/parser/classes/ShoppingContentLineItemView.d.ts
+@@ -0,0 +1,10 @@
++import { YTNode } from '../helpers.js';
++import { type RawNode } from '../index.js';
++import Text from './misc/Text.js';
++export default class ShoppingContentLineItemView extends YTNode {
++    static type: string;
++    text: Text;
++    font_attributes: RawNode;
++    can_shrink?: boolean;
++    constructor(data: RawNode);
++}
+diff --git a/dist/src/parser/classes/ShoppingContentLineItemView.js b/dist/src/parser/classes/ShoppingContentLineItemView.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..7650338f64fde687ddbf4ad9b231a9374a8b05a2
+--- /dev/null
++++ b/dist/src/parser/classes/ShoppingContentLineItemView.js
+@@ -0,0 +1,16 @@
++import { YTNode } from '../helpers.js';
++import Text from './misc/Text.js';
++export default class ShoppingContentLineItemView extends YTNode {
++    static type = 'ShoppingContentLineItemView';
++    text;
++    font_attributes;
++    can_shrink;
++    constructor(data) {
++        super();
++        this.text = Text.fromAttributed(data.text.attributedString);
++        this.font_attributes = data.text.fontAttributes;
++        if ('canShrink' in data) {
++            this.can_shrink = data.canShrink;
++        }
++    }
++}
+diff --git a/dist/src/parser/classes/ShoppingContentLineView.d.ts b/dist/src/parser/classes/ShoppingContentLineView.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..c42fca30e494fdd075f4460c6dfe9b5ade29d1fa
+--- /dev/null
++++ b/dist/src/parser/classes/ShoppingContentLineView.d.ts
+@@ -0,0 +1,11 @@
++import { YTNode, type ObservedArray } from '../helpers.js';
++import { type RawNode } from '../index.js';
++import ShoppingContentLineItemView from './ShoppingContentLineItemView.js';
++export default class ShoppingContentLineView extends YTNode {
++    static type: string;
++    items: ObservedArray<ShoppingContentLineItemView>;
++    line_height: number;
++    wrap_content?: boolean;
++    item_gap: number;
++    constructor(data: RawNode);
++}
+diff --git a/dist/src/parser/classes/ShoppingContentLineView.js b/dist/src/parser/classes/ShoppingContentLineView.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..96b6d82506cf02a46d95eb417a9f912a55a11202
+--- /dev/null
++++ b/dist/src/parser/classes/ShoppingContentLineView.js
+@@ -0,0 +1,19 @@
++import { YTNode } from '../helpers.js';
++import { Parser } from '../index.js';
++import ShoppingContentLineItemView from './ShoppingContentLineItemView.js';
++export default class ShoppingContentLineView extends YTNode {
++    static type = 'ShoppingContentLineView';
++    items;
++    line_height;
++    wrap_content;
++    item_gap;
++    constructor(data) {
++        super();
++        this.items = Parser.parseArray(data.items, ShoppingContentLineItemView);
++        this.line_height = data.lineHeight;
++        if ('wrapContent' in data) {
++            this.wrap_content = data.wrapContent;
++        }
++        this.item_gap = data.itemGap;
++    }
++}
+diff --git a/dist/src/parser/classes/ShoppingTimelyShelfContentView.d.ts b/dist/src/parser/classes/ShoppingTimelyShelfContentView.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..198de1e2bf8f82ddefc543a4d38afa532b08d626
+--- /dev/null
++++ b/dist/src/parser/classes/ShoppingTimelyShelfContentView.d.ts
+@@ -0,0 +1,16 @@
++import { YTNode, type ObservedArray } from '../helpers.js';
++import { type RawNode } from '../index.js';
++import ButtonView from './ButtonView.js';
++import ShoppingContentLineView from './ShoppingContentLineView.js';
++import RendererContext from './misc/RendererContext.js';
++export default class ShoppingTimelyShelfContentView extends YTNode {
++    static type: string;
++    image: RawNode;
++    line_1: ShoppingContentLineView | null;
++    line_2: ShoppingContentLineView | null;
++    buttons: ObservedArray<ButtonView>;
++    padding: RawNode;
++    background_color: number;
++    renderer_context?: RendererContext;
++    constructor(data: RawNode);
++}
+diff --git a/dist/src/parser/classes/ShoppingTimelyShelfContentView.js b/dist/src/parser/classes/ShoppingTimelyShelfContentView.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..105c3ee763bcd9281c1b66740fa1848676657c43
+--- /dev/null
++++ b/dist/src/parser/classes/ShoppingTimelyShelfContentView.js
+@@ -0,0 +1,27 @@
++import { YTNode } from '../helpers.js';
++import { Parser } from '../index.js';
++import ButtonView from './ButtonView.js';
++import ShoppingContentLineView from './ShoppingContentLineView.js';
++import RendererContext from './misc/RendererContext.js';
++export default class ShoppingTimelyShelfContentView extends YTNode {
++    static type = 'ShoppingTimelyShelfContentView';
++    image;
++    line_1;
++    line_2;
++    buttons;
++    padding;
++    background_color;
++    renderer_context;
++    constructor(data) {
++        super();
++        this.image = data.image;
++        this.line_1 = Parser.parseItem(data.line1, ShoppingContentLineView);
++        this.line_2 = Parser.parseItem(data.line2, ShoppingContentLineView);
++        this.buttons = Parser.parseArray(data.button, ButtonView);
++        this.padding = data.padding;
++        this.background_color = data.backgroundColor;
++        if ('rendererContext' in data) {
++            this.renderer_context = new RendererContext(data.rendererContext);
++        }
++    }
++}
+diff --git a/dist/src/parser/classes/ShoppingTimelyShelfView.d.ts b/dist/src/parser/classes/ShoppingTimelyShelfView.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..e6c682a8ec8c43773c5d9a50d645b5e449d33e60
+--- /dev/null
++++ b/dist/src/parser/classes/ShoppingTimelyShelfView.d.ts
+@@ -0,0 +1,28 @@
++import { YTNode } from '../helpers.js';
++import { type RawNode } from '../index.js';
++import NavigationEndpoint from './NavigationEndpoint.js';
++import ShoppingTimelyShelfContentView from './ShoppingTimelyShelfContentView.js';
++export default class ShoppingTimelyShelfView extends YTNode {
++    static type: string;
++    offer_id_to_variants: {
++        key: string;
++        value: {
++            shelf: ShoppingTimelyShelfContentView | null;
++        };
++    }[];
++    cue_ranges: {
++        id: string;
++        start_time: {
++            seconds: string;
++        };
++        end_time: {
++            seconds: string;
++            nanos: number;
++        };
++        on_enter: {
++            click_tracking_params: string;
++            shopping_timely_shelf_update_command: NavigationEndpoint;
++        };
++    }[];
++    constructor(data: RawNode);
++}
+diff --git a/dist/src/parser/classes/ShoppingTimelyShelfView.js b/dist/src/parser/classes/ShoppingTimelyShelfView.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..45748bdbfe50e166f9044b0cbbb9467faad8938c
+--- /dev/null
++++ b/dist/src/parser/classes/ShoppingTimelyShelfView.js
+@@ -0,0 +1,32 @@
++import { YTNode } from '../helpers.js';
++import { Parser } from '../index.js';
++import NavigationEndpoint from './NavigationEndpoint.js';
++import ShoppingTimelyShelfContentView from './ShoppingTimelyShelfContentView.js';
++export default class ShoppingTimelyShelfView extends YTNode {
++    static type = 'ShoppingTimelyShelfView';
++    offer_id_to_variants;
++    cue_ranges;
++    constructor(data) {
++        super();
++        this.offer_id_to_variants = data.offerIdToVariants.map((item) => ({
++            key: item.key,
++            value: {
++                shelf: Parser.parseItem(item.value.shelf, ShoppingTimelyShelfContentView)
++            }
++        }));
++        this.cue_ranges = data.cueRanges.map((item) => ({
++            id: item.id,
++            start_time: {
++                seconds: item.startTime.seconds
++            },
++            end_time: {
++                seconds: item.endTime.seconds,
++                nanos: item.endTime.nanos
++            },
++            on_enter: {
++                click_tracking_params: item.onEnter.clickTrackingParams,
++                shopping_timely_shelf_update_command: new NavigationEndpoint(item.onEnter.shoppingTimelyShelfUpdateCommand)
++            }
++        }));
++    }
++}
+diff --git a/dist/src/parser/nodes.d.ts b/dist/src/parser/nodes.d.ts
+index a4504dd14432fee77c9afdd92b99c9721adaee72..7bac9ee05cf4fcf15e82dfad67c95773926d76fe 100644
+--- a/dist/src/parser/nodes.d.ts
++++ b/dist/src/parser/nodes.d.ts
+@@ -451,5 +451,9 @@ export { default as ShareTarget } from './classes/ShareTarget.js';
+ export { default as SheetView } from './classes/SheetView.js';
+ export { default as Shelf } from './classes/Shelf.js';
++export { default as ShoppingContentLineItemView } from './classes/ShoppingContentLineItemView.js';
++export { default as ShoppingContentLineView } from './classes/ShoppingContentLineView.js';
++export { default as ShoppingTimelyShelfContentView } from './classes/ShoppingTimelyShelfContentView.js';
++export { default as ShoppingTimelyShelfView } from './classes/ShoppingTimelyShelfView.js';
+ export { default as ShortsLockupView } from './classes/ShortsLockupView.js';
+ export { default as ShowCustomThumbnail } from './classes/ShowCustomThumbnail.js';
+ export { default as ShowingResultsFor } from './classes/ShowingResultsFor.js';
+diff --git a/dist/src/parser/nodes.js b/dist/src/parser/nodes.js
+index c14752245565fc3e647264f6618804cfd4bafe93..466673024dbf9a26ac613a3fef666d2085f1f4d0 100644
+--- a/dist/src/parser/nodes.js
++++ b/dist/src/parser/nodes.js
+@@ -453,5 +453,9 @@ export { default as ShareTarget } from './classes/ShareTarget.js';
+ export { default as SheetView } from './classes/SheetView.js';
+ export { default as Shelf } from './classes/Shelf.js';
++export { default as ShoppingContentLineItemView } from './classes/ShoppingContentLineItemView.js';
++export { default as ShoppingContentLineView } from './classes/ShoppingContentLineView.js';
++export { default as ShoppingTimelyShelfContentView } from './classes/ShoppingTimelyShelfContentView.js';
++export { default as ShoppingTimelyShelfView } from './classes/ShoppingTimelyShelfView.js';
+ export { default as ShortsLockupView } from './classes/ShortsLockupView.js';
+ export { default as ShowCustomThumbnail } from './classes/ShowCustomThumbnail.js';
+ export { default as ShowingResultsFor } from './classes/ShowingResultsFor.js';
 diff --git a/dist/src/parser/classes/CommentFilterContextView.d.ts b/dist/src/parser/classes/CommentFilterContextView.d.ts
 new file mode 100644
 index 0000000000000000000000000000000000000000..38ae8fba7c1c76c25f316b3b989e65694a8ba096
