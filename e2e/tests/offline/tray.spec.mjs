@@ -15,8 +15,12 @@ async function captureTray(app, page) {
       return original.call(this, menu)
     }
   })
-  // Updating the media state rebuilds the existing tray menu without replacing the icon.
-  await page.evaluate(() => window.ftElectron.tabs.setMediaSessionState({ playbackState: 'none', actions: [] }))
+  // Changing the media controls rebuilds the existing tray menu without replacing the icon.
+  await page.evaluate(() => window.ftElectron.tabs.setMediaSessionState({
+    playbackState: 'paused',
+    hasMetadata: true,
+    actions: ['play']
+  }))
   await expect.poll(() => app.electronApp.evaluate(() => !!globalThis.testTray)).toBe(true)
 }
 

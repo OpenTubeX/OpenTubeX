@@ -3081,13 +3081,13 @@ function runApp() {
           (wasLastWindow || tabManager.tabs.size > 1)) {
         event.preventDefault()
 
-        let quitsApp = wasLastWindow && !trayOnClose
+        let quitsApp = wasLastWindow
         let confirmed = quitsApp
           ? await confirmCloseApp(newWindow, keepRefreshingInBackground)
           : await confirmCloseWindowWithMultipleTabs(newWindow, tabManager.tabs.size)
         const openWindowCount = BrowserWindow.getAllWindows()
           .filter(window => !closingWindowIds.has(window.id)).length
-        if (confirmed && !wasLastWindow && openWindowCount === 1 && !trayOnClose) {
+        if (confirmed && !wasLastWindow && openWindowCount === 1) {
           confirmed = await confirmCloseApp(newWindow, keepRefreshingInBackground)
           quitsApp = confirmed
         }
