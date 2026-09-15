@@ -17,6 +17,8 @@ Maximize: 'تكبير'
 Restore: 'استعادة'
 Close Tab: إغلاق علامة التبويب
 Close Confirmation:
+  Background Sync Warning: سيؤدي إنهاء التطبيق إلى إيقاف تحديث الاشتراكات في الخلفية.
+  Hide Window: إخفاء النافذة
   Title: هل تريد إنهاء برنامج OpenTubeX؟
   Message: هل أنت متأكد أنك تريد إنهاء OpenTubeX؟
   Quit: 'إنهاء'

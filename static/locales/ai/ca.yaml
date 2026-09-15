@@ -17,6 +17,8 @@ Maximize: Maximitza
 Restore: Restaura
 Close Tab: Tanca la pestanya
 Close Confirmation:
+  Background Sync Warning: En sortir, s'aturarà l'actualització de subscripcions en segon pla.
+  Hide Window: Amaga la finestra
   Title: Voleu sortir de l'OpenTubeX?
   Message: Segur que voleu sortir de l'OpenTubeX?
   Quit: Surt

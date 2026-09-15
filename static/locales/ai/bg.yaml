@@ -17,6 +17,8 @@ Maximize: Максимизиране
 Restore: Възстановяване
 Close Tab: Затваряне на раздела
 Close Confirmation:
+  Background Sync Warning: Излизането ще спре фоновото обновяване на абонаментите.
+  Hide Window: Скриване на прозореца
   Title: Изход от OpenTubeX?
   Message: Наистина ли искате да излезете от OpenTubeX?
   Quit: Изход

@@ -17,6 +17,8 @@ Maximize: Maximizar
 Restore: Restaurar
 Close Tab: Cerrar pestaña
 Close Confirmation:
+  Background Sync Warning: Salir detendrá las actualizaciones de suscripciones en segundo plano.
+  Hide Window: Ocultar ventana
   Title: ¿Salir de OpenTubeX?
   Message: ¿Seguro que quieres salir de OpenTubeX?
   Quit: Salir

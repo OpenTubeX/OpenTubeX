@@ -17,6 +17,8 @@ Maximize: הגדלה
 Restore: שחזור
 Close Tab: סגירת הכרטיסייה
 Close Confirmation:
+  Background Sync Warning: יציאה תפסיק את רענון המינויים ברקע.
+  Hide Window: הסתרת החלון
   Title: לצאת מ־OpenTubeX?
   Message: האם ברצונך לצאת מ־OpenTubeX?
   Quit: יציאה

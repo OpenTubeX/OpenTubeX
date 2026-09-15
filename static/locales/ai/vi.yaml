@@ -17,6 +17,8 @@ Maximize: Phóng to
 Restore: Khôi phục
 Close Tab: Đóng thẻ
 Close Confirmation:
+  Background Sync Warning: Thoát sẽ dừng làm mới gói đăng ký trong nền.
+  Hide Window: Ẩn cửa sổ
   Title: Thoát OpenTubeX?
   Message: Bạn có chắc muốn thoát OpenTubeX không?
   Quit: Thoát
