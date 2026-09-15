@@ -112,6 +112,34 @@ test('marks progress fully seen from the menu and the configurable thumbnail act
   await expect.poll(persistedProgress).toEqual({ watchProgress: 60, isWatched: true })
 })
 
+test.describe('fully seen eligibility', () => {
+  const ineligibleVideos = [
+    { ...historyEntry('aaaaaaaaaaa', 'Live video'), isLive: true },
+    { ...historyEntry('bbbbbbbbbbb', 'Upcoming video'), isUpcoming: true },
+    { ...historyEntry('ccccccccccc', 'Zero duration'), lengthSeconds: 0 },
+    { ...historyEntry('ddddddddddd', 'Unknown duration'), lengthSeconds: undefined }
+  ]
+  test.use({
+    seed: {
+      settings: { extraThumbnailAction: 'markAsFullySeen' },
+      history: ineligibleVideos
+    }
+  })
+
+  test('hides fully seen menu and thumbnail actions for ineligible videos', async ({ page }) => {
+    await goTo(page, 'history')
+    for (const { title } of ineligibleVideos) {
+      const video = page.locator('.ft-list-video').filter({ hasText: title })
+      await video.hover()
+      await expect(video.locator('.extraThumbnailActionIcon')).toHaveCount(0)
+      await video.locator('.title').click({ button: 'right' })
+      await expect(page.getByRole('menuitem', { name: 'Remove From History', exact: true })).toBeVisible()
+      await expect(page.getByRole('menuitem', { name: 'Mark as fully seen', exact: true })).toHaveCount(0)
+      await page.keyboard.press('Escape')
+    }
+  })
+})
+
 test.describe('video link copy actions', () => {
   test.use({
     seed: {
