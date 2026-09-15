@@ -190,6 +190,8 @@ User Playlists:
     This playlist could not be loaded.: Không thể tải danh sách phát này.
     More videos could not be loaded.: Không thể tải thêm video.
 History:
+  Repair: "Sửa lịch sử"
+  Repair Progress: "Đã kiểm tra {checked}/{total} · Đã sửa {repaired} · Thất bại {failed}"
   Mark All As Watched: Đánh dấu tất cả là đã xem
   Mark All As Watched Confirmation: Bạn có chắc muốn đánh dấu mọi video trong lịch sử là đã xem không?
   All History Marked as Watched: Đã đánh dấu mọi video trong lịch sử là đã xem

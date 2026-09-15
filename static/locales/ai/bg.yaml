@@ -188,6 +188,8 @@ User Playlists:
     This playlist could not be loaded.: Този плейлист не можа да бъде зареден.
     More videos could not be loaded.: Не можаха да бъдат заредени още видеоклипове.
 History:
+  Repair: "Поправяне на историята"
+  Repair Progress: "Проверени {checked}/{total} · Поправени {repaired} · Неуспешни {failed}"
   Mark All As Watched: Отбележи всички като гледани
   Mark All As Watched Confirmation: Наистина ли искате да отбележите като гледани всички видеоклипове в историята си?
   All History Marked as Watched: Всички видеоклипове в историята ви са отбелязани като гледани

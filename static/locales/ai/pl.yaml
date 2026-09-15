@@ -974,3 +974,7 @@ App Icon:
   Saved Message: "Ikona została zapisana. Aktualizacja programu uruchamiającego może chwilę potrwać."
   Title: "Ikona aplikacji"
   Error: "Nie udało się wczytać lub zmienić ikony aplikacji"
+
+History:
+  Repair: "Napraw historię"
+  Repair Progress: "Sprawdzono {checked}/{total} · Naprawiono {repaired} · Błędy {failed}"

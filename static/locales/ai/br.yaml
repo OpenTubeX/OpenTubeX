@@ -186,6 +186,8 @@ User Playlists:
     This playlist could not be loaded.: "N'eus ket bet gallet kargañ ar roll-videoioù-mañ."
     More videos could not be loaded.: "N'eus ket bet gallet kargañ muioc'h a videoioù."
 History:
+  Repair: "Kempenn an istor"
+  Repair Progress: "Gwiriet {checked}/{total} · Kempennet {repaired} · C’hwitet {failed}"
   Mark All As Watched: "Merkañ pep tra evel sellet"
   Mark All As Watched Confirmation: "Ha sur oc'h e faot deoc'h merkañ an holl videoioù en hoc'h istor evel sellet?"
   All History Marked as Watched: "Merket eo bet holl videoioù hoc'h istor evel sellet"

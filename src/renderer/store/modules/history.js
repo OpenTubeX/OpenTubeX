@@ -63,7 +63,9 @@ const actions = {
       commit('applyHistorySyncChanges', { insertions: [], updates: result.records, deletions: [] })
     }
     if (result.seenVideos != null) await dispatch('applySubscriptionSeenVideos', result.seenVideos)
-    return result.records.length
+    return update.metadata
+      ? { repaired: result.records.length, failed: result.failedCount }
+      : result.records.length
   },
 
   async updateHistory({ dispatch }, record) {

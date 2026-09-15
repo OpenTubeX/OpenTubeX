@@ -304,6 +304,8 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Seznam predvajanja {playlistName} je uspešno ustvarjen.
       There was an issue with creating the playlist.: Pri ustvarjanju seznama predvajanja je prišlo do težave.
 History:
+  Repair: "Popravi zgodovino"
+  Repair Progress: "Preverjeno {checked}/{total} · Popravljeno {repaired} · Neuspešno {failed}"
   Case Sensitive Search: Iskanje z razlikovanjem velikih in malih črk
   Mark All As Watched: Označi vse kot ogledano
   Mark All As Watched Confirmation: Ali res želite vse videoposnetke v zgodovini označiti kot ogledane?

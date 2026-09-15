@@ -188,6 +188,8 @@ User Playlists:
     This playlist could not be loaded.: Nid oedd modd llwytho'r rhestr chwarae hon.
     More videos could not be loaded.: Nid oedd modd llwytho rhagor o fideos.
 History:
+  Repair: "Trwsio’r hanes"
+  Repair Progress: "Gwiriwyd {checked}/{total} · Trwsiwyd {repaired} · Methwyd {failed}"
   Mark All As Watched: Marcio'r cyfan fel wedi'u gwylio
   Mark All As Watched Confirmation: Ydych chi'n siŵr eich bod am farcio pob fideo yn eich hanes fel wedi'i wylio?
   All History Marked as Watched: Mae pob fideo yn eich hanes wedi'i farcio fel wedi'i wylio

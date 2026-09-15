@@ -190,6 +190,8 @@ User Playlists:
     This playlist could not be loaded.: Не вдалося завантажити цей список відтворення.
     More videos could not be loaded.: Не вдалося завантажити інші відео.
 History:
+  Repair: "Виправити історію"
+  Repair Progress: "Перевірено {checked}/{total} · Виправлено {repaired} · Помилок {failed}"
   Mark All As Watched: Позначити все як переглянуте
   Mark All As Watched Confirmation: Позначити всі відео в історії як переглянуті?
   All History Marked as Watched: Усі відео в історії позначено як переглянуті

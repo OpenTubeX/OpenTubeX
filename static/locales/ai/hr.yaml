@@ -188,6 +188,8 @@ User Playlists:
     This playlist could not be loaded.: Ovaj popis za reprodukciju nije moguće učitati.
     More videos could not be loaded.: Dodatne videozapise nije moguće učitati.
 History:
+  Repair: "Popravi povijest"
+  Repair Progress: "Provjereno {checked}/{total} · Popravljeno {repaired} · Neuspjelo {failed}"
   Mark All As Watched: Označi sve kao pogledano
   Mark All As Watched Confirmation: Jeste li sigurni da sve videozapise u povijesti želite označiti kao pogledane?
   All History Marked as Watched: Svi videozapisi u povijesti označeni su kao pogledani

@@ -190,6 +190,8 @@ User Playlists:
     This playlist could not be loaded.: לא ניתן לטעון את רשימת ההשמעה הזאת.
     More videos could not be loaded.: לא ניתן לטעון סרטונים נוספים.
 History:
+  Repair: "תיקון ההיסטוריה"
+  Repair Progress: "נבדקו {checked}/{total} · תוקנו {repaired} · נכשלו {failed}"
   Mark All As Watched: סימון הכול כנצפה
   Mark All As Watched Confirmation: לסמן את כל הסרטונים בהיסטוריה שלך כנצפו?
   All History Marked as Watched: כל הסרטונים בהיסטוריה שלך סומנו כנצפו

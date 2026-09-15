@@ -188,6 +188,8 @@ User Playlists:
     This playlist could not be loaded.: Acest playlist nu a putut fi încărcat.
     More videos could not be loaded.: Nu au putut fi încărcate mai multe videoclipuri.
 History:
+  Repair: "Repară istoricul"
+  Repair Progress: "Verificate {checked}/{total} · Reparate {repaired} · Eșuate {failed}"
   Mark All As Watched: Marchează totul ca vizionat
   Mark All As Watched Confirmation: Sigur doriți să marcați ca vizionate toate videoclipurile din istoric?
   All History Marked as Watched: Toate videoclipurile din istoric au fost marcate ca vizionate

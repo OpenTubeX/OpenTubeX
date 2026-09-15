@@ -186,6 +186,8 @@ User Playlists:
     This playlist could not be loaded.: 无法加载此播放列表。
     More videos could not be loaded.: 无法加载更多视频。
 History:
+  Repair: "修复历史记录"
+  Repair Progress: "已检查 {checked}/{total} · 已修复 {repaired} · 失败 {failed}"
   Mark All As Watched: 全部标记为已观看
   Mark All As Watched Confirmation: 确定要将历史记录中的所有视频标记为已观看吗？
   All History Marked as Watched: 已将历史记录中的所有视频标记为已观看

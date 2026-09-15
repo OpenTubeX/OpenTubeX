@@ -200,6 +200,8 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: Відэа дададзена ў 1 спіс прайгравання | Відэа дададзена ў {playlistCount} спісы прайгравання | Відэа дададзена ў {playlistCount} спісаў прайгравання
 History:
+  Repair: "Выправіць гісторыю"
+  Repair Progress: "Праверана {checked}/{total} · Выпраўлена {repaired} · Памылак {failed}"
   Mark All As Watched: Пазначыць усё прагледжаным
   Mark All As Watched Confirmation: Сапраўды пазначыць усе відэа ў гісторыі прагледжанымі?
   All History Marked as Watched: Усе відэа ў гісторыі пазначаныя прагледжанымі

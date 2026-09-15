@@ -188,6 +188,8 @@ User Playlists:
     This playlist could not be loaded.: Ekki tókst að hlaða þessum spilunarlista.
     More videos could not be loaded.: Ekki tókst að hlaða fleiri myndböndum.
 History:
+  Repair: "Laga feril"
+  Repair Progress: "Athugað {checked}/{total} · Lagað {repaired} · Mistókst {failed}"
   Mark All As Watched: Merkja öll myndbönd sem skoðuð
   Mark All As Watched Confirmation: Viltu örugglega merkja öll myndbönd í áhorfsferlinum sem skoðuð?
   All History Marked as Watched: Öll myndbönd í áhorfsferlinum hafa verið merkt sem skoðuð

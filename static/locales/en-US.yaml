@@ -437,6 +437,8 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Playlist {playlistName} has been successfully created.
       There was an issue with creating the playlist.: There was an issue with creating the playlist.
 History:
+  Repair: "Repair History"
+  Repair Progress: "Checked {checked}/{total} · Repaired {repaired} · Failed {failed}"
   # On History Page
   History: History
   Watch History: Watch History

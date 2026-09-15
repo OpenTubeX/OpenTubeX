@@ -186,6 +186,8 @@ User Playlists:
     This playlist could not be loaded.: Seda esitusloendit ei saanud laadida.
     More videos could not be loaded.: Rohkem videoid ei saanud laadida.
 History:
+  Repair: "Paranda ajalugu"
+  Repair Progress: "Kontrollitud {checked}/{total} · Parandatud {repaired} · Ebaõnnestunud {failed}"
   Mark All As Watched: Märgi kõik vaadatuks
   Mark All As Watched Confirmation: Kas soovite kindlasti kõik ajaloos olevad videod vaadatuks märkida?
   All History Marked as Watched: Kõik ajaloos olevad videod on vaadatuks märgitud

@@ -1898,3 +1898,14 @@ export async function getLocalCommunityPostComments(postId, channelId) {
 
   return await innertube.getPostComments(postId, channelId)
 }
+
+/** Fetch public history metadata without player setup or stream extraction. */
+export async function getLocalHistoryMetadata(videoId, signal) {
+  const innertube = await createInnertube({ signal })
+  const response = await innertube.actions.execute('/player', {
+    videoId,
+    contentCheckOk: true,
+    racyCheckOk: true,
+  })
+  return response.data
+}

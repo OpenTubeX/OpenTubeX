@@ -186,6 +186,8 @@ User Playlists:
     This playlist could not be loaded.: Impossibile caricare questa playlist.
     More videos could not be loaded.: Impossibile caricare altri video.
 History:
+  Repair: "Ripara cronologia"
+  Repair Progress: "Controllati {checked}/{total} · Riparati {repaired} · Non riusciti {failed}"
   Mark All As Watched: Segna tutto come guardato
   Mark All As Watched Confirmation: Vuoi davvero segnare come guardati tutti i video nella cronologia?
   All History Marked as Watched: Tutti i video nella cronologia sono stati segnati come guardati

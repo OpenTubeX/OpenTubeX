@@ -169,9 +169,29 @@ class History {
     return db.history.findAsync({}).sort({ timeWatched: -1 })
   }
 
-  static updateSubscriptionState({ records = [], unseenVideo }) {
+  static updateSubscriptionState({ records = [], unseenVideo, metadata }) {
     return Settings.runSeenVideosUpdate(async () => {
       const updatedRecords = []
+      if (metadata) {
+        let failedCount = 0
+        for (const patch of metadata) {
+          const fields = {}
+          for (const key of ['title', 'author', 'authorId', 'description', 'published', 'lengthSeconds', 'isLive', 'liveNow', 'isUpcoming']) {
+            if (patch[key] !== undefined) fields[key] = patch[key]
+          }
+          if (Object.keys(fields).length === 0) continue
+          try {
+            const { affectedDocuments } = await db.history.updateAsync(
+              { videoId: patch.videoId }, { $set: fields }, { returnUpdatedDocs: true }
+            )
+            if (affectedDocuments) updatedRecords.push(affectedDocuments)
+          } catch (error) {
+            console.error(error)
+            failedCount++
+          }
+        }
+        return { records: updatedRecords, seenVideos: null, failedCount }
+      }
       if (unseenVideo) {
         const { affectedDocuments } = await db.history.updateAsync(
           { videoId: unseenVideo.videoId },
