@@ -89,6 +89,13 @@ test('publishes all architecture APKs alongside the existing desktop artifacts',
 })
 
 for (const file of ['build', 'release']) {
+  test(`${file} workflow requests only available Android SDK packages`, async () => {
+    const workflow = load(await readFile(`.github/workflows/${file}.yml`, 'utf8'))
+    const steps = Object.values(workflow.jobs).flatMap(job => job.steps ?? [])
+    const setup = steps.find(step => step.name === 'Set up Android SDK')
+    assert.equal(setup.with?.packages, 'platform-tools')
+  })
+
   test(`${file} workflow omits Android build summaries and shrinking report uploads`, async () => {
     const workflow = load(await readFile(`.github/workflows/${file}.yml`, 'utf8'))
     const steps = Object.values(workflow.jobs).flatMap(job => job.steps ?? [])
