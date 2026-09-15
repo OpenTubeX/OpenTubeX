@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 
-import { test, expect, goTo, waitForAppReady, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, waitForAppReady, setWindowSize, expectScrollAtRenderedEnd } from '../../helpers/app.mjs'
 
 const RELEASES_URL = /^https:\/\/api\.github\.com\/repos\/OpenTubeX\/OpenTubeX\/releases/
 const COMMIT_HASH = '3904e64f503cde6be8793606a04ad69c5d57cef0'
@@ -107,12 +107,7 @@ for (const uiScale of [100, 95]) {
     for (const size of [{ width: 481, height: 1000 }, { width: 1000, height: 900 }]) {
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await setWindowSize(app, page, size)
-      await expect.poll(() => scroller.evaluate(element => {
-        const content = element.firstElementChild
-        const end = content.getBoundingClientRect().bottom - element.getBoundingClientRect().top +
-          element.scrollTop - element.clientTop - element.clientHeight
-        return Math.abs(element.scrollTop - Math.max(0, end))
-      })).toBeLessThanOrEqual(1)
+      await expectScrollAtRenderedEnd(scroller)
       await expect.poll(() => scrollbar.evaluate(element => {
         const track = element.querySelector('.os-scrollbar-track').getBoundingClientRect()
         const handle = element.querySelector('.os-scrollbar-handle').getBoundingClientRect()

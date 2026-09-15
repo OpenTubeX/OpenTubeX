@@ -2,6 +2,18 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { test, expect, goToSettingsSection, latestSettings, openNewWindowFromTabBar, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
 
+async function reconnect(page) {
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+    window.dispatchEvent(new Event('offline'))
+  })
+  await expect(page.locator('.connectionStatus')).toContainText('Offline')
+  await page.evaluate(() => {
+    delete navigator.onLine
+    window.dispatchEvent(new Event('online'))
+  })
+}
+
 const profiles = Array.from({ length: 16 }, (_, index) => ({
   _id: `profile-${index}`,
   name: index < 2 ? 'Music' : `Profile ${index} <test> ${'Long name '.repeat(8)}`,
@@ -128,7 +140,7 @@ for (const uiScale of [95, 125]) {
       await expect(autoSync).toBeChecked()
       await page.keyboard.press('Escape')
       await expect(page.locator('.settingsWindow')).toBeHidden()
-      await page.evaluate(() => window.dispatchEvent(new Event('online')))
+      await reconnect(page)
       const notification = page.locator('.toast', { hasText: 'Sync stopped to prevent data loss.' })
       await expect(notification).toBeVisible()
       await expect(page.getByRole('dialog', { name: 'Confirm destructive sync?' })).toBeHidden()
@@ -291,7 +303,7 @@ test.describe('automatic sync recovery', () => {
     await sync.getByRole('checkbox', { name: 'Sync automatically after changes and every five minutes' }).press('Space')
     await page.keyboard.press('Escape')
     await expect(page.locator('.settingsWindow')).toBeHidden()
-    await page.evaluate(() => window.dispatchEvent(new Event('online')))
+    await reconnect(page)
     const notification = page.locator('.toast', { hasText: 'Sync stopped to prevent data loss.' })
     await expect(notification).toBeVisible()
     await notification.screenshot({ path: testInfo.outputPath('sync-notification.png') })

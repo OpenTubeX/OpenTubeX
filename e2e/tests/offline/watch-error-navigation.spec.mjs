@@ -56,6 +56,12 @@ async function mockBlockedVideo({
   await page.route(/^https?:\/\//, async (route, request) => {
     const url = request.url()
 
+    if (url.startsWith('https://www.youtube.com/oembed?')) {
+      // No fallback title is available. A transport abort would put subsequent
+      // YouTube requests into network recovery instead of testing the IP block.
+      return route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
+    }
+
     if (url === 'https://www.youtube.com/iframe_api') {
       return route.fulfill({ status: 200, contentType: 'text/javascript', body: 'player\\/test-player\\/' })
     }
@@ -117,6 +123,15 @@ async function mockBlockedVideo({
             delete primaryInfo.relativeDateText
           }
           delete json.playerOverlays?.playerOverlayRenderer?.videoDetails?.playerOverlayVideoDetailsRenderer?.title
+          // The watch page also reads titles from the structured description.
+          for (const panel of json.engagementPanels ?? []) {
+            const items = panel.engagementPanelSectionListRenderer?.content
+              ?.structuredDescriptionContentRenderer?.items ?? []
+            for (const item of items) {
+              delete item.videoDescriptionHeaderRenderer?.title
+              delete item.videoTitleHeaderViewModel?.videoTitle
+            }
+          }
           body = Buffer.from(JSON.stringify(json))
         }
         return route.fulfill({ status: 200, contentType: 'application/json', body })

@@ -249,11 +249,12 @@ test('distraction-free switch disables the early splash in new windows and can r
       await gate
       await route.continue()
     })
+    let browserWindow
     try {
       const created = app.electronApp.waitForEvent('window')
       await page.evaluate(() => window.ftElectron.openInNewWindow('/history'))
       const nextPage = await created
-      const browserWindow = await app.electronApp.browserWindow(nextPage)
+      browserWindow = await app.electronApp.browserWindow(nextPage)
       await expect.poll(() => browserWindow.evaluate(window => window.isVisible())).toBe(true)
       await expect(nextPage.locator('.topNav')).toHaveCount(0)
       if (hidden) {
@@ -267,10 +268,10 @@ test('distraction-free switch disables the early splash in new windows and can r
       await expect(nextPage.locator('.topNav')).toBeVisible()
       await expect(nextPage.locator('#startup-splash')).toHaveCount(0)
       await expect(nextPage.locator('#app')).not.toHaveAttribute('inert')
-      await browserWindow.evaluate(window => window.destroy())
     } finally {
       releaseRenderer()
       await context.unrouteAll({ behavior: 'wait' })
+      await browserWindow?.evaluate(window => window.destroy())
     }
   }
 })

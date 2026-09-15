@@ -60,10 +60,16 @@ export async function updateInputWithoutScrolling(input, value) {
 export async function expectScrollAtRenderedEnd(scroller) {
   await expect.poll(() => scroller.evaluate((element) => {
     const content = element.querySelector(':scope > div')
-    const contentEnd = content.offsetTop + content.offsetHeight +
-      Number.parseFloat(getComputedStyle(element).paddingBottom)
-    const maximumScrollTop = Math.max(0, contentEnd - element.clientHeight)
-    return Math.abs(element.scrollTop - maximumScrollTop)
+    const style = getComputedStyle(element)
+    const contentEnd = content.getBoundingClientRect().bottom +
+      Number.parseFloat(getComputedStyle(content).marginBottom) +
+      Number.parseFloat(style.paddingBottom)
+    const viewportEnd = element.getBoundingClientRect().bottom -
+      Number.parseFloat(style.borderBottomWidth)
+    // Keep every measurement fractional at non-100% UI scales. Chromium can
+    // quantize the scroll offset to a physical pixel at the rendered boundary.
+    const remaining = Math.max(-element.scrollTop, contentEnd - viewportEnd)
+    return Math.abs(remaining) * devicePixelRatio
   })).toBeLessThanOrEqual(1)
 }
 
