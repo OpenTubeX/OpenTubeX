@@ -3182,7 +3182,10 @@ function runApp() {
         await initialization
       } catch (error) {
         try {
-          await tabManager.clearSession()
+          await tabManager.clearSession({
+            preservePersistedSession: typeof sessionData?.sessionId === 'string' &&
+              sessionData.sessionId === tabManager.sessionId
+          })
         } finally {
           // Destroy skips the close handler, so a failed partial restore is not
           // remembered as another recently closed window.

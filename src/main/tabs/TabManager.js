@@ -3165,9 +3165,12 @@ export class TabManager {
 
   /** Return the state before an operation closed the final tabs, if needed. */
   getSessionDataForWindowClose() {
-    return this.tabs.size === 0 && this.lastClosedWindowSession
-      ? this.lastClosedWindowSession
-      : this.getSessionData()
+    return {
+      sessionId: this.sessionId,
+      ...(this.tabs.size === 0 && this.lastClosedWindowSession
+        ? this.lastClosedWindowSession
+        : this.getSessionData())
+    }
   }
 
   getSessionData() {
@@ -3422,7 +3425,7 @@ export class TabManager {
     }
   }
 
-  async clearSession() {
+  async clearSession({ preservePersistedSession = false } = {}) {
     this._sessionPersistenceDisabled = true
     const clearedTabs = Array.from(this.tabs.values())
       .filter(tab => tab.isTransferStaged !== true)
@@ -3434,7 +3437,9 @@ export class TabManager {
         new Set(clearedTabs)
       ))
     ])
-    await clearTabSession(this.sessionId)
+    if (!preservePersistedSession) {
+      await clearTabSession(this.sessionId)
+    }
   }
 
   /**
