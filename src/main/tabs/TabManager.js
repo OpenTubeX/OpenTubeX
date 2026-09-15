@@ -761,6 +761,7 @@ export class TabManager {
     this.selectionRevision = 0
     /** @type {Array<{ id: string, url: string, title?: string, isPinned?: boolean, color?: string | null, groupId?: string | null, history?: object[] | null, historyIndex?: number, tabIndex: number }>} */
     this.closedTabs = []
+    this.lastClosedWindowSession = null
     /** @type {Map<string, {id: string, name: string, color: string | null, icon: string, isCollapsed: boolean}>} */
     this.tabGroups = new Map()
     this.tabBarScrollPosition = 0
@@ -1632,6 +1633,10 @@ export class TabManager {
       return true
     }
 
+    if (this.tabs.size === 1) {
+      this.lastClosedWindowSession = structuredClone(this.getSessionData())
+    }
+
     if (this.activeTabId === tabId) {
       if (this.browserWindow.isFullScreen()) {
         this.browserWindow.setFullScreen(false)
@@ -1716,6 +1721,9 @@ export class TabManager {
       return this.closeTab(closingTabIds[0])
     }
 
+    const windowSession = closingTabIds.length === this.tabs.size
+      ? structuredClone(this.getSessionData())
+      : null
     return await this.runBatched(() => {
       const closingTabIdSet = new Set(closingTabIds)
       if (this.activeTabId != null && closingTabIdSet.has(this.activeTabId)) {
@@ -1732,6 +1740,7 @@ export class TabManager {
       for (const tabId of closingTabIds) {
         hasRemainingTabs = this.closeTab(tabId)
       }
+      if (!hasRemainingTabs && windowSession) this.lastClosedWindowSession = windowSession
       return hasRemainingTabs
     })
   }
@@ -3151,6 +3160,20 @@ export class TabManager {
 
     this.sessionUpdatedAt = Date.now()
 
+    await saveTabSession(this.sessionId, this.getSessionData())
+  }
+
+  /** Return the state before an operation closed the final tabs, if needed. */
+  getSessionDataForWindowClose() {
+    return {
+      sessionId: this.sessionId,
+      ...(this.tabs.size === 0 && this.lastClosedWindowSession
+        ? this.lastClosedWindowSession
+        : this.getSessionData())
+    }
+  }
+
+  getSessionData() {
     const tabs = Array.from(this.tabs.values())
       // A presented tab stays mounted until its replacement is ready, but a
       // shutdown during that handoff must not resurrect the already-closed tab.
@@ -3197,13 +3220,13 @@ export class TabManager {
       ? this.activeTabId
       : tabs[0]?.id ?? null
 
-    await saveTabSession(this.sessionId, {
+    return {
       tabs,
       groups: Array.from(this.tabGroups.values(), group => ({ ...group })),
       activeTabId,
       bounds: this._getCurrentBounds(),
       updatedAt: this.sessionUpdatedAt
-    })
+    }
   }
 
   /**
@@ -3402,7 +3425,7 @@ export class TabManager {
     }
   }
 
-  async clearSession() {
+  async clearSession({ preservePersistedSession = false } = {}) {
     this._sessionPersistenceDisabled = true
     const clearedTabs = Array.from(this.tabs.values())
       .filter(tab => tab.isTransferStaged !== true)
@@ -3414,7 +3437,9 @@ export class TabManager {
         new Set(clearedTabs)
       ))
     ])
-    await clearTabSession(this.sessionId)
+    if (!preservePersistedSession) {
+      await clearTabSession(this.sessionId)
+    }
   }
 
   /**

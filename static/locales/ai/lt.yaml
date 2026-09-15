@@ -2023,6 +2023,7 @@ Keys:
   arrowright: Rodyklė dešinėn
   arrowup: Rodyklė aukštyn
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Vėl atverti paskutinį užvertą langą
   Keyboard Shortcuts: Spartieji klavišai
   Edit Hint: Pasirinkite spartųjį klavišą, tada paspauskite naują klavišų derinį. Jei norite panaikinti priskyrimą, paspauskite Backspace arba Delete.
   Change Shortcut: Keisti veiksmo {action} spartųjį klavišą

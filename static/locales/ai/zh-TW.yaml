@@ -1584,6 +1584,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: 播放清單已在開頭。啟用循環播放即可繼續播放
 External link opening has been disabled in Settings → Privacy: 已在「設定」→「隱私權」中停用開啟外部連結
 KeyboardShortcutPrompt:
+  Reopen Closed Window: 重新開啟最近關閉的視窗
   Edit Hint: 選取快捷鍵，然後按下新的按鍵組合。按 Backspace 或 Delete 可取消指派。
   Change Shortcut: 變更 {action} 的快捷鍵
   Press Shortcut: 按下快捷鍵…

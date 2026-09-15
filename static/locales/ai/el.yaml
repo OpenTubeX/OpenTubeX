@@ -1612,6 +1612,7 @@ External link opening has been disabled in Settings → Privacy: Το άνοιγ
 Screenshot Clipboard Success: Το στιγμιότυπο οθόνης αποθηκεύτηκε στο πρόχειρο
 Screenshot Clipboard Error: Η αντιγραφή του στιγμιότυπου οθόνης στο πρόχειρο απέτυχε
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Επαναφορά του τελευταίου κλεισμένου παραθύρου
   Edit Hint: Επιλέξτε μια συντόμευση και έπειτα πατήστε έναν νέο συνδυασμό πλήκτρων. Πατήστε Backspace ή Delete για να καταργήσετε την αντιστοίχισή της.
   Change Shortcut: Αλλαγή συντόμευσης για {action}
   Press Shortcut: Πατήστε συντόμευση…

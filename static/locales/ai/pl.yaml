@@ -826,6 +826,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Playlista jest na początku. Włącz zapętlanie, aby kontynuować odtwarzanie
 External link opening has been disabled in Settings → Privacy: Otwieranie zewnętrznych odnośników wyłączono w sekcji Ustawienia → Prywatność
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Otwórz ponownie ostatnio zamknięte okno
   Set A-B Repeat Point A: Ustaw punkt A powtarzania A-B
   Set A-B Repeat Point B: Ustaw punkt B powtarzania A-B
   Clear A-B Repeat: Wyczyść powtarzanie A-B

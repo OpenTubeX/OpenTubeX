@@ -1570,6 +1570,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Zoznam videí je na začiatku. Ak chcete pokračovať v prehrávaní, zapnite opakovanie
 External link opening has been disabled in Settings → Privacy: Otváranie externých odkazov bolo vypnuté v časti Nastavenia → Súkromie
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Znova otvoriť naposledy zatvorené okno
   Edit Hint: Vyberte skratku a potom stlačte novú kombináciu klávesov. Priradenie zrušíte klávesom Backspace alebo Delete.
   Change Shortcut: Zmeniť skratku pre akciu {action}
   Press Shortcut: Stlačte skratku…

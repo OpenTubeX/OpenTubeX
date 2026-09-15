@@ -2742,6 +2742,7 @@ Keys:
   arrowright: Right Arrow
   arrowup: Up Arrow
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Reopen the last closed window
   Keyboard Shortcuts: Keyboard Shortcuts
   Edit Hint: Select a shortcut, then press a new key combination. Press Backspace or Delete to unassign it.
   Change Shortcut: 'Change shortcut for {action}'

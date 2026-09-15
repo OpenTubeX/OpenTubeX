@@ -1590,6 +1590,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: قائمة التشغيل في البداية. تمكين الحلقة لمواصلة اللعب
 External link opening has been disabled in Settings → Privacy: تم تعطيل فتح الرابط الخارجي في الإعدادات → الخصوصية
 KeyboardShortcutPrompt:
+  Reopen Closed Window: إعادة فتح آخر نافذة مغلقة
   Edit Hint: حدد اختصارًا، ثم اضغط على مجموعة مفاتيح جديدة. اضغط على Backspace أو حذف لإلغاء تعيينه.
   Change Shortcut: تغيير الاختصار لـ {action}
   Press Shortcut: اضغط على الاختصار...

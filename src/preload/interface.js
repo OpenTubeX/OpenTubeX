@@ -165,6 +165,10 @@ export default {
     return ipcRenderer.invoke(IpcChannels.SUPPORTS_AUTO_PICTURE_IN_PICTURE_MINIMIZE)
   },
 
+  reopenClosedWindow: () => {
+    ipcRenderer.send(IpcChannels.RESTORE_CLOSED_WINDOW)
+  },
+
   /**
    * @param {string} path
    * @param {Record<string, string> | null | undefined} query

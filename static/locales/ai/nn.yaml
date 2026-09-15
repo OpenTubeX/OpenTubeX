@@ -1955,6 +1955,7 @@ Keys:
   arrowright: Pil høgre
   arrowup: Pil opp
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Opne det sist lukka vindauget igjen
   Keyboard Shortcuts: Hurtigtastar
   Edit Hint: Vel ein hurtigtast, og trykk deretter ein ny tastekombinasjon. Trykk Backspace eller Delete for å fjerne tilordninga.
   Change Shortcut: Endra hurtigtasten for {action}

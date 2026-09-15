@@ -1605,6 +1605,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Список відтворення на початку. Увімкніть повторення, щоб продовжити відтворення
 External link opening has been disabled in Settings → Privacy: Відкриття зовнішніх посилань вимкнено в розділі «Налаштування» → «Конфіденційність»
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Відкрити останнє закрите вікно
   Edit Hint: Виберіть клавіатурне скорочення, а потім натисніть нову комбінацію клавіш. Натисніть Backspace або Delete, щоб скасувати призначення.
   Change Shortcut: Змінити клавіатурне скорочення для дії «{action}»
   Press Shortcut: Натисніть комбінацію клавіш…

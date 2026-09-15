@@ -1623,6 +1623,7 @@ External link opening has been disabled in Settings → Privacy: Het openen van 
 Screenshot Clipboard Success: Schermafbeelding op klembord opgeslagen
 Screenshot Clipboard Error: Kopiëren van schermafbeelding naar klembord mislukt
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Laatst gesloten venster opnieuw openen
   Edit Hint: Selecteer een sneltoets en druk daarna op een nieuwe toetsencombinatie. Druk op Backspace of Delete om de toewijzing te verwijderen.
   Change Shortcut: Sneltoets voor {action} wijzigen
   Press Shortcut: Druk op sneltoets…

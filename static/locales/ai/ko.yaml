@@ -1985,6 +1985,7 @@ Keys:
   arrowright: 오른쪽 화살표
   arrowup: 위쪽 화살표
 KeyboardShortcutPrompt:
+  Reopen Closed Window: 마지막으로 닫은 창 다시 열기
   Keyboard Shortcuts: 키보드 단축키
   Edit Hint: 단축키를 선택한 다음 새 키 조합을 누르세요. 할당을 해제하려면 Backspace 또는 Delete를 누르세요.
   Change Shortcut: '{action} 단축키 변경'

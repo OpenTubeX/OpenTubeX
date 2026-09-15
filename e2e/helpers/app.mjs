@@ -349,6 +349,9 @@ export const test = base.extend({
       await cp(path.join(repoRoot, 'dist-e2e'), path.join(appRoot, 'dist-e2e'), {
         recursive: true
       })
+      await cp(path.join(repoRoot, '_icons'), path.join(appRoot, '_icons'), {
+        recursive: true
+      })
       for (const [localePath, messages] of Object.entries(localeOverrides)) {
         const outputPath = path.join(
           appRoot,

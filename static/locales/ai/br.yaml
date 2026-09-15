@@ -1579,6 +1579,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: "Ar roll-videoioù zo en e zerou. Gweredekait al lenn en ur voul evit kenderc'hel da lenn"
 External link opening has been disabled in Settings → Privacy: "Diweredekaet eo bet digeriñ al liammoù diavaez en Arventennoù → Prevezded"
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Digeriñ ar prenestr diwezhañ serret en-dro
   Edit Hint: "Diuzit ur verradenn, ha pouezit war ur c'hediad stokelloù nevez. Pouezit war Kilennañ pe Dilemel evit distagañ anezhi."
   Change Shortcut: "Kemmañ ar verradenn evit {action}"
   Press Shortcut: "Pouezit war ur verradenn…"

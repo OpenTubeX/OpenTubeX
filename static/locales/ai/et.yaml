@@ -1573,6 +1573,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Esitusloend on alguses. Esitamise jätkamiseks luba kordus
 External link opening has been disabled in Settings → Privacy: Väliste linkide avamine on jaotises Seaded → Privaatsus keelatud
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Ava viimati suletud aken uuesti
   Edit Hint: Vali kiirklahv ja vajuta seejärel uut klahvikombinatsiooni. Määrangu eemaldamiseks vajuta Backspace või Delete.
   Change Shortcut: Muuda toimingu {action} kiirklahvi
   Press Shortcut: Vajuta kiirklahvi…

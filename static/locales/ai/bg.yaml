@@ -1586,6 +1586,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Плейлистът е в началото. Включете повтарянето, за да продължите възпроизвеждането
 External link opening has been disabled in Settings → Privacy: Отварянето на външни връзки е изключено в Настройки → Поверителност
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Повторно отваряне на последния затворен прозорец
   Edit Hint: Изберете клавишна комбинация, след което натиснете нова комбинация. Натиснете Backspace или Delete, за да премахнете зададената комбинация.
   Change Shortcut: Промяна на клавишната комбинация за {action}
   Press Shortcut: Натиснете клавишна комбинация…

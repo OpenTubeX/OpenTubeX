@@ -47,6 +47,18 @@ async function openSecondWindowWithTwoTabs(app, page) {
   return { newWindow, windowId, primaryWindowId: existingWindowIds[0] }
 }
 
+async function readSavedSessions(userDataDir) {
+  const contents = await readFile(path.join(userDataDir, 'tab-session.db'), 'utf8')
+  const sessions = new Map()
+  for (const line of contents.trim().split('\n')) {
+    if (!line) continue
+    const record = JSON.parse(line)
+    if (record.$$deleted) sessions.delete(record._id)
+    else if (record.value) sessions.set(record._id, { sessionId: record._id, ...record.value })
+  }
+  return [...sessions.values()]
+}
+
 test.describe('multi-tab window close confirmation', () => {
   test.use({ seed: { settings: { confirmCloseWindowWithMultipleTabs: true } } })
 
@@ -165,6 +177,100 @@ test.describe('multi-tab window close confirmation', () => {
 
 test.describe('disabled multi-tab window close confirmation', () => {
   test.use({ seed: { settings: { confirmCloseWindowWithMultipleTabs: false } } })
+
+  for (const closeMethod of ['closing the window', 'closing the final tab', 'closing all tabs']) {
+    test(`reopens a closed window after ${closeMethod} with Ctrl+Shift+N`, async ({ app, page }) => {
+      const { newWindow, windowId } = await openSecondWindowWithTwoTabs(app, page)
+      await newWindow.locator('.sideNav a[href="#/history"]:visible').first().click()
+      await expect(newWindow).toHaveURL(/#\/history/)
+      if (closeMethod === 'closing the final tab') {
+        const state = await newWindow.evaluate(() => window.ftElectron.tabs.getState())
+        await newWindow.evaluate(id => window.ftElectron.tabs.close(id), state.tabs[0].id)
+      }
+      const before = await newWindow.evaluate(() => window.ftElectron.tabs.getState())
+      const closed = newWindow.waitForEvent('close')
+      if (closeMethod === 'closing the window') {
+        await app.electronApp.evaluate(({ BrowserWindow }, id) => BrowserWindow.fromId(id)?.close(), windowId)
+      } else {
+        await newWindow.evaluate(async method => {
+          const state = await window.ftElectron.tabs.getState()
+          if (method === 'closing the final tab') await window.ftElectron.tabs.close(state.activeTabId)
+          else await window.ftElectron.tabs.closeMultiple(state.tabs.map(tab => tab.id))
+        }, closeMethod).catch(error => {
+          if (!newWindow.isClosed()) throw error
+        })
+      }
+      await closed
+
+      const reopenedPromise = app.electronApp.waitForEvent('window')
+      await page.bringToFront()
+      await page.keyboard.press('Control+Shift+N')
+      const reopened = await reopenedPromise
+      await waitForAppReady(reopened)
+      await expect(reopened).toHaveURL(/#\/history/)
+      const after = await reopened.evaluate(() => window.ftElectron.tabs.getState())
+      expect(after.tabs.map(tab => tab.url)).toEqual(before.tabs.map(tab => tab.url))
+      expect(after.tabs.findIndex(tab => tab.id === after.activeTabId))
+        .toBe(before.tabs.findIndex(tab => tab.id === before.activeTabId))
+    })
+  }
+
+  test('reopened last window keeps one session across a failed retry and restart', async ({ app, page }) => {
+    await page.locator('.newTabButton').click()
+    await page.locator('.sideNav a[href="#/history"]:visible').first().click()
+    await expect(page).toHaveURL(/#\/history/)
+    await page.evaluate(() => window.ftElectron.subscriptionAutoRefresh.configureBackground({
+      enabled: true,
+      intervals: {},
+      profiles: [],
+      requests: {}
+    }))
+    const expectedTabUrls = (await page.evaluate(() => window.ftElectron.tabs.getState())).tabs.map(tab => tab.url)
+    const sourceSession = (await readSavedSessions(app.userDataDir))
+      .find(session => session.tabs.length === expectedTabUrls.length)
+    expect(sourceSession).toBeDefined()
+
+    const closed = page.waitForEvent('close')
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close())
+    await closed
+    await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(0)
+
+    const temporaryWindowPromise = app.electronApp.waitForEvent('window')
+    await app.electronApp.evaluate(({ app }) => app.emit('activate'))
+    page = await temporaryWindowPromise
+    app.page = page
+    await waitForAppReady(page)
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      const original = BrowserWindow.prototype.loadURL
+      globalThis.reopenFailureInjected = false
+      BrowserWindow.prototype.loadURL = async function () {
+        BrowserWindow.prototype.loadURL = original
+        globalThis.reopenFailureInjected = true
+        throw new Error('Injected reopen initialization failure')
+      }
+    })
+    await page.evaluate(() => window.ftElectron.reopenClosedWindow())
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.reopenFailureInjected)).toBe(true)
+    await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(1)
+    await expect.poll(async () => (await readSavedSessions(app.userDataDir))
+      .some(session => session.sessionId === sourceSession.sessionId)).toBe(true)
+
+    const reopenedPromise = app.electronApp.waitForEvent('window')
+    await page.evaluate(() => window.ftElectron.reopenClosedWindow())
+    const reopened = await reopenedPromise
+    await waitForAppReady(reopened)
+    await expect(reopened).toHaveURL(/#\/history/)
+    await expect(reopened.locator('.tab[data-tab-id]')).toHaveCount(2)
+    expect((await reopened.evaluate(() => window.ftElectron.tabs.getState())).tabs.map(tab => tab.url))
+      .toEqual(expectedTabUrls)
+
+    await app.relaunch()
+    await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(2)
+    const restoredUrls = await Promise.all((await app.electronApp.windows()).map(window => (
+      window.evaluate(() => window.ftElectron.tabs.getState()).then(state => state.tabs.map(tab => tab.url))
+    )))
+    expect(restoredUrls.filter(urls => urls.length === expectedTabUrls.length)).toEqual([expectedTabUrls])
+  })
 
   test('can disable the multi-tab window close confirmation', async ({ app, page }) => {
     const { newWindow, windowId } = await openSecondWindowWithTwoTabs(app, page)

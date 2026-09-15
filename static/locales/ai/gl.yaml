@@ -1614,6 +1614,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: A lista de reprodución está no principio. Activa a repetición para continuar a reprodución
 External link opening has been disabled in Settings → Privacy: A apertura de ligazóns externas desactivouse en Configuración → Privacidade
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Reabrir a última xanela pechada
   Edit Hint: Selecciona un atallo e preme unha nova combinación de teclas. Preme Retroceso ou Supr para deixalo sen asignar.
   Change Shortcut: Cambiar o atallo de {action}
   Press Shortcut: Preme o atallo…

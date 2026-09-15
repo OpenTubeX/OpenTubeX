@@ -1,3 +1,4 @@
+import { ClosedWindowHistory } from './tabs/ClosedWindowHistory.js'
 import {
   app, BrowserWindow, dialog, Menu, ipcMain,
   powerSaveBlocker, screen, session,
@@ -773,6 +774,20 @@ function runApp() {
   // window is restored on the next launch) or cleared (so a window that was
   // manually closed while the app keeps running is forgotten).
   let isQuitting = false
+  const closedWindows = new ClosedWindowHistory()
+
+  async function reopenClosedWindow() {
+    try {
+      await closedWindows.restore(sessionData => createWindow({
+        replaceMainWindow: false,
+        sessionData,
+        restoreTabLoadStateOnRestore: true,
+        waitForInitialization: true
+      }))
+    } catch (error) {
+      console.error('Failed to reopen closed window:', error)
+    }
+  }
 
   // Registered per-webContents in 'web-contents-created' so the shared
   // BrowserWindow renderer can resolve native menu targets through TabManager.
@@ -2732,7 +2747,8 @@ function runApp() {
       sessionData = null,
       loadInactiveTabsOnRestore = false,
       restoreTabLoadStateOnRestore = false,
-      loadLandingPageOnRestore = false
+      loadLandingPageOnRestore = false,
+      waitForInitialization = false
     } = { }) {
     await backgroundSubscriptions.setBackground(false)
     // Syncing new window background to theme choice.
@@ -3035,11 +3051,13 @@ function runApp() {
       }
     }
 
-    // Kick off tab initialization (errors are logged but shouldn't crash the app)
-    initializeTabs().catch(error => {
-      console.error('Failed to initialize tabs', error)
-      showWindow()
-    })
+    const initialization = initializeTabs()
+    if (!waitForInitialization) {
+      initialization.catch(error => {
+        console.error('Failed to initialize tabs', error)
+        showWindow()
+      })
+    }
 
     // Renderer presentation readiness above has a bounded timeout, so the
     // window cannot remain hidden if the initial logical tab fails to mount.
@@ -3082,6 +3100,10 @@ function runApp() {
         }
 
         return
+      }
+
+      if (!isQuitting) {
+        closedWindows.remember(tabManager.getSessionDataForWindowClose())
       }
 
       closingWindowIds.add(newWindow.id)
@@ -3154,6 +3176,24 @@ function runApp() {
       stopPowerSaveBlockerForWindow(newWindow)
       updateBackgroundSubscriptionVisibility()
     })
+
+    if (waitForInitialization) {
+      try {
+        await initialization
+      } catch (error) {
+        try {
+          await tabManager.clearSession({
+            preservePersistedSession: typeof sessionData?.sessionId === 'string' &&
+              sessionData.sessionId === tabManager.sessionId
+          })
+        } finally {
+          // Destroy skips the close handler, so a failed partial restore is not
+          // remembered as another recently closed window.
+          if (!newWindow.isDestroyed()) newWindow.destroy()
+        }
+        throw error
+      }
+    }
 
     return newWindow
   }
@@ -4340,6 +4380,13 @@ function runApp() {
 
       activePowerSaveBlockers.set(browserWindow.id, powerSaveBlockerId)
     }
+  })
+
+  ipcMain.on(IpcChannels.RESTORE_CLOSED_WINDOW, (event) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+    const browserWindow = BrowserWindow.fromWebContents(event.sender)
+    if (!browserWindow || appShortcutBlockedWindows.has(browserWindow)) return
+    reopenClosedWindow()
   })
 
   ipcMain.on(IpcChannels.CREATE_NEW_WINDOW, (event, path, query, searchQueryText) => {
@@ -5745,6 +5792,14 @@ function runApp() {
               })
             },
             type: 'normal'
+          },
+          {
+            label: 'Reopen Closed Window',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.RESTORE_CLOSED_WINDOW),
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) return
+              reopenClosedWindow()
+            }
           },
           { type: 'separator' },
           {

@@ -2174,6 +2174,7 @@ Keys:
   arrowright: Fletxa dreta
   arrowup: Fletxa amunt
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Torna a obrir l’última finestra tancada
   Keyboard Shortcuts: Dreceres de teclat
   Edit Hint: Seleccioneu una drecera i premeu una combinació de tecles nova. Premeu Retrocés o Supr per treure'n l'assignació.
   Change Shortcut: Canvia la drecera de {action}

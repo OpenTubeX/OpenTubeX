@@ -50,6 +50,12 @@ test('opens downloads with Ctrl or Command+J by default', () => {
   assert.equal(getConfiguredKeyboardShortcuts().APP.GENERAL.NAVIGATE_TO_DOWNLOADS, 'ctrl+J')
 })
 
+test('reopens closed windows with a configurable Ctrl+Shift+N shortcut', () => {
+  assert.equal(getConfiguredKeyboardShortcuts().APP.GENERAL.RESTORE_CLOSED_WINDOW, 'ctrl+shift+N')
+  const overrides = { APP: { GENERAL: { RESTORE_CLOSED_WINDOW: 'alt+N' } } }
+  assert.equal(getConfiguredKeyboardShortcuts(overrides).APP.GENERAL.RESTORE_CLOSED_WINDOW, 'alt+N')
+})
+
 test('reloads tabs with Ctrl or Command+R and F5 by default', () => {
   const shortcuts = getConfiguredKeyboardShortcuts().APP.GENERAL
 

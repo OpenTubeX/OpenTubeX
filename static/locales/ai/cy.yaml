@@ -1595,6 +1595,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Mae'r rhestr chwarae ar y dechrau. Galluogwch ailadrodd i barhau i chwarae
 External link opening has been disabled in Settings → Privacy: Mae agor dolenni allanol wedi'i analluogi yn Gosodiadau → Preifatrwydd
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Ailagor y ffenestr ddiwethaf a gaewyd
   Edit Hint: Dewiswch lwybr byr, yna pwyswch gyfuniad newydd o fysellau. Pwyswch Backspace neu Delete i dynnu ei aseiniad.
   Change Shortcut: Newid y llwybr byr ar gyfer {action}
   Press Shortcut: Pwyswch lwybr byr…
