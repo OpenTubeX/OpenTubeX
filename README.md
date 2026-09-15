@@ -166,7 +166,7 @@ The first build with a green check mark is the latest build.
 
 > [!IMPORTANT]
 > You will need to have a GitHub account to download these builds.
-> If you don't have a GitHub account, you can download the builds via [nightly.link](https://nightly.link/OpenTubeX/OpenTubeX/workflows/build/development).
+> If you don't have a GitHub account, you can download the builds via [nightly.link](https://nightly.link/OpenTubeX/OpenTubeX/workflows/build/development?status=completed).
 
 * Debian / Ubuntu: [APT nightly repository](https://apt.opentubex.org/#nightly-builds)
 * Fedora / Enterprise Linux: [RPM nightly repository](https://rpm.opentubex.org/#nightly-builds)
