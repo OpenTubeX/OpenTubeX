@@ -53,6 +53,8 @@ const GENERAL_PROVIDER_KEYS = new Set([
   'View all Invidious instance information'
 ])
 
+const WATCH_STATISTICS_KEYS = new Set(['Enable Watch Statistics', 'Week Starts On'])
+
 const PRIVACY_STORAGE_KEYS = new Set([
   'Automatic History Retention',
   'Automatic History Retention Placeholder',
@@ -76,6 +78,10 @@ export const SETTINGS_SEARCH_SOURCES = {
     type: 'general',
     key: 'Settings.General Settings',
     include: GENERAL_EVERYDAY_KEYS
+  }, {
+    type: 'privacy',
+    key: 'Settings.Privacy Settings',
+    include: WATCH_STATISTICS_KEYS
   }, {
     type: 'context-menu-search',
     key: 'Settings.Context Menu Search Settings',
@@ -137,7 +143,7 @@ export const SETTINGS_SEARCH_SOURCES = {
   privacy: [{
     type: 'privacy',
     key: 'Settings.Privacy Settings',
-    exclude: PRIVACY_STORAGE_KEYS
+    exclude: new Set([...PRIVACY_STORAGE_KEYS, ...WATCH_STATISTICS_KEYS])
   }, {
     type: 'general',
     key: 'Settings.General Settings',

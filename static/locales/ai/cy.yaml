@@ -665,6 +665,8 @@ Settings:
     Title Excludes: Nid yw'r teitl yn cynnwys
     Title Filter Hint: Gwahanwch nifer o dermau teitl â choma. Rhaid i fideo gyfateb i o leiaf un term i'w gynnwys a dim un term i'w eithrio.
   External Software Settings:
+    Checking FFmpeg and FFprobe: Wrthi'n gwirio FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: Nid yw FFmpeg/FFprobe wedi'i lawrlwytho eto. Cliciwch y botwm isod i'w lawrlwytho.
     External Software Settings: Meddalwedd allanol
     yt-dlp Source: Ffynhonnell yt-dlp
     yt-dlp Channel: Sianel yt-dlp

@@ -14,6 +14,7 @@ const source = (await readFile(new URL('../../src/renderer/helpers/player/androi
 
 async function fixture({ failLoad = false, initialTracks = [], captionCues = [], captionBytes = Promise.resolve(new Uint8Array()), options = {} } = {}) {
   const calls = []
+  const sabrCallbacks = []
   const listeners = new Set()
   let state
   const publish = next => {
@@ -74,11 +75,12 @@ async function fixture({ failLoad = false, initialTracks = [], captionCues = [],
     createAndroidNativeScreen: () => {
       let open = false
       return {
-        isOpen: () => open, reset() { open = false }, destroy() {},
+        isOpen: () => open, reset({ preserveFullscreen = false } = {}) { calls.push(['reset', preserveFullscreen]); if (!preserveFullscreen) open = false }, destroy() {},
         async show() { open = true; calls.push(['show']) },
         async attach() { calls.push(['attach']) },
       }
     },
+    createAndroidSabrSource: () => ({ source: 'sabr', onBackoffRequested(callback) { sabrCallbacks.push(callback) } }),
     MANIFEST_TYPE_SABR: 'application/sabr+json',
     crypto, AbortController, clearInterval, console,
   })
@@ -87,7 +89,7 @@ async function fixture({ failLoad = false, initialTracks = [], captionCues = [],
   })
   const player = createPlayer(element, {}, () => options)
   await player.attach()
-  return { player, element, calls, publish }
+  return { player, element, calls, publish, sabrCallbacks }
 }
 
 test('returning to a paused native tab preserves its position without reapplying autoplay', async () => {
@@ -120,7 +122,8 @@ test('reloading an explicitly fullscreen native video preserves fullscreen', asy
   calls.length = 0
   await player.load('video.mp4', 12, 'video/mp4')
   assert.equal(player.nativePlayback.isScreenOpen(), true)
-  assert.deepEqual(calls.filter(call => ['attach', 'show', 'load'].includes(call[0])), [['show'], ['load', 'video.mp4']])
+  assert.ok(calls.filter(call => call[0] === 'reset').every(call => call[1]), 'source replacement must not exit fullscreen even temporarily')
+  assert.deepEqual(calls.filter(call => ['attach', 'show', 'load'].includes(call[0])), [['attach'], ['load', 'video.mp4']])
   await player.destroy()
 })
 
@@ -289,5 +292,21 @@ test('audio-only selection reaches native DASH loading and resets on a later vid
   options.audioOnly = false
   await player.load('video.mpd', 2, 'application/dash+xml')
   assert.equal(calls.findLast(call => call[0] === 'loadOptions')[1].audioOnly, false)
+  await player.destroy()
+})
+
+
+test('an old SABR backoff cannot appear after switching to a local file or unloading', async () => {
+  const backoffs = []
+  const { player, sabrCallbacks } = await fixture({ options: { onBackoff: event => backoffs.push(event.backoffMs) } })
+  await player.load('data:application/json,%7B%7D', 0, 'application/sabr+json')
+  sabrCallbacks[0]({ backoffMs: 100 })
+  assert.deepEqual(backoffs, [100])
+  await player.load('file:///local.mp4', 0, 'video/mp4')
+  sabrCallbacks[0]({ backoffMs: 5000 })
+  assert.deepEqual(backoffs, [100])
+  await player.unload()
+  sabrCallbacks[0]({ backoffMs: 6000 })
+  assert.deepEqual(backoffs, [100])
   await player.destroy()
 })

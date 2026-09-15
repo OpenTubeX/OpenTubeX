@@ -340,6 +340,7 @@
 </template>
 
 <script setup>
+import { useSyncedChannelAvatars } from '../../composables/useSyncedChannelAvatars'
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, reactive, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -399,6 +400,10 @@ const activeOtherDeviceSession = computed(() => (
 const activeOtherDeviceTabs = computed(() => (
   activeOtherDeviceSession.value?.tabs.map(getSyncedTabPreview) ?? []
 ))
+useSyncedChannelAvatars(computed(() => open.value && activeView.value === 'synced'
+  ? activeOtherDeviceTabs.value
+  : []))
+
 const activeOtherDeviceSessionKey = computed(() => (
   activeOtherDeviceSession.value ? otherDeviceSessionKey(activeOtherDeviceSession.value) : null
 ))

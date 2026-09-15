@@ -864,6 +864,8 @@ Settings:
     Title Excludes: Pavadinime nėra
     Title Filter Hint: Kelis pavadinimo terminus atskirkite kableliais. Vaizdo įrašas turi atitikti bent vieną įtrauktą terminą ir neturėti nė vieno atmesto termino.
   External Software Settings:
+    Checking FFmpeg and FFprobe: Tikrinama FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe dar neatsisiųsta. Norėdami atsisiųsti, spustelėkite toliau esantį mygtuką.
     External Software Settings: Išorinė programinė įranga
     yt-dlp Source: yt-dlp šaltinis
     yt-dlp Channel: yt-dlp kanalas

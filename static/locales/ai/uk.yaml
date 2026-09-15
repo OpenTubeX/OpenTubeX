@@ -671,6 +671,8 @@ Settings:
     Title Excludes: Заголовок не містить
     Title Filter Hint: Розділяйте кілька фрагментів заголовка комами. Відео має містити принаймні один із доданих фрагментів і не містити жодного з виключених.
   External Software Settings:
+    Checking FFmpeg and FFprobe: Перевірка FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ще не завантажено. Натисніть кнопку нижче, щоб завантажити його.
     External Software Settings: Зовнішнє програмне забезпечення
     yt-dlp Source: Джерело yt-dlp
     yt-dlp Channel: Канал yt-dlp

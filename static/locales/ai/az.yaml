@@ -665,6 +665,8 @@ Settings:
     Title Excludes: Başlıqda olmayan sözlər
     Title Filter Hint: Başlıq üçün bir neçə ifadəni vergüllə ayırın. Video daxil edilən ifadələrdən ən azı birinə uyğun gəlməli və istisna edilən ifadələrin heç birini ehtiva etməməlidir.
   External Software Settings:
+    Checking FFmpeg and FFprobe: FFmpeg/FFprobe yoxlanılır…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe hələ endirilməyib. Endirmək üçün aşağıdakı düyməni klikləyin.
     External Software Settings: Xarici proqramlar
     yt-dlp Source: yt-dlp mənbəyi
     yt-dlp Channel: yt-dlp kanalı

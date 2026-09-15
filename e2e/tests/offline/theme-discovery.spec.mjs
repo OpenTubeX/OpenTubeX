@@ -407,3 +407,30 @@ for (const fullPreview of [false, true]) {
     await expect.poll(() => container.locator('img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
   })
 }
+
+test('pinches theme screenshots to zoom and resets zoom when switching screenshots', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await mockScreenshots(page)
+  await page.route(feedUrl, route => route.fulfill({ contentType: 'application/atom+xml', body: feed([entry(1)]) }))
+  const gallery = await openDiscovery(page)
+  await gallery.locator('.themePreview button').click()
+  const image = page.locator('.fullThemeScreenshot')
+  await expect(image).toBeVisible()
+  const bounds = await image.boundingBox()
+  const x = bounds.x + bounds.width / 2
+  const y = bounds.y + bounds.height / 2
+  const session = await page.context().newCDPSession(page)
+  try {
+    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: x - 20, y, id: 1 }, { x: x + 20, y, id: 2 }] })
+    for (const distance of [30, 45, 65, 85]) {
+      await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x - distance, y, id: 1 }, { x: x + distance, y, id: 2 }] })
+    }
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await expect.poll(() => image.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).a)).toBeGreaterThan(1.5)
+    await page.locator('.screenshotNavigation button').last().click()
+    await expect(image).toHaveAttribute('src', secondScreenshot)
+    await expect.poll(() => image.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).a)).toBe(1)
+  } finally {
+    await session.detach()
+  }
+})

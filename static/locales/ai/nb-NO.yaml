@@ -663,6 +663,8 @@ Settings:
     Title Excludes: Tittelen inneholder ikke
     Title Filter Hint: Skill flere søkeord for tittelen med komma. En video må samsvare med minst ett inkludert søkeord og ingen ekskluderte søkeord.
   External Software Settings:
+    Checking FFmpeg and FFprobe: Ser etter FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe er ikke lastet ned ennå. Klikk på knappen nedenfor for å laste det ned.
     External Software Settings: Ekstern programvare
     yt-dlp Source: Kilde for yt-dlp
     yt-dlp Channel: Kanal for yt-dlp

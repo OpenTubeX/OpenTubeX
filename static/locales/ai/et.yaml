@@ -663,6 +663,8 @@ Settings:
     Title Excludes: Pealkiri ei sisalda
     Title Filter Hint: Eralda pealkirja otsingusõnad komadega. Video pealkiri peab sisaldama vähemalt üht nõutud otsingusõna ega tohi sisaldada ühtki välistatud otsingusõna.
   External Software Settings:
+    Checking FFmpeg and FFprobe: FFmpeg/FFprobei kontrollimine…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe pole veel alla laaditud. Allalaadimiseks klõpsa allolevat nuppu.
     External Software Settings: Väline tarkvara
     yt-dlp Source: yt-dlp allikas
     yt-dlp Channel: yt-dlp kanal

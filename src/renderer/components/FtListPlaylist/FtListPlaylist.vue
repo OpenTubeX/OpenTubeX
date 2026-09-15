@@ -6,6 +6,12 @@
       list: listType === 'list',
       grid: listType === 'grid'
     }"
+    @contextmenu="openPlaylistContextMenu"
+    @keydown="handleContextMenuKeydown"
+    @pointerdown="startMenuHold"
+    @pointermove="moveMenuHold"
+    @pointerup="cancelMenuHold"
+    @pointercancel="cancelMenuHold"
   >
     <div
       class="videoThumbnail"
@@ -75,41 +81,15 @@
       </div>
       <div class="buttonStack playlistButtonStack">
         <FtIconButton
-          v-if="externalPlayer !== '' && !isUserPlaylist"
-          :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
-          :icon="['fas', 'external-link-alt']"
-          class="externalPlayerButton"
+          v-if="store.getters.getShowVideoMenuButton"
+          ref="menuButton"
+          class="optionsButton"
+          :title="t('Video.More Options')"
+          :icon="['fas', 'ellipsis-v']"
           theme="base-no-default"
           :size="16"
           :use-shadow="false"
-          @click="handleExternalPlayer"
-        />
-        <FtIconButton
-          v-if="supportsYtDlp && enableDownloads && playlistMetadata.videoCount > 0"
-          :title="t('Downloads.Download Playlist')"
-          :icon="['fas', 'download']"
-          theme="base-no-default"
-          :size="16"
-          @click="showDownloadPrompt = true"
-        />
-        <FtIconButton
-          v-if="isUserPlaylist"
-          :title="markedAsQuickBookmarkTarget ? t('User Playlists.Quick Bookmark Enabled') : t('User Playlists.Enable Quick Bookmark With This Playlist')"
-          :icon="markedAsQuickBookmarkTarget ? quickBookmarkIcon : ['far', 'bookmark']"
-          :disabled="markedAsQuickBookmarkTarget"
-          :theme="markedAsQuickBookmarkTarget ? 'secondary' : 'base-no-default'"
-          :size="16"
-          @disabled-click="handleQuickBookmarkEnabledDisabledClick"
-          @click="enableQuickBookmarkForThisPlaylist"
-        />
-        <FtIconButton
-          v-if="isPlaylistBookmark"
-          :title="t('User Playlists.Remove Saved Playlist')"
-          :icon="['fas', 'bookmark']"
-          :aria-pressed="true"
-          theme="secondary"
-          :size="16"
-          @click="removePlaylistBookmark"
+          @click="openPlaylistOptionsMenu"
         />
       </div>
     </div>
@@ -127,10 +107,11 @@
 </template>
 
 <script setup>
+import { useContextMenuHold } from '../../composables/useContextMenuHold'
 import FtRetryImage from '../FtRetryImage.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
-import { computed, ref, toRef, watch } from 'vue'
+import { computed, inject, onBeforeUnmount, ref, toRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtChannelAvatar from '../FtChannelAvatar/FtChannelAvatar.vue'
@@ -140,7 +121,7 @@ import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDown
 import store from '../../store/index'
 
 import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar'
-import { showToast } from '../../helpers/utils'
+import { copyToClipboard, openInternalPath, showToast } from '../../helpers/utils'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -159,6 +140,94 @@ const props = defineProps({
 })
 
 const { t } = useI18n()
+const menuButton = useTemplateRef('menuButton')
+const openMobileContextActions = inject('openMobileContextActions')
+const playlistMenuItems = computed(() => {
+  const items = [{
+    label: t('Context Menu.Open in a New Tab'),
+    icon: ['fas', 'arrow-up-right-from-square'],
+    quickAction: true,
+    run: () => openInternalPath({ ...playlistPageLinkTo.value, title: titleForDisplay.value, doCreateNewTab: true, makeActive: true })
+  }]
+  if (process.env.IS_ELECTRON) {
+    items.push({
+      label: t('Context Menu.Open in a New Window'),
+      icon: ['fas', 'external-link-alt'],
+      quickAction: true,
+      run: () => openInternalPath({ ...playlistPageLinkTo.value, title: titleForDisplay.value, doCreateNewWindow: true, makeActive: true })
+    })
+  }
+  if (externalPlayer.value !== '' && !isUserPlaylist.value) {
+    items.push({
+      label: t('Video.External Player.OpenInTemplate', { externalPlayer: externalPlayer.value }),
+      icon: ['fas', 'external-link-alt'],
+      run: handleExternalPlayer,
+    })
+  }
+  if (supportsYtDlp && enableDownloads.value && playlistMetadata.value.videoCount > 0) {
+    items.push({
+      label: t('Downloads.Download Playlist'),
+      icon: ['fas', 'download'],
+      run: () => { showDownloadPrompt.value = true },
+    })
+  }
+  if (isUserPlaylist.value) {
+    items.push({
+      label: markedAsQuickBookmarkTarget.value ? t('User Playlists.Quick Bookmark Enabled') : t('User Playlists.Enable Quick Bookmark With This Playlist'),
+      icon: markedAsQuickBookmarkTarget.value ? quickBookmarkIcon.value : ['far', 'bookmark'],
+      enabled: !markedAsQuickBookmarkTarget.value,
+      run: enableQuickBookmarkForThisPlaylist,
+    })
+  }
+  if (isPlaylistBookmark.value) {
+    items.push({
+      label: t('User Playlists.Remove Saved Playlist'), icon: ['fas', 'bookmark'], run: removePlaylistBookmark,
+    })
+  }
+  if (!isUserPlaylist.value) {
+    items.push({
+      label: t('Context Menu.Copy YouTube Link'),
+      icon: ['fas', 'link'],
+      run: () => copyToClipboard(`https://www.youtube.com/playlist?list=${encodeURIComponent(playlistMetadata.value.playlistId)}`)
+    })
+  }
+  return items.map(item => ({ enabled: true, ...item }))
+})
+
+const { startMenuHold, moveMenuHold, cancelMenuHold, suppressMenuHoldClick } = useContextMenuHold(openPlaylistContextMenu)
+
+function openPlaylistOptionsMenu() {
+  cancelMenuHold()
+  const button = menuButton.value.$el.querySelector('button')
+  button.focus({ preventScroll: true })
+  const bounds = button.getBoundingClientRect()
+  window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
+    detail: { x: document.body.dir === 'rtl' ? bounds.right : bounds.left, y: bounds.bottom, items: playlistMenuItems }
+  }))
+}
+function openPlaylistContextMenu(event) {
+  if (event.target.closest('.channelName, [role="dialog"], [role="menu"], .iconDropdown')) return
+  event.preventDefault()
+  event.stopPropagation()
+  cancelMenuHold()
+  if (event.pointerType === 'touch') {
+    suppressMenuHoldClick()
+    openMobileContextActions({ title: titleForDisplay.value, actions: playlistMenuItems })
+    return
+  }
+  const bounds = event.target.getBoundingClientRect()
+  const keyboard = event.type === 'keydown' || (event.clientX === 0 && event.clientY === 0)
+  window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
+    detail: { x: keyboard ? bounds.left : event.clientX, y: keyboard ? bounds.bottom : event.clientY, items: playlistMenuItems, contextEvent: event }
+  }))
+}
+function handleContextMenuKeydown(event) {
+  if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) openPlaylistContextMenu(event)
+}
+onBeforeUnmount(() => {
+  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: playlistMenuItems }))
+})
+
 const showDownloadPrompt = ref(false)
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
@@ -294,13 +363,6 @@ const markedAsQuickBookmarkTarget = computed(() => {
     quickBookmarkPlaylistId.value != null &&
     quickBookmarkPlaylistId.value === playlistMetadata.value.playlistId
 })
-
-function handleQuickBookmarkEnabledDisabledClick() {
-  showToast({
-    message: t('User Playlists.SinglePlaylistView.Toast["This playlist is already being used for quick bookmark."]'),
-    icon: ['fas', 'bookmark'],
-  })
-}
 
 async function enableQuickBookmarkForThisPlaylist() {
   const currentQuickBookmarkTargetPlaylist = store.getters.getQuickBookmarkPlaylist

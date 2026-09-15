@@ -665,6 +665,8 @@ Settings:
     Title Excludes: Izenburuak ez du hau
     Title Filter Hint: Bereizi izenburuko terminoak komaz. Bideoak sartutako terminoetako batekin bat etorri behar du gutxienez, eta baztertutako terminoekin ez.
   External Software Settings:
+    Checking FFmpeg and FFprobe: FFmpeg/FFprobe egiaztatzen…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ez da deskargatu oraindik. Egin klik beheko botoian deskargatzeko.
     External Software Settings: Kanpoko softwarea
     yt-dlp Source: yt-dlp-ren jatorria
     yt-dlp Channel: yt-dlp-ren kanala

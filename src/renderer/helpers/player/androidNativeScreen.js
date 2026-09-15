@@ -461,7 +461,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
       }
       scheduleLayout()
     },
-    reset() {
+    reset({ preserveFullscreen = false } = {}) {
       miniSnapshot.update(null, 0, 0, false)
       attachmentSequence++
       endGesture()
@@ -472,7 +472,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
       container.toggleAttribute('data-native-player-scrolling', false)
       releaseInlineBackground()
       clearAmbientClips()
-      setOpen(false)
+      if (!preserveFullscreen) setOpen(false)
     },
     destroy() {
       miniSnapshot.destroy()

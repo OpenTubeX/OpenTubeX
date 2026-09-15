@@ -663,6 +663,8 @@ Settings:
     Title Excludes: タイトルから除外
     Title Filter Hint: 複数のタイトル条件はコンマで区切ってください。含める条件のいずれかに一致し、除外条件には一つも一致しない動画が対象になります。
   External Software Settings:
+    Checking FFmpeg and FFprobe: FFmpeg/FFprobeを確認中…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobeはまだダウンロードされていません。下のボタンをクリックしてダウンロードしてください。
     External Software Settings: 外部ソフトウェア
     yt-dlp Source: yt-dlpの入手元
     yt-dlp Channel: yt-dlpのチャンネル

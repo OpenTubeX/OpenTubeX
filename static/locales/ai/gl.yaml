@@ -671,6 +671,8 @@ Settings:
     Title Excludes: O título exclúe
     Title Filter Hint: Separa con comas os distintos termos do título. Un vídeo debe coincidir polo menos cun termo incluído e con ningún dos excluídos.
   External Software Settings:
+    Checking FFmpeg and FFprobe: Comprobando FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: Aínda non se descargou FFmpeg/FFprobe. Preme o botón inferior para descargalo.
     External Software Settings: Software externo
     yt-dlp Source: Orixe de yt-dlp
     yt-dlp Channel: Canle de yt-dlp

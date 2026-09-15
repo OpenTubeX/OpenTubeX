@@ -676,6 +676,8 @@ Settings:
     Title Excludes: Ο τίτλος δεν περιλαμβάνει
     Title Filter Hint: Διαχωρίστε πολλούς όρους τίτλου με κόμματα. Ένα βίντεο πρέπει να αντιστοιχεί σε τουλάχιστον έναν όρο συμπερίληψης και σε κανέναν όρο αποκλεισμού.
   External Software Settings:
+    Checking FFmpeg and FFprobe: Έλεγχος FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: Δεν έχει γίνει ακόμη λήψη του FFmpeg/FFprobe. Κάντε κλικ στο παρακάτω κουμπί για να το κατεβάσετε.
     External Software Settings: Εξωτερικό λογισμικό
     yt-dlp Source: Προέλευση yt-dlp
     yt-dlp Channel: Κανάλι yt-dlp

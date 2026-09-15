@@ -663,6 +663,8 @@ Settings:
     Title Excludes: Název neobsahuje
     Title Filter Hint: Více výrazů v názvu oddělte čárkami. Video musí odpovídat alespoň jednomu zahrnutému výrazu a žádnému vyloučenému výrazu.
   External Software Settings:
+    Checking FFmpeg and FFprobe: Kontrola FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe zatím není stažený. Stáhnete jej kliknutím na tlačítko níže.
     External Software Settings: Externí software
     yt-dlp Source: Zdroj yt-dlp
     yt-dlp Channel: Kanál yt-dlp

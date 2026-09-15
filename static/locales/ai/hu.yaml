@@ -663,6 +663,8 @@ Settings:
     Title Excludes: A cím nem tartalmazza
     Title Filter Hint: A cím több keresőkifejezését vesszővel válassza el. A videónak legalább egy megadott kifejezést tartalmaznia kell, a kizárt kifejezések egyikét sem tartalmazhatja.
   External Software Settings:
+    Checking FFmpeg and FFprobe: FFmpeg/FFprobe ellenőrzése…
+    FFmpeg and FFprobe Managed Not Downloaded: Az FFmpeg/FFprobe még nincs letöltve. A letöltéshez kattintson az alábbi gombra.
     External Software Settings: Külső szoftverek
     yt-dlp Source: yt-dlp forrása
     yt-dlp Channel: yt-dlp csatornája

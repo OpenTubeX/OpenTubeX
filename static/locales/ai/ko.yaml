@@ -839,6 +839,8 @@ Settings:
     Title Excludes: 제목에서 제외
     Title Filter Hint: 제목 검색어가 여러 개이면 쉼표로 구분하세요. 동영상은 포함 검색어 중 하나 이상과 일치하고 제외 검색어와는 모두 일치하지 않아야 합니다.
   External Software Settings:
+    Checking FFmpeg and FFprobe: FFmpeg/FFprobe 확인 중…
+    FFmpeg and FFprobe Managed Not Downloaded: 아직 FFmpeg/FFprobe를 다운로드하지 않았습니다. 아래 버튼을 클릭하여 다운로드하세요.
     External Software Settings: 외부 소프트웨어
     yt-dlp Source: yt-dlp 소스
     yt-dlp Channel: yt-dlp 채널

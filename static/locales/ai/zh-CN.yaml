@@ -663,6 +663,8 @@ Settings:
     Title Excludes: 标题不包含
     Title Filter Hint: 多个标题关键词请用逗号分隔。视频必须至少匹配一个包含关键词，且不能匹配任何排除关键词。
   External Software Settings:
+    Checking FFmpeg and FFprobe: 正在检查 FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: 尚未下载 FFmpeg/FFprobe。点击下方按钮进行下载。
     External Software Settings: 外部软件
     yt-dlp Source: yt-dlp 来源
     yt-dlp Channel: yt-dlp 更新通道

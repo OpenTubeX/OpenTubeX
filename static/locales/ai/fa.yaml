@@ -692,6 +692,8 @@ Settings:
     Title Excludes: عنوان شامل نباشد
     Title Filter Hint: عبارت‌های عنوان را با ویرگول جدا کنید. ویدیو باید دست‌کم با یکی از عبارت‌های شامل‌شده و با هیچ‌یک از عبارت‌های کنارگذاشته‌شده مطابقت داشته باشد.
   External Software Settings:
+    Checking FFmpeg and FFprobe: در حال بررسی FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe هنوز بارگیری نشده است. برای بارگیری، روی دکمهٔ زیر کلیک کنید.
     External Software Settings: نرم‌افزار خارجی
     yt-dlp Source: منبع yt-dlp
     yt-dlp Channel: کانال yt-dlp

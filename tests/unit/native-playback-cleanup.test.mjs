@@ -29,6 +29,7 @@ function fixture(native = true) {
     player, localPlayer: player, controls: {}, mediaTabId: 'video',
     nativePlaybackCleanup: null, screenWakeBinding: null,
     repeatStatsTracker: null, repeatStatsLoopObserver: null,
+    clearSabrBackoffTimer() {},
     store: { getters: reactive({ getContinuePlaybackWhenScreenIsLocked: true }) },
     defaultSkipInterval: ref(5), seekIntervalMultiplyByPlaybackRate: ref(false),
     watch, handleError: assert.fail,

@@ -671,6 +671,8 @@ Settings:
     Title Excludes: Judul tidak memuat
     Title Filter Hint: Pisahkan beberapa istilah judul dengan koma. Video harus cocok dengan setidaknya satu istilah yang disertakan dan tidak boleh cocok dengan istilah yang dikecualikan.
   External Software Settings:
+    Checking FFmpeg and FFprobe: Memeriksa FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe belum diunduh. Klik tombol di bawah untuk mengunduhnya.
     External Software Settings: Perangkat Lunak Eksternal
     yt-dlp Source: Sumber yt-dlp
     yt-dlp Channel: Kanal yt-dlp

@@ -147,8 +147,7 @@ export function createAndroidPlayer(element, container, getOptions) {
     loadAbort = abort
     const previousController = controller
     controller = null
-    const reopenScreen = screen.isOpen()
-    screen.reset()
+    screen.reset({ preserveFullscreen: true })
     loading?.reject(new Error('Playback was replaced'))
     loading = null
     await previousController?.close()
@@ -248,12 +247,15 @@ export function createAndroidPlayer(element, container, getOptions) {
             getState: () => state
           })
         : { source: uri, mimeType }
-      source.onReloadOnce?.(() => options.onReload?.())
-      source.onBackoffRequested?.(event => options.onBackoff?.(event))
+      source.onReloadOnce?.(() => {
+        if (!destroyed && generation === loadGeneration) options.onReload?.()
+      })
+      source.onBackoffRequested?.(event => {
+        if (!destroyed && generation === loadGeneration) options.onBackoff?.(event)
+      })
       // Attach the surface before preparing paused media so its first decoded
       // frame is presented instead of being consumed by ExoPlayer's dummy surface.
-      if (reopenScreen) await screen.show()
-      else await screen.attach()
+      await screen.attach()
       await nextController.load(source, {
         positionMs: Math.max(0, startTime ?? 0) * 1000,
         play: false,

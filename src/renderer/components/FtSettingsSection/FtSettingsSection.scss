@@ -109,11 +109,11 @@
     :deep(.switchColumn > .select.containsTooltip .select-text),
     :deep(.switchColumn > .select.containsTooltip .nativeSelect),
     :deep(.switchColumn > .select.containsTooltip .select-bar) {
-      inline-size: calc(100% - 70px);
+      inline-size: calc(100% - 82px);
     }
 
     :deep(.switchColumn > .select.containsTooltip .iconSelect) {
-      inset-inline-end: 80px;
+      inset-inline-end: 92px;
     }
 
     :deep(.switchColumn > .select.containsTooltip .selectIndicators) {
@@ -140,7 +140,7 @@
       display: inline-flex;
     }
 
-    :deep(:not(.select, .selectLabel, .groupTitle, .selectIndicators, .labelRow) > .tooltip) {
+    :deep(:not(.select, .selectLabel, .groupTitle, .selectIndicators, .labelRow, .switch-label) > .tooltip) {
       display: inline-block;
       position: absolute;
       inset-inline-end: -25px;

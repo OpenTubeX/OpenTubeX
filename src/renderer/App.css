@@ -291,13 +291,15 @@
   z-index: 1;
 }
 
-.app.capacitorPhoneLayout > .routerView {
-  box-sizing: border-box;
-  flex-basis: 100%;
-  inline-size: 100%;
-  margin-block: var(--top-nav-height) 0;
-  margin-inline: 0;
-  overflow-inline: clip;
+@media (width <= 680px) {
+  .app.capacitorPhoneLayout > .routerView {
+    box-sizing: border-box;
+    flex-basis: 100%;
+    inline-size: 100%;
+    margin-block: var(--top-nav-height) 0;
+    margin-inline: 0;
+    overflow-inline: clip;
+  }
 }
 
 .app.capacitorPhoneLayout > .routerView :deep(.routerView) {

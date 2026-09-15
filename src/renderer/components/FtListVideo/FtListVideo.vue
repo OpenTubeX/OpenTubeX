@@ -396,6 +396,7 @@
 </template>
 
 <script setup>
+import { useContextMenuHold } from '../../composables/useContextMenuHold'
 import FtRetryImage from '../FtRetryImage.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
@@ -1244,41 +1245,9 @@ const videoContextMenuItems = computed(() => {
 
 const openMobileContextActions = inject('openMobileContextActions')
 
-let menuHoldTimer = null
-let menuHoldPosition = null
-
-function cancelMenuHold() {
-  clearTimeout(menuHoldTimer)
-  menuHoldTimer = null
-  menuHoldPosition = null
-}
-
-function resetMenuHold() {
-  cancelMenuHold()
-  document.removeEventListener('click', suppressMenuHoldClick, true)
-  document.removeEventListener('pointerdown', resetMenuHold, true)
-  document.removeEventListener('keydown', resetMenuHold, true)
-}
-
-function suppressMenuHoldClick(event) {
-  event.preventDefault()
-  event.stopImmediatePropagation()
-  resetMenuHold()
-}
-
-function startMenuHold(event) {
-  cancelMenuHold()
-  if (event.pointerType !== 'touch' || !event.isPrimary || event.target.closest('button, .channelName, [role="dialog"], [role="menu"], .iconDropdown')) return
-  menuHoldPosition = { x: event.clientX, y: event.clientY }
-  menuHoldTimer = setTimeout(() => openVideoContextMenu(event), 500)
-}
-
-function moveMenuHold(event) {
-  if (menuHoldPosition && Math.hypot(event.clientX - menuHoldPosition.x, event.clientY - menuHoldPosition.y) > 10) cancelMenuHold()
-}
+const { startMenuHold, moveMenuHold, cancelMenuHold, suppressMenuHoldClick } = useContextMenuHold(openVideoContextMenu)
 
 onBeforeUnmount(() => {
-  resetMenuHold()
   window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: videoContextMenuItems }))
 })
 
@@ -1309,9 +1278,7 @@ function openVideoContextMenu(event) {
     event.preventDefault()
     event.stopPropagation()
     cancelMenuHold()
-    document.addEventListener('click', suppressMenuHoldClick, true)
-    document.addEventListener('pointerdown', resetMenuHold, true)
-    document.addEventListener('keydown', resetMenuHold, true)
+    suppressMenuHoldClick()
     openMobileContextActions({
       title: title.value,
       actions: videoContextMenuItems

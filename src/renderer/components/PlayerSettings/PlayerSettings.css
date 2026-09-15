@@ -22,11 +22,11 @@
   .playerSelectGrid :deep(.select-text),
   .playerSelectGrid :deep(.nativeSelect),
   .playerSelectGrid :deep(.select-bar) {
-    inline-size: calc(100% - 70px);
+    inline-size: calc(100% - 82px);
   }
 
   .playerSelectGrid :deep(.iconSelect) {
-    inset-inline-end: 80px;
+    inset-inline-end: 92px;
   }
 
   .playerSelectGrid :deep(.selectIndicators) {
@@ -242,9 +242,13 @@
 }
 
 @media only screen and (width <= 680px) {
-  .quickPlaybackSpeedEntry,
-  .quickPlaybackSpeedFields {
-    grid-template-columns: 1fr;
+  .quickPlaybackSpeedEntry {
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+  }
+
+  .quickPlaybackSpeedInput {
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 
   .quickPlaybackSpeedDragHandle,

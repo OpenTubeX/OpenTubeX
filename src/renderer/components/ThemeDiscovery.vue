@@ -147,15 +147,26 @@
         name="themeScreenshot"
         mode="out-in"
       >
-        <img
+        <Swiper
           v-if="!failedImages.has(currentScreenshot(preview))"
           :key="currentScreenshot(preview)"
-          class="fullThemeScreenshot"
-          :src="currentScreenshot(preview)"
-          :alt="preview.title"
-          referrerpolicy="no-referrer"
-          @error="failedImages.add($event.currentTarget.src)"
+          class="screenshotZoom"
+          :modules="[Zoom]"
+          :zoom="{ maxRatio: 5 }"
+          :allow-touch-move="false"
         >
+          <SwiperSlide>
+            <div class="swiper-zoom-container">
+              <img
+                class="fullThemeScreenshot"
+                :src="currentScreenshot(preview)"
+                :alt="preview.title"
+                referrerpolicy="no-referrer"
+                @error="failedImages.add($event.currentTarget.src)"
+              >
+            </div>
+          </SwiperSlide>
+        </Swiper>
         <p v-else>
           {{ t('Theme Discovery.No Preview') }}
         </p>
@@ -185,6 +196,10 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, reactive, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Zoom } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/zoom'
 import FtButton from './FtButton/FtButton.vue'
 import FtPrompt from './FtPrompt/FtPrompt.vue'
 import FtIconButton from './FtIconButton/FtIconButton.vue'
@@ -423,6 +438,13 @@ async function install(entry) {
   display: grid;
   place-items: center;
   block-size: max(120px, calc(90dvh - 150px));
+}
+
+.screenshotZoom {
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
 }
 
 .fullThemeScreenshot {

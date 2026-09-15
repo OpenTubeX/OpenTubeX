@@ -648,6 +648,8 @@ Settings:
     Title Excludes: Заголовок не содержит
     Title Filter Hint: Разделяйте условия для заголовка запятыми. Видео должно соответствовать хотя бы одному включённому условию и не соответствовать ни одному исключённому.
   External Software Settings:
+    Checking FFmpeg and FFprobe: Проверка FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ещё не загружен. Нажмите кнопку ниже, чтобы загрузить его.
     External Software Settings: Внешнее ПО
     yt-dlp Source: Источник yt-dlp
     yt-dlp Channel: Канал обновлений yt-dlp
