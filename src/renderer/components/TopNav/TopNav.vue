@@ -1,5 +1,6 @@
 <template>
   <nav
+    v-page-scrollbar-header
     class="topNav"
     :class="{ topNavBarColor: barColor }"
   >

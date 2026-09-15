@@ -9,7 +9,7 @@ import App from './App.vue'
 import { initializeTabNavigationService } from './tabs/TabNavigationService'
 import { showExternalPlayerUnsupportedActionToast, showToast } from './helpers/utils'
 import { installViewTransitions } from './helpers/viewTransitions'
-import { initializeAppScrollbars, overlayScrollbarsDirective } from './helpers/overlayScrollbars'
+import { initializeAppScrollbars, overlayScrollbarsDirective, pageScrollbarHeaderDirective } from './helpers/overlayScrollbars'
 import { releaseAutomaticDownloadSchedule } from './helpers/automaticDownloads'
 import { initializeAndroidDynamicColors } from './helpers/dynamicColors'
 // import the styles
@@ -37,6 +37,7 @@ app
   .component('FtIconLayers', FtIconLayers)
   .directive('observe-visibility', ObserveVisibility)
   .directive('overlay-scrollbars', overlayScrollbarsDirective)
+  .directive('page-scrollbar-header', pageScrollbarHeaderDirective)
 
   .use(router)
   .use(store)
@@ -55,7 +56,7 @@ const dynamicColorsReady = process.env.IS_CAPACITOR
 
 Promise.all([router.isReady(), dynamicColorsReady]).then(() => {
   app.mount('#app')
-  initializeAppScrollbars({ useNativePageScrollbar: process.env.IS_CAPACITOR })
+  initializeAppScrollbars({ insetPageHeaders: process.env.IS_CAPACITOR })
 })
 
 // to avoid accessing electron api from web app build

@@ -7,7 +7,7 @@ import {
   DEFAULT_SCROLL_SPEED,
   normalizeScrollSpeed
 } from './scrollSpeed'
-import { initializePageScrollbar } from './pageScrollbar'
+import { observePageScrollbarHeaders } from './pageScrollbar'
 
 // Kept out of the core bundle by the library, so `clickScroll` below silently
 // does nothing unless it is registered.
@@ -30,6 +30,29 @@ const instances = new Map()
 const removeScrollSpeedHandlers = new WeakMap()
 const SCROLL_BOUNDARY_TOLERANCE = 1
 const suspendScrollbarPosition = new WeakMap()
+const pageHeaders = new Set()
+let pageHeaderObserver = null
+let pageHeaderInset = 0
+
+export const pageScrollbarHeaderDirective = {
+  mounted(element) {
+    pageHeaders.add(element)
+    pageHeaderObserver?.observe(element)
+  },
+  updated() {
+    pageHeaderObserver?.refresh()
+  },
+  unmounted(element) {
+    pageHeaders.delete(element)
+    pageHeaderObserver?.unobserve(element)
+  }
+}
+
+function updatePageHeaderInset(instance) {
+  const { scrollbar } = instance.elements().scrollbarVertical
+  scrollbar.style.top = `${pageHeaderInset}px`
+  scrollbar.style.height = `calc(100% - ${pageHeaderInset}px)`
+}
 
 function scrollbarOptions(initialization) {
   const options = {
@@ -70,6 +93,7 @@ function create(initialization) {
 
   if (initialization === document.body) {
     updateBodyScrollbarPosition(instance)
+    updatePageHeaderInset(instance)
     optimizeBodyScrollbarDrag(instance)
   } else if (initialization.elements?.viewport instanceof HTMLElement) {
     reconcileScrollbarOnResize(initialization.elements.viewport, instance)
@@ -174,7 +198,7 @@ function updateBodyScrollbarPosition(instance) {
   scrollbar.style.removeProperty('left')
   scrollbar.style.removeProperty('right')
 
-  if (position === 'right') {
+  if (process.env.IS_ELECTRON && position === 'right') {
     scrollbar.style.right = width
   }
 
@@ -345,8 +369,18 @@ function optimizeBodyScrollbarDrag(instance) {
  * Replaces the main window's scrollbars. `window.scrollTo`, `window.scrollY`
  * and the document's scroll events keep working when the body is the target.
  */
-export function initializeAppScrollbars({ useNativePageScrollbar = false } = {}) {
-  initializePageScrollbar(document, useNativePageScrollbar, create)
+export function initializeAppScrollbars({ insetPageHeaders = false } = {}) {
+  create(document.body)
+
+  if (insetPageHeaders) {
+    pageHeaderObserver = observePageScrollbarHeaders(inset => {
+      pageHeaderInset = inset
+      for (const [instance, initialization] of instances) {
+        if (initialization === document.body) updatePageHeaderInset(instance)
+      }
+    })
+    for (const header of pageHeaders) pageHeaderObserver.observe(header)
+  }
 
   watch(
     () => normalizeScrollSpeed(store.getters.getScrollSpeed),
@@ -361,6 +395,7 @@ export function initializeAppScrollbars({ useNativePageScrollbar = false } = {})
   watch(
     () => [store.getters.getTabBarPosition, store.getters.getVerticalTabBarWidth],
     () => {
+      pageHeaderObserver?.refresh()
       for (const [instance, initialization] of instances) {
         if (initialization === document.body) {
           updateBodyScrollbarPosition(instance)
