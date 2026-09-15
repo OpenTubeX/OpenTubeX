@@ -247,6 +247,9 @@ Settings:
       Network: sítě
       Disk: disku
   General Settings:
+    Use tray icon: "Používat ikonu v oznamovací oblasti"
+    Close to system tray: "Při zavření skrýt do oznamovací oblasti"
+    Tray required for background refresh: "Ikona v oznamovací oblasti je nutná, pokud je zapnutá aktualizace odběrů na pozadí."
     Show Video Menu Button: Zobrazit tlačítko nabídky videa
     Swipe to refresh: Obnovit potažením
     Blur Thumbnails: Rozmazat miniatury
@@ -1758,3 +1761,6 @@ App Icon:
   Saved Message: "Ikona byla uložena. Aktualizace spouštěče může chvíli trvat."
   Title: "Ikona aplikace"
   Error: "Ikonu aplikace se nepodařilo načíst nebo změnit"
+
+Tray:
+  Show All Windows: "Zobrazit všechna okna"

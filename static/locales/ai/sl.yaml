@@ -369,6 +369,9 @@ Settings:
       Disk: disk
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
+    Use tray icon: "Uporabi ikono v sistemski vrstici"
+    Close to system tray: "Zapri v sistemsko vrstico"
+    Tray required for background refresh: "Ikona v sistemski vrstici je potrebna, dokler je omogočeno osveževanje naročnin v ozadju."
     Show Video Menu Button: Prikaži gumb menija videoposnetka
     Swipe to refresh: Povlecite za osvežitev
     Blur Thumbnails: Zamegli sličice
@@ -2352,3 +2355,6 @@ App Icon:
   Saved Message: "Ikona je shranjena. Posodobitev zaganjalnika lahko traja nekaj časa."
   Title: "Ikona aplikacije"
   Error: "Ikone aplikacije ni bilo mogoče naložiti ali spremeniti"
+
+Tray:
+  Show All Windows: "Pokaži vsa okna"

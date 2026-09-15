@@ -512,6 +512,9 @@ Settings:
   The app needs to restart for changes to take effect. Restart and apply change?: The
     app needs to restart for changes to take effect. Restart and apply change?
   General Settings:
+    Use tray icon: "Use tray icon"
+    Close to system tray: "Close to system tray"
+    Tray required for background refresh: "The tray icon is required while background subscription refresh is enabled."
     Show Video Menu Button: Show video menu button
     Swipe to refresh: Swipe to refresh
     Blur Thumbnails: Blur thumbnails
@@ -2974,3 +2977,6 @@ App Icon:
   Saved Message: "Icon saved. Your launcher may take a moment to update."
   Title: "App icon"
   Error: "Unable to load or change the app icon"
+
+Tray:
+  Show All Windows: "Show All Windows"

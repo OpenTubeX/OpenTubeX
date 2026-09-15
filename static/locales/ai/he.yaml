@@ -251,6 +251,9 @@ Settings:
       Network: רשת
       Disk: כונן
   General Settings:
+    Use tray icon: "שימוש בסמל במגש המערכת"
+    Close to system tray: "סגירה למגש המערכת"
+    Tray required for background refresh: "סמל מגש המערכת נדרש כל עוד רענון המינויים ברקע מופעל."
     Show Video Menu Button: הצגת כפתור תפריט הסרטון
     Swipe to refresh: החלקה לרענון
     Blur Thumbnails: טשטוש תמונות ממוזערות
@@ -1805,3 +1808,6 @@ App Icon:
   Saved Message: "הסמל נשמר. ייתכן שיידרש רגע לעדכון מסך הבית."
   Title: "סמל היישום"
   Error: "לא ניתן לטעון או לשנות את סמל היישום"
+
+Tray:
+  Show All Windows: "הצגת כל החלונות"

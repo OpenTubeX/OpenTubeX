@@ -249,6 +249,9 @@ Settings:
       Network: şəbəkə
       Disk: disk
   General Settings:
+    Use tray icon: "Sistem sahəsi nişanından istifadə et"
+    Close to system tray: "Sistem sahəsinə bağla"
+    Tray required for background refresh: "Abunəliklərin arxa planda yenilənməsi aktiv olduqda sistem sahəsi nişanı tələb olunur."
     Show Video Menu Button: Video menyusu düyməsini göstər
     Swipe to refresh: Yeniləmək üçün sürüşdür
     Blur Thumbnails: Miniatürləri bulanıqlaşdır
@@ -1768,3 +1771,6 @@ App Icon:
   Saved Message: "Nişan saxlanıldı. Başladıcının yenilənməsi bir qədər vaxt ala bilər."
   Title: "Tətbiq nişanı"
   Error: "Tətbiq nişanını yükləmək və ya dəyişmək mümkün olmadı"
+
+Tray:
+  Show All Windows: "Bütün pəncərələri göstər"

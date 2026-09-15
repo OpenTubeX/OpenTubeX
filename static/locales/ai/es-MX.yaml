@@ -275,6 +275,9 @@ Settings:
       Network: red
       Disk: disco
   General Settings:
+    Use tray icon: "Usar icono de la bandeja"
+    Close to system tray: "Cerrar a la bandeja del sistema"
+    Tray required for background refresh: "El icono de la bandeja es necesario mientras la actualización de suscripciones en segundo plano esté activada."
     Show Video Menu Button: Mostrar botón del menú del video
     Swipe to refresh: Deslizar para actualizar
     Blur Thumbnails: Desenfocar miniaturas
@@ -2192,3 +2195,6 @@ App Icon:
   Saved Message: "Ícono guardado. El lanzador puede tardar un momento en actualizarse."
   Title: "Ícono de la aplicación"
   Error: "No se pudo cargar o cambiar el ícono de la aplicación"
+
+Tray:
+  Show All Windows: "Mostrar todas las ventanas"

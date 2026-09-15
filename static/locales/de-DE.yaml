@@ -334,6 +334,9 @@ Settings:
     Advanced Description: Anbieter, externe Anwendungen und Netzwerk
     Alternative providers: Video- und Metadatenanbieter
   General Settings:
+    Use tray icon: "Symbol im Infobereich verwenden"
+    Close to system tray: "Beim Schließen in den Infobereich minimieren"
+    Tray required for background refresh: "Das Symbol im Infobereich ist erforderlich, solange die Hintergrundaktualisierung von Abonnements aktiviert ist."
     Show Video Menu Button: Videomenü-Schaltfläche anzeigen
     Swipe to refresh: Zum Aktualisieren wischen
     Blur Thumbnails: Vorschaubilder weichzeichnen
@@ -2952,3 +2955,6 @@ App Icon:
   Saved Message: "Symbol gespeichert. Es kann einen Moment dauern, bis dein Launcher es aktualisiert."
   Title: "App-Symbol"
   Error: "Das App-Symbol konnte nicht geladen oder geändert werden"
+
+Tray:
+  Show All Windows: "Alle Fenster anzeigen"

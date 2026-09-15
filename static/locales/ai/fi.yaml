@@ -251,6 +251,9 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Use tray icon: "Käytä ilmoitusalueen kuvaketta"
+    Close to system tray: "Sulje ilmoitusalueelle"
+    Tray required for background refresh: "Ilmoitusalueen kuvake tarvitaan, kun tilausten päivitys taustalla on käytössä."
     Show Video Menu Button: Näytä videovalikon painike
     Swipe to refresh: Päivitä pyyhkäisemällä
     Blur Thumbnails: Sumenna pikkukuvat
@@ -1803,3 +1806,6 @@ App Icon:
   Saved Message: "Kuvake tallennettu. Käynnistyssovelluksen päivittyminen voi kestää hetken."
   Title: "Sovelluskuvake"
   Error: "Sovelluskuvaketta ei voitu ladata tai vaihtaa"
+
+Tray:
+  Show All Windows: "Näytä kaikki ikkunat"

@@ -10,6 +10,8 @@ const GENERAL_EVERYDAY_KEYS = new Set([
   'Extra Thumbnail Action Button',
   'Locale Preference',
   'Minimize to system tray',
+  'Use tray icon',
+  'Close to system tray',
   'New Tab Position',
   'Open Deep Links In New Window',
   'Reduced Motion',

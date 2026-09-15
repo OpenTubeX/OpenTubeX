@@ -249,6 +249,9 @@ Settings:
       Network: nets
       Disk: disks
   General Settings:
+    Use tray icon: "Nota tákn í kerfisbakka"
+    Close to system tray: "Loka í kerfisbakka"
+    Tray required for background refresh: "Tákn í kerfisbakka er nauðsynlegt meðan uppfærsla áskrifta í bakgrunni er virk."
     Show Video Menu Button: Sýna myndskeiðsvalmyndarhnapp
     Swipe to refresh: Strjúktu til að endurhlaða
     Blur Thumbnails: Þoka smámyndir
@@ -1780,3 +1783,6 @@ App Icon:
   Saved Message: "Táknið hefur verið vistað. Uppfærsla heimaskjásins gæti tekið smástund."
   Title: "Tákn forrits"
   Error: "Ekki tókst að hlaða eða breyta tákni forritsins"
+
+Tray:
+  Show All Windows: "Sýna alla glugga"

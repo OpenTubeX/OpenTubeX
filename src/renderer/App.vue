@@ -550,7 +550,7 @@ import {
   resolveMobileContextLinkCopyUrl,
 } from './helpers/mobileLinkActions'
 import { startProgressBarOperation } from './helpers/progressBar'
-import { initializePlatformInfo, isLinuxWayland } from './helpers/platform'
+import { initializePlatformInfo, isLinuxWayland, supportsAutoPictureInPictureMinimize } from './helpers/platform'
 import { revealStartupSplash } from './helpers/startupSplash'
 import {
   shouldShowProgressStartToast,
@@ -3066,6 +3066,7 @@ const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
   supportsLocalApi: !!process.env.SUPPORTS_LOCAL_API,
   isMac: process.platform === 'darwin',
   isLinuxWayland: isLinuxWayland.value,
+  supportsAutoPictureInPictureMinimize: supportsAutoPictureInPictureMinimize.value,
   systemUsesDarkTheme: systemUsesDarkTheme.value,
 }))
 

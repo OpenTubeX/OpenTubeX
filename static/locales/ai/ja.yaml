@@ -247,6 +247,9 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Use tray icon: "トレイアイコンを使用"
+    Close to system tray: "閉じるときにトレイに格納"
+    Tray required for background refresh: "バックグラウンドでの登録チャンネルの更新が有効な間は、トレイアイコンが必要です。"
     Show Video Menu Button: 動画メニューボタンを表示
     Swipe to refresh: スワイプして更新
     Blur Thumbnails: サムネイルをぼかす
@@ -1758,3 +1761,6 @@ App Icon:
   Saved Message: "アイコンを保存しました。ランチャーの更新には少し時間がかかる場合があります。"
   Title: "アプリアイコン"
   Error: "アプリアイコンを読み込むか変更することができませんでした"
+
+Tray:
+  Show All Windows: "すべてのウィンドウを表示"

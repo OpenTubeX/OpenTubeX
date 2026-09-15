@@ -251,6 +251,9 @@ Settings:
       Network: mạng
       Disk: ổ đĩa
   General Settings:
+    Use tray icon: "Sử dụng biểu tượng khay hệ thống"
+    Close to system tray: "Đóng vào khay hệ thống"
+    Tray required for background refresh: "Biểu tượng khay hệ thống là bắt buộc khi bật làm mới kênh đăng ký trong nền."
     Show Video Menu Button: Hiện nút trình đơn video
     Swipe to refresh: Vuốt để làm mới
     Blur Thumbnails: Làm mờ hình thu nhỏ
@@ -1793,3 +1796,6 @@ App Icon:
   Saved Message: "Đã lưu biểu tượng. Trình khởi chạy có thể mất một lúc để cập nhật."
   Title: "Biểu tượng ứng dụng"
   Error: "Không thể tải hoặc thay đổi biểu tượng ứng dụng"
+
+Tray:
+  Show All Windows: "Hiển thị tất cả cửa sổ"

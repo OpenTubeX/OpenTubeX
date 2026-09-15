@@ -247,6 +247,9 @@ Settings:
       Network: võrgu
       Disk: ketta
   General Settings:
+    Use tray icon: "Kasuta süsteemisalve ikooni"
+    Close to system tray: "Sulge süsteemisalve"
+    Tray required for background refresh: "Süsteemisalve ikoon on vajalik, kui tellimuste taustal värskendamine on lubatud."
     Show Video Menu Button: Kuva videomenüü nupp
     Swipe to refresh: Värskendamiseks viipa
     Blur Thumbnails: Hägusta pisipildid
@@ -1761,3 +1764,6 @@ App Icon:
   Saved Message: "Ikoon on salvestatud. Käivitaja värskendamine võib võtta hetke."
   Title: "Rakenduse ikoon"
   Error: "Rakenduse ikooni ei saanud laadida ega muuta"
+
+Tray:
+  Show All Windows: "Näita kõiki aknaid"

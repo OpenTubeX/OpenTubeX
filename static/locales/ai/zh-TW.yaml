@@ -247,6 +247,9 @@ Settings:
       Network: 網路
       Disk: 磁碟
   General Settings:
+    Use tray icon: "使用系統匣圖示"
+    Close to system tray: "關閉時縮小至系統匣"
+    Tray required for background refresh: "啟用背景重新整理訂閱時，必須顯示系統匣圖示。"
     Show Video Menu Button: 顯示影片選單按鈕
     Swipe to refresh: 下拉重新整理
     Blur Thumbnails: 模糊縮圖
@@ -1775,3 +1778,6 @@ App Icon:
   Saved Message: "圖示已儲存。啟動器可能需要一點時間更新。"
   Title: "應用程式圖示"
   Error: "無法載入或變更應用程式圖示"
+
+Tray:
+  Show All Windows: "顯示所有視窗"

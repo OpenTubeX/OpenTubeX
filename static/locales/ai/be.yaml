@@ -263,6 +263,9 @@ Settings:
       Network: сетка
       Disk: дыск
   General Settings:
+    Use tray icon: "Выкарыстоўваць значок у трэі"
+    Close to system tray: "Згортваць у трэй пры закрыцці"
+    Tray required for background refresh: "Значок у трэі неабходны, пакуль уключана фонавае абнаўленне падпісак."
     Show Video Menu Button: Паказваць кнопку меню відэа
     Swipe to refresh: Пацягніце, каб абнавіць
     Blur Thumbnails: Размываць мініяцюры
@@ -1851,3 +1854,6 @@ App Icon:
   Saved Message: "Значок захаваны. Абнаўленне ў праграме запуску можа заняць крыху часу."
   Title: "Значок праграмы"
   Error: "Не ўдалося загрузіць або змяніць значок праграмы"
+
+Tray:
+  Show All Windows: "Паказаць усе вокны"

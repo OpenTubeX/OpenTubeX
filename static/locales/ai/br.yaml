@@ -247,6 +247,9 @@ Settings:
       Network: "ar rouedad"
       Disk: "ar bladenn"
   General Settings:
+    Use tray icon: "Implijout un arlun er maez reizhiad"
+    Close to system tray: "Serriñ er maez reizhiad"
+    Tray required for background refresh: "Ret eo an arlun er maez reizhiad pa vez gweredekaet hizivaat ar c’houmanantoù en drekleur."
     Show Video Menu Button: Diskouez afell lañser ar video
     Swipe to refresh: Riklañ evit freskaat
     Blur Thumbnails: Lakaat ar skeudennoùigoù da vezañ dispis
@@ -1767,3 +1770,6 @@ App Icon:
   Saved Message: "Enrollet eo an arlun. Un tamm amzer a c'hall bezañ ret d'al lañser evit hizivaat anezhañ."
   Title: "Arlun an arload"
   Error: "N'eus ket bet gallet kargañ pe cheñch arlun an arload"
+
+Tray:
+  Show All Windows: "Diskouez an holl brenestroù"

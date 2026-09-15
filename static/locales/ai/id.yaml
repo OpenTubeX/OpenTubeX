@@ -251,6 +251,9 @@ Settings:
       Network: jaringan
       Disk: disk
   General Settings:
+    Use tray icon: "Gunakan ikon baki sistem"
+    Close to system tray: "Tutup ke baki sistem"
+    Tray required for background refresh: "Ikon baki sistem diperlukan selama pembaruan langganan di latar belakang diaktifkan."
     Show Video Menu Button: Tampilkan tombol menu video
     Swipe to refresh: Geser untuk menyegarkan
     Blur Thumbnails: Buramkan gambar mini
@@ -1795,3 +1798,6 @@ App Icon:
   Saved Message: "Ikon disimpan. Peluncur mungkin memerlukan waktu untuk memperbarui."
   Title: "Ikon aplikasi"
   Error: "Tidak dapat memuat atau mengubah ikon aplikasi"
+
+Tray:
+  Show All Windows: "Tampilkan Semua Jendela"

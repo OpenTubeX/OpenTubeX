@@ -247,6 +247,9 @@ Settings:
       Network: sieť
       Disk: disk
   General Settings:
+    Use tray icon: "Používať ikonu v systémovej lište"
+    Close to system tray: "Pri zatvorení skryť do systémovej lišty"
+    Tray required for background refresh: "Ikona v systémovej lište je potrebná, kým je zapnutá aktualizácia odberov na pozadí."
     Show Video Menu Button: Zobraziť tlačidlo ponuky videa
     Swipe to refresh: Obnoviť potiahnutím
     Blur Thumbnails: Rozmazať miniatúry
@@ -1758,3 +1761,6 @@ App Icon:
   Saved Message: "Ikona bola uložená. Aktualizácia spúšťača môže chvíľu trvať."
   Title: "Ikona aplikácie"
   Error: "Ikonu aplikácie sa nepodarilo načítať alebo zmeniť"
+
+Tray:
+  Show All Windows: "Zobraziť všetky okná"

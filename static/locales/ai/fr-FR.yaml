@@ -247,6 +247,9 @@ Settings:
       Network: le réseau
       Disk: le disque
   General Settings:
+    Use tray icon: "Utiliser l’icône de notification"
+    Close to system tray: "Fermer dans la zone de notification"
+    Tray required for background refresh: "L’icône de notification est nécessaire lorsque l’actualisation des abonnements en arrière-plan est activée."
     Show Video Menu Button: Afficher le bouton du menu vidéo
     Swipe to refresh: Balayer pour actualiser
     Blur Thumbnails: Flouter les miniatures
@@ -1757,3 +1760,6 @@ App Icon:
   Saved Message: "Icône enregistrée. Votre lanceur peut mettre un moment à se mettre à jour."
   Title: "Icône de l'application"
   Error: "Impossible de charger ou de modifier l'icône de l'application"
+
+Tray:
+  Show All Windows: "Afficher toutes les fenêtres"

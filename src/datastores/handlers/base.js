@@ -145,6 +145,8 @@ class Settings {
           'proxyPort',
           'backendFallback',
           'backendPreference',
+          'useTrayIcon',
+          'hideToTrayOnClose',
           'hideToTrayOnMinimize'
         ]
       }

@@ -302,6 +302,9 @@ Settings:
       Disk: disk
   Return to Settings Menu: Tilbake til innstillingsmenyen
   General Settings:
+    Use tray icon: "Bruk ikon i systemtrauet"
+    Close to system tray: "Lukk til systemtrauet"
+    Tray required for background refresh: "Ikonet i systemtrauet er påkravd medan oppdatering av abonnement i bakgrunnen er aktivert."
     Show Video Menu Button: Vis videomenyknapp
     Swipe to refresh: Sveip for å oppdatere
     Blur Thumbnails: Gjer miniatyrbilete uskarpe
@@ -2188,3 +2191,6 @@ App Icon:
   Saved Message: "Ikonet er lagra. Det kan ta litt tid før startskjermen vert oppdatert."
   Title: "Appikon"
   Error: "Kunne ikkje laste inn eller endre appikonet"
+
+Tray:
+  Show All Windows: "Vis alle vindauge"

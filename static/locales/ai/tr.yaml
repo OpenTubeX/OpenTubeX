@@ -247,6 +247,9 @@ Settings:
       Network: ağ
       Disk: disk
   General Settings:
+    Use tray icon: "Tepsi simgesini kullan"
+    Close to system tray: "Sistem tepsisine kapat"
+    Tray required for background refresh: "Arka planda abonelik yenileme etkinken tepsi simgesi gereklidir."
     Show Video Menu Button: Video menüsü düğmesini göster
     Swipe to refresh: Yenilemek için kaydır
     Blur Thumbnails: Küçük resimleri bulanıklaştır
@@ -1759,3 +1762,6 @@ App Icon:
   Saved Message: "Simge kaydedildi. Başlatıcınızın güncellenmesi biraz zaman alabilir."
   Title: "Uygulama simgesi"
   Error: "Uygulama simgesi yüklenemedi veya değiştirilemedi"
+
+Tray:
+  Show All Windows: "Tüm Pencereleri Göster"

@@ -251,6 +251,9 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Use tray icon: "Usar a icona da bandexa"
+    Close to system tray: "Pechar na bandexa do sistema"
+    Tray required for background refresh: "A icona da bandexa é necesaria mentres a actualización das subscricións en segundo plano estea activada."
     Show Video Menu Button: Amosar o botón do menú do vídeo
     Swipe to refresh: Esvarar para actualizar
     Blur Thumbnails: Desenfocar miniaturas
@@ -1805,3 +1808,6 @@ App Icon:
   Saved Message: "Icona gardada. O iniciador pode tardar un momento en actualizarse."
   Title: "Icona da aplicación"
   Error: "Non se puido cargar ou cambiar a icona da aplicación"
+
+Tray:
+  Show All Windows: "Mostrar todas as xanelas"
