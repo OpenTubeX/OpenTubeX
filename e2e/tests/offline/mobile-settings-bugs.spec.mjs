@@ -17,17 +17,21 @@ for (const uiScale of [100, 125]) {
       expect(Math.abs(await center('.quickPlaybackSpeedDragHandle') - await center('.delete'))).toBeLessThan(2)
     })
 
-    test('leaves room between selects and their help icons', async ({ page }) => {
-      await page.setViewportSize({ width: 375, height: 812 })
-      const section = await goToSettingsSection(page, 'playback')
-      const selects = section.locator('.select.containsTooltip')
-      await expect(selects.first()).toBeVisible()
-      expect(await selects.evaluateAll(elements => elements.every(el => {
-        const help = el.querySelector('.selectTooltip').getBoundingClientRect()
-        const select = el.querySelector('.select-text').getBoundingClientRect()
-        return help.left - select.right >= 16
-      }))).toBe(true)
-    })
+    for (const sectionName of ['playback', 'subscription']) {
+      test(`leaves room between ${sectionName} selects and their help icons`, async ({ page }) => {
+        await page.setViewportSize({ width: 375, height: 812 })
+        const section = await goToSettingsSection(page, sectionName)
+        const selects = section.locator('.select.containsTooltip')
+        await expect(selects.first()).toBeVisible()
+        expect(await selects.evaluateAll(elements => elements.every(el => {
+          const help = el.querySelector('.selectTooltip').getBoundingClientRect()
+          const select = el.querySelector('.select-text').getBoundingClientRect()
+          const style = getComputedStyle(el)
+          const contentWidth = el.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
+          return Math.abs(select.width - (contentWidth - 70)) < 1 && help.left - select.right >= 15.75 && help.left - select.right <= 17
+        }))).toBe(true)
+      })
+    }
 
     test('centers caption help with a multiline switch label', async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 812 })

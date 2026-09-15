@@ -109,15 +109,15 @@
     :deep(.switchColumn > .select.containsTooltip .select-text),
     :deep(.switchColumn > .select.containsTooltip .nativeSelect),
     :deep(.switchColumn > .select.containsTooltip .select-bar) {
-      inline-size: calc(100% - 82px);
+      inline-size: calc(100% - 70px);
     }
 
     :deep(.switchColumn > .select.containsTooltip .iconSelect) {
-      inset-inline-end: 92px;
+      inset-inline-end: 80px;
     }
 
     :deep(.switchColumn > .select.containsTooltip .selectIndicators) {
-      inset-inline: auto 8px;
+      inset-inline: calc(100% - 54px) auto;
     }
 
     :deep(.switch-ctn.containsTooltip) {

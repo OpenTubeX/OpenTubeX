@@ -3512,6 +3512,16 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   border: 0;
   background-color: transparent;
   line-height: 0.5;
+  white-space: nowrap;
+}
+
+:deep(.ft-controls-stack-times > .shaka-spacer) {
+  min-inline-size: 0;
+  padding: 0;
+}
+
+:deep(.ft-controls-stack-times > .shaka-volume-bar-container) {
+  margin-inline: 0;
 }
 
 :deep(.ft-controls-stack-times > .ft-time-display-group) {
@@ -3521,8 +3531,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.ft-controls-stack-times > .ft-time-display-group > .shaka-current-time) {
-  inline-size: min-content;
-  white-space: normal;
   block-size: auto;
   line-height: 1.2;
 }
@@ -4752,7 +4760,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 /* Keep neighbouring controls easy to distinguish with a finger. The adaptive
    panel moves optional controls into its menu when the larger targets need room. */
 @media (any-pointer: coarse) {
-  :deep(:is(.shaka-controls-button-panel, .shaka-controls-top-button-panel) > button:not(:disabled)) {
+  :deep(:is(.shaka-controls-button-panel, .shaka-controls-top-button-panel) > :is(.shaka-overflow-menu-button, .shaka-pip-button)) {
     min-inline-size: 56px;
     min-block-size: 56px;
     flex-shrink: 0;

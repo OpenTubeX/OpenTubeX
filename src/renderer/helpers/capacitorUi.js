@@ -15,6 +15,10 @@ export function shouldRotateFullscreenToLandscape(fullscreen, video, enabled = t
 export async function setFullscreenOrientation(fullscreen, video, enabled = true) {
   if (!Capacitor.isNativePlatform()) return
 
+  // Track replacement briefly clears the video size. Keep the current lock
+  // until the new dimensions arrive instead of rotating out of fullscreen.
+  if (fullscreen && enabled && !(video?.videoWidth > 0 && video?.videoHeight > 0)) return
+
   return shouldRotateFullscreenToLandscape(fullscreen, video, enabled)
     ? ScreenOrientation.lock({ type: OrientationType.LANDSCAPE })
     : ScreenOrientation.unlock()

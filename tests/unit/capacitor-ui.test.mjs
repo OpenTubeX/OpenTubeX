@@ -30,7 +30,21 @@ for (const platform of ['android', 'ios']) {
     await ui.setFullscreenOrientation(true, { videoWidth: 1080, videoHeight: 1920 })
     await ui.setFullscreenOrientation(true, { videoWidth: 1080, videoHeight: 1080 })
     await ui.setFullscreenOrientation(true, null)
-    assert.deepEqual(calls, ['landscape', 'unlock', 'unlock', 'unlock', 'unlock', 'unlock'])
+    assert.deepEqual(calls, ['landscape', 'unlock', 'unlock', 'unlock', 'unlock'])
+  })
+
+  test(`${platform} retains the fullscreen orientation while replacement dimensions are unknown`, async () => {
+    const calls = []
+    const ui = loadUi(platform, {
+      lock: async ({ type }) => calls.push(type),
+      unlock: async () => calls.push('unlock'),
+    })
+    await ui.setFullscreenOrientation(true, { videoWidth: 1920, videoHeight: 1080 })
+    await ui.setFullscreenOrientation(true, { videoWidth: 0, videoHeight: 0 })
+    assert.deepEqual(calls, ['landscape'])
+    await ui.setFullscreenOrientation(true, { videoWidth: 1280, videoHeight: 720 })
+    await ui.setFullscreenOrientation(false, null)
+    assert.deepEqual(calls, ['landscape', 'landscape', 'unlock'])
   })
 
   test(`${platform} opens notification settings without opening general settings`, async () => {

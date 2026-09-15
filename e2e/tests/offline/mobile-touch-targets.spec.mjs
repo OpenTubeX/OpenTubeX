@@ -5,7 +5,7 @@ import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
 
 for (const uiScale of [100, 125]) {
-  test(`player touch buttons retain 56px targets at ${uiScale}% scale`, async ({ app, page }) => {
+  test(`player settings and PiP retain 56px touch targets at ${uiScale}% scale`, async ({ app, page }) => {
     await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100), uiScale)
     const session = await page.context().newCDPSession(page)
     await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
@@ -17,8 +17,10 @@ for (const uiScale of [100, 125]) {
     await expect(panel.locator('.shaka-overflow-menu-button')).toBeVisible()
     await expect.poll(() => panel.locator(':scope > button:enabled:visible').evaluateAll(buttons => buttons.map(button => {
       const bounds = button.getBoundingClientRect()
-      return { width: bounds.width, height: bounds.height }
-    }).every(bounds => bounds.width >= 55.75 && bounds.height >= 55.75))).toBe(true)
+      return { width: bounds.width, height: bounds.height, minimum: button.matches('.shaka-overflow-menu-button, .shaka-pip-button') ? 55.75 : 47.75 }
+    }).every(bounds => bounds.width >= bounds.minimum && bounds.height >= bounds.minimum))).toBe(true)
+    const time = panel.locator('.ft-time-display-group > .shaka-current-time').first()
+    await expect(time).toHaveCSS('white-space', 'nowrap')
     const bounds = await panel.boundingBox()
     await expect.poll(() => panel.locator(':scope > button:enabled:visible').evaluateAll((buttons, right) => buttons.every(button => button.getBoundingClientRect().right <= right + 1), bounds.x + bounds.width)).toBe(true)
     await panel.locator('.shaka-overflow-menu-button').click({ position: { x: 4, y: 28 } })
@@ -28,7 +30,8 @@ for (const uiScale of [100, 125]) {
     await setPlayerFullscreen(page, true)
     await expect.poll(() => panel.locator(':scope > button:enabled:visible').evaluateAll(buttons => buttons.every(button => {
       const rect = button.getBoundingClientRect()
-      return rect.width >= 55.75 && rect.height >= 55.75
+      const minimum = button.matches('.shaka-overflow-menu-button, .shaka-pip-button') ? 55.75 : 47.75
+      return rect.width >= minimum && rect.height >= minimum
     }))).toBe(true)
     await panel.locator('.shaka-overflow-menu-button').click({ position: { x: 4, y: 28 } })
     await expect(page.locator('.shaka-overflow-menu')).toBeVisible()

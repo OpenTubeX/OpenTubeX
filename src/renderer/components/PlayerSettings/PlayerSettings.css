@@ -22,15 +22,15 @@
   .playerSelectGrid :deep(.select-text),
   .playerSelectGrid :deep(.nativeSelect),
   .playerSelectGrid :deep(.select-bar) {
-    inline-size: calc(100% - 82px);
+    inline-size: calc(100% - 70px);
   }
 
   .playerSelectGrid :deep(.iconSelect) {
-    inset-inline-end: 92px;
+    inset-inline-end: 80px;
   }
 
   .playerSelectGrid :deep(.selectIndicators) {
-    inset-inline: auto 8px;
+    inset-inline: calc(100% - 54px) auto;
   }
 }
 
