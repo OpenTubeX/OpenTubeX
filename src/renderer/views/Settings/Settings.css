@@ -81,6 +81,14 @@
   vertical-align: 0;
 }
 
+.settingsHeaderNavigation {
+  min-inline-size: 0;
+  flex: 1 1 160px;
+  display: flex;
+  align-items: center;
+  gap: inherit;
+}
+
 .settingsBreadcrumb {
   min-inline-size: 0;
   flex: 1 1 0;

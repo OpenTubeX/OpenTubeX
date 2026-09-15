@@ -396,6 +396,7 @@
     <br>
     <FtFlexBox>
       <FtToggleSwitch
+        class="quickPlaybackSpeedToggle"
         :label="t('Settings.Player Settings.Use Quick Playback Speed Bar')"
         :compact="true"
         :default-value="useQuickPlaybackSpeedBar"

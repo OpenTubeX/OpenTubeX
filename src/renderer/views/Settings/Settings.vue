@@ -17,108 +17,110 @@
       @pointerdown="startDragging"
       @dblclick="handleHeaderDoubleClick"
     >
-      <button
-        v-if="showBackButton"
-        type="button"
-        class="settingsHeaderButton settingsBackButton"
-        :aria-label="t('Back')"
-        :title="t('Back')"
-        @click="goBack"
-      >
-        <FtIcon :icon="['fas', 'arrow-left']" />
-      </button>
-      <div
-        class="settingsBreadcrumb"
-        aria-live="polite"
-      >
-        <span
-          v-if="isStandaloneViewOpen"
-          class="settingsBreadcrumbLabel"
-        >
-          <FtIcon
-            class="settingsWindowIcon"
-            :icon="standaloneViewIcon"
-            aria-hidden="true"
-          />
-          <span class="settingsBreadcrumbText">{{ windowTitle }}</span>
-        </span>
+      <div class="settingsHeaderNavigation">
         <button
-          v-else-if="showBackButton"
-          v-show="isInDesktopView"
+          v-if="showBackButton"
           type="button"
-          class="settingsBreadcrumbRoot"
-          @click="returnToSettingsMenu"
+          class="settingsHeaderButton settingsBackButton"
+          :aria-label="t('Back')"
+          :title="t('Back')"
+          @click="goBack"
         >
-          <FtIcon
-            class="settingsWindowIcon"
-            :icon="['fas', 'cog']"
-            aria-hidden="true"
-          />
-          <span class="settingsBreadcrumbText">{{ t('Settings.Settings') }}</span>
+          <FtIcon :icon="['fas', 'arrow-left']" />
         </button>
-        <span
-          v-else
-          class="settingsBreadcrumbLabel"
+        <div
+          class="settingsBreadcrumb"
+          aria-live="polite"
         >
-          <FtIcon
-            class="settingsWindowIcon"
-            :icon="['fas', 'cog']"
-            aria-hidden="true"
-          />
-          <span class="settingsBreadcrumbText">{{ t('Settings.Settings') }}</span>
-        </span>
-        <template v-if="!isStandaloneViewOpen && currentSectionTitle">
-          <FtIcon
-            v-show="isInDesktopView"
-            class="settingsBreadcrumbSeparator"
-            :icon="['fas', 'angle-right']"
-          />
-          <button
-            v-if="subpageTitle"
-            type="button"
-            class="settingsBreadcrumbParent"
-            @click="returnToCategory"
+          <span
+            v-if="isStandaloneViewOpen"
+            class="settingsBreadcrumbLabel"
           >
             <FtIcon
-              v-if="currentSectionIcon"
-              class="settingsBreadcrumbCategoryIcon"
-              :icon="currentSectionIcon"
+              class="settingsWindowIcon"
+              :icon="standaloneViewIcon"
               aria-hidden="true"
             />
-            <span class="settingsBreadcrumbText">{{ currentSectionTitle }}</span>
+            <span class="settingsBreadcrumbText">{{ windowTitle }}</span>
+          </span>
+          <button
+            v-else-if="showBackButton"
+            v-show="isInDesktopView"
+            type="button"
+            class="settingsBreadcrumbRoot"
+            @click="returnToSettingsMenu"
+          >
+            <FtIcon
+              class="settingsWindowIcon"
+              :icon="['fas', 'cog']"
+              aria-hidden="true"
+            />
+            <span class="settingsBreadcrumbText">{{ t('Settings.Settings') }}</span>
           </button>
           <span
             v-else
             class="settingsBreadcrumbLabel"
           >
             <FtIcon
-              v-if="currentSectionIcon"
-              class="settingsBreadcrumbCategoryIcon"
-              :icon="currentSectionIcon"
+              class="settingsWindowIcon"
+              :icon="['fas', 'cog']"
               aria-hidden="true"
             />
-            <span class="settingsBreadcrumbText">{{ currentSectionTitle }}</span>
+            <span class="settingsBreadcrumbText">{{ t('Settings.Settings') }}</span>
           </span>
-        </template>
-        <template v-if="!isStandaloneViewOpen && subpageTitle">
-          <FtIcon
-            class="settingsBreadcrumbSeparator"
-            :icon="['fas', 'angle-right']"
-          />
-          <span class="settingsBreadcrumbLabel">
+          <template v-if="!isStandaloneViewOpen && currentSectionTitle">
             <FtIcon
-              v-if="subpageIcon"
-              class="settingsBreadcrumbCategoryIcon settingsBreadcrumbSubpageIcon"
-              :icon="subpageIcon"
-              aria-hidden="true"
+              v-show="isInDesktopView"
+              class="settingsBreadcrumbSeparator"
+              :icon="['fas', 'angle-right']"
             />
-            <span class="settingsBreadcrumbText">{{ subpageTitle }}</span>
-          </span>
-        </template>
-        <span
-          :id="subpageBreadcrumbTargetId"
-          class="settingsBreadcrumbAction"
-        />
+            <button
+              v-if="subpageTitle"
+              type="button"
+              class="settingsBreadcrumbParent"
+              @click="returnToCategory"
+            >
+              <FtIcon
+                v-if="currentSectionIcon"
+                class="settingsBreadcrumbCategoryIcon"
+                :icon="currentSectionIcon"
+                aria-hidden="true"
+              />
+              <span class="settingsBreadcrumbText">{{ currentSectionTitle }}</span>
+            </button>
+            <span
+              v-else
+              class="settingsBreadcrumbLabel"
+            >
+              <FtIcon
+                v-if="currentSectionIcon"
+                class="settingsBreadcrumbCategoryIcon"
+                :icon="currentSectionIcon"
+                aria-hidden="true"
+              />
+              <span class="settingsBreadcrumbText">{{ currentSectionTitle }}</span>
+            </span>
+          </template>
+          <template v-if="!isStandaloneViewOpen && subpageTitle">
+            <FtIcon
+              class="settingsBreadcrumbSeparator"
+              :icon="['fas', 'angle-right']"
+            />
+            <span class="settingsBreadcrumbLabel">
+              <FtIcon
+                v-if="subpageIcon"
+                class="settingsBreadcrumbCategoryIcon settingsBreadcrumbSubpageIcon"
+                :icon="subpageIcon"
+                aria-hidden="true"
+              />
+              <span class="settingsBreadcrumbText">{{ subpageTitle }}</span>
+            </span>
+          </template>
+          <span
+            :id="subpageBreadcrumbTargetId"
+            class="settingsBreadcrumbAction"
+          />
+        </div>
       </div>
       <label
         v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen && !isStandaloneViewOpen && !subpageTitle"
