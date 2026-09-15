@@ -57,6 +57,7 @@ function fixture(platform = 'linux') {
     clearTimeout: id => timers.delete(id),
   })
   vm.runInContext(`
+    let trayMenuSignature = null;
     let tray = null, mainWindow, useTrayIcon = true, keepRefreshingInBackground = false;
     let trayOnClose = false, trayOnMinimize = false, isQuitting = false;
     let trayWindows = [];
@@ -210,4 +211,63 @@ test('KWin restore polling does not clear minimized state while hidden in the tr
   assert.equal(minimizedStates.at(-1), true)
   context.trayClick(window)
   assert.equal(minimizedStates.at(-1), false)
+})
+
+test('unchanged playback updates keep the attached tray menu', () => {
+  const { context, Window, trays, setMedia } = fixture()
+  new Window()
+  setMedia({ playbackState: 'playing', actions: new Set(['pause']) })
+  context.configure({})
+  const menu = trays[0].menu
+  for (let position = 0; position < 10; position++) {
+    setMedia({ playbackState: 'playing', actions: new Set(['pause']), position })
+    context.createTrayContextMenu()
+    assert.equal(trays[0].menu, menu)
+  }
+  setMedia({ playbackState: 'paused', actions: new Set(['play']) })
+  context.createTrayContextMenu()
+  assert.notEqual(trays[0].menu, menu)
+})
+
+test('tray window labels omit the app suffix and actions follow visibility', () => {
+  const { context, Window } = fixture()
+  const window = new Window()
+  window.getTitle = () => 'Video - OpenTubeX\u2063\u200c'
+  context.configure({})
+  let menu = context.defaultTrayMenu()
+  assert.equal(menu[0].label, 'Video')
+  assert.equal(menu[0].submenu[0].label, 'Video.Player.Hide')
+  assert.equal(menu.some(item => item.label === 'Tray.Show All Windows'), false)
+  menu.find(item => item.label === 'Tray.Hide All Windows').click()
+  assert.equal(window.visible, false)
+  menu = context.defaultTrayMenu()
+  assert.equal(menu[0].submenu[0].label, 'Video.Player.Show')
+  assert.equal(menu.some(item => item.label === 'Tray.Hide All Windows'), false)
+  menu.find(item => item.label === 'Tray.Show All Windows').click()
+  assert.equal(window.visible, true)
+})
+
+test('mixed window visibility offers both bulk actions and individual toggles', () => {
+  const { context, Window } = fixture()
+  const shown = new Window()
+  const hidden = new Window()
+  context.attach(shown)
+  context.attach(hidden)
+  context.hideWindowToTray(hidden)
+  const menu = context.defaultTrayMenu()
+  assert.ok(menu.some(item => item.label === 'Tray.Show All Windows'))
+  assert.ok(menu.some(item => item.label === 'Tray.Hide All Windows'))
+  menu[0].submenu[0].click()
+  assert.equal(shown.visible, false)
+  menu[1].submenu[0].click()
+  assert.equal(hidden.visible, true)
+})
+
+test('a recreated tray receives a menu even when its contents are unchanged', () => {
+  const { context, Window, trays } = fixture()
+  new Window()
+  context.configure({})
+  context.configure({ enabled: false })
+  context.configure({ enabled: true })
+  assert.ok(trays[1].menu.length > 0)
 })

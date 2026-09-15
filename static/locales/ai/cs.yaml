@@ -1766,4 +1766,5 @@ App Icon:
   Error: "Ikonu aplikace se nepodařilo načíst nebo změnit"
 
 Tray:
+  Hide All Windows: "Skrýt všechna okna"
   Show All Windows: "Zobrazit všechna okna"

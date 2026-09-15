@@ -1766,4 +1766,5 @@ App Icon:
   Error: "アプリアイコンを読み込むか変更することができませんでした"
 
 Tray:
+  Hide All Windows: "すべてのウィンドウを非表示"
   Show All Windows: "すべてのウィンドウを表示"

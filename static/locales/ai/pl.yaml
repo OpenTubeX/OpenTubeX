@@ -986,4 +986,5 @@ History:
   Repair Progress: "Sprawdzono {checked}/{total} · Naprawiono {repaired} · Błędy {failed}"
 
 Tray:
+  Hide All Windows: "Ukryj wszystkie okna"
   Show All Windows: "Pokaż wszystkie okna"

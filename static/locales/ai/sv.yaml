@@ -1785,4 +1785,5 @@ App Icon:
   Error: "Kunde inte läsa in eller ändra appikonen"
 
 Tray:
+  Hide All Windows: "Dölj alla fönster"
   Show All Windows: "Visa alla fönster"

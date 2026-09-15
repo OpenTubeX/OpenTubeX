@@ -1766,4 +1766,5 @@ App Icon:
   Error: "Não foi possível carregar ou alterar o ícone do aplicativo"
 
 Tray:
+  Hide All Windows: "Ocultar todas as janelas"
   Show All Windows: "Mostrar todas as janelas"

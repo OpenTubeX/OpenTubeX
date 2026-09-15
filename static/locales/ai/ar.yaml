@@ -1789,4 +1789,5 @@ App Icon:
   Error: "تعذر تحميل أيقونة التطبيق أو تغييرها"
 
 Tray:
+  Hide All Windows: "إخفاء جميع النوافذ"
   Show All Windows: "إظهار جميع النوافذ"

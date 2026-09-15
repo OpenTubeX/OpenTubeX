@@ -320,12 +320,11 @@ workspace.windowActivated.connect(reportActiveWindow)
       if (!Number.isInteger(scriptId) || scriptId < 0) {
         throw new Error('KWin rejected the active-window script')
       }
-      const scriptInterface = await service.getInterface(
-        `${KWIN_SCRIPTING_PATH}/Script${scriptId}`,
-        'org.kde.kwin.Script'
-      )
       if (closed) return
-      await scriptInterface.run()
+      // KWin assigns IDs from the loaded-script count. After an unload, an
+      // ID's D-Bus path can still belong to another running script. Start
+      // through the manager so our reporter runs even when its ID collides.
+      await scripting.start()
     }
 
     // A previous process may have exited while its activation script was running.

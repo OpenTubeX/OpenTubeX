@@ -1700,6 +1700,7 @@ function runApp() {
 
   let mainWindow
   let startupUrl
+  let trayMenuSignature = null
   let tray = null
   let useTrayIcon = true
   let trayOnClose = false
@@ -1766,6 +1767,7 @@ function runApp() {
         ? path.join(__dirname, '..', '..', '_icons', 'iconColor.png')
         : path.join(__dirname, '..', '_icons', 'iconColor.png')
       tray = new Tray(icon)
+      trayMenuSignature = null
       tray.setToolTip('OpenTubeX')
       tray.on('click', toggleTrayWindow)
       if (process.platform === 'darwin') {
@@ -2587,7 +2589,13 @@ function runApp() {
     // macOS opens an attached context menu on left click; show it explicitly
     // on right click so left click can toggle the window on every platform.
     if (process.platform !== 'darwin') {
-      tray.setContextMenu(Menu.buildFromTemplate(defaultTrayMenu()))
+      const template = defaultTrayMenu()
+      // Media position updates do not change menu items. Replacing an identical
+      // menu interrupts the open StatusNotifier menu on Plasma.
+      const signature = JSON.stringify(template)
+      if (signature === trayMenuSignature) return
+      tray.setContextMenu(Menu.buildFromTemplate(template))
+      trayMenuSignature = signature
     }
   }
 
@@ -2615,11 +2623,17 @@ function runApp() {
   }
 
   function defaultTrayMenu() {
+    const windows = BrowserWindow.getAllWindows()
+    const isShown = window => window.isVisible() && !window.isMinimized() && !trayWindows.includes(window)
     return [
-      ...BrowserWindow.getAllWindows().map(window => ({
-        label: window.getTitle(),
+      ...windows.map(window => ({
+        id: `window-${window.id}`,
+        label: window.getTitle().replace(/\u2063[\u200b\u200c]+$/, '').replace(/ - OpenTubeX$/, ''),
         submenu: [
-          { label: trayTranslate('Video.Player.Show'), click: () => trayClick(window) },
+          {
+            label: trayTranslate(isShown(window) ? 'Video.Player.Hide' : 'Video.Player.Show'),
+            click: () => isShown(window) ? hideWindowToTray(window) : trayClick(window)
+          },
           {
             label: trayTranslate('Close'),
             click: () => {
@@ -2640,13 +2654,26 @@ function runApp() {
           replaceMainWindow: !mainWindow || mainWindow.isDestroyed() || trayWindows.includes(mainWindow)
         })
       },
-      {
-        label: trayTranslate('Tray.Show All Windows'),
-        enabled: BrowserWindow.getAllWindows().length > 0,
-        click: () => {
-          for (const window of BrowserWindow.getAllWindows()) trayClick(window)
-        }
-      },
+      ...(windows.some(window => !isShown(window))
+        ? [{
+            label: trayTranslate('Tray.Show All Windows'),
+            click: () => {
+              for (const window of BrowserWindow.getAllWindows()) {
+                if (!isShown(window)) trayClick(window)
+              }
+            }
+          }]
+        : []),
+      ...(windows.some(isShown)
+        ? [{
+            label: trayTranslate('Tray.Hide All Windows'),
+            click: () => {
+              for (const window of BrowserWindow.getAllWindows()) {
+                if (isShown(window)) hideWindowToTray(window)
+              }
+            }
+          }]
+        : []),
       {
         label: trayTranslate('Quit'),
         click: () => requestQuit(BrowserWindow.getFocusedWindow() ?? mainWindow)
@@ -2658,6 +2685,7 @@ function runApp() {
     if (!tray || isTrayEnabled()) return
     tray.destroy()
     tray = null
+    trayMenuSignature = null
   }
 
   function showHiddenWindows() {

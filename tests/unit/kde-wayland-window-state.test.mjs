@@ -110,7 +110,7 @@ test('rejects malformed D-Bus window state and runner matches', () => {
   assert.deepEqual(extractKwinWindowHandles([['invalid-id'], null]), [])
 })
 
-test('reloads the KWin reporter with the new D-Bus name after reconnect', async t => {
+test('starts the KWin reporter despite a reused script ID and reloads it after reconnect', async t => {
   const originalSessionBus = dbus.sessionBus
   const bus = new EventEmitter()
   bus.name = ':1.10'
@@ -124,6 +124,11 @@ test('reloads the KWin reporter with the new D-Bus name after reconnect', async 
   })
   const scripting = {
     unloadScript: async () => true,
+    start: async () => {
+      scriptRuns++
+      reportInterface.ReportActiveWindow('window', false, 'electron')
+      if (scriptRuns === 2) resolveSecondRun()
+    },
   }
   const service = {
     getInterface: async path => {
@@ -131,11 +136,9 @@ test('reloads the KWin reporter with the new D-Bus name after reconnect', async 
       if (path === '/WindowsRunner') return { Match: async () => [] }
       if (path === '/Scripting') return scripting
       return {
-        run: async () => {
-          scriptRuns++
-          reportInterface.ReportActiveWindow('window', false, 'electron')
-          if (scriptRuns === 2) resolveSecondRun()
-        },
+        // KWin can reuse an ID whose D-Bus object still belongs to an
+        // already-running script. Calling that object's run does nothing.
+        run: async () => {},
       }
     },
   }

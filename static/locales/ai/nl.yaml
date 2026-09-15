@@ -1822,4 +1822,5 @@ App Icon:
   Error: "Kan het app-pictogram niet laden of wijzigen"
 
 Tray:
+  Hide All Windows: "Alle vensters verbergen"
   Show All Windows: "Alle vensters tonen"

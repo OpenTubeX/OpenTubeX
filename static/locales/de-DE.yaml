@@ -2960,4 +2960,5 @@ App Icon:
   Error: "Das App-Symbol konnte nicht geladen oder geändert werden"
 
 Tray:
+  Hide All Windows: "Alle Fenster ausblenden"
   Show All Windows: "Alle Fenster anzeigen"

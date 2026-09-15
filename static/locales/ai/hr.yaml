@@ -1789,4 +1789,5 @@ App Icon:
   Error: "Nije moguće učitati ili promijeniti ikonu aplikacije"
 
 Tray:
+  Hide All Windows: "Sakrij sve prozore"
   Show All Windows: "Prikaži sve prozore"
