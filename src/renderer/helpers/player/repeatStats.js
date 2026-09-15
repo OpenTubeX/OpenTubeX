@@ -123,6 +123,21 @@ export function createRepeatStatsTracker(video, onChange, now = () => performanc
       if (mode !== null) repeats++
       publish()
     },
+    getState() {
+      accountTime()
+      return { session, repeats, milliseconds }
+    },
+    restore(state) {
+      if (!state || typeof state.session !== 'string') return
+
+      session = state.session
+      repeats = Number.isSafeInteger(state.repeats) && state.repeats >= 0 ? state.repeats : 0
+      milliseconds = Number.isFinite(state.milliseconds) && state.milliseconds >= 0
+        ? state.milliseconds
+        : 0
+      lastClock = now()
+      publish()
+    },
     reset() {
       repeats = 0
       milliseconds = 0

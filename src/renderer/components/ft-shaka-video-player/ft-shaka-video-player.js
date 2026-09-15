@@ -543,12 +543,8 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    sabrReloadCaptionIndex: {
-      type: Number,
-      default: null
-    },
-    sabrReloadPlaybackRate: {
-      type: Number,
+    sabrReloadState: {
+      type: Object,
       default: null
     },
   },
@@ -1285,7 +1281,7 @@ export default defineComponent({
     }
 
     /** @type {number|null} */
-    let restoreCaptionIndex = props.sabrReloadCaptionIndex
+    let restoreCaptionIndex = props.sabrReloadState?.captionIndex ?? null
 
     // The channel's subtitles state is more specific than the global default, so it wins
     const enableSubtitlesInitially = getSavedChannelSubtitlesState() ?? store.getters.getEnableSubtitlesByDefault
@@ -4052,7 +4048,11 @@ export default defineComponent({
 
     watch([abRepeatStart, abRepeatEnd, abRepeatEnabled, isLive], syncRepeatStatsMode)
     onMounted(() => {
+      if (typeof props.sabrReloadState?.loopEnabled === 'boolean') {
+        video.value.loop = props.sabrReloadState.loopEnabled
+      }
       repeatStatsTracker = createRepeatStatsTracker(video.value, stats => Object.assign(repeatStats, stats))
+      repeatStatsTracker.restore(props.sabrReloadState?.repeatStats)
       repeatStatsLoopObserver = new MutationObserver(syncRepeatStatsMode)
       repeatStatsLoopObserver.observe(video.value, { attributes: true, attributeFilter: ['loop'] })
       syncRepeatStatsMode()
@@ -9041,7 +9041,7 @@ export default defineComponent({
     /** @type {number | null} */
     let pendingPlaybackRateRestore = null
 
-    let playbackRateUserSet = normalizePlaybackRate(props.sabrReloadPlaybackRate) !== null
+    let playbackRateUserSet = normalizePlaybackRate(props.sabrReloadState?.playbackRate) !== null
     let musicPlaybackRateToastShown = false
     let pendingMusicPlaybackRateToast = false
 
@@ -9080,7 +9080,7 @@ export default defineComponent({
      * @returns {number}
      */
     function getInitialPlaybackRate() {
-      const sabrReloadPlaybackRate = normalizePlaybackRate(props.sabrReloadPlaybackRate)
+      const sabrReloadPlaybackRate = normalizePlaybackRate(props.sabrReloadState?.playbackRate)
       if (sabrReloadPlaybackRate !== null) {
         return sabrReloadPlaybackRate
       }
@@ -11312,7 +11312,9 @@ export default defineComponent({
         wasPlaying: !video.value?.paused,
         captionIndex: captionIndex >= 0 ? captionIndex : null,
         playbackRate: getCurrentPlaybackRate(),
-        videoQuality: getActiveVariantQuality()
+        videoQuality: getActiveVariantQuality(),
+        loopEnabled: video.value?.loop === true,
+        repeatStats: repeatStatsTracker?.getState() ?? null
       }
     }
 

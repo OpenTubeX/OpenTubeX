@@ -128,6 +128,24 @@ test('A-B repeats retain the session when toggled and reset for a different rang
   assert.deepEqual(stats(), { active: true, repeats: 0, seconds: 0 })
 })
 
+test('restores a repeat session in a replacement tracker', () => {
+  const first = setup()
+  first.tracker.setMode('video')
+  first.event('playing', { paused: false })
+  first.advance(2500)
+  first.tracker.repeat()
+
+  const saved = first.tracker.getState()
+  const replacement = setup()
+  replacement.tracker.restore(saved)
+  replacement.tracker.setMode('video')
+  assert.deepEqual(replacement.stats(), { active: true, repeats: 1, seconds: 2 })
+
+  replacement.tracker.setMode(null)
+  replacement.tracker.setMode('video')
+  assert.deepEqual(replacement.stats(), { active: true, repeats: 1, seconds: 2 })
+})
+
 test('destroy removes media listeners', () => {
   const { tracker, event, advance, stats } = setup()
   tracker.setMode('video')
