@@ -1041,6 +1041,97 @@ test('pausing keeps a SABR replacement paused when autoplay is enabled', async (
   expect(await replacementVideo.evaluate(element => element.paused)).toBe(true)
 })
 
+test('a SABR-requested replacement keeps looping and its repeat stats', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => {
+    element.pause()
+    element.loop = true
+    element.currentTime = element.duration - 0.5
+  })
+  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+
+  const stats = page.getByRole('region', { name: 'Repeat stats', exact: true })
+  await video.evaluate(element => element.play())
+  await expect(stats.locator('.repeatStatsCount')).toHaveText('1')
+  await video.evaluate(element => element.pause())
+  const spent = await stats.locator('.repeatStatsTime').textContent()
+
+  const watchView = await watchViewHandle(page)
+  await watchView.evaluate(async view => {
+    view.getTimestamp = () => 0
+    view.isLoading = false
+    view.isLive = false
+    view.isPostLiveDvr = false
+    view.activeFormat = 'dash'
+    view.manifestMimeType = 'application/sabr+json'
+
+    await view.onPlayerReloadRequested(view.$refs.player.getSabrReloadState())
+  })
+
+  const replacementVideo = page.locator('.tabContent[aria-hidden="false"] video')
+  await expect(replacementVideo).toHaveCount(1, { timeout: 30_000 })
+  await expect.poll(() => replacementVideo.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
+  await expect.poll(() => replacementVideo.evaluate(element => element.loop)).toBe(true)
+  await expect(stats.locator('.repeatStatsCount')).toHaveText('1')
+  await expect(stats.locator('.repeatStatsTime')).toHaveText(spent)
+  expect(await watchView.evaluate(view => view.sabrReloadState)).toBeNull()
+})
+
+test('a SABR-requested replacement keeps an active A-B repeat session', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => {
+    element.pause()
+    element.currentTime = 5
+  })
+  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+  await page.keyboard.press('Shift+A')
+
+  await video.evaluate(element => { element.currentTime = 6 })
+  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+  await page.keyboard.press('Shift+B')
+
+  const stats = page.getByRole('region', { name: 'Repeat stats', exact: true })
+  await expect(stats).toContainText('A-B repeat')
+  await expect(stats).toContainText('0:05')
+  await expect(stats).toContainText('0:06')
+
+  await video.evaluate(element => { element.currentTime = 5.7 })
+  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+  await video.evaluate(element => element.play())
+  await expect(stats.locator('.repeatStatsCount')).toHaveText('1')
+  await video.evaluate(element => element.pause())
+
+  const watchView = await watchViewHandle(page)
+  await watchView.evaluate(async view => {
+    view.getTimestamp = () => 0
+    view.isLoading = false
+    view.isLive = false
+    view.isPostLiveDvr = false
+    view.activeFormat = 'dash'
+    view.manifestMimeType = 'application/sabr+json'
+
+    await view.onPlayerReloadRequested(view.$refs.player.getSabrReloadState())
+  })
+
+  const replacementVideo = page.locator('.tabContent[aria-hidden="false"] video')
+  await expect(replacementVideo).toHaveCount(1, { timeout: 30_000 })
+  await expect.poll(() => replacementVideo.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
+
+  await expect(stats).toContainText('A-B repeat')
+  await expect(stats).toContainText('0:05')
+  await expect(stats).toContainText('0:06')
+  await expect(stats.locator('.repeatStatsCount')).toHaveText('1')
+
+  expect(await watchView.evaluate(view => view.$refs.player.getSabrReloadState().abRepeat)).toEqual({
+    start: 5,
+    end: 6,
+    enabled: true
+  })
+  expect(await watchView.evaluate(view => view.sabrReloadState)).toBeNull()
+})
+
 test('a second SABR failure after successful playback refetches instead of dropping to legacy', async ({ app, page }) => {
   await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
@@ -1200,8 +1291,7 @@ test('a loaded event from the outgoing player is ignored while the view reloads'
     view.isUpcoming = false
     view.rememberHistory = true
     view.oneTimeTimestamp = 73
-    view.sabrReloadCaptionIndex = 2
-    view.sabrReloadPlaybackRate = 1.5
+    view.sabrReloadState = { captionIndex: 2, playbackRate: 1.5 }
     view.addToHistory = () => { historyCalls++ }
     view.handlePlaylistPersisting = () => { playlistCalls++ }
     view.updateLocalPlaylistLastPlayedAtSometimes = () => { localPlaylistCalls++ }
@@ -1212,8 +1302,7 @@ test('a loaded event from the outgoing player is ignored while the view reloads'
       await view.handleVideoLoaded({})
       stateDuringPreparation = {
         oneTimeTimestamp: view.oneTimeTimestamp,
-        sabrReloadCaptionIndex: view.sabrReloadCaptionIndex,
-        sabrReloadPlaybackRate: view.sabrReloadPlaybackRate,
+        sabrReloadState: view.sabrReloadState,
         videoPlayerLoaded: view.videoPlayerLoaded,
         historyCalls,
         playlistCalls,
@@ -1228,8 +1317,7 @@ test('a loaded event from the outgoing player is ignored while the view reloads'
 
   expect(result).toEqual({
     oneTimeTimestamp: 73,
-    sabrReloadCaptionIndex: 2,
-    sabrReloadPlaybackRate: 1.5,
+    sabrReloadState: { captionIndex: 2, playbackRate: 1.5 },
     videoPlayerLoaded: false,
     historyCalls: 0,
     playlistCalls: 0,
