@@ -17,6 +17,8 @@ Maximize: Μεγιστοποίηση
 Restore: Επαναφορά
 Close Tab: Κλείσιμο καρτέλας
 Close Confirmation:
+  Background Sync Warning: Η έξοδος θα διακόψει την ανανέωση συνδρομών στο παρασκήνιο.
+  Hide Window: Απόκρυψη παραθύρου
   Title: Έξοδος από το OpenTubeX;
   Message: Θέλετε σίγουρα να κλείσετε το OpenTubeX;
   Quit: Έξοδος

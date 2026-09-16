@@ -43,6 +43,8 @@ Close Tab: Close Tab
 Close Confirmation:
   Title: Quit OpenTubeX?
   Message: Are you sure you want to quit OpenTubeX?
+  Background Sync Warning: Quitting will stop background subscription refreshes.
+  Hide Window: Hide Window
   Quit: Quit
   Never Ask Again: Never ask again
 Close Window Confirmation:

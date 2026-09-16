@@ -17,6 +17,8 @@ Maximize: Išdidinti
 Restore: Atkurti
 Close Tab: Užverti kortelę
 Close Confirmation:
+  Background Sync Warning: Išėjus bus sustabdytas prenumeratų atnaujinimas fone.
+  Hide Window: Slėpti langą
   Title: Išeiti iš OpenTubeX?
   Message: Ar tikrai norite išeiti iš OpenTubeX?
   Quit: Išeiti

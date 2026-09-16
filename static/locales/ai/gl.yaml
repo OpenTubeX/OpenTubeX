@@ -17,6 +17,8 @@ Maximize: Maximizar
 Restore: Restaurar
 Close Tab: Pechar a lapela
 Close Confirmation:
+  Background Sync Warning: Ao saír deterase a actualización das subscricións en segundo plano.
+  Hide Window: Agochar a xanela
   Title: Queres saír de OpenTubeX?
   Message: Seguro que queres saír de OpenTubeX?
   Quit: Saír
